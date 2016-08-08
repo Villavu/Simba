@@ -1091,9 +1091,10 @@ begin
     Inc(Ptr, PtrInc);
   end;
 
-  SetLength(Points, C);
-  Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
   Result := C > 0;
+  SetLength(Points, C);
+  if Result then
+    Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
 
   Free_CTSInfo(ctsinfo);
   TClient(Client).IOManager.FreeReturnData;
@@ -1141,9 +1142,10 @@ begin
       inc(c);
     end;
 
-  SetLength(Points, C);
-  Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
   Result := C > 0;
+  SetLength(Points, C);
+  if Result then
+    Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
 
   Free_CTSInfo(ctsinfo);
   TClient(Client).IOManager.FreeReturnData;
@@ -1446,12 +1448,10 @@ begin
   end;
 
   TheEnd:
-  if FoundC > 0 then
-  begin;
-    result := true;
-    SetLength(Points,FoundC);
+  Result := FoundC > 0;
+  SetLength(Points, FoundC);
+  if Result then
     Move(ClientTPA[0], Points[0], FoundC * SizeOf(TPoint));
-  end;
 
   Free_CTSInfo2DArray(ctsinfoarray);
   TClient(Client).IOManager.FreeReturnData;
