@@ -42,7 +42,7 @@ uses
   {$IFDEF USE_SQLITE}, msqlite3{$ENDIF}
   {$IFDEF USE_LAPE}
   , lpparser, lpcompiler, lptypes, lpvartypes, ffi, lpffi, lpffiwrappers,
-    lpeval, lpinterpreter, lputils, lpexceptions, LPDump
+    lpeval, lpinterpreter, lputils, lpmessages, LPDump
   {$ENDIF};
 
 const
@@ -258,6 +258,7 @@ type
      procedure SetFonts(Fonts: TMFonts); override;
      procedure Execute; override;
      procedure Terminate; override;
+     procedure OnHint(Sender: TLapeCompilerBase; Msg: lpString);
      function OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
      function OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
    end;
@@ -1388,6 +1389,7 @@ begin
   ExposeGlobals(Compiler);
 
   Compiler['Move'].Name := 'MemMove';
+  Compiler.OnHint     := @OnHint;
   Compiler.OnFindFile := @OnFindFile;
   Compiler.OnHandleDirective := @OnHandleDirective;
 
@@ -1513,6 +1515,11 @@ begin
       Compiler.addGlobalVar(Fonts[I].Name, Fonts[I].Name).isConstant := True;
 
   Compiler.EndImporting;
+end;
+
+procedure TLPThread.OnHint(Sender: TLapeCompilerBase; Msg: lpString);
+begin
+  psWriteLn(Msg);
 end;
 
 function TLPThread.OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
