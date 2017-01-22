@@ -49,7 +49,7 @@ AddGlobalFunc('procedure ShowBalloonHint(const Title, Hint: string; const Timeou
 AddGlobalFunc('procedure TerminateScript;', @Lape_TerminateScript);
 AddGlobalFunc('function GetTimeRunning: LongWord', @Lape_GetTimeRunning);
 {$IFNDEF FUNC_LIST}
-AddGlobalFunc('function GetSystemTime: uInt64', PPointer(Compiler['GetTickCount'].Ptr)^); //TODO: FIX!!
+AddGlobalFunc('function GetSystemTime: UInt64', PPointer(Compiler['GetTickCount'].Ptr)^); //TODO: FIX!!
 {$ENDIF}
 AddGlobalFunc('function GetTClient: TClient', @Lape_GetTClient);
 AddGlobalFunc('procedure ConvertTime(Time: integer; var h,m,s: integer);', @Lape_ConvertTime);
