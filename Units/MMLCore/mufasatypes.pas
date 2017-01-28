@@ -254,6 +254,8 @@ type
   TOcrFilterDataArray = array of TOCRFilterData;
   POcrFilterDataArray = ^TOCRFilterDataArray;
 
+  TUnique = array[0..5] of Byte;
+
 var
   BufferString : PChar;
   BufferLen : LongWord;

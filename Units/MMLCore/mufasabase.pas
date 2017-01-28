@@ -60,6 +60,7 @@ procedure mDebugLn( s : string);overload;
 procedure mDebugLn( s : string; f : array of const);overload;
 procedure InitmDebug;
 procedure FreemDebug;
+
 implementation
 
 var

@@ -27,7 +27,9 @@ unit os_windows;
 interface
 
   uses
-    Classes, SysUtils, mufasatypes, windows, graphics, LCLType, LCLIntf, bitmaps, IOManager, WinKeyInput;
+    Classes, SysUtils, mufasatypes, windows, graphics, LCLType,
+    LCLIntf, bitmaps, IOManager, WinKeyInput,
+    JwaIpHlpApi, JwaIpExport, JwaIpTypes;
     
   type
 
@@ -122,6 +124,8 @@ interface
         procedure NativeInit; override;
         procedure NativeFree; override;
     end;
+
+    function getUnique(): TUnique;
     
 implementation
 
@@ -618,6 +622,38 @@ begin
   Rect.Right := GetSystemMetrics(SM_CXVIRTUALSCREEN);
   Rect.Bottom:= GetSystemMetrics(SM_CYVIRTUALSCREEN);
   Result := true;
+end;
+
+function getUnique(): TUnique;
+var
+  AdapterInfo, Adapter: PIpAdapterInfo;
+  BufLen: ULONG;
+begin
+  BufLen := SizeOf(IP_ADAPTER_INFO);
+  AdapterInfo := AllocMem(BufLen);
+
+  if (GetAdaptersInfo(AdapterInfo, BufLen) <> IP_SUCCESS) then
+  begin
+    Freemem(AdapterInfo);
+    AdapterInfo := AllocMem(BufLen);
+  end;
+
+  if (GetAdaptersInfo(AdapterInfo, BufLen) = IP_SUCCESS) then
+  begin
+    Adapter := AdapterInfo;
+
+    while (Adapter <> Nil) do
+    begin
+      with Adapter^ do
+        if ((AddressLength = 6) and (Address[0] <> 0)) then
+        begin
+          Move(Address, Result, 6);
+          Break;
+        end;
+
+      Adapter := Adapter^.Next;
+    end;
+  end;
 end;
 
 end.

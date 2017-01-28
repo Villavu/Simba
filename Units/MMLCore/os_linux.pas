@@ -33,7 +33,7 @@ interface
 
   uses
     Classes, SysUtils, mufasatypes, mufasabase, IOManager,
-    xlib, x, xutil, XKeyInput, ctypes, syncobjs;
+    xlib, x, xutil, XKeyInput, ctypes, syncobjs, strutils;
 
   type
 
@@ -130,6 +130,7 @@ interface
     end;
 
   function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint; cdecl;
+  function getUnique(): TUnique;
 
 implementation
 
@@ -675,5 +676,45 @@ implementation
   begin
     raise Exception.Create('SetTargetEx: Not Implemented.');
   end;
+
+function getUnique(): TUnique;
+  function getFileContents(const Path: string): string;
+  begin
+    with TStringList.Create() do
+    begin
+      LoadFromFile(Path);
+      Result := Text;
+    end;
+  end;
+var
+  SearchRec: TSearchRec;
+  Address: string;
+begin
+  try
+    if (FindFirst('/sys/class/net/*', faDirectory or faSymLink, SearchRec) < 0) then
+      Exit;
+
+    repeat
+      if (SearchRec.Name[1] <> '.') then
+      begin
+        Address := getFileContents('/sys/class/net/' + SearchRec.Name + '/address');
+
+        if (Copy(Address, 1, 2) <> '00') then
+        begin
+          Result[0] := Hex2Dec(Copy(Address, 1, 2));
+          Result[1] := Hex2Dec(Copy(Address, 4, 2));
+          Result[2] := Hex2Dec(Copy(Address, 7, 2));
+          Result[3] := Hex2Dec(Copy(Address, 10, 2));
+          Result[4] := Hex2Dec(Copy(Address, 13, 2));
+          Result[5] := Hex2Dec(Copy(Address, 16, 2));
+
+          Break;
+        end;
+      end;
+    until(FindNext(SearchRec) <> 0);
+  finally
+    FindClose(SearchRec);
+  end;
+end;
 
 end.
