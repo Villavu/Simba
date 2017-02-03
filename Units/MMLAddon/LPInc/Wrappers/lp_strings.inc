@@ -107,3 +107,8 @@ procedure Lape_IsStrInArr(const Params: PParamArray; const Result: Pointer); lap
 begin
   PBoolean(Result)^ := ps_IsStrInArr(PString(Params^[0])^, PBoolean(Params^[1])^, PStringArray(Params^[2])^);
 end;
+
+procedure Lape_StrToFloatDot(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PExtended(Result)^ := StrToFloat(StringReplace(PString(Params^[0])^, '.', FormatSettings.DecimalSeparator, []));
+end;

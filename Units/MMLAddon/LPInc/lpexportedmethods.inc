@@ -412,6 +412,7 @@ AddGlobalFunc('function MultiBetween(str, s1, s2: string): TStringArray;', @Lape
 AddGlobalFunc('function IsArrInStr(strArr: TStringArray; s: string): boolean;', @Lape_IsArrInStr);
 AddGlobalFunc('function IsStrInArr(const s: string; const UsePos: Boolean; const arr: TStringArray): boolean;', @Lape_IsStrInArr);
 AddGlobalFunc('function PosMulti(const SubStr: String; Text: string): TIntegerArray;', @Lape_PosMulti);
+AddGlobalFunc('function StrToFloatDot(str: string): Extended;', @Lape_StrToFloatDot);
 
 { TPA }
 SetCurrSection('TPA');
