@@ -6,7 +6,10 @@ object FunctionListFrame: TFunctionListFrame
   Align = alLeft
   ClientHeight = 522
   ClientWidth = 182
+  DesignTimePPI = 192
+  LCLVersion = '1.8.0.5'
   OnEndDock = FrameEndDock
+  ParentFont = False
   TabOrder = 0
   DesignLeft = 434
   DesignTop = 200
@@ -16,7 +19,6 @@ object FunctionListFrame: TFunctionListFrame
     Top = 20
     Width = 182
     Align = alClient
-    DefaultItemHeight = 18
     HideSelection = False
     Images = SimbaForm.Mufasa_Image_List
     ReadOnly = True
@@ -125,7 +127,6 @@ object FunctionListFrame: TFunctionListFrame
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000
     }
-    NumGlyphs = 0
     OnClick = CloseButtonClick
   end
   object Panel1: TPanel
@@ -145,7 +146,6 @@ object FunctionListFrame: TFunctionListFrame
       Width = 29
       Align = alRight
       Caption = 'x'
-      NumGlyphs = 0
       OnClick = ClearSearchClick
     end
     object editSearchList: TEdit

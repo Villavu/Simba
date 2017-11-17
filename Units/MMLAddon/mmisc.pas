@@ -27,7 +27,11 @@ unit mmisc;
 interface
 
 uses
-  Classes, SysUtils,bzip2, bzip2comn,bzip2stream, libtar,mufasabase,mufasatypes;
+  Classes,
+  SysUtils, bzip2,
+  bzip2comn, bzip2stream,
+  libtar, mufasabase, mufasatypes,
+  LazUTF8;
 
 function DecompressBZip2(const input : TStream; const BlockSize : Cardinal = 4096) : TMemoryStream;
 function UnTar(const Input : TStream) : TStringArray;overload;
@@ -168,7 +172,7 @@ begin;
       end;
     end else if (DirRec.FileType = ftNormal) then
     begin;
-      if FileExistsUTF8(outputdir + dirrec.name) and not overwrite then
+      if FileExists(outputdir + dirrec.name) and not overwrite then
         continue;
       try
         FS := TFileStream.Create(UTF8ToSys(outputdir +dirrec.name),fmCreate);

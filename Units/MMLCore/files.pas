@@ -78,7 +78,8 @@ type
 
 implementation
 uses
-  {$IFDEF MSWINDOWS}Windows,{$ENDIF} IniFiles,Client,FileUtil, Zipper;
+  {$IFDEF MSWINDOWS}Windows,{$ENDIF} IniFiles, Client, FileUtil,
+  LazFileUtils, LazUTF8, Zipper;
 
 { GetFiles in independant of the TMFiles class }
 
@@ -88,7 +89,7 @@ var
     c : integer;
 begin
   c := 0;
-  if FindFirstUTF8(Path + '*.' + ext, faAnyFile, SearchRec) = 0 then
+  if FindFirst(Path + '*.' + ext, faAnyFile, SearchRec) = 0 then
   begin
     repeat
       if (SearchRec.Attr and faDirectory) = faDirectory then
@@ -97,7 +98,7 @@ begin
       SetLength(Result,c);
       Result[c-1] := SearchRec.Name;
     until FindNext(SearchRec) <> 0;
-    FindCloseUTF8(SearchRec);
+    SysUtils.FindClose(SearchRec);
   end;
 end;
 
@@ -108,7 +109,7 @@ var
   CurFilename: String;
 begin
   if (not Empty) then
-    exit(RemoveDirUTF8(Directory));
+    exit(RemoveDir(Directory));
 
   Result := False;
   CurSrcDir := CleanAndExpandDirectory(Directory);

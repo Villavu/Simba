@@ -134,7 +134,7 @@ implementation
     ValidateDirs;
     PluginName := ExtractFileNameWithoutExt(PluginName);
     for i := 0 to PluginDirs.Count - 1 do
-      if FileExistsUTF8(PluginDirs.Strings[i] + Pluginname + PlugExt) then
+      if FileExists(PluginDirs.Strings[i] + Pluginname + PlugExt) then
       begin;
         if ii <> -1 then
           raise Exception.CreateFmt('Plugin(%s) has been found multiple times', [PluginName]);
