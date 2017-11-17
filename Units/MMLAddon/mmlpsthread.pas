@@ -292,6 +292,7 @@ uses
   IOmanager,//TTarget_Exported
   IniFiles,//Silly INI files
   stringutil, //String st00f
+  LazUTF8,
   newsimbasettings, // SimbaSettings
   {$IFDEF USE_DEBUGGER}debugger,{$ENDIF}
   {$IFDEF USE_PASCALSCRIPT}
@@ -310,7 +311,7 @@ uses
   tpa, //Tpa stuff
   mmltimer,
   forms,//Forms
-  SynRegExpr,
+  RegExpr,
   lclintf,  // for GetTickCount and others.
   Clipbrd,
 

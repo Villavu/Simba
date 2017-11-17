@@ -101,7 +101,8 @@ type
 implementation
 
 uses
-  SimbaUnit, Graphics, stringutil, simpleanalyzer, v_ideCodeParser, lclintf, dynlibs;
+  SimbaUnit, Graphics, stringutil, simpleanalyzer, v_ideCodeParser, lclintf,
+  dynlibs, LazFileUtils;
 
 { TFunctionListFrame }
 
@@ -179,7 +180,7 @@ begin
           case Copy(MethodInfo.Filename, 1, 5) of
             'docs:': OpenDocs(MethodInfo);
             else
-              if (FileExistsUTF8(MethodInfo.Filename)) then
+              if (FileExists(MethodInfo.Filename)) then
                 SimbaForm.LoadScriptFile(MethodInfo.Filename,true,true)
               else
                 Exit;

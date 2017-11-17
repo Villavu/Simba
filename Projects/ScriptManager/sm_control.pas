@@ -5,10 +5,13 @@ unit sm_control;
 interface
 
 uses
-  Classes, SysUtils,FileUtil ,sm_types,sm_web,libtar,sm_utils,sm_settings;
+  Classes,
+  SysUtils, FileUtil,
+  LazUTF8,
+  sm_types, sm_web, libtar, sm_utils ,sm_settings;
 
-function GetScript(Script: TFileItem;opt: TOption): boolean;
-function UpdateScript(Script: TFileItem;opt: TOption): boolean;
+function GetScript(Script: TFileItem; opt: TOption): boolean;
+function UpdateScript(Script: TFileItem; opt: TOption): boolean;
 function RemoveScript(Script: TFileItem; opt: TOption): boolean;
 implementation
 function GetScript(Script: TFileItem;opt: TOption): boolean;

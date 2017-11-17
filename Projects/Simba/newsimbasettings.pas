@@ -331,13 +331,13 @@ procedure CreateSimbaSettings(SettingsFileName: String);
   begin
     result := true;
     mDebugLn('Could not load settings.xml!');
-    if renamefileUTF8(SettingsFileName, 'settings.bak') then
+    if RenameFile(SettingsFileName, 'settings.bak') then
     begin
       mDebugLn('Moved ' + SettingsFileName + ' to settings.bak');
     end else
     begin
       mDebugLn('Could not move ' + SettingsFileName + ' to settings.bak');
-      if not deletefileUTF8(SettingsFileName) then
+      if not DeleteFile(SettingsFileName) then
       begin
         mDebugLn('Couldnt delete the file either.');
         exit(false);

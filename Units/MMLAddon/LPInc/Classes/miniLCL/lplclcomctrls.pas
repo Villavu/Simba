@@ -777,7 +777,8 @@ end;
 //function IndexOfTabAt(X, Y: Integer): Integer;
 procedure TCustomTabControl_IndexOfTabAt(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  PInteger(Result)^ := PCustomTabControl(Params^[0])^.IndexOfTabAt(PInteger(Params^[1])^, PInteger(Params^[2])^);
+  // FIXME: R0b0t1 @ 11/16/17 22:05 CST.
+  //PInteger(Result)^ := PCustomTabControl(Params^[0])^.IndexOfTabAt(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 //procedure DoCloseTabClicked(APage: TCustomPage); virtual;
@@ -885,7 +886,8 @@ end;
 //Read: property IsUnpaged: boolean read FUnPaged;
 procedure TCustomTabControl_IsUnpaged_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  Pboolean(Result)^ := PCustomTabControl(Params^[0])^.IsUnpaged;
+  // FIXME: R0b0t1 @ 11/16/17 22:05 CST.
+  //Pboolean(Result)^ := PCustomTabControl(Params^[0])^.IsUnpaged;
 end;
 
 //constructor Create();
