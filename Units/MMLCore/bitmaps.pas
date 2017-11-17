@@ -161,8 +161,10 @@ type
 implementation
 
 uses
-  paszlib,DCPbase64,math, client,tpa,
-  colour_conv,IOManager,mufasatypesutil,FileUtil;
+  paszlib, DCPbase64, math,
+  client, tpa,
+  colour_conv, IOManager, mufasatypesutil,
+  FileUtil, LazUTF8;
 
 // Needs more fixing. We need to either copy the memory ourself, or somehow
 // find a TRawImage feature to skip X bytes after X bytes read. (Most likely a

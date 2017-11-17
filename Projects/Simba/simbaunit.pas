@@ -34,7 +34,12 @@ interface
 uses
   {$IFDEF LINUX}cthreads, cmem,{$ENDIF}
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit, SynHighlighterLape,
+  StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit,
+
+  // FIXME: R0b0t1 @ 11/16/17 16:55 CST.
+  // Breaking changes made in the LCL; abandoning custom class intended
+  // to support multi-line string literals.
+  {SynHighlighterLape,}
 
   mufasabase, MufasaTypes,
   mmlpsthread, // Code to use the interpreters in threads.
@@ -581,6 +586,8 @@ implementation
 uses
    lclintf,
    syncobjs, // for the critical sections / mutexes
+   LazUTF8,
+   LazFileUtils,
    debugimage,
    files,
    InterfaceBase,
@@ -2051,7 +2058,7 @@ begin
   if (Paramcount = 1) and not (Application.HasOption('open')) then
   begin
     writeln('Opening file: ' + ParamStr(1));
-    if FileExistsUTF8(ParamStrUTF8(1)) then
+    if FileExists(ParamStrUTF8(1)) then
       LoadScriptFile(ParamStrUTF8(1));
   end else
   // we have more parameters. Check for specific options. (-r -o -c, --run --open --config)

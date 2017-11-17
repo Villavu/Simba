@@ -75,20 +75,20 @@ begin
 end;
 function ps_FileExists ( const FileName : string ) : Boolean;extdecl;
 begin
-  result := FileExistsUTF8(FileName);
+  result := FileExists(FileName);
 end;
 function ps_DirectoryExists ( const DirectoryName : string ) : Boolean; extdecl;
 begin
-  result := DirectoryExistsUTF8(DirectoryName);
+  result := DirectoryExists(DirectoryName);
 end;
 function ps_CreateDirectory( const DirectoryName : string) : boolean; extdecl;
 begin
-  result := CreateDirUTF8(directoryName);
+  result := CreateDir(directoryName);
 end;
 
 function ps_ForceDirectories(const dir : string) : boolean; extdecl;
 begin
-  result := ForceDirectoriesUTF8(dir);
+  result := ForceDirectories(dir);
 end;
 
 function ps_GetFiles(const Path, Ext : string) : TStringArray;extdecl;
@@ -106,7 +106,7 @@ begin
   if Assigned(CurrThread) then
     Result := CurrThread.Client.MFiles.DeleteFile(Filename)
   else
-    Result := DeleteFileUTF8(Filename);
+    Result := DeleteFile(PChar(Filename));
 end;
 
 function ps_RenameFile(const OldName, Newname: string): Boolean; extdecl;
@@ -114,7 +114,7 @@ begin
   if Assigned(CurrThread) then
     Result := CurrThread.Client.MFiles.RenameFile(OldName, NewName)
   else
-    Result := RenameFileUTF8(Oldname, Newname);
+    Result := RenameFile(Oldname, Newname);
 end;
 
 procedure ps_WriteINI(const Section, KeyName, NewString : string; FileName: string);extdecl;

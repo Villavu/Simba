@@ -139,13 +139,18 @@ end;
 //function ShouldAutoAdjustLeftAndTop: Boolean;
 procedure TControl_ShouldAutoAdjustLeftAndTop(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  PBoolean(Result)^ := PControl(Params^[0])^.ShouldAutoAdjustLeftAndTop();
+  // FIXME: R0b0t1 @ 11/16/17 22:05 CST.
+  // Breaking changes made in the LCL; this has been replaced with
+  // ShouldAutoAdjust.
+  //
+  //PBoolean(Result)^ := PControl(Params^[0])^.ShouldAutoAdjustLeftAndTop();
 end;
 
 //function ShouldAutoAdjustWidthAndHeight: Boolean;
 procedure TControl_ShouldAutoAdjustWidthAndHeight(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  PBoolean(Result)^ := PControl(Params^[0])^.ShouldAutoAdjustWidthAndHeight();
+  // FIXME: R0b0t1 @ 11/16/17 22:05 CST.
+  //PBoolean(Result)^ := PControl(Params^[0])^.ShouldAutoAdjustWidthAndHeight();
 end;
 
 //constructor Create(TheOwner: TComponent);
