@@ -219,8 +219,8 @@ begin
   if Cmax = Cmin then
   begin
     //S and H are both zero, lets check if it mathces the tol
-    if (i.H <= (i.hueMod)) and
-       (i.S <= (i.satMod)) then
+    if ((i.H <= i.hueMod) or  (100-iH <= i.hueMod)) and
+       (i.S <= i.satMod) then
       exit(true)
     else
       exit(false);
