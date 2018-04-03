@@ -219,8 +219,7 @@ begin
   if Cmax = Cmin then
   begin
     //S and H are both zero, the color is gray, so ignore hue and leave it to saturation tolerance.
-    if {((i.H <= i.hueMod) or  (100-i.H <= i.hueMod)) and}
-       (i.S <= i.satMod) then
+    if (i.S <= i.satMod) then
       exit(true)
     else
       exit(false);
