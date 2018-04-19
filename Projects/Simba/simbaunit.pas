@@ -190,6 +190,7 @@ type
     SpeedButtonFindPrev: TSpeedButton;
     ToolButton5: TToolButton;
     TB_FromDesigner: TToolButton;
+    TB_ShowPackages: TToolButton;
     TT_ScriptManager: TToolButton;
     ToolButton6: TToolButton;
     TT_Console: TToolButton;
@@ -414,6 +415,7 @@ type
       var Accept: Boolean);
     procedure TB_FromDesignerClick(Sender: TObject);
     procedure TB_ReloadPluginsClick(Sender: TObject);
+    procedure TB_ShowPackagesClick(Sender: TObject);
     procedure ThreadOpenConnectionEvent(Sender: TObject; var url: string;
       var Continue: boolean);
     procedure ThreadOpenFileEvent(Sender: TObject; var Filename: string;
@@ -586,6 +588,9 @@ uses
    InterfaceBase,
    bitmapconv,
    bitmaps,
+   package,
+   {$IFDEF VER3_0} openssl {$ELSE} package_openssl {$ENDIF},
+   ssl_openssl_lib,
    {$IFDEF USE_EXTENSIONS}extensionmanagergui,{$ENDIF}
    colourhistory,
    math
@@ -1200,6 +1205,14 @@ end;
 procedure TSimbaForm.TB_ReloadPluginsClick(Sender: TObject);
 begin
 //  PluginsGlob.FreePlugins;
+end;
+
+procedure TSimbaForm.TB_ShowPackagesClick(Sender: TObject);
+begin
+  if PackageForm.Showing then
+    PackageForm.BringToFront()
+  else
+    PackageForm.Show();
 end;
 
 
@@ -2951,22 +2964,67 @@ begin
   end;
   {$ENDIF}
 
-  self.BeginFormUpdate;
-  Randomize;
-  FormatSettings.DecimalSeparator := '.';
-  DecimalSeparator := '.'; //This should be the same thing as above, but just in case...
-
   AppPath := IncludeTrailingPathDelimiter(Application.Location);
   DocPath := GetDocPath();
   DataPath := {$IFDEF LINUX}DocPath{$ELSE}GetDataPath(){$ENDIF};
   SimbaSettingsFile := {$IFDEF LINUX}GetDataPath(){$ELSE}DataPath{$ENDIF} + 'settings.xml';
 
+  // For linux: apt-get install openssl-dev
+  // Windows note: For some reason 64 bit libs use the 32 bit prefix too.
+  {$IFDEF WINDOWS}
+  if (not FileExists('libeay32.dll')) or (not FileExists('ssleay32.dll')) then
+  begin
+    WriteLn('SSL libs not present, adding...');
+
+    {$IFDEF CPU32}
+      {$i openssl32.lrs}
+    {$ELSE}
+      {$i openssl64.lrs}
+    {$ENDIF}
+
+    if (not FileExists('libeay32.dll')) then
+      with TLazarusResourceStream.Create('libeay32', nil) do
+      try
+        SaveToFile('libeay32.dll');
+      finally
+        Free();
+      end;
+
+    if (not FileExists('ssleay32.dll')) then
+      with TLazarusResourceStream.Create('ssleay32', nil) do
+      try
+        SaveToFile('ssleay32.dll');
+      finally
+        Free();
+      end;
+  end;
+
+  {$IFDEF VER3_0}
+  openssl.DLLSSLName := AppPath + 'ssleay32.dll';
+  openssl.DLLUtilName := AppPath + 'libeay32.dll';
+  {$ELSE}
+  package_openssl.DLLSSLName := AppPath + 'ssleay32.dll';
+  package_openssl.DLLUtilName := AppPath + 'libeay32.dll';
+  {$ENDIF}
+  ssl_openssl_lib.DLLSSLName := AppPath + 'ssleay32.dll';
+  ssl_openssl_lib.DLLUtilName := AppPath + 'libeay32.dll';
+  {$ENDIF}
+
+  BeginFormUpdate();
+  Randomize();
+  FormatSettings.DecimalSeparator := '.';
+  DecimalSeparator := '.'; //This should be the same thing as above, but just in case...
+
   RecentFiles := TStringList.Create;
+
+  CreateSimbaSettings(SimbaSettingsFile);
 
   //AutoCompletionStart := Point(-1, -1);
   CodeCompletionForm := TAutoCompletePopup.Create(Self);
   CodeCompletionForm.InsertProc := @OnCompleteCode;
   ParamHint := TParamHint.Create(self);
+
+  PackageForm := TPackageForm.Create(Self, TB_ShowPackages);
 
   {$IFDEF MSWindows}
   ConsoleVisible := True;
@@ -2998,8 +3056,6 @@ begin
   {$IFDEF USE_DEBUGGER}Application.CreateForm(TDebuggerForm, DebuggerForm);{$ENDIF}
 
   HandleConfigParameter;
-
-  CreateSimbaSettings(SimbaSettingsFile);
 
   Application.CreateForm(TSettingsForm,SettingsForm);
   Application.CreateForm(TSettingsSimpleForm,SettingsSimpleForm);
