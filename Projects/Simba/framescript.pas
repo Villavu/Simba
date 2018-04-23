@@ -69,7 +69,6 @@ type
     procedure SynEditSpecialLineColors(Sender: TObject; Line: integer;
       var Special: boolean; var FG, BG: TColor);
     procedure SynEditStatusChange(Sender: TObject; Changes: TSynStatusChanges);
-    procedure SynEditGutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
   private
     OwnerPage  : TPageControl;
     OwnerSheet : TTabSheet;//The owner TTabsheet -> For title setting
@@ -702,43 +701,6 @@ begin
     Shift := AShift;
     Command := ACmd;
   end;
-end;
-
-procedure TScriptFrame.SynEditGutterClick(Sender: TObject; X, Y, Line: integer; Mark: TSynEditMark);
-var
-  I, H: LongInt;
-begin
-  {$IFDEF USE_DEBUGGER}
-  if (SimbaSettings.Interpreter._Type.Value <> interp_PS) then
-    Exit;
-
-  H := SynEdit.Marks.Count - 1;
-  for I := 0 to H do
-    if (SynEdit.Marks.Items[I].Line = Line) then
-    begin
-      SynEdit.Marks.Line[Line].Clear(True);
-
-      try
-        if (Assigned(ScriptThread)) and (ScriptThread is TPSThread) then
-          with TPSThread(ScriptThread).PSScript do
-            ClearBreakPoint(MainFileName, Line - 1);
-      except end;
-
-      Exit;
-    end;
-
-  Mark := TSynEditMark.Create(SynEdit);
-  Mark.Line := Line;
-  Mark.ImageIndex := 6;
-  Mark.Visible := True;
-  SynEdit.Marks.Add(Mark);
-
-  try
-    if (Assigned(ScriptThread)) and (ScriptThread is TPSThread) then
-      with TPSThread(ScriptThread).PSScript do
-        SetBreakPoint(MainFileName, Line - 1);
-  except end;
-  {$ENDIF}
 end;
 
 constructor TScriptFrame.Create(TheOwner: TComponent);

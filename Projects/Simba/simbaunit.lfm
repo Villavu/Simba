@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 481
+  Left = 61
   Height = 671
-  Top = 133
+  Top = 262
   Width = 660
   ActiveControl = ScriptPanel
   AllowDropFiles = True
@@ -16,7 +16,7 @@ object SimbaForm: TSimbaForm
   OnDropFiles = FormDropFiles
   OnHide = doOnHide
   OnShortCut = FormShortCuts
-  LCLVersion = '1.4.5.0'
+  LCLVersion = '1.4.4.0'
   Visible = True
   object ToolBar1: TToolBar
     Left = 0
@@ -495,10 +495,9 @@ object SimbaForm: TSimbaForm
         Height = 365
         Top = 19
         Width = 150
+        DefaultItemHeight = 18
         HideSelection = True
         Images = nil
-        ShowLines = True
-        ShowRoot = True
         OnChange = FunctionListChange
         OnEnter = FunctionListEnter
         OnExit = FunctionListExit
@@ -1434,7 +1433,6 @@ object SimbaForm: TSimbaForm
         object MenuItemPascalScript: TMenuItem
           Action = ActionPascalScript
           RadioItem = True
-          OnClick = ActionPascalScriptExecute
         end
         object MenuItemLape: TMenuItem
           Action = ActionLape
@@ -3650,7 +3648,6 @@ object SimbaForm: TSimbaForm
     end
     object ActionPascalScript: TAction
       Caption = 'PascalScript'
-      OnExecute = ActionPascalScriptExecute
       Visible = False
     end
     object ActionGoto: TAction
@@ -3660,14 +3657,12 @@ object SimbaForm: TSimbaForm
     end
     object ActionLape: TAction
       Caption = 'Lape'
-      OnExecute = ActionLapeExecute
       Visible = False
     end
     object ActionDebugger: TAction
       Caption = 'Debugger'
       Enabled = False
       ImageIndex = 31
-      OnExecute = ActionDebuggerExecute
       Visible = False
     end
     object ActionNotes: TAction
