@@ -62,12 +62,10 @@ uses
 
   v_ideCodeInsight, CastaliaPasLexTypes, // Code completion units
   CastaliaSimplePasPar, v_AutoCompleteForm,  // Code completion units
-  {$IFDEF USE_PASCALSCRIPT}PSDump, {$ENDIF}
 
   updater,
   {$IFDEF USE_SCRIPTMANAGER}SM_Main,{$ENDIF}
-  newsimbasettings
-  {$IFDEF USE_DEBUGGER}, debugger{$ENDIF};
+  newsimbasettings;
 
 const
   interp_PS = 0; //PascalScript
@@ -302,7 +300,6 @@ type
     procedure ActionConsoleExecute(Sender: TObject);
     procedure ActionCopyExecute(Sender: TObject);
     procedure ActionCutExecute(Sender: TObject);
-    procedure ActionDebuggerExecute(Sender: TObject);
     procedure ActionDeleteExecute(Sender: TObject);
     procedure ActionExitExecute(Sender: TObject);
     procedure ActionExtensionsExecute(Sender: TObject);
@@ -312,13 +309,12 @@ type
     procedure ActionFindstartExecute(Sender: TObject);
     procedure ActionFontExecute(Sender: TObject);
     procedure ActionGotoExecute(Sender: TObject);
-    procedure ActionLapeExecute(Sender: TObject);
     procedure ActionNewExecute(Sender: TObject);
     procedure ActionNewTabExecute(Sender: TObject);
     procedure ActionNormalSizeExecute(Sender: TObject);
     procedure ActionNotesExecute(Sender: TObject);
     procedure ActionOpenExecute(Sender: TObject);
-    procedure ActionPascalScriptExecute(Sender: TObject);
+
     procedure ActionPasteExecute(Sender: TObject);
     procedure ActionPauseExecute(Sender: TObject);
     procedure ActionRedoExecute(Sender: TObject);
@@ -454,7 +450,6 @@ type
 
     function SilentUpdateBeat: Boolean;
 
-    procedure UpdateInterpreter;
     procedure HandleConnectionData;
     procedure HandleOpenFileData;
     procedure HandleWriteFileData;
@@ -468,7 +463,6 @@ type
     function GetSimbaNews: String;
 
     { Settings Hooks }
-    procedure SetInterpreter(obj: TSetting);
     procedure SetPluginsPath(obj: TSetting);
     procedure SetScriptsPath(obj: TSetting);
     {$IFDEF USE_EXTENSIONS}procedure SetExtensionsPath(obj: TSetting);{$ENDIF}
@@ -517,7 +511,6 @@ type
     function LoadSettingDef(const Key, Def : string) : string;
     procedure FunctionListShown( ShowIt : boolean);
     property ScriptState : TScriptState read GetScriptState write SetScriptState;
-    {$IFDEF USE_PASCALSCRIPT}procedure SafeCallThread;{$ENDIF}
     procedure UpdateTitle;
     function OpenScript : boolean;
     function LoadScriptFile(filename : string; AlwaysOpenInNewTab : boolean = false; CheckOtherTabs : boolean = true) : boolean;
@@ -876,28 +869,6 @@ begin
   end;
 end;
 
-procedure TSimbaForm.UpdateInterpreter;
-begin
-{$IFDEF WINDOWS}
-  ActionPascalScript.Checked := False;
-  ActionLape.Checked := False;
-
-  case SimbaSettings.Interpreter._Type.Value of
-    interp_PS: ActionPascalScript.Checked := True;
-    interp_LP: ActionLape.Checked := True;
-  end;
-{$ELSE}
-  MenuItemPascalScript.RadioItem := False;
-  MenuItemLape.RadioItem := False;
-
-  case SimbaSettings.Interpreter._Type.Value of
-    interp_PS: MenuItemPascalScript.RadioItem := True;
-    interp_LP: MenuItemLape.RadioItem := True;
-  end;
-{$ENDIF}
-{$IFDEF USE_DEBUGGER}ActionDebugger.Visible := SimbaSettings.Interpreter._Type.Value = interp_PS;{$ENDIF}
-end;
-
 procedure TSimbaForm.HandleConnectionData;
 {$IFDEF USE_EXTENSIONS}
 var
@@ -987,34 +958,6 @@ begin
 end;
 {$ENDIF}
 
-
-procedure TSimbaForm.SetInterpreter(obj: TSetting);
-var
-  UpdateCurrScript: Boolean;
-  Interpreter: Integer;
-begin
-  UpdateCurrScript := false;
-  if (CurrScript <> nil) then
-    with CurrScript.Synedit do
-      if (Lines.text = DefaultScript) and not(CanUndo or CanRedo) then
-        UpdateCurrScript := true;
-
-  Interpreter := TIntegerSetting(obj).Value;
-
-  if (Interpreter < 0) or (Interpreter > 1) then
-  begin
-    writeln('Resetting interpreter to valid value');
-    SimbaSettings.Interpreter._Type.Value := 1; //Default Lape
-  end;
-
-  UpdateInterpreter;
-
-  if UpdateCurrScript then
-    CurrScript.SynEdit.Lines.text := DefaultScript;
-
-  frmFunctionList.FunctionList.Items.Clear;
-  MenuitemFillFunctionList.Click;
-end;
 
 procedure TSimbaForm.SetTrayVisiblity(obj: TSetting);
 begin
@@ -1796,7 +1739,7 @@ begin
     MTrayIcon.Hide;
     Writeln('Hiding tray.'); // TODO REMOVE?
   end;
-  UpdateInterpreter;
+
   self.EndFormUpdate;
 end;
 
@@ -1952,15 +1895,9 @@ begin
       exit;
   end;
   CurrScript.ScriptErrorLine:= -1;
-  {$IFDEF USE_PASCALSCRIPT}CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;{$ENDIF}
 
   try
-    case SimbaSettings.Interpreter._Type.Value of
-      {$IFDEF USE_PASCALSCRIPT}interp_PS: Thread := TPSThread.Create(True, @CurrentSyncInfo, SimbaSettings.Plugins.Path.Value);{$ENDIF}
-      {$IFDEF USE_LAPE}interp_LP: Thread := TLPThread.Create(True, @CurrentSyncInfo, SimbaSettings.Plugins.Path.Value);{$ENDIF}
-      else
-        raise Exception.CreateFmt('Unknown Interpreter %d!', [SimbaSettings.Interpreter._Type.Value]);
-    end;
+    Thread := TLPThread.Create(True, @CurrentSyncInfo, SimbaSettings.Plugins.Path.Value);
   except
     on E: Exception do
     begin
@@ -1970,14 +1907,7 @@ begin
     end;
   end;
 
-  {$IFDEF USE_PASCALSCRIPT}
-  if ((Thread is TPSThread) and (CurrScript.ScriptFile <> '')) then
-    TPSThread(Thread).PSScript.MainFileName := CurrScript.ScriptFile;
-  {$ENDIF}
-
-  {$IFNDEF TERMINALWRITELN}
   Thread.SetDebug(@formWriteln);
-  {$ENDIF}
   Thread.SetScript(Script);
 
   Thread.ErrorData := @CurrScript.ErrorData;
@@ -2102,26 +2032,23 @@ end;
 
 function TSimbaForm.DefaultScript: string;
 begin
-  Result := '';
+  Result := 'program new;' + LineEnding +
+            'begin' + LineEnding +
+            'end.';
 
-  case SimbaSettings.Interpreter._Type.Value of
-    interp_PS, interp_LP: begin
-                  Result := 'program new;' + LineEnding + 'begin' + LineEnding + 'end.' + LineEnding;
-                  if FileExistsUTF8(SimbaSettings.SourceEditor.DefScriptPath.Value) then
-                  begin
-                    try
-                      with TStringList.Create do
-                        try
-                          LoadFromFile(SimbaSettings.SourceEditor.DefScriptPath.Value);
-                          Result := Text;
-                        finally
-                          Free;
-                        end;
-                    except
-                      mDebugLn('Couldn''t load default script file.');
-                    end;
-                  end;
-                end;
+  if FileExistsUTF8(SimbaSettings.SourceEditor.DefScriptPath.Value) then
+  begin
+    try
+      with TStringList.Create do
+        try
+          LoadFromFile(SimbaSettings.SourceEditor.DefScriptPath.Value);
+          Result := Text;
+        finally
+          Free;
+        end;
+    except
+      mDebugLn('Couldn''t load default script file.');
+    end;
   end;
 end;
 
@@ -2181,15 +2108,6 @@ begin
     CurrScript.SynEdit.CutToClipboard
   else if Memo1.Focused then
     Memo1.CutToClipboard;
-end;
-
-procedure TSimbaForm.ActionDebuggerExecute(Sender: TObject);
-begin
-  {$IFDEF USE_DEBUGGER}
-  DebuggerForm.DebugThread := CurrScript.ScriptThread;
-  DebuggerForm.Show;
-  DebuggerForm.UpdateInfo();
-  {$ENDIF}
 end;
 
 procedure TSimbaForm.ActionDeleteExecute(Sender: TObject);
@@ -2281,11 +2199,6 @@ begin
   end;
 end;
 
-procedure TSimbaForm.ActionLapeExecute(Sender: TObject);
-begin
-  {$IFDEF USE_LAPE}SimbaSettings.Interpreter._Type.Value := interp_LP;{$ENDIF}
-end;
-
 procedure TSimbaForm.ActionClearDebugExecute(Sender: TObject);
 begin
   Memo1.Clear;
@@ -2331,11 +2244,6 @@ end;
 procedure TSimbaForm.ActionOpenExecute(Sender: TObject);
 begin
   Self.OpenScript;
-end;
-
-procedure TSimbaForm.ActionPascalScriptExecute(Sender: TObject);
-begin
-  SimbaSettings.Interpreter._Type.Value := interp_PS;
 end;
 
 procedure TSimbaForm.ActionPasteExecute(Sender: TObject);
@@ -2444,7 +2352,7 @@ end;
 procedure TSimbaForm.CallFormDesignerExecute(Sender: TObject);
 begin
   {$IFDEF USE_FORMDESIGNER}
-  CompForm.Interpreter:=Integer(SimbaSettings.Interpreter._Type.Value);
+  CompForm.Interpreter := 1;
   if (CompForm.Visible) then
     CompForm.{$IFDEF WINDOWS}Hide{$ELSE}Visible := False{$ENDIF}
   else
@@ -2808,27 +2716,13 @@ begin
 
   ValueDefs := TStringList.Create();
   try
-    if (SimbaSettings.Interpreter._Type.Value = interp_PS) then
-    begin
-      {$IFDEF USE_PASCALSCRIPT}
-      with TPSThread(Thread) do
-      try
-        PSScript.GetValueDefs(ValueDefs);
-        CoreDefines.AddStrings(PSScript.Defines);
-      finally
-        Free();
-      end;
-      {$ENDIF}
-    end else if (SimbaSettings.Interpreter._Type.Value = interp_LP) then
-    begin
-      with TLPThread(Thread) do
-      try
-        Compiler.getInfo(ValueDefs);
-        for I := 0 to Compiler.BaseDefines.Count - 1 do
-          CoreDefines.Add(Compiler.BaseDefines.Names[I]);
-      finally
-        Free();
-      end;
+    with TLPThread(Thread) do
+    try
+      Compiler.getInfo(ValueDefs);
+      for I := 0 to Compiler.BaseDefines.Count - 1 do
+        CoreDefines.Add(Compiler.BaseDefines.Names[I]);
+    finally
+      Free();
     end;
 
     Stream := TMemoryStream.Create;
@@ -2851,9 +2745,7 @@ begin
     SetLength(CoreBuffer, 1);
     CoreBuffer[0] := Buffer;
 
-    // Now we have internal interpeter methods lets add em to function list
-    if (SimbaSettings.Interpreter._Type.Value = interp_LP) then
-      TThread.Synchronize(nil, @FillFunctionListForce);
+    TThread.Synchronize(nil, @FillFunctionListForce);
   end;
   //Stream.Free; // TCodeInsight free's the stream!
 end;
@@ -3002,7 +2894,6 @@ begin
 
   Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
   {$IFDEF USE_EXTENSIONS}Application.CreateForm(TExtensionsForm, ExtensionsForm);{$ENDIF}
-  {$IFDEF USE_DEBUGGER}Application.CreateForm(TDebuggerForm, DebuggerForm);{$ENDIF}
 
   HandleConfigParameter;
 
@@ -3063,7 +2954,6 @@ begin
   {$IFDEF USE_PASCALSCRIPT}ActionPascalScript.Visible := True;{$ENDIF}
   {$IFDEF USE_LAPE}ActionLape.Visible := True;{$ENDIF}
   {$IFDEF USE_EXTENSIONS}ActionExtensions.Visible := True;{$ENDIF}
-  {$IFDEF USE_DEBUGGER}ActionDebugger.Visible := SimbaSettings.Interpreter._Type.Value = interp_PS;{$ENDIF}
 
   // TODO TEST
   if SimbaSettings.Oops then
@@ -3350,29 +3240,18 @@ begin
     frmFunctionList.FunctionList.BeginUpdate();
     frmFunctionList.FunctionList.Items.Clear();
 
-    case SimbaSettings.Interpreter._Type.Value of
-      {$IFDEF USE_PASCALSCRIPT}
-      interp_PS:
-        Methods := TPSThread.GetExportedMethods();
-      {$ENDIF}
-      interp_LP:
-        begin
-          Methods := TLPThread.GetExportedMethods();
+    Methods := TLPThread.GetExportedMethods();
 
-          if (Length(CoreBuffer) > 0) then
-          begin
-            InterpMethods := Self.GetInterepterMethods(Methods);
+    if (Length(CoreBuffer) > 0) then
+    begin
+      InterpMethods := Self.GetInterepterMethods(Methods);
 
-            for i := 0 to High(InterpMethods) do
-            begin
-              Len := Length(Methods);
-              SetLength(Methods, Len + 1);
-              Methods[Len] := InterpMethods[i];
-            end;
-          end;
-        end;
-      else
-        raise Exception.Create('Invalid Interpreter!');
+      for i := 0 to High(InterpMethods) do
+      begin
+        Len := Length(Methods);
+        SetLength(Methods, Len + 1);
+        Methods[Len] := InterpMethods[i];
+      end;
     end;
 
     Tree := frmFunctionList.FunctionList;
@@ -3746,11 +3625,6 @@ begin
                          TB_Stop.ImageIndex := Image_Stop; TB_Stop.Enabled:= True;
                          TrayPlay.Checked := True; TrayPlay.Enabled := False; {$ifdef MSWindows}TrayPause.Checked := false; TrayPause.Enabled := True;{$endif}
                          TrayStop.Enabled:= True; TrayStop.Checked:= False;
-
-                         {$IFDEF USE_DEBUGGER}
-                         if (SimbaSettings.Interpreter._Type.Value = interp_PS) then
-                           ActionDebugger.Enabled := True;
-                         {$ENDIF}
                    end;
       ss_Paused  : begin Text := 'Paused'; TB_Run.Enabled:= True; {$ifdef MSWindows}TB_Pause.Enabled:= True; {$endif}
                          TB_Stop.ImageIndex := Image_Stop; TB_Stop.Enabled:= True;
@@ -3767,15 +3641,6 @@ begin
                          TB_Stop.ImageIndex := Image_Stop;
                          TrayPlay.Checked := false; TrayPlay.Enabled := True; {$ifdef MSWindows}TrayPause.Checked := false; TrayPause.Enabled := False;{$endif}
                          TrayStop.Enabled:= false; TrayStop.Checked:= False;
-
-                         {$IFDEF USE_DEBUGGER}
-                         if (SimbaSettings.Interpreter._Type.Value = interp_PS) then
-                         begin
-                           ActionDebugger.Enabled := False;
-                           if  (DebuggerForm.Showing) then
-                             DebuggerForm.Hide;
-                         end;
-                         {$ENDIF}
                    end;
     end;
 end;
@@ -3823,7 +3688,6 @@ end;
 
 procedure TSimbaForm.RegisterSettingsOnChanges;
 begin
-  SimbaSettings.Interpreter._Type.OnChange := @SetInterpreter;
   SimbaSettings.Tray.AlwaysVisible.onChange:= @SetTrayVisiblity;
 
   SimbaSettings.Plugins.Path.onChange:= @SetPluginsPath;
@@ -4034,35 +3898,6 @@ begin
     end;
   end;
 end;
-
-{$IFDEF USE_PASCALSCRIPT}
-procedure TSimbaForm.SafeCallThread;
-var
-  thread: TMThread;
-  LocalCopy : TSyncInfo;
-begin
-  LocalCopy := CurrentSyncInfo;
-  mDebugLn('Executing : ' + LocalCopy.MethodName);
-  thread:= TMThread(LocalCopy.OldThread);
-  mmlpsthread.CurrThread:= thread;
-  try
-    if thread is TPSThread then
-    begin
-      with TPSThread(thread).PSScript do
-      begin
-        OnLine:=@OnLinePSScript;
-        LocalCopy.Res^:= Exec.RunProcPVar(LocalCopy.V^,Exec.GetProc(LocalCopy.MethodName));
-        Online := nil;
-      end;
-    end else
-    begin
-      raise Exception.Create('ThreadSafeCall not implemented on this client');
-    end;
-  finally
-    mmlpsthread.CurrThread:= nil;
-  end;
-end;
-{$ENDIF}
 
 procedure TSimbaForm.UpdateTitle;
 begin
