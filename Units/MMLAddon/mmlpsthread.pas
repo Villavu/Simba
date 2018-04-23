@@ -23,8 +23,6 @@
 
 unit mmlpsthread;
 
-{$define PS_USESSUPPORT}
-
 {$mode objfpc}{$H+}
 
 {$I Simba.inc}
@@ -35,12 +33,9 @@ uses
   Classes, SysUtils, client,
   MufasaTypes, MufasaBase, web, fontloader,
   bitmaps, plugins, dynlibs, internets,scriptproperties,
-  settings, settingssandbox, lcltype, dialogs, ExtCtrls
-  {$IFDEF USE_SQLITE}, msqlite3{$ENDIF}
-  {$IFDEF USE_LAPE}
-  , lpparser, lpcompiler, lptypes, lpvartypes, ffi, lpffi, lpffiwrappers,
-    lpeval, lpinterpreter, lputils, lpmessages, LPDump
-  {$ENDIF};
+  settings, settingssandbox, lcltype, dialogs, ExtCtrls,
+  lpparser, lpcompiler, lptypes, lpvartypes, ffi, lpffi, lpffiwrappers,
+  lpeval, lpinterpreter, lputils, lpmessages, LPDump;
 
 const
   m_Status = 0; //Data = PChar to new status
@@ -57,7 +52,6 @@ const
   m_BalloonHint = 11; //Data = PBalloonHintData
 
   {$I settings_const.inc}
-  {$WARNING REMOVEME}
 
 type
     { TMMLPSThread }
@@ -183,9 +177,6 @@ type
       property OpenFileEvent : TOpenFileEvent read FOpenFileEvent write SetOpenFileEvent;
     end;
 
-
-   {$IFDEF USE_LAPE}
-   { TLPThread }
    TLPThread = class(TMThread)
    protected
      procedure LoadPlugin(plugidx: integer); override;
@@ -220,8 +211,6 @@ type
      constructor Create(Method: Pointer);
      procedure Call;
    end;
-
-   {$ENDIF}
 
 threadvar
   CurrThread : TMThread;
@@ -258,9 +247,7 @@ uses
   DCPhaval, DCPmd4, DCPmd5,
   DCPripemd128, DCPripemd160,
   DCPsha1, DCPsha256, DCPsha512,
-  DCPtiger
-
-  {$IFDEF USE_LAPE}, lpClasses, lpClassHelper{$ENDIF};
+  DCPtiger, lpClasses, lpClassHelper;
 
 {$MACRO ON}
 {$define extdecl := register}

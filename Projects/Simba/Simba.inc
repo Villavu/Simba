@@ -24,8 +24,8 @@
 {$DEFINE SIMBA}
 
 {$IFDEF LINUX}
-    {$DEFINE LINUX_HOTKEYS} // For global hotkeys, requires libkeybinder.
-                            // See Units/Linux/keybinder.pas
+  {$DEFINE LINUX_HOTKEYS} // For global hotkeys, requires libkeybinder.
+                          // See Units/Linux/keybinder.pas
 {$ENDIF}
 
 {$DEFINE SIMBA_VERBOSE} // For more verbosity.
@@ -34,13 +34,8 @@
                         // default, yet keep it possible to disable it with
                         // command line flags.
 
-{$DEFINE USE_DEBUGGER}
 {$DEFINE USE_FORMDESIGNER}
-
-{$DEFINE USE_PASCALSCRIPT}
-{$DEFINE USE_LAPE}
-
-{.$DEFINE USE_EXTENSIONS}
+{$DEFINE USE_EXTENSIONS}
 
 {$MACRO ON}
 {$define lape_extdecl:=cdecl;}
