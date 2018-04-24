@@ -291,12 +291,9 @@ begin
     exit;
   if FillThread <> nil then {Already busy filling!}
     exit;
-  if ((FLastScript = Script) and (FLastInterp = SimbaSettings.Interpreter._Type.Value)) and (not Force) then
-    exit;
   if SimbaForm.CurrScript = nil then
     exit;
   FLastScript := Script;
-  FLastInterp := SimbaSettings.Interpreter._Type.Value;
   Filtering := FilterTree.Visible;
   if FilterTree.Visible then
     FilterTreeVis(false);

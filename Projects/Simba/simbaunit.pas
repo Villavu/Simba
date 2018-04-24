@@ -58,16 +58,12 @@ uses
   mmisc, stringutil,mufasatypesutil,
   about, framefunctionlist, ocr, updateform, Simbasettingsold,
   Simbasettingssimple,
-  {$IFDEF USE_EXTENSIONS}virtualextension, extensionmanager,{$ENDIF}
-
   v_ideCodeInsight, CastaliaPasLexTypes, // Code completion units
   CastaliaSimplePasPar, v_AutoCompleteForm,  // Code completion units
-  {$IFDEF USE_PASCALSCRIPT}PSDump, {$ENDIF}
 
   updater,
   {$IFDEF USE_SCRIPTMANAGER}SM_Main,{$ENDIF}
-  newsimbasettings
-  {$IFDEF USE_DEBUGGER}, debugger{$ENDIF};
+  newsimbasettings;
 
 const
   interp_PS = 0; //PascalScript
@@ -302,23 +298,19 @@ type
     procedure ActionConsoleExecute(Sender: TObject);
     procedure ActionCopyExecute(Sender: TObject);
     procedure ActionCutExecute(Sender: TObject);
-    procedure ActionDebuggerExecute(Sender: TObject);
     procedure ActionDeleteExecute(Sender: TObject);
     procedure ActionExitExecute(Sender: TObject);
-    procedure ActionExtensionsExecute(Sender: TObject);
-    procedure ActionExtensionsUpdate(Sender: TObject);
     procedure ActionFindNextExecute(Sender: TObject);
     procedure ActionFindPrevExecute(Sender: TObject);
     procedure ActionFindstartExecute(Sender: TObject);
     procedure ActionFontExecute(Sender: TObject);
     procedure ActionGotoExecute(Sender: TObject);
-    procedure ActionLapeExecute(Sender: TObject);
     procedure ActionNewExecute(Sender: TObject);
     procedure ActionNewTabExecute(Sender: TObject);
     procedure ActionNormalSizeExecute(Sender: TObject);
     procedure ActionNotesExecute(Sender: TObject);
     procedure ActionOpenExecute(Sender: TObject);
-    procedure ActionPascalScriptExecute(Sender: TObject);
+
     procedure ActionPasteExecute(Sender: TObject);
     procedure ActionPauseExecute(Sender: TObject);
     procedure ActionRedoExecute(Sender: TObject);
@@ -404,8 +396,6 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure PageControl1MouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
-    procedure PickerPick(Sender: TObject; const Colour, colourx,
-      coloury: integer);
     procedure PopupItemFindClick(Sender: TObject);
     procedure ProcessDebugStream(Sender: TObject);
     procedure RecentFileItemsClick(Sender: TObject);
@@ -454,13 +444,6 @@ type
 
     function SilentUpdateBeat: Boolean;
 
-    procedure UpdateInterpreter;
-    procedure HandleConnectionData;
-    procedure HandleOpenFileData;
-    procedure HandleWriteFileData;
-    procedure HandleScriptStartData;
-    procedure HandleScriptOpenData;
-
     function GetHighlighter: TSynCustomHighlighter;
     function GetScriptState: TScriptState;
     function GetShowParamHintAuto: boolean;
@@ -468,10 +451,8 @@ type
     function GetSimbaNews: String;
 
     { Settings Hooks }
-    procedure SetInterpreter(obj: TSetting);
     procedure SetPluginsPath(obj: TSetting);
     procedure SetScriptsPath(obj: TSetting);
-    {$IFDEF USE_EXTENSIONS}procedure SetExtensionsPath(obj: TSetting);{$ENDIF}
     procedure SetIncludesPath(obj: TSetting);
     procedure SetFontsPath(obj: TSetting);
     procedure SetDefaultScriptPath(obj: TSetting);
@@ -517,7 +498,6 @@ type
     function LoadSettingDef(const Key, Def : string) : string;
     procedure FunctionListShown( ShowIt : boolean);
     property ScriptState : TScriptState read GetScriptState write SetScriptState;
-    {$IFDEF USE_PASCALSCRIPT}procedure SafeCallThread;{$ENDIF}
     procedure UpdateTitle;
     function OpenScript : boolean;
     function LoadScriptFile(filename : string; AlwaysOpenInNewTab : boolean = false; CheckOtherTabs : boolean = true) : boolean;
@@ -542,7 +522,6 @@ type
     procedure CreateDefaultEnvironment;
     procedure LoadFormSettings;
     procedure SaveFormSettings;
-    procedure LoadExtensions;
     procedure AddRecentFile(const filename : string);
     procedure InitializeTMThread(out Thread : TMThread);
     procedure HandleParameters;
@@ -593,7 +572,6 @@ uses
    InterfaceBase,
    bitmapconv,
    bitmaps,
-   {$IFDEF USE_EXTENSIONS}extensionmanagergui,{$ENDIF}
    colourhistory,
    math
    {$IFDEF USE_FORMDESIGNER}, frmdesigner{$ENDIF}
@@ -812,8 +790,7 @@ end;
 
 function TSimbaForm.OnCCFindInclude(Sender: TObject; var Filename: string): Boolean;
 begin
-  Result := FindFile(Filename, [AppPath, SimbaSettings.Includes.Path.Value
-          {$IFDEF USE_EXTENSIONS}, SimbaSettings.Extensions.Path.Value{$ENDIF}]);
+  Result := FindFile(Filename, [AppPath, SimbaSettings.Includes.Path.Value]);
 end;
 
 function TSimbaForm.OnCCLoadLibrary(Sender: TObject; var LibName: string; out ci: TCodeInsight): Boolean;
@@ -876,51 +853,6 @@ begin
   end;
 end;
 
-procedure TSimbaForm.UpdateInterpreter;
-begin
-{$IFDEF WINDOWS}
-  ActionPascalScript.Checked := False;
-  ActionLape.Checked := False;
-
-  case SimbaSettings.Interpreter._Type.Value of
-    interp_PS: ActionPascalScript.Checked := True;
-    interp_LP: ActionLape.Checked := True;
-  end;
-{$ELSE}
-  MenuItemPascalScript.RadioItem := False;
-  MenuItemLape.RadioItem := False;
-
-  case SimbaSettings.Interpreter._Type.Value of
-    interp_PS: MenuItemPascalScript.RadioItem := True;
-    interp_LP: MenuItemLape.RadioItem := True;
-  end;
-{$ENDIF}
-{$IFDEF USE_DEBUGGER}ActionDebugger.Visible := SimbaSettings.Interpreter._Type.Value = interp_PS;{$ENDIF}
-end;
-
-procedure TSimbaForm.HandleConnectionData;
-{$IFDEF USE_EXTENSIONS}
-var
-  Args : TVariantArray;
-  Called: Boolean;
-begin
-  SetLength(Args,2);
-  Args[0] := OpenConnectionData.URL^;
-  Args[1] := OpenConnectionData.Continue^;
-  try
-    ExtManager.HandleHook(EventHooks[SExt_onOpenConnection].HookName, Args,
-        Called);
-    OpenConnectionData.URL^ := Args[0];
-    OpenConnectionData.Continue^ := Args[1];
-  except
-    on e : Exception do
-      mDebugLn('ERROR in HandleConnectiondata: ' + e.message);
-  end;
-{$ELSE}
-begin
-{$ENDIF}
-end;
-
 function TSimbaForm.GetHighlighter: TSynCustomHighlighter;
 begin
   if SimbaSettings.SourceEditor.LazColors.GetDefValue(True) then
@@ -978,139 +910,9 @@ begin
     TMufasaTab(Tabs[I]).ScriptFrame.SynEdit.Font.Assign(TFontSetting(obj).Value);
 end;
 
-{$IFDEF USE_EXTENSIONS}
-procedure TSimbaForm.SetExtensionsPath(obj: TSetting);
-begin
-  {$IFDEF SIMBA_VERBOSE}
-  writeln('--- SetExtensionPath with value: ' + TPathSetting(obj).Value);
-  {$ENDIF}
-end;
-{$ENDIF}
-
-
-procedure TSimbaForm.SetInterpreter(obj: TSetting);
-var
-  UpdateCurrScript: Boolean;
-  Interpreter: Integer;
-begin
-  UpdateCurrScript := false;
-  if (CurrScript <> nil) then
-    with CurrScript.Synedit do
-      if (Lines.text = DefaultScript) and not(CanUndo or CanRedo) then
-        UpdateCurrScript := true;
-
-  Interpreter := TIntegerSetting(obj).Value;
-
-  if (Interpreter < 0) or (Interpreter > 1) then
-  begin
-    writeln('Resetting interpreter to valid value');
-    SimbaSettings.Interpreter._Type.Value := 1; //Default Lape
-  end;
-
-  UpdateInterpreter;
-
-  if UpdateCurrScript then
-    CurrScript.SynEdit.Lines.text := DefaultScript;
-
-  frmFunctionList.FunctionList.Items.Clear;
-  MenuitemFillFunctionList.Click;
-end;
-
 procedure TSimbaForm.SetTrayVisiblity(obj: TSetting);
 begin
   MTrayIcon.Visible := TBooleanSetting(obj).Value;
-end;
-
-procedure TSimbaForm.HandleOpenFileData;
-{$IFDEF USE_EXTENSIONS}
-var
-  Args : TVariantArray;
-  Called: Boolean;
-begin
-  SetLength(Args,2);
-  Args[0] := OpenFileData.FileName^;
-  Args[1] := OpenFileData.Continue^;
-  try
-    ExtManager.HandleHook(EventHooks[SExt_onOpenFile].HookName, Args, Called);
-    OpenFileData.FileName^ := Args[0];
-    OpenFileData.Continue^ := Args[1];
-  except
-    on e : Exception do
-      mDebugLn('ERROR in HandleOpenFileData: ' + e.message);
-  end;
-{$ELSE}
-begin
-{$ENDIF}
-end;
-
-procedure TSimbaForm.HandleWriteFileData;
-{$IFDEF USE_EXTENSIONS}
-var
-  Args : TVariantArray;
-  Called: Boolean;
-begin
-  SetLength(Args,2);
-  Args[0] := WriteFileData.FileName^;
-  Args[1] := WriteFileData.Continue^;
-  try
-    ExtManager.HandleHook(EventHooks[SExt_onWriteFile].HookName, Args, Called);
-    WriteFileData.FileName^ := Args[0];
-    WriteFileData.Continue^ := Args[1];
-  except
-    on e : Exception do
-      mDebugLn('ERROR in HandleWriteFileData: ' + e.message);
-  end;
-{$ELSE}
-begin
-{$ENDIF}
-end;
-
-procedure TSimbaForm.HandleScriptStartData;
-{$IFDEF USE_EXTENSIONS}
-var
-  Args : TVariantArray;
-  s: String;
-  Called: Boolean;
-begin
-  SetLength(Args,2);
-  Args[0] := ScriptStartData.Script^;
-  Args[1] := ScriptStartData.Continue^;
-  try
-    s := ExtManager.HandleHook(EventHooks[SExt_onScriptStart].HookName, Args, Called);
-    if Called then
-    begin
-      ScriptStartData.Script^ := s;
-      ScriptStartData.Continue^ := Args[1];
-    end;
-  except
-    on e : Exception do
-      mDebugLn('ERROR in HandleScriptStartData: ' + e.message);
-  end;
-{$ELSE}
-begin
-{$ENDIF}
-end;
-
-procedure TSimbaForm.HandleScriptOpenData;
-{$IFDEF USE_EXTENSIONS}
-var
-  Args : TVariantArray;
-  s: String;
-  Called: Boolean;
-begin
-  SetLength(Args,1);
-  Args[0] := ScriptOpenData.Script^;
-  try
-    s := ExtManager.HandleHook(EventHooks[SExt_onScriptOpen].HookName, Args, Called);
-    if Called then
-      ScriptOpenData.Script^ := s;
-  except
-    on e : Exception do
-      mDebugLn('ERROR in HandleScriptOpenData: ' + e.message);
-  end;
-{$ELSE}
-begin
-{$ENDIF}
 end;
 
 procedure TSimbaForm.ProcessDebugStream(Sender: TObject);
@@ -1216,7 +1018,6 @@ begin
   OpenConnectionData.Sender := Sender;
   OpenConnectionData.URL:= @URL;
   OpenConnectionData.Continue:= @Continue;
-  TThread.Synchronize(nil,@HandleConnectionData);
 end;
 
 procedure TSimbaForm.ThreadOpenFileEvent(Sender: TObject; var Filename: string;
@@ -1225,7 +1026,6 @@ begin
   OpenFileData.Sender := Sender;
   OpenFileData.FileName:= @FileName;
   OpenFileData.Continue:= @Continue;
-  TThread.Synchronize(nil,@HandleOpenFileData);
 end;
 
 procedure TSimbaForm.ThreadWriteFileEvent(Sender: TObject; var Filename: string;
@@ -1234,7 +1034,6 @@ begin
   WriteFileData.Sender := Sender;
   WriteFileData.FileName:= @FileName;
   WriteFileData.Continue:= @Continue;
-  TThread.Synchronize(nil,@HandleWriteFileData);
 end;
 
 procedure TSimbaForm.TrayPopupPopup(Sender: TObject);
@@ -1719,11 +1518,6 @@ end;
 procedure TSimbaForm.CreateDefaultEnvironment;
 
 begin
-  {$IFDEF USE_EXTENSIONS}
-  // TODO
-  CreateSetting(ssExtensionsCount, '0');
-  {$ENDIF}
-
   {$ifdef MSWindows}
   ShowConsole(SimbaSettings.LastConfig.MainForm.ConsoleVisible.Value);
   {$endif}
@@ -1734,10 +1528,6 @@ begin
     CreateDir(SimbaSettings.Fonts.Path.Value);
   if not DirectoryExists(SimbaSettings.Plugins.Path.Value) then
     CreateDir(SimbaSettings.Plugins.Path.Value);
-  {$IFDEF USE_EXTENSIONS}
-  if not DirectoryExists(SimbaSettings.Extensions.Path.Value) then
-    CreateDir(SimbaSettings.Extensions.Path.Value);
-  {$ENDIF}
   if not DirectoryExists(SimbaSettings.Scripts.Path.Value) then
     CreateDir(SimbaSettings.Scripts.Path.Value);
 
@@ -1796,7 +1586,7 @@ begin
     MTrayIcon.Hide;
     Writeln('Hiding tray.'); // TODO REMOVE?
   end;
-  UpdateInterpreter;
+
   self.EndFormUpdate;
 end;
 
@@ -1804,7 +1594,6 @@ end;
 procedure TSimbaForm.SaveFormSettings;
 var
   Data: TStringArray;
-  {$IFDEF USE_EXTENSIONS}Path: string;{$ENDIF}
   i: integer;
 begin
   if (not Assigned(SimbaSettings)) then
@@ -1832,74 +1621,8 @@ begin
     {$ifdef MSWindows}
     SimbaSettings.LastConfig.MainForm.ConsoleVisible.Value := ConsoleVisible;
     {$endif}
-    {$IFDEF USE_EXTENSIONS}
-    SetSetting(ssExtensionsCount, inttostr(ExtManager.Extensions.Count));
-    for i := 0 to ExtManager.Extensions.Count-1 do
-    begin;
-      Path := ssExtensionsExtensionN + inttostr(I);
-      SetSetting(Path + '/Path',TVirtualSimbaExtension(ExtManager.Extensions[i]).Filename);
-      SetSetting(Path + '/Enabled',BoolToStr(TVirtualSimbaExtension(ExtManager.Extensions[i]).Enabled,True));
-    end;
-    {$ENDIF}
     SaveToXML(SimbaSettingsFile);
   end;
-end;
-
-procedure TSimbaForm.LoadExtensions;
-{$IFDEF USE_EXTENSIONS}
-var
-  extCount : integer;
-  function LoadExtension(Number : integer) : boolean;
-  var
-    Path : string;
-    ExtPath : string;
-    ExtEnabled : boolean;
-  begin;
-    result := false;
-    if (number < 0) or (number >= extCount) then
-      exit;
-    path := ssExtensionsExtensionN + inttostr(number);
-    if SettingExists(Path) = false then
-      exit;
-    ExtPath := LoadSettingDef(Path + '/Path','');
-    if ExtPath = '' then
-      exit;
-    ExtEnabled := StrToBoolDef(LoadSettingDef(Path + '/Enabled','false'),false);
-    if ExtManager.LoadPSExtension(ExtPath,ExtEnabled) = false then
-      exit;
-    Result := true;
-  end;
-  procedure DeleteExtension(number : integer);
-  var
-    i : integer;
-    path : string;
-  begin;
-    path := ssExtensionsExtensionN;
-    SimbaSettings.MMLSettings.DeleteKey(path + inttostr(number));
-    for i := number + 1 to extCount - 1 do
-      SimbaSettings.MMLSettings.RenameKey(path + inttostr(i),'Extension' + inttostr(i-1));
-    SetSetting(ssExtensionsCount, inttostr(extCount - 1),true);
-    dec(extCount);
-  end;
-
-var
-  str,str2 : string;
-  i : integer;
-begin
-  extCount := StrToIntDef(LoadSettingDef(ssExtensionsCount, '0'),0);
-  for i := 0 to extCount - 1 do
-    while (i < extCount) and not LoadExtension(i) do
-      DeleteExtension(i);
-  SetSetting(ssExtensionsCount, inttostr(extCount));
-
-  str := SimbaSettings.Extensions.Path.GetDefValue(ExpandFileName(DataPath + 'Extensions' + DS));
-
-  str2 := SimbaSettings.Extensions.FileExtension.GetDefValue('sex');
-
-  ExtManager.LoadPSExtensionsDir(str,str2);
-{$ELSE}
-begin
-{$ENDIF}
 end;
 
 procedure TSimbaForm.AddRecentFile(const filename: string);
@@ -1952,15 +1675,9 @@ begin
       exit;
   end;
   CurrScript.ScriptErrorLine:= -1;
-  {$IFDEF USE_PASCALSCRIPT}CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;{$ENDIF}
 
   try
-    case SimbaSettings.Interpreter._Type.Value of
-      {$IFDEF USE_PASCALSCRIPT}interp_PS: Thread := TPSThread.Create(True, @CurrentSyncInfo, SimbaSettings.Plugins.Path.Value);{$ENDIF}
-      {$IFDEF USE_LAPE}interp_LP: Thread := TLPThread.Create(True, @CurrentSyncInfo, SimbaSettings.Plugins.Path.Value);{$ENDIF}
-      else
-        raise Exception.CreateFmt('Unknown Interpreter %d!', [SimbaSettings.Interpreter._Type.Value]);
-    end;
+    Thread := TLPThread.Create(True, @CurrentSyncInfo, SimbaSettings.Plugins.Path.Value);
   except
     on E: Exception do
     begin
@@ -1970,14 +1687,7 @@ begin
     end;
   end;
 
-  {$IFDEF USE_PASCALSCRIPT}
-  if ((Thread is TPSThread) and (CurrScript.ScriptFile <> '')) then
-    TPSThread(Thread).PSScript.MainFileName := CurrScript.ScriptFile;
-  {$ENDIF}
-
-  {$IFNDEF TERMINALWRITELN}
   Thread.SetDebug(@formWriteln);
-  {$ENDIF}
   Thread.SetScript(Script);
 
   Thread.ErrorData := @CurrScript.ErrorData;
@@ -2102,26 +1812,23 @@ end;
 
 function TSimbaForm.DefaultScript: string;
 begin
-  Result := '';
+  Result := 'program new;' + LineEnding +
+            'begin' + LineEnding +
+            'end.';
 
-  case SimbaSettings.Interpreter._Type.Value of
-    interp_PS, interp_LP: begin
-                  Result := 'program new;' + LineEnding + 'begin' + LineEnding + 'end.' + LineEnding;
-                  if FileExistsUTF8(SimbaSettings.SourceEditor.DefScriptPath.Value) then
-                  begin
-                    try
-                      with TStringList.Create do
-                        try
-                          LoadFromFile(SimbaSettings.SourceEditor.DefScriptPath.Value);
-                          Result := Text;
-                        finally
-                          Free;
-                        end;
-                    except
-                      mDebugLn('Couldn''t load default script file.');
-                    end;
-                  end;
-                end;
+  if FileExistsUTF8(SimbaSettings.SourceEditor.DefScriptPath.Value) then
+  begin
+    try
+      with TStringList.Create do
+        try
+          LoadFromFile(SimbaSettings.SourceEditor.DefScriptPath.Value);
+          Result := Text;
+        finally
+          Free;
+        end;
+    except
+      mDebugLn('Couldn''t load default script file.');
+    end;
   end;
 end;
 
@@ -2183,15 +1890,6 @@ begin
     Memo1.CutToClipboard;
 end;
 
-procedure TSimbaForm.ActionDebuggerExecute(Sender: TObject);
-begin
-  {$IFDEF USE_DEBUGGER}
-  DebuggerForm.DebugThread := CurrScript.ScriptThread;
-  DebuggerForm.Show;
-  DebuggerForm.UpdateInfo();
-  {$ENDIF}
-end;
-
 procedure TSimbaForm.ActionDeleteExecute(Sender: TObject);
 begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
@@ -2203,21 +1901,6 @@ end;
 procedure TSimbaForm.ActionExitExecute(Sender: TObject);
 begin
   Self.Close;
-end;
-
-procedure TSimbaForm.ActionExtensionsExecute(Sender: TObject);
-begin
-  {$IFDEF USE_EXTENSIONS}
-  if not ExtensionsForm.Showing then
-    ExtensionsForm.Show
-  else
-    ExtensionsForm.Hide;
-  {$ENDIF}
-end;
-
-procedure TSimbaForm.ActionExtensionsUpdate(Sender: TObject);
-begin
-  {$IFDEF USE_EXTENSIONS}TAction(Sender).Checked := ExtensionsForm.Showing;{$ENDIF}
 end;
 
 procedure TSimbaForm.ActionFindNextExecute(Sender: TObject);
@@ -2281,11 +1964,6 @@ begin
   end;
 end;
 
-procedure TSimbaForm.ActionLapeExecute(Sender: TObject);
-begin
-  {$IFDEF USE_LAPE}SimbaSettings.Interpreter._Type.Value := interp_LP;{$ENDIF}
-end;
-
 procedure TSimbaForm.ActionClearDebugExecute(Sender: TObject);
 begin
   Memo1.Clear;
@@ -2331,11 +2009,6 @@ end;
 procedure TSimbaForm.ActionOpenExecute(Sender: TObject);
 begin
   Self.OpenScript;
-end;
-
-procedure TSimbaForm.ActionPascalScriptExecute(Sender: TObject);
-begin
-  SimbaSettings.Interpreter._Type.Value := interp_PS;
 end;
 
 procedure TSimbaForm.ActionPasteExecute(Sender: TObject);
@@ -2444,7 +2117,7 @@ end;
 procedure TSimbaForm.CallFormDesignerExecute(Sender: TObject);
 begin
   {$IFDEF USE_FORMDESIGNER}
-  CompForm.Interpreter:=Integer(SimbaSettings.Interpreter._Type.Value);
+  CompForm.Interpreter := 1;
   if (CompForm.Visible) then
     CompForm.{$IFDEF WINDOWS}Hide{$ELSE}Visible := False{$ENDIF}
   else
@@ -2768,10 +2441,6 @@ begin
     frmFunctionList.Terminate;
 
   CloseAction := caFree;
-  {$IFDEF USE_EXTENSIONS}
-  if (Assigned(ExtManager)) then
-    FreeAndNil(ExtManager);
-  {$ENDIF}
 end;
 
 procedure TSimbaForm.CCFillCore;
@@ -2808,27 +2477,13 @@ begin
 
   ValueDefs := TStringList.Create();
   try
-    if (SimbaSettings.Interpreter._Type.Value = interp_PS) then
-    begin
-      {$IFDEF USE_PASCALSCRIPT}
-      with TPSThread(Thread) do
-      try
-        PSScript.GetValueDefs(ValueDefs);
-        CoreDefines.AddStrings(PSScript.Defines);
-      finally
-        Free();
-      end;
-      {$ENDIF}
-    end else if (SimbaSettings.Interpreter._Type.Value = interp_LP) then
-    begin
-      with TLPThread(Thread) do
-      try
-        Compiler.getInfo(ValueDefs);
-        for I := 0 to Compiler.BaseDefines.Count - 1 do
-          CoreDefines.Add(Compiler.BaseDefines.Names[I]);
-      finally
-        Free();
-      end;
+    with TLPThread(Thread) do
+    try
+      Compiler.getInfo(ValueDefs);
+      for I := 0 to Compiler.BaseDefines.Count - 1 do
+        CoreDefines.Add(Compiler.BaseDefines.Names[I]);
+    finally
+      Free();
     end;
 
     Stream := TMemoryStream.Create;
@@ -2851,9 +2506,7 @@ begin
     SetLength(CoreBuffer, 1);
     CoreBuffer[0] := Buffer;
 
-    // Now we have internal interpeter methods lets add em to function list
-    if (SimbaSettings.Interpreter._Type.Value = interp_LP) then
-      TThread.Synchronize(nil, @FillFunctionListForce);
+    TThread.Synchronize(nil, @FillFunctionListForce);
   end;
   //Stream.Free; // TCodeInsight free's the stream!
 end;
@@ -3001,8 +2654,6 @@ begin
   UpdateTimer.OnTimer := @UpdateTimerCheck;
 
   Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
-  {$IFDEF USE_EXTENSIONS}Application.CreateForm(TExtensionsForm, ExtensionsForm);{$ENDIF}
-  {$IFDEF USE_DEBUGGER}Application.CreateForm(TDebuggerForm, DebuggerForm);{$ENDIF}
 
   HandleConfigParameter;
 
@@ -3027,7 +2678,6 @@ begin
   AddTab;//Give it alteast 1 tab ;-).
   Manager := TIOManager.Create; //No need to load plugins for the Global manager
   Picker := TMColorPicker.Create(Manager);
-  Picker.OnPick:=@PickerPick;
   Selector := TMWindowSelector.Create(Manager);
 
   { For writeln }
@@ -3055,15 +2705,7 @@ begin
 
   TT_Update.Visible:= false;
 
-  //Load the extensions
-  {$IFDEF USE_EXTENSIONS}LoadExtensions;{$ENDIF}
-
   UpdateTitle;
-
-  {$IFDEF USE_PASCALSCRIPT}ActionPascalScript.Visible := True;{$ENDIF}
-  {$IFDEF USE_LAPE}ActionLape.Visible := True;{$ENDIF}
-  {$IFDEF USE_EXTENSIONS}ActionExtensions.Visible := True;{$ENDIF}
-  {$IFDEF USE_DEBUGGER}ActionDebugger.Visible := SimbaSettings.Interpreter._Type.Value = interp_PS;{$ENDIF}
 
   // TODO TEST
   if SimbaSettings.Oops then
@@ -3095,11 +2737,6 @@ begin
 
   for i := 0 to high(RecentFileItems) do
     RecentFileItems[i].Free;
-
-  {$IFDEF USE_EXTENSIONS}
-   if Assigned(ExtManager) then
-     FreeAndNil(extmanager);
-  {$ENDIF}
 
   if (Assigned(Tabs)) then
     FreeAndNil(Tabs);
@@ -3350,29 +2987,18 @@ begin
     frmFunctionList.FunctionList.BeginUpdate();
     frmFunctionList.FunctionList.Items.Clear();
 
-    case SimbaSettings.Interpreter._Type.Value of
-      {$IFDEF USE_PASCALSCRIPT}
-      interp_PS:
-        Methods := TPSThread.GetExportedMethods();
-      {$ENDIF}
-      interp_LP:
-        begin
-          Methods := TLPThread.GetExportedMethods();
+    Methods := TLPThread.GetExportedMethods();
 
-          if (Length(CoreBuffer) > 0) then
-          begin
-            InterpMethods := Self.GetInterepterMethods(Methods);
+    if (Length(CoreBuffer) > 0) then
+    begin
+      InterpMethods := Self.GetInterepterMethods(Methods);
 
-            for i := 0 to High(InterpMethods) do
-            begin
-              Len := Length(Methods);
-              SetLength(Methods, Len + 1);
-              Methods[Len] := InterpMethods[i];
-            end;
-          end;
-        end;
-      else
-        raise Exception.Create('Invalid Interpreter!');
+      for i := 0 to High(InterpMethods) do
+      begin
+        Len := Length(Methods);
+        SetLength(Methods, Len + 1);
+        Methods[Len] := InterpMethods[i];
+      end;
     end;
 
     Tree := frmFunctionList.FunctionList;
@@ -3699,23 +3325,6 @@ begin
       DeleteTab(PageControl1.TabIndexAtClientPos(Classes.Point(x,y)), False);
 end;
 
-procedure TSimbaForm.PickerPick(Sender: TObject; const Colour, colourx,
-  coloury: integer);
-{$IFDEF USE_EXTENSIONS}
-var
-  Args : TVariantArray;
-  Called: Boolean;
-begin
-  SetLength(args,3);
-  Args[0] := Colour;
-  Args[1] := Colourx;
-  Args[2] := Coloury;
-  ExtManager.HandleHook(EventHooks[SExt_OnColourPick].HookName, Args, Called);
-{$ELSE}
-begin
-{$ENDIF}
-end;
-
 procedure TSimbaForm.PopupItemFindClick(Sender: TObject);
 begin
   SearchString := CurrScript.SynEdit.SelText;
@@ -3746,11 +3355,6 @@ begin
                          TB_Stop.ImageIndex := Image_Stop; TB_Stop.Enabled:= True;
                          TrayPlay.Checked := True; TrayPlay.Enabled := False; {$ifdef MSWindows}TrayPause.Checked := false; TrayPause.Enabled := True;{$endif}
                          TrayStop.Enabled:= True; TrayStop.Checked:= False;
-
-                         {$IFDEF USE_DEBUGGER}
-                         if (SimbaSettings.Interpreter._Type.Value = interp_PS) then
-                           ActionDebugger.Enabled := True;
-                         {$ENDIF}
                    end;
       ss_Paused  : begin Text := 'Paused'; TB_Run.Enabled:= True; {$ifdef MSWindows}TB_Pause.Enabled:= True; {$endif}
                          TB_Stop.ImageIndex := Image_Stop; TB_Stop.Enabled:= True;
@@ -3767,15 +3371,6 @@ begin
                          TB_Stop.ImageIndex := Image_Stop;
                          TrayPlay.Checked := false; TrayPlay.Enabled := True; {$ifdef MSWindows}TrayPause.Checked := false; TrayPause.Enabled := False;{$endif}
                          TrayStop.Enabled:= false; TrayStop.Checked:= False;
-
-                         {$IFDEF USE_DEBUGGER}
-                         if (SimbaSettings.Interpreter._Type.Value = interp_PS) then
-                         begin
-                           ActionDebugger.Enabled := False;
-                           if  (DebuggerForm.Showing) then
-                             DebuggerForm.Hide;
-                         end;
-                         {$ENDIF}
                    end;
     end;
 end;
@@ -3823,14 +3418,12 @@ end;
 
 procedure TSimbaForm.RegisterSettingsOnChanges;
 begin
-  SimbaSettings.Interpreter._Type.OnChange := @SetInterpreter;
   SimbaSettings.Tray.AlwaysVisible.onChange:= @SetTrayVisiblity;
 
   SimbaSettings.Plugins.Path.onChange:= @SetPluginsPath;
   SimbaSettings.Fonts.Path.onChange:= @SetFontsPath;
   SimbaSettings.Includes.Path.onChange:= @SetIncludesPath;
   SimbaSettings.Scripts.Path.onChange:= @SetScriptsPath;
-  {$IFDEF USE_EXTENSIONS}SimbaSettings.Extensions.Path.onChange := @SetExtensionsPath;{$ENDIF}
 
   SimbaSettings.SourceEditor.DefScriptPath.onChange := @SetDefaultScriptPath;
   SimbaSettings.SourceEditor.Font.onChange := @SetSourceEditorFont;
@@ -3918,14 +3511,12 @@ begin
   ScriptStartData.Sender:=Sender;
   ScriptStartData.Script:= @Script;
   ScriptStartData.Continue:= @Continue;
-  TThread.Synchronize(nil,@HandleScriptStartData);
 end;
 
 procedure TSimbaForm.ScriptOpenEvent(Sender: TObject; var Script: string);
 begin
   ScriptOpenData.Sender:=Sender;
   ScriptOpenData.Script:= @Script;
-  TThread.Synchronize(nil,@HandleScriptOpenData);
 end;
 
 procedure TSimbaForm.TT_ScriptManagerClick(Sender: TObject);
@@ -4035,35 +3626,6 @@ begin
   end;
 end;
 
-{$IFDEF USE_PASCALSCRIPT}
-procedure TSimbaForm.SafeCallThread;
-var
-  thread: TMThread;
-  LocalCopy : TSyncInfo;
-begin
-  LocalCopy := CurrentSyncInfo;
-  mDebugLn('Executing : ' + LocalCopy.MethodName);
-  thread:= TMThread(LocalCopy.OldThread);
-  mmlpsthread.CurrThread:= thread;
-  try
-    if thread is TPSThread then
-    begin
-      with TPSThread(thread).PSScript do
-      begin
-        OnLine:=@OnLinePSScript;
-        LocalCopy.Res^:= Exec.RunProcPVar(LocalCopy.V^,Exec.GetProc(LocalCopy.MethodName));
-        Online := nil;
-      end;
-    end else
-    begin
-      raise Exception.Create('ThreadSafeCall not implemented on this client');
-    end;
-  finally
-    mmlpsthread.CurrThread:= nil;
-  end;
-end;
-{$ENDIF}
-
 procedure TSimbaForm.UpdateTitle;
 begin
   Application.Title:= PChar('Simba'); // XXX - Sure you want to do this for Disguise?
@@ -4099,9 +3661,7 @@ begin
     else
       InitialDir := SimbaSettings.Scripts.Path.Value;
     Options := [ofAllowMultiSelect, ofExtensionDifferent, ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail];
-    Filter:= 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.pas' +
-    {$IFDEF USE_EXTENSIONS}';*.' + SimbaSettings.Extensions.FileExtension.GetDefValue('sex') + ';*.sei' + {$ENDIF}
-             '|Any files|*.*';
+    Filter:= 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.pas;|Any files|*.*';
     if Execute then
     begin
       Result := True;
@@ -4219,9 +3779,7 @@ begin
       InitialDir := ExtractFileDir(CurrScript.ScriptFile)
     else
       InitialDir := SimbaSettings.Scripts.Path.Value;
-    filter := 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.pas' +
-    {$IFDEF USE_EXTENSIONS}';*.' + SimbaSettings.Extensions.FileExtension.GetDefValue('sex') + ';*.sei' + {$ENDIF}
-              '|Any files|*.*';
+    filter := 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.pas;|Any files|*.*';
     if Execute then
     begin;
       if ExtractFileExt(FileName) = '' then

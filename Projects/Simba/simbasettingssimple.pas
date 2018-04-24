@@ -164,12 +164,6 @@ begin
   SimbaSettings.Updater.RemoteLink.Value := UpdaterURL.Text;
   SimbaSettings.Updater.RemoteVersionLink.Value := UpdaterURLVersion.Text;
 
-  // Interpreter
-  if InterpreterGroup.ItemIndex = 0 then
-    SimbaSettings.Interpreter._Type.Value := 0
-  else
-    SimbaSettings.Interpreter._Type.Value := 3; // 3 is lape
-
   // Tabs
   SimbaSettings.Tab.OpenNextOnClose.Value := TabSettingsCheckBoxes.Checked[0];
   SimbaSettings.Tab.OpenScriptInNewTab.Value := TabSettingsCheckBoxes.Checked[1];
@@ -246,11 +240,6 @@ begin
   UpdaterURL.Text := SimbaSettings.Updater.RemoteLink.Value;
   UpdaterURLVersion.Text := SimbaSettings.Updater.RemoteVersionLink.Value;
 
-  // Interpreter
-  if SimbaSettings.Interpreter._Type.Value = 0 then
-    InterpreterGroup.ItemIndex := 0
-  else
-    InterpreterGroup.ItemIndex := 1;
 
   // Tabs
   TabSettingsCheckBoxes.Checked[0] := SimbaSettings.Tab.OpenNextOnClose.Value;
