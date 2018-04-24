@@ -184,11 +184,6 @@ type
       AlwaysVisible: TBooleanSetting;
     end;
 
-    TInterpreterSection = class(TSection)
-      _Type: TIntegerSetting;
-      AllowSysCalls: TBooleanSetting;
-    end;
-
     TSourceEditorSection = class(TSection)
       DefScriptPath: TFileSetting;
       LazColors: TBooleanSetting;
@@ -279,7 +274,6 @@ type
       Scripts: TScriptsSection;
       CodeInsight: TCodeInsightSection;
       Tray: TTraySection;
-      Interpreter: TInterpreterSection;
       SourceEditor: TSourceEditorSection;
       News: TNewsSection;
       Plugins: TPluginsSection;
@@ -945,12 +939,6 @@ begin
   Tray := AddChild(TTraySection.Create()) as TTraySection;
   Tray.AlwaysVisible := Tray.AddChild(TBooleanSetting.Create(ssTrayAlwaysVisible)) as TBooleanSetting;
   Tray.AlwaysVisible.onDefault := @GetTrayAlwaysVisible;
-
-  Interpreter := AddChild(TInterpreterSection.Create()) as TInterpreterSection;
-  Interpreter._Type := Interpreter.AddChild(TIntegerSetting.Create(ssInterpreterType)) as TIntegerSetting;
-  Interpreter._Type.onDefault := @GetInterpreterType;
-  Interpreter.AllowSysCalls := Interpreter.AddChild(TBooleanSetting.Create(ssInterpreterAllowSysCalls)) as TBooleanSetting;
-  Interpreter.AllowSysCalls.onDefault := @GetInterpreterAllowSysCalls;
 
   SourceEditor := AddChild(TSourceEditorSection.Create()) as TSourceEditorSection;
   SourceEditor.DefScriptPath := SourceEditor.AddChild(TFileSetting.Create(ssSourceEditorDefScriptPath)) as TFileSetting;

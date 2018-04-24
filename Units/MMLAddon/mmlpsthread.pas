@@ -23,8 +23,6 @@
 
 unit mmlpsthread;
 
-{$define PS_USESSUPPORT}
-
 {$mode objfpc}{$H+}
 
 {$I Simba.inc}
@@ -33,17 +31,11 @@ interface
 
 uses
   Classes, SysUtils, client,
-  {$IFDEF USE_PASCALSCRIPT}
-  uPSComponent, uPSCompiler, PSDump, uPSRuntime, uPSPreProcessor,
-  {$ENDIF}
   MufasaTypes, MufasaBase, web, fontloader,
   bitmaps, plugins, dynlibs, internets,scriptproperties,
-  settings, settingssandbox, lcltype, dialogs, ExtCtrls
-  {$IFDEF USE_SQLITE}, msqlite3{$ENDIF}
-  {$IFDEF USE_LAPE}
-  , lpparser, lpcompiler, lptypes, lpvartypes, ffi, lpffi, lpffiwrappers,
-    lpeval, lpinterpreter, lputils, lpmessages, LPDump
-  {$ENDIF};
+  settings, settingssandbox, lcltype, dialogs, ExtCtrls,
+  lpparser, lpcompiler, lptypes, lpvartypes, ffi, lpffi, lpffiwrappers,
+  lpeval, lpinterpreter, lputils, lpmessages, LPDump;
 
 const
   m_Status = 0; //Data = PChar to new status
@@ -60,7 +52,6 @@ const
   m_BalloonHint = 11; //Data = PBalloonHintData
 
   {$I settings_const.inc}
-  {$WARNING REMOVEME}
 
 type
     { TMMLPSThread }
@@ -161,12 +152,7 @@ type
       procedure FormCallBackEx(cmd : integer; var data : pointer);
       procedure FormCallBack(cmd : integer; data : pointer);
       procedure HandleError(Row, Col, Pos: integer; Error: string; Typ: TErrorType; Filename: string);
-      {$IFDEF USE_PASCALSCRIPT}
-      function ProcessDirective(Sender: TPSPreProcessor;
-                    Parser: TPSPascalPreProcessorParser;
-                    Active: Boolean;
-                    DirectiveName, DirectiveArgs: string; Filename:String): boolean;
-      {$ENDIF}
+
       function LoadFile(ParentFile: string; var FileName, Content: string): boolean;
 
       procedure AddMethod(meth: TExpMethod); virtual;
@@ -191,51 +177,6 @@ type
       property OpenFileEvent : TOpenFileEvent read FOpenFileEvent write SetOpenFileEvent;
     end;
 
-    { TPSThread }
-    {$IFDEF USE_PASCALSCRIPT}
-    TPSThread = class(TMThread)
-      public
-        procedure OnProcessDirective(Sender: TPSPreProcessor;
-          Parser: TPSPascalPreProcessorParser; const Active: Boolean;
-          const DirectiveName, DirectiveParam: string; var Continue: Boolean;
-          Filename: String);
-        function PSScriptFindUnknownFile(Sender: TObject;
-          const OrginFileName: string; var FileName, Output: string): Boolean;
-        procedure PSScriptProcessUnknownDirective(Sender: TPSPreProcessor;
-          Parser: TPSPascalPreProcessorParser; const Active: Boolean;
-          const DirectiveName, DirectiveParam: string; var Continue: Boolean;
-          Filename: string);
-      protected
-        PluginsToload : array of integer;
-        procedure LoadPlugin(plugidx: integer); override;
-        procedure OnCompile(Sender: TPSScript);
-        function RequireFile(Sender: TObject; const OriginFileName: String;
-                            var FileName, OutPut: string): Boolean;
-        function FileAlreadyIncluded(Sender: TObject; OrgFileName, FileName: string): Boolean;
-        function OnIncludingFile(Sender: TObject; OrgFileName, FileName: string): Boolean;
-
-        procedure OnCompImport(Sender: TObject; x: TPSPascalCompiler);
-        procedure OnExecImport(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
-        procedure OutputMessages;
-        function CallMethod(const Method: string; var Args: array of Variant): Variant; override;
-        procedure HandleScriptTerminates; override;
-      public
-        PSScript: TPSScriptExtension;
-        constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
-        destructor Destroy; override;
-
-        procedure HandleError(Row, Col, Pos: integer; Error: string; Typ: TErrorType; Filename: string);
-
-        class function GetExportedMethods: TExpMethodArr; override;
-
-        procedure SetScript(script: string); override;
-        procedure Execute; override;
-        procedure Terminate; override;
-    end;
-    {$ENDIF}
-
-   {$IFDEF USE_LAPE}
-   { TLPThread }
    TLPThread = class(TMThread)
    protected
      procedure LoadPlugin(plugidx: integer); override;
@@ -271,8 +212,6 @@ type
      procedure Call;
    end;
 
-   {$ENDIF}
-
 threadvar
   CurrThread : TMThread;
 var
@@ -284,23 +223,11 @@ uses
   SimbaUnit,
   colour_conv, dtmutil,
   {$ifdef mswindows}windows,  MMSystem,{$endif}//MMSystem -> Sounds
-  {$IFDEF USE_PASCALSCRIPT}
-  uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms, uPSC_menus,
-  uPSC_extctrls, uPSC_mml, uPSC_dll, //Compile-libs
-  uPSUtils,
-  {$ENDIF}
   IOmanager,//TTarget_Exported
   IniFiles,//Silly INI files
   stringutil, //String st00f
   LazUTF8,
   newsimbasettings, // SimbaSettings
-  {$IFDEF USE_DEBUGGER}debugger,{$ENDIF}
-  {$IFDEF USE_PASCALSCRIPT}
-  uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms, uPSR_mml,
-  uPSR_menus, uPSR_dll,
-  uPSI_ComCtrls, uPSI_Dialogs,
-  uPSR_extctrls, //Runtime-libs
-  {$ENDIF}
   files,
   dtm, //Dtms!
   Graphics, //For Graphics types
@@ -320,9 +247,7 @@ uses
   DCPhaval, DCPmd4, DCPmd5,
   DCPripemd128, DCPripemd160,
   DCPsha1, DCPsha256, DCPsha512,
-  DCPtiger
-
-  {$IFDEF USE_LAPE}, lpClasses, lpClassHelper{$ENDIF};
+  DCPtiger, lpClasses, lpClassHelper;
 
 {$MACRO ON}
 {$define extdecl := register}
@@ -483,82 +408,6 @@ begin
   end;
 end;
 
-{$IFDEF USE_PASCALSCRIPT}
-function TMThread.ProcessDirective(Sender: TPSPreProcessor;
-        Parser: TPSPascalPreProcessorParser;
-        Active: Boolean;
-        DirectiveName, DirectiveArgs: string; FileName: string): boolean;
-var
-  plugin_idx: integer;
-
-begin
-  Result := False;
-
-  if (CompareText(DirectiveName,'LOADLIB') = 0) then
-  begin
-    if (not (Active)) then
-      Exit(True);
-
-    if (DirectiveArgs <> '') then
-    begin
-      plugin_idx := PluginsGlob.LoadPlugin(DirectiveArgs);
-
-      if (plugin_idx >= 0) then
-      begin
-        LoadPlugin(plugin_idx);
-
-        if (not (PluginsGlob.MPlugins[plugin_idx].MemMgrSet)) then
-          mDebugLn(Format('The DLL "%s" doesn''t set a memory manager.', [DirectiveArgs]));
-
-        Result := True;
-      end else
-        psWriteln(Format('Your DLL %s has not been found.', [DirectiveArgs]))
-    end else
-      psWriteln('Your LoadLib directive has no params, thus cannot find the plugin');
-  end else if CompareText(DirectiveName,'WARNING') = 0 then
-  begin
-    if not active then
-      exit(true);
-    if (sender = nil) or (parser = nil) then
-    begin
-      psWriteln('ERROR: WARNING directive not supported for this interpreter');
-      exit(False);
-    end;
-
-    if (DirectiveArgs <> '') then
-    begin
-      Result := True;
-      if FileName = '' then
-        psWriteln(format('Warning: In %s: at row: %d, col: %d, pos %d: %s',
-                               ['Main script', Parser.row - 1, Parser.col,
-                               Parser.pos, DirectiveArgs]))
-      else
-        psWriteln(format('Warning: In file %s: at row: %d, col: %d, pos %d: %s',
-                             [FileName, Parser.row - 1, Parser.col,
-                             Parser.pos, DirectiveArgs]));
-      //HandleError(Parser.Row + 1, Parser.Col, Parser.Pos, 'Warning at ' + DirectiveArgs, errCompile, FileName);
-    end;
-  end else if CompareText(DirectiveName,'ERROR') = 0 then
-  begin
-    if not active then
-      exit(true);
-    if (sender = nil) or (parser = nil) then
-    begin
-      psWriteln('ERROR: ERROR directive not supported for this interpreter');
-      exit(False);
-    end;
-
-    if (DirectiveArgs <> '') then
-    begin
-      Result := True;
-      HandleError(Parser.Row, Parser.Col, Parser.Pos, DirectiveArgs, errCompile, FileName);
-      raise EPSPreProcessor.Create('ERROR directive found');
-    end;
-  end else
-    Result := False;
-end;
-{$ENDIF}
-
 procedure TMThread.SetDebug(writelnProc: TWritelnProc);
 begin
   DebugTo := writelnProc;
@@ -608,30 +457,6 @@ begin
   end;
 end;
 
-{$IFDEF USE_PASCALSCRIPT}
-function ThreadSafeCall(aProcName: string; var V: TVariantArray): Variant; extdecl;
-begin
-  if GetCurrentThreadId = MainThreadID then
-  begin
-    with TPSThread(currthread).PSScript do
-      Result := Exec.RunProcPVar(V,Exec.GetProc(aProcName));
-  end else
-  begin
-    CurrThread.SyncInfo^.MethodName:= aProcName;
-    CurrThread.SyncInfo^.V:= @V;
-    CurrThread.SyncInfo^.OldThread := CurrThread;
-    CurrThread.SyncInfo^.Res := @Result;
-    CurrThread.Synchronize(CurrThread.SyncInfo^.SyncMethod);
-  end;
-end;
-
-function CallProc(aProcName: string; var V: TVariantArray): Variant; extdecl;
-begin
-  with TPSThread(currthread).PSScript do
-    Result := Exec.RunProcPVar(V,Exec.GetProc(aProcName));
-end;
-{$ENDIF}
-
 {$I PSInc/Wrappers/other.inc}
 {$I PSInc/Wrappers/settings.inc}
 {$I PSInc/Wrappers/bitmap.inc}
@@ -644,650 +469,12 @@ end;
 {$I PSInc/Wrappers/colour.inc}
 {$I PSInc/Wrappers/colourconv.inc}
 {$I PSInc/Wrappers/math.inc}
-{$IFDEF USE_SQLITE}
-{$I PSInc/Wrappers/ps_sqlite3.inc}
-{$ENDIF}
 {$I PSInc/Wrappers/mouse.inc}
 {$I PSInc/Wrappers/file.inc}
 {$I PSInc/Wrappers/keyboard.inc}
 {$I PSInc/Wrappers/dtm.inc}
 {$I PSInc/Wrappers/ocr.inc}
 {$I PSInc/Wrappers/internets.inc}
-{$IFDEF USE_PASCALSCRIPT}
-{$I PSInc/psmethods.inc}
-
-{***implementation TPSThread***}
-
-constructor TPSThread.Create(CreateSuspended : boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
-var
-  I, H: LongInt;
-begin
-  inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
-  PSScript := TPSScriptExtension.Create(nil);
-  PSScript.UsePreProcessor := True;
-  PSScript.UseDebugInfo := True;
-  PSScript.CompilerOptions := PSScript.CompilerOptions + [icBooleanShortCircuit];
-  PSScript.OnNeedFile := @RequireFile;
-  PSScript.OnIncludingFile := @OnIncludingFile;
-  PSScript.OnFileAlreadyIncluded := @FileAlreadyIncluded;
-  PSScript.OnProcessDirective := @OnProcessDirective;
-  PSScript.OnProcessUnknowDirective := @PSScriptProcessUnknownDirective;
-  PSScript.OnCompile := @OnCompile;
-  PSScript.OnCompImport := @OnCompImport;
-  PSScript.OnExecImport := @OnExecImport;
-  PSScript.OnFindUnknownFile := @PSScriptFindUnknownFile;
-
-  {$IFDEF USE_DEBUGGER}
-  DebuggerForm.DebugThread := Self;
-  if (SimbaForm.CurrScript.SynEdit.Marks.Count > 0) then
-    TThread.Synchronize(nil, @DebuggerForm.ShowForm);
-  {$ENDIF}
-
-  with PSScript do
-  begin
-    // Set some defines
-    {$I PSInc/psdefines.inc}
-  end;
-
-  H := High(ExportedMethods);
-  for I := 0 to H do
-    if (Pos('Writeln', ExportedMethods[i].FuncDecl) > 0) then
-    begin
-      ExportedMethods[i].FuncPtr := nil;
-      Break;
-    end;
-end;
-
-
-destructor TPSThread.Destroy;
-begin
-  PSScript.Free;
-  inherited;
-end;
-
-class function TPSThread.GetExportedMethods: TExpMethodArr;
-var
-  c : integer;
-  CurrSection : string;
-
-procedure SetCurrSection(str : string);
-begin;
-  CurrSection := Str;
-end;
-
-procedure AddFunction( Ptr : Pointer; DeclStr : String);
-begin;
-  if c >= 600 then
-    raise exception.create('TMThread.LoadMethods: Exported more than 600 functions');
-
-  Result[c].FuncDecl:= DeclStr;
-  Result[c].FuncPtr:= Ptr;
-  Result[c].Section:= CurrSection;
-
-  Inc(c);
-end;
-
-begin
-  c := 0;
-  CurrSection := 'Other';
-  SetLength(Result, 550);
-
-  {$i PSInc/psexportedmethods.inc}
-
-  SetLength(Result, c);
-end;
-
-procedure TPSThread.OnProcessDirective(Sender: TPSPreProcessor;
-  Parser: TPSPascalPreProcessorParser; const Active: Boolean;
-  const DirectiveName, DirectiveParam: string; var Continue: Boolean; Filename: String);
-begin
-  if (CompareText(DirectiveName, 'LOADLIB') = 0)
-  or (CompareText(DirectiveName, 'WARNING') = 0)
-  or (CompareText(DirectiveName, 'ERROR') = 0)  then
-    Continue := not ProcessDirective(Sender, Parser, Active, DirectiveName,DirectiveParam,
-             FileName);
-end;
-
-function TPSThread.PSScriptFindUnknownFile(Sender: TObject;
-  const OrginFileName: string; var FileName, Output: string): Boolean;
-begin
-  mDebugLn(OrginFileName + '-' +  Output + '-' + FileName);
-  Result := false;
-end;
-
-procedure TPSThread.PSScriptProcessUnknownDirective(Sender: TPSPreProcessor;
-  Parser: TPSPascalPreProcessorParser; const Active: Boolean;
-  const DirectiveName, DirectiveParam: string; var Continue: Boolean;
-  Filename: string);
-begin
-  Continue:= not ProcessDirective(Sender, Parser, Active, DirectiveName,
-             DirectiveParam, FileName);
-end;
-
-function Muf_Conv_to_PS_Conv( conv : integer) : TDelphiCallingConvention;
-begin
-  case conv of
-    cv_StdCall : result := cdStdCall;
-    cv_Register: result := cdRegister;
-
-    cv_Default: result :=
-    {$IFDEF CPU32}
-    cdCdecl;
-    {$ELSE}
-    cdCdecl; // this shouldn't matter at all
-    {$ENDIF}
-  else
-    raise exception.createfmt('Unknown Calling Convention[%d]',[conv]);
-  end;
-end;
-
-procedure TPSThread.LoadPlugin(plugidx: integer);
-var
- i: integer;
-begin
-  for i := High(PluginsToLoad) downto 0 do
-    if PluginsToLoad[i] = plugidx then
-      Exit;
-  SetLength(PluginsToLoad,Length(PluginsToLoad)+1);
-  PluginsToLoad[High(PluginsToLoad)]:= plugidx;
-end;
-
-procedure TPSThread.OnCompile(Sender: TPSScript);
-var
-  i,ii : integer;
-  Fonts : TMFonts;
-begin
-  Fonts := Client.MOCR.Fonts;
-  for i := fonts.count - 1 downto 0 do
-    Sender.Comp.AddConstantN(Fonts[i].Name,'string').SetString(Fonts[i].Name);
-
-  for i := High(PluginsToLoad) downto 0 do
-  begin
-    for ii := 0 to PluginsGlob.MPlugins[PluginsToLoad[i]].TypesLen - 1 do
-      Sender.Comp.AddTypeS(PluginsGlob.MPlugins[PluginsToLoad[i]].Types[ii].TypeName,
-                      PluginsGlob.MPlugins[PluginsToLoad[i]].Types[ii].TypeDef);
-
-    for ii := 0 to PluginsGlob.MPlugins[PluginsToLoad[i]].MethodLen - 1 do
-      Sender.AddFunctionEx(PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii].FuncPtr,
-                           PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii].FuncStr,
-                           Muf_Conv_to_PS_Conv(PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii].FuncConv));
-  end;
-  
-  for i := 0 to high(VirtualKeys) do
-    Sender.Comp.AddConstantN(Format('VK_%S',[VirtualKeys[i].Str]),'Byte').SetInt(VirtualKeys[i].Key);
-  // Here we add all the Consts/Types to the engine.
-
-  //Export all the methods
-  for i := 0 to high(ExportedMethods) do
-    if ExportedMethods[i].FuncPtr <> nil then
-      Sender.AddFunctionEx(ExportedMethods[i].FuncPtr,ExportedMethods[i].FuncDecl, cdRegister);
-end;
-
-function TPSThread.RequireFile(Sender: TObject; const OriginFileName: string; var FileName, OutPut: string): Boolean;
-var
-  File_MD5{$IFDEF SIMBA_VERBOSE}, OriginalFileName{$ENDIF}: string;
-begin
-  {$IFDEF SIMBA_VERBOSE}OriginalFileName := FileName;{$ENDIF}
-  Result := LoadFile(OriginFileName, FileName, OutPut);
-
-  if Result then
-  begin
-    {$IFDEF SIMBA_VERBOSE}mDebugLn('RequireFile(0x%P, ''%S'', ''%S'' => ''%S'') = %S;', [Pointer(Sender), OriginFileName, OriginalFileName, FileName, BoolToStr(Result, True)]);{$ENDIF}
-    File_MD5 := UpperCase(_Hash(TDCP_md5, Output));
-
-    Output := '{$IFNDEF IS_INCLUDE}' +
-              '{$DEFINE __REMOVE_IS_INCLUDE_' + File_MD5 + '_}' +
-              '{$DEFINE IS_INCLUDE}' +
-              '{$ENDIF}' +
-
-              LineEnding + Output + LineEnding +
-
-              '{$IFDEF __REMOVE_IS_INCLUDE_' + File_MD5 + '_}' +
-              '{$UNDEF IS_INCLUDE}' +
-              '{$UNDEF __REMOVE_IS_INCLUDE_' + File_MD5 + '_}' +
-              '{$ENDIF}';
-  end;
-end;
-
-function TPSThread.FileAlreadyIncluded(Sender: TObject; OrgFileName, FileName: string): Boolean;
-var
-  Path: string;
-begin
-  Result := True;
-
-  Path := FileName;
-  if (not (FindFile(Path, [IncludeTrailingPathDelimiter(ExtractFileDir(OrgFileName)), ScriptPath, IncludePath]))) then
-    Exit;
-
-  Path := ExpandFileNameUTF8(Path);
-
-  if ((Path <> '') and (Includes.IndexOf(Path) <> -1)) then
-  begin
-    {$IFDEF SIMBA_VERBOSE}
-    mDebugLn('Include_Once file already included:' + Path);
-    {$ENDIF}
-    Exit;
-  end;
-
-  {$IFDEF SIMBA_VERBOSE}
-  mDebugLn('OnFileAlreadyIncluded, Adding: ' + path);
-  {$ENDIF}
-  Includes.Add(Path);
-  Result := False;
-end;
-
-function TPSThread.OnIncludingFile(Sender: TObject; OrgFileName, FileName: string): Boolean;
-var
-  Path: string;
-begin
-  Result := True;
-
-  Path := FileName;
-  if (not (FindFile(Path, [IncludeTrailingPathDelimiter(ExtractFileDir(OrgFileName)), ScriptPath, IncludePath]))) then
-    Exit;
-
-  Path := ExpandFileNameUTF8(Path);
-
-  if (Includes.IndexOf(Path) = -1) then
-  begin
-    {$IFDEF SIMBA_VERBOSE}
-    mDebugLn('OnIncludingFile, Adding: ' + Path);
-    {$ENDIF}
-    Includes.Add(Path);
-  end;
-end;
-
-procedure SIRegister_Mufasa(cl: TPSPascalCompiler);
-begin
-  SIRegister_MML(cl);
-end;
-
-procedure TPSThread.OnCompImport(Sender: TObject; x: TPSPascalCompiler);
-begin
-  SIRegister_Std(x);
-  SIRegister_Classes(x, True);
-  SIRegister_Controls(x);
-  SIRegister_Graphics(x, True);
-  SIRegister_Forms(x);
-  SIRegister_stdctrls(x);
-  SIRegister_ExtCtrls(x);
-  SIRegister_Menus(x);
-  SIRegister_ComCtrls(x);
-  SIRegister_Dialogs(x);
-  
-  if self.settings <> nil then
-  begin
-    if lowercase(self.settings.GetKeyValueDefLoad(ssInterpreterAllowSysCalls,
-      'False', Self.SimbaSettingsFile)) = 'true' then
-    begin
-      { Can remove later }
-      psWriteln('Allowing API/SysCalls.');
-      RegisterDll_Compiletime(x);
-    end;
-  end;
-
-  with x do
-  begin
-    {$I PSInc/pscompile.inc}
-  end;
-
-  SIRegister_Mufasa(x);
-
-  with x.AddFunction('procedure writeln;').Decl.AddParam do
-  begin
-    OrgName := 'x';
-    Mode := pmIn;
-  end;
-
-  with x.AddFunction('function ToStr:string').Decl.AddParam do
-  begin
-    OrgName := 'x';
-    Mode := pmIn;
-  end;
-
-  with x.AddFunction('procedure swap;').Decl do
-  begin
-    with AddParam do
-    begin
-      OrgName := 'x';
-      Mode := pmInOut;
-    end;
-
-    with AddParam do
-    begin
-      OrgName := 'y';
-      Mode := pmInOut;
-    end;
-  end;
-
-  with x.AddFunction('procedure Insert;').Decl do
-  begin
-    with AddParam do
-    begin
-      OrgName := 'Item';
-      Mode := pmInOut;  //NOTE: InOut because of DynamicArrays
-    end;
-
-    with AddParam do
-    begin
-      OrgName := 'Obj';
-      Mode := pmInOut;
-    end;
-
-    with AddParam do
-    begin
-      OrgName := 'Index';
-      Mode := pmIn;
-    end;
-  end;
-
-  with x.AddFunction('procedure Append;').Decl do
-  begin
-    with AddParam do
-    begin
-      OrgName := 'Item';
-      Mode := pmInOut;  //NOTE: InOut because of DynamicArrays
-    end;
-
-    with AddParam do
-    begin
-      OrgName := 'Obj';
-      Mode := pmInOut;
-    end;
-  end;
-
-  with x.AddFunction('procedure Delete;').Decl do
-  begin
-    with AddParam do
-    begin
-      OrgName := 'x';
-      Mode := pmInOut;
-    end;
-
-    with AddParam do
-    begin
-      OrgName := 'Index';
-      Mode := pmIn;
-    end;
-
-    with AddParam do
-    begin
-      OrgName := 'Count';
-      Mode := pmIn;
-    end;
-  end;
-end;
-
-function TMufasaBitmapCreate: TMufasaBitmap;
-begin
-  Result := TMufasaBitmap.Create;
-  CurrThread.Client.MBitmaps.AddBMP(result);
-end;
-
-procedure TMufasaBitmapFree(Self: TMufasaBitmap);
-begin
-  Self.Free();
-end;
-
-function TMufasaBitmapCopy(Self : TMufasaBitmap;const xs,ys,xe,ye : integer) : TMufasaBitmap;
-begin
-  result := Self.Copy(xs,ys,xe,ye);
-  CurrThread.Client.MBitmaps.AddBMP(result);
-end;
-function TMDTMCreate : TMDTM;
-begin
-  result := TMDTM.Create;
-  CurrThread.Client.MDTMs.AddDTM(result);
-end;
-procedure TMDTMFree(Self : TMDTM);
-begin
-  CurrThread.Client.MDTMs.FreeDTM(self.Index);
-end;
-
-procedure RIRegister_Mufasa(CL: TPSRuntimeClassImporter);
-begin
-  RIRegister_MML(cl);
- //Overwrites the default stuff
-  with cl.FindClass('TMufasaBitmap') do
-  begin
-    RegisterConstructor(@TMufasaBitmapCreate,'Create');
-    RegisterMethod(@TMufasaBitmapFree,'Free');
-    RegisterMethod(@TMufasaBitmapCopy,'Copy');
-  end;
-  With cl.FindClass('TMDTM') do
-  begin
-    RegisterConstructor(@TMDTMCreate,'Create');
-    RegisterMethod(@TMDTMFree,'Free');
-  end;
-end;
-
-function Insert_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
-var
-  Item, Obj: TPSVariantIFC;
-  Index, Len, ItemSize, ItemLen, I: Int32;
-  PArr, DArr: PByte;
-begin
-  Result := True;
-  if (Stack.Count > 3) then
-    raise Exception.Create('Too many parameters');
-  if (Stack.Count < 2) then
-    raise Exception.Create('Not enough parameters');
-
-  Item := NewTPSVariantIFC(Stack[Stack.Count - 1], False);
-  Obj := NewTPSVariantIFC(Stack[Stack.Count - 2], True);
-
-  Index := -1;
-  if (Stack.Count = 3) then
-    Index := Stack.GetInt(-3);
-
-  if ((Item.Dta = nil) or (Obj.Dta = nil)) then
-    raise Exception.Create('Invalid parameter');
-
-  case Obj.aType.BaseType of
-    btArray: begin
-        Len := PSDynArrayGetLength(PPointer(Obj.Dta)^, Obj.aType);
-        if (Index = -1) or (Index > Len) then
-          Index := Len;
-
-        if (Obj.aType.RealSize <> Item.aType.RealSize) then
-            raise Exception.Create('Invalid parameter');
-
-        ItemSize := Obj.aType.RealSize;
-        ItemLen := 1;
-
-        if (Item.aType.BaseType = btArray) then
-          ItemLen := PSDynArrayGetLength(PPointer(Item.Dta)^, Item.aType);
-
-        PSDynArraySetLength(PPointer(Obj.Dta)^, Obj.aType, Len + ItemLen);
-
-        PArr := PByte(Obj.Dta^);
-        DArr := PByte(Item.Dta^);
-
-        if (Index < Len) then
-          Move(PArr[Index * ItemSize], PArr[(Index + ItemLen) * ItemSize], (Len - Index) * ItemSize);
-
-        if (Item.aType.BaseType = btArray) then //FIXME: Only want DynArrays here....
-          Move(DArr[0], PArr[Index * ItemSize], ItemSize * ItemLen)
-        else
-          Move(DArr, PArr[Index * ItemSize], ItemSize * ItemLen);
-      end;
-    btString: begin
-        if (Index = -1) then
-          Index := Length(PString(Obj.Dta)^) + 1;
-
-        case Item.aType.BaseType of
-          btString: Insert(PString(Item.Dta)^, PString(Obj.Dta)^, Index);
-          btChar: Insert(PChar(Item.Dta)^, PString(Obj.Dta)^, Index);
-          btWideString, btUnicodeString: Insert(PWideString(Item.Dta)^, PString(Obj.Dta)^, Index);
-          btWideChar: Insert(PWideChar(Item.Dta)^, PString(Obj.Dta)^, Index);
-          else
-            raise Exception.Create('Invalid parameter');
-        end;
-      end;
-    btWideString, btUnicodeString: begin
-        if (Index = -1) then
-          Index := Length(PWideString(Obj.Dta)^) + 1;
-
-        case Item.aType.BaseType of
-          btString: Insert(PString(Item.Dta)^, PWideString(Obj.Dta)^, Index);
-          btChar: Insert(PChar(Item.Dta)^, PWideString(Obj.Dta)^, Index);
-          btWideString, btUnicodeString: Insert(PWideString(Item.Dta)^, PWideString(Obj.Dta)^, Index);
-          btWideChar: Insert(PWideChar(Item.Dta)^, PWideString(Obj.Dta)^, Index);
-          else
-            raise Exception.Create('Invalid parameter');
-        end;
-      end;
-    else
-      raise Exception.Create('Invalid parameter');
-  end;
-end;
-
-function Delete_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
-var
-  Param: TPSVariantIFC;
-  ItemSize, Len, Index, Count: Int32;
-  PArr: PByte;
-begin
-  Result := True;
-  if (Stack.Count > 3) then
-    raise Exception.Create('Too many parameters');
-  if (Stack.Count < 3) then
-    raise Exception.Create('Not enough parameters');
-
-  Param := NewTPSVariantIFC(Stack[Stack.Count - 1], True);
-  if (Param.Dta = nil) then
-    raise Exception.Create('Invalid parameter');
-
-  Index := Stack.GetInt(-2);
-  Count := Stack.GetInt(-3);
-
-  case Param.aType.BaseType of
-    btWideString, btUnicodeString: Delete(PWideString(Param.Dta)^, Index , Count);
-    btString: Delete(PString(Param.Dta)^, Index, Count);
-    btArray: begin
-        ItemSize := TPSTypeRec_Array(Param.aType).ArrayType.RealSize;
-        Len := PSDynArrayGetLength(PPointer(Param.Dta)^, Param.aType);
-
-        if ((Index < 0) or (Index >= Len)) then
-          raise Exception.Create('Out of array range');
-
-        PArr := PByte(Param.Dta^);
-        Move(PArr[(Index + Count) * ItemSize], PArr[Index * ItemSize], (Len - (Index + Count)) * ItemSize);
-
-        PSDynArraySetLength(PPointer(Param.Dta)^, Param.aType, Len - Count);
-      end;
-    else
-      raise Exception.Create('Invalid parameter type');
-  end;
-end;
-
-procedure TPSThread.OnExecImport(Sender: TObject; se: TPSExec;
-  x: TPSRuntimeClassImporter);
-begin
-  RIRegister_Std(x);
-  RIRegister_Classes(x, True);
-  RIRegister_Controls(x);
-  RIRegister_Graphics(x, True);
-  RIRegister_Forms(x);
-  RIRegister_stdctrls(x);
-  RIRegister_ExtCtrls(x);
-  RIRegister_Menus(x);
-  RIRegister_Mufasa(x);
-  RIRegister_ComCtrls(x);
-  RIRegister_Dialogs(x);
-  RegisterDLLRuntime(se);
-
-  se.RegisterFunctionName('WriteLn',@Writeln_,nil,nil);
-  se.RegisterFunctionName('ToStr',@ToStr_,nil,nil);
-  se.RegisterFunctionName('Swap',@swap_,nil,nil);
-
-  se.RegisterFunctionName('Append', @Insert_, nil, nil);
-  se.RegisterFunctionName('Insert', @Insert_, nil, nil);
-  se.RegisterFunctionName('Delete', @Delete_, nil, nil);
-end;
-
-procedure TPSThread.OutputMessages;
-var
-  l: Longint;
-  b: Boolean;
-begin
-  b := False;
-  for l := 0 to PSScript.CompilerMessageCount - 1 do
-  begin
-    if (not b) and (PSScript.CompilerMessages[l] is TIFPSPascalCompilerError) then
-    begin
-      b := True;
-      if OnError <> nil then
-        with PSScript.CompilerMessages[l] do
-          HandleError(Row, Col, Pos, MessageToString, errCompile, ModuleName)
-      else
-        psWriteln(PSScript.CompilerErrorToStr(l) + ' at line ' + inttostr(PSScript.CompilerMessages[l].Row - 1));
-    end else
-      psWriteln(PSScript.CompilerErrorToStr(l) + ' at line ' + inttostr(PSScript.CompilerMessages[l].Row - 1));
-  end;
-end;
-
-function TPSThread.CallMethod(const Method: string; var Args: array of Variant): Variant;
-begin
-  Result := PSScript.ExecuteFunction(Args, Method);
-end;
-
-procedure TPSThread.HandleScriptTerminates;
-begin
-  if (PSScript.Exec.ExceptionCode = ErNoError) then
-    inherited;
-end;
-
-procedure TPSThread.Execute;
-begin
-  CurrThread := Self;
-  Starttime := lclintf.GetTickCount;
-
-  try
-    if PSScript.Compile then
-    begin
-      OutputMessages;
-      psWriteln('Compiled successfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
-      if CompileOnly then
-        exit;
-//      if not (ScriptState = SCompiling) then
-        if not PSScript.Execute then
-          HandleError(PSScript.ExecErrorRow, PSScript.ExecErrorCol, PSScript.ExecErrorPosition, PSScript.ExecErrorToString,
-                      errRuntime, PSScript.ExecErrorFileName)
-        else
-        begin
-          HandleScriptTerminates;
-          psWriteln('Successfully executed.');
-        end;
-    end else
-    begin
-      OutputMessages;
-      psWriteln('Compiling failed.');
-    end;
-  except
-     on E : Exception do
-       psWriteln('Exception in Script: ' + e.message);
-  end;
-end;
-
-procedure TPSThread.Terminate;
-begin
-  PSScript.Stop;
-end;
-
-procedure TPSThread.SetScript(script: string);
-begin
-   PSScript.Script.Text := LineEnding + Script; //A LineEnding to conform with the info we add to includes
-end;
-
-procedure TPSThread.HandleError(Row, Col, Pos: integer; Error: string; Typ: TErrorType; Filename: string);
-begin
-  inherited HandleError(Row + 1, Col, Pos, Error, Typ, Filename);
-end;
-{$ENDIF}
-
-{$IFDEF USE_LAPE}
-{ TLPThread }
 
 type
   PBoolean = ^Boolean;
@@ -1364,9 +551,6 @@ end;
 {$I LPInc/Wrappers/lp_colourconv.inc}
 {$I LPInc/Wrappers/lp_crypto.inc}
 {$I LPInc/Wrappers/lp_math.inc}
-{$IFDEF USE_SQLITE}
-{$I LPInc/Wrappers/lp_sqlite3.inc}
-{$ENDIF}
 {$I LPInc/Wrappers/lp_mouse.inc}
 {$I LPInc/Wrappers/lp_file.inc}
 {$I LPInc/Wrappers/lp_keyboard.inc}
@@ -1731,10 +915,9 @@ begin
   TProc(FMethod)();
 end;
 
-{$ENDIF}
-
 initialization
   PluginsGlob := TMPlugins.Create;
+
 finalization
   //PluginsGlob.Free;
   //Its a nice idea, but it will segfault... the program is closing anyway.
