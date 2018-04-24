@@ -35,7 +35,6 @@
                         // command line flags.
 
 {$DEFINE USE_FORMDESIGNER}
-{$DEFINE USE_EXTENSIONS}
 
 {$MACRO ON}
 {$define lape_extdecl:=cdecl;}

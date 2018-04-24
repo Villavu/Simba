@@ -1,0 +1,8 @@
+FPC 3.0 [✔]
+Remove PascalScript [✔]
+Remove axtensions [✔] 
+Update importing system for Lape (addGlobalMethod to become threadsafe) [✖]
+Replace 3rd party units for new FPC units that have been added since Simba's release (eg. TFPHTTPClient replacing Synapse) [✖]
+Add packages [✖]
+Add core utilities (DTMEditor, ACA) to Simba [✖]
+Add extensions back (Lape or .dll?) [✖]
