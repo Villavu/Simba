@@ -6,3 +6,4 @@ Replace 3rd party units for new FPC units that have been added since Simba's rel
 Add packages [✖]
 Add core utilities (DTMEditor, ACA) to Simba [✖]
 Add extensions back (Lape or .dll?) [✖]
+Have finder functions not use a global TPA buffer (thread safety), gradual overallocation of result instead [✖]
