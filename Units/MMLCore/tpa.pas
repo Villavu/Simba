@@ -118,13 +118,28 @@ function TPAInATPA(const TPA: TPointArray;const InATPA: T2DPointArray; var Index
 procedure OffsetTPA(var TPA : TPointArray; const Offset : TPoint);
 procedure OffsetATPA(var ATPA : T2DPointArray; const Offset : TPoint);
 function PartitionTPA(const TPA:TPointArray; BoxWidth, BoxHeight:Integer): T2DPointArray;
+function CopyTPA(const TPA : TPointArray) : TPointArray;
+function CopyATPA(const ATPA : T2DPointArray) : T2DPointArray;
 
 implementation
 
 uses
   math;
 
+function CopyTPA(const TPA : TPointArray) : TPointArray;
+begin
+  result := Copy(TPA,0,Length(TPA));
+end;
 
+function CopyATPA(const ATPA : T2DPointArray) : T2DPointArray;
+var
+  i,l : integer;
+begin
+  l := high(ATPA);
+  SetLength(result,l+1);
+  for i := 0 to l do
+    result[i] := copy(ATPA[i],0,Length(ATPA[i]));
+end;
 
 
 {/\

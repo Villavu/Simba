@@ -28,7 +28,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, MufasaBase,Forms, ComCtrls, StdCtrls, Controls,
-  ExtCtrls, Buttons,mmisc,v_ideCodeInsight, newsimbasettings;
+  ExtCtrls, Buttons,mmisc,v_ideCodeInsight, newsimbasettings, Types;
 
 type
 
@@ -45,7 +45,7 @@ type
 
   { TFunctionListFrame }
   TFunctionListFrame = class(TFrame)
-    editSearchList: TEdit;
+    editSearchList  : TEdit;
     FunctionList: TTreeView;
     FunctionListLabel: TLabel;
     CloseButton: TSpeedButton;
@@ -57,18 +57,14 @@ type
     procedure FrameEndDock(Sender, Target: TObject; X, Y: Integer);
     procedure FunctionListDblClick(Sender: TObject);
     procedure FunctionListDeletion(Sender: TObject; Node: TTreeNode);
-    procedure FunctionListLabelMouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
-    procedure FunctionListMouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+    procedure FunctionListLabelMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure FunctionListMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure DockFormOnClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure CloseButtonClick(Sender: TObject);
-    procedure FunctionListMouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+    procedure FunctionListMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   private
     FFilterTree: TTreeView;
     FLastScript: string;
-    FLastInterp: Integer;
     Filtering: boolean;
     FillThread: TFillThread;
     procedure FilterTreeVis(Vis : boolean);
@@ -89,20 +85,18 @@ type
     property FilterTree: TTreeView read GetFilterTree;
     procedure LoadScriptTree(Script: String; Force: Boolean = False);
     function Find(Next: boolean; backwards: boolean = false) : boolean;
-    { public declarations }
   end; 
 
   TMethodInfo = packed record
-    MethodStr, Filename: PChar;
-    BeginPos, endpos: integer;
+    Header, FileName: PChar;
+    StartPos, EndPos: Int32;
   end;
   PMethodInfo = ^TMethodInfo;
 
 implementation
 
 uses
-  SimbaUnit, Graphics, stringutil, simpleanalyzer, v_ideCodeParser, lclintf,
-  dynlibs, LazFileUtils;
+  SimbaUnit, Graphics, stringutil, v_ideCodeParser, lclintf, LazFileUtils;
 
 { TFunctionListFrame }
 
@@ -167,13 +161,13 @@ begin
   if (node<> nil) and (node.Level > 0) and (node.Data <> nil) then
     if InCodeCompletion then
     begin
-      SimbaForm.CurrScript.SynEdit.InsertTextAtCaret( GetMethodName(PMethodInfo(node.Data)^.MethodStr,true));
+      SimbaForm.CurrScript.SynEdit.InsertTextAtCaret( GetMethodName(PMethodInfo(node.Data)^.Header, true));
       SimbaForm.RefreshTab;
     end
     else
     begin
       MethodInfo := PMethodInfo(node.Data)^;
-      if (DraggingNode = node) and (MethodInfo.BeginPos >= 0) then
+      if (DraggingNode = node) and (MethodInfo.StartPos >= 0) then
       begin
         if (MethodInfo.Filename <> nil) and (MethodInfo.Filename <> '') then
         begin
@@ -188,9 +182,9 @@ begin
         end;
 
 
-        if (MethodInfo.BeginPos > 0) then
+        if (MethodInfo.StartPos > 0) then
         begin
-          SimbaForm.CurrScript.SynEdit.SelStart := MethodInfo.BeginPos + 1;
+          SimbaForm.CurrScript.SynEdit.SelStart := MethodInfo.StartPos + 1;
           SimbaForm.CurrScript.SynEdit.SelEnd := MethodInfo.EndPos + 1;
         end;
       end;
@@ -205,10 +199,10 @@ begin
   if node.data <> nil then
   begin
     MethodInfo := PMethodInfo(Node.data);
-    if MethodInfo^.MethodStr <> nil then
-      StrDispose(MethodInfo^.MethodStr);
+    if MethodInfo^.Header <> nil then
+      StrDispose(MethodInfo^.Header);
     if MethodInfo^.FileName <> nil then
-      StrDispose(MethodInfo^.filename);
+      StrDispose(MethodInfo^.FileName);
     Freemem(node.data,sizeof(TMethodInfo));
   end;
 end;
@@ -236,7 +230,6 @@ procedure TFunctionListFrame.FunctionListMouseUp(Sender: TObject;
   Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
    N: TTreeNode;
-   MethodInfo : TMethodInfo;
 begin
   if InCodeCompletion then
   begin;
@@ -295,6 +288,8 @@ begin
     exit;
   FLastScript := Script;
   Filtering := FilterTree.Visible;
+  if Filtering then
+    Exit;
   if FilterTree.Visible then
     FilterTreeVis(false);
   FunctionList.BeginUpdate;
@@ -614,9 +609,9 @@ procedure TFillThread.Update;
 
         with PMethodInfo(tmpNode.Data)^ do
         begin
-          MethodStr := strnew(Pchar(Proc.CleanDeclaration));
+          Header := strnew(Pchar(Proc.CleanDeclaration));
           Filename := strnew(pchar(Path));
-          BeginPos := Proc.Name.StartPos;
+          StartPos := Proc.Name.StartPos;
           EndPos :=  Proc.Name.StartPos + Length(TrimRight(Proc.Name.RawText));
         end;
       end;
@@ -644,9 +639,9 @@ procedure TFillThread.Update;
 
       with PMethodInfo(tmpNode.Data)^ do
       begin
-        MethodStr := strnew(Pchar(getVarName(Decl)));
+        Header := strnew(Pchar(getVarName(Decl)));
         Filename := strnew(pchar(Path));
-        BeginPos := Decl.StartPos;
+        StartPos := Decl.StartPos;
         EndPos :=  Decl.StartPos + Length(TrimRight(Decl.RawText));
       end;
     end;
@@ -683,9 +678,9 @@ procedure TFillThread.Update;
 
       with PMethodInfo(tmpNode.Data)^ do
       begin
-        MethodStr := strnew(Pchar(Decl.CleanText));
+        Header := strnew(Pchar(Decl.CleanText));
         Filename := strnew(pchar(Path));
-        BeginPos := Decl.StartPos;
+        StartPos := Decl.StartPos;
         EndPos :=  Decl.StartPos + Length(TrimRight(Decl.RawText));
       end;
 

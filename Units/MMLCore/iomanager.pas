@@ -260,6 +260,7 @@ interface
 
     {Basically like TEIOS_Client, only this is exported to some plugin, whilst TEIOS_Client is Imported
      Not all functions have to be 'set', it depends on the kind of target (Image/KeyMouse) }
+    PTarget_Exported = ^TTarget_Exported;
     TTarget_Exported = record
       Target : Pointer;
 
@@ -329,11 +330,15 @@ interface
 
         procedure GetMousePos(var X, Y: Integer);
         procedure MoveMouse(X, Y: Integer);
-        procedure ScrollMouse(x,y : integer; Lines : integer);
-        procedure HoldMouse(x,y : integer; button: TClickType);
-        procedure ReleaseMouse(x,y : integer; button: TClickType);
-        procedure ClickMouse(X, Y: Integer; button: TClickType);
-        function  IsMouseButtonDown( button : TClickType) : boolean;
+        procedure ScrollMouse(X, Y : Integer; Lines : integer);
+        procedure HoldMouse(X, Y: Integer; Button: TClickType); overload;
+        procedure HoldMouse(X, Y, Button: Int32); overload;
+        procedure ReleaseMouse(X, Y: Integer; Button: TClickType); overload;
+        procedure ReleaseMouse(X, Y, Button: Int32); overload;
+        procedure ClickMouse(X, Y: Integer; Button: TClickType); overload;
+        procedure ClickMouse(X, Y, Button: Int32); overload;
+        function IsMouseButtonDown(Button: TClickType) : boolean; overload;
+        function IsMouseButtonDown(Button: Int32): Boolean; overload;
 
         procedure KeyUp(key: Word);
         procedure KeyDown(key: Word);
@@ -586,7 +591,8 @@ begin
   result:= image.GetColor(x,y);
 end;
 
-function TIOManager_Abstract.ReturnData(xs,ys,width,height: integer): TRetData;
+function TIOManager_Abstract.ReturnData(xs, ys, width, height: Integer
+  ): TRetData;
 begin
   result:= image.ReturnData(xs,ys,width,height);
 end;
@@ -615,7 +621,7 @@ begin
   bmp.OnDestroy:= @BitmapDestroyed;
 end;
 
-function TIOManager_Abstract.SetTarget(name, initargs: String): integer;
+function TIOManager_Abstract.SetTarget(name, initargs: string): integer;
 var
   client: TEIOS_Client;
 begin
@@ -697,30 +703,53 @@ begin
   keymouse.MoveMouse(x,y);
 end;
 
-procedure TIOManager_Abstract.ScrollMouse(x, y: integer; Lines: integer);
+procedure TIOManager_Abstract.ScrollMouse(X, Y: Integer; Lines: integer);
 begin
   keymouse.ScrollMouse(x,y,lines);
 end;
 
-procedure TIOManager_Abstract.HoldMouse(x,y : integer; button: TClickType);
+procedure TIOManager_Abstract.HoldMouse(X, Y: Integer; Button: TClickType);
 begin
   keymouse.HoldMouse(x,y,button);
 end;
-procedure TIOManager_Abstract.ReleaseMouse(x,y : integer; button: TClickType);
+
+procedure TIOManager_Abstract.HoldMouse(X, Y, Button: Int32);
+begin
+  keymouse.HoldMouse(x, y, TClickType(Button));
+end;
+
+procedure TIOManager_Abstract.ReleaseMouse(X, Y: Integer; Button: TClickType);
 begin
   keymouse.ReleaseMouse(x,y,button);
 end;
 
-procedure TIOManager_Abstract.ClickMouse(X, Y: Integer; button: TClickType);
+procedure TIOManager_Abstract.ReleaseMouse(X, Y, Button: Int32);
+begin
+  keymouse.ReleaseMouse(x,y,TClickType(button));
+end;
+
+procedure TIOManager_Abstract.ClickMouse(X, Y: Integer; Button: TClickType);
 begin
   HoldMouse(x,y,button);
   //BenLand100 note: probably should wait here
   ReleaseMouse(x,y,button);
 end;
 
-function TIOManager_Abstract.IsMouseButtonDown(button: TClickType): boolean;
+procedure TIOManager_Abstract.ClickMouse(X, Y, Button: Int32);
 begin
-  result := keymouse.IsMouseButtonHeld(button);
+  HoldMouse(x,y,TClickType(button));
+  //BenLand100 note: probably should wait here
+  ReleaseMouse(x,y,TClickType(button));
+end;
+
+function TIOManager_Abstract.IsMouseButtonDown(Button: TClickType): boolean;
+begin
+  Result := keymouse.IsMouseButtonHeld(button);
+end;
+
+function TIOManager_Abstract.IsMouseButtonDown(Button: Int32): Boolean;
+begin
+  Result := keymouse.IsMouseButtonHeld(TClickType(button));
 end;
 
 procedure TIOManager_Abstract.KeyUp(key: Word);

@@ -30,7 +30,7 @@ interface
 
 uses
   Classes, SysUtils, MufasaTypes,MufasaBase,
-  IOManager, Files, Finder, Bitmaps, dtm, ocr,
+  IOManager, Files, Finder, Bitmaps, dtm, ocr, internets,
   {$IFDEF MSWINDOWS} os_windows {$ENDIF}
   {$IFDEF LINUX} os_linux {$ENDIF};
 
@@ -64,15 +64,17 @@ type
 
   TClient = class(TObject)
   private
-    FOwnIOManager : boolean;
+    FOwnIOManager: Boolean;
   public
     IOManager: TIOManager;
     MFiles: TMFiles;
     MFinder: TMFinder;
-    MBitmaps : TMBitmaps;
+    MBitmaps: TMBitmaps;
     MDTMs: TMDTMS;
     MOCR: TMOCR;
-    WritelnProc : TWritelnProc;
+    MInternets: TMInternet;
+    MSockets: TMSocks;
+    WriteLnProc: TWritelnProc;
     procedure WriteLn(s : string);
     constructor Create(const plugin_dir: string = ''; const UseIOManager : TIOManager = nil);
     destructor Destroy; override;
@@ -138,6 +140,8 @@ begin
   MBitmaps := TMBitmaps.Create(self);
   MDTMs := TMDTMS.Create(self);
   MOCR := TMOCR.Create(self);
+  MInternets := TMInternet.Create(Self);
+  MSockets := TMSocks.Create(Self);
 end;
 
 (*
@@ -161,6 +165,8 @@ begin
   MBitmaps.Free;
   MFinder.Free;
   MFiles.Free;
+  MInternets.Free;
+  MSockets.Free;
   if FOwnIOManager then
     IOManager.Free;
 

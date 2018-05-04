@@ -93,7 +93,7 @@ type
   end;
 
   { TSocks }
-  TSocks = class(TObject)
+  TMSocks = class(TObject)
   protected
     Client: TObject;
     SockList: TList;
@@ -327,19 +327,19 @@ begin
   inherited Destroy;
 end;
 
-{ TSocks }
+{ TMSocks }
 
-function TSocks.CreateSocket: integer;
+function TMSocks.CreateSocket: integer;
 begin;
   Result := SockList.Add(TSock.Create(Client));
 end;
 
-function TSocks.CreateSocketEx(Socket: TTCPBlockSocket): integer;
+function TMSocks.CreateSocketEx(Socket: TTCPBlockSocket): integer;
 begin;
   Result := SockList.Add(TSock.Create(Client, Socket));
 end;
 
-function TSocks.GetSocket(Index: integer): TSock;
+function TMSocks.GetSocket(Index: integer): TSock;
 begin
   if (not (InRange(Index, 0, SockList.Count))) then
     raise exception.CreateFmt('GetSocket: Trying to acces an index(%d) that is out of range', [index]);
@@ -348,7 +348,7 @@ begin
   Result := TSock(SockList[Index]);
 end;
 
-procedure TSocks.FreeSocket(Index: Integer);
+procedure TMSocks.FreeSocket(Index: Integer);
 begin
   if (not (InRange(Index, 0, SockList.Count))) then
     raise exception.CreateFmt('GetSocket: Trying to free an index(%d) that is out of range', [index]);
@@ -358,14 +358,14 @@ begin
   SockList[Index] := nil;
 end;
 
-constructor TSocks.Create(Owner : TObject);
+constructor TMSocks.Create(Owner : TObject);
 begin
   inherited Create;
   Client := Owner;
   SockList := TList.Create;
 end;
 
-destructor TSocks.Destroy;
+destructor TMSocks.Destroy;
 var
   i: integer;
 begin
