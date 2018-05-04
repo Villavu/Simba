@@ -34,6 +34,7 @@ type
 
     { TMDTM }
 
+    PMDTM = ^TMDTM;
     TMDTM = class(TObject)
     private
       FPoints : TMDTMPointArray;

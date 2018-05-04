@@ -325,7 +325,9 @@ implementation
   function TWindow.GetColor(x,y : integer) : TColor;
   begin
     ImageApplyAreaOffset(x, y);
-    result:= GetPixel(self.dc,x,y)
+    with ReturnData(x,y,1,1) do
+      Result := RGBToColor(Ptr[0].r,Ptr[0].g,Ptr[0].b);
+    FreeReturnData;
   end;
   
   procedure TWindow.ValidateBuffer(w,h:integer);
