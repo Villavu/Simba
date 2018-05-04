@@ -127,6 +127,7 @@ type
     function FindDTMsRotated(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray;Alternating : boolean; maxToFind: Integer = 0): Boolean;
     //Donno
     function GetColors(const Coords: TPointArray): TIntegerArray;
+    function GetColor(const X, Y: Int32): Integer;
 
     // tol speeds
     procedure SetToleranceSpeed(nCTS: Integer);
@@ -889,7 +890,8 @@ begin
   end;
 end;
 
-function TMFinder.FindColoredArea(var x, y: Integer; Color, xs, ys, xe, ye, MinArea: Integer): Boolean;
+function TMFinder.FindColoredArea(var x, y: Integer; color, xs, ys, xe,
+  ye: Integer; MinArea: Integer): Boolean;
 var
   temp : integer;
 begin
@@ -957,7 +959,8 @@ begin
     TClient(Client).IOManager.FreeReturnData;
 end;
 
-function TMFinder.FindColoredAreaTolerance(var x, y: Integer; Color, xs, ys, xe, ye, MinArea, tol: Integer): Boolean;
+function TMFinder.FindColoredAreaTolerance(var x, y: Integer; color, xs, ys,
+  xe, ye: Integer; MinArea, tol: Integer): Boolean;
 var
    PtrData: TRetData;
    Ptr, Before: PRGB32;
@@ -1377,7 +1380,8 @@ begin
 end;
 
 function TMFinder.FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x,
-  y: Integer; out Points: TPointArray; xs, ys, xe, ye, tolerance, maxToFind: Integer): Boolean;
+  y: Integer; out Points: TPointArray; xs, ys, xe, ye, tolerance: Integer;
+  maxToFind: Integer): Boolean;
 var
    MainRowdata : TPRGB32Array;
    BmpRowData : TPRGB32Array;
@@ -1598,7 +1602,8 @@ begin
 end;
 
 //MaxToFind, if it's < 1 it won't stop looking
-function TMFinder.FindDTMs(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2, maxToFind: Integer): Boolean;
+function TMFinder.FindDTMs(DTM: TMDTM; out Points: TPointArray; x1, y1, x2,
+  y2: integer; maxToFind: Integer): Boolean;
 var
    //Cache DTM stuff
    Len : integer;       //Len of the points
@@ -2010,6 +2015,11 @@ begin
     Result[i] := BGRToRGB(cd[Coords[i].y - Box.y1][Coords[i].x - Box.x1]);
 
   TClient(Client).IOManager.FreeReturnData;
+end;
+
+function TMFinder.GetColor(const X, Y: Int32): Integer;
+begin
+  Result := TClient(Client).IOManager.GetColor(X, Y);
 end;
 
 end.

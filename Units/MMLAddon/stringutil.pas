@@ -49,6 +49,7 @@ function MultiBetween(str, s1, s2: string): TStringArray;
 function IsArrInStr(strArr: TStringArray; s: string): boolean;
 function IsStrInArr(const s: string; const UsePos: Boolean; const Arr: TStringArray): boolean;
 function PosMulti(const SubStr, Text:String): TIntegerArray;
+function Between(s1, s2, str: string): string;
 
 implementation
 uses
@@ -405,6 +406,21 @@ begin
       HitPos := 1;
   end;
   SetLength(Result, h);
+end;
+
+function Between(s1, s2, str: string): string;
+var
+  I,J : integer;
+begin;
+  Result := '';
+  I := pos(s1,str);
+  if I > 0 then
+  begin;
+    i := i + length(s1);
+    j := posex(s2,str,i);
+    if j > 0 then
+      Result := copy(str,i,j-i);
+  end;
 end;
 
 end.

@@ -29,7 +29,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, SynHighlighterPas, SynEdit, SynEditMarkupHighAll,
-  mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType,MufasaBase, Graphics, Controls, SynEditStrConst,
+  script_thread,ComCtrls, SynEditKeyCmds, LCLType,MufasaBase, Graphics, Controls, SynEditStrConst,
   v_ideCodeInsight, v_ideCodeParser,  SynEditHighlighter, SynPluginSyncroEdit, SynGutterBase,
   SynEditMarks, newsimbasettings;
 const
@@ -82,7 +82,8 @@ type
     ScriptName: string;//The name of the currently opened/saved file.
     ScriptDefault: string;//The default script e.g. program new; begin end.
     ScriptChanged: boolean;//We need this for that little * (edited star).
-    ScriptThread: TMThread;//Just one thread for now..
+    ScriptThread: TMMLScriptThread;//Just one thread for now..
+    ScriptThreadHandle: PtrUInt;
     FScriptState: TScriptState;//Stores the ScriptState, if you want the Run/Pause/Start buttons to change accordingly, acces through Form1
     procedure undo;
     procedure redo;
@@ -284,7 +285,7 @@ begin
   if Source is TFunctionListFrame then
     with TFunctionListFrame(Source).DraggingNode do
       if (Level > 0) and (Data <> nil) then
-        SynEdit.InsertTextAtCaret(GetMethodName(PMethodInfo(Data)^.MethodStr, True));
+        SynEdit.InsertTextAtCaret(GetMethodName(PMethodInfo(Data)^.Header, True));
 end;
 
 procedure TScriptFrame.SynEditDragOver(Sender, Source: TObject; X, Y: Integer;
@@ -629,46 +630,23 @@ begin
 end;
 
 procedure TScriptFrame.HandleErrorData;
-var
-  RetStr: string;
 begin
-  if ErrorData.Module <> '' then
-  begin;
-    if not FileExists(ErrorData.Module) then
-      formWriteln(Format('ERROR comes from a non-existing file (%s)',[ErrorData.Module]))
-    else
+  if (ErrorData.FilePath <> '') and (not FileExists(ErrorData.FilePath)) then
+    formWriteln(StringReplace(ErrorData.Error, 'in file', 'in internal file', []))
+  else
+  begin
+    SimbaForm.LoadScriptFile(ErrorData.FilePath, True, True);
+
+    with SimbaForm.CurrScript do
     begin
-      ErrorData.Module:= SetDirSeparators(ErrorData.Module);// Set it right ;-)
-      SimbaForm.LoadScriptFile(ErrorData.Module,true,true);//Checks if the file is already open!
-      ErrorData.Module:= '';
-      SimbaForm.CurrScript.ErrorData := Self.ErrorData;
-      SimbaForm.CurrScript.HandleErrorData;
-      exit;
+      ScriptErrorLine := Self.ErrorData.Line;
+
+      SynEdit.LogicalCaretXY := Point(Self.ErrorData.Col, Self.ErrorData.Line);
+      SynEdit.Invalidate();
     end;
+
+    formWriteln(ErrorData.Error);
   end;
-
-  MakeActiveScriptFrame;
-  if (ErrorData.Row > 0) then
-    ScriptErrorLine := ErrorData.Row;
-
-  SynEdit.Invalidate;
-
-  if (ErrorData.Row > 0) then
-    if ErrorData.Col = -1 then
-      SynEdit.SelStart := ErrorData.Position
-    else
-      SynEdit.LogicalCaretXY := Point(ErrorData.Col, ErrorData.Row);
-
-  RetStr := '';
-  if (Pos('error', Lowercase(ErrorData.Error)) = 0) then
-    RetStr += 'Error: ';
-
-  RetStr += ErrorData.Error;
-
-  if (ErrorData.Row > 0) then
-    RetStr += ' at line ' + IntToStr(ErrorData.Row);
-
-  formWriteln(RetStr);
 end;
 
 procedure TScriptFrame.MakeActiveScriptFrame;

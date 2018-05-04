@@ -33,9 +33,9 @@
             <Filename Value="../../Simba.$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/MMLAddon/LPInc;$(ProjPath)../../Units/MMLAddon/LPInc/Wrappers;../../Units/lape"/>
+            <IncludeFiles Value="$(ProjOutDir);../../Units/lape;../../Units/MMLAddon/Imports/lape"/>
             <Libraries Value="../../Units/lape/extensions/ffi/bin/$(TargetOS)"/>
-            <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/PascalScript;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;../../Units/lape/extensions/ffi;$(ProjPath)../ScriptManager;$(ProjPath)../FormDesigner;../../Units/MMLAddon/LPInc/Classes;../../Units/MMLAddon/LPInc/Classes/MML;$(ProjPath)../../Units/MMLAddon/LPInc/Classes/miniLCL;$(ProjPath)../../Projects/FormDesigner/CodeGen"/>
+            <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;../../Units/lape/extensions/ffi;$(ProjPath)../ScriptManager;$(ProjPath)../FormDesigner;$(ProjPath)../../Projects/FormDesigner/CodeGen;../../Units/MMLAddon/Imports;../../Units/MMLAddon/Imports/classes/MML;../../Units/MMLAddon/Imports/classes/LCL"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -51,11 +51,12 @@
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
-            <CustomOptions Value="-dUseCThreads
--dM_MEMORY_DEBUG
--dFONTDEBUG
--dLape_CDECL
+            <CustomOptions Value="-dLape_CDECL
 -dStaticFFI"/>
+            <OtherDefines Count="2">
+              <Define0 Value="Lape_CDECL"/>
+              <Define1 Value="StaticFFI"/>
+            </OtherDefines>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
@@ -85,7 +86,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="63">
+    <Units Count="81">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -172,6 +173,7 @@
         <Filename Value="framescript.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="ScriptFrame"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
       </Unit19>
       <Unit20>
@@ -258,127 +260,197 @@
         <IsPartOfProject Value="True"/>
       </Unit35>
       <Unit36>
-        <Filename Value="../../Units/Misc/PSDump.pas"/>
+        <Filename Value="../../Units/Misc/v_ideCodeInsight.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit36>
       <Unit37>
-        <Filename Value="../../Units/Misc/v_ideCodeInsight.pas"/>
+        <Filename Value="../../Units/Misc/CastaliaPasLex.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit37>
       <Unit38>
-        <Filename Value="../../Units/Misc/CastaliaPasLex.pas"/>
+        <Filename Value="../../Units/Misc/CastaliaPasLexTypes.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit38>
       <Unit39>
-        <Filename Value="../../Units/Misc/CastaliaPasLexTypes.pas"/>
+        <Filename Value="../../Units/Misc/CastaliaSimplePasPar.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit39>
       <Unit40>
-        <Filename Value="../../Units/Misc/CastaliaSimplePasPar.pas"/>
+        <Filename Value="../../Units/Misc/CastaliaSimplePasParTypes.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit40>
       <Unit41>
-        <Filename Value="../../Units/Misc/CastaliaSimplePasParTypes.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit41>
-      <Unit42>
         <Filename Value="../../Units/Misc/dcpbase64.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="DCPbase64"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="../../Units/Misc/mPasLex.pas"/>
+        <IsPartOfProject Value="True"/>
       </Unit42>
       <Unit43>
-        <Filename Value="../../Units/Misc/mPasLex.pas"/>
+        <Filename Value="../../Units/Misc/v_Constants.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit43>
       <Unit44>
-        <Filename Value="../../Units/Misc/v_Constants.pas"/>
+        <Filename Value="../../Units/Misc/v_MiscFunctions.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit44>
       <Unit45>
-        <Filename Value="../../Units/Misc/v_MiscFunctions.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit45>
-      <Unit46>
         <Filename Value="bitmapconv.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="BitmapConvForm"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit46>
-      <Unit47>
+      </Unit45>
+      <Unit46>
         <Filename Value="../../Units/MMLCore/os_linux.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit47>
-      <Unit48>
+      </Unit46>
+      <Unit47>
         <Filename Value="simbasettingssimple.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SettingsSimpleForm"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit48>
-      <Unit49>
+      </Unit47>
+      <Unit48>
         <Filename Value="../../Units/MMLCore/tpa.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit49>
-      <Unit50>
+      </Unit48>
+      <Unit49>
         <Filename Value="scriptmanager.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="Form1"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ScriptManager"/>
-      </Unit50>
-      <Unit51>
+      </Unit49>
+      <Unit50>
         <Filename Value="newsimbasettings.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit51>
-      <Unit52>
+      </Unit50>
+      <Unit51>
         <Filename Value="../../Units/MMLAddon/LPInc/Classes/MML/lptobject.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="lpTObject"/>
-      </Unit52>
-      <Unit53>
-        <Filename Value="../../Units/MMLAddon/LPInc/Classes/lpclasshelper.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="lpClassHelper"/>
-      </Unit53>
-      <Unit54>
+      </Unit51>
+      <Unit52>
         <Filename Value="../../Units/MMLAddon/LPInc/Classes/MML/lptmufasabitmap.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="lpTMufasaBitmap"/>
+      </Unit52>
+      <Unit53>
+        <Filename Value="../../Units/MMLAddon/LPInc/Classes/miniLCL/lplclcomctrls.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit53>
+      <Unit54>
+        <Filename Value="../../Units/MMLAddon/LPInc/Classes/miniLCL/lplcldialogs.pas"/>
+        <IsPartOfProject Value="True"/>
       </Unit54>
       <Unit55>
-        <Filename Value="../../Units/MMLAddon/LPInc/Classes/miniLCL/lplclcomctrls.pas"/>
+        <Filename Value="../../Units/MMLAddon/LPInc/Classes/miniLCL/lplclmenus.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit55>
       <Unit56>
-        <Filename Value="../../Units/MMLAddon/LPInc/Classes/miniLCL/lplcldialogs.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit56>
-      <Unit57>
-        <Filename Value="../../Units/MMLAddon/LPInc/Classes/miniLCL/lplclmenus.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit57>
-      <Unit58>
         <Filename Value="../../Units/MMLAddon/LPInc/Classes/MML/lptmmlsettingssandbox.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="lpTMMLSettingsSandbox"/>
-      </Unit58>
-      <Unit59>
-        <Filename Value="../../Units/Misc/lpdump.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="LPDump"/>
-      </Unit59>
-      <Unit60>
+      </Unit56>
+      <Unit57>
         <Filename Value="../../Units/MMLAddon/LPInc/Classes/miniLCL/lplclprocess.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit60>
-      <Unit61>
+      </Unit57>
+      <Unit58>
         <Filename Value="../../Units/MMLAddon/LPInc/Classes/MML/lptmmltimer.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="lpTMMLTimer"/>
-      </Unit61>
-      <Unit62>
+      </Unit58>
+      <Unit59>
         <Filename Value="../../Units/MMLAddon/LPInc/Classes/miniLCL/lplclregexpr.pas"/>
         <IsPartOfProject Value="True"/>
+      </Unit59>
+      <Unit60>
+        <Filename Value="../../Units/MMLAddon/script_thread.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit60>
+      <Unit61>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_simba.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit61>
+      <Unit62>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_script.pas"/>
+        <IsPartOfProject Value="True"/>
       </Unit62>
+      <Unit63>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_types.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit63>
+      <Unit64>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_time_date.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit64>
+      <Unit65>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_target.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit65>
+      <Unit66>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_file.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit66>
+      <Unit67>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_bitmap.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit67>
+      <Unit68>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_ocr.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit68>
+      <Unit69>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_colormath.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit69>
+      <Unit70>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_input.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit70>
+      <Unit71>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_arrays_algorithms.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit71>
+      <Unit72>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_math.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit72>
+      <Unit73>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_dtm.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit73>
+      <Unit74>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_web.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit74>
+      <Unit75>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_string.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit75>
+      <Unit76>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_settings.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit76>
+      <Unit77>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_finder.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit77>
+      <Unit78>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_system.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit78>
+      <Unit79>
+        <Filename Value="../../Units/MMLAddon/Imports/script_imports.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit79>
+      <Unit80>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_other.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit80>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -387,16 +459,23 @@
       <Filename Value="../../Simba.$(TargetCPU)-$(TargetOS)-debug"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/MMLAddon/LPInc;$(ProjPath)../../Units/MMLAddon/LPInc/Wrappers;../../Units/lape"/>
+      <IncludeFiles Value="$(ProjOutDir);../../Units/lape;../../Units/MMLAddon/Imports/lape"/>
       <Libraries Value="../../Units/lape/extensions/ffi/bin/$(TargetOS)"/>
-      <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/PascalScript;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;../../Units/lape/extensions/ffi;$(ProjPath)../ScriptManager;$(ProjPath)../FormDesigner;../../Units/MMLAddon/LPInc/Classes;../../Units/MMLAddon/LPInc/Classes/MML;$(ProjPath)../../Units/MMLAddon/LPInc/Classes/miniLCL;$(ProjPath)../../Projects/FormDesigner/CodeGen"/>
+      <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;../../Units/lape/extensions/ffi;$(ProjPath)../ScriptManager;$(ProjPath)../FormDesigner;$(ProjPath)../../Projects/FormDesigner/CodeGen;../../Units/MMLAddon/Imports;../../Units/MMLAddon/Imports/classes/MML;../../Units/MMLAddon/Imports/classes/LCL"/>
       <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <IncludeAssertionCode Value="True"/>
+      </SyntaxOptions>
+    </Parsing>
     <CodeGeneration>
       <Checks>
+        <IOChecks Value="True"/>
         <RangeChecks Value="True"/>
+        <OverflowChecks Value="True"/>
+        <StackChecks Value="True"/>
       </Checks>
-      <TargetCPU Value="i386"/>
     </CodeGeneration>
     <Linking>
       <Debugging>
@@ -404,12 +483,21 @@
       </Debugging>
     </Linking>
     <Other>
-      <CustomOptions Value="-dUseCThreads
--dM_MEMORY_DEBUG
--dFONTDEBUG
--dLape_CDECL
+      <CustomOptions Value="-dLape_CDECL
 -dStaticFFI"/>
+      <OtherDefines Count="2">
+        <Define0 Value="Lape_CDECL"/>
+        <Define1 Value="StaticFFI"/>
+      </OtherDefines>
       <CreateMakefileOnBuild Value="True"/>
     </Other>
   </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="1">
+      <Item1>
+        <Name Value="lpException"/>
+        <Enabled Value="False"/>
+      </Item1>
+    </Exceptions>
+  </Debugging>
 </CONFIG>
