@@ -1,12 +1,12 @@
 object FunctionListFrame: TFunctionListFrame
   Left = 0
-  Height = 522
+  Height = 528
   Top = 0
-  Width = 182
+  Width = 209
   Align = alLeft
-  ClientHeight = 522
-  ClientWidth = 182
-  LCLVersion = '1.8.0.5'
+  ClientHeight = 528
+  ClientWidth = 209
+  LCLVersion = '1.8.2.0'
   OnEndDock = FrameEndDock
   ParentFont = False
   TabOrder = 0
@@ -14,26 +14,27 @@ object FunctionListFrame: TFunctionListFrame
   DesignTop = 200
   object FunctionList: TTreeView
     Left = 0
-    Height = 476
-    Top = 20
-    Width = 182
+    Height = 483
+    Top = 19
+    Width = 209
     Align = alClient
     HideSelection = False
     Images = SimbaForm.Mufasa_Image_List
     ReadOnly = True
     ScrollBars = ssAutoBoth
     TabOrder = 0
+    ToolTips = False
     OnDblClick = FunctionListDblClick
     OnDeletion = FunctionListDeletion
     OnMouseDown = FunctionListMouseDown
     OnMouseUp = FunctionListMouseUp
-    Options = [tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips]
+    Options = [tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot]
   end
   object FunctionListLabel: TLabel
     Left = 2
-    Height = 16
+    Height = 15
     Top = 2
-    Width = 178
+    Width = 205
     Align = alTop
     Alignment = taCenter
     BorderSpacing.Around = 2
@@ -44,7 +45,7 @@ object FunctionListFrame: TFunctionListFrame
     OnMouseDown = FunctionListLabelMouseDown
   end
   object CloseButton: TSpeedButton
-    Left = 134
+    Left = 161
     Height = 16
     Top = 2
     Width = 16
@@ -131,15 +132,15 @@ object FunctionListFrame: TFunctionListFrame
   object Panel1: TPanel
     Left = 0
     Height = 26
-    Top = 496
-    Width = 182
+    Top = 502
+    Width = 209
     Align = alBottom
     Caption = 'Panel1'
     ClientHeight = 26
-    ClientWidth = 182
+    ClientWidth = 209
     TabOrder = 1
     object ClearSearch: TSpeedButton
-      Left = 152
+      Left = 179
       Height = 24
       Top = 1
       Width = 29
@@ -152,7 +153,7 @@ object FunctionListFrame: TFunctionListFrame
       Height = 24
       Hint = 'Search ...'
       Top = 1
-      Width = 151
+      Width = 178
       Align = alClient
       OnChange = editSearchListChange
       ParentShowHint = False

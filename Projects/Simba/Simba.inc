@@ -36,6 +36,3 @@
 
 {$DEFINE USE_FORMDESIGNER}
 
-{$MACRO ON}
-{$define lape_extdecl:=cdecl;}
-

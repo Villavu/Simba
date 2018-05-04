@@ -247,7 +247,7 @@ uses
   DCPhaval, DCPmd4, DCPmd5,
   DCPripemd128, DCPripemd160,
   DCPsha1, DCPsha256, DCPsha512,
-  DCPtiger, lpClasses, lpClassHelper;
+  DCPtiger;
 
 {$MACRO ON}
 {$define extdecl := register}

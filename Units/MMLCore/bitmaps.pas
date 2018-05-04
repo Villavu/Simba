@@ -32,6 +32,10 @@ uses
 type
   TMBitmaps = class;
 
+  TBmpMirrorStyle = (MirrorWidth,MirrorHeight,MirrorLine);
+  TBmpThreshMethod = (TM_Mean, TM_MinMax);
+  TBmpResizeMethod = (RM_Nearest, RM_Bilinear);
+
   { TMufasaBitmap }
   PMufasaBitmap = ^TMufasaBitmap;
   TMufasaBitmap = class(TObject)
