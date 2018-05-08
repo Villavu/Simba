@@ -65,9 +65,6 @@ uses
   newsimbasettings;
 
 const
-  interp_PS = 0; //PascalScript
-  interp_LP = 1; //Lape
-
   { Place the shortcuts here }
   {$IFDEF LINUX}
   shortcut_StartScript = '<Ctrl><Alt>R';
@@ -99,7 +96,6 @@ type
     destructor Destroy; override;
   end;
 
-//  Tab
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
@@ -277,7 +273,6 @@ type
     TB_Pause: TToolButton;
     TB_Stop: TToolButton;
     ToolButton1: TToolButton;
-    TB_ReloadPlugins: TToolButton;
     TB_Tray: TToolButton;
     TB_NewTab: TToolButton;
     TB_CloseTab: TToolButton;
@@ -408,7 +403,6 @@ type
     procedure SplitterFunctionListCanResize(Sender: TObject; var NewSize: Integer;
       var Accept: Boolean);
     procedure TB_FromDesignerClick(Sender: TObject);
-    procedure TB_ReloadPluginsClick(Sender: TObject);
     procedure ThreadOpenConnectionEvent(Sender: TObject; var url: string;
       var Continue: boolean);
     procedure ThreadOpenFileEvent(Sender: TObject; var Filename: string;
@@ -426,7 +420,7 @@ type
     procedure OnCCMessage(Sender: TObject; const Typ: TMessageEventType; const Msg: string; X, Y: Integer);
     procedure OnCompleteCode(Str: string);
     function OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
-    function OnCCLoadLibrary(Sender: TObject; var LibName: string; out ci: TCodeInsight): Boolean;
+    function OnCCLoadLibrary(Sender: TObject; var Argument: string; out Parser: TCodeInsight): Boolean;
   private
     PopupTab : integer;
     RecentFileItems : array of TMenuItem;
@@ -570,7 +564,7 @@ uses
    bitmaps,
    colourhistory,
    math,
-   script_imports
+   script_imports, script_plugins
    {$IFDEF USE_FORMDESIGNER}, frmdesigner{$ENDIF}
 
    {$IFDEF LINUX_HOTKEYS}, keybinder{$ENDIF}
@@ -785,72 +779,47 @@ begin
   end;
 end;
 
-function TSimbaForm.OnCCFindInclude(Sender: TObject; var FileName: string
-  ): Boolean;
+function TSimbaForm.OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
 begin
   Result := FindFile(Filename, [AppPath, SimbaSettings.Includes.Path.Value]);
 end;
 
-function TSimbaForm.OnCCLoadLibrary(Sender: TObject; var LibName: string; out ci: TCodeInsight): Boolean;
-
-  function AddTrailingSemiColon(const s: string): string;
-  var
-    l: Integer;
-  begin
-    l := Length(s);
-    while (l >= 1) and (s[l] = ';') do
-      Dec(l);
-    Result := Copy(s, 1, l) + ';';
-  end;
-
-  function AddTrailingForward(const s: string): string;
-  begin
-    Result := AddTrailingSemiColon(s) + 'forward;';
-  end;
-
+function TSimbaForm.OnCCLoadLibrary(Sender: TObject; var Argument: String; out Parser: TCodeInsight): Boolean;
 var
-  i, Index: Integer;
-  b: TStringList;
-  ms: TMemoryStream;
+  Dump: String;
+  Plugin: TMPlugin;
+  i: Int32;
+  MS: TMemoryStream;
 begin
-  {
-  ci := nil;
+  Dump := '';
+
   try
-    Index := PluginsGlob.LoadPlugin(LibName);
+    Plugin := Plugins.Get(TCodeInsight(Sender).FileName, Argument);
+    for i := 0 to Plugin.Declarations.Count - 1 do
+      Plugin.Declarations[i].Dump(Dump);
   except
-    Exit(False);
   end;
 
-  if (Index < 0) then
-    Exit(False);
+  if (Dump <> '') then
+  begin
+    MS := TMemoryStream.Create();
+    MS.Write(Dump[1], Length(Dump));
 
-  b := TStringList.Create;
-  try
-    with PluginsGlob.MPlugins[Index] do
-    begin
-      for i := 0 to TypesLen - 1 do
-        b.Add('type ' + Types[i].TypeName + ' = ' + AddTrailingSemiColon(Types[i].TypeDef));
-      for i := 0 to MethodLen - 1 do
-        b.Add(AddTrailingForward(Methods[i].FuncStr));
-    end;
+    Parser := TCodeInsight.Create();
+    Parser.FileName := Plugin.FilePath;
+    Parser.OnMessage := @OnCCMessage;
 
-    ms := TMemoryStream.Create;
-    ci := TCodeInsight.Create;
-    with ci do
     try
-      OnMessage := @SimbaForm.OnCCMessage;
-      b.SaveToStream(ms);
-      FileName := PluginsGlob.Loaded[Index].Filename;
-      Run(ms, nil, -1, True);
-      Result := True;
+      Parser.Run(MS, nil,-1, True);
+
+      Exit(True);
     except
-      Result := False;
-      mDebugLn('CC ERROR: Could not parse imports for plugin: ' + LibName);
+      on e: Exception do
+        Parser.Free();
     end;
-  finally
-    b.Free;
   end;
-  }
+
+  Exit(False);
 end;
 
 function TSimbaForm.GetHighlighter: TSynCustomHighlighter;
@@ -1005,13 +974,6 @@ procedure TSimbaForm.TB_FromDesignerClick(Sender: TObject);
 begin
   CallFormDesignerExecute(Sender);
 end;
-
-procedure TSimbaForm.TB_ReloadPluginsClick(Sender: TObject);
-begin
-//  PluginsGlob.FreePlugins;
-end;
-
-
 
 procedure TSimbaForm.ThreadOpenConnectionEvent(Sender: TObject; var url: string;var Continue: boolean);
 begin
@@ -1645,7 +1607,7 @@ begin
   CurrScript.ScriptErrorLine := -1;
 
   try
-    Thread := TMMLScriptThread.Create(Script, SimbaSettings.MMLSettings);
+    Thread := TMMLScriptThread.Create(Script, CurrScript.ScriptFile, SimbaSettings.MMLSettings);
     Thread.Output := DebugMemo.Lines;
     Thread.Error.Data := @CurrScript.ErrorData;
     Thread.Error.Callback := @CurrScript.HandleErrorData;
@@ -2422,7 +2384,7 @@ procedure TSimbaForm.InitializeCoreBuffer;
     Stream: TMemoryStream;
   begin
     Stream := TMemoryStream.Create();
-    Stream.WriteBuffer(Text[1], Length(Text));
+    Stream.Write(Text[1], Length(Text));
 
     Result := TCodeInsight.Create();
     Result.FileName := Section;
@@ -2658,6 +2620,8 @@ begin
   // TODO TEST
   if SimbaSettings.Oops then
     formWriteln('WARNING: No permissions to write to ' + SimbaSettingsFile);
+
+  Plugins.Paths.Add(SimbaSettings.Plugins.Path.Value);
 
   try
     NotesMemo.Lines.Text := DecompressString(Base64Decode(SimbaSettings.Notes.Content.Value));

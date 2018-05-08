@@ -45,6 +45,7 @@ begin
     addBaseDefine('SIMBAMAJOR' + IntToStr(SimbaMajor));
     {$IFDEF CPU32}
     addBaseDefine('CPU32');
+    addBaseDefine('CPU386');
     {$ENDIF}
     {$IFDEF CPU64}
     addBaseDefine('CPU64');
@@ -83,7 +84,7 @@ begin
     addGlobalType('array of TPoint', 'TPointArray');
     addGlobalType('array of TPointArray', 'T2DPointArray');
 
-    addGlobalType('record P, T: Extended; end', 'TPolarPoint');
+    addGlobalType('record R, T: Extended; end', 'TPolarPoint');
     addGlobalType('^TPolarPoint', 'PPolarPoint');
 
     addGlobalType('Int32', 'TColor');
