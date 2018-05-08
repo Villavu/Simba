@@ -63,6 +63,7 @@ type
       // + methods for creating pascal strings & arrays?
     end;
 
+    GetPluginABIVersion: function: Int32; cdecl;
     GetFunctionInfo: function(Index: Int32; var Address: Pointer; var Header: PChar): Int32; cdecl;
     GetFunctionCount: function: Int32; cdecl;
     GetTypeInfo: function(Index: Int32; var Name: PChar; var Str: PChar): Int32; cdecl;
@@ -217,21 +218,19 @@ end;
 
 constructor TMPluginMethod.Create(Address: Pointer; Header: String);
 begin
-  FHeader := Trim(Header);
   FAddress := Address;
-
-  if (FHeader[Length(FHeader)] <> ';') then
+  FHeader := Trim(Header);
+  if (Header[Length(FHeader)] <> ';') then
     FHeader := FHeader + ';';
 
-  if FHeader.EndsWith('native;', True) then
+  if FHeader.EndsWith('native;') then
   begin
-    SetLength(FHeader, Length(FHeader) - Length('native;'));
+    Header := Copy(FHeader, 1, Length(FHeader) - Length('native;'));
+    Header := Trim(Header);
 
-    FHeader := Trim(FHeader);
-    if (FHeader[Length(FHeader)] <> ';') then
-      FHeader := FHeader + ';';
-
-    FNative := True;
+    FNative := Header[Length(Header)] = ';';
+    if FNative then
+      FHeader := Header;
   end;
 end;
 
@@ -278,12 +277,13 @@ var
 begin
   WriteLn('Loading plugin "' + ExtractFileNameOnly(FFilePath) + '"');
 
-  if (Pointer(SetPluginMemManager) <> nil) then
-  begin
-    GetMemoryManager(MemoryManager);
+  if (Pointer(GetPluginABIVersion) = nil) or (GetPluginABIVersion() <> 2) then
+    raise Exception.Create('ABI version not supported');
 
+  GetMemoryManager(MemoryManager);
+
+  if (Pointer(SetPluginMemManager) <> nil) then
     SetPluginMemManager(MemoryManager);
-  end;
 
   if (Pointer(OnAttach) <> nil) then
     OnAttach(@FData);
@@ -351,6 +351,7 @@ begin
 
   if (FLib > 0) then
   begin
+    Pointer(GetPluginABIVersion) := GetProcedureAddress(FLib, 'GetPluginABIVersion');
     Pointer(GetFunctionInfo) := GetProcedureAddress(FLib, 'GetFunctionInfo');
     Pointer(GetFunctionCount) := GetProcedureAddress(FLib, 'GetFunctionCount');
     Pointer(GetTypeInfo) := GetProcedureAddress(FLib, 'GetTypeInfo');
