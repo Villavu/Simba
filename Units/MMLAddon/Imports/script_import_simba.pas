@@ -213,7 +213,7 @@ type
 
 procedure TDisplayDebugImgWindow.Execute;
 begin
-  DebugImgForm.ShowDebugImgForm(PPoint(Params^[1])^);
+  DebugImgForm.ShowDebugImgForm(Point(PInt32(Params^[1])^, PInt32(Params^[2])^));
 end;
 
 // procedure DisplayDebugImgWindow(W, H: Int32);

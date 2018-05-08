@@ -107,16 +107,8 @@ object SimbaForm: TSimbaForm
       Caption = 'ToolButton8'
       Style = tbsDivider
     end
-    object TB_ReloadPlugins: TToolButton
-      Left = 448
-      Hint = 'Reload plugins'
-      Top = 2
-      Caption = 'TB_ReloadPlugins'
-      Enabled = False
-      ImageIndex = 13
-    end
     object TB_Tray: TToolButton
-      Left = 471
+      Left = 448
       Hint = 'Minimize to tray'
       Top = 2
       Caption = 'TB_Tray'
@@ -160,14 +152,14 @@ object SimbaForm: TSimbaForm
       Enabled = False
     end
     object ToolButton3: TToolButton
-      Left = 517
+      Left = 494
       Height = 22
       Top = 2
       Caption = 'ToolButton3'
       Style = tbsDivider
     end
     object TT_Update: TToolButton
-      Left = 522
+      Left = 499
       Hint = 'Update'
       Top = 2
       Caption = 'TT_Update'
@@ -204,7 +196,7 @@ object SimbaForm: TSimbaForm
       Style = tbsDivider
     end
     object TT_Console: TToolButton
-      Left = 494
+      Left = 471
       Hint = 'Hide/Show Console'
       Top = 2
       Action = ActionConsole
