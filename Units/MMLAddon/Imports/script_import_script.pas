@@ -99,7 +99,8 @@ begin
                    'procedure AddOnTerminate(Method: procedure of object); overload;' + LineEnding +
                    'begin'                                                            + LineEnding +
                    '  __OnTerminateObjects += @Method;'                               + LineEnding +
-                   'end;', 'OnTerminate');
+                   'end;',
+                   'OnTerminate');
   end;
 end;
 
