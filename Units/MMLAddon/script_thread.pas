@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils,
-  lpparser, lpcompiler, lptypes, lpvartypes, lpffiwrappers, lpmessages, lpinterpreter, lpffi, LPDump,
+  lpparser, lpcompiler, lptypes, lpvartypes, lpmessages, lpinterpreter,
   Client, Settings, SettingsSandbox, Files;
 
 type
@@ -23,7 +23,7 @@ type
   PMMLScriptThread = ^TMMLScriptThread;
   TMMLScriptThread = class(TThread)
   protected
-    FCompiler: TLPCompiler;
+    FCompiler: TLapeCompiler;
     FOutputBuffer: String;
     FOutput: TStrings;
     FRunning: TInitBool;
@@ -60,14 +60,14 @@ type
     property Settings: TMMLSettingsSandbox read FSettings;
     property StartTime: UInt64 read FStartTime;
 
-    constructor Create(constref Script: String; ASettings: TMMLSettings);
+    constructor Create(constref Script, FilePath: String; ASettings: TMMLSettings);
     destructor Destroy; override;
   end;
 
 implementation
 
 uses
-  script_imports;
+  script_imports, script_plugins;
 
 procedure TMMLScriptThread.SetState(Value: EMMLScriptState);
 begin
@@ -115,20 +115,49 @@ begin
     FileName := '';
 end;
 
-function TMMLScriptThread.OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
-begin
-  case LowerCase(Directive) of
-    'loadlib':
-      begin
-        if InPeek or InIgnore then
-          Exit(True);
-      end;
+type
+   __TLapeCompiler = class(TLapeCompiler); // blasphemy!
 
-    'findlib':
+function TMMLScriptThread.OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
+var
+  Plugin: TMPlugin;
+  i: Int32;
+  lapeException: lpException;
+begin
+  if (UpperCase(Directive) = 'LOADLIB') then
+  begin
+    if InPeek or InIgnore or (Argument = '') then
+      Exit(True);
+
+    try
+      Plugin := Plugins.Get(Sender.Tokenizer.FileName, Argument);
+      for i := 0 to Plugin.Declarations.Count - 1 do
+        Plugin.Declarations[i].Import(Sender);
+    except
+      on e: Exception do
       begin
-        if InPeek or InIgnore then
-          Exit(True);
+        lapeException := lpException.Create('', Sender.DocPos);
+        lapeException.Message := e.Message;
+
+        raise lapeException;
       end;
+    end;
+
+    Exit(True);
+  end;
+
+  if (UpperCase(Directive) = 'IFHASLIB') then
+  begin
+    try
+      Plugin := Plugins.Get(Sender.Tokenizer.FileName, Argument);
+    except
+      Plugin := nil;
+    end;
+
+    with __TLapeCompiler(Sender) do
+      pushConditional((not InIgnore) and (Plugin <> nil), Sender.DocPos);
+
+    Exit(True);
   end;
 
   Exit(False);
@@ -207,13 +236,13 @@ begin
   end;
 end;
 
-constructor TMMLScriptThread.Create(constref Script: String; ASettings: TMMLSettings);
+constructor TMMLScriptThread.Create(constref Script, FilePath: String; ASettings: TMMLSettings);
 begin
   inherited Create(True);
 
   FreeOnTerminate := True;
 
-  FCompiler := TLPCompiler.Create(TLapeTokenizerString.Create(Script));
+  FCompiler := TLapeCompiler.Create(TLapeTokenizerString.Create(Script, FilePath));
   FCompiler.OnFindFile := @OnFindFile;
   FCompiler.OnHandleDirective := @OnHandleDirective;
   FCompiler['Move'].Name := 'MemMove';
@@ -232,8 +261,8 @@ destructor TMMLScriptThread.Destroy;
 begin
   inherited Destroy();
 
-  FSettings.Free();
   FClient.Free();
+  FSettings.Free();
   FCompiler.Free();
 end;
 
