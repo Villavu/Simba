@@ -1475,54 +1475,43 @@ end;
 { Load settings }
 procedure TSimbaForm.LoadFormSettings;
 var
-  str: string;
-  Data : TStringArray;
-  i,ii : integer;
+  Str: String;
+  Data: TStringArray;
+  i: Int32;
 begin
-  self.BeginFormUpdate;
-  str := SimbaSettings.LastConfig.MainForm.Position.GetDefValue('');
-  if str <> '' then
-  begin;
-    Data := Explode(':',str);
-    if length(Data) <> 4 then
-      Exit;
-    Self.Left:= StrToIntDef(Data[0],Self.Left);
-    Self.Top:= StrToIntDef(Data[1],self.top);
-    Self.Width:= StrToIntDef(Data[2],self.width);
-    Self.Height:= StrToIntDef(Data[3],self.height);
+  Data := Explode(':', SimbaSettings.LastConfig.MainForm.Position.GetDefValue(''));
+  if (Length(Data) = 4) then
+  begin
+    Position := poDesigned;
+
+    SetBounds(StrToInt(Data[0]), StrToInt(Data[1]), StrToInt(Data[2]), StrToInt(Data[3]));
   end;
-  str := lowercase(SimbaSettings.LastConfig.MainForm.State.GetDefValue('normal'));
-  if str = 'maximized' then
-    self.windowstate := wsMaximized
+
+  Str := LowerCase(SimbaSettings.LastConfig.MainForm.State.GetDefValue('normal'));
+  if (Str = 'maximized') then
+    Self.WindowState := wsMaximized
   else
     Self.WindowState := wsNormal;
+
   if SettingExists(ssRecentFilesCount) then
-  begin;
-    ii := StrToIntDef(LoadSettingDef(ssRecentFilesCount, '-1'), -1);
-    for i := 0 to ii do
+    for i := 0 to StrToIntDef(LoadSettingDef(ssRecentFilesCount, '-1'), -1) do
     begin
-      str := LoadSettingDef(ssRecentFileN + inttostr(I),'');
-      if str <> '' then
-        AddRecentFile(str);
+      Str := LoadSettingDef(ssRecentFileN + IntToStr(i), '');
+      if (Str <> '') then
+        AddRecentFile(Str);
     end;
-  end;
 
   if SimbaSettings.CodeInsight.FunctionList.ShowOnStart.GetDefValue(True) or SimbaSettings.LastConfig.MainForm.FunctionListShown.GetDefValue(True) then
     FunctionListShown(True)
   else
-    FunctionListShown(false);
+    FunctionListShown(False);
 
-  {$ifdef MSWindows}
+  {$IFDEF WINDOWS}
   ShowConsole(SimbaSettings.LastConfig.MainForm.ConsoleVisible.GetDefValue(True));
-  {$endif}
+  {$ENDIF}
 
   if not SimbaSettings.Tray.AlwaysVisible.GetDefValue(True) then
-  begin
-    MTrayIcon.Hide;
-    Writeln('Hiding tray.'); // TODO REMOVE?
-  end;
-
-  self.EndFormUpdate;
+    MTrayIcon.Hide();
 end;
 
 { Save Settings }
