@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils,
   lpparser, lpcompiler, lptypes, lpvartypes, lpmessages, lpinterpreter,
-  Client, Settings, SettingsSandbox, Files;
+  Client, Settings, SettingsSandbox, Files, FontLoader;
 
 type
   PErrorData = ^TErrorData;
@@ -60,7 +60,10 @@ type
     property Settings: TMMLSettingsSandbox read FSettings;
     property StartTime: UInt64 read FStartTime;
 
-    constructor Create(constref Script, FilePath: String; ASettings: TMMLSettings);
+    procedure CreateSettings(From: TMMLSettings);
+    procedure CreateFonts(From: TMFonts);
+
+    constructor Create(constref Script, FilePath: String);
     destructor Destroy; override;
   end;
 
@@ -236,7 +239,7 @@ begin
   end;
 end;
 
-constructor TMMLScriptThread.Create(constref Script, FilePath: String; ASettings: TMMLSettings);
+constructor TMMLScriptThread.Create(constref Script, FilePath: String);
 begin
   inherited Create(True);
 
@@ -249,9 +252,6 @@ begin
 
   FClient := TClient.Create();
   FClient.WriteLnProc := @Self.WriteLn;
-
-  FSettings := TMMLSettingsSandbox.Create(ASettings);
-  FSettings.Prefix := 'Scripts/';
 
   FOutput := nil;
   FOutputBuffer := '';
@@ -283,6 +283,24 @@ procedure TMMLScriptThread.WriteLn(constref S: String);
 begin
   Write(S);
   WriteLn();
+end;
+
+procedure TMMLScriptThread.CreateSettings(From: TMMLSettings);
+begin
+  FSettings := TMMLSettingsSandbox.Create(From);
+  FSettings.Prefix := 'Scripts/';
+end;
+
+procedure TMMLScriptThread.CreateFonts(From: TMFonts);
+var
+  i: Int32;
+begin
+  with FClient do
+  begin
+    MOCR.Fonts := From;
+    for i := 0 to MOCR.Fonts.Count - 1 do
+      FCompiler.addGlobalVar(MOCR.Fonts[i].Name, MOCR.Fonts[i].Name).isConstant := True;
+  end;
 end;
 
 end.
