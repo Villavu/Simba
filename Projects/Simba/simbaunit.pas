@@ -55,7 +55,7 @@ uses
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
   SynEditMarkupHighAll, SynHighlighterPas, LMessages, Buttons,
   mmisc, stringutil,mufasatypesutil,
-  about, framefunctionlist, ocr, updateform, Simbasettingsold,
+  about, framefunctionlist, fontloader, updateform, Simbasettingsold,
   Simbasettingssimple,
   v_ideCodeInsight, v_ideCodeParser, CastaliaPasLexTypes, // Code completion units
   CastaliaSimplePasPar, v_AutoCompleteForm,  // Code completion units
@@ -459,24 +459,24 @@ type
     function CreateSetting(const Key, Value : string) : string;
     procedure SetSetting(const key,Value : string; save : boolean = false);
     function SettingExists(const key : string) : boolean;
-    procedure FontUpdate;
     procedure InitializeCoreBuffer;
     procedure CustomExceptionHandler(Sender: TObject; E: Exception);
     procedure RegisterSettingsOnChanges;
+    procedure LoadFonts;
   public
     { Required to work around using freed resources on quit }
     Exiting: Boolean;
 
     DebugStream: String;
     SearchString : string;
-    CurrScript : TScriptFrame; //The current scriptframe
-    CurrTab    : TMufasaTab; //The current TMufasaTab
+    CurrScript: TScriptFrame; //The current scriptframe
+    CurrTab: TMufasaTab; //The current TMufasaTab
     CodeCompletionForm: TAutoCompletePopup;
     CodeCompletionStart: TPoint;
     ParamHint : TParamHint;
-    Tabs : TList;
+    Tabs: TList;
     Manager: TIOManager;
-    OCR_Fonts: TMOCR;
+    Fonts: TMFonts;
     Picker: TMColorPicker;
     Selector: TMWindowSelector;
     OnScriptStart : TScriptStartEvent;
@@ -784,7 +784,8 @@ begin
   Result := FindFile(Filename, [AppPath, SimbaSettings.Includes.Path.Value]);
 end;
 
-function TSimbaForm.OnCCLoadLibrary(Sender: TObject; var Argument: String; out Parser: TCodeInsight): Boolean;
+function TSimbaForm.OnCCLoadLibrary(Sender: TObject; var Argument: string; out
+  Parser: TCodeInsight): Boolean;
 var
   Dump: String;
   Plugin: TMPlugin;
@@ -1074,9 +1075,6 @@ var
   LatestVersion : integer;
 begin
   UpdateTimer.Interval := MaxInt;
-
-  if SimbaSettings.Fonts.CheckForUpdates.GetDefValue(True) then
-    FontUpdate;
 
   if not SimbaSettings.Updater.CheckForUpdates.GetDefValue(True) then
     Exit;
@@ -1475,54 +1473,43 @@ end;
 { Load settings }
 procedure TSimbaForm.LoadFormSettings;
 var
-  str: string;
-  Data : TStringArray;
-  i,ii : integer;
+  Str: String;
+  Data: TStringArray;
+  i: Int32;
 begin
-  self.BeginFormUpdate;
-  str := SimbaSettings.LastConfig.MainForm.Position.GetDefValue('');
-  if str <> '' then
-  begin;
-    Data := Explode(':',str);
-    if length(Data) <> 4 then
-      Exit;
-    Self.Left:= StrToIntDef(Data[0],Self.Left);
-    Self.Top:= StrToIntDef(Data[1],self.top);
-    Self.Width:= StrToIntDef(Data[2],self.width);
-    Self.Height:= StrToIntDef(Data[3],self.height);
+  Data := Explode(':', SimbaSettings.LastConfig.MainForm.Position.GetDefValue(''));
+  if (Length(Data) = 4) then
+  begin
+    Position := poDesigned;
+
+    SetBounds(StrToInt(Data[0]), StrToInt(Data[1]), StrToInt(Data[2]), StrToInt(Data[3]));
   end;
-  str := lowercase(SimbaSettings.LastConfig.MainForm.State.GetDefValue('normal'));
-  if str = 'maximized' then
-    self.windowstate := wsMaximized
+
+  Str := LowerCase(SimbaSettings.LastConfig.MainForm.State.GetDefValue('normal'));
+  if (Str = 'maximized') then
+    Self.WindowState := wsMaximized
   else
     Self.WindowState := wsNormal;
+
   if SettingExists(ssRecentFilesCount) then
-  begin;
-    ii := StrToIntDef(LoadSettingDef(ssRecentFilesCount, '-1'), -1);
-    for i := 0 to ii do
+    for i := 0 to StrToIntDef(LoadSettingDef(ssRecentFilesCount, '-1'), -1) do
     begin
-      str := LoadSettingDef(ssRecentFileN + inttostr(I),'');
-      if str <> '' then
-        AddRecentFile(str);
+      Str := LoadSettingDef(ssRecentFileN + IntToStr(i), '');
+      if (Str <> '') then
+        AddRecentFile(Str);
     end;
-  end;
 
   if SimbaSettings.CodeInsight.FunctionList.ShowOnStart.GetDefValue(True) or SimbaSettings.LastConfig.MainForm.FunctionListShown.GetDefValue(True) then
     FunctionListShown(True)
   else
-    FunctionListShown(false);
+    FunctionListShown(False);
 
-  {$ifdef MSWindows}
+  {$IFDEF WINDOWS}
   ShowConsole(SimbaSettings.LastConfig.MainForm.ConsoleVisible.GetDefValue(True));
-  {$endif}
+  {$ENDIF}
 
   if not SimbaSettings.Tray.AlwaysVisible.GetDefValue(True) then
-  begin
-    MTrayIcon.Hide;
-    Writeln('Hiding tray.'); // TODO REMOVE?
-  end;
-
-  self.EndFormUpdate;
+    MTrayIcon.Hide();
 end;
 
 { Save Settings }
@@ -1604,10 +1591,10 @@ begin
       Exit;
   end;
 
-  CurrScript.ScriptErrorLine := -1;
+  LoadFonts();
 
   try
-    Thread := TMMLScriptThread.Create(Script, CurrScript.ScriptFile, SimbaSettings.MMLSettings);
+    Thread := TMMLScriptThread.Create(Script, CurrScript.ScriptFile);
     Thread.Output := DebugMemo.Lines;
     Thread.Error.Data := @CurrScript.ErrorData;
     Thread.Error.Callback := @CurrScript.HandleErrorData;
@@ -1623,10 +1610,11 @@ begin
     if Selector.HasPicked then
       Thread.Client.IOManager.SetTarget(Selector.LastPick);
 
-    // Add PluginPath
-    // Load OCR
+    Thread.CreateFonts(Fonts);
+    Thread.CreateSettings(SimbaSettings.MMLSettings);
 
     CurrScript.ScriptThreadHandle := Thread.Handle;
+    CurrScript.ScriptErrorLine := -1;
   except
     on e: Exception do
       formWriteln('Failed to initialise script thread: ' + e.ClassName + '::' + e.Message);
@@ -2660,14 +2648,8 @@ begin
     FreeAndNil(Picker);
   if (Assigned(Manager)) then
     FreeAndNil(Manager);
-   {
-  { Free the plugins }
-  if (Assigned(PluginsGlob)) then
-    FreeAndNil(PluginsGlob);
-  }
-  { Free Fonts }
-  if (Assigned(OCR_Fonts)) then
-    FreeAndNil(OCR_Fonts);
+  if Assigned(Fonts) then
+    FreeAndNil(Fonts);
 
   SetLength(DebugStream, 0);
   if (Assigned(DebugCriticalSection)) then
@@ -3291,80 +3273,22 @@ begin
   SimbaSettings.SourceEditor.Font.onChange := @SetSourceEditorFont;
 end;
 
-
-procedure TSimbaForm.FontUpdate;
-  function Idler: boolean;
-  begin
-    result := false;
-    Application.ProcessMessages;
-    Sleep(25);
-    if exiting then
-    begin
-      writeln('FontUpdate, exiting=True; breaking...');
-      result := true;
-    end;
-  end;
-
+procedure TSimbaForm.LoadFonts;
 var
-  CurrVersion : integer;
-  LatestVersion : integer;
-  FontDownload : TDownloadThread;
-  Stream : TStringStream;
-  UnTarrer : TUntarThread;
-  Fonts : string;
-  Decompress : TDecompressThread;
+  Directory: String;
 begin
-  if UpdatingFonts then
-    exit;
-  UpdatingFonts := True;
+  if (Fonts = nil) then
+  begin
+    formWritelnEx('Loading fonts...');
 
-  CurrVersion := SimbaSettings.Fonts.Version.GetDefValue(-1);
-  LatestVersion := SimbaUpdateForm.GetLatestFontVersion;
-  if LatestVersion > CurrVersion then
-  begin;
-    formWriteln(format('New fonts available. Current version: %d. Latest version: %d',[CurrVersion,LatestVersion]));
-    FontDownload := TDownloadThread.Create(SimbaSettings.Fonts.UpdateLink.GetDefValue(FontURL + 'Fonts.tar.bz2'),
-                                           @Fonts);
-    FontDownload.Start;
-    while FontDownload.Done = false do
-      if Idler then
-      begin
-        writeln('FontUpdate: Pre-mature exit due to exiting=true');
-        exit;
-      end;
-    //Fontdownload is freed now
-    Stream := TStringStream.Create(Fonts);
-    try
-      Decompress := TDecompressThread.Create(Stream);
-      Decompress.Start;
-      while Decompress.Finished = false do
-        Idler;
-      if Decompress.Result <> nil then
-      begin;
-        UnTarrer := TUntarThread.Create(Decompress.Result,
-            SimbaSettings.Fonts.Path.Value, True);
-        UnTarrer.Start;
-        while UnTarrer.Finished = false do
-          Idler;
-        if UnTarrer.Result then
-        begin;
-          FormWriteln('Successfully installed the new fonts!');
-          SimbaSettings.Fonts.Version.Value := LatestVersion;
-          if Assigned(self.OCR_Fonts) then
-            self.OCR_Fonts.Free;
-          FormWriteln('Freeing the current fonts. Creating new ones now');
-          Self.OCR_Fonts := TMOCR.Create(nil);
-          OCR_Fonts.InitTOCR(SimbaSettings.Fonts.Path.Value);
-        end;
-        UnTarrer.Free;
-        Decompress.Result.Free;
-      end;
-      Decompress.free;
-    finally
-      Stream.Free;
-    end;
+    Fonts := TMFonts.Create(nil);
+    Fonts.Path := SimbaSettings.Fonts.Path.Value;
+
+    for Directory in GetDirectories(SimbaSettings.Fonts.Path.Value) do
+      Fonts.LoadFont(Directory, False);
+
+    formWriteLn('Loaded ' + IntToStr(Fonts.Count) + ' fonts');
   end;
-  UpdatingFonts := False;
 end;
 
 procedure TSimbaForm.ScriptStartEvent(Sender: TObject; var Script: string;
