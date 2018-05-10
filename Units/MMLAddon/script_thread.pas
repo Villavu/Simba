@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils,
   lpparser, lpcompiler, lptypes, lpvartypes, lpmessages, lpinterpreter,
-  Client, Settings, SettingsSandbox, Files;
+  Client, Settings, SettingsSandbox, Files, FontLoader;
 
 type
   PErrorData = ^TErrorData;
