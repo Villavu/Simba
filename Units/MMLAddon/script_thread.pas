@@ -46,7 +46,7 @@ type
 
     procedure Execute; override;
   public
-    Error: record Data: PErrorData; Callback: procedure of object; end; // set by framescript
+    Error: record Data: PErrorData; Callback: procedure() of object; end; // set by framescript
     AppPath, DocPath, ScriptPath, ScriptFile, IncludePath, PluginPath, FontPath: String; // set by TSimbaForm.InitializeTMThread
 
     procedure Write(constref S: String);
@@ -60,8 +60,10 @@ type
     property Settings: TMMLSettingsSandbox read FSettings;
     property StartTime: UInt64 read FStartTime;
 
-    procedure CreateSettings(From: TMMLSettings);
-    procedure CreateFonts(From: TMFonts);
+    function Kill: Boolean;
+
+    procedure SetSettings(From: TMMLSettings);
+    procedure SetFonts(From: TMFonts);
 
     constructor Create(constref Script, FilePath: String);
     destructor Destroy; override;
@@ -70,6 +72,7 @@ type
 implementation
 
 uses
+  {$IFDEF LINUX} pthreads, {$ENDIF}
   script_imports, script_plugins;
 
 procedure TMMLScriptThread.SetState(Value: EMMLScriptState);
@@ -125,7 +128,7 @@ function TMMLScriptThread.OnHandleDirective(Sender: TLapeCompiler; Directive, Ar
 var
   Plugin: TMPlugin;
   i: Int32;
-  lapeException: lpException;
+  lpe: lpException;
 begin
   if (UpperCase(Directive) = 'LOADLIB') then
   begin
@@ -139,10 +142,10 @@ begin
     except
       on e: Exception do
       begin
-        lapeException := lpException.Create('', Sender.DocPos);
-        lapeException.Message := e.Message;
+        lpe := lpException.Create('', Sender.DocPos); // raise a lape exception so we get the docpos when exception is handled.
+        lpe.Message := e.Message;
 
-        raise lapeException;
+        raise lpe;
       end;
     end;
 
@@ -211,6 +214,10 @@ end;
 
 procedure TMMLScriptThread.Execute;
 begin
+  {$IFDEF LINUX}
+  pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, nil);
+  {$ENDIF}
+
   FRunning := bTrue;
 
   try
@@ -261,9 +268,12 @@ destructor TMMLScriptThread.Destroy;
 begin
   inherited Destroy();
 
-  FClient.Free();
-  FSettings.Free();
-  FCompiler.Free();
+  if (FClient <> nil) then
+    FreeAndNil(FClient);
+  if (FSettings <> nil) Then
+    FreeAndNil(FSettings);
+  if (FCompiler <> nil) then
+    FreeAndNil(FCompiler);
 end;
 
 procedure TMMLScriptThread.Write(constref S: String);
@@ -285,13 +295,73 @@ begin
   WriteLn();
 end;
 
-procedure TMMLScriptThread.CreateSettings(From: TMMLSettings);
+{$IFDEF WINDOWS}
+function TMMLScriptThread.Kill: Boolean;
+begin
+  if (KillThread(Handle) = 0) and (WaitForThreadTerminate(Handle, 2500) = 0) then
+  begin
+    OnTerminate(Self);
+
+    if (FClient <> nil) then
+      FreeAndNil(FClient);
+    if (FSettings <> nil) Then
+      FreeAndNil(FSettings);
+    if (FCompiler <> nil) then
+      FreeAndNil(FCompiler);
+
+    Exit(True);
+  end;
+
+  Exit(False);
+end;
+{$ENDIF}
+
+{$IFDEF LINUX}
+(*
+  For this to work `thread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, nil);` must be called on the script thread and
+  `pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, nil);` must called on simba initialization.
+*)
+function TMMLScriptThread.Kill: Boolean;
+const
+  ESRCH = 3;
+var
+  T: UInt64;
+begin
+  if (pthread_cancel(Handle) = 0) then
+  begin
+    T := GetTickCount64() + 2500;
+
+    while (T > GetTickCount64()) do
+    begin
+      if (pthread_kill(Handle, 0) = ESRCH) then
+      begin
+        OnTerminate(Self);
+
+        if (FClient <> nil) then
+          FreeAndNil(FClient);
+        if (FSettings <> nil) Then
+          FreeAndNil(FSettings);
+        if (FCompiler <> nil) then
+          FreeAndNil(FCompiler);
+
+        Exit(True);
+      end;
+
+      Sleep(1);
+    end;
+  end;
+
+  Exit(False);
+end;
+{$ENDIF}
+
+procedure TMMLScriptThread.SetSettings(From: TMMLSettings);
 begin
   FSettings := TMMLSettingsSandbox.Create(From);
   FSettings.Prefix := 'Scripts/';
 end;
 
-procedure TMMLScriptThread.CreateFonts(From: TMFonts);
+procedure TMMLScriptThread.SetFonts(From: TMFonts);
 var
   i: Int32;
 begin

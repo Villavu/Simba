@@ -7,7 +7,7 @@ unit lpTIOManager_Linux;
 interface
 
 uses
-  Classes, SysUtils, lpcompiler, lptypes, lpClassHelper;
+  Classes, SysUtils, lpcompiler, lptypes, script_imports;
 
 procedure Register_TIOManager(Compiler: TLapeCompiler);
 
@@ -23,79 +23,79 @@ type
   PWindow = ^x.TWindow;
 
 //constructor Create;
-procedure TIOManager_Init(const Params: PParamArray); lape_extdecl
+procedure TIOManager_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PIOManager(Params^[0])^ := TIOManager.Create();
 end;
 
 //constructor Create(plugin_dir: string);
-procedure TIOManager_InitEx(const Params: PParamArray); lape_extdecl
+procedure TIOManager_InitEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PIOManager(Params^[0])^ := TIOManager.Create(PlpString(Params^[1])^);
 end;
 
 //function SetTarget(target: TNativeWindow): integer; overload;
-procedure TIOManager_SetTarget(const Params: PParamArray; const Result: Pointer); lape_extdecl
+procedure TIOManager_SetTarget(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   Pinteger(Result)^ := PIOManager(Params^[0])^.SetTarget(PNativeWindow(Params^[1])^);
 end;
 
 //procedure SetDesktop; override;
-procedure TIOManager_SetDesktop(const Params: PParamArray); lape_extdecl
+procedure TIOManager_SetDesktop(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PIOManager(Params^[0])^.SetDesktop;
 end;
 
 //function GetProcesses: TSysProcArr; override;
-procedure TIOManager_GetProcesses(const Params: PParamArray; const Result: Pointer); lape_extdecl
+procedure TIOManager_GetProcesses(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PSysProcArr(Result)^ := PIOManager(Params^[0])^.GetProcesses();
 end;
 
 //procedure SetTargetEx(Proc: TSysProc); overload;
-procedure TIOManager_SetTargetEx(const Params: PParamArray); lape_extdecl
+procedure TIOManager_SetTargetEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PIOManager(Params^[0])^.SetTargetEx(PSysProc(Params^[1])^);
 end;
 
 //Read: display: PDisplay;
-procedure TIOManager_display_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+procedure TIOManager_display_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PPDisplay(Result)^ := PIOManager(Params^[0])^.display;
 end;
 
 //Write: display: PDisplay;
-procedure TIOManager_display_Write(const Params: PParamArray); lape_extdecl
+procedure TIOManager_display_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PIOManager(Params^[0])^.display := PPDisplay(Params^[1])^;
 end;
 
 //Read: screennum: integer;
-procedure TIOManager_screennum_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+procedure TIOManager_screennum_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   Pinteger(Result)^ := PIOManager(Params^[0])^.screennum;
 end;
 
 //Write: screennum: integer;
-procedure TIOManager_screennum_Write(const Params: PParamArray); lape_extdecl
+procedure TIOManager_screennum_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PIOManager(Params^[0])^.screennum := Pinteger(Params^[1])^;
 end;
 
 //Read: desktop: x.TWindow;
-procedure TIOManager_desktop_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+procedure TIOManager_desktop_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PWindow(Result)^ := PIOManager(Params^[0])^.desktop;
 end;
 
 //Write: desktop: x.TWindow;
-procedure TIOManager_desktop_Write(const Params: PParamArray); lape_extdecl
+procedure TIOManager_desktop_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PIOManager(Params^[0])^.desktop := PNativeWindow(Params^[1])^;
 end;
 
 //procedure Free();
-procedure TIOManager_Free(const Params: PParamArray); lape_extdecl
+procedure TIOManager_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PIOManager(Params^[0])^.Free();
 end;
