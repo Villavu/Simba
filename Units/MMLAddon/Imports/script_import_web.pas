@@ -40,7 +40,7 @@ end;
 
 procedure Lape_SetHTTPUserAgent(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  TMMLScriptThread(Params^[0]).Client.MInternets.GetHTTPClient(PInt32(Params^[1])^).SetHTTPUserAgent(PString(Params^[2])^);
+  TMMLScriptThread(Params^[0]).Client.MInternets.GetHTTPClient(PInt32(Params^[1])^).UserAgent := PString(Params^[2])^;
 end;
 
 procedure Lape_PostHTTPPage(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -65,7 +65,7 @@ end;
 
 procedure Lape_GetRawHeaders(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := TMMLScriptThread(Params^[0]).Client.MInternets.GetHTTPClient(PInt32(Params^[1])^).GetRawHeaders();
+  PString(Result)^ := TMMLScriptThread(Params^[0]).Client.MInternets.GetHTTPClient(PInt32(Params^[1])^).Headers;
 end;
 
 procedure Lape_SetProxy(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -139,6 +139,21 @@ begin
   TMMLScriptThread(Params^[0]).Client.MSockets.FreeSocket(PInt32(Params^[1])^);
 end;
 
+procedure Lape_GetHTTPResponseCode(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PInt32(Result)^ := TMMLScriptThread(Params^[0]).Client.MInternets.GetHTTPClient(PInt32(Params^[1])^).ResponseCode;
+end;
+
+procedure Lape_GetHTTPPageEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PInt32(Result)^ := TMMLScriptThread(Params^[0]).Client.MInternets.GetHTTPClient(PInt32(Params^[1])^).GetHTTPPage(PString(Params^[2])^, PString(Params^[3])^);
+end;
+
+procedure Lape_GetHTTPUserAgent(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PString(Result)^ := TMMLScriptThread(Params^[0]).Client.MInternets.GetHTTPClient(PInt32(Params^[1])^).UserAgent;
+end;
+
 procedure Lape_Import_Web(Compiler: TLapeCompiler; Data: Pointer);
 begin
   with Compiler do
@@ -147,8 +162,11 @@ begin
     addGlobalMethod('function GetPage(URL: String): String', @Lape_GetPage, Data);
     addGlobalMethod('function InitializeHTTPClient(HandleCookies: Boolean = True): Int32', @Lape_InitializeHTTPClient, Data);
     addGlobalMethod('procedure FreeHTTPClient(Client: Int32);', @Lape_FreeHTTPClient, Data);
+    addGlobalMethod('function GetHTTPResponseCode: Int32;', @Lape_GetHTTPResponseCode, Data);
     addGlobalMethod('function GetHTTPPage(Client: Int32; URL: String): String', @Lape_GetHTTPPage, Data);
     addGlobalMethod('procedure SetHTTPUserAgent(Client: Int32; Agent: String);', @Lape_SetHTTPUserAgent, Data);
+    addGlobalMethod('function GetHTTPUserAgent(Client: Int32): String;', @Lape_GetHTTPUserAgent, Data);
+    addGlobalMethod('function GetHTTPPageEx(Client: Int32; URL: String; FilePath: String): Int32;', @Lape_GetHTTPPageEx, Data);
     addGlobalMethod('function PostHTTPPage(Client: Int32; URL, PostData: String): String', @Lape_PostHTTPPage, Data);
     addGlobalMethod('function PostHTTPPageEx(Client: Int32; URL: String): String', @Lape_PostHTTPPageEx, Data);
     addGlobalMethod('procedure ClearPostData(Client: Int32);', @Lape_ClearPostData, Data);
