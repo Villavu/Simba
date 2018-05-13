@@ -31,7 +31,7 @@ unit SimbaUnit;
 interface
 
 uses
-  {$IFDEF LINUX}cthreads, cmem,{$ENDIF}
+  {$IFDEF LINUX}cthreads, cmem, pthreads,{$ENDIF}
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit,
 
@@ -1172,24 +1172,18 @@ begin
 end;
 
 procedure TSimbaForm.StopScript;
-var
-  Code: UInt32 = 0;
 begin
   case ScriptState of
     ss_Stopping:
       begin
         Sleep(500); // Give a little time to terminate on it's own.
 
-        if GetExitCodeThread(CurrScript.ScriptThreadHandle, Code) and (Code > 0) then
+        if (CurrScript.ScriptThread <> nil) then
         begin
           WriteLn('Forcefully terminating the script thread');
 
-          KillThread(CurrScript.ScriptThreadHandle);
-          WaitForThreadTerminate(CurrScript.ScriptThreadHandle, -1);
-
-          ScriptState := ss_None;
-
-          CurrScript.ScriptThread.Free();
+          if (not CurrScript.ScriptThread.Kill()) then
+            formWritelnEx('Failed to forcefully kill the script thread');
         end;
       end;
 
@@ -1610,10 +1604,9 @@ begin
     if Selector.HasPicked then
       Thread.Client.IOManager.SetTarget(Selector.LastPick);
 
-    Thread.CreateFonts(Fonts);
-    Thread.CreateSettings(SimbaSettings.MMLSettings);
+    Thread.SetFonts(Fonts);
+    Thread.SetSettings(SimbaSettings.MMLSettings);
 
-    CurrScript.ScriptThreadHandle := Thread.Handle;
     CurrScript.ScriptErrorLine := -1;
   except
     on e: Exception do
@@ -3638,6 +3631,10 @@ begin
 end;
 
 initialization
-  {$R *.lfm}
+  {$IFDEF LINUX}
+  pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, nil);
+  {$ENDIF}
+
+{$R *.lfm}
 
 end.
