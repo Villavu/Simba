@@ -1,7 +1,0 @@
-const
-  TestStr = 'Hai, seems like you got includes working!';
- 
-function Multiply(a,b : integer) : integer;
-begin;
-  result := a*b;
-end;
