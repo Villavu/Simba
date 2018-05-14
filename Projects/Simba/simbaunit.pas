@@ -33,13 +33,7 @@ interface
 uses
   {$IFDEF LINUX}cthreads, cmem, pthreads,{$ENDIF}
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit,
-
-  // FIXME: R0b0t1 @ 11/16/17 16:55 CST.
-  // Breaking changes made in the LCL; abandoning custom class intended
-  // to support multi-line string literals.
-  {SynHighlighterLape,}
-
+  StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit, SynHighlighterLape,
   mufasabase, MufasaTypes,
   synedittypes,
   script_thread,
@@ -52,8 +46,8 @@ uses
   framescript,
 
   lcltype, ActnList,
-  SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
-  SynEditMarkupHighAll, SynHighlighterPas, LMessages, Buttons,
+  SynExportHTML, SynEditKeyCmds,
+  SynEditMarkupHighAll,  LMessages, Buttons,
   mmisc, stringutil,mufasatypesutil,
   about, framefunctionlist, fontloader, updateform, Simbasettingsold,
   Simbasettingssimple,
@@ -140,7 +134,6 @@ type
     CheckBoxMatchCase: TCheckBox;
     frmFunctionList: TFunctionListFrame;
     LabeledEditSearch: TLabeledEdit;
-    LazHighlighter: TSynPasSyn;
     MainMenu: TMainMenu;
     DebugMemo: TMemo;
     MenuItemFindPrev: TMenuItem;
@@ -180,7 +173,6 @@ type
     MouseTimer: TTimer;
     NewsTimer: TTimer;
     FunctionListTimer: TTimer;
-    SCARHighlighter: TSynPasSyn;
     NotesSplitter: TSplitter;
     SpeedButtonFindNext: TSpeedButton;
     SpeedButtonFindPrev: TSpeedButton;
@@ -438,7 +430,6 @@ type
 
     function SilentUpdateBeat: Boolean;
 
-    function GetHighlighter: TSynCustomHighlighter;
     function GetScriptState: TScriptState;
     function GetShowParamHintAuto: boolean;
     function GetShowCodeCompletionAuto: Boolean;
@@ -481,6 +472,7 @@ type
     Selector: TMWindowSelector;
     OnScriptStart : TScriptStartEvent;
     OnScriptOpen : TScriptOpenEvent;
+    Highlighter: TSynFreePascalSyn;
 
     {$ifdef mswindows}
     ConsoleVisible : boolean;
@@ -521,9 +513,8 @@ type
     procedure OnSaveScript(const Filename : string);
     property ShowParamHintAuto : boolean read GetShowParamHintAuto write SetShowParamHintAuto;
     property ShowCodeCompletionAuto: Boolean read GetShowCodeCompletionAuto write SetShowCodeCompletionAuto;
-    property CurrHighlighter : TSynCustomHighlighter read GetHighlighter;
     function DefaultScript : string;
-
+    procedure DefaultHighlighter;
     procedure UpdateSimbaSilent(Force: Boolean);
   end;
 
@@ -821,14 +812,6 @@ begin
   end;
 
   Exit(False);
-end;
-
-function TSimbaForm.GetHighlighter: TSynCustomHighlighter;
-begin
-  if SimbaSettings.SourceEditor.LazColors.GetDefValue(True) then
-    result := LazHighlighter
-  else
-    result := SCARHighlighter;
 end;
 
 procedure TSimbaForm.SetIncludesPath(obj: TSetting);
@@ -1705,6 +1688,26 @@ begin
   end;
 end;
 
+procedure TSimbaForm.DefaultHighlighter;
+begin
+  if (Highlighter = nil) then
+    Highlighter := TSynFreePascalSyn.Create(Self);
+
+  with Highlighter do
+  begin
+    CommentAttri.Foreground := clBlue;
+    CommentAttri.Style := [fsBold];
+    IdentifierAttri.Foreground := clDefault;
+    NumberAttri.Foreground := clNavy;
+    StringAttri.Foreground := clBlue;
+    SymbolAttri.Foreground := clRed;
+    DirectiveAttri.Foreground := clRed;
+    DirectiveAttri.Style := [fsBold];
+    NestedComments := False;
+    StringKeywordMode := spsmNone;
+  end;
+end;
+
 
 procedure TSimbaForm.ActionTabLastExecute(Sender: TObject);
 var
@@ -2517,6 +2520,8 @@ begin
   CodeCompletionForm.InsertProc := @OnCompleteCode;
   ParamHint := TParamHint.Create(self);
 
+  DefaultHighlighter();
+
   {$IFDEF MSWindows}
   ConsoleVisible := True;
 
@@ -2745,7 +2750,7 @@ var
   SynExporterHTML : TSynExporterHTML;
 begin;
   SynExporterHTML := TSynExporterHTML.Create(nil);
-  SynExporterHTML.Highlighter := CurrHighlighter;
+  SynExporterHTML.Highlighter := Highlighter;
   SynExporterHTML.ExportAsText:= True;
   with TSaveDialog.Create(nil) do
     try
