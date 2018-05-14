@@ -97,7 +97,8 @@ type
     rsVarTypeInSpecification, // between ":"/"=" and ";" in a var or type section (or class members)
                               // var a: Integer; type b = Int64;
     rsInTypeBlock,
-    rsSkipAllPasBlocks        // used for: class of ... ;
+    rsSkipAllPasBlocks,        // used for: class of ... ;
+    rsString
   );
   TRangeStates = set of TRangeState;
 
@@ -2357,13 +2358,13 @@ begin
       '$': fProcTable[I] := @HexProc;
       '%': fProcTable[I] := @BinaryProc;
       '&': fProcTable[I] := @OctalProc;
-      #39: fProcTable[I] := @StringProc;
+      #39, #34: fProcTable[I] := @StringProc;
       '0'..'9': fProcTable[I] := @NumberProc;
       'A'..'Z', 'a'..'z', '_':
         fProcTable[I] := @IdentProc;
       '^': fProcTable[I] := @CaretProc;
       '{': fProcTable[I] := @BraceOpenProc;
-      '}', '!', '"', '('..'/', ':'..'@', '[', ']', '\', '`', '~':
+      '}', '!', '('..'/', ':'..'@', '[', ']', '\', '`', '~':
         begin
           case I of
             '(': fProcTable[I] := @RoundOpenProc;
@@ -3104,14 +3105,45 @@ end;
 procedure TSynPasSyn.StringProc;
 begin
   fTokenID := tkString;
-  Inc(Run);
-  while (not (fLine[Run] in [#0, #10, #13])) do begin
-    if fLine[Run] = '''' then begin
+
+  if (fLine[Run] = #34) or (rsString in fRange) then  // heredoc
+  begin
+    fTokenID := tkString;
+    if (Run > 0) and (length(fLine) > 0) then
       Inc(Run);
-      if (fLine[Run] <> '''') then
-        break;
+
+    if not(rsString in fRange) then
+    begin
+      fRange := fRange+[rsString];
+      if (Run = 0) then Inc(Run);
     end;
+
+    while (not (fLine[Run] in [#0])) do
+    begin
+      if fLine[Run] = #34 then
+      begin
+        Inc(Run);
+        if (fLine[Run] <> #34) then
+        begin
+          fRange := fRange - [rsString];
+          break;
+        end;
+      end;
+      Inc(Run);
+    end;
+  end else
+  begin
+    fTokenID := tkString;
     Inc(Run);
+    while (not (fLine[Run] in [#0,#10,#13])) do
+    begin
+      if fLine[Run] = #39 then begin
+        Inc(Run);
+        if (fLine[Run] <> #39) then
+          break;
+      end;
+      Inc(Run);
+    end;
   end;
 end;
 
@@ -3140,6 +3172,9 @@ begin
     NullProc;
     exit;
   end;
+  if rsString in fRange then
+    StringProc()
+  else
   case fLine[Run] of
      #0: NullProc;
     #10: LFProc;
