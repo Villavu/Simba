@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 265
+  Left = 478
   Height = 700
-  Top = 254
+  Top = 351
   Width = 900
   ActiveControl = ScriptPanel
   AllowDropFiles = True
@@ -3154,8 +3154,8 @@ object SimbaForm: TSimbaForm
   end
   object UpdateTimer: TTimer
     Interval = 10000
-    left = 608
-    top = 144
+    left = 600
+    top = 200
   end
   object MouseTimer: TTimer
     Interval = 100
@@ -3172,35 +3172,7 @@ object SimbaForm: TSimbaForm
   object FunctionListTimer: TTimer
     Interval = 750
     OnTimer = FunctionListTimerTimer
-    left = 608
-    top = 200
-  end
-  object SCARHighlighter: TSynPasSyn
-    Enabled = False
-    CommentAttri.Foreground = clGreen
-    CommentAttri.Style = []
-    NumberAttri.Foreground = clNavy
-    StringAttri.Foreground = clFuchsia
-    CompilerMode = pcmObjFPC
-    NestedComments = False
-    StringKeywordMode = spsmNone
-    left = 568
-    top = 200
-  end
-  object LazHighlighter: TSynPasSyn
-    Enabled = False
-    CommentAttri.Foreground = clBlue
-    CommentAttri.Style = [fsBold]
-    IdentifierAttri.Foreground = clDefault
-    NumberAttri.Foreground = clNavy
-    StringAttri.Foreground = clBlue
-    SymbolAttri.Foreground = clRed
-    DirectiveAttri.Foreground = clRed
-    DirectiveAttri.Style = [fsBold]
-    CompilerMode = pcmObjFPC
-    NestedComments = False
-    StringKeywordMode = spsmNone
-    left = 528
+    left = 544
     top = 200
   end
 end
