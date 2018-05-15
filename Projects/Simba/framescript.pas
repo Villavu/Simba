@@ -707,7 +707,7 @@ begin
 
   SynEdit.Enabled := True; // For some reason we need this?
   
-  SynEdit.Highlighter := SimbaForm.CurrHighlighter;
+  SynEdit.Highlighter := SimbaForm.Highlighter;
   SynEdit.Options := SynEdit.Options + [eoTabIndent, eoKeepCaretX, eoDragDropEditing, eoScrollPastEof] - [eoSmartTabs];
   SynEdit.Options2 := SynEdit.Options2 + [eoCaretSkipsSelection];
   
