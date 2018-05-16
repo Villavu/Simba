@@ -555,7 +555,8 @@ uses
    bitmaps,
    colourhistory,
    math,
-   script_imports, script_plugins
+   script_imports, script_plugins,
+   openssl
    {$IFDEF USE_FORMDESIGNER}, frmdesigner{$ENDIF}
 
    {$IFDEF LINUX_HOTKEYS}, keybinder{$ENDIF}
@@ -2501,6 +2502,40 @@ begin
 
     WriteLn('You have no write access to this directory, and elevation failed!');
   end;
+  {$ENDIF}
+
+  // For Linux: apt-get install openssl-dev.
+  // Note: 64 bit libs use the `32` suffix too.
+  {$IFDEF WINDOWS}
+  if (not FileExists(AppPath + 'libeay32.dll')) or (not FileExists(AppPath + 'ssleay32.dll')) then
+  begin
+    WriteLn('SSL libs not present, adding...');
+
+    {$IFDEF CPU32}
+      {$i openssl32.lrs}
+    {$ELSE}
+      {$i openssl64.lrs}
+    {$ENDIF}
+
+    if (not FileExists(AppPath + 'libeay32.dll')) then
+      with TLazarusResourceStream.Create('libeay32', nil) do
+      try
+        SaveToFile(AppPath + 'libeay32.dll');
+      finally
+        Free();
+      end;
+
+    if (not FileExists(AppPath + 'ssleay32.dll')) then
+      with TLazarusResourceStream.Create('ssleay32', nil) do
+      try
+        SaveToFile(AppPath + 'ssleay32.dll');
+      finally
+        Free();
+      end;
+  end;
+
+  DLLSSLName := AppPath + 'ssleay32.dll';
+  DLLUtilName := AppPath + 'libeay32.dll';
   {$ENDIF}
 
   self.BeginFormUpdate;
