@@ -32,18 +32,10 @@ $Id: synhighlighterpas.pp 57210 2018-02-01 22:36:10Z maxim $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
-
-Known Issues:
 -------------------------------------------------------------------------------}
-{
-@abstract(Provides a Pascal/Delphi syntax highlighter for SynEdit)
-@author(Martin Waldenburg)
-@created(1998, converted to SynEdit 2000-04-07)
-@lastmod(2000-06-23)
-The SynHighlighterPas unit provides SynEdit with a Object Pascal syntax highlighter.
-An extra boolean property "D4Syntax" is included to enable the recognition of the
-advanced features found in Object Pascal in Delphi 4.
-}
+
+// CHANGES FOR LAPE: https://github.com/MerlijnWajer/Simba/commit/8dc67d7a6009bd1cfb63a4e2b657ae06554e4d82
+
 unit SynHighlighterLape;
 
 {$I synedit.inc}
