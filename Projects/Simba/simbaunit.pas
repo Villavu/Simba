@@ -3670,11 +3670,6 @@ begin
   inherited Destroy;
 end;
 
-initialization
-  {$IFDEF LINUX}
-  pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, nil);
-  {$ENDIF}
-
 {$R *.lfm}
 
 end.

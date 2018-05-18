@@ -327,6 +327,8 @@ const
 var
   T: UInt64;
 begin
+  pthread_detach(pthread_self());
+
   if (pthread_cancel(Handle) = 0) then
   begin
     T := GetTickCount64() + 2500;
