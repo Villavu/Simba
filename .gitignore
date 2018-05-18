@@ -11,3 +11,5 @@
 default.simba
 settings.xml
 ^build\/
+/ssleay32.dll
+/libeay32.dll
