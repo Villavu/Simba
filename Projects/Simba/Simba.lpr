@@ -30,7 +30,7 @@ program Simba;
 
 uses
   {$IFDEF UNIX}
-  cthreads, cmem,
+  cthreads, cmem, linux_startup,
   {$ENDIF}
   Interfaces, Forms,
   simbaunit, colourhistory, about, debugimage, bitmapconv,
