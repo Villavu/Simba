@@ -178,6 +178,7 @@ type
     SpeedButtonFindPrev: TSpeedButton;
     ToolButton5: TToolButton;
     TB_FromDesigner: TToolButton;
+    TB_ShowPackages: TToolButton;
     TT_ScriptManager: TToolButton;
     ToolButton6: TToolButton;
     TT_Console: TToolButton;
@@ -395,6 +396,7 @@ type
     procedure SplitterFunctionListCanResize(Sender: TObject; var NewSize: Integer;
       var Accept: Boolean);
     procedure TB_FromDesignerClick(Sender: TObject);
+    procedure TB_ShowPackagesClick(Sender: TObject);
     procedure ThreadOpenConnectionEvent(Sender: TObject; var url: string;
       var Continue: boolean);
     procedure ThreadOpenFileEvent(Sender: TObject; var Filename: string;
@@ -958,6 +960,14 @@ end;
 procedure TSimbaForm.TB_FromDesignerClick(Sender: TObject);
 begin
   CallFormDesignerExecute(Sender);
+end;
+
+procedure TSimbaForm.TB_ShowPackagesClick(Sender: TObject);
+begin
+  if PackageForm.Showing then
+    PackageForm.BringToFront()
+  else
+    PackageForm.Show();
 end;
 
 procedure TSimbaForm.ThreadOpenConnectionEvent(Sender: TObject; var url: string;var Continue: boolean);
@@ -2589,6 +2599,8 @@ begin
   HandleConfigParameter;
 
   CreateSimbaSettings(SimbaSettingsFile);
+
+  PackageForm := TPackageForm.Create(Self, TB_ShowPackages);
 
   Application.CreateForm(TSettingsForm,SettingsForm);
   Application.CreateForm(TSettingsSimpleForm,SettingsSimpleForm);
