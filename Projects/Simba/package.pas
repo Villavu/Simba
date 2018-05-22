@@ -135,7 +135,7 @@ implementation
 
 uses
   LCLType, newsimbasettings, dateutils, MufasaTypes, httpd, Zipper, XMLRead, DOM,
-  Math, fphttpclient, LazFileUtils, FileUtil;
+  Math, fphttpclient, LazFileUtils, FileUtil, jsonparser;
 
 // pretty neat imo.
 type
