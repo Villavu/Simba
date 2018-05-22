@@ -1,0 +1,496 @@
+object PackageForm: TPackageForm
+  Tag = 1
+  Left = -676
+  Height = 498
+  Top = 509
+  Width = 600
+  Caption = 'Packages'
+  ClientHeight = 498
+  ClientWidth = 600
+  Position = poScreenCenter
+  LCLVersion = '1.8.2.0'
+  object lbPackages: TListBox
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = btnAdd
+    AnchorSideTop.Side = asrBottom
+    AnchorSideBottom.Control = btnPanel
+    Left = 5
+    Height = 430
+    Top = 22
+    Width = 139
+    Anchors = [akTop, akLeft, akBottom]
+    BorderSpacing.Left = 5
+    Font.Height = -13
+    ItemHeight = 0
+    OnSelectionChange = packagedChanged
+    ParentFont = False
+    Style = lbOwnerDrawFixed
+    TabOrder = 0
+  end
+  object btnAdd: TSpeedButton
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = lbPackages
+    AnchorSideRight.Side = asrBottom
+    Left = 122
+    Height = 22
+    Top = 0
+    Width = 22
+    Anchors = [akTop, akRight]
+    Flat = True
+    Glyph.Data = {
+      36040000424D3604000000000000360000002800000010000000100000000100
+      2000000000000004000064000000640000000000000000000000FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFC00FFFFF700806D5EFF7B604BFF7D624DFF806D
+      5EFFFFFFF700FFFFFC00FDFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFB00FFFFF2007C614CFFECCEB5FFECCEB5FF7C61
+      4CFFFFFFF200FFFFFB00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFC00FFFFFB00FFFFF500FFFFED00856346FFEFCFB2FFCBAB8EFF8563
+      46FFFFFFEB00FFFFF500FFFFFB00FFFFFC00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFF800FFFFF200FFFFED00FFFFE6008E6342FFF6D0AEFFD2AC8AFF8E63
+      42FFFFFFE600FFFFED00FFFFF200FFFFF700FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00806D5EFF7C614DFF836248FF8A6343FF8E6342FFD2AC8AFFD4AB8AFF9063
+      41FF8E6342FF876246FF7E624AFF826D5EFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF007C614CFFE6CCB4FFD3B59CFFD4B497FFD5B395FFD4B294FFCFAC8BFFCFA9
+      89FFCCA688FFC6A487FFDCBEA3FF7E614CFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF007C614CFFEED4BCFFEFD2B7FFF2D2B5FFF1CFB2FFEDCFB2FFEFCFB2FFF5CF
+      B1FFF4CEB0FFEFCDB0FFEBCDB2FF7F634BFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00806D5EFF7A624CFF836248FF8A6343FF8A6343FFEDCFB4FFEDCFB4FF8C63
+      43FF8C6342FF856346FF7F634BFF816F5EFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFF700FFFFF200FFFFEB00FFFFE6008A6245FFECCEB5FFECCEB5FF8A62
+      45FFFFFFE600FFFFEB00FFFFF100FFFFF700FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFC00FFFFFB00FFFFF500FFFFED00836248FFEACEB6FFEACEB6FF8362
+      48FFFFFFEB00FFFFF500FFFFF900FFFFFC00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFB00FFFFF2007C614CFFE8CDB8FFE8CDB8FF7C61
+      4CFFFFFFF200FFFFFA00FFFFFF00FFFFFE00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFC00FFFFF700806D5EFF7C614CFF7C614CFF806D
+      5EFFFFFFF700FFFFFC00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
+    }
+    OnClick = btnAddClick
+  end
+  object btnPanel: TButtonPanel
+    Tag = 1
+    Left = 6
+    Height = 34
+    Top = 458
+    Width = 588
+    OKButton.Name = 'OKButton'
+    OKButton.DefaultCaption = True
+    HelpButton.Name = 'HelpButton'
+    HelpButton.DefaultCaption = True
+    CloseButton.Name = 'CloseButton'
+    CloseButton.Tag = 1
+    CloseButton.DefaultCaption = True
+    CancelButton.Name = 'CancelButton'
+    CancelButton.DefaultCaption = True
+    TabOrder = 1
+    ShowButtons = [pbClose]
+    object lblStatus: TLabel
+      Tag = 1
+      AnchorSideLeft.Control = btnPanel
+      AnchorSideTop.Control = btnPanel
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = btnPanel
+      AnchorSideBottom.Side = asrBottom
+      Left = 5
+      Height = 20
+      Top = 10
+      Width = 508
+      Anchors = [akTop, akLeft, akRight, akBottom]
+      AutoSize = False
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 10
+      BorderSpacing.Bottom = 4
+      Layout = tlCenter
+      ParentColor = False
+    end
+  end
+  object btnRemove: TSpeedButton
+    AnchorSideTop.Control = btnAdd
+    AnchorSideRight.Control = btnAdd
+    Left = 100
+    Height = 22
+    Top = 0
+    Width = 22
+    Anchors = [akTop, akRight]
+    Flat = True
+    Glyph.Data = {
+      36040000424D3604000000000000360000002800000010000000100000000100
+      2000000000000004000064000000640000000000000000000000FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00806D5EFF7C614CFF806249FF816249FF816249FF816249FF816249FF8362
+      48FF816348FF816249FF7C614CFF806D5EFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF007C614CFFE6CCB4FFD1B69CFFD2B59AFFD1B398FFD2B295FFCBAB8EFFCBA9
+      8CFFC8A689FFC6A389FFDCBDA4FF7E614CFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF007C614CFFEED4BCFFEDD2B8FFEFD2B7FFEDCFB4FFEFCFB2FFEECEB1FFF1CF
+      B2FFF0CEB1FFEFCCB2FFEBCCB3FF7E614CFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00806D5EFF7C614CFF806249FF816249FF816249FF826449FF816348FF8362
+      48FF836248FF84624AFF7E614CFF806D5EFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
+    }
+    OnClick = btnRemoveClick
+  end
+  object pnlTop: TPanel
+    AnchorSideLeft.Control = lbPackages
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = lbPackages
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = pnlBottom
+    Left = 149
+    Height = 196
+    Top = 22
+    Width = 446
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    BorderSpacing.Left = 5
+    BorderSpacing.Right = 5
+    BevelOuter = bvNone
+    ClientHeight = 196
+    ClientWidth = 446
+    TabOrder = 2
+    object comboVersions: TComboBox
+      AnchorSideLeft.Control = lblSelectVersion
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = lblInstalledVersion
+      AnchorSideTop.Side = asrBottom
+      Left = 80
+      Height = 21
+      Top = 40
+      Width = 366
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 5
+      BorderSpacing.Right = 5
+      ItemHeight = 15
+      OnChange = comboVersionsChange
+      OnDrawItem = comboVersionsDrawItem
+      ParentShowHint = False
+      ReadOnly = True
+      Style = csOwnerDrawFixed
+      TabOrder = 0
+    end
+    object lblSelectVersion: TLabel
+      AnchorSideLeft.Control = pnlTop
+      AnchorSideTop.Control = comboVersions
+      AnchorSideBottom.Control = comboVersions
+      AnchorSideBottom.Side = asrBottom
+      Left = 0
+      Height = 21
+      Top = 40
+      Width = 75
+      Anchors = [akTop, akLeft, akBottom]
+      Caption = 'Select Version:'
+      Layout = tlCenter
+      ParentColor = False
+    end
+    object memoReleaseNotes: TMemo
+      AnchorSideLeft.Control = pnlTop
+      AnchorSideTop.Control = comboVersions
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = pnlTop
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = pnlTop
+      AnchorSideBottom.Side = asrBottom
+      Left = 0
+      Height = 125
+      Top = 66
+      Width = 446
+      Anchors = [akTop, akLeft, akRight, akBottom]
+      BorderSpacing.Top = 5
+      BorderSpacing.Bottom = 5
+      ReadOnly = True
+      ScrollBars = ssVertical
+      TabOrder = 1
+    end
+    object lblInstalledVersion: TLabel
+      AnchorSideLeft.Control = pnlTop
+      AnchorSideTop.Control = lblLatestVersion
+      AnchorSideTop.Side = asrBottom
+      Left = 0
+      Height = 15
+      Top = 20
+      Width = 88
+      BorderSpacing.Top = 5
+      Caption = 'Installed Version:'
+      ParentColor = False
+    end
+    object lblLatestVersion: TLabel
+      AnchorSideLeft.Control = pnlTop
+      AnchorSideTop.Control = pnlTop
+      Left = 0
+      Height = 15
+      Top = 0
+      Width = 105
+      Caption = 'Latest Version: v1.00'
+      ParentColor = False
+    end
+    object lblUpdate: TLabel
+      AnchorSideLeft.Control = lblLatestVersion
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = lblLatestVersion
+      AnchorSideBottom.Control = lblLatestVersion
+      AnchorSideBottom.Side = asrBottom
+      Left = 108
+      Height = 15
+      Top = 0
+      Width = 39
+      Anchors = [akTop, akLeft, akBottom]
+      BorderSpacing.Left = 3
+      Caption = '(update)'
+      Font.Color = clBlue
+      Font.Height = -11
+      Font.Style = [fsItalic]
+      Layout = tlCenter
+      ParentColor = False
+      ParentFont = False
+      OnClick = lblUpdateClick
+      OnMouseEnter = lblUpdateMouseEnter
+      OnMouseLeave = lblUpdateMouseLeave
+    end
+  end
+  object pnlBottom: TPanel
+    AnchorSideLeft.Control = pnlTop
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = pnlTop
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = btnPanel
+    Left = 149
+    Height = 234
+    Top = 218
+    Width = 446
+    Anchors = [akLeft, akRight, akBottom]
+    BevelOuter = bvNone
+    ClientHeight = 234
+    ClientWidth = 446
+    TabOrder = 3
+    object btnInstall: TButton
+      AnchorSideLeft.Control = pnlBottom
+      AnchorSideTop.Control = optionsGroup
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = pnlBottom
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = pnlBottom
+      AnchorSideBottom.Side = asrBottom
+      Left = 0
+      Height = 28
+      Top = 205
+      Width = 446
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 5
+      Caption = 'Install'
+      OnClick = btnInstallClick
+      TabOrder = 0
+    end
+    object installationDivider: TDividerBevel
+      AnchorSideLeft.Control = pnlBottom
+      AnchorSideTop.Control = pnlBottom
+      AnchorSideRight.Control = pnlBottom
+      AnchorSideRight.Side = asrBottom
+      Left = 0
+      Height = 15
+      Top = 0
+      Width = 446
+      Caption = 'Installation'
+      Anchors = [akTop, akLeft, akRight]
+      BevelWidth = 1
+      ParentFont = False
+    end
+    object optionsGroup: TGroupBox
+      AnchorSideLeft.Control = pnlBottom
+      AnchorSideTop.Control = btnCustomInstall
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = pnlBottom
+      AnchorSideRight.Side = asrBottom
+      Left = 0
+      Height = 132
+      Top = 68
+      Width = 446
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 5
+      Caption = 'Options'
+      ClientHeight = 112
+      ClientWidth = 442
+      TabOrder = 1
+      object lblInstallName: TLabel
+        AnchorSideLeft.Control = optionsGroup
+        AnchorSideTop.Control = editInstallName
+        AnchorSideBottom.Control = editInstallName
+        AnchorSideBottom.Side = asrBottom
+        Left = 5
+        Height = 23
+        Top = 5
+        Width = 35
+        Anchors = [akTop, akLeft, akBottom]
+        BorderSpacing.Left = 5
+        Caption = 'Name:'
+        Layout = tlCenter
+        ParentColor = False
+      end
+      object comboInstallDirectory: TComboBox
+        AnchorSideLeft.Control = lblInstallDiretory
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = editInstallName
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = btnInstallDirectory
+        Left = 58
+        Height = 23
+        Top = 33
+        Width = 335
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Left = 5
+        BorderSpacing.Top = 5
+        BorderSpacing.Right = 5
+        ItemHeight = 15
+        OnChange = InstallationChange
+        TabOrder = 1
+      end
+      object lblInstallDiretory: TLabel
+        AnchorSideLeft.Control = optionsGroup
+        AnchorSideTop.Control = comboInstallDirectory
+        AnchorSideBottom.Control = comboInstallDirectory
+        AnchorSideBottom.Side = asrBottom
+        Left = 5
+        Height = 23
+        Top = 33
+        Width = 48
+        Anchors = [akTop, akLeft, akBottom]
+        BorderSpacing.Left = 5
+        Caption = 'Directory'
+        Layout = tlCenter
+        ParentColor = False
+      end
+      object checkExtractInDirectory: TCheckBox
+        AnchorSideLeft.Control = optionsGroup
+        AnchorSideTop.Control = comboInstallDirectory
+        AnchorSideTop.Side = asrBottom
+        Left = 5
+        Height = 19
+        Top = 61
+        Width = 119
+        BorderSpacing.Left = 5
+        BorderSpacing.Top = 5
+        Caption = 'Extract In Directory'
+        TabOrder = 2
+      end
+      object checkCollapse: TCheckBox
+        AnchorSideLeft.Control = optionsGroup
+        AnchorSideTop.Control = checkExtractInDirectory
+        AnchorSideTop.Side = asrBottom
+        AnchorSideBottom.Control = optionsGroup
+        AnchorSideBottom.Side = asrBottom
+        Left = 5
+        Height = 22
+        Top = 85
+        Width = 68
+        Anchors = [akTop, akLeft, akBottom]
+        BorderSpacing.Left = 5
+        BorderSpacing.Top = 5
+        BorderSpacing.Bottom = 5
+        Caption = 'Collapse '
+        TabOrder = 3
+      end
+      object btnInstallDirectory: TButton
+        AnchorSideLeft.Control = comboInstallDirectory
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = comboInstallDirectory
+        AnchorSideRight.Control = optionsGroup
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = comboInstallDirectory
+        AnchorSideBottom.Side = asrBottom
+        Left = 398
+        Height = 23
+        Top = 33
+        Width = 39
+        Anchors = [akTop, akRight, akBottom]
+        BorderSpacing.Right = 5
+        Caption = '...'
+        OnClick = btnInstallDirectoryClick
+        ParentShowHint = False
+        TabOrder = 4
+      end
+      object editInstallName: TEdit
+        AnchorSideLeft.Control = lblInstallName
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = optionsGroup
+        AnchorSideRight.Control = btnInstallDirectory
+        Left = 45
+        Height = 23
+        Top = 5
+        Width = 348
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Left = 5
+        BorderSpacing.Top = 5
+        BorderSpacing.Right = 5
+        OnChange = InstallationChange
+        TabOrder = 0
+      end
+    end
+    object btnBasicInstall: TRadioButton
+      AnchorSideLeft.Control = pnlBottom
+      AnchorSideTop.Control = installationDivider
+      AnchorSideTop.Side = asrBottom
+      Left = 0
+      Height = 19
+      Top = 20
+      Width = 47
+      BorderSpacing.Top = 5
+      Caption = 'Basic'
+      Checked = True
+      OnChange = InstallationChange
+      TabOrder = 3
+      TabStop = True
+    end
+    object btnCustomInstall: TRadioButton
+      AnchorSideLeft.Control = pnlBottom
+      AnchorSideTop.Control = btnBasicInstall
+      AnchorSideTop.Side = asrBottom
+      Left = 0
+      Height = 19
+      Top = 44
+      Width = 62
+      BorderSpacing.Top = 5
+      Caption = 'Custom'
+      OnChange = InstallationChange
+      TabOrder = 2
+    end
+  end
+  object timerCheckUpdate: TIdleTimer
+    Interval = 900000
+    OnTimer = checkUpdates
+    left = 520
+    top = 8
+  end
+  object selectDirectory: TSelectDirectoryDialog
+    left = 424
+    top = 8
+  end
+end
