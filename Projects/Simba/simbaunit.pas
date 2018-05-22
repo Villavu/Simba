@@ -54,7 +54,7 @@ uses
   v_ideCodeInsight, v_ideCodeParser, CastaliaPasLexTypes, // Code completion units
   CastaliaSimplePasPar, v_AutoCompleteForm,  // Code completion units
 
-  updater,
+  updater, package,
   {$IFDEF USE_SCRIPTMANAGER}SM_Main,{$ENDIF}
   newsimbasettings;
 
