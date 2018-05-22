@@ -134,8 +134,12 @@ var
 implementation
 
 uses
-  LCLType, newsimbasettings, dateutils, MufasaTypes, httpd, Zipper, XMLRead, DOM,
+  LCLType, newsimbasettings, dateutils, MufasaTypes, Zipper, XMLRead, DOM,
   Math, fphttpclient, LazFileUtils, FileUtil, jsonparser;
+
+const
+  HTTP_OK = 200;
+  HTTP_NOT_FOUND = 404;
 
 // pretty neat imo.
 type
