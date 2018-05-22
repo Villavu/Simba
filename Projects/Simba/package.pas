@@ -123,7 +123,7 @@ type
 
     function GetPackage(var Package: TPackageData): Boolean;
   public
-    procedure UpdateStatus(Status: String; Process: Boolean = False);
+    procedure UpdateStatus(Status: String);
 
     constructor Create(AOwner: TComponent; ShowButton: TToolButton); reintroduce;
   end;
@@ -175,7 +175,7 @@ begin
 
   if (not FileExists(S)) or (not SameFile(FileName, S)) then
   begin
-    PackageForm.UpdateStatus('Copying... ' + ExtractFileName(S), True);
+    PackageForm.UpdateStatus('Copying... ' + ExtractFileName(S));
 
     if FileExists(S) and (not DeleteFile(S)) then
       raise Exception.Create('Failed to delete file "' + S + '"');
@@ -284,9 +284,9 @@ begin
   end;
 
   if (FContentLength > 0) then
-    PackageForm.UpdateStatus('Downloading... (' + IntToStr(Round(Position / FContentLength * 100)) + '%)', True)
+    PackageForm.UpdateStatus('Downloading... (' + IntToStr(Round(Position / FContentLength * 100)) + '%)')
   else
-    PackageForm.UpdateStatus('Downloading...', True);
+    PackageForm.UpdateStatus('Downloading...');
 end;
 
 procedure TDownloader.Extracting(Sender: TObject; const FilePath: String);
@@ -308,9 +308,9 @@ begin
     end;
 
   if (Current > 0) and (Total > 0) then
-    PackageForm.UpdateStatus('Extracting...' + IntToStr(Current) + '/' + IntToStr(Total), True)
+    PackageForm.UpdateStatus('Extracting...' + IntToStr(Current) + '/' + IntToStr(Total))
   else
-    PackageForm.UpdateStatus('Extracting...', True);
+    PackageForm.UpdateStatus('Extracting...');
 end;
 
 procedure TDownloader.Redirect(Sender: TObject; const Source: String; var Dest: String);
@@ -336,7 +336,7 @@ function TDownloader.Get: Boolean;
 begin
   Result := False;
 
-  PackageForm.UpdateStatus('Connecting...', True);
+  PackageForm.UpdateStatus('Connecting...');
 
   try
     FClient.HTTPMethod('GET', FURL, FData, [HTTP_OK, HTTP_NOT_FOUND]);
@@ -345,13 +345,13 @@ begin
   except
     on e: Exception do
     begin
-      PackageForm.UpdateStatus('ERROR downloading: ' + e.ClassName + '::' + e.Message, True);
+      PackageForm.UpdateStatus('ERROR downloading: ' + e.ClassName + '::' + e.Message);
 
       Exit(False);
     end;
   end;
 
-  PackageForm.UpdateStatus('', True);
+  PackageForm.UpdateStatus('');
 end;
 
 function TDownloader.Extract(Path: String; Collapse: Boolean; Blacklist: TStringList): Boolean;
@@ -1079,11 +1079,11 @@ begin
   Exit(False);
 end;
 
-procedure TPackageForm.UpdateStatus(Status: String; Process: Boolean);
+procedure TPackageForm.UpdateStatus(Status: String);
 begin
   lblStatus.Caption := Status;
-  if Process then
-    Application.ProcessMessages();
+
+  Application.ProcessMessages();
 end;
 
 constructor TPackageForm.Create(AOwner: TComponent; ShowButton: TToolButton);
@@ -1099,7 +1099,6 @@ begin
   FShowButtonImage := ShowButton.ImageIndex;
 
   lbPackages.Font.Size := 10;
-  lbPackages.ItemHeight := 20;
   with lbPackages.Items as TStringList do
     OwnsObjects := True;
 
