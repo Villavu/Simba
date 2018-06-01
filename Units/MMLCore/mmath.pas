@@ -61,6 +61,7 @@ function IntInBox(x, y: Integer; Box: TBox): Boolean;
 function PointToBox(topLeft,bottomRight: TPoint): TBox;
 function PointInBox(PT : TPoint; Box: TBox): Boolean;
 function DecRet(e: Extended): Extended;
+function DeltaAngle(DegA, DegB: Double): Double;
 
 implementation
 uses
@@ -383,6 +384,13 @@ end;
 function DecRet(e: Extended): Extended;
 begin
   result := e - Trunc(e);
+end;
+
+function DeltaAngle(DegA, DegB: Double): Double;
+begin
+  Result := DegA - DegB;
+  while Result < -50 do Result += 100;
+  while Result > 50  do Result -= 100;
 end;
 
 
