@@ -1,0 +1,516 @@
+object ACAForm: TACAForm
+  Left = -1092
+  Height = 650
+  Top = 237
+  Width = 950
+  Caption = 'ACAForm'
+  ClientHeight = 630
+  ClientWidth = 950
+  Font.Height = -12
+  Menu = MainMenu
+  OnClose = FormClose
+  Position = poScreenCenter
+  ShowHint = True
+  LCLVersion = '1.8.2.0'
+  object pnlMain: TPanel
+    Left = 0
+    Height = 630
+    Top = 0
+    Width = 683
+    Align = alClient
+    BevelOuter = bvNone
+    ClientHeight = 630
+    ClientWidth = 683
+    TabOrder = 0
+    object StatusBar: TStatusBar
+      Left = 0
+      Height = 23
+      Top = 607
+      Width = 683
+      Panels = <      
+        item
+          Width = 85
+        end      
+        item
+          Width = 85
+        end      
+        item
+          Width = 1000
+        end>
+      SimplePanel = False
+    end
+    object ScrollBox: TScrollBox
+      Left = 0
+      Height = 607
+      Top = 0
+      Width = 683
+      HorzScrollBar.Page = 454
+      HorzScrollBar.Tracking = True
+      VertScrollBar.Page = 387
+      VertScrollBar.Tracking = True
+      Align = alClient
+      BorderStyle = bsNone
+      ClientHeight = 607
+      ClientWidth = 683
+      TabOrder = 1
+      OnResize = ClientImageCenter
+      object imgClient: TImage
+        Left = 364
+        Height = 90
+        Top = 297
+        Width = 90
+        OnMouseDown = ClientImageMouseDown
+        OnMouseLeave = ClientImageMouseLeave
+        OnMouseMove = ClientImageMouseMove
+        OnMouseUp = ClientImageMouseUp
+        OnMouseWheelDown = ClientImageScrollDown
+        OnMouseWheelUp = ClientImageScrollUp
+        Stretch = True
+      end
+    end
+  end
+  object pnlRight: TPanel
+    Left = 683
+    Height = 630
+    Top = 0
+    Width = 267
+    Align = alRight
+    Anchors = [akTop, akRight]
+    BevelInner = bvLowered
+    BevelOuter = bvNone
+    ClientHeight = 630
+    ClientWidth = 267
+    TabOrder = 1
+    object pnlZoom: TPanel
+      AnchorSideLeft.Control = pnlRight
+      AnchorSideTop.Control = pnlRight
+      Left = 6
+      Height = 102
+      Top = 6
+      Width = 102
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 5
+      BevelOuter = bvNone
+      Caption = 'pnlZoom'
+      ClientHeight = 102
+      ClientWidth = 102
+      Color = clBlack
+      ParentColor = False
+      TabOrder = 0
+      object imgMouseZoom: TImage
+        Left = 1
+        Height = 100
+        Top = 1
+        Width = 100
+        Align = alClient
+        BorderSpacing.Around = 1
+        OnPaint = MouseZoomPaint
+        Stretch = True
+      end
+    end
+    object lblMouseZoom: TLabel
+      AnchorSideLeft.Control = pnlZoom
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = pnlZoom
+      AnchorSideRight.Control = pnlRight
+      AnchorSideRight.Side = asrBottom
+      Left = 113
+      Height = 1
+      Top = 5
+      Width = 148
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = -1
+      BorderSpacing.Right = 5
+      ParentColor = False
+      ParentFont = False
+      WordWrap = True
+    end
+    object listColors: TColorListBox
+      AnchorSideLeft.Control = pnlRight
+      AnchorSideTop.Control = pnlZoom
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = pnlRight
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = Divider1
+      Left = 6
+      Height = 354
+      Top = 113
+      Width = 255
+      Style = []
+      Align = alCustom
+      Anchors = [akTop, akLeft, akRight, akBottom]
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 5
+      BorderSpacing.Right = 5
+      ItemHeight = 0
+      OnSelectionChange = SelectColor
+      PopupMenu = PopupColors
+      TabOrder = 1
+    end
+    object Divider1: TDividerBevel
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = pnlRight
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = editColor
+      Left = 6
+      Height = 17
+      Top = 472
+      Width = 255
+      Caption = 'Best Color'
+      Anchors = [akLeft, akRight, akBottom]
+      BevelStyle = bsRaised
+      BorderSpacing.Top = 5
+      BorderSpacing.Right = 5
+      BorderSpacing.Bottom = 5
+      CaptionSpacing = 15
+      Font.Height = -13
+      LeftIndent = 82
+      ParentFont = False
+      Style = gsHorLines
+    end
+    object lblColor: TLabel
+      AnchorSideTop.Control = editColor
+      AnchorSideBottom.Control = editColor
+      AnchorSideBottom.Side = asrBottom
+      Left = 8
+      Height = 23
+      Top = 496
+      Width = 29
+      Anchors = [akTop, akLeft, akBottom]
+      Caption = 'Color'
+      Layout = tlCenter
+      ParentColor = False
+    end
+    object lblTolerance: TLabel
+      AnchorSideTop.Control = editTolerance
+      AnchorSideBottom.Control = editTolerance
+      AnchorSideBottom.Side = asrBottom
+      Left = 8
+      Height = 23
+      Top = 524
+      Width = 51
+      Anchors = [akTop, akLeft, akBottom]
+      Caption = 'Tolerance'
+      Layout = tlCenter
+      ParentColor = False
+    end
+    object lblHue: TLabel
+      AnchorSideTop.Control = editHue
+      AnchorSideRight.Control = editHue
+      AnchorSideBottom.Control = editHue
+      AnchorSideBottom.Side = asrBottom
+      Left = 156
+      Height = 23
+      Top = 496
+      Width = 22
+      Anchors = [akTop, akRight, akBottom]
+      BorderSpacing.Right = 5
+      Caption = 'Hue'
+      Layout = tlCenter
+      ParentColor = False
+    end
+    object lblSat: TLabel
+      AnchorSideLeft.Control = lblHue
+      AnchorSideTop.Control = editSat
+      AnchorSideRight.Control = editSat
+      AnchorSideBottom.Control = editSat
+      AnchorSideBottom.Side = asrBottom
+      Left = 156
+      Height = 23
+      Top = 524
+      Width = 22
+      Anchors = [akTop, akLeft, akRight, akBottom]
+      BorderSpacing.Right = 5
+      Caption = 'Sat'
+      Layout = tlCenter
+      ParentColor = False
+    end
+    object editColor: TEdit
+      AnchorSideLeft.Control = editTolerance
+      AnchorSideTop.Side = asrBottom
+      AnchorSideBottom.Control = editTolerance
+      Left = 64
+      Height = 23
+      Top = 496
+      Width = 78
+      Anchors = [akLeft, akBottom]
+      BorderSpacing.Top = 7
+      TabOrder = 2
+    end
+    object editTolerance: TEdit
+      AnchorSideLeft.Control = lblTolerance
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Side = asrBottom
+      AnchorSideBottom.Control = btnFindBestColor
+      Left = 64
+      Height = 23
+      Top = 524
+      Width = 78
+      Anchors = [akLeft, akBottom]
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 5
+      BorderSpacing.Bottom = 8
+      TabOrder = 3
+    end
+    object editHue: TEdit
+      AnchorSideLeft.Control = lblHue
+      AnchorSideTop.Control = editColor
+      AnchorSideRight.Control = pnlRight
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = editColor
+      AnchorSideBottom.Side = asrBottom
+      Left = 183
+      Height = 23
+      Top = 496
+      Width = 78
+      Anchors = [akTop, akRight, akBottom]
+      BorderSpacing.Right = 5
+      TabOrder = 4
+    end
+    object editSat: TEdit
+      AnchorSideLeft.Control = editHue
+      AnchorSideTop.Control = editTolerance
+      AnchorSideRight.Control = pnlRight
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = editTolerance
+      AnchorSideBottom.Side = asrBottom
+      Left = 183
+      Height = 23
+      Top = 524
+      Width = 78
+      Anchors = [akTop, akLeft, akRight, akBottom]
+      BorderSpacing.Right = 5
+      TabOrder = 5
+    end
+    object Divider2: TDividerBevel
+      AnchorSideLeft.Control = pnlRight
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = pnlRight
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = btnUpdateImage
+      Left = 6
+      Height = 17
+      Top = 581
+      Width = 255
+      Anchors = [akLeft, akRight, akBottom]
+      BevelStyle = bsRaised
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 1
+      BorderSpacing.Right = 5
+      BorderSpacing.Bottom = 1
+      CaptionSpacing = 15
+      Font.Height = -13
+      Font.Style = [fsBold]
+      LeftIndent = 80
+      ParentFont = False
+      Style = gsHorLines
+    end
+    object btnClearImage: TButton
+      AnchorSideLeft.Control = pnlRight
+      AnchorSideTop.Control = btnUpdateImage
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = pnlRight
+      AnchorSideBottom.Side = asrBottom
+      Left = 6
+      Height = 25
+      Hint = 'Clear all drawing from the image'
+      Top = 599
+      Width = 128
+      Anchors = [akTop, akLeft, akRight, akBottom]
+      AutoSize = True
+      BorderSpacing.Left = 5
+      BorderSpacing.Bottom = 5
+      Caption = 'Clear Image'
+      OnClick = ClientImageClear
+      TabOrder = 6
+    end
+    object btnUpdateImage: TButton
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = pnlRight
+      AnchorSideBottom.Side = asrBottom
+      Left = 144
+      Height = 25
+      Hint = 'Updates the image from the client'
+      Top = 599
+      Width = 117
+      Anchors = [akLeft, akRight, akBottom]
+      AutoSize = True
+      BorderSpacing.Bottom = 5
+      Caption = 'Update Image'
+      OnClick = ClientImageUpdate
+      TabOrder = 7
+    end
+    object btnFindBestColor: TButton
+      AnchorSideLeft.Control = btnCTS2
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideRight.Control = pnlRight
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = Divider2
+      Left = 171
+      Height = 25
+      Hint = 'Displays best color matches'
+      Top = 555
+      Width = 90
+      Anchors = [akLeft, akRight, akBottom]
+      AutoSize = True
+      BorderSpacing.Left = 5
+      BorderSpacing.Right = 5
+      Caption = 'Find Color'
+      OnClick = FindBestColorClick
+      TabOrder = 8
+    end
+    object btnCTS2: TButton
+      Tag = 2
+      AnchorSideLeft.Control = btnCTS1
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = btnCTS0
+      AnchorSideBottom.Control = btnFindBestColor
+      AnchorSideBottom.Side = asrBottom
+      Left = 116
+      Height = 25
+      Hint = 'Calculate the best color using CTS 2'
+      Top = 555
+      Width = 50
+      Anchors = [akTop, akLeft, akBottom]
+      BorderSpacing.Left = 5
+      Caption = 'CTS 2'
+      OnClick = CalculateBestColor
+      TabOrder = 9
+    end
+    object btnCTS1: TButton
+      Tag = 1
+      AnchorSideLeft.Control = btnCTS0
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = btnCTS0
+      AnchorSideBottom.Control = btnFindBestColor
+      AnchorSideBottom.Side = asrBottom
+      Left = 61
+      Height = 25
+      Hint = 'Calculate the best color using CTS 1'
+      Top = 555
+      Width = 50
+      Anchors = [akTop, akLeft, akBottom]
+      BorderSpacing.Left = 5
+      Caption = 'CTS 1'
+      OnClick = CalculateBestColor
+      TabOrder = 10
+    end
+    object btnCTS0: TButton
+      AnchorSideLeft.Control = pnlRight
+      AnchorSideBottom.Control = btnFindBestColor
+      AnchorSideBottom.Side = asrBottom
+      Left = 6
+      Height = 25
+      Hint = 'Calculate the best color using CTS 0'
+      Top = 555
+      Width = 50
+      Anchors = [akLeft, akBottom]
+      BorderSpacing.Left = 5
+      Caption = 'CTS 0'
+      OnClick = CalculateBestColor
+      TabOrder = 11
+    end
+  end
+  object MainMenu: TMainMenu
+    left = 32
+    top = 16
+    object menuFile: TMenuItem
+      Caption = 'File'
+      object menuLoad: TMenuItem
+        Caption = 'Load Colors'
+        OnClick = LoadColors
+      end
+      object menuSave: TMenuItem
+        Caption = 'Save Colors'
+        OnClick = SaveColors
+      end
+    end
+    object menuImage: TMenuItem
+      Caption = 'Image'
+      object menuUpdate: TMenuItem
+        Caption = 'Update'
+        ShortCut = 116
+        OnClick = ClientImageUpdate
+      end
+      object menuClear: TMenuItem
+        Caption = 'Clear'
+        OnClick = ClientImageClear
+      end
+      object menuSeperator: TMenuItem
+        Caption = '-'
+      end
+      object menuDrawColor: TMenuItem
+        Caption = 'Draw Color'
+        object menuColorRed: TMenuItem
+          AutoCheck = True
+          Caption = 'Red'
+          Checked = True
+          ShowAlwaysCheckable = True
+          OnClick = ChangeDrawColor
+        end
+        object menuColorGreen: TMenuItem
+          AutoCheck = True
+          Caption = 'Green'
+          ShowAlwaysCheckable = True
+          OnClick = ChangeDrawColor
+        end
+        object menuColorBlue: TMenuItem
+          AutoCheck = True
+          Caption = 'Blue'
+          ShowAlwaysCheckable = True
+          OnClick = ChangeDrawColor
+        end
+        object menuColorYellow: TMenuItem
+          AutoCheck = True
+          Caption = 'Yellow'
+          ShowAlwaysCheckable = True
+          OnClick = ChangeDrawColor
+        end
+      end
+    end
+    object menuColors: TMenuItem
+      Caption = 'Colors'
+      object menuColorAdd: TMenuItem
+        Caption = 'Add Color'
+        OnClick = AddColor
+      end
+      object menuColorDelete: TMenuItem
+        Caption = 'Delete Color'
+        OnClick = DeleteColor
+      end
+      object menuColorClear: TMenuItem
+        Caption = 'Clear Colors'
+        OnClick = ClearColors
+      end
+    end
+  end
+  object PopupColors: TPopupMenu
+    left = 112
+    top = 16
+    object popupColorAdd: TMenuItem
+      Caption = 'Add'
+      OnClick = AddColor
+    end
+    object popupColorDelete: TMenuItem
+      Caption = 'Delete'
+      OnClick = DeleteColor
+    end
+    object popupColorClear: TMenuItem
+      Caption = 'Clear'
+      OnClick = ClearColors
+    end
+  end
+  object SaveDialog: TSaveDialog
+    Title = 'Save Colors'
+    DefaultExt = '.aca'
+    Options = [ofEnableSizing]
+    left = 192
+    top = 16
+  end
+  object OpenDialog: TOpenDialog
+    Title = 'Load Colors'
+    left = 272
+    top = 16
+  end
+end

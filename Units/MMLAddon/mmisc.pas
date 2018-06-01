@@ -40,6 +40,8 @@ function UnTar(const Input : TStream;const outputdir : string; overwrite : boole
 procedure ConvertTime(Time : integer; var h,m,s : integer);
 procedure ConvertTime64(time: int64; var y, m, w, d, h, min, s: integer);
 
+function MarkTime: Double;
+
 type
   { TProcThread }
   TProcThread = class(TThread)
@@ -98,7 +100,8 @@ type
 implementation
 
 uses
-  FileUtil, internets;
+  FileUtil, Internets,
+  {$IFDEF WINDOWS} Windows {$ELSE} BaseUnix, Unix {$ENDIF};
 
 function DecompressBZip2(const input: TStream; const BlockSize: Cardinal): TMemoryStream;
 var
@@ -321,6 +324,26 @@ begin
   x := x mod (60000);
   s := x div (1000); // 1000 (1 second)
   x := x mod (1000);
+end;
+
+function MarkTime: Double;
+var
+  Frequency, Count: Int64;
+  {$IFDEF UNIX}
+  TV: TTimeVal;
+  TZ: PTimeZone;
+  {$ENDIF}
+begin
+  {$IFDEF WINDOWS}
+  QueryPerformanceFrequency(Frequency);
+  QueryPerformanceCounter(Count);
+  Result := Count / Frequency * 1000;
+  {$ELSE}
+  TZ := nil;
+  fpGetTimeOfDay(@TV, TZ);
+  Count := Int64(TV.tv_sec) * 1000000 + Int64(TV.tv_usec);
+  Result := Count / 1000;
+  {$ENDIF}
 end;
 
 end.
