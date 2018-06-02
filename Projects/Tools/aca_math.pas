@@ -117,6 +117,13 @@ procedure BestColor_CTS2(Colors: TIntegerArray; out Color, Tolerance: Int32; out
 type
   THSLCylinder = record H1, S1, L1, H2, S2, L2: Extended; end;
 
+  function DeltaHue(DegA, DegB: Double): Double;
+  begin
+    Result := DegA - DegB;
+    while Result < -50 do Result += 100;
+    while Result > 50  do Result -= 100;
+  end;
+
   function HSLCylinder(H1, S1, L1, H2, S2, L2: Extended): THSLCylinder; overload;
   begin
     Result.H1 := H1;
@@ -150,7 +157,7 @@ type
       for j := i + 1 to High(Colors) do
       begin
         ColorToHSL(Colors[j], H2, S2, L2);
-        Delta := Abs(DeltaAngle(H1, H2));
+        Delta := Abs(DeltaHue(H1, H2));
         if (Delta > MaxDelta) then
         begin
           Result.H1 := H1;
@@ -179,11 +186,11 @@ type
     for i := 0 to High(Colors) do
     begin
       Tol := Ceil(
-        Max(Abs(DeltaAngle(Result, H1)), Abs(DeltaAngle(Result, H2)))
+        Max(Abs(DeltaHue(Result, H1)), Abs(DeltaHue(Result, H2)))
       );
       ColorToHSL(Colors[i], H, S, L);
-      if DeltaAngle(H, Result) > +Tol then H2 := H;
-      if DeltaAngle(H, Result) < -Tol then H1 := H;
+      if DeltaHue(H, Result) > +Tol then H2 := H;
+      if DeltaHue(H, Result) < -Tol then H1 := H;
     end;
   end;
 
@@ -202,7 +209,7 @@ begin
 
   Tol := Max(1, Max(Abs(L - Cylinder.L2), Abs(L - Cylinder.L1)) + 0.1e-10);
   Sat := Max(Abs(S - Cylinder.S2), Abs(S - Cylinder.S1)) / Tol;
-  Hue := Max(Abs(DeltaAngle(H, Cylinder.H2)), Abs(DeltaAngle(H, Cylinder.H1))) / Tol;
+  Hue := Max(Abs(DeltaHue(H, Cylinder.H2)), Abs(DeltaHue(H, Cylinder.H1))) / Tol;
 
   Tolerance := Ceil(Tol);
   Hue := Hue + 0.1e-10;
