@@ -346,12 +346,12 @@ type
 
 procedure TACA.GetACAResult(CTS, Color, Tolerance: Int32; Hue, Sat: Extended);
 begin
-  PInt32(Params^[1])^ := CTS;
-  PInt32(Params^[2])^ := Color;
-  PInt32(Params^[3])^ := Tolerance;
+  PInt32(Params^[2])^ := CTS;
+  PInt32(Params^[3])^ := Color;
+  PInt32(Params^[4])^ := Tolerance;
 
-  PExtended(Params^[4])^ := Hue;
-  PExtended(Params^[5])^ := Sat;
+  PExtended(Params^[5])^ := Hue;
+  PExtended(Params^[6])^ := Sat;
 end;
 
 procedure TACA.Execute;
@@ -359,7 +359,7 @@ begin
   with TACAForm.Create(TMMLScriptThread(Params^[0]).Client.IOManager) do
   begin
     OnGetResult := @GetACAResult;
-
+    Caption := 'ACA - ' + PString(Params^[1])^;
     ShowModal();
   end;
 end;
@@ -444,8 +444,8 @@ begin
     addGlobalMethod('procedure DrawBitmapDebugImg(BMP: Int32);', @Lape_DrawBitmapDebugImg, Data);
     addGlobalMethod('function GetDebugBitmap: Int32;', @Lape_GetDebugBitmap, Data);
     addGlobalMethod('procedure ClearDebugImg;', @Lape_ClearDebugImg, Data);
-    addGlobalMethod('procedure ACA(out CTS, Color, Tolerance: Int32; out Hue, Sat: Extended); overload;', @Lape_ACA, Data);
-    addGlobalMethod('procedure ACA(Colors: TIntegerArray; CTS: Int32; out Color, Tolerance: Int32; out Hue, Sat: Extended); overload;', @Lape_ACAEx, Data);
+    addGlobalMethod('procedure ACAGUI(Title: String; out CTS, Color, Tolerance: Int32; out Hue, Sat: Extended);', @Lape_ACA, Data);
+    addGlobalMethod('procedure ACA(Colors: TIntegerArray; CTS: Int32; out Color, Tolerance: Int32; out Hue, Sat: Extended);', @Lape_ACAEx, Data);
     addGlobalMethod('procedure Sync(Method: TSyncMethod);', @Lape_Sync, Data);
   end;
 end;
