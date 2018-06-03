@@ -11,7 +11,7 @@ implementation
 
 uses
   script_imports, script_thread, lpcompiler, lptypes, ffi, mufasatypes, simbaunit, debugimage,
-  Dialogs, ExtCtrls, Forms, Controls;
+  Dialogs, ExtCtrls, Forms, Controls, aca, aca_math;
 
 type
   TBalloonHint = class
@@ -336,6 +336,55 @@ begin
   Sync.Free();
 end;
 
+type
+  TACA = class
+    Params: PParamArray;
+
+    procedure GetACAResult(CTS, Color, Tolerance: Int32; Hue, Sat: Extended);
+    procedure Execute;
+  end;
+
+procedure TACA.GetACAResult(CTS, Color, Tolerance: Int32; Hue, Sat: Extended);
+begin
+  PInt32(Params^[2])^ := CTS;
+  PInt32(Params^[3])^ := Color;
+  PInt32(Params^[4])^ := Tolerance;
+
+  PExtended(Params^[5])^ := Hue;
+  PExtended(Params^[6])^ := Sat;
+end;
+
+procedure TACA.Execute;
+begin
+  with TACAForm.Create(TMMLScriptThread(Params^[0]).Client.IOManager) do
+  begin
+    OnGetResult := @GetACAResult;
+    Caption := 'ACA - ' + PString(Params^[1])^;
+    ShowModal();
+  end;
+end;
+
+procedure Lape_ACA(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+var
+  ACA: TACA;
+begin
+  ACA := TACA.Create();
+  ACA.Params := Params;
+
+  TThread.Synchronize(nil, @ACA.Execute);
+
+  ACA.Free();
+end;
+
+procedure Lape_ACAEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  case PInt32(Params^[2])^ of
+    0: BestColor_CTS0(PIntegerArray(Params^[1])^, PInt32(Params^[3])^, PInt32(Params^[4])^);
+    1: BestColor_CTS1(PIntegerArray(Params^[1])^, PInt32(Params^[3])^, PInt32(Params^[4])^);
+    2: BestColor_CTS2(PIntegerArray(Params^[1])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PExtended(Params^[5])^, PExtended(Params^[6])^);
+  end;
+end;
+
 procedure Lape_Import_Simba(Compiler: TLapeCompiler; Data: Pointer);
 var
   AppPath: String = '';
@@ -395,6 +444,8 @@ begin
     addGlobalMethod('procedure DrawBitmapDebugImg(BMP: Int32);', @Lape_DrawBitmapDebugImg, Data);
     addGlobalMethod('function GetDebugBitmap: Int32;', @Lape_GetDebugBitmap, Data);
     addGlobalMethod('procedure ClearDebugImg;', @Lape_ClearDebugImg, Data);
+    addGlobalMethod('procedure ACAGUI(Title: String; out CTS, Color, Tolerance: Int32; out Hue, Sat: Extended);', @Lape_ACA, Data);
+    addGlobalMethod('procedure ACA(Colors: TIntegerArray; CTS: Int32; out Color, Tolerance: Int32; out Hue, Sat: Extended);', @Lape_ACAEx, Data);
     addGlobalMethod('procedure Sync(Method: TSyncMethod);', @Lape_Sync, Data);
   end;
 end;

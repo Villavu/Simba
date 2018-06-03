@@ -327,7 +327,7 @@ const
 var
   T: UInt64;
 begin
-  pthread_detach(pthread_self());
+  pthread_detach(Handle);
 
   if (pthread_cancel(Handle) = 0) then
   begin
