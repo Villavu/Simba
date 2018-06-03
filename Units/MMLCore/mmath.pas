@@ -385,6 +385,5 @@ begin
   result := e - Trunc(e);
 end;
 
-
 end.
 

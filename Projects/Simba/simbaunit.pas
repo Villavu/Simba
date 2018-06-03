@@ -136,6 +136,7 @@ type
     LabeledEditSearch: TLabeledEdit;
     MainMenu: TMainMenu;
     DebugMemo: TMemo;
+    MenuItemACA: TMenuItem;
     MenuItemFindPrev: TMenuItem;
     MenuItemFont: TMenuItem;
     MenuItemDivider51: TMenuItem;
@@ -145,14 +146,11 @@ type
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
     MenuDivider7: TMenuItem;
-    MenuInterpreters: TMenuItem;
     MenuItemFormDesigner: TMenuItem;
     MenuItemSettingsSimpleButton: TMenuItem;
-    MenuItemLape: TMenuItem;
     MenuItemReadOnlyTab: TMenuItem;
     MenuItemGoto: TMenuItem;
     MenuItemDivider50: TMenuItem;
-    MenuItemPascalScript: TMenuItem;
     MenuItemOpenPluginsFolder: TMenuItem;
     MenuItemOpenIncludesFolder: TMenuItem;
     MenuItemOpenScriptsFolder: TMenuItem;
@@ -392,6 +390,7 @@ type
     procedure ScriptPanelDockOver(Sender: TObject; Source: TDragDockObject; X,
       Y: Integer; State: TDragState; var Accept: Boolean);
     procedure ScriptPopupPopup(Sender: TObject);
+    procedure ShowACA(Sender: TObject);
     procedure SpeedButtonSearchClick(Sender: TObject);
     procedure SplitterFunctionListCanResize(Sender: TObject; var NewSize: Integer;
       var Accept: Boolean);
@@ -558,7 +557,8 @@ uses
    colourhistory,
    math,
    script_imports, script_plugins,
-   openssl
+   openssl,
+   aca
    {$IFDEF USE_FORMDESIGNER}, frmdesigner{$ENDIF}
 
    {$IFDEF LINUX_HOTKEYS}, keybinder{$ENDIF}
@@ -943,6 +943,11 @@ end;
 procedure TSimbaForm.ScriptPopupPopup(Sender: TObject);
 begin
   SetEditActions;
+end;
+
+procedure TSimbaForm.ShowACA(Sender: TObject);
+begin
+  TACAForm.Create(Manager).Show();
 end;
 
 procedure TSimbaForm.SpeedButtonSearchClick(Sender: TObject);
@@ -2519,7 +2524,7 @@ begin
   {$IFDEF WINDOWS}
   if (not FileExists(AppPath + 'libeay32.dll')) or (not FileExists(AppPath + 'ssleay32.dll')) then
   begin
-    WriteLn('SSL libs not present, adding...');
+    WriteLn('SSL libs not present, extracting...');
 
     {$IFDEF CPU32}
       {$i openssl32.lrs}
@@ -2590,7 +2595,7 @@ begin
   FillThread := TProcThread.Create;
   FillThread.ClassProc := @InitializeCoreBuffer;
   FillThread.Start();
-  FillThread.OnTerminate:= @FillFunctionListForce;
+  FillThread.OnTerminate := @FillFunctionListForce;
 
   UpdateTimer.OnTimer := @UpdateTimerCheck;
 
