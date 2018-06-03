@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, DividerBevel, LResources, Forms, Controls,
   Graphics, Dialogs, ExtCtrls, ComCtrls, StdCtrls, Menus, ColorBox,
-  Types, client, mufasatypes, GraphType, Buttons,
+  Types, client, mufasatypes, GraphType, Buttons, clipbrd,
   {$IFDEF WINDOWS} os_windows {$ELSE} os_linux {$ENDIF};
 
 type
@@ -41,7 +41,10 @@ type
     menuColorDelete: TMenuItem;
     menuColorClear: TMenuItem;
     menuFile: TMenuItem;
-    menuLoad: TMenuItem;
+    menuNew: TMenuItem;
+    menuSeperator2: TMenuItem;
+    menuCopyBestColor: TMenuItem;
+    menuOpen: TMenuItem;
     menuSave: TMenuItem;
     OpenDialog: TOpenDialog;
     popupColorClear: TMenuItem;
@@ -49,7 +52,7 @@ type
     popupColorAdd: TMenuItem;
     menuUpdate: TMenuItem;
     menuClear: TMenuItem;
-    menuSeperator: TMenuItem;
+    menuSeperator1: TMenuItem;
     menuDrawColor: TMenuItem;
     menuColorRed: TMenuItem;
     menuColorGreen: TMenuItem;
@@ -69,6 +72,7 @@ type
     procedure DeleteColor(Sender: TObject);
     procedure FindBestColorClick(Sender: TObject);
     procedure LoadColors(Sender: TObject);
+    procedure menuCopyBestColorClick(Sender: TObject);
     procedure MouseZoomPaint(Sender: TObject);
     procedure SaveColors(Sender: TObject);
     procedure SelectColor(Sender: TObject; User: Boolean);
@@ -99,13 +103,14 @@ type
     FDrawColor: TColor;
     FCTS: PtrInt;
 
+    function GetColors: TIntegerArray;
+
     procedure Status(S: String);
     procedure Coords(X, Y: Int32);
     procedure Dimensions(W, H: Int32);
 
     procedure DrawTPA(TPA: TPointArray);
     procedure FindColor(Col, Tolerance: Int32; Hue, Sat: Extended);
-    function GetColors: TIntegerArray;
     procedure ApplyZoom(Reset: Boolean = False);
   public
     OnGetResult: TACAResult;
@@ -500,6 +505,15 @@ begin
   end;
 end;
 
+procedure TACAForm.menuCopyBestColorClick(Sender: TObject);
+begin
+  case FCTS of
+    0: Clipboard.AsText := Format('CTS0(%s, %s)', [editColor.Text, editTolerance.Text]);
+    1: Clipboard.AsText := Format('CTS1(%s, %s)', [editColor.Text, editTolerance.Text]);
+    2: Clipboard.AsText := Format('CTS2(%s, %s, %s, %s)', [editColor.Text, editTolerance.Text, editHue.Text, editSat.Text]);
+  end;
+end;
+
 procedure TACAForm.CalculateBestColor(Sender: TObject);
 var
   Col, Tolerance: Int32;
@@ -545,6 +559,11 @@ end;
 procedure TACAForm.ClearColors(Sender: TObject);
 begin
   listColors.Items.Clear();
+
+  editColor.Text := '';
+  editTolerance.Text := '';
+  editHue.Text := '';
+  editSat.Text := '';
 end;
 
 procedure TACAForm.DeleteColor(Sender: TObject);
