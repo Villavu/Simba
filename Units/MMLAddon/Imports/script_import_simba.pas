@@ -337,6 +337,33 @@ begin
 end;
 
 type
+  TSyncEx = class
+    Params: PParamArray;
+
+    procedure Execute;
+  end;
+
+procedure TSyncEx.Execute;
+type
+  TSyncProcedure = procedure of object; {$IF DEFINED(CPU32) and DEFINED(LAPE_CDECL)}cdecl;{$ENDIF}
+begin
+  TSyncProcedure(Params^[1]^)();
+end;
+
+// procedure Sync(Method: procedure);
+procedure Lape_SyncEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+var
+  Sync: TSyncEx;
+begin
+  Sync := TSyncEx.Create();
+  Sync.Params := Params;
+
+  TThread.Synchronize(nil, @Sync.Execute);
+
+  Sync.Free();
+end;
+
+type
   TACA = class
     Params: PParamArray;
 
@@ -429,8 +456,10 @@ begin
 
     {$IF DEFINED(CPU32) and DEFINED(LAPE_CDECL)}
     addGlobalType('procedure();', 'TSyncMethod', FFI_CDECL);
+    addGlobalType('procedure() of object;', 'TSyncObjectMethod', FFI_CDECL);
     {$ELSE}
     addGlobalType('procedure();', 'TSyncMethod', FFI_DEFAULT_ABI);
+    addGlobalType('procedure() of object;', 'TSyncObjectMethod', FFI_DEFAULT_ABI);
     {$ENDIF}
 
     addGlobalMethod('procedure ShowBalloonHint(const Title, Hint: String; const Timeout: Int32; const Flag: TBalloonFlags);', @Lape_ShowBalloonHint, Data);
@@ -446,7 +475,8 @@ begin
     addGlobalMethod('procedure ClearDebugImg;', @Lape_ClearDebugImg, Data);
     addGlobalMethod('procedure ACAGUI(Title: String; out CTS, Color, Tolerance: Int32; out Hue, Sat: Extended);', @Lape_ACA, Data);
     addGlobalMethod('procedure ACA(Colors: TIntegerArray; CTS: Int32; out Color, Tolerance: Int32; out Hue, Sat: Extended);', @Lape_ACAEx, Data);
-    addGlobalMethod('procedure Sync(Method: TSyncMethod);', @Lape_Sync, Data);
+    addGlobalMethod('procedure Sync(Method: TSyncMethod); overload;', @Lape_Sync, Data);
+    addGlobalMethod('procedure Sync(Method: TSyncObjectMethod); overload;', @Lape_SyncEx, Data);
   end;
 end;
 

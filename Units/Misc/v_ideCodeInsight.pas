@@ -42,6 +42,9 @@ type
     Proposal_ItemList: TStrings;
     Proposal_InsertList: TStrings;
 
+    function GetIncludesHash: UInt32;
+    function GetLibrary: Boolean;
+
     procedure SetPos(APos: Integer);
 
     procedure Reset;
@@ -86,6 +89,8 @@ type
     property Position: Integer read fPos write SetPos;
     property DeclarationAtPos: TDeclaration read fDeclarationAtPos;
     property Includes: TCodeInsightArray read fIncludes;
+    property IncludesHash: UInt32 read GetIncludesHash;
+    property IsLibrary: Boolean read GetLibrary;
   end;
 
   TIncludeBuffer = record
@@ -384,6 +389,22 @@ begin
   end;
 
   inherited;
+end;
+
+function TCodeInsight.GetLibrary: Boolean;
+begin
+  Result := Copy(fFileName, 1, 4) = 'lib:';
+end;
+
+function TCodeInsight.GetIncludesHash: UInt32;
+var
+  i: Int32;
+  Files: String = '';
+begin
+  for i := 0 to High(fIncludes) do
+    Files := Files + fIncludes[i].FileName;
+
+  Result := Hash(Files);
 end;
 
 procedure TCodeInsight.SetPos(APos: Integer);

@@ -1,56 +1,40 @@
-object FunctionListFrame: TFunctionListFrame
+object FunctionList_Frame: TFunctionList_Frame
   Left = 0
   Height = 528
   Top = 0
-  Width = 209
+  Width = 225
   Align = alLeft
   ClientHeight = 528
-  ClientWidth = 209
+  ClientWidth = 225
   LCLVersion = '1.8.2.0'
   OnEndDock = FrameEndDock
   ParentFont = False
   TabOrder = 0
-  DesignLeft = 434
-  DesignTop = 200
-  object FunctionList: TTreeView
-    Left = 0
-    Height = 483
-    Top = 19
-    Width = 209
-    Align = alClient
-    HideSelection = False
-    Images = SimbaForm.Mufasa_Image_List
-    ReadOnly = True
-    ScrollBars = ssAutoBoth
-    TabOrder = 0
-    ToolTips = False
-    OnDblClick = FunctionListDblClick
-    OnDeletion = FunctionListDeletion
-    OnMouseDown = FunctionListMouseDown
-    OnMouseUp = FunctionListMouseUp
-    Options = [tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot]
-  end
+  DesignLeft = -314
+  DesignTop = 388
   object FunctionListLabel: TLabel
     Left = 2
     Height = 15
     Top = 2
-    Width = 205
+    Width = 221
     Align = alTop
     Alignment = taCenter
     BorderSpacing.Around = 2
-    Caption = 'Functionlist'
+    Caption = 'Function List'
     Font.Style = [fsBold]
     ParentColor = False
     ParentFont = False
-    OnMouseDown = FunctionListLabelMouseDown
+    OnMouseDown = LabelMouseDown
   end
-  object CloseButton: TSpeedButton
-    Left = 161
-    Height = 16
-    Top = 2
-    Width = 16
-    Anchors = [akTop, akRight]
-    Flat = True
+  object Filter: TTreeFilterEdit
+    Left = 0
+    Height = 23
+    Top = 505
+    Width = 225
+    OnAfterFilter = AfterFilter
+    ButtonWidth = 30
+    NumGlyphs = 1
+    Align = alBottom
     Glyph.Data = {
       36090000424D3609000000000000360000002800000018000000180000000100
       2000000000000009000064000000640000000000000000000000000000000000
@@ -127,38 +111,27 @@ object FunctionListFrame: TFunctionListFrame
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000
     }
-    OnClick = CloseButtonClick
+    MaxLength = 0
+    Spacing = 0
+    TabOrder = 0
+    FilteredTreeview = TreeView
   end
-  object Panel1: TPanel
+  object TreeView: TTreeView
     Left = 0
-    Height = 26
-    Top = 502
-    Width = 209
-    Align = alBottom
-    Caption = 'Panel1'
-    ClientHeight = 26
-    ClientWidth = 209
+    Height = 486
+    Top = 19
+    Width = 225
+    Align = alClient
+    BorderStyle = bsNone
+    DragMode = dmAutomatic
+    Images = SimbaForm.Mufasa_Image_List
+    ReadOnly = True
     TabOrder = 1
-    object ClearSearch: TSpeedButton
-      Left = 179
-      Height = 24
-      Top = 1
-      Width = 29
-      Align = alRight
-      Caption = 'x'
-      OnClick = ClearSearchClick
-    end
-    object editSearchList: TEdit
-      Left = 1
-      Height = 24
-      Hint = 'Search ...'
-      Top = 1
-      Width = 178
-      Align = alClient
-      OnChange = editSearchListChange
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 0
-    end
+    ToolTips = False
+    OnClick = TreeViewClick
+    OnDblClick = TreeViewDoubleClick
+    OnMouseLeave = TreeViewMouseLeave
+    OnMouseMove = TreeViewMouseMove
+    Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoThemedDraw]
   end
 end

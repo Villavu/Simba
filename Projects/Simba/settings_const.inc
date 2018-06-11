@@ -83,10 +83,12 @@ ssFunctionListShowOnStart = ssSettings + ssCodeInsight + ssFunctionList + 'ShowO
 ssMaxRecentFiles = ssSettings + 'General/MaxRecentFiles';
 ssRecentFiles = ssLastConfig + ssMainForm + 'RecentFiles';
 ssRecentFilesCount = ssLastConfig + ssMainForm + 'RecentFiles/Count';
-ssRecentFileN = ssLastConfig + ssMainForm + 'RecentFiles/File';
+ssRecentFile = ssLastConfig + ssMainForm + 'RecentFiles/File';
 
 ssNotesContent = ssSettings + ssNotes + 'Content';
 ssNotesVisible = ssSettings + ssNotes + 'Visible';
+
+ssFileBrowserVisible = ssSettings + 'FileBrowser/Visible';
 
 ssMiscRestartScriptIfStarted = ssSettings + ssMisc + 'RestartScriptIfStarted';
 ssMiscWarnIfRunning = ssSettings + ssMisc + 'WarnIfRunning';

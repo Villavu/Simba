@@ -281,32 +281,35 @@ end;
 
 procedure TScriptFrame.SynEditDragDrop(Sender, Source: TObject; X, Y: Integer);
 begin
-  if Source is TFunctionListFrame then
-    with TFunctionListFrame(Source).DraggingNode do
-      if (Level > 0) and (Data <> nil) then
-        SynEdit.InsertTextAtCaret(GetMethodName(PMethodInfo(Data)^.Header, True));
+  if (Source <> nil) and (Source is TTreeView) and (TTreeView(Source).Selected <> nil) then
+    SynEdit.InsertTextAtCaret(TTreeView(Source).Selected.Text);
 end;
 
-procedure TScriptFrame.SynEditDragOver(Sender, Source: TObject; X, Y: Integer;
-  State: TDragState; var Accept: Boolean);
+procedure TScriptFrame.SynEditDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
 begin
-  Accept := Source = SimbaForm.frmFunctionList;
-  if(Accept)then
+  Accept := (Source <> nil) and (Source is TTreeView) and (TTreeView(Source).Selected <> nil);
+
+  if Accept then
   begin
-    SynEdit.CaretXY := SynEdit.PixelsToLogicalPos(point(x, y));
-    if(not(SimbaForm.Active))then SimbaForm.BringToFront;
-    if(SimbaForm.ActiveControl <> SynEdit)then SimbaForm.ActiveControl := SynEdit;
+    SynEdit.CaretXY := SynEdit.PixelsToLogicalPos(Point(X, Y));
+
+    if (not (SimbaForm.Active)) then
+      SimbaForm.BringToFront;
+    if (SimbaForm.ActiveControl <> SynEdit) then
+      SimbaForm.ActiveControl := SynEdit;
+    if SynEdit.CanFocus then
+      SynEdit.SetFocus();
   end;
 end;
 
 procedure TScriptFrame.SynEditKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if key = VK_F3 then
-  begin;
+  if (Key = VK_F3) then
+  begin
     SimbaForm.ActionFindNextExecute(Sender);
-    key := 0;
+    Key := 0;
   end
-  else if key = VK_ESCAPE then
+  else if (Key = VK_ESCAPE) then
     SimbaForm.ParamHint.Hide;
 
   SimbaForm.CodeCompletionForm.HandleKeyDown(Sender, Key, Shift);
@@ -770,11 +773,11 @@ begin
   end;
 
   try
-      SetLength(NewScript, ExternScript.Size);
-      ExternScript.Read(NewScript[1], ExternScript.Size);
+    SetLength(NewScript, ExternScript.Size);
+    ExternScript.Read(NewScript[1], ExternScript.Size);
 
-      SynEdit.Lines.SetText(PChar(NewScript));
-      SetLength(NewScript, 0);
+    SynEdit.Lines.SetText(PChar(NewScript));
+    SetLength(NewScript, 0);
   finally
     ExternScript.Free;
   end;
