@@ -108,7 +108,7 @@ begin
         Self.Error.Data^.Error := Message;
       end;
     end else
-      Self.Error.Data^.Error := e.ClassName + ' :: ' + e.Message;
+      Self.Error.Data^.Error := 'ERROR: ' + e.ClassName + ' :: ' + e.Message;
 
     Synchronize(Error.Callback);
   end;

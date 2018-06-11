@@ -464,12 +464,11 @@ begin
 end;
 
 destructor TMPlugins.Destroy;
+var
+  i: Int32;
 begin
-  (* commented until functionlist is fixed.
   for i := 0 to FPlugins.Count - 1 do
     FPlugins[i].Free();
-  *)
-  FPlugins.Free();
   FPaths.Free();
 
   inherited Destroy();
@@ -477,6 +476,9 @@ end;
 
 initialization
   Plugins := TMPlugins.Create();
+
+finalization
+  Plugins.Free();
 
 end.
 
