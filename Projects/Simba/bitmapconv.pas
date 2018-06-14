@@ -79,7 +79,7 @@ begin
         dispPic.Free;
       dispPic := x;
     except
-      formWritelnEx('ERROR loading the file: ' + OpenPictureDialog.FileName);
+      formWriteln('ERROR loading the file: ' + OpenPictureDialog.FileName);
       ImagePreview.Picture := nil;
       if dispPic <> nil then
         FreeAndNil(dispPic);
@@ -124,12 +124,12 @@ begin
     if PadOutput.Checked then
       while Len > 65 do
       begin
-        formWritelnEx(Copy(str,1,62) + #39 + ' +');
+        formWriteln(Copy(str,1,62) + #39 + ' +');
         delete(str,1,62);
         str := StringOfChar(' ',8) + #39 + str;
         len := length(str);
       end;
-    formWritelnEx(str + strend);
+    formWriteln(str + strend);
   end;
 end;
 

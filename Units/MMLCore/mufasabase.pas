@@ -33,56 +33,44 @@ uses
 {$I Simba.inc}
 
 const
-    SimbaVersion = 1206;
-    SimbaMajor = 1200; // this should be 980 even if SimbaVersion is 981, etc
+  SimbaVersion = 1300;
+  SimbaMajor = 1300; // this should be 980 even if SimbaVersion is 981, etc
 
-    SimbaURL =     {$IFDEF WINDOWS}
-                    {$IFDEF CPUI386}
-                    'http://simba.villavu.com/bin/Windows/x86/Stable/'
-                    {$IFDEF NOTPORTABLE}+ 'SystemWide/'{$ENDIF}
-                    {$ELSE}
-                    'http://simba.villavu.com/bin/Windows/x86_64/Stable/'
-                    {$IFDEF NOTPORTABLE}+ 'SystemWide/'{$ENDIF}
-                    {$ENDIF}
-                  {$ELSE}
-                    {$IFDEF CPUI386}
-                    'http://simba.villavu.com/bin/Linux/x86/Stable/'
-                    {$IFDEF NOTPORTABLE}+ 'SystemWide/'{$ENDIF}
-                    {$ELSE}
-                    'http://simba.villavu.com/bin/Linux/x86_64/Stable/'
-                    {$IFDEF NOTPORTABLE}+ 'SystemWide/'{$ENDIF}
-                    {$ENDIF}
-                  {$ENDIF};
-    FontURL = 'http://simba.villavu.com/bin/Fonts/';
-
-procedure mDebugLn( s : string);overload;
-procedure mDebugLn( s : string; f : array of const);overload;
-procedure InitmDebug;
-procedure FreemDebug;
-implementation
+  SimbaURL = {$IFDEF WINDOWS}
+                {$IFDEF CPU32}
+                'http://simba.villavu.com/bin/Windows/x86/Stable/'
+                {$IFDEF NOTPORTABLE} + 'SystemWide/'{$ENDIF}
+                {$ELSE}
+                'http://simba.villavu.com/bin/Windows/x86_64/Stable/'
+                {$IFDEF NOTPORTABLE} + 'SystemWide/'{$ENDIF}
+                {$ENDIF}
+             {$ELSE}
+                {$IFDEF CPUI386}
+                'http://simba.villavu.com/bin/Linux/x86/Stable/'
+                {$IFDEF NOTPORTABLE} + 'SystemWide/'{$ENDIF}
+                {$ELSE}
+                'http://simba.villavu.com/bin/Linux/x86_64/Stable/'
+                {$IFDEF NOTPORTABLE} + 'SystemWide/'{$ENDIF}
+                {$ENDIF}
+             {$ENDIF};
 
 var
-  CanDebug : boolean = false;
+  mDebugging: Boolean = True;
 
-procedure mDebugLn(s: string);
+procedure mDebugLn(constref S: String); overload;
+procedure mDebugLn(constref S: String; Args: array of const); overload;
+
+implementation
+
+procedure mDebugLn(constref S: String);
 begin
-  if CanDebug then
+  if mDebugging then
     Writeln(s);
 end;
 
-procedure mDebugLn(s: string; f: array of const); overload;
+procedure mDebugLn(constref S: String; Args: array of const);
 begin
-  mDebugLn(format(s,f));
-end;
-
-procedure InitmDebug;
-begin
-  CanDebug := true;
-end;
-
-procedure FreemDebug;
-begin
-  CanDebug := false;
+  mDebugLn(Format(S, Args));
 end;
 
 end.
