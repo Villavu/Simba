@@ -155,11 +155,6 @@ type
 
     TFontsSection = class(TSection)
       Path: TPathSetting;
-      LoadOnStartUp: TBooleanSetting;
-      CheckForUpdates: TBooleanSetting;
-      Version: TIntegerSetting;
-      VersionLink: TStringSetting;
-      UpdateLink: TStringSetting;
     end;
 
     TExtensionsSection = class(TSection)
@@ -260,6 +255,10 @@ type
       Visible: TBooleanSetting;
     end;
 
+    TFileBrowserSection = class(TSection)
+      Visible: TBooleanSetting;
+    end;
+
     TMiscSection = class(TSection)
       RestartScriptIfStarted: TBooleanSetting;
       WarnIfRunning: TBooleanSetting;
@@ -284,6 +283,7 @@ type
       CodeHints: TCodeHintsSection;
       CodeCompletion: TCodeCompletionSection;
       Notes: TNotesSection;
+      FileBrowser: TFileBrowserSection;
       Misc: TMiscSection;
       ShowBalloonHints: TShowBalloonHints;
 
@@ -835,9 +835,6 @@ procedure GetInterpreterAllowSysCalls(obj: TSetting); begin TBooleanSetting(obj)
 procedure GetFontsLoadOnStartUp(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
 procedure GetFontsCheckForUpdates(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
 procedure GetFontsVersion(obj: TSetting); begin TIntegerSetting(obj).Value := -1; end;
-procedure GetFontsVersionLink(obj: TSetting); begin TStringSetting(obj).Value := FontURL + 'Version'; end;
-procedure GetFontsUpdateLink(obj: TSetting); begin TStringSetting(obj).Value := FontURL + 'Fonts.tar.bz2'; end;
-
 
 procedure GetTabOpenNextOnClose(obj: TSetting); begin TBooleanSetting(obj).Value := False; end;
 procedure GetOpenScriptInNewTab(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
@@ -879,8 +876,10 @@ procedure GetTrayAlwaysVisible(obj: TSetting); begin TBooleanSetting(obj).Value 
 
 procedure GetSimbaNewsURL(obj: TSetting); begin TStringSetting(obj).Value := 'http://simba.villavu.com/bin/news'; end;
 
-procedure GetNotesContent(obj: TSetting); begin TStringSetting(obj).Value := 'FQAAAHic88svSS1WCE5NLsnMz1PQVXAqSvRWBABR+Abt'; end;
+procedure GetNotesContent(obj: TSetting); begin TStringSetting(obj).Value := ''; end;
 procedure GetNotesVisible(obj: TSetting); begin TBooleanSetting(obj).Value := False; end;
+
+procedure GetFileBrowserVisible(Obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
 
 procedure GetMiscRestartScriptIfStarted(obj: TSetting); begin TBooleanSetting(obj).Value := False; end;
 procedure GetMiscWarnIfRunning(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
@@ -901,25 +900,6 @@ begin
   Fonts := AddChild(TFontsSection.Create()) as TFontsSection;
   Fonts.Path := Fonts.AddChild(TPathSetting.Create(ssFontsPath)) as TPathSetting;
   Fonts.Path.onDefault := @GetFontPath;
-
-  Fonts.LoadOnStartUp := Fonts.AddChild(TBooleanSetting.Create(ssLoadFontsOnStart)) as TBooleanSetting;
-  Fonts.LoadOnStartUp.onDefault := @GetFontsLoadOnStartUp;
-  Fonts.CheckForUpdates := Fonts.AddChild(TBooleanSetting.Create(ssFontsCheckForUpdates)) as TBooleanSetting;
-  Fonts.CheckForUpdates.onDefault := @GetFontsCheckForUpdates;
-  Fonts.Version := Fonts.AddChild(TIntegerSetting.Create(ssFontsVersion)) as TIntegerSetting;
-  Fonts.Version.onDefault := @GetFontsVersion;
-  Fonts.VersionLink := Fonts.AddChild(TStringSetting.Create(ssFontsVersionLink)) as TStringSetting;
-  Fonts.VersionLink.onDefault := @GetFontsVersionLink;
-  Fonts.UpdateLink := Fonts.AddChild(TStringSetting.Create(ssFontsLink)) as TStringSetting;
-  Fonts.UpdateLink.onDefault := @GetFontsUpdateLink;
-
-  {$IFDEF USE_EXTENSIONS}
-  Extensions := AddChild(TExtensionsSection.Create()) as TExtensionsSection;
-  Extensions.Path := Extensions.AddChild(TPathSetting.Create(ssExtensionsPath)) as TPathSetting;
-  Extensions.Path.onDefault := @GetExtPath;
-  Extensions.FileExtension := Extensions.AddChild(TStringSetting.Create(ssExtensionsFileExtension)) as TStringSetting;
-  Extensions.FileExtension.onDefault := @GetExtensionsFileExtension;
-  {$ENDIF}
 
   Scripts := AddChild(TScriptsSection.Create()) as TScriptsSection;
   Scripts.Path := Scripts.AddChild(TPathSetting.Create(ssScriptsPath)) as TPathSetting;
@@ -1004,6 +984,10 @@ begin
   Notes.Content.onDefault := @GetNotesContent;
   Notes.Visible := Notes.AddChild(TBooleanSetting.Create(ssNotesVisible)) as TBooleanSetting;
   Notes.Visible.onDefault := @GetNotesVisible;
+
+  FileBrowser := AddChild(TFileBrowserSection.Create()) as TFileBrowserSection;
+  FileBrowser.Visible := FileBrowser.AddChild(TBooleanSetting.Create(ssFileBrowserVisible)) as TBooleanSetting;
+  FileBrowser.Visible.onDefault := @GetFileBrowserVisible;
 
   Misc := AddChild(TMiscSection.Create()) as TMiscSection;
   Misc.RestartScriptIfStarted := Misc.AddChild(TBooleanSetting.Create(ssMiscRestartScriptIfStarted)) as TBooleanSetting;

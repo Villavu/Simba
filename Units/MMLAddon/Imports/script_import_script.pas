@@ -53,7 +53,7 @@ var
 begin
   if (Data <> nil) then
   begin
-    Client := TMMLScriptThread(Data).Client;
+    Client := @TMMLScriptThread(Data).Client;
     ScriptPath := TMMLScriptThread(Data).ScriptFile;
     ScriptFile := TMMLScriptThread(Data).ScriptFile;
   end;
