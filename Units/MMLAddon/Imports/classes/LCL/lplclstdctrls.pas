@@ -1973,10 +1973,10 @@ begin
    begin
      addGlobalType('(ssNone, ssHorizontal, ssVertical, ssBoth,ssAutoHorizontal, ssAutoVertical, ssAutoBoth)','TScrollStyle');
      addGlobalType('(scLineUp,scLineDown, scPageUp,scPageDown,scPosition, scTrack,scTop,scBottom,scEndScroll)','TScrollCode');
-     addGlobalType('procedure(Sender: TObject; ScrollCode: TScrollCode; var ScrollPos: Integer)', 'TScrollEvent', FFI_DEFAULT_ABI);
+     addGlobalType('procedure(Sender: TObject; ScrollCode: TScrollCode; var ScrollPos: Integer) of object', 'TScrollEvent', FFI_DEFAULT_ABI);
      addGlobalType('(odSelected, odGrayed, odDisabled, odChecked, odFocused, odDefault, odHotLight, odInactive, odNoAccel, odNoFocusRect, odReserved1, odReserved2, odComboBoxEdit, odPainted)' , 'TOwnerDrawStateType');
      addGlobalType('set of TOwnerDrawStateType', 'TOwnerDrawState');
-     addGlobalType('procedure(Control: TWinControl; Index: Integer; ARect: TRect; State: TOwnerDrawState)', 'TDrawItemEvent', FFI_DEFAULT_ABI);
+     addGlobalType('procedure(Control: TWinControl; Index: Integer; ARect: TRect; State: TOwnerDrawState) of object', 'TDrawItemEvent', FFI_DEFAULT_ABI);
      addGlobalType('(csDropDown,csSimple,csDropDownList,csOwnerDrawFixed,csOwnerDrawVariable)','TComboBoxStyle');
      addGlobalType('(lbStandard, lbOwnerDrawFixed, lbOwnerDrawVariable, lbVirtual)', 'TListBoxStyle');
      addGlobalType('(sbsNone, sbsSingle, sbsSunken)','TStaticBorderStyle');
