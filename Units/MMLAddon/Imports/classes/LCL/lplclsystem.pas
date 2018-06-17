@@ -1275,7 +1275,7 @@ procedure RegisterLCLSystem(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addGlobalType('procedure(Sender: TObject)', 'TNotifyEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TObject) of object', 'TNotifyEvent', FFI_DEFAULT_ABI);
     addGlobalType('^TNotifyEvent','PNotifyEvent');
     addGlobalType('UInt32','THandle');
     addGlobalType('string','TComponentName');

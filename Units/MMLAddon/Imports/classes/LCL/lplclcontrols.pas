@@ -1664,11 +1664,11 @@ begin
    begin
      addGlobalType('(ssShift, ssAlt, ssCtrl, ssLeft, ssRight, ssMiddle, ssDouble, ssMeta, ssSuper, ssHyper, ssAltGr, ssCaps, ssNum, ssScroll, ssTriple, ssQuad, ssExtra1, ssExtra2)', 'TShiftStateEnum');
      addGlobalType('set of TShiftStateEnum', 'TShiftState');
-     addGlobalType('procedure(Sender: TObject; var Key: Word; Shift: TShiftState)','TKeyEvent', FFI_DEFAULT_ABI);
-     addGlobalType('procedure(Sender: TObject; var Key: char)','TKeyPressEvent', FFI_DEFAULT_ABI);
+     addGlobalType('procedure(Sender: TObject; var Key: Word; Shift: TShiftState) of object','TKeyEvent', FFI_DEFAULT_ABI);
+     addGlobalType('procedure(Sender: TObject; var Key: Char) of object','TKeyPressEvent', FFI_DEFAULT_ABI);
      addGlobalType('(mbLeft, mbRight, mbMiddle, mbExtra1, mbExtra2)','TMouseButton');
-     addGlobalType('procedure(Sender: TObject; Button: TMouseButton;Shift: TShiftState; X, Y: Integer)','TMouseEvent', FFI_DEFAULT_ABI);
-     addGlobalType('procedure(Sender: TObject; Shift: TShiftState; X, Y: Integer)', 'TMouseMoveEvent', FFI_DEFAULT_ABI);
+     addGlobalType('procedure(Sender: TObject; Button: TMouseButton;Shift: TShiftState; X, Y: Integer) of object','TMouseEvent', FFI_DEFAULT_ABI);
+     addGlobalType('procedure(Sender: TObject; Shift: TShiftState; X, Y: Integer) of object', 'TMouseMoveEvent', FFI_DEFAULT_ABI);
      addGlobalType('(sbHorizontal, sbVertical)','TScrollBarKind');
      addGlobalType('(alNone, alTop, alBottom, alLeft, alRight, alClient, alCustom)', 'TAlign');
      addGlobalType('(bsNone, bsSingle, bsSizeable, bsDialog, bsToolWindow, bsSizeToolWin)','TFormBorderStyle');
