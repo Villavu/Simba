@@ -1187,8 +1187,8 @@ begin
   with Compiler do
   begin
     AddGlobalType('(caNone, caHide, caFree, caMinimize)','TCloseAction');
-    AddGlobalType('procedure(Sender: TObject; var CloseAction: TCloseAction)','TCloseEvent', FFI_DEFAULT_ABI);
-    AddGlobalType('procedure(Sender : TObject; var CanClose : boolean)','TCloseQueryEvent', FFI_DEFAULT_ABI);
+    AddGlobalType('procedure(Sender: TObject; var CloseAction: TCloseAction) of object','TCloseEvent', FFI_DEFAULT_ABI);
+    AddGlobalType('procedure(Sender : TObject; var CanClose: Boolean) of object','TCloseQueryEvent', FFI_DEFAULT_ABI);
     AddGlobalType('(poDesigned, poDefault, poDefaultPosOnly, poDefaultSizeOnly, poScreenCenter, poMainFormCenter, poOwnerFormCenter)', 'TPosition');
     AddGlobalType('(biSystemMenu, biMinimize, biMaximize, biHelp)', 'TBorderIcon');
     AddGlobalType('set of TBorderIcon', 'TBorderIcons');

@@ -1334,8 +1334,8 @@ begin
     addGlobalType('(tmBottomRight, tmTopLeft, tmBoth)', 'TTickMark');
     addGlobalType('(tsNone, tsAuto, tsManual)', 'TTickStyle');
     addGlobalType('(trLeft, trRight, trTop, trBottom)', 'TTrackBarScalePos');
-    addGlobalType('procedure(Sender: TObject; Index: integer)', 'TCheckListClicked', FFI_DEFAULT_ABI);
-    addGlobalType('procedure(Sender: TObject; var AllowChange: Boolean)', 'TTabChangingEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TObject; Index: Integer) of object', 'TCheckListClicked', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TObject; var AllowChange: Boolean) of object', 'TTabChangingEvent', FFI_DEFAULT_ABI);
     addGlobalType('(tsTabs, tsButtons, tsFlatButtons)', 'TTabStyle');
     addGlobalType('(tpTop, tpBottom, tpLeft, tpRight)', 'TTabPosition');
     addGlobalType('(nboShowCloseButtons, nboMultiLine, nboHidePageListPopup, nboKeyboardTabSwitch, nboShowAddTabButton)', 'TCTabControlOption');
