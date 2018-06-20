@@ -33,7 +33,8 @@ uses
   cthreads, cmem, linux_startup,
   {$ENDIF}
   Interfaces, Forms,
-  simbaunit, colourhistory, about, debugimage, bitmapconv, updateform, simbasettingssimple, simbasettingsold,
+  simbaunit, colourhistory, about, debugimage, bitmapconv, updateform,
+  simbasettingssimple, simbasettingsold,
   {$IFDEF USE_FORMDESIGNER}
   design_frm, frmdesigner,
   {$ENDIF}
