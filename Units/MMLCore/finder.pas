@@ -218,9 +218,8 @@ begin
     exit(false);
   if Cmax = Cmin then
   begin
-    //S and H are both zero, lets check if it mathces the tol
-    if (i.H <= (i.hueMod)) and
-       (i.S <= (i.satMod)) then
+    //S and H are both zero, the color is gray, so ignore hue and leave it to saturation tolerance.
+    if (i.S <= i.satMod) then
       exit(true)
     else
       exit(false);
