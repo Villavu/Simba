@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils,
   lpparser, lpcompiler, lptypes, lpvartypes, lpmessages, lpinterpreter,
-  Client, Settings, SettingsSandbox, Files, FontLoader;
+  Client, Settings, SettingsSandbox, Files, FontLoader, script_plugins;
 
 type
   PErrorData = ^TErrorData;
@@ -31,6 +31,7 @@ type
     FClient: TClient;
     FOptions: EMMLScriptOptions;
     FSettings: TMMLSettingsSandbox;
+    FUsedPlugins: TMPluginsList;
 
     procedure SetState(Value: EMMLScriptState);
 
@@ -73,7 +74,7 @@ implementation
 
 uses
   {$IFDEF LINUX} pthreads, {$ENDIF}
-  script_imports, script_plugins;
+  script_imports;
 
 procedure TMMLScriptThread.SetState(Value: EMMLScriptState);
 begin
@@ -136,9 +137,11 @@ begin
       Exit(True);
 
     try
-      Plugin := Plugins.Get(Sender.Tokenizer.FileName, Argument);
+      Plugin := Plugins.Get(Sender.Tokenizer.FileName, Argument, True);
       for i := 0 to Plugin.Declarations.Count - 1 do
         Plugin.Declarations[i].Import(Sender);
+
+      FUsedPlugins.Add(Plugin);
     except
       on e: Exception do
       begin
@@ -155,7 +158,7 @@ begin
   if (UpperCase(Directive) = 'IFHASLIB') then
   begin
     try
-      Plugin := Plugins.Get(Sender.Tokenizer.FileName, Argument);
+      Plugin := Plugins.Get(Sender.Tokenizer.FileName, Argument, False);
     except
       Plugin := nil;
     end;
@@ -262,11 +265,23 @@ begin
 
   FOutput := nil;
   FOutputBuffer := '';
+
+  FUsedPlugins := TMPluginsList.Create(False);
 end;
 
 destructor TMMLScriptThread.Destroy;
+var
+  i: Int32;
 begin
   inherited Destroy();
+
+  if (FUsedPlugins <> nil) then
+  begin
+    for i := 0 to FUsedPlugins.Count - 1 do
+      FUsedPlugins[i].RefCount := FUsedPlugins[i].RefCount - 1;
+
+    FreeAndNil(FUsedPlugins);
+  end;
 
   if (FClient <> nil) then
     FreeAndNil(FClient);

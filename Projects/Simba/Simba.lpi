@@ -89,7 +89,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="67">
+    <Units Count="66">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -384,17 +384,9 @@
         <IsPartOfProject Value="True"/>
       </Unit64>
       <Unit65>
-        <Filename Value="../ACA/aca.pas"/>
+        <Filename Value="../../Units/MMLAddon/script_plugins_exports.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="ACAForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-        <UnitName Value="ACA"/>
       </Unit65>
-      <Unit66>
-        <Filename Value="../ACA/aca_math.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit66>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
