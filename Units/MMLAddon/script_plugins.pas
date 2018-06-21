@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils {$IFDEF WINDOWS}, JwaWindows {$ENDIF}, dynlibs, fgl,
-  lpcompiler, lptypes, lpffiwrappers, ffi;
+  lpcompiler, lptypes, lpffiwrappers, ffi, syncobjs, script_plugins_exports;
 
 type
   TMPlugin = class;
@@ -57,11 +57,7 @@ type
     FLib: TLibHandle;
     FFilePath: String;
     FDeclarations: TMPluginDeclarations;
-    FData: record
-      GetMem: function(Size: PtrUInt): Pointer; cdecl;
-      FreeMem: function(Ptr: Pointer): PtrUInt; cdecl;
-      // + methods for creating pascal strings & arrays?
-    end;
+    FRefCount: Int32;
 
     GetPluginABIVersion: function: Int32; cdecl;
     GetFunctionInfo: function(Index: Int32; var Address: Pointer; var Header: PChar): Int32; cdecl;
@@ -71,11 +67,14 @@ type
     GetDelayedCode: procedure(var Code: PChar); cdecl;
     GetDelayedCodeLength: function: Int32; cdecl;
     SetPluginMemManager: procedure(MemoryManager: TMemoryManager); cdecl;
+    SetPluginSimbaMethods: procedure(Methods: TSimbaMethods); cdecl;
+    SetPluginSimbaMemoryAllocators: procedure(Allocators: TSimbaMemoryAllocators); cdecl;
     OnAttach: procedure(Data: Pointer); cdecl;
     OnDetach: procedure; cdecl;
   public
     property FilePath: String read FFilePath;
     property Declarations: TMPluginDeclarations read FDeclarations;
+    property RefCount: Int32 read FRefCount write FRefCount;
 
     procedure Load;
 
@@ -86,6 +85,7 @@ type
   TMPluginsList = specialize TFPGObjectList<TMPlugin>;
   TMPlugins = class
   protected
+    FLock: TCriticalSection;
     FPlugins: TMPluginsList;
     FPaths: TStringList;
 
@@ -93,7 +93,9 @@ type
   public
     property Paths: TStringList read FPaths;
 
-    function Get(Sender, Argument: String): TMPlugin;
+    function Get(Sender, Argument: String; IncRef: Boolean): TMPlugin;
+    procedure GetAll(var Files: TStringArray; var RefCounts: TIntegerArray);
+    procedure Unload(Path: String);
 
     constructor Create;
     destructor Destroy; override;
@@ -105,7 +107,7 @@ var
 implementation
 
 uses
-  LazFileUtils, LCLProc;
+  LazFileUtils, LCLProc, SimbaUnit;
 
 {$IFDEF WINDOWS}
 function CorrectArchitecture(FilePath: WideString): Boolean; // returns true if we can't figure it out.
@@ -159,16 +161,6 @@ begin
 end;
 {$ENDIF}
 
-function _GetMem(Size: PtrUInt): Pointer; cdecl;
-begin
-  Result := GetMem(Size);
-end;
-
-function _FreeMem(Ptr: Pointer): PtrUInt; cdecl;
-begin
-  Result := FreeMem(Ptr);
-end;
-
 type
   TFFIWrapper = class(TLapeDeclaration)
   protected
@@ -181,7 +173,7 @@ type
 
 constructor TFFIWrapper.Create(var Address: Pointer; Compiler: TLapeCompiler; Header: String);
 begin
-  inherited Create('!ffi');
+  inherited Create('!plugin');
 
   {$IFDEF CPU32}
   Wrapper := LapeImportWrapper(Address, Compiler, Header, FFI_CDECL);
@@ -270,10 +262,10 @@ end;
 
 procedure TMPlugin.Load;
 var
-  MemoryManager: TMemoryManager;
   Name, Str, Header: PChar;
   Index: Int32;
   Address: Pointer;
+  MemoryManager: TMemoryManager;
 begin
   WriteLn('Loading plugin "' + ExtractFileNameOnly(FFilePath) + '"');
 
@@ -281,12 +273,14 @@ begin
     raise Exception.Create('ABI version not supported');
 
   GetMemoryManager(MemoryManager);
-
   if (Pointer(SetPluginMemManager) <> nil) then
     SetPluginMemManager(MemoryManager);
 
-  if (Pointer(OnAttach) <> nil) then
-    OnAttach(@FData);
+  if (Pointer(SetPluginSimbaMethods) <> nil) then
+    SetPluginSimbaMethods(SimbaMethods);
+
+  if (Pointer(SetPluginSimbaMemoryAllocators) <> nil) then
+    SetPluginSimbaMemoryAllocators(SimbaMemoryAllocators);
 
   if (Pointer(GetTypeCount) <> nil) and (Pointer(GetTypeInfo) <> nil) then
   begin
@@ -335,6 +329,9 @@ begin
       StrDispose(Str);
     end;
   end;
+
+  if (Pointer(OnAttach) <> nil) then
+    OnAttach(nil);
 end;
 
 constructor TMPlugin.Create(AFilePath: String);
@@ -342,12 +339,6 @@ begin
   FFilePath := AFilePath;
   FDeclarations := TMPluginDeclarations.Create();
   FLib := LoadLibrary(FFilePath);
-
-  with FData do
-  begin
-    FreeMem := @_FreeMem;
-    GetMem := @_GetMem;
-  end;
 
   if (FLib > 0) then
   begin
@@ -359,6 +350,8 @@ begin
     Pointer(GetDelayedCode) := GetProcedureAddress(FLib, 'GetDelayedCode');
     Pointer(GetDelayedCodeLength) := GetProcedureAddress(FLib, 'GetDelayedCodeLength');
     Pointer(SetPluginMemManager) := GetProcedureAddress(FLib, 'SetPluginMemManager');
+    Pointer(SetPluginSimbaMethods) := GetProcAddress(FLib, 'SetPluginSimbaMethods');
+    Pointer(SetPluginSimbaMemoryAllocators) := GetProcAddress(FLib, 'SetPluginSimbaMemoryAllocators');
     Pointer(OnAttach) := GetProcedureAddress(FLib, 'OnAttach');
     Pointer(OnDetach) := GetProcedureAddress(FLib, 'OnDetach');
   end;
@@ -373,7 +366,7 @@ begin
       OnDetach();
   except
     on e: Exception do
-      WriteLn('ERROR on detaching plugin "', ExtractFileNameOnly(FFilePath), '"', e.Message);
+      WriteLn('ERROR on plugin detach "', ExtractFileNameOnly(FFilePath), '"', e.Message);
   end;
 
   if (FLib > 0) then
@@ -416,47 +409,96 @@ begin
   end;
 end;
 
-function TMPlugins.Get(Sender, Argument: String): TMPlugin;
+function TMPlugins.Get(Sender, Argument: String; IncRef: Boolean): TMPlugin;
 var
   i: Int32;
   Path: String;
 begin
-  Result := nil;
-
-  Path := FindFile(ExtractFileDir(Sender), Argument);
-  if (Path = '') then
-    raise Exception.Create('ERROR: Plugin "' + ExtractFileNameOnly(Argument) + '" not found');
-
-  {$IFDEF WINDOWS}
-   if (not CorrectArchitecture(Path)) then
-      raise Exception.Create('ERROR: Plugin "' + ExtractFileNameOnly(Argument) + '" architecture mismatch');
-  {$ENDIF}
-
-  // Already loaded?
-  for i := 0 to FPlugins.Count - 1 do
-    if (Path = FPlugins[i].FilePath) then
-      Exit(FPlugins[i]);
-
-  Result := TMPlugin.Create(Path);
+  FLock.Enter();
 
   try
-    Result.Load();
-  except
-    on e: Exception do
-    begin
-      Result.Free();
-      Result := nil;
+    Result := nil;
 
-      raise Exception.Create('ERROR: Exception "' + e.Message + '" while loading plugin "' + ExtractFileNameOnly(Argument) + '"');
+    Path := FindFile(ExtractFileDir(Sender), Argument);
+    if (Path = '') then
+      raise Exception.Create('ERROR: Plugin "' + ExtractFileNameOnly(Argument) + '" not found');
+
+    {$IFDEF WINDOWS}
+    if (not CorrectArchitecture(Path)) then
+      raise Exception.Create('ERROR: Plugin "' + ExtractFileNameOnly(Argument) + '" architecture mismatch');
+    {$ENDIF}
+
+    // Already loaded?
+    for i := 0 to FPlugins.Count - 1 do
+      if (Path = FPlugins[i].FilePath) then
+        Exit(FPlugins[i]);
+
+    Result := TMPlugin.Create(Path);
+
+    try
+      Result.Load();
+    except
+      on e: Exception do
+      begin
+        Result.Free();
+        Result := nil;
+
+        raise Exception.Create('ERROR: Exception "' + e.Message + '" while loading plugin "' + ExtractFileNameOnly(Argument) + '"');
+      end;
     end;
-  end;
 
-  if (Result <> nil) then
-    FPlugins.Add(Result);
+    if (Result <> nil) then
+      FPlugins.Add(Result);
+  finally
+    if (Result <> nil) and IncRef then
+      Result.RefCount := Result.RefCount + 1;
+
+    FLock.Leave();
+  end;
+end;
+
+procedure TMPlugins.GetAll(var Files: TStringArray; var RefCounts: TIntegerArray);
+var
+  i: Int32;
+begin
+  FLock.Enter();
+
+  try
+    SetLength(Files, FPlugins.Count);
+    SetLength(RefCounts, FPlugins.Count);
+
+    for i := 0 to FPlugins.Count - 1 do
+    begin
+      Files[i] := FPlugins[i].FilePath;
+      RefCounts[i] := FPlugins[i].RefCount;
+    end;
+  finally
+    FLock.Release();
+  end;
+end;
+
+procedure TMPlugins.Unload(Path: String);
+var
+  i: Int32;
+begin
+  FLock.Enter();
+
+  try
+    for i := 0 to FPlugins.Count - 1 do
+      if (Path = FPlugins[i].FilePath) and (FPlugins[i].RefCount = 0) then
+      begin
+        FPlugins.Delete(i);
+
+        Break;
+      end;
+  finally
+    FLock.Leave();
+  end;
 end;
 
 constructor TMPlugins.Create;
 begin
+  FLock := TCriticalSection.Create();
   FPlugins := TMPluginsList.Create();
 
   FPaths := TStringList.Create();
@@ -464,12 +506,10 @@ begin
 end;
 
 destructor TMPlugins.Destroy;
-var
-  i: Int32;
 begin
-  for i := 0 to FPlugins.Count - 1 do
-    FPlugins[i].Free();
+  FPlugins.Free();
   FPaths.Free();
+  FLock.Free();
 
   inherited Destroy();
 end;

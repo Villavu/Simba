@@ -36,7 +36,7 @@ uses
   synedittypes,
   script_thread,
 
-  {$IFDEF MSWINDOWS} os_windows, windows, shellapi,{$ENDIF} //For ColorPicker etc.
+  {$IFDEF MSWINDOWS} os_windows, windows, {$ENDIF} //For ColorPicker etc.
   {$IFDEF LINUX} os_linux, {$ENDIF} //For ColorPicker etc.
 
   colourpicker, windowselector, Clipbrd, // We need these for the Colour Picker and Window Selector
@@ -136,6 +136,8 @@ type
     LabeledEditSearch: TLabeledEdit;
     MainMenu: TMainMenu;
     DebugMemo: TMemo;
+    MenuItemUnloadPlugin: TMenuItem;
+    MenuItemDivider12: TMenuItem;
     popupFileBrowserOpen: TMenuItem;
     popupFileBrowserOpenExternally: TMenuItem;
     memoNotes: TMemo;
@@ -230,7 +232,6 @@ type
     MenuItemCloseTab: TMenuItem;
     MenuItemNewTab: TMenuItem;
     MenuItemDivider2: TMenuItem;
-    MenuItemDivider: TMenuItem;
     PageControl1: TPageControl;
     ScriptPopup: TPopupMenu;
     SearchPanel: TPanel;
@@ -262,7 +263,7 @@ type
     SplitterMemoSynedit: TSplitter;
     TrayPopup: TPopupMenu;
     StatusBar: TStatusBar;
-    ToolBar1: TToolBar;
+    ToolBar: TToolBar;
     TB_Run: TToolButton;
     TB_Pause: TToolButton;
     TB_Stop: TToolButton;
@@ -320,6 +321,8 @@ type
     procedure FileBrowserRefresh(Sender: TObject);
     procedure FormDropFiles(Sender: TObject; const FileNames: array of String);
     procedure DebugMemoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure UnloadPlugin(Sender: TObject);
+    procedure MenuToolsClick(Sender: TObject);
     procedure popupFileBrowserOpenClick(Sender: TObject);
     procedure popupFileBrowserOpenExternallyClick(Sender: TObject);
     procedure MenuItemFormDesignerClick(Sender: TObject);
@@ -521,14 +524,13 @@ const
 var
   SimbaForm: TSimbaForm;
   AppPath, DocPath, DataPath: string;
-  {$ifdef MSWindows}
+  {$IFDEF WINDOWS}
   PrevWndProc : WNDPROC;
-  {$endif}
+  {$ENDIF}
 
 implementation
 uses
-   lclintf,
-   syncobjs, // for the critical sections / mutexes
+   LCLIntf,
    LazUTF8,
    LazFileUtils,
    debugimage,
@@ -615,7 +617,7 @@ begin
   end;
 end;
 
-{$IFDEF MSWINDOWS}
+{$IFDEF WINDOWS}
 
 { Used for global callbacks on WINDOWS }
 function WndCallback(Ahwnd: HWND; uMsg: UINT; wParam: WParam;
@@ -744,10 +746,12 @@ begin
   Dump := '';
 
   try
-    Plugin := Plugins.Get(TCodeInsight(Sender).FileName, Argument);
+    Plugin := Plugins.Get(TCodeInsight(Sender).FileName, Argument, False);
     for i := 0 to Plugin.Declarations.Count - 1 do
       Plugin.Declarations[i].Dump(Dump);
   except
+    on e: Exception do
+      mDebugLn(e.Message);
   end;
 
   if (Dump <> '') then
@@ -2070,6 +2074,37 @@ begin
   //Are there any more?
 end;
 
+procedure TSimbaForm.UnloadPlugin(Sender: TObject);
+begin
+  Plugins.Unload(TMenuItem(Sender).Caption);
+end;
+
+// Populate unload plugin items
+procedure TSimbaForm.MenuToolsClick(Sender: TObject);
+var
+  Files: TStringArray;
+  RefCounts: TIntegerArray;
+  i: Int32;
+  Item: TMenuItem;
+begin
+  MenuItemUnloadPlugin.Clear();
+  MenuItemUnloadPlugin.RecreateHandle();
+
+  Plugins.GetAll(Files, RefCounts);
+
+  for i := 0 to High(Files) do
+  begin
+    Item := TMenuItem.Create(MenuItemUnloadPlugin);
+    Item.Caption := Files[i];
+    Item.Enabled := RefCounts[i] = 0;
+    Item.OnClick := @UnloadPlugin;
+    if (not Item.Enabled) then
+      Item.Caption := Item.Caption + ' [' + IntToStr(RefCounts[i]) + ']';
+
+    MenuItemUnloadPlugin.Add(Item);
+  end;
+end;
+
 procedure TSimbaForm.popupFileBrowserOpenClick(Sender: TObject);
 begin
   if (FileBrowser.Selected <> nil) and FileExists(TShellTreeNode(FileBrowser.Selected).FullFileName) then
@@ -2397,8 +2432,8 @@ begin
       Start();
     end;
 
+    Application.ProcessMessages(); // Make sure everything is ready for a script run instantly (via parameters).
     HandleParameters();
-
     UpdateTitle();
   finally
     EndFormUpdate();
@@ -2999,9 +3034,6 @@ begin
         FunctionList.Show;
       end else
         FunctionList.Parent.Show;
-
-     // if Self.Visible and editSearchList.CanFocus then
-     //   editSearchList.SetFocus;
     end else begin
       if(FunctionList.Parent is TPanel)then
         FunctionList.Hide
