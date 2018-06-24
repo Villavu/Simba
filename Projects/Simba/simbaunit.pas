@@ -136,6 +136,7 @@ type
     LabeledEditSearch: TLabeledEdit;
     MainMenu: TMainMenu;
     DebugMemo: TMemo;
+    MenuDTMEditor: TMenuItem;
     MenuItemUnloadPlugin: TMenuItem;
     MenuItemDivider12: TMenuItem;
     popupFileBrowserOpen: TMenuItem;
@@ -145,7 +146,7 @@ type
     MenuItemACA: TMenuItem;
     MenuItemFindPrev: TMenuItem;
     MenuItemFont: TMenuItem;
-    MenuItemDivider51: TMenuItem;
+    MenuItemDivider13: TMenuItem;
     MenuItemNotes: TMenuItem;
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
@@ -154,7 +155,7 @@ type
     MenuItemSettingsSimpleButton: TMenuItem;
     MenuItemReadOnlyTab: TMenuItem;
     MenuItemGoto: TMenuItem;
-    MenuItemDivider50: TMenuItem;
+    MenuItemDivider14: TMenuItem;
     MenuItemOpenPluginsFolder: TMenuItem;
     MenuItemOpenIncludesFolder: TMenuItem;
     MenuItemOpenScriptsFolder: TMenuItem;
@@ -321,6 +322,7 @@ type
     procedure FileBrowserRefresh(Sender: TObject);
     procedure FormDropFiles(Sender: TObject; const FileNames: array of String);
     procedure DebugMemoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure ShowDTMEditor(Sender: TObject);
     procedure UnloadPlugin(Sender: TObject);
     procedure MenuToolsClick(Sender: TObject);
     procedure popupFileBrowserOpenClick(Sender: TObject);
@@ -540,7 +542,7 @@ uses
    math,
    script_imports, script_plugins,
    openssl,
-   aca, fphttpclient
+   aca, fphttpclient, dtm_editor
    {$IFDEF USE_FORMDESIGNER}, frmdesigner{$ENDIF}
 
    {$IFDEF LINUX_HOTKEYS}, keybinder{$ENDIF};
@@ -2074,6 +2076,11 @@ begin
   //Are there any more?
 end;
 
+procedure TSimbaForm.ShowDTMEditor(Sender: TObject);
+begin
+  TDTMForm.Create(Manager, DebugMemo).Show();
+end;
+
 procedure TSimbaForm.UnloadPlugin(Sender: TObject);
 begin
   Plugins.Unload(TMenuItem(Sender).Caption);
@@ -2088,18 +2095,27 @@ var
   Item: TMenuItem;
 begin
   MenuItemUnloadPlugin.Clear();
-  MenuItemUnloadPlugin.RecreateHandle();
 
   Plugins.GetAll(Files, RefCounts);
 
-  for i := 0 to High(Files) do
+  if (Length(Files) > 0) then
+  begin
+    for i := 0 to High(Files) do
+    begin
+      Item := TMenuItem.Create(MenuItemUnloadPlugin);
+      Item.Caption := Files[i];
+      Item.Enabled := RefCounts[i] = 0;
+      Item.OnClick := @UnloadPlugin;
+      if (not Item.Enabled) then
+        Item.Caption := Item.Caption + ' [' + IntToStr(RefCounts[i]) + ']';
+
+      MenuItemUnloadPlugin.Add(Item);
+    end;
+  end else
   begin
     Item := TMenuItem.Create(MenuItemUnloadPlugin);
-    Item.Caption := Files[i];
-    Item.Enabled := RefCounts[i] = 0;
-    Item.OnClick := @UnloadPlugin;
-    if (not Item.Enabled) then
-      Item.Caption := Item.Caption + ' [' + IntToStr(RefCounts[i]) + ']';
+    Item.Caption := '(none)';
+    Item.Enabled := False;
 
     MenuItemUnloadPlugin.Add(Item);
   end;
@@ -2400,6 +2416,10 @@ begin
 
     {$IFDEF LINUX_HOTKEYS}
     Bind_Linux_Keys();
+    {$ENDIF}
+
+    {$IFDEF USE_SCRIPTMANAGER}
+    MenuItemFormDesigner.Visible := True;
     {$ENDIF}
 
     Self.OnScriptStart := @ScriptStartEvent;
