@@ -17,6 +17,8 @@ type
      ComboBoxesCode, RadBtnsCode,HeaderCode,ScriptCode,ResultScript: TStringList;
      Stream: TStringStream;
      Img: integer;
+
+     function GetFormName: String;
     public
      constructor Create;
      Destructor Destroy;override;
@@ -30,6 +32,7 @@ type
      procedure GenerateScriptHeader;virtual;abstract;
      procedure GenerateProgressHeader;virtual;abstract;
      function GetScript(const List: TSimbaComponentList): TStrings;virtual;abstract;
+     property FormName: String read GetFormName;
   end;
 
 function GenSpaces(c: integer): string;
@@ -48,6 +51,14 @@ begin
   result:=s;
 end;
 { TAbstractCodeGen }
+
+function TAbstractCodeGen.GetFormName: String;
+begin
+  Result := '';
+
+  if (CmpList.Count > 0) then
+    Result := CmpList[0].CompName;
+end;
 
 constructor TAbstractCodeGen.Create;
 begin

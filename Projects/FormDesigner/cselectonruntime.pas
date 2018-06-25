@@ -760,10 +760,8 @@ begin
   end;
 
   // reposicionar?
-  if (repos) then begin
+  if (repos) and (Self.SelectControl <> nil) and (Self.SelectControl is TControl) then
     PositionNodes(Self.SelectControl, False);
-  end;
-
 end;
 
 procedure TSelectOnRunTime.SetSelectControl(Value: TControl);
