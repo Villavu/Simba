@@ -95,7 +95,6 @@ type
     ActionFindPrev: TAction;
     ActionFont: TAction;
     ActionNotes: TAction;
-    CallFormDesigner: TAction;
     ActionDebugger: TAction;
     ActionLape: TAction;
     ActionGoto: TAction;
@@ -137,6 +136,7 @@ type
     MainMenu: TMainMenu;
     DebugMemo: TMemo;
     MenuDTMEditor: TMenuItem;
+    MenuItem1: TMenuItem;
     MenuItemUnloadPlugin: TMenuItem;
     MenuItemDivider12: TMenuItem;
     popupFileBrowserOpen: TMenuItem;
@@ -178,12 +178,11 @@ type
     PanelCodeBrowser: TPairSplitterSide;
     PanelNotes: TPairSplitterSide;
     FileBrowser: TShellTreeView;
-    popupFileBrowser: TPopupMenu;
+    FileBrowserPopup: TPopupMenu;
     btnRefreshFileBrowser: TSpeedButton;
     SpeedButtonFindNext: TSpeedButton;
     SpeedButtonFindPrev: TSpeedButton;
     ToolButton5: TToolButton;
-    TB_FromDesigner: TToolButton;
     TB_ShowPackages: TToolButton;
     TT_ScriptManager: TToolButton;
     ToolButton6: TToolButton;
@@ -313,7 +312,6 @@ type
     procedure ActionTabLastExecute(Sender: TObject);
     procedure ActionTabNextExecute(Sender: TObject);
     procedure ActionUndoExecute(Sender: TObject);
-    procedure CallFormDesignerExecute(Sender: TObject);
     procedure ChangeMouseStatus(Sender: TObject);
     procedure CheckBoxMatchCaseClick(Sender: TObject);
     procedure CloseFindPanel;
@@ -323,11 +321,11 @@ type
     procedure FormDropFiles(Sender: TObject; const FileNames: array of String);
     procedure DebugMemoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure ShowDTMEditor(Sender: TObject);
+    procedure ShowFormDesigner(Sender: TObject);
     procedure UnloadPlugin(Sender: TObject);
     procedure MenuToolsClick(Sender: TObject);
     procedure popupFileBrowserOpenClick(Sender: TObject);
     procedure popupFileBrowserOpenExternallyClick(Sender: TObject);
-    procedure MenuItemFormDesignerClick(Sender: TObject);
     procedure MenuItemReadOnlyTabClick(Sender: TObject);
     procedure MenuItemBitmapConvClick(Sender: TObject);
     procedure MenuItemHandbookClick(Sender: TObject);
@@ -387,7 +385,6 @@ type
     procedure SpeedButtonSearchClick(Sender: TObject);
     procedure SplitterFunctionListCanResize(Sender: TObject; var NewSize: Integer;
       var Accept: Boolean);
-    procedure TB_FromDesignerClick(Sender: TObject);
     procedure TB_ShowPackagesClick(Sender: TObject);
     procedure ThreadOpenConnectionEvent(Sender: TObject; var url: string;
       var Continue: boolean);
@@ -900,11 +897,6 @@ procedure TSimbaForm.SplitterFunctionListCanResize(Sender: TObject; var NewSize:
 begin
   if(NewSize > ScriptPanel.Width div 2)then
     NewSize := ScriptPanel.Width div 2;
-end;
-
-procedure TSimbaForm.TB_FromDesignerClick(Sender: TObject);
-begin
-  CallFormDesignerExecute(Sender);
 end;
 
 procedure TSimbaForm.TB_ShowPackagesClick(Sender: TObject);
@@ -1952,17 +1944,6 @@ begin
     DebugMemo.Undo;
 end;
 
-procedure TSimbaForm.CallFormDesignerExecute(Sender: TObject);
-begin
-  {$IFDEF USE_FORMDESIGNER}
-  CompForm.Interpreter := 1;
-  if (CompForm.Visible) then
-    CompForm.{$IFDEF WINDOWS}Hide{$ELSE}Visible := False{$ENDIF}
-  else
-    CompForm.{$IFDEF WINDOWS}Show{$ELSE}Visible := True{$ENDIF};
-  {$ENDIF}
-end;
-
 procedure TSimbaForm.ChangeMouseStatus(Sender: TObject);
 var
   x: integer = -1;
@@ -2081,6 +2062,11 @@ begin
   TDTMForm.Create(Manager, DebugMemo).Show();
 end;
 
+procedure TSimbaForm.ShowFormDesigner(Sender: TObject);
+begin
+  CompForm.ShowOnTop();
+end;
+
 procedure TSimbaForm.UnloadPlugin(Sender: TObject);
 begin
   Plugins.Unload(TMenuItem(Sender).Caption);
@@ -2131,11 +2117,6 @@ procedure TSimbaForm.popupFileBrowserOpenExternallyClick(Sender: TObject);
 begin
   if (FileBrowser.Selected <> nil) and FileExists(TShellTreeNode(FileBrowser.Selected).FullFileName) then
     OpenDocument(TShellTreeNode(FileBrowser.Selected).FullFileName);
-end;
-
-procedure TSimbaForm.MenuItemFormDesignerClick(Sender: TObject);
-begin
-  CallFormDesignerExecute(Sender);
 end;
 
 procedure TSimbaForm.MenuItemBitmapConvClick(Sender: TObject);

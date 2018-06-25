@@ -34,5 +34,5 @@
                         // default, yet keep it possible to disable it with
                         // command line flags.
 
-//{$DEFINE USE_FORMDESIGNER} // Disabled until updated for Lape
+{$DEFINE USE_FORMDESIGNER}
 

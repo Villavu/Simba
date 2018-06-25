@@ -202,8 +202,8 @@ begin
   Self.FControlsClassPStd[9] := TShape;
   f:=TDsgnForm.Create(self);
   //f.Parent:=CompForm.Panel1;
-  f.Left:=Self.Panel1.Left;
-  f.Top:=Self.Panel1.Top;
+  f.Left:=0;
+  f.Top:=0;
   //f.Show;
  // setParent(Self.Panel1);
   LCLIntf.SetParent(f.Handle,self.Panel1.Handle);
@@ -214,6 +214,7 @@ begin
  ofdlg.Filter:='Simba form files only|*.smf';
  sfdlg:= TSaveDialog.Create(self);
  sfdlg.Filter:='Simba form files|*.smf';
+ Interpreter := 1;
 end;
 
 procedure TCompForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -360,6 +361,7 @@ begin
   codefrm:=TCodeGen.Create(self);}
   SimbaForm.AddTab;
   FormToSCList(f);
+
   {codefrm.CreateScript(CompList);}
   try
   C:=TCodeGenerator.Create(Interpreter);
@@ -497,6 +499,7 @@ begin
       else
         fontname := #39 + cmp.Font.Name + #39;
       fontsize := cmp.Font.Size;
+
       if (CompareText(cmp.ClassName, 'TImage') = 0) and Assigned(TImage(cmp).Picture.Graphic) then
       begin
         mb.LoadFromTBitmap(TImage(cmp).Picture.Bitmap);
@@ -510,6 +513,7 @@ begin
     if mb <> nil then
       mb.Free;
   end;
+
 end;
 
 procedure TCompForm.ApplySimbaToComponent(smb: TSimbaComponent; cmp: TControl);
@@ -597,15 +601,14 @@ end;
 
 procedure TCompForm.FormToSCList(form: TDsgnForm);
 var
-   i: integer;
+  i: integer;
 begin
  if assigned(complist) then
    complist.Free;
   complist:=TSimbaComponentList.Create;
   ComponentToSimba(form);
   for i := 0 to form.ControlCount - 1 do
-     //CompList.AddItem(ComponentToSimba(Form.Controls[i]),i+1);
-      ComponentToSimba(Form.Controls[i]);
+    ComponentToSimba(Form.Controls[i]);
 end;
 
 procedure TCompForm.AddToStringGridEx(smb: TSimbaComponent);

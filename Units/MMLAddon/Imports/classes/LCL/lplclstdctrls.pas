@@ -58,6 +58,8 @@ type
   PSpeedButton = ^TSpeedButton;
   PButtonLayout = ^TButtonLayout;
   PDrawItemEvent = ^TDrawItemEvent;
+  // TRadioButton
+  PRadioButton = ^TRadioButton;
 
 {TCustomScrollBar}
 
@@ -1965,8 +1967,29 @@ begin
   end;
 end;
 
+//constructor Create();
+procedure TRadioButton_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PRadioButton(Params^[0])^ := TRadioButton.Create(PComponent(Params^[1])^);
+end;
 
-{}
+//procedure Free();
+procedure TRadioButton_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PRadioButton(Params^[0])^.Free();
+end;
+
+procedure Register_TRadioButton(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TRadioButton', 'TCustomCheckBox');
+
+    addGlobalFunc('procedure TRadioButton.Init(AOwner: TComponent);', @TRadioButton_Init);
+    addGlobalFunc('procedure TRadioButton.Free(); constref;', @TRadioButton_Free);
+  end;
+end;
+
 procedure RegisterLCLStdCtrls(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -2008,6 +2031,7 @@ begin
   Register_TLabel(Compiler);
   Register_TCustomSpeedButton(Compiler);
   Register_TSpeedButton(Compiler);
+  Register_TRadioButton(Compiler);
 end;
 
 end.
