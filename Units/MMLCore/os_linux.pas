@@ -33,7 +33,7 @@ interface
 
   uses
     Classes, SysUtils, mufasatypes, mufasabase, IOManager,
-    xlib, x, xutil, XKeyInput, ctypes, syncobjs;
+    xlib, x, xutil, XKeyInput, KeySym, ctypes, syncobjs;
 
   type
 
@@ -163,8 +163,154 @@ implementation
 
   }
 
-  function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint; cdecl;
+var
+  SpecialXKeys: array [0..255] of Int32;
 
+  function XGetKeySym(Key: String; Display: PDisplay): TKeySym;
+  var ks: TKeySym;
+  begin
+    ks := XStringToKeysym(PChar(Key));
+    if (ks = NoSymbol) then
+      raise Exception.CreateFmt('Undefined key: `%s`', [key]);
+    Result := ks;
+  end;
+
+  procedure XKeyDown(Key: TKeyCode);
+  var
+    Display: PDisplay;
+  begin
+    Display := XOpenDisplay(nil);
+    XTestFakeKeyEvent(Display, Key, True, 0);
+    XFlush(Display);
+    XCloseDisplay(Display);
+  end;
+
+  procedure XKeyUp(Key: TKeyCode);
+  var
+    Display: PDisplay;
+  begin
+    Display := XOpenDisplay(nil);
+    XTestFakeKeyEvent(Display, Key, False, 0);
+    XFlush(Display);
+    XCloseDisplay(Display);
+  end;
+
+  function VirtualKeyToXKeySym(Key: Word): TKeySym;
+  begin
+    case Key of
+      VK_BACK:      Result := XK_BackSpace;
+      VK_TAB:       Result := XK_Tab;
+      VK_CLEAR:     Result := XK_Clear;
+      VK_RETURN:    Result := XK_Return;
+      VK_SHIFT:     Result := XK_Shift_L;
+      VK_CONTROL:   Result := XK_Control_L;
+      VK_MENU:      Result := XK_Alt_R;
+      VK_CAPITAL:   Result := XK_Caps_Lock;
+
+      VK_ESCAPE:    Result := XK_Escape;
+      VK_SPACE:     Result := XK_space;
+      VK_PRIOR:     Result := XK_Prior;
+      VK_NEXT:      Result := XK_Next;
+      VK_END:       Result := XK_End;
+      VK_HOME:      Result := XK_Home;
+      VK_LEFT:      Result := XK_Left;
+      VK_UP:        Result := XK_Up;
+      VK_RIGHT:     Result := XK_Right;
+      VK_DOWN:      Result := XK_Down;
+      VK_SELECT:    Result := XK_Select;
+      VK_PRINT:     Result := XK_Print;
+      VK_EXECUTE:   Result := XK_Execute;
+
+      VK_INSERT:    Result := XK_Insert;
+      VK_DELETE:    Result := XK_Delete;
+      VK_HELP:      Result := XK_Help;
+      VK_0:         Result := XK_0;
+      VK_1:         Result := XK_1;
+      VK_2:         Result := XK_2;
+      VK_3:         Result := XK_3;
+      VK_4:         Result := XK_4;
+      VK_5:         Result := XK_5;
+      VK_6:         Result := XK_6;
+      VK_7:         Result := XK_7;
+      VK_8:         Result := XK_8;
+      VK_9:         Result := XK_9;
+
+      VK_A:         Result := XK_a;
+      VK_B:         Result := XK_b;
+      VK_C:         Result := XK_c;
+      VK_D:         Result := XK_d;
+      VK_E:         Result := XK_e;
+      VK_F:         Result := XK_f;
+      VK_G:         Result := XK_g;
+      VK_H:         Result := XK_h;
+      VK_I:         Result := XK_i;
+      VK_J:         Result := XK_j;
+      VK_K:         Result := XK_k;
+      VK_L:         Result := XK_l;
+      VK_M:         Result := XK_m;
+      VK_N:         Result := XK_n;
+      VK_O:         Result := XK_o;
+      VK_P:         Result := XK_p;
+      VK_Q:         Result := XK_q;
+      VK_R:         Result := XK_r;
+      VK_S:         Result := XK_s;
+      VK_T:         Result := XK_t;
+      VK_U:         Result := XK_u;
+      VK_V:         Result := XK_v;
+      VK_W:         Result := XK_w;
+      VK_X:         Result := XK_x;
+      VK_Y:         Result := XK_y;
+      VK_Z:         Result := XK_z;
+
+      VK_NUMPAD0:   Result := XK_KP_0;
+      VK_NUMPAD1:   Result := XK_KP_1;
+      VK_NUMPAD2:   Result := XK_KP_2;
+      VK_NUMPAD3:   Result := XK_KP_3;
+      VK_NUMPAD4:   Result := XK_KP_4;
+      VK_NUMPAD5:   Result := XK_KP_5;
+      VK_NUMPAD6:   Result := XK_KP_6;
+      VK_NUMPAD7:   Result := XK_KP_7;
+      VK_NUMPAD8:   Result := XK_KP_8;
+      VK_NUMPAD9:   Result := XK_KP_9;
+      VK_MULTIPLY:  Result := XK_KP_Multiply;
+      VK_ADD:       Result := XK_KP_Add;
+      VK_SEPARATOR: Result := XK_KP_Separator;
+      VK_SUBTRACT:  Result := XK_KP_Subtract;
+      VK_DECIMAL:   Result := XK_KP_Decimal;
+      VK_DIVIDE:    Result := XK_KP_Divide;
+      VK_F1:        Result := XK_F1;
+      VK_F2:        Result := XK_F2;
+      VK_F3:        Result := XK_F3;
+      VK_F4:        Result := XK_F4;
+      VK_F5:        Result := XK_F5;
+      VK_F6:        Result := XK_F6;
+      VK_F7:        Result := XK_F7;
+      VK_F8:        Result := XK_F8;
+      VK_F9:        Result := XK_F9;
+      VK_F10:       Result := XK_F10;
+      VK_F11:       Result := XK_F11;
+      VK_F12:       Result := XK_F12;
+      VK_F13:       Result := XK_F13;
+      VK_F14:       Result := XK_F14;
+      VK_F15:       Result := XK_F15;
+      VK_F16:       Result := XK_F16;
+      VK_F17:       Result := XK_F17;
+      VK_F18:       Result := XK_F18;
+      VK_F19:       Result := XK_F19;
+      VK_F20:       Result := XK_F20;
+      VK_F21:       Result := XK_F21;
+      VK_F22:       Result := XK_F22;
+      VK_F23:       Result := XK_F23;
+      VK_F24:       Result := XK_F24;
+      VK_NUMLOCK:   Result := XK_Num_Lock;
+      VK_SCROLL:    Result := XK_Scroll_Lock;
+    else
+      Result := XK_VoidSymbol;
+    end;
+  end;
+
+
+  function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint; cdecl;
   begin
     case para2^.error_code of
       1:  xerror := 'BadRequest';
@@ -558,43 +704,49 @@ implementation
     end;
   end;
 
-  { TODO: Check if this supports multiple keyboard layouts, probably not }
+  { XXX: This can be done better - just more work }
   procedure TWindow.SendString(str: string; keywait, keymodwait: integer);
   var
-    I, L: Integer;
-    K: Byte;
-    HoldShift: Boolean;
-  begin
-    HoldShift := False;
-    L := Length(str);
-    for I := 1 to L do
+    i,index: Int32;
+    SpecialKS,KS: TKeySym;
+    KC: TKeyCode;
+
+    function GetModifierKC(n: Int32): TKeyCode;
     begin
-      if (((str[I] >= 'A') and (str[I] <= 'Z')) or
-          ((str[I] >= '!') and (str[I] <= '&')) or
-          ((str[I] >= '(') and (str[I] <= '+')) or
-          (str[I] = ':') or
-          ((str[I] >= '<') and (str[I] <= '@')) or
-          ((str[I] >= '^') and (str[I] <= '_')) or
-          ((str[I] >= '{') and (str[I] <= '~'))) then
+       if n = ShiftMapIndex then
+         Exit(XKeysymToKeycode(Self.Display, XK_Shift_L))
+       else if n >= Mod1MapIndex then
+         Exit(XKeysymToKeycode(Self.Display, XK_ISO_Level3_Shift))
+       else
+         raise Exception.CreateFmt('SendString - Unsupported modifier for key: `%s`', [str[i]]);
+    end;
+
+  begin
+    for i:=1 to Length(str) do
+    begin
+      SpecialKS := SpecialXKeys[ord(str[i])];
+      if SpecialKS <> 0 then KS := SpecialKS
+      else                   KS := XGetKeySym(str[i], Self.Display);
+      KC := XKeysymToKeycode(Self.Display, KS);
+
+      index := 0;
+      while (index < 8) and (XKeycodeToKeysym(Self.Display, KC, index) <> KS) do
+        Inc(index);
+
+      if (index <> 0) then
       begin
-        HoldKey(VK_SHIFT);
-        HoldShift := True;
-        sleep(keymodwait shr 1);
+        XKeyDown(GetModifierKC(index-1));
+        Sleep(keymodwait shr 1);
       end;
 
-      K := GetKeyCode(str[I]);
-      HoldKey(K);
+      XKeyDown(KC);
+      if keywait <> 0 then Sleep(keywait);
+      XKeyUp(KC);
 
-      if keywait <> 0 then
-        Sleep(keywait);
-
-      ReleaseKey(K);
-
-      if (HoldShift) then
+      if (index <> 0) then
       begin
-        HoldShift := False;
-        sleep(keymodwait shr 1);
-        ReleaseKey(VK_SHIFT);
+        XKeyUp(GetModifierKC(index-1));
+        Sleep(keymodwait shr 1);
       end;
     end;
   end;
@@ -610,20 +762,26 @@ implementation
   end;
 
   function TWindow.IsKeyHeld(key: integer): boolean;
+  var
+    KC: TKeyCode;
+    Keys: array [0..31] of Byte;
   begin
-    raise Exception.CreateFmt('IsKeyDown isn''t implemented yet on Linux', []);
+    KC := XKeysymToKeycode(Self.Display, VirtualKeyToXKeySym(key));
+    if(KC = 0) then Exit(False);
+    XQueryKeymap(Self.Display, chararr32(Keys));
+    Result := (keys[KC shr 3] shr (KC and $07)) and $01 > 0;
   end;
 
-  function TWindow.GetKeyCode(c: char): integer;
+  function TWindow.GetKeyCode(c: Char): Integer;
   begin
     case C of
-      '0'..'9' :Result := VK_0 + Ord(C) - Ord('0');
-      'a'..'z' :Result := VK_A + Ord(C) - Ord('a');
-      'A'..'Z' :Result := VK_A + Ord(C) - Ord('A');
-      ' ' : result := VK_SPACE;
+      '0'..'9': Result := VK_0 + Ord(C) - Ord('0');
+      'a'..'z': Result := VK_A + Ord(C) - Ord('a');
+      'A'..'Z': Result := VK_A + Ord(C) - Ord('A');
+      ' ' :     Result := VK_SPACE;
     else
-      Raise Exception.CreateFMT('GetSimpleKeyCode - char (%s) is not in A..z',[c]);
-    end
+      raise Exception.CreateFMT('GetSimpleKeyCode - char (%s) is not in A..z',[c]);
+    end;
   end;
 
   { ***implementation*** IOManager }
@@ -676,4 +834,43 @@ implementation
     raise Exception.Create('SetTargetEx: Not Implemented.');
   end;
 
+
+
+
+initialization
+   SpecialXKeys[Ord(#9)]  := (XK_TAB);
+   SpecialXKeys[Ord(#10)] := (XK_RETURN);
+   SpecialXKeys[Ord(#32)] := (XK_SPACE);
+   SpecialXKeys[Ord(#34)] := (XK_QUOTEDBL);
+   SpecialXKeys[Ord(#39)] := (XK_APOSTROPHE);
+   SpecialXKeys[Ord('!')] := (XK_EXCLAM);
+   SpecialXKeys[Ord('#')] := (XK_NUMBERSIGN);
+   SpecialXKeys[Ord('%')] := (XK_PERCENT);
+   SpecialXKeys[Ord('$')] := (XK_DOLLAR);
+   SpecialXKeys[Ord('&')] := (XK_AMPERSAND);
+   SpecialXKeys[Ord('(')] := (XK_PARENLEFT);
+   SpecialXKeys[Ord(')')] := (XK_PARENRIGHT);
+   SpecialXKeys[Ord('=')] := (XK_EQUAL);
+   SpecialXKeys[Ord(',')] := (XK_COMMA);
+   SpecialXKeys[Ord('.')] := (XK_PERIOD);
+   SpecialXKeys[Ord(':')] := (XK_COLON);
+   SpecialXKeys[Ord(';')] := (XK_SEMICOLON);
+   SpecialXKeys[Ord('<')] := (XK_LESS);
+   SpecialXKeys[Ord('>')] := (XK_GREATER);
+   SpecialXKeys[Ord('?')] := (XK_QUESTION);
+   SpecialXKeys[Ord('@')] := (XK_AT);
+   SpecialXKeys[Ord('[')] := (XK_BRACKETLEFT);
+   SpecialXKeys[Ord(']')] := (XK_BRACKETRIGHT);
+   SpecialXKeys[Ord('\')] := (XK_BACKSLASH);
+   SpecialXKeys[Ord('^')] := (XK_ASCIICIRCUM);
+   SpecialXKeys[Ord('_')] := (XK_UNDERSCORE);
+   SpecialXKeys[Ord('`')] := (XK_GRAVE);
+   SpecialXKeys[Ord('{')] := (XK_BRACELEFT);
+   SpecialXKeys[Ord('|')] := (XK_BAR);
+   SpecialXKeys[Ord('}')] := (XK_BRACERIGHT);
+   SpecialXKeys[Ord('~')] := (XK_ASCIITILDE);
+   SpecialXKeys[Ord('+')] := (XK_PLUS);
+   SpecialXKeys[Ord('-')] := (XK_MINUS);
+   SpecialXKeys[Ord('*')] := (XK_ASTERISK);
+   SpecialXKeys[Ord('/')] := (XK_SLASH);
 end.
