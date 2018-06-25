@@ -1,6 +1,7 @@
 unit script_import_system;
 
 {$mode objfpc}{$H+}
+{$MACRO ON}
 
 interface
 
@@ -37,6 +38,10 @@ begin
 
   with Compiler do
   begin
+    addBaseDefine(Format('FPC_VERSION_%d', [FPC_VERSION]));
+    addBaseDefine(Format('FPC_RELEASE_%d', [FPC_RELEASE]));
+    addBaseDefine(Format('FPC_PATCH_%d', [FPC_PATCH]));
+
     addBaseDefine('MUFASA');
     addBaseDefine('COGAT');
     addBaseDefine('DGROCKS');

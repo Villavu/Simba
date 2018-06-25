@@ -47,8 +47,6 @@ type
      FMode: integer;{0: script form; 1:form in smart; 2: progress report}
     function CreateComponent(Sender: TObject; X, Y: Integer):TControl;
     function ResolveFileType(AStream: TStream): Integer;
-    procedure CreateParams(var Params: TCreateParams); override;
-    procedure CreateWnd; override;
     procedure Paint; override;
     procedure SetScriptMode();
     procedure SetProgressMode();
@@ -278,14 +276,15 @@ var
       comp := CreateClass.Create(Self);
       pInfo := comp.ClassInfo;
       cname := pInfo^.Name;
+      Delete(cname, 1, 1);
       if (comp is TWinControl) then begin
         TWinControl(comp).ParentWindow := TWinControl(Self).Handle;
       //  if comparetext(TWinControl(comp).ClassName,'TForm') =0  then
         TWinControl(comp).Parent := TWinControl(Self); //else TWinControl(comp).Parent:=DsgnForm;
         try
-        TWinControl(comp).Name := cname + IntToStr(_ControlsCreated);
+        TWinControl(comp).Name := cname + IntToStr(_ControlsCreated+1);
         except
-        TWinControl(comp).Name := cname + IntToStr(_ControlsCreated+random(20));
+        TWinControl(comp).Name := cname + IntToStr(_ControlsCreated+1+random(20));
         end;
         TWinControl(comp).Left := X;
         TWinControl(comp).Top := Y;
@@ -294,9 +293,9 @@ var
        // if comparetext(TControl(Sender).ClassName,'TForm')=0 then
         Tcontrol(comp).Parent := TWinControl(Self);// else exit;
         try
-        TControl(comp).Name := cname + IntToStr(_ControlsCreated);
+        TControl(comp).Name := cname + IntToStr(_ControlsCreated+1);
         except
-        TControl(comp).Name := cname + IntToStr(_ControlsCreated+random(20));
+        TControl(comp).Name := cname + IntToStr(_ControlsCreated+1+random(20));
         end;
         TControl(comp).Left := X;
         TControl(comp).Top := Y;
@@ -390,19 +389,6 @@ begin
   end;
 end;
 
-procedure TDsgnForm.CreateParams(var Params: TCreateParams);
-begin
-  inherited CreateParams(Params);
-  Params.Style := WS_CAPTION or WS_SIZEBOX or WS_SYSMENU;
-  Params.ExStyle := WS_EX_DLGMODALFRAME or WS_EX_WINDOWEDGE;
-end;
-
-procedure TDsgnForm.CreateWnd;
-begin
-  inherited CreateWnd;
- // SendMessage(Self.Handle, LM_SETICON, 1, 0);
-end;
-
 procedure TDsgnForm.DeleteComponent();
 begin
   if Assigned(CurComp) then
@@ -435,7 +421,6 @@ end;
 
 procedure TDsgnForm.SetScriptMode();
 begin
-  //Self.BorderStyle:=BsSizeable;
   Self.Width:=320;
   Self.Height:=240;
   Self.Caption:=Self.Name;
