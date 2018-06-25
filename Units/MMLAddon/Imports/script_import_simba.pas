@@ -11,7 +11,7 @@ implementation
 
 uses
   script_imports, script_thread, lpcompiler, lptypes, ffi, mufasatypes, simbaunit, debugimage,
-  Dialogs, ExtCtrls, Forms, Controls, aca, aca_math;
+  Dialogs, ExtCtrls, Forms, Controls, aca, aca_math, dtm_editor;
 
 type
   TBalloonHint = class
@@ -367,11 +367,11 @@ type
   TACA = class
     Params: PParamArray;
 
-    procedure GetACAResult(CTS, Color, Tolerance: Int32; Hue, Sat: Extended);
+    procedure GetResult(CTS, Color, Tolerance: Int32; Hue, Sat: Extended);
     procedure Execute;
   end;
 
-procedure TACA.GetACAResult(CTS, Color, Tolerance: Int32; Hue, Sat: Extended);
+procedure TACA.GetResult(CTS, Color, Tolerance: Int32; Hue, Sat: Extended);
 begin
   PInt32(Params^[2])^ := CTS;
   PInt32(Params^[3])^ := Color;
@@ -385,8 +385,9 @@ procedure TACA.Execute;
 begin
   with TACAForm.Create(TMMLScriptThread(Params^[0]).Client.IOManager) do
   begin
-    OnGetResult := @GetACAResult;
-    Caption := 'ACA - ' + PString(Params^[1])^;
+    OnGetResult := @GetResult;
+    if (PString(Params^[1])^ <> '') then
+      Caption := 'ACA - ' + PString(Params^[1])^;
     ShowModal();
   end;
 end;
@@ -410,6 +411,42 @@ begin
     1: BestColor_CTS1(PIntegerArray(Params^[1])^, PInt32(Params^[3])^, PInt32(Params^[4])^);
     2: BestColor_CTS2(PIntegerArray(Params^[1])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PExtended(Params^[5])^, PExtended(Params^[6])^);
   end;
+end;
+
+type
+  TDTMEditor = class
+    Params: PParamArray;
+
+    procedure GetResult(DTM: String);
+    procedure Execute;
+  end;
+
+procedure TDTMEditor.GetResult(DTM: String);
+begin
+  PString(Params^[2])^ := DTM;
+end;
+
+procedure TDTMEditor.Execute;
+begin
+  with TDTMForm.Create(TMMLScriptThread(Params^[0]).Client.IOManager, SimbaForm.DebugMemo) do
+  begin
+    OnGetResult := @GetResult;
+    if (PString(Params^[1])^ <> '') then
+      Caption := 'DTM Editor - ' + PString(Params^[1])^;
+    ShowModal();
+  end;
+end;
+
+procedure Lape_DTMEditor(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+var
+  DTMEditor: TDTMEditor;
+begin
+  DTMEditor := TDTMEditor.Create();
+  DTMEditor.Params := Params;
+
+  TThread.Synchronize(nil, @DTMEditor.Execute);
+
+  DTMEditor.Free();
 end;
 
 procedure Lape_Import_Simba(Compiler: TLapeCompiler; Data: Pointer);
@@ -477,6 +514,7 @@ begin
     addGlobalMethod('procedure ACA(Colors: TIntegerArray; CTS: Int32; out Color, Tolerance: Int32; out Hue, Sat: Extended);', @Lape_ACAEx, Data);
     addGlobalMethod('procedure Sync(Method: TSyncMethod); overload;', @Lape_Sync, Data);
     addGlobalMethod('procedure Sync(Method: TSyncObjectMethod); overload;', @Lape_SyncEx, Data);
+    addGlobalMethod('procedure DTMEditor(Title: String; out DTM: String);', @Lape_DTMEditor, Data);
   end;
 end;
 

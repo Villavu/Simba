@@ -51,6 +51,9 @@
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
+            <CompilerMessages>
+              <IgnoredMessages idx5024="True"/>
+            </CompilerMessages>
             <CustomOptions Value="-dLape_CDECL
 -dStaticFFI"/>
             <OtherDefines Count="2">
@@ -89,7 +92,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="66">
+    <Units Count="69">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -387,6 +390,25 @@
         <Filename Value="../../Units/MMLAddon/script_plugins_exports.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit65>
+      <Unit66>
+        <Filename Value="../Tools/dtm_editor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="DTMForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit66>
+      <Unit67>
+        <Filename Value="../Tools/aca_math.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit67>
+      <Unit68>
+        <Filename Value="../Tools/aca.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ACAForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ACA"/>
+      </Unit68>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -432,7 +454,7 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="3">
+    <Exceptions Count="4">
       <Item1>
         <Name Value="lpException"/>
       </Item1>
@@ -442,6 +464,9 @@
       <Item3>
         <Name Value="ESocketError"/>
       </Item3>
+      <Item4>
+        <Name Value="ESyntaxError"/>
+      </Item4>
     </Exceptions>
   </Debugging>
 </CONFIG>

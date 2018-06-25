@@ -162,7 +162,6 @@ end;
 procedure TACAForm.ApplyZoom(Reset: Boolean);
 var
   X, Y, W, H: Int32;
-  P: TPoint;
 begin
   if Reset then
   begin
@@ -170,24 +169,18 @@ begin
     FZoom.Current := 1;
   end;
 
-  // Zoom in towards the mouse cursor
-  X := Mouse.CursorPos.X - Self.ClientToScreen(Point(ScrollBox.ClientRect.Left, 0)).X;
-  Y := Mouse.CursorPos.Y - Self.ClientToScreen(Point(ScrollBox.ClientRect.Top, 0)).Y;
-
+  X := imgClient.ScreenToClient(Mouse.CursorPos).X;
+  Y := imgClient.ScreenToClient(Mouse.CursorPos).Y;
   W := imgClient.Width;
   H := imgClient.Height;
-
-  // Get the center of the currently visible area at 1x zoom.
-  P.X := Trunc(ScrollBox.HorzScrollBar.Position + (X * FZoom.Previous) / FZoom.Previous);
-  P.Y := Trunc(ScrollBox.VertScrollBar.Position + (Y * FZoom.Previous) / FZoom.Previous);
 
   imgClient.Width := Trunc(FClient.MBitmaps[0].Width * FZoom.Current);
   imgClient.Height := Trunc(FClient.MBitmaps[0].Height * FZoom.Current);
 
-  if (not (fsCreating in FormState)) then
+  if (FZoom.Previous <> FZoom.Current) then
   begin
-    ScrollBox.HorzScrollBar.Position := Trunc(P.X * imgClient.Width / W) - X;
-    ScrollBox.VertScrollBar.Position := Trunc(P.Y * imgClient.Height / H) - Y;
+    ScrollBox.HorzScrollBar.Position := Round(X * imgClient.Width / W) - Round(ScrollBox.ClientWidth / 2);
+    ScrollBox.VertScrollBar.Position := Round(Y * imgClient.Height / H) - Round(ScrollBox.ClientHeight / 2);
   end;
 
   ClientImageCenter(nil);
@@ -465,6 +458,8 @@ end;
 procedure TACAForm.ClientImageMouseLeave(Sender: TObject);
 begin
   Coords(-1, -1);
+
+  FScroll.Active := False;
 end;
 
 procedure TACAForm.FindBestColorClick(Sender: TObject);

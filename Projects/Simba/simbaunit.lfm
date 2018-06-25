@@ -102,14 +102,14 @@ object SimbaForm: TSimbaForm
       OnMouseDown = ButtonSelectorDown
     end
     object ToolButton8: TToolButton
-      Left = 443
+      Left = 420
       Height = 22
       Top = 2
       Caption = 'ToolButton8'
       Style = tbsDivider
     end
     object TB_Tray: TToolButton
-      Left = 448
+      Left = 425
       Hint = 'Minimize to tray'
       Top = 2
       Caption = 'TB_Tray'
@@ -153,14 +153,14 @@ object SimbaForm: TSimbaForm
       Enabled = False
     end
     object ToolButton3: TToolButton
-      Left = 494
+      Left = 471
       Height = 22
       Top = 2
       Caption = 'ToolButton3'
       Style = tbsDivider
     end
     object TT_Update: TToolButton
-      Left = 499
+      Left = 476
       Hint = 'Update'
       Top = 2
       Caption = 'TT_Update'
@@ -198,7 +198,7 @@ object SimbaForm: TSimbaForm
       Style = tbsDivider
     end
     object TB_Console: TToolButton
-      Left = 471
+      Left = 448
       Hint = 'Hide/Show Console'
       Top = 2
       Action = ActionConsole
@@ -225,16 +225,8 @@ object SimbaForm: TSimbaForm
       Top = 2
       Action = ActionDebugger
     end
-    object TB_FromDesigner: TToolButton
-      Left = 420
-      Hint = 'Form Designer'
-      Top = 2
-      Caption = 'TB_FromDesigner'
-      ImageIndex = 32
-      OnClick = TB_FromDesignerClick
-    end
     object TB_ShowPackages: TToolButton
-      Left = 522
+      Left = 499
       Top = 2
       ImageIndex = 44
       OnClick = TB_ShowPackagesClick
@@ -250,7 +242,7 @@ object SimbaForm: TSimbaForm
         Width = 60
       end    
       item
-        Text = 'MouseBla'
+        Text = 'MouseCoords'
         Width = 100
       end    
       item
@@ -528,7 +520,7 @@ object SimbaForm: TSimbaForm
           FileSortType = fstNone
           Images = Mufasa_Image_List
           ParentFont = False
-          PopupMenu = popupFileBrowser
+          PopupMenu = FileBrowserPopup
           ReadOnly = True
           RightClickSelect = True
           TabOrder = 0
@@ -609,8 +601,8 @@ object SimbaForm: TSimbaForm
     end
   end
   object MainMenu: TMainMenu
-    left = 488
-    top = 144
+    left = 448
+    top = 48
     object MenuFile: TMenuItem
       Caption = '&File'
       SubMenuImages = Mufasa_Image_List
@@ -763,13 +755,13 @@ object SimbaForm: TSimbaForm
         Action = ActionReplace
         OnClick = ActionReplaceExecute
       end
-      object MenuItemDivider51: TMenuItem
+      object MenuItemDivider13: TMenuItem
         Caption = '-'
       end
       object MenuItemFont: TMenuItem
         Action = ActionFont
       end
-      object MenuItemDivider50: TMenuItem
+      object MenuItemDivider14: TMenuItem
         Caption = '-'
       end
       object MenuItemGoto: TMenuItem
@@ -1082,8 +1074,8 @@ object SimbaForm: TSimbaForm
         OnClick = MenuItemBitmapConvClick
       end
       object MenuItemFormDesigner: TMenuItem
-        Caption = 'Form designer'
-        OnClick = MenuItemFormDesignerClick
+        Caption = 'Form Designer'
+        Visible = False
       end
       object MenuItemACA: TMenuItem
         Caption = 'ACA'
@@ -1124,6 +1116,86 @@ object SimbaForm: TSimbaForm
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
         }
         OnClick = ShowACA
+      end
+      object MenuDTMEditor: TMenuItem
+        Caption = 'DTM Editor'
+        Bitmap.Data = {
+          36040000424D3604000000000000360000002800000010000000100000000100
+          2000000000000004000064000000640000000000000000000000FFFFFF000000
+          001A0000001A0000001A0000001A0000001A0000001A0000001A0000001A0000
+          001A0000001A0000001A0000001A0000001A0000001A0000001AFFFFFF000033
+          65A1004386C7002D6FB5004386C7002D6FB5004386C7002D6FB5004386C7002D
+          6FB5004386C7002D6FB5004386C7002D6FB5004386C7003365A1FFFFFF000149
+          90BC86B9EBFF679ACDFF81B4E6FF679ACDFF81B4E6FF679ACDFF81B4E6FF679A
+          CDFF81B4E6FF679ACDFF81B4E6FF6C9FD1FF407EBBD9014990A0FFFFFF000135
+          7BAB6FA2D4FF7BAEE0FF83B6E8FF83B6E8FF83B6E8FF83B6E8FF83B6E8FF83B6
+          E8FF83B6E8FF7BAEE0FF7FB2E4FF4283C3D2024F9D95024C9612FFFFFF000253
+          A3A986B9EAFF7DB0E2FF0253A3A90253A3A90253A3A90253A3A90253A3A9125F
+          ABB26EA5DAF282B5E6FF4486C7D00253A3900252A111024C9600FFFFFF00013C
+          85A572A5D7FF80B3E4FF0255A6A50254A4000354A5000255A64A1361AEAE71A8
+          DCF285B8E8FF4689C9CE0255A68D0254A4110252A100024C9600FFFFFF000356
+          A9A28CBFEDFF83B6E6FF0356A9A20357AB000356AA491462B1AB74ABDEF188BB
+          E9FF488BCCCC0356A98A0355A8110254A4000252A100024C9600FFFFFF000242
+          8CA176A9D9FF86B9E9FF0358AC9F0358AD481465B4A977AEE2F18BBEECFF4A8E
+          CFCA0358AC870357AB100355A8000254A4000252A100024C9600FFFFFF00035A
+          B09B93C6F2FF8ABDEBFF035AB09B1567B8A57AB2E4F18FC2EEFF4D91D2C8035A
+          B0840359AE100357AB000355A8000254A4000252A100024C9600FFFFFF000248
+          949E7BAEDDFF8DC0EEFF1668BBA37DB4E7F092C5F1FF4E93D4C7035BB382035A
+          B1100359AE000357AB000355A8000254A4000252A100024C9600FFFFFF00035D
+          B59699CCF6FF90C3F0FF80B7E9F095C8F3FF5096D7C5035DB580035CB40F035A
+          B1000359AE000357AB000355A8000254A4000252A100024C9600FFFFFF00024C
+          999B7EB1DFFF93C6F2FF98CBF4FF5398D9C4045EB87D035DB70F035CB400035A
+          B1000359AE000357AB000355A8000254A400023E790001142700FFFFFF00045F
+          BA919FD2F9FF9ACDF6FF549BDBC2045FBA7B045FB90F035DB700035CB400035A
+          B1000359AE000357AB0003519F0001264B000000000000000000FFFFFF000250
+          9E9985B8E3FF569CDDC10460BD790460BC0F045FB900035DB700035CB400035A
+          B1003D5C940001488E0000428400002142000000000000000000FFFFFF000461
+          BF8C579EDEC00461BF770461BE0E0460BC00045FB900035DB700034587000117
+          2D00763322000042840000428400002142000000000000000000FFFFFF000462
+          C0680462C0760462BF0E0461BE000460BC0003488B0001182E00000000000000
+          0000763322000042840000428400002142000000000000000000
+        }
+        OnClick = ShowDTMEditor
+      end
+      object MenuItem1: TMenuItem
+        Caption = 'Form Designer'
+        Bitmap.Data = {
+          36040000424D3604000000000000360000002800000010000000100000000100
+          2000000000000004000064000000640000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          000000000000000000000000000000000000000000000000000000000000C29A
+          74FFC29973FFC29972FFC19870FFC1976FFFC1966EFFC0956DFFC0956CFFC094
+          6BFFBF946BFFBE936AFFBE936AFFBD926AFFBD936BFFBD936BFF00000000C49B
+          75FFEEEEEEFFEEEEEEFFEEEEEEFFEEEEEEFFEEEEEEFFEEEEEEFFEEEEEEFFEDED
+          EDFFECECECFFEBEBEBFFEAEAEAFFEAEAEAFFE9E9E9FFBD936BFF00000000C69D
+          76FFF0F0F0FFF1F1F1FFF1F1F1FFF1F1F1FFF1F1F1FFF0F0F0FFF0F0F0FFF0F0
+          F0FFEFEFEFFFEDEDEDFFECECECFFEBEBEBFFEAEAEAFFBD936AFF00000000C89E
+          77FFF3F3F3FFF3F3F3FFF4F4F4FFF4F4F4FFF4F4F4FFF4F4F4FFF3F3F3FFF3F3
+          F3FFF1F1F1FFF0F0F0FFEEEEEEFFEDEDEDFFEBEBEBFFBE936AFF00000000CAA0
+          78FFF5F5F5FFF6F6F6FFF7F7F7FFF7F7F7FFF7F7F7FFF6F6F6FFF6F6F6FFF5F5
+          F5FFF3F3F3FFF1F1F1FFF0F0F0FFEEEEEEFFECECECFFBE936BFF00000000CCA1
+          79FFF8F8F8FFF9F9F9FFF9F9F9FFF9F9F9FFF9F9F9FFF9F9F9FFF8F8F8FFF7F7
+          F7FFF5F5F5FFF3F3F3FFF1F1F1FFEFEFEFFFEDEDEDFFBF946CFF00000000CEA3
+          7AFFFAFAFAFFFBFBFBFFFBFBFBFFFBFBFBFFFBFBFBFFFBFBFBFFFAFAFAFFF9F9
+          F9FFF7F7F7FFF5F5F5FFF2F2F2FFEFEFEFFFEDEDEDFFC0956CFF00000000CFA4
+          7BFFFBFBFBFFFCFCFCFFFDFDFDFFFDFDFDFFFDFDFDFFFCFCFCFFFBFBFBFFFAFA
+          FAFFF8F8F8FFF6F6F6FFF3F3F3FFF0F0F0FFEDEDEDFFC0966EFF00000000CFA4
+          7CFFFCFCFCFFFDFDFDFFFDFDFDFFFEFEFEFFFEFEFEFFFDFDFDFFFCFCFCFFFBFB
+          FBFFF9F9F9FFF6F6F6FFF3F3F3FFF1F1F1FFEEEEEEFFC1976FFF00000000D0A5
+          7CFFFCFCFCFFFDFDFDFFFEFEFEFFFEFEFEFFFEFEFEFFFDFDFDFFFCFCFCFFFBFB
+          FBFFF9F9F9FFF6F6F6FFF3F3F3FFF1F1F1FFEEEEEEFFC19870FF00000000D0A5
+          7CFFD1A57CFFD1A57CFFD1A57CFFD1A57BFFD1A47AFFD0A379FFCFA379FFCEA2
+          78FFCDA077FFCA9F76FFC89D75FFC69B73FFC49A72FFC29972FF00000000CFA4
+          7CFFD0A57CFFD1A57CFFD1A57CFFD1A57CFFD1A47BFFD0A47BFFCFA37AFFCEA2
+          79FFCCA178FFCB9F77FFC89E76FFC69C75FFC49B74FFC29973FF00000000CEA4
+          7CFFCFA47CFFD0A57DFFD0A57CFFD0A57CFFD0A47BFFCFA47BFFCFA37BFFCDA2
+          7AFFCCA179FFCAA078FFC89E77FFC69D76FFC49B75FFC29A74FF000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000
+        }
+        OnClick = ShowFormDesigner
       end
       object MenuItemDivider10: TMenuItem
         Caption = '-'
@@ -1316,8 +1388,8 @@ object SimbaForm: TSimbaForm
   end
   object Mufasa_Image_List: TImageList
     Tag = 4
-    left = 448
-    top = 144
+    left = 424
+    top = 112
     Bitmap = {
       4C69390000001000000010000000424242004242420042424200424242004242
       420042424200424242004242420042424200424242004242420042424200A155
@@ -3236,14 +3308,14 @@ object SimbaForm: TSimbaForm
     }
     Visible = True
     OnClick = MTrayIconClick
-    left = 528
-    top = 104
+    left = 384
+    top = 48
   end
   object TrayPopup: TPopupMenu
     Images = Mufasa_Image_List
     OnPopup = TrayPopupPopup
-    left = 528
-    top = 144
+    left = 744
+    top = 48
     object TrayStop: TMenuItem
       Action = ActionStopScript
       Enabled = False
@@ -3276,8 +3348,8 @@ object SimbaForm: TSimbaForm
   end
   object TabPopup: TPopupMenu
     Images = Mufasa_Image_List
-    left = 488
-    top = 104
+    left = 320
+    top = 48
     object MenuItemTabAdd: TMenuItem
       Action = ActionNewTab
       OnClick = ActionNewTabExecute
@@ -3334,8 +3406,8 @@ object SimbaForm: TSimbaForm
   end
   object ActionList: TActionList
     Images = Mufasa_Image_List
-    left = 448
-    top = 104
+    left = 256
+    top = 48
     object ActionTabNext: TAction
       Caption = 'Next tab'
       OnExecute = ActionTabNextExecute
@@ -3512,10 +3584,6 @@ object SimbaForm: TSimbaForm
       Caption = '&Notes'
       OnExecute = ActionUtiltiesExecute
     end
-    object CallFormDesigner: TAction
-      Caption = 'CallFormDesigner'
-      OnExecute = CallFormDesignerExecute
-    end
     object ActionFont: TAction
       Caption = 'Font'
       OnExecute = ActionFontExecute
@@ -3528,8 +3596,8 @@ object SimbaForm: TSimbaForm
   object ScriptPopup: TPopupMenu
     Images = Mufasa_Image_List
     OnPopup = ScriptPopupPopup
-    left = 568
-    top = 144
+    left = 680
+    top = 48
     object PopupItemUndo: TMenuItem
       Action = ActionUndo
       OnClick = ActionUndoExecute
@@ -3581,25 +3649,25 @@ object SimbaForm: TSimbaForm
     Options = [frDown, frFindNext, frHideUpDown, frEntireScope]
     OnFind = dlgReplaceFind
     OnReplace = dlgReplaceReplace
-    left = 608
-    top = 104
+    left = 512
+    top = 48
   end
   object UpdateTimer: TTimer
     Interval = 10000
     OnTimer = UpdateTimerCheck
-    left = 600
-    top = 200
+    left = 336
+    top = 112
   end
   object MouseTimer: TTimer
     Interval = 100
     OnTimer = ChangeMouseStatus
-    left = 448
-    top = 200
+    left = 256
+    top = 112
   end
-  object popupFileBrowser: TPopupMenu
+  object FileBrowserPopup: TPopupMenu
     Images = Mufasa_Image_List
-    left = 679
-    top = 104
+    left = 592
+    top = 48
     object popupFileBrowserOpen: TMenuItem
       Caption = 'Open'
       Bitmap.Data = {
