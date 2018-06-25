@@ -483,39 +483,42 @@ end;
 
 procedure TWindow.SendString(str: string; keywait, keymodwait: integer);
 var
-  I, L: integer;
+  i: Int32;
   C: Byte;
   ScanCode, VK: Word;
-  Shift: boolean;
+  SS: TShiftState;
 begin
-  L := Length(str);
-  for I := 1 to L do
+  for i:=1 to Length(str) do
   begin
     VK := VkKeyScan(str[I]);
-    Shift := (Hi(VK) > 0);
-    C := LoByte(VK);
+    SS := TShiftState(VK shr 8 and $FF);
+    C  := VK and $FF;
     ScanCode := MapVirtualKey(C, 0);
     if (ScanCode = 0) then
       Continue; // TODO/XXX: Perhaps raise an exception?
 
     // TODO/XXX: Do we wait when/after pressing shift as well?
-    if (Shift) then
+    if (SS <> []) then
     begin
-      Keybd_Event(VK_SHIFT, $2A, 0, 0);
-      sleep(keymodwait shr 1) ;
+      if ssShift in SS then Keybd_Event(VK_SHIFT,   $2A, 0, 0);
+      if ssCtrl  in SS then Keybd_Event(VK_CONTROL, $2A, 0, 0);
+      if ssALT   in SS then Keybd_Event(VK_MENU,    $2A, 0, 0);
+      Sleep(keymodwait shr 1);
     end;
 
     Keybd_Event(C, ScanCode, 0, 0);
 
     if keywait <> 0 then
-        sleep(keywait);
+      Sleep(keywait);
 
     Keybd_Event(C, ScanCode, KEYEVENTF_KEYUP, 0);
 
-    if (Shift) then
+    if (SS <> []) then
     begin
-      sleep(keymodwait shr 1);
-      Keybd_Event(VK_SHIFT, $2A, KEYEVENTF_KEYUP, 0);
+      Sleep(keymodwait shr 1);
+      if ssALT   in SS then Keybd_Event(VK_MENU,    $2A, KEYEVENTF_KEYUP, 0);
+      if ssCtrl  in SS then Keybd_Event(VK_CONTROL, $2A, KEYEVENTF_KEYUP, 0);
+      if ssShift in SS then Keybd_Event(VK_SHIFT,   $2A, KEYEVENTF_KEYUP, 0);
     end;
   end;
 end;
