@@ -1109,6 +1109,7 @@ begin
 
     ss_Running:
       begin
+        CurrScript.ScriptThread.TerminateOptions := CurrScript.ScriptThread.TerminateOptions + [stoUserTerminated];
         CurrScript.ScriptThread.State := ssStop;
 
         ScriptState := ss_Stopping;
