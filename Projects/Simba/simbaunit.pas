@@ -47,7 +47,7 @@ uses
   SynExportHTML, SynEditKeyCmds,
   SynEditMarkupHighAll,  LMessages, Buttons, ShellCtrls, PairSplitter,
   mmisc, stringutil,mufasatypesutil,
-  about, framefunctionlist, fontloader, updateform, Simbasettingsold,
+  about, framefunctionlist, updateform, Simbasettingsold,
   Simbasettingssimple,
   v_ideCodeInsight, v_ideCodeParser, CastaliaPasLexTypes, // Code completion units
   CastaliaSimplePasPar, v_AutoCompleteForm,  // Code completion units
@@ -445,7 +445,6 @@ type
     procedure InitializeCoreBuffer;
     procedure CustomExceptionHandler(Sender: TObject; E: Exception);
     procedure RegisterSettingsOnChanges;
-    procedure LoadFonts;
     procedure FillFunctionList(Sender: TObject);
   public
     { Required to work around using freed resources on quit }
@@ -460,7 +459,6 @@ type
     ParamHint : TParamHint;
     Tabs: TList;
     Manager: TIOManager;
-    Fonts: TMFonts;
     Picker: TMColorPicker;
     Selector: TMWindowSelector;
     OnScriptStart : TScriptStartEvent;
@@ -1493,8 +1491,6 @@ begin
       Exit;
   end;
 
-  LoadFonts();
-
   try
     Thread := TMMLScriptThread.Create(Script, CurrScript.ScriptFile);
     Thread.Output := DebugMemo.Lines;
@@ -1512,8 +1508,8 @@ begin
     if Selector.HasPicked then
       Thread.Client.IOManager.SetTarget(Selector.LastPick);
 
-    Thread.SetFonts(Fonts);
     Thread.SetSettings(SimbaSettings.MMLSettings);
+    Thread.SetFonts(SimbaSettings.Fonts.Path.Value); // Create font constants
 
     CurrScript.ScriptErrorLine := -1;
   except
@@ -2464,8 +2460,6 @@ begin
     FreeAndNil(Picker);
   if (Assigned(Manager)) then
     FreeAndNil(Manager);
-  if Assigned(Fonts) then
-    FreeAndNil(Fonts);
 
   if (Assigned(RecentFiles)) then
     FreeAndNil(RecentFiles);
@@ -2938,24 +2932,6 @@ begin
 
   SimbaSettings.SourceEditor.DefScriptPath.onChange := @SetDefaultScriptPath;
   SimbaSettings.SourceEditor.Font.onChange := @SetSourceEditorFont;
-end;
-
-procedure TSimbaForm.LoadFonts;
-var
-  Directory: String;
-begin
-  if (Fonts = nil) then
-  begin
-    formWriteLn('Loading fonts...');
-
-    Fonts := TMFonts.Create(nil);
-    Fonts.Path := SimbaSettings.Fonts.Path.Value;
-
-    for Directory in GetDirectories(SimbaSettings.Fonts.Path.Value) do
-      Fonts.LoadFont(Directory, False);
-
-    formWriteLn('Loaded ' + IntToStr(Fonts.Count) + ' fonts');
-  end;
 end;
 
 procedure TSimbaForm.FileBrowserExpand(Sender: TObject; Node: TTreeNode);

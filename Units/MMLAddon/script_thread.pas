@@ -68,7 +68,7 @@ type
     function Kill: Boolean;
 
     procedure SetSettings(From: TMMLSettings);
-    procedure SetFonts(From: TMFonts);
+    procedure SetFonts(Path: String);
 
     constructor Create(constref Script, FilePath: String);
     destructor Destroy; override;
@@ -387,16 +387,12 @@ begin
   FSettings.Prefix := 'Scripts/';
 end;
 
-procedure TMMLScriptThread.SetFonts(From: TMFonts);
+procedure TMMLScriptThread.SetFonts(Path: String);
 var
-  i: Int32;
+  Directory: String;
 begin
-  with FClient do
-  begin
-    MOCR.Fonts := From;
-    for i := 0 to MOCR.Fonts.Count - 1 do
-      FCompiler.addGlobalVar(MOCR.Fonts[i].Name, MOCR.Fonts[i].Name).isConstant := True;
-  end;
+  for Directory in GetDirectories(Path) do
+    FCompiler.addGlobalVar(Directory, Directory).isConstant := True;
 end;
 
 end.

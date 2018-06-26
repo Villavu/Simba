@@ -412,7 +412,7 @@ begin
          list.Add(GenSpaces(2)+ smb.compname+'.Init(Self.Form);');
          list.Add(GenSpaces(2)+'with'+GenSpaces(1)+smb.compname+GenSpaces(1)+'do');
          list.Add(GenSpaces(2)+'begin');
-         list.Add(GenSpaces(4)+'SetParent('+cmpList[0].compname+');');
+         list.Add(GenSpaces(4)+'SetParent(Self.Form);');
          list.Add(GenSpaces(4)+'SetCaption('+#39+smb.caption+#39+');');
          //list.Add(GenSpaces(4)+'Checked:=false'+';');
          list.Add(GenSpaces(4)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
@@ -508,8 +508,12 @@ begin
       AddStrings(ComboBoxesCode);
     if RadBtnsCode.Count > 0 then
       AddStrings(RadBtnsCode);
-    Add('  Self.Form.ShowModal();');
-    Add('  Self.Form.Free();');
+    Add('  try');
+    Add('    Self.Form.ShowModal();');
+    Add('    Self.Form.Free();');
+    Add('  except');
+    Add('    WriteLn(' + #39 + 'Encountered an exception while showing the form' + #39 + ');');
+    Add('  end');
     Add('end;');
     Add('');
     Add('begin');

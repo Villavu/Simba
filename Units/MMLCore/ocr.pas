@@ -53,16 +53,18 @@ type
   private
     Client: TObject;
     FFonts: TMFonts;
-    filterdata: TOCRFilterDataArray;
-    function  GetFonts:TMFonts;
-    procedure SetFonts(const NewFonts: TMFonts);
+    FilterData: TOCRFilterDataArray;
+    FUseFontBuffer: Boolean;
+
+    function GetFont(Name: String; Shadow: Boolean = False): TOCRData; overload;
+    function GetFont(Font: TFont): TOCRData; overload;
+
+    procedure SetFonts(Value: TMFonts);
   public
-    constructor Create(Owner: TObject);
+    constructor Create(Owner: TObject; UseFontBuffer: Boolean = True);
     destructor Destroy; override;
     procedure SetPath(const path: string);
-    function InitTOCR(const path: string): boolean;
-    function getTextPointsIn(sx, sy, w, h: Integer; shadow: boolean;
-           var _chars, _shadows: T2DPointArray): Boolean;
+    function getTextPointsIn(sx, sy, w, h: Integer; shadow: boolean; var _chars, _shadows: T2DPointArray): Boolean;
     function GetUpTextAtEx(atX, atY: integer; shadow: boolean; fontname: string): string;
     function GetUpTextAt(atX, atY: integer; shadow: boolean): string;
 
@@ -75,15 +77,17 @@ type
     procedure FilterShadowBitmap(bmp: TMufasaBitmap);
     procedure FilterCharsBitmap(bmp: TMufasaBitmap);
 
-    function GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing,
-                    color, tol, len: integer; font: string): string;overload;
-    function GetTextAt(xs, ys, xe, ye, minvspacing, maxvspacing, hspacing,
-      color, tol: integer; font: string): string;overload;
+    function GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing, color, tol, len: integer; font: string): string;overload;
+    function GetTextAt(xs, ys, xe, ye, minvspacing, maxvspacing, hspacing, color, tol: integer; font: string): string;overload;
     function GetTextATPA(const ATPA: T2DPointArray; const maxvspacing: integer; font: string): string;
-    function TextToFontTPA(Text, font: String; out w, h: integer): TPointArray;
+    function TextToFontTPA(Text: String; Data: TOCRData; out W, H: Int32): TPointArray; overload;
+    function TextToFontTPA(Text, Font: String; out W, H: Int32): TPointArray; overload;
+    function TextToFontTPA(Text: String; Font: TFont; out W, H: Int32): TPointArray; overload;
     function TextToFontBitmap(Text, font: String): TMufasaBitmap;
     function TextToMask(Text, font: String): TMask;
-    property Fonts : TMFonts read GetFonts write SetFonts;
+
+    property Fonts: TMFonts read FFonts write SetFonts;
+
     {$IFDEF OCRDEBUG}
     procedure DebugToBmp(bmp: TMufasaBitmap; hmod,h: integer);
     public
@@ -102,7 +106,11 @@ type
 implementation
 
 uses
-  colour_conv, client,  files, tpa, mufasatypesutil, iomanager;
+  colour_conv, client, tpa, mufasatypesutil, iomanager, syncobjs, newsimbasettings;
+
+var
+  FontBuffer: TMFonts;
+  FontBufferLock: TCriticalSection;
 
 const
     { Very rough limits for R, G, B }
@@ -141,15 +149,15 @@ const
     OF_LN = 256;
     OF_HN = -1;
 
-
 { Constructor }
-constructor TMOCR.Create(Owner: TObject);
+constructor TMOCR.Create(Owner: TObject; UseFontBuffer: Boolean);
 begin
   inherited Create;
   Self.Client := Owner;
   Self.FFonts := TMFonts.Create(Owner);
+  Self.FUseFontBuffer := UseFontBuffer;
 
-  CreateDefaultFilter;
+  CreateDefaultFilter();
 end;
 
 { Destructor }
@@ -178,72 +186,70 @@ begin
   FFonts.Path := path;
 end;
 
-(*
-InitTOCR
-~~~~~~~~
-
-.. code-block:: pascal
-
-    function TMOCR.InitTOCR(const path: string): boolean;
-
-InitTOCR loads all fonts in path
-We don't do this in the constructor because we may not yet have the path.
-
-*)
-function TMOCR.InitTOCR(const path: string): boolean;
-var
-   dirs: array of string;
-   i: longint;
-   {$IFDEF FONTDEBUG}
-   fonts_loaded: String = '';
-   {$ENDIF}
+function TMOCR.GetFont(Name: String; Shadow: Boolean): TOCRData;
 begin
-  // We're going to load all fonts now
-  FFonts.Path := path;
-  dirs := GetDirectories(path);
-  Result := false;
-  for i := 0 to high(dirs) do
+  if (not FFonts.IsFontLoaded(Name)) then
   begin
-    {$IFDEF FONTDEBUG}
-    // REMOVING THIS WILL CAUSE FONTS_LOADED NOT BE ADDED SOMEHOW?
-    writeln('Loading: ' + dirs[i]);
-    {$ENDIF}
-    if FFonts.LoadFont(dirs[i], false) then
+    if FUseFontBuffer then
     begin
-      {$IFDEF FONTDEBUG}
-      fonts_loaded := fonts_loaded + dirs[i] + ', ';
-      {$ENDIF}
-      result := true;
-    end;
+      FontBufferLock.Enter();
+
+      try
+        if (not FontBuffer.IsFontLoaded(Name)) then
+        begin
+          FontBuffer.Path := SimbaSettings.Fonts.Path.Value;
+          if (not FontBuffer.LoadFont(Name, Shadow)) then
+            raise Exception.Create('ERROR loading font "' + Name + '"');
+        end;
+
+        FFonts.Add(FontBuffer.Copy(Name));
+      finally
+        FontBufferLock.Leave();
+      end;
+    end else
+    if (not FFonts.IsFontLoaded(Name)) and (not FFonts.LoadFont(Name, Shadow)) then
+      raise Exception.Create('ERROR loading font "' + Name + '"');
   end;
-  {$IFDEF FONTDEBUG}
-  if length(fonts_loaded) > 2 then
-  begin
-    writeln(fonts_loaded);
-    setlength(fonts_loaded,length(fonts_loaded)-2);
-    TClient(Self.Client).WriteLn('Loaded fonts: ' + fonts_loaded);
-  end;
-  {$ENDIF}
-  { TODO FIXME CHANGE TO NEW CHARS? }
-  If DirectoryExists(path + 'UpChars') then
-    FFonts.LoadFont('UpChars', true); // shadow
+
+  Result := FFonts.GetFont(Name);
 end;
 
-{ Get the current pointer to our list of Fonts }
-function TMOCR.GetFonts:TMFonts;
+function TMOCR.GetFont(Font: TFont): TOCRData;
+var
+  Name: String;
 begin
-  Result := Self.FFonts;
+  Name := Format('%s:%d:%d', [Font.Name, Font.Size, Integer(Font.Style)]);
+
+  if (not FFonts.IsFontLoaded(Name)) then
+  begin
+    if FUseFontBuffer then
+    begin
+      FontBufferLock.Enter();
+
+      try
+        if (not FontBuffer.IsFontLoaded(Name)) and (not FontBuffer.LoadSystemFont(Font, Name)) then
+          raise Exception.Create('ERROR loading font "' + Font.Name + '"');
+
+        FFonts.Add(FontBuffer.Copy(Name));
+      finally
+        FontBufferLock.Leave();
+      end;
+    end else
+    if (not FFonts.IsFontLoaded(Name)) and (not FFonts.LoadSystemFont(Font, Name)) then
+      raise Exception.Create('ERROR loading font "' + Font.Name + '"');
+  end;
+
+  Result := FFonts.GetFont(Name);
 end;
 
 { Set new Fonts. We set it to a Copy of NewFonts }
-procedure TMOCR.SetFonts(const NewFonts: TMFonts);
+procedure TMOCR.SetFonts(Value: TMFonts);
 begin
   if (Self.FFonts <> nil) then
     Self.FFonts.Free;
 
-  Self.FFonts := NewFonts.Copy(Self.Client);
+  Self.FFonts := Value.Copy(Self.Client);
 end;
-
 
 {
   Filter UpText by a very rough colour comparison / range check.
@@ -922,16 +928,16 @@ begin
   getTextPointsIn(atX, atY, ww, hh, shadow, chars, shadows);
 
   // Get font data for analysis.
-  font := FFonts.GetFont(fontname);
+  font := GetFont(fontname);
 
   if shadow then
   begin
-    font := FFonts.GetFont(fontname + '_s');
+    font := GetFont(fontname + '_s');
     thachars := shadows;
   end
   else
   begin
-    font := FFonts.GetFont(fontname);
+    font := GetFont(fontname);
     thachars := chars;
   end;
 
@@ -1013,7 +1019,7 @@ approximately.
 function TMOCR.GetTextATPA(const ATPA : T2DPointArray;const maxvspacing : integer; font: string): string;
 var
   b, lb: TBox;
-  i, j, w, h: Integer;
+  i, j: Integer;
   lbset: boolean;
   n: TNormArray;
   fD: TocrData;
@@ -1021,7 +1027,7 @@ var
 
 begin
   Result := '';
-  fD := FFonts.GetFont(font);
+  fD := GetFont(font);
 
   lbset := false;
   SetLength(Result, 0);
@@ -1117,7 +1123,7 @@ var
 
 begin
   Result := '';
-  fD := FFonts.GetFont(font);
+  fD := GetFont(font);
   TClient(Client).IOManager.GetDimensions(w, h);
  { writeln('Dimensions: (' + inttostr(w) + ', ' + inttostr(h) + ')');    }
 
@@ -1131,6 +1137,41 @@ begin
 
 end;
 
+function TMOCR.TextToFontTPA(Text: String; Data: TOCRData; out W, H: Int32): TPointArray;
+var
+  c, i, x, y, off: Integer;
+  d: TocrGlyphMetric;
+  an: integer;
+begin
+  c := 0;
+  off := 0;
+  SetLength(Result, 0);
+  for i := 1 to Length(text) do
+  begin
+    an := Ord(Text[i]);
+    if not InRange(an, 0, 255) then
+      Continue;
+    d := Data.ascii[an];
+    if not d.inited then
+      Continue;
+
+    SetLength(Result, c + d.width * d.height);
+    for y := 0 to Data.height - 1 do
+      for x := 0 to Data.width - 1 do
+      begin
+        if Data.pos[d.index][x + y * Data.width] = 1 then
+        begin
+          Result[c] := Point(x + off + d.xoff, y + d.yoff);
+          Inc(c);
+        end;
+      end;
+    SetLength(Result, c);
+    off := off + d.width;
+  end;
+  w := off;
+  h := d.height;
+end;
+
 (*
 TextToFontTPA
 ~~~~~~~~~~~~~
@@ -1142,55 +1183,20 @@ TextToFontTPA
 Returns a TPA of a specific *Text* of the specified *Font*.
 
 *)
-
-
-function TMOCR.TextToFontTPA(Text, font: String; out w, h: integer): TPointArray;
-
+function TMOCR.TextToFontTPA(Text, Font: String; out W, H: Int32): TPointArray;
 var
-   fontD: TOcrData;
-   c, i, x, y, off: Integer;
-   d: TocrGlyphMetric;
-   an: integer;
-
+  Data: TOCRData;
 begin
-  fontD := FFonts.GetFont(font);
-  c := 0;
-  off := 0;
-  setlength(result, 0);
-  for i := 1 to length(text)  do
-  begin
-    an := Ord(text[i]);
-    if not InRange(an, 0, 255) then
-    begin
-      mDebugLn('WARNING: Invalid character passed to TextToFontTPA');
-      continue;
-    end;
-    d := fontD.ascii[an];
-    if not d.inited then
-    begin
-      mDebugLn('WARNING: Character does not exist in font');
-      continue;
-    end;
-{    writeln(format('xoff, yoff: %d, %d', [d.xoff, d.yoff]));
-    writeln(format('bmp w,h: %d, %d', [d.width, d.height]));
-    writeln(format('font w,h: %d, %d', [fontD.width, fontD.height]));}
-    setlength(result, c+d.width*d.height);
-    for y := 0 to fontD.height - 1 do
-      for x := 0 to fontD.width - 1 do
-      begin
-        if fontD.pos[d.index][x + y * fontD.width] = 1 then
-       // if fontD.pos[an][x + y * fontD.width] = 1 then
-        begin
-          result[c] := Point(x + off +d.xoff, y+d.yoff);
-          inc(c);
-        end;
-      end;
-    setlength(result, c);
-    off := off + d.width;
-  end;
-  w := off;
-  h := d.height;
- { writeln('C: ' + inttostr(c));      }
+  Data := GetFont(Font);
+  Result := TextToFontTPA(Text, Data, W, H);
+end;
+
+function TMOCR.TextToFontTPA(Text: String; Font: TFont; out W, H: Int32): TPointArray;
+var
+  Data: TOCRData;
+begin
+  Data := GetFont(Font);
+  Result := TextToFontTPA(Text, Data, W, H);
 end;
 
 (*
@@ -1251,6 +1257,14 @@ begin
       inc(c);
     end;
 end;
+
+initialization
+  FontBuffer := TMFonts.Create(nil);
+  FontBufferLock := TCriticalSection.Create();
+
+finalization
+  FontBuffer.Free();
+  FontBufferLock.Free();
 
 end.
 
