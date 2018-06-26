@@ -620,7 +620,7 @@ begin
       else
         Insert(' ', s, a[i].StartPos - fStartPos + 1);
     end;
-    fCleanText := TrimRight(s);
+    fCleanText := s;
   end;
 
   Result := fCleanText;

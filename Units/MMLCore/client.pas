@@ -137,9 +137,9 @@ begin
   FOwnIOManager := (UseIOManager = nil);
   MFiles := TMFiles.Create(self);
   MFinder := TMFinder.Create(Self);
-  MBitmaps := TMBitmaps.Create(self);
-  MDTMs := TMDTMS.Create(self);
-  MOCR := TMOCR.Create(self);
+  MBitmaps := TMBitmaps.Create(Self);
+  MDTMs := TMDTMS.Create(Self);
+  MOCR := TMOCR.Create(Self);
   MInternets := TMInternet.Create(Self);
   MSockets := TMSocks.Create(Self);
 end;
