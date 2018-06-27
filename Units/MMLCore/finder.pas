@@ -1593,7 +1593,7 @@ end;
 function TMFinder.FindTemplateEx(TemplImage: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula;
               xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
 var
-  x,y,w,h: Int32;
+  y,w,h: Int32;
   Image, Templ: T2DIntArray;
   xcorr: TSingleMatrix;
   PtrData : TRetData;
@@ -1620,20 +1620,29 @@ begin
     Move(TemplImage.FData[y*TemplImage.Width], Templ[y,0], TemplImage.Width*SizeOf(TRGB32));
   
   xcorr := MatchTempl.MatchTemplate(Image, Templ, Ord(Formula));
-  MatrixMinMax(xcorr, maxLo, maxHi);
+
 
   if Formula in [TM_SQDIFF, TM_SQDIFF_NORMED] then
   begin
-    if DynamicAdjust then MinMatch := Min(MinMatch, maxLo + 0.1e-2);
+    if DynamicAdjust then
+    begin
+      MatrixMinMax(xcorr, maxLo, maxHi);
+      MinMatch := Min(MinMatch, maxLo + 0.1e-2);
+    end;
     TPA := MatrixIndices(xcorr, MinMatch, __LE__)
   end
   else
   begin
-    if DynamicAdjust then MinMatch := Max(MinMatch, maxHi - 0.1e-2);
+    if DynamicAdjust then
+    begin
+      MatrixMinMax(xcorr, maxLo, maxHi);
+      MinMatch := Max(MinMatch, maxHi - 0.1e-2);
+    end;
     TPA := MatrixIndices(xcorr, MinMatch, __GE__);
   end;
-
+  
   Result := Length(TPA) > 0;
+  OffsetTPA(TPA, Point(xs,ys));
   TClient(Client).IOManager.FreeReturnData;
 end;
 
