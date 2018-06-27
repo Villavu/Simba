@@ -33,9 +33,9 @@
             <Filename Value="../../Simba.$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);../../Units/lape;../../Units/MMLAddon/Imports/lape;$(LazarusDir)/components/synedit;../../Plugins"/>
+            <IncludeFiles Value="$(ProjOutDir);../../Units/lape;../../Units/MMLAddon/Imports/lape;$(LazarusDir)/components/synedit;../../Plugins;../../Units/Misc/MatchTemplate"/>
             <Libraries Value="../../Units/lape/extensions/ffi/bin/$(TargetOS)"/>
-            <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;../../Units/lape/extensions/ffi;$(ProjPath)../ScriptManager;$(ProjPath)../FormDesigner;$(ProjPath)../../Projects/FormDesigner/CodeGen;../../Units/MMLAddon/Imports;../../Units/MMLAddon/Imports/classes/MML;../../Units/MMLAddon/Imports/classes/LCL;../Tools"/>
+            <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;../../Units/lape/extensions/ffi;$(ProjPath)../ScriptManager;$(ProjPath)../FormDesigner;$(ProjPath)../../Projects/FormDesigner/CodeGen;../../Units/MMLAddon/Imports;../../Units/MMLAddon/Imports/classes/MML;../../Units/MMLAddon/Imports/classes/LCL;../Tools;../../Units/Misc/MatchTemplate;../../Units/Misc/MatchTemplate/fftlib"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -395,9 +395,9 @@
       <Filename Value="../../Simba.$(TargetCPU)-$(TargetOS)-debug"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);../../Units/lape;../../Units/MMLAddon/Imports/lape;$(LazarusDir)/components/synedit;../../Plugins"/>
+      <IncludeFiles Value="$(ProjOutDir);../../Units/lape;../../Units/MMLAddon/Imports/lape;$(LazarusDir)/components/synedit;../../Plugins;../../Units/Misc/MatchTemplate"/>
       <Libraries Value="../../Units/lape/extensions/ffi/bin/$(TargetOS)"/>
-      <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;../../Units/lape/extensions/ffi;$(ProjPath)../ScriptManager;$(ProjPath)../FormDesigner;$(ProjPath)../../Projects/FormDesigner/CodeGen;../../Units/MMLAddon/Imports;../../Units/MMLAddon/Imports/classes/MML;../../Units/MMLAddon/Imports/classes/LCL;../Tools"/>
+      <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;../../Units/lape/extensions/ffi;$(ProjPath)../ScriptManager;$(ProjPath)../FormDesigner;$(ProjPath)../../Projects/FormDesigner/CodeGen;../../Units/MMLAddon/Imports;../../Units/MMLAddon/Imports/classes/MML;../../Units/MMLAddon/Imports/classes/LCL;../Tools;../../Units/Misc/MatchTemplate;../../Units/Misc/MatchTemplate/fftlib"/>
       <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -424,10 +424,6 @@
       </CompilerMessages>
       <CustomOptions Value="-dLape_CDECL
 -dStaticFFI"/>
-      <OtherDefines Count="2">
-        <Define0 Value="Lape_CDECL"/>
-        <Define1 Value="StaticFFI"/>
-      </OtherDefines>
       <CreateMakefileOnBuild Value="True"/>
     </Other>
   </CompilerOptions>
