@@ -110,7 +110,7 @@ type
     function  CompareAt(Other: TMufasaBitmap; Pt: TPoint; Tol: Int32): Extended;
     procedure Downsample(DownScale: Int32; TargetBitmap: TMufasaBitmap);
     function  MatchTemplate(Other: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
-    function  FindImage(Other: TMufasaBitmap; Formula: ETMFormula; MinMatch: Extended): TPoint;
+    function  FindTemplate(Other: TMufasaBitmap; Formula: ETMFormula; MinMatch: Extended): TPoint;
     
     function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap; overload;
     function Copy: TMufasaBitmap;overload;
@@ -1905,6 +1905,9 @@ var
   y: Int32;
   Image, Templ: T2DIntArray;
 begin
+  if (W < Other.Width) or (H < Other.Height) then
+    raise Exception.CreateFmt('Image must be larger than Template - Image(%d, %d), Templ(%d, %d)', [W,H, Other.Width, Other.Height]);
+
   SetLength(Image, Self.Height, Self.Width);
   SetLength(Templ, Other.Height, Other.Width);
   
@@ -1917,7 +1920,7 @@ begin
   Result := MatchTempl.MatchTemplate(Image, Templ, Int32(Formula));
 end;
 
-function TMufasaBitmap.FindImage(Other: TMufasaBitmap; Formula: ETMFormula; MinMatch: Extended): TPoint;
+function TMufasaBitmap.FindTemplate(Other: TMufasaBitmap; Formula: ETMFormula; MinMatch: Extended): TPoint;
 var
   xcorr: TSingleMatrix;
 begin
