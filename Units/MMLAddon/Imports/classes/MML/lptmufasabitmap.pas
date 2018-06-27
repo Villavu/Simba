@@ -321,6 +321,32 @@ begin
   PMufasaBitmap(Params^[0])^.Convolute(PMufasaBitmap(Params^[1])^, P2DExtendedArray(Params^[2])^);
 end;
 
+
+//function CompareAt(Other: TMufasaBitmap; Pt: TPoint; Tol: Int32): Extended;
+procedure TMufasaBitmap_CompareAt(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  Extended(Result^) := TMufasaBitmap(Params^[0]^).CompareAt(TMufasaBitmap(Params^[1]^), TPoint(Params^[2]^), Int32(Params^[3]^));
+end;
+
+//procedure Downsample(DownScale: Int32; TargetBitmap: TMufasaBitmap);
+procedure TMufasaBitmap_Downsample(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  TMufasaBitmap(Params^[0]^).Downsample(Int32(Params^[1]^), TMufasaBitmap(Params^[2]^));
+end;
+
+//function MatchTemplate(Other: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
+procedure TMufasaBitmap_MatchTemplate(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  TSingleMatrix(Result^) := TMufasaBitmap(Params^[0]^).MatchTemplate(TMufasaBitmap(Params^[1]^), ETMFormula(Params^[2]^));
+end;
+
+//function FindImage(Other: TMufasaBitmap; Formula: ETMFormula; MinMatch: Extended): TPoint;
+procedure TMufasaBitmap_FindImage(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  TPoint(Result^) := TMufasaBitmap(Params^[0]^).FindImage(TMufasaBitmap(Params^[1]^), ETMFormula(Params^[2]^), Extended(Params^[3]^));
+end;
+
+
 //function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap; overload;
 procedure TMufasaBitmap_Copy(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -367,6 +393,12 @@ end;
 procedure TMufasaBitmap_DrawMatrix(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PMufasaBitmap(Params^[0])^.DrawMatrix(P2DIntArray(Params^[1])^);
+end;
+
+//procedure DrawMatrix(matrix: T2DIntegerArray); overload;
+procedure TMufasaBitmap_DrawMatrixF(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  TMufasaBitmap(Params^[0]^).DrawMatrix(TSingleMatrix(Params^[1]^));
 end;
 
 //procedure ResizeEx(method: TBmpResizeMethod, newW, newH: integer);
@@ -564,12 +596,19 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.DrawText(const Text, FontName: string; const pnt: TPoint; const Shadow: Boolean; const Color: Integer); constref;', @TMufasaBitmap_DrawText);
     addGlobalFunc('procedure TMufasaBitmap.DrawSystemText(const Text, FontName: string; const FontSize: Integer; const pnt: TPoint; const Shadow: Boolean; const Color: Integer); constref;', @TMufasaBitmap_DrawSystemText);
     addGlobalFunc('procedure TMufasaBitmap.Convolute(TargetBitmap : TMufasaBitmap; Matrix : T2DExtendedArray); constref;', @TMufasaBitmap_Convolute);
+
+    addGlobalFunc('function  TMufasaBitmap.CompareAt(Other: TMufasaBitmap; Pt: TPoint; Tol: Int32): Extended;', @TMufasaBitmap_CompareAt);
+    addGlobalFunc('procedure TMufasaBitmap.Downsample(DownScale: Int32; TargetBitmap: TMufasaBitmap);', @TMufasaBitmap_Downsample);
+    addGlobalFunc('function  TMufasaBitmap.MatchTemplate(Other: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;', @TMufasaBitmap_MatchTemplate);
+    addGlobalFunc('function  TMufasaBitmap.FindImage(Other: TMufasaBitmap; Formula: ETMFormula; MinMatch: Extended): TPoint;', @TMufasaBitmap_FindImage);
+
     addGlobalFunc('function TMufasaBitmap.Copy(const xs,ys,xe,ye : integer): TMufasaBitmap; constref;', @TMufasaBitmap_Copy);
     addGlobalFunc('function TMufasaBitmap.Copy(): TMufasaBitmap; constref; overload;', @TMufasaBitmap_CopyEx);
     addGlobalFunc('procedure TMufasaBitmap.Crop(xs, ys, xe, ye: integer); constref;', @TMufasaBitmap_Crop);
     addGlobalFunc('function TMufasaBitmap.GetColors(): TIntegerArray; constref;', @TMufasaBitmap_GetColors);
     addGlobalFunc('function TMufasaBitmap.ToMatrix(): T2DIntArray; constref;', @TMufasaBitmap_ToMatrix);
-    addGlobalFunc('procedure TMufasaBitmap.DrawMatrix(const matrix: T2DIntArray); constref;', @TMufasaBitmap_DrawMatrix);
+    addGlobalFunc('procedure TMufasaBitmap.DrawMatrix(const Matrix: T2DIntArray); constref;', @TMufasaBitmap_DrawMatrix);
+    addGlobalFunc('procedure TMufasaBitmap.DrawMatrix(const Matrix: TSingleMatrix); constref; overload;', @TMufasaBitmap_DrawMatrixF);
     addGlobalFunc('procedure TMufasaBitmap.ThresholdAdaptive(Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer); constref;', @TMufasaBitmap_ThresholdAdaptive);
     addGlobalFunc('procedure TMufasaBitmap.ResizeEx(Method: TBmpResizeMethod; NewW, NewH: integer); constref;', @TMufasaBitmap_ResizeEx);
     addGlobalFunc('function TMufasaBitmap.ToTBitmap(): TBitmap; constref;', @TMufasaBitmap_ToTBitmap);
