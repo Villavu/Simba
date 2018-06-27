@@ -187,8 +187,8 @@ begin
 
   SetLength(Result, 512);
   c := 0;
-  for Y:=0 to High(a) do
-    for X:=0 to W do
+  for Y:=0 to H-1 do
+    for X:=0 to W-1 do
     begin
       Match := False;
       case Comparator of
@@ -199,12 +199,13 @@ begin
         __GE__: Match := a[y,x] >= Value;
         __NE__: Match := a[y,x] <> Value;
       end;
-      
+
       if Match then
       begin
         if c = Length(Result) then
           SetLength(Result, 2*c);
         Result[c] := Point(x,y);
+        Inc(c);
       end;
     end;
   SetLength(Result, c);

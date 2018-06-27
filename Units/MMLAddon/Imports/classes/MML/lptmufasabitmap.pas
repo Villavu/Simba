@@ -340,10 +340,10 @@ begin
   TSingleMatrix(Result^) := TMufasaBitmap(Params^[0]^).MatchTemplate(TMufasaBitmap(Params^[1]^), ETMFormula(Params^[2]^));
 end;
 
-//function FindImage(Other: TMufasaBitmap; Formula: ETMFormula; MinMatch: Extended): TPoint;
-procedure TMufasaBitmap_FindImage(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+//function FindTemplate(Other: TMufasaBitmap; Formula: ETMFormula; MinMatch: Extended): TPoint;
+procedure TMufasaBitmap_FindTemplate(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  TPoint(Result^) := TMufasaBitmap(Params^[0]^).FindImage(TMufasaBitmap(Params^[1]^), ETMFormula(Params^[2]^), Extended(Params^[3]^));
+  TPoint(Result^) := TMufasaBitmap(Params^[0]^).FindTemplate(TMufasaBitmap(Params^[1]^), ETMFormula(Params^[2]^), Extended(Params^[3]^));
 end;
 
 
@@ -600,7 +600,7 @@ begin
     addGlobalFunc('function  TMufasaBitmap.CompareAt(Other: TMufasaBitmap; Pt: TPoint; Tol: Int32): Extended;', @TMufasaBitmap_CompareAt);
     addGlobalFunc('procedure TMufasaBitmap.Downsample(DownScale: Int32; TargetBitmap: TMufasaBitmap);', @TMufasaBitmap_Downsample);
     addGlobalFunc('function  TMufasaBitmap.MatchTemplate(Other: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;', @TMufasaBitmap_MatchTemplate);
-    addGlobalFunc('function  TMufasaBitmap.FindImage(Other: TMufasaBitmap; Formula: ETMFormula; MinMatch: Extended): TPoint;', @TMufasaBitmap_FindImage);
+    addGlobalFunc('function  TMufasaBitmap.FindTemplate(Other: TMufasaBitmap; Formula: ETMFormula; MinMatch: Extended): TPoint;', @TMufasaBitmap_FindTemplate);
 
     addGlobalFunc('function TMufasaBitmap.Copy(const xs,ys,xe,ye : integer): TMufasaBitmap; constref;', @TMufasaBitmap_Copy);
     addGlobalFunc('function TMufasaBitmap.Copy(): TMufasaBitmap; constref; overload;', @TMufasaBitmap_CopyEx);
