@@ -66,7 +66,7 @@ type
     procedure SetPersistentMemory(mem: PtrUInt; awidth, aheight: integer);
     procedure ResetPersistentMemory;
 
-    function PointInBitmap(x,y : integer) : boolean;
+    function PointInBitmap(x,y : integer) : boolean; inline;
     procedure ValidatePoint(x,y : integer);
     function SaveToFile(const FileName : string) :boolean;
     procedure LoadFromFile(const FileName : string);
@@ -128,8 +128,8 @@ type
     procedure LoadFromRawImage(RawImage: TRawImage);
     function CreateTMask : TMask;
     procedure ResizeBilinear(NewW, NewH: Integer);
-    procedure DrawText(const Text, FontName: string; const pnt: TPoint; const Shadow: Boolean; const Color: Integer);
-    procedure DrawSystemText(const Text, FontName: string; const FontSize: Integer; const pnt: TPoint; const Shadow: Boolean; const Color: Integer);
+    procedure DrawText(Text, Font: String; Position: TPoint; Shadow: Boolean;  Color: TColor);
+    procedure DrawSystemText(Text, Font: String; const Size: Integer; Position: TPoint; Shadow: Boolean; Color: TColor);
     procedure SetTransparentColor(Col : TColor);
     function GetTransparentColor : TColor;
     property TransparentColorSet : boolean read FTransparentSet;
@@ -797,7 +797,7 @@ begin
   end;
 end;
 
-function TMufasaBitmap.ToMatrix(): T2DIntegerArray;
+function TMufasaBitmap.ToMatrix: T2DIntegerArray;
 var
   wid, hei, x, y: integer;
 begin
@@ -1038,7 +1038,8 @@ begin
 end;
 
 //TODO - Best method would be using a mask to ignore the alpha, ie. (FDdata[c] and $FFFFFF00).
-function TMufasaBitmap.FindColors(var Points: TPointArray; const Color: integer): boolean;
+function TMufasaBitmap.FindColors(var points: TPointArray; const color: integer
+  ): boolean;
 var
   x, y, i, c,  wid, hei: integer;
   SearchColor: TRGB32;
@@ -2054,82 +2055,91 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.DrawText(const Text, FontName: string; const pnt: TPoint; const Shadow: Boolean; const Color: Integer);
+procedure TMufasaBitmap.DrawText(Text, Font: String; Position: TPoint; Shadow: Boolean; Color: TColor);
 var
   TPA: TPointArray;
-  ATPA: T2DPointArray;
-  tW, tH, i: LongInt;
+  P: TPoint;
+  RGB: TRGB32;
+  i, _: Int32;
 begin
-  if (Self.FList = nil) or (not Assigned(Self.FList)) then
-    raise Exception.Create('DrawText will not work unless the owner has been assigned');
+  if (FList = nil) then
+    raise Exception.Create('TMufasaBitmap.DrawText requires the TMBitmaps list set');
 
-  if (Text <> '') then
+  TPA := TClient(FList.Client).MOCR.TextToFontTPA(Text, Font, _, _);
+
+  if Shadow then
   begin
-    if (not TClient(Self.FList.Client).MOCR.Fonts.IsFontLoaded(FontName)) then
-      raise Exception.CreateFmt('DrawText: Font "%s" doesn''t exist', [FontName]);
+    RGB := RGBToBGR($000000);
 
-    SetLength(ATPA, 1);
-    ATPA[0] := TClient(Self.FList.Client).MOCR.TextToFontTPA(Text, FontName, tW, tH);
-
-    if (Length(ATPA[0]) > 0) then
+    for i := 0 to High(TPA) do
     begin
-      OffsetTPA(ATPA[0], Pnt);
+      P.X := TPA[i].X + Position.X + 1;
+      P.Y := TPA[i].Y + Position.Y + 1;
 
-      if (Shadow) then
-      begin
-        TPA := System.Copy(ATPA[0], 0, Length(ATPA[0]));
-        OffsetTPA(TPA, Point(1, 1));
-        SetLength(ATPA, 2); // Text & Shadow
-        ATPA[1] := ClearTPAFromTPA(TPA, ATPA[0]);
-        Inc(tW); Inc(tH); // Text will be bigger with a shadow
-      end;
-
-      for i := 0 to High(ATPA) do
-        if (ATPA[i][0].x < 0) or (ATPA[i][0].y < 0) or ((ATPA[i][0].x + tW) >= Self.Width) or ((ATPA[i][0].y + tH) >= Self.Height) then // check fits on bitmap
-          FilterPointsBox(ATPA[i], 0, 0, Self.Width - 1, Self.Height - 1);
-
-      if (not Shadow) then
-        Self.DrawTPA(ATPA[0], Color)
-      else begin
-        Self.DrawTPA(ATPA[0], Color);
-        Self.DrawTPA(ATPA[1], 0); // Shadow
-      end;
+      if PointInBitmap(P.X, P.Y) then
+        FData[P.Y * Self.W + P.X] := RGB;
     end;
   end;
+
+  RGB := RGBToBGR(Color);
+
+  for i := 0 to High(TPA) do
+  begin
+    P.X := TPA[i].X + Position.X;
+    P.Y := TPA[i].Y + Position.Y;
+
+    if PointInBitmap(P.X, P.Y) then
+      FData[P.Y * Self.W + P.X] := RGB;
+  end;
 end;
 
-// Note: The font is automaticly free'd when the client is free'd, There's a good chance the script will use it more than once so its best to keep it loaded
-procedure TMufasaBitmap.DrawSystemText(const Text, FontName: string; const FontSize: Integer; const pnt: TPoint; const Shadow: Boolean; const Color: Integer);
+procedure TMufasaBitmap.DrawSystemText(Text, Font: String; const Size: Integer; Position: TPoint; Shadow: Boolean; Color: TColor);
 var
-  f: TFont;
-  s: string;
+  TPA: TPointArray;
+  P: TPoint;
+  RGB: TRGB32;
+  i, _: Int32;
+  F: TFont;
 begin
-  if (Self.FList = nil) or (not Assigned(Self.FList)) then
-    raise Exception.Create('DrawSystemText will not work unless the owner has been assigned');
+  if (FList = nil) then
+    raise Exception.Create('TMufasaBitmap.DrawText requires the TMBitmaps list set');
 
-  s := FontName + '_' + IntToStr(FontSize);
-  if (TClient(Self.FList.Client).MOCR.Fonts.IsFontLoaded(s)) then
-  begin
-    Self.DrawText(Text, s, Pnt, Shadow, Color);
-    Exit();
-  end;
-
-  mDebugLn('Font "%s" not loaded, going to load it', [FontName]);
-  f := TFont.Create;
+  F := TFont.Create();
 
   try
-    f.Name := FontName;
-    f.Size := FontSize;
+    F.Name := Font;
+    F.Size := Size;
 
-    if (TClient(Self.FList.Client).MOCR.Fonts.LoadSystemFont(f, s)) then
-      Self.DrawText(Text, s, Pnt, Shadow, Color)
-    else
-      mDebugLn('DrawSystemText: Failed to load system font "%s"', [FontName]);
+    TPA := TClient(FList.Client).MOCR.TextToFontTPA(Text, F, _, _);
   finally
-    f.Free();
+    F.Free();
+  end;
+
+  if Shadow then
+  begin
+    RGB := RGBToBGR($000000);
+
+    for i := 0 to High(TPA) do
+    begin
+      P.X := TPA[i].X + Position.X + 1;
+      P.Y := TPA[i].Y + Position.Y + 1;
+
+      if PointInBitmap(P.X, P.Y) then
+        FData[P.Y * Self.W + P.X] := RGB;
+    end;
+  end;
+
+  RGB := RGBToBGR(Color);
+
+  for i := 0 to High(TPA) do
+  begin
+    P.X := TPA[i].X + Position.X;
+    P.Y := TPA[i].Y + Position.Y;
+
+    if PointInBitmap(P.X, P.Y) then
+      FData[P.Y * Self.W + P.X] := RGB;
   end;
 end;
-
 constructor TMBitmaps.Create(Owner: TObject);
 begin
   inherited Create;
@@ -2174,7 +2184,7 @@ end;
 
 
 { TMufasaBitmap }
-procedure TMufasaBitmap.SetSize(Awidth, Aheight: integer);
+procedure TMufasaBitmap.SetSize(AWidth, AHeight: integer);
 var
   NewData : PRGB32;
   i,minw,minh : integer;
