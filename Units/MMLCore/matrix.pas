@@ -40,6 +40,8 @@ function MatrixArgMax(a: TSingleMatrix): TPoint;
 function MatrixArgMin(a: TSingleMatrix): TPoint;
 function MatrixNormMinMax(a: TSingleMatrix; Alpha, Beta: Single): TSingleMatrix;
 function MatrixIndices(a: TSingleMatrix; Value: Single; Comparator: EComparator): TPointArray;
+function MatrixExtract(a: TSingleMatrix; Indices: TPointArray): TSingleArray;
+procedure MatrixFill(a: TSingleMatrix; Indices: TPointArray; Values: TSingleArray);
 
 implementation
 
@@ -210,6 +212,53 @@ begin
     end;
   SetLength(Result, c);
 end;
+
+function MatrixExtract(a: TSingleMatrix; Indices: TPointArray): TSingleArray;
+var
+  i,c,W,H: Int32;
+begin
+  MatrixSize(a, W,H);
+  if (W = 0) or (H = 0) then
+    Exit;
+
+  SetLength(Result, Length(Indices));
+  c := 0;
+  for i:=0 to High(Indices) do
+    if (Indices[i].x >= 0) and (Indices[i].y >= 0) and
+       (Indices[i].x < W)  and (Indices[i].y < H) then
+    begin
+      Result[c] := a[Indices[i].y][Indices[i].x];
+      Inc(c);
+    end;
+  SetLength(Result, c);
+end;
+
+procedure MatrixFill(a: TSingleMatrix; Indices: TPointArray; Values: TSingleArray);
+var
+  i,c,W,H: Int32;
+begin
+  MatrixSize(a, W,H);
+  if (W = 0) or (H = 0) then
+    Exit;
+
+  if (Length(Values) <> 1) and (Length(Values) <> Length(Indices)) then
+    raise Exception.CreateFmt('The number of values has to be 1, or equal to the number of indices - (Indices=%d, Values=%d)', [Length(Values), Length(Indices)]);
+
+  if Length(Values) = 1 then
+  begin
+    for i:=0 to High(Indices) do
+      if (Indices[i].x >= 0) and (Indices[i].y >= 0) and
+         (Indices[i].x < W)  and (Indices[i].y < H) then
+        a[Indices[i].y][Indices[i].x] := Values[0];
+  end else
+  begin
+    for i:=0 to High(Indices) do
+      if (Indices[i].x >= 0) and (Indices[i].y >= 0) and
+         (Indices[i].x < W)  and (Indices[i].y < H) then
+        a[Indices[i].y][Indices[i].x] := Values[i];
+  end;
+end;
+
 
 end.
 
