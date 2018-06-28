@@ -45,6 +45,14 @@ begin
   TMMLScriptThread(Params^[0]).State := ssStop;
 end;
 
+procedure Lape_IsTerminated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  if PBoolean(Params^[1])^ then
+    PBoolean(Result)^ := (stoTerminated in TMMLScriptThread(Params^[0]).TerminateOptions) and (stoUserTerminated in TMMLScriptThread(Params^[0]).TerminateOptions)
+  else
+    PBoolean(Result)^ := (stoTerminated in TMMLScriptThread(Params^[0]).TerminateOptions);
+end;
+
 procedure Lape_Import_Script(Compiler: TLapeCompiler; Data: Pointer);
 var
   Client: Pointer = nil;
@@ -70,6 +78,7 @@ begin
     addGlobalMethod('procedure WriteTimeStamp(Enable: Boolean);', @Lape_SetWriteTimeStamp, Data);
     addGlobalMethod('function GetTimeRunning: UInt64;', @Lape_GetTimeRunning, Data);
     addGlobalMethod('procedure TerminateScript;', @Lape_TerminateScript, Data);
+    addGlobalMethod('function IsTerminated(UserTerminated: Boolean = False): Boolean;', @Lape_IsTerminated, Data);
 
     addDelayedCode('var __OnTerminateStrings: array of String;'                       + LineEnding +
                    'var __OnTerminateMethods: array of procedure;'                    + LineEnding +
@@ -99,8 +108,7 @@ begin
                    'procedure AddOnTerminate(Method: procedure of object); overload;' + LineEnding +
                    'begin'                                                            + LineEnding +
                    '  __OnTerminateObjects += @Method;'                               + LineEnding +
-                   'end;',
-                   'OnTerminate');
+                   'end;', 'OnTerminate');
   end;
 end;
 

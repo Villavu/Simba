@@ -20,6 +20,8 @@ type
   EMMLScriptOptions = set of (soCompileOnly, soWriteTimeStamp);
   EMMLScriptState = (ssRun, ssPause, ssStop);
 
+  EMMLScriptTerminateOptions = set of (stoTerminated, stoUserTerminated);
+
   PMMLScriptThread = ^TMMLScriptThread;
   TMMLScriptThread = class(TThread)
   protected
@@ -32,6 +34,7 @@ type
     FOptions: EMMLScriptOptions;
     FSettings: TMMLSettingsSandbox;
     FUsedPlugins: TMPluginsList;
+    FTerminateOptions: EMMLScriptTerminateOptions;
 
     procedure SetState(Value: EMMLScriptState);
 
@@ -60,11 +63,12 @@ type
     property Client: TClient read FClient;
     property Settings: TMMLSettingsSandbox read FSettings;
     property StartTime: UInt64 read FStartTime;
+    property TerminateOptions: EMMLScriptTerminateOptions read FTerminateOptions write FTerminateOptions;
 
     function Kill: Boolean;
 
     procedure SetSettings(From: TMMLSettings);
-    procedure SetFonts(From: TMFonts);
+    procedure SetFonts(Path: String);
 
     constructor Create(constref Script, FilePath: String);
     destructor Destroy; override;
@@ -233,6 +237,9 @@ begin
 
       try
         RunCode(FCompiler.Emitter.Code, FRunning);
+
+        FTerminateOptions := FTerminateOptions + [stoTerminated];
+
         RunCode(FCompiler.Emitter.Code, nil, TCodePos(FCompiler.getGlobalVar('__OnTerminate').Ptr^));
       except
         on e: Exception do
@@ -267,6 +274,8 @@ begin
   FOutputBuffer := '';
 
   FUsedPlugins := TMPluginsList.Create(False);
+
+  FTerminateOptions := [];
 end;
 
 destructor TMMLScriptThread.Destroy;
@@ -378,16 +387,12 @@ begin
   FSettings.Prefix := 'Scripts/';
 end;
 
-procedure TMMLScriptThread.SetFonts(From: TMFonts);
+procedure TMMLScriptThread.SetFonts(Path: String);
 var
-  i: Int32;
+  Directory: String;
 begin
-  with FClient do
-  begin
-    MOCR.Fonts := From;
-    for i := 0 to MOCR.Fonts.Count - 1 do
-      FCompiler.addGlobalVar(MOCR.Fonts[i].Name, MOCR.Fonts[i].Name).isConstant := True;
-  end;
+  for Directory in GetDirectories(Path) do
+    FCompiler.addGlobalVar(Directory, Directory).isConstant := True;
 end;
 
 end.

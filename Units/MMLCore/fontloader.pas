@@ -51,6 +51,7 @@ type
     Fonts: TList;
     FPath: String;
     Client : TObject;
+
     function GetFontIndex(const Name: String): Integer;
     function GetFontByIndex(Index : integer): TMfont;
     procedure SetPath(const aPath: String);
@@ -58,12 +59,15 @@ type
   public
     constructor Create(Owner : TObject);
     destructor Destroy; override;
+
+    procedure Add(Font: TMFont);
     function GetFont(const Name: String): TOcrData;
     function FreeFont(const Name: String): Boolean;
     function LoadFont(const Name: String; Shadow: Boolean): boolean;
-    function LoadSystemFont(const SysFont : TFont; const FontName : string) : boolean;
+    function LoadSystemFont(const SysFont: TFont; const FontName: String): Boolean;
     function IsFontLoaded(const Name: String): boolean;
-    function Copy(Owner : TObject): TMFonts;
+    function Copy(Owner : TObject): TMFonts; overload;
+    function Copy(const Name: String): TMFont; overload;
     function Count : integer;
     property Path : string read GetPath write SetPath;
     property Font[Index : integer]: TMfont read GetFontByIndex; default;
@@ -72,8 +76,7 @@ type
 implementation
 
 uses
-  MufasaTypes, Client, strutils;
-
+  MufasaTypes, mufasabase,  Forms;
 
 constructor TMFont.Create;
 begin
@@ -156,6 +159,11 @@ begin
   inherited;
 end;
 
+procedure TMFonts.Add(Font: TMFont);
+begin
+  Fonts.Add(Font);
+end;
+
 procedure TMFonts.SetPath(const aPath: String);
 begin
   FPath := aPath;
@@ -187,7 +195,7 @@ begin
   Exit(TMFont(Fonts.Items[i]).Data);
 end;
 
-function TMFonts.FreeFont(const Name: String): boolean;
+function TMFonts.FreeFont(const Name: String): Boolean;
 var
   i: integer;
 begin
@@ -203,125 +211,86 @@ end;
 function TMFonts.LoadFont(const Name: String; Shadow: Boolean): boolean;
 var
   f: TMFont;
-  CanonicalName, fontPath, n: String;
-  i: Integer;
-  FontFound: Boolean;
 begin
   Result := True;
-  CanonicalName := '';
-  fontPath := '';
 
-  FontFound := False;
-
-  // TODO: Use UTF8 here?
-  if not DirectoryExists(FPath + Name) then
+  if (not IsFontLoaded(Name)) then
   begin
-     if not DirectoryExists(Name) then
-      begin
-        raise Exception.Create('LoadFont: Directory ' + Name + ' does not exist (either absolute or in FontPath');
-        Exit(False);
-      end
-      else
-      begin
-        FontFound := True;
-        fontPath := Name;
-        if Name[Length(Name)] = DS then
-          CanonicalName := ExtractFileDir(Name)
-        else
-          CanonicalName := ExtractFilePath(Name) + ExtractFileName(Name);
-
-        CanonicalName := system.Copy(CanonicalName, rpos(DS, CanonicalName) + 1, Length(CanonicalName) - rpos(DS, CanonicalName));
-      end;
-
-    Writeln('LoadFont debug, CanonicalName = ' + CanonicalName);
-    if not FontFound then
+    if (not DirectoryExists(FPath + Name)) then
     begin
-      raise Exception.Create('LoadFont: Directory ' + FPath + Name + ' does not exist.');
-      Exit(False);
+      Result := False;
+
+      raise Exception.Create('Font "' + Name + '" does not exist in path "' + FPath + '"');
     end;
-  end else
-  begin
-    CanonicalName := Name;
-    fontPath := FPath + Name;
+
+    mDebugLn('Loading font "' + Name + '"');
+
+    f := TMFont.Create();
+    f.Name := Name;
+    if Shadow then
+      f.Name := f.Name + '_s';
+    f.Data := InitOCR(LoadGlyphMasks(IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(FPath) + Name), Shadow));
+
+    Fonts.Add(f);
   end;
-
-  n := CanonicalName;
-  if Shadow then
-    n := n + '_s';
-
-  FontFound := False;
-
-  for i := 0 to Fonts.Count - 1 do
-  begin
-    if lowercase(n) = lowercase(TMFont(Fonts.Items[i]).Name) then
-    begin
-      FontFound := True;
-      break;
-    end;
-  end;
-
-  if FontFound then
-  begin
-    TClient(Client).Writeln('Font ' + Name + ' already loaded as: ' + n);
-    Exit(False);
-  end;
-
-  f := TMFont.Create;
-  f.Name := CanonicalName;
-  if Shadow then
-    F.Name := F.Name + '_s';
-  f.Data := InitOCR(LoadGlyphMasks(fontPath + DS, Shadow));
-  Fonts.Add(f);
-  TClient(Client).Writeln('Loaded Font ' + f.Name);
 end;
 
-function TMFonts.LoadSystemFont(const SysFont: TFont; const FontName: string): boolean;
+function TMFonts.LoadSystemFont(const SysFont: TFont; const FontName: String): Boolean;
 var
-  Masks : TocrGlyphMaskArray;
-  i,c : integer;
-  w,h : integer;
-  Bmp : TBitmap;
-  NewFont : TMFont;
-  MBmp : TMufasaBitmap;
+  Masks: TOCRGlyphMaskArray;
+  i, W, H: Int32;
+  BMP: TBitmap;
+  F: TMFont;
+  Mufasa: TMufasaBitmap;
 begin
-  SetLength(Masks,255);
-  MBmp := TMufasaBitmap.Create;
-  Bmp := TBitmap.Create;
-  c := 0;
-  with Bmp.canvas do
-  begin
-    Font := SysFont;
-    Font.Color:= clWhite;
-    Font.Quality:=   fqNonAntialiased;
-    Brush.Color:= clBlack;
-    Pen.Style:= psClear;
-    for i := 1 to 255 do
-    begin
-      GetTextSize(chr(i),w,h);
-      if (w<=0) or (h<=0) then
-        Continue;
-      Bmp.SetSize(w,h);
-      TextOut(0,0,chr(i));
-      MBmp.LoadFromTBitmap(bmp);
-      Masks[c] := LoadGlyphMask(MBmp,false,chr(i));
-      inc(c);
-    end;
-  end;
-  setlength(masks,c);
-  if c > 0 then
-  begin
-    NewFont := TMFont.Create;
-    NewFont.Name:= FontName;
-    NewFont.Data := InitOCR(masks);
-    Fonts.Add(NewFont);
-    result := true;
-  end;
-  bmp.free;
-  MBmp.free;
+  if IsFontLoaded(FontName) then
+    Exit(True);
+  if (Screen.Fonts.IndexOf(SysFont.Name) = -1) then
+    Exit(False);
 
+  mDebugLn('Loading system font "' + SysFont.Name + '"');
+
+  Mufasa := TMufasaBitmap.Create();
+  BMP := TBitmap.Create();
+
+  try
+    with BMP.Canvas do
+    begin
+      Font := SysFont;
+      Font.Color := clWhite;
+      Font.Quality := fqNonAntialiased;
+      Brush.Color := clBlack;
+      Pen.Style := psClear;
+
+      for i := 1 to 255 do
+      begin
+        GetTextSize(Chr(i), W, H);
+
+        if (W > 0) and (H > 0) then
+        begin
+          BMP.SetSize(W, H);
+          TextOut(0, 0, Chr(i));
+          Mufasa.LoadFromTBitmap(BMP);
+          SetLength(Masks, Length(Masks) + 1);
+          Masks[High(Masks)] := LoadGlyphMask(Mufasa, False, Chr(i));
+        end;
+      end;
+    end;
+
+    F := TMFont.Create();
+    F.Name := FontName;
+    F.Data := InitOCR(Masks);
+
+    Fonts.Add(F);
+  finally
+    BMP.Free();
+    Mufasa.Free();
+  end;
+
+  Exit(True);
 end;
 
-function TMFonts.IsFontLoaded(const Name: String): Boolean;
+function TMFonts.IsFontLoaded(const Name: String): boolean;
 var
   i: integer;
 begin
@@ -341,6 +310,17 @@ begin
   Result.Path := FPath;
   for i := 0 to Self.Fonts.Count -1 do
     Result.Fonts.Add(TMFont(Self.Fonts.Items[i]).Copy());
+end;
+
+function TMFonts.Copy(const Name: String): TMFont;
+var
+  i: Int32;
+begin
+  Result := nil;
+
+  for i := 0 to Fonts.Count - 1 do
+    if SameText(Name, TMFont(Fonts.Items[i]).Name) then
+      Exit(TMFont(Fonts.Items[i]).Copy());
 end;
 
 function TMFonts.Count: integer;

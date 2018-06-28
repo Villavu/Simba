@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 402
+  Left = 527
   Height = 773
-  Top = 115
+  Top = 112
   Width = 1200
   ActiveControl = ScriptPanel
   AllowDropFiles = True
