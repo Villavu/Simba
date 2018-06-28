@@ -10,7 +10,7 @@ uses
 implementation
 
 uses
-  script_imports, lpcompiler, lptypes, mufasatypes, matrix, mmath;
+  script_imports, lpcompiler, lptypes, mufasatypes, matrix;
 
 //procedure Size(a: TSingleMatrix; out Width, Height: Int32);
 procedure Lape_MatrixSize(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -45,7 +45,7 @@ end;
 //procedure MeanStdev(a: TSingleMatrix; out Mean, Stdev: Double);
 procedure Lape_MatrixMeanStdev(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  matrixMeanStdev(TSingleMatrix(Params^[0]^), Single(Params^[1]^), Single(Params^[2]^));
+  MatrixMeanStdev(TSingleMatrix(Params^[0]^), Single(Params^[1]^), Single(Params^[2]^));
 end;
 
 //procedure MinMax(a: TSingleMatrix; out vMin,vMax: Single);
@@ -90,6 +90,17 @@ begin
   TPointArray(Result^) := MatrixIndices(TSingleMatrix(Params^[0]^), Single(Params^[1]^), EComparator(Params^[2]^));
 end;
 
+//function Extract(a: TSingleMatrix; Indices: TPointArray): TSingleArray;
+procedure Lape_MatrixExtract(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  TSingleArray(Result^) := MatrixExtract(TSingleMatrix(Params^[0]^), TPointArray(Params^[1]^));
+end;
+
+//procedure Fill(a: TSingleMatrix; Indices: TPointArray; Values: TSingleArray);
+procedure Lape_MatrixFill(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  MatrixFill(TSingleMatrix(Params^[0]^), TPointArray(Params^[1]^), TSingleArray(Params^[2]^));
+end;
 
 procedure Lape_Import_Matrix(Compiler: TLapeCompiler; Data: Pointer);
 begin
@@ -108,6 +119,8 @@ begin
     addGlobalFunc('function TSingleMatrix.ArgMin(): TPoint; constref;', @Lape_MatrixArgMin);
     addGlobalFunc('function TSingleMatrix.NormMinMax(Alpha, Beta: Single): TSingleMatrix; constref;', @Lape_NormMinMax);
     addGlobalFunc('function TSingleMatrix.Indices(Value: Single; Comparator: EComparator): TPointArray; constref;', @Lape_MatrixIndices);
+    addGlobalFunc('function TSingleMatrix.Extract(Indices: TPointArray): TSingleArray; constref;', @Lape_MatrixExtract);
+    addGlobalFunc('procedure TSingleMatrix.Fill(Indices: TPointArray; Values: TSingleArray); constref;', @Lape_MatrixFill);
   end;
 end;
 

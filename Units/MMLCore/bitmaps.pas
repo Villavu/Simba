@@ -177,7 +177,7 @@ uses
   client, tpa,
   colour_conv, IOManager, mufasatypesutil,
   FileUtil, LazUTF8,
-  matchTempl, mtMatrix, matrix;
+  matchTempl, matrix;
 
 
 // Needs more fixing. We need to either copy the memory ourself, or somehow
