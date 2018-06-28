@@ -94,6 +94,14 @@ begin
 
     addGlobalType('Int32', 'TColor');
 
+  //template matching & misc float matrix
+    addGlobalType('array of Single', 'TSingleArray');
+    addGlobalType('array of TSingleArray', 'TSingleMatrix');
+    addGlobalType('(TM_CCORR, TM_CCORR_NORMED, TM_CCOEFF, TM_CCOEFF_NORMED, TM_SQDIFF, TM_SQDIFF_NORMED)', 'ETMFormula');
+    addGlobalType('(__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__)', 'EComparator');
+    
+    
+  // 
     addGlobalType('record'                                                       + LineEnding +
                   '  CurrencyFormat: Byte;'                                      + LineEnding +
                   '  NegCurrFormat: Byte;'                                       + LineEnding +
