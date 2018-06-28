@@ -129,6 +129,15 @@ type
   P2DExtendedArray = ^T2DExtendedArray;
   T2DExtendedArray = Array of Array of Extended;
 
+  {Tempalte matching}
+  PSingleArray  = ^TSingleArray;
+  TSingleArray  = array of Single;
+  PSingleMatrix = ^TSingleMatrix;
+  TSingleMatrix = array of TSingleArray;
+
+  ETMFormula  = (TM_CCORR, TM_CCORR_NORMED, TM_CCOEFF, TM_CCOEFF_NORMED, TM_SQDIFF, TM_SQDIFF_NORMED);
+  EComparator = (__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__);
+
   { Crypto }
   THashType = (htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160,
                htSHA1, htSHA256, htSHA384, htSHA512, htTiger);

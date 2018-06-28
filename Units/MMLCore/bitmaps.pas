@@ -106,6 +106,12 @@ type
     procedure Posterize(TargetBitmap : TMufasaBitmap; Po : integer);overload;
     procedure Posterize(Po : integer);overload;
     procedure Convolute(TargetBitmap : TMufasaBitmap; Matrix : T2DExtendedArray);
+    
+    function  CompareAt(Other: TMufasaBitmap; Pt: TPoint; Tol: Int32): Extended;
+    procedure Downsample(DownScale: Int32; TargetBitmap: TMufasaBitmap);
+    function  MatchTemplate(Other: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
+    function  FindTemplate(Other: TMufasaBitmap; Formula: ETMFormula; MinMatch: Extended): TPoint;
+    
     function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap; overload;
     function Copy: TMufasaBitmap;overload;
     procedure Blur(const Block, xs, ys, xe, ye: integer);
@@ -115,6 +121,7 @@ type
     function ToString : string; override;
     function ToMatrix: T2DIntegerArray;
     procedure DrawMatrix(const matrix: T2DIntegerArray);
+    procedure DrawMatrix(const Matrix: TSingleMatrix); overload;
     procedure ThresholdAdaptive(Alpha, Beta: Byte; InvertIt: Boolean; Method: TBmpThreshMethod; C: Integer);
     function RowPtrs : TPRGB32Array;
     procedure LoadFromTBitmap(bmp: TBitmap);
@@ -132,6 +139,7 @@ type
     destructor Destroy;override;
   end;
   TMufasaBmpArray = Array of TMufasaBitmap;
+  
   { TMBitmaps }
   TMBitmaps = class(TObject)
   protected
@@ -168,7 +176,9 @@ uses
   paszlib, DCPbase64, math,
   client, tpa,
   colour_conv, IOManager, mufasatypesutil,
-  FileUtil, LazUTF8;
+  FileUtil, LazUTF8,
+  matchTempl, matrix;
+
 
 // Needs more fixing. We need to either copy the memory ourself, or somehow
 // find a TRawImage feature to skip X bytes after X bytes read. (Most likely a
@@ -816,6 +826,31 @@ begin
   for y := 0 to hei do
     for x := 0 to wid do
       self.FData[y * w + x] := RGBToBGR(matrix[y][x]);
+end;
+
+procedure TMufasaBitmap.DrawMatrix(const Matrix: TSingleMatrix);
+var
+  x,y, wid,hei, color: Int32;
+  _h,_s: Extended;
+  tmp: TSingleMatrix;
+begin
+  if (Length(matrix) = 0) then
+    raise exception.Create('Matrix with length 0 has been passed to TMufasaBitmap.DrawMatrix');
+
+  Self.SetSize(Length(matrix[0]), Length(matrix));
+
+  wid := self.Width - 1;
+  hei := self.Height - 1;
+  tmp := MatrixNormMinMax(Matrix, 0,1);
+
+  for y:=0 to hei do
+    for x:=0 to wid do
+    begin
+      _h := (1 - tmp[y,x]) * 67;
+      _s := 40 + tmp[y,x] * 60;
+      color := HSLToColor(_H,_S,50);
+      Self.FastSetPixel(x,y,color);
+     end;
 end;
 
 function TMufasaBitmap.RowPtrs: TPRGB32Array;
@@ -1769,15 +1804,15 @@ var
   mW,mH,midx,midy:Integer;
   valR,valG,valB: Extended;
 
-procedure ForceInBounds(x,y, Wid,Hig: Int32; out cx,cy: Int32); Inline;
-begin
-  cx := x;
-  cy := y;
-  if cx >= Wid then   cx := Wid-1
-  else if cx < 0 then cx := 0;
-  if cy >= Hig then   cy := Hig-1
-  else if cy < 0 then cy := 0;
-end;
+  procedure ForceInBounds(x,y, Wid,Hig: Int32; out cx,cy: Int32); Inline;
+  begin
+    cx := x;
+    cy := y;
+    if cx >= Wid then   cx := Wid-1
+    else if cx < 0 then cx := 0;
+    if cy >= Hig then   cy := Hig-1
+    else if cy < 0 then cy := 0;
+  end;
 
 begin
   TargetBitmap.SetSize(Self.W,Self.H);
@@ -1805,8 +1840,106 @@ begin
       RowT[y][x].R := round(valR);
       RowT[y][x].G := round(valG);
       RowT[y][x].B := round(valB);;
+    end;
+end;
+
+
+function TMufasaBitmap.CompareAt(Other: TMufasaBitmap; Pt: TPoint; Tol: Int32): Extended;
+var
+  x,y,tw,th,SAD: Int32;
+  c1,c2: TRGB32;
+begin
+  tw := Other.Width;
+  th := Other.Height;
+  if (tw = 0) or (th = 0) or (tw+pt.x > Self.W) or (th+pt.y > Self.H) then
+    Exit(0);
+
+  SAD := 0;
+  for y:=0 to th-1 do
+    for x:=0 to tw-1 do
+    begin
+      c1 := Self.FData [(y + pt.y) * w + x + pt.x];
+      c2 := Other.FData[y * tw + x];
+      if Sqr(c1.R-c2.R) + Sqr(c1.G-c2.G) + Sqr(c1.B-c2.B) > Sqr(Tol) then
+        Inc(SAD);
+    end;
+  
+  Result := 1 - SAD / (W*H);
+end;
+
+procedure TMufasaBitmap.Downsample(DownScale: Int32; TargetBitmap: TMufasaBitmap);
+var
+  invArea: Double;
+  function BlendArea(x1,y1: Int32): TRGB32; inline;
+  var
+    x,y:Int32;
+    R:Int32=0; G:Int32=0; B:Int32=0;
+  begin
+    for y:=y1 to y1+DownScale-1 do
+      for x:=x1 to x1+DownScale-1 do
+      begin
+        Inc(R, Self.FData[y*w+x].R);
+        Inc(G, Self.FData[y*w+x].G);
+        Inc(B, Self.FData[y*w+x].B);
+      end;
+    Result.R := Round(R * invArea);
+    Result.G := Round(G * invArea);
+    Result.B := Round(B * invArea);
+  end;
+var
+  x,y,nw,nh:Int32;
+begin
+  if (w = 0) or (h = 0) or (DownScale <= 0) then 
+    Exit;
+  
+  nw := w div DownScale;
+  nh := h div DownScale;
+  invArea := Double(1.0) / Sqr(DownScale);
+  TargetBitmap.SetSize(nH, nW);
+  for y:=0 to nh-1 do
+    for x:=0 to nw-1 do
+      TargetBitmap.FData[y*nw+x] := BlendArea(x*DownScale, y*DownScale);
+end;
+
+function TMufasaBitmap.MatchTemplate(Other: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
+var
+  y: Int32;
+  Image, Templ: T2DIntArray;
+begin
+  if (W < Other.Width) or (H < Other.Height) then
+    raise Exception.CreateFmt('Image must be larger than Template - Image(%d, %d), Templ(%d, %d)', [W,H, Other.Width, Other.Height]);
+
+  SetLength(Image, Self.Height, Self.Width);
+  SetLength(Templ, Other.Height, Other.Width);
+  
+  for y:=0 to Self.Height-1 do
+    Move(Self.FData[y*Self.Width], Image[y,0], Self.Width*SizeOf(Int32));
+  
+  for y:=0 to Other.Height-1 do
+    Move(Other.FData[y*Other.Width], Templ[y,0], Other.Width*SizeOf(Int32));
+  
+  Result := MatchTempl.MatchTemplate(Image, Templ, Int32(Formula));
+end;
+
+function TMufasaBitmap.FindTemplate(Other: TMufasaBitmap; Formula: ETMFormula; MinMatch: Extended): TPoint;
+var
+  xcorr: TSingleMatrix;
+begin
+  xcorr := Self.MatchTemplate(Other, Formula);
+  
+  if Formula in [TM_SQDIFF, TM_SQDIFF_NORMED] then
+  begin
+    Result := TPoint(MatrixArgMin(xcorr));
+    if xcorr[Result.Y, Result.X] > MinMatch then
+      Result := Point(-1,-1);
+  end else
+  begin
+    Result := TPoint(MatrixArgMax(xcorr));
+    if xcorr[Result.Y, Result.X] < MinMatch then
+      Result := Point(-1,-1);
   end;
 end;
+
 
 function TMufasaBitmap.CreateTMask: TMask;
 var
@@ -2114,10 +2247,7 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.ResizeEx(Method: TBmpResizeMethod; NewWidth,
-  NewHeight: integer);
-var
-  Matrix: T2DIntegerArray;
+procedure TMufasaBitmap.ResizeEx(method: TBmpResizeMethod; NewWidth, NewHeight: integer);
 begin
   if (Self.FExternData) then
     raise Exception.Create('Cannot resize a bitmap with FExternData = True!');
