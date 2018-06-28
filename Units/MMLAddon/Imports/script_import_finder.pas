@@ -10,7 +10,7 @@ uses
 implementation
 
 uses
-  script_imports, script_thread, lpcompiler, lptypes, mufasatypes;
+  script_imports, script_thread, lpcompiler, lptypes, mufasatypes, bitmaps;
 
 procedure Lape_FindDTM(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -222,6 +222,20 @@ begin
     PBoolean(Result)^ := MFinder.FindDeformedBitmapToleranceIn(MBitmaps[PInt32(Params^[1])^], PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^, PInt32(Params^[8])^, PInt32(Params^[9])^, PBoolean(Params^[10])^, PExtended(Params^[11])^);
 end;
 
+//function TMFinder.FindTemplateEx(Templ: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
+procedure Lape_FindTemplateEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  with TMMLScriptThread(Params^[0]).Client do // bitmap                     out TPA                   formula                  xs                  ys                  xe                  ye                  min match              dynamic adjust
+    PBoolean(Result)^ := MFinder.FindTemplateEx(TMufasaBitmap(Params^[1]^), TPointArray(Params^[2]^), ETMFormula(Params^[3]^), Int32(Params^[4]^), Int32(Params^[5]^), Int32(Params^[6]^), Int32(Params^[7]^), Extended(Params^[8]^), Boolean(Params^[9]^));
+end;
+
+//function TMFinder.FindTemplateEx(Templ: TMufasaBitmap; out X,Y: Int32; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
+procedure Lape_FindTemplate(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  with TMMLScriptThread(Params^[0]).Client do // bitmap                   out X               out Y               formula                  xs                  ys,                 xe                  ye                  min match              dynamic adjust
+    PBoolean(Result)^ := MFinder.FindTemplate(TMufasaBitmap(Params^[1]^), Int32(Params^[2]^), Int32(Params^[3]^), ETMFormula(Params^[4]^), Int32(Params^[5]^), Int32(Params^[6]^), Int32(Params^[7]^), Int32(Params^[8]^), Extended(Params^[9]^), Boolean(Params^[10]^));
+end;
+
 procedure Lape_Import_Finder(Compiler: TLapeCompiler; Data: Pointer);
 begin
   with Compiler do
@@ -261,6 +275,9 @@ begin
     addGlobalMethod('function FindMaskTolerance(const mask: TMask; var x, y: Int32; xs,ys, xe, ye: Int32; Tolerance, ContourTolerance: Int32): Boolean;', @Lape_FindMaskTolerance, Data);
     addGlobalMethod('function FindBitmapMaskTolerance(mask: Int32; var x, y: Int32; xs, ys, xe, ye: Int32; Tolerance, ContourTolerance: Int32): Boolean', @Lape_FindBitmapMaskTolerance, Data);
     addGlobalMethod('function FindDeformedBitmapToleranceIn(bitmap: Int32; var x, y: Int32; xs, ys, xe, ye: Int32; tolerance: Int32; Range: Int32; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean', @Lape_FindDeformedBitmapToleranceIn, Data);
+    
+    addGlobalMethod('function FindTemplate(Templ: TMufasaBitmap; out x, y: Int32; Formula: ETMFormula; xs,ys,xe,ye: Int32; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @Lape_FindTemplate, Data);
+    addGlobalMethod('function FindTemplateEx(Templ: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; xs,ys,xe,ye: Int32; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @Lape_FindTemplateEx, Data);
   end;
 end;
 
