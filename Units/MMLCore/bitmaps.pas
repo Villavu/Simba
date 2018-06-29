@@ -1895,7 +1895,7 @@ begin
   nw := w div DownScale;
   nh := h div DownScale;
   invArea := Double(1.0) / Sqr(DownScale);
-  TargetBitmap.SetSize(nH, nW);
+  TargetBitmap.SetSize(nW, nH);
   for y:=0 to nh-1 do
     for x:=0 to nw-1 do
       TargetBitmap.FData[y*nw+x] := BlendArea(x*DownScale, y*DownScale);
