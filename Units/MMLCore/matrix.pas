@@ -29,7 +29,7 @@ interface
 uses
   Classes, SysUtils, mufasatypes;
 
-procedure MatrixSetSize(a: TSingleMatrix; Width, Height: Int32);
+procedure MatrixSetSize(var a: TSingleMatrix; Width, Height: Int32);
 procedure MatrixSize(a: TSingleMatrix; out Width, Height: Int32);
 function MatrixWidth(a: TSingleMatrix): Int32;
 function MatrixHeight(a: TSingleMatrix): Int32;
@@ -49,7 +49,7 @@ implementation
 uses
   math;
 
-procedure MatrixSetSize(a: TSingleMatrix; Width, Height: Int32);
+procedure MatrixSetSize(var a: TSingleMatrix; Width, Height: Int32);
 begin
   SetLength(a, Height, Width);
 end;

@@ -112,7 +112,7 @@ procedure Lape_Import_Matrix(Compiler: TLapeCompiler; Data: Pointer);
 begin
   with Compiler do
   begin
-    addGlobalFunc('procedure TSingleMatrix.SetSize(Width, Height: Int32); constref;', @Lape_MatrixSetSize);
+    addGlobalFunc('procedure TSingleMatrix.SetSize(Width, Height: Int32);', @Lape_MatrixSetSize);
     addGlobalFunc('procedure TSingleMatrix.Size(out Width, Height: Int32); constref;', @Lape_MatrixSize);
     addGlobalFunc('function TSingleMatrix.Width(): Int32; constref;', @Lape_MatrixWidth);
     addGlobalFunc('function TSingleMatrix.Height(): Int32; constref;', @Lape_MatrixHeight);
