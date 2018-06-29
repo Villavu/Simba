@@ -29,6 +29,7 @@ interface
 uses
   Classes, SysUtils, mufasatypes;
 
+procedure MatrixSetSize(a: TSingleMatrix; Width, Height: Int32);
 procedure MatrixSize(a: TSingleMatrix; out Width, Height: Int32);
 function MatrixWidth(a: TSingleMatrix): Int32;
 function MatrixHeight(a: TSingleMatrix): Int32;
@@ -48,6 +49,11 @@ implementation
 uses
   math;
 
+procedure MatrixSetSize(a: TSingleMatrix; Width, Height: Int32);
+begin
+  SetLength(a, Height, Width);
+end;
+
 procedure MatrixSize(a: TSingleMatrix; out Width, Height: Int32);
 begin
   Height := Length(a);
@@ -56,14 +62,14 @@ begin
   else
     Width := 0;
 end;
-  
+
 function MatrixWidth(a: TSingleMatrix): Int32;
 begin
   Result := 0;
   if Length(a) > 0 then
     Result := Length(a[0]);
 end;
-  
+
 function MatrixHeight(a: TSingleMatrix): Int32;
 begin
   Result := Length(a);
