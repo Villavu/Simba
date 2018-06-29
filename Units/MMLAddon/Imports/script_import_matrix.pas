@@ -12,6 +12,12 @@ implementation
 uses
   script_imports, lpcompiler, lptypes, mufasatypes, matrix;
 
+//procedure SetSize(a: TSingleMatrix; Width, Height: Int32);
+procedure Lape_MatrixSetSize(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  MatrixSetSize(TSingleMatrix(Params^[0]^), Int32(Params^[1]^), Int32(Params^[2]^));
+end;
+
 //procedure Size(a: TSingleMatrix; out Width, Height: Int32);
 procedure Lape_MatrixSize(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -106,6 +112,7 @@ procedure Lape_Import_Matrix(Compiler: TLapeCompiler; Data: Pointer);
 begin
   with Compiler do
   begin
+    addGlobalFunc('procedure TSingleMatrix.SetSize(Width, Height: Int32); constref;', @Lape_MatrixSetSize);
     addGlobalFunc('procedure TSingleMatrix.Size(out Width, Height: Int32); constref;', @Lape_MatrixSize);
     addGlobalFunc('function TSingleMatrix.Width(): Int32; constref;', @Lape_MatrixWidth);
     addGlobalFunc('function TSingleMatrix.Height(): Int32; constref;', @Lape_MatrixHeight);
