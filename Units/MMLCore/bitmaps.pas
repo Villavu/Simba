@@ -121,7 +121,7 @@ type
     function ToString : string; override;
     function ToMatrix: T2DIntegerArray;
     procedure DrawMatrix(const matrix: T2DIntegerArray);
-    procedure DrawMatrix(const Matrix: TSingleMatrix); overload;
+    procedure DrawMatrix(const Matrix: TSingleMatrix; ColorMapID: Int32 = 0); overload;
     procedure ThresholdAdaptive(Alpha, Beta: Byte; InvertIt: Boolean; Method: TBmpThreshMethod; C: Integer);
     function RowPtrs : TPRGB32Array;
     procedure LoadFromTBitmap(bmp: TBitmap);
@@ -828,15 +828,15 @@ begin
       self.FData[y * w + x] := RGBToBGR(matrix[y][x]);
 end;
 
-procedure TMufasaBitmap.DrawMatrix(const Matrix: TSingleMatrix);
+procedure TMufasaBitmap.DrawMatrix(const Matrix: TSingleMatrix; ColorMapID: Int32 = 0); overload;
 var
   x,y, wid,hei, color: Int32;
-  _h,_s: Extended;
+  _H,_S,_L: Extended;
   tmp: TSingleMatrix;
 begin
   if (Length(matrix) = 0) then
-    raise exception.Create('Matrix with length 0 has been passed to TMufasaBitmap.DrawMatrix');
-
+    Raise Exception.Create('Matrix with length 0 has been passed to TMufasaBitmap.DrawMatrix');
+  
   Self.SetSize(Length(matrix[0]), Length(matrix));
 
   wid := self.Width - 1;
@@ -846,11 +846,38 @@ begin
   for y:=0 to hei do
     for x:=0 to wid do
     begin
-      _h := (1 - tmp[y,x]) * 67;
-      _s := 40 + tmp[y,x] * 60;
-      color := HSLToColor(_H,_S,50);
+      case ColorMapID of
+        0:begin //cold blue to red
+            _H := (1 - tmp[y,x]) * 67;
+            _S := 40 + tmp[y,x] * 60;
+            color := HSLToColor(_H,_S,50);
+          end;
+        1:begin //black -> blue -> red
+            _H := (1 - tmp[y,x]) * 67;
+            _L := tmp[y,x] * 50;
+            color := HSLToColor(_H,100,_L);
+          end;
+        2:begin //white -> blue -> red
+            _H := (1 - tmp[y,x]) * 67;
+            _L := 100 - tmp[y,x] * 50;
+            color := HSLToColor(_H,100,_L);
+          end;
+        3:begin //Light (to white)
+            _L := (1 - tmp[y,x]) * 100;
+            color := HSLToColor(0,0,_L);
+          end;
+        4:begin //Light (to black)
+            _L := tmp[y,x] * 100;
+            color := HSLToColor(0,0,_L);
+          end;
+        else
+          begin //Custom black to hue to white
+            _L := tmp[y,x] * 100;
+            color := HSLToColor(ColorMapID/3.6,100,_L);
+          end;
+      end;
       Self.FastSetPixel(x,y,color);
-     end;
+    end;       
 end;
 
 function TMufasaBitmap.RowPtrs: TPRGB32Array;
