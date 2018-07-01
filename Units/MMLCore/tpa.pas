@@ -2465,27 +2465,19 @@ end;
 
 Function MergeATPA(const ATPA: T2DPointArray): TPointArray;
 var
-  I, II, Len, TempL, CurrentL: integer;
+  i, L: Int32;
 begin;
-  Len := High(ATPA);
-  if Len < 0 then
+  SetLength(Result, 0);
+
+  for i := 0 to High(ATPA) do
   begin
-    SetLength(Result, 0);
-    Exit;
-  end;
-  CurrentL := 0;
-  For I:= 0 to Len do
-  begin;
-    TempL := High(ATPA[I]);
-    if TempL < 0 then
+    if (Length(ATPA[i]) = 0) then
       Continue;
-    TempL := Templ + CurrentL + 1;
-    Setlength(Result, TempL+1);
-    For II := CurrentL to TempL do
-      Result[II] := ATPA[I][II - CurrentL];
-    CurrentL := TempL;
+
+    L := Length(Result);
+    SetLength(Result, L + Length(ATPA[i]));
+    Move(ATPA[i][0], Result[L], Length(ATPA[i]) * SizeOf(TPoint));
   end;
-  SetLength(Result,CurrentL);
 end;
 
 {/\

@@ -1,0 +1,73 @@
+Deprecated crypto methods
+  Replacements:
+    `function BlowFish_Encrypt(constref Data, Password: String): String;`
+	`function BlowFish_Decrypt(constref Data, Password: String): String;`
+	`function MD5String(constref Data: String): String;`
+    `function MD5File(constref FilePath: String): String;`
+    `function SHA1String(constref Data: String): String;`
+	`function SHA1File(constref FilePath: String): String;`
+
+Deprecated UpText methods
+  Replacement: SimpleOCR plugin
+ 
+Deprecated MessageBox
+  Replacement: MessageDlg
+  
+Deprecated GetScriptProp & SetScriptProp
+  Replacement:
+    `procedure WriteTimeStamp(Enable: Boolean);`
+    `procedure AddOnTerminate(Method: String);`
+
+Deprecated GetTClient
+  Replacement: `Client` variable	
+
+Deprecated PascalScript wrappers
+  Replacement: `SplitTPAWrap` > `SplitTPA` etc.
+
+Added AddOnTerminate & DeleteOnTerminate overloads
+  `procedure AddOnTerminate(Method: procedure);`
+  `procedure AddOnTerminate(Method: procedure of object);`
+  
+Exposed AddOnTerminate variables
+  `var OnTerminateStrings: array of String;`                      
+  `var OnTerminateMethods: array of procedure;`                 
+  `var OnTerminateObjects: array of procedure of object;` 
+  
+Added IsTerminate function
+  `function IsTerminated(UserTerminated: Boolean = False): Boolean;`
+   > Returns if the script is terminating with a option of knowing if the script was terminated by the user.
+     This is useful when AddOnTerminate methods are being called.
+
+Added WriteTimeStamp procedure
+  `procedure WriteTimeStamp(Enable: Boolean);` 
+   > if Enabled will prefix each `WriteLn` call with the scripts runtime.
+  
+Added methods to execute tools from a script
+  `procedure ACAGUI(Title: String; out CTS, Color, Tolerance: Int32; out Hue, Sat: Extended);`
+  `procedure ACA(Colors: TIntegerArray; CTS: Int32; out Color, Tolerance: Int32; out Hue, Sat: Extended);`
+  `procedure DTMEditor(Title: String; out DTM: String);`
+ 
+HTTPClient improvements:
+  Added `function GetHTTPUserAgent(Client: Int32): String;`  
+   > Returns the HTTPClient's user agent.
+  Added `function GetHTTPPageEx(Client: Int32; URL: String; FilePath: String): Int32;`
+   > Downloads the page content and saves it to `FilePath`. Returns the response code.
+  Added `function GetHTTPResponseCode: Int32;`
+   > Returns the response code of a HTTPClient.
+  
+  HTTPS access should work by default on Windows. Simba will extract OpenSSL libs on startup if not present, for Linux users you can install openssl-dev package.
+  
+Added ShowBitmap: 
+  `procedure ShowBitmap(BMP: TMufasaBitmap);`
+  `procedure ShowBitmap(BMP: Int32);`
+   > Displays the bitmap. alternative 
+  
+Renamed `PPoint` to `TPolarPoint`
+   
+FPC version defines added:
+  Dynamically set to what FPC Simba is compiled with. These are currently:
+  `FPC_VERSION_3`
+  `FPC_RELEASE_0, 
+  `FPC_PATCH_4`
+ 
+ 

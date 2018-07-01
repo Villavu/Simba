@@ -2188,11 +2188,12 @@ end;
 
 procedure TSimbaForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 var
-  i : integer;
+  i: Int32;
 begin
   Exiting := True;
 
-  SaveFormSettings;
+  FunctionList.Stop();
+  SaveFormSettings();
 
   if (Assigned(Tabs)) then
     for i := Tabs.Count - 1 downto 0 do
@@ -2754,7 +2755,6 @@ procedure TSimbaForm.PageControl1Change(Sender: TObject);
 begin
   RefreshTab();
   UpdateTitle();
-  FunctionList.ForceUpdate();
 end;
 
 procedure TSimbaForm.ButtonTrayClick(Sender: TObject);
