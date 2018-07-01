@@ -11,7 +11,7 @@ uses
 implementation
 
 uses
-  script_imports, script_thread, lpcompiler, lptypes, lpffi, lputils, mufasatypes, mufasabase,
+  script_imports, lpcompiler, lptypes, lpffi, lputils, mufasatypes, mufasabase,
   LazUTF8;
 
 procedure Lape_GetEnvironmentVariable(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -29,6 +29,9 @@ begin
   Sleep(PUInt32(Params^[1])^);
 end;
 
+type
+  __TLapeCompiler = class(TLapeCompiler);
+
 procedure Lape_Import_System(Compiler: TLapeCompiler; Data: Pointer);
 begin
   InitializeFFI(Compiler);
@@ -36,11 +39,14 @@ begin
 
   ExposeGlobals(Compiler);
 
-  with Compiler do
+  with __TLapeCompiler(Compiler) do
   begin
-    addBaseDefine(Format('FPC_VERSION_%d', [FPC_VERSION]));
-    addBaseDefine(Format('FPC_RELEASE_%d', [FPC_RELEASE]));
-    addBaseDefine(Format('FPC_PATCH_%d', [FPC_PATCH]));
+    FBaseDefines.Values['SIMBA_VERSION'] := IntToStr(SimbaVersion);
+    FBaseDefines.Values['SIMBA_MAJOR'] := IntToStr(SimbaMajor);
+
+    FBaseDefines.Values['FPC_VERSION'] := Format('%d', [FPC_VERSION]);
+    FBaseDefines.Values['FPC_RELEASE'] := Format('%d', [FPC_RELEASE]);
+    FBaseDefines.Values['FPC_PATCH'] := Format('%d', [FPC_PATCH]);
 
     addBaseDefine('MUFASA');
     addBaseDefine('COGAT');
@@ -93,6 +99,7 @@ begin
     addGlobalType('^TPolarPoint', 'PPolarPoint');
 
     addGlobalType('Int32', 'TColor');
+    addGlobalType('UInt32', 'DWord');
 
     addGlobalType('record'                                                       + LineEnding +
                   '  CurrencyFormat: Byte;'                                      + LineEnding +

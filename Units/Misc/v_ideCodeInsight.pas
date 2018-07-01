@@ -1864,7 +1864,7 @@ begin
         Parent := checkInclude(Self, dType); // Scan script + includes
 
         if (Parent <> '') then
-          while (Parent <> '') do
+          while (Parent <> '') and (not SameText(Parent, dType)) do
           begin
             //mDebugLn('CC: %s is a parent for %s, adding...', [Parent, dType]);
 
@@ -1881,11 +1881,8 @@ begin
           Parent := '';
           Parent := checkInclude(CoreBuffer[i], dType);
 
-          while (Parent <> '') do
-          begin
-            //mDebugLn('CC: %s is a parent for %s, adding...', [Parent, dType]);
+          while (Parent <> '') and (not SameText(Parent, dType)) do
             Parent := checkInclude(CoreBuffer[i], Parent);
-          end;
         end;
       end;
     end else

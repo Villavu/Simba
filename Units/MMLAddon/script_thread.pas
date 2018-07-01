@@ -38,12 +38,13 @@ type
 
     procedure SetState(Value: EMMLScriptState);
 
-    procedure Flush;
-
-    procedure HandleException(e: Exception);
+    procedure OnHint(Sender: TLapeCompilerBase; Hint: lpString);
 
     function OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
     function OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
+
+    procedure Flush;
+    procedure HandleException(e: Exception);
 
     function Import: Boolean;
     function Compile: Boolean;
@@ -78,7 +79,7 @@ implementation
 
 uses
   {$IFDEF LINUX} pthreads, {$ENDIF}
-  script_imports;
+  script_imports, fpexprpars, stringutil;
 
 procedure TMMLScriptThread.SetState(Value: EMMLScriptState);
 begin
@@ -87,6 +88,11 @@ begin
     ssStop: FRunning := bFalse;
     ssPause: FRunning := bUnknown;
   end;
+end;
+
+procedure TMMLScriptThread.OnHint(Sender: TLapeCompilerBase; Hint: lpString);
+begin
+  WriteLn(Hint);
 end;
 
 procedure TMMLScriptThread.Flush;
@@ -130,10 +136,54 @@ type
    __TLapeCompiler = class(TLapeCompiler); // blasphemy!
 
 function TMMLScriptThread.OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
+
+  function EvalExpression(Op, Left, Right: String): Boolean;
+  var
+    Parser: TFPExpressionParser;
+  begin
+    Parser := TFPExpressionParser.Create(nil);
+
+    try
+      Parser.Expression := Left + Trim(Op) + Right; // Simple :>
+
+      Result := Parser.AsBoolean;
+    finally
+      Parser.Free();
+    end;
+  end;
+
+  function EvalVersion(Op: String; Left, Right: array of Integer): Boolean; overload;
+  begin
+    case Trim(Op) of
+      '=':  Result := (Left[0] = Right[0]) and (Left[1] = Right[1]) and (Left[2] = Right[2]);
+
+      '<>': Result := (Left[0] <> Right[0]) or (Left[1] <> Right[1]) or (Left[2] <> Right[2]);
+
+      '>':  Result := ((Left[0] > Right[0])) or
+                      ((Left[0] >= Right[0]) and (Left[1] > Right[1])) or
+                      ((Left[0] >= Right[0]) and (Left[1] >= Right[1]) and (Left[2] > Right[2]));
+
+      '<':  Result := ((Left[0] < Right[0])) or
+                      ((Left[0] <= Right[0]) and (Left[1] < Right[1])) or
+                      ((Left[0] <= Right[0]) and (Left[1] <= Right[1]) and (Left[2] < Right[2]));
+    end;
+  end;
+
+  function EvalVersion(Op: String; Left, Right: TStringArray): Boolean; overload;
+  begin
+    if (Length(Left) <> 3) or (Length(Right) <> 3) then
+      raise Exception.Create('');
+
+    Result := EvalVersion(Op, [StrToInt(Left[0]), StrToInt(Left[1]), StrToInt(Left[2])], [StrToInt(Right[0]), StrToInt(Right[1]), StrToInt(Right[2])]);
+  end;
+
 var
   Plugin: TMPlugin;
   i: Int32;
   lpe: lpException;
+  Eval: Boolean;
+  Op: String;
+  Args: TStringArray;
 begin
   if (UpperCase(Directive) = 'LOADLIB') then
   begin
@@ -171,6 +221,51 @@ begin
       pushConditional((not InIgnore) and (Plugin <> nil), Sender.DocPos);
 
     Exit(True);
+  end;
+
+  if (UpperCase(Directive) = 'IFVALUE') or (UpperCase(Directive) = 'IFVERSION') then
+  begin
+    Eval := False;
+
+    if Pos(' = ', Argument) > 0 then Op := ' = ' else
+    if Pos(' <> ', Argument) > 0 then Op := ' <> ' else
+    if Pos(' > ', Argument) > 0 then Op := ' > ' else
+    if Pos(' < ', Argument) > 0 then Op := ' < ' else Op := '';
+
+    if (Op <> '') then
+    begin
+      Args := Explode(Op, Argument);
+
+      if (Length(Args) = 2) then
+      begin
+        Args[0] := Trim(Sender.Defines.Values[Args[0]]);
+        Args[1] := Trim(Args[1]);
+
+        if (Args[0] <> '') and (Args[1] <> '') then
+        begin
+          case UpperCase(Directive) of
+            'IFVALUE': // {$IFVALUE SIMBAMAJOR = 1300}
+              try
+                Eval := EvalExpression(Op, Args[0], Args[1]);
+              except
+                Exit(False);
+              end;
+
+            'IFVERSION': // {$IFVERSION SRL > 1.2.2}
+              try
+                Eval := EvalVersion(Op, Explode('.', Args[0]), Explode('.', Args[1]));
+              except
+                Exit(False);
+              end;
+          end;
+
+          with __TLapeCompiler(Sender) do
+             pushConditional((not InIgnore) and Eval, Sender.DocPos);
+
+          Exit(True);
+        end;
+      end;
+    end;
   end;
 
   Exit(False);
@@ -265,6 +360,7 @@ begin
   FCompiler := TLapeCompiler.Create(TLapeTokenizerString.Create(Script, FilePath));
   FCompiler.OnFindFile := @OnFindFile;
   FCompiler.OnHandleDirective := @OnHandleDirective;
+  FCompiler.OnHint := @OnHint;
   FCompiler['Move'].Name := 'MemMove';
 
   FClient := TClient.Create();
@@ -391,6 +487,7 @@ procedure TMMLScriptThread.SetFonts(Path: String);
 var
   Directory: String;
 begin
+  FClient.MOCR.SetPath(Path);
   for Directory in GetDirectories(Path) do
     FCompiler.addGlobalVar(Directory, Directory).isConstant := True;
 end;

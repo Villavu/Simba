@@ -164,8 +164,8 @@ begin
     addGlobalFunc('function TMOCR.GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing, color, tol, len: integer; font: string): string; constref;', @TMOCR_GetTextAt);
     addGlobalFunc('function TMOCR.GetTextAt(xs, ys, xe, ye, minvspacing, maxvspacing, hspacing, color, tol: integer; font: string): string; constref; overload;', @TMOCR_GetTextAtEx);
     addGlobalFunc('function TMOCR.GetTextATPA(const ATPA: T2DPointArray; const maxvspacing: integer; font: string): string; constref;', @TMOCR_GetTextATPA);
-    addGlobalFunc('function TMOCR.TextToFontTPA(Text, Font: String; out W, H: Int32): TPointArray; overload; constref;', @TMOCR_TextToFontTPA);
-    addGlobalFunc('function TMOCR.TextToFontTPA(Text: String; Font: TFont; out W, H: Int32): TPointArray; overload; constref;', @TMOCR_TextToFontTPAEx);
+    addGlobalFunc('function TMOCR.TextToFontTPA(Text, Font: String; out W, H: Int32): TPointArray; constref; overload;', @TMOCR_TextToFontTPA);
+    addGlobalFunc('function TMOCR.TextToFontTPA(Text: String; Font: TFont; out W, H: Int32): TPointArray; constref; overload;', @TMOCR_TextToFontTPAEx);
     addGlobalFunc('function TMOCR.TextToFontBitmap(Text, font: String): TMufasaBitmap; constref;', @TMOCR_TextToFontBitmap);
     addGlobalFunc('function TMOCR.TextToMask(Text, font: String): TMask; constref;', @TMOCR_TextToMask);
     addClassVar('TMOCR', 'Fonts', 'TMFonts', @TMOCR_Fonts_Read, @TMOCR_Fonts_Write);

@@ -61,6 +61,7 @@ type
     property LastUpdate: Int64 read FLastUpdate write FLastUpdate;
 
     constructor Create(FunctionList: TFunctionList_Frame); reintroduce;
+    destructor Destroy; override;
   end;
 
   TFunctionList_Hint = class(THintWindow)
@@ -92,6 +93,8 @@ type
     PluginsNode: TTreeNode;
     IncludesNode: TTreeNode;
 
+    procedure Stop;
+
     function addPluginSection(Section: String): TTreeNode;
     function addIncludeSection(Section: String): TTreeNode;
     function addNode(Declaration: TDeclaration; ParentNode: TTreeNode): TFunctionList_Node;
@@ -102,8 +105,6 @@ type
     procedure addVar(Declaration: TciVarDeclaration; ParentNode: TTreeNode);
     procedure addConst(Declaration: TciConstantDeclaration; ParentNode: TTreeNode);
     procedure addDeclarations(Declarations: TDeclarationList; ParentNode: TTreeNode; Clear, Sort: Boolean);
-
-    procedure ForceUpdate;
 
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -141,6 +142,9 @@ var
   end;
 
 begin
+  if Terminated then
+    Exit;
+
   if (FParser <> nil) then
   begin
     FParser.Free();
@@ -183,7 +187,7 @@ procedure TFunctionList_Updater.FinishUpdate;
       if Includes[i].IsLibrary then
         FFunctionList.addDeclarations(Includes[i].Items, FFunctionList.addPluginSection(ExtractFileNameOnly(Includes[i].FileName)), False, False)
       else
-        FFunctionList.addDeclarations(Includes[i].Items, FFunctionList.addIncludeSection(ExtractFileNameOnly(Includes[i].FileName)), False, False);
+        FFunctionList.addDeclarations(Includes[i].Items, FFunctionList.addIncludeSection(Includes[i].FileName), False, False);
 
       addIncludes(Includes[i].Includes);
     end;
@@ -288,7 +292,26 @@ constructor TFunctionList_Updater.Create(FunctionList: TFunctionList_Frame);
 begin
   inherited Create(False);
 
+  FreeOnTerminate := True;
+
   FFunctionList := FunctionList;
+end;
+
+destructor TFunctionList_Updater.Destroy;
+begin
+  if (FParser <> nil) then
+  begin
+    FParser.Free();
+    FParser := nil;
+  end;
+
+  if (FStream <> nil) then
+  begin
+    FStream.Free();
+    FStream := nil;
+  end;
+
+  inherited Destroy();
 end;
 
 procedure TFunctionList_Frame.AfterFilter(Sender: TObject);
@@ -425,9 +448,12 @@ end;
 
 function TFunctionList_Frame.addIncludeSection(Section: String): TTreeNode;
 begin
-  Result := TreeView.Items.AddChild(IncludesNode, Section);
+  Result := TreeView.Items.AddNode(TFunctionList_Node.Create(TreeView.Items), IncludesNode, ExtractFileNameOnly(Section), nil, naAddChild);
   Result.ImageIndex := 38;
   Result.SelectedIndex := 38;
+
+  TFunctionList_Node(Result).DocPos.FilePath := Section;
+  TFunctionList_Node(Result).Header := Section;
 end;
 
 function TFunctionList_Frame.addNode(Declaration: TDeclaration; ParentNode: TTreeNode): TFunctionList_Node;
@@ -579,11 +605,6 @@ begin
   end;
 end;
 
-procedure TFunctionList_Frame.ForceUpdate;
-begin
-  FUpdater.LastUpdate := -1;
-end;
-
 function TFunctionList_Frame.addSimbaSection(Section: String): TTreeNode;
 begin
   Result := TreeView.Items.Add(nil, Section);
@@ -595,6 +616,11 @@ procedure TFunctionList_Frame.HintMouseLeave(Sender: TObject);
 begin
   if FindLCLControl(Mouse.CursorPos) <> TreeView then
     FHint.Hide();
+end;
+
+procedure TFunctionList_Frame.Stop;
+begin
+  FUpdater.Terminate();
 end;
 
 procedure TFunctionList_Frame.TreeViewMouseLeave(Sender: TObject);
@@ -637,9 +663,8 @@ end;
 
 destructor TFunctionList_Frame.Destroy;
 begin
-  FUpdater.Terminate();
-  FUpdater.WaitFor();
-  FUpdater.Free();
+  if (FUpdater <> nil) then
+    Stop();
 
   inherited Destroy();
 end;

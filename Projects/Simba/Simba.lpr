@@ -33,17 +33,17 @@ uses
   cthreads, cmem, linux_startup,
   {$ENDIF}
   Interfaces, Forms,
-  simbaunit, colourhistory, about, debugimage, bitmapconv, updateform,
-  simbasettingssimple, simbasettingsold,
+  simbaunit, colourhistory, about, debugimage, bitmapconv, updateform, simbasettingsold, simbasettingssimple,
   {$IFDEF USE_FORMDESIGNER}
   design_frm, frmdesigner,
   {$ENDIF}
   // initialize in import order.
   script_import_system, script_import_classes, script_import_target, script_import_input,
-  script_import_finder, script_import_web, script_import_arrays_algorithms,
-  script_import_math, script_import_time_date, script_import_ocr, script_import_string,
-  script_import_simba, script_import_colormath, script_import_bitmap, script_import_settings,
-  script_import_dtm, script_import_file, script_import_other, script_import_script;
+  script_import_finder, script_import_web, script_import_arrays_algorithms, script_import_math,
+  script_import_time_date, script_import_ocr, script_import_string, script_import_simba,
+  script_import_colormath, script_import_bitmap, script_import_settings, script_import_dtm,
+  script_import_file, script_import_other, script_import_script, script_import_deprecated,
+  script_import_crypto;
 
 begin
   {$IF DECLARED(SetHeapTraceOutput)}
@@ -62,6 +62,7 @@ begin
   {$IFDEF USE_FORMDESIGNER}
   Application.CreateForm(TCompForm, CompForm);
   {$ENDIF}
+
   Application.Run();
 end.
 

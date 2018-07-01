@@ -92,7 +92,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="69">
+    <Units Count="71">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -409,6 +409,14 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ACA"/>
       </Unit68>
+      <Unit69>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_deprecated.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit69>
+      <Unit70>
+        <Filename Value="../../Units/MMLAddon/Imports/script_import_crypto.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit70>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
