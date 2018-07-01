@@ -1,6 +1,0 @@
-- MessageBox (It just wrapped MessageDlg and a flags parameter where constants weren't exported)
-+ Result constants for MessageDlg (mrOk, mrCancel, mrAbort, mrRetry, mrIgnore, mrYes, mrNo, mrAll, mrNoToAll, mrYesToAll, mrClose)
-- SetScriptProp/GetScriptProp (unused, AddOnTerminate exists for SP_OnTerminate & WriteTimeStamp exists for SP_WriteTimeStamp)
-- GetTClient (use Client variable)
-- Wrap methods (SplitTPAWrap etc. These were for a PS bug)
-- rs_GetUpText OCR methods. (Outdated and replaced by Slacky's OCR plugin, is also the only RS specific code in Simba)

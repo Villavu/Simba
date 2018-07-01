@@ -80,35 +80,61 @@ begin
     addGlobalMethod('procedure TerminateScript;', @Lape_TerminateScript, Data);
     addGlobalMethod('function IsTerminated(UserTerminated: Boolean = False): Boolean;', @Lape_IsTerminated, Data);
 
-    addDelayedCode('var __OnTerminateStrings: array of String;'                       + LineEnding +
-                   'var __OnTerminateMethods: array of procedure;'                    + LineEnding +
-                   'var __OnTerminateObjects: array of procedure of object;'          + LineEnding +
+    addDelayedCode('var OnTerminateStrings: array of String;'                         + LineEnding +
+                   'var OnTerminateMethods: array of procedure;'                      + LineEnding +
+                   'var OnTerminateObjects: array of procedure of object;'            + LineEnding +
                    ''                                                                 + LineEnding +
                    'procedure __OnTerminate;'                                         + LineEnding +
                    'var i: Int32;'                                                    + LineEnding +
                    'begin'                                                            + LineEnding +
-                   '  for i := 0 to High(__OnTerminateStrings) do'                    + LineEnding +
-                   '    VariantInvoke(__OnTerminateStrings[i], []);'                  + LineEnding +
-                   '  for i := 0 to High(__OnTerminateMethods) do'                    + LineEnding +
-                   '    __OnTerminateMethods[i]();'                                   + LineEnding +
-                   '  for i := 0 to High(__OnTerminateObjects) do'                    + LineEnding +
-                   '    __OnTerminateObjects[i]();'                                   + LineEnding +
+                   '  for i := 0 to High(OnTerminateStrings) do'                      + LineEnding +
+                   '    VariantInvoke(OnTerminateStrings[i], []);'                    + LineEnding +
+                   '  for i := 0 to High(OnTerminateMethods) do'                      + LineEnding +
+                   '    OnTerminateMethods[i]();'                                     + LineEnding +
+                   '  for i := 0 to High(OnTerminateObjects) do'                      + LineEnding +
+                   '    OnTerminateObjects[i]();'                                     + LineEnding +
                    'end;'                                                             + LineEnding +
                    ''                                                                 + LineEnding +
                    'procedure AddOnTerminate(Method: String); overload;'              + LineEnding +
                    'begin'                                                            + LineEnding +
-                   '  __OnTerminateStrings += Method;'                                + LineEnding +
+                   '  OnTerminateStrings += Method;'                                  + LineEnding +
                    'end;'                                                             + LineEnding +
                    ''                                                                 + LineEnding +
                    'procedure AddOnTerminate(Method: procedure); overload;'           + LineEnding +
                    'begin'                                                            + LineEnding +
-                   '  __OnTerminateMethods += @Method;'                               + LineEnding +
+                   '  OnTerminateMethods += @Method;'                                 + LineEnding +
                    'end;'                                                             + LineEnding +
                    ''                                                                 + LineEnding +
                    'procedure AddOnTerminate(Method: procedure of object); overload;' + LineEnding +
                    'begin'                                                            + LineEnding +
-                   '  __OnTerminateObjects += @Method;'                               + LineEnding +
-                   'end;', 'OnTerminate');
+                   '  OnTerminateObjects += @Method;'                                 + LineEnding +
+                   'end;'                                                             + LineEnding +
+                   ''                                                                 + LineEnding +
+                   'procedure DeleteOnTerminate(Method: String); overload;'           + LineEnding +
+                   'var i: Int32;'                                                    + LineEnding +
+                   'begin'                                                            + LineEnding +
+                   '  for i := High(OnTerminateStrings) downto 0 do'                  + LineEnding +
+                   '    if SameText(OnTerminateStrings[i], Method) then'              + LineEnding +
+                   '      Delete(OnTerminateStrings, i, 1);'                          + LineEnding +
+                   'end;'                                                             + LineEnding +
+                   ''                                                                 + LineEnding +
+                   'procedure DeleteOnTerminate(Method: procedure); overload;'        + LineEnding +
+                   'var i: Int32;'                                                    + LineEnding +
+                   'begin'                                                            + LineEnding +
+                   '  for i := High(OnTerminateMethods) downto 0 do'                  + LineEnding +
+                   '    if @OnTerminateMethods[i] = @Method then'                     + LineEnding +
+                   '      Delete(OnTerminateMethods, i, 1);'                          + LineEnding +
+                   'end;'                                                             + LineEnding +
+                   ''                                                                 + LineEnding +
+                   'procedure DeleteOnTerminate(Method: procedure of object); overload;'           + LineEnding +
+                   'var i: Int32;'                                                    + LineEnding +
+                   'begin'                                                            + LineEnding +
+                   '  for i := High(OnTerminateObjects) downto 0 do'                  + LineEnding +
+                   '    if @OnTerminateObjects[i] = @Method then'                       + LineEnding +
+                   '      Delete(OnTerminateObjects, i, 1);'                          + LineEnding +
+                   'end;'                                                             + LineEnding +
+                   '',
+                   'OnTerminate');
   end;
 end;
 
