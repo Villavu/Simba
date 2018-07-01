@@ -120,7 +120,10 @@ type
         out Points : TPointArray; xs, ys, xe, ye,tolerance: Integer; maxToFind:
             Integer = 0): Boolean;
     function FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; out accuracy: Extended): Boolean;
-
+    
+    function FindTemplateEx(TemplImage: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula;   xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
+    function FindTemplate(TemplImage: TMufasaBitmap; out X,Y: Integer; Formula: ETMFormula;  xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
+        
     function FindDTM(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
     function FindDTMs(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2 : integer; maxToFind: Integer = 0): Boolean;
     function FindDTMRotated(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating : boolean): Boolean;
@@ -149,10 +152,11 @@ type
 
 implementation
 uses
-  Client,           // For the Client casting.
-  math,             // min/max
-  tpa,              //TPABounds
-  dtmutil;
+  Client,             // For the client casting.
+  math,               // min/max
+  tpa,                //TPABounds
+  dtmutil,
+  matchTempl, matrix; //template matching
 
 
 var
@@ -1580,6 +1584,83 @@ begin
     x := BestPT.x;
     y := BestPT.y;
     Exit(true);
+  end;
+end;
+
+{
+  Tries to find the given bitmap / template using MatchTemplate
+}
+function TMFinder.FindTemplateEx(TemplImage: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula;
+              xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
+var
+  y,w,h: Int32;
+  Image, Templ: T2DIntArray;
+  xcorr: TSingleMatrix;
+  PtrData : TRetData;
+  maxLo,maxHi: Single;
+begin
+  Result := False;
+  // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
+  DefaultOperations(xs,ys,xe,ye);
+  W := xe-xs+1;
+  H := ye-ys+1;
+
+  if (W < TemplImage.Width) or (H < TemplImage.Height) then
+    raise Exception.CreateFmt('Search area must be larger than Template - Client(%d, %d), Templ(%d, %d)', [W,H, TemplImage.Width, TemplImage.Height]);
+
+  PtrData := TClient(Client).IOManager.ReturnData(xs,ys, W,H);
+  
+  SetLength(Image, H, W);
+  SetLength(Templ, TemplImage.Height, TemplImage.Width);
+
+  for y:=0 to H-1 do
+    Move(PtrData.Ptr[y * PtrData.RowLen], Image[y,0], W*SizeOf(TRGB32));
+  
+  for y:=0 to TemplImage.Height-1 do
+    Move(TemplImage.FData[y*TemplImage.Width], Templ[y,0], TemplImage.Width*SizeOf(TRGB32));
+  
+  xcorr := MatchTempl.MatchTemplate(Image, Templ, Ord(Formula));
+
+
+  if Formula in [TM_SQDIFF, TM_SQDIFF_NORMED] then
+  begin
+    if DynamicAdjust then
+    begin
+      MatrixMinMax(xcorr, maxLo, maxHi);
+      MinMatch := Min(MinMatch, maxLo + 0.1e-2);
+    end;
+    TPA := MatrixIndices(xcorr, MinMatch, __LE__)
+  end
+  else
+  begin
+    if DynamicAdjust then
+    begin
+      MatrixMinMax(xcorr, maxLo, maxHi);
+      MinMatch := Max(MinMatch, maxHi - 0.1e-2);
+    end;
+    TPA := MatrixIndices(xcorr, MinMatch, __GE__);
+  end;
+  
+  Result := Length(TPA) > 0;
+  OffsetTPA(TPA, Point(xs,ys));
+  TClient(Client).IOManager.FreeReturnData;
+end;
+
+function TMFinder.FindTemplate(TemplImage: TMufasaBitmap; out X,Y: Integer; Formula: ETMFormula;
+              xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
+var
+  TPA: TPointArray;
+begin
+  Result := Self.FindTemplateEx(TemplImage, TPA, Formula, xs,ys,xe,ye, MinMatch, DynamicAdjust);
+
+  if Result then
+  begin
+    X := TPA[0].x;
+    Y := TPA[0].y;
+  end else
+  begin
+    X := -1;
+    Y := -1;
   end;
 end;
 
