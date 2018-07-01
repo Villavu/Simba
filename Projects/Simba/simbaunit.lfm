@@ -3487,6 +3487,7 @@ object SimbaForm: TSimbaForm
     object ActionFindStart: TAction
       Caption = '&Find ...'
       ImageIndex = 26
+      OnExecute = ActionFindStartExecute
       ShortCut = 16454
     end
     object ActionCut: TAction
