@@ -292,6 +292,7 @@ type
     procedure ActionExitExecute(Sender: TObject);
     procedure ActionFindNextExecute(Sender: TObject);
     procedure ActionFindPrevExecute(Sender: TObject);
+    procedure ActionFindStartExecute(Sender: TObject);
     procedure ActionFontExecute(Sender: TObject);
     procedure ActionGotoExecute(Sender: TObject);
     procedure ActionNewExecute(Sender: TObject);
@@ -1742,6 +1743,16 @@ end;
 procedure TSimbaForm.ActionFindPrevExecute(Sender: TObject);
 begin
   DoSearch([ssoFindContinue, ssoBackwards], False);
+end;
+
+procedure TSimbaForm.ActionFindStartExecute(Sender: TObject);
+begin
+  if (CurrScript.SynEdit.SelAvail) then
+      LabeledEditSearch.Text := CurrScript.SynEdit.SelText;
+
+  SearchPanel.Visible := True;
+  if LabeledEditSearch.CanFocus then
+    LabeledEditSearch.SetFocus;
 end;
 
 procedure TSimbaForm.ActionFontExecute(Sender: TObject);

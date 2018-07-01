@@ -318,8 +318,11 @@ procedure TFunctionList_Frame.AfterFilter(Sender: TObject);
 begin
   with Sender as TTreeFilterEdit do
     if (Filter = '') then
-      FilteredTreeView.FullCollapse()
-    else
+    begin
+      FilteredTreeView.FullCollapse();
+
+      ScriptNode.Expand(True);
+    end else
       FilteredTreeView.FullExpand();
 end;
 
