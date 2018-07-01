@@ -11,7 +11,7 @@ implementation
 
 uses
   script_imports, script_thread, lpcompiler, lptypes, ffi, mufasatypes, simbaunit, debugimage,
-  Dialogs, ExtCtrls, Forms, Controls, aca, aca_math, dtm_editor;
+  Dialogs, ExtCtrls, Forms, Controls, aca, aca_math, dtm_editor, bitmaps, math;
 
 type
   TBalloonHint = class
@@ -449,6 +449,85 @@ begin
   DTMEditor.Free();
 end;
 
+type
+  TShowBitmap = class
+    Params: PParamArray;
+
+    procedure Execute;
+  end;
+
+procedure TShowBitmap.Execute;
+var
+  BMP: TMufasaBitmap;
+begin
+  BMP := PMufasaBitmap(Params^[1])^;
+
+  if (not DebugImgForm.Visible) then
+  begin
+    with DebugImgForm.Monitor.WorkareaRect do
+      DebugImgForm.SetBounds(Max(Left, (Left + Right - BMP.Width) div 2), Max(Top, (Top + Bottom - BMP.Height) div 2), BMP.Width, BMP.Height);
+  end else
+  begin
+    DebugImgForm.Width := BMP.Width;
+    DebugImgForm.Height := BMP.Height;
+  end;
+
+  DebugImgForm.ShowOnTop();
+  DebugImgForm.DrawBitmap(BMP);
+end;
+
+procedure Lape_ShowBitmap(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+var
+  ShowBitmap: TShowBitmap;
+begin
+  ShowBitmap := TShowBitmap.Create();
+  ShowBitmap.Params := Params;
+
+  TThread.Synchronize(nil, @ShowBitmap.Execute);
+
+  ShowBitmap.Free();
+end;
+
+type
+  TShowBitmapEx = class
+    Params: PParamArray;
+
+    procedure Execute;
+  end;
+
+procedure TShowBitmapEx.Execute;
+var
+  BMP: TMufasaBitmap;
+begin
+  with TMMLScriptThread(Params^[0]).Client do
+    BMP := MBitmaps[PInt32(Params^[1])^];
+
+  if (not DebugImgForm.Visible) then
+  begin
+    with DebugImgForm.Monitor.WorkareaRect do
+      DebugImgForm.SetBounds(Max(Left, (Left + Right - BMP.Width) div 2), Max(Top, (Top + Bottom - BMP.Height) div 2), BMP.Width, BMP.Height);
+  end else
+  begin
+    DebugImgForm.Width := BMP.Width;
+    DebugImgForm.Height := BMP.Height;
+  end;
+
+  DebugImgForm.ShowOnTop();
+  DebugImgForm.DrawBitmap(BMP);
+end;
+
+procedure Lape_ShowBitmapEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+var
+  ShowBitmapEx: TShowBitmapEx;
+begin
+  ShowBitmapEx := TShowBitmapEx.Create();
+  ShowBitmapEx.Params := Params;
+
+  TThread.Synchronize(nil, @ShowBitmapEx.Execute);
+
+  ShowBitmapEx.Free();
+end;
+
 procedure Lape_Import_Simba(Compiler: TLapeCompiler; Data: Pointer);
 var
   AppPath: String = '';
@@ -515,6 +594,8 @@ begin
     addGlobalMethod('procedure Sync(Method: TSyncMethod); overload;', @Lape_Sync, Data);
     addGlobalMethod('procedure Sync(Method: TSyncObjectMethod); overload;', @Lape_SyncEx, Data);
     addGlobalMethod('procedure DTMEditor(Title: String; out DTM: String);', @Lape_DTMEditor, Data);
+    addGlobalMethod('procedure ShowBitmap(BMP: TMufasaBitmap); overload;', @Lape_ShowBitmap, Data);
+    addGlobalMethod('procedure ShowBitmap(BMP: Int32); overload;', @Lape_ShowBitmapEx, Data);
   end;
 end;
 
