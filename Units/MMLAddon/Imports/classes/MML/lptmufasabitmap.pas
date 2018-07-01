@@ -395,10 +395,10 @@ begin
   PMufasaBitmap(Params^[0])^.DrawMatrix(P2DIntArray(Params^[1])^);
 end;
 
-//procedure DrawMatrix(matrix: T2DIntegerArray); overload;
+//procedure DrawMatrix(matrix: T2DIntegerArray; ColorMapID: Int32 = 0); overload;
 procedure TMufasaBitmap_DrawMatrixF(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  TMufasaBitmap(Params^[0]^).DrawMatrix(TSingleMatrix(Params^[1]^));
+  TMufasaBitmap(Params^[0]^).DrawMatrix(TSingleMatrix(Params^[1]^), Int32(Params^[2]^));
 end;
 
 //procedure ResizeEx(method: TBmpResizeMethod, newW, newH: integer);
@@ -608,7 +608,7 @@ begin
     addGlobalFunc('function TMufasaBitmap.GetColors(): TIntegerArray; constref;', @TMufasaBitmap_GetColors);
     addGlobalFunc('function TMufasaBitmap.ToMatrix(): T2DIntArray; constref;', @TMufasaBitmap_ToMatrix);
     addGlobalFunc('procedure TMufasaBitmap.DrawMatrix(const Matrix: T2DIntArray); constref;', @TMufasaBitmap_DrawMatrix);
-    addGlobalFunc('procedure TMufasaBitmap.DrawMatrix(const Matrix: TSingleMatrix); constref; overload;', @TMufasaBitmap_DrawMatrixF);
+    addGlobalFunc('procedure TMufasaBitmap.DrawMatrix(const Matrix: TSingleMatrix; ColorMapID: Int32 = 0); constref; overload;', @TMufasaBitmap_DrawMatrixF);
     addGlobalFunc('procedure TMufasaBitmap.ThresholdAdaptive(Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer); constref;', @TMufasaBitmap_ThresholdAdaptive);
     addGlobalFunc('procedure TMufasaBitmap.ResizeEx(Method: TBmpResizeMethod; NewW, NewH: integer); constref;', @TMufasaBitmap_ResizeEx);
     addGlobalFunc('function TMufasaBitmap.ToTBitmap(): TBitmap; constref;', @TMufasaBitmap_ToTBitmap);
