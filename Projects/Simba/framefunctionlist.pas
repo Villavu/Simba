@@ -391,6 +391,8 @@ begin
         SelStart := Node.DocPos.StartPos;
         SelEnd := Node.DocPos.EndPos;
       end;
+
+      Filter.Filter := '';
     end;
   end;
 end;
