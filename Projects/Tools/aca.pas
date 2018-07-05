@@ -538,8 +538,8 @@ begin
 
     if (FCTS = 2) then
     begin
-      editHue.Text := Format('%f', [Hue]);
-      editSat.Text := Format('%f', [Sat]);
+      editHue.Text := Format('%.2f', [Hue+0.5e-2]);
+      editSat.Text := Format('%.2f', [Sat+0.5e-2]);
     end;
   end;
 end;
