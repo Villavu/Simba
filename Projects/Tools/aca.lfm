@@ -4,28 +4,29 @@ object ACAForm: TACAForm
   Top = 297
   Width = 950
   Caption = 'ACA'
-  ClientHeight = 650
+  ClientHeight = 630
   ClientWidth = 950
   Font.Height = -12
   Menu = MainMenu
   OnClose = FormClose
   Position = poScreenCenter
   ShowHint = True
+  ShowInTaskBar = stAlways
   LCLVersion = '1.8.2.0'
   object pnlMain: TPanel
     Left = 0
-    Height = 650
+    Height = 630
     Top = 0
     Width = 683
     Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 650
+    ClientHeight = 630
     ClientWidth = 683
     TabOrder = 0
     object StatusBar: TStatusBar
       Left = 0
-      Height = 21
-      Top = 629
+      Height = 23
+      Top = 607
       Width = 683
       Panels = <      
         item
@@ -41,7 +42,7 @@ object ACAForm: TACAForm
     end
     object ScrollBox: TScrollBox
       Left = 0
-      Height = 629
+      Height = 607
       Top = 0
       Width = 683
       HorzScrollBar.Page = 454
@@ -50,7 +51,7 @@ object ACAForm: TACAForm
       VertScrollBar.Tracking = True
       Align = alClient
       BorderStyle = bsNone
-      ClientHeight = 629
+      ClientHeight = 607
       ClientWidth = 683
       TabOrder = 1
       OnResize = ClientImageCenter
@@ -71,14 +72,14 @@ object ACAForm: TACAForm
   end
   object pnlRight: TPanel
     Left = 683
-    Height = 650
+    Height = 630
     Top = 0
     Width = 267
     Align = alRight
     Anchors = [akTop, akRight]
     BevelInner = bvLowered
     BevelOuter = bvNone
-    ClientHeight = 650
+    ClientHeight = 630
     ClientWidth = 267
     TabOrder = 1
     object pnlZoom: TPanel
@@ -134,7 +135,7 @@ object ACAForm: TACAForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = Divider1
       Left = 6
-      Height = 380
+      Height = 354
       Top = 113
       Width = 255
       Style = []
@@ -147,7 +148,6 @@ object ACAForm: TACAForm
       OnSelectionChange = SelectColor
       PopupMenu = PopupColors
       TabOrder = 1
-      TopIndex = -1
     end
     object Divider1: TDividerBevel
       AnchorSideTop.Side = asrBottom
@@ -155,8 +155,8 @@ object ACAForm: TACAForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = editColor
       Left = 6
-      Height = 14
-      Top = 498
+      Height = 17
+      Top = 472
       Width = 255
       Caption = 'Best Color'
       Anchors = [akLeft, akRight, akBottom]
@@ -176,7 +176,7 @@ object ACAForm: TACAForm
       AnchorSideBottom.Side = asrBottom
       Left = 8
       Height = 23
-      Top = 519
+      Top = 496
       Width = 29
       Anchors = [akTop, akLeft, akBottom]
       Caption = 'Color'
@@ -189,8 +189,8 @@ object ACAForm: TACAForm
       AnchorSideBottom.Side = asrBottom
       Left = 8
       Height = 23
-      Top = 547
-      Width = 54
+      Top = 524
+      Width = 51
       Anchors = [akTop, akLeft, akBottom]
       Caption = 'Tolerance'
       Layout = tlCenter
@@ -203,7 +203,7 @@ object ACAForm: TACAForm
       AnchorSideBottom.Side = asrBottom
       Left = 156
       Height = 23
-      Top = 519
+      Top = 496
       Width = 22
       Anchors = [akTop, akRight, akBottom]
       BorderSpacing.Right = 5
@@ -219,7 +219,7 @@ object ACAForm: TACAForm
       AnchorSideBottom.Side = asrBottom
       Left = 156
       Height = 23
-      Top = 547
+      Top = 524
       Width = 22
       Anchors = [akTop, akLeft, akRight, akBottom]
       BorderSpacing.Right = 5
@@ -231,9 +231,9 @@ object ACAForm: TACAForm
       AnchorSideLeft.Control = editTolerance
       AnchorSideTop.Side = asrBottom
       AnchorSideBottom.Control = editTolerance
-      Left = 67
+      Left = 64
       Height = 23
-      Top = 519
+      Top = 496
       Width = 78
       Anchors = [akLeft, akBottom]
       BorderSpacing.Top = 7
@@ -244,9 +244,9 @@ object ACAForm: TACAForm
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Side = asrBottom
       AnchorSideBottom.Control = btnFindBestColor
-      Left = 67
+      Left = 64
       Height = 23
-      Top = 547
+      Top = 524
       Width = 78
       Anchors = [akLeft, akBottom]
       BorderSpacing.Left = 5
@@ -263,7 +263,7 @@ object ACAForm: TACAForm
       AnchorSideBottom.Side = asrBottom
       Left = 183
       Height = 23
-      Top = 519
+      Top = 496
       Width = 78
       Anchors = [akTop, akRight, akBottom]
       BorderSpacing.Right = 5
@@ -278,7 +278,7 @@ object ACAForm: TACAForm
       AnchorSideBottom.Side = asrBottom
       Left = 183
       Height = 23
-      Top = 547
+      Top = 524
       Width = 78
       Anchors = [akTop, akLeft, akRight, akBottom]
       BorderSpacing.Right = 5
@@ -291,8 +291,8 @@ object ACAForm: TACAForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = btnUpdateImage
       Left = 6
-      Height = 14
-      Top = 604
+      Height = 17
+      Top = 581
       Width = 255
       Anchors = [akLeft, akRight, akBottom]
       BevelStyle = bsRaised
@@ -316,7 +316,7 @@ object ACAForm: TACAForm
       Left = 6
       Height = 25
       Hint = 'Clear all drawing from the image'
-      Top = 619
+      Top = 599
       Width = 128
       Anchors = [akTop, akLeft, akRight, akBottom]
       AutoSize = True
@@ -333,7 +333,7 @@ object ACAForm: TACAForm
       Left = 144
       Height = 25
       Hint = 'Updates the image from the client'
-      Top = 619
+      Top = 599
       Width = 117
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
@@ -351,7 +351,7 @@ object ACAForm: TACAForm
       Left = 171
       Height = 25
       Hint = 'Displays best color matches'
-      Top = 578
+      Top = 555
       Width = 90
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
@@ -371,7 +371,7 @@ object ACAForm: TACAForm
       Left = 116
       Height = 25
       Hint = 'Calculate the best color using CTS 2'
-      Top = 578
+      Top = 555
       Width = 50
       Anchors = [akTop, akLeft, akBottom]
       BorderSpacing.Left = 5
@@ -389,7 +389,7 @@ object ACAForm: TACAForm
       Left = 61
       Height = 25
       Hint = 'Calculate the best color using CTS 1'
-      Top = 578
+      Top = 555
       Width = 50
       Anchors = [akTop, akLeft, akBottom]
       BorderSpacing.Left = 5
@@ -404,7 +404,7 @@ object ACAForm: TACAForm
       Left = 6
       Height = 25
       Hint = 'Calculate the best color using CTS 0'
-      Top = 578
+      Top = 555
       Width = 50
       Anchors = [akLeft, akBottom]
       BorderSpacing.Left = 5
