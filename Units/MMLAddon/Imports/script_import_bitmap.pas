@@ -421,7 +421,7 @@ end;
 procedure Lape_CopyClientToBitmap(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with TMMLScriptThread(Params^[0]).Client do
-    MBitmaps[PInt32(Params^[1])^].CopyClientToBitmap(IOManager, True, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^);
+    MBitmaps[PInt32(Params^[1])^].CopyClientToBitmap(IOManager, True, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^);
 end;
 
 procedure Lape_BitmapFromText(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

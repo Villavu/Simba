@@ -12,6 +12,7 @@ object DTMForm: TDTMForm
   OnKeyDown = FormKeyDown
   Position = poScreenCenter
   ShowHint = True
+  ShowInTaskBar = stAlways
   LCLVersion = '1.8.2.0'
   object pnlMain: TPanel
     Left = 0
