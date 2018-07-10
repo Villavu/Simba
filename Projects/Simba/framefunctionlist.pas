@@ -328,12 +328,12 @@ end;
 
 procedure TFunctionList_Frame.FrameEndDock(Sender, Target: TObject; X, Y: Integer);
 begin
-  SimbaForm.SplitterFunctionList.Visible := Target is TPanel;
-
   if (Target is TCustomDockForm) then
   begin
     TCustomDockForm(Target).Caption := 'Function List';
     TCustomDockForm(Target).OnClose := @DockFormOnClose;
+
+    SimbaForm.SplitterFunctionList.Hide();
   end;
 end;
 
