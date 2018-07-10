@@ -157,11 +157,6 @@ type
       Path: TPathSetting;
     end;
 
-    TExtensionsSection = class(TSection)
-      Path: TPathSetting;
-      FileExtension: TStringSetting;
-    end;
-
     TScriptsSection = class(TSection)
       Path: TPathSetting;
     end;
@@ -263,13 +258,13 @@ type
       RestartScriptIfStarted: TBooleanSetting;
       WarnIfRunning: TBooleanSetting;
       WarnIfModified: TBooleanSetting;
+      SaveScriptOnCompile: TBooleanSetting;
     end;
 
     TSimbaSettings = class(TSection)
     public
       Includes: TIncludesSection;
       Fonts: TFontsSection;
-      Extensions: TExtensionsSection;
       Scripts: TScriptsSection;
       CodeInsight: TCodeInsightSection;
       Tray: TTraySection;
@@ -801,13 +796,6 @@ begin
   TPathSetting(obj).Value := DataPath + 'Plugins' + DS;
 end;
 
-{$IFDEF USE_EXTENSIONS}
-procedure GetExtPath(obj: TSetting);
-begin
-  TPathSetting(obj).Value := DataPath + 'Extensions' + DS;
-end;
-{$ENDIF}
-
 procedure GetScriptPath(obj: TSetting);
 begin
   TPathSetting(obj).Value := DocPath + 'Scripts' + DS;
@@ -863,9 +851,6 @@ procedure GetScriptManagerFirstRun(obj: TSetting); begin TBooleanSetting(obj).Va
 procedure GetSourceEditorLazColors(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
 procedure GetSourceEditorCaretPastEOL(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
 
-procedure GetExtensionsFileExtension(obj: TSetting); begin TStringSetting(obj).Value := 'sex'; end;
-
-
 procedure GetMainFormNormalSize(obj: TSetting); begin TStringSetting(obj).Value := '739:555'; end;
 procedure GetMainFormPosition(obj: TSetting); begin TStringSetting(obj).Value := ''; end;
 procedure GetMainFormState(obj: TSetting); begin TStringSetting(obj).Value := 'normal'; end;
@@ -884,6 +869,7 @@ procedure GetFileBrowserVisible(Obj: TSetting); begin TBooleanSetting(obj).Value
 procedure GetMiscRestartScriptIfStarted(obj: TSetting); begin TBooleanSetting(obj).Value := False; end;
 procedure GetMiscWarnIfRunning(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
 procedure GetMiscWarnIfModified(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
+procedure GetSaveScriptOnCompile(obj: TSetting); begin TBooleanSetting(obj).Value := False; end;
 
 constructor TSimbaSettings.Create;
 begin
@@ -996,6 +982,8 @@ begin
   Misc.WarnIfRunning.onDefault := @GetMiscWarnIfRunning;
   Misc.WarnIfModified := Misc.AddChild(TBooleanSetting.Create(ssMiscWarnIfModified)) as TBooleanSetting;
   Misc.WarnIfModified.onDefault := @GetMiscWarnIfModified;
+  Misc.SaveScriptOnCompile := Misc.AddChild(TBooleanSetting.Create(ssSaveScriptOnCompile)) as TBooleanSetting;
+  Misc.SaveScriptOnCompile.onDefault := @GetSaveScriptOnCompile;
 
   ScriptManager := AddChild(TScriptManagerSection.Create()) as TScriptManagerSection;
   ScriptManager.ServerURL := ScriptManager.AddChild(TStringSetting.Create(ssSMURL)) as TStringSetting;

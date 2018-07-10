@@ -93,6 +93,7 @@ ssFileBrowserVisible = ssSettings + 'FileBrowser/Visible';
 ssMiscRestartScriptIfStarted = ssSettings + ssMisc + 'RestartScriptIfStarted';
 ssMiscWarnIfRunning = ssSettings + ssMisc + 'WarnIfRunning';
 ssMiscWarnIfModified = ssSettings + ssMisc + 'WarnIfModified';
+ssSaveScriptOnCompile = ssSettings + ssMisc + 'SaveScriptOnCompile';
 
 ssSMURL = ssScriptManager + 'URL';
 ssSMPath = ssScriptManager + 'Path';
