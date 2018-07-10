@@ -1482,6 +1482,9 @@ var
 begin
   Thread := nil;
 
+  if SimbaSettings.Misc.SaveScriptOnCompile.Value then
+    SaveCurrentScript();
+
   Script := CurrScript.SynEdit.Lines.Text;
 
   if Assigned(OnScriptStart) then
@@ -3150,29 +3153,34 @@ begin
   if CurrScript.GetReadOnly() then
   begin
     formWriteln('Script is in read-only/external editor mode. Not saving!');
-    exit(false);
+
+    Exit(False);
   end;
+
   if not CurrScript.ScriptChanged then
   begin
     mDebugLn('SaveScript - no changes.');
-    exit(false);
+
+    Exit(False);
   end;
+
   with CurrScript do
   begin
     Result := (ScriptFile <> '');
+
     if Result then
     begin
       try
-         SynEdit.Lines.SaveToFile(ScriptFile);
+        SynEdit.Lines.SaveToFile(ScriptFile);
       except
         mDebugLn('Cannot save the file. Try specifying a different location.');
-        result := SaveCurrentScriptAs;
-        exit;
+
+        Exit(SaveCurrentScriptAs());
       end;
       OnSaveScript(scriptfile);
     end
     else
-      result := SaveCurrentScriptAs;
+      Result := SaveCurrentScriptAs();
   end;
 end;
 
