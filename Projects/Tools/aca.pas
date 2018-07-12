@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, DividerBevel, LResources, Forms, Controls,
   Graphics, Dialogs, ExtCtrls, ComCtrls, StdCtrls, Menus, ColorBox,
-  Types, client, mufasatypes, GraphType, Buttons, clipbrd,
+  Types, client, mufasatypes, GraphType, Buttons, clipbrd, LCLType,
   {$IFDEF WINDOWS} os_windows {$ELSE} os_linux {$ENDIF};
 
 type
@@ -71,9 +71,12 @@ type
     procedure CalculateBestColor(Sender: TObject);
     procedure DeleteColor(Sender: TObject);
     procedure FindBestColorClick(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure LoadColors(Sender: TObject);
+    procedure menuColorsClick(Sender: TObject);
     procedure menuCopyBestColorClick(Sender: TObject);
     procedure MouseZoomPaint(Sender: TObject);
+    procedure PopupColorsPopup(Sender: TObject);
     procedure SaveColors(Sender: TObject);
     procedure SelectColor(Sender: TObject; User: Boolean);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -203,33 +206,36 @@ begin
     X := Trunc(X / FZoom.Current);
     Y := Trunc(Y / FZoom.Current);
 
-    imgMouseZoom.Picture.Bitmap.BeginUpdate(True);
-    imgMouseZoom.Tag := PtrInt(True);
+    if FClient.MBitmaps[0].PointInBitmap(X, Y) then
+    begin
+      imgMouseZoom.Picture.Bitmap.BeginUpdate(True);
+      imgMouseZoom.Tag := PtrInt(True);
 
-    try
-      imgMouseZoom.Picture.Bitmap.Canvas.Clear();
+      try
+        imgMouseZoom.Picture.Bitmap.Canvas.Clear();
 
-      for localX := 0 to 5 do
-        for localY := 0 to 5 do
-        begin
-          globalX := X + localX - 2;
-          globalY := Y + localY - 2;
+        for localX := 0 to 5 do
+          for localY := 0 to 5 do
+          begin
+            globalX := X + localX - 2;
+            globalY := Y + localY - 2;
 
-          if FClient.MBitmaps[0].PointInBitmap(globalX, globalY) then
-            imgMouseZoom.Picture.Bitmap.Canvas.Pixels[localX, localY] := FClient.MBitmaps[0].FastGetPixel(globalX, globalY)
-          else
-            imgMouseZoom.Picture.Bitmap.Canvas.Pixels[localX, localY] := clBlack;
-        end;
-    finally
-      imgMouseZoom.Picture.Bitmap.EndUpdate(False);
+            if FClient.MBitmaps[0].PointInBitmap(globalX, globalY) then
+              imgMouseZoom.Picture.Bitmap.Canvas.Pixels[localX, localY] := FClient.MBitmaps[0].FastGetPixel(globalX, globalY)
+            else
+              imgMouseZoom.Picture.Bitmap.Canvas.Pixels[localX, localY] := clBlack;
+          end;
+      finally
+        imgMouseZoom.Picture.Bitmap.EndUpdate(False);
+      end;
+
+      ColorToRGB(FClient.MBitmaps[0].FastGetPixel(X, Y), R, G, B);
+      ColorToHSL(FClient.MBitmaps[0].FastGetPixel(X, Y), H, S, L);
+
+      lblMouseZoom.Caption := Format('Color: %d', [FClient.MBitmaps[0].FastGetPixel(X, Y)]) + LineEnding +
+                              Format('RGB: [%d, %d, %d]', [R, G, B])                        + LineEnding +
+                              Format('HSL: [%f, %f, %f]', [H, S, L])                        + LineEnding;
     end;
-
-    ColorToRGB(FClient.MBitmaps[0].FastGetPixel(X, Y), R, G, B);
-    ColorToHSL(FClient.MBitmaps[0].FastGetPixel(X, Y), H, S, L);
-
-    lblMouseZoom.Caption := Format('Color: %d', [FClient.MBitmaps[0].FastGetPixel(X, Y)]) + LineEnding +
-                            Format('RGB: [%d, %d, %d]', [R, G, B])                        + LineEnding +
-                            Format('HSL: [%f, %f, %f]', [H, S, L])                        + LineEnding;
 
     Coords(X, Y);
   end;
@@ -253,7 +259,7 @@ begin
     mbLeft:
       with FClient.MBitmaps[0] do
       begin
-        if (listColors.Items.IndexOf(IntToStr(FastGetPixel(X, Y))) = -1) then
+        if FClient.MBitmaps[0].PointInBitmap(X, Y) and (listColors.Items.IndexOf(IntToStr(FastGetPixel(X, Y))) = -1) then
           listColors.AddItem(IntToStr(FastGetPixel(X, Y)), TObject(PtrUInt(FastGetPixel(X, Y))));
       end;
   end;
@@ -430,6 +436,11 @@ begin
     end;
 end;
 
+procedure TACAForm.PopupColorsPopup(Sender: TObject);
+begin
+  popupColorDelete.Enabled := listColors.ItemIndex >= 0;
+end;
+
 procedure TACAForm.SaveColors(Sender: TObject);
 begin
   if SaveDialog.Execute() then
@@ -484,6 +495,17 @@ begin
   FindColor(Col, Tolerance, Hue, Sat);
 end;
 
+procedure TACAForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if (Key = VK_DELETE) then
+  begin
+    if listColors.ItemIndex >= 0 then
+      listColors.Items.Delete(listColors.ItemIndex);
+
+    Key := VK_UNKNOWN;
+  end;
+end;
+
 procedure TACAForm.LoadColors(Sender: TObject);
 var
   i: Int32;
@@ -499,6 +521,11 @@ begin
 
     listColors.Items.EndUpdate();
   end;
+end;
+
+procedure TACAForm.menuColorsClick(Sender: TObject);
+begin
+  menuColorDelete.Enabled := listColors.ItemIndex >= 0;
 end;
 
 procedure TACAForm.menuCopyBestColorClick(Sender: TObject);
