@@ -7,8 +7,10 @@ object ACAForm: TACAForm
   ClientHeight = 630
   ClientWidth = 950
   Font.Height = -12
+  KeyPreview = True
   Menu = MainMenu
   OnClose = FormClose
+  OnKeyDown = FormKeyDown
   Position = poScreenCenter
   ShowHint = True
   ShowInTaskBar = stAlways
@@ -620,6 +622,7 @@ object ACAForm: TACAForm
     end
     object menuColors: TMenuItem
       Caption = 'Colors'
+      OnClick = menuColorsClick
       object menuColorAdd: TMenuItem
         Caption = 'Add'
         Bitmap.Data = {
@@ -751,6 +754,7 @@ object ACAForm: TACAForm
     end
   end
   object PopupColors: TPopupMenu
+    OnPopup = PopupColorsPopup
     left = 112
     top = 16
     object popupColorAdd: TMenuItem
