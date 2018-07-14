@@ -211,12 +211,10 @@ procedure TThreadPool.DoParallel(Method: TThreadMethod; Args: array of Pointer; 
 var
   i,step,A,B: Int32;
   Thread: array of TExecThread;
-  Params: TParamArray;
 begin
   if (fallback) or (nThreads=1) then
   begin
-    Params := Args;
-    Method(@Params, iLow, iHigh);
+    Method(@Args, iLow, iHigh);
     Exit();
   end;
 
