@@ -480,33 +480,36 @@ begin
     X := Trunc(X / FZoom.Current);
     Y := Trunc(Y / FZoom.Current);
 
-    imgMouseZoom.Picture.Bitmap.BeginUpdate(True);
-    imgMouseZoom.Tag := PtrInt(True);
+    if FClient.MBitmaps[0].PointInBitmap(X, Y) then
+    begin
+      imgMouseZoom.Picture.Bitmap.BeginUpdate(True);
+      imgMouseZoom.Tag := PtrInt(True);
 
-    try
-      imgMouseZoom.Picture.Bitmap.Canvas.Clear();
+      try
+        imgMouseZoom.Picture.Bitmap.Canvas.Clear();
 
-      for localX := 0 to 5 do
-        for localY := 0 to 5 do
-        begin
-          globalX := X + localX - 2;
-          globalY := Y + localY - 2;
+        for localX := 0 to 5 do
+          for localY := 0 to 5 do
+          begin
+            globalX := X + localX - 2;
+            globalY := Y + localY - 2;
 
-          if FClient.MBitmaps[0].PointInBitmap(globalX, globalY) then
-            imgMouseZoom.Picture.Bitmap.Canvas.Pixels[localX, localY] := FClient.MBitmaps[0].FastGetPixel(globalX, globalY)
-          else
-            imgMouseZoom.Picture.Bitmap.Canvas.Pixels[localX, localY] := clBlack;
-        end;
-    finally
-      imgMouseZoom.Picture.Bitmap.EndUpdate(False);
+            if FClient.MBitmaps[0].PointInBitmap(globalX, globalY) then
+              imgMouseZoom.Picture.Bitmap.Canvas.Pixels[localX, localY] := FClient.MBitmaps[0].FastGetPixel(globalX, globalY)
+            else
+              imgMouseZoom.Picture.Bitmap.Canvas.Pixels[localX, localY] := clBlack;
+          end;
+      finally
+        imgMouseZoom.Picture.Bitmap.EndUpdate(False);
+      end;
+
+      ColorToRGB(FClient.MBitmaps[0].FastGetPixel(X, Y), R, G, B);
+      ColorToHSL(FClient.MBitmaps[0].FastGetPixel(X, Y), H, S, L);
+
+      lblMouseZoom.Caption := Format('Color: %d', [FClient.MBitmaps[0].FastGetPixel(X, Y)]) + LineEnding +
+                              Format('RGB: [%d, %d, %d]', [R, G, B])                        + LineEnding +
+                              Format('HSL: [%f, %f, %f]', [H, S, L])                        + LineEnding;
     end;
-
-    ColorToRGB(FClient.MBitmaps[0].FastGetPixel(X, Y), R, G, B);
-    ColorToHSL(FClient.MBitmaps[0].FastGetPixel(X, Y), H, S, L);
-
-    lblMouseZoom.Caption := Format('Color: %d', [FClient.MBitmaps[0].FastGetPixel(X, Y)]) + LineEnding +
-                            Format('RGB: [%d, %d, %d]', [R, G, B])                        + LineEnding +
-                            Format('HSL: [%f, %f, %f]', [H, S, L])                        + LineEnding;
 
     if (GetPointAt(X, Y) <> nil) then
       imgClient.Cursor := crHandPoint
@@ -536,7 +539,8 @@ begin
       case imgClient.Cursor of
         crDefault:
           begin
-            DrawDTMPoint(FTree.Add(CreateDTMPoint(X, Y, FClient.MBitmaps[0].FastGetPixel(X, Y), 0, 0, False)).Point^);
+            if FClient.MBitmaps[0].PointInBitmap(X, Y) then
+              DrawDTMPoint(FTree.Add(CreateDTMPoint(X, Y, FClient.MBitmaps[0].FastGetPixel(X, Y), 0, 0, False)).Point^);
 
             imgClient.Cursor := crHandPoint;
           end;
