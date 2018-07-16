@@ -1,7 +1,7 @@
 object SettingsSimpleForm: TSettingsSimpleForm
-  Left = 277
+  Left = -897
   Height = 500
-  Top = 303
+  Top = 330
   Width = 457
   ActiveControl = SettingsTabsPanel
   Caption = 'Settings'
@@ -14,46 +14,7 @@ object SettingsSimpleForm: TSettingsSimpleForm
   OnCreate = FormCreate
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '1.4.5.0'
-  object PgControlAdvanced: TPageControl
-    Left = 8
-    Height = 304
-    Top = 72
-    Width = 440
-    ActivePage = tsAdvanced
-    TabIndex = 0
-    TabOrder = 4
-    Visible = False
-    object tsAdvanced: TTabSheet
-      Caption = 'Paths'
-      ChildSizing.TopBottomSpacing = 10
-      ChildSizing.VerticalSpacing = 10
-      ClientHeight = 276
-      ClientWidth = 432
-      object PathsTreeView: TTreeView
-        Left = 13
-        Height = 239
-        Top = 13
-        Width = 400
-        DefaultItemHeight = 18
-        TabOrder = 0
-        Items.Data = {
-          F9FFFFFF020005000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF010000000000
-          00000108000000496E636C75646573FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00
-          00000000000000000400000070617468FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-          01000000000000000107000000506C7567696E73FFFFFFFFFFFFFFFFFFFFFFFF
-          FFFFFFFF0000000000000000000400000070617468FFFFFFFFFFFFFFFFFFFFFF
-          FFFFFFFFFF01000000000000000105000000466F6E7473FFFFFFFFFFFFFFFFFF
-          FFFFFFFFFFFFFF0000000000000000000400000070617468FFFFFFFFFFFFFFFF
-          FFFFFFFFFFFFFFFF0100000000000000010A000000457874656E73696F6E73FF
-          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000400000070617468
-          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF01000000000000000107000000536372
-          69707473FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000000000000040000
-          0070617468
-        }
-      end
-    end
-  end
+  LCLVersion = '1.8.2.0'
   object ButtonOK: TButton
     Left = 280
     Height = 25
@@ -77,6 +38,7 @@ object SettingsSimpleForm: TSettingsSimpleForm
     Height = 72
     Top = 0
     Width = 457
+    Align = alTop
     Alignment = taLeftJustify
     Caption = 'SettingsTabsPanel'
     ClientHeight = 72
@@ -128,289 +90,394 @@ object SettingsSimpleForm: TSettingsSimpleForm
       OnMouseMove = SettingsTabsListMouseMove
     end
   end
-  object PgControlGeneral: TPageControl
-    Left = 8
-    Height = 304
+  object Tabs: TNotebook
+    Left = 0
+    Height = 428
     Top = 72
-    Width = 440
-    ActivePage = tsUpdater
-    TabIndex = 0
-    TabOrder = 5
-    object tsUpdater: TTabSheet
-      Caption = 'Updater'
-      ChildSizing.TopBottomSpacing = 10
-      ChildSizing.VerticalSpacing = 10
-      ClientHeight = 276
-      ClientWidth = 432
-      object UpdaterGroup: TGroupBox
-        Left = 12
-        Height = 232
-        Top = 8
-        Width = 409
-        ClientHeight = 212
-        ClientWidth = 405
-        TabOrder = 0
-        object CheckForUpdatesBox: TCheckBox
-          Left = 16
-          Height = 19
-          Top = 13
-          Width = 116
-          Caption = 'Check for updates'
-          TabOrder = 0
-        end
-        object Label1: TLabel
-          Left = 16
-          Height = 15
-          Top = 50
-          Width = 121
-          Caption = 'Check every (minutes):'
-          ParentColor = False
-        end
-        object UpdateMinutesEdit: TEdit
-          Left = 160
-          Height = 23
-          Top = 47
-          Width = 80
-          TabOrder = 1
-        end
-        object UpdaterURL: TEdit
-          Left = 160
-          Height = 23
-          Top = 80
-          Width = 240
-          TabOrder = 2
-        end
-        object UpdaterURLVersion: TEdit
-          Left = 160
-          Height = 23
-          Top = 110
-          Width = 240
-          TabOrder = 3
-          Text = 'UpdaterURLVersion'
-        end
-        object UpdaterURLLabel: TLabel
-          Left = 16
-          Height = 15
-          Top = 85
-          Width = 66
-          Caption = 'Updater URL'
-          ParentColor = False
-        end
-        object UpdaterURLVersionLabel: TLabel
-          Left = 16
-          Height = 15
-          Top = 115
-          Width = 107
-          Caption = 'Updater Version URL'
-          ParentColor = False
-        end
-        object AutomaticallyUpdateBox: TCheckBox
-          Left = 16
-          Height = 19
-          Top = 144
-          Width = 139
-          Caption = 'Automatically update?'
-          TabOrder = 4
-        end
-      end
-    end
-    object tsInterpreter: TTabSheet
-      Caption = 'Interpreter'
-      ClientHeight = 271
-      ClientWidth = 434
-      object InterpreterGroup: TRadioGroup
-        Left = 12
-        Height = 92
-        Top = 8
-        Width = 408
-        AutoFill = True
-        ChildSizing.LeftRightSpacing = 6
-        ChildSizing.TopBottomSpacing = 6
-        ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-        ChildSizing.EnlargeVertical = crsHomogenousChildResize
-        ChildSizing.ShrinkHorizontal = crsScaleChilds
-        ChildSizing.ShrinkVertical = crsScaleChilds
-        ChildSizing.Layout = cclLeftToRightThenTopToBottom
-        ChildSizing.ControlsPerLine = 1
-        ClientHeight = 72
-        ClientWidth = 404
-        Items.Strings = (
-          'PascalScript'
-          'Lape'
-        )
-        TabOrder = 0
-      end
-    end
-  end
-  object PgControlEnvironment: TPageControl
-    Left = 8
-    Height = 384
-    Top = 72
-    Width = 440
-    ActivePage = tsEditor
-    TabIndex = 1
+    Width = 457
+    PageIndex = 1
+    Align = alBottom
     TabOrder = 3
-    Visible = False
-    object tsTabs: TTabSheet
-      Caption = 'Tabs'
-      ClientHeight = 356
-      ClientWidth = 432
-      object TabSettingsCheckBoxes: TCheckGroup
-        Left = 12
-        Height = 167
-        Top = 17
-        Width = 403
-        AutoFill = True
-        Caption = 'Tab options'
-        ChildSizing.LeftRightSpacing = 6
-        ChildSizing.TopBottomSpacing = 6
-        ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-        ChildSizing.EnlargeVertical = crsHomogenousChildResize
-        ChildSizing.ShrinkHorizontal = crsScaleChilds
-        ChildSizing.ShrinkVertical = crsScaleChilds
-        ChildSizing.Layout = cclLeftToRightThenTopToBottom
-        ChildSizing.ControlsPerLine = 1
-        ClientHeight = 147
-        ClientWidth = 399
-        Items.Strings = (
-          'Open Next on Close'
-          'Open Script in new Tab'
-          'Check tabs for open script before opening'
-        )
+    object TabGeneral: TPage
+      object PgControlGeneral: TPageControl
+        Left = 0
+        Height = 428
+        Top = 0
+        Width = 457
+        ActivePage = tsUpdater
+        Align = alClient
+        TabIndex = 0
         TabOrder = 0
-        Data = {
-          03000000030202
-        }
+        object tsUpdater: TTabSheet
+          Caption = 'Updater'
+          ChildSizing.TopBottomSpacing = 10
+          ChildSizing.VerticalSpacing = 10
+          ClientHeight = 400
+          ClientWidth = 449
+          object UpdaterGroup: TGroupBox
+            AnchorSideLeft.Control = tsUpdater
+            AnchorSideTop.Control = tsUpdater
+            AnchorSideRight.Control = tsUpdater
+            AnchorSideBottom.Side = asrBottom
+            Left = 5
+            Height = 157
+            Top = 10
+            Width = 439
+            Align = alTop
+            AutoSize = True
+            BorderSpacing.Left = 5
+            BorderSpacing.Right = 5
+            ClientHeight = 137
+            ClientWidth = 435
+            TabOrder = 0
+            object CheckForUpdatesBox: TCheckBox
+              AnchorSideLeft.Control = UpdaterGroup
+              AnchorSideTop.Control = UpdaterGroup
+              Left = 5
+              Height = 19
+              Top = 0
+              Width = 116
+              BorderSpacing.Left = 5
+              Caption = 'Check for updates'
+              TabOrder = 0
+            end
+            object UpdateCheckMinutes: TLabel
+              AnchorSideLeft.Control = CheckForUpdatesBox
+              AnchorSideTop.Control = AutomaticallyUpdateBox
+              AnchorSideTop.Side = asrBottom
+              AnchorSideBottom.Control = UpdateMinutesEdit
+              AnchorSideBottom.Side = asrBottom
+              Left = 5
+              Height = 23
+              Top = 48
+              Width = 121
+              Anchors = [akTop, akLeft, akBottom]
+              BorderSpacing.Top = 5
+              Caption = 'Check every (minutes):'
+              Layout = tlCenter
+              ParentColor = False
+            end
+            object UpdateMinutesEdit: TEdit
+              AnchorSideLeft.Control = UpdateCheckMinutes
+              AnchorSideLeft.Side = asrBottom
+              AnchorSideRight.Control = UpdaterGroup
+              AnchorSideRight.Side = asrBottom
+              Left = 131
+              Height = 23
+              Top = 48
+              Width = 299
+              Anchors = [akTop, akLeft, akRight]
+              BorderSpacing.Left = 5
+              BorderSpacing.Right = 5
+              TabOrder = 1
+            end
+            object UpdaterURL: TEdit
+              AnchorSideLeft.Control = UpdateMinutesEdit
+              AnchorSideTop.Control = UpdateMinutesEdit
+              AnchorSideTop.Side = asrBottom
+              AnchorSideRight.Control = UpdaterGroup
+              AnchorSideRight.Side = asrBottom
+              Left = 131
+              Height = 23
+              Top = 76
+              Width = 299
+              Anchors = [akTop, akLeft, akRight]
+              BorderSpacing.Top = 5
+              BorderSpacing.Right = 5
+              TabOrder = 2
+            end
+            object UpdaterURLVersion: TEdit
+              AnchorSideLeft.Control = UpdateMinutesEdit
+              AnchorSideTop.Control = UpdaterURL
+              AnchorSideTop.Side = asrBottom
+              AnchorSideRight.Control = UpdaterGroup
+              AnchorSideRight.Side = asrBottom
+              Left = 131
+              Height = 23
+              Top = 104
+              Width = 299
+              Anchors = [akTop, akLeft, akRight]
+              BorderSpacing.Top = 5
+              BorderSpacing.Right = 5
+              BorderSpacing.Bottom = 10
+              TabOrder = 3
+              Text = 'UpdaterURLVersion'
+            end
+            object UpdaterURLLabel: TLabel
+              AnchorSideLeft.Control = CheckForUpdatesBox
+              AnchorSideTop.Control = UpdaterURL
+              AnchorSideBottom.Control = UpdaterURL
+              AnchorSideBottom.Side = asrBottom
+              Left = 5
+              Height = 18
+              Top = 81
+              Width = 66
+              Anchors = [akTop, akLeft, akBottom]
+              BorderSpacing.Top = 5
+              Caption = 'Updater URL'
+              ParentColor = False
+            end
+            object UpdaterURLVersionLabel: TLabel
+              AnchorSideLeft.Control = CheckForUpdatesBox
+              AnchorSideTop.Control = UpdaterURLLabel
+              AnchorSideTop.Side = asrBottom
+              AnchorSideBottom.Control = UpdaterURLVersion
+              AnchorSideBottom.Side = asrBottom
+              Left = 5
+              Height = 23
+              Top = 104
+              Width = 107
+              Anchors = [akTop, akLeft, akBottom]
+              BorderSpacing.Top = 5
+              Caption = 'Updater Version URL'
+              Layout = tlCenter
+              ParentColor = False
+            end
+            object AutomaticallyUpdateBox: TCheckBox
+              AnchorSideLeft.Control = CheckForUpdatesBox
+              AnchorSideTop.Control = CheckForUpdatesBox
+              AnchorSideTop.Side = asrBottom
+              Left = 5
+              Height = 19
+              Top = 24
+              Width = 134
+              BorderSpacing.Top = 5
+              Caption = 'Automatically update'
+              TabOrder = 4
+            end
+          end
+        end
       end
     end
-    object tsEditor: TTabSheet
-      Caption = 'Editor'
-      ClientHeight = 356
-      ClientWidth = 432
-      object CodeToolsCheckBoxes: TCheckGroup
-        Left = 13
-        Height = 71
-        Top = 16
-        Width = 403
-        AutoFill = True
-        Caption = 'Code Tools'
-        ChildSizing.LeftRightSpacing = 6
-        ChildSizing.TopBottomSpacing = 6
-        ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-        ChildSizing.EnlargeVertical = crsHomogenousChildResize
-        ChildSizing.ShrinkHorizontal = crsScaleChilds
-        ChildSizing.ShrinkVertical = crsScaleChilds
-        ChildSizing.Layout = cclLeftToRightThenTopToBottom
-        ChildSizing.ControlsPerLine = 1
-        ClientHeight = 51
-        ClientWidth = 399
-        Items.Strings = (
-          'Automatically show hints'
-          'Automatically show completion'
-        )
+    object TabEnvironment: TPage
+      object PgControlEnvironment: TPageControl
+        Left = 0
+        Height = 428
+        Top = 0
+        Width = 457
+        ActivePage = tsOther
+        Align = alClient
+        TabIndex = 2
         TabOrder = 0
-        Data = {
-          020000000202
-        }
-      end
-      object ColourPickerCheckGroup: TCheckGroup
-        Left = 12
-        Height = 71
-        Top = 96
-        Width = 403
-        AutoFill = True
-        Caption = 'Colour Picker'
-        ChildSizing.LeftRightSpacing = 6
-        ChildSizing.TopBottomSpacing = 6
-        ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-        ChildSizing.EnlargeVertical = crsHomogenousChildResize
-        ChildSizing.ShrinkHorizontal = crsScaleChilds
-        ChildSizing.ShrinkVertical = crsScaleChilds
-        ChildSizing.Layout = cclLeftToRightThenTopToBottom
-        ChildSizing.ControlsPerLine = 1
-        ClientHeight = 51
-        ClientWidth = 399
-        Items.Strings = (
-          'Show history on pick'
-          'Add to history on pick'
-        )
-        TabOrder = 1
-        Data = {
-          020000000202
-        }
-      end
-      object GroupBox2: TGroupBox
-        Left = 12
-        Height = 108
-        Top = 180
-        Width = 403
-        Caption = 'Source Editor'
-        ClientHeight = 88
-        ClientWidth = 399
-        TabOrder = 2
-        object HighlightLazColours: TCheckBox
-          Left = 14
-          Height = 19
-          Top = 8
-          Width = 116
-          Caption = 'Use Lazarus colors'
-          TabOrder = 0
+        object tsTabs: TTabSheet
+          Caption = 'Tabs'
+          ClientHeight = 400
+          ClientWidth = 449
+          object TabSettingsCheckBoxes: TCheckGroup
+            Left = 0
+            Height = 89
+            Top = 0
+            Width = 449
+            Align = alTop
+            AutoFill = True
+            AutoSize = True
+            Caption = 'Tab options'
+            ChildSizing.LeftRightSpacing = 6
+            ChildSizing.TopBottomSpacing = 6
+            ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+            ChildSizing.EnlargeVertical = crsHomogenousChildResize
+            ChildSizing.ShrinkHorizontal = crsScaleChilds
+            ChildSizing.ShrinkVertical = crsScaleChilds
+            ChildSizing.Layout = cclLeftToRightThenTopToBottom
+            ChildSizing.ControlsPerLine = 1
+            ClientHeight = 69
+            ClientWidth = 445
+            Items.Strings = (
+              'Open Next on Close'
+              'Open Script in new Tab'
+              'Check tabs for open script before opening'
+            )
+            TabOrder = 0
+            Data = {
+              03000000030202
+            }
+          end
         end
-        object Label2: TLabel
-          Left = 14
-          Height = 15
-          Top = 60
-          Width = 73
-          Caption = 'Default script:'
-          ParentColor = False
+        object tsEditor: TTabSheet
+          Caption = 'Editor'
+          ClientHeight = 400
+          ClientWidth = 449
+          object CodeToolsCheckBoxes: TCheckGroup
+            Left = 0
+            Height = 80
+            Top = 0
+            Width = 449
+            Align = alTop
+            AutoFill = True
+            Caption = 'Code Tools'
+            ChildSizing.LeftRightSpacing = 6
+            ChildSizing.TopBottomSpacing = 6
+            ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+            ChildSizing.EnlargeVertical = crsHomogenousChildResize
+            ChildSizing.ShrinkHorizontal = crsScaleChilds
+            ChildSizing.ShrinkVertical = crsScaleChilds
+            ChildSizing.Layout = cclLeftToRightThenTopToBottom
+            ChildSizing.ControlsPerLine = 1
+            ClientHeight = 60
+            ClientWidth = 445
+            Items.Strings = (
+              'Automatically show hints'
+              'Automatically show completion'
+            )
+            TabOrder = 0
+            Data = {
+              020000000202
+            }
+          end
+          object ColourPickerCheckGroup: TCheckGroup
+            Left = 0
+            Height = 79
+            Top = 90
+            Width = 449
+            Align = alTop
+            AutoFill = True
+            BorderSpacing.Top = 10
+            Caption = 'Colour Picker'
+            ChildSizing.LeftRightSpacing = 6
+            ChildSizing.TopBottomSpacing = 6
+            ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+            ChildSizing.EnlargeVertical = crsHomogenousChildResize
+            ChildSizing.ShrinkHorizontal = crsScaleChilds
+            ChildSizing.ShrinkVertical = crsScaleChilds
+            ChildSizing.Layout = cclLeftToRightThenTopToBottom
+            ChildSizing.ControlsPerLine = 1
+            ClientHeight = 59
+            ClientWidth = 445
+            Items.Strings = (
+              'Show history on pick'
+              'Add to history on pick'
+            )
+            TabOrder = 1
+            Data = {
+              020000000202
+            }
+          end
+          object GroupBox2: TGroupBox
+            Left = 0
+            Height = 108
+            Top = 179
+            Width = 449
+            Align = alTop
+            BorderSpacing.Top = 10
+            Caption = 'Source Editor'
+            ClientHeight = 88
+            ClientWidth = 445
+            TabOrder = 2
+            object HighlightLazColours: TCheckBox
+              Left = 14
+              Height = 19
+              Top = 8
+              Width = 116
+              Caption = 'Use Lazarus colors'
+              TabOrder = 0
+            end
+            object Label2: TLabel
+              Left = 14
+              Height = 15
+              Top = 60
+              Width = 73
+              Caption = 'Default script:'
+              ParentColor = False
+            end
+            object DefaultScriptedit: TEdit
+              Left = 110
+              Height = 23
+              Top = 56
+              Width = 184
+              TabOrder = 1
+              Text = 'path'
+            end
+            object CaretPastEOL: TCheckBox
+              Left = 14
+              Height = 19
+              Top = 32
+              Width = 97
+              Caption = 'Caret past EOL'
+              TabOrder = 2
+            end
+          end
         end
-        object DefaultScriptedit: TEdit
-          Left = 110
-          Height = 23
-          Top = 56
-          Width = 184
-          TabOrder = 1
-          Text = 'path'
-        end
-        object CaretPastEOL: TCheckBox
-          Left = 14
-          Height = 19
-          Top = 32
-          Width = 97
-          Caption = 'Caret past EOL'
-          TabOrder = 2
+        object tsOther: TTabSheet
+          Caption = 'Other'
+          ClientHeight = 400
+          ClientWidth = 449
+          object EnvOther: TCheckGroup
+            AnchorSideLeft.Control = tsOther
+            AnchorSideTop.Control = tsOther
+            AnchorSideRight.Control = tsOther
+            AnchorSideRight.Side = asrBottom
+            Left = 5
+            Height = 89
+            Top = 0
+            Width = 439
+            Anchors = [akTop, akLeft, akRight]
+            AutoFill = True
+            AutoSize = True
+            BorderSpacing.Left = 5
+            BorderSpacing.Right = 5
+            ChildSizing.LeftRightSpacing = 6
+            ChildSizing.TopBottomSpacing = 6
+            ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+            ChildSizing.EnlargeVertical = crsHomogenousChildResize
+            ChildSizing.ShrinkHorizontal = crsScaleChilds
+            ChildSizing.ShrinkVertical = crsScaleChilds
+            ChildSizing.Layout = cclLeftToRightThenTopToBottom
+            ChildSizing.ControlsPerLine = 1
+            ClientHeight = 69
+            ClientWidth = 435
+            Items.Strings = (
+              'Tray always Visible'
+              'Show Function List on Start'
+              'Save Script On Compile'
+            )
+            OnItemClick = EnvOtherItemClick
+            TabOrder = 0
+            Data = {
+              03000000020202
+            }
+          end
         end
       end
     end
-    object tsOther: TTabSheet
-      Caption = 'Other'
-      ClientHeight = 356
-      ClientWidth = 432
-      object EnvOther: TCheckGroup
-        Left = 13
-        Height = 166
-        Top = 18
-        Width = 402
-        AutoFill = True
-        ChildSizing.LeftRightSpacing = 6
-        ChildSizing.TopBottomSpacing = 6
-        ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-        ChildSizing.EnlargeVertical = crsHomogenousChildResize
-        ChildSizing.ShrinkHorizontal = crsScaleChilds
-        ChildSizing.ShrinkVertical = crsScaleChilds
-        ChildSizing.Layout = cclLeftToRightThenTopToBottom
-        ChildSizing.ControlsPerLine = 1
-        ClientHeight = 146
-        ClientWidth = 398
-        Items.Strings = (
-          'Tray always Visible'
-          'Show Function List on Start'
-        )
-        OnItemClick = EnvOtherItemClick
+    object TabAdvanced: TPage
+      object PgControlAdvanced: TPageControl
+        Left = 0
+        Height = 428
+        Top = 0
+        Width = 457
+        ActivePage = tsAdvanced
+        Align = alClient
+        TabIndex = 0
         TabOrder = 0
-        Data = {
-          020000000202
-        }
+        object tsAdvanced: TTabSheet
+          Caption = 'Paths'
+          ChildSizing.TopBottomSpacing = 10
+          ChildSizing.VerticalSpacing = 10
+          ClientHeight = 400
+          ClientWidth = 449
+          object PathsTreeView: TTreeView
+            Left = 5
+            Height = 380
+            Top = 10
+            Width = 439
+            Align = alClient
+            BorderSpacing.Left = 5
+            BorderSpacing.Right = 5
+            ScrollBars = ssAutoBoth
+            TabOrder = 0
+            Items.Data = {
+              F9FFFFFF020004000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF010000000000
+              00000108000000496E636C75646573FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00
+              00000000000000000400000070617468FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              01000000000000000107000000506C7567696E73FFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFF0000000000000000000400000070617468FFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFF01000000000000000105000000466F6E7473FFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFF0000000000000000000400000070617468FFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFF0100000000000000010700000053637269707473FFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000400000070617468
+            }
+          end
+        end
       end
     end
   end
@@ -421,8 +488,8 @@ object SettingsSimpleForm: TSettingsSimpleForm
     Height = 32
     Masked = True
     Width = 32
-    left = 32
-    top = 456
+    left = 400
+    top = 8
     Bitmap = {
       4C69050000002000000020000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
