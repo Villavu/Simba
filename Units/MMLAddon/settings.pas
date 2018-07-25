@@ -96,7 +96,7 @@ type
 
 implementation
 uses
-  stringutil,fileutil;
+  StringUtil, FileUtil, LazUTF8;
 
 constructor TSettingData.Create;
 begin
@@ -599,7 +599,7 @@ var
     Doc: TXMLDocument;
 begin
   Nodes.Clear;
-  if not fileExistsUTF8(fileName) then
+  if not FileExists(fileName) then
   begin
     mDebugLn('SettingsFile hasn''t been created yet.');
     // create file.
@@ -607,7 +607,7 @@ begin
   end;
 
   try
-    ReadXMLFile(Doc, utf8tosys(fileName));
+    ReadXMLFile(Doc, UTF8ToSys(fileName));
     InternalLoadFromXML(Doc);
     Doc.Free;
     Result := True;

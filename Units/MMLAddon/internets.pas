@@ -27,39 +27,47 @@ unit internets;
 interface
 
 uses
-  Classes, SysUtils, httpsend, blcksock, MufasaTypes, math, ssl_openssl,
-  mufasabase;
+  Classes, SysUtils, blcksock, MufasaTypes, math, fphttpclient;
 
 function GetPage(URL: String): String;
 
 type
-  { THTTPClient }
   THTTPClient = class(TObject)
   private
-    HTTPSend : THTTPSend;
-    fHandleCookies : boolean;
-    PostVariables : TStringList;
-    Client : TObject;
+    FHTTPClient: TFPHTTPClient;
+    FHandleCookies: Boolean;
+    FPostVariables: TStringList;
+    FClient: TObject;
+
+    function GetHeaders: String;
+    function GetResponseCode: Int32;
+    function GetUserAgent: String;
+    procedure SetUserAgent(Value: String);
   public
-    OpenConnectionEvent : TOpenConnectionEvent;
-    procedure SetHTTPUserAgent(agent : string);
-    function GetHTTPPage(url : string ) : string;
-    function PostHTTPPage(Url: string; PostData: string): string;overload;
-    function PostHTTPPage(Url: string): string;overload;
-    function GetRawHeaders: string;
+    property UserAgent: String read GetUserAgent write SetUserAgent;
+    property Headers: String read GetHeaders;
+    property ResponseCode: Int32 read GetResponseCode;
+
+    function GetHTTPPage(URL: String): String;
+    function GetHTTPPage(URL: String; FilePath: String): Int32; overload;
+    function PostHTTPPage(URL: String; PostData: String): String; overload;
+    function PostHTTPPage(URL: String): String; overload;
+
     procedure ClearPostData;
-    procedure AddPostVariable(VarName, VarValue: string);
-    procedure SetProxy(pHost, pPort : String);
-    constructor Create(Owner : TObject; HandleCookies : boolean = true);
-    destructor Destroy;override;
+    procedure AddPostVariable(Name, Value: String);
+
+    procedure SetProxy(Host, Port: String);
+
+    constructor Create(Owner: TObject; HandleCookies: Boolean = True);
+    destructor Destroy; override;
   end;
 
   { TMInternet }
   TMInternet = class(TObject)
   protected
-    Client : TObject;
-    Connections : TList;
-    HTTPClients : TList;
+    Client: TObject;
+    Connections: TList;
+    HTTPClients: TList;
   public
     OpenConnectionEvent : TOpenConnectionEvent;
     function GetPage(URL: String): String;
@@ -93,7 +101,7 @@ type
   end;
 
   { TSocks }
-  TSocks = class(TObject)
+  TMSocks = class(TObject)
   protected
     Client: TObject;
     SockList: TList;
@@ -106,31 +114,21 @@ type
     destructor Destroy; override;
   end;
 
-var
-  ProxyHost, ProxyPort : String;
 implementation
 
 uses
   Client;
-{ OTHER }
+
 function GetPage(URL: String): String;
 var
-  HTTP : THTTPSend;
-begin;
-  HTTP := THTTPSend.Create;
+  HTTPClient: THTTPClient;
+begin
+  HTTPClient := THTTPClient.Create(nil);
 
-  HTTP.UserAgent := 'Mozilla 4.0/ (compatible; Simba/' +
-      IntToStr(SimbaVersion) + '; Synapse)';
-
-  Result := '';
   try
-    if HTTP.HTTPMethod('GET', URL) then
-    begin
-      SetLength(result,HTTP.Document.Size);
-      HTTP.Document.Read(result[1],length(result));
-    end;
+    Result := HTTPClient.GetHTTPPage(URL);
   finally
-    HTTP.Free;
+    HTTPClient.Free();
   end;
 end;
 
@@ -151,9 +149,8 @@ end;
 { TMInternet }
 
 function TMInternet.CreateHTTPClient(HandleCookies: boolean = true): integer;
-begin;
+begin
   Result := HTTPClients.Add(THTTPClient.Create(Client,HandleCookies));
-  THttpClient(HTTPClients[result]).OpenConnectionEvent:= OpenConnectionEvent;
 end;
 
 function TMInternet.GetHTTPClient(Index: integer): THTTPClient;
@@ -178,7 +175,7 @@ end;
 constructor TMInternet.Create(Owner: TObject);
 begin
   inherited Create;
-  client := Owner;
+  Client := Owner;
   Connections := TList.Create;
   HTTPClients := TList.Create;
 end;
@@ -204,142 +201,161 @@ begin
   inherited Destroy;
 end;
 
-{ THTTPClient }
-
-procedure THTTPClient.SetHTTPUserAgent(agent: string);
+function THTTPClient.GetHeaders: String;
 begin
-  HTTPSend.UserAgent := agent;
+  Result := FHTTPClient.ResponseHeaders.Text;
 end;
 
-function THTTPClient.GetHTTPPage(url: string): string;
-var
-  Continue : boolean = true;
+function THTTPClient.GetResponseCode: Int32;
+begin
+  Result := FHTTPClient.ResponseStatusCode;
+end;
+
+function THTTPClient.GetUserAgent: String;
+begin
+  Result := FHTTPClient.GetHeader('User-Agent');
+end;
+
+procedure THTTPClient.SetUserAgent(Value: String);
+begin
+  FHTTPClient.AddHeader('User-Agent', Value);
+end;
+
+function THTTPClient.GetHTTPPage(URL: String): String;
 begin
   Result := '';
-  if Assigned(OpenConnectionEvent) then
-  begin;
-    OpenConnectionEvent(Self,url,continue);
-    if not Continue then
-      exit;
-  end;
-  if not fHandleCookies then
-    HTTPSend.Cookies.Clear;
-  HTTPSend.Headers.Clear;
-  HTTPSend.Document.Clear;
-  if (ProxyHost <> '') and (ProxyPort <> '') then
-  begin
-    HTTPSend.ProxyHost := ProxyHost;
-    HTTPSend.ProxyPort := ProxyPort;
-  end;
-  HTTPSend.MimeType :=  'text/html';
+
+  if (not URL.StartsWith('http://', True)) and (not URL.StartsWith('https://', True)) then
+    URL := 'http://' + URL;
+
   try
-    if HTTPSend.HTTPMethod('GET',url) then
-    begin;
-      SetLength(result,HTTPSend.Document.Size);
-      HTTPSend.Document.Read(result[1],length(result));
-    end else
-      result := '';
+    if (not FHandleCookies) then
+      FHTTPClient.Cookies.Clear();
+
+    Result := FHTTPClient.Get(URL);
   except
-    on e : exception do
-      TClient(Client).Writeln('THTTPClient error: ' + e.message);
+    on e: Exception do
+      if (FClient <> nil) then
+        TClient(FClient).Writeln('THTTPClient Exception: ' + e.Message)
+      else
+        WriteLn('THTTPClient Exception: ' + e.Message);
   end;
 end;
 
-function THTTPClient.PostHTTPPage(Url: string; PostData: string): string;
+function THTTPClient.GetHTTPPage(URL: String; FilePath: String): Int32;
 begin
-  if (ProxyHost <> '') and (ProxyPort <> '') then
-  begin
-    HTTPSend.ProxyHost := ProxyHost;
-    HTTPSend.ProxyPort := ProxyPort;
-  end;
-  HTTPSend.Headers.Clear;
-  HTTPSend.MimeType := 'application/x-www-form-urlencoded';
-  HTTPSend.Document.Clear;
-  HTTPSend.Document.Write(Postdata[1],length(postdata));
+  if (not URL.StartsWith('http://', True)) and (not URL.StartsWith('https://', True)) then
+    URL := 'http://' + URL;
+
   try
-    if HTTPSend.HTTPMethod('POST',url) then
-    begin;
-      SetLength(result,HTTPSend.Document.Size);
-      HTTPSend.Document.Read(result[1],Length(result));
-    end else
-      result := '';
+    if (not FHandleCookies) then
+      FHTTPClient.Cookies.Clear();
+
+    FHTTPClient.Get(URL, FilePath);
   except
-    on e : exception do
-      TClient(Client).Writeln('THTTPClient error: ' + e.message);
+    on e: Exception do
+      if (FClient <> nil) then
+        TClient(FClient).Writeln('THTTPClient Exception: ' + e.Message)
+      else
+        WriteLn('THTTPClient Exception: ' + e.Message);
   end;
+
+  Result := FHTTPClient.ResponseStatusCode;
 end;
 
-function THTTPClient.PostHTTPPage(Url: string): string;
-var
-  PostData : string;
-  i : integer;
-  Continue : boolean = true;
+function THTTPClient.PostHTTPPage(URL: String; PostData: String): String;
 begin
   Result := '';
-  if Assigned(OpenConnectionEvent) then
-  begin;
-    OpenConnectionEvent(Self,url,continue);
-    if not Continue then
-      exit;
+
+  if (not URL.StartsWith('http://', True)) and (not URL.StartsWith('https://', True)) then
+    URL := 'http://' + URL;
+
+  try
+    if (not FHandleCookies) then
+      FHTTPClient.Cookies.Clear();
+
+    Result := FHTTPClient.FormPost(URL, PostData);
+  except
+    on e: Exception do
+      if (FClient <> nil) then
+        TClient(FClient).Writeln('THTTPClient Exception: ' + e.Message)
+      else
+        WriteLn('THTTPClient Exception: ' + e.Message);
   end;
-  PostData := '';
-  for i := 0 to PostVariables.Count - 1 do
-    PostData := PostData + PostVariables[i] +'&';
-  if Length(PostData) > 1 then
-    setlength(postdata,length(postdata) - 1); //Wipe away that last &
-  result := PostHTTPPage(url,postdata);
 end;
 
-function THTTPClient.GetRawHeaders: string;
+function THTTPClient.PostHTTPPage(URL: String): String;
+var
+  PostData: String = '';
+  i: Int32;
 begin
-  Result := HTTPSend.Headers.Text;
+  Result := '';
+
+  for i := 0 to FPostVariables.Count - 1 do
+    PostData := PostData + FPostVariables[i] + '&';
+  if (Length(PostData) > 1) then
+    SetLength(PostData, Length(PostData) - 1);
+
+  Result := PostHTTPPage(URL, PostData);
+end;
+
+procedure THTTPClient.SetProxy(Host, Port: String);
+begin
+  FHTTPClient.Proxy.Host := Host;
+  FHTTPClient.Proxy.Port := StrToInt(Port);
 end;
 
 procedure THTTPClient.ClearPostData;
 begin
-  PostVariables.Clear;
+  FPostVariables.Clear();
 end;
 
-procedure THTTPClient.AddPostVariable(VarName, VarValue: string);
+procedure THTTPClient.AddPostVariable(Name, Value: String);
 begin
-  PostVariables.Add(Varname + '=' + VarValue);
+  FPostVariables.Add(Name + '=' + Value);
 end;
 
-procedure THTTPClient.SetProxy(pHost, pPort : String);
+constructor THTTPClient.Create(Owner: TObject; HandleCookies: Boolean);
 begin
-  ProxyHost := pHost;
-  ProxyPort := pPort;
-end;
+  inherited Create();
 
-constructor THTTPClient.Create(Owner : TObject; HandleCookies : boolean = true);
-begin
-  inherited Create;
-  Client := Owner;
-  HTTPSend := THTTPSend.Create;
-  fHandleCookies:= HandleCookies;
-  PostVariables := TStringList.Create;
+  FClient := Owner;
+
+  FHTTPClient := TFPHTTPClient.Create(nil);
+  FHTTPClient.AllowRedirect := True;
+
+  // Just init with something (some sites don't allow API access without a vaild one)
+  {$IFDEF WINDOWS}
+  FHTTPClient.AddHeader('User-Agent', 'Mozilla/5.0 (Windows NT x.y; Win64; x64; rv:10.0) Gecko/20100101 Firefox/10.0');
+  {$ELSE}
+  FHTTPClient.AddHeader('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0');
+  {$ENDIF}
+
+  FHandleCookies := HandleCookies;
+  FPostVariables := TStringList.Create;
 end;
 
 destructor THTTPClient.Destroy;
 begin
-  HTTPSend.Free;
-  PostVariables.Free;
+  FHTTPClient.Free();
+  FPostVariables.Free();
+
   inherited Destroy;
 end;
 
-{ TSocks }
+{ TMSocks }
 
-function TSocks.CreateSocket: integer;
+function TMSocks.CreateSocket: integer;
 begin;
   Result := SockList.Add(TSock.Create(Client));
 end;
 
-function TSocks.CreateSocketEx(Socket: TTCPBlockSocket): integer;
+function TMSocks.CreateSocketEx(Socket: TTCPBlockSocket): integer;
 begin;
   Result := SockList.Add(TSock.Create(Client, Socket));
 end;
 
-function TSocks.GetSocket(Index: integer): TSock;
+function TMSocks.GetSocket(Index: integer): TSock;
 begin
   if (not (InRange(Index, 0, SockList.Count))) then
     raise exception.CreateFmt('GetSocket: Trying to acces an index(%d) that is out of range', [index]);
@@ -348,7 +364,7 @@ begin
   Result := TSock(SockList[Index]);
 end;
 
-procedure TSocks.FreeSocket(Index: Integer);
+procedure TMSocks.FreeSocket(Index: Integer);
 begin
   if (not (InRange(Index, 0, SockList.Count))) then
     raise exception.CreateFmt('GetSocket: Trying to free an index(%d) that is out of range', [index]);
@@ -358,14 +374,14 @@ begin
   SockList[Index] := nil;
 end;
 
-constructor TSocks.Create(Owner : TObject);
+constructor TMSocks.Create(Owner : TObject);
 begin
   inherited Create;
   Client := Owner;
   SockList := TList.Create;
 end;
 
-destructor TSocks.Destroy;
+destructor TMSocks.Destroy;
 var
   i: integer;
 begin

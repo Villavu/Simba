@@ -29,7 +29,7 @@ interface
 
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, Graphics;
 const
   DS = DirectorySeparator;
   MEOL = {$ifdef MSWINDOWS}#13+{$endif}#10;
@@ -86,18 +86,18 @@ type
     RowLen : integer;
   end;
 
-  TBmpMirrorStyle = (MirrorWidth,MirrorHeight,MirrorLine); //LineMirror is in line x=y;
-  TBmpThreshMethod = (TM_Mean, TM_MinMax);
-  TBmpResizeMethod = (RM_Nearest, RM_Bilinear);
+  PStrings = ^TStrings;
+  PFont = ^TFont;
+  PColor = ^TColor;
+  PCanvas = ^TCanvas;
 
-  TTargetWindowMode = (w_BMP, w_Window, w_HDC, w_ArrayPtr, w_XWindow);
-  TClickType = (mouse_Left, mouse_Right, mouse_Middle);
+  TClickType = (mouse_Right, mouse_Left, mouse_Middle);
+
   TMousePress = (mouse_Down, mouse_Up);
 
-  PBmpThreshMethod = ^TBmpThreshMethod;
-  PBmpResizeMethod = ^TBmpResizeMethod;
-
+  PStringArray = ^TStringArray;
   TStringArray = array of String;
+  P2DStringArray = ^T2DStringArray;
   T2DStringArray = array of TStringArray;
 
   PPoint = ^TPoint;
@@ -115,6 +115,7 @@ type
   P2DIntArray = ^T2DIntArray;
   T2DIntArray = array of TIntegerArray;
   T2DIntegerArray = T2DIntArray;
+  P2DIntegerArray = ^T2DIntegerArray;
 
   TByteArray = array of Byte;
   T2DByteArray = array of TByteArray;
@@ -123,9 +124,19 @@ type
   TBooleanArray = TBoolArray;
   T2DBoolArray = Array of TBoolArray;
 
+  PExtendedArray = ^TExtendedArray;
   TExtendedArray = Array of Extended;
   P2DExtendedArray = ^T2DExtendedArray;
   T2DExtendedArray = Array of Array of Extended;
+
+  {Tempalte matching}
+  PSingleArray  = ^TSingleArray;
+  TSingleArray  = array of Single;
+  PSingleMatrix = ^TSingleMatrix;
+  TSingleMatrix = array of TSingleArray;
+
+  ETMFormula  = (TM_CCORR, TM_CCORR_NORMED, TM_CCOEFF, TM_CCOEFF_NORMED, TM_SQDIFF, TM_SQDIFF_NORMED);
+  EComparator = (__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__);
 
   { Crypto }
   THashType = (htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160,
@@ -188,12 +199,13 @@ type
 
   TSDTMPointDefArray = Array Of TSDTMPointDef;
 
+  PSDTM = ^TSDTM;
   TSDTM = record
     MainPoint: TSDTMPointDef;
     SubPoints: TSDTMPointDefArray;
   end;
 
-  TWritelnProc = procedure(s: string);
+  TWritelnProc = procedure(constref S: String) of object;
   {events}
   TOpenFileEvent = procedure(Sender : TObject;var Filename : string; var Continue : boolean) of object;
   TWriteFileEvent = TOpenFileEvent;

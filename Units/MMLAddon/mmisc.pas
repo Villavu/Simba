@@ -27,11 +27,20 @@ unit mmisc;
 interface
 
 uses
-  Classes, SysUtils,bzip2, bzip2comn,bzip2stream, libtar,mufasabase,mufasatypes;
+  Classes,
+  SysUtils, bzip2,
+  bzip2comn, bzip2stream,
+  libtar, mufasabase, mufasatypes,
+  LazUTF8;
 
 function DecompressBZip2(const input : TStream; const BlockSize : Cardinal = 4096) : TMemoryStream;
 function UnTar(const Input : TStream) : TStringArray;overload;
 function UnTar(const Input : TStream;const outputdir : string; overwrite : boolean): boolean;overload;
+
+procedure ConvertTime(Time : integer; var h,m,s : integer);
+procedure ConvertTime64(time: int64; var y, m, w, d, h, min, s: integer);
+
+function MarkTime: Double;
 
 type
   { TProcThread }
@@ -91,7 +100,8 @@ type
 implementation
 
 uses
-  FileUtil, internets;
+  FileUtil, Internets,
+  {$IFDEF WINDOWS} Windows {$ELSE} BaseUnix, Unix {$ENDIF};
 
 function DecompressBZip2(const input: TStream; const BlockSize: Cardinal): TMemoryStream;
 var
@@ -168,7 +178,7 @@ begin;
       end;
     end else if (DirRec.FileType = ftNormal) then
     begin;
-      if FileExistsUTF8(outputdir + dirrec.name) and not overwrite then
+      if FileExists(outputdir + dirrec.name) and not overwrite then
         continue;
       try
         FS := TFileStream.Create(UTF8ToSys(outputdir +dirrec.name),fmCreate);
@@ -281,6 +291,59 @@ begin
   if (Finput <> nil) and (FOutputDir <> '') then
     result := UnTar(FInput,Foutputdir,FOverWrite);
   FFinished:= True;
+end;
+
+procedure ConvertTime(Time : integer; var h,m,s : integer);
+var
+  x : integer;
+begin;
+  x := time;
+  h := x div (3600000);
+  x := x mod (3600000);
+  m := x div (60000);
+  x := x mod (60000);
+  s := x div (1000);
+end;
+
+procedure ConvertTime64(time: int64; var y, m, w, d, h, min, s: integer);
+var
+  x : int64;
+begin
+  x := time;
+  y := x div (31536000000); // 1000 * 60 * 60 * 24 * 365 (1 year or 365 days)
+  x := x mod (31536000000);
+  m := x div (2592000000); // 1000 * 60 * 60 * 24 * 30 (1 month or 30 days)
+  x := x mod (2592000000);
+  w := x div (604800000); // 1000 * 60 * 60 * 24 * 7 (1 week or 7 days)
+  x := x mod (604800000);
+  d := x div (86400000); // 1000 * 60 * 60 * 24 (1 day or 24 hours)
+  x := x mod (86400000);
+  h := x div (3600000); // 1000 * 60 * 60 (1 hour or 60 minutes)
+  x := x mod (3600000);
+  min := x div (60000); // 1000 * 60 (1 minute or 60 seconds)
+  x := x mod (60000);
+  s := x div (1000); // 1000 (1 second)
+  x := x mod (1000);
+end;
+
+function MarkTime: Double;
+var
+  Frequency, Count: Int64;
+  {$IFDEF UNIX}
+  TV: TTimeVal;
+  TZ: PTimeZone;
+  {$ENDIF}
+begin
+  {$IFDEF WINDOWS}
+  QueryPerformanceFrequency(Frequency);
+  QueryPerformanceCounter(Count);
+  Result := Count / Frequency * 1000;
+  {$ELSE}
+  TZ := nil;
+  fpGetTimeOfDay(@TV, TZ);
+  Count := Int64(TV.tv_sec) * 1000000 + Int64(TV.tv_usec);
+  Result := Count / 1000;
+  {$ENDIF}
 end;
 
 end.

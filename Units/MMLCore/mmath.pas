@@ -43,7 +43,24 @@ function MaxA(a: TIntegerArray): Integer;
 function fixRad(rad: Extended): Extended; 
 function InAbstractBox(x1, y1, x2, y2, x3, y3, x4, y4: Integer; x, y: Integer): Boolean;
 function MiddleBox(b : TBox): TPoint;
-
+function pow(base,exponent : extended) : extended;
+function Distance(x1,y1,x2,y2 : integer) : integer;
+procedure IncEx(var x : integer; increase : integer);
+procedure DecEx(var x : integer; Decrease : integer);
+function Factorial(number: longword): Int64;
+function BinCoe(a, b: LongInt): Extended;
+function FixD(Degrees : extended) : Extended;
+function sar(AValue : longint; shift : byte) : longint;
+function ror(num : longword; shift : byte) : LongWord;
+function rol(num : longword; shift : byte) : LongWord;
+function radians(e: extended): extended;
+function degrees(e: extended): extended;
+function Sum64IntArr(const Arr: TIntegerArray): Int64;
+function IntToBox(x1,y1,x2,y2 : integer) : TBox;
+function IntInBox(x, y: Integer; Box: TBox): Boolean;
+function PointToBox(topLeft,bottomRight: TPoint): TBox;
+function PointInBox(PT : TPoint; Box: TBox): Boolean;
+function DecRet(e: Extended): Extended;
 
 implementation
 uses
@@ -212,6 +229,11 @@ var
   U, D, R, L: Boolean;
   UB, DB, LB, RB, UM, DM, LM, RM, PI: Extended;
 begin
+  U := False;
+  D := False;
+  R := False;
+  L := False;
+
   PI := 3.14159265358979320;
   UM := (-y1 - -y2) div (x1 - x2);
   DM := (-y4 - -y3) div (x4 - x3);
@@ -247,6 +269,120 @@ end;
 function MiddleBox(b : TBox): TPoint;
 begin
   result := point((b.x2+b.x1) div 2,(b.y2+b.y1) div 2);
+end;
+
+function pow(base,exponent : extended) : extended;
+begin
+  if (exponent=0) then
+    result := 1
+  else
+    result := power(base,exponent);
+end;
+
+function Distance(x1,y1,x2,y2 : integer) : integer;
+begin
+  Result := Round(Sqrt(Sqr(x2-x1) + Sqr(y2-y1)));
+end;
+
+procedure IncEx(var x : integer; increase : integer);
+begin
+  x := x + increase;
+end;
+
+procedure DecEx(var x : integer; Decrease : integer);
+begin
+  x := x - Decrease;
+end;
+
+function Factorial(number: longword): Int64;
+var
+  Loop : longword;
+begin
+  result := 1;
+  for loop := number downto 2 do
+    result := result * loop;
+end;
+
+function BinCoe(a, b: LongInt): Extended;
+begin
+  result := Factorial(a) / (Factorial(b) * Factorial(a-b));
+end;
+
+function FixD(Degrees : extended) : Extended;
+begin
+  Result := Degrees;
+  while Result < 0 do
+    Result := Result + 360;
+  while Result > 360 do
+    Result := Result - 360;
+end;
+
+function sar(AValue : longint; shift : byte) : longint;
+begin
+  Shift:=Shift and 31;
+  Result:=longint(dword(dword(dword(AValue) shr Shift) or (dword(longint(dword(0-dword(dword(AValue) shr 31)) and dword(longint(0-(ord(Shift<>0){ and 1}))))) shl (32-Shift))));
+end;
+
+function ror(num : longword; shift : byte) : LongWord;
+begin
+  result := RorDWord(num,shift);
+end;
+
+function rol(num : longword; shift : byte) : LongWord;
+begin
+  result := RolDWord(num,shift);
+end;
+
+function radians(e: extended): extended;
+begin
+  result := e / 180.0 * pi;
+end;
+
+function degrees(e: extended): extended;
+begin
+  result := e * 180.0 / pi;
+end;
+
+function Sum64IntArr(const Arr: TIntegerArray): Int64;
+var
+  H, I: LongInt;
+begin
+  Result := 0;
+
+  H := High(Arr);
+  for I := 0 to H do
+    Result += Arr[I];
+end;
+
+function IntToBox(x1,y1,x2,y2 : integer) : TBox;
+begin
+  result.x1 := x1;
+  result.y1 := y1;
+  result.x2 := x2;
+  result.y2 := y2;
+end;
+
+function IntInBox(x, y: Integer; Box: TBox): Boolean;
+begin;
+  result := (((x >= Box.x1) and(x <= Box.x2)) and ((y >= box.y1) and (y <= box.y2)));
+end;
+
+function PointToBox(topLeft,bottomRight: TPoint): TBox;
+begin;
+  result.x1 := topLeft.x;
+  result.y1 := topLeft.y;
+  result.x2 := bottomRight.x;
+  result.y2 := bottomRight.y;
+end;
+
+function PointInBox(PT : TPoint; Box: TBox): Boolean;
+begin;
+  result := (((PT.x >= Box.x1) and(PT.x <= Box.x2)) and ((PT.y>= box.y1) and (PT.y <= box.y2)));
+end;
+
+function DecRet(e: Extended): Extended;
+begin
+  result := e - Trunc(e);
 end;
 
 end.

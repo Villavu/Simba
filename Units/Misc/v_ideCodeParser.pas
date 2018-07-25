@@ -111,17 +111,19 @@ type
   end;
 
   TciProcedureName = class(TDeclaration);
+  TciProcedureClassName = class(TDeclaration);
 
-  { TciProcedureDeclaration }
   TciProcedureDeclaration = class(TDeclaration)
   private
     fProcType: string;
     fParams: string;
     fName: TciProcedureName;
+    fObjectName: TciProcedureClassName;
     fCleanDecl : string;
 
     function GetCleanDeclaration: string;
     function GetName: TciProcedureName;
+    function GetObjectName: TciProcedureClassName;
     function GetProcType: string;
     function GetParams: string;
 
@@ -131,6 +133,7 @@ type
 
     property CleanDeclaration : string read GetCleanDeclaration;
     property Name : TciProcedureName read GetName;
+    property ObjectName: TciProcedureClassName read GetObjectName;
     property ProcType: string read GetProcType;
     property Params: string read GetParams;
   end;
@@ -149,21 +152,47 @@ type
   TciExpression = class(TDeclaration);                                      //Var + Const + Enum
   TciProceduralType = class(TciProcedureDeclaration);                       //Var + Tciype + Procedure/Function Parameters
 
-  TciTypeDeclaration = class(TDeclaration);                                 //Type
-  TciTypeName = class(TDeclaration);                                        //Type
+  TciTypeName = class(TDeclaration);
+  TciTypeDeclaration = class(TDeclaration)
+  protected
+    fName: TciTypeName;
 
-  TciVarDeclaration = class(TDeclaration);                                  //Var
-  TciVarName = class(TDeclaration);                                         //Var
+    function GetName: TciTypeName;
+  public
+    property Name: TciTypeName read GetName;
+  end;
 
-  TciConstantDeclaration = class(TDeclaration);                             //Const
-  TciConstantName = class(TDeclaration);                                    //Const
+  TciVarName = class(TDeclaration);
+  TciVarDeclaration = class(TDeclaration)
+  protected
+    fNames: TDeclarationArray;
+    fVarType: String;
+
+    function GetVarType: String;
+    function GetNames: TDeclarationArray;
+  public
+    property Names: TDeclarationArray read GetNames;
+    property VarType: String read GetVarType;
+  end;
+
+  TciConstantName = class(TDeclaration);
+  TciConstantDeclaration = class(TDeclaration)                             //Const
+  protected
+    fNames: TDeclarationArray;
+    fValue: String;
+
+    function GetNames: TDeclarationArray;
+    function GetValue: String;
+  public
+    property Names: TDeclarationArray read GetNames;
+    property Value: String read GetValue;
+  end;
 
   TciLabelDeclaration = class(TDeclaration);                                //Label
   TciLabelName = class(TDeclaration);                                       //Label
 
   //TciProcedureDeclaration = class(TDeclaration);                            //Procedure/Function
   //TciProcedureName = class(TDeclaration);                                   //Procedure/Function
-  TciProcedureClassName = class(TDeclaration);                              //Class Procedure/Function
   TciReturnType = class(TciTypeKind);                                       //Function Result
   TciForward = class(TciTypeKind);                                          //Forwarding
   TciConstRefParameter = class(TDeclaration);                               //Procedure/Function Parameters
@@ -291,6 +320,57 @@ implementation
 
 uses
   CastaliaPasLexTypes;
+
+function TciVarDeclaration.GetVarType: String;
+var
+  Decl: TDeclaration;
+begin
+  if (fVarType = '') then
+  begin
+    Decl := fItems.GetFirstItemOfClass(TciTypeKind);
+    if (Decl <> nil) then
+      fVarType := DEcl.CleanText;
+  end;
+
+  Result := fVarType;
+end;
+
+function TciVarDeclaration.GetNames: TDeclarationArray;
+begin
+  if (Length(fNames) = 0) then
+    fNames := fItems.GetItemsOfClass(TciVarName);
+
+  Result := fNames;
+end;
+
+function TciConstantDeclaration.GetNames: TDeclarationArray;
+begin
+  if (Length(fNames) = 0) then
+    fNames := fItems.GetItemsOfClass(TciConstantName);
+  Result := fNames;
+end;
+
+function TciConstantDeclaration.GetValue: String;
+var
+  Decl: TDeclaration;
+  i: Int32;
+begin
+  if (fValue = '') then
+  begin
+    Decl := fItems.GetFirstItemOfClass(TciExpression);
+    if (Decl <> nil) then
+      fValue := Decl.CleanText;
+  end;
+
+  Result := fValue;
+end;
+
+function TciTypeDeclaration.GetName: TciTypeName;
+begin
+  if (fName = nil) then
+    fName := TciTypeName(FItems.GetFirstItemOfClass(TciTypeName));
+  Result := fName;
+end;
 
 procedure TDeclarationStack.Push(Item: TDeclaration);
 begin
@@ -603,7 +683,8 @@ begin
   IsOwner(AClass, Self, Result, l);
 end;
 
-constructor TDeclaration.Create(AParser: TmwSimplePasPar; AOwner: TDeclaration; AOrigin: PAnsiChar; AStart, AEnd: Integer);
+constructor TDeclaration.Create(AParser: TmwSimplePasPar; AOwner: TDeclaration;
+  AOrigin: PAnsiChar; AStart: Integer; AEnd: Integer);
 begin
   inherited Create;
 
@@ -859,6 +940,13 @@ begin
   end;
 end;
 
+function TciProcedureDeclaration.GetObjectName: TciProcedureClassName;
+begin
+  if (fObjectName = nil) then
+    fObjectName := TciProcedureClassName(Items.GetFirstItemOfClass(TciProcedureClassName));
+  Result := fObjectName;
+end;
+
 function TciProcedureDeclaration.GetCleanDeclaration: string;
 var
   Return : TciReturnType;
@@ -867,10 +955,13 @@ begin
     Result := fCleanDecl
   else
   begin
-    Result := ProcType;
+    Result := ProcType + ' ';
+
+    if (ObjectName <> nil) then
+      Result := Result + ObjectName.CleanText + '.';
 
     if (Name <> nil) then
-      Result := Result + ' ' + Name.ShortText + '(';
+      Result := Result + Name.ShortText + '(';
 
     if (Params <> '') then
       Result := Result + Params;

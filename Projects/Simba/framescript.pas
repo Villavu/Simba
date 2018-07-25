@@ -29,7 +29,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, SynHighlighterPas, SynEdit, SynEditMarkupHighAll,
-  mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType,MufasaBase, Graphics, Controls, SynEditStrConst,
+  script_thread,ComCtrls, SynEditKeyCmds, LCLType,MufasaBase, Graphics, Controls, SynEditStrConst,
   v_ideCodeInsight, v_ideCodeParser,  SynEditHighlighter, SynPluginSyncroEdit, SynGutterBase,
   SynEditMarks, newsimbasettings;
 const
@@ -69,7 +69,6 @@ type
     procedure SynEditSpecialLineColors(Sender: TObject; Line: integer;
       var Special: boolean; var FG, BG: TColor);
     procedure SynEditStatusChange(Sender: TObject; Changes: TSynStatusChanges);
-    procedure SynEditGutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
   private
     OwnerPage  : TPageControl;
     OwnerSheet : TTabSheet;//The owner TTabsheet -> For title setting
@@ -83,7 +82,7 @@ type
     ScriptName: string;//The name of the currently opened/saved file.
     ScriptDefault: string;//The default script e.g. program new; begin end.
     ScriptChanged: boolean;//We need this for that little * (edited star).
-    ScriptThread: TMThread;//Just one thread for now..
+    ScriptThread: TMMLScriptThread;//Just one thread for now..
     FScriptState: TScriptState;//Stores the ScriptState, if you want the Run/Pause/Start buttons to change accordingly, acces through Form1
     procedure undo;
     procedure redo;
@@ -103,7 +102,8 @@ type
 
 implementation
 uses
-  SimbaUnit, MufasaTypes, SynEditTypes, SynEditHighlighterFoldBase, LCLIntF, framefunctionlist;
+  SimbaUnit, MufasaTypes, SynEditTypes, SynEditHighlighterFoldBase, LCLIntF,
+  colorscheme, framefunctionlist;
 
 function WordAtCaret(e: TSynEdit; var sp, ep: Integer; Start: Integer = -1; Offset: Integer = 0): string;
 var
@@ -282,32 +282,35 @@ end;
 
 procedure TScriptFrame.SynEditDragDrop(Sender, Source: TObject; X, Y: Integer);
 begin
-  if Source is TFunctionListFrame then
-    with TFunctionListFrame(Source).DraggingNode do
-      if (Level > 0) and (Data <> nil) then
-        SynEdit.InsertTextAtCaret(GetMethodName(PMethodInfo(Data)^.MethodStr, True));
+  if (Source <> nil) and (Source is TTreeView) and (TTreeView(Source).Selected <> nil) then
+    SynEdit.InsertTextAtCaret(TTreeView(Source).Selected.Text);
 end;
 
-procedure TScriptFrame.SynEditDragOver(Sender, Source: TObject; X, Y: Integer;
-  State: TDragState; var Accept: Boolean);
+procedure TScriptFrame.SynEditDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
 begin
-  Accept := Source = SimbaForm.frmFunctionList;
-  if(Accept)then
+  Accept := (Source <> nil) and (Source is TTreeView) and (TTreeView(Source).Selected <> nil);
+
+  if Accept then
   begin
-    SynEdit.CaretXY := SynEdit.PixelsToLogicalPos(point(x, y));
-    if(not(SimbaForm.Active))then SimbaForm.BringToFront;
-    if(SimbaForm.ActiveControl <> SynEdit)then SimbaForm.ActiveControl := SynEdit;
+    SynEdit.CaretXY := SynEdit.PixelsToLogicalPos(Point(X, Y));
+
+    if (not (SimbaForm.Active)) then
+      SimbaForm.BringToFront;
+    if (SimbaForm.ActiveControl <> SynEdit) then
+      SimbaForm.ActiveControl := SynEdit;
+    if SynEdit.CanFocus then
+      SynEdit.SetFocus();
   end;
 end;
 
 procedure TScriptFrame.SynEditKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if key = VK_F3 then
-  begin;
+  if (Key = VK_F3) then
+  begin
     SimbaForm.ActionFindNextExecute(Sender);
-    key := 0;
+    Key := 0;
   end
-  else if key = VK_ESCAPE then
+  else if (Key = VK_ESCAPE) then
     SimbaForm.ParamHint.Hide;
 
   SimbaForm.CodeCompletionForm.HandleKeyDown(Sender, Key, Shift);
@@ -630,46 +633,23 @@ begin
 end;
 
 procedure TScriptFrame.HandleErrorData;
-var
-  RetStr: string;
 begin
-  if ErrorData.Module <> '' then
-  begin;
-    if not FileExists(ErrorData.Module) then
-      formWriteln(Format('ERROR comes from a non-existing file (%s)',[ErrorData.Module]))
-    else
+  if (ErrorData.FilePath <> '') and (not FileExists(ErrorData.FilePath)) then
+    formWriteln(StringReplace(ErrorData.Error, 'in file', 'in internal file', []))
+  else
+  begin
+    SimbaForm.LoadScriptFile(ErrorData.FilePath, True, True);
+
+    with SimbaForm.CurrScript do
     begin
-      ErrorData.Module:= SetDirSeparators(ErrorData.Module);// Set it right ;-)
-      SimbaForm.LoadScriptFile(ErrorData.Module,true,true);//Checks if the file is already open!
-      ErrorData.Module:= '';
-      SimbaForm.CurrScript.ErrorData := Self.ErrorData;
-      SimbaForm.CurrScript.HandleErrorData;
-      exit;
+      ScriptErrorLine := Self.ErrorData.Line;
+
+      SynEdit.LogicalCaretXY := Point(Self.ErrorData.Col, Self.ErrorData.Line);
+      SynEdit.Invalidate();
     end;
+
+    formWriteln(ErrorData.Error);
   end;
-
-  MakeActiveScriptFrame;
-  if (ErrorData.Row > 0) then
-    ScriptErrorLine := ErrorData.Row;
-
-  SynEdit.Invalidate;
-
-  if (ErrorData.Row > 0) then
-    if ErrorData.Col = -1 then
-      SynEdit.SelStart := ErrorData.Position
-    else
-      SynEdit.LogicalCaretXY := Point(ErrorData.Col, ErrorData.Row);
-
-  RetStr := '';
-  if (Pos('error', Lowercase(ErrorData.Error)) = 0) then
-    RetStr += 'Error: ';
-
-  RetStr += ErrorData.Error;
-
-  if (ErrorData.Row > 0) then
-    RetStr += ' at line ' + IntToStr(ErrorData.Row);
-
-  formWriteln(RetStr);
 end;
 
 procedure TScriptFrame.MakeActiveScriptFrame;
@@ -704,43 +684,6 @@ begin
   end;
 end;
 
-procedure TScriptFrame.SynEditGutterClick(Sender: TObject; X, Y, Line: integer; Mark: TSynEditMark);
-var
-  I, H: LongInt;
-begin
-  {$IFDEF USE_DEBUGGER}
-  if (SimbaSettings.Interpreter._Type.Value <> interp_PS) then
-    Exit;
-
-  H := SynEdit.Marks.Count - 1;
-  for I := 0 to H do
-    if (SynEdit.Marks.Items[I].Line = Line) then
-    begin
-      SynEdit.Marks.Line[Line].Clear(True);
-
-      try
-        if (Assigned(ScriptThread)) and (ScriptThread is TPSThread) then
-          with TPSThread(ScriptThread).PSScript do
-            ClearBreakPoint(MainFileName, Line - 1);
-      except end;
-
-      Exit;
-    end;
-
-  Mark := TSynEditMark.Create(SynEdit);
-  Mark.Line := Line;
-  Mark.ImageIndex := 6;
-  Mark.Visible := True;
-  SynEdit.Marks.Add(Mark);
-
-  try
-    if (Assigned(ScriptThread)) and (ScriptThread is TPSThread) then
-      with TPSThread(ScriptThread).PSScript do
-        SetBreakPoint(MainFileName, Line - 1);
-  except end;
-  {$ENDIF}
-end;
-
 constructor TScriptFrame.Create(TheOwner: TComponent);
 const
   AdditionalFolds:TPascalCodeFoldBlockTypes = [cfbtSlashComment,cfbtBorCommand,cfbtAnsiComment];
@@ -768,7 +711,7 @@ begin
 
   SynEdit.Enabled := True; // For some reason we need this?
   
-  SynEdit.Highlighter := SimbaForm.CurrHighlighter;
+  SynEdit.Highlighter := SimbaForm.Highlighter;
   SynEdit.Options := SynEdit.Options + [eoTabIndent, eoKeepCaretX, eoDragDropEditing, eoScrollPastEof] - [eoSmartTabs];
   SynEdit.Options2 := SynEdit.Options2 + [eoCaretSkipsSelection];
   
@@ -800,6 +743,9 @@ begin
   end;
   AddKey(SynEdit,ecCodeCompletion,VK_SPACE,[ssCtrl]);
   AddKey(SynEdit,ecCodeHints,VK_SPACE,[ssCtrl,ssShift]);
+  
+  // colorize the highlighter
+  SimbaColors.UpdateEditor(SynEdit);
 end;
 
 function TScriptFrame.GetReadOnly: Boolean;
@@ -831,11 +777,11 @@ begin
   end;
 
   try
-      SetLength(NewScript, ExternScript.Size);
-      ExternScript.Read(NewScript[1], ExternScript.Size);
+    SetLength(NewScript, ExternScript.Size);
+    ExternScript.Read(NewScript[1], ExternScript.Size);
 
-      SynEdit.Lines.SetText(PChar(NewScript));
-      SetLength(NewScript, 0);
+    SynEdit.Lines.SetText(PChar(NewScript));
+    SetLength(NewScript, 0);
   finally
     ExternScript.Free;
   end;

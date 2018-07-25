@@ -325,7 +325,9 @@ implementation
   function TWindow.GetColor(x,y : integer) : TColor;
   begin
     ImageApplyAreaOffset(x, y);
-    result:= GetPixel(self.dc,x,y)
+    with ReturnData(x,y,1,1) do
+      Result := RGBToColor(Ptr[0].r,Ptr[0].g,Ptr[0].b);
+    FreeReturnData;
   end;
   
   procedure TWindow.ValidateBuffer(w,h:integer);
@@ -432,42 +434,43 @@ begin
   SendInput(1,Input, sizeof(Input));
 end;
 
-  procedure TWindow.HoldMouse(x,y: integer; button: TClickType);
-  var
-    Input : TInput;
-    Rect : TRect;
-  begin
-    MouseApplyAreaOffset(x, y);
-    WindowRect(rect);
-    Input.Itype:= INPUT_MOUSE;
-    FillChar(Input,Sizeof(Input),0);
-    Input.mi.dx:= x + Rect.left;
-    Input.mi.dy:= y + Rect.Top;
-    case button of
-      Mouse_Left: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTDOWN;
-      Mouse_Middle: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_MIDDLEDOWN;
-      Mouse_Right: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_RIGHTDOWN;
-    end;
-    SendInput(1,Input, sizeof(Input));
+procedure TWindow.HoldMouse(x,y: integer; button: TClickType);
+var
+  Input : TInput;
+  Rect : TRect;
+begin
+  MouseApplyAreaOffset(x, y);
+  WindowRect(rect);
+  Input.Itype:= INPUT_MOUSE;
+  FillChar(Input,Sizeof(Input),0);
+  Input.mi.dx:= x + Rect.left;
+  Input.mi.dy:= y + Rect.Top;
+  case button of
+    Mouse_Left: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTDOWN;
+    Mouse_Middle: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_MIDDLEDOWN;
+    Mouse_Right: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_RIGHTDOWN;
   end;
-  procedure TWindow.ReleaseMouse(x,y: integer; button: TClickType);
-  var
-    Input : TInput;
-    Rect : TRect;
-  begin
-    MouseApplyAreaOffset(x, y);
-    WindowRect(rect);
-    Input.Itype:= INPUT_MOUSE;
-    FillChar(Input,Sizeof(Input),0);
-    Input.mi.dx:= x + Rect.left;
-    Input.mi.dy:= y + Rect.Top;
-   case button of
-      Mouse_Left: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTUP;
-      Mouse_Middle: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_MIDDLEUP;
-      Mouse_Right: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_RIGHTUP;
-    end;
-    SendInput(1,Input, sizeof(Input));
+  SendInput(1,Input, sizeof(Input));
+end;
+
+procedure TWindow.ReleaseMouse(x,y: integer; button: TClickType);
+var
+  Input : TInput;
+  Rect : TRect;
+begin
+  MouseApplyAreaOffset(x, y);
+  WindowRect(rect);
+  Input.Itype:= INPUT_MOUSE;
+  FillChar(Input,Sizeof(Input),0);
+  Input.mi.dx:= x + Rect.left;
+  Input.mi.dy:= y + Rect.Top;
+ case button of
+    Mouse_Left: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTUP;
+    Mouse_Middle: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_MIDDLEUP;
+    Mouse_Right: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_RIGHTUP;
   end;
+  SendInput(1,Input, sizeof(Input));
+end;
 
 function TWindow.IsMouseButtonHeld(button: TClickType): boolean;
 begin
@@ -480,57 +483,62 @@ end;
 
 procedure TWindow.SendString(str: string; keywait, keymodwait: integer);
 var
-  I, L: integer;
+  i: Int32;
   C: Byte;
   ScanCode, VK: Word;
-  Shift: boolean;
+  SS: TShiftState;
 begin
-  L := Length(str);
-  for I := 1 to L do
+  for i:=1 to Length(str) do
   begin
     VK := VkKeyScan(str[I]);
-    Shift := (Hi(VK) > 0);
-    C := LoByte(VK);
+    SS := TShiftState(VK shr 8 and $FF);
+    C  := VK and $FF;
     ScanCode := MapVirtualKey(C, 0);
     if (ScanCode = 0) then
       Continue; // TODO/XXX: Perhaps raise an exception?
 
     // TODO/XXX: Do we wait when/after pressing shift as well?
-    if (Shift) then
+    if (SS <> []) then
     begin
-      Keybd_Event(VK_SHIFT, $2A, 0, 0);
-      sleep(keymodwait shr 1) ;
+      if ssShift in SS then Keybd_Event(VK_SHIFT,   $2A, 0, 0);
+      if ssCtrl  in SS then Keybd_Event(VK_CONTROL, $2A, 0, 0);
+      if ssALT   in SS then Keybd_Event(VK_MENU,    $2A, 0, 0);
+      Sleep(keymodwait shr 1);
     end;
 
     Keybd_Event(C, ScanCode, 0, 0);
 
     if keywait <> 0 then
-        sleep(keywait);
+      Sleep(keywait);
 
     Keybd_Event(C, ScanCode, KEYEVENTF_KEYUP, 0);
 
-    if (Shift) then
+    if (SS <> []) then
     begin
-      sleep(keymodwait shr 1);
-      Keybd_Event(VK_SHIFT, $2A, KEYEVENTF_KEYUP, 0);
+      Sleep(keymodwait shr 1);
+      if ssALT   in SS then Keybd_Event(VK_MENU,    $2A, KEYEVENTF_KEYUP, 0);
+      if ssCtrl  in SS then Keybd_Event(VK_CONTROL, $2A, KEYEVENTF_KEYUP, 0);
+      if ssShift in SS then Keybd_Event(VK_SHIFT,   $2A, KEYEVENTF_KEYUP, 0);
     end;
   end;
 end;
 
-procedure TWindow.HoldKey(key: integer);
+procedure TWindow.HoldKey(key: Integer);
 begin
   keyinput.Down(key);
 end;
-procedure TWindow.ReleaseKey(key: integer);
+
+procedure TWindow.ReleaseKey(key: Integer);
 begin
   keyinput.Up(key);
 end;
-function TWindow.IsKeyHeld(key: integer): boolean;
+
+function TWindow.IsKeyHeld(key: Integer): Boolean;
 begin
-  Result := (GetAsyncKeyState(key)  <> 0);
+  Result := (GetAsyncKeyState(key) and $8000 <> 0); //only check if high-order bit is set
 end;
 
-function TWindow.GetKeyCode(c: char): integer;
+function TWindow.GetKeyCode(c: Char): Integer;
 begin
   result := VkKeyScan(c) and $FF;
 end;

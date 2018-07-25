@@ -25,7 +25,7 @@ Settings:
         X   Tab options:
             X   Open Next on Close
             X   Open Script in new Tab
-            X   Check tabs for open script before opening
+            X   Check TabGeneral for open script before opening
 
         X   Colour Picker:
             X   Show history on pick
@@ -62,18 +62,19 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ComCtrls,
-  StdCtrls, ExtCtrls, CheckLst, NewSimbaSettings, types;
+  StdCtrls, ExtCtrls, types;
 
 type
-
-  { TSettingsSimpleForm }
-
   TSettingsSimpleForm = class(TForm)
     ButtonOK: TButton;
     ButtonCancel: TButton;
     CheckForUpdatesBox: TCheckBox;
     AutomaticallyUpdateBox: TCheckBox;
     CaretPastEOL: TCheckBox;
+    TabAdvanced: TPage;
+    TabEnvironment: TPage;
+    Tabs: TNotebook;
+    TabGeneral: TPage;
     UpdaterURLLabel: TLabel;
     UpdaterURLVersionLabel: TLabel;
     UpdaterURLVersion: TEdit;
@@ -88,11 +89,10 @@ type
     UpdaterGroup: TGroupBox;
     GroupBox2: TGroupBox;
     ImageList1: TImageList;
-    Label1: TLabel;
+    UpdateCheckMinutes: TLabel;
     Label2: TLabel;
     PgControlEnvironment: TPageControl;
     PgControlAdvanced: TPageControl;
-    InterpreterGroup: TRadioGroup;
     SettingsTabsList: TListView;
     PgControlGeneral: TPageControl;
     SettingsTabsPanel: TPanel;
@@ -100,7 +100,6 @@ type
     tsEditor: TTabSheet;
     tsOther: TTabSheet;
     tsUpdater: TTabSheet;
-    tsInterpreter: TTabSheet;
     tsTabs: TTabSheet;
     tsAdvanced: TTabSheet;
     procedure ButtonCancelClick(Sender: TObject);
@@ -108,33 +107,27 @@ type
     procedure EnvOtherItemClick(Sender: TObject; Index: integer);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure SettingsTabsListAdvancedCustomDrawItem(Sender: TCustomListView;
-      Item: TListItem; State: TCustomDrawState; Stage: TCustomDrawStage;
-      var DefaultDraw: Boolean);
+    procedure SettingsTabsListAdvancedCustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState; Stage: TCustomDrawStage; var DefaultDraw: Boolean);
     procedure SettingsTabsListClick(Sender: TObject);
     procedure SettingsTabsListMouseLeave(Sender: TObject);
-    procedure SettingsTabsListMouseMove(Sender: TObject; Shift: TShiftState; X,
-      Y: Integer);
+    procedure SettingsTabsListMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure SwitchSettingsTab(NewTab: Integer);
     procedure HighlightSettingsTab(NewTab: Integer);
   private
-    { private declarations }
   public
-    { public declarations }
   end; 
 
 var
   SettingsSimpleForm: TSettingsSimpleForm;
-  SettingsTabState: Array of Integer;
+  SettingsTabState: array of Integer;
   ClickSettingsTab: Boolean;
 
 implementation
+
 uses
-  simbaunit;
+  simbaunit, newsimbasettings;
 
 {$R *.lfm}
-
-{ TSettingsSimpleForm }
 
 procedure TSettingsSimpleForm.FormCreate(Sender: TObject);
 begin
@@ -164,13 +157,7 @@ begin
   SimbaSettings.Updater.RemoteLink.Value := UpdaterURL.Text;
   SimbaSettings.Updater.RemoteVersionLink.Value := UpdaterURLVersion.Text;
 
-  // Interpreter
-  if InterpreterGroup.ItemIndex = 0 then
-    SimbaSettings.Interpreter._Type.Value := 0
-  else
-    SimbaSettings.Interpreter._Type.Value := 3; // 3 is lape
-
-  // Tabs
+  // TabGeneral
   SimbaSettings.Tab.OpenNextOnClose.Value := TabSettingsCheckBoxes.Checked[0];
   SimbaSettings.Tab.OpenScriptInNewTab.Value := TabSettingsCheckBoxes.Checked[1];
   SimbaSettings.Tab.CheckBeforeOpen.Value := TabSettingsCheckBoxes.Checked[2];
@@ -191,6 +178,7 @@ begin
   // Other
   SimbaSettings.Tray.AlwaysVisible.Value := EnvOther.Checked[0];
   SimbaSettings.CodeInsight.FunctionList.ShowOnStart.Value := EnvOther.Checked[1];
+  SimbaSettings.Misc.SaveScriptOnCompile.Value := EnvOther.Checked[2];
   // Add 'Show Command prompt'
 
   // Paths
@@ -223,12 +211,13 @@ begin
   end;
 end;
 
-{ For live changes }
-procedure TSettingsSimpleForm.EnvOtherItemClick(Sender: TObject;
-  Index: integer);
+procedure TSettingsSimpleForm.EnvOtherItemClick(Sender: TObject; Index: Integer);
 begin
-  if Index = 0 then
-    SimbaSettings.Tray.AlwaysVisible.Value:= EnvOther.Checked[index];
+  case Index of
+    0: SimbaSettings.Tray.AlwaysVisible.Value:= EnvOther.Checked[0];
+    1: SimbaSettings.CodeInsight.FunctionList.ShowOnStart.Value := EnvOther.Checked[1];
+    2: SimbaSettings.Misc.SaveScriptOnCompile.Value := EnvOther.Checked[2];
+  end;
 end;
 
 procedure TSettingsSimpleForm.ButtonCancelClick(Sender: TObject);
@@ -246,13 +235,8 @@ begin
   UpdaterURL.Text := SimbaSettings.Updater.RemoteLink.Value;
   UpdaterURLVersion.Text := SimbaSettings.Updater.RemoteVersionLink.Value;
 
-  // Interpreter
-  if SimbaSettings.Interpreter._Type.Value = 0 then
-    InterpreterGroup.ItemIndex := 0
-  else
-    InterpreterGroup.ItemIndex := 1;
 
-  // Tabs
+  // TabGeneral
   TabSettingsCheckBoxes.Checked[0] := SimbaSettings.Tab.OpenNextOnClose.Value;
   TabSettingsCheckBoxes.Checked[1] := SimbaSettings.Tab.OpenScriptInNewTab.Value;
   TabSettingsCheckBoxes.Checked[2] := SimbaSettings.Tab.CheckBeforeOpen.Value;
@@ -273,6 +257,7 @@ begin
   // Other
   EnvOther.Checked[0] := SimbaSettings.Tray.AlwaysVisible.Value;
   EnvOther.Checked[1] := SimbaSettings.CodeInsight.FunctionList.ShowOnStart.Value;
+  EnvOther.Checked[2] := SimbaSettings.Misc.SaveScriptOnCompile.Value;
 
 
   // Add 'Show Command prompt', not set in SimbaSettings?
@@ -281,12 +266,6 @@ begin
   N := PathsTreeView.Items.FindNodeWithText('Includes');
   if (N <> nil) and (N.HasChildren) then
     N.GetLastChild.Text:= SimbaSettings.Includes.Path.Value;
-
-  {$IFDEF USE_EXTENSIONS}
-  N := PathsTreeView.Items.FindNodeWithText('Extensions');
-  if (N <> nil) and (N.HasChildren) then
-    N.GetLastChild.Text:= SimbaSettings.Extensions.Path.Value;
-  {$ENDIF}
 
   N := PathsTreeView.Items.FindNodeWithText('Plugins');
   if (N <> nil) and (N.HasChildren) then
@@ -306,37 +285,22 @@ begin
   SettingsTabState[2] := 0;
 end;
 
-// Part of Faux Tabs - Controls switching of tabs
+// Part of Faux TabGeneral - Controls switching of TabGeneral
 procedure TSettingsSimpleForm.SwitchSettingsTab(NewTab: Integer);
 var i: Integer;
 begin
   for i := 0 to High(SettingsTabState) do
-  begin
-    if i = NewTab then
+    if (i = NewTab) then
       SettingsTabState[i] := 1
     else
-    begin
       SettingsTabState[i] := 0;
-    end;
-  end;
 
-  PgControlGeneral.Visible := False;
-  PgControlEnvironment.Visible := False;
-  PgControlAdvanced.Visible := False;
+  Tabs.PageIndex := NewTab;
 
-  if NewTab = 0 then
-    PgControlGeneral.Visible := True
-  else
-    if NewTab = 1 then
-      PgControlEnvironment.Visible := True
-    else
-      if NewTab = 2 then
-        PgControlAdvanced.Visible := True;
-
-  SettingsTabsList.Refresh;
+  SettingsTabsList.Refresh();
 end;
 
-// Part of Faux Tabs - Controls the highlight state
+// Part of Faux TabGeneral - Controls the highlight state
 procedure TSettingsSimpleForm.HighlightSettingsTab(NewTab: Integer);
 var i: Integer;
 begin
@@ -355,18 +319,15 @@ begin
   SettingsTabsList.Refresh;
 end;
 
-
-
-// Part of Faux Tabs - Custom draws tabs
+// Part of Faux TabGeneral - Custom draws TabGeneral
 procedure TSettingsSimpleForm.SettingsTabsListAdvancedCustomDrawItem(
   Sender: TCustomListView; Item: TListItem; State: TCustomDrawState;
   Stage: TCustomDrawStage; var DefaultDraw: Boolean);
 var
   ItemBoundsRect, IconRect, LabelRect: TRect;
 begin
-  if stage = cdPostPaint then
+  if Stage = cdPostPaint then
   begin
-
     ItemBoundsRect := item.DisplayRect(drBounds);
 
     case SettingsTabState[Item.Index] of
@@ -384,39 +345,35 @@ begin
             end;
     end;
 
-    IconRect := item.DisplayRect(drIcon);
-    LabelRect := item.DisplayRect(drlabel);
-
+    IconRect := Item.DisplayRect(drIcon);
+    LabelRect := Item.DisplayRect(drLabel);
 
     ImageList1.Draw(Sender.Canvas, ItemBoundsRect.Left + (((ItemBoundsRect.Right - ItemBoundsRect.Left) div 2) - 16), IconRect.Top+3, Item.ImageIndex);
     Sender.Canvas.TextOut(LabelRect.Left+2, LabelRect.Top, Item.Caption);
-
   end;
-
 end;
 
-// Part of Faux Tabs - OnClick
+// Part of Faux TabGeneral - OnClick
 procedure TSettingsSimpleForm.SettingsTabsListClick(Sender: TObject);
 var
   x, y: Integer;
   f: TListItem;
-
 begin
   x := ScreenToClient(Mouse.CursorPos).x;
   y := ScreenToClient(Mouse.CursorPos).y;
 
   f := SettingsTabsList.GetItemAt(x, y);
 
-  if f = nil then
-    exit;
+  if (f = nil) then
+    Exit;
 
   SwitchSettingsTab(f.Index);
 end;
 
-// Part of Faux Tabs - On mouse leave
+// Part of Faux TabGeneral - On mouse leave
 procedure TSettingsSimpleForm.SettingsTabsListMouseLeave(Sender: TObject);
-var i: integer;
-
+var
+  i: Integer;
 begin
   for i := 0 to High(SettingsTabState) do
   begin
@@ -428,23 +385,16 @@ begin
   SettingsTabsList.Repaint;
 end;
 
-// Part of Faux Tabs - On mouse move
-procedure TSettingsSimpleForm.SettingsTabsListMouseMove(Sender: TObject; Shift: TShiftState;
-  X, Y: Integer);
+// Part of Faux TabGeneral - On mouse move
+procedure TSettingsSimpleForm.SettingsTabsListMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
   f: TListItem;
-
 begin
   f := SettingsTabsList.GetItemAt(x, y);
-
-  if f = nil then
-    exit;
+  if (f = nil) then
+    Exit;
   HighlightSettingsTab(f.Index);
 end;
-
-
-
-
 
 end.
 

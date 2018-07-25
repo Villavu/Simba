@@ -2538,17 +2538,8 @@ end;
 procedure TmwSimplePasPar.RaiseStatement;
 begin
   Expected(tokRaise);
-  case TokenID of
-    tokAddressOp, tokDoubleAddressOp, tokIdentifier, tokPointerSymbol, tokRoundOpen:
-      begin
-        Designator;
-      end;
-  end;
-  if ExID = tokAt then
-  begin
-    NextToken;
-    Expression;
-  end;
+  while (not (TokenID in [tokSemiColon, tokNull, tok_DONE])) do
+    NextToken();
 end;
 
 procedure TmwSimplePasPar.TryStatement;
@@ -2612,17 +2603,23 @@ begin {removed tokIntegerConst jdj-Put back in for labels}
   while TokenID in [tokAddressOp, tokAsm, tokBegin, tokCase, tokDoubleAddressOp,
     tokFor, tokGoTo, tokIdentifier, tokIf, tokInherited, tokInline, tokIntegerConst,
     tokPointerSymbol, tokRaise, tokRoundOpen, tokRepeat, tokSemiColon, tokString,
-    tokTry, tokWhile, tokWith] do
+    tokTry, tokWhile, tokWith, tokAssign] do
   begin
-    Statement;
-    SEMICOLON;
+    Statement();
+
+    if (TokenID = tokAssign) then
+    begin
+      NextToken();
+      Statement();
+    end else
+      SemiColon();
   end;
 end;
 
 procedure TmwSimplePasPar.SimpleStatement;
 begin
   case TokenID of
-    tokAddressOp, tokDoubleAddressOp, tokIdentifier, tokPointerSymbol, tokRoundOpen:
+    tokAddressOp, tokDoubleAddressOp, tokIdentifier, tokPointerSymbol, tokRoundOpen, tokStringConst:
       begin
         Designator;
         if TokenID in [tokAssign, tokMulAsgn, tokDivAsgn, tokPlusAsgn, tokMinusAsgn, tokPowAsgn] then
@@ -2688,6 +2685,8 @@ begin
       begin
         InlineStatement;
       end;
+    tokFloat:
+      NextToken();
     tokIntegerConst:
       begin
         fLexer.InitAhead;
@@ -2696,11 +2695,8 @@ begin
             begin
               LabeledStatement;
             end;
-        else
-          begin
-            SynError(InvalidLabeledStatement);
-            NextToken;
-          end;
+          else
+            NextToken();
         end;
       end;
     tokRepeat:
@@ -2829,6 +2825,8 @@ begin //mw 12/7/2000
       begin
         ConstantExpression;
       end;
+    tokStringConst, tokIntegerConst, tokFloat, tokIdentifier:
+      ConstantExpression;
   end;
 (*  Expected(tokIdentifier); // old code for information removed in next versions
   case TokenID of
@@ -3111,6 +3109,11 @@ begin
             SimpleExpression;
           end;
       end;
+    end;
+  tokAssign:
+    begin
+      StatementList;
+      Expression;
     end;
   end;
 end;

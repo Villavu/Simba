@@ -10,8 +10,8 @@ uses
 
   {$IFDEF FPC}
   LMessages,
-  lcltype,
-  mPasLex
+  LCLType,
+  LCLIntf
   {$ELSE}
   Windows,
   Messages
@@ -108,7 +108,7 @@ type
 implementation
 
 uses
-  StrUtils {$IFDEF FPC}, lclintf{$ENDIF},math, Themes, mufasabase;
+  StrUtils, Math, Themes, MufasaBase, CastaliaPasLex, CastaliaPasLexTypes;
 
 procedure TAutoCompleteListBox.setItemList(List: TStrings);
 begin
@@ -632,22 +632,22 @@ begin
                                                FSynEdit.lines));
     bracketcount := 0;
     ParameterIndex := -1;
-    while parser.TokenID <> tkNull do
+    while (parser.TokenID <> tokNull) do
     begin
       case parser.tokenID of
-        tkRoundOpen,tkSquareOpen:
+        tokRoundOpen,tokSquareOpen:
           begin
             inc(BracketCount);
             if BracketCount = 1 then
               ParameterIndex := 0;
           end;
-        tkRoundClose, tkSquareClose:
+        tokRoundClose, tokSquareClose:
           begin
             dec(BracketCount);
             if bracketcount =0 then
               exit;
           end;
-        tkComma:
+        tokComma:
           begin
             if bracketcount = 1 then
               inc(parameterIndex);

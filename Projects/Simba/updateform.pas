@@ -56,14 +56,11 @@ type
     FOldSpeed : integer;
     FLastUpdateSpeed : longword;
     FSimbaVersion: Integer;
-    FFontVersion : integer;
     SimbaVersionThread : TDownloadThread;
-    FontVersionThread : TDownloadThread;
   private
     function OnUpdateBeat: Boolean;
   public
     function CanUpdate: Boolean;
-    function GetLatestFontVersion : integer;
     function GetLatestSimbaVersion: Integer;
     procedure PerformUpdate;
   protected
@@ -89,47 +86,6 @@ begin
   mDebugLn(format('Current Simba version: %d',[SimbaVersion]));
   mDebugLn('Latest Simba Version: ' + IntToStr(FSimbaVersion));
   Exit(SimbaVersion < FSimbaVersion);
-end;
-
-function TSimbaUpdateForm.GetLatestFontVersion: integer;
-var
-  Vers : string;
-begin
-  if FontVersionThread = nil then//Create thread (only if no-other one is already running)
-  begin
-    FontVersionThread :=
-    TDownloadThread.Create(SimbaSettings.Fonts.VersionLink.GetDefValue(FontURL + 'Version'), @Vers);
-
-    FontVersionThread.Resume;
-    while FontVersionThread.Done = false do//Wait till thread is done
-    begin
-      Application.ProcessMessages;
-      if SimbaForm.exiting then
-      begin
-        writeln('GetLatestFontVersion: Exiting due to exiting=True...');
-        exit(-1);
-      end;
-      Sleep(25);
-    end;
-    FFontVersion := StrToIntDef(Trim(Vers), -1);//Read output
-    FontVersionThread := nil; //It's already freed
-  end else
-  begin
-    //Another thread is already running, lets wait for it! (When it's nil, it means that the result is written!)
-    while FontVersionThread <> nil do
-    begin;
-      Application.ProcessMessages;
-      Sleep(50);
-
-      if SimbaForm.exiting then
-      begin
-        writeln('GetLatestFontVersion(2): Exiting due to exiting=True...');
-        exit(-1);
-      end;
-    end;
-  end;
-  Exit(FFontVersion);
-
 end;
 
 function TSimbaUpdateForm.GetLatestSimbaVersion: Integer;

@@ -2,6 +2,7 @@
 
 *.bmp binary
 *.png binary
+*.lrs binary
 
 *.simba linguist-language=Pascal
 *.sex linguist-language=Pascal
