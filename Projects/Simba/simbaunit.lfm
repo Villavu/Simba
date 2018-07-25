@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 527
+  Left = 48
   Height = 773
-  Top = 112
+  Top = 132
   Width = 1200
   ActiveControl = ScriptPanel
   AllowDropFiles = True
@@ -17,7 +17,7 @@ object SimbaForm: TSimbaForm
   OnHide = doOnHide
   OnShortCut = FormShortCuts
   Position = poScreenCenter
-  LCLVersion = '1.8.2.0'
+  LCLVersion = '1.8.4.0'
   Visible = True
   object ToolBar: TToolBar
     Left = 0
@@ -760,6 +760,9 @@ object SimbaForm: TSimbaForm
       end
       object MenuItemFont: TMenuItem
         Action = ActionFont
+      end
+      object MenuItemColors: TMenuItem
+        Action = ActionColors
       end
       object MenuItemDivider14: TMenuItem
         Caption = '-'
@@ -3588,6 +3591,10 @@ object SimbaForm: TSimbaForm
     object ActionFont: TAction
       Caption = 'Font'
       OnExecute = ActionFontExecute
+    end
+    object ActionColors: TAction
+      Caption = 'Colors'
+      OnExecute = ActionColorsExecute
     end
     object ActionFileBrowser: TAction
       Caption = 'File Browser'
