@@ -54,9 +54,9 @@ type
     CustomFGbtn, CustomBGbtn: TSpeedButton;
     CustomFG, CustomBG: TColorDialog;
 
-    CheckBold, CheckItalic, CheckUnderline: TCheckBox;
+    CheckBold, CheckItalic, CheckUnderline, CheckStrike: TCheckBox;
 
-    ApplyBtn, SaveBtn, LoadBtn: TButton;
+    ApplyBtn, ApplyAndSaveBtn, SaveBtn, LoadBtn: TButton;
 
     Scheme, DefaultScheme: TColorScheme;
 
@@ -64,6 +64,7 @@ type
     procedure LoadDefaults();
     procedure UpdateEditor(SynEdit: TSynEdit);
     function LoadScheme(AFileName: String): TColorScheme;
+    procedure Save(AName: String);
 
     procedure OnSelectionChange(Sender: TObject; User: Boolean);
     procedure OnSelectBG(Sender: TObject);
@@ -72,8 +73,10 @@ type
     procedure OnBoldChange(Sender: TObject);
     procedure OnItalicChange(Sender: TObject);
     procedure OnUnderlineChange(Sender: TObject);
+    procedure OnStrikeChange(Sender: TObject);
 
     procedure OnApply(Sender: TObject);
+    procedure OnApplyAndSave(Sender: TObject);
     procedure OnSave(Sender: TObject);
     procedure OnLoad(Sender: TObject);
   end;
@@ -139,9 +142,9 @@ begin
   DefaultScheme[ecGutterMarksPart].Background := Editor.Gutter.MarksPart.MarkupInfo.Background;
   DefaultScheme[ecGutterMarksPart].Style      := Editor.Gutter.MarksPart.MarkupInfo.Style;
 
-  DefaultScheme[ecGutterMarksPart].Foreground := Editor.Gutter.SeparatorPart.MarkupInfo.Foreground;
-  DefaultScheme[ecGutterMarksPart].Background := Editor.Gutter.SeparatorPart.MarkupInfo.Background;
-  DefaultScheme[ecGutterMarksPart].Style      := Editor.Gutter.SeparatorPart.MarkupInfo.Style;
+  DefaultScheme[ecGutterSeparatorPart].Foreground := Editor.Gutter.SeparatorPart.MarkupInfo.Foreground;
+  DefaultScheme[ecGutterSeparatorPart].Background := Editor.Gutter.SeparatorPart.MarkupInfo.Background;
+  DefaultScheme[ecGutterSeparatorPart].Style      := Editor.Gutter.SeparatorPart.MarkupInfo.Style;
 
   // general editor
   DefaultScheme[ecEdtior].Background    := Editor.Color;
@@ -204,9 +207,9 @@ begin
   SynEdit.Gutter.MarksPart.MarkupInfo.Background := Scheme[ecGutterMarksPart].Background;
   SynEdit.Gutter.MarksPart.MarkupInfo.Style      := Scheme[ecGutterMarksPart].Style;
 
-  SynEdit.Gutter.SeparatorPart.MarkupInfo.Foreground := Scheme[ecGutterMarksPart].Foreground;
-  SynEdit.Gutter.SeparatorPart.MarkupInfo.Background := Scheme[ecGutterMarksPart].Background;
-  SynEdit.Gutter.SeparatorPart.MarkupInfo.Style      := Scheme[ecGutterMarksPart].Style;
+  SynEdit.Gutter.SeparatorPart.MarkupInfo.Foreground := Scheme[ecGutterSeparatorPart].Foreground;
+  SynEdit.Gutter.SeparatorPart.MarkupInfo.Background := Scheme[ecGutterSeparatorPart].Background;
+  SynEdit.Gutter.SeparatorPart.MarkupInfo.Style      := Scheme[ecGutterSeparatorPart].Style;
 
   // general editor
   SynEdit.Color := Scheme[ecEdtior].Background;
@@ -278,9 +281,9 @@ begin
     UInt32(Result[ecGutterMarksPart].Background) := INI.ReadInt64('Gutter', 'ecGutterMarksPart.Background', UInt32(DefaultScheme[ecGutterMarksPart].Background));
     UInt32(Result[ecGutterMarksPart].Style)      := INI.ReadInt64('Gutter', 'ecGutterMarksPart.Style',      UInt32(DefaultScheme[ecGutterMarksPart].Style));
 
-    UInt32(Result[ecGutterMarksPart].Foreground) := INI.ReadInt64('Gutter', 'ecGutterMarksPart.Foreground', UInt32(DefaultScheme[ecGutterMarksPart].Foreground));
-    UInt32(Result[ecGutterMarksPart].Background) := INI.ReadInt64('Gutter', 'ecGutterMarksPart.Background', UInt32(DefaultScheme[ecGutterMarksPart].Background));
-    UInt32(Result[ecGutterMarksPart].Style)      := INI.ReadInt64('Gutter', 'ecGutterMarksPart.Style',      UInt32(DefaultScheme[ecGutterMarksPart].Style));
+    UInt32(Result[ecGutterSeparatorPart].Foreground) := INI.ReadInt64('Gutter', 'ecGutterSeparatorPart.Foreground', UInt32(DefaultScheme[ecGutterSeparatorPart].Foreground));
+    UInt32(Result[ecGutterSeparatorPart].Background) := INI.ReadInt64('Gutter', 'ecGutterSeparatorPart.Background', UInt32(DefaultScheme[ecGutterSeparatorPart].Background));
+    UInt32(Result[ecGutterSeparatorPart].Style)      := INI.ReadInt64('Gutter', 'ecGutterSeparatorPart.Style',      UInt32(DefaultScheme[ecGutterSeparatorPart].Style));
 
     // general editor
     UInt32(Result[ecEdtior].Background) := INI.ReadInt64('Editor', 'ecEdtior.Background',    UInt32(DefaultScheme[ecEdtior].Background));
@@ -317,6 +320,78 @@ begin
   finally
     // After the ini file was used it must be freed to prevent memory leaks.
     INI.Free;
+  end;
+end;
+
+
+procedure TSimbaColors.Save(AName: String);
+var
+  INI: TINIFile;
+  i: Int32;
+  x: String;
+begin
+  INI := TINIFile.Create(AName);
+
+  try
+    INI.WriteInt64('Gutter', 'ecGutter.Background', UInt32(Scheme[ecGutter].Background));
+
+    INI.WriteInt64('Gutter', 'ecGutterLineNumberPart.Foreground', UInt32(Scheme[ecGutterLineNumberPart].Foreground));
+    INI.WriteInt64('Gutter', 'ecGutterLineNumberPart.Background', UInt32(Scheme[ecGutterLineNumberPart].Background));
+    INI.WriteInt64('Gutter', 'ecGutterLineNumberPart.Style',      UInt32(Scheme[ecGutterLineNumberPart].Style));
+
+    INI.WriteInt64('Gutter', 'ecGutterChangesPart.Foreground', UInt32(Scheme[ecGutterChangesPart].Foreground));
+    INI.WriteInt64('Gutter', 'ecGutterChangesPart.Background', UInt32(Scheme[ecGutterChangesPart].Background));
+    INI.WriteInt64('Gutter', 'ecGutterChangesPart.Style',      UInt32(Scheme[ecGutterChangesPart].Style));
+
+    INI.WriteInt64('Gutter', 'ecGutterCodeFoldPart.Foreground', UInt32(Scheme[ecGutterCodeFoldPart].Foreground));
+    INI.WriteInt64('Gutter', 'ecGutterCodeFoldPart.Background', UInt32(Scheme[ecGutterCodeFoldPart].Background));
+    INI.WriteInt64('Gutter', 'ecGutterCodeFoldPart.Style',      UInt32(Scheme[ecGutterCodeFoldPart].Style));
+
+    INI.WriteInt64('Gutter', 'ecGutterMarksPart.Foreground', UInt32(Scheme[ecGutterMarksPart].Foreground));
+    INI.WriteInt64('Gutter', 'ecGutterMarksPart.Background', UInt32(Scheme[ecGutterMarksPart].Background));
+    INI.WriteInt64('Gutter', 'ecGutterMarksPart.Style',      UInt32(Scheme[ecGutterMarksPart].Style));
+
+    INI.WriteInt64('Gutter', 'ecGutterSeparatorPart.Foreground', UInt32(Scheme[ecGutterSeparatorPart].Foreground));
+    INI.WriteInt64('Gutter', 'ecGutterSeparatorPart.Background', UInt32(Scheme[ecGutterSeparatorPart].Background));
+    INI.WriteInt64('Gutter', 'ecGutterSeparatorPart.Style',      UInt32(Scheme[ecGutterSeparatorPart].Style));
+
+    // general editor
+    INI.WriteInt64('Editor', 'ecEdtior.Background',    UInt32(Scheme[ecEdtior].Background));
+    INI.WriteInt64('Editor', 'ecRightEdge.Foreground', UInt32(Scheme[ecRightEdge].Foreground));
+
+    INI.WriteInt64('Editor', 'ecLineHighlight.Foreground', UInt32(Scheme[ecLineHighlight].Foreground));
+    INI.WriteInt64('Editor', 'ecLineHighlight.Background', UInt32(Scheme[ecLineHighlight].Background));
+    INI.WriteInt64('Editor', 'ecLineHighlight.Style',      UInt32(Scheme[ecLineHighlight].Style));
+
+    INI.WriteInt64('Editor', 'ecFoldedCode.Foreground', UInt32(Scheme[ecFoldedCode].Foreground));
+    INI.WriteInt64('Editor', 'ecFoldedCode.Background', UInt32(Scheme[ecFoldedCode].Background));
+    INI.WriteInt64('Editor', 'ecFoldedCode.Style',      UInt32(Scheme[ecFoldedCode].Style));
+
+    INI.WriteInt64('Editor', 'ecFoldedCodeLine.Foreground', UInt32(Scheme[ecFoldedCodeLine].Foreground));
+    INI.WriteInt64('Editor', 'ecFoldedCodeLine.Background', UInt32(Scheme[ecFoldedCodeLine].Background));
+    INI.WriteInt64('Editor', 'ecFoldedCodeLine.Style',      UInt32(Scheme[ecFoldedCodeLine].Style));
+
+    INI.WriteInt64('Editor', 'ecBracketMatch.Foreground', UInt32(Scheme[ecBracketMatch].Foreground));
+    INI.WriteInt64('Editor', 'ecBracketMatch.Background', UInt32(Scheme[ecBracketMatch].Background));
+    INI.WriteInt64('Editor', 'ecBracketMatch.Style',      UInt32(Scheme[ecBracketMatch].Style));
+
+    for i:=0 to 10 do
+    begin
+      WriteStr(x, EEditorAttr(Ord(ecAttrAsm)+i));
+      INI.WriteInt64('Highlighter', x+'.Foreground', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Foreground));
+      INI.WriteInt64('Highlighter', x+'.Background', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Background));
+      INI.WriteInt64('Highlighter', x+'.Style',      UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Style));
+      INI.WriteInt64('Highlighter', x+'.FrameEdges', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Edges));
+      INI.WriteInt64('Highlighter', x+'.FrameColor', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Color));
+      INI.WriteInt64('Highlighter', x+'.FrameStyle', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Style));
+    end;
+
+  finally
+    // After the ini file was used it must be freed to prevent memory leaks.
+    INI.Free;
+
+    Self.FileName := AName;
+    Self.Edited   := False;
   end;
 end;
 
@@ -361,6 +436,7 @@ begin
   CheckBold.Checked      := fsBold      in Scheme[EEditorAttr(currSelection)].Style;
   CheckItalic.Checked    := fsItalic    in Scheme[EEditorAttr(currSelection)].Style;
   CheckUnderline.Checked := fsUnderline in Scheme[EEditorAttr(currSelection)].Style;
+  CheckStrike.Checked    := fsStrikeOut in Scheme[EEditorAttr(currSelection)].Style;
 
   SelectFG.Repaint();
   SelectBG.Repaint();
@@ -408,21 +484,42 @@ begin
   UpdateEditor(Self.Editor);
 end;
 
+procedure TSimbaColors.OnStrikeChange(Sender: TObject);
+begin
+  with Scheme[EEditorAttr(List.ItemIndex)] do
+    if CheckStrike.Checked then Style := Style + [fsStrikeOut]
+    else                        Style := Style - [fsStrikeOut];
+  UpdateEditor(Self.Editor);
+end;
+
+
 procedure TSimbaColors.OnApply(Sender: TObject);
 var i : Int32;
 begin
   for i := 0 to SimbaForm.Tabs.Count - 1 do
     UpdateEditor(TMufasaTab(SimbaForm.Tabs[i]).ScriptFrame.SynEdit);
 
+  if(not Self.Edited) then
+    SimbaSettings.SourceEditor.HighlighterPath.Value := Self.FileName;
+end;
+
+procedure TSimbaColors.OnApplyAndSave(Sender: TObject);
+var i : Int32;
+begin
+  for i := 0 to SimbaForm.Tabs.Count - 1 do
+    UpdateEditor(TMufasaTab(SimbaForm.Tabs[i]).ScriptFrame.SynEdit);
+
+  if Self.FileName <> '' then
+    Self.Save(Self.FileName)
+  else
+    Self.OnSave(Sender);
+
   SimbaSettings.SourceEditor.HighlighterPath.Value := Self.FileName;
 end;
 
 procedure TSimbaColors.OnSave(Sender: TObject);
 var
-  INI: TINIFile;
   UI: TSaveDialog;
-  i: Int32;
-  x: String;
 begin
   UI := TSaveDialog.Create(Self);
   UI.FileName:= ExtractFileName(Self.FileName);
@@ -430,70 +527,7 @@ begin
   UI.Filter := 'Text file|*.ini';
   UI.InitialDir := GetCurrentDir;
   UI.Execute();
-
-  INI := TINIFile.Create(UI.FileName);
-
-  try
-    INI.WriteInt64('Gutter', 'ecGutter.Background', UInt32(Scheme[ecGutter].Background));
-
-    INI.WriteInt64('Gutter', 'ecGutterLineNumberPart.Foreground', UInt32(Scheme[ecGutterLineNumberPart].Foreground));
-    INI.WriteInt64('Gutter', 'ecGutterLineNumberPart.Background', UInt32(Scheme[ecGutterLineNumberPart].Background));
-    INI.WriteInt64('Gutter', 'ecGutterLineNumberPart.Style',      UInt32(Scheme[ecGutterLineNumberPart].Style));
-
-    INI.WriteInt64('Gutter', 'ecGutterChangesPart.Foreground', UInt32(Scheme[ecGutterChangesPart].Foreground));
-    INI.WriteInt64('Gutter', 'ecGutterChangesPart.Background', UInt32(Scheme[ecGutterChangesPart].Background));
-    INI.WriteInt64('Gutter', 'ecGutterChangesPart.Style',      UInt32(Scheme[ecGutterChangesPart].Style));
-
-    INI.WriteInt64('Gutter', 'ecGutterCodeFoldPart.Foreground', UInt32(Scheme[ecGutterCodeFoldPart].Foreground));
-    INI.WriteInt64('Gutter', 'ecGutterCodeFoldPart.Background', UInt32(Scheme[ecGutterCodeFoldPart].Background));
-    INI.WriteInt64('Gutter', 'ecGutterCodeFoldPart.Style',      UInt32(Scheme[ecGutterCodeFoldPart].Style));
-
-    INI.WriteInt64('Gutter', 'ecGutterMarksPart.Foreground', UInt32(Scheme[ecGutterMarksPart].Foreground));
-    INI.WriteInt64('Gutter', 'ecGutterMarksPart.Background', UInt32(Scheme[ecGutterMarksPart].Background));
-    INI.WriteInt64('Gutter', 'ecGutterMarksPart.Style',      UInt32(Scheme[ecGutterMarksPart].Style));
-
-    INI.WriteInt64('Gutter', 'ecGutterMarksPart.Foreground', UInt32(Scheme[ecGutterMarksPart].Foreground));
-    INI.WriteInt64('Gutter', 'ecGutterMarksPart.Background', UInt32(Scheme[ecGutterMarksPart].Background));
-    INI.WriteInt64('Gutter', 'ecGutterMarksPart.Style',      UInt32(Scheme[ecGutterMarksPart].Style));
-
-    // general editor
-    INI.WriteInt64('Editor', 'ecEdtior.Background',    UInt32(Scheme[ecEdtior].Background));
-    INI.WriteInt64('Editor', 'ecRightEdge.Foreground', UInt32(Scheme[ecRightEdge].Foreground));
-
-    INI.WriteInt64('Editor', 'ecLineHighlight.Foreground', UInt32(Scheme[ecLineHighlight].Foreground));
-    INI.WriteInt64('Editor', 'ecLineHighlight.Background', UInt32(Scheme[ecLineHighlight].Background));
-    INI.WriteInt64('Editor', 'ecLineHighlight.Style',      UInt32(Scheme[ecLineHighlight].Style));
-
-    INI.WriteInt64('Editor', 'ecFoldedCode.Foreground', UInt32(Scheme[ecFoldedCode].Foreground));
-    INI.WriteInt64('Editor', 'ecFoldedCode.Background', UInt32(Scheme[ecFoldedCode].Background));
-    INI.WriteInt64('Editor', 'ecFoldedCode.Style',      UInt32(Scheme[ecFoldedCode].Style));
-
-    INI.WriteInt64('Editor', 'ecFoldedCodeLine.Foreground', UInt32(Scheme[ecFoldedCodeLine].Foreground));
-    INI.WriteInt64('Editor', 'ecFoldedCodeLine.Background', UInt32(Scheme[ecFoldedCodeLine].Background));
-    INI.WriteInt64('Editor', 'ecFoldedCodeLine.Style',      UInt32(Scheme[ecFoldedCodeLine].Style));
-
-    INI.WriteInt64('Editor', 'ecBracketMatch.Foreground', UInt32(Scheme[ecBracketMatch].Foreground));
-    INI.WriteInt64('Editor', 'ecBracketMatch.Background', UInt32(Scheme[ecBracketMatch].Background));
-    INI.WriteInt64('Editor', 'ecBracketMatch.Style',      UInt32(Scheme[ecBracketMatch].Style));
-
-    for i:=0 to 10 do
-    begin
-      WriteStr(x, EEditorAttr(Ord(ecAttrAsm)+i));
-      INI.WriteInt64('Highlighter', x+'.Foreground', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Foreground));
-      INI.WriteInt64('Highlighter', x+'.Background', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Background));
-      INI.WriteInt64('Highlighter', x+'.Style',      UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Style));
-      INI.WriteInt64('Highlighter', x+'.FrameEdges', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Edges));
-      INI.WriteInt64('Highlighter', x+'.FrameColor', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Color));
-      INI.WriteInt64('Highlighter', x+'.FrameStyle', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Style));
-    end;
-
-  finally
-    // After the ini file was used it must be freed to prevent memory leaks.
-    INI.Free;
-
-    Self.FileName := UI.FileName;
-    Self.Edited   := False;
-  end;
+  Self.Save(UI.FileName);
 end;
 
 procedure TSimbaColors.OnLoad(Sender: TObject);
@@ -615,7 +649,7 @@ begin
     align  := alBottom;
     Height := Round(Self.Height * 0.25);
     BevelColor:=clLtGray;
-    BevelWidth:=4;
+    BevelWidth:=2;
   end;
 
 // Colorlists
@@ -646,7 +680,7 @@ begin
     Parent   := BtmPanel;
     OnChange := @Self.OnSelectFG;
     Style    := [cbStandardColors,cbExtendedColors,cbSystemColors,cbCustomColor,cbPrettyNames,cbCustomColors];
-    Left  := 100;
+    Left  := 110;
     Top   := 8;
     Width := 150;
     Items.Objects[Items.Add('Default')]   := TObject(PtrInt(-1));
@@ -657,7 +691,7 @@ begin
     Parent   := BtmPanel;
     OnChange := @Self.OnSelectBG;
     Style    := [cbStandardColors,cbExtendedColors,cbSystemColors,cbCustomColor,cbPrettyNames,cbCustomColors];
-    Left  := 100;
+    Left  := 110;
     Top   := 36;
     Width := 150;
     Items.Objects[Items.Add('Default')] := TObject(PtrInt(-1));
@@ -667,12 +701,13 @@ begin
   CheckBold      := TCheckBox.Create(BtmPanel);
   CheckItalic    := TCheckBox.Create(BtmPanel);
   CheckUnderline := TCheckBox.Create(BtmPanel);
+  CheckStrike    := TCheckBox.Create(BtmPanel);
 
   with CheckBold do
   begin
     Parent := BtmPanel;
-    Left   := 300;
-    Top    := 8;
+    Left   := 10;
+    Top    := 72;
     Caption:= 'Bold';
     OnChange := @Self.OnBoldChange;
   end;
@@ -680,8 +715,8 @@ begin
   with CheckItalic do
   begin
     Parent := BtmPanel;
-    Left   := 300;
-    Top    := 36;
+    Left   := 65;
+    Top    := 72;
     Caption:= 'Italic';
     OnChange := @Self.OnItalicChange;
   end;
@@ -689,12 +724,20 @@ begin
   with CheckUnderline do
   begin
     Parent := BtmPanel;
-    Left   := 300;
-    Top    := 64;
+    Left   := 120;
+    Top    := 72;
     Caption:= 'Underline';
     OnChange := @Self.OnUnderlineChange;
   end;
 
+  with CheckStrike do
+  begin
+    Parent := BtmPanel;
+    Left   := 200;
+    Top    := 72;
+    Caption:= 'Strike';
+    OnChange := @Self.OnStrikeChange;
+  end;
 
 // save, load, apply
   ApplyBtn := TButton.Create(BtmPanel);
@@ -705,6 +748,17 @@ begin
     Top    := 115;
     Caption:= 'Apply';
     OnClick := @Self.OnApply;
+  end;
+
+  ApplyAndSaveBtn := TButton.Create(BtmPanel);
+  with ApplyAndSaveBtn do
+  begin
+    Parent := BtmPanel;
+    Left   := 90;
+    Top    := 115;
+    Caption:= 'Apply and Save';
+    Width  := Width + 20;
+    OnClick := @Self.OnApplyAndSave;
   end;
 
   LoadBtn := TButton.Create(BtmPanel);
