@@ -157,6 +157,10 @@ type
       Path: TPathSetting;
     end;
 
+    TExtensionsSection = class(TSection)
+      Path: TPathSetting;
+      FileExtension: TStringSetting;
+    end;                                                            
     TScriptsSection = class(TSection)
       Path: TPathSetting;
     end;
@@ -179,6 +183,7 @@ type
       LazColors: TBooleanSetting;
       CaretPastEOL: TBooleanSetting;
       Font: TFontSetting;
+      HighlighterPath: TFileSetting;                            
     end;
 
     TNewsSection = class(TSection)
@@ -811,6 +816,10 @@ begin
   TFileSetting(obj).Value := DataPath + 'default.simba';
 end;
 
+procedure GetHighlighterFile(obj: TSetting);
+begin
+  TFileSetting(obj).Value := DataPath + 'highlighter.ini';
+end;                                                                                                   
 procedure GetUpdaterGetCheckForUpdates(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
 procedure GetUpdaterGetAutomaticallyUpdate(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
 procedure GetUpdaterCheckEveryXminutes(obj: TSetting); begin TIntegerSetting(obj).Value := 30; end;
@@ -914,6 +923,8 @@ begin
   SourceEditor.CaretPastEOL := SourceEditor.AddChild(TBooleanSetting.Create(ssSourceEditorCaretPastEOL)) as TBooleanSetting;
   SourceEditor.CaretPastEOL.onDefault := @GetSourceEditorCaretPastEOL;
   SourceEditor.Font := SourceEditor.AddChild(TFontSetting.Create(ssSourceEditorFont)) as TFontSetting;
+  SourceEditor.HighlighterPath := SourceEditor.AddChild(TFileSetting.Create(ssSourceEditorHighlighterPath)) as TFileSetting;
+  SourceEditor.HighlighterPath.onDefault := @GetHighlighterFile;                                                             
 
   News := AddChild(TNewsSection.Create()) as TNewsSection;
   News.URL := News.AddChild(TStringSetting.Create(ssNewsLink)) as TStringSetting;

@@ -59,6 +59,7 @@ ssSourceEditorLazColors = ssSettings + ssSourceEditor + 'LazColors';
 ssSourceEditorCaretPastEOL = ssSettings + ssSourceEditor + 'CaretPastEOL';
 ssSourceEditorFont = ssSettings + ssSourceEditor + 'Font/';
 ssSourceEditorDefScriptPath = ssSettings + ssSourceEditor + 'DefScriptPath';
+ssSourceEditorHighlighterPath = ssSettings + ssSourceEditor + 'Highlighter';
 
 ssNewsLink = ssSettings + ssNews + 'URL';
 ssPluginsPath = ssSettings + ssPlugins + 'Path';
