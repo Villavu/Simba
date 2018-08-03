@@ -129,36 +129,36 @@ implementation
 
   type
     PMouseInput = ^TMouseInput;
-    tagMOUSEINPUT = packed record
-      dx: Longint;
-      dy: Longint;
+    tagMOUSEINPUT = record
+      dx: LONG;
+      dy: LONG;
       mouseData: DWORD;
       dwFlags: DWORD;
       time: DWORD;
-      dwExtraInfo: DWORD;
+      dwExtraInfo: ULONG_PTR;
     end;
     TMouseInput = tagMOUSEINPUT;
 
     PKeybdInput = ^TKeybdInput;
-    tagKEYBDINPUT = packed record
+    tagKEYBDINPUT = record
       wVk: WORD;
       wScan: WORD;
       dwFlags: DWORD;
       time: DWORD;
-      dwExtraInfo: DWORD;
+      dwExtraInfo: ULONG_PTR;
     end;
     TKeybdInput = tagKEYBDINPUT;
 
     PHardwareInput = ^THardwareInput;
-    tagHARDWAREINPUT = packed record
+    tagHARDWAREINPUT = record
       uMsg: DWORD;
       wParamL: WORD;
       wParamH: WORD;
     end;
     THardwareInput = tagHARDWAREINPUT;
     PInput = ^TInput;
-    tagINPUT = packed record
-      Itype: DWORD;
+    tagINPUT = record
+      type_: DWORD;
       case Integer of
         0: (mi: TMouseInput);
         1: (ki: TKeybdInput);
@@ -425,7 +425,7 @@ var
 begin
   MouseApplyAreaOffset(x, y);
   WindowRect(rect);
-  Input.Itype:= INPUT_MOUSE;
+  Input.type_:= INPUT_MOUSE;
   FillChar(Input,Sizeof(Input),0);
   Input.mi.dx:= x + Rect.left;
   Input.mi.dy:= y + Rect.Top;
@@ -441,7 +441,7 @@ var
 begin
   MouseApplyAreaOffset(x, y);
   WindowRect(rect);
-  Input.Itype:= INPUT_MOUSE;
+  Input.Type_:= INPUT_MOUSE;
   FillChar(Input,Sizeof(Input),0);
   Input.mi.dx:= x + Rect.left;
   Input.mi.dy:= y + Rect.Top;
@@ -460,7 +460,7 @@ var
 begin
   MouseApplyAreaOffset(x, y);
   WindowRect(rect);
-  Input.Itype:= INPUT_MOUSE;
+  Input.Type_:= INPUT_MOUSE;
   FillChar(Input,Sizeof(Input),0);
   Input.mi.dx:= x + Rect.left;
   Input.mi.dy:= y + Rect.Top;
