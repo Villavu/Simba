@@ -102,7 +102,8 @@ type
 
 implementation
 uses
-  SimbaUnit, MufasaTypes, SynEditTypes, SynEditHighlighterFoldBase, LCLIntF, framefunctionlist;
+  SimbaUnit, MufasaTypes, SynEditTypes, SynEditHighlighterFoldBase, LCLIntF,
+  colorscheme, framefunctionlist;
 
 function WordAtCaret(e: TSynEdit; var sp, ep: Integer; Start: Integer = -1; Offset: Integer = 0): string;
 var
@@ -742,6 +743,9 @@ begin
   end;
   AddKey(SynEdit,ecCodeCompletion,VK_SPACE,[ssCtrl]);
   AddKey(SynEdit,ecCodeHints,VK_SPACE,[ssCtrl,ssShift]);
+  
+  // colorize the highlighter
+  SimbaColors.UpdateEditor(SynEdit);
 end;
 
 function TScriptFrame.GetReadOnly: Boolean;
