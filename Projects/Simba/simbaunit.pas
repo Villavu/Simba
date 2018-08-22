@@ -91,6 +91,7 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
+    ActionColors: TAction;                     
     ActionFileBrowser: TAction;
     ActionFindPrev: TAction;
     ActionFont: TAction;
@@ -137,6 +138,7 @@ type
     DebugMemo: TMemo;
     MenuDTMEditor: TMenuItem;
     MenuItem1: TMenuItem;
+    MenuColors: TMenuItem;                 
     MenuItemUnloadPlugin: TMenuItem;
     MenuItemDivider12: TMenuItem;
     popupFileBrowserOpen: TMenuItem;
@@ -282,6 +284,7 @@ type
     ToolButton8: TToolButton;
     MTrayIcon: TTrayIcon;
     FunctionListHint: THintWindow;
+    procedure ActionColorsExecute(Sender: TObject);                                            
     procedure ActionClearDebugExecute(Sender: TObject);
     procedure ActionCloseTabExecute(Sender: TObject);
     procedure ActionCompileScriptExecute(Sender: TObject);
@@ -538,7 +541,7 @@ uses
    math,
    script_imports, script_plugins,
    openssl,
-   aca, fphttpclient, dtm_editor
+   aca, fphttpclient, dtm_editor, colorscheme           
    {$IFDEF USE_FORMDESIGNER}, frmdesigner{$ENDIF}
 
    {$IFDEF LINUX_HOTKEYS}, keybinder{$ENDIF};
@@ -1620,14 +1623,6 @@ begin
 
   with Highlighter do
   begin
-    CommentAttri.Foreground := clBlue;
-    CommentAttri.Style := [fsBold];
-    IdentifierAttri.Foreground := clDefault;
-    NumberAttri.Foreground := clNavy;
-    StringAttri.Foreground := clBlue;
-    SymbolAttri.Foreground := clRed;
-    DirectiveAttri.Foreground := clRed;
-    DirectiveAttri.Style := [fsBold];
     NestedComments := False;
     StringKeywordMode := spsmNone;
   end;
@@ -1774,6 +1769,11 @@ begin
   finally
     Dialog.Free;
   end;
+end;
+
+procedure TSimbaForm.ActionColorsExecute(Sender: TObject);
+begin
+  SimbaColors.Show();
 end;
 
 procedure TSimbaForm.ActionGotoExecute(Sender: TObject);
@@ -2357,6 +2357,7 @@ begin
 
     LoadSettings();
     LoadUtilites();
+    SimbaColors := TSimbaColors.Create(SimbaForm);                                                                                                                                                               
 
     Plugins.Paths.Add(SimbaSettings.Plugins.Path.Value);
 

@@ -1,0 +1,8 @@
+object SimbaColors: TSimbaColors
+  Left = 277
+  Height = 500
+  Top = 303
+  Width = 457
+  Position = poMainFormCenter
+  LCLVersion = '1.4.5.0'
+end
