@@ -41,7 +41,7 @@ type
     constructor Create(Name, Str: String);
   end;
 
-  TMPluginDelayedCode = class(TMPluginDeclaration)
+  TMPluginCode = class(TMPluginDeclaration)
   protected
     FCode: String;
     FName: String;
@@ -64,8 +64,8 @@ type
     GetFunctionCount: function: Int32; cdecl;
     GetTypeInfo: function(Index: Int32; var Name: PChar; var Str: PChar): Int32; cdecl;
     GetTypeCount: function: Int32; cdecl;
-    GetDelayedCode: procedure(var Code: PChar); cdecl;
-    GetDelayedCodeLength: function: Int32; cdecl;
+    GetCode: procedure(var Code: PChar); cdecl;
+    GetCodeLength: function: Int32; cdecl;
     SetPluginMemManager: procedure(MemoryManager: TMemoryManager); cdecl;
     SetPluginSimbaMethods: procedure(Methods: TSimbaMethods); cdecl;
     SetPluginSimbaMemoryAllocators: procedure(Allocators: TSimbaMemoryAllocators); cdecl;
@@ -244,17 +244,17 @@ begin
     FStr := FStr + ';';
 end;
 
-procedure TMPluginDelayedCode.Import(Compiler: TLapeCompiler);
+procedure TMPluginCode.Import(Compiler: TLapeCompiler);
 begin
-  Compiler.addDelayedCode(FCode, FName);
+  Compiler.addDelayedCode(FCode, FName, False, True);
 end;
 
-procedure TMPluginDelayedCode.Dump(var Str: String);
+procedure TMPluginCode.Dump(var Str: String);
 begin
   Str := Str + FCode + LineEnding;
 end;
 
-constructor TMPluginDelayedCode.Create(Code, Name: String);
+constructor TMPluginCode.Create(Code, Name: String);
 begin
   FCode := Code;
   FName := Name;
@@ -317,14 +317,14 @@ begin
     end;
   end;
 
-  if (Pointer(GetDelayedCodeLength) <> nil) and (Pointer(GetDelayedCode) <> nil) then
+  if (Pointer(GetCodeLength) <> nil) and (Pointer(GetCode) <> nil) then
   begin
-    Str := StrAlloc(GetDelayedCodeLength());
+    Str := StrAlloc(GetCodeLength());
 
     try
-      GetDelayedCode(Str);
+      GetCode(Str);
 
-      FDeclarations.Add(TMPluginDelayedCode.Create(Str, ExtractFileNameOnly(FFilePath)));
+      FDeclarations.Add(TMPluginCode.Create(Str, ExtractFileNameOnly(FFilePath)));
     finally
       StrDispose(Str);
     end;
@@ -347,8 +347,8 @@ begin
     Pointer(GetFunctionCount) := GetProcedureAddress(FLib, 'GetFunctionCount');
     Pointer(GetTypeInfo) := GetProcedureAddress(FLib, 'GetTypeInfo');
     Pointer(GetTypeCount) := GetProcedureAddress(FLib, 'GetTypeCount');
-    Pointer(GetDelayedCode) := GetProcedureAddress(FLib, 'GetDelayedCode');
-    Pointer(GetDelayedCodeLength) := GetProcedureAddress(FLib, 'GetDelayedCodeLength');
+    Pointer(GetCode) := GetProcedureAddress(FLib, 'GetCode');
+    Pointer(GetCodeLength) := GetProcedureAddress(FLib, 'GetCodeLength');
     Pointer(SetPluginMemManager) := GetProcedureAddress(FLib, 'SetPluginMemManager');
     Pointer(SetPluginSimbaMethods) := GetProcAddress(FLib, 'SetPluginSimbaMethods');
     Pointer(SetPluginSimbaMemoryAllocators) := GetProcAddress(FLib, 'SetPluginSimbaMemoryAllocators');
