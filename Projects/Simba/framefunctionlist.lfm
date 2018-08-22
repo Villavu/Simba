@@ -31,7 +31,7 @@ object FunctionList_Frame: TFunctionList_Frame
     Top = 505
     Width = 225
     OnAfterFilter = AfterFilter
-    ButtonWidth = 30
+    ButtonWidth = 0
     NumGlyphs = 1
     Align = alBottom
     Glyph.Data = {

@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils,
   lpparser, lpcompiler, lptypes, lpvartypes, lpmessages, lpinterpreter,
-  Client, Settings, SettingsSandbox, Files, FontLoader, script_plugins;
+  Client, Settings, SettingsSandbox, Files, script_plugins;
 
 type
   PErrorData = ^TErrorData;
@@ -315,6 +315,14 @@ begin
 end;
 
 procedure TMMLScriptThread.Execute;
+
+  procedure CallOnTerminate(Method: String);
+  begin
+    FTerminateOptions := FTerminateOptions + [stoTerminated];
+
+    RunCode(FCompiler.Emitter.Code, nil, TCodePos(FCompiler.getGlobalVar(Method).Ptr^));
+  end;
+
 begin
   {$IFDEF LINUX}
   pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, nil);
@@ -333,12 +341,14 @@ begin
       try
         RunCode(FCompiler.Emitter.Code, FRunning);
 
-        FTerminateOptions := FTerminateOptions + [stoTerminated];
-
-        RunCode(FCompiler.Emitter.Code, nil, TCodePos(FCompiler.getGlobalVar('__OnTerminate').Ptr^));
+        CallOnTerminate('__OnTerminate');
       except
         on e: Exception do
+        begin
+          CallOnTerminate('__OnTerminate_Exception');
+
           HandleException(e);
+        end;
       end;
 
       if (GetTickCount64() - FStartTime <= 60000) then
