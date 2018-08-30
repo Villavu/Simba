@@ -83,7 +83,7 @@ begin
 
     OnTerminate :=
       'type'                                                                                                    + LineEnding +
-      '  TTerminateMethod = record CallOnException: Boolean; end;'                                              + LineEnding +
+      '  TTerminateMethod = record Always: Boolean; end;'                                                       + LineEnding +
       '  TTerminateMethod_String = record(TTerminateMethod) Method: String; end;'                               + LineEnding +
       '  TTerminateMethod_Procedure = record(TTerminateMethod) Method: procedure; end;'                         + LineEnding +
       '  TTerminateMethod_ProcedureOfObject = record(TTerminateMethod) Method: procedure of object; end;'       + LineEnding +
@@ -104,30 +104,45 @@ begin
       '    OnTerminateProceduresOfObject[i].Method();'                                                          + LineEnding +
       'end;'                                                                                                    + LineEnding +
       ''                                                                                                        + LineEnding +
-      'procedure __OnTerminate_Exception;'                                                                      + LineEnding +
+      'procedure AddOnTerminate(Method: String); overload;'                                                     + LineEnding +
+      'begin'                                                                                                   + LineEnding +
+      '  OnTerminateStrings += TTerminateMethod_String([False, Method]);'                                       + LineEnding +
+      'end;'                                                                                                    + LineEnding +
+      ''                                                                                                        + LineEnding +
+      'procedure AddOnTerminate(Method: procedure); overload;'                                                  + LineEnding +
+      'begin'                                                                                                   + LineEnding +
+      '  OnTerminateProcedures += TTerminateMethod_Procedure([False, @Method]);'                                + LineEnding +
+      'end;'                                                                                                    + LineEnding +
+      ''                                                                                                        + LineEnding +
+      'procedure AddOnTerminate(Method: procedure of object); overload;'                                        + LineEnding +
+      'begin'                                                                                                   + LineEnding +
+      '  OnTerminateProceduresOfObject += TTerminateMethod_ProcedureOfObject([False, @Method]);'                + LineEnding +
+      'end;'                                                                                                    + LineEnding +
+      ''                                                                                                        + LineEnding +
+      'procedure __OnTerminate_Always;'                                                                         + LineEnding +
       'var i: Int32;'                                                                                           + LineEnding +
       'begin'                                                                                                   + LineEnding +
       '  for i := 0 to High(OnTerminateStrings) do'                                                             + LineEnding +
-      '    if OnTerminateStrings[i].CallOnException then VariantInvoke(OnTerminateStrings[i].Method, []);'      + LineEnding +
+      '    if OnTerminateStrings[i].Always then VariantInvoke(OnTerminateStrings[i].Method, []);'               + LineEnding +
       '  for i := 0 to High(OnTerminateProcedures) do'                                                          + LineEnding +
-      '    if OnTerminateProcedures[i].CallOnException then OnTerminateProcedures[i].Method();'                 + LineEnding +
+      '    if OnTerminateProcedures[i].Always then OnTerminateProcedures[i].Method();'                          + LineEnding +
       '  for i := 0 to High(OnTerminateProceduresOfObject) do'                                                  + LineEnding +
-      '    if OnTerminateProceduresOfObject[i].CallOnException then OnTerminateProceduresOfObject[i].Method();' + LineEnding +
+      '    if OnTerminateProceduresOfObject[i].Always then OnTerminateProceduresOfObject[i].Method();'          + LineEnding +
       'end;'                                                                                                    + LineEnding +
       ''                                                                                                        + LineEnding +
-      'procedure AddOnTerminate(Method: String; CallOnException: Boolean = False); overload;'                   + LineEnding +
+      'procedure AddOnTerminateAlways(Method: String); overload;'                                               + LineEnding +
       'begin'                                                                                                   + LineEnding +
-      '  OnTerminateStrings += TTerminateMethod_String([CallOnException, Method]);'                             + LineEnding +
+      '  OnTerminateStrings += TTerminateMethod_String([True, Method]);'                                        + LineEnding +
       'end;'                                                                                                    + LineEnding +
       ''                                                                                                        + LineEnding +
-      'procedure AddOnTerminate(Method: procedure; CallOnException: Boolean = False); overload;'                + LineEnding +
+      'procedure AddOnTerminateAlways(Method: procedure); overload;'                                            + LineEnding +
       'begin'                                                                                                   + LineEnding +
-      '  OnTerminateProcedures += TTerminateMethod_Procedure([CallOnException, @Method]);'                      + LineEnding +
+      '  OnTerminateProcedures += TTerminateMethod_Procedure([True, @Method]);'                                 + LineEnding +
       'end;'                                                                                                    + LineEnding +
       ''                                                                                                        + LineEnding +
-      'procedure AddOnTerminate(Method: procedure of object; CallOnException: Boolean = False); overload;'      + LineEnding +
+      'procedure AddOnTerminateAlways(Method: procedure of object); overload;'                                  + LineEnding +
       'begin'                                                                                                   + LineEnding +
-      '  OnTerminateProceduresOfObject += TTerminateMethod_ProcedureOfObject([CallOnException, @Method]);'      + LineEnding +
+      '  OnTerminateProceduresOfObject += TTerminateMethod_ProcedureOfObject([True, @Method]);'                 + LineEnding +
       'end;'                                                                                                    + LineEnding +
       ''                                                                                                        + LineEnding +
       'procedure DeleteOnTerminate(Method: String); overload;'                                                  + LineEnding +
