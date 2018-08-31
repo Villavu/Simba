@@ -73,9 +73,11 @@ type
   TFunctionList_Frame = class(TFrame)
     FunctionListLabel: TLabel;
     Filter: TTreeFilterEdit;
+    btnClear: TSpeedButton;
     TreeView: TTreeView;
 
     procedure AfterFilter(Sender: TObject);
+    procedure DoClear(Sender: TObject);
 
     procedure FrameEndDock(Sender, Target: TObject; X, Y: Integer);
     procedure DockFormOnClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -324,6 +326,11 @@ begin
       ScriptNode.Expand(True);
     end else
       FilteredTreeView.FullExpand();
+end;
+
+procedure TFunctionList_Frame.DoClear(Sender: TObject);
+begin
+  Filter.Clear();
 end;
 
 procedure TFunctionList_Frame.FrameEndDock(Sender, Target: TObject; X, Y: Integer);

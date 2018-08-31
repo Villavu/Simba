@@ -1,21 +1,21 @@
 object FunctionList_Frame: TFunctionList_Frame
   Left = 0
-  Height = 528
+  Height = 542
   Top = 0
-  Width = 225
+  Width = 322
   Align = alLeft
-  ClientHeight = 528
-  ClientWidth = 225
+  ClientHeight = 542
+  ClientWidth = 322
   OnEndDock = FrameEndDock
   ParentFont = False
   TabOrder = 0
-  DesignLeft = -314
-  DesignTop = 388
+  DesignLeft = -773
+  DesignTop = 267
   object FunctionListLabel: TLabel
     Left = 2
     Height = 15
     Top = 2
-    Width = 221
+    Width = 318
     Align = alTop
     Alignment = taCenter
     BorderSpacing.Around = 2
@@ -26,14 +26,21 @@ object FunctionList_Frame: TFunctionList_Frame
     OnMouseDown = LabelMouseDown
   end
   object Filter: TTreeFilterEdit
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = btnClear
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
     Left = 0
     Height = 23
-    Top = 505
-    Width = 225
+    Top = 518
+    Width = 299
     OnAfterFilter = AfterFilter
-    ButtonWidth = 30
+    ButtonWidth = 0
     NumGlyphs = 1
-    Align = alBottom
+    Align = alCustom
+    Anchors = [akLeft, akRight, akBottom]
+    BorderSpacing.Bottom = 1
     Glyph.Data = {
       36090000424D3609000000000000360000002800000018000000180000000100
       2000000000000009000064000000640000000000000000000000000000000000
@@ -116,11 +123,15 @@ object FunctionList_Frame: TFunctionList_Frame
     FilteredTreeview = TreeView
   end
   object TreeView: TTreeView
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Filter
     Left = 0
-    Height = 486
+    Height = 499
     Top = 19
-    Width = 225
-    Align = alClient
+    Width = 322
+    Align = alCustom
+    Anchors = [akTop, akLeft, akRight, akBottom]
     BorderStyle = bsNone
     DragMode = dmAutomatic
     Images = SimbaForm.Mufasa_Image_List
@@ -132,5 +143,23 @@ object FunctionList_Frame: TFunctionList_Frame
     OnMouseLeave = TreeViewMouseLeave
     OnMouseMove = TreeViewMouseMove
     Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoThemedDraw]
+  end
+  object btnClear: TSpeedButton
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Filter
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 299
+    Height = 25
+    Top = 517
+    Width = 23
+    Align = alCustom
+    Anchors = [akTop, akRight, akBottom]
+    BorderSpacing.Around = -1
+    Caption = '✖'
+    OnClick = DoClear
+    ParentFont = False
   end
 end
