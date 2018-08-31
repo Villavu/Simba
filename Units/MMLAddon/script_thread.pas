@@ -98,7 +98,7 @@ end;
 
 procedure TMMLScriptThread.Flush;
 begin
-  if (FOutput <> nil) then
+  if (FOutput <> nil) and (FOutputBuffer <> '') then
     FOutput.Add(FOutputBuffer);
 
   FOutputBuffer := '';

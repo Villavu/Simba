@@ -525,7 +525,7 @@ begin
   UI.FileName:= ExtractFileName(Self.FileName);
   UI.DefaultExt := 'ini';
   UI.Filter := 'Text file|*.ini';
-  UI.InitialDir := GetCurrentDir;
+  UI.InitialDir := DataPath;
   UI.Execute();
   Self.Save(UI.FileName);
 end;
@@ -537,7 +537,7 @@ begin
   UI := TOpenDialog.Create(Self);
   UI.DefaultExt := 'ini';
   UI.Filter := 'Text file|*.ini';
-  UI.InitialDir := GetCurrentDir;
+  UI.InitialDir := DataPath;
   UI.Execute();
 
   Self.Scheme   := Self.LoadScheme(UI.FileName);
