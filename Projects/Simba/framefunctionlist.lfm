@@ -2,10 +2,10 @@ object FunctionList_Frame: TFunctionList_Frame
   Left = 0
   Height = 542
   Top = 0
-  Width = 322
+  Width = 250
   Align = alLeft
   ClientHeight = 542
-  ClientWidth = 322
+  ClientWidth = 250
   OnEndDock = FrameEndDock
   ParentFont = False
   TabOrder = 0
@@ -15,7 +15,7 @@ object FunctionList_Frame: TFunctionList_Frame
     Left = 2
     Height = 15
     Top = 2
-    Width = 318
+    Width = 246
     Align = alTop
     Alignment = taCenter
     BorderSpacing.Around = 2
@@ -34,7 +34,7 @@ object FunctionList_Frame: TFunctionList_Frame
     Left = 0
     Height = 23
     Top = 518
-    Width = 299
+    Width = 227
     OnAfterFilter = AfterFilter
     ButtonWidth = 0
     NumGlyphs = 1
@@ -129,7 +129,7 @@ object FunctionList_Frame: TFunctionList_Frame
     Left = 0
     Height = 499
     Top = 19
-    Width = 322
+    Width = 250
     Align = alCustom
     Anchors = [akTop, akLeft, akRight, akBottom]
     BorderStyle = bsNone
@@ -151,7 +151,7 @@ object FunctionList_Frame: TFunctionList_Frame
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 299
+    Left = 227
     Height = 25
     Top = 517
     Width = 23

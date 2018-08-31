@@ -138,7 +138,8 @@ type
     DebugMemo: TMemo;
     MenuDTMEditor: TMenuItem;
     MenuItem1: TMenuItem;
-    MenuColors: TMenuItem;                 
+    MenuColors: TMenuItem;
+    MenuItemColors: TMenuItem;
     MenuItemUnloadPlugin: TMenuItem;
     MenuItemDivider12: TMenuItem;
     popupFileBrowserOpen: TMenuItem;
@@ -2271,6 +2272,10 @@ begin
   end;
 end;
 
+{$IFDEF WINDOWS}
+function SetDllDirectory(Directory: PChar): LongBool; stdcall; external 'kernel32.dll' name 'SetDllDirectoryA';
+{$ENDIF}
+
 procedure TSimbaForm.FormCreate(Sender: TObject);
 
   function GetDocPath(): string;
@@ -2292,21 +2297,9 @@ procedure TSimbaForm.FormCreate(Sender: TObject);
     {$ENDIF}
   end;
 
-  function GetDataPath(): string;
-  begin
-    {$IFDEF NOTPORTABLE}
-      Result := IncludeTrailingPathDelimiter(GetAppConfigDir(False));
-      if (not (DirectoryExists(Result))) then
-        if (not (CreateDir(Result))) then
-          Result := GetDocPath();
-    {$ELSE}
-      Result := IncludeTrailingPathDelimiter(AppPath);
-    {$ENDIF}
-  end;
-
   procedure LoadSettings;
   begin
-    SimbaSettingsFile := {$IFDEF LINUX}GetDataPath(){$ELSE}DataPath{$ENDIF} + 'settings.xml';
+    SimbaSettingsFile := DataPath + 'settings.xml';
 
     HandleSettingsParameter();
     CreateSimbaSettings(SimbaSettingsFile);
@@ -2351,7 +2344,9 @@ begin
     // Paths
     AppPath := IncludeTrailingPathDelimiter(Application.Location);
     DocPath := GetDocPath();
-    DataPath := {$IFDEF LINUX}DocPath{$ELSE}GetDataPath(){$ENDIF};
+    DataPath := IncludeTrailingPathDelimiter(AppPath + 'AppData');
+    if not DirectoryExists(DataPath) then
+      CreateDir(DataPath);
 
     RecentFiles := TStringList.Create();
 
@@ -2361,39 +2356,46 @@ begin
 
     Plugins.Paths.Add(SimbaSettings.Plugins.Path.Value);
 
-    // Binaries
-    // For Linux: apt-get install openssl-dev.
-    // Note: 64 bit libs use the `32` suffix too.
     {$IFDEF WINDOWS}
-    if (not FileExists(AppPath + 'libeay32.dll')) or (not FileExists(AppPath + 'ssleay32.dll')) then
-    begin
-      mDebugLn('SSL libs not present, extracting...');
-
       {$IFDEF CPU32}
         {$i openssl32.lrs}
       {$ELSE}
         {$i openssl64.lrs}
       {$ENDIF}
 
-      if (not FileExists(AppPath + 'libeay32.dll')) then
-        with TLazarusResourceStream.Create('libeay32', nil) do
-        try
-          SaveToFile(AppPath + 'libeay32.dll');
-        finally
-          Free();
-        end;
+      {$IFDEF CPU32}
+      if not DirectoryExists(IncludeTrailingPathDelimiter(DataPath + 'libs32')) then
+        CreateDir(IncludeTrailingPathDelimiter(DataPath + 'libs32'));
 
-      if (not FileExists(AppPath + 'ssleay32.dll')) then
+      SetDLLDirectory(PChar(IncludeTrailingPathDelimiter(DataPath + 'libs32')));
+
+      DLLSSLName := IncludeTrailingPathDelimiter(DataPath + 'libs32') + 'ssleay32.dll';
+      DLLUtilName := IncludeTrailingPathDelimiter(DataPath + 'libs32') + 'libeay32.dll';
+      {$ELSE}
+      if not DirectoryExists(IncludeTrailingPathDelimiter(DataPath + 'libs64')) then
+        CreateDir(IncludeTrailingPathDelimiter(DataPath + 'libs64'));
+
+      SetDLLDirectory(PChar(IncludeTrailingPathDelimiter(DataPath + 'libs64')));
+
+      DLLSSLName := IncludeTrailingPathDelimiter(DataPath + 'libs64') + 'ssleay32.dll';
+      DLLUtilName := IncludeTrailingPathDelimiter(DataPath + 'libs64') + 'libeay32.dll';
+      {$ENDIF}
+
+      if (not FileExists(DLLSSLName)) then
         with TLazarusResourceStream.Create('ssleay32', nil) do
         try
-          SaveToFile(AppPath + 'ssleay32.dll');
+          SaveToFile(DLLSSLName);
         finally
           Free();
         end;
-    end;
 
-    DLLSSLName := AppPath + 'ssleay32.dll';
-    DLLUtilName := AppPath + 'libeay32.dll';
+      if (not FileExists(DLLUtilName)) then
+        with TLazarusResourceStream.Create('libeay32', nil) do
+        try
+          SaveToFile(DLLUtilName);
+        finally
+          Free();
+        end;
     {$ENDIF}
 
     PackageForm := TPackageForm.Create(Self, TB_ShowPackages);
