@@ -1,13 +1,13 @@
 object SimbaForm: TSimbaForm
-  Left = 48
-  Height = 773
-  Top = 132
-  Width = 1200
+  Left = -1536
+  Height = 800
+  Top = 137
+  Width = 1250
   ActiveControl = ScriptPanel
   AllowDropFiles = True
   Caption = 'Simba'
-  ClientHeight = 753
-  ClientWidth = 1200
+  ClientHeight = 780
+  ClientWidth = 1250
   KeyPreview = True
   Menu = MainMenu
   OnClose = FormClose
@@ -17,13 +17,13 @@ object SimbaForm: TSimbaForm
   OnHide = doOnHide
   OnShortCut = FormShortCuts
   Position = poScreenCenter
-  LCLVersion = '1.8.4.0'
+  LCLVersion = '1.8.2.0'
   Visible = True
   object ToolBar: TToolBar
     Left = 0
     Height = 24
     Top = 0
-    Width = 1200
+    Width = 1250
     AutoSize = True
     Caption = 'ToolBar'
     Images = Mufasa_Image_List
@@ -235,8 +235,8 @@ object SimbaForm: TSimbaForm
   object StatusBar: TStatusBar
     Left = 0
     Height = 23
-    Top = 730
-    Width = 1200
+    Top = 757
+    Width = 1250
     Panels = <    
       item
         Width = 60
@@ -257,17 +257,17 @@ object SimbaForm: TSimbaForm
   object PanelMemo: TPanel
     Left = 0
     Height = 154
-    Top = 576
-    Width = 1200
+    Top = 603
+    Width = 1250
     Align = alBottom
     ClientHeight = 154
-    ClientWidth = 1200
+    ClientWidth = 1250
     TabOrder = 2
     object DebugMemo: TMemo
       Left = 1
       Height = 152
       Top = 1
-      Width = 1198
+      Width = 1248
       Align = alClient
       BorderStyle = bsNone
       Font.Height = -13
@@ -282,27 +282,27 @@ object SimbaForm: TSimbaForm
     Cursor = crVSplit
     Left = 0
     Height = 5
-    Top = 571
-    Width = 1200
+    Top = 598
+    Width = 1250
     Align = alBottom
     ResizeAnchor = akBottom
   end
   object ScriptPanel: TPanel
     Left = 0
-    Height = 547
+    Height = 574
     Top = 24
-    Width = 1200
+    Width = 1250
     Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 547
-    ClientWidth = 1200
+    ClientHeight = 574
+    ClientWidth = 1250
     DockSite = True
     TabOrder = 4
     OnDockDrop = ScriptPanelDockDrop
     OnDockOver = ScriptPanelDockOver
     object PageControl1: TPageControl
-      Left = 230
-      Height = 512
+      Left = 255
+      Height = 539
       Top = 0
       Width = 740
       Align = alClient
@@ -322,12 +322,12 @@ object SimbaForm: TSimbaForm
     object SearchPanel: TPanel
       Left = 0
       Height = 35
-      Top = 512
-      Width = 1200
+      Top = 539
+      Width = 1250
       Align = alBottom
       BevelOuter = bvSpace
       ClientHeight = 35
-      ClientWidth = 1200
+      ClientWidth = 1250
       TabOrder = 1
       Visible = False
       object SpeedButtonSearch: TSpeedButton
@@ -465,16 +465,16 @@ object SimbaForm: TSimbaForm
       end
     end
     object SplitterFunctionList: TSplitter
-      Left = 225
-      Height = 512
+      Left = 250
+      Height = 539
       Top = 0
       Width = 5
       OnCanResize = SplitterFunctionListCanResize
       Visible = False
     end
     object NotesSplitter: TSplitter
-      Left = 970
-      Height = 512
+      Left = 995
+      Height = 539
       Top = 0
       Width = 5
       Align = alRight
@@ -483,10 +483,10 @@ object SimbaForm: TSimbaForm
     end
     object PanelUtilites: TPairSplitter
       Cursor = crVSplit
-      Left = 975
-      Height = 512
+      Left = 1000
+      Height = 539
       Top = 0
-      Width = 225
+      Width = 250
       Align = alRight
       Position = 350
       SplitterType = pstVertical
@@ -495,14 +495,14 @@ object SimbaForm: TSimbaForm
         Left = 0
         Height = 350
         Top = 0
-        Width = 225
-        ClientWidth = 225
+        Width = 250
+        ClientWidth = 250
         ClientHeight = 350
         object lblFileBrowser: TLabel
           Left = 2
           Height = 15
           Top = 2
-          Width = 221
+          Width = 246
           Align = alTop
           Alignment = taCenter
           BorderSpacing.Around = 2
@@ -515,7 +515,7 @@ object SimbaForm: TSimbaForm
           Left = 0
           Height = 331
           Top = 19
-          Width = 225
+          Width = 250
           Align = alClient
           FileSortType = fstNone
           Images = Mufasa_Image_List
@@ -558,16 +558,16 @@ object SimbaForm: TSimbaForm
       object PanelNotes: TPairSplitterSide
         Cursor = crArrow
         Left = 0
-        Height = 157
+        Height = 184
         Top = 355
-        Width = 225
-        ClientWidth = 225
-        ClientHeight = 157
+        Width = 250
+        ClientWidth = 250
+        ClientHeight = 184
         object lblNotes: TLabel
           Left = 2
           Height = 15
           Top = 2
-          Width = 221
+          Width = 246
           Align = alTop
           Alignment = taCenter
           BorderSpacing.Around = 2
@@ -578,9 +578,9 @@ object SimbaForm: TSimbaForm
         end
         object memoNotes: TMemo
           Left = 0
-          Height = 138
+          Height = 165
           Top = 19
-          Width = 225
+          Width = 250
           Align = alClient
           BorderStyle = bsNone
           TabOrder = 0
@@ -588,15 +588,22 @@ object SimbaForm: TSimbaForm
       end
     end
     inline FunctionList: TFunctionList_Frame
-      Height = 512
-      ClientHeight = 512
+      Height = 539
+      ClientHeight = 539
       TabOrder = 5
       inherited Filter: TTreeFilterEdit
-        Top = 489
+        AnchorSideLeft.Control = FunctionList
+        AnchorSideBottom.Control = FunctionList
+        Top = 515
       end
       inherited TreeView: TTreeView
-        Height = 470
-        Images = nil
+        AnchorSideRight.Control = FunctionList
+        Height = 496
+      end
+      inherited btnClear: TSpeedButton
+        AnchorSideRight.Control = FunctionList
+        AnchorSideBottom.Control = FunctionList
+        Top = 514
       end
     end
   end
