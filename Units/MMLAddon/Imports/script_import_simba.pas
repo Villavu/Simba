@@ -161,7 +161,7 @@ type
 
 procedure TStatus.Execute;
 begin
-  SimbaForm.StatusBar.Panels[0].Text := PString(Params^[1])^;
+  SimbaForm.StatusBar.Panels[3].Text := PString(Params^[1])^;
 end;
 
 // procedure Status(const Status: String);

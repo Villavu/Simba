@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils,
   lpparser, lpcompiler, lptypes, lpvartypes, lpmessages, lpinterpreter,
-  Client, Settings, SettingsSandbox, Files, FontLoader, script_plugins;
+  Client, Settings, SettingsSandbox, Files, script_plugins;
 
 type
   PErrorData = ^TErrorData;
@@ -45,6 +45,7 @@ type
 
     procedure Flush;
     procedure HandleException(e: Exception);
+    procedure CallTerminateMethod(Method: String);
 
     function Import: Boolean;
     function Compile: Boolean;
@@ -54,10 +55,6 @@ type
     Error: record Data: PErrorData; Callback: procedure() of object; end; // set by framescript
     AppPath, DocPath, ScriptPath, ScriptFile, IncludePath, PluginPath, FontPath: String; // set by TSimbaForm.InitializeTMThread
 
-    procedure Write(constref S: String);
-    procedure WriteLn; overload;
-    procedure WriteLn(constref S: String); overload;
-
     property Options: EMMLScriptOptions read FOptions write FOptions;
     property Output: TStrings read FOutput write FOutput;
     property State: EMMLScriptState write SetState;
@@ -66,10 +63,14 @@ type
     property StartTime: UInt64 read FStartTime;
     property TerminateOptions: EMMLScriptTerminateOptions read FTerminateOptions write FTerminateOptions;
 
-    function Kill: Boolean;
+    procedure Write(constref S: String);
+    procedure WriteLn; overload;
+    procedure WriteLn(constref S: String); overload;
 
     procedure SetSettings(From: TMMLSettings);
     procedure SetFonts(Path: String);
+
+    function Kill: Boolean;
 
     constructor Create(constref Script, FilePath: String);
     destructor Destroy; override;
@@ -123,6 +124,15 @@ begin
 
     Synchronize(Error.Callback);
   end;
+end;
+
+procedure TMMLScriptThread.CallTerminateMethod(Method: String);
+begin
+  FTerminateOptions := FTerminateOptions + [stoTerminated];
+
+  RunCode(FCompiler.Emitter.Code, nil, TCodePos(FCompiler.getGlobalVar(Method).Ptr^));
+
+  Flush();
 end;
 
 function TMMLScriptThread.OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
@@ -333,12 +343,14 @@ begin
       try
         RunCode(FCompiler.Emitter.Code, FRunning);
 
-        FTerminateOptions := FTerminateOptions + [stoTerminated];
-
-        RunCode(FCompiler.Emitter.Code, nil, TCodePos(FCompiler.getGlobalVar('__OnTerminate').Ptr^));
+        CallTerminateMethod('__OnTerminate');
       except
         on e: Exception do
+        begin
+          CallTerminateMethod('__OnTerminate_Always');
+
           HandleException(e);
+        end;
       end;
 
       if (GetTickCount64() - FStartTime <= 60000) then
@@ -418,6 +430,8 @@ end;
 {$IFDEF WINDOWS}
 function TMMLScriptThread.Kill: Boolean;
 begin
+  CallTerminateMethod('__OnTerminate_Always');
+
   if (KillThread(Handle) = 0) and (WaitForThreadTerminate(Handle, 2500) = 0) then
   begin
     OnTerminate(Self);
