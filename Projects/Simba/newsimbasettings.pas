@@ -793,22 +793,22 @@ end;
 
 procedure GetIncludePath(obj: TSetting);
 begin
-  TPathSetting(obj).Value := DataPath + 'Includes' + DS;
+  TPathSetting(obj).Value := IncludeTrailingPathDelimiter(GetCurrentDir()) + 'Includes' + DS;
 end;
 
 procedure GetPluginPath(obj: TSetting);
 begin
-  TPathSetting(obj).Value := DataPath + 'Plugins' + DS;
+  TPathSetting(obj).Value := IncludeTrailingPathDelimiter(GetCurrentDir()) + 'Plugins' + DS;
 end;
 
 procedure GetScriptPath(obj: TSetting);
 begin
-  TPathSetting(obj).Value := DocPath + 'Scripts' + DS;
+  TPathSetting(obj).Value := IncludeTrailingPathDelimiter(GetCurrentDir()) + 'Scripts' + DS;
 end;
 
 procedure GetFontPath(obj: TSetting);
 begin
-  TPathSetting(obj).Value := DataPath + 'Fonts' + DS;
+  TPathSetting(obj).Value := IncludeTrailingPathDelimiter(GetCurrentDir()) + 'Fonts' + DS;
 end;
 
 procedure GetDefScriptPath(obj: TSetting);
@@ -819,19 +819,13 @@ end;
 procedure GetHighlighterFile(obj: TSetting);
 begin
   TFileSetting(obj).Value := DataPath + 'highlighter.ini';
-end;                                                                                                   
+end;
+
 procedure GetUpdaterGetCheckForUpdates(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
 procedure GetUpdaterGetAutomaticallyUpdate(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
 procedure GetUpdaterCheckEveryXminutes(obj: TSetting); begin TIntegerSetting(obj).Value := 30; end;
 procedure GetUpdaterLink(obj: TSetting); begin TStringSetting(obj).Value := SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF};; end;
 procedure GetUpdaterVersionLink(obj: TSetting); begin TStringSetting(obj).Value := SimbaURL + 'Version'; end;
-
-procedure GetInterpreterType(obj: TSetting); begin TIntegerSetting(obj).Value := 1; end; // 1 is Lape
-procedure GetInterpreterAllowSysCalls(obj: TSetting); begin TBooleanSetting(obj).Value := False; end;
-
-procedure GetFontsLoadOnStartUp(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
-procedure GetFontsCheckForUpdates(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
-procedure GetFontsVersion(obj: TSetting); begin TIntegerSetting(obj).Value := -1; end;
 
 procedure GetTabOpenNextOnClose(obj: TSetting); begin TBooleanSetting(obj).Value := False; end;
 procedure GetOpenScriptInNewTab(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
@@ -1018,7 +1012,6 @@ begin
   LastConfig.MainForm.FunctionListShown.onDefault := @GetFunctionListShowOnStart;
   LastConfig.MainForm.ConsoleVisible := LastConfig.MainForm.AddChild(TBooleanSetting.Create(ssConsoleVisible)) as TBooleanSetting;
   LastConfig.MainForm.ConsoleVisible.onDefault := @GetMainFormConsoleVisible;
-
 end;
 
 procedure TSimbaSettings.Save(SettingsFileName: String);
