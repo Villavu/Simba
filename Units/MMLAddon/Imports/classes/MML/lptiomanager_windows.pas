@@ -71,7 +71,8 @@ begin
 
     addGlobalFunc('procedure TIOManager.Init(); overload;', @TIOManager_Init);
     addGlobalFunc('procedure TIOManager.Init(plugin_dir: string); overload;', @TIOManager_InitEx);
-    addGlobalFunc('function TIOManager.SetTarget2(target: TNativeWindow): integer; constref;', @TIOManager_SetTarget); //inheritence issue...
+    addGlobalFunc('function TIOManager.SetTarget2(target: TNativeWindow): integer; constref; deprecated ' + #39 + 'Use `TIOManager.SetTarget`' + #39, @TIOManager_SetTarget); //inheritence issue...
+    addGlobalFunc('function TIOManager.SetTarget(target: TNativeWindow): integer; constref; overload;', @TIOManager_SetTarget);
     addGlobalFunc('procedure TIOManager.SetDesktop(); constref;', @TIOManager_SetDesktop);
     addGlobalFunc('function TIOManager.GetProcesses(): TSysProcArr; constref;', @TIOManager_GetProcesses);
     addGlobalFunc('procedure TIOManager.SetTargetEx(Proc: TSysProc); constref;', @TIOManager_SetTargetEx);
