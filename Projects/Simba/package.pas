@@ -232,15 +232,12 @@ type
     FClient: TFPHTTPClient;
     FData: TMemoryStream;
     FURL: String;
-    FContentLength: Int32;
+
+    procedure DoCreateStream(Sender: TObject; var Stream: TStream);
+    procedure DoDownloadProgress(Sender: TObject; const Size, Position: Int64);
+    procedure DoExtractProgress(Sender: TObject; const FilePath: String);
 
     function GetData: String;
-
-    procedure GetStream(Sender: TObject; var Stream: TStream);
-
-    procedure Downloading(Sender: TObject; const Size, Position: Int64);
-    procedure Extracting(Sender: TObject; const FilePath: String);
-    procedure Redirect(Sender : TObject; Const Source: String; Var Dest: String);
   public
     property Stream: TMemoryStream read FData;
     property Data: String read GetData;
@@ -252,44 +249,12 @@ type
     destructor Destroy; override;
   end;
 
-procedure TDownloader.Downloading(Sender: TObject; const Size, Position: Int64);
-var
-  Headers: TStringList;
-  i: Int32;
+procedure TDownloader.DoDownloadProgress(Sender: TObject; const Size, Position: Int64);
 begin
-  if (Size > 0) then
-    FContentLength := Size;
-
-  // Github can redirect to another place to download such as `codeload.github`
-  // HTTPClient does not check for the content length header again, so we do that here.
-  if (Size = -1) and (FContentLength = -1) then
-  begin
-    Headers := TStringList.Create();
-
-    try
-      with TFPHTTPClient.Create(nil) do
-      try
-        Head(FURL, Headers);
-
-        for i := 0 to Headers.Count - 1 do
-          if Headers[i].StartsWith('Content-Length: ', True) then
-            FContentLength := StrToInt(Copy(Headers[i], Length('Content-Length: '), $FFFFFF));
-      finally
-        Free();
-      end;
-    except
-    end;
-
-    Headers.Free();
-  end;
-
-  if (FContentLength > 0) then
-    PackageForm.UpdateStatus('Downloading... (' + IntToStr(Round(Position / FContentLength * 100)) + '%)')
-  else
-    PackageForm.UpdateStatus('Downloading...');
+  PackageForm.UpdateStatus('Downloading... (' + FormatFloat('0.00', Position / (1024 * 1024)) + ' MB)');
 end;
 
-procedure TDownloader.Extracting(Sender: TObject; const FilePath: String);
+procedure TDownloader.DoExtractProgress(Sender: TObject; const FilePath: String);
 var
   i, Current, Total: Int32;
 begin
@@ -313,17 +278,12 @@ begin
     PackageForm.UpdateStatus('Extracting...');
 end;
 
-procedure TDownloader.Redirect(Sender: TObject; const Source: String; var Dest: String);
-begin
-  FURL := Dest;
-end;
-
 function TDownloader.GetData: String;
 begin
   SetString(Result, PAnsiChar(FData.Memory), FData.Size);
 end;
 
-procedure TDownloader.GetStream(Sender: TObject; var Stream: TStream);
+procedure TDownloader.DoCreateStream(Sender: TObject; var Stream: TStream);
 begin
   FData.Position := 0;
 
@@ -334,8 +294,6 @@ end;
 
 function TDownloader.Get: Boolean;
 begin
-  Result := False;
-
   PackageForm.UpdateStatus('Connecting...');
 
   try
@@ -362,8 +320,8 @@ begin
   Result := False;
 
   Zipper := TUnZipper.Create();
-  Zipper.OnOpenInputStream := @GetStream;
-  Zipper.OnStartFile := @Extracting;
+  Zipper.OnOpenInputStream := @DoCreateStream;
+  Zipper.OnStartFile := @DoExtractProgress;
   Zipper.OutputPath := ExtractFilePath(Path);
 
   try
@@ -396,17 +354,15 @@ end;
 
 constructor TDownloader.Create(URL: String);
 begin
-  FContentLength := -1;
   FURL := URL;
   FData := TMemoryStream.Create();
   FClient := TFPHTTPClient.Create(nil);
+
   with FClient do
   begin
     AllowRedirect := True;
     AddHeader('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36');
-    HTTPVersion := '1.0'; // say NO! to chunked encoding - git is weird and we can't display our progress.
-    OnDataReceived := @Downloading;
-    OnRedirect := @Redirect;
+    OnDataReceived := @DoDownloadProgress;
   end;
 end;
 
