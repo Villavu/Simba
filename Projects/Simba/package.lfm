@@ -1,14 +1,14 @@
 object PackageForm: TPackageForm
   Tag = 1
-  Left = -1086
+  Left = 1223
   Height = 550
-  Top = 297
+  Top = 372
   Width = 650
   Caption = 'Packages'
   ClientHeight = 550
   ClientWidth = 650
   Position = poScreenCenter
-  LCLVersion = '1.8.2.0'
+  LCLVersion = '1.8.4.0'
   object lbPackages: TListBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = btnAdd
@@ -183,14 +183,15 @@ object PackageForm: TPackageForm
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = lblInstalledVersion
       AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = pnlTop
+      AnchorSideRight.Side = asrBottom
       Left = 80
       Height = 21
       Top = 40
-      Width = 400
+      Width = 416
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 5
       BorderSpacing.Top = 5
-      BorderSpacing.Right = 5
       ItemHeight = 15
       OnChange = comboVersionsChange
       OnDrawItem = comboVersionsDrawItem
@@ -465,13 +466,15 @@ object PackageForm: TPackageForm
     end
     object btnBasicInstall: TRadioButton
       AnchorSideLeft.Control = pnlBottom
-      AnchorSideLeft.Side = asrCenter
       AnchorSideTop.Control = installationDivider
       AnchorSideTop.Side = asrBottom
-      Left = 1
+      AnchorSideRight.Control = pnlBottom
+      AnchorSideRight.Side = asrBottom
+      Left = 0
       Height = 20
       Top = 20
-      Width = 495
+      Width = 496
+      Anchors = [akTop, akLeft, akRight]
       AutoSize = False
       BorderSpacing.Top = 5
       Caption = 'Basic'
