@@ -38,8 +38,8 @@ script:
   - test -z "$DOCS" || make -C ./Doc $DOCS
 
 before_deploy:
-  # Generate documentation, ignore result if sphinx-build not available
-  - make -C ./Doc release tarball || ! command -v sphinx-build
+  # Generate documentation
+  - make -C ./Doc release tarball
 
 deploy:
   provider: releases
