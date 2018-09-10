@@ -41,6 +41,17 @@ before_deploy:
   # Generate documentation, ignore result if sphinx-build not available
   - make -C ./Doc release tarball || ! command -v sphinx-build
 
+deploy:
+  provider: releases
+  api_key:
+    secure: QZ+cBxlR0AToocD5cVhB3FLCCWluX+Ce3QGvPYu5NBHNpwdu3JNtXtJbe/4MBRQKg+SfqJPewva8t4tdSy58fjWBF+kddviiAxekrxcnXkpI1Ts/n+CIfcH6HwvWwQsUCzQuArnQ5LJh9F46xCTysox9QWY8UgCIS7Ahw3EPJ6s=
+  file: "./Simba.*"
+  skip_cleanup: true
+  on:
+    repo: MerlijnWajer/Simba
+    tags: true
+
+
 notifications:
   irc:
     channels: "irc.rizon.net#simba"
