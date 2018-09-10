@@ -37,9 +37,9 @@ script:
   # Validate references in documentation
   - test -z "$DOCS" || make -C ./Doc $DOCS
 
-before_deploy:
+#before_deploy:
   # Generate documentation
-  - make -C ./Doc release tarball
+#  - make -C ./Doc release tarball
 
 deploy:
   provider: releases
