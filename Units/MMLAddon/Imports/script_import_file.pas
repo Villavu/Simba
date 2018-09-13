@@ -10,7 +10,7 @@ uses
 implementation
 
 uses
-  script_imports, script_thread, lpcompiler, lptypes, mufasatypes, files;
+  script_imports, script_thread, lpcompiler, lptypes, mufasatypes, files, fileutil;
 
 procedure Lape_CreateFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -138,11 +138,6 @@ begin
     MFiles.DeleteINI(PString(Params^[1])^, PString(Params^[2])^, PString(Params^[3])^);
 end;
 
-procedure Lape_ExtractFileExt(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PString(Result)^ := ExtractFileExt(PString(Params^[1])^);
-end;
-
 procedure Lape_DeleteDirectory(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PBoolean(Result)^ := DeleteDirectoryEx(PString(Params^[1])^, PBoolean(Params^[2])^);
@@ -158,11 +153,34 @@ begin
   ZipFiles(PString(Params^[1])^, PStringArray(Params^[2])^);
 end;
 
+procedure Lape_FindFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+var
+  List: TStringList;
+  Files: ^TStringArray absolute Result;
+  i: Int32;
+begin
+  List := TStringList.Create();
+
+  try
+    with TListFileSearcher.Create(List) do
+    try
+      Search(PString(Params^[1])^, PString(Params^[2])^, PBoolean(Params^[3])^, PBoolean(Params^[4])^);
+    finally
+      Free();
+    end;
+
+    SetLength(Files^, List.Count);
+    for i := 0 to List.Count - 1 do
+      Files^[i] := List[i];
+  finally
+    List.Free();
+  end;
+end;
+
 procedure Lape_Import_File(Compiler: TLapeCompiler; Data: Pointer);
 begin
   with Compiler do
   begin
-    addGlobalMethod('function ExtractFileExt(FileName: String): String;', @Lape_ExtractFileExt, Data);
     addGlobalMethod('function CreateFile(Path: String): Int32', @Lape_CreateFile, Data);
     addGlobalMethod('function OpenFile(Path: String; Shared: Boolean): Int32', @Lape_OpenFile, Data);
     addGlobalMethod('function RewriteFile(Path: String; Shared: Boolean): Int32', @Lape_RewriteFile, Data);
@@ -188,6 +206,7 @@ begin
     addGlobalMethod('function DeleteDirectory(Dir: String; Empty: Boolean): Boolean;', @Lape_DeleteDirectory, Data);
     addGlobalMethod('procedure ZipFiles(ToFolder: String; Files: TStringArray);', @Lape_ZipFiles, Data);
     addGlobalMethod('procedure UnZipFile(FilePath, TargetPath: String);', @Lape_UnZipFile, Data);
+    addGlobalMethod('function FindFile(Path, Mask: String; SearchSubDirs: Boolean = True; CaseSenstive: Boolean = False): TStringArray;', @Lape_FindFile, Data);
   end;
 end;
 
