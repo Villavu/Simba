@@ -542,7 +542,7 @@ uses
    math,
    script_imports, script_plugins,
    openssl,
-   aca, fphttpclient, dtm_editor, colorscheme           
+   aca, fphttpclient, dtm_editor, colorscheme
    {$IFDEF USE_FORMDESIGNER}, frmdesigner{$ENDIF}
 
    {$IFDEF LINUX_HOTKEYS}, keybinder{$ENDIF};
@@ -2076,7 +2076,9 @@ end;
 
 procedure TSimbaForm.ShowFormDesigner(Sender: TObject);
 begin
+  {$IFDEF USE_FORMDESIGNER}
   CompForm.ShowOnTop();
+  {$ENDIF}
 end;
 
 procedure TSimbaForm.UnloadPlugin(Sender: TObject);
@@ -2356,6 +2358,7 @@ begin
 
     Plugins.Paths.Add(SimbaSettings.Plugins.Path.Value);
 
+
     {$IFDEF WINDOWS}
       {$IFDEF CPU32}
         {$i openssl32.lrs}
@@ -2423,7 +2426,7 @@ begin
 
     Tabs := TList.Create();
     AddTab();
-    Manager := TIOManager.Create;
+    Manager := TIOManager.Create(SimbaSettings.Plugins.Path.Value);
     Picker := TMColorPicker.Create(Manager);
     Selector := TMWindowSelector.Create(Manager);
 

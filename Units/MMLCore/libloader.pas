@@ -51,7 +51,6 @@ interface
       public
         constructor Create;
         destructor Destroy; override;
-        procedure ValidateDirs;
         procedure AddPath(path: string);
         procedure FreePlugins; virtual;
         function LoadPlugin(PluginName : string) : integer;
@@ -64,28 +63,11 @@ implementation
     MufasaTypes,MufasaBase,FileUtil;
 
   procedure TGenericLoader.AddPath(path: string);
-  var
-    verified : string;
   begin
-    verified := VerifyPath(path);
-    //IDK who changed this to loading a dir, but DON'T
-    if PluginDirs.IndexOf(verified) = -1 then
-    begin
-      mDebugLn('Adding Plugin Path: ' + verified);
-      PluginDirs.Add(verified);
-    end;
-  end;
+    Path := IncludeTrailingPathDelimiter(Path);
 
-  procedure TGenericLoader.ValidateDirs;
-  var
-    i : integer;
-  begin
-    for i := 0 to PluginDirs.Count - 1 do
-    begin;
-      if DirectoryExists(PluginDirs[i]) = false then
-        raise Exception.createFMT('Directory(%s) does not exist',[PluginDirs[i]]);
-      PluginDirs[i] := VerifyPath(PluginDirs[i]);
-    end;
+    if DirectoryExists(Path) and (PluginDirs.IndexOf(Path) = -1) then
+      PluginDirs.Add(Path);
   end;
 
   procedure TGenericLoader.LoadPluginsDir(DirIndex: integer);
@@ -131,7 +113,6 @@ implementation
     if PluginDirs.Count = 0 then
       Exit;
 
-    ValidateDirs;
     PluginName := ExtractFileNameWithoutExt(PluginName);
     for i := 0 to PluginDirs.Count - 1 do
       if FileExists(PluginDirs.Strings[i] + Pluginname + PlugExt) then
