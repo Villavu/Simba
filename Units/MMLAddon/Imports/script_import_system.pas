@@ -37,7 +37,7 @@ begin
   InitializeFFI(Compiler);
   InitializePascalScriptBasics(Compiler, [psiTypeAlias, psiSettings, psiMagicMethod, psiFunctionWrappers, psiExceptions]);
 
-  ExposeGlobals(Compiler);
+  ExposeGlobals(Compiler, [egmInvoke]);
 
   with __TLapeCompiler(Compiler) do
   begin

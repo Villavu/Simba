@@ -130,7 +130,7 @@ procedure TMMLScriptThread.CallTerminateMethod(Method: String);
 begin
   FTerminateOptions := FTerminateOptions + [stoTerminated];
 
-  RunCode(FCompiler.Emitter.Code, nil, TCodePos(FCompiler.getGlobalVar(Method).Ptr^));
+  RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, nil, TCodePos(FCompiler.getGlobalVar(Method).Ptr^));
 
   Flush();
 end;
@@ -341,7 +341,7 @@ begin
       FStartTime := GetTickCount64();
 
       try
-        RunCode(FCompiler.Emitter.Code, FRunning);
+        RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, FRunning);
 
         CallTerminateMethod('__OnTerminate');
       except
