@@ -1,47 +1,58 @@
 # Based on .travis.yml in `travis-lazarus` (https://github.com/nielsAD/travis-lazarus)
+# Reqiures git personal access token set in Travis as a secure enviorment variable named `GITHUB_API_KEY` with `public_repo` access.
+# Travis hides secure variables AND we hide all output when the key is used so should be no issues.
 
-sudo: true
+language: generic
+sudo: required
+dist: trusty
 
 env:
   global:
     - WINEPREFIX=~/.winelaz
     - DISPLAY=:99.0
 
-matrix:
-  allow_failures:
-    - os: osx
-  include:
-    - os: osx
+jobs:
+  include: 
+    - stage: "Autobuild prepare"
+      script: python ./autobuild/travis-autobuild-prepare.py 2>&1 | tee >/dev/null
+      if: tag IS blank
+      before_install: true
+      install: true
+    - stage: "Windows 32"  
+      os: linux
+      env: LAZ_VER=1.8.2  LAZ_ENV=wine WINEARCH=win32 LAZ_OPT="--os=win32 --cpu=i386"
+      if: tag IS blank
+      after_failure: python ./autobuild/travis-autobuild-error.py 2>&1 | tee >/dev/null
+    - stage: "Windows 64"  
+      os: linux
+      env: LAZ_VER=1.8.2  LAZ_ENV=wine WINEARCH=win64 LAZ_OPT="--os=win64 --cpu=x86_64"
+      if: tag IS blank
+      after_failure: python ./autobuild/travis-autobuild-error.py 2>&1 | tee >/dev/null
+    - stage: "Linux 64"  
+      os: linux
       env: LAZ_VER=1.8.2
-    - os: linux
-      env: LAZ_VER=1.8.2 DOCS=test
-    - os: linux
-      env: LAZ_VER=1.8.2 LAZ_WINE=wine WINEARCH=win32 LAZ_OPT="--os=win32 --cpu=i386"
-    - os: linux
-      env: LAZ_VER=1.8.2 LAZ_WINE=wine WINEARCH=win64 LAZ_OPT="--os=win64 --cpu=x86_64"
+      if: tag IS blank
+      after_failure: python ./autobuild/travis-autobuild-error.py 2>&1 | tee >/dev/null
+    - stage: "Autobuild finalize"
+      script: python ./autobuild/travis-autobuild-finalize.py 2>&1 | tee >/dev/null
+      if: tag IS blank
+      before_install: true
+      install: true
 
 before_install:
-  # Install environment prerequisites
   - sudo apt-get update && sudo apt-get install xvfb python-sphinx graphviz libxtst-dev libkeybinder-dev || true
   - Xvfb $DISPLAY &
 
 install:
-  # Install testing prerequisites (wine/fpc/lazarus)
   - ./autobuild/travis-lazarus/.travis.install.py
 
 script:
-  # Generate Simba.exe in debug and release mode
-  - $LAZ_WINE lazbuild --bm=debug   $LAZ_OPT ./Projects/Simba/Simba.lpi
-  - $LAZ_WINE lazbuild --bm=release $LAZ_OPT ./Projects/Simba/Simba.lpi
-
-  # Validate references in documentation
-  - test -z "$DOCS" || make -C ./Doc $DOCS
-
-before_deploy:
-  # Generate documentation, ignore result if sphinx-build not available
-  - make -C ./Doc release tarball || ! command -v sphinx-build
-
+  - lazbuild $LAZ_OPT --bm=release "./Projects/Simba/Simba.lpi"
+  - lazbuild $LAZ_OPT --bm=debug "./Projects/Simba/Simba.lpi"
+  - python ./autobuild/travis-autobuild-upload.py 2>&1 | tee >/dev/null
+  
 notifications:
+  email: false
   irc:
     channels: "irc.rizon.net#simba"
     template:
