@@ -17,7 +17,7 @@ object SimbaForm: TSimbaForm
   OnHide = doOnHide
   OnShortCut = FormShortCuts
   Position = poScreenCenter
-  LCLVersion = '1.8.2.0'
+  LCLVersion = '1.8.4.0'
   Visible = True
   object ToolBar: TToolBar
     Left = 0
@@ -599,6 +599,7 @@ object SimbaForm: TSimbaForm
       inherited TreeView: TTreeView
         AnchorSideRight.Control = FunctionList
         Height = 496
+        Images = nil
       end
       inherited btnClear: TSpeedButton
         AnchorSideRight.Control = FunctionList
@@ -3668,6 +3669,7 @@ object SimbaForm: TSimbaForm
     top = 48
   end
   object UpdateTimer: TTimer
+    Enabled = False
     Interval = 10000
     OnTimer = UpdateTimerCheck
     left = 336
