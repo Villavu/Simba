@@ -493,8 +493,8 @@ type
     procedure SetEditActions;
     procedure DoSearch(SearchOptions: TSynSearchOptions; HighlightAll: Boolean);
     procedure RefreshTab;//Refreshes all the form items that depend on the Script (Panels, title etc.)
-    procedure RefreshTabSender(sender : PtrInt);
-    procedure CreateDefaultEnvironment;
+    procedure RefreshTabSender(Sender: PtrInt);
+    procedure CheckUpdates(Sender: PtrInt);
     procedure LoadFormSettings;
     procedure SaveFormSettings;
     procedure AddRecentFile(const filename : string);
@@ -1357,30 +1357,15 @@ begin
   SetEditActions;
 end;
 
-procedure TSimbaForm.RefreshTabSender(sender: PtrInt);
+procedure TSimbaForm.RefreshTabSender(Sender: PtrInt);
 begin
   RefreshTab;
 end;
 
-{ Settings related code }
-
-{ Creates default settings }
-procedure TSimbaForm.CreateDefaultEnvironment;
-
+procedure TSimbaForm.CheckUpdates(Sender: PtrInt);
 begin
-  if not DirectoryExists(SimbaSettings.Includes.Path.Value) then
-    CreateDir(SimbaSettings.Includes.Path.Value);
-  if not DirectoryExists(SimbaSettings.Fonts.Path.Value) then
-    CreateDir(SimbaSettings.Fonts.Path.Value);
-  if not DirectoryExists(SimbaSettings.Plugins.Path.Value) then
-    CreateDir(SimbaSettings.Plugins.Path.Value);
-  if not DirectoryExists(SimbaSettings.Scripts.Path.Value) then
-    CreateDir(SimbaSettings.Scripts.Path.Value);
-
-  SimbaSettings.Save(SimbaSettingsFile);
-
-  LoadFormSettings;
   UpdateTimer.Interval := SimbaSettings.Updater.CheckEveryXMinutes.Value;
+  UpdateTimer.Enabled := True;
 end;
 
 { Load settings }
@@ -2306,11 +2291,27 @@ procedure TSimbaForm.FormCreate(Sender: TObject);
     HandleSettingsParameter();
     CreateSimbaSettings(SimbaSettingsFile);
 
-    if (not FileExistsUTF8(SimbaSettingsFile)) then
-      CreateDefaultEnvironment()
-    else
-      LoadFormSettings();
+    // check setting directories vaild, else default.
+    if (not DirectoryExists(SimbaSettings.Plugins.Path.Value)) then
+      SimbaSettings.Plugins.Path.OnDefault(SimbaSettings.Plugins.Path);
+    if (not DirectoryExists(SimbaSettings.Includes.Path.Value)) then
+      SimbaSettings.Includes.Path.OnDefault(SimbaSettings.Includes.Path);
+    if (not DirectoryExists(SimbaSettings.Plugins.Path.Value)) then
+      SimbaSettings.Scripts.Path.OnDefault(SimbaSettings.Scripts.Path);
+    if (not DirectoryExists(SimbaSettings.Fonts.Path.Value)) then
+      SimbaSettings.Fonts.Path.OnDefault(SimbaSettings.Fonts.Path);
 
+    // create directories if needed
+    if (not DirectoryExists(SimbaSettings.Includes.Path.Value) )then
+      CreateDir(SimbaSettings.Includes.Path.Value);
+    if (not DirectoryExists(SimbaSettings.Fonts.Path.Value)) then
+      CreateDir(SimbaSettings.Fonts.Path.Value);
+    if (not DirectoryExists(SimbaSettings.Plugins.Path.Value)) then
+      CreateDir(SimbaSettings.Plugins.Path.Value);
+    if (not DirectoryExists(SimbaSettings.Scripts.Path.Value)) then
+      CreateDir(SimbaSettings.Scripts.Path.Value);
+
+    LoadFormSettings();
     RegisterSettingsOnChanges();
   end;
 
@@ -2337,6 +2338,7 @@ begin
   try
     Application.OnException := @CustomExceptionHandler;
     Application.QueueAsyncCall(@RefreshTabSender, 0);
+    Application.QueueAsyncCall(@CheckUpdates, 0);
 
     AddHandlerFirstShow(@FirstShow);
 

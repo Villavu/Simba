@@ -793,22 +793,22 @@ end;
 
 procedure GetIncludePath(obj: TSetting);
 begin
-  TPathSetting(obj).Value := IncludeTrailingPathDelimiter(GetCurrentDir()) + 'Includes' + DS;
+  TPathSetting(obj).Value := IncludeTrailingPathDelimiter(AppPath + 'Includes');
 end;
 
 procedure GetPluginPath(obj: TSetting);
 begin
-  TPathSetting(obj).Value := IncludeTrailingPathDelimiter(GetCurrentDir()) + 'Plugins' + DS;
+  TPathSetting(obj).Value := IncludeTrailingPathDelimiter(AppPath + 'Plugins');
 end;
 
 procedure GetScriptPath(obj: TSetting);
 begin
-  TPathSetting(obj).Value := IncludeTrailingPathDelimiter(GetCurrentDir()) + 'Scripts' + DS;
+  TPathSetting(obj).Value := IncludeTrailingPathDelimiter(AppPath + 'Scripts');
 end;
 
 procedure GetFontPath(obj: TSetting);
 begin
-  TPathSetting(obj).Value := IncludeTrailingPathDelimiter(GetCurrentDir()) + 'Fonts' + DS;
+  TPathSetting(obj).Value := IncludeTrailingPathDelimiter(AppPath + 'Fonts');
 end;
 
 procedure GetDefScriptPath(obj: TSetting);
