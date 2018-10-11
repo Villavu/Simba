@@ -141,91 +141,6 @@ const
   HTTP_OK = 200;
   HTTP_NOT_FOUND = 404;
 
-// pretty neat imo.
-type
-  TCopyDirectory = class(TFileSearcher)
-  protected
-    FSource: string;
-    FDestination: string;
-    FCollapse: Boolean;
-    FBlacklist: TStringList;
-
-    procedure DoFileFound; override;
-    procedure DoDirectoryFound; override;
-  public
-    class function Copy(Source, Destination: String; Collapse: Boolean; Blacklist: TStringList): Boolean;
-  end;
-
-procedure TCopyDirectory.DoFileFound;
-
-  function SameFile(Left, Right: String): Boolean;
-  begin
-    Result := (FileSize(Left) = FileSize(Right)) and (ReadFileToString(Left) = ReadFileToString(Right));
-  end;
-
-var
-  S: String;
-begin
-  S := StringReplace(FileName, FSource, FDestination, []);
-
-  if (not DirectoryExists(ExtractFileDir(S))) then
-    Exit;
-  if (FBlacklist <> nil) and (FBlacklist.IndexOf(CreateRelativePath(FileName, FSource)) >= 0) then
-    Exit;
-
-  if (not FileExists(S)) or (not SameFile(FileName, S)) then
-  begin
-    PackageForm.UpdateStatus('Copying... ' + ExtractFileName(S));
-
-    if FileExists(S) and (not DeleteFile(S)) then
-      raise Exception.Create('Failed to delete file "' + S + '"');
-    if (not CopyFile(FileName, S)) then
-      raise Exception.Create('Failed to copy file "' + FileName + '"');
-  end;
-end;
-
-procedure TCopyDirectory.DoDirectoryFound;
-var
-  S: String;
-begin
-  S := StringReplace(FileName, FSource, FDestination, []);
-
-  if (FBlacklist <> nil) and (FBlacklist.IndexOf(CreateRelativePath(FileName, FSource)) >= 0) then
-    Exit;
-
-  if FCollapse and (Level = 0) then
-    TCopyDirectory.Copy(ExcludeTrailingPathDelimiter(FileName), ExcludeTrailingPathDelimiter(ExtractFilePath(S)), False, FBlacklist)
-  else
-  if (not DirectoryExistsUTF8(S)) and (not ForceDirectoriesUTF8(S)) then
-    raise Exception.Create('Failed to create directory "' + S + '"');
-end;
-
-class function TCopyDirectory.Copy(Source, Destination: String; Collapse: Boolean; Blacklist: TStringList): Boolean;
-begin
-  with TCopyDirectory.Create() do
-  try
-    FSource := SetDirSeparators(Source);
-    FDestination := SetDirSeparators(Destination);
-    FCollapse := Collapse;
-    FBlacklist := Blacklist;
-
-    try
-      Search(FSource);
-
-      Exit(True);
-    except
-      on e: Exception do
-        WriteLn('TCopyDirectory.Copy: ', e.ClassName + '::' + e.Message);
-    end;
-  finally
-    DeleteDirectory(FSource, False);
-
-    Free();
-  end;
-
-  Exit(False);
-end;
-
 type
   TDownloader = class
   protected
@@ -235,7 +150,6 @@ type
 
     procedure DoCreateStream(Sender: TObject; var Stream: TStream);
     procedure DoDownloadProgress(Sender: TObject; const Size, Position: Int64);
-    procedure DoExtractProgress(Sender: TObject; const FilePath: String);
 
     function GetData: String;
   public
@@ -252,30 +166,6 @@ type
 procedure TDownloader.DoDownloadProgress(Sender: TObject; const Size, Position: Int64);
 begin
   PackageForm.UpdateStatus('Downloading... (' + FormatFloat('0.00', Position / (1024 * 1024)) + ' MB)');
-end;
-
-procedure TDownloader.DoExtractProgress(Sender: TObject; const FilePath: String);
-var
-  i, Current, Total: Int32;
-begin
-  Current := 0;
-  Total := 0;
-
-  with Sender as TUnZipper do
-    for i := 0 to Entries.Count - 1 do
-    begin
-      if (not Entries[i].IsLink) and (not Entries[i].IsDirectory) then
-      begin
-        Inc(Total);
-        if (Entries[i].ArchiveFileName = Copy(FilePath, Length(OutputPath) + 1, $FFFFFF)) then
-          Current := Total;
-      end;
-    end;
-
-  if (Current > 0) and (Total > 0) then
-    PackageForm.UpdateStatus('Extracting...' + IntToStr(Current) + '/' + IntToStr(Total))
-  else
-    PackageForm.UpdateStatus('Extracting...');
 end;
 
 function TDownloader.GetData: String;
@@ -312,16 +202,91 @@ begin
   PackageForm.UpdateStatus('');
 end;
 
+type
+  TDownloader_UnZipper = class(TUnZipper)
+  public
+    function ExtractTo(Archive, Path: String; Collapse: Boolean; Blacklist: TStringList): Boolean;
+  end;
+
+function TDownloader_UnZipper.ExtractTo(Archive, Path: String; Collapse: Boolean; Blacklist: TStringList): Boolean;
+
+  function SameFile(Left, Right: String): Boolean;
+  begin
+    Result := (FileSize(Left) = FileSize(Right)) and (ReadFileToString(Left) = ReadFileToString(Right));
+  end;
+
+var
+  i: Int32;
+  Progress, Total: Int64;
+  From, Destination: String;
+begin
+  Progress := 0;
+  Total := 0;
+
+  Clear();
+  OpenInput();
+
+  try
+    ReadZipDirectory();
+
+    for i := 0 to Entries.Count - 1 do
+      Total += Entries[i].Size;
+
+    for i := 0 to Entries.Count - 1 do
+    begin
+      UnZipOneFile(Entries[i]);
+
+      Progress := Progress + Entries[i].Size;
+      From := Archive + StringReplace(Entries[i].DiskFileName, Entries[0].DiskFileName, '', []);
+      Destination := StringReplace(Entries[i].DiskFileName, Entries[0].DiskFileName, '', []);
+
+      // Blacklist
+      if (Blacklist <> nil) and (Blacklist.IndexOf(Destination) > -1) then
+        Continue;
+
+      // Collapse
+      if Collapse and (Destination.CountChar(DirectorySeparator) > 1) then
+        Destination := Destination.Join(DirectorySeparator, Destination.Split(DirectorySeparator), 1, $FFFFFF);
+
+      Destination := Path + Destination;
+
+      case Entries[i].IsDirectory() of
+        True:
+          if (not DirectoryExists(Destination)) and (not ForceDirectory(Destination)) then
+            Exit(False);
+
+        False:
+          if (not FileExists(Destination)) or (not SameFile(Destination, From)) then
+          begin
+            if FileExists(Destination) and (not DeleteFile(Destination)) then
+              Exit(False);
+            if (not RenameFile(From, Destination)) then
+              Exit(False);
+          end;
+      end;
+
+      PackageForm.UpdateStatus(Format('Extracting... (%f / %f MB)', [Progress / (1024 * 1024), Total / (1024 * 1024)]));
+    end;
+
+    Exit(True);
+  finally
+    PackageForm.UpdateStatus('Cleaning...');
+    DeleteDirectory(Archive, False);
+    CloseInput();
+  end;
+
+  Exit(False);
+end;
+
 function TDownloader.Extract(Path: String; Collapse: Boolean; Blacklist: TStringList): Boolean;
 var
-  Zipper: TUnZipper;
+  Zipper: TDownloader_UnZipper;
   Archive: String;
 begin
   Result := False;
 
-  Zipper := TUnZipper.Create();
+  Zipper := TDownloader_UnZipper.Create();
   Zipper.OnOpenInputStream := @DoCreateStream;
-  Zipper.OnStartFile := @DoExtractProgress;
   Zipper.OutputPath := ExtractFilePath(Path);
 
   try
@@ -335,15 +300,13 @@ begin
     if DirectoryExists(Archive) then
       DeleteDirectory(Archive, False);
 
-    // create destination lblInstallDiretory.
+    Path := ExpandFileName(Path);
+
+    // create destination install directory.
     if (not DirectoryExists(Path)) then
       ForceDirectories(Path);
 
-    Zipper.Clear();
-    Zipper.UnZipAllFiles();
-
-    // Copy all the files if they need updating.
-    Result := TCopyDirectory.Copy(ExcludeTrailingPathDelimiter(Archive), ExcludeTrailingPathDelimiter(Path), Collapse, Blacklist);
+    Result := Zipper.ExtractTo(Archive, Path, Collapse, Blacklist);
   except
     on e: Exception do
       WriteLn('TDownloader.Extract: ', e.ClassName, '::', e.Message);
@@ -363,6 +326,7 @@ begin
     AllowRedirect := True;
     AddHeader('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36');
     OnDataReceived := @DoDownloadProgress;
+    HTTPVersion := '1.0';
   end;
 end;
 
