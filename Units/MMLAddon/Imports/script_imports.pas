@@ -186,6 +186,7 @@ begin
   Dump.Values['String'] := {$i lape_import_string.inc}
   Dump.Values['Variant'] := {$i lape_import_variant.inc}
   Dump.Values['System'] := {$i lape_import_system.inc}
+  Dump.Values['File'] := {$i lape_import_file.inc}
 
   StartImporting();
 

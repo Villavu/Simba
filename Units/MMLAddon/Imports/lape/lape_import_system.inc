@@ -1,4 +1,3 @@
-
 '{$DEFINE Lape}' + LineEnding +
 '{$DEFINE Sesquipedalian}' + LineEnding +
 '{$DEFINE Lape_CaseInsensitive}' + LineEnding +
@@ -94,4 +93,6 @@
 'function Random: Extended; overload; begin end;' + LineEnding +
 'procedure Randomize; begin end;' + LineEnding +
 'var RandSeed: Int32;' + LineEnding +
-'procedure Sleep(Milliseconds: UInt32); begin end;' + LineEnding;
+'procedure Sleep(Milliseconds: UInt32); begin end;' + LineEnding +
+'function GetExceptionMessage: ShortString; begin end;';
+
