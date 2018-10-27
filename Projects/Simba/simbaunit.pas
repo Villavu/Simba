@@ -499,7 +499,7 @@ type
     procedure SaveFormSettings;
     procedure AddRecentFile(const filename : string);
     procedure InitializeTMThread(out Thread : TMMLScriptThread);
-    procedure HandleParameters;
+    procedure HandleParameters(Data: PtrInt);
     procedure HandleSettingsParameter;
     procedure OnSaveScript(const Filename : string);
     property ShowParamHintAuto : boolean read GetShowParamHintAuto write SetShowParamHintAuto;
@@ -1527,7 +1527,7 @@ begin
     mDebugLn('ERROR IN COMMAND LINE ARGS: ' + ErrorMsg)
 end;
 
-procedure TSimbaForm.HandleParameters;
+procedure TSimbaForm.HandleParameters(Data: PtrInt);
 var
   DoRun : Boolean;
   ErrorMsg : string;
@@ -2339,6 +2339,7 @@ begin
     Application.OnException := @CustomExceptionHandler;
     Application.QueueAsyncCall(@RefreshTabSender, 0);
     Application.QueueAsyncCall(@CheckUpdates, 0);
+    Application.QueueAsyncCall(@HandleParameters, 0);
 
     AddHandlerFirstShow(@FirstShow);
 
@@ -2453,8 +2454,6 @@ begin
       Start();
     end;
 
-    Application.ProcessMessages(); // Make sure everything is ready for a script run instantly (via parameters).
-    HandleParameters();
     UpdateTitle();
   finally
     EndFormUpdate();
