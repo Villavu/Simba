@@ -1653,8 +1653,6 @@ begin
 end;
 
 {$IFDEF WINDOWS}
-function GetConsoleWindow: HWND; stdcall; external kernel32 name 'GetConsoleWindow';
-
 function ConsoleHandler(Event: DWord): WINBOOL; stdcall;
 begin
   Result := TRue;
@@ -1665,29 +1663,44 @@ end;
 
 procedure TSimbaForm.ActionConsoleExecute(Sender: TObject);
 
-  function GetConsole: HWND;
+  function GetConsoleWindow: HWND;
   var
-    PID: UInt32;
+    PID: UInt32 = 0;
   begin
     Result := 0;
 
     {$IFDEF WINDOWS}
-    GetWindowThreadProcessId(GetConsoleWindow(), PID);
+    GetWindowThreadProcessId(Windows.GetConsoleWindow(), PID);
     if (PID = GetCurrentProcessID()) then
-      Result := GetConsoleWindow();
+      Result := Windows.GetConsoleWindow();
     {$ENDIF}
   end;
 
+  function GetConsoleHandle: THandle;
+  begin
+    Result := 0;
+
+    {$IFDEF WINDOWS}
+    Result := GetStdHandle(STD_OUTPUT_HANDLE);
+    {$ENDIF}
+  end;
+
+var
+  Mode: UInt32 = 0;
 begin
   if (Sender <> nil) then
     SimbaSettings.LastConfig.MainForm.ConsoleVisible.Value := not SimbaSettings.LastConfig.MainForm.ConsoleVisible.Value;
 
-  {$IFDEF WINDOWS}SetConsoleCtrlHandler(@ConsoleHandler, True);{$ENDIF}
+  {$IFDEF WINDOWS}
+  SetConsoleCtrlHandler(@ConsoleHandler, True); // close simba when command prompt is closed.
+  GetConsoleMode(GetConsoleHandle, Mode);
+  SetConsoleMode(GetConsoleHandle(), Mode and (not ENABLE_QUICK_EDIT_MODE)); // remove silly quick edit mode.
 
   case SimbaSettings.LastConfig.MainForm.ConsoleVisible.Value of
-    True: {$IFDEF WINDOWS}ShowWindow(GetConsole(), SW_SHOWNORMAL){$ENDIF};
-    False: {$IFDEF WINDOWS}ShowWindow(GetConsole(), SW_HIDE){$ENDIF};
+    True: ShowWindow(GetConsoleWindow(), SW_SHOWNORMAL);
+    False: ShowWindow(GetConsoleWindow(), SW_HIDE);
   end;
+  {$ENDIF}
 end;
 
 procedure TSimbaForm.ActionCopyExecute(Sender: TObject);
