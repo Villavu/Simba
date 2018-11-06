@@ -120,6 +120,16 @@ begin
   PBoolean(Result)^ := IsStrInArr(PString(Params^[0])^, PBoolean(Params^[1])^, PStringArray(Params^[2])^);
 end;
 
+procedure Lape_UTF8Decode(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PWideString(Result)^ := UTF8Decode(PString(Params^[0])^);
+end;
+
+procedure Lape_UTF8Encode(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PAnsiString(Result)^ := UTF8Encode(PWideString(Params^[0])^);
+end;
+
 procedure Lape_Import_String(Compiler: TLapeCompiler; Data: Pointer);
 begin
   with Compiler do
@@ -147,6 +157,8 @@ begin
     addGlobalFunc('function IsArrInStr(constref Arr: TStringArray; S: String): Boolean;', @Lape_IsArrInStr);
     addGlobalFunc('function IsStrInArr(S: String; const UsePos: Boolean; const Arr: TStringArray): Boolean;', @Lape_IsStrInArr);
     addGlobalFunc('function PosMulti(const SubStr: String; Text: String): TIntegerArray;', @Lape_PosMulti);
+    addGlobalFunc('function UTF8Decode(constref S: AnsiString): WideString;', @Lape_UTF8Decode);
+    addGlobalFunc('function UTF8Encode(constref S: WideString): AnsiString;', @Lape_UTF8Encode);
   end;
 end;
 
