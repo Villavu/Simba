@@ -177,7 +177,7 @@ end;
 procedure Lape_FastDrawTransparent(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with TMMLScriptThread(Params^[0]).Client do
-    MBitmaps[PInt32(Params^[1])^].FastDrawTransparent(PInt32(Params^[2])^, PInt32(Params^[3])^, MBitmaps[PInt32(Params^[4])^]);
+    MBitmaps[PInt32(Params^[3])^].FastDrawTransparent(PInt32(Params^[1])^, PInt32(Params^[2])^, MBitmaps[PInt32(Params^[4])^]);
 end;
 
 procedure Lape_SetTransparentColor(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
