@@ -238,7 +238,7 @@ begin
                    '  case Prop of'                                                                                                                           + LineEnding +
                    '    SP_OnTerminate:'                                                                                                                      + LineEnding +
                    '      for i := 0 to High(OnTerminateStrings) do'                                                                                          + LineEnding +
-                   '        Value += OnTerminateStrings[i];'                                                                                                  + LineEnding +
+                   '        Value += OnTerminateStrings[i].Method;'                                                                                                  + LineEnding +
                    '  end;'                                                                                                                                   + LineEnding +
                    'end;'                                                                                                                                     + LineEnding +
                    ''                                                                                                                                         + LineEnding +
