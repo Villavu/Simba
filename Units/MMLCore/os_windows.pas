@@ -591,7 +591,7 @@ begin
     SetLength(ProcArr, I + 1);
     ProcArr[I].Handle := Handle;
     SetLength(ProcArr[I].Title, 255);
-    SetLength(ProcArr[I].Title, GetWindowText(Handle, PChar(ProcArr[I].Title), Length(ProcArr[I].Title)));
+    SetLength(ProcArr[I].Title, GetWindowTextW(Handle, PWideChar(ProcArr[I].Title), Length(ProcArr[I].Title)));
     GetWindowSize(Handle, ProcArr[I].Width, ProcArr[I].Height);
     GetWindowThreadProcessId(Handle, pPid);
     ProcArr[I].Pid := pPid;

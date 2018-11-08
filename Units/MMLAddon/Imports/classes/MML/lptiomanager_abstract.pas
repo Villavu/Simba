@@ -306,7 +306,7 @@ begin
     addClass('TIOManager_Abstract');
 
     addGlobalType('record func1, func2, func3, func4, func5, func6, func7, func8, func9, func10, func11, func12, func13, func14, func15, func16: Pointer; end', 'TTarget_Exported');
-    addGlobalType('record Title: String; Handle: PtrUInt; PID: UInt32; Width, Height: Int32; end', 'TSysProc');
+    addGlobalType('record Title: WideString; Handle: UInt32; PID: UInt32; Width, Height: Int32; end', 'TSysProc');
     addGlobalType('array of TSysProc', 'TSysProcArr');
 
     addGlobalFunc('function TIOManager_Abstract.GetError(): String; constref;', @TIOManager_Abstract_GetError);

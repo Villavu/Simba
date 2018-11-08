@@ -170,9 +170,9 @@ type
   end;
 
   TSysProc = record
-    Title: string;
-    Handle: integer;
-    Pid: integer;
+    Title: WideString;
+    Handle: UInt32;
+    PID: UInt32;
     Width, Height: integer;
   end;
   TSysProcArr = array of TSysProc;
