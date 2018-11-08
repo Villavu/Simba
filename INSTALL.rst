@@ -3,45 +3,17 @@ Install
 =======
 
 Requirements
-------------
+~~~~~~~~~~~~
 
-Required
+- Lazarus 1.8.4 & FPC 3.0.4 - https://sourceforge.net/projects/lazarus/files/
+- (Linux) libkeybinder - ``sudo apt-get install libkeybinder-dev``
+- (Linux) libxtst - ``sudo apt-get install libxtst-dev``
+
+Building
 ~~~~~~~~
 
-Simba 1.0 and newer:
-* FPC 2.6.0+ `Project Home <http://www.freepascal.org/>`_ `Download <http://sourceforge.net/projects/freepascal/files/>`_
-* Lazarus 1.0+ `Project Home <http://www.lazarus.freepascal.org/>`_ `Download <http://sourceforge.net/projects/lazarus/files/>`_
-
-Simba 0.99 and earlier:
-* FPC 2.4.4 `Project Home <http://www.freepascal.org/>`_ `Download <http://sourceforge.net/projects/freepascal/files/>`_
-* Lazarus 0.9.30 `Project Home <http://www.lazarus.freepascal.org/>`_ `Download <http://sourceforge.net/projects/lazarus/files/>`_
-
-Optional
-~~~~~~~~
-
-* Git `Project Home <http://git-scm.com/>`_ `Download <http://git-scm.com/downloads>`_
-
-Instructions
-------------
-
-Setup
-~~~~~
-
-1. Download or Clone the Simba repository. (To clone you need Git)
-2. Pull submodules by running "git submodule init; git submodule update".
-3. Make any changes to Projects/Simba/Simba.inc you need.
-
-Compiling using Lazarus
-~~~~~~~~~~~~~~~~~~~~~~~
-
-1. Open Lazarus
-2. Open Projects/Simba/Simba.lpi
-3. Click Project->Compile
-
-Compiling using Makefile
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-1. Open a Console
-2. Change directory to Projects/Simba/Simba.lpi
-3. Run make
-
+1. Clone the Simba repository with git. 
+2. Install submodules "git submodule init; git submodule update".
+3. Open Projects/Simba/Simba.lpi in Lazarus
+4. Run > Build
+5. When built, the Simba executable will be located in the root directory of the repository. 
