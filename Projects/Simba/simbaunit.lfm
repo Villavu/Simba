@@ -472,15 +472,6 @@ object SimbaForm: TSimbaForm
       OnCanResize = SplitterFunctionListCanResize
       Visible = False
     end
-    object NotesSplitter: TSplitter
-      Left = 995
-      Height = 539
-      Top = 0
-      Width = 5
-      Align = alRight
-      ResizeAnchor = akRight
-      Visible = False
-    end
     object PanelUtilites: TPairSplitter
       Cursor = crVSplit
       Left = 1000
@@ -590,7 +581,7 @@ object SimbaForm: TSimbaForm
     inline FunctionList: TFunctionList_Frame
       Height = 539
       ClientHeight = 539
-      TabOrder = 5
+      TabOrder = 4
       inherited Filter: TTreeFilterEdit
         AnchorSideLeft.Control = FunctionList
         AnchorSideBottom.Control = FunctionList
@@ -606,6 +597,14 @@ object SimbaForm: TSimbaForm
         AnchorSideBottom.Control = FunctionList
         Top = 514
       end
+    end
+    object NotesSplitter: TSplitter
+      Left = 995
+      Height = 539
+      Top = 0
+      Width = 5
+      Align = alRight
+      ResizeAnchor = akRight
     end
   end
   object MainMenu: TMainMenu

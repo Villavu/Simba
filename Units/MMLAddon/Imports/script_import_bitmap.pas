@@ -301,19 +301,19 @@ end;
 procedure Lape_CalculatePixelShift(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with TMMLScriptThread(Params^[0]).Client do
-    PInt32(Result)^ := CalculatePixelShift(MBitmaps[PInt32(Params^[1])^], MBitmaps[PInt32(Params^[2])^], PBox(Params^[2])^);
+    PInt32(Result)^ := CalculatePixelShift(MBitmaps[PInt32(Params^[1])^], MBitmaps[PInt32(Params^[2])^], PBox(Params^[3])^);
 end;
 
 procedure Lape_CalculatePixelShiftTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with TMMLScriptThread(Params^[0]).Client do
-    PInt32(Result)^ := CalculatePixelShiftTPA(MBitmaps[PInt32(Params^[1])^], MBitmaps[PInt32(Params^[2])^], PPointArray(Params^[2])^);
+    PInt32(Result)^ := CalculatePixelShiftTPA(MBitmaps[PInt32(Params^[1])^], MBitmaps[PInt32(Params^[2])^], PPointArray(Params^[3])^);
 end;
 
 procedure Lape_CalculatePixelTolerance(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with TMMLScriptThread(Params^[0]).Client do
-    PExtended(Result)^ := CalculatePixelTolerance(MBitmaps[PInt32(Params^[1])^], MBitmaps[PInt32(Params^[2])^], PBox(Params^[2])^, PInt32(Params^[3])^);
+    PExtended(Result)^ := CalculatePixelTolerance(MBitmaps[PInt32(Params^[1])^], MBitmaps[PInt32(Params^[2])^], PBox(Params^[3])^, PInt32(Params^[4])^);
 end;
 
 procedure Lape_CalculatePixelToleranceTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

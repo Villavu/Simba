@@ -176,7 +176,6 @@ type
     MenuItemExportHTML: TMenuItem;
     MenuItemDivider9: TMenuItem;
     MouseTimer: TTimer;
-    NotesSplitter: TSplitter;
     PanelUtilites: TPairSplitter;
     PanelCodeBrowser: TPairSplitterSide;
     PanelNotes: TPairSplitterSide;
@@ -185,6 +184,7 @@ type
     btnRefreshFileBrowser: TSpeedButton;
     SpeedButtonFindNext: TSpeedButton;
     SpeedButtonFindPrev: TSpeedButton;
+    NotesSplitter: TSplitter;
     ToolButton5: TToolButton;
     TB_ShowPackages: TToolButton;
     TT_ScriptManager: TToolButton;
@@ -1681,20 +1681,22 @@ procedure TSimbaForm.ActionConsoleExecute(Sender: TObject);
     Result := 0;
 
     {$IFDEF WINDOWS}
-    Result := GetStdHandle(STD_OUTPUT_HANDLE);
+    Result := GetStdHandle(STD_INPUT_HANDLE);
     {$ENDIF}
   end;
 
 var
-  Mode: UInt32 = 0;
+  Mode: UInt32;
 begin
   if (Sender <> nil) then
     SimbaSettings.LastConfig.MainForm.ConsoleVisible.Value := not SimbaSettings.LastConfig.MainForm.ConsoleVisible.Value;
 
   {$IFDEF WINDOWS}
   SetConsoleCtrlHandler(@ConsoleHandler, True); // close simba when command prompt is closed.
-  GetConsoleMode(GetConsoleHandle, Mode);
-  SetConsoleMode(GetConsoleHandle(), Mode and (not ENABLE_QUICK_EDIT_MODE)); // remove silly quick edit mode.
+
+  // Disable silly windows features that freeze the application
+  GetConsoleMode(GetConsoleHandle(), Mode);
+  SetConsoleMode(GetConsoleHandle, Mode and not (ENABLE_QUICK_EDIT_MODE or ENABLE_INSERT_MODE));
 
   case SimbaSettings.LastConfig.MainForm.ConsoleVisible.Value of
     True: ShowWindow(GetConsoleWindow(), SW_SHOWNORMAL);
@@ -1846,7 +1848,6 @@ begin
   ActionFileBrowser.Checked := sideBrowser.Visible;
 
   PanelUtilites.Visible := sideBrowser.Visible or sideNotes.Visible;
-  NotesSplitter.Visible := sideBrowser.Visible or sideNotes.Visible;
 end;
 
 procedure TSimbaForm.ActionOpenExecute(Sender: TObject);
