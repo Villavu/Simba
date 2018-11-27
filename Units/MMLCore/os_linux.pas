@@ -21,856 +21,516 @@
       Linux OS specific implementation for Mufasa Macro Library
 }
 {$mode objfpc}{$H+}
-unit os_linux;
 
-{
-  TODO's:
-  - Allow selecting a different X display
-  - Fix keyboard layout / SendString
-}
+unit os_linux;
 
 interface
 
-  uses
-    Classes, SysUtils, mufasatypes, mufasabase, IOManager,
-    xlib, x, xutil, XKeyInput, KeySym, ctypes, syncobjs;
+uses
+  classes, sysutils, lcltype,
+  xlib, x, xutil, xlibhelpers, keysym,
+  mufasatypes, iomanager;
 
-  type
+type
+  TWindow = class(TWindow_Abstract)
+  public
+    procedure GetTargetDimensions(out w, h: integer); override;
+    procedure GetTargetPosition(out left, top: integer); override;
+    function ReturnData(xs, ys, width, height: Integer): TRetData; override;
+    procedure FreeReturnData; override;
 
-    TNativeWindow = x.TWindow;
+    function TargetValid: boolean; override;
 
-    TKeyInput = class(TXKeyInput)
-      public
-        procedure Down(Key: Word);
-        procedure Up(Key: Word);
-    end;
+    function MouseSetClientArea(x1, y1, x2, y2: integer): boolean; override;
+    procedure MouseResetClientArea; override;
+    function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; override;
+    procedure ImageResetClientArea; override;
 
-    { TWindow }
+    procedure ActivateClient; override;
+    procedure GetMousePosition(out x,y: integer); override;
+    procedure ScrollMouse(x, y: integer; Lines: integer); override;
+    procedure MoveMouse(x,y: integer); override;
+    procedure HoldMouse(x,y: integer; button: TClickType); override;
+    procedure ReleaseMouse(x,y: integer; button: TClickType); override;
+    function  IsMouseButtonHeld( button : TClickType) : boolean;override;
 
-    TWindow = class(TWindow_Abstract)
-      public
-        constructor Create(display: PDisplay; screennum: integer; window: x.TWindow);
-        destructor Destroy; override;
-        procedure GetTargetDimensions(out w, h: integer); override;
-        procedure GetTargetPosition(out left, top: integer); override;
-        function ReturnData(xs, ys, width, height: Integer): TRetData; override;
-        procedure FreeReturnData; override;
+    procedure SendString(str: string; keywait, keymodwait: integer); override;
+    procedure HoldKey(key: integer); override;
+    procedure ReleaseKey(key: integer); override;
+    function IsKeyHeld(key: integer): boolean; override;
+    function GetKeyCode(c : char) : integer;override;
 
-        function  GetError: String; override;
-        function  ReceivedError: Boolean; override;
-        procedure ResetError; override;
+    function GetHandle: PtrUInt; override;
+  private
+    Window: HWND;
+    Buffer: PXImage;
 
-        function TargetValid: boolean; override;
+    { (Forced) Client Area }
+    mx1, my1, mx2, my2: integer;
+    ix1, iy1, ix2, iy2: integer;
+    mcaset, icaset: Boolean;
 
-        function MouseSetClientArea(x1, y1, x2, y2: integer): boolean; override;
-        procedure MouseResetClientArea; override;
-        function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; override;
-        procedure ImageResetClientArea; override;
+    procedure MouseApplyAreaOffset(var x, y: integer);
+    procedure ImageApplyAreaOffset(var x, y: integer);
+  public
+    constructor Create(AWindow: HWND);
+    destructor Destroy; override;
+  end;
 
-        procedure ActivateClient; override;
-        procedure GetMousePosition(out x,y: integer); override;
-        procedure MoveMouse(x,y: integer); override;
-        procedure HoldMouse(x,y: integer; button: TClickType); override;
-        procedure ReleaseMouse(x,y: integer; button: TClickType); override;
-        function  IsMouseButtonHeld( button : TClickType) : boolean;override;
+  TIOManager = class(TIOManager_Abstract)
+  public
+    function GetProcesses: TSysProcArr; override;
+    function SetTarget(Handle: HWND): Int32; overload;
 
-        procedure SendString(str: string; keywait, keymodwait: integer); override;
-        procedure HoldKey(key: integer); override;
-        procedure ReleaseKey(key: integer); override;
-        function IsKeyHeld(key: integer): boolean; override;
-        function GetKeyCode(c : char) : integer;override;
-
-        function GetNativeWindow: TNativeWindow;
-        function GetHandle(): PtrUInt; override;
-      private
-        { display is the connection to the X server }
-        display: PDisplay;
-
-        { screen-number and selected window }
-        screennum: integer;
-        window: x.TWindow;
-
-        { Reference to the XImage }
-        buffer: PXImage;
-
-        { For memory-leak checks }
-        dirty: Boolean;  //true if image loaded
-
-        { KeyInput class }
-        keyinput: TKeyInput;
-
-        { X Error Handler }
-        oldXHandler: TXErrorHandler;
-
-        { (Forced) Client Area }
-        mx1, my1, mx2, my2: integer;
-        ix1, iy1, ix2, iy2: integer;
-        mcaset, icaset: Boolean;
-
-        procedure MouseApplyAreaOffset(var x, y: integer);
-        procedure ImageApplyAreaOffset(var x, y: integer);
-    end;
-
-    TIOManager = class(TIOManager_Abstract)
-      public
-        constructor Create;
-        constructor Create(plugin_dir: string);
-        function SetTarget(target: TNativeWindow): integer; overload;
-        procedure SetDesktop; override;
-
-        function GetProcesses: TSysProcArr; override;
-        procedure SetTargetEx(Proc: TSysProc); override;
-      private
-        procedure NativeInit; override;
-        procedure NativeFree; override;
-      public
-        display: PDisplay;
-        screennum: integer;
-        desktop: x.TWindow;
-    end;
-
-  function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint; cdecl;
+    procedure SetTargetEx(Proc: TSysProc); override;
+    procedure SetDesktop; override;
+  end;
 
 implementation
-
-  uses GraphType, interfacebase, lcltype;
-
-  { PROBLEM: .Create is called on the main thread. ErrorCS etc aren't
-    created on other threads. We will create them on the fly...
-    More info below...}
-  threadvar
-    xerror: string;
-  threadvar
-    ErrorCS: syncobjs.TCriticalSection;
-
-
- {
-    This is extremely hacky, but also very useful.
-    We have to install a X error handler, because otherwise X
-    will terminate our entire app on error.
-
-    Since we want the right thread to recieve the right error, we have to
-    fiddle a bit with threadvars, mutexes / semaphores.
-
-    Another problem is that the script thread is initialised on the main thread.
-    This means that all (threadvar!) semaphores initialised on the mainthread
-    are NOT initialised on the script thread, which has yet to be started.
-    Therefore, we check if it hasn't been created yet.
-
-    ** Horrible solution, but WFM **
-
-    This is the Handler function.
-
-  }
 
 var
   SpecialXKeys: array [0..255] of Int32;
 
-  function XGetKeySym(Key: String; Display: PDisplay): TKeySym;
-  var ks: TKeySym;
+constructor TWindow.Create(AWindow: HWND);
+begin
+  inherited Create();
+
+  Self.Window := AWindow;
+end;
+
+destructor TWindow.Destroy;
+begin
+  Self.FreeReturnData();
+
+  inherited Destroy();
+end;
+
+function TWindow.GetHandle: PtrUInt;
+begin
+  Result := Self.Window;
+end;
+
+procedure TWindow.GetTargetDimensions(out W, H: integer);
+var
+  Attributes: TXWindowAttributes;
+begin
+  W := -1;
+  H := -1;
+
+  if icaset then
   begin
-    ks := XStringToKeysym(PChar(Key));
-    if (ks = NoSymbol) then
-      raise Exception.CreateFmt('Undefined key: `%s`', [key]);
-    Result := ks;
+    W := ix2 - ix1;
+    H := iy2 - iy1;
+  end else
+  if _XGetWindowAttributes(Self.Window, Attributes) then
+  begin
+    W := Attributes.Width;
+    H := Attributes.Height;
+  end;
+end;
+
+procedure TWindow.GetTargetPosition(out left, top: integer);
+var
+  Attributes: TXWindowAttributes;
+begin
+  Left := 0;
+  Top := 0;
+
+  if _XGetWindowAttributes(Self.Window, Attributes) Then
+  begin
+    Left := Attributes.X;
+    Top := Attributes.Y;
+  end;
+end;
+
+function TWindow.TargetValid: boolean;
+begin
+  Result := _XIsWindowVaild(Self.Window);
+end;
+
+{ SetClientArea allows you to use a part of the actual client as a virtual
+  client. Im other words, all mouse,find functions will be relative to the
+  virtual client.
+
+  XXX:
+  I realise I can simply add a[x,y]1 to all of the functions rather than check
+  for caset (since they're 0 if it's not set), but I figured it would be more
+  clear this way.
+}
+function TWindow.MouseSetClientArea(x1, y1, x2, y2: integer): boolean;
+var w, h: integer;
+begin
+  { TODO: What if the client resizes (shrinks) and our ``area'' is too large? }
+  GetTargetDimensions(w, h);
+  if ((x2 - x1) > w) or ((y2 - y1) > h) then
+    exit(False);
+  if (x1 < 0) or (y1 < 0) then
+    exit(False);
+
+  mx1 := x1; my1 := y1; mx2 := x2; my2 := y2;
+  mcaset := True;
+end;
+
+procedure TWindow.MouseResetClientArea;
+begin
+  mx1 := 0; my1 := 0; mx2 := 0; my2 := 0;
+  mcaset := False;
+end;
+
+function TWindow.ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
+var w, h: integer;
+begin
+  { TODO: What if the client resizes (shrinks) and our ``area'' is too large? }
+  GetTargetDimensions(w, h);
+  if ((x2 - x1) > w) or ((y2 - y1) > h) then
+    exit(False);
+  if (x1 < 0) or (y1 < 0) then
+    exit(False);
+
+  ix1 := x1; iy1 := y1; ix2 := x2; iy2 := y2;
+  icaset := True;
+end;
+
+procedure TWindow.ImageResetClientArea;
+begin
+  ix1 := 0; iy1 := 0; ix2 := 0; iy2 := 0;
+  icaset := False;
+end;
+
+procedure TWindow.MouseApplyAreaOffset(var x, y: integer);
+begin
+  if mcaset then
+  begin
+    x := x + mx1;
+    y := y + my1;
+  end;
+end;
+
+procedure TWindow.ImageApplyAreaOffset(var x, y: integer);
+begin
+  if icaset then
+  begin
+    x := x + ix1;
+    y := y + iy1;
+  end;
+end;
+
+procedure TWindow.ActivateClient;
+begin
+  _XSetActiveWindow(_XGetRootWindow(Self.Window));
+end;
+
+function TWindow.ReturnData(xs, ys, width, height: Integer): TRetData;
+var
+  w, h: integer;
+begin
+  GetTargetDimensions(w,h);
+  if (xs < 0) or (xs + width > w) or (ys < 0) or (ys + height > h) or (width < 0) or (height < 0) then
+    raise Exception.CreateFMT('TMWindow.ReturnData: The parameters passed are wrong; xs,ys %d,%d width,height %d,%d',[xs,ys,width,height]);
+
+  ImageApplyAreaOffset(xs, ys);
+
+  Result.Ptr := nil;
+  Result.IncPtrWith := 0;
+
+  if (Self.Buffer <> nil) then
+    raise Exception.Create('TIOManager.FreeReturnData must be called for each TIOManager.ReturnData call');
+
+  Self.Buffer := _XGetImage(Self.Window, xs, ys, width, height, AllPlanes, ZPixmap);
+  if (Self.Buffer = nil) then
+    raise Exception.Create('TIOManager.ReturnData: XGetImage returned nothing!');
+
+  Result.Ptr := PRGB32(buffer^.data);
+  Result.IncPtrWith := 0;
+  Result.RowLen := width;
+end;
+
+procedure TWindow.FreeReturnData;
+begin
+  if (Self.Buffer <> nil) then
+    XDestroyImage(Self.Buffer);
+  Self.Buffer := nil;
+end;
+
+procedure TWindow.GetMousePosition(out x, y: integer);
+var
+  event: TXButtonEvent;
+begin
+  Event := Default(TXButtonEvent);
+
+  _XQueryPointer(Self.Window,
+                 Event.Root, Event.Window,
+                 Event.X_Root, Event.Y_Root,
+                 Event.X, Event.Y,
+                 Event.State);
+
+  x := Event.x;
+  y := Event.y;
+
+  x := x - mx1;
+  y := y - my1;
+end;
+
+procedure TWindow.ScrollMouse(x, y: integer; Lines: integer);
+var
+  Button: TClickType;
+  i: Int32;
+begin
+  MouseApplyAreaOffset(x, y);
+
+  if Lines > 0 then
+    Button := mouse_ScrollDown
+  else
+  if Lines < 0 then
+    Button := mouse_ScrollUp;
+
+  for i := 1 to Abs(Lines) do
+  begin
+    HoldMouse(x, y, Button);
+    ReleaseMouse(x, y, Button);
+  end;
+end;
+
+procedure TWindow.MoveMouse(x,y: integer);
+begin
+  MouseApplyAreaOffset(x, y);
+
+  _XWarpPointer(None, window, 0, 0, 0, 0, X, Y);
+  _XFlush();
+end;
+
+procedure TWindow.HoldMouse(x, y: integer; button: TClickType);
+var
+  Event: TXButtonPressedEvent;
+begin
+  Event := Default(TXButtonPressedEvent);
+
+  case button of
+    mouse_Left:   Event.button := Button1;
+    mouse_Middle: Event.button := Button2;
+    mouse_Right:  Event.button := Button3;
+    mouse_ScrollDown: Event.button := Button5;
+    mouse_ScrollUp: Event.Button := Button4;
+  end;
+  Event.subwindow := Self.Window;
+
+  while (Event.subwindow <> None) do
+  begin
+    Event.window := Event.subwindow;
+
+    _XQueryPointer(Event.window,
+                   Event.root, Event.subwindow,
+                   Event.x_root, Event.y_root,
+                   Event.x, Event.y,
+                   Event.state);
   end;
 
-  procedure XKeyDown(Key: TKeyCode);
-  var
-    Display: PDisplay;
+  Event._type := ButtonPress;
+
+  _XSendEvent(PointerWindow, True, ButtonPressMask, @Event);
+  _XFlush();
+end;
+
+procedure TWindow.ReleaseMouse(x,y: integer; button: TClickType);
+var
+  Event: TXButtonPressedEvent;
+begin
+  Event := Default(TXButtonPressedEvent);
+
+  case button of
+    mouse_Left:   Event.button := Button1;
+    mouse_Middle: Event.button := Button2;
+    mouse_Right:  Event.button := Button3;
+    mouse_ScrollDown: Event.button := Button5;
+    mouse_ScrollUp: Event.Button := Button4;
+  end;
+  Event.subwindow := Self.Window;
+
+  while (Event.subwindow <> None) do
   begin
-    Display := XOpenDisplay(nil);
-    XTestFakeKeyEvent(Display, Key, True, 0);
-    XFlush(Display);
-    XCloseDisplay(Display);
+    Event.window := Event.subwindow;
+
+    _XQueryPointer(Event.window,
+                   Event.root, Event.subwindow,
+                   Event.x_root, Event.y_root,
+                   Event.x, Event.y,
+                   Event.state);
   end;
 
-  procedure XKeyUp(Key: TKeyCode);
-  var
-    Display: PDisplay;
-  begin
-    Display := XOpenDisplay(nil);
-    XTestFakeKeyEvent(Display, Key, False, 0);
-    XFlush(Display);
-    XCloseDisplay(Display);
-  end;
+  Event._type := ButtonRelease;
 
-  function VirtualKeyToXKeySym(Key: Word): TKeySym;
-  begin
-    case Key of
-      VK_BACK:      Result := XK_BackSpace;
-      VK_TAB:       Result := XK_Tab;
-      VK_CLEAR:     Result := XK_Clear;
-      VK_RETURN:    Result := XK_Return;
-      VK_SHIFT:     Result := XK_Shift_L;
-      VK_CONTROL:   Result := XK_Control_L;
-      VK_MENU:      Result := XK_Alt_R;
-      VK_CAPITAL:   Result := XK_Caps_Lock;
+  _XSendEvent(PointerWindow, True, ButtonReleaseMask, @Event);
+  _XFlush();
+end;
 
-      VK_ESCAPE:    Result := XK_Escape;
-      VK_SPACE:     Result := XK_space;
-      VK_PRIOR:     Result := XK_Prior;
-      VK_NEXT:      Result := XK_Next;
-      VK_END:       Result := XK_End;
-      VK_HOME:      Result := XK_Home;
-      VK_LEFT:      Result := XK_Left;
-      VK_UP:        Result := XK_Up;
-      VK_RIGHT:     Result := XK_Right;
-      VK_DOWN:      Result := XK_Down;
-      VK_SELECT:    Result := XK_Select;
-      VK_PRINT:     Result := XK_Print;
-      VK_EXECUTE:   Result := XK_Execute;
+function TWindow.IsMouseButtonHeld(button: TClickType): boolean;
+var
+  Event: TXButtonEvent;
+begin
+  Event := Default(TXButtonEvent);
 
-      VK_INSERT:    Result := XK_Insert;
-      VK_DELETE:    Result := XK_Delete;
-      VK_HELP:      Result := XK_Help;
-      VK_0:         Result := XK_0;
-      VK_1:         Result := XK_1;
-      VK_2:         Result := XK_2;
-      VK_3:         Result := XK_3;
-      VK_4:         Result := XK_4;
-      VK_5:         Result := XK_5;
-      VK_6:         Result := XK_6;
-      VK_7:         Result := XK_7;
-      VK_8:         Result := XK_8;
-      VK_9:         Result := XK_9;
+  _XQueryPointer(Event.window,
+                 Event.root, Event.window,
+                 Event.x_root, Event.y_root,
+                 Event.x, event.y,
+                 Event.state);
 
-      VK_A:         Result := XK_a;
-      VK_B:         Result := XK_b;
-      VK_C:         Result := XK_c;
-      VK_D:         Result := XK_d;
-      VK_E:         Result := XK_e;
-      VK_F:         Result := XK_f;
-      VK_G:         Result := XK_g;
-      VK_H:         Result := XK_h;
-      VK_I:         Result := XK_i;
-      VK_J:         Result := XK_j;
-      VK_K:         Result := XK_k;
-      VK_L:         Result := XK_l;
-      VK_M:         Result := XK_m;
-      VK_N:         Result := XK_n;
-      VK_O:         Result := XK_o;
-      VK_P:         Result := XK_p;
-      VK_Q:         Result := XK_q;
-      VK_R:         Result := XK_r;
-      VK_S:         Result := XK_s;
-      VK_T:         Result := XK_t;
-      VK_U:         Result := XK_u;
-      VK_V:         Result := XK_v;
-      VK_W:         Result := XK_w;
-      VK_X:         Result := XK_x;
-      VK_Y:         Result := XK_y;
-      VK_Z:         Result := XK_z;
-
-      VK_NUMPAD0:   Result := XK_KP_0;
-      VK_NUMPAD1:   Result := XK_KP_1;
-      VK_NUMPAD2:   Result := XK_KP_2;
-      VK_NUMPAD3:   Result := XK_KP_3;
-      VK_NUMPAD4:   Result := XK_KP_4;
-      VK_NUMPAD5:   Result := XK_KP_5;
-      VK_NUMPAD6:   Result := XK_KP_6;
-      VK_NUMPAD7:   Result := XK_KP_7;
-      VK_NUMPAD8:   Result := XK_KP_8;
-      VK_NUMPAD9:   Result := XK_KP_9;
-      VK_MULTIPLY:  Result := XK_KP_Multiply;
-      VK_ADD:       Result := XK_KP_Add;
-      VK_SEPARATOR: Result := XK_KP_Separator;
-      VK_SUBTRACT:  Result := XK_KP_Subtract;
-      VK_DECIMAL:   Result := XK_KP_Decimal;
-      VK_DIVIDE:    Result := XK_KP_Divide;
-      VK_F1:        Result := XK_F1;
-      VK_F2:        Result := XK_F2;
-      VK_F3:        Result := XK_F3;
-      VK_F4:        Result := XK_F4;
-      VK_F5:        Result := XK_F5;
-      VK_F6:        Result := XK_F6;
-      VK_F7:        Result := XK_F7;
-      VK_F8:        Result := XK_F8;
-      VK_F9:        Result := XK_F9;
-      VK_F10:       Result := XK_F10;
-      VK_F11:       Result := XK_F11;
-      VK_F12:       Result := XK_F12;
-      VK_F13:       Result := XK_F13;
-      VK_F14:       Result := XK_F14;
-      VK_F15:       Result := XK_F15;
-      VK_F16:       Result := XK_F16;
-      VK_F17:       Result := XK_F17;
-      VK_F18:       Result := XK_F18;
-      VK_F19:       Result := XK_F19;
-      VK_F20:       Result := XK_F20;
-      VK_F21:       Result := XK_F21;
-      VK_F22:       Result := XK_F22;
-      VK_F23:       Result := XK_F23;
-      VK_F24:       Result := XK_F24;
-      VK_NUMLOCK:   Result := XK_Num_Lock;
-      VK_SCROLL:    Result := XK_Scroll_Lock;
+  case Button of
+    mouse_Left:       Result := ((Event.state and Button1Mask) > 0);
+    mouse_Middle:     Result := ((Event.state and Button2Mask) > 0);
+    mouse_Right:      Result := ((Event.state and Button3Mask) > 0);
+    mouse_ScrollDown: Result := ((Event.state and Button4Mask) > 0);
+    mouse_ScrollUp:   Result := ((Event.state and Button5Mask) > 0);
     else
-      Result := XK_VoidSymbol;
-    end;
+      Result := False;
+  end;
+end;
+
+procedure TWindow.SendString(str: string; keywait, keymodwait: integer);
+var
+  i, Index: Int32;
+  SpecialKS, KS: TKeySym;
+  KC: TKeyCode;
+
+  function GetModifierKC(n: Int32): TKeyCode;
+  begin
+     if n = ShiftMapIndex then
+       Exit(_XKeysymToKeycode(XK_Shift_L))
+     else if n >= Mod1MapIndex then
+       Exit(_XKeysymToKeycode(XK_ISO_Level3_Shift))
+     else
+       raise Exception.CreateFmt('SendString - Unsupported modifier for key: `%s`', [str[i]]);
   end;
 
-
-  function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint; cdecl;
+begin
+  for i := 1 to Length(str) do
   begin
-    case para2^.error_code of
-      1:  xerror := 'BadRequest';
-      2:  xerror := 'BadValue';
-      3:  xerror := 'BadWindow';
-      4:  xerror := 'BadPixmap';
-      5:  xerror := 'BadAtom';
-      6:  xerror := 'BadCursor';
-      7:  xerror := 'BadFont';
-      8:  xerror := 'BadMatch';
-      9:  xerror := 'BadDrawable';
-      10: xerror := 'BadAccess';
-      11: xerror := 'BadAlloc';
-      12: xerror := 'BadColor';
-      13: xerror := 'BadGC';
-      14: xerror := 'BadIDChoice';
-      15: xerror := 'BadName';
-      16: xerror := 'BadLength';
-      17: xerror := 'BadImplementation';
-      else
-        xerror := 'UNKNOWN';
-    end;
-    result := 0;
-    mDebugLn('X Error: ' + xerror);
-    mDebugLn('Error code: ' + inttostr(para2^.error_code));
-    mDebugLn('Display: ' + inttostr(LongWord(para2^.display)));
-    mDebugLn('Minor code: ' + inttostr(para2^.minor_code));
-    mDebugLn('Request code: ' + inttostr(para2^.request_code));
-    mDebugLn('Resource ID: ' + inttostr(para2^.resourceid));
-    mDebugLn('Serial: ' + inttostr(para2^.serial));
-    mDebugLn('Type: ' + inttostr(para2^._type));
-  end;
-
- { TKeyInput }
-
-  procedure TKeyInput.Down(Key: Word);
-  begin
-    DoDown(Key);
-  end;
-
-  procedure TKeyInput.Up(Key: Word);
-  begin
-    DoUp(Key);
-  end;
-
-  { TWindow }
-
-  function TWindow.GetError: String;
-  begin
-    exit(xerror);
-  end;
-
-  function  TWindow.ReceivedError: Boolean;
-  begin
-    result := xerror <> '';
-  end;
-
-  procedure TWindow.ResetError;
-  begin
-    xerror := '';
-  end;
-
-  { See if the semaphores / CS are initialised }
-  constructor TWindow.Create(display: PDisplay; screennum: integer; window: x.TWindow);
-  begin
-    inherited Create;
-    self.display:= display;
-    self.screennum:= screennum;
-    self.window:= window;
-    self.dirty:= false;
-    self.keyinput:= TKeyInput.Create;
-    self.mx1 := 0; self.my1 := 0; self.mx2 := 0; self.my2 := 0;
-    self.mcaset := false;
-    self.ix1 := 0; self.iy1 := 0; self.ix2 := 0; self.iy2 := 0;
-    self.icaset := false;
-
-    xerror := '';
-
-    { XXX FIXME TODO O GOD WTF }
-    if not assigned(ErrorCS) then
-      ErrorCS := syncobjs.TCriticalSection.Create;
-    ErrorCS.Enter;
-    try
-      oldXHandler:=XSetErrorHandler(@MufasaXErrorHandler);
-    finally
-      ErrorCS.Leave;
-    end;
-  end;
-
-  destructor TWindow.Destroy;
-    var
-      erh: TXErrorHandler;
-  begin
-    FreeReturnData;
-    keyinput.Free;
-
-    { XXX FIXME TODO O GOD WTF }
-    if not assigned(ErrorCS) then
-      ErrorCS := syncobjs.TCriticalSection.Create;
-    ErrorCS.Enter;
-
-    erh := XSetErrorHandler(oldXHandler);
-    try
-      if erh <> @MufasaXErrorHandler then
-        XSetErrorHandler(erh);
-    finally
-      ErrorCS.Leave;
-    end;
-    inherited Destroy;
-  end;
-
-  function TWindow.GetNativeWindow: TNativeWindow;
-  begin
-    result := self.window;
-  end;
-
-  function TWindow.GetHandle(): PtrUInt;
-  begin
-    Result := PtrUInt(GetNativeWindow());
-  end;
-
-  procedure TWindow.GetTargetDimensions(out w, h: integer);
-  var
-    Attrib: TXWindowAttributes;
-  begin
-    if icaset then
-    begin
-      w := ix2 - ix1;
-      h := iy2 - iy1;
-      exit;
-    end;
-    if XGetWindowAttributes(display, window, @Attrib) <> 0 Then
-    begin
-      W := Attrib.Width;
-      H := Attrib.Height;
-    end else
-    begin
-      W := -1;
-      H := -1;
-    end;
-  end;
-
-  procedure TWindow.GetTargetPosition(out left, top: integer);
-  var
-    Attrib: TXWindowAttributes;
-  begin
-    if XGetWindowAttributes(display, window, @Attrib) <> 0 Then
-    begin
-      left := Attrib.x;
-      top := attrib.y;
-    end else
-    begin
-      // XXX: this is tricky; what do we return when it doesn't exist?
-      // The window can very well be at -1, -1. We'll return 0 for now.
-      left := 0;
-      top := 0;
-    end;
-  end;
-
-  function TWindow.TargetValid: boolean;
-  var
-    Attrib: TXWindowAttributes;
-  begin
-    XGetWindowAttributes(display, window, @Attrib);
-    result := not ReceivedError;
-  end;
-
-  { SetClientArea allows you to use a part of the actual client as a virtual
-    client. Im other words, all mouse,find functions will be relative to the
-    virtual client.
-
-    XXX:
-    I realise I can simply add a[x,y]1 to all of the functions rather than check
-    for caset (since they're 0 if it's not set), but I figured it would be more
-    clear this way.
-  }
-  function TWindow.MouseSetClientArea(x1, y1, x2, y2: integer): boolean;
-  var w, h: integer;
-  begin
-    { TODO: What if the client resizes (shrinks) and our ``area'' is too large? }
-    GetTargetDimensions(w, h);
-    if ((x2 - x1) > w) or ((y2 - y1) > h) then
-      exit(False);
-    if (x1 < 0) or (y1 < 0) then
-      exit(False);
-
-    mx1 := x1; my1 := y1; mx2 := x2; my2 := y2;
-    mcaset := True;
-  end;
-
-  procedure TWindow.MouseResetClientArea;
-  begin
-    mx1 := 0; my1 := 0; mx2 := 0; my2 := 0;
-    mcaset := False;
-  end;
-
-  function TWindow.ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
-  var w, h: integer;
-  begin
-    { TODO: What if the client resizes (shrinks) and our ``area'' is too large? }
-    GetTargetDimensions(w, h);
-    if ((x2 - x1) > w) or ((y2 - y1) > h) then
-      exit(False);
-    if (x1 < 0) or (y1 < 0) then
-      exit(False);
-
-    ix1 := x1; iy1 := y1; ix2 := x2; iy2 := y2;
-    icaset := True;
-  end;
-
-  procedure TWindow.ImageResetClientArea;
-  begin
-    ix1 := 0; iy1 := 0; ix2 := 0; iy2 := 0;
-    icaset := False;
-  end;
-
-  procedure TWindow.MouseApplyAreaOffset(var x, y: integer);
-  begin
-    if mcaset then
-    begin
-      x := x + mx1;
-      y := y + my1;
-    end;
-  end;
-
-  procedure TWindow.ImageApplyAreaOffset(var x, y: integer);
-  begin
-    if icaset then
-    begin
-      x := x + ix1;
-      y := y + iy1;
-    end;
-  end;
-
-  procedure TWindow.ActivateClient;
-
-  begin
-    XSetInputFocus(display,window,RevertToParent,CurrentTime);
-    XFlush(display);
-    if ReceivedError then
-      raise Exception.Create('Error: ActivateClient: ' + GetError);
-  end;
-
-  function TWindow.ReturnData(xs, ys, width, height: Integer): TRetData;
-  var
-    w,h: integer;
-  begin
-    GetTargetDimensions(w,h);
-    if (xs < 0) or (xs + width > w) or (ys < 0) or (ys + height > h) then
-      raise Exception.CreateFMT('TMWindow.ReturnData: The parameters passed are wrong; xs,ys %d,%d width,height %d,%d',[xs,ys,width,height]);
-    if dirty then
-      raise Exception.CreateFmt('ReturnData was called again without freeing'+
-                                ' the previously used data. Do not forget to'+
-                                ' call FreeReturnData', []);
-
-    ImageApplyAreaOffset(xs, ys);
-
-    buffer := XGetImage(display, window, xs, ys, width, height, AllPlanes, ZPixmap);
-    if buffer = nil then
-    begin
-      mDebugLn('ReturnData: XGetImage Error. Dumping data now:');
-      mDebugLn('xs, ys, width, height: ' + inttostr(xs) + ', '  + inttostr(ys) +
-              ', ' + inttostr(width) + ', ' + inttostr(height));
-      Result.Ptr := nil;
-      Result.IncPtrWith := 0;
-      raise Exception.CreateFMT('TMWindow.ReturnData: ReturnData: XGetImage Error', []);
-      exit;
-    end;
-    Result.Ptr := PRGB32(buffer^.data);
-    Result.IncPtrWith := 0;
-    Result.RowLen := width;
-    dirty:= true;
-    //XSetErrorHandler(Old_Handler);
-  end;
-
-  procedure TWindow.FreeReturnData;
-  begin
-    if dirty then
-    begin
-      if (buffer <> nil) then
-        XDestroyImage(buffer);
-      buffer:= nil;
-      dirty:= false;
-    end;
-  end;
-
-  procedure TWindow.GetMousePosition(out x,y: integer);
-  var
-    event: TXButtonEvent;
-  begin
-    FillChar(event, SizeOf(event), 0);
-
-    XQueryPointer(display, window,
-                     @event.root, @event.window,
-                     @event.x_root, @event.y_root,
-                     @event.x, @event.y,
-                     @event.state);
-
-    x := event.x;
-    y := event.y;
-
-    x := x - mx1;
-    y := y - my1;
-  end;
-
-  procedure TWindow.MoveMouse(x,y: integer);
-  begin
-    MouseApplyAreaOffset(x, y);
-    XWarpPointer(display, None, window, 0, 0, 0, 0, X, Y);
-    XFlush(display);
-  end;
-
-  procedure TWindow.HoldMouse(x,y: integer; button: TClickType);
-  var
-    event: TXButtonPressedEvent;
-  begin
-    FillChar(event, SizeOf(event), 0);
-
-    case button of
-      mouse_Left:   event.button := Button1;
-      mouse_Middle: event.button := Button2;
-      mouse_Right:  event.button := Button3;
-    end;
-    event.same_screen := cint(0);
-    event.subwindow := window;
-
-    while (event.subwindow <> None) do
-    begin
-      event.window := event.subwindow;
-
-      XQueryPointer(display, event.window,
-                       @event.root, @event.subwindow,
-                       @event.x_root, @event.y_root,
-                       @event.x, @event.y,
-                       @event.state);
-    end;
-
-    event._type := ButtonPress;
-    XSendEvent(display, PointerWindow, True, ButtonPressMask, @event);
-    XFlush(display);
-  end;
-
-  procedure TWindow.ReleaseMouse(x,y: integer; button: TClickType);
-  var
-    event: TXButtonReleasedEvent;
-  begin
-    FillChar(event, SizeOf(event), 0);
-
-    case button of
-      mouse_Left:   event.button := Button1;
-      mouse_Middle: event.button := Button2;
-      mouse_Right:  event.button := Button3;
-    end;
-    event.same_screen := cint(0);
-    event.subwindow := window;
-
-    while (event.subwindow <> None) do
-    begin
-      event.window := event.subwindow;
-
-      XQueryPointer(display, event.window,
-                       @event.root, @event.subwindow,
-                       @event.x_root, @event.y_root,
-                       @event.x, @event.y,
-                       @event.state);
-    end;
-
-    event._type := ButtonRelease;
-    XSendEvent(display, PointerWindow, True, ButtonReleaseMask, @event);
-    XFlush(display);
-  end;
-
-  function TWindow.IsMouseButtonHeld(button: TClickType): boolean;
-  var
-    event: TXEvent;
-  begin
-    FillChar(event, SizeOf(event), 0);
-
-    XQueryPointer(display, event.xbutton.window,
-                     @event.xbutton.root, @event.xbutton.window,
-                     @event.xbutton.x_root, @event.xbutton.y_root,
-                     @event.xbutton.x, @event.xbutton.y,
-                     @event.xbutton.state);
-
-    case button of
-      mouse_Left:   Result := ((event.xbutton.state and Button1Mask) > 0);
-      mouse_Middle: Result := ((event.xbutton.state and Button2Mask) > 0);
-      mouse_Right:  Result := ((event.xbutton.state and Button3Mask) > 0);
-      else
-        Result := False;
-    end;
-  end;
-
-  { XXX: This can be done better - just more work }
-  procedure TWindow.SendString(str: string; keywait, keymodwait: integer);
-  var
-    i,index: Int32;
-    SpecialKS,KS: TKeySym;
-    KC: TKeyCode;
-
-    function GetModifierKC(n: Int32): TKeyCode;
-    begin
-       if n = ShiftMapIndex then
-         Exit(XKeysymToKeycode(Self.Display, XK_Shift_L))
-       else if n >= Mod1MapIndex then
-         Exit(XKeysymToKeycode(Self.Display, XK_ISO_Level3_Shift))
-       else
-         raise Exception.CreateFmt('SendString - Unsupported modifier for key: `%s`', [str[i]]);
-    end;
-
-  begin
-    for i:=1 to Length(str) do
-    begin
-      SpecialKS := SpecialXKeys[ord(str[i])];
-      if SpecialKS <> 0 then KS := SpecialKS
-      else                   KS := XGetKeySym(str[i], Self.Display);
-      KC := XKeysymToKeycode(Self.Display, KS);
-
-      index := 0;
-      while (index < 8) and (XKeycodeToKeysym(Self.Display, KC, index) <> KS) do
-        Inc(index);
-
-      if (index <> 0) then
-      begin
-        XKeyDown(GetModifierKC(index-1));
-        Sleep(keymodwait shr 1);
-      end;
-
-      XKeyDown(KC);
-      if keywait <> 0 then Sleep(keywait);
-      XKeyUp(KC);
-
-      if (index <> 0) then
-      begin
-        XKeyUp(GetModifierKC(index-1));
-        Sleep(keymodwait shr 1);
-      end;
-    end;
-  end;
-
-  procedure TWindow.HoldKey(key: integer);
-  begin
-    keyinput.Down(key);
-  end;
-
-  procedure TWindow.ReleaseKey(key: integer);
-  begin
-    keyinput.Up(key);
-  end;
-
-  function TWindow.IsKeyHeld(key: integer): boolean;
-  var
-    KC: TKeyCode;
-    Keys: array [0..31] of Byte;
-  begin
-    KC := XKeysymToKeycode(Self.Display, VirtualKeyToXKeySym(key));
-    if(KC = 0) then Exit(False);
-    XQueryKeymap(Self.Display, chararr32(Keys));
-    Result := (keys[KC shr 3] shr (KC and $07)) and $01 > 0;
-  end;
-
-  function TWindow.GetKeyCode(c: Char): Integer;
-  begin
-    case C of
-      '0'..'9': Result := VK_0 + Ord(C) - Ord('0');
-      'a'..'z': Result := VK_A + Ord(C) - Ord('a');
-      'A'..'Z': Result := VK_A + Ord(C) - Ord('A');
-      ' ' :     Result := VK_SPACE;
+    SpecialKS := SpecialXKeys[Ord(str[i])];
+    if SpecialKS <> 0 then
+      KS := SpecialKS
     else
-      raise Exception.CreateFMT('GetSimpleKeyCode - char (%s) is not in A..z',[c]);
+      KS := _XGetKeySym(str[i]);
+
+    KC := _XKeysymToKeycode(KS);
+
+    Index := 0;
+    while (Index < 8) and (_XKeycodeToKeysym(KC, Index) <> KS) do
+      Inc(Index);
+
+    if (Index <> 0) then
+    begin
+      _XKeyDown(GetModifierKC(Index-1));
+
+      Sleep(keymodwait shr 1);
+    end;
+
+    _XKeyDown(KC);
+
+    if (KeyWait > 0) then
+      Sleep(KeyWait);
+
+    _XKeyUp(KC);
+
+    if (Index <> 0) then
+    begin
+      _XKeyUp(GetModifierKC(Index-1));
+
+      Sleep(keymodwait shr 1);
     end;
   end;
+end;
 
-  { ***implementation*** IOManager }
+procedure TWindow.HoldKey(key: integer);
+begin
+  _XKeyDown(_XKeySymToKeyCode(VirtualKeyToXKeySym(Key)));
+end;
 
-  constructor TIOManager.Create;
-  begin
-    inherited Create;
+procedure TWindow.ReleaseKey(key: integer);
+begin
+  _XKeyUp(_XKeySymToKeyCode(VirtualKeyToXKeySym(Key)));
+end;
+
+function TWindow.IsKeyHeld(key: integer): boolean;
+var
+  KC: TKeyCode;
+  Keys: array [0..31] of Byte;
+begin
+  KC := _XKeySymToKeyCode(VirtualKeyToXKeySym(key));
+  if (KC = 0) then
+    Exit(False);
+
+  _XQueryKeymap(CharArr32(Keys));
+
+  Result := (Keys[KC shr 3] shr (KC and $07)) and $01 > 0;
+end;
+
+function TWindow.GetKeyCode(c: Char): integer;
+begin
+  case C of
+    '0'..'9': Result := VK_0 + Ord(C) - Ord('0');
+    'a'..'z': Result := VK_A + Ord(C) - Ord('a');
+    'A'..'Z': Result := VK_A + Ord(C) - Ord('A');
+    ' ' :     Result := VK_SPACE;
+  else
+    raise Exception.CreateFMT('GetSimpleKeyCode - char (%s) is not in A..z',[c]);
   end;
+end;
 
-  constructor TIOManager.Create(plugin_dir: string);
-  begin
-    inherited Create(plugin_dir);
-  end;
+procedure TIOManager.SetDesktop;
+begin
+  SetBothTargets(TWindow.Create(_XGetDesktopWindow()));
+end;
 
-  procedure TIOManager.NativeInit;
-  begin
-    display := XOpenDisplay(nil);
-    if display = nil then
-      raise Exception.Create('Could not open a connection to the X Display');
+function TIOManager.SetTarget(Handle: HWND): Int32;
+begin
+  Result := SetBothTargets(TWindow.Create(Handle));
+end;
 
-    { DefaultScreen }
-    screennum:= DefaultScreen(display);
+function TIOManager.GetProcesses: TSysProcArr;
+begin
+  raise Exception.Create('GetProcesses: Not implemented on linux');
+end;
 
-    { Get the Desktop Window }
-    desktop:= RootWindow(display,screennum)
-  end;
-
-  procedure TIOManager.NativeFree;
-  begin
-    XCloseDisplay(display);
-  end;
-
-  procedure TIOManager.SetDesktop;
-  begin
-    SetBothTargets(TWindow.Create(display, screennum, desktop));
-  end;
-
-  function TIOManager.SetTarget(target: x.TWindow): integer;
-  begin
-    result := SetBothTargets(TWindow.Create(display, screennum, target))
-  end;
-
-  function TIOManager.GetProcesses: TSysProcArr;
-  begin
-    raise Exception.Create('GetProcesses: Not Implemented.');
-  end;
-
-  procedure TIOManager.SetTargetEx(Proc: TSysProc);
-  begin
-    raise Exception.Create('SetTargetEx: Not Implemented.');
-  end;
-
-
-
+procedure TIOManager.SetTargetEx(Proc: TSysProc);
+begin
+  raise Exception.Create('SetTargetEx: Not implemented on linux');
+end;
 
 initialization
-   SpecialXKeys[Ord(#9)]  := (XK_TAB);
-   SpecialXKeys[Ord(#10)] := (XK_RETURN);
-   SpecialXKeys[Ord(#32)] := (XK_SPACE);
-   SpecialXKeys[Ord(#34)] := (XK_QUOTEDBL);
-   SpecialXKeys[Ord(#39)] := (XK_APOSTROPHE);
-   SpecialXKeys[Ord('!')] := (XK_EXCLAM);
-   SpecialXKeys[Ord('#')] := (XK_NUMBERSIGN);
-   SpecialXKeys[Ord('%')] := (XK_PERCENT);
-   SpecialXKeys[Ord('$')] := (XK_DOLLAR);
-   SpecialXKeys[Ord('&')] := (XK_AMPERSAND);
-   SpecialXKeys[Ord('(')] := (XK_PARENLEFT);
-   SpecialXKeys[Ord(')')] := (XK_PARENRIGHT);
-   SpecialXKeys[Ord('=')] := (XK_EQUAL);
-   SpecialXKeys[Ord(',')] := (XK_COMMA);
-   SpecialXKeys[Ord('.')] := (XK_PERIOD);
-   SpecialXKeys[Ord(':')] := (XK_COLON);
-   SpecialXKeys[Ord(';')] := (XK_SEMICOLON);
-   SpecialXKeys[Ord('<')] := (XK_LESS);
-   SpecialXKeys[Ord('>')] := (XK_GREATER);
-   SpecialXKeys[Ord('?')] := (XK_QUESTION);
-   SpecialXKeys[Ord('@')] := (XK_AT);
-   SpecialXKeys[Ord('[')] := (XK_BRACKETLEFT);
-   SpecialXKeys[Ord(']')] := (XK_BRACKETRIGHT);
-   SpecialXKeys[Ord('\')] := (XK_BACKSLASH);
-   SpecialXKeys[Ord('^')] := (XK_ASCIICIRCUM);
-   SpecialXKeys[Ord('_')] := (XK_UNDERSCORE);
-   SpecialXKeys[Ord('`')] := (XK_GRAVE);
-   SpecialXKeys[Ord('{')] := (XK_BRACELEFT);
-   SpecialXKeys[Ord('|')] := (XK_BAR);
-   SpecialXKeys[Ord('}')] := (XK_BRACERIGHT);
-   SpecialXKeys[Ord('~')] := (XK_ASCIITILDE);
-   SpecialXKeys[Ord('+')] := (XK_PLUS);
-   SpecialXKeys[Ord('-')] := (XK_MINUS);
-   SpecialXKeys[Ord('*')] := (XK_ASTERISK);
-   SpecialXKeys[Ord('/')] := (XK_SLASH);
+  SpecialXKeys[Ord(#9)]  := (XK_TAB);
+  SpecialXKeys[Ord(#10)] := (XK_RETURN);
+  SpecialXKeys[Ord(#32)] := (XK_SPACE);
+  SpecialXKeys[Ord(#34)] := (XK_QUOTEDBL);
+  SpecialXKeys[Ord(#39)] := (XK_APOSTROPHE);
+  SpecialXKeys[Ord('!')] := (XK_EXCLAM);
+  SpecialXKeys[Ord('#')] := (XK_NUMBERSIGN);
+  SpecialXKeys[Ord('%')] := (XK_PERCENT);
+  SpecialXKeys[Ord('$')] := (XK_DOLLAR);
+  SpecialXKeys[Ord('&')] := (XK_AMPERSAND);
+  SpecialXKeys[Ord('(')] := (XK_PARENLEFT);
+  SpecialXKeys[Ord(')')] := (XK_PARENRIGHT);
+  SpecialXKeys[Ord('=')] := (XK_EQUAL);
+  SpecialXKeys[Ord(',')] := (XK_COMMA);
+  SpecialXKeys[Ord('.')] := (XK_PERIOD);
+  SpecialXKeys[Ord(':')] := (XK_COLON);
+  SpecialXKeys[Ord(';')] := (XK_SEMICOLON);
+  SpecialXKeys[Ord('<')] := (XK_LESS);
+  SpecialXKeys[Ord('>')] := (XK_GREATER);
+  SpecialXKeys[Ord('?')] := (XK_QUESTION);
+  SpecialXKeys[Ord('@')] := (XK_AT);
+  SpecialXKeys[Ord('[')] := (XK_BRACKETLEFT);
+  SpecialXKeys[Ord(']')] := (XK_BRACKETRIGHT);
+  SpecialXKeys[Ord('\')] := (XK_BACKSLASH);
+  SpecialXKeys[Ord('^')] := (XK_ASCIICIRCUM);
+  SpecialXKeys[Ord('_')] := (XK_UNDERSCORE);
+  SpecialXKeys[Ord('`')] := (XK_GRAVE);
+  SpecialXKeys[Ord('{')] := (XK_BRACELEFT);
+  SpecialXKeys[Ord('|')] := (XK_BAR);
+  SpecialXKeys[Ord('}')] := (XK_BRACERIGHT);
+  SpecialXKeys[Ord('~')] := (XK_ASCIITILDE);
+  SpecialXKeys[Ord('+')] := (XK_PLUS);
+  SpecialXKeys[Ord('-')] := (XK_MINUS);
+  SpecialXKeys[Ord('*')] := (XK_ASTERISK);
+  SpecialXKeys[Ord('/')] := (XK_SLASH);
+
 end.
