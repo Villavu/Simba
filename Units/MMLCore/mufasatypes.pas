@@ -91,7 +91,7 @@ type
   PColor = ^TColor;
   PCanvas = ^TCanvas;
 
-  TClickType = (mouse_Right, mouse_Left, mouse_Middle);
+  TClickType = (mouse_Right, mouse_Left, mouse_Middle, mouse_ScrollUp, mouse_ScrollDown);
 
   TMousePress = (mouse_Down, mouse_Up);
 

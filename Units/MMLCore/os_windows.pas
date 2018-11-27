@@ -26,398 +26,346 @@ unit os_windows;
 
 interface
 
-  uses
-    Classes, SysUtils, mufasatypes, windows, graphics, LCLType, LCLIntf, bitmaps, IOManager, WinKeyInput;
-    
-  type
+uses
+  Classes, SysUtils, mufasatypes, windows, graphics, LCLType, LCLIntf, IOManager, WinKeyInput;
 
-    TNativeWindow = Hwnd;
+type
+  TWindow = class(TWindow_Abstract)
+  public
+    constructor Create;
+    constructor Create(target: HWND);
+    destructor Destroy; override;
+    procedure GetTargetDimensions(out w, h: integer); override;
+    procedure GetTargetPosition(out left, top: integer); override;
+    function ReturnData(xs, ys, width, height: Integer): TRetData; override;
+    function GetColor(x,y : integer) : TColor; override;
 
-    TKeyInput = class(TWinKeyInput)
-      public
-        procedure Down(Key: Word);
-        procedure Up(Key: Word);
-    end;
+    function TargetValid: boolean; override;
 
-    { TWindow }
-
-    TWindow = class(TWindow_Abstract)
-      public
-        constructor Create;
-        constructor Create(target: Hwnd); 
-        destructor Destroy; override;
-        procedure GetTargetDimensions(out w, h: integer); override;
-        procedure GetTargetPosition(out left, top: integer); override;
-        function ReturnData(xs, ys, width, height: Integer): TRetData; override;
-        function GetColor(x,y : integer) : TColor; override;
-
-        function  GetError: String; override;
-        function  ReceivedError: Boolean; override;
-        procedure ResetError; override;
-
-        function TargetValid: boolean; override;
-
-        function MouseSetClientArea(x1, y1, x2, y2: integer): boolean; override;
-        procedure MouseResetClientArea; override;
-        function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; override;
-        procedure ImageResetClientArea; override;
+    function MouseSetClientArea(x1, y1, x2, y2: integer): boolean; override;
+    procedure MouseResetClientArea; override;
+    function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; override;
+    procedure ImageResetClientArea; override;
 
 
-        procedure ActivateClient; override;
-        procedure GetMousePosition(out x,y: integer); override;
-        procedure MoveMouse(x,y: integer); override;
-        procedure ScrollMouse(x,y, lines : integer); override;
-        procedure HoldMouse(x,y: integer; button: TClickType); override;
-        procedure ReleaseMouse(x,y: integer; button: TClickType); override;
-        function  IsMouseButtonHeld( button : TClickType) : boolean;override;
+    procedure ActivateClient; override;
+    procedure GetMousePosition(out x,y: integer); override;
+    procedure MoveMouse(x,y: integer); override;
+    procedure ScrollMouse(x,y, lines : integer); override;
+    procedure HoldMouse(x,y: integer; button: TClickType); override;
+    procedure ReleaseMouse(x,y: integer; button: TClickType); override;
+    function  IsMouseButtonHeld( button : TClickType) : boolean;override;
 
-        procedure SendString(str: string; keywait, keymodwait: integer); override;
-        procedure HoldKey(key: integer); override;
-        procedure ReleaseKey(key: integer); override;
-        function IsKeyHeld(key: integer): boolean; override;
-        function GetKeyCode(c : char) : integer;override;
+    procedure SendString(str: string; keywait, keymodwait: integer); override;
+    procedure HoldKey(key: integer); override;
+    procedure ReleaseKey(key: integer); override;
+    function IsKeyHeld(key: integer): boolean; override;
+    function GetKeyCode(c : char) : integer;override;
 
-        function GetNativeWindow: TNativeWindow;
-        function GetHandle(): PtrUInt; override;
-      private
-        handle: Hwnd;
-        dc: HDC;
-        buffer: TBitmap;
-        buffer_raw: prgb32;
-        width,height: integer;
-        keyinput: TKeyInput;
+    function GetHandle(): PtrUInt; override;
+  private
+    handle: Hwnd;
+    dc: HDC;
+    buffer: TBitmap;
+    buffer_raw: prgb32;
+    width,height: integer;
 
+    { (Forced) Client Area }
+    mx1, my1, mx2, my2: integer;
+    ix1, iy1, ix2, iy2: integer;
+    mcaset, icaset: Boolean;
+    procedure ValidateBuffer(w,h:integer);
 
-        { (Forced) Client Area }
-        mx1, my1, mx2, my2: integer;
-        ix1, iy1, ix2, iy2: integer;
-        mcaset, icaset: Boolean;
-        procedure ValidateBuffer(w,h:integer);
+    procedure MouseApplyAreaOffset(var x, y: integer);
+    procedure ImageApplyAreaOffset(var x, y: integer);
+  protected
+    function WindowRect(out Rect : TRect) : Boolean; virtual;
+  end;
 
-        procedure MouseApplyAreaOffset(var x, y: integer);
-        procedure ImageApplyAreaOffset(var x, y: integer);
-      protected
-        function WindowRect(out Rect : TRect) : Boolean; virtual;
-    end;
+  TDesktopWindow = class(TWindow)
+  private
+    constructor Create(DesktopHandle : HWND);
+    function WindowRect(out Rect : TRect) : Boolean;override;
+  end;
 
-    { TDesktopWindow }
+  TIOManager = class(TIOManager_Abstract)
+  public
+    constructor Create;
+    constructor Create(plugin_dir: string);
+    function SetTarget(target: HWND): integer; overload;
+    procedure SetDesktop; override;
 
-    TDesktopWindow = class(TWindow)
-    private
-      constructor Create(DesktopHandle : HWND);
-      function WindowRect(out Rect : TRect) : Boolean;override;
-    end;
+    function GetProcesses: TSysProcArr; override;
+    procedure SetTargetEx(Proc: TSysProc); overload;
+  protected
+    DesktopHWND : Hwnd;
+    procedure NativeInit; override;
+    procedure NativeFree; override;
+  end;
 
-    TIOManager = class(TIOManager_Abstract)
-      public
-        constructor Create;
-        constructor Create(plugin_dir: string);
-        function SetTarget(target: TNativeWindow): integer; overload;
-        procedure SetDesktop; override;
-        
-        function GetProcesses: TSysProcArr; override;
-        procedure SetTargetEx(Proc: TSysProc); overload;
-      protected
-        DesktopHWND : Hwnd;
-        procedure NativeInit; override;
-        procedure NativeFree; override;
-    end;
-    
 implementation
 
-  uses GraphType, interfacebase;
+uses
+  GraphType;
 
-  type
-    PMouseInput = ^TMouseInput;
-    tagMOUSEINPUT = record
-      dx: LONG;
-      dy: LONG;
-      mouseData: DWORD;
-      dwFlags: DWORD;
-      time: DWORD;
-      dwExtraInfo: ULONG_PTR;
-    end;
-    TMouseInput = tagMOUSEINPUT;
-
-    PKeybdInput = ^TKeybdInput;
-    tagKEYBDINPUT = record
-      wVk: WORD;
-      wScan: WORD;
-      dwFlags: DWORD;
-      time: DWORD;
-      dwExtraInfo: ULONG_PTR;
-    end;
-    TKeybdInput = tagKEYBDINPUT;
-
-    PHardwareInput = ^THardwareInput;
-    tagHARDWAREINPUT = record
-      uMsg: DWORD;
-      wParamL: WORD;
-      wParamH: WORD;
-    end;
-    THardwareInput = tagHARDWAREINPUT;
-    PInput = ^TInput;
-    tagINPUT = record
-      type_: DWORD;
-      case Integer of
-        0: (mi: TMouseInput);
-        1: (ki: TKeybdInput);
-        2: (hi: THardwareInput);
-    end;
-    TInput = tagINPUT;
-
-  const
-    INPUT_MOUSE = 0;
-    INPUT_KEYBOARD = 1;
-    INPUT_HARDWARE = 2;
-
-  function SendInput(cInputs: UINT; var pInputs: TInput; cbSize: Integer): UINT; stdcall; external user32 name 'SendInput';
-
-//***implementation*** TKeyInput
-
-  procedure TKeyInput.Down(Key: Word);
-  begin
-    DoDown(Key);
+type
+  PMouseInput = ^TMouseInput;
+  tagMOUSEINPUT = record
+    dx: LONG;
+    dy: LONG;
+    mouseData: DWORD;
+    dwFlags: DWORD;
+    time: DWORD;
+    dwExtraInfo: ULONG_PTR;
   end;
+  TMouseInput = tagMOUSEINPUT;
 
-  procedure TKeyInput.Up(Key: Word);
-  begin
-    DoUp(Key);
+  PKeybdInput = ^TKeybdInput;
+  tagKEYBDINPUT = record
+    wVk: WORD;
+    wScan: WORD;
+    dwFlags: DWORD;
+    time: DWORD;
+    dwExtraInfo: ULONG_PTR;
   end;
+  TKeybdInput = tagKEYBDINPUT;
 
-//***implementation*** TWindow
-
-  constructor TWindow.Create;
-  begin
-    inherited Create;
-    self.buffer:= TBitmap.Create;
-    self.buffer.PixelFormat:= pf32bit;
-    keyinput:= TKeyInput.Create;
-
-    self.mx1 := 0; self.my1 := 0; self.mx2 := 0; self.my2 := 0;
-    self.mcaset := false;
-    self.ix1 := 0; self.iy1 := 0; self.ix2 := 0; self.iy2 := 0;
-    self.icaset := false;
+  PHardwareInput = ^THardwareInput;
+  tagHARDWAREINPUT = record
+    uMsg: DWORD;
+    wParamL: WORD;
+    wParamH: WORD;
   end;
-
-  constructor TWindow.Create(target: Hwnd);
-  begin
-    inherited Create;
-    self.buffer:= TBitmap.Create;
-    self.buffer.PixelFormat:= pf32bit;
-    keyinput:= TKeyInput.Create;
-    self.handle:= target;
-    self.dc:= GetWindowDC(target);
-
-    self.mx1 := 0; self.my1 := 0; self.mx2 := 0; self.my2 := 0;
-    self.mcaset := false;
-    self.ix1 := 0; self.iy1 := 0; self.ix2 := 0; self.iy2 := 0;
-    self.icaset := false;
+  THardwareInput = tagHARDWAREINPUT;
+  PInput = ^TInput;
+  tagINPUT = record
+    type_: DWORD;
+    case Integer of
+      0: (mi: TMouseInput);
+      1: (ki: TKeybdInput);
+      2: (hi: THardwareInput);
   end;
-  
-  destructor TWindow.Destroy;
-  begin
-    ReleaseDC(handle,dc);//Dogdy as one might have used .create and not set a handle..
-    buffer.Free;
-    keyinput.Free;
-    inherited Destroy; 
-  end;
+  TInput = tagINPUT;
 
-  function  TWindow.GetError: String;
-  begin
-    exit('');
-  end;
-
-  function  TWindow.ReceivedError: Boolean;
-  begin
-    exit(false);
-  end;
-
-  procedure TWindow.ResetError;
-  begin
-
-  end;
-
-  function TWindow.GetNativeWindow: TNativeWindow;
-  begin
-    result := handle;
-  end;
-
-  function TWindow.GetHandle(): PtrUInt;
-  begin
-    Result := PtrUInt(GetNativeWindow());
-  end;
-
-  function TWindow.TargetValid: boolean;
-  begin
-    result:= IsWindow(handle);
-  end;
-
-  function TWindow.MouseSetClientArea(x1, y1, x2, y2: integer): boolean;
-  var w, h: integer;
-  begin
-    { TODO: What if the client resizes (shrinks) and our ``area'' is too large? }
-    GetTargetDimensions(w, h);
-    if ((x2 - x1) > w) or ((y2 - y1) > h) then
-      exit(False);
-    if (x1 < 0) or (y1 < 0) then
-      exit(False);
-
-    mx1 := x1; my1 := y1; mx2 := x2; my2 := y2;
-    mcaset := True;
-  end;
-
-  procedure TWindow.MouseResetClientArea;
-  begin
-    mx1 := 0; my1 := 0; mx2 := 0; my2 := 0;
-    mcaset := False;
-  end;
-
-  function TWindow.ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
-  var w, h: integer;
-  begin
-    { TODO: What if the client resizes (shrinks) and our ``area'' is too large? }
-    GetTargetDimensions(w, h);
-    if ((x2 - x1) > w) or ((y2 - y1) > h) then
-      exit(False);
-    if (x1 < 0) or (y1 < 0) then
-      exit(False);
-
-    ix1 := x1; iy1 := y1; ix2 := x2; iy2 := y2;
-    icaset := True;
-  end;
-
-  procedure TWindow.ImageResetClientArea;
-  begin
-    ix1 := 0; iy1 := 0; ix2 := 0; iy2 := 0;
-    icaset := False;
-  end;
-
-  procedure TWindow.ActivateClient;
-  begin
-    SetForegroundWindow(handle);
-  end;
-
-  procedure TWindow.GetTargetDimensions(out w, h: integer);
-  var
-    Rect : TRect;
-  begin
-    if icaset then
-    begin
-      w := ix2 - ix1;
-      h := iy2 - iy1;
-      exit;
-    end;
-    WindowRect(rect);
-    w:= Rect.Right - Rect.Left;
-    h:= Rect.Bottom - Rect.Top;
-  end;
-
-  procedure TWindow.GetTargetPosition(out left, top: integer);
-  var
-    Rect : TRect;
-  begin
-    WindowRect(rect);
-    left := Rect.Left;
-    top := Rect.Top;
-  end;
-  
-  function TWindow.GetColor(x,y : integer) : TColor;
-  begin
-    ImageApplyAreaOffset(x, y);
-    with ReturnData(x,y,1,1) do
-      Result := RGBToColor(Ptr[0].r,Ptr[0].g,Ptr[0].b);
-    FreeReturnData;
-  end;
-  
-  procedure TWindow.ValidateBuffer(w,h:integer);
-  var
-     BmpInfo : Windows.TBitmap;
-  begin
-    if (w <> self.width) or (height <> self.height) then
-    begin
-      buffer.SetSize(w,h);
-      self.width:= w;
-      self.height:= h;
-      GetObject(buffer.Handle, SizeOf(BmpInfo), @BmpInfo);
-      self.buffer_raw := BmpInfo.bmBits;
-    end;
-  end;
-
-  procedure TWindow.MouseApplyAreaOffset(var x, y: integer);
-  begin
-    if mcaset then
-    begin
-      x := x + mx1;
-      y := y + my1;
-    end;
-  end;
-
-  procedure TWindow.ImageApplyAreaOffset(var x, y: integer);
-  begin
-    if icaset then
-    begin
-      x := x + ix1;
-      y := y + iy1;
-    end;
-  end;
-
-  function TWindow.WindowRect(out Rect : TRect) : boolean;
-  begin
-    result := Windows.GetWindowRect(self.handle,rect);
-  end;
-
-  { This functions return a struct of pointer data.
-    Data is blitted from the target window to the *start* of the buffer,
-    and not to the corresponding position.
-    So [xs,ys,xe,ye] is mapped to [0, 0, xe-xs, ye-ys].
-  }
-  function TWindow.ReturnData(xs, ys, width, height: Integer): TRetData;
-  var
-    temp: PRGB32;
-    w,h : integer;
-  begin
-    GetTargetDimensions(w,h);
-    ValidateBuffer(w,h);
-    if (xs < 0) or (xs + width > w) or (ys < 0) or (ys + height > h) then
-      raise Exception.CreateFMT('TMWindow.ReturnData: The parameters passed are wrong; xs,ys %d,%d width,height %d,%d',[xs,ys,width,height]);
-
-    ImageApplyAreaOffset(xs, ys);
-
-    Windows.BitBlt(self.buffer.Canvas.Handle,0,0, width, height, self.dc, xs,ys, SRCCOPY);
-    Result.Ptr:= self.buffer_raw;
-
-    Result.IncPtrWith:= w - width;
-    Result.RowLen:= w;
-  end;
-
-  procedure TWindow.GetMousePosition(out x,y: integer);
-  var
-    MousePoint : TPoint;
-    Rect : TRect;
-  begin
-    Windows.GetCursorPos(MousePoint);
-    WindowRect(rect);
-    x := MousePoint.x - Rect.Left;
-    y := MousePoint.y - Rect.Top;
-
-    x := x - mx1;
-    y := y - my1;
-  end;
-  procedure TWindow.MoveMouse(x,y: integer);
-  var
-    rect : TRect;
-    w,h: integer;
-  begin
-    MouseApplyAreaOffset(x, y);
-    WindowRect(rect);
-    x := x + rect.left;
-    y := y + rect.top;
-    Windows.SetCursorPos(x, y);
-  end;
+const
+  INPUT_MOUSE = 0;
+  INPUT_KEYBOARD = 1;
+  INPUT_HARDWARE = 2;
 
 const
   MOUSEEVENTF_WHEEL = $800;
+
+function SendInput(cInputs: UINT; var pInputs: TInput; cbSize: Integer): UINT; stdcall; external user32 name 'SendInput';
+
+constructor TWindow.Create;
+begin
+  inherited Create;
+
+  self.buffer:= TBitmap.Create;
+  self.buffer.PixelFormat:= pf32bit;
+
+  self.mx1 := 0; self.my1 := 0; self.mx2 := 0; self.my2 := 0;
+  self.mcaset := false;
+  self.ix1 := 0; self.iy1 := 0; self.ix2 := 0; self.iy2 := 0;
+  self.icaset := false;
+end;
+
+constructor TWindow.Create(target: Hwnd);
+begin
+  inherited Create;
+  self.buffer:= TBitmap.Create;
+  self.buffer.PixelFormat:= pf32bit;
+  self.handle:= target;
+  self.dc:= GetWindowDC(target);
+
+  self.mx1 := 0; self.my1 := 0; self.mx2 := 0; self.my2 := 0;
+  self.mcaset := false;
+  self.ix1 := 0; self.iy1 := 0; self.ix2 := 0; self.iy2 := 0;
+  self.icaset := false;
+end;
+
+destructor TWindow.Destroy;
+begin
+  ReleaseDC(handle,dc);//Dogdy as one might have used .create and not set a handle..
+  buffer.Free;
+
+  inherited Destroy;
+end;
+
+function TWindow.GetHandle(): PtrUInt;
+begin
+  Result := Handle;
+end;
+
+function TWindow.TargetValid: boolean;
+begin
+  Result := IsWindow(Handle);
+end;
+
+function TWindow.MouseSetClientArea(x1, y1, x2, y2: integer): boolean;
+var w, h: integer;
+begin
+  { TODO: What if the client resizes (shrinks) and our ``area'' is too large? }
+  GetTargetDimensions(w, h);
+  if ((x2 - x1) > w) or ((y2 - y1) > h) then
+    exit(False);
+  if (x1 < 0) or (y1 < 0) then
+    exit(False);
+
+  mx1 := x1; my1 := y1; mx2 := x2; my2 := y2;
+  mcaset := True;
+end;
+
+procedure TWindow.MouseResetClientArea;
+begin
+  mx1 := 0; my1 := 0; mx2 := 0; my2 := 0;
+  mcaset := False;
+end;
+
+function TWindow.ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
+var w, h: integer;
+begin
+  { TODO: What if the client resizes (shrinks) and our ``area'' is too large? }
+  GetTargetDimensions(w, h);
+  if ((x2 - x1) > w) or ((y2 - y1) > h) then
+    exit(False);
+  if (x1 < 0) or (y1 < 0) then
+    exit(False);
+
+  ix1 := x1; iy1 := y1; ix2 := x2; iy2 := y2;
+  icaset := True;
+end;
+
+procedure TWindow.ImageResetClientArea;
+begin
+  ix1 := 0; iy1 := 0; ix2 := 0; iy2 := 0;
+  icaset := False;
+end;
+
+procedure TWindow.ActivateClient;
+begin
+  SetForegroundWindow(handle);
+end;
+
+procedure TWindow.GetTargetDimensions(out w, h: integer);
+var
+  Rect : TRect;
+begin
+  if icaset then
+  begin
+    w := ix2 - ix1;
+    h := iy2 - iy1;
+    exit;
+  end;
+  WindowRect(rect);
+  w:= Rect.Right - Rect.Left;
+  h:= Rect.Bottom - Rect.Top;
+end;
+
+procedure TWindow.GetTargetPosition(out left, top: integer);
+var
+  Rect : TRect;
+begin
+  WindowRect(rect);
+  left := Rect.Left;
+  top := Rect.Top;
+end;
+
+function TWindow.GetColor(x,y : integer) : TColor;
+begin
+  ImageApplyAreaOffset(x, y);
+  with ReturnData(x,y,1,1) do
+    Result := RGBToColor(Ptr[0].r,Ptr[0].g,Ptr[0].b);
+  FreeReturnData;
+end;
+
+procedure TWindow.ValidateBuffer(w,h:integer);
+var
+   BmpInfo : Windows.TBitmap;
+begin
+  if (w <> self.width) or (height <> self.height) then
+  begin
+    buffer.SetSize(w,h);
+    self.width:= w;
+    self.height:= h;
+    GetObject(buffer.Handle, SizeOf(BmpInfo), @BmpInfo);
+    self.buffer_raw := BmpInfo.bmBits;
+  end;
+end;
+
+procedure TWindow.MouseApplyAreaOffset(var x, y: integer);
+begin
+  if mcaset then
+  begin
+    x := x + mx1;
+    y := y + my1;
+  end;
+end;
+
+procedure TWindow.ImageApplyAreaOffset(var x, y: integer);
+begin
+  if icaset then
+  begin
+    x := x + ix1;
+    y := y + iy1;
+  end;
+end;
+
+function TWindow.WindowRect(out Rect : TRect) : boolean;
+begin
+  result := Windows.GetWindowRect(self.handle,rect);
+end;
+
+{ This functions return a struct of pointer data.
+  Data is blitted from the target window to the *start* of the buffer,
+  and not to the corresponding position.
+  So [xs,ys,xe,ye] is mapped to [0, 0, xe-xs, ye-ys].
+}
+function TWindow.ReturnData(xs, ys, width, height: Integer): TRetData;
+var
+  temp: PRGB32;
+  w,h : integer;
+begin
+  GetTargetDimensions(w,h);
+  ValidateBuffer(w,h);
+  if (xs < 0) or (xs + width > w) or (ys < 0) or (ys + height > h) or (width < 0) or (height < 0) then
+    raise Exception.CreateFMT('TMWindow.ReturnData: The parameters passed are wrong; xs,ys %d,%d width,height %d,%d',[xs,ys,width,height]);
+
+  ImageApplyAreaOffset(xs, ys);
+
+  Windows.BitBlt(self.buffer.Canvas.Handle,0,0, width, height, self.dc, xs,ys, SRCCOPY);
+  Result.Ptr:= self.buffer_raw;
+
+  Result.IncPtrWith:= w - width;
+  Result.RowLen:= w;
+end;
+
+procedure TWindow.GetMousePosition(out x,y: integer);
+var
+  MousePoint : TPoint;
+  Rect : TRect;
+begin
+  Windows.GetCursorPos(MousePoint);
+  WindowRect(rect);
+  x := MousePoint.x - Rect.Left;
+  y := MousePoint.y - Rect.Top;
+
+  x := x - mx1;
+  y := y - my1;
+end;
+
+procedure TWindow.MoveMouse(x,y: integer);
+var
+  rect : TRect;
+  w,h: integer;
+begin
+  MouseApplyAreaOffset(x, y);
+  WindowRect(rect);
+  x := x + rect.left;
+  y := y + rect.top;
+  Windows.SetCursorPos(x, y);
+end;
+
 procedure TWindow.ScrollMouse(x, y, lines: integer);
 var
   Input : TInput;
@@ -524,13 +472,27 @@ begin
 end;
 
 procedure TWindow.HoldKey(key: Integer);
+var
+  Input: TInput;
 begin
-  keyinput.Down(key);
+  Input := Default(TInput);
+  Input.type_ := INPUT_KEYBOARD;
+  Input.ki.dwFlags := 0;
+  Input.ki.wVk := Key;
+
+  SendInput(1, Input, SizeOf(Input));
 end;
 
 procedure TWindow.ReleaseKey(key: Integer);
+var
+  Input: TInput;
 begin
-  keyinput.Up(key);
+  Input := Default(TInput);
+  Input.type_ := INPUT_KEYBOARD;
+  Input.ki.dwFlags := KEYEVENTF_KEYUP;
+  Input.ki.wVk := Key;
+
+  SendInput(1, Input, SizeOf(Input));
 end;
 
 function TWindow.IsKeyHeld(key: Integer): Boolean;
@@ -542,9 +504,6 @@ function TWindow.GetKeyCode(c: Char): Integer;
 begin
   result := VkKeyScan(c) and $FF;
 end;
-
-
-//***implementation*** IOManager
 
 constructor TIOManager.Create;
 begin
@@ -570,7 +529,7 @@ begin
   SetBothTargets(TDesktopWindow.Create(DesktopHWND));
 end;
 
-function TIOManager.SetTarget(target: TNativeWindow): integer;
+function TIOManager.SetTarget(target: HWND): integer;
 begin
   Result := SetBothTargets(TWindow.Create(target));
 end;
@@ -580,7 +539,6 @@ threadvar
 
 function EnumProcess(Handle: HWND; Param: LPARAM): WINBOOL; stdcall;
 var
-  Proc: TSysProc;
   I: integer;
   pPid: DWORD;
 begin
@@ -610,8 +568,6 @@ begin
   SetTarget(Proc.Handle);
 end;
 
-{ TDesktopWindow }
-
 constructor TDesktopWindow.Create(DesktopHandle: HWND);
 begin
   inherited Create;
@@ -629,3 +585,4 @@ begin
 end;
 
 end.
+

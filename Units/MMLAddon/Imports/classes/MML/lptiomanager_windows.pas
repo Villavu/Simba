@@ -13,11 +13,11 @@ procedure Register_TIOManager(Compiler: TLapeCompiler);
 implementation
 
 uses
-  iomanager, os_windows, MufasaTypes;
+  iomanager, os_windows, mufasatypes, lcltype;
 
 type
   PIOManager = ^TIOManager;
-  PNativeWindow = ^TNativeWindow;
+  PHWND = ^HWND;
 
 //constructor Create;
 procedure TIOManager_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -34,7 +34,7 @@ end;
 //function SetTarget(target: TNativeWindow): integer; overload;
 procedure TIOManager_SetTarget(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pinteger(Result)^ := PIOManager(Params^[0])^.SetTarget(PNativeWindow(Params^[1])^);
+  Pinteger(Result)^ := PIOManager(Params^[0])^.SetTarget(PHWND(Params^[1])^);
 end;
 
 //procedure SetDesktop; override;

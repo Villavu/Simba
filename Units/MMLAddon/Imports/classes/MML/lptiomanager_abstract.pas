@@ -35,24 +35,6 @@ begin
   PIOManager_Abstract(Params^[0])^ := TIOManager_Abstract.Create(PlpString(Params^[1])^);
 end;
 
-//function  GetError: String;
-procedure TIOManager_Abstract_GetError(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PlpString(Result)^ := PIOManager_Abstract(Params^[0])^.GetError();
-end;
-
-//function  ReceivedError: Boolean;
-procedure TIOManager_Abstract_ReceivedError(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PIOManager_Abstract(Params^[0])^.ReceivedError();
-end;
-
-//procedure ResetError;
-procedure TIOManager_Abstract_ResetError(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PIOManager_Abstract(Params^[0])^.ResetError();
-end;
-
 //function SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; overload;
 procedure TIOManager_Abstract_SetTarget(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -309,9 +291,6 @@ begin
     addGlobalType('record Title: WideString; Handle: UInt32; PID: UInt32; Width, Height: Int32; end', 'TSysProc');
     addGlobalType('array of TSysProc', 'TSysProcArr');
 
-    addGlobalFunc('function TIOManager_Abstract.GetError(): String; constref;', @TIOManager_Abstract_GetError);
-    addGlobalFunc('function TIOManager_Abstract.ReceivedError(): Boolean; constref;', @TIOManager_Abstract_ReceivedError);
-    addGlobalFunc('procedure TIOManager_Abstract.ResetError(); constref;', @TIOManager_Abstract_ResetError);
     addGlobalFunc('function TIOManager_Abstract.SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; constref;', @TIOManager_Abstract_SetTarget);
     addGlobalFunc('function TIOManager_Abstract.SetTarget(bmp : TMufasaBitmap): integer; constref; overload;', @TIOManager_Abstract_SetTargetEx);
     addGlobalFunc('function TIOManager_Abstract.SetTarget(name, initargs: string): integer; constref; overload;', @TIOManager_Abstract_SetTargetExEx);
