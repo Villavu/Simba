@@ -768,7 +768,7 @@ end;
 type
   TXGetWindowImage = class
     Window: ^TWindow;
-    Result: ^TXImage;
+    Result: ^PXImage;
     X: ^Int32;
     Y: ^Int32;
     Width: ^Int32;
@@ -779,7 +779,26 @@ type
 
 procedure TXGetWindowImage.Execute;
 begin
-  Result := XGetImage(_Display, Window^, X^, Y^, Width^, Height^, AllPlanes, ZPixmap);
+  Result^ := XGetImage(_Display, Window^, X^, Y^, Width^, Height^, AllPlanes, ZPixmap);
+end;
+
+function _XGetWindowImage(Window: TWindow; X, Y, Width, Height: Int32): PXImage;
+var
+  Method: TXGetWindowImage;
+begin
+  Result := nil;
+
+  Method := TXGetWindowImage.Create();
+  Method.Window := @Window;
+  Method.Result := @Result;
+  Method.X := @X;
+  Method.Y := @Y;
+  Method.Width := @Width;
+  Method.Height := @Height;
+
+  TThread.Synchronize(nil, @Method.Execute);
+
+  Method.Free();
 end;
 
 // SetWindowBounds
@@ -811,25 +830,6 @@ begin
   Method.Free();
 end;
 
-function _XGetWindowImage(Window: TWindow; X, Y, Width, Height: Int32): PXImage;
-var
-  Method: TXGetWindowImage;
-begin
-  Result := nil;
-
-  Method := TXGetWindowImage.Create();
-  Method.Window := @Window;
-  Method.Result := @Result;
-  Method.X := @X;
-  Method.Y := @Y;
-  Method.Width := @Width;
-  Method.Height := @Height;
-
-  TThread.Synchronize(nil, @Method.Execute);
-
-  Method.Free();
-end;
-
 // HoldMouse
 
 type
@@ -848,6 +848,7 @@ var
 begin
   Event := Default(TXButtonPressedEvent);
   Event.SubWindow := Window^;
+  Event.Button := Button^;
 
   while (Event.SubWindow <> None) do
   begin
@@ -899,6 +900,7 @@ var
 begin
   Event := Default(TXButtonReleasedEvent);
   Event.SubWindow := Window^;
+  Event.Button := Button^;
 
   while (Event.SubWindow <> None) do
   begin
