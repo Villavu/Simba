@@ -43,7 +43,7 @@ uses
   script_import_math, script_import_time_date, script_import_ocr, script_import_string,
   script_import_simba, script_import_colormath, script_import_bitmap, script_import_settings,
   script_import_dtm, script_import_file, script_import_other, script_import_script,
-  script_import_crypto, script_import_deprecated;
+  script_import_crypto, script_import_deprecated, script_import_oswindow;
 
 begin
   {$IF DECLARED(SetHeapTraceOutput)}
