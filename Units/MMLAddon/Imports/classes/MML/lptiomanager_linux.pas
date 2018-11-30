@@ -18,7 +18,6 @@ uses
 
 type
   PIOManager = ^TIOManager;
-  PNativeWindow = ^TNativeWindow;
   PPDisplay = ^PDisplay;
   PWindow = ^x.TWindow;
 
@@ -37,7 +36,7 @@ end;
 //function SetTarget(target: TNativeWindow): integer; overload;
 procedure TIOManager_SetTarget(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pinteger(Result)^ := PIOManager(Params^[0])^.SetTarget(PNativeWindow(Params^[1])^);
+  Pinteger(Result)^ := PIOManager(Params^[0])^.SetTarget(PWindow(Params^[1])^);
 end;
 
 //procedure SetDesktop; override;
@@ -58,42 +57,6 @@ begin
   PIOManager(Params^[0])^.SetTargetEx(PSysProc(Params^[1])^);
 end;
 
-//Read: display: PDisplay;
-procedure TIOManager_display_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PPDisplay(Result)^ := PIOManager(Params^[0])^.display;
-end;
-
-//Write: display: PDisplay;
-procedure TIOManager_display_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PIOManager(Params^[0])^.display := PPDisplay(Params^[1])^;
-end;
-
-//Read: screennum: integer;
-procedure TIOManager_screennum_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  Pinteger(Result)^ := PIOManager(Params^[0])^.screennum;
-end;
-
-//Write: screennum: integer;
-procedure TIOManager_screennum_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PIOManager(Params^[0])^.screennum := Pinteger(Params^[1])^;
-end;
-
-//Read: desktop: x.TWindow;
-procedure TIOManager_desktop_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PWindow(Result)^ := PIOManager(Params^[0])^.desktop;
-end;
-
-//Write: desktop: x.TWindow;
-procedure TIOManager_desktop_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PIOManager(Params^[0])^.desktop := PNativeWindow(Params^[1])^;
-end;
-
 //procedure Free();
 procedure TIOManager_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -106,19 +69,13 @@ begin
   begin
     addClass('TIOManager', 'TIOManager_Abstract');
 
-    addGlobalType('UInt32', 'TNativeWindow');
-    addGlobalType('Pointer', 'PDisplay'); //TODO: Export properly
-
     addGlobalFunc('procedure TIOManager.Init(); overload;', @TIOManager_Init);
     addGlobalFunc('procedure TIOManager.Init(plugin_dir: string); overload;', @TIOManager_InitEx);
-    addGlobalFunc('function TIOManager.SetTarget2(target: TNativeWindow): integer; constref; deprecated ' + #39 + 'Use `TIOManager.SetTarget`' + #39, @TIOManager_SetTarget); //inheritence issue...
-    addGlobalFunc('function TIOManager.SetTarget(target: TNativeWindow): integer; constref; overload;', @TIOManager_SetTarget);
+    addGlobalFunc('function TIOManager.SetTarget2(target: PtrUInt): integer; constref; deprecated ' + #39 + 'Use `TIOManager.SetTarget`' + #39, @TIOManager_SetTarget); //inheritence issue...
+    addGlobalFunc('function TIOManager.SetTarget(target: PtrUInt): integer; constref; overload;', @TIOManager_SetTarget);
     addGlobalFunc('procedure TIOManager.SetDesktopAsTarget(); constref;', @TIOManager_SetDesktop);
     addGlobalFunc('function TIOManager.GetProcesses(): TSysProcArr; constref;', @TIOManager_GetProcesses);
     addGlobalFunc('procedure TIOManager.SetTargetEx(Proc: TSysProc); constref;', @TIOManager_SetTargetEx);
-    addClassVar('TIOManager', 'display', 'PDisplay', @TIOManager_display_Read, @TIOManager_display_Write);
-    addClassVar('TIOManager', 'screennum', 'integer', @TIOManager_screennum_Read, @TIOManager_screennum_Write);
-    addClassVar('TIOManager', 'desktop', 'TNativeWindow', @TIOManager_desktop_Read, @TIOManager_desktop_Write);
     addGlobalFunc('procedure TIOManager.Free(); constref;', @TIOManager_Free);
   end;
 end;

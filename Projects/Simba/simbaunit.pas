@@ -1959,16 +1959,11 @@ procedure TSimbaForm.ChangeMouseStatus(Sender: TObject);
 var
   x: integer = -1;
   y: integer = -1;
-begin
-  if Self.Manager.TargetValid = false then
-    self.Manager.SetDesktop;
+begin;
+  if (not Self.Manager.TargetValid()) then
+    Self.Manager.SetDesktop();
   Self.Manager.GetMousePos(x, y);
-  if self.Manager.ReceivedError() then
-  begin
-    formWriteLn('Our window no longer exists -> Resetting to desktop');
-    self.Manager.SetDesktop;
-    self.Manager.ResetError;
-  end;
+
   StatusBar.Panels[Panel_Coords].Text := Format('(%d, %d)', [x, y]);
 end;
 
@@ -2808,7 +2803,7 @@ end;
 procedure TSimbaForm.PageControl1ContextPopup(Sender: TObject; MousePos: TPoint;
   var Handled: Boolean);
 begin
-  PopupTab := PageControl1.TabIndexAtClientPos(MousePos);
+  PopupTab := PageControl1.IndexOfPageAt(MousePos);
   if PopupTab = -1 then
   begin
     mDebugLn('We couldn''t find which tab you clicked on, closing the popup');
@@ -2826,7 +2821,7 @@ var
 begin
   if sender <> PageControl1 then
     exit;
-  NewPos := PageControl1.TabIndexAtClientPos(Classes.Point(x,y));
+  NewPos := PageControl1.IndexOfPageAt(Classes.Point(x,y));
   OldPos := PageControl1.TabIndex;
   if (NewPos <> OldPos) and (NewPos <> -1) then
   begin;
@@ -2840,7 +2835,7 @@ procedure TSimbaForm.PageControl1DragOver(Sender, Source: TObject; X, Y: Integer
 var
   Pos: Integer;
 begin
-  Pos := PageControl1.TabIndexAtClientPos(Classes.Point(x,y));
+  Pos := PageControl1.IndexOfPageAt(Classes.Point(x,y));
   Accept := (Pos <> PageControl1.TabIndex) and (Pos <> -1);
 end;
 
@@ -2850,7 +2845,7 @@ begin
   if(Button = mbLeft)then
   begin
     {$ifdef linux}
-    PageControl1.TabIndex := PageControl1.TabIndexAtClientPos(Point(x,y));
+    PageControl1.TabIndex := PageControl1.IndexOfPageAt(Point(x,y));
     {$endif}
     PageControl1.BeginDrag(false, 10);
   end;
@@ -2860,8 +2855,8 @@ procedure TSimbaForm.PageControl1MouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
   if(Button = mbMiddle) and (not(PageControl1.Dragging))then
-    if(PageControl1.TabIndexAtClientPos(Classes.Point(x,y)) <> -1)then
-      DeleteTab(PageControl1.TabIndexAtClientPos(Classes.Point(x,y)), False);
+    if(PageControl1.IndexOfPageAt(Classes.Point(x,y)) <> -1)then
+      DeleteTab(PageControl1.IndexOfPageAt(Classes.Point(x,y)), False);
 end;
 
 procedure TSimbaForm.PopupItemFindClick(Sender: TObject);

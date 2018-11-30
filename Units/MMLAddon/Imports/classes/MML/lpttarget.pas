@@ -87,24 +87,6 @@ begin
   PTarget(Params^[0])^.ImageResetClientArea();
 end;
 
-//function  GetError: String; virtual;
-procedure TTarget_GetError(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PlpString(Result)^ := PTarget(Params^[0])^.GetError();
-end;
-
-//function  ReceivedError: Boolean; virtual;
-procedure TTarget_ReceivedError(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PTarget(Params^[0])^.ReceivedError();
-end;
-
-//procedure ResetError; virtual;
-procedure TTarget_ResetError(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PTarget(Params^[0])^.ResetError();
-end;
-
 //procedure GetMousePosition(out x,y: integer); virtual;
 procedure TTarget_GetMousePosition(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -208,9 +190,6 @@ begin
     addGlobalFunc('procedure TTarget.MouseResetClientArea(); constref;', @TTarget_MouseResetClientArea);
     addGlobalFunc('function TTarget.ImageSetClientArea(x1, y1, x2, y2: integer): boolean; constref;', @TTarget_ImageSetClientArea);
     addGlobalFunc('procedure TTarget.ImageResetClientArea(); constref;', @TTarget_ImageResetClientArea);
-    addGlobalFunc('function TTarget.GetError(): String; constref;', @TTarget_GetError);
-    addGlobalFunc('function TTarget.ReceivedError(): Boolean; constref;', @TTarget_ReceivedError);
-    addGlobalFunc('procedure TTarget.ResetError(); constref;', @TTarget_ResetError);
     addGlobalFunc('procedure TTarget.GetMousePosition(out x,y: integer); constref;', @TTarget_GetMousePosition);
     addGlobalFunc('procedure TTarget.MoveMouse(x,y: integer); constref;', @TTarget_MoveMouse);
     addGlobalFunc('procedure TTarget.ScrollMouse(x,y : integer; Lines : integer); constref;', @TTarget_ScrollMouse);

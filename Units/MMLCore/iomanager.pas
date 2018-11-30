@@ -55,11 +55,6 @@ interface
         function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; virtual;
         procedure ImageResetClientArea; virtual;
 
-        { Sucky implementation }
-        function  GetError: String; virtual;
-        function  ReceivedError: Boolean; virtual;
-        procedure ResetError; virtual;
-
         procedure GetMousePosition(out x,y: integer); virtual;
         procedure MoveMouse(x,y: integer); virtual;
         procedure ScrollMouse(x,y : integer; Lines : integer); virtual;
@@ -130,10 +125,6 @@ interface
         function ReturnData(xs, ys, width, height: Integer): TRetData; override; abstract;
 
         function TargetValid: boolean; override; abstract;
-
-        function  GetError: String; override; abstract;
-        function  ReceivedError: Boolean; override; abstract;
-        procedure ResetError; override; abstract;
 
         function MouseSetClientArea(x1, y1, x2, y2: integer): boolean; override; abstract;
         procedure MouseResetClientArea; override; abstract;
@@ -300,11 +291,6 @@ interface
         constructor Create(plugin_dir: string);
         destructor Destroy; override;
 
-        { Sucky implementation }
-        function  GetError: String;
-        function  ReceivedError: Boolean;
-        procedure ResetError;
-        
         procedure SetDesktop; virtual; abstract;
         function SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; overload;
         function SetTarget(bmp : TMufasaBitmap) : integer; overload;
@@ -365,8 +351,8 @@ interface
         function SetImageTarget(target: TTarget): integer;
         function SetKeyMouseTarget(target: TTarget): integer;
         function SetBothTargets(target: TTarget): integer;
-        procedure NativeInit; virtual; abstract;
-        procedure NativeFree; virtual; abstract;
+        procedure NativeInit; virtual;
+        procedure NativeFree; virtual;
 
       private
         keymouse: TTarget;
@@ -552,6 +538,16 @@ begin
   result:= GetTargetIdx(target);
   image:= target;
   keymouse:= target;
+end;
+
+procedure TIOManager_Abstract.NativeInit;
+begin
+  { nothing }
+end;
+
+procedure TIOManager_Abstract.NativeFree;
+begin
+  { nothing }
 end;
 
 procedure TIOManager_Abstract.SetFrozen(makefrozen: boolean);
@@ -762,8 +758,8 @@ begin
 end;
 procedure TIOManager_Abstract.PressKey(key: Word);
 begin
-  keyup(key);
   keydown(key);
+  keyup(key);
 end;
 procedure TIOManager_Abstract.SendText(text: string; keywait, keymodwait: integer);
 begin
@@ -779,28 +775,6 @@ function TIOManager_Abstract.GetKeyCode(c: char): integer;
 begin
   result := keymouse.GetKeyCode(c);
 end;
-
-function TIOManager_Abstract.GetError: String;
-begin
-  if keymouse.ReceivedError then
-    exit(keymouse.GetError);
-  if image.ReceivedError then
-    exit(image.GetError);
-  raise Exception.Create('TIOManager_Abstract.GetError: NO ERROR!');
-  exit('');
-end;
-
-function TIOManager_Abstract.ReceivedError: Boolean;
-begin
-  exit(keymouse.ReceivedError or image.ReceivedError);
-end;
-
-procedure TIOManager_Abstract.ResetError;
-begin
-  keymouse.ResetError;
-  image.ResetError;
-end;
-
 // TRUE when STOPPING.
 procedure TIOManager_Abstract.SetState(val: Boolean);
 begin
@@ -856,18 +830,6 @@ end;
 procedure TTarget.ImageResetClientArea;
 begin
   raise Exception.Create('ImageResetClientArea not available for this target');
-end;
-function  TTarget.GetError: String;
-begin
-  raise Exception.Create('GetError not available for this target');
-end;
-function  TTarget.ReceivedError: Boolean;
-begin
-  raise Exception.Create('ReceivedError not available for this target');
-end;
-procedure TTarget.ResetError;
-begin
-  raise Exception.Create('ResetError not available for this target');
 end;
 procedure TTarget.GetMousePosition(out x,y: integer);
 begin
