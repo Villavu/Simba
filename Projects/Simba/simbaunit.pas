@@ -447,10 +447,10 @@ type
     function CreateSetting(const Key, Value : string) : string;
     procedure SetSetting(const key,Value : string; save : boolean = false);
     function SettingExists(const key : string) : boolean;
-    procedure InitializeCoreBuffer;
+    procedure ParseInternals;
+    procedure FillFunctionList(Sender: TObject);
     procedure CustomExceptionHandler(Sender: TObject; E: Exception);
     procedure RegisterSettingsOnChanges;
-    procedure FillFunctionList(Sender: TObject);
   public
     { Required to work around using freed resources on quit }
     Exiting: Boolean;
@@ -494,13 +494,15 @@ type
     procedure SetEditActions;
     procedure DoSearch(SearchOptions: TSynSearchOptions; HighlightAll: Boolean);
     procedure RefreshTab;//Refreshes all the form items that depend on the Script (Panels, title etc.)
-    procedure RefreshTabSender(Sender: PtrInt);
-    procedure CheckUpdates(Sender: PtrInt);
     procedure LoadFormSettings;
     procedure SaveFormSettings;
     procedure AddRecentFile(const filename : string);
     procedure InitializeTMThread(out Thread : TMMLScriptThread);
-    procedure HandleParameters(Data: PtrInt);
+    procedure DoRefreshTab(Sender: PtrInt);
+    procedure DoSimbaUpdateCheck(Sender: PtrInt);
+    procedure DoHandleParameters(Data: PtrInt);
+    procedure DoParseInternals(Data: PtrInt);
+    procedure DoSimbaNews(Data: PtrInt);
     procedure OnSaveScript(const Filename : string);
     property ShowParamHintAuto : boolean read GetShowParamHintAuto write SetShowParamHintAuto;
     property ShowCodeCompletionAuto: Boolean read GetShowCodeCompletionAuto write SetShowCodeCompletionAuto;
@@ -532,6 +534,7 @@ var
 
 implementation
 uses
+   InterfaceBase,
    LCLIntf,
    LazUTF8,
    LazFileUtils,
@@ -1371,12 +1374,12 @@ begin
   SetEditActions;
 end;
 
-procedure TSimbaForm.RefreshTabSender(Sender: PtrInt);
+procedure TSimbaForm.DoRefreshTab(Sender: PtrInt);
 begin
-  RefreshTab;
+  RefreshTab();
 end;
 
-procedure TSimbaForm.CheckUpdates(Sender: PtrInt);
+procedure TSimbaForm.DoSimbaUpdateCheck(Sender: PtrInt);
 begin
   UpdateTimer.Interval := SimbaSettings.Updater.CheckEveryXMinutes.Value;
   UpdateTimer.Enabled := True;
@@ -1525,7 +1528,7 @@ begin
   end;
 end;
 
-procedure TSimbaForm.HandleParameters(Data: PtrInt);
+procedure TSimbaForm.DoHandleParameters(Data: PtrInt);
 begin
   if Application.HasOption('h', 'help') then
   begin
@@ -1553,7 +1556,7 @@ begin
   if Application.HasOption('t', 'test') then
   begin
     while (Self.GetScriptState() in [ss_Running, ss_Stopping]) do
-      Application.ProcessMessages();
+      WidgetSet.AppProcessMessages(); // no Application.ProcessMessages, we don't want to call other async calls
 
     WriteLn(DebugMemo.Lines.Text);
 
@@ -1561,6 +1564,26 @@ begin
       Halt(0)
     else
       Halt(1);
+  end;
+end;
+
+procedure TSimbaForm.DoParseInternals(Data: PtrInt);
+begin
+  with TProcThread.Create() do
+  begin
+    ClassProc := @ParseInternals;
+    OnTerminate := @FillFunctionList;
+    Start();
+  end;
+end;
+
+procedure TSimbaForm.DoSimbaNews(Data: PtrInt);
+begin
+  with TProcThread.Create() do
+  begin
+    ClassProc := @GetSimbaNews;
+    OnTerminate := @WriteSimbaNews;
+    Start();
   end;
 end;
 
@@ -2210,7 +2233,7 @@ begin
   CloseAction := caFree;
 end;
 
-procedure TSimbaForm.InitializeCoreBuffer;
+procedure TSimbaForm.ParseInternals;
 
   function Parse(Section, Text: String): TCodeInsight;
   var
@@ -2243,7 +2266,7 @@ begin
     end;
   except
     on e: Exception do
-      mDebugLn('ERROR filling core buffer: ' + e.ClassName + ' :: ' + e.Message);
+      mDebugLn('ERROR parsing internals: ' + e.ClassName + ' :: ' + e.Message);
   end;
 end;
 
@@ -2341,9 +2364,11 @@ begin
 
   try
     Application.OnException := @CustomExceptionHandler;
-    Application.QueueAsyncCall(@RefreshTabSender, 0);
-    Application.QueueAsyncCall(@CheckUpdates, 0);
-    Application.QueueAsyncCall(@HandleParameters, 0);
+    Application.QueueAsyncCall(@DoHandleParameters, 0);
+    Application.QueueAsyncCall(@DoParseInternals, 0);
+    Application.QueueAsyncCall(@DoRefreshTab, 0);
+    Application.QueueAsyncCall(@DoSimbaNews, 0);
+    Application.QueueAsyncCall(@DoSimbaUpdateCheck, 0);
 
     AddHandlerFirstShow(@FirstShow);
 
@@ -2441,22 +2466,6 @@ begin
     if FileExists(Application.ExeName+'_old_') then
       DeleteFileUTF8(Application.ExeName+'_old_');
     {$ENDIF}
-
-    // Code Tools
-    with TProcThread.Create() do
-    begin
-      ClassProc := @InitializeCoreBuffer;
-      OnTerminate := @FillFunctionList;
-      Start();
-    end;
-
-    // Simba News
-    with TProcThread.Create() do
-    begin
-      ClassProc := @GetSimbaNews;
-      OnTerminate := @WriteSimbaNews;
-      Start();
-    end;
 
     UpdateTitle();
   finally
