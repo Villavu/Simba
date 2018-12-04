@@ -500,7 +500,6 @@ type
     procedure AddRecentFile(const filename : string);
     procedure InitializeTMThread(out Thread : TMMLScriptThread);
     procedure HandleParameters(Data: PtrInt);
-    procedure HandleSettingsParameter;
     procedure OnSaveScript(const Filename : string);
     property ShowParamHintAuto : boolean read GetShowParamHintAuto write SetShowParamHintAuto;
     property ShowCodeCompletionAuto: Boolean read GetShowCodeCompletionAuto write SetShowCodeCompletionAuto;
@@ -1511,56 +1510,33 @@ begin
   end;
 end;
 
-procedure TSimbaForm.HandleSettingsParameter;
-var
-  ErrorMsg : string;
-begin
-  ErrorMsg := Application.CheckOptions('c:o:r', ['config:', 'open:', 'run']);
-  if (ErrorMsg = '') then
-  begin
-    if Application.HasOption('c', 'config') then
-    begin
-      mDebugLn('Using alternative config file: ' + Application.GetOptionValue('c', 'config') + '.');
-      SimbaSettingsFile := Application.GetOptionValue('c', 'config');
-    end;
-  end else
-    mDebugLn('ERROR IN COMMAND LINE ARGS: ' + ErrorMsg)
-end;
-
 procedure TSimbaForm.HandleParameters(Data: PtrInt);
 var
-  DoRun : Boolean;
-  ErrorMsg : string;
+  Script: String = '';
 begin
-  DoRun := false;
-  // paramcount = 1 means we got only one parameter. We assume this to be a file.
-  // and try to open it accordingly
-  if (Paramcount = 1) and not (Application.HasOption('open')) then
-  begin
-    mDebugLn('Opening file: ' + ParamStr(1));
-    if FileExists(ParamStrUTF8(1)) then
-      LoadScriptFile(ParamStrUTF8(1));
-  end else
-  // we have more parameters. Check for specific options. (-r -o -c, --run --open --config)
-  begin
-    ErrorMsg := Application.CheckOptions('c:o:r', ['config:', 'open:', 'run']);
-    if (ErrorMsg = '') then
-    begin
-      { Config Params are handled in HandleConfigParameter, as we need to check
-        those earlier }
+  if (Application.ParamCount = 1) then
+    Script := Application.Params[1];
+  if Application.HasOption('o', 'open') then
+    Script := Application.GetOptionValue('o', 'open');
 
-      if Application.HasOption('o', 'open') then
-      begin
-        mDebugLn('Opening file: ' + Application.GetOptionValue('o', 'open'));
-        LoadScriptFile(Application.GetOptionValue('o', 'open'));
-        DoRun:= Application.HasOption('r', 'run');
-      end;
-    end else
-      mDebugLn('ERROR IN COMMAND LINE ARGS: ' + ErrorMsg)
+  if (Script <> '') then
+    LoadScriptFile(Script);
+
+  if Application.HasOption('r', 'run') or Application.HasOption('t', 'test') then
+    Self.RunScript();
+
+  if Application.HasOption('t', 'test') then
+  begin
+    while (Self.GetScriptState() in [ss_Running, ss_Stopping]) do
+      Application.ProcessMessages();
+
+    WriteLn(DebugMemo.Lines.Text);
+
+    if Self.CurrScript.ScriptErrorLine > -1 then
+      Halt(1)
+    else
+      Halt(0);
   end;
-
-  if DoRun then
-    Self.RunScript;
 end;
 
 procedure TSimbaForm.OnSaveScript(const Filename: string);
@@ -2295,9 +2271,11 @@ procedure TSimbaForm.FormCreate(Sender: TObject);
 
   procedure LoadSettings;
   begin
-    SimbaSettingsFile := DataPath + 'settings.xml';
+    if Application.HasOption('c', 'config') then
+      SimbaSettingsFile := Application.GetOptionValue('c', 'config')
+    else
+      SimbaSettingsFile := DataPath + 'settings.xml';
 
-    HandleSettingsParameter();
     CreateSimbaSettings(SimbaSettingsFile);
 
     // check setting directories vaild, else default.

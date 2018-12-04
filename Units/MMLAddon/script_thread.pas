@@ -237,10 +237,10 @@ begin
   begin
     Eval := False;
 
-    if Pos(' = ', Argument) > 0 then Op := ' = ' else
+    if Pos(' = ', Argument) > 0 then  Op := ' = ' else
     if Pos(' <> ', Argument) > 0 then Op := ' <> ' else
-    if Pos(' > ', Argument) > 0 then Op := ' > ' else
-    if Pos(' < ', Argument) > 0 then Op := ' < ' else Op := '';
+    if Pos(' > ', Argument) > 0 then  Op := ' > ' else
+    if Pos(' < ', Argument) > 0 then  Op := ' < ' else Op := '';
 
     if (Op <> '') then
     begin
@@ -313,7 +313,7 @@ begin
 
     if FCompiler.Compile() then
     begin
-      Self.Write('Compiled succesfully in ' + IntToStr(GetTickCount64() - T) + ' ms.');
+      Self.Write('Compiled successfully in ' + IntToStr(GetTickCount64() - T) + ' ms.');
       Self.WriteLn();
 
       Result := True;
@@ -354,9 +354,9 @@ begin
       end;
 
       if (GetTickCount64() - FStartTime <= 60000) then
-        WriteLn('Succesfully executed in ' + IntToStr(GetTickCount64() - FStartTime) + ' ms.')
+        WriteLn('Successfully executed in ' + IntToStr(GetTickCount64() - FStartTime) + ' ms.')
       else
-        WriteLn('Succesfully executed in ' + TimeToStr(TimeStampToDateTime(MSecsToTimeStamp(GetTickCount64() - FStartTime))) + '.');
+        WriteLn('Successfully executed in ' + TimeToStr(TimeStampToDateTime(MSecsToTimeStamp(GetTickCount64() - FStartTime))) + '.');
     end;
   finally
     Terminate();
