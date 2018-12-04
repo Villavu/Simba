@@ -482,6 +482,7 @@ type
     function CanExitOrOpen : boolean;
     function ClearScript : boolean;
     procedure RunScript;
+    procedure CompileScript;
     procedure PauseScript;
     procedure StopScript;
     procedure AddTab;
@@ -1083,6 +1084,20 @@ begin
   end;
 end;
 
+procedure TSimbaForm.CompileScript;
+begin
+  InitializeTMThread(CurrScript.ScriptThread);
+
+  if (CurrScript.ScriptThread <> nil) then
+  begin
+    CurrScript.ScriptThread.Options := CurrScript.ScriptThread.Options + [soCompileOnly];
+    CurrScript.ScriptThread.OnTerminate := @CurrScript.ScriptThreadTerminate;
+    CurrScript.ScriptThread.Start();
+
+    ScriptState := ss_Running;
+  end;
+end;
+
 procedure TSimbaForm.PauseScript;
 begin
   if (ScriptState = ss_Running) then
@@ -1511,19 +1526,29 @@ begin
 end;
 
 procedure TSimbaForm.HandleParameters(Data: PtrInt);
-var
-  Script: String = '';
 begin
+  if Application.HasOption('h', 'help') then
+  begin
+    WriteLn('');
+    WriteLn('Options:');
+    WriteLn('  -open, -o: opens the given script');
+    WriteLn('  -run, -r: runs the script opened with -open');
+    WriteLn('  -compile: compiles the script opened with -open');
+    WriteLn('  -test: will wait for script to run then terminates Simba, exit code 1 if errored. requires -open and -run or -compile');
+    WriteLn('  -config, -c: uses the given config file');
+    WriteLn('');
+  end;
+
   if (Application.ParamCount = 1) then
-    Script := Application.Params[1];
+    LoadScriptFile(Application.Params[1]);
   if Application.HasOption('o', 'open') then
-    Script := Application.GetOptionValue('o', 'open');
+    LoadScriptFile(Application.GetOptionValue('o', 'open'));
 
-  if (Script <> '') then
-    LoadScriptFile(Script);
-
-  if Application.HasOption('r', 'run') or Application.HasOption('t', 'test') then
+  if Application.HasOption('r', 'run') then
     Self.RunScript();
+
+  if Application.HasOption('compile') then
+    Self.CompileScript();
 
   if Application.HasOption('t', 'test') then
   begin
@@ -1532,10 +1557,10 @@ begin
 
     WriteLn(DebugMemo.Lines.Text);
 
-    if Self.CurrScript.ScriptErrorLine > -1 then
-      Halt(1)
+    if (Self.CurrScript.ScriptErrorLine = -1) then
+      Halt(0)
     else
-      Halt(0);
+      Halt(1);
   end;
 end;
 
@@ -1616,16 +1641,8 @@ begin
 end;
 
 procedure TSimbaForm.ActionCompileScriptExecute(Sender: TObject);
-var
-  ScriptThread: TMMLScriptThread;
 begin
-  InitializeTMThread(ScriptThread);
-
-  if (ScriptThread <> nil) then
-  begin
-    ScriptThread.Options := ScriptThread.Options + [soCompileOnly];
-    ScriptThread.Start();
-  end;
+  Self.CompileScript();
 end;
 
 {$IFDEF WINDOWS}
