@@ -447,10 +447,10 @@ type
     function CreateSetting(const Key, Value : string) : string;
     procedure SetSetting(const key,Value : string; save : boolean = false);
     function SettingExists(const key : string) : boolean;
-    procedure InitializeCoreBuffer;
+    procedure ParseInternals;
+    procedure FillFunctionList(Sender: TObject);
     procedure CustomExceptionHandler(Sender: TObject; E: Exception);
     procedure RegisterSettingsOnChanges;
-    procedure FillFunctionList(Sender: TObject);
   public
     { Required to work around using freed resources on quit }
     Exiting: Boolean;
@@ -482,6 +482,7 @@ type
     function CanExitOrOpen : boolean;
     function ClearScript : boolean;
     procedure RunScript;
+    procedure CompileScript;
     procedure PauseScript;
     procedure StopScript;
     procedure AddTab;
@@ -493,14 +494,15 @@ type
     procedure SetEditActions;
     procedure DoSearch(SearchOptions: TSynSearchOptions; HighlightAll: Boolean);
     procedure RefreshTab;//Refreshes all the form items that depend on the Script (Panels, title etc.)
-    procedure RefreshTabSender(Sender: PtrInt);
-    procedure CheckUpdates(Sender: PtrInt);
     procedure LoadFormSettings;
     procedure SaveFormSettings;
     procedure AddRecentFile(const filename : string);
     procedure InitializeTMThread(out Thread : TMMLScriptThread);
-    procedure HandleParameters(Data: PtrInt);
-    procedure HandleSettingsParameter;
+    procedure DoRefreshTab(Sender: PtrInt);
+    procedure DoSimbaUpdateCheck(Sender: PtrInt);
+    procedure DoHandleParameters(Data: PtrInt);
+    procedure DoParseInternals(Data: PtrInt);
+    procedure DoSimbaNews(Data: PtrInt);
     procedure OnSaveScript(const Filename : string);
     property ShowParamHintAuto : boolean read GetShowParamHintAuto write SetShowParamHintAuto;
     property ShowCodeCompletionAuto: Boolean read GetShowCodeCompletionAuto write SetShowCodeCompletionAuto;
@@ -532,6 +534,7 @@ var
 
 implementation
 uses
+   InterfaceBase,
    LCLIntf,
    LazUTF8,
    LazFileUtils,
@@ -1084,6 +1087,20 @@ begin
   end;
 end;
 
+procedure TSimbaForm.CompileScript;
+begin
+  InitializeTMThread(CurrScript.ScriptThread);
+
+  if (CurrScript.ScriptThread <> nil) then
+  begin
+    CurrScript.ScriptThread.Options := CurrScript.ScriptThread.Options + [soCompileOnly];
+    CurrScript.ScriptThread.OnTerminate := @CurrScript.ScriptThreadTerminate;
+    CurrScript.ScriptThread.Start();
+
+    ScriptState := ss_Running;
+  end;
+end;
+
 procedure TSimbaForm.PauseScript;
 begin
   if (ScriptState = ss_Running) then
@@ -1357,12 +1374,12 @@ begin
   SetEditActions;
 end;
 
-procedure TSimbaForm.RefreshTabSender(Sender: PtrInt);
+procedure TSimbaForm.DoRefreshTab(Sender: PtrInt);
 begin
-  RefreshTab;
+  RefreshTab();
 end;
 
-procedure TSimbaForm.CheckUpdates(Sender: PtrInt);
+procedure TSimbaForm.DoSimbaUpdateCheck(Sender: PtrInt);
 begin
   UpdateTimer.Interval := SimbaSettings.Updater.CheckEveryXMinutes.Value;
   UpdateTimer.Enabled := True;
@@ -1511,56 +1528,63 @@ begin
   end;
 end;
 
-procedure TSimbaForm.HandleSettingsParameter;
-var
-  ErrorMsg : string;
+procedure TSimbaForm.DoHandleParameters(Data: PtrInt);
 begin
-  ErrorMsg := Application.CheckOptions('c:o:r', ['config:', 'open:', 'run']);
-  if (ErrorMsg = '') then
+  if Application.HasOption('h', 'help') then
   begin
-    if Application.HasOption('c', 'config') then
-    begin
-      mDebugLn('Using alternative config file: ' + Application.GetOptionValue('c', 'config') + '.');
-      SimbaSettingsFile := Application.GetOptionValue('c', 'config');
-    end;
-  end else
-    mDebugLn('ERROR IN COMMAND LINE ARGS: ' + ErrorMsg)
-end;
-
-procedure TSimbaForm.HandleParameters(Data: PtrInt);
-var
-  DoRun : Boolean;
-  ErrorMsg : string;
-begin
-  DoRun := false;
-  // paramcount = 1 means we got only one parameter. We assume this to be a file.
-  // and try to open it accordingly
-  if (Paramcount = 1) and not (Application.HasOption('open')) then
-  begin
-    mDebugLn('Opening file: ' + ParamStr(1));
-    if FileExists(ParamStrUTF8(1)) then
-      LoadScriptFile(ParamStrUTF8(1));
-  end else
-  // we have more parameters. Check for specific options. (-r -o -c, --run --open --config)
-  begin
-    ErrorMsg := Application.CheckOptions('c:o:r', ['config:', 'open:', 'run']);
-    if (ErrorMsg = '') then
-    begin
-      { Config Params are handled in HandleConfigParameter, as we need to check
-        those earlier }
-
-      if Application.HasOption('o', 'open') then
-      begin
-        mDebugLn('Opening file: ' + Application.GetOptionValue('o', 'open'));
-        LoadScriptFile(Application.GetOptionValue('o', 'open'));
-        DoRun:= Application.HasOption('r', 'run');
-      end;
-    end else
-      mDebugLn('ERROR IN COMMAND LINE ARGS: ' + ErrorMsg)
+    WriteLn('');
+    WriteLn('Options:');
+    WriteLn('  -open, -o: opens the given script');
+    WriteLn('  -run, -r: runs the script opened with -open');
+    WriteLn('  -compile: compiles the script opened with -open');
+    WriteLn('  -test: will wait for script to run then terminates Simba, exit code 1 if errored. requires -open and -run or -compile');
+    WriteLn('  -config, -c: uses the given config file');
+    WriteLn('');
   end;
 
-  if DoRun then
-    Self.RunScript;
+  if (Application.ParamCount = 1) then
+    LoadScriptFile(Application.Params[1]);
+  if Application.HasOption('o', 'open') then
+    LoadScriptFile(Application.GetOptionValue('o', 'open'));
+
+  if Application.HasOption('r', 'run') then
+    Self.RunScript();
+
+  if Application.HasOption('compile') then
+    Self.CompileScript();
+
+  if Application.HasOption('t', 'test') then
+  begin
+    while (Self.GetScriptState() in [ss_Running, ss_Stopping]) do
+      WidgetSet.AppProcessMessages(); // no Application.ProcessMessages, we don't want to call other async calls
+
+    WriteLn(DebugMemo.Lines.Text);
+
+    if (Self.CurrScript.ScriptErrorLine = -1) then
+      Halt(0)
+    else
+      Halt(1);
+  end;
+end;
+
+procedure TSimbaForm.DoParseInternals(Data: PtrInt);
+begin
+  with TProcThread.Create() do
+  begin
+    ClassProc := @ParseInternals;
+    OnTerminate := @FillFunctionList;
+    Start();
+  end;
+end;
+
+procedure TSimbaForm.DoSimbaNews(Data: PtrInt);
+begin
+  with TProcThread.Create() do
+  begin
+    ClassProc := @GetSimbaNews;
+    OnTerminate := @WriteSimbaNews;
+    Start();
+  end;
 end;
 
 procedure TSimbaForm.OnSaveScript(const Filename: string);
@@ -1640,16 +1664,8 @@ begin
 end;
 
 procedure TSimbaForm.ActionCompileScriptExecute(Sender: TObject);
-var
-  ScriptThread: TMMLScriptThread;
 begin
-  InitializeTMThread(ScriptThread);
-
-  if (ScriptThread <> nil) then
-  begin
-    ScriptThread.Options := ScriptThread.Options + [soCompileOnly];
-    ScriptThread.Start();
-  end;
+  Self.CompileScript();
 end;
 
 {$IFDEF WINDOWS}
@@ -2217,7 +2233,7 @@ begin
   CloseAction := caFree;
 end;
 
-procedure TSimbaForm.InitializeCoreBuffer;
+procedure TSimbaForm.ParseInternals;
 
   function Parse(Section, Text: String): TCodeInsight;
   var
@@ -2250,7 +2266,7 @@ begin
     end;
   except
     on e: Exception do
-      mDebugLn('ERROR filling core buffer: ' + e.ClassName + ' :: ' + e.Message);
+      mDebugLn('ERROR parsing internals: ' + e.ClassName + ' :: ' + e.Message);
   end;
 end;
 
@@ -2295,9 +2311,11 @@ procedure TSimbaForm.FormCreate(Sender: TObject);
 
   procedure LoadSettings;
   begin
-    SimbaSettingsFile := DataPath + 'settings.xml';
+    if Application.HasOption('c', 'config') then
+      SimbaSettingsFile := Application.GetOptionValue('c', 'config')
+    else
+      SimbaSettingsFile := DataPath + 'settings.xml';
 
-    HandleSettingsParameter();
     CreateSimbaSettings(SimbaSettingsFile);
 
     // check setting directories vaild, else default.
@@ -2346,9 +2364,11 @@ begin
 
   try
     Application.OnException := @CustomExceptionHandler;
-    Application.QueueAsyncCall(@RefreshTabSender, 0);
-    Application.QueueAsyncCall(@CheckUpdates, 0);
-    Application.QueueAsyncCall(@HandleParameters, 0);
+    Application.QueueAsyncCall(@DoHandleParameters, 0);
+    Application.QueueAsyncCall(@DoParseInternals, 0);
+    Application.QueueAsyncCall(@DoRefreshTab, 0);
+    Application.QueueAsyncCall(@DoSimbaNews, 0);
+    Application.QueueAsyncCall(@DoSimbaUpdateCheck, 0);
 
     AddHandlerFirstShow(@FirstShow);
 
@@ -2446,22 +2466,6 @@ begin
     if FileExists(Application.ExeName+'_old_') then
       DeleteFileUTF8(Application.ExeName+'_old_');
     {$ENDIF}
-
-    // Code Tools
-    with TProcThread.Create() do
-    begin
-      ClassProc := @InitializeCoreBuffer;
-      OnTerminate := @FillFunctionList;
-      Start();
-    end;
-
-    // Simba News
-    with TProcThread.Create() do
-    begin
-      ClassProc := @GetSimbaNews;
-      OnTerminate := @WriteSimbaNews;
-      Start();
-    end;
 
     UpdateTitle();
   finally
