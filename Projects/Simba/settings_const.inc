@@ -26,18 +26,10 @@ ssCheckUpdateMinutes = ssSettings + ssUpdater + 'CheckEveryXMinutes';
 ssUpdaterLink = ssSettings + ssUpdater + 'RemoteLink';
 ssUpdaterVersionLink = ssSettings + ssUpdater + 'RemoteVersionLink';
 ssAutomaticallyUpdate = ssSettings + ssUpdater + 'AutomaticallyUpdate';
-ssUpdaterReleaseChannel = ssSettings + ssUpdater + 'ReleaseChannel';
 
-ssLoadFontsOnStart = ssSettings + ssFonts + 'LoadOnStartUp';
-ssFontsCheckForUpdates = ssSettings + ssFonts + 'CheckForUpdates';
-ssFontsVersion = ssSettings + ssFonts + 'Version';
-ssFontsLink = ssSettings + ssFonts + 'UpdateLink';
-ssFontsVersionLink = ssSettings + ssFonts + 'VersionLink';
 ssFontsPath = ssSettings + ssFonts + 'Path';
-
 ssIncludesPath = ssSettings + ssIncludes + 'Path';
-ssInterpreterType = ssSettings + ssInterpreter + 'Type';
-ssInterpreterAllowSysCalls = ssSettings + ssInterpreter + 'AllowSysCalls';
+ssPluginsPath = ssSettings + ssPlugins + 'Path';
 
 ssTabsOpenNextOnClose = ssSettings + ssTabs + 'OpenNextOnClose';
 ssTabsOpenScriptInNewTab = ssSettings + ssTabs + 'OpenScriptInNewTab';
@@ -62,12 +54,6 @@ ssSourceEditorDefScriptPath = ssSettings + ssSourceEditor + 'DefScriptPath';
 ssSourceEditorHighlighterPath = ssSettings + ssSourceEditor + 'Highlighter';
 
 ssNewsLink = ssSettings + ssNews + 'URL';
-ssPluginsPath = ssSettings + ssPlugins + 'Path';
-
-ssExtensionsExtensionN = ssExtensions + 'Extension';
-ssExtensionsPath = ssSettings + ssExtensions + 'Path';
-ssExtensionsCount = ssExtensions + 'ExtensionCount';
-ssExtensionsFileExtension = ssSettings + ssExtensions + 'FileExtension';
 
 ssTrayAlwaysVisible = ssSettings + ssTray + 'AlwaysVisible';
 
