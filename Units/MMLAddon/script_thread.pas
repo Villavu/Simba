@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils,
   lpparser, lpcompiler, lptypes, lpvartypes, lpmessages, lpinterpreter,
-  Client, Settings, SettingsSandbox, Files, script_plugins;
+  Client, Files, script_plugins;
 
 type
   PErrorData = ^TErrorData;
@@ -32,7 +32,6 @@ type
     FStartTime: UInt64;
     FClient: TClient;
     FOptions: EMMLScriptOptions;
-    FSettings: TMMLSettingsSandbox;
     FUsedPlugins: TMPluginsList;
     FTerminateOptions: EMMLScriptTerminateOptions;
 
@@ -59,7 +58,6 @@ type
     property Output: TStrings read FOutput write FOutput;
     property State: EMMLScriptState write SetState;
     property Client: TClient read FClient;
-    property Settings: TMMLSettingsSandbox read FSettings;
     property StartTime: UInt64 read FStartTime;
     property TerminateOptions: EMMLScriptTerminateOptions read FTerminateOptions write FTerminateOptions;
 
@@ -67,7 +65,6 @@ type
     procedure WriteLn; overload;
     procedure WriteLn(constref S: String); overload;
 
-    procedure SetSettings(From: TMMLSettings);
     procedure SetFonts(Path: String);
 
     function Kill: Boolean;
@@ -402,8 +399,6 @@ begin
 
   if (FClient <> nil) then
     FreeAndNil(FClient);
-  if (FSettings <> nil) Then
-    FreeAndNil(FSettings);
   if (FCompiler <> nil) then
     FreeAndNil(FCompiler);
 end;
@@ -438,8 +433,6 @@ begin
 
     if (FClient <> nil) then
       FreeAndNil(FClient);
-    if (FSettings <> nil) Then
-      FreeAndNil(FSettings);
     if (FCompiler <> nil) then
       FreeAndNil(FCompiler);
 
@@ -475,8 +468,6 @@ begin
 
         if (FClient <> nil) then
           FreeAndNil(FClient);
-        if (FSettings <> nil) Then
-          FreeAndNil(FSettings);
         if (FCompiler <> nil) then
           FreeAndNil(FCompiler);
 
@@ -490,12 +481,6 @@ begin
   Exit(False);
 end;
 {$ENDIF}
-
-procedure TMMLScriptThread.SetSettings(From: TMMLSettings);
-begin
-  FSettings := TMMLSettingsSandbox.Create(From);
-  FSettings.Prefix := 'Scripts/';
-end;
 
 procedure TMMLScriptThread.SetFonts(Path: String);
 var

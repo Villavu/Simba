@@ -33,7 +33,8 @@ uses
   cthreads, cmem, linux_startup,
   {$ENDIF}
   Interfaces, Forms,
-  simbaunit, colourhistory, about, debugimage, bitmapconv, updateform, simbasettingsold, simbasettingssimple,
+  simbaunit, colourhistory, about, debugimage, bitmapconv, updateform,
+  simba.settingsform,
   {$IFDEF USE_FORMDESIGNER}
   design_frm, frmdesigner,
   {$ENDIF}
@@ -57,10 +58,9 @@ begin
   Application.CreateForm(TDebugImgForm, DebugImgForm);
   Application.CreateForm(TBitmapConvForm, BitmapConvForm);
   Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
-  Application.CreateForm(TSettingsForm, SettingsForm);
-  Application.CreateForm(TSettingsSimpleForm, SettingsSimpleForm);
-  {$IFDEF USE_FORMDESIGNER}
+  Application.CreateForm(TSimbaSettingsForm, SimbaSettingsForm);
   Application.CreateForm(TCompForm, CompForm);
+  {$IFDEF USE_FORMDESIGNER}
   {$ENDIF}
 
   Application.Run();

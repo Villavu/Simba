@@ -31,7 +31,7 @@ interface
 uses
   {$IFDEF LINUX}cthreads, cmem, pthreads,{$ENDIF}
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit, SynHighlighterLape,
+  StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit,
   mufasabase, MufasaTypes,
   synedittypes,
   script_thread,
@@ -44,20 +44,16 @@ uses
   framescript,
 
   lcltype, ActnList,
-  SynExportHTML, SynEditKeyCmds,
-  SynEditMarkupHighAll,  LMessages, Buttons, ShellCtrls, PairSplitter,
-  mmisc, stringutil,mufasatypesutil,
-  about, framefunctionlist, updateform, Simbasettingsold,
-  Simbasettingssimple,
+  SynEditMarkupHighAll, LMessages, Buttons, ShellCtrls, PairSplitter,
+  mmisc,
+  about, framefunctionlist, updateform,
   v_ideCodeInsight, v_ideCodeParser, CastaliaPasLexTypes, // Code completion units
   CastaliaSimplePasPar, v_AutoCompleteForm,  // Code completion units
 
-  updater, package,
-  {$IFDEF USE_SCRIPTMANAGER}SM_Main,{$ENDIF}
-  newsimbasettings;
+  package,
+  simba.settings;
 
 const
-  { Place the shortcuts here }
   {$IFDEF LINUX}
   shortcut_StartScript = '<Ctrl><Alt>R';
   shortcut_StopScript =  '<Ctrl><Alt>S';
@@ -65,24 +61,25 @@ const
   {$ELSE}
   shortcut_StartScriptMod = MOD_CONTROL or MOD_ALT;
   shortcut_StartScriptKey = VK_R;
+  shortcut_StartScriptID  = 0;
+
   shortcut_StopScriptMod  = MOD_CONTROL or MOD_ALT;
   shortcut_StopScriptKey  = VK_S;
+  shortcut_StopScriptID   = 1;
+
   shortcut_PickColourMod  = MOD_CONTROL or MOD_ALT;
   shortcut_PickColourKey  = VK_P;
+  shortcut_PickColorID    = 2;
   {$ENDIF}
 
-  {$I settings_const.inc}
-
 type
-
-  { TMufasaTab }
-
   TMufasaTab = class(Tobject)
   private
-    PageCtrl : TPageControl;
+    PageCtrl: TPageControl;
   public
-    TabSheet : TTabsheet;
-    ScriptFrame : TScriptFrame;
+    TabSheet: TTabsheet;
+    ScriptFrame: TScriptFrame;
+
     procedure Clear;//This will 'reset' the ScriptFrame
     constructor Create(Page : TPageControl);
     destructor Destroy; override;
@@ -96,11 +93,7 @@ type
     ActionFindPrev: TAction;
     ActionFont: TAction;
     ActionNotes: TAction;
-    ActionDebugger: TAction;
-    ActionLape: TAction;
     ActionGoto: TAction;
-    ActionPascalScript: TAction;
-    ActionExtensions: TAction;
     ActionSaveDef: TAction;
     ActionConsole: TAction;
     ActionCompileScript: TAction;
@@ -165,7 +158,6 @@ type
     MenuItemDivider11: TMenuItem;
     MenuItemSaveDef: TMenuItem;
     MenuItemBitmapConv: TMenuItem;
-    MenuItemSettingsButton: TMenuItem;
     MenuItemDivider10: TMenuItem;
     MenuTools: TMenuItem;
     MenuItemOpenRecent: TMenuItem;
@@ -301,7 +293,8 @@ type
     procedure ActionGotoExecute(Sender: TObject);
     procedure ActionNewExecute(Sender: TObject);
     procedure ActionNewTabExecute(Sender: TObject);
-    procedure ActionUtiltiesExecute(Sender: TObject);
+    procedure ActionFileBrowserExecute(Sender: TObject);
+    procedure ActionNotesExecute(Sender: TObject);
     procedure ActionOpenExecute(Sender: TObject);
     procedure ActionPasteExecute(Sender: TObject);
     procedure ActionPauseExecute(Sender: TObject);
@@ -350,14 +343,8 @@ type
     procedure MenuItemAboutClick(Sender: TObject);
     procedure MenuItemCloseTabsClick(Sender: TObject);
     procedure MenuItemDebugImageClick(Sender: TObject);
-    procedure MenuItemExportHTMLClick(Sender: TObject);
-    procedure MenuitemFillFunctionListClick(Sender: TObject);
     procedure MenuItemHideClick(Sender: TObject);
-    procedure MenuItemOpenIncludesFolderClick(Sender: TObject);
-    procedure MenuItemOpenPluginsFolderClick(Sender: TObject);
-    procedure MenuItemOpenScriptsFolderClick(Sender: TObject);
     procedure MenuItemReportBugClick(Sender: TObject);
-    procedure MenuItemSettingsButtonClick(Sender: TObject);
     procedure MenuItemSettingsSimpleButtonClick(Sender: TObject);
     procedure MenuItemShowClick(Sender: TObject);
     procedure MenuItemTabCloseClick(Sender: TObject);
@@ -365,150 +352,117 @@ type
     procedure MenuItemFunctionListClick(Sender: TObject);
     procedure MTrayIconClick(Sender: TObject);
     procedure ButtonPickClick(Sender: TObject);
-    procedure ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+    procedure ButtonSelectorDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure PageControl1Change(Sender: TObject);
     procedure ButtonTrayClick(Sender: TObject);
     procedure PageControl1Changing(Sender: TObject; var AllowChange: Boolean);
-    procedure PageControl1ContextPopup(Sender: TObject; MousePos: TPoint;
-      var Handled: Boolean);
+    procedure PageControl1ContextPopup(Sender: TObject; MousePos: TPoint; var Handled: Boolean);
     procedure PageControl1DragDrop(Sender, Source: TObject; X, Y: Integer);
-    procedure PageControl1DragOver(Sender, Source: TObject; X, Y: Integer;
-      State: TDragState; var Accept: Boolean);
-    procedure PageControl1MouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
-    procedure PageControl1MouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+    procedure PageControl1DragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
+    procedure PageControl1MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure PageControl1MouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure PopupItemFindClick(Sender: TObject);
     procedure RecentFileItemsClick(Sender: TObject);
-    procedure ScriptPanelDockDrop(Sender: TObject; Source: TDragDockObject; X,
-      Y: Integer);
-    procedure ScriptPanelDockOver(Sender: TObject; Source: TDragDockObject; X,
-      Y: Integer; State: TDragState; var Accept: Boolean);
+    procedure ScriptPanelDockDrop(Sender: TObject; Source: TDragDockObject; X, Y: Integer);
+    procedure ScriptPanelDockOver(Sender: TObject; Source: TDragDockObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
     procedure ScriptPopupPopup(Sender: TObject);
     procedure ShowACA(Sender: TObject);
     procedure SpeedButtonSearchClick(Sender: TObject);
-    procedure SplitterFunctionListCanResize(Sender: TObject; var NewSize: Integer;
-      var Accept: Boolean);
+    procedure SplitterFunctionListCanResize(Sender: TObject; var NewSize: Integer; var Accept: Boolean);
     procedure TB_ShowPackagesClick(Sender: TObject);
-    procedure ThreadOpenConnectionEvent(Sender: TObject; var url: string;
-      var Continue: boolean);
-    procedure ThreadOpenFileEvent(Sender: TObject; var Filename: string;
-      var Continue: boolean);
-    procedure ThreadWriteFileEvent(Sender: TObject; var Filename: string;
-      var Continue: boolean);
-    procedure ScriptStartEvent(Sender: TObject; var Script : string; var Continue : boolean);
-    procedure ScriptOpenEvent(Sender: TObject; var Script : string);
-    procedure TT_ScriptManagerClick(Sender: TObject);
     procedure TrayPopupPopup(Sender: TObject);
     procedure TT_UpdateClick(Sender: TObject);
     procedure UpdateMenuButtonClick(Sender: TObject);
     procedure UpdateTimerCheck(Sender: TObject);
-
     procedure OnCCMessage(Sender: TObject; const Typ: TMessageEventType; const Msg: string; X, Y: Integer);
     procedure OnCompleteCode(Str: string);
     function OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
     function OnCCLoadLibrary(Sender: TObject; var Argument: string; out Parser: TCodeInsight): Boolean;
     procedure FileBrowserExpand(Sender: TObject; Node: TTreeNode);
-    procedure FirstShow(Sender: TObject);
-  private
-    PopupTab : integer;
-    RecentFileItems : array of TMenuItem;
-    RecentFiles : TStringList;
-    SearchStart : TPoint;
-    LastTab  : integer;
-    OpenConnectionData : TOpenConnectionData;
-    OpenFileData : TOpenFileData;
-    WriteFileData : TWriteFileData;
-    ScriptStartData : TScriptStartData;
-    ScriptOpenData : TScriptOpenData;
-    News: String;
-
-    function SilentUpdateBeat: Boolean;
-
-    function GetScriptState: TScriptState;
-    function GetShowParamHintAuto: boolean;
-    function GetShowCodeCompletionAuto: Boolean;
-    procedure GetSimbaNews;
-    procedure WriteSimbaNews(Sender: TObject);
-
-    { Settings Hooks }
-    procedure SetPluginsPath(obj: TSetting);
-    procedure SetScriptsPath(obj: TSetting);
-    procedure SetIncludesPath(obj: TSetting);
-    procedure SetFontsPath(obj: TSetting);
-    procedure SetDefaultScriptPath(obj: TSetting);
-    procedure SetSourceEditorFont(obj: TSetting);
-    procedure SetTrayVisiblity(obj: TSetting);
-
-    procedure SetShowParamHintAuto(const AValue: boolean);
-    procedure SetShowCodeCompletionAuto(const AValue: boolean);
-    procedure SetScriptState(const State: TScriptState);
-    function CreateSetting(const Key, Value : string) : string;
-    procedure SetSetting(const key,Value : string; save : boolean = false);
-    function SettingExists(const key : string) : boolean;
-    procedure ParseInternals;
-    procedure FillFunctionList(Sender: TObject);
-    procedure CustomExceptionHandler(Sender: TObject; E: Exception);
-    procedure RegisterSettingsOnChanges;
+  protected
+    procedure WndProc(var Message: TLMessage); override;
   public
-    { Required to work around using freed resources on quit }
-    Exiting: Boolean;
-
-    DebugStream: String;
-    SearchString : string;
+    PopupTab: Integer;
+    SearchStart: TPoint;
+    LastTab: Integer;
+    News: String;
+    SearchString: String;
     CurrScript: TScriptFrame; //The current scriptframe
     CurrTab: TMufasaTab; //The current TMufasaTab
     CodeCompletionForm: TAutoCompletePopup;
     CodeCompletionStart: TPoint;
-    ParamHint : TParamHint;
+    ParamHint: TParamHint;
     Tabs: TList;
     Manager: TIOManager;
     Picker: TMColorPicker;
     Selector: TMWindowSelector;
-    OnScriptStart : TScriptStartEvent;
-    OnScriptOpen : TScriptOpenEvent;
-    Highlighter: TSynFreePascalSyn;
+    Exiting: Boolean;
 
-    function LoadSettingDef(const Key, Def : string) : string;
-    procedure FunctionListShown( ShowIt : boolean);
-    property ScriptState : TScriptState read GetScriptState write SetScriptState;
+    procedure Settings_Init;
+    procedure Settings_ConsoleVisibleChanged(Value: Boolean);
+    procedure Settings_FileBrowserVisibleChanged(Value: Boolean);
+    procedure Settings_FunctionListVisibleChanged(Value: Boolean);
+    procedure Settings_NotesVisibleChanged(Value: Boolean);
+    procedure Settings_EditorFontNameChanged(Value: WideString);
+    procedure Settings_EditorFontSizeChanged(Value: Int64);
+    procedure Settings_EditorCaretPastEOLChanged(Value: Boolean);
+    procedure Settings_EditorShowSpecialCharactersChanged(Value: Boolean);
+    procedure Settings_Form_TrayIconVisible_Changed(Value: Boolean);
+
+    procedure Utilities_Init;
+    procedure Utilities_Update;
+
+    procedure Environment_Init;
+
+    procedure Editor_EditFont;
+    procedure Editor_EditColors;
+
+    procedure Form_LoadSettings;
+    procedure Form_SaveSettings;
+
+    procedure Parameters_Handle(Data: PtrInt);
+    procedure Parameters_RunTest(Data: PtrInt);
+
+    procedure SimbaNews_Download;
+    procedure SimbaNews_Write(Sender: TObject);
+    procedure SimbaNews_Execute(Data: PtrInt);
+
+    procedure CodeTools_Initialize(Data: PtrInt);
+    procedure CodeTools_ParseInternals;
+    procedure CodeTools_FillFunctionList(Sender: TObject);
+
+    function GetScriptState: TScriptState;
+    procedure SetScriptState(const State: TScriptState);
+
+    procedure CustomExceptionHandler(Sender: TObject; E: Exception);
+
     procedure UpdateTitle;
-    function OpenScript : boolean;
-    function LoadScriptFile(filename : string; AlwaysOpenInNewTab : boolean = false; CheckOtherTabs : boolean = true) : boolean;
-    function SaveCurrentScript : boolean;
-    function SaveCurrentScriptAs : boolean;
-    function SaveCurrentScriptAsDefault : boolean;
-    function CanExitOrOpen : boolean;
-    function ClearScript : boolean;
+    function OpenScript: Boolean;
+    function LoadScriptFile(FileName: String; AlwaysOpenInNewTab: Boolean = False; CheckOtherTabs: Boolean = True): Boolean;
+    function SaveCurrentScript: Boolean;
+    function SaveCurrentScriptAs: Boolean;
+    function SaveCurrentScriptAsDefault: Boolean;
+    function CanExitOrOpen: Boolean;
+    function ClearScript: Boolean;
     procedure RunScript;
     procedure CompileScript;
     procedure PauseScript;
     procedure StopScript;
     procedure AddTab;
     procedure StopCodeCompletion;
-    function FindTab(filename : string) : integer;
-    function DeleteTab( TabIndex : integer; CloseLast : boolean; Silent : boolean = false) : boolean;
-    procedure ClearTab( TabIndex : integer);
-    procedure CloseTabs(Exclude: integer = -1; Silent : boolean = false); //-1 for no exclusion
+    function FindTab(FileName: string): Integer;
+    function DeleteTab(TabIndex: Integer; CloseLast: Boolean; Silent: Boolean = False): Boolean;
+    procedure ClearTab(TabIndex: Integer);
+    procedure CloseTabs(Exclude: Integer = -1; Silent: Boolean = False); //-1 for no exclusion
     procedure SetEditActions;
     procedure DoSearch(SearchOptions: TSynSearchOptions; HighlightAll: Boolean);
-    procedure RefreshTab;//Refreshes all the form items that depend on the Script (Panels, title etc.)
-    procedure LoadFormSettings;
-    procedure SaveFormSettings;
-    procedure AddRecentFile(const filename : string);
+    procedure RefreshTab;
+    procedure AddRecentFile(const FileName : string);
     procedure InitializeTMThread(out Thread : TMMLScriptThread);
-    procedure DoRefreshTab(Sender: PtrInt);
-    procedure DoSimbaUpdateCheck(Sender: PtrInt);
-    procedure DoHandleParameters(Data: PtrInt);
-    procedure DoParseInternals(Data: PtrInt);
-    procedure DoSimbaNews(Data: PtrInt);
     procedure OnSaveScript(const Filename : string);
-    property ShowParamHintAuto : boolean read GetShowParamHintAuto write SetShowParamHintAuto;
-    property ShowCodeCompletionAuto: Boolean read GetShowCodeCompletionAuto write SetShowCodeCompletionAuto;
-    function DefaultScript : string;
-    procedure DefaultHighlighter;
-    procedure UpdateSimbaSilent(Force: Boolean);
+    function DefaultScript: string;
+
+    property ScriptState: TScriptState read GetScriptState write SetScriptState;
   end;
 
   procedure formWriteln(constref S: String);
@@ -522,33 +476,34 @@ const
   Panel_ScriptPath = 3;
   Panel_General = 3;
 
-
   Image_Stop = 7;
   Image_Terminate = 19;
+
 var
   SimbaForm: TSimbaForm;
-  AppPath, DocPath, DataPath: string;
-  {$IFDEF WINDOWS}
-  PrevWndProc : WNDPROC;
-  {$ENDIF}
+  AppPath, DataPath: string;
 
 implementation
-uses
-   InterfaceBase,
-   LCLIntf,
-   LazUTF8,
-   LazFileUtils,
-   debugimage,
-   files,
-   bitmapconv,
-   colourhistory,
-   math,
-   script_imports, script_plugins,
-   openssl,
-   aca, fphttpclient, dtm_editor, colorscheme
-   {$IFDEF USE_FORMDESIGNER}, frmdesigner{$ENDIF}
 
-   {$IFDEF LINUX_HOTKEYS}, keybinder{$ENDIF};
+uses
+  LCLIntf,
+  LazUTF8,
+  LazFileUtils,
+  debugimage,
+  files,
+  bitmapconv,
+  colourhistory,
+  math,
+  script_imports, script_plugins,
+  openssl,
+  aca, fphttpclient, dtm_editor, colorscheme,
+  simba.settingsform
+  {$IFDEF USE_FORMDESIGNER},
+  frmdesigner
+  {$ENDIF}
+  {$IFDEF LINUX_HOTKEYS},
+  keybinder
+  {$ENDIF};
 
 procedure TSimbaForm.CustomExceptionHandler(Sender: TObject; E: Exception);
 
@@ -622,52 +577,376 @@ begin
   end;
 end;
 
-{$IFDEF WINDOWS}
-
-{ Used for global callbacks on WINDOWS }
-function WndCallback(Ahwnd: HWND; uMsg: UINT; wParam: WParam;
-  lParam: LParam): LRESULT stdcall;
+procedure TSimbaForm.Settings_Init;
 begin
-  if uMsg = WM_HOTKEY then //Found an hotkey!
-  begin
-    if (lo(lParam) = shortcut_StartScriptMod) and (hi(lParam) =shortcut_StartScriptKey) then
-      SimbaForm.ActionRunScript.Execute;
-    if (lo(lParam) = shortcut_StopScriptMod) and (hi(lParam) =shortcut_StopScriptKey) then
-      SimbaForm.ActionStopScript.Execute;
-    if (lo(lParam) = shortcut_PickColourMod) and (hi(lParam) =shortcut_PickColourKey) then
-      SimbaForm.ButtonPickClick(nil);
-    Result := 0;
-  end else
-    Result := Windows.CallWindowProc(PrevWndProc,Ahwnd, uMsg, WParam, LParam);
+  if Application.HasOption('s', 'settings') then
+    SimbaSettings := TSimbaSettings.Create(Application.GetOptionValue('s', 'settings'))
+  else
+    SimbaSettings := TSimbaSettings.Create(DataPath + 'settings.json');
+
+  SimbaSettings.Form.ConsoleVisible.OnChange := @Settings_ConsoleVisibleChanged;
+  SimbaSettings.Form.FileBrowserVisible.OnChange := @Settings_FileBrowserVisibleChanged;
+  SimbaSettings.Form.FunctionListVisible.OnChange := @Settings_FunctionListVisibleChanged;
+  SimbaSettings.Form.NotesVisible.OnChange := @Settings_NotesVisibleChanged;
+  SimbaSettings.Form.TrayIconVisible.OnChange := @Settings_Form_TrayIconVisible_Changed;
+
+  SimbaSettings.Editor.FontName.OnChange := @Settings_EditorFontNameChanged;
+  SimbaSettings.Editor.FontSize.OnChange := @Settings_EditorFontSizeChanged;
+  SimbaSettings.Editor.CaretPastEOL.OnChange := @Settings_EditorCaretPastEOLChanged;
+  SimbaSettings.Editor.ShowSpecialCharacters.OnChange := @Settings_EditorShowSpecialCharactersChanged;
 end;
 
-procedure Bind_Windows_Keys;
-
+procedure TSimbaForm.Form_LoadSettings;
+var
+  i: Int32;
 begin
-  PrevWndProc := Windows.WNDPROC(GetWindowLong(SimbaForm.handle,GWL_WNDPROC));
-  SetWindowLong(SimbaForm.Handle,GWL_WNDPROC,PtrInt(@WndCallback));
-  if not RegisterHotkey(SimbaForm.Handle,0,shortcut_StartScriptMod,shortcut_StartScriptKey) then
-    mDebugLn('Unable to register start script global hotkey');
-  if not RegisterHotkey(SimbaForm.Handle,1,shortcut_StopScriptMod,shortcut_StopScriptKey) then
-    mDebugLn('Unable to register stop script global hotkey');
-  if not RegisterHotkey(SimbaForm.Handle,2,shortcut_PickColourMod,shortcut_PickColourKey) then
-    mDebugLn('Unable to register pick colour global hotkey');
+  BeginFormUpdate();
+
+  try
+    if SimbaSettings.Form.Maximized.Exists() and SimbaSettings.Form.Maximized.Value then
+      Self.WindowState := wsMaximized
+    else
+    if SimbaSettings.Form.Left.Exists() and SimbaSettings.Form.Top.Exists() and
+       SimbaSettings.Form.Width.Exists() and SimbaSettings.Form.Height.Exists() then
+    begin
+      Position := poDesigned;
+
+      Self.Left := SimbaSettings.Form.Left.Value;
+      Self.Top := SimbaSettings.Form.Top.Value;
+      Self.Width := SimbaSettings.Form.Width.Value;
+      Self.Height := SimbaSettings.Form.Height.Value;
+    end;
+
+    MTrayIcon.Visible := SimbaSettings.Form.TrayIconVisible.Value;
+
+    // if not on the current monitor, let's just maximize on the current.
+    if (Self.WindowState <> wsMaximized) and (not Self.Monitor.WorkAreaRect.Contains(Self.BoundsRect)) then
+      Self.WindowState := wsMaximized;
+
+    if SimbaSettings.Form.RecentFiles.Exists() then
+      for i := 0 to High(SimbaSettings.Form.RecentFiles.Value) do
+        if FileExists(SimbaSettings.Form.RecentFiles.Value[i]) then
+          AddRecentFile(SimbaSettings.Form.RecentFiles.Value[i]);
+
+    MemoNotes.Text := SimbaSettings.Form.NotesContent.Value;
+  finally
+    EndFormUpdate();
+  end;
+end;
+
+procedure TSimbaForm.Form_SaveSettings;
+var
+  i: Int32;
+  Files: TStringArray;
+begin
+  SimbaSettings.Form.Left.Value := Self.Left;
+  SimbaSettings.Form.Top.Value := Self.Top;
+  SimbaSettings.Form.Width.Value := Self.Width;
+  SimbaSettings.Form.Height.Value := Self.Height;
+  SimbaSettings.Form.Maximized.Value := (Self.WindowState = wsMaximized);
+
+  SimbaSettings.Form.NotesContent.Value := MemoNotes.Text;
+
+  for i := 0 to MenuItemOpenRecent.Count - 1 do
+  begin
+    SetLength(Files, Length(Files) + 1);
+
+    Files[High(Files)] := MenuItemOpenRecent[i].Caption;
+  end;
+
+  SimbaSettings.Form.RecentFiles.Value := Files;
+end;
+
+procedure TSimbaForm.Parameters_RunTest(Data: PtrInt);
+begin
+  if Application.HasOption('test') then
+  begin
+    Application.RemoveASyncCalls(Self);
+
+    while (Self.GetScriptState() in [ss_Running, ss_Stopping]) do
+      Application.ProcessMessages();
+
+    WriteLn('Testing ' + CurrScript.ScriptFile);
+    Writeln(DebugMemo.Text);
+
+    // This whole testing interface is a hack right now until out of process scripts are implemented.
+    // But terminating like this allows nothing else to raise a exception while freeing (halt calls finalization sections).
+    {$IFDEF WINDOWS}
+    if (Self.CurrScript.ScriptErrorLine > -1) then
+      TerminateProcess(OpenProcess(PROCESS_TERMINATE, True, GetProcessID()), 1)
+    else
+      TerminateProcess(OpenProcess(PROCESS_TERMINATE, True, GetProcessID()), 0);
+    {$ELSE}
+    if (Self.CurrScript.ScriptErrorLine > -1) then
+      Halt(1)
+    else
+      Halt(0);
+    {$ENDIF}
+  end;
+end;
+
+procedure TSimbaForm.SimbaNews_Download;
+begin
+  try
+    News := TFPHTTPClient.SimpleGet('http://simba.villavu.com/bin/news');
+  except
+    on e: Exception do
+      WriteLn('Failed downloading Simba news: ' + e.Message);
+  end;
+end;
+
+procedure TSimbaForm.SimbaNews_Write(Sender: TObject);
+begin
+  with TStringList.Create() do
+  try
+    Text := News; // Process line endings.
+
+    if (Text <> '') then
+      DebugMemo.Lines.Add(Text);
+  finally
+    Free();
+  end;
+end;
+
+procedure TSimbaForm.SimbaNews_Execute(Data: PtrInt);
+begin
+  if SimbaSettings.General.ShowSimbaNews.Value then
+    with TProcThread.Create() do
+    begin
+      ClassProc := @SimbaNews_Download;
+      OnTerminate := @SimbaNews_Write;
+      Start();
+    end;
+end;
+
+procedure TSimbaForm.Environment_Init;
+begin
+  // Reset paths to default if they don't exist
+  if (not DirectoryExistsUTF8(SimbaSettings.Environment.PluginPath.Value)) then
+    SimbaSettings.Environment.PluginPath.Value := SimbaSettings.Environment.PluginPath.DefaultValue;
+  if (not DirectoryExistsUTF8(SimbaSettings.Environment.FontPath.Value)) then
+    SimbaSettings.Environment.FontPath.Value := SimbaSettings.Environment.FontPath.DefaultValue;
+  if (not DirectoryExistsUTF8(SimbaSettings.Environment.IncludePath.Value)) then
+    SimbaSettings.Environment.IncludePath.Value := SimbaSettings.Environment.IncludePath.DefaultValue;
+  if (not DirectoryExistsUTF8(SimbaSettings.Environment.ScriptPath.Value)) then
+    SimbaSettings.Environment.ScriptPath.Value := SimbaSettings.Environment.ScriptPath.DefaultValue;
+
+  // Create the dirs if they don't exist
+  CreateDirUTF8(SimbaSettings.Environment.PluginPath.Value);
+  CreateDirUTF8(SimbaSettings.Environment.FontPath.Value);
+  CreateDirUTF8(SimbaSettings.Environment.IncludePath.Value);
+  CreateDirUTF8(SimbaSettings.Environment.ScriptPath.Value);
+end;
+
+procedure TSimbaForm.Editor_EditFont;
+var
+  Dialog: TFontDialog;
+begin
+  Dialog := TFontDialog.Create(nil);
+
+  with Dialog do
+  try
+    Options := [fdEffects, fdFixedPitchOnly];
+    Title := 'Font Editor';
+
+    if Execute() then
+    begin
+      SimbaSettings.Editor.FontName.Value := Font.Name;
+      SimbaSettings.Editor.FontSize.Value := Font.Size;
+    end;
+  finally
+    Dialog.Free();
+  end;
+end;
+
+procedure TSimbaForm.Editor_EditColors;
+begin
+  SimbaColorsForm.ShowModal();
+end;
+
+
+procedure TSimbaForm.Settings_ConsoleVisibleChanged(Value: Boolean);
+{$IFDEF WINDOWS}
+var
+  PID: UInt32;
+begin
+  GetWindowThreadProcessId(GetConsoleWindow(), PID);
+
+  if (PID = GetCurrentProcessID()) then
+  begin
+    case Value of
+      True: ShowWindow(GetConsoleWindow(), SW_SHOWNORMAL);
+      False: ShowWindow(GetConsoleWindow(), SW_HIDE);
+    end;
+  end;
+end;
+{$ELSE}
+begin
+end;
+{$ENDIF}
+
+procedure TSimbaForm.Settings_FileBrowserVisibleChanged(Value: Boolean);
+begin
+  Utilities_Update();
+
+  MenuItemFileBrowser.Checked := Value;
+end;
+
+procedure TSimbaForm.Settings_FunctionListVisibleChanged(Value: Boolean);
+begin
+  case Value of
+    True:
+      begin
+        FunctionList.FrameEndDock(FunctionList, FunctionList.Parent, 0, 0);
+
+        if (FunctionList.Parent is TPanel) then
+        begin
+          SplitterFunctionList.Show();
+          FunctionList.Show();
+        end else
+          FunctionList.Parent.Show();
+      end;
+
+    False:
+      begin
+        if (FunctionList.Parent is TPanel) then
+          FunctionList.Hide()
+        else
+          FunctionList.Parent.Hide();
+
+        SplitterFunctionList.Hide();
+      end;
+  end;
+
+  MenuItemFunctionList.Checked := SimbaSettings.Form.FunctionListVisible.Value;
+end;
+
+procedure TSimbaForm.Settings_NotesVisibleChanged(Value: Boolean);
+begin
+  Utilities_Update();
+
+  MenuItemNotes.Checked := Value;
+end;
+
+procedure TSimbaForm.Settings_EditorFontNameChanged(Value: WideString);
+var
+  i: Int32;
+begin
+  if (Tabs <> nil) then
+    for i := 0 to Tabs.Count - 1 do
+      TMufasaTab(Tabs[i]).ScriptFrame.SynEdit.Font.Name := Value;
+end;
+
+procedure TSimbaForm.Settings_EditorFontSizeChanged(Value: Int64);
+var
+  i: Int32;
+begin
+  if (Tabs <> nil) then
+    for i := 0 to Tabs.Count - 1 do
+      TMufasaTab(Tabs[i]).ScriptFrame.SynEdit.Font.Size := Value;
+end;
+
+procedure TSimbaForm.Settings_EditorCaretPastEOLChanged(Value: Boolean);
+var
+  i: Int32;
+begin
+  if (Tabs <> nil) then
+    for i := 0 to Tabs.Count - 1 do
+    begin
+      with TMufasaTab(Tabs[i]).ScriptFrame do
+        if Value then
+          SynEdit.Options := SynEdit.Options + [eoScrollPastEOL, eoTrimTrailingSpaces]
+        else
+          SynEdit.Options := SynEdit.Options - [eoScrollPastEOL, eoTrimTrailingSpaces];
+    end;
+end;
+
+procedure TSimbaForm.Settings_EditorShowSpecialCharactersChanged(Value: Boolean);
+var
+  i: Int32;
+begin
+  if (Tabs <> nil) then
+    for i := 0 to Tabs.Count - 1 do
+    begin
+      with TMufasaTab(Tabs[i]).ScriptFrame do
+        if Value then
+          SynEdit.Options := SynEdit.Options + [eoShowSpecialChars]
+        else
+          SynEdit.Options := SynEdit.Options - [eoShowSpecialChars];
+    end;
+end;
+
+procedure TSimbaForm.Settings_Form_TrayIconVisible_Changed(Value: Boolean);
+begin
+  MTrayIcon.Visible := Value;
+end;
+
+procedure TSimbaForm.Utilities_Init;
+begin
+  FileBrowser.Root := AppPath;
+
+  if (FileBrowser.Items.Count > 0) then
+  begin
+    FileBrowser.Items[0].Text := ExtractFileName(ExcludeTrailingPathDelimiter(FileBrowser.Root));
+    FileBrowser.Items[0].ImageIndex := 54;
+    FileBrowser.Items[0].SelectedIndex := 54;
+  end;
+
+  Utilities_Update();
+end;
+
+procedure TSimbaForm.Utilities_Update;
+var
+  Browser, Notes: TPairSplitterSide;
+  i: Int32;
+begin
+  if (not PanelUtilites.HandleAllocated) then
+    PanelUtilites.HandleNeeded();
+
+  Browser := PanelUtilites.Sides[0];
+  Browser.Visible := SimbaSettings.Form.FileBrowserVisible.Value;
+
+  Notes := PanelUtilites.Sides[1];
+  Notes.Visible := SimbaSettings.Form.NotesVisible.Value;
+
+  for i := 0 to PanelUtilites.ControlCount - 1 do
+    if PanelUtilites.Controls[i] is TSplitter then
+      TSplitter(PanelUtilites.Controls[i]).Visible := Browser.Visible and Notes.Visible;
+
+  if Browser.Visible and Notes.Visible then
+  begin
+    Browser.Align := alTop;
+    Notes.Align := alClient;
+  end else
+  if Browser.Visible and (not Notes.Visible) then
+    Browser.Align := alClient
+  else
+  if Notes.Visible and (not Browser.Visible) then
+    Notes.Align := alClient;
+
+  PanelUtilites.Visible := Browser.Visible or Notes.Visible;
+end;
+
+{$IFDEF WINDOWS}
+procedure Bind_Windows_Keys;
+begin
+  if not RegisterHotkey(SimbaForm.Handle, shortcut_StartScriptID, shortcut_StartScriptMod, shortcut_StartScriptKey) then
+    WriteLn('Unable to register start script hotkey - prehaps another Simba instance is running?');
+  if not RegisterHotkey(SimbaForm.Handle, shortcut_StopScriptID, shortcut_StopScriptMod, shortcut_StopScriptKey) then
+    WriteLn('Unable to register stop script hotkey - prehaps another Simba instance is running?');
+  if not RegisterHotkey(SimbaForm.Handle, shortcut_PickColorID, shortcut_PickColourMod, shortcut_PickColourKey) then
+    WriteLn('Unable to register pick colour hotkey - prehaps another Simba instance is running?');
 end;
 
 procedure Unbind_Windows_Keys;
-var
-  i : integer;
 begin
-  for i := 0 to 2 do
-    if not UnRegisterHotkey(SimbaForm.Handle,i) then
-      mDebugLn('Unable to unregister '+ inttostr(i) + ' global hotkey');
+  UnregisterHotKey(SimbaForm.Handle, shortcut_StartScriptID);
+  UnregisterHotKey(SimbaForm.Handle, shortcut_StopScriptID);
+  UnregisterHotKey(SimbaForm.Handle, shortcut_PickColorID);
 end;
+{$ENDIF}
 
-
-{$ELSE}
-  {$IFDEF LINUX_HOTKEYS}
-  {$WARNING This will probably not work if people don't have libkeybinder installed. Perhaps ship it with Simba? }
-
+{$IFDEF LINUX_HOTKEYS}
 { Used for global callbacks on LINUX }
 procedure keybinder_callback(keystring: PChar; user_data: PtrUInt); cdecl;
 begin
@@ -699,10 +978,7 @@ begin
   keybinder_unbind(PChar(shortcut_StopScript), @keybinder_callback, PtrUInt(0));
   keybinder_unbind(PChar(shortcut_PickColour), @keybinder_callback, PtrUInt(0));
 end;
-  {$ENDIF}
-
 {$ENDIF}
-
 
 procedure TSimbaForm.OnCCMessage(Sender: TObject; const Typ: TMessageEventType; const Msg: string; X, Y: Integer);
 begin
@@ -738,7 +1014,7 @@ end;
 
 function TSimbaForm.OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
 begin
-  Result := FindFile(Filename, [AppPath, SimbaSettings.Includes.Path.Value]);
+  Result := FindFile(Filename, [AppPath, SimbaSettings.Environment.IncludePath.Value]);
 end;
 
 function TSimbaForm.OnCCLoadLibrary(Sender: TObject; var Argument: string; out Parser: TCodeInsight): Boolean;
@@ -781,67 +1057,9 @@ begin
   Exit(False);
 end;
 
-procedure TSimbaForm.SetIncludesPath(obj: TSetting);
-begin
-  {$IFDEF SIMBA_VERBOSE}
-  mDebugLn('--- SetIncludesPath with value: ' + TPathSetting(obj).Value);
-  {$ENDIF}
-end;
-
-procedure TSimbaForm.SetPluginsPath(obj: TSetting);
-begin
-  {$IFDEF SIMBA_VERBOSE}
-  mDebugLn('--- SetPluginsPath with value: ' + TPathSetting(obj).Value);
-  {$ENDIF}
-end;
-
-procedure TSimbaForm.SetFontsPath(obj: TSetting);
-begin
-  {$IFDEF SIMBA_VERBOSE}
-  mDebugLn('--- SetFontsPath with value: ' + TPathSetting(obj).Value);
-  {$ENDIF}
-end;
-
-procedure TSimbaForm.SetScriptsPath(obj: TSetting);
-begin
-  {$IFDEF SIMBA_VERBOSE}
-  mDebugLn('--- SetScriptPath with value: ' + TPathSetting(obj).Value);
-  {$ENDIF}
-end;
-
-procedure TSimbaForm.SetDefaultScriptPath(obj: TSetting);
-begin
-  {$IFDEF SIMBA_VERBOSE}
-  mDebugLn('--- SetDefaultScriptPath with value: ' + TPathSetting(obj).Value);
-  {$ENDIF}
-end;
-
-procedure TSimbaForm.SetSourceEditorFont(obj: TSetting);
-var
-  I: LongInt;
-begin
-  if (TFontSetting(obj).Color.Value <> clDefault) then
-    TFontSetting(obj).Color.Value := clDefault;
-
-  for I := 0 to Tabs.Count - 1 do
-    TMufasaTab(Tabs[I]).ScriptFrame.SynEdit.Font.Assign(TFontSetting(obj).Value);
-end;
-
-procedure TSimbaForm.SetTrayVisiblity(obj: TSetting);
-begin
-  MTrayIcon.Visible := TBooleanSetting(obj).Value;
-end;
-
 procedure TSimbaForm.RecentFileItemsClick(Sender: TObject);
-var
-  i : integer;
 begin
-  for i := 0 to high(RecentFileItems) do
-    if RecentFileItems[i] = sender then
-    begin;
-      LoadScriptFile(RecentFiles[RecentFiles.Count - 1 -i]);//Inverse order
-      exit;
-    end;
+  LoadScriptFile(TMenuItem(Sender).Caption);
 end;
 
 procedure TSimbaForm.ScriptPanelDockDrop(Sender: TObject; Source: TDragDockObject;
@@ -913,39 +1131,16 @@ begin
     PackageForm.Show();
 end;
 
-procedure TSimbaForm.ThreadOpenConnectionEvent(Sender: TObject; var url: string;var Continue: boolean);
-begin
-  OpenConnectionData.Sender := Sender;
-  OpenConnectionData.URL:= @URL;
-  OpenConnectionData.Continue:= @Continue;
-end;
-
-procedure TSimbaForm.ThreadOpenFileEvent(Sender: TObject; var Filename: string;
-  var Continue: boolean);
-begin
-  OpenFileData.Sender := Sender;
-  OpenFileData.FileName:= @FileName;
-  OpenFileData.Continue:= @Continue;
-end;
-
-procedure TSimbaForm.ThreadWriteFileEvent(Sender: TObject; var Filename: string;
-  var Continue: boolean);
-begin
-  WriteFileData.Sender := Sender;
-  WriteFileData.FileName:= @FileName;
-  WriteFileData.Continue:= @Continue;
-end;
-
 procedure TSimbaForm.TrayPopupPopup(Sender: TObject);
 begin
   { XXX: What's up with this? }
-  MenuItemHide.enabled:= SimbaForm.Visible;
-  {$ifdef MSWindows}
+  MenuItemHide.Enabled:= SimbaForm.Visible;
+  {$IFDEF WINDOWS}
   MenuItemShow.Enabled:= not SimbaForm.Visible;
   if SimbaForm.Visible then
     if SimbaForm.CanFocus then
       SimbaForm.SetFocus;
-  {$endif}
+  {$ENDIF}
 end;
 
 procedure TSimbaForm.TT_UpdateClick(Sender: TObject);
@@ -954,93 +1149,39 @@ begin
   TT_Update.Visible:=False;
 end;
 
-function TSimbaForm.SilentUpdateBeat: Boolean;
+procedure TSimbaForm.WndProc(var Message: TLMessage);
 begin
-  Application.ProcessMessages;
-  Result := False;
+  inherited WndProc(Message);
 
-  if exiting then
-  begin
-     mDebugLn('SilentUpdateBeat: Exiting=true; stop update.');
-     result := true;
-  end;
-end;
-
-procedure TSimbaForm.UpdateSimbaSilent(Force: Boolean);
-
-var
-  Updater: TMMLFileDownloader;
-  LatestVersion: Integer;
-
-begin
-  if not Force then
-  begin
-    LatestVersion:= SimbaUpdateForm.GetLatestSimbaVersion;
-    if not (LatestVersion > SimbaVersion) then
-    begin
-      mDebugLn('Not updating; Force = False and LatestVersion <= SimbaVersion');
-      exit;
+  {$IFDEF WINDOWS}
+  if (Message.Msg = WM_HOTKEY) then
+    case Message.wParam of
+      shortcut_StartScriptID: RunScript();
+      shortcut_StopScriptID:  StopScript();
+      shortcut_PickColorID:   ButtonPickClick(nil);
     end;
-  end;
-
-  try
-    Updater := TMMLFileDownloader.Create;
-
-    Updater.FileURL := SimbaSettings.Updater.RemoteLink.GetDefValue(
-          SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF}
-    );
-
-    Updater.ReplacementFile := ExtractFileName(Application.ExeName);
-    Updater.BasePath := ExtractFilePath(Application.ExeName);
-    Updater.OnBeat:= @SimbaForm.SilentUpdateBeat;
-
-    try
-      Updater.DownloadAndSave;
-      Updater.Replace;
-      mDebugLn('Simba update succesfull!');
-    except
-      mDebugLn('Simba update failed!');
-    end;
-  finally
-    Updater.Free;
-  end;
+  {$ENDIF}
 end;
 
 procedure TSimbaForm.UpdateTimerCheck(Sender: TObject);
 var
-   time:integer;
-  LatestVersion : integer;
+  LatestVersion: Int32;
 begin
-  UpdateTimer.Interval := MaxInt;
-
-  if not SimbaSettings.Updater.CheckForUpdates.GetDefValue(True) then
-    Exit;
-
-  LatestVersion:= SimbaUpdateForm.GetLatestSimbaVersion;
-  if LatestVersion > SimbaVersion then
+  if SimbaSettings.General.AutomaticallyCheckForSimbaUpdates.Value then
   begin
-    if SimbaSettings.Updater.AutomaticallyUpdate.GetDefValue(True) then
-    begin
-      mDebugLn('Performing automatic background update.');
-      mDebugLn(format('Current version is %d. Latest version is %d',[SimbaVersion,LatestVersion]));
+    WriteLn('Checking for Simba update...');
 
-      UpdateSimbaSilent(True); // Force can be true; we already checked versions.
-    end else
+    LatestVersion := SimbaUpdateForm.GetLatestSimbaVersion();
+
+    if (LatestVersion > SimbaVersion) then
     begin
-      TT_Update.Visible:=True;
+      TT_Update.Visible := True;
+
       formWriteLn('A new update of Simba is available!');
-      formWriteLn(format('Current version is %d. Latest version is %d',[SimbaVersion,LatestVersion]));
+      formWriteLn('To update, click the update button in the toolbar');
+      formWriteLn(Format('Current version is %d. Latest version is %d', [SimbaVersion, LatestVersion]));
     end;
-
-
-  end else
-  begin
-    mDebugLn(format('Current Simba version: %d',[SimbaVersion]));
-    mDebugLn('Latest Simba Version: ' + IntToStr(LatestVersion));
   end;
-  time := SimbaSettings.Updater.CheckEveryXMinutes.GetDefValue(30);
-
-  UpdateTimer.Interval:= time {mins} * 60 {secs} * 1000 {ms};//Every half hour
 end;
 
 procedure TSimbaForm.UpdateMenuButtonClick(Sender: TObject);
@@ -1057,7 +1198,7 @@ end;
 procedure formWriteln(constref S: String);
 begin
   if (GetCurrentThreadId() <> MainThreadID) then
-    mDebugLn('formWriteLn called off main thread')
+    WriteLn('formWriteLn called off main thread')
   else
     SimbaForm.DebugMemo.Lines.Add(s);
 end;
@@ -1120,7 +1261,7 @@ begin
 
         if (CurrScript.ScriptThread <> nil) then
         begin
-          mDebugLn('Forcefully terminating the script thread');
+          formWriteLn('Forcefully terminating the script thread');
 
           if (not CurrScript.ScriptThread.Kill()) then
             formWriteLn('Failed to forcefully kill the script thread');
@@ -1144,40 +1285,54 @@ begin
   end;
 end;
 
-{ Tab management }
-
 procedure TSimbaForm.AddTab;
 var
-  Tab : TMufasaTab;
-begin;
+  Tab: TMufasaTab;
+begin
   Tab := TMufasaTab.Create(Self.PageControl1);
   Tabs.Add(Tab);
-  Tab.TabSheet.ImageIndex:= 8;
-//  Tab.TabSheet.OnContextPopup:= @TabPopup;
-  PageControl1.TabIndex:= Tabs.Count - 1;
-  RefreshTab;
-  if tabs.count > 1 then
-  begin;
-    TB_SaveAll.Enabled:= True;
-    MenuItemSaveAll.Enabled:= True;
+  Tab.TabSheet.ImageIndex := 8;
+
+  // customize based on settings.
+  with Tab.ScriptFrame do
+  begin
+    if SimbaSettings.Editor.FontName.Exists() then
+      SynEdit.Font.Name := SimbaSettings.Editor.FontName.Value;
+
+    if SimbaSettings.Editor.FontSize.Exists() then
+      SynEdit.Font.Size := SimbaSettings.Editor.FontSize.Value;
+
+    if SimbaSettings.Editor.CaretPastEOL.Exists() and SimbaSettings.Editor.CaretPastEOL.Value then
+      SynEdit.Options := SynEdit.Options + [eoScrollPastEOL, eoTrimTrailingSpaces]
+    else
+      SynEdit.Options := SynEdit.Options - [eoScrollPastEOL, eoTrimTrailingSpaces];
+
+    if SimbaSettings.Editor.ShowSpecialCharacters.Exists() and SimbaSettings.Editor.ShowSpecialCharacters.Value then
+      SynEdit.Options := SynEdit.Options + [eoShowSpecialChars];
+  end;
+
+  PageControl1.TabIndex := Tabs.Count - 1;
+
+  RefreshTab();
+
+  if (Tabs.Count > 1) then
+  begin
+    TB_SaveAll.Enabled := True;
+
+    MenuItemSaveAll.Enabled := True;
   end;
 end;
 
-function TSimbaForm.DeleteTab(TabIndex: integer; CloseLast : boolean; Silent : boolean = false) : boolean;
+function TSimbaForm.DeleteTab(TabIndex: Integer; CloseLast: Boolean; Silent: Boolean): Boolean;
 var
   Tab : TMufasaTab;
   OldIndex : integer;//So that we can switch back, if needed.
 begin
   if not Silent then
-  begin;
+  begin
     OldIndex := PageControl1.TabIndex;
     if TabIndex = OldIndex then
-    begin;
-      if SimbaSettings.Tab.OpenNextOnClose.GetDefValue(False) = False then
-        OldIndex := LastTab //We are closing the 'current'  tab, lets go back in history
-      else
-        OldIndex := Min(Tabs.Count - 1,OldIndex + 1);
-    end;
+      OldIndex := Min(Tabs.Count - 1,OldIndex + 1);
     PageControl1.TabIndex:= TabIndex;
   end;
   //ScriptFrame now is now correct ;-D
@@ -1208,12 +1363,12 @@ begin
     RefreshTab;
 end;
 
-procedure TSimbaForm.ClearTab(TabIndex: integer);
+procedure TSimbaForm.ClearTab(TabIndex: Integer);
 begin
   TMufasaTab(Tabs[TabIndex]).Clear;
 end;
 
-procedure TSimbaForm.CloseTabs(Exclude: integer = -1; Silent : boolean = false);
+procedure TSimbaForm.CloseTabs(Exclude: Integer; Silent: Boolean);
 var
   I : integer;
 begin
@@ -1372,113 +1527,20 @@ begin
 
   //Set tha edit buttons right
   SetEditActions;
+  UpdateTitle();
 end;
 
-procedure TSimbaForm.DoRefreshTab(Sender: PtrInt);
-begin
-  RefreshTab();
-end;
-
-procedure TSimbaForm.DoSimbaUpdateCheck(Sender: PtrInt);
-begin
-  UpdateTimer.Interval := SimbaSettings.Updater.CheckEveryXMinutes.Value;
-  UpdateTimer.Enabled := True;
-end;
-
-{ Load settings }
-procedure TSimbaForm.LoadFormSettings;
+procedure TSimbaForm.AddRecentFile(const FileName: string);
 var
-  Str: String;
-  Data: TStringArray;
-  i: Int32;
+  Item: TMenuItem;
 begin
-  Data := Explode(':', SimbaSettings.LastConfig.MainForm.Position.GetDefValue(''));
-  if (Length(Data) = 4) then
-  begin
-    Position := poDesigned;
+  Item := TMenuItem.Create(MenuItemOpenRecent);
+  Item.Caption := FileName;
+  Item.OnClick := @RecentFileItemsClick;
 
-    SetBounds(StrToInt(Data[0]), StrToInt(Data[1]), StrToInt(Data[2]), StrToInt(Data[3]));
-  end;
-
-  Str := LowerCase(SimbaSettings.LastConfig.MainForm.State.GetDefValue('normal'));
-  if (Str = 'maximized') then
-    Self.WindowState := wsMaximized
-  else
-    Self.WindowState := wsNormal;
-
-  for i := 0 to StrToIntDef(SimbaSettings.MMLSettings.GetKeyValue(ssRecentFilesCount), -1) do
-  begin
-    Str := SimbaSettings.MMLSettings.GetKeyValue(ssRecentFile + IntToStr(i));
-
-    if FileExists(Str) then
-      AddRecentFile(Str);
-  end;
-
-  if SimbaSettings.CodeInsight.FunctionList.ShowOnStart.GetDefValue(True) or SimbaSettings.LastConfig.MainForm.FunctionListShown.GetDefValue(True) then
-    FunctionListShown(True)
-  else
-    FunctionListShown(False);
-
-  ActionConsoleExecute(nil);
-
-  if not SimbaSettings.Tray.AlwaysVisible.GetDefValue(True) then
-    MTrayIcon.Hide();
-end;
-
-{ Save Settings }
-procedure TSimbaForm.SaveFormSettings;
-var
-  Data: TStringArray;
-  i: integer;
-begin
-  if (not Assigned(SimbaSettings)) then
-    Exit;
-
-  with SimbaSettings.MMLSettings do
-  begin
-    if Self.WindowState = wsMaximized then
-      SimbaSettings.LastConfig.MainForm.State.Value := 'maximized'
-    else
-    begin; //Only save the form position if its not maximized.
-      SimbaSettings.LastConfig.MainForm.State.Value := 'normal';
-      Data := ConvArr([inttostr(Self.left),inttostr(self.top),inttostr(self.width),inttostr(self.height)]);
-      SimbaSettings.LastConfig.MainForm.Position.Value := Implode(':', Data);
-    end;
-    DeleteKey(ssRecentFiles);
-    if RecentFiles.Count > 0 then
-    begin
-      SetSetting(ssRecentFiles + '/Count', inttostr(RecentFiles.Count));
-      SetLength(data,RecentFiles.Count);
-      for i := 0 to RecentFiles.Count - 1 do
-        SetSetting(ssRecentFile + inttostr(i),RecentFiles[i]);
-    end;
-    SimbaSettings.LastConfig.MainForm.FunctionListShown.Value := MenuItemFunctionList.Checked;
-    SaveToXML(SimbaSettingsFile);
-  end;
-end;
-
-procedure TSimbaForm.AddRecentFile(const filename: string);
-var
-  MaxRecentFiles : integer;
-  Len,i : integer;
-begin
-  MaxRecentFiles := SimbaSettings.General.MaxRecentFiles.GetDefValue(10);
-  i := RecentFiles.IndexOf(filename);
-  if i <> -1 then
-    RecentFiles.Delete(i);
-  if RecentFiles.Count = MaxRecentFiles then
-    RecentFiles.Delete(0);
-  RecentFiles.Add(filename);
-  Len := RecentFiles.Count;
-  if len <> length(RecentFileItems) then //Not reached maximum yet, add those files!
-  begin
-    SetLength(RecentFileItems,len);
-    RecentFileItems[len-1] := TMenuItem.Create(MenuItemOpenRecent);
-    RecentFileItems[len-1].OnClick:=@RecentFileItemsClick;
-    MenuItemOpenRecent.Add(RecentFileItems[len-1]);
-  end;
-  for i := 0 to len - 1 do
-    RecentFileItems[len - 1-i].Caption:= ExtractFileName(RecentFiles[i]);
+  MenuItemOpenRecent.Insert(0, Item);
+  if MenuItemOpenRecent.Count > 10 then
+    MenuItemOpenRecent[10].Free();
 end;
 
 procedure TSimbaForm.InitializeTMThread(out Thread: TMMLScriptThread);
@@ -1488,18 +1550,10 @@ var
 begin
   Thread := nil;
 
-  if SimbaSettings.Misc.SaveScriptOnCompile.Value then
+  if SimbaSettings.General.SaveScriptOnCompile.Value then
     SaveCurrentScript();
 
   Script := CurrScript.SynEdit.Lines.Text;
-
-  if Assigned(OnScriptStart) then
-  begin
-    Continue := True;
-    OnScriptStart(Self, Script, Continue);
-    if (not Continue) then
-      Exit;
-  end;
 
   try
     Thread := TMMLScriptThread.Create(Script, CurrScript.ScriptFile);
@@ -1509,17 +1563,15 @@ begin
 
     Thread.ScriptFile := ExtractFileName(CurrScript.ScriptFile);
     Thread.ScriptPath := ExtractFilePath(CurrScript.ScriptFile);
-    Thread.FontPath := SimbaSettings.Fonts.Path.Value;
-    Thread.PluginPath := SimbaSettings.Plugins.Path.Value;
-    Thread.IncludePath := SimbaSettings.Includes.Path.Value;
+    Thread.FontPath := SimbaSettings.Environment.FontPath.Value;
+    Thread.PluginPath := SimbaSettings.Environment.PluginPath.Value;
+    Thread.IncludePath := SimbaSettings.Environment.IncludePath.Value;
     Thread.AppPath := AppPath;
-    Thread.DocPath := DocPath;
 
     if Selector.HasPicked then
       Thread.Client.IOManager.SetTarget(Selector.LastPick);
 
-    Thread.SetSettings(SimbaSettings.MMLSettings);
-    Thread.SetFonts(SimbaSettings.Fonts.Path.Value); // Create font constants
+    Thread.SetFonts(SimbaSettings.Environment.FontPath.Value); // Create font constants
 
     CurrScript.ScriptErrorLine := -1;
   except
@@ -1528,7 +1580,7 @@ begin
   end;
 end;
 
-procedure TSimbaForm.DoHandleParameters(Data: PtrInt);
+procedure TSimbaForm.Parameters_Handle(Data: PtrInt);
 begin
   if Application.HasOption('h', 'help') then
   begin
@@ -1536,9 +1588,9 @@ begin
     WriteLn('Options:');
     WriteLn('  -open, -o: opens the given script');
     WriteLn('  -run, -r: runs the script opened with -open');
-    WriteLn('  -compile: compiles the script opened with -open');
+    WriteLn('  -compile, -c: compiles the script opened with -open');
+    WriteLn('  -settings, -s: uses the given settings file');
     WriteLn('  -test: will wait for script to run then terminates Simba, exit code 1 if errored. requires -open and -run or -compile');
-    WriteLn('  -config, -c: uses the given config file');
     WriteLn('');
   end;
 
@@ -1546,44 +1598,70 @@ begin
     LoadScriptFile(Application.Params[1]);
   if Application.HasOption('o', 'open') then
     LoadScriptFile(Application.GetOptionValue('o', 'open'));
-
   if Application.HasOption('r', 'run') then
     Self.RunScript();
-
-  if Application.HasOption('compile') then
+  if Application.HasOption('c', 'compile') then
     Self.CompileScript();
-
-  if Application.HasOption('t', 'test') then
-  begin
-    while (Self.GetScriptState() in [ss_Running, ss_Stopping]) do
-      WidgetSet.AppProcessMessages(); // no Application.ProcessMessages, we don't want to call other async calls
-
-    WriteLn(DebugMemo.Lines.Text);
-
-    if (Self.CurrScript.ScriptErrorLine = -1) then
-      Halt(0)
-    else
-      Halt(1);
-  end;
 end;
 
-procedure TSimbaForm.DoParseInternals(Data: PtrInt);
+procedure TSimbaForm.CodeTools_Initialize(Data: PtrInt);
 begin
   with TProcThread.Create() do
   begin
-    ClassProc := @ParseInternals;
-    OnTerminate := @FillFunctionList;
+    ClassProc := @CodeTools_ParseInternals;
+    OnTerminate := @CodeTools_FillFunctionList;
     Start();
   end;
 end;
 
-procedure TSimbaForm.DoSimbaNews(Data: PtrInt);
-begin
-  with TProcThread.Create() do
+procedure TSimbaForm.CodeTools_ParseInternals;
+
+  function Parse(Section, Text: String): TCodeInsight;
+  var
+    Stream: TMemoryStream;
   begin
-    ClassProc := @GetSimbaNews;
-    OnTerminate := @WriteSimbaNews;
-    Start();
+    Stream := TMemoryStream.Create();
+    Stream.Write(Text[1], Length(Text));
+
+    Result := TCodeInsight.Create();
+    Result.FileName := Section;
+    Result.OnMessage := @OnCCMessage;
+    Result.Run(Stream, nil, -1, True);
+  end;
+
+var
+  Imports: TScriptImports_Dump;
+  i: Int32;
+begin
+  try
+    Imports := TScriptImports_Dump.Create();
+
+    try
+      for i := 0 to Imports.Dump.Count - 1 do
+      begin
+        SetLength(CoreBuffer, Length(CoreBuffer) + 1);
+        CoreBuffer[High(CoreBuffer)] := Parse(Imports.Dump.Names[i], Imports.Dump.ValueFromIndex[i]);
+      end;
+    finally
+      Imports.Free();
+    end;
+  except
+    on e: Exception do
+      WriteLn('ERROR parsing internals: ' + e.ClassName + ' :: ' + e.Message);
+  end;
+end;
+
+procedure TSimbaForm.CodeTools_FillFunctionList(Sender: TObject);
+var
+  i: Int32;
+begin
+  for i := 0 to High(CoreBuffer) do
+  begin
+    if (CoreBuffer[i].FileName = 'LCLClasses') or (CoreBuffer[i].FileName = 'MMLClasses') then
+      Continue;
+
+    with FunctionList do
+      addDeclarations(CoreBuffer[i].Items, addSimbaSection(CoreBuffer[i].FileName), False, True);
   end;
 end;
 
@@ -1610,31 +1688,17 @@ begin
             'begin' + LineEnding +
             'end.';
 
-  if FileExistsUTF8(SimbaSettings.SourceEditor.DefScriptPath.Value) then
-  begin
+  if FileExistsUTF8(SimbaSettings.Editor.DefaultScriptPath.Value) then
+  try
+    with TStringList.Create do
     try
-      with TStringList.Create do
-        try
-          LoadFromFile(SimbaSettings.SourceEditor.DefScriptPath.Value);
-          Result := Text;
-        finally
-          Free;
-        end;
-    except
-      mDebugLn('Couldn''t load default script file.');
+      LoadFromFile(SimbaSettings.Editor.DefaultScriptPath.Value);
+
+      Result := Text;
+    finally
+      Free();
     end;
-  end;
-end;
-
-procedure TSimbaForm.DefaultHighlighter;
-begin
-  if (Highlighter = nil) then
-    Highlighter := TSynFreePascalSyn.Create(Self);
-
-  with Highlighter do
-  begin
-    NestedComments := False;
-    StringKeywordMode := spsmNone;
+  except
   end;
 end;
 
@@ -1671,55 +1735,11 @@ end;
 {$IFDEF WINDOWS}
 function ConsoleHandler(Event: DWord): WINBOOL; stdcall;
 begin
-  Result := TRue;
+  Result := True;
 
   TThread.Synchronize(nil, @SimbaForm.Close);
 end;
 {$ENDIF}
-
-procedure TSimbaForm.ActionConsoleExecute(Sender: TObject);
-
-  function GetConsoleWindow: HWND;
-  var
-    PID: UInt32 = 0;
-  begin
-    Result := 0;
-
-    {$IFDEF WINDOWS}
-    GetWindowThreadProcessId(Windows.GetConsoleWindow(), PID);
-    if (PID = GetCurrentProcessID()) then
-      Result := Windows.GetConsoleWindow();
-    {$ENDIF}
-  end;
-
-  function GetConsoleHandle: THandle;
-  begin
-    Result := 0;
-
-    {$IFDEF WINDOWS}
-    Result := GetStdHandle(STD_INPUT_HANDLE);
-    {$ENDIF}
-  end;
-
-var
-  Mode: UInt32;
-begin
-  if (Sender <> nil) then
-    SimbaSettings.LastConfig.MainForm.ConsoleVisible.Value := not SimbaSettings.LastConfig.MainForm.ConsoleVisible.Value;
-
-  {$IFDEF WINDOWS}
-  SetConsoleCtrlHandler(@ConsoleHandler, True); // close simba when command prompt is closed.
-
-  // Disable silly windows features that freeze the application
-  GetConsoleMode(GetConsoleHandle(), Mode);
-  SetConsoleMode(GetConsoleHandle, Mode and not (ENABLE_QUICK_EDIT_MODE or ENABLE_INSERT_MODE));
-
-  case SimbaSettings.LastConfig.MainForm.ConsoleVisible.Value of
-    True: ShowWindow(GetConsoleWindow(), SW_SHOWNORMAL);
-    False: ShowWindow(GetConsoleWindow(), SW_HIDE);
-  end;
-  {$ENDIF}
-end;
 
 procedure TSimbaForm.ActionCopyExecute(Sender: TObject);
 begin
@@ -1771,26 +1791,13 @@ begin
 end;
 
 procedure TSimbaForm.ActionFontExecute(Sender: TObject);
-var
-  Dialog: TFontDialog;
 begin
-  Dialog := TFontDialog.Create(nil);
-  with Dialog do
-  try
-    Options := [fdEffects, fdFixedPitchOnly];
-    Title := 'Font Editor';
-    Font := SimbaSettings.SourceEditor.Font.Value;
-
-    if (Execute) then
-      SimbaSettings.SourceEditor.Font.Value := Font;
-  finally
-    Dialog.Free;
-  end;
+  Editor_EditFont();
 end;
 
 procedure TSimbaForm.ActionColorsExecute(Sender: TObject);
 begin
-  SimbaColors.Show();
+  Editor_EditColors();
 end;
 
 procedure TSimbaForm.ActionGotoExecute(Sender: TObject);
@@ -1825,45 +1832,14 @@ begin
   Self.AddTab;
 end;
 
-procedure TSimbaForm.ActionUtiltiesExecute(Sender: TObject);
-var
-  sideBrowser, sideNotes: TPairSplitterSide;
-  i: Int32;
+procedure TSimbaForm.ActionFileBrowserExecute(Sender: TObject);
 begin
-  sideBrowser := PanelUtilites.Sides[0];
-  sideNotes := PanelUtilites.Sides[1];
+  SimbaSettings.Form.FileBrowserVisible.Value := not SimbaSettings.Form.FileBrowserVisible.Value;
+end;
 
-  if (Sender <> nil) then
-  begin
-    if (Sender = ActionNotes) then
-      SimbaSettings.Notes.Visible.Value := (not SimbaSettings.Notes.Visible.Value);
-
-    if (Sender = ActionFileBrowser) then
-      SimbaSettings.FileBrowser.Visible.Value := (not SimbaSettings.FileBrowser.Visible.Value);
-  end;
-
-  sideBrowser.Visible := SimbaSettings.FileBrowser.Visible.Value;
-  sideNotes.Visible := SimbaSettings.Notes.Visible.Value;
-
-  for i := 0 to PanelUtilites.ControlCount - 1 do
-    if PanelUtilites.Controls[i] is TSplitter then
-      TSplitter(PanelUtilites.Controls[i]).Visible := sideBrowser.Visible and sideNotes.Visible;
-
-  if sideBrowser.Visible and sideNotes.Visible then
-  begin
-    sideBrowser.Align := alTop;
-    sideNotes.Align := alClient;
-  end else
-  if sideBrowser.Visible and (not sideNotes.Visible) then
-    sideBrowser.Align := alClient
-  else
-  if sideNotes.Visible and (not sideBrowser.Visible) then
-    sideNotes.Align := alClient;
-
-  ActionNotes.Checked := sideNotes.Visible;
-  ActionFileBrowser.Checked := sideBrowser.Visible;
-
-  PanelUtilites.Visible := sideBrowser.Visible or sideNotes.Visible;
+procedure TSimbaForm.ActionNotesExecute(Sender: TObject);
+begin
+  SimbaSettings.Form.NotesVisible.Value := not SimbaSettings.Form.NotesVisible.Value;
 end;
 
 procedure TSimbaForm.ActionOpenExecute(Sender: TObject);
@@ -2023,7 +1999,7 @@ begin
   CodeCompletionForm.Hide;
 end;
 
-function TSimbaForm.FindTab(filename: string): integer;
+function TSimbaForm.FindTab(FileName: string): Integer;
 var
   i : integer;
 begin
@@ -2043,8 +2019,7 @@ begin
   FileBrowser.Items[0].Expand(False);
 end;
 
-procedure TSimbaForm.FormDropFiles(Sender: TObject; const FileNames: array of String
-  );
+procedure TSimbaForm.FormDropFiles(Sender: TObject; const FileNames: array of String);
 var
   i : integer;
 begin
@@ -2220,12 +2195,11 @@ begin
   Exiting := True;
 
   FunctionList.Stop();
-  SaveFormSettings();
 
   if (Assigned(Tabs)) then
     for i := Tabs.Count - 1 downto 0 do
       if not DeleteTab(i,true) then
-      begin;
+      begin
         CloseAction := caNone;
         Exit;
       end;
@@ -2233,286 +2207,142 @@ begin
   CloseAction := caFree;
 end;
 
-procedure TSimbaForm.ParseInternals;
-
-  function Parse(Section, Text: String): TCodeInsight;
-  var
-    Stream: TMemoryStream;
-  begin
-    Stream := TMemoryStream.Create();
-    Stream.Write(Text[1], Length(Text));
-
-    Result := TCodeInsight.Create();
-    Result.FileName := Section;
-    Result.OnMessage := @OnCCMessage;
-    Result.Run(Stream, nil, -1, True);
-  end;
-
-var
-  Imports: TScriptImports_Dump;
-  i: Int32;
-begin
-  try
-    Imports := TScriptImports_Dump.Create();
-
-    try
-      for i := 0 to Imports.Dump.Count - 1 do
-      begin
-        SetLength(CoreBuffer, Length(CoreBuffer) + 1);
-        CoreBuffer[High(CoreBuffer)] := Parse(Imports.Dump.Names[i], Imports.Dump.ValueFromIndex[i]);
-      end;
-    finally
-      Imports.Free();
-    end;
-  except
-    on e: Exception do
-      mDebugLn('ERROR parsing internals: ' + e.ClassName + ' :: ' + e.Message);
-  end;
-end;
-
-procedure TSimbaForm.FillFunctionList(Sender: TObject);
-var
-  i: Int32;
-begin
-  for i := 0 to High(CoreBuffer) do
-  begin
-    if (CoreBuffer[i].FileName = 'LCLClasses') or (CoreBuffer[i].FileName = 'MMLClasses') then
-      Continue;
-
-    with FunctionList do
-      addDeclarations(CoreBuffer[i].Items, addSimbaSection(CoreBuffer[i].FileName), False, True);
-  end;
-end;
-
 {$IFDEF WINDOWS}
-function SetDllDirectory(Directory: PChar): LongBool; stdcall; external 'kernel32.dll' name 'SetDllDirectoryA';
+function SetDLLDirectory(Directory: PChar): LongBool; stdcall; external 'kernel32.dll' name 'SetDllDirectoryA';
 {$ENDIF}
 
 procedure TSimbaForm.FormCreate(Sender: TObject);
-
-  function GetDocPath(): string;
-  begin
-    {$IFDEF NOTPORTABLE}
-      {$IFDEF WINDOWS}
-        Result := IncludeTrailingPathDelimiter(GetUserDir()) + 'My Documents' + DS + 'Simba' + DS;
-      {$ELSE}
-        Result := IncludeTrailingPathDelimiter(GetEnvironmentVariable('XDG_DATA_HOME'));
-        if (Result = '') then
-          Result := IncludeTrailingPathDelimiter(GetEnvironmentVariable('HOME')) + '.local' + DS + 'share' + DS;
-        Result := Result + 'Simba' + DS;
-      {$ENDIF}
-      if (not (DirectoryExists(Result))) then
-        if (not (CreateDir(Result))) then
-          Result := IncludeTrailingPathDelimiter(AppPath);
-    {$ELSE}
-      Result := IncludeTrailingPathDelimiter(AppPath);
-    {$ENDIF}
-  end;
-
-  procedure LoadSettings;
-  begin
-    if Application.HasOption('c', 'config') then
-      SimbaSettingsFile := Application.GetOptionValue('c', 'config')
-    else
-      SimbaSettingsFile := DataPath + 'settings.xml';
-
-    CreateSimbaSettings(SimbaSettingsFile);
-
-    // check setting directories vaild, else default.
-    if (not DirectoryExists(SimbaSettings.Plugins.Path.Value)) then
-      SimbaSettings.Plugins.Path.OnDefault(SimbaSettings.Plugins.Path);
-    if (not DirectoryExists(SimbaSettings.Includes.Path.Value)) then
-      SimbaSettings.Includes.Path.OnDefault(SimbaSettings.Includes.Path);
-    if (not DirectoryExists(SimbaSettings.Plugins.Path.Value)) then
-      SimbaSettings.Scripts.Path.OnDefault(SimbaSettings.Scripts.Path);
-    if (not DirectoryExists(SimbaSettings.Fonts.Path.Value)) then
-      SimbaSettings.Fonts.Path.OnDefault(SimbaSettings.Fonts.Path);
-
-    // create directories if needed
-    if (not DirectoryExists(SimbaSettings.Includes.Path.Value) )then
-      CreateDir(SimbaSettings.Includes.Path.Value);
-    if (not DirectoryExists(SimbaSettings.Fonts.Path.Value)) then
-      CreateDir(SimbaSettings.Fonts.Path.Value);
-    if (not DirectoryExists(SimbaSettings.Plugins.Path.Value)) then
-      CreateDir(SimbaSettings.Plugins.Path.Value);
-    if (not DirectoryExists(SimbaSettings.Scripts.Path.Value)) then
-      CreateDir(SimbaSettings.Scripts.Path.Value);
-
-    LoadFormSettings();
-    RegisterSettingsOnChanges();
-  end;
-
-  procedure LoadUtilites;
-  begin
-    memoNotes.Lines.Text := DecompressString(Base64Decode(SimbaSettings.Notes.Content.Value));
-
-    with FileBrowser do
-    begin
-      Root := AppPath;
-
-      if (Items.Count > 0) then
-      begin
-        FileBrowser.Items[0].Text := ExtractFileName(ExcludeTrailingPathDelimiter(Root));
-        FileBrowser.Items[0].ImageIndex := 54;
-        FileBrowser.Items[0].SelectedIndex := 54;
-      end;
-    end;
-  end;
-
+var
+  Mode: UInt32 = 0;
 begin
-  BeginFormUpdate();
+  Application.OnException := @CustomExceptionHandler;
 
-  try
-    Application.OnException := @CustomExceptionHandler;
-    Application.QueueAsyncCall(@DoHandleParameters, 0);
-    Application.QueueAsyncCall(@DoParseInternals, 0);
-    Application.QueueAsyncCall(@DoRefreshTab, 0);
-    Application.QueueAsyncCall(@DoSimbaNews, 0);
-    Application.QueueAsyncCall(@DoSimbaUpdateCheck, 0);
+  AppPath := IncludeTrailingPathDelimiter(Application.Location);
+  DataPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(Application.Location) + 'AppData');
 
-    AddHandlerFirstShow(@FirstShow);
+  if (not DirectoryIsWritable(Application.Location)) then
+    ShowMessage('No permission to write to Simba''s directory. Run as ' + {$IFDEF WINDOWS} 'administrator' {$ELSE} 'sudo' {$ENDIF} + ' if this causes issues.');
+  if (not DirectoryExists(DataPath)) and (not CreateDir(DataPath)) then
+    ShowMessage('Unable to create data path');
 
-    if (not DirectoryIsWritable(Application.Location)) then
-      ShowMessage('No permission to write to Simba''s directory. Run as ' + {$IFDEF WINDOWS} 'administrator' {$ELSE} 'sudo' {$ENDIF} + ' if this causes issues.');
+  // On windows:
+  // 1) Terminate simba when command prompt is closed.
+  // 2) Disable windows features that suspend Simba while interacting with the console.
+  {$IFDEF WINDOWS}
+  SetConsoleCtrlHandler(@ConsoleHandler, True);
 
-    // Paths
-    AppPath := IncludeTrailingPathDelimiter(Application.Location);
-    DocPath := GetDocPath();
-    DataPath := IncludeTrailingPathDelimiter(AppPath + 'AppData');
-    if not DirectoryExists(DataPath) then
-      CreateDir(DataPath);
+  GetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), Mode);
+  SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), Mode and not (ENABLE_QUICK_EDIT_MODE or ENABLE_INSERT_MODE));
+  {$ENDIF}
 
-    RecentFiles := TStringList.Create();
+  Settings_Init();
+  Environment_Init();
+  Utilities_Init();
 
-    LoadSettings();
-    LoadUtilites();
-    SimbaColors := TSimbaColors.Create(SimbaForm);                                                                                                                                                               
+  Form_LoadSettings();
 
-    Plugins.Paths.Add(SimbaSettings.Plugins.Path.Value);
+  SimbaColorsForm := TSimbaColors.Create(Self);
+  PackageForm := TPackageForm.Create(Self, TB_ShowPackages);
 
+  Manager := TIOManager.Create(SimbaSettings.Environment.PluginPath.Value);
+  Picker := TMColorPicker.Create(Manager);
+  Selector := TMWindowSelector.Create(Manager);
 
-    {$IFDEF WINDOWS}
-      {$IFDEF CPU32}
-        {$i openssl32.lrs}
-      {$ELSE}
-        {$i openssl64.lrs}
-      {$ENDIF}
+  CodeCompletionForm := TAutoCompletePopup.Create(Self);
+  CodeCompletionForm.InsertProc := @OnCompleteCode;
 
-      {$IFDEF CPU32}
-      if not DirectoryExists(IncludeTrailingPathDelimiter(DataPath + 'libs32')) then
-        CreateDir(IncludeTrailingPathDelimiter(DataPath + 'libs32'));
+  ParamHint := TParamHint.Create(Self);
 
-      SetDLLDirectory(PChar(IncludeTrailingPathDelimiter(DataPath + 'libs32')));
+  Application.QueueASyncCall(@Parameters_Handle, 0);
+  Application.QueueASyncCall(@Parameters_RunTest, 0);
+  Application.QueueASyncCall(@CodeTools_Initialize, 0);
+  Application.QueueASyncCall(@SimbaNews_Execute, 0);
 
-      DLLSSLName := IncludeTrailingPathDelimiter(DataPath + 'libs32') + 'ssleay32.dll';
-      DLLUtilName := IncludeTrailingPathDelimiter(DataPath + 'libs32') + 'libeay32.dll';
-      {$ELSE}
-      if not DirectoryExists(IncludeTrailingPathDelimiter(DataPath + 'libs64')) then
-        CreateDir(IncludeTrailingPathDelimiter(DataPath + 'libs64'));
+  Plugins.Paths.Add(SimbaSettings.Environment.PluginPath.Value);
 
-      SetDLLDirectory(PChar(IncludeTrailingPathDelimiter(DataPath + 'libs64')));
+  Tabs := TList.Create();
+  AddTab();
 
-      DLLSSLName := IncludeTrailingPathDelimiter(DataPath + 'libs64') + 'ssleay32.dll';
-      DLLUtilName := IncludeTrailingPathDelimiter(DataPath + 'libs64') + 'libeay32.dll';
-      {$ENDIF}
-
-      if (not FileExists(DLLSSLName)) then
-        with TLazarusResourceStream.Create('ssleay32', nil) do
-        try
-          SaveToFile(DLLSSLName);
-        finally
-          Free();
-        end;
-
-      if (not FileExists(DLLUtilName)) then
-        with TLazarusResourceStream.Create('libeay32', nil) do
-        try
-          SaveToFile(DLLUtilName);
-        finally
-          Free();
-        end;
+  {$IFDEF WINDOWS}
+    {$IFDEF CPU32}
+      {$i openssl32.lrs}
+    {$ELSE}
+      {$i openssl64.lrs}
     {$ENDIF}
 
-    PackageForm := TPackageForm.Create(Self, TB_ShowPackages);
+    {$IFDEF CPU32}
+    if not DirectoryExists(IncludeTrailingPathDelimiter(DataPath + 'libs32')) then
+      CreateDir(IncludeTrailingPathDelimiter(DataPath + 'libs32'));
 
-    CodeCompletionForm := TAutoCompletePopup.Create(Self);
-    CodeCompletionForm.InsertProc := @OnCompleteCode;
-    ParamHint := TParamHint.Create(Self);
+    SetDLLDirectory(PChar(IncludeTrailingPathDelimiter(DataPath + 'libs32')));
 
-    DefaultHighlighter();
+    DLLSSLName := IncludeTrailingPathDelimiter(DataPath + 'libs32') + 'ssleay32.dll';
+    DLLUtilName := IncludeTrailingPathDelimiter(DataPath + 'libs32') + 'libeay32.dll';
+    {$ELSE}
+    if not DirectoryExists(IncludeTrailingPathDelimiter(DataPath + 'libs64')) then
+      CreateDir(IncludeTrailingPathDelimiter(DataPath + 'libs64'));
 
-    {$IFDEF WINDOWS}
-    Bind_Windows_Keys();
+    SetDLLDirectory(PChar(IncludeTrailingPathDelimiter(DataPath + 'libs64')));
+
+    DLLSSLName := IncludeTrailingPathDelimiter(DataPath + 'libs64') + 'ssleay32.dll';
+    DLLUtilName := IncludeTrailingPathDelimiter(DataPath + 'libs64') + 'libeay32.dll';
     {$ENDIF}
 
-    {$IFDEF LINUX_HOTKEYS}
-    Bind_Linux_Keys();
-    {$ENDIF}
+    if (not FileExists(DLLSSLName)) then
+      with TLazarusResourceStream.Create('ssleay32', nil) do
+      try
+        SaveToFile(DLLSSLName);
+      finally
+        Free();
+      end;
 
-    {$IFDEF USE_SCRIPTMANAGER}
-    MenuItemFormDesigner.Visible := True;
-    {$ENDIF}
+    if (not FileExists(DLLUtilName)) then
+      with TLazarusResourceStream.Create('libeay32', nil) do
+      try
+        SaveToFile(DLLUtilName);
+      finally
+        Free();
+      end;
+  {$ENDIF}
 
-    Self.OnScriptStart := @ScriptStartEvent;
-    Self.OnScriptOpen := @ScriptOpenEvent;
+  {$IFDEF WINDOWS}
+  Bind_Windows_Keys();
+  {$ENDIF}
 
-    Tabs := TList.Create();
-    AddTab();
-    Manager := TIOManager.Create(SimbaSettings.Plugins.Path.Value);
-    Picker := TMColorPicker.Create(Manager);
-    Selector := TMWindowSelector.Create(Manager);
-
-    {$IFDEF WINDOWS}
-    if FileExists(Application.ExeName+'_old_') then
-      DeleteFileUTF8(Application.ExeName+'_old_');
-    {$ENDIF}
-
-    UpdateTitle();
-  finally
-    EndFormUpdate();
-  end;
+  {$IFDEF LINUX_HOTKEYS}
+  Bind_Linux_Keys();
+  {$ENDIF}
 end;
 
 procedure TSimbaForm.FormDestroy(Sender: TObject);
 var
-  i : integer;
+  i: Int32;
 begin
-  { Free the tabs }
-  if (Assigned(Tabs)) then
+  if Assigned(Tabs) then
     for i := Tabs.Count - 1 downto 0 do
-      TMufasaTab(Tabs[i]).Free;
+      TMufasaTab(Tabs[i]).Free();
 
-  for i := 0 to high(RecentFileItems) do
-    RecentFileItems[i].Free;
-
-  if (Assigned(Tabs)) then
+  if Assigned(Tabs) then
     FreeAndNil(Tabs);
 
-  { Free MML Core stuff }
-  if (Assigned(Selector)) then
+  if Assigned(Selector) then
     FreeAndNil(Selector);
-  if (Assigned(Picker)) then
+  if Assigned(Picker) then
     FreeAndNil(Picker);
-  if (Assigned(Manager)) then
+  if Assigned(Manager) then
     FreeAndNil(Manager);
 
-  if (Assigned(RecentFiles)) then
-    FreeAndNil(RecentFiles);
-  if (Assigned(ParamHint)) then
+  if Assigned(ParamHint) then
     FreeAndNil(ParamHint);
 
-  {$ifdef MSWindows}
-  Unbind_Windows_Keys;
-  {$else}
-  {$IFDEF LINUX_HOTKEYS}
-  Unbind_Linux_Keys;
+  {$IFDEF MSWindows}
+  Unbind_Windows_Keys();
   {$ENDIF}
-  {$endif}
+  {$IFDEF LINUX_HOTKEYS}
+  Unbind_Linux_Keys();
+  {$ENDIF}
 
-  if (Assigned(SimbaSettings)) then
-    SimbaSettings.Notes.Content.Value := Base64Encode(CompressString(memoNotes.Lines.Text));
-
-  FreeSimbaSettings(True, SimbaSettingsFile);
+  Form_SaveSettings();
 end;
 
 procedure TSimbaForm.FormShortCuts(var Msg: TLMKey; var Handled: Boolean);
@@ -2520,8 +2350,6 @@ begin
   SetEditActions;
   Handled := ActionList.IsShortCut(Msg);
 end;
-
-
 
 procedure TSimbaForm.LabeledEditSearchEnter(Sender: TObject);
 begin
@@ -2588,38 +2416,6 @@ begin
     DebugImgForm.Hide;
 end;
 
-procedure TSimbaForm.MenuItemExportHTMLClick(Sender: TObject);
-var
-  SynExporterHTML : TSynExporterHTML;
-begin;
-  SynExporterHTML := TSynExporterHTML.Create(nil);
-  SynExporterHTML.Highlighter := Highlighter;
-  SynExporterHTML.ExportAsText:= True;
-  with TSaveDialog.Create(nil) do
-    try
-      Filter:= 'HTML Files (*.html;*.htm)|*.html;*.htm|All files(*.*)|*.*';
-      Options:= [ofOverwritePrompt,ofEnableSizing];
-      DefaultExt:= 'html';
-      if Execute then
-      begin
-        if CurrScript.ScriptName <> '' then
-          SynExporterHTML.Title:= 'Simba - ' + CurrScript.ScriptName
-        else
-          SynExporterHTML.Title:= 'Simba - Untitled';
-        SynExporterHTML.ExportAll(CurrScript.SynEdit.Lines);
-        SynExporterHTML.SaveToFile(FileName);
-      end;
-    finally
-      free;
-      SynExporterHTML.Free;
-    end;
-end;
-
-procedure TSimbaForm.MenuitemFillFunctionListClick(Sender: TObject);
-begin
-
-end;
-
 procedure TSimbaForm.MenuItemHideClick(Sender: TObject);
 begin
   if Self.Visible = false then
@@ -2628,40 +2424,14 @@ begin
     Self.Hide;
 end;
 
-procedure TSimbaForm.MenuItemOpenIncludesFolderClick(Sender: TObject);
-begin
-  OpenDocument(SimbaSettings.Includes.Path.Value);
-end;
-
-procedure TSimbaForm.MenuItemOpenPluginsFolderClick(Sender: TObject);
-begin
-  OpenDocument(SimbaSettings.Plugins.Path.Value);
-end;
-
-procedure TSimbaForm.MenuItemOpenScriptsFolderClick(Sender: TObject);
-begin
-  OpenDocument(SimbaSettings.Scripts.Path.Value);
-end;
-
 procedure TSimbaForm.MenuItemReportBugClick(Sender: TObject);
 begin
   OpenURL('https://github.com/MerlijnWajer/Simba/issues/new');
 end;
 
-procedure TSimbaForm.MenuItemSettingsButtonClick(Sender: TObject);
-var
-  res: Integer;
-begin
-  SimbaSettings.Save(SimbaSettingsFile);
-
-  res := SettingsForm.ShowModal;
-  if res = mrOK then
-    ReloadSimbaSettings(SimbaSettingsFile);
-end;
-
 procedure TSimbaForm.MenuItemSettingsSimpleButtonClick(Sender: TObject);
 begin
-  SettingsSimpleForm.ShowModal;
+  SimbaSettingsForm.ShowModal;
 end;
 
 procedure TSimbaForm.MenuItemShowClick(Sender: TObject);
@@ -2699,82 +2469,49 @@ end;
 
 procedure TSimbaForm.MenuItemFunctionListClick(Sender: TObject);
 begin
-  FunctionListShown(not MenuItemFunctionList.Checked);
+  SimbaSettings.Form.FunctionListVisible.Value := not SimbaSettings.Form.FunctionListVisible.Value;
 end;
 
 procedure TSimbaForm.MTrayIconClick(Sender: TObject);
 begin
-  self.Show;
-  if not SimbaSettings.Tray.AlwaysVisible.GetDefValue(True) then
-    MTrayIcon.Hide;
-  if Self.CanFocus then
-    self.SetFocus;
-end;
-
-procedure TSimbaForm.GetSimbaNews;
-begin
-  try
-    News := TFPHTTPClient.SimpleGet(SimbaSettings.News.URL.Value);
-  except
-    on e: Exception do
-      mDebugLn('Error getting Simba news: ' + e.Message);
-  end;
-end;
-
-procedure TSimbaForm.WriteSimbaNews(Sender: TObject);
-begin
-  with TStringList.Create() do
-  try
-    Text := News; // Process line endings.
-
-    if (Text <> '') then
-      DebugMemo.Lines.Add(Text);
-  finally
-    Free();
-  end;
+  Self.Show();
+  if Self.CanFocus() then
+    Self.SetFocus();
 end;
 
 procedure TSimbaForm.ButtonPickClick(Sender: TObject);
 var
-   c, x, y: Integer;
-   cobj: TColourPickerObject;
-   coordinate, colour, clipboardtext: String;
+   Selected: record
+     Color: Int32;
+     X, Y: Int32;
+   end;
+   ClipboardText: String;
 begin
-  if Picker.Picking then
+  if (not Picker.Picking) then
   begin
-    formWriteln('Error: Already picking a colour');
-    exit;
-  end;
-  Picker.Pick(c, x, y);
-  cobj := TColourPickerObject.Create(c, Classes.Point(x,y), '');
+    Picker.Pick(Selected.Color, Selected.X, Selected.Y);
 
-  { TODO: This should be no problem if the form is hidden? }
-  if SimbaSettings.ColourPicker.AddToHistoryOnPick.GetDefValue(True) then
-    ColourHistoryForm.AddColObj(cobj, true);
+    ColourHistoryForm.AddColObj(TColourPickerObject.Create(Selected.Color, TPoint.Create(Selected.X, Selected.Y), ''), True);
+    ColourHistoryForm.Show();
 
-  if SimbaSettings.ColourPicker.ShowHistoryOnPick.GetDefValue(True) then
-    ColourHistoryForm.Show;
+    if SimbaSettings.ColorPicker.AddColorToClipBoard.Value then
+      ClipboardText := IntToStr(Selected.Color)
+    else
+    if SimbaSettings.ColorPicker.AddCoordinateToClipBoard.Value then
+      ClipboardText := IntToStr(Selected.X) + ', ' + IntToStr(Selected.Y)
+    else
+    if SimbaSettings.ColorPicker.AddColorAndCoordinateToClipboard.Value then
+      ClipboardText := IntToStr(Selected.Color) + ' ' + IntToStr(Selected.X) + ', ' + IntToStr(Selected.Y)
+    else
+      ClipboardText := '';
 
-  colour := inttostr(c);
-  coordinate := inttostr(x) + ', ' + inttostr(y);
-  formWriteLn('Picked colour: ' + colour + ' at (' + coordinate + ')');
-  if (SimbaSettings.ColourPicker.AddColourToClipBoard.GetDefValue(False)) then
-  begin
-    clipboardtext := colour;
-    if (SimbaSettings.ColourPicker.AddCoordinateToClipBoard.GetDefValue(False)) then
-      clipboardtext := clipboardtext + ', ' + coordinate;
-  end else
-    if (SimbaSettings.ColourPicker.AddCoordinateToClipBoard.GetDefValue(False)) then
-      clipboardtext := coordinate;
+    try
+      Clipboard.AsText := ClipboardText;
+    except
+    end;
 
-  if clipboardtext = '' then
-    Exit;
-
-  try
-    Clipboard.AsText := clipboardtext;
-  except
-    on e: exception do
-      mDebugLn('Exception in TSimbaForm.ButtonPickClick: ' + e.message);
+    with Selected do
+      formWriteLn(Format('Picked color %d at (%d, %d)', [Color, X, Y]));
   end;
 end;
 
@@ -2874,16 +2611,6 @@ begin
   result := CurrScript.FScriptState;
 end;
 
-function TSimbaForm.GetShowParamHintAuto: boolean;
-begin
-  Result := SimbaSettings.CodeHints.ShowAutomatically.GetDefValue(True);
-end;
-
-function TSimbaForm.GetShowCodeCompletionAuto: Boolean;
-begin
-  Result := SimbaSettings.CodeCompletion.ShowAutomatically.GetDefValue(True);
-end;
-
 procedure TSimbaForm.SetScriptState(const State: TScriptState);
 begin
   CurrScript.FScriptState:= State;
@@ -2913,59 +2640,9 @@ begin
     end;
 end;
 
-
-function TSimbaForm.LoadSettingDef(const Key,Def: string): string;
+procedure TSimbaForm.ActionConsoleExecute(Sender: TObject);
 begin
-  {$IFDEF SIMBADEBUG}
-  mDebugLn('DEPRECATED LoadSettingDef call for: ' + key);
-  {$ENDIF}
-  result := SimbaSettings.MMLSettings.GetKeyValueDefLoad(Key,def,SimbaSettingsFile);
-end;
-
-function TSimbaForm.CreateSetting(const Key,Value: string): string;
-begin
-  {$IFDEF SIMBADEBUG}
-  mDebugLn('DEPRECATED CreateSetting call for: ' + key);
-  {$ENDIF}
-  result := SimbaSettings.MMLSettings.GetKeyValueDef(Key,value);
-end;
-
-procedure TSimbaForm.SetSetting(const key,Value: string; save : boolean);
-begin
-
-  //Creates the setting if needed
-  {$IFDEF SIMBADEBUG}
-  mDebugLn('DEPRECATED SetSetting call for: ' + key);
-  {$ENDIF}
-  SimbaSettings.MMLSettings.SetKeyValue(key, value);
-
-  if save then
-  begin
-    SimbaSettings.Load(SimbaSettings.MMLSettings);
-    SimbaSettings.Save(SimbaSettingsFile);
-    ReloadSimbaSettings(SimbaSettingsFile);
-  end;
-end;
-
-function TSimbaForm.SettingExists(const key: string): boolean;
-begin
-  {$IFDEF SIMBADEBUG}
-  mDebugLn('DEPRECATED SettingExists call for: ' + key);
-  {$ENDIF}
-  result := SimbaSettings.MMLSettings.KeyExists(key);
-end;
-
-procedure TSimbaForm.RegisterSettingsOnChanges;
-begin
-  SimbaSettings.Tray.AlwaysVisible.onChange:= @SetTrayVisiblity;
-
-  SimbaSettings.Plugins.Path.onChange:= @SetPluginsPath;
-  SimbaSettings.Fonts.Path.onChange:= @SetFontsPath;
-  SimbaSettings.Includes.Path.onChange:= @SetIncludesPath;
-  SimbaSettings.Scripts.Path.onChange:= @SetScriptsPath;
-
-  SimbaSettings.SourceEditor.DefScriptPath.onChange := @SetDefaultScriptPath;
-  SimbaSettings.SourceEditor.Font.onChange := @SetSourceEditorFont;
+  SimbaSettings.Form.ConsoleVisible.Value := not SimbaSettings.Form.ConsoleVisible.Value;
 end;
 
 procedure TSimbaForm.FileBrowserExpand(Sender: TObject; Node: TTreeNode);
@@ -2995,67 +2672,6 @@ begin
   end;
 end;
 
-procedure TSimbaForm.FirstShow(Sender: TObject);
-begin
-  ActionUtiltiesExecute(nil);
-end;
-
-procedure TSimbaForm.ScriptStartEvent(Sender: TObject; var Script: string;
-  var Continue: boolean);
-begin
-  ScriptStartData.Sender:=Sender;
-  ScriptStartData.Script:= @Script;
-  ScriptStartData.Continue:= @Continue;
-end;
-
-procedure TSimbaForm.ScriptOpenEvent(Sender: TObject; var Script: string);
-begin
-  ScriptOpenData.Sender:=Sender;
-  ScriptOpenData.Script:= @Script;
-end;
-
-procedure TSimbaForm.TT_ScriptManagerClick(Sender: TObject);
-begin
-  {$IFDEF USE_SCRIPTMANAGER}
-  SManager.SetOptions(AppPath,SimbaSettings.ScriptManager.ServerURL.Value,SimbaSettings.ScriptManager.StoragePath.Value,SimbaSettings.ScriptManager.FileName.Value,SimbaSettings.ScriptManager.FirstRun.Value);
-  if not (SManager.Visible = false) then Smanager.Show else SManager.Hide;
-  {$ENDIF}
-end;
-
-procedure TSimbaForm.SetShowParamHintAuto(const AValue: boolean);
-begin
-  SimbaSettings.CodeHints.ShowAutomatically.Value := AValue;
-end;
-
-procedure TSimbaForm.SetShowCodeCompletionAuto(const AValue: boolean);
-begin
-  SimbaSettings.CodeCompletion.ShowAutomatically.Value := AValue;
-end;
-
-procedure TSimbaForm.FunctionListShown(ShowIt: boolean);
-begin
-  with MenuItemFunctionList, FunctionList do
-  begin
-    Checked := ShowIt;
-    if(Checked)then
-    begin
-      FrameEndDock(FunctionList,FunctionList.Parent,0,0);//Set the label correctly
-      if(FunctionList.Parent is TPanel)then
-      begin
-        SplitterFunctionList.Show;
-        FunctionList.Show;
-      end else
-        FunctionList.Parent.Show;
-    end else begin
-      if(FunctionList.Parent is TPanel)then
-        FunctionList.Hide
-      else
-        FunctionList.Parent.Hide;
-      SplitterFunctionList.Hide;
-    end;
-  end;
-end;
-
 procedure TSimbaForm.UpdateTitle;
 begin
   Application.Title:= PChar('Simba'); // XXX - Sure you want to do this for Disguise?
@@ -3074,13 +2690,14 @@ begin
   StatusBar.Panels[Panel_ScriptPath].text:= CurrScript.ScriptFile;
 end;
 
-function TSimbaForm.OpenScript: boolean;
+function TSimbaForm.OpenScript: Boolean;
 var
   i: Integer;
   OpenInNewTab : boolean;
 begin
   Result := False;
-  OpenInNewTab := SimbaSettings.Tab.OpenScriptInNewTab.GetDefValue(True);
+  OpenInNewTab := True;
+  //OpenInNewTab := SimbaSettings.Tab.OpenScriptInNewTab.GetDefValue(True);
   if not OpenInNewTab then
     if CanExitOrOpen = false then
       Exit;
@@ -3089,7 +2706,7 @@ begin
     if (CurrScript.ScriptFile <> '') then
       InitialDir := ExtractFileDir(CurrScript.ScriptFile)
     else
-      InitialDir := SimbaSettings.Scripts.Path.Value;
+      InitialDir := SimbaSettings.Environment.ScriptPath.Value;
     Options := [ofAllowMultiSelect, ofExtensionDifferent, ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail];
     Filter:= 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.pas;|Any files|*.*';
     if Execute then
@@ -3109,28 +2726,19 @@ begin
     UpdateTitle;
 end;
 
-function TSimbaForm.LoadScriptFile(filename: string; AlwaysOpenInNewTab: boolean; CheckOtherTabs : boolean
-  ): boolean;
+function TSimbaForm.LoadScriptFile(FileName: String; AlwaysOpenInNewTab: Boolean; CheckOtherTabs: Boolean): Boolean;
 var
-  OpenInNewTab : boolean;
-  CheckTabsFirst : boolean;
-  Tab : integer;
-
-  script: String;
-
+  OpenInNewTab: boolean;
+  CheckTabsFirst: boolean;
+  Tab: integer;
 begin
-  if AlwaysOpenInNewTab then
-    OpenInNewTab := true
-  else
-    OpenInNewTab := SimbaSettings.Tab.OpenScriptInNewTab.GetDefValue(True);
-  if CheckOtherTabs then
-    CheckTabsFirst := True
-  else
-    CheckTabsFirst := SimbaSettings.Tab.CheckBeforeOpen.GetDefValue(True);
+  OpenInNewTab := true;
+  CheckTabsFirst := True;
+
   if FileExistsUTF8(FileName) then
-  begin;
+  begin
     if CheckTabsFirst then
-    begin;
+    begin
       Tab :=  FindTab(filename);
       if tab <> -1 then
       begin
@@ -3140,18 +2748,11 @@ begin
       end;
     end;
     if OpenInNewTab and (CurrScript.SynEdit.Text <> CurrScript.ScriptDefault) then //Add la tab!
-      self.addtab;
+      Self.AddTab();
     with CurrScript do
     begin
       filename := SetDirSeparators(filename);
       SynEdit.Lines.LoadFromFile(filename);
-
-      if assigned(onScriptOpen) then
-      begin
-        script := SynEdit.Lines.text;
-        onScriptOpen(Self, script);
-        SynEdit.Lines.Text := script;
-      end;
 
       StartText := SynEdit.Lines.text;
 
@@ -3168,7 +2769,7 @@ begin
     UpdateTitle;
 end;
 
-function TSimbaForm.SaveCurrentScript: boolean;
+function TSimbaForm.SaveCurrentScript: Boolean;
 begin
   if CurrScript.GetReadOnly() then
   begin
@@ -3204,7 +2805,7 @@ begin
   end;
 end;
 
-function TSimbaForm.SaveCurrentScriptAs: boolean;
+function TSimbaForm.SaveCurrentScriptAs: Boolean;
 var
   ScriptFile : string;
 begin
@@ -3214,7 +2815,7 @@ begin
     if (CurrScript.ScriptFile <> '') then
       InitialDir := ExtractFileDir(CurrScript.ScriptFile)
     else
-      InitialDir := SimbaSettings.Scripts.Path.Value;
+      InitialDir := SimbaSettings.Environment.ScriptPath.Value;
     filter := 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.pas;|Any files|*.*';
     if Execute then
     begin;
@@ -3231,27 +2832,23 @@ begin
   end;
 end;
 
-function TSimbaForm.SaveCurrentScriptAsDefault : boolean;
+function TSimbaForm.SaveCurrentScriptAsDefault: Boolean;
 begin
-  with CurrScript do
-  begin
-    try
-      SynEdit.Lines.SaveToFile(SimbaSettings.SourceEditor.DefScriptPath.Value);
-      mDebugLn('Script saved as default.');
-      Result := True;
-    except
-      mDebugLn('Cannot save script as default.');
-      Result := False;
-    end;
+  try
+    CurrScript.SynEdit.Lines.SaveToFile(SimbaSettings.Editor.DefaultScriptPath.Value);
+
+    Exit(True);
+  except
+    Exit(False);
   end;
 end;
 
-function TSimbaForm.CanExitOrOpen: boolean;
+function TSimbaForm.CanExitOrOpen: Boolean;
 begin;
   Self.Enabled := False;//We HAVE to answer the popup
   Result := True;
 
-  if (ScriptState <> ss_None) and SimbaSettings.Misc.WarnIfRunning.GetDefValue(true) then
+  if (ScriptState <> ss_None) then
   begin
     if ScriptState <> ss_Stopping then
     begin
@@ -3268,8 +2865,7 @@ begin;
                       end;
   end;
 
-  if Result and (CurrScript.StartText <> CurrScript.SynEdit.Lines.text) and
-     SimbaSettings.Misc.WarnIfModified.GetDefValue(true) then
+  if Result and (CurrScript.StartText <> CurrScript.SynEdit.Lines.text) then
   begin
     case MessageDlg('Script has been modified.', 'Do you want to save the script?',
                 mtConfirmation, mbYesNoCancel, 0) of
@@ -3282,7 +2878,7 @@ begin;
     Self.SetFocus;
 end;
 
-function TSimbaForm.ClearScript: boolean;
+function TSimbaForm.ClearScript: Boolean;
 begin
   result := false;
   if CanExitOrOpen then

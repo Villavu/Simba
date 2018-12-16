@@ -17,3 +17,6 @@ build
 trace.trc
 *.exe
 *.x86_64-linux
+Includes/
+Plugins/
+Scripts/

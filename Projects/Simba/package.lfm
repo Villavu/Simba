@@ -9,7 +9,7 @@ object PackageForm: TPackageForm
   ClientWidth = 650
   Position = poScreenCenter
   LCLVersion = '1.8.4.0'
-  object lbPackages: TListBox
+  object PackageList: TListBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = btnAdd
     AnchorSideTop.Side = asrBottom
@@ -30,10 +30,11 @@ object PackageForm: TPackageForm
   end
   object btnAdd: TSpeedButton
     AnchorSideTop.Control = Owner
-    AnchorSideRight.Control = lbPackages
+    AnchorSideRight.Control = PackageList
     AnchorSideRight.Side = asrBottom
     Left = 122
     Height = 22
+    Hint = 'Add Package'
     Top = 0
     Width = 22
     Anchors = [akTop, akRight]
@@ -75,6 +76,8 @@ object PackageForm: TPackageForm
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
     }
     OnClick = btnAddClick
+    ShowHint = True
+    ParentShowHint = False
   end
   object btnPanel: TButtonPanel
     Tag = 1
@@ -118,6 +121,7 @@ object PackageForm: TPackageForm
     AnchorSideRight.Control = btnAdd
     Left = 100
     Height = 22
+    Hint = 'Remove Package'
     Top = 0
     Width = 22
     Anchors = [akTop, akRight]
@@ -159,11 +163,13 @@ object PackageForm: TPackageForm
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
     }
     OnClick = btnRemoveClick
+    ShowHint = True
+    ParentShowHint = False
   end
   object pnlTop: TPanel
-    AnchorSideLeft.Control = lbPackages
+    AnchorSideLeft.Control = PackageList
     AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = lbPackages
+    AnchorSideTop.Control = PackageList
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = pnlBottom
@@ -501,7 +507,7 @@ object PackageForm: TPackageForm
     end
   end
   object timerCheckUpdate: TIdleTimer
-    Interval = 900000
+    Interval = 1800000
     OnTimer = checkUpdates
     left = 520
     top = 8

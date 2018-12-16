@@ -22,6 +22,14 @@ uses
   Graphics, Dialogs, StdCtrls, Buttons, ButtonPanel, ExtCtrls, fpjson, types,
   ComCtrls;
 
+// Eventually we can populate from a webpage, but this will do for now.
+const
+  SUGGESTED_PACKAGE_URLS: array[0..2] of String = (
+    'https://github.com/SRL/SRL',
+    'https://github.com/SRL/SRL-Plugins',
+    'https://github.com/SRL/SRL-Fonts'
+  );
+
 type
   TPackageRelease = record
     Version: String;
@@ -61,7 +69,6 @@ type
     property Version: String read FVersion write FVersion;
     property URL: String read FURL write FURL;
 
-    function Load(Key: String): Boolean; overload;
     function Load(JSON: TJSONArray): Boolean; overload;
 
     procedure Save;
@@ -92,7 +99,7 @@ type
     lblStatus: TLabel;
     lblSelectVersion: TLabel;
     lblInstalledVersion: TLabel;
-    lbPackages: TListBox;
+    PackageList: TListBox;
     memoReleaseNotes: TMemo;
     pnlTop: TPanel;
     pnlBottom: TPanel;
@@ -134,7 +141,7 @@ var
 implementation
 
 uses
-  LCLType, newsimbasettings, dateutils, MufasaTypes, Zipper, XMLRead, DOM,
+  LCLType, simba.settings, dateutils, MufasaTypes, Zipper, XMLRead, DOM,
   Math, fphttpclient, LazFileUtils, FileUtil, jsonparser;
 
 const
@@ -294,13 +301,12 @@ begin
     if (Zipper.Entries.Count = 0) then
       raise Exception.Create('No files to extract');
 
-    Archive := ExpandFileName(ExtractFilePath(Path) + Zipper.Entries[0].ArchiveFileName);
+    Path := ExpandFileName(IncludeLeadingPathDelimiter(Application.Location) + Path);  // do not use current directory
+    Archive := ExtractFilePath(Path) + Zipper.Entries[0].ArchiveFileName;
 
     // delete previously downloaded archive if it exists.
     if DirectoryExists(Archive) then
       DeleteDirectory(Archive, False);
-
-    Path := ExpandFileName(Path);
 
     // create destination install directory.
     if (not DirectoryExists(Path)) then
@@ -388,7 +394,7 @@ end;
 
 procedure TPackageUpdater.Execute;
 
-  // Don't use API for this (60 requests P/H limit)
+  // Don't use API for this (60 requests per hour limit, which should be plenty)
   function GetLatestVersion(Owner, Name: String): String;
   var
     Client: TFPHTTPClient;
@@ -508,16 +514,14 @@ end;
 
 procedure TPackageData.Save;
 begin
-  SimbaSettings.MMLSettings.SetKeyValue('Packages/' + FName + '/Version', FVersion);
-  SimbaSettings.MMLSettings.SetKeyValue('Packages/' + FName + '/URL', FURL);
-  SimbaSettings.MMLSettings.SetKeyValue('Packages/' + FName + '/Owner', FOwner);
-  SimbaSettings.Save(SimbaSettingsFile);
+  SimbaSettings.Value['Packages/' + FName + '/Version'] := FVersion;
+  SimbaSettings.Value['Packages/' + FName + '/URL'] := FURL;
+  SimbaSettings.Value['Packages/' + FName + '/Owner'] := FOwner;
 end;
 
 procedure TPackageData.Delete;
 begin
-  SimbaSettings.MMLSettings.DeleteKey('Packages/' + FName);
-  SimbaSettings.Save(SimbaSettingsFile);
+  SimbaSettings.Value['Packages/' + FName] := '';
 end;
 
 destructor TPackageData.Destroy;
@@ -532,16 +536,6 @@ begin
       FReleases[i].Blacklist.Free();
 
   inherited Destroy();
-end;
-
-function TPackageData.Load(Key: String): Boolean;
-begin
-  FName := Key;
-  FVersion := SimbaSettings.MMLSettings.GetKeyValueDef('Packages/' + FName + '/Version', 'N/A');
-  FURL := SimbaSettings.MMLSettings.GetKeyValue('Packages/' + FName + '/URL');
-  FOwner := SimbaSettings.MMLSettings.GetKeyValue('Packages/' + FName + '/Owner');
-
-  Exit(True);
 end;
 
 function TPackageData.Load(JSON: TJSONArray): Boolean;
@@ -783,8 +777,8 @@ begin
   begin
     Package.Delete();
 
-    lbPackages.Items.Delete(lbPackages.ItemIndex);
-    lbPackages.OnSelectionChange(Self, False);
+    PackageList.Items.Delete(PackageList.ItemIndex);
+    PackageList.OnSelectionChange(Self, False);
   end;
 end;
 
@@ -885,11 +879,11 @@ end;
 
 procedure TPackageForm.checkUpdates(Sender: TObject);
 begin
-  if (lbPackages.Count > 0) then;
+  if (PackageList.Count > 0) then;
   begin
     WriteLn('Checking for package updates...');
 
-    TPackageUpdater.Create(lbPackages.Items, FShowButton, FShowButtonImage);
+    TPackageUpdater.Create(PackageList.Items, FShowButton, FShowButtonImage);
   end;
 end;
 
@@ -904,9 +898,9 @@ var
   Path: TStringList;
   Package: TPackageData;
 begin
-  URL := 'https://github.com/';
+  URL := InputComboEx('Add Package', 'Enter or select package URL:', SUGGESTED_PACKAGE_URLS, True);
 
-  if InputQuery('New Package', 'Git Repository URL:', URL) then
+  if (URL <> '') then
   begin
     Path := TStringList.Create();
     Path.Delimiter := '/';
@@ -924,8 +918,8 @@ begin
 
       if LoadPackage(Package) then
       begin
-        lbPackages.AddItem(Package.Name, Package);
-        lbPackages.ItemIndex := lbPackages.Count - 1;
+        PackageList.AddItem(Package.Name, Package);
+        PackageList.ItemIndex := PackageList.Count - 1;
 
         UpdateStatus('Added package: ' + Package.Name);
       end else
@@ -941,7 +935,7 @@ procedure TPackageForm.Disable(Packages: Boolean);
 begin
   ActiveControl := nil;
 
-  lbPackages.Enabled := not Packages;
+  PackageList.Enabled := not Packages;
   btnBasicInstall.Enabled := False;
   btnCustomInstall.Enabled := False;
   btnInstall.Enabled := False;
@@ -951,7 +945,7 @@ end;
 
 procedure TPackageForm.Enable;
 begin
-  lbPackages.Enabled := True;
+  PackageList.Enabled := True;
   pnlTop.Enabled := True;
   btnBasicInstall.Enabled := True;
   btnCustomInstall.Enabled := True;
@@ -989,9 +983,9 @@ end;
 
 function TPackageForm.GetPackage(var Package: TPackageData): Boolean;
 begin
-  if (lbPackages.ItemIndex >= 0) then
+  if (PackageList.ItemIndex >= 0) then
   begin
-    Package := lbPackages.Items.Objects[lbPackages.ItemIndex] as TPackageData;
+    Package := PackageList.Items.Objects[PackageList.ItemIndex] as TPackageData;
 
     Exit(True);
   end;
@@ -1018,8 +1012,8 @@ begin
   FShowButton := ShowButton;
   FShowButtonImage := ShowButton.ImageIndex;
 
-  lbPackages.Font.Size := 10;
-  with lbPackages.Items as TStringList do
+  PackageList.Font.Size := 10;
+  with PackageList.Items as TStringList do
     OwnsObjects := True;
 
   Directories := FindAllDirectories(GetCurrentDirUTF8(), False);
@@ -1031,14 +1025,20 @@ begin
     Directories.Free();
   end;
 
-  SimbaSettings.MMLSettings.ListKeys('Packages', Packages);
+  Packages := SimbaSettings.Keys['Packages/'];
 
   for i := 0 to High(Packages) do
   begin
     Package := TPackageData.Create();
-    Package.Load(Packages[i]);
+    Package.Name := Packages[i];
+    Package.Version := SimbaSettings.Value['Packages/' + Package.Name + '/Version'];
+    Package.Owner := SimbaSettings.Value['Packages/' + Package.Name + '/Owner'];
+    Package.URL := SimbaSettings.Value['Packages/' + Package.Name + '/URL'];
 
-    lbPackages.AddItem(Package.Name, Package);
+    if (Package.Name <> '') and (Package.Version <> '') and (Package.URL <> '') and (Package.Owner <> '') then
+      PackageList.AddItem(Package.Name, Package)
+    else
+      Package.Free();
   end;
 
   Application.QueueASyncCall(@checkUpdatesSync, 0);

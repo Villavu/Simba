@@ -107,7 +107,7 @@ var
 implementation
 
 uses
-  v_Constants, v_MiscFunctions, newsimbasettings, mufasabase, syncobjs;
+  v_Constants, v_MiscFunctions, mufasabase, syncobjs;
 
 var
   IncludeBuffer: TIncludeBufferArray;
@@ -1117,8 +1117,6 @@ begin
   Reset;
 
   Lexer.Defines.AddStrings(CoreDefines);
-  if (not SimbaSettings.CodeInsight.ShowHidden.GetDefValue(False)) then
-    Lexer.Defines.Add('CODEINSIGHT');
 
   fOwnStream := (fFileName <> '');
   if fOwnStream then
@@ -1183,9 +1181,6 @@ begin
     Lexer.ClearDefines;
     Lexer.Defines.AddStrings(CoreDefines);
     Lexer.Defines.AddStrings(BaseDefines);
-
-    if (not SimbaSettings.CodeInsight.ShowHidden.GetDefValue(False)) then
-      Lexer.Defines.Add('CODEINSIGHT');
   end;
 
   FreeIncludes();

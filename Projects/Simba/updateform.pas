@@ -71,14 +71,13 @@ const
   DownloadSpeedTextRunning = 'Downloading at %d kB/s';
   DownloadSpeedTextEnded = 'Downloaded at %d kB/s';
 
-  {$I settings_const.inc}
-
 var
   SimbaUpdateForm: TSimbaUpdateForm;
 
 implementation
 uses
-  internets,  SimbaUnit, newsimbasettings,lclintf;
+  SimbaUnit, lclintf,
+  simba.settings;
 
 function TSimbaUpdateForm.CanUpdate: Boolean;
 begin
@@ -94,8 +93,8 @@ var
 begin
   if SimbaVersionThread = nil then//Create thread (only if no-other one is already running)
   begin
-    SimbaVersionThread := TDownloadThread.Create(SimbaSettings.Updater.RemoteVersionLink.GetDefValue(SimbaURL + 'Version'), @Vers);
-    SimbaVersionThread.Resume;
+    SimbaVersionThread := TDownloadThread.Create(SimbaSettings.General.VersionURL.Value, @Vers);
+    SimbaVersionThread.Start;
     while SimbaVersionThread.Done = false do//Wait till thread is done
     begin
       Application.ProcessMessages;
@@ -202,11 +201,7 @@ begin
   FCancelling := False;
   FCancelled := False;
 
-  Updater.FileURL := SimbaSettings.Updater.RemoteLink.GetDefValue(
-        SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF}
-  );
-
-  //ApplicationName{$IFDEF WINDOWS} +'.exe'{$ENDIF};
+  Updater.FileURL := SimbaSettings.General.UpdateURL.Value;
 
   // Should work on Windows as well
   Updater.ReplacementFile := ExtractFileName(Application.ExeName);

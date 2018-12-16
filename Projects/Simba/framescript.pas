@@ -30,8 +30,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, SynHighlighterPas, SynEdit, SynEditMarkupHighAll,
   script_thread,ComCtrls, SynEditKeyCmds, LCLType,MufasaBase, Graphics, Controls, SynEditStrConst,
-  v_ideCodeInsight, v_ideCodeParser,  SynEditHighlighter, SynPluginSyncroEdit, SynGutterBase,
-  SynEditMarks, newsimbasettings;
+  v_ideCodeInsight, v_ideCodeParser,  SynEditHighlighter, SynPluginSyncroEdit, SynGutterBase;
 const
    ecCodeCompletion = ecUserFirst;
    ecCodeHints = ecUserFirst + 1;
@@ -103,7 +102,7 @@ type
 implementation
 uses
   SimbaUnit, MufasaTypes, SynEditTypes, SynEditHighlighterFoldBase, LCLIntF,
-  colorscheme, framefunctionlist;
+  colorscheme, SynHighlighterLape , simba.settings;
 
 function WordAtCaret(e: TSynEdit; var sp, ep: Integer; Start: Integer = -1; Offset: Integer = 0): string;
 var
@@ -251,12 +250,12 @@ var
   sp, ep: Integer;
 begin
   if (Command = ecChar) then
-    if(AChar = '(') and (SimbaForm.ParamHint.Visible = False) and (SimbaForm.ShowParamHintAuto) then
+    if (AChar = '(') and (SimbaForm.ParamHint.Visible = False) and SimbaSettings.CodeTools.AutomaticallyShowParameterHints.Value then
     begin
       Command2:= ecCodeHints;
       SynEditProcessUserCommand(sender,command2,achar,nil);
     end
-    else if(AChar = '.') and (SimbaForm.CodeCompletionForm.Visible = False) and (SimbaForm.ShowCodeCompletionAuto) then
+    else if (AChar = '.') and (SimbaForm.CodeCompletionForm.Visible = False) and SimbaSettings.CodeTools.AutomaticallyShowAutoComplete.Value then
     begin
       Command2:= ecCodeCompletion;
       SynEditProcessUserCommand(sender,command2,achar, Pointer(@s));
@@ -695,8 +694,6 @@ begin
   SyncEdit := TSynPluginSyncroEdit.Create(SynEdit);
   SimbaForm.Mufasa_Image_List.GetBitmap(28,SyncEdit.GutterGlyph);
 
-  SynEdit.Font.Assign(SimbaSettings.SourceEditor.Font.Value);
-
   OwnerSheet := TTabSheet(TheOwner);
   OwnerPage := TPageControl(OwnerSheet.Owner);
 
@@ -709,15 +706,16 @@ begin
   ScriptErrorLine:= -1;
   OwnerSheet.Caption:= ScriptName;
 
-  SynEdit.Enabled := True; // For some reason we need this?
-  
-  SynEdit.Highlighter := SimbaForm.Highlighter;
+  SynEdit.Highlighter := TSynFreePascalSyn.Create(SynEdit);
+  with SynEdit.Highlighter as TSynFreePascalSyn do
+  begin
+    StringKeywordMode := spsmNone;
+    NestedComments := False;
+  end;
+
   SynEdit.Options := SynEdit.Options + [eoTabIndent, eoKeepCaretX, eoDragDropEditing, eoScrollPastEof] - [eoSmartTabs];
   SynEdit.Options2 := SynEdit.Options2 + [eoCaretSkipsSelection];
-  
-  if not SimbaSettings.SourceEditor.CaretPastEOL.GetDefValue(True) then
-    SynEdit.Options := SynEdit.Options - [eoScrollPastEol, eoTrimTrailingSpaces];
-  
+
   SynEdit.Gutter.CodeFoldPart.MarkupInfo.Background:= clWhite;
   for i := low(i) to high(i) do
     if i in AdditionalFolds then
@@ -745,7 +743,7 @@ begin
   AddKey(SynEdit,ecCodeHints,VK_SPACE,[ssCtrl,ssShift]);
   
   // colorize the highlighter
-  SimbaColors.UpdateEditor(SynEdit);
+  SimbaColorsForm.UpdateEditor(SynEdit);
 end;
 
 function TScriptFrame.GetReadOnly: Boolean;

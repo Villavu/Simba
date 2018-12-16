@@ -106,7 +106,8 @@ type
 implementation
 
 uses
-  colour_conv, client, tpa, mufasatypesutil, iomanager, syncobjs, newsimbasettings;
+  colour_conv, client, tpa, mufasatypesutil, iomanager, syncobjs,
+  simba.settings;
 
 var
   FontBuffer: TMFonts;
@@ -197,7 +198,7 @@ begin
       try
         if (not FontBuffer.IsFontLoaded(Name)) then
         begin
-          FontBuffer.Path := SimbaSettings.Fonts.Path.Value;
+          FontBuffer.Path := SimbaSettings.Environment.FontPath.Value;
           if (not FontBuffer.LoadFont(Name, Shadow)) then
             raise Exception.Create('ERROR loading font "' + Name + '"');
         end;

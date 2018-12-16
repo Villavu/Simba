@@ -38,7 +38,6 @@ uses
   {$IFDEF WINDOWS} lpTIOManager_Windows {$ENDIF}
   {$IFDEF LINUX} lpTIOManager_Linux {$ENDIF},
   lpTClient,
-  lpTMMLSettingsSandbox,
   lpTMMLTimer,
   lpjson;
 
@@ -92,8 +91,6 @@ begin
 
   { MML Client }
   Register_TClient(Compiler);
-
-  Register_TMMLSettingsSandbox(Compiler);
 
   Register_TMMLTimer(Compiler);
   Register_JSON(Compiler);

@@ -1,14 +1,12 @@
 unit colorscheme;
 {$mode objfpc}{$H+}
-{$modeswitch advancedrecords}
 
 interface
 
 uses
   SysUtils, Classes,
   Forms, Controls, Graphics, Dialogs, StdCtrls,
-  Menus, ExtCtrls, SynEdit, SynEditTypes, ColorBox, Buttons,
-  newsimbasettings;
+  Menus, ExtCtrls, SynEdit, SynEditTypes, ColorBox, Buttons;
 
 type
   EEditorAttr = (
@@ -42,10 +40,8 @@ type
   public
     FileName: String;
     Edited: Boolean;
-    SimbaSettings: TSimbaSettings;
 
     List: TListBox;
-    Splitter: TSplitter;
     Editor: TSynEdit;
     TopPanel, BtmPanel: TPanel;
 
@@ -82,12 +78,13 @@ type
   end;
 
 var
-  SimbaColors: TSimbaColors;
+  SimbaColorsForm: TSimbaColors;
 
 implementation
 
 uses
-  SynHighlighterLape, LResources, SimbaUnit, IniFiles, FileUtil;
+  SynHighlighterLape, LResources, SimbaUnit, JSONConf, FileUtil,
+  simba.settings;
 
 resourcestring
   ExampleText =
@@ -255,140 +252,156 @@ end;
 
 function TSimbaColors.LoadScheme(AFileName: String): TColorScheme;
 var
-  INI: TINIFile;
+  Config: TJSONConfig;
   i: Int32;
   x: String;
 begin
-  INI := TINIFile.Create(AFileName);
+  Config := TJSONConfig.Create(nil);
+  Config.Formatted := True;
+
+  try
+    Config.FileName := AFileName;
+  except
+    DeleteFile(AFileName);
+  end;
 
   Result := DefaultScheme;
+
   try
-    UInt32(Result[ecGutter].Background) := INI.ReadInt64('Gutter', 'ecGutter.Background', UInt32(DefaultScheme[ecGutter].Background));
+    UInt32(Result[ecGutter].Background) := Config.GetValue('Gutter/ecGutter.Background', UInt32(DefaultScheme[ecGutter].Background));
 
-    UInt32(Result[ecGutterLineNumberPart].Foreground) := INI.ReadInt64('Gutter', 'ecGutterLineNumberPart.Foreground', UInt32(DefaultScheme[ecGutterLineNumberPart].Foreground));
-    UInt32(Result[ecGutterLineNumberPart].Background) := INI.ReadInt64('Gutter', 'ecGutterLineNumberPart.Background', UInt32(DefaultScheme[ecGutterLineNumberPart].Background));
-    UInt32(Result[ecGutterLineNumberPart].Style)      := INI.ReadInt64('Gutter', 'ecGutterLineNumberPart.Style',      UInt32(DefaultScheme[ecGutterLineNumberPart].Style));
+    UInt32(Result[ecGutterLineNumberPart].Foreground) := Config.GetValue('Gutter/ecGutterLineNumberPart.Foreground', UInt32(DefaultScheme[ecGutterLineNumberPart].Foreground));
+    UInt32(Result[ecGutterLineNumberPart].Background) := Config.GetValue('Gutter/ecGutterLineNumberPart.Background', UInt32(DefaultScheme[ecGutterLineNumberPart].Background));
+    UInt32(Result[ecGutterLineNumberPart].Style)      := Config.GetValue('Gutter/ecGutterLineNumberPart.Style',      UInt32(DefaultScheme[ecGutterLineNumberPart].Style));
 
-    UInt32(Result[ecGutterChangesPart].Foreground) := INI.ReadInt64('Gutter', 'ecGutterChangesPart.Foreground', UInt32(DefaultScheme[ecGutterChangesPart].Foreground));
-    UInt32(Result[ecGutterChangesPart].Background) := INI.ReadInt64('Gutter', 'ecGutterChangesPart.Background', UInt32(DefaultScheme[ecGutterChangesPart].Background));
-    UInt32(Result[ecGutterChangesPart].Style)      := INI.ReadInt64('Gutter', 'ecGutterChangesPart.Style',      UInt32(DefaultScheme[ecGutterChangesPart].Style));
+    UInt32(Result[ecGutterChangesPart].Foreground) := Config.GetValue('Gutter/ecGutterChangesPart.Foreground', UInt32(DefaultScheme[ecGutterChangesPart].Foreground));
+    UInt32(Result[ecGutterChangesPart].Background) := Config.GetValue('Gutter/ecGutterChangesPart.Background', UInt32(DefaultScheme[ecGutterChangesPart].Background));
+    UInt32(Result[ecGutterChangesPart].Style)      := Config.GetValue('Gutter/ecGutterChangesPart.Style',      UInt32(DefaultScheme[ecGutterChangesPart].Style));
 
-    UInt32(Result[ecGutterCodeFoldPart].Foreground) := INI.ReadInt64('Gutter', 'ecGutterCodeFoldPart.Foreground', UInt32(DefaultScheme[ecGutterCodeFoldPart].Foreground));
-    UInt32(Result[ecGutterCodeFoldPart].Background) := INI.ReadInt64('Gutter', 'ecGutterCodeFoldPart.Background', UInt32(DefaultScheme[ecGutterCodeFoldPart].Background));
-    UInt32(Result[ecGutterCodeFoldPart].Style)      := INI.ReadInt64('Gutter', 'ecGutterCodeFoldPart.Style',      UInt32(DefaultScheme[ecGutterCodeFoldPart].Style));
+    UInt32(Result[ecGutterCodeFoldPart].Foreground) := Config.GetValue('Gutter/ecGutterCodeFoldPart.Foreground', UInt32(DefaultScheme[ecGutterCodeFoldPart].Foreground));
+    UInt32(Result[ecGutterCodeFoldPart].Background) := Config.GetValue('Gutter/ecGutterCodeFoldPart.Background', UInt32(DefaultScheme[ecGutterCodeFoldPart].Background));
+    UInt32(Result[ecGutterCodeFoldPart].Style)      := Config.GetValue('Gutter/ecGutterCodeFoldPart.Style',      UInt32(DefaultScheme[ecGutterCodeFoldPart].Style));
 
-    UInt32(Result[ecGutterMarksPart].Foreground) := INI.ReadInt64('Gutter', 'ecGutterMarksPart.Foreground', UInt32(DefaultScheme[ecGutterMarksPart].Foreground));
-    UInt32(Result[ecGutterMarksPart].Background) := INI.ReadInt64('Gutter', 'ecGutterMarksPart.Background', UInt32(DefaultScheme[ecGutterMarksPart].Background));
-    UInt32(Result[ecGutterMarksPart].Style)      := INI.ReadInt64('Gutter', 'ecGutterMarksPart.Style',      UInt32(DefaultScheme[ecGutterMarksPart].Style));
+    UInt32(Result[ecGutterMarksPart].Foreground) := Config.GetValue('Gutter/ecGutterMarksPart.Foreground', UInt32(DefaultScheme[ecGutterMarksPart].Foreground));
+    UInt32(Result[ecGutterMarksPart].Background) := Config.GetValue('Gutter/ecGutterMarksPart.Background', UInt32(DefaultScheme[ecGutterMarksPart].Background));
+    UInt32(Result[ecGutterMarksPart].Style)      := Config.GetValue('Gutter/ecGutterMarksPart.Style',      UInt32(DefaultScheme[ecGutterMarksPart].Style));
 
-    UInt32(Result[ecGutterSeparatorPart].Foreground) := INI.ReadInt64('Gutter', 'ecGutterSeparatorPart.Foreground', UInt32(DefaultScheme[ecGutterSeparatorPart].Foreground));
-    UInt32(Result[ecGutterSeparatorPart].Background) := INI.ReadInt64('Gutter', 'ecGutterSeparatorPart.Background', UInt32(DefaultScheme[ecGutterSeparatorPart].Background));
-    UInt32(Result[ecGutterSeparatorPart].Style)      := INI.ReadInt64('Gutter', 'ecGutterSeparatorPart.Style',      UInt32(DefaultScheme[ecGutterSeparatorPart].Style));
+    UInt32(Result[ecGutterSeparatorPart].Foreground) := Config.GetValue('Gutter/ecGutterSeparatorPart.Foreground', UInt32(DefaultScheme[ecGutterSeparatorPart].Foreground));
+    UInt32(Result[ecGutterSeparatorPart].Background) := Config.GetValue('Gutter/ecGutterSeparatorPart.Background', UInt32(DefaultScheme[ecGutterSeparatorPart].Background));
+    UInt32(Result[ecGutterSeparatorPart].Style)      := Config.GetValue('Gutter/ecGutterSeparatorPart.Style',      UInt32(DefaultScheme[ecGutterSeparatorPart].Style));
 
     // general editor
-    UInt32(Result[ecEdtior].Background) := INI.ReadInt64('Editor', 'ecEdtior.Background',    UInt32(DefaultScheme[ecEdtior].Background));
+    UInt32(Result[ecEdtior].Background) := Config.GetValue('Editor/ecEdtior.Background', UInt32(DefaultScheme[ecEdtior].Background));
 
-    UInt32(Result[ecRightEdge].Foreground) := INI.ReadInt64('Editor', 'ecRightEdge.Foreground', UInt32(DefaultScheme[ecRightEdge].Foreground));
+    UInt32(Result[ecRightEdge].Foreground) := Config.GetValue('Editor/ecRightEdge.Foreground', UInt32(DefaultScheme[ecRightEdge].Foreground));
 
-    UInt32(Result[ecLineHighlight].Foreground) := INI.ReadInt64('Editor', 'ecLineHighlight.Foreground', UInt32(DefaultScheme[ecLineHighlight].Foreground));
-    UInt32(Result[ecLineHighlight].Background) := INI.ReadInt64('Editor', 'ecLineHighlight.Background', UInt32(DefaultScheme[ecLineHighlight].Background));
-    UInt32(Result[ecLineHighlight].Style)      := INI.ReadInt64('Editor', 'ecLineHighlight.Style',      UInt32(DefaultScheme[ecLineHighlight].Style));
+    UInt32(Result[ecLineHighlight].Foreground) := Config.GetValue('Editor/ecLineHighlight.Foreground', UInt32(DefaultScheme[ecLineHighlight].Foreground));
+    UInt32(Result[ecLineHighlight].Background) := Config.GetValue('Editor/ecLineHighlight.Background', UInt32(DefaultScheme[ecLineHighlight].Background));
+    UInt32(Result[ecLineHighlight].Style)      := Config.GetValue('Editor/ecLineHighlight.Style',      UInt32(DefaultScheme[ecLineHighlight].Style));
 
-    UInt32(Result[ecFoldedCode].Foreground) := INI.ReadInt64('Editor', 'ecFoldedCode.Foreground', UInt32(DefaultScheme[ecFoldedCode].Foreground));
-    UInt32(Result[ecFoldedCode].Background) := INI.ReadInt64('Editor', 'ecFoldedCode.Background', UInt32(DefaultScheme[ecFoldedCode].Background));
-    UInt32(Result[ecFoldedCode].Style)      := INI.ReadInt64('Editor', 'ecFoldedCode.Style',      UInt32(DefaultScheme[ecFoldedCode].Style));
+    UInt32(Result[ecFoldedCode].Foreground) := Config.GetValue('Editor/ecFoldedCode.Foreground', UInt32(DefaultScheme[ecFoldedCode].Foreground));
+    UInt32(Result[ecFoldedCode].Background) := Config.GetValue('Editor/ecFoldedCode.Background', UInt32(DefaultScheme[ecFoldedCode].Background));
+    UInt32(Result[ecFoldedCode].Style)      := Config.GetValue('Editor/ecFoldedCode.Style',      UInt32(DefaultScheme[ecFoldedCode].Style));
 
-    UInt32(Result[ecFoldedCodeLine].Foreground) := INI.ReadInt64('Editor', 'ecFoldedCodeLine.Foreground', UInt32(DefaultScheme[ecFoldedCodeLine].Foreground));
-    UInt32(Result[ecFoldedCodeLine].Background) := INI.ReadInt64('Editor', 'ecFoldedCodeLine.Background', UInt32(DefaultScheme[ecFoldedCodeLine].Background));
-    UInt32(Result[ecFoldedCodeLine].Style)      := INI.ReadInt64('Editor', 'ecFoldedCodeLine.Style',      UInt32(DefaultScheme[ecFoldedCodeLine].Style));
+    UInt32(Result[ecFoldedCodeLine].Foreground) := Config.GetValue('Editor/ecFoldedCodeLine.Foreground', UInt32(DefaultScheme[ecFoldedCodeLine].Foreground));
+    UInt32(Result[ecFoldedCodeLine].Background) := Config.GetValue('Editor/ecFoldedCodeLine.Background', UInt32(DefaultScheme[ecFoldedCodeLine].Background));
+    UInt32(Result[ecFoldedCodeLine].Style)      := Config.GetValue('Editor/ecFoldedCodeLine.Style',      UInt32(DefaultScheme[ecFoldedCodeLine].Style));
 
-    UInt32(Result[ecBracketMatch].Foreground) := INI.ReadInt64('Editor', 'ecBracketMatch.Foreground', UInt32(DefaultScheme[ecBracketMatch].Foreground));
-    UInt32(Result[ecBracketMatch].Background) := INI.ReadInt64('Editor', 'ecBracketMatch.Background', UInt32(DefaultScheme[ecBracketMatch].Background));
-    UInt32(Result[ecBracketMatch].Style)      := INI.ReadInt64('Editor', 'ecBracketMatch.Style',      UInt32(DefaultScheme[ecBracketMatch].Style));
+    UInt32(Result[ecBracketMatch].Foreground) := Config.GetValue('Editor/ecBracketMatch.Foreground', UInt32(DefaultScheme[ecBracketMatch].Foreground));
+    UInt32(Result[ecBracketMatch].Background) := Config.GetValue('Editor/ecBracketMatch.Background', UInt32(DefaultScheme[ecBracketMatch].Background));
+    UInt32(Result[ecBracketMatch].Style)      := Config.GetValue('Editor/ecBracketMatch.Style',      UInt32(DefaultScheme[ecBracketMatch].Style));
 
     for i:=0 to 10 do
     begin
       WriteStr(x, EEditorAttr(Ord(ecAttrAsm)+i));
-      UInt32(Result[EEditorAttr(Ord(ecAttrAsm)+i)].Foreground)  := INI.ReadInt64('Highlighter', x+'.Foreground', UInt32(DefaultScheme[EEditorAttr(Ord(ecAttrAsm)+i)].Foreground));
-      UInt32(Result[EEditorAttr(Ord(ecAttrAsm)+i)].Background)  := INI.ReadInt64('Highlighter', x+'.Background', UInt32(DefaultScheme[EEditorAttr(Ord(ecAttrAsm)+i)].Background));
-      UInt32(Result[EEditorAttr(Ord(ecAttrAsm)+i)].Style)       := INI.ReadInt64('Highlighter', x+'.Style',      UInt32(DefaultScheme[EEditorAttr(Ord(ecAttrAsm)+i)].Style));
-      UInt32(Result[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Edges) := INI.ReadInt64('Highlighter', x+'.FrameEdges', UInt32(DefaultScheme[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Edges));
-      UInt32(Result[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Color) := INI.ReadInt64('Highlighter', x+'.FrameColor', UInt32(DefaultScheme[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Color));
-      UInt32(Result[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Style) := INI.ReadInt64('Highlighter', x+'.FrameStyle', UInt32(DefaultScheme[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Style));
+      UInt32(Result[EEditorAttr(Ord(ecAttrAsm)+i)].Foreground)  := Config.GetValue('Highlighter/' + x + '.Foreground', UInt32(DefaultScheme[EEditorAttr(Ord(ecAttrAsm)+i)].Foreground));
+      UInt32(Result[EEditorAttr(Ord(ecAttrAsm)+i)].Background)  := Config.GetValue('Highlighter/' + x + '.Background', UInt32(DefaultScheme[EEditorAttr(Ord(ecAttrAsm)+i)].Background));
+      UInt32(Result[EEditorAttr(Ord(ecAttrAsm)+i)].Style)       := Config.GetValue('Highlighter/' + x + '.Style',      UInt32(DefaultScheme[EEditorAttr(Ord(ecAttrAsm)+i)].Style));
+      UInt32(Result[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Edges) := Config.GetValue('Highlighter/' + x + '.FrameEdges', UInt32(DefaultScheme[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Edges));
+      UInt32(Result[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Color) := Config.GetValue('Highlighter/' + x + '.FrameColor', UInt32(DefaultScheme[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Color));
+      UInt32(Result[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Style) := Config.GetValue('Highlighter/' + x + '.FrameStyle', UInt32(DefaultScheme[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Style));
     end;
 
   finally
-    // After the ini file was used it must be freed to prevent memory leaks.
-    INI.Free;
+    Config.Flush();
+    Config.Free();
   end;
 end;
 
 
 procedure TSimbaColors.Save(AName: String);
 var
-  INI: TINIFile;
+  Config: TJSONConfig;
   i: Int32;
   x: String;
 begin
-  INI := TINIFile.Create(AName);
+  Config := TJSONConfig.Create(nil);
+  Config.Formatted := True;
 
   try
-    INI.WriteInt64('Gutter', 'ecGutter.Background', UInt32(Scheme[ecGutter].Background));
+    Config.FileName := AName;
+  except
+    DeleteFile(AName);
+  end;
 
-    INI.WriteInt64('Gutter', 'ecGutterLineNumberPart.Foreground', UInt32(Scheme[ecGutterLineNumberPart].Foreground));
-    INI.WriteInt64('Gutter', 'ecGutterLineNumberPart.Background', UInt32(Scheme[ecGutterLineNumberPart].Background));
-    INI.WriteInt64('Gutter', 'ecGutterLineNumberPart.Style',      UInt32(Scheme[ecGutterLineNumberPart].Style));
+  try
+    Config.SetValue('Gutter/ecGutter.Background', UInt32(Scheme[ecGutter].Background));
 
-    INI.WriteInt64('Gutter', 'ecGutterChangesPart.Foreground', UInt32(Scheme[ecGutterChangesPart].Foreground));
-    INI.WriteInt64('Gutter', 'ecGutterChangesPart.Background', UInt32(Scheme[ecGutterChangesPart].Background));
-    INI.WriteInt64('Gutter', 'ecGutterChangesPart.Style',      UInt32(Scheme[ecGutterChangesPart].Style));
+    Config.SetValue('Gutter/ecGutterLineNumberPart.Foreground', UInt32(Scheme[ecGutterLineNumberPart].Foreground));
+    Config.SetValue('Gutter/ecGutterLineNumberPart.Background', UInt32(Scheme[ecGutterLineNumberPart].Background));
+    Config.SetValue('Gutter/ecGutterLineNumberPart.Style',      UInt32(Scheme[ecGutterLineNumberPart].Style));
 
-    INI.WriteInt64('Gutter', 'ecGutterCodeFoldPart.Foreground', UInt32(Scheme[ecGutterCodeFoldPart].Foreground));
-    INI.WriteInt64('Gutter', 'ecGutterCodeFoldPart.Background', UInt32(Scheme[ecGutterCodeFoldPart].Background));
-    INI.WriteInt64('Gutter', 'ecGutterCodeFoldPart.Style',      UInt32(Scheme[ecGutterCodeFoldPart].Style));
+    Config.SetValue('Gutter/ecGutterChangesPart.Foreground', UInt32(Scheme[ecGutterChangesPart].Foreground));
+    Config.SetValue('Gutter/ecGutterChangesPart.Background', UInt32(Scheme[ecGutterChangesPart].Background));
+    Config.SetValue('Gutter/ecGutterChangesPart.Style',      UInt32(Scheme[ecGutterChangesPart].Style));
 
-    INI.WriteInt64('Gutter', 'ecGutterMarksPart.Foreground', UInt32(Scheme[ecGutterMarksPart].Foreground));
-    INI.WriteInt64('Gutter', 'ecGutterMarksPart.Background', UInt32(Scheme[ecGutterMarksPart].Background));
-    INI.WriteInt64('Gutter', 'ecGutterMarksPart.Style',      UInt32(Scheme[ecGutterMarksPart].Style));
+    Config.SetValue('Gutter/ecGutterCodeFoldPart.Foreground', UInt32(Scheme[ecGutterCodeFoldPart].Foreground));
+    Config.SetValue('Gutter/ecGutterCodeFoldPart.Background', UInt32(Scheme[ecGutterCodeFoldPart].Background));
+    Config.SetValue('Gutter/ecGutterCodeFoldPart.Style',      UInt32(Scheme[ecGutterCodeFoldPart].Style));
 
-    INI.WriteInt64('Gutter', 'ecGutterSeparatorPart.Foreground', UInt32(Scheme[ecGutterSeparatorPart].Foreground));
-    INI.WriteInt64('Gutter', 'ecGutterSeparatorPart.Background', UInt32(Scheme[ecGutterSeparatorPart].Background));
-    INI.WriteInt64('Gutter', 'ecGutterSeparatorPart.Style',      UInt32(Scheme[ecGutterSeparatorPart].Style));
+    Config.SetValue('Gutter/ecGutterMarksPart.Foreground', UInt32(Scheme[ecGutterMarksPart].Foreground));
+    Config.SetValue('Gutter/ecGutterMarksPart.Background', UInt32(Scheme[ecGutterMarksPart].Background));
+    Config.SetValue('Gutter/ecGutterMarksPart.Style',      UInt32(Scheme[ecGutterMarksPart].Style));
+
+    Config.SetValue('Gutter/ecGutterSeparatorPart.Foreground', UInt32(Scheme[ecGutterSeparatorPart].Foreground));
+    Config.SetValue('Gutter/ecGutterSeparatorPart.Background', UInt32(Scheme[ecGutterSeparatorPart].Background));
+    Config.SetValue('Gutter/ecGutterSeparatorPart.Style',      UInt32(Scheme[ecGutterSeparatorPart].Style));
 
     // general editor
-    INI.WriteInt64('Editor', 'ecEdtior.Background',    UInt32(Scheme[ecEdtior].Background));
-    INI.WriteInt64('Editor', 'ecRightEdge.Foreground', UInt32(Scheme[ecRightEdge].Foreground));
+    Config.SetValue('Editor/ecEdtior.Background',    UInt32(Scheme[ecEdtior].Background));
+    Config.SetValue('Editor/ecRightEdge.Foreground', UInt32(Scheme[ecRightEdge].Foreground));
 
-    INI.WriteInt64('Editor', 'ecLineHighlight.Foreground', UInt32(Scheme[ecLineHighlight].Foreground));
-    INI.WriteInt64('Editor', 'ecLineHighlight.Background', UInt32(Scheme[ecLineHighlight].Background));
-    INI.WriteInt64('Editor', 'ecLineHighlight.Style',      UInt32(Scheme[ecLineHighlight].Style));
+    Config.SetValue('Editor/ecLineHighlight.Foreground', UInt32(Scheme[ecLineHighlight].Foreground));
+    Config.SetValue('Editor/ecLineHighlight.Background', UInt32(Scheme[ecLineHighlight].Background));
+    Config.SetValue('Editor/ecLineHighlight.Style',      UInt32(Scheme[ecLineHighlight].Style));
 
-    INI.WriteInt64('Editor', 'ecFoldedCode.Foreground', UInt32(Scheme[ecFoldedCode].Foreground));
-    INI.WriteInt64('Editor', 'ecFoldedCode.Background', UInt32(Scheme[ecFoldedCode].Background));
-    INI.WriteInt64('Editor', 'ecFoldedCode.Style',      UInt32(Scheme[ecFoldedCode].Style));
+    Config.SetValue('Editor/ecFoldedCode.Foreground', UInt32(Scheme[ecFoldedCode].Foreground));
+    Config.SetValue('Editor/ecFoldedCode.Background', UInt32(Scheme[ecFoldedCode].Background));
+    Config.SetValue('Editor/ecFoldedCode.Style',      UInt32(Scheme[ecFoldedCode].Style));
 
-    INI.WriteInt64('Editor', 'ecFoldedCodeLine.Foreground', UInt32(Scheme[ecFoldedCodeLine].Foreground));
-    INI.WriteInt64('Editor', 'ecFoldedCodeLine.Background', UInt32(Scheme[ecFoldedCodeLine].Background));
-    INI.WriteInt64('Editor', 'ecFoldedCodeLine.Style',      UInt32(Scheme[ecFoldedCodeLine].Style));
+    Config.SetValue('Editor/ecFoldedCodeLine.Foreground', UInt32(Scheme[ecFoldedCodeLine].Foreground));
+    Config.SetValue('Editor/ecFoldedCodeLine.Background', UInt32(Scheme[ecFoldedCodeLine].Background));
+    Config.SetValue('Editor/ecFoldedCodeLine.Style',      UInt32(Scheme[ecFoldedCodeLine].Style));
 
-    INI.WriteInt64('Editor', 'ecBracketMatch.Foreground', UInt32(Scheme[ecBracketMatch].Foreground));
-    INI.WriteInt64('Editor', 'ecBracketMatch.Background', UInt32(Scheme[ecBracketMatch].Background));
-    INI.WriteInt64('Editor', 'ecBracketMatch.Style',      UInt32(Scheme[ecBracketMatch].Style));
+    Config.SetValue('Editor/ecBracketMatch.Foreground', UInt32(Scheme[ecBracketMatch].Foreground));
+    Config.SetValue('Editor/ecBracketMatch.Background', UInt32(Scheme[ecBracketMatch].Background));
+    Config.SetValue('Editor/ecBracketMatch.Style',      UInt32(Scheme[ecBracketMatch].Style));
 
     for i:=0 to 10 do
     begin
       WriteStr(x, EEditorAttr(Ord(ecAttrAsm)+i));
-      INI.WriteInt64('Highlighter', x+'.Foreground', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Foreground));
-      INI.WriteInt64('Highlighter', x+'.Background', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Background));
-      INI.WriteInt64('Highlighter', x+'.Style',      UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Style));
-      INI.WriteInt64('Highlighter', x+'.FrameEdges', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Edges));
-      INI.WriteInt64('Highlighter', x+'.FrameColor', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Color));
-      INI.WriteInt64('Highlighter', x+'.FrameStyle', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Style));
+
+      Config.SetValue('Highlighter/' + x + '.Foreground', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Foreground));
+      Config.SetValue('Highlighter/' + x + '.Background', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Background));
+      Config.SetValue('Highlighter/' + x + '.Style',      UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Style));
+      Config.SetValue('Highlighter/' + x + '.FrameEdges', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Edges));
+      Config.SetValue('Highlighter/' + x + '.FrameColor', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Color));
+      Config.SetValue('Highlighter/' + x + '.FrameStyle', UInt32(Scheme[EEditorAttr(Ord(ecAttrAsm)+i)].Frame.Style));
     end;
 
   finally
-    // After the ini file was used it must be freed to prevent memory leaks.
-    INI.Free;
+    Config.Flush();
+    Config.Free();
 
     Self.FileName := AName;
     Self.Edited   := False;
@@ -499,8 +512,8 @@ begin
   for i := 0 to SimbaForm.Tabs.Count - 1 do
     UpdateEditor(TMufasaTab(SimbaForm.Tabs[i]).ScriptFrame.SynEdit);
 
-  if(not Self.Edited) then
-    SimbaSettings.SourceEditor.HighlighterPath.Value := Self.FileName;
+  if (not Self.Edited) then
+    SimbaSettings.Editor.HighlighterPath.Value := Self.FileName;
 end;
 
 procedure TSimbaColors.OnApplyAndSave(Sender: TObject);
@@ -514,7 +527,7 @@ begin
   else
     Self.OnSave(Sender);
 
-  SimbaSettings.SourceEditor.HighlighterPath.Value := Self.FileName;
+  SimbaSettings.Editor.HighlighterPath.Value := Self.FileName
 end;
 
 procedure TSimbaColors.OnSave(Sender: TObject);
@@ -522,12 +535,17 @@ var
   UI: TSaveDialog;
 begin
   UI := TSaveDialog.Create(Self);
-  UI.FileName:= ExtractFileName(Self.FileName);
-  UI.DefaultExt := 'ini';
-  UI.Filter := 'Text file|*.ini';
+
+  if ExtractFileName(Self.FileName) = '' then
+    UI.FileName := 'highlighter'
+  else
+    UI.FileName:= ExtractFileName(Self.FileName);
+
+  UI.DefaultExt := 'json';
+  UI.Filter := 'JSON file|*.json';
   UI.InitialDir := DataPath;
-  UI.Execute();
-  Self.Save(UI.FileName);
+  if UI.Execute() then
+    Self.Save(UI.FileName);
 end;
 
 procedure TSimbaColors.OnLoad(Sender: TObject);
@@ -535,24 +553,25 @@ var
   UI: TOpenDialog;
 begin
   UI := TOpenDialog.Create(Self);
-  UI.DefaultExt := 'ini';
-  UI.Filter := 'Text file|*.ini';
+  UI.DefaultExt := 'json';
+  UI.Filter := 'JSON file|*.json';
   UI.InitialDir := DataPath;
-  UI.Execute();
 
-  Self.Scheme   := Self.LoadScheme(UI.FileName);
-  Self.FileName := UI.FileName;
-  Self.Edited   := False;
+  if UI.Execute() then
+  begin
+    Self.Scheme   := Self.LoadScheme(UI.FileName);
+    Self.FileName := UI.FileName;
+    Self.Edited   := False;
 
-  UpdateEditor(Self.Editor);
+    UpdateEditor(Self.Editor);
+  end;
 end;
 
 constructor TSimbaColors.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
 
-  Caption := 'Simba colors';
-  SimbaSettings := newsimbasettings.SimbaSettings;
+  Caption := 'Editor Colors';
   Width  := 800;
   Height := 600;
   Position := poMainFormCenter;
@@ -568,6 +587,8 @@ begin
     Width  := Self.Width;
     Height := Round(Self.Height * 0.75);
     Align  := alTop;
+    BevelOuter := bvNone;
+    BevelInner := bvNone;
   end;
 
   Editor := TSynEdit.Create(TopPanel);
@@ -576,7 +597,6 @@ begin
     Parent := TopPanel;
     Align := alRight;
     Width := Round(Self.Width * 0.8);
-    Font.Assign(SimbaSettings.SourceEditor.Font.Value);
     Highlighter := TSynFreePascalSyn.Create(Editor);
     Editor.Text := ExampleText;
 
@@ -594,13 +614,6 @@ begin
       NestedComments := False;
       StringKeywordMode := spsmNone;
     end;
-  end;
-
-  Splitter := TSplitter.Create(TopPanel);
-  with Splitter do
-  begin
-    Parent := TopPanel;
-    Align := alLeft;
   end;
 
   List := TListBox.Create(TopPanel);
@@ -648,8 +661,10 @@ begin
     Width  := Self.Width;
     align  := alBottom;
     Height := Round(Self.Height * 0.25);
-    BevelColor:=clLtGray;
-    BevelWidth:=2;
+    BevelColor := clLtGray;
+    BevelWidth := 2;
+    BevelOuter := bvNone;
+    BevelInner := bvNone;
   end;
 
 // Colorlists
@@ -782,7 +797,7 @@ begin
   end;
 
   LoadDefaults();
-  Self.Scheme := LoadScheme(SimbaSettings.SourceEditor.HighlighterPath.Value);
+  Self.Scheme := LoadScheme(SimbaSettings.Editor.HighlighterPath.Value);
   Self.UpdateEditor(Self.Editor);
 end;
 
