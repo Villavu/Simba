@@ -17,7 +17,6 @@ build
 *.trc
 *.exe
 *.x86_64-linux
-*.lrs
 Includes/
 Plugins/
 Scripts/
