@@ -14,6 +14,10 @@ ssleay32.dll
 libeay32.dll
 backup
 build
-trace.trc
+*.trc
 *.exe
 *.x86_64-linux
+*.lrs
+Includes/
+Plugins/
+Scripts/
