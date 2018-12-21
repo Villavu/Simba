@@ -501,6 +501,7 @@ type
     procedure DoRefreshTab(Sender: PtrInt);
     procedure DoSimbaUpdateCheck(Sender: PtrInt);
     procedure DoHandleParameters(Data: PtrInt);
+    procedure DoRunTest(Data: PtrInt);
     procedure DoParseInternals(Data: PtrInt);
     procedure DoSimbaNews(Data: PtrInt);
     procedure OnSaveScript(const Filename : string);
@@ -1536,9 +1537,9 @@ begin
     WriteLn('Options:');
     WriteLn('  -open, -o: opens the given script');
     WriteLn('  -run, -r: runs the script opened with -open');
-    WriteLn('  -compile: compiles the script opened with -open');
+    WriteLn('  -compile, -c: compiles the script opened with -open');
     WriteLn('  -test: will wait for script to run then terminates Simba, exit code 1 if errored. requires -open and -run or -compile');
-    WriteLn('  -config, -c: uses the given config file');
+    WriteLn('  -settings, -s: uses the given settings file');
     WriteLn('');
   end;
 
@@ -1549,21 +1550,35 @@ begin
 
   if Application.HasOption('r', 'run') then
     Self.RunScript();
-
-  if Application.HasOption('compile') then
+  if Application.HasOption('c', 'compile') then
     Self.CompileScript();
+end;
 
-  if Application.HasOption('t', 'test') then
+procedure TSimbaForm.DoRunTest(Data: PtrInt);
+begin
+  if Application.HasOption('test') then
   begin
+    Application.RemoveASyncCalls(Self);
+
     while (Self.GetScriptState() in [ss_Running, ss_Stopping]) do
-      WidgetSet.AppProcessMessages(); // no Application.ProcessMessages, we don't want to call other async calls
+      Application.ProcessMessages();
 
-    WriteLn(DebugMemo.Lines.Text);
+    WriteLn('Testing ' + CurrScript.ScriptFile);
+    Writeln(DebugMemo.Text);
 
-    if (Self.CurrScript.ScriptErrorLine = -1) then
-      Halt(0)
+    // This whole testing interface is a hack right now until out of process scripts are implemented.
+    // But terminating like this allows nothing else to raise a exception while freeing (halt calls finalization sections).
+    {$IFDEF WINDOWS}
+    if (Self.CurrScript.ScriptErrorLine > -1) then
+      TerminateProcess(OpenProcess(PROCESS_TERMINATE, True, GetProcessID()), 1)
     else
-      Halt(1);
+      TerminateProcess(OpenProcess(PROCESS_TERMINATE, True, GetProcessID()), 0);
+    {$ELSE}
+    if (Self.CurrScript.ScriptErrorLine > -1) then
+      Halt(1)
+    else
+      Halt(0);
+    {$ENDIF}
   end;
 end;
 
@@ -2311,8 +2326,8 @@ procedure TSimbaForm.FormCreate(Sender: TObject);
 
   procedure LoadSettings;
   begin
-    if Application.HasOption('c', 'config') then
-      SimbaSettingsFile := Application.GetOptionValue('c', 'config')
+    if Application.HasOption('s', 'settings') then
+      SimbaSettingsFile := Application.GetOptionValue('s', 'settings')
     else
       SimbaSettingsFile := DataPath + 'settings.xml';
 
@@ -2365,6 +2380,7 @@ begin
   try
     Application.OnException := @CustomExceptionHandler;
     Application.QueueAsyncCall(@DoHandleParameters, 0);
+    Application.QueueAsyncCall(@DoRunTest, 0);
     Application.QueueAsyncCall(@DoParseInternals, 0);
     Application.QueueAsyncCall(@DoRefreshTab, 0);
     Application.QueueAsyncCall(@DoSimbaNews, 0);
