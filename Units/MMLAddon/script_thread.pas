@@ -248,7 +248,7 @@ begin
 
       if (Length(Args) = 2) then
       begin
-        Args[0] := Trim(Sender.Defines.Values[Args[0]]);
+        Args[0] := Trim(Sender.Defines[Args[0]]);
         Args[1] := Trim(Args[1]);
 
         if (Args[0] <> '') and (Args[1] <> '') then

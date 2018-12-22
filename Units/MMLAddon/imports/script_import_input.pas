@@ -100,7 +100,7 @@ begin
 
     addGlobalMethod('procedure KeyDown(Key: UInt16);', @Lape_KeyDown, Data);
     addGlobalMethod('procedure KeyUp(Key: UInt16);', @Lape_KeyUp, Data);
-    addGlobalMethod('procedure SendKeys(S: String; KeyWait, KeyModWait: Int32);', @Lape_SendKeys, Data);
+    addGlobalMethod('procedure SendKeys(const S: String; KeyWait, KeyModWait: Int32);', @Lape_SendKeys, Data);
     addGlobalMethod('procedure PressKey(Key: UInt16);', @Lape_PressKey, Data);
     addGlobalMethod('function isKeyDown(Key: UInt16): Boolean', @Lape_isKeyDown, Data);
     addGlobalMethod('function GetKeyCode(C: Char): Int32', @Lape_GetKeyCode, Data);

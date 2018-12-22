@@ -41,12 +41,12 @@ begin
 
   with __TLapeCompiler(Compiler) do
   begin
-    FBaseDefines.Values['SIMBA_VERSION'] := IntToStr(SimbaVersion);
-    FBaseDefines.Values['SIMBA_MAJOR'] := IntToStr(SimbaMajor);
+    FBaseDefines['SIMBA_VERSION'] := IntToStr(SimbaVersion);
+    FBaseDefines['SIMBA_MAJOR'] := IntToStr(SimbaMajor);
 
-    FBaseDefines.Values['FPC_VERSION'] := Format('%d', [FPC_VERSION]);
-    FBaseDefines.Values['FPC_RELEASE'] := Format('%d', [FPC_RELEASE]);
-    FBaseDefines.Values['FPC_PATCH'] := Format('%d', [FPC_PATCH]);
+    FBaseDefines['FPC_VERSION'] := Format('%d', [FPC_VERSION]);
+    FBaseDefines['FPC_RELEASE'] := Format('%d', [FPC_RELEASE]);
+    FBaseDefines['FPC_PATCH'] := Format('%d', [FPC_PATCH]);
 
     addBaseDefine('MUFASA');
     addBaseDefine('COGAT');
