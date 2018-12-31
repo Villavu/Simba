@@ -22,6 +22,14 @@ uses
   Graphics, Dialogs, StdCtrls, Buttons, ButtonPanel, ExtCtrls, fpjson, types,
   ComCtrls;
 
+// Eventually we can populate from a webpage, but this will do for now.
+const
+  SUGGESTED_PACKAGES: array[0..2] of String = (
+    'https://github.com/SRL/SRL',
+    'https://github.com/SRL/SRL-Plugins',
+    'https://github.com/SRL/SRL-Fonts'
+  );
+
 type
   TPackageRelease = record
     Version: String;
@@ -737,7 +745,7 @@ var
 begin
   if GetPackage(Package) then
   begin
-    Path := IncludeTrailingPathDelimiter(comboInstallDirectory.Text);
+    Path := Application.Location + IncludeTrailingPathDelimiter(comboInstallDirectory.Text);
     if (not checkExtractInDirectory.Checked) then
       Path := Path + IncludeTrailingPathDelimiter(editInstallName.Text);
 
@@ -746,7 +754,7 @@ begin
     try
       Disable();
 
-      if (MessageDlg('Install Package', 'Continue to install this package? Files in ' + #39 + Path + #39 + ' will be permanently overwritten.', mtConfirmation, mbYesNo, '') = mrYes) then
+      if (MessageDlg('Install Package', 'Continue to install this package? Files in ' + #39 + CreateRelativePath(Path, Application.Location) + #39 + ' will be permanently overwritten.', mtConfirmation, mbYesNo, '') = mrYes) then
       begin
         Downloader := TDownloader.Create(SelectedRelease.Download);
 
@@ -758,7 +766,7 @@ begin
               Package.Version := comboVersions.Text;
               Package.Save();
 
-              UpdateStatus('Succesfully installed package: ' + Package.Name + ' v' + Package.Version);
+              UpdateStatus('Succesfully installed package: ' + Package.Name + ' ' + Package.Version);
             end else
               UpdateStatus('ERROR: Unable to extract, the installed package is currently in use. Restart Simba and retry.');
           end;
@@ -904,9 +912,9 @@ var
   Path: TStringList;
   Package: TPackageData;
 begin
-  URL := 'https://github.com/';
+  URL := InputComboEx('Add Package', 'Enter or select package URL:', SUGGESTED_PACKAGES, True);
 
-  if InputQuery('New Package', 'Git Repository URL:', URL) then
+  if (URL <> '') then
   begin
     Path := TStringList.Create();
     Path.Delimiter := '/';
