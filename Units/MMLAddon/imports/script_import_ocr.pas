@@ -78,9 +78,9 @@ begin
   begin
     addGlobalMethod('function MaskFromText(Text, Font: String): TMask', @Lape_MaskFromText, Data);
     addGlobalMethod('function TPAFromText(Text, Font: String; var W, H: Int32): TPointArray', @Lape_TPAFromText, Data);
-    addGlobalMethod('function GetTextATPA(constref ATPA: T2DPointArray; maxvspacing: Int32; font: String): String', @Lape_GetTextATPA, Data);
-    addGlobalMethod('function GetTextAt(X, Y, minvspacing, maxvspacing, hspacing, color, tol, len: Int32; font: String): String', @Lape_GetTextAt, Data);
-    addGlobalMethod('function GetTextAtEx(xs, ys, xe, ye, minvspacing, maxvspacing, hspacing, color, tol: Int32; font: String): String', @Lape_GetTextAtEx, Data);
+    addGlobalMethod('function GetTextATPA(const ATPA: T2DPointArray; const maxvspacing: integer; const font: string): String', @Lape_GetTextATPA, Data);
+    addGlobalMethod('function GetTextAt(const atX, atY, minvspacing, maxvspacing, hspacing, color, tol, len: integer; const font: string): String', @Lape_GetTextAt, Data);
+    addGlobalMethod('function GetTextAtEx(const xs,ys,xe,ye, minvspacing, maxvspacing, hspacing, color, tol: integer; const font: string): String', @Lape_GetTextAtEx, Data);
     addGlobalMethod('function LoadSystemFont(Font: TFont; FontName: String): Boolean', @Lape_LoadSystemFont, Data);
     addGlobalMethod('function LoadFont(FontName: String; Shadow: Boolean): Boolean', @Lape_LoadFont, Data);
     addGlobalMethod('function FreeFont(FontName: String): Boolean', @Lape_FreeFont, Data);

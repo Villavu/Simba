@@ -33,9 +33,9 @@
             <Filename Value="../../Simba.$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);../../Units/lape;../../Units/MMLAddon/Imports/lape;$(LazarusDir)/components/synedit;../../Plugins;../../Units/Misc/MatchTemplate"/>
+            <IncludeFiles Value="$(ProjOutDir);../../Units/lape;../../Units/MMLAddon/imports/lape;$(LazarusDir)/components/synedit;../../Plugins;../../Units/Misc/MatchTemplate;../../Units/MMLAddon/oswindow"/>
             <Libraries Value="../../Units/lape/extensions/ffi/bin/$(TargetOS)"/>
-            <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;../../Units/lape/extensions/ffi;$(ProjPath)../ScriptManager;$(ProjPath)../FormDesigner;$(ProjPath)../../Projects/FormDesigner/CodeGen;../../Units/MMLAddon/Imports;../../Units/MMLAddon/Imports/classes/MML;../../Units/MMLAddon/Imports/classes/LCL;../Tools;../../Units/Misc/MatchTemplate;../../Units/Misc/MatchTemplate/fftlib"/>
+            <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;../../Units/lape/extensions/ffi;$(ProjPath)../ScriptManager;$(ProjPath)../FormDesigner;$(ProjPath)../../Projects/FormDesigner/CodeGen;../../Units/MMLAddon/imports;../../Units/MMLAddon/imports/classes/MML;../../Units/MMLAddon/imports/classes/LCL;../Tools;../../Units/Misc/MatchTemplate;../../Units/Misc/MatchTemplate/fftlib;../../Units/MMLAddon/oswindow"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -89,7 +89,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="75">
+    <Units Count="76">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -300,79 +300,79 @@
         <IsPartOfProject Value="True"/>
       </Unit43>
       <Unit44>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_simba.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_simba.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit44>
       <Unit45>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_script.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_script.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit45>
       <Unit46>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_time_date.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_time_date.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit46>
       <Unit47>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_target.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_target.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit47>
       <Unit48>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_file.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_file.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit48>
       <Unit49>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_bitmap.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_bitmap.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit49>
       <Unit50>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_ocr.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_ocr.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit50>
       <Unit51>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_colormath.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_colormath.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit51>
       <Unit52>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_input.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_input.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit52>
       <Unit53>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_arrays_algorithms.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_arrays_algorithms.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit53>
       <Unit54>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_math.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_math.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit54>
       <Unit55>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_dtm.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_dtm.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit55>
       <Unit56>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_web.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_web.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit56>
       <Unit57>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_string.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_string.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit57>
       <Unit58>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_settings.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_settings.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit58>
       <Unit59>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_finder.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_finder.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit59>
       <Unit60>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_system.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_system.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit60>
       <Unit61>
-        <Filename Value="../../Units/MMLAddon/Imports/script_imports.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_imports.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit61>
       <Unit62>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_other.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_other.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit62>
       <Unit63>
@@ -407,29 +407,33 @@
         <UnitName Value="ACA"/>
       </Unit68>
       <Unit69>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_deprecated.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_deprecated.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit69>
       <Unit70>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_crypto.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_crypto.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit70>
       <Unit71>
-        <Filename Value="../../Units/MMLAddon/oswindow.pas"/>
+        <Filename Value="../../Units/Linux/xlibhelpers.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit71>
       <Unit72>
-        <Filename Value="../../Units/Linux/xlibhelpers.pas"/>
+        <Filename Value="../../Units/MMLAddon/imports/script_import_oswindow.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit72>
       <Unit73>
-        <Filename Value="../../Units/MMLAddon/oswindow_linux.inc"/>
+        <Filename Value="../../Units/MMLAddon/oswindow/oswindow.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit73>
       <Unit74>
-        <Filename Value="../../Units/MMLAddon/Imports/script_import_oswindow.pas"/>
+        <Filename Value="../../Units/MMLAddon/oswindow/oswindow_linux.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit74>
+      <Unit75>
+        <Filename Value="../../Units/MMLAddon/oswindow/oswindow_windows.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit75>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -438,9 +442,9 @@
       <Filename Value="../../Simba.$(TargetCPU)-$(TargetOS)-debug"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);../../Units/lape;../../Units/MMLAddon/Imports/lape;$(LazarusDir)/components/synedit;../../Plugins;../../Units/Misc/MatchTemplate"/>
+      <IncludeFiles Value="$(ProjOutDir);../../Units/lape;../../Units/MMLAddon/imports/lape;$(LazarusDir)/components/synedit;../../Plugins;../../Units/Misc/MatchTemplate;../../Units/MMLAddon/oswindow"/>
       <Libraries Value="../../Units/lape/extensions/ffi/bin/$(TargetOS)"/>
-      <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;../../Units/lape/extensions/ffi;$(ProjPath)../ScriptManager;$(ProjPath)../FormDesigner;$(ProjPath)../../Projects/FormDesigner/CodeGen;../../Units/MMLAddon/Imports;../../Units/MMLAddon/Imports/classes/MML;../../Units/MMLAddon/Imports/classes/LCL;../Tools;../../Units/Misc/MatchTemplate;../../Units/Misc/MatchTemplate/fftlib"/>
+      <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;../../Units/lape/extensions/ffi;$(ProjPath)../ScriptManager;$(ProjPath)../FormDesigner;$(ProjPath)../../Projects/FormDesigner/CodeGen;../../Units/MMLAddon/imports;../../Units/MMLAddon/imports/classes/MML;../../Units/MMLAddon/imports/classes/LCL;../Tools;../../Units/Misc/MatchTemplate;../../Units/Misc/MatchTemplate/fftlib;../../Units/MMLAddon/oswindow"/>
       <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
