@@ -12,7 +12,7 @@ implementation
 uses
   script_imports, lpcompiler, lptypes, script_thread,
   DCPcrypt2, DCPmd4, DCPmd5, DCPtiger, DCPsha1, DCPsha256, DCPsha512, DCPhaval, DCPripemd128, DCPripemd160, DCPrc2,
-  forms;
+  forms, tpa, mufasatypes, math;
 
 type
   THashType = (htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160,
@@ -193,11 +193,43 @@ begin
   MessageBox.Free();
 end;
 
+procedure Lape_tSwap(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  tSwap(PPoint(Params^[0])^, PPoint(Params^[1])^);
+end;
+
+procedure Lape_tpaSwap(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  tpaSwap(PPointArray(Params^[0])^, PPointArray(Params^[1])^);
+end;
+
+procedure Lape_SwapE(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  SwapE(PExtended(Params^[0])^, PExtended(Params^[1])^);
+end;
+
+procedure Lape_MinE(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PExtended(Result)^ := Min(PExtended(Params^[0])^, PExtended(Params^[1])^);
+end;
+
+procedure Lape_MaxE(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PExtended(Result)^ := Max(PExtended(Params^[0])^, PExtended(Params^[1])^);
+end;
+
 procedure Lape_Import_Deprecated(Compiler: TLapeCompiler; Data: Pointer);
 begin
   with Compiler do
   begin
     addGlobalType('(htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160, htSHA1, htSHA256, htSHA384, htSHA512, htTiger)', 'THashType');
+
+    addGlobalFunc('procedure tSwap(var a, b: TPoint); deprecated ' + #39 + 'Replace with `Swap`' + #39 + ';', @Lape_tSwap);
+    addGlobalFunc('procedure tpaSwap(var a, b: TPointArray); deprecated ' + #39 + 'Replace with `Swap`' + #39 + ';', @Lape_tpaSwap);
+    addGlobalFunc('procedure SwapE(var a, b: Extended); deprecated ' + #39 + 'Replace with `Swap`' + #39 + ';', @Lape_SwapE);
+
+    addGlobalFunc('function MinE(a, b: Extended): Extended; deprecated ' + #39 + 'Replace with `Min`' + #39 + ';', @Lape_MinE);
+    addGlobalFunc('function MaxE(a, b: Extended): Extended; deprecated ' + #39 + 'Replace with `Max`' + #39 + ';', @Lape_MaxE);
 
     addGlobalFunc('function hash(const HashType: THashType; const Data: string): string; deprecated;', @Lape_hash);
     addGlobalFunc('function haval(const Data: string): string; deprecated;', @Lape_haval);
@@ -217,7 +249,7 @@ begin
     addGlobalMethod('function rs_GetUpTextAt(x, y : integer): string; deprecated;', @Lape_rs_GetUpTextAt, Data);
     addGlobalMethod('function rs_GetUpTextAtEx(x, y: integer; shadow: boolean; fontname: string): string; deprecated;', @Lape_rs_GetUpTextAtEx, Data);
 
-    addGlobalFunc('function MessageBox(Text, Caption: String; Flags: Int32): Int32; deprecated;', @Lape_MessageBox);
+    addGlobalFunc('function MessageBox(Text, Caption: String; Flags: Int32): Int32; deprecated '+ #39 + 'Replace with `MessageDlg`' + #39 + ';', @Lape_MessageBox);
 
     addDelayedCode('type'                                                                                                                                      + LineEnding +
                    '  TSP_Property = (SP_OnTerminate, SP_WriteTimeStamp);'                                                                                     + LineEnding +
