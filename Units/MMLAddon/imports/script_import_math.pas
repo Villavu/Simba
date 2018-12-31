@@ -33,26 +33,6 @@ begin
   P2DExtendedArray(Result)^ := GaussMatrix(PInt32(Params^[0])^, PExtended(Params^[1])^);
 end;
 
-procedure Lape_Max(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PInt32(Result)^ := Max(PInt32(Params^[0])^, PInt32(Params^[1])^);
-end;
-
-procedure Lape_Min(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PInt32(Result)^ := Min(PInt32(Params^[0])^, PInt32(Params^[1])^);
-end;
-
-procedure Lape_MinE(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PExtended(Result)^ := Min(PExtended(Params^[0])^, PExtended(Params^[1])^);
-end;
-
-procedure Lape_MaxE(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PExtended(Result)^ := Max(PExtended(Params^[0])^, PExtended(Params^[1])^);
-end;
-
 procedure Lape_Point(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PPoint(Result)^ := Point(PInt32(Params^[0])^, PInt32(Params^[1])^);
@@ -296,8 +276,6 @@ begin
     addGlobalFunc('function RiemannGauss(Xstart, StepSize, Sigma: Extended; AmountSteps: Int32): Extended', @Lape_RiemannGauss);
     addGlobalFunc('function DiscreteGauss(Xstart, Xend: Int32; sigma: Extended): TExtendedArray', @Lape_DiscreteGauss);
     addGlobalFunc('function GaussMatrix(N: Int32; sigma: Extended): T2DExtendedArray', @Lape_GaussMatrix);
-    addGlobalFunc('function MinE(a, b: Extended): Extended', @Lape_MinE);
-    addGlobalFunc('function MaxE(a, b: Extended): Extended', @Lape_MaxE);
     addGlobalFunc('function Point(x, y: Int32): TPoint', @Lape_Point);
     addGlobalFunc('function Distance(x1, y1, x2, y2: Int32): Int32', @Lape_Distance);
     addGlobalFunc('function RandomRange(const aFrom, aTo: Int32): Int32', @Lape_RandomRange);

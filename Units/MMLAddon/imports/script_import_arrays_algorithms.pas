@@ -12,21 +12,6 @@ implementation
 uses
   script_imports, lpcompiler, lptypes, mufasatypes, tpa, mmath;
 
-procedure Lape_tSwap(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  tSwap(PPoint(Params^[0])^, PPoint(Params^[1])^);
-end;
-
-procedure Lape_tpaSwap(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  tpaSwap(PPointArray(Params^[0])^, PPointArray(Params^[1])^);
-end;
-
-procedure Lape_SwapE(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  SwapE(PExtended(Params^[0])^, PExtended(Params^[1])^);
-end;
-
 procedure Lape_RAaSTPAEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   RAaSTPAEx(PPointArray(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^);
@@ -466,9 +451,6 @@ procedure Lape_Import_Arrays_Algorithms(Compiler: TLapeCompiler; Data: Pointer);
 begin
   with Compiler do
   begin
-    addGlobalFunc('procedure tSwap(var a, b: TPoint);', @Lape_tSwap);
-    addGlobalFunc('procedure tpaSwap(var a, b: TPointArray);', @Lape_tpaSwap);
-    addGlobalFunc('procedure SwapE(var a, b: Extended);', @Lape_SwapE);
     addGlobalFunc('procedure RAaSTPAEx(var a: TPointArray; const w, h: Int32);', @Lape_RAaSTPAEx);
     addGlobalFunc('procedure RAaSTPA(var a: TPointArray; const Dist: Int32);', @Lape_RAaSTPA);
     addGlobalFunc('function NearbyPointInArrayEx(const P: TPoint; w, h: Int32; const a: TPointArray): Boolean', @Lape_NearbyPointInArrayEx);
