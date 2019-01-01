@@ -54,7 +54,8 @@ var
 implementation
 
 uses
-  Math, mtMatrix, mtThreading, mtcpuinfo;
+ math, utf8process,
+ mtMatrix, simba_threadpool;
 
 
 const
@@ -245,12 +246,12 @@ begin
 
   Size(m, W,H);
   plan := InitFFT(W);
-  ThreadPool.DoParallel(@Parallel_FFT2, [@m, @plan, @inverse], 0,H-1, tc, Area(m) < Self.MinThreadingSize);
+  SimbaThreadPool.RunParallel(@Parallel_FFT2, [@m, @plan, @inverse], 0,H-1, tc, Area(m) < Self.MinThreadingSize);
 
   m := Rot90(m);
   Size(m, W,H);
   plan := InitFFT(W);
-  ThreadPool.DoParallel(@Parallel_FFT2, [@m, @plan, @inverse], 0,H-1, tc, Area(m) < Self.MinThreadingSize);
+  SimbaThreadPool.RunParallel(@Parallel_FFT2, [@m, @plan, @inverse], 0,H-1, tc, Area(m) < Self.MinThreadingSize);
 
   Result := Rot90(m);
 end;
