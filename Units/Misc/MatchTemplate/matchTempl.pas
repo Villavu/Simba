@@ -41,7 +41,9 @@ procedure EnableFFTCache(Enabled: Boolean);
 implementation
 
 uses
-  math, mtMatrix, mtThreading, mtcpuinfo, FFTPACK4, FFTW3;
+  math, utf8process,
+  mtMatrix, FFTPACK4, FFTW3,
+  simba_threadpool;
 
 type
   TRANSFORM_CACHE = record
@@ -194,12 +196,11 @@ end;
 
 function MulSpectrumConj(a,b: T2DComplexArray): T2DComplexArray;
 var
-  tc,W,H: Int32;
+  W,H: Int32;
 begin
   Size(a,W,H);
-  tc := GetSystemThreadCount div 2;
   SetLength(Result, H,W);
-  ThreadPool.DoParallel(@Parallel_MulSpecConj, [@a,@b,@Result], Low(a), High(a), tc, Area(a) < 300*300);
+  SimbaThreadPool.RunParallel(@Parallel_MulSpecConj, [@a,@b,@Result], Low(a), High(a), GetSystemThreadCount() div 2, Area(a) < 300*300);
 end;
 
 
