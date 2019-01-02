@@ -41,7 +41,7 @@
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <Optimizations>
-              <OptimizationLevel Value="2"/>
+              <OptimizationLevel Value="3"/>
             </Optimizations>
           </CodeGeneration>
           <Linking>
@@ -89,7 +89,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="76">
+    <Units Count="77">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -434,6 +434,10 @@
         <Filename Value="../../Units/MMLAddon/oswindow/oswindow_windows.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit75>
+      <Unit76>
+        <Filename Value="../../Units/MMLAddon/simba_threadpool.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit76>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

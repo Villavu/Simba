@@ -98,7 +98,8 @@ var
 implementation
 
 uses
-  Math, mtMatrix, mtcpuinfo;
+  math, utf8process,
+  mtMatrix;
 
 
 const
