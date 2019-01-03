@@ -683,22 +683,28 @@ end;
 { XXX, TODO: Pressing the stop shortcut twice (quickly) may crash Simba. }
 procedure Bind_Linux_Keys;
 begin
-  keybinder_init(); { Initialise keybinder }
+  if KeybinderLoaded() then
+  begin
+    keybinder_init(); { Initialise keybinder }
 
-  { Bind keys }
-  if not keybinder_bind(PChar(shortcut_StartScript), @keybinder_callback, PtrUInt(0)) then
-    mDebugLn('Unable to register '+ shortcut_StartScript + ' as global hotkey');
-  if not keybinder_bind(PChar(shortcut_StopScript), @keybinder_callback, PtrUInt(0)) then
-    mDebugLn('Unable to register '+ shortcut_StopScript + ' as global hotkey');
-  if not keybinder_bind(PChar(shortcut_PickColour), @keybinder_callback, PtrUInt(0)) then
-    mDebugLn('Unable to register '+ shortcut_PickColour + ' as global hotkey');
+    { Bind keys }
+    if not keybinder_bind(PChar(shortcut_StartScript), @keybinder_callback, PtrUInt(0)) then
+      mDebugLn('Unable to register '+ shortcut_StartScript + ' as global hotkey');
+    if not keybinder_bind(PChar(shortcut_StopScript), @keybinder_callback, PtrUInt(0)) then
+      mDebugLn('Unable to register '+ shortcut_StopScript + ' as global hotkey');
+    if not keybinder_bind(PChar(shortcut_PickColour), @keybinder_callback, PtrUInt(0)) then
+      mDebugLn('Unable to register '+ shortcut_PickColour + ' as global hotkey');
+  end;
 end;
 
 procedure Unbind_Linux_Keys;
 begin
-  keybinder_unbind(PChar(shortcut_StartScript), @keybinder_callback, PtrUInt(0));
-  keybinder_unbind(PChar(shortcut_StopScript), @keybinder_callback, PtrUInt(0));
-  keybinder_unbind(PChar(shortcut_PickColour), @keybinder_callback, PtrUInt(0));
+  if KeybinderLoaded() then
+  begin
+    keybinder_unbind(PChar(shortcut_StartScript), @keybinder_callback, PtrUInt(0));
+    keybinder_unbind(PChar(shortcut_StopScript), @keybinder_callback, PtrUInt(0));
+    keybinder_unbind(PChar(shortcut_PickColour), @keybinder_callback, PtrUInt(0));
+  end;
 end;
   {$ENDIF}
 
