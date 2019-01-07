@@ -40,7 +40,7 @@ uses
   lpTClient,
   lpTMMLSettingsSandbox,
   lpTMMLTimer,
-  lpjson;
+  lpjson,lpxml;
 
 procedure Lape_Import_LCLClasses(Compiler: TLapeCompiler; Data: Pointer);
 begin
@@ -96,7 +96,10 @@ begin
   Register_TMMLSettingsSandbox(Compiler);
 
   Register_TMMLTimer(Compiler);
+  { Native Json Support}
   Register_JSON(Compiler);
+  { Native XML Support}
+  Register_TXML(Compiler);
 end;
 
 initialization
