@@ -1,0 +1,54 @@
+program rs232test;
+
+const
+  {:stopbit value for 1 stopbit}
+  SB1 = 0;
+  {:stopbit value for 1.5 stopbit}
+  SB1andHalf = 1;
+  {:stopbit value for 2 stopbits}
+  SB2 = 2;
+
+  Data = '<?xml version="1.0" encoding="UTF-8"?><ArmRequest><RequestBody><ProtocolLabel>OFDFNARMUKM</ProtocolLabel><ProtocolVersion>10.4</ProtocolVersion><RequestId>{305a5e44-42cd-4e33-86fb-258950ee11b5}</RequestId><DateTime>2017-05-18 19:44:06</DateTime><Command>2</Command></RequestBody><RequestData><![CDATA[]]></RequestData></ArmRequest>';
+
+procedure RS232Test();
+var
+ ComPort: TBlockSerial;
+ Answer: string;
+begin
+ answer:='';
+ ComPort.Init();
+ try
+  ComPort.Connect('COM9');
+  ComPort.SetLinuxLock(False);
+  sleep(1000);
+  ComPort.Config(115200, 8, 'N', SB1, True, False);
+  Sleep(1000);
+  if ComPort.GetLastError() <> 0 then
+   begin
+    WriteLn('RS232 Error: ' + ComPort.GetLastErrorDesc());
+    TerminateScript();
+  end;
+
+  ComPort.SendString(Data);
+  if ComPort.GetLastError() <> 0 then
+    begin
+     WriteLn('RS232 Send Error: ' + ComPort.GetLastErrorDesc());
+     TerminateScript();
+    end;
+   WriteLn('Send data: ' + Data);
+
+   while (answer <> '') do
+    begin
+      answer := ComPort.RecvPacket(5000);
+      Sleep(10);
+    end;
+   WriteLn('Get answer: '+ answer);
+
+ finally
+  ComPort.Free();
+ end;
+end;
+
+begin
+ RS232Test();
+end.
