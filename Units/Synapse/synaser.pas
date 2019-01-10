@@ -741,8 +741,6 @@ type
     property InterPacketTimeout: Boolean read FInterPacketTimeout Write FInterPacketTimeout;
   end;
 
-{:Returns list of existing computer serial ports. Working properly only in Windows!}
-function GetSerialPortNames: string;
 
 implementation
 
@@ -2288,70 +2286,5 @@ end;
 {$ENDIF}
 {----------------------------------------------------------------}
 
-{$IFDEF MSWINDOWS}
-function GetSerialPortNames: string;
-var
-  reg: TRegistry;
-  l, v: TStringList;
-  n: integer;
-begin
-  l := TStringList.Create;
-  v := TStringList.Create;
-  reg := TRegistry.Create;
-  try
-{$IFNDEF VER100}
-{$IFNDEF VER120}
-    reg.Access := KEY_READ;
-{$ENDIF}
-{$ENDIF}
-    reg.RootKey := HKEY_LOCAL_MACHINE;
-    reg.OpenKey('\HARDWARE\DEVICEMAP\SERIALCOMM', false);
-    reg.GetValueNames(l);
-    for n := 0 to l.Count - 1 do
-      v.Add(PChar(reg.ReadString(l[n])));
-    Result := v.CommaText;
-  finally
-    reg.Free;
-    l.Free;
-    v.Free;
-  end;
-end;
-{$ENDIF}
-{$IFNDEF MSWINDOWS}
-function GetSerialPortNames: string;
-var
-  sr : TSearchRec;
-begin
-  Result := '';
-  if FindFirst('/dev/ttyS*', $FFFFFFFF, sr) = 0 then
-    repeat
-      if (sr.Attr and $FFFFFFFF) = Sr.Attr then
-      begin
-        if Result <> '' then
-          Result := Result + ',';
-        Result := Result + '/dev/' + sr.Name;
-      end;
-    until FindNext(sr) <> 0;
-  FindClose(sr);
-  if FindFirst('/dev/ttyUSB*', $FFFFFFFF, sr) = 0 then begin
-    repeat
-      if (sr.Attr and $FFFFFFFF) = Sr.Attr then begin
-        if Result <> '' then Result := Result + ',';
-        Result := Result + '/dev/' + sr.Name;
-      end;
-    until FindNext(sr) <> 0;
-  end;
-  FindClose(sr);
-  if FindFirst('/dev/ttyAM*', $FFFFFFFF, sr) = 0 then begin
-    repeat
-      if (sr.Attr and $FFFFFFFF) = Sr.Attr then begin
-        if Result <> '' then Result := Result + ',';
-        Result := Result + '/dev/' + sr.Name;
-      end;
-    until FindNext(sr) <> 0;
-  end;
-  FindClose(sr);
-end;
-{$ENDIF}
 
-end.
+end.
