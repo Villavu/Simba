@@ -65,7 +65,7 @@ begin
   XML.LoadFromStream(ss);
   mss.Init('');
   XML.SaveToStream(mss);
-  ShowStream('Readed xml',mss);
+  ShowStream('Read xml',mss);
   WriteLn('Node description is: ' + Xml.GetRoot().Find('book', 'id', 'bk103').Find('description').GetText());
  finally
   if Assigned(XML) then
