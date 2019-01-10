@@ -1,9 +1,9 @@
 {==============================================================================|
-| Project : Ararat Synapse                                       | 007.004.000 |
+| Project : Ararat Synapse                                       | 007.006.001 |
 |==============================================================================|
 | Content: Serial port support                                                 |
 |==============================================================================|
-| Copyright (c)2001-2010, Lukas Gebauer                                        |
+| Copyright (c)2001-2017, Lukas Gebauer                                        |
 | All rights reserved.                                                         |
 |                                                                              |
 | Redistribution and use in source and binary forms, with or without           |
@@ -33,7 +33,7 @@
 | DAMAGE.                                                                      |
 |==============================================================================|
 | The Initial Developer of the Original Code is Lukas Gebauer (Czech Republic).|
-| Portions created by Lukas Gebauer are Copyright (c)2001-2010.                |
+| Portions created by Lukas Gebauer are Copyright (c)2001-2017.                |
 | All Rights Reserved.                                                         |
 |==============================================================================|
 | Contributor(s):                                                              |
@@ -44,9 +44,9 @@
 |==============================================================================}
 
 {: @abstract(Serial port communication library)
-This unit contains a class that implements serial port communication for Windows
- or Linux. This class provides numerous methods with same name and functionality
-  as methods of the Ararat Synapse TCP/IP library.
+This unit contains a class that implements serial port communication 
+ for Windows, Linux, Unix or MacOSx. This class provides numerous methods with 
+ same name and functionality as methods of the Ararat Synapse TCP/IP library.
 
 The following is a small example how establish a connection by modem (in this
 case with my USB modem):
@@ -73,6 +73,13 @@ case with my USB modem):
 {$IFDEF WIN32}
   {$IFNDEF MSWINDOWS}
     {$DEFINE MSWINDOWS}
+  {$ENDIF}
+{$ENDIF}
+
+//Kylix does not known UNIX define
+{$IFDEF LINUX}
+  {$IFNDEF UNIX}
+    {$DEFINE UNIX}
   {$ENDIF}
 {$ENDIF}
 
@@ -189,10 +196,14 @@ type
   PDCB = ^TDCB;
 
 const
-{$IFDEF LINUX}
-  MaxRates = 30;
+{$IFDEF UNIX}
+  {$IFDEF BSD}
+  MaxRates = 18;  //MAC
+  {$ELSE}
+   MaxRates = 30; //UNIX
+  {$ENDIF}
 {$ELSE}
-  MaxRates = 19;  //FPC on some platforms not know high speeds?
+  MaxRates = 19;  //WIN
 {$ENDIF}
   Rates: array[0..MaxRates, 0..1] of cardinal =
   (
@@ -214,9 +225,10 @@ const
     (38400, B38400),
     (57600, B57600),
     (115200, B115200),
-    (230400, B230400),
-    (460800, B460800)
-{$IFDEF LINUX}
+    (230400, B230400)
+{$IFNDEF BSD}
+    ,(460800, B460800)
+  {$IFDEF UNIX}
     ,(500000, B500000),
     (576000, B576000),
     (921600, B921600),
@@ -228,8 +240,14 @@ const
     (3000000, B3000000),
     (3500000, B3500000),
     (4000000, B4000000)
+  {$ENDIF}
 {$ENDIF}
     );
+{$ENDIF}
+
+{$IFDEF BSD}
+const // From fcntl.h
+  O_SYNC = $0080;  { synchronous writes }
 {$ENDIF}
 
 const
@@ -296,8 +314,10 @@ type
     FPortAddr: Word;
     function CanEvent(Event: dword; Timeout: integer): boolean;
     procedure DecodeCommError(Error: DWord); virtual;
+ {$IFDEF WIN32}
     function GetPortAddr: Word;  virtual;
     function ReadTxEmpty(PortAddr: Word): Boolean; virtual;
+ {$ENDIF}
 {$ENDIF}
     procedure SetSizeRecvBuffer(size: integer); virtual;
     function GetDSR: Boolean; virtual;
@@ -310,11 +330,9 @@ type
     procedure GetComNr(Value: string); virtual;
     function PreTestFailing: boolean; virtual;{HGJ}
     function TestCtrlLine: Boolean; virtual;
-{$IFNDEF MSWINDOWS}
+{$IFDEF UNIX}    
     procedure DcbToTermios(const dcb: TDCB; var term: termios); virtual;
     procedure TermiosToDcb(const term: termios; var dcb: TDCB); virtual;
-{$ENDIF}
-{$IFDEF LINUX}
     function ReadLockfile: integer; virtual;
     function LockfileName: String; virtual;
     procedure CreateLockfile(PidNr: integer); virtual;
@@ -325,7 +343,7 @@ type
     {: data Control Block with communication parameters. Usable only when you
      need to call API directly.}
     DCB: Tdcb;
-{$IFNDEF MSWINDOWS}
+{$IFDEF UNIX}
     TermiosStruc: termios;
 {$ENDIF}
     {:Object constructor.}
@@ -603,7 +621,7 @@ type
 
     {:Raise Synaser error with ErrNumber code. Usually used by internal routines.}
     procedure RaiseSynaError(ErrNumber: integer); virtual;
-{$IFDEF LINUX}
+{$IFDEF UNIX}
     function  cpomComportAccessible: boolean; virtual;{HGJ}
     procedure cpomReleaseComport; virtual; {HGJ}
 {$ENDIF}
@@ -764,7 +782,7 @@ end;
 
 class function TBlockSerial.GetVersion: string;
 begin
-	Result := 'SynaSer 7.4.0';
+	Result := 'SynaSer 7.6.0';
 end;
 
 procedure TBlockSerial.CloseSocket;
@@ -778,7 +796,7 @@ begin
   end;
   if InstanceActive then
   begin
-    {$IFDEF LINUX}
+    {$IFDEF UNIX}
     if FLinuxLock then
       cpomReleaseComport;
     {$ENDIF}
@@ -790,7 +808,7 @@ begin
   DoStatus(HR_SerialClose, FDevice);
 end;
 
-{$IFDEF MSWINDOWS}
+{$IFDEF WIN32}
 function TBlockSerial.GetPortAddr: Word;
 begin
   Result := 0;
@@ -933,7 +951,7 @@ begin
     SerialCheck(-1)
   else
     SerialCheck(0);
-  {$IFDEF LINUX}
+  {$IFDEF UNIX}
   if FLastError <> sOK then
     if FLinuxLock then
       cpomReleaseComport;
@@ -961,14 +979,16 @@ begin
   CommTimeOuts.WriteTotalTimeoutMultiplier := 0;
   CommTimeOuts.WriteTotalTimeoutConstant := 0;
   SetCommTimeOuts(FHandle, CommTimeOuts);
+  {$IFDEF WIN32}
   FPortAddr := GetPortAddr;
+  {$ENDIF}
 {$ENDIF}
   SetSynaError(sOK);
   if not TestCtrlLine then  {HGJ}
   begin
     SetSynaError(ErrNoDeviceAnswer);
     FileClose(FHandle);         {HGJ}
-    {$IFDEF LINUX}
+    {$IFDEF UNIX}
     if FLinuxLock then
       cpomReleaseComport;                {HGJ}
     {$ENDIF}                             {HGJ}
@@ -1023,6 +1043,7 @@ begin
   end
   else
     SetSynaError(y);
+  err := 0;
   ClearCommError(FHandle, err, nil);
   if err <> 0 then
     DecodeCommError(err);
@@ -1138,6 +1159,7 @@ begin
   end
   else
     SetSynaError(y);
+  err := 0;
   ClearCommError(FHandle, err, nil);
   if err <> 0 then
     DecodeCommError(err);
@@ -1444,6 +1466,7 @@ var
   stat: TComStat;
   err: DWORD;
 begin
+  err := 0;
   if ClearCommError(FHandle, err, @stat) then
   begin
     SetSynaError(sOK);
@@ -1479,6 +1502,7 @@ var
   err: DWORD;
 begin
   SetSynaError(sOK);
+  err := 0;
   if not ClearCommError(FHandle, err, @stat) then
     serialcheck(sErr);
   ExceptCheck;
@@ -1754,6 +1778,7 @@ begin
     else
     begin
       y := 0;
+      ex := 0;
       if not WaitCommEvent(FHandle, ex, @Overlapped) then
         y := GetLastError;
       if y = ERROR_IO_PENDING then
@@ -1807,7 +1832,8 @@ function TBlockSerial.CanRead(Timeout: integer): boolean;
 begin
   Result := WaitingData > 0;
   if not Result then
-    Result := CanEvent(EV_RXCHAR, Timeout);
+    Result := CanEvent(EV_RXCHAR, Timeout) or (WaitingData > 0);
+    //check WaitingData again due some broken virtual ports
   if Result then
     DoStatus(HR_CanRead, '');
 end;
@@ -1851,6 +1877,7 @@ begin
   Result := SendingData = 0;
   if not Result then
 	  Result := CanEvent(EV_TXEMPTY, Timeout);
+  {$IFDEF WIN32}
   if Result and (Win32Platform <> VER_PLATFORM_WIN32_NT) then
   begin
     t := GetTick;
@@ -1861,6 +1888,7 @@ begin
       Sleep(0);
     end;
   end;
+  {$ENDIF}
   if Result then
     DoStatus(HR_CanWrite, '');
 end;
@@ -1918,7 +1946,11 @@ begin
   {$IFNDEF FPC}
   SerialCheck(ioctl(FHandle, TCFLSH, TCIOFLUSH));
   {$ELSE}
-  SerialCheck(fpioctl(FHandle, TCFLSH, TCIOFLUSH));
+    {$IFDEF DARWIN}
+    SerialCheck(fpioctl(FHandle, TCIOflush, Pointer(PtrInt(TCIOFLUSH))));
+    {$ELSE}
+    SerialCheck(fpioctl(FHandle, {$IFDEF FreeBSD}TCIOFLUSH{$ELSE}TCFLSH{$ENDIF}, Pointer(PtrInt(TCIOFLUSH))));
+    {$ENDIF}
   {$ENDIF}
   FBuffer := '';
   ExceptCheck;
@@ -2126,7 +2158,7 @@ begin
     sOK:               Result := 'OK';
     ErrAlreadyOwned:   Result := 'Port owned by other process';{HGJ}
     ErrAlreadyInUse:   Result := 'Instance already in use';    {HGJ}
-    ErrWrongParameter: Result := 'Wrong paramter at call';     {HGJ}
+    ErrWrongParameter: Result := 'Wrong parameter at call';     {HGJ}
     ErrPortNotOpen:    Result := 'Instance not yet connected'; {HGJ}
     ErrNoDeviceAnswer: Result := 'No device answer detected';  {HGJ}
     ErrMaxBuffer:      Result := 'Maximal buffer length exceeded';
@@ -2154,7 +2186,7 @@ end;
   Ownership Manager.
 }
 
-{$IFDEF LINUX}
+{$IFDEF UNIX}
 
 function TBlockSerial.LockfileName: String;
 var
@@ -2276,7 +2308,7 @@ begin
     reg.OpenKey('\HARDWARE\DEVICEMAP\SERIALCOMM', false);
     reg.GetValueNames(l);
     for n := 0 to l.Count - 1 do
-      v.Add(reg.ReadString(l[n]));
+      v.Add(PChar(reg.ReadString(l[n])));
     Result := v.CommaText;
   finally
     reg.Free;
@@ -2288,31 +2320,38 @@ end;
 {$IFNDEF MSWINDOWS}
 function GetSerialPortNames: string;
 var
-  Index: Integer;
-  Data: string;
-  TmpPorts: String;
   sr : TSearchRec;
 begin
-  try
-    TmpPorts := '';
-    if FindFirst('/dev/ttyS*', $FFFFFFFF, sr) = 0 then
-    begin
-      repeat
-        if (sr.Attr and $FFFFFFFF) = Sr.Attr then
-        begin
-          data := sr.Name;
-          index := length(data);
-          while (index > 1) and (data[index] <> '/') do
-            index := index - 1;
-          TmpPorts := TmpPorts + ' ' + copy(data, 1, index + 1);
-        end;
-      until FindNext(sr) <> 0;
-    end;
-    FindClose(sr);
-  finally
-    Result:=TmpPorts;
+  Result := '';
+  if FindFirst('/dev/ttyS*', $FFFFFFFF, sr) = 0 then
+    repeat
+      if (sr.Attr and $FFFFFFFF) = Sr.Attr then
+      begin
+        if Result <> '' then
+          Result := Result + ',';
+        Result := Result + '/dev/' + sr.Name;
+      end;
+    until FindNext(sr) <> 0;
+  FindClose(sr);
+  if FindFirst('/dev/ttyUSB*', $FFFFFFFF, sr) = 0 then begin
+    repeat
+      if (sr.Attr and $FFFFFFFF) = Sr.Attr then begin
+        if Result <> '' then Result := Result + ',';
+        Result := Result + '/dev/' + sr.Name;
+      end;
+    until FindNext(sr) <> 0;
   end;
+  FindClose(sr);
+  if FindFirst('/dev/ttyAM*', $FFFFFFFF, sr) = 0 then begin
+    repeat
+      if (sr.Attr and $FFFFFFFF) = Sr.Attr then begin
+        if Result <> '' then Result := Result + ',';
+        Result := Result + '/dev/' + sr.Name;
+      end;
+    until FindNext(sr) <> 0;
+  end;
+  FindClose(sr);
 end;
 {$ENDIF}
 
-end.
+end.
