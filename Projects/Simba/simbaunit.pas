@@ -2187,33 +2187,22 @@ end;
 
 procedure TSimbaForm.FileBrowser_Popup_OpenExternally(Sender: TObject);
 var
-  Path: String;
+  Path, Output: String;
+  ExitStatus: Int32;
 begin
   if (FileBrowser.Selected <> nil) then
   begin
     Path := TSimbaFileBrowser_Node(FileBrowser.Selected).Path;
 
-    if DirectoryExists(Path) then
+    if TSimbaFileBrowser_Node(FileBrowser.Selected).IsDirectory then
     begin
       {$IFDEF WINDOWS}
-      ShellExecute(Handle, 'OPEN', PChar('explorer.exe'), PChar('/root, "' + Path + '"'), nil, SW_NORMAL);
+      if RunCommandInDir('', 'explorer.exe', ['/root,', '"' + Path + '"'], Output, ExitStatus) <> 0 then
+        ShowMessage('Unable to open explorer.exe: ' + Output);
       {$ENDIF}
-
       {$IFDEF LINUX}
-      with TProcess.Create(nil) do
-      try
-        Executable := 'xdg-open';
-        Parameters.Add(Path);
-
-        try
-          Execute();
-        except
-          on e: Exception do
-            ShowMessage('Unable to open file explorer: ' + e.Message);
-        end;
-      finally
-        Free();
-      end;
+      if RunCommandInDir('', 'xdg-open', [Path], Output, ExitStatus) <> 0 then
+        ShowMessage('Unable to open xdg-open: ' + Output);
       {$ENDIF}
     end else
     if FileExists(Path) then
