@@ -2186,27 +2186,39 @@ begin
 end;
 
 procedure TSimbaForm.FileBrowser_Popup_OpenExternally(Sender: TObject);
+  procedure OpenDirectory(Path: String);
+  var
+    Exe, Output: String;
+    ExitStatus: Int32;
+  begin
+    {$IFDEF WINDOWS}
+    Exe := 'explorer.exe';
+    Path := '/root,"' + Path + '"';
+    {$ENDIF}
+    
+    {$IFDEF LINUX}
+    Exe := 'xdg-open';
+    {$ENDIF}
+    
+    if Exe = '' then
+      raise Exception.Create('OpenDirectory is unsupported on your Operating System.');
+    
+    if RunCommandInDir('', Exe, [Path], Output, ExitStatus) <> 0 then
+        ShowMessage('Unable to open ' + Exe + ': ' + Output);
+  end;
 var
-  Path, Output: String;
-  ExitStatus: Int32;
+  Path: String;
 begin
   if (FileBrowser.Selected <> nil) then
   begin
-    Path := TSimbaFileBrowser_Node(FileBrowser.Selected).Path;
+    Path := ExpandFileName((FileBrowser.Selected as TSimbaFileBrowser_Node).Path);
 
-    if TSimbaFileBrowser_Node(FileBrowser.Selected).IsDirectory then
-    begin
-      {$IFDEF WINDOWS}
-      if RunCommandInDir('', 'explorer.exe', ['/root,', '"' + Path + '"'], Output, ExitStatus) <> 0 then
-        ShowMessage('Unable to open explorer.exe: ' + Output);
-      {$ENDIF}
-      {$IFDEF LINUX}
-      if RunCommandInDir('', 'xdg-open', [Path], Output, ExitStatus) <> 0 then
-        ShowMessage('Unable to open xdg-open: ' + Output);
-      {$ENDIF}
-    end else
-    if FileExists(Path) then
-      OpenDocument(Path);
+    if (DirectoryExists(Path)) then
+      OpenDirectory(Path)
+    else if (FileExists(Path)) then
+      OpenDocument(Path)
+    else
+      ShowMessage('Unable to open "' + Path + '", it either does not exist or is not a file or a directory.');
   end;
 end;
 
