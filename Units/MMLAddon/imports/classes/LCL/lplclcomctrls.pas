@@ -713,12 +713,6 @@ begin
   end;
 end;
 
-//function TabIndexAtClientPos(ClientPos: TPoint): integer;
-procedure TCustomTabControl_TabIndexAtClientPos(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  Pinteger(Result)^ := PCustomTabControl(Params^[0])^.TabIndexAtClientPos(PPoint(Params^[1])^);
-end;
-
 //function TabRect(AIndex: Integer): TRect;
 procedure TCustomTabControl_TabRect(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -907,7 +901,6 @@ begin
   begin
     addClass('TCustomTabControl', 'TWinControl');
 
-    addGlobalFunc('function TCustomTabControl.TabIndexAtClientPos(ClientPos: TPoint): integer; constref;', @TCustomTabControl_TabIndexAtClientPos);
     addGlobalFunc('function TCustomTabControl.TabRect(AIndex: Integer): TRect; constref;', @TCustomTabControl_TabRect);
     addGlobalFunc('function TCustomTabControl.GetImageIndex(ThePageIndex: Integer): Integer; constref;', @TCustomTabControl_GetImageIndex);
     addGlobalFunc('function TCustomTabControl.IndexOf(APage: TPersistent): integer; constref;', @TCustomTabControl_IndexOf);

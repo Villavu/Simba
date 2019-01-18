@@ -34,7 +34,7 @@ uses
   StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit, SynHighlighterLape,
   mufasabase, MufasaTypes,
   synedittypes,
-  script_thread,
+  script_thread, file_browser,
 
   {$IFDEF MSWINDOWS} os_windows, windows, {$ENDIF} //For ColorPicker etc.
   {$IFDEF LINUX} os_linux, {$ENDIF} //For ColorPicker etc.
@@ -45,8 +45,8 @@ uses
 
   lcltype, ActnList,
   SynExportHTML, SynEditKeyCmds,
-  SynEditMarkupHighAll,  LMessages, Buttons, ShellCtrls, PairSplitter,
-  mmisc, stringutil,mufasatypesutil,
+  SynEditMarkupHighAll, LMessages, Buttons, PairSplitter,
+  mmisc, stringutil, mufasatypesutil,
   about, framefunctionlist, updateform, Simbasettingsold,
   Simbasettingssimple,
   v_ideCodeInsight, v_ideCodeParser, CastaliaPasLexTypes, // Code completion units
@@ -132,7 +132,7 @@ type
     CheckBoxMatchCase: TCheckBox;
     FunctionList: TFunctionList_Frame;
     lblNotes: TLabel;
-    lblFileBrowser: TLabel;
+    FileBrowserLabel: TLabel;
     LabeledEditSearch: TLabeledEdit;
     MainMenu: TMainMenu;
     DebugMemo: TMemo;
@@ -142,9 +142,9 @@ type
     MenuItemColors: TMenuItem;
     MenuItemUnloadPlugin: TMenuItem;
     MenuItemDivider12: TMenuItem;
-    popupFileBrowserOpen: TMenuItem;
-    popupFileBrowserOpenExternally: TMenuItem;
-    memoNotes: TMemo;
+    FileBrowser_PopupItem_Open: TMenuItem;
+    FileBrowser_PopupItem_OpenExternally: TMenuItem;
+    NotesMemo: TMemo;
     MenuItemFileBrowser: TMenuItem;
     MenuItemACA: TMenuItem;
     MenuItemFindPrev: TMenuItem;
@@ -177,11 +177,10 @@ type
     MenuItemDivider9: TMenuItem;
     MouseTimer: TTimer;
     PanelUtilites: TPairSplitter;
-    PanelCodeBrowser: TPairSplitterSide;
+    FileBrowserPanel: TPairSplitterSide;
     PanelNotes: TPairSplitterSide;
-    FileBrowser: TShellTreeView;
     FileBrowserPopup: TPopupMenu;
-    btnRefreshFileBrowser: TSpeedButton;
+    FileBrowserRefreshButton: TSpeedButton;
     SpeedButtonFindNext: TSpeedButton;
     SpeedButtonFindPrev: TSpeedButton;
     NotesSplitter: TSplitter;
@@ -301,7 +300,8 @@ type
     procedure ActionGotoExecute(Sender: TObject);
     procedure ActionNewExecute(Sender: TObject);
     procedure ActionNewTabExecute(Sender: TObject);
-    procedure ActionUtiltiesExecute(Sender: TObject);
+    procedure ActionFileBrowserExecute(Sender: TObject);
+    procedure ActionNotesExecute(Sender: TObject);
     procedure ActionOpenExecute(Sender: TObject);
     procedure ActionPasteExecute(Sender: TObject);
     procedure ActionPauseExecute(Sender: TObject);
@@ -322,6 +322,7 @@ type
     procedure CloseFindPanel;
     procedure doOnHide(Sender: TObject);
     procedure FileBrowserDoubleClick(Sender: TObject);
+    procedure FileBrowser_Popup_OnPopup(Sender: TObject);
     procedure FileBrowserRefresh(Sender: TObject);
     procedure FormDropFiles(Sender: TObject; const FileNames: array of String);
     procedure DebugMemoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -329,8 +330,8 @@ type
     procedure ShowFormDesigner(Sender: TObject);
     procedure UnloadPlugin(Sender: TObject);
     procedure MenuToolsClick(Sender: TObject);
-    procedure popupFileBrowserOpenClick(Sender: TObject);
-    procedure popupFileBrowserOpenExternallyClick(Sender: TObject);
+    procedure FileBrowser_Popup_Open(Sender: TObject);
+    procedure FileBrowser_Popup_OpenExternally(Sender: TObject);
     procedure MenuItemReadOnlyTabClick(Sender: TObject);
     procedure MenuItemBitmapConvClick(Sender: TObject);
     procedure MenuItemHandbookClick(Sender: TObject);
@@ -409,8 +410,7 @@ type
     procedure OnCompleteCode(Str: string);
     function OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
     function OnCCLoadLibrary(Sender: TObject; var Argument: string; out Parser: TCodeInsight): Boolean;
-    procedure FileBrowserExpand(Sender: TObject; Node: TTreeNode);
-    procedure FirstShow(Sender: TObject);
+    procedure UpdateUtilties;
   private
     PopupTab : integer;
     RecentFileItems : array of TMenuItem;
@@ -469,6 +469,7 @@ type
     OnScriptStart : TScriptStartEvent;
     OnScriptOpen : TScriptOpenEvent;
     Highlighter: TSynFreePascalSyn;
+    FileBrowser: TSimbaFileBrowser;
 
     function LoadSettingDef(const Key, Def : string) : string;
     procedure FunctionListShown( ShowIt : boolean);
@@ -535,10 +536,10 @@ var
 
 implementation
 uses
-   InterfaceBase,
    LCLIntf,
    LazUTF8,
    LazFileUtils,
+   process,
    debugimage,
    files,
    bitmapconv,
@@ -1846,45 +1847,52 @@ begin
   Self.AddTab;
 end;
 
-procedure TSimbaForm.ActionUtiltiesExecute(Sender: TObject);
+procedure TSimbaForm.ActionFileBrowserExecute(Sender: TObject);
+begin
+  SimbaSettings.FileBrowser.Visible.Value := not SimbaSettings.FileBrowser.Visible.Value;
+  MenuItemFileBrowser.Checked := SimbaSettings.FileBrowser.Visible.Value;
+
+  UpdateUtilties();
+end;
+
+procedure TSimbaForm.ActionNotesExecute(Sender: TObject);
+begin
+  SimbaSettings.Notes.Visible.Value := not SimbaSettings.Notes.Visible.Value;
+  MenuItemNotes.Checked := SimbaSettings.Notes.Visible.Value;
+
+  UpdateUtilties();
+end;
+
+procedure TSimbaForm.UpdateUtilties;
 var
-  sideBrowser, sideNotes: TPairSplitterSide;
+  Browser, Notes: TPairSplitterSide;
   i: Int32;
 begin
-  sideBrowser := PanelUtilites.Sides[0];
-  sideNotes := PanelUtilites.Sides[1];
+  if (not PanelUtilites.HandleAllocated) then
+    PanelUtilites.HandleNeeded();
 
-  if (Sender <> nil) then
-  begin
-    if (Sender = ActionNotes) then
-      SimbaSettings.Notes.Visible.Value := (not SimbaSettings.Notes.Visible.Value);
+  Browser := PanelUtilites.Sides[0];
+  Browser.Visible := SimbaSettings.FileBrowser.Visible.Value;
 
-    if (Sender = ActionFileBrowser) then
-      SimbaSettings.FileBrowser.Visible.Value := (not SimbaSettings.FileBrowser.Visible.Value);
-  end;
-
-  sideBrowser.Visible := SimbaSettings.FileBrowser.Visible.Value;
-  sideNotes.Visible := SimbaSettings.Notes.Visible.Value;
+  Notes := PanelUtilites.Sides[1];
+  Notes.Visible := SimbaSettings.Notes.Visible.Value;
 
   for i := 0 to PanelUtilites.ControlCount - 1 do
     if PanelUtilites.Controls[i] is TSplitter then
-      TSplitter(PanelUtilites.Controls[i]).Visible := sideBrowser.Visible and sideNotes.Visible;
+      TSplitter(PanelUtilites.Controls[i]).Visible := Browser.Visible and Notes.Visible;
 
-  if sideBrowser.Visible and sideNotes.Visible then
+  if Browser.Visible and Notes.Visible then
   begin
-    sideBrowser.Align := alTop;
-    sideNotes.Align := alClient;
+    Browser.Align := alTop;
+    Notes.Align := alClient;
   end else
-  if sideBrowser.Visible and (not sideNotes.Visible) then
-    sideBrowser.Align := alClient
+  if Browser.Visible and (not Notes.Visible) then
+    Browser.Align := alClient
   else
-  if sideNotes.Visible and (not sideBrowser.Visible) then
-    sideNotes.Align := alClient;
+  if Notes.Visible and (not Browser.Visible) then
+    Notes.Align := alClient;
 
-  ActionNotes.Checked := sideNotes.Visible;
-  ActionFileBrowser.Checked := sideBrowser.Visible;
-
-  PanelUtilites.Visible := sideBrowser.Visible or sideNotes.Visible;
+  PanelUtilites.Visible := Browser.Visible or Notes.Visible;
 end;
 
 procedure TSimbaForm.ActionOpenExecute(Sender: TObject);
@@ -2036,7 +2044,25 @@ end;
 procedure TSimbaForm.FileBrowserDoubleClick(Sender: TObject);
 begin
   if (FileBrowser.Selected <> nil) then
-    LoadScriptFile(TShellTreeNode(FileBrowser.Selected).FullFileName, True, True);
+    LoadScriptFile(TSimbaFileBrowser_Node(FileBrowser.Selected).Path, True, True);
+end;
+
+procedure TSimbaForm.FileBrowser_Popup_OnPopup(Sender: TObject);
+begin
+  if (FileBrowser.Selected <> nil) then
+  begin
+    FileBrowser_PopupItem_OpenExternally.Enabled := True;
+    FileBrowser_PopupItem_Open.Enabled := not TSimbaFileBrowser_Node(FileBrowser.Selected).IsDirectory;
+  end else
+  begin
+    FileBrowser_PopupItem_OpenExternally.Enabled := False;
+    FileBrowser_PopupItem_Open.Enabled := False;
+  end;
+end;
+
+procedure TSimbaForm.FileBrowserRefresh(Sender: TObject);
+begin
+  FileBrowser.Refresh();
 end;
 
 procedure TSimbaForm.StopCodeCompletion;
@@ -2057,11 +2083,6 @@ begin
     {$endif}
       exit(i);
   result := -1;
-end;
-
-procedure TSimbaForm.FileBrowserRefresh(Sender: TObject);
-begin
-  FileBrowser.Items[0].Expand(False);
 end;
 
 procedure TSimbaForm.FormDropFiles(Sender: TObject; const FileNames: array of String
@@ -2152,16 +2173,53 @@ begin
   end;
 end;
 
-procedure TSimbaForm.popupFileBrowserOpenClick(Sender: TObject);
+procedure TSimbaForm.FileBrowser_Popup_Open(Sender: TObject);
+var
+  Path: String;
 begin
-  if (FileBrowser.Selected <> nil) and FileExists(TShellTreeNode(FileBrowser.Selected).FullFileName) then
-    LoadScriptFile(TShellTreeNode(FileBrowser.Selected).FullFileName, True, True);
+  if (FileBrowser.Selected <> nil) then
+  begin
+    Path := TSimbaFileBrowser_Node(FileBrowser.Selected).Path;
+    if FileExists(Path) then
+      LoadScriptFile(Path, True, True);
+  end;
 end;
 
-procedure TSimbaForm.popupFileBrowserOpenExternallyClick(Sender: TObject);
+procedure TSimbaForm.FileBrowser_Popup_OpenExternally(Sender: TObject);
+  procedure OpenDirectory(Path: String);
+  var
+    Exe, Output: String;
+    ExitStatus: Int32;
+  begin
+    {$IFDEF WINDOWS}
+    Exe := 'explorer.exe';
+    Path := '/root,"' + Path + '"';
+    {$ENDIF}
+    
+    {$IFDEF LINUX}
+    Exe := 'xdg-open';
+    {$ENDIF}
+    
+    if Exe = '' then
+      raise Exception.Create('OpenDirectory is unsupported on your Operating System.');
+    
+    if RunCommandInDir('', Exe, [Path], Output, ExitStatus) <> 0 then
+        ShowMessage('Unable to open ' + Exe + ': ' + Output);
+  end;
+var
+  Path: String;
 begin
-  if (FileBrowser.Selected <> nil) and FileExists(TShellTreeNode(FileBrowser.Selected).FullFileName) then
-    OpenDocument(TShellTreeNode(FileBrowser.Selected).FullFileName);
+  if (FileBrowser.Selected <> nil) then
+  begin
+    Path := ExpandFileName((FileBrowser.Selected as TSimbaFileBrowser_Node).Path);
+
+    if (DirectoryExists(Path)) then
+      OpenDirectory(Path)
+    else if (FileExists(Path)) then
+      OpenDocument(Path)
+    else
+      ShowMessage('Unable to open "' + Path + '", it either does not exist or is not a file or a directory.');
+  end;
 end;
 
 procedure TSimbaForm.MenuItemBitmapConvClick(Sender: TObject);
@@ -2365,19 +2423,20 @@ procedure TSimbaForm.FormCreate(Sender: TObject);
 
   procedure LoadUtilites;
   begin
-    memoNotes.Lines.Text := DecompressString(Base64Decode(SimbaSettings.Notes.Content.Value));
+    FileBrowser := TSimbaFileBrowser.Create(FileBrowserPanel);
+    FileBrowser.Parent := FileBrowserPanel;
+    FileBrowser.Align := alClient;
+    FileBrowser.BorderStyle := bsNone;
+    FileBrowser.Root := Application.Location;
+    FileBrowser.OnDblClick := @FileBrowserDoubleClick;
+    FileBrowser.PopupMenu := FileBrowserPopup;
 
-    with FileBrowser do
-    begin
-      Root := AppPath;
+    NotesMemo.Lines.Text := DecompressString(Base64Decode(SimbaSettings.Notes.Content.Value));
 
-      if (Items.Count > 0) then
-      begin
-        FileBrowser.Items[0].Text := ExtractFileName(ExcludeTrailingPathDelimiter(Root));
-        FileBrowser.Items[0].ImageIndex := 54;
-        FileBrowser.Items[0].SelectedIndex := 54;
-      end;
-    end;
+    MenuItemNotes.Checked := SimbaSettings.Notes.Visible.Value;
+    MenuItemFileBrowser.Checked := SimbaSettings.FileBrowser.Visible.Value;
+
+    UpdateUtilties();
   end;
 
 begin
@@ -2391,8 +2450,6 @@ begin
     Application.QueueAsyncCall(@DoRefreshTab, 0);
     Application.QueueAsyncCall(@DoSimbaNews, 0);
     Application.QueueAsyncCall(@DoSimbaUpdateCheck, 0);
-
-    AddHandlerFirstShow(@FirstShow);
 
     if (not DirectoryIsWritable(Application.Location)) then
       ShowMessage('No permission to write to Simba''s directory. Run as ' + {$IFDEF WINDOWS} 'administrator' {$ELSE} 'sudo' {$ENDIF} + ' if this causes issues.');
@@ -2408,10 +2465,8 @@ begin
 
     LoadSettings();
     LoadUtilites();
-    SimbaColors := TSimbaColors.Create(SimbaForm);                                                                                                                                                               
 
     Plugins.Paths.Add(SimbaSettings.Plugins.Path.Value);
-
 
     {$IFDEF WINDOWS}
       {$IFDEF CPU32}
@@ -2455,6 +2510,7 @@ begin
         end;
     {$ENDIF}
 
+    SimbaColors := TSimbaColors.Create(SimbaForm);
     PackageForm := TPackageForm.Create(Self, TB_ShowPackages);
 
     CodeCompletionForm := TAutoCompletePopup.Create(Self);
@@ -2532,7 +2588,7 @@ begin
   {$endif}
 
   if (Assigned(SimbaSettings)) then
-    SimbaSettings.Notes.Content.Value := Base64Encode(CompressString(memoNotes.Lines.Text));
+    SimbaSettings.Notes.Content.Value := Base64Encode(CompressString(NotesMemo.Lines.Text));
 
   FreeSimbaSettings(True, SimbaSettingsFile);
 end;
@@ -2988,38 +3044,6 @@ begin
 
   SimbaSettings.SourceEditor.DefScriptPath.onChange := @SetDefaultScriptPath;
   SimbaSettings.SourceEditor.Font.onChange := @SetSourceEditorFont;
-end;
-
-procedure TSimbaForm.FileBrowserExpand(Sender: TObject; Node: TTreeNode);
-var
-  i: Int32;
-begin
-  for i := 0 to Node.Count - 1 do
-    case TShellTreeNode(Node.Items[i]).IsDirectory of
-    True:
-      begin
-        Node.Items[i].ImageIndex := 54;
-        Node.Items[i].SelectedIndex := 54;
-      end;
-
-    False:
-      begin
-        if ExtractFileExt(TShellTreeNode(Node.Items[i]).FullFilename) = '.simba' then
-        begin
-          Node.Items[i].ImageIndex := 8;
-          Node.Items[i].SelectedIndex := 8;
-        end else
-        begin
-          Node.Items[i].ImageIndex := 56;
-          Node.Items[i].SelectedIndex := 56;
-        end;
-      end;
-  end;
-end;
-
-procedure TSimbaForm.FirstShow(Sender: TObject);
-begin
-  ActionUtiltiesExecute(nil);
 end;
 
 procedure TSimbaForm.ScriptStartEvent(Sender: TObject; var Script: string;
