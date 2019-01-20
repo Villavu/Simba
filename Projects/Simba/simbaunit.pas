@@ -1360,10 +1360,9 @@ begin
   Self.CurrScript := Script;
   Self.CurrTab := Tab;
   SetScriptState(Tab.ScriptFrame.FScriptState);//To set the buttons right
-  if Self.Showing then
-    if Tab.TabSheet.TabIndex = Self.PageControl1.TabIndex then
-      if CurrScript.SynEdit.CanFocus then
-        CurrScript.SynEdit.SetFocus;      // XXX: This is never called
+  // Only focus editor if Simba is focused and tab is currently showing.
+  if Self.Focused and (Tab.TabSheet.TabIndex = Self.PageControl1.TabIndex) and CurrScript.SynEdit.CanFocus() then
+    CurrScript.SynEdit.SetFocus();
 
   StopCodeCompletion;//To set the highlighting back to normal;
 
