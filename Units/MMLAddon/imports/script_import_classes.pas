@@ -40,7 +40,7 @@ uses
   lpTClient,
   lpTMMLSettingsSandbox,
   lpTMMLTimer,
-  lpjson,lpxml, lpblockserial;
+  lpjson,lpxml;
 
 procedure Lape_Import_LCLClasses(Compiler: TLapeCompiler; Data: Pointer);
 begin
@@ -100,8 +100,6 @@ begin
   Register_JSON(Compiler);
   { Native XML Support}
   Register_TXML(Compiler);
-  { RS232 Support}
-  Register_TBlockSerial(Compiler);
 end;
 
 initialization
