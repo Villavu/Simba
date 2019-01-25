@@ -29,7 +29,8 @@ interface
 uses
   Classes, SysUtils, FileUtil, TreeFilterEdit, LResources, Forms,
   ComCtrls, StdCtrls, Controls, ExtCtrls, Buttons,
-  v_ideCodeParser, v_ideCodeInsight;
+  v_ideCodeParser, v_ideCodeInsight,
+  simbahintwindow;
 
 type
   TFunctionList_Frame = class;
@@ -64,7 +65,7 @@ type
     destructor Destroy; override;
   end;
 
-  TFunctionList_Hint = class(THintWindow)
+  TFunctionList_Hint = class(TSimbaHintWindow)
     procedure Paint; override; // Default drawing will clip the text
   end;
 
@@ -89,7 +90,7 @@ type
     procedure HintMouseLeave(Sender: TObject);
   protected
     FUpdater: TFunctionList_Updater;
-    FHint: THintWindow;
+    FHint: TFunctionList_Hint;
   public
     ScriptNode: TTreeNode;
     PluginsNode: TTreeNode;
@@ -637,7 +638,7 @@ end;
 
 procedure TFunctionList_Frame.TreeViewMouseLeave(Sender: TObject);
 begin
-  if (not PtInRect(TreeView.ClientRect, ScreenToClient(Mouse.CursorPos))) then
+  if (not PtInRect(TreeView.ClientRect, TreeView.ScreenToClient(Mouse.CursorPos))) then
     FHint.Hide();
 end;
 

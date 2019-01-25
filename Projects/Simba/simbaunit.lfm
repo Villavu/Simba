@@ -1,12 +1,12 @@
 object SimbaForm: TSimbaForm
-  Left = -1536
-  Height = 800
-  Top = 137
+  Left = 761
+  Height = 773
+  Top = 128
   Width = 1250
   ActiveControl = ScriptPanel
   AllowDropFiles = True
   Caption = 'Simba'
-  ClientHeight = 780
+  ClientHeight = 773
   ClientWidth = 1250
   KeyPreview = True
   Menu = MainMenu
@@ -17,7 +17,7 @@ object SimbaForm: TSimbaForm
   OnHide = doOnHide
   OnShortCut = FormShortCuts
   Position = poScreenCenter
-  LCLVersion = '1.8.2.0'
+  LCLVersion = '1.8.1.0'
   Visible = True
   object ToolBar: TToolBar
     Left = 0
@@ -235,7 +235,7 @@ object SimbaForm: TSimbaForm
   object StatusBar: TStatusBar
     Left = 0
     Height = 23
-    Top = 757
+    Top = 730
     Width = 1250
     Panels = <    
       item
@@ -257,7 +257,7 @@ object SimbaForm: TSimbaForm
   object PanelMemo: TPanel
     Left = 0
     Height = 154
-    Top = 603
+    Top = 576
     Width = 1250
     Align = alBottom
     ClientHeight = 154
@@ -282,19 +282,19 @@ object SimbaForm: TSimbaForm
     Cursor = crVSplit
     Left = 0
     Height = 5
-    Top = 598
+    Top = 571
     Width = 1250
     Align = alBottom
     ResizeAnchor = akBottom
   end
   object ScriptPanel: TPanel
     Left = 0
-    Height = 574
+    Height = 547
     Top = 24
     Width = 1250
     Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 574
+    ClientHeight = 547
     ClientWidth = 1250
     DockSite = True
     TabOrder = 4
@@ -302,7 +302,7 @@ object SimbaForm: TSimbaForm
     OnDockOver = ScriptPanelDockOver
     object PageControl1: TPageControl
       Left = 255
-      Height = 539
+      Height = 512
       Top = 0
       Width = 740
       Align = alClient
@@ -322,7 +322,7 @@ object SimbaForm: TSimbaForm
     object SearchPanel: TPanel
       Left = 0
       Height = 35
-      Top = 539
+      Top = 512
       Width = 1250
       Align = alBottom
       BevelOuter = bvSpace
@@ -466,7 +466,7 @@ object SimbaForm: TSimbaForm
     end
     object SplitterFunctionList: TSplitter
       Left = 250
-      Height = 539
+      Height = 512
       Top = 0
       Width = 5
       OnCanResize = SplitterFunctionListCanResize
@@ -475,13 +475,13 @@ object SimbaForm: TSimbaForm
     object PanelUtilites: TPairSplitter
       Cursor = crVSplit
       Left = 1000
-      Height = 539
+      Height = 512
       Top = 0
       Width = 250
       Align = alRight
       Position = 350
       SplitterType = pstVertical
-      object PanelCodeBrowser: TPairSplitterSide
+      object FileBrowserPanel: TPairSplitterSide
         Cursor = crArrow
         Left = 0
         Height = 350
@@ -489,7 +489,7 @@ object SimbaForm: TSimbaForm
         Width = 250
         ClientWidth = 250
         ClientHeight = 350
-        object lblFileBrowser: TLabel
+        object FileBrowserLabel: TLabel
           Left = 2
           Height = 15
           Top = 2
@@ -502,28 +502,10 @@ object SimbaForm: TSimbaForm
           ParentColor = False
           ParentFont = False
         end
-        object FileBrowser: TShellTreeView
-          Left = 0
-          Height = 331
-          Top = 19
-          Width = 250
-          Align = alClient
-          FileSortType = fstNone
-          Images = Mufasa_Image_List
-          ParentFont = False
-          PopupMenu = FileBrowserPopup
-          ReadOnly = True
-          RightClickSelect = True
-          TabOrder = 0
-          OnDblClick = FileBrowserDoubleClick
-          OnExpanded = FileBrowserExpand
-          Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoRightClickSelect, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
-          ObjectTypes = [otFolders, otNonFolders, otHidden]
-        end
-        object btnRefreshFileBrowser: TSpeedButton
-          AnchorSideLeft.Control = lblFileBrowser
-          AnchorSideTop.Control = lblFileBrowser
-          AnchorSideBottom.Control = lblFileBrowser
+        object FileBrowserRefreshButton: TSpeedButton
+          AnchorSideLeft.Control = FileBrowserLabel
+          AnchorSideTop.Control = FileBrowserLabel
+          AnchorSideBottom.Control = FileBrowserLabel
           AnchorSideBottom.Side = asrBottom
           Left = -2
           Height = 16
@@ -549,11 +531,11 @@ object SimbaForm: TSimbaForm
       object PanelNotes: TPairSplitterSide
         Cursor = crArrow
         Left = 0
-        Height = 184
+        Height = 157
         Top = 355
         Width = 250
         ClientWidth = 250
-        ClientHeight = 184
+        ClientHeight = 157
         object lblNotes: TLabel
           Left = 2
           Height = 15
@@ -567,9 +549,9 @@ object SimbaForm: TSimbaForm
           ParentColor = False
           ParentFont = False
         end
-        object memoNotes: TMemo
+        object NotesMemo: TMemo
           Left = 0
-          Height = 165
+          Height = 138
           Top = 19
           Width = 250
           Align = alClient
@@ -579,28 +561,28 @@ object SimbaForm: TSimbaForm
       end
     end
     inline FunctionList: TFunctionList_Frame
-      Height = 539
-      ClientHeight = 539
+      Height = 512
+      ClientHeight = 512
       TabOrder = 4
       inherited Filter: TTreeFilterEdit
         AnchorSideLeft.Control = FunctionList
         AnchorSideBottom.Control = FunctionList
-        Top = 515
+        Top = 488
       end
       inherited TreeView: TTreeView
         AnchorSideRight.Control = FunctionList
-        Height = 496
+        Height = 469
         Images = nil
       end
       inherited btnClear: TSpeedButton
         AnchorSideRight.Control = FunctionList
         AnchorSideBottom.Control = FunctionList
-        Top = 514
+        Top = 487
       end
     end
     object NotesSplitter: TSplitter
       Left = 995
-      Height = 539
+      Height = 512
       Top = 0
       Width = 5
       Align = alRight
@@ -3593,7 +3575,7 @@ object SimbaForm: TSimbaForm
     end
     object ActionNotes: TAction
       Caption = '&Notes'
-      OnExecute = ActionUtiltiesExecute
+      OnExecute = ActionNotesExecute
     end
     object ActionFont: TAction
       Caption = 'Font'
@@ -3605,7 +3587,7 @@ object SimbaForm: TSimbaForm
     end
     object ActionFileBrowser: TAction
       Caption = 'File Browser'
-      OnExecute = ActionUtiltiesExecute
+      OnExecute = ActionFileBrowserExecute
     end
     object ActCodeComment: TAction
       Caption = 'ActCodeComment'
@@ -3686,9 +3668,10 @@ object SimbaForm: TSimbaForm
   end
   object FileBrowserPopup: TPopupMenu
     Images = Mufasa_Image_List
+    OnPopup = FileBrowser_Popup_OnPopup
     left = 592
     top = 48
-    object popupFileBrowserOpen: TMenuItem
+    object FileBrowser_PopupItem_Open: TMenuItem
       Caption = 'Open'
       Bitmap.Data = {
         36040000424D3604000000000000360000002800000010000000100000000100
@@ -3727,11 +3710,11 @@ object SimbaForm: TSimbaForm
         0000000000000000000000000000000000000000000000000000
       }
       ImageIndex = 8
-      OnClick = popupFileBrowserOpenClick
+      OnClick = FileBrowser_Popup_Open
     end
-    object popupFileBrowserOpenExternally: TMenuItem
+    object FileBrowser_PopupItem_OpenExternally: TMenuItem
       Caption = 'Open Externally'
-      OnClick = popupFileBrowserOpenExternallyClick
+      OnClick = FileBrowser_Popup_OpenExternally
     end
   end
 end

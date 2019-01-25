@@ -179,12 +179,6 @@ begin
   Pboolean(Result)^ := PMenuItem(Params^[0])^.HasBitmap();
 end;
 
-//function GetIconSize: TPoint; virtual;
-procedure TMenuItem_GetIconSize(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PPoint(Result)^ := PMenuItem(Params^[0])^.GetIconSize();
-end;
-
 //procedure RemoveHandlerOnDestroy(const OnDestroyEvent: TNotifyEvent);
 procedure TMenuItem_RemoveHandlerOnDestroy(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -409,7 +403,6 @@ begin
     addGlobalFunc('function TMenuItem.IsInMenuBar(): boolean; constref;', @TMenuItem_IsInMenuBar);
     addGlobalFunc('procedure TMenuItem.Clear(); constref;', @TMenuItem_Clear);
     addGlobalFunc('function TMenuItem.HasBitmap(): boolean; constref;', @TMenuItem_HasBitmap);
-    addGlobalFunc('function TMenuItem.GetIconSize(): TPoint; constref;', @TMenuItem_GetIconSize);
     addGlobalFunc('function TMenuItem.AddMenu(s: string): TMenuItem; constref;', @TMenuItem_AddMenu);
     addClassVar('TMenuItem', 'Count', 'Integer', @TMenuItem_Count_Read, nil);
     addClassVar('TMenuItem', 'Items', 'TMenuItem', @TMenuItem_Items_Read, nil);
