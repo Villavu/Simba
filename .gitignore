@@ -20,3 +20,5 @@ build
 Includes/
 Plugins/
 Scripts/
+libcrypto.so
+libssl.so

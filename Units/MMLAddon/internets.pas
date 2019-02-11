@@ -27,14 +27,14 @@ unit internets;
 interface
 
 uses
-  Classes, SysUtils, blcksock, MufasaTypes, math, fphttpclient;
+  Classes, SysUtils, blcksock, MufasaTypes, math, simba.httpclient;
 
 function GetPage(URL: String): String;
 
 type
   THTTPClient = class(TObject)
   private
-    FHTTPClient: TFPHTTPClient;
+    FHTTPClient: TSimbaHTTPClient;
     FHandleCookies: Boolean;
     FPostVariables: TStringList;
     FClient: TObject;
@@ -121,12 +121,12 @@ uses
 
 function GetPage(URL: String): String;
 var
-  HTTPClient: THTTPClient;
+  HTTPClient: TSimbaHTTPClient;
 begin
-  HTTPClient := THTTPClient.Create(nil);
+  HTTPClient := TSimbaHTTPClient.Create;
 
   try
-    Result := HTTPClient.GetHTTPPage(URL);
+    Result := HTTPClient.Get(URL);
   finally
     HTTPClient.Free();
   end;
@@ -208,17 +208,17 @@ end;
 
 function THTTPClient.GetResponseCode: Int32;
 begin
-  Result := FHTTPClient.ResponseStatusCode;
+  Result := FHTTPClient.ResponseCode;
 end;
 
 function THTTPClient.GetUserAgent: String;
 begin
-  Result := FHTTPClient.GetHeader('User-Agent');
+  Result := FHTTPClient.RequestHeader['User-Agent'];
 end;
 
 procedure THTTPClient.SetUserAgent(Value: String);
 begin
-  FHTTPClient.AddHeader('User-Agent', Value);
+  FHTTPClient.RequestHeader['User-Agent'] := Value;
 end;
 
 function THTTPClient.GetHTTPPage(URL: String): String;
@@ -260,7 +260,7 @@ begin
         WriteLn('THTTPClient Exception: ' + e.Message);
   end;
 
-  Result := FHTTPClient.ResponseStatusCode;
+  Result := FHTTPClient.ResponseCode;
 end;
 
 function THTTPClient.PostHTTPPage(URL: String; PostData: String): String;
@@ -274,7 +274,7 @@ begin
     if (not FHandleCookies) then
       FHTTPClient.Cookies.Clear();
 
-    Result := FHTTPClient.FormPost(URL, PostData);
+    Result := FHTTPClient.Post(URL, PostData);
   except
     on e: Exception do
       if (FClient <> nil) then
@@ -300,9 +300,14 @@ begin
 end;
 
 procedure THTTPClient.SetProxy(Host, Port: String);
+var
+  Proxy: TSimbaHTTPClientProxy;
 begin
-  FHTTPClient.Proxy.Host := Host;
-  FHTTPClient.Proxy.Port := StrToInt(Port);
+  Proxy := Default(TSimbaHTTPClientProxy);
+  Proxy.Host := Host;
+  Proxy.Port := StrToInt(Port);
+
+  FHTTPClient.Proxy := Proxy;
 end;
 
 procedure THTTPClient.ClearPostData;
@@ -321,16 +326,7 @@ begin
 
   FClient := Owner;
 
-  FHTTPClient := TFPHTTPClient.Create(nil);
-  FHTTPClient.AllowRedirect := True;
-
-  // Just init with something (some sites don't allow API access without a vaild one)
-  {$IFDEF WINDOWS}
-  FHTTPClient.AddHeader('User-Agent', 'Mozilla/5.0 (Windows NT x.y; Win64; x64; rv:10.0) Gecko/20100101 Firefox/10.0');
-  {$ELSE}
-  FHTTPClient.AddHeader('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0');
-  {$ENDIF}
-
+  FHTTPClient := TSimbaHTTPClient.Create();
   FHandleCookies := HandleCookies;
   FPostVariables := TStringList.Create;
 end;

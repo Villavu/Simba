@@ -162,7 +162,7 @@ begin
     addGlobalMethod('function GetPage(URL: String): String', @Lape_GetPage, Data);
     addGlobalMethod('function InitializeHTTPClient(HandleCookies: Boolean = True): Int32', @Lape_InitializeHTTPClient, Data);
     addGlobalMethod('procedure FreeHTTPClient(Client: Int32);', @Lape_FreeHTTPClient, Data);
-    addGlobalMethod('function GetHTTPResponseCode: Int32;', @Lape_GetHTTPResponseCode, Data);
+    addGlobalMethod('function GetHTTPResponseCode(Client: Int32): Int32;', @Lape_GetHTTPResponseCode, Data);
     addGlobalMethod('function GetHTTPPage(Client: Int32; URL: String): String', @Lape_GetHTTPPage, Data);
     addGlobalMethod('procedure SetHTTPUserAgent(Client: Int32; Agent: String);', @Lape_SetHTTPUserAgent, Data);
     addGlobalMethod('function GetHTTPUserAgent(Client: Int32): String;', @Lape_GetHTTPUserAgent, Data);
