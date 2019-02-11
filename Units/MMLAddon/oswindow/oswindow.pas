@@ -117,6 +117,8 @@ begin
   for Window in Self do
     if ExecRegExpr(Title, Window.GetTitle()) and ExecRegExpr(ClassName, Window.GetClassName()) then
       Exit(True);
+
+  Exit(False);
 end;
 
 function TOSWindowArray_Helper.GetByTitleAndClass(Title, ClassName: String): TOSWindowArray;

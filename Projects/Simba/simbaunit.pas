@@ -432,12 +432,6 @@ type
     procedure GetSimbaNews;
     procedure WriteSimbaNews(Sender: TObject);
 
-    { Settings Hooks }
-    procedure SetPluginsPath(obj: TSetting);
-    procedure SetScriptsPath(obj: TSetting);
-    procedure SetIncludesPath(obj: TSetting);
-    procedure SetFontsPath(obj: TSetting);
-    procedure SetDefaultScriptPath(obj: TSetting);
     procedure SetSourceEditorFont(obj: TSetting);
     procedure SetTrayVisiblity(obj: TSetting);
 
@@ -529,7 +523,6 @@ const
   Image_Terminate = 19;
 var
   SimbaForm: TSimbaForm;
-  AppPath, DocPath, DataPath: string;
   {$IFDEF WINDOWS}
   PrevWndProc : WNDPROC;
   {$ENDIF}
@@ -546,8 +539,8 @@ uses
    colourhistory,
    math,
    script_imports, script_plugins,
-   openssl,
-   aca, fphttpclient, dtm_editor, colorscheme
+   simba.environment, simba.httpclient,
+   aca, dtm_editor, colorscheme
    {$IFDEF USE_FORMDESIGNER}, frmdesigner{$ENDIF}
 
    {$IFDEF LINUX_HOTKEYS}, keybinder{$ENDIF};
@@ -586,7 +579,7 @@ begin
   Trace := DumpExceptionCallStack(E);
   Trace += LineEnding + 'Simba Version: ' + IntToStr(SimbaVersion) + LineEnding;
 
-  LogName := DataPath + 'ErrorLog_' + FormatDateTime('dd-mm-yy_hh-nn-ss', Now) + '.txt';
+  LogName := SimbaEnvironment.DataPath + 'ErrorLog_' + FormatDateTime('dd-mm-yy_hh-nn-ss', Now) + '.txt';
   mDebugLn(Format('Going to try to save the error information to "%s".', [LogName]));
 
   try
@@ -746,7 +739,7 @@ end;
 
 function TSimbaForm.OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
 begin
-  Result := FindFile(Filename, [AppPath, SimbaSettings.Includes.Path.Value]);
+  Result := FindFile(Filename, [Application.Location, SimbaEnvironment.IncludePath]);
 end;
 
 function TSimbaForm.OnCCLoadLibrary(Sender: TObject; var Argument: string; out Parser: TCodeInsight): Boolean;
@@ -787,41 +780,6 @@ begin
   end;
 
   Exit(False);
-end;
-
-procedure TSimbaForm.SetIncludesPath(obj: TSetting);
-begin
-  {$IFDEF SIMBA_VERBOSE}
-  mDebugLn('--- SetIncludesPath with value: ' + TPathSetting(obj).Value);
-  {$ENDIF}
-end;
-
-procedure TSimbaForm.SetPluginsPath(obj: TSetting);
-begin
-  {$IFDEF SIMBA_VERBOSE}
-  mDebugLn('--- SetPluginsPath with value: ' + TPathSetting(obj).Value);
-  {$ENDIF}
-end;
-
-procedure TSimbaForm.SetFontsPath(obj: TSetting);
-begin
-  {$IFDEF SIMBA_VERBOSE}
-  mDebugLn('--- SetFontsPath with value: ' + TPathSetting(obj).Value);
-  {$ENDIF}
-end;
-
-procedure TSimbaForm.SetScriptsPath(obj: TSetting);
-begin
-  {$IFDEF SIMBA_VERBOSE}
-  mDebugLn('--- SetScriptPath with value: ' + TPathSetting(obj).Value);
-  {$ENDIF}
-end;
-
-procedure TSimbaForm.SetDefaultScriptPath(obj: TSetting);
-begin
-  {$IFDEF SIMBA_VERBOSE}
-  mDebugLn('--- SetDefaultScriptPath with value: ' + TPathSetting(obj).Value);
-  {$ENDIF}
 end;
 
 procedure TSimbaForm.SetSourceEditorFont(obj: TSetting);
@@ -1516,17 +1474,16 @@ begin
 
     Thread.ScriptFile := ExtractFileName(CurrScript.ScriptFile);
     Thread.ScriptPath := ExtractFilePath(CurrScript.ScriptFile);
-    Thread.FontPath := SimbaSettings.Fonts.Path.Value;
-    Thread.PluginPath := SimbaSettings.Plugins.Path.Value;
-    Thread.IncludePath := SimbaSettings.Includes.Path.Value;
-    Thread.AppPath := AppPath;
-    Thread.DocPath := DocPath;
+    Thread.FontPath := SimbaEnvironment.FontPath;
+    Thread.PluginPath := SimbaEnvironment.PluginPath;
+    Thread.IncludePath := SimbaEnvironment.IncludePath;
+    Thread.AppPath := SimbaEnvironment.SimbaPath;
 
     if Selector.HasPicked then
       Thread.Client.IOManager.SetTarget(Selector.LastPick);
 
     Thread.SetSettings(SimbaSettings.MMLSettings);
-    Thread.SetFonts(SimbaSettings.Fonts.Path.Value); // Create font constants
+    Thread.SetFonts(SimbaEnvironment.FontPath); // Create font constants
 
     CurrScript.ScriptErrorLine := -1;
   except
@@ -2185,26 +2142,29 @@ begin
 end;
 
 procedure TSimbaForm.FileBrowser_Popup_OpenExternally(Sender: TObject);
+
   procedure OpenDirectory(Path: String);
   var
-    Exe, Output: String;
+    Executable: String = '';
+    Output: String;
     ExitStatus: Int32;
   begin
     {$IFDEF WINDOWS}
-    Exe := 'explorer.exe';
+    Executable := 'explorer.exe';
     Path := '/root,"' + Path + '"';
     {$ENDIF}
     
     {$IFDEF LINUX}
-    Exe := 'xdg-open';
+    Executable := 'xdg-open';
     {$ENDIF}
     
-    if Exe = '' then
-      raise Exception.Create('OpenDirectory is unsupported on your Operating System.');
+    if Executable = '' then
+      raise Exception.Create('OpenDirectory is unsupported on your OS');
     
-    if RunCommandInDir('', Exe, [Path], Output, ExitStatus) <> 0 then
-        ShowMessage('Unable to open ' + Exe + ': ' + Output);
+    if RunCommandInDir('', Executable, [Path], Output, ExitStatus) <> 0 then
+      ShowMessage('Unable to open ' + Executable + ': ' + Output);
   end;
+
 var
   Path: String;
 begin
@@ -2362,59 +2322,16 @@ begin
   end;
 end;
 
-{$IFDEF WINDOWS}
-function SetDllDirectory(Directory: PChar): LongBool; stdcall; external 'kernel32.dll' name 'SetDllDirectoryA';
-{$ENDIF}
-
 procedure TSimbaForm.FormCreate(Sender: TObject);
-
-  function GetDocPath(): string;
-  begin
-    {$IFDEF NOTPORTABLE}
-      {$IFDEF WINDOWS}
-        Result := IncludeTrailingPathDelimiter(GetUserDir()) + 'My Documents' + DS + 'Simba' + DS;
-      {$ELSE}
-        Result := IncludeTrailingPathDelimiter(GetEnvironmentVariable('XDG_DATA_HOME'));
-        if (Result = '') then
-          Result := IncludeTrailingPathDelimiter(GetEnvironmentVariable('HOME')) + '.local' + DS + 'share' + DS;
-        Result := Result + 'Simba' + DS;
-      {$ENDIF}
-      if (not (DirectoryExists(Result))) then
-        if (not (CreateDir(Result))) then
-          Result := IncludeTrailingPathDelimiter(AppPath);
-    {$ELSE}
-      Result := IncludeTrailingPathDelimiter(AppPath);
-    {$ENDIF}
-  end;
 
   procedure LoadSettings;
   begin
     if Application.HasOption('s', 'settings') then
       SimbaSettingsFile := Application.GetOptionValue('s', 'settings')
     else
-      SimbaSettingsFile := DataPath + 'settings.xml';
+      SimbaSettingsFile := SimbaEnvironment.DataPath + 'settings.xml';
 
     CreateSimbaSettings(SimbaSettingsFile);
-
-    // check setting directories vaild, else default.
-    if (not DirectoryExists(SimbaSettings.Plugins.Path.Value)) then
-      SimbaSettings.Plugins.Path.OnDefault(SimbaSettings.Plugins.Path);
-    if (not DirectoryExists(SimbaSettings.Includes.Path.Value)) then
-      SimbaSettings.Includes.Path.OnDefault(SimbaSettings.Includes.Path);
-    if (not DirectoryExists(SimbaSettings.Plugins.Path.Value)) then
-      SimbaSettings.Scripts.Path.OnDefault(SimbaSettings.Scripts.Path);
-    if (not DirectoryExists(SimbaSettings.Fonts.Path.Value)) then
-      SimbaSettings.Fonts.Path.OnDefault(SimbaSettings.Fonts.Path);
-
-    // create directories if needed
-    if (not DirectoryExists(SimbaSettings.Includes.Path.Value) )then
-      CreateDir(SimbaSettings.Includes.Path.Value);
-    if (not DirectoryExists(SimbaSettings.Fonts.Path.Value)) then
-      CreateDir(SimbaSettings.Fonts.Path.Value);
-    if (not DirectoryExists(SimbaSettings.Plugins.Path.Value)) then
-      CreateDir(SimbaSettings.Plugins.Path.Value);
-    if (not DirectoryExists(SimbaSettings.Scripts.Path.Value)) then
-      CreateDir(SimbaSettings.Scripts.Path.Value);
 
     LoadFormSettings();
     RegisterSettingsOnChanges();
@@ -2453,61 +2370,12 @@ begin
     if (not DirectoryIsWritable(Application.Location)) then
       ShowMessage('No permission to write to Simba''s directory. Run as ' + {$IFDEF WINDOWS} 'administrator' {$ELSE} 'sudo' {$ENDIF} + ' if this causes issues.');
 
-    // Paths
-    AppPath := IncludeTrailingPathDelimiter(Application.Location);
-    DocPath := GetDocPath();
-    DataPath := IncludeTrailingPathDelimiter(AppPath + 'AppData');
-    if not DirectoryExists(DataPath) then
-      CreateDir(DataPath);
-
     RecentFiles := TStringList.Create();
 
     LoadSettings();
     LoadUtilites();
 
     Plugins.Paths.Add(SimbaSettings.Plugins.Path.Value);
-
-    {$IFDEF WINDOWS}
-      {$IFDEF CPU32}
-        {$i openssl32.lrs}
-      {$ELSE}
-        {$i openssl64.lrs}
-      {$ENDIF}
-
-      {$IFDEF CPU32}
-      if not DirectoryExists(IncludeTrailingPathDelimiter(DataPath + 'libs32')) then
-        CreateDir(IncludeTrailingPathDelimiter(DataPath + 'libs32'));
-
-      SetDLLDirectory(PChar(IncludeTrailingPathDelimiter(DataPath + 'libs32')));
-
-      DLLSSLName := IncludeTrailingPathDelimiter(DataPath + 'libs32') + 'ssleay32.dll';
-      DLLUtilName := IncludeTrailingPathDelimiter(DataPath + 'libs32') + 'libeay32.dll';
-      {$ELSE}
-      if not DirectoryExists(IncludeTrailingPathDelimiter(DataPath + 'libs64')) then
-        CreateDir(IncludeTrailingPathDelimiter(DataPath + 'libs64'));
-
-      SetDLLDirectory(PChar(IncludeTrailingPathDelimiter(DataPath + 'libs64')));
-
-      DLLSSLName := IncludeTrailingPathDelimiter(DataPath + 'libs64') + 'ssleay32.dll';
-      DLLUtilName := IncludeTrailingPathDelimiter(DataPath + 'libs64') + 'libeay32.dll';
-      {$ENDIF}
-
-      if (not FileExists(DLLSSLName)) then
-        with TLazarusResourceStream.Create('ssleay32', nil) do
-        try
-          SaveToFile(DLLSSLName);
-        finally
-          Free();
-        end;
-
-      if (not FileExists(DLLUtilName)) then
-        with TLazarusResourceStream.Create('libeay32', nil) do
-        try
-          SaveToFile(DLLUtilName);
-        finally
-          Free();
-        end;
-    {$ENDIF}
 
     SimbaColors := TSimbaColors.Create(SimbaForm);
     PackageForm := TPackageForm.Create(Self, TB_ShowPackages);
@@ -2791,10 +2659,17 @@ end;
 procedure TSimbaForm.GetSimbaNews;
 begin
   try
-    News := TFPHTTPClient.SimpleGet(SimbaSettings.News.URL.Value);
+    with TSimbaHTTPClient.Create() do
+    try
+      News := Get(SimbaSettings.News.URL.Value);
+      if ResponseCode <> HTTP_OK then
+        WriteLn('[NEWS]: Invaild response code ', ResponseCode);
+    finally
+      Free();
+    end;
   except
     on e: Exception do
-      mDebugLn('Error getting Simba news: ' + e.Message);
+      WriteLn('[NEWS]: Exception "', e.Message, '" encountered');
   end;
 end;
 
@@ -3035,13 +2910,6 @@ end;
 procedure TSimbaForm.RegisterSettingsOnChanges;
 begin
   SimbaSettings.Tray.AlwaysVisible.onChange:= @SetTrayVisiblity;
-
-  SimbaSettings.Plugins.Path.onChange:= @SetPluginsPath;
-  SimbaSettings.Fonts.Path.onChange:= @SetFontsPath;
-  SimbaSettings.Includes.Path.onChange:= @SetIncludesPath;
-  SimbaSettings.Scripts.Path.onChange:= @SetScriptsPath;
-
-  SimbaSettings.SourceEditor.DefScriptPath.onChange := @SetDefaultScriptPath;
   SimbaSettings.SourceEditor.Font.onChange := @SetSourceEditorFont;
 end;
 
@@ -3370,6 +3238,6 @@ end;
 initialization
   FormatSettings.DecimalSeparator := '.';
 
-{$R *.lfm}
+  {$R *.lfm}
 
 end.
