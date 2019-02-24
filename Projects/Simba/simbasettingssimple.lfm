@@ -14,7 +14,7 @@ object SettingsSimpleForm: TSettingsSimpleForm
   OnCreate = FormCreate
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '1.8.2.0'
+  LCLVersion = '1.8.4.0'
   object ButtonOK: TButton
     Left = 280
     Height = 25
@@ -92,16 +92,16 @@ object SettingsSimpleForm: TSettingsSimpleForm
   end
   object Tabs: TNotebook
     Left = 0
-    Height = 428
+    Height = 380
     Top = 72
     Width = 457
-    PageIndex = 1
-    Align = alBottom
+    PageIndex = 0
+    Align = alTop
     TabOrder = 3
     object TabGeneral: TPage
       object PgControlGeneral: TPageControl
         Left = 0
-        Height = 428
+        Height = 380
         Top = 0
         Width = 457
         ActivePage = tsUpdater
@@ -112,7 +112,7 @@ object SettingsSimpleForm: TSettingsSimpleForm
           Caption = 'Updater'
           ChildSizing.TopBottomSpacing = 10
           ChildSizing.VerticalSpacing = 10
-          ClientHeight = 400
+          ClientHeight = 352
           ClientWidth = 449
           object UpdaterGroup: TGroupBox
             AnchorSideLeft.Control = tsUpdater
