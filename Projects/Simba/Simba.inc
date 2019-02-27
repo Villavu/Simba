@@ -35,4 +35,5 @@
                         // command line flags.
 
 {$DEFINE USE_FORMDESIGNER}
+{$DEFINE SIMBA_OPENSSL} // Will simba try to load it's own OpenSSL libraries?
 
