@@ -1,6 +1,7 @@
 unit simba.httpclient;
 
 {$mode objfpc}{$H+}
+{$i Simba.inc}
 
 interface
 
@@ -147,9 +148,9 @@ type
 implementation
 
 uses
-  lresources,
   mufasabase, simbaunit,
-  simba.zip, simba.tar, simba.tar_gz, simba.tar_bz2, simba.openssl, simba.opensslsockets, simba.environment;
+  simba.zip, simba.tar, simba.tar_gz, simba.tar_bz2,
+  simba.environment, simba.openssloader;
 
 type
   TSimbaHTTPClientBase = class(TFPHTTPClient) // default will raise a exception on a response code that isn't HTTP_OK or HTTP_FOUND.
@@ -350,7 +351,7 @@ function TSimbaHTTPClient.Post(URL: String; Data: String): String;
 begin
   FURL := URL;
 
-  FHTTPClient.FormPost(FURL, Data);
+  Result := FHTTPClient.FormPost(FURL, Data);
 end;
 
 procedure TSimbaHTTPClient.Post(URL: String; Data: String; Response: TMemoryStream);
@@ -377,76 +378,14 @@ begin
 end;
 
 initialization
-  {$IFDEF WINDOWS}
-
-  {$IFDEF CPU32}
-    {$i openssl32_dll.lrs}
-  {$ELSE}
-    {$i openssl64_dll.lrs}
-  {$ENDIF}
-
-  if (not FileExists(SimbaEnvironment.LibPath + 'ssleay32.dll')) then
-    with TLazarusResourceStream.Create('ssleay32', nil) do
-    try
-      SaveToFile(SimbaEnvironment.LibPath + 'ssleay32.dll');
-    finally
-      Free();
-    end;
-
-  if (not FileExists(SimbaEnvironment.LibPath + 'libeay32.dll')) then
-    with TLazarusResourceStream.Create('libeay32', nil) do
-    try
-      SaveToFile(SimbaEnvironment.LibPath + 'libeay32.dll');
-    finally
-      Free();
-    end;
-
-  DLLUtilName := SimbaEnvironment.LibPath + 'libeay32.dll';
-  DLLSSLName := SimbaEnvironment.LibPath + 'ssleay32.dll';
-  {$ENDIF}
-
-  {$IFDEF LINUX}
-
-  {$i openssl64_so.lrs}
-
-  if (not FileExists(SimbaEnvironment.LibPath + 'libssl.so')) then
-    with TLazarusResourceStream.Create('libssl', nil) do
-    try
-      SaveToFile(SimbaEnvironment.LibPath + 'libssl.so');
-    finally
-      Free();
-    end;
-
-  if (not FileExists(SimbaEnvironment.LibPath + 'libcrypto.so')) then
-    with TLazarusResourceStream.Create('libcrypto', nil) do
-    try
-      SaveToFile(SimbaEnvironment.LibPath + 'libcrypto.so');
-    finally
-      Free();
-    end;
-
-  DLLSSLName := SimbaEnvironment.LibPath + 'libssl';
-  DLLUtilName := SimbaEnvironment.LibPath + 'libcrypto';
-  {$ENDIF}
-
-  WriteLN('[WEB]: Initializing OpenSSL');
-
+  {$IFDEF SIMBA_OPENSSL}
+  with TSimbaOpenSSLLoader.Create() do
   try
-    InitSSLInterface();
-  except
+    if not Load() then
+      WriteLn('[WEB]: OpenSSL initialization failed. Falling back to system libaries');
+  finally
+    Free();
   end;
-
-  if (not IsSSLLoaded()) then
-    WriteLn('[WEB]: OpenSSL initialization failed. Will fallback to system libaries');
-
-  {$IFDEF WINDOWS}
-  DLLSSLName := 'ssleay32.dll';
-  DLLUtilName := 'libeay32.dll';
-  {$ENDIF}
-
-  {$IFDEF LINUX}
-  DLLSSLName := 'libssl';
-  DLLUtilName := 'libcrypto';
   {$ENDIF}
 
 end.

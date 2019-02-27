@@ -12,6 +12,11 @@
       <Title Value="Simba"/>
       <UseXPManifest Value="True"/>
       <Icon Value="0"/>
+      <Resources Count="3">
+        <Resource_0 FileName="..\..\Units\Misc\Web\openssl\linux64.zip" Type="RCDATA" ResourceName="OPENSSL_LINUX64"/>
+        <Resource_1 FileName="..\..\Units\Misc\Web\openssl\win32.zip" Type="RCDATA" ResourceName="OPENSSL_WIN32"/>
+        <Resource_2 FileName="..\..\Units\Misc\Web\openssl\win64.zip" Type="RCDATA" ResourceName="OPENSSL_WIN64"/>
+      </Resources>
     </General>
     <LazDoc Paths="../../LazDoc"/>
     <VersionInfo>
@@ -89,7 +94,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="93">
+    <Units Count="94">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -502,6 +507,10 @@
         <Filename Value="../../Units/Misc/Archive/simba.tar_bz2.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit92>
+      <Unit93>
+        <Filename Value="../../Units/Misc/Web/simba.openssloader.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit93>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
