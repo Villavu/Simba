@@ -382,7 +382,7 @@ function TMPlugins.FindFile(Sender, Argument: String): String;
 
   function Find(Path: String; var Plugin: String): Boolean;
   begin
-    Path := IncludeTrailingPathDelimiter(Path) + Argument;
+    Path := SetDirSeparators(IncludeTrailingPathDelimiter(Path) + Argument);
 
     if FileExists(Path) then
       Plugin := Path
