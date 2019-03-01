@@ -97,19 +97,6 @@ type
       property Value: Boolean read GetValue write SetValue;
     end;
 
-    TFileSetting = class(TStringSetting)
-    private
-      function GetValue: string; override;
-      procedure SetValue(val: string); override;
-    public
-      property Value: string read GetValue write SetValue;
-    end;
-
-    TPathSetting = class(TFileSetting)
-    private
-      procedure SetValue(val: string); override;
-    end;
-
     TFontSetting = class(TSetting)
     private
       FPath: string;
@@ -137,11 +124,16 @@ type
       property Value: TFont read getValue write setValue;
     end;
 
+    TEnvironmentSetting = class(TStringSetting)
+    public
+      procedure Load(MMLSettings: TMMLSettings); override;
+    end;
+
     TSection = class(TSetting)
     public
       Nodes: TSettingsArray;
 
-      constructor Create(); virtual;
+      constructor Create; virtual;
       destructor Destroy; override;
 
       procedure Save(MMLSettings: TMMLSettings); override;
@@ -150,19 +142,27 @@ type
     end;
 
     TIncludesSection = class(TSection)
-      Path: TPathSetting;
+      Path: TEnvironmentSetting;
+
+      procedure UpdateSimbaEnvironment(Setting: TSetting);
     end;
 
     TFontsSection = class(TSection)
-      Path: TPathSetting;
+      Path: TEnvironmentSetting;
+
+      procedure UpdateSimbaEnvironment(Setting: TSetting);
     end;
 
-    TExtensionsSection = class(TSection)
-      Path: TPathSetting;
-      FileExtension: TStringSetting;
-    end;                                                            
     TScriptsSection = class(TSection)
-      Path: TPathSetting;
+      Path: TEnvironmentSetting;
+
+      procedure UpdateSimbaEnvironment(Setting: TSetting);
+    end;
+
+    TPluginsSection = class(TSection)
+      Path: TEnvironmentSetting;
+
+      procedure UpdateSimbaEnvironment(Setting: TSetting);
     end;
 
     TFunctionListSection = class(TSection)
@@ -179,19 +179,15 @@ type
     end;
 
     TSourceEditorSection = class(TSection)
-      DefScriptPath: TFileSetting;
+      DefScriptPath: TStringSetting;
       LazColors: TBooleanSetting;
       CaretPastEOL: TBooleanSetting;
       Font: TFontSetting;
-      HighlighterPath: TFileSetting;                            
+      HighlighterPath: TStringSetting;
     end;
 
     TNewsSection = class(TSection)
       URL: TStringSetting;
-    end;
-
-    TPluginsSection = class(TSection)
-      Path: TPathSetting;
     end;
 
     TTabsSection = class(TSection)
@@ -233,7 +229,7 @@ type
 
     TScriptManagerSection = class(TSection)
       ServerURL: TStringSetting;
-      StoragePath: TFileSetting;
+      StoragePath: TStringSetting;
       FileName: TStringSetting;
       FirstRun: TBooleanSetting;
     end;
@@ -314,7 +310,7 @@ uses
    mufasabase,
    mufasatypes,
    fileutil,
-   simbaunit; // mDebugLn
+   simba.environment;
 
 const
 {$I settings_const.inc}
@@ -394,6 +390,38 @@ begin
   SimbaSettings.Free;
 
   SimbaSettingsTreeView.Free;
+end;
+
+procedure TEnvironmentSetting.Load(MMLSettings: TMMLSettings);
+begin
+  if (FValue = '') then
+  begin
+    // if environment directory no longer exists reset to default.
+    if MMLSettings.KeyExists(FPath) and (not DirectoryExists(MMLSettings.GetKeyValue(FPath))) then
+      MMLSettings.DeleteKey(FPath);
+  end;
+
+  inherited Load(MMLSettings);
+end;
+
+procedure TPluginsSection.UpdateSimbaEnvironment(Setting: TSetting);
+begin
+  SimbaEnvironment.PluginPath := Path.Value;
+end;
+
+procedure TScriptsSection.UpdateSimbaEnvironment(Setting: TSetting);
+begin
+  SimbaEnvironment.ScriptPath := Path.Value;
+end;
+
+procedure TFontsSection.UpdateSimbaEnvironment(Setting: TSetting);
+begin
+  SimbaEnvironment.FontPath := Path.Value;
+end;
+
+procedure TIncludesSection.UpdateSimbaEnvironment(Setting: TSetting);
+begin
+  SimbaEnvironment.IncludePath := Path.Value
 end;
 
 { Values }
@@ -604,54 +632,6 @@ begin
   end;
 end;
 
-function IsAbsolute(const filename: string): boolean;
-begin
-  {$IFDEF WINDOWS}
-    Result := False;
-    if (Length(filename) > 2) then
-      Result := (filename[2] = ':');
-  {$ELSE}
-    Result := (filename[1] = DS);
-  {$ENDIF}
-end;
-
-function TFileSetting.GetValue: string;
-begin
-  if (FValueSet) then
-  begin
-    Result := FValue;
-    if (not (IsAbsolute(Result))) then
-      Result := AppPath + Result;
-  end else
-    raise Exception.Create('Value is not set yet.');
-end;
-
-procedure TFileSetting.SetValue(val: string);
-begin
-  {$IFNDEF NOTPORTABLE}
-  if (IsAbsolute(val)) then
-    val := ExtractRelativepath(AppPath, val);
-  {$ENDIF}
-
-  FValue := val;
-  FValueSet := True;
-  if Assigned(OnChange) then
-    OnChange(Self);
-end;
-
-procedure TPathSetting.SetValue(val: string);
-begin
-  {$IFNDEF NOTPORTABLE}
-  if (IsAbsolute(val)) then
-    val := ExtractRelativepath(AppPath, val);
-  {$ENDIF}
-
-  FValue := IncludeTrailingPathDelimiter(val);
-  FValueSet := True;
-  if Assigned(OnChange) then
-    OnChange(Self);
-end;
-
 function TFontSetting.getValue(): TFont;
   function styleFromStr(Style: string): TFontStyles;
   var
@@ -791,34 +771,34 @@ begin
     nodes[i].Load(MMLSettings)
 end;
 
-procedure GetIncludePath(obj: TSetting);
+procedure GetDefaultIncludePath(obj: TSetting);
 begin
-  TPathSetting(obj).Value := IncludeTrailingPathDelimiter(AppPath + 'Includes');
+  TStringSetting(Obj).Value := SimbaEnvironment.IncludePath;
 end;
 
-procedure GetPluginPath(obj: TSetting);
+procedure GetDefaultPluginPath(obj: TSetting);
 begin
-  TPathSetting(obj).Value := IncludeTrailingPathDelimiter(AppPath + 'Plugins');
+  TStringSetting(Obj).Value := SimbaEnvironment.PluginPath;
 end;
 
-procedure GetScriptPath(obj: TSetting);
+procedure GetDefaultScriptPath(obj: TSetting);
 begin
-  TPathSetting(obj).Value := IncludeTrailingPathDelimiter(AppPath + 'Scripts');
+  TStringSetting(Obj).Value := SimbaEnvironment.ScriptPath;
 end;
 
-procedure GetFontPath(obj: TSetting);
+procedure GetDefaultFontPath(obj: TSetting);
 begin
-  TPathSetting(obj).Value := IncludeTrailingPathDelimiter(AppPath + 'Fonts');
+  TStringSetting(Obj).Value := SimbaEnvironment.FontPath;
 end;
 
-procedure GetDefScriptPath(obj: TSetting);
+procedure GetDefaultScriptFile(obj: TSetting);
 begin
-  TFileSetting(obj).Value := DataPath + 'default.simba';
+  TStringSetting(Obj).Value := SimbaEnvironment.DataPath + 'default.simba';
 end;
 
-procedure GetHighlighterFile(obj: TSetting);
+procedure GetDefaultHighlighterFile(obj: TSetting);
 begin
-  TFileSetting(obj).Value := DataPath + 'highlighter.ini';
+  TStringSetting(Obj).Value := SimbaEnvironment.DataPath + 'highlighter.ini';
 end;
 
 procedure GetUpdaterGetCheckForUpdates(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
@@ -847,7 +827,7 @@ procedure GetCodeCompletionShowAutomatically(obj: TSetting); begin TBooleanSetti
 procedure GetShowBalloonHints(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
 
 procedure GetScriptManagerURL(obj: TSetting); begin TStringSetting(obj).Value := 'http://127.0.0.1/'; end;
-procedure GetScriptManagerPath(obj: TSetting); begin TFileSetting(obj).Value := SimbaSettings.Scripts.Path.Value+'ScriptStorage.xml'; end;
+procedure GetScriptManagerPath(obj: TSetting); begin TStringSetting(obj).Value := SimbaSettings.Scripts.Path.Value+'ScriptStorage.xml'; end;
 procedure GetScriptManagerFile(obj: TSetting); begin TStringSetting(obj).Value := 'ScriptManager.xml'; end;
 procedure GetScriptManagerFirstRun(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
 
@@ -876,23 +856,31 @@ procedure GetSaveScriptOnCompile(obj: TSetting); begin TBooleanSetting(obj).Valu
 
 constructor TSimbaSettings.Create;
 begin
-  inherited;
+  inherited Create();
 
   ShowBalloonHints := AddChild(TShowBalloonHints.Create()) as TShowBalloonHints;
   ShowBalloonHints.Show := ShowBalloonHints.AddChild(TBooleanSetting.Create(ssShowBalloonHints)) as TBooleanSetting;
-  ShowBalloonHints.Show.onDefault := @GetShowBalloonHints;
+  ShowBalloonHints.Show.OnDefault := @GetShowBalloonHints;
 
   Includes := AddChild(TIncludesSection.Create()) as TIncludesSection;
-  Includes.Path := Includes.AddChild(TPathSetting.Create(ssIncludesPath)) as TPathSetting;
-  Includes.Path.onDefault := @GetIncludePath;
+  Includes.Path := Includes.AddChild(TEnvironmentSetting.Create(ssIncludesPath)) as TEnvironmentSetting;
+  Includes.Path.OnDefault := @GetDefaultIncludePath;
+  Includes.Path.OnChange := @Includes.UpdateSimbaEnvironment;
 
   Fonts := AddChild(TFontsSection.Create()) as TFontsSection;
-  Fonts.Path := Fonts.AddChild(TPathSetting.Create(ssFontsPath)) as TPathSetting;
-  Fonts.Path.onDefault := @GetFontPath;
+  Fonts.Path := Fonts.AddChild(TEnvironmentSetting.Create(ssFontsPath)) as TEnvironmentSetting;
+  Fonts.Path.OnDefault := @GetDefaultFontPath;
+  Fonts.Path.OnChange := @Fonts.UpdateSimbaEnvironment;
 
   Scripts := AddChild(TScriptsSection.Create()) as TScriptsSection;
-  Scripts.Path := Scripts.AddChild(TPathSetting.Create(ssScriptsPath)) as TPathSetting;
-  Scripts.Path.onDefault := @GetScriptPath;
+  Scripts.Path := Scripts.AddChild(TEnvironmentSetting.Create(ssScriptsPath)) as TEnvironmentSetting;
+  Scripts.Path.OnDefault := @GetDefaultScriptPath;
+  Scripts.Path.OnChange := @Scripts.UpdateSimbaEnvironment;
+
+  Plugins := AddChild(TPluginsSection.Create()) as TPluginsSection;
+  Plugins.Path := Plugins.AddChild(TEnvironmentSetting.Create(ssPluginsPath)) as TEnvironmentSetting;
+  Plugins.Path.OnDefault := @GetDefaultPluginPath;
+  Plugins.Path.OnChange := @Plugins.UpdateSimbaEnvironment;
 
   CodeInsight := AddChild(TCodeInsightSection.Create()) as TCodeInsightSection;
   with CodeInsight do
@@ -910,23 +898,19 @@ begin
   Tray.AlwaysVisible.onDefault := @GetTrayAlwaysVisible;
 
   SourceEditor := AddChild(TSourceEditorSection.Create()) as TSourceEditorSection;
-  SourceEditor.DefScriptPath := SourceEditor.AddChild(TFileSetting.Create(ssSourceEditorDefScriptPath)) as TFileSetting;
-  SourceEditor.DefScriptPath.onDefault := @GetDefScriptPath;
+  SourceEditor.DefScriptPath := SourceEditor.AddChild(TStringSetting.Create(ssSourceEditorDefScriptPath)) as TStringSetting;
+  SourceEditor.DefScriptPath.onDefault := @GetDefaultScriptFile;
   SourceEditor.LazColors := SourceEditor.AddChild(TBooleanSetting.Create(ssSourceEditorLazColors)) as TBooleanSetting;
   SourceEditor.LazColors.onDefault := @GetSourceEditorLazColors;
   SourceEditor.CaretPastEOL := SourceEditor.AddChild(TBooleanSetting.Create(ssSourceEditorCaretPastEOL)) as TBooleanSetting;
   SourceEditor.CaretPastEOL.onDefault := @GetSourceEditorCaretPastEOL;
   SourceEditor.Font := SourceEditor.AddChild(TFontSetting.Create(ssSourceEditorFont)) as TFontSetting;
-  SourceEditor.HighlighterPath := SourceEditor.AddChild(TFileSetting.Create(ssSourceEditorHighlighterPath)) as TFileSetting;
-  SourceEditor.HighlighterPath.onDefault := @GetHighlighterFile;                                                             
+  SourceEditor.HighlighterPath := SourceEditor.AddChild(TStringSetting.Create(ssSourceEditorHighlighterPath)) as TStringSetting;
+  SourceEditor.HighlighterPath.onDefault := @GetDefaultHighlighterFile;                                                             
 
   News := AddChild(TNewsSection.Create()) as TNewsSection;
   News.URL := News.AddChild(TStringSetting.Create(ssNewsLink)) as TStringSetting;
   News.URL.onDefault := @GetSimbaNewsURL;
-
-  Plugins := AddChild(TPluginsSection.Create()) as TPluginsSection;
-  Plugins.Path := Plugins.AddChild(TPathSetting.Create(ssPluginsPath)) as TPathSetting;
-  Plugins.Path.onDefault := @GetPluginPath;
 
   Tab := AddChild(TTabsSection.Create()) as TTabsSection;
   Tab.OpenNextOnClose := Tab.AddChild(TBooleanSetting.Create(ssTabsOpenNextOnClose)) as TBooleanSetting;
@@ -993,7 +977,7 @@ begin
   ScriptManager := AddChild(TScriptManagerSection.Create()) as TScriptManagerSection;
   ScriptManager.ServerURL := ScriptManager.AddChild(TStringSetting.Create(ssSMURL)) as TStringSetting;
   ScriptManager.ServerURL.onDefault := @GetScriptManagerURL;
-  ScriptManager.StoragePath := ScriptManager.AddChild(TFileSetting.Create(ssSMPath)) as TFileSetting;
+  ScriptManager.StoragePath := ScriptManager.AddChild(TStringSetting.Create(ssSMPath)) as TStringSetting;
   ScriptManager.StoragePath.onDefault := @GetScriptManagerPath;
   ScriptManager.FileName := ScriptManager.AddChild(TStringSetting.Create(ssSMFile)) as TStringSetting;
   ScriptManager.FileName.onDefault := @GetScriptManagerFile;
