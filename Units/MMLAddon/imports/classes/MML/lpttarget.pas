@@ -39,6 +39,12 @@ begin
   PColor(Result)^ := PTarget(Params^[0])^.GetColor(Pinteger(Params^[1])^, Pinteger(Params^[2])^);
 end;
 
+//function CopyData(X, Y, Width, Height: Integer): PRGB32; virtual;
+procedure TTarget_CopyData(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPRGB32(Result)^ := PTarget(Params^[0])^.CopyData(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+end;
+
 //function ReturnData(xs, ys, width, height: Integer): TRetData; virtual;
 procedure TTarget_ReturnData(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -182,6 +188,7 @@ begin
     addGlobalFunc('procedure TTarget.GetTargetDimensions(out w, h: integer); constref;', @TTarget_GetTargetDimensions);
     addGlobalFunc('procedure TTarget.GetTargetPosition(out left, top: integer); constref;', @TTarget_GetTargetPosition);
     addGlobalFunc('function TTarget.GetColor(x,y : integer): TColor; constref;', @TTarget_GetColor);
+    addGlobalFunc('function TTarget.CopyData(X, Y, Width, Height: Integer): PRGB32; constref;', @TTarget_CopyData);
     addGlobalFunc('function TTarget.ReturnData(xs, ys, width, height: Integer): TRetData; constref;', @TTarget_ReturnData);
     addGlobalFunc('procedure TTarget.FreeReturnData(); constref;', @TTarget_FreeReturnData);
     addGlobalFunc('procedure TTarget.ActivateClient(); constref;', @TTarget_ActivateClient);
