@@ -45,6 +45,7 @@ interface
         procedure GetTargetDimensions(out w, h: integer); virtual;
         procedure GetTargetPosition(out left, top: integer); virtual;
         function GetColor(x,y : integer) : TColor; virtual;
+        function CopyData(X, Y, Width, Height: Integer): PRGB32; virtual;
         function ReturnData(xs, ys, width, height: Integer): TRetData; virtual;
         procedure FreeReturnData; virtual;
         procedure ActivateClient; virtual;
@@ -77,12 +78,13 @@ interface
     | Currently this uses the pointer as-is, but it might be needed to make a local copy... }
     TRawTarget = class(TTarget)
       public
-        constructor Create(rgb: prgb32; w,h: integer; CopyData : boolean = false);
+        constructor Create(rgb: prgb32; w,h: integer; ACopyData: boolean = False);
         destructor Destroy; override;
         
         procedure GetTargetDimensions(out w, h: integer); override;
         procedure GetTargetPosition(out left, top: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
+        function CopyData(X, Y, Width, Height: Integer): PRGB32; override;
 
         function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; override;
         procedure ImageResetClientArea; override;
@@ -103,6 +105,7 @@ interface
 
         procedure GetTargetDimensions(out w, h: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
+        function CopyData(X, Y, Width, Height: Integer): PRGB32; override;
 
         function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; override;
         procedure ImageResetClientArea; override;
@@ -122,6 +125,7 @@ interface
       public
         procedure GetTargetDimensions(out w, h: integer); override; abstract;
         procedure GetTargetPosition(out left, top: integer); override; abstract;
+        function CopyData(X, Y, Width, Height: Integer): PRGB32; override; abstract;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override; abstract;
 
         function TargetValid: boolean; override; abstract;
@@ -196,6 +200,7 @@ interface
         procedure GetTargetDimensions(out w, h: integer); override;
         procedure GetTargetPosition(out left, top: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
+        function CopyData(X, Y, Width, Height: Integer): PRGB32; override;
 
         procedure GetMousePosition(out x,y: integer); override;
         procedure MoveMouse(x,y: integer); override;
@@ -299,6 +304,7 @@ interface
         procedure BitmapDestroyed(Bitmap : TMufasaBitmap);
 
         function GetColor(x,y : integer) : TColor;
+        function CopyData(X, Y, Width, Height: Integer): PRGB32;
         function ReturnData(xs, ys, width, height: Integer): TRetData;
         procedure FreeReturnData;
 
@@ -587,8 +593,12 @@ begin
   result:= image.GetColor(x,y);
 end;
 
-function TIOManager_Abstract.ReturnData(xs, ys, width, height: Integer
-  ): TRetData;
+function TIOManager_Abstract.CopyData(X, Y, Width, Height: Integer): PRGB32;
+begin
+  Result := image.CopyData(X, Y, Width, Height);
+end;
+
+function TIOManager_Abstract.ReturnData(xs, ys, width, height: Integer): TRetData;
 begin
   result:= image.ReturnData(xs,ys,width,height);
 end;
@@ -799,6 +809,12 @@ begin
     Result := RGBToColor(Ptr[0].r,Ptr[0].g,Ptr[0].b);
   FreeReturnData;
 end;
+
+function TTarget.CopyData(X, Y, Width, Height: Integer): PRGB32;
+begin
+  raise Exception.Create('CopyData not availble for this target');
+end;
+
 function TTarget.ReturnData(xs, ys, width, height: Integer): TRetData;
 begin
   raise Exception.Create('ReturnData not available for this target');
@@ -839,7 +855,7 @@ procedure TTarget.MoveMouse(x,y: integer);
 begin
   raise Exception.Create('MoveMouse not available for this target');
 end;
-procedure TTarget.ScrollMouse(x,y : integer; lines : integer);
+procedure TTarget.ScrollMouse(x, y: integer; Lines: integer);
 begin
   raise Exception.Create('ScrollMouse is not available for this target');
 end;
@@ -1011,6 +1027,22 @@ begin
   end;
 end;
 
+function TEIOS_Target.CopyData(X, Y, Width, Height: Integer): PRGB32;
+begin
+  Result := GetMem(Width * Height * SizeOf(TRGB32));
+
+  if Pointer(client.UpdateImageBufferBounds) <> nil then
+    client.UpdateImageBufferBounds(target, X, Y, X + Width, Y + Height)
+  else if Pointer(client.UpdateImageBuffer) <> nil then
+    client.UpdateImageBuffer(target)
+  else begin
+    {no update command exported}
+  end;
+
+  for Y := 0 to Height - 1 do
+    Move(Buffer[Y * Self.Width + X], Result[Y * Width], Width * SizeOf(TRGB32));
+end;
+
 procedure TEIOS_Target.GetMousePosition(out x,y: integer);
 begin
   if Pointer(client.GetMousePosition) <> nil then
@@ -1124,13 +1156,13 @@ end;
 
 //***implementation*** TRawTarget
 
-constructor TRawTarget.Create(rgb: prgb32; w,h: integer; CopyData : boolean = false);
+constructor TRawTarget.Create(rgb: prgb32; w, h: integer; ACopyData: boolean);
 begin
   inherited Create;
   self.w:= w;
   self.h:= h;
-  self.freedata:= copydata;
-  if CopyData then
+  self.freedata:= ACopyData;
+  if ACopyData then
   begin
     GetMem(self.rgb,w*h*sizeof(TRGB32));
     Move(rgb[0],self.rgb[0],w*h*sizeof(TRGB32));
@@ -1183,6 +1215,14 @@ begin
   begin
     Inc(result.IncPtrWith, result.RowLen - (ax2 - ax1));
   end;
+end;
+
+function TRawTarget.CopyData(X, Y, Width, Height: Integer): PRGB32;
+begin
+  Result := GetMem(Width * Height * SizeOf(TRGB32));
+
+  for Y := 0 to Height - 1 do
+    Move(Self.RGB[Y * Self.W + X], Result[Y * Width], Width * SizeOf(TRGB32));
 end;
 
 function TRawTarget.ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
@@ -1240,6 +1280,14 @@ begin
   begin
     Inc(result.IncPtrWith, result.RowLen - (ax2 - ax1));
   end;
+end;
+
+function TBitmapTarget.CopyData(X, Y, Width, Height: Integer): PRGB32;
+begin
+  Result := GetMem(Width * Height * SizeOf(TRGB32));
+
+  for Y := 0 to Height - 1 do
+    Move(Bitmap.FData[Y * Bitmap.Width + X], Result[Y * Width], Width * SizeOf(TRGB32));
 end;
 
 function TBitmapTarget.ImageSetClientArea(x1, y1, x2, y2: integer): boolean;

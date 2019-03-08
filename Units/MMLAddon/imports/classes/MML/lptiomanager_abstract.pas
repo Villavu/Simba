@@ -77,6 +77,12 @@ begin
   PRetData(Result)^ := PIOManager_Abstract(Params^[0])^.ReturnData(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
 end;
 
+//function CopyData(X, Y, Width, Height: Integer): PRGB32;
+procedure TIOManager_Abstract_CopyData(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPRGB32(Result)^ := PIOManager_Abstract(Params^[0])^.CopyData(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+end;
+
 //procedure FreeReturnData;
 procedure TIOManager_Abstract_FreeReturnData(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -297,6 +303,7 @@ begin
     addGlobalFunc('function TIOManager_Abstract.TargetValid(): Boolean; constref;', @TIOManager_Abstract_TargetValid);
     addGlobalFunc('procedure TIOManager_Abstract.BitmapDestroyed(Bitmap : TMufasaBitmap); constref;', @TIOManager_Abstract_BitmapDestroyed);
     addGlobalFunc('function TIOManager_Abstract.GetColor(x,y : integer): TColor; constref;', @TIOManager_Abstract_GetColor);
+    addGlobalFunc('function TIOManager_Abstract.CopyData(X, Y, Width, Height: Integer): PRGB32; constref;', @TIOManager_Abstract_CopyData);
     addGlobalFunc('function TIOManager_Abstract.ReturnData(xs, ys, width, height: Integer): TRetData; constref;', @TIOManager_Abstract_ReturnData);
     addGlobalFunc('procedure TIOManager_Abstract.FreeReturnData(); constref;', @TIOManager_Abstract_FreeReturnData);
     addGlobalFunc('procedure TIOManager_Abstract.GetDimensions(out W, H: Integer); constref;', @TIOManager_Abstract_GetDimensions);
