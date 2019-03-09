@@ -37,6 +37,7 @@ type
     destructor Destroy; override;
     procedure GetTargetDimensions(out w, h: integer); override;
     procedure GetTargetPosition(out left, top: integer); override;
+    function CopyData(X, Y, Width, Height: Integer): PRGB32; override;
     function ReturnData(xs, ys, width, height: Integer): TRetData; override;
     function GetColor(x,y : integer) : TColor; override;
 
@@ -47,22 +48,21 @@ type
     function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; override;
     procedure ImageResetClientArea; override;
 
-
     procedure ActivateClient; override;
     procedure GetMousePosition(out x,y: integer); override;
     procedure MoveMouse(x,y: integer); override;
     procedure ScrollMouse(x,y, lines : integer); override;
     procedure HoldMouse(x,y: integer; button: TClickType); override;
     procedure ReleaseMouse(x,y: integer; button: TClickType); override;
-    function  IsMouseButtonHeld( button : TClickType) : boolean;override;
+    function  IsMouseButtonHeld( button : TClickType) : boolean; override;
 
     procedure SendString(str: string; keywait, keymodwait: integer); override;
     procedure HoldKey(key: integer); override;
     procedure ReleaseKey(key: integer); override;
     function IsKeyHeld(key: integer): boolean; override;
-    function GetKeyCode(c : char) : integer;override;
+    function GetKeyCode(c : char) : integer; override;
 
-    function GetHandle(): PtrUInt; override;
+    function GetHandle: PtrUInt; override;
   private
     handle: Hwnd;
     dc: HDC;
@@ -170,7 +170,7 @@ begin
   self.icaset := false;
 end;
 
-constructor TWindow.Create(target: Hwnd);
+constructor TWindow.Create(target: HWND);
 begin
   inherited Create;
   self.buffer:= TBitmap.Create;
@@ -271,6 +271,29 @@ begin
   top := Rect.Top;
 end;
 
+function TWindow.CopyData(X, Y, Width, Height: Integer): PRGB32;
+var
+  WindowDC: HDC;
+  CompatibleDC: HDC;
+  Bitmap: HBitmap;
+begin
+  Result := GetMem(Width * Height * SizeOf(TRGB32));
+
+  WindowDC := Windows.GetWindowDC(Handle);
+  CompatibleDC := Windows.CreateCompatibleDC(WindowDC);
+  Bitmap := Windows.CreateCompatibleBitmap(WindowDC, Width, Height);
+
+  try
+    Windows.SelectObject(CompatibleDC, Bitmap);
+    Windows.BitBlt(CompatibleDC, 0,0, Width, Height, WindowDC, X, Y, SRCCOPY);
+    Windows.GetBitmapBits(Bitmap, Width * Height * SizeOf(TRGB32), Result);
+  finally
+    Windows.DeleteObject(Windows.SelectObject(CompatibleDC, Bitmap));
+    Windows.DeleteDC(CompatibleDC);
+    Windows.ReleaseDC(Handle, WindowDC);
+  end;
+end;
+
 function TWindow.GetColor(x,y : integer) : TColor;
 begin
   ImageApplyAreaOffset(x, y);
@@ -311,7 +334,7 @@ begin
   end;
 end;
 
-function TWindow.WindowRect(out Rect : TRect) : boolean;
+function TWindow.WindowRect(out Rect: TRect): Boolean;
 begin
   result := Windows.GetWindowRect(self.handle,rect);
 end;
@@ -471,7 +494,7 @@ begin
   end;
 end;
 
-procedure TWindow.HoldKey(key: Integer);
+procedure TWindow.HoldKey(key: integer);
 var
   Input: TInput;
 begin
@@ -483,7 +506,7 @@ begin
   SendInput(1, Input, SizeOf(Input));
 end;
 
-procedure TWindow.ReleaseKey(key: Integer);
+procedure TWindow.ReleaseKey(key: integer);
 var
   Input: TInput;
 begin
@@ -495,12 +518,12 @@ begin
   SendInput(1, Input, SizeOf(Input));
 end;
 
-function TWindow.IsKeyHeld(key: Integer): Boolean;
+function TWindow.IsKeyHeld(key: integer): boolean;
 begin
   Result := (GetAsyncKeyState(key) and $8000 <> 0); //only check if high-order bit is set
 end;
 
-function TWindow.GetKeyCode(c: Char): Integer;
+function TWindow.GetKeyCode(c: char): integer;
 begin
   result := VkKeyScan(c) and $FF;
 end;
