@@ -36,6 +36,7 @@ type
   public
     procedure GetTargetDimensions(out w, h: integer); override;
     procedure GetTargetPosition(out left, top: integer); override;
+    function CopyData(X, Y, Width, Height: Integer): PRGB32; override;
     function ReturnData(xs, ys, width, height: Integer): TRetData; override;
     procedure FreeReturnData; override;
 
@@ -209,6 +210,20 @@ end;
 procedure TWindow.ActivateClient;
 begin
   _XSetActiveWindow(Self.Window);
+end;
+
+function TWindow.CopyData(X, Y, Width, Height: Integer): PRGB32;
+begin
+  Result := GetMem(Width * Height * SizeOf(TRGB32));
+
+  Self.Buffer := _XGetWindowImage(Self.Window, X, Y, Width, Height);
+
+  if (Self.Buffer <> nil) then
+  try
+    Move(Self.Buffer^.Data^, Result^, Width * Height * SizeOf(TRGB32));
+  finally
+    XDestroyImage(Self.Buffer);
+  end;
 end;
 
 function TWindow.ReturnData(xs, ys, width, height: Integer): TRetData;
