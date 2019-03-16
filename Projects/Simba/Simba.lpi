@@ -290,6 +290,7 @@
         <Filename Value="simbasettingssimple.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SettingsSimpleForm"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit40>
       <Unit41>
