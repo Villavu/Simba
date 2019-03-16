@@ -5,25 +5,15 @@ unit scriptcommenter;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, SynEdit;
 
 type
 
   { TScriptCommenter }
 
   TScriptCommenter = class
-  private
-    FSelStart: integer;
-    FSelEnd: integer;
-    FLines: TStrings;
-    procedure Clear;
   public
-    constructor Create(const SStart, SSEnd: integer);
-    property SelStart: integer read FSelStart write FSelStart;
-    property SelEnd: integer read FSelEnd write FSelEnd;
-    property Lines: TStrings read FLines write FLines;
-
-    procedure Process;
+    class procedure Process(Syn: TSynEdit);static;
 
   end;
 
@@ -31,34 +21,37 @@ implementation
 
 { TScriptCommenter }
 
-procedure TScriptCommenter.Clear;
-begin
-  FSelStart := -1;
-  FSelEnd := -1;
-end;
-
-constructor TScriptCommenter.Create(const SStart, SSEnd: integer);
-begin
-  Clear;
-  SelStart := SStart;
-  SelEnd := SSEnd;
-end;
-
-procedure TScriptCommenter.Process;
+class procedure TScriptCommenter.Process(Syn: TSynEdit);
 var
-  i: integer;
-  Str: string;
+  i, SelStart, SelEnd, temp: integer;
 begin
-  for i := SelStart to SelEnd do
+  SelStart := Syn.BlockBegin.y;
+  SelEnd := Syn.BlockEnd.y;
+  if(SelStart > SelEnd) then
   begin
-    Str := Lines.Strings[i];
-    if ((Length(Str) > 3) and (Str[1] = '/') and (Str[2] = '/')) then
-    begin
-      Str := copy(Str, 3, length(Str) - 2);
-    end
-    else if (Length(Str) > 1) then
-      Str := '//' + Str;
-    Lines.Strings[i] := str;
+    temp := SelStart;
+    SelStart := SelEnd;
+    SelEnd := temp;
+  end;
+
+  Syn.BeginUpdate;
+  try
+    Syn.BeginUndoBlock;
+    try
+      if Syn.Lines[SelStart - 1].StartsWith('//') then
+      begin
+        for i := SelStart to SelEnd do
+            if Syn.Lines[i - 1].StartsWith('//') then
+              Syn.TextBetweenPoints[Point(0, i), Point(3, i)] := '';
+      end
+      else
+          for i := SelStart to SelEnd do
+              Syn.TextBetweenPoints[Point(0, i), Point(0, i)] := '//';
+    finally
+      Syn.EndUndoBlock;
+    end;
+  finally
+    Syn.EndUpdate;
   end;
 end;
 
