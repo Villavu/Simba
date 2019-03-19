@@ -3589,9 +3589,9 @@ object SimbaForm: TSimbaForm
       Caption = 'File Browser'
       OnExecute = ActionFileBrowserExecute
     end
-    object ActCodeComment: TAction
-      Caption = 'ActCodeComment'
-      OnExecute = ActCodeCommentExecute
+    object ActionCodeComment: TAction
+      Caption = 'Code Comment'
+      OnExecute = ActionCodeCommentExecute
     end
   end
   object ScriptPopup: TPopupMenu
