@@ -91,7 +91,7 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
-    ActCodeComment: TAction;
+    ActionCodeComment: TAction;
     ActionColors: TAction;                     
     ActionFileBrowser: TAction;
     ActionFindPrev: TAction;
@@ -285,7 +285,7 @@ type
     ToolButton8: TToolButton;
     MTrayIcon: TTrayIcon;
     FunctionListHint: THintWindow;
-    procedure ActCodeCommentExecute(Sender: TObject);
+    procedure ActionCodeCommentExecute(Sender: TObject);
     procedure ActionColorsExecute(Sender: TObject);
     procedure ActionClearDebugExecute(Sender: TObject);
     procedure ActionCloseTabExecute(Sender: TObject);
@@ -1773,7 +1773,7 @@ begin
   SimbaColors.Show();
 end;
 
-procedure TSimbaForm.ActCodeCommentExecute(Sender: TObject);
+procedure TSimbaForm.ActionCodeCommentExecute(Sender: TObject);
 var
   CurPos: TPoint;
 begin

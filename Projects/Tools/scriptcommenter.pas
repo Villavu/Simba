@@ -23,7 +23,9 @@ implementation
 
 class procedure TScriptCommenter.Process(Syn: TSynEdit);
 var
-  i, SelStart, SelEnd, temp: integer;
+  i, SelStart, SelEnd, ColStart, temp: integer;
+  StartStr: String;
+
 begin
   SelStart := Syn.BlockBegin.y;
   SelEnd := Syn.BlockEnd.y;
@@ -38,15 +40,18 @@ begin
   try
     Syn.BeginUndoBlock;
     try
-      if Syn.Lines[SelStart - 1].StartsWith('//') then
+      StartStr := Syn.Lines[SelStart - 1].TrimLeft();
+      ColStart := Syn.Lines[SelStart - 1].IndexOf(StartStr) + 1;
+
+      if StartStr.StartsWith('//') then
       begin
         for i := SelStart to SelEnd do
-            if Syn.Lines[i - 1].StartsWith('//') then
-              Syn.TextBetweenPoints[Point(0, i), Point(3, i)] := '';
+          if Syn.Lines[i - 1].TrimLeft().StartsWith('//') then
+            Syn.TextBetweenPoints[Point(ColStart, i), Point(ColStart + 2, i)] := '';
       end
       else
-          for i := SelStart to SelEnd do
-              Syn.TextBetweenPoints[Point(0, i), Point(0, i)] := '//';
+        for i := SelStart to SelEnd do
+          Syn.TextBetweenPoints[Point(ColStart, i), Point(ColStart, i)] := '//';
     finally
       Syn.EndUndoBlock;
     end;
