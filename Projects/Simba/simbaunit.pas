@@ -1777,14 +1777,12 @@ procedure TSimbaForm.ActionCodeCommentExecute(Sender: TObject);
 var
   CurPos: TPoint;
 begin
-  begin
-    try
-      CurPos := CurrScript.SynEdit.CaretXY;
-      TScriptCommenter.Process(CurrScript.SynEdit);
-      CurrScript.SynEdit.CaretXY := CurPos;
-    except
-      mDebugLn('Cannot comment the selected code!');
-    end;
+  try
+    CurPos := CurrScript.SynEdit.CaretXY;
+    TScriptCommenter.Process(CurrScript.SynEdit);
+    CurrScript.SynEdit.CaretXY := CurPos;
+  except
+    mDebugLn('Cannot comment the selected code!');
   end;
 end;
 

@@ -1,13 +1,13 @@
 object SimbaForm: TSimbaForm
-  Left = 226
+  Left = 761
   Height = 773
-  Top = 34
+  Top = 128
   Width = 1250
   ActiveControl = ScriptPanel
   AllowDropFiles = True
   Caption = 'Simba'
-  ClientHeight = 0
-  ClientWidth = 0
+  ClientHeight = 773
+  ClientWidth = 1250
   KeyPreview = True
   Menu = MainMenu
   OnClose = FormClose
