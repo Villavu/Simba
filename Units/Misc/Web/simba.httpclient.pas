@@ -62,7 +62,7 @@ const
   HTTP_VERSION_NOT_SUPPORTED = 505;
 
 type
-  TSimbaHTTPProgressEvent = procedure(Sender: TObject; URL: String; Position, Size: Int64) of object;
+  TSimbaHTTPProgressEvent = procedure(Sender: TObject; URL: String; Position, Size: Int64) of object; // -1, -1 for connecting.
   TSimbaHTTPClientProxy = record
     Host: String;
     Port: Int32;
@@ -132,7 +132,7 @@ type
     // Post string (URL parameters) returns response
     function Post(URL: String; Parameters: TStringArray): String; overload;
 
-    // Postsstring (URL parameters) and writes response to stream
+    // Posts string (URL parameters) and writes response to stream
     procedure Post(URL: String; Parameters: TStringArray; Response: TMemoryStream); overload;
 
     // Post string (form data) returns response
@@ -150,7 +150,7 @@ implementation
 uses
   mufasabase, simbaunit,
   simba.zip, simba.tar, simba.tar_gz, simba.tar_bz2,
-  simba.environment, simba.openssloader;
+  simba.environment, simba.openssloader, simba.opensslsockets;
 
 type
   TSimbaHTTPClientBase = class(TFPHTTPClient) // default will raise a exception on a response code that isn't HTTP_OK or HTTP_FOUND.
@@ -246,6 +246,8 @@ end;
 procedure TSimbaHTTPClient.Get(URL: String; Stream: TMemoryStream);
 begin
   FURL := URL;
+  if (FOnDownloadProgress <> nil) then
+    FOnDownloadProgress(Self, FURL, -1, -1); // Connecting
 
   FHTTPClient.Get(FURL, Stream);
 end;
@@ -253,6 +255,8 @@ end;
 function TSimbaHTTPClient.Get(URL: String): String;
 begin
   FURL := URL;
+  if (FOnDownloadProgress <> nil) then
+    FOnDownloadProgress(Self, FURL, -1, -1); // Connecting
 
   Result := FHTTPClient.Get(FURL);
 end;
@@ -260,6 +264,8 @@ end;
 procedure TSimbaHTTPClient.Get(URL: String; FileName: String);
 begin
   FURL := URL;
+  if (FOnDownloadProgress <> nil) then
+    FOnDownloadProgress(Self, FURL, -1, -1); // Connecting
 
   FHTTPClient.Get(FURL, FileName);
 end;

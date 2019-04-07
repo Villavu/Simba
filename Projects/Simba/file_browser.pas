@@ -50,8 +50,8 @@ procedure TSimbaFileBrowser.Expand(Node: TTreeNode);
 
       if Node.IsDirectory then
       begin
-        Node.ImageIndex := 54;
-        Node.SelectedIndex := 54;
+        Node.ImageIndex := 44;
+        Node.SelectedIndex := 44;
       end else
       begin
         if ExtractFileExt(Node.Path) = '.simba' then
@@ -60,8 +60,8 @@ procedure TSimbaFileBrowser.Expand(Node: TTreeNode);
           Node.SelectedIndex := 8;
         end else
         begin
-          Node.ImageIndex := 56;
-          Node.SelectedIndex := 56;
+          Node.ImageIndex := 45;
+          Node.SelectedIndex := 45;
         end;
       end;
 
@@ -112,8 +112,8 @@ begin
     begin
       Expand(False);
 
-      ImageIndex := 54;
-      SelectedIndex := 54;
+      ImageIndex := 44;
+      SelectedIndex := 44;
     end;
   finally
     EndUpdate();
