@@ -1,0 +1,708 @@
+object SimbaPackageForm: TSimbaPackageForm
+  Tag = 1
+  Left = 911
+  Height = 585
+  Top = 238
+  Width = 650
+  Caption = 'Simba Packages'
+  ClientHeight = 585
+  ClientWidth = 650
+  OnHide = DoFormHide
+  OnShow = DoFormShow
+  Position = poScreenCenter
+  ShowHint = True
+  LCLVersion = '2.0.0.4'
+  object DisabledLabel: TLabel
+    AnchorSideLeft.Control = PackagesListBox
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = PackagesListBox
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = PackagesListBox
+    AnchorSideBottom.Side = asrBottom
+    Left = 144
+    Height = 517
+    Top = 22
+    Width = 506
+    Alignment = taCenter
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    Caption = '(no package selected)'
+    Font.Height = -13
+    Font.Name = 'Sans'
+    Font.Style = [fsItalic]
+    Layout = tlCenter
+    ParentColor = False
+    ParentFont = False
+  end
+  object PackagesListBox: TListBox
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = AddPackageButton
+    AnchorSideTop.Side = asrBottom
+    AnchorSideBottom.Control = ButtonPanel
+    Left = 5
+    Height = 517
+    Top = 22
+    Width = 139
+    Anchors = [akTop, akLeft, akBottom]
+    BorderSpacing.Left = 5
+    Font.CharSet = ANSI_CHARSET
+    Font.Color = clBlack
+    Font.Height = -13
+    Font.Name = 'Segoe UI'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ItemHeight = 0
+    OnContextPopup = DoPackageListPopup
+    OnMouseDown = HandePackageListMouseDown
+    OnSelectionChange = DoSelectedPackageChanged
+    Options = []
+    ParentFont = False
+    PopupMenu = PackageListPopup
+    ScrollWidth = 135
+    TabOrder = 0
+  end
+  object AddPackageButton: TSpeedButton
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = PackagesListBox
+    AnchorSideRight.Side = asrBottom
+    Left = 122
+    Height = 22
+    Hint = 'Add Package'
+    Top = 0
+    Width = 22
+    Anchors = [akTop, akRight]
+    Flat = True
+    Glyph.Data = {
+      36040000424D3604000000000000360000002800000010000000100000000100
+      2000000000000004000064000000640000000000000000000000FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFC00FFFFF700806D5EFF7B604BFF7D624DFF806D
+      5EFFFFFFF700FFFFFC00FDFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFB00FFFFF2007C614CFFECCEB5FFECCEB5FF7C61
+      4CFFFFFFF200FFFFFB00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFC00FFFFFB00FFFFF500FFFFED00856346FFEFCFB2FFCBAB8EFF8563
+      46FFFFFFEB00FFFFF500FFFFFB00FFFFFC00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFF800FFFFF200FFFFED00FFFFE6008E6342FFF6D0AEFFD2AC8AFF8E63
+      42FFFFFFE600FFFFED00FFFFF200FFFFF700FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00806D5EFF7C614DFF836248FF8A6343FF8E6342FFD2AC8AFFD4AB8AFF9063
+      41FF8E6342FF876246FF7E624AFF826D5EFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF007C614CFFE6CCB4FFD3B59CFFD4B497FFD5B395FFD4B294FFCFAC8BFFCFA9
+      89FFCCA688FFC6A487FFDCBEA3FF7E614CFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF007C614CFFEED4BCFFEFD2B7FFF2D2B5FFF1CFB2FFEDCFB2FFEFCFB2FFF5CF
+      B1FFF4CEB0FFEFCDB0FFEBCDB2FF7F634BFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00806D5EFF7A624CFF836248FF8A6343FF8A6343FFEDCFB4FFEDCFB4FF8C63
+      43FF8C6342FF856346FF7F634BFF816F5EFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFF700FFFFF200FFFFEB00FFFFE6008A6245FFECCEB5FFECCEB5FF8A62
+      45FFFFFFE600FFFFEB00FFFFF100FFFFF700FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFC00FFFFFB00FFFFF500FFFFED00836248FFEACEB6FFEACEB6FF8362
+      48FFFFFFEB00FFFFF500FFFFF900FFFFFC00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFB00FFFFF2007C614CFFE8CDB8FFE8CDB8FF7C61
+      4CFFFFFFF200FFFFFA00FFFFFF00FFFFFE00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFC00FFFFF700806D5EFF7C614CFF7C614CFF806D
+      5EFFFFFFF700FFFFFC00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
+    }
+    OnClick = DoAddPackageClick
+  end
+  object ButtonPanel: TButtonPanel
+    Tag = 1
+    Left = 6
+    Height = 34
+    Top = 545
+    Width = 638
+    OKButton.Name = 'OKButton'
+    OKButton.DefaultCaption = True
+    HelpButton.Name = 'HelpButton'
+    HelpButton.DefaultCaption = True
+    CloseButton.Name = 'CloseButton'
+    CloseButton.Tag = 1
+    CloseButton.DefaultCaption = True
+    CancelButton.Name = 'CancelButton'
+    CancelButton.DefaultCaption = True
+    TabOrder = 1
+    ShowButtons = [pbClose]
+    object StatusLabel: TLabel
+      Tag = 1
+      AnchorSideLeft.Control = ButtonPanel
+      AnchorSideTop.Control = ButtonPanel
+      AnchorSideRight.Control = ButtonPanel
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = ButtonPanel
+      AnchorSideBottom.Side = asrBottom
+      Left = 5
+      Height = 20
+      Top = 10
+      Width = 533
+      Anchors = [akTop, akLeft, akRight, akBottom]
+      AutoSize = False
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 10
+      BorderSpacing.Right = 100
+      BorderSpacing.Bottom = 4
+      Layout = tlCenter
+      ParentColor = False
+    end
+  end
+  object RemovePackageButton: TSpeedButton
+    AnchorSideTop.Control = AddPackageButton
+    AnchorSideRight.Control = AddPackageButton
+    Left = 100
+    Height = 22
+    Hint = 'Remove Package'
+    Top = 0
+    Width = 22
+    Anchors = [akTop, akRight]
+    Flat = True
+    Glyph.Data = {
+      36040000424D3604000000000000360000002800000010000000100000000100
+      2000000000000004000064000000640000000000000000000000FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00806D5EFF7C614CFF806249FF816249FF816249FF816249FF816249FF8362
+      48FF816348FF816249FF7C614CFF806D5EFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF007C614CFFE6CCB4FFD1B69CFFD2B59AFFD1B398FFD2B295FFCBAB8EFFCBA9
+      8CFFC8A689FFC6A389FFDCBDA4FF7E614CFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF007C614CFFEED4BCFFEDD2B8FFEFD2B7FFEDCFB4FFEFCFB2FFEECEB1FFF1CF
+      B2FFF0CEB1FFEFCCB2FFEBCCB3FF7E614CFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00806D5EFF7C614CFF806249FF816249FF816249FF826449FF816348FF8362
+      48FF836248FF84624AFF7E614CFF806D5EFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
+    }
+    OnClick = DoRemovePackageClick
+  end
+  object ReleasesPanel: TPanel
+    AnchorSideLeft.Control = PackagesListBox
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = PackagesListBox
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = InstallationPanel
+    Left = 149
+    Height = 285
+    Top = 22
+    Width = 496
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    BorderSpacing.Left = 5
+    BorderSpacing.Right = 5
+    BevelOuter = bvNone
+    ClientHeight = 285
+    ClientWidth = 496
+    TabOrder = 2
+    object ReleasesList: TComboBox
+      AnchorSideLeft.Control = ReleasesListLabel
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = InstalledVersionLabel
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = ReleasesPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 80
+      Height = 21
+      Top = 39
+      Width = 416
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 4
+      ItemHeight = 15
+      OnChange = DoSelectedReleaseChanged
+      OnDrawItem = DoReleasesListDraw
+      ParentShowHint = False
+      Style = csOwnerDrawFixed
+      TabOrder = 0
+    end
+    object ReleasesListLabel: TLabel
+      AnchorSideLeft.Control = ReleasesPanel
+      AnchorSideTop.Control = ReleasesList
+      AnchorSideBottom.Control = ReleasesList
+      AnchorSideBottom.Side = asrCenter
+      Left = 0
+      Height = 20
+      Top = 39
+      Width = 75
+      Anchors = [akTop, akLeft, akBottom]
+      Caption = 'Select Version:'
+      Layout = tlCenter
+      ParentColor = False
+    end
+    object NotesMemo: TMemo
+      AnchorSideLeft.Control = ReleasesPanel
+      AnchorSideTop.Control = ReleasesList
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = ReleasesPanel
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = ReleasesPanel
+      AnchorSideBottom.Side = asrBottom
+      Left = 0
+      Height = 215
+      Top = 65
+      Width = 496
+      Anchors = [akTop, akLeft, akRight, akBottom]
+      BorderSpacing.Top = 5
+      BorderSpacing.Bottom = 5
+      ReadOnly = True
+      ScrollBars = ssVertical
+      TabOrder = 1
+    end
+    object InstalledVersionLabel: TLabel
+      AnchorSideLeft.Control = ReleasesPanel
+      AnchorSideTop.Control = LatestVersionLabel
+      AnchorSideTop.Side = asrBottom
+      Left = 0
+      Height = 15
+      Top = 20
+      Width = 88
+      BorderSpacing.Top = 5
+      Caption = 'Installed Version:'
+      ParentColor = False
+    end
+    object LatestVersionLabel: TLabel
+      AnchorSideLeft.Control = ReleasesPanel
+      AnchorSideTop.Control = ReleasesPanel
+      Left = 0
+      Height = 15
+      Top = 0
+      Width = 78
+      Caption = 'Latest Version: '
+      ParentColor = False
+    end
+    object UpdatePackageLabel: TLabel
+      AnchorSideLeft.Control = LatestVersionLabel
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = LatestVersionLabel
+      AnchorSideBottom.Control = LatestVersionLabel
+      AnchorSideBottom.Side = asrBottom
+      Left = 81
+      Height = 15
+      Top = 0
+      Width = 101
+      Anchors = [akTop, akLeft, akBottom]
+      BorderSpacing.Left = 3
+      Caption = '(check for updates)'
+      Font.Color = clBlue
+      Font.Style = [fsItalic]
+      Layout = tlCenter
+      ParentColor = False
+      ParentFont = False
+      OnClick = DoUpdateClick
+      OnMouseEnter = DoUpdateLabelMouseEnter
+      OnMouseLeave = DoUpdateLabelMouseLeave
+    end
+  end
+  object InstallationPanel: TPanel
+    AnchorSideLeft.Control = ReleasesPanel
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = ReleasesPanel
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = ButtonPanel
+    Left = 149
+    Height = 232
+    Top = 307
+    Width = 496
+    Anchors = [akLeft, akRight, akBottom]
+    AutoSize = True
+    BevelOuter = bvNone
+    ClientHeight = 232
+    ClientWidth = 496
+    TabOrder = 3
+    object InstallButton: TButton
+      AnchorSideLeft.Control = InstallationPanel
+      AnchorSideTop.Control = OptionsGroup
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = InstallationPanel
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = InstallationPanel
+      AnchorSideBottom.Side = asrBottom
+      Left = 0
+      Height = 25
+      Top = 207
+      Width = 496
+      Anchors = [akTop, akLeft, akRight, akBottom]
+      BorderSpacing.Top = 5
+      Caption = 'Install'
+      OnClick = DoInstallPackageClick
+      TabOrder = 0
+    end
+    object installationDivider: TDividerBevel
+      AnchorSideLeft.Control = InstallationPanel
+      AnchorSideTop.Control = InstallationPanel
+      AnchorSideRight.Control = InstallationPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 0
+      Height = 15
+      Top = 0
+      Width = 496
+      Caption = 'Installation'
+      Anchors = [akTop, akLeft, akRight]
+      ParentFont = False
+      Style = gsHorLines
+    end
+    object OptionsGroup: TGroupBox
+      AnchorSideLeft.Control = InstallationPanel
+      AnchorSideTop.Control = CustomInstallButton
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = InstallationPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 0
+      Height = 133
+      Top = 69
+      Width = 496
+      Anchors = [akTop, akLeft, akRight]
+      AutoSize = True
+      BorderSpacing.Top = 5
+      Caption = 'Options'
+      ClientHeight = 113
+      ClientWidth = 492
+      TabOrder = 1
+      object InstallNameLabel: TLabel
+        AnchorSideLeft.Control = OptionsGroup
+        AnchorSideTop.Control = InstallNameEdit
+        AnchorSideBottom.Control = InstallNameEdit
+        AnchorSideBottom.Side = asrBottom
+        Left = 5
+        Height = 23
+        Top = 5
+        Width = 35
+        Anchors = [akTop, akLeft, akBottom]
+        BorderSpacing.Left = 5
+        Caption = 'Name:'
+        Layout = tlCenter
+        ParentColor = False
+      end
+      object InstallDirectoryList: TComboBox
+        AnchorSideLeft.Control = IgnoreListEdit
+        AnchorSideTop.Control = InstallNameEdit
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = SelectDirectoryButton
+        Left = 65
+        Height = 23
+        Hint = 'The directory to install into. Relative from Simba''s directory.'
+        Top = 33
+        Width = 378
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Top = 5
+        BorderSpacing.Right = 5
+        ItemHeight = 15
+        OnChange = DoInstallationModeChange
+        TabOrder = 1
+      end
+      object InstallDiretoryLabel: TLabel
+        AnchorSideLeft.Control = OptionsGroup
+        AnchorSideTop.Control = InstallDirectoryList
+        AnchorSideBottom.Control = InstallDirectoryList
+        AnchorSideBottom.Side = asrBottom
+        Left = 5
+        Height = 23
+        Top = 33
+        Width = 48
+        Anchors = [akTop, akLeft, akBottom]
+        BorderSpacing.Left = 5
+        Caption = 'Directory'
+        Layout = tlCenter
+        ParentColor = False
+      end
+      object FlatExtractionButton: TCheckBox
+        AnchorSideLeft.Control = OptionsGroup
+        AnchorSideTop.Control = IgnoreListEdit
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = OptionsGroup
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = OptionsGroup
+        AnchorSideBottom.Side = asrBottom
+        Left = 5
+        Height = 19
+        Hint = 'Flatten directory structure'
+        Top = 89
+        Width = 487
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        BorderSpacing.Left = 5
+        BorderSpacing.Top = 5
+        BorderSpacing.Bottom = 5
+        Caption = 'Extract Flat'
+        TabOrder = 3
+      end
+      object SelectDirectoryButton: TButton
+        AnchorSideLeft.Control = InstallDirectoryList
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = InstallDirectoryList
+        AnchorSideRight.Control = OptionsGroup
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = InstallDirectoryList
+        AnchorSideBottom.Side = asrBottom
+        Left = 448
+        Height = 23
+        Top = 33
+        Width = 39
+        Anchors = [akTop, akRight]
+        BorderSpacing.Right = 5
+        Caption = '...'
+        OnClick = SelectDirectoryButtonClick
+        ParentShowHint = False
+        TabOrder = 4
+      end
+      object InstallNameEdit: TEdit
+        AnchorSideLeft.Control = IgnoreListEdit
+        AnchorSideTop.Control = OptionsGroup
+        AnchorSideRight.Control = SelectDirectoryButton
+        Left = 65
+        Height = 23
+        Hint = 'The package name to install under. Can be empty to install directly into the directory'
+        Top = 5
+        Width = 378
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Top = 5
+        BorderSpacing.Right = 5
+        OnChange = DoInstallationModeChange
+        TabOrder = 0
+      end
+      object IgnoreListEdit: TEdit
+        AnchorSideLeft.Control = IgnoreListLabel
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = SelectDirectoryButton
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = SelectDirectoryButton
+        Left = 65
+        Height = 23
+        Hint = 'Files or directories not to install delimited with commas'
+        Top = 61
+        Width = 378
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Left = 5
+        BorderSpacing.Top = 5
+        BorderSpacing.Right = 5
+        TabOrder = 2
+      end
+      object IgnoreListLabel: TLabel
+        AnchorSideLeft.Control = OptionsGroup
+        AnchorSideTop.Control = IgnoreListEdit
+        AnchorSideBottom.Control = IgnoreListEdit
+        AnchorSideBottom.Side = asrBottom
+        Left = 5
+        Height = 23
+        Top = 61
+        Width = 55
+        Anchors = [akTop, akLeft, akBottom]
+        BorderSpacing.Left = 5
+        Caption = 'Ignore List'
+        Layout = tlCenter
+        ParentColor = False
+      end
+    end
+    object BasicInstallButton: TRadioButton
+      AnchorSideLeft.Control = InstallationPanel
+      AnchorSideTop.Control = installationDivider
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = InstallationPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 0
+      Height = 20
+      Hint = 'One click installation. Reads options from .simbapackage providing it exists the root of the repository.'
+      Top = 20
+      Width = 496
+      Anchors = [akTop, akLeft, akRight]
+      AutoSize = False
+      BorderSpacing.Top = 5
+      Caption = 'Basic'
+      Checked = True
+      OnChange = DoInstallationModeChange
+      OnClick = InstallationModeChangedUser
+      TabOrder = 3
+      TabStop = True
+    end
+    object CustomInstallButton: TRadioButton
+      AnchorSideLeft.Control = InstallationPanel
+      AnchorSideTop.Control = BasicInstallButton
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = InstallationPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 0
+      Height = 19
+      Top = 45
+      Width = 496
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 5
+      Caption = 'Custom'
+      OnChange = DoInstallationModeChange
+      TabOrder = 2
+    end
+  end
+  object SelectDirectoryDialog: TSelectDirectoryDialog
+    left = 56
+    top = 176
+  end
+  object Images: TImageList
+    left = 56
+    top = 112
+    Bitmap = {
+      4C69040000001000000010000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF004DB4D82B4BB2D8AF4AB0D7BC48AED631FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF004EB6
+      D9164DB4D8844BB2D7EF9CD5EAFF88CCE7FF45ACD5F344AAD48C42A7D31AFFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF004FB7DA054EB6D9654CB4
+      D8DB92CFE5FFE6F8FCFFE3F6FEFFAFDDF2FFB2E4F7FF72C0E1FF3FA4D1E03DA2
+      D06C3BA0CF09FFFFFF00FFFFFF00FFFFFF004FB7D9464EB5D9C27EC6E0FFD1EE
+      F7FFF6FFFFFFF0FEFFFFCBEDFBFF50ADDAFF8BD7F7FFAAE1F9FF95D6F2FF62B2
+      DBFF399DCEC8369ACD4DFFFFFF004FB7D99F4DB5D9FEA5D9EDFFD2EBF5FFBEDE
+      EDFF95C9DEFF89C3DBFF70B8D6FF69B9DDFF90D7F5FF7FCFF5FF9DDBF8FFAAE3
+      FAFF84CAECFF51A6D5FF3295CBA64DB4D8FBE1F8FEFFCDEBF9FF92D2EDFF84CC
+      EBFF6FBFE5FF56B1DBFF3B94C8FFCEECFAFFD9F5FFFFB9EAFFFF95DFFEFF77D5
+      FFFFA5E4FFFF84DCFBFF2F92C9FB4BB2D7F0E2F8FDFFD4F3FFFFB0E4FAFF86CF
+      F1FF7FD0F5FF78D0F5FF4CB1E4FFB0E4FAFFB6E9FFFF9BE1FFFF78D6FEFF40BD
+      F5FF3DB5E9FF90D5F1FF2D8FC8F049B0D6F0E2F6FDFFDAF4FFFFD5F3FFFFBDEB
+      FFFF89D5F7FF69C9F5FF4CB4E9FF8DDAFBFF8CDCFFFF48C4F9FF38B6ECFF48BF
+      E8FF4FBBE8FF8CD0F0FF2B8DC7F047ADD5F0E2F6FCFFD7F4FFFFCEF2FFFFC8EF
+      FFFFBAEBFFFF92DBFBFF56C1F1FF48C2F9FF3BBDF0FF47C5ECFF45BDE9FF42B5
+      E6FF47B1E6FF88CAEEFF288AC6F044AAD4F0E2F6FCFFD4F3FFFFC9F0FFFFBEED
+      FFFFB3EAFFFFADE7FFFF7CD9FEFF48C7EFFF43C4EAFF43BEE8FF3FB5E6FF3AAB
+      E3FF40A7E1FF83C5ECFF2687C5F042A8D3F9E7FBFEFFDDF6FFFFC1EFFFFFB7EB
+      FFFFABE8FFFFA4E4FFFF96E1FEFF48C6EBFF40BDE9FF3DB4E6FF38A9E2FF329F
+      DEFF6BB6E6FF83C4EEFF2485C4F840A5D2BB77BDDCFFBFE5F6FFDBF6FFFFC1EE
+      FFFFA5E5FFFF9FE3FFFF94E1FEFF46C1EAFF3AB5E6FF37AAE2FF56AFE5FF87C6
+      EDFF74B3E4FF4A90CAFF2283C3C13DA2D0063BA0CF65399DCEDB7DC0E0FFC7EE
+      FCFFCCF2FFFFA8E8FFFF94E0FEFF41BAE7FF45B1E4FF8ACAEFFF82C1EBFF5397
+      D0FF2384C3E02282C26D2080C20AFFFFFF00FFFFFF00369ACD163498CC853295
+      CBEF82C4E5FFCCF4FFFFC4EFFFFF8BD2F1FF8ACEF0FF5FA4D7FF2586C4F32384
+      C38D2182C21BFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF003093
+      CA2B2E90C9A52C8EC8FE8FCDEBFF6FB7E2FF408EC8FF2485C4AC2383C331FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF002A8BC6462889C5BE2687C5C42485C44DFFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00000000000000000000000000000000000000
+      0000000000004DB4D82B4BB2D8AF4AB0D7BC48AED63100000000000000000000
+      0000000000000000000000000000000000000000000000000000000000004EB6
+      D9164DB4D8844BB2D7EF9CD5EAFF88CCE7FF45ACD5F344AAD48C42A7D31A0000
+      000000000000000000000000000000000000000000004FB7DA054EB6D9654CB4
+      D8DB92CFE5FFE6F8FCFFE3F6FEFFAFDDF2FFB2E4F7FF72C0E1FF3FA4D1E03DA2
+      D06C3BA0CF090000000000000000000000004FB7D9464EB5D9C27EC6E0FFD1EE
+      F7FFF6FFFFFFF0FEFFFFCBEDFBFF50ADDAFF8BD7F7FFAAE1F9FF95D6F2FF62B2
+      DBFF399DCEC8369ACD4D000000004FB7D99F4DB5D9FEA5D9EDFFD2EBF5FFBEDE
+      EDFF95C9DEFF89C3DBFF70B8D6FF69B9DDFF90D7F5FF7FCFF5FF9DDBF8FFAAE3
+      FAFF84CAECFF51A6D5FF3295CBA64DB4D8FBE1F8FEFFCDEBF9FF92D2EDFF84CC
+      EBFF6FBFE5FF56B1DBFF3B94C8FFCEECFAFFD9F5FFFFB9EAFFFF95DFFEFF77D5
+      FFFFA5E4FFFF84DCFBFF2F92C9FB4BB2D7F0E2F8FDFFD4F3FFFFB0E4FAFF86CF
+      F1FF7FD0F5FF78D0F5FF4CB1E4FFB0E4FAFFB6E9FFFF9BE1FFFF78D6FEFF40BD
+      F5FF3DB5E9FF90D5F1FF2D8FC8F049B0D6F0E2F6FDFFDAF4FFFFD5F3FFFFBDEB
+      FFFF89D5F7FF69C9F5FF4CB4E9FF8DDAFBFF8CDCFFFF009600FF009600FF0096
+      00FF4FBBE8FF8CD0F0FF2A8DC7F047ADD5F0E2F6FCFFD7F4FFFFCEF2FFFFC8EF
+      FFFFBAEBFFFF92DBFBFF56C1F1FF48C2F9FF3BBDF0FF009600FF00C000FF0096
+      00FF47B1E6FF88CAEEFF288AC6F044AAD4F0E2F6FCFFD4F3FFFFC9F0FFFFBEED
+      FFFFB3EAFFFFADE7FFFF7CD9FEFF48C7EFFF43C4EAFF009600FF00C000FF0096
+      00FF40A7E1FF83C5ECFF2687C5F042A8D3F9E7FBFEFFDDF6FFFFC1EFFFFFB7EB
+      FFFFABE8FFFFA4E4FFFF009600FF009600FF009600FF009600FF00C000FF0096
+      00FF009600FF009600FF009600FF40A5D2BB77BDDCFFBFE5F6FFDBF6FFFFC1EE
+      FFFFA5E5FFFF9FE3FFFF009600FF00C000FF00C000FF00C000FF00C000FF00C0
+      00FF00C000FF00C000FF009600FF3DA2D0063BA0CF65399DCEDB7DC0E0FFC7EE
+      FCFFCCF2FFFFA8E8FFFF009600FF009600FF009600FF009600FF00C000FF0096
+      00FF009600FF009600FF009600FF0000000000000000369ACD163498CC853295
+      CBEF82C4E5FFCCF4FFFFC4EFFFFF8BD2F1FF8ACEF0FF009600FF00C000FF0096
+      00FF1C84BD1B0000000000000000000000000000000000000000000000003093
+      CA2B2E90C9A52C8EC8FE8FCDEBFF6FB7E2FF408EC8FF009600FF00C000FF0096
+      00FF000000000000000000000000000000000000000000000000000000000000
+      0000000000002A8BC6462889C5BE2687C4C42484C34D009600FF009600FF0096
+      00FF000000000000000000000000161517001615170016151700161517001615
+      173E16151796171618DA171618F2171618F2171618DA161517961615173E1615
+      1700161517001615170016151700161517001615170017161803151416A01312
+      14FF171618FF161517FF161517FF161517FF161517FF171618FF131214FF1514
+      16A017161803161517001615170016151700171618041A191BC80E0D0FFF0000
+      00FF000000FF0A090BFF010002FF010002FF0A090BFF000000FF000000FF0E0D
+      0FFF1A191BC8171618041615170016151700171618A4080708FF515052FFA0A0
+      A1FF424143FF131214FF39383AFF39383AFF131214FF424143FFA0A0A1FF5150
+      52FF080708FF171618A41615170016151738171618FF000000FF747375FFFFFF
+      FFFFFFFFFFFFE5E5E6FFFFFFFFFFFFFFFFFFE5E5E6FFFFFFFFFFFFFFFFFF7473
+      74FF000000FF171618FF16151738161517A2161517FF000000FF777677FFFFFF
+      FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7776
+      77FF000000FF161517FF161517A2171618DF0A090BFF171618FFE0E1E1FFFFFF
+      FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE0E1
+      E1FF171618FF0A090BFF171618DF161517F7020103FF353336FFFFFFFFFFFFFF
+      FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+      FFFF353336FF020103FF161517F7171618F7050407FF252427FFFDFDFEFFFFFF
+      FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFDFD
+      FEFF252427FF060507FF171618F7171618DA100F11FF000000FFB9B9B9FFFFFF
+      FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBCBC
+      BCFF020203FF100F11FF171618DA1514169B1B1A1CFF181818FF111012FFC6C6
+      C6FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC9C9CAFF2121
+      22FF050506FF181719FF1716189B1413152E0A0A0BFF8D8C8EFF6F6E6FFF0000
+      00FF242324FFCCCCCCFFFFFFFFFFFFFFFFFFCECECEFF424242FF070608FF0000
+      01FF181719FF171618FF1716182E171618000B0A0C91171617FFDDDDDDFF9C9C
+      9CFF4F4E4FFFE0E0E0FFFFFFFFFFFFFFFFFFD3D3D3FF000000FF010002FF1716
+      18FF171618FF18171991161517001514160019181A00000000B2383739FFCFCF
+      D0FFE5E4E5FFFFFFFFFFFFFFFFFFFFFFFFFFF3F3F2FF201F21FF060507FF1716
+      18FF1A191BB2171618001514160016151700161517001A191B00040305870000
+      00FF1E1D1FFFECECECFFFFFFFFFFFFFFFFFFEDEDEDFF1E1D1FFF0A090BFF1817
+      1987161517001514160016151700161517001615170016151700161517000403
+      052A25242580F2F2F280FFFFFFACFFFFFFACF3F3F3802E2D2E800A090B2A1514
+      1600151416001615170016151700FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF003AB73F0039B43F00FFFFFF0037AE3D0036AC3C00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF003BBB41000374
+      0360037503BE037503BE037503BE037503BE037503BE0374036034A63A00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF003AB74000036E
+      03BFE6E6B3FF399339F062B762FC399339F0E6E6B3FF036E03BF339D3A003B71
+      5800FFFFFF00FFFFFF00FFFFFF00FFFFFF0003740377FFFFFF00025F02190D6E
+      0DC73F943FF561B661FF76CB76FF61B661FF3F943FF50D6E0DC7025F02195F8C
+      780003740377FFFFFF00FFFFFF00FFFFFF00036C0399036B0343025902682F81
+      2FE067B567FF71C171FF71C171FF71C171FF67B567FF2F812FE002590268036B
+      0343036C03992B8930002A852E0038B13E0003660319025F02AA025202C93E87
+      3EF24C934CFF3C813CFF347834FF3B803BFF4A904AFF3C853CF2025202C9025F
+      02AA03660319FFFFFF00FFFFFF0037AD3C0036AA3B0035A73A00014301B857A1
+      57FB69B569FF6EBD6EFF357935FF6EBD6EFF69B569FF57A157FB014301B82983
+      2E0025593B00FFFFFF00FFFFFF00FFFFFF0034A4390033A13800013901C74789
+      47FF5A9D5AFF65AE65FF377B37FF65AE65FF5A9D5AFF478947FF013901C72A7E
+      2D0026792A0025762900FFFFFF000034002401370189013701CA003100C64083
+      40FC549954FF5FA95FFF3A7E3AFF5FA95FFF549954FF408340FC003100C60137
+      01CA0137018900340024226C2600002F008A0030004D0030000B002C00A03679
+      36F44E9B4EFF59A959FF3D843DFF59A959FF4E9B4EFF367936F4002C00A00030
+      000B0030004D002F008A20662300FFFFFF00FFFFFF0035923A00002C00712261
+      22E5489E48FF54AC54FF3F8D3FFF54AC54FF489E48FF226122E5002C0071236B
+      2600FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF000035000B003100B90940
+      09CD409B40FB4EB24EFF409940FF4EB24EFF409B40FB094009CD003100B90035
+      000B1F622200FFFFFF00FFFFFF00FFFFFF00FFFFFF00003C008A003A0066003C
+      00761C6A1CE047AE47FE41A741FF47AE47FE1C6A1CE0003C0076003A0066003C
+      008A1D5C20001C5A1F00FFFFFF00FFFFFF00FFFFFF00004900B3FFFFFF000021
+      000D00470091196F19DD40AA40FD196F19DD004700910021000DFFFFFF000049
+      00B3FFFFFF00FFFFFF00FFFFFF00FFFFFF00000000020015003C000000150000
+      0021000C003300340077005000C700340077000C003400000023000000160015
+      003D00000002FFFFFF00FFFFFF00FFFFFF0000000001000000050000000B0000
+      0011000000160000001A0000001A0000001A00000017000000120000000B0000
+      000600000001FFFFFF00FFFFFF00
+    }
+  end
+  object PackageListPopup: TPopupMenu
+    Images = Images
+    left = 56
+    top = 56
+    object PackageListPopup_VistRepository: TMenuItem
+      Caption = 'Visit Repository'
+      ImageIndex = 2
+      OnClick = DoPackageListPopupClick
+    end
+    object PackageListPopup_SubmitIssue: TMenuItem
+      Caption = 'Submit Issue'
+      ImageIndex = 3
+      OnClick = DoPackageListPopupClick
+    end
+  end
+end
