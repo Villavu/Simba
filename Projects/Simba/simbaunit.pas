@@ -184,7 +184,7 @@ type
     FileBrowserRefreshButton: TSpeedButton;
     SpeedButtonFindNext: TSpeedButton;
     SpeedButtonFindPrev: TSpeedButton;
-    NotesSplitter: TSplitter;
+    UtilitesSplitter: TSplitter;
     ToolButton5: TToolButton;
     TB_ShowPackages: TToolButton;
     TT_ScriptManager: TToolButton;
@@ -1864,6 +1864,7 @@ begin
     Notes.Align := alClient;
 
   PanelUtilites.Visible := Browser.Visible or Notes.Visible;
+  UtilitesSplitter.Visible := Browser.Visible or Notes.Visible;
 end;
 
 procedure TSimbaForm.ActionOpenExecute(Sender: TObject);
