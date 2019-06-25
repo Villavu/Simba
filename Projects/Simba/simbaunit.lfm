@@ -17,7 +17,7 @@ object SimbaForm: TSimbaForm
   OnHide = doOnHide
   OnShortCut = FormShortCuts
   Position = poScreenCenter
-  LCLVersion = '1.8.1.0'
+  LCLVersion = '1.8.4.0'
   Visible = True
   object ToolBar: TToolBar
     Left = 0
@@ -3588,6 +3588,10 @@ object SimbaForm: TSimbaForm
     object ActionFileBrowser: TAction
       Caption = 'File Browser'
       OnExecute = ActionFileBrowserExecute
+    end
+    object ActionCodeComment: TAction
+      Caption = 'Code Comment'
+      OnExecute = ActionCodeCommentExecute
     end
   end
   object ScriptPopup: TPopupMenu

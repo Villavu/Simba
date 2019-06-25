@@ -91,6 +91,7 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
+    ActionCodeComment: TAction;
     ActionColors: TAction;                     
     ActionFileBrowser: TAction;
     ActionFindPrev: TAction;
@@ -284,7 +285,8 @@ type
     ToolButton8: TToolButton;
     MTrayIcon: TTrayIcon;
     FunctionListHint: THintWindow;
-    procedure ActionColorsExecute(Sender: TObject);                                            
+    procedure ActionCodeCommentExecute(Sender: TObject);
+    procedure ActionColorsExecute(Sender: TObject);
     procedure ActionClearDebugExecute(Sender: TObject);
     procedure ActionCloseTabExecute(Sender: TObject);
     procedure ActionCompileScriptExecute(Sender: TObject);
@@ -540,7 +542,7 @@ uses
    math,
    script_imports, script_plugins,
    simba.environment, simba.httpclient,
-   aca, dtm_editor, colorscheme
+   aca, dtm_editor, scriptcommenter, colorscheme
    {$IFDEF USE_FORMDESIGNER}, frmdesigner{$ENDIF}
 
    {$IFDEF LINUX_HOTKEYS}, keybinder{$ENDIF};
@@ -1769,6 +1771,19 @@ end;
 procedure TSimbaForm.ActionColorsExecute(Sender: TObject);
 begin
   SimbaColors.Show();
+end;
+
+procedure TSimbaForm.ActionCodeCommentExecute(Sender: TObject);
+var
+  CurPos: TPoint;
+begin
+  try
+    CurPos := CurrScript.SynEdit.CaretXY;
+    TScriptCommenter.Process(CurrScript.SynEdit);
+    CurrScript.SynEdit.CaretXY := CurPos;
+  except
+    mDebugLn('Cannot comment the selected code!');
+  end;
 end;
 
 procedure TSimbaForm.ActionGotoExecute(Sender: TObject);

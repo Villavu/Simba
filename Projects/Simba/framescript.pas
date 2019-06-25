@@ -313,6 +313,12 @@ begin
   else if (Key = VK_ESCAPE) then
     SimbaForm.ParamHint.Hide;
 
+  if ((ssCtrl in Shift) and (not ((ssShift in Shift) and not (ssAlt in Shift)))) then
+    begin
+      if (Key = VK_LCL_SLASH) then
+        SimbaForm.ActionCodeCommentExecute(Sender);
+    end;
+
   SimbaForm.CodeCompletionForm.HandleKeyDown(Sender, Key, Shift);
 end;
 
