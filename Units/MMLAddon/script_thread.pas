@@ -80,7 +80,7 @@ implementation
 
 uses
   {$IFDEF LINUX} pthreads, {$ENDIF}
-  script_imports, fpexprpars, stringutil;
+  script_imports, fpexprpars, stringutil, mmisc;
 
 procedure TMMLScriptThread.SetState(Value: EMMLScriptState);
 begin
@@ -233,6 +233,9 @@ begin
     Exit(True);
   end;
 
+  if (UpperCase(Directive) = 'ERROR') then
+    raise lpException.Create('User defined error: ' + Argument, Sender.DocPos);
+
   if (UpperCase(Directive) = 'IFVALUE') or (UpperCase(Directive) = 'IFVERSION') then
   begin
     Eval := False;
@@ -356,7 +359,7 @@ begin
       if (GetTickCount64() - FStartTime <= 60000) then
         WriteLn('Successfully executed in ' + IntToStr(GetTickCount64() - FStartTime) + ' ms.')
       else
-        WriteLn('Successfully executed in ' + TimeToStr(TimeStampToDateTime(MSecsToTimeStamp(GetTickCount64() - FStartTime))) + '.');
+        WriteLn('Successfully executed in ' + FormatTime(GetTickCount64() - FStartTime) + '.');
     end;
   finally
     Terminate();
