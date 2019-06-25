@@ -162,6 +162,7 @@ interface
       GetTargetPosition: procedure(var left, top: integer); stdcall;
       GetImageBuffer: function(target: pointer): prgb32; stdcall;
       UpdateImageBuffer: procedure(target: pointer); stdcall;
+      UpdateImageBufferEx: function(target: pointer): prgb32; stdcall;
       UpdateImageBufferBounds: procedure(target: pointer; sx,sy,ex,ey: integer); stdcall;
 
       GetMousePosition: procedure(target: pointer; var x,y: integer); stdcall;
@@ -1011,12 +1012,15 @@ begin
   ImageApplyAreaOffset(xs, ys);
   if Pointer(client.UpdateImageBufferBounds) <> nil then
     client.UpdateImageBufferBounds(target,xs,ys,xs+width,ys+height)
+  else if Pointer(client.UpdateImageBufferEx) <> nil then
+    self.buffer := client.UpdateImageBufferEx(target)
   else if Pointer(client.UpdateImageBuffer) <> nil then
     client.UpdateImageBuffer(target)
   else begin
     {no update command exported}
   end;
-  result.Ptr := buffer;
+  GetTargetDimensions(self.width,self.height);
+  result.Ptr := self.buffer;
   result.RowLen:= self.width;
   result.IncPtrWith:= result.RowLen - width;
   Inc(result.Ptr, ys * result.RowLen + xs);
@@ -1033,6 +1037,8 @@ begin
 
   if Pointer(client.UpdateImageBufferBounds) <> nil then
     client.UpdateImageBufferBounds(target, X, Y, X + Width, Y + Height)
+  else if Pointer(client.UpdateImageBufferEx) <> nil then
+    self.buffer := client.UpdateImageBufferEx(target)
   else if Pointer(client.UpdateImageBuffer) <> nil then
     client.UpdateImageBuffer(target)
   else begin
@@ -1040,7 +1046,7 @@ begin
   end;
 
   for Y := 0 to Height - 1 do
-    Move(Buffer[Y * Self.Width + X], Result[Y * Width], Width * SizeOf(TRGB32));
+    Move(self.buffer[Y * Self.Width + X], Result[Y * Width], Width * SizeOf(TRGB32));
 end;
 
 procedure TEIOS_Target.GetMousePosition(out x,y: integer);
@@ -1335,6 +1341,7 @@ begin
     Pointer(GetTargetDimensions):= GetProcAddress(plugin, PChar('EIOS_GetTargetDimensions'));
     Pointer(GetImageBuffer):= GetProcAddress(plugin, PChar('EIOS_GetImageBuffer'));
     Pointer(UpdateImageBuffer):= GetProcAddress(plugin, PChar('EIOS_UpdateImageBuffer'));
+    Pointer(UpdateImageBufferEx):= GetProcAddress(plugin, PChar('EIOS_UpdateImageBufferEx'));
     Pointer(UpdateImageBufferBounds):= GetProcAddress(plugin, PChar('EIOS_UpdateImageBufferBounds'));
 
     Pointer(GetMousePosition):= GetProcAddress(plugin, PChar('EIOS_GetMousePosition'));

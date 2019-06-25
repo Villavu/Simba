@@ -3510,6 +3510,10 @@ object SimbaForm: TSimbaForm
       Caption = 'File Browser'
       OnExecute = ActionFileBrowserExecute
     end
+    object ActionCodeComment: TAction
+      Caption = 'Code Comment'
+      OnExecute = ActionCodeCommentExecute
+    end
   end
   object ScriptPopup: TPopupMenu
     Images = Mufasa_Image_List
