@@ -24,7 +24,7 @@ implementation
 class procedure TScriptCommenter.Process(Syn: TSynEdit);
 var
   i, SelStart, SelEnd, ColStart, temp: integer;
-  StartStr: String;
+  StartStr, CurrLineStr: String;
 
 begin
   SelStart := Syn.BlockBegin.y;
@@ -41,7 +41,14 @@ begin
     Syn.BeginUndoBlock;
     try
       StartStr := Syn.Lines[SelStart - 1].TrimLeft();
-      ColStart := Syn.Lines[SelStart - 1].IndexOf(StartStr) + 1;
+      ColStart := -1;
+      for i := SelStart to SelEnd do
+      begin
+        CurrLineStr := Syn.Lines[i - 1].TrimLeft();
+        temp := Syn.Lines[i - 1].IndexOf(CurrLineStr) + 1;
+        if (ColStart < 0) or (ColStart > temp) then
+          ColStart := temp;
+      end;
 
       if StartStr.StartsWith('//') then
       begin
