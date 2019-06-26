@@ -27,12 +27,12 @@ However, updates are checked for hourly and will change the appearance and hint 
 
 
 ## Installing the master branch
-If the repository has no releases, or you want to install the master (which most likely the development branch) this is also possible. It's appended last in the version list. Simba will not notify you of updates if the master branch is installed.
+If the repository has no releases, or you want to install the master branch (most likely the development branch) this is also possible. It's added last in the version list. Simba will not notify you of updates if the master branch is installed.
 
 ![img](master.png?raw=true "Master Branch")
 
 ## Miscellaneous
 
-* Each component has a mouse-over hint.
-* Right click on the package list for quick access to a packages Github repository or submit a issue on Github.
+* Each component has a mouse-over hint for detailed infomation.
+* Right click on the package list for quick access to a packages Github page or to submit a Github issue.
 * Github API has a limit of 60 requests per hour for unauthorised users so all requests are cached for an hour. "Check for updates" can be clicked which will force update the cache. 
