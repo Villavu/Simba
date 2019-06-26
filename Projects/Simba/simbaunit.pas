@@ -184,7 +184,7 @@ type
     FileBrowserRefreshButton: TSpeedButton;
     SpeedButtonFindNext: TSpeedButton;
     SpeedButtonFindPrev: TSpeedButton;
-    NotesSplitter: TSplitter;
+    UtilitesSplitter: TSplitter;
     ToolButton5: TToolButton;
     TB_ShowPackages: TToolButton;
     TT_ScriptManager: TToolButton;
@@ -1777,14 +1777,12 @@ procedure TSimbaForm.ActionCodeCommentExecute(Sender: TObject);
 var
   CurPos: TPoint;
 begin
-  begin
-    try
-      CurPos := CurrScript.SynEdit.CaretXY;
-      TScriptCommenter.Process(CurrScript.SynEdit);
-      CurrScript.SynEdit.CaretXY := CurPos;
-    except
-      mDebugLn('Cannot comment the selected code!');
-    end;
+  try
+    CurPos := CurrScript.SynEdit.CaretXY;
+    TScriptCommenter.Process(CurrScript.SynEdit);
+    CurrScript.SynEdit.CaretXY := CurPos;
+  except
+    mDebugLn('Cannot comment the selected code!');
   end;
 end;
 
@@ -1866,6 +1864,7 @@ begin
     Notes.Align := alClient;
 
   PanelUtilites.Visible := Browser.Visible or Notes.Visible;
+  UtilitesSplitter.Visible := Browser.Visible or Notes.Visible;
 end;
 
 procedure TSimbaForm.ActionOpenExecute(Sender: TObject);

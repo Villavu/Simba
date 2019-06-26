@@ -37,9 +37,9 @@ function DecompressBZip2(const input : TStream; const BlockSize : Cardinal = 409
 function UnTar(const Input : TStream) : TStringArray;overload;
 function UnTar(const Input : TStream;const outputdir : string; overwrite : boolean): boolean;overload;
 
-procedure ConvertTime(Time : integer; var h,m,s : integer);
+procedure ConvertTime(Time : int64; var h,m,s : integer);
 procedure ConvertTime64(time: int64; var y, m, w, d, h, min, s: integer);
-
+function FormatTime(Milliseconds: Int64): String;
 function MarkTime: Double;
 
 type
@@ -293,9 +293,9 @@ begin
   FFinished:= True;
 end;
 
-procedure ConvertTime(Time : integer; var h,m,s : integer);
+procedure ConvertTime(Time: int64; var h, m, s: integer);
 var
-  x : integer;
+  x : int64;
 begin;
   x := time;
   h := x div (3600000);
@@ -324,6 +324,23 @@ begin
   x := x mod (60000);
   s := x div (1000); // 1000 (1 second)
   x := x mod (1000);
+end;
+
+function FormatTime(Milliseconds: Int64): String;
+
+  function Pad(Value: Int32): String;
+  begin
+    Result := IntToStr(Value);
+    if Length(Result) = 1 then
+      Result := '0' + Result;
+  end;
+
+var
+  H, M, S: Int32;
+begin
+  ConvertTime(Milliseconds, H, M, S);
+
+  Result := Format('[%s:%s:%s]', [Pad(H), Pad(M), Pad(S)]);
 end;
 
 function MarkTime: Double;
