@@ -52,7 +52,7 @@ uses
   v_ideCodeInsight, v_ideCodeParser, CastaliaPasLexTypes, // Code completion units
   CastaliaSimplePasPar, v_AutoCompleteForm,  // Code completion units
 
-  updater, package,
+  updater, simba.package_form,
   {$IFDEF USE_SCRIPTMANAGER}SM_Main,{$ENDIF}
   newsimbasettings;
 
@@ -186,7 +186,6 @@ type
     SpeedButtonFindPrev: TSpeedButton;
     UtilitesSplitter: TSplitter;
     ToolButton5: TToolButton;
-    TB_ShowPackages: TToolButton;
     TT_ScriptManager: TToolButton;
     ToolButton6: TToolButton;
     TB_Console: TToolButton;
@@ -393,7 +392,6 @@ type
     procedure SpeedButtonSearchClick(Sender: TObject);
     procedure SplitterFunctionListCanResize(Sender: TObject; var NewSize: Integer;
       var Accept: Boolean);
-    procedure TB_ShowPackagesClick(Sender: TObject);
     procedure ThreadOpenConnectionEvent(Sender: TObject; var url: string;
       var Continue: boolean);
     procedure ThreadOpenFileEvent(Sender: TObject; var Filename: string;
@@ -871,14 +869,6 @@ procedure TSimbaForm.SplitterFunctionListCanResize(Sender: TObject; var NewSize:
 begin
   if(NewSize > ScriptPanel.Width div 2)then
     NewSize := ScriptPanel.Width div 2;
-end;
-
-procedure TSimbaForm.TB_ShowPackagesClick(Sender: TObject);
-begin
-  if PackageForm.Showing then
-    PackageForm.BringToFront()
-  else
-    PackageForm.Show();
 end;
 
 procedure TSimbaForm.ThreadOpenConnectionEvent(Sender: TObject; var url: string;var Continue: boolean);
@@ -2394,7 +2384,7 @@ begin
     Plugins.Paths.Add(SimbaSettings.Plugins.Path.Value);
 
     SimbaColors := TSimbaColors.Create(SimbaForm);
-    PackageForm := TPackageForm.Create(Self, TB_ShowPackages);
+    SimbaPackageForm := TSimbaPackageForm.Create(Self, ToolBar);
 
     CodeCompletionForm := TAutoCompletePopup.Create(Self);
     CodeCompletionForm.InsertProc := @OnCompleteCode;

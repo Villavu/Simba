@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="10"/>
+    <Version Value="11"/>
     <General>
       <Flags>
         <MainUnitHasUsesSectionForAllUnits Value="False"/>
@@ -78,9 +78,16 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <FormatVersion Value="1"/>
         <LaunchingApplication PathPlusParams="/usr/bin/gnome-terminal -t 'Lazarus Run Output' -e '$(LazarusDir)/tools/runwait.sh $(TargetCmdLine)'"/>
       </local>
+      <FormatVersion Value="2"/>
+      <Modes Count="1">
+        <Mode0 Name="default">
+          <local>
+            <LaunchingApplication PathPlusParams="/usr/bin/gnome-terminal -t 'Lazarus Run Output' -e '$(LazarusDir)/tools/runwait.sh $(TargetCmdLine)'"/>
+          </local>
+        </Mode0>
+      </Modes>
     </RunParams>
     <RequiredPackages Count="3">
       <Item1>
@@ -94,7 +101,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="94">
+    <Units Count="92">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -444,73 +451,65 @@
         <IsPartOfProject Value="True"/>
       </Unit76>
       <Unit77>
-        <Filename Value="../../Units/Misc/OpenSSL/simba.sslbase.pas"/>
+        <Filename Value="../../Units/Misc/Web/simba.httpclient.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit77>
       <Unit78>
-        <Filename Value="../../Units/Misc/Web/simba.httpclient.pas"/>
+        <Filename Value="../../Units/Misc/Archive/simba.archive.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit78>
       <Unit79>
-        <Filename Value="package/simba.package_web.pas"/>
+        <Filename Value="../../Units/Misc/Web/simba.httpclient_async.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit79>
       <Unit80>
-        <Filename Value="package/simba.package.inc"/>
+        <Filename Value="../../Units/Misc/Web/fpc/simba.fphttpclient.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit80>
       <Unit81>
-        <Filename Value="package/simba.package_classes.pas"/>
+        <Filename Value="simba.environment.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit81>
       <Unit82>
-        <Filename Value="../../Units/Misc/Archive/simba.archive.pas"/>
+        <Filename Value="../../Units/Misc/Archive/simba.tar.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit82>
       <Unit83>
-        <Filename Value="../../Units/Misc/Web/simba.httpclient_async.pas"/>
+        <Filename Value="../../Units/Misc/Archive/simba.tar_gz.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit83>
       <Unit84>
-        <Filename Value="package/simba.package_updater.pas"/>
+        <Filename Value="../../Units/Misc/Archive/simba.tar_bz2.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit84>
       <Unit85>
-        <Filename Value="../../Units/Misc/Web/simba.ssockets.pas"/>
+        <Filename Value="../../Units/Misc/Web/simba.openssloader.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit85>
       <Unit86>
-        <Filename Value="../../Units/Misc/Web/fpc/simba.fphttpclient.pas"/>
+        <Filename Value="package/simba.package_buttons.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit86>
       <Unit87>
-        <Filename Value="simba.environment.pas"/>
+        <Filename Value="package/simba.package.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit87>
       <Unit88>
-        <Filename Value="../../Units/Misc/Archive/simba.tar.pas"/>
+        <Filename Value="package/simba.package_github_releases.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit88>
       <Unit89>
-        <Filename Value="../../Units/Misc/Archive/simba.gz.pas"/>
+        <Filename Value="package/simba.package_github_json.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit89>
       <Unit90>
-        <Filename Value="../../Units/Misc/Archive/simba.tar_gz.pas"/>
+        <Filename Value="package/simba.package_github_url.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit90>
       <Unit91>
-        <Filename Value="../../Units/Misc/Archive/simba.gz_stream.pas"/>
+        <Filename Value="../../Units/MMLAddon/simba.inifile_exclusive.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit91>
-      <Unit92>
-        <Filename Value="../../Units/Misc/Archive/simba.tar_bz2.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit92>
-      <Unit93>
-        <Filename Value="../../Units/Misc/Web/simba.openssloader.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit93>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

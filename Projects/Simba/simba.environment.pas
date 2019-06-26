@@ -62,6 +62,7 @@ type
     FPluginPath: String;
     FScriptPath: String;
     FSimbaPath: String;
+    FPackagePath: String;
 
     procedure SetDataPath(Value: String);
     procedure SetFontPath(Value: String);
@@ -69,6 +70,7 @@ type
     procedure SetLibPath(Value: String);
     procedure SetPluginPath(Value: String);
     procedure SetScriptPath(Value: String);
+    procedure SetPackagePath(Value: String);
   public
     property DataPath: String read FDataPath write SetDataPath;
     property LibPath: String read FLibPath write SetLibPath;
@@ -77,6 +79,7 @@ type
     property IncludePath: String read FIncludePath write SetIncludePath;
     property ScriptPath: String read FScriptPath write SetScriptPath;
     property SimbaPath: String read FSimbaPath;
+    property PackagePath: String read FPackagePath write SetPackagePath;
 
     constructor Create;
   end;
@@ -100,6 +103,15 @@ begin
     FScriptPath := Application.Location + 'Scripts' + DirectorySeparator;
 
   ForceDirectories(FScriptPath);
+end;
+
+procedure TSimbaEnvironment.SetPackagePath(Value: String);
+begin
+  FPackagePath := Value;
+  if FPackagePath = '' then
+    FPackagePath := FDataPath + 'packages' + DirectorySeparator;
+
+  ForceDirectories(FPackagePath);
 end;
 
 procedure TSimbaEnvironment.SetDataPath(Value: String);
@@ -166,6 +178,7 @@ begin
   IncludePath := '';
   FontPath := '';
   ScriptPath := '';
+  PackagePath := '';
 end;
 
 initialization
