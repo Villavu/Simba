@@ -289,7 +289,9 @@ begin
 
   if (Package <> nil) then
   begin
-    Options.Path := IncludeTrailingPathDelimiter(Application.Location + InstallDirectoryList.Text) + IncludeTrailingPathDelimiter(InstallNameEdit.Text);
+    Options.Path := IncludeTrailingPathDelimiter(Application.Location + SetDirSeparators(InstallDirectoryList.Text));
+    if InstallNameEdit.Text <> '' then
+      Options.Path := Options.Path + IncludeTrailingPathDelimiter(InstallNameEdit.Text);
     Options.Flat := FlatExtractionButton.Checked;
     Options.Version := ReleasesList.Text;
     Options.IgnoreList := IgnoreListEdit.Text;
@@ -425,6 +427,8 @@ begin
 
       CustomInstallButton.Checked := True;
     end;
+
+    DoInstallationModeChange(nil);
 
     InstallDirectoryList.Text := IncludeTrailingPathDelimiter(InstallDirectoryList.Text);
     InstallDirectoryList.Text := SetDirSeparators(InstallDirectoryList.Text);
