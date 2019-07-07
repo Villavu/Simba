@@ -136,7 +136,7 @@ function TOSWindowArray_Helper.ToString: String;
 
   procedure Append(Text: String; Args: array of const);
   begin
-    Result := Result + Format(Text, Args) + #10;
+    Result := Result + Format(Text, Args) + LineEnding;
   end;
 
 var

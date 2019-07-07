@@ -11,7 +11,7 @@ implementation
 
 uses
   lptypes, lpcompiler, lpparser, script_imports,
-  oswindow, mufasatypes;
+  simba.oswindow, mufasatypes;
 
 procedure Lape_OSWindow_Activate(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -20,7 +20,7 @@ end;
 
 procedure Lape_OSWindow_IsVaild(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := POSWindow(Params^[0])^.IsVaild();
+  PBoolean(Result)^ := POSWindow(Params^[0])^.IsValid();
 end;
 
 procedure Lape_OSWindow_IsActive(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -50,12 +50,12 @@ end;
 
 procedure Lape_OSWindow_GetTitle(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := POSWindow(Params^[0])^.GetTitle();
+  PWideString(Result)^ := POSWindow(Params^[0])^.GetTitle();
 end;
 
 procedure Lape_OSWindow_GetClassName(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := POSWindow(Params^[0])^.GetClassName();
+  PWideString(Result)^ := POSWindow(Params^[0])^.GetClassName();
 end;
 
 procedure Lape_OSWindow_GetBounds(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -65,7 +65,7 @@ end;
 
 procedure Lape_OSWindow_GetChildren(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  POSWindowArray(Result)^ := POSWindow(Params^[0])^.GetChildren();
+  POSWindowArray(Result)^ := POSWindow(Params^[0])^.GetChildren(PBoolean(Params^[1])^);
 end;
 
 procedure Lape_OSWindow_SetBounds(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -108,6 +108,16 @@ begin
   POSWindowArray(Result)^ := POSWindowArray(Params^[0])^.GetByTitleAndClass(PString(Params^[1])^, PString(Params^[2])^);
 end;
 
+procedure Lape_OSWindowArray_ToString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PString(Result)^ := POSWindowArray(Params^[0])^.ToString();
+end;
+
+procedure Lape_GetTopWindows(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  POSWindowArray(Result)^ := GetTopWindows();
+end;
+
 procedure Lape_GetVisibleWindows(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   POSWindowArray(Result)^ := GetVisibleWindows();
@@ -128,6 +138,26 @@ begin
   POSWindow(Result)^ := GetDesktopWindow();
 end;
 
+procedure Lape_FindWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  POSWindowArray(Result)^ := FindWindow(PString(Params^[0])^);
+end;
+
+procedure Lape_FindWindowEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := FindWindow(PString(Params^[0])^, POSWindow(Params^[1])^);
+end;
+
+procedure Lape_FindChildWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  POSWindowArray(Result)^ := FindChildWindow(PString(Params^[0])^, PString(Params^[1])^);
+end;
+
+procedure Lape_FindChildWindowEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := FindChildWindow(PString(Params^[0])^, PString(Params^[1])^, POSWindow(Params^[2])^);
+end;
+
 procedure Lape_Import_Web(Compiler: TLapeCompiler; Data: Pointer);
 begin
   with Compiler do
@@ -142,10 +172,10 @@ begin
     addGlobalFunc('function TOSWindow.IsVisible: Boolean; constref;', @Lape_OSWindow_IsVisible);
     addGlobalFunc('function TOSWindow.GetPID: UInt32; constref;', @Lape_OSWindow_GetPID);
     addGlobalFunc('function TOSWindow.GetRootWindow: TOSWindow; constref; ', @Lape_OSWindow_GetRootWindow);
-    addGlobalFunc('function TOSWindow.GetClassName: String; constref;', @Lape_OSWindow_GetClassName);
-    addGlobalFunc('function TOSWindow.GetTitle: String; constref;', @Lape_OSWindow_GetTitle);
+    addGlobalFunc('function TOSWindow.GetClassName: WideString; constref;', @Lape_OSWindow_GetClassName);
+    addGlobalFunc('function TOSWindow.GetTitle: WideString; constref;', @Lape_OSWindow_GetTitle);
     addGlobalFunc('function TOSWindow.GetBounds: TBox; constref;', @Lape_OSWindow_GetBounds);
-    addGlobalFunc('function TOSWindow.GetChildren: TOSWindowArray; constref;', @Lape_OSWindow_GetChildren);
+    addGlobalFunc('function TOSWindow.GetChildren(Recursive: Boolean = True): TOSWindowArray; constref;', @Lape_OSWindow_GetChildren);
     addGlobalFunc('procedure TOSWindow.SetBounds(Bounds: TBox); constref;', @Lape_OSWindow_SetBounds);
     addGlobalFunc('procedure TOSWindow.Kill; constref;', @Lape_OSWindow_Kill);
 
@@ -158,10 +188,18 @@ begin
     addGlobalFunc('function TOSWindowArray.GetByTitleAndClass(Title, ClassName: String; out Window: TOSWindow): Boolean; overload;', @Lape_OSWindowArray_GetByTitleAndClass);
     addGlobalFunc('function TOSWindowArray.GetByTitleAndClass(Title, ClassName: String): TOSWindowArray; overload;', @Lape_OSWindowArray_GetByTitleAndClassEx);
 
+    addGlobalFunc('function TOSWindowArray.ToString: String; constref;', @Lape_OSWindowArray_ToString);
+
+    addGlobalFunc('function GetTopWindows: TOSWindowArray', @Lape_GetTopWindows);
     addGlobalFunc('function GetVisibleWindows: TOSWindowArray;', @Lape_GetVisibleWindows);
     addGlobalFunc('function GetWindows: TOSWindowArray;', @Lape_GetWindows);
     addGlobalFunc('function GetActiveWindow: TOSWindow;', @Lape_GetActiveWindow);
     addGlobalFunc('function GetDesktopWindow: TOSWindow;', @Lape_GetDesktopWindow);
+
+    addGlobalFunc('function FindWindow(Title: String): TOSWindowArray; overload;', @Lape_FindWindow);
+    addGlobalFunc('function FindWindow(Title: String; out Window: TOSWindow): Boolean; overload;', @Lape_FindWindowEx);
+    addGlobalFunc('function FindChildWindow(Title: String; ClassName: String): TOSWindowArray; overload;', @Lape_FindChildWindow);
+    addGlobalFunc('function FindChildWindow(Title: String; ClassName: String; out Child: TOSWindow): Boolean; overload;', @Lape_FindChildWindowEx);
   end;
 end;
 
