@@ -1,16 +1,16 @@
-{%MainUnit oswindow}
+{%MainUnit simba.oswindow}
 
 uses
-  windows;
+  windows, dwmapi;
 
-function TOSWindow_Helper.IsVaild: Boolean;
+function TOSWindow_Helper.IsValid: Boolean;
 begin
   Result := IsWindow(Self);
 end;
 
 function TOSWindow_Helper.IsActive: Boolean;
 begin
-  Result := GetForegroundWindow() = GetAncestor(Self, GA_ROOT);
+  Result := GetForegroundWindow() = Self.GetRootWindow();
 end;
 
 function TOSWindow_Helper.IsActive(Time: Int32): Boolean;
@@ -23,7 +23,7 @@ begin
     if Self.IsActive() then
       Exit(True);
 
-    Sleep(5);
+    Sleep(25);
   end;
 
   Exit(False);
@@ -44,51 +44,83 @@ begin
   Result := GetAncestor(Self, GA_ROOT);
 end;
 
-function TOSWindow_Helper.GetClassName: String;
+function TOSWindow_Helper.GetClassName: WideString;
 var
-  Buffer: array[0..255] of Char;
+  Buffer: array[0..255] of WideChar;
 begin
-  Windows.GetClassName(Self, @Buffer[0], Length(Buffer));
+  GetClassNameW(Self, @Buffer[0], Length(Buffer));
 
-  Result := String(Buffer);
+  Result := WideString(Buffer);
 end;
 
-function TOSWindow_Helper.GetTitle: String;
+function TOSWindow_Helper.GetTitle: WideString;
 var
-  Buffer: array[0..255] of Char;
+  Buffer: array[0..255] of WideChar;
 begin
-  GetWindowText(Self, @Buffer[0], Length(Buffer));
+  GetWindowTextW(Self, @Buffer[0], Length(Buffer));
 
-  Result := String(Buffer);
+  Result := WideString(Buffer);
 end;
 
-function TOSWindow_Helper.GetBounds: TBox;
+function TOSWindow_Helper.GetBounds(out Bounds: TBox): Boolean;
 var
   R: TRect;
 begin
-  R := Default(TRect);
+  if DwmCompositionEnabled and (Self = Self.GetRootWindow()) then
+    Result := DwmGetWindowAttribute(Self, DWMWA_EXTENDED_FRAME_BOUNDS, @R, SizeOf(TRect)) = S_OK
+  else
+    Result := GetWindowRect(Self, R);
 
-  GetWindowRect(Self, R);
-
-  Result.X1 := R.Left;
-  Result.Y1 := R.Top;
-  Result.X2 := R.Right;
-  Result.Y2 := R.Bottom;
+  if Result then
+  begin
+    Bounds.X1 := R.Left;
+    Bounds.Y1 := R.Top;
+    Bounds.X2 := R.Right;
+    Bounds.Y2 := R.Bottom;
+  end;
 end;
+
+function TOSWindow_Helper.GetBounds: TBox;
+begin
+  if Self.GetBounds(Result) then
+    Exit;
+
+  Result.X1 := -1;
+  Result.Y1 := -1;
+  Result.X2 := -1;
+  Result.Y2 := -1;
+end;
+
+type
+  PEnumWindowData = ^TEnumWindowData;
+  TEnumWindowData = record
+    Windows: TOSWindowArray;
+    Recursive: Boolean;
+    Parent: TOSWindow;
+  end;
 
 function __GetChildren(Window: HWND; Data: LPARAM): WINBOOL; stdcall;
-var
-  Arr: ^TOSWindowArray absolute Data;
 begin
-  SetLength(Arr^, Length(Arr^) + 1);
-  Arr^[High(Arr^)] := Window;
+  Result := True;
 
-  Exit(True);
+  with PEnumWindowData(Data)^ do
+  begin
+    if Recursive or (not Recursive and (GetAncestor(Window, GA_PARENT) = Parent)) then
+      Windows += Window;
+  end;
 end;
 
-function TOSWindow_Helper.GetChildren: TOSWindowArray;
+function TOSWindow_Helper.GetChildren(Recursive: Boolean): TOSWindowArray;
+var
+  Data: TEnumWindowData;
 begin
-  EnumChildWindows(Self, @__GetChildren, LParam(@Result));
+  Data := Default(TEnumWindowData);
+  Data.Parent := Self;
+  Data.Recursive := Recursive;
+
+  EnumChildWindows(Self, @__GetChildren, PtrUInt(@Data));
+
+  Result := Data.Windows;
 end;
 
 procedure TOSWindow_Helper.SetBounds(Bounds: TBox);
@@ -99,23 +131,25 @@ end;
 function TOSWindow_Helper.Activate: Boolean;
 var
   Current, Thread, PID: UInt32;
+  Root: TOSWindow;
 begin
-  if (GetForegroundWindow() <> Self) then
-  begin
-    Current := GetWindowThreadProcessID(GetForegroundWindow(), PID);
-    Thread := GetCurrentThreadID;
+  if Self.IsActive() then
+    Exit(True);
 
-    if (Current <> Thread) then
-      AttachThreadInput(Current, Thread, True);
+  Root := GetRootWindow();
+  Current := GetWindowThreadProcessID(GetForegroundWindow(), PID);
+  Thread := GetCurrentThreadID();
 
-    BringWindowToTop(Self);
-    ShowWindow(Self, SW_SHOW);
+  if (Current <> Thread) then
+    AttachThreadInput(Current, Thread, True);
 
-    if (Current <> Thread) then
-      AttachThreadInput(Current, Thread, False);
-  end;
+  BringWindowToTop(Root);
+  ShowWindow(Root, SW_SHOW);
 
-  Result := Self.IsActive(1000);
+  if (Current <> Thread) then
+    AttachThreadInput(Current, Thread, False);
+
+  Result := Self.IsActive(500);
 end;
 
 procedure TOSWindow_Helper.Kill;
@@ -128,40 +162,54 @@ begin
 end;
 
 function __GetVisibleWindows(Window: HWND; Data: LPARAM): WINBOOL; stdcall;
-var
-  Arr: ^TOSWindowArray absolute Data;
 begin
-  if IsWindowVisible(Window) then
+  Result := True;
+
+  with PEnumWindowData(Data)^ do
   begin
-    EnumChildWindows(Window, @__GetChildren, Data);
+    if IsWindowVisible(Window) and (not IsIconic(Window)) then
+    begin
+      Windows += Window;
 
-    SetLength(Arr^, Length(Arr^) + 1);
-    Arr^[High(Arr^)] := Window;
+      EnumChildWindows(Window, @__GetChildren, Data);
+    end;
   end;
-
-  Exit(True);
 end;
 
 function GetVisibleWindows: TOSWindowArray;
+var
+  Data: TEnumWindowData;
 begin
-  EnumWindows(@__GetVisibleWindows, LParam(@Result));
+  Data := Default(TEnumWindowData);
+  Data.Recursive := True;
+
+  EnumWindows(@__GetVisibleWindows, PtrUInt(@Data));
+
+  Result := Data.Windows;
 end;
 
 function __GetWindows(Window: HWND; Data: LPARAM): WINBOOL; stdcall;
-var
-  Arr: ^TOSWindowArray absolute Data;
 begin
-  SetLength(Arr^, Length(Arr^) + 1);
-  Arr^[High(Arr^)] := Window;
+  Result := True;
 
-  EnumChildWindows(Window, @__GetChildren, Data);
+  with PEnumWindowData(Data)^ do
+  begin
+    Windows += Window;
 
-  Exit(True);
+    EnumChildWindows(Window, @__GetChildren, Data);
+  end;
 end;
 
 function GetWindows: TOSWindowArray;
+var
+  Data: TEnumWindowData;
 begin
-  EnumWindows(@__GetWindows, LParam(@Result));
+  Data := Default(TEnumWindowData);
+  Data.Recursive := True;
+
+  EnumWindows(@__GetWindows, PtrUInt(@Data));
+
+  Result := Data.Windows;
 end;
 
 function GetActiveWindow: TOSWindow;
@@ -172,4 +220,26 @@ end;
 function GetDesktopWindow: TOSWindow;
 begin
   Result := Windows.GetDesktopWindow();
+end;
+
+function __GetTopWindows(Window: HWND; Data: LPARAM): WINBOOL; stdcall;
+begin
+  Result := True;
+
+  with PEnumWindowData(Data)^ do
+  begin
+    if IsWindowVisible(Window) and (not IsIconic(Window)) and (GetAncestor(Window, GA_ROOT) = Window) then
+      Windows += Window;
+  end;
+end;
+
+function GetTopWindows: TOSWindowArray;
+var
+  Data: TEnumWindowData;
+begin
+  Data := Default(TEnumWindowData);
+
+  EnumWindows(@__GetTopWindows, PtrUInt(@Data));
+
+  Result := Data.Windows;
 end;
