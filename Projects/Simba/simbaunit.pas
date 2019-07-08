@@ -52,7 +52,7 @@ uses
   v_ideCodeInsight, v_ideCodeParser, CastaliaPasLexTypes, // Code completion units
   CastaliaSimplePasPar, v_AutoCompleteForm,  // Code completion units
 
-  updater, simba.package_form,
+  updater, simba.package_form, simba.windowselector,
   {$IFDEF USE_SCRIPTMANAGER}SM_Main,{$ENDIF}
   newsimbasettings;
 
@@ -2411,7 +2411,7 @@ begin
     AddTab();
     Manager := TIOManager.Create(SimbaSettings.Plugins.Path.Value);
     Picker := TMColorPicker.Create(Manager);
-    Selector := TMWindowSelector.Create(Manager);
+    Selector := TMWindowSelector.Create();
 
     {$IFDEF WINDOWS}
     if FileExists(Application.ExeName+'_old_') then
