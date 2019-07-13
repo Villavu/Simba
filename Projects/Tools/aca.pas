@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, FileUtil, DividerBevel, LResources, Forms, Controls,
   Graphics, Dialogs, ExtCtrls, ComCtrls, StdCtrls, Menus, ColorBox,
   Types, client, mufasatypes, GraphType, Buttons, clipbrd, LCLType,
-  {$IFDEF WINDOWS} os_windows {$ELSE} os_linux {$ENDIF};
+  simba.iomanager;
 
 type
   TACAResult = procedure(CTS, Color, Tolerance: Int32; Hue, Sat: Extended) of object;

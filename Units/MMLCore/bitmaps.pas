@@ -175,7 +175,7 @@ implementation
 uses
   paszlib, DCPbase64, math,
   client, tpa,
-  colour_conv, IOManager, mufasatypesutil,
+  colour_conv, simba.iomanager, mufasatypesutil,
   FileUtil, LazUTF8,
   matchTempl, matrix;
 
@@ -1251,11 +1251,14 @@ begin
   wi := Min(xe-xs + 1,Self.w);
   hi := Min(ye-ys + 1,Self.h);
 
-  PtrRet := TIOManager_Abstract(MWindow).ReturnData(xs,ys,wi,hi);
-
-  for y := 0 to (hi-1) do
-    Move(PtrRet.Ptr[y * PtrRet.RowLen], FData[y * self.w],wi * SizeOf(TRGB32));
-  TIOManager_Abstract(MWindow).FreeReturnData;
+  PtrRet := TIOManager(MWindow).ReturnData(xs,ys,wi,hi);
+  if (PtrRet.Ptr <> nil) then
+  begin
+    for y := 0 to (hi-1) do
+      Move(PtrRet.Ptr[y * PtrRet.RowLen], FData[y * self.w],wi * SizeOf(TRGB32));
+    
+TIOManager(MWindow).FreeReturnData;
+  end;
 end;
 
 procedure TMufasaBitmap.CopyClientToBitmap(MWindow: TObject; Resize: boolean;
@@ -1270,10 +1273,14 @@ begin
   ValidatePoint(x,y);
   wi := Min(xe-xs + 1 + x,Self.w)-x;
   hi := Min(ye-ys + 1 + y,Self.h)-y;
-  PtrRet := TIOManager_Abstract(MWindow).ReturnData(xs,ys,wi,hi);
-  for yy := 0 to (hi-1) do
-    Move(PtrRet.Ptr[yy * (PtrRet.RowLen)], FData[(yy + y) * self.w + x],wi * SizeOf(TRGB32));
-  TIOManager_Abstract(MWindow).FreeReturnData;
+  PtrRet := TIOManager(MWindow).ReturnData(xs,ys,wi,hi);
+  if (PtrRet.Ptr <> nil) then
+  begin
+    for yy := 0 to (hi-1) do
+      Move(PtrRet.Ptr[yy * (PtrRet.RowLen)], FData[(yy + y) * self.w + x],wi * SizeOf(TRGB32));
+    
+TIOManager(MWindow).FreeReturnData;
+  end;
 end;
 
 

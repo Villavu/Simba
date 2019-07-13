@@ -772,6 +772,9 @@ begin
   dY := ye - ys;
 
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  if (PtrData.Ptr = nil) then
+    Exit;
+
   Ptr := PtrData.Ptr;
   PtrInc := PtrData.IncPtrWith;
   result := 0;
@@ -858,6 +861,9 @@ begin
   ColorToRGB(Color, clR, clG, clB);
 
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  if (PtrData.Ptr = nil) then
+    Exit;
+
   //Load rowdata
   RowData:= CalculateRowPtrs(ptrdata,dy+1);
   //Load the spiral path
@@ -929,6 +935,8 @@ begin
   dY := ye - ys;
 
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  if (PtrData.Ptr = nil) then
+    Exit;
 
   // Do we want to "cache" these vars?
   // We will, for now. Easier to type.
@@ -992,6 +1000,8 @@ begin
   if Cts = 2 then
     RGBToHSL(clR,clG,clB,H1,S1,L1);
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  if (PtrData.Ptr = nil) then
+    Exit;
 
   // Do we want to "cache" these vars?
   // We will, for now. Easier to type.
@@ -1072,6 +1082,8 @@ begin
   dY := ye - ys;
 
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  if (PtrData.Ptr = nil) then
+    Exit;
 
   // Do we want to "cache" these vars?
   // We will, for now. Easier to type.
@@ -1127,6 +1139,8 @@ begin
   //next, convert the color to r,g,b
 
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  if (PtrData.Ptr = nil) then
+    Exit;
 
   c := 0;
 
@@ -1196,6 +1210,8 @@ begin
   dY := ye - ys;
 
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  if (PtrData.Ptr = nil) then
+    Exit;
   //Caculate the row ptrs
   MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
 
@@ -1308,6 +1324,8 @@ begin
   dY := ye - ys;
 
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  if (PtrData.Ptr = nil) then
+    Exit;
   //Caculate the row ptrs
   MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
   BmpRowData:= CalculateRowPtrs(bitmap);
@@ -1413,6 +1431,8 @@ begin
   dY := ye - ys;
 
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  if (PtrData.Ptr = nil) then
+    Exit;
   //Caculate the row ptrs
   MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
   BmpRowData:= CalculateRowPtrs(bitmap);
@@ -1501,6 +1521,8 @@ begin
   SearchDx := dX;
   SearchDy := dY;
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  if (PtrData.Ptr = nil) then
+    Exit;
   //Caculate the row ptrs
   MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
   BmpRowData:= CalculateRowPtrs(bitmap);
@@ -1609,6 +1631,8 @@ begin
     raise Exception.CreateFmt('Search area must be larger than Template - Client(%d, %d), Templ(%d, %d)', [W,H, TemplImage.Width, TemplImage.Height]);
 
   PtrData := TClient(Client).IOManager.ReturnData(xs,ys, W,H);
+  if (PtrData.Ptr = nil) then
+    Exit;
   
   SetLength(Image, H, W);
   SetLength(Templ, TemplImage.Height, TemplImage.Width);
@@ -1754,6 +1778,8 @@ begin
 
   // Retreive Client Data.
   PtrData := TClient(Client).IOManager.ReturnData(x1, y1, W + 1, H + 1);
+  if (PtrData.Ptr = nil) then
+    Exit;
 
   SetLength(col_arr, Len);
   SetLength(tol_arr, Len);
@@ -1957,6 +1983,8 @@ begin
 
   // Retreive Client Data.
   PtrData := TClient(Client).IOManager.ReturnData(x1, y1, W + 1, H + 1);
+  if (PtrData.Ptr = nil) then
+    Exit;
 
   SetLength(col_arr, Len);
   SetLength(tol_arr, Len);
@@ -2086,6 +2114,8 @@ begin
   //TClient(Self.Client).IOManager.GetDimensions(w, h);
 
   PtrRet := TClient(Client).IOManager.ReturnData(Box.x1, Box.y1, w + 1, h + 1);//Otherwise lotsashit.
+  if (PtrRet.Ptr = nil) then
+    Exit;
 
   cd := CalculateRowPtrs(PtrRet, h + 1);
 

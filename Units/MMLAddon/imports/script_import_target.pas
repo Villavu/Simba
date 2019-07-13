@@ -10,16 +10,12 @@ uses
 implementation
 
 uses
-  script_imports, script_thread, lpcompiler, lptypes, mufasatypes, iomanager, bitmaps;
+  script_imports, script_thread, lpcompiler, lptypes, mufasatypes, simba.iomanager, bitmaps,
+  simba.target;
 
 procedure Lape_GetProcessID(const Params : PParamArray; const Result : Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PSizeUInt(Result)^ := GetProcessID();
-end;
-
-procedure Lape_GetProcesses(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PSysProcArr(Result)^ := TMMLScriptThread(Params^[0]).Client.IOManager.GetProcesses();
 end;
 
 procedure Lape_SetTarget(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -34,7 +30,7 @@ end;
 
 procedure Lape_SetTargetArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInt32(Result)^ := TMMLScriptThread(Params^[0]).Client.IOManager.SetTarget(PRGB32(PInt32(Params^[1])^), Point(PInt32(Params^[2])^, PInt32(Params^[3])^));
+  PInt32(Result)^ := TMMLScriptThread(Params^[0]).Client.IOManager.SetTarget(PRGB32(PPtrUInt(Params^[1])^), Point(PInt32(Params^[2])^, PInt32(Params^[3])^));
 end;
 
 procedure Lape_SetTargetBitmap(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -135,7 +131,7 @@ end;
 
 procedure Lape_GetNativeWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PPtrUInt(Result)^ := TMMLScriptThread(Params^[0]).Client.IOManager.GetImageTarget.GetHandle();
+  PPtrUInt(Result)^ := TMMLScriptThread(Params^[0]).Client.IOManager.GetImageTarget.Handle;
 end;
 
 procedure Lape_SaveScreenshot(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -158,15 +154,19 @@ begin
   end;
 end;
 
+procedure Lape_SetAutoFocus(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  TMMLScriptThread(Params^[0]).Client.IOManager.AutoFocus := PBoolean(Params^[1])^;
+end;
+
 procedure Lape_Import_Window(Compiler: TLapeCompiler; Data: Pointer);
 begin
   with Compiler do
   begin
-    addGlobalMethod('function GetProcesses: TSysProcArr;', @Lape_GetProcesses, Data);
     addGlobalMethod('function GetProcessID: SizeUInt', @Lape_GetProcessID, Data);
     addGlobalMethod('procedure SetTarget(Proc: TSysProc);', @Lape_SetTarget, Data);
     addGlobalMethod('procedure SetDesktopAsClient;', @Lape_SetDesktopAsClient, Data);
-    addGlobalMethod('function SetTargetArray(P: Int32; W, H: Int32): Int32', @Lape_SetTargetArray, Data);
+    addGlobalMethod('function SetTargetArray(P: PtrUInt; W, H: Int32): Int32', @Lape_SetTargetArray, Data);
     addGlobalMethod('function SetTargetBitmap(bitmap: Int32): Int32', @Lape_SetTargetBitmap, Data);
     addGlobalMethod('function SetEIOSTarget(name, args: String): Int32', @Lape_SetEIOSTarget, Data);
     addGlobalMethod('function MouseSetClientArea(x1, y1, x2, y2: Int32): Boolean;', @Lape_MouseSetClientArea, Data);
@@ -188,6 +188,7 @@ begin
     addGlobalMethod('function IsTargetValid: Boolean', @Lape_IsTargetValid, Data);
     addGlobalMethod('function GetNativeWindow: PtrUInt;', @Lape_GetNativeWindow, Data);
     addGlobalMethod('procedure SaveScreenshot(FileName: string);', @Lape_SaveScreenshot, Data);
+    addGlobalMethod('procedure SetAutoFocus(Value: Boolean)', @Lape_SetAutoFocus, Data);
   end;
 end;
 

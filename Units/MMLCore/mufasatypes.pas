@@ -91,9 +91,9 @@ type
   PColor = ^TColor;
   PCanvas = ^TCanvas;
 
-  TClickType = (mouse_Right, mouse_Left, mouse_Middle, mouse_ScrollUp, mouse_ScrollDown);
+  TClickType = (MOUSE_RIGHT, MOUSE_LEFT, MOUSE_MIDDLE, MOUSE_SCROLLUP, MOUSE_SCROLLDOWN);
 
-  TMousePress = (mouse_Down, mouse_Up);
+  TMousePress = (MOUSE_DOWN, MOUSE_UP);
 
   PStringArray = ^TStringArray;
   TStringArray = array of String;

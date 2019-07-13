@@ -7,8 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, DividerBevel, LResources, Forms, Controls,
   Graphics, Dialogs, ExtCtrls, ComCtrls, StdCtrls, Menus, Types, Client,
-  MufasaTypes, GraphType, Buttons, DTM,
-  {$IFDEF WINDOWS} os_windows {$ELSE} os_linux {$ENDIF};
+  MufasaTypes, GraphType, Buttons, DTM, simba.iomanager;
 
 type
   TDTMNode = class(TTreeNode)
