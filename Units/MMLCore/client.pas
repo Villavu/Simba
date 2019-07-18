@@ -30,9 +30,7 @@ interface
 
 uses
   Classes, SysUtils, MufasaTypes,MufasaBase,
-  IOManager, Files, Finder, Bitmaps, dtm, ocr, internets,
-  {$IFDEF MSWINDOWS} os_windows {$ENDIF}
-  {$IFDEF LINUX} os_linux {$ENDIF};
+  simba.iomanager, Files, Finder, Bitmaps, dtm, ocr, internets;
 
 (*
 
@@ -157,9 +155,6 @@ TClient.Destroy
 
 destructor TClient.Destroy;
 begin
-  if FOwnIOManager then
-    IOManager.SetState(True);
-
   MOCR.Free;
   MDTMs.Free;
   MBitmaps.Free;

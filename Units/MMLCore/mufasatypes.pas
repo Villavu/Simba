@@ -24,6 +24,7 @@
 unit MufasaTypes;
 
 {$mode objfpc}{$H+}
+{$modeswitch advancedrecords}
 
 interface
 
@@ -86,14 +87,20 @@ type
     RowLen : integer;
   end;
 
+const
+  NullReturnData: TRetData = (Ptr: nil; IncPtrWith: -1; RowLen: -1);
+
+operator =(Left, Right: TRetData): Boolean;
+
+type
   PStrings = ^TStrings;
   PFont = ^TFont;
   PColor = ^TColor;
   PCanvas = ^TCanvas;
 
-  TClickType = (mouse_Right, mouse_Left, mouse_Middle, mouse_ScrollUp, mouse_ScrollDown);
+  TClickType = (MOUSE_RIGHT, MOUSE_LEFT, MOUSE_MIDDLE, MOUSE_SCROLLUP, MOUSE_SCROLLDOWN);
 
-  TMousePress = (mouse_Down, mouse_Up);
+  TMousePress = (MOUSE_DOWN, MOUSE_UP);
 
   PStringArray = ^TStringArray;
   TStringArray = array of String;
@@ -166,7 +173,18 @@ type
   }
   PBox = ^TBox;
   TBox = record
-    x1, y1, x2, y2: Integer;
+    X1, Y1, X2, Y2: Integer;
+  end;
+
+  TBoxHelper = record Helper for TBox
+  protected
+    function GetWidth: Int32;
+    function GetHeight: Int32;
+  public
+    function Contains(X, Y, Width, Height: Int32): Boolean;
+
+    property Width: Int32 read GetWidth;
+    property Height: Int32 read GetHeight;
   end;
 
   TSysProc = record
@@ -476,11 +494,32 @@ begin
   Result := ((PT1.X < PT2.X) and (PT1.Y < PT2.Y));
 end;
 
+operator =(Left, Right: TRetData): Boolean;
+begin
+  Result := (Left.Ptr = Right.Ptr) and (Left.RowLen = Right.RowLen) and (Left.IncPtrWith = Right.IncPtrWith);
+end;
+
+function TBoxHelper.GetWidth: Int32;
+begin
+  Result := (Self.X2 - Self.X1) + 1;
+end;
+
+function TBoxHelper.GetHeight: Int32;
+begin
+  Result := (Self.Y2 - Self.Y1) + 1;
+end;
+
+function TBoxHelper.Contains(X, Y, Width, Height: Int32): Boolean;
+begin
+  Result := (X >= Self.X1) and (Y >= Self.Y1) and (X + Width <= Self.X2) and (Y + Height <= Self.Y2);
+end;
+
 initialization
   BufferString := StrAlloc(524288);
   BufferLen := 524288;
+
 finalization
-  StrDispose(bufferstring);
+  StrDispose(BufferString);
 
 end.
 

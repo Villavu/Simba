@@ -49,12 +49,12 @@ end;
 
 function TOSWindow_Helper.GetClassName: WideString;
 begin
-  Result := UTF8Decode(XGetWindowClass(DefaultDisplay, Self));
+  Result := XGetWindowClass(DefaultDisplay, Self);
 end;
 
 function TOSWindow_Helper.GetTitle: WideString;
 begin
-  Result := UTF8Decode(XGetWindowTitle(DefaultDisplay, Self));
+  Result := XGetWindowTitle(DefaultDisplay, Self);
 end;
 
 function TOSWindow_Helper.GetBounds(out Bounds: TBox): Boolean;

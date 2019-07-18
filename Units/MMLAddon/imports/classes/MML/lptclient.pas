@@ -14,9 +14,8 @@ implementation
 
 uses
   client,
-  iomanager
-  {$IFDEF WINDOWS}, os_windows{$ENDIF}{$IFDEF LINUX}, os_linux{$ENDIF}
-  , files,
+  simba.iomanager,
+  files,
   bitmaps,
   dtm,
   ocr,
