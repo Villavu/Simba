@@ -13,10 +13,9 @@ procedure Register_TTarget(Compiler: TLapeCompiler);
 implementation
 
 uses
-  iomanager, graphics, MufasaTypes;
+  simba.target, graphics, mufasatypes, simba.iomanager;
 
 type
-  PTarget = ^TTarget;
   PColor = ^TColor;
   PRetData = ^TRetData;
   PClickType = ^TClickType;
@@ -161,7 +160,12 @@ end;
 
 procedure TTarget_GetHandle(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PPtrUInt(Result)^ := PTarget(Params^[0])^.GetHandle();
+  PPtrUInt(Result)^ := PTarget(Params^[0])^.Handle;
+end;
+
+procedure TTarget_SetHandle(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PTarget(Params^[0])^.Handle := PPtrUInt(Params^[1])^;
 end;
 
 //constructor Create();
@@ -174,6 +178,26 @@ end;
 procedure TTarget_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PTarget(Params^[0])^.Free();
+end;
+
+procedure TTarget_AddHandlerInvalidTarget(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PInt32(Result)^ := PTarget(Params^[0])^.AddHandlerInvalidTarget(TNotifyEvent(Params^[1]^));
+end;
+
+procedure TTarget_RemoveHandlerInvalidTarget(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PTarget(Params^[0])^.RemoveHandlerInvalidTarget(PInt32(Params^[1])^);
+end;
+
+procedure TTarget_SetAutoFocus(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PTarget(Params^[0])^.AutoFocus := PBoolean(Params^[1])^;
+end;
+
+procedure TTarget_GetAutoFocus(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PTarget(Params^[0])^.AutoFocus;
 end;
 
 procedure Register_TTarget(Compiler: TLapeCompiler);
@@ -209,6 +233,11 @@ begin
     addGlobalFunc('function TTarget.IsKeyHeld(key: integer): boolean; constref;', @TTarget_IsKeyHeld);
     addGlobalFunc('function TTarget.GetKeyCode(C : char): integer; constref;', @TTarget_GetKeyCode);
     addGlobalFunc('function TTarget.GetHandle(): PtrUInt; constref;', @TTarget_GetHandle);
+    addGlobalFunc('procedure TTarget.SetHandle(Value: PtrUInt); constref', @TTarget_SetHandle);
+    addGlobalFunc('function TTarget.AddHandlerInvalidTarget(Handler: TNotifyEvent): Int32; constref;', @TTarget_AddHandlerInvalidTarget);
+    addGlobalFunc('procedure TTarget.RemoveHandlerInvalidTarget(Index: Int32); constref;', @TTarget_RemoveHandlerInvalidTarget);
+    addGlobalFunc('procedure TTarget.SetAutoFocus(Value: Boolean); constref;', @TTarget_SetAutoFocus);
+    addGlobalFunc('function TTarget.GetAutoFocus: Boolean; constref;', @TTarget_GetAutoFocus);
     addGlobalFunc('procedure TTarget.Init();', @TTarget_Init);
     addGlobalFunc('procedure TTarget.Free(); constref;', @TTarget_Free);
   end;

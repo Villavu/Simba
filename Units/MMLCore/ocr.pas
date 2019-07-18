@@ -106,7 +106,7 @@ type
 implementation
 
 uses
-  colour_conv, client, tpa, mufasatypesutil, iomanager, syncobjs, newsimbasettings;
+  colour_conv, client, tpa, mufasatypesutil, simba.iomanager, syncobjs, newsimbasettings;
 
 var
   FontBuffer: TMFonts;
