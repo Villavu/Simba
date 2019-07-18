@@ -30,9 +30,7 @@ interface
 
 uses
   Classes, SysUtils, MufasaTypes,MufasaBase,
-  simba.iomanager, Files, Finder, Bitmaps, dtm, ocr, internets,
-  {$IFDEF MSWINDOWS} os_windows {$ENDIF}
-  {$IFDEF LINUX} os_linux {$ENDIF};
+  simba.iomanager, Files, Finder, Bitmaps, dtm, ocr, internets;
 
 (*
 

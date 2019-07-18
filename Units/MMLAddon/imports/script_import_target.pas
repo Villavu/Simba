@@ -11,7 +11,7 @@ implementation
 
 uses
   script_imports, script_thread, lpcompiler, lptypes, mufasatypes, simba.iomanager, bitmaps,
-  simba.target;
+  simba.target, simba.target_exported;
 
 procedure Lape_GetProcessID(const Params : PParamArray; const Result : Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin

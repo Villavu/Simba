@@ -13,7 +13,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.target, simba.oswindow, bitmaps, mufasatypes;
+  simba.target, simba.target_exported, simba.oswindow, bitmaps, mufasatypes;
 
 type
   TIOManager = class(TObject)
@@ -52,12 +52,12 @@ type
     procedure GetPosition(var Left, Top: Int32);
     procedure ActivateClient;
 
-    function IsFrozen: boolean;
+    function IsFrozen: Boolean;
     procedure SetFrozen(MakeFrozen: Boolean);
 
-    function MouseSetClientArea(X1, Y1, X2, Y2: Int32): boolean;
+    function MouseSetClientArea(X1, Y1, X2, Y2: Int32): Boolean;
     procedure MouseResetClientArea;
-    function ImageSetClientArea(X1, Y1, X2, Y2: Int32): boolean;
+    function ImageSetClientArea(X1, Y1, X2, Y2: Int32): Boolean;
     procedure ImageResetClientArea;
 
     procedure GetMousePos(var X, Y: Int32);
@@ -69,7 +69,7 @@ type
     procedure ReleaseMouse(X, Y, Button: Int32); overload;
     procedure ClickMouse(X, Y: Int32; Button: TClickType); overload;
     procedure ClickMouse(X, Y, Button: Int32); overload;
-    function IsMouseButtonDown(Button: TClickType): boolean; overload;
+    function IsMouseButtonDown(Button: TClickType): Boolean; overload;
     function IsMouseButtonDown(Button: Int32): Boolean; overload;
 
     procedure KeyUp(Key: Word);
@@ -102,10 +102,13 @@ type
 implementation
 
 uses
+  simba.target_raw,
+  simba.target_bitmap,
+  simba.target_eios,
   {$IFDEF WINDOWS}
-  os_windows
+  simba.target_windows
   {$ELSE}
-  os_linux
+  simba.target_linux
   {$ENDIF};
 
 constructor TIOManager.Create(PluginPath: String);
@@ -134,7 +137,7 @@ end;
 
 procedure TIOManager.SetDesktop;
 begin
-  SetBothTargets(TWindow.Create(GetDesktopWindow()));
+  SetBothTargets(TWindowTarget.Create(GetDesktopWindow()));
 end;
 
 procedure TIOManager.FreeTarget(Index: Int32);
@@ -164,7 +167,7 @@ begin
   end;
   if Result = -1 then
   begin
-    SetLength(FTargetArray,Length(FTargetArray) + 1);
+    SetLength(FTargetArray, Length(FTargetArray) + 1);
     Result := High(FTargetArray);
   end;
   FTargetArray[Result]:= Target;
@@ -217,38 +220,12 @@ end;
 
 function TIOManager.ExportImageTarget: TTarget_Exported;
 begin
-  FillChar(Result, SizeOf(TTarget_Exported) ,0);
-  with Result do
-  begin
-    Target := FImage;
-
-    GetTargetDimensions:= @TTarget_Exported_GetTargetDimensions;
-    GetTargetPosition := @TTarget_Exported_GetTargetPosition;
-    GetColor:= @TTarget_Exported_GetColor;
-    ReturnData := @TTarget_Exported_ReturnData;
-    FreeReturnData:= @TTarget_Exported_FreeReturnData;
-  end;
+  Result := FImage.ExportImageTarget();
 end;
 
 function TIOManager.ExportKeyMouseTarget: TTarget_Exported;
 begin
-  FillChar(Result, SizeOf(TTarget_Exported), 0);
-  with Result do
-  begin
-    Target := FKeyMouse;
-
-    GetMousePosition := @TTarget_Exported_GetMousePosition;
-    MoveMouse := @TTarget_Exported_MoveMouse;
-    ScrollMouse:= @TTarget_Exported_ScrollMouse;
-    HoldMouse := @TTarget_Exported_HoldMouse;
-    ReleaseMouse := @TTarget_Exported_ReleaseMouse;
-
-    SendString := @TTarget_Exported_SendString;
-    HoldKey := @TTarget_Exported_HoldKey;
-    ReleaseKey := @TTarget_Exported_ReleaseKey;
-    IsKeyHeld := @TTarget_Exported_IsKeyHeld;
-    GetKeyCode := @TTarget_Exported_GetKeyCode;
-  end;
+  Result := FKeyMouse.ExportKeyMouseTarget();
 end;
 
 function TIOManager.SetBothTargets(Target: TTarget): Int32;
@@ -286,7 +263,7 @@ begin
   end;
 end;
 
-function TIOManager.IsFrozen: boolean;
+function TIOManager.IsFrozen: Boolean;
 begin
   Result := FFrozen <> nil;
 end;
@@ -322,19 +299,16 @@ begin
 end;
 
 function TIOManager.SetTarget(Name, Data: String): Int32;
-var
-  Client: TEIOS_Client;
 begin
-  if not EIOSController.ClientExists(name) then
+  if not EIOSController.ClientExists(Name) then
     raise Exception.Create('EIOS Client by specified name does not exist');
-  Client := EIOSController.GetClient(name);
 
-  Result := SetBothTargets(TEIOS_Target.Create(Client, Data));
+  Result := SetBothTargets(TEIOS_Target.Create(EIOSController.GetClient(Name), Data));
 end;
 
 function TIOManager.SetTarget(Target: TOSWindow): Int32;
 begin
-  Result := SetBothTargets(TWindow.Create(Target));
+  Result := SetBothTargets(TWindowTarget.Create(Target));
 end;
 
 procedure TIOManager.SetImageTarget(Index: Int32);
@@ -383,7 +357,7 @@ begin
   {not sure if FImage needs activation or not, if its a native window FKeyMouse == FImage so it should be good.}
 end;
 
-function TIOManager.MouseSetClientArea(X1, Y1, X2, Y2: Int32): boolean;
+function TIOManager.MouseSetClientArea(X1, Y1, X2, Y2: Int32): Boolean;
 begin
   Result := FKeyMouse.MouseSetClientArea(X1, Y1, X2, Y2);
 end;
@@ -393,7 +367,7 @@ begin
   FKeyMouse.MouseResetClientArea();
 end;
 
-function TIOManager.ImageSetClientArea(X1, Y1, X2, Y2: Int32): boolean;
+function TIOManager.ImageSetClientArea(X1, Y1, X2, Y2: Int32): Boolean;
 begin
   Result := FImage.ImageSetClientArea(X1, Y1, X2, Y2);
 end;
@@ -452,7 +426,7 @@ begin
   ReleaseMouse(X, Y, TClickType(Button));
 end;
 
-function TIOManager.IsMouseButtonDown(Button: TClickType): boolean;
+function TIOManager.IsMouseButtonDown(Button: TClickType): Boolean;
 begin
   Result := FKeyMouse.IsMouseButtonHeld(Button);
 end;

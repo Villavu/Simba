@@ -12,7 +12,8 @@ implementation
 uses
   script_imports, lpcompiler, lptypes, script_thread,
   DCPcrypt2, DCPmd4, DCPmd5, DCPtiger, DCPsha1, DCPsha256, DCPsha512, DCPhaval, DCPripemd128, DCPripemd160, DCPrc2,
-  forms, tpa, mufasatypes, math {$IFDEF WINDOWS}, windows{$ENDIF};
+  forms, tpa, mufasatypes, math {$IFDEF WINDOWS}, windows{$ENDIF},
+  simba.iomanager;
 
 type
   THashType = (htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160,
@@ -256,6 +257,12 @@ begin
 {$ENDIF}
 end;
 
+//function SetTarget(target: TNativeWindow): integer; overload;
+procedure TIOManager_SetTargetHandle(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  Pinteger(Result)^ := TIOManager(Params^[0]^).SetTarget(PPtrUInt(Params^[1])^);
+end;
+
 procedure Lape_Import_Deprecated(Compiler: TLapeCompiler; Data: Pointer);
 begin
   with Compiler do
@@ -264,6 +271,7 @@ begin
 
     addGlobalFunc('function GetProcesses: TSysProcArr; deprecated ' + #39 + 'Use TOSWindow' + #39 + ';', @Lape_GetProcesses);
     addGlobalFunc('function TIOManager.GetProcesses: TSysProcArr; constref; deprecated ' + #39 + 'Use TOSWindow' + #39 + ';', @Lape_GetProcesses);
+    addGlobalFunc('function TIOManager.SetTarget2(target: TNativeWindow): integer; constref; deprecated ' + #39 + 'Use `TIOManager.SetTarget`' + #39, @TIOManager_SetTargetHandle);
 
     addGlobalFunc('procedure tSwap(var a, b: TPoint); deprecated ' + #39 + 'Replace with `Swap`' + #39 + ';', @Lape_tSwap);
     addGlobalFunc('procedure tpaSwap(var a, b: TPointArray); deprecated ' + #39 + 'Replace with `Swap`' + #39 + ';', @Lape_tpaSwap);

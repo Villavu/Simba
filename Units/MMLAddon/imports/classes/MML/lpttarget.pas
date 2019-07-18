@@ -13,7 +13,7 @@ procedure Register_TTarget(Compiler: TLapeCompiler);
 implementation
 
 uses
-  simba.target, graphics, mufasatypes;
+  simba.target, graphics, mufasatypes, simba.iomanager;
 
 type
   PColor = ^TColor;

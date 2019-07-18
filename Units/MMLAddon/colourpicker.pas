@@ -29,18 +29,8 @@ interface
 
 uses
   Classes, SysUtils, LCLIntf,LCLType,InterfaceBase,Forms,Controls,ExtCtrls,
-  Graphics,
-  {$IFDEF MSWINDOWS} os_windows, {$ENDIF}
-  {$IFDEF LINUX} os_linux, {$ENDIF}
-  MufasaTypes, colourhistory,bitmaps
-
-  {$IFNDEF PICKER_CLIENT}
-    {$IFDEF LINUX}
-    ,x
-    {$ENDIF}
-  {$ENDIF}
-  ;
-
+  Graphics, simba.iomanager,
+  MufasaTypes, colourhistory,bitmaps;
 
 type
   TMColorPicker = class(TObject)
@@ -102,7 +92,7 @@ var
 
 procedure TMColorPicker.Pick(Out C, X, Y: Integer);
 var
-   w, h: integer;
+   w, h, left, top: integer;
    p : TPoint;
    bmp2 : Graphics.TBitmap;
    bmp: TMufasaBitmap;
@@ -118,6 +108,8 @@ begin
   { Disable both of the color pick buttons }
   w := 0;
   h := 0;
+  Left := 0;
+  Top := 0;
   { If the target window isn't valid (closed etc), make the destkop the new window}
   if not Self.Manager.TargetValid then
     Self.Manager.SetDesktop;
@@ -126,7 +118,9 @@ begin
   Desktop := TIOManager.Create;
   Desktop.SetDesktop;
   Desktop.GetDimensions(w, h);
+  Desktop.GetPosition(Left, Top);
 
+;
 {  Application.MainForm.Enabled := False;
   ColourHistoryForm.Enabled := False;}
 
@@ -139,8 +133,8 @@ begin
   { Set the form's dimensions to match that of the screen }
   ScreenForm.Width := w;
   ScreenForm.Height := h;
-  ScreenForm.Top := 0;
-  ScreenForm.left := 0;
+  ScreenForm.Left := Left;
+  ScreenForm.Top := Top;
   //ScreenForm.WindowState := wsmaximized; {Dual screen problems}
   ScreenForm.BorderStyle:= bsNone;
 //  ScreenForm.FormStyle := fsStayOnTop;  {Runescape generates new handle ;-)}

@@ -203,8 +203,13 @@ operator +(Left: TOSWindowArray; Right: TOSWindowArray): TOSWindowArray;
 begin
   SetLength(Result, Length(Left) + Length(Right));
 
-  Move(Left[0], Result[0], Length(Left) * SizeOf(TOSWindow));
-  Move(Right[0], Result[Length(Left)], Length(Right) * SizeOf(TOSWindow));
+  if Length(Result) > 0 then
+  begin
+    if Length(Left) > 0 then
+      Move(Left[0], Result[0], Length(Left) * SizeOf(TOSWindow));
+    if Length(Right) > 0 then
+      Move(Right[0], Result[Length(Left)], Length(Right) * SizeOf(TOSWindow));
+  end;
 end;
 
 initialization

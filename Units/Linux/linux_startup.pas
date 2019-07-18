@@ -5,12 +5,12 @@ unit linux_startup;
 interface
 
 uses
-  xlib, pthreads;
+  pthreads, xlib;
 
 implementation
 
 initialization
-  XInitThreads(); // for xlib usage on the script thread
+  XInitThreads();
 
   pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, nil); // for script thread force terminate
 
