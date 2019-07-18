@@ -10,7 +10,7 @@ end;
 
 function TOSWindow_Helper.IsActive: Boolean;
 begin
-  Result := GetForegroundWindow() = Self.GetRootWindow();
+  Result := (GetForegroundWindow() = Self.GetRootWindow()) or (Self = GetDesktopWindow());
 end;
 
 function TOSWindow_Helper.IsActive(Time: Int32): Boolean;

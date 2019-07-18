@@ -453,7 +453,7 @@ begin
     addGlobalMethod('function CreateMirroredBitmapEx(Bmp: Int32; MirrorStyle: TBmpMirrorStyle): Int32', @Lape_CreateMirroredBitmapEx, Data);
     addGlobalMethod('function FastGetPixel(bmp,x,y: Int32): LongWord', @Lape_FastGetPixel, Data);
     addGlobalMethod('function FastGetPixels(bmp: Int32; TPA: TPointArray): TIntegerArray', @Lape_FastGetPixels, Data);
-    addGlobalMethod('function GetBitmapAreaColors(bmp,xs, ys, xe, ye: Int32): TIntegerArray', @Lape_GetBitmapAreaColors, Data);
+    addGlobalMethod('function GetBitmapAreaColors(bmp,xs, ys, xe, ye: Int32): T2DIntegerArray', @Lape_GetBitmapAreaColors, Data);
     addGlobalMethod('function FindColorsBitmap(bmp: Int32; var points: TPointArray; const color: Int32): boolean;', @Lape_FindColorsBitmap, Data);
     addGlobalMethod('procedure FastSetPixel(Bmp,x,y: Int32; Color: TColor);', @Lape_FastSetPixel, Data);
     addGlobalMethod('procedure FastSetPixels(Bmp: Int32; TPA: TPointArray; Colors: TIntegerArray);', @Lape_FastSetPixels, Data);

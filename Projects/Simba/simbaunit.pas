@@ -30,14 +30,14 @@ interface
 
 uses
   {$IFDEF LINUX}cthreads, cmem, pthreads,{$ENDIF}
+  {$IFDEF WINDOWS}windows,{$ENDIF}
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit, SynHighlighterLape,
   mufasabase, MufasaTypes,
   synedittypes,
   script_thread, file_browser,
 
-  {$IFDEF MSWINDOWS} os_windows, windows, {$ENDIF} //For ColorPicker etc.
-  {$IFDEF LINUX} os_linux, {$ENDIF} //For ColorPicker etc.
+  simba.iomanager,
 
   colourpicker, Clipbrd, // We need these for the Colour Picker and Window Selector
 

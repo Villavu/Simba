@@ -34,9 +34,7 @@ uses
   lpTMFont, lpTMFonts,
   lpTMOCR,
   lpTTarget,
-  lpTIOManager_Abstract,
-  {$IFDEF WINDOWS} lpTIOManager_Windows {$ENDIF}
-  {$IFDEF LINUX} lpTIOManager_Linux {$ENDIF},
+  lpTIOManager,
   lpTClient,
   lpTMMLSettingsSandbox,
   lpTMMLTimer,
@@ -87,7 +85,6 @@ begin
   Register_TTarget(Compiler);
 
   { MML IOManager }
-  Register_TIOManager_Abstract(Compiler);
   Register_TIOManager(Compiler);
 
   { MML Client }

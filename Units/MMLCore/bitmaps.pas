@@ -175,7 +175,7 @@ implementation
 uses
   paszlib, DCPbase64, math,
   client, tpa,
-  colour_conv, IOManager, mufasatypesutil,
+  colour_conv, simba.iomanager, mufasatypesutil,
   FileUtil, LazUTF8,
   matchTempl, matrix;
 
@@ -1241,9 +1241,10 @@ end;
 
 procedure TMufasaBitmap.CopyClientToBitmap(MWindow : TObject;Resize : boolean; xs, ys, xe, ye: Integer);
 var
-  y : integer;
-  wi,hi : integer;
-  PtrRet : TRetData;
+  y: integer;
+  wi,hi: integer;
+  Data: TRetData;
+  TargetWidth, TargetHeight: Int32;
 begin
   if Resize then
     Self.SetSize(xe-xs+1,ye-ys+1);
@@ -1251,29 +1252,68 @@ begin
   wi := Min(xe-xs + 1,Self.w);
   hi := Min(ye-ys + 1,Self.h);
 
-  PtrRet := TIOManager_Abstract(MWindow).ReturnData(xs,ys,wi,hi);
+  TIOManager(MWindow).GetDimensions(TargetWidth, TargetHeight);
+  if (xs + wi > TargetWidth) or (ys + hi > TargetHeight) then
+  begin
+    if (FList <> nil) and (FList.Client <> nil) then
+      TClient(FList.Client).WriteLn('Warning! The area passed to `CopyClientToBitmap` exceeds the clients bounds');
 
-  for y := 0 to (hi-1) do
-    Move(PtrRet.Ptr[y * PtrRet.RowLen], FData[y * self.w],wi * SizeOf(TRGB32));
-  TIOManager_Abstract(MWindow).FreeReturnData;
+    xe := Min(xe, TargetWidth - 1);
+    ye := Min(ye, TargetHeight - 1);
+  end;
+
+  Data := TIOManager(MWindow).ReturnData(xs,ys,wi,hi);
+
+  if (Data = NullReturnData) then
+  begin
+    if (FList <> nil) and (FList.Client <> nil) then
+      TClient(FList.Client).WriteLn('Warning! ReturnData returned null');
+  end else
+  begin
+    for y := 0 to (hi-1) do
+      Move(Data.Ptr[y * Data.RowLen], FData[y * self.w],wi * SizeOf(TRGB32));
+    
+    TIOManager(MWindow).FreeReturnData();
+  end;
 end;
 
-procedure TMufasaBitmap.CopyClientToBitmap(MWindow: TObject; Resize: boolean;
-  x, y: integer; xs, ys, xe, ye: Integer);
+procedure TMufasaBitmap.CopyClientToBitmap(MWindow: TObject; Resize: boolean; x, y: integer; xs, ys, xe, ye: Integer);
 var
   yy : integer;
   wi,hi : integer;
-  PtrRet : TRetData;
+  Data: TRetData;
+  TargetWidth, TargetHeight: Int32;
 begin
   if Resize then
     Self.SetSize(xe-xs+1 + x,ye-ys+1 + y);
+
   ValidatePoint(x,y);
   wi := Min(xe-xs + 1 + x,Self.w)-x;
   hi := Min(ye-ys + 1 + y,Self.h)-y;
-  PtrRet := TIOManager_Abstract(MWindow).ReturnData(xs,ys,wi,hi);
-  for yy := 0 to (hi-1) do
-    Move(PtrRet.Ptr[yy * (PtrRet.RowLen)], FData[(yy + y) * self.w + x],wi * SizeOf(TRGB32));
-  TIOManager_Abstract(MWindow).FreeReturnData;
+
+  TIOManager(MWindow).GetDimensions(TargetWidth, TargetHeight);
+  if (xs + wi > TargetWidth) or (ys + hi > TargetHeight) then
+  begin
+    if (FList <> nil) and (FList.Client <> nil) then
+      TClient(FList.Client).WriteLn('Warning! The area passed to `CopyClientToBitmap` exceeds the clients bounds');
+
+    xe := Min(xe, TargetWidth - 1);
+    ye := Min(ye, TargetHeight - 1);
+  end;
+
+  Data := TIOManager(MWindow).ReturnData(xs,ys,wi,hi);
+
+  if (Data = NullReturnData) then
+  begin
+    if (FList <> nil) and (FList.Client <> nil) then
+      TClient(FList.Client).WriteLn('Warning! ReturnData returned null');
+  end else
+  begin
+    for yy := 0 to (hi-1) do
+      Move(Data.Ptr[yy * (Data.RowLen)], FData[(yy + y) * self.w + x], wi * SizeOf(TRGB32));
+
+    TIOManager(MWindow).FreeReturnData();
+  end;
 end;
 
 

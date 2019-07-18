@@ -12,7 +12,8 @@ implementation
 uses
   script_imports, lpcompiler, lptypes, script_thread,
   DCPcrypt2, DCPmd4, DCPmd5, DCPtiger, DCPsha1, DCPsha256, DCPsha512, DCPhaval, DCPripemd128, DCPripemd160, DCPrc2,
-  forms, tpa, mufasatypes, math;
+  forms, tpa, mufasatypes, math {$IFDEF WINDOWS}, windows{$ENDIF},
+  simba.iomanager;
 
 type
   THashType = (htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160,
@@ -210,12 +211,56 @@ end;
 
 procedure Lape_MinE(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PExtended(Result)^ := Min(PExtended(Params^[0])^, PExtended(Params^[1])^);
+  PExtended(Result)^ := Math.Min(PExtended(Params^[0])^, PExtended(Params^[1])^);
 end;
 
 procedure Lape_MaxE(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PExtended(Result)^ := Max(PExtended(Params^[0])^, PExtended(Params^[1])^);
+  PExtended(Result)^ := Math.Max(PExtended(Params^[0])^, PExtended(Params^[1])^);
+end;
+
+{$IFDEF WINDOWS}
+threadvar
+  ProcArr: TSysProcArr;
+
+function EnumProcess(WindowHandle: HWND; Param: LPARAM): WINBOOL; stdcall;
+var
+  I: integer;
+  pPid: DWORD;
+  r: TRect;
+begin
+  Result := (not ((WindowHandle = 0) or (WindowHandle = null)));
+  if ((Result) and (IsWindowVisible(WindowHandle))) then
+  begin
+    I := Length(ProcArr);
+    SetLength(ProcArr, I + 1);
+    ProcArr[I].Handle := WindowHandle;
+    SetLength(ProcArr[I].Title, 255);
+    SetLength(ProcArr[I].Title, GetWindowTextW(WindowHandle, PWideChar(ProcArr[I].Title), Length(ProcArr[I].Title)));
+    GetWindowRect(WindowHandle, R);
+    ProcArr[i].Width := R.Right - R.Left;
+    ProcArr[i].Height := R.Bottom - R.Top;
+    GetWindowThreadProcessId(WindowHandle, pPid);
+    ProcArr[I].Pid := pPid;
+  end;
+end;
+{$ENDIF}
+
+procedure Lape_GetProcesses(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+{$IFDEF WINDOWS}
+  SetLength(ProcArr, 0);
+  EnumWindows(@EnumProcess, 0);
+  TSysProcArr(Result^) := ProcArr;
+{$ELSE}
+  raise Exception.Create('GetProcesses is not available on this platform');
+{$ENDIF}
+end;
+
+//function SetTarget(target: TNativeWindow): integer; overload;
+procedure TIOManager_SetTargetHandle(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  Pinteger(Result)^ := TIOManager(Params^[0]^).SetTarget(PPtrUInt(Params^[1])^);
 end;
 
 procedure Lape_Import_Deprecated(Compiler: TLapeCompiler; Data: Pointer);
@@ -223,6 +268,10 @@ begin
   with Compiler do
   begin
     addGlobalType('(htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160, htSHA1, htSHA256, htSHA384, htSHA512, htTiger)', 'THashType');
+
+    addGlobalFunc('function GetProcesses: TSysProcArr; deprecated ' + #39 + 'Use TOSWindow' + #39 + ';', @Lape_GetProcesses);
+    addGlobalFunc('function TIOManager.GetProcesses: TSysProcArr; constref; deprecated ' + #39 + 'Use TOSWindow' + #39 + ';', @Lape_GetProcesses);
+    addGlobalFunc('function TIOManager.SetTarget2(target: TNativeWindow): integer; constref; deprecated ' + #39 + 'Use `TIOManager.SetTarget`' + #39, @TIOManager_SetTargetHandle);
 
     addGlobalFunc('procedure tSwap(var a, b: TPoint); deprecated ' + #39 + 'Replace with `Swap`' + #39 + ';', @Lape_tSwap);
     addGlobalFunc('procedure tpaSwap(var a, b: TPointArray); deprecated ' + #39 + 'Replace with `Swap`' + #39 + ';', @Lape_tpaSwap);
