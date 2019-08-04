@@ -39,7 +39,7 @@ function UnTar(const Input : TStream;const outputdir : string; overwrite : boole
 
 procedure ConvertTime(Time : int64; var h,m,s : integer);
 procedure ConvertTime64(time: int64; var y, m, w, d, h, min, s: integer);
-function FormatTime(Milliseconds: Int64): String;
+function TimeStamp(Time: Int64): String;
 function MarkTime: Double;
 
 type
@@ -326,21 +326,18 @@ begin
   x := x mod (1000);
 end;
 
-function FormatTime(Milliseconds: Int64): String;
-
-  function Pad(Value: Int32): String;
-  begin
-    Result := IntToStr(Value);
-    if Length(Result) = 1 then
-      Result := '0' + Result;
-  end;
-
+function TimeStamp(Time: Int64): String;
 var
-  H, M, S: Int32;
+  Hours, Mins, Secs: Int32;
 begin
-  ConvertTime(Milliseconds, H, M, S);
+  Hours := Time div 3600000;
+  Time  := Time mod 3600000;
+  Mins  := Time div 60000;
+  Time  := Time mod 60000;
+  Secs  := Time div 1000;
+  Time  := Time mod 1000;
 
-  Result := Format('[%s:%s:%s]', [Pad(H), Pad(M), Pad(S)]);
+  Result := Format('[%.2d:%.2d:%.2d:%.3d] ', [Hours, Mins, Secs, Time]);
 end;
 
 function MarkTime: Double;
