@@ -80,6 +80,7 @@ type
     function GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing, color, tol, len: integer; font: string): string;overload;
     function GetTextAt(xs, ys, xe, ye, minvspacing, maxvspacing, hspacing, color, tol: integer; font: string): string;overload;
     function GetTextATPA(const ATPA: T2DPointArray; const maxvspacing: integer; font: string): string;
+    function TextToFontMatrix(Text, Font: String): TIntegerMatrix;
     function TextToFontTPA(Text: String; Data: TOCRData; out W, H: Int32): TPointArray; overload;
     function TextToFontTPA(Text, Font: String; out W, H: Int32): TPointArray; overload;
     function TextToFontTPA(Text: String; Font: TFont; out W, H: Int32): TPointArray; overload;
@@ -1137,39 +1138,119 @@ begin
 
 end;
 
+function TMOCR.TextToFontMatrix(Text, Font: String): TIntegerMatrix;
+var
+  Character, X, Y, i: Int32;
+  Glyph: TocrGlyphMetric;
+  Data: TocrData;
+  Bounds: TBox;
+begin
+  Data := Self.GetFont(Font);
+
+  Bounds.X1 := 0;
+  Bounds.Y1 := $FFFFFF;
+  Bounds.X2 := 0;
+  Bounds.Y2 := -$FFFFFF;
+
+  for i := 1 to Length(Text) do
+  begin
+    Character := Ord(Text[i]);
+    if (not (Character in [0..255])) then
+      Continue;
+    Glyph := Data.ascii[Character];
+    if not Glyph.inited then
+      Continue;
+
+    if (Character <> 32) then
+    begin
+      if (Glyph.YOff < Bounds.Y1) then
+        Bounds.Y1 := Glyph.YOff;
+      if (Glyph.Bottom > Bounds.Y2) then
+        Bounds.Y2 := Glyph.Bottom;
+    end;
+
+    Bounds.X2 := Bounds.X2 + Glyph.Width;
+  end;
+
+  SetLength(Result, Bounds.Height, Bounds.Width - 1);
+
+  Bounds.X1 := 0;
+  Bounds.X2 := 0;
+
+  for i := 1 to Length(Text) do
+  begin
+    Character := Ord(Text[i]);
+    if (not (Character in [0..255])) then
+      Continue;
+    Glyph := Data.ascii[Character];
+    if not Glyph.inited then
+      Continue;
+
+    if (Character = 32) then
+    begin
+      for Y := Bounds.Y1 to Bounds.Y2 do
+        for X := 0 to Glyph.Width - 1 do
+          Result[Y + Glyph.YOff - Bounds.Y1][X + Bounds.X2 + Glyph.XOff] := $00FF00;
+    end else
+    begin
+      for Y := 0 to Data.Height - 1 do
+        for X := 0 to Data.Width - 1 do
+        begin
+          if Data.Pos[Glyph.Index][X + Y * Data.Width] = 1 then
+            Result[Y + Glyph.YOff - Bounds.Y1][X + Bounds.X2 + Glyph.XOff] := $0000FF;
+        end;
+    end;
+
+    Bounds.X2 := Bounds.X2 + Glyph.Width;
+  end;
+end;
+
 function TMOCR.TextToFontTPA(Text: String; Data: TOCRData; out W, H: Int32): TPointArray;
 var
   c, i, x, y, off: Integer;
   d: TocrGlyphMetric;
-  an: integer;
+  Character: integer;
+  Count, Size: Int32;
 begin
   c := 0;
   off := 0;
-  SetLength(Result, 0);
+
+  Count := 0;
+  Size := 128;
+  SetLength(Result, Size);
+
   for i := 1 to Length(text) do
   begin
-    an := Ord(Text[i]);
-    if not InRange(an, 0, 255) then
+    Character := Ord(Text[i]);
+    if (not (Character in [0..255])) then
       Continue;
-    d := Data.ascii[an];
+    d := Data.ascii[Character];
     if not d.inited then
       Continue;
 
-    SetLength(Result, c + d.width * d.height);
     for y := 0 to Data.height - 1 do
       for x := 0 to Data.width - 1 do
       begin
         if Data.pos[d.index][x + y * Data.width] = 1 then
         begin
-          Result[c] := Point(x + off + d.xoff, y + d.yoff);
-          Inc(c);
+          Result[Count] := Point(x + off + d.xoff, y + d.yoff);
+          Inc(Count);
+
+          if (Count = Size) then
+          begin
+            Size := Size * 2;
+            SetLength(Result, Size);
+          end;
         end;
       end;
-    SetLength(Result, c);
+
     off := off + d.width;
   end;
-  w := off;
-  h := d.height;
+
+  SetLength(Result, Count);
+
+  W := off;
+  H := d.height;
 end;
 
 (*

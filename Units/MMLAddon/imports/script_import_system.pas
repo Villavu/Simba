@@ -101,6 +101,8 @@ begin
     addGlobalType('Int32', 'TColor');
     addGlobalType('UInt32', 'DWord');
 
+    addGlobalType('array of TIntegerArray', 'TIntegerMatrix');
+
   //template matching & misc float matrix
     addGlobalType('array of Single', 'TSingleArray');
     addGlobalType('array of TSingleArray', 'TSingleMatrix');

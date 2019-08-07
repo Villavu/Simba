@@ -236,6 +236,36 @@ begin
     PBoolean(Result)^ := MFinder.FindTemplate(TMufasaBitmap(Params^[1]^), Int32(Params^[2]^), Int32(Params^[3]^), ETMFormula(Params^[4]^), Int32(Params^[5]^), Int32(Params^[6]^), Int32(Params^[7]^), Int32(Params^[8]^), Extended(Params^[9]^), Boolean(Params^[10]^));
 end;
 
+procedure Lape_FindTextMatrix(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  with TMMLScriptThread(Params^[0]).Client do
+    PSingle(Result)^ := MFinder.FindTextMatrix(PString(Params^[1])^, PString(Params^[2])^, P2DIntegerArray(Params^[3])^, PBox(Params^[4])^);
+end;
+
+procedure Lape_FindTextColor(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  with TMMLScriptThread(Params^[0]).Client do
+    PSingle(Result)^ := MFinder.FindTextColor(PString(Params^[1])^, PString(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^, PInt32(Params^[8])^, PBox(Params^[9])^);
+end;
+
+procedure Lape_FindTextColorEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  with TMMLScriptThread(Params^[0]).Client do
+    PBoolean(Result)^ := MFinder.FindTextColor(PString(Params^[1])^, PString(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^, PInt32(Params^[8])^, PSingle(Params^[9])^);
+end;
+
+procedure Lape_FindText(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  with TMMLScriptThread(Params^[0]).Client do
+    PSingle(Result)^ := MFinder.FindText(PString(Params^[1])^, PString(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PBox(Params^[7])^);
+end;
+
+procedure Lape_FindTextEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  with TMMLScriptThread(Params^[0]).Client do
+    PBoolean(Result)^ := MFinder.FindText(PString(Params^[1])^, PString(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PSingle(Params^[7])^);
+end;
+
 procedure Lape_Import_Finder(Compiler: TLapeCompiler; Data: Pointer);
 begin
   with Compiler do
@@ -278,6 +308,12 @@ begin
     
     addGlobalMethod('function FindTemplate(Templ: TMufasaBitmap; out x, y: Int32; Formula: ETMFormula; xs,ys,xe,ye: Int32; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @Lape_FindTemplate, Data);
     addGlobalMethod('function FindTemplateEx(Templ: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; xs,ys,xe,ye: Int32; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @Lape_FindTemplateEx, Data);
+
+    addGlobalMethod('function FindTextMatrix(Text, Font: String; constref Matrix: T2DIntegerArray; out Bounds: TBox): Single;', @Lape_FindTextMatrix, Data);
+    addGlobalMethod('function FindTextColor(Text, Font: String; Color, Tolerance: Int32; X1, Y1, X2, Y2: Int32; out Bounds: TBox): Single; overload;', @Lape_FindTextColor, Data);
+    addGlobalMethod('function FindTextColor(Text, Font: String; Color, Tolerance: Int32; X1, Y1, X2, Y2: Int32; MinMatch: Single = 1): Boolean; overload;', @Lape_FindTextColorEx, Data);
+    addGlobalMethod('function FindText(Text, Font: String; X1, Y1, X2, Y2: Int32; out Bounds: TBox): Single; overload;', @Lape_FindText, Data);
+    addGlobalMethod('function FindText(Text, Font: String; X1, Y1, X2, Y2: Int32; MinMatch: Single = 1): Boolean; overload;', @Lape_FindTextEx, Data);
   end;
 end;
 

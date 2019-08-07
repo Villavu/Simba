@@ -46,6 +46,7 @@ type
     function GetColor(X, Y: Int32): Int32;
     function CopyData(X, Y, Width, Height: Int32): PRGB32;
     function ReturnData(X, Y, Width, Height: Int32): TRetData;
+    function ReturnMatrix(X, Y, Width, Height: Int32): TIntegerMatrix;
     procedure FreeReturnData;
 
     procedure GetDimensions(out Width, Height: Int32);
@@ -298,6 +299,11 @@ end;
 function TIOManager.ReturnData(X, Y, Width, Height: Int32): TRetData;
 begin
   Result := FImage.ReturnData(X, Y, Width, Height);
+end;
+
+function TIOManager.ReturnMatrix(X, Y, Width, Height: Int32): TIntegerMatrix;
+begin
+  Result := FImage.ReturnMatrix(X, Y, Width, Height);
 end;
 
 procedure TIOManager.FreeReturnData;

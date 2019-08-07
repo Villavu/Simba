@@ -142,6 +142,9 @@ type
   PSingleMatrix = ^TSingleMatrix;
   TSingleMatrix = array of TSingleArray;
 
+  PIntegerMatrix = ^TIntegerMatrix;
+  TIntegerMatrix = array of TIntegerArray;
+
   ETMFormula  = (TM_CCORR, TM_CCORR_NORMED, TM_CCOEFF, TM_CCOEFF_NORMED, TM_SQDIFF, TM_SQDIFF_NORMED);
   EComparator = (__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__);
 
