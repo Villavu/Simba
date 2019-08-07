@@ -68,6 +68,7 @@ type
     function GetColor(X, Y: Int32): Int32; virtual;
     function CopyData(X, Y, Width, Height: Int32): PRGB32; virtual;
     function ReturnData(X, Y, Width, Height: Int32): TRetData; virtual;
+    function ReturnMatrix(X, Y, Width, Height: Int32): TIntegerMatrix; virtual;
     procedure FreeReturnData; virtual;
 
     // Mouse
@@ -168,6 +169,37 @@ end;
 function TTarget.ReturnData(X, Y, Width, Height: Int32): TRetData;
 begin
   raise Exception.Create('ReturnData not available for this target');
+end;
+
+function TTarget.ReturnMatrix(X, Y, Width, Height: Int32): TIntegerMatrix;
+var
+  Data: TRetData;
+  Ptr: PRGB32;
+  Upper: PtrUInt;
+begin
+  Result := Default(TIntegerMatrix);
+
+  Data := ReturnData(X, Y, Width, Height);
+
+  if Data <> NullReturnData then
+  begin
+    Ptr := Data.Ptr;
+
+    // Clear alpha
+    Upper := PtrUInt(@Ptr[Width * Height - 1]);
+    while PtrUInt(Ptr) <= Upper do
+    begin
+      Ptr^.A := 0;
+
+      Inc(Ptr);
+    end;
+
+    SetLength(Result, Height, Width);
+    for Y := 0 to Height - 1 do
+      Move(Data.Ptr[Y * Data.RowLen], Result[Y, 0], Width * SizeOf(TRGB32));
+  end;
+
+  FreeReturnData();
 end;
 
 procedure TTarget.FreeReturnData;
