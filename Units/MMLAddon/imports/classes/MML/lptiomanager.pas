@@ -66,6 +66,11 @@ begin
   PColor(Result)^ := PIOManager(Params^[0])^.GetColor(Pinteger(Params^[1])^, Pinteger(Params^[2])^);
 end;
 
+procedure TIOManager_ReturnMatrix(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PIntegerMatrix(Result)^ := PIOManager(Params^[0])^.ReturnMatrix(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+end;
+
 //function ReturnData(xs, ys, width, height: Integer): TRetData;
 procedure TIOManager_ReturnData(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -310,7 +315,8 @@ begin
     addGlobalFunc('function TIOManager.TargetValid(): Boolean; constref;', @TIOManager_TargetValid);
     addGlobalFunc('function TIOManager.GetColor(x,y : integer): TColor; constref;', @TIOManager_GetColor);
     addGlobalFunc('function TIOManager.CopyData(X, Y, Width, Height: Integer): PRGB32; constref;', @TIOManager_CopyData);
-    addGlobalFunc('function TIOManager.ReturnData(xs, ys, width, height: Integer): TRetData; constref;', @TIOManager_ReturnData);
+    addGlobalFunc('function TIOManager.ReturnMatrix(X, Y, Width, Height: Integer): TIntegerMatrix; constref;', @TIOManager_ReturnMatrix);
+    addGlobalFunc('function TIOManager.ReturnData(X, Y, Width, Height: Integer): TRetData; constref;', @TIOManager_ReturnData);
     addGlobalFunc('procedure TIOManager.FreeReturnData(); constref;', @TIOManager_FreeReturnData);
     addGlobalFunc('procedure TIOManager.GetDimensions(out W, H: Integer); constref;', @TIOManager_GetDimensions);
     addGlobalFunc('procedure TIOManager.GetPosition(var Left, Top: Integer); constref;', @TIOManager_GetPosition);

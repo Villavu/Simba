@@ -44,6 +44,7 @@ type
   TocrGlyphMetric = record
     xoff,yoff: integer; { xoff and yoff (only on the left side, afaik
                           correspond to l and t (see InitOCR) }
+    bottom: integer;
     width,height: integer;
     index: integer; //stores the internal TocrData index for this char
     { Index is never used }
@@ -328,6 +329,7 @@ begin
     { These are not changed by the loop }
     result.ascii[ord(ascii)].width:= masks[i].width;
     result.ascii[ord(ascii)].height:= masks[i].height;
+    result.ascii[ord(ascii)].bottom := masks[i].b;
 
     { Done }
     result.ascii[ord(ascii)].inited:= true;

@@ -96,8 +96,11 @@ type
   public
     WarnOnly: Boolean;
 
-    procedure DefaultOperations(var xs,ys,xe,ye : Integer);
+    procedure DefaultOperations(var xs, ys, xe, ye: Integer);
+
     function GetData(out Data: TRetData; var xs, ys, xe, ye: Int32): Boolean;
+    function GetMatrix(out Matrix: T2DIntegerArray; xs, ys, xe, ye: Int32): Boolean;
+
     function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
     function CountColor(Color, xs, ys, xe, ye: Integer): Integer;
     function SimilarColors(Color1,Color2,Tolerance : Integer) : Boolean;
@@ -128,6 +131,12 @@ type
 
     function FindTemplateEx(TemplImage: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula;   xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
     function FindTemplate(TemplImage: TMufasaBitmap; out X,Y: Integer; Formula: ETMFormula;  xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
+
+    function FindTextMatrix(Text, Font: String; Matrix: T2DIntegerArray; out Bounds: TBox): Single;
+    function FindTextColor(Text, Font: String; Color, Tolerance: Int32; X1, Y1, X2, Y2: Int32; out Bounds: TBox): Single; overload;
+    function FindTextColor(Text, Font: String; Color, Tolerance: Int32; X1, Y1, X2, Y2: Int32; MinMatch: Single = 1): Boolean; overload;
+    function FindText(Text, Font: String; X1, Y1, X2, Y2: Int32; out Bounds: TBox): Single; overload;
+    function FindText(Text, Font: String; X1, Y1, X2, Y2: Int32; MinMatch: Single = 1): Boolean; overload;
 
     function FindDTM(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
     function FindDTMs(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2 : Integer; maxToFind: Integer = 0): Boolean;
@@ -729,9 +738,20 @@ begin
 
   Data := TClient(Self.Client).IOManager.ReturnData(xs, ys, xe - xs + 1, ye - ys + 1);
   if (Data = NullReturnData) then
-    Error('Warning! ReturnData returned null. Is the window resizing?', []);
+    Error('Warning! ReturnData returned null. Is the target resizing?', []);
 
-  Result := Data.Ptr <> nil;
+  Result := Data <> NullReturnData;
+end;
+
+function TMFinder.GetMatrix(out Matrix: T2DIntegerArray; xs, ys, xe, ye: Int32): Boolean;
+begin
+  DefaultOperations(xs, ys, xe, ye);
+
+  Matrix := TClient(Self.Client).IOManager.ReturnMatrix(xs, ys, xe - xs + 1, ye - ys + 1);
+  if (Length(Matrix) = 0) then
+    Error('Warning! ReturnMatrix returned null. Is the target resizing?', []);
+
+  Result := Length(Matrix) > 0;
 end;
 
 function TMFinder.SimilarColors(Color1, Color2, Tolerance: Integer) : Boolean;
@@ -1581,6 +1601,178 @@ begin
     X := -1;
     Y := -1;
   end;
+end;
+
+function TMFinder.FindTextMatrix(Text, Font: String; Matrix: T2DIntegerArray; out Bounds: TBox): Single;
+var
+  X, Y, Color, Bad, dX, dY, i: Int32;
+  P: TPoint;
+  Match: Single;
+  TextMatrix: T2DIntegerArray;
+  CharacterIndices, OtherIndices: TPointArray;
+  CharacterCount, OtherCount: Int32;
+label
+  NotFound;
+begin
+  Result := 0;
+
+  TextMatrix := TClient(Self.Client).MOCR.TextToFontMatrix(Text, Font);
+
+  if Length(TextMatrix) > 0 then
+  begin
+    SetLength(CharacterIndices, Length(TextMatrix[0]) * Length(TextMatrix));
+    SetLength(OtherIndices, Length(TextMatrix[0]) * Length(TextMatrix));
+
+    CharacterCount := 0;
+    OtherCount := 0;
+
+    for Y := 0 to High(TextMatrix) do
+      for X := 0 to High(TextMatrix[0]) do
+        if TextMatrix[Y][X] = $0000FF then
+        begin
+          CharacterIndices[CharacterCount].X := X;
+          CharacterIndices[CharacterCount].Y := Y;
+
+          Inc(CharacterCount);
+        end else
+        begin
+          OtherIndices[OtherCount].X := X;
+          OtherIndices[OtherCount].Y := Y;
+
+          Inc(OtherCount);
+        end;
+
+    CharacterCount := CharacterCount - 1;
+    OtherCount := OtherCount - 1;
+
+    if Length(CharacterIndices) > 0 then
+    begin
+      dX := Length(Matrix[0]) - Length(TextMatrix[0]);
+      dY := Length(Matrix) - Length(TextMatrix);
+
+      for Y := 0 to dY do
+        for X := 0 to dX do
+        begin
+          P.Y := Y + CharacterIndices[0].Y;
+          P.X := X + CharacterIndices[0].X;
+
+          Color := Matrix[P.Y][P.X];
+          if (Color = -1) then
+            Continue;
+
+          for i := 1 to CharacterCount do
+          begin
+            P.Y := Y + CharacterIndices[i].Y;
+            P.X := X + CharacterIndices[i].X;
+
+            if (Matrix[P.Y][P.X] <> Color) then
+              goto NotFound;
+          end;
+
+          Bad := 0;
+
+          for i := 0 to OtherCount do
+          begin
+            P.Y := Y + OtherIndices[i].Y;
+            P.X := X + OtherIndices[i].X;
+
+            if (Matrix[P.Y][P.X] = Color) then
+              Inc(Bad);
+          end;
+
+          Match := 1 - (Bad / OtherCount);
+
+          if Match > Result then
+          begin
+            Result := Match;
+
+            Bounds.X1 := X;
+            Bounds.Y1 := Y;
+            Bounds.X2 := X + High(TextMatrix[0]);
+            Bounds.Y2 := Y + High(TextMatrix);
+
+            if Result = 1 then
+              Exit;
+          end;
+
+          NotFound:
+        end;
+    end;
+  end;
+end;
+
+function TMFinder.FindTextColor(Text, Font: String; Color, Tolerance: Int32; X1, Y1, X2, Y2: Int32; out Bounds: TBox): Single;
+var
+  W, H, X, Y: Int32;
+  Matrix: T2DIntegerArray;
+  CTSInfo: Pointer;
+  CTSCompare: TCTSCompareFunction;
+begin
+  Result := 0;
+
+  if GetMatrix(Matrix, X1, Y1, X2, Y2) then
+  begin
+    W := High(Matrix[0]);
+    H := High(Matrix);
+
+    CTSInfo := Create_CTSInfo(Color, Tolerance);
+    CTSCompare := Get_CTSCompare(Self.CTS);
+
+    for Y := 0 to H do
+      for X := 0 to W do
+      begin
+        if CTSCompare(CTSInfo, @Matrix[Y][X]) then
+          Matrix[Y][X] := 1
+        else
+          Matrix[Y][X] := -1;
+      end;
+
+    Result := FindTextMatrix(Text, Font, Matrix, Bounds);
+
+    if Result > 0 then
+    begin
+      Bounds.X1 += X1;
+      Bounds.Y1 += Y1;
+      Bounds.X2 += X1;
+      Bounds.Y2 += Y1;
+    end;
+
+    Free_CTSInfo(CTSInfo);
+  end;
+end;
+
+function TMFinder.FindTextColor(Text, Font: String; Color, Tolerance: Int32; X1, Y1, X2, Y2: Int32; MinMatch: Single): Boolean;
+var
+  Bounds: TBox;
+begin
+  Result := FindTextColor(Text, Font, Color, Tolerance, X1, Y1, X2, Y2, Bounds) >= MinMatch;;
+end;
+
+function TMFinder.FindText(Text, Font: String; X1, Y1, X2, Y2: Int32; out Bounds: TBox): Single;
+var
+  Matrix: T2DIntegerArray;
+begin
+  Result := 0;
+
+  if GetMatrix(Matrix, X1, Y1, X2, Y2) then
+  begin
+    Result := FindTextMatrix(Text, Font, Matrix, Bounds);
+
+    if Result > 0 then
+    begin
+      Bounds.X1 += X1;
+      Bounds.Y1 += Y1;
+      Bounds.X2 += X1;
+      Bounds.Y2 += Y1;
+    end;
+  end;
+end;
+
+function TMFinder.FindText(Text, Font: String; X1, Y1, X2, Y2: Int32; MinMatch: Single): Boolean;
+var
+  Bounds: TBox;
+begin
+  Result := FindText(Text, Font, X1, Y1, X2, Y2, Bounds) >= MinMatch;
 end;
 
 {

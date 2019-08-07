@@ -189,10 +189,8 @@ begin
       Result.Ptr := PRGB32(FImage^.Data);
       Result.IncPtrWith := 0;
       Result.RowLen := Width;
-    end else
-      Result := NullReturnData;
-  end else
-    Result := NullReturnData;
+    end;
+  end;
 end;
 
 procedure TWindowTarget.FreeReturnData;
