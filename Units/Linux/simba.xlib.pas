@@ -244,7 +244,7 @@ var
 
 procedure LoadX11;
 begin
-  X11 := dlmopen(-1, PChar('libX11.so'), RTLD_NOW);
+  X11 := dlmopen(-1, PChar('libX11.so.6'), RTLD_NOW);
   if (X11 = nil) then
     raise Exception.Create('Error loading X11');
 
