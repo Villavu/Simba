@@ -106,7 +106,7 @@ function FindTPAEdges(const p: TPointArray): TPointArray;
 function PointInTPA(const p: TPoint;const arP: TPointArray): Boolean;
 function ClearTPAFromTPA(const arP, ClearPoints: TPointArray): TPointArray;
 procedure ClearDoubleTPA(var TPA: TPointArray);
-Function ReturnPointsNotInTPA(Const TotalTPA: TPointArray; const Box: TBox): TPointArray;
+function ReturnPointsNotInTPA(const TPA: TPointArray; Area: TBox): TPointArray;
 Procedure TPACountSort(Var TPA: TPointArray;const max: TPoint;Const SortOnX : Boolean);
 Procedure TPACountSortBase(Var TPA: TPointArray;const maxx, base: TPoint; const SortOnX : Boolean);
 procedure InvertTIA(var tI: TIntegerArray);
@@ -2463,7 +2463,7 @@ end;
   Merges the TPointArrays of the T2DPointArray ATPA in to one TPA.
 /\}
 
-Function MergeATPA(const ATPA: T2DPointArray): TPointArray;
+function MergeATPA(const ATPA: T2DPointArray): TPointArray;
 var
   i, L: Int32;
 begin;
@@ -2566,32 +2566,39 @@ end;
 /\}
 function EdgeFromBox(const Box: TBox): TPointArray;
 var
-  Height, I, Len, WHM1, Width: Integer;
+  X, Y, Count: Int32;
 begin
-  Width := (Box.x2 - Box.x1);
-  Height := (Box.y2 - Box.y1);
-  Len := ((Width * 2) + (Height * 2));
-  if Len <= 0 then
+  Count := 0;
+
+  if (Box.X1 = Box.X2) and (Box.Y1 = Box.Y2) then
   begin
-    writeln('EdgeFromBox: Box {X1 = ', Box.X1, ', Y1 = ', Box.Y1, ', X2 = ', Box.X2, ', Y2 = ', Box.Y2, '} is invalid');
-    SetLength(Result, 0);
-    Exit;
-  end;
-  SetLength(Result, Len);
-  for I := 0 to Width do
+    SetLength(Result, 1);
+
+    Result[0].X := Box.X1;
+    Result[0].Y := Box.Y1;
+  end else
   begin
-    Result[i].x := Box.x1 + i;
-    Result[i].y := Box.y1;
-    Result[(Len - (Width - i)) - 1].x := Box.x1 + i;
-    Result[(Len - (Width - i)) - 1].y := Box.y2;
-  end;
-  WHM1 := Width + (Height - 1);
-  for I := 1 to (Height - 1) do
-  begin
-    Result[Width + I].x := Box.x1;
-    Result[Width + I].y := Box.y1 + I;
-    Result[WHM1 + I].x := Box.x2;
-    Result[WHM1 + I].y := Box.y1 + I;
+    SetLength(Result, ((Box.X2 - Box.X1) + (Box.Y2 - Box.Y1)) * 2);
+
+    for X := Box.X1 + 1 to Box.X2 - 1 do
+    begin
+      Result[Count].X := X;
+      Result[Count].Y := Box.Y1;
+      Result[Count + 1].X := X;
+      Result[Count + 1].Y := Box.Y2;
+
+      Inc(Count, 2);
+    end;
+
+    for Y := Box.Y1 to Box.Y2 do
+    begin
+      Result[Count].X := Box.X1;
+      Result[Count].Y := Y;
+      Result[Count + 1].X := Box.X2;
+      Result[Count + 1].Y := Y;
+
+      Inc(Count, 2);
+    end;
   end;
 end;
 
@@ -3057,40 +3064,31 @@ end;
   \\ If you pass this all the colors of the background, it will returns the points of the object.
 /\}
 
-Function ReturnPointsNotInTPA(Const TotalTPA: TPointArray; const Box: TBox): TPointArray;
+function ReturnPointsNotInTPA(const TPA: TPointArray; Area: TBox): TPointArray;
 var
-  x, y, w, h, i, l: integer;
-  B: T2DBoolArray;
-begin;
-  w := Box.x2 - Box.x1;
-  h := Box.y2 - Box.y1;
-  if (w = 0) and (h = 0) then
-    Exit;
-  SetLength(b, w + 1, h + 1);
-  for i := w downto 0 do
-    FillChar(b[i][0],h+1,0);
-  l := High(TotalTPA);
-  x := 0;
-  for i := 0 to l do
-    if ((TotalTPA[i].x >= Box.x1) and (TotalTPA[i].x <= Box.x2) and
-        (TotalTPA[i].y >= Box.y1) and (TotalTPA[i].y <= Box.y2)) then
-    begin;
-      Inc(x);
-      B[TotalTPA[i].x-Box.x1][TotalTPA[i].y-Box.y1] := True;
-    end;
-  if x = 0 then
-    Exit;
-  SetLength(result,(w + 1) * (h + 1) - x);
+  Matrix: T2DBoolArray;
+  i, W, H, X, Y: Integer;
+begin
+  W := (Area.X2 - Area.X1) + 1;
+  H := (Area.Y2 - Area.Y1) + 1;
+  SetLength(Matrix, H, W);
+
+  for i := 0 to High(TPA) do
+    if (TPA[i].X >= Area.X1) and (TPA[i].Y >= Area.Y1) and (TPA[i].X <= Area.X2) and (TPA[i].Y <= Area.Y2) then
+      Matrix[TPA[i].Y - Area.Y1][TPA[i].X - Area.X1] := True;
+
+  SetLength(Result, W * H);
+
   i := 0;
-  for x := 0 to w do
-    for y := 0 to h do
-      if not B[x][y] then
-      try
-        Result[i].x := x + Box.x1;
-        Result[i].y := y + Box.y1;
+  for Y := 0 to H-1 do
+    for X := 0 to W-1 do
+      if not Matrix[Y][X] then
+      begin
+        Result[i].X := X + Area.X1;
+        Result[i].Y := Y + Area.Y1;
         Inc(i);
-      except end;
-  SetLength(b, 0);
+      end;
+
   SetLength(Result, i);
 end;
 
