@@ -33,7 +33,7 @@ uses
 {$I Simba.inc}
 
 const
-  SimbaVersion = 1300;
+  SimbaVersion = 1302;
   SimbaMajor = 1300; // this should be 980 even if SimbaVersion is 981, etc
 
   SimbaURL = {$IFDEF WINDOWS}
