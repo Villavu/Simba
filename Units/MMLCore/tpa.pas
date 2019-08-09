@@ -2570,6 +2570,12 @@ var
 begin
   Count := 0;
 
+  if (Box.X1 > Box.X2) or (Box.Y1 > Box.Y2) then
+  begin
+    SetLength(Result, Count);
+    Exit;
+  end;
+
   if (Box.X1 = Box.X2) and (Box.Y1 = Box.Y2) then
   begin
     SetLength(Result, 1);
@@ -2578,9 +2584,9 @@ begin
     Result[0].Y := Box.Y1;
   end else
   begin
-    SetLength(Result, ((Box.X2 - Box.X1) + (Box.Y2 - Box.Y1)) * 2);
+    SetLength(Result, (Max(2, (Box.X2 - Box.X1) * 2)) + (Max(2, (Box.Y2 - Box.Y1) * 2)));
 
-    for X := Box.X1 + 1 to Box.X2 - 1 do
+    for X := Box.X1 to Box.X2 do
     begin
       Result[Count].X := X;
       Result[Count].Y := Box.Y1;
@@ -2590,7 +2596,7 @@ begin
       Inc(Count, 2);
     end;
 
-    for Y := Box.Y1 to Box.Y2 do
+    for Y := Box.Y1+1 to Box.Y2-1 do
     begin
       Result[Count].X := Box.X1;
       Result[Count].Y := Y;
