@@ -46,7 +46,8 @@ var
 begin;
   Len := Length(Arr);
   SetLength(Result, Len);
-  Move(Arr[Low(Arr)], Result[0], Len*SizeOf(TPoint));
+  if Len > 0 then
+     Move(Arr[Low(Arr)], Result[0], Len*SizeOf(TPoint));
 end;
 
 function ConvTPAArr(Arr: array of TPoint): TPointArray; overload;
@@ -55,7 +56,8 @@ var
 begin;
   Len := Length(Arr);
   SetLength(Result, Len);
-  Move(Arr[Low(Arr)], Result[0], Len*SizeOf(TPoint));
+  if Len > 0 then
+     Move(Arr[Low(Arr)], Result[0], Len*SizeOf(TPoint));
 end;
 
 
@@ -70,7 +72,8 @@ begin;
   begin
     Len2 := Length(Arr[i]);
     SetLength(result[i],len2);
-    Move(Arr[i][0],Result[i][0],Len2*SizeOf(TPoint));
+    if Len2 > 0 then
+      Move(Arr[i][0],Result[i][0],Len2*SizeOf(TPoint));
   end;
 end;
 
@@ -80,7 +83,8 @@ var
 begin;
   Len := Length(Arr);
   SetLength(Result, Len);
-  Move(Arr[Low(Arr)], Result[0], Len*SizeOf(Integer));
+  if Len > 0 then
+    Move(Arr[Low(Arr)], Result[0], Len*SizeOf(Integer));
 end;
 
 function ConvArr(Arr: array of String): TStringArray; overload;
