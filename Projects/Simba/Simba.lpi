@@ -10,6 +10,7 @@
       <SessionStorage Value="InIDEConfig"/>
       <MainUnit Value="0"/>
       <Title Value="Simba"/>
+      <UseXPManifest Value="True"/>
       <Icon Value="0"/>
       <Resources Count="3">
         <Resource_0 FileName="..\..\Units\Misc\Web\openssl\linux64.zip" Type="RCDATA" ResourceName="OPENSSL_LINUX64"/>
@@ -133,6 +134,7 @@
         <Filename Value="debugimage.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="DebugImgForm"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit5>
       <Unit6>
