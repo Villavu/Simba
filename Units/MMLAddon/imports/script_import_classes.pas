@@ -38,7 +38,8 @@ uses
   lpTClient,
   lpTMMLSettingsSandbox,
   lpTMMLTimer,
-  lpjson;
+  lpjson,
+  lpxml;
 
 procedure Lape_Import_LCLClasses(Compiler: TLapeCompiler; Data: Pointer);
 begin
@@ -94,6 +95,7 @@ begin
 
   Register_TMMLTimer(Compiler);
   Register_JSON(Compiler);
+  Register_TXML(Compiler); 
 end;
 
 initialization
