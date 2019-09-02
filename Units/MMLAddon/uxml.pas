@@ -126,7 +126,10 @@ type
     procedure LoadFromFile(const FileName: String);
     // Load XML for a stream
     procedure LoadFromStream(const Stream: TStream);
+    // Load XML from string
+    procedure LoadFromString(const Str: String);
     // Encoding is specified in Header-Node
+    procedure SaveToString(var Str: String);
     procedure SaveToStream(const Stream: TStream);
     procedure SaveToFile(const FileName: String);
     property Root: TXMLNode read GetRoot write SetRoot;
@@ -272,6 +275,19 @@ begin
   Lines.LoadFromStream(Stream);
   Parse;
   Lines.Clear;
+end;
+
+procedure TVerySimpleXml.LoadFromString(const Str: String);
+var
+  Stream: TStringStream;
+begin
+  Stream := TStringStream.Create(Str);
+
+  try
+    LoadFromStream(Stream);
+  finally
+    Stream.Free();
+  end;
 end;
 
 procedure TVerySimpleXml.Parse;
@@ -509,6 +525,21 @@ begin
 
   Lines.SaveToStream(Stream);
   Lines.Free;
+end;
+
+procedure TVerySimpleXml.SaveToString(var Str: String);
+var
+  Stream: TStringStream;
+begin
+  Stream := TStringStream.Create(Str);
+
+  try
+    SaveToStream(Stream);
+
+    Str := Stream.DataString;
+  finally
+    Stream.Free();
+  end;
 end;
 
 procedure TVerySimpleXml.Walk(Lines: TStringList; Prefix: String;

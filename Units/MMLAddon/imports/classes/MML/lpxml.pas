@@ -257,6 +257,11 @@ begin
   PVerySimpleXml(Params^[0])^.LoadFromStream(PStream(Params^[1])^);
 end;
 
+procedure TVerySimpleXml_LoadFromString(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PVerySimpleXml(Params^[0])^.LoadFromString(PlpString(Params^[1])^);
+end;
+
 //procedure SaveToStream(const Stream: TStream);
 procedure TVerySimpleXml_SaveToStream(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -267,6 +272,11 @@ end;
 procedure TVerySimpleXml_SaveToFile(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PVerySimpleXml(Params^[0])^.SaveToFile(PlpString(Params^[1])^);
+end;
+
+procedure TVerySimpleXml_SaveToString(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PVerySimpleXml(Params^[0])^.SaveToString(PlpString(Params^[1])^);
 end;
 
 //Read: property Root: TXMLNode read GetRoot write SetRoot;
@@ -323,8 +333,10 @@ begin
     addGlobalFunc('procedure TXml.Clear();', @TVerySimpleXml_Clear);
     addGlobalFunc('procedure TXml.LoadFromFile(const FileName: String);', @TVerySimpleXml_LoadFromFile);
     addGlobalFunc('procedure TXml.LoadFromStream(const Stream: TStream);', @TVerySimpleXml_LoadFromStream);
+    addGlobalFunc('procedure TXml.LoadFromString(const Str: String);', @TVerySimpleXml_LoadFromString);
     addGlobalFunc('procedure TXml.SaveToStream(const Stream: TStream);', @TVerySimpleXml_SaveToStream);
     addGlobalFunc('procedure TXml.SaveToFile(const FileName: String);', @TVerySimpleXml_SaveToFile);
+    addGlobalFunc('procedure TXml.SaveToString(var Str: String);', @TVerySimpleXml_SaveToString);
     addClassVar('TXml', 'Root', 'TXMLNode', @TVerySimpleXml_Root_Read, @TVerySimpleXml_Root_Write);
     addClassVar('TXml', 'Header', 'TXMLNode', @TVerySimpleXml_Header_Read, @TVerySimpleXml_Header_Write);
     addClassVar('TXml', 'Ident', 'string', @TVerySimpleXml_Ident_Read, @TVerySimpleXml_Ident_Write);
