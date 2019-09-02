@@ -103,6 +103,8 @@ begin
 
     addGlobalType('array of TIntegerArray', 'TIntegerMatrix');
 
+    addGlobalVar(LineEnding, 'LineEnding').isConstant := True;
+
   //template matching & misc float matrix
     addGlobalType('array of Single', 'TSingleArray');
     addGlobalType('array of TSingleArray', 'TSingleMatrix');
