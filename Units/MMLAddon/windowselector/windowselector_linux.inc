@@ -1,7 +1,7 @@
 {&MainUnit windowselector.pas}
 
 uses
-  x, simba.xlib, simba.xlib_helpers;
+  x, simba.xlib, simba.xlib_helpers, simba.xlib_display;
 
 function TMWindowSelector.Drag: TOSWindow;
 type
@@ -60,7 +60,7 @@ begin
     BuildTree(Trees[i], Windows[i]);
 
   repeat
-    XQueryPointer(DefaultDisplay, GetDesktopWindow(), @Root, @Child, @RootX, @RootY, @X, @Y, @Mask);
+    XQueryPointer(GetDisplay(), GetDesktopWindow(), @Root, @Child, @RootX, @RootY, @X, @Y, @Mask);
 
     Window := 0;
     for i := 0 to High(Trees) do

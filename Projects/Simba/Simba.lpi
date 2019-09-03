@@ -97,7 +97,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="13">
+    <Units Count="14">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -184,6 +184,10 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ACA"/>
       </Unit12>
+      <Unit13>
+        <Filename Value="../../Units/Linux/simba.xlib_display.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit13>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

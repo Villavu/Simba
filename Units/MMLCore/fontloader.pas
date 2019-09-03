@@ -248,8 +248,6 @@ begin
   if (Screen.Fonts.IndexOf(SysFont.Name) = -1) then
     Exit(False);
 
-  mDebugLn('Loading system font "' + SysFont.Name + '"');
-
   Mufasa := TMufasaBitmap.Create();
   BMP := TBitmap.Create();
 
@@ -264,15 +262,22 @@ begin
 
       for i := 1 to 255 do
       begin
-        GetTextSize(Chr(i), W, H);
+        GetTextSize(UnicodeString(Chr(i)), W, H);
 
         if (W > 0) and (H > 0) then
         begin
+          SetLength(Masks, Length(Masks) + 1);
+
           BMP.SetSize(W, H);
           TextOut(0, 0, Chr(i));
           Mufasa.LoadFromTBitmap(BMP);
-          SetLength(Masks, Length(Masks) + 1);
+
+          {$IFDEF LINUX} // :| GTK2 always renders anti aliased.
+          Mufasa.ThresholdAdaptive(0, 255, False, TM_MinMax, -100);
+          Masks[High(Masks)] := LoadGlyphMask(Mufasa, True, Chr(i));
+          {$ELSE}
           Masks[High(Masks)] := LoadGlyphMask(Mufasa, False, Chr(i));
+          {$ENDIF}
         end;
       end;
     end;

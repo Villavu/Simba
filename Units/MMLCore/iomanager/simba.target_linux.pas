@@ -28,7 +28,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.xlib, simba.xlib_helpers, simba.target, simba.oswindow, mufasatypes;
+  simba.xlib, simba.xlib_helpers, simba.xlib_display, simba.target, simba.oswindow, mufasatypes;
 
 type
   TWindowTarget = class(TTarget)
@@ -125,7 +125,7 @@ function TWindowTarget.TargetValid: Boolean;
 var
   Attributes: TXWindowAttributes;
 begin
-  Result := XGetWindowAttributes(DefaultDisplay, FWindow, @Attributes) <> 0;
+  Result := XGetWindowAttributes(GetDisplay(), FWindow, @Attributes) <> 0;
 end;
 
 procedure TWindowTarget.ActivateClient;
@@ -149,7 +149,7 @@ begin
 
   if Bounds.Contains(Bounds.X1 + X, Bounds.Y1 + Y, Width, Height) then
   begin
-    Image := XGetImage(DefaultDisplay, FWindow, X, Y, Width, Height, AllPlanes, ZPixmap);
+    Image := XGetImage(GetDisplay(), FWindow, X, Y, Width, Height, AllPlanes, ZPixmap);
 
     if (Image <> nil) then
     begin
@@ -182,7 +182,7 @@ begin
     if (FImage <> nil) then
       raise Exception.Create('FreeReturnData has not been called');
 
-    FImage := XGetImage(DefaultDisplay, FWindow, X, Y, Width, Height, AllPlanes, ZPixmap);
+    FImage := XGetImage(GetDisplay(), FWindow, X, Y, Width, Height, AllPlanes, ZPixmap);
 
     if (FImage <> nil) then
     begin
@@ -205,7 +205,7 @@ procedure TWindowTarget.GetMousePosition(out X, Y: Int32);
 var
   Event: TXButtonEvent;
 begin
-  XQueryPointer(DefaultDisplay, FWindow,
+  XQueryPointer(GetDisplay(), FWindow,
                 @Event.Root, @Event.Window,
                 @Event.X_Root, @Event.Y_Root,
                 @X, @Y,
@@ -243,8 +243,8 @@ begin
 
   MouseClientAreaOffset(X, Y);
 
-  XWarpPointer(DefaultDisplay, None, FWindow, 0, 0, 0, 0, X, Y);
-  XFlush(DefaultDisplay);
+  XWarpPointer(GetDisplay(), None, FWindow, 0, 0, 0, 0, X, Y);
+  XFlush(GetDisplay());
 end;
 
 procedure TWindowTarget.HoldMouse(X, Y: Int32; Button: TClickType);
@@ -269,7 +269,7 @@ begin
   begin
     Event.Window := Event.SubWindow;
 
-    XQueryPointer(DefaultDisplay, Event.Window,
+    XQueryPointer(GetDisplay(), Event.Window,
                   @Event.Root, @Event.SubWindow,
                   @Event.X_Root, @Event.Y_Root,
                   @Event.X, @Event.Y,
@@ -278,8 +278,8 @@ begin
 
   Event._Type := ButtonPress;
 
-  XSendEvent(DefaultDisplay, PointerWindow, True, ButtonPressMask, @Event);
-  XFlush(DefaultDisplay);
+  XSendEvent(GetDisplay(), PointerWindow, True, ButtonPressMask, @Event);
+  XFlush(GetDisplay());
 end;
 
 procedure TWindowTarget.ReleaseMouse(X, Y: Int32; Button: TClickType);
@@ -304,7 +304,7 @@ begin
   begin
     Event.Window := Event.SubWindow;
 
-    XQueryPointer(DefaultDisplay, Event.Window,
+    XQueryPointer(GetDisplay(), Event.Window,
                   @Event.Root, @Event.SubWindow,
                   @Event.X_Root, @Event.Y_Root,
                   @Event.X, @Event.Y,
@@ -313,8 +313,8 @@ begin
 
   Event._Type := ButtonRelease;
 
-  XSendEvent(DefaultDisplay, PointerWindow, True, ButtonPressMask, @Event);
-  XFlush(DefaultDisplay);
+  XSendEvent(GetDisplay(), PointerWindow, True, ButtonPressMask, @Event);
+  XFlush(GetDisplay());
 end;
 
 function TWindowTarget.IsMouseButtonHeld(Button: TClickType): Boolean;
@@ -322,7 +322,7 @@ var
   Mask: Int32;
   Event: TXButtonEvent;
 begin
-  XSync(DefaultDisplay, 0);
+  XSync(GetDisplay(), 0);
 
   case Button of
     mouse_Left:       Mask := Button1Mask;
@@ -334,7 +334,7 @@ begin
 
   Event := Default(TXButtonEvent);
 
-  XQueryPointer(DefaultDisplay, Event.Window,
+  XQueryPointer(GetDisplay(), Event.Window,
                 @Event.Root, @Event.Window,
                 @Event.X_Root, @Event.Y_Root,
                 @Event.X, @Event.Y,
@@ -353,28 +353,28 @@ begin
 
   for i := 1 to Length(Text) do
   begin
-    XGetKeyCode(DefaultDisplay, Text[i], Key, Modifier);
+    XGetKeyCode(GetDisplay(), Text[i], Key, Modifier);
 
     if (Modifier <> 0) then
     begin
-      XTestFakeKeyEvent(DefaultDisplay, Modifier, True, 0);
-      XSync(DefaultDisplay, 0);
+      XTestFakeKeyEvent(GetDisplay(), Modifier, True, 0);
+      XSync(GetDisplay(), 0);
       if KeyModWait > 0 then
         Sleep(KeyModWait div 2);
     end;
 
-    XTestFakeKeyEvent(DefaultDisplay, Key, True, 0);
-    XSync(DefaultDisplay, 0);
+    XTestFakeKeyEvent(GetDisplay(), Key, True, 0);
+    XSync(GetDisplay(), 0);
 
     Sleep(KeyWait);
 
-    XTestFakeKeyEvent(DefaultDisplay, Key, False, 0);
-    XSync(DefaultDisplay, 0);
+    XTestFakeKeyEvent(GetDisplay(), Key, False, 0);
+    XSync(GetDisplay(), 0);
 
     if (Modifier <> 0) then
     begin
-      XTestFakeKeyEvent(DefaultDisplay, Modifier, False, 0);
-      XSync(DefaultDisplay, 0);
+      XTestFakeKeyEvent(GetDisplay(), Modifier, False, 0);
+      XSync(GetDisplay(), 0);
       if KeyModWait > 0 then
         Sleep(KeyModWait div 2);
     end;
@@ -386,8 +386,8 @@ begin
   if FAutoFocus then
     ActivateClient();
 
-  XTestFakeKeyEvent(DefaultDisplay, XGetKeyCode(DefaultDisplay, Key), True, 0);
-  XFlush(DefaultDisplay);
+  XTestFakeKeyEvent(GetDisplay(), XGetKeyCode(GetDisplay(), Key), True, 0);
+  XFlush(GetDisplay());
 end;
 
 procedure TWindowTarget.ReleaseKey(Key: Int32);
@@ -395,8 +395,8 @@ begin
   if FAutoFocus then
     ActivateClient();
 
-  XTestFakeKeyEvent(DefaultDisplay, XGetKeyCode(DefaultDisplay, Key), False, 0);
-  XFlush(DefaultDisplay);
+  XTestFakeKeyEvent(GetDisplay(), XGetKeyCode(GetDisplay(), Key), False, 0);
+  XFlush(GetDisplay());
 end;
 
 function TWindowTarget.IsKeyHeld(Key: Int32): Boolean;
@@ -404,10 +404,10 @@ var
   Code: TKeySym;
   Keys: CharArr32;
 begin
-  Code := XGetKeyCode(DefaultDisplay, Key);
+  Code := XGetKeyCode(GetDisplay(), Key);
 
-  XSync(DefaultDisplay, 0);
-  XQueryKeymap(DefaultDisplay, CharArr32(Keys));
+  XSync(GetDisplay(), 0);
+  XQueryKeymap(GetDisplay(), CharArr32(Keys));
 
   Result := (Keys[Code shr 3] shr (Code and $07)) and $01 > 0;
 end;
@@ -416,7 +416,7 @@ function TWindowTarget.GetKeyCode(Character: Char): Int32;
 var
   KeyCode, Modifier: TKeyCode;
 begin
-  XGetKeyCode(DefaultDisplay, Character, KeyCode, Modifier);
+  XGetKeyCode(GetDisplay(), Character, KeyCode, Modifier);
 
   Result := KeyCode;
 end;

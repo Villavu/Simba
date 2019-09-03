@@ -170,7 +170,6 @@ type
   end;
 
 var
-  XInitThreads: function: TStatus; cdecl;
   XGetWindowAttributes: function(para1:PDisplay; para2:TWindow; para3:PXWindowAttributes):TStatus; cdecl;
   XFlush: function(para1: PDisplay): cint; cdecl;
   XTranslateCoordinates: function(ADisplay:PDisplay; ASrcWindow:TWindow; ADestWindow:TWindow; ASrcX:cint; ASrcY:cint;ADestXReturn:Pcint; ADestYReturn:Pcint; AChildReturn:PWindow):TBool; cdecl;
@@ -248,7 +247,6 @@ begin
   if (X11 = nil) then
     raise Exception.Create('Error loading X11');
 
-  Pointer(XInitThreads) := dlsym(X11, 'XInitThreads');
   Pointer(XGetWindowAttributes) := dlsym(X11, 'XGetWindowAttributes');
   Pointer(XFlush) := dlsym(X11, 'XFlush');
   Pointer(XTranslateCoordinates) := dlsym(X11, 'XTranslateCoordinates');
@@ -276,7 +274,6 @@ begin
   Pointer(XSendEvent) := dlsym(X11, 'XSendEvent');
   Pointer(XSync) := dlsym(X11, 'XSync');
 
-  XInitThreads();
   XSetErrorHandler(@ErrorHandler);
 end;
 
