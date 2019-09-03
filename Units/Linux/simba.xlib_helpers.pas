@@ -23,9 +23,6 @@ procedure XSetActiveWindow(Display: PDisplay; Window: TWindow);
 function XGetActiveWindow(Display: PDisplay): TWindow;
 function XGetChildren(Display: PDisplay; Window: TWindow; Recursive: Boolean): TWindowArray;
 
-var
-  DefaultDisplay: PDisplay;
-
 implementation
 
 uses
@@ -355,8 +352,7 @@ begin
   Result := XKeySymToKeyCode(Display, Symbol);
 end;
 
-function XGetChildren(Display: PDisplay; Window: TWindow; Recursive: Boolean
-  ): TWindowArray;
+function XGetChildren(Display: PDisplay; Window: TWindow; Recursive: Boolean): TWindowArray;
 
   procedure GetChildren(Window: TWindow);
   var
@@ -366,7 +362,7 @@ function XGetChildren(Display: PDisplay; Window: TWindow; Recursive: Boolean
   begin
     if (Window > 0) then
     begin
-      if XQueryTree(DefaultDisplay, Window, Root, Parent, Children, Count) then
+      if XQueryTree(Display, Window, Root, Parent, Children, Count) then
       begin
         for i := 0 to High(Children) do
         begin
@@ -385,14 +381,6 @@ begin
 
   GetChildren(Window);
 end;
-
-initialization
-  DefaultDisplay := XOpenDisplay(nil);
-  if (DefaultDisplay = nil) then
-    raise Exception.Create('Error opening default display');
-
-finalization
-  XCloseDisplay(DefaultDisplay);
 
 end.
 

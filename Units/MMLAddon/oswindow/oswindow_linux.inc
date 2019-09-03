@@ -2,18 +2,18 @@
 
 uses
   x, baseunix,
-  simba.xlib, simba.xlib_helpers;
+  simba.xlib, simba.xlib_helpers, simba.xlib_display;
 
 function TOSWindow_Helper.IsValid: Boolean;
 var
   Attributes: TXWindowAttributes;
 begin
-  Result := XGetWindowAttributes(DefaultDisplay, Self, @Attributes) <> 0;
+  Result := XGetWindowAttributes(GetDisplay(), Self, @Attributes) <> 0;
 end;
 
 function TOSWindow_Helper.IsActive: Boolean;
 begin
-  Result := XGetRootWindow(DefaultDisplay, XGetActiveWindow(DefaultDisplay)) = XGetRootWindow(DefaultDisplay, Self);
+  Result := XGetRootWindow(GetDisplay(), XGetActiveWindow(GetDisplay())) = XGetRootWindow(GetDisplay(), Self);
 end;
 
 function TOSWindow_Helper.IsActive(Time: Int32): Boolean;
@@ -34,27 +34,27 @@ end;
 
 function TOSWindow_Helper.IsVisible: Boolean;
 begin
-  Result := XHasWindowProperty(DefaultDisplay, XGetRootWindow(DefaultDisplay, Self), 'WM_STATE');
+  Result := XHasWindowProperty(GetDisplay(), XGetRootWindow(GetDisplay(), Self), 'WM_STATE');
 end;
 
 function TOSWindow_Helper.GetPID: UInt32;
 begin
-  Result := XGetWindowProperty(DefaultDisplay, XGetRootWindow(DefaultDisplay, Self), XInternAtom(DefaultDisplay, PChar('_NET_WM_PID'), False));
+  Result := XGetWindowProperty(GetDisplay(), XGetRootWindow(GetDisplay(), Self), XInternAtom(GetDisplay(), PChar('_NET_WM_PID'), False));
 end;
 
 function TOSWindow_Helper.GetRootWindow: TOSWindow;
 begin
-  Result := XGetRootWindow(DefaultDisplay, Self);
+  Result := XGetRootWindow(GetDisplay(), Self);
 end;
 
 function TOSWindow_Helper.GetClassName: WideString;
 begin
-  Result := XGetWindowClass(DefaultDisplay, Self);
+  Result := XGetWindowClass(GetDisplay(), Self);
 end;
 
 function TOSWindow_Helper.GetTitle: WideString;
 begin
-  Result := XGetWindowTitle(DefaultDisplay, Self);
+  Result := XGetWindowTitle(GetDisplay(), Self);
 end;
 
 function TOSWindow_Helper.GetBounds(out Bounds: TBox): Boolean;
@@ -63,8 +63,8 @@ var
   X, Y: Int32;
   Attributes: TXWindowAttributes;
 begin
-  Result := (XGetWindowAttributes(DefaultDisplay, Self, @Attributes) <> 0) and
-            (XTranslateCoordinates(DefaultDisplay, Self, Attributes.Root, -Attributes.Border_Width, -Attributes.Border_Width, @X, @Y, @Child) <> 0);
+  Result := (XGetWindowAttributes(GetDisplay(), Self, @Attributes) <> 0) and
+            (XTranslateCoordinates(GetDisplay(), Self, Attributes.Root, -Attributes.Border_Width, -Attributes.Border_Width, @X, @Y, @Child) <> 0);
 
   if Result then
   begin
@@ -88,18 +88,18 @@ end;
 
 function TOSWindow_Helper.GetChildren(Recursive: Boolean): TOSWindowArray;
 begin
-  Result := XGetChildren(DefaultDisplay, Self, Recursive);
+  Result := XGetChildren(GetDisplay(), Self, Recursive);
 end;
 
 procedure TOSWindow_Helper.SetBounds(Bounds: TBox);
 begin
-  XMoveResizeWindow(DefaultDisplay, Self, Bounds.X1, Bounds.Y1, Bounds.X2 - Bounds.X1, Bounds.Y2 - Bounds.Y1);
-  XSync(DefaultDisplay, 0);
+  XMoveResizeWindow(GetDisplay(), Self, Bounds.X1, Bounds.Y1, Bounds.X2 - Bounds.X1, Bounds.Y2 - Bounds.Y1);
+  XSync(GetDisplay(), 0);
 end;
 
 function TOSWindow_Helper.Activate: Boolean;
 begin
-  XSetActiveWindow(DefaultDisplay, Self.GetRootWindow());
+  XSetActiveWindow(GetDisplay(), Self.GetRootWindow());
 
   Result := Self.IsActive(1000);
 end;
@@ -113,7 +113,7 @@ function GetWindows: TOSWindowArray;
 var
   Window: TOSWindow;
 begin
-  Window := XDefaultRootWindow(DefaultDisplay);
+  Window := XDefaultRootWindow(GetDisplay());
 
   Result := Window.GetChildren();
 end;
@@ -134,12 +134,12 @@ end;
 
 function GetActiveWindow: TOSWindow;
 begin
-  Result := XGetActiveWindow(DefaultDisplay);
+  Result := XGetActiveWindow(GetDisplay());
 end;
 
 function GetDesktopWindow: TOSWindow;
 begin
-  Result := XDefaultRootWindow(DefaultDisplay);
+  Result := XDefaultRootWindow(GetDisplay());
 end;
 
 function GetTopWindows: TOSWindowArray;
@@ -153,7 +153,7 @@ function GetTopWindows: TOSWindowArray;
 
     if (not Result) then
     begin
-      Windows := XGetChildren(DefaultDisplay, Window, False);
+      Windows := XGetChildren(GetDisplay(), Window, False);
 
       for i := High(Windows) downto 0 do
       begin
@@ -170,7 +170,7 @@ var
 begin
   SetLength(Result, 0);
 
-  Windows := XGetChildren(DefaultDisplay, GetDesktopWindow, FAlse);
+  Windows := XGetChildren(GetDisplay(), GetDesktopWindow, FAlse);
   for i := High(Windows) downto 0 do
     if IsVisible(Windows[i]) then
     begin
