@@ -24,7 +24,8 @@
 unit bitmaps;
 
 {$mode objfpc}{$H+}
-{$Inline on}
+{$inline on}
+
 interface
 uses
   Classes, SysUtils, FPImage,IntfGraphics,graphtype,MufasaTypes,MufasaBase,graphics;
@@ -40,7 +41,7 @@ type
   PMufasaBitmap = ^TMufasaBitmap;
   TMufasaBitmap = class(TObject)
   private
-    w,h : integer;
+    FWidth,FHeight : integer;
     FTransparentColor : TRGB32;
     FTransparentSet : boolean;
     FIndex : integer;
@@ -60,15 +61,15 @@ type
     procedure StretchResize(AWidth,AHeight : integer);
     procedure ResizeEx(Method: TBmpResizeMethod; NewWidth, NewHeight: integer);
 
-    property Width : Integer read w;
-    property Height : Integer read h;
+    property Width : Integer read FWidth;
+    property Height : Integer read FHeight;
 
     procedure SetPersistentMemory(mem: PtrUInt; awidth, aheight: integer);
     procedure ResetPersistentMemory;
 
     function PointInBitmap(x,y : integer) : boolean; inline;
     procedure ValidatePoint(x,y : integer);
-    function SaveToFile(const FileName : string) :boolean;
+    function SaveToFile(FileName : string) :boolean;
     procedure LoadFromFile(const FileName : string);
     procedure Rectangle(const Box : TBox;FillCol : TColor);
     procedure Rectangle(const Box: TBox; const Color: Integer; const Transparency: Extended); overload;
@@ -129,7 +130,8 @@ type
     function CreateTMask : TMask;
     procedure ResizeBilinear(NewW, NewH: Integer);
     procedure DrawText(Text, Font: String; Position: TPoint; Shadow: Boolean;  Color: TColor);
-    procedure DrawSystemText(Text, Font: String; const Size: Integer; Position: TPoint; Shadow: Boolean; Color: TColor);
+    procedure DrawSystemText(Text: String; Font: TFont; Position: TPoint); overload;
+    procedure DrawSystemText(Text, FontName: String; Size: Integer; Position: TPoint; Shadow: Boolean; Color: TColor); overload;
     procedure SetTransparentColor(Col : TColor);
     function GetTransparentColor : TColor;
     property TransparentColorSet : boolean read FTransparentSet;
@@ -397,9 +399,9 @@ var
   OutputBMP : TMUfasaBitmap;
 begin
   InputBMP := GetBMP(Bitmap);
-  Result := CreateBMP(InputBmp.w,InputBMP.h);
+  Result := CreateBMP(InputBmp.Width,InputBMP.Height);
   OutputBMP := GetBMP(Result);
-  Move(InputBMP.FData[0],OutPutBMP.FData[0],InputBMP.w * InputBMP.h * SizeOf(TRGB32));
+  Move(InputBMP.FData[0],OutPutBMP.FData[0],InputBMP.Width * InputBMP.Height * SizeOf(TRGB32));
 end;
 
 function TMBitmaps.CreateMirroredBitmap(bitmap: Integer;
@@ -587,53 +589,24 @@ begin
   Result.List := nil;
 end;
 
-{
-  Saves a bitmap to a file.
-  If Filename ends with 'png' it will save as a PNG file,
-  if Filename ends with 'jpg' or 'jpeg' it will save as JPG,
-  otherwise BMP is assumed.
-}
-
-function TMufasaBitmap.SaveToFile(const FileName: string): boolean;
+function TMufasaBitmap.SaveToFile(FileName: string): boolean;
 var
-  rawImage : TRawImage;
-  Bmp : TLazIntfImage;
-  png: TPortableNetworkGraphic;
-  jpg: TJPEGImage;
+  RawImage: TRawImage;
+  Image: TLazIntfImage;
 begin
-  ArrDataToRawImage(FData,Point(w,h),RawImage);
-  result := true;
+  if ExtractFileExt(FileName) = '' then
+    FileName := FileName + '.bmp';
 
-  if LowerCase(RightStr(Filename, 3)) = 'png' then
-  begin
-    png := TPortableNetworkGraphic.Create;
-    try
-       png.LoadFromRawImage(RawImage, False);
-       png.SaveToFile(UTF8ToSys(Filename));
-    except
-       result := false;
-    end;
-    png.Free;
-  end else if (LowerCase(RightStr(Filename, 3)) = 'jpg') or (LowerCase(RightStr(Filename, 4)) = 'jpeg') then
-  begin
-    jpg := TJPEGImage.Create;
-    try
-       jpg.LoadFromRawImage(RawImage, False);
-       jpg.SaveToFile(UTF8ToSys(Filename));
-    except
-       result := false;
-    end;
-    jpg.Free;
-  end else // Assume .bmp
-  begin
-    Bmp := TLazIntfImage.Create(RawImage,false);
-    try
-       Bmp.SaveToFile(UTF8ToSys(FileName));
-    except
-       result := false;
-    end;
-    Bmp.Free;
-  end; 
+  ArrDataToRawImage(FData, Point(Self.FWidth, Self.FHeight), RawImage);
+
+  Image := TLazIntfImage.Create(RawImage, False);
+
+  try
+    if not Image.SaveToFile(FileName) then
+      raise Exception.CreateFmt('TMufasaBitmap.SaveToFile: Image format "%s" is not supported', [ExtractFileExt(FileName)]);
+  finally
+    Image.Free();
+  end;
 end;
 
 procedure TMufasaBitmap.LoadFromFile(const FileName: string);
@@ -648,10 +621,10 @@ begin
     LazIntf.LoadFromFile(UTF8ToSys(FileName));
     if Assigned(FData) then
       Freemem(FData);
-    Self.W := LazIntf.Width;
-    Self.H := LazIntf.Height;
-    FData := GetMem(Self.W*Self.H*SizeOf(TRGB32));
-    Move(LazIntf.PixelData[0],FData[0],w*h*sizeOf(TRGB32));
+    Self.FWidth := LazIntf.Width;
+    Self.FHeight := LazIntf.Height;
+    FData := GetMem(Self.FWidth*Self.FHeight*SizeOf(TRGB32));
+    Move(LazIntf.PixelData[0],FData[0],FWidth*FHeight*sizeOf(TRGB32));
   finally
     LazIntf.Free;
   end;
@@ -671,7 +644,7 @@ var
   Col : Longword;
   Size : longword;
 begin
-  if (Box.x1 < 0) or (Box.y1 < 0) or (Box.x2 >= self.w) or (Box.y2 >= self.h) then
+  if (Box.x1 < 0) or (Box.y1 < 0) or (Box.x2 >= self.FWidth) or (Box.y2 >= self.FHeight) then
     raise exception.Create('The Box you passed to Rectangle exceed the bitmap''s bounds');
   if (box.x1 > box.x2) or (Box.y1 > box.y2) then
     raise exception.CreateFmt('The Box you passed to Rectangle doesn''t have normal bounds: (%d,%d) : (%d,%d)',
@@ -679,7 +652,7 @@ begin
   col :=  Longword(RGBToBGR(FillCol));
   Size := Box.x2 - box.x1 + 1;
   for y := Box.y1 to Box.y2 do
-    FillDWord(FData[y * self.w + Box.x1],size,Col);
+    FillDWord(FData[y * self.FWidth + Box.x1],size,Col);
 end;
 
 procedure TMufasaBitmap.FloodFill(const StartPT: TPoint; const SearchCol,
@@ -691,9 +664,9 @@ var
   Search,Replace : LongWord;
 procedure AddToStack(x,y : integer);inline;
 begin
-  if LongWord(FData[y * w + x]) = Search then
+  if LongWord(FData[y * FWidth + x]) = Search then
   begin
-    LongWord(FData[y * w + x]) := Replace;
+    LongWord(FData[y * FWidth + x]) := Replace;
     Stack[SIndex].x := x;
     Stack[SIndex].y := y;
     inc(SIndex);
@@ -704,9 +677,9 @@ begin
   Search := LongWord(RGBToBGR(SearchCol));
   Replace := LongWord(RGBToBGR(ReplaceCol));
   SetAlphaValue(0);
-  if LongWord(FData[StartPT.y * w + StartPT.x]) <> Search then //Only add items to the stack that are the searchcol.
+  if LongWord(FData[StartPT.y * FWidth + StartPT.x]) <> Search then //Only add items to the stack that are the searchcol.
     Exit;
-  SetLength(Stack,w * h);
+  SetLength(Stack,FWidth * FHeight);
   SIndex := 0;
   AddToStack(StartPT.x,StartPT.y);
   SIndex := 0;
@@ -716,11 +689,11 @@ begin
     Curry := Stack[SIndex].y;
     if (CurrX > 0) and (CurrY > 0)         then AddToStack(CurrX - 1, CurrY - 1);
     if (CurrX > 0)                         then AddToStack(CurrX - 1, CurrY);
-    if (CurrX > 0) and (CurrY + 1 < h)     then AddToStack(CurrX - 1, CurrY + 1);
-    if (CurrY + 1 < h)                     then AddToStack(CurrX   ,  CurrY + 1);
-    if (CurrX + 1 < w) and (CurrY + 1 < h) then AddToStack(CurrX + 1, CurrY + 1);
-    if (CurrX + 1 < w)                     then AddToStack(CurrX + 1, CurrY    );
-    if (CurrX + 1 < w) and (CurrY > 0)     then AddToStack(CurrX + 1, CurrY - 1);
+    if (CurrX > 0) and (CurrY + 1 < FHeight)     then AddToStack(CurrX - 1, CurrY + 1);
+    if (CurrY + 1 < FHeight)                     then AddToStack(CurrX   ,  CurrY + 1);
+    if (CurrX + 1 < FWidth) and (CurrY + 1 < FHeight) then AddToStack(CurrX + 1, CurrY + 1);
+    if (CurrX + 1 < FWidth)                     then AddToStack(CurrX + 1, CurrY    );
+    if (CurrX + 1 < FWidth) and (CurrY > 0)     then AddToStack(CurrX + 1, CurrY - 1);
     if (CurrY > 0)                         then AddToStack(CurrX    , CurrY - 1);
     Dec(SIndex);
   end;
@@ -730,7 +703,7 @@ function TMufasaBitmap.Copy: TMufasaBitmap;
 begin
   Result := TMufasaBitmap.Create;
   Result.SetSize(self.Width, self.Height);
-  Move(self.FData[0], Result.FData[0],self.w * self.h * SizeOf(TRGB32));
+  Move(self.FData[0], Result.FData[0],self.FWidth * self.FHeight * SizeOf(TRGB32));
 end;
 
 function TMufasaBitmap.Copy(const xs, ys, xe, ye: integer): TMufasaBitmap;
@@ -742,7 +715,7 @@ begin
   Result := TMufasaBitmap.Create;
   Result.SetSize(xe-xs+1, ye-ys+1);
   for i := ys to ye do
-    Move(self.FData[i * self.w + xs], Result.FData[(i-ys) * result.w],result.Width * SizeOf(TRGB32));
+    Move(self.FData[i * self.FWidth + xs], Result.FData[(i-ys) * result.FWidth],result.Width * SizeOf(TRGB32));
 end;
 
 procedure TMufasaBitmap.Crop(const xs, ys, xe, ye: integer);
@@ -779,16 +752,16 @@ var
   DataStr : string;
   CorrectData : PRGB24;
 begin
-  SetLength(DataStr,w*h*3);
+  SetLength(DataStr,FWidth*FHeight*3);
   CorrectData:= PRGB24(@DataStr[1]);
-  for i := w*h - 1 downto 0 do
+  for i := FWidth*FHeight - 1 downto 0 do
   begin
     CorrectData[i].R := FData[i].R;
     CorrectData[i].G := FData[i].G;
     CorrectData[i].B := FData[i].B;
   end;
   DestLen := BufferLen;
-  if compress(BufferString,destlen,PChar(DataStr),w*h*3) = Z_OK then
+  if compress(BufferString,destlen,PChar(DataStr),FWidth*FHeight*3) = Z_OK then
   begin;
     SetLength(DataStr,DestLen);
     move(bufferstring[0],dataStr[1],DestLen);
@@ -808,7 +781,7 @@ begin
 
   for y := 0 to hei do
     for x := 0 to wid do
-      result[y][x] := BGRToRGB(self.FData[y * w + x]);
+      result[y][x] := BGRToRGB(self.FData[y * FWidth + x]);
 end;
 
 procedure TMufasaBitmap.DrawMatrix(const matrix: T2DIntegerArray);
@@ -825,7 +798,7 @@ begin
 
   for y := 0 to hei do
     for x := 0 to wid do
-      self.FData[y * w + x] := RGBToBGR(matrix[y][x]);
+      self.FData[y * FWidth + x] := RGBToBGR(matrix[y][x]);
 end;
 
 procedure TMufasaBitmap.DrawMatrix(const Matrix: TSingleMatrix; ColorMapID: Int32 = 0); overload;
@@ -880,13 +853,14 @@ begin
     end;       
 end;
 
+
 function TMufasaBitmap.RowPtrs: TPRGB32Array;
 var
   I : integer;
 begin;
-  setlength(result,h);
-  for i := 0 to h - 1 do
-    result[i] := FData + w * i;
+  setlength(result,FHeight);
+  for i := 0 to FHeight - 1 do
+    result[i] := FData + FWidth * i;
 end;
 
 procedure TMufasaBitmap.LoadFromRawImage(RawImage: TRawImage);
@@ -924,27 +898,27 @@ begin
   // Set w,h and alloc mem.
   Self.SetSize(RawImage.Description.Width, RawImage.Description.Height);
 
-  {writeln(format('Image size: %d, %d', [w,h]));  }
+  {writeln(format('Image size: %d, %d', [FWidth,FHeight]));  }
   rs := RawImage.Description.RedShift shr 3;
   gs := RawImage.Description.GreenShift shr 3;
   bs := RawImage.Description.BlueShift shr 3;
  { writeln(format('Shifts(R,G,B): %d, %d, %d', [rs,gs,bs]));
   writeln(format('Bits per line %d, expected: %d',
-  [RawImage.Description.BitsPerLine, RawImage.Description.BitsPerPixel * self.w]));
+  [RawImage.Description.BitsPerLine, RawImage.Description.BitsPerPixel * self.FWidth]));
   }
 
 
   if RawImage.Description.BitsPerPixel = 32 then
-    Move(RawImage.Data[0], Self.FData[0],  self.w * self.h * SizeOf(TRGB32))
+    Move(RawImage.Data[0], Self.FData[0],  self.FWidth * self.FHeight * SizeOf(TRGB32))
   else
   begin
-    //FillChar(Self.FData[0], self.w * self.h * SizeOf(TRGB32), 0);
+    //FillChar(Self.FData[0], self.FWidth * self.FHeight * SizeOf(TRGB32), 0);
     data := self.FData;
 
     _24_old_p := RawImage.Data;
-    for y := 0 to self.h -1 do
+    for y := 0 to self.FHeight -1 do
     begin
-      for x := 0 to self.w -1 do
+      for x := 0 to self.FWidth -1 do
       begin
         // b is the first byte in the record.
         data^.b := _24_old_p[bs];
@@ -984,66 +958,70 @@ begin
 end;
 
 procedure TMufasaBitmap.FastSetPixel(x, y: integer; Color: TColor);
+var
+  TPA: array[0..0] of TPoint;
 begin
-  ValidatePoint(x,y);
-  FData[y*w+x] := RGBToBGR(Color);
+  TPA[0].X := X;
+  TPA[0].Y := Y;
+
+  DrawTPA(TPA, Color);
 end;
 
 procedure TMufasaBitmap.FastSetPixels(Points: TPointArray; Colors: TIntegerArray);
 var
-  i,len : integer;
-  Box : TBox;
+  ATPA: T2DPointArray;
+  i: Int32;
 begin
-  len := High(Points);
-  if Len <> High(colors) then
-    Raise Exception.CreateFMT('TPA/Colors Length differ',[]);
-  Box := GetTPABounds(Points);
-  if (Box.x1 < 0) or (Box.y1 < 0) or (Box.x2 >= self.w) or (Box.y2 >= self.h) then
-    raise exception.Create('The Points you passed to FastSetPixels exceed the bitmap''s bounds')
-  else
-    for i := 0 to len do
-      FData[Points[i].y * w + Points[i].x] := RGBToBGR(Colors[i]);
+  SetLength(ATPA, Length(Points), 1);
+  for i := 0 to High(ATPA) do
+    ATPA[i][0] := Points[i];
+
+  DrawATPA(ATPA, Colors);
 end;
 
 procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray; Colors: TIntegerArray);
 var
-  lenTPA,lenATPA : integer;
-  i,ii : integer;
-  Color : TRGB32;
-  Box : TBox;
+  i: Int32;
 begin
-  lenATPA := High(ATPA);
-  if LenATPA <> High(colors) then
-    Raise Exception.CreateFMT('TPA/Colors Length differ -> %d : %d',[LenATPA + 1,High(Colors) + 1]);
-  for i := 0 to lenATPA do
-  begin;
-    lenTPA := High(ATPA[i]);
-    Color := RGBToBGR(Colors[i]);
-    Box := GetTPABounds(ATPA[i]);
-    if (Box.x1 < 0) or (Box.y1 < 0) or (Box.x2 >= self.w) or (Box.y2 >= self.h) then
-      raise exception.Create('The Points you passed to DrawATPA exceed the bitmap''s bounds')
-    else
-      for ii := 0 to lenTPA do
-        FData[ATPA[i][ii].y * w + ATPA[i][ii].x] := Color;
-  end;
-end;
+  if (Length(Colors) = 0) or (Length(ATPA) = 0) then
+    Exit;
 
+  for i := 0 to High(ATPA) do
+    DrawTPA(ATPA[i], Colors[Min(i, High(Colors))]);
+end;
 
 procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray);
 var
-  Colors : TIntegerArray;
-  i,len : integer;
+  i: Int32;
 begin
-  len := high(ATPA);
-  SetLength(colors,len+1);
-  for i := 0 to len do
-    Colors[i] := Random(clwhite);
-  DrawATPA(ATPA,Colors);
+  if Length(ATPA) = 0 then
+    Exit;
+
+  for i := 0 to High(ATPA) do
+    DrawTPA(ATPA[i], Random($FFFFFF));
 end;
 
 procedure TMufasaBitmap.DrawTPA(Points: TPointArray; Color: TColor);
+var
+  Ptr: PPoint;
+  Upper: PtrUInt;
+  BGR: TRGB32;
 begin
-  DrawATPA(ConvArr([Points]),ConvArr([Color]));
+  if Length(Points) = 0 then
+    Exit;
+
+  BGR := RGBToBGR(Color);
+
+  Ptr := @Points[0];
+  Upper := PtrUInt(@Points[High(Points)]);
+
+  while (PtrUInt(Ptr) <= Upper) do
+  begin
+    if (Ptr^.X >= 0) and (Ptr^.Y >= 0) and (Ptr^.X < Self.FWidth) and (Ptr^.Y < Self.FHeight) then
+      FData[Ptr^.Y * Self.FWidth + Ptr^.X] := BGR;
+
+    Inc(Ptr);
+  end;
 end;
 
 procedure TMufasaBitmap.DrawToCanvas(x,y : integer; Canvas: TCanvas);
@@ -1085,7 +1063,7 @@ begin
   for y := 0 to hei do
     for x := 0 to wid do
     begin
-       c := (y * w + x);
+       c := (y * FWidth + x);
        SearchColor.a := Self.FData[c].a;
 
        if (LongWord(Self.FData[c]) = LongWord(SearchColor)) then
@@ -1103,7 +1081,7 @@ end;
 function TMufasaBitmap.FastGetPixel(x, y: integer): TColor;
 begin
   ValidatePoint(x,y);
-  Result := BGRToRGB(FData[y*w+x]);
+  Result := BGRToRGB(FData[y*FWidth+x]);
 end;
 
 function TMufasaBitmap.FastGetPixels(Points: TPointArray): TIntegerArray;
@@ -1113,11 +1091,11 @@ var
 begin
   len := high(Points);
   Box := GetTPABounds(Points);
-  if (Box.x1 < 0) or (Box.y1 < 0) or (Box.x2 >= self.w) or (Box.y2 >= self.h) then
+  if (Box.x1 < 0) or (Box.y1 < 0) or (Box.x2 >= self.FWidth) or (Box.y2 >= self.FHeight) then
     raise exception.Create('The Points you passed to FastGetPixels exceed the bitmap''s bounds');
   SetLength(result,len+1);
   for i := 0 to len do
-    Result[i] := BGRToRGB(FData[Points[i].y*w + Points[i].x]);
+    Result[i] := BGRToRGB(FData[Points[i].y*FWidth + Points[i].x]);
 end;
 
 function TMufasaBitmap.GetAreaColors(xs, ys, xe, ye : integer): T2DIntArray;
@@ -1129,7 +1107,7 @@ begin
   setlength(result,xe-xs+1,ye-ys+1);
   for x := xs to xe do
     for y := ys to ye do
-      result[x-xs][y-ys] := BGRToRGB(FData[y*w+x]);
+      result[x-xs][y-ys] := BGRToRGB(FData[y*FWidth+x]);
 end;
 
 function TMufasaBitmap.GetHSLValues(xs, ys, xe, ye: integer): T2DHSLArray;
@@ -1142,7 +1120,7 @@ begin
   for y := ys to ye do
     for x := xs to xe do
     begin                                                   { REWRITE THIS }
-      RGBToHSL(FData[y*w+x].R, FData[y*w+x].G, FData[y*w+x].B,
+      RGBToHSL(FData[y*FWidth+x].R, FData[y*FWidth+x].G, FData[y*FWidth+x].B,
                Result[y-ys][x-xs].H, Result[y-ys][x-xs].S,
                Result[y-ys][x-xs].L);
     end;
@@ -1178,22 +1156,21 @@ procedure TMufasaBitmap.SetAlphaValue(const value: byte);
 var
   i : integer;
 begin
-  for i := w * h - 1 downto 0 do
+  for i := FWidth * FHeight - 1 downto 0 do
     FData[i].A:= Value;
 end;
-
 procedure TMufasaBitmap.FastDrawClear(Color: TColor);
 var
   i : integer;
   Rec : TRGB32;
 begin
   Rec := RGBToBGR(Color);
-  if h > 0 then
+  if FHeight > 0 then
   begin;
-    for i := (w-1) downto 0 do
+    for i := (FWidth-1) downto 0 do
       FData[i] := Rec;
-    for i := (h-1) downto 1 do
-      Move(FData[0],FData[i*w],w*SizeOf(TRGB32));
+    for i := (FHeight-1) downto 1 do
+      Move(FData[0],FData[i*FWidth],FWidth*SizeOf(TRGB32));
   end;
 end;
 
@@ -1206,21 +1183,21 @@ begin
   TargetBitmap.ValidatePoint(x,y);
   TargetW := TargetBitmap.Width;
   TargetH := TargetBitmap.height;
-  MinW := Min(w-1,TargetW-x-1);
-  MinH := Min(h-1,TargetH-y-1);
+  MinW := Min(FWidth-1,TargetW-x-1);
+  MinH := Min(FHeight-1,TargetH-y-1);
   if FTransparentSet then
   begin;
     for loopy := 0 to MinH do
       for loopx := 0 to MinW do
       begin;
-        FData[loopy * w + loopx].A := 0;
-        if LongWord(FData[loopy * w + loopx]) <> LongWord(FTransparentColor) then
-          TargetBitmap.FData[(loopy + y) * TargetW + loopx + x] := FData[Loopy * w + loopx];
+        FData[loopy * FWidth + loopx].A := 0;
+        if LongWord(FData[loopy * FWidth + loopx]) <> LongWord(FTransparentColor) then
+          TargetBitmap.FData[(loopy + y) * TargetW + loopx + x] := FData[Loopy * FWidth + loopx];
       end;
   end
   else
     for loopy := 0 to MinH do
-      Move(FData[loopy*w],TargetBitmap.FData[(loopy+y) * TargetW + x],(MinW+1) * SizeOf(TRGB32));
+      Move(FData[loopy*FWidth],TargetBitmap.FData[(loopy+y) * TargetW + x],(MinW+1) * SizeOf(TRGB32));
 
 end;
 
@@ -1231,7 +1208,7 @@ var
 begin
   OldCol := RGBToBGR(OldColor);
   NewCol := RGBToBGR(NewColor);
-  for i := w*h-1 downto 0 do
+  for i := FWidth*FHeight-1 downto 0 do
   begin
     FData[i].a := 0;
     if LongWord(FData[i]) = LongWord(OldCol) then
@@ -1249,8 +1226,8 @@ begin
   if Resize then
     Self.SetSize(xe-xs+1,ye-ys+1);
 
-  wi := Min(xe-xs + 1,Self.w);
-  hi := Min(ye-ys + 1,Self.h);
+  wi := Min(xe-xs + 1,Self.FWidth);
+  hi := Min(ye-ys + 1,Self.FHeight);
 
   TIOManager(MWindow).GetDimensions(TargetWidth, TargetHeight);
   if (xs + wi > TargetWidth) or (ys + hi > TargetHeight) then
@@ -1271,7 +1248,7 @@ begin
   end else
   begin
     for y := 0 to (hi-1) do
-      Move(Data.Ptr[y * Data.RowLen], FData[y * self.w],wi * SizeOf(TRGB32));
+      Move(Data.Ptr[y * Data.RowLen], FData[y * self.FWidth],wi * SizeOf(TRGB32));
     
     TIOManager(MWindow).FreeReturnData();
   end;
@@ -1288,8 +1265,8 @@ begin
     Self.SetSize(xe-xs+1 + x,ye-ys+1 + y);
 
   ValidatePoint(x,y);
-  wi := Min(xe-xs + 1 + x,Self.w)-x;
-  hi := Min(ye-ys + 1 + y,Self.h)-y;
+  wi := Min(xe-xs + 1 + x,Self.FWidth)-x;
+  hi := Min(ye-ys + 1 + y,Self.FHeight)-y;
 
   TIOManager(MWindow).GetDimensions(TargetWidth, TargetHeight);
   if (xs + wi > TargetWidth) or (ys + hi > TargetHeight) then
@@ -1310,7 +1287,7 @@ begin
   end else
   begin
     for yy := 0 to (hi-1) do
-      Move(Data.Ptr[yy * (Data.RowLen)], FData[(yy + y) * self.w + x], wi * SizeOf(TRGB32));
+      Move(Data.Ptr[yy * (Data.RowLen)], FData[(yy + y) * self.FWidth + x], wi * SizeOf(TRGB32));
 
     TIOManager(MWindow).FreeReturnData();
   end;
@@ -1336,16 +1313,16 @@ var
   MiddlePoint : TPoint;
   NewCorners : array[1..4] of TPoint; //(xs,ye);(xe,ye);(xe,ys);(xs,ys)
 begin
-  MiddlePoint := Point((w-1) div 2,(h-1) div 2);
+  MiddlePoint := Point((FWidth-1) div 2,(FHeight-1) div 2);
   CosAngle := Cos(Angle);
   SinAngle := Sin(Angle);
   MinX := MaxInt;
   MinY := MaxInt;
   MaxX := 0;
   MaxY := 0;
-  NewCorners[1]:= RotatePointEdited(Point(0,h-1),angle,middlepoint.x,middlepoint.y);
-  NewCorners[2]:= RotatePointEdited(Point(w-1,h-1),angle,middlepoint.x,middlepoint.y);
-  NewCorners[3]:= RotatePointEdited(Point(w-1,0),angle,middlepoint.x,middlepoint.y);
+  NewCorners[1]:= RotatePointEdited(Point(0,FHeight-1),angle,middlepoint.x,middlepoint.y);
+  NewCorners[2]:= RotatePointEdited(Point(FWidth-1,FHeight-1),angle,middlepoint.x,middlepoint.y);
+  NewCorners[3]:= RotatePointEdited(Point(FWidth-1,0),angle,middlepoint.x,middlepoint.y);
   NewCorners[4]:= RotatePointEdited(Point(0,0),angle,middlepoint.x,middlepoint.y);
   for i := 1 to 4 do
   begin;
@@ -1368,8 +1345,8 @@ begin
     begin;
       Oldx := Round(MiddlePoint.x + CosAngle * (x + MinX-MiddlePoint.x) - SinAngle * (y + MinY - MiddlePoint.y));
       Oldy := Round(MiddlePoint.y + SinAngle * (x + MinX-MiddlePoint.x) + CosAngle * (y + MinY-MiddlePoint.y));
-      if not ((Oldx <0) or (Oldx >= w) or (Oldy < 0) or (Oldy >= h)) then
-        TargetBitmap.FData[ y * NewW + x] := Self.FData[OldY * W + OldX];
+      if not ((Oldx <0) or (Oldx >= FWidth) or (Oldy < 0) or (Oldy >= FHeight)) then
+        TargetBitmap.FData[ y * NewW + x] := Self.FData[OldY * FWidth + OldX];
     end;
 end;
 
@@ -1576,7 +1553,7 @@ var
   Ptr : PRGB32;
 begin
   Ptr := FData;
-  for i := (h*w-1) downto 0 do
+  for i := (FHeight*FWidth-1) downto 0 do
   begin;
     RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,He,Se,Le);
     HSLtoRGB(He,0.0,Le,Ptr^.R,Ptr^.G,Ptr^.B);
@@ -1590,10 +1567,10 @@ var
   He,Se,Le : extended;
   PtrOld,PtrNew : PRGB32;
 begin
-  TargetBitmap.SetSize(w,h);
+  TargetBitmap.SetSize(FWidth,FHeight);
   PtrOld := Self.FData;
   PtrNew := TargetBitmap.FData;
-  for i := (h*w-1) downto 0 do
+  for i := (FHeight*FWidth-1) downto 0 do
   begin;
     RGBToHSL(PtrOld^.R,PtrOld^.G,PtrOld^.B,He,Se,Le);
     HSLtoRGB(He,0.0,Le,PtrNew^.R,PtrNew^.G,PtrNew^.B);
@@ -1608,10 +1585,10 @@ var
   Lum : byte;
   PtrOld,PtrNew : PRGB32;
 begin
-  TargetBitmap.SetSize(w,h);
+  TargetBitmap.SetSize(FWidth,FHeight);
   PtrOld := Self.FData;
   PtrNew := TargetBitmap.FData;
-  for i := (h*w-1) downto 0 do
+  for i := (FHeight*FWidth-1) downto 0 do
   begin;
     Lum := Round(PtrOld^.r * 0.3 + PtrOld^.g * 0.59 + PtrOld^.b * 0.11);
     PtrNew^.r := Lum;
@@ -1629,7 +1606,7 @@ var
   Ptr: PRGB32;
 begin
   Ptr := Self.FData;
-  for i := (h*w-1) downto 0 do
+  for i := (FHeight*FWidth-1) downto 0 do
   begin;
     Lum := Round(Ptr^.r * 0.3 + Ptr^.g * 0.59 + Ptr^.b * 0.11);
     Ptr^.r := Lum;
@@ -1656,7 +1633,7 @@ var
   Ptr: PRGB32;
 begin
   Ptr := Self.FData;
-  for i := (h*w-1) downto 0 do
+  for i := (FHeight*FWidth-1) downto 0 do
   begin;
     Ptr^.r := BrightnessAdjust(Ptr^.r,br);
     Ptr^.g := BrightnessAdjust(Ptr^.g,br);
@@ -1670,10 +1647,10 @@ var
   I : integer;
   PtrOld,PtrNew : PRGB32;
 begin
-  TargetBitmap.SetSize(w,h);
+  TargetBitmap.SetSize(FWidth,FHeight);
   PtrOld := Self.FData;
   PtrNew := TargetBitmap.FData;
-  for i := (h*w-1) downto 0 do
+  for i := (FHeight*FWidth-1) downto 0 do
   begin;
     PtrNew^.r := BrightnessAdjust(PtrOld^.r,br);
     PtrNew^.g := BrightnessAdjust(PtrOld^.g,br);
@@ -1703,7 +1680,7 @@ var
   Ptr: PRGB32;
 begin
   Ptr := Self.FData;
-  for i := (h*w-1) downto 0 do
+  for i := (FHeight*FWidth-1) downto 0 do
   begin;
     Ptr^.r := ContrastAdjust(Ptr^.r,co);
     Ptr^.g := ContrastAdjust(Ptr^.g,co);
@@ -1717,10 +1694,10 @@ var
   I : integer;
   PtrOld,PtrNew : PRGB32;
 begin
-  TargetBitmap.SetSize(w,h);
+  TargetBitmap.SetSize(FWidth,FHeight);
   PtrOld := Self.FData;
   PtrNew := TargetBitmap.FData;
-  for i := (h*w-1) downto 0 do
+  for i := (FHeight*FWidth-1) downto 0 do
   begin;
     PtrNew^.r := ContrastAdjust(PtrOld^.r,co);
     PtrNew^.g := ContrastAdjust(PtrOld^.g,co);
@@ -1734,7 +1711,7 @@ procedure TMufasaBitmap.Invert;
 var
   i : integer;
 begin
-  for i := (h*w-1) downto 0 do
+  for i := (FHeight*FWidth-1) downto 0 do
   begin;
     Self.FData[i].r := not Self.FData[i].r;
     Self.FData[i].g := not Self.FData[i].g;
@@ -1747,10 +1724,10 @@ var
   I : integer;
   PtrOld,PtrNew : PRGB32;
 begin
-  TargetBitmap.SetSize(w,h);
+  TargetBitmap.SetSize(FWidth,FHeight);
   PtrOld := Self.FData;
   PtrNew := TargetBitmap.FData;
-  for i := (h*w-1) downto 0 do
+  for i := (FHeight*FWidth-1) downto 0 do
   begin;
     PtrNew^.r := not PtrOld^.r;
     PtrNew^.g := not PtrOld^.g;
@@ -1767,10 +1744,10 @@ var
 begin
   if not InRange(Po,1,255) then
     Raise exception.CreateFmt('Posterize Po(%d) out of range[1,255]',[Po]);
-  TargetBitmap.SetSize(w,h);
+  TargetBitmap.SetSize(FWidth,FHeight);
   PtrOld := Self.FData;
   PtrNew := TargetBitmap.FData;
-  for i := (h*w-1) downto 0 do
+  for i := (FHeight*FWidth-1) downto 0 do
   begin;
     PtrNew^.r := min(Round(PtrOld^.r / po) * Po, 255);
     PtrNew^.g := min(Round(PtrOld^.g / po) * Po, 255);
@@ -1789,7 +1766,7 @@ begin
   if not InRange(Po,1,255) then
     Raise exception.CreateFmt('Posterize Po(%d) out of range[1,255]',[Po]);
   Ptr := Self.FData;
-  for i := (h*w-1) downto 0 do
+  for i := (FHeight*FWidth-1) downto 0 do
   begin;
    { a := round(ptr^.r / po);
     a := a * po;
@@ -1841,14 +1818,14 @@ begin
         for fy:=ly to hy do
           for fx:=lx to hx do
           begin
-            sl := (fy * bmp.w +fx);
+            sl := (fy * bmp.Width +fx);
             inc(red, bmp.FData[sl].R);
             inc(green, bmp.FData[sl].G);
             inc(blue, bmp.FData[sl].B);
             inc(size);
           end;
 
-         sl := ((y+xs)*self.w+(x+ys));
+         sl := ((y+xs)*self.Width+(x+ys));
          Self.FData[sl].R := (red div size);
          Self.FData[sl].G := (green div size);
          Self.FData[sl].B := (blue div size);
@@ -1882,7 +1859,7 @@ var
   end;
 
 begin
-  TargetBitmap.SetSize(Self.W,Self.H);
+  TargetBitmap.SetSize(Self.FWidth,Self.FHeight);
   Row := RowPtrs;
   RowT := TargetBitmap.RowPtrs; //Target
 
@@ -1890,8 +1867,8 @@ begin
   mH := High(Matrix);
   midx := (mW+1) div 2;
   midy := (mH+1) div 2;
-  for y:=0 to Self.H-1 do
-    for x:=0 to Self.W-1 do
+  for y:=0 to Self.FHeight-1 do
+    for x:=0 to Self.FWidth-1 do
     begin
       valR := 0;
       valG := 0;
@@ -1899,7 +1876,7 @@ begin
       for yy:=0 to mH do
         for xx:=0 to mW do
         begin
-          ForceInBounds(x+xx-midx, y+yy-midy, Self.W, Self.H, cx, cy);
+          ForceInBounds(x+xx-midx, y+yy-midy, Self.FWidth, Self.FHeight, cx, cy);
           valR := valR + (Matrix[yy][xx] * Row[cy][cx].R);
           valG := valG + (Matrix[yy][xx] * Row[cy][cx].G);
           valB := valB + (Matrix[yy][xx] * Row[cy][cx].B);
@@ -1918,20 +1895,20 @@ var
 begin
   tw := Other.Width;
   th := Other.Height;
-  if (tw = 0) or (th = 0) or (tw+pt.x > Self.W) or (th+pt.y > Self.H) then
+  if (tw = 0) or (th = 0) or (tw+pt.x > Self.FWidth) or (th+pt.y > Self.FHeight) then
     Exit(0);
 
   SAD := 0;
   for y:=0 to th-1 do
     for x:=0 to tw-1 do
     begin
-      c1 := Self.FData [(y + pt.y) * w + x + pt.x];
+      c1 := Self.FData [(y + pt.y) * FWidth + x + pt.x];
       c2 := Other.FData[y * tw + x];
       if Sqr(c1.R-c2.R) + Sqr(c1.G-c2.G) + Sqr(c1.B-c2.B) > Sqr(Tol) then
         Inc(SAD);
     end;
   
-  Result := 1 - SAD / (W*H);
+  Result := 1 - SAD / (FWidth*FHeight);
 end;
 
 procedure TMufasaBitmap.Downsample(DownScale: Int32; TargetBitmap: TMufasaBitmap);
@@ -1945,9 +1922,9 @@ var
     for y:=y1 to y1+DownScale-1 do
       for x:=x1 to x1+DownScale-1 do
       begin
-        Inc(R, Self.FData[y*w+x].R);
-        Inc(G, Self.FData[y*w+x].G);
-        Inc(B, Self.FData[y*w+x].B);
+        Inc(R, Self.FData[y*FWidth+x].R);
+        Inc(G, Self.FData[y*FWidth+x].G);
+        Inc(B, Self.FData[y*FWidth+x].B);
       end;
     Result.R := Round(R * invArea);
     Result.G := Round(G * invArea);
@@ -1956,11 +1933,11 @@ var
 var
   x,y,nw,nh:Int32;
 begin
-  if (w = 0) or (h = 0) or (DownScale <= 0) then 
+  if (FWidth = 0) or (FHeight = 0) or (DownScale <= 0) then 
     Exit;
   
-  nw := w div DownScale;
-  nh := h div DownScale;
+  nw := FWidth div DownScale;
+  nh := FHeight div DownScale;
   invArea := Double(1.0) / Sqr(DownScale);
   TargetBitmap.SetSize(nW, nH);
   for y:=0 to nh-1 do
@@ -1973,8 +1950,8 @@ var
   y: Int32;
   Image, Templ: T2DIntArray;
 begin
-  if (W < Other.Width) or (H < Other.Height) then
-    raise Exception.CreateFmt('Image must be larger than Template - Image(%d, %d), Templ(%d, %d)', [W,H, Other.Width, Other.Height]);
+  if (FWidth < Other.Width) or (FHeight < Other.Height) then
+    raise Exception.CreateFmt('Image must be larger than Template - Image(%d, %d), Templ(%d, %d)', [FWidth,FHeight, Other.Width, Other.Height]);
 
   SetLength(Image, Self.Height, Self.Width);
   SetLength(Templ, Other.Height, Other.Width);
@@ -2015,16 +1992,16 @@ var
 begin
   Result.BlackHi:= -1;
   Result.WhiteHi:= -1;
-  Result.W := Self.Width;
-  Result.H := Self.Height;
-  SetLength(result.Black,w*h);
-  SetLength(result.White,w*h);
-  dX := w-1;
-  dY := h-1;
+  Result.w := Self.Width;
+  Result.h := Self.Height;
+  SetLength(result.Black,FWidth*FHeight);
+  SetLength(result.White,FWidth*FHeight);
+  dX := FWidth-1;
+  dY := FHeight-1;
   for y := 0 to dY do
     for x := 0 to dX do
     //Check for non-white/black pixels? Not for now atleast.
-      if FData[y*w+x].r = 255 then
+      if FData[y*FWidth+x].r = 255 then
       begin;
         inc(Result.WhiteHi);
         Result.White[Result.WhiteHi].x := x;
@@ -2125,88 +2102,80 @@ end;
 procedure TMufasaBitmap.DrawText(Text, Font: String; Position: TPoint; Shadow: Boolean; Color: TColor);
 var
   TPA: TPointArray;
-  P: TPoint;
-  RGB: TRGB32;
-  i, _: Int32;
+  TextWidth, TextHeight: Int32;
 begin
   if (FList = nil) then
     raise Exception.Create('TMufasaBitmap.DrawText requires the TMBitmaps list set');
 
-  TPA := TClient(FList.Client).MOCR.TextToFontTPA(Text, Font, _, _);
+  with FList.Client as TClient do
+    TPA := MOCR.TextToFontTPA(Text, Font, TextWidth, TextHeight);
+
+  OffsetTPA(TPA, Position);
 
   if Shadow then
   begin
-    RGB := RGBToBGR($000000);
-
-    for i := 0 to High(TPA) do
-    begin
-      P.X := TPA[i].X + Position.X + 1;
-      P.Y := TPA[i].Y + Position.Y + 1;
-
-      if PointInBitmap(P.X, P.Y) then
-        FData[P.Y * Self.W + P.X] := RGB;
-    end;
+    OffsetTPA(TPA, Point(1, 1));
+    DrawTPA(TPA, $000000);
+    OffsetTPA(TPA, Point(-1, -1));
   end;
 
-  RGB := RGBToBGR(Color);
-
-  for i := 0 to High(TPA) do
-  begin
-    P.X := TPA[i].X + Position.X;
-    P.Y := TPA[i].Y + Position.Y;
-
-    if PointInBitmap(P.X, P.Y) then
-      FData[P.Y * Self.W + P.X] := RGB;
-  end;
+  DrawTPA(TPA, Color);
 end;
 
-procedure TMufasaBitmap.DrawSystemText(Text, Font: String; const Size: Integer; Position: TPoint; Shadow: Boolean; Color: TColor);
+procedure TMufasaBitmap.DrawSystemText(Text: String; Font: TFont; Position: TPoint);
 var
-  TPA: TPointArray;
-  P: TPoint;
-  RGB: TRGB32;
-  i, _: Int32;
-  F: TFont;
+  TextWidth, TextHeight, Y: Int32;
 begin
-  if (FList = nil) then
-    raise Exception.Create('TMufasaBitmap.DrawText requires the TMBitmaps list set');
-
-  F := TFont.Create();
-
+  with TBitmap.Create() do
   try
-    F.Name := Font;
-    F.Size := Size;
+    PixelFormat := pf32bit;
 
-    TPA := TClient(FList.Client).MOCR.TextToFontTPA(Text, F, _, _);
-  finally
-    F.Free();
-  end;
+    Canvas.Brush.Style := bsClear;
+    Canvas.Font := Font;
+    Canvas.GetTextSize(Text, TextWidth, TextHeight);
 
-  if Shadow then
-  begin
-    RGB := RGBToBGR($000000);
+    if Position.X + TextWidth > Self.FWidth then
+      TextWidth := Self.FWidth - Position.X;
+    if Position.Y + TextHeight > Self.FHeight then
+      TextHeight := Self.FHeight - Position.Y;
 
-    for i := 0 to High(TPA) do
+    if (TextWidth > 0) and (TextHeight > 0) then
     begin
-      P.X := TPA[i].X + Position.X + 1;
-      P.Y := TPA[i].Y + Position.Y + 1;
+      SetSize(TextWidth, TextHeight);
 
-      if PointInBitmap(P.X, P.Y) then
-        FData[P.Y * Self.W + P.X] := RGB;
+      BeginUpdate();
+
+      for Y := Position.Y to Min(Position.Y + TextHeight - 1, Self.FHeight - 1) do
+        if (Y >= 0) then
+          Move(FData[Y * Self.FWidth + Max(0, Position.X)], ScanLine[Y - Position.Y]^, Width * 4);
+
+      Canvas.TextOut(Min(Position.X, 0), Min(Position.Y, 0), Text);
+
+      for Y := Position.Y to Min(Position.Y + TextHeight - 1, Self.FHeight - 1) do
+        if (Y >= 0) then
+          Move(ScanLine[Y - Position.Y]^, FData[Y * Self.FWidth + Max(0, Position.X)], Width * 4);
+
+      EndUpdate();
     end;
-  end;
-
-  RGB := RGBToBGR(Color);
-
-  for i := 0 to High(TPA) do
-  begin
-    P.X := TPA[i].X + Position.X;
-    P.Y := TPA[i].Y + Position.Y;
-
-    if PointInBitmap(P.X, P.Y) then
-      FData[P.Y * Self.W + P.X] := RGB;
+  finally
+    Free();
   end;
 end;
+
+procedure TMufasaBitmap.DrawSystemText(Text, FontName: String; Size: Integer; Position: TPoint; Shadow: Boolean; Color: TColor);
+var
+  Font: TFont;
+begin
+  Font := TFont.Create();
+  Font.Name := FontName;
+  Font.Size := Size;
+  Font.Color := Color;
+
+  DrawSystemText(Text, Font, Position);
+
+  Font.Free();
+end;
+
 constructor TMBitmaps.Create(Owner: TObject);
 begin
   inherited Create;
@@ -2259,7 +2228,7 @@ begin
   if FExternData then
     raise Exception.Create('Cannot resize a bitmap with FExternData = True!');
 
-  if (AWidth <> w) or (AHeight <> h) then
+  if (AWidth <> FWidth) or (AHeight <> FHeight) then
   begin
     if AWidth*AHeight <> 0 then
     begin;
@@ -2268,18 +2237,18 @@ begin
     end
     else
       NewData := nil;
-    if Assigned(FData) and Assigned(NewData) and (w*H <> 0) then
+    if Assigned(FData) and Assigned(NewData) and (FWidth*FHeight <> 0) then
     begin;
-      minw := Min(AWidth,w);
-      minh := Min(AHeight,h);
+      minw := Min(AWidth,FWidth);
+      minh := Min(AHeight,FHeight);
       for i := 0 to minh - 1 do
-        Move(FData[i*w],Newdata[i*AWidth],minw * SizeOf(TRGB32));
+        Move(FData[i*FWidth],Newdata[i*AWidth],minw * SizeOf(TRGB32));
     end;
     if Assigned(FData) then
       FreeMem(FData);
     FData := NewData;
-    w := AWidth;
-    h := AHeight;
+    FWidth := AWidth;
+    FHeight := AHeight;
   end;
 end;
 
@@ -2291,7 +2260,7 @@ begin
   if FExternData then
     raise Exception.Create('Cannot resize a bitmap with FExternData = True!');
 
-  if (AWidth <> w) or (AHeight <> h) then
+  if (AWidth <> FWidth) or (AHeight <> FHeight) then
   begin;
     if AWidth*AHeight <> 0 then
     begin;
@@ -2300,21 +2269,22 @@ begin
     end
     else
       NewData := nil;
-    if Assigned(FData) and Assigned(NewData) and (w*H <> 0) then
+    if Assigned(FData) and Assigned(NewData) and (FWidth*FHeight <> 0) then
     begin;
       for y := 0 to AHeight - 1 do
         for x := 0 to AWidth -1 do
-          NewData[y*AWidth + x] := FData[((y * h)div aheight) * W+ (x * W) div awidth];
+          NewData[y*AWidth + x] := FData[((y * FHeight)div aheight) * FWidth+ (x * FWidth) div awidth];
     end;
     if Assigned(FData) then
       FreeMem(FData);
     FData := NewData;
-    w := AWidth;
-    h := AHeight;
+    FWidth := AWidth;
+    FHeight := AHeight;
   end;
 end;
 
-procedure TMufasaBitmap.ResizeEx(method: TBmpResizeMethod; NewWidth, NewHeight: integer);
+procedure TMufasaBitmap.ResizeEx(Method: TBmpResizeMethod; NewWidth,
+  NewHeight: integer);
 begin
   if (Self.FExternData) then
     raise Exception.Create('Cannot resize a bitmap with FExternData = True!');
@@ -2403,8 +2373,8 @@ procedure TMufasaBitmap.SetPersistentMemory(mem: PtrUInt; awidth, aheight: integ
 begin
   SetSize(0, 0);
   FExternData := True;
-  w := awidth;
-  h := aheight;
+  FWidth := awidth;
+  FHeight := aheight;
 
   FData := PRGB32(mem);
 end;
@@ -2422,7 +2392,7 @@ end;
 
 function TMufasaBitmap.PointInBitmap(x, y: integer): boolean;
 begin
-  result := ((x >= 0) and (x < w) and (y >= 0) and (y < h));
+  result := ((x >= 0) and (x < FWidth) and (y >= 0) and (y < FHeight));
 end;
 
 procedure TMufasaBitmap.ValidatePoint(x, y: integer);
@@ -2443,8 +2413,8 @@ begin
   Index := -1;
   List := nil;
   {FData:= nil;
-  w := 0;
-  h := 0; }
+  FWidth := 0;
+  FHeight := 0; }
 end;
 
 destructor TMufasaBitmap.Destroy;

@@ -240,10 +240,10 @@ begin
 
   GetTargetBounds(Bounds);
 
-  if (FBuffer.Width <> Bounds.Width) or (FBuffer.Height <> Bounds.Height) then
+  if (FBuffer.Width <> Bounds.Width - 1) or (FBuffer.Height <> Bounds.Height - 1) then
   begin
     FBuffer.Free();
-    FBuffer := TWindowBuffer.Create(Bounds.Width, Bounds.Height);
+    FBuffer := TWindowBuffer.Create(Bounds.Width - 1, Bounds.Height - 1);
   end;
 
   ImageClientAreaOffset(X, Y);

@@ -490,6 +490,11 @@ begin
   PMufasaBitmap(Params^[0])^.DrawSystemText(PString(Params^[1])^, PString(Params^[2])^, PInteger(Params^[3])^, PPoint(Params^[4])^, PBoolean(Params^[5])^, PInteger(Params^[6])^);
 end;
 
+procedure TMufasaBitmap_DrawSystemTextEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PMufasaBitmap(Params^[0])^.DrawSystemText(PString(Params^[1])^, PFont(Params^[2])^, PPoint(Params^[3])^);
+end;
+
 //Read: List: TMBitmaps;
 procedure TMufasaBitmap_List_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -594,7 +599,8 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.Blur(const Block: integer); constref;', @TMufasaBitmap_Blur);
     addGlobalFunc('procedure TMufasaBitmap.Blur(const Block, xs, ys, xe, ye: integer); constref; overload;', @TMufasaBitmap_BlurEx);
     addGlobalFunc('procedure TMufasaBitmap.DrawText(const Text, FontName: string; const pnt: TPoint; const Shadow: Boolean; const Color: Integer); constref;', @TMufasaBitmap_DrawText);
-    addGlobalFunc('procedure TMufasaBitmap.DrawSystemText(const Text, FontName: string; const FontSize: Integer; const pnt: TPoint; const Shadow: Boolean; const Color: Integer); constref;', @TMufasaBitmap_DrawSystemText);
+    addGlobalFunc('procedure TMufasaBitmap.DrawSystemText(const Text, FontName: string; const FontSize: Integer; const pnt: TPoint; const Shadow: Boolean; const Color: Integer); constref; overload;', @TMufasaBitmap_DrawSystemText);
+    addGlobalFunc('procedure TMufasaBitmap.DrawSystemText(const Text: String; Font: TFont; Position: TPoint); constref; overload;', @TMufasaBitmap_DrawSystemTextEx);
     addGlobalFunc('procedure TMufasaBitmap.Convolute(TargetBitmap : TMufasaBitmap; Matrix : T2DExtendedArray); constref;', @TMufasaBitmap_Convolute);
 
     addGlobalFunc('function  TMufasaBitmap.CompareAt(Other: TMufasaBitmap; Pt: TPoint; Tol: Int32): Extended;', @TMufasaBitmap_CompareAt);

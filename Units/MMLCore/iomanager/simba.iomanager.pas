@@ -266,7 +266,7 @@ begin
   begin
     FFrozen := FImage;
     FFrozen.GetTargetDimensions(W, H);
-    FImage := TRawTarget.Create(FFrozen.ReturnData(0, 0, W, H).Ptr, W, H, True);
+    FImage := TRawTarget.Create(FFrozen.ReturnData(0, 0, W-1, H-1).Ptr, W, H, True);
     FFrozen.FreeReturnData();
   end else
   begin
