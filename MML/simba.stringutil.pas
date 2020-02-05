@@ -145,8 +145,7 @@ begin
   end;
 
   if (Stream <> nil) then
-    Stream.Free() // Stream will free Output too
-  else
+    Stream.Free(); // Stream will free Output too
   if (Output <> nil) then
     Output.Free();
 end;

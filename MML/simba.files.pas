@@ -69,8 +69,9 @@ type
   // We don't need one per object. :-)
   function GetFiles(Path, Ext: string): TStringArray;
   function GetDirectories(Path: string): TstringArray;
-  function FindFile(var Filename: string; const Dirs: array of string): boolean;
-  function FindPlugin(Argument: String; SearchPaths: array of String): String;
+  function FindFile(var FileName: string; const Dirs: array of String): Boolean; overload;
+  function FindFile(var FileName: string; Extensions: array of String; const Dirs: array of String): Boolean; overload;
+  function FindPlugin(var FileName: String; Dirs: array of String): Boolean;
   procedure UnZipFile(const FilePath, TargetPath: string);
   procedure UnZipOneFile(const ArchiveFileName, FileName, OutputPath: String);
   procedure ZipFiles(const ToFolder: string; const Files: TStringArray);
@@ -80,38 +81,53 @@ uses
   {$IFDEF MSWINDOWS}Windows,{$ENDIF} IniFiles, simba.client, FileUtil,
   LazFileUtils, LazUTF8, Zipper, dynlibs;
 
-function FindPlugin(Argument: String; SearchPaths: array of String): String;
-
-  function Find(Path: String; var Plugin: String): Boolean;
-  begin
-    Path := SetDirSeparators(IncludeTrailingPathDelimiter(Path) + Argument);
-
-    if FileExists(Path) then
-      Plugin := Path
-    else
-    if FileExists(Path + '.' + SharedSuffix) then
-      Plugin := Path + '.' + SharedSuffix
-    else
-    if FileExists(Path + {$IFDEF CPU64}'64'{$ELSE}'32'{$ENDIF} + '.' + SharedSuffix) then
-      Plugin := Path + {$IFDEF CPU64}'64'{$ELSE}'32'{$ENDIF} + '.' + SharedSuffix;
-
-    Result := Plugin <> '';
-  end;
-
+function FindFile(var FileName: string; const Dirs: array of String): Boolean;
 var
-  i: Int32;
-begin
-  for i := 0 to High(SearchPaths) do
-    if Find(SearchPaths[i], Result) then
-      Exit;
+  I, H: LongInt;
+begin;
+  Result := False;
 
-  Result := '';
+  H := High(Dirs);
+  for I := 0 to H do
+    if FileExistsUTF8(IncludeTrailingPathDelimiter(Dirs[I]) + Filename) then
+    begin
+      Filename := ExpandFileName(IncludeTrailingPathDelimiter(Dirs[I]) + Filename);
+      Result := True;
+      Exit;
+    end;
 end;
 
-function GetFiles(Path, Ext: string): TstringArray;
+function FindFile(var FileName: string; Extensions: array of String; const Dirs: array of String): Boolean;
 var
-    SearchRec : TSearchRec;
-    c : integer;
+  Root: String;
+  I: Int32;
+begin
+  Root := FileName;
+
+  for I := 0 to High(Extensions) do
+  begin
+    FileName := Root + Extensions[i];
+
+    if FindFile(FileName, Dirs) then
+    begin
+      Result := True;
+
+      Exit;
+    end;
+  end;
+
+  Result := False;
+end;
+
+function FindPlugin(var FileName: String; Dirs: array of String): Boolean;
+begin
+  Result := FindFile(FileName, ['', '.' + SharedSuffix, {$IFDEF CPU64}'64'{$ELSE}'32'{$ENDIF} + '.' + SharedSuffix], Dirs);
+end;
+
+function GetFiles(Path, Ext: string): TStringArray;
+var
+  SearchRec : TSearchRec;
+  c : integer;
 begin
   c := 0;
   if FindFirst(Path + '*.' + ext, faAnyFile, SearchRec) = 0 then
@@ -144,22 +160,6 @@ begin
     until FindNext(SearchRec) <> 0;
     SysUtils.FindClose(SearchRec);
   end;
-end;
-
-function FindFile(var Filename: string; const Dirs: array of string): boolean;
-var
-  I, H: LongInt;
-begin;
-  Result := False;
-
-  H := High(Dirs);
-  for I := 0 to H do
-    if FileExistsUTF8(IncludeTrailingPathDelimiter(Dirs[I]) + Filename) then
-    begin
-      Filename := ExpandFileName(IncludeTrailingPathDelimiter(Dirs[I]) + Filename);
-      Result := True;
-      Exit;
-    end;
 end;
 
 procedure UnZipFile(const FilePath, TargetPath: string);

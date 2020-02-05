@@ -27,6 +27,13 @@ type
                   SIMBA_METHOD_DISGUISE,
                   SIMBA_METHOD_STATUS);
 
+  TSimbaMethod_ScriptError = packed record
+    Message: array[1..2048] of Char;
+    FileName: ShortString;
+    Line: Int32;
+    Column: Int32;
+  end;
+
 type
   ESimbaScriptState = (SCRIPT_STOPPING, SCRIPT_PAUSED, SCRIPT_RUNNING);
 

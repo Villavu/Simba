@@ -95,7 +95,7 @@ type
 implementation
 
 uses
-  SynEditMarkupHighAll, SynEditMarkupWordGroup, SynEditMarkupFoldColoring, SynEditPointClasses, SynGutter,
+  SynEditMarkupHighAll, SynEditMarkupFoldColoring, SynEditPointClasses, SynGutter,
   dialogs, inifiles, math,
   simba.settings, simba.editor_attributes, simba.scripttabhistory;
 

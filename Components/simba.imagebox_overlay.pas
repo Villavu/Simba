@@ -19,7 +19,6 @@ type
     function GetBrush: TBrush;
     function GetPen: TPen;
   public
-    property Client: TClient read FClient write FClient;
     property Buffer: TBitmap read FBuffer;
 
     property Brush: TBrush read GetBrush;
@@ -39,7 +38,7 @@ type
 
     function DebugDTM(DTM: TMDTM): TSimbaImageOverlayBenchmark;
 
-    constructor Create(Image: TImage);
+    constructor Create(Image: TImage; Client: TClient);
     destructor Destroy; override;
   end;
 
@@ -47,6 +46,7 @@ type
   protected
     FOverlay: TSimbaImageOverlay;
     FBitmap: TMufasaBitmap;
+    FClient: TClient;
   public
     property Image: TMufasaBitmap read FBitmap;
     property Overlay: TSimbaImageOverlay read FOverlay;
@@ -54,6 +54,7 @@ type
     procedure Changed; override;
 
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
   end;
 
 implementation
@@ -74,7 +75,18 @@ begin
   inherited Create(AOwner);
 
   FBitmap := TMufasaBitmap.Create();
-  FOverlay := TSimbaImageOverlay.Create(FImage);
+  FClient := TClient.Create();
+  FClient.IOManager.SetTarget(FBitmap);
+
+  FOverlay := TSimbaImageOverlay.Create(FImage, FClient);
+end;
+
+destructor TSimbaImageBox_Overlay.Destroy;
+begin
+  FBitmap.Free();
+  FClient.Free();
+
+  inherited Destroy();
 end;
 
 function TSimbaImageOverlay.GetBrush: TBrush;
@@ -143,7 +155,8 @@ begin
 
   Result.Time := PerformanceTimer();
 
-  FClient.MFinder.FindColorsTolerance(TPA, Color, 0, 0, W-1, H-1, Tolerance);
+  if (FClient <> nil) then
+    FClient.MFinder.FindColorsTolerance(TPA, Color, 0, 0, W-1, H-1, Tolerance);
 
   Result.Time := PerformanceTimer() - Result.Time;
   Result.Matches := Length(TPA);
@@ -152,8 +165,7 @@ begin
   DrawPoints(TPA);
 end;
 
-function TSimbaImageOverlay.DebugColorCTS1(Color: TColor; Tolerance: Int32
-  ): TSimbaImageOverlayBenchmark;
+function TSimbaImageOverlay.DebugColorCTS1(Color: TColor; Tolerance: Int32): TSimbaImageOverlayBenchmark;
 var
   W, H: Int32;
   TPA: TPointArray;
@@ -163,7 +175,8 @@ begin
 
   Result.Time := PerformanceTimer();
 
-  FClient.MFinder.FindColorsTolerance(TPA, Color, 0, 0, W-1, H-1, Tolerance);
+  if (FClient <> nil) then
+    FClient.MFinder.FindColorsTolerance(TPA, Color, 0, 0, W-1, H-1, Tolerance);
 
   Result.Time := PerformanceTimer() - Result.Time;
   Result.Matches := Length(TPA);
@@ -172,8 +185,7 @@ begin
   DrawPoints(TPA);
 end;
 
-function TSimbaImageOverlay.DebugColorCTS2(Color: TColor; Tolerance: Int32;
-  Hue, Sat: Extended): TSimbaImageOverlayBenchmark;
+function TSimbaImageOverlay.DebugColorCTS2(Color: TColor; Tolerance: Int32; Hue, Sat: Extended): TSimbaImageOverlayBenchmark;
 var
   W, H: Int32;
   TPA: TPointArray;
@@ -184,7 +196,8 @@ begin
 
   Result.Time := PerformanceTimer();
 
-  FClient.MFinder.FindColorsTolerance(TPA, Color, 0, 0, W-1, H-1, Tolerance);
+  if (FClient <> nil) then
+    FClient.MFinder.FindColorsTolerance(TPA, Color, 0, 0, W-1, H-1, Tolerance);
 
   Result.Time := PerformanceTimer() - Result.Time;
   Result.Matches := Length(TPA);
@@ -225,19 +238,17 @@ end;
 destructor TSimbaImageOverlay.Destroy;
 begin
   FBuffer.Free();
-  FClient.Free();
 
   inherited Destroy();
 end;
 
-constructor TSimbaImageOverlay.Create(Image: TImage);
+constructor TSimbaImageOverlay.Create(Image: TImage; Client: TClient);
 begin
   inherited Create();
 
   FImage := Image;
   FBuffer := TBitmap.Create();
-  FClient := TClient.Create();
-  //FClient.IOManager.SetTarget(FBackground);
+  FClient := Client;
 end;
 
 end.

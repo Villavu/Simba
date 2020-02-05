@@ -1,7 +1,7 @@
 object SimbaFunctionListForm: TSimbaFunctionListForm
-  Left = 61
+  Left = 157
   Height = 241
-  Top = 934
+  Top = 1196
   Width = 320
   Caption = 'Function List'
   ClientHeight = 241
@@ -9,7 +9,7 @@ object SimbaFunctionListForm: TSimbaFunctionListForm
   LCLVersion = '2.0.6.0'
   object TreeView: TTreeView
     Left = 0
-    Height = 218
+    Height = 241
     Top = 0
     Width = 320
     Align = alClient
@@ -17,26 +17,10 @@ object SimbaFunctionListForm: TSimbaFunctionListForm
     Images = SimbaForm.Images
     ReadOnly = True
     TabOrder = 0
+    ToolTips = False
     OnDblClick = TreeViewDblClick
     OnMouseLeave = HandleMouseLeave
     OnMouseMove = HandleHint
-    Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
-  end
-  object TreeFilterEdit: TTreeFilterEdit
-    Left = 0
-    Height = 23
-    Top = 218
-    Width = 320
-    ButtonWidth = 0
-    Align = alBottom
-    NumGlyphs = 1
-    MaxLength = 0
-    Spacing = 0
-    TabOrder = 1
-    OnChange = TreeFilterEditChange
-    OnKeyDown = TreeFilterEditKeyDown
-    TextHint = '(search)'
-    FilteredTreeview = TreeView
-    ExpandAllInitially = True
+    Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoThemedDraw]
   end
 end

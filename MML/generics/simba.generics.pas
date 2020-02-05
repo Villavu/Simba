@@ -160,6 +160,7 @@ type
     procedure setSorted(Sort: Boolean); virtual;
   public
     constructor Create(InvalidValue: _T; Duplicates: TDuplicates; Sort: Boolean; InvalidKey: String = ''; ACaseSensitive: Boolean = False); reintroduce; virtual;
+    constructor Create; reintroduce; virtual;
     destructor Destroy; override;
     procedure Clear; virtual;
 
@@ -187,6 +188,8 @@ type
 
     procedure ImportFromArrays(Arr: TTArrays); virtual;
     function ExportToArrays: TTArrays; virtual;
+
+    procedure Extend(Arr: TTArrays);
 
     property Items[Index: String]: _T read getItem write setItem; default;
     property ItemsI[Index: Integer]: _T read getItemI write setItemI;

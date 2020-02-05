@@ -25,8 +25,8 @@ type
     procedure SettingChanged_EditorFontHeight(Value: Int64);
   public
   const
-    CAPACITY = 750000; // Maximum characters the debug can hold for performance reasons.
-    CAPACITY_LINE = 300000; // Maximum characters a line can be for performance reasons.
+    CAPACITY = 750000; // Maximum characters the debug can hold. Performance reasons.
+    CAPACITY_LINE = 300000; // Maximum characters a line can be. Performance reasons.
   public
     procedure Clear;
 

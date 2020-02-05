@@ -33,9 +33,9 @@ uses
   {$IFDEF UNIX}
   cthreads, cmem, simba.linux_initialization,
   {$ENDIF}
-  classes, interfaces, forms,
+  classes, interfaces, forms, sysutils,
   simba.settings, simba.main, simba.aboutform, simba.debugimage, simba.bitmapconv,
-  simba.updateform, simba.splashform, simba.functionlistform, simba.scripttabsform,
+  simba.updateform, simba.functionlistform, simba.scripttabsform,
   simba.debugform, simba.filebrowserform, simba.notesform, simba.settingsform,
   simba.package_form, simba.colorpicker_historyform
   {$IFDEF USE_FORMDESIGNER},
@@ -52,7 +52,6 @@ begin
 
   Application.ShowMainForm := False;
   Application.Initialize();
-  Application.CreateForm(TSimbaSplashForm, SimbaSplashForm);
   Application.CreateForm(TSimbaForm, SimbaForm);
   Application.CreateForm(TSimbaFunctionListForm, SimbaFunctionListForm);
   Application.CreateForm(TSimbaDebugImageForm, SimbaDebugImageForm);

@@ -31,7 +31,7 @@
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="../../Simba.$(TargetCPU)-$(TargetOS)"/>
+            <Filename Value="../../Simba-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);../../Units/lape;$(LazarusDir)/components/synedit;../../Units/Misc/MatchTemplate"/>
@@ -41,6 +41,9 @@
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
+            <Checks>
+              <RangeChecks Value="True"/>
+            </Checks>
           </CodeGeneration>
           <Linking>
             <LinkSmart Value="True"/>
@@ -90,7 +93,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="52">
+    <Units Count="53">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -381,6 +384,10 @@
         <Filename Value="../../Components/simba.imagebox_overlay.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit51>
+      <Unit52>
+        <Filename Value="parser/simba.ci_includecache.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit52>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

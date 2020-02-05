@@ -747,6 +747,8 @@ destructor TSimbaPackageForm.Destroy;
 begin
   if (FPackages <> nil) then
     FPackages.Free();
+  if (FUpdates <> nil) then
+    FUpdates.Free();
 
   inherited Destroy();
 end;

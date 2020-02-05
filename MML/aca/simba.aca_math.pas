@@ -57,9 +57,9 @@ var
 begin
   Cube := RGBCube(Colors);
 
-  R := Round((Cube.R1 + Cube.R2) / 2);
-  G := Round((Cube.G1 + Cube.G2) / 2);
-  B := Round((Cube.B1 + Cube.B2) / 2);
+  R := Ceil((Cube.R1 + Cube.R2) / 2);
+  G := Ceil((Cube.G1 + Cube.G2) / 2);
+  B := Ceil((Cube.B1 + Cube.B2) / 2);
 
   Color := RGBtoColor(R, G, B);
   Tolerance := Max(Max(Abs(R - Cube.R1), Abs(G - Cube.G1)), Abs(B - Cube.B1));
@@ -105,9 +105,9 @@ var
 begin
   Cube := RGBCube(Colors);
 
-  R := Round((Cube.R1 + Cube.R2) / 2);
-  G := Round((Cube.G1 + Cube.G2) / 2);
-  B := Round((Cube.B1 + Cube.B2) / 2);
+  R := Ceil((Cube.R1 + Cube.R2) / 2);
+  G := Ceil((Cube.G1 + Cube.G2) / 2);
+  B := Ceil((Cube.B1 + Cube.B2) / 2);
 
   Color := RGBtoColor(R, G, B);
   Tolerance := Ceil(Sqrt(Sqr(R - Cube.R1) + Sqr(G - Cube.G1) + Sqr(B - Cube.B1)));

@@ -433,6 +433,8 @@ begin
   Template.SetSize(16, 16);
 
   CHImages.Add(Template, nil);
+
+  Template.Free();
 end;
 
 destructor TSimbaColorHistoryForm.Destroy;

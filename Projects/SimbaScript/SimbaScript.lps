@@ -39,13 +39,13 @@
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="10" Y="51"/>
-        <UsageCount Value="165"/>
+        <UsageCount Value="166"/>
       </Unit4>
       <Unit5>
         <Filename Value="imports\simbascript.import_types.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="164"/>
+        <UsageCount Value="165"/>
       </Unit5>
       <Unit6>
         <Filename Value="simbascript.main.pas"/>
@@ -550,9 +550,7 @@
       </Unit79>
       <Unit80>
         <Filename Value="imports\simbascript.import_simba.pas"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="5"/>
-        <CursorPos X="58" Y="17"/>
+        <CursorPos X="25" Y="114"/>
         <UsageCount Value="59"/>
         <Loaded Value="True"/>
       </Unit80>
@@ -571,9 +569,10 @@
       </Unit82>
       <Unit83>
         <Filename Value="simbascript.script.pas"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="460"/>
-        <CursorPos X="57" Y="470"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="238"/>
+        <CursorPos X="38" Y="267"/>
         <UsageCount Value="112"/>
         <Loaded Value="True"/>
       </Unit83>
@@ -668,9 +667,11 @@
       </Unit97>
       <Unit98>
         <Filename Value="simbascript.script_compiler.pas"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="3" Y="15"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="350"/>
+        <CursorPos X="47" Y="367"/>
         <UsageCount Value="28"/>
+        <Loaded Value="True"/>
       </Unit98>
       <Unit99>
         <Filename Value="..\..\Units\Misc\Web\fpc\simba.ssockets.pas"/>
@@ -859,9 +860,10 @@
       </Unit125>
       <Unit126>
         <Filename Value="..\..\MML\simba.script_common.pas"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="33" Y="26"/>
+        <EditorIndex Value="1"/>
+        <CursorPos X="23" Y="17"/>
         <UsageCount Value="62"/>
+        <Loaded Value="True"/>
       </Unit126>
       <Unit127>
         <Filename Value="..\..\MML\iomanager\simba.target_linux.pas"/>
@@ -955,107 +957,127 @@
         <UsageCount Value="29"/>
       </Unit139>
     </Units>
-    <JumpHistory Count="25" HistoryIndex="24">
+    <JumpHistory Count="30" HistoryIndex="28">
       <Position1>
-        <Filename Value="simbascript.script.pas"/>
-        <Caret Line="14" Column="15" TopLine="6"/>
-      </Position1>
-      <Position2>
-        <Filename Value="simbascript.script.pas"/>
-        <Caret Line="175" Column="23" TopLine="141"/>
-      </Position2>
-      <Position3>
-        <Filename Value="imports\simbascript.import_simba.pas"/>
-        <Caret Line="51" Column="6" TopLine="23"/>
-      </Position3>
-      <Position4>
-        <Filename Value="imports\simbascript.import_simba.pas"/>
-        <Caret Line="117" Column="18" TopLine="96"/>
-      </Position4>
-      <Position5>
-        <Filename Value="imports\simbascript.import_simba.pas"/>
-        <Caret Line="82" Column="46" TopLine="75"/>
-      </Position5>
-      <Position6>
         <Filename Value="imports\simbascript.import_simba.pas"/>
         <Caret Line="143" Column="41" TopLine="117"/>
+      </Position1>
+      <Position2>
+        <Filename Value="imports\simbascript.import_simba.pas"/>
+        <Caret Line="147" Column="16" TopLine="142"/>
+      </Position2>
+      <Position3>
+        <Filename Value="simbascript.script.pas"/>
+        <Caret Line="185" Column="21" TopLine="159"/>
+      </Position3>
+      <Position4>
+        <Filename Value="simbascript.script.pas"/>
+        <Caret Line="370" Column="17" TopLine="331"/>
+      </Position4>
+      <Position5>
+        <Filename Value="simbascript.script.pas"/>
+        <Caret Line="378" Column="17" TopLine="339"/>
+      </Position5>
+      <Position6>
+        <Filename Value="simbascript.script.pas"/>
+        <Caret Line="407" Column="51" TopLine="382"/>
       </Position6>
       <Position7>
         <Filename Value="imports\simbascript.import_simba.pas"/>
-        <Caret Line="147" Column="16" TopLine="142"/>
+        <Caret Line="148" Column="62" TopLine="125"/>
       </Position7>
       <Position8>
-        <Filename Value="simbascript.script.pas"/>
-        <Caret Line="185" Column="21" TopLine="159"/>
+        <Filename Value="imports\simbascript.import_simba.pas"/>
+        <Caret Line="36" Column="53" TopLine="20"/>
       </Position8>
       <Position9>
         <Filename Value="simbascript.script.pas"/>
-        <Caret Line="370" Column="17" TopLine="331"/>
+        <Caret Line="256" Column="15" TopLine="232"/>
       </Position9>
       <Position10>
         <Filename Value="simbascript.script.pas"/>
-        <Caret Line="378" Column="17" TopLine="339"/>
+        <Caret Line="247" Column="34" TopLine="232"/>
       </Position10>
       <Position11>
         <Filename Value="simbascript.script.pas"/>
-        <Caret Line="407" Column="51" TopLine="382"/>
+        <Caret Line="60" Column="30" TopLine="37"/>
       </Position11>
       <Position12>
-        <Filename Value="imports\simbascript.import_simba.pas"/>
-        <Caret Line="148" Column="62" TopLine="125"/>
+        <Filename Value="simbascript.script.pas"/>
+        <Caret Line="259" Column="27" TopLine="240"/>
       </Position12>
       <Position13>
-        <Filename Value="imports\simbascript.import_simba.pas"/>
-        <Caret Line="36" Column="53" TopLine="20"/>
+        <Filename Value="simbascript.script.pas"/>
+        <Caret Line="248" Column="25" TopLine="240"/>
       </Position13>
       <Position14>
         <Filename Value="simbascript.script.pas"/>
-        <Caret Line="256" Column="15" TopLine="232"/>
+        <Caret Line="506" Column="55" TopLine="485"/>
       </Position14>
       <Position15>
         <Filename Value="simbascript.script.pas"/>
-        <Caret Line="247" Column="34" TopLine="232"/>
+        <Caret Line="263" Column="31" TopLine="234"/>
       </Position15>
       <Position16>
         <Filename Value="simbascript.script.pas"/>
-        <Caret Line="60" Column="30" TopLine="37"/>
+        <Caret Line="63" Column="21" TopLine="38"/>
       </Position16>
       <Position17>
         <Filename Value="simbascript.script.pas"/>
-        <Caret Line="259" Column="27" TopLine="240"/>
+        <Caret Line="289" Column="14" TopLine="277"/>
       </Position17>
       <Position18>
-        <Filename Value="simbascript.script.pas"/>
-        <Caret Line="248" Column="25" TopLine="240"/>
+        <Filename Value="imports\simbascript.import_simba.pas"/>
+        <Caret Line="17" Column="58" TopLine="5"/>
       </Position18>
       <Position19>
         <Filename Value="simbascript.script.pas"/>
-        <Caret Line="506" Column="55" TopLine="485"/>
+        <Caret Line="19" Column="15"/>
       </Position19>
       <Position20>
         <Filename Value="simbascript.script.pas"/>
-        <Caret Line="263" Column="31" TopLine="234"/>
+        <Caret Line="98" Column="20" TopLine="73"/>
       </Position20>
       <Position21>
-        <Filename Value="simbascript.script.pas"/>
-        <Caret Line="63" Column="21" TopLine="38"/>
+        <Filename Value="imports\simbascript.import_simba.pas"/>
+        <Caret Line="109" Column="34" TopLine="98"/>
       </Position21>
       <Position22>
         <Filename Value="simbascript.script.pas"/>
-        <Caret Line="289" Column="14" TopLine="277"/>
+        <Caret Line="63" Column="24" TopLine="40"/>
       </Position22>
       <Position23>
-        <Filename Value="imports\simbascript.import_simba.pas"/>
-        <Caret Line="17" Column="58" TopLine="5"/>
+        <Filename Value="simbascript.script.pas"/>
+        <Caret Line="91" Column="17" TopLine="54"/>
       </Position23>
       <Position24>
         <Filename Value="simbascript.script.pas"/>
-        <Caret Line="19" Column="15"/>
+        <Caret Line="483" Column="37" TopLine="464"/>
       </Position24>
       <Position25>
         <Filename Value="simbascript.script.pas"/>
-        <Caret Line="98" Column="20" TopLine="73"/>
+        <Caret Line="509" Column="39" TopLine="470"/>
       </Position25>
+      <Position26>
+        <Filename Value="simbascript.script_compiler.pas"/>
+        <Caret Line="64" Column="19" TopLine="43"/>
+      </Position26>
+      <Position27>
+        <Filename Value="simbascript.script.pas"/>
+        <Caret Line="60" Column="21" TopLine="49"/>
+      </Position27>
+      <Position28>
+        <Filename Value="simbascript.script.pas"/>
+        <Caret Line="265" Column="31" TopLine="231"/>
+      </Position28>
+      <Position29>
+        <Filename Value="simbascript.script.pas"/>
+        <Caret Line="254" Column="24" TopLine="238"/>
+      </Position29>
+      <Position30>
+        <Filename Value="..\..\MML\simba.script_common.pas"/>
+        <Caret Line="17" Column="23"/>
+      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

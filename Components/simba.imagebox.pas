@@ -265,7 +265,7 @@ var
   Source, Dest: PByte;
   SourceBytesPerLine, DestBytesPerLine: Int32;
 
-  procedure Row(Source, Dest: PByte);
+  procedure Row24(Source, Dest: PByte);
   var
     Upper: PtrUInt;
   begin
@@ -277,6 +277,21 @@ var
 
       Inc(Source, SizeOf(TRGB32));
       Inc(Dest, SizeOf(TRGB24));
+    end;
+  end;
+
+  procedure Row32(Source, Dest: PByte);
+  var
+    Upper: PtrUInt;
+  begin
+    Upper := PtrUInt(Source + SourceBytesPerLine);
+
+    while PtrUInt(Source) < Upper do
+    begin
+      PRGB32(Dest)^ := PRGB32(Source)^;
+
+      Inc(Source, SizeOf(TRGB32));
+      Inc(Dest, SizeOf(TRGB32));
     end;
   end;
 
@@ -298,7 +313,12 @@ begin
 
   while PtrUInt(Source) < Upper do
   begin
-    Row(Source, Dest);
+    case Bitmap.PixelFormat of
+      pf24bit: Row24(Source, Dest);
+      pf32bit: Row32(Source, Dest);
+      else
+        raise Exception.Create('TSimbaImageBox.Draw: Invalid pixel format');
+    end;
 
     Inc(Source, SourceBytesPerLine);
     Inc(Dest, DestBytesPerLine);

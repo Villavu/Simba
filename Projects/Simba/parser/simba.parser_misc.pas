@@ -1,19 +1,27 @@
 unit simba.parser_misc;
 
 {$mode objfpc}{$H+}
+{$modeswitch typehelpers}
 
 interface
 
 uses
   sysutils;
 
-function GetExpression(constref Text: String; Start: Int32): String;
-function CleanExpression(constref Text: String): String;
-function SplitExpression(constref Text: String): TStringArray;
+type
+  TExpressionItem = record Identifier: String; Dimensions: Int32; end;
+  TExpressionArray = array of TExpressionItem;
+  TExpressionArrayHelper = type Helper for TExpressionArray
+    function Pop: TExpressionItem;
+    function PopLeft: TExpressionItem;
+  end;
+
+function GetExpression(Text: String; Start: Int32): String;
+function GetExpressionArray(Expression: String): TExpressionArray;
 
 implementation
 
-function GetExpression(constref Text: String; Start: Int32): String;
+function GetExpression(Text: String; Start: Int32): String;
 var
   i: Int32;
   InIndex, InParams: Int32;
@@ -82,47 +90,101 @@ begin
   end;
 end;
 
-// Remove parameters and index contents
-function CleanExpression(constref Text: String): String;
+function GetExpressionArray(Expression: String): TExpressionArray;
 var
-  i, InIndex, InParameter: Int32;
-begin
-  Result := '';
+  Identifier: String;
+  Dimensions: Int32;
 
-  InIndex := 0;
-  InParameter := 0;
-
-  for i := Length(Text) downto 1 do
+  procedure Push;
+  var
+    i: Int32;
   begin
-    if Text[i] = ')' then
-      InParameter += 1
-    else
-    if Text[i] = '(' then
-      InParameter -= 1
-    else
-    if (Text[i] = ']') and (InParameter = 0) then
+    if (Identifier <> '') then
     begin
-      Result := Text[i] + Result;
-      InIndex += 1;
-    end else
-    if (Text[i] = '[') and (InParameter = 0) then
-    begin
-      Result := Text[i] + Result;
-      InIndex -= 1;
-    end else
-    if (Text[i] = ',') and (InIndex > 0) and (InParameter = 0) then
-      Result := Text[i] + Result
-    else
-    if (InIndex = 0) and (InParameter = 0) then
-      Result := Text[i] + Result;
+      SetLength(Result, Length(Result) + 1);
+      for i := High(Result) downto 1 do
+        Result[i] := Result[i - 1];
+
+      Result[0].Identifier := Identifier;
+      Result[0].Dimensions := Dimensions;
+    end;
+
+    Identifier := '';
+    Dimensions := 0;
   end;
 
-  Result := Result.ToUpper();
+var
+  i: Int32;
+  IndexCount, ParameterCount: Int32;
+begin
+  Result := nil;
+
+  IndexCount := 0;
+  ParameterCount := 0;
+
+  Identifier := '';
+  Dimensions := 0;
+
+  for i := Length(Expression) downto 1 do
+  begin
+    case Expression[i] of
+      '(':
+        begin
+          Inc(ParameterCount);
+        end;
+
+      ')':
+        begin
+          Dec(ParameterCount);
+        end;
+
+      '[':
+        begin
+          if (ParameterCount = 0) then
+            Dec(IndexCount);
+        end;
+
+      ']':
+        if (ParameterCount = 0) then
+        begin
+          Inc(Dimensions);
+          Inc(IndexCount);
+        end;
+
+      ',':
+        if (IndexCount > 0) and (ParameterCount = 0) then
+          Inc(Dimensions);
+
+      else
+        if (IndexCount = 0) and (ParameterCount = 0) then
+        begin
+          if (Expression[i] = '.') then
+            Push()
+          else
+            Identifier := UpCase(Expression[i]) + Identifier;
+        end;
+    end;
+  end;
+
+  Push();
 end;
 
-function SplitExpression(constref Text: String): TStringArray;
+function TExpressionArrayHelper.Pop: TExpressionItem;
 begin
-  Result := CleanExpression(Text).Split('.');
+  if Length(Self) = 0 then
+    Exit(Default(TExpressionItem));
+
+  Result := Self[High(Self)];
+  Self := Copy(Self, 0, Length(Self) - 1);
+end;
+
+function TExpressionArrayHelper.PopLeft: TExpressionItem;
+begin
+  if Length(Self) = 0 then
+    Exit(Default(TExpressionItem));
+
+  Result := Self[0];
+  Self := Copy(Self, 1);
 end;
 
 end.

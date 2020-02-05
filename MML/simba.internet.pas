@@ -40,13 +40,20 @@ type
     FClient: TObject;
 
     function GetHeaders: String;
+    function GetRequestContentType: String;
+    function GetRequestHeader(Name: String): String;
     function GetResponseCode: Int32;
     function GetUserAgent: String;
+
+    procedure SetRequestContentType(Value: String);
+    procedure SetRequestHeader(Name: String; Value: String);
     procedure SetUserAgent(Value: String);
   public
     property UserAgent: String read GetUserAgent write SetUserAgent;
     property Headers: String read GetHeaders;
     property ResponseCode: Int32 read GetResponseCode;
+    property RequestContentType: String read GetRequestContentType write SetRequestContentType;
+    property RequestHeader[Name: String]: String read GetRequestHeader write SetRequestHeader;
 
     function GetHTTPPage(URL: String): String;
     function GetHTTPPage(URL: String; FilePath: String): Int32; overload;
@@ -190,6 +197,16 @@ begin
   Result := FHTTPClient.ResponseHeaders.Text;
 end;
 
+function THTTPClient.GetRequestContentType: String;
+begin
+  Result := FHTTPClient.RequestContentType;
+end;
+
+function THTTPClient.GetRequestHeader(Name: String): String;
+begin
+  Result := FHTTPClient.RequestHeader[Name];
+end;
+
 function THTTPClient.GetResponseCode: Int32;
 begin
   Result := FHTTPClient.ResponseCode;
@@ -198,6 +215,16 @@ end;
 function THTTPClient.GetUserAgent: String;
 begin
   Result := FHTTPClient.RequestHeader['User-Agent'];
+end;
+
+procedure THTTPClient.SetRequestContentType(Value: String);
+begin
+  FHTTPClient.RequestContentType := Value;
+end;
+
+procedure THTTPClient.SetRequestHeader(Name: String; Value: String);
+begin
+  FHTTPClient.RequestHeader[Name] := Value;
 end;
 
 procedure THTTPClient.SetUserAgent(Value: String);

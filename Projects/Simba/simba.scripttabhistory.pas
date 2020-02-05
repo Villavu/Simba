@@ -76,6 +76,7 @@ begin
 
       Editor.CaretX := StrToInt(FHistory[FIndex].Split(':')[0]);
       Editor.CaretY := StrToInt(FHistory[FIndex].Split(':')[1]);
+      Editor.TopLine := Editor.CaretY - (Editor.LinesInWindow div 2);
     end;
 end;
 
@@ -95,6 +96,7 @@ begin
 
       Editor.CaretX := StrToInt(FHistory[FIndex].Split(':')[0]);
       Editor.CaretY := StrToInt(FHistory[FIndex].Split(':')[1]);
+      Editor.TopLine := Editor.CaretY - (Editor.LinesInWindow div 2);
     end;
 end;
 

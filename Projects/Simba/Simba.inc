@@ -28,5 +28,5 @@
                           // See Units/Linux/keybinder.pas
 {$ENDIF}
 
-{$DEFINE USE_FORMDESIGNER}
+{.$DEFINE USE_FORMDESIGNER}
 
