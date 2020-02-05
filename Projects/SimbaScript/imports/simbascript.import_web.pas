@@ -152,6 +152,16 @@ begin
   PString(Result)^ := Script.Client.MInternets.GetHTTPClient(PInt32(Params^[0])^).UserAgent;
 end;
 
+procedure Lape_SetHTTPContentType(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  Script.Client.MInternets.GetHTTPClient(PInt32(Params^[0])^).RequestContentType := PString(Params^[1])^;
+end;
+
+procedure Lape_SetHTTPHeader(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  Script.Client.MInternets.GetHTTPClient(PInt32(Params^[0])^).RequestHeader[PString(Params^[1])^] := PString(Params^[2])^;
+end;
+
 procedure Lape_Import_Web(Compiler: TScriptCompiler);
 begin
   with Compiler do
@@ -169,6 +179,9 @@ begin
     addGlobalFunc('function GetHTTPPageEx(Client: Int32; URL: String; FilePath: String): Int32;', @Lape_GetHTTPPageEx);
     addGlobalFunc('function PostHTTPPage(Client: Int32; URL, PostData: String): String', @Lape_PostHTTPPage);
     addGlobalFunc('function PostHTTPPageEx(Client: Int32; URL: String): String', @Lape_PostHTTPPageEx);
+    addGlobalFunc('procedure SetHTTPContentType(Client: Int32; Value: String);', @Lape_SetHTTPContentType);
+    addGlobalFunc('procedure SetHTTPHeader(Client: Int32; Name: String; Value: String);', @Lape_SetHTTPHeader);
+
     addGlobalFunc('procedure ClearPostData(Client: Int32);', @Lape_ClearPostData);
     addGlobalFunc('procedure AddPostVariable(Client: Int32; VariableName, VariableValue: String);', @Lape_AddPostVariable);
     addGlobalFunc('function GetRawHeaders(Client: Int32): String', @Lape_GetRawHeaders);

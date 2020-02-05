@@ -83,6 +83,7 @@ type
     fCommentState: TCommentState;
     fOrigin: PAnsiChar;
     fProcTable: array[#0..#255] of procedure of object;
+    fScript: String;
     Run: Integer;
     RunAhead: Integer;
     TempRun: Integer;
@@ -100,13 +101,14 @@ type
     fOnIfNDefDirect: TDirectiveEvent;
     fOnResourceDirect: TDirectiveEvent;
     fOnIncludeDirect: TDirectiveEvent;
+    fOnLibraryDirect: TDirectiveEvent;
     fOnDefineDirect: TDirectiveEvent;
     fOnIfOptDirect: TDirectiveEvent;
     fOnIfDirect: TDirectiveEvent;
     fOnIfEndDirect: TDirectiveEvent;
     fOnElseIfDirect: TDirectiveEvent;
-	fOnUnDefDirect: TDirectiveEvent;
-  FDirectiveParamOrigin: PAnsiChar;
+	  fOnUnDefDirect: TDirectiveEvent;
+    FDirectiveParamOrigin: PAnsiChar;
 
   	fAsmCode : Boolean;		// DR 2002-01-14
 
@@ -246,6 +248,7 @@ type
     procedure RoundCloseProc;
     procedure RoundOpenProc;
     procedure SemiColonProc;
+    procedure SetScript(Value: String);
     procedure SlashProc;
     procedure SpaceProc;
     procedure SquareCloseProc;
@@ -298,6 +301,7 @@ type
     procedure SetOnIfNDefDirect(const Value: TDirectiveEvent); virtual;
     procedure SetOnIfOptDirect(const Value: TDirectiveEvent); virtual;
     procedure SetOnIncludeDirect(const Value: TDirectiveEvent); virtual;
+    procedure SetOnLibraryDirect(const Value: TDirectiveEvent); virtual;
     procedure SetOnResourceDirect(const Value: TDirectiveEvent); virtual;
     procedure SetOnUnDefDirect(const Value: TDirectiveEvent); virtual;
     procedure SetOnIfDirect(const Value: TDirectiveEvent); virtual;
@@ -329,13 +333,14 @@ type
     property CompilerDirective: string read GetCompilerDirective;
     property DirectiveParam: string read GetDirectiveParam;
     property DirectiveParamOriginal : string read GetDirectiveParamOriginal;
-	property IsJunk: Boolean read GetIsJunk;
+	  property IsJunk: Boolean read GetIsJunk;
     property IsSpace: Boolean read GetIsSpace;
     property Line: AnsiString write SetLine;
     //Note: setting the following two properties does not GO to that line, it just sets the internal counters
     property LineNumber: Integer read fLineNumber write fLineNumber;
     property LinePos: Integer read fLinePos write fLinePos;
     property Origin: PAnsiChar read fOrigin write SetOrigin;
+    property Script: String read FScript write SetScript;
     property PosXY: TTokenPoint read GetPosXY; // !! changed to TokenPoint //jdj 7/18/1999
     property RunPos: Integer read Run write SetRunPos;
     property Token: string read GetToken;
@@ -363,16 +368,15 @@ type
     property OnIfNDefDirect: TDirectiveEvent read fOnIfNDefDirect write SetOnIfNDefDirect;
     property OnIfOptDirect: TDirectiveEvent read fOnIfOptDirect write SetOnIfOptDirect;
     property OnIncludeDirect: TDirectiveEvent read fOnIncludeDirect write SetOnIncludeDirect;
+    property OnLibraryDirect: TDirectiveEvent read fOnLibraryDirect write SetOnLibraryDirect;
     property OnIfDirect: TDirectiveEvent read fOnIfDirect write SetOnIfDirect;
-    property OnIfEndDirect: TDirectiveEvent read fOnIfEndDirect write 
-    SetOnIfEndDirect;
-    property OnElseIfDirect: TDirectiveEvent read fOnElseIfDirect write 
-    SetOnElseIfDirect;
-	property OnResourceDirect: TDirectiveEvent read fOnResourceDirect write SetOnResourceDirect;
-	property OnUnDefDirect: TDirectiveEvent read fOnUnDefDirect write SetOnUnDefDirect;
+    property OnIfEndDirect: TDirectiveEvent read fOnIfEndDirect write SetOnIfEndDirect;
+    property OnElseIfDirect: TDirectiveEvent read fOnElseIfDirect write  SetOnElseIfDirect;
+	  property OnResourceDirect: TDirectiveEvent read fOnResourceDirect write SetOnResourceDirect;
+	  property OnUnDefDirect: TDirectiveEvent read fOnUnDefDirect write SetOnUnDefDirect;
 
-	property AsmCode : Boolean read fAsmCode write fAsmCode; // DR 2002-01-14
-  property DirectiveParamOrigin: PAnsiChar read FDirectiveParamOrigin;
+	  property AsmCode : Boolean read fAsmCode write fAsmCode; // DR 2002-01-14
+    property DirectiveParamOrigin: PAnsiChar read FDirectiveParamOrigin;
 
     property UseDefines: Boolean read FUseDefines write FUseDefines;
 
@@ -382,6 +386,8 @@ type
   TmwPasLex = class(TmwBasePasLex)
   private
     fAheadLex: TmwBasePasLex;
+    fFileName: String;
+    fIsLibrary: Boolean;
     function GetAheadExID: TptTokenKind;
     function GetAheadGenID: TptTokenKind;
     function GetAheadToken: string;
@@ -402,7 +408,7 @@ type
     procedure SetOnResourceDirect(const Value: TDirectiveEvent); override;
     procedure SetOnUnDefDirect(const Value: TDirectiveEvent); override;
   public
-    constructor Create;
+    constructor Create; overload;
     destructor Destroy; override;
     procedure InitAhead;
     procedure AheadNext;
@@ -412,13 +418,11 @@ type
     property AheadExID: TptTokenKind read GetAheadExID;
     property AheadGenID: TptTokenKind read GetAheadGenID;
     property Status: TmwPasLexStatus read GetStatus write SetStatus;
+    property FileName: String read fFileName write fFileName;
+    property IsLibrary: Boolean read fIsLibrary write fIsLibrary;
   end;
 
 implementation
-
-{$IFNDEF LCL}
-uses Windows;
-{$ENDIF}
 
 procedure MakeIdentTable;
 var
@@ -1556,7 +1560,7 @@ begin
         FTokenPos := Run;
         case KeyHash of
           55: if KeyComp('LOADLIB') then
-                fTokenID := tokIncludeDirect
+                fTokenID := tokLibraryDirect
               else
                 fTokenID := tokBorComment;
           68: if KeyComp('INCLUDE') then
@@ -1564,7 +1568,7 @@ begin
               else
                 fTokenID := tokBorComment;
           136: if KeyComp('INCLUDE_ONCE') then
-                fTokenID := tokIncludeDirect
+                fTokenID := tokIncludeOnceDirect
               else
                 fTokenID := tokBorComment;
         else
@@ -1705,10 +1709,15 @@ begin
         if Assigned(fOnElseIfDirect) then
           fOnElseIfDirect(Self);
       end;
-    tokIncludeDirect:
+    tokIncludeDirect, tokIncludeOnceDirect:
       begin
         if Assigned(fOnIncludeDirect) and (FDefineStack = 0) then
           fOnIncludeDirect(Self);
+      end;
+    tokLibraryDirect:
+      begin
+        if Assigned(fOnLibraryDirect) and (FDefineStack = 0) then
+          fOnLibraryDirect(Self);
       end;
     tokResourceDirect:
       begin
@@ -2111,7 +2120,12 @@ begin
         if Assigned(fOnIfOptDirect) then
           fOnIfOptDirect(Self);
       end;
-    tokIncludeDirect:
+    tokLibraryDirect:
+       begin
+        if Assigned(fOnLibraryDirect) then
+          fOnLibraryDirect(Self);
+      end;
+    tokIncludeDirect, tokIncludeOnceDirect:
       begin
         if Assigned(fOnIncludeDirect) then
           fOnIncludeDirect(Self);
@@ -2133,6 +2147,12 @@ procedure TmwBasePasLex.SemiColonProc;
 begin
   inc(Run);
   fTokenID := tokSemiColon;
+end;
+
+procedure TmwBasePasLex.SetScript(Value: String);
+begin
+  fScript := Value;
+  Origin := PChar(fScript);
 end;
 
 procedure TmwBasePasLex.SlashProc;
@@ -2277,13 +2297,9 @@ begin
     end;
   end;
 
-  // if (MaxPos > -1) and (fTokenPos > MaxPos) and (not IsJunk) then
-//begin
-  //   WritelN('DONE');
-  ///    fTokenID := tok_DONE
-  // end;
+  if (MaxPos > -1) and (fTokenPos > MaxPos) and (not IsJunk) then
+    fTokenID := tok_DONE;
 end;
-
 
 function TmwBasePasLex.GetIsJunk: Boolean; inline;
 begin
@@ -2433,7 +2449,7 @@ begin
         Result := tokCompDirect;
     55:
       if KeyComp('LOADLIB') then
-        Result := tokIncludeDirect else
+        Result := tokLibraryDirect else
         Result := tokCompDirect;
     56:
       if KeyComp('ELSEIF') then
@@ -2452,7 +2468,7 @@ begin
         Result := tokResourceDirect else
         Result := tokCompDirect;
     136: if KeyComp('INCLUDE_ONCE') then
-        Result := tokIncludeDirect else
+        Result := tokIncludeOnceDirect else
         Result := tokCompDirect;
   else Result := tokCompDirect;
   end;
@@ -2668,7 +2684,7 @@ function TmwBasePasLex.GetIsCompilerDirective: Boolean;
 begin
   Result := fTokenID in [tokCompDirect, tokDefineDirect, tokElseDirect,
     tokEndIfDirect, tokIfDefDirect, tokIfNDefDirect, tokIfOptDirect,
-    tokIncludeDirect, tokResourceDirect, tokUndefDirect];
+    tokIncludeDirect, tokIncludeOnceDirect, tokResourceDirect, tokUndefDirect, tokLibraryDirect];
 end;
 
 function TmwBasePasLex.GetGenID: TptTokenKind;
@@ -2821,6 +2837,11 @@ end;
 procedure TmwBasePasLex.SetOnIncludeDirect(const Value: TDirectiveEvent);
 begin
   fOnIncludeDirect := Value;
+end;
+
+procedure TmwBasePasLex.SetOnLibraryDirect(const Value: TDirectiveEvent);
+begin
+  fOnLibraryDirect := Value;
 end;
 
 procedure TmwBasePasLex.SetOnResourceDirect(const Value: TDirectiveEvent);

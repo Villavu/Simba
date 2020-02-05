@@ -25,6 +25,11 @@ begin
   Clear();
 end;
 
+constructor TSimbaStringMap.Create;
+begin
+  Create(Default(_T), dupAccept, False);
+end;
+
 destructor TSimbaStringMap.Destroy;
 begin
   FStringList.Free();
@@ -167,4 +172,11 @@ function TSimbaStringMap.ExportToArrays: TTArrays;
 begin
   Result.Keys := FStringList.ExportToArray();
   Result.Items := FItems.ExportToArray;
+end;
+
+procedure TSimbaStringMap.Extend(Arr: TTArrays);
+begin
+  FStringList.Extend(Arr.Keys);
+  FItems.Extend(Arr.Items);
+  FCount := FItems.Count;
 end;

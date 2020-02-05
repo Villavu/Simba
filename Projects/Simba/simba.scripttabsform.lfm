@@ -304,13 +304,13 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
     object EditorPopupUndo: TMenuItem
       Caption = 'Undo'
       ImageIndex = 17
-      ShortCut = 24666
+      ShortCut = 16474
       OnClick = EditorPopupClick
     end
     object EditorPopupRedo: TMenuItem
       Caption = 'Redo'
       ImageIndex = 13
-      ShortCut = 16474
+      ShortCut = 24666
       OnClick = EditorPopupClick
     end
     object MenuItem6: TMenuItem

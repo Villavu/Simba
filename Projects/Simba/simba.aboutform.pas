@@ -55,7 +55,7 @@ var
 
 implementation
 uses
-  simba.mufasabase, simba.main;
+  simba.mufasabase;
 
 procedure TAboutForm.FormCreate(Sender: TObject);
 begin

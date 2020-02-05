@@ -182,47 +182,31 @@ begin
 end;
 
 procedure TSimbaAutoComplete.FillGlobalDeclarations;
-
-  procedure Add(constref Declarations: TDeclarationArray; MethodOfTypes: Boolean);
-  var
-    i: Int32;
-  begin
-    for i := 0 to High(Declarations) do
-    begin
-      if Declarations[i].Name = '' then
-        Continue;
-
-      if (Declarations[i] is TciProcedureDeclaration) then
-        with Declarations[i] as TciProcedureDeclaration do
-        begin
-          if (not MethodOfTypes) and IsMethodOfType then
-            Continue;
-          if IsOperator then
-            Continue;
-        end;
-
-      if (Declarations[i] is TciProcedureDeclaration) or (Declarations[i] is TciVarDeclaration) or
-         (Declarations[i] is TciTypeDeclaration) or (Declarations[i] is TciEnumElement) then
-        FDeclarations.Add(Declarations[i]);
-    end;
-  end;
-
+var
+  Declaration: TDeclaration;
+  Method: TciProcedureDeclaration;
 begin
   FDeclarations.Clear();
 
-  Add(FParser.getLocals(), True);
-  Add(FParser.getGlobals(), False);
+  for Declaration in FParser.Globals do
+  begin
+    if Declaration.ClassType = TciProcedureDeclaration then
+    begin
+      Method := Declaration as TciProcedureDeclaration;
+      if Method.IsOperator or Method.IsMethodOfType then
+        Continue;
+    end;
+
+    FDeclarations.Add(Declaration);
+  end;
+
+  FDeclarations.Extend(FParser.Locals);
 end;
 
 procedure TSimbaAutoComplete.FillTypeDeclarations(Declaration: TDeclaration);
 begin
   FDeclarations.Clear();
-
-  if Declaration is TciTypeDeclaration then
-    FDeclarations.Extend(FParser.getGlobalTypeMembers(Declaration as TciTypeDeclaration))
-  else
-  if Declaration is TciRecordType then
-    FDeclarations.Extend(Declaration.Items.GetItemsOfClass(TciClassField));
+  FDeclarations.Extend(FParser.GetMembersOfType(Declaration));
 end;
 
 procedure TSimbaAutoComplete.SetEditor(const Value: TCustomSynEdit);

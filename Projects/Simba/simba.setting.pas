@@ -48,37 +48,37 @@ type
 
   TSimbaSetting_Int64 = class(specialize TSimbaSetting_Generic<Int64>)
   protected
-    function GetValue: _T; override;
-    procedure SetValue(AValue: _T); override;
+    function GetValue: Int64; override;
+    procedure SetValue(AValue: Int64); override;
   end;
 
   TSimbaSetting_Boolean = class(specialize TSimbaSetting_Generic<Boolean>)
   protected
-    function GetValue: _T; override;
-    procedure SetValue(AValue: _T); override;
+    function GetValue: Boolean; override;
+    procedure SetValue(AValue: Boolean); override;
   end;
 
   TSimbaSetting_String = class(specialize TSimbaSetting_Generic<String>)
   protected
-    function GetValue: _T; override;
-    procedure SetValue(AValue: _T); override;
+    function GetValue: String; override;
+    procedure SetValue(AValue: String); override;
   end;
 
-  TSimbaSetting_CompressedString = class(specialize TSimbaSetting_Generic<String>)
+  TSimbaSetting_CompressedString = class(TSimbaSetting_String)
   protected
-    function GetValue: _T; override;
-    procedure SetValue(AValue: _T); override;
+    function GetValue: String; override;
+    procedure SetValue(AValue: String); override;
   end;
 
   TSimbaSetting_Directory = class(TSimbaSetting_String)
   protected
-    procedure SetValue(AValue: _T); override;
-    function GetValue: _T; override;
+    procedure SetValue(AValue: String); override;
+    function GetValue: String; override;
   end;
 
   TSimbaSetting_File = class(TSimbaSetting_String)
   protected
-    function GetValue: _T; override;
+    function GetValue: String; override;
   end;
 
   TSimbaSettingsList = specialize TSimbaObjectList<TSimbaSetting>;
@@ -136,64 +136,64 @@ begin
   inherited Destroy();
 end;
 
-function TSimbaSetting_Boolean.GetValue: _T;
+function TSimbaSetting_Boolean.GetValue: Boolean;
 begin
   Result := FINI.ReadBool(FSection, FName, DefaultValue);
 end;
 
-procedure TSimbaSetting_Boolean.SetValue(AValue: _T);
+procedure TSimbaSetting_Boolean.SetValue(AValue: Boolean);
 begin
   FINI.WriteBool(FSection, FName, AValue);
 
   Changed();
 end;
 
-function TSimbaSetting_Int64.GetValue: _T;
+function TSimbaSetting_Int64.GetValue: Int64;
 begin
   Result := FINI.ReadInt64(FSection, FName, DefaultValue);
 end;
 
-procedure TSimbaSetting_Int64.SetValue(AValue: _T);
+procedure TSimbaSetting_Int64.SetValue(AValue: Int64);
 begin
   FINI.WriteInt64(FSection, FName, AValue);
 
   Changed();
 end;
 
-function TSimbaSetting_CompressedString.GetValue: _T;
+function TSimbaSetting_CompressedString.GetValue: String;
 begin
   Result := FINI.ReadString(FSection, FName, DefaultValue);
   if Result <> DefaultValue then
     Result := DecompressString(Base64Decode(Result));
 end;
 
-procedure TSimbaSetting_CompressedString.SetValue(AValue: _T);
+procedure TSimbaSetting_CompressedString.SetValue(AValue: String);
 begin
   FINI.WriteString(FSection, FName, Base64Encode(CompressString(AValue)));
 
   Changed();
 end;
 
-function TSimbaSetting_String.GetValue: _T;
+function TSimbaSetting_String.GetValue: String;
 begin
   Result := FINI.ReadString(FSection, FName, DefaultValue);
 end;
 
-procedure TSimbaSetting_String.SetValue(AValue: _T);
+procedure TSimbaSetting_String.SetValue(AValue: String);
 begin
   FINI.WriteString(FSection, FName, AValue);
 
   Changed();
 end;
 
-procedure TSimbaSetting_Directory.SetValue(AValue: _T);
+procedure TSimbaSetting_Directory.SetValue(AValue: String);
 begin
   inherited SetValue(AValue);
 
   ForceDirectories(AValue);
 end;
 
-function TSimbaSetting_Directory.GetValue: _T;
+function TSimbaSetting_Directory.GetValue: String;
 begin
   Result := inherited GetValue;
 

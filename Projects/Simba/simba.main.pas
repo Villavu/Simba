@@ -36,16 +36,17 @@ uses
   simba.codeparser, simba.setting, LCLType, ImgList, simba.oswindow;
 
 const
+  IMAGE_COMPILE = 0;
   IMAGE_PACKAGE = 1;
   IMAGE_PACKAGE_NOTIFCATION = 23;
-  IMAGE_FILE = 27;
-  IMAGE_DIRECTORY = 28;
-  IMAGE_SIMBA = 29;
-  IMAGE_BOOK = 30;
-  IMAGE_SCRIPT = 31;
-  IMAGE_TYPE = 32;
-  IMAGE_FUNCTION = 33;
-  IMAGE_PROCEDURE = 34;
+  IMAGE_DIRECTORY = 27;
+  IMAGE_SIMBA = 28;
+  IMAGE_BOOK = 29;
+  IMAGE_FILE = 30;
+  IMAGE_TYPE = 31;
+  IMAGE_FUNCTION = 32;
+  IMAGE_PROCEDURE = 33;
+  IMAGE_GITHUB = 34;
   IMAGE_CONSTANT = 35;
   IMAGE_VARIABLE = 36;
 
@@ -208,9 +209,10 @@ type
     procedure ShowACA(Sender: TObject);
     procedure TrayPopupPopup(Sender: TObject);
 
-    procedure OnCCMessage(Sender: TObject; const Typ: TMessageEventType; const Msg: string; X, Y: Integer);
+    procedure OnCCMessage(Sender: TObject; const Typ: TMessageEventType; const Message: string; X, Y: Integer);
     function OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
-    function OnCCLoadLibrary(Sender: TObject; var Argument: string; out Parser: TCodeInsight): Boolean;
+    function OnCCFindLibrary(Sender: TObject; var FileName: string): Boolean;
+    procedure OnCCLoadLibrary(Sender: TObject; FileName: String; var Contents: String);
     procedure HandleMenuViewClick(Sender: TObject);
     procedure ResetDockingSplitters(Data: PtrInt);
     procedure SettingChanged_CustomToolbarSize(Value: Int64);
@@ -287,12 +289,12 @@ implementation
 uses
   clipbrd, lclintf, lazfileutils,  SynExportHTML, anchordocking, xmlconf, simba.mufasatypes,
   XMLPropStorage, AnchorDockStorage,
-  simba.misc, simba.pluginparser, simba.mufasabase, simba.settings,
+  simba.misc, simba.mufasabase, simba.settings,
   simba.httpclient, simba.files, simba.resourceextractor,
   simba.debugimage, simba.bitmapconv, simba.colorpicker_historyform,
   simba.aca, simba.dtmeditor,  simba.scriptinstance,
   simba.aboutform,  simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
-  simba.notesform, simba.settingsform, simba.splashform, simba.colorpicker
+  simba.notesform, simba.settingsform, simba.colorpicker, simba.ci_includecache
   {$IFDEF WINDOWS},
   windows
   {$ENDIF}
@@ -301,7 +303,8 @@ uses
   {$ENDIF}
   {$IFDEF LINUX_HOTKEYS},
   simba.linux_keybinder
-  {$ENDIF};
+  {$ENDIF},
+  dynlibs;
 
 const
   {$IFDEF LINUX}
@@ -334,10 +337,15 @@ type
 
   TSimbaAnchorDockHostSite = class(TAnchorDockHostSite)
   protected
+    FMenuItem: TMenuItem;
+
+    procedure MenuItemDestroyed(Sender: TObject);
+
+    procedure SetMenuItem(Value: TMenuItem);
     procedure SetVisible(Value: Boolean); override;
     procedure SetParent(Value: TWinControl); override;
   public
-    MenuItem: TMenuItem;
+    property MenuItem: TMenuItem read FMenuItem write SetMenuItem;
 
     procedure UpdateDockCaption(Exclude: TControl = nil); override;
 
@@ -377,6 +385,17 @@ begin
   Color := clForm;
 
   CloseButton.Parent := nil;
+end;
+
+procedure TSimbaAnchorDockHostSite.MenuItemDestroyed(Sender: TObject);
+begin
+  FMenuItem := nil;
+end;
+
+procedure TSimbaAnchorDockHostSite.SetMenuItem(Value: TMenuItem);
+begin
+  FMenuItem := Value;
+  FMenuItem.AddHandlerOnDestroy(@MenuItemDestroyed);
 end;
 
 procedure TSimbaAnchorDockHostSite.SetVisible(Value: Boolean);
@@ -577,27 +596,120 @@ end;
 
 {$ENDIF}
 
-
-procedure TSimbaForm.OnCCMessage(Sender: TObject; const Typ: TMessageEventType; const Msg: string; X, Y: Integer);
+procedure TSimbaForm.OnCCMessage(Sender: TObject; const Typ: TMessageEventType; const Message: string; X, Y: Integer);
 begin
-  if (Typ = meNotSupported) then
-    Exit;
-  if (Sender is TmwSimplePasPar) then
-    if (TmwSimplePasPar(Sender).Lexer.TokenID = tok_DONE) then
-      Exit;
-  WriteLn('CC ERROR: '+Format('%d:%d %s', [Y + 1, X, Msg])+' in '+TCodeInsight(Sender).FileName);
+  if TCodeParser(Sender).Lexer.FileName <> '' then
+    WriteLn(Format('Parser: %s at line %d, column %d in file "%s"', [Message, Y, X, TCodeParser(Sender).Lexer.FileName]))
+  else
+    WriteLn(Format('Parser: %s at line %d, column %d', [Message, Y, X]))
 end;
 
 function TSimbaForm.OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
 begin
-  Result := FindFile(Filename, [Application.Location, SimbaSettings.Environment.IncludePath.Value]);
+  Result := FindFile(FileName, [ExtractFileDir(TCodeParser(Sender).Lexer.FileName), SimbaSettings.Environment.IncludePath.Value, Application.Location]);
 end;
 
-function TSimbaForm.OnCCLoadLibrary(Sender: TObject; var Argument: string; out Parser: TCodeInsight): Boolean;
+function TSimbaForm.OnCCFindLibrary(Sender: TObject; var FileName: string): Boolean;
 begin
-  Parser := ParsePlugin(Argument, [ExtractFileDir(TCodeInsight(Sender).FileName), SimbaSettings.Environment.PluginPath.Value]);
+  Result := FindPlugin(FileName, [ExtractFileDir(TCodeParser(Sender).Lexer.FileName), SimbaSettings.Environment.PluginPath.Value, Application.Location]);
+end;
 
-  Result := Parser <> nil;
+procedure TSimbaForm.OnCCLoadLibrary(Sender: TObject; FileName: String; var Contents: String);
+var
+  Lib: TLibHandle;
+  Header, Info: PChar;
+  Index: Int32;
+  Address: Pointer;
+var
+  GetFunctionInfo: function(Index: Int32; var Address: Pointer; var Header: PChar): Int32; cdecl;
+  GetFunctionCount: function: Int32; cdecl;
+  GetType: function(Index: Int32; var Name: PChar; var Str: PChar): Int32; cdecl;
+  GetTypeCount: function: Int32; cdecl;
+  GetCode: procedure(var Code: PChar); cdecl;
+  GetCodeLength: function: Int32; cdecl;
+begin
+  WriteLn('Loading library "', FileName, '"');
+
+  try
+    Lib := LoadLibrary(FileName);
+
+    if Lib <> NilHandle then
+    try
+      Pointer(GetFunctionInfo) := GetProcedureAddress(Lib, 'GetFunctionInfo');
+      Pointer(GetFunctionCount) := GetProcedureAddress(Lib, 'GetFunctionCount');
+      Pointer(GetType) := GetProcedureAddress(Lib, 'GetTypeInfo');
+      Pointer(GetTypeCount) := GetProcedureAddress(Lib, 'GetTypeCount');
+      Pointer(GetCode) := GetProcedureAddress(Lib, 'GetCode');
+      Pointer(GetCodeLength) := GetProcedureAddress(Lib, 'GetCodeLength');
+
+      // Types
+      if (Pointer(GetTypeCount) <> nil) and (Pointer(GetType) <> nil) then
+      begin
+        Header := StrAlloc(2048);
+        Info := StrAlloc(2048);
+
+        try
+          for Index := 0 to GetTypeCount() - 1 do
+          begin
+            GetType(Index, Header, Info);
+
+            Contents := Contents + 'type ' + Header + ' = ' + Info;
+            if (not Contents.EndsWith(';')) then
+              Contents := Contents + ';';
+          end;
+        finally
+          StrDispose(Header);
+          StrDispose(Info);
+        end;
+      end;
+
+      // Functions
+      if (Pointer(GetFunctionCount) <> nil) and (Pointer(GetFunctionInfo) <> nil) then
+      begin
+        Header := StrAlloc(2048);
+
+        try
+          for Index := 0 to GetFunctionCount() - 1 do
+          begin
+            GetFunctionInfo(Index, Address, Header);
+
+            Contents := Contents + Header;
+
+            // Remove native, and add trailing semicolon if needed
+            if (not Contents.EndsWith(';')) then
+              Contents := Contents + ';';
+            if Contents.EndsWith('native;', True) then
+              Contents.Remove(Length(Contents) - Length('native;'), $FFFFFF);
+            if (not Contents.EndsWith(';')) then
+              Contents := Contents + ';';
+
+            Contents := Contents + 'begin end;';
+          end;
+        finally
+          StrDispose(Header);
+        end;
+      end;
+
+      // Code
+      if (Pointer(GetCodeLength) <> nil) and (Pointer(GetCode) <> nil) then
+      begin
+        Info := StrAlloc(GetCodeLength() + 1);
+
+        try
+          GetCode(Info);
+
+          Contents := Contents + Info;
+        finally
+          StrDispose(Info);
+        end;
+      end;
+    finally
+      FreeLibrary(Lib);
+    end;
+  except
+    on E: Exception do
+      WriteLn('Error loading library: ', E.Message);
+  end;
 end;
 
 procedure TSimbaForm.RecentFileItemsClick(Sender: TObject);
@@ -682,7 +794,7 @@ begin
         Save(ScriptFile);
 
       ScriptInstance := TSimbaScriptInstance.Create();
-      ScriptInstance.HandleOutput := True;
+      ScriptInstance.ManageOutput := True;
       ScriptInstance.TargetWindow := Self.WindowSelection;
       ScriptInstance.ScriptName := ScriptName;
 
@@ -710,7 +822,7 @@ begin
         Save(ScriptFile);
 
       ScriptInstance := TSimbaScriptInstance.Create();
-      ScriptInstance.HandleOutput := True;
+      ScriptInstance.ManageOutput := True;
       ScriptInstance.TargetWindow := Self.WindowSelection;
       ScriptInstance.ScriptName := ScriptName;
 
@@ -1228,7 +1340,7 @@ begin
     CloseAction := caFree;
 
     SimbaSettings.GUI.RecentFiles.Value := '';
-    for i := 0 to MenuItemOpenRecent.Count - 1 do
+    for i := MenuItemOpenRecent.Count - 1 downto 0 do
       SimbaSettings.GUI.RecentFiles.Value := SimbaSettings.GUI.RecentFiles.Value + ',' + MenuItemOpenRecent[i].Caption;
 
     SaveLayout();
@@ -1384,6 +1496,7 @@ end;
 procedure TSimbaForm.InitCodeTools;
 var
   ScriptInstance: TSimbaScriptInstance;
+  Parser: TCodeInsight_Include;
   i: Int32;
 begin
   ScriptInstance := nil;
@@ -1393,25 +1506,27 @@ begin
     ScriptInstance.Script := 'begin end.';
     ScriptInstance.Dump();
 
-    SetLength(CoreBuffer, ScriptInstance.Output.Count);
-
     for i := 0 to ScriptInstance.Output.Count - 1 do
     begin
-      CoreBuffer[i] := TCodeInsight.Create();
-      CoreBuffer[i].FileName := ScriptInstance.Output.Names[i];
-      CoreBuffer[i].OnMessage := @Self.OnCCMessage;
-      CoreBuffer[i].Run(ScriptInstance.Output.ValueFromIndex[i]);
+      Parser := TCodeInsight_Include.Create();
+      Parser.OnMessage := @Self.OnCCMessage;
+      Parser.Run(ScriptInstance.Output.ValueFromIndex[i], ScriptInstance.Output.Names[i]);
 
-      if CoreBuffer[i].FileName <> 'Classes' then
-        SimbaFunctionListForm.addDeclarations(CoreBuffer[i].Items, SimbaFunctionListForm.addSimbaSection(CoreBuffer[i].FileName), False, True, False);
+      if Parser.Lexer.FileName <> 'Classes' then
+        SimbaFunctionListForm.addDeclarations(Parser.Items, SimbaFunctionListForm.addSimbaSection(Parser.Lexer.FileName), False, True, False);
+
+      TCodeInsight.AddBaseInclude(Parser);
     end;
 
     SimbaFunctionListForm.SimbaNode.Expanded := True;
   except
     on E: Exception do
+    begin
+      Writeln('EXCEPTION!');
       SimbaDebugForm.Add('Error parsing internals: ' + E.Message);
+    end;
   end;
-
+   Writeln('Free');
   if ScriptInstance <> nil then
     ScriptInstance.Free();
 end;
@@ -1423,14 +1538,16 @@ begin
   if (not DirectoryIsWritable(Application.Location)) then
     ShowMessage('No permission to write to Simba''s directory. This will likely cause issues.');
 
-  SimbaSplashForm.Execute('Initializing Console', @InitConsole);
-  SimbaSplashForm.Execute('Initializing Docking', @InitDocking);
-  SimbaSplashForm.Execute('Initializing OpenSSL', @InitOpenSSL);
-  SimbaSplashForm.Execute('Initializing SimbaScript', @InitSimbaScript);
-  SimbaSplashForm.Execute('Initializing OpenSSL', @InitOpenSSL);
-  SimbaSplashForm.Execute('Initializing CodeTools', @InitCodeTools);
-  SimbaSplashForm.Execute('Initializing Settings', @InitSettings);
-  SimbaSplashForm.Execute('Startup Parameters', @Startup_Parameters);
+
+  InitConsole;
+  InitDocking;
+  InitOpenSSL;
+  InitSimbaScript;
+  InitOpenSSL;
+  InitCodeTools;
+  InitSimbaScript;
+  InitSettings;
+  Startup_Parameters;
 
   Self.ToolBar.Images := TImageList.Create(ToolBar);
   Self.ToolBar.Images.Assign(Self.Images);
@@ -1438,6 +1555,7 @@ begin
 
   ScriptProcessorTimer.Enabled := True;
 
+  Application.OnException := @CustomExceptionHandler;
   Application.QueueAsyncCall(@ResetDockingSplitters, 0);
 
   // Everything should be loaded. Display our forms!

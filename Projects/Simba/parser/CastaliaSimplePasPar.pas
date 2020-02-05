@@ -183,17 +183,19 @@ type
 
 type
   TmwSimplePasPar = class(TObject)
-  private
+  protected
     fOnMessage: TMessageEvent;
     fLexer: TmwPasLex;
+
     fInterfaceOnly: Boolean;
     fLastNoJunkPos: Integer;
     fLastNoJunkLen: Integer;
 
     AheadParse: TmwSimplePasPar;
-    procedure InitAhead;
-  protected
+
     fInRound: Boolean;
+
+    procedure InitAhead;
 
     procedure Expected(Sym: TptTokenKind); virtual;
     procedure ExpectedEx(Sym: TptTokenKind); virtual;
@@ -513,7 +515,10 @@ type
     destructor Destroy; override;
     procedure Assign(From: TObject); virtual;
     procedure SynError(Error: TmwParseError); virtual;
-    procedure Run(SourceStream: TCustomMemoryStream; MaxPos: Integer = -1); virtual;
+
+    procedure Run; virtual; overload;
+    procedure Run(Script: String; FileName: String); virtual; overload;
+    procedure Run(FileName: String); virtual; overload;
 
     property InterfaceOnly: Boolean read fInterfaceOnly write fInterfaceOnly;
     property Lexer: TmwPasLex read fLexer;
@@ -612,12 +617,8 @@ begin {jdj added method 02/07/2001}
   SEMICOLON;
 end;
 
-procedure TmwSimplePasPar.Run(SourceStream: TCustomMemoryStream; MaxPos: Integer = -1);
+procedure TmwSimplePasPar.Run;
 begin
-  TerminateStream(SourceStream);
-  fLexer.Origin := SourceStream.Memory;
-  fLexer.MaxPos := MaxPos;
-
   try
     ParseFile();
   except
@@ -629,23 +630,39 @@ begin
   end;
 end;
 
+procedure TmwSimplePasPar.Run(Script: String; FileName: String);
+begin
+  fLexer.FileName := FileName;
+  fLexer.Script := Script;
+
+  Run();
+end;
+
+procedure TmwSimplePasPar.Run(FileName: String);
+var
+  Script: String;
+begin
+  Script := '';
+
+  try
+    with TStringList.Create() do
+    try
+      LoadFromFile(FileName);
+
+      Script := Text;
+    finally
+      Free();
+    end;
+  except
+  end;
+
+  Run(Script, FileName);
+end;
+
 constructor TmwSimplePasPar.Create;
 begin
   inherited Create;
   fLexer := TmwPasLex.Create;
-  fLexer.OnCompDirect := {$IFDEF FPC}@{$ENDIF}HandlePtCompDirect;
-  fLexer.OnDefineDirect := {$IFDEF FPC}@{$ENDIF}HandlePtDefineDirect;
-  fLexer.OnElseDirect := {$IFDEF FPC}@{$ENDIF}HandlePtElseDirect;
-  fLexer.OnEndIfDirect := {$IFDEF FPC}@{$ENDIF}HandlePtEndIfDirect;
-  fLexer.OnIfDefDirect := {$IFDEF FPC}@{$ENDIF}HandlePtIfDefDirect;
-  fLexer.OnIfNDefDirect := {$IFDEF FPC}@{$ENDIF}HandlePtIfNDefDirect;
-  fLexer.OnIfOptDirect := {$IFDEF FPC}@{$ENDIF}HandlePtIfOptDirect;
-  fLexer.OnIncludeDirect := {$IFDEF FPC}@{$ENDIF}HandlePtIncludeDirect;
-  fLexer.OnResourceDirect := {$IFDEF FPC}@{$ENDIF}HandlePtResourceDirect;
-  fLexer.OnUnDefDirect := {$IFDEF FPC}@{$ENDIF}HandlePtUndefDirect;
-  fLexer.OnIfDirect := {$IFDEF FPC}@{$ENDIF}HandlePtIfDirect;
-  fLexer.OnIfEndDirect := {$IFDEF FPC}@{$ENDIF}HandlePtIfEndDirect;
-  fLexer.OnElseIfDirect := {$IFDEF FPC}@{$ENDIF}HandlePtElseIfDirect;
 end;
 
 destructor TmwSimplePasPar.Destroy;

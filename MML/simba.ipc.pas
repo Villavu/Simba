@@ -162,7 +162,7 @@ function TSimbaIPC_Server.Read(var Buffer; Count: Int32): Int32;
 begin
   Result := FInputStream.Read(Buffer, Count);
   if FTerminating then
-    Result := 0;
+    Result := PIPE_TERMINATED;
 end;
 
 destructor TSimbaIPC_Server.Destroy;

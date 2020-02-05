@@ -326,14 +326,11 @@ begin
 end;
 
 function TIOManager.SetTarget(Plugin, Data: String): Int32;
-var
-  Path: String;
 begin
-  Path := FindPlugin(Plugin, FPluginPaths);
-  if (Path = '') then
+  if not FindPlugin(Plugin, FPluginPaths) then
     raise Exception.Create('EIOS plugin not found: ' + Plugin);
 
-  Result := SetBothTargets(TEIOS_Target.Create(Path, Data));
+  Result := SetBothTargets(TEIOS_Target.Create(Plugin, Data));
 end;
 
 function TIOManager.SetTarget(Window: TOSWindow): Int32;

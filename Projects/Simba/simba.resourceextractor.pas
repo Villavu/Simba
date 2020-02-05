@@ -87,6 +87,8 @@ begin
                          'Things may not work correctly!');
     end;
   end;
+
+  Stream.Free();
 end;
 
 procedure TSimbaResourceLoader.Extract(Name: String; OutputPath: String);

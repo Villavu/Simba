@@ -87,7 +87,9 @@ type
     function GetRequestHeaders: TStrings;
     function GetCookies: TStrings;
     function GetProxy: TSimbaHTTPClientProxy;
+    function GetRequestContentType: String;
 
+    procedure SetRequestContentType(Value: String);
     procedure SetRequestHeader(Name: String; Value: String);
     procedure SetProxy(Value: TSimbaHTTPClientProxy);
   public
@@ -100,6 +102,8 @@ type
 
     property RequestHeader[Name: String]: String read GetRequestHeader write SetRequestHeader;
     property RequestHeaders: TStrings read GetRequestHeaders;
+
+    property RequestContentType: String read GetRequestContentType write SetRequestContentType;
 
     property Cookies: TStrings read GetCookies;
     property Proxy: TSimbaHTTPClientProxy read GetProxy write SetProxy;
@@ -227,6 +231,16 @@ begin
   FHTTPClient.Proxy.Port := Value.Port;
   FHTTPClient.Proxy.UserName := Value.UserName;
   FHTTPClient.Proxy.Password := Value.Password;
+end;
+
+function TSimbaHTTPClient.GetRequestContentType: String;
+begin
+  Result := RequestHeader['Content-Type'];
+end;
+
+procedure TSimbaHTTPClient.SetRequestContentType(Value: String);
+begin
+  RequestHeader['Content-Type'] := Value;
 end;
 
 procedure TSimbaHTTPClient.DoExtractProgress(Sender: TObject; FileName: String; Position, Size: Int64);

@@ -37,7 +37,7 @@ var
 implementation
 
 uses
-  simba.settings, simba.editor, simba.main;
+  simba.settings, simba.editor;
 
 procedure TSimbaSettingsForm.TreeViewClick(Sender: TObject);
 begin

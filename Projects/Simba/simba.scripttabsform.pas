@@ -313,7 +313,8 @@ end;
 
 procedure TSimbaScriptTabsForm.NotebookChanging(Sender: TObject; var AllowChange: Boolean);
 begin
-  CurrentTab.FunctionListState := SimbaFunctionListForm.State;
+  if CurrentTab.TabIndex > -1 then
+    CurrentTab.FunctionListState := SimbaFunctionListForm.State;
 
   AllowChange := True;
 end;
@@ -636,31 +637,31 @@ end;
 procedure TSimbaScriptTabsForm.OpenDeclaration(Declaration: TDeclaration);
 var
   FileName: String;
-  IsLibrary: Boolean;
 begin
-  FileName := TCodeInsight(Declaration.Parser).FileName;
-  IsLibrary := TCodeInsight(Declaration.Parser).IsLibrary;
+  FileName := Declaration.Lexer.FileName;
 
   if (FileName = '') or FileExists(FileName) then
   begin
     if FileExists(FileName) then
       Open(FileName);
 
-    CurrentTab.ShowDeclaration(Declaration);
+    CurrentEditor.SelStart := Declaration.StartPos + 1;
+    CurrentEditor.SelEnd := Declaration.EndPos + 1;
+    CurrentEditor.TopLine := (Declaration.Line + 1) - (CurrentEditor.LinesInWindow div 2);
+    if CurrentEditor.CanSetFocus() then
+      CurrentEditor.SetFocus();
+
+    ScriptTabHistory.Add(CurrentTab);
+  end else
+  begin
+    if IsLibrary then
+      SimbaDebugForm.Add('Declared internally in plugin: ' + FileName)
+    else
+      SimbaDebugForm.Add('Declared internally in Simba: ' + FileName);
+
+    SimbaDebugForm.Add('Declaration:');
+    SimbaDebugForm.Add(Declaration.RawText);
   end;
-
-  if IsLibrary then
-    SimbaDebugForm.Add('Declared internally in plugin: ' + FileName)
-  else
-    SimbaDebugForm.Add('Declared internally in Simba: ' + FileName);
-
-  SimbaDebugForm.Add('Declaration:');
-  SimbaDebugForm.Add(Declaration.RawText);
-
-  ScriptTabHistory.Add(CurrentTab);
-
-  if CurrentEditor.CanSetFocus() then
-    CurrentEditor.SetFocus();
 end;
 
 procedure TSimbaScriptTabsForm.SaveAll;
@@ -676,7 +677,6 @@ begin
   inherited Create(TheOwner);
 
   addTab();
-  NoteBook.OnChange(Notebook);
 end;
 
 initialization

@@ -71,8 +71,6 @@ const
   DownloadSpeedTextRunning = 'Downloading at %d kB/s';
   DownloadSpeedTextEnded = 'Downloaded at %d kB/s';
 
-  {$I settings_const.inc}
-
 var
   SimbaUpdateForm: TSimbaUpdateForm;
 

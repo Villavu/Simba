@@ -90,8 +90,8 @@ procedure TSimbaFileBrowser.Expand(Node: TTreeNode);
           Node.SelectedIndex := IMAGE_SIMBA;
         end else
         begin
-          Node.ImageIndex := IMAGE_SCRIPT;
-          Node.SelectedIndex := IMAGE_SCRIPT;
+          Node.ImageIndex := IMAGE_FILE;
+          Node.SelectedIndex := IMAGE_FILE;
         end;
       end;
 
@@ -190,8 +190,8 @@ begin
         Node.SelectedIndex := IMAGE_SIMBA;
       end else
       begin
-        Node.ImageIndex := IMAGE_SCRIPT;
-        Node.SelectedIndex := IMAGE_SCRIPT;
+        Node.ImageIndex := IMAGE_FILE;
+        Node.SelectedIndex := IMAGE_FILE;
       end;
 
       FFileBrowser.Items.AddNode(Node, nil, ExtractFileName(Node.Path), nil, naAdd);

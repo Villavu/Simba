@@ -33,7 +33,7 @@ implementation
 
 uses
   graphtype, extctrls,
-  simba.debugimage, simba.debugform, simba.scripttabsform, simba.mufasatypes, simba.bitmap, simba.main, simba.scripttab;
+  simba.debugimage, simba.debugform, simba.scripttabsform, simba.mufasatypes, simba.main, simba.scripttab;
 
 procedure TSimbaMethod._GetPID;
 begin
@@ -123,28 +123,24 @@ end;
 
 procedure TSimbaMethod._ScriptError;
 var
-  Message, FileName: ShortString;
-  Line, Column: Int32;
+  Param: TSimbaMethod_ScriptError;
   i: Int32;
 begin
-  Params.Read(Message, SizeOf(ShortString));
-  Params.Read(FileName, SizeOf(ShortString));
-  Params.Read(Line, SizeOf(Int32));
-  Params.Read(Column, SizeOf(Int32));
+  Params.Read(Param, SizeOf(TSimbaMethod_ScriptError));
 
   for i := 0 to SimbaScriptTabsForm.TabCount - 1 do
     if SimbaScriptTabsForm.Tabs[i].ScriptInstance = Self.Script then
     begin
-      if (SimbaScriptTabsForm.Tabs[i].ScriptName = FileName) or FileExists(FileName) then
+      if (SimbaScriptTabsForm.Tabs[i].ScriptName = Param.FileName) or FileExists(Param.FileName) then
       begin
-        if FileExists(FileName) then
-          SimbaScriptTabsForm.Open(FileName)
+        if FileExists(Param.FileName) then
+          SimbaScriptTabsForm.Open(Param.FileName)
         else
           SimbaScriptTabsForm.Tabs[i].MakeVisible();
 
-        SimbaScriptTabsForm.CurrentTab.ScriptErrorLine := Line;
-        SimbaScriptTabsForm.CurrentEditor.CaretX := Column;
-        SimbaScriptTabsForm.CurrentEditor.CaretY := Line;
+        SimbaScriptTabsForm.CurrentTab.ScriptErrorLine := Param.Line;
+        SimbaScriptTabsForm.CurrentEditor.CaretX := Param.Column;
+        SimbaScriptTabsForm.CurrentEditor.CaretY := Param.Line;
 
         if SimbaScriptTabsForm.Focused and SimbaScriptTabsForm.CurrentEditor.CanSetFocus() then
           SimbaScriptTabsForm.CurrentEditor.SetFocus();

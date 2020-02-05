@@ -10,6 +10,3 @@
 [submodule "Modules/lape"]
 	path = Modules/lape
 	url = https://github.com/nielsAD/lape
-[submodule "Modules/travis-lazarus"]
-	path = Modules/travis-lazarus
-	url = https://github.com/nielsAD/travis-lazarus

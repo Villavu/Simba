@@ -1,0 +1,126 @@
+name: Auto Build
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    env: 
+      OS: ${{ matrix.config.os }}
+      LAZ_VER: ${{ matrix.config.LAZ_VER }}
+      LAZ_OPT: ${{ matrix.config.LAZ_OPT }}
+      ARTIFACT: ${{ matrix.config.ARTIFACT }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: windows-latest
+            name: Windows 32
+            LAZ_VER: 2.0.6
+            LAZ_OPT: "--os=win32 --cpu=i386"
+            ARTIFACT: "Simba-i386-win32.exe"
+
+          - os: windows-latest
+            name: Windows 64
+            LAZ_VER: 2.0.6
+            LAZ_OPT: "--os=win64 --cpu=x86_64"
+            ARTIFACT: "Simba-x86_64-win64.exe"
+
+          - os: ubuntu-latest
+            name: Linux 64
+            LAZ_VER: 2.0.6
+            LAZ_OPT: "--os=linux --cpu=x86_64"
+            ARTIFACT: "Simba-x86_64-linux"
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Install Modules
+      run: |
+        git submodule init
+        git submodule update
+
+    - name: Install Dependices
+      if: env.OS == 'ubuntu-latest'
+      run: sudo apt-get install libffi-dev libxtst-dev
+
+    - name: Install Lazarus
+      shell: python
+      run: |
+        import sys
+        import os
+        import subprocess
+        import re
+        
+        try:
+            from urllib import quote
+        except ImportError:
+            from urllib.parse import quote
+
+        OS_NAME = os.environ.get('RUNNER_OS')
+        OS_PMAN = {'Linux': 'sudo apt-get', 'Windows': 'choco', 'macOS': 'brew'}[OS_NAME]
+
+        LAZ_DOWNLOAD_DIR = '.laz'
+        LAZ_BIN_ROOT = 'https://sourceforge.net/projects/lazarus/files/'
+        LAZ_BIN_TARGET = {
+            'Linux':   'Lazarus Linux amd64 DEB/Lazarus %(version)s',
+            'Windows': 'Lazarus Windows 64 bits/Lazarus %(version)s',
+            'macOS':   'Lazarus macOS x86-64/'
+        }[OS_NAME];
+
+        def install_lazarus_version(ver):
+
+            url = LAZ_BIN_TARGET % {'version': ver}
+            url = LAZ_BIN_ROOT + quote(url)
+
+            # Collect all download links on target version
+            assets = re.findall("https://(.*?)/download", subprocess.check_output('wget -O- %s' % (url), shell=True).decode('utf-8'))
+            for asset in list(set(assets)):
+                os.system('wget --progress=dot:mega -P "%s" %s' % (LAZ_DOWNLOAD_DIR, asset))
+
+            if OS_NAME == 'Windows':
+                 # Add Lazarus directory to PATH
+                 if os.system('echo ::add-path::C:\\Lazarus\\') != 0:
+                     return False
+
+                 # Install all .exe files
+                 process_file = lambda f: (not f.endswith('.exe')) or os.system('%s /VERYSILENT /DIR="C:\Lazarus"' % (f)) == 0
+            elif OS_NAME == 'Linux':
+                # Install dependencies
+                if os.system('%s install libgtk2.0-dev' % (OS_PMAN)) != 0:
+                    return False
+
+                # Install all .deb files
+                process_file = lambda f: (not f.endswith('.deb')) or os.system('sudo dpkg --force-overwrite -i %s' % (f)) == 0
+            elif OS_NAME == 'macOS':
+                # Install all .pkg files
+                process_file = lambda f: (not f.endswith('.pkg')) or os.system('sudo installer -pkg %s -target /' % (f)) == 0
+            else:
+                return False
+
+            # Process all downloaded files
+            if not all(map(lambda f: os.system('echo Installing %s' % (f)) == 0 and process_file(os.path.join(LAZ_DOWNLOAD_DIR, f)), sorted(os.listdir(LAZ_DOWNLOAD_DIR)))):
+                return False
+
+            return True
+
+        def main():
+            if os.system('%s install wget' % (OS_PMAN)) != 0:
+                return False
+
+            return install_lazarus_version(os.environ.get('LAZ_VER'))
+
+        sys.exit(int(not main()))
+
+    - name: Build Simba
+      run: lazbuild ${{ env.LAZ_OPT }} --build-mode=Release "Projects/Simba/Simba.lpi"
+      
+    - name: Upload Simba Binary
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: ${{ env.ARTIFACT }}
+        asset_name: ${{ env.ARTIFACT }}
+        tag: autobuild
+        overwrite: true

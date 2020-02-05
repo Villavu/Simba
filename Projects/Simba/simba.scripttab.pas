@@ -11,6 +11,7 @@ uses
 type
   TSimbaScriptTab = class(TTabSheet)
   private
+    procedure SetFunctionListState(Value: TSimbaFunctionList_State);
     procedure SetScriptChanged(Value: Boolean);
   protected
     FEditor: TSimbaEditor;
@@ -51,9 +52,7 @@ type
     property Editor: TSimbaEditor read FEditor;
     property ScriptIsDefault: Boolean read FScriptIsDefault;
     property MouseLinkXY: TPoint read FMouseLinkXY write FMouseLinkXY;
-    property FunctionListState: TSimbaFunctionList_State read FFunctionListState write FFunctionListState;
-
-    procedure ShowDeclaration(Declaration: TDeclaration);
+    property FunctionListState: TSimbaFunctionList_State read FFunctionListState write SetFunctionListState;
 
     procedure HandleCodeJump(Data: PtrInt);
 
@@ -94,11 +93,7 @@ begin
     Exit;
 
   Parser := Self.ParseScript();
-
-  if Expression.Contains('.') then
-    Parser.ParseExpression(Expression, Declarations)
-  else
-    Declarations := Parser.getDeclarations(Expression);
+  Declarations := Parser.FindDeclarations(Expression);
 
   if Length(Declarations) = 1 then
     SimbaScriptTabsForm.OpenDeclaration(Declarations[0])
@@ -111,7 +106,7 @@ begin
     begin
       with Buttons.Add() do
       begin
-        Caption := ExtractFileName(TCodeInsight(Declarations[i].Parser).FileName) + ' (Line ' + IntToStr(Declarations[i].Line + 1) + ')';
+        Caption := ExtractFileName(Declarations[i].Lexer.FileName) + ' (Line ' + IntToStr(Declarations[i].Line + 1) + ')';
         ModalResult := 1000 + i;
       end;
     end;
@@ -170,10 +165,8 @@ end;
 procedure TSimbaScriptTab.HandleParameterHints;
 var
   BracketPos, InParameters: Int32;
-  Expression, Identifier, ScriptText: String;
-  Invoked: Boolean;
-  Declaration: TDeclaration;
-  Declarations: TDeclarationArray;
+  Expression, ScriptText: String;
+  Methods: TDeclarationArray;
 begin
   ScriptText := Script;
 
@@ -196,38 +189,14 @@ begin
     end;
 
     Expression := GetExpression(ScriptText, BracketPos - 1);
-    Invoked := Expression.EndsWith('()');
   end else
     Exit;
 
   FEditor.ParameterHint.Parser := Self.ParseScript();
+  with FEditor.ParameterHint.Parser do
+    Methods := FindMethods(Expression);
 
-  if Expression.Contains('.') then
-  begin
-    Identifier := Copy(Expression, LastDelimiter('.', Expression) + 1, $FFFFFF);
-    Declaration := FEditor.ParameterHint.Parser.ParseExpression(Expression, Declarations);
-
-    if Invoked then
-    begin
-      Declarations := nil;
-      Declarations := Declarations + Declaration;
-    end;
-  end else
-  begin
-    Identifier := CleanExpression(Expression);
-    Declarations := FEditor.ParameterHint.Parser.getDeclarations(Identifier);
-  end;
-
-  if Length(Declarations) > 0 then
-  begin
-    if Invoked then
-      Identifier := '';
-
-    FEditor.ParameterHint.Show(FEditor.CharIndexToRowCol(BracketPos - Length(Identifier) - 1),
-                        FEditor.CharIndexToRowCol(BracketPos - 1), Declarations, Invoked);
-
-    Exit;
-  end;
+  FEditor.ParameterHint.Execute(FEditor.CharIndexToRowCol(BracketPos - 1), Methods);
 end;
 
 function TSimbaScriptTab.GetFileName: String;
@@ -253,6 +222,15 @@ begin
   FScriptErrorLine := Value;
 
   Invalidate();
+end;
+
+
+
+procedure TSimbaScriptTab.SetFunctionListState(Value: TSimbaFunctionList_State);
+begin
+  FFunctionListState.Free();
+
+  FFunctionListState := Value;
 end;
 
 procedure TSimbaScriptTab.SetScriptChanged(Value: Boolean);
@@ -328,13 +306,6 @@ begin
     HandleAutoComplete();
 end;
 
-procedure TSimbaScriptTab.ShowDeclaration(Declaration: TDeclaration);
-begin
-  FEditor.SelStart := Declaration.StartPos + 1;
-  FEditor.SelEnd := Declaration.EndPos + 1;
-  FEditor.TopLine := (Declaration.Line + 1) - (FEditor.LinesInWindow div 2);
-end;
-
 function TSimbaScriptTab.Save(AFileName: String): Boolean;
 begin
   Result := False;
@@ -389,11 +360,15 @@ end;
 function TSimbaScriptTab.ParseScript: TCodeInsight;
 begin
   Result := TCodeInsight.Create();
-  Result.FileName := ScriptFile;
+  Result.Lexer.FileName := ScriptFile;
+  if Result.Lexer.FileName = '' then
+    Result.Lexer.FileName := ScriptName;
   Result.OnMessage := @SimbaForm.OnCCMessage;
   Result.OnFindInclude := @SimbaForm.OnCCFindInclude;
+  Result.OnFindLibrary := @SimbaForm.OnCCFindLibrary;
   Result.OnLoadLibrary := @SimbaForm.OnCCLoadLibrary;
-  Result.Run(Script, FEditor.SelStart - 1);
+  Result.Run(Script, Result.Lexer.FileName, FEditor.SelStart - 1);
+  Result.Position := Feditor.SelStart - 1;
 end;
 
 procedure TSimbaScriptTab.MakeVisible;
@@ -434,6 +409,8 @@ begin
   FEditor.BorderStyle := bsNone;
 
   FScriptIsDefault := True;
+
+  FunctionListState := nil;
 end;
 
 constructor TSimbaScriptTab.Create(APageControl: TPageControl);
@@ -451,8 +428,7 @@ end;
 
 destructor TSimbaScriptTab.Destroy;
 begin
-  if (FFunctionListState <> nil) then
-    FunctionListState.Free();
+  FunctionListState := nil;
 
   inherited Destroy();
 end;

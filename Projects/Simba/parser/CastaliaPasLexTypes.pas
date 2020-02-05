@@ -142,6 +142,8 @@ type
     tokImplements,
     tokIn,
     tokIncludeDirect,
+    tokIncludeOnceDirect,
+    tokLibraryDirect,
     tokIndex,
     tokInherited,
     tokInitialization,
