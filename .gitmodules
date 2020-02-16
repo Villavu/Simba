@@ -1,12 +1,3 @@
-[submodule "Modules/EncConv"]
-	path = Modules/EncConv
-	url = https://github.com/Alexey-T/EncConv
-[submodule "Modules/ATFlatControls"]
-	path = Modules/ATFlatControls
-	url = https://github.com/Alexey-T/ATFlatControls
-[submodule "Modules/ATSynEdit"]
-	path = Modules/ATSynEdit
-	url = https://github.com/Alexey-T/ATSynEdit
 [submodule "Modules/lape"]
 	path = Modules/lape
 	url = https://github.com/nielsAD/lape

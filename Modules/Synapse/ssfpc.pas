@@ -250,7 +250,11 @@ const
 
   MSG_OOB       = sockets.MSG_OOB;      // Process out-of-band data.
   MSG_PEEK      = sockets.MSG_PEEK;     // Peek at incoming messages.
+  {$IFDEF DARWIN}
+  MSG_NOSIGNAL  = $20000;
+  {$ELSE}
   MSG_NOSIGNAL  = sockets.MSG_NOSIGNAL; // Do not generate SIGPIPE.
+  {$ENDIF}
 
 const
   WSAEINTR = ESysEINTR;

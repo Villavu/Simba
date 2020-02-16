@@ -73,6 +73,11 @@ implementation
   {$INCLUDE oswindow_windows.inc}
 {$ENDIF}
 
+{$IFDEF DARWIN}
+  {$INCLUDE oswindow_darwin.inc}
+
+{$ENDIF}
+
 function TOSWindowArray_Helper.GetByTitle(Title: String; out Window: TOSWindow): Boolean;
 begin
   for Window in Self do

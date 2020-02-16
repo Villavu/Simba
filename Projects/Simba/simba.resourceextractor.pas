@@ -32,6 +32,8 @@ uses
 procedure TSimbaResourceLoader.CreateInputStream(Sender: TObject; var Stream: TStream);
 begin
   Stream := TResourceStream.Create(HInstance, FName, RT_RCDATA);
+  if Stream.Size = 0 then
+    raise Exception.Create('Missing resource "' + FName +'"');
 end;
 
 procedure TSimbaResourceLoader.CreateOutputStream(Sender: TObject; var Stream: TStream; Item: TFullZipFileEntry);
@@ -96,15 +98,20 @@ begin
   FName := Name;
   FOutputPath := OutputPath;
 
-  with TUnZipper.Create() do
   try
-    OnOpenInputStream := @CreateInputStream;
-    OnCreateStream := @CreateOutputStream;
-    OnDoneStream := @Done;
+    with TUnZipper.Create() do
+    try
+      OnOpenInputStream := @CreateInputStream;
+      OnCreateStream := @CreateOutputStream;
+      OnDoneStream := @Done;
 
-    UnZipAllFiles();
-  finally
-    Free();
+      UnZipAllFiles();
+    finally
+      Free();
+    end;
+  except
+    on E: Exception do
+      WriteLn('Error extracting resource: ' + E.Message);
   end;
 end;
 

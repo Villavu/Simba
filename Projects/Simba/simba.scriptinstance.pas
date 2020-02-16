@@ -85,10 +85,10 @@ type
 implementation
 
 uses
-  {$IFDEF LINUX}
+  {$IFDEF UNIX}
   baseunix,
   {$ENDIF}
-  forms,
+  forms, dialogs,
   simba.script_simbamethod, simba.debugform, simba.settings;
 
 constructor TSimbaScriptProcess.Create;
@@ -155,32 +155,23 @@ end;
 procedure TSimbaScriptInstance.RunMethodServer;
 var
   Method: TSimbaMethod;
+  Size: Int32;
+  Total: Int32;
   Count: Int32;
+  msg: Int32;
 begin
   Method.Script := Self;
   Method.Params := TMemoryStream.Create();
   Method.Result := TMemoryStream.Create();
 
+  Total := 0;
   try
     while True do
     begin
-      Method.Params.Clear();
-
-      Count := FMethodServer.Read(Method.Method, SizeOf(Int32));
-      if Count = PIPE_TERMINATED then
+      if not FMethodServer.ReadMessage(msg, Method.Params) then
         Break;
 
-      if FMethodServer.Peek() > 0 then
-      begin
-        Count := FMethodServer.Read(Method.Params);
-        if Count = PIPE_TERMINATED then
-          Break;
-      end;
-
-      Method.Result.Clear();
-      Method.Result.Write(Method.Method, SizeOf(Int32)); // Ensure something is returned to unblock
-
-      case Method.Method of
+      case ESimbaMethod(msg) of
         SIMBA_METHOD_DEBUG_IMAGE:         TThread.Synchronize(nil, @Method._DebugImage);
         SIMBA_METHOD_DEBUG_IMAGE_DRAW:    TThread.Synchronize(nil, @Method._DebugImageDraw);
         SIMBA_METHOD_SCRIPT_ERROR:        TThread.Synchronize(nil, @Method._ScriptError);
@@ -196,7 +187,7 @@ begin
           raise Exception.CreateFmt('Invalid method %d', [Method.Method]);
       end;
 
-      FMethodServer.Write(Method.Result);
+      FMethodServer.WriteMessage(msg, Method.Result);
     end;
   except
     on e: Exception do
@@ -369,7 +360,7 @@ begin
   if (not FileExists(FProcess.Executable)) then
     raise Exception.Create('SimbaScript exectuable not found: ' + FProcess.Executable);
 
-  {$IFDEF LINUX}
+  {$IFDEF UNIX}
   if fpchmod(FProcess.Executable, &755) <> 0 then //rwxr-xr-x
     raise Exception.Create('Unable to make SimbaScript exectuable');
   {$ENDIF}

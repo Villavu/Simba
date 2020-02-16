@@ -41,9 +41,9 @@ jobs:
         git submodule init
         git submodule update
 
-    - name: Install Dependices
+    - name: Install Dependencies
       if: env.OS == 'ubuntu-latest'
-      run: sudo apt-get install libffi-dev libxtst-dev
+      run: sudo apt-get install libffi-dev libxtst-dev xvfb
 
     - name: Install Lazarus
       shell: python
@@ -116,6 +116,25 @@ jobs:
     - name: Build Simba
       run: lazbuild ${{ env.LAZ_OPT }} --build-mode=Release "Projects/Simba/Simba.lpi"
       
+    - name: Test Simba
+      shell: python
+      run: |
+        import sys
+        import os
+        def main():
+            os.chdir('Projects/SimbaScript/')
+
+            if os.name == 'posix':
+                os.system('Xvfb :1 &')
+                if os.system('DISPLAY=:1 ./SimbaScript --run --script="begin end."') != 0:
+                  return False
+            else:
+                if os.system('SimbaScript.exe --run --script="begin end."') != 0:
+                  return False
+            return True
+
+        sys.exit(int(not main()))
+
     - name: Upload Simba Binary
       uses: svenstaro/upload-release-action@v1-release
       with:

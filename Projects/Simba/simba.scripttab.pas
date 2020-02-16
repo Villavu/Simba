@@ -76,7 +76,7 @@ implementation
 
 uses
   synedit, lazfileutils, SynEditMouseCmds, InterfaceBase, forms, simba.scripttabsform,
-  simba.settings, simba.scripttabhistory, simba.main, simba.parser_misc;
+  simba.settings, simba.scripttabhistory, simba.main, simba.parser_misc, simba.debugform;
 
 
 procedure TSimbaScriptTab.HandleCodeJump(Data: PtrInt);
@@ -158,8 +158,10 @@ begin
   else
     P := FEditor.CharIndexToRowCol(FEditor.SelStart - Length(Filter) - 1);
 
-  with FEditor.ClientToScreen(FEditor.RowColumnToPixels(P)) do
-    FEditor.AutoComplete.Execute(Filter, X, Y + FEditor.LineHeight);
+  P := FEditor.RowColumnToPixels(P);
+  P := FEditor.ClientToScreen(P);
+
+  FEditor.AutoComplete.Execute(Filter, P.X, P.Y + FEditor.LineHeight);
 end;
 
 procedure TSimbaScriptTab.HandleParameterHints;

@@ -34,7 +34,7 @@ end;
 
 procedure Lape_GetCurrentThreadID(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PPtrUInt(Result)^ := GetCurrentThreadID();
+ // PPtrUInt(Result)^ := GetCurrentThreadID();
 end;
 
 procedure Lape_Wait(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -221,7 +221,7 @@ begin
                   'end;', 'TFormatSettings');
 
     addGlobalConst(TThread.ProcessorCount, 'ProcessorCount');
-    addGlobalConst(MainThreadID, 'MainThreadID');
+    //addGlobalConst(MainThreadID, 'MainThreadID');
 
     addGlobalVar('TFormatSettings', @FormatSettings, 'FormatSettings');
     addGlobalVar('TClient', @Script.Client, 'Client');

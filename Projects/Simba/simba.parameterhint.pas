@@ -332,6 +332,8 @@ var
   var
     i: Int32;
   begin
+    Canvas.Font.Color := clBlack;
+
     for i := 1 to Length(Text) do
     begin
       if Text[i] = '\' then

@@ -1,7 +1,7 @@
-unit simba.fftw3;
+unit simba.FFTW3;
 {==============================================================================]
   Copyright © 2018, Jarl Krister Holta
-  
+
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -14,14 +14,11 @@ unit simba.fftw3;
   See the License for the specific language governing permissions and
   limitations under the License.
 [==============================================================================}
-
 {$I ../header.inc}
-
 interface
 
 uses
-  sysutils, dynlibs,
-  simba.matchtemplate_core;
+  SysUtils, dynlibs, simba.matchtemplate_core;
 
 
 type
@@ -61,7 +58,7 @@ const
   FFTW_EXHAUSTIVE      = 8;   {1U << 3} {NO_EXHAUSTIVE is default }
   FFTW_PRESERVE_INPUT  = 16;  {1U << 4} {cancels FFTW_DESTROY_INPUT}
   FFTW_PATIENT         = 32;  {1U << 5} {IMPATIENT is default }
-  FFTW_ESTIMATE        = 64;  {1U << 6}   
+  FFTW_ESTIMATE        = 64;  {1U << 6}
 
   {$IF Defined(WIN32)}
   LIB_NAME = 'libfftw3f-3_32.dll';
@@ -71,12 +68,18 @@ const
   LIB_NAME = 'libfftw3f-3_32.so';
   {$ELSEIF Defined(CPUX86_64) and Defined(LINUX)}
   LIB_NAME = 'libfftw3f-3_64.so';
+  {$ELSEIF Defined(CPU386) and Defined(DARWIN)}
+  LIB_NAME = 'libfftw3f-3_32.dylib';
+  {$ELSEIF Defined(CPUX86_64) and Defined(DARWIN)}
+  LIB_NAME = 'libfftw3f-3_64.dylib';
   {$ENDIF}
 
   {$IF Defined(Windows)}
   ALT_LIB_NAME = 'libfftw3f-3.dll';
   {$ELSEIF Defined(Linux)}
   ALT_LIB_NAME = 'libfftw3f-3.so';
+  {$ELSEIF Defined(DARWIN)}
+  ALT_LIB_NAME = 'libfftw3f-3.dylib';
   {$ENDIF}
 
 
@@ -96,7 +99,7 @@ var
   fftw_exec:               procedure(plan: FFTW_PLAN); cdecl;
   fftw_exec_dft:           procedure(plan: FFTW_PLAN; inData, outData: PComplex); cdecl;
   fftw_free_plan:          procedure(plan: FFTW_PLAN); cdecl;
-  
+
 
 implementation
 
@@ -193,10 +196,10 @@ var
 begin
   if (target <= 6) then
     Exit(target);
-  
+
   if NextPow2(target) = target then
     Exit(target);
-  
+
   n := 0;
   if target <= __OptimalDFT[High(__OptimalDFT)] then
   begin
@@ -223,7 +226,7 @@ begin
     end;
     if p35 < match then
       match := p35;
-    
+
     p5 *= 5;
     if p5 = target then
       Exit(p5);
@@ -264,7 +267,7 @@ end;
 function TFFTW.FFT2(m: T2DComplexArray): T2DComplexArray;
 var
   y,w,h,row,sz: Int32;
-  _data, _res: PComplex;  
+  _data, _res: PComplex;
   plan: FFTW_PLAN;
 begin
   Size(m, W,H);
@@ -291,20 +294,20 @@ end;
 function TFFTW.IFFT2(m: T2DComplexArray): T2DComplexArray;
 var
   x,y,row,sz,w,h: Int32;
-  f: Single;   
-  _data, _res: PComplex;  
+  f: Single;
+  _data, _res: PComplex;
   plan: FFTW_PLAN;
 begin
   Size(m, W,H);
   if W = 0 then Exit;
-  
+
   row := SizeOf(Complex) * W;
   sz  := row * H;
 
   _data := fftw_malloc(sz);
   _res  := fftw_malloc(sz);
   plan  := fftw_plan_dft2(H,W, _data, _res, FFTW_BACKWARD, FFTW_ESTIMATE);
-  
+
   for y:=0 to h-1 do Move(m[y,0], _data[y*w], row);
   fftw_exec(plan);
   for y:=0 to h-1 do Move(_res[y*w], m[y,0], row);

@@ -71,7 +71,7 @@
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);..\..\Modules\lape;imports;imports\lape"/>
       <Libraries Value="..\..\Modules\lape\extensions\ffi\bin\$(TargetOS)"/>
-      <OtherUnitFiles Value="..\Simba;imports;imports\classes\MML;imports\classes\LCL;..\..\MML\matchtemplate\fftlib;..\..\MML\matchtemplate;..\..\MML;..\..\MML\iomanager;..\..\MML\dtmeditor;..\..\MML\aca;..\..\MML\oswindow;..\..\MML\web;..\..\MML\web\fpc;..\..\MML\archive;..\..\Modules\lape;..\..\Modules\lape\extensions\ffi;..\..\Modules\Synapse;..\..\Modules\DCPCrypt;..\..\Modules\DCPCrypt\Ciphers;..\..\Modules\DCPCrypt\Hashes;..\..\MML\linux;..\..\Components"/>
+      <OtherUnitFiles Value="..\Simba;imports;imports\classes\MML;imports\classes\LCL;..\..\MML\matchtemplate\fftlib;..\..\MML\matchtemplate;..\..\MML;..\..\MML\iomanager;..\..\MML\dtmeditor;..\..\MML\aca;..\..\MML\oswindow;..\..\MML\web;..\..\MML\web\fpc;..\..\MML\archive;..\..\Modules\lape;..\..\Modules\lape\extensions\ffi;..\..\Modules\Synapse;..\..\Modules\DCPCrypt;..\..\Modules\DCPCrypt\Ciphers;..\..\Modules\DCPCrypt\Hashes;..\..\MML\linux;..\..\Components;..\..\MML\darwin"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Conditionals Value="if (TargetOS = 'win32') or (TargetOS = 'win64') then
@@ -84,6 +84,7 @@
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
+        <DebugInfoType Value="dsDwarf2Set"/>
       </Debugging>
     </Linking>
     <Other>
