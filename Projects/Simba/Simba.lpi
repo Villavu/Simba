@@ -55,7 +55,7 @@
             <ExecuteBefore>
               <Command Value="$MakeExe($(LazarusDir)lazbuild) --cpu=$(TargetCPU) --os=$(TargetOS) --widgetset=$(LCLWidgetType) --build-mode=default ../SimbaScript/SimbaScript.lpi"/>
               <ShowAllMessages Value="True"/>
-              <CompileReasons Compile="False" Run="False"/>
+              <CompileReasons Run="False"/>
             </ExecuteBefore>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
