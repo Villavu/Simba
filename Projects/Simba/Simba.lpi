@@ -36,7 +36,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);../../Units/lape;$(LazarusDir)/components/synedit;../../Units/Misc/MatchTemplate"/>
             <Libraries Value="../../Units/lape/extensions/ffi/bin/$(TargetOS)"/>
-            <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../FormDesigner;$(ProjPath)../../Projects/FormDesigner/CodeGen;package;parser;colorpicker;settings;../../MML/matchtemplate;../../MML/matchtemplate/fftlib;../../MML;../../MML/iomanager;../../MML/oswindow;../../MML/dtmeditor;../../MML/aca;../../MML/generics;../../MML/web;../../MML/web/fpc;../../MML/archive;../../MML/linux;../../Modules/Synapse;../../Modules/ATSynEdit/atsynedit;../../Modules/ATFlatControls/atflatcontrols;../../Modules/EncConv/encconv;../../Components"/>
+            <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../FormDesigner;$(ProjPath)../../Projects/FormDesigner/CodeGen;package;parser;colorpicker;settings;../../MML/matchtemplate;../../MML/matchtemplate/fftlib;../../MML;../../MML/iomanager;../../MML/oswindow;../../MML/dtmeditor;../../MML/aca;../../MML/generics;../../MML/web;../../MML/web/fpc;../../MML/archive;../../MML/linux;../../MML/darwin;../../Modules/Synapse;../../Modules/ATSynEdit/atsynedit;../../Modules/ATFlatControls/atflatcontrols;../../Modules/EncConv/encconv;../../Components"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -53,9 +53,9 @@
               <IgnoredMessages idx5024="True"/>
             </CompilerMessages>
             <ExecuteBefore>
-              <Command Value="$MakeExe($(LazarusDir)lazbuild) --cpu=$(TargetCPU) --os=$(TargetOS) --build-mode=default ../SimbaScript/SimbaScript.lpi"/>
+              <Command Value="$MakeExe($(LazarusDir)lazbuild) --cpu=$(TargetCPU) --os=$(TargetOS) --widgetset=$(LCLWidgetType) --build-mode=default ../SimbaScript/SimbaScript.lpi"/>
               <ShowAllMessages Value="True"/>
-              <CompileReasons Run="False"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteBefore>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
@@ -93,7 +93,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="53">
+    <Units Count="54">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -388,6 +388,10 @@
         <Filename Value="parser/simba.ci_includecache.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit52>
+      <Unit53>
+        <Filename Value="../../MML/oswindow/oswindow_darwin.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit53>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -429,7 +433,7 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="8">
+    <Exceptions Count="6">
       <Item1>
         <Name Value="lpException"/>
       </Item1>
@@ -448,12 +452,6 @@
       <Item6>
         <Name Value="Exception"/>
       </Item6>
-      <Item7>
-        <Name Value="EWriteError"/>
-      </Item7>
-      <Item8>
-        <Name Value="EReadError"/>
-      </Item8>
     </Exceptions>
   </Debugging>
 </CONFIG>

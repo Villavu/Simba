@@ -176,13 +176,15 @@ type
     X1, Y1, X2, Y2: Integer;
   end;
 
+  { TBoxHelper }
+
   TBoxHelper = record Helper for TBox
   protected
     function GetWidth: Int32;
     function GetHeight: Int32;
   public
-    function Contains(X, Y, Width, Height: Int32): Boolean;
-
+    function Contains(X, Y, Width, Height: Int32): Boolean; overload;
+    function Contains(X, Y: Int32): Boolean; overload;
     property Width: Int32 read GetWidth;
     property Height: Int32 read GetHeight;
   end;
@@ -475,6 +477,11 @@ end;
 function TBoxHelper.Contains(X, Y, Width, Height: Int32): Boolean;
 begin
   Result := (X >= Self.X1) and (Y >= Self.Y1) and (X + Width <= Self.X2) and (Y + Height <= Self.Y2);
+end;
+
+function TBoxHelper.Contains(X, Y: Int32): Boolean;
+begin
+  Result := (X >= Self.X1) and (Y >= Self.Y1) and (X <= Self.X2) and (Y <= Self.Y2);
 end;
 
 end.

@@ -293,7 +293,7 @@ uses
   simba.httpclient, simba.files, simba.resourceextractor,
   simba.debugimage, simba.bitmapconv, simba.colorpicker_historyform,
   simba.aca, simba.dtmeditor,  simba.scriptinstance,
-  simba.aboutform,  simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
+  simba.aboutform, simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.colorpicker, simba.ci_includecache
   {$IFDEF WINDOWS},
   windows
@@ -306,12 +306,14 @@ uses
   {$ENDIF},
   dynlibs;
 
-const
   {$IFDEF LINUX}
+  const
   shortcut_StartScript = '<Ctrl><Alt>R';
   shortcut_StopScript =  '<Ctrl><Alt>S';
   shortcut_PickColour =  '<Ctrl><Alt>P';
-  {$ELSE}
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+  const
   shortcut_StartScriptID  = 0;
   shortcut_StartScriptMod = MOD_CONTROL or MOD_ALT;
   shortcut_StartScriptKey = VK_R;
@@ -1306,8 +1308,6 @@ begin
     end;
   end;
 
-
-
   Output.Free();
 end;
 
@@ -1521,12 +1521,9 @@ begin
     SimbaFunctionListForm.SimbaNode.Expanded := True;
   except
     on E: Exception do
-    begin
-      Writeln('EXCEPTION!');
       SimbaDebugForm.Add('Error parsing internals: ' + E.Message);
-    end;
   end;
-   Writeln('Free');
+
   if ScriptInstance <> nil then
     ScriptInstance.Free();
 end;
@@ -1537,7 +1534,6 @@ var
 begin
   if (not DirectoryIsWritable(Application.Location)) then
     ShowMessage('No permission to write to Simba''s directory. This will likely cause issues.');
-
 
   InitConsole;
   InitDocking;

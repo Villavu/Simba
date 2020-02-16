@@ -113,8 +113,12 @@ uses
   simba.target_eios,
   {$IFDEF WINDOWS}
   simba.target_windows
-  {$ELSE}
+  {$ENDIF}
+  {$IFDEF LINUX}
   simba.target_linux
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  simba.target_darwin
   {$ENDIF};
 
 constructor TIOManager.Create(PluginPath: String);

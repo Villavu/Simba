@@ -13,12 +13,13 @@ type
 
   TSimbaMethod = class
   public
+    Method: Int32;
     Params: TMemoryStream;
     Result: TMemoryStream;
 
     procedure Invoke(Script: TSimbaScript);
 
-    constructor Create(Method: ESimbaMethod);
+    constructor Create(AMethod: ESimbaMethod);
     destructor Destroy; override;
   end;
 
@@ -55,7 +56,7 @@ type
     FPlugins: TScriptPluginList;
 
     procedure Execute; override;
-
+    procedure DoTerminate; override;
     procedure HandleState;
     procedure HandleException(E: Exception);
 
@@ -63,12 +64,15 @@ type
     function HandleFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
     function HandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
   public
+    CompileOnly: Boolean;
+    DumpOnly: Boolean;
     property StartTime: UInt64 read FStartTime;
     property Client: TClient read FClient;
 
     procedure PauseScript;
     procedure RunScript;
     procedure StopScript;
+
 
 
     property IsUserTerminated: Boolean read FIsUserTerminated write FIsUserTerminated;
@@ -86,17 +90,12 @@ type
 
     property WriteTimeStamp: Boolean read FWriteTimeStamp write FWriteTimeStamp;
 
-    procedure Terminate(Data: PtrInt); overload;
-    procedure Initialize(Data: PtrInt);
-    procedure Run(Data: PtrInt);
-    procedure Compile(Data: PtrInt);
-    procedure Dump(Data: PtrInt);
-
     procedure _Write(constref S: String);
     procedure _WriteLn(constref S: String);
 
-    procedure Invoke(Params, Result: TMemoryStream);
+    procedure Invoke(Message: Int32; Params, Result: TMemoryStream);
 
+    constructor Create; reintroduce;
     destructor Destroy; override;
   end;
 
@@ -168,15 +167,14 @@ uses
 
 procedure TSimbaMethod.Invoke(Script: TSimbaScript);
 begin
-  Script.Invoke(Params, Result);
+  Script.Invoke(Self.Method, Params, Result);
 end;
 
-constructor TSimbaMethod.Create(Method: ESimbaMethod);
+constructor TSimbaMethod.Create(AMethod: ESimbaMethod);
 begin
+  Method := Ord(AMethod);
   Result := TMemoryStream.Create();
-
   Params := TMemoryStream.Create();
-  Params.Write(Ord(Method), SizeOf(Int32));
 end;
 
 destructor TSimbaMethod.Destroy;
@@ -191,36 +189,71 @@ procedure TSimbaScript.Execute;
 var
   T: Double;
 begin
-  if FCompiled then
+  if DumpOnly then
   begin
-    FStartTime := GetTickCount64();
+    try
+      _WriteLn(FCompiler.Dump());
+    except
+      on E: Exception do
+        WriteLn('Dumping exception: ', E.Message);
+    end;
+
+    Exit;
+  end;
+
+  try
+    FCompiler.Import();
 
     T := PerformanceTimer();
 
-    try
-      try
-        RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, FRunning);
-      finally
-        FIsTerminating := True;
+    FCompiled := FCompiler.Compile();
+    if (not FCompiled) then
+      raise Exception.Create('Compiling failed');
 
-        RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, nil, TCodePos(FCompiler.getGlobalVar('__OnTerminate').Ptr^));
-      end;
-
-      if GetTickCount64() - FStartTime < 60000 then
-        _WriteLn(Format('Succesfully executed in %d milliseconds.', [Round(PerformanceTimer() - T)]))
-      else
-        _WriteLn(Format('Succesfully executed in %s.', [TimeStamp(GetTickCount64() - FStartTime)]));
-    except
-      on E: Exception do
-      begin
-        ExitCode := SCRIPT_ERROR_RUNTIME;
-
-        HandleException(E);
-      end;
+    _WriteLn(Format('Succesfully compiled in %d milliseconds.', [Round(PerformanceTimer() - T)]));
+  except
+    on E: Exception do
+    begin
+      ExitCode := SCRIPT_ERROR_COMPILE;
+      HandleException(E);
+      Exit;
     end;
   end;
 
-  Terminate(0);
+  if CompileOnly then
+    Exit;
+
+  FStartTime := GetTickCount64();
+
+  T := PerformanceTimer();
+
+  try
+    try
+      RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, FRunning);
+    finally
+      FIsTerminating := True;
+
+      RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, nil, TCodePos(FCompiler.getGlobalVar('__OnTerminate').Ptr^));
+    end;
+
+    if GetTickCount64() - FStartTime < 60000 then
+      _WriteLn(Format('Succesfully executed in %d milliseconds.', [Round(PerformanceTimer() - T)]))
+    else
+      _WriteLn(Format('Succesfully executed in %s.', [TimeStamp(GetTickCount64() - FStartTime)]));
+  except
+    on E: Exception do
+    begin
+      ExitCode := SCRIPT_ERROR_RUNTIME;
+
+      HandleException(E);
+    end;
+  end;
+end;
+
+procedure TSimbaScript.DoTerminate;
+begin
+  Halt(0);
+  inherited DoTerminate();
 end;
 
 procedure TSimbaScript.HandleState;
@@ -286,7 +319,6 @@ var
   Arguments: TStringArray;
   Parser: TFPExpressionParser;
   Plugin: TMPlugin;
-  Path: String;
   i: Int32;
 begin
   if (UpperCase(Directive) = 'LOADLIB') or (UpperCase(Directive) = 'IFHASLIB') or
@@ -382,54 +414,6 @@ begin
   FState.Write(i, SizeOf(Int32));
 end;
 
-procedure TSimbaScript.Terminate(Data: PtrInt);
-begin
-  inherited Terminate();
-
-  Application.Terminate();
-  if WakeMainThread <> nil then
-    WakeMainThread(nil);
-end;
-
-procedure TSimbaScript.Run(Data: PtrInt);
-begin
-  Start();
-end;
-
-procedure TSimbaScript.Compile(Data: PtrInt);
-var
-  T: Double;
-begin
-  try
-    FCompiler.Import();
-
-    T := PerformanceTimer();
-
-    FCompiled := FCompiler.Compile();
-    if (not FCompiled) then
-      raise Exception.Create('Compiling failed');
-
-    _WriteLn(Format('Succesfully compiled in %d milliseconds.', [Round(PerformanceTimer() - T)]));
-  except
-    on E: Exception do
-    begin
-      ExitCode := SCRIPT_ERROR_COMPILE;
-
-      HandleException(E);
-    end;
-  end;
-end;
-
-procedure TSimbaScript.Dump(Data: PtrInt);
-begin
-  try
-    _WriteLn(FCompiler.Dump());
-  except
-    on E: Exception do
-      WriteLn('Dumping exception: ', E.Message);
-  end;
-end;
-
 procedure TSimbaScript._Write(constref S: String);
 begin
   FWriteBuffer := FWriteBuffer + S;
@@ -451,54 +435,61 @@ begin
   FWriteBuffer := '';
 end;
 
-procedure TSimbaScript.Invoke(Params, Result: TMemoryStream);
+procedure TSimbaScript.Invoke(Message: Int32; Params, Result: TMemoryStream);
 begin
   FSimbaMethodLock.Enter();
 
   try
-    FSimbaMethodClient.Write(Params);
-    FSimbaMethodClient.Read(Result);
-
-    Result.Position := SizeOf(Int32); // Skip message id
+    FSimbaMethodClient.WriteMessage(Message, Params);
+    FSimbaMethodClient.ReadMessage(Message, Result);;
   finally
     FSimbaMethodLock.Leave();
   end;
 end;
 
-procedure TSimbaScript.Initialize(Data: PtrInt);
+constructor TSimbaScript.Create;
 begin
+  inherited Create(True);
+
   FAppPath := Application.GetOptionValue('apppath');
   FDataPath := Application.GetOptionValue('datapath');
   FPluginPath := Application.GetOptionValue('pluginpath');
   FFontPath := Application.GetOptionValue('fontpath');
   FScriptPath := Application.GetOptionValue('scriptpath');
   FIncludePath := Application.GetOptionValue('includepath');
-
-  FScriptFile := Application.GetOptionValue('scriptfile');
   FScriptName := Application.GetOptionValue('scriptname');
 
-  if (not FileExists(FScriptFile)) then
-    raise Exception.Create('Script "' + FScriptFile + '" not found');
+  if Application.HasOption('scriptfile') then
+  begin
+    FScriptFile := Application.GetOptionValue('scriptfile');
 
+    if (not FileExists(FScriptFile)) then
+      raise Exception.Create('Script "' + FScriptFile + '" not found');
 
-  try
-    with TStringList.Create() do
     try
-      LoadFromFile(Application.GetOptionValue('scriptfile'));
+      with TStringList.Create() do
+      try
+        LoadFromFile(Application.GetOptionValue('scriptfile'));
 
-      FScript := Text;
-    finally
-      if ExtractFileExt(FScriptFile) = '.tmp' then
-        DeleteFile(FScriptFile);
+        FScript := Text;
+      finally
+        if ExtractFileExt(FScriptFile) = '.tmp' then
+          DeleteFile(FScriptFile);
 
-      FScriptFile := FScriptName;
+        FScriptFile := FScriptName;
 
-      Free();
+        Free();
+      end;
+    except
+      on e: Exception do
+        raise Exception.Create('Unable to load script: ' + e.Message);
     end;
-  except
-    on e: Exception do
-      raise Exception.Create('Unable to load script: ' + e.Message);
-  end;
+  end else
+  if Application.HasOption('script') then
+  begin
+    FScript := Application.GetOptionValue('script');
+  end else
+    raise Exception.Create('No script!');
 
   FCompiler := TScriptCompiler.Create(FScript, FScriptFile);
   FCompiler.OnFindFile := @HandleFindFile;
@@ -523,29 +514,6 @@ begin
   FSimbaMethodLock := TCriticalSection.Create();
 
   ExecuteInThread(@HandleState);
-
-  {
-  if Application.HasOption('function-writer') and Application.HasOption('function-reader') then
-  begin
-    FExternalLock := TCriticalSection.Create();
-
-    FExternalMethodWriter := TIPCClient_WriterStream.Create(Application.GetOptionValue('function-writer'));
-    FExternalMethodReader := TIPCClient_ReaderStream.Create(Application.GetOptionValue('function-reader'));
-  end;
-
-  if Application.HasOption('state-reader') then
-  begin
-    FStateReader := TIPCClient_ReaderStream.Create(Application.GetOptionValue('state-reader'));
-
-    ExecuteInThread(@HandleStateReading);
-  end;
-
-  if Application.HasOption('state-writer') then
-  begin
-    FStateWriter := TIPCClient_WriterStream.Create(Application.GetOptionValue('state-writer'));
-
-    ExecuteInThread(@HandleStateWriting);
-  end; }
 end;
 
 destructor TSimbaScript.Destroy;
@@ -563,12 +531,6 @@ begin
 
   inherited Destroy();
 end;
-
-initialization
-  Script := TSimbaScript.Create(True);
-
-finalization
-  Script.Free();
 
 end.
 

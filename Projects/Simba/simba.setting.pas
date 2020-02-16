@@ -76,6 +76,8 @@ type
     function GetValue: String; override;
   end;
 
+  { TSimbaSetting_File }
+
   TSimbaSetting_File = class(TSimbaSetting_String)
   protected
     function GetValue: String; override;
@@ -205,7 +207,7 @@ begin
   end;
 end;
 
-function TSimbaSetting_File.GetValue: _T;
+function TSimbaSetting_File.GetValue: String;
 begin
   Result := inherited GetValue;
 

@@ -7,7 +7,7 @@ program SimbaScript;
 {$ENDIF}
 
 uses
-  {$IFDEF LINUX}
+  {$IFDEF UNIX}
   cthreads, cmem,
   {$ENDIF}
   sysutils, classes, interfaces, forms, lazLoggerbase, lazcontrols,
@@ -15,8 +15,24 @@ uses
 
 {$R *.res}
 
+type
+  TObjectHelper = class helper for TObject
+    procedure Execute(Data: PtrInt);
+  end;
+
 var
   i: Int32;
+  obj: TObject;
+
+procedure TObjectHelper.Execute(Data: PtrInt);
+begin
+  Script := TSimbaScript.Create();
+  if Application.HasOption('compile') then
+    Script.CompileOnly := True;
+  if Application.HasOption('dump') then
+    Script.DumpOnly := True;
+  Script.Start();
+end;
 
 begin
   ExitCode := SCRIPT_ERROR;
@@ -28,26 +44,7 @@ begin
     Application.Scaled := True;
     Application.Initialize();
 
-    Application.QueueAsyncCall(@Script.Initialize, 0);
-
-    if Application.HasOption('dump') then
-    begin
-      Application.QueueAsyncCall(@Script.Dump, 0);
-      Application.QueueAsyncCall(@Script.Terminate, 0);
-    end;
-
-    if Application.HasOption('compile') then
-    begin
-      Application.QueueAsyncCall(@Script.Compile, 0);
-      Application.QueueAsyncCall(@Script.Terminate, 0);
-    end;
-
-    if Application.HasOption('run') then
-    begin
-      Application.QueueAsyncCall(@Script.Compile, 0);
-      Application.QueueAsyncCall(@Script.Run, 0);
-    end;
-
+    Application.QueueAsyncCall(@obj.Execute, 0);
     Application.Run();
 
     ExitCode := SCRIPT_SUCCESS;

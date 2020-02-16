@@ -5,13 +5,19 @@ unit simba.ipc;
 interface
 
 uses
-  classes, sysutils, pipes;
+  classes, sysutils, pipes, math;
 
 const
   PIPE_TERMINATED = 0;
 
 type
   TSimbaIPC = class
+  protected
+  type
+    TMessageHeader = packed record
+      Size: Int32;
+      Message: Int32;
+    end;
   protected
     FInputStream: TInputPipeStream;
     FOutputStream: TOutputPipeStream;
@@ -21,11 +27,11 @@ type
   public
     function Peek: Int32; virtual;
 
-    function Read(Stream: TMemoryStream): Int32; virtual; overload;
+    procedure Write(const Buffer; Count: Int32); virtual; overload;
     function Read(var Buffer; Count: Int32): Int32; virtual; overload;
 
-    procedure Write(const Buffer; Count: Int32); virtual; overload;
-    procedure Write(const Stream: TMemoryStream); virtual; overload;
+    function ReadMessage(out Message: Int32; Data: TMemoryStream): Boolean; virtual; overload;
+    procedure WriteMessage(const Message: Int32; Data: TMemoryStream); virtual; overload;
   end;
 
   TSimbaIPC_Server = class(TSimbaIPC)
@@ -74,29 +80,33 @@ begin
   Result := FInputStream.NumBytesAvailable;
 end;
 
-function TSimbaIPC.Read(Stream: TMemoryStream): Int32;
+function TSimbaIPC.ReadMessage(out Message: Int32; Data: TMemoryStream): Boolean;
 var
   Count: Int32;
+  Header: TMessageHeader;
   Buffer: array[0..BUFFER_SIZE - 1] of Byte;
 begin
-  Result := 0;
+  Result := True;
 
-  Count := Read(Buffer[0], Length(Buffer));
-  if Count > 0 then
+  if Read(Header, SizeOf(TMessageHeader)) = PIPE_TERMINATED then
+    Exit(False);
+
+  Message := Header.Message;
+
+  Data.Clear();
+  Data.Size := Header.Size - SizeOf(TMessageHeader);
+  Data.Position := 0;
+
+  while Data.Position < Data.Size do
   begin
-    Result := Result + Stream.Write(Buffer[0], Count);
+    Count := Read(Buffer[0], Min(Data.Size - Data.Position, Length(Buffer)));
+    if Count = PIPE_TERMINATED then
+      Exit(False);
 
-    while Peek() > 0 do
-    begin
-      Count := Read(Buffer[0], Length(Buffer));
-      if (Count = 0) then
-        Break;
-
-      Result := Result + Stream.Write(Buffer[0], Count);
-    end;
+    Data.Write(Buffer[0], Count);
   end;
 
-  Stream.Position := 0;
+  Data.Position := 0;
 end;
 
 function TSimbaIPC.Read(var Buffer; Count: Int32): Int32;
@@ -109,9 +119,15 @@ begin
   FOutputStream.Write(Buffer, Count);
 end;
 
-procedure TSimbaIPC.Write(const Stream: TMemoryStream);
+procedure TSimbaIPC.WriteMessage(const Message: Int32; Data: TMemoryStream);
+var
+  Header: TMessageHeader;
 begin
-  FOutputStream.Write(PByte(Stream.Memory)^, Stream.Size);
+  Header.Size := Data.Size + SizeOf(TMessageHeader);
+  Header.Message := Message;
+
+  FOutputStream.Write(Header, SizeOf(TMessageHeader));
+  FOutputStream.Write(PByte(Data.Memory)^, Data.Size);
 end;
 
 constructor TSimbaIPC_Client.Create(Server: String);
@@ -174,7 +190,6 @@ begin
 
   inherited Destroy();
 end;
-
 
 end.
 

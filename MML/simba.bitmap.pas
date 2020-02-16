@@ -901,7 +901,7 @@ begin
   TPA[0].X := X;
   TPA[0].Y := Y;
 
-  DrawTPA(TPA, Color);
+  DrawTPA(TPointArray(TPA), Color);
 end;
 
 procedure TMufasaBitmap.FastSetPixels(Points: TPointArray; Colors: TIntegerArray);
@@ -1186,7 +1186,7 @@ begin
   begin
     for y := 0 to (hi-1) do
       Move(Data.Ptr[y * Data.RowLen], FData[y * self.FWidth], wi * SizeOf(TRGB32));
-    
+
     TIOManager(MWindow).FreeReturnData();
   end;
 end;
