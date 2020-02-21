@@ -2,8 +2,6 @@
 {$macro on}
 {$inline on}
 
-{$ASMMODE INTEL}
-
 {$OPTIMIZATION LOOPUNROLL}
 
 {$IF FPC_VERSION >= 3}

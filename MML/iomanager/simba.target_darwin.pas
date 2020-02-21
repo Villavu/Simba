@@ -7,7 +7,7 @@ interface
 
 uses
   classes, sysutils,
-  macosall, lcltype, simba.target, simba.oswindow, simba.mufasatypes, CocoaAll;
+  macosall, lcltype, simba.target, simba.oswindow, simba.mufasatypes;
 
 type
   TWindowTarget = class(TTarget)
@@ -17,6 +17,7 @@ type
     FBuffer: PRGB32;
     FBufferContext: CGContextRef;
     FBufferWidth, FBufferHeight: Int32;
+    FCursorWindow: TOSWindow;
 
     function GetHandle: PtrUInt; override;
     procedure SetHandle(Value: PtrUInt); override;
@@ -81,6 +82,11 @@ end;
 procedure TWindowTarget.SetHandle(Value: PtrUInt);
 begin
   FWindow := Value;
+  if (FWindow = 0) then
+  begin
+    FWindow := GetDesktopWindow();
+    FCursorWindow := GetOnScreenWindows()[0]; // Cursor is always topmost
+  end;
 end;
 
 function TWindowTarget.GetAutoFocus: Boolean;
@@ -142,7 +148,6 @@ begin
   FWindow.Activate();
 end;
 
-// fixme
 function TWindowTarget.CopyData(X, Y, Width, Height: Int32): PRGB32;
 var
   Bounds: TBox;
@@ -163,7 +168,10 @@ begin
 
   if Bounds.Contains(Bounds.X1 + X, Bounds.Y1 + Y, Width, Height) then
   begin
-    Image := CGWindowListCreateImage(CGRectNull, kCGWindowListOptionIncludingWindow, FWindow, kCGWindowImageBoundsIgnoreFraming);
+    if FWindow = GetDesktopWindow() then
+      Image := CGWindowListCreateImage(CGRectNull, kCGWindowListOptionOnScreenBelowWindow, FCursorWindow, kCGWindowImageBoundsIgnoreFraming)
+    else
+      Image := CGWindowListCreateImage(CGRectNull, kCGWindowListOptionIncludingWindow, FWindow, kCGWindowImageBoundsIgnoreFraming);
 
     W := Bounds.Width - 1;
     H := Bounds.Height - 1;
@@ -206,7 +214,10 @@ begin
 
   if Bounds.Contains(Bounds.X1 + X, Bounds.Y1 + Y, Width, Height) then
   begin
-    Image := CGWindowListCreateImage(CGRectNull, kCGWindowListOptionIncludingWindow, FWindow, kCGWindowImageBoundsIgnoreFraming);
+    if FWindow = GetDesktopWindow() then
+      Image := CGWindowListCreateImage(CGRectNull, kCGWindowListOptionOnScreenBelowWindow, FCursorWindow, kCGWindowImageBoundsIgnoreFraming)
+    else
+      Image := CGWindowListCreateImage(CGRectNull, kCGWindowListOptionIncludingWindow, FWindow, kCGWindowImageBoundsIgnoreFraming);
 
     W := Bounds.Width - 1;
     H := Bounds.Height - 1;
@@ -234,10 +245,12 @@ begin
 
     Result.Ptr := PRGB32(FBuffer);
     Result.IncPtrWith := FBufferWidth - Width;
-    Result.RowLen := Width;
+    Result.RowLen := FBufferWidth;
 
-    Inc(Result.Ptr, Y * FBufferWidth);
-    Inc(Result.Ptr, X);
+    // Move image to start of buffer
+    Move(FBuffer[Y * FBufferWidth + X], FBuffer^, FBufferWidth * Height * SizeOf(TRGB32));
+
+    Result.Ptr := PRGB32(FBuffer);
   end;
 end;
 
@@ -249,24 +262,28 @@ procedure TWindowTarget.GetMousePosition(out X, Y: Int32);
 var
   event: CGEventRef;
   point: CGPoint;
+  Left, Top: Int32;
 begin
   event := CGEventCreate(nil);
   point := CGEventGetLocation(event);
   CFRelease(event);
 
-  X := round(point.x);
-  Y := round(point.y);
+  X := Round(point.x);
+  Y := Round(point.y);
+
   MouseClientAreaOffset(X, Y);
+  GetTargetPosition(Left, Top);
+
+  X -= Left;
+  Y -= Top;
 end;
 
 procedure TWindowTarget.ScrollMouse(X, Y: Int32; Lines: Int32);
 var
-   ScrollEvent: CGEventRef;
+  ScrollEvent: CGEventRef;
 begin
   if FAutoFocus then
     ActivateClient();
-
-  MouseClientAreaOffset(X, Y);
 
   ScrollEvent := CGEventCreateScrollWheelEvent(nil, kCGScrollEventUnitPixel, 1, lines * 10);
   CGEventPost(kCGHIDEventTap, scrollEvent);
@@ -274,26 +291,23 @@ begin
 end;
 
 procedure TWindowTarget.MoveMouse(X, Y: Int32);
-{var
-  event: CGEventRef;}
+var
+  Left, Top: Int32;
 begin
   if FAutoFocus then
     ActivateClient();
 
   MouseClientAreaOffset(X, Y);
+  GetTargetPosition(Left, Top);
 
-  {CGWarpCursorPos(
-  event := CGEventCreateMouseEvent(nil, {kCGEventMouseMoved} 5, CGPointMake(x, y), 0); //CGWarpCursorPos
-  CGEventPost(kCGSessionEventTap, event);
-  CFRelease(event);}
-
-  CGWarpMouseCursorPosition(CGPointMake(x, y));
+  CGWarpMouseCursorPosition(CGPointMake(Left + X, Top + Y));
 end;
 
 procedure TWindowTarget.HoldMouse(X, Y: Int32; Button: TClickType);
 var
   event: CGEventRef;
   eventType, mouseButton: LongInt;
+  Left, Top: Int32;
 begin
   if FAutoFocus then
     ActivateClient();
@@ -316,7 +330,9 @@ begin
       end;
   end;
 
-  event := CGEventCreateMouseEvent(nil, eventType, CGPointMake(x, y), mouseButton);
+  GetTargetPosition(Left, Top);
+
+  event := CGEventCreateMouseEvent(nil, eventType, CGPointMake(Left + X, Top + Y), mouseButton);
   CGEventPost(kCGSessionEventTap, event);
   CFRelease(event);
 end;
@@ -325,6 +341,7 @@ procedure TWindowTarget.ReleaseMouse(X, Y: Int32; Button: TClickType);
 var
   event: CGEventRef;
   eventType, mouseButton: LongInt;
+  Left, Top: Int32;
 begin
   if FAutoFocus then
     ActivateClient();
@@ -347,7 +364,9 @@ begin
       end;
   end;
 
-  event := CGEventCreateMouseEvent(nil, eventType, CGPointMake(x, y), mouseButton);
+  GetTargetPosition(Left, Top);
+
+  event := CGEventCreateMouseEvent(nil, eventType, CGPointMake(Left + X, Top + Y), mouseButton);
   CGEventPost(kCGSessionEventTap, event);
   CFRelease(event);
 end;

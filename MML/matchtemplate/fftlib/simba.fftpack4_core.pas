@@ -45,6 +45,9 @@ type
 
   
 {$IF FPC_VERSION < 3}
+
+  {$ASMMODE INTEL}
+
   {$IF Defined(CPU386)}  //"overload" for i386, so we get a float32 version
     procedure SinCos(Theta: Single; out FSin, FCos: Single); assembler;
     asm
