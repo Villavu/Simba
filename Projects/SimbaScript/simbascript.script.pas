@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, simba.client, Forms, lptypes, lpinterpreter, lpparser, lpcompiler, lpvartypes, lpmessages,
-  simbascript.script_compiler, simba.ipc, syncobjs, simba.script_common, simba.script_plugin;
+  simbascript.script_compiler, simba.ipc, syncobjs, simba.script_common, simba.script_plugin, ffi;
 
 type
   TSimbaScript = class;
@@ -189,6 +189,9 @@ procedure TSimbaScript.Execute;
 var
   T: Double;
 begin
+  if not FFILoaded() then
+    _WriteLn('LibFFI not found. Extension will not be available.');
+
   if DumpOnly then
   begin
     try
@@ -531,6 +534,12 @@ begin
 
   inherited Destroy();
 end;
+
+{$IFDEF DARWIN}
+initialization
+  if not FFILoaded then
+    LoadFFI('/usr/local/opt/libffi/lib/');
+{$ENDIF}
 
 end.
 

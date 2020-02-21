@@ -365,7 +365,9 @@ begin
 
   Section := 'System';
 
-  InitializeFFI(Self);
+  if FFILoaded then
+    InitializeFFI(Self);
+
   InitializePascalScriptBasics(Self, [psiTypeAlias, psiSettings, psiMagicMethod, psiFunctionWrappers, psiExceptions]);
 
   ExposeGlobals(Self, [egmInvoke]);

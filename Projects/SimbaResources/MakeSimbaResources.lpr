@@ -65,6 +65,10 @@ begin
         AddFileEntry(ExtractFileDir(ParamStr(0)) + '/openssl/libssl64.so', 'libssl.so');
         AddFileEntry(ExtractFileDir(ParamStr(0)) + '/openssl/libcrypto64.so', 'libcrypto.so');
       {$ENDIF}
+      {$IFDEF DARWIN}
+        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/openssl/libssl.dylib', 'libssl.dylib');
+        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/openssl/libcrypto.dylib', 'libcrypto.dylib');
+      {$ENDIF}
     end;
 
     ZipAllFiles();

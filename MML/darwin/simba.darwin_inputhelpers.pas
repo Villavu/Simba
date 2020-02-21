@@ -54,7 +54,7 @@ type
 implementation
 
 uses
-  LCLType, cocoaall, cocoa_extra, cocoautils;
+  LCLType, cocoaall, cocoautils;
 
 type
   NSWorkspaceFix = objccategory external (NSWorkspace)

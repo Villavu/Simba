@@ -1,6 +1,7 @@
 unit simba.imagebox_overlay;
 
 {$mode objfpc}{$H+}
+{$modeswitch nestedprocvars}
 
 interface
 
@@ -60,7 +61,7 @@ type
 implementation
 
 uses
-  simba.colormath, simba.misc;
+  simba.colormath, simba.misc, Dialogs;
 
 procedure TSimbaImageBox_Overlay.Changed;
 begin
@@ -122,13 +123,53 @@ end;
 
 procedure TSimbaImageOverlay.DrawPoints(TPA: TPointArray);
 var
+  R, G, B: Int32;
+
+  procedure PixelARGB(constref Ptr: Pointer);
+  var
+    Pixel: PARGB32 absolute Ptr;
+  begin
+    Pixel^.A := 0;
+    Pixel^.R := R;
+    Pixel^.G := G;
+    Pixel^.B := B;
+  end;
+
+  procedure PixelBGRA(constref Ptr: Pointer);
+  var
+    Pixel: PRGB32 absolute Ptr;
+  begin
+    Pixel^.R := R;
+    Pixel^.G := G;
+    Pixel^.B := B;
+    Pixel^.A := 0;
+  end;
+
+  procedure PixelBGR(constref Ptr: Pointer);
+  var
+    Pixel: PRGB24 absolute Ptr;
+  begin
+    Pixel^.R := R;
+    Pixel^.G := G;
+    Pixel^.B := B;
+  end;
+
+var
   Data: PByte;
   BytesPerLine, BytesPerPixel: Int32;
-  Color: TRGB24;
   P: TPoint;
+  Pixel: procedure(constref Pixel: Pointer) is nested;
 begin
   with FImage.Picture.Bitmap do
   begin
+    case DataFormat of
+      dfARGB: Pixel := @PixelARGB;
+      dfBGRA: Pixel := @PixelBGRA;
+      dfBGR:  Pixel := @PixelBGR;
+      else
+        raise Exception.CreateFmt('TSimbaImageOverlay.DrawPoints: Data format not supported', [Ord(DataFormat)]);
+    end;
+
     BeginUpdate(False);
 
     try
@@ -136,9 +177,10 @@ begin
       BytesPerLine := RawImage.Description.BytesPerLine;
       BytesPerPixel := RawImage.Description.BitsPerPixel div 8;
 
-      ColorToRGB(Self.Pen.Color, Color.R, Color.G, Color.B);
+      ColorToRGB(Self.Pen.Color, R, G, B);
+
       for P in TPA do
-        Move(Color, Data[P.Y * BytesPerLine + P.X * BytesPerPixel], SizeOf(TRGB24));
+        Pixel(Pointer(Data + (P.Y * BytesPerLine + P.X * BytesPerPixel)));
     finally
       EndUpdate();
     end;

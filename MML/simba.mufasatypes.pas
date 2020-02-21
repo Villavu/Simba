@@ -62,6 +62,9 @@ type
     B, G, R, A: Byte;
   end;
 
+  TARGB32 = packed record A, R, G, B: Byte; end;
+  PARGB32 = ^TARGB32;
+
   PRGB32Array = ^TRGB32Array;
   TRGB32Array = array of TRGB32;
 

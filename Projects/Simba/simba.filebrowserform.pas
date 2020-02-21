@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ComCtrls,
-  Menus, ExtCtrls, StdCtrls, EditBtn;
+  Menus, ExtCtrls, StdCtrls;
 
 type
   TSimbaFileBrowser_Node = class(TTreeNode)

@@ -1,6 +1,7 @@
 unit simba.imagebox;
 
 {$mode objfpc}{$H+}
+{$modeswitch nestedprocvars}
 
 interface
 
@@ -75,7 +76,7 @@ type
 implementation
 
 uses
-  types, math;
+  types, math, GraphType;
 
 procedure TSimbaImageBox.SetZoom(Value: Double);
 var
@@ -264,8 +265,25 @@ var
   Upper: PtrUInt;
   Source, Dest: PByte;
   SourceBytesPerLine, DestBytesPerLine: Int32;
+  Row: procedure(Source, Dest: PByte) is nested;
 
-  procedure Row24(Source, Dest: PByte);
+  procedure RowARGB(Source, Dest: PByte);
+  var
+    Upper: PtrUInt;
+  begin
+    Upper := PtrUInt(Source + SourceBytesPerLine);
+    while PtrUInt(Source) < Upper do
+    begin
+      PARGB32(Dest)^.R := PRGB32(Source)^.R;
+      PARGB32(Dest)^.G := PRGB32(Source)^.G;
+      PARGB32(Dest)^.B := PRGB32(Source)^.B;
+
+      Inc(Source, SizeOf(TRGB32));
+      Inc(Dest, SizeOf(TARGB32));
+    end;
+  end;
+
+  procedure RowBGR(Source, Dest: PByte);
   var
     Upper: PtrUInt;
   begin
@@ -280,7 +298,7 @@ var
     end;
   end;
 
-  procedure Row32(Source, Dest: PByte);
+  procedure RowBGRA(Source, Dest: PByte);
   var
     Upper: PtrUInt;
   begin
@@ -303,6 +321,14 @@ begin
   Bitmap.Width := AWidth;
   Bitmap.Height := AHeight;
 
+  case Bitmap.DataFormat of
+    dfABGR: Row := @RowARGB;
+    dfBGRA: Row := @RowBGRA;
+    dfBGR:  Row := @RowBGR;
+    else
+      raise Exception.CreateFmt('TSimbaImageBox.Draw: Bitmap format "%d" not supported', [Ord(Bitmap.DataFormat)]);
+  end;
+
   Dest := Bitmap.RawImage.Data;
   DestBytesPerLine := Bitmap.RawImage.Description.BytesPerLine;
 
@@ -313,12 +339,7 @@ begin
 
   while PtrUInt(Source) < Upper do
   begin
-    case Bitmap.PixelFormat of
-      pf24bit: Row24(Source, Dest);
-      pf32bit: Row32(Source, Dest);
-      else
-        raise Exception.Create('TSimbaImageBox.Draw: Invalid pixel format');
-    end;
+    Row(Source, Dest);
 
     Inc(Source, SourceBytesPerLine);
     Inc(Dest, DestBytesPerLine);

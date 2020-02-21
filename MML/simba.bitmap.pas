@@ -24,6 +24,7 @@
 unit simba.bitmap;
 
 {$mode objfpc}{$H+}
+{$modeswitch typehelpers}
 {$inline on}
 
 interface
@@ -170,6 +171,19 @@ type
     destructor Destroy;override;
   end;
 
+  TBitmapDataFormat = (
+    dfBGR,   // color bitmap 8-8-8 B-G-R
+    dfRGB,   // color bitmap 8-8-8 R-G-B
+    dfARGB,  // color bitmap with alpha channel first 8-8-8-8 A-R-G-B
+    dfRGBA,  // color bitmap with alpha channel last 8-8-8-8 R-G-B-A
+    dfABGR,  // color bitmap with alpha channel first 8-8-8-8 A-B-G-R
+    dfBGRA   // color bitmap with alpha channel last 8-8-8-8 B-G-R-A);
+  );
+
+  TBitmap_Helper = class helper for TBitmap
+    function DataFormat: TBitmapDataFormat;
+  end;
+
   Procedure ArrDataToRawImage(Ptr: PRGB32; Size: TPoint; out RawImage: TRawImage);
   function CalculatePixelShift(Bmp1,Bmp2 : TMufasaBitmap; CompareBox : TBox) : integer;
   function CalculatePixelShiftTPA(Bmp1, Bmp2: TMufasaBitmap; CPoints: TPointArray): integer;
@@ -179,12 +193,72 @@ type
 implementation
 
 uses
-  math, base64,
+  math,
   simba.client, simba.tpa, simba.stringutil,
   simba.colormath, simba.iomanager,
   FileUtil, LazUTF8,
   simba.matchtemplate, simba.matrix;
 
+function TBitmap_Helper.DataFormat: TBitmapDataFormat;
+var
+  Desc: TRawImageDescription;
+begin
+  Desc := RawImage.Description;
+
+  if Desc.BitsPerPixel = 32 then
+  begin
+    if Desc.ByteOrder = riboMSBFirst then
+    begin
+      if (Desc.AlphaShift = 0) and (Desc.RedShift = 16) and (Desc.GreenShift = 8) and (Desc.BlueShift = 0) then
+        Result := dfARGB
+      else
+      if (Desc.AlphaShift = 24) and (Desc.RedShift = 16) and (Desc.GreenShift = 8) and (Desc.BlueShift = 0) then
+        Result := dfARGB
+      else
+      if (Desc.AlphaShift = 0) and (Desc.RedShift = 24) and (Desc.GreenShift = 16) and (Desc.BlueShift  = 8) then
+        Result := dfRGBA
+      else
+      if (Desc.AlphaShift = 0) and (Desc.RedShift = 8) and (Desc.GreenShift = 16)  and (Desc.BlueShift  = 24) then
+        Result := dfBGRA
+      else
+        raise Exception.Create('Unknown bitmap format(32): ' + Desc.AsString);
+    end else
+    begin
+      if (Desc.AlphaShift = 24) and (Desc.RedShift = 16) and (Desc.GreenShift = 8) and (Desc.BlueShift  = 0) then
+        Result := dfBGRA
+      else
+      if (Desc.AlphaShift = 0) and (Desc.RedShift = 8) and (Desc.GreenShift = 16) and (Desc.BlueShift  = 24) then
+        Result := dfARGB
+      else
+      if (Desc.AlphaShift = 24) and (Desc.RedShift = 0) and (Desc.GreenShift = 8) and (Desc.BlueShift  = 16) then
+        Result := dfRGBA
+      else
+        raise Exception.Create('Unknown bitmap format(32): ' + Desc.AsString);
+    end;
+  end else
+  if Desc.BitsPerPixel = 24 then
+  begin
+    if Desc.ByteOrder = riboMSBFirst then
+    begin
+      if (Desc.RedShift = 24) and (Desc.GreenShift = 16) and (Desc.BlueShift  = 8) then
+        Result := dfRGB
+      else
+      if (Desc.RedShift = 8) and (Desc.GreenShift = 16) and (Desc.BlueShift  = 24) then
+        Result := dfBGR
+      else
+        raise Exception.Create('Unknown bitmap format(24): ' + Desc.AsString);
+    end else
+    begin
+      if (Desc.RedShift = 16) and (Desc.GreenShift = 8) and (Desc.BlueShift  = 0) then
+        Result := dfBGR
+      else
+      if (Desc.RedShift = 0) and (Desc.GreenShift = 8) and (Desc.BlueShift  = 16) then
+        Result := dfRGB
+      else
+        raise Exception.Create('Unknown bitmap format(24): ' + Desc.AsString);
+    end;
+  end;
+end;
 
 // Needs more fixing. We need to either copy the memory ourself, or somehow
 // find a TRawImage feature to skip X bytes after X bytes read. (Most likely a
