@@ -126,12 +126,6 @@ end;
 
 procedure TSimbaAutoComplete.HandleCompletion(var Value: string; SourceValue: string; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
 begin
-  if FParser <> nil then
-  begin
-    FParser.Free();
-    FParser := nil;
-  end;
-
   FSynEdit.TextBetweenPointsEx[SourceStart, SourceEnd, scamEnd] := Value;
   FSynEdit.CommandProcessor(ecChar, KeyChar, nil);
 
@@ -147,9 +141,41 @@ begin
   Value := '';
 end;
 
+var
+  Filter: String; // TODO
+
+function Test(List: TStringList; Index1, Index2: Integer): Integer;
+var
+  Left, Right: String;
+  l, r: Int32;
+begin
+  Left := TDeclaration(List.Objects[Index1]).Name;
+  Right := TDeclaration(List.Objects[Index2]).Name;
+
+  l := Length(Left) - Length(Filter);
+  r := Length(Right) - Length(Filter);
+
+  Result := l-r;
+end;
+
+function Test2(List: TStringList; Index1, Index2: Integer): Integer;
+var
+  Left, Right: String;
+  l, r: Int32;
+begin
+  Left := UpperCase(TDeclaration(List.Objects[Index1]).Name);
+  Right := UpperCase(TDeclaration(List.Objects[Index2]).Name);
+
+  l := Pos(Filter, Left) * 100;
+  l := l + Round(Length(Left) / l);
+  r := Pos(Filter, RIght) * 100;
+  r := r + Round(Length(Right) / l);
+
+  Result := l-r;
+end;
+
 procedure TSimbaAutoComplete.HandleFiltering(var APosition: Int32);
 var
-  Filter: String;
   i: Int32;
 begin
   Filter := UpperCase(CurrentString);
@@ -158,10 +184,13 @@ begin
   ItemList.Clear();
 
   for i := 0 to FDeclarations.Count - 1 do
-  begin
     if (Filter = '') or UpperCase(FDeclarations[i].Name).Contains(Filter) then
       ItemList.AddObject(FDeclarations[i].Name, FDeclarations[i]);
-  end;
+
+  if Filter <> '' then
+    TStringList(ItemList).CustomSort(@Test2)
+  else
+    TStringList(ItemList).Sort();
 
   ItemList.EndUpdate();
 
@@ -242,7 +271,7 @@ begin
   OnSearchPosition := @HandleFiltering;
   OnExecute := @HandleExecute;
 
-  TStringList(ItemList).Sorted := True;
+  //TStringList(ItemList).Sorted := True;
   TStringList(ItemList).Duplicates := dupAccept;
   TStringList(ItemList).OwnsObjects := False;
 end;

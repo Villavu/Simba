@@ -46,7 +46,6 @@ type
     property ScriptChanged: Boolean read FScriptChanged write SetScriptChanged;
     property ScriptInstance: TSimbaScriptInstance read FScriptInstance write FScriptInstance;
     property ScriptName: String read FScriptName;
-    property ScriptFile: String read FScriptFile;
     property Script: String read GetScript write SetScript;
     property ScriptErrorLine: Int32 read FScriptErrorLine write SetScriptErrorLine;
     property Editor: TSimbaEditor read FEditor;
@@ -362,15 +361,16 @@ end;
 function TSimbaScriptTab.ParseScript: TCodeInsight;
 begin
   Result := TCodeInsight.Create();
-  Result.Lexer.FileName := ScriptFile;
+  Result.Lexer.FileName := FileName;
   if Result.Lexer.FileName = '' then
     Result.Lexer.FileName := ScriptName;
   Result.OnMessage := @SimbaForm.OnCCMessage;
   Result.OnFindInclude := @SimbaForm.OnCCFindInclude;
   Result.OnFindLibrary := @SimbaForm.OnCCFindLibrary;
   Result.OnLoadLibrary := @SimbaForm.OnCCLoadLibrary;
-  Result.Run(Script, Result.Lexer.FileName, FEditor.SelStart - 1);
-  Result.Position := Feditor.SelStart - 1;
+  Result.Lexer.CaretPos := FEditor.SelStart - 1;
+  Result.Lexer.MaxPos := FEditor.SelStart - 1;
+  Result.Run(Script, Result.Lexer.FileName);
 end;
 
 procedure TSimbaScriptTab.MakeVisible;

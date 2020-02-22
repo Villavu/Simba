@@ -1,7 +1,7 @@
 object SimbaFunctionListForm: TSimbaFunctionListForm
-  Left = 157
+  Left = 122
   Height = 241
-  Top = 1196
+  Top = 627
   Width = 320
   Caption = 'Function List'
   ClientHeight = 241

@@ -308,6 +308,7 @@ type
     procedure SetOnIfEndDirect(const Value: TDirectiveEvent); virtual;
 
   public
+    CaretPos: Integer;
     MaxPos: Integer;
 
     constructor Create;

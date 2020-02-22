@@ -15,7 +15,6 @@ type
     FIncludeCache: TCodeInsight_IncludeCache;
     FBaseIncludes: TCodeInsight_IncludeArray;
   protected
-    FPosition: Integer;
     FIncludes: TCodeInsight_IncludeArray;
     FLocals: TDeclarationMap;
 
@@ -31,8 +30,6 @@ type
     function GetLocals: TDeclarationArray;
     function GetLocalByName(Name: String): TDeclaration;
     function GetLocalsByName(Name: String): TDeclarationArray;
-
-    procedure SetPosition(Value: Integer);
   public
     class procedure CreateClassVariables;
     class procedure DestroyClassVariables;
@@ -50,8 +47,9 @@ type
     function ResolveType(Declaration: TDeclaration): TDeclaration;
     function ResolveArrayType(Declaration: TDeclaration; Dimensions: Int32): TDeclaration;
 
+    procedure Run; overload; override;
+
     property Includes: TCodeInsight_IncludeArray read FIncludes;
-    property Position: Integer read FPosition write SetPosition;
 
     property Globals: TDeclarationArray read GetGlobals;
     property GlobalsByName[Name: String]: TDeclarationArray read GetGlobalsByName;
@@ -60,8 +58,6 @@ type
     property Locals: TDeclarationArray read GetLocals;
     property LocalsByName[Name: String]: TDeclarationArray read GetLocalsByName;
     property LocalByName[Name: String]: TDeclaration read GetLocalByName;
-
-    procedure Run(Script: String; FileName: String; MaxPos: Int32); overload;
 
     constructor Create;
     destructor Destroy; override;
@@ -139,7 +135,6 @@ end;
 function TCodeInsight.GetLocals: TDeclarationArray;
 begin
   Result := FLocals.ExportToArrays.Items;
-  Writeln(Length(Result));
 end;
 
 procedure TCodeInsight.DoInclude(Sender: TObject; FileName: String; var Handled: Boolean);
@@ -168,86 +163,6 @@ begin
   end;
 
   Handled := True;
-end;
-
-procedure TCodeInsight.SetPosition(Value: Integer);
-
-  procedure GetMethodLocals(Method: TciProcedureDeclaration);
-  var
-    Declaration: TDeclaration;
-    Declarations: TDeclarationArray;
-    i: Int32;
-  begin
-    Declarations := nil;
-
-    while (Method <> nil) do
-    begin
-      if (tokStatic in Method.Directives) then
-        Break;
-
-      Declarations := Declarations + Method.Items.GetItemsOfClass(TciVarDeclaration);
-      Declarations := Declarations + Method.Items.GetItemsOfClass(TciTypeDeclaration);
-      Declarations := Declarations + Method.Items.GetItemsOfClass(TciProcedureDeclaration);
-      Declarations := Declarations + Method.Items.GetItemsOfClass(TciReturnType);
-      Declarations := Declarations + Method.GetParamDeclarations();
-
-      Declaration := Method.Items.GetFirstItemOfClass(TciProcedureClassName);
-
-      if Declaration <> nil then
-      begin
-        Declarations := Declarations + Declaration;
-        Declarations := Declarations + GetMembersOfType(Declaration);
-      end;
-
-      Method.HasOwnerClass(TciProcedureDeclaration, TDeclaration(Method));
-    end;
-
-    for i := 0 to High(Declarations) do
-      FLocals.Add(Declarations[i].Name, Declarations[i]);
-  end;
-
-  procedure GetWithVariables(Declarations: TDeclarationArray);
-  var
-    Declaration: TDeclaration;
-    i: Int32;
-  begin
-    for i := 0 to High(Declarations) do
-    begin
-      Declaration := ParseExpression(Declarations[i].RawText);
-      if Declaration <> nil then
-        for Declaration in GetMembersOfType(Declaration) do
-          FLocals.Add(Declaration.Name, Declaration);
-    end;
-  end;
-
-var
-  Declaration: TDeclaration;
-  Declarations: TDeclarationArray;
-  Method: TDeclaration;
-  i: Int32;
-begin
-  FPosition := Value;
-
-  FLocals.Clear();
-
-  if (FPosition > -1) then
-  begin
-    Declaration := FItems.GetItemInPosition(FPosition);
-
-    if (Declaration <> nil) then
-    begin
-      Method := Declaration;
-      if (Method is TciProcedureDeclaration) or Declaration.HasOwnerClass(TciProcedureDeclaration, Method, True) then
-        GetMethodLocals(Method as TciProcedureDeclaration);
-
-      Declarations := Declaration.GetOwnersOfClass(TciWithStatement);
-      if Declaration is TciWithStatement then
-        Declarations := Declarations + Declaration;
-
-      for i := 0 to High(Declarations) do
-        GetWithVariables(Declarations[i].Items.GetItemsOfClass(TciVariable));
-    end;
-  end;
 end;
 
 procedure TCodeInsight.Reset;
@@ -573,11 +488,85 @@ begin
   Result := Declaration;
 end;
 
-procedure TCodeInsight.Run(Script: String; FileName: String; MaxPos: Int32);
-begin
-  FLexer.MaxPos := MaxPos;
+procedure TCodeInsight.Run;
 
-  inherited Run(Script, FileName);
+    procedure GetMethodLocals(Method: TciProcedureDeclaration);
+  var
+    Declaration: TDeclaration;
+    Declarations: TDeclarationArray;
+    i: Int32;
+  begin
+    Declarations := nil;
+
+    while (Method <> nil) do
+    begin
+      if (tokStatic in Method.Directives) then
+        Break;
+
+      Declarations := Declarations + Method.Items.GetItemsOfClass(TciVarDeclaration);
+      Declarations := Declarations + Method.Items.GetItemsOfClass(TciTypeDeclaration);
+      Declarations := Declarations + Method.Items.GetItemsOfClass(TciProcedureDeclaration);
+      Declarations := Declarations + Method.Items.GetItemsOfClass(TciReturnType);
+      Declarations := Declarations + Method.GetParamDeclarations();
+
+      Declaration := Method.Items.GetFirstItemOfClass(TciProcedureClassName);
+
+      if Declaration <> nil then
+      begin
+        Declarations := Declarations + Declaration;
+        Declarations := Declarations + GetMembersOfType(Declaration);
+      end;
+
+      Method.HasOwnerClass(TciProcedureDeclaration, TDeclaration(Method));
+    end;
+
+    for i := 0 to High(Declarations) do
+      FLocals.Add(Declarations[i].Name, Declarations[i]);
+  end;
+
+  procedure GetWithVariables(Declarations: TDeclarationArray);
+  var
+    Declaration: TDeclaration;
+    i: Int32;
+  begin
+    for i := 0 to High(Declarations) do
+    begin
+      Declaration := ParseExpression(Declarations[i].RawText);
+      if Declaration <> nil then
+        for Declaration in GetMembersOfType(Declaration) do
+          FLocals.Add(Declaration.Name, Declaration);
+    end;
+  end;
+
+var
+  Declaration: TDeclaration;
+  Declarations: TDeclarationArray;
+  Method: TDeclaration;
+  i: Int32;
+begin
+  inherited Run();
+
+  FLocals.Clear();
+
+  // Find Locals
+  if (FLexer.CaretPos > -1) then
+  begin
+    Declaration := FItems.GetItemInPosition(FLexer.CaretPos);
+
+    if (Declaration <> nil) then
+    begin
+      Method := Declaration;
+      if (Method is TciProcedureDeclaration) or Declaration.HasOwnerClass(TciProcedureDeclaration, Method, True) then
+        GetMethodLocals(Method as TciProcedureDeclaration);
+
+      Declarations := Declaration.GetOwnersOfClass(TciWithStatement);
+      if Declaration is TciWithStatement then
+        Declarations := Declarations + Declaration;
+
+      for i := 0 to High(Declarations) do
+        GetWithVariables(Declarations[i].Items.GetItemsOfClass(TciVariable));
+    end;
+  end;
 end;
 
 constructor TCodeInsight.Create;
