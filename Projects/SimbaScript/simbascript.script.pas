@@ -477,9 +477,11 @@ begin
         FScript := Text;
       finally
         if ExtractFileExt(FScriptFile) = '.tmp' then
+        begin
           DeleteFile(FScriptFile);
 
-        FScriptFile := FScriptName;
+          FScriptFile := FScriptName;
+        end;
 
         Free();
       end;

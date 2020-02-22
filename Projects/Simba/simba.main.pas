@@ -225,6 +225,8 @@ type
     FWindowSelection: TOSWindow;
     FScriptState: TScriptButtonState;
 
+    procedure RemoveTabASync(Data: PtrInt);
+
     procedure PrintDTM(constref DTM: String);
 
     function GetScriptState: TScriptButtonState;
@@ -599,11 +601,18 @@ end;
 {$ENDIF}
 
 procedure TSimbaForm.OnCCMessage(Sender: TObject; const Typ: TMessageEventType; const Message: string; X, Y: Integer);
+var
+  Parser: TCodeParser absolute Sender;
 begin
-  if TCodeParser(Sender).Lexer.FileName <> '' then
-    WriteLn(Format('Parser: %s at line %d, column %d in file "%s"', [Message, Y, X, TCodeParser(Sender).Lexer.FileName]))
-  else
-    WriteLn(Format('Parser: %s at line %d, column %d', [Message, Y, X]))
+  if (Parser.Lexer.CaretPos = -1) or (Parser.Lexer.RunPos < Parser.Lexer.CaretPos) then
+  begin
+    SimbaDebugForm.Add('Simba''s code parser encountered an error. This could break your code tools & suggestions:');
+
+    if Parser.Lexer.FileName <> '' then
+      SimbaDebugForm.Add(Format('"%s" at line %d, column %d in file "%s"', [Message, Y, X, Parser.Lexer.FileName]))
+    else
+      SimbaDebugForm.Add(Format('"%s" at line %d, column %d', [Message, Y, X]));
+  end;
 end;
 
 function TSimbaForm.OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
@@ -792,16 +801,16 @@ begin
   try
     if (ScriptInstance = nil) then
     begin
-      if ScriptFile <> '' then
-        Save(ScriptFile);
+      if FileName <> '' then
+        Save(FileName);
 
       ScriptInstance := TSimbaScriptInstance.Create();
       ScriptInstance.ManageOutput := True;
       ScriptInstance.TargetWindow := Self.WindowSelection;
       ScriptInstance.ScriptName := ScriptName;
 
-      if (ScriptFile <> '') then
-        ScriptInstance.ScriptFile := ScriptFile
+      if (FileName <> '') then
+        ScriptInstance.ScriptFile := FileName
       else
         ScriptInstance.Script := Script;
 
@@ -820,16 +829,16 @@ begin
   try
     if (ScriptInstance = nil) then
     begin
-      if (ScriptFile <> '') then
-        Save(ScriptFile);
+      if (FileName <> '') then
+        Save(FileName);
 
       ScriptInstance := TSimbaScriptInstance.Create();
       ScriptInstance.ManageOutput := True;
       ScriptInstance.TargetWindow := Self.WindowSelection;
       ScriptInstance.ScriptName := ScriptName;
 
-      if (ScriptFile <> '') then
-        ScriptInstance.ScriptFile := ScriptFile
+      if (FileName <> '') then
+        ScriptInstance.ScriptFile := FileName
       else
         ScriptInstance.Script := Script;
 
@@ -942,10 +951,8 @@ begin
 end;
 
 procedure TSimbaForm.MenuCloseTabClick(Sender: TObject);
-var
-  Aborted: Boolean;
 begin
-  SimbaScriptTabsForm.RemoveTab(SimbaScriptTabsForm.CurrentTab, Aborted);
+  Application.QueueAsyncCall(@RemoveTabASync, 0);
 end;
 
 procedure TSimbaForm.MenuCompileClick(Sender: TObject);
@@ -1116,6 +1123,13 @@ begin
 
   if OnResize <> nil then
     OnResize(nil);
+end;
+
+procedure TSimbaForm.RemoveTabASync(Data: PtrInt);
+var
+  Aborted: Boolean;
+begin
+  SimbaScriptTabsForm.RemoveTab(SimbaScriptTabsForm.CurrentTab, Aborted);
 end;
 
 procedure TSimbaForm.PrintDTM(constref DTM: String);

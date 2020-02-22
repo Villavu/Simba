@@ -30,6 +30,7 @@ type
     FFileName: String;
     FStamp: Int64;
     FUpdating: Boolean;
+    FCaretPos: Int32;
 
     procedure CheckUpdate;
     procedure Update(Sender: TObject);
@@ -80,7 +81,7 @@ type
     procedure addDeclarations(Declarations: TDeclarationList; ParentNode: TTreeNode; Clear, Sort, Expand: Boolean);
 
     procedure Reset;
-    procedure Fill(Script: String; FileName: String);
+    procedure Fill(Script: String; FileName: String; CaretPos: Int32);
 
     property State: TSimbaFunctionList_State read GetState write SetState;
 
@@ -99,6 +100,7 @@ var
 implementation
 
 uses
+  CastaliaPasLex,
   simba.main, simba.scripttabsform, simba.editor, simba.ci_includecache,
   lazfileutils, LCLIntf;
 
@@ -143,6 +145,7 @@ begin
       FStamp := Editor.ChangeStamp;
       FScript := Editor.Text;
       FFileName := Editor.FileName;
+      FCaretPos := Editor.SelStart - 1;
     end;
   end;
 end;
@@ -151,7 +154,7 @@ procedure TSimbaFunctionList_Updater.Update(Sender: TObject);
 begin
   TThread.Synchronize(TThread.CurrentThread, @CheckUpdate);
   if FUpdating then
-    FFunctionList.Fill(FScript, FFileName);
+    FFunctionList.Fill(FScript, FFileName, FCaretPos);
 end;
 
 constructor TSimbaFunctionList_Updater.Create(FunctionList: TSimbaFunctionListForm);
@@ -198,12 +201,11 @@ procedure TSimbaFunctionListForm.TreeViewDblClick(Sender: TObject);
 begin
   if (TreeView.Selected <> nil) and (TreeView.Selected.Data <> nil) then
   begin
-    {
-    if TObject(TreeView.Selected.Data) is TCodeInsight then
-      SimbaScriptTabsForm.Open(TCodeInsight(TreeView.Selected.Data).FileName)
+    if TObject(TreeView.Selected.Data) is TmwPasLex then
+      SimbaScriptTabsForm.Open(TmwPasLex(TreeView.Selected.Data).FileName)
     else
     if TObject(TreeView.Selected.Data) is TDeclaration then
-      SimbaScriptTabsForm.OpenDeclaration(TDeclaration(TreeView.Selected.Data)); }
+      SimbaScriptTabsForm.OpenDeclaration(TDeclaration(TreeView.Selected.Data));
   end;
 end;
 
@@ -414,7 +416,7 @@ begin
   FScriptNode.Expanded := True;
 end;
 
-procedure TSimbaFunctionListForm.Fill(Script: String; FileName: String);
+procedure TSimbaFunctionListForm.Fill(Script: String; FileName: String; CaretPos: Int32);
 
   function IncludesChanged: Boolean;
   var
@@ -445,6 +447,8 @@ begin
   FReplacementParser.OnFindInclude := @SimbaForm.OnCCFindInclude;
   FReplacementParser.OnFindLibrary := @SimbaForm.OnCCFindLibrary;
   FReplacementParser.OnLoadLibrary := @SimbaForm.OnCCLoadLibrary;
+  FReplacementParser.OnMessage := @SimbaForm.OnCCMessage;
+  FReplacementParser.Lexer.CaretPos := CaretPos;
   FReplacementParser.Run(Script, FileName);
 
   addDeclarations(FReplacementParser.Items, FScriptNode, True, False, True);
@@ -469,7 +473,10 @@ begin
           if Declaration.Lexer.IsLibrary then
             currentNode := addPluginSection(currentFile)
           else
+          begin
             currentNode := addIncludeSection(currentFile);
+            currentNode.Data := Declaration.Lexer;
+          end;
         end;
 
         if currentNode = nil then

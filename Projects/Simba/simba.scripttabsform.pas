@@ -304,7 +304,7 @@ begin
   SimbaForm.MenuItemSaveAll.Enabled := TabCount > 1;
   SimbaForm.SaveAllButton.Enabled := TabCount > 1;
 
-  SimbaFunctionListForm.Fill(CurrentTab.Editor.Text, CurrentTab.Editor.FileName);
+  SimbaFunctionListForm.Fill(CurrentTab.Editor.Text, CurrentTab.Editor.FileName, CurrentTab.Editor.SelStart - 1);
   SimbaFunctionListForm.State := CurrentTab.FunctionListState;
 
   if CurrentEditor.CanSetFocus() then
@@ -484,7 +484,7 @@ begin
   Result := nil;
 
   for i := 0 to Notebook.PageCount - 1 do
-    if TSimbaScriptTab(Notebook.Pages[i]).ScriptFile = FileName then
+    if TSimbaScriptTab(Notebook.Pages[i]).FileName = FileName then
     begin
       Result := Notebook.Pages[i] as TSimbaScriptTab;
 
@@ -561,7 +561,7 @@ begin
     ScriptTab.MakeVisible();
 
     case MessageDlg('Script has been modified.', 'Do you want to save the script?', mtConfirmation, [mbYes, mbNo, mbAbort], 0) of
-      mrYes: ScriptTab.Save(ScriptTab.ScriptFile);
+      mrYes: ScriptTab.Save(ScriptTab.FileName);
       mrNo: { nothing };
       mrAbort:
         begin
@@ -619,7 +619,7 @@ var
 begin
   with TOpenDialog.Create(nil) do
   try
-    InitialDir := ExtractFileDir(CurrentTab.ScriptFile);
+    InitialDir := ExtractFileDir(CurrentTab.FileName);
     if InitialDir = '' then
       InitialDir := SimbaSettings.Environment.ScriptPath.Value;
 
@@ -669,7 +669,7 @@ var
   i: Int32;
 begin
   for i := TabCount - 1 downto 0 do
-    Tabs[i].Save(Tabs[i].ScriptFile);
+    Tabs[i].Save(Tabs[i].FileName);
 end;
 
 constructor TSimbaScriptTabsForm.Create(TheOwner: TComponent);

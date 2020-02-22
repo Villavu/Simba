@@ -57,11 +57,11 @@ type
     procedure ButtonDeleteColorsClick(Sender: TObject);
     procedure ButtonDeleteSelectedColorClick(Sender: TObject);
     procedure ButtonLoadImageClick(Sender: TObject);
-    procedure ButtonLoadColorsClick(Sender: TObject);
+    procedure ButtonSaveColorsClick(Sender: TObject);
     procedure CenterDivider(Sender: TObject);
     procedure ButtonDebugColorClick(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure ButtonSaveColorsClick(Sender: TObject);
+    procedure ButtonLoadColorsClick(Sender: TObject);
     procedure MouseZoomPaint(Sender: TObject);
     procedure ButtonCTSClick(Sender: TObject);
     procedure CopyBestColorClick(Sender: TObject);
@@ -300,12 +300,12 @@ begin
   end;
 end;
 
-procedure TSimbaACAForm.ButtonSaveColorsClick(Sender: TObject);
+procedure TSimbaACAForm.ButtonLoadColorsClick(Sender: TObject);
 var
   i: Int32;
 begin
   try
-    with TSaveDialog.Create(Self) do
+    with TOpenDialog.Create(Self) do
     try
       if Execute() then
       begin
@@ -320,6 +320,7 @@ begin
         end;
 
         ColorListBox.Items.EndUpdate();
+        ColorListBox.OnSelectionChange(Sender, True);
       end;
     finally
       Free();
@@ -408,10 +409,10 @@ begin
   end;
 end;
 
-procedure TSimbaACAForm.ButtonLoadColorsClick(Sender: TObject);
+procedure TSimbaACAForm.ButtonSaveColorsClick(Sender: TObject);
 begin
   try
-    with TOpenDialog.Create(Self) do
+    with TSaveDialog.Create(Self) do
     try
       if Execute() then
         ColorListBox.Items.SaveToFile(FileName);

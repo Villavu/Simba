@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, SynEdit, syncobjs;
+  ExtCtrls, SynEdit, lcltype, lclintf, syncobjs;
 
 type
   TSimbaDebugForm = class(TForm)
@@ -35,18 +35,7 @@ var
 implementation
 
 uses
-  synedittypes,
   simba.settings;
-
-type
-  TSynEdit_Helper = class Helper for TSynEdit
-    procedure Add(Text: String);
-  end;
-
-procedure TSynEdit_Helper.Add(Text: String);
-begin
-  SetSelTextPrimitive(smNormal, PChar(Text));
-end;
 
 procedure TSimbaDebugForm.Add(constref S: String);
 begin
@@ -55,8 +44,7 @@ begin
   FLock.Enter();
 
   try
-    FStrings.Clear();
-    FStrings.Add(S);
+    FStrings.Text := S;
 
     TThread.Synchronize(TThread.CurrentThread, @InternalAdd);
   finally
@@ -69,7 +57,7 @@ begin
   FLock.Enter();
 
   try
-    FStrings.AddStrings(Strings, True);
+    FStrings.Text := Strings.Text;
 
     TThread.Synchronize(TThread.CurrentThread, @InternalAdd);
   finally
@@ -79,8 +67,6 @@ end;
 
 procedure TSimbaDebugForm.InternalAdd;
 var
-  Caret: TPoint;
-  Line: Int32;
   Scroll: Boolean;
   I: Int32;
 begin
@@ -88,26 +74,13 @@ begin
 
   with Editor do
   try
-    Scroll := TopLine = (Lines.Count - LinesInWindow) + 1;
-    Line := TopLine;
-    Caret := CaretXY;
+    // auto scroll if already scrolled to bottom.
+    Scroll := (Editor.Lines.Count < Editor.LinesInWindow) or ((Editor.Lines.Count + 1) = (Editor.TopLine + Editor.LinesInWindow));
+    for I := 0 to FStrings.Count - 1 do
+      Lines.Add(FStrings[I]);
 
-    try
-      CaretX := 0;
-      CaretY := Lines.Count;
-
-      for I := 0 to FStrings.Count - 1 do
-        Add(FStrings[I] + LineEnding);
-    finally
-   //   CaretXY := Caret;
-    end;
-
-   Editor.TopLine := Lines.Count;
-
-   // if Scroll then
-    //  TopLine := (Lines.Count - LinesInWindow) + 1
-   // else
-   //   TopLine := Line;
+    if Scroll then
+      Editor.TopLine := Editor.Lines.Count;
   finally
     Editor.EndUpdate();
   end;
@@ -125,7 +98,7 @@ end;
 
 procedure TSimbaDebugForm.Clear;
 begin
-  Editor.ClearAll();
+  Editor.Lines.Clear;
 end;
 
 constructor TSimbaDebugForm.Create(AOwner: TComponent);
@@ -136,7 +109,11 @@ begin
   FLock := TCriticalSection.Create();
 
   Editor.Font.Color := clWindowText;
+  {$IFDEF DARWIN}
   Editor.Font.Quality := fqAntialiased;
+  {$ELSE}
+  Editor.Font.Quality := fqDefault; // weird one, I know
+  {$ENDIF}
 
   SimbaSettings.Editor.FontName.AddHandlerOnChange(@SettingChanged_EditorFont);
   SimbaSettings.Editor.FontHeight.AddHandlerOnChange(@SettingChanged_EditorFontHeight);

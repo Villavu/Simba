@@ -690,6 +690,7 @@ function TDeclarationList.GetFirstItemOfClass(AClass: TDeclarationClass; SubSear
   var
     i: Integer;
   begin
+    Res := nil;
     Result := False;
     if ((Item = nil) and (AClass = nil)) or (Item is AClass) then
     begin
@@ -1103,6 +1104,7 @@ begin
   fLexer.OnIfEndDirect := @OnDirect;
   fLexer.OnElseIfDirect := @OnDirect;
   fLexer.OnCompDirect := @OnDirect;
+  fLexer.OnMessage := OnMessage;
 end;
 
 procedure TCodeParser.PopLexer;
@@ -1189,6 +1191,8 @@ begin
 
   for I := 1 to High(FLexers) do
     FLexers[I].Free();
+
+  fLexer := FLexers[0];
 
   inherited;
 end;
@@ -1332,8 +1336,7 @@ begin
           end;
         end;
       end;
-    end else
-      WriteLn('Include not found: ', FileName);
+    end;
   end;
 
   Sender.Next();
@@ -2001,6 +2004,7 @@ begin
     FOnFindInclude := TCodeParser(From).OnFindInclude;
     FOnFindLibrary := TCodeParser(From).OnFindLibrary;
     FOnLoadLibrary := TCodeParser(From).OnLoadLibrary;
+    FOnMessage := TCodeParser(From).OnMessage;
   end;
 end;
 

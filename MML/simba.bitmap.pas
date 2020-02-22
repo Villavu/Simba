@@ -215,22 +215,25 @@ begin
       if (Desc.AlphaShift = 24) and (Desc.RedShift = 16) and (Desc.GreenShift = 8) and (Desc.BlueShift = 0) then
         Result := dfARGB
       else
-      if (Desc.AlphaShift = 0) and (Desc.RedShift = 24) and (Desc.GreenShift = 16) and (Desc.BlueShift  = 8) then
+      if (Desc.AlphaShift = 0) and (Desc.RedShift = 24) and (Desc.GreenShift = 16) and (Desc.BlueShift = 8) then
         Result := dfRGBA
       else
-      if (Desc.AlphaShift = 0) and (Desc.RedShift = 8) and (Desc.GreenShift = 16)  and (Desc.BlueShift  = 24) then
+      if (Desc.AlphaShift = 0) and (Desc.RedShift = 8) and (Desc.GreenShift = 16)  and (Desc.BlueShift = 24) then
         Result := dfBGRA
       else
         raise Exception.Create('Unknown bitmap format(32): ' + Desc.AsString);
     end else
     begin
-      if (Desc.AlphaShift = 24) and (Desc.RedShift = 16) and (Desc.GreenShift = 8) and (Desc.BlueShift  = 0) then
+      if (Desc.AlphaShift = 0) and (Desc.RedShift = 16) and (Desc.GreenShift = 8) and (Desc.BlueShift = 0) then
         Result := dfBGRA
       else
-      if (Desc.AlphaShift = 0) and (Desc.RedShift = 8) and (Desc.GreenShift = 16) and (Desc.BlueShift  = 24) then
+      if (Desc.AlphaShift = 24) and (Desc.RedShift = 16) and (Desc.GreenShift = 8) and (Desc.BlueShift = 0) then
+        Result := dfBGRA
+      else
+      if (Desc.AlphaShift = 0) and (Desc.RedShift = 8) and (Desc.GreenShift = 16) and (Desc.BlueShift = 24) then
         Result := dfARGB
       else
-      if (Desc.AlphaShift = 24) and (Desc.RedShift = 0) and (Desc.GreenShift = 8) and (Desc.BlueShift  = 16) then
+      if (Desc.AlphaShift = 24) and (Desc.RedShift = 0) and (Desc.GreenShift = 8) and (Desc.BlueShift = 16) then
         Result := dfRGBA
       else
         raise Exception.Create('Unknown bitmap format(32): ' + Desc.AsString);
@@ -240,19 +243,19 @@ begin
   begin
     if Desc.ByteOrder = riboMSBFirst then
     begin
-      if (Desc.RedShift = 24) and (Desc.GreenShift = 16) and (Desc.BlueShift  = 8) then
+      if (Desc.RedShift = 24) and (Desc.GreenShift = 16) and (Desc.BlueShift = 8) then
         Result := dfRGB
       else
-      if (Desc.RedShift = 8) and (Desc.GreenShift = 16) and (Desc.BlueShift  = 24) then
+      if (Desc.RedShift = 8) and (Desc.GreenShift = 16) and (Desc.BlueShift = 24) then
         Result := dfBGR
       else
         raise Exception.Create('Unknown bitmap format(24): ' + Desc.AsString);
     end else
     begin
-      if (Desc.RedShift = 16) and (Desc.GreenShift = 8) and (Desc.BlueShift  = 0) then
+      if (Desc.RedShift = 16) and (Desc.GreenShift = 8) and (Desc.BlueShift = 0) then
         Result := dfBGR
       else
-      if (Desc.RedShift = 0) and (Desc.GreenShift = 8) and (Desc.BlueShift  = 16) then
+      if (Desc.RedShift = 0) and (Desc.GreenShift = 8) and (Desc.BlueShift = 16) then
         Result := dfRGB
       else
         raise Exception.Create('Unknown bitmap format(24): ' + Desc.AsString);
