@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ComCtrls,
-  Menus, ExtCtrls, StdCtrls;
+  Menus, ExtCtrls, StdCtrls,
+  simba.hintwindow;
 
 type
   TSimbaFileBrowser_Node = class(TTreeNode)
@@ -18,13 +19,18 @@ type
   TSimbaFileBrowser = class(TTreeView)
   protected
     FRoot: String;
+    FHint: TSimbaHintWindow;
 
+    procedure MouseLeave; override;
+    procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
     procedure Expand(Node: TTreeNode); override;
     procedure SetRoot(Value: String);
   public
     procedure Refresh;
 
     property Root: String read FRoot write SetRoot;
+
+    constructor Create(AOwner: TComponent); override;
   end;
 
   TSimbaFileBrowserForm = class(TForm)
@@ -63,6 +69,44 @@ implementation
 uses
   fileutil, lclintf, lcltype, clipbrd, lazfileutils, AnchorDocking,
   simba.misc, simba.scripttabsform, simba.main;
+
+procedure TSimbaFileBrowser.MouseLeave;
+begin
+  inherited MouseLeave();
+
+  FHint.Visible := False;
+end;
+
+procedure TSimbaFileBrowser.MouseMove(Shift: TShiftState; X, Y: Integer);
+var
+  Node: TSimbaFileBrowser_Node;
+  P: TPoint;
+  R: TRect;
+  Path: String;
+begin
+  inherited MouseMove(Shift, X, Y);
+
+  Node := TSimbaFileBrowser_Node(GetNodeAt(X, Y));
+
+  if (Node <> nil) then
+  begin
+    Path := CreateRelativePath(Node.Path, Application.Location);
+    with Node.DisplayRect(True) do
+      P := ClientToScreen(TopLeft);
+
+    R.Left := P.X;
+    R.Top := P.Y - 3;
+    R.Right := R.Left + Canvas.TextWidth(Path) + 8;
+    R.Bottom := R.Top + Canvas.TextHeight(Path) + 8;
+
+    with Screen.MonitorFromPoint(R.TopLeft).BoundsRect do
+      if R.Right > Right then
+        R.Right := Right;
+
+    FHint.ActivateHint(R, Path);
+  end else
+    FHint.Hide();
+end;
 
 procedure TSimbaFileBrowser.Expand(Node: TTreeNode);
 
@@ -153,6 +197,13 @@ end;
 procedure TSimbaFileBrowser.Refresh;
 begin
   Root := Root;
+end;
+
+constructor TSimbaFileBrowser.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  FHint := TSimbaHintWindow.Create(Self);
 end;
 
 procedure TSimbaFileBrowserForm.MenuItemOpenClick(Sender: TObject);

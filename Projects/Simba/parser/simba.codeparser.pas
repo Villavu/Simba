@@ -1289,7 +1289,8 @@ begin
               OnMessage(Self, meError, E.Message, Sender.PosXY.X, Sender.PosXY.Y);
           end;
         end;
-      end;
+      end else
+        WriteLn('Library "', FileName, '" not found');
     end;
   end;
 
@@ -1305,37 +1306,41 @@ begin
   begin
     FileName := SetDirSeparators(Sender.DirectiveParamOriginal);
 
-    if (FOnFindInclude <> nil) and FOnFindInclude(Self, FileName) then
+    if (FOnFindInclude <> nil) then
     begin
-      Handled := (Sender.TokenID = tokIncludeOnceDirect) and (FFiles.IndexOf(FileName) > -1);
-
-      if not Handled then
+      if FOnFindInclude(Self, FileName) then
       begin
-        FFiles.AddObject(FileName, TObject(PtrInt(FileAge(FileName))));
-        if (FOnInclude <> nil) then
-          FOnInclude(Self, FileName, Handled);
+        Handled := (Sender.TokenID = tokIncludeOnceDirect) and (FFiles.IndexOf(FileName) > -1);
 
         if not Handled then
-        try
-          PushLexer(TmwPasLex.Create());
+        begin
+          FFiles.AddObject(FileName, TObject(PtrInt(FileAge(FileName))));
+          if (FOnInclude <> nil) then
+            FOnInclude(Self, FileName, Handled);
 
-          with TStringList.Create() do
+          if not Handled then
           try
-            LoadFromFile(FileName);
+            PushLexer(TmwPasLex.Create());
 
-            FLexer.FileName := FileName;
-            FLexer.Script := Text;
-          finally
-            Free();
-          end;
-        except
-          on E: Exception do
-          begin
-            if OnMessage <> nil then
-              OnMessage(Self, meError, E.Message, Sender.PosXY.X, Sender.PosXY.Y);
+            with TStringList.Create() do
+            try
+              LoadFromFile(FileName);
+
+              FLexer.FileName := FileName;
+              FLexer.Script := Text;
+            finally
+              Free();
+            end;
+          except
+            on E: Exception do
+            begin
+              if OnMessage <> nil then
+                OnMessage(Self, meError, E.Message, Sender.PosXY.X, Sender.PosXY.Y);
+            end;
           end;
         end;
-      end;
+      end else
+        WriteLn('Include "', FileName, '" not found');
     end;
   end;
 
@@ -1344,7 +1349,8 @@ end;
 
 procedure TCodeParser.NextToken;
 begin
-  Lexer.Next;
+  Lexer.Next();
+
   FTokenPos := Lexer.TokenPos;
 
   if Lexer.IsJunk and (not InDeclaration(TciJunk)) then
@@ -1354,11 +1360,11 @@ begin
       begin
         if (not InDeclaration(TciJunk)) then
           PushStack(TciJunk);
-      end
-      else if InDeclaration(TciJunk) then
+      end else
+      if InDeclaration(TciJunk) then
         PopStack(Lexer.TokenPos);
 
-      Lexer.Next;
+      Lexer.Next();
     until (not Lexer.IsJunk);
 
     if InDeclaration(TciJunk) then
@@ -1380,16 +1386,14 @@ begin
     Sender.Next;
     Exit;
   end;
+
   if InDeclaration(TciJunk) then
     Exit;
   if (not InDeclaration(nil)) then
     PushStack(TciJunk, Sender.TokenPos);
 
   if (not (Sender.TokenID in [TokEndIfDirect, TokIfEndDirect])) then
-    if Sender = Lexer then
-      NextToken
-    else
-      Sender.Next;
+    Sender.Next;
 
   if InDeclaration(TciJunk) then
     PopStack(Sender.TokenPos + Sender.TokenLen);
@@ -1981,7 +1985,7 @@ begin
       Continue;
 
     if Declaration is TciProcedureDeclaration and TciProcedureDeclaration(Declaration).IsMethodOfType then
-      FGlobals.Add(TciProcedureDeclaration(Declaration).ObjectName, Declaration)
+      FGlobals.Add('!' + TciProcedureDeclaration(Declaration).ObjectName, Declaration)
     else
     if Declaration is TciTypeDeclaration and (TciTypeDeclaration(Declaration).EnumType <> nil) then
     begin

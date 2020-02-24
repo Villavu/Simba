@@ -6,7 +6,7 @@ object SimbaDebugForm: TSimbaDebugForm
   Caption = 'Output'
   ClientHeight = 371
   ClientWidth = 541
-  LCLVersion = '2.1.0.0'
+  LCLVersion = '2.0.6.0'
   inline Editor: TSynEdit
     Left = 0
     Height = 371
@@ -14,12 +14,17 @@ object SimbaDebugForm: TSimbaDebugForm
     Width = 541
     Align = alClient
     Color = clWindow
+    Font.Height = -13
+    Font.Name = 'Courier New'
+    Font.Pitch = fpFixed
+    Font.Quality = fqNonAntialiased
     ParentColor = False
     ParentFont = False
+    PopupMenu = EditorPopupMenu
     TabOrder = 0
     BorderStyle = bsNone
     Gutter.Visible = False
-    Gutter.Width = 67
+    Gutter.Width = 57
     Gutter.MouseActions = <>
     RightGutter.Width = 0
     RightGutter.MouseActions = <>
@@ -474,7 +479,7 @@ object SimbaDebugForm: TSimbaDebugForm
         MouseActions = <>
       end
       object SynGutterLineNumber1: TSynGutterLineNumber
-        Width = 27
+        Width = 17
         MouseActions = <>
         MarkupInfo.Background = clBtnFace
         MarkupInfo.Foreground = clNone
@@ -502,6 +507,33 @@ object SimbaDebugForm: TSimbaDebugForm
         MouseActionsExpanded = <>
         MouseActionsCollapsed = <>
       end
+    end
+  end
+  object EditorPopupMenu: TPopupMenu
+    left = 40
+    top = 24
+    object MenuItemCut: TMenuItem
+      Caption = 'Cut'
+      OnClick = MenuItemCutClick
+    end
+    object MenuItemCopy: TMenuItem
+      Caption = 'Copy'
+      OnClick = MenuItemCopyClick
+    end
+    object MenuItemPaste: TMenuItem
+      Caption = 'Paste'
+      OnClick = MenuItemPasteClick
+    end
+    object MenuItemDelete: TMenuItem
+      Caption = 'Delete'
+      OnClick = MenuItemDeleteClick
+    end
+    object MenuItemSeperator: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemSelectAll: TMenuItem
+      Caption = 'Select All'
+      OnClick = MenuItemSelectAllClick
     end
   end
 end

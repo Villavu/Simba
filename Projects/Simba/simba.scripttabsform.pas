@@ -637,10 +637,12 @@ end;
 procedure TSimbaScriptTabsForm.OpenDeclaration(Declaration: TDeclaration);
 var
   FileName: String;
+  IsLibrary: Boolean;
 begin
   FileName := Declaration.Lexer.FileName;
+  IsLibrary := Declaration.Lexer.IsLibrary;
 
-  if (FileName = '') or FileExists(FileName) then
+  if (FileName = '') or FileExists(FileName) and (not IsLibrary) then
   begin
     if FileExists(FileName) then
       Open(FileName);
@@ -660,7 +662,7 @@ begin
       SimbaDebugForm.Add('Declared internally in Simba: ' + FileName);
 
     SimbaDebugForm.Add('Declaration:');
-    SimbaDebugForm.Add(Declaration.RawText);
+    SimbaDebugForm.Add(Declaration.RawText.Replace('begin end;', ''));
   end;
 end;
 
