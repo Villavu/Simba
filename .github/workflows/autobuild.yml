@@ -32,6 +32,12 @@ jobs:
             LAZ_VER: 2.0.6
             LAZ_OPT: "--os=linux --cpu=x86_64"
             ARTIFACT: "Simba-x86_64-linux"
+            
+          - os: macos-latest
+            name: macOS 64
+            LAZ_VER: 2.0.6
+            LAZ_OPT: "--os=darwin --cpu=x86_64 --widgetset=cocoa"
+            ARTIFACT: "Simba-x86_64-darwin"
 
     steps:
     - uses: actions/checkout@v1
@@ -43,7 +49,9 @@ jobs:
 
     - name: Install Dependencies
       if: env.OS == 'ubuntu-latest'
-      run: sudo apt-get install libffi-dev libxtst-dev xvfb
+      run: |
+        sudo apt-get update
+        sudo apt-get install libffi-dev libxtst-dev xvfb
 
     - name: Install Lazarus
       shell: python
@@ -136,7 +144,7 @@ jobs:
         sys.exit(int(not main()))
 
     - name: Upload Simba Binary
-      uses: svenstaro/upload-release-action@v1-release
+      uses: ollydev/upload-release-action@master
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: ${{ env.ARTIFACT }}

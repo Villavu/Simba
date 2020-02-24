@@ -306,7 +306,6 @@ type
     procedure SetOnUnDefDirect(const Value: TDirectiveEvent); virtual;
     procedure SetOnIfDirect(const Value: TDirectiveEvent); virtual;
     procedure SetOnIfEndDirect(const Value: TDirectiveEvent); virtual;
-
   public
     CaretPos: Integer;
     MaxPos: Integer;
@@ -1409,6 +1408,7 @@ begin
   InitDefines;
 
   MaxPos := -1;
+  CaretPos := -1;
 end; { Create }
 
 destructor TmwBasePasLex.Destroy;

@@ -690,11 +690,12 @@ begin
             if (not Contents.EndsWith(';')) then
               Contents := Contents + ';';
             if Contents.EndsWith('native;', True) then
-              Contents.Remove(Length(Contents) - Length('native;'), $FFFFFF);
+              SetLength(Contents, Length(Contents) - 8);
+            //Contents.Remove(Length(Contents) - Length('native;'), $FFFFFF);
             if (not Contents.EndsWith(';')) then
               Contents := Contents + ';';
 
-            Contents := Contents + 'begin end;';
+            Contents := Contents + 'begin end;' + LineEnding;
           end;
         finally
           StrDispose(Header);
@@ -715,6 +716,8 @@ begin
         end;
       end;
     finally
+      WriteLn('Closing library "', FileName, '"');
+
       FreeLibrary(Lib);
     end;
   except

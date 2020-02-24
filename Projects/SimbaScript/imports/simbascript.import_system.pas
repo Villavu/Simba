@@ -171,6 +171,9 @@ begin
     {$IFDEF CPU64}
     addBaseDefine('CPU64');
     {$ENDIF}
+    {$IFDEF CPUAARCH64}
+    addBaseDefine('CPUAARCH64');
+    {$ENDIF}
     {$IFDEF WINDOWS}
     addBaseDefine('WINDOWS');
     {$ENDIF}
@@ -182,6 +185,9 @@ begin
     {$ENDIF}
     {$IFDEF LINUX}
     addBaseDefine('LINUX');
+    {$ENDIF}
+    {$IFDEF DARWIN}
+    addBaseDefine('DARWIN');
     {$ENDIF}
 
     addGlobalConst(Script.ScriptFile, 'ScriptFile');

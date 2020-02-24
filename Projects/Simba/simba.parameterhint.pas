@@ -332,6 +332,7 @@ var
   var
     i: Int32;
   begin
+    Canvas.Brush.Style := bsClear;
     Canvas.Font.Color := clBlack;
 
     for i := 1 to Length(Text) do
