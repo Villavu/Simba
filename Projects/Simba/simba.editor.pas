@@ -341,11 +341,12 @@ end;
 
 procedure TSimbaEditor.SettingChanged_FontName(Value: String);
 begin
-  Font.Name := Value;
+  if Value <> '' then
+    Font.Name := Value;
 end;
 
 procedure TSimbaEditor.SettingChanged_FontHeight(Value: Int64);
-begin;
+begin
   Font.Height := Value;
 end;
 

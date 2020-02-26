@@ -49,8 +49,6 @@ procedure TSimbaSettingsForm.FormShow(Sender: TObject);
 begin
   EditorFontFrame.FontHeightEdit.Value := SimbaSettings.Editor.FontHeight.Value;
   EditorFontFrame.FontHeightEdit.OnChange(nil);
-  EditorFontFrame.FontsComboBox.ItemIndex := EditorFontFrame.FontsComboBox.Items.IndexOf(SimbaSettings.Editor.FontName.Value);
-  EditorFontFrame.FontsComboBox.OnChange(nil);
   EditorFontFrame.FontAntiAliasedCheckbox.Checked := SimbaSettings.Editor.AntiAliasing.Value;
   EditorFontFrame.FontAntiAliasedCheckbox.OnChange(nil);
 

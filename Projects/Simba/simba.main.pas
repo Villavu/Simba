@@ -263,20 +263,17 @@ type
 
     procedure DoSimbaNews(Data: PtrInt);
 
-    procedure Error(Message: String);
-    procedure WndProc(var Message: TLMessage); override;
-
     procedure AddSettingChangeHandlers;
     procedure RemoveSettingChangeHandlers;
 
-    procedure Init(Data: PtrInt);
-    procedure InitConsole;
-    procedure InitDocking;
-    procedure InitSettings;
-    procedure InitCodeTools;
-    procedure InitSimbaScript;
-    procedure InitOpenSSL;
-    procedure Startup_Parameters;
+    procedure Initialize(Data: PtrInt);
+    procedure Initialize_Console;
+    procedure Initialize_Docking;
+    procedure Initialize_Settings;
+    procedure Initialize_CodeTools;
+    procedure Initialize_SimbaScript;
+    procedure Initialize_OpenSSL;
+    procedure Initialize_CommandLineOptions;
 
     procedure ShowForm(Form: TForm);
     procedure HideForm(Form: TForm);
@@ -302,32 +299,8 @@ uses
   {$ENDIF}
   {$IFDEF USE_FORMDESIGNER},
   simba.formdesigner
-  {$ENDIF}
-  {$IFDEF LINUX_HOTKEYS},
-  simba.linux_keybinder
   {$ENDIF},
   dynlibs;
-
-  {$IFDEF LINUX}
-  const
-  shortcut_StartScript = '<Ctrl><Alt>R';
-  shortcut_StopScript =  '<Ctrl><Alt>S';
-  shortcut_PickColour =  '<Ctrl><Alt>P';
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-  const
-  shortcut_StartScriptID  = 0;
-  shortcut_StartScriptMod = MOD_CONTROL or MOD_ALT;
-  shortcut_StartScriptKey = VK_R;
-
-  shortcut_StopScriptID   = 1;
-  shortcut_StopScriptMod  = MOD_CONTROL or MOD_ALT;
-  shortcut_StopScriptKey  = VK_S;
-
-  shortcut_PickColorID    = 2;
-  shortcut_PickColourMod  = MOD_CONTROL or MOD_ALT;
-  shortcut_PickColourKey  = VK_P;
-  {$ENDIF}
 
 type
   TSimbaAnchorDockHeader = class(TAnchorDockHeader)
@@ -533,73 +506,6 @@ begin
   end;
 end;
 
-{$IFDEF WINDOWS}
-
-procedure Bind_Windows_Keys;
-begin
-  if not RegisterHotkey(SimbaForm.Handle,shortcut_StartScriptID,shortcut_StartScriptMod,shortcut_StartScriptKey) then
-    WriteLn('Unable to register start script global hotkey');
-  if not RegisterHotkey(SimbaForm.Handle,shortcut_StopScriptID,shortcut_StopScriptMod,shortcut_StopScriptKey) then
-    WriteLn('Unable to register stop script global hotkey');
-  if not RegisterHotkey(SimbaForm.Handle,shortcut_PickColorID,shortcut_PickColourMod,shortcut_PickColourKey) then
-    WriteLn('Unable to register pick colour global hotkey');
-end;
-
-procedure Unbind_Windows_Keys;
-var
-  i : integer;
-begin
-  for i := 0 to 2 do
-    if not UnRegisterHotkey(SimbaForm.Handle,i) then
-      WriteLn('Unable to unregister '+ inttostr(i) + ' global hotkey');
-end;
-
-
-{$ELSE}
-  {$IFDEF LINUX_HOTKEYS}
-  {$WARNING This will probably not work if people don't have libkeybinder installed. Perhaps ship it with Simba? }
-
-{ Used for global callbacks on LINUX }
-procedure keybinder_callback(keystring: PChar; user_data: PtrUInt); cdecl;
-begin
-  //if keystring = shortcut_StartScript then
-  //  SimbaForm.ActionRunScript.Execute
-  //else if keystring = shortcut_StopScript then
-   // SimbaForm.ActionStopScript.Execute
-  //else if keystring = shortcut_PickColour then
-  //  SimbaForm.ButtonPickClick(nil);
-end;
-
-{ XXX, TODO: Pressing the stop shortcut twice (quickly) may crash Simba. }
-procedure Bind_Linux_Keys;
-begin
-  if KeybinderLoaded() then
-  begin
-    keybinder_init(); { Initialise keybinder }
-
-    { Bind keys }
-    if not keybinder_bind(PChar(shortcut_StartScript), @keybinder_callback, PtrUInt(0)) then
-      WriteLn('Unable to register '+ shortcut_StartScript + ' as global hotkey');
-    if not keybinder_bind(PChar(shortcut_StopScript), @keybinder_callback, PtrUInt(0)) then
-      WriteLn('Unable to register '+ shortcut_StopScript + ' as global hotkey');
-    if not keybinder_bind(PChar(shortcut_PickColour), @keybinder_callback, PtrUInt(0)) then
-      WriteLn('Unable to register '+ shortcut_PickColour + ' as global hotkey');
-  end;
-end;
-
-procedure Unbind_Linux_Keys;
-begin
-  if KeybinderLoaded() then
-  begin
-    keybinder_unbind(PChar(shortcut_StartScript), @keybinder_callback, PtrUInt(0));
-    keybinder_unbind(PChar(shortcut_StopScript), @keybinder_callback, PtrUInt(0));
-    keybinder_unbind(PChar(shortcut_PickColour), @keybinder_callback, PtrUInt(0));
-  end;
-end;
-  {$ENDIF}
-
-{$ENDIF}
-
 procedure TSimbaForm.OnCCMessage(Sender: TObject; const Typ: TMessageEventType; const Message: string; X, Y: Integer);
 var
   Parser: TCodeParser absolute Sender;
@@ -759,7 +665,6 @@ begin
   {$ENDIF}
 end;
 
-
 procedure TSimbaForm.TrayPopupPopup(Sender: TObject);
 begin
   { XXX: What's up with this? }
@@ -770,32 +675,6 @@ begin
     if SimbaForm.CanFocus then
       SimbaForm.SetFocus;
   {$endif}
-end;
-
-procedure TSimbaForm.Error(Message: String);
-begin
-  MessageDlg('Simba Error', Message, mtError, [mbOK], 0);
-end;
-
-procedure TSimbaForm.WndProc(var Message: TLMessage);
-begin
-  inherited WndProc(Message);
-
-  {$IFDEF WINDOWS}
-  if Message.Msg = WM_HOTKEY then
-    case Message.wParam of
-      shortcut_StartScriptID:
-        if RunButton.Enabled then
-          RunButton.Click();
-
-      shortcut_StopScriptID:
-        if StopButton.Enabled then
-          StopButton.Click();
-
-      shortcut_PickColorID:
-        ColorPickerButton.Click();
-    end;
-  {$ENDIF}
 end;
 
 procedure TSimbaForm.RunScript;
@@ -895,51 +774,6 @@ begin
     Item.Caption := FileName;
 
     MenuItemOpenRecent.Insert(0, Item);
-  end;
-end;
-
-procedure TSimbaForm.Startup_Parameters;
-var
-  Script: String;
-begin
-  if Application.HasOption('h', 'help') then
-  begin
-    WriteLn('');
-    WriteLn('Options:');
-    WriteLn('  -open, -o: opens the given script');
-    WriteLn('  -run, -r: runs the given script');
-    WriteLn('  -compile, -c: compiles the given script');
-    WriteLn('');
-    WriteLn('Example:');
-    WriteLn('  Simba.exe -run "Test.simba"');
-    WriteLn('');
-  end;
-
-  if Application.ParamCount > 0 then
-  begin
-    Script := '';
-
-    if (Application.ParamCount = 1) then
-      Script := Application.Params[1]
-    else
-    if (Application.ParamCount = 2) then
-      Script := Application.Params[2];
-
-    if not FileExists(Script) then
-    begin
-      WriteLn('A valid script is required for this option.');
-      Halt(1);
-    end;
-
-    if Application.HasOption('o', 'open') or Application.HasOption('c', 'compile') or Application.HasOption('r', 'run') then
-    begin
-      SimbaScriptTabsForm.Open(Script);
-
-      if Application.HasOption('c', 'compile') then
-        Self.CompileScript();
-      if Application.HasOption('r', 'run') then
-        Self.RunScript();
-    end;
   end;
 end;
 
@@ -1407,12 +1241,14 @@ begin
   SimbaSettings.GUI.CustomToolbarSize.RemoveHandlerOnChange(@SettingChanged_CustomToolbarSize);
 end;
 
-procedure TSimbaForm.InitConsole;
+procedure TSimbaForm.Initialize_Console;
 {$IFDEF WINDOWS}
 var
   Mode: UInt32 = 0;
 {$ENDIF}
 begin
+  WriteLn('Initialize Console');
+
   {$IFDEF WINDOWS}
   // Close Simba when console is closed
   SetConsoleCtrlHandler(@ConsoleHandler, True);
@@ -1423,8 +1259,10 @@ begin
   {$ENDIF}
 end;
 
-procedure TSimbaForm.InitDocking;
+procedure TSimbaForm.Initialize_Docking;
 begin
+  WriteLn('Initialize Docking');
+
   DockMaster.HeaderClass := TSimbaAnchorDockHeader;
   DockMaster.SplitterClass := TSimbaAnchorDockSplitter;
   DockMaster.SiteClass := TSimbaAnchorDockHostSite;
@@ -1454,68 +1292,26 @@ begin
   SetupLayout(False);
 end;
 
-procedure TSimbaForm.InitSettings;
+procedure TSimbaForm.Initialize_Settings;
 var
   RecentFile: String;
 begin
+  WriteLn('Initialize Settings');
+
   for RecentFile in SimbaSettings.GUI.RecentFiles.Value.Split([',']) do
     AddRecentFile(RecentFile);
 
   AddSettingChangeHandlers();
 end;
 
-procedure TSimbaForm.InitSimbaScript;
-begin
-  if SimbaSettings.Resources.ExtractSimbaScript.Value then
-    SimbaResourceExtractor.Extract('SIMBASCRIPT', Application.Location);
-end;
-
-procedure TSimbaForm.InitOpenSSL;
-begin
-  if SimbaSettings.Resources.ExtractOpenSSL.Value then
-    SimbaResourceExtractor.Extract('OPENSSL', Application.Location);
-
-  if SimbaSettings.Resources.InitializeOpenSSL.Value then
-    InitializeOpenSSL(Application.Location);
-end;
-
-procedure TSimbaForm.ShowForm(Form: TForm);
-begin
-  if DockMaster.GetAnchorSite(Form) = nil then
-    raise Exception.Create('Not a Simba form');
-
-  DockMaster.GetAnchorSite(Form).Visible := True;
-end;
-
-procedure TSimbaForm.HideForm(Form: TForm);
-begin
-  if DockMaster.GetAnchorSite(Form) = nil then
-    raise Exception.Create('Not a Simba form');
-
-  DockMaster.GetAnchorSite(Form).Header.CloseButton.Click();
-end;
-
-procedure TSimbaForm.CenterForm(Form: TForm);
-var
-  W, H, X, Y: Int32;
-begin
-  if DockMaster.GetAnchorSite(Form) = nil then
-    raise Exception.Create('Not a Simba form');
-
-  W := DockMaster.GetAnchorSite(Form).Width;
-  H := DockMaster.GetAnchorSite(Form).Height;
-  X := (Monitor.Width - W) div 2;
-  Y := (Monitor.Height - H) div 2;
-
-  DockMaster.GetAnchorSite(Form).SetBounds(X, Y, W, H);
-end;
-
-procedure TSimbaForm.InitCodeTools;
+procedure TSimbaForm.Initialize_CodeTools;
 var
   ScriptInstance: TSimbaScriptInstance;
   Parser: TCodeInsight_Include;
   i: Int32;
 begin
+  WriteLn('Initialize Code Tools');
+
   ScriptInstance := nil;
 
   try
@@ -1541,32 +1337,120 @@ begin
       SimbaDebugForm.Add('Error parsing internals: ' + E.Message);
   end;
 
-  if ScriptInstance <> nil then
+  if (ScriptInstance <> nil) then
     ScriptInstance.Free();
 end;
 
-procedure TSimbaForm.Init(Data: PtrInt);
-var
-  i: Int32;
+procedure TSimbaForm.Initialize_SimbaScript;
 begin
-  if (not DirectoryIsWritable(Application.Location)) then
-    ShowMessage('No permission to write to Simba''s directory. This will likely cause issues.');
+  WriteLn('Initialize SimbaScript');
 
-  InitConsole;
-  InitDocking;
-  InitOpenSSL;
-  InitSimbaScript;
-  InitOpenSSL;
-  InitCodeTools;
-  InitSimbaScript;
-  InitSettings;
-  Startup_Parameters;
+  if SimbaSettings.Resources.ExtractSimbaScript.Value then
+    SimbaResourceExtractor.Extract('SIMBASCRIPT', Application.Location);
+end;
+
+procedure TSimbaForm.Initialize_OpenSSL;
+begin
+  Writeln('Initialize OpenSSL');
+
+  if SimbaSettings.Resources.ExtractOpenSSL.Value then
+    SimbaResourceExtractor.Extract('OPENSSL', Application.Location);
+
+  if SimbaSettings.Resources.InitializeOpenSSL.Value then
+    InitializeOpenSSL(Application.Location);
+end;
+
+procedure TSimbaForm.ShowForm(Form: TForm);
+begin
+  if DockMaster.GetAnchorSite(Form) = nil then
+    raise Exception.Create('Not a Simba form');
+
+  DockMaster.GetAnchorSite(Form).Visible := True;
+end;
+
+procedure TSimbaForm.HideForm(Form: TForm);
+begin
+  if DockMaster.GetAnchorSite(Form) = nil then
+    raise Exception.Create('Not a Simba form');
+
+  DockMaster.GetAnchorSite(Form).Header.CloseButton.Click();
+end;
+
+procedure TSimbaForm.Initialize_CommandLineOptions;
+const
+  Help =
+    ''                                       + LineEnding +
+    'Options:'                               + LineEnding +
+    '  -open:    opens the given script'     + LineEnding +
+    '  -run:     runs the given script'      + LineEnding +
+    '  -compile: compiles the given script'  + LineEnding +
+    ''                                       + LineEnding +
+    'Example:'                               + LineEnding +
+    '  Simba.exe -run "Test.simba"'          + LineEnding +
+    '';
+begin
+  WriteLn('Initialize Command Line Options');
+
+  if Application.HasOption('h', 'help') then
+    WriteLn(Help);
+
+  if Application.ParamCount = 2 then
+  begin
+    if not FileExists(Application.Params[2]) then
+    begin
+      WriteLn('A valid script file must be passed');
+      Halt(1);
+    end;
+
+    if Application.HasOption('open') or Application.HasOption('compile') or Application.HasOption('run') then
+    begin
+      SimbaScriptTabsForm.Open(Application.Params[2]);
+
+      if Application.HasOption('c', 'compile') then
+        Self.CompileScript();
+      if Application.HasOption('r', 'run') then
+        Self.RunScript();
+    end else
+      WriteLn(Help);
+  end else
+  if Application.ParamCount > 0 then
+    WriteLn(Help);
+end;
+
+procedure TSimbaForm.CenterForm(Form: TForm);
+var
+  W, H, X, Y: Int32;
+begin
+  if DockMaster.GetAnchorSite(Form) = nil then
+    raise Exception.Create('Not a Simba form');
+
+  W := DockMaster.GetAnchorSite(Form).Width;
+  H := DockMaster.GetAnchorSite(Form).Height;
+  X := (Monitor.Width - W) div 2;
+  Y := (Monitor.Height - H) div 2;
+
+  DockMaster.GetAnchorSite(Form).SetBounds(X, Y, W, H);
+end;
+
+procedure TSimbaForm.Initialize(Data: PtrInt);
+var
+  I: Int32;
+  Site: TSimbaAnchorDockHostSite;
+begin
+  WriteLn('Initializing...');
+
+  Initialize_Console();
+  Initialize_Docking();
+  Initialize_OpenSSL();
+  Initialize_SimbaScript();
+  Initialize_CodeTools();
+  Initialize_SimbaScript();
+  Initialize_Settings();
+  Initialize_CommandLineOptions();
 
   Self.ToolBar.Images := TImageList.Create(ToolBar);
   Self.ToolBar.Images.Assign(Self.Images);
   Self.ToolBar.Images.Scaled := False;
-
-  ScriptProcessorTimer.Enabled := True;
 
   Application.OnException := @CustomExceptionHandler;
   Application.QueueAsyncCall(@ResetDockingSplitters, 0);
@@ -1574,11 +1458,21 @@ begin
   // Everything should be loaded. Display our forms!
   Self.Initialized := True;
 
-  for i := 0 to Screen.CustomFormCount - 1 do
-    if (Screen.CustomForms[i] is TSimbaAnchorDockHostSite) and ((TSimbaAnchorDockHostSite(Screen.CustomForms[i]).MenuItem = nil) or (TSimbaAnchorDockHostSite(Screen.CustomForms[i]).MenuItem.Checked)) then
-      Screen.CustomForms[i].Visible := True;
+  for I := 0 to Screen.CustomFormCount - 1 do
+    if (Screen.CustomForms[I] is TSimbaAnchorDockHostSite) then
+    begin
+      Site := Screen.CustomForms[I] as TSimbaAnchorDockHostSite;
+
+      if DockMaster.ShowHeader then
+        Screen.CustomForms[I].Visible := (Screen.CustomForms[I].ControlCount > 1) and ((Site.MenuItem = nil) or Site.MenuItem.Checked)
+      else
+        Screen.CustomForms[I].Visible := (Screen.CustomForms[I].ControlCount > 0) and ((Site.MenuItem = nil) or Site.MenuItem.Checked);
+    end;
 
   Self.Visible := True;
+  Self.ScriptProcessorTimer.Enabled := True;
+
+  WriteLn('');
 end;
 
 procedure TSimbaForm.SetEnabled(Value: Boolean);
@@ -1595,14 +1489,6 @@ end;
 procedure TSimbaForm.FormDestroy(Sender: TObject);
 begin
   RemoveSettingChangeHandlers();
-
-  {$ifdef MSWindows}
-  Unbind_Windows_Keys;
-  {$else}
-  {$IFDEF LINUX_HOTKEYS}
-  Unbind_Linux_Keys;
-  {$ENDIF}
-  {$endif}
 end;
 
 procedure TSimbaForm.MenuEditClick(Sender: TObject);
@@ -1821,7 +1707,6 @@ begin
   Result := False;
 
   Stream := TStringStream.Create(SimbaSettings.GUI.Layout.Value);
-
   if Stream.Size > 0 then
   try
     Position := poDesigned;
