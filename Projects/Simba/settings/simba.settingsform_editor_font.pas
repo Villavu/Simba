@@ -23,13 +23,32 @@ type
     procedure FontHeightEditChange(Sender: TObject);
   protected
     FEditor: TSimbaEditor;
+    FFonts: TStringList;
+
+    procedure PopulateFonts;
+    procedure ApplyFonts(Sender: TObject);
   public
     property Editor: TSimbaEditor read FEditor;
 
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
   end;
 
 implementation
+
+uses
+  LCLIntf, LCLType;
+
+function EnumFontsFixedPitchNoDups(var LogFont: TEnumLogFontEx; var Metric: TNewTextMetricEx; FontType: LongInt; Data: LParam): LongInt; stdcall;
+var
+  S: String;
+begin
+  S := LogFont.elfLogFont.lfFaceName;
+  if ((LogFont.elfLogFont.lfPitchAndFamily and FIXED_PITCH) = FIXED_PITCH) then
+    TStringList(PtrUInt(Data)).Add(S);
+
+  Result := 1;
+end;
 
 procedure TEditorFontFrame.FontAntiAliasedCheckboxChange(Sender: TObject);
 begin
@@ -46,27 +65,37 @@ begin
   FEditor.Font.Height := FontHeightEdit.Value;
 end;
 
-constructor TEditorFontFrame.Create(AOwner: TComponent);
+procedure TEditorFontFrame.PopulateFonts;
 var
-  i: Int32;
+  DC: HDC;
+  LogFont: TLogFont;
+begin
+  LogFont.lfCharSet := DEFAULT_CHARSET;
+  LogFont.lfFaceName := '';
+  LogFont.lfPitchAndFamily := {$IFDEF LINUX}FIXED_PITCH{$ELSE}0{$ENDIF};
+
+  DC := GetDC(0);
+
+  try
+    EnumFontFamiliesEX(DC, @LogFont, @EnumFontsFixedPitchNoDups, PtrUInt(FFonts), 0);
+  finally
+    ReleaseDC(0, DC);
+  end;
+end;
+
+procedure TEditorFontFrame.ApplyFonts(Sender: TObject);
+begin
+  FontsComboBox.Items.Assign(FFonts);
+  FontsComboBox.Text := GetFontData(FEditor.Font.Handle).Name;
+end;
+
+constructor TEditorFontFrame.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  FontsComboBox.Items.BeginUpdate();
-
-  with TBitmap.Create() do
-  try
-    for i := 0 to Screen.Fonts.Count - 1 do
-    begin
-      Canvas.Font.Name := Screen.Fonts[i];
-      if Canvas.TextWidth('i') = Canvas.TextWidth('M') then
-        FontsComboBox.Items.Add(Screen.Fonts[i]);
-    end;
-  finally
-    Free();
-  end;
-
-  FontsComboBox.Items.EndUpdate();
+  FFonts := TStringList.Create();
+  FFonts.Sorted := True;
+  FFonts.Duplicates := dupIgnore;
 
   FEditor := TSimbaEditor.Create(Self);
   with FEditor do
@@ -102,6 +131,15 @@ begin
             '  Result := inherited();                                '+ LineEnding +
             'end;                                                    ';
   end;
+
+  TThread.ExecuteInThread(@PopulateFonts, @ApplyFonts);
+end;
+
+destructor TEditorFontFrame.Destroy;
+begin
+  FFonts.Free();
+
+  inherited Destroy();
 end;
 
 initialization

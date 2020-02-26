@@ -40,10 +40,22 @@ uses
   simba.settings, simba.main, simba.aboutform, simba.debugimage, simba.bitmapconv,
   simba.updateform, simba.functionlistform, simba.scripttabsform,
   simba.debugform, simba.filebrowserform, simba.notesform, simba.settingsform,
-  simba.package_form, simba.colorpicker_historyform
+  simba.package_form, simba.colorpicker_historyform, simba.mufasabase
   {$IFDEF USE_FORMDESIGNER},
   simba.formdesigner
   {$ENDIF};
+
+type
+  TApplicationHelper = class helper for TApplication
+    procedure CreateForm(InstanceClass: TComponentClass; out Reference);
+  end;
+
+procedure TApplicationHelper.CreateForm(InstanceClass: TComponentClass; out Reference);
+begin
+  WriteLn('Create ', InstanceClass.ClassName);
+
+  inherited CreateForm(InstanceClass, Reference);
+end;
 
 begin
   {$IF DECLARED(SetHeapTraceOutput)}
@@ -52,6 +64,14 @@ begin
 
   SetHeapTraceOutput('memoryleaks.trc');
   {$ENDIF}
+
+  WriteLn('Simba Version: ', IntToStr(SimbaVersion));
+  WriteLn('Build Time: ', {$I %TIME%}, ' on ', {$I %DATE%});
+  Writeln('FPC Version: ', {$I %FPCVERSION%});
+  Writeln('Target CPU: ', {$I %FPCTARGET%});
+  WriteLn('');
+
+  WriteLn('Creating forms...');
 
   Application.ShowMainForm := False;
   Application.Initialize();
@@ -72,7 +92,9 @@ begin
   Application.CreateForm(TCompForm, CompForm);
   {$ENDIF}
 
-  Application.QueueASyncCall(@SimbaForm.Init, 0);
+  WriteLn('');
+
+  Application.QueueASyncCall(@SimbaForm.Initialize, 0);
   Application.Run();
 end.
 

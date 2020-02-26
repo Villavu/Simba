@@ -84,9 +84,9 @@ begin
     begin
       WriteLn(E.Message, ' (', E.ClassName, ')');
 
-      SimbaDebugForm.Add('Unable to write file "' + Path + '". The file is currently in use!' + LineEnding +
-                         'You likely have another Simba open that is a different version/bitness.' + LineEnding +
-                         'Things may not work correctly!');
+      SimbaDebugForm.Add('Unable to write file "' + Path + '".' + LineEnding +
+                         'The file is currently in use!' + LineEnding +
+                         'Close all running Simba''s and Scripts!');
     end;
   end;
 

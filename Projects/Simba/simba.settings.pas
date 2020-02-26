@@ -165,9 +165,8 @@ begin
   Editor.DefaultScriptPath := addFileSetting('Editor', 'DefaultScriptPath');
   Editor.DefaultScriptPath.DefaultValue := Environment.DataPath.Value + 'default.simba';
   Editor.FontHeight := addIntegerSetting('Editor', 'FontHeight');
-  Editor.FontHeight.DefaultValue := 21;
+  Editor.FontHeight.DefaultValue := 18;
   Editor.FontName := addStringSetting('Editor', 'FontName');
-  Editor.FontName.DefaultValue := 'Courier New';
   Editor.AntiAliasing := addBooleanSetting('Editor', 'AntiAliasing');
   Editor.AntiAliasing.DefaultValue := True;
   Editor.SaveScriptAutomatically := addBooleanSetting('Editor', 'SaveScriptAutomatically');
