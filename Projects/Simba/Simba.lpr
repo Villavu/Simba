@@ -65,7 +65,7 @@ begin
   {$ENDIF}
 
   WriteLn('Simba ', IntToStr(SimbaVersion));
-  WriteLn('Built At ', {$I %TIME%}, ' on ', {$I %DATE%});
+  WriteLn('Built at ', {$I %TIME%}, ' on ', {$I %DATE%});
   WriteLn('');
 
   if Application.HasOption('help') or (Application.ParamCount = 2) and (Application.CheckOptions('', ['open', 'compile', 'run']) <> '') then

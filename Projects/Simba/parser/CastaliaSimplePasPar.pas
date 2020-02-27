@@ -133,7 +133,7 @@ Known Issues:
    added property handling in Object types
    changed handling of forward declarations in ExportedHeading method
 -----------------------------------------------------------------------------}
-unit CastaliaSimplePasPar;
+unit castaliasimplepaspar;
 
 {$DEFINE D8_NEWER}
 {$DEFINE D9_NEWER}
@@ -144,11 +144,11 @@ interface
 
 uses
   //!! pruned uses
-  SysUtils,
-  Classes,
-  CastaliaPasLexTypes,
-  CastaliaPasLex,
-  CastaliaSimplePasParTypes;
+  sysutils,
+  classes,
+  castaliapaslextypes,
+  castaliapaslex,
+  castaliasimplepaspartypes;
 
 resourcestring
   rsExpected = '''%s'' expected found ''%s''';

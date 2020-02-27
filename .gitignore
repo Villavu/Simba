@@ -36,3 +36,4 @@ ppas.bat
 /Projects/SimbaResources/MakeSimbaResources
 /libssl.dylib
 /libcrypto.dylib
+/*.tmp

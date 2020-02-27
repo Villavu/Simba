@@ -28,19 +28,23 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, ComCtrls,
+  ExtCtrls, ComCtrls, Buttons,
   simba.mufasatypes, simba.imagebox;
 
 type
   TSimbaDebugImageForm = class(TForm)
   published
     procedure ImageDoubleClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Int32);
+    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure SetParent(AParent: TWinControl); override;
+  protected
+    FControlDown: Boolean;
+    FPoints: TPointArray;
   public
     ImageBox: TSimbaImageBox;
 
-    procedure SetDimensions(AWidth, AHeight: Int32);
+    procedure SetDimensions(W, H: Int32);
 
     constructor Create(AOwner: TComponent); override;
   end;
@@ -60,6 +64,9 @@ var
   Bitmap: TMufasaBitmap;
   W, H: Int32;
 begin
+  if (Key = VK_CONTROL) then
+    FControlDown := True;
+
   if (Key = VK_F5) then
   begin
     Manager := nil;
@@ -87,28 +94,59 @@ end;
 procedure TSimbaDebugImageForm.SetParent(AParent: TWinControl);
 begin
   if (AParent <> nil) and (AParent is TAnchorDockHostSite) then
-    AParent.OnKeyDown := Self.OnKeyDown;
+    AParent.OnKeyDown := @FormKeyDown;
 
   inherited SetParent(AParent);
 end;
 
 procedure TSimbaDebugImageForm.ImageDoubleClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Int32);
 begin
-  SimbaDebugForm.Add('Debug Image Click: ' + IntToStr(X) + ', ' + IntToStr(Y));
+  if FControlDown then
+  begin
+    SetLength(FPoints, Length(FPoints) + 1);
+
+    FPoints[High(FPoints)].X := X;
+    FPoints[High(FPoints)].Y := Y;
+  end else
+    SimbaDebugForm.Add('Debug Image Click: ' + IntToStr(X) + ', ' + IntToStr(Y));
 end;
 
-procedure TSimbaDebugImageForm.SetDimensions(AWidth, AHeight: Int32);
+procedure TSimbaDebugImageForm.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+var
+  I: Int32;
+  S: String;
 begin
-  AHeight := AHeight + ImageBox.StatusBar.Height;
+  if (Key = VK_CONTROL) then
+  begin
+    if (Length(FPoints) > 0) then
+    begin
+      S := '[';
+      for I := 0 to High(FPoints) do
+      begin
+        if I > 0 then
+          S := S + ', ';
+        S := S + '[' + IntToStr(FPoints[I].X) + ', ' + IntToStr(FPoints[I].Y) + ']';
+      end;
+      S := S + ']';
 
+      SimbaDebugForm.Add('Debug Image Clicks: ' + S);
+    end;
+
+    FPoints := nil;
+    FControlDown := False;
+  end;
+end;
+
+procedure TSimbaDebugImageForm.SetDimensions(W, H: Int32);
+begin
   if (DockMaster.GetAnchorSite(Self) <> nil) then
   begin
-    DockMaster.GetAnchorSite(Self).Width := AWidth;
-    DockMaster.GetAnchorSite(Self).Height := AHeight + DockMaster.GetAnchorSite(Self).Header.Height;
+    DockMaster.GetAnchorSite(Self).Width := W;
+    DockMaster.GetAnchorSite(Self).Height := H + DockMaster.GetAnchorSite(Self).Header.Height;
   end else
   begin
-    Width := AWidth;
-    Height := AHeight;
+    Width := W;
+    Height := H;
   end;
 end;
 
@@ -120,8 +158,6 @@ begin
   ImageBox.Parent := Self;
   ImageBox.Align := alClient;
   ImageBox.OnImageDoubleClick := @ImageDoubleClick;
-
-  ActiveControl := ImageBox;
 end;
 
 initialization

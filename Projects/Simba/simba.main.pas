@@ -290,13 +290,14 @@ var
 implementation
 
 uses
-  lclintf, synexporthtml, anchordocking, xmlconf, xmlpropstorage, anchordockstorage, simba.highlighter,
+  lclintf, synexporthtml, anchordocking, xmlconf, xmlpropstorage, anchordockstorage,
   simba.mufasatypes, simba.misc, simba.mufasabase, simba.settings, simba.httpclient,
   simba.files, simba.resourceextractor, simba.codeparser, simba.codeinsight,
   simba.debugimage, simba.bitmapconv, simba.colorpicker_historyform, simba.aca,
   simba.dtmeditor, simba.scriptinstance, simba.package_form, simba.aboutform,
   simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
-  simba.notesform, simba.settingsform, simba.colorpicker, simba.ci_includecache
+  simba.notesform, simba.settingsform, simba.colorpicker, simba.ci_includecache,
+  simba.highlighter
   {$IFDEF WINDOWS},
   windows
   {$ENDIF}
@@ -1361,7 +1362,7 @@ begin
   if DockMaster.GetAnchorSite(Form) = nil then
     raise Exception.Create('Not a Simba form');
 
-  DockMaster.GetAnchorSite(Form).Visible := True;
+  DockMaster.GetAnchorSite(Form).ShowOnTop();
 end;
 
 procedure TSimbaForm.HideForm(Form: TForm);

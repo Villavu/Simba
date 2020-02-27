@@ -43,6 +43,9 @@ type
     procedure ImageMouseLeave(Sender: TObject); virtual;
     procedure ImageDoubleClick(Sender: TObject); virtual;
 
+    function GetImageHeight: Int32;
+    function GetImageWidth: Int32;
+
     function GetCursor: TCursor; override;
     procedure SetCursor(Value: TCursor); override;
 
@@ -52,6 +55,8 @@ type
     ZOOM_MIN = 0.25;
     ZOOM_MAX = {$IFDEF LINUX}2.0{$ELSE}16.0{$ENDIF}; // GTK2 resizing sucks. Let's hope it's better in GTK3.
   public
+    property ImageWidth: Int32 read GetImageWidth;
+    property ImageHeight: Int32 read GetImageHeight;
     property Zoom: Double read FZoom write SetZoom;
     property StatusBar: TStatusBar read FStatusBar;
     property StatusPanel: TStatusPanel read FStatusPanel;
@@ -113,6 +118,16 @@ begin
   end;
 end;
 
+function TSimbaImageBox.GetImageHeight: Int32;
+begin
+  Result := FImage.Picture.Bitmap.Width;
+end;
+
+function TSimbaImageBox.GetImageWidth: Int32;
+begin
+  Result := FImage.Picture.Bitmap.Height;
+end;
+
 procedure TSimbaImageBox.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
@@ -127,6 +142,9 @@ end;
 
 procedure TSimbaImageBox.ImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
+  if CanSetFocus() then
+    SetFocus();
+
   X := Trunc(X / FZoom);
   Y := Trunc(Y / FZoom);
 

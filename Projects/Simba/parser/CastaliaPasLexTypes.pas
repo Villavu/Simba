@@ -15,7 +15,7 @@ unit CastaliaPasLexTypes;
 
 ----------------------------------------------------------------------------}
 
-unit CastaliaPasLexTypes;
+unit castaliapaslextypes;
 
 {$DEFINE D8_NEWER}
 {$DEFINE D9_NEWER}
