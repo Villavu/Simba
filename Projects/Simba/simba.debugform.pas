@@ -18,6 +18,7 @@ type
     MenuItemPaste: TMenuItem;
     MenuItemSelectAll: TMenuItem;
     MenuItemDelete: TMenuItem;
+
     procedure MenuItemCopyClick(Sender: TObject);
     procedure MenuItemCutClick(Sender: TObject);
     procedure MenuItemDeleteClick(Sender: TObject);
@@ -27,7 +28,7 @@ type
     FLock: TCriticalSection;
     FStrings: TStringList;
 
-    procedure InternalAdd; overload;
+    procedure InternalAdd;
 
     procedure SettingChanged_EditorFont(Value: String);
     procedure SettingChanged_EditorFontHeight(Value: Int64);
@@ -136,7 +137,7 @@ end;
 
 procedure TSimbaDebugForm.Clear;
 begin
-  Editor.Lines.Clear;
+  Editor.Lines.Clear();
 end;
 
 constructor TSimbaDebugForm.Create(AOwner: TComponent);
