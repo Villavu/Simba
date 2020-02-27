@@ -125,7 +125,8 @@ end;
 
 procedure TSimbaDebugForm.SettingChanged_EditorFont(Value: String);
 begin
-  Editor.Font.Name := Value;
+  if Value <> '' then
+    Editor.Font.Name := Value;
 end;
 
 procedure TSimbaDebugForm.SettingChanged_EditorFontHeight(Value: Int64);

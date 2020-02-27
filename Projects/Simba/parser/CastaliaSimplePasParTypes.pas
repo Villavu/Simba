@@ -15,7 +15,7 @@ unit CastaliaPasLexTypes;
 
 ----------------------------------------------------------------------------}
 
-unit CastaliaSimplePasParTypes;
+unit castaliasimplepaspartypes;
 
 interface
 

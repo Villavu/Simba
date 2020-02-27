@@ -39,7 +39,7 @@ local
 Known Issues:
 -----------------------------------------------------------------------------}
 
-unit CastaliaPasLex;
+unit castaliapaslex;
 
 {$DEFINE D8_NEWER}
 {$DEFINE D9_NEWER}
@@ -53,7 +53,7 @@ interface
 
 uses
   //!! pruned uses
-  SysUtils, Classes, Controls, CastaliaPasLexTypes;
+  SysUtils, Classes, Controls, castaliapaslextypes;
 
 var
   Identifiers: array[#0..#255] of ByteBool;
