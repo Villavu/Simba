@@ -133,7 +133,7 @@ jobs:
             os.chdir('Projects/SimbaScript/')
 
             if os.name == 'posix':
-                os.system('Xvfb :1 &')
+                os.system('Xvfb :1 & sleep 3')
                 if os.system('DISPLAY=:1 ./SimbaScript --run --script="begin end."') != 0:
                   return False
             else:
