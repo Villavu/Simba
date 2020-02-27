@@ -323,7 +323,7 @@ begin
   FFileBrowser.PopupMenu := Popup;
   FFileBrowser.ReadOnly := True;
   FFileBrowser.OnDblClick := @HandleFileBrowserDoubleClick;
-  FFileBrowser.Options := FFileBrowser.Options + [tvoAutoItemHeight];
+  FFileBrowser.Options := FFileBrowser.Options + [tvoAutoItemHeight] - [tvoToolTips];
 end;
 
 initialization

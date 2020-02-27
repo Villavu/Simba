@@ -31,10 +31,7 @@ uses
   StdCtrls, EditBtn, ExtDlgs, ExtCtrls;
 
 type
-
-  { TBitmapConvForm }
-
-  TBitmapConvForm = class(TForm)
+  TSimbaBitmapConversionForm = class(TForm)
     ClipboardButton: TButton;
     GroupBox: TGroupBox;
     ToStringButton: TButton;
@@ -46,14 +43,12 @@ type
     procedure OpenButtonClick(Sender: TObject);
     procedure ToStringButtonClick(Sender: TObject);
   private
-    { private declarations }
   public
     dispPic : TMufasaBitmap;
-    { public declarations }
   end; 
 
 var
-  BitmapConvForm: TBitmapConvForm;
+  SimbaBitmapConversionForm: TSimbaBitmapConversionForm;
 
 implementation
 
@@ -64,9 +59,7 @@ uses
 const
   BmpSizeTxt = '(%dx%d)';
 
-{ TBitmapConvForm }
-
-procedure TBitmapConvForm.OpenButtonClick(Sender: TObject);
+procedure TSimbaBitmapConversionForm.OpenButtonClick(Sender: TObject);
 var
   x : TMufasaBitmap;
 begin
@@ -88,7 +81,7 @@ begin
   end;
 end;
 
-procedure TBitmapConvForm.ClipboardButtonClick(Sender: TObject);
+procedure TSimbaBitmapConversionForm.ClipboardButtonClick(Sender: TObject);
 begin
   if (Clipboard.HasPictureFormat()) then
   try
@@ -110,7 +103,7 @@ begin
     MessageDlg('Invalid Clipboard?', 'Cannot create bitmap from clipboard.', mtError, [mbOK], 0);
 end;
 
-procedure TBitmapConvForm.ToStringButtonClick(Sender: TObject);
+procedure TSimbaBitmapConversionForm.ToStringButtonClick(Sender: TObject);
 var
   str : string;
   strend : string;

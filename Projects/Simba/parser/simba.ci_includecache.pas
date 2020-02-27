@@ -202,7 +202,7 @@ end;
 
 function TCodeInsight_IncludeCache.GetLibrary(Sender: TCodeParser; FileName: String): TCodeInsight_Include;
 var
-  Contents: String;
+  Contents: String = '';
 begin
   Result := nil;
 

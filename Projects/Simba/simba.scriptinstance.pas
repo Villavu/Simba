@@ -155,23 +155,19 @@ end;
 procedure TSimbaScriptInstance.RunMethodServer;
 var
   Method: TSimbaMethod;
-  Size: Int32;
-  Total: Int32;
-  Count: Int32;
-  msg: Int32;
+  Message: Int32;
 begin
   Method.Script := Self;
   Method.Params := TMemoryStream.Create();
   Method.Result := TMemoryStream.Create();
 
-  Total := 0;
   try
     while True do
     begin
-      if not FMethodServer.ReadMessage(msg, Method.Params) then
+      if not FMethodServer.ReadMessage(Message, Method.Params) then
         Break;
 
-      case ESimbaMethod(msg) of
+      case ESimbaMethod(Message) of
         SIMBA_METHOD_DEBUG_IMAGE:         TThread.Synchronize(nil, @Method._DebugImage);
         SIMBA_METHOD_DEBUG_IMAGE_DRAW:    TThread.Synchronize(nil, @Method._DebugImageDraw);
         SIMBA_METHOD_SCRIPT_ERROR:        TThread.Synchronize(nil, @Method._ScriptError);
@@ -187,7 +183,7 @@ begin
           raise Exception.CreateFmt('Invalid method %d', [Method.Method]);
       end;
 
-      FMethodServer.WriteMessage(msg, Method.Result);
+      FMethodServer.WriteMessage(Message, Method.Result);
     end;
   except
     on e: Exception do
@@ -253,6 +249,8 @@ begin
     on e: Exception do
       WriteLn('Output Server: ' + e.Message);
   end;
+
+  FOutput.Free();
 
   FOutputServer.Free();
   FOutputServer := nil;
@@ -386,34 +384,11 @@ begin
     FProcess.Free();
   end;
 
-  if FMethodThread <> nil then
-  begin
-    WriteLn('Terminate method server');
+  if (FMethodServer <> nil) then FMethodServer.Terminate();
+  if (FStateServer <> nil)  then FStateServer.Terminate();
+  if (FOutputServer <> nil) then FOutputServer.Terminate();
 
-    FMethodServer.Terminate();
-    while FMethodServer <> nil do
-      Sleep(10);
-  end;
-
-  if FStateThread <> nil then
-  begin
-    WriteLn('Terminate state server');
-
-    FStateServer.Terminate();
-    while FStateServer <> nil do
-      Sleep(10);
-  end;
-
-  if FOutputThread <> nil then
-  begin
-    WriteLn('Terminate output server');
-
-    FOutputServer.Terminate();
-    while FOutputServer <> nil do
-      Sleep(10);
-  end;
-
-  if (FOutput <> nil) then
+  if (FOutputThread = nil) then // exception raised in create
     FOutput.Free();
 
   inherited Destroy();

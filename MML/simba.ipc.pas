@@ -5,7 +5,7 @@ unit simba.ipc;
 interface
 
 uses
-  classes, sysutils, pipes, math;
+  classes, sysutils, pipes;
 
 const
   PIPE_TERMINATED = 0;
