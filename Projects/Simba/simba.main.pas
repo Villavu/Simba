@@ -29,29 +29,51 @@ unit simba.main;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Menus, ComCtrls, ExtCtrls, ActnList, LMessages, Buttons,
-  CastaliaPasLexTypes, CastaliaSimplePasPar,
-  simba.codeinsight, simba.updater, simba.package_form, simba.windowselector, simba.scripttab,
-  simba.codeparser, simba.setting, LCLType, ImgList, simba.oswindow;
+  classes, sysutils, fileutil, lresources, forms, controls, graphics, dialogs,
+  stdctrls, menus, comctrls, extctrls, actnlist, buttons, imglist,
+  simba.windowselector, simba.scripttab, simba.oswindow, castaliapaslextypes;
 
 const
-  IMAGE_COMPILE = 0;
-  IMAGE_PACKAGE = 1;
+  IMAGE_COMPILE             = 0;
+  IMAGE_PACKAGE             = 1;
+  IMAGE_COPY                = 2;
+  IMAGE_CUT                 = 3;
+  IMAGE_OPEN                = 4;
+  IMAGE_PASTE               = 5;
+  IMAGE_SAVE                = 6;
+  IMAGE_TRASH               = 7;
+  IMAGE_CLOSE               = 8;
+  IMAGE_CLOSE_ALL           = 9;
+  IMAGE_POWER               = 10;
+  IMAGE_NEW_FILE            = 11;
+  IMAGE_PAUSE               = 12;
+  IMAGE_REDO                = 13;
+  IMAGE_PLAY                = 14;
+  IMAGE_SAVE_ALL            = 15;
+  IMAGE_STOP                = 16;
+  IMAGE_UNDO                = 17;
+  IMAGE_SEARCH              = 18;
+  IMAGE_COLOR_PICKER        = 19;
+  IMAGE_SELECT              = 20;
+  IMAGE_GEAR                = 21;
+  IMAGE_OPEN_RECENT         = 22;
   IMAGE_PACKAGE_NOTIFCATION = 23;
-  IMAGE_DIRECTORY = 27;
-  IMAGE_SIMBA = 28;
-  IMAGE_BOOK = 29;
-  IMAGE_FILE = 30;
-  IMAGE_TYPE = 31;
-  IMAGE_FUNCTION = 32;
-  IMAGE_PROCEDURE = 33;
-  IMAGE_GITHUB = 34;
-  IMAGE_CONSTANT = 35;
-  IMAGE_VARIABLE = 36;
+  IMAGE_WRITE_BUG           = 24;
+  IMAGE_MINUS               = 25;
+  IMAGE_PLUS                = 26;
+  IMAGE_DIRECTORY           = 27;
+  IMAGE_SIMBA               = 28;
+  IMAGE_BOOK                = 29;
+  IMAGE_FILE                = 30;
+  IMAGE_TYPE                = 31;
+  IMAGE_FUNCTION            = 32;
+  IMAGE_PROCEDURE           = 33;
+  IMAGE_GITHUB              = 34;
+  IMAGE_CONSTANT            = 35;
+  IMAGE_VARIABLE            = 36;
 
 type
-  TScriptButtonState = (ss_None, ss_Running, ss_Paused, ss_Stopping, ss_Locked);
+  TScriptButtonState = (ss_None, ss_Running, ss_Paused, ss_Stopping);
 
   TSimbaForm = class(TForm)
     Images: TImageList;
@@ -63,7 +85,6 @@ type
     MenuItemTrayIcon: TMenuItem;
     MenuItem4: TMenuItem;
     MainMenu: TMainMenu;
-    MenuColors: TMenuItem;
     MenuItemDTMEditor: TMenuItem;
     MenuEdit: TMenuItem;
     MenuFile: TMenuItem;
@@ -102,10 +123,7 @@ type
     MenuItemNew: TMenuItem;
     MenuItemNotes: TMenuItem;
     MenuItemOpen: TMenuItem;
-    MenuItemOpenPluginsFolder: TMenuItem;
-    MenuItemOpenIncludesFolder: TMenuItem;
     MenuItemOpenRecent: TMenuItem;
-    MenuItemOpenScriptsFolder: TMenuItem;
     MenuItemPaste: TMenuItem;
     MenuItemPause: TMenuItem;
     MenuItemRedo: TMenuItem;
@@ -158,7 +176,7 @@ type
     procedure MenuCloseAllTabsClick(Sender: TObject);
     procedure MenuCloseTabClick(Sender: TObject);
     procedure MenuCompileClick(Sender: TObject);
-    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+
     procedure MenuCopyClick(Sender: TObject);
     procedure MenuCutClick(Sender: TObject);
     procedure MenuExitClick(Sender: TObject);
@@ -190,7 +208,6 @@ type
     procedure ShowFormDesigner(Sender: TObject);
     procedure HandleRunningScripts(Sender: TObject);
     procedure MenuItemBitmapConvClick(Sender: TObject);
-    procedure MenuItemColourHistoryClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
 
     procedure FormDestroy(Sender: TObject);
@@ -208,20 +225,22 @@ type
     procedure ButtonTrayClick(Sender: TObject);
     procedure ShowACA(Sender: TObject);
     procedure TrayPopupPopup(Sender: TObject);
+    procedure SetScriptState(const State: TScriptButtonState);
+    procedure CodeTools_OnMessage(Sender: TObject; const Typ: TMessageEventType; const Message: String; X, Y: Integer);
+    procedure CodeTools_OnLoadLibrary(Sender: TObject; FileName: String; var Contents: String);
 
-    procedure OnCCMessage(Sender: TObject; const Typ: TMessageEventType; const Message: string; X, Y: Integer);
-    function OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
-    function OnCCFindLibrary(Sender: TObject; var FileName: string): Boolean;
-    procedure OnCCLoadLibrary(Sender: TObject; FileName: String; var Contents: String);
+    function CodeTools_OnFindInclude(Sender: TObject; var FileName: String): Boolean;
+    function CodeTools_OnFindLibrary(Sender: TObject; var FileName: String): Boolean;
+
     procedure HandleMenuViewClick(Sender: TObject);
     procedure ResetDockingSplitters(Data: PtrInt);
+
     procedure SettingChanged_CustomToolbarSize(Value: Int64);
     procedure SettingChanged_CustomFontSize(Value: Int64);
-  private
-    function GetLayerLocked: Boolean;
-    procedure SetLayoutLocked(Value: Boolean);
+    procedure SettingChanged_LayoutLocked(Value: Boolean);
+    procedure SettingChanged_ConsoleVisible(Value: Boolean);
+    procedure SettingChanged_TrayIconVisible(Value: Boolean);
   protected
-    News: String;
     FWindowSelection: TOSWindow;
     FScriptState: TScriptButtonState;
 
@@ -229,30 +248,17 @@ type
 
     procedure PrintDTM(constref DTM: String);
 
-    function GetScriptState: TScriptButtonState;
-    procedure GetSimbaNews;
-    procedure WriteSimbaNews(Sender: TObject);
-
-    procedure SetTrayIconVisible(Value: Boolean);
-    procedure SetConsoleVisible(Value: Boolean);
-
-    procedure SetScriptState(const State: TScriptButtonState);
-
     procedure CustomExceptionHandler(Sender: TObject; E: Exception);
 
     function LoadLayout: Boolean;
     procedure SaveLayout;
     procedure SetupLayout(Reset: Boolean = False);
     procedure SetEnabled(Value: Boolean); override;
-    procedure SetVisible(Value: boolean); override;
+    procedure SetVisible(Value: Boolean); override;
   public
     Initialized: Boolean;
 
     property WindowSelection: TOSWindow read FWindowSelection;
-
-    property ScriptButtonState : TScriptButtonState read FScriptState write SetScriptState;
-    property ConsoleVisible: Boolean write SetConsoleVisible;
-    property LayoutLocked: Boolean read GetLayerLocked write SetLayoutLocked;
 
     procedure RunScript;
     procedure CompileScript;
@@ -260,8 +266,6 @@ type
     procedure StopScript;
 
     procedure AddRecentFile(const FileName: String);
-
-    procedure DoSimbaNews(Data: PtrInt);
 
     procedure AddSettingChangeHandlers;
     procedure RemoveSettingChangeHandlers;
@@ -286,13 +290,12 @@ var
 implementation
 
 uses
-  clipbrd, lclintf, lazfileutils,  SynExportHTML, anchordocking, xmlconf, simba.mufasatypes,
-  XMLPropStorage, AnchorDockStorage,
-  simba.misc, simba.mufasabase, simba.settings,
-  simba.httpclient, simba.files, simba.resourceextractor,
-  simba.debugimage, simba.bitmapconv, simba.colorpicker_historyform,
-  simba.aca, simba.dtmeditor,  simba.scriptinstance,
-  simba.aboutform, simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
+  lclintf, synexporthtml, anchordocking, xmlconf, xmlpropstorage, anchordockstorage, simba.highlighter,
+  simba.mufasatypes, simba.misc, simba.mufasabase, simba.settings, simba.httpclient,
+  simba.files, simba.resourceextractor, simba.codeparser, simba.codeinsight,
+  simba.debugimage, simba.bitmapconv, simba.colorpicker_historyform, simba.aca,
+  simba.dtmeditor, simba.scriptinstance, simba.package_form, simba.aboutform,
+  simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.colorpicker, simba.ci_includecache
   {$IFDEF WINDOWS},
   windows
@@ -318,11 +321,14 @@ type
 
     procedure MenuItemDestroyed(Sender: TObject);
 
+    function GetFormCount: Int32;
+
     procedure SetMenuItem(Value: TMenuItem);
     procedure SetVisible(Value: Boolean); override;
     procedure SetParent(Value: TWinControl); override;
   public
     property MenuItem: TMenuItem read FMenuItem write SetMenuItem;
+    property FormCount: Int32 read GetFormCount;
 
     procedure UpdateDockCaption(Exclude: TControl = nil); override;
 
@@ -369,6 +375,17 @@ begin
   FMenuItem := nil;
 end;
 
+function TSimbaAnchorDockHostSite.GetFormCount: Int32;
+var
+  I: Int32;
+begin
+  Result := 0;
+
+  for I := 0 to ControlCount - 1 do
+    if Controls[I] is TForm then
+      Result := Result + 1;
+end;
+
 procedure TSimbaAnchorDockHostSite.SetMenuItem(Value: TMenuItem);
 begin
   FMenuItem := Value;
@@ -381,6 +398,11 @@ begin
 
   if (MenuItem <> nil) then
     MenuItem.Checked := Value;
+
+  if (Parent <> nil) then
+    ShowInTaskBar := stNever
+  else
+    ShowInTaskBar := stAlways;
 end;
 
 procedure TSimbaAnchorDockHostSite.SetParent(Value: TWinControl);
@@ -394,10 +416,18 @@ begin
 end;
 
 procedure TSimbaAnchorDockHostSite.UpdateDockCaption(Exclude: TControl);
+var
+  I: Int32;
 begin
   inherited UpdateDockCaption(Exclude);
 
-  Caption := 'Simba';
+  if FormCount = 1 then
+  begin
+    for I := 0 to ControlCount - 1 do
+      if Controls[I] is TForm then
+        Caption := Controls[i].Caption;
+  end else
+    Caption := 'Simba';
 end;
 
 constructor TSimbaAnchorDockHostSite.CreateNew(AOwner: TComponent; Num: Integer);
@@ -506,13 +536,13 @@ begin
   end;
 end;
 
-procedure TSimbaForm.OnCCMessage(Sender: TObject; const Typ: TMessageEventType; const Message: string; X, Y: Integer);
+procedure TSimbaForm.CodeTools_OnMessage(Sender: TObject; const Typ: TMessageEventType; const Message: string; X, Y: Integer);
 var
   Parser: TCodeParser absolute Sender;
 begin
   if (Parser.Lexer.CaretPos = -1) or (Parser.Lexer.RunPos < Parser.Lexer.CaretPos) then
   begin
-    SimbaDebugForm.Add('Simba''s code parser encountered an error. This could break your code tools & suggestions:');
+    SimbaDebugForm.Add('Simba''s code parser encountered an error. This could break code tools:');
 
     if Parser.Lexer.FileName <> '' then
       SimbaDebugForm.Add(Format('"%s" at line %d, column %d in file "%s"', [Message, Y, X, Parser.Lexer.FileName]))
@@ -521,17 +551,17 @@ begin
   end;
 end;
 
-function TSimbaForm.OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
+function TSimbaForm.CodeTools_OnFindInclude(Sender: TObject; var FileName: String): Boolean;
 begin
   Result := FindFile(FileName, [ExtractFileDir(TCodeParser(Sender).Lexer.FileName), SimbaSettings.Environment.IncludePath.Value, Application.Location]);
 end;
 
-function TSimbaForm.OnCCFindLibrary(Sender: TObject; var FileName: string): Boolean;
+function TSimbaForm.CodeTools_OnFindLibrary(Sender: TObject; var FileName: String): Boolean;
 begin
   Result := FindPlugin(FileName, [ExtractFileDir(TCodeParser(Sender).Lexer.FileName), SimbaSettings.Environment.PluginPath.Value, Application.Location]);
 end;
 
-procedure TSimbaForm.OnCCLoadLibrary(Sender: TObject; FileName: String; var Contents: String);
+procedure TSimbaForm.CodeTools_OnLoadLibrary(Sender: TObject; FileName: String; var Contents: String);
 var
   Lib: TLibHandle;
   Header, Info: PChar;
@@ -645,26 +675,6 @@ begin
     ShowOnTop();
   end;
 end;
-
-procedure TSimbaForm.SetConsoleVisible(Value: Boolean);
-var
-  PID: UInt32;
-begin
-  MenuItemConsole.Checked := Value;
-
-  {$IFDEF WINDOWS}
-  GetWindowThreadProcessId(GetConsoleWindow(), PID);
-
-  if (PID = GetCurrentProcessID()) then
-  begin
-    case Value of
-      True: ShowWindow(GetConsoleWindow(), SW_SHOWNORMAL);
-      False: ShowWindow(GetConsoleWindow(), SW_HIDE);
-    end;
-  end;
-  {$ENDIF}
-end;
-
 procedure TSimbaForm.TrayPopupPopup(Sender: TObject);
 begin
   { XXX: What's up with this? }
@@ -777,16 +787,6 @@ begin
   end;
 end;
 
-procedure TSimbaForm.DoSimbaNews(Data: PtrInt);
-begin
-  with TProcThread.Create() do
-  begin
-    ClassProc := @GetSimbaNews;
-    OnTerminate := @WriteSimbaNews;
-    Start();
-  end;
-end;
-
 procedure TSimbaForm.MenuCloseTabClick(Sender: TObject);
 begin
   Application.QueueAsyncCall(@RemoveTabASync, 0);
@@ -795,19 +795,6 @@ end;
 procedure TSimbaForm.MenuCompileClick(Sender: TObject);
 begin
   Self.CompileScript();
-end;
-
-// Handle old hotkeys.
-procedure TSimbaForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-  if (Key = VK_F9) and ((Shift * [ssCtrl]) = [ssCtrl]) then
-    MenuItemCompile.Click()
-  else
-  if (Key = VK_F9) then
-    MenuItemRun.Click()
-  else
-  if (Key = VK_F2) then
-    MenuItemStop.Click();
 end;
 
 {$IFDEF WINDOWS}
@@ -936,9 +923,40 @@ begin
   Screen.HintFont.Size := Value;
 end;
 
-function TSimbaForm.GetLayerLocked: Boolean;
+procedure TSimbaForm.SettingChanged_LayoutLocked(Value: Boolean);
 begin
-  Result := SimbaSettings.GUI.LayoutLocked.Value;
+  MenuItemLockLayout.Checked := Value;
+
+  DockMaster.ShowHeader := not Value;
+  DockMaster.AllowDragging := not Value;
+
+  Application.QueueAsyncCall(@FormResizeASync, 0);
+end;
+
+procedure TSimbaForm.SettingChanged_ConsoleVisible(Value: Boolean);
+var
+  PID: UInt32;
+begin
+  MenuItemConsole.Checked := Value;
+
+  {$IFDEF WINDOWS}
+  GetWindowThreadProcessId(GetConsoleWindow(), PID);
+
+  if (PID = GetCurrentProcessID()) then
+  begin
+    case Value of
+      True: ShowWindow(GetConsoleWindow(), SW_SHOWNORMAL);
+      False: ShowWindow(GetConsoleWindow(), SW_HIDE);
+    end;
+  end;
+  {$ENDIF}
+end;
+
+procedure TSimbaForm.SettingChanged_TrayIconVisible(Value: Boolean);
+begin
+  MenuItemTrayIcon.Checked := Value;
+
+  TrayIcon.Visible := Value;
 end;
 
 type
@@ -949,17 +967,6 @@ type
 function TToolBar_Helper.Size: TPoint;
 begin
   CalculatePreferredSize(Result.X, Result.Y, True);
-end;
-
-procedure TSimbaForm.SetLayoutLocked(Value: Boolean);
-begin
-  MenuItemLockLayout.Checked := Value;
-
-  DockMaster.ShowHeader := not Value;
-  DockMaster.AllowDragging := not Value;
-
-  if OnResize <> nil then
-    OnResize(nil);
 end;
 
 procedure TSimbaForm.RemoveTabASync(Data: PtrInt);
@@ -974,7 +981,7 @@ begin
   SimbaDebugForm.Add('DTM := DTMFromString(' + #39 + DTM + #39 + ');');
 end;
 
-procedure TSimbaForm.SetVisible(Value: boolean);
+procedure TSimbaForm.SetVisible(Value: Boolean);
 begin
   if (not Value) or (not FormIsUpdating) then
     inherited SetVisible(Value);
@@ -1139,23 +1146,23 @@ begin
       if Tab.ScriptInstance.IsStopping then
       begin
         SimbaScriptTabsForm.StatusPanelState.Caption := 'Stopping';
-        ScriptButtonState := ss_Stopping;
+        SetScriptState(ss_Stopping);
       end
       else
       if Tab.ScriptInstance.IsPaused then
       begin
         SimbaScriptTabsForm.StatusPanelState.Caption := 'Paused';
-        ScriptButtonState := ss_Paused;
+        SetScriptState(ss_Paused);
       end
       else
       begin
-        ScriptButtonState := ss_Running;
-        SimbaScriptTabsForm.StatusPanelState.Caption := ShortTimeStamp(Tab.ScriptInstance.TimeRunning);
+        SetScriptState(ss_Running);
+        SimbaScriptTabsForm.StatusPanelState.Caption := TimeStamp(Tab.ScriptInstance.TimeRunning);
       end;
     end else
     begin
       SimbaScriptTabsForm.StatusPanelState.Caption := 'Stopped';
-      ScriptButtonState := ss_None;
+      SetScriptState(ss_None);
     end;
   end;
 
@@ -1164,17 +1171,7 @@ end;
 
 procedure TSimbaForm.MenuItemBitmapConvClick(Sender: TObject);
 begin
-  BitmapConvForm.Show;
-end;
-
-procedure TSimbaForm.MenuItemColourHistoryClick(Sender: TObject);
-begin
-  {
-  MenuItemColourHistory.Checked := not ColourHistoryForm.Visible;
-  if MenuItemColourHistory.Checked then
-    ColourHistoryForm.Show
-  else
-    ColourHistoryForm.Hide;    }
+  SimbaBitmapConversionForm.Show();
 end;
 
 procedure TSimbaForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -1209,7 +1206,7 @@ begin
     begin
       R := TAnchorDockHostSite(Controls[i]).BoundsRect;
       R.Top := ToolBar.Size.Y;
-      if LayoutLocked then
+      if SimbaSettings.GUI.LayoutLocked.Value then
         R.Top := R.Top - 2;
 
       TAnchorDockHostSite(Controls[i]).BoundsRect := R;
@@ -1224,19 +1221,18 @@ end;
 
 procedure TSimbaForm.AddSettingChangeHandlers;
 begin
- // SimbaSettings.GUI.ToolbarSize.AddHandlerOnChange(@SetToolbarSize);
-  SimbaSettings.GUI.TrayIconVisible.AddHandlerOnChange(@SetTrayIconVisible);
-  SimbaSettings.GUI.ConsoleVisible.AddHandlerOnChange(@SetConsoleVisible);
-  SimbaSettings.GUI.LayoutLocked.AddHandlerOnChange(@SetLayoutLocked);
+  SimbaSettings.GUI.TrayIconVisible.AddHandlerOnChange(@SettingChanged_TrayIconVisible);
+  SimbaSettings.GUI.ConsoleVisible.AddHandlerOnChange(@SettingChanged_ConsoleVisible);
+  SimbaSettings.GUI.LayoutLocked.AddHandlerOnChange(@SettingChanged_LayoutLocked);
   SimbaSettings.GUI.CustomFontSize.AddHandlerOnChange(@SettingChanged_CustomFontSize);
   SimbaSettings.GUI.CustomToolbarSize.AddHandlerOnChange(@SettingChanged_CustomToolbarSize);
 end;
 
 procedure TSimbaForm.RemoveSettingChangeHandlers;
 begin
-  SimbaSettings.GUI.TrayIconVisible.RemoveHandlerOnChange(@SetTrayIconVisible);
-  SimbaSettings.GUI.ConsoleVisible.RemoveHandlerOnChange(@SetConsoleVisible);
-  SimbaSettings.GUI.LayoutLocked.RemoveHandlerOnChange(@SetLayoutLocked);
+  SimbaSettings.GUI.TrayIconVisible.RemoveHandlerOnChange(@SettingChanged_TrayIconVisible);
+  SimbaSettings.GUI.ConsoleVisible.RemoveHandlerOnChange(@SettingChanged_ConsoleVisible);
+  SimbaSettings.GUI.LayoutLocked.RemoveHandlerOnChange(@SettingChanged_LayoutLocked);
   SimbaSettings.GUI.CustomFontSize.RemoveHandlerOnChange(@SettingChanged_CustomFontSize);
   SimbaSettings.GUI.CustomToolbarSize.RemoveHandlerOnChange(@SettingChanged_CustomToolbarSize);
 end;
@@ -1322,7 +1318,7 @@ begin
     for i := 0 to ScriptInstance.Output.Count - 1 do
     begin
       Parser := TCodeInsight_Include.Create();
-      Parser.OnMessage := @Self.OnCCMessage;
+      Parser.OnMessage := @Self.CodeTools_OnMessage;
       Parser.Run(ScriptInstance.Output.ValueFromIndex[i], ScriptInstance.Output.Names[i]);
 
       if Parser.Lexer.FileName <> 'Classes' then
@@ -1377,44 +1373,24 @@ begin
 end;
 
 procedure TSimbaForm.Initialize_CommandLineOptions;
-const
-  Help =
-    ''                                       + LineEnding +
-    'Options:'                               + LineEnding +
-    '  -open:    opens the given script'     + LineEnding +
-    '  -run:     runs the given script'      + LineEnding +
-    '  -compile: compiles the given script'  + LineEnding +
-    ''                                       + LineEnding +
-    'Example:'                               + LineEnding +
-    '  Simba.exe -run "Test.simba"'          + LineEnding +
-    '';
 begin
-  WriteLn('Initialize Command Line Options');
-
-  if Application.HasOption('h', 'help') then
-    WriteLn(Help);
-
-  if Application.ParamCount = 2 then
+  if (Application.ParamCount = 2) then
   begin
+    WriteLn('Initialize Command Line Options');
+
     if not FileExists(Application.Params[2]) then
     begin
-      WriteLn('A valid script file must be passed');
-      Halt(1);
+      WriteLn('Script does not exist!');
+      Halt(0);
     end;
 
-    if Application.HasOption('open') or Application.HasOption('compile') or Application.HasOption('run') then
-    begin
-      SimbaScriptTabsForm.Open(Application.Params[2]);
+    SimbaScriptTabsForm.Open(Application.Params[2]);
 
-      if Application.HasOption('c', 'compile') then
-        Self.CompileScript();
-      if Application.HasOption('r', 'run') then
-        Self.RunScript();
-    end else
-      WriteLn(Help);
-  end else
-  if Application.ParamCount > 0 then
-    WriteLn(Help);
+    if Application.HasOption('c', 'compile') then
+      Self.CompileScript();
+    if Application.HasOption('r', 'run') then
+      Self.RunScript();
+  end;
 end;
 
 procedure TSimbaForm.CenterForm(Form: TForm);
@@ -1437,8 +1413,6 @@ var
   I: Int32;
   Site: TSimbaAnchorDockHostSite;
 begin
-  WriteLn('Initializing...');
-
   Initialize_Console();
   Initialize_Docking();
   Initialize_OpenSSL();
@@ -1462,16 +1436,19 @@ begin
     if (Screen.CustomForms[I] is TSimbaAnchorDockHostSite) then
     begin
       Site := Screen.CustomForms[I] as TSimbaAnchorDockHostSite;
+      if (Site.MenuItem <> nil) and (not Site.MenuItem.Checked) then
+        Continue;
 
       if DockMaster.ShowHeader then
-        Screen.CustomForms[I].Visible := (Screen.CustomForms[I].ControlCount > 1) and ((Site.MenuItem = nil) or Site.MenuItem.Checked)
+        Screen.CustomForms[I].Visible := (Screen.CustomForms[I].ControlCount > 1)
       else
-        Screen.CustomForms[I].Visible := (Screen.CustomForms[I].ControlCount > 0) and ((Site.MenuItem = nil) or Site.MenuItem.Checked);
+        Screen.CustomForms[I].Visible := (Screen.CustomForms[I].ControlCount > 0);
     end;
 
   Self.Visible := True;
   Self.ScriptProcessorTimer.Enabled := True;
 
+  WriteLn('Initialized.');
   WriteLn('');
 end;
 
@@ -1504,7 +1481,7 @@ end;
 
 procedure TSimbaForm.MenuItemAboutClick(Sender: TObject);
 begin
-  AboutForm.ShowModal();
+  SimbaAboutForm.ShowModal();
 end;
 
 procedure TSimbaForm.MenuItemCloseTabsClick(Sender: TObject);
@@ -1516,30 +1493,29 @@ end;
 
 procedure TSimbaForm.MenuItemExportHTMLClick(Sender: TObject);
 var
-  SynExporterHTML : TSynExporterHTML;
-begin;
-  {
+  SynExporterHTML: TSynExporterHTML;
+begin
   SynExporterHTML := TSynExporterHTML.Create(nil);
-  SynExporterHTML.Highlighter := CurrentScriptTab.Editor.Highlighter;
-  SynExporterHTML.ExportAsText:= True;
+  SynExporterHTML.Highlighter := TSynFreePascalSyn.Create(SynExporterHTML);
+  SynExporterHTML.ExportAsText := True;
+
   with TSaveDialog.Create(nil) do
-    try
-      Filter:= 'HTML Files (*.html;*.htm)|*.html;*.htm|All files(*.*)|*.*';
-      Options:= [ofOverwritePrompt,ofEnableSizing];
-      DefaultExt:= 'html';
-      if Execute then
-      begin
-        if CurrentScriptTab.ScriptName <> '' then
-          SynExporterHTML.Title:= 'Simba - ' + CurrentScriptTab.ScriptName
-        else
-          SynExporterHTML.Title:= 'Simba - Untitled';
-        SynExporterHTML.ExportAll(CurrentScriptTab.Editor.Lines);
-        SynExporterHTML.SaveToFile(FileName);
-      end;
-    finally
-      free;
-      SynExporterHTML.Free;
-    end;}
+  try
+    Filter := 'HTML Files (*.html;*.htm)|*.html;*.htm|All files(*.*)|*.*';
+    Options := [ofOverwritePrompt, ofEnableSizing];
+    DefaultExt := 'html';
+
+    if Execute then
+    begin
+      SynExporterHTML.Title := 'Simba - ' + SimbaScriptTabsForm.CurrentTab.ScriptName;
+      SynExporterHTML.ExportAll(SimbaScriptTabsForm.CurrentEditor.Lines);
+      SynExporterHTML.SaveToFile(FileName);
+    end;
+  finally
+    Free();
+  end;
+
+  SynExporterHTML.Free();
 end;
 
 procedure TSimbaForm.MenuItemHideClick(Sender: TObject);
@@ -1573,44 +1549,6 @@ begin
     Self.SetFocus;
 end;
 
-procedure TSimbaForm.GetSimbaNews;
-begin
-  try
-    with TSimbaHTTPClient.Create() do
-    try
-      //News := Get(SimbaSettings.News.URL.Value);
-      if ResponseCode <> HTTP_OK then
-        WriteLn('[NEWS]: Invaild response code ', ResponseCode);
-    finally
-      Free();
-    end;
-  except
-    on e: Exception do
-      WriteLn('[NEWS]: Exception "', e.Message, '" encountered');
-  end;
-end;
-
-procedure TSimbaForm.WriteSimbaNews(Sender: TObject);
-begin
-  {
-  with TStringList.Create() do
-  try
-    Text := News; // Process line endings.
-
-    if (Text <> '') then
-      Debug(Text);
-  finally
-    Free();
-  end;  }
-end;
-
-procedure TSimbaForm.SetTrayIconVisible(Value: Boolean);
-begin
-  MenuItemTrayIcon.Checked := Value;
-
-  TrayIcon.Visible := Value;
-end;
-
 procedure TSimbaForm.ButtonPickClick(Sender: TObject);
 begin
   try
@@ -1638,8 +1576,11 @@ begin
       SimbaDebugForm.Add('Window Selected: ' + IntToStr(Selected));
       SimbaDebugForm.Add(' - Dimensions: ' + IntToStr(Selected.GetBounds().Width - 1) + 'x' + IntToStr(Selected.GetBounds().Height - 1));
       SimbaDebugForm.Add(' - PID: ' + IntToStr(Selected.GetPID));
-      SimbaDebugForm.Add(' - Title: ' + Selected.GetTitle());
-      SimbaDebugForm.Add(' - ClassName: ' + Selected.GetClassName());
+
+      if Selected.GetTitle() <> '' then
+        SimbaDebugForm.Add(' - Title: ' + Selected.GetTitle());
+      if Selected.GetClassName <> '' then
+        SimbaDebugForm.Add(' - ClassName: ' + Selected.GetClassName());
 
       FWindowSelection := Selected;
     finally
@@ -1657,11 +1598,6 @@ begin
   self.hide;
 end;
 
-function TSimbaForm.GetScriptState: TScriptButtonState;
-begin
-  Result := FScriptState;
-end;
-
 procedure TSimbaForm.SetScriptState(const State: TScriptButtonState);
 begin
   if (State = FScriptState) then
@@ -1669,34 +1605,29 @@ begin
 
   FScriptState := State;
 
-
-    case FScriptState of
-      ss_Running : begin {Text := 'Running';} RunButton.Enabled := False; PauseButton.Enabled:= True; CompileButton.Enabled := True;
-                         StopButton.ImageIndex := 16; StopButton.Enabled := True;
-                         TrayPlay.Checked := True; TrayPlay.Enabled := False; TrayPause.Checked := False; TrayPause.Enabled := True;
-                         TrayStop.Enabled := True; TrayStop.Checked := False;
-                   end;
-      ss_Paused  : begin {Text := 'Paused';} RunButton.Enabled:= True; PauseButton.Enabled := False; CompileButton.Enabled := True;
-                         StopButton.ImageIndex := 16; StopButton.Enabled := True;
-                         TrayPlay.Checked := False; TrayPlay.Enabled := True; TrayPause.Checked := True; TrayPause.Enabled := True;
-                         TrayStop.Enabled := True; TrayStop.Checked:= False;
-                   end;
-      ss_Stopping: begin {Text := 'Stopping';} RunButton.Enabled := False; PauseButton.Enabled := False; StopButton.Enabled := True; CompileButton.Enabled := True;
-                         StopButton.ImageIndex := 10;
-                         TrayPlay.Checked := False; TrayPlay.Enabled := False; TrayPause.Checked := False; TrayPause.Enabled := False;
-                         TrayStop.Enabled := True; TrayStop.Checked := True;
-
-                   end;
-      ss_None    : begin {Text := 'Done';} RunButton.Enabled := True; PauseButton.Enabled := False; StopButton.Enabled := False; CompileButton.Enabled := True;
-                         StopButton.ImageIndex := 16;
-                         TrayPlay.Checked := False; TrayPlay.Enabled := True; TrayPause.Checked := False; TrayPause.Enabled := False;
-                         TrayStop.Enabled := False; TrayStop.Checked := False;
-                   end;
-      ss_Locked: begin
-                   {Text := 'Loading';}
-                   RunButton.Enabled := False; PauseButton.Enabled := False; StopButton.Enabled := False; CompileButton.Enabled := False;
+  case FScriptState of
+    ss_Running : begin RunButton.Enabled := False; PauseButton.Enabled:= True; CompileButton.Enabled := True;
+                       StopButton.ImageIndex := IMAGE_STOP; StopButton.Enabled := True;
+                       TrayPlay.Checked := True; TrayPlay.Enabled := False; TrayPause.Checked := False; TrayPause.Enabled := True;
+                       TrayStop.Enabled := True; TrayStop.Checked := False;
                  end;
-      end;
+    ss_Paused  : begin RunButton.Enabled:= True; PauseButton.Enabled := False; CompileButton.Enabled := True;
+                       StopButton.ImageIndex := IMAGE_STOP; StopButton.Enabled := True;
+                       TrayPlay.Checked := False; TrayPlay.Enabled := True; TrayPause.Checked := True; TrayPause.Enabled := True;
+                       TrayStop.Enabled := True; TrayStop.Checked:= False;
+                 end;
+    ss_Stopping: begin RunButton.Enabled := False; PauseButton.Enabled := False; StopButton.Enabled := True; CompileButton.Enabled := True;
+                       StopButton.ImageIndex := IMAGE_POWER;
+                       TrayPlay.Checked := False; TrayPlay.Enabled := False; TrayPause.Checked := False; TrayPause.Enabled := False;
+                       TrayStop.Enabled := True; TrayStop.Checked := True;
+
+                 end;
+    ss_None    : begin RunButton.Enabled := True; PauseButton.Enabled := False; StopButton.Enabled := False; CompileButton.Enabled := True;
+                       StopButton.ImageIndex := IMAGE_STOP;
+                       TrayPlay.Checked := False; TrayPlay.Enabled := True; TrayPause.Checked := False; TrayPause.Enabled := False;
+                       TrayStop.Enabled := False; TrayStop.Checked := False;
+                 end;
+    end;
 end;
 
 function TSimbaForm.LoadLayout: Boolean;
@@ -1752,6 +1683,7 @@ var
   i: Int32;
 begin
   BeginFormUpdate();
+
   DockMaster.BeginUpdate();
 
   if Reset then

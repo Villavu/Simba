@@ -156,7 +156,6 @@ begin
 end;
 function ValidMainPointBox(const TPA: TPointArray; const x1, y1, x2, y2: Integer): TBox;
 var
-  i: Integer;
   b: TBox;
 begin
   b := GetTPABounds(TPA);
@@ -170,7 +169,6 @@ function ValidMainPointBoxRotated(var dtm: TMDTM; const x1, y1, x2, y2: Integer;
                                   const sAngle, eAngle, aStep: Extended): TBox;
 
 var
-   i: Integer;
    d:extended;
 
 begin

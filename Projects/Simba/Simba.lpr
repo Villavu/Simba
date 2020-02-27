@@ -38,9 +38,8 @@ uses
   {$ENDIF}
   classes, interfaces, forms, sysutils,
   simba.settings, simba.main, simba.aboutform, simba.debugimage, simba.bitmapconv,
-  simba.updateform, simba.functionlistform, simba.scripttabsform,
-  simba.debugform, simba.filebrowserform, simba.notesform, simba.settingsform,
-  simba.package_form, simba.colorpicker_historyform, simba.mufasabase
+  simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
+  simba.notesform, simba.package_form, simba.colorpicker_historyform, simba.mufasabase
   {$IFDEF USE_FORMDESIGNER},
   simba.formdesigner
   {$ENDIF};
@@ -65,16 +64,30 @@ begin
   SetHeapTraceOutput('memoryleaks.trc');
   {$ENDIF}
 
-  WriteLn('Simba Version: ', IntToStr(SimbaVersion));
-  WriteLn('Build Time: ', {$I %TIME%}, ' on ', {$I %DATE%});
-  Writeln('FPC Version: ', {$I %FPCVERSION%});
-  Writeln('Target CPU: ', {$I %FPCTARGET%});
+  WriteLn('Simba ', IntToStr(SimbaVersion));
+  WriteLn('Built At ', {$I %TIME%}, ' on ', {$I %DATE%});
   WriteLn('');
 
-  WriteLn('Creating forms...');
+  if Application.HasOption('help') or (Application.ParamCount = 2) and (Application.CheckOptions('', ['open', 'compile', 'run']) <> '') then
+  begin
+    WriteLn(
+      'Options:'                              + LineEnding +
+      '  -open:    opens the given script'    + LineEnding +
+      '  -run:     runs the given script'     + LineEnding +
+      '  -compile: compiles the given script' + LineEnding +
+      ''                                      + LineEnding +
+      'Example:'                              + LineEnding +
+      '  Simba.exe -run "script.simba"'       + LineEnding +
+      ''
+    );
 
+    Halt(0);
+  end;
+
+  Application.Title := 'Simba';
   Application.ShowMainForm := False;
   Application.Initialize();
+
   Application.CreateForm(TSimbaForm, SimbaForm);
   Application.CreateForm(TSimbaFunctionListForm, SimbaFunctionListForm);
   Application.CreateForm(TSimbaDebugImageForm, SimbaDebugImageForm);
@@ -82,10 +95,8 @@ begin
   Application.CreateForm(TSimbaScriptTabsForm, SimbaScriptTabsForm);
   Application.CreateForm(TSimbaDebugForm, SimbaDebugForm);
   Application.CreateForm(TSimbaFileBrowserForm, SimbaFileBrowserForm);
-  Application.CreateForm(TAboutForm, AboutForm);
-  Application.CreateForm(TBitmapConvForm, BitmapConvForm);
-  Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
-  Application.CreateForm(TSimbaSettingsForm, SimbaSettingsForm);
+  Application.CreateForm(TSimbaAboutForm, SimbaAboutForm);
+  Application.CreateForm(TSimbaBitmapConversionForm, SimbaBitmapConversionForm);
   Application.CreateForm(TSimbaPackageForm, SimbaPackageForm);
   Application.CreateForm(TSimbaColorHistoryForm, SimbaColorHistoryForm);
   {$IFDEF USE_FORMDESIGNER}

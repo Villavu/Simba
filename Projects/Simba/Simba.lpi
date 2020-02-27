@@ -25,42 +25,8 @@
       <CharSet Value="04B0"/>
       <StringTable CompanyName="Villavu.com" FileDescription="Simba: http://wizzup.org/simba/" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="1.3 RC2"/>
     </VersionInfo>
-    <BuildModes Count="2">
-      <Item1 Name="Debug" Default="True"/>
-      <Item2 Name="Release">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <Target>
-            <Filename Value="../../Simba-$(TargetCPU)-$(TargetOS)"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);../../Units/lape;$(LazarusDir)/components/synedit;../../Units/Misc/MatchTemplate"/>
-            <Libraries Value="../../Units/lape/extensions/ffi/bin/$(TargetOS)"/>
-            <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../FormDesigner;$(ProjPath)../../Projects/FormDesigner/CodeGen;package;parser;colorpicker;settings;../../MML/matchtemplate;../../MML/matchtemplate/fftlib;../../MML;../../MML/iomanager;../../MML/oswindow;../../MML/dtmeditor;../../MML/aca;../../MML/generics;../../MML/web;../../MML/web/fpc;../../MML/archive;../../MML/linux;../../MML/darwin;../../Modules/Synapse;../../Modules/ATSynEdit/atsynedit;../../Modules/ATFlatControls/atflatcontrols;../../Modules/EncConv/encconv;../../Components"/>
-            <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <SmartLinkUnit Value="True"/>
-            <Checks>
-              <RangeChecks Value="True"/>
-            </Checks>
-          </CodeGeneration>
-          <Linking>
-            <LinkSmart Value="True"/>
-          </Linking>
-          <Other>
-            <CompilerMessages>
-              <IgnoredMessages idx5024="True"/>
-            </CompilerMessages>
-            <ExecuteBefore>
-              <Command Value="$MakeExe($(LazarusDir)lazbuild) --cpu=$(TargetCPU) --os=$(TargetOS) --widgetset=$(LCLWidgetType) --build-mode=default ../SimbaScript/SimbaScript.lpi"/>
-              <ShowAllMessages Value="True"/>
-              <CompileReasons Run="False"/>
-            </ExecuteBefore>
-            <CreateMakefileOnBuild Value="True"/>
-          </Other>
-        </CompilerOptions>
-      </Item2>
+    <BuildModes Count="1">
+      <Item1 Name="Release" Default="True"/>
     </BuildModes>
     <PublishOptions>
       <Version Value="2"/>
@@ -93,7 +59,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="54">
+    <Units Count="33">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -106,329 +72,199 @@
         <ResourceBaseClass Value="Form"/>
       </Unit1>
       <Unit2>
-        <Filename Value="simba.scriptframe.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="ScriptFrame"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Frame"/>
-      </Unit2>
-      <Unit3>
         <Filename Value="colorpicker/simba.colorpicker_historyform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaColorHistoryForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit3>
-      <Unit4>
+      </Unit2>
+      <Unit3>
         <Filename Value="simba.aboutform.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="AboutForm"/>
+        <ComponentName Value="SimbaAboutForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit4>
-      <Unit5>
+      </Unit3>
+      <Unit4>
         <Filename Value="simba.debugimage.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaDebugImageForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="simba.scriptinstance.pas"/>
+        <IsPartOfProject Value="True"/>
       </Unit5>
       <Unit6>
-        <Filename Value="simba.functionlistframe.pas"/>
+        <Filename Value="simba.resourceextractor.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="FunctionList_Frame"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Frame"/>
       </Unit6>
       <Unit7>
-        <Filename Value="simba.updateform.pas"/>
+        <Filename Value="../../MML/generics/simba.generics.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="SimbaUpdateForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
       </Unit7>
       <Unit8>
-        <Filename Value="simba.settings_expert.pas"/>
+        <Filename Value="../../MML/generics/simbastack.inc"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="SettingsForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
       </Unit8>
       <Unit9>
-        <Filename Value="simba.settings_simple.pas"/>
+        <Filename Value="simba.autocomplete.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="SettingsSimpleForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
       </Unit9>
       <Unit10>
-        <Filename Value="../Tools/dtm_editor.pas"/>
+        <Filename Value="simba.scripttab.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="DTMForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
       </Unit10>
       <Unit11>
-        <Filename Value="../Tools/aca_math.pas"/>
+        <Filename Value="simba.editor.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit11>
       <Unit12>
-        <Filename Value="../Tools/aca.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="ACAForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-        <UnitName Value="ACA"/>
-      </Unit12>
-      <Unit13>
-        <Filename Value="../../Units/Linux/simba.xlib_display.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit13>
-      <Unit14>
-        <Filename Value="../../Units/MMLAddon/simba.script_output.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit14>
-      <Unit15>
-        <Filename Value="simba.scriptinstance.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit15>
-      <Unit16>
-        <Filename Value="../Tools/aca.helpers.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit16>
-      <Unit17>
-        <Filename Value="../../MML/simba.script_plugin.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit17>
-      <Unit18>
-        <Filename Value="simba.resourceextractor.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit18>
-      <Unit19>
-        <Filename Value="simba.pluginparser.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit19>
-      <Unit20>
-        <Filename Value="../../MML/generics/simba.generics.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit20>
-      <Unit21>
-        <Filename Value="../../MML/generics/simbastack.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit21>
-      <Unit22>
-        <Filename Value="simba.autocomplete.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit22>
-      <Unit23>
-        <Filename Value="simba.scripttab.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit23>
-      <Unit24>
-        <Filename Value="simba.editor.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit24>
-      <Unit25>
         <Filename Value="simba.scripttabhistory.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit25>
-      <Unit26>
-        <Filename Value="simba.editorform.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit26>
-      <Unit27>
+      </Unit12>
+      <Unit13>
         <Filename Value="simba.scripttabsform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaScriptTabsForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit27>
-      <Unit28>
+      </Unit13>
+      <Unit14>
         <Filename Value="simba.debugform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaDebugForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit28>
-      <Unit29>
+      </Unit14>
+      <Unit15>
         <Filename Value="simba.functionlistform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaFunctionListForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit29>
-      <Unit30>
+      </Unit15>
+      <Unit16>
         <Filename Value="simba.filebrowserform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaFileBrowserForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit30>
-      <Unit31>
-        <Filename Value="simba.functionlist.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="SimbaFunctionList"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Frame"/>
-      </Unit31>
-      <Unit32>
-        <Filename Value="simba.functionlistupdater.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit32>
-      <Unit33>
+      </Unit16>
+      <Unit17>
         <Filename Value="simba.notesform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaNotesForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit33>
-      <Unit34>
-        <Filename Value="simba.baseform.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="SimbaBaseForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-      </Unit34>
-      <Unit35>
+      </Unit17>
+      <Unit18>
         <Filename Value="simba.settings.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit35>
-      <Unit36>
-        <Filename Value="simba.settingsform.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="SimbaSettingsForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-      </Unit36>
-      <Unit37>
+      </Unit18>
+      <Unit19>
         <Filename Value="settings/simba.settingsform_editor_font.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="EditorFontFrame"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-      </Unit37>
-      <Unit38>
+      </Unit19>
+      <Unit20>
         <Filename Value="settings/simba.settingsform_editor_colors.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="EditorColorsFrame"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-      </Unit38>
-      <Unit39>
+      </Unit20>
+      <Unit21>
         <Filename Value="settings/simba.settingsform_environment.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="EnvironmentFrame"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-      </Unit39>
-      <Unit40>
+      </Unit21>
+      <Unit22>
         <Filename Value="settings/simba.settingsform_editor_general.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="EditorGeneralFrame"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-      </Unit40>
-      <Unit41>
+      </Unit22>
+      <Unit23>
         <Filename Value="settings/simba.settingsform_gui.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="GUIFrame"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-      </Unit41>
-      <Unit42>
+      </Unit23>
+      <Unit24>
         <Filename Value="simba.setting.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit42>
-      <Unit43>
-        <Filename Value="simba.splashform.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="SimbaSplashForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-      </Unit43>
-      <Unit44>
+      </Unit24>
+      <Unit25>
         <Filename Value="simba.editor_attributes.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit44>
-      <Unit45>
-        <Filename Value="colorpicker/simba.colorpicker_hintform.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="SimbaColorPickerHintForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-      </Unit45>
-      <Unit46>
-        <Filename Value="colorpicker/simba.colorpicker_form.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="SimbaColorPickerForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-      </Unit46>
-      <Unit47>
+      </Unit25>
+      <Unit26>
         <Filename Value="colorpicker/simba.colorpicker.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit47>
-      <Unit48>
+      </Unit26>
+      <Unit27>
         <Filename Value="simba.script_simbamethod.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit48>
-      <Unit49>
+      </Unit27>
+      <Unit28>
         <Filename Value="../../Components/simba.imagebox.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit49>
-      <Unit50>
+      </Unit28>
+      <Unit29>
         <Filename Value="../../MML/simba.bitmap_helpers.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit50>
-      <Unit51>
+      </Unit29>
+      <Unit30>
         <Filename Value="../../Components/simba.imagebox_overlay.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit51>
-      <Unit52>
+      </Unit30>
+      <Unit31>
         <Filename Value="parser/simba.ci_includecache.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit52>
-      <Unit53>
+      </Unit31>
+      <Unit32>
         <Filename Value="../../MML/oswindow/oswindow_darwin.inc"/>
         <IsPartOfProject Value="True"/>
-      </Unit53>
+      </Unit32>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
     <Target>
-      <Filename Value="../../Simba.$(TargetCPU)-$(TargetOS)-debug"/>
+      <Filename Value="../../Simba-$(TargetCPU)-$(TargetOS)"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);../../Units/lape;../../Units/MMLAddon/imports/lape;$(LazarusDir)/components/synedit;../../Units/Misc/MatchTemplate;../../Units/MMLAddon/oswindow"/>
+      <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit"/>
       <Libraries Value="../../Units/lape/extensions/ffi/bin/$(TargetOS)"/>
-      <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;../../Units/lape/extensions/ffi;$(ProjPath)../ScriptManager;$(ProjPath)../FormDesigner;$(ProjPath)../../Projects/FormDesigner/CodeGen;../../Units/MMLAddon/imports;../../Units/MMLAddon/imports/classes/MML;../../Units/MMLAddon/imports/classes/LCL;../Tools;../../Units/Misc/MatchTemplate;../../Units/Misc/MatchTemplate/fftlib;../../Units/MMLAddon/oswindow;../../Units/Misc/Web;../../Units/Misc/Archive;package;../../Units/Misc/Web/fpc;../../Units/Misc/Archive/gzip;../../Units/MMLAddon/windowselector;../../Units/MMLCore/iomanager;../../MML/generics;settings;colorpicker;../../Components"/>
+      <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../FormDesigner;$(ProjPath)../../Projects/FormDesigner/CodeGen;package;parser;colorpicker;settings;../../MML/matchtemplate;../../MML/matchtemplate/fftlib;../../MML;../../MML/iomanager;../../MML/oswindow;../../MML/dtmeditor;../../MML/aca;../../MML/generics;../../MML/web;../../MML/web/fpc;../../MML/archive;../../MML/linux;../../MML/darwin;../../Modules/Synapse;../../Components"/>
       <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
-    <Parsing>
-      <SyntaxOptions>
-        <IncludeAssertionCode Value="True"/>
-      </SyntaxOptions>
-    </Parsing>
     <CodeGeneration>
+      <SmartLinkUnit Value="True"/>
       <Checks>
-        <IOChecks Value="True"/>
         <RangeChecks Value="True"/>
-        <OverflowChecks Value="True"/>
-        <StackChecks Value="True"/>
       </Checks>
     </CodeGeneration>
     <Linking>
-      <Debugging>
-        <UseHeaptrc Value="True"/>
-      </Debugging>
+      <LinkSmart Value="True"/>
     </Linking>
     <Other>
       <CompilerMessages>
-        <IgnoredMessages idx5024="True"/>
+        <IgnoredMessages idx5024="True" idx4055="True"/>
       </CompilerMessages>
-      <CustomOptions Value="-dLape_CDECL
--dStaticFFI"/>
+      <ExecuteBefore>
+        <Command Value="$MakeExe($(LazarusDir)lazbuild) --cpu=$(TargetCPU) --os=$(TargetOS) --widgetset=$(LCLWidgetType) --build-mode=default ../SimbaScript/SimbaScript.lpi"/>
+        <ShowAllMessages Value="True"/>
+        <CompileReasons Run="False"/>
+      </ExecuteBefore>
       <CreateMakefileOnBuild Value="True"/>
     </Other>
   </CompilerOptions>

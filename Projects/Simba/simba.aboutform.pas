@@ -33,10 +33,7 @@ uses
   StdCtrls, ExtCtrls;
 
 type
-
-  { TAboutForm }
-
-  TAboutForm = class(TForm)
+  TSimbaAboutForm = class(TForm)
     AboutMemo: TMemo;
     ButtonClose: TButton;
     ImageSimba: TImage;
@@ -44,35 +41,32 @@ type
     LabelRevision: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure OkButtonClick(Sender: TObject);
-  private
-    { private declarations }
-  public
-    { public declarations }
   end; 
 
 var
-  AboutForm: TAboutForm;
+  SimbaAboutForm: TSimbaAboutForm;
 
 implementation
+
 uses
   simba.mufasabase;
 
-procedure TAboutForm.FormCreate(Sender: TObject);
+procedure TSimbaAboutForm.FormCreate(Sender: TObject);
 begin
-  Self.Caption := format('About Simba r%d', [SimbaVersion]);
-  Self.LabelRevision.Caption := format('Revision %d', [SimbaVersion]);
+  Self.Caption := Format('About Simba r%d', [SimbaVersion]);
+  Self.LabelRevision.Caption := Format('Revision %d', [SimbaVersion]);
+
   AboutMemo.Lines.Add('Simba is released under the GPL license.');
-  AboutMemo.Lines.Add(format('You are currently using version: %d',[SimbaVersion]));
-  AboutMemo.Lines.Add(format('Compiled with FPC version %d.%d.%d', [FPC_VERSION,
-      FPC_RELEASE, FPC_PATCH]));
+  AboutMemo.Lines.Add(Format('You are currently using version: %d',[SimbaVersion]));
+  AboutMemo.Lines.Add(Format('Compiled with FPC version %d.%d.%d', [FPC_VERSION, FPC_RELEASE, FPC_PATCH]));
   AboutMemo.Lines.Add('');
   AboutMemo.Lines.Add('Please report bugs at: http://bugs.villavu.com/');
-  AboutMemo.ReadOnly:= True;
+  AboutMemo.ReadOnly := True;
 end;
 
-procedure TAboutForm.OkButtonClick(Sender: TObject);
+procedure TSimbaAboutForm.OkButtonClick(Sender: TObject);
 begin
-  Self.ModalResult:=mrOK;
+  Self.ModalResult := mrOK;
   Self.Hide;
 end;
 

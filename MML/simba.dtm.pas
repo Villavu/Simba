@@ -78,12 +78,10 @@ type
     end;
 
 implementation
+
 uses
-    simba.dtmutil, paszlib,
-    simba.client, simba.stringutil,
-    base64,
-    graphics,
-    math;
+  simba.dtmutil, simba.client, simba.stringutil,
+  graphics, math;
 
 constructor TMDTMS.Create(Owner: TObject);
 begin
@@ -293,7 +291,7 @@ end;
 function TMDTM.LoadFromString(const s: string): boolean;
 var
   Source : String;
-  i,c : integer;
+  i: integer;
   Ptr : Pointer;
 
   function ReadInteger : integer;

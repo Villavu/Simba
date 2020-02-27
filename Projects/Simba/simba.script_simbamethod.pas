@@ -6,7 +6,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.script_common, simba.ipc;
+  simba.script_common;
 
 type
   TSimbaMethod = object

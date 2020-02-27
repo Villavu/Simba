@@ -74,7 +74,6 @@ end;
 
 function MatrixToInt(a: TSingleMatrix): T2DIntArray;
 var
-  Lo,Hi,oldRange,newRange: Single;
   X,Y,W,H: Int32;
 begin
   MatrixSize(a, W,H);
@@ -238,7 +237,7 @@ end;
 
 procedure MatrixFill(a: TSingleMatrix; Indices: TPointArray; Values: TSingleArray);
 var
-  i,c,W,H: Int32;
+  i,W,H: Int32;
 begin
   MatrixSize(a, W,H);
   if (W = 0) or (H = 0) then

@@ -182,7 +182,6 @@ end;
 function TEIOS_Target.ReturnData(X, Y, Width, Height: Int32): TRetData;
 var
   Bounds: TBox;
-  Loop: Int32;
 begin
   GetTargetBounds(Bounds);
 

@@ -203,6 +203,8 @@ begin
     if Rect^.Top < Y then
       Y := Rect^.Top;
   end;
+
+  Result := True;
 end;
 
 // If using multi monitors with monitor on the left of the primary it will be in the negative values.

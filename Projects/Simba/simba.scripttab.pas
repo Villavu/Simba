@@ -364,10 +364,10 @@ begin
   Result.Lexer.FileName := FileName;
   if Result.Lexer.FileName = '' then
     Result.Lexer.FileName := ScriptName;
-  Result.OnMessage := @SimbaForm.OnCCMessage;
-  Result.OnFindInclude := @SimbaForm.OnCCFindInclude;
-  Result.OnFindLibrary := @SimbaForm.OnCCFindLibrary;
-  Result.OnLoadLibrary := @SimbaForm.OnCCLoadLibrary;
+  Result.OnMessage := @SimbaForm.CodeTools_OnMessage;
+  Result.OnFindInclude := @SimbaForm.CodeTools_OnFindInclude;
+  Result.OnFindLibrary := @SimbaForm.CodeTools_OnFindLibrary;
+  Result.OnLoadLibrary := @SimbaForm.CodeTools_OnLoadLibrary;
   Result.Lexer.CaretPos := FEditor.SelStart - 1;
   Result.Lexer.MaxPos := FEditor.SelStart - 1;
   Result.Run(Script, Result.Lexer.FileName);

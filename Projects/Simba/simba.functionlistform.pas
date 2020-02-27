@@ -444,10 +444,10 @@ begin
   TThread.Synchronize(nil, @BeginUpdate);
 
   FReplacementParser := TCodeInsight.Create();
-  FReplacementParser.OnFindInclude := @SimbaForm.OnCCFindInclude;
-  FReplacementParser.OnFindLibrary := @SimbaForm.OnCCFindLibrary;
-  FReplacementParser.OnLoadLibrary := @SimbaForm.OnCCLoadLibrary;
-  FReplacementParser.OnMessage := @SimbaForm.OnCCMessage;
+  FReplacementParser.OnFindInclude := @SimbaForm.CodeTools_OnFindInclude;
+  FReplacementParser.OnFindLibrary := @SimbaForm.CodeTools_OnFindLibrary;
+  FReplacementParser.OnLoadLibrary := @SimbaForm.CodeTools_OnLoadLibrary;
+  FReplacementParser.OnMessage := @SimbaForm.CodeTools_OnMessage;
   FReplacementParser.Lexer.CaretPos := CaretPos;
   FReplacementParser.Run(Script, FileName);
 

@@ -341,8 +341,6 @@ var
   Expressions: TExpressionArray;
   Name: String;
   Declaration: TDeclaration;
-  Declarations: TDeclarationArray;
-  I: Int32;
 begin
   Result := nil;
 

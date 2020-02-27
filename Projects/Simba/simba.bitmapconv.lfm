@@ -1,4 +1,4 @@
-object BitmapConvForm: TBitmapConvForm
+object SimbaBitmapConversionForm: TSimbaBitmapConversionForm
   Left = 800
   Height = 240
   Top = 426
@@ -8,7 +8,7 @@ object BitmapConvForm: TBitmapConvForm
   ClientWidth = 320
   Constraints.MinHeight = 240
   Constraints.MinWidth = 320
-  LCLVersion = '0.9.30.1'
+  LCLVersion = '2.0.6.0'
   object ToStringButton: TButton
     Left = 216
     Height = 36
@@ -20,10 +20,10 @@ object BitmapConvForm: TBitmapConvForm
     TabOrder = 0
   end
   object PadOutput: TCheckBox
-    Left = 170
-    Height = 22
-    Top = 155
-    Width = 93
+    Left = 184
+    Height = 19
+    Top = 158
+    Width = 79
     Anchors = [akRight, akBottom]
     Caption = 'Pad output'
     Checked = True
@@ -47,12 +47,12 @@ object BitmapConvForm: TBitmapConvForm
     Width = 284
     Anchors = [akTop, akLeft, akRight, akBottom]
     Caption = 'Image'
-    ClientHeight = 128
+    ClientHeight = 125
     ClientWidth = 280
     TabOrder = 3
     object ImagePreview: TImage
       Left = 0
-      Height = 128
+      Height = 125
       Top = 0
       Width = 280
       Align = alClient

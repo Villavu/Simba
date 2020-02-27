@@ -1,4 +1,4 @@
-object AboutForm: TAboutForm
+object SimbaAboutForm: TSimbaAboutForm
   Left = 622
   Height = 400
   Top = 270
@@ -9,7 +9,7 @@ object AboutForm: TAboutForm
   ClientHeight = 400
   ClientWidth = 400
   OnCreate = FormCreate
-  LCLVersion = '0.9.29'
+  LCLVersion = '2.0.6.0'
   object AboutMemo: TMemo
     AnchorSideBottom.Control = ButtonClose
     Left = 10
@@ -39,9 +39,9 @@ object AboutForm: TAboutForm
   end
   object LabelTitle: TLabel
     Left = 8
-    Height = 27
+    Height = 26
     Top = 16
-    Width = 64
+    Width = 63
     Caption = 'Simba'
     Font.Height = -23
     Font.Name = 'Sans'
@@ -49,10 +49,10 @@ object AboutForm: TAboutForm
     ParentFont = False
   end
   object LabelRevision: TLabel
-    Left = 290
-    Height = 20
-    Top = 19
-    Width = 100
+    Left = 291
+    Height = 19
+    Top = 20
+    Width = 99
     Anchors = [akRight]
     Caption = 'Revision XXX'
     Font.Height = -17
