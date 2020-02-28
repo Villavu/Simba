@@ -69,6 +69,7 @@ begin
   EditorGeneralFrame.OpenAutoCompletionCheckbox.Checked := SimbaSettings.Editor.AutomaticallyOpenAutoCompletion.Value;
   EditorGeneralFrame.ShowParameterHintsCheckbox.Checked := SimbaSettings.Editor.AutomaticallyShowParameterHints.Value;
   EditorGeneralFrame.DividerVisibleCheckbox.Checked := SimbaSettings.Editor.DividerVisible.Value;
+  EditorGeneralFrame.IgnoreCodeToolsDirectiveCheckbox.Checked := SimbaSettings.Editor.IgnoreCodeToolsIDEDirective.Value;
 
   GUIFrame.ToolbarSizeTrackBar.Position := SimbaSettings.GUI.CustomToolbarSize.Value;
   GUIFrame.FontSizeTrackBar.Position := SimbaSettings.GUI.CustomFontSize.Value;
@@ -97,6 +98,7 @@ begin
   SimbaSettings.Editor.AutomaticallyOpenAutoCompletion.Value := EditorGeneralFrame.OpenAutoCompletionCheckbox.Checked;
   SimbaSettings.Editor.AutomaticallyShowParameterHints.Value := EditorGeneralFrame.ShowParameterHintsCheckbox.Checked;
   SimbaSettings.Editor.DividerVisible.Value := EditorGeneralFrame.DividerVisibleCheckbox.Checked;
+  SimbaSettings.Editor.IgnoreCodeToolsIDEDirective.Value := EditorGeneralFrame.IgnoreCodeToolsDirectiveCheckbox.Checked;
 
   SimbaSettings.GUI.CustomToolbarSize.Value := GUIFrame.ToolbarSizeTrackBar.Position;
   SimbaSettings.GUI.CustomFontSize.Value := GUIFrame.FontSizeTrackBar.Position;

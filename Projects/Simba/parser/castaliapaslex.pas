@@ -116,8 +116,9 @@ type
     FDefineStack: Integer;
     FTopDefineRec: PDefineRec;
     FUseDefines: Boolean;
+    FUseCodeToolsIDEDirective: Boolean;
 
-	  function KeyHash: Integer;
+    function KeyHash: Integer;
     function KeyComp(const aKey: string): Boolean;
     function Func9: tptTokenKind;
     function Func15: TptTokenKind;
@@ -265,6 +266,7 @@ type
     procedure SetCommentState(const Value: Pointer);
     procedure InitLine;
     function GetDirectiveKind: TptTokenKind;
+    function GetIDEDirectiveKind: TptTokenKind;
     function GetDirectiveParam: string;
     function GetDirectiveParamOriginal : string;
     function GetStringContent: string;
@@ -378,6 +380,7 @@ type
 	  property AsmCode : Boolean read fAsmCode write fAsmCode; // DR 2002-01-14
     property DirectiveParamOrigin: PAnsiChar read FDirectiveParamOrigin;
 
+    property UseCodeToolsIDEDirective: Boolean read FUseCodeToolsIDEDirective write FUseCodeToolsIDEDirective;
     property UseDefines: Boolean read FUseDefines write FUseDefines;
 
     property Defines: TStrings read FDefines;
@@ -1435,7 +1438,6 @@ procedure TmwBasePasLex.SetOrigin(NewValue: PAnsiChar);
 begin
   fOrigin := NewValue;
   Init;
-  Next;
 end; { SetOrigin }
 
 procedure TmwBasePasLex.SetRunPos(Value: Integer);
@@ -1553,6 +1555,7 @@ var
 begin
   case FOrigin[Run + 1] of
     '$': fTokenID := GetDirectiveKind;
+    '%': FTokenID := GetIDEDirectiveKind;
     '.':
       begin
         tmpRun := fTokenPos;
@@ -1591,26 +1594,41 @@ begin
           fCommentState := csNo;
           inc(Run);
           break;
-		end;
-	  #10:
-		begin
-			inc(Run);
-			inc(fLineNumber);
-			fLinePos := Run;
-		end;
-	  #13:
-		begin
-			inc(Run);
-			if FOrigin[Run] = #10 then inc( Run );
-			inc(fLineNumber);
-			fLinePos := Run;
-		end;
+		    end;
+	    #10:
+		  begin
+			  inc(Run);
+			  inc(fLineNumber);
+			  fLinePos := Run;
+		  end;
+	    #13:
+		  begin
+			  inc(Run);
+			  if FOrigin[Run] = #10 then inc( Run );
+			  inc(fLineNumber);
+			  fLinePos := Run;
+		  end;
 {      #10: break;  DR 2001-10-12
 
       #13: break;}
     else inc(Run);
     end;
+
   case fTokenID of
+    tokIDECodeTools:
+      begin
+        if FUseCodeToolsIDEDirective then
+        begin
+          if DirectiveParamOriginal = 'off' then
+            EnterDefineBlock(False)
+          else
+          if DirectiveParamOriginal = 'on' then
+            ExitDefineBlock();
+        end;
+
+        Next();
+      end;
+
     tokCompDirect:
       begin
         if Assigned(fOnCompDirect) and (FDefineStack = 0) then
@@ -2407,6 +2425,7 @@ begin
   FDirectiveParamOrigin := FOrigin + FTokenPos;
   TempPos := fTokenPos;
   fTokenPos := Run;
+
   case KeyHash of
     9:
       if KeyComp('I') then
@@ -2477,7 +2496,33 @@ begin
   dec(Run);
 end;
 
-function TmwBasePasLex.GetDirectiveParamOriginal : string;
+function TmwBasePasLex.GetIDEDirectiveKind: TptTokenKind;
+var
+  TempPos: Integer;
+begin
+  case fOrigin[fTokenPos] of
+    '(': Run := FTokenPos + 3;
+    '{': Run := FTokenPos + 2;
+  end;
+  fDirectiveParamOrigin := FOrigin + FTokenPos;
+  TempPos := fTokenPos;
+  fTokenPos := Run;
+
+   case KeyHash of
+     108:
+       if KeyComp('CODETOOLS') then
+         Result := tokIDECodeTools
+       else
+         Result := tokCompDirect;
+     else
+       Result := tokCompDirect;
+  end;
+
+  fTokenPos := TempPos;
+  dec(Run);
+end;
+
+function TmwBasePasLex.GetDirectiveParamOriginal: string;
 var
   EndPos: Integer;
   ParamLen: Integer;

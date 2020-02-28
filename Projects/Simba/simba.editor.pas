@@ -431,7 +431,7 @@ var
   i: Int32;
 begin
   try
-    INI := TIniFile.Create(FileName);
+    INI := TIniFile.Create(AFileName);
     INI.CacheUpdates := True;
 
     for i := 0 to FAttributes.Count - 1 do
@@ -447,9 +447,9 @@ var
   i: Int32;
   INI: TINIFile;
 begin
-  if FileExists(FileName) then
+  if FileExists(AFileName) then
   try
-    INI := TIniFile.Create(FileName);
+    INI := TIniFile.Create(AFileName);
 
     for i := 0 to FAttributes.Count - 1 do
       FAttributes[i].Load(INI);

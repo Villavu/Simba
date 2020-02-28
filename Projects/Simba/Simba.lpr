@@ -39,7 +39,8 @@ uses
   classes, interfaces, forms, sysutils,
   simba.settings, simba.main, simba.aboutform, simba.debugimage, simba.bitmapconv,
   simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
-  simba.notesform, simba.package_form, simba.colorpicker_historyform, simba.mufasabase
+  simba.notesform, simba.package_form, simba.colorpicker_historyform, simba.mufasabase,
+  simba.settingsform
   {$IFDEF USE_FORMDESIGNER},
   simba.formdesigner
   {$ENDIF};
@@ -71,13 +72,13 @@ begin
   if Application.HasOption('help') or (Application.ParamCount = 2) and (Application.CheckOptions('', ['open', 'compile', 'run']) <> '') then
   begin
     WriteLn(
-      'Options:'                              + LineEnding +
-      '  -open:    opens the given script'    + LineEnding +
-      '  -run:     runs the given script'     + LineEnding +
-      '  -compile: compiles the given script' + LineEnding +
-      ''                                      + LineEnding +
-      'Example:'                              + LineEnding +
-      '  Simba.exe -run "script.simba"'       + LineEnding +
+      'Options:'                               + LineEnding +
+      '  --open:    Opens the given script'    + LineEnding +
+      '  --run:     Runs the given script'     + LineEnding +
+      '  --compile: Compiles the given script' + LineEnding +
+      ''                                       + LineEnding +
+      'Example:'                               + LineEnding +
+      '  Simba.exe --run "script.simba"'       + LineEnding +
       ''
     );
 
@@ -97,6 +98,7 @@ begin
   Application.CreateForm(TSimbaDebugForm, SimbaDebugForm);
   Application.CreateForm(TSimbaFileBrowserForm, SimbaFileBrowserForm);
   Application.CreateForm(TSimbaAboutForm, SimbaAboutForm);
+  Application.CreateForm(TSimbaSettingsForm, SimbaSettingsForm);
   Application.CreateForm(TSimbaBitmapConversionForm, SimbaBitmapConversionForm);
   Application.CreateForm(TSimbaPackageForm, SimbaPackageForm);
   Application.CreateForm(TSimbaColorHistoryForm, SimbaColorHistoryForm);

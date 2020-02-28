@@ -138,6 +138,7 @@ type
     tokIfDefDirect,
     tokIfNDefDirect,
     tokIfOptDirect,
+    tokIDECodeTools,
     tokImplementation,
     tokImplements,
     tokIn,

@@ -1084,6 +1084,7 @@ begin
     raise Exception.Create('Recursive include detected');
 
   ALexer.CloneDefinesFrom(FLexer);
+  ALexer.UseCodeToolsIDEDirective := FLexer.UseCodeToolsIDEDirective;
 
   SetLength(FLexers, Length(FLexers) + 1);
   FLexers[High(FLexers)] := ALexer;
@@ -1091,20 +1092,20 @@ begin
   SetLength(FLexerStack, Length(FLexerStack) + 1);
   FLexerStack[High(FLexerStack)] := ALexer;
 
-  fLexer := ALexer;
-  fLexer.OnIncludeDirect := @OnIncludeDirect;
-  fLexer.OnLibraryDirect := @OnLibraryDirect;
-  fLexer.OnDefineDirect := @OnDirect;
-  fLexer.OnElseDirect := @OnDirect;
-  fLexer.OnEndIfDirect := @OnDirect;
-  fLexer.OnIfDefDirect := @OnDirect;
-  fLexer.OnIfNDefDirect := @OnDirect;
-  fLexer.OnUnDefDirect := @OnDirect;
-  fLexer.OnIfDirect := @OnDirect;
-  fLexer.OnIfEndDirect := @OnDirect;
-  fLexer.OnElseIfDirect := @OnDirect;
-  fLexer.OnCompDirect := @OnDirect;
-  fLexer.OnMessage := OnMessage;
+  FLexer := ALexer;
+  FLexer.OnIncludeDirect := @OnIncludeDirect;
+  FLexer.OnLibraryDirect := @OnLibraryDirect;
+  FLexer.OnDefineDirect := @OnDirect;
+  FLexer.OnElseDirect := @OnDirect;
+  FLexer.OnEndIfDirect := @OnDirect;
+  FLexer.OnIfDefDirect := @OnDirect;
+  FLexer.OnIfNDefDirect := @OnDirect;
+  FLexer.OnUnDefDirect := @OnDirect;
+  FLexer.OnIfDirect := @OnDirect;
+  FLexer.OnIfEndDirect := @OnDirect;
+  FLexer.OnElseIfDirect := @OnDirect;
+  FLexer.OnCompDirect := @OnDirect;
+  FLexer.OnMessage := OnMessage;
 end;
 
 procedure TCodeParser.PopLexer;
@@ -1199,6 +1200,8 @@ end;
 
 procedure TCodeParser.ParseFile;
 begin
+  Lexer.Next;
+
   SkipJunk;
   case GenID of
     tokLibrary:
