@@ -24,6 +24,8 @@ type
     property Outdated: Boolean read GetOutdated;
     property InDefines: TSaveDefinesRec read FInDefines write FInDefines;
     property OutDefines: TSaveDefinesRec read FOutDefines write FOutDefines;
+
+    constructor Create;
   end;
 
   TCodeInsight_IncludeArray = array of TCodeInsight_Include;
@@ -51,6 +53,9 @@ operator + (Left: TCodeInsight_IncludeArray; Right: TCodeInsight_Include): TCode
 operator + (Left: TCodeInsight_IncludeArray; Right: TCodeInsight_IncludeArray): TCodeInsight_IncludeArray;
 
 implementation
+
+uses
+  simba.settings;
 
 operator + (Left: TCodeInsight_IncludeArray; Right: TCodeInsight_Include): TCodeInsight_IncludeArray;
 begin
@@ -94,6 +99,9 @@ var
 begin
   Result := True;
 
+  if TCodeInsight_Include(Obj).Lexer.UseCodeToolsIDEDirective <> Lexer.UseCodeToolsIDEDirective then
+    Exit(False);
+
   if (TCodeInsight_Include(Obj).InDefines.Defines <> InDefines.Defines) or
      (TCodeInsight_Include(Obj).InDefines.Stack <> InDefines.Stack) then
     Exit(False);
@@ -111,6 +119,13 @@ begin
       Exit(False);
 end;
 
+constructor TCodeInsight_Include.Create;
+begin
+  inherited Create();
+
+  FLexer.UseCodeToolsIDEDirective := not SimbaSettings.Editor.IgnoreCodeToolsIDEDirective.Value;
+end;
+
 procedure TCodeInsight_IncludeCache.Purge;
 var
   i: Int32;
@@ -124,7 +139,7 @@ begin
     if (Include.LastUsed < 500) and (not Include.Outdated) then
       Continue;
 
-    WriteLn('Removing include: ', Include.Lexer.FileName);
+    WriteLn('Purge include "', Include.Lexer.FileName, '"');
 
     FCachedIncludes.Delete(i).Free();
   end;
@@ -139,7 +154,8 @@ begin
   for Include in FCachedIncludes.ItemsOfKey(FileName) do
   begin
     if (Include.InDefines.Defines <> Sender.Lexer.SaveDefines.Defines) or
-       (Include.InDefines.Stack <> Sender.Lexer.SaveDefines.Stack) then
+       (Include.InDefines.Stack <> Sender.Lexer.SaveDefines.Stack) or
+       (Include.Lexer.UseCodeToolsIDEDirective <> Sender.Lexer.UseCodeToolsIDEDirective) then
     begin
       Include.LastUsed := Include.LastUsed + 3; // When this reaches 500 the include will be destroyed.
 

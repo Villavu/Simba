@@ -42,7 +42,7 @@ type
       DividerVisible: TSimbaSetting_Boolean;
       AntiAliasing: TSimbaSetting_Boolean;
       AllowCaretPastEOL: TSimbaSetting_Boolean;
-      SaveScriptAutomatically: TSimbaSetting_Boolean;
+      IgnoreCodeToolsIDEDirective: TSimbaSetting_Boolean;
       AutomaticallyOpenAutoCompletion: TSimbaSetting_Boolean;
       AutomaticallyShowParameterHints: TSimbaSetting_Boolean;
     end;
@@ -169,8 +169,8 @@ begin
   Editor.FontName := addStringSetting('Editor', 'FontName');
   Editor.AntiAliasing := addBooleanSetting('Editor', 'AntiAliasing');
   Editor.AntiAliasing.DefaultValue := True;
-  Editor.SaveScriptAutomatically := addBooleanSetting('Editor', 'SaveScriptAutomatically');
-  Editor.SaveScriptAutomatically.Value := False;
+  Editor.IgnoreCodeToolsIDEDirective := addBooleanSetting('Editor', 'IgnoreCodeToolsIDEDirective');
+  Editor.IgnoreCodeToolsIDEDirective.DefaultValue := False;
   Editor.AllowCaretPastEOL := addBooleanSetting('Editor', 'AllowCaretPastEOL');
   Editor.AllowCaretPastEOL.DefaultValue := True;
   Editor.AutomaticallyOpenAutoCompletion := addBooleanSetting('Editor', 'AutomaticallyOpenAutoCompletion');

@@ -9,6 +9,7 @@ uses
 
 type
   TEditorGeneralFrame = class(TFrame)
+    IgnoreCodeToolsDirectiveCheckbox: TCheckBox;
     OpenDefaultScriptButton: TButton;
     CaretPastEOLCheckBox: TCheckBox;
     DividerVisibleCheckbox: TCheckBox;
@@ -17,7 +18,6 @@ type
     Label2: TLabel;
     ShowParameterHintsCheckbox: TCheckBox;
     OpenAutoCompletionCheckbox: TCheckBox;
-    SaveScriptAutomaticallyCheckbox: TCheckBox;
     DividerBevel1: TDividerBevel;
     DividerBevel2: TDividerBevel;
     DividerBevel3: TDividerBevel;

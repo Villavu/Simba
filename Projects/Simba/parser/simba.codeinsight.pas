@@ -66,6 +66,9 @@ type
 
 implementation
 
+uses
+  simba.settings;
+
 class procedure TCodeInsight.CreateClassVariables;
 begin
   FIncludeCache := TCodeInsight_IncludeCache.Create();
@@ -565,6 +568,8 @@ end;
 constructor TCodeInsight.Create;
 begin
   inherited Create();
+
+  FLexer.UseCodeToolsIDEDirective := not SimbaSettings.Editor.IgnoreCodeToolsIDEDirective.Value;
 
   FLocals := TDeclarationMap.Create();
 
