@@ -53,7 +53,7 @@ type
       IncludePath: TSimbaSetting_Directory;
       PluginPath: TSimbaSetting_Directory;
       ScriptPath: TSimbaSetting_Directory;
-      ScriptExectuablePath: TSimbaSetting_String;
+      ScriptExecutablePath: TSimbaSetting_String;
       PackagePath: TSimbaSetting_Directory;
     end;
 
@@ -140,8 +140,8 @@ begin
   Environment.ScriptPath := addDirectorySetting('Environment', 'ScriptPath');
   Environment.ScriptPath.DefaultValue := Application.Location + 'Scripts' + DirectorySeparator;
 
-  Environment.ScriptExectuablePath := addFileSetting('Environment', 'ScriptExectuablePath');
-  Environment.ScriptExectuablePath.DefaultValue := Application.Location + 'SimbaScript' {$IFDEF WINDOWS} + '.exe' {$ENDIF};
+  Environment.ScriptExecutablePath := addFileSetting('Environment', 'ScriptExecutablePath');
+  Environment.ScriptExecutablePath.DefaultValue := Application.Location + 'SimbaScript' {$IFDEF WINDOWS} + '.exe' {$ENDIF};
 
   Environment.PackagePath := addDirectorySetting('Environment', 'PackagePath');
   Environment.PackagePath.DefaultValue := Application.Location + 'Data' + DirectorySeparator + 'packages' + DirectorySeparator;

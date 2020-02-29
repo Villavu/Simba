@@ -63,8 +63,12 @@ type
 
     FManageOutput: Boolean;
     FOutput: TStringList;
+    FTargetWindow: THandle;
 
     FStartTime: UInt64;
+    FScript: String;
+    FScriptFile: String;
+    FScriptName: String;
 
     function GetTimeRunning: UInt64;
     function GetIsPaused: Boolean;
@@ -74,9 +78,6 @@ type
     function GetManageOutput: Boolean;
 
     procedure SetScript(Value: String);
-    procedure SetScriptFile(Value: String);
-    procedure SetScriptName(Value: String);
-    procedure SetTargetWindow(Value: THandle);
     procedure SetManageOutput(Value: Boolean);
   public
     // Output
@@ -84,10 +85,10 @@ type
     property Output: TStringList read FOutput;
 
     // Parameters to pass to script
-    property Script: String write SetScript;
-    property ScriptFile: String write SetScriptFile;
-    property ScriptName: String Write SetScriptName;
-    property TargetWindow: THandle write SetTargetWindow;
+    property Script: String write FScript;
+    property ScriptName: String write FScriptName;
+    property ScriptFile: String write FScriptFile;
+    property TargetWindow: THandle write FTargetWindow;
 
     // Stats
     property TimeRunning: UInt64 read GetTimeRunning;
@@ -294,16 +295,6 @@ begin
   Result := FProcess.Running and (FStateThread.State = SCRIPT_STOPPING);
 end;
 
-procedure TSimbaScriptInstance.SetScriptFile(Value: String);
-begin
-  FProcess.Parameters.Add('--scriptfile=' + Value);
-end;
-
-procedure TSimbaScriptInstance.SetScriptName(Value: String);
-begin
-  FProcess.Parameters.Add('--scriptname=' + Value);
-end;
-
 procedure TSimbaScriptInstance.SetScript(Value: String);
 var
   FileName: String;
@@ -320,11 +311,6 @@ begin
   end;
 
   FProcess.Parameters.Add('--scriptfile=' + FileName);
-end;
-
-procedure TSimbaScriptInstance.SetTargetWindow(Value: THandle);
-begin
-  FProcess.Parameters.Add('--target-window=' + IntToStr(Value));
 end;
 
 procedure TSimbaScriptInstance.SetManageOutput(Value: Boolean);
@@ -349,7 +335,25 @@ end;
 
 procedure TSimbaScriptInstance.Run;
 begin
+  if (FScript <> '') then
+  begin
+    FScriptFile := GetTempFileName(SimbaSettings.Environment.DataPath.Value, '.script');
+
+    with TStringList.Create() do
+    try
+      Text := FScript;
+
+      SaveToFile(FScriptFile);
+    finally
+      Free();
+    end;
+
+    FProcess.Parameters.Add('--scriptname=' + FScriptName);
+  end;
+
+  FProcess.Parameters.Add('--target-window=' + IntToStr(FTargetWindow));
   FProcess.Parameters.Add('--run');
+  FProcess.Parameters.Add(FScriptFile);
   FProcess.Execute();
 
   FStartTime := GetTickCount64();
@@ -357,7 +361,25 @@ end;
 
 procedure TSimbaScriptInstance.Compile;
 begin
+  if (FScript <> '') then
+  begin
+    FScriptFile := GetTempFileName(SimbaSettings.Environment.DataPath.Value, '.script');
+
+    with TStringList.Create() do
+    try
+      Text := FScript;
+
+      SaveToFile(FScriptFile);
+    finally
+      Free();
+    end;
+
+    FProcess.Parameters.Add('--scriptname=' + FScriptName);
+  end;
+
+  FProcess.Parameters.Add('--target-window=' + IntToStr(FTargetWindow));
   FProcess.Parameters.Add('--compile');
+  FProcess.Parameters.Add(FScriptFile);
   FProcess.Execute();
 
   FStartTime := GetTickCount64();
@@ -415,11 +437,10 @@ begin
   FProcess.Parameters.Add('--includepath=%s', [SimbaSettings.Environment.IncludePath.Value]);
   FProcess.Parameters.Add('--pluginpath=%s', [SimbaSettings.Environment.PluginPath.Value]);
   FProcess.Parameters.Add('--fontpath=%s', [SimbaSettings.Environment.FontPath.Value]);
-  FProcess.Parameters.Add('--scriptpath=%s', [SimbaSettings.Environment.ScriptPath.Value]);
 
-  FProcess.Executable := SimbaSettings.Environment.ScriptExectuablePath.Value;
+  FProcess.Executable := SimbaSettings.Environment.ScriptExecutablePath.Value;
   if (not FileExists(FProcess.Executable)) then
-    raise Exception.Create('SimbaScript exectuable not found: ' + FProcess.Executable);
+    raise Exception.Create('SimbaScript executable not found: ' + FProcess.Executable);
 
   {$IFDEF UNIX}
   if fpchmod(FProcess.Executable, &755) <> 0 then //rwxr-xr-x

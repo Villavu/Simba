@@ -662,7 +662,11 @@ begin
       SimbaDebugForm.Add('Declared internally in Simba: ' + FileName);
 
     SimbaDebugForm.Add('Declaration:');
-    SimbaDebugForm.Add(Declaration.RawText.Replace('begin end;', ''));
+
+    if Declaration is TciProcedureDeclaration then
+      SimbaDebugForm.Add(TciProcedureDeclaration(Declaration).Header)
+    else
+      SimbaDebugForm.Add(Declaration.RawText);
   end;
 end;
 

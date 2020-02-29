@@ -2,72 +2,146 @@ program SimbaScript;
 
 {$mode objfpc}{$H+}
 
-{$IFOPT D+}
-  {$DEFINE HAS_DEBUG_INFO}
-{$ENDIF}
-
 uses
   {$IFDEF UNIX}
   cthreads, cmem,
   {$ENDIF}
-  sysutils, classes, interfaces, forms, lazLoggerbase, lazcontrols,
-  simbascript.script, simba.script_common;
+  sysutils, classes, interfaces, forms, lazLoggerbase, lazcontrols, FileUtil,
+  simbascript.script, simba.script_common, simba.ipc;
 
 {$R *.res}
 
 type
-  TObjectHelper = class helper for TObject
+  TApplicationHelper = class helper for TApplication
+  public
     procedure Execute(Data: PtrInt);
+    procedure Terminate(Sender: TObject);
   end;
 
-var
-  i: Int32;
-  obj: TObject;
-
-procedure TObjectHelper.Execute(Data: PtrInt);
+procedure TApplicationHelper.Execute(Data: PtrInt);
 begin
-  Script := TSimbaScript.Create();
-  if Application.HasOption('compile') then
-    Script.CompileOnly := True;
-  if Application.HasOption('dump') then
-    Script.DumpOnly := True;
+  Script := TSimbaScript.Create(True);
+  Script.OnTerminate := @Terminate;
+  Script.CompileOnly := Application.HasOption('compile');
+  Script.Dump := Application.HasOption('dump');
+
+  Script.ScriptFile := Application.Params[Application.ParamCount];
+  Script.Script := ReadFileToString(Script.ScriptFile);
+
+  if Application.HasOption('scriptname') then
+  begin
+    if ExtractFileExt(Script.ScriptFile) = '.tmp' then
+      DeleteFile(Script.ScriptFile);
+
+    Script.ScriptFile := Application.GetOptionValue('scriptname');
+  end;
+
+  Script.AppPath := Application.GetOptionValue('apppath');
+  if Script.AppPath = '' then
+    Script.AppPath := IncludeTrailingPathDelimiter(Application.Location);
+
+  Script.DataPath := Application.GetOptionValue('datapath');
+  if Script.DataPath = '' then
+    Script.DataPath := IncludeTrailingPathDelimiter(Application.Location) + 'Data';
+
+  Script.PluginPath := Application.GetOptionValue('pluginpath');
+  if Script.PluginPath = '' then
+    Script.PluginPath := IncludeTrailingPathDelimiter(Application.Location) + 'Plugins';
+
+  Script.FontPath := Application.GetOptionValue('fontpath');
+  if Script.FontPath = '' then
+    Script.FontPath := IncludeTrailingPathDelimiter(Application.Location) + 'Fonts';
+
+  Script.IncludePath := Application.GetOptionValue('includepath');
+  if Script.IncludePath = '' then
+    Script.IncludePath := IncludeTrailingPathDelimiter(Application.Location) + 'Includes';
+
+  if Application.HasOption('targetwindow') then
+    Script.TargetWindow := Application.GetOptionValue('targetwindow').ToInt64();
+
+  if Application.HasOption('output-client') then
+    Script.OutputServer := TSimbaIPC_Client.Create(Application.GetOptionValue('output-client'));
+
+  if Application.HasOption('method-client') then
+    Script.MethodServer := TSimbaIPC_Client.Create(Application.GetOptionValue('method-client'));
+
+  if Application.HasOption('state-client') then
+    Script.StateServer := TSimbaIPC_Client.Create(Application.GetOptionValue('state-client'));
+
   Script.Start();
 end;
 
+procedure TApplicationHelper.Terminate(Sender: TObject);
 begin
-  ExitCode := SCRIPT_ERROR;
+  inherited Terminate();
+
+  if (WakeMainThread <> nil) then
+    WakeMainThread(nil);
+end;
+
+var
+  I: Int32;
+
+begin
+  ExitCode := SCRIPT_EXIT_CODE_INITIALIZE;
 
   try
-    RequireDerivedFormResource := True;
+    if not Application.HasOption('dump') then
+    begin
+      if Application.HasOption('help') or (Application.ParamCount < 2) or (not Application.HasOption('compile') and (not Application.HasOption('run'))) then
+      begin
+        WriteLn(
+          'Options:'                                                       + LineEnding +
+          '  --run:          Runs the given script'                        + LineEnding +
+          '  --compile:      Compiles the given script'                    + LineEnding +
+          ''                                                               + LineEnding +
+          '  --targetwindow: Window handle to target. Defaults to Desktop' + LineEnding +
+          '  --apppath:      Defaults to SimbaScript.exe location'         + LineEnding +
+          '  --datapath:     Defaults to AppPath/Data'                     + LineEnding +
+          '  --pluginpath:   Defaults to AppPath/Plugins'                  + LineEnding +
+          '  --fontpath:     Defaults to AppPath/Fonts'                    + LineEnding +
+          '  --includepath:  Defaults to AppPath/Includes'                 + LineEnding +
+          ''                                                               + LineEnding +
+          'Example:'                                                       + LineEnding +
+          '  SimbaScript.exe --run script.simba'                           + LineEnding +
+          ''
+        );
 
+        Halt;
+      end;
+
+      if (not FileExists(Application.Params[Application.ParamCount])) then
+      begin
+        WriteLn('Script not found: ', Application.Params[Application.ParamCount]);
+
+        Halt;
+      end;
+    end;
+
+    Application.Title := 'SimbaScript';
     Application.CaptureExceptions := False;
     Application.Scaled := True;
     Application.Initialize();
 
-    Application.QueueAsyncCall(@obj.Execute, 0);
+    Application.QueueAsyncCall(@Application.Execute, 0);
     Application.Run();
-
-    ExitCode := SCRIPT_SUCCESS;
   except
     on E: Exception do
     begin
       WriteLn(StringOfChar('-', 80));
-      WriteLn(' ');
+      WriteLn('');
       WriteLn('Exception: ', E.Message);
       WriteLn('Exception Class: ', E.ClassName);
-
-      {$IFDEF HAS_DEBUG_INFO}
-      WriteLn(' ');
-      DumpExceptionBackTrace();
-      {$ENDIF}
-
-      WriteLn(' ');
-      WriteLn('  Parameters:');
+      WriteLn('');
+      WriteLn('Parameters:');
       for i := 1 to Application.ParamCount + 1 do
         WriteLn('  ' + Application.Params[i]);
 
       WriteLn(StringOfChar('-', 80));
     end;
   end;
+
+  if (Script <> nil) then
+    Script.Free();
 end.
 

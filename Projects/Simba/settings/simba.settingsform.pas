@@ -56,7 +56,7 @@ begin
   EnvironmentFrame.PluginPathEdit.Text := SimbaSettings.Environment.PluginPath.Value;
   EnvironmentFrame.FontPathEdit.Text := SimbaSettings.Environment.FontPath.Value;
   EnvironmentFrame.ScriptPathEdit.Text := SimbaSettings.Environment.ScriptPath.Value;
-  EnvironmentFrame.ScriptExecutableEdit.Text := SimbaSettings.Environment.ScriptExectuablePath.Value;
+  EnvironmentFrame.ScriptExecutableEdit.Text := SimbaSettings.Environment.ScriptExecutablePath.Value;
 
   EnvironmentFrame.OpenSSLExtractCheckbox.Checked := SimbaSettings.Resources.ExtractOpenSSL.Value;
   EnvironmentFrame.OpenSSLInitalizeCheckbox.Checked := SimbaSettings.Resources.InitializeOpenSSL.Value;
@@ -81,7 +81,7 @@ begin
   SimbaSettings.Environment.PluginPath.Value := EnvironmentFrame.PluginPathEdit.Text;
   SimbaSettings.Environment.FontPath.Value := EnvironmentFrame.FontPathEdit.Text;
   SimbaSettings.Environment.ScriptPath.Value := EnvironmentFrame.ScriptPathEdit.Text;
-  SimbaSettings.Environment.ScriptExectuablePath.Value := EnvironmentFrame.ScriptExecutableEdit.Text;
+  SimbaSettings.Environment.ScriptExecutablePath.Value := EnvironmentFrame.ScriptExecutableEdit.Text;
 
   SimbaSettings.Resources.ExtractOpenSSL.Value := EnvironmentFrame.OpenSSLExtractCheckbox.Checked;
   SimbaSettings.Resources.InitializeOpenSSL.Value := EnvironmentFrame.OpenSSLInitalizeCheckbox.Checked;

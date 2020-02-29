@@ -312,7 +312,7 @@ begin
                    '    SP_OnTerminate:'                                                                                                                       + LineEnding +
                    '      AddOnTerminate(Value[0]);'                                                                                                           + LineEnding +
                    '    SP_WriteTimeStamp:'                                                                                                                    + LineEnding +
-                   '      WriteTimeStamp(Value[0]);'                                                                                                           + LineEnding +
+                   '      ;'                                                                                                           + LineEnding +
                    '  end;'                                                                                                                                    + LineEnding +
                    'end;'                                                                                                                                      + LineEnding +
                    ''                                                                                                                                          + LineEnding +
