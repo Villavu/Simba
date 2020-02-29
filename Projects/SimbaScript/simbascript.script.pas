@@ -26,76 +26,79 @@ type
   TSimbaScript = class(TThread)
   protected
     FCompiler: TScriptCompiler;
+    FTokenizier: TLapeTokenizerString;
     FCompiled: Boolean;
     FClient: TClient;
-    FWriteBuffer: String;
-    FStartTime: UInt64;
-    FRunning: TInitBool;
 
-    FState: TSimbaIPC_Client;
-    FOutputIPC: TSimbaIPC_Client;
-    FSimbaMethodClient: TSimbaIPC_Client;
-    FSimbaMethodLock: TCriticalSection;
+    FStartTime: UInt64;
+
+    FState: TInitBool;
+    FStateServer: TSimbaIPC_Client;
+    FStateThread: TThread;
+
+    FMethodServer: TSimbaIPC_Client;
+    FMethodLock: TCriticalSection;
+
+    FOutputServer: TSimbaIPC_Client;
+    FOutputBuffer: String;
 
     FScript: String;
     FScriptFile: String;
-    FScriptName: String;
 
     FAppPath: String;
     FDataPath: String;
     FIncludePath: String;
     FFontPath: String;
     FPluginPath: String;
-    FScriptPath: String;
-
-    FWriteTimeStamp: Boolean;
 
     FIsTerminating: Boolean;
     FIsUserTerminated: Boolean;
 
     FPlugins: TScriptPluginList;
+    FTargetWindow: THandle;
 
     procedure Execute; override;
-    procedure DoTerminate; override;
-    procedure HandleState;
-    procedure HandleException(E: Exception);
 
+    procedure HandleStateReading;
+
+    procedure HandleException(E: Exception);
     procedure HandleHint(Sender: TLapeCompilerBase; Hint: lpString);
+
     function HandleFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
     function HandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
+
+    procedure SetState(Value: TInitBool);
   public
     CompileOnly: Boolean;
-    DumpOnly: Boolean;
+    Dump: Boolean;
+
+    property State: TInitBool read FState write SetState;
     property StartTime: UInt64 read FStartTime;
     property Client: TClient read FClient;
-
-    procedure PauseScript;
-    procedure RunScript;
-    procedure StopScript;
-
-
 
     property IsUserTerminated: Boolean read FIsUserTerminated write FIsUserTerminated;
     property IsTerminating: Boolean read FIsTerminating write FIsTerminating;
 
-    property ScriptFile: String read FScriptFile;
-    property ScriptName: String read FScriptName;
+    property ScriptFile: String read FScriptFile write FScriptFile;
+    property Script: String read FScript write FScript;
 
-    property AppPath: String read FAppPath;
-    property DataPath: String read FDataPath;
-    property ScriptPath: String read FScriptPath;
-    property FontPath: String read FFontPath;
-    property PluginPath: String read FPluginPath;
-    property IncludePath: String read FIncludePath;
+    property AppPath: String read FAppPath write FAppPath;
+    property DataPath: String read FDataPath write FDataPath;
+    property FontPath: String read FFontPath write FFontPath;
+    property PluginPath: String read FPluginPath write FPluginPath;
+    property IncludePath: String read FIncludePath write FIncludePath;
 
-    property WriteTimeStamp: Boolean read FWriteTimeStamp write FWriteTimeStamp;
+    property OutputServer: TSimbaIPC_Client read FOutputServer write FOutputServer;
+    property MethodServer: TSimbaIPC_Client read FMethodServer write FMethodServer;
+    property StateServer: TSimbaIPC_Client read FStateServer write FStateServer;
+
+    property TargetWindow: THandle read FTargetWindow write FTargetWindow;
 
     procedure _Write(constref S: String);
     procedure _WriteLn(constref S: String);
 
     procedure Invoke(Message: Int32; Params, Result: TMemoryStream);
 
-    constructor Create; reintroduce;
     destructor Destroy; override;
   end;
 
@@ -105,7 +108,7 @@ var
 implementation
 
 uses
-  fileutil, simba.misc, simba.files, fpexprpars,
+  fileutil, simba.misc, simba.files, fpexprpars, typinfo,
 
   // Base types
   simbascript.import_types,
@@ -163,7 +166,8 @@ uses
   simbascript.import_deprecated,
   simbascript.import_oswindow,
   simbascript.import_dialog,
-  simbascript.import_simba;
+  simbascript.import_simba,
+  simbascript.import_process;
 
 procedure TSimbaMethod.Invoke(Script: TSimbaScript);
 begin
@@ -185,39 +189,84 @@ begin
     Result.Free();
 end;
 
+procedure TSimbaScript.SetState(Value: TInitBool);
+var
+  ScriptState: ESimbaScriptState;
+begin
+  FState := Value;
+
+  if (FStateServer <> nil) then
+  begin
+    case FState of
+      bTrue: ScriptState := SCRIPT_RUNNING;
+      bFalse: ScriptState := SCRIPT_STOPPING;
+      bUnknown: ScriptState := SCRIPT_PAUSED;
+    end;
+
+    FStateServer.Write(ScriptState, SizeOf(Int32));
+  end;
+end;
+
 procedure TSimbaScript.Execute;
 var
   T: Double;
+  Method: TLapeGlobalVar;
 begin
-  if not FFILoaded() then
-    _WriteLn('LibFFI not found. Extension will not be available.');
+  try
+    FCompiler := TScriptCompiler.Create(TLapeTokenizerString.Create(FScript, FScriptFile));
+    FCompiler.OnFindFile := @HandleFindFile;
+    FCompiler.OnHint := @HandleHint;
+    FCompiler.OnHandleDirective := @HandleDirective;
 
-  if DumpOnly then
-  begin
-    try
-      _WriteLn(FCompiler.Dump());
-    except
-      on E: Exception do
-        WriteLn('Dumping exception: ', E.Message);
+    FClient := TClient.Create(FPluginPath);
+    FClient.MOCR.FontPath := FFontPath;
+    FClient.WriteLnProc := @_WriteLn;
+    FClient.IOManager.SetTarget(FTargetWindow);
+
+    FPlugins := TScriptPluginList.Create(True);
+
+    if (FStateServer <> nil) then
+      FStateThread := TThread.ExecuteInThread(@HandleStateReading);
+
+    if (FMethodServer <> nil) then
+      FMethodLock := TCriticalSection.Create();
+  except
+    on E: Exception do
+    begin
+      ExitCode := SCRIPT_EXIT_CODE_INITIALIZE;
+      HandleException(E);
+      Exit;
     end;
+  end;
+
+  try
+    FCompiler.Import(Dump);
+  except
+    on E: Exception do
+    begin
+      ExitCode := SCRIPT_EXIT_CODE_IMPORT;
+      HandleException(E);
+      Exit;
+    end;
+  end;
+
+  if Dump then
+  begin
+    _WriteLn(FCompiler.Dump.Text);
 
     Exit;
   end;
 
   try
-    FCompiler.Import();
-
     T := PerformanceTimer();
-
-    FCompiled := FCompiler.Compile();
-    if (not FCompiled) then
+    if (not FCompiler.Compile()) then
       raise Exception.Create('Compiling failed');
 
     _WriteLn(Format('Succesfully compiled in %d milliseconds.', [Round(PerformanceTimer() - T)]));
   except
     on E: Exception do
     begin
-      ExitCode := SCRIPT_ERROR_COMPILE;
+      ExitCode := SCRIPT_EXIT_CODE_COMPILE;
       HandleException(E);
       Exit;
     end;
@@ -226,51 +275,30 @@ begin
   if CompileOnly then
     Exit;
 
-  FStartTime := GetTickCount64();
-
-  T := PerformanceTimer();
-
   try
+    FStartTime := GetTickCount64();
+    FState := bTrue;
+
     try
-      RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, FRunning);
+      RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, FState);
     finally
       FIsTerminating := True;
 
-      RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, nil, TCodePos(FCompiler.getGlobalVar('__OnTerminate').Ptr^));
+      Method := FCompiler.GetGlobalVar('__OnTerminate');
+      if (Method <> nil) then
+        RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, nil, PCodePos(Method.Ptr)^);
     end;
 
-    if GetTickCount64() - FStartTime < 60000 then
-      _WriteLn(Format('Succesfully executed in %d milliseconds.', [Round(PerformanceTimer() - T)]))
+    if (GetTickCount64() - FStartTime < 60000) then
+      _WriteLn('Succesfully executed in ' + FormatFloat('0.00', PerformanceTimer() - T) + ' milliseconds.')
     else
-      _WriteLn(Format('Succesfully executed in %s.', [TimeStamp(GetTickCount64() - FStartTime)]));
+      _WriteLn('Succesfully executed in ' + TimeStamp(GetTickCount64() - FStartTime) + '.');
   except
     on E: Exception do
     begin
-      ExitCode := SCRIPT_ERROR_RUNTIME;
+      ExitCode := SCRIPT_EXIT_CODE_RUNTIME;
 
       HandleException(E);
-    end;
-  end;
-end;
-
-procedure TSimbaScript.DoTerminate;
-begin
-  Halt(0);
-  inherited DoTerminate();
-end;
-
-procedure TSimbaScript.HandleState;
-var
-  ScriptState: ESimbaScriptState;
-begin
-  while True do
-  begin
-    FState.Read(ScriptState, SizeOf(Int32));
-
-    case ScriptState of
-      SCRIPT_RUNNING:  RunScript();
-      SCRIPT_PAUSED:   PauseScript();
-      SCRIPT_STOPPING: StopScript();
     end;
   end;
 end;
@@ -284,25 +312,29 @@ begin
   Param.Line := -1;
   Param.Column := -1;
 
-  if (E is lpException) then
+  if (FMethodServer <> nil) then
   begin
-    Param.Message := E.Message;
-
-    with E as lpException do
+    if (E is lpException) then
     begin
-      Param.FileName := DocPos.FileName;
-      Param.Line := DocPos.Line;
-      Param.Column := DocPos.Col;
-    end;
+      Param.Message := E.Message;
+
+      with E as lpException do
+      begin
+        Param.FileName := DocPos.FileName;
+        Param.Line := DocPos.Line;
+        Param.Column := DocPos.Col;
+      end;
+    end else
+      Param.Message := E.Message + ' (' + E.ClassName + ')';
+
+    Self._WriteLn(Param.Message);
+
+    Method := TSimbaMethod.Create(SIMBA_METHOD_SCRIPT_ERROR);
+    Method.Params.Write(Param, SizeOf(Param));
+    Method.Invoke(Self);
+    Method.Free();
   end else
-    Param.Message := E.Message + ' (' + E.ClassName + ')';
-
-  Self._WriteLn(Param.Message);
-
-  Method := TSimbaMethod.Create(SIMBA_METHOD_SCRIPT_ERROR);
-  Method.Params.Write(Param, SizeOf(Param));
-  Method.Invoke(Script);
-  Method.Free();
+    Self._WriteLn(E.Message);
 end;
 
 procedure TSimbaScript.HandleHint(Sender: TLapeCompilerBase; Hint: lpString);
@@ -393,136 +425,73 @@ begin
     Result := False;
 end;
 
-procedure TSimbaScript.PauseScript;
+// Isn't terminated safely, but the program is exiting soo...
+procedure TSimbaScript.HandleStateReading;
 var
-  i: Int32 = Ord(SCRIPT_PAUSED);
+  ScriptState: ESimbaScriptState;
 begin
-  FRunning := bUnknown;
-  FState.Write(i, SizeOf(Int32));
-end;
+  while FStateServer.Read(ScriptState, SizeOf(Int32)) = SizeOf(Int32) do
+  begin
+    FIsUserTerminated := False;
 
-procedure TSimbaScript.RunScript;
-var
-  i: Int32 = Ord(SCRIPT_RUNNING);
-begin
-  FRunning := bTrue;
-  FState.Write(i, SizeOf(Int32));
-end;
+    case ScriptState of
+      SCRIPT_RUNNING:  FState := bTrue;
+      SCRIPT_PAUSED:   FState := bUnknown;
+      SCRIPT_STOPPING:
+        begin
+          FIsUserTerminated := True;
 
-procedure TSimbaScript.StopScript;
-var
-  i: Int32 = Ord(SCRIPT_STOPPING);
-begin
-  FRunning := bFalse;
-  FState.Write(i, SizeOf(Int32));
+          FState := bFalse;
+        end;
+    end;
+
+    FStateServer.Write(ScriptState, SizeOf(Int32)); // return the message so Simba can update accordingly
+  end;
 end;
 
 procedure TSimbaScript._Write(constref S: String);
 begin
-  FWriteBuffer := FWriteBuffer + S;
+  FOutputBuffer := FOutputBuffer + S;
 end;
 
 procedure TSimbaScript._WriteLn(constref S: String);
 begin
   if (S <> '') then
-    FWriteBuffer := FWriteBuffer + S;
-  if FWriteTimeStamp then
-    FWriteBuffer := TimeStamp(GetTickCount64() - FStartTime) + FWriteBuffer;
+    FOutputBuffer := FOutputBuffer + S;
 
-  if FOutputIPC <> nil then
-  begin
-    FOutputIPC.Write(FWriteBuffer[1], Length(FWriteBuffer) + 1); // Include null terminated character. This is how lines are split Simba sided.
-  end else
-    WriteLn(FWriteBuffer);
+  if FOutputServer <> nil then
+    FOutputServer.Write(FOutputBuffer[1], Length(FOutputBuffer) + 1) // Include null termination. This is how lines are detected simba sided.
+  else
+    WriteLn(FOutputBuffer);
 
-  FWriteBuffer := '';
+  FOutputBuffer := '';
 end;
 
 procedure TSimbaScript.Invoke(Message: Int32; Params, Result: TMemoryStream);
 begin
-  FSimbaMethodLock.Enter();
-
   try
-    FSimbaMethodClient.WriteMessage(Message, Params);
-    FSimbaMethodClient.ReadMessage(Message, Result);;
-  finally
-    FSimbaMethodLock.Leave();
-  end;
-end;
+    if (FMethodServer = nil) then
+      raise Exception.Create('Method "' + GetEnumName(TypeInfo(ESimbaMethod), Message) + '" unavailable when running detached from Simba');
 
-constructor TSimbaScript.Create;
-begin
-  inherited Create(True);
-
-  FAppPath := Application.GetOptionValue('apppath');
-  FDataPath := Application.GetOptionValue('datapath');
-  FPluginPath := Application.GetOptionValue('pluginpath');
-  FFontPath := Application.GetOptionValue('fontpath');
-  FScriptPath := Application.GetOptionValue('scriptpath');
-  FIncludePath := Application.GetOptionValue('includepath');
-  FScriptName := Application.GetOptionValue('scriptname');
-
-  if Application.HasOption('scriptfile') then
-  begin
-    FScriptFile := Application.GetOptionValue('scriptfile');
-
-    if (not FileExists(FScriptFile)) then
-      raise Exception.Create('Script "' + FScriptFile + '" not found');
+    FMethodLock.Enter();
 
     try
-      with TStringList.Create() do
-      try
-        LoadFromFile(Application.GetOptionValue('scriptfile'));
-
-        FScript := Text;
-      finally
-        if ExtractFileExt(FScriptFile) = '.tmp' then
-        begin
-          DeleteFile(FScriptFile);
-
-          FScriptFile := FScriptName;
-        end;
-
-        Free();
-      end;
-    except
-      on e: Exception do
-        raise Exception.Create('Unable to load script: ' + e.Message);
+      FMethodServer.WriteMessage(Message, Params);
+      FMethodServer.ReadMessage(Message, Result);
+    finally
+      FMethodLock.Leave();
     end;
-  end else
-  if Application.HasOption('script') then
-  begin
-    FScript := Application.GetOptionValue('script');
-  end else
-    raise Exception.Create('No script!');
-
-  FCompiler := TScriptCompiler.Create(FScript, FScriptFile);
-  FCompiler.OnFindFile := @HandleFindFile;
-  FCompiler.OnHint := @HandleHint;
-  FCompiler.OnHandleDirective := @HandleDirective;
-
-  FRunning := bTrue;
-
-  FPlugins := TScriptPluginList.Create(True);
-
-  FClient := TClient.Create(FPluginPath);
-  FClient.MOCR.FontPath := FFontPath;
-  FClient.WriteLnProc := @_WriteLn;
-
-  if Application.HasOption('target-window') then
-    FClient.IOManager.SetTarget(Application.GetOptionValue('target-window').ToInt64());
-
-  if Application.HasOption('output-client') then FOutputIPC := TSimbaIPC_Client.Create(Application.GetOptionValue('output-client'));
-  if Application.HasOption('method-client') then FSimbaMethodClient := TSimbaIPC_Client.Create(Application.GetOptionValue('method-client'));
-  if Application.HasOption('state-client') then FState := TSimbaIPC_Client.Create(Application.GetOptionValue('state-client'));
-
-  FSimbaMethodLock := TCriticalSection.Create();
-
-  ExecuteInThread(@HandleState);
+  except
+    on E: Exception do
+      HandleException(E);
+  end;
 end;
 
 destructor TSimbaScript.Destroy;
 begin
+  if (FMethodLock <> nil) then
+    FMethodLock.Free();
+
   if (FPlugins <> nil) then
     FPlugins.Free();
   if (FCompiler <> nil) then
@@ -530,9 +499,12 @@ begin
   if (FClient <> nil) then
     FClient.Free();
 
-  FOutputIPC.Free();
-  FSimbaMethodClient.Free();
-  FState.Free();
+  if (FStateServer <> nil) then
+    FStateServer.Free();
+  if (FOutputServer <> nil) then
+    FOutputServer.Free();
+  if (FMethodServer <> nil) then
+    FMethodServer.Free();
 
   inherited Destroy();
 end;

@@ -1313,7 +1313,6 @@ begin
 
   try
     ScriptInstance := TSimbaScriptInstance.Create();
-    ScriptInstance.Script := 'begin end.';
     ScriptInstance.Dump();
 
     for i := 0 to ScriptInstance.Output.Count - 1 do
@@ -1322,12 +1321,13 @@ begin
       Parser.OnMessage := @Self.CodeTools_OnMessage;
       Parser.Run(ScriptInstance.Output.ValueFromIndex[i], ScriptInstance.Output.Names[i]);
 
-      if Parser.Lexer.FileName <> 'Classes' then
+      if (Parser.Lexer.FileName <> 'Classes') then
         SimbaFunctionListForm.addDeclarations(Parser.Items, SimbaFunctionListForm.addSimbaSection(Parser.Lexer.FileName), False, True, False);
 
       TCodeInsight.AddBaseInclude(Parser);
     end;
 
+    SimbaFunctionListForm.SimbaNode.AlphaSort();
     SimbaFunctionListForm.SimbaNode.Expanded := True;
   except
     on E: Exception do
@@ -1449,7 +1449,6 @@ begin
   Self.Visible := True;
   Self.ScriptProcessorTimer.Enabled := True;
 
-  WriteLn('Initialized.');
   WriteLn('');
 end;
 

@@ -31,10 +31,6 @@ uses
   Classes, SysUtils,Graphics, simba.bitmap,
   simba.ocrutil,lclintf; // contains the actual `loading'
 
-{
-  We will not give any access to actual indices.
-}
-
 type
   TMFont = class(TObject)
   public
@@ -46,8 +42,6 @@ type
     constructor Create;
     destructor Destroy; override;
   end;
-
-
 
   TMFonts = class(TObject)
   private
@@ -199,7 +193,7 @@ begin
     end;
 
   if LoadFont(Name, False) then
-    Result := TMFont(FFonts[i]);
+    Result := TMFont(FFonts.Last);
 end;
 
 function TMFonts.GetFontData(const Name: String): TOcrData;

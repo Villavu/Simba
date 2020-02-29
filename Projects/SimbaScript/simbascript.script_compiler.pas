@@ -22,6 +22,8 @@ type
 
     procedure Write(Header: String; SemiColon: Boolean = True; Method: Boolean = False);
   public
+    property Dump: TStringList read FDump;
+
     function addGlobalFunc(Header: lpString; Value: Pointer): TLapeGlobalVar; overload; override;
 
     function addGlobalVar(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar; overload; override;
@@ -58,10 +60,8 @@ type
 
     property Section: String read FSection write FSection;
 
-    function Dump: String;
-    function Import(Data: Pointer = nil): Boolean;
+    function Import(Dumping: Boolean): Boolean;
 
-    constructor Create(Script: String = 'begin end.'; FileName: String = ''); reintroduce;
     destructor Destroy; override;
   end;
 
@@ -331,36 +331,23 @@ begin
     Write(Code);
 end;
 
-function TScriptCompiler.Dump: String;
-begin
-  Result := '';
-
-  if (FDump = nil) then
-    FDump := TStringList.Create()
-  else
-    FDump.Clear();
-
-  FDump.LineBreak := #0;
-  FDump.Values['Types'] := {$i lape_type_imports.inc}
-  FDump.Values['Math'] := {$i lape_math_imports.inc}
-  FDump.Values['Time & Date'] := {$i lape_date_time_imports.inc}
-  FDump.Values['String'] := {$i lape_string_imports.inc}
-  FDump.Values['Variant'] := {$i lape_variant_imports.inc}
-  FDump.Values['System'] := {$i lape_system_imports.inc}
-  FDump.Values['File'] := {$i lape_file_imports.inc}
-
-  if Self.Import() then
-  begin
-    FDump.Sort();
-
-    Result := FDump.Text;
-  end;
-end;
-
-function TScriptCompiler.Import(Data: Pointer): Boolean;
+function TScriptCompiler.Import(Dumping: Boolean): Boolean;
 var
   i: Int32;
 begin
+  if Dumping then
+  begin
+    FDump := TStringList.Create();
+    FDump.LineBreak := #0;
+    FDump.Values['Types'] := {$i lape_type_imports.inc}
+    FDump.Values['Math'] := {$i lape_math_imports.inc}
+    FDump.Values['Time & Date'] := {$i lape_date_time_imports.inc}
+    FDump.Values['String'] := {$i lape_string_imports.inc}
+    FDump.Values['Variant'] := {$i lape_variant_imports.inc}
+    FDump.Values['System'] := {$i lape_system_imports.inc}
+    FDump.Values['File'] := {$i lape_file_imports.inc}
+  end;
+
   StartImporting();
 
   Section := 'System';
@@ -380,13 +367,6 @@ begin
   finally
     EndImporting();
   end;
-end;
-
-constructor TScriptCompiler.Create(Script: String; FileName: String);
-begin
-  inherited Create(TLapeTokenizerString.Create(Script, FileName));
-
-  Globals['Move'].Name := 'MemMove';
 end;
 
 destructor TScriptCompiler.Destroy;

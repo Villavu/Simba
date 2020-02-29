@@ -10,14 +10,14 @@ interface
 implementation
 
 uses
-  forms, simba.misc, simba.mufasabase, lazutf8, simba.script_common;
+  forms, simba.mufasabase, lazutf8;
 
-procedure Lape_Write(const Params: PParamArray);
+procedure Lape_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   Script._Write(PString(Params^[0])^);
 end;
 
-procedure Lape_WriteLn(const Params: PParamArray);
+procedure Lape_WriteLn(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   Script._WriteLn('');
 end;
@@ -27,14 +27,13 @@ begin
   PString(Result)^ := GetEnvironmentVariableUTF8(PString(Params^[0])^);
 end;
 
-procedure Lape_GetCommandLine(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PStringArray(Result)^ := GetCommandLine();
-end;
-
 procedure Lape_GetCurrentThreadID(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
- // PPtrUInt(Result)^ := GetCurrentThreadID();
+  {$IFDEF DARWIN}
+  PPtrUInt(Result)^ := 0;
+  {$ELSE}
+  PPtrUInt(Result)^ := GetCurrentThreadID();
+  {$ENDIF}
 end;
 
 procedure Lape_Wait(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -96,52 +95,24 @@ begin
   Sync.Free();
 end;
 
-procedure Lape_RunCommandInDir(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PInt32(Result)^ := RunCommand(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
-end;
-
-procedure Lape_RunCommandInDirEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  RunCommand(PString(Params^[0])^, PString(Params^[1])^);
-end;
-
-procedure Lape_RunCommand(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PInt32(Result)^ := RunCommand(GetCurrentDir(), PString(Params^[0])^, PString(Params^[1])^);
-end;
-
-procedure Lape_RunCommandEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  RunCommand(GetCurrentDir(), PString(Params^[0])^);
-end;
-
-procedure Lape_WriteTimeStamp(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  Script.WriteTimeStamp := PBoolean(Params^[0])^;
-end;
-
-procedure Lape_GetTimeRunning(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PUInt64(Result)^ := GetTickCount64() - Script.StartTime;
-end;
-
 procedure Lape_PauseScript(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
- // Script.State := SCRIPT_STATE_PAUSED;
+  Script.State := bUnknown;
 end;
 
 procedure Lape_TerminateScript(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
- // Script.State := SCRIPT_STATE_STOPPING;
+  Script.State := bFalse;
 end;
 
 procedure Lape_IsTerminated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  if PBoolean(Params^[1])^ then
-    PBoolean(Result)^ := (Script.IsTerminating and Script.IsUserTerminated)
-  else
-    PBoolean(Result)^ := Script.IsTerminating;
+  PBoolean(Result)^ := Script.IsTerminating;
+end;
+
+procedure Lape_IsUserTerminated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := (Script.IsTerminating and Script.IsUserTerminated)
 end;
 
 procedure Lape_Import_System(Compiler: TScriptCompiler);
@@ -191,11 +162,9 @@ begin
     {$ENDIF}
 
     addGlobalConst(Script.ScriptFile, 'ScriptFile');
-    addGlobalConst(Script.ScriptName, 'ScriptName');
     addGlobalConst(Script.IncludePath, 'IncludePath');
     addGlobalConst(Script.PluginPath, 'PluginPath');
     addGlobalConst(Script.FontPath, 'FontPath');
-    addGlobalConst(Script.ScriptPath, 'ScriptPath');
     addGlobalConst(Script.AppPath, 'AppPath');
 
     addGlobalConst(LineEnding, 'LineEnding');
@@ -227,7 +196,12 @@ begin
                   'end;', 'TFormatSettings');
 
     addGlobalConst(TThread.ProcessorCount, 'ProcessorCount');
-    //addGlobalConst(MainThreadID, 'MainThreadID');
+
+    {$IFDEF DARWIN}
+    addGlobalConst(0, 'MainThreadID');
+    {$ELSE}
+    addGlobalConst(MainThreadID, 'MainThreadID');
+    {$ENDIF}
 
     addGlobalVar('TFormatSettings', @FormatSettings, 'FormatSettings');
     addGlobalVar('TClient', @Script.Client, 'Client');
@@ -248,77 +222,72 @@ begin
     addGlobalFunc('procedure Sync(Method: TSyncMethod); overload;', @Lape_Sync);
     addGlobalFunc('procedure Sync(Method: TSyncObjectMethod); overload;', @Lape_SyncObject);
 
-    addGlobalFunc('function GetCommandLine: TStringArray;', @Lape_GetCommandLine);
-
-    addGlobalFunc('function RunCommandInDir(CurrentDirectory: String; CommandLine: String; out Output: String): Int32; overload;', @Lape_RunCommandInDir);
-    addGlobalFunc('procedure RunCommandInDir(CurrentDirectory: String; CommandLine: String); overload;', @Lape_RunCommandInDirEx);
-
-    addGlobalFunc('function RunCommand(CommandLine: String; out Output: String): Int32; overload;', @Lape_RunCommand);
-    addGlobalFunc('procedure RunCommand(CommandLine: String); overload;', @Lape_RunCommandEx);
-
-    addGlobalFunc('procedure WriteTimeStamp(Enable: Boolean);', @Lape_WriteTimeStamp);
     addGlobalFunc('procedure TerminateScript;', @Lape_TerminateScript);
     addGlobalFunc('procedure PauseScript;', @Lape_PauseScript);
-    addGlobalFunc('function IsTerminated(UserTerminated: Boolean = False): Boolean;', @Lape_IsTerminated);
+    addGlobalFunc('function IsTerminated: Boolean;', @Lape_IsTerminated);
+    addGlobalFunc('function IsUserTerminated: Boolean;', @Lape_IsUserTerminated);
 
     addDelayedCode(
-      '{$IFNDEF CODEINSIGHT}'                                                                 + LineEnding +
-      'var'                                                                                   + LineEnding +
-      '  OnTerminateStrings: array of String;'                                                + LineEnding +
-      '  OnTerminateProcedures: array of procedure;'                                          + LineEnding +
-      '  OnTerminateProceduresOfObject: array of procedure of object;'                        + LineEnding +
-      ''                                                                                      + LineEnding +
-      'procedure __OnTerminate;'                                                              + LineEnding +
-      'var i: Int32;'                                                                         + LineEnding +
-      'begin'                                                                                 + LineEnding +
-      '  for i := 0 to High(OnTerminateStrings) do'                                           + LineEnding +
-      '    VariantInvoke(OnTerminateStrings[i], []);'                                         + LineEnding +
-      '  for i := 0 to High(OnTerminateProcedures) do'                                        + LineEnding +
-      '    OnTerminateProcedures[i]();'                                                       + LineEnding +
-      '  for i := 0 to High(OnTerminateProceduresOfObject) do'                                + LineEnding +
-      '    OnTerminateProceduresOfObject[i]()'                                                + LineEnding +
-      'end;'                                                                                  + LineEnding +
-      '{$ENDIF}'                                                                              + LineEnding +
-      ''                                                                                      + LineEnding +
-      'procedure AddOnTerminate(Method: String); overload;'                                   + LineEnding +
-      'begin'                                                                                 + LineEnding +
-      '  OnTerminateStrings += Method;'                                                       + LineEnding +
-      'end;'                                                                                  + LineEnding +
-      ''                                                                                      + LineEnding +
-      'procedure AddOnTerminate(Method: procedure); overload;'                                + LineEnding +
-      'begin'                                                                                 + LineEnding +
-      '  OnTerminateProcedures += @Method;'                                                   + LineEnding +
-      'end;'                                                                                  + LineEnding +
-      ''                                                                                      + LineEnding +
-      'procedure AddOnTerminate(Method: procedure of object); overload;'                      + LineEnding +
-      'begin'                                                                                 + LineEnding +
-      '  OnTerminateProceduresOfObject += @Method;'                                           + LineEnding +
-      'end;'                                                                                  + LineEnding +
-      ''                                                                                      + LineEnding +
-      'procedure DeleteOnTerminate(Method: String); overload;'                                + LineEnding +
-      'var i: Int32;'                                                                         + LineEnding +
-      'begin'                                                                                 + LineEnding +
-      '  for i := High(OnTerminateStrings) downto 0 do'                                       + LineEnding +
-      '    if SameText(OnTerminateStrings[i], Method) then'                                   + LineEnding +
-      '      Delete(OnTerminateStrings, i, 1);'                                               + LineEnding +
-      'end;'                                                                                  + LineEnding +
-      ''                                                                                      + LineEnding +
-      'procedure DeleteOnTerminate(Method: procedure); overload;'                             + LineEnding +
-      'var i: Int32;'                                                                         + LineEnding +
-      'begin'                                                                                 + LineEnding +
-      '  for i := High(OnTerminateProcedures) downto 0 do'                                    + LineEnding +
-      '    if @OnTerminateProcedures[i] = @Method then'                                       + LineEnding +
-      '      Delete(OnTerminateProcedures, i, 1);'                                            + LineEnding +
-      'end;'                                                                                  + LineEnding +
-     ''                                                                                       + LineEnding +
-     'procedure DeleteOnTerminate(Method: procedure of object); overload;'                    + LineEnding +
-     'var i: Int32;'                                                                          + LineEnding +
-     'begin'                                                                                  + LineEnding +
-     '  for i := High(OnTerminateProceduresOfObject) downto 0 do'                             + LineEnding +
-     '    if @OnTerminateProceduresOfObject[i] = @Method then'                                + LineEnding +
-     '      Delete(OnTerminateProceduresOfObject, i, 1);'                                     + LineEnding +
-     'end;',
-     'OnTerminate', False, True);
+      'var'                                                                      + LineEnding +
+      '  OnTerminateStrings: array of String;'                                   + LineEnding +
+      '  OnTerminateProcedures: array of procedure;'                             + LineEnding +
+      '  OnTerminateProceduresOfObject: array of procedure of object;'           + LineEnding +
+      ''                                                                         + LineEnding +
+      'procedure __OnTerminate;'                                                 + LineEnding +
+      'var i: Int32;'                                                            + LineEnding +
+      'begin'                                                                    + LineEnding +
+      '  for i := 0 to High(OnTerminateStrings) do'                              + LineEnding +
+      '    VariantInvoke(OnTerminateStrings[i], []);'                            + LineEnding +
+      '  for i := 0 to High(OnTerminateProcedures) do'                           + LineEnding +
+      '    OnTerminateProcedures[i]();'                                          + LineEnding +
+      '  for i := 0 to High(OnTerminateProceduresOfObject) do'                   + LineEnding +
+      '    OnTerminateProceduresOfObject[i]()'                                   + LineEnding +
+      'end;'                                                                     + LineEnding +
+      ''                                                                         + LineEnding +
+      'procedure AddOnTerminate(Method: String); overload;'                      + LineEnding +
+      'begin'                                                                    + LineEnding +
+      '  OnTerminateStrings += Method;'                                          + LineEnding +
+      'end;'                                                                     + LineEnding +
+      ''                                                                         + LineEnding +
+      'procedure AddOnTerminate(Method: procedure); overload;'                   + LineEnding +
+      'begin'                                                                    + LineEnding +
+      '  OnTerminateProcedures += @Method;'                                      + LineEnding +
+      'end;'                                                                     + LineEnding +
+      ''                                                                         + LineEnding +
+      'procedure AddOnTerminate(Method: procedure of object); overload;'         + LineEnding +
+      'begin'                                                                    + LineEnding +
+      '  OnTerminateProceduresOfObject += @Method;'                              + LineEnding +
+      'end;'                                                                     + LineEnding +
+      ''                                                                         + LineEnding +
+      'procedure DeleteOnTerminate(Method: String); overload;'                   + LineEnding +
+      'var i: Int32;'                                                            + LineEnding +
+      'begin'                                                                    + LineEnding +
+      '  for i := High(OnTerminateStrings) downto 0 do'                          + LineEnding +
+      '    if SameText(OnTerminateStrings[i], Method) then'                      + LineEnding +
+      '      Delete(OnTerminateStrings, i, 1);'                                  + LineEnding +
+      'end;'                                                                     + LineEnding +
+      ''                                                                         + LineEnding +
+      'procedure DeleteOnTerminate(Method: procedure); overload;'                + LineEnding +
+      'var i: Int32;'                                                            + LineEnding +
+      'begin'                                                                    + LineEnding +
+      '  for i := High(OnTerminateProcedures) downto 0 do'                       + LineEnding +
+      '    if @OnTerminateProcedures[i] = @Method then'                          + LineEnding +
+      '      Delete(OnTerminateProcedures, i, 1);'                               + LineEnding +
+      'end;'                                                                     + LineEnding +
+      ''                                                                         + LineEnding +
+      'procedure DeleteOnTerminate(Method: procedure of object); overload;'      + LineEnding +
+      'var i: Int32;'                                                            + LineEnding +
+      'begin'                                                                    + LineEnding +
+      '  for i := High(OnTerminateProceduresOfObject) downto 0 do'               + LineEnding +
+      '    if @OnTerminateProceduresOfObject[i] = @Method then'                  + LineEnding +
+      '      Delete(OnTerminateProceduresOfObject, i, 1);'                       + LineEnding +
+      'end;', 'OnTerminate', False);
+
+    addDelayedCode(
+      'procedure MemMove(constref Src; var Dst; Size: SizeInt);'                + LineEnding +
+      'begin'                                                                   + LineEnding +
+      '  Move(Src, Dst, Size);'                                                 + LineEnding +
+      'end;', 'MemMove', False);
   end;
 end;
 

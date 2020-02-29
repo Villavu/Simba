@@ -1283,7 +1283,6 @@ end;
 
 procedure TBitmap_ToString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 var
-  b: TBitmap;
   x, y, w, h: integer;
   Addition, Data: string;
 begin
@@ -1306,7 +1305,7 @@ end;
 
 procedure TBitmap_LoadFromString(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 var
-  x, y, w, h: integer;
+  x, y: integer;
 begin
   PBitmap(Params^[0])^.SetSize(PInteger(Params^[1])^, PInteger(Params^[2])^);
 

@@ -23,7 +23,6 @@
 'procedure FreeMem(p: Pointer); begin end;' + LineEnding +
 'procedure ReallocMem(var p: Pointer; s: SizeInt); begin end;' + LineEnding +
 'procedure FillMem(var p; s: SizeInt; b: UInt8 = 0); begin end;' + LineEnding +
-'procedure MemMove(constref Src; var Dst; s: SizeInt); begin end;' + LineEnding +
 'function CompareMem(constref p1, p2; Length: SizeInt): EvalBool; begin end;' + LineEnding +
 'function Assigned(constref p): EvalBool; begin end;' + LineEnding +
 'procedure RaiseException(Ex: string); overload; begin end;' + LineEnding +
