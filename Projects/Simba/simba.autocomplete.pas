@@ -142,21 +142,7 @@ begin
 end;
 
 var
-  Filter: String; // TODO
-
-function Test(List: TStringList; Index1, Index2: Integer): Integer;
-var
-  Left, Right: String;
-  l, r: Int32;
-begin
-  Left := TDeclaration(List.Objects[Index1]).Name;
-  Right := TDeclaration(List.Objects[Index2]).Name;
-
-  l := Length(Left) - Length(Filter);
-  r := Length(Right) - Length(Filter);
-
-  Result := l-r;
-end;
+  Filter: String; // TODO. Can't pass data to sort method? :<
 
 function Test2(List: TStringList; Index1, Index2: Integer): Integer;
 var
@@ -166,10 +152,10 @@ begin
   Left := UpperCase(TDeclaration(List.Objects[Index1]).Name);
   Right := UpperCase(TDeclaration(List.Objects[Index2]).Name);
 
-  l := Pos(Filter, Left) * 100;
-  l := l + Round(Length(Left) / l);
-  r := Pos(Filter, RIght) * 100;
-  r := r + Round(Length(Right) / l);
+  l := Length(Left) div Length(Filter);
+  l += Pos(Filter, Left) * 100;
+  r := Length(Right) div Length(Filter);
+  r += Pos(Filter, RIght) * 100;
 
   Result := l-r;
 end;

@@ -1438,6 +1438,7 @@ procedure TmwBasePasLex.SetOrigin(NewValue: PAnsiChar);
 begin
   fOrigin := NewValue;
   Init;
+  //Next();
 end; { SetOrigin }
 
 procedure TmwBasePasLex.SetRunPos(Value: Integer);
@@ -1751,6 +1752,7 @@ begin
           fOnUndefDirect(Self);
       end;
   end;
+  Next();
 end;
 
 procedure TmwBasePasLex.ColonProc;

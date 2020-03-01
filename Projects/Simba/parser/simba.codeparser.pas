@@ -303,9 +303,8 @@ type
 
     procedure ParseFile; override;
     procedure OnLibraryDirect(Sender: TmwBasePasLex); virtual;
-    procedure OnIncludeDirect(Sender: TmwBasePasLex); virtual;                        //Includes
+    procedure OnIncludeDirect(Sender: TmwBasePasLex); virtual;                  //Includes
     procedure NextToken; override;                                              //Junk
-    procedure OnDirect(Sender: TmwBasePasLex);                                  //Junk
 
     procedure CompoundStatement; override;                                      //Begin-End
     procedure WithStatement; override;                                          //With
@@ -1095,16 +1094,6 @@ begin
   FLexer := ALexer;
   FLexer.OnIncludeDirect := @OnIncludeDirect;
   FLexer.OnLibraryDirect := @OnLibraryDirect;
-  FLexer.OnDefineDirect := @OnDirect;
-  FLexer.OnElseDirect := @OnDirect;
-  FLexer.OnEndIfDirect := @OnDirect;
-  FLexer.OnIfDefDirect := @OnDirect;
-  FLexer.OnIfNDefDirect := @OnDirect;
-  FLexer.OnUnDefDirect := @OnDirect;
-  FLexer.OnIfDirect := @OnDirect;
-  FLexer.OnIfEndDirect := @OnDirect;
-  FLexer.OnElseIfDirect := @OnDirect;
-  FLexer.OnCompDirect := @OnDirect;
   FLexer.OnMessage := OnMessage;
 end;
 
@@ -1193,7 +1182,7 @@ begin
   for I := 1 to High(FLexers) do
     FLexers[I].Free();
 
-  fLexer := FLexers[0];
+  FLexer := FLexers[0];
 
   inherited;
 end;
@@ -1233,20 +1222,15 @@ begin
       if (TokenID = TokUses) then
         MainUsesClause;
 
-      while (TokenID in [TokClass, TokConst, TokConstructor, TokDestructor, TokExports, TokFunction, TokLabel, TokProcedure, TokResourceString, TokThreadVar, TokType, TokVar]) or (Lexer.ExID = tokOperator) do
-        DeclarationSection;
-
-      if (TokenID = TokBegin) then
+      while (TokenID in [tokBegin, TokClass, TokConst, TokConstructor, TokDestructor, TokExports, TokFunction, TokLabel, TokProcedure, TokResourceString, TokThreadVar, TokType, TokVar]) or (Lexer.ExID = tokOperator) do
       begin
-        CompoundStatement;
-
-        if (TokenID = tokSemiColon) then
+        if TokenID = tokBegin then
         begin
-          Expected(tokSemiColon);
-          ParseFile();
-        end
-        else
-          Expected(tokPoint);
+          CompoundStatement;
+          if (TokenID = tokSemiColon) then
+            Expected(tokSemiColon);
+        end else
+          DeclarationSection;
       end;
     end;
   end;
@@ -1282,6 +1266,7 @@ begin
             FLexer.IsLibrary := True;
             FLexer.FileName := FileName;
             FLexer.Script := Contents;
+            FLexer.Next();
 
             FFiles.AddObject(FileName, TObject(PtrInt(FileAge(FileName))));
           end;
@@ -1296,8 +1281,6 @@ begin
         WriteLn('Library "', FileName, '" not found');
     end;
   end;
-
-  Sender.Next();
 end;
 
 procedure TCodeParser.OnIncludeDirect(Sender: TmwBasePasLex);
@@ -1331,6 +1314,7 @@ begin
 
               FLexer.FileName := FileName;
               FLexer.Script := Text;
+              FLexer.Next();
             finally
               Free();
             end;
@@ -1346,60 +1330,25 @@ begin
         WriteLn('Include "', FileName, '" not found');
     end;
   end;
-
-  Sender.Next();
 end;
 
 procedure TCodeParser.NextToken;
 begin
-  Lexer.Next();
+  FTokenPos := -1;
 
-  FTokenPos := Lexer.TokenPos;
+  repeat
+    FLexer.Next;
 
-  if Lexer.IsJunk and (not InDeclaration(TciJunk)) then
-  begin
-    repeat
-      if (Lexer.TokenID in [tokAnsiComment, tokBorComment, tokSlashesComment]) then
-      begin
-        if (not InDeclaration(TciJunk)) then
-          PushStack(TciJunk);
-      end else
-      if InDeclaration(TciJunk) then
-        PopStack(Lexer.TokenPos);
+    if (FTokenPos = -1) then
+      FTokenPos := Lexer.TokenPos;
 
-      Lexer.Next();
-    until (not Lexer.IsJunk);
+    if (Lexer.TokenID = tokNull) and (Length(FLexerStack) > 1) then
+    begin
+      PopLexer();
 
-    if InDeclaration(TciJunk) then
-      PopStack(Lexer.TokenPos);
-  end;
-
-  if (Lexer.TokenID = tokNull) and (Length(FLexerStack) > 1) then
-  begin
-    PopLexer();
-
-    NextToken();
-  end;
-end;
-
-procedure TCodeParser.OnDirect(Sender: TmwBasePasLex);
-begin
-  if (Sender.TokenID = TokElseDirect) then
-  begin
-    Sender.Next;
-    Exit;
-  end;
-
-  if InDeclaration(TciJunk) then
-    Exit;
-  if (not InDeclaration(nil)) then
-    PushStack(TciJunk, Sender.TokenPos);
-
-  if (not (Sender.TokenID in [TokEndIfDirect, TokIfEndDirect])) then
-    Sender.Next;
-
-  if InDeclaration(TciJunk) then
-    PopStack(Sender.TokenPos + Sender.TokenLen);
+      Continue;
+    end;
+  until not Lexer.IsJunk;
 end;
 
 procedure TCodeParser.CompoundStatement;
@@ -1976,8 +1925,8 @@ var
   I: Int32;
 begin
   FFiles.Clear();
-  if FileExists(fLexer.FileName) then
-    FFiles.AddObject(fLexer.FileName, TObject(PtrInt(FileAge(fLexer.FileName))));
+  if FileExists(FLexer.FileName) then
+    FFiles.AddObject(FLexer.FileName, TObject(PtrInt(FileAge(FLexer.FileName))));
 
   inherited Run();
 

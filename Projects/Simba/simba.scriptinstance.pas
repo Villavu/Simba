@@ -351,7 +351,7 @@ begin
     FProcess.Parameters.Add('--scriptname=' + FScriptName);
   end;
 
-  FProcess.Parameters.Add('--target-window=' + IntToStr(FTargetWindow));
+  FProcess.Parameters.Add('--targetwindow=' + IntToStr(FTargetWindow));
   FProcess.Parameters.Add('--run');
   FProcess.Parameters.Add(FScriptFile);
   FProcess.Execute();
@@ -377,7 +377,7 @@ begin
     FProcess.Parameters.Add('--scriptname=' + FScriptName);
   end;
 
-  FProcess.Parameters.Add('--target-window=' + IntToStr(FTargetWindow));
+  FProcess.Parameters.Add('--targetwindow=' + IntToStr(FTargetWindow));
   FProcess.Parameters.Add('--compile');
   FProcess.Parameters.Add(FScriptFile);
   FProcess.Execute();
