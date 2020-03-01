@@ -100,6 +100,27 @@ begin
 end;
 
 procedure TEditorColorsFrame.Reset(Colors: Boolean);
+
+  procedure AddAttribute(Attri: TSynHighlighterAttributes);
+  var
+    Node: TTreeNode;
+    Name: TStringArray;
+  begin
+    Name := Attri.StoredName.Split(['.']);
+
+    if Length(Name) = 2 then
+    begin
+      Node := TreeView.Items.FindNodeWithText(Name[0]);
+      if Node = nil then
+        Node := TreeView.Items.Add(nil, Name[0]);
+
+      Node := TreeView.Items.AddChild(Node, Name[1]);
+      Node.Data := Attri;
+    end;
+  end;
+
+var
+  I: Int32;
 begin
   if (FEditor <> nil) then
     FEditor.Free();
@@ -132,11 +153,18 @@ begin
             '  end;                                                  '+ LineEnding +
             'end;                                                    '+ LineEnding +
             '                                                        '+ LineEnding +
-            'function TPoint.Test: Boolean; overload;                '+ LineEnding +
+            'function TPoint.Test: Boolean; static;                  '+ LineEnding +
             'begin                                                   '+ LineEnding +
-            '  Result := inherited();                                '+ LineEnding +
+            '  Result := [100, 100];                                 '+ LineEnding +
             'end;                                                    ';
   end;
+
+  TreeView.Items.Clear();
+
+  for I := 0 to FEditor.Attributes.Count - 1 do
+    AddAttribute(FEditor.Attributes[I]);
+
+  TreeView.AlphaSort();
 end;
 
 procedure TEditorColorsFrame.AddCustomColor(CustomColor: TColor; ColorListBox: TColorListBox);
@@ -253,27 +281,6 @@ begin
 end;
 
 constructor TEditorColorsFrame.Create(AOwner: TComponent);
-
-  procedure AddAttribute(Attri: TSynHighlighterAttributes);
-  var
-    Node: TTreeNode;
-    Name: TStringArray;
-  begin
-    Name := Attri.StoredName.Split(['.']);
-
-    if Length(Name) = 2 then
-    begin
-      Node := TreeView.Items.FindNodeWithText(Name[0]);
-      if Node = nil then
-        Node := TreeView.Items.Add(nil, Name[0]);
-
-      Node := TreeView.Items.AddChild(Node, Name[1]);
-      Node.Data := Attri;
-    end;
-  end;
-
-var
-  i: Int32;
 begin
   inherited Create(AOwner);
 
@@ -286,11 +293,6 @@ begin
   BackgroundColorBox.Height := Scale96ToScreen(BackgroundColorBox.Height);
   ForegoundColorBox.Height := Scale96ToScreen(ForegoundColorBox.Height);
   FrameColorBox.Height := Scale96ToScreen(FrameColorBox.Height);
-
-  for i := 0 to FEditor.Attributes.Count - 1 do
-    AddAttribute(FEditor.Attributes[i]);
-
-  TreeView.AlphaSort();
 end;
 
 initialization
