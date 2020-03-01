@@ -5,7 +5,7 @@ unit simba.ci_includecache;
 interface
 
 uses
-  Classes, SysUtils, syncobjs, castaliapaslex,
+  Classes, SysUtils, syncobjs, castaliapaslex, castaliapaslextypes,
   simba.generics, simba.codeparser;
 
 type
@@ -14,11 +14,15 @@ type
     FInDefines: TSaveDefinesRec;
     FOutDefines: TSaveDefinesRec;
 
+    procedure HandleMessage(Sender: TObject; const Typ: TMessageEventType; const Message: String; X, Y: Integer);
+
     function GetOutdated: Boolean;
   public
     RefCount: Int32;
     LastUsed: Int32;
+    Messages: String;
 
+    procedure Assign(From: TObject); override;
     function Equals(Obj: TObject): Boolean; override;
 
     property Outdated: Boolean read GetOutdated;
@@ -55,7 +59,7 @@ operator + (Left: TCodeInsight_IncludeArray; Right: TCodeInsight_IncludeArray): 
 implementation
 
 uses
-  simba.settings;
+  simba.settings, simba.debugform;
 
 operator + (Left: TCodeInsight_IncludeArray; Right: TCodeInsight_Include): TCodeInsight_IncludeArray;
 begin
@@ -77,6 +81,22 @@ begin
     if Length(Right) > 0 then
       Move(Right[0], Result[Length(Left)], Length(Right) * SizeOf(TCodeInsight_IncludeArray));
   end;
+end;
+
+procedure TCodeInsight_Include.Assign(From: TObject);
+begin
+  inherited Assign(From);
+
+  FOnInclude := nil; // No include cache
+  FOnLibrary := nil; // No library cache
+  FOnMessage := @HandleMessage;
+end;
+
+procedure TCodeInsight_Include.HandleMessage(Sender: TObject; const Typ: TMessageEventType; const Message: String; X, Y: Integer);
+var
+  Parser: TCodeParser absolute Sender;
+begin
+  Messages := Messages + Format('"%s" at line %d, column %d in file "%s"', [Message, Y, X, Parser.Lexer.FileName]) + LineEnding;
 end;
 
 function TCodeInsight_Include.GetOutdated: Boolean;
@@ -187,8 +207,6 @@ begin
 
       Result := TCodeInsight_Include.Create();
       Result.Assign(Sender);
-      Result.OnInclude := nil; // No include cache
-      Result.OnLibrary := nil; // No library cache
       Result.Run(FileName);
       Result.OutDefines := Result.Lexer.SaveDefines;
       Result.InDefines := Sender.Lexer.SaveDefines;
@@ -200,6 +218,12 @@ begin
 
     Result.RefCount := Result.RefCount + 1;
     Result.LastUsed := 0;
+
+    if Result.Messages <> '' then
+    begin
+      SimbaDebugForm.Add('Simba''s code parser encountered errors in a include. This could break code tools:');
+      SimbaDebugForm.Add(Result.Messages);
+    end;
   finally
     FLock.Leave();
   end;
@@ -239,8 +263,6 @@ begin
 
         Result := TCodeInsight_Include.Create();
         Result.Assign(Sender);
-        Result.OnInclude := nil; // No include cache
-        Result.OnLibrary := nil; // No library cache
         Result.Run(Contents, FileName);
         Result.OutDefines := Result.Lexer.SaveDefines;
         Result.InDefines := Sender.Lexer.SaveDefines;
@@ -254,6 +276,12 @@ begin
 
     Result.RefCount := Result.RefCount + 1;
     Result.LastUsed := 0;
+
+    if Result.Messages <> '' then
+    begin
+      SimbaDebugForm.Add('Simba''s code parser encountered errors in a plugin. This could break code tools:');
+      SimbaDebugForm.Add(Result.Messages);
+    end;
   finally
     FLock.Leave();
   end;
