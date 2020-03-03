@@ -297,14 +297,13 @@ uses
   simba.dtmeditor, simba.scriptinstance, simba.package_form, simba.aboutform,
   simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.colorpicker, simba.ci_includecache,
-  simba.highlighter
+  simba.highlighter, simba.scriptpluginloader
   {$IFDEF WINDOWS},
   windows
   {$ENDIF}
   {$IFDEF USE_FORMDESIGNER},
   simba.formdesigner
-  {$ENDIF},
-  dynlibs;
+  {$ENDIF};
 
 type
   TSimbaAnchorDockHeader = class(TAnchorDockHeader)
@@ -541,7 +540,7 @@ procedure TSimbaForm.CodeTools_OnMessage(Sender: TObject; const Typ: TMessageEve
 var
   Parser: TCodeParser absolute Sender;
 begin
-  if (Parser.Lexer.CaretPos = -1) or (Parser.Lexer.RunPos < Parser.Lexer.CaretPos) then
+  if (Parser.Lexer.TokenPos + Parser.Lexer.TokenLen < Parser.Lexer.CaretPos) then
   begin
     SimbaDebugForm.Add('Simba''s code parser encountered an error. This could break code tools:');
 
@@ -559,107 +558,20 @@ end;
 
 function TSimbaForm.CodeTools_OnFindLibrary(Sender: TObject; var FileName: String): Boolean;
 begin
-  Result := FindPlugin(FileName, [ExtractFileDir(TCodeParser(Sender).Lexer.FileName), SimbaSettings.Environment.PluginPath.Value, Application.Location]);
+  Result := TSimbaScriptPluginLoader.FindFile(FileName, [ExtractFileDir(TCodeParser(Sender).Lexer.FileName), SimbaSettings.Environment.PluginPath.Value, Application.Location]);
 end;
 
 procedure TSimbaForm.CodeTools_OnLoadLibrary(Sender: TObject; FileName: String; var Contents: String);
 var
-  Lib: TLibHandle;
-  Header, Info: PChar;
-  Index: Int32;
-  Address: Pointer;
-var
-  GetFunctionInfo: function(Index: Int32; var Address: Pointer; var Header: PChar): Int32; cdecl;
-  GetFunctionCount: function: Int32; cdecl;
-  GetType: function(Index: Int32; var Name: PChar; var Str: PChar): Int32; cdecl;
-  GetTypeCount: function: Int32; cdecl;
-  GetCode: procedure(var Code: PChar); cdecl;
-  GetCodeLength: function: Int32; cdecl;
+  Plugin: TSimbaScriptPluginLoader;
 begin
-  WriteLn('Loading library "', FileName, '"');
+  Plugin := TSimbaScriptPluginLoader.Create(FileName);
 
+  if (Plugin <> nil) then
   try
-    Lib := LoadLibrary(FileName);
-
-    if Lib <> NilHandle then
-    try
-      Pointer(GetFunctionInfo) := GetProcedureAddress(Lib, 'GetFunctionInfo');
-      Pointer(GetFunctionCount) := GetProcedureAddress(Lib, 'GetFunctionCount');
-      Pointer(GetType) := GetProcedureAddress(Lib, 'GetTypeInfo');
-      Pointer(GetTypeCount) := GetProcedureAddress(Lib, 'GetTypeCount');
-      Pointer(GetCode) := GetProcedureAddress(Lib, 'GetCode');
-      Pointer(GetCodeLength) := GetProcedureAddress(Lib, 'GetCodeLength');
-
-      // Types
-      if (Pointer(GetTypeCount) <> nil) and (Pointer(GetType) <> nil) then
-      begin
-        Header := StrAlloc(2048);
-        Info := StrAlloc(2048);
-
-        try
-          for Index := 0 to GetTypeCount() - 1 do
-          begin
-            GetType(Index, Header, Info);
-
-            Contents := Contents + 'type ' + Header + ' = ' + Info;
-            if (not Contents.EndsWith(';')) then
-              Contents := Contents + ';';
-          end;
-        finally
-          StrDispose(Header);
-          StrDispose(Info);
-        end;
-      end;
-
-      // Functions
-      if (Pointer(GetFunctionCount) <> nil) and (Pointer(GetFunctionInfo) <> nil) then
-      begin
-        Header := StrAlloc(2048);
-
-        try
-          for Index := 0 to GetFunctionCount() - 1 do
-          begin
-            GetFunctionInfo(Index, Address, Header);
-
-            Contents := Contents + Header;
-
-            // Remove native, and add trailing semicolon if needed
-            if (not Contents.EndsWith(';')) then
-              Contents := Contents + ';';
-            if Contents.EndsWith('native;', True) then
-              SetLength(Contents, Length(Contents) - 8);
-            //Contents.Remove(Length(Contents) - Length('native;'), $FFFFFF);
-            if (not Contents.EndsWith(';')) then
-              Contents := Contents + ';';
-
-            Contents := Contents + 'begin end;' + LineEnding;
-          end;
-        finally
-          StrDispose(Header);
-        end;
-      end;
-
-      // Code
-      if (Pointer(GetCodeLength) <> nil) and (Pointer(GetCode) <> nil) then
-      begin
-        Info := StrAlloc(GetCodeLength() + 1);
-
-        try
-          GetCode(Info);
-
-          Contents := Contents + Info;
-        finally
-          StrDispose(Info);
-        end;
-      end;
-    finally
-      WriteLn('Closing library "', FileName, '"');
-
-      FreeLibrary(Lib);
-    end;
-  except
-    on E: Exception do
-      WriteLn('Error loading library: ', E.Message);
+    Contents := Plugin.Dump;
+  finally
+    Plugin.Free();
   end;
 end;
 
@@ -831,7 +743,7 @@ begin
   if SimbaScriptTabsForm.CurrentEditor <> nil then
   begin
     Value := '';
-    if InputQuery('Goto line','Goto line:', Value) and (StrToIntDef(Value, -1) > -1) then
+    if InputQuery('Goto line', 'Goto line:', Value) and (StrToIntDef(Value, -1) > -1) then
       SimbaScriptTabsForm.CurrentEditor.TopLine := StrToInt(Value) - (SimbaScriptTabsForm.CurrentEditor.LinesInWindow div 2);
   end;
 end;
@@ -1125,7 +1037,6 @@ begin
     begin
       if ScriptInstance <> nil then
       begin
-
         if (not ScriptInstance.IsRunning) then
         begin
           if ScriptInstance.ExitCode > 0 then

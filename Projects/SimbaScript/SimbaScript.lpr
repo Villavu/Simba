@@ -6,7 +6,7 @@ uses
   {$IFDEF UNIX}
   cthreads, cmem,
   {$ENDIF}
-  sysutils, classes, interfaces, forms, lazLoggerbase, lazcontrols, FileUtil,
+  sysutils, classes, interfaces, forms,
   simbascript.script, simba.script_common, simba.ipc;
 
 {$R *.res}
@@ -25,8 +25,19 @@ begin
   Script.CompileOnly := Application.HasOption('compile');
   Script.Dump := Application.HasOption('dump');
 
-  Script.ScriptFile := Application.Params[Application.ParamCount];
-  Script.Script := ReadFileToString(Script.ScriptFile);
+  if not Script.Dump then
+  begin
+    Script.ScriptFile := Application.Params[Application.ParamCount];
+
+    with TStringList.Create() do
+    try
+      LoadFromFile(Script.ScriptFile);
+
+      Script.Script := Text;
+    finally
+      Free();
+    end;
+  end;
 
   if Application.HasOption('scriptname') then
   begin

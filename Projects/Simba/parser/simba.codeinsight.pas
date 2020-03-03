@@ -483,7 +483,7 @@ end;
 
 procedure TCodeInsight.Run;
 
-    procedure GetMethodLocals(Method: TciProcedureDeclaration);
+  procedure GetMethodLocals(Method: TciProcedureDeclaration);
   var
     Declaration: TDeclaration;
     Declarations: TDeclarationArray;

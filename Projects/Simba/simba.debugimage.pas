@@ -139,14 +139,19 @@ end;
 
 procedure TSimbaDebugImageForm.SetDimensions(W, H: Int32);
 begin
+  if (W < 200) then
+    W := 200;
+  if (H < 200) then
+    H := 200;
+
   if (DockMaster.GetAnchorSite(Self) <> nil) then
   begin
     DockMaster.GetAnchorSite(Self).Width := W;
-    DockMaster.GetAnchorSite(Self).Height := H + DockMaster.GetAnchorSite(Self).Header.Height;
+    DockMaster.GetAnchorSite(Self).Height := H + DockMaster.GetAnchorSite(Self).Header.Height + ImageBox.StatusBar.Height;
   end else
   begin
     Width := W;
-    Height := H;
+    Height := H + ImageBox.StatusBar.Height
   end;
 end;
 
