@@ -136,7 +136,7 @@ begin
   begin
     FMousePanel.Width := Round(CX * 1.50);
     FDimensionsPanel.Width := Round(CX * 1.50);
-    FStatusBar.Constraints.MinHeight := Round(CY * 1.25);
+    FStatusBar.Height := Round(CY * 1.25);
   end;
 end;
 

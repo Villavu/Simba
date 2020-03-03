@@ -69,7 +69,7 @@ begin
   WriteLn('Built at ', {$I %TIME%}, ' on ', {$I %DATE%});
   WriteLn('');
 
-  if Application.HasOption('help') or (Application.ParamCount = 2) and (Application.CheckOptions('', ['open', 'compile', 'run']) <> '') then
+  if Application.HasOption('help') or ((Application.ParamCount = 2) and (not Application.HasOption('open')) and (not Application.HasOption('run')) and (not Application.HasOption('compile'))) then
   begin
     WriteLn(
       'Options:'                               + LineEnding +

@@ -22,7 +22,6 @@ type
     FImage: TTarget;
     FFrozen: TTarget;
     FPluginPaths: array of String;
-
     FTargetArray: array of TTarget;
 
     function GetAutoFocus: Boolean;
@@ -107,7 +106,7 @@ type
 implementation
 
 uses
-  simba.files,
+  simba.scriptpluginloader,
   simba.target_raw,
   simba.target_bitmap,
   simba.target_eios,
@@ -331,7 +330,7 @@ end;
 
 function TIOManager.SetTarget(Plugin, Data: String): Int32;
 begin
-  if not FindPlugin(Plugin, FPluginPaths) then
+  if not TSimbaScriptPluginLoader.FindFile(Plugin, FPluginPaths) then
     raise Exception.Create('EIOS plugin not found: ' + Plugin);
 
   Result := SetBothTargets(TEIOS_Target.Create(Plugin, Data));

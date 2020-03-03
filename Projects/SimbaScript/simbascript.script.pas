@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, simba.client, Forms, lptypes, lpinterpreter, lpparser, lpcompiler, lpvartypes, lpmessages,
-  simbascript.script_compiler, simba.ipc, syncobjs, simba.script_common, simba.script_plugin, ffi;
+  simbascript.compiler, simba.ipc, syncobjs, simba.script_common, simbascript.plugin;
 
 type
   TSimbaScript = class;
@@ -54,8 +54,9 @@ type
     FIsTerminating: Boolean;
     FIsUserTerminated: Boolean;
 
-    FPlugins: TScriptPluginList;
     FTargetWindow: THandle;
+
+    FPlugins: TSimbaScriptPluginArray;
 
     procedure Execute; override;
 
@@ -108,7 +109,7 @@ var
 implementation
 
 uses
-  fileutil, simba.misc, simba.files, fpexprpars, typinfo,
+  fileutil, simba.misc, simba.files, fpexprpars, typinfo, ffi,
 
   // Base types
   simbascript.import_types,
@@ -222,8 +223,6 @@ begin
     FClient.MOCR.FontPath := FFontPath;
     FClient.WriteLnProc := @_WriteLn;
     FClient.IOManager.SetTarget(FTargetWindow);
-
-    FPlugins := TScriptPluginList.Create(True);
 
     if (FStateServer <> nil) then
       FStateThread := TThread.ExecuteInThread(@HandleStateReading);
@@ -353,7 +352,7 @@ function TSimbaScript.HandleDirective(Sender: TLapeCompiler; Directive, Argument
 var
   Arguments: TStringArray;
   Parser: TFPExpressionParser;
-  Plugin: TMPlugin;
+  Plugin: TSimbaScriptPlugin;
   i: Int32;
 begin
   if (UpperCase(Directive) = 'LOADLIB') or (UpperCase(Directive) = 'IFHASLIB') or
@@ -392,19 +391,19 @@ begin
             if InIgnore then
               Exit;
 
-            if not FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), FPluginPath, FAppPath]) then
+            if not TSimbaScriptPlugin.FindFile(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), FPluginPath, FAppPath]) then
               raise Exception.Create('Plugin "' + Argument + '" not found');
 
-            Plugin := TMPlugin.Create(Argument);
-            for i := 0 to Plugin.Declarations.Count - 1 do
-              Plugin.Declarations[i].Import(Sender);
+            Plugin := TSimbaScriptPlugin.Create(Argument);
+            Plugin.Import(FCompiler);
 
-            FPlugins.Add(Plugin);
+            SetLength(FPlugins, Length(FPlugins) + 1);
+            FPlugins[High(FPlugins)] := Plugin;
           end;
 
         'IFHASLIB':
           begin
-            if FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), FPluginPath, FAppPath]) then
+            if TSimbaScriptPlugin.FindFile(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), FPluginPath, FAppPath]) then
               FCompiler.pushConditional((not InIgnore) and True, Sender.DocPos)
             else
               FCompiler.pushConditional((not InIgnore) and False, Sender.DocPos);
@@ -416,8 +415,8 @@ begin
           end;
       end;
     except
-      on e: Exception do
-        raise lpException.Create(e.Message, Sender.DocPos);
+      on E: Exception do
+        raise lpException.Create(E.Message, Sender.DocPos);
     end;
 
     Result := True;
@@ -488,12 +487,15 @@ begin
 end;
 
 destructor TSimbaScript.Destroy;
+var
+  I: Int32;
 begin
+  for I := 0 to High(FPlugins) do
+    FPlugins[I].Free();
+
   if (FMethodLock <> nil) then
     FMethodLock.Free();
 
-  if (FPlugins <> nil) then
-    FPlugins.Free();
   if (FCompiler <> nil) then
     FCompiler.Free();
   if (FClient <> nil) then
@@ -509,7 +511,7 @@ begin
   inherited Destroy();
 end;
 
-{$IFDEF DARWIN}
+{$IF Declared(DARWIN) and Declared(DynamicFFI)}
 initialization
   if not FFILoaded then
     LoadFFI('/usr/local/opt/libffi/lib/');

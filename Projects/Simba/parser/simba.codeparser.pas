@@ -1244,7 +1244,7 @@ begin
   Contents := '';
 
   if (not Sender.IsJunk) then
-  begin
+  try
     FileName := SetDirSeparators(Sender.DirectiveParamOriginal);
 
     if (FOnFindLibrary <> nil) then
@@ -1252,11 +1252,12 @@ begin
       if FOnFindLibrary(Self, FileName) then
       begin
         Handled := False;
+
         if (FOnLibrary <> nil) then
           FOnLibrary(Self, FileName, Handled);
 
         if not Handled then
-        try
+        begin
           if (FOnLoadLibrary <> nil) then
           begin
             FOnLoadLibrary(Self, FileName, Contents);
@@ -1270,15 +1271,15 @@ begin
 
             FFiles.AddObject(FileName, TObject(PtrInt(FileAge(FileName))));
           end;
-        except
-          on E: Exception do
-          begin
-            if (OnMessage <> nil) then
-              OnMessage(Self, meError, E.Message, Sender.PosXY.X, Sender.PosXY.Y);
-          end;
         end;
       end else
         WriteLn('Library "', FileName, '" not found');
+    end;
+  except
+    on E: Exception do
+    begin
+      if (FOnMessage <> nil) then
+        FOnMessage(Self, meError, E.Message, Sender.PosXY.X, Sender.PosXY.Y);
     end;
   end;
 end;
@@ -1289,7 +1290,7 @@ var
   Handled: Boolean;
 begin
   if (not Sender.IsJunk) then
-  begin
+  try
     FileName := SetDirSeparators(Sender.DirectiveParamOriginal);
 
     if (FOnFindInclude <> nil) then
@@ -1305,7 +1306,7 @@ begin
             FOnInclude(Self, FileName, Handled);
 
           if not Handled then
-          try
+          begin
             PushLexer(TmwPasLex.Create());
 
             with TStringList.Create() do
@@ -1318,16 +1319,16 @@ begin
             finally
               Free();
             end;
-          except
-            on E: Exception do
-            begin
-              if OnMessage <> nil then
-                OnMessage(Self, meError, E.Message, Sender.PosXY.X, Sender.PosXY.Y);
-            end;
           end;
         end;
       end else
         WriteLn('Include "', FileName, '" not found');
+    end;
+  except
+    on E: Exception do
+    begin
+      if (FOnMessage <> nil) then
+        FOnMessage(Self, meError, E.Message, Sender.PosXY.X, Sender.PosXY.Y);
     end;
   end;
 end;

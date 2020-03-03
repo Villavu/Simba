@@ -9,6 +9,8 @@ uses
   simba.ipc, simba.script_common;
 
 type
+  TSimbaScriptInstance = class;
+
   TSimbaScriptProcess = class(TProcess)
   public
     constructor Create; reintroduce;
@@ -17,6 +19,7 @@ type
 
   TSimbaScriptOutputThread = class(TThread)
   protected
+    FScript: TSimbaScriptInstance;
     FServer: TSimbaIPC_Server;
     FOutput: TStringList;
     FManageOutput: Boolean;
@@ -25,11 +28,12 @@ type
   public
     property ManageOutput: Boolean read FManageOutput write FManageOutput;
 
-    constructor Create(Server: TSimbaIPC_Server; Output: TStringList); reintroduce;
+    constructor Create(Script: TSimbaScriptInstance; Server: TSimbaIPC_Server; Output: TStringList); reintroduce;
   end;
 
   TSimbaScriptStateThread = class(TThread)
   protected
+    FScript: TSimbaScriptInstance;
     FServer: TSimbaIPC_Server;
     FState: ESimbaScriptState;
 
@@ -37,16 +41,17 @@ type
   public
     property State: ESimbaScriptState read FState;
 
-    constructor Create(Server: TSimbaIPC_Server); reintroduce;
+    constructor Create(Script: TSimbaScriptInstance; Server: TSimbaIPC_Server); reintroduce;
   end;
 
   TSimbaScriptMethodThread = class(TThread)
   protected
     FServer: TSimbaIPC_Server;
+    FScript: TSimbaScriptInstance;
 
     procedure Execute; override;
   public
-    constructor Create(Server: TSimbaIPC_Server); reintroduce;
+    constructor Create(Script: TSimbaScriptInstance; Server: TSimbaIPC_Server); reintroduce;
   end;
 
   TSimbaScriptInstance = class
@@ -128,7 +133,7 @@ var
   Method: TSimbaMethod;
   Message: Int32;
 begin
-  Method.Script := Self;
+  Method.Script := FScript;
   Method.Params := TMemoryStream.Create();
   Method.Result := TMemoryStream.Create();
 
@@ -167,13 +172,14 @@ begin
   FServer.Free();
 end;
 
-constructor TSimbaScriptMethodThread.Create(Server: TSimbaIPC_Server);
+constructor TSimbaScriptMethodThread.Create(Script: TSimbaScriptInstance; Server: TSimbaIPC_Server);
 begin
   inherited Create(False, 512*512);
 
   FreeOnTerminate := True;
 
   FServer := Server;
+  FScript := Script;
 end;
 
 procedure TSimbaScriptStateThread.Execute;
@@ -195,12 +201,13 @@ begin
   FServer.Free();
 end;
 
-constructor TSimbaScriptStateThread.Create(Server: TSimbaIPC_Server);
+constructor TSimbaScriptStateThread.Create(Script: TSimbaScriptInstance; Server: TSimbaIPC_Server);
 begin
   inherited Create(False, 512*512);
 
   FreeOnTerminate := True;
 
+  FScript := Script;
   FServer := Server;
   FState := SCRIPT_RUNNING;
 end;
@@ -257,12 +264,13 @@ begin
   FServer.Free();
 end;
 
-constructor TSimbaScriptOutputThread.Create(Server: TSimbaIPC_Server; Output: TStringList);
+constructor TSimbaScriptOutputThread.Create(Script: TSimbaScriptInstance; Server: TSimbaIPC_Server; Output: TStringList);
 begin
   inherited Create(False, 512*512);
 
   FreeOnTerminate := True;
 
+  FScript := Script;
   FServer := Server;
   FOutput := Output;
 end;
@@ -447,9 +455,9 @@ begin
     raise Exception.Create('Unable to make SimbaScript executable');
   {$ENDIF}
 
-  FMethodThread := TSimbaScriptMethodThread.Create(FMethodServer);
-  FStateThread := TSimbaScriptStateThread.Create(FStateServer);
-  FOutputThread := TSimbaScriptOutputThread.Create(FOutputServer, FOutput);
+  FMethodThread := TSimbaScriptMethodThread.Create(Self, FMethodServer);
+  FStateThread := TSimbaScriptStateThread.Create(Self, FStateServer);
+  FOutputThread := TSimbaScriptOutputThread.Create(Self, FOutputServer, FOutput);
 end;
 
 procedure TSimbaScriptInstance.Kill;

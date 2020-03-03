@@ -83,13 +83,13 @@ begin
   Params.Read(Width, SizeOf(Int32));
   Params.Read(Height, SizeOf(Int32));
 
+  SimbaForm.ShowForm(SimbaDebugImageForm);
+
   // Only resize if needed
   if (Width <> SimbaDebugImageForm.ImageBox.ImageWidth) or (Height <> SimbaDebugImageForm.ImageBox.ImageHeight) then
     SimbaDebugImageForm.SetDimensions(Width, Height);
 
   SimbaDebugImageForm.ImageBox.Draw(PRGB32(Params.Memory + Params.Position), Width, Height);
-
-  SimbaForm.ShowForm(SimbaDebugImageForm);
 end;
 
 procedure TSimbaMethod._DebugImageDraw;

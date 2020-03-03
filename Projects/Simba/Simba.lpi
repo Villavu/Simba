@@ -59,7 +59,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="33">
+    <Units Count="34">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -234,6 +234,10 @@
         <Filename Value="../../MML/oswindow/oswindow_darwin.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit32>
+      <Unit33>
+        <Filename Value="../../MML/simba.scriptpluginloader.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit33>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

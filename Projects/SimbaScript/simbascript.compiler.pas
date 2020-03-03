@@ -1,4 +1,4 @@
-unit simbascript.script_compiler;
+unit simbascript.compiler;
 
 {$mode objfpc}{$H+}
 
@@ -6,7 +6,7 @@ interface
 
 uses
   classes, sysutils, typinfo,
-  ffi, lpcompiler, lptypes, lpvartypes, lpparser, lptree;
+  ffi, lpcompiler, lptypes, lpvartypes, lpparser, lptree, lpffiwrappers;
 
 type
   TScriptCompiler = class;
@@ -19,11 +19,13 @@ type
   protected
     FDump: TStringList;
     FSection: String;
+    FImportClosures: array of TImportClosure;
 
     procedure Write(Header: String; SemiColon: Boolean = True; Method: Boolean = False);
   public
     property Dump: TStringList read FDump;
 
+    function addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar; overload;
     function addGlobalFunc(Header: lpString; Value: Pointer): TLapeGlobalVar; overload; override;
 
     function addGlobalVar(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar; overload; override;
@@ -99,6 +101,18 @@ begin
 
     FDump.Values[FSection] := FDump.Values[FSection] + Header + LineEnding;
   end;
+end;
+
+function TScriptCompiler.addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar;
+var
+  Closure: TImportClosure;
+begin
+  Closure := LapeImportWrapper(Value, Self, Header, ABI);
+
+  SetLength(FImportClosures, Length(FImportClosures) + 1);
+  FImportClosures[High(FImportClosures)] := Closure;
+
+  Result := inherited addGlobalFunc(Header, Closure.Func);
 end;
 
 procedure TScriptCompiler.addBaseDefine(Define: lpString);
@@ -370,7 +384,12 @@ begin
 end;
 
 destructor TScriptCompiler.Destroy;
+var
+  I: Int32;
 begin
+  for I := 0 to High(FImportClosures) do
+    FImportClosures[I].Free();
+
   if (FDump <> nil) then
     FDump.Free();
 

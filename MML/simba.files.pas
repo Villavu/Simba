@@ -70,8 +70,6 @@ type
   function GetFiles(Path, Ext: string): TStringArray;
   function GetDirectories(Path: string): TstringArray;
   function FindFile(var FileName: string; const Dirs: array of String): Boolean; overload;
-  function FindFile(var FileName: string; Extensions: array of String; const Dirs: array of String): Boolean; overload;
-  function FindPlugin(var FileName: String; Dirs: array of String): Boolean;
   procedure UnZipFile(const FilePath, TargetPath: string);
   procedure UnZipOneFile(const ArchiveFileName, FileName, OutputPath: String);
   procedure ZipFiles(const ToFolder: string; const Files: TStringArray);
@@ -95,33 +93,6 @@ begin;
       Result := True;
       Exit;
     end;
-end;
-
-function FindFile(var FileName: string; Extensions: array of String; const Dirs: array of String): Boolean;
-var
-  Root: String;
-  I: Int32;
-begin
-  Root := FileName;
-
-  for I := 0 to High(Extensions) do
-  begin
-    FileName := Root + Extensions[i];
-
-    if FindFile(FileName, Dirs) then
-    begin
-      Result := True;
-
-      Exit;
-    end;
-  end;
-
-  Result := False;
-end;
-
-function FindPlugin(var FileName: String; Dirs: array of String): Boolean;
-begin
-  Result := FindFile(FileName, ['', '.' + SharedSuffix, {$IFDEF CPU64}'64'{$ELSE}'32'{$ENDIF} + '.' + SharedSuffix], Dirs);
 end;
 
 function GetFiles(Path, Ext: string): TStringArray;
