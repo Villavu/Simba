@@ -132,13 +132,18 @@ jobs:
         def main():
             os.chdir('Projects/SimbaScript/')
 
+            with open('script.simba', "w+") as file:
+                file.write('begin Simba(); end.')
+                file.close() 
+
             if os.name == 'posix':
                 os.system('Xvfb :1 & sleep 3')
-                if os.system('DISPLAY=:1 ./SimbaScript --run --script="begin end."') != 0:
+                if os.system('DISPLAY=:1 ./SimbaScript --run script.simba') != 0:
                   return False
             else:
-                if os.system('SimbaScript.exe --run --script="begin end."') != 0:
+                if os.system('SimbaScript.exe --run script.simba') != 0:
                   return False
+            
             return True
 
         sys.exit(int(not main()))
