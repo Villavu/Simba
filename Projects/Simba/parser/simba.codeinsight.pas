@@ -150,14 +150,11 @@ procedure TCodeInsight.DoInclude(Sender: TObject; FileName: String; var Handled:
 var
   Include: TCodeInsight_Include;
 begin
-  if (FStack.Top = nil) then // Only global includes are cached
-  begin
-    Include := FIncludeCache.GetInclude(Self, FileName);
-    if (Include <> nil) then
-      FIncludes := FIncludes + Include;
+  Include := FIncludeCache.GetInclude(Self, FileName);
+  if (Include <> nil) then
+    FIncludes := FIncludes + Include;
 
-    Handled := True;
-  end;
+  Handled := True;
 end;
 
 procedure TCodeInsight.DoLibrary(Sender: TObject; FileName: String; var Handled: Boolean);
