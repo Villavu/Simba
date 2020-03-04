@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, SynEdit, lcltype, lclintf, Menus, syncobjs;
+  ExtCtrls, SynEdit, Menus, syncobjs;
 
 type
   TSimbaDebugForm = class(TForm)
@@ -18,17 +18,17 @@ type
     MenuItemPaste: TMenuItem;
     MenuItemSelectAll: TMenuItem;
     MenuItemDelete: TMenuItem;
+    Timer: TTimer;
 
     procedure MenuItemCopyClick(Sender: TObject);
     procedure MenuItemCutClick(Sender: TObject);
     procedure MenuItemDeleteClick(Sender: TObject);
     procedure MenuItemPasteClick(Sender: TObject);
     procedure MenuItemSelectAllClick(Sender: TObject);
+    procedure TimerExecute(Sender: TObject);
   protected
     FLock: TCriticalSection;
     FStrings: TStringList;
-
-    procedure InternalAdd;
 
     procedure SettingChanged_EditorFont(Value: String);
     procedure SettingChanged_EditorFontHeight(Value: Int64);
@@ -51,28 +51,28 @@ uses
   simba.settings;
 
 procedure TSimbaDebugForm.Add(constref S: String);
+var
+  Line: String;
 begin
-  WriteLn(S);
-
   FLock.Enter();
 
   try
-    FStrings.Text := S;
-
-    TThread.Synchronize(TThread.CurrentThread, @InternalAdd);
+    for Line in S.Split([LineEnding]) do
+      FStrings.Add(Line);
   finally
     FLock.Leave();
   end;
 end;
 
 procedure TSimbaDebugForm.Add(Strings: TStrings);
+var
+  Line: String;
 begin
   FLock.Enter();
 
   try
-    FStrings.Text := Strings.Text;
-
-    TThread.Synchronize(TThread.CurrentThread, @InternalAdd);
+    for Line in Strings.Text.Split([LineEnding]) do
+      FStrings.Add(Line);
   finally
     FLock.Leave();
   end;
@@ -98,30 +98,38 @@ begin
   Editor.SelectAll();
 end;
 
-procedure TSimbaDebugForm.MenuItemCopyClick(Sender: TObject);
-begin
-  Editor.CopyToClipboard();
-end;
-
-procedure TSimbaDebugForm.InternalAdd;
+procedure TSimbaDebugForm.TimerExecute(Sender: TObject);
 var
   Scroll: Boolean;
   I: Int32;
 begin
-  Editor.BeginUpdate(False);
+  FLock.Enter();
 
-  with Editor do
   try
-    // auto scroll if already scrolled to bottom.
-    Scroll := (Editor.Lines.Count < Editor.LinesInWindow) or ((Editor.Lines.Count + 1) = (Editor.TopLine + Editor.LinesInWindow));
-    for I := 0 to FStrings.Count - 1 do
-      Lines.Add(FStrings[I]);
+    if FStrings.Count > 0 then
+    begin
+      Editor.BeginUpdate(False);
 
-    if Scroll then
-      Editor.TopLine := Editor.Lines.Count;
+      // auto scroll if already scrolled to bottom.
+      Scroll := (Editor.Lines.Count < Editor.LinesInWindow) or ((Editor.Lines.Count + 1) = (Editor.TopLine + Editor.LinesInWindow));
+      for I := 0 to FStrings.Count - 1 do
+        Editor.Lines.Add(FStrings[I]);
+
+      if Scroll then
+        Editor.TopLine := Editor.Lines.Count;
+
+      FStrings.Clear();
+
+      Editor.EndUpdate();
+    end;
   finally
-    Editor.EndUpdate();
+    FLock.Leave();
   end;
+end;
+
+procedure TSimbaDebugForm.MenuItemCopyClick(Sender: TObject);
+begin
+  Editor.CopyToClipboard();
 end;
 
 procedure TSimbaDebugForm.SettingChanged_EditorFont(Value: String);
