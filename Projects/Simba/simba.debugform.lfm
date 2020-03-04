@@ -1,7 +1,7 @@
 object SimbaDebugForm: TSimbaDebugForm
-  Left = 1379
+  Left = 61
   Height = 371
-  Top = 147
+  Top = 142
   Width = 541
   Caption = 'Output'
   ClientHeight = 371
@@ -535,5 +535,11 @@ object SimbaDebugForm: TSimbaDebugForm
       Caption = 'Select All'
       OnClick = MenuItemSelectAllClick
     end
+  end
+  object Timer: TTimer
+    Interval = 500
+    OnTimer = TimerExecute
+    left = 144
+    top = 24
   end
 end
