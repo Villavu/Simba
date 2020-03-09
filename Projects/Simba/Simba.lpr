@@ -36,6 +36,9 @@ uses
   {$IFDEF LINUX}
   simba.linux_initialization,
   {$ENDIF}
+  {$IFDEF DARWIN}
+  simba.darwin_initialization,
+  {$ENDIF}
   classes, interfaces, forms, sysutils,
   simba.settings, simba.main, simba.aboutform, simba.debugimage, simba.bitmapconv,
   simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
