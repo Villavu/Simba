@@ -10,8 +10,11 @@ uses
   {$IFDEF UNIX}
   cthreads, cmem,
   {$ENDIF}
+  {$IFDEF LINUX}
+  simba.linux_initialization,
+  {$ENDIF}
   {$IFDEF DARWIN}
-  cocoaint,
+  simba.darwin_initialization, cocoaint,
   {$ENDIF}
   sysutils, classes, interfaces, forms,
   simbascript.script, simba.script_common, simba.ipc;

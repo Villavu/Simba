@@ -5,6 +5,9 @@ unit simba.xlib;
 
    This unit loads a new xlib instance (using dlmopen) which will handle all
    the xlib calls for a script.
+
+   It's either we synchronize (call on main thread) each xlib call we make
+   or do this which I think is much more efficient.
  *)
 
 {$mode objfpc}{$H+}
@@ -196,6 +199,7 @@ var
   XDestroyImage: function(ximage: PXImage): cint; cdecl;
   XSendEvent: function(para1: PDisplay; para2: TWindow; para3: Boolean; para4: clong; para5: Pointer): TStatus; cdecl;
   XSync: function(para1: PDisplay; para2: TBool): cint; cdecl;
+  XInitThreads: function: cint; cdecl;
 
   function XTestFakeKeyEvent(Display: PDisplay; KeyCode: UInt32; Is_Press: Boolean; Delay: UInt32): Int32; cdecl; external 'Xtst';
 
@@ -273,7 +277,9 @@ begin
   Pointer(XDestroyImage) := dlsym(X11, 'XDestroyImage');
   Pointer(XSendEvent) := dlsym(X11, 'XSendEvent');
   Pointer(XSync) := dlsym(X11, 'XSync');
+  Pointer(XInitThreads) := dlsym(X11, 'XInitThreads');
 
+  XInitThreads();
   XSetErrorHandler(@ErrorHandler);
 end;
 
@@ -288,5 +294,4 @@ initialization
 finalization
   UnloadX11();
 
-end.
-
+end.s
