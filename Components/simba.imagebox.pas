@@ -117,7 +117,7 @@ type
 
     procedure BackgroundChanged(UpdateOverlay: Boolean = True);
 
-    procedure Repaint; override;
+    procedure Update; override;
 
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -453,7 +453,7 @@ begin
     inherited WMHScroll(Message);
   end;
 
-  Repaint();
+  FImageBox.Update();
 end;
 
 procedure TSimbaImageBox_ScrollBox.WMVScroll(var Message: TLMVScroll);
@@ -470,7 +470,7 @@ begin
     inherited WMVScroll(Message);
   end;
 
-  Repaint();
+  FImageBox.Update();
 end;
 
 procedure TSimbaImageBox_ScrollBox.EraseBackground(DC: HDC);
@@ -516,7 +516,7 @@ begin
     if (Current.X <> -1) and (Current.Y <> -1) then
       MoveTo(Current.X, Current.Y);
 
-    FScrollBox.Repaint();
+    Self.Update();
   end;
 end;
 
@@ -529,6 +529,7 @@ begin
   W := FScrollBox.ClientWidth;
   while W mod Ceil(1 * FZoom) <> 0 do
     W += 1;
+
   H := FScrollBox.ClientHeight;
   while H mod Ceil(1 * FZoom) <> 0 do
     H += 1;
@@ -542,8 +543,6 @@ begin
   LocalRect.Top := Trunc(FScrollBox.VertScrollBar.Position / FZoom);
   LocalRect.Width := Trunc(W / FZoom);
   LocalRect.Height := Trunc(H / FZoom);
-
-  BitBlt(FScrollBox.Canvas.Handle, ScreenRect.Left, ScreenRect.Top, ScreenRect.Width, ScreenRect.Height, 0, 0, 0, BLACKNESS);
 
   if (FOnPaintArea <> nil) then
   begin
@@ -677,7 +676,7 @@ begin
       end;
     end;
 
-    FScrollBox.Repaint();
+    Update();
   end else
   begin
     if FZoom <> 1 then
@@ -779,9 +778,13 @@ begin
             InRange(Y, FScrollBox.VertScrollBar.Position, FScrollBox.VertScrollBar.Position + FScrollBox.ClientHeight);
 end;
 
-procedure TSimbaImageBox.Repaint;
+procedure TSimbaImageBox.Update;
 begin
+  {$IFDEF WINDOWS}
   FScrollBox.Repaint();
+  {$ELSE}
+  FScrollBox.Update();
+  {$ENDIF}
 end;
 
 constructor TSimbaImageBox.Create(AOwner: TComponent);

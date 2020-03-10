@@ -377,7 +377,7 @@ end;
 procedure TSimbaACAForm.ButtonClearImageClick(Sender: TObject);
 begin
   FImageBox.Overlay.Clear();
-  FImageBox.Repaint();
+  FImageBox.Update();
 end;
 
 procedure TSimbaACAForm.ButtonDeleteSelectedColorClick(Sender: TObject);
