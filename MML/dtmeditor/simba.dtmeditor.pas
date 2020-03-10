@@ -230,7 +230,7 @@ begin
     end;
   end;
 
-  FImageBox.Repaint();
+  FImageBox.Update();
 end;
 
 function TSimbaDTMEditorForm.GetPointAt(X, Y: Int32): Int32;
@@ -430,7 +430,7 @@ begin
     FImageBox.Overlay.Canvas.FillRect(Point.X - Max(1, Point.ASZ), Point.Y - Max(1, Point.ASZ),
                                       Point.X + Max(1, Point.ASZ), Point.Y + Max(1, Point.ASZ));
 
-    FImageBox.Repaint();
+    FImageBox.Update();
 
     PointFlashTimer.Tag := PointFlashTimer.Tag + 1;
   end;
@@ -448,7 +448,7 @@ begin
   try
     Matches := FImageBox.Overlay.DebugDTM(DTM);
 
-    FImageBox.Repaint();
+    FImageBox.Update();
     FImageBox.StatusPanel.Text := Format('%.0n matches found.', [Double(Matches)]);
   finally
     DTM.Free();
