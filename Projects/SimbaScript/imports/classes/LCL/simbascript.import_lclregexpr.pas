@@ -118,7 +118,7 @@ begin
   begin
     addClass('TRegExpr', 'TObject');
 
-    addGlobalFunc('procedure TRegExpr.Init();', @TRegExpr_Init);
+    addGlobalFunc('procedure TRegExpr.Init(); override;', @TRegExpr_Init);
     addClassVar('TRegExpr', 'Expression', 'String', @TRegExpr_Expression_Read, @TRegExpr_Expression_Write);
     addGlobalFunc('function TRegExpr.Exec(const AInputString :String): boolean; constref;', @TRegExpr_Exec);
     addGlobalFunc('function TRegExpr.ExecNext(): boolean; constref;', @TRegExpr_ExecNext);
@@ -131,7 +131,7 @@ begin
     addClassVar('TRegExpr', 'MatchPos', 'PtrInt', @TRegExpr_MatchPos_Read, nil, True);
     addClassVar('TRegExpr', 'MatchLen', 'PtrInt', @TRegExpr_MatchLen_Read, nil, True);
     addClassVar('TRegExpr', 'Match', 'String', @TRegExpr_Match_Read, nil, True);
-    addGlobalFunc('procedure TRegExpr.Free(); constref;', @TRegExpr_Free);
+    //addGlobalFunc('procedure TRegExpr.Free(); constref;', @TRegExpr_Free);
   end;
 end;
 

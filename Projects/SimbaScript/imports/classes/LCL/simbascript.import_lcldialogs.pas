@@ -73,8 +73,8 @@ begin
     addGlobalFunc('procedure TLCLComponent.IncLCLRefCount(); constref;', @TLCLComponent_IncLCLRefCount);
     addGlobalFunc('procedure TLCLComponent.DecLCLRefCount(); constref;', @TLCLComponent_DecLCLRefCount);
     addClassVar('TLCLComponent', 'LCLRefCount', 'integer', @TLCLComponent_LCLRefCount_Read, nil);
-    addGlobalFunc('procedure TLCLComponent.Init(TheOwner: TComponent);', @TLCLComponent_Init);
-    addGlobalFunc('procedure TLCLComponent.Free(); constref;', @TLCLComponent_Free);
+    addGlobalFunc('procedure TLCLComponent.Init(TheOwner: TComponent); override;', @TLCLComponent_Init);
+    //addGlobalFunc('procedure TLCLComponent.Free(); constref;', @TLCLComponent_Free);
   end;
 end;
 
@@ -244,7 +244,7 @@ begin
     addClassVar('TCommonDialog', 'Width', 'integer', @TCommonDialog_Width_Read, @TCommonDialog_Width_Write);
     addClassVar('TCommonDialog', 'Height', 'integer', @TCommonDialog_Height_Read, @TCommonDialog_Height_Write);
     addGlobalFunc('procedure TCommonDialog.Init(AOwner: TComponent);', @TCommonDialog_Init);
-    addGlobalFunc('procedure TCommonDialog.Free(); constref;', @TCommonDialog_Free);
+    //addGlobalFunc('procedure TCommonDialog.Free(); constref;', @TCommonDialog_Free);
   end;
 end;
 
@@ -387,7 +387,7 @@ begin
     AddClass('TFileDialog', 'TCommonDialog');
 
     addGlobalFunc('procedure TFileDialog.DoTypeChange(); constref;', @TFileDialog_DoTypeChange);
-    addGlobalFunc('function TFileDialog.Execute(): boolean; constref;', @TFileDialog_Execute);
+    //addGlobalFunc('function TFileDialog.Execute(): boolean; constref;', @TFileDialog_Execute);
     addClassVar('TFileDialog', 'Files', 'TStrings', @TFileDialog_Files_Read, nil);
     addClassVar('TFileDialog', 'HistoryList', 'TStrings', @TFileDialog_HistoryList_Read, @TFileDialog_HistoryList_Write);
     addGlobalFunc('procedure TFileDialog.IntfFileTypeChanged(NewFilterIndex: Integer); constref;', @TFileDialog_IntfFileTypeChanged);
@@ -398,8 +398,8 @@ begin
     addClassVar('TFileDialog', 'InitialDir', 'string', @TFileDialog_InitialDir_Read, @TFileDialog_InitialDir_Write);
     addClassVar('TFileDialog', 'OnHelpClicked', 'TNotifyEvent', @TFileDialog_OnHelpClicked_Read, @TFileDialog_OnHelpClicked_Write);
     addClassVar('TFileDialog', 'OnTypeChange', 'TNotifyEvent', @TFileDialog_OnTypeChange_Read, @TFileDialog_OnTypeChange_Write);
-    addGlobalFunc('procedure TFileDialog.Init(AOwner: TComponent);', @TFileDialog_Init);
-    addGlobalFunc('procedure TFileDialog.Free(); constref;', @TFileDialog_Free);
+    addGlobalFunc('procedure TFileDialog.Init(AOwner: TComponent); override;', @TFileDialog_Init);
+    //addGlobalFunc('procedure TFileDialog.Free(); constref;', @TFileDialog_Free);
   end;
 end;
 
@@ -480,8 +480,8 @@ begin
     addClassVar('TOpenDialog', 'Options', 'TOpenOptions', @TOpenDialog_Options_Read, @TOpenDialog_Options_Write);
     addClassVar('TOpenDialog', 'OnFolderChange', 'TNotifyEvent', @TOpenDialog_OnFolderChange_Read, @TOpenDialog_OnFolderChange_Write);
     addClassVar('TOpenDialog', 'OnSelectionChange', 'TNotifyEvent', @TOpenDialog_OnSelectionChange_Read, @TOpenDialog_OnSelectionChange_Write);
-    addGlobalFunc('procedure TOpenDialog.Init(TheOwner: TComponent);', @TOpenDialog_Init);
-    addGlobalFunc('procedure TOpenDialog.Free(); constref;', @TOpenDialog_Free);
+    addGlobalFunc('procedure TOpenDialog.Init(TheOwner: TComponent); override;', @TOpenDialog_Init);
+    //addGlobalFunc('procedure TOpenDialog.Free(); constref;', @TOpenDialog_Free);
   end;
 end;
 
@@ -529,8 +529,8 @@ begin
 
      addClassVar('TColorDialog', 'Color', 'TColor', @TColorDialog_Color_Read, @TColorDialog_Color_Write);
      addClassVar('TColorDialog', 'CustomColors', 'TStrings', @TColorDialog_CustomColors_Read, @TColorDialog_CustomColors_Write);
-     addGlobalFunc('procedure TColorDialog.Init(TheOwner: TComponent);', @TColorDialog_Init);
-     addGlobalFunc('procedure TColorDialog.Free(); constref;', @TColorDialog_Free);
+     addGlobalFunc('procedure TColorDialog.Init(TheOwner: TComponent); override;', @TColorDialog_Init);
+     //addGlobalFunc('procedure TColorDialog.Free(); constref;', @TColorDialog_Free);
    end;
 end;
 

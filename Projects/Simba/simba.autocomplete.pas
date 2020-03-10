@@ -42,13 +42,16 @@ type
     property FilterColor: TColor read FFilterColor write FFilterColor;
 
     procedure FillGlobalDeclarations;
-    procedure FillTypeDeclarations(Declaration: TDeclaration);
+    procedure FillTypeDeclarations(TypeDeclaration: TDeclaration);
 
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
   end;
 
 implementation
+
+uses
+  castaliapaslextypes;
 
 procedure TSimbaAutoComplete.PaintName(Canvas: TCanvas; var X, Y: Int32; AName: String);
 var
@@ -126,7 +129,9 @@ end;
 
 procedure TSimbaAutoComplete.HandleCompletion(var Value: string; SourceValue: string; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
 begin
-  FSynEdit.TextBetweenPointsEx[SourceStart, SourceEnd, scamEnd] := Value;
+  if UpperCase(Value) <> UpperCase(SourceValue) then
+    FSynEdit.TextBetweenPointsEx[SourceStart, SourceEnd, scamEnd] := Value;
+
   FSynEdit.CommandProcessor(ecChar, KeyChar, nil);
 
   if KeyChar <> '.' then
@@ -208,7 +213,7 @@ begin
     if Declaration.ClassType = TciProcedureDeclaration then
     begin
       Method := Declaration as TciProcedureDeclaration;
-      if Method.IsOperator or Method.IsMethodOfType then
+      if Method.IsOperator or Method.IsMethodOfType or (tokOverride in Method.Directives) then
         Continue;
     end;
 
@@ -218,9 +223,20 @@ begin
   FDeclarations.Extend(FParser.Locals);
 end;
 
-procedure TSimbaAutoComplete.FillTypeDeclarations(Declaration: TDeclaration);
+procedure TSimbaAutoComplete.FillTypeDeclarations(TypeDeclaration: TDeclaration);
+var
+  Declaration: TDeclaration;
 begin
   FDeclarations.Clear();
+
+  for Declaration in FParser.GetMembersOfType(TypeDeclaration) do
+  begin
+    if (Declaration.ClassType = TciProcedureDeclaration) and (tokOverride in TciProcedureDeclaration(Declaration).Directives) then
+      Continue;
+
+    FDeclarations.Add(Declaration);
+  end;
+
   FDeclarations.Extend(FParser.GetMembersOfType(Declaration));
 end;
 

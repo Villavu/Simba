@@ -59,10 +59,10 @@ begin
   begin
     addClass('TOutputPipeStream', 'THandleStream');
 
-    addGlobalFunc('function TOutputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64; constref;', @TOutputPipeStream_Seek);
-    addGlobalFunc('function TOutputPipeStream.Read(Var Buffer; Count : Longint): longint; constref;', @TOutputPipeStream_Read);
-    addGlobalFunc('procedure TOutputPipeStream.Init(AHandle: THandle);', @TOutputPipeStream_Init);
-    addGlobalFunc('procedure TOutputPipeStream.Free(); constref;', @TOutputPipeStream_Free);
+   // addGlobalFunc('function TOutputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64; constref;', @TOutputPipeStream_Seek);
+   // addGlobalFunc('function TOutputPipeStream.Read(Var Buffer; Count : Longint): longint; constref;', @TOutputPipeStream_Read);
+    addGlobalFunc('procedure TOutputPipeStream.Init(AHandle: THandle); override;', @TOutputPipeStream_Init);
+   // addGlobalFunc('procedure TOutputPipeStream.Free(); constref;', @TOutputPipeStream_Free);
   end;
 end;
 
@@ -108,12 +108,12 @@ begin
   begin
     addClass('TInputPipeStream', 'THandleStream');
 
-    addGlobalFunc('function TInputPipeStream.Write(constref Buffer; Count : Longint): Longint; constref;', @TInputPipeStream_Write);
-    addGlobalFunc('function TInputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64; constref;', @TInputPipeStream_Seek);
-    addGlobalFunc('function TInputPipeStream.Read(var Buffer; Count : Longint): longint; constref;', @TInputPipeStream_Read);
+    //addGlobalFunc('function TInputPipeStream.Write(constref Buffer; Count : Longint): Longint; constref;', @TInputPipeStream_Write);
+    //addGlobalFunc('function TInputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64; constref;', @TInputPipeStream_Seek);
+    //addGlobalFunc('function TInputPipeStream.Read(var Buffer; Count : Longint): longint; constref;', @TInputPipeStream_Read);
     addClassVar('TInputPipeStream', 'NumBytesAvailable', 'UInt32', @TInputPipeStream_NumBytesAvailable_Read, nil);
-    addGlobalFunc('procedure TInputPipeStream.Init(AHandle: THandle);', @TInputPipeStream_Init);
-    addGlobalFunc('procedure TInputPipeStream.Free(); constref;', @TInputPipeStream_Free);
+    addGlobalFunc('procedure TInputPipeStream.Init(AHandle: THandle); override;', @TInputPipeStream_Init);
+    //addGlobalFunc('procedure TInputPipeStream.Free(); constref;', @TInputPipeStream_Free);
   end;
 end;
 
@@ -573,8 +573,8 @@ begin
     addClassVar('TProcess', 'WindowWidth', 'Cardinal', @TProcess_WindowWidth_Read, @TProcess_WindowWidth_Write);
     addClassVar('TProcess', 'FillAttribute', 'Cardinal', @TProcess_FillAttribute_Read, @TProcess_FillAttribute_Write);
     addClassVar('TProcess', 'XTermProgram', 'String', @TProcess_XTermProgram_Read, @TProcess_XTermProgram_Write);
-    addGlobalFunc('procedure TProcess.Init(AOwner : TComponent);', @TProcess_Init);
-    addGlobalFunc('procedure TProcess.Free(); constref;', @TProcess_Free);
+    addGlobalFunc('procedure TProcess.Init(AOwner : TComponent); overrride;', @TProcess_Init);
+    //addGlobalFunc('procedure TProcess.Free(); constref;', @TProcess_Free);
   end;
 end;
 

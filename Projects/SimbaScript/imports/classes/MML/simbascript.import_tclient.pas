@@ -142,7 +142,7 @@ begin
     addClassVar('TClient', 'WriteLnProc', 'TWriteLnProc', @TClient_WritelnProc_Read, @TClient_WritelnProc_Write);
     addGlobalFunc('procedure TClient.WriteLn(s : string); constref;', @TClient_WriteLn);
     addGlobalFunc('procedure TClient.Init(const plugin_dir: string = ''''; const UseIOManager: TIOManager = nil);', @TClient_Init);
-    addGlobalFunc('procedure TClient.Free(); constref;', @TClient_Free);
+    //addGlobalFunc('procedure TClient.Free(); constref;', @TClient_Free);
   end;
 end;
 

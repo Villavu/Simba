@@ -111,13 +111,13 @@ begin
   begin
     addClass('TCustomTimer', 'TComponent');
 
-    addGlobalFunc('procedure TCustomTimer.Init(AOwner: TComponent);', @TCustomTimer_Init);
+    addGlobalFunc('procedure TCustomTimer.Init(AOwner: TComponent); override;', @TCustomTimer_Init);
     addClassVar('TCustomTimer', 'Enabled', 'Boolean', @TCustomTimer_Enabled_Read, @TCustomTimer_Enabled_Write);
     addClassVar('TCustomTimer', 'Interval', 'Cardinal', @TCustomTimer_Interval_Read, @TCustomTimer_Interval_Write);
     addClassVar('TCustomTimer', 'OnTimer', 'TNotifyEvent', @TCustomTimer_OnTimer_Read, @TCustomTimer_OnTimer_Write);
     addClassVar('TCustomTimer', 'OnStartTimer', 'TNotifyEvent', @TCustomTimer_OnStartTimer_Read, @TCustomTimer_OnStartTimer_Write);
     addClassVar('TCustomTimer', 'OnStopTimer', 'TNotifyEvent', @TCustomTimer_OnStopTimer_Read, @TCustomTimer_OnStopTimer_Write);
-    addGlobalFunc('procedure TCustomTimer.Free(); constref;', @TCustomTimer_Free);
+    //addGlobalFunc('procedure TCustomTimer.Free(); constref;', @TCustomTimer_Free);
   end;
 end;
 
@@ -139,8 +139,8 @@ begin
   begin
     addClass('TTimer', 'TCustomTimer');
 
-    addGlobalFunc('procedure TTimer.Init(AOwner: TComponent);', @TTimer_Init);
-    addGlobalFunc('procedure TTimer.Free(); constref;', @TTimer_Free);
+    addGlobalFunc('procedure TTimer.Init(AOwner: TComponent); override;', @TTimer_Init);
+    //addGlobalFunc('procedure TTimer.Free(); constref;', @TTimer_Free);
   end;
 end;
 
@@ -256,9 +256,8 @@ begin
   with Compiler do
   begin
     addClass('TCustomImage', 'TGraphicControl');
-
-    addGlobalFunc('procedure TCustomImage.Init(AOwner: TComponent);', @TCustomImage_Init);
-    addClassVar('TCustomImage', 'Canvas', 'TCanvas', @TCustomImage_Canvas_Read);
+    addGlobalFunc('procedure TCustomImage.Init(AOwner: TComponent); override;', @TCustomImage_Init);
+    //addClassVar('TCustomImage', 'Canvas', 'TCanvas', @TCustomImage_Canvas_Read);
     addGlobalFunc('function TCustomImage.DestRect(): TRect; constref;', @TCustomImage_DestRect);
     addClassVar('TCustomImage', 'Center', 'Boolean', @TCustomImage_Center_Read, @TCustomImage_Center_Write);
     addClassVar('TCustomImage', 'Picture', 'TPicture', @TCustomImage_Picture_Read, @TCustomImage_Picture_Write);
@@ -268,7 +267,7 @@ begin
     addClassVar('TCustomImage', 'OnPictureChanged', 'TNotifyEvent', @TCustomImage_OnPictureChanged_Read, @TCustomImage_OnPictureChanged_Write);
     addClassVar('TCustomImage', 'OnMouseDown', 'TMouseEvent', nil, @TCustomImage_OnMouseDown_Write);
     addClassVar('TCustomImage', 'OnMouseUp', 'TMouseEvent', nil, @TCustomImage_OnMouseUp_Write);
-    addGlobalFunc('procedure TCustomImage.Free(); constref;', @TCustomImage_Free);
+    //addGlobalFunc('procedure TCustomImage.Free(); constref;', @TCustomImage_Free);
   end;
 end;
 
@@ -340,10 +339,10 @@ begin
   begin
     addClass('TImage', 'TCustomImage');
 
-    addGlobalFunc('procedure TImage.Init(AOwner: TComponent);', @TImage_Init);
-    addGlobalFunc('procedure TImage.Free(); constref;', @TImage_Free);
-    addClassVar('TImage', 'Hint', 'String', @TImage_Hint_Read, @TImage_Hint_Write);
-    addClassVar('TImage', 'ShowHint', 'Boolean', @TImage_ShowHint_Read, @TImage_ShowHint_Write);
+    addGlobalFunc('procedure TImage.Init(AOwner: TComponent); override;', @TImage_Init);
+    //addGlobalFunc('procedure TImage.Free(); constref;', @TImage_Free);
+    //addClassVar('TImage', 'Hint', 'String', @TImage_Hint_Read, @TImage_Hint_Write);
+    //addClassVar('TImage', 'ShowHint', 'Boolean', @TImage_ShowHint_Read, @TImage_ShowHint_Write);
     addClassVar('TImage', 'OnMouseEnter', 'TNotifyEvent', @TImage_OnMouseEnter_Read, @TImage_OnMouseEnter_Write);
     addClassVar('TImage', 'OnMouseLeave', 'TNotifyEvent', @TImage_OnMouseLeave_Read, @TImage_OnMouseLeave_Write);
     addClassVar('TImage', 'OnMouseMove', 'TMouseMoveEvent', @TImage_OnMouseMove_Read, @TImage_OnMouseMove_Write);
@@ -432,8 +431,8 @@ begin
     addClassVar('TCustomPanel', 'BevelOuter', 'TPanelBevel', @TCustomPanel_BevelOuter_Read, @TCustomPanel_BevelOuter_Write);
     addClassVar('TCustomPanel', 'BevelWidth', 'TBevelWidth', @TCustomPanel_BevelWidth_Read, @TCustomPanel_BevelWidth_Write);
     addClassVar('TCustomPanel', 'FullRepaint', 'Boolean', @TCustomPanel_FullRepaint_Read, @TCustomPanel_FullRepaint_Write);
-    addGlobalFunc('procedure TCustomPanel.Init(TheOwner: TComponent);', @TCustomPanel_Init);
-    addGlobalFunc('procedure TCustomPanel.Free(); constref;', @TCustomPanel_Free);
+    addGlobalFunc('procedure TCustomPanel.Init(TheOwner: TComponent); override;', @TCustomPanel_Init);
+    //addGlobalFunc('procedure TCustomPanel.Free(); constref;', @TCustomPanel_Free);
   end;
 end;
 
@@ -455,8 +454,8 @@ begin
   begin
     addClass('TPanel', 'TCustomPanel');
 
-    addGlobalFunc('procedure TPanel.Init(TheOwner: TComponent);', @TPanel_Init);
-    addGlobalFunc('procedure TPanel.Free(); constref;', @TPanel_Free);
+    addGlobalFunc('procedure TPanel.Init(TheOwner: TComponent); override;', @TPanel_Init);
+    //addGlobalFunc('procedure TPanel.Free(); constref;', @TPanel_Free);
   end;
 end;
 
@@ -524,8 +523,8 @@ begin
     addClassVar('TShape', 'Brush', 'TBrush', @TShape_Brush_Read, @TShape_Brush_Write);
     addClassVar('TShape', 'Pen', 'TPen', @TShape_Pen_Read, @TShape_Pen_Write);
     addClassVar('TShape', 'Shape', 'TShapeType', @TShape_Shape_Read, @TShape_Shape_Write);
-    addGlobalFunc('procedure TShape.Init(TheOwner: TComponent);', @TShape_Init);
-    addGlobalFunc('procedure TShape.Free(); constref;', @TShape_Free);
+    addGlobalFunc('procedure TShape.Init(TheOwner: TComponent); override;', @TShape_Init);
+   // addGlobalFunc('procedure TShape.Free(); constref;', @TShape_Free);
   end;
 end;
 

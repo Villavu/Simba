@@ -135,8 +135,8 @@ begin
     addClassVar('TCustomFloatSpinEdit', 'MaxValue', 'Double', @TCustomFloatSpinEdit_MaxValue_Read, @TCustomFloatSpinEdit_MaxValue_Write);
     addClassVar('TCustomFloatSpinEdit', 'Value', 'Double', @TCustomFloatSpinEdit_Value_Read, @TCustomFloatSpinEdit_Value_Write);
     addClassVar('TCustomFloatSpinEdit', 'ValueEmpty', 'Boolean', @TCustomFloatSpinEdit_ValueEmpty_Read, @TCustomFloatSpinEdit_ValueEmpty_Write);
-    addGlobalFunc('procedure TCustomFloatSpinEdit.Init(TheOwner: TComponent);', @TCustomFloatSpinEdit_Init);
-    addGlobalFunc('procedure TCustomFloatSpinEdit.Free(); constref;', @TCustomFloatSpinEdit_Free);
+    addGlobalFunc('procedure TCustomFloatSpinEdit.Init(TheOwner: TComponent); override;', @TCustomFloatSpinEdit_Init);
+    //addGlobalFunc('procedure TCustomFloatSpinEdit.Free(); constref;', @TCustomFloatSpinEdit_Free);
   end;
 end;
 
@@ -158,8 +158,8 @@ begin
   begin
     addClass('TFloatSpinEdit', 'TCustomFloatSpinEdit');
 
-    addGlobalFunc('procedure TFloatSpinEdit.Init(TheOwner: TComponent);', @TFloatSpinEdit_Init);
-    addGlobalFunc('procedure TFloatSpinEdit.Free(); constref;', @TFloatSpinEdit_Free);
+    addGlobalFunc('procedure TFloatSpinEdit.Init(TheOwner: TComponent); override;', @TFloatSpinEdit_Init);
+    //addGlobalFunc('procedure TFloatSpinEdit.Free(); constref;', @TFloatSpinEdit_Free);
   end;
 end;
 
@@ -233,8 +233,8 @@ begin
     addClassVar('TCustomSpinEdit', 'MinValue', 'integer', @TCustomSpinEdit_MinValue_Read, @TCustomSpinEdit_MinValue_Write);
     addClassVar('TCustomSpinEdit', 'MaxValue', 'integer', @TCustomSpinEdit_MaxValue_Read, @TCustomSpinEdit_MaxValue_Write);
     addClassVar('TCustomSpinEdit', 'Increment', 'integer', @TCustomSpinEdit_Increment_Read, @TCustomSpinEdit_Increment_Write);
-    addGlobalFunc('procedure TCustomSpinEdit.Init(TheOwner: TComponent);', @TCustomSpinEdit_Init);
-    addGlobalFunc('procedure TCustomSpinEdit.Free(); constref;', @TCustomSpinEdit_Free);
+    addGlobalFunc('procedure TCustomSpinEdit.Init(TheOwner: TComponent); override;', @TCustomSpinEdit_Init);
+    //addGlobalFunc('procedure TCustomSpinEdit.Free(); constref;', @TCustomSpinEdit_Free);
   end;
 end;
 
@@ -256,8 +256,8 @@ begin
   begin
     addClass('TSpinEdit', 'TCustomSpinEdit');
 
-    addGlobalFunc('procedure TSpinEdit.Init(TheOwner: TComponent);', @TSpinEdit_Init);
-    addGlobalFunc('procedure TSpinEdit.Free(); constref;', @TSpinEdit_Free);
+    addGlobalFunc('procedure TSpinEdit.Init(TheOwner: TComponent); override;', @TSpinEdit_Init);
+   // addGlobalFunc('procedure TSpinEdit.Free(); constref;', @TSpinEdit_Free);
   end;
 end;
 
