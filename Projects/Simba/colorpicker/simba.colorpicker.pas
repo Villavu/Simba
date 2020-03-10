@@ -86,6 +86,7 @@ begin
   Image.Picture.Bitmap.Width := ZOOM_PIXELS;
   Image.Picture.Bitmap.Height := ZOOM_PIXELS;
   Image.OnPaint := @ImagePaint;
+  Image.AntialiasingMode := amOff;
 
   Image.Top := 5;
   Image.Left := Canvas.TextWidth('Position: 99999, 99999');

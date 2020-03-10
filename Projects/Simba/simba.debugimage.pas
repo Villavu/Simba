@@ -33,14 +33,11 @@ uses
 
 type
   TSimbaDebugImageForm = class(TForm)
-  published
-    procedure ImageDoubleClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Int32);
-    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure SetParent(AParent: TWinControl); override;
   protected
-    FControlDown: Boolean;
-    FPoints: TPointArray;
+    FMouseX, FMouseY: Int32;
+
+    procedure ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Int32);
+    procedure ImageDoubleClick(Sender: TObject);
   public
     ImageBox: TSimbaImageBox;
 
@@ -56,85 +53,17 @@ implementation
 
 uses
   anchordocking, lcltype,
-  simba.debugform, simba.main, simba.iomanager, simba.bitmap;
+  simba.debugform, simba.main;
 
-procedure TSimbaDebugImageForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-var
-  Manager: TIOManager;
-  Bitmap: TMufasaBitmap;
-  W, H: Int32;
+procedure TSimbaDebugImageForm.ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Int32);
 begin
-  if (Key = VK_CONTROL) then
-    FControlDown := True;
-
-  if (Key = VK_F5) then
-  begin
-    Manager := nil;
-    Bitmap := nil;
-
-    try
-      Manager := TIOManager.Create();
-      Manager.SetTarget(SimbaForm.WindowSelection);
-      Manager.GetDimensions(W, H);
-
-      Bitmap := TMufasaBitmap.Create();
-      Bitmap.CopyClientToBitmap(Manager, True, 0, 0, W-1, H-1);
-
-      ImageBox.Draw(Bitmap.FData, Bitmap.Width, Bitmap.Height);
-    except
-    end;
-
-    if (Bitmap <> nil) then
-      Bitmap.Free();
-    if (Manager <> nil) then
-      Manager.Free();
-  end;
+  FMouseX := X;
+  FMouseY := Y;
 end;
 
-procedure TSimbaDebugImageForm.SetParent(AParent: TWinControl);
+procedure TSimbaDebugImageForm.ImageDoubleClick(Sender: TObject);
 begin
-  if (AParent <> nil) and (AParent is TAnchorDockHostSite) then
-    AParent.OnKeyDown := @FormKeyDown;
-
-  inherited SetParent(AParent);
-end;
-
-procedure TSimbaDebugImageForm.ImageDoubleClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Int32);
-begin
-  if FControlDown then
-  begin
-    SetLength(FPoints, Length(FPoints) + 1);
-
-    FPoints[High(FPoints)].X := X;
-    FPoints[High(FPoints)].Y := Y;
-  end else
-    SimbaDebugForm.Add('Debug Image Click: ' + IntToStr(X) + ', ' + IntToStr(Y));
-end;
-
-procedure TSimbaDebugImageForm.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-var
-  I: Int32;
-  S: String;
-begin
-  if (Key = VK_CONTROL) then
-  begin
-    if (Length(FPoints) > 0) then
-    begin
-      S := '[';
-      for I := 0 to High(FPoints) do
-      begin
-        if I > 0 then
-          S := S + ', ';
-        S := S + '[' + IntToStr(FPoints[I].X) + ', ' + IntToStr(FPoints[I].Y) + ']';
-      end;
-      S := S + ']';
-
-      SimbaDebugForm.Add('Debug Image Clicks: ' + S);
-    end;
-
-    FPoints := nil;
-    FControlDown := False;
-  end;
+  SimbaDebugForm.Add('Debug Image Click: ' + IntToStr(FMouseX) + ', ' + IntToStr(FMouseY));
 end;
 
 procedure TSimbaDebugImageForm.SetDimensions(W, H: Int32);
@@ -151,7 +80,7 @@ begin
   end else
   begin
     Width := W;
-    Height := H + ImageBox.StatusBar.Height
+    Height := H + ImageBox.StatusBar.Height;
   end;
 end;
 
@@ -162,7 +91,8 @@ begin
   ImageBox := TSimbaImageBox.Create(Self);
   ImageBox.Parent := Self;
   ImageBox.Align := alClient;
-  ImageBox.OnImageDoubleClick := @ImageDoubleClick;
+  ImageBox.OnMouseMove := @ImageMouseMove;
+  ImageBox.OnDblClick := @ImageDoubleClick;
 end;
 
 initialization

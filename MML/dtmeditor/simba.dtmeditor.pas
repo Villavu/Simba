@@ -7,7 +7,7 @@ interface
 uses
   classes, sysutils, fileutil, dividerbevel, lresources, forms, controls,
   graphics, dialogs, extctrls, comctrls, stdctrls, menus, lcltype,
-  simba.client, simba.dtm, simba.imagebox_overlay, simba.mufasatypes;
+  simba.client, simba.dtm, simba.imagebox, simba.mufasatypes;
 
 type
   TSimbaDTMEditorForm = class(TForm)
@@ -48,7 +48,7 @@ type
     MenuDTM: TMenuItem;
     MenuItemLoadDTM: TMenuItem;
     MenuItemSeperator: TMenuItem;
-    MenuItemDrawColor: TMenuItem;
+    MenuItemDebugColor: TMenuItem;
     MenuItemColorRed: TMenuItem;
     MenuItemColorGreen: TMenuItem;
     MenuItemColorBlue: TMenuItem;
@@ -81,8 +81,7 @@ type
     procedure ClientImageClear(Sender: TObject);
     procedure ButtonUpdateImageClick(Sender: TObject);
   protected
-    FImageBox: TSimbaImageBox_Overlay;
-    FDrawColor: TColor;
+    FImageBox: TSimbaImageBox;
     FClient: TClient;
     FDragging: Int32;
 
@@ -117,47 +116,35 @@ var
   R, G, B: Byte;
   H, S, L: Extended;
   localX, localY, globalX, globalY: Int32;
-  Col: TColor;
   Point: TMDTMPoint;
 begin
-  if FImageBox.Image.PointInBitmap(X, Y) then
-  begin
-    ImageZoom.Picture.Bitmap.BeginUpdate(True);
-    ImageZoom.Tag := PtrInt(True);
+  ImageZoom.Picture.Bitmap.BeginUpdate(True);
+  ImageZoom.Tag := PtrInt(True);
 
-    try
-      ImageZoom.Picture.Bitmap.Canvas.Clear();
+  try
+    for localX := 0 to 5 do
+      for localY := 0 to 5 do
+      begin
+        globalX := X + localX - 2;
+        globalY := Y + localY - 2;
 
-      for localX := 0 to 5 do
-        for localY := 0 to 5 do
-        begin
-          globalX := X + localX - 2;
-          globalY := Y + localY - 2;
-
-          if FImageBox.Image.PointInBitmap(globalX, globalY) then
-            ImageZoom.Picture.Bitmap.Canvas.Pixels[localX, localY] := FImageBox.Image.FastGetPixel(globalX, globalY)
-          else
-            ImageZoom.Picture.Bitmap.Canvas.Pixels[localX, localY] := clBlack;
-        end;
-    finally
-      ImageZoom.Picture.Bitmap.EndUpdate(False);
-    end;
-
-    Col := FImageBox.Image.FastGetPixel(X, Y);
-
-    ColorToRGB(Col, R, G, B);
-    ColorToHSL(Col, H, S, L);
-
-    LabelColorZoom.Caption := Format('Color: %d', [Col])           + LineEnding +
-                              Format('RGB: %d, %d, %d', [R, G, B]) + LineEnding +
-                              Format('HSL: %f, %f, %f', [H, S, L]) + LineEnding;
+        ImageZoom.Picture.Bitmap.Canvas.Pixels[localX, localY] :=  FImageBox.Background.Canvas.Pixels[globalX, globalY];
+      end;
+  finally
+    ImageZoom.Picture.Bitmap.EndUpdate(False);
   end;
 
+  ColorToRGB(FImageBox.Background.Canvas.Pixels[X, Y], R, G, B);
+  ColorToHSL(FImageBox.Background.Canvas.Pixels[X, Y], H, S, L);
 
-  if (FDragging > -1) and FImageBox.Image.PointInBitmap(X, Y) then
+  LabelColorZoom.Caption := Format('Color: %d', [FImageBox.Background.Canvas.Pixels[X, Y]]) + LineEnding +
+                            Format('RGB: %d, %d, %d', [R, G, B])                            + LineEnding +
+                            Format('HSL: %f, %f, %f', [H, S, L])                            + LineEnding;
+  if (FDragging > -1) then
   begin
     Point := GetPoint(FDragging);
-    EditPoint(FDragging, X, Y, FImageBox.Image.FastGetPixel(X, Y), Point.T, Point.ASZ);
+
+    EditPoint(FDragging, X, Y, FImageBox.Background.Canvas.Pixels[X, Y], Point.T, Point.ASZ);
   end;
 
   if (GetPointAt(X, Y) > -1) then
@@ -176,8 +163,7 @@ begin
         case FImageBox.Cursor of
           crDefault:
             begin
-              if FImageBox.Image.PointInBitmap(X, Y) then
-                AddPoint(X, Y, FImageBox.Image.FastGetPixel(X, Y));
+              AddPoint(X, Y, FImageBox.Background.Canvas.Pixels[X, Y]);
 
               FImageBox.Cursor := crHandPoint;
             end;
@@ -206,10 +192,10 @@ begin
         Parent[i].Checked := False;
 
     case Caption of
-      'Red': FDrawColor := clRed;
-      'Green': FDrawColor := clGreen;
-      'Blue': FDrawColor := clBlue;
-      'Yellow': FDrawColor := clYellow;
+      'Red': FImageBox.Overlay.Canvas.Pen.Color := clRed;
+      'Green': FImageBox.Overlay.Canvas.Pen.Color := clGreen;
+      'Blue': FImageBox.Overlay.Canvas.Pen.Color := clBlue;
+      'Yellow': FImageBox.Overlay.Canvas.Pen.Color := clYellow;
     end;
   end;
 end;
@@ -223,8 +209,6 @@ begin
   PointFlashTimer.Enabled := True;
 
   FImageBox.Overlay.Clear();
-  FImageBox.Overlay.Pen.Color := FDrawColor;
-  FImageBox.Overlay.Brush.Color := FDrawColor;
 
   Points := GetPoints();
 
@@ -236,17 +220,17 @@ begin
 
       if (Length(Points) > 1) then // Connect to main point
       begin
-        FImageBox.Overlay.Line(Points[0].X, Points[0].Y, Point.X, Point.Y);
-        FImageBox.Overlay.FillRect(Points[0].X - Max(1, Points[0].ASZ), Points[0].Y - Max(1, Points[0].ASZ),
-                                   Points[0].X + Max(1, Points[0].ASZ), Points[0].Y + Max(1, Points[0].ASZ));
+        FImageBox.Overlay.Canvas.Line(Points[0].X, Points[0].Y, Point.X, Point.Y);
+        FImageBox.Overlay.Canvas.FillRect(Points[0].X - Max(1, Points[0].ASZ), Points[0].Y - Max(1, Points[0].ASZ),
+                                          Points[0].X + Max(1, Points[0].ASZ), Points[0].Y + Max(1, Points[0].ASZ));
       end;
 
-      FImageBox.Overlay.FillRect(Point.X - Max(1, Point.ASZ), Point.Y - Max(1, Point.ASZ),
-                                 Point.X + Max(1, Point.ASZ), Point.Y + Max(1, Point.ASZ));
+      FImageBox.Overlay.Canvas.FillRect(Point.X - Max(1, Point.ASZ), Point.Y - Max(1, Point.ASZ),
+                                        Point.X + Max(1, Point.ASZ), Point.Y + Max(1, Point.ASZ));
     end;
   end;
 
-  FImageBox.Overlay.Update();
+  FImageBox.Repaint();
 end;
 
 function TSimbaDTMEditorForm.GetPointAt(X, Y: Int32): Int32;
@@ -277,9 +261,10 @@ begin
     FClient.IOManager.SetDesktop();
 
   FClient.IOManager.GetDimensions(W, H);
+  FClient.MBitmaps[0].CopyClientToBitmap(FClient.IOManager, True, 0, 0, W-1, H-1);
 
-  FImageBox.Image.CopyClientToBitmap(FClient.IOManager, True, 0, 0, W-1, H-1);
-  FImageBox.Changed();
+  FImageBox.Background.LoadFromMufasaBitmap(FClient.MBitmaps[0]);
+  FImageBox.BackgroundChanged();
 
   DrawDTM();
 end;
@@ -387,7 +372,7 @@ begin
   with Sender as TGraphicControl do
     if Boolean(Tag) then
     begin
-      Canvas.Pen.Color := FDrawColor;
+      Canvas.Pen.Color := FImageBox.Overlay.Canvas.Pen.Color;
       Canvas.Frame(
         (Width div 2)  - Floor(Width / 5 / 2),
         (Height div 2) - Floor(Width / 5 / 2),
@@ -438,12 +423,14 @@ begin
     Point := GetPoint(ListBox.ItemIndex);
 
     if Odd(PointFlashTimer.Tag) then
-      FImageBox.Overlay.Brush.Color := clYellow
+      FImageBox.Overlay.Canvas.Brush.Color := clYellow
     else
-      FImageBox.Overlay.Brush.Color := FDrawColor;
+      FImageBox.Overlay.Canvas.Brush.Color := FImageBox.Overlay.Canvas.Pen.Color;
 
-    FImageBox.Overlay.FillRect(Point.X - Max(1, Point.ASZ), Point.Y - Max(1, Point.ASZ),
-                               Point.X + Max(1, Point.ASZ), Point.Y + Max(1, Point.ASZ));
+    FImageBox.Overlay.Canvas.FillRect(Point.X - Max(1, Point.ASZ), Point.Y - Max(1, Point.ASZ),
+                                      Point.X + Max(1, Point.ASZ), Point.Y + Max(1, Point.ASZ));
+
+    FImageBox.Repaint();
 
     PointFlashTimer.Tag := PointFlashTimer.Tag + 1;
   end;
@@ -452,14 +439,17 @@ end;
 procedure TSimbaDTMEditorForm.FindDTMClick(Sender: TObject);
 var
   DTM: TMDTM;
+  Matches: Int32;
 begin
   ListBox.ClearSelection();
 
   DTM := GetDTM();
 
   try
-    with FImageBox.Overlay.DebugDTM(DTM) do
-      FImageBox.StatusPanel.Text := Format('FindDTMs took %f ms. %.0n matches found.', [Time, Double(Matches)]);
+    Matches := FImageBox.Overlay.DebugDTM(DTM);
+
+    FImageBox.Repaint();
+    FImageBox.StatusPanel.Text := Format('%.0n matches found.', [Double(Matches)]);
   finally
     DTM.Free();
   end;
@@ -488,8 +478,8 @@ begin
 
     with GetPoint(ListBox.ItemIndex) do
     begin
-      if not FImageBox.IsPointVisible(X, Y) then
-        FImageBox.MoveToPoint(X, Y);
+      if not FImageBox.IsVisible(X, Y) then
+        FImageBox.MoveTo(X, Y);
 
       EditPointX.Text := IntToStr(X);
       EditPointY.Text := IntToStr(Y);
@@ -566,8 +556,8 @@ begin
 
     if Execute() then
     try
-      FImageBox.Image.LoadFromFile(FileName);
-      FImageBox.Changed();
+      FImageBox.Background.LoadFromFile(FileName);
+      FImageBox.BackgroundChanged();
     except
     end;
   finally
@@ -614,18 +604,19 @@ constructor TSimbaDTMEditorForm.Create(TargetWindow: THandle);
 begin
   inherited Create(Application.MainForm);
 
-  FDrawColor := clRed;
   FDragging := -1;
 
-  FImageBox := TSimbaImageBox_Overlay.Create(Self);
+  FImageBox := TSimbaImageBox.Create(Self);
   FImageBox.Parent := PanelMain;
   FImageBox.Align := alClient;
-  FImageBox.OnImageMouseDown := @ClientImageMouseDown;
-  FImageBox.OnImageMouseMove := @ClientImageMouseMove;
-  FImageBox.OnImageMouseUp := @ClientImageMouseUp;
+  FImageBox.OnMouseDown := @ClientImageMouseDown;
+  FImageBox.OnMouseMove := @ClientImageMouseMove;
+  FImageBox.OnMouseUp := @ClientImageMouseUp;
+  FImageBox.Overlay.Canvas.Pen.Color := clRed;
 
   FClient := TClient.Create();
   FClient.IOManager.SetTarget(TargetWindow);
+  FClient.MBitmaps.CreateBMP(0, 0);
 
   ImageZoom.Picture.Bitmap.Width := 5;
   ImageZoom.Picture.Bitmap.Height := 5;
@@ -635,6 +626,7 @@ end;
 
 destructor TSimbaDTMEditorForm.Destroy;
 begin
+  FClient.MBitmaps[0].Free();
   FClient.Free();
 
   inherited Destroy();

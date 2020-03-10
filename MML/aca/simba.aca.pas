@@ -7,7 +7,7 @@ interface
 uses
   classes, sysutils, fileutil, dividerbevel, lresources, forms, controls,
   graphics, dialogs, extctrls, comctrls, stdctrls, menus, colorbox, lcltype,
-  simba.client, simba.imagebox_overlay, simba.mufasatypes;
+  simba.client, simba.imagebox, simba.mufasatypes;
 
 type
   TSimbaACAForm = class(TForm)
@@ -73,7 +73,7 @@ type
     procedure ClientImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   protected
     FClient: TClient;
-    FImageBox: TSimbaImageBox_Overlay;
+    FImageBox: TSimbaImageBox;
 
     procedure FontChanged(Sender: TObject); override;
 
@@ -90,7 +90,7 @@ type
 implementation
 
 uses
-  math, clipbrd,
+  math, clipbrd, simba.bitmap,
   simba.aca_math, simba.colormath;
 
 procedure TSimbaACAForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -99,45 +99,37 @@ var
   H, S, L: Extended;
   localX, localY, globalX, globalY: Int32;
 begin
-  if FImageBox.Image.PointInBitmap(X, Y) then
-  begin
-    ImageZoom.Picture.Bitmap.BeginUpdate(True);
-    ImageZoom.Tag := PtrInt(True);
+  ImageZoom.Picture.Bitmap.BeginUpdate(True);
+  ImageZoom.Tag := PtrInt(True);
 
-    try
-      ImageZoom.Picture.Bitmap.Canvas.Clear();
+  try
+    for localX := 0 to 5 do
+      for localY := 0 to 5 do
+      begin
+        globalX := X + localX - 2;
+        globalY := Y + localY - 2;
 
-      for localX := 0 to 5 do
-        for localY := 0 to 5 do
-        begin
-          globalX := X + localX - 2;
-          globalY := Y + localY - 2;
-
-          if FImageBox.Image.PointInBitmap(globalX, globalY) then
-            ImageZoom.Picture.Bitmap.Canvas.Pixels[localX, localY] := FImageBox.Image.FastGetPixel(globalX, globalY)
-          else
-            ImageZoom.Picture.Bitmap.Canvas.Pixels[localX, localY] := clBlack;
-        end;
-    finally
-      ImageZoom.Picture.Bitmap.EndUpdate(False);
-    end;
-
-    ColorToRGB(FImageBox.Image.FastGetPixel(X, Y), R, G, B);
-    ColorToHSL(FImageBox.Image.FastGetPixel(X, Y), H, S, L);
-
-    ColorLabel.Caption := Format('Color: %d', [FImageBox.Image.FastGetPixel(X, Y)]) + LineEnding +
-                          Format('RGB: %d, %d, %d', [R, G, B])                           + LineEnding +
-                          Format('HSL: %.2f, %.2f, %.2f', [H, S, L])                     + LineEnding;
+        ImageZoom.Picture.Bitmap.Canvas.Pixels[localX, localY] := FImageBox.Background.Canvas.Pixels[globalX, globalY];
+      end;
+  finally
+    ImageZoom.Picture.Bitmap.EndUpdate(False);
   end;
+
+  ColorToRGB(FImageBox.Background.Canvas.Pixels[X, Y], R, G, B);
+  ColorToHSL(FImageBox.Background.Canvas.Pixels[X, Y], H, S, L);
+
+  ColorLabel.Caption := Format('Color: %d', [FImageBox.Background.Canvas.Pixels[X, Y]]) + LineEnding +
+                        Format('RGB: %d, %d, %d', [R, G, B])                            + LineEnding +
+                        Format('HSL: %.2f, %.2f, %.2f', [H, S, L])                      + LineEnding;
 end;
 
 procedure TSimbaACAForm.ClientImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
   Pixel: Int32;
 begin
-  if (Button = mbLeft) and FImageBox.Image.PointInBitmap(X, Y) then
+  if (Button = mbLeft) then
   begin
-    Pixel := FImageBox.Image.FastGetPixel(X, Y);
+    Pixel := FImageBox.Background.Canvas.Pixels[X, Y];
 
     if ColorListBox.Items.IndexOf(Pixel.ToString()) = -1 then
       ColorListBox.ItemIndex := ColorListBox.Items.AddObject(Pixel.ToString(), TObject(PtrUInt(Pixel)));
@@ -180,10 +172,10 @@ begin
         Parent[i].Checked := False;
 
     case Caption of
-      'Red': FImageBox.Overlay.Pen.Color := clRed;
-      'Green': FImageBox.Overlay.Pen.Color := clGreen;
-      'Blue': FImageBox.Overlay.Pen.Color := clBlue;
-      'Yellow': FImageBox.Overlay.Pen.Color := clYellow;
+      'Red': FImageBox.Overlay.Canvas.Pen.Color := clRed;
+      'Green': FImageBox.Overlay.Canvas.Pen.Color := clGreen;
+      'Blue': FImageBox.Overlay.Canvas.Pen.Color := clBlue;
+      'Yellow': FImageBox.Overlay.Canvas.Pen.Color := clYellow;
     end;
   end;
 end;
@@ -205,9 +197,10 @@ begin
     FClient.IOManager.SetDesktop();
 
   FClient.IOManager.GetDimensions(W, H);
+  FClient.MBitmaps[0].CopyClientToBitmap(FClient.IOManager, True, 0, 0, W-1, H-1);
 
-  FImageBox.Image.CopyClientToBitmap(FClient.IOManager, True, 0, 0, W-1, H-1);
-  FImageBox.Changed();
+  FImageBox.Background.LoadFromMufasaBitmap(FClient.MBitmaps[0]);
+  FImageBox.BackgroundChanged();
 end;
 
 procedure TSimbaACAForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -220,7 +213,7 @@ begin
   with Sender as TGraphicControl do
     if Boolean(Tag) then
     begin
-      Canvas.Pen.Color := FImageBox.Overlay.Pen.Color;
+      Canvas.Pen.Color := FImageBox.Overlay.Canvas.Pen.Color;
       Canvas.Frame(
         (Width div 2) - Floor(Width / 5 / 2),
         (Height div 2) - Floor(Width / 5 / 2),
@@ -269,7 +262,7 @@ var
   CTS: Int32;
   Col, Tol: Int32;
   Hue, Sat: Extended;
-  Benchmark: TSimbaImageOverlayBenchmark;
+  Matches: Int32;
 begin
   if ButtonCTS0.Checked then CTS := 0;
   if ButtonCTS1.Checked then CTS := 1;
@@ -281,12 +274,13 @@ begin
   Sat := StrToFloatDef(EditSat.Text, -1);
 
   case CTS of
-    0: Benchmark := FImageBox.Overlay.DebugColorCTS0(Col, Tol);
-    1: Benchmark := FImageBox.Overlay.DebugColorCTS1(Col, Tol);
-    2: Benchmark := FImageBox.Overlay.DebugColorCTS2(Col, Tol, Hue, Sat);
+    0: Matches := FImageBox.Overlay.DebugColorCTS0(Col, Tol);
+    1: Matches := FImageBox.Overlay.DebugColorCTS1(Col, Tol);
+    2: Matches := FImageBox.Overlay.DebugColorCTS2(Col, Tol, Hue, Sat);
   end;
 
-  FImageBox.StatusPanel.Text := Format('Found %.0n matches in %f ms', [Double(Benchmark.Matches), Benchmark.Time]);
+  FImageBox.Repaint();
+  FImageBox.StatusPanel.Text := Format('Found %.0n matches', [Double(Matches)]);
 end;
 
 procedure TSimbaACAForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -383,7 +377,7 @@ end;
 procedure TSimbaACAForm.ButtonClearImageClick(Sender: TObject);
 begin
   FImageBox.Overlay.Clear();
-  FImageBox.Overlay.Update();
+  FImageBox.Repaint();
 end;
 
 procedure TSimbaACAForm.ButtonDeleteSelectedColorClick(Sender: TObject);
@@ -400,8 +394,8 @@ begin
 
     if Execute() then
     try
-      FImageBox.Image.LoadFromFile(FileName);
-      FImageBox.Changed();
+      FImageBox.Background.LoadFromFile(FileName);
+      FImageBox.BackgroundChanged();
     except
     end;
   finally
@@ -434,15 +428,16 @@ constructor TSimbaACAForm.Create(TargetWindow: THandle);
 begin
   inherited Create(Application.MainForm);
 
-  FImageBox := TSimbaImageBox_Overlay.Create(Self);
+  FImageBox := TSimbaImageBox.Create(Self);
   FImageBox.Parent := PanelMain;
   FImageBox.Align := alClient;
-  FImageBox.OnImageMouseDown := @ClientImageMouseDown;
-  FImageBox.OnImageMouseMove := @ClientImageMouseMove;
-  FImageBox.Overlay.Pen.Color := clRed;
+  FImageBox.OnMouseDown := @ClientImageMouseDown;
+  FImageBox.OnMouseMove := @ClientImageMouseMove;
+  FImageBox.Overlay.Canvas.Pen.Color := clRed;
 
   FClient := TClient.Create();
   FClient.IOManager.SetTarget(TargetWindow);
+  FClient.MBitmaps.CreateBMP(0, 0);
 
   ImageZoom.Picture.Bitmap.Width := 5;
   ImageZoom.Picture.Bitmap.Height := 5;
@@ -454,6 +449,7 @@ end;
 
 destructor TSimbaACAForm.Destroy;
 begin
+  FClient.MBitmaps[0].Free();
   FClient.Free();
 
   inherited Destroy();

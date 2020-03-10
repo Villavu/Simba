@@ -1,7 +1,7 @@
 object SimbaDTMEditorForm: TSimbaDTMEditorForm
-  Left = 2622
+  Left = 834
   Height = 800
-  Top = 531
+  Top = 497
   Width = 1000
   Caption = 'DTM Editor'
   ClientHeight = 780
@@ -57,6 +57,7 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
         Height = 100
         Top = 1
         Width = 100
+        AntialiasingMode = amOff
         Align = alClient
         BorderSpacing.Around = 1
         OnPaint = MouseZoomPaint
@@ -526,8 +527,8 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       object MenuItemSeperator: TMenuItem
         Caption = '-'
       end
-      object MenuItemDrawColor: TMenuItem
-        Caption = 'Draw Color'
+      object MenuItemDebugColor: TMenuItem
+        Caption = 'Debug Color'
         object MenuItemColorRed: TMenuItem
           AutoCheck = True
           Caption = 'Red'

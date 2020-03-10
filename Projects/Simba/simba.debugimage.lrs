@@ -1,0 +1,8 @@
+LazarusResources.Add('TSimbaDebugImageForm','FORMDATA',[
+  'TPF0'#20'TSimbaDebugImageForm'#19'SimbaDebugImageForm'#4'Left'#2#31#6'Height'
+  +#3'-'#1#3'Top'#3#0#3#5'Width'#3#144#1#7'Caption'#6#11'Debug Image'#12'Font.C'
+  +'harSet'#7#12'ANSI_CHARSET'#10'Font.Color'#7#7'clBlack'#9'Font.Name'#6#8'Seg'
+  +'oe UI'#10'Font.Pitch'#7#10'fpVariable'#12'Font.Quality'#7#7'fqDraft'#10'Key'
+  +'Preview'#9#9'OnKeyDown'#7#11'FormKeyDown'#7'OnKeyUp'#7#9'FormKeyUp'#8'Posit'
+  +'ion'#7#16'poMainFormCenter'#10'LCLVersion'#6#7'2.0.6.0'#0#0
+]);

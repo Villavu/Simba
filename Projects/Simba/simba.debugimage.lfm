@@ -10,8 +10,6 @@ object SimbaDebugImageForm: TSimbaDebugImageForm
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
   KeyPreview = True
-  OnKeyDown = FormKeyDown
-  OnKeyUp = FormKeyUp
   Position = poMainFormCenter
   LCLVersion = '2.0.6.0'
 end
