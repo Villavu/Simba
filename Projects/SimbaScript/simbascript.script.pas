@@ -145,6 +145,7 @@ uses
   simbascript.import_tmmltimer,
   simbascript.import_json,
   simbascript.import_xml,
+  simbascript.import_simbaimagebox,
 
   // Simba
   simbascript.import_system,

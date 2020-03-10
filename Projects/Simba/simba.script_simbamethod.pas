@@ -33,7 +33,8 @@ implementation
 
 uses
   graphtype, extctrls,
-  simba.debugimage, simba.debugform, simba.scripttabsform, simba.mufasatypes, simba.main, simba.scripttab;
+  simba.debugimage, simba.debugform, simba.scripttabsform, simba.mufasatypes,
+  simba.main, simba.scripttab, simba.bitmap;
 
 procedure TSimbaMethod._GetPID;
 begin
@@ -86,10 +87,12 @@ begin
   SimbaForm.ShowForm(SimbaDebugImageForm);
 
   // Only resize if needed
-  if (Width <> SimbaDebugImageForm.ImageBox.ImageWidth) or (Height <> SimbaDebugImageForm.ImageBox.ImageHeight) then
+  if (Width <> SimbaDebugImageForm.ImageBox.Background.Width) or (Height <> SimbaDebugImageForm.ImageBox.Background.Height) then
     SimbaDebugImageForm.SetDimensions(Width, Height);
 
-  SimbaDebugImageForm.ImageBox.Draw(PRGB32(Params.Memory + Params.Position), Width, Height);
+  SimbaDebugImageForm.ImageBox.Background.LoadFromPointer(PRGB32(Params.Memory + Params.Position), Width, Height);
+  SimbaDebugImageForm.ImageBox.BackgroundChanged(False);
+  SimbaDebugImageForm.ImageBox.Repaint();
 end;
 
 procedure TSimbaMethod._DebugImageDraw;
@@ -99,7 +102,9 @@ begin
   Params.Read(Width, SizeOf(Int32));
   Params.Read(Height, SizeOf(Int32));
 
-  SimbaDebugImageForm.ImageBox.Draw(PRGB32(Params.Memory + Params.Position), Width, Height);
+  SimbaDebugImageForm.ImageBox.Background.LoadFromPointer(PRGB32(Params.Memory + Params.Position), Width, Height);
+  SimbaDebugImageForm.ImageBox.BackgroundChanged(False);
+  SimbaDebugImageForm.ImageBox.Repaint();
 end;
 
 procedure TSimbaMethod._DebugImageDisplay;
@@ -116,12 +121,25 @@ end;
 
 procedure TSimbaMethod._DebugImageClear;
 begin
-  SimbaDebugImageForm.ImageBox.Clear();
+  SimbaDebugImageForm.ImageBox.Background.Canvas.Clear();
+  SimbaDebugImageForm.ImageBox.Repaint();
 end;
 
 procedure TSimbaMethod._DebugImageGetImage;
+var
+  Bitmap: TMufasaBitmap;
 begin
-  SimbaDebugImageForm.ImageBox.Write(Result);
+  Bitmap := TMufasaBitmap.Create();
+
+  try
+    Bitmap.LoadFromTBitmap(SimbaDebugImageForm.ImageBox.Background);
+
+    Result.Write(Bitmap.Width, SizeOf(Int32));
+    Result.Write(Bitmap.Height, SizeOf(Int32));
+    Result.Write(Bitmap.FData^, Bitmap.Width * Bitmap.Height * SizeOf(TRGB32));
+  finally
+    Bitmap.Free();
+  end;
 end;
 
 procedure TSimbaMethod._ScriptError;

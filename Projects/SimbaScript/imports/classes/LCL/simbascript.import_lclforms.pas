@@ -789,6 +789,7 @@ end;
 procedure TForm_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PForm(Params^[0])^ := TForm.Create(PComponent(Params^[1])^);
+  PForm(Params^[0])^.ShowInTaskBar := stAlways;
 end;
 
 //procedure Cascade;
