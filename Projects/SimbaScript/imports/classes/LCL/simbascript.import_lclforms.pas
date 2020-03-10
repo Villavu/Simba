@@ -34,6 +34,9 @@ type
   PObject = ^TObject;
   PMouseEvent = ^TMouseEvent;
   PMouseMoveEvent = ^TMouseMoveEvent;
+  PKeyEvent = ^TKeyEvent;
+  PKeyPressEvent = ^TKeyPressEvent;
+  PShowInTaskBar = ^TShowInTaskbar;
 
 //constructor Create(AControl: TControl); virtual;
 procedure TSizeConstraints_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -223,7 +226,7 @@ begin
    addClassVar('TSizeConstraints', 'MaxWidth', 'Integer', @TSizeConstraints_MaxWidth_Read, @TSizeConstraints_MaxWidth_Write);
    addClassVar('TSizeConstraints', 'MinHeight', 'Integer', @TSizeConstraints_MinHeight_Read, @TSizeConstraints_MinHeight_Write);
    addClassVar('TSizeConstraints', 'MinWidth', 'Integer', @TSizeConstraints_MinWidth_Read, @TSizeConstraints_MinWidth_Write);
-   addGlobalFunc('procedure TSizeConstraints.Free(); constref;', @TSizeConstraints_Free);
+  // addGlobalFunc('procedure TSizeConstraints.Free(); constref;', @TSizeConstraints_Free);
  end;
 end;
 
@@ -710,6 +713,16 @@ begin
   PCustomForm(Params^[0])^.Constraints := PSizeConstraints(Params^[1])^;
 end;
 
+procedure TCustomForm_ShowInTaskBar_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PShowInTaskBar(Result)^ := PCustomForm(Params^[0])^.ShowInTaskBar;
+end;
+
+procedure TCustomForm_ShowInTaskBar_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PCustomForm(Params^[0])^.ShowInTaskBar := PShowInTaskBar(Params^[1])^;
+end;
+
 //procedure Free();
 procedure TCustomForm_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -722,29 +735,31 @@ begin
   begin
     addClass('TCustomForm', 'TScrollingWinControl');
 
+    addGlobalType('(stDefault, stAlways, stNever)', 'TShowInTaskbar');
+
     addGlobalFunc('procedure TCustomForm.Init(AOwner: TComponent); override;', @TCustomForm_Init);
     addGlobalFunc('procedure TCustomForm.InitNew(AOwner: TComponent; Num: Integer);', @TCustomForm_CreateNew);
     addGlobalFunc('procedure TCustomForm.AfterConstruction(); constref;', @TCustomForm_AfterConstruction);
-    addGlobalFunc('procedure TCustomForm.BeforeDestruction(); constref;', @TCustomForm_BeforeDestruction);
+    //addGlobalFunc('procedure TCustomForm.BeforeDestruction(); constref;', @TCustomForm_BeforeDestruction);
     addGlobalFunc('procedure TCustomForm.Close(); constref;', @TCustomForm_Close);
     addGlobalFunc('function TCustomForm.CloseQuery(): boolean; constref;', @TCustomForm_CloseQuery);
     addGlobalFunc('procedure TCustomForm.DefocusControl(Control: TWinControl; Removing: Boolean); constref;', @TCustomForm_DefocusControl);
     addGlobalFunc('procedure TCustomForm.DestroyWnd(); constref;', @TCustomForm_DestroyWnd);
     addGlobalFunc('procedure TCustomForm.EnsureVisible(AMoveToTop: Boolean); constref;', @TCustomForm_EnsureVisible);
     addGlobalFunc('procedure TCustomForm.FocusControl(WinControl: TWinControl); constref;', @TCustomForm_FocusControl);
-    addGlobalFunc('function TCustomForm.FormIsUpdating(): boolean; constref;', @TCustomForm_FormIsUpdating);
+    //addGlobalFunc('function TCustomForm.FormIsUpdating(): boolean; constref;', @TCustomForm_FormIsUpdating);
     addGlobalFunc('function TCustomForm.GetFormImage(): TBitmap; constref;', @TCustomForm_GetFormImage);
-    addGlobalFunc('procedure TCustomForm.Hide(); constref;', @TCustomForm_Hide);
+    //addGlobalFunc('procedure TCustomForm.Hide(); constref;', @TCustomForm_Hide);
     addGlobalFunc('procedure TCustomForm.IntfDropFiles(const FileNames: TStringArray); constref;', @TCustomForm_IntfDropFiles);
     addGlobalFunc('procedure TCustomForm.IntfHelp(AComponent: TComponent); constref;', @TCustomForm_IntfHelp);
-    addGlobalFunc('function TCustomForm.AutoSizeDelayedHandle(): Boolean; constref;', @TCustomForm_AutoSizeDelayedHandle);
-    addGlobalFunc('procedure TCustomForm.GetPreferredSize(var PreferredWidth, PreferredHeight: integer;Raw,WithThemeSpace: boolean ); constref;', @TCustomForm_GetPreferredSize);
+    //addGlobalFunc('function TCustomForm.AutoSizeDelayedHandle(): Boolean; constref;', @TCustomForm_AutoSizeDelayedHandle);
+    //addGlobalFunc('procedure TCustomForm.GetPreferredSize(var PreferredWidth, PreferredHeight: integer;Raw,WithThemeSpace: boolean ); constref;', @TCustomForm_GetPreferredSize);
     addGlobalFunc('procedure TCustomForm.Release(); constref;', @TCustomForm_Release);
-    addGlobalFunc('function TCustomForm.CanFocus(): Boolean; constref;', @TCustomForm_CanFocus);
-    addGlobalFunc('procedure TCustomForm.SetFocus(); constref;', @TCustomForm_SetFocus);
+    //addGlobalFunc('function TCustomForm.CanFocus(): Boolean; constref;', @TCustomForm_CanFocus);
+    //addGlobalFunc('procedure TCustomForm.SetFocus(); constref;', @TCustomForm_SetFocus);
     addGlobalFunc('function TCustomForm.SetFocusedControl(Control: TWinControl): Boolean; constref;', @TCustomForm_SetFocusedControl);
     addGlobalFunc('procedure TCustomForm.SetRestoredBounds(ALeft, ATop, AWidth, AHeight: integer); constref;', @TCustomForm_SetRestoredBounds);
-    addGlobalFunc('procedure TCustomForm.Show(); constref;', @TCustomForm_Show);
+    //addGlobalFunc('procedure TCustomForm.Show(); constref;', @TCustomForm_Show);
     addGlobalFunc('function TCustomForm.ShowModal(): Integer; constref;', @TCustomForm_ShowModal);
     addGlobalFunc('procedure TCustomForm.ShowOnTop(); constref;', @TCustomForm_ShowOnTop);
     addGlobalFunc('procedure TCustomForm.RemoveAllHandlersOfObject(AnObject: TObject); constref;', @TCustomForm_RemoveAllHandlersOfObject);
@@ -754,7 +769,7 @@ begin
     addGlobalFunc('procedure TCustomForm.RemoveHandlerClose(OnCloseHandler: TCloseEvent); constref;', @TCustomForm_RemoveHandlerClose);
     addGlobalFunc('procedure TCustomForm.AddHandlerCreate(OnCreateHandler: TNotifyEvent; AsFirst: Boolean); constref;', @TCustomForm_AddHandlerCreate);
     addGlobalFunc('procedure TCustomForm.RemoveHandlerCreate(OnCreateHandler: TNotifyEvent); constref;', @TCustomForm_RemoveHandlerCreate);
-    addClassVar('TCustomForm', 'BorderStyle', 'TFormBorderStyle', @TCustomForm_Read_BorderStyle, @TCustomForm_Write_BorderStyle);
+    addClassVar('TCustomForm', 'BorderStyle', 'TFormBorderStyle', @TCustomForm_Read_BorderStyle);
     addClassVar('TCustomForm', 'BorderIcons', 'TBorderIcons', @TCustomForm_Read_BorderIcons, @TCustomForm_Write_BorderIcons);
     addClassVar('TCustomForm', 'Active', 'Boolean', @TCustomForm_Active_Read);
     addClassVar('TCustomForm', 'ActiveControl', 'TWinControl', @TCustomForm_ActiveControl_Read, @TCustomForm_ActiveControl_Write);
@@ -781,7 +796,8 @@ begin
     addClassVar('TCustomForm', 'RestoredWidth', 'integer', @TCustomForm_RestoredWidth_Read);
     addClassVar('TCustomForm', 'RestoredHeight', 'integer', @TCustomForm_RestoredHeight_Read);
     addClassVar('TCustomForm', 'Constraints', 'TSizeConstraints', @TCustomForm_Constraints_Read, @TCustomForm_Constraints_Write);
-    addGlobalFunc('procedure TCustomForm.Free(); constref;', @TCustomForm_Free);
+    addClassVar('TCustomForm', 'ShowInTaskBar', 'TShowInTaskBar', @TCustomForm_ShowInTaskBar_Read, @TCustomForm_ShowInTaskBar_Write);
+    //addGlobalFunc('procedure TCustomForm.Free(); constref;', @TCustomForm_Free);
   end;
 end;
  {TForm}
@@ -1126,6 +1142,56 @@ begin
   PForm(Params^[0])^.OnMouseMove := PMouseMoveEvent(Params^[1])^;
 end;
 
+procedure TForm_OnMouseDown_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PForm(Params^[0])^.OnMouseDown := PMouseEvent(Params^[1])^;
+end;
+
+procedure TForm_OnMouseDown_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PMouseEvent(Result)^ := PForm(Params^[0])^.OnMouseDown;
+end;
+
+procedure TForm_OnMouseUp_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PForm(Params^[0])^.OnMouseUp := PMouseEvent(Params^[1])^;
+end;
+
+procedure TForm_OnMouseUp_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PMouseEvent(Result)^ := PForm(Params^[0])^.OnMouseUp;
+end;
+
+procedure TForm_OnKeyUp_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PForm(Params^[0])^.OnKeyUp := PKeyEvent(Params^[1])^;
+end;
+
+procedure TForm_OnKeyUp_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PKeyEvent(Result)^ := PForm(Params^[0])^.OnKeyUp;
+end;
+
+procedure TForm_OnKeyDown_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PForm(Params^[0])^.OnKeyDown := PKeyEvent(Params^[1])^;
+end;
+
+procedure TForm_OnKeyDown_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PKeyEvent(Result)^ := PForm(Params^[0])^.OnKeyDown;
+end;
+
+procedure TForm_OnKeyPress_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PForm(Params^[0])^.OnKeyPress := PKeyPressEvent(Params^[1])^;
+end;
+
+procedure TForm_OnKeyPress_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PKeyPressEvent(Result)^ := PForm(Params^[0])^.OnKeyPress;
+end;
+
 procedure Register_TForm(Compiler: TScriptCompiler);
 begin
   with Compiler do
@@ -1137,34 +1203,40 @@ begin
     addGlobalFunc('procedure TForm.Next(); constref;', @TForm_Next);
     addGlobalFunc('procedure TForm.Previous(); constref;', @TForm_Previous);
     addGlobalFunc('procedure TForm.Tile(); constref;', @TForm_Tile);
-    addGlobalFunc('procedure TForm.Show(); constref;', @TForm_Show);
-    addGlobalFunc('procedure TForm.Close(); constref;', @TForm_Close);
-    addGlobalFunc('procedure TForm.Hide(); constref;', @TForm_Hide);
-    addClassVar('TForm', 'ClientWidth', 'Integer', @TForm_ClientWidth_Read, @TForm_ClientWidth_Write);
-    addClassVar('TForm', 'ClientHeight', 'Integer', @TForm_ClientHeight_Read, @TForm_ClientHeight_Write);
-    addClassVar('TForm', 'OnClose', 'TCloseEvent', @TForm_OnClose_Read, @TForm_OnClose_Write);
-    addClassVar('TForm', 'OnCreate', 'TNotifyEvent', @TForm_OnCreate_Read, @TForm_OnCreate_Write);
-    addClassVar('TForm', 'OnDestroy', 'TNotifyEvent', @TForm_OnDestroy_Read, @TForm_OnDestroy_Write);
-    addClassVar('TForm', 'OnHide', 'TNotifyEvent', @TForm_OnHide_Read, @TForm_OnHide_Write);
-    addClassVar('TForm', 'OnPaint', 'TNotifyEvent', @TForm_OnPaint_Read, @TForm_OnPaint_Write);
-    addClassVar('TForm', 'OnShow', 'TNotifyEvent', @TForm_OnShow_Read, @TForm_OnShow_Write);
+    //addGlobalFunc('procedure TForm.Show(); constref;', @TForm_Show);
+    //addGlobalFunc('procedure TForm.Close(); constref;', @TForm_Close);
+    //addGlobalFunc('procedure TForm.Hide(); constref;', @TForm_Hide);
+    //addClassVar('TForm', 'ClientWidth', 'Integer', @TForm_ClientWidth_Read, @TForm_ClientWidth_Write);
+    //addClassVar('TForm', 'ClientHeight', 'Integer', @TForm_ClientHeight_Read, @TForm_ClientHeight_Write);
+    //addClassVar('TForm', 'OnClose', 'TCloseEvent', @TForm_OnClose_Read, @TForm_OnClose_Write);
+    //addClassVar('TForm', 'OnCreate', 'TNotifyEvent', @TForm_OnCreate_Read, @TForm_OnCreate_Write);
+    //addClassVar('TForm', 'OnDestroy', 'TNotifyEvent', @TForm_OnDestroy_Read, @TForm_OnDestroy_Write);
+    //addClassVar('TForm', 'OnHide', 'TNotifyEvent', @TForm_OnHide_Read, @TForm_OnHide_Write);
+    //addClassVar('TForm', 'OnPaint', 'TNotifyEvent', @TForm_OnPaint_Read, @TForm_OnPaint_Write);
+    //addClassVar('TForm', 'OnShow', 'TNotifyEvent', @TForm_OnShow_Read, @TForm_OnShow_Write);
     addClassVar('TForm', 'OnDblClick', 'TNotifyEvent', @TForm_OnDblClick_Read, @TForm_OnDblClick_Write);
-    addClassVar('TForm', 'OnEnter', 'TNotifyEvent', @TForm_OnEnter_Read, @TForm_OnEnter_Write);
-    addClassVar('TForm', 'OnExit', 'TNotifyEvent', @TForm_OnExit_Read, @TForm_OnExit_Write);
-    addClassVar('TForm', 'OnClick', 'TNotifyEvent', @TForm_OnClick_Read, @TForm_OnClick_Write);
-    addClassVar('TForm', 'OnResize', 'TNotifyEvent', @TForm_OnResize_Read, @TForm_OnResize_Write);
-    addClassVar('TForm', 'Enabled', 'Boolean', @TForm_Enabled_Read, @TForm_Enabled_Write);
-    addClassVar('TForm', 'Font', 'TFont', @TForm_Font_Read, @TForm_Font_Write);
-    addClassVar('TForm', 'Visible', 'Boolean', @TForm_Visible_Read, @TForm_Visible_Write);
-    addClassVar('TForm', 'Canvas', 'TCanvas', @TForm_Canvas_Read, @TForm_Canvas_Write);
-    addClassVar('TForm', 'Left', 'Integer', @TForm_Left_Read, @TForm_Left_Write);
-    addClassVar('TForm', 'Height', 'Integer', @TForm_Height_Read, @TForm_Height_Write);
-    addClassVar('TForm', 'Top', 'Integer', @TForm_Top_Read, @TForm_Top_Write);
-    addClassVar('TForm', 'Width', 'Integer', @TForm_Width_Read, @TForm_Width_Write);
-    addClassVar('TForm', 'Caption', 'string', @TForm_Caption_Read, @TForm_Caption_Write);
-    addClassVar('TForm', 'Position', 'TPosition', @TForm_Position_Read, @TForm_Position_Write);
-    addGlobalFunc('procedure TForm.Free(); constref;', @TForm_Free);
+    //addClassVar('TForm', 'OnEnter', 'TNotifyEvent', @TForm_OnEnter_Read, @TForm_OnEnter_Write);
+    //addClassVar('TForm', 'OnExit', 'TNotifyEvent', @TForm_OnExit_Read, @TForm_OnExit_Write);
+    //addClassVar('TForm', 'OnClick', 'TNotifyEvent', @TForm_OnClick_Read, @TForm_OnClick_Write);
+    //addClassVar('TForm', 'OnResize', 'TNotifyEvent', @TForm_OnResize_Read, @TForm_OnResize_Write);
+    //addClassVar('TForm', 'Enabled', 'Boolean', @TForm_Enabled_Read, @TForm_Enabled_Write);
+    //addClassVar('TForm', 'Font', 'TFont', @TForm_Font_Read, @TForm_Font_Write);
+    //addClassVar('TForm', 'Visible', 'Boolean', @TForm_Visible_Read, @TForm_Visible_Write);
+    //addClassVar('TForm', 'Canvas', 'TCanvas', @TForm_Canvas_Read, @TForm_Canvas_Write);
+    //addClassVar('TForm', 'Left', 'Integer', @TForm_Left_Read, @TForm_Left_Write);
+    //addClassVar('TForm', 'Height', 'Integer', @TForm_Height_Read, @TForm_Height_Write);
+    //addClassVar('TForm', 'Top', 'Integer', @TForm_Top_Read, @TForm_Top_Write);
+    //addClassVar('TForm', 'Width', 'Integer', @TForm_Width_Read, @TForm_Width_Write);
+    //addClassVar('TForm', 'Caption', 'string', @TForm_Caption_Read, @TForm_Caption_Write);
     addClassVar('TForm', 'OnMouseMove', 'TMouseMoveEvent', @TForm_OnMouseMove_Read, @TForm_OnMouseMove_Write);
+    addClassVar('TForm', 'OnMouseDown', 'TMouseEvent', @TForm_OnMouseDown_Read, @TForm_OnMouseDown_Write);
+    addClassVar('TForm', 'OnMouseUp', 'TMouseEvent', @TForm_OnMouseUp_Read, @TForm_OnMouseUp_Write);
+    addClassVar('TForm', 'OnKeyDown', 'TKeyEvent', @TForm_OnKeyDown_Read, @TForm_OnKeyDown_Write);
+    addClassVar('TForm', 'OnKeyUp', 'TKeyEvent', @TForm_OnKeyUp_Read, @TForm_OnKeyUp_Write);
+    addClassVar('TForm', 'OnKeyPress', 'TKeyPressEvent', @TForm_OnKeyPress_Read, @TForm_OnKeyPress_Write);
+    addClassVar('TForm', 'Position', 'TPosition', @TForm_Position_Read, @TForm_Position_Write);
+
+    //addGlobalFunc('procedure TForm.Free(); constref;', @TForm_Free);
   end;
 end;
 
@@ -1186,8 +1258,8 @@ begin
   begin
     addClass('TScrollBox', 'TScrollingWinControl');
 
-    addGlobalFunc('procedure TScrollBox.Init(AOwner: TComponent);', @TScrollBox_Init);
-    addGlobalFunc('procedure TScrollBox.Free(); constref;', @TScrollBox_Free);
+    addGlobalFunc('procedure TScrollBox.Init(AOwner: TComponent); override', @TScrollBox_Init);
+    //addGlobalFunc('procedure TScrollBox.Free(); constref;', @TScrollBox_Free);
   end;
 end;
 

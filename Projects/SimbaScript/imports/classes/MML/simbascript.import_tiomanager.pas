@@ -349,7 +349,7 @@ begin
     addGlobalFunc('function TIOManager.SetImageTargetEx(Window: TNativeWindow): TTarget; constref;', @TIOManager_SetImageTargetEx);
     addGlobalFunc('function TIOManager.SetKeyMouseTargetEx(Window: TNativeWindow): TTarget; constref;', @TIOManager_SetKeyMouseTargetEx);
     addGlobalFunc('procedure TIOManager.FreeTarget(idx: integer); constref;', @TIOManager_FreeTarget);
-    addGlobalFunc('procedure TIOManager.Free(); constref;', @TIOManager_Free);
+    //addGlobalFunc('procedure TIOManager.Free(); constref;', @TIOManager_Free);
   end;
 end;
 

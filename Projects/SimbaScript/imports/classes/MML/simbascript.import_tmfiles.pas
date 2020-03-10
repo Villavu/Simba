@@ -150,7 +150,7 @@ begin
     addGlobalFunc('function TMFiles.SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer; constref;', @TMFiles_SetFileCharPointer);
     addGlobalFunc('function TMFiles.FilePointerPos(FileNum: Integer): Integer; constref;', @TMFiles_FilePointerPos);
     addGlobalFunc('procedure TMFiles.Init(Owner : TObject);', @TMFiles_Init);
-    addGlobalFunc('procedure TMFiles.Free(); constref;', @TMFiles_Free);
+    //addGlobalFunc('procedure TMFiles.Free(); constref;', @TMFiles_Free);
   end;
 end;
 

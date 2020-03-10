@@ -237,8 +237,8 @@ begin
     addGlobalFunc('procedure TTarget.RemoveHandlerInvalidTarget(Index: Int32); constref;', @TTarget_RemoveHandlerInvalidTarget);
     addGlobalFunc('procedure TTarget.SetAutoFocus(Value: Boolean); constref;', @TTarget_SetAutoFocus);
     addGlobalFunc('function TTarget.GetAutoFocus: Boolean; constref;', @TTarget_GetAutoFocus);
-    addGlobalFunc('procedure TTarget.Init();', @TTarget_Init);
-    addGlobalFunc('procedure TTarget.Free(); constref;', @TTarget_Free);
+    addGlobalFunc('procedure TTarget.Init(); override;', @TTarget_Init);
+   // addGlobalFunc('procedure TTarget.Free(); constref;', @TTarget_Free);
   end;
 end;
 

@@ -628,7 +628,7 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.SetAlphaValue(const value : byte); constref;', @TMufasaBitmap_SetAlphaValue);
     addClassVar('TMufasaBitmap', 'List', 'TObject', @TMufasaBitmap_List_Read, @TMufasaBitmap_List_Write);
     addGlobalFunc('procedure TMufasaBitmap.Init(List: TObject = nil);', @TMufasaBitmap_Init);
-    addGlobalFunc('procedure TMufasaBitmap.Free(); constref;', @TMufasaBitmap_Free);
+    //addGlobalFunc('procedure TMufasaBitmap.Free(); constref;', @TMufasaBitmap_Free);
   end;
 end;
 

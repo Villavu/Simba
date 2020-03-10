@@ -121,6 +121,7 @@ end;
 
 procedure TSimbaMethod._DebugImageClear;
 begin
+  SimbaDebugImageForm.ImageBox.Background.Canvas.Brush.Color := 0;
   SimbaDebugImageForm.ImageBox.Background.Canvas.Clear();
   SimbaDebugImageForm.ImageBox.Repaint();
 end;

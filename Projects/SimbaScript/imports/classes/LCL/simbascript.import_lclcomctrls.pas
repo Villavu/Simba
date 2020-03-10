@@ -183,7 +183,7 @@ begin
   with Compiler do
   begin
     addClass('TCustomProgressBar', 'TWinControl');
-    addGlobalFunc('procedure TCustomProgressBar.Init(AOwner: TComponent);', @TCustomProgressBar_Init);
+    addGlobalFunc('procedure TCustomProgressBar.Init(AOwner: TComponent); override;', @TCustomProgressBar_Init);
     addGlobalFunc('procedure TCustomProgressBar.StepIt(); constref;', @TCustomProgressBar_StepIt);
     addGlobalFunc('procedure TCustomProgressBar.StepBy(Delta: Integer); constref;', @TCustomProgressBar_StepBy);
     addClassVar('TCustomProgressBar', 'Max', 'Integer', @TCustomProgressBar_Max_Read, @TCustomProgressBar_Max_Write);
@@ -194,7 +194,7 @@ begin
     addClassVar('TCustomProgressBar', 'Step', 'Integer', @TCustomProgressBar_Step_Read, @TCustomProgressBar_Step_Write);
     addClassVar('TCustomProgressBar', 'Style', 'TProgressBarStyle', @TCustomProgressBar_Style_Read, @TCustomProgressBar_Style_Write);
     addClassVar('TCustomProgressBar', 'BarShowText', 'boolean', @TCustomProgressBar_BarShowText_Read, @TCustomProgressBar_BarShowText_Write);
-    addGlobalFunc('procedure TCustomProgressBar.Free(); constref;', @TCustomProgressBar_Free);
+    //addGlobalFunc('procedure TCustomProgressBar.Free(); constref;', @TCustomProgressBar_Free);
   end;
 end;
 
@@ -216,8 +216,8 @@ begin
   begin
     addClass('TProgressBar', 'TCustomProgressBar');
 
-    addGlobalFunc('procedure TProgressBar.Init(AOwner: TComponent);', @TProgressBar_Init);
-    addGlobalFunc('procedure TProgressBar.Free(); constref;', @TProgressBar_Free);
+    addGlobalFunc('procedure TProgressBar.Init(AOwner: TComponent); override;', @TProgressBar_Init);
+    //addGlobalFunc('procedure TProgressBar.Free(); constref;', @TProgressBar_Free);
   end;
 end;
 
@@ -425,7 +425,7 @@ begin
   begin
     addClass('TCustomTrackBar', 'TWinControl');
 
-    addGlobalFunc('procedure TCustomTrackBar.Init(AOwner: TComponent);', @TCustomTrackBar_Init);
+    addGlobalFunc('procedure TCustomTrackBar.Init(AOwner: TComponent); override;', @TCustomTrackBar_Init);
     addGlobalFunc('procedure TCustomTrackBar.SetTick(Value: Integer); constref;', @TCustomTrackBar_SetTick);
     addClassVar('TCustomTrackBar', 'Frequency', 'Integer', @TCustomTrackBar_Frequency_Read, @TCustomTrackBar_Frequency_Write);
     addClassVar('TCustomTrackBar', 'LineSize', 'Integer', @TCustomTrackBar_LineSize_Read, @TCustomTrackBar_LineSize_Write);
@@ -442,7 +442,7 @@ begin
     addClassVar('TCustomTrackBar', 'ShowSelRange', 'Boolean', @TCustomTrackBar_ShowSelRange_Read, @TCustomTrackBar_ShowSelRange_Write);
     addClassVar('TCustomTrackBar', 'TickMarks', 'TTickMark', @TCustomTrackBar_TickMarks_Read, @TCustomTrackBar_TickMarks_Write);
     addClassVar('TCustomTrackBar', 'TickStyle', 'TTickStyle', @TCustomTrackBar_TickStyle_Read, @TCustomTrackBar_TickStyle_Write);
-    addGlobalFunc('procedure TCustomTrackBar.Free(); constref;', @TCustomTrackBar_Free);
+    //addGlobalFunc('procedure TCustomTrackBar.Free(); constref;', @TCustomTrackBar_Free);
   end;
 end;
 
@@ -464,8 +464,8 @@ begin
   begin
     addClass('TTrackBar', 'TCustomTrackBar');
 
-    addGlobalFunc('procedure TTrackBar.Init(AOwner: TComponent);', @TTrackBar_Init);
-    addGlobalFunc('procedure TTrackBar.Free(); constref;', @TTrackBar_Free);
+    addGlobalFunc('procedure TTrackBar.Init(AOwner: TComponent); override;', @TTrackBar_Init);
+    //addGlobalFunc('procedure TTrackBar.Free(); constref;', @TTrackBar_Free);
   end;
 end;
 
@@ -582,11 +582,11 @@ begin
     addClassVar('TCustomCheckListBox', 'Checked', 'Boolean', @TCustomCheckListBox_Checked_Read, @TCustomCheckListBox_Checked_Write, true);
     addClassVar('TCustomCheckListBox', 'ItemEnabled', 'Boolean', @TCustomCheckListBox_ItemEnabled_Read, @TCustomCheckListBox_ItemEnabled_Write, true);
     addClassVar('TCustomCheckListBox', 'State', 'TCheckBoxState', @TCustomCheckListBox_State_Read, @TCustomCheckListBox_State_Write, true);
-    addClassVar('TCustomCheckListBox', 'Count', 'integer', @TCustomCheckListBox_Count_Read, nil);
+    //addClassVar('TCustomCheckListBox', 'Count', 'integer', @TCustomCheckListBox_Count_Read, nil);
     addClassVar('TCustomCheckListBox', 'OnClickCheck', 'TNotifyEvent', @TCustomCheckListBox_OnClickCheck_Read, @TCustomCheckListBox_OnClickCheck_Write);
     addClassVar('TCustomCheckListBox', 'OnItemClick', 'TCheckListClicked', nil, @TCustomCheckListBox_OnCheckListClicked_Write);
     addGlobalFunc('procedure TCustomCheckListBox.Init(AOwner: TComponent);', @TCustomCheckListBox_Init);
-    addGlobalFunc('procedure TCustomCheckListBox.Free(); constref;', @TCustomCheckListBox_Free);
+    //addGlobalFunc('procedure TCustomCheckListBox.Free(); constref;', @TCustomCheckListBox_Free);
   end;
 end;
 
@@ -608,8 +608,8 @@ begin
   begin
     addClass('TCheckListBox', 'TCustomCheckListBox');
 
-    addGlobalFunc('procedure TCheckListBox.Init(AOwner: TComponent);', @TCheckListBox_Init);
-    addGlobalFunc('procedure TCheckListBox.Free(); constref;', @TCheckListBox_Free);
+    addGlobalFunc('procedure TCheckListBox.Init(AOwner: TComponent); override;', @TCheckListBox_Init);
+    //addGlobalFunc('procedure TCheckListBox.Free(); constref;', @TCheckListBox_Free);
   end;
 end;
 
@@ -705,16 +705,16 @@ begin
   begin
     addClass('TCustomPage', 'TWinControl');
 
-    addGlobalFunc('procedure TCustomPage.Init(TheOwner: TComponent);', @TCustomPage_Init);
+    addGlobalFunc('procedure TCustomPage.Init(TheOwner: TComponent); override;', @TCustomPage_Init);
     addGlobalFunc('function TCustomPage.CanTab(): boolean; constref;', @TCustomPage_CanTab);
-    addGlobalFunc('function TCustomPage.IsControlVisible(): Boolean; constref;', @TCustomPage_IsControlVisible);
-    addGlobalFunc('function TCustomPage.HandleObjectShouldBeVisible(): boolean; constref;', @TCustomPage_HandleObjectShouldBeVisible);
+    //addGlobalFunc('function TCustomPage.IsControlVisible(): Boolean; constref;', @TCustomPage_IsControlVisible);
+    //addGlobalFunc('function TCustomPage.HandleObjectShouldBeVisible(): boolean; constref;', @TCustomPage_HandleObjectShouldBeVisible);
     addGlobalFunc('function TCustomPage.VisibleIndex(): integer; constref;', @TCustomPage_VisibleIndex);
     addClassVar('TCustomPage', 'PageIndex', 'Integer', @TCustomPage_PageIndex_Read, @TCustomPage_PageIndex_Write);
     addClassVar('TCustomPage', 'TabVisible', 'Boolean', @TCustomPage_TabVisible_Read, @TCustomPage_TabVisible_Write);
     addClassVar('TCustomPage', 'OnHide', 'TNotifyEvent', @TCustomPage_OnHide_Read, @TCustomPage_OnHide_Write);
     addClassVar('TCustomPage', 'OnShow', 'TNotifyEvent', @TCustomPage_OnShow_Read, @TCustomPage_OnShow_Write);
-    addGlobalFunc('procedure TCustomPage.Free(); constref;', @TCustomPage_Free);
+    //addGlobalFunc('procedure TCustomPage.Free(); constref;', @TCustomPage_Free);
   end;
 end;
 
@@ -927,8 +927,8 @@ begin
     addClassVar('TCustomTabControl', 'ShowTabs', 'Boolean', @TCustomTabControl_ShowTabs_Read, @TCustomTabControl_ShowTabs_Write);
     addClassVar('TCustomTabControl', 'TabPosition', 'TTabPosition', @TCustomTabControl_TabPosition_Read, @TCustomTabControl_TabPosition_Write);
     addClassVar('TCustomTabControl', 'IsUnpaged', 'boolean', @TCustomTabControl_IsUnpaged_Read, nil);
-    addGlobalFunc('procedure TCustomTabControl.Init(TheOwner: TComponent);', @TCustomTabControl_Init);
-    addGlobalFunc('procedure TCustomTabControl.Free(); constref;', @TCustomTabControl_Free);
+    addGlobalFunc('procedure TCustomTabControl.Init(TheOwner: TComponent); override;', @TCustomTabControl_Init);
+    //addGlobalFunc('procedure TCustomTabControl.Free(); constref;', @TCustomTabControl_Free);
   end;
 end;
 
@@ -956,8 +956,8 @@ begin
   begin
     addClass('TTabSheet', 'TCustomPage');
     addClassVar('TTabSheet', 'TabIndex', 'Integer', @TTabSheet_TabIndex_Read, nil);
-    addGlobalFunc('procedure TTabSheet.Init(TheOwner: TComponent);', @TTabSheet_Init);
-    addGlobalFunc('procedure TTabSheet.Free(); constref;', @TTabSheet_Free);
+    addGlobalFunc('procedure TTabSheet.Init(TheOwner: TComponent); override;', @TTabSheet_Init);
+    //addGlobalFunc('procedure TTabSheet.Free(); constref;', @TTabSheet_Free);
   end;
 end;
 
@@ -1018,8 +1018,8 @@ begin
     addGlobalFunc('function TPageControl.AddTabSheet(): TTabSheet; constref;', @TPageControl_AddTabSheet);
     addClassVar('TPageControl', 'Pages', 'Integer', @TPageControl_Pages_Read, nil);
     addClassVar('TPageControl', 'ActivePage', 'TTabSheet', @TPageControl_ActivePage_Read, @TPageControl_ActivePage_Write);
-    addGlobalFunc('procedure TPageControl.Init(TheOwner: TComponent);', @TPageControl_Init);
-    addGlobalFunc('procedure TPageControl.Free(); constref;', @TPageControl_Free);
+    addGlobalFunc('procedure TPageControl.Init(TheOwner: TComponent); override;', @TPageControl_Init);
+    //addGlobalFunc('procedure TPageControl.Free(); constref;', @TPageControl_Free);
   end;
 end;
 
@@ -1119,8 +1119,8 @@ begin
     addClassVar('TStatusPanel', 'Style', 'TStatusPanelStyle', @TStatusPanel_Style_Read, @TStatusPanel_Style_Write);
     addClassVar('TStatusPanel', 'Text', 'TCaption', @TStatusPanel_Text_Read, @TStatusPanel_Text_Write);
     addClassVar('TStatusPanel', 'Width', 'Integer', @TStatusPanel_Width_Read, @TStatusPanel_Width_Write);
-    addGlobalFunc('procedure TStatusPanel.Init(ACollection: TCollection);', @TStatusPanel_Init);
-    addGlobalFunc('procedure TStatusPanel.Free(); constref;', @TStatusPanel_Free);
+    addGlobalFunc('procedure TStatusPanel.Init(ACollection: TCollection); override;', @TStatusPanel_Init);
+    //addGlobalFunc('procedure TStatusPanel.Free(); constref;', @TStatusPanel_Free);
   end;
 end;
 
@@ -1170,7 +1170,7 @@ begin
     addGlobalFunc('function TStatusPanels.Add(): TStatusPanel; constref;', @TStatusPanels_Add);
     addClassVar('TStatusPanels', 'Items', 'TStatusPanel', @TStatusPanels_Items_Index_Read, @TStatusPanels_Items_Index_Write, True); // array
     addClassVar('TStatusPanels', 'StatusBar', 'TStatusBar', @TStatusPanels_StatusBar_Read, nil);
-    addGlobalFunc('procedure TStatusPanels.Free(); constref;', @TStatusPanels_Free);
+    //addGlobalFunc('procedure TStatusPanels.Free(); constref;', @TStatusPanels_Free);
   end;
 end;
 
@@ -1317,8 +1317,8 @@ begin
     addClassVar('TStatusBar', 'SimplePanel', 'Boolean', @TStatusBar_SimplePanel_Read, @TStatusBar_SimplePanel_Write);
     addClassVar('TStatusBar', 'SizeGrip', 'Boolean', @TStatusBar_SizeGrip_Read, @TStatusBar_SizeGrip_Write);
     addClassVar('TStatusBar', 'OnHint', 'TNotifyEvent', @TStatusBar_OnHint_Read, @TStatusBar_OnHint_Write);
-    addGlobalFunc('procedure TStatusBar.Init(TheOwner: TComponent);', @TStatusBar_Init);
-    addGlobalFunc('procedure TStatusBar.Free(); constref;', @TStatusBar_Free);
+    addGlobalFunc('procedure TStatusBar.Init(TheOwner: TComponent); override;', @TStatusBar_Init);
+    //addGlobalFunc('procedure TStatusBar.Free(); constref;', @TStatusBar_Free);
   end;
 end;
 

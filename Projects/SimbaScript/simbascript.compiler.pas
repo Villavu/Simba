@@ -132,8 +132,30 @@ begin
 end;
 
 function TScriptCompiler.addGlobalFunc(Header: lpString; Value: Pointer): TLapeGlobalVar;
+var
+  Decls: TLapeDeclArray;
+  I: Int32;
 begin
   Result := inherited addGlobalFunc(Header, Value);
+
+  {
+  if Result.VarType is TLapeType_MethodOfType then
+  begin
+    if TLapeType_MethodOfType(Result.VarType).ObjectType.ManagedDeclarations.HasParent then
+    begin
+      Decls := TLapeType_MethodOfType(Result.VarType).ObjectType.ManagedDeclarations.Parent.getByName(Result.Name, bTrue);
+
+      for I := 0 to High(Decls) do
+      begin
+        if not (TLapeGlobalVar(Decls[I]).VarType is TLapeType_MethodOfType) then
+          Continue;
+
+        if TLapeType_MethodOfType(TLapeGlobalVar(Decls[I]).VarType).EqualParams(Result.VarType as TLapeType_Method) then
+          Writeln('Bad: ', Result.Name, ' :: ', TLapeType_MethodOfType(Result.VarType).ObjectType.Name);
+      end;
+    end;
+  end;
+  }
 
   if (FDump <> nil) then
     Write(Header, True, True);

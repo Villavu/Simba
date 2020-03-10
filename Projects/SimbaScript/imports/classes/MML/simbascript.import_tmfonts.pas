@@ -94,7 +94,7 @@ begin
     addGlobalFunc('function TMFonts.Copy(Owner : TObject): TMFonts; constref;', @TMFonts_Copy);
     addGlobalFunc('function TMFonts.Count(): integer; constref;', @TMFonts_Count);
     addClassVar('TMFonts', 'Path', 'string', @TMFonts_Path_Read, @TMFonts_Path_Write);
-    addGlobalFunc('procedure TMFonts.Free(); constref;', @TMFonts_Free);
+    //addGlobalFunc('procedure TMFonts.Free(); constref;', @TMFonts_Free);
   end;
 end;
 

@@ -732,7 +732,7 @@ begin
     addGlobalFunc('procedure TControl.WriteLayoutDebugReport(const Prefix: string); constref;', @TControl_WriteLayoutDebugReport);
     addGlobalFunc('function TControl.ShouldAutoAdjustLeftAndTop(): Boolean; constref;', @TControl_ShouldAutoAdjustLeftAndTop);
     addGlobalFunc('function TControl.ShouldAutoAdjustWidthAndHeight(): Boolean; constref;', @TControl_ShouldAutoAdjustWidthAndHeight);
-    addGlobalFunc('procedure TControl.Init(TheOwner: TComponent);', @TControl_Init);
+    addGlobalFunc('procedure TControl.Init(TheOwner: TComponent); override;', @TControl_Init);
     addGlobalFunc('procedure TControl.BeforeDestruction(); constref;', @TControl_BeforeDestruction);
     addGlobalFunc('procedure TControl.EditingDone(); constref;', @TControl_EditingDone);
     addGlobalFunc('procedure TControl.ExecuteDefaultAction(); constref;', @TControl_ExecuteDefaultAction);
@@ -801,7 +801,7 @@ begin
     addGlobalFunc('procedure TControl.ShowHint(); constref;', @TControl_ShowHint);
     addClassVar('TControl', 'Hint', 'String', @TControl_Hint_Read, @TControl_Hint_Write);
     addClassVar('TControl', 'Parent', 'TControl', @TControl_Parent_Read, @TControl_Parent_Write); //FIXME: Should be OS-Depend TControl
-    addGlobalFunc('procedure TControl.Free(); constref;', @TControl_Free);
+   // addGlobalFunc('procedure TControl.Free(); constref;', @TControl_Free);
   end;
 end;
 
@@ -1284,9 +1284,9 @@ begin
     addClassVar('TWinControl', 'ParentWindow', 'THandle', @TWinControl_ParentWindow_Read, @TWinControl_ParentWindow_Write);
     addClassVar('TWinControl', 'Showing', 'Boolean', @TWinControl_Showing_Read);
     addClassVar('TWinControl', 'VisibleDockClientCount', 'Integer', @TWinControl_VisibleDockClientCount_Read, nil);
-    addGlobalFunc('function TWinControl.AutoSizeDelayed(): boolean; constref;', @TWinControl_AutoSizeDelayed);
-    addGlobalFunc('function TWinControl.AutoSizeDelayedReport(): string; constref;', @TWinControl_AutoSizeDelayedReport);
-    addGlobalFunc('function TWinControl.AutoSizeDelayedHandle(): Boolean; constref;', @TWinControl_AutoSizeDelayedHandle);
+    //addGlobalFunc('function TWinControl.AutoSizeDelayed(): boolean; constref;', @TWinControl_AutoSizeDelayed);
+    //addGlobalFunc('function TWinControl.AutoSizeDelayedReport(): string; constref;', @TWinControl_AutoSizeDelayedReport);
+    //addGlobalFunc('function TWinControl.AutoSizeDelayedHandle(): Boolean; constref;', @TWinControl_AutoSizeDelayedHandle);
     addGlobalFunc('procedure TWinControl.BeginUpdateBounds(); constref;', @TWinControl_BeginUpdateBounds);
     addGlobalFunc('procedure TWinControl.EndUpdateBounds(); constref;', @TWinControl_EndUpdateBounds);
     addGlobalFunc('procedure TWinControl.LockRealizeBounds(); constref;', @TWinControl_LockRealizeBounds);
@@ -1297,14 +1297,14 @@ begin
     addGlobalFunc('procedure TWinControl.DoAdjustClientRectChange(const InvalidateRect: Boolean); constref;', @TWinControl_DoAdjustClientRectChange);
     addGlobalFunc('procedure TWinControl.InvalidateClientRectCache(WithChildControls: boolean); constref;', @TWinControl_InvalidateClientRectCache);
     addGlobalFunc('function TWinControl.ClientRectNeedsInterfaceUpdate(): boolean; constref;', @TWinControl_ClientRectNeedsInterfaceUpdate);
-    addGlobalFunc('procedure TWinControl.SetBounds(ALeft, ATop, AWidth, AHeight: integer); constref;', @TWinControl_SetBounds);
-    addGlobalFunc('function TWinControl.GetChildsRect(Scrolled: boolean): TRect; constref;', @TWinControl_GetChildsRect);
+    //addGlobalFunc('procedure TWinControl.SetBounds(ALeft, ATop, AWidth, AHeight: integer); constref;', @TWinControl_SetBounds);
+    //addGlobalFunc('function TWinControl.GetChildsRect(Scrolled: boolean): TRect; constref;', @TWinControl_GetChildsRect);
     addGlobalFunc('procedure TWinControl.DisableAlign(); constref;', @TWinControl_DisableAlign);
     addGlobalFunc('procedure TWinControl.EnableAlign(); constref;', @TWinControl_EnableAlign);
     addGlobalFunc('procedure TWinControl.ReAlign(); constref;', @TWinControl_ReAlign);
     addGlobalFunc('procedure TWinControl.ScrollBy(DeltaX, DeltaY: Integer); constref;', @TWinControl_ScrollBy);
-    addGlobalFunc('procedure TWinControl.WriteLayoutDebugReport(const Prefix: string); constref;', @TWinControl_WriteLayoutDebugReport);
-    addGlobalFunc('procedure TWinControl.Init(TheOwner: TComponent);', @TWinControl_Init);
+    //addGlobalFunc('procedure TWinControl.WriteLayoutDebugReport(const Prefix: string); constref;', @TWinControl_WriteLayoutDebugReport);
+    addGlobalFunc('procedure TWinControl.Init(TheOwner: TComponent); override;', @TWinControl_Init);
     addGlobalFunc('procedure TWinControl.CreateParented(AParentWindow: Thandle); constref;', @TWinControl_CreateParented);
     addGlobalFunc('function TWinControl.CanFocus(): Boolean; constref;', @TWinControl_CanFocus);
     addGlobalFunc('function TWinControl.GetControlIndex(AControl: TControl): integer; constref;', @TWinControl_GetControlIndex);
@@ -1313,26 +1313,26 @@ begin
     addGlobalFunc('function TWinControl.PerformTab(ForwardTab: boolean): boolean; constref;', @TWinControl_PerformTab);
     addGlobalFunc('function TWinControl.FindChildControl(const ControlName: String): TControl; constref;', @TWinControl_FindChildControl);
     addGlobalFunc('procedure TWinControl.SelectNext(CurControl: TWinControl;GoForward, CheckTabStop: Boolean); constref;', @TWinControl_SelectNext);
-    addGlobalFunc('function TWinControl.GetTextLen(): Integer; constref;', @TWinControl_GetTextLen);
-    addGlobalFunc('procedure TWinControl.Invalidate(); constref;', @TWinControl_Invalidate);
+    //addGlobalFunc('function TWinControl.GetTextLen(): Integer; constref;', @TWinControl_GetTextLen);
+    //addGlobalFunc('procedure TWinControl.Invalidate(); constref;', @TWinControl_Invalidate);
     addGlobalFunc('procedure TWinControl.AddControl(); constref;', @TWinControl_AddControl);
     addGlobalFunc('procedure TWinControl.InsertControl(AControl: TControl); constref;', @TWinControl_InsertControl);
     addGlobalFunc('procedure TWinControl.InsertControl(AControl: TControl; Index: integer); constref; overload;', @TWinControl_InsertControlEx);
     addGlobalFunc('procedure TWinControl.RemoveControl(AControl: TControl); constref;', @TWinControl_RemoveControl);
-    addGlobalFunc('procedure TWinControl.Repaint(); constref;', @TWinControl_Repaint);
-    addGlobalFunc('procedure TWinControl.Update(); constref;', @TWinControl_Update);
+    //addGlobalFunc('procedure TWinControl.Repaint(); constref;', @TWinControl_Repaint);
+    //addGlobalFunc('procedure TWinControl.Update(); constref;', @TWinControl_Update);
     addGlobalFunc('procedure TWinControl.SetFocus(); constref;', @TWinControl_SetFocus);
     addGlobalFunc('procedure TWinControl.FlipChildren(AllLevels: Boolean); constref;', @TWinControl_FlipChildren);
     addGlobalFunc('procedure TWinControl.ScaleBy(Multiplier, Divider: Integer); constref;', @TWinControl_ScaleBy);
     addGlobalFunc('function TWinControl.GetDockCaption(AControl: TControl): String; constref;', @TWinControl_GetDockCaption);
     addGlobalFunc('procedure TWinControl.UpdateDockCaption(Exclude: TControl); constref;', @TWinControl_UpdateDockCaption);
     addGlobalFunc('function TWinControl.HandleAllocated(): Boolean; constref;', @TWinControl_HandleAllocated);
-    addGlobalFunc('function TWinControl.ParentHandlesAllocated(): boolean; constref;', @TWinControl_ParentHandlesAllocated);
+    //addGlobalFunc('function TWinControl.ParentHandlesAllocated(): boolean; constref;', @TWinControl_ParentHandlesAllocated);
     addGlobalFunc('procedure TWinControl.HandleNeeded(); constref;', @TWinControl_HandleNeeded);
     addGlobalFunc('function TWinControl.BrushCreated(): Boolean; constref;', @TWinControl_BrushCreated);
     addGlobalFunc('procedure TWinControl.PaintTo(ACanvas: TCanvas; X, Y: Integer); constref;', @TWinControl_PaintTo);
     addGlobalFunc('procedure TWinControl.SetShape(AShape: TBitmap); constref;', @TWinControl_SetShape);
-    addGlobalFunc('procedure TWinControl.Free(); constref;', @TWinControl_Free);
+    //addGlobalFunc('procedure TWinControl.Free(); constref;', @TWinControl_Free);
   end;
 end;
 
@@ -1385,11 +1385,11 @@ begin
   begin
     addClass('TCustomControl', 'TWinControl');
 
-    addGlobalFunc('procedure TCustomControl.Init(AOwner: TComponent);', @TCustomControl_Init);
+    addGlobalFunc('procedure TCustomControl.Init(AOwner: TComponent); override;', @TCustomControl_Init);
     addClassVar('TCustomControl', 'Canvas', 'TCanvas', @TCustomControl_Canvas_Read, @TCustomControl_Canvas_Write);
     addClassVar('TCustomControl', 'OnPaint', 'TNotifyEvent', @TCustomControl_OnPaint_Read, @TCustomControl_OnPaint_Write);
     addClassVar('TCustomControl', 'BorderStyle', 'TFormBorderStyle', nil, @TCustomControl_BorderStyle_Write);
-    addGlobalFunc('procedure TCustomControl.Free(); constref;', @TCustomControl_Free);
+    //addGlobalFunc('procedure TCustomControl.Free(); constref;', @TCustomControl_Free);
   end;
 end;
 
@@ -1545,7 +1545,7 @@ begin
     addClass('TControlScrollBar', 'TPersistent');
 
     addGlobalFunc('procedure TControlScrollBar.Init(AControl: TWinControl; AKind: TScrollBarKind);', @TControlScrollBar_Init);
-    addGlobalFunc('procedure TControlScrollBar.Assign(Source: TPersistent); constref;', @TControlScrollBar_Assign);
+    //addGlobalFunc('procedure TControlScrollBar.Assign(Source: TPersistent); constref;', @TControlScrollBar_Assign);
     addGlobalFunc('function TControlScrollBar.IsScrollBarVisible(): Boolean; constref;', @TControlScrollBar_IsScrollBarVisible);
     addGlobalFunc('function TControlScrollBar.ScrollPos(): Integer; constref;', @TControlScrollBar_ScrollPos);
     addGlobalFunc('function TControlScrollBar.GetOtherScrollBar(): TControlScrollBar; constref;', @TControlScrollBar_GetOtherScrollBar);
@@ -1560,7 +1560,7 @@ begin
     addClassVar('TControlScrollBar', 'Range', 'Integer', @TControlScrollBar_Range_Read, @TControlScrollBar_Range_Write);
     addClassVar('TControlScrollBar', 'Tracking', 'Boolean', @TControlScrollBar_Tracking_Read, @TControlScrollBar_Tracking_Write);
     addClassVar('TControlScrollBar', 'Visible', 'Boolean', @TControlScrollBar_Visible_Read, @TControlScrollBar_Visible_Write);
-    addGlobalFunc('procedure TControlScrollBar.Free(); constref;', @TControlScrollBar_Free);
+    //addGlobalFunc('procedure TControlScrollBar.Free(); constref;', @TControlScrollBar_Free);
   end;
 end;
 {TScrollingWinControl}
@@ -1618,12 +1618,12 @@ begin
   begin
     addClass('TScrollingWinControl', 'TCustomControl');
 
-    addGlobalFunc('procedure TScrollingWinControl.Init(TheOwner : TComponent);', @TScrollingWinControl_Init);
+    addGlobalFunc('procedure TScrollingWinControl.Init(TheOwner : TComponent); override;', @TScrollingWinControl_Init);
     addGlobalFunc('procedure TScrollingWinControl.UpdateScrollbars(); constref;', @TScrollingWinControl_UpdateScrollbars);
-    addGlobalFunc('procedure TScrollingWinControl.ScrollBy(DeltaX, DeltaY: Integer); constref;', @TScrollingWinControl_ScrollBy);
+    //addGlobalFunc('procedure TScrollingWinControl.ScrollBy(DeltaX, DeltaY: Integer); constref;', @TScrollingWinControl_ScrollBy);
     addClassVar('TScrollingWinControl', 'HorzScrollBar', 'TControlScrollBar', @TScrollingWinControl_HorzScrollBar_Read, @TScrollingWinControl_HorzScrollBar_Write);
     addClassVar('TScrollingWinControl', 'VertScrollBar', 'TControlScrollBar', @TScrollingWinControl_VertScrollBar_Read, @TScrollingWinControl_VertScrollBar_Write);
-    addGlobalFunc('procedure TScrollingWinControl.Free(); constref;', @TScrollingWinControl_Free);
+    //addGlobalFunc('procedure TScrollingWinControl.Free(); constref;', @TScrollingWinControl_Free);
   end;
 end;
 
@@ -1655,7 +1655,7 @@ begin
   begin
     addClass('TGraphicControl', 'TControl');
 
-    addGlobalFunc('procedure TGraphicControl.Update(); constref;', @TGraphicControl_Update);
+    //addGlobalFunc('procedure TGraphicControl.Update(); constref;', @TGraphicControl_Update);
     addClassVar('TGraphicControl', 'Canvas', 'TCanvas', @TGraphicControl_Canvas_Read);
     addClassVar('TGraphicControl', 'Alignment', 'TAlign', @TGraphicControl_Align_Read, @TGraphicControl_Align_Write);
   end;

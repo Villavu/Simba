@@ -123,7 +123,7 @@ begin
 
     addClass('TXmlNode', 'TObject');
     addClass('TXMLNodeList', 'TObject');
-    addGlobalFunc('procedure TXmlNode.Init();', @TXmlNode_Init);
+    addGlobalFunc('procedure TXmlNode.Init(); override;', @TXmlNode_Init);
     addGlobalFunc('function TXmlNode.GetChildNodes(): TXMLNodeList; constref;', @TXMLNode_GetChildNodes);
     addGlobalFunc('function TXmlNode.GetNodeName(): string; constref;', @TXmlNode_GetNodeName);
     addGlobalFunc('function TXmlNode.GetText(): string; constref;', @TXmlNode_GetText);
@@ -139,7 +139,7 @@ begin
     addGlobalFunc('function TXmlNode.AddChild(const Name: String): TXmlNode; constref;', @TXmlNode_AddChild);
     addGlobalFunc('function TXmlNode.SetText(Value: String): TXmlNode; constref;', @TXmlNode_SetText);
     addGlobalFunc('function TXmlNode.SetAttribute(AttrName: String;Value: String): TXmlNode; constref;', @TXmlNode_SetAttribute);
-    addGlobalFunc('procedure TXmlNode.Free(); constref;', @TXmlNode_Free);
+    //addGlobalFunc('procedure TXmlNode.Free(); constref;', @TXmlNode_Free);
   end;
 end;
 
@@ -219,7 +219,7 @@ procedure Register_TXMLNodeList(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
-    addGlobalFunc('procedure TXMLNodeList.Init();', @TXMLNodeList_Init);
+    addGlobalFunc('procedure TXMLNodeList.Init(); override;', @TXMLNodeList_Init);
     addGlobalFunc('procedure TXMLNodeList.Clear(); constref;', @TXMLNodeList_Clear);
     addGlobalFunc('procedure TXMLNodeList.Assign(Src: TXMLNodeList); constref;', @TXMLNodeList_Assign);
     addGlobalFunc('procedure TXMLNodeList.Add(aXMLNode: TXMLNode); constref; overload;', @TXMLNodeList_Add);
@@ -230,7 +230,7 @@ begin
     addGlobalFunc('procedure TXMLNodeList.Delete(Index: Integer); constref; overload;', @TXMLNodeList_DeleteEx);
     addClassVar('TXMLNodeList', 'Count', 'Integer', @TXMLNodeList_Count_Read, nil);
     addGlobalFunc('function TXMLNodeList.Item(Index: Integer): TXMLNode; constref;', @TXMLNodeList_Item);
-    addGlobalFunc('procedure TXMLNodeList.Free(); constref;', @TXMLNodeList_Free);
+    //addGlobalFunc('procedure TXMLNodeList.Free(); constref;', @TXMLNodeList_Free);
   end;
 end;
 
@@ -330,7 +330,7 @@ begin
   begin
     addClass('TXml', 'TObject');
 
-    addGlobalFunc('procedure TXml.Init();', @TVerySimpleXml_Init);
+    addGlobalFunc('procedure TXml.Init(); override;', @TVerySimpleXml_Init);
     addGlobalFunc('procedure TXml.Clear();', @TVerySimpleXml_Clear);
     addGlobalFunc('procedure TXml.LoadFromFile(const FileName: String);', @TVerySimpleXml_LoadFromFile);
     addGlobalFunc('procedure TXml.LoadFromStream(const Stream: TStream);', @TVerySimpleXml_LoadFromStream);
@@ -341,7 +341,7 @@ begin
     addClassVar('TXml', 'Root', 'TXMLNode', @TVerySimpleXml_Root_Read, @TVerySimpleXml_Root_Write);
     addClassVar('TXml', 'Header', 'TXMLNode', @TVerySimpleXml_Header_Read, @TVerySimpleXml_Header_Write);
     addClassVar('TXml', 'Ident', 'string', @TVerySimpleXml_Ident_Read, @TVerySimpleXml_Ident_Write);
-    addGlobalFunc('procedure TXml.Free();', @TVerySimpleXml_Free);
+    //addGlobalFunc('procedure TXml.Free();', @TVerySimpleXml_Free);
   end;
 end;
 

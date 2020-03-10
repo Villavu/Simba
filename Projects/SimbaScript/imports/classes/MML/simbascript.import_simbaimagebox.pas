@@ -258,13 +258,13 @@ begin
     addClassVar('TSimbaImageBox', 'OnMouseLeave', 'TNotifyEvent', @TSimbaImageBox_OnMouseLeave_Read, @TSimbaImageBox_OnMouseLeave_Write);
     addClassVar('TSimbaImageBox', 'OnMouseEnter', 'TNotifyEvent', @TSimbaImageBox_OnMouseEnter_Read, @TSimbaImageBox_OnMouseEnter_Write);
     addClassVar('TSimbaImageBox', 'OnDblClick', 'TNotifyEvent', @TSimbaImageBox_OnDblClick_Read, @TSimbaImageBox_OnDblClick_Write);
-    addClassVar('TSimbaImageBox', 'Cursor', 'TCursor', @TSimbaImageBox_Cursor_Read, @TSimbaImageBox_Cursor_Write);
+    //addClassVar('TSimbaImageBox', 'Cursor', 'TCursor', @TSimbaImageBox_Cursor_Read, @TSimbaImageBox_Cursor_Write);
 
     addGlobalFunc('procedure TSimbaImageBox.BackgroundChanged(UpdateOverlay: Boolean = True); constref;', @TSimbaImageBox_BackgroundChanged);
     addGlobalFunc('procedure TSimbaImageBox.MoveTo(X, Y: Int32); constref;', @TSimbaImageBox_MoveTo);
     addGlobalFunc('function TSimbaImageBox.IsVisible(X, Y: Int32): Boolean; overload; constref;', @TSimbaImageBox_IsVisible);
-    addGlobalFunc('procedure TSimbaImageBox.Init(Owner: TComponent);', @TSimbaImageBox_Init);
-    addGlobalFunc('procedure TSimbaImageBox.Free(); constref;', @TSimbaImageBox_Free);
+    addGlobalFunc('procedure TSimbaImageBox.Init(Owner: TComponent); override;', @TSimbaImageBox_Init);
+    //addGlobalFunc('procedure TSimbaImageBox.Free(); constref;', @TSimbaImageBox_Free);
   end;
 end;
 

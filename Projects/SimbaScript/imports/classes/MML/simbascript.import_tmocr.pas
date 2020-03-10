@@ -161,7 +161,7 @@ begin
     addGlobalFunc('function TMOCR.TextToFontTPA(Text: String; Font: TFont; out W, H: Int32): TPointArray; constref; overload;', @TMOCR_TextToFontTPAEx);
     addGlobalFunc('function TMOCR.TextToFontBitmap(Text, font: String): TMufasaBitmap; constref;', @TMOCR_TextToFontBitmap);
     addGlobalFunc('function TMOCR.TextToMask(Text, font: String): TMask; constref;', @TMOCR_TextToMask);
-    addGlobalFunc('procedure TMOCR.Free(); constref;', @TMOCR_Free);
+    //addGlobalFunc('procedure TMOCR.Free(); constref;', @TMOCR_Free);
 
     addClassVar('TMOCR', 'Fonts', 'TMFonts', @TMOCR_Fonts_Read);
   end;
