@@ -9,6 +9,20 @@ uses
   simba.codeparser, simba.codeinsight;
 
 type
+  TSimbaAutoComplete_Form = class(TSynCompletionForm)
+  public
+    constructor Create(AOwner: TComponent); override;
+  end;
+
+  TSimbaAutoComplete_ItemList = class(TStringList)
+  protected
+    FOwner: TSimbaAutoComplete_Form;
+  public
+    property Owner: TSimbaAutoComplete_Form read FOwner;
+
+    constructor Create(AOwner: TComponent); reintroduce;
+  end;
+
   TSimbaAutoComplete = class(TSynCompletion)
   protected
     FSynEdit: TSynEdit;
@@ -20,6 +34,8 @@ type
     FAlternatingColor: TColor;
     FBackgroundColor: TColor;
     FSelectedColor: TColor;
+
+    function GetCompletionFormClass: TSynBaseCompletionFormClass; override;
 
     procedure SetEditor(const Value: TCustomSynEdit); override;
     procedure SetParser(Value: TCodeInsight);
@@ -52,6 +68,21 @@ implementation
 
 uses
   castaliapaslextypes;
+
+constructor TSimbaAutoComplete_ItemList.Create(AOwner: TComponent);
+begin
+  inherited Create();
+
+  FOwner := AOwner as TSimbaAutoComplete_Form;
+end;
+
+constructor TSimbaAutoComplete_Form.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  FItemList.Free();
+  FItemList := TSimbaAutoComplete_ItemList.Create(Self);
+end;
 
 procedure TSimbaAutoComplete.PaintName(Canvas: TCanvas; var X, Y: Int32; AName: String);
 var
@@ -146,28 +177,24 @@ begin
   Value := '';
 end;
 
-var
-  Filter: String; // TODO. Can't pass data to sort method? :<
-
-function Test2(List: TStringList; Index1, Index2: Integer): Integer;
+function Sort(List: TStringList; Index1, Index2: Integer): Integer;
 var
   Left, Right: String;
-  l, r: Int32;
+  Filter: String;
 begin
+  Filter := UpperCase(TSimbaAutoComplete_ItemList(List).Owner.CurrentString);
+
   Left := UpperCase(TDeclaration(List.Objects[Index1]).Name);
   Right := UpperCase(TDeclaration(List.Objects[Index2]).Name);
 
-  l := Length(Left) div Length(Filter);
-  l += Pos(Filter, Left) * 100;
-  r := Length(Right) div Length(Filter);
-  r += Pos(Filter, RIght) * 100;
-
-  Result := l-r;
+  Result := ((100 - Round(Length(Filter) / Length(Left) * 100)) + (Pos(Filter, Left) * 100)) -
+            ((100 - Round(Length(Filter) / Length(Right) * 100)) + (Pos(Filter, Right) * 100));
 end;
 
 procedure TSimbaAutoComplete.HandleFiltering(var APosition: Int32);
 var
   i: Int32;
+  Filter: String;
 begin
   Filter := UpperCase(CurrentString);
 
@@ -178,8 +205,8 @@ begin
     if (Filter = '') or UpperCase(FDeclarations[i].Name).Contains(Filter) then
       ItemList.AddObject(FDeclarations[i].Name, FDeclarations[i]);
 
-  if Filter <> '' then
-    TStringList(ItemList).CustomSort(@Test2)
+  if (Filter <> '') then
+    TStringList(ItemList).CustomSort(@Sort)
   else
     TStringList(ItemList).Sort();
 
@@ -236,8 +263,11 @@ begin
 
     FDeclarations.Add(Declaration);
   end;
+end;
 
-  FDeclarations.Extend(FParser.GetMembersOfType(Declaration));
+function TSimbaAutoComplete.GetCompletionFormClass: TSynBaseCompletionFormClass;
+begin
+  Result := TSimbaAutoComplete_Form;
 end;
 
 procedure TSimbaAutoComplete.SetEditor(const Value: TCustomSynEdit);

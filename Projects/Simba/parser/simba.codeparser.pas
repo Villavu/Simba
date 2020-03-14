@@ -1937,10 +1937,10 @@ begin
     if Declaration.Name = '' then
       Continue;
 
-    if Declaration is TciProcedureDeclaration and TciProcedureDeclaration(Declaration).IsMethodOfType then
+    if (Declaration is TciProcedureDeclaration) and TciProcedureDeclaration(Declaration).IsMethodOfType then
       FGlobals.Add('!' + TciProcedureDeclaration(Declaration).ObjectName, Declaration)
     else
-    if Declaration is TciTypeDeclaration and (TciTypeDeclaration(Declaration).EnumType <> nil) then
+    if (Declaration is TciTypeDeclaration) and (TciTypeDeclaration(Declaration).EnumType <> nil) then
     begin
       FGlobals.Add(Declaration.Name, Declaration);
       for Declaration in TciTypeDeclaration(Declaration).EnumType.Elements do

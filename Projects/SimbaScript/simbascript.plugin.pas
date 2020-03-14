@@ -97,7 +97,7 @@ begin
   end;
 
   if (FCode <> '') then
-    Compiler.addDelayedCode(FCode, FFileName, False);
+    Compiler.addDelayedCode(FCode, '!' + FFileName, False);
 end;
 
 constructor TSimbaScriptPlugin.Create(FileName: String);
