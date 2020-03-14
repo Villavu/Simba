@@ -98,6 +98,10 @@
       <CompilerMessages>
         <IgnoredMessages idx5024="True"/>
       </CompilerMessages>
+      <CustomOptions Value="-dLape_CDECL"/>
+      <OtherDefines Count="1">
+        <Define0 Value="Lape_CDECL"/>
+      </OtherDefines>
       <ExecuteAfter>
         <Command Value="$MakeExe($(LazarusDir)lazbuild) --cpu=$(TargetCPU) --os=$(TargetOS) ..\SimbaResources\MakeSimbaResources.lpi"/>
         <ShowAllMessages Value="True"/>
