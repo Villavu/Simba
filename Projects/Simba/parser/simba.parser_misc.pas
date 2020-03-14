@@ -55,19 +55,26 @@ begin
         end;
 
       ']':
-        if (InParams = 0) then
         begin
-          Result := Text[i] + Result;
+          if (InParams = 0) then
+          begin
+            Result := Text[i] + Result;
 
-          InIndex += 1;
+            InIndex += 1;
+          end;
         end;
 
       '[':
-        if (InParams = 0) then
         begin
-          Result := Text[i] + Result;
+          if InIndex <= 0 then
+            Break;
 
-          InIndex -= 1;
+          if (InParams = 0) then
+          begin
+            Result := Text[i] + Result;
+
+            InIndex -= 1;
+          end;
         end;
 
       ',':
