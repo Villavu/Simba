@@ -60,7 +60,7 @@ type
     function GetFontData(const Font: TFont): TOcrData; overload;
 
     function FreeFont(const Name: String): Boolean;
-    function LoadFont(const Name: String; Shadow: Boolean): boolean;
+    function LoadFont(Name: String; Shadow: Boolean): boolean;
     function LoadSystemFont(const SysFont: TFont; const FontName: String): Boolean;
     function IsFontLoaded(const Name: String): boolean;
     function Copy(Owner : TObject): TMFonts; overload;
@@ -229,7 +229,7 @@ begin
     end;
 end;
 
-function TMFonts.LoadFont(const Name: String; Shadow: Boolean): boolean;
+function TMFonts.LoadFont(Name: String; Shadow: Boolean): boolean;
 var
   Font: TMFont;
 begin
@@ -237,16 +237,27 @@ begin
 
   WriteLn('Loading font: ', Name);
 
-  if (not DirectoryExists(FPath + Name)) then
-    raise Exception.Create('Font "' + Name + '" does not exist in path "' + FPath + '"');
+  // Allow user to pass a filename too
+  if DirectoryExists(Name) then
+  begin
+    Font := TMFont.Create();
+    Font.Name := ExtractFileName(Name);
+    Font.Data := InitOCR(LoadGlyphMasks(IncludeTrailingPathDelimiter(SetDirSeparators(Name)), Shadow));
 
-  Font := TMFont.Create();
-  Font.Name := Name;
-  if Shadow then
-    Font.Name := Font.Name + '_s';
-  Font.Data := InitOCR(LoadGlyphMasks(IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(FPath) + Name), Shadow));
+    FFonts.Add(Font);
+  end else
+  begin
+    if (not DirectoryExists(FPath + Name)) then
+      raise Exception.Create('Font "' + Name + '" does not exist in path "' + FPath + '"');
 
-  FFonts.Add(Font);
+    Font := TMFont.Create();
+    Font.Name := Name;
+    if Shadow then
+      Font.Name := Font.Name + '_s';
+    Font.Data := InitOCR(LoadGlyphMasks(IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(FPath) + Name), Shadow));
+
+    FFonts.Add(Font);
+  end;
 end;
 
 function TMFonts.LoadSystemFont(const SysFont: TFont; const FontName: String): Boolean;
