@@ -1,7 +1,7 @@
 object SimbaScriptTabsForm: TSimbaScriptTabsForm
-  Left = 8
+  Left = 648
   Height = 252
-  Top = 599
+  Top = 903
   Width = 564
   AllowDropFiles = True
   Caption = 'Editor'

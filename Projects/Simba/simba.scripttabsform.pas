@@ -237,12 +237,12 @@ end;
 procedure TSimbaScriptTabsForm.HandleReplace(Sender: TObject);
 var
   Options: TSynSearchOptions;
-  P: TPoint;
+  Start: TPoint;
   Prompt: Boolean;
 
   procedure Replacement;
   begin
-    CurrentEditor.SearchReplaceEx(ReplaceDialog.FindText, ReplaceDialog.ReplaceText, Options + [ssoReplace], P);
+    CurrentEditor.SearchReplaceEx(ReplaceDialog.FindText, ReplaceDialog.ReplaceText, Options + [ssoReplace], Start);
   end;
 
 begin
@@ -259,17 +259,22 @@ begin
       Options := Options + [ssoMatchCase];
     if (frWholeWord in ReplaceDialog.Options) then
       Options := Options + [ssoWholeWord];
+    if CurrentEditor.SelAvail then
+      Options := Options + [ssoSelectedOnly];
 
     if (frEntireScope in ReplaceDialog.Options) then
-      P := Point(0, 0)
-    else
-      P := CurrentEditor.CaretXY;
+    begin
+      Options := Options - [ssoSelectedOnly];
 
-    while CurrentEditor.SearchReplaceEx(ReplaceDialog.FindText, '', Options, P) > 0 do
+      Start := Point(0, 0)
+    end else
+      Start := CurrentEditor.CaretXY;
+
+    while CurrentEditor.SearchReplaceEx(ReplaceDialog.FindText, '', Options, Start) > 0 do
     begin
       if Prompt then
       begin
-        case MessageDlg('Replace', Format('Do you want to replace "%s" with "%s"?', [ReplaceDialog.FindText, ReplaceDialog.ReplaceText]), mtConfirmation, [mbYes, mbNo, mbYesToAll], 0) of
+        case MessageDlg('Replace', Format('Replace "%s" with "%s"?', [ReplaceDialog.FindText, ReplaceDialog.ReplaceText]), mtConfirmation, [mbYes, mbNo, mbYesToAll], 0) of
           mrYes:
             begin
               Replacement();
@@ -281,11 +286,14 @@ begin
 
               Prompt := False;
             end;
-          end;
+
+          mrCancel:
+            Break;
+        end;
       end else
         Replacement();
 
-      P := CurrentEditor.CaretXY;
+      Start := CurrentEditor.CaretXY;
     end;
   finally
     CurrentEditor.EndUndoBlock();
@@ -473,6 +481,11 @@ begin
   if (CurrentEditor <> nil) then
   begin
     ReplaceDialog.FindText := CurrentEditor.GetWordAtRowCol(CurrentEditor.CaretXY);
+    if CurrentEditor.SelAvail then
+      ReplaceDialog.Options := ReplaceDialog.Options - [frEntireScope]
+    else
+      ReplaceDialog.Options := ReplaceDialog.Options + [frEntireScope];
+
     ReplaceDialog.Execute();
   end;
 end;
