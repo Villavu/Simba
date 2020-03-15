@@ -460,6 +460,8 @@ end;
 
 procedure TSimbaScript._WriteLn(constref S: String);
 begin
+  if (S = '') then
+    FOutputBuffer := FOutputBuffer + ' ';
   if (S <> '') then
     FOutputBuffer := FOutputBuffer + S;
 
