@@ -9,7 +9,7 @@ uses
   sysutils;
 
 type
-  TExpressionItem = record Identifier: String; Dimensions: Int32; end;
+  TExpressionItem = record Identifier: String; Dimensions: Int32; Deref: Boolean; DerefArray: Boolean; end;
   TExpressionArray = array of TExpressionItem;
   TExpressionArrayHelper = type Helper for TExpressionArray
     function Pop: TExpressionItem;
@@ -87,7 +87,7 @@ begin
       begin
         if (InParams = 0) and (InIndex = 0) then
         begin
-          if (not (Text[i] in ['a'..'z', 'A'..'Z', '0'..'9', '_', '.'])) then
+          if (not (Text[i] in ['a'..'z', 'A'..'Z', '0'..'9', '_', '.', '^'])) then
             Break;
 
           Result := Text[i] + Result
@@ -101,6 +101,8 @@ function GetExpressionArray(Expression: String): TExpressionArray;
 var
   Identifier: String;
   Dimensions: Int32;
+  Deref: Boolean;
+  DerefArray: Boolean;
 
   procedure Push;
   var
@@ -114,10 +116,14 @@ var
 
       Result[0].Identifier := Identifier;
       Result[0].Dimensions := Dimensions;
+      Result[0].Deref := Deref;
+      Result[0].DerefArray := DerefArray;
     end;
 
     Identifier := '';
     Dimensions := 0;
+    Deref := False;
+    DerefArray := False;
   end;
 
 var
@@ -131,6 +137,8 @@ begin
 
   Identifier := '';
   Dimensions := 0;
+  Deref := False;
+  DeRefArray := False;
 
   for i := Length(Expression) downto 1 do
   begin
@@ -161,6 +169,15 @@ begin
       ',':
         if (IndexCount > 0) and (ParameterCount = 0) then
           Inc(Dimensions);
+
+      '^':
+        if (IndexCount = 0) and (ParameterCount = 0) then
+        begin
+          if Expression[i - 1] = ']' then
+            DerefArray := True
+          else
+            Deref := True;
+        end;
 
       else
         if (IndexCount = 0) and (ParameterCount = 0) then

@@ -47,6 +47,7 @@ type
 
     function ResolveType(Declaration: TDeclaration): TDeclaration;
     function ResolveArrayType(Declaration: TDeclaration; Dimensions: Int32): TDeclaration;
+    function ResolvePointer(Declaration: TDeclaration): TDeclaration;
 
     procedure Run; overload; override;
 
@@ -205,11 +206,25 @@ begin
     if Declaration = nil then
       Exit;
 
+    if Base.Deref then
+    begin
+      Declaration := ResolvePointer(Declaration);
+      if Declaration = nil then
+        Exit;
+    end;
+
     if Base.Dimensions > 0 then
     begin
       Declaration := ResolveArrayType(Declaration, Base.Dimensions);
       if Declaration = nil then
         Exit;
+
+      if Base.DerefArray then
+      begin
+        Declaration := ResolvePointer(Declaration);
+        if Declaration = nil then
+          Exit;
+      end;
     end;
 
     for i := 0 to High(Expressions) do
@@ -223,11 +238,25 @@ begin
       if Declaration = nil then
         Exit;
 
+      if Expressions[i].Deref then
+      begin
+        Declaration := ResolvePointer(Declaration);
+        if Declaration = nil then
+          Exit;
+      end;
+
       if Expressions[i].Dimensions > 0 then
       begin
         Declaration := ResolveArrayType(Declaration, Expressions[i].Dimensions);
         if Declaration = nil then
           Exit;
+
+        if Expressions[i].DerefArray then
+        begin
+          Declaration := ResolvePointer(Declaration);
+          if Declaration = nil then
+            Exit;
+        end;
       end;
     end;
 
@@ -245,6 +274,12 @@ function TCodeInsight.GetMembersOfType(Declaration: TDeclaration): TDeclarationA
   procedure GetFields(Declaration: TciRecordType);
   begin
     Result := Result + Declaration.Items.GetItemsOfClass(TciClassField);
+  end;
+
+  procedure GetEnumElements(Declaration: TciTypeDeclaration);
+  begin
+    if Declaration.EnumType <> nil then
+      Result := Result + Declaration.EnumType.Elements;
   end;
 
   procedure GetMethods(Declaration: TciTypeDeclaration);
@@ -315,8 +350,10 @@ begin
     end;
   end else
   if Declaration is TciTypeDeclaration then
-    GetMethods(Declaration as TciTypeDeclaration)
-  else
+  begin
+    GetMethods(Declaration as TciTypeDeclaration);
+    GetEnumElements(Declaration as TciTypeDeclaration);
+  end else
   if Declaration is TciRecordType then
     GetFields(Declaration as TciRecordType)
   else
@@ -423,6 +460,12 @@ function TCodeInsight.ResolveType(Declaration: TDeclaration): TDeclaration;
 begin
   Result := nil;
 
+  if Declaration is TciTypeIdentifer then
+  begin
+    Result := GlobalByName[Declaration.RawText];
+    Exit;
+  end;
+
   if Declaration is TciProcedureClassName then
   begin
     Result := GlobalByName[Declaration.RawText];
@@ -476,6 +519,17 @@ begin
   end;
 
   Result := Declaration;
+end;
+
+function TCodeInsight.ResolvePointer(Declaration: TDeclaration): TDeclaration;
+begin
+  Result := nil;
+
+  if Declaration is TciTypeDeclaration then
+    Declaration := TciTypeDeclaration(Declaration).PointerType;
+
+  if (Declaration <> nil) and (Declaration.ClassType = TciPointerType) then
+    Result := ResolveType(TciPointerType(Declaration).GetType());
 end;
 
 procedure TCodeInsight.Run;

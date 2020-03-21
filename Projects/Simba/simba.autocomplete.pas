@@ -177,18 +177,31 @@ begin
   Value := '';
 end;
 
-function Sort(List: TStringList; Index1, Index2: Integer): Integer;
+function Sort(List: TStringList; Left, Right: Integer): Integer;
 var
-  Left, Right: String;
   Filter: String;
+  LeftName, RightName: String;
+  LeftDeclaration, RightDeclaration: TDeclaration;
+  LeftWeight, RightWeight: Int32;
+  Declaration: TDeclaration;
 begin
   Filter := UpperCase(TSimbaAutoComplete_ItemList(List).Owner.CurrentString);
 
-  Left := UpperCase(TDeclaration(List.Objects[Index1]).Name);
-  Right := UpperCase(TDeclaration(List.Objects[Index2]).Name);
+  LeftDeclaration := TDeclaration(List.Objects[Left]);
+  LeftName := UpperCase(LeftDeclaration.Name);
+  LeftWeight := ((100 - Round(Length(Filter) / Length(LeftName) * 100)) + (Pos(Filter, LeftName) * 100));
 
-  Result := ((100 - Round(Length(Filter) / Length(Left) * 100)) + (Pos(Filter, Left) * 100)) -
-            ((100 - Round(Length(Filter) / Length(Right) * 100)) + (Pos(Filter, Right) * 100));
+  if LeftDeclaration.HasOwnerClass(TciProcedureDeclaration, Declaration) then
+    LeftWeight -= $FFFF;
+
+  RightDeclaration := TDeclaration(List.Objects[Right]);
+  RightName := UpperCase(RightDeclaration.Name);
+  RightWeight := ((100 - Round(Length(Filter) / Length(RightName) * 100)) + (Pos(Filter, RightName) * 100));
+
+  if RightDeclaration.HasOwnerClass(TciProcedureDeclaration, Declaration) then
+    RightWeight -= $FFFF;
+
+  Result := LeftWeight - RightWeight;
 end;
 
 procedure TSimbaAutoComplete.HandleFiltering(var APosition: Int32);
@@ -303,7 +316,6 @@ begin
   OnSearchPosition := @HandleFiltering;
   OnExecute := @HandleExecute;
 
-  //TStringList(ItemList).Sorted := True;
   TStringList(ItemList).Duplicates := dupAccept;
   TStringList(ItemList).OwnsObjects := False;
 end;
