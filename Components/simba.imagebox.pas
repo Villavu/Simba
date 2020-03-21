@@ -209,7 +209,7 @@ begin
   Height := AHeight;
 
   case DataFormat of
-    dfABGR: Row := @RowARGB;
+    dfARGB: Row := @RowARGB;
     dfBGRA: Row := @RowBGRA;
     dfBGR:  Row := @RowBGR;
     else

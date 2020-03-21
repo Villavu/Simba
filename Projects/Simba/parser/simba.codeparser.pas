@@ -110,6 +110,11 @@ type
     function GetName: string; override;
   end;
 
+  TciPointerType = class(TDeclaration)
+  public
+    function GetType: TDeclaration;
+  end;
+
   TciEnumType = class(TDeclaration)
   protected
     function GetElements: TDeclarationArray;
@@ -208,6 +213,7 @@ type
     function GetAliasType: TciTypeAlias;
     function GetCopyType: TciTypeCopy;
     function GetArrayType: TciArrayType;
+    function GetPointerType: TciPointerType;
     function GetName: String; override;
   public
     function GetType: TDeclaration;
@@ -219,6 +225,7 @@ type
     property RecordType: TciRecordType read GetRecordType;
     property ArrayType: TciArrayType read GetArrayType;
     property EnumType: TciEnumType read GetEnumType;
+    property PointerType: TciPointerType read GetPointerType;
   end;
 
   TciVarName = class(TDeclaration);
@@ -321,6 +328,7 @@ type
     procedure TypeDeclaration; override;                                        //Type
     procedure TypeName; override;                                               //Type
     procedure ExplicitType; override;                                           //Type
+    procedure PointerType; override;
 
     procedure VarDeclaration; override;                                         //Var
     procedure VarName; override;                                                //Var
@@ -412,6 +420,11 @@ begin
     if Length(Right) > 0 then
       Move(Right[0], Result[Length(Left)], Length(Right) * SizeOf(TDeclarationArray));
   end;
+end;
+
+function TciPointerType.GetType: TDeclaration;
+begin
+  Result := FItems.GetFirstItemOfClass(TciTypeIdentifer);
 end;
 
 function TciTypeCopy.GetParent: String;
@@ -622,6 +635,17 @@ begin
   Declaration := GetType();
   if (Declaration <> nil) and (Declaration is TciArrayType) then
     Result := TciArrayType(Declaration);
+end;
+
+function TciTypeDeclaration.GetPointerType: TciPointerType;
+var
+  Declaration: TDeclaration;
+begin
+  Result := nil;
+
+  Declaration := GetType();
+  if (Declaration <> nil) and (Declaration is TciPointerType) then
+    Result := TciPointerType(Declaration);
 end;
 
 function TciTypeDeclaration.GetName: String;
@@ -1506,6 +1530,13 @@ begin
   PushStack(TciTypeCopy);
   inherited ExplicitType;
   PopStack;
+  PopStack;
+end;
+
+procedure TCodeParser.PointerType;
+begin
+  PushStack(TciPointerType);
+  inherited PointerType();
   PopStack;
 end;
 
