@@ -518,8 +518,10 @@ begin
   inherited Destroy();
 end;
 
-{$IF DEFINED(DARWIN) and DECLARED(LoadFFI)} { DynamicFFI }
 initialization
+  Randomize(); // Else we get the same sequence everytime...
+
+{$IF DEFINED(DARWIN) and DECLARED(LoadFFI)} { DynamicFFI }
   if not FFILoaded then
     LoadFFI('/usr/local/opt/libffi/lib/');
 {$ENDIF}
