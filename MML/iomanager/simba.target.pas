@@ -174,32 +174,37 @@ end;
 function TTarget.ReturnMatrix(X, Y, Width, Height: Int32): TIntegerMatrix;
 var
   Data: TRetData;
-  Ptr: PRGB32;
-  Upper: PtrUInt;
+  Dest: PInt32;
+  Source: PRGB32;
+  SourceInc: Int32;
+  LoopX, LoopY: Int32;
 begin
-  Result := Default(TIntegerMatrix);
+  SetLength(Result, Height, Width);
 
   Data := ReturnData(X, Y, Width, Height);
 
-  if Data <> NullReturnData then
+  Source := Data.Ptr;
+  SourceInc := Data.IncPtrWith;
+
+  if (Data <> NullReturnData) then
   begin
-    Ptr := Data.Ptr;
-
-    // Clear alpha
-    Upper := PtrUInt(@Ptr[Width * Height - 1]);
-    while PtrUInt(Ptr) <= Upper do
+    for LoopY := 0 to Height - 1 do
     begin
-      Ptr^.A := 0;
+      Dest := @Result[LoopY][0];
 
-      Inc(Ptr);
+      for LoopX := 0 to Width - 1 do
+      begin
+        Dest^ := BGRToRGB(Source^);
+
+        Inc(Dest);
+        Inc(Source);
+      end;
+
+      Inc(Source, SourceInc);
     end;
 
-    SetLength(Result, Height, Width);
-    for Y := 0 to Height - 1 do
-      Move(Data.Ptr[Y * Data.RowLen], Result[Y, 0], Width * SizeOf(TRGB32));
+    FreeReturnData();
   end;
-
-  FreeReturnData();
 end;
 
 procedure TTarget.FreeReturnData;
