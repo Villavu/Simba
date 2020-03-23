@@ -265,6 +265,12 @@ begin
     PBoolean(Result)^ := MFinder.FindText(PString(Params^[0])^, PString(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PSingle(Params^[6])^);
 end;
 
+procedure Lape_GetColorsMatrix(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  with Script.Client do
+    PIntegerMatrix(Result)^ := IOManager.ReturnMatrix(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^ - PInt32(Params^[0])^, PInt32(Params^[3])^ - PInt32(Params^[1])^);
+end;
+
 procedure Lape_Import_Finder(Compiler: TScriptCompiler);
 begin
   with Compiler do
@@ -284,7 +290,8 @@ begin
     addGlobalFunc('function FindBitmapsSpiralTolerance(bitmap: Int32; x, y: Int32; var Points: TPointArray; xs, ys, xe, ye,tolerance: Int32): Boolean', @Lape_FindBitmapsSpiralTolerance);
     addGlobalFunc('function FindBitmapSpiralTolerance(bitmap: Int32; var x, y: Int32; xs, ys, xe, ye,tolerance: Int32): Boolean', @Lape_FindBitmapSpiralTolerance);
     addGlobalFunc('function GetColor(x, y: Int32): Integer;', @Lape_GetColor);
-    addGlobalFunc('function GetColors(const Coords: TPointArray): TIntegerArray', @Lape_GetColors);
+    addGlobalFunc('function GetColors(const Coords: TPointArray): TIntegerArray;', @Lape_GetColors);
+    addGlobalFunc('function GetColorsMatrix(X1, Y1, X2, Y2: Int32): TIntegerMatrix;', @Lape_GetColorsMatrix);
     addGlobalFunc('function FindColor(var x, y: Int32; color, x1, y1, x2, y2: Int32): boolean', @Lape_FindColor);
     addGlobalFunc('function FindColorTolerance(var x, y: Int32; color, x1, y1, x2, y2, tol: Int32): boolean', @Lape_FindColorTolerance);
     addGlobalFunc('function FindColors(var TPA: TPointArray; Color, x1, y1, x2, y2: Int32): Boolean', @Lape_FindColors);
