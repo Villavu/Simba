@@ -1,7 +1,7 @@
 object SimbaScriptTabsForm: TSimbaScriptTabsForm
-  Left = 648
+  Left = 2573
   Height = 252
-  Top = 903
+  Top = 1088
   Width = 564
   AllowDropFiles = True
   Caption = 'Editor'
@@ -360,5 +360,11 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
       ShortCut = 16466
       OnClick = EditorPopupClick
     end
+  end
+  object OpenDialog: TOpenDialog
+    Filter = 'Simba Files|*.simba;*.pas;*.inc|All Files|*.*'
+    Options = [ofAllowMultiSelect, ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
+    left = 88
+    top = 16
   end
 end

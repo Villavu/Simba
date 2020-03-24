@@ -588,6 +588,7 @@ begin
     ShowOnTop();
   end;
 end;
+
 procedure TSimbaForm.TrayPopupPopup(Sender: TObject);
 begin
   { XXX: What's up with this? }
@@ -761,7 +762,12 @@ end;
 procedure TSimbaForm.MenuSaveAsDefaultClick(Sender: TObject);
 begin
   if MessageDlg('Save Default Script', 'Are you sure you want to overwrite the default script?', mtConfirmation, [mbYes, mbCancel], 0) = mrYes then
-    SimbaScriptTabsForm.CurrentTab.Save(SimbaSettings.Editor.DefaultScriptPath.Value);
+  try
+    SimbaScriptTabsForm.CurrentEditor.Lines.SaveToFile(SimbaSettings.Editor.DefaultScriptPath.Value);
+  except
+    on E: Exception do
+      ShowMessage('Exception while saving default script: ' + E.Message);
+  end;
 end;
 
 procedure TSimbaForm.MenuCloseAllTabsClick(Sender: TObject);
@@ -950,7 +956,12 @@ end;
 procedure TSimbaForm.MenuSaveClick(Sender: TObject);
 begin
   if SimbaScriptTabsForm.CurrentTab <> nil then
-    SimbaScriptTabsForm.CurrentTab.Save(SimbaScriptTabsForm.CurrentTab.FileName);
+  begin
+    if SimbaScriptTabsForm.CurrentTab.FileName = '' then
+      SimbaScriptTabsForm.CurrentTab.SaveAs()
+    else
+      SimbaScriptTabsForm.CurrentTab.Save(SimbaScriptTabsForm.CurrentTab.FileName);
+  end;
 end;
 
 procedure TSimbaForm.MenuStopClick(Sender: TObject);
@@ -996,14 +1007,25 @@ begin
 end;
 
 procedure TSimbaForm.SaveAllButtonClick(Sender: TObject);
+var
+  I: Int32;
 begin
-  SimbaScriptTabsForm.SaveAll();
+  for I := SimbaScriptTabsForm.TabCount - 1 downto 0 do
+    if SimbaScriptTabsForm.Tabs[I].ScriptChanged then
+    begin
+      if (SimbaScriptTabsForm.Tabs[I].FileName = '') then
+      begin
+        SimbaScriptTabsForm.Tabs[I].MakeVisible();
+        SimbaScriptTabsForm.Tabs[I].SaveAs();
+      end else
+        SimbaScriptTabsForm.Tabs[I].Save(SimbaScriptTabsForm.Tabs[I].FileName);
+    end;
 end;
 
 procedure TSimbaForm.MenuSaveAsClick(Sender: TObject);
 begin
-  if SimbaScriptTabsForm.CurrentTab <> nil then
-    SimbaScriptTabsForm.CurrentTab.Save();
+  if (SimbaScriptTabsForm.CurrentTab <> nil) and SimbaScriptTabsForm.CurrentTab.ScriptChanged then
+    SimbaScriptTabsForm.CurrentTab.SaveAs();
 end;
 
 procedure TSimbaForm.ShowDTMEditor(Sender: TObject);
@@ -1549,6 +1571,7 @@ begin
   Result := False;
 
   Stream := TStringStream.Create(SimbaSettings.GUI.Layout.Value);
+
   if Stream.Size > 0 then
   try
     Position := poDesigned;

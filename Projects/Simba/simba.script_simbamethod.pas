@@ -166,6 +166,9 @@ begin
 
         if SimbaScriptTabsForm.Focused and SimbaScriptTabsForm.CurrentEditor.CanSetFocus() then
           SimbaScriptTabsForm.CurrentEditor.SetFocus();
+
+        // Always make the error message visible
+        SimbaDebugForm.Editor.TopLine := SimbaDebugForm.Editor.Lines.Count;
       end;
     end;
 end;

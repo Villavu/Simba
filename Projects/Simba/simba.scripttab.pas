@@ -10,19 +10,14 @@ uses
 
 type
   TSimbaScriptTab = class(TTabSheet)
-  private
-    procedure SetFunctionListState(Value: TSimbaFunctionList_State);
-    procedure SetScriptChanged(Value: Boolean);
   protected
     FEditor: TSimbaEditor;
-    FScriptChanged: Boolean;
     FSavedText: String;
     FScriptName: String;
     FScriptFile: String;
     FScriptInstance: TSimbaScriptInstance;
     FScriptErrorLine: Int32;
     FMouseLinkXY: TPoint;
-    FScriptIsDefault: Boolean;
     FFunctionListState: TSimbaFunctionList_State;
 
     procedure HandleEditorClick(Sender: TObject);
@@ -39,23 +34,25 @@ type
     function GetFileName: String;
     function GetScript: String;
     procedure SetScript(Value: String);
+    function GetScriptChanged: Boolean;
 
     procedure SetScriptErrorLine(Value: Int32);
+    procedure SetFunctionListState(Value: TSimbaFunctionList_State);
   public
     property FileName: String read GetFileName;
-    property ScriptChanged: Boolean read FScriptChanged write SetScriptChanged;
+    property ScriptChanged: Boolean read GetScriptChanged;
     property ScriptInstance: TSimbaScriptInstance read FScriptInstance write FScriptInstance;
     property ScriptName: String read FScriptName;
     property Script: String read GetScript write SetScript;
     property ScriptErrorLine: Int32 read FScriptErrorLine write SetScriptErrorLine;
     property Editor: TSimbaEditor read FEditor;
-    property ScriptIsDefault: Boolean read FScriptIsDefault;
     property MouseLinkXY: TPoint read FMouseLinkXY write FMouseLinkXY;
     property FunctionListState: TSimbaFunctionList_State read FFunctionListState write SetFunctionListState;
 
     procedure HandleCodeJump(Data: PtrInt);
 
-    function Save(AFileName: String = ''): Boolean;
+    procedure SaveAs;
+    function Save(AFileName: String): Boolean;
     function Load(AFileName: String): Boolean;
 
     function ParseScript: TCodeInsight;
@@ -225,26 +222,16 @@ begin
   Invalidate();
 end;
 
-
+function TSimbaScriptTab.GetScriptChanged: Boolean;
+begin
+  Result := FEditor.Text <> FSavedText;
+end;
 
 procedure TSimbaScriptTab.SetFunctionListState(Value: TSimbaFunctionList_State);
 begin
   FFunctionListState.Free();
 
   FFunctionListState := Value;
-end;
-
-procedure TSimbaScriptTab.SetScriptChanged(Value: Boolean);
-begin
-  FScriptChanged := Value;
-
-  if FScriptChanged then
-    Caption := '*' + FScriptName
-  else
-    Caption := FScriptName;
-
-  SimbaForm.MenuItemSave.Enabled := FScriptChanged;
-  SimbaForm.SaveButton.Enabled := FScriptChanged;
 end;
 
 procedure TSimbaScriptTab.HandleEditorClick(Sender: TObject);
@@ -254,7 +241,19 @@ end;
 
 procedure TSimbaScriptTab.HandleEditorChange(Sender: TObject);
 begin
-  ScriptChanged := True;
+  if ScriptChanged then
+  begin
+    Caption := '*' + FScriptName;
+
+    SimbaForm.MenuItemSave.Enabled := True;
+    SimbaForm.SaveButton.Enabled := True;
+  end else
+  begin
+    Caption := FScriptName;
+
+    SimbaForm.MenuItemSave.Enabled := False;
+    SimbaForm.SaveButton.Enabled := False;
+  end;
 
   if FScriptErrorLine > -1 then
     ScriptErrorLine := -1;
@@ -299,37 +298,43 @@ end;
 
 procedure TSimbaScriptTab.HandleEditorCommandProcessed(Sender: TObject; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer);
 begin
-  if (Command = ecUndo) then
-    ScriptChanged := FEditor.Lines.Text <> FSavedText;
   if (Command = ecChar) and (AChar = '(') and SimbaSettings.Editor.AutomaticallyShowParameterHints.Value then
     HandleParameterHints();
   if (Command = ecChar) and (AChar = '.') and SimbaSettings.Editor.AutomaticallyOpenAutoCompletion.Value then
     HandleAutoComplete();
 end;
 
-function TSimbaScriptTab.Save(AFileName: String): Boolean;
+procedure TSimbaScriptTab.SaveAs;
+var
+  SaveDialog: TSaveDialog;
 begin
-  Result := False;
+  SaveDialog := nil;
 
-  if AFileName = '' then
-  begin
-    with TSaveDialog.Create(nil) do
-    try
-      InitialDir := FScriptFile;
-      if (FScriptFile = '') then
-        InitialDir := SimbaSettings.Environment.ScriptPath.Value;
+  try
+    SaveDialog := TSaveDialog.Create(nil);
+    SaveDialog.Filter := 'Simba Files|*.simba;*.pas;*.inc;|Any Files|*.*';
+    SaveDialog.InitialDir := FScriptFile;
+    if (FScriptFile = '') then
+      SaveDialog.InitialDir := SimbaSettings.Environment.ScriptPath.Value;
 
-      Filter := 'Simba Files|*.simba;*.txt;*.pas;*.inc;|Any files|*.*';
+    if SaveDialog.Execute then
+    begin
+      if ExtractFileName(SaveDialog.FileName) = '' then
+        SaveDialog.FileName := SaveDialog.FileName + '.simba';
 
-      if Execute and (FileName <> '') and (ExtractFileExt(FileName) = '') then
-        FileName := FileName + '.simba';
-
-      AFileName := FileName;
-    finally
-      Free();
+      Self.Save(SaveDialog.FileName);
     end;
+  except
+    on E: Exception do
+      ShowMessage('Error while saving file as: ' + E.Message);
   end;
 
+  if (SaveDialog <> nil) then
+    SaveDialog.Free();
+end;
+
+function TSimbaScriptTab.Save(AFileName: String): Boolean;
+begin
   Result := FEditor.Save(AFileName);
 
   if Result then
@@ -339,7 +344,7 @@ begin
 
     FSavedText := FEditor.Text;
 
-    ScriptChanged := False;
+    HandleEditorChange(nil);
   end;
 end;
 
@@ -354,7 +359,7 @@ begin
 
     FSavedText := FEditor.Text;
 
-    ScriptChanged := False;
+    HandleEditorChange(nil);
   end;
 end;
 
@@ -409,8 +414,6 @@ begin
   FEditor.TabWidth := 2;
   FEditor.BlockIndent := 2;
   FEditor.BorderStyle := bsNone;
-
-  FScriptIsDefault := True;
 
   FunctionListState := nil;
 end;
