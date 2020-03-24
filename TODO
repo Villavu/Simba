@@ -1,7 +1,0 @@
-Lape Extensions [✖]
-Have finder functions not use a global TPA buffer (thread safety), gradual overallocation of result instead [✖]
-Basic threading in scripts [✖]
-Cleanup class imports [✖]
-Cleanup/fix crypto imports [✖]
-Integer math for CTS2? https://pastebin.com/9dybzgVH & https://pastebin.com/wkuCEShF [✖]
-Support Windows 10 high dpi scaling [✖]

@@ -54,6 +54,8 @@ procedure TSimbaDebugForm.Add(constref S: String);
 var
   Line: String;
 begin
+  WriteLn(S);
+
   FLock.Enter();
 
   try
