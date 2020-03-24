@@ -379,7 +379,7 @@ procedure TSimbaScriptTabsForm.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
 
-  if (StatusBar <> nil) then
+  if (not (csLoading in ComponentState)) then
   begin
     StatusBar.Height := Round(Canvas.TextHeight('Fj') * 1.33);
     if StatusPanelCaret <> nil then
