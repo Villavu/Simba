@@ -544,6 +544,9 @@ begin
   LocalRect.Width := Trunc(W / FZoom);
   LocalRect.Height := Trunc(H / FZoom);
 
+  FScrollBox.Canvas.Brush.Color := clBlack;
+  FScrollBox.Canvas.FillRect(ScreenRect);
+
   if (FOnPaintArea <> nil) then
   begin
     BitBlt(FOverlay.Canvas.Handle,

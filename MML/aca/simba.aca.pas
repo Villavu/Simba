@@ -436,8 +436,10 @@ begin
   FImageBox.Overlay.Canvas.Pen.Color := clRed;
 
   FClient := TClient.Create();
-  FClient.IOManager.SetTarget(TargetWindow);
   FClient.MBitmaps.CreateBMP(0, 0);
+  FClient.IOManager.SetTarget(TargetWindow);
+  if not FClient.IOManager.TargetValid then
+    FClient.IOManager.SetDesktop();
 
   ImageZoom.Picture.Bitmap.Width := 5;
   ImageZoom.Picture.Bitmap.Height := 5;

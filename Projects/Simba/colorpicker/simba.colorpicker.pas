@@ -126,6 +126,7 @@ begin
   FHint.PositionLabel.Caption := 'Position: ' + IntToStr(X - FOffset.X) + ', ' + IntToStr(Y - FOffset.Y);
 
   FHint.Image.Picture.Bitmap.BeginUpdate(True);
+  FHint.Image.Picture.Bitmap.Canvas.AntialiasingMode := amOff;
 
   try
     FHint.Image.Picture.Bitmap.Canvas.Clear();
@@ -189,6 +190,9 @@ begin
   FForm.ShowOnTop();
 
   FIOManager.SetTarget(TargetWindow);
+  if not FIOManager.TargetValid() then
+    FIOManager.SetDesktop();
+
   FIOManager.GetPosition(FOffset.X, FOffset.Y);
 
   FHint := TSimbaColorPickerHint.CreateNew(nil);

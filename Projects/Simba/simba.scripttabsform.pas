@@ -33,6 +33,7 @@ type
     MenuItem3: TMenuItem;
     EditorPopupDelete: TMenuItem;
     MenuItem6: TMenuItem;
+    OpenDialog: TOpenDialog;
     StatusPanelState: TPanel;
     StatusPanelFileName: TPanel;
     StatusPanelCaret: TPanel;
@@ -104,8 +105,6 @@ type
     procedure Open; overload;
 
     procedure OpenDeclaration(Declaration: TDeclaration);
-
-    procedure SaveAll;
 
     constructor Create(TheOwner: TComponent); override;
   end;
@@ -531,39 +530,26 @@ procedure TSimbaScriptTabsForm.RemoveTab(ScriptTab: TSimbaScriptTab; out Abort: 
 begin
   Abort := False;
 
-  if ScriptTab.ScriptInstance <> nil then
+  if (ScriptTab.ScriptInstance <> nil) then
   begin
     ScriptTab.MakeVisible();
 
     Application.MainForm.Enabled := False;
 
     try
-      {
-      case ScriptTab.ScriptInstance.State of
-        SCRIPT_RUNNING:
-          case MessageDlg('Script is still running', 'Do you want to stop the script?', mtConfirmation, [mbYes, mbNo, mbAbort], 0) of
-            mrYes: ScriptTab.ScriptInstance.Stop();
-            mrNo: Exit;
-            mrAbort:
-              begin
-                Abort := True;
+      if ScriptTab.ScriptInstance.IsRunning then
+      begin
+        case MessageDlg('Script is still running', 'Do you want to forcefully stop the script?', mtConfirmation, [mbYes, mbNo, mbAbort], 0) of
+          mrYes: ScriptTab.ScriptInstance.Kill();
+          mrNo: Exit;
+          mrAbort:
+            begin
+              Abort := True;
 
-                Exit;
-              end;
-          end;
-
-        SCRIPT_STOPPING:
-          case MessageDlg('Script is stopping', 'Do you want to forcefully stop the script?', mtConfirmation, [mbYes, mbNo, mbAbort], 0) of
-            mrYes: ScriptTab.ScriptInstance.Kill();
-            mrNo: Exit;
-            mrAbort:
-              begin
-                Abort := True;
-
-                Exit;
-              end;
-          end;
-      end;   }
+              Exit;
+            end;
+        end;
+      end;
     finally
       Application.MainForm.Enabled := True;
     end;
@@ -585,7 +571,7 @@ begin
     end;
   end;
 
-  if TabCount = 1 then
+  if (TabCount = 1) then
     ScriptTab.Reset()
   else
     ScriptTab.Free();
@@ -628,22 +614,19 @@ end;
 
 procedure TSimbaScriptTabsForm.Open;
 var
-  i: Int32;
+  I: Int32;
 begin
-  with TOpenDialog.Create(nil) do
   try
-    InitialDir := ExtractFileDir(CurrentTab.FileName);
-    if InitialDir = '' then
-      InitialDir := SimbaSettings.Environment.ScriptPath.Value;
+    OpenDialog.InitialDir := ExtractFileDir(CurrentTab.FileName);
+    if OpenDialog.InitialDir = '' then
+      OpenDialog.InitialDir := SimbaSettings.Environment.ScriptPath.Value;
 
-    Options := [ofAllowMultiSelect, ofExtensionDifferent, ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail];
-    Filter := 'Simba Files|*.simba;*.txt;*.pas';
-
-    if Execute then
-      for i := 0 to Files.Count - 1 do
-        Open(Files[i], True);
-  finally
-    Free();
+    if OpenDialog.Execute() then
+      for I := 0 to OpenDialog.Files.Count - 1 do
+        Open(OpenDialog.Files[I], True);
+  except
+    on E: Exception do
+      ShowMessage('Exception while opening file: ' + E.Message);
   end;
 end;
 
@@ -681,14 +664,6 @@ begin
     else
       SimbaDebugForm.Add(Declaration.RawText);
   end;
-end;
-
-procedure TSimbaScriptTabsForm.SaveAll;
-var
-  i: Int32;
-begin
-  for i := TabCount - 1 downto 0 do
-    Tabs[i].Save(Tabs[i].FileName);
 end;
 
 constructor TSimbaScriptTabsForm.Create(TheOwner: TComponent);
