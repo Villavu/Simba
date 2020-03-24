@@ -596,15 +596,18 @@ procedure TSimbaImageBox.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
 
-  with TBitmap.Create() do
-  try
-    Canvas.Font := Self.Font;
+  if (not (csLoading in ComponentState)) then
+  begin
+    with TBitmap.Create() do
+    try
+      Canvas.Font := Self.Font;
 
-    FMousePanel.Width := Canvas.TextWidth('9999x9999') * 2;
-    FDimensionsPanel.Width := Canvas.TextWidth('9999x9999') * 2;
-    FStatusBar.Height := Round(Canvas.TextHeight('9998x9999') * 1.5);
-  finally
-    Free();
+      FMousePanel.Width := Canvas.TextWidth('9999x9999') * 2;
+      FDimensionsPanel.Width := Canvas.TextWidth('9999x9999') * 2;
+      FStatusBar.Height := Round(Canvas.TextHeight('9998x9999') * 1.5);
+    finally
+      Free();
+    end;
   end;
 end;
 

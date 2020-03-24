@@ -453,15 +453,18 @@ procedure TSimbaPackageForm.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
 
-  UpdatePackageLabel.Font.Color := clNavy;
+  if (not (csLoading in ComponentState)) then
+  begin
+    UpdatePackageLabel.Font.Color := clNavy;
 
-  with TBitmap.Create() do
-  try
-    Canvas.Font := Self.Font;
+    with TBitmap.Create() do
+    try
+      Canvas.Font := Self.Font;
 
-    ReleasesList.ItemHeight := Canvas.TextHeight('Fj');
-  finally
-    Free();
+      ReleasesList.ItemHeight := Canvas.TextHeight('Fj');
+    finally
+      Free();
+    end;
   end;
 end;
 
