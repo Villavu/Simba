@@ -268,7 +268,7 @@ end;
 procedure Lape_GetColorsMatrix(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with Script.Client do
-    PIntegerMatrix(Result)^ := IOManager.ReturnMatrix(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^ - PInt32(Params^[0])^, PInt32(Params^[3])^ - PInt32(Params^[1])^);
+    PIntegerMatrix(Result)^ := IOManager.ReturnMatrix(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^ - PInt32(Params^[0])^ + 1, PInt32(Params^[3])^ - PInt32(Params^[1])^ + 1);
 end;
 
 procedure Lape_Import_Finder(Compiler: TScriptCompiler);

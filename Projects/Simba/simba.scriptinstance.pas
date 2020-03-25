@@ -396,8 +396,9 @@ end;
 procedure TSimbaScriptInstance.Dump;
 begin
   FProcess.Parameters.Add('--dump');
-  FProcess.Options := FProcess.Options + [poWaitOnExit];
   FProcess.Execute();
+  while FProcess.Running do
+    Application.ProcessMessages();
 
   FStartTime := GetTickCount64();
 end;
