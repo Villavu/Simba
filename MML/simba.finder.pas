@@ -1703,6 +1703,7 @@ end;
 
 function TMFinder.FindTextColor(Text, Font: String; Color, Tolerance: Int32; X1, Y1, X2, Y2: Int32; out Bounds: TBox): Single;
 var
+  R, G, B: Int32;
   W, H, X, Y: Int32;
   Matrix: T2DIntegerArray;
   CTSInfo: Pointer;
@@ -1714,6 +1715,10 @@ begin
   begin
     W := High(Matrix[0]);
     H := High(Matrix);
+
+    // Simba matrix are R,G,B, turn it into B,G,R for the finder
+    ColorToRGB(Color, R, G, B);
+    Color := RGBtoColor(B, G, R);
 
     CTSInfo := Create_CTSInfo(Color, Tolerance);
     CTSCompare := Get_CTSCompare(Self.CTS);

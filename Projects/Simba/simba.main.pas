@@ -1049,10 +1049,7 @@ procedure TSimbaForm.HandleRunningScripts(Sender: TObject);
 var
   i: Int32;
   Tab: TSimbaScriptTab;
-  Output: TStringList;
 begin
-  Output := TStringList.Create();
-
   for i := 0 to SimbaScriptTabsForm.TabCount - 1 do
   begin
     with SimbaScriptTabsForm.Tabs[i] do
@@ -1062,7 +1059,7 @@ begin
         if (not ScriptInstance.IsRunning) then
         begin
           if ScriptInstance.ExitCode > 0 then
-            Output.Add('Script process didn''t exit cleanly. Exit code: ' + IntToStr(ScriptInstance.ExitCode));
+            SimbaDebugForm.Add('Script process did not exit cleanly; Exit code: ' + IntToStr(ScriptInstance.ExitCode));
 
           ScriptInstance.Free();
           ScriptInstance := nil;
@@ -1099,8 +1096,6 @@ begin
       SetScriptState(ss_None);
     end;
   end;
-
-  Output.Free();
 end;
 
 procedure TSimbaForm.MenuItemBitmapConvClick(Sender: TObject);
@@ -1248,20 +1243,24 @@ begin
     ScriptInstance := TSimbaScriptInstance.Create();
     ScriptInstance.Dump();
 
-    for i := 0 to ScriptInstance.Output.Count - 1 do
+    if (ScriptInstance.ExitCode = 0) then
     begin
-      Parser := TCodeInsight_Include.Create();
-      Parser.OnMessage := @Self.CodeTools_OnMessage;
-      Parser.Run(ScriptInstance.Output.ValueFromIndex[i], ScriptInstance.Output.Names[i]);
+      for i := 0 to ScriptInstance.Output.Count - 1 do
+      begin
+        Parser := TCodeInsight_Include.Create();
+        Parser.OnMessage := @Self.CodeTools_OnMessage;
+        Parser.Run(ScriptInstance.Output.ValueFromIndex[i], ScriptInstance.Output.Names[i]);
 
-      if (Parser.Lexer.FileName <> 'Classes') then
-        SimbaFunctionListForm.addDeclarations(Parser.Items, SimbaFunctionListForm.addSimbaSection(Parser.Lexer.FileName), False, True, False);
+        if (Parser.Lexer.FileName <> 'Classes') then
+          SimbaFunctionListForm.addDeclarations(Parser.Items, SimbaFunctionListForm.addSimbaSection(Parser.Lexer.FileName), False, True, False);
 
-      TCodeInsight.AddBaseInclude(Parser);
-    end;
+        TCodeInsight.AddBaseInclude(Parser);
+      end;
 
-    SimbaFunctionListForm.SimbaNode.AlphaSort();
-    SimbaFunctionListForm.SimbaNode.Expanded := True;
+      SimbaFunctionListForm.SimbaNode.AlphaSort();
+      SimbaFunctionListForm.SimbaNode.Expanded := True;
+    end else
+      SimbaDebugForm.Add('Error dumping script imports: ' + IntToStr(ScriptInstance.ExitCode));
   except
     on E: Exception do
       SimbaDebugForm.Add('Error parsing internals: ' + E.Message);
