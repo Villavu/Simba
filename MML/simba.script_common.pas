@@ -7,13 +7,6 @@ interface
 uses
   Classes, SysUtils, ExtCtrls;
 
-const
-  SCRIPT_EXIT_CODE_SUCCESS    = 0;
-  SCRIPT_EXIT_CODE_INITIALIZE = 1;
-  SCRIPT_EXIT_CODE_IMPORT     = 2;
-  SCRIPT_EXIT_CODE_COMPILE    = 3;
-  SCRIPT_EXIT_CODE_RUNTIME    = 4;
-
 type
   ESimbaMethod = (SIMBA_METHOD_DEBUG_IMAGE,
                   SIMBA_METHOD_SCRIPT_ERROR,

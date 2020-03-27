@@ -68,7 +68,7 @@ type
 
     FManageOutput: Boolean;
     FOutput: TStringList;
-    FTargetWindow: THandle;
+    FTarget: THandle;
 
     FStartTime: UInt64;
     FScript: String;
@@ -93,7 +93,7 @@ type
     property Script: String write FScript;
     property ScriptName: String write FScriptName;
     property ScriptFile: String write FScriptFile;
-    property TargetWindow: THandle write FTargetWindow;
+    property Target: THandle write FTarget;
 
     // Stats
     property TimeRunning: UInt64 read GetTimeRunning;
@@ -359,7 +359,7 @@ begin
     FProcess.Parameters.Add('--scriptname=' + FScriptName);
   end;
 
-  FProcess.Parameters.Add('--targetwindow=' + IntToStr(FTargetWindow));
+  FProcess.Parameters.Add('--target=' + IntToStr(FTarget));
   FProcess.Parameters.Add('--run');
   FProcess.Parameters.Add(FScriptFile);
   FProcess.Execute();
@@ -385,7 +385,7 @@ begin
     FProcess.Parameters.Add('--scriptname=' + FScriptName);
   end;
 
-  FProcess.Parameters.Add('--targetwindow=' + IntToStr(FTargetWindow));
+  FProcess.Parameters.Add('--target=' + IntToStr(FTarget));
   FProcess.Parameters.Add('--compile');
   FProcess.Parameters.Add(FScriptFile);
   FProcess.Execute();
@@ -437,9 +437,9 @@ begin
   FProcess.CurrentDirectory := Application.Location;
   FProcess.Options := FProcess.Options + [poStderrToOutPut];
 
-  FProcess.Parameters.Add('--method-client=%s', [FMethodServer.Client]);
-  FProcess.Parameters.Add('--output-client=%s', [FOutputServer.Client]);
-  FProcess.Parameters.Add('--state-client=%s', [FStateServer.Client]);
+  FProcess.Parameters.Add('--simba-method-server=%s', [FMethodServer.Client]);
+  FProcess.Parameters.Add('--simba-output-server=%s', [FOutputServer.Client]);
+  FProcess.Parameters.Add('--simba-state-server=%s', [FStateServer.Client]);
 
   FProcess.Parameters.Add('--apppath=%s', [Application.Location]);
   FProcess.Parameters.Add('--datapath=%s', [SimbaSettings.Environment.DataPath.Value]);

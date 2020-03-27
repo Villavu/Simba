@@ -612,7 +612,7 @@ begin
 
       ScriptInstance := TSimbaScriptInstance.Create();
       ScriptInstance.ManageOutput := True;
-      ScriptInstance.TargetWindow := Self.WindowSelection;
+      ScriptInstance.Target := Self.WindowSelection;
       ScriptInstance.ScriptName := ScriptName;
 
       if (FileName <> '') then
@@ -640,7 +640,7 @@ begin
 
       ScriptInstance := TSimbaScriptInstance.Create();
       ScriptInstance.ManageOutput := True;
-      ScriptInstance.TargetWindow := Self.WindowSelection;
+      ScriptInstance.Target := Self.WindowSelection;
       ScriptInstance.ScriptName := ScriptName;
 
       if (FileName <> '') then
@@ -1051,22 +1051,14 @@ var
   Tab: TSimbaScriptTab;
 begin
   for i := 0 to SimbaScriptTabsForm.TabCount - 1 do
-  begin
     with SimbaScriptTabsForm.Tabs[i] do
     begin
-      if ScriptInstance <> nil then
+      if (ScriptInstance <> nil) and (not ScriptInstance.IsRunning) then
       begin
-        if (not ScriptInstance.IsRunning) then
-        begin
-          if ScriptInstance.ExitCode > 0 then
-            SimbaDebugForm.Add('Script process did not exit cleanly; Exit code: ' + IntToStr(ScriptInstance.ExitCode));
-
-          ScriptInstance.Free();
-          ScriptInstance := nil;
-        end;
+        ScriptInstance.Free();
+        ScriptInstance := nil;
       end;
     end;
-  end;
 
   // Update buttons
   Tab := SimbaScriptTabsForm.CurrentTab;

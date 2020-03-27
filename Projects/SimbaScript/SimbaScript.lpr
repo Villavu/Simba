@@ -17,7 +17,7 @@ uses
   simba.darwin_initialization, cocoaint,
   {$ENDIF}
   sysutils, classes, interfaces, forms,
-  simbascript.script, simba.script_common, simba.ipc;
+  simbascript.script, simba.ipc;
 
 {$R *.res}
 
@@ -77,17 +77,17 @@ begin
   if Script.IncludePath = '' then
     Script.IncludePath := IncludeTrailingPathDelimiter(Application.Location) + 'Includes';
 
-  if Application.HasOption('targetwindow') then
-    Script.TargetWindow := Application.GetOptionValue('targetwindow').ToInt64();
+  if Application.HasOption('target') then
+    Script.Target := Application.GetOptionValue('target').ToInt64();
 
-  if Application.HasOption('output-client') then
-    Script.OutputServer := TSimbaIPC_Client.Create(Application.GetOptionValue('output-client'));
+  if Application.HasOption('simba-output-server') then
+    Script.SimbaOutputServer := TSimbaIPC_Client.Create(Application.GetOptionValue('simba-output-server'));
 
-  if Application.HasOption('method-client') then
-    Script.MethodServer := TSimbaIPC_Client.Create(Application.GetOptionValue('method-client'));
+  if Application.HasOption('simba-method-server') then
+    Script.SimbaMethodServer := TSimbaIPC_Client.Create(Application.GetOptionValue('simba-method-server'));
 
-  if Application.HasOption('state-client') then
-    Script.StateServer := TSimbaIPC_Client.Create(Application.GetOptionValue('state-client'));
+  if Application.HasOption('simba-state-server') then
+    Script.SimbaStateServer := TSimbaIPC_Client.Create(Application.GetOptionValue('simba-state-server'));
 
   Script.Start();
 end;
@@ -108,8 +108,6 @@ var
   I: Int32;
 
 begin
-  ExitCode := SCRIPT_EXIT_CODE_INITIALIZE;
-
   try
     if not Application.HasOption('dump') then
     begin
@@ -120,7 +118,7 @@ begin
           '  --run:          Runs the given script'                        + LineEnding +
           '  --compile:      Compiles the given script'                    + LineEnding +
           ''                                                               + LineEnding +
-          '  --targetwindow: Window handle to target. Defaults to Desktop' + LineEnding +
+          '  --target:       Window handle to target. Defaults to Desktop' + LineEnding +
           '  --apppath:      Defaults to SimbaScript.exe location'         + LineEnding +
           '  --datapath:     Defaults to AppPath/Data'                     + LineEnding +
           '  --pluginpath:   Defaults to AppPath/Plugins'                  + LineEnding +
@@ -128,7 +126,7 @@ begin
           '  --includepath:  Defaults to AppPath/Includes'                 + LineEnding +
           ''                                                               + LineEnding +
           'Example:'                                                       + LineEnding +
-          '  SimbaScript.exe --run script.simba'                           + LineEnding +
+          '  SimbaScript.exe --run "script.simba"'                         + LineEnding +
           ''
         );
 
@@ -153,6 +151,8 @@ begin
   except
     on E: Exception do
     begin
+      ExitCode := 1;
+
       WriteLn(StringOfChar('-', 80));
       WriteLn('');
       WriteLn('Exception: ', E.Message);

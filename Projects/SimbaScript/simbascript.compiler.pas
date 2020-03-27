@@ -389,7 +389,7 @@ begin
   Section := 'System';
 
   if not FFILoaded then
-     raise Exception.Create('libFFI is missing or incompatible');
+    raise Exception.Create('libFFI is missing or incompatible');
 
   InitializeFFI(Self);
   InitializePascalScriptBasics(Self, [psiTypeAlias, psiSettings, psiMagicMethod, psiFunctionWrappers, psiExceptions]);

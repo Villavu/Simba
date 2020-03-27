@@ -93,9 +93,9 @@ begin
   Milliseconds  := Time mod 1000;
 
   if IncludeMilliseconds then
-    Result := Format('[%.2d:%.2d:%.2d:%.3d] ', [Hours, Mins, Secs, Milliseconds])
+    Result := Format('[%.2d:%.2d:%.2d:%.3d]', [Hours, Mins, Secs, Milliseconds])
   else
-    Result := Format('[%.2d:%.2d:%.2d] ', [Hours, Mins, Secs]);
+    Result := Format('[%.2d:%.2d:%.2d]', [Hours, Mins, Secs]);
 end;
 
 function PerformanceTimer: Double;

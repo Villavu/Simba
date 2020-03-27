@@ -208,7 +208,7 @@ constructor TSimbaScriptPluginLoader.Create(FileName: String);
 var
   Index: Int32;
 begin
-  WriteLn('Loading Plugin: ', FileName);
+  WriteLn('Loading Plugin: ', ExtractFileName(FileName));
 
   FFileName := FileName;
   FHandle := LoadLibrary(FFileName);
@@ -251,7 +251,7 @@ destructor TSimbaScriptPluginLoader.Destroy;
 begin
   if (FHandle > 0) then
   begin
-    WriteLn('Free Plugin: ' + FFileName);
+    WriteLn('Free Plugin: ' + ExtractFileName(FFileName));
 
     FreeLibrary(FHandle);
   end;

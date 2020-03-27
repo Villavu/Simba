@@ -27,19 +27,19 @@ type
   protected
     FCompiler: TScriptCompiler;
     FTokenizier: TLapeTokenizerString;
-    FCompiled: Boolean;
     FClient: TClient;
 
     FStartTime: UInt64;
 
     FState: TInitBool;
-    FStateServer: TSimbaIPC_Client;
-    FStateThread: TThread;
 
-    FMethodServer: TSimbaIPC_Client;
-    FMethodLock: TCriticalSection;
+    FSimbaStateThread: TThread;
+    FSimbaStateServer: TSimbaIPC_Client;
 
-    FOutputServer: TSimbaIPC_Client;
+    FSimbaOutputServer: TSimbaIPC_Client;
+    FSimbaMethodServer: TSimbaIPC_Client;
+    FSimbaMethodLock: TCriticalSection;
+
     FOutputBuffer: String;
 
     FScript: String;
@@ -54,14 +54,13 @@ type
     FIsTerminating: Boolean;
     FIsUserTerminated: Boolean;
 
-    FTargetWindow: THandle;
+    FTarget: THandle;
 
     FPlugins: TSimbaScriptPluginArray;
 
     procedure Execute; override;
 
-    procedure HandleStateReading;
-
+    procedure HandleSimbaState;
     procedure HandleException(E: Exception);
     procedure HandleHint(Sender: TLapeCompilerBase; Hint: lpString);
 
@@ -89,14 +88,14 @@ type
     property PluginPath: String read FPluginPath write FPluginPath;
     property IncludePath: String read FIncludePath write FIncludePath;
 
-    property OutputServer: TSimbaIPC_Client read FOutputServer write FOutputServer;
-    property MethodServer: TSimbaIPC_Client read FMethodServer write FMethodServer;
-    property StateServer: TSimbaIPC_Client read FStateServer write FStateServer;
+    property SimbaOutputServer: TSimbaIPC_Client read FSimbaOutputServer write FSimbaOutputServer;
+    property SimbaMethodServer: TSimbaIPC_Client read FSimbaMethodServer write FSimbaMethodServer;
+    property SimbaStateServer: TSimbaIPC_Client read FSimbaStateServer write FSimbaStateServer;
 
-    property TargetWindow: THandle read FTargetWindow write FTargetWindow;
+    property Target: THandle read FTarget write FTarget;
 
-    procedure _Write(constref S: String);
-    procedure _WriteLn(constref S: String);
+    procedure Write(constref S: String);
+    procedure WriteLn(constref S: String);
 
     procedure Invoke(Message: Int32; Params, Result: TMemoryStream);
 
@@ -197,7 +196,7 @@ var
 begin
   FState := Value;
 
-  if (FStateServer <> nil) then
+  if (FSimbaStateServer <> nil) then
   begin
     case FState of
       bTrue: ScriptState := SCRIPT_RUNNING;
@@ -205,7 +204,7 @@ begin
       bUnknown: ScriptState := SCRIPT_PAUSED;
     end;
 
-    FStateServer.Write(ScriptState, SizeOf(Int32));
+    FSimbaStateServer.Write(ScriptState, SizeOf(Int32));
   end;
 end;
 
@@ -214,70 +213,43 @@ var
   T: Double;
   Method: TLapeGlobalVar;
 begin
-  ExitCode := SCRIPT_EXIT_CODE_SUCCESS;
-
   try
+    // Create
+    FSimbaStateThread := TThread.ExecuteInThread(@HandleSimbaState);
+    FSimbaMethodLock := TCriticalSection.Create();
+
+    FClient := TClient.Create(FPluginPath);
+    FClient.MOCR.FontPath := FFontPath;
+    FClient.WriteLnProc := @WriteLn;
+    FClient.IOManager.SetTarget(FTarget);
+
+    // Import
     FCompiler := TScriptCompiler.Create(TLapeTokenizerString.Create(FScript, FScriptFile));
     FCompiler.OnFindFile := @HandleFindFile;
     FCompiler.OnHint := @HandleHint;
     FCompiler.OnHandleDirective := @HandleDirective;
-
-    FClient := TClient.Create(FPluginPath);
-    FClient.MOCR.FontPath := FFontPath;
-    FClient.WriteLnProc := @_WriteLn;
-    FClient.IOManager.SetTarget(FTargetWindow);
-
-    if (FStateServer <> nil) then
-      FStateThread := TThread.ExecuteInThread(@HandleStateReading);
-
-    if (FMethodServer <> nil) then
-      FMethodLock := TCriticalSection.Create();
-  except
-    on E: Exception do
-    begin
-      ExitCode := SCRIPT_EXIT_CODE_INITIALIZE;
-      HandleException(E);
-      Exit;
-    end;
-  end;
-
-  try
     FCompiler.Import(Dump);
-  except
-    on E: Exception do
+
+    // Dump
+    if Dump then
     begin
-      ExitCode := SCRIPT_EXIT_CODE_IMPORT;
-      HandleException(E);
+      if (FCompiler.Dump.Count > 0) then
+        WriteLn(FCompiler.Dump.Text);
+
       Exit;
     end;
-  end;
 
-  if Dump then
-  begin
-    _WriteLn(FCompiler.Dump.Text);
-
-    Exit;
-  end;
-
-  try
+    // Compile
     T := PerformanceTimer();
     if (not FCompiler.Compile()) then
       raise Exception.Create('Compiling failed');
 
-    _WriteLn(Format('Succesfully compiled in %d milliseconds.', [Round(PerformanceTimer() - T)]));
-  except
-    on E: Exception do
-    begin
-      ExitCode := SCRIPT_EXIT_CODE_COMPILE;
-      HandleException(E);
+    WriteLn(Format('Succesfully compiled in %d milliseconds.', [Round(PerformanceTimer() - T)]));
+
+    if CompileOnly then
       Exit;
-    end;
-  end;
 
-  if CompileOnly then
-    Exit;
-
-  try
+    // Run
     T := PerformanceTimer();
 
     FStartTime := GetTickCount64();
@@ -287,23 +259,20 @@ begin
       RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, FState);
     finally
       FIsTerminating := True;
+      FIsUserTerminated := FState <> bTrue;
 
       Method := FCompiler.GetGlobalVar('__OnTerminate');
       if (Method <> nil) then
         RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, nil, PCodePos(Method.Ptr)^);
     end;
 
-    if (GetTickCount64() - FStartTime < 60000) then
-      _WriteLn('Succesfully executed in ' + FormatFloat('0.00', PerformanceTimer() - T) + ' milliseconds.')
+    if (PerformanceTimer() - T < 10000) then
+      WriteLn(Format('Succesfully executed in %d milliseconds.', [Round(PerformanceTimer() - T)]))
     else
-      _WriteLn('Succesfully executed in ' + TimeStamp(GetTickCount64() - FStartTime) + '.');
+      WriteLn(Format('Succesfully executed in %s.', [TimeStamp(Round(PerformanceTimer() - T))]));
   except
     on E: Exception do
-    begin
-      ExitCode := SCRIPT_EXIT_CODE_RUNTIME;
-
       HandleException(E);
-    end;
   end;
 end;
 
@@ -312,11 +281,13 @@ var
   Param: TSimbaMethod_ScriptError;
   Method: TSimbaMethod;
 begin
+  ExitCode := 1;
+
   Param := Default(TSimbaMethod_ScriptError);
   Param.Line := -1;
   Param.Column := -1;
 
-  if (FMethodServer <> nil) then
+  if (FSimbaMethodServer <> nil) then
   begin
     if (E is lpException) then
     begin
@@ -331,19 +302,19 @@ begin
     end else
       Param.Message := E.Message + ' (' + E.ClassName + ')';
 
-    Self._WriteLn(Param.Message);
+    WriteLn(Param.Message);
 
     Method := TSimbaMethod.Create(SIMBA_METHOD_SCRIPT_ERROR);
     Method.Params.Write(Param, SizeOf(Param));
     Method.Invoke(Self);
     Method.Free();
   end else
-    Self._WriteLn(E.Message);
+    WriteLn(E.Message);
 end;
 
 procedure TSimbaScript.HandleHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
-  _WriteLn(Hint);
+  WriteLn(Hint);
 end;
 
 function TSimbaScript.HandleFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
@@ -430,45 +401,38 @@ begin
 end;
 
 // Isn't terminated safely, but the program is exiting soo...
-procedure TSimbaScript.HandleStateReading;
+procedure TSimbaScript.HandleSimbaState;
 var
   ScriptState: ESimbaScriptState;
 begin
-  while FStateServer.Read(ScriptState, SizeOf(Int32)) = SizeOf(Int32) do
+  while FSimbaStateServer.Read(ScriptState, SizeOf(Int32)) = SizeOf(Int32) do
   begin
-    FIsUserTerminated := False;
-
     case ScriptState of
       SCRIPT_RUNNING:  FState := bTrue;
       SCRIPT_PAUSED:   FState := bUnknown;
-      SCRIPT_STOPPING:
-        begin
-          FIsUserTerminated := True;
-
-          FState := bFalse;
-        end;
+      SCRIPT_STOPPING: FState := bFalse;
     end;
 
-    FStateServer.Write(ScriptState, SizeOf(Int32)); // return the message so Simba can update accordingly
+    FSimbaStateServer.Write(ScriptState, SizeOf(Int32)); // return the message so Simba can update accordingly
   end;
 end;
 
-procedure TSimbaScript._Write(constref S: String);
+procedure TSimbaScript.Write(constref S: String);
 begin
   FOutputBuffer := FOutputBuffer + S;
 end;
 
-procedure TSimbaScript._WriteLn(constref S: String);
+procedure TSimbaScript.WriteLn(constref S: String);
 begin
   if (S = '') then
     FOutputBuffer := FOutputBuffer + ' ';
   if (S <> '') then
     FOutputBuffer := FOutputBuffer + S;
 
-  if FOutputServer <> nil then
-    FOutputServer.Write(FOutputBuffer[1], Length(FOutputBuffer) + 1) // Include null termination. This is how lines are detected simba sided.
+  if FSimbaOutputServer <> nil then
+    FSimbaOutputServer.Write(FOutputBuffer[1], Length(FOutputBuffer) + 1) // Include null termination. This is how lines are detected simba sided.
   else
-    WriteLn(FOutputBuffer);
+    System.WriteLn(FOutputBuffer);
 
   FOutputBuffer := '';
 end;
@@ -476,16 +440,16 @@ end;
 procedure TSimbaScript.Invoke(Message: Int32; Params, Result: TMemoryStream);
 begin
   try
-    if (FMethodServer = nil) then
+    if (FSimbaMethodServer = nil) then
       raise Exception.Create('Method "' + GetEnumName(TypeInfo(ESimbaMethod), Message) + '" unavailable when running detached from Simba');
 
-    FMethodLock.Enter();
+    FSimbaMethodLock.Enter();
 
     try
-      FMethodServer.WriteMessage(Message, Params);
-      FMethodServer.ReadMessage(Message, Result);
+      FSimbaMethodServer.WriteMessage(Message, Params);
+      FSimbaMethodServer.ReadMessage(Message, Result);
     finally
-      FMethodLock.Leave();
+      FSimbaMethodLock.Leave();
     end;
   except
     on E: Exception do
@@ -500,20 +464,13 @@ begin
   for I := 0 to High(FPlugins) do
     FPlugins[I].Free();
 
-  if (FMethodLock <> nil) then
-    FMethodLock.Free();
+  FCompiler.Free();
+  FClient.Free();
 
-  if (FCompiler <> nil) then
-    FCompiler.Free();
-  if (FClient <> nil) then
-    FClient.Free();
-
-  if (FStateServer <> nil) then
-    FStateServer.Free();
-  if (FOutputServer <> nil) then
-    FOutputServer.Free();
-  if (FMethodServer <> nil) then
-    FMethodServer.Free();
+  FSimbaStateServer.Free();
+  FSimbaOutputServer.Free();
+  FSimbaMethodServer.Free();
+  FSimbaMethodLock.Free();
 
   inherited Destroy();
 end;
@@ -521,10 +478,10 @@ end;
 initialization
   Randomize(); // Else we get the same sequence everytime...
 
-{$IF DEFINED(DARWIN) and DECLARED(LoadFFI)} { DynamicFFI }
+  {$IF DEFINED(DARWIN) and DECLARED(LoadFFI)} { DynamicFFI }
   if not FFILoaded then
     LoadFFI('/usr/local/opt/libffi/lib/');
-{$ENDIF}
+  {$ENDIF}
 
 end.
 
