@@ -14,12 +14,12 @@ uses
 
 procedure Lape_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Script._Write(PString(Params^[0])^);
+  Script.Write(PString(Params^[0])^);
 end;
 
 procedure Lape_WriteLn(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Script._WriteLn('');
+  Script.WriteLn('');
 end;
 
 procedure Lape_GetEnvironmentVariable(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
