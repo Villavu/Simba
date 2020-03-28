@@ -582,6 +582,14 @@ procedure TCodeInsight.Run;
     end;
   end;
 
+  function GetLastDeclaration(Declaration: TDeclaration): TDeclaration;
+  begin
+    while Declaration.Items.Count > 0 do
+      Declaration := Declaration.Items[Declaration.Items.Count - 1];
+
+    Result := Declaration;
+  end;
+
 var
   Declaration: TDeclaration;
   Declarations: TDeclarationArray;
@@ -596,9 +604,11 @@ begin
   FLocals.Clear();
 
   // Find Locals
-  if (FLexer.CaretPos > -1) then
+  if (FItems.Count > 0) and (FLexer.CaretPos > -1) then
   begin
     Declaration := FItems.GetItemInPosition(FLexer.CaretPos);
+    if (Declaration = nil) and (FLexer.CaretPos >= FItems[FItems.Count - 1].StartPos) then // Assume declaration isn't fully declared
+      Declaration := GetLastDeclaration(FItems[FItems.Count - 1]);
 
     if (Declaration <> nil) then
     begin
