@@ -53,21 +53,29 @@ begin
     FileName := ExtractFileDir(ParamStr(0)) + '/OpenSSL.zip';
     with Entries do
     begin
-      {$IFDEF WIN64}
-        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/openssl/libeay64.dll', 'libeay32.dll');
-        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/openssl/ssleay64.dll', 'ssleay32.dll');
+      {$IFDEF SIMBA_WIN64}
+        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/win64/libeay32.dll', 'libeay32.dll');
+        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/win64/ssleay32.dll', 'ssleay32.dll');
       {$ENDIF}
-      {$IFDEF WIN32}
-        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/openssl/libeay32.dll', 'libeay32.dll');
-        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/openssl/ssleay32.dll', 'ssleay32.dll');
+
+      {$IFDEF SIMBA_WIN32}
+        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/win32/libeay32.dll', 'libeay32.dll');
+        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/win32/ssleay32.dll', 'ssleay32.dll');
       {$ENDIF}
-      {$IFDEF LINUX}
-        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/openssl/libssl64.so', 'libssl.so');
-        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/openssl/libcrypto64.so', 'libcrypto.so');
+
+      {$IFDEF SIMBA_LINUX64}
+        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/linux64/libssl.so', 'libssl.so');
+        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/linux64/libcrypto.so', 'libcrypto.so');
       {$ENDIF}
-      {$IFDEF DARWIN}
-        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/openssl/libssl.dylib', 'libssl.dylib');
-        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/openssl/libcrypto.dylib', 'libcrypto.dylib');
+
+      {$IFDEF SIMBA_ARM64}
+        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/arm64/libssl.so', 'libssl.so');
+        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/arm64/libcrypto.so', 'libcrypto.so');
+      {$ENDIF}
+
+      {$IFDEF SIMBA_DARWIN}
+        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/darwin64/libssl.dylib', 'libssl.dylib');
+        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/darwin64/libcrypto.dylib', 'libcrypto.dylib');
       {$ENDIF}
     end;
 

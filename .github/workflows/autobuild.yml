@@ -18,34 +18,31 @@ jobs:
           - os: windows-latest
             name: Windows 32
             LAZ_VER: 2.0.6
-            LAZ_OPT: "--os=win32 --cpu=i386"
-            ARTIFACT: "Simba-i386-win32.exe"
+            LAZ_OPT: "--build-mode=SIMBA_WIN32"
+            ARTIFACT: "Simba-Win32.exe"
 
           - os: windows-latest
             name: Windows 64
             LAZ_VER: 2.0.6
-            LAZ_OPT: "--os=win64 --cpu=x86_64"
-            ARTIFACT: "Simba-x86_64-win64.exe"
+            LAZ_OPT: "--build-mode=SIMBA_WIN64"
+            ARTIFACT: "Simba-Win64.exe"
 
           - os: ubuntu-latest
             name: Linux 64
             LAZ_VER: 2.0.6
-            LAZ_OPT: "--os=linux --cpu=x86_64"
-            ARTIFACT: "Simba-x86_64-linux"
+            LAZ_OPT: "--build-mode=SIMBA_LINUX64"
+            ARTIFACT: "Simba-Linux64"
             
           - os: macos-latest
-            name: macOS 64
+            name: MacOS 64
             LAZ_VER: 2.0.6
-            LAZ_OPT: "--os=darwin --cpu=x86_64 --widgetset=cocoa"
-            ARTIFACT: "Simba-x86_64-darwin"
+            LAZ_OPT: "--build-mode=SIMBA_DARWIN64"
+            ARTIFACT: "Simba-Darwin64"
 
     steps:
-    - uses: actions/checkout@v1
-
-    - name: Install Modules
-      run: |
-        git submodule init
-        git submodule update
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
 
     - name: Install Dependencies
       if: env.OS == 'ubuntu-latest'
@@ -122,7 +119,7 @@ jobs:
         sys.exit(int(not main()))
 
     - name: Build Simba
-      run: lazbuild ${{ env.LAZ_OPT }} --build-mode=Release "Projects/Simba/Simba.lpi"
+      run: lazbuild ${{ env.LAZ_OPT }} "Projects/Simba/Simba.lpi"
       
     - name: Test Simba
       shell: python
