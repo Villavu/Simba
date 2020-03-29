@@ -1,0 +1,44 @@
+name: Auto Build
+
+on: [push]
+
+jobs:
+  ARM64:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Download
+      run: |
+        sudo apt-get install libgtk2.0-dev
+
+        # Download fpcup
+        wget --progress=dot:mega https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.4f/fpclazup-x86_64-linux
+        sudo chmod +x fpclazup-x86_64-linux
+        # Download arm64 libs 
+        wget --progress=dot:mega https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/crosslibs_v1.1/CrossLibsLinuxAarch64.zip
+        unzip CrossLibsLinuxAarch64.zip
+        # Download cross bins
+        wget https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/linuxx64crossbins_v1.0/CrossBinsLinuxAarch64.zip
+        unzip CrossBinsLinuxAarch64.zip -d cross/bin
+
+    - name: Install
+      run: |
+        # Install Lazarus & FPC
+        ./fpclazup-x86_64-linux --installdir=lazarus/ --fpcURL=https://svn.freepascal.org/svn/fpc/tags/release_3_2_0_rc1 --lazURL=2.1.0 --noconfirm
+        # Install cross compiler
+        ./fpclazup-x86_64-linux --installdir=lazarus/ --ostarget="linux" --cputarget="aarch64" --only="FPCCleanOnly,FPCBuildOnly" --crossbindir=cross/bin --crosslibdir=cross/lib/aarch64-linux --noconfirm
+
+    - name: Build Simba
+      run: |
+        ./lazarus/lazarus/lazbuild --build-mode=SIMBA_ARM64 "Projects/Simba/Simba.lpi"
+
+    - name: Upload Simba Binary
+      uses: ollydev/upload-release-action@master
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: Simba-Arm64
+        asset_name: Simba-Arm64
+        tag: autobuild
+        overwrite: true

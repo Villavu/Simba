@@ -15,8 +15,135 @@
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
-    <BuildModes Count="1">
-      <Item1 Name="Default" Default="True"/>
+    <BuildModes Count="5">
+      <Item1 Name="SIMBA_WIN64" Default="True"/>
+      <Item2 Name="SIMBA_WIN32">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="MakeSimbaResources"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dSIMBA_WIN32"/>
+            <OtherDefines Count="4">
+              <Define0 Value="SIMBA_WIN64"/>
+              <Define1 Value="SIMBA_WIN32"/>
+              <Define2 Value="SIMBA_LINUX64"/>
+              <Define3 Value="SIMBA_DARWIN64"/>
+            </OtherDefines>
+            <ExecuteAfter>
+              <Command Value="$MakeExe(MakeSimbaResources)"/>
+              <ShowAllMessages Value="True"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item2>
+      <Item3 Name="SIMBA_ARM64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="MakeSimbaResources"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dSIMBA_ARM64"/>
+            <OtherDefines Count="5">
+              <Define0 Value="SIMBA_WIN64"/>
+              <Define1 Value="SIMBA_WIN32"/>
+              <Define2 Value="SIMBA_LINUX64"/>
+              <Define3 Value="SIMBA_DARWIN64"/>
+              <Define4 Value="SIMBA_ARM64"/>
+            </OtherDefines>
+            <ExecuteAfter>
+              <Command Value="$MakeExe(MakeSimbaResources)"/>
+              <ShowAllMessages Value="True"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item3>
+      <Item4 Name="SIMBA_DARWIN64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="MakeSimbaResources"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dSIMBA_DARWIN64"/>
+            <OtherDefines Count="5">
+              <Define0 Value="SIMBA_WIN64"/>
+              <Define1 Value="SIMBA_WIN32"/>
+              <Define2 Value="SIMBA_LINUX64"/>
+              <Define3 Value="SIMBA_DARWIN64"/>
+              <Define4 Value="SIMBA_ARM64"/>
+            </OtherDefines>
+            <ExecuteAfter>
+              <Command Value="$MakeExe(MakeSimbaResources)"/>
+              <ShowAllMessages Value="True"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item4>
+      <Item5 Name="SIMBA_LINUX64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="MakeSimbaResources"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dSIMBA_LINUX64"/>
+            <OtherDefines Count="5">
+              <Define0 Value="SIMBA_WIN64"/>
+              <Define1 Value="SIMBA_WIN32"/>
+              <Define2 Value="SIMBA_LINUX64"/>
+              <Define3 Value="SIMBA_DARWIN64"/>
+              <Define4 Value="SIMBA_ARM64"/>
+            </OtherDefines>
+            <ExecuteAfter>
+              <Command Value="$MakeExe(MakeSimbaResources)"/>
+              <ShowAllMessages Value="True"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item5>
     </BuildModes>
     <PublishOptions>
       <Version Value="2"/>
@@ -49,6 +176,13 @@
       </Debugging>
     </Linking>
     <Other>
+      <CustomOptions Value="-dSIMBA_WIN64"/>
+      <OtherDefines Count="4">
+        <Define0 Value="SIMBA_WIN64"/>
+        <Define1 Value="SIMBA_WIN32"/>
+        <Define2 Value="SIMBA_LINUX64"/>
+        <Define3 Value="SIMBA_DARWIN64"/>
+      </OtherDefines>
       <ExecuteAfter>
         <Command Value="$MakeExe(MakeSimbaResources)"/>
         <ShowAllMessages Value="True"/>

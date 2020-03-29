@@ -3,14 +3,14 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="11"/>
-    <BuildModes Active="Default"/>
+    <BuildModes Active="SIMBA_WIN64"/>
     <Units Count="8">
       <Unit0>
         <Filename Value="MakeSimbaResources.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="58"/>
-        <CursorPos X="21" Y="40"/>
+        <TopLine Value="46"/>
+        <CursorPos X="13" Y="70"/>
         <UsageCount Value="23"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -44,7 +44,7 @@
       </Unit4>
       <Unit5>
         <Filename Value="C:\lazarus\fpc\3.0.4\source\packages\fcl-res\src\resource.pp"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="2"/>
         <TopLine Value="97"/>
         <CursorPos X="3" Y="99"/>
         <UsageCount Value="11"/>
@@ -52,10 +52,11 @@
       </Unit5>
       <Unit6>
         <Filename Value="C:\lazarus\fpc\3.0.4\source\packages\paszlib\src\zipper.pp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1757"/>
-        <CursorPos X="3" Y="1745"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="363"/>
+        <CursorPos X="20" Y="382"/>
         <UsageCount Value="11"/>
+        <Loaded Value="True"/>
       </Unit6>
       <Unit7>
         <Filename Value="C:\lazarus\fpc\3.0.4\source\packages\fcl-res\src\reswriter.pp"/>
@@ -64,15 +65,29 @@
         <UsageCount Value="10"/>
       </Unit7>
     </Units>
-    <JumpHistory Count="2">
+    <OtherDefines Count="4">
+      <Define0 Value="SIMBA_WIN64"/>
+      <Define1 Value="SIMBA_WIN32"/>
+      <Define2 Value="SIMBA_LINUX64"/>
+      <Define3 Value="SIMBA_DARWIN64"/>
+    </OtherDefines>
+    <JumpHistory Count="4" HistoryIndex="1">
       <Position1>
         <Filename Value="MakeSimbaResources.lpr"/>
         <Caret Line="20" Column="11"/>
       </Position1>
       <Position2>
-        <Filename Value="C:\lazarus\fpc\3.0.4\source\packages\fcl-res\src\resource.pp"/>
-        <Caret Line="99" Column="3" TopLine="97"/>
+        <Filename Value="MakeSimbaResources.lpr"/>
+        <Caret Line="58" Column="18" TopLine="40"/>
       </Position2>
+      <Position3>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\packages\paszlib\src\zipper.pp"/>
+        <Caret Line="382" Column="20" TopLine="363"/>
+      </Position3>
+      <Position4>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\packages\paszlib\src\zipper.pp"/>
+        <Caret Line="2736" Column="3" TopLine="2734"/>
+      </Position4>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
