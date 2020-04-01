@@ -1024,7 +1024,7 @@ end;
 
 procedure TSimbaForm.MenuSaveAsClick(Sender: TObject);
 begin
-  if (SimbaScriptTabsForm.CurrentTab <> nil) and SimbaScriptTabsForm.CurrentTab.ScriptChanged then
+  if (SimbaScriptTabsForm.CurrentTab <> nil) then
     SimbaScriptTabsForm.CurrentTab.SaveAs();
 end;
 
