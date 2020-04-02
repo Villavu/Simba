@@ -201,7 +201,7 @@ var
   XSync: function(para1: PDisplay; para2: TBool): cint; cdecl;
   XInitThreads: function: cint; cdecl;
 
-  function XTestFakeKeyEvent(Display: PDisplay; KeyCode: UInt32; Is_Press: Boolean; Delay: UInt32): Int32; cdecl; external 'Xtst';
+  XTestFakeKeyEvent: function(Display: PDisplay; KeyCode: UInt32; Is_Press: Boolean; Delay: UInt32): Int32; cdecl;
 
 implementation
 
@@ -285,13 +285,34 @@ end;
 
 procedure UnloadX11;
 begin
-  dlclose(X11);
+  if (X11 <> nil) then
+    dlclose(X11);
+end;
+
+var
+  XTst: Pointer;
+
+procedure LoadXtst;
+begin
+  XTst := dlmopen(-1, PChar('libXtst.so.6'), RTLD_NOW);
+  if (XTst = nil) then
+    raise Exception.Create('Error loading Xtst');
+
+  Pointer(XTestFakeKeyEvent) := dlsym(XTst, 'XTestFakeKeyEvent');
+end;
+
+procedure UnloadXtst;
+begin
+  if (Xtst <> nil) then
+    dlclose(Xtst);
 end;
 
 initialization
   LoadX11();
+  LoadXtst();
 
 finalization
   UnloadX11();
+  UnloadXTst();
 
 end.
