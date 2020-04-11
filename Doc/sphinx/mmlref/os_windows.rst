@@ -1,4 +1,0 @@
-Windows Specific Implementation Details
-=======================================
-
-

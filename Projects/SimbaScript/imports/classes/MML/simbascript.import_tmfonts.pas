@@ -7,7 +7,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Register_TMFonts(Compiler: TScriptCompiler);
+procedure Lape_Import_TMFonts(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 
 implementation
 
@@ -80,7 +80,7 @@ begin
   PMFonts(Params^[0])^.Free();
 end;
 
-procedure Register_TMFonts(Compiler: TScriptCompiler);
+procedure Lape_Import_TMFonts(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
@@ -97,9 +97,6 @@ begin
     //addGlobalFunc('procedure TMFonts.Free(); constref;', @TMFonts_Free);
   end;
 end;
-
-initialization
-  RegisterScriptImport(@Register_TMFonts);
 
 end.
 

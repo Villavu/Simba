@@ -7,7 +7,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Register_TIOManager(Compiler: TScriptCompiler);
+procedure Lape_Import_TIOManager(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 
 implementation
 
@@ -295,7 +295,7 @@ begin
   PTarget(Result)^ := PIOManager(Params^[0])^.SetKeyMouseTargetEx(POSWindow(Params^[1])^);
 end;
 
-procedure Register_TIOManager(Compiler: TScriptCompiler);
+procedure Lape_Import_TIOManager(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
@@ -352,9 +352,6 @@ begin
     //addGlobalFunc('procedure TIOManager.Free(); constref;', @TIOManager_Free);
   end;
 end;
-
-initialization
-  RegisterScriptImport(@Register_TIOManager);
 
 end.
 

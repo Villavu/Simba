@@ -27,6 +27,8 @@ type
     procedure _ShowBalloonHint;
     procedure _Disguise;
     procedure _Status;
+    procedure _GetSimbaTargetPID;
+    procedure _GetSimbaTargetWindow;
   end;
 
 implementation
@@ -34,7 +36,7 @@ implementation
 uses
   graphtype, extctrls,
   simba.debugimage, simba.debugform, simba.scripttabsform, simba.mufasatypes,
-  simba.main, simba.scripttab, simba.bitmap;
+  simba.main, simba.scripttab, simba.bitmap, simba.oswindow;
 
 procedure TSimbaMethod._GetPID;
 begin
@@ -75,6 +77,16 @@ begin
   Params.Read(Status, SizeOf(ShortString));
 
   SimbaScriptTabsForm.StatusPanelFileName.Caption := Status;
+end;
+
+procedure TSimbaMethod._GetSimbaTargetPID;
+begin
+  Result.Write(SimbaForm.ProcessSelection, SizeOf(TOSWindow));
+end;
+
+procedure TSimbaMethod._GetSimbaTargetWindow;
+begin
+  Result.Write(SimbaForm.WindowSelection, SizeOf(TOSWindow));
 end;
 
 procedure TSimbaMethod._DebugImage;

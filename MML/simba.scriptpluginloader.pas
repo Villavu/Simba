@@ -74,7 +74,7 @@ type
     property Methods: TSimbaScriptPluginLoader_Methods read FMethods;
     property Code: String read FCode;
 
-    function Dump: String;
+    function Dump: TStringList;
 
     class function FindFile(var FileName: String; SearchPaths: array of String): Boolean;
 
@@ -84,18 +84,18 @@ type
 
 implementation
 
-function TSimbaScriptPluginLoader.Dump: String;
+function TSimbaScriptPluginLoader.Dump: TStringList;
 var
   I: Int32;
 begin
-  Result := '';
+  Result := TStringList.Create();
 
   for I := 0 to High(FTypes) do
-    Result := Result + 'type ' + FTypes[i].Name + ' = ' + FTypes[i].Str + LineEnding;
+    Result.Add('type ' + FTypes[i].Name + ' = ' + FTypes[i].Str);
   for I := 0 to High(FMethods) do
-    Result := Result + FMethods[i].Header + 'begin end;' + LineEnding;
+    Result.Add(FMethods[i].Header + 'begin end;');
 
-  Result := Result + FCode;
+  Result.Add(FCode);
 end;
 
 class function TSimbaScriptPluginLoader.FindFile(var FileName: String; SearchPaths: array of String): Boolean;
@@ -208,8 +208,6 @@ constructor TSimbaScriptPluginLoader.Create(FileName: String);
 var
   Index: Int32;
 begin
-  WriteLn('Loading Plugin: ', ExtractFileName(FileName));
-
   FFileName := FileName;
   FHandle := LoadLibrary(FFileName);
 
@@ -250,11 +248,7 @@ end;
 destructor TSimbaScriptPluginLoader.Destroy;
 begin
   if (FHandle > 0) then
-  begin
-    WriteLn('Free Plugin: ' + ExtractFileName(FFileName));
-
     FreeLibrary(FHandle);
-  end;
 
   inherited Destroy();
 end;

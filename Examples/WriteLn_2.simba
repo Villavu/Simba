@@ -1,9 +1,0 @@
-program WriteLn_ExampleTwo;
-
-var
-  S: String;
-
-begin
-  S := 'This is an example!';
-  Writeln(S);
-end.

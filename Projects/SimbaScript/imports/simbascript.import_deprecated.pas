@@ -6,6 +6,8 @@ interface
 
 {$i import_uses.inc}
 
+procedure Lape_Import_Deprecated(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+
 implementation
 
 uses
@@ -88,82 +90,82 @@ end;
 
 procedure Lape_Hash(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := _Hash(_HashType2Class(PHashType(Params^[0])^), PString(Params^[1])^);
+  PString(Result)^ := _Hash(_HashType2Class(PHashType(Params^[1])^), PString(Params^[2])^);
 end;
 
 procedure Lape_haval(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := _Hash(TDCP_Haval, PString(Params^[0])^);
+  PString(Result)^ := _Hash(TDCP_Haval, PString(Params^[1])^);
 end;
 
 procedure Lape_md4(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := _Hash(TDCP_MD4, PString(Params^[0])^);
+  PString(Result)^ := _Hash(TDCP_MD4, PString(Params^[1])^);
 end;
 
 procedure Lape_md5(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := _Hash(TDCP_MD5, PString(Params^[0])^);
+  PString(Result)^ := _Hash(TDCP_MD5, PString(Params^[1])^);
 end;
 
 procedure Lape_ripemd128(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := _Hash(TDCP_RipeMD128, PString(Params^[0])^);
+  PString(Result)^ := _Hash(TDCP_RipeMD128, PString(Params^[1])^);
 end;
 
 procedure Lape_ripemd160(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := _Hash(TDCP_RipeMD160, PString(Params^[0])^);
+  PString(Result)^ := _Hash(TDCP_RipeMD160, PString(Params^[1])^);
 end;
 
 procedure Lape_sha1(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := _Hash(TDCP_SHA1, PString(Params^[0])^);
+  PString(Result)^ := _Hash(TDCP_SHA1, PString(Params^[1])^);
 end;
 
 procedure Lape_sha256(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := _Hash(TDCP_SHA256, PString(Params^[0])^);
+  PString(Result)^ := _Hash(TDCP_SHA256, PString(Params^[1])^);
 end;
 
 procedure Lape_sha384(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := _Hash(TDCP_SHA384, PString(Params^[0])^);
+  PString(Result)^ := _Hash(TDCP_SHA384, PString(Params^[1])^);
 end;
 
 procedure Lape_sha512(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := _Hash(TDCP_SHA512, PString(Params^[0])^);
+  PString(Result)^ := _Hash(TDCP_SHA512, PString(Params^[1])^);
 end;
 
 procedure Lape_tiger(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := _Hash(TDCP_Tiger, PString(Params^[0])^);
+  PString(Result)^ := _Hash(TDCP_Tiger, PString(Params^[1])^);
 end;
 
 procedure Lape_rc2_encrypt(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  _Encrypt(TDCP_RC2, _HashType2Class(PHashType(Params^[0])^), PString(Params^[1])^, PString(Params^[2])^);
+  _Encrypt(TDCP_RC2, _HashType2Class(PHashType(Params^[1])^), PString(Params^[2])^, PString(Params^[3])^);
 end;
 
 procedure Lape_rc2_decrypt(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  _Decrypt(TDCP_RC2, _HashType2Class(PHashType(Params^[0])^), PString(Params^[1])^, PString(Params^[2])^);
+  _Decrypt(TDCP_RC2, _HashType2Class(PHashType(Params^[1])^), PString(Params^[2])^, PString(Params^[3])^);
 end;
 
 procedure Lape_rs_GetUpText(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := Script.Client.MOCR.GetUpTextAt(7, 7, True);
+  PString(Result)^ := TSimbaScript(Params^[0]).Client.MOCR.GetUpTextAt(7, 7, True);
 end;
 
 procedure Lape_rs_GetUpTextAt(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := Script.Client.MOCR.GetUpTextAt(PInt32(Params^[0])^, PInt32(Params^[1])^, True);
+  PString(Result)^ := TSimbaScript(Params^[0]).Client.MOCR.GetUpTextAt(PInt32(Params^[1])^, PInt32(Params^[2])^, True);
 end;
 
 procedure Lape_rs_GetUpTextAtEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := Script.Client.MOCR.GetUpTextAtEx(PInt32(Params^[0])^, PInt32(Params^[1])^, True, PString(Params^[2])^);
+  PString(Result)^ := TSimbaScript(Params^[0]).Client.MOCR.GetUpTextAtEx(PInt32(Params^[1])^, PInt32(Params^[2])^, True, PString(Params^[3])^);
 end;
 
 type
@@ -176,7 +178,7 @@ type
 
 procedure TMessageBox.Execute;
 begin
-  PInt32(Result)^ := Application.MessageBox(PChar(PString(Params^[0])^), PChar(PString(Params^[1])^), PInt32(Params^[2])^);
+  PInt32(Result)^ := Application.MessageBox(PChar(PString(Params^[1])^), PChar(PString(Params^[2])^), PInt32(Params^[3])^);
 end;
 
 procedure Lape_MessageBox(const Params: PParamArray; const Result: Pointer);
@@ -194,27 +196,27 @@ end;
 
 procedure Lape_tSwap(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  tSwap(PPoint(Params^[0])^, PPoint(Params^[1])^);
+  tSwap(PPoint(Params^[1])^, PPoint(Params^[2])^);
 end;
 
 procedure Lape_tpaSwap(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  tpaSwap(PPointArray(Params^[0])^, PPointArray(Params^[1])^);
+  tpaSwap(PPointArray(Params^[1])^, PPointArray(Params^[2])^);
 end;
 
 procedure Lape_SwapE(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SwapE(PExtended(Params^[0])^, PExtended(Params^[1])^);
+  SwapE(PExtended(Params^[1])^, PExtended(Params^[2])^);
 end;
 
 procedure Lape_MinE(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PExtended(Result)^ := Math.Min(PExtended(Params^[0])^, PExtended(Params^[1])^);
+  PExtended(Result)^ := Math.Min(PExtended(Params^[1])^, PExtended(Params^[2])^);
 end;
 
 procedure Lape_MaxE(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PExtended(Result)^ := Math.Max(PExtended(Params^[0])^, PExtended(Params^[1])^);
+  PExtended(Result)^ := Math.Max(PExtended(Params^[1])^, PExtended(Params^[2])^);
 end;
 
 {$IFDEF WINDOWS}
@@ -261,10 +263,10 @@ end;
 //function SetTarget(target: TNativeWindow): integer; overload;
 procedure TIOManager_SetTargetHandle(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pinteger(Result)^ := TIOManager(Params^[0]^).SetTarget(PPtrUInt(Params^[1])^);
+  Pinteger(Result)^ := TIOManager(Params^[1]^).SetTarget(PPtrUInt(Params^[2])^);
 end;
 
-procedure Lape_Import_Deprecated(Compiler: TScriptCompiler);
+procedure Lape_Import_Deprecated(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
@@ -272,36 +274,36 @@ begin
 
     addGlobalType('(htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160, htSHA1, htSHA256, htSHA384, htSHA512, htTiger)', 'THashType');
 
-    addGlobalFunc('function GetProcesses: TSysProcArr; deprecated ' + #39 + 'Use TOSWindow' + #39 + ';', @Lape_GetProcesses);
-    addGlobalFunc('function TIOManager.GetProcesses: TSysProcArr; constref; deprecated ' + #39 + 'Use TOSWindow' + #39 + ';', @Lape_GetProcesses);
-    addGlobalFunc('function TIOManager.SetTarget2(target: TNativeWindow): integer; constref; deprecated ' + #39 + 'Use `TIOManager.SetTarget`' + #39, @TIOManager_SetTargetHandle);
+    addGlobalMethod('function GetProcesses: TSysProcArr; deprecated ' + #39 + 'Use TOSWindow' + #39 + ';', @Lape_GetProcesses, Data);
+    addGlobalMethod('function TIOManager.GetProcesses: TSysProcArr; constref; deprecated ' + #39 + 'Use TOSWindow' + #39 + ';', @Lape_GetProcesses, Data);
+    addGlobalMethod('function TIOManager.SetTarget2(target: TNativeWindow): integer; constref; deprecated ' + #39 + 'Use `TIOManager.SetTarget`' + #39, @TIOManager_SetTargetHandle, Data);
 
-    addGlobalFunc('procedure tSwap(var a, b: TPoint); deprecated ' + #39 + 'Replace with `Swap`' + #39 + ';', @Lape_tSwap);
-    addGlobalFunc('procedure tpaSwap(var a, b: TPointArray); deprecated ' + #39 + 'Replace with `Swap`' + #39 + ';', @Lape_tpaSwap);
-    addGlobalFunc('procedure SwapE(var a, b: Extended); deprecated ' + #39 + 'Replace with `Swap`' + #39 + ';', @Lape_SwapE);
+    addGlobalMethod('procedure tSwap(var a, b: TPoint); deprecated ' + #39 + 'Replace with `Swap`' + #39 + ';', @Lape_tSwap, Data);
+    addGlobalMethod('procedure tpaSwap(var a, b: TPointArray); deprecated ' + #39 + 'Replace with `Swap`' + #39 + ';', @Lape_tpaSwap, Data);
+    addGlobalMethod('procedure SwapE(var a, b: Extended); deprecated ' + #39 + 'Replace with `Swap`' + #39 + ';', @Lape_SwapE, Data);
 
-    addGlobalFunc('function MinE(a, b: Extended): Extended; deprecated ' + #39 + 'Replace with `Min`' + #39 + ';', @Lape_MinE);
-    addGlobalFunc('function MaxE(a, b: Extended): Extended; deprecated ' + #39 + 'Replace with `Max`' + #39 + ';', @Lape_MaxE);
+    addGlobalMethod('function MinE(a, b: Extended): Extended; deprecated ' + #39 + 'Replace with `Min`' + #39 + ';', @Lape_MinE, Data);
+    addGlobalMethod('function MaxE(a, b: Extended): Extended; deprecated ' + #39 + 'Replace with `Max`' + #39 + ';', @Lape_MaxE, Data);
 
-    addGlobalFunc('function hash(const HashType: THashType; const Data: string): string; deprecated;', @Lape_hash);
-    addGlobalFunc('function haval(const Data: string): string; deprecated;', @Lape_haval);
-    addGlobalFunc('function md4(const Data: string): string; deprecated;', @Lape_md4);
-    addGlobalFunc('function md5(const Data: string): string; deprecated;', @Lape_md5);
-    addGlobalFunc('function ripemd128(const Data: string): string; deprecated;', @Lape_ripemd128);
-    addGlobalFunc('function ripemd160(const Data: string): string; deprecated;', @Lape_ripemd160);
-    addGlobalFunc('function sha1(const Data: string): string; deprecated;', @Lape_sha1);
-    addGlobalFunc('function sha256(const Data: string): string; deprecated;', @Lape_sha256);
-    addGlobalFunc('function sha384(const Data: string): string; deprecated;', @Lape_sha384);
-    addGlobalFunc('function sha512(const Data: string): string; deprecated;', @Lape_sha512);
-    addGlobalFunc('function tiger(const Data: string): string; deprecated;', @Lape_tiger);
-    addGlobalFunc('procedure rc2_encrypt(const Key: string; const HashType: THashType; var Data: string); deprecated;', @Lape_rc2_encrypt);
-    addGlobalFunc('procedure rc2_decrypt(const Key: string; const HashType: THashType; var Data: string); deprecated;', @Lape_rc2_decrypt);
+    addGlobalMethod('function hash(const HashType: THashType; const Data: string): string; deprecated;', @Lape_hash, Data);
+    addGlobalMethod('function haval(const Data: string): string; deprecated;', @Lape_haval, Data);
+    addGlobalMethod('function md4(const Data: string): string; deprecated;', @Lape_md4, Data);
+    addGlobalMethod('function md5(const Data: string): string; deprecated;', @Lape_md5, Data);
+    addGlobalMethod('function ripemd128(const Data: string): string; deprecated;', @Lape_ripemd128, Data);
+    addGlobalMethod('function ripemd160(const Data: string): string; deprecated;', @Lape_ripemd160, Data);
+    addGlobalMethod('function sha1(const Data: string): string; deprecated;', @Lape_sha1, Data);
+    addGlobalMethod('function sha256(const Data: string): string; deprecated;', @Lape_sha256, Data);
+    addGlobalMethod('function sha384(const Data: string): string; deprecated;', @Lape_sha384, Data);
+    addGlobalMethod('function sha512(const Data: string): string; deprecated;', @Lape_sha512, Data);
+    addGlobalMethod('function tiger(const Data: string): string; deprecated;', @Lape_tiger, Data);
+    addGlobalMethod('procedure rc2_encrypt(const Key: string; const HashType: THashType; var Data: string); deprecated;', @Lape_rc2_encrypt, Data);
+    addGlobalMethod('procedure rc2_decrypt(const Key: string; const HashType: THashType; var Data: string); deprecated;', @Lape_rc2_decrypt, Data);
 
-    addGlobalFunc('function rs_GetUpText: string; deprecated;', @Lape_rs_GetUpText);
-    addGlobalFunc('function rs_GetUpTextAt(x, y : integer): string; deprecated;', @Lape_rs_GetUpTextAt);
-    addGlobalFunc('function rs_GetUpTextAtEx(x, y: integer; shadow: boolean; fontname: string): string; deprecated;', @Lape_rs_GetUpTextAtEx);
+    addGlobalMethod('function rs_GetUpText: string; deprecated;', @Lape_rs_GetUpText, Data);
+    addGlobalMethod('function rs_GetUpTextAt(x, y : integer): string; deprecated;', @Lape_rs_GetUpTextAt, Data);
+    addGlobalMethod('function rs_GetUpTextAtEx(x, y: integer; shadow: boolean; fontname: string): string; deprecated;', @Lape_rs_GetUpTextAtEx, Data);
 
-    addGlobalFunc('function MessageBox(Text, Caption: String; Flags: Int32): Int32; deprecated '+ #39 + 'Replace with `MessageDlg`' + #39 + ';', @Lape_MessageBox);
+    addGlobalMethod('function MessageBox(Text, Caption: String; Flags: Int32): Int32; deprecated '+ #39 + 'Replace with `MessageDlg`' + #39 + ';', @Lape_MessageBox, Data);
 
     addDelayedCode('type'                                                                                                                                      + LineEnding +
                    '  TSP_Property = (SP_OnTerminate, SP_WriteTimeStamp);'                                                                                     + LineEnding +
@@ -453,8 +455,5 @@ begin
                    'Deprecated');
   end;
 end;
-
-initialization
-  RegisterScriptImport(@Lape_Import_Deprecated);
 
 end.

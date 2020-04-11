@@ -242,6 +242,7 @@ type
     procedure SettingChanged_TrayIconVisible(Value: Boolean);
   protected
     FWindowSelection: TOSWindow;
+    FProcessSelection: UInt32;
     FScriptState: TScriptButtonState;
 
     procedure RemoveTabASync(Data: PtrInt);
@@ -259,6 +260,7 @@ type
     Initialized: Boolean;
 
     property WindowSelection: TOSWindow read FWindowSelection;
+    property ProcessSelection: UInt32 read FProcessSelection;
 
     procedure RunScript;
     procedure CompileScript;
@@ -297,12 +299,15 @@ uses
   simba.dtmeditor, simba.scriptinstance, simba.package_form, simba.aboutform,
   simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.colorpicker, simba.ci_includecache,
-  simba.highlighter, simba.scriptpluginloader
+  simba.highlighter, simba.scriptpluginloader, simba.stringutil
   {$IFDEF WINDOWS},
   windows
   {$ENDIF}
   {$IFDEF USE_FORMDESIGNER},
   simba.formdesigner
+  {$ENDIF}
+  {$IFDEF UNIX},
+  baseunix
   {$ENDIF};
 
 type
@@ -563,15 +568,23 @@ end;
 
 procedure TSimbaForm.CodeTools_OnLoadLibrary(Sender: TObject; FileName: String; var Contents: String);
 var
-  Plugin: TSimbaScriptPluginLoader;
+  Output: String;
+  Status: Int32;
 begin
-  Plugin := TSimbaScriptPluginLoader.Create(FileName);
+  SimbaDebugForm.Add('Dumping plugin: ' + ExtractFileName(FileName));
 
-  if (Plugin <> nil) then
   try
-    Contents := Plugin.Dump;
-  finally
-    Plugin.Free();
+    Status := RunCommand('SimbaScript --dump-plugin "' + FileName + '"', Output);
+    if (Status <> 0) then
+      raise Exception.Create(IntToStr(Status));
+
+    Contents := Between(#0, #0, Output);
+  except
+    on E: Exception do
+    begin
+      SimbaDebugForm.Add('Error dumping: ' + E.Message);
+      SimbaDebugForm.Add(Output);
+    end;
   end;
 end;
 
@@ -1223,43 +1236,51 @@ end;
 
 procedure TSimbaForm.Initialize_CodeTools;
 var
-  ScriptInstance: TSimbaScriptInstance;
   Parser: TCodeInsight_Include;
-  i: Int32;
+  Status: Int32;
+  I: Int32;
+  Dump: TStringList;
+  Output: String;
 begin
   WriteLn('Initialize Code Tools');
 
-  ScriptInstance := nil;
+  Dump := nil;
 
   try
-    ScriptInstance := TSimbaScriptInstance.Create();
-    ScriptInstance.Dump();
+    Status := RunCommand('SimbaScript --dump-compiler', Output);
+    if (Status <> 0) then
+      raise Exception.Create(IntToStr(Status));
 
-    if (ScriptInstance.ExitCode = 0) then
+    Dump := TStringList.Create();
+    Dump.LineBreak := '!';
+    Dump.Text := Between(#0, #0, Output);
+
+    for I := 0 to Dump.Count - 1 do
     begin
-      for i := 0 to ScriptInstance.Output.Count - 1 do
-      begin
-        Parser := TCodeInsight_Include.Create();
-        Parser.OnMessage := @Self.CodeTools_OnMessage;
-        Parser.Run(ScriptInstance.Output.ValueFromIndex[i], ScriptInstance.Output.Names[i]);
+      if (Dump.Names[I] = 'Classes') or (Dump.Names[I] = '') then
+        Continue;
 
-        if (Parser.Lexer.FileName <> 'Classes') then
-          SimbaFunctionListForm.addDeclarations(Parser.Items, SimbaFunctionListForm.addSimbaSection(Parser.Lexer.FileName), False, True, False);
+      Parser := TCodeInsight_Include.Create();
+      Parser.OnMessage := @Self.CodeTools_OnMessage;
+      Parser.Run(Dump.ValueFromIndex[I], Dump.Names[I]);
 
-        TCodeInsight.AddBaseInclude(Parser);
-      end;
+      SimbaFunctionListForm.addDeclarations(Parser.Items, SimbaFunctionListForm.addSimbaSection(Parser.Lexer.FileName), False, True, False);
 
-      SimbaFunctionListForm.SimbaNode.AlphaSort();
-      SimbaFunctionListForm.SimbaNode.Expanded := True;
-    end else
-      SimbaDebugForm.Add('Error dumping script imports: ' + IntToStr(ScriptInstance.ExitCode));
+      TCodeInsight.AddBaseInclude(Parser);
+    end;
+
+    SimbaFunctionListForm.SimbaNode.AlphaSort();
+    SimbaFunctionListForm.SimbaNode.Expanded := True;
   except
     on E: Exception do
-      SimbaDebugForm.Add('Error parsing internals: ' + E.Message);
+    begin
+      SimbaDebugForm.Add('Error dumping compiler: ' + E.Message);
+      SimbaDebugForm.Add(Output);
+    end;
   end;
 
-  if (ScriptInstance <> nil) then
-    ScriptInstance.Free();
+  if (Dump <> nil) then
+    Dump.Free();
 end;
 
 procedure TSimbaForm.Initialize_SimbaScript;
@@ -1267,7 +1288,14 @@ begin
   WriteLn('Initialize SimbaScript');
 
   if SimbaSettings.Resources.ExtractSimbaScript.Value then
+  begin
     SimbaResourceExtractor.Extract('SIMBASCRIPT', Application.Location);
+
+    {$IFDEF UNIX}
+    if fpchmod(SimbaSettings.Environment.ScriptExecutablePath.Value, &755) <> 0 then //rwxr-xr-x
+      SimbaDebugForm.Add('Unable to make SimbaScript an executable');
+    {$ENDIF}
+  end;
 end;
 
 procedure TSimbaForm.Initialize_OpenSSL;
@@ -1507,6 +1535,7 @@ begin
         SimbaDebugForm.Add(' - ClassName: ' + Selected.GetClassName());
 
       FWindowSelection := Selected;
+      FProcessSelection := Selected.GetPID();
     finally
       Free();
     end;

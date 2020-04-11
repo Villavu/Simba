@@ -7,6 +7,7 @@ interface
 
 {$i import_uses.inc}
 
+procedure Lape_Import_TClient(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 
 implementation
 
@@ -125,7 +126,7 @@ begin
   PClient(Params^[0])^.Free();
 end;
 
-procedure Register_TClient(Compiler: TScriptCompiler);
+procedure Lape_Import_TClient(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
@@ -145,9 +146,6 @@ begin
     //addGlobalFunc('procedure TClient.Free(); constref;', @TClient_Free);
   end;
 end;
-
-initialization
-  RegisterScriptImport(@Register_TClient);
 
 end.
 

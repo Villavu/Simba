@@ -7,6 +7,8 @@ interface
 
 {$i import_uses.inc}
 
+procedure Lape_Import_TMFiles(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+
 implementation
 
 uses
@@ -124,7 +126,7 @@ begin
   PMFiles(Params^[0])^.Free();
 end;
 
-procedure Register_TMFiles(Compiler: TScriptCompiler);
+procedure Lape_Import_TMFiles(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
@@ -153,9 +155,6 @@ begin
     //addGlobalFunc('procedure TMFiles.Free(); constref;', @TMFiles_Free);
   end;
 end;
-
-initialization
-  RegisterScriptImport(@Register_TMFiles);
 
 end.
 

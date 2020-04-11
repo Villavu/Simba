@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Register_TMMLTimer(Compiler: TScriptCompiler);
+procedure Lape_Import_TMMLTimer(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 
 implementation
 
@@ -78,7 +78,7 @@ begin
   PMMLTimer(Params^[0])^.OnTimer := PNotifyEvent(Params^[1])^;
 end;
 
-procedure Register_TMMLTimer(Compiler: TScriptCompiler);
+procedure Lape_Import_TMMLTimer(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
@@ -96,9 +96,6 @@ begin
     //addGlobalFunc('procedure TMMLTimer.Free(); constref;', @TMMLTimer_Free);
   end;
 end;
-
-initialization
-  RegisterScriptImport(@Register_TMMLTimer);
 
 end.
 

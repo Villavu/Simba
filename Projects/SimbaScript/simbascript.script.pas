@@ -9,6 +9,7 @@ uses
   simbascript.compiler, simba.ipc, syncobjs, simba.script_common, simbascript.plugin;
 
 type
+  PSimbaScript = ^TSimbaScript;
   TSimbaScript = class;
 
   TSimbaMethod = class
@@ -25,7 +26,7 @@ type
 
   TSimbaScript = class(TThread)
   protected
-    FCompiler: TScriptCompiler;
+    FCompiler: TSimbaScript_Compiler;
     FTokenizier: TLapeTokenizerString;
     FClient: TClient;
 
@@ -70,7 +71,6 @@ type
     procedure SetState(Value: TInitBool);
   public
     CompileOnly: Boolean;
-    Dump: Boolean;
 
     property State: TInitBool read FState write SetState;
     property StartTime: UInt64 read FStartTime;
@@ -102,73 +102,10 @@ type
     destructor Destroy; override;
   end;
 
-var
-  Script: TSimbaScript;
-
 implementation
 
 uses
-  fileutil, simba.misc, simba.files, fpexprpars, typinfo, ffi,
-
-  // Base types
-  simbascript.import_types,
-
-  // Lazarus classes
-  simbascript.import_tobject,
-  simbascript.import_lclsystem,
-  simbascript.import_lclgraphics,
-  simbascript.import_lclcontrols,
-  simbascript.import_lclforms,
-  simbascript.import_lclstdctrls,
-  simbascript.import_lclextctrls,
-  simbascript.import_lclcomctrls,
-  simbascript.import_lcldialogs,
-  simbascript.import_lclmenus,
-  simbascript.import_lclspin,
-  simbascript.import_lclprocess,
-  simbascript.import_lclregexpr,
-
-  // Simba classes
-  simbascript.import_tmdtm,
-  simbascript.import_tmdtms,
-  simbascript.import_tmufasabitmap,
-  simbascript.import_tmbitmaps,
-  simbascript.import_tmfiles,
-  simbascript.import_tmfinder,
-  simbascript.import_tmfont,
-  simbascript.import_tmfonts,
-  simbascript.import_tmocr,
-  simbascript.import_ttarget,
-  simbascript.import_tiomanager,
-  simbascript.import_tclient,
-  simbascript.import_tmmltimer,
-  simbascript.import_json,
-  simbascript.import_xml,
-  simbascript.import_simbaimagebox,
-
-  // Simba
-  simbascript.import_system,
-  simbascript.import_target,
-  simbascript.import_input,
-  simbascript.import_finder,
-  simbascript.import_web,
-  simbascript.import_arrays_algorithms,
-  simbascript.import_matrix,
-  simbascript.import_math,
-  simbascript.import_time_date,
-  simbascript.import_ocr,
-  simbascript.import_string,
-  simbascript.import_colormath,
-  simbascript.import_bitmap,
-  simbascript.import_dtm,
-  simbascript.import_file,
-  simbascript.import_other,
-  simbascript.import_crypto,
-  simbascript.import_deprecated,
-  simbascript.import_oswindow,
-  simbascript.import_dialog,
-  simbascript.import_simba,
-  simbascript.import_process;
+  fileutil, simba.misc, simba.files, fpexprpars, typinfo, ffi;
 
 procedure TSimbaMethod.Invoke(Script: TSimbaScript);
 begin
@@ -224,20 +161,11 @@ begin
     FClient.IOManager.SetTarget(FTarget);
 
     // Import
-    FCompiler := TScriptCompiler.Create(TLapeTokenizerString.Create(FScript, FScriptFile));
+    FCompiler := TSimbaScript_Compiler.Create(TLapeTokenizerString.Create(FScript, FScriptFile));
     FCompiler.OnFindFile := @HandleFindFile;
     FCompiler.OnHint := @HandleHint;
     FCompiler.OnHandleDirective := @HandleDirective;
-    FCompiler.Import(Dump);
-
-    // Dump
-    if Dump then
-    begin
-      if (FCompiler.Dump.Count > 0) then
-        WriteLn(FCompiler.Dump.Text);
-
-      Exit;
-    end;
+    FCompiler.Import(Self);
 
     // Compile
     T := PerformanceTimer();
@@ -272,7 +200,11 @@ begin
       WriteLn(Format('Succesfully executed in %s.', [TimeStamp(Round(PerformanceTimer() - T))]));
   except
     on E: Exception do
+    begin
       HandleException(E);
+
+      raise;
+    end;
   end;
 end;
 
@@ -281,8 +213,6 @@ var
   Param: TSimbaMethod_ScriptError;
   Method: TSimbaMethod;
 begin
-  ExitCode := 1;
-
   Param := Default(TSimbaMethod_ScriptError);
   Param.Line := -1;
   Param.Column := -1;
@@ -405,16 +335,17 @@ procedure TSimbaScript.HandleSimbaState;
 var
   ScriptState: ESimbaScriptState;
 begin
-  while FSimbaStateServer.Read(ScriptState, SizeOf(Int32)) = SizeOf(Int32) do
-  begin
-    case ScriptState of
-      SCRIPT_RUNNING:  FState := bTrue;
-      SCRIPT_PAUSED:   FState := bUnknown;
-      SCRIPT_STOPPING: FState := bFalse;
-    end;
+  if (SimbaStateServer <> nil) then
+    while FSimbaStateServer.Read(ScriptState, SizeOf(Int32)) = SizeOf(Int32) do
+    begin
+      case ScriptState of
+        SCRIPT_RUNNING:  FState := bTrue;
+        SCRIPT_PAUSED:   FState := bUnknown;
+        SCRIPT_STOPPING: FState := bFalse;
+      end;
 
-    FSimbaStateServer.Write(ScriptState, SizeOf(Int32)); // return the message so Simba can update accordingly
-  end;
+      FSimbaStateServer.Write(ScriptState, SizeOf(Int32)); // return the message so Simba can update accordingly
+    end;
 end;
 
 procedure TSimbaScript.Write(constref S: String);
@@ -461,16 +392,20 @@ destructor TSimbaScript.Destroy;
 var
   I: Int32;
 begin
-  for I := 0 to High(FPlugins) do
-    FPlugins[I].Free();
+  try
+    for I := 0 to High(FPlugins) do
+      FPlugins[I].Free();
 
-  FCompiler.Free();
-  FClient.Free();
+    FCompiler.Free();
+    FClient.Free();
 
-  FSimbaStateServer.Free();
-  FSimbaOutputServer.Free();
-  FSimbaMethodServer.Free();
-  FSimbaMethodLock.Free();
+    FSimbaStateServer.Free();
+    FSimbaOutputServer.Free();
+    FSimbaMethodServer.Free();
+    FSimbaMethodLock.Free();
+  except
+    // The process is ending anyway...
+  end;
 
   inherited Destroy();
 end;

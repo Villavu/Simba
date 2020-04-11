@@ -1,3 +1,0 @@
-Simba Keyboard Input
-====================
-

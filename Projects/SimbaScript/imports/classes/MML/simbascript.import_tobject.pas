@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Register_TObject(Compiler: TScriptCompiler);
+procedure Lape_Import_TObject(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 
 implementation
 
@@ -28,7 +28,7 @@ begin
   PlpString(Result)^ := PObject(Params^[0])^.ToString();
 end;
 
-procedure Register_TObject(Compiler: TScriptCompiler);
+procedure Lape_Import_TObject(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
@@ -41,9 +41,6 @@ begin
     addGlobalFunc('function TObject.ToString(): string; constref;', @TObject_ToString);
   end;
 end;
-
-initialization
-  RegisterScriptImport(@Register_TObject);
 
 end.
 

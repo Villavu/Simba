@@ -6,6 +6,8 @@ interface
 
 {$i import_uses.inc}
 
+procedure Lape_Import_DTM(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+
 implementation
 
 uses
@@ -13,74 +15,71 @@ uses
 
 procedure Lape_SetDTMName(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Script.Client.MDTMs[PInt32(Params^[0])^].Name := PString(Params^[0])^;
+  TSimbaScript(Params^[0]).Client.MDTMs[PInt32(Params^[1])^].Name := PString(Params^[1])^;
 end;
 
 procedure Lape_DTMFromString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInt32(Result)^ := Script.Client.MDTMs.StringToDTM(PString(Params^[0])^);
+  PInt32(Result)^ := TSimbaScript(Params^[0]).Client.MDTMs.StringToDTM(PString(Params^[1])^);
 end;
 
 procedure Lape_FreeDTM(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Script.Client.MDTMs.FreeDTM(PInt32(Params^[0])^);
+  TSimbaScript(Params^[0]).Client.MDTMs.FreeDTM(PInt32(Params^[1])^);
 end;
 
 procedure Lape_GetDTM(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PMDTM(Result)^ := Script.Client.MDTMs.GetDTM(PInt32(Params^[0])^);
+  PMDTM(Result)^ := TSimbaScript(Params^[0]).Client.MDTMs.GetDTM(PInt32(Params^[1])^);
 end;
 
 procedure Lape_AddTSDTM(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInt32(Result)^ := Script.Client.MDTMs.AddDTM(PSDTM(Params^[0])^);
+  PInt32(Result)^ := TSimbaScript(Params^[0]).Client.MDTMs.AddDTM(PSDTM(Params^[1])^);
 end;
 
 procedure Lape_AddDTM(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInt32(Result)^ := Script.Client.MDTMs.AddDTM(PMDTM(Params^[0])^);
+  PInt32(Result)^ := TSimbaScript(Params^[0]).Client.MDTMs.AddDTM(PMDTM(Params^[1])^);
 end;
 
 procedure Lape_MDTMToSDTM(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PSDTM(Result)^ := MDTMToSDTM(PMDTM(Params^[0])^);
+  PSDTM(Result)^ := MDTMToSDTM(PMDTM(Params^[1])^);
 end;
 
 procedure Lape_SDTMToMDTM(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PMDTM(Result)^ := SDTMToMDTM(PSDTM(Params^[0])^);
+  PMDTM(Result)^ := SDTMToMDTM(PSDTM(Params^[1])^);
 end;
 
 procedure Lape_CreateDTMPoint(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PMDTMPoint(Result)^ := CreateDTMPoint(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, Pboolean(Params^[5])^);
+  PMDTMPoint(Result)^ := CreateDTMPoint(PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, Pboolean(Params^[6])^);
 end;
 
 procedure Lape_DTMExists(const Params : PParamArray; const Result : Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := Script.Client.MDTMs.ExistsDTM(PInt32(Params^[0])^);
+  PBoolean(Result)^ := TSimbaScript(Params^[0]).Client.MDTMs.ExistsDTM(PInt32(Params^[1])^);
 end;
 
-procedure Lape_Import_DTM(Compiler: TScriptCompiler);
+procedure Lape_Import_DTM(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
     Section := 'DTM';
 
-    addGlobalFunc('procedure SetDTMName(DTM: Int32; Name: String);', @Lape_SetDTMName);
-    addGlobalFunc('function DTMFromString(S: String): Int32', @Lape_DTMFromString);
-    addGlobalFunc('procedure FreeDTM(DTM: Int32);', @Lape_FreeDTM);
-    addGlobalFunc('function GetDTM(Index: Int32): TMDTM', @Lape_GetDTM);
-    addGlobalFunc('function AddSDTM(d: TSDTM): Int32', @Lape_AddTSDTM);
-    addGlobalFunc('function AddDTM(d: TMDTM): Int32', @Lape_AddDTM);
-    addGlobalFunc('function DTMExists(Index : Int32): Boolean', @Lape_DTMExists);
-    addGlobalFunc('function MDTMToSDTM(DTM: TMDTM): TSDTM', @Lape_MDTMToSDTM);
-    addGlobalFunc('function SDTMToMDTM(DTM: TSDTM): TMDTM', @Lape_SDTMToMDTM);
-    addGlobalFunc('function CreateDTMPoint(x,y,c,t,asz: Int32; bp: Boolean): TMDTMPoint', @Lape_CreateDTMPoint);
+    addGlobalMethod('procedure SetDTMName(DTM: Int32; Name: String);', @Lape_SetDTMName, Data);
+    addGlobalMethod('function DTMFromString(S: String): Int32', @Lape_DTMFromString, Data);
+    addGlobalMethod('procedure FreeDTM(DTM: Int32);', @Lape_FreeDTM, Data);
+    addGlobalMethod('function GetDTM(Index: Int32): TMDTM', @Lape_GetDTM, Data);
+    addGlobalMethod('function AddSDTM(d: TSDTM): Int32', @Lape_AddTSDTM, Data);
+    addGlobalMethod('function AddDTM(d: TMDTM): Int32', @Lape_AddDTM, Data);
+    addGlobalMethod('function DTMExists(Index : Int32): Boolean', @Lape_DTMExists, Data);
+    addGlobalMethod('function MDTMToSDTM(DTM: TMDTM): TSDTM', @Lape_MDTMToSDTM, Data);
+    addGlobalMethod('function SDTMToMDTM(DTM: TSDTM): TMDTM', @Lape_SDTMToMDTM, Data);
+    addGlobalMethod('function CreateDTMPoint(x,y,c,t,asz: Int32; bp: Boolean): TMDTMPoint', @Lape_CreateDTMPoint, Data);
   end;
 end;
-
-initialization
-  RegisterScriptImport(@Lape_Import_DTM);
 
 end.

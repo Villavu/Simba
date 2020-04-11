@@ -5,7 +5,7 @@
 'function ExtractFileExt(const FileName: String): String; begin end;' + LineEnding +
 'function ExtractFileDir(const FileName: String): String; begin end;' + LineEnding +
 'function ExpandFileName(const FileName: String): String; begin end;' + LineEnding +
-'function ExtractRelativepath(const BaseName, DestName: String): String; begin end;' + LineEnding +
+'function ExtractRelativePath(const BaseName, DestName: String): String; begin end;' + LineEnding +
 'function IncludeTrailingPathDelimiter(const Path: String) : String; begin end;' + LineEnding +
 'function ExcludeTrailingPathDelimiter(const Path: String): String; begin end;' + LineEnding +
 'function IncludeTrailingBackslash(const Path: String) : String; begin end;' + LineEnding +

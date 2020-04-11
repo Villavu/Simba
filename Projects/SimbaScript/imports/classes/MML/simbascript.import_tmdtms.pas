@@ -7,7 +7,7 @@ interface
 
 {$i import_uses}
 
-procedure Register_TMDTMS(Compiler: TScriptCompiler);
+procedure Lape_Import_TMDTMS(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 
 implementation
 
@@ -68,7 +68,7 @@ begin
   PMDTMS(Params^[0])^.Free();
 end;
 
-procedure Register_TMDTMS(Compiler: TScriptCompiler);
+procedure Lape_Import_TMDTMS(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
@@ -88,9 +88,6 @@ begin
     //addGlobalFunc('procedure TMDTMS.Free(); constref;', @TMDTMS_Free);
   end;
 end;
-
-initialization
-  RegisterScriptImport(@Register_TMDTMS);
 
 end.
 

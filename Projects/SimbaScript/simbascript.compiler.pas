@@ -9,320 +9,175 @@ uses
   ffi, lpcompiler, lptypes, lpvartypes, lpparser, lptree, lpffiwrappers;
 
 type
-  TScriptCompiler = class;
-  TScriptImport = procedure(Compiler: TScriptCompiler);
+  TSimbaScript_Compiler = class;
+  TSimbaScript_Import = procedure(Compiler: TSimbaScript_Compiler; Data: Pointer);
 
-  TScriptCompiler = class(TLapeCompiler)
-  public
-  class var
-    Imports: array of TScriptImport;
+  TSimbaScript_Compiler = class(TLapeCompiler)
   protected
-    FDump: TStringList;
+    FManagedClosures: array of TImportClosure;
     FSection: String;
-    FImportClosures: array of TImportClosure;
-
-    procedure Write(Header: String; SemiColon: Boolean = True; Method: Boolean = False);
   public
-    property Dump: TStringList read FDump;
+    procedure pushConditional(AEval: Boolean; ADocPos: TDocPos); reintroduce;
 
     function addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar; overload;
-    function addGlobalFunc(Header: lpString; Value: Pointer): TLapeGlobalVar; overload; override;
 
-    function addGlobalVar(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar; overload; override;
-    function addGlobalVar(Value: Int32; AName: lpString): TLapeGlobalVar; overload; override;
-    function addGlobalVar(Value: UInt32; AName: lpString): TLapeGlobalVar; overload; override;
-    function addGlobalVar(Value: Int64; AName: lpString): TLapeGlobalVar; overload; override;
-    function addGlobalVar(Value: UInt64; AName: lpString): TLapeGlobalVar; overload; override;
-    function addGlobalVar(Value: Extended; AName: lpString): TLapeGlobalVar; overload; override;
-    function addGlobalVar(Value: EvalBool; AName: lpString): TLapeGlobalVar; overload; override;
-    function addGlobalVar(Value: AnsiString; AName: lpString): TLapeGlobalVar; overload; override;
-    function addGlobalVar(Value: UnicodeString; AName: lpString): TLapeGlobalVar; overload; override;
+    function addGlobalConst(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar; virtual; overload;
+    function addGlobalConst(Value: Int32; AName: lpString): TLapeGlobalVar; virtual; overload;
+    function addGlobalConst(Value: UInt32; AName: lpString): TLapeGlobalVar; virtual; overload;
+    function addGlobalConst(Value: Int64; AName: lpString): TLapeGlobalVar; virtual; overload;
+    function addGlobalConst(Value: UInt64; AName: lpString): TLapeGlobalVar; virtual; overload;
+    function addGlobalConst(Value: Extended; AName: lpString): TLapeGlobalVar; virtual; overload;
+    function addGlobalConst(Value: EvalBool; AName: lpString): TLapeGlobalVar; virtual; overload;
+    function addGlobalConst(Value: AnsiString; AName: lpString): TLapeGlobalVar; virtual; overload;
+    function addGlobalConst(Value: UnicodeString; AName: lpString): TLapeGlobalVar; virtual; overload;
+    function addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType; virtual; overload;
 
-    function addGlobalConst(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar; overload;
-    function addGlobalConst(Value: Int32; AName: lpString): TLapeGlobalVar; overload;
-    function addGlobalConst(Value: UInt32; AName: lpString): TLapeGlobalVar; overload;
-    function addGlobalConst(Value: Int64; AName: lpString): TLapeGlobalVar; overload;
-    function addGlobalConst(Value: UInt64; AName: lpString): TLapeGlobalVar; overload;
-    function addGlobalConst(Value: Extended; AName: lpString): TLapeGlobalVar; overload;
-    function addGlobalConst(Value: EvalBool; AName: lpString): TLapeGlobalVar; overload;
-    function addGlobalConst(Value: AnsiString; AName: lpString): TLapeGlobalVar; overload;
-    function addGlobalConst(Value: UnicodeString; AName: lpString): TLapeGlobalVar; overload;
-
-    function addDelayedCode(Code: lpString; AFileName: lpString = ''; AfterCompilation: Boolean = True; IsGlobal: Boolean = True): TLapeTree_Base; override;
-    function addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType; overload;
-    function addGlobalType(Str: lpString; AName: lpString): TLapeType; overload; override;
-
-    procedure addBaseDefine(Define: lpString); override;
-    procedure addBaseDefine(Define: lpString; Value: lpString); overload;
+    procedure addBaseDefine(Define: lpString; Value: lpString); virtual; overload;
 
     procedure addClass(const Name: String; const Parent: String = 'TObject');
     procedure addClassVar(const Obj, Item, Typ: String; const ARead: Pointer; const AWrite: Pointer = nil; const Arr: Boolean = False; const ArrType: string = 'UInt32');
 
-    procedure pushConditional(AEval: Boolean; ADocPos: TDocPos); override;
+    procedure Import(Imports: array of TSimbaScript_Import; Data: Pointer); overload;
+    procedure Import(Data: Pointer); overload;
 
     property Section: String read FSection write FSection;
-
-    function Import(Dumping: Boolean): Boolean;
 
     destructor Destroy; override;
   end;
 
-procedure RegisterScriptImport(Callback: TScriptImport);
-
 implementation
 
 uses
-  lpffi, lputils;
+  lpffi, lputils,
 
-procedure RegisterScriptImport(Callback: TScriptImport);
+  // Base types
+  simbascript.import_types,
+
+  // Lazarus classes
+  simbascript.import_tobject,
+  simbascript.import_lclsystem,
+  simbascript.import_lclgraphics,
+  simbascript.import_lclcontrols,
+  simbascript.import_lclforms,
+  simbascript.import_lclstdctrls,
+  simbascript.import_lclextctrls,
+  simbascript.import_lclcomctrls,
+  simbascript.import_lcldialogs,
+  simbascript.import_lclmenus,
+  simbascript.import_lclspin,
+  simbascript.import_lclprocess,
+  simbascript.import_lclregexpr,
+
+  // Simba classes
+  simbascript.import_tmdtm,
+  simbascript.import_tmdtms,
+  simbascript.import_tmufasabitmap,
+  simbascript.import_tmbitmaps,
+  simbascript.import_tmfiles,
+  simbascript.import_tmfinder,
+  simbascript.import_tmfont,
+  simbascript.import_tmfonts,
+  simbascript.import_tmocr,
+  simbascript.import_ttarget,
+  simbascript.import_tiomanager,
+  simbascript.import_tclient,
+  simbascript.import_tmmltimer,
+  simbascript.import_json,
+  simbascript.import_xml,
+  simbascript.import_simbaimagebox,
+
+  // Simba
+  simbascript.import_system,
+  simbascript.import_target,
+  simbascript.import_input,
+  simbascript.import_finder,
+  simbascript.import_web,
+  simbascript.import_arrays_algorithms,
+  simbascript.import_matrix,
+  simbascript.import_math,
+  simbascript.import_time_date,
+  simbascript.import_ocr,
+  simbascript.import_string,
+  simbascript.import_colormath,
+  simbascript.import_bitmap,
+  simbascript.import_dtm,
+  simbascript.import_file,
+  simbascript.import_other,
+  simbascript.import_crypto,
+  simbascript.import_deprecated,
+  simbascript.import_oswindow,
+  simbascript.import_dialog,
+  simbascript.import_simba,
+  simbascript.import_process;
+
+function TSimbaScript_Compiler.addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar;
 begin
-  with TScriptCompiler do
-  begin
-    SetLength(Imports, Length(Imports) + 1);
-    Imports[High(Imports)] := Callback;
-  end;
+  SetLength(FManagedClosures, Length(FManagedClosures) + 1);
+  FManagedClosures[High(FManagedClosures)] := LapeImportWrapper(Value, Self, Header, ABI);
+
+  Result := inherited addGlobalFunc(Header, FManagedClosures[High(FManagedClosures)].Func);
 end;
 
-procedure TScriptCompiler.Write(Header: String; SemiColon: Boolean; Method: Boolean);
-begin
-  Header := Trim(Header);
-
-  if (FDump <> nil) and (FSection <> '') and (Header <> '') then
-  begin
-    if SemiColon and (Header[Length(Header)] <> ';') then
-      Header := Header + ';';
-
-    if Method then
-    begin
-      Header := Header + LineEnding + 'begin';
-      Header := Header + LineEnding + '  // Internal method in Simba';
-      Header := Header + LineEnding + 'end;';
-    end;
-
-    FDump.Values[FSection] := FDump.Values[FSection] + Header + LineEnding;
-  end;
-end;
-
-function TScriptCompiler.addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar;
-var
-  Closure: TImportClosure;
-begin
-  Closure := LapeImportWrapper(Value, Self, Header, ABI);
-
-  SetLength(FImportClosures, Length(FImportClosures) + 1);
-  FImportClosures[High(FImportClosures)] := Closure;
-
-  Result := inherited addGlobalFunc(Header, Closure.Func);
-end;
-
-procedure TScriptCompiler.addBaseDefine(Define: lpString);
-begin
-  inherited addBaseDefine(Define);
-
-  if (FDump <> nil) then
-    Write(Format('{$DEFINE %s}', [Define]), False, False);
-end;
-
-procedure TScriptCompiler.addBaseDefine(Define: lpString; Value: lpString);
+procedure TSimbaScript_Compiler.addBaseDefine(Define: lpString; Value: lpString);
 begin
   FBaseDefines[Define] := Trim(Value);
-
-  if (FDump <> nil) then
-    Write(Format('{$DEFINE %s}', [Define]), False, False);
 end;
 
-function TScriptCompiler.addGlobalFunc(Header: lpString; Value: Pointer): TLapeGlobalVar;
-var
-  Decls: TLapeDeclArray;
-  I: Int32;
-begin
-  Result := inherited addGlobalFunc(Header, Value);
-
-  {
-  if Result.VarType is TLapeType_MethodOfType then
-  begin
-    if TLapeType_MethodOfType(Result.VarType).ObjectType.ManagedDeclarations.HasParent then
-    begin
-      Decls := TLapeType_MethodOfType(Result.VarType).ObjectType.ManagedDeclarations.Parent.getByName(Result.Name, bTrue);
-
-      for I := 0 to High(Decls) do
-      begin
-        if not (TLapeGlobalVar(Decls[I]).VarType is TLapeType_MethodOfType) then
-          Continue;
-
-        if TLapeType_MethodOfType(TLapeGlobalVar(Decls[I]).VarType).EqualParams(Result.VarType as TLapeType_Method) then
-          Writeln('Bad: ', Result.Name, ' :: ', TLapeType_MethodOfType(Result.VarType).ObjectType.Name);
-      end;
-    end;
-  end;
-  }
-
-  if (FDump <> nil) then
-    Write(Header, True, True);
-end;
-
-function TScriptCompiler.addGlobalType(Str: lpString; AName: lpString): TLapeType;
-begin
-  Result := inherited addGlobalType(Str, AName);
-
-  if (FDump <> nil) then
-    Write(Format('type %s = %s', [AName, Str]));
-end;
-
-function TScriptCompiler.addGlobalVar(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar;
-begin
-  Result := inherited addGlobalVar(Typ, Value, AName);
-
-  if (FDump <> nil) then
-    Write(Format('var %s: %s', [AName, Typ]));
-end;
-
-function TScriptCompiler.addGlobalVar(Value: Int32; AName: lpString): TLapeGlobalVar;
-begin
-  Result := inherited addGlobalVar(Value, AName);
-
-  if (FDump <> nil) then
-    Write(Format('var %s: Int32 = %d', [AName, Value]));
-end;
-
-function TScriptCompiler.addGlobalVar(Value: UInt32; AName: lpString): TLapeGlobalVar;
-begin
-  Result := inherited addGlobalVar(Value, AName);
-
-  if (FDump <> nil) then
-    Write(Format('var %s: UInt32 = %d', [AName, Value]));
-end;
-
-function TScriptCompiler.addGlobalVar(Value: Int64; AName: lpString): TLapeGlobalVar;
-begin
-  Result := inherited addGlobalVar(Value, AName);
-
-  if (FDump <> nil) then
-    Write(Format('var %s: Int64 = %d', [AName, Value]));
-end;
-
-function TScriptCompiler.addGlobalVar(Value: UInt64; AName: lpString): TLapeGlobalVar;
-begin
-  Result := inherited addGlobalVar(Value, AName);
-
-  if (FDump <> nil) then
-    Write(Format('var %s: UInt64 = %d', [AName, Value]));
-end;
-
-function TScriptCompiler.addGlobalVar(Value: Extended; AName: lpString): TLapeGlobalVar;
-begin
-  Result := inherited addGlobalVar(Value, AName);
-
-  if (FDump <> nil) then
-    Write(Format('var %s: Extended = %s', [AName, FloatToStr(Value)]));
-end;
-
-function TScriptCompiler.addGlobalVar(Value: EvalBool; AName: lpString): TLapeGlobalVar;
-begin
-  Result := inherited addGlobalVar(Value, AName);
-
-  if (FDump <> nil) then
-    Write(Format('var %s: EvalBool = %s', [AName, BoolToStr(Value, True)]));
-end;
-
-function TScriptCompiler.addGlobalVar(Value: AnsiString; AName: lpString): TLapeGlobalVar;
-begin
-  Result := inherited addGlobalVar(Value, AName);
-
-  if (FDump <> nil) then
-    Write(Format('var %s: String = "%s"', [AName, Value]));
-end;
-
-function TScriptCompiler.addGlobalVar(Value: UnicodeString; AName: lpString): TLapeGlobalVar;
-begin
-  Result := inherited addGlobalVar(Value, AName);
-
-  if (FDump <> nil) then
-    Write(Format('var %s: UnicodeString = "%s"', [AName, Value]));
-end;
-
-function TScriptCompiler.addGlobalConst(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar;
+function TSimbaScript_Compiler.addGlobalConst(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar;
 begin
   Result := inherited addGlobalVar(Typ, Value, AName);
   Result.isConstant := True;
-
-  if (FDump <> nil) then
-    Write(Format('const %s: %s', [AName, Typ]));
 end;
 
-function TScriptCompiler.addGlobalConst(Value: Int32; AName: lpString): TLapeGlobalVar;
+function TSimbaScript_Compiler.addGlobalConst(Value: Int32; AName: lpString): TLapeGlobalVar;
 begin
   Result := inherited addGlobalVar(Value, AName);
   Result.isConstant := True;
-
-  if (FDump <> nil) then
-    Write(Format('const %s: Int32 = %d', [AName, Value]));
 end;
 
-function TScriptCompiler.addGlobalConst(Value: UInt32; AName: lpString): TLapeGlobalVar;
+function TSimbaScript_Compiler.addGlobalConst(Value: UInt32; AName: lpString): TLapeGlobalVar;
 begin
   Result := inherited addGlobalVar(Value, AName);
   Result.isConstant := True;
-
-  if (FDump <> nil) then
-    Write(Format('const %s: UInt32 = %d', [AName, Value]));
 end;
 
-function TScriptCompiler.addGlobalConst(Value: Int64; AName: lpString): TLapeGlobalVar;
+function TSimbaScript_Compiler.addGlobalConst(Value: Int64; AName: lpString): TLapeGlobalVar;
 begin
   Result := inherited addGlobalVar(Value, AName);
   Result.isConstant := True;
-
- if (FDump <> nil) then
-   Write(Format('const %s: Int64 = %d', [AName, Value]));
 end;
 
-function TScriptCompiler.addGlobalConst(Value: UInt64; AName: lpString): TLapeGlobalVar;
+function TSimbaScript_Compiler.addGlobalConst(Value: UInt64; AName: lpString): TLapeGlobalVar;
 begin
   Result := inherited addGlobalVar(Value, AName);
   Result.isConstant := True;
-
-  if (FDump <> nil) then
-    Write(Format('const %s: UInt64 = %d', [AName, Value]));
 end;
 
-function TScriptCompiler.addGlobalConst(Value: Extended; AName: lpString): TLapeGlobalVar;
+function TSimbaScript_Compiler.addGlobalConst(Value: Extended; AName: lpString): TLapeGlobalVar;
 begin
   Result := inherited addGlobalVar(Value, AName);
   Result.isConstant := True;
-
-  if (FDump <> nil) then
-    Write(Format('const %s: Extended = %s', [AName, FloatToStr(Value)]));
 end;
 
-function TScriptCompiler.addGlobalConst(Value: EvalBool; AName: lpString): TLapeGlobalVar;
+function TSimbaScript_Compiler.addGlobalConst(Value: EvalBool; AName: lpString): TLapeGlobalVar;
 begin
   Result := inherited addGlobalVar(Value, AName);
   Result.isConstant := True;
-
-  if (FDump <> nil) then
-    Write(Format('const %s: EvalBool = %s', [AName, BoolToStr(Value, True)]));
 end;
 
-function TScriptCompiler.addGlobalConst(Value: AnsiString; AName: lpString): TLapeGlobalVar;
+function TSimbaScript_Compiler.addGlobalConst(Value: AnsiString; AName: lpString): TLapeGlobalVar;
 begin
   Result := inherited addGlobalVar(Value, AName);
   Result.isConstant := True;
-
-  if (FDump <> nil) then
-    Write(Format('const %s: String = "%s"', [AName, Value]));
 end;
 
-function TScriptCompiler.addGlobalConst(Value: UnicodeString; AName: lpString): TLapeGlobalVar;
+function TSimbaScript_Compiler.addGlobalConst(Value: UnicodeString; AName: lpString): TLapeGlobalVar;
 begin
   Result := inherited addGlobalVar(Value, AName);
   Result.isConstant := True;
-
-  if (FDump <> nil) then
-    Write(Format('const %s: UnicodeString = "%s"', [AName, Value]));
 end;
 
-function TScriptCompiler.addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType;
+function TSimbaScript_Compiler.addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType;
 begin
   with addGlobalType(Str, '_' + AName) do
   begin
@@ -332,12 +187,12 @@ begin
   end;
 end;
 
-procedure TScriptCompiler.addClass(const Name: String; const Parent: String);
+procedure TSimbaScript_Compiler.addClass(const Name: String; const Parent: String);
 begin
   addGlobalType(Format('type %s', [Parent]), Name);
 end;
 
-procedure TScriptCompiler.addClassVar(const Obj, Item, Typ: String; const ARead: Pointer; const AWrite: Pointer; const Arr: Boolean; const ArrType: string);
+procedure TSimbaScript_Compiler.addClassVar(const Obj, Item, Typ: String; const ARead: Pointer; const AWrite: Pointer; const Arr: Boolean; const ArrType: string);
 var
   Param: String = '';
 begin
@@ -354,67 +209,99 @@ begin
     addGlobalFunc(Format('procedure %s.set%s(%sconst Value: %s); constref;', [Obj, Item, Param, Typ]), AWrite);
 end;
 
-procedure TScriptCompiler.pushConditional(AEval: Boolean; ADocPos: TDocPos);
-begin
-  inherited pushConditional(AEval, ADocPos);
-end;
-
-function TScriptCompiler.addDelayedCode(Code: lpString; AFileName: lpString; AfterCompilation: Boolean; IsGlobal: Boolean ): TLapeTree_Base;
-begin
-  Result := inherited addDelayedCode(Code, AFileName, AfterCompilation, IsGlobal);
-
-  if (FDump <> nil) and (not AFileName.StartsWith('!')) then
-    Write(Code);
-end;
-
-function TScriptCompiler.Import(Dumping: Boolean): Boolean;
+procedure TSimbaScript_Compiler.Import(Imports: array of TSimbaScript_Import; Data: Pointer);
 var
-  i: Int32;
+  I: Int32;
 begin
-  if Dumping then
-  begin
-    FDump := TStringList.Create();
-    FDump.LineBreak := #0;
-    FDump.Values['Types'] := {$i lape_type_imports.inc}
-    FDump.Values['Math'] := {$i lape_math_imports.inc}
-    FDump.Values['Time & Date'] := {$i lape_date_time_imports.inc}
-    FDump.Values['String'] := {$i lape_string_imports.inc}
-    FDump.Values['Variant'] := {$i lape_variant_imports.inc}
-    FDump.Values['System'] := {$i lape_system_imports.inc}
-    FDump.Values['File'] := {$i lape_file_imports.inc}
-  end;
-
   StartImporting();
 
-  Section := 'System';
-
-  if not FFILoaded then
-    raise Exception.Create('libFFI is missing or incompatible');
-
-  InitializeFFI(Self);
-  InitializePascalScriptBasics(Self, [psiTypeAlias, psiSettings, psiMagicMethod, psiFunctionWrappers, psiExceptions]);
-
-  ExposeGlobals(Self, [egmInvoke]);
-
   try
-    for i := 0 to High(Imports) do
-      Imports[i](Self);
+    if not FFILoaded then
+      raise Exception.Create('libFFI is missing or incompatible');
 
-    Result := True;
+    InitializeFFI(Self);
+    InitializePascalScriptBasics(Self, [psiTypeAlias, psiSettings, psiMagicMethod, psiFunctionWrappers, psiExceptions]);
+
+    ExposeGlobals(Self, [egmInvoke]);
+
+    for I := 0 to High(Imports) do
+      Imports[I](Self, Data);
   finally
     EndImporting();
   end;
 end;
 
-destructor TScriptCompiler.Destroy;
+procedure TSimbaScript_Compiler.Import(Data: Pointer);
+begin
+  Import([
+    @Lape_Import_Types,
+    @Lape_Import_TObject,
+    @Lape_Import_LCLSystem,
+    @Lape_Import_LCLGraphics,
+    @Lape_Import_LCLControls,
+    @Lape_Import_LCLForms,
+    @Lape_Import_LCLStdCtrls,
+    @Lape_Import_LCLExtCtrls,
+    @Lape_Import_LCLComCtrls,
+    @Lape_Import_LCLDialogs,
+    @Lape_Import_LCLMenus,
+    @Lape_Import_LCLSpinCtrls,
+    @Lape_Import_LCLProcess,
+    @Lape_Import_LCLRegExpr,
+
+    @Lape_Import_TMDTM,
+    @Lape_Import_TMDTMS,
+    @Lape_Import_TMufasaBitmap,
+    @Lape_Import_TMBitmaps,
+    @Lape_Import_TMFiles,
+    @Lape_Import_TMFinder,
+    @Lape_Import_TMFont,
+    @Lape_Import_TMFonts,
+    @Lape_Import_TMOCR,
+    @Lape_Import_TTarget,
+    @Lape_Import_TIOManager,
+    @Lape_Import_TClient,
+    @Lape_Import_TMMLTimer,
+    @Lape_Import_JSON,
+    @Lape_Import_XML,
+    @Lape_Import_SimbaImageBox,
+
+    @Lape_Import_System,
+    @Lape_Import_OSWindow,
+    @Lape_Import_Target,
+    @Lape_Import_Input,
+    @Lape_Import_Finder,
+    @Lape_Import_Web,
+    @Lape_Import_Arrays_Algorithms,
+    @Lape_Import_Matrix,
+    @Lape_Import_Math,
+    @Lape_Import_Time_Date,
+    @Lape_Import_OCR,
+    @Lape_Import_String,
+    @Lape_Import_ColorMath,
+    @Lape_Import_Bitmap,
+    @Lape_Import_DTM,
+    @Lape_Import_File,
+    @Lape_Import_Other,
+    @Lape_Import_Crypto,
+    @Lape_Import_Deprecated,
+    @Lape_Import_Dialogs,
+    @Lape_Import_Simba,
+    @Lape_Import_Process
+  ], Data);
+end;
+
+procedure TSimbaScript_Compiler.pushConditional(AEval: Boolean; ADocPos: TDocPos);
+begin
+  inherited pushConditional(AEval, ADocPos);
+end;
+
+destructor TSimbaScript_Compiler.Destroy;
 var
   I: Int32;
 begin
-  for I := 0 to High(FImportClosures) do
-    FImportClosures[I].Free();
-
-  if (FDump <> nil) then
-    FDump.Free();
+  for I := 0 to High(FManagedClosures) do
+    FManagedClosures[I].Free();
 
   inherited Destroy();
 end;
