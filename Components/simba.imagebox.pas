@@ -596,19 +596,17 @@ procedure TSimbaImageBox.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
 
-  if (not (csLoading in ComponentState)) then
-  begin
+  if (FMousePanel <> nil) and (FDimensionsPanel <> nil) and (FStatusBar <> nil) then
     with TBitmap.Create() do
     try
       Canvas.Font := Self.Font;
 
       FMousePanel.Width := Canvas.TextWidth('9999x9999') * 2;
       FDimensionsPanel.Width := Canvas.TextWidth('9999x9999') * 2;
-      FStatusBar.Height := Round(Canvas.TextHeight('9998x9999') * 1.5);
+      FStatusBar.Height := Round(Canvas.TextHeight('9999x9999') * 1.5);
     finally
       Free();
     end;
-  end;
 end;
 
 procedure TSimbaImageBox.ImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);

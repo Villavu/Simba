@@ -453,7 +453,7 @@ procedure TSimbaPackageForm.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
 
-  if (not (csLoading in ComponentState)) then
+  if (UpdatePackageLabel <> nil) and (ReleasesList <> nil) then
   begin
     UpdatePackageLabel.Font.Color := clNavy;
 

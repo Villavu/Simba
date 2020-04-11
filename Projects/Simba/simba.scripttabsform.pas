@@ -379,14 +379,17 @@ procedure TSimbaScriptTabsForm.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
 
-  if (not (csLoading in ComponentState)) then
-  begin
-    StatusBar.Height := Round(Canvas.TextHeight('Fj') * 1.33);
-    if StatusPanelCaret <> nil then
-      StatusPanelCaret.Width := Round(Canvas.TextWidth('1000:1000') * 1.5);
-    if StatusPanelState <> nil then
+  if (StatusBar <> nil) and (StatusPanelCaret <> nil) and (StatusPanelState <> nil) then
+    with TBitmap.Create() do
+    try
+      Canvas.Font := Self.Font;
+
+      StatusBar.Height := Round(Canvas.TextHeight('0') * 1.5);
+      StatusPanelCaret.Width := Round(Canvas.TextWidth('9999:9999') * 1.5);
       StatusPanelState.Width := Round(Canvas.TextWidth('000:000:000') * 1.5);
-  end;
+    finally
+      Free();
+    end;
 end;
 
 procedure TSimbaScriptTabsForm.SetVisible(Value: boolean);
