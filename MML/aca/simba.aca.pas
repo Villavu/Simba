@@ -140,23 +140,30 @@ procedure TSimbaACAForm.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
 
-  if (not (csLoading in ComponentState)) then
+  if (ColorListBox <> nil) and (ColorLabelPanel <> nil) and (PanelZoom <> nil) then
   begin
-    with Canvas.TextExtent(' HSL: 100.00, 100.00, 100.00 ') do
-    begin
-      ColorListBox.ItemHeight := CY + 10;
-      ColorListBox.ColorRectWidth := ColorListBox.ItemHeight - (ColorListBox.ColorRectOffset * 2);
+    with TBitmap.Create() do
+    try
+      Canvas.Font := Self.Font;
 
-      ColorLabelPanel.Width := CX;
-      ColorLabelPanel.Height := CY * 3;
-    end;
+      with Canvas.TextExtent(' HSL: 100.00, 100.00, 100.00 ') do
+      begin
+        ColorListBox.ItemHeight := CY + 10;
+        ColorListBox.ColorRectWidth := ColorListBox.ItemHeight - (ColorListBox.ColorRectOffset * 2);
 
-    if ColorLabelPanel.Height > PanelZoom.Height then
-    begin
-      PanelZoom.Width := (ColorLabelPanel.Height-5) + (5 - (ColorLabelPanel.Height-5) mod 5);
-      PanelZoom.Height := (ColorLabelPanel.Height-5) + (5 - (ColorLabelPanel.Height-5) mod 5);
-      PanelZoom.Height := PanelZoom.Height + 2;
-      PanelZoom.Width := PanelZoom.Height + 2;
+        ColorLabelPanel.Width := CX;
+        ColorLabelPanel.Height := CY * 3;
+      end;
+
+      if ColorLabelPanel.Height > PanelZoom.Height then
+      begin
+        PanelZoom.Width := (ColorLabelPanel.Height-5) + (5 - (ColorLabelPanel.Height-5) mod 5);
+        PanelZoom.Height := (ColorLabelPanel.Height-5) + (5 - (ColorLabelPanel.Height-5) mod 5);
+        PanelZoom.Height := PanelZoom.Height + 2;
+        PanelZoom.Width := PanelZoom.Height + 2;
+      end;
+    finally
+      Free();
     end;
   end;
 end;

@@ -344,20 +344,27 @@ procedure TSimbaDTMEditorForm.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
 
-  if (not (csLoading in ComponentState)) then
+  if (PanelColorZoom <> nil) and (PanelZoom <> nil) then
   begin
-    with Canvas.TextExtent(' HSL: 100.00, 100.00, 100.00 ') do
-    begin
-      PanelColorZoom.Width := CX;
-      PanelColorZoom.Height := CY * 3;
-    end;
+    with TBitmap.Create() do
+    try
+      Canvas.Font := Self.Font;
 
-    if PanelColorZoom.Height > PanelZoom.Height then
-    begin
-      PanelZoom.Width := (PanelColorZoom.Height-5) + (5 - (PanelColorZoom.Height-5) mod 5);
-      PanelZoom.Height := (PanelColorZoom.Height-5) + (5 - (PanelColorZoom.Height-5) mod 5);
-      PanelZoom.Height := PanelZoom.Height + 2;
-      PanelZoom.Width := PanelZoom.Height + 2;
+      with Canvas.TextExtent(' HSL: 100.00, 100.00, 100.00 ') do
+      begin
+        PanelColorZoom.Width := CX;
+        PanelColorZoom.Height := CY * 3;
+      end;
+
+      if PanelColorZoom.Height > PanelZoom.Height then
+      begin
+        PanelZoom.Width := (PanelColorZoom.Height-5) + (5 - (PanelColorZoom.Height-5) mod 5);
+        PanelZoom.Height := (PanelColorZoom.Height-5) + (5 - (PanelColorZoom.Height-5) mod 5);
+        PanelZoom.Height := PanelZoom.Height + 2;
+        PanelZoom.Width := PanelZoom.Height + 2;
+      end;
+    finally
+      Free();
     end;
   end;
 end;
