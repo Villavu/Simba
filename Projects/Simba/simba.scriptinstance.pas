@@ -107,7 +107,6 @@ type
     // Start
     procedure Run;
     procedure Compile;
-    procedure Dump;
 
     // Change the state
     procedure Resume;
@@ -122,9 +121,6 @@ type
 implementation
 
 uses
-  {$IFDEF UNIX}
-  baseunix,
-  {$ENDIF}
   forms, dialogs,
   simba.script_simbamethod, simba.debugform, simba.settings;
 
@@ -140,6 +136,9 @@ begin
   try
     while True do
     begin
+      Method.Params.Clear();
+      Method.Result.Clear();
+
       if not FServer.ReadMessage(Message, Method.Params) then
         Break;
 
@@ -155,6 +154,8 @@ begin
         SIMBA_METHOD_BALLOON_HINT:        TThread.Synchronize(nil, @Method._ShowBalloonHint);
         SIMBA_METHOD_DISGUISE:            TThread.Synchronize(nil, @Method._Disguise);
         SIMBA_METHOD_STATUS:              TThread.Synchronize(nil, @Method._Status);
+        SIMBA_METHOD_GET_TARGET_PID:      TThread.Synchronize(nil, @Method._GetSimbaTargetPID);
+        SIMBA_METHOD_GET_TARGET_WINDOW:   TThread.Synchronize(nil, @Method._GetSimbaTargetWindow)
         else
           raise Exception.CreateFmt('Invalid method %d', [Method.Method]);
       end;
@@ -393,16 +394,6 @@ begin
   FStartTime := GetTickCount64();
 end;
 
-procedure TSimbaScriptInstance.Dump;
-begin
-  FProcess.Parameters.Add('--dump');
-  FProcess.Execute();
-  while FProcess.Running do
-    Application.ProcessMessages();
-
-  FStartTime := GetTickCount64();
-end;
-
 procedure TSimbaScriptInstance.Resume;
 var
   Message: Int32 = Ord(SCRIPT_RUNNING);
@@ -450,11 +441,6 @@ begin
   FProcess.Executable := SimbaSettings.Environment.ScriptExecutablePath.Value;
   if (not FileExists(FProcess.Executable)) then
     raise Exception.Create('SimbaScript executable not found: ' + FProcess.Executable);
-
-  {$IFDEF UNIX}
-  if fpchmod(FProcess.Executable, &755) <> 0 then //rwxr-xr-x
-    raise Exception.Create('Unable to make SimbaScript executable');
-  {$ENDIF}
 
   FMethodThread := TSimbaScriptMethodThread.Create(Self, FMethodServer);
   FStateThread := TSimbaScriptStateThread.Create(Self, FStateServer);

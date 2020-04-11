@@ -83,24 +83,21 @@ end;
 function TSimbaIPC.ReadMessage(out Message: Int32; Data: TMemoryStream): Boolean;
 var
   Count: Int32;
-  Header: TMessageHeader;
   Buffer: array[0..BUFFER_SIZE - 1] of Byte;
+  Header: TMessageHeader;
 begin
   Result := True;
-
   if Read(Header, SizeOf(TMessageHeader)) = PIPE_TERMINATED then
     Exit(False);
 
   Message := Header.Message;
 
   Data.Clear();
-  Data.Size := Header.Size - SizeOf(TMessageHeader);
-  Data.Position := 0;
 
-  while Data.Position < Data.Size do
+  while Data.Size < Header.Size do
   begin
-    Count := Read(Buffer[0], Min(Data.Size - Data.Position, Length(Buffer)));
-    if Count = PIPE_TERMINATED then
+    Count := Read(Buffer[0], Length(Buffer));
+    if (Count = PIPE_TERMINATED) then
       Exit(False);
 
     Data.Write(Buffer[0], Count);
@@ -123,7 +120,7 @@ procedure TSimbaIPC.WriteMessage(const Message: Int32; Data: TMemoryStream);
 var
   Header: TMessageHeader;
 begin
-  Header.Size := Data.Size + SizeOf(TMessageHeader);
+  Header.Size := Data.Size;
   Header.Message := Message;
 
   FOutputStream.Write(Header, SizeOf(TMessageHeader));

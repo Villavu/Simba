@@ -34,8 +34,11 @@ procedure ConvertTime64(Time: Int64; var y, m, w, d, h, min, s: Int32);
 function TimeStamp(Time: Int64; IncludeMilliseconds: Boolean = False): String;
 function PerformanceTimer: Double;
 function GetCommandLine: TStringArray;
-function RunCommand(CurrentDirectory: String; CommandLine: String; out Output: String): Int32;
-procedure RunCommand(CurrentDirectory: String; CommandLine: String);
+function RunCommandInDir(Directory: String; CommandLine: String; out OutputString: String): Int32; overload;
+procedure RunCommandInDir(Directory: String; CommandLine: String); overload;
+function RunCommand(CommandLine: String; out OutputString: String): Int32; overload;
+procedure RunCommand(CommandLine: String); overload;
+
 function OpenDirectory(Path: String): Boolean;
 
 implementation
@@ -131,69 +134,115 @@ begin
     Result[i] := ParamStr(i);
 end;
 
-function RunCommand(CurrentDirectory: String; CommandLine: String; out Output: String): Int32;
+function RunCommandInDir(Directory: String; CommandLine: String; out OutputString: String): Int32;
+const
+  BUFFER_SIZE = 1024 * 16;
 var
-  List: TStringList;
-  Commands: array of String;
-  i: Int32;
+  Commands: TStringList;
+  I, Count: Int32;
+  Buffer: array[1..BUFFER_SIZE] of Char;
 begin
   Result := -1;
+  SetLength(OutputString, 0);
 
-  List := TStringList.Create();
+  Commands := TStringList.Create();
 
-  CommandToList(CommandLine, List);
-
-  if List.Count > 0 then
   try
-    SetLength(Commands, List.Count - 1);
-    for i := 1 to List.Count - 1 do
-      Commands[i - 1] := List[i];
+    CommandToList(CommandLine, Commands);
+    if (Commands.Count = 0) then
+      Exit;
 
-    RunCommandInDir(CurrentDirectory, List[0], Commands, Output, Result);
+    with TProcess.Create(nil) do
+    try
+      Options := [poUsePipes];
+      PipeBufferSize := BUFFER_SIZE;
+      CurrentDirectory := Directory;
+      Executable := Commands[0];
+
+      {$IFDEF WINDOWS}
+      if ExtractFileExt(Executable) = '' then
+        Executable := Executable + '.exe';
+      {$ENDIF}
+
+      for I := 1 to Commands.Count - 1 do
+        Parameters.Add(Commands[I]);
+
+      Execute();
+
+      while Running do
+      begin
+        while (Output.NumBytesAvailable > 0) do
+        begin
+          Count := Output.Read(Buffer[1], BUFFER_SIZE);
+          if Count > 0 then
+            OutputString := OutputString + Copy(Buffer, 1, Count);
+        end;
+
+        Sleep(50);
+      end;
+
+      // Make sure we empty the output
+      while (Output.NumBytesAvailable > 0) do
+      begin
+        Count := Output.Read(Buffer[1], BUFFER_SIZE);
+        if (Count > 0) then
+          OutputString := OutputString + Copy(Buffer, 1, Count);
+      end;
+
+      Result := ExitStatus;
+    finally
+      Free();
+    end;
   finally
-    List.Free();
+    Commands.Free();
   end;
 end;
 
-procedure ManageProcess(Data: Pointer);
+procedure RunCommandInDir(Directory: String; CommandLine: String);
+const
+  BUFFER_SIZE = 1024 * 16;
 var
-  Process: TProcess absolute Data;
-  Buffer: array[1..1024] of Char;
+  Commands: TStringList;
+  I: Int32;
+  Buffer: array[1..BUFFER_SIZE] of Char;
 begin
-  while Process.Running do
-  begin
-    while Process.Output.NumBytesAvailable > 0 do
-      Process.Output.Read(Buffer[1], Length(Buffer));
+  Commands := TStringList.Create();
 
-    Sleep(500);
+  try
+    CommandToList(CommandLine, Commands);
+    if (Commands.Count = 0) then
+      Exit;
+
+    with TProcess.Create(nil) do
+    try
+      CurrentDirectory := Directory;
+      Executable := Commands[0];
+
+      {$IFDEF WINDOWS}
+      if ExtractFileExt(Executable) = '' then
+        Executable := Executable + '.exe';
+      {$ENDIF}
+
+      for I := 1 to Commands.Count - 1 do
+        Parameters.Add(Commands[I]);
+
+      Execute();
+    finally
+      Free();
+    end;
+  finally
+    Commands.Free();
   end;
-
-  Process.Free();
 end;
 
-procedure RunCommand(CurrentDirectory: String; CommandLine: String);
-var
-  Params: TStringList;
-  Process: TProcess;
-  i: Int32;
+function RunCommand(CommandLine: String; out OutputString: String): Int32;
 begin
-  Params := TStringList.Create();
+  Result := RunCommandInDir(GetCurrentDir(), CommandLine, OutputString);
+end;
 
-  CommandToList(CommandLine, Params);
-
-  if Params.Count > 0 then
-  begin
-    Process := TProcess.Create(nil);
-    Process.Options := Process.Options + [poUsePipes, poStderrToOutPut, poNewProcessGroup];
-    Process.Executable := Params[0];
-    for i := 1 to Params.Count - 1 do
-      Process.Parameters.Add(Params[i]);
-    Process.Execute();
-
-    TThread.ExecuteInThread(@ManageProcess, Process);
-  end;
-
-  Params.Free();
+procedure RunCommand(CommandLine: String);
+begin
+  RunCommandInDir(GetCurrentDir(), CommandLine);
 end;
 
 function OpenDirectory(Path: String): Boolean;
@@ -215,7 +264,7 @@ begin
   Executable := 'open';
   {$ENDIF}
 
-  if Executable = '' then
+  if (Executable = '') then
     raise Exception.Create('OpenDirectory is unsupported on this system.');
 
   Result := RunCommandInDir('', Executable, [Path], Output, ExitStatus) = 0;

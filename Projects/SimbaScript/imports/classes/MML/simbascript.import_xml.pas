@@ -7,7 +7,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Register_TXml(Compiler: TScriptCompiler);
+procedure Lape_Import_XML(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 
 implementation
 
@@ -116,7 +116,7 @@ begin
   PlpString(Result)^ := PXmlNode(Params^[0])^[PlpString(Params^[1])^];
 end;
 
-procedure Register_TXmlNode(Compiler: TScriptCompiler);
+procedure Lape_Import_TXmlNode(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
@@ -215,7 +215,7 @@ begin
   PXMLNodeList(Params^[0])^.Free();
 end;
 
-procedure Register_TXMLNodeList(Compiler: TScriptCompiler);
+procedure Lape_Import_TXMLNodeList(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
@@ -322,10 +322,10 @@ begin
   PVerySimpleXml(Params^[0])^.Free();
 end;
 
-procedure Register_TXml(Compiler: TScriptCompiler);
+procedure Lape_Import_XML(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
-  Register_TXmlNode(Compiler);
-  Register_TXmlNodeList(Compiler);
+  Lape_Import_TXmlNode(Compiler);
+  Lape_Import_TXmlNodeList(Compiler);
   with Compiler do
   begin
     addClass('TXml', 'TObject');
@@ -344,9 +344,6 @@ begin
     //addGlobalFunc('procedure TXml.Free();', @TVerySimpleXml_Free);
   end;
 end;
-
-initialization
-  RegisterScriptImport(@Register_TXml);
 
 end.
 

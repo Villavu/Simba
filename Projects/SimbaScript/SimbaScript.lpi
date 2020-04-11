@@ -27,7 +27,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\..\Modules\lape;imports;imports\lape"/>
             <Libraries Value="..\..\Modules\lape\extensions\ffi\bin\$(TargetOS)"/>
-            <OtherUnitFiles Value="..\Simba;imports;imports\classes\MML;imports\classes\LCL;..\..\MML\matchtemplate\fftlib;..\..\MML\matchtemplate;..\..\MML;..\..\MML\iomanager;..\..\MML\dtmeditor;..\..\MML\aca;..\..\MML\oswindow;..\..\MML\web;..\..\MML\web\fpc;..\..\MML\archive;..\..\Modules\lape;..\..\Modules\lape\extensions\ffi;..\..\Modules\Synapse;..\..\Modules\DCPCrypt;..\..\Modules\DCPCrypt\Ciphers;..\..\Modules\DCPCrypt\Hashes;..\..\MML\linux;..\..\Components;..\..\MML\darwin"/>
+            <OtherUnitFiles Value="..\Simba;imports;imports\classes\MML;imports\classes\LCL;..\..\MML\matchtemplate\fftlib;..\..\MML\matchtemplate;..\..\MML;..\..\MML\iomanager;..\..\MML\dtmeditor;..\..\MML\aca;..\..\MML\oswindow;..\..\MML\web;..\..\MML\web\fpc;..\..\MML\archive;..\..\Modules\lape;..\..\Modules\lape\extensions\ffi;..\..\Modules\Synapse;..\..\Modules\DCPCrypt;..\..\Modules\DCPCrypt\Ciphers;..\..\Modules\DCPCrypt\Hashes;..\..\MML\linux;..\..\MML\darwin"/>
             <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -48,10 +48,6 @@
             </CompilerMessages>
             <CustomOptions Value="-dLape_CDECL
 -dStaticFFI"/>
-            <OtherDefines Count="2">
-              <Define0 Value="Lape_CDECL"/>
-              <Define1 Value="StaticFFI"/>
-            </OtherDefines>
             <ExecuteAfter>
               <Command Value="$MakeExe($(LazarusDir)lazbuild) --build-mode=$(BuildMode) ..\SimbaResources\MakeSimbaResources.lpi"/>
               <ShowAllMessages Value="True"/>
@@ -69,7 +65,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\..\Modules\lape;imports;imports\lape"/>
             <Libraries Value="..\..\Modules\lape\extensions\ffi\bin\$(TargetOS)"/>
-            <OtherUnitFiles Value="..\Simba;imports;imports\classes\MML;imports\classes\LCL;..\..\MML\matchtemplate\fftlib;..\..\MML\matchtemplate;..\..\MML;..\..\MML\iomanager;..\..\MML\dtmeditor;..\..\MML\aca;..\..\MML\oswindow;..\..\MML\web;..\..\MML\web\fpc;..\..\MML\archive;..\..\Modules\lape;..\..\Modules\lape\extensions\ffi;..\..\Modules\Synapse;..\..\Modules\DCPCrypt;..\..\Modules\DCPCrypt\Ciphers;..\..\Modules\DCPCrypt\Hashes;..\..\MML\linux;..\..\Components;..\..\MML\darwin"/>
+            <OtherUnitFiles Value="..\Simba;imports;imports\classes\MML;imports\classes\LCL;..\..\MML\matchtemplate\fftlib;..\..\MML\matchtemplate;..\..\MML;..\..\MML\iomanager;..\..\MML\dtmeditor;..\..\MML\aca;..\..\MML\oswindow;..\..\MML\web;..\..\MML\web\fpc;..\..\MML\archive;..\..\Modules\lape;..\..\Modules\lape\extensions\ffi;..\..\Modules\Synapse;..\..\Modules\DCPCrypt;..\..\Modules\DCPCrypt\Ciphers;..\..\Modules\DCPCrypt\Hashes;..\..\MML\linux;..\..\MML\darwin"/>
             <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -106,7 +102,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\..\Modules\lape;imports;imports\lape"/>
             <Libraries Value="..\..\Modules\lape\extensions\ffi\bin\$(TargetOS)"/>
-            <OtherUnitFiles Value="..\Simba;imports;imports\classes\MML;imports\classes\LCL;..\..\MML\matchtemplate\fftlib;..\..\MML\matchtemplate;..\..\MML;..\..\MML\iomanager;..\..\MML\dtmeditor;..\..\MML\aca;..\..\MML\oswindow;..\..\MML\web;..\..\MML\web\fpc;..\..\MML\archive;..\..\Modules\lape;..\..\Modules\lape\extensions\ffi;..\..\Modules\Synapse;..\..\Modules\DCPCrypt;..\..\Modules\DCPCrypt\Ciphers;..\..\Modules\DCPCrypt\Hashes;..\..\MML\linux;..\..\Components;..\..\MML\darwin"/>
+            <OtherUnitFiles Value="..\Simba;imports;imports\classes\MML;imports\classes\LCL;..\..\MML\matchtemplate\fftlib;..\..\MML\matchtemplate;..\..\MML;..\..\MML\iomanager;..\..\MML\dtmeditor;..\..\MML\aca;..\..\MML\oswindow;..\..\MML\web;..\..\MML\web\fpc;..\..\MML\archive;..\..\Modules\lape;..\..\Modules\lape\extensions\ffi;..\..\Modules\Synapse;..\..\Modules\DCPCrypt;..\..\Modules\DCPCrypt\Ciphers;..\..\Modules\DCPCrypt\Hashes;..\..\MML\linux;..\..\MML\darwin"/>
             <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -143,7 +139,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\..\Modules\lape;imports;imports\lape"/>
             <Libraries Value="..\..\Modules\lape\extensions\ffi\bin\$(TargetOS)"/>
-            <OtherUnitFiles Value="..\Simba;imports;imports\classes\MML;imports\classes\LCL;..\..\MML\matchtemplate\fftlib;..\..\MML\matchtemplate;..\..\MML;..\..\MML\iomanager;..\..\MML\dtmeditor;..\..\MML\aca;..\..\MML\oswindow;..\..\MML\web;..\..\MML\web\fpc;..\..\MML\archive;..\..\Modules\lape;..\..\Modules\lape\extensions\ffi;..\..\Modules\Synapse;..\..\Modules\DCPCrypt;..\..\Modules\DCPCrypt\Ciphers;..\..\Modules\DCPCrypt\Hashes;..\..\MML\linux;..\..\Components;..\..\MML\darwin"/>
+            <OtherUnitFiles Value="..\Simba;imports;imports\classes\MML;imports\classes\LCL;..\..\MML\matchtemplate\fftlib;..\..\MML\matchtemplate;..\..\MML;..\..\MML\iomanager;..\..\MML\dtmeditor;..\..\MML\aca;..\..\MML\oswindow;..\..\MML\web;..\..\MML\web\fpc;..\..\MML\archive;..\..\Modules\lape;..\..\Modules\lape\extensions\ffi;..\..\Modules\Synapse;..\..\Modules\DCPCrypt;..\..\Modules\DCPCrypt\Ciphers;..\..\Modules\DCPCrypt\Hashes;..\..\MML\linux;..\..\MML\darwin"/>
             <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -175,9 +171,16 @@
       <Version Value="2"/>
     </PublishOptions>
     <RunParams>
+      <local>
+        <CommandLineParams Value="--compile test"/>
+      </local>
       <FormatVersion Value="2"/>
       <Modes Count="1">
-        <Mode0 Name="default"/>
+        <Mode0 Name="default">
+          <local>
+            <CommandLineParams Value="--compile test"/>
+          </local>
+        </Mode0>
       </Modes>
     </RunParams>
     <RequiredPackages Count="2">
@@ -188,7 +191,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="8">
+    <Units Count="10">
       <Unit0>
         <Filename Value="SimbaScript.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -221,6 +224,14 @@
         <Filename Value="simbascript.plugin.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit7>
+      <Unit8>
+        <Filename Value="simbascript.dumper.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="simbascript.compilerdump.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit9>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -232,10 +243,12 @@
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);..\..\Modules\lape;imports;imports\lape"/>
       <Libraries Value="..\..\Modules\lape\extensions\ffi\bin\$(TargetOS)"/>
-      <OtherUnitFiles Value="..\Simba;imports;imports\classes\MML;imports\classes\LCL;..\..\MML\matchtemplate\fftlib;..\..\MML\matchtemplate;..\..\MML;..\..\MML\iomanager;..\..\MML\dtmeditor;..\..\MML\aca;..\..\MML\oswindow;..\..\MML\web;..\..\MML\web\fpc;..\..\MML\archive;..\..\Modules\lape;..\..\Modules\lape\extensions\ffi;..\..\Modules\Synapse;..\..\Modules\DCPCrypt;..\..\Modules\DCPCrypt\Ciphers;..\..\Modules\DCPCrypt\Hashes;..\..\MML\linux;..\..\Components;..\..\MML\darwin"/>
+      <OtherUnitFiles Value="..\Simba;imports;imports\classes\MML;imports\classes\LCL;..\..\MML\matchtemplate\fftlib;..\..\MML\matchtemplate;..\..\MML;..\..\MML\iomanager;..\..\MML\dtmeditor;..\..\MML\aca;..\..\MML\oswindow;..\..\MML\web;..\..\MML\web\fpc;..\..\MML\archive;..\..\Modules\lape;..\..\Modules\lape\extensions\ffi;..\..\Modules\Synapse;..\..\Modules\DCPCrypt;..\..\Modules\DCPCrypt\Ciphers;..\..\Modules\DCPCrypt\Hashes;..\..\MML\linux;..\..\MML\darwin"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
+      <TargetCPU Value="x86_64"/>
+      <TargetOS Value="win64"/>
       <Optimizations>
         <OptimizationLevel Value="3"/>
       </Optimizations>
@@ -251,10 +264,6 @@
       </CompilerMessages>
       <CustomOptions Value="-dLape_CDECL
 -dStaticFFI"/>
-      <OtherDefines Count="2">
-        <Define0 Value="Lape_CDECL"/>
-        <Define1 Value="StaticFFI"/>
-      </OtherDefines>
       <ExecuteAfter>
         <Command Value="$MakeExe($(LazarusDir)lazbuild) --build-mode=$(BuildMode) ..\SimbaResources\MakeSimbaResources.lpi"/>
         <ShowAllMessages Value="True"/>

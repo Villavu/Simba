@@ -18,7 +18,9 @@ type
                   SIMBA_METHOD_DEBUG_IMAGE_DRAW,
                   SIMBA_METHOD_BALLOON_HINT,
                   SIMBA_METHOD_DISGUISE,
-                  SIMBA_METHOD_STATUS);
+                  SIMBA_METHOD_STATUS,
+                  SIMBA_METHOD_GET_TARGET_PID,
+                  SIMBA_METHOD_GET_TARGET_WINDOW);
 
   TSimbaMethod_ScriptError = packed record
     Message: array[1..2048] of Char;

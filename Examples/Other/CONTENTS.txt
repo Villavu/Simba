@@ -1,9 +1,0 @@
-+=========================================================================================+
-
- FOLDER Contents:
-
-   * MagicTrick.simba......................Show's advanced use of forms and simple arrays.
-                                           Plus a nice little magic trick to read your
-                                           mind. :-) Created by Daniel.
-
-+=========================================================================================+

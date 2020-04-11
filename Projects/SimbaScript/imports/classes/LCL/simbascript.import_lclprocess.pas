@@ -6,6 +6,8 @@ interface
 
 {$i import_uses.inc}
 
+procedure Lape_Import_LCLProcess(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+
 implementation
 
 uses
@@ -30,555 +32,555 @@ type
 
 
 //function Seek(const Offset: int64; Origin: TSeekOrigin): int64; override;
-procedure TOutputPipeStream_Seek(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TOutputPipeStream_Seek(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   Pint64(Result)^ := POutputPipeStream(Params^[0])^.Seek(Pint64(Params^[1])^, PSeekOrigin(Params^[2])^);
 end;
 
 //Function Read (Var Buffer; Count : Longint) : longint; Override;
-procedure TOutputPipeStream_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TOutputPipeStream_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   Plongint(Result)^ := POutputPipeStream(Params^[0])^.Read(PLongint(Params^[1])^, PLongint(Params^[2])^);
 end;
 
 //constructor Create();
-procedure TOutputPipeStream_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TOutputPipeStream_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   POutputPipeStream(Params^[0])^ := TOutputPipeStream.Create(PHandle(Params^[1])^);
 end;
 
 //procedure Free();
-procedure TOutputPipeStream_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TOutputPipeStream_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   POutputPipeStream(Params^[0])^.Free();
 end;
 
-procedure Register_TOutputPipeStream(Compiler: TScriptCompiler);
+procedure Lape_Import_TOutputPipeStream(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
     addClass('TOutputPipeStream', 'THandleStream');
 
-   // addGlobalFunc('function TOutputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64; constref;', @TOutputPipeStream_Seek);
-   // addGlobalFunc('function TOutputPipeStream.Read(Var Buffer; Count : Longint): longint; constref;', @TOutputPipeStream_Read);
-    addGlobalFunc('procedure TOutputPipeStream.Init(AHandle: THandle); override;', @TOutputPipeStream_Init);
-   // addGlobalFunc('procedure TOutputPipeStream.Free(); constref;', @TOutputPipeStream_Free);
+   // addGlobalFunc('function TOutputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64; constref;', @Lape_TOutputPipeStream_Seek);
+   // addGlobalFunc('function TOutputPipeStream.Read(Var Buffer; Count : Longint): longint; constref;', @Lape_TOutputPipeStream_Read);
+    addGlobalFunc('procedure TOutputPipeStream.Init(AHandle: THandle); override;', @Lape_TOutputPipeStream_Init);
+   // addGlobalFunc('procedure TOutputPipeStream.Free(); constref;', @Lape_TOutputPipeStream_Free);
   end;
 end;
 
 //Function Write (Const Buffer; Count : Longint) :Longint; Override;
-procedure TInputPipeStream_Write(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TInputPipeStream_Write(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PLongint(Result)^ := PInputPipeStream(Params^[0])^.Write(PLongint(Params^[1])^, PLongint(Params^[2])^);
 end;
 
 //function Seek(const Offset: int64; Origin: TSeekOrigin): int64; override;
-procedure TInputPipeStream_Seek(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TInputPipeStream_Seek(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   Pint64(Result)^ := PInputPipeStream(Params^[0])^.Seek(Pint64(Params^[1])^, PSeekOrigin(Params^[2])^);
 end;
 
 //Function Read (Var Buffer; Count : Longint) : longint; Override;
-procedure TInputPipeStream_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TInputPipeStream_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   Plongint(Result)^ := PInputPipeStream(Params^[0])^.Read(PLongint(Params^[1])^, PLongint(Params^[2])^);
 end;
 
 //Read: property NumBytesAvailable: UInt32 read GetNumBytesAvailable;
-procedure TInputPipeStream_NumBytesAvailable_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TInputPipeStream_NumBytesAvailable_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PUInt32(Result)^ := PInputPipeStream(Params^[0])^.NumBytesAvailable;
 end;
 
 //constructor Create();
-procedure TInputPipeStream_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TInputPipeStream_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PInputPipeStream(Params^[0])^ := TInputPipeStream.Create(PHandle(Params^[1])^);
 end;
 
 //procedure Free();
-procedure TInputPipeStream_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TInputPipeStream_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PInputPipeStream(Params^[0])^.Free();
 end;
 
-procedure Register_TInputPipeStream(Compiler: TScriptCompiler);
+procedure Lape_Import_TInputPipeStream(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
     addClass('TInputPipeStream', 'THandleStream');
 
-    //addGlobalFunc('function TInputPipeStream.Write(constref Buffer; Count : Longint): Longint; constref;', @TInputPipeStream_Write);
-    //addGlobalFunc('function TInputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64; constref;', @TInputPipeStream_Seek);
-    //addGlobalFunc('function TInputPipeStream.Read(var Buffer; Count : Longint): longint; constref;', @TInputPipeStream_Read);
-    addClassVar('TInputPipeStream', 'NumBytesAvailable', 'UInt32', @TInputPipeStream_NumBytesAvailable_Read, nil);
-    addGlobalFunc('procedure TInputPipeStream.Init(AHandle: THandle); override;', @TInputPipeStream_Init);
-    //addGlobalFunc('procedure TInputPipeStream.Free(); constref;', @TInputPipeStream_Free);
+    //addGlobalFunc('function TInputPipeStream.Write(constref Buffer; Count : Longint): Longint; constref;', @Lape_TInputPipeStream_Write);
+    //addGlobalFunc('function TInputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64; constref;', @Lape_TInputPipeStream_Seek);
+    //addGlobalFunc('function TInputPipeStream.Read(var Buffer; Count : Longint): longint; constref;', @Lape_TInputPipeStream_Read);
+    addClassVar('TInputPipeStream', 'NumBytesAvailable', 'UInt32', @Lape_TInputPipeStream_NumBytesAvailable_Read, nil);
+    addGlobalFunc('procedure TInputPipeStream.Init(AHandle: THandle); override;', @Lape_TInputPipeStream_Init);
+    //addGlobalFunc('procedure TInputPipeStream.Free(); constref;', @Lape_TInputPipeStream_Free);
   end;
 end;
 
 //Procedure Execute; virtual;
-procedure TProcess_Execute(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Execute(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.Execute();
 end;
 
 //procedure CloseInput; virtual;
-procedure TProcess_CloseInput(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_CloseInput(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.CloseInput();
 end;
 
 //procedure CloseOutput; virtual;
-procedure TProcess_CloseOutput(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_CloseOutput(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.CloseOutput();
 end;
 
 //procedure CloseStderr; virtual;
-procedure TProcess_CloseStderr(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_CloseStderr(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.CloseStderr();
 end;
 
 //Function Resume : Integer; virtual;
-procedure TProcess_Resume(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Resume(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PInteger(Result)^ := PProcess(Params^[0])^.Resume();
 end;
 
 //Function Suspend : Integer; virtual;
-procedure TProcess_Suspend(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Suspend(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PInteger(Result)^ := PProcess(Params^[0])^.Suspend();
 end;
 
 //Function Terminate (AExitCode : Integer): Boolean; virtual;
-procedure TProcess_Terminate(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Terminate(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PBoolean(Result)^ := PProcess(Params^[0])^.Terminate(PInteger(Params^[1])^);
 end;
 
 //Function WaitOnExit : Boolean;
-procedure TProcess_WaitOnExit(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_WaitOnExit(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PBoolean(Result)^ := PProcess(Params^[0])^.WaitOnExit();
 end;
 
 //Read: Property WindowRect : Trect Read GetWindowRect Write SetWindowRect;
-procedure TProcess_WindowRect_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_WindowRect_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   Prect(Result)^ := PProcess(Params^[0])^.WindowRect;
 end;
 
 //Write: Property WindowRect : Trect Read GetWindowRect Write SetWindowRect;
-procedure TProcess_WindowRect_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_WindowRect_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.WindowRect := Prect(Params^[1])^;
 end;
 
 //Read: Property Handle : THandle Read FProcessHandle;
-procedure TProcess_Handle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Handle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PHandle(Result)^ := PProcess(Params^[0])^.Handle;
 end;
 
 //Read: Property ProcessHandle : THandle Read FProcessHandle;
-procedure TProcess_ProcessHandle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_ProcessHandle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PHandle(Result)^ := PProcess(Params^[0])^.ProcessHandle;
 end;
 
 //Read: Property ThreadHandle : THandle Read FThreadHandle;
-procedure TProcess_ThreadHandle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_ThreadHandle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PHandle(Result)^ := PProcess(Params^[0])^.ThreadHandle;
 end;
 
 //Read: Property ProcessID : Integer Read FProcessID;
-procedure TProcess_ProcessID_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_ProcessID_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PInteger(Result)^ := PProcess(Params^[0])^.ProcessID;
 end;
 
 //Read: Property ThreadID : Integer Read FThreadID;
-procedure TProcess_ThreadID_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_ThreadID_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PInteger(Result)^ := PProcess(Params^[0])^.ThreadID;
 end;
 
 //Read: Property ExitStatus : Integer Read GetExitStatus;
-procedure TProcess_ExitStatus_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_ExitStatus_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PInteger(Result)^ := PProcess(Params^[0])^.ExitStatus;
 end;
 
 //Read: Property InheritHandles : Boolean Read FInheritHandles Write FInheritHandles;
-procedure TProcess_InheritHandles_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_InheritHandles_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PBoolean(Result)^ := PProcess(Params^[0])^.InheritHandles;
 end;
 
 //Write: Property InheritHandles : Boolean Read FInheritHandles Write FInheritHandles;
-procedure TProcess_InheritHandles_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_InheritHandles_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.InheritHandles := PBoolean(Params^[1])^;
 end;
 
 //Read: property PipeBufferSize : cardinal read FPipeBufferSize write FPipeBufferSize default 1024;
-procedure TProcess_PipeBufferSize_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_PipeBufferSize_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   Pcardinal(Result)^ := PProcess(Params^[0])^.PipeBufferSize;
 end;
 
 //Write: property PipeBufferSize : cardinal read FPipeBufferSize write FPipeBufferSize default 1024;
-procedure TProcess_PipeBufferSize_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_PipeBufferSize_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.PipeBufferSize := Pcardinal(Params^[1])^;
 end;
 
 //Read: Property Active : Boolean Read GetRunning Write SetActive;
-procedure TProcess_Active_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Active_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PBoolean(Result)^ := PProcess(Params^[0])^.Active;
 end;
 
 //Write: Property Active : Boolean Read GetRunning Write SetActive;
-procedure TProcess_Active_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Active_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.Active := PBoolean(Params^[1])^;
 end;
 
 //Read: Property ApplicationName : String Read FApplicationName Write SetApplicationName; deprecated;
-procedure TProcess_ApplicationName_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_ApplicationName_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PlpString(Result)^ := PProcess(Params^[0])^.ApplicationName;
 end;
 
 //Write: Property ApplicationName : String Read FApplicationName Write SetApplicationName; deprecated;
-procedure TProcess_ApplicationName_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_ApplicationName_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.ApplicationName := PlpString(Params^[1])^;
 end;
 
 //Read: Property CommandLine : String Read FCommandLine Write SetCommandLine ; deprecated;
-procedure TProcess_CommandLine_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_CommandLine_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PlpString(Result)^ := PProcess(Params^[0])^.CommandLine;
 end;
 
 //Write: Property CommandLine : String Read FCommandLine Write SetCommandLine ; deprecated;
-procedure TProcess_CommandLine_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_CommandLine_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.CommandLine := PlpString(Params^[1])^;
 end;
 
 //Read: Property Executable : String Read FExecutable Write FExecutable;
-procedure TProcess_Executable_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Executable_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PlpString(Result)^ := PProcess(Params^[0])^.Executable;
 end;
 
 //Write: Property Executable : String Read FExecutable Write FExecutable;
-procedure TProcess_Executable_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Executable_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.Executable := PlpString(Params^[1])^;
 end;
 
 //Read: Property Parameters : TStrings Read FParameters Write SetParameters;
-procedure TProcess_Parameters_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Parameters_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PStrings(Result)^ := PProcess(Params^[0])^.Parameters;
 end;
 
 //Write: Property Parameters : TStrings Read FParameters Write SetParameters;
-procedure TProcess_Parameters_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Parameters_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.Parameters := PStrings(Params^[1])^;
 end;
 
 //Read: Property ConsoleTitle : String Read FConsoleTitle Write FConsoleTitle;
-procedure TProcess_ConsoleTitle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_ConsoleTitle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PlpString(Result)^ := PProcess(Params^[0])^.ConsoleTitle;
 end;
 
 //Write: Property ConsoleTitle : String Read FConsoleTitle Write FConsoleTitle;
-procedure TProcess_ConsoleTitle_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_ConsoleTitle_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.ConsoleTitle := PlpString(Params^[1])^;
 end;
 
 //Read: Property CurrentDirectory : String Read FCurrentDirectory Write FCurrentDirectory;
-procedure TProcess_CurrentDirectory_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_CurrentDirectory_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PlpString(Result)^ := PProcess(Params^[0])^.CurrentDirectory;
 end;
 
 //Write: Property CurrentDirectory : String Read FCurrentDirectory Write FCurrentDirectory;
-procedure TProcess_CurrentDirectory_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_CurrentDirectory_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.CurrentDirectory := PlpString(Params^[1])^;
 end;
 
 //Read: Property Desktop : String Read FDesktop Write FDesktop;
-procedure TProcess_Desktop_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Desktop_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PlpString(Result)^ := PProcess(Params^[0])^.Desktop;
 end;
 
 //Write: Property Desktop : String Read FDesktop Write FDesktop;
-procedure TProcess_Desktop_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Desktop_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.Desktop := PlpString(Params^[1])^;
 end;
 
 //Read: Property Environment : TStrings Read FEnvironment Write SetEnvironment;
-procedure TProcess_Environment_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Environment_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PStrings(Result)^ := PProcess(Params^[0])^.Environment;
 end;
 
 //Write: Property Environment : TStrings Read FEnvironment Write SetEnvironment;
-procedure TProcess_Environment_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Environment_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.Environment := PStrings(Params^[1])^;
 end;
 
 //Read: Property Options : TProcessOptions Read FProcessOptions Write SetProcessOptions;
-procedure TProcess_Options_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Options_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcessOptions(Result)^ := PProcess(Params^[0])^.Options;
 end;
 
 //Write: Property Options : TProcessOptions Read FProcessOptions Write SetProcessOptions;
-procedure TProcess_Options_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Options_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.Options := PProcessOptions(Params^[1])^;
 end;
 
 //Read: Property Priority : TProcessPriority Read FProcessPriority Write FProcessPriority;
-procedure TProcess_Priority_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Priority_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcessPriority(Result)^ := PProcess(Params^[0])^.Priority;
 end;
 
 //Write: Property Priority : TProcessPriority Read FProcessPriority Write FProcessPriority;
-procedure TProcess_Priority_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Priority_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.Priority := PProcessPriority(Params^[1])^;
 end;
 
 //Read: Property StartupOptions : TStartupOptions Read FStartupOptions Write FStartupOptions;
-procedure TProcess_StartupOptions_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_StartupOptions_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PStartupOptions(Result)^ := PProcess(Params^[0])^.StartupOptions;
 end;
 
 //Write: Property StartupOptions : TStartupOptions Read FStartupOptions Write FStartupOptions;
-procedure TProcess_StartupOptions_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_StartupOptions_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.StartupOptions := PStartupOptions(Params^[1])^;
 end;
 
 //Read: Property Running : Boolean Read GetRunning;
-procedure TProcess_Running_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Running_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PBoolean(Result)^ := PProcess(Params^[0])^.Running;
 end;
 
 //Read: Property ShowWindow : TShowWindowOptions Read FShowWindow Write SetShowWindow;
-procedure TProcess_ShowWindow_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_ShowWindow_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PShowWindowOptions(Result)^ := PProcess(Params^[0])^.ShowWindow;
 end;
 
 //Write: Property ShowWindow : TShowWindowOptions Read FShowWindow Write SetShowWindow;
-procedure TProcess_ShowWindow_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_ShowWindow_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.ShowWindow := PShowWindowOptions(Params^[1])^;
 end;
 
 //Read: Property WindowColumns : Cardinal Read dwXCountChars Write SetWindowColumns;
-procedure TProcess_WindowColumns_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_WindowColumns_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PCardinal(Result)^ := PProcess(Params^[0])^.WindowColumns;
 end;
 
 //Write: Property WindowColumns : Cardinal Read dwXCountChars Write SetWindowColumns;
-procedure TProcess_WindowColumns_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_WindowColumns_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.WindowColumns := PCardinal(Params^[1])^;
 end;
 
 //Read: Property WindowHeight : Cardinal Read dwYSize Write SetWindowHeight;
-procedure TProcess_WindowHeight_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_WindowHeight_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PCardinal(Result)^ := PProcess(Params^[0])^.WindowHeight;
 end;
 
 //Write: Property WindowHeight : Cardinal Read dwYSize Write SetWindowHeight;
-procedure TProcess_WindowHeight_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_WindowHeight_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.WindowHeight := PCardinal(Params^[1])^;
 end;
 
 //Read: Property WindowLeft : Cardinal Read dwX Write SetWindowLeft;
-procedure TProcess_WindowLeft_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_WindowLeft_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PCardinal(Result)^ := PProcess(Params^[0])^.WindowLeft;
 end;
 
 //Write: Property WindowLeft : Cardinal Read dwX Write SetWindowLeft;
-procedure TProcess_WindowLeft_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_WindowLeft_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.WindowLeft := PCardinal(Params^[1])^;
 end;
 
 //Read: Property WindowRows : Cardinal Read dwYCountChars Write SetWindowRows;
-procedure TProcess_WindowRows_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_WindowRows_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PCardinal(Result)^ := PProcess(Params^[0])^.WindowRows;
 end;
 
 //Write: Property WindowRows : Cardinal Read dwYCountChars Write SetWindowRows;
-procedure TProcess_WindowRows_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_WindowRows_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.WindowRows := PCardinal(Params^[1])^;
 end;
 
 //Read: Property WindowTop : Cardinal Read dwY Write SetWindowTop ;
-procedure TProcess_WindowTop_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_WindowTop_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PCardinal(Result)^ := PProcess(Params^[0])^.WindowTop;
 end;
 
 //Write: Property WindowTop : Cardinal Read dwY Write SetWindowTop ;
-procedure TProcess_WindowTop_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_WindowTop_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.WindowTop := PCardinal(Params^[1])^;
 end;
 
 //Read: Property WindowWidth : Cardinal Read dwXSize Write SetWindowWidth;
-procedure TProcess_WindowWidth_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_WindowWidth_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PCardinal(Result)^ := PProcess(Params^[0])^.WindowWidth;
 end;
 
 //Write: Property WindowWidth : Cardinal Read dwXSize Write SetWindowWidth;
-procedure TProcess_WindowWidth_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_WindowWidth_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.WindowWidth := PCardinal(Params^[1])^;
 end;
 
 //Read: Property FillAttribute : Cardinal read FFillAttribute Write FFillAttribute;
-procedure TProcess_FillAttribute_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_FillAttribute_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PCardinal(Result)^ := PProcess(Params^[0])^.FillAttribute;
 end;
 
 //Write: Property FillAttribute : Cardinal read FFillAttribute Write FFillAttribute;
-procedure TProcess_FillAttribute_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_FillAttribute_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.FillAttribute := PCardinal(Params^[1])^;
 end;
 
 //Read: Property XTermProgram : String Read FXTermProgram Write FXTermProgram;
-procedure TProcess_XTermProgram_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_XTermProgram_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PlpString(Result)^ := PProcess(Params^[0])^.XTermProgram;
 end;
 
 //Write: Property XTermProgram : String Read FXTermProgram Write FXTermProgram;
-procedure TProcess_XTermProgram_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_XTermProgram_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.XTermProgram := PlpString(Params^[1])^;
 end;
 
 //constructor Create();
-procedure TProcess_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^ := TProcess.Create(PComponent(Params^[1])^);
 end;
 
 //procedure Free();
-procedure TProcess_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^.Free();
 end;
 
 //Read: Property Input  : TOutputPipeStream Read FInputStream;
-procedure TProcess_Input_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Input_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   POutputPipeStream(Result)^ := PProcess(Params^[0])^.Input;
 end;
 
 //Read: Property Output : TInputPipeStream  Read FOutputStream;
-procedure TProcess_Output_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Output_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PInputPipeStream(Result)^ := PProcess(Params^[0])^.Output;
 end;
 
 //Read: Property Stderr : TinputPipeStream  Read FStderrStream;
-procedure TProcess_Stderr_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_TProcess_Stderr_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PinputPipeStream(Result)^ := PProcess(Params^[0])^.Stderr;
 end;
 
-procedure Register_TProcess(Compiler: TScriptCompiler);
+procedure Lape_Import_TProcess(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
     addClass('TProcess', 'TComponent');
 
-    addGlobalFunc('procedure TProcess.Execute(); constref;', @TProcess_Execute);
-    addGlobalFunc('procedure TProcess.CloseInput(); constref;', @TProcess_CloseInput);
-    addGlobalFunc('procedure TProcess.CloseOutput(); constref;', @TProcess_CloseOutput);
-    addGlobalFunc('procedure TProcess.CloseStderr(); constref;', @TProcess_CloseStderr);
-    addGlobalFunc('function TProcess.Resume(): Integer; constref;', @TProcess_Resume);
-    addGlobalFunc('function TProcess.Suspend(): Integer; constref;', @TProcess_Suspend);
-    addGlobalFunc('function TProcess.Terminate(AExitCode : Integer): Boolean; constref;', @TProcess_Terminate);
-    addGlobalFunc('function TProcess.WaitOnExit(): Boolean; constref;', @TProcess_WaitOnExit);
-    addClassVar('TProcess', 'WindowRect', 'TRect', @TProcess_WindowRect_Read, @TProcess_WindowRect_Write);
-    addClassVar('TProcess', 'Handle', 'THandle', @TProcess_Handle_Read, nil);
-    addClassVar('TProcess', 'ProcessHandle', 'THandle', @TProcess_ProcessHandle_Read, nil);
-    addClassVar('TProcess', 'ThreadHandle', 'THandle', @TProcess_ThreadHandle_Read, nil);
-    addClassVar('TProcess', 'ProcessID', 'Integer', @TProcess_ProcessID_Read, nil);
-    addClassVar('TProcess', 'ThreadID', 'Integer', @TProcess_ThreadID_Read, nil);
-    addClassVar('TProcess', 'Input', 'TOutputPipeStream', @TProcess_Input_Read, nil);
-    addClassVar('TProcess', 'Output', 'TInputPipeStream', @TProcess_Output_Read, nil);
-    addClassVar('TProcess', 'Stderr', 'TinputPipeStream', @TProcess_Stderr_Read, nil);
-    addClassVar('TProcess', 'ExitStatus', 'Integer', @TProcess_ExitStatus_Read, nil);
-    addClassVar('TProcess', 'InheritHandles', 'Boolean', @TProcess_InheritHandles_Read, @TProcess_InheritHandles_Write);
-    addClassVar('TProcess', 'PipeBufferSize', 'cardinal', @TProcess_PipeBufferSize_Read, @TProcess_PipeBufferSize_Write);
-    addClassVar('TProcess', 'Active', 'Boolean', @TProcess_Active_Read, @TProcess_Active_Write);
-    addClassVar('TProcess', 'ApplicationName', 'String', @TProcess_ApplicationName_Read, @TProcess_ApplicationName_Write);
-    addClassVar('TProcess', 'CommandLine', 'String', @TProcess_CommandLine_Read, @TProcess_CommandLine_Write);
-    addClassVar('TProcess', 'Executable', 'String', @TProcess_Executable_Read, @TProcess_Executable_Write);
-    addClassVar('TProcess', 'Parameters', 'TStrings', @TProcess_Parameters_Read, @TProcess_Parameters_Write);
-    addClassVar('TProcess', 'ConsoleTitle', 'String', @TProcess_ConsoleTitle_Read, @TProcess_ConsoleTitle_Write);
-    addClassVar('TProcess', 'CurrentDirectory', 'String', @TProcess_CurrentDirectory_Read, @TProcess_CurrentDirectory_Write);
-    addClassVar('TProcess', 'Desktop', 'String', @TProcess_Desktop_Read, @TProcess_Desktop_Write);
-    addClassVar('TProcess', 'Environment', 'TStrings', @TProcess_Environment_Read, @TProcess_Environment_Write);
-    addClassVar('TProcess', 'Options', 'TProcessOptions', @TProcess_Options_Read, @TProcess_Options_Write);
-    addClassVar('TProcess', 'Priority', 'TProcessPriority', @TProcess_Priority_Read, @TProcess_Priority_Write);
-    addClassVar('TProcess', 'StartupOptions', 'TStartupOptions', @TProcess_StartupOptions_Read, @TProcess_StartupOptions_Write);
-    addClassVar('TProcess', 'Running', 'Boolean', @TProcess_Running_Read, nil);
-    addClassVar('TProcess', 'ShowWindow', 'TShowWindowOptions', @TProcess_ShowWindow_Read, @TProcess_ShowWindow_Write);
-    addClassVar('TProcess', 'WindowColumns', 'Cardinal', @TProcess_WindowColumns_Read, @TProcess_WindowColumns_Write);
-    addClassVar('TProcess', 'WindowHeight', 'Cardinal', @TProcess_WindowHeight_Read, @TProcess_WindowHeight_Write);
-    addClassVar('TProcess', 'WindowLeft', 'Cardinal', @TProcess_WindowLeft_Read, @TProcess_WindowLeft_Write);
-    addClassVar('TProcess', 'WindowRows', 'Cardinal', @TProcess_WindowRows_Read, @TProcess_WindowRows_Write);
-    addClassVar('TProcess', 'WindowTop', 'Cardinal', @TProcess_WindowTop_Read, @TProcess_WindowTop_Write);
-    addClassVar('TProcess', 'WindowWidth', 'Cardinal', @TProcess_WindowWidth_Read, @TProcess_WindowWidth_Write);
-    addClassVar('TProcess', 'FillAttribute', 'Cardinal', @TProcess_FillAttribute_Read, @TProcess_FillAttribute_Write);
-    addClassVar('TProcess', 'XTermProgram', 'String', @TProcess_XTermProgram_Read, @TProcess_XTermProgram_Write);
-    addGlobalFunc('procedure TProcess.Init(AOwner : TComponent); overrride;', @TProcess_Init);
-    //addGlobalFunc('procedure TProcess.Free(); constref;', @TProcess_Free);
+    addGlobalFunc('procedure TProcess.Execute(); constref;', @Lape_TProcess_Execute);
+    addGlobalFunc('procedure TProcess.CloseInput(); constref;', @Lape_TProcess_CloseInput);
+    addGlobalFunc('procedure TProcess.CloseOutput(); constref;', @Lape_TProcess_CloseOutput);
+    addGlobalFunc('procedure TProcess.CloseStderr(); constref;', @Lape_TProcess_CloseStderr);
+    addGlobalFunc('function TProcess.Resume(): Integer; constref;', @Lape_TProcess_Resume);
+    addGlobalFunc('function TProcess.Suspend(): Integer; constref;', @Lape_TProcess_Suspend);
+    addGlobalFunc('function TProcess.Terminate(AExitCode : Integer): Boolean; constref;', @Lape_TProcess_Terminate);
+    addGlobalFunc('function TProcess.WaitOnExit(): Boolean; constref;', @Lape_TProcess_WaitOnExit);
+    addClassVar('TProcess', 'WindowRect', 'TRect', @Lape_TProcess_WindowRect_Read, @Lape_TProcess_WindowRect_Write);
+    addClassVar('TProcess', 'Handle', 'THandle', @Lape_TProcess_Handle_Read, nil);
+    addClassVar('TProcess', 'ProcessHandle', 'THandle', @Lape_TProcess_ProcessHandle_Read, nil);
+    addClassVar('TProcess', 'ThreadHandle', 'THandle', @Lape_TProcess_ThreadHandle_Read, nil);
+    addClassVar('TProcess', 'ProcessID', 'Integer', @Lape_TProcess_ProcessID_Read, nil);
+    addClassVar('TProcess', 'ThreadID', 'Integer', @Lape_TProcess_ThreadID_Read, nil);
+    addClassVar('TProcess', 'Input', 'TOutputPipeStream', @Lape_TProcess_Input_Read, nil);
+    addClassVar('TProcess', 'Output', 'TInputPipeStream', @Lape_TProcess_Output_Read, nil);
+    addClassVar('TProcess', 'Stderr', 'TinputPipeStream', @Lape_TProcess_Stderr_Read, nil);
+    addClassVar('TProcess', 'ExitStatus', 'Integer', @Lape_TProcess_ExitStatus_Read, nil);
+    addClassVar('TProcess', 'InheritHandles', 'Boolean', @Lape_TProcess_InheritHandles_Read, @Lape_TProcess_InheritHandles_Write);
+    addClassVar('TProcess', 'PipeBufferSize', 'cardinal', @Lape_TProcess_PipeBufferSize_Read, @Lape_TProcess_PipeBufferSize_Write);
+    addClassVar('TProcess', 'Active', 'Boolean', @Lape_TProcess_Active_Read, @Lape_TProcess_Active_Write);
+    addClassVar('TProcess', 'ApplicationName', 'String', @Lape_TProcess_ApplicationName_Read, @Lape_TProcess_ApplicationName_Write);
+    addClassVar('TProcess', 'CommandLine', 'String', @Lape_TProcess_CommandLine_Read, @Lape_TProcess_CommandLine_Write);
+    addClassVar('TProcess', 'Executable', 'String', @Lape_TProcess_Executable_Read, @Lape_TProcess_Executable_Write);
+    addClassVar('TProcess', 'Parameters', 'TStrings', @Lape_TProcess_Parameters_Read, @Lape_TProcess_Parameters_Write);
+    addClassVar('TProcess', 'ConsoleTitle', 'String', @Lape_TProcess_ConsoleTitle_Read, @Lape_TProcess_ConsoleTitle_Write);
+    addClassVar('TProcess', 'CurrentDirectory', 'String', @Lape_TProcess_CurrentDirectory_Read, @Lape_TProcess_CurrentDirectory_Write);
+    addClassVar('TProcess', 'Desktop', 'String', @Lape_TProcess_Desktop_Read, @Lape_TProcess_Desktop_Write);
+    addClassVar('TProcess', 'Environment', 'TStrings', @Lape_TProcess_Environment_Read, @Lape_TProcess_Environment_Write);
+    addClassVar('TProcess', 'Options', 'TProcessOptions', @Lape_TProcess_Options_Read, @Lape_TProcess_Options_Write);
+    addClassVar('TProcess', 'Priority', 'TProcessPriority', @Lape_TProcess_Priority_Read, @Lape_TProcess_Priority_Write);
+    addClassVar('TProcess', 'StartupOptions', 'TStartupOptions', @Lape_TProcess_StartupOptions_Read, @Lape_TProcess_StartupOptions_Write);
+    addClassVar('TProcess', 'Running', 'Boolean', @Lape_TProcess_Running_Read, nil);
+    addClassVar('TProcess', 'ShowWindow', 'TShowWindowOptions', @Lape_TProcess_ShowWindow_Read, @Lape_TProcess_ShowWindow_Write);
+    addClassVar('TProcess', 'WindowColumns', 'Cardinal', @Lape_TProcess_WindowColumns_Read, @Lape_TProcess_WindowColumns_Write);
+    addClassVar('TProcess', 'WindowHeight', 'Cardinal', @Lape_TProcess_WindowHeight_Read, @Lape_TProcess_WindowHeight_Write);
+    addClassVar('TProcess', 'WindowLeft', 'Cardinal', @Lape_TProcess_WindowLeft_Read, @Lape_TProcess_WindowLeft_Write);
+    addClassVar('TProcess', 'WindowRows', 'Cardinal', @Lape_TProcess_WindowRows_Read, @Lape_TProcess_WindowRows_Write);
+    addClassVar('TProcess', 'WindowTop', 'Cardinal', @Lape_TProcess_WindowTop_Read, @Lape_TProcess_WindowTop_Write);
+    addClassVar('TProcess', 'WindowWidth', 'Cardinal', @Lape_TProcess_WindowWidth_Read, @Lape_TProcess_WindowWidth_Write);
+    addClassVar('TProcess', 'FillAttribute', 'Cardinal', @Lape_TProcess_FillAttribute_Read, @Lape_TProcess_FillAttribute_Write);
+    addClassVar('TProcess', 'XTermProgram', 'String', @Lape_TProcess_XTermProgram_Read, @Lape_TProcess_XTermProgram_Write);
+    addGlobalFunc('procedure TProcess.Init(AOwner : TComponent); overrride;', @Lape_TProcess_Init);
+    //addGlobalFunc('procedure TProcess.Free(); constref;', @Lape_TProcess_Free);
   end;
 end;
 
-procedure Register_LCLProcess(Compiler: TScriptCompiler);
+procedure Lape_Import_LCLProcess(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
    begin
@@ -590,13 +592,10 @@ begin
      addGlobalType('set of TStartupOption', 'TStartupOptions');
    end;
 
-  Register_TInputPipeStream(Compiler);
-  Register_TOutputPipeStream(Compiler);
-  Register_TProcess(Compiler);
+  Lape_Import_TInputPipeStream(Compiler);
+  Lape_Import_TOutputPipeStream(Compiler);
+  Lape_Import_TProcess(Compiler);
 end;
-
-initialization
-  RegisterScriptImport(@Register_LCLProcess);
 
 end.
 

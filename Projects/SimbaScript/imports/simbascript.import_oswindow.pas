@@ -6,6 +6,8 @@ interface
 
 {$i import_uses.inc}
 
+procedure Lape_Import_OSWindow(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+
 implementation
 
 uses
@@ -138,25 +140,25 @@ end;
 
 procedure Lape_FindWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  POSWindowArray(Result)^ := FindWindow(PString(Params^[0])^);
+  POSWindowArray(Result)^ := FindWindow(PString(Params^[1])^);
 end;
 
 procedure Lape_FindWindowEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := FindWindow(PString(Params^[0])^, POSWindow(Params^[1])^);
+  PBoolean(Result)^ := FindWindow(PString(Params^[1])^, POSWindow(Params^[2])^);
 end;
 
 procedure Lape_FindChildWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  POSWindowArray(Result)^ := FindChildWindow(PString(Params^[0])^, PString(Params^[1])^);
+  POSWindowArray(Result)^ := FindChildWindow(PString(Params^[1])^, PString(Params^[2])^);
 end;
 
 procedure Lape_FindChildWindowEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := FindChildWindow(PString(Params^[0])^, PString(Params^[1])^, POSWindow(Params^[2])^);
+  PBoolean(Result)^ := FindChildWindow(PString(Params^[1])^, PString(Params^[2])^, POSWindow(Params^[3])^);
 end;
 
-procedure Lape_Import_OSWindow(Compiler: TScriptCompiler);
+procedure Lape_Import_OSWindow(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
@@ -190,21 +192,18 @@ begin
 
     addGlobalFunc('function TOSWindowArray.ToString: String; constref;', @Lape_OSWindowArray_ToString);
 
-    addGlobalFunc('function GetTopWindows: TOSWindowArray', @Lape_GetTopWindows);
-    addGlobalFunc('function GetVisibleWindows: TOSWindowArray;', @Lape_GetVisibleWindows);
-    addGlobalFunc('function GetWindows: TOSWindowArray;', @Lape_GetWindows);
-    addGlobalFunc('function GetActiveWindow: TOSWindow;', @Lape_GetActiveWindow);
-    addGlobalFunc('function GetDesktopWindow: TOSWindow;', @Lape_GetDesktopWindow);
+    addGlobalMethod('function GetTopWindows: TOSWindowArray', @Lape_GetTopWindows, Data);
+    addGlobalMethod('function GetVisibleWindows: TOSWindowArray;', @Lape_GetVisibleWindows, Data);
+    addGlobalMethod('function GetWindows: TOSWindowArray;', @Lape_GetWindows, Data);
+    addGlobalMethod('function GetActiveWindow: TOSWindow;', @Lape_GetActiveWindow, Data);
+    addGlobalMethod('function GetDesktopWindow: TOSWindow;', @Lape_GetDesktopWindow, Data);
 
-    addGlobalFunc('function FindWindow(Title: String): TOSWindowArray; overload;', @Lape_FindWindow);
-    addGlobalFunc('function FindWindow(Title: String; out Window: TOSWindow): Boolean; overload;', @Lape_FindWindowEx);
-    addGlobalFunc('function FindChildWindow(Title: String; ClassName: String): TOSWindowArray; overload;', @Lape_FindChildWindow);
-    addGlobalFunc('function FindChildWindow(Title: String; ClassName: String; out Child: TOSWindow): Boolean; overload;', @Lape_FindChildWindowEx);
+    addGlobalMethod('function FindWindow(Title: String): TOSWindowArray; overload;', @Lape_FindWindow, Data);
+    addGlobalMethod('function FindWindow(Title: String; out Window: TOSWindow): Boolean; overload;', @Lape_FindWindowEx, Data);
+    addGlobalMethod('function FindChildWindow(Title: String; ClassName: String): TOSWindowArray; overload;', @Lape_FindChildWindow, Data);
+    addGlobalMethod('function FindChildWindow(Title: String; ClassName: String; out Child: TOSWindow): Boolean; overload;', @Lape_FindChildWindowEx, Data);
   end;
 end;
-
-initialization
-  RegisterScriptImport(@Lape_Import_OSWindow);
 
 end.
 

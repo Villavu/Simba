@@ -7,7 +7,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Register_TMBitmaps(Compiler: TScriptCompiler);
+procedure Lape_Import_TMBitmaps(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 
 implementation
 
@@ -91,7 +91,7 @@ begin
   PMBitmaps(Params^[0])^.Free();
 end;
 
-procedure Register_TMBitmaps(Compiler: TScriptCompiler);
+procedure Lape_Import_TMBitmaps(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
@@ -111,9 +111,6 @@ begin
     //addGlobalFunc('procedure TMBitmaps.Free(); constref;', @TMBitmaps_Free);
   end;
 end;
-
-initialization
-  RegisterScriptImport(@Register_TMBitmaps);
 
 end.
 

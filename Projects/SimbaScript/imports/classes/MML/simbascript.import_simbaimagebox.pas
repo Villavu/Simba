@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Register_TSimbaImageBox(Compiler: TScriptCompiler);
+procedure Lape_Import_SimbaImageBox(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 
 implementation
 
@@ -43,7 +43,7 @@ begin
   PSimbaImageBox_Background(Params^[0])^.LoadFromPointer(PPRGB32(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[2])^);
 end;
 
-procedure Register_TSimbaImageBox_Background(Compiler: TScriptCompiler);
+procedure Lape_Import_TSimbaImageBox_Background(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
@@ -88,7 +88,7 @@ begin
   PInteger(Result)^ := PSimbaImageBox_Overlay(Params^[0])^.DebugDTM(PMDTM(Params^[1])^);
 end;
 
-procedure Register_TSimbaImageBox_Overlay(Compiler: TScriptCompiler);
+procedure Lape_Import_TSimbaImageBox_Overlay(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
@@ -238,8 +238,11 @@ begin
   PSimbaImageBox(Params^[0])^.OnDblClick := PNotifyEvent(Params^[1])^;
 end;
 
-procedure Register_TSimbaImageBox(Compiler: TScriptCompiler);
+procedure Lape_Import_SimbaImageBox(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
+  Lape_Import_TSimbaImageBox_Background(Compiler, Data);
+  Lape_Import_TSimbaImageBox_Overlay(Compiler, Data);
+
   with Compiler do
   begin
     addClass('TSimbaImageBox', 'TCustomControl');
@@ -267,11 +270,6 @@ begin
     //addGlobalFunc('procedure TSimbaImageBox.Free(); constref;', @TSimbaImageBox_Free);
   end;
 end;
-
-initialization
-  RegisterScriptImport(@Register_TSimbaImageBox_Background);
-  RegisterScriptImport(@Register_TSimbaImageBox_Overlay);
-  RegisterScriptImport(@Register_TSimbaImageBox);
 
 end.
 

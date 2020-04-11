@@ -15,7 +15,7 @@ type
     FSimbaMemoryAllocators: TSimbaMemoryAllocators;
     FMemoryManager: TMemoryManager;
   public
-    procedure Import(Compiler: TScriptCompiler);
+    procedure Import(Compiler: TSimbaScript_Compiler);
 
     constructor Create(FileName: String); reintroduce;
     destructor Destroy; override;
@@ -81,7 +81,7 @@ begin
   Sync.Free();
 end;
 
-procedure TSimbaScriptPlugin.Import(Compiler: TScriptCompiler);
+procedure TSimbaScriptPlugin.Import(Compiler: TSimbaScript_Compiler);
 var
   I: Int32;
 begin

@@ -6,9 +6,11 @@ interface
 
 {$i import_uses.inc}
 
+procedure Lape_Import_Types(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+
 implementation
 
-procedure Lape_Import_Types(Compiler: TScriptCompiler);
+procedure Lape_Import_Types(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
@@ -57,9 +59,6 @@ begin
     addGlobalType('(__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__)', 'EComparator');
   end;
 end;
-
-initialization
-  RegisterScriptImport(@Lape_Import_Types);
 
 end.
 

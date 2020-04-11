@@ -6,6 +6,8 @@ interface
 
 {$i import_uses.inc}
 
+procedure Lape_Import_Matrix(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+
 implementation
 
 uses
@@ -107,7 +109,7 @@ begin
   MatrixFill(TSingleMatrix(Params^[0]^), TPointArray(Params^[1]^), TSingleArray(Params^[2]^));
 end;
 
-procedure Lape_Import_Matrix(Compiler: TScriptCompiler);
+procedure Lape_Import_Matrix(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
@@ -131,9 +133,6 @@ begin
     addGlobalFunc('procedure TSingleMatrix.Fill(Indices: TPointArray; Values: TSingleArray); constref;', @Lape_MatrixFill);
   end;
 end;
-
-initialization
-  RegisterScriptImport(@Lape_Import_Matrix);
 
 end.
 

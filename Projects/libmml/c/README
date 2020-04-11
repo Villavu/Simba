@@ -1,7 +1,0 @@
-Yes, I know this is ugly. I'll add a Makefile etc later. :-)
-
-Compile with:
-    gcc move.c -lmml -I. -L. -o move
-Run:
-    LD_LIBRARY_PATH="`pwd`" ./move
-

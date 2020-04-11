@@ -7,7 +7,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Register_TMufasaBitmap(Compiler: TScriptCompiler);
+procedure Lape_Import_TMufasaBitmap(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 
 implementation
 
@@ -521,7 +521,7 @@ begin
   PMufasaBitmap(Params^[0])^.Free();
 end;
 
-procedure Register_TMufasaBitmap(Compiler: TScriptCompiler);
+procedure Lape_Import_TMufasaBitmap(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
   begin
@@ -631,9 +631,6 @@ begin
     //addGlobalFunc('procedure TMufasaBitmap.Free(); constref;', @TMufasaBitmap_Free);
   end;
 end;
-
-initialization
-  RegisterScriptImport(@Register_TMufasaBitmap);
 
 end.
 
