@@ -20,7 +20,8 @@ type
                   SIMBA_METHOD_DISGUISE,
                   SIMBA_METHOD_STATUS,
                   SIMBA_METHOD_GET_TARGET_PID,
-                  SIMBA_METHOD_GET_TARGET_WINDOW);
+                  SIMBA_METHOD_GET_TARGET_WINDOW,
+                  SIMBA_METHOD_SCRIPT_STATE_CHANGED);
 
   TSimbaMethod_ScriptError = packed record
     Message: array[1..2048] of Char;
@@ -28,9 +29,6 @@ type
     Line: Int32;
     Column: Int32;
   end;
-
-type
-  ESimbaScriptState = (SCRIPT_STOPPING, SCRIPT_PAUSED, SCRIPT_RUNNING);
 
 implementation
 

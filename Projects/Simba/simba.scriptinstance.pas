@@ -8,11 +8,26 @@ uses
   classes, sysutils, process,
   simba.ipc, simba.script_common;
 
+const
+  SIMBA_SCRIPT_STATE_STOPPING = UInt8(0);
+  SIMBA_SCRIPT_STATE_PAUSED   = UInt8(1);
+  SIMBA_SCRIPT_STATE_RUNNING  = UInt8(2);
+
+var
+  SIMBA_SCRIPT_RESUME: UInt8 = 0;
+  SIMBA_SCRIPT_STOP:   UInt8 = 1;
+  SIMBA_SCRIPT_PAUSE:  UInt8 = 2;
+
 type
   TSimbaScriptInstance = class;
 
   TSimbaScriptProcess = class(TProcess)
   public
+    OnExecute: TNotifyEvent;
+    OnDestroy: TNotifyEvent;
+
+    procedure Execute; override;
+
     constructor Create; reintroduce;
     destructor Destroy; override;
   end;
@@ -21,27 +36,10 @@ type
   protected
     FScript: TSimbaScriptInstance;
     FServer: TSimbaIPC_Server;
-    FOutput: TStringList;
-    FManageOutput: Boolean;
 
     procedure Execute; override;
   public
-    property ManageOutput: Boolean read FManageOutput write FManageOutput;
-
-    constructor Create(Script: TSimbaScriptInstance; Server: TSimbaIPC_Server; Output: TStringList); reintroduce;
-  end;
-
-  TSimbaScriptStateThread = class(TThread)
-  protected
-    FScript: TSimbaScriptInstance;
-    FServer: TSimbaIPC_Server;
-    FState: ESimbaScriptState;
-
-    procedure Execute; override;
-  public
-    property State: ESimbaScriptState read FState;
-
-    constructor Create(Script: TSimbaScriptInstance; Server: TSimbaIPC_Server); reintroduce;
+    constructor Create(Script: TSimbaScriptInstance); reintroduce;
   end;
 
   TSimbaScriptMethodThread = class(TThread)
@@ -58,16 +56,10 @@ type
   protected
     FProcess: TSimbaScriptProcess;
 
-    FStateServer: TSimbaIPC_Server;
-    FOutputServer: TSimbaIPC_Server;
-    FMethodServer: TSimbaIPC_Server;
-
-    FStateThread: TSimbaScriptStateThread;
+    FSimbaIPC: TSimbaIPC_Server;
     FOutputThread: TSimbaScriptOutputThread;
     FMethodThread: TSimbaScriptMethodThread;
 
-    FManageOutput: Boolean;
-    FOutput: TStringList;
     FTarget: THandle;
 
     FStartTime: UInt64;
@@ -75,19 +67,20 @@ type
     FScriptFile: String;
     FScriptName: String;
 
+    FState: UInt8;
+
+    procedure OnExecuteProcess(Sender: TObject);
+    procedure OnDestroyProcess(Sender: TObject);
+
     function GetTimeRunning: UInt64;
-    function GetIsPaused: Boolean;
-    function GetIsStopping: Boolean;
-    function GetIsRunning: Boolean;
     function GetExitCode: Int32;
-    function GetManageOutput: Boolean;
+    function GetRunning: Boolean;
 
     procedure SetScript(Value: String);
-    procedure SetManageOutput(Value: Boolean);
   public
-    // Output
-    property ManageOutput: Boolean read GetManageOutput write SetManageOutput; // Automatially output to debug box
-    property Output: TStringList read FOutput;
+    property Process: TSimbaScriptProcess read FProcess;
+    property State: UInt8 read FState write FState;
+    property Running: Boolean read GetRunning;
 
     // Parameters to pass to script
     property Script: String write FScript;
@@ -98,11 +91,6 @@ type
     // Stats
     property TimeRunning: UInt64 read GetTimeRunning;
     property ExitCode: Int32 read GetExitCode;
-
-    // Get state
-    property IsPaused: Boolean read GetIsPaused;
-    property IsStopping: Boolean read GetIsStopping;
-    property IsRunning: Boolean read GetIsRunning;
 
     // Start
     procedure Run;
@@ -143,19 +131,20 @@ begin
         Break;
 
       case ESimbaMethod(Message) of
-        SIMBA_METHOD_DEBUG_IMAGE:         TThread.Synchronize(nil, @Method._DebugImage);
-        SIMBA_METHOD_DEBUG_IMAGE_DRAW:    TThread.Synchronize(nil, @Method._DebugImageDraw);
-        SIMBA_METHOD_SCRIPT_ERROR:        TThread.Synchronize(nil, @Method._ScriptError);
-        SIMBA_METHOD_CLEAR_DEBUG:         TThread.Synchronize(nil, @Method._ClearDebug);
-        SIMBA_METHOD_DEBUG_IMAGE_CLEAR:   TThread.Synchronize(nil, @Method._DebugImageClear);
-        SIMBA_METHOD_DEBUG_IMAGE_DISPLAY: TThread.Synchronize(nil, @Method._DebugImageDisplay);
-        SIMBA_METHOD_GET_PID:             TThread.Synchronize(nil, @Method._GetPID);
-        SIMBA_METHOD_DEBUG_IMAGE_GET:     TThread.Synchronize(nil, @Method._DebugImageGetImage);
-        SIMBA_METHOD_BALLOON_HINT:        TThread.Synchronize(nil, @Method._ShowBalloonHint);
-        SIMBA_METHOD_DISGUISE:            TThread.Synchronize(nil, @Method._Disguise);
-        SIMBA_METHOD_STATUS:              TThread.Synchronize(nil, @Method._Status);
-        SIMBA_METHOD_GET_TARGET_PID:      TThread.Synchronize(nil, @Method._GetSimbaTargetPID);
-        SIMBA_METHOD_GET_TARGET_WINDOW:   TThread.Synchronize(nil, @Method._GetSimbaTargetWindow)
+        SIMBA_METHOD_DEBUG_IMAGE:          TThread.Synchronize(nil, @Method._DebugImage);
+        SIMBA_METHOD_DEBUG_IMAGE_DRAW:     TThread.Synchronize(nil, @Method._DebugImageDraw);
+        SIMBA_METHOD_SCRIPT_ERROR:         TThread.Synchronize(nil, @Method._ScriptError);
+        SIMBA_METHOD_CLEAR_DEBUG:          TThread.Synchronize(nil, @Method._ClearDebug);
+        SIMBA_METHOD_DEBUG_IMAGE_CLEAR:    TThread.Synchronize(nil, @Method._DebugImageClear);
+        SIMBA_METHOD_DEBUG_IMAGE_DISPLAY:  TThread.Synchronize(nil, @Method._DebugImageDisplay);
+        SIMBA_METHOD_GET_PID:              TThread.Synchronize(nil, @Method._GetPID);
+        SIMBA_METHOD_DEBUG_IMAGE_GET:      TThread.Synchronize(nil, @Method._DebugImageGetImage);
+        SIMBA_METHOD_BALLOON_HINT:         TThread.Synchronize(nil, @Method._ShowBalloonHint);
+        SIMBA_METHOD_DISGUISE:             TThread.Synchronize(nil, @Method._Disguise);
+        SIMBA_METHOD_STATUS:               TThread.Synchronize(nil, @Method._Status);
+        SIMBA_METHOD_GET_TARGET_PID:       TThread.Synchronize(nil, @Method._GetSimbaTargetPID);
+        SIMBA_METHOD_GET_TARGET_WINDOW:    TThread.Synchronize(nil, @Method._GetSimbaTargetWindow);
+        SIMBA_METHOD_SCRIPT_STATE_CHANGED: TThread.Synchronize(nil, @Method._ScriptStateChanged);
         else
           raise Exception.CreateFmt('Invalid method %d', [Method.Method]);
       end;
@@ -183,97 +172,75 @@ begin
   FScript := Script;
 end;
 
-procedure TSimbaScriptStateThread.Execute;
-var
-  Count: Int32;
-begin
-  try
-    while True do
-    begin
-      Count := FServer.Read(FState, SizeOf(Int32));
-      if Count = PIPE_TERMINATED then
-        Break;
-    end;
-  except
-    on E: Exception do
-      WriteLn('State Server Exception: ' + E.Message);
-  end;
-
-  FServer.Free();
-end;
-
-constructor TSimbaScriptStateThread.Create(Script: TSimbaScriptInstance; Server: TSimbaIPC_Server);
-begin
-  inherited Create(False, 512*512);
-
-  FreeOnTerminate := True;
-
-  FScript := Script;
-  FServer := Server;
-  FState := SCRIPT_RUNNING;
-end;
-
 procedure TSimbaScriptOutputThread.Execute;
+var
+  Output: TStringList;
 
-  function Process(constref Output: String): String;
+  function Process(constref Data: String): String;
   var
-    Start, Index: Int32;
+    I: Int32;
+    Lines: TStringArray;
   begin
-    Index := 1;
-    Start := 1;
+    Result := '';
 
-    for Index := 1 to Length(Output) do
-      if (Output[Index] = #0) then
-      begin
-        if (Index - Start > 0) then
-          FOutput.Add(Copy(Output, Start, (Index - Start)));
+    Lines := Data.Split([LineEnding]);
+    for I := 0 to High(Lines) - 1 do
+      Output.Add(Lines[I]);
 
-        Start := Index + 1;
-      end;
+    // Pipe buffer is full, this is not a complete line.
+    if not Data.EndsWith(LineEnding) then
+      Exit(Lines[High(Lines)]);
 
-    Result := Copy(Output, Start, (Index - Start) + 1);
+    Output.Add(Lines[High(Lines)]);
   end;
 
 var
-  Buffer: array[1..TSimbaIPC.BUFFER_SIZE] of Char;
+  Buffer: array[1..16 * 1024] of Char;
   Remaining: String;
   Count: Int32;
 begin
+  Output := TStringList.Create();
+
   Remaining := '';
 
   try
     while True do
     begin
-      if FManageOutput then
-        FOutput.Clear();
+      Output.Clear();
 
-      Count := FServer.Read(Buffer[1], Length(Buffer));
-      if Count = PIPE_TERMINATED then
+      Count := FScript.Process.Output.Read(Buffer[1], Length(Buffer));
+      if (Count = 0) then
         Break;
 
       Remaining := Process(Remaining + Copy(Buffer, 1, Count));
 
-      if FManageOutput then
-        SimbaDebugForm.Add(FOutput);
+      if (Output.Count > 0) then
+        SimbaDebugForm.Add(Output);
     end;
   except
     on E: Exception do
-      WriteLn('Output Server Exception: ' + E.Message);
+      WriteLn('Output Thread Exception: ' + E.Message);
   end;
 
-  FOutput.Free();
-  FServer.Free();
+  if (Length(Remaining) > 0) then
+    SimbaDebugForm.Add(Remaining);
+
+  Output.Free();
 end;
 
-constructor TSimbaScriptOutputThread.Create(Script: TSimbaScriptInstance; Server: TSimbaIPC_Server; Output: TStringList);
+constructor TSimbaScriptOutputThread.Create(Script: TSimbaScriptInstance);
 begin
   inherited Create(False, 512*512);
 
-  FreeOnTerminate := True;
-
   FScript := Script;
-  FServer := Server;
-  FOutput := Output;
+end;
+
+procedure TSimbaScriptProcess.Execute;
+begin
+  inherited Execute();
+
+  if (OnExecute <> nil) then
+    OnExecute(Self);
 end;
 
 constructor TSimbaScriptProcess.Create;
@@ -286,22 +253,10 @@ begin
   if Running then
     Terminate(0);
 
+  if (OnDestroy <> nil) then
+    OnDestroy(Self);
+
   inherited Destroy();
-end;
-
-function TSimbaScriptInstance.GetIsRunning: Boolean;
-begin
-  Result := FProcess.Running;
-end;
-
-function TSimbaScriptInstance.GetIsPaused: Boolean;
-begin
-  Result := FProcess.Running and (FStateThread.State = SCRIPT_PAUSED);
-end;
-
-function TSimbaScriptInstance.GetIsStopping: Boolean;
-begin
-  Result := FProcess.Running and (FStateThread.State = SCRIPT_STOPPING);
 end;
 
 procedure TSimbaScriptInstance.SetScript(Value: String);
@@ -322,9 +277,15 @@ begin
   FProcess.Parameters.Add('--scriptfile=' + FileName);
 end;
 
-procedure TSimbaScriptInstance.SetManageOutput(Value: Boolean);
+procedure TSimbaScriptInstance.OnExecuteProcess(Sender: TObject);
 begin
-  FOutputThread.ManageOutput := Value;
+  FOutputThread := TSimbaScriptOutputThread.Create(Self);
+end;
+
+procedure TSimbaScriptInstance.OnDestroyProcess(Sender: TObject);
+begin
+  FOutputThread.WaitFor();
+  FOutputThread.Free();
 end;
 
 function TSimbaScriptInstance.GetTimeRunning: UInt64;
@@ -337,9 +298,9 @@ begin
   Result := FProcess.ExitCode;
 end;
 
-function TSimbaScriptInstance.GetManageOutput: Boolean;
+function TSimbaScriptInstance.GetRunning: Boolean;
 begin
-  Result := FOutputThread.ManageOutput;
+  Result := FProcess.Running;
 end;
 
 procedure TSimbaScriptInstance.Run;
@@ -395,43 +356,33 @@ begin
 end;
 
 procedure TSimbaScriptInstance.Resume;
-var
-  Message: Int32 = Ord(SCRIPT_RUNNING);
 begin
-  FStateServer.Write(Message, SizeOf(Int32));
+  FProcess.Input.Write(SIMBA_SCRIPT_RESUME, SizeOf(UInt8));
 end;
 
 procedure TSimbaScriptInstance.Pause;
-var
-  Message: Int32 = Ord(SCRIPT_PAUSED);
 begin
-  FStateServer.Write(Message, SizeOf(Int32));
+  FProcess.Input.Write(SIMBA_SCRIPT_PAUSE, SizeOf(UInt8));
 end;
 
 procedure TSimbaScriptInstance.Stop;
-var
-  Message: Int32 = Ord(SCRIPT_STOPPING);
 begin
-  FStateServer.Write(Message, SizeOf(Int32));
+  FProcess.Input.Write(SIMBA_SCRIPT_STOP, SizeOf(UInt8));
 end;
 
 constructor TSimbaScriptInstance.Create;
 begin
-  FMethodServer := TSimbaIPC_Server.Create();
-  FOutputServer := TSimbaIPC_Server.Create();
-  FStateServer := TSimbaIPC_Server.Create();
-
-  FOutput := TStringList.Create();
+  FSimbaIPC := TSimbaIPC_Server.Create();
+  FState := SIMBA_SCRIPT_STATE_RUNNING;
 
   FProcess := TSimbaScriptProcess.Create();
-  FProcess.InheritHandles := True;
+  FProcess.PipeBufferSize := 16 * 1024;
+  FProcess.OnExecute := @Self.OnExecuteProcess;
+  FProcess.OnDestroy := @Self.OnDestroyProcess;
   FProcess.CurrentDirectory := Application.Location;
-  FProcess.Options := FProcess.Options + [poStderrToOutPut];
+  FProcess.Options := FProcess.Options + [poUsePipes, poStderrToOutPut];
 
-  FProcess.Parameters.Add('--simba-method-server=%s', [FMethodServer.Client]);
-  FProcess.Parameters.Add('--simba-output-server=%s', [FOutputServer.Client]);
-  FProcess.Parameters.Add('--simba-state-server=%s', [FStateServer.Client]);
-
+  FProcess.Parameters.Add('--simbaipc=%s', [FSimbaIPC.Client]);
   FProcess.Parameters.Add('--apppath=%s', [Application.Location]);
   FProcess.Parameters.Add('--datapath=%s', [SimbaSettings.Environment.DataPath.Value]);
   FProcess.Parameters.Add('--includepath=%s', [SimbaSettings.Environment.IncludePath.Value]);
@@ -442,9 +393,7 @@ begin
   if (not FileExists(FProcess.Executable)) then
     raise Exception.Create('SimbaScript executable not found: ' + FProcess.Executable);
 
-  FMethodThread := TSimbaScriptMethodThread.Create(Self, FMethodServer);
-  FStateThread := TSimbaScriptStateThread.Create(Self, FStateServer);
-  FOutputThread := TSimbaScriptOutputThread.Create(Self, FOutputServer, FOutput);
+  FMethodThread := TSimbaScriptMethodThread.Create(Self, FSimbaIPC);
 end;
 
 procedure TSimbaScriptInstance.Kill;
@@ -463,9 +412,8 @@ begin
     FProcess.Free();
   end;
 
-  if (FMethodServer <> nil) then FMethodServer.Terminate();
-  if (FStateServer <> nil)  then FStateServer.Terminate();
-  if (FOutputServer <> nil) then FOutputServer.Terminate();
+  if (FSimbaIPC <> nil) then
+    FSimbaIPC.Terminate();
 
   inherited Destroy();
 end;

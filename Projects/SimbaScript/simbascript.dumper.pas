@@ -25,21 +25,32 @@ type
 implementation
 
 uses
+  streamio,
   simbascript.plugin, simbascript.compilerdump;
 
 procedure TSimbaScript_PluginDumper.Execute;
 var
   Plugin: TSimbaScriptPlugin;
+  OrginalOutput: TextFile;
+  Stream: TStringStream;
 begin
-  Plugin := nil;
+  OrginalOutput := Output;
+  Stream := TStringStream.Create('');
+
+  AssignStream(Output, Stream);
+  Rewrite(Output);
 
   try
     Plugin := TSimbaScriptPlugin.Create(FFileName);
 
-    WriteLn(#0 + Plugin.Dump.Text + #0);
-  finally
-    if (Plugin <> nil) then
-      Plugin.Free();
+    WriteLn(OrginalOutput, Plugin.Dump.Text);
+  except
+    on E: Exception do
+    begin
+      WriteLn(OrginalOutput, Stream.DataString);
+
+      raise;
+    end;
   end;
 end;
 
@@ -50,7 +61,7 @@ begin
   Compiler := TSimbaScript_CompilerDump.Create();
 
   try
-    Writeln(#0 + Compiler.Dump.Text + #0);
+    WriteLn(Compiler.Dump.Text);
   finally
     if (Compiler <> nil) then
       Compiler.Free();
