@@ -80,14 +80,8 @@ begin
     if Application.HasOption('target') then
       Target := Application.GetOptionValue('target').ToInt64();
 
-    if Application.HasOption('simba-output-server') then
-      SimbaOutputServer := TSimbaIPC_Client.Create(Application.GetOptionValue('simba-output-server'));
-
-    if Application.HasOption('simba-method-server') then
-      SimbaMethodServer := TSimbaIPC_Client.Create(Application.GetOptionValue('simba-method-server'));
-
-    if Application.HasOption('simba-state-server') then
-      SimbaStateServer := TSimbaIPC_Client.Create(Application.GetOptionValue('simba-state-server'));
+    if Application.HasOption('simbaipc') then
+      SimbaIPC := TSimbaIPC_Client.Create(Application.GetOptionValue('simbaipc'));
 
     Start();
   end;
@@ -120,6 +114,7 @@ procedure TApplicationHelper.DumpPlugin(Data: PtrInt);
 begin
   with TSimbaScript_PluginDumper.Create(True) do
   begin
+    FreeOnTerminate := True;
     OnTerminate := @Self.Terminate;
     FileName := Application.Params[Application.ParamCount];
     Start();
@@ -130,6 +125,7 @@ procedure TApplicationHelper.DumpCompiler(Data: PtrInt);
 begin
   with TSimbaScript_CompilerDumper.Create(True) do
   begin
+    FreeOnTerminate := True;
     OnTerminate := @Self.Terminate;
     Start();
   end;

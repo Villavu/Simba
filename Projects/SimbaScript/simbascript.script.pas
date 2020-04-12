@@ -8,6 +8,16 @@ uses
   Classes, SysUtils, simba.client, Forms, lptypes, lpinterpreter, lpparser, lpcompiler, lpvartypes, lpmessages,
   simbascript.compiler, simba.ipc, syncobjs, simba.script_common, simbascript.plugin;
 
+const
+  SIMBA_SCRIPT_RESUME = UInt8(0);
+  SIMBA_SCRIPT_STOP   = UInt8(1);
+  SIMBA_SCRIPT_PAUSE  = UInt8(2);
+
+var
+  SIMBA_SCRIPT_STOPPING: UInt8 = 0;
+  SIMBA_SCRIPT_PAUSED:   UInt8 = 1;
+  SIMBA_SCRIPT_RUNNING:  UInt8 = 2;
+
 type
   PSimbaScript = ^TSimbaScript;
   TSimbaScript = class;
@@ -35,13 +45,11 @@ type
     FState: TInitBool;
 
     FSimbaStateThread: TThread;
-    FSimbaStateServer: TSimbaIPC_Client;
 
-    FSimbaOutputServer: TSimbaIPC_Client;
-    FSimbaMethodServer: TSimbaIPC_Client;
-    FSimbaMethodLock: TCriticalSection;
+    FSimbaIPC: TSimbaIPC_Client;
+    FSimbaIPCLock: TCriticalSection;
 
-    FOutputBuffer: String;
+    FWriteBuffer: String;
 
     FScript: String;
     FScriptFile: String;
@@ -88,9 +96,7 @@ type
     property PluginPath: String read FPluginPath write FPluginPath;
     property IncludePath: String read FIncludePath write FIncludePath;
 
-    property SimbaOutputServer: TSimbaIPC_Client read FSimbaOutputServer write FSimbaOutputServer;
-    property SimbaMethodServer: TSimbaIPC_Client read FSimbaMethodServer write FSimbaMethodServer;
-    property SimbaStateServer: TSimbaIPC_Client read FSimbaStateServer write FSimbaStateServer;
+    property SimbaIPC: TSimbaIPC_Client read FSimbaIPC write FSimbaIPC;
 
     property Target: THandle read FTarget write FTarget;
 
@@ -128,20 +134,20 @@ begin
 end;
 
 procedure TSimbaScript.SetState(Value: TInitBool);
-var
-  ScriptState: ESimbaScriptState;
 begin
   FState := Value;
 
-  if (FSimbaStateServer <> nil) then
-  begin
+  with TSimbaMethod.Create(SIMBA_METHOD_SCRIPT_STATE_CHANGED) do
+  try
     case FState of
-      bTrue: ScriptState := SCRIPT_RUNNING;
-      bFalse: ScriptState := SCRIPT_STOPPING;
-      bUnknown: ScriptState := SCRIPT_PAUSED;
+      bTrue:    Params.Write(SIMBA_SCRIPT_RUNNING,  SizeOf(UInt8));
+      bFalse:   Params.Write(SIMBA_SCRIPT_STOPPING, SizeOf(UInt8));
+      bUnknown: Params.Write(SIMBA_SCRIPT_PAUSED,   SizeOf(UInt8));
     end;
 
-    FSimbaStateServer.Write(ScriptState, SizeOf(Int32));
+    Invoke(Self);
+  finally
+    Free();
   end;
 end;
 
@@ -153,7 +159,7 @@ begin
   try
     // Create
     FSimbaStateThread := TThread.ExecuteInThread(@HandleSimbaState);
-    FSimbaMethodLock := TCriticalSection.Create();
+    FSimbaIPCLock := TCriticalSection.Create();
 
     FClient := TClient.Create(FPluginPath);
     FClient.MOCR.FontPath := FFontPath;
@@ -217,7 +223,7 @@ begin
   Param.Line := -1;
   Param.Column := -1;
 
-  if (FSimbaMethodServer <> nil) then
+  if (FSimbaIPC <> nil) then
   begin
     if (E is lpException) then
     begin
@@ -259,7 +265,6 @@ var
   Arguments: TStringArray;
   Parser: TFPExpressionParser;
   Plugin: TSimbaScriptPlugin;
-  i: Int32;
 begin
   if (UpperCase(Directive) = 'LOADLIB') or (UpperCase(Directive) = 'IFHASLIB') or
      (UpperCase(Directive) = 'IFVALUE') or (UpperCase(Directive) = 'ERROR') or
@@ -330,57 +335,50 @@ begin
     Result := False;
 end;
 
-// Isn't terminated safely, but the program is exiting soo...
 procedure TSimbaScript.HandleSimbaState;
 var
-  ScriptState: ESimbaScriptState;
+  Stream: THandleStream;
+  Value: UInt8;
 begin
-  if (SimbaStateServer <> nil) then
-    while FSimbaStateServer.Read(ScriptState, SizeOf(Int32)) = SizeOf(Int32) do
-    begin
-      case ScriptState of
-        SCRIPT_RUNNING:  FState := bTrue;
-        SCRIPT_PAUSED:   FState := bUnknown;
-        SCRIPT_STOPPING: FState := bFalse;
-      end;
+  Stream := THandleStream.Create(StdInputHandle);
 
-      FSimbaStateServer.Write(ScriptState, SizeOf(Int32)); // return the message so Simba can update accordingly
+  while Stream.Read(Value, SizeOf(UInt8)) = SizeOf(UInt8) do
+  begin
+    case Value of
+      SIMBA_SCRIPT_RESUME: Self.State := bTrue;
+      SIMBA_SCRIPT_STOP:   Self.State := bFalse;
+      SIMBA_SCRIPT_PAUSE:  Self.State := bUnknown;
     end;
+  end;
+
+  Stream.Free();
 end;
 
 procedure TSimbaScript.Write(constref S: String);
 begin
-  FOutputBuffer := FOutputBuffer + S;
+  FWriteBuffer := FWriteBuffer + S;
 end;
 
 procedure TSimbaScript.WriteLn(constref S: String);
 begin
-  if (S = '') then
-    FOutputBuffer := FOutputBuffer + ' ';
-  if (S <> '') then
-    FOutputBuffer := FOutputBuffer + S;
+  System.WriteLn(FWriteBuffer + S);
 
-  if FSimbaOutputServer <> nil then
-    FSimbaOutputServer.Write(FOutputBuffer[1], Length(FOutputBuffer) + 1) // Include null termination. This is how lines are detected simba sided.
-  else
-    System.WriteLn(FOutputBuffer);
-
-  FOutputBuffer := '';
+  FWriteBuffer := '';
 end;
 
 procedure TSimbaScript.Invoke(Message: Int32; Params, Result: TMemoryStream);
 begin
   try
-    if (FSimbaMethodServer = nil) then
+    if (FSimbaIPC = nil) then
       raise Exception.Create('Method "' + GetEnumName(TypeInfo(ESimbaMethod), Message) + '" unavailable when running detached from Simba');
 
-    FSimbaMethodLock.Enter();
+    FSimbaIPCLock.Enter();
 
     try
-      FSimbaMethodServer.WriteMessage(Message, Params);
-      FSimbaMethodServer.ReadMessage(Message, Result);
+      FSimbaIPC.WriteMessage(Message, Params);
+      FSimbaIPC.ReadMessage(Message, Result);
     finally
-      FSimbaMethodLock.Leave();
+      FSimbaIPCLock.Leave();
     end;
   except
     on E: Exception do
@@ -399,10 +397,8 @@ begin
     FCompiler.Free();
     FClient.Free();
 
-    FSimbaStateServer.Free();
-    FSimbaOutputServer.Free();
-    FSimbaMethodServer.Free();
-    FSimbaMethodLock.Free();
+    FSimbaIPC.Free();
+    FSimbaIPCLock.Free();
   except
     // The process is ending anyway...
   end;

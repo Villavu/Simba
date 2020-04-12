@@ -540,7 +540,7 @@ begin
     Application.MainForm.Enabled := False;
 
     try
-      if ScriptTab.ScriptInstance.IsRunning then
+      if ScriptTab.ScriptInstance.Running then
       begin
         case MessageDlg('Script is still running', 'Do you want to forcefully stop the script?', mtConfirmation, [mbYes, mbNo, mbAbort], 0) of
           mrYes: ScriptTab.ScriptInstance.Kill();

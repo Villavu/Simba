@@ -244,7 +244,7 @@ begin
   inherited Create(TLapeTokenizerString.Create('begin end.'));
 
   FDump := TStringList.Create();
-  FDump.LineBreak := '!';
+  FDump.LineBreak := #0;
   FDump.Values['Types'] := {$i lape_type_imports.inc}
   FDump.Values['Math'] := {$i lape_math_imports.inc}
   FDump.Values['Time & Date'] := {$i lape_date_time_imports.inc}

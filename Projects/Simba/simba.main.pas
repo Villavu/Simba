@@ -299,7 +299,7 @@ uses
   simba.dtmeditor, simba.scriptinstance, simba.package_form, simba.aboutform,
   simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.colorpicker, simba.ci_includecache,
-  simba.highlighter, simba.scriptpluginloader, simba.stringutil
+  simba.highlighter, simba.scriptpluginloader, simba.stringutil, simba.script_common
   {$IFDEF WINDOWS},
   windows
   {$ENDIF}
@@ -576,7 +576,7 @@ begin
     if (Status <> 0) then
       raise Exception.Create(IntToStr(Status));
 
-    Contents := Between(#0, #0, Output);
+    Contents := Output;
   except
     on E: Exception do
     begin
@@ -622,7 +622,6 @@ begin
         Save(FileName);
 
       ScriptInstance := TSimbaScriptInstance.Create();
-      ScriptInstance.ManageOutput := True;
       ScriptInstance.Target := Self.WindowSelection;
       ScriptInstance.ScriptName := ScriptName;
 
@@ -650,7 +649,6 @@ begin
         Save(FileName);
 
       ScriptInstance := TSimbaScriptInstance.Create();
-      ScriptInstance.ManageOutput := True;
       ScriptInstance.Target := Self.WindowSelection;
       ScriptInstance.ScriptName := ScriptName;
 
@@ -679,7 +677,7 @@ begin
   with SimbaScriptTabsForm.CurrentTab do
    if (ScriptInstance <> nil) then
    begin
-     if ScriptInstance.IsStopping then
+     if ScriptInstance.State = SIMBA_SCRIPT_STATE_STOPPING then
        ScriptInstance.Kill()
      else
        ScriptInstance.Stop();
@@ -1064,7 +1062,7 @@ begin
   for i := 0 to SimbaScriptTabsForm.TabCount - 1 do
     with SimbaScriptTabsForm.Tabs[i] do
     begin
-      if (ScriptInstance <> nil) and (not ScriptInstance.IsRunning) then
+      if (ScriptInstance <> nil) and (not ScriptInstance.Running) then
       begin
         ScriptInstance.Free();
         ScriptInstance := nil;
@@ -1075,23 +1073,26 @@ begin
   Tab := SimbaScriptTabsForm.CurrentTab;
   if (Tab <> nil) then
   begin
-    if (Tab.ScriptInstance <> nil) and Tab.ScriptInstance.IsRunning then
+    if (Tab.ScriptInstance <> nil) and Tab.ScriptInstance.Running then
     begin
-      if Tab.ScriptInstance.IsStopping then
-      begin
-        SimbaScriptTabsForm.StatusPanelState.Caption := 'Stopping';
-        SetScriptState(ss_Stopping);
-      end
-      else
-      if Tab.ScriptInstance.IsPaused then
-      begin
-        SimbaScriptTabsForm.StatusPanelState.Caption := 'Paused';
-        SetScriptState(ss_Paused);
-      end
-      else
-      begin
-        SetScriptState(ss_Running);
-        SimbaScriptTabsForm.StatusPanelState.Caption := TimeStamp(Tab.ScriptInstance.TimeRunning);
+      case Tab.ScriptInstance.State of
+        SIMBA_SCRIPT_STATE_STOPPING:
+          begin
+            SimbaScriptTabsForm.StatusPanelState.Caption := 'Stopping';
+            SetScriptState(ss_Stopping);
+          end;
+
+        SIMBA_SCRIPT_STATE_PAUSED:
+          begin
+            SimbaScriptTabsForm.StatusPanelState.Caption := 'Paused';
+            SetScriptState(ss_Paused);
+          end;
+
+        SIMBA_SCRIPT_STATE_RUNNING:
+          begin
+            SetScriptState(ss_Running);
+            SimbaScriptTabsForm.StatusPanelState.Caption := TimeStamp(Tab.ScriptInstance.TimeRunning);
+          end;
       end;
     end else
     begin
@@ -1250,8 +1251,8 @@ begin
       raise Exception.Create(IntToStr(Status));
 
     Dump := TStringList.Create();
-    Dump.LineBreak := '!';
-    Dump.Text := Between(#0, #0, Output);
+    Dump.LineBreak := #0;
+    Dump.Text := Output;
 
     for I := 0 to Dump.Count - 1 do
     begin

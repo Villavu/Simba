@@ -29,6 +29,7 @@ type
     procedure _Status;
     procedure _GetSimbaTargetPID;
     procedure _GetSimbaTargetWindow;
+    procedure _ScriptStateChanged;
   end;
 
 implementation
@@ -36,7 +37,7 @@ implementation
 uses
   graphtype, extctrls,
   simba.debugimage, simba.debugform, simba.scripttabsform, simba.mufasatypes,
-  simba.main, simba.scripttab, simba.bitmap, simba.oswindow;
+  simba.main, simba.scripttab, simba.bitmap, simba.oswindow, simba.scriptinstance;
 
 procedure TSimbaMethod._GetPID;
 begin
@@ -89,6 +90,14 @@ begin
   Result.Write(SimbaForm.WindowSelection, SizeOf(TOSWindow));
 end;
 
+procedure TSimbaMethod._ScriptStateChanged;
+var
+  State: UInt8;
+begin
+  if Params.Read(State, SizeOf(UInt8)) = SizeOf(UInt8) then
+    TSimbaScriptInstance(Script).State := State;
+end;
+
 procedure TSimbaMethod._DebugImage;
 var
   Width, Height: Int32;
@@ -104,7 +113,7 @@ begin
 
   SimbaDebugImageForm.ImageBox.Background.LoadFromPointer(PRGB32(Params.Memory + Params.Position), Width, Height);
   SimbaDebugImageForm.ImageBox.BackgroundChanged(False);
-  SimbaDebugImageForm.ImageBox.Repaint();
+  SimbaDebugImageForm.ImageBox.Update();
 end;
 
 procedure TSimbaMethod._DebugImageDraw;
@@ -116,7 +125,7 @@ begin
 
   SimbaDebugImageForm.ImageBox.Background.LoadFromPointer(PRGB32(Params.Memory + Params.Position), Width, Height);
   SimbaDebugImageForm.ImageBox.BackgroundChanged(False);
-  SimbaDebugImageForm.ImageBox.Repaint();
+  SimbaDebugImageForm.ImageBox.Update();
 end;
 
 procedure TSimbaMethod._DebugImageDisplay;
@@ -135,7 +144,7 @@ procedure TSimbaMethod._DebugImageClear;
 begin
   SimbaDebugImageForm.ImageBox.Background.Canvas.Brush.Color := 0;
   SimbaDebugImageForm.ImageBox.Background.Canvas.Clear();
-  SimbaDebugImageForm.ImageBox.Repaint();
+  SimbaDebugImageForm.ImageBox.Update();
 end;
 
 procedure TSimbaMethod._DebugImageGetImage;
