@@ -117,7 +117,6 @@ type
     property ScrolledTop: Int32 read GetScrolledTop write SetScrolledTop;
   end;
 
-
 procedure TSimbaFunctionList_Filter.Reset;
 begin
   Force('');
@@ -164,8 +163,9 @@ begin
   FFunctionList := FunctionList;
 
   OnTimer := @Update;
-  Interval := 800;
+  Interval := 1000;
   Enabled := True;
+  UseTimerThread := True;
 end;
 
 function TTreeViewHelper.GetScrolledLeft: Int32;

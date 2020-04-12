@@ -96,7 +96,7 @@ procedure TCodeInsight_Include.HandleMessage(Sender: TObject; const Typ: TMessag
 var
   Parser: TCodeParser absolute Sender;
 begin
-  Messages := Messages + Format('"%s" at line %d, column %d in file "%s"', [Message, Y, X, Parser.Lexer.FileName]) + LineEnding;
+  Messages := Messages + Format('"%s" at line %d, column %d in file "%s"', [Message, Y + 1, X, Parser.Lexer.FileName]) + LineEnding;
 end;
 
 function TCodeInsight_Include.GetOutdated: Boolean;
@@ -105,7 +105,7 @@ var
 begin
   Result := False;
 
-  for i := 0 to FFiles.Count-1 do
+  for i := 0 to FFiles.Count - 1 do
     if FileAge(FFiles[i]) <> PtrInt(FFiles.Objects[i]) then
     begin
       Result := True;
@@ -156,7 +156,7 @@ begin
     Include := FCachedIncludes.ItemsI[i];
     if Include.RefCount > 0 then
       Continue;
-    if (Include.LastUsed < 500) and (not Include.Outdated) then
+    if (Include.LastUsed < 10) and (not Include.Outdated) then
       Continue;
 
     WriteLn('Purge include "', Include.Lexer.FileName, '"');
@@ -177,8 +177,7 @@ begin
        (Include.InDefines.Stack <> Sender.Lexer.SaveDefines.Stack) or
        (Include.Lexer.UseCodeToolsIDEDirective <> Sender.Lexer.UseCodeToolsIDEDirective) then
     begin
-      Include.LastUsed := Include.LastUsed + 3; // When this reaches 500 the include will be destroyed.
-
+      Include.LastUsed := Include.LastUsed + 1; // When this reaches 10 the include will be destroyed.
       Continue;
     end;
 
