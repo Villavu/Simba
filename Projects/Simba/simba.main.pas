@@ -550,9 +550,9 @@ begin
     SimbaDebugForm.Add('Simba''s code parser encountered an error. This could break code tools:');
 
     if Parser.Lexer.FileName <> '' then
-      SimbaDebugForm.Add(Format('"%s" at line %d, column %d in file "%s"', [Message, Y, X, Parser.Lexer.FileName]))
+      SimbaDebugForm.Add(Format('"%s" at line %d, column %d in file "%s"', [Message, Y + 1, X, Parser.Lexer.FileName]))
     else
-      SimbaDebugForm.Add(Format('"%s" at line %d, column %d', [Message, Y, X]));
+      SimbaDebugForm.Add(Format('"%s" at line %d, column %d', [Message, Y + 1, X]));
   end;
 end;
 
@@ -571,8 +571,6 @@ var
   Output: String;
   Status: Int32;
 begin
-  SimbaDebugForm.Add('Dumping plugin: ' + ExtractFileName(FileName));
-
   try
     Status := RunCommand('SimbaScript --dump-plugin "' + FileName + '"', Output);
     if (Status <> 0) then
