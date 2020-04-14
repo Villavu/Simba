@@ -15,11 +15,8 @@ type
     FontPathOpenButton: TButton;
     ScriptPathOpenButton: TButton;
     ScriptExecutableOpenButton: TButton;
-    ScriptExecutableExtractCheckbox: TCheckBox;
-    OpenSSLInitalizeCheckbox: TCheckBox;
-    OpenSSLExtractCheckbox: TCheckBox;
+    ExtractResourcesOnLaunchCheckbox: TCheckBox;
     DividerBevel1: TDividerBevel;
-    DividerBevel2: TDividerBevel;
     IncludePathEdit: TEdit;
     PluginPathEdit: TEdit;
     FontPathEdit: TEdit;

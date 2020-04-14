@@ -39,16 +39,12 @@
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
-            <SmartLinkUnit Value="True"/>
             <Checks>
               <RangeChecks Value="True"/>
             </Checks>
             <TargetCPU Value="i386"/>
             <TargetOS Value="win32"/>
           </CodeGeneration>
-          <Linking>
-            <LinkSmart Value="True"/>
-          </Linking>
           <Other>
             <CompilerMessages>
               <IgnoredMessages idx5024="True" idx4055="True"/>
@@ -74,16 +70,12 @@
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
-            <SmartLinkUnit Value="True"/>
             <Checks>
               <RangeChecks Value="True"/>
             </Checks>
             <TargetCPU Value="aarch64"/>
             <TargetOS Value="linux"/>
           </CodeGeneration>
-          <Linking>
-            <LinkSmart Value="True"/>
-          </Linking>
           <Other>
             <CompilerMessages>
               <IgnoredMessages idx5024="True" idx4055="True"/>
@@ -109,16 +101,12 @@
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
-            <SmartLinkUnit Value="True"/>
             <Checks>
               <RangeChecks Value="True"/>
             </Checks>
             <TargetCPU Value="x86_64"/>
             <TargetOS Value="linux"/>
           </CodeGeneration>
-          <Linking>
-            <LinkSmart Value="True"/>
-          </Linking>
           <Other>
             <CompilerMessages>
               <IgnoredMessages idx5024="True" idx4055="True"/>
@@ -147,16 +135,12 @@
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
-            <SmartLinkUnit Value="True"/>
             <Checks>
               <RangeChecks Value="True"/>
             </Checks>
             <TargetCPU Value="x86_64"/>
             <TargetOS Value="darwin"/>
           </CodeGeneration>
-          <Linking>
-            <LinkSmart Value="True"/>
-          </Linking>
           <Other>
             <CompilerMessages>
               <IgnoredMessages idx5024="True" idx4055="True"/>
@@ -397,16 +381,12 @@
       <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
-      <SmartLinkUnit Value="True"/>
       <Checks>
         <RangeChecks Value="True"/>
       </Checks>
       <TargetCPU Value="x86_64"/>
       <TargetOS Value="win64"/>
     </CodeGeneration>
-    <Linking>
-      <LinkSmart Value="True"/>
-    </Linking>
     <Other>
       <CompilerMessages>
         <IgnoredMessages idx5024="True" idx4055="True"/>

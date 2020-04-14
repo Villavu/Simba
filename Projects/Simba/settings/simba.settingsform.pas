@@ -57,10 +57,7 @@ begin
   EnvironmentFrame.FontPathEdit.Text := SimbaSettings.Environment.FontPath.Value;
   EnvironmentFrame.ScriptPathEdit.Text := SimbaSettings.Environment.ScriptPath.Value;
   EnvironmentFrame.ScriptExecutableEdit.Text := SimbaSettings.Environment.ScriptExecutablePath.Value;
-
-  EnvironmentFrame.OpenSSLExtractCheckbox.Checked := SimbaSettings.Resources.ExtractOpenSSL.Value;
-  EnvironmentFrame.OpenSSLInitalizeCheckbox.Checked := SimbaSettings.Resources.InitializeOpenSSL.Value;
-  EnvironmentFrame.ScriptExecutableExtractCheckbox.Checked := SimbaSettings.Resources.ExtractSimbaScript.Value;
+  EnvironmentFrame.ExtractResourcesOnLaunchCheckbox.Checked := SimbaSettings.Resources.ExtractOnLaunch.Value;
 
   EditorGeneralFrame.RightMarginEdit.Value := SimbaSettings.Editor.RightMargin.Value;
   EditorGeneralFrame.VisibleRightMarginCheckbox.Checked := SimbaSettings.Editor.RightMarginVisible.Value;
@@ -83,9 +80,7 @@ begin
   SimbaSettings.Environment.ScriptPath.Value := EnvironmentFrame.ScriptPathEdit.Text;
   SimbaSettings.Environment.ScriptExecutablePath.Value := EnvironmentFrame.ScriptExecutableEdit.Text;
 
-  SimbaSettings.Resources.ExtractOpenSSL.Value := EnvironmentFrame.OpenSSLExtractCheckbox.Checked;
-  SimbaSettings.Resources.InitializeOpenSSL.Value := EnvironmentFrame.OpenSSLInitalizeCheckbox.Checked;
-  SimbaSettings.Resources.ExtractSimbaScript.Value := EnvironmentFrame.ScriptExecutableExtractCheckbox.Checked;
+  SimbaSettings.Resources.ExtractOnLaunch.Value := EnvironmentFrame.ExtractResourcesOnLaunchCheckbox.Checked;
 
   SimbaSettings.Editor.FontName.Value := EditorFontFrame.Editor.FontName;
   SimbaSettings.Editor.FontHeight.Value := EditorFontFrame.Editor.Font.Height;

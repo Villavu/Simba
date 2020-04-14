@@ -347,6 +347,13 @@ object SimbaForm: TSimbaForm
         ImageIndex = 21
         OnClick = MenuItemSettingsSimpleButtonClick
       end
+      object MenuItem6: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemAssociateScripts: TMenuItem
+        Caption = 'Associate Scripts'
+        OnClick = MenuItemAssociateScriptsClick
+      end
       object MenuItem1: TMenuItem
         Caption = '-'
       end

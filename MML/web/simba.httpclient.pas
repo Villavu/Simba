@@ -166,6 +166,8 @@ begin
   try
     InitSSLInterface();
   except
+    on E: Exception do
+      WritelN(E.Message);
   end;
 
   if IsSSLLoaded() then

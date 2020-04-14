@@ -3,95 +3,57 @@ program MakeSimbaResources;
 {$mode objfpc}{$H+}
 
 uses
-  {$IFDEF UNIX}{$IFDEF UseCThreads}
-  cthreads,
-  {$ENDIF}{$ENDIF}
-  Classes, resource, reswriter, sysutils, zipper;
+  classes, resource, reswriter, sysutils, zipper, fileutil;
+
+const
+  Target =
+    {$IF Defined(SIMBA_WIN32)}
+    'win32'
+    {$ELSEIF Defined(SIMBA_WIN64)}
+    'win64'
+    {$ELSEIF Defined(SIMBA_ARM64)}
+    'arm64'
+    {$ELSEIF Defined(SIMBA_LINUX64)}
+    'linux64'
+    {$ELSEIF Defined(SIMBA_DARWIN64)}
+    'darwin64'
+    {$ENDIF};
 
 var
+  Stream: TMemoryStream;
   Resources: TResources;
-
-procedure WriteResource(Name: String; Stream: TStream);
-var
-  Resource: TGenericResource;
-begin
-  Resource := TGenericResource.Create(TResourceDesc.Create(RT_RCDATA), TResourceDesc.Create(Name));
-  Resource.RawData.CopyFrom(Stream, Stream.Size);
-
-  Resources.Add(Resource);
-end;
-
-var
-  FileStream: TFileStream;
+  GenericResource: TGenericResource;
+  List: TStringList;
+  I: Int32;
 
 begin
   Resources := TResources.Create();
+  Stream := TMemoryStream.Create();
 
-  // SimbaScript
+  List := FindAllFiles(ExtractFileDir(ParamStr(0)) + '/' + Target);
+  List.Add(ExtractFileDir(ParamStr(0)) + '/../SimbaScript/SimbaScript' {$IFDEF WINDOWS} + '.exe' {$ENDIF});
+
   with TZipper.Create() do
   try
-    FileName := ExtractFileDir(ParamStr(0)) + '/SimbaScript.zip';
-    with Entries do
-      AddFileEntry(ExtractFileDir(ParamStr(0)) + '/../SimbaScript/SimbaScript' {$IFDEF WINDOWS} + '.exe' {$ENDIF}, 'SimbaScript' {$IFDEF WINDOWS} + '.exe' {$ENDIF});
+    Entries.AddFileEntries(List);
+    for I := 0 to Entries.Count - 1 do
+      Entries[I].ArchiveFileName := ExtractFileName(Entries[I].ArchiveFileName);
 
-    ZipAllFiles();
+    SaveToStream(Stream);
   finally
     Free();
   end;
 
-  FileStream := TFileStream.Create(ExtractFileDir(ParamStr(0)) + '/SimbaScript.zip', fmOpenRead);
+  Stream.Position := 0;
 
-  try
-    WriteResource('SIMBASCRIPT', FileStream);
-  finally
-    FileStream.Free();
-  end;
+  GenericResource := TGenericResource.Create(TResourceDesc.Create(RT_RCDATA), TResourceDesc.Create('SIMBARESOURCES'));
+  GenericResource.RawData.CopyFrom(Stream, Stream.Size);
 
-  // OpenSSL
-  with TZipper.Create() do
-  try
-    FileName := ExtractFileDir(ParamStr(0)) + '/OpenSSL.zip';
-    with Entries do
-    begin
-      {$IFDEF SIMBA_WIN64}
-        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/win64/libeay32.dll', 'libeay32.dll');
-        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/win64/ssleay32.dll', 'ssleay32.dll');
-      {$ENDIF}
-
-      {$IFDEF SIMBA_WIN32}
-        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/win32/libeay32.dll', 'libeay32.dll');
-        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/win32/ssleay32.dll', 'ssleay32.dll');
-      {$ENDIF}
-
-      {$IFDEF SIMBA_LINUX64}
-        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/linux64/libssl.so', 'libssl.so');
-        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/linux64/libcrypto.so', 'libcrypto.so');
-      {$ENDIF}
-
-      {$IFDEF SIMBA_ARM64}
-        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/arm64/libssl.so', 'libssl.so');
-        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/arm64/libcrypto.so', 'libcrypto.so');
-      {$ENDIF}
-
-      {$IFDEF SIMBA_DARWIN}
-        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/darwin64/libssl.dylib', 'libssl.dylib');
-        AddFileEntry(ExtractFileDir(ParamStr(0)) + '/darwin64/libcrypto.dylib', 'libcrypto.dylib');
-      {$ENDIF}
-    end;
-
-    ZipAllFiles();
-  finally
-    Free();
-  end;
-
-  FileStream := TFileStream.Create(ExtractFileDir(ParamStr(0)) + '/OpenSSL.zip', fmOpenRead);
-
-  try
-    WriteResource('OPENSSL', FileStream);
-  finally
-    FileStream.Free();
-  end;
-
+  Resources.Add(GenericResource);
   Resources.WriteToFile(ExtractFileDir(ParamStr(0)) + '/SimbaResources.res');
+
+  List.Free();
+  Stream.Free();
+  Resources.Free();
 end.
 

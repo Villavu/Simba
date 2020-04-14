@@ -72,20 +72,29 @@ begin
   WriteLn('Built at ', {$I %TIME%}, ' on ', {$I %DATE%});
   WriteLn('');
 
-  if Application.HasOption('help') or ((Application.ParamCount = 2) and (not Application.HasOption('open')) and (not Application.HasOption('run')) and (not Application.HasOption('compile'))) then
+  if (Application.ParamCount > 0) then
   begin
-    WriteLn(
-      'Options:'                               + LineEnding +
-      '  --open:    Opens the given script'    + LineEnding +
-      '  --run:     Runs the given script'     + LineEnding +
-      '  --compile: Compiles the given script' + LineEnding +
-      ''                                       + LineEnding +
-      'Example:'                               + LineEnding +
-      '  Simba.exe --run "script.simba"'       + LineEnding +
-      ''
-    );
+    if (Application.ParamCount = 1) and FileExists(Application.Params[1]) then
+      { valid options }
+    else
+    if (Application.ParamCount = 2) and FileExists(Application.Params[2]) and
+       (Application.HasOption('compile') or Application.HasOption('run')) then
+      { valid options }
+    else
+    begin
+      WriteLn(
+        'Options:'                               + LineEnding +
+        '  --open:    Opens the given script'    + LineEnding +
+        '  --run:     Runs the given script'     + LineEnding +
+        '  --compile: Compiles the given script' + LineEnding +
+        ''                                       + LineEnding +
+        'Example:'                               + LineEnding +
+        '  Simba.exe --run "script.simba"'       + LineEnding +
+        ''
+      );
 
-    Halt(0);
+      Halt(0);
+    end;
   end;
 
   Application.Title := 'Simba';

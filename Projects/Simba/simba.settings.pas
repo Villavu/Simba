@@ -58,9 +58,7 @@ type
     end;
 
     Resources: record
-      InitializeOpenSSL: TSimbaSetting_Boolean;
-      ExtractOpenSSL: TSimbaSetting_Boolean;
-      ExtractSimbaScript: TSimbaSetting_Boolean;
+      ExtractOnLaunch: TSimbaSetting_Boolean;
     end;
 
     constructor Create;
@@ -184,12 +182,8 @@ begin
   Editor.DividerVisible := addBooleanSetting('Editor', 'DividerVisible');
   Editor.DividerVisible.DefaultValue := True;
 
-  Resources.ExtractOpenSSL := addBooleanSetting('Resources', 'ExtractOpenSSL');
-  Resources.ExtractOpenSSL.DefaultValue := True;
-  Resources.ExtractSimbaScript := addBooleanSetting('Resources', 'ExtractSimbaScript');
-  Resources.ExtractSimbaScript.DefaultValue := True;
-  Resources.InitializeOpenSSL := addBooleanSetting('Resources', 'InitializeOpenSSL');
-  Resources.InitializeOpenSSL.DefaultValue := True;
+  Resources.ExtractOnLaunch := addBooleanSetting('Resources', 'ExtractOnLaunch');
+  Resources.ExtractOnLaunch.DefaultValue := True;
 
   try
     FINI.UpdateFile();
