@@ -6,8 +6,8 @@ object EnvironmentFrame: TEnvironmentFrame
   ClientHeight = 440
   ClientWidth = 569
   TabOrder = 0
-  DesignLeft = 438
-  DesignTop = 389
+  DesignLeft = 40
+  DesignTop = 356
   object Label1: TLabel
     AnchorSideLeft.Control = IncludePathEdit
     AnchorSideTop.Control = Owner
@@ -237,60 +237,24 @@ object EnvironmentFrame: TEnvironmentFrame
     Height = 15
     Top = 235
     Width = 569
-    Caption = 'Script Executable'
+    Caption = 'Resources'
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 10
     Style = gsHorLines
   end
-  object ScriptExecutableExtractCheckbox: TCheckBox
+  object ExtractResourcesOnLaunchCheckbox: TCheckBox
     AnchorSideLeft.Control = DividerBevel1
     AnchorSideTop.Control = DividerBevel1
     AnchorSideTop.Side = asrBottom
     Left = 0
     Height = 19
+    Hint = 'On launch, automatically extract Simba''s resources (SimbaScript, OpenSSL).'
     Top = 255
-    Width = 116
+    Width = 117
     BorderSpacing.Top = 5
-    Caption = 'Extract On Startup'
+    Caption = 'Extract On Launch'
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 10
-  end
-  object OpenSSLInitalizeCheckbox: TCheckBox
-    AnchorSideLeft.Control = OpenSSLExtractCheckbox
-    AnchorSideTop.Control = OpenSSLExtractCheckbox
-    AnchorSideTop.Side = asrBottom
-    Left = 0
-    Height = 19
-    Top = 330
-    Width = 123
-    BorderSpacing.Top = 7
-    Caption = 'Initialize On Startup'
-    TabOrder = 11
-  end
-  object OpenSSLExtractCheckbox: TCheckBox
-    AnchorSideLeft.Control = DividerBevel2
-    AnchorSideTop.Control = DividerBevel2
-    AnchorSideTop.Side = asrBottom
-    Left = 0
-    Height = 19
-    Top = 304
-    Width = 116
-    BorderSpacing.Top = 5
-    Caption = 'Extract On Startup'
-    TabOrder = 12
-  end
-  object DividerBevel2: TDividerBevel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = ScriptExecutableExtractCheckbox
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    Left = 0
-    Height = 15
-    Top = 284
-    Width = 569
-    Caption = 'OpenSSL'
-    Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 10
-    Style = gsHorLines
   end
 end

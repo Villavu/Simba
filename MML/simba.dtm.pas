@@ -297,13 +297,11 @@ var
   function ReadInteger : integer;
   begin
     Result := PInteger(ptr)^;
-    WRiteln(Result);
     inc(ptr,sizeof(integer));
   end;
   function ReadBoolean : boolean;
   begin
     result := PBoolean(ptr)^;
-    WRiteln(Result);
     inc(ptr,sizeof(boolean));
   end;
 

@@ -112,7 +112,7 @@ begin
   Str := Str.Replace('T', '');
   Str := Str.Replace('Z', '');
 
-  if Str <> '' then
+  if (Str <> '') then
   try
     Result := ScanDateTime('yyyy-mm-ddhh:nn:ss', Str);
   except

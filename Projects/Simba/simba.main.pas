@@ -79,6 +79,8 @@ type
     Images: TImageList;
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
+    MenuItemAssociateScripts: TMenuItem;
+    MenuItem6: TMenuItem;
     MenuItemEditor: TMenuItem;
     MenuItemReplace: TMenuItem;
     MenuItemConsole: TMenuItem;
@@ -169,6 +171,7 @@ type
     TrayPopup: TPopupMenu;
     TrayIcon: TTrayIcon;
 
+    procedure MenuItemAssociateScriptsClick(Sender: TObject);
     procedure RecentFileItemsClick(Sender: TObject);
     procedure MenuClearOutputClick(Sender: TObject);
     procedure MenuFileClick(Sender: TObject);
@@ -277,8 +280,7 @@ type
     procedure Initialize_Docking;
     procedure Initialize_Settings;
     procedure Initialize_CodeTools;
-    procedure Initialize_SimbaScript;
-    procedure Initialize_OpenSSL;
+    procedure Initialize_Resources;
     procedure Initialize_CommandLineOptions;
 
     procedure ShowForm(Form: TForm);
@@ -301,7 +303,7 @@ uses
   simba.notesform, simba.settingsform, simba.colorpicker, simba.ci_includecache,
   simba.highlighter, simba.scriptpluginloader, simba.stringutil, simba.script_common
   {$IFDEF WINDOWS},
-  windows
+  windows, shellapi
   {$ENDIF}
   {$IFDEF USE_FORMDESIGNER},
   simba.formdesigner
@@ -589,6 +591,36 @@ end;
 procedure TSimbaForm.RecentFileItemsClick(Sender: TObject);
 begin
   SimbaScriptTabsForm.Open(TMenuItem(Sender).Caption, True);
+end;
+
+procedure TSimbaForm.MenuItemAssociateScriptsClick(Sender: TObject);
+
+  {$IFDEF WINDOWS}
+  function RunAsAdmin(const Handle: THandle; const Path, Params: String): Boolean;
+  var
+    info: TShellExecuteInfo;
+  begin
+    info := Default(TShellExecuteInfo);
+    info.cbSize := SizeOf(TShellExecuteInfo);
+    info.Wnd := Handle;
+    info.fMask := SEE_MASK_FLAG_DDEWAIT or SEE_MASK_FLAG_NO_UI;
+    info.lpVerb := 'runas';
+    info.lpFile := PAnsiChar(Path);
+    info.lpParameters := PAnsiChar(Params);
+    info.nShow := SW_SHOWNORMAL;
+
+    Result := ShellExecuteExA(@info);
+  end;
+  {$ENDIF}
+
+const
+  Message = 'Would you like to accociate scripts with this Simba?' + LineEnding +
+            'This means when opening a script, the script will be opened using this Simba executable.';
+begin
+  {$IFDEF WINDOWS}
+  if MessageDlg('Associate Scripts', Message, mtConfirmation, mbYesNo, 0) = mrYes then
+    RunAsAdmin(Handle, 'SimbaAssociate.exe', '"' + Application.ExeName + '"');
+  {$ENDIF}
 end;
 
 procedure TSimbaForm.ShowACA(Sender: TObject);
@@ -1282,30 +1314,25 @@ begin
     Dump.Free();
 end;
 
-procedure TSimbaForm.Initialize_SimbaScript;
+procedure TSimbaForm.Initialize_Resources;
+var
+  SimbaResourceExtractor: TSimbaResourceExtractor;
 begin
-  WriteLn('Initialize SimbaScript');
-
-  if SimbaSettings.Resources.ExtractSimbaScript.Value then
-  begin
-    SimbaResourceExtractor.Extract('SIMBASCRIPT', Application.Location);
+  if SimbaSettings.Resources.ExtractOnLaunch.Value then
+  try
+    SimbaResourceExtractor.Extract();
 
     {$IFDEF UNIX}
     if fpchmod(SimbaSettings.Environment.ScriptExecutablePath.Value, &755) <> 0 then //rwxr-xr-x
-      SimbaDebugForm.Add('Unable to make SimbaScript an executable');
+      SimbaDebugForm.Add('Unable to make SimbaScript executable');
     {$ENDIF}
+
+    if not InitializeOpenSSL(Application.Location) then
+      SimbaDebugForm.Add('Failed to initialize OpenSSL, falling back to using system libraries');
+  except
+    on E: Exception do
+      SimbaDebugForm.Add('Failed to initialize resources: ' + E.Message);
   end;
-end;
-
-procedure TSimbaForm.Initialize_OpenSSL;
-begin
-  Writeln('Initialize OpenSSL');
-
-  if SimbaSettings.Resources.ExtractOpenSSL.Value then
-    SimbaResourceExtractor.Extract('OPENSSL', Application.Location);
-
-  if SimbaSettings.Resources.InitializeOpenSSL.Value then
-    InitializeOpenSSL(Application.Location);
 end;
 
 procedure TSimbaForm.ShowForm(Form: TForm);
@@ -1326,22 +1353,23 @@ end;
 
 procedure TSimbaForm.Initialize_CommandLineOptions;
 begin
-  if (Application.ParamCount = 2) then
+  if (Application.ParamCount > 0) then
   begin
     WriteLn('Initialize Command Line Options');
 
-    if not FileExists(Application.Params[2]) then
+    if (Application.ParamCount = 1) and FileExists(Application.Params[1]) then
+      SimbaScriptTabsForm.Open(Application.Params[1])
+    else
+    if (Application.ParamCount = 2) and FileExists(Application.Params[2]) and
+       (Application.HasOption('compile') or Application.HasOption('run')) then
     begin
-      WriteLn('Script does not exist!');
-      Halt(0);
+      SimbaScriptTabsForm.Open(Application.Params[2]);
+
+      if Application.HasOption('compile') then
+        Self.CompileScript();
+      if Application.HasOption('run') then
+        Self.RunScript();
     end;
-
-    SimbaScriptTabsForm.Open(Application.Params[2]);
-
-    if Application.HasOption('c', 'compile') then
-      Self.CompileScript();
-    if Application.HasOption('r', 'run') then
-      Self.RunScript();
   end;
 end;
 
@@ -1367,12 +1395,14 @@ var
 begin
   Initialize_Console();
   Initialize_Docking();
-  Initialize_OpenSSL();
-  Initialize_SimbaScript();
+  Initialize_Resources();
   Initialize_CodeTools();
-  Initialize_SimbaScript();
   Initialize_Settings();
   Initialize_CommandLineOptions();
+
+  {$IFDEF WINDOWS}
+  Self.MenuItemAssociateScripts.Enabled := True;
+  {$ENDIF}
 
   Self.ToolBar.Images := TImageList.Create(ToolBar);
   Self.ToolBar.Images.Assign(Self.Images);

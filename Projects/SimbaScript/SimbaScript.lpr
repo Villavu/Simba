@@ -169,21 +169,21 @@ begin
     end else
     begin
       WriteLn(
-          'Options:'                                                       + LineEnding +
-          '  --run:          Runs the given script'                        + LineEnding +
-          '  --compile:      Compiles the given script'                    + LineEnding +
-          ''                                                               + LineEnding +
-          '  --target:       Window handle to target. Defaults to Desktop' + LineEnding +
-          '  --apppath:      Defaults to SimbaScript.exe location'         + LineEnding +
-          '  --datapath:     Defaults to AppPath/Data'                     + LineEnding +
-          '  --pluginpath:   Defaults to AppPath/Plugins'                  + LineEnding +
-          '  --fontpath:     Defaults to AppPath/Fonts'                    + LineEnding +
-          '  --includepath:  Defaults to AppPath/Includes'                 + LineEnding +
-          ''                                                               + LineEnding +
-          'Example:'                                                       + LineEnding +
-          '  SimbaScript.exe --run "script.simba"'                         + LineEnding +
-          ''
-        );
+        'Options:'                                                       + LineEnding +
+        '  --run:          Runs the given script'                        + LineEnding +
+        '  --compile:      Compiles the given script'                    + LineEnding +
+        ''                                                               + LineEnding +
+        '  --target:       Window handle to target. Defaults to Desktop' + LineEnding +
+        '  --apppath:      Defaults to SimbaScript.exe location'         + LineEnding +
+        '  --datapath:     Defaults to AppPath/Data'                     + LineEnding +
+        '  --pluginpath:   Defaults to AppPath/Plugins'                  + LineEnding +
+        '  --fontpath:     Defaults to AppPath/Fonts'                    + LineEnding +
+        '  --includepath:  Defaults to AppPath/Includes'                 + LineEnding +
+        ''                                                               + LineEnding +
+        'Example:'                                                       + LineEnding +
+        '  SimbaScript.exe --run "script.simba"'                         + LineEnding +
+        ''
+      );
 
       Halt(0);
     end;
