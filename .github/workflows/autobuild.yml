@@ -17,27 +17,27 @@ jobs:
         config:
           - os: windows-latest
             name: Windows 32
-            LAZ_VER: 2.0.6
+            LAZ_VER: 2.0.8
             LAZ_OPT: "--build-mode=SIMBA_WIN32"
             ARTIFACT: "Simba-Win32.exe"
 
           - os: windows-latest
             name: Windows 64
-            LAZ_VER: 2.0.6
+            LAZ_VER: 2.0.8
             LAZ_OPT: "--build-mode=SIMBA_WIN64"
             ARTIFACT: "Simba-Win64.exe"
 
           - os: ubuntu-latest
             name: Linux 64
-            LAZ_VER: 2.0.6
+            LAZ_VER: 2.0.8
             LAZ_OPT: "--build-mode=SIMBA_LINUX64"
             ARTIFACT: "Simba-Linux64"
             
-          - os: macos-latest
-            name: MacOS 64
-            LAZ_VER: 2.0.6
-            LAZ_OPT: "--build-mode=SIMBA_DARWIN64"
-            ARTIFACT: "Simba-Darwin64"
+          #- os: macos-latest
+          #  name: MacOS 64
+          #  LAZ_VER: 2.0.8
+          #  LAZ_OPT: "--build-mode=SIMBA_DARWIN64"
+          #  ARTIFACT: "Simba-Darwin64"
 
     steps:
     - uses: actions/checkout@v2
@@ -71,8 +71,8 @@ jobs:
         LAZ_BIN_TARGET = {
             'Linux':   'Lazarus Linux amd64 DEB/Lazarus %(version)s',
             'Windows': 'Lazarus Windows 64 bits/Lazarus %(version)s',
-            'macOS':   'Lazarus macOS x86-64/'
-        }[OS_NAME];
+            'macOS':   'Lazarus macOS x86-64/Lazarus %(version)s'
+        }[OS_NAME]
 
         def install_lazarus_version(ver):
 
@@ -82,41 +82,44 @@ jobs:
             # Collect all download links on target version
             assets = re.findall("https://(.*?)/download", subprocess.check_output('wget -O- %s' % (url), shell=True).decode('utf-8'))
             for asset in list(set(assets)):
-                os.system('wget --progress=dot:mega -P "%s" %s' % (LAZ_DOWNLOAD_DIR, asset))
+                subprocess.call('wget --progress=dot:mega -P "%s" %s' % (LAZ_DOWNLOAD_DIR, asset), shell=True)
 
             if OS_NAME == 'Windows':
                  # Add Lazarus directory to PATH
-                 if os.system('echo ::add-path::C:\\Lazarus\\') != 0:
+                 if subprocess.call('echo ::add-path::C:\\Lazarus\\', shell=True) != 0:
                      return False
 
                  # Install all .exe files
-                 process_file = lambda f: (not f.endswith('.exe')) or os.system('%s /VERYSILENT /DIR="C:\Lazarus"' % (f)) == 0
+                 process_file = lambda f: (not f.endswith('.exe')) or subprocess.call('%s /VERYSILENT /DIR="C:\Lazarus"' % (f), shell=True) == 0
             elif OS_NAME == 'Linux':
                 # Install dependencies
-                if os.system('%s install libgtk2.0-dev' % (OS_PMAN)) != 0:
+                if subprocess.call('%s install libgtk2.0-dev' % (OS_PMAN), shell=True) != 0:
                     return False
 
                 # Install all .deb files
-                process_file = lambda f: (not f.endswith('.deb')) or os.system('sudo dpkg --force-overwrite -i %s' % (f)) == 0
+                process_file = lambda f: (not f.endswith('.deb')) or subprocess.call('sudo dpkg --force-overwrite -i %s' % (f), shell=True) == 0
             elif OS_NAME == 'macOS':
+                subprocess.call('sudo spctl --master-disable', shell=True);
+            
                 # Install all .pkg files
-                process_file = lambda f: (not f.endswith('.pkg')) or os.system('sudo installer -pkg %s -target /' % (f)) == 0
+                process_file = lambda f: (not f.endswith('.pkg')) or (subprocess.call('sudo xattr -cr %s' % (f), shell=True) == 0 and subprocess.call('sudo installer -pkg %s -target /' % (f), shell=True) == 0);
             else:
                 return False
 
             # Process all downloaded files
-            if not all(map(lambda f: os.system('echo Installing %s' % (f)) == 0 and process_file(os.path.join(LAZ_DOWNLOAD_DIR, f)), sorted(os.listdir(LAZ_DOWNLOAD_DIR)))):
+            if not all(map(lambda f: subprocess.call('echo Installing %s' % (f), shell=True) == 0 and process_file(os.path.join(LAZ_DOWNLOAD_DIR, f)), sorted(os.listdir(LAZ_DOWNLOAD_DIR)))):
                 return False
 
             return True
 
         def main():
-            if os.system('%s install wget' % (OS_PMAN)) != 0:
+            if subprocess.call('%s install wget' % (OS_PMAN), shell=True) != 0:
                 return False
 
             return install_lazarus_version(os.environ.get('LAZ_VER'))
 
         sys.exit(int(not main()))
+
 
     - name: Build Simba
       run: lazbuild ${{ env.LAZ_OPT }} "Projects/Simba/Simba.lpi"
@@ -126,21 +129,23 @@ jobs:
       run: |
         import sys
         import os
+        import subprocess
+        import platform
+        
         def main():
             os.chdir('Projects/SimbaScript/')
+            os.environ['DISPLAY'] = ':1'
 
             with open('script.simba', "w+") as file:
                 file.write('begin Simba(); end.')
                 file.close() 
 
-            if os.name == 'posix':
-                os.system('Xvfb :1 & sleep 3')
-                if os.system('DISPLAY=:1 ./SimbaScript --run script.simba') != 0:
-                  return False
-            else:
-                if os.system('SimbaScript.exe --run script.simba') != 0:
-                  return False
-            
+            if platform.system() == 'Linux':
+                subprocess.call('Xvfb :1 & sleep 5', shell=True)
+                
+            if subprocess.call('%s --run script.simba' % (os.path.abspath('SimbaScript')), shell=True) != 0:
+                return False
+
             return True
 
         sys.exit(int(not main()))
