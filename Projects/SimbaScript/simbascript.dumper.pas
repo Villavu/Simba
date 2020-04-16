@@ -10,48 +10,28 @@ uses
 type
   TSimbaScript_PluginDumper = class(TThread)
   protected
-    FFileName: String;
-
     procedure Execute; override;
   public
-    property FileName: String read FFileName write FFileName;
+    Plugin: String;
+    Output: String;
   end;
 
   TSimbaScript_CompilerDumper = class(TThread)
   protected
     procedure Execute; override;
+  public
+    Output: String;
   end;
 
 implementation
 
 uses
-  streamio,
   simbascript.plugin, simbascript.compilerdump;
 
 procedure TSimbaScript_PluginDumper.Execute;
-var
-  Plugin: TSimbaScriptPlugin;
-  OrginalOutput: TextFile;
-  Stream: TStringStream;
 begin
-  OrginalOutput := Output;
-  Stream := TStringStream.Create('');
-
-  AssignStream(Output, Stream);
-  Rewrite(Output);
-
-  try
-    Plugin := TSimbaScriptPlugin.Create(FFileName);
-
-    WriteLn(OrginalOutput, Plugin.Dump.Text);
-  except
-    on E: Exception do
-    begin
-      WriteLn(OrginalOutput, Stream.DataString);
-
-      raise;
-    end;
-  end;
+  with TSimbaScriptPlugin.Create(Plugin) do // Don't free plugin, it's not worth it. Let the OS clean up...
+    Dump.SaveToFile(Output);
 end;
 
 procedure TSimbaScript_CompilerDumper.Execute;
@@ -61,7 +41,7 @@ begin
   Compiler := TSimbaScript_CompilerDump.Create();
 
   try
-    WriteLn(Compiler.Dump.Text);
+    Compiler.Dump.SaveToFile(Output);
   finally
     if (Compiler <> nil) then
       Compiler.Free();

@@ -570,22 +570,26 @@ end;
 
 procedure TSimbaForm.CodeTools_OnLoadLibrary(Sender: TObject; FileName: String; var Contents: String);
 var
-  Output: String;
+  Output, Dump: String;
   Status: Int32;
 begin
+  Dump := SysUtils.GetTempFileName(SimbaSettings.Environment.DataPath.Value, '.dump');
+
   try
-    Status := RunCommand('SimbaScript --dump-plugin "' + FileName + '"', Output);
+    Status := RunCommand('SimbaScript --dump-plugin="' + FileName + '" "' + Dump + '"', Output);
     if (Status <> 0) then
       raise Exception.Create(IntToStr(Status));
 
-    Contents := Output;
+    Contents := ReadFileToString(Dump);
   except
     on E: Exception do
     begin
-      SimbaDebugForm.Add('Error dumping: ' + E.Message);
+      SimbaDebugForm.Add('Error dumping ' + ExtractFileName(FileName));
       SimbaDebugForm.Add(Output);
     end;
   end;
+
+  SysUtils.DeleteFile(Dump);
 end;
 
 procedure TSimbaForm.RecentFileItemsClick(Sender: TObject);
@@ -1270,30 +1274,31 @@ var
   Parser: TCodeInsight_Include;
   Status: Int32;
   I: Int32;
-  Dump: TStringList;
-  Output: String;
+  List: TStringList;
+  Output, Dump: String;
 begin
   WriteLn('Initialize Code Tools');
 
-  Dump := nil;
+  Dump := SysUtils.GetTempFileName(SimbaSettings.Environment.DataPath.Value, '.dump');
+
+  List := TStringList.Create();
 
   try
-    Status := RunCommand('SimbaScript --dump-compiler', Output);
+    Status := RunCommand('SimbaScript --dump-compiler "' + Dump + '"', Output);
     if (Status <> 0) then
       raise Exception.Create(IntToStr(Status));
 
-    Dump := TStringList.Create();
-    Dump.LineBreak := #0;
-    Dump.Text := Output;
+    List.LineBreak := #0;
+    List.LoadFromFile(Dump);
 
-    for I := 0 to Dump.Count - 1 do
+    for I := 0 to List.Count - 1 do
     begin
-      if (Dump.Names[I] = 'Classes') or (Dump.Names[I] = '') then
+      if (List.Names[I] = 'Classes') or (List.Names[I] = '') then
         Continue;
 
       Parser := TCodeInsight_Include.Create();
       Parser.OnMessage := @Self.CodeTools_OnMessage;
-      Parser.Run(Dump.ValueFromIndex[I], Dump.Names[I]);
+      Parser.Run(List.ValueFromIndex[I], List.Names[I]);
 
       SimbaFunctionListForm.addDeclarations(Parser.Items, SimbaFunctionListForm.addSimbaSection(Parser.Lexer.FileName), False, True, False);
 
@@ -1302,16 +1307,19 @@ begin
 
     SimbaFunctionListForm.SimbaNode.AlphaSort();
     SimbaFunctionListForm.SimbaNode.Expanded := True;
+
+    List.Free();
   except
     on E: Exception do
     begin
       SimbaDebugForm.Add('Error dumping compiler: ' + E.Message);
       SimbaDebugForm.Add(Output);
+
+      List.Free();
     end;
   end;
 
-  if (Dump <> nil) then
-    Dump.Free();
+  SysUtils.DeleteFile(Dump);
 end;
 
 procedure TSimbaForm.Initialize_Resources;

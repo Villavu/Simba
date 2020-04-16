@@ -9,6 +9,9 @@ uses
   simba.ipc, simba.script_common;
 
 const
+  OUTPUT_BUFFER_SIZE = 16 * 1024;
+
+const
   SIMBA_SCRIPT_STATE_STOPPING = UInt8(0);
   SIMBA_SCRIPT_STATE_PAUSED   = UInt8(1);
   SIMBA_SCRIPT_STATE_RUNNING  = UInt8(2);
@@ -195,7 +198,7 @@ var
   end;
 
 var
-  Buffer: array[1..16 * 1024] of Char;
+  Buffer: array[1..OUTPUT_BUFFER_SIZE] of Char;
   Remaining: String;
   Count: Int32;
 begin
@@ -376,7 +379,7 @@ begin
   FState := SIMBA_SCRIPT_STATE_RUNNING;
 
   FProcess := TSimbaScriptProcess.Create();
-  FProcess.PipeBufferSize := 16 * 1024;
+  FProcess.PipeBufferSize := OUTPUT_BUFFER_SIZE;
   FProcess.OnExecute := @Self.OnExecuteProcess;
   FProcess.OnDestroy := @Self.OnDestroyProcess;
   FProcess.CurrentDirectory := Application.Location;

@@ -96,7 +96,8 @@ begin
     begin
       if (FatalException <> nil) then
       begin
-        WriteLn(Exception(FatalException).Message);
+        if not Application.HasOption('simbaipc') then
+          WriteLn(Exception(FatalException).Message);
 
         ExitCode := 1;
       end;
@@ -116,7 +117,10 @@ begin
   begin
     FreeOnTerminate := True;
     OnTerminate := @Self.Terminate;
-    FileName := Application.Params[Application.ParamCount];
+
+    Plugin := Application.GetOptionValue('dump-plugin');
+    Output := Application.Params[Application.ParamCount];
+
     Start();
   end;
 end;
@@ -127,6 +131,9 @@ begin
   begin
     FreeOnTerminate := True;
     OnTerminate := @Self.Terminate;
+
+    Output := Application.Params[Application.ParamCount];
+
     Start();
   end;
 end;
@@ -142,12 +149,11 @@ begin
     Application.Initialize();
 
     if Application.HasOption('dump-compiler') then
-    begin
-      Application.QueueAsyncCall(@Application.DumpCompiler, 0);
-    end else
+      Application.QueueAsyncCall(@Application.DumpCompiler, 0)
+    else
     if Application.HasOption('dump-plugin') then
     begin
-      if (not FileExists(Application.Params[Application.ParamCount])) then
+      if (not FileExists(Application.GetOptionValue('dump-plugin'))) then
       begin
         WriteLn('Plugin not found');
 
