@@ -35,7 +35,7 @@ type
 implementation
 
 uses
-  graphtype, extctrls,
+  graphtype, extctrls, forms,
   simba.debugimage, simba.debugform, simba.scripttabsform, simba.mufasatypes,
   simba.main, simba.scripttab, simba.bitmap, simba.oswindow, simba.scriptinstance;
 
@@ -69,6 +69,7 @@ begin
   Params.Read(Title, SizeOf(ShortString));
 
   SimbaForm.Caption := Title;
+  Application.Title := Title;
 end;
 
 procedure TSimbaMethod._Status;

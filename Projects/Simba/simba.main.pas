@@ -963,7 +963,7 @@ end;
 
 procedure TSimbaForm.MenuFindClick(Sender: TObject);
 begin
-  SimbaScriptTabsForm.FindVisible := True;
+  SimbaScriptTabsForm.Find();
 end;
 
 procedure TSimbaForm.MenuItemFindNextClick(Sender: TObject);
