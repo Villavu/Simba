@@ -498,8 +498,11 @@ begin
   end;
 
   if (TabCount = 1) then
-    ScriptTab.Reset()
-  else
+  begin
+    ScriptTab.Reset();
+    if (Notebook.OnChange <> nil) then
+      Notebook.OnChange(Self);
+  end else
     ScriptTab.Free();
 end;
 

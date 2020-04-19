@@ -154,9 +154,9 @@ begin
   for i := FCachedIncludes.Count - 1 downto 0 do
   begin
     Include := FCachedIncludes.ItemsI[i];
-    if Include.RefCount > 0 then
+    if (Include.RefCount > 0) then
       Continue;
-    if (Include.LastUsed < 10) and (not Include.Outdated) then
+    if (Include.LastUsed < 25) and (not Include.Outdated) then
       Continue;
 
     WriteLn('Purge include "', Include.Lexer.FileName, '"');

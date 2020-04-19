@@ -742,36 +742,27 @@ end;
 
 function TDeclarationList.GetItemInPosition(Position: Int32): TDeclaration;
 
-  function Search(Declaration: TDeclaration): TDeclaration;
+  procedure Search(Declaration: TDeclaration; var Result: TDeclaration);
   var
-    i: Int32;
+    I: Int32;
   begin
-    Result := nil;
-
     if (Position >= Declaration.StartPos) and (Position <= Declaration.EndPos) then
-      Result := Declaration
-    else
     begin
-      for i := 0 to Declaration.Items.Count - 1 do
-      begin
-        Result := Search(Declaration.Items[i]);
-        if (Result <> nil) then
-          Exit;
-      end;
+      Result := Declaration;
+
+      for I := 0 to Declaration.Items.Count - 1 do
+        Search(Declaration.Items[I], Result);
     end;
   end;
 
 var
-  i: Int32;
+  I: Int32;
 begin
   Result := nil;
 
-  for i := 0 to FCount - 1 do
-  begin
-    Result := Search(FItems[i]);
-    if (Result <> nil) then
-      Exit;
-  end;
+  for I := 0 to FCount - 1 do
+    if (Position >= FItems[I].StartPos) and (Position <= FItems[I].EndPos) then
+      Search(FItems[I], Result);
 end;
 
 function TDeclarationList.GetRawText(AClass: TDeclarationClass): String;

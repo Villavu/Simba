@@ -594,7 +594,7 @@ var
   Declaration: TDeclaration;
   Declarations: TDeclarationArray;
   Method: TDeclaration;
-  i: Int32;
+  I: Int32;
 begin
   Lexer.ClearDefines();
   Lexer.Defines.AddStrings(FBaseDefines);
@@ -613,15 +613,18 @@ begin
     if (Declaration <> nil) then
     begin
       Method := Declaration;
-      if (Method is TciProcedureDeclaration) or Declaration.HasOwnerClass(TciProcedureDeclaration, Method, True) then
+
+      if (Method is TciProcedureDeclaration) then
+        GetMethodLocals(Method as TciProcedureDeclaration);
+      if Method.HasOwnerClass(TciProcedureDeclaration, Method, True) then
         GetMethodLocals(Method as TciProcedureDeclaration);
 
       Declarations := Declaration.GetOwnersOfClass(TciWithStatement);
       if Declaration is TciWithStatement then
         Declarations := Declarations + Declaration;
 
-      for i := 0 to High(Declarations) do
-        GetWithVariables(Declarations[i].Items.GetItemsOfClass(TciVariable));
+      for I := 0 to High(Declarations) do
+        GetWithVariables(Declarations[I].Items.GetItemsOfClass(TciVariable));
     end;
   end;
 end;
