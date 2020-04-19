@@ -415,6 +415,11 @@ begin
   FEditor.BlockIndent := 2;
   FEditor.BorderStyle := bsNone;
 
+  FScriptName := 'Untitled';
+  FSavedText := Editor.Text;
+
+  Caption := FScriptName;
+
   FunctionListState := nil;
 end;
 

@@ -1293,14 +1293,12 @@ begin
 
     for I := 0 to List.Count - 1 do
     begin
-      if (List.Names[I] = 'Classes') or (List.Names[I] = '') then
-        Continue;
-
       Parser := TCodeInsight_Include.Create();
       Parser.OnMessage := @Self.CodeTools_OnMessage;
       Parser.Run(List.ValueFromIndex[I], List.Names[I]);
 
-      SimbaFunctionListForm.addDeclarations(Parser.Items, SimbaFunctionListForm.addSimbaSection(Parser.Lexer.FileName), False, True, False);
+      if (List.Names[I] <> 'Classes') and (List.Names[I] <> '') then
+        SimbaFunctionListForm.addDeclarations(Parser.Items, SimbaFunctionListForm.addSimbaSection(Parser.Lexer.FileName), False, True, False);
 
       TCodeInsight.AddBaseInclude(Parser);
     end;

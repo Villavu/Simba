@@ -33,11 +33,11 @@ jobs:
             LAZ_OPT: "--build-mode=SIMBA_LINUX64"
             ARTIFACT: "Simba-Linux64"
             
-          #- os: macos-latest
-          #  name: MacOS 64
-          #  LAZ_VER: 2.0.8
-          #  LAZ_OPT: "--build-mode=SIMBA_DARWIN64"
-          #  ARTIFACT: "Simba-Darwin64"
+          - os: macos-latest
+            name: MacOS 64
+            LAZ_VER: 2.0.8
+            LAZ_OPT: "--build-mode=SIMBA_DARWIN64"
+            ARTIFACT: "Simba-Darwin64"
 
     steps:
     - uses: actions/checkout@v2
@@ -99,16 +99,19 @@ jobs:
                 # Install all .deb files
                 process_file = lambda f: (not f.endswith('.deb')) or subprocess.call('sudo dpkg --force-overwrite -i %s' % (f), shell=True) == 0
             elif OS_NAME == 'macOS':
-                subprocess.call('sudo spctl --master-disable', shell=True);
-            
                 # Install all .pkg files
-                process_file = lambda f: (not f.endswith('.pkg')) or (subprocess.call('sudo xattr -cr %s' % (f), shell=True) == 0 and subprocess.call('sudo installer -pkg %s -target /' % (f), shell=True) == 0);
+                process_file = lambda f: (not f.endswith('.pkg')) or (subprocess.call('sudo installer -pkg %s -target /' % (f), shell=True) == 0 or True)
             else:
                 return False
 
             # Process all downloaded files
-            if not all(map(lambda f: subprocess.call('echo Installing %s' % (f), shell=True) == 0 and process_file(os.path.join(LAZ_DOWNLOAD_DIR, f)), sorted(os.listdir(LAZ_DOWNLOAD_DIR)))):
+            if not all(map(lambda f: process_file(os.path.join(LAZ_DOWNLOAD_DIR, f)), sorted(os.listdir(LAZ_DOWNLOAD_DIR)))):
                 return False
+
+            # Fix macOS installer https://forum.lazarus.freepascal.org/index.php/topic,47408.msg358322.html#msg358322
+            if OS_NAME == 'macOS':
+                for command in ['sudo rm /etc/fpc.cfg', 'sudo fpcmkcfg -d basepath=/usr/local/lib/fpc/\$fpcversion -o /etc/fpc.cfg', 'sudo ln -s /usr/local/lib/fpc/3.0.4/ppcx64 /usr/local/bin']:
+                  subprocess.call(command, shell=True);
 
             return True
 
