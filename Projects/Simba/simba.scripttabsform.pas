@@ -239,7 +239,6 @@ begin
   SimbaForm.MenuItemSaveAll.Enabled := TabCount > 1;
   SimbaForm.SaveAllButton.Enabled := TabCount > 1;
 
-  SimbaFunctionListForm.Fill(CurrentTab.Editor.Text, CurrentTab.Editor.FileName, CurrentTab.Editor.SelStart - 1);
   SimbaFunctionListForm.State := CurrentTab.FunctionListState;
 
   if CurrentEditor.CanSetFocus() then
