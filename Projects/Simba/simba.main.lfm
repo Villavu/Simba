@@ -375,6 +375,10 @@ object SimbaForm: TSimbaForm
       object MenuItemDivider10: TMenuItem
         Caption = '-'
       end
+      object MenuItemFormatScript: TMenuItem
+        Caption = 'Format Script'
+        OnClick = MenuItemFormatScriptClick
+      end
       object MenuItemExportHTML: TMenuItem
         Caption = '&Export script as HTML'
         OnClick = MenuItemExportHTMLClick

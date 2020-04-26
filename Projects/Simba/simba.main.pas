@@ -79,6 +79,7 @@ type
     Images: TImageList;
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
+    MenuItemFormatScript: TMenuItem;
     MenuItemAssociateScripts: TMenuItem;
     MenuItem6: TMenuItem;
     MenuItemEditor: TMenuItem;
@@ -171,6 +172,7 @@ type
     TrayPopup: TPopupMenu;
     TrayIcon: TTrayIcon;
 
+    procedure MenuItemFormatScriptClick(Sender: TObject);
     procedure MenuItemAssociateScriptsClick(Sender: TObject);
     procedure RecentFileItemsClick(Sender: TObject);
     procedure MenuClearOutputClick(Sender: TObject);
@@ -301,7 +303,8 @@ uses
   simba.dtmeditor, simba.scriptinstance, simba.package_form, simba.aboutform,
   simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.colorpicker, simba.ci_includecache,
-  simba.highlighter, simba.scriptpluginloader, simba.stringutil, simba.script_common
+  simba.highlighter, simba.scriptpluginloader, simba.stringutil, simba.script_common,
+  simba.scriptformatter
   {$IFDEF WINDOWS},
   windows, shellapi
   {$ENDIF}
@@ -625,6 +628,33 @@ begin
   if MessageDlg('Associate Scripts', Message, mtConfirmation, mbYesNo, 0) = mrYes then
     RunAsAdmin(Handle, 'SimbaAssociate.exe', '"' + Application.ExeName + '"');
   {$ENDIF}
+end;
+
+procedure TSimbaForm.MenuItemFormatScriptClick(Sender: TObject);
+var
+  Script: String;
+begin
+  try
+    SimbaScriptTabsForm.CurrentEditor.BeginUndoBlock();
+
+    try
+      if SimbaScriptTabsForm.CurrentEditor.SelAvail then
+      begin
+        SimbaScriptTabsForm.CurrentEditor.SelText := FormatScript(SimbaScriptTabsForm.CurrentEditor.SelText);
+      end else
+      begin
+        Script := SimbaScriptTabsForm.CurrentEditor.Text;
+
+        SimbaScriptTabsForm.CurrentEditor.ClearAll();
+        SimbaScriptTabsForm.CurrentEditor.InsertTextAtCaret(FormatScript(Script));
+      end;
+    finally
+      SimbaScriptTabsForm.CurrentEditor.EndUndoBlock();
+    end;
+  except
+    on E: Exception do
+      ShowMessage('Exception while formatting script: ' + E.Message);
+  end;
 end;
 
 procedure TSimbaForm.ShowACA(Sender: TObject);
