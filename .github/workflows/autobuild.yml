@@ -108,11 +108,6 @@ jobs:
             if not all(map(lambda f: process_file(os.path.join(LAZ_DOWNLOAD_DIR, f)), sorted(os.listdir(LAZ_DOWNLOAD_DIR)))):
                 return False
 
-            # Fix macOS installer https://forum.lazarus.freepascal.org/index.php/topic,47408.msg358322.html#msg358322
-            if OS_NAME == 'macOS':
-                for command in ['sudo rm /etc/fpc.cfg', 'sudo fpcmkcfg -d basepath=/usr/local/lib/fpc/\$fpcversion -o /etc/fpc.cfg', 'sudo ln -s /usr/local/lib/fpc/3.0.4/ppcx64 /usr/local/bin']:
-                  subprocess.call(command, shell=True);
-
             return True
 
         def main():
