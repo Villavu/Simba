@@ -26,7 +26,7 @@ jobs:
     - name: Install
       run: |
         # Install Lazarus & FPC
-        ./fpclazup-x86_64-linux --installdir=lazarus/ --fpcURL=https://svn.freepascal.org/svn/fpc/tags/release_3_2_0_rc1 --lazURL=2.1.0 --noconfirm
+        ./fpclazup-x86_64-linux --installdir=lazarus/ --fpcURL=https://svn.freepascal.org/svn/fpc/tags/release_3_2_0_rc1 --lazURL=https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_8/ --noconfirm
         # Install cross compiler
         ./fpclazup-x86_64-linux --installdir=lazarus/ --ostarget="linux" --cputarget="aarch64" --only="FPCCleanOnly,FPCBuildOnly" --crossbindir=cross/bin --crosslibdir=cross/lib/aarch64-linux --noconfirm
 

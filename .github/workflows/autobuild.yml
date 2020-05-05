@@ -1,4 +1,4 @@
-name: Auto Build
+﻿name: Auto Build
 
 on: [push, pull_request]
 
@@ -37,7 +37,7 @@ jobs:
             name: MacOS 64
             LAZ_VER: 2.0.8
             LAZ_OPT: "--build-mode=SIMBA_DARWIN64"
-            ARTIFACT: "Simba-Darwin64"
+            ARTIFACT: "Simba-Darwin64.zip"
 
     steps:
     - uses: actions/checkout@v2
@@ -147,6 +147,13 @@ jobs:
             return True
 
         sys.exit(int(not main()))
+        
+    - name: MacOS Application Bundle
+      if: env.OS == 'macos-latest'
+      run: |
+        sudo chmod +x macos-bundle.sh
+        sudo ./macos-bundle.sh
+        zip -r Simba-Darwin64.zip Simba.app
 
     - name: Upload Simba Binary
       uses: ollydev/upload-release-action@master
