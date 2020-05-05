@@ -6,7 +6,7 @@ interface
 
 uses
   classes, sysutils, process,
-  simba.ipc, simba.script_common;
+  simba.ipc, simba.script_common, simba.debuggerform;
 
 const
   OUTPUT_BUFFER_SIZE = 16 * 1024;
@@ -72,6 +72,8 @@ type
 
     FState: UInt8;
 
+    FDebuggingForm: TSimbaDebuggerForm;
+
     procedure OnExecuteProcess(Sender: TObject);
     procedure OnDestroyProcess(Sender: TObject);
 
@@ -81,6 +83,7 @@ type
 
     procedure SetScript(Value: String);
   public
+    property DebuggerForm: TSimbaDebuggerForm read FDebuggingForm;
     property Process: TSimbaScriptProcess read FProcess;
     property State: UInt8 read FState write FState;
     property Running: Boolean read GetRunning;
@@ -96,7 +99,7 @@ type
     property ExitCode: Int32 read GetExitCode;
 
     // Start
-    procedure Run;
+    procedure Run(DebuggingForm: TSimbaDebuggerForm = nil);
     procedure Compile;
 
     // Change the state
@@ -112,7 +115,7 @@ type
 implementation
 
 uses
-  forms, dialogs,
+  forms, dialogs, math,
   simba.script_simbamethod, simba.debugform, simba.settings;
 
 procedure TSimbaScriptMethodThread.Execute;
@@ -148,6 +151,8 @@ begin
         SIMBA_METHOD_GET_TARGET_PID:       TThread.Synchronize(nil, @Method._GetSimbaTargetPID);
         SIMBA_METHOD_GET_TARGET_WINDOW:    TThread.Synchronize(nil, @Method._GetSimbaTargetWindow);
         SIMBA_METHOD_SCRIPT_STATE_CHANGED: TThread.Synchronize(nil, @Method._ScriptStateChanged);
+        SIMBA_METHOD_DEBUGGER_METHOD:      Method._DebuggerMethod();
+        SIMBA_METHOD_DEBUGGER_EVENT:       Method._DebuggerEvent();
         else
           raise Exception.CreateFmt('Invalid method %d', [Method.Method]);
       end;
@@ -306,7 +311,7 @@ begin
   Result := FProcess.Running;
 end;
 
-procedure TSimbaScriptInstance.Run;
+procedure TSimbaScriptInstance.Run(DebuggingForm: TSimbaDebuggerForm);
 begin
   if (FScript <> '') then
   begin
@@ -322,6 +327,15 @@ begin
     end;
 
     FProcess.Parameters.Add('--scriptname=' + FScriptName);
+  end;
+
+  FDebuggingForm := DebuggingForm;
+
+  if (FDebuggingForm <> nil) then
+  begin
+    FDebuggingForm.Clear();
+
+    FProcess.Parameters.Add('--debugging');
   end;
 
   FProcess.Parameters.Add('--target=' + IntToStr(FTarget));
@@ -376,6 +390,7 @@ end;
 constructor TSimbaScriptInstance.Create;
 begin
   FSimbaIPC := TSimbaIPC_Server.Create();
+
   FState := SIMBA_SCRIPT_STATE_RUNNING;
 
   FProcess := TSimbaScriptProcess.Create();

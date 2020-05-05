@@ -34,6 +34,23 @@ type
     destructor Destroy; override;
   end;
 
+  TDebuggerThread = class(TThread)
+  protected
+    FStream: TMemoryStream;
+    FLock: TCriticalSection;
+    FWarned: Boolean;
+    FScript: TSimbaScript;
+
+    procedure DoTerminate; override;
+
+    procedure Execute; override;
+  public
+    procedure Queue(Event: TSimbaScript_DebuggerEvent);
+
+    constructor Create(Script: TSimbaScript); reintroduce;
+    destructor Destroy; override;
+  end;
+
   TSimbaScript = class(TThread)
   protected
     FCompiler: TSimbaScript_Compiler;
@@ -48,6 +65,7 @@ type
 
     FSimbaIPC: TSimbaIPC_Client;
     FSimbaIPCLock: TCriticalSection;
+
 
     FWriteBuffer: String;
 
@@ -79,6 +97,12 @@ type
     procedure SetState(Value: TInitBool);
   public
     CompileOnly: Boolean;
+    Debugging: Boolean;
+    FDebuggerThread: TDebuggerThread;
+
+    _DebuggingMethods: TSimbaScript_DebuggingMethods;
+    _DebuggingIndent: Int16;
+    _DebuggingMethod: Int16;
 
     property State: TInitBool read FState write SetState;
     property StartTime: UInt64 read FStartTime;
@@ -112,6 +136,89 @@ implementation
 
 uses
   fileutil, simba.misc, simba.files, fpexprpars, typinfo, ffi;
+
+procedure TDebuggerThread.DoTerminate;
+begin
+  if FStream.Position > 0 then
+    with TSimbaMethod.Create(SIMBA_METHOD_DEBUGGER_EVENT) do
+    try
+      Params.Write(FStream.Memory^, FStream.Position);
+
+      Invoke(FScript);
+    finally
+      Free();
+    end;
+end;
+
+procedure TDebuggerThread.Execute;
+begin
+  while not Terminated do
+  begin
+    FLock.Enter();
+
+    try
+      if (FStream.Position > 0) then
+      begin
+        with TSimbaMethod.Create(SIMBA_METHOD_DEBUGGER_EVENT) do
+        try
+          Params.Write(FStream.Memory^, FStream.Position);
+
+          Invoke(FScript);
+        finally
+          Free();
+        end;
+      end;
+    finally
+      FStream.Position := 0;
+
+      FLock.Leave();
+    end;
+
+    Sleep(500);
+  end;
+end;
+
+procedure TDebuggerThread.Queue(Event: TSimbaScript_DebuggerEvent);
+begin
+  if FStream.Position >= 1024 * 1024 then
+  begin
+    if not FWarned then
+    begin
+      WriteLn('Debugger cannot keep up with your scripts function calling!');
+      WriteLn('Your script will be throttled since it cannot keep up.');
+
+      FWarned := True;
+    end;
+
+    while FStream.Position > 0 do
+      Sleep(100);
+  end;
+
+  FLock.Enter();
+
+  try
+    FStream.Write(Event, SizeOf(TSimbaScript_DebuggerEvent));
+  finally
+    FLock.Leave();
+  end;
+end;
+
+constructor TDebuggerThread.Create(Script: TSimbaScript);
+begin
+  inherited Create(False, 512 * 512);
+
+  FScript := Script;
+  FStream := TMemoryStream.Create();
+  FLock := TCriticalSection.Create();
+end;
+
+destructor TDebuggerThread.Destroy;
+begin
+  FStream.Free();
+  FLock.Free();
+
+  inherited Destroy();
+end;
 
 procedure TSimbaMethod.Invoke(Script: TSimbaScript);
 begin
@@ -155,11 +262,15 @@ procedure TSimbaScript.Execute;
 var
   T: Double;
   Method: TLapeGlobalVar;
+  I: Int32;
 begin
   try
     // Create
     FSimbaStateThread := TThread.ExecuteInThread(@HandleSimbaState);
     FSimbaIPCLock := TCriticalSection.Create();
+
+    if Debugging then
+      FDebuggerThread := TDebuggerThread.Create(Self);
 
     FClient := TClient.Create(FPluginPath);
     FClient.MOCR.FontPath := FFontPath;
@@ -171,6 +282,7 @@ begin
     FCompiler.OnFindFile := @HandleFindFile;
     FCompiler.OnHint := @HandleHint;
     FCompiler.OnHandleDirective := @HandleDirective;
+    FCompiler.Debugging := Debugging;
     FCompiler.Import(Self);
 
     // Compile
@@ -182,6 +294,22 @@ begin
 
     if CompileOnly then
       Exit;
+
+    if Debugging then
+    begin
+      _DebuggingIndent := -1;
+      _DebuggingMethods := FCompiler.DebuggingMethods;
+
+      for I := 0 to High(_DebuggingMethods) do
+        with TSimbaMethod.Create(SIMBA_METHOD_DEBUGGER_METHOD) do
+        try
+          Params.Write(_DebuggingMethods[I], SizeOf(ShortString));
+
+          Invoke(Self);
+        finally
+          Free();
+        end;
+    end;
 
     // Run
     T := PerformanceTimer();
@@ -391,6 +519,13 @@ var
   I: Int32;
 begin
   try
+    if (FDebuggerThread <> nil) then
+    begin
+      FDebuggerThread.Terminate();
+      FDebuggerThread.WaitFor();
+      FDebuggerThread.Free();
+    end;
+
     for I := 0 to High(FPlugins) do
       FPlugins[I].Free();
 

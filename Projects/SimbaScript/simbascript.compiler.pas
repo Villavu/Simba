@@ -5,19 +5,24 @@ unit simbascript.compiler;
 interface                         
 
 uses
-  classes, sysutils, typinfo,
+  classes, sysutils, typinfo, fgl,
   ffi, lpcompiler, lptypes, lpvartypes, lpparser, lptree, lpffiwrappers;
 
 type
   TSimbaScript_Compiler = class;
   TSimbaScript_Import = procedure(Compiler: TSimbaScript_Compiler; Data: Pointer);
+  TSimbaScript_DebuggingMethods = array of ShortString;
 
   TSimbaScript_Compiler = class(TLapeCompiler)
   protected
     FManagedClosures: array of TImportClosure;
     FSection: String;
+    FDebugging: Boolean;
+    FDebuggingMethods: TSimbaScript_DebuggingMethods;
   public
     procedure pushConditional(AEval: Boolean; ADocPos: TDocPos); reintroduce;
+
+    function ParseMethod(FuncForwards: TLapeFuncForwards; FuncHeader: TLapeType_Method; FuncName: lpString; isExternal: Boolean): TLapeTree_Method; override;
 
     function addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar; overload;
 
@@ -41,6 +46,9 @@ type
     procedure Import(Data: Pointer); overload;
 
     property Section: String read FSection write FSection;
+
+    property Debugging: Boolean read FDebugging write FDebugging;
+    property DebuggingMethods: TSimbaScript_DebuggingMethods read FDebuggingMethods;
 
     destructor Destroy; override;
   end;
@@ -219,6 +227,11 @@ begin
     if not FFILoaded then
       raise Exception.Create('libFFI is missing or incompatible');
 
+    addGlobalVar('array of ShortString', @FDebuggingMethods, '_DebuggingMethods');
+
+    addDelayedCode('{$HINTS OFF} procedure _EnterMethod(constref Index: Int32); begin end;');
+    addDelayedCode('{$HINTS OFF} procedure _LeaveMethod(constref Index: Int32); begin end;');
+
     InitializeFFI(Self);
     InitializePascalScriptBasics(Self, [psiTypeAlias, psiSettings, psiMagicMethod, psiFunctionWrappers, psiExceptions]);
 
@@ -226,6 +239,9 @@ begin
 
     for I := 0 to High(Imports) do
       Imports[I](Self, Data);
+
+    if FDebugging then
+      addBaseDefine('DEBUGGING');
   finally
     EndImporting();
   end;
@@ -294,6 +310,45 @@ end;
 procedure TSimbaScript_Compiler.pushConditional(AEval: Boolean; ADocPos: TDocPos);
 begin
   inherited pushConditional(AEval, ADocPos);
+end;
+
+function TSimbaScript_Compiler.ParseMethod(FuncForwards: TLapeFuncForwards; FuncHeader: TLapeType_Method; FuncName: lpString; isExternal: Boolean): TLapeTree_Method;
+var
+  EnterMethod, LeaveMethod: TLapeTree_Invoke;
+  Statement: TLapeTree_Try;
+begin
+  Result := inherited ParseMethod(FuncForwards, FuncHeader, FuncName, isExternal);
+
+  if FDebugging then
+  begin
+    if (Result <> nil) and (Result.Statements <> nil) and hasDefine('DEBUGGING') then
+    begin
+      FuncName := UpperCase(FuncName);
+      if (FuncName[1] = '!') or (FuncName = '_ENTERMETHOD') or (FuncName = '_LEAVEMETHOD') then
+        Exit;
+
+      if (FuncHeader <> nil) and (FuncHeader is TLapeType_MethodOfType) then
+        FuncName := UpperCase(TLapeType_MethodOfType(FuncHeader).ObjectType.Name) + '.' + FuncName;
+
+      SetLength(FDebuggingMethods, Length(FDebuggingMethods) + 1);
+      FDebuggingMethods[High(FDebuggingMethods)] := FuncName;
+
+      EnterMethod := TLapeTree_Invoke.Create('_EnterMethod', Self);
+      EnterMethod.addParam(TLapeTree_Integer.Create(High(FDebuggingMethods), EnterMethod));
+
+      LeaveMethod := TLapeTree_Invoke.Create('_LeaveMethod', Self);
+      LeaveMethod.addParam(TLapeTree_Integer.Create(High(FDebuggingMethods), LeaveMethod));
+
+      Result.Statements.addStatement(EnterMethod, True);
+
+      Statement := TLapeTree_Try.Create(Self);
+      Statement.Body := Result.Statements;
+      Statement.FinallyBody := LeaveMethod;
+
+      Result.Statements := TLapeTree_StatementList.Create(Self);
+      Result.Statements.AddStatement(Statement);
+    end;
+  end;
 end;
 
 destructor TSimbaScript_Compiler.Destroy;

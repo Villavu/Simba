@@ -6,7 +6,8 @@ interface
 
 uses
   classes, sysutils, comctrls, controls, syneditmiscclasses, syneditkeycmds, lcltype, dialogs, simba.functionlistform,
-  simba.editor, simba.scriptinstance, simba.codeinsight, simba.codeparser, simba.parameterhint, simba.autocomplete;
+  simba.editor, simba.scriptinstance, simba.codeinsight, simba.codeparser, simba.parameterhint, simba.autocomplete,
+  simba.debuggerform;
 
 type
   TSimbaScriptTab = class(TTabSheet)
@@ -19,6 +20,7 @@ type
     FScriptErrorLine: Int32;
     FMouseLinkXY: TPoint;
     FFunctionListState: TSimbaFunctionList_State;
+    FDebuggingForm: TSimbaDebuggerForm;
 
     procedure HandleEditorClick(Sender: TObject);
     procedure HandleEditorChange(Sender: TObject);
@@ -33,12 +35,14 @@ type
 
     function GetFileName: String;
     function GetScript: String;
-    procedure SetScript(Value: String);
     function GetScriptChanged: Boolean;
 
+    procedure SetScript(Value: String);
     procedure SetScriptErrorLine(Value: Int32);
     procedure SetFunctionListState(Value: TSimbaFunctionList_State);
   public
+    property DebuggingForm: TSimbaDebuggerForm read FDebuggingForm;
+
     property FileName: String read GetFileName;
     property ScriptChanged: Boolean read GetScriptChanged;
     property ScriptInstance: TSimbaScriptInstance read FScriptInstance write FScriptInstance;
@@ -63,6 +67,7 @@ type
     procedure Redo;
 
     procedure Reset;
+    function CreateDebuggingForm: TSimbaDebuggerForm;
 
     constructor Create(APageControl: TPageControl); reintroduce;
     destructor Destroy; override;
@@ -230,7 +235,6 @@ end;
 procedure TSimbaScriptTab.SetFunctionListState(Value: TSimbaFunctionList_State);
 begin
   FFunctionListState.Free();
-
   FFunctionListState := Value;
 end;
 
@@ -421,6 +425,21 @@ begin
   Caption := FScriptName;
 
   FunctionListState := nil;
+end;
+
+function TSimbaScriptTab.CreateDebuggingForm: TSimbaDebuggerForm;
+begin
+  if (FDebuggingForm = nil) then
+  begin
+    FDebuggingForm := TSimbaDebuggerForm.Create(Self);
+    FDebuggingForm.Font := Self.Font;
+    FDebuggingForm.ShowOnTop();
+  end;
+
+  FDebuggingForm.Caption := 'Debugger - ' + FScriptName;
+  FDebuggingForm.ShowOnTop();
+
+  Result := FDebuggingForm;
 end;
 
 constructor TSimbaScriptTab.Create(APageControl: TPageControl);

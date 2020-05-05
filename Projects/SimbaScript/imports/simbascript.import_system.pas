@@ -12,7 +12,7 @@ procedure Lape_Import_System(Compiler: TSimbaScript_Compiler; Data: Pointer = ni
 implementation
 
 uses
-  forms, simba.mufasabase, lazutf8;
+  forms, simba.mufasabase, lazutf8, simba.script_common;
 
 procedure Lape_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -117,6 +117,38 @@ begin
   PBoolean(Result)^ := (TSimbaScript(Params^[0]).IsTerminating and TSimbaScript(Params^[0]).IsUserTerminated)
 end;
 
+procedure Lape_EnterMethod(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+var
+  Event: TSimbaScript_DebuggerEvent;
+begin
+  with TSimbaScript(Params^[0]) do
+  begin
+    _DebuggingIndent += 1;
+    _DebuggingMethod := PUInt16(Params^[1])^;
+
+    Event.Method := _DebuggingMethod;
+    Event.Indent := _DebuggingIndent;
+
+    FDebuggerThread.Queue(Event);
+  end;
+end;
+
+procedure Lape_LeaveMethod(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+var
+  Event: TSimbaScript_DebuggerEvent;
+begin
+  with TSimbaScript(Params^[0]) do
+  begin
+    Event.Method := PUInt16(Params^[1])^;
+    Event.Indent := _DebuggingIndent;
+
+    if Event.Method <> _DebuggingMethod then
+      FDebuggerThread.Queue(Event);
+
+    _DebuggingIndent -= 1;
+  end;
+end;
+
 procedure Lape_Import_System(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 var
   Script: TSimbaScript absolute Data;
@@ -176,13 +208,13 @@ begin
       addGlobalConst(Script.AppPath, 'AppPath');
     end else
     begin
-      addDelayedCode(
-        'var Client: TClient;'    + LineEnding +
-        'const ScriptFile = "";'  + LineEnding +
-        'const IncludePath = "";' + LineEnding +
-        'const PluginPath = "";'  + LineEnding +
-        'const FontPath = "";'    + LineEnding +
-        'const AppPath = "";');
+      addDelayedCode('var Client: TClient;');
+
+      addDelayedCode('const ScriptFile = "";');
+      addDelayedCode('const IncludePath = "";');
+      addDelayedCode('const PluginPath = "";');
+      addDelayedCode('const FontPath = "";');
+      addDelayedCode('const AppPath = "";');
     end;
 
     addGlobalConst(LineEnding, 'LineEnding');
@@ -243,6 +275,9 @@ begin
     addGlobalMethod('procedure PauseScript;', @Lape_PauseScript, Data);
     addGlobalMethod('function IsTerminated: Boolean;', @Lape_IsTerminated, Data);
     addGlobalMethod('function IsUserTerminated: Boolean;', @Lape_IsUserTerminated, Data);
+
+    addGlobalMethod('procedure _EnterMethod(constref Index: Int32); override;', @Lape_EnterMethod, Data);
+    addGlobalMethod('procedure _LeaveMethod(constref Index: Int32); override;', @Lape_LeaveMethod, Data);
 
     addDelayedCode(
       'var'                                                                      + LineEnding +

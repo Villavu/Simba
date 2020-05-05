@@ -30,6 +30,8 @@ type
     procedure _GetSimbaTargetPID;
     procedure _GetSimbaTargetWindow;
     procedure _ScriptStateChanged;
+    procedure _DebuggerMethod;
+    procedure _DebuggerEvent;
   end;
 
 implementation
@@ -37,7 +39,8 @@ implementation
 uses
   graphtype, extctrls, forms,
   simba.debugimage, simba.debugform, simba.scripttabsform, simba.mufasatypes,
-  simba.main, simba.scripttab, simba.bitmap, simba.oswindow, simba.scriptinstance;
+  simba.main, simba.scripttab, simba.bitmap, simba.oswindow, simba.scriptinstance,
+  simba.debuggerform;
 
 procedure TSimbaMethod._GetPID;
 begin
@@ -97,6 +100,16 @@ var
 begin
   if Params.Read(State, SizeOf(UInt8)) = SizeOf(UInt8) then
     TSimbaScriptInstance(Script).State := State;
+end;
+
+procedure TSimbaMethod._DebuggerMethod;
+begin
+  TSimbaScriptInstance(Script).DebuggerForm.AddMethod(PShortString(Params.Memory + Params.Position)^);
+end;
+
+procedure TSimbaMethod._DebuggerEvent;
+begin
+  TSimbaScriptInstance(Script).DebuggerForm.AddEvents(PSimbaScript_DebuggerEvent(Params.Memory + Params.Position), (Params.Size - Params.Position) div SizeOf(TSimbaScript_DebuggerEvent));
 end;
 
 procedure TSimbaMethod._DebugImage;

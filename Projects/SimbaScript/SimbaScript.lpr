@@ -34,9 +34,10 @@ procedure TApplicationHelper.RunScript(Data: PtrInt);
 begin
   with TSimbaScript.Create(True) do
   begin
-    FreeOnTerminate := True;
     OnTerminate := @Self.Terminate;
+
     CompileOnly := Application.HasOption('compile');
+    Debugging := Application.HasOption('debugging');
 
     ScriptFile := Application.Params[Application.ParamCount];
 
@@ -89,7 +90,7 @@ end;
 
 procedure TApplicationHelper.Terminate(Sender: TObject);
 begin
-  inherited Terminate();
+  TThread(Sender).Free();
 
   if Sender is TThread then
     with Sender as TThread do
@@ -103,6 +104,8 @@ begin
       end;
     end;
 
+  inherited Terminate();
+
   {$IFDEF DARWIN}
   CocoaWidgetSet.NSApp.Terminate(nil); // Lazarus doesn't exit the message loop
   {$ELSE}
@@ -115,7 +118,6 @@ procedure TApplicationHelper.DumpPlugin(Data: PtrInt);
 begin
   with TSimbaScript_PluginDumper.Create(True) do
   begin
-    FreeOnTerminate := True;
     OnTerminate := @Self.Terminate;
 
     Plugin := Application.GetOptionValue('dump-plugin');
@@ -129,7 +131,6 @@ procedure TApplicationHelper.DumpCompiler(Data: PtrInt);
 begin
   with TSimbaScript_CompilerDumper.Create(True) do
   begin
-    FreeOnTerminate := True;
     OnTerminate := @Self.Terminate;
 
     Output := Application.Params[Application.ParamCount];
