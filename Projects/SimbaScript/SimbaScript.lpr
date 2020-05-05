@@ -2,10 +2,6 @@ program SimbaScript;
 
 {$mode objfpc}{$H+}
 
-{$IFDEF DARWIN}
-  {$modeswitch objectivec2}
-{$ENDIF}
-
 uses
   {$IFDEF UNIX}
   cthreads, cmem,
@@ -14,7 +10,7 @@ uses
   simba.linux_initialization,
   {$ENDIF}
   {$IFDEF DARWIN}
-  simba.darwin_initialization, cocoaint,
+  simba.darwin_initialization,
   {$ENDIF}
   sysutils, classes, interfaces, forms,
   simbascript.script, simba.ipc, simbascript.dumper;
@@ -24,7 +20,11 @@ uses
 type
   TApplicationHelper = class helper for TApplication
   public
-    procedure Terminate(Sender: TObject);
+    procedure Terminate(Data: PtrInt);
+
+    procedure TaskTerminated(Sender: TObject);
+    procedure TaskDestroyed(Sender: TObject);
+
     procedure RunScript(Data: PtrInt);
     procedure DumpPlugin(Data: PtrInt);
     procedure DumpCompiler(Data: PtrInt);
@@ -34,7 +34,10 @@ procedure TApplicationHelper.RunScript(Data: PtrInt);
 begin
   with TSimbaScript.Create(True) do
   begin
-    OnTerminate := @Self.Terminate;
+    OnTerminate := @Self.TaskTerminated;
+    OnDestroyed := @Self.TaskDestroyed;
+
+    FreeOnTerminate := True;
 
     CompileOnly := Application.HasOption('compile');
     Debugging := Application.HasOption('debugging');
@@ -88,10 +91,18 @@ begin
   end;
 end;
 
-procedure TApplicationHelper.Terminate(Sender: TObject);
+procedure TApplicationHelper.TaskDestroyed(Sender: TObject);
 begin
-  TThread(Sender).Free();
+  Application.QueueAsyncCall(@Terminate, 0);
+end;
 
+procedure TApplicationHelper.Terminate(Data: PtrInt);
+begin
+  Halt(ExitCode);
+end;
+
+procedure TApplicationHelper.TaskTerminated(Sender: TObject);
+begin
   if Sender is TThread then
     with Sender as TThread do
     begin
@@ -103,24 +114,18 @@ begin
         ExitCode := 1;
       end;
     end;
-
-  inherited Terminate();
-
-  {$IFDEF DARWIN}
-  CocoaWidgetSet.NSApp.Terminate(nil); // Lazarus doesn't exit the message loop
-  {$ELSE}
-  if (WakeMainThread <> nil) then
-    WakeMainThread(nil);
-  {$ENDIF}
 end;
 
 procedure TApplicationHelper.DumpPlugin(Data: PtrInt);
 begin
   with TSimbaScript_PluginDumper.Create(True) do
   begin
-    OnTerminate := @Self.Terminate;
+    FreeOnTerminate := True;
 
-    Plugin := Application.GetOptionValue('dump-plugin');
+    OnTerminate := @Self.TaskTerminated;
+    OnDestroyed := @Self.TaskDestroyed;
+
+    Plugin := Application.GetOptionValue('dump-plugin').Trim(['"']);
     Output := Application.Params[Application.ParamCount];
 
     Start();
@@ -131,7 +136,10 @@ procedure TApplicationHelper.DumpCompiler(Data: PtrInt);
 begin
   with TSimbaScript_CompilerDumper.Create(True) do
   begin
-    OnTerminate := @Self.Terminate;
+    FreeOnTerminate := True;
+
+    OnTerminate := @Self.TaskTerminated;
+    OnDestroyed := @Self.TaskDestroyed;
 
     Output := Application.Params[Application.ParamCount];
 
@@ -154,7 +162,7 @@ begin
     else
     if Application.HasOption('dump-plugin') then
     begin
-      if (not FileExists(Application.GetOptionValue('dump-plugin'))) then
+      if (not FileExists(Application.GetOptionValue('dump-plugin').Trim(['"']))) then
       begin
         WriteLn('Plugin not found');
 

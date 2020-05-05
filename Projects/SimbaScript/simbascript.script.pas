@@ -41,8 +41,6 @@ type
     FWarned: Boolean;
     FScript: TSimbaScript;
 
-    procedure DoTerminate; override;
-
     procedure Execute; override;
   public
     procedure Queue(Event: TSimbaScript_DebuggerEvent);
@@ -65,7 +63,6 @@ type
 
     FSimbaIPC: TSimbaIPC_Client;
     FSimbaIPCLock: TCriticalSection;
-
 
     FWriteBuffer: String;
 
@@ -99,6 +96,7 @@ type
     CompileOnly: Boolean;
     Debugging: Boolean;
     FDebuggerThread: TDebuggerThread;
+    OnDestroyed: TNotifyEvent;
 
     _DebuggingMethods: TSimbaScript_DebuggingMethods;
     _DebuggingIndent: Int16;
@@ -137,22 +135,9 @@ implementation
 uses
   fileutil, simba.misc, simba.files, fpexprpars, typinfo, ffi;
 
-procedure TDebuggerThread.DoTerminate;
-begin
-  if FStream.Position > 0 then
-    with TSimbaMethod.Create(SIMBA_METHOD_DEBUGGER_EVENT) do
-    try
-      Params.Write(FStream.Memory^, FStream.Position);
-
-      Invoke(FScript);
-    finally
-      Free();
-    end;
-end;
-
 procedure TDebuggerThread.Execute;
-begin
-  while not Terminated do
+
+  procedure Send;
   begin
     FLock.Enter();
 
@@ -167,15 +152,23 @@ begin
         finally
           Free();
         end;
+
+        FStream.Position := 0;
       end;
     finally
-      FStream.Position := 0;
-
       FLock.Leave();
     end;
+  end;
+
+begin
+  while (not Terminated) do
+  begin
+    Send();
 
     Sleep(500);
   end;
+
+  Send();
 end;
 
 procedure TDebuggerThread.Queue(Event: TSimbaScript_DebuggerEvent);
@@ -205,7 +198,7 @@ end;
 
 constructor TDebuggerThread.Create(Script: TSimbaScript);
 begin
-  inherited Create(False, 512 * 512);
+  inherited Create(False);
 
   FScript := Script;
   FStream := TMemoryStream.Create();
@@ -270,7 +263,7 @@ begin
     FSimbaIPCLock := TCriticalSection.Create();
 
     if Debugging then
-      FDebuggerThread := TDebuggerThread.Create(Self);
+       FDebuggerThread := TDebuggerThread.Create(Self);
 
     FClient := TClient.Create(FPluginPath);
     FClient.MOCR.FontPath := FFontPath;
@@ -490,6 +483,7 @@ end;
 procedure TSimbaScript.WriteLn(constref S: String);
 begin
   System.WriteLn(FWriteBuffer + S);
+  System.Flush(Output);
 
   FWriteBuffer := '';
 end;
@@ -539,6 +533,9 @@ begin
   end;
 
   inherited Destroy();
+
+  if (OnDestroyed <> nil) then
+    OnDestroyed(Self);
 end;
 
 initialization

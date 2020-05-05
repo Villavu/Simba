@@ -586,7 +586,7 @@ begin
   Dump := SysUtils.GetTempFileName(SimbaSettings.Environment.DataPath.Value, '.dump');
 
   try
-    Status := RunCommand('SimbaScript --dump-plugin="' + FileName + '" "' + Dump + '"', Output);
+    Status := RunCommand(Format('"%s" --dump-plugin="%s" "%s"', [SimbaSettings.Environment.ScriptExecutablePath.Value, FileName, Dump]), Output);
     if (Status <> 0) then
       raise Exception.Create(IntToStr(Status));
 
@@ -1345,7 +1345,7 @@ begin
   List := TStringList.Create();
 
   try
-    Status := RunCommand('SimbaScript --dump-compiler "' + Dump + '"', Output);
+    Status := RunCommand(Format('"%s" --dump-compiler "%s"', [SimbaSettings.Environment.ScriptExecutablePath.Value, Dump]), Output);
     if (Status <> 0) then
       raise Exception.Create(IntToStr(Status));
 
