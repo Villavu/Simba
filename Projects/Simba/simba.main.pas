@@ -79,6 +79,9 @@ type
     Images: TImageList;
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
+    MenuItem5: TMenuItem;
+    MenuItemDebugger: TMenuItem;
+    MenuItemRunWithDebugging: TMenuItem;
     MenuItemFormatScript: TMenuItem;
     MenuItemAssociateScripts: TMenuItem;
     MenuItem6: TMenuItem;
@@ -172,8 +175,11 @@ type
     TrayPopup: TPopupMenu;
     TrayIcon: TTrayIcon;
 
+    procedure MenuItemAboutClick(Sender: TObject);
+    procedure MenuItemDebuggerClick(Sender: TObject);
     procedure MenuItemFormatScriptClick(Sender: TObject);
     procedure MenuItemAssociateScriptsClick(Sender: TObject);
+    procedure MenuViewClick(Sender: TObject);
     procedure RecentFileItemsClick(Sender: TObject);
     procedure MenuClearOutputClick(Sender: TObject);
     procedure MenuFileClick(Sender: TObject);
@@ -195,6 +201,7 @@ type
     procedure MenuPasteClick(Sender: TObject);
     procedure MenuRedoClick(Sender: TObject);
     procedure MenuRunClick(Sender: TObject);
+    procedure MenuRunWithDebuggingClick(Sender: TObject);
     procedure MenuSaveClick(Sender: TObject);
     procedure MenuStopClick(Sender: TObject);
     procedure MenuReplaceClick(Sender: TObject);
@@ -217,7 +224,6 @@ type
 
     procedure FormDestroy(Sender: TObject);
     procedure MenuEditClick(Sender: TObject);
-    procedure MenuItemAboutClick(Sender: TObject);
     procedure MenuItemCloseTabsClick(Sender: TObject);
     procedure MenuItemExportHTMLClick(Sender: TObject);
     procedure MenuItemHideClick(Sender: TObject);
@@ -267,7 +273,7 @@ type
     property WindowSelection: TOSWindow read FWindowSelection;
     property ProcessSelection: UInt32 read FProcessSelection;
 
-    procedure RunScript;
+    procedure RunScript(Debugging: Boolean);
     procedure CompileScript;
     procedure PauseScript;
     procedure StopScript;
@@ -546,7 +552,8 @@ begin
   end;
 end;
 
-procedure TSimbaForm.CodeTools_OnMessage(Sender: TObject; const Typ: TMessageEventType; const Message: string; X, Y: Integer);
+procedure TSimbaForm.CodeTools_OnMessage(Sender: TObject;
+  const Typ: TMessageEventType; const Message: String; X, Y: Integer);
 var
   Parser: TCodeParser absolute Sender;
 begin
@@ -630,6 +637,11 @@ begin
   {$ENDIF}
 end;
 
+procedure TSimbaForm.MenuViewClick(Sender: TObject);
+begin
+  MenuItemDebugger.Enabled := SimbaScriptTabsForm.CurrentTab.DebuggingForm <> nil;
+end;
+
 procedure TSimbaForm.MenuItemFormatScriptClick(Sender: TObject);
 var
   Script: String;
@@ -657,6 +669,17 @@ begin
   end;
 end;
 
+procedure TSimbaForm.MenuItemAboutClick(Sender: TObject);
+begin
+  SimbaAboutForm.ShowModal();
+end;
+
+procedure TSimbaForm.MenuItemDebuggerClick(Sender: TObject);
+begin
+  if (SimbaScriptTabsForm.CurrentTab.DebuggingForm <> nil) then
+    SimbaScriptTabsForm.CurrentTab.DebuggingForm.ShowOnTop();
+end;
+
 procedure TSimbaForm.ShowACA(Sender: TObject);
 begin
   with TSimbaACAForm.Create(WindowSelection) do
@@ -678,7 +701,7 @@ begin
   {$endif}
 end;
 
-procedure TSimbaForm.RunScript;
+procedure TSimbaForm.RunScript(Debugging: Boolean);
 begin
   with SimbaScriptTabsForm.CurrentTab do
   try
@@ -696,12 +719,15 @@ begin
       else
         ScriptInstance.Script := Script;
 
-      ScriptInstance.Run();
+      if Debugging then
+        ScriptInstance.Run(CreateDebuggingForm())
+      else
+        ScriptInstance.Run();
     end else
       ScriptInstance.Resume();
   except
-    on e: Exception do
-      MessageDlg('Run Script Error: ' + e.Message, mtError, [mbOK], 0);
+    on E: Exception do
+      MessageDlg('Run Script Error: ' + E.Message, mtError, [mbOK], 0);
   end;
 end;
 
@@ -1025,7 +1051,12 @@ end;
 
 procedure TSimbaForm.MenuRunClick(Sender: TObject);
 begin
-  Self.RunScript();
+  Self.RunScript(False);
+end;
+
+procedure TSimbaForm.MenuRunWithDebuggingClick(Sender: TObject);
+begin
+  Self.RunScript(True);
 end;
 
 procedure TSimbaForm.MenuSaveClick(Sender: TObject);
@@ -1404,7 +1435,7 @@ begin
       if Application.HasOption('compile') then
         Self.CompileScript();
       if Application.HasOption('run') then
-        Self.RunScript();
+        Self.RunScript(False);
     end;
   end;
 end;
@@ -1494,11 +1525,6 @@ begin
       MenuItemCopy.Enabled := SelText <> '';
       MenuItemPaste.Enabled := SelText <> '';
     end;
-end;
-
-procedure TSimbaForm.MenuItemAboutClick(Sender: TObject);
-begin
-  SimbaAboutForm.ShowModal();
 end;
 
 procedure TSimbaForm.MenuItemCloseTabsClick(Sender: TObject);

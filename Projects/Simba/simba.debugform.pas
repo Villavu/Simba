@@ -147,7 +147,15 @@ end;
 
 procedure TSimbaDebugForm.Clear;
 begin
-  Editor.Lines.Clear();
+  FLock.Enter();
+
+  try
+    FStrings.Clear();
+  finally
+    FLock.Leave();
+  end;
+
+  Editor.Clear();
 end;
 
 constructor TSimbaDebugForm.Create(AOwner: TComponent);

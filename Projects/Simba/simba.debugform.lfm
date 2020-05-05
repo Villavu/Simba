@@ -1,7 +1,7 @@
 object SimbaDebugForm: TSimbaDebugForm
-  Left = 61
+  Left = 64
   Height = 371
-  Top = 142
+  Top = 593
   Width = 541
   Caption = 'Output'
   ClientHeight = 371
@@ -537,7 +537,7 @@ object SimbaDebugForm: TSimbaDebugForm
     end
   end
   object Timer: TTimer
-    Interval = 500
+    Interval = 350
     OnTimer = TimerExecute
     left = 144
     top = 24

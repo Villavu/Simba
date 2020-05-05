@@ -190,7 +190,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="10">
+    <Units Count="11">
       <Unit0>
         <Filename Value="SimbaScript.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -231,6 +231,10 @@
         <Filename Value="simbascript.compilerdump.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit9>
+      <Unit10>
+        <Filename Value="simbascript.debugger.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit10>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
