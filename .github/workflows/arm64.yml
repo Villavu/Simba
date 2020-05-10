@@ -11,6 +11,7 @@ jobs:
         submodules: true
     - name: Download
       run: |
+        sudo apt-get update
         sudo apt-get install libgtk2.0-dev
 
         # Download fpcup

@@ -146,11 +146,13 @@ begin
     Pointer(ScrollMouse) := GetProcedureAddress(FLib,'EIOS_ScrollMouse');
     Pointer(HoldMouse) := GetProcedureAddress(FLib, 'EIOS_HoldMouse');
     Pointer(ReleaseMouse) := GetProcedureAddress(FLib, 'EIOS_ReleaseMouse');
+    Pointer(IsMouseButtonHeld) := GetProcedureAddress(FLib, 'EIOS_IsMouseButtonHeld');
 
     Pointer(SendString) := GetProcedureAddress(FLib, 'EIOS_SendString');
     Pointer(HoldKey) := GetProcedureAddress(FLib, 'EIOS_HoldKey');
     Pointer(ReleaseKey) := GetProcedureAddress(FLib, 'EIOS_ReleaseKey');
     Pointer(IsKeyHeld) := GetProcedureAddress(FLib, 'EIOS_IsKeyHeld');
+    Pointer(GetKeyCode) := GetProcedureAddress(FLib, 'EIOS_GetKeyCode');
   end;
 
   FTarget := nil;
@@ -269,7 +271,7 @@ begin
   if Pointer(FClient.ScrollMouse) <> nil then
     FClient.ScrollMouse(FTarget, X, Y, Lines)
   else
-    inherited Scrollmouse(X, Y, Lines);
+    inherited ScrollMouse(X, Y, Lines);
 end;
 
 procedure TEIOS_Target.HoldMouse(X, Y: Int32; Button: TClickType);

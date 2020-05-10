@@ -586,11 +586,11 @@ begin
   Dump := SysUtils.GetTempFileName(SimbaSettings.Environment.DataPath.Value, '.dump');
 
   try
-    Status := RunCommand(Format('"%s" --dump-plugin="%s" "%s"', [SimbaSettings.Environment.ScriptExecutablePath.Value, FileName, Dump]), Output);
-    if (Status <> 0) then
-      raise Exception.Create(IntToStr(Status));
+    RunCommand(Format('"%s" --dump-plugin="%s" "%s"', [SimbaSettings.Environment.ScriptExecutablePath.Value, FileName, Dump]), Output);
 
     Contents := ReadFileToString(Dump);
+    if (Contents = '') then
+      raise Exception.Create('');
   except
     on E: Exception do
     begin

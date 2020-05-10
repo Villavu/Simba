@@ -199,12 +199,9 @@ begin
 end;
 
 procedure RunCommandInDir(Directory: String; CommandLine: String);
-const
-  BUFFER_SIZE = 1024 * 16;
 var
   Commands: TStringList;
   I: Int32;
-  Buffer: array[1..BUFFER_SIZE] of Char;
 begin
   Commands := TStringList.Create();
 
