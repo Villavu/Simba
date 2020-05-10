@@ -3,7 +3,7 @@
 LazarusResources.Add('TSimbaDebuggerForm','FORMDATA',[
   'TPF0'#18'TSimbaDebuggerForm'#17'SimbaDebuggerForm'#4'Left'#3'n'#1#6'Height'#3
   +'X'#2#3'Top'#3#227#0#5'Width'#3#144#1#7'Caption'#6#8'Debugger'#8'Position'#7
-  +#14'poScreenCenter'#13'ShowInTaskBar'#7#8'stAlways'#10'LCLVersion'#6#7'2.0.6'
+  +#14'poScreenCenter'#13'ShowInTaskBar'#7#8'stAlways'#10'LCLVersion'#6#7'2.0.8'
   +'.0'#7'Visible'#9#0#6'TTimer'#5'Timer'#8'Interval'#3#244#1#7'OnTimer'#7#12'T'
   +'imerExecute'#4'left'#2#24#3'top'#2#16#0#0#10'TPopupMenu'#5'Popup'#4'left'#2
   +'X'#3'top'#2#16#0#9'TMenuItem'#13'PopupItemCopy'#7'Caption'#6#4'Copy'#7'OnCl'

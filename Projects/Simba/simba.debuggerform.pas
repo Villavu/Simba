@@ -306,7 +306,8 @@ begin
   FList := TSimbaDebuggerList.Create(Self);
   FList.Parent := Self;
   FList.Align := alClient;
-  FList.Color := clWhite;
+  FList.Color := clWindow;
+  FList.Font.Color := clWindowText;
   FList.PopupMenu := Popup;
 
   SetLength(FBuffer, 32768);
