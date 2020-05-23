@@ -1,0 +1,7 @@
+{ This is an automatically generated lazarus resource file }
+
+LazarusResources.Add('TSimbaDebugForm','FORMDATA',[
+  'TPF0'#15'TSimbaDebugForm'#14'SimbaDebugForm'#4'Left'#3'6'#4#6'Height'#3#218#2
+  +#3'Top'#2'N'#5'Width'#3'%'#3#7'Caption'#6#6'Output'#10'LCLVersion'#6#7'2.0.6'
+  +'.0'#0#0
+]);

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, LCLType,LCLIntf, Dialogs,
-  TypInfo, Math, cselectonruntime, LMessages, ComCtrls, ExtCtrls, Menus,bitmaps,Graphics ;
+  TypInfo, cselectonruntime, ComCtrls, ExtCtrls, Menus, Graphics;
 type
  THControl = Class(TControl);
   { TDsgnForm }
@@ -67,7 +67,9 @@ var
 implementation
 
 {$R *.lfm}
-uses frmdesigner;
+
+uses simba.formdesigner;
+
 {Image functions}
 function JpegToBitmap(jpeg: string):TBitmap;
 var

@@ -1,0 +1,8 @@
+object SimbaDebugForm: TSimbaDebugForm
+  Left = 1078
+  Height = 730
+  Top = 78
+  Width = 805
+  Caption = 'Output'
+  LCLVersion = '2.0.6.0'
+end

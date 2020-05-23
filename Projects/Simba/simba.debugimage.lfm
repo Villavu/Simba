@@ -1,0 +1,15 @@
+object SimbaDebugImageForm: TSimbaDebugImageForm
+  Left = 0
+  Height = 300
+  Top = 770
+  Width = 400
+  Caption = 'Image Debug'
+  Font.CharSet = ANSI_CHARSET
+  Font.Color = clBlack
+  Font.Name = 'Segoe UI'
+  Font.Pitch = fpVariable
+  Font.Quality = fqDraft
+  OnKeyDown = FormKeyDown
+  Position = poMainFormCenter
+  LCLVersion = '2.0.6.0'
+end

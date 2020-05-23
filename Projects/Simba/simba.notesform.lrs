@@ -1,0 +1,10 @@
+{ This is an automatically generated lazarus resource file }
+
+LazarusResources.Add('TSimbaNotesForm','FORMDATA',[
+  'TPF0'#15'TSimbaNotesForm'#14'SimbaNotesForm'#4'Left'#3#206#2#6'Height'#3#240
+  +#0#3'Top'#3'1'#1#5'Width'#3'@'#1#7'Caption'#6#5'Notes'#12'ClientHeight'#3#240
+  +#0#11'ClientWidth'#3'@'#1#12'Font.CharSet'#7#12'ANSI_CHARSET'#10'LCLVersion'
+  +#6#7'2.0.4.0'#0#5'TMemo'#4'Memo'#4'Left'#2#0#6'Height'#3#240#0#3'Top'#2#0#5
+  +'Width'#3'@'#1#5'Align'#7#8'alClient'#11'BorderStyle'#7#6'bsNone'#8'TabOrder'
+  +#2#0#0#0#0
+]);

@@ -36,7 +36,7 @@ located at http://SynEdit.SourceForge.net
 
 // CHANGES FOR LAPE: https://github.com/MerlijnWajer/Simba/commit/8dc67d7a6009bd1cfb63a4e2b657ae06554e4d82
 
-unit SynHighlighterLape;
+unit simba.highlighter;
 
 {$I synedit.inc}
 
@@ -51,7 +51,7 @@ type
   TSynPasStringMode = (spsmDefault, spsmStringOnly, spsmNone);
 
   TtkTokenKind = (tkAsm, tkComment, tkIdentifier, tkKey, tkNull, tkNumber,
-    tkSpace, tkString, tkSymbol, tkDirective, tkIDEDirective,
+    tkSpace, tkString, tkSymbol, tkDirective, tkIDEDirective, tkMethodType,
     tkUnknown);
 
   TRangeState = (
@@ -342,6 +342,7 @@ type
     FCaseLabelAttri: TSynHighlighterAttributesModifier;
     FCurCaseLabelAttri: TSynSelectedColorMergeResult;
     fDirectiveAttri: TSynHighlighterAttributes;
+    fMethodTypeAttri: TSynHighlighterAttributes;
     FCompilerMode: TPascalCompilerMode;
     fD4syntax: boolean;
     // Divider
@@ -602,6 +603,7 @@ type
       write FCaseLabelAttri;
     property DirectiveAttri: TSynHighlighterAttributes read fDirectiveAttri
       write fDirectiveAttri;
+    property MethodTypeAttri: TSynHighlighterAttributes read fMethodTypeAttri write fMethodTypeAttri;
     property CompilerMode: TPascalCompilerMode read FCompilerMode write SetCompilerMode;
     property NestedComments: boolean read FNestedComments write SetNestedComments;
     property D4syntax: boolean read FD4syntax write SetD4syntax default true;
@@ -1908,8 +1910,10 @@ begin
 
       if InClass then
         fRange := fRange + [rsAfterClassMembers];
+
     end;
     fRange := fRange + [rsInProcHeader];
+
     Result := tkKey;
   end
   else Result := tkIdentifier;
@@ -2329,10 +2333,14 @@ var
 begin
   fToIdent := p;
   HashKey := KeyHash;
+
   if HashKey < 192 then
     Result := fIdentFuncTable[HashKey]()
   else
     Result := tkIdentifier;
+
+  if (Result = tkIdentifier) and (rsInProcHeader in fRange) and (Run + fStringLen + 1 <= fLineLen) and (fLineStr[Run + fStringLen + 1] = '.') then
+    Result := tkMethodType;
 end;
 
 procedure TSynPasSyn.MakeMethodTables;
@@ -2417,6 +2425,8 @@ begin
   fDirectiveAttri := TSynHighlighterAttributes.Create(@SYNS_AttrDirective, SYNS_XML_AttrDirective);
   fDirectiveAttri.Style:= [fsItalic];
   AddAttribute(fDirectiveAttri);
+  fMethodTypeAttri := TSynHighlighterAttributes.Create(@SYNS_Untitled, 'Method Type');
+  AddAttribute(fMethodTypeAttri);
   CompilerMode:=pcmDelphi;
   SetAttributesOnChange(@DefHighlightChange);
 
@@ -3297,6 +3307,7 @@ begin
     tkString: Result := fStringAttri;
     tkSymbol: Result := fSymbolAttri;
     tkDirective: Result := fDirectiveAttri;
+    tkMethodType: Result := fMethodTypeAttri;
     tkUnknown: Result := fSymbolAttri;
   else
     Result := nil;

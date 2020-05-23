@@ -28,12 +28,5 @@
                           // See Units/Linux/keybinder.pas
 {$ENDIF}
 
-{$DEFINE SIMBA_VERBOSE} // For more verbosity.
-
-//{$DEFINE NOTPORTABLE} // NOTPORTABLE makes it easier to build portable by
-                        // default, yet keep it possible to disable it with
-                        // command line flags.
-
 {$DEFINE USE_FORMDESIGNER}
-{$DEFINE SIMBA_OPENSSL} // Will simba try to load it's own OpenSSL libraries?
 
