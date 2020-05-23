@@ -17,7 +17,9 @@ unit CastaliaPasLexTypes;
 
 unit CastaliaPasLexTypes;
 
-{$include ValistusDefines.inc}
+{$DEFINE D8_NEWER}
+{$DEFINE D9_NEWER}
+{$DEFINE D10_NEWER}
 
 interface
 
@@ -28,15 +30,15 @@ var
 
 type
 
-  TMessageEventType = ( meError, meNotSupported );
+  TMessageEventType = (meError, meNotSupported);
 
-  TMessageEvent = procedure(Sender: TObject; const Typ : TMessageEventType; const Msg: string; X, Y: Integer ) of object; //jdj 7/16/1999; DR 2001-11-06
+  TMessageEvent = procedure(Sender: TObject; const Typ: TMessageEventType; const Msg: string; X, Y: integer) of object; //jdj 7/16/1999; DR 2001-11-06
 
   TCommentState = (csAnsi, csBor, csNo);
 
   TTokenPoint = packed record
-    X : Integer;
-    Y : Integer;
+    X: integer;
+    Y: integer;
   end;
 
   TptTokenKind = (
@@ -66,7 +68,7 @@ type
     tokByte,
     tokByteBool,
     tokCardinal,
-	tokCase,
+    tokCase,
     tokCdecl,
     tokChar,
     tokClass,
@@ -79,14 +81,14 @@ type
     tokCompDirect,
     tokConst, tokConstRef,
     tokConstructor,
-	tokContains,
+    tokContains,
     tokContinue, //JThurman 2004-11-8 (flow control routines)
-	tokCRLF,
-	tokCRLFCo,
-	tokCurrency,
-	tokDefault,
-	tokDefineDirect,
-	tokDeprecated, // DR 2001-10-20
+    tokCRLF,
+    tokCRLFCo,
+    tokCurrency,
+    tokDefault,
+    tokDefineDirect,
+    tokDeprecated, // DR 2001-10-20
     tokDestructor,
     tokDispid,
     tokDispinterface,
@@ -111,9 +113,9 @@ type
     tokExtended,
     tokExternal,
     tokFar,
-	tokFile,
-  {$IFDEF D8_NEWER} //JThurman 2004-03-20
-  tokFinal,
+    tokFile,
+  {$IFDEF D8_NEWER}//JThurman 2004-03-20
+    tokFinal,
   {$ENDIF}
     tokFinalization,
     tokFinally,
@@ -124,9 +126,9 @@ type
     tokGoto,
     tokGreater,
     tokGreaterEqual,
-  tokHalt, //JThurman 2004-11-8 (flow control routines)
-  {$IFDEF D8_NEWER} //JThurman 2004-04-06
-  tokHelper,
+    tokHalt, //JThurman 2004-11-8 (flow control routines)
+  {$IFDEF D8_NEWER}//JThurman 2004-04-06
+    tokHelper,
   {$ENDIF}
     tokIdentifier,
     tokIf,
@@ -150,8 +152,8 @@ type
     tokInterface,
     tokIs,
     tokLabel,
-	tokLibrary,
-	tokLocal,  // DR 2001-11-14
+    tokLibrary,
+    tokLocal,  // DR 2001-11-14
     tokLongBool,
     tokLongint,
     tokLongword,
@@ -172,8 +174,8 @@ type
     tokOf,
     tokOleVariant,
     tokOn,
-  {$IFDEF D8_NEWER} //JThurman 2004-03-20
-  tokOperator,
+  {$IFDEF D8_NEWER}//JThurman 2004-03-20
+    tokOperator,
   {$ENDIF}
     tokOr,
     tokOut,
@@ -182,8 +184,8 @@ type
     tokPackage,
     tokPacked,
     tokPascal,
-	tokPChar,
-	tokPlatform, // DR 2001-10-20
+    tokPChar,
+    tokPlatform, // DR 2001-10-20
     tokPlus,
     tokPoint,
     tokPointerSymbol,
@@ -216,12 +218,12 @@ type
     tokRoundOpen,
     tokRunError, //JThurman 2004-11-8 (flow control routines)
     tokSafeCall,
-  {$IFDEF D8_NEWER} //JThurman 2004-03-19
-  tokSealed,
+  {$IFDEF D8_NEWER}//JThurman 2004-03-19
+    tokSealed,
   {$ENDIF}
     tokSemiColon,
     tokSet,
-	tokShl,
+    tokShl,
     tokShortint,
     tokShortString,
     tokShr,
@@ -234,17 +236,17 @@ type
     tokSquareOpen,
     tokStar,
     tokStarStar,
-  {$IFDEF D8_NEWER} //JThurman 2004-03-20
-  tokStatic,
+  {$IFDEF D8_NEWER}//JThurman 2004-03-20
+    tokStatic,
   {$ENDIF}
     tokStdcall,
     tokStored,
   {$IFDEF D8_NEWER}
-  tokStrict, //JThurman 2004-03-03
+    tokStrict, //JThurman 2004-03-03
   {$ENDIF}
     tokString,
-	tokStringConst,
-    tokStringDQConst,	// 2002-01-14	
+    tokStringConst,
+    tokStringDQConst,  // 2002-01-14
     tokStringresource,
     tokSymbol,
     tokThen,
@@ -255,13 +257,13 @@ type
     tokUndefDirect,
     tokUnit,
     tokUnknown,
-  {$IFDEF D8_NEWER} //JThurman 2004-03-2003
-  tokUnsafe,
+  {$IFDEF D8_NEWER}//JThurman 2004-03-2003
+    tokUnsafe,
   {$ENDIF}
     tokUntil,
     tokUses,
-	tokVar,
-	tokVarargs, // DR 2001-11-14
+    tokVar,
+    tokVarargs, // DR 2001-11-14
     tokVariant,
     tokVirtual,
     tokWhile,
@@ -281,25 +283,38 @@ type
     tokPlusAsgn,
     tokMinusAsgn,
     tokPowAsgn,
-    
+
     tok_DONE);
 
-TmwPasLexStatus = record
-  CommentState: TCommentState;
-  ExID: TptTokenKind;
-  LineNumber: Integer;
-  LinePos: Integer;
-  Origin: PAnsiChar;
-  RunPos: Integer;
-  TokenPos: Integer;
-  TokenID: TptTokenKind;
-end;
+  TmwPasLexStatus = record
+    CommentState: TCommentState;
+    ExID: TptTokenKind;
+    LineNumber: integer;
+    LinePos: integer;
+    Origin: PAnsiChar;
+    RunPos: integer;
+    TokenPos: integer;
+    TokenID: TptTokenKind;
+  end;
 
-const ExTypes = [tokDWORD, tokUnknown];
+const
+  ExTypes = [tokDWORD, tokUnknown];
+
+const
+  TypeTokens = [tokReal48, tokReal, tokSingle, tokDouble, tokExtended,
+    tokCurrency, tokComp,          // Float
+    tokString, tokAnsiString, tokShortString,
+    tokWideString,                              // String
+    tokBoolean, tokByte, tokBytebool, tokCardinal,
+    tokChar, tokDWord, tokInt64,          // Ordinal
+    tokInteger, tokLongBool, tokLongInt, tokLongWord,
+    tokPChar, tokShortInt, tokSmallInt, tokWideChar,
+    tokWord, tokWordBool];
+
 
 function TokenName(Value: TptTokenKind): string;
 function tokTokenName(Value: TptTokenKind): string;
-function IsTokenIDJunk(const aTokenID : TptTokenKind ) :Boolean; //XM 20001210
+function IsTokenIDJunk(const aTokenID: TptTokenKind): boolean; //XM 20001210
 
 implementation
 
@@ -310,23 +325,16 @@ end;
 
 function tokTokenName(Value: TptTokenKind): string;
 begin
-  result := GetEnumName(TypeInfo(TptTokenKind), Integer(Value));
+  Result := GetEnumName(TypeInfo(TptTokenKind), integer(Value));
 end;
 
-function IsTokenIDJunk(const aTokenID : TptTokenKind ) :boolean; //XM 20001210
+function IsTokenIDJunk(const aTokenID: TptTokenKind): boolean; //XM 20001210
 begin
-  Result := aTokenID in [tokAnsiComment, tokBorComment, tokCRLF, tokCRLFCo, tokSlashesComment, tokSpace,
-    tokIfDirect,
-    tokIfEndDirect,
-    tokElseIfDirect,
-    tokIfDefDirect,
-    tokIfNDefDirect,
-    tokEndIfDirect,
-    tokIfOptDirect,
-    tokDefineDirect,
-    tokUndefDirect];
+  Result := aTokenID in [tokAnsiComment, tokBorComment, tokCRLF,
+    tokCRLFCo, tokSlashesComment, tokSpace, tokIfDirect, tokIfEndDirect,
+    tokElseIfDirect, tokIfDefDirect, tokIfNDefDirect, tokEndIfDirect,
+    tokIfOptDirect, tokDefineDirect, tokUndefDirect];
 end;
 
 
 end.
-

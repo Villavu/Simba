@@ -17,8 +17,6 @@ unit CastaliaPasLexTypes;
 
 unit CastaliaSimplePasParTypes;
 
-{$include ValistusDefines.inc}
-
 interface
 
 uses SysUtils, TypInfo;

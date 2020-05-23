@@ -135,7 +135,10 @@ Known Issues:
 -----------------------------------------------------------------------------}
 unit CastaliaSimplePasPar;
 
-{$include ValistusDefines.inc}
+{$DEFINE D8_NEWER}
+{$DEFINE D9_NEWER}
+{$DEFINE D10_NEWER}
+
 
 interface
 
@@ -211,7 +214,7 @@ type
     procedure NextToken; virtual;
     procedure SkipJunk; virtual;
     procedure TerminateStream(Stream: TCustomMemoryStream); virtual;
-    procedure SEMICOLON; virtual;
+    procedure SemiColon; virtual;
     function GetExID: TptTokenKind; virtual;
     function GetTokenID: TptTokenKind; virtual;
     function GetGenID: TptTokenKind; virtual;
@@ -344,6 +347,7 @@ type
     procedure MultiplicativeOperator; virtual;
     procedure NewFormalParameterType; virtual;
     procedure Number; virtual;
+    procedure NativeType; virtual;
     procedure ObjectConstructorHeading; virtual;
     procedure ObjectDestructorHeading; virtual;
     procedure ObjectField; virtual;
@@ -434,7 +438,8 @@ type
     procedure TryStatement; virtual;
     procedure TypedConstant; virtual;
     procedure TypeDeclaration; virtual;
-    procedure TypeId; virtual;
+    procedure TypeIdentifer; virtual;
+    procedure TypeAlias; virtual;
     procedure TypeKind; virtual;
     procedure TypeName; virtual;
     //generics
@@ -613,7 +618,15 @@ begin
   fLexer.Origin := SourceStream.Memory;
   fLexer.MaxPos := MaxPos;
 
-  ParseFile;
+  try
+    ParseFile();
+  except
+    on E: Exception do
+    begin
+      if (fOnMessage <> nil) then
+        fOnMessage(Self, meError, E.Message, Lexer.PosXY.X, LExer.PosXY.Y);
+    end;
+  end;
 end;
 
 constructor TmwSimplePasPar.Create;
@@ -898,7 +911,7 @@ begin
   Stream.Write(aChar, SizeOf(char));
 end;
 
-procedure TmwSimplePasPar.SEMICOLON;
+procedure TmwSimplePasPar.SemiColon;
 begin
   case Lexer.TokenID of
     tokElse, tokEnd, tokExcept, tokfinally, tokFinalization, tokRoundClose, tokUntil: // jdj 2.23.20001 added tokFinalization
@@ -1391,7 +1404,7 @@ begin
   end;
   IdentifierList;
   Expected(tokColon);
-  TypeId;
+  TypeIdentifer;
   while TokenID = tokSemiColon do
   begin
     SEMICOLON;
@@ -1401,7 +1414,7 @@ begin
     end;
     IdentifierList;
     Expected(tokColon);
-    TypeId;
+    TypeIdentifer;
   end;
   Expected(tokSquareClose);
 end;
@@ -1414,13 +1427,13 @@ end;
   end;
   IdentifierList;
   Expected(tokColon);
-  TypeId;
+  TypeIdentifer;
   while TokenID = tokSemiColon do
   begin
     SEMICOLON;
     IdentifierList;
     Expected(tokColon);
-    TypeId;
+    TypeIdentifer;
   end;
   Expected(tokSquareClose);
 end;*)
@@ -1464,7 +1477,7 @@ begin
     PropertyParameterList;
   end;
   Expected(tokColon);
-  TypeID;
+  TypeIdentifer;
 end;
 
 procedure TmwSimplePasPar.ClassMethodHeading;
@@ -1616,7 +1629,7 @@ begin
   begin
     case TokenId of
       tokConstructor, tokRecord, tokUnion, tokClass: NextToken;
-      tokIdentifier: TypeId;
+      tokIdentifier: TypeIdentifer;
     end;
     if TokenId = tokComma then
       NextToken;
@@ -1831,20 +1844,7 @@ end;
 
 procedure TmwSimplePasPar.ReturnType;
 begin
-  {$IFDEF D8_NEWER}
-  while TokenID = tokSquareOpen do
-    CustomAttribute;
-  {$ENDIF}
-  case TokenID of
-    tokString:
-      begin
-        StringType;
-      end;
-  else
-    begin
-      TypeID;
-    end;
-  end;
+  TypeKind;
 end;
 
 procedure TmwSimplePasPar.FormalParameterList;
@@ -2041,7 +2041,7 @@ begin
       end;
   else
     begin
-      TypeID;
+      TypeIdentifer;
     end;
   end;
 end;
@@ -2136,18 +2136,7 @@ end;
 
 procedure TmwSimplePasPar.ObjectNameOfMethod;
 begin
-  Expected(tokIdentifier);
-  {$IFDEF D8_NEWER} //JThurman 2004-03-22
-  if TokenId = tokLower then
-    TypeParams;
-  Lexer.InitAHead;
-  Lexer.AheadNext;
-  if Lexer.AheadTokenID = tokPoint then
-  begin
-    Expected(tokPoint);
-    ObjectNameOfMethod;
-  end;
-  {$ENDIF}
+  NextToken;
 end;
 
 procedure TmwSimplePasPar.FunctionProcedureBlock;
@@ -2881,6 +2870,25 @@ begin
   end;
 end;
 
+procedure TmwSimplePasPar.NativeType;
+begin
+  NextToken;
+
+  if TokenID = tokIdentifier then
+  begin
+    AncestorId;
+  end else
+  begin
+    Expected(tokRoundOpen);
+
+    AncestorId;
+    while (not (TokenID in [tokRoundClose, tokNull, tok_DONE])) do
+      NextToken;
+
+    Expected(tokRoundClose);
+  end;
+end;
+
 procedure TmwSimplePasPar.ExpressionList;
 begin
   Expression;
@@ -3162,7 +3170,7 @@ end;
 procedure TmwSimplePasPar.VarAssign;
 begin
   Expected(tokAssign);
-  ConstantValueTyped;
+  ConstantValue;
 end;
 
 procedure TmwSimplePasPar.VarNameList;
@@ -3344,7 +3352,7 @@ begin
   if TokenID = tokOf then
   begin
     NextToken;
-    TypeId;
+    TypeIdentifer;
   end;
 end;
 
@@ -3552,7 +3560,7 @@ begin
             end;
         else
           begin
-            TypeID;
+            TypeIdentifer;
           end;
         end;
       end;
@@ -4217,7 +4225,7 @@ procedure TmwSimplePasPar.ClassReferenceType;
 begin
   Expected(tokClass);
   Expected(tokOf);
-  TypeId;
+  TypeIdentifer;
 end;
 
 procedure TmwSimplePasPar.VariantIdentifier;
@@ -4340,7 +4348,7 @@ end;
 procedure TmwSimplePasPar.PointerType;
 begin
   Expected(tokPointerSymbol);
-  TypeId;
+  TypeIdentifer;
 end;
 
 procedure TmwSimplePasPar.StructuredType;
@@ -4386,7 +4394,7 @@ begin
         case Lexer.AheadTokenID of
           tokPoint, tokSemiColon:
             begin
-              TypeID;
+              TypeIdentifer;
             end;
         else
           begin
@@ -4474,11 +4482,20 @@ begin
 //    TypeParams;
   //end generics
   Expected(tokEqual);
+  Lexer.InitAhead;
+
+  // Some types have their own tokens which messes when declarating base types: `type Currency = Currency`
+  if (TokenID in [tokIdentifier] + TypeTokens) and (Lexer.AheadTokenID = tokSemiColon) then
+  begin
+    TypeAlias;
+    Exit;
+  end;
   if TokenID = tokType then
   begin
     ExplicitType;
+    Exit;
   end;
-  Lexer.InitAhead;
+
   case TokenID of
     tokClass:
       begin
@@ -4569,16 +4586,22 @@ end;
 procedure TmwSimplePasPar.ExplicitType;
 begin
   Expected(tokType);
+  TypeIdentifer;
 end;
 
 procedure TmwSimplePasPar.TypeKind;
 begin
-  if ((TokenID = tokIdentifier) and (GenID = tokPrivate)) or (ExID = tokNative) then
+  if ExID = tokNative then
+  begin
+    NativeType;
+    Exit;
+  end;
+
+  if (TokenID = tokIdentifier) and (GenID = tokPrivate) then
     NextToken;
 
   case TokenID of
-    tokAsciiChar, tokFloat, tokIntegerConst, tokMinus, tokNil, tokPlus, tokRoundOpen,
-      tokSquareOpen, tokStringConst:
+    tokAsciiChar, tokFloat, tokIntegerConst, tokMinus, tokNil, tokPlus, tokSquareOpen, tokStringConst, tokRoundOpen:
       begin
         SimpleType;
       end;
@@ -4590,24 +4613,9 @@ begin
       begin
         ProceduralType;
       end;
-    tokIdentifier:
+    tokIdentifier, tokString:
       begin
-        Lexer.InitAhead;
-        case Lexer.AheadTokenID of
-          tokPoint, tokSemiColon, tokLower:
-            begin
-              TypeId;
-            end;
-        else
-          begin
-            SimpleExpression;
-            if Lexer.TokenID = tokDotDot then
-            begin
-              NextToken;
-              SimpleExpression;
-            end;
-          end;
-        end;
+        TypeIdentifer;
       end;
     tokPointerSymbol:
       begin
@@ -4620,10 +4628,6 @@ begin
         end else
           PointerType;
       end;
-    tokString:
-      begin
-        StringType;
-      end;
   else
     begin
       SynError(InvalidTypeKind);
@@ -4634,11 +4638,11 @@ end;
 procedure TmwSimplePasPar.TypeArgs;
 begin
   Expected(tokLower);
-  TypeId;
+  TypeIdentifer;
   while TokenId = tokComma do
   begin
     NextToken;
-    TypeId;
+    TypeIdentifer;
   end;
   Expected(tokGreater);
 end;
@@ -4740,61 +4744,14 @@ begin
   end;
 end;
 
-procedure TmwSimplePasPar.TypeId;
+procedure TmwSimplePasPar.TypeIdentifer;
 begin
-  Lexer.InitAhead;
-  {$IFDEF D8_NEWER} //JThurman 2004-03-03
-  while Lexer.AheadTokenID = tokPoint do
-  begin
-    //UnitId;
-    NextToken;
-    Expected(tokPoint);
-    Lexer.InitAhead;
-  end;
-  {$ELSE}
-  if Lexer.AheadTokenID = tokPoint then
-  begin
-    UnitId;
-    Expected(tokPoint);
-  end;
-  {$ENDIF}
-  case GenID of
-    tokBoolean, tokByte, tokChar, tokDWord, tokInt64, tokInteger, tokLongInt,
-      tokLongWord, tokPChar, tokShortInt, tokSmallInt, tokWideChar, tokWord:
-      begin
-        OrdinalIdentifier;
-      end;
-    tokComp, tokCurrency, tokDouble, tokExtended, tokReal, tokReal48, tokSingle:
-      begin
-        RealIdentifier;
-      end;
-    tokAnsiString, tokShortString, tokWideString:
-      begin
-        StringIdentifier;
-      end;
-    tokOleVariant, tokVariant:
-      begin
-        VariantIdentifier;
-      end;
-    tokString:
-      begin
-        StringType;
-      end;
-  else
-    begin
-      //Problem: Delphi 8 allows things like 'Object' to be types
-      //when they are fully qualified (as System.Object, etc...), so
-      //tokIdentifier doesn't quite work right in this context
-      //TODO: Come up with a more elegant solution to the 'Object' dilemna
-      {$IFDEF D8_NEWER}//JThurman 2004-03-03
-      NextToken;
-      {$ELSE}
-      Expected(tokIdentifier);
-      {$ENDIF}
-      if TokenId = tokLower then
-        TypeArgs;
-    end;
-  end;
+  NextToken;
+end;
+
+procedure TmwSimplePasPar.TypeAlias;
+begin
+  TypeIdentifer;
 end;
 
 procedure TmwSimplePasPar.ConstantExpression;
@@ -4849,7 +4806,9 @@ begin
   Expected(tokColon);
 //JR changed to constant Type
   ConstantType;
-  Expected(tokEqual);
+  if (not (Lexer.TokenID in [tokAssign, tokEqual])) then
+    Expected(tokEqual);
+  NextToken;
   ConstantValueTyped;
 end;
 
@@ -4872,7 +4831,7 @@ end;
 
 procedure TmwSimplePasPar.ConstantValueTyped;
 begin
-  TypedConstant;
+  ConstantValue;
 end;
 
 procedure TmwSimplePasPar.ConstantName;
@@ -5124,18 +5083,12 @@ procedure TmwSimplePasPar.TypeSection;
 begin
   Expected(tokType);
   {$IFDEF D8_NEWER}
-  while ((TokenID = tokIdentifier) and (Lexer.ExID in ExTypes)) or
-        (Lexer.TokenID = tokSquareOpen) or (Lexer.TokenID = tokString) do
+  while (TokenID in [tokIdentifier] + TypeTokens) do
   begin
-    if TokenID = tokSquareOpen then
-      CustomAttribute
-    else
-    begin
-      TypeDeclaration;
-      if TokenID = tokEqual then
-        TypedConstant;
-      SEMICOLON;
-    end;
+    TypeDeclaration;
+    if TokenID = tokEqual then
+      TypedConstant;
+    SEMICOLON;
   end;
   {$ELSE}
   while (TokenID = tokIdentifier) or (TokenID = tokString) do
