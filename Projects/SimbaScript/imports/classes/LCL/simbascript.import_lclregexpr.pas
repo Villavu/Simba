@@ -1,15 +1,15 @@
-unit lplclregexpr;
+unit simbascript.import_lclregexpr;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils, RegExpr, lpcompiler, lptypes, script_imports;
-
-procedure RegisterLCLTRegExpr(Compiler: TLapeCompiler);
+{$i import_uses.inc}
 
 implementation
+
+uses
+  regexpr;
 
 type
   PRegExpr = ^TRegExpr;
@@ -112,7 +112,7 @@ begin
   PRegExpr(Params^[0])^.Free();
 end;
 
-procedure RegisterLCLTRegExpr(Compiler: TLapeCompiler);
+procedure Register_LCLTRegExpr(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -134,6 +134,9 @@ begin
     addGlobalFunc('procedure TRegExpr.Free(); constref;', @TRegExpr_Free);
   end;
 end;
+
+initialization
+  RegisterScriptImport(@Register_LCLTRegExpr);
 
 end.
 

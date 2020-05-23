@@ -1,26 +1,17 @@
-unit lpTClient;
+unit simbascript.import_tclient;
 //Depends: TClient, TObject, TIOManager, TMFiles, TMFinder, TMBitmaps, TMDTMS, TMOCR, TWritelnProc, string
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils, lpcompiler, lptypes, ffi, script_imports;
+{$i import_uses.inc}
 
-procedure Register_TClient(Compiler: TLapeCompiler);
 
 implementation
 
 uses
-  client,
-  simba.iomanager,
-  files,
-  bitmaps,
-  dtm,
-  ocr,
-  finder,
-  MufasaTypes;
+  simba.client, simba.iomanager, simba.files, simba.bitmap, simba.dtm, simba.ocr, simba.finder;
 
 type
   PClient = ^TClient;
@@ -28,7 +19,6 @@ type
   PMFiles = ^TMFiles;
   PMFinder = ^TMFinder;
   PMBitmaps = ^TMBitmaps;
-  //PMDTM = ^TMDTM;
   PMDTMS = ^TMDTMS;
   PMOCR = ^TMOCR;
   PWriteLnProc = ^TWriteLnProc;
@@ -135,7 +125,7 @@ begin
   PClient(Params^[0])^.Free();
 end;
 
-procedure Register_TClient(Compiler: TLapeCompiler);
+procedure Register_TClient(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -155,6 +145,9 @@ begin
     addGlobalFunc('procedure TClient.Free(); constref;', @TClient_Free);
   end;
 end;
+
+initialization
+  RegisterScriptImport(@Register_TClient);
 
 end.
 

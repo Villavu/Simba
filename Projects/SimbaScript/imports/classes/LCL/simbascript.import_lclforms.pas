@@ -1,13 +1,22 @@
-unit lplclforms;
+unit simbascript.import_lclforms;
 
 {$mode objfpc}{$H+}
 
 interface
 
+{$i import_uses.inc}
+
+implementation
+
 uses
-  Classes, SysUtils, Forms, controls, lpcompiler, lptypes, ffi, script_imports;
+  forms, graphics, controls;
 
 type
+  PCloseQueryEvent = ^TCloseQueryEvent;
+  PFormBorderIcons = ^TBorderIcons;
+  PSizeConstraints = ^TSizeConstraints;
+  PConstraintSize = ^TConstraintSize;
+
   PCustomForm = ^TCustomForm;
   PForm = ^TForm;
   PCloseAction = ^TCloseAction;
@@ -16,16 +25,15 @@ type
   PScrollBox = ^TScrollBox;
   PFormBorderStyle = ^TFormBorderStyle;
 
-procedure RegisterLCLForms(Compiler: TLapeCompiler);
-
-implementation
- uses lplclsystem,lplclgraphics,lplclcontrols;
-
- type
-   PCloseQueryEvent = ^TCloseQueryEvent;
-   PFormBorderIcons = ^TBorderIcons;
-   PSizeConstraints = ^TSizeConstraints;
-   PConstraintSize = ^TConstraintSize;
+  PCanvas = ^TCanvas;
+  PControl = ^TControl;
+  PNotifyEvent = ^TNotifyEvent;
+  PComponent = ^TComponent;
+  PBitmap = ^TBitmap;
+  PWinControl = ^TWinControl;
+  PObject = ^TObject;
+  PMouseEvent = ^TMouseEvent;
+  PMouseMoveEvent = ^TMouseMoveEvent;
 
 //constructor Create(AControl: TControl); virtual;
 procedure TSizeConstraints_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -189,7 +197,7 @@ begin
   PSizeConstraints(Params^[0])^.Free();
 end;
 
-procedure Register_TSizeConstraints(Compiler: TLapeCompiler);
+procedure Register_TSizeConstraints(Compiler: TScriptCompiler);
 begin
  with Compiler do
  begin
@@ -708,13 +716,13 @@ begin
   PCustomForm(Params^[0])^.Free;
 end;
 
-procedure Register_TCustomForm(Compiler: TLapeCompiler);
+procedure Register_TCustomForm(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
     addClass('TCustomForm', 'TScrollingWinControl');
 
-    addGlobalFunc('procedure TCustomForm.Init(AOwner: TComponent);', @TCustomForm_Init);
+    addGlobalFunc('procedure TCustomForm.Init(AOwner: TComponent); override;', @TCustomForm_Init);
     addGlobalFunc('procedure TCustomForm.InitNew(AOwner: TComponent; Num: Integer);', @TCustomForm_CreateNew);
     addGlobalFunc('procedure TCustomForm.AfterConstruction(); constref;', @TCustomForm_AfterConstruction);
     addGlobalFunc('procedure TCustomForm.BeforeDestruction(); constref;', @TCustomForm_BeforeDestruction);
@@ -1117,13 +1125,13 @@ begin
   PForm(Params^[0])^.OnMouseMove := PMouseMoveEvent(Params^[1])^;
 end;
 
-procedure Register_TForm(Compiler: TLapeCompiler);
+procedure Register_TForm(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
     addClass('TForm', 'TCustomForm');
 
-    addGlobalFunc('procedure TForm.Init(TheOwner: TComponent);', @TForm_Init);
+    addGlobalFunc('procedure TForm.Init(TheOwner: TComponent); override;', @TForm_Init);
     addGlobalFunc('procedure TForm.Cascade(); constref;', @TForm_Cascade);
     addGlobalFunc('procedure TForm.Next(); constref;', @TForm_Next);
     addGlobalFunc('procedure TForm.Previous(); constref;', @TForm_Previous);
@@ -1171,7 +1179,7 @@ begin
   PScrollBox(Params^[0])^.Free();
 end;
 
-procedure Register_TScrollBox(Compiler: TLapeCompiler);
+procedure Register_TScrollBox(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1182,7 +1190,7 @@ begin
   end;
 end;
 
-procedure RegisterLCLForms(Compiler: TLapeCompiler);
+procedure Register_LCLForms(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1199,6 +1207,9 @@ begin
   Register_TForm(Compiler);
   Register_TScrollBox(Compiler);
 end;
+
+initialization
+  RegisterScriptImport(@Register_LCLForms);
 
 end.
 

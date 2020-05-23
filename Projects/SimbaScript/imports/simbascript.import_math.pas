@@ -1,17 +1,15 @@
-unit script_import_math;
+unit simbascript.import_math;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils;
+{$i import_uses.inc}
 
 implementation
 
 uses
-  script_imports, lpcompiler, lptypes, mufasatypes, mmath,
-  math;
+  simba.math, math;
 
 procedure Lape_pow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -268,10 +266,12 @@ begin
   PPoint(Result)^ := MiddleBox(PBox(Params^[0])^);
 end;
 
-procedure Lape_Import_Math(Compiler: TLapeCompiler; Data: Pointer);
+procedure Lape_Import_Math(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
+    Section := 'Math';
+
     addGlobalFunc('function Pow(base, exponent: Extended): Extended', @Lape_pow);
     addGlobalFunc('function RiemannGauss(Xstart, StepSize, Sigma: Extended; AmountSteps: Int32): Extended', @Lape_RiemannGauss);
     addGlobalFunc('function DiscreteGauss(Xstart, Xend: Int32; sigma: Extended): TExtendedArray', @Lape_DiscreteGauss);
@@ -314,7 +314,7 @@ begin
 end;
 
 initialization
-  ScriptImports.Add('Math', @Lape_Import_Math);
+  RegisterScriptImport(@Lape_Import_Math);
 
 end.
 

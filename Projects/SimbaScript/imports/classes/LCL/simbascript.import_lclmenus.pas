@@ -1,18 +1,19 @@
-unit lplclmenus;
+unit simbascript.import_lclmenus;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils, lpcompiler, lptypes, script_imports;
-
-procedure RegisterLCLMenus(Compiler: TLapeCompiler);
+{$i import_uses.inc}
 
 implementation
-   uses MufasaTypes, forms, lplclsystem, lplclgraphics, Menus, lclType, graphics;
+
+uses
+  forms, menus, lcltype, graphics;
 
 type
+  PComponent = ^TComponent;
+  PNotifyEvent = ^TNotifyEvent;
   PMenuItem = ^TMenuItem;
   PMenu = ^TMenu;
   PMainMenu = ^TMainMenu;
@@ -21,7 +22,7 @@ type
   TMenuItemArray = array of TMenuItem;
   PMenuItemArray = ^TMenuItemArray;
 
-procedure Register_TMenu_Forward(Compiler: TLapeCompiler);
+procedure Register_TMenu_Forward(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -372,7 +373,7 @@ begin
   PMenuItem(Params^[0])^.Add(PMenuItem(Result)^);
 end;
 
-procedure Register_TMenuItem(Compiler: TLapeCompiler);
+procedure Register_TMenuItem(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -540,7 +541,7 @@ begin
   PMenu(Params^[0])^.Items.Add(PMenuItem(Result)^);
 end;
 
-procedure Register_TMenu(Compiler: TLapeCompiler);
+procedure Register_TMenu(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -573,7 +574,7 @@ begin
   PMainMenu(Params^[0])^.Free();
 end;
 
-procedure Register_TMainMenu(Compiler: TLapeCompiler);
+procedure Register_TMainMenu(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -584,8 +585,7 @@ begin
   end;
 end;
 
-
-procedure RegisterLCLMenus(Compiler: TLapeCompiler);
+procedure Register_LCLMenus(Compiler: TScriptCompiler);
 begin
   Register_TMenu_Forward(Compiler);
   Register_TMenuItem(Compiler);
@@ -593,6 +593,8 @@ begin
   Register_TMainMenu(Compiler);
 end;
 
+initialization
+  RegisterScriptImport(@Register_LCLMenus);
 
 end.
 

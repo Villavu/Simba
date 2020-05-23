@@ -1,17 +1,15 @@
-unit script_import_other;
+unit simbascript.import_other;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils;
+{$i import_uses.inc}
 
 implementation
 
 uses
-  script_imports, script_thread, lpcompiler, lptypes, stringutil,
-  lclintf, clipbrd
+  simba.stringutil, lclintf, clipbrd
   {$IFDEF WINDOWS},
   mmsystem
   {$ENDIF};
@@ -19,7 +17,7 @@ uses
 procedure Lape_PlaySound(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   {$IFDEF WINDOWS}
-  sndPlaySound(PChar(PString(Params^[1])^), SND_ASYNC or SND_NODEFAULT);
+  sndPlaySound(PChar(PString(Params^[0])^), SND_ASYNC or SND_NODEFAULT);
   {$ENDIF}
 end;
 
@@ -32,7 +30,7 @@ end;
 
 procedure Lape_SetSupressExceptions(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  TMMLScriptThread(Params^[0]).Client.MFinder.WarnOnly := System.PBoolean(Params^[1])^;
+  Script.Client.MFinder.WarnOnly := System.PBoolean(Params^[0])^;
 end;
 
 procedure Lape_HakunaMatata(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -42,7 +40,8 @@ end;
 
 procedure Lape_Simba(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  with TMMLScriptThread(Params^[0]) do
+  {
+  with TMMLScriptThread(Params^[-1]) do
   begin
     Write(DecompressString(Base64Decode(
       '9AoAAHicldU7b+0gDADgvdL9D+AisSDOTrpUvWvGuzNVOkMn9v72a942j6T1dJrEX7AxqRAXYaS9up3iz8suVxoMKe+' +
@@ -54,13 +53,13 @@ begin
       '+//1sR/NLyhCQ==')));
 
     WriteLn();
-  end;
+  end; }
 end;
 
 procedure Lape_SetClipBoard(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   try
-    Clipboard.AsText := PString(Params^[1])^;
+    Clipboard.AsText := PString(Params^[0])^;
   except
   end;
 end;
@@ -73,22 +72,23 @@ begin
   end;
 end;
 
-procedure Lape_Import_Other(Compiler: TLapeCompiler; Data: Pointer);
+procedure Lape_Import_Other(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
-    addGlobalMethod('procedure PlaySound(Sound: String);', @Lape_PlaySound, Data);
-    addGlobalMethod('procedure StopSound;', @Lape_StopSound, Data);
-    addGlobalMethod('procedure SetSupressExceptions(Supress: Boolean);', @Lape_SetSupressExceptions, Data);
-    addGlobalMethod('procedure HakunaMatata;', @Lape_HakunaMatata, Data);
-    addGlobalMethod('procedure Simba;', @Lape_Simba, Data);
-    addGlobalMethod('procedure SetClipBoard(Data: string);', @Lape_SetClipBoard, Data);
-    addGlobalMethod('function GetClipBoard: String', @Lape_GetClipBoard, Data);
+    Section := 'Other';
+
+    addGlobalFunc('procedure PlaySound(Sound: String);', @Lape_PlaySound);
+    addGlobalFunc('procedure StopSound;', @Lape_StopSound);
+    addGlobalFunc('procedure SetSupressExceptions(Supress: Boolean);', @Lape_SetSupressExceptions);
+    addGlobalFunc('procedure HakunaMatata;', @Lape_HakunaMatata);
+    addGlobalFunc('procedure Simba;', @Lape_Simba);
+    addGlobalFunc('procedure SetClipBoard(Data: string);', @Lape_SetClipBoard);
+    addGlobalFunc('function GetClipBoard: String', @Lape_GetClipBoard);
   end;
 end;
 
 initialization
-  ScriptImports.Add('Other', @Lape_Import_Other);
+  RegisterScriptImport(@Lape_Import_Other);
 
 end.
-

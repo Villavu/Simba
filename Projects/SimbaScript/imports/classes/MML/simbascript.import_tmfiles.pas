@@ -1,51 +1,20 @@
-unit lpTMFiles;
+unit simbascript.import_tmfiles;
 //Depends: TMFiles, TObject, TOpenFileEvent, TWriteFileEvent, string, Boolean, Integer
 
 {$mode objfpc}{$H+}
-{$I Simba.inc}
 
 interface
 
-uses
-  Classes, SysUtils, lpcompiler, lptypes, script_imports;
-
-procedure Register_TMFiles(Compiler: TLapeCompiler);
+{$i import_uses.inc}
 
 implementation
 
 uses
-  files, MufasaTypes;
+  simba.files;
 
 type
   PMFiles = ^TMFiles;
   PObject = ^TObject;
-  POpenFileEvent = ^TOpenFileEvent;
-  PWriteFileEvent = ^TWriteFileEvent;
-
-
-//Read: OpenFileEvent : TOpenFileEvent;
-procedure TMFiles_OpenFileEvent_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  POpenFileEvent(Result)^ := PMFiles(Params^[0])^.OpenFileEvent;
-end;
-
-//Write: OpenFileEvent : TOpenFileEvent;
-procedure TMFiles_OpenFileEvent_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PMFiles(Params^[0])^.OpenFileEvent := POpenFileEvent(Params^[1])^;
-end;
-
-//Read: WriteFileEvent: TWriteFileEvent;
-procedure TMFiles_WriteFileEvent_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PWriteFileEvent(Result)^ := PMFiles(Params^[0])^.WriteFileEvent;
-end;
-
-//Write: WriteFileEvent: TWriteFileEvent;
-procedure TMFiles_WriteFileEvent_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PMFiles(Params^[0])^.WriteFileEvent := PWriteFileEvent(Params^[1])^;
-end;
 
 //function CreateFile(Path: string): Integer;
 procedure TMFiles_CreateFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -155,7 +124,7 @@ begin
   PMFiles(Params^[0])^.Free();
 end;
 
-procedure Register_TMFiles(Compiler: TLapeCompiler);
+procedure Register_TMFiles(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -184,6 +153,9 @@ begin
     addGlobalFunc('procedure TMFiles.Free(); constref;', @TMFiles_Free);
   end;
 end;
+
+initialization
+  RegisterScriptImport(@Register_TMFiles);
 
 end.
 

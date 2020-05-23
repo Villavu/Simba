@@ -1,58 +1,54 @@
-unit lplclgraphics;
+unit simbascript.import_lclgraphics;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils,Graphics, lpcompiler, lptypes, script_imports;
-
-type
-  PStream = ^TStream;
-  PHandle = ^THandle;
-  PNotifyEvent = ^TNotifyEvent;
-  PGraphicsObject = ^TGraphicsObject;
-  //TFont
-  PFontStyles = ^TFontStyles;
-  PFont = ^TFont;
-  PFontPitch = ^TFontPitch;
-  PCopyMode = ^TCopyMode;
-  PFontQuality = ^TFontQuality;
-  //TPen
-  PPen = ^TPen;
-  PPenStyle = ^TPenStyle;
-  PPenMode = ^TPenMode;
-  //TBrush
-  PBrush = ^TBrush;
-  PBrushStyle = ^TBrushStyle;
-  //TCanvas
-  PCanvas = ^TCanvas;
-  PFillStyle = ^TFillStyle;
-  PRect = ^TRect;
-  PPoint = ^TPoint;
-  PPPoint = ^PPoint;
-  //TGraphics
-   PGraphic = ^TGraphic;
-  //TBitmap
-  PBitmap = ^Tbitmap;
-  PTransparentMode =^TTransparentMode;
-  //TPicture
-  PPicture = ^TPicture;
-
-procedure RegisterLCLGraphics(Compiler: TLapeCompiler);
+{$i import_uses.inc}
 
 implementation
 
 uses
-  MufasaTypes,LCLType,lplclsystem, stringutil, Clipbrd;
+  lcltype, clipbrd, graphics;
 
 type
+  PPersistent = ^TPersistent;
   PHbitmap = ^HBitmap;
   PHPalette = ^HPalette;
   PClipboardFormat = ^TClipboardFormat;
   PAntialiasingMode = ^TAntialiasingMode;
 
-  {TGraphicsObject}
+  PStream = ^TStream;
+  PHandle = ^THandle;
+  PNotifyEvent = ^TNotifyEvent;
+  PGraphicsObject = ^TGraphicsObject;
+
+  PFontStyles = ^TFontStyles;
+  PFont = ^TFont;
+  PFontPitch = ^TFontPitch;
+  PCopyMode = ^TCopyMode;
+  PFontQuality = ^TFontQuality;
+
+  PPen = ^TPen;
+  PPenStyle = ^TPenStyle;
+  PPenMode = ^TPenMode;
+
+  PBrush = ^TBrush;
+  PBrushStyle = ^TBrushStyle;
+
+  PCanvas = ^TCanvas;
+  PFillStyle = ^TFillStyle;
+  PRect = ^TRect;
+  PPoint = ^TPoint;
+  PPPoint = ^PPoint;
+
+  PGraphic = ^TGraphic;
+
+  PBitmap = ^Tbitmap;
+  PTransparentMode =^TTransparentMode;
+
+  PPicture = ^TPicture;
+
 //Read: property OnChanging: TNotifyEvent read OnChanging write OnChanging;
 procedure TGraphicsObject_OnChanging_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -89,7 +85,7 @@ begin
   PGraphicsObject(Params^[0])^.Free();
 end;
 
-procedure Register_TGraphicsObject(Compiler: TLapeCompiler);
+procedure Register_TGraphicsObject(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -283,7 +279,7 @@ begin
   PFont(Params^[0])^.Free();
 end;
 
-procedure Register_TFont(Compiler: TLapeCompiler);
+procedure Register_TFont(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -403,7 +399,7 @@ begin
   PPen(Params^[0])^.Free();
 end;
 
-procedure Register_TPen(Compiler: TLapeCompiler);
+procedure Register_TPen(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -464,7 +460,7 @@ begin
   PBrush(Params^[0])^.Free();
 end;
 
-procedure Register_TBrush(Compiler: TLapeCompiler);
+procedure Register_TBrush(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -882,7 +878,7 @@ begin
   PAntialiasingMode(Result)^ := PCanvas(Params^[0])^.AntialiasingMode;
 end;
 
-procedure Register_TCanvas(Compiler: TLapeCompiler);
+procedure Register_TCanvas(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1083,7 +1079,7 @@ begin
     PGraphic(Params^[0])^.LoadFromClipboardFormat(CF_Bitmap);
 end;
 
-procedure Register_TGraphic(Compiler: TLapeCompiler);
+procedure Register_TGraphic(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1321,7 +1317,7 @@ begin
   PBitmap(Params^[0])^.Mask(PInteger(Params^[3])^);
 end;
 
-procedure Register_TBitmap(Compiler: TLapeCompiler);
+procedure Register_TBitmap(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1458,7 +1454,7 @@ begin
   PPicture(Params^[0])^.Free();
 end;
 
-procedure Register_TPicture(Compiler: TLapeCompiler);
+procedure Register_TPicture(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1482,36 +1478,39 @@ begin
 end;
 
 {ALL}
- procedure RegisterLCLGraphics(Compiler: TLapeCompiler);
+ procedure Register_LCLGraphics(Compiler: TScriptCompiler);
  begin
    with Compiler do
-     begin
-       addGlobalType('record Left,Top,Right,Bottom : Longint;end;','TRect');
-       addGlobalType('(fsBold, fsItalic, fsStrikeOut, fsUnderline)','TFontStyle');
-       addGlobalType('(fqDefault, fqDraft, fqProof, fqNonAntialiased, fqAntialiased, fqCleartype, fqCleartypeNatural)', 'TFontQuality');
-       addGlobalType('set of TFontStyle','TFontStyles');
-       addGlobalType('(fpDefault, fpVariable, fpFixed)','TFontPitch');
-       addGlobalType('integer','TCopyMode');
-       addGlobalType('(psSolid, psDash, psDot, psDashDot, psDashDotDot, psinsideFrame, psPattern,psClear)','TPenStyle');
-       addGlobalType('(pmBlack, pmWhite, pmNop, pmNot, pmCopy, pmNotCopy,pmMergePenNot, pmMaskPenNot, pmMergeNotPen, pmMaskNotPen, pmMerge,pmNotMerge, pmMask, pmNotMask, pmXor, pmNotXor)','TPenMode');
-       addGlobalType('(bsSolid, bsClear, bsHorizontal, bsVertical, bsFDiagonal,bsBDiagonal, bsCross, bsDiagCross, bsImage, bsPattern)','TBrushStyle');
-       addGlobalType('(fsSurface,fsBorder)','TFillStyle');
-       addGlobalType('integer','HBITMAP');
-       addGlobalType('integer','HPALETTE');
-       addGlobalType('(tmAuto, tmFixed)','TTransparentMode');
-       addGlobalType('(amDontCare, amOn, amOff)', 'TAntialiasingMode');
+   begin
+     addGlobalType('record Left,Top,Right,Bottom : Longint;end;','TRect');
+     addGlobalType('(fsBold, fsItalic, fsStrikeOut, fsUnderline)','TFontStyle');
+     addGlobalType('(fqDefault, fqDraft, fqProof, fqNonAntialiased, fqAntialiased, fqCleartype, fqCleartypeNatural)', 'TFontQuality');
+     addGlobalType('set of TFontStyle','TFontStyles');
+     addGlobalType('(fpDefault, fpVariable, fpFixed)','TFontPitch');
+     addGlobalType('integer','TCopyMode');
+     addGlobalType('(psSolid, psDash, psDot, psDashDot, psDashDotDot, psinsideFrame, psPattern,psClear)','TPenStyle');
+     addGlobalType('(pmBlack, pmWhite, pmNop, pmNot, pmCopy, pmNotCopy,pmMergePenNot, pmMaskPenNot, pmMergeNotPen, pmMaskNotPen, pmMerge,pmNotMerge, pmMask, pmNotMask, pmXor, pmNotXor)','TPenMode');
+     addGlobalType('(bsSolid, bsClear, bsHorizontal, bsVertical, bsFDiagonal,bsBDiagonal, bsCross, bsDiagCross, bsImage, bsPattern)','TBrushStyle');
+     addGlobalType('(fsSurface,fsBorder)','TFillStyle');
+     addGlobalType('integer','HBITMAP');
+     addGlobalType('integer','HPALETTE');
+     addGlobalType('(tmAuto, tmFixed)','TTransparentMode');
+     addGlobalType('(amDontCare, amOn, amOff)', 'TAntialiasingMode');
 
-       //register graphics
-       Register_TGraphicsObject(Compiler);
-       Register_TFont(Compiler);
-       Register_TPen(Compiler);
-       Register_TBrush(Compiler);
-       Register_TGraphic(Compiler);
-       Register_TCanvas(Compiler);
-       Register_TBitmap(Compiler);
-       Register_TPicture(Compiler);
-     end;
- end;
+     //register graphics
+     Register_TGraphicsObject(Compiler);
+     Register_TFont(Compiler);
+     Register_TPen(Compiler);
+     Register_TBrush(Compiler);
+     Register_TGraphic(Compiler);
+     Register_TCanvas(Compiler);
+     Register_TBitmap(Compiler);
+     Register_TPicture(Compiler);
+   end;
+end;
+
+initialization
+  RegisterScriptImport(@Register_LCLGraphics);
 
 end.
 

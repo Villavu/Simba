@@ -1,19 +1,18 @@
-unit lpTMOCR;
+unit simbascript.import_tmocr;
 //Depends: TMOCR, TObject, string, Integer, boolean, T2DPointArray, integer, TOCRFilterDataArray, TMufasaBitmap, String, TMFonts
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils, lpcompiler, lptypes, script_imports;
+{$i import_uses.inc}
 
-procedure Register_TMOCR(Compiler: TLapeCompiler);
+procedure Register_TMOCR(Compiler: TScriptCompiler);
 
 implementation
 
 uses
-  ocr, bitmaps, fontloader, MufasaTypes;
+  simba.ocr, simba.bitmap, simba.fontloader;
 
 type
   PMOCR = ^TMOCR;
@@ -23,7 +22,7 @@ type
 //constructor Create(Owner: TObject);
 procedure TMOCR_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PMOCR(Params^[0])^ := TMOCR.Create(PObject(Params^[1])^, PBoolean(Params^[2])^);
+  PMOCR(Params^[0])^ := TMOCR.Create(PObject(Params^[1])^);
 end;
 
 //function getTextPointsIn(sx, sy, w, h: Integer; shadow: boolean; var _chars, _shadows: T2DPointArray): Boolean;
@@ -134,12 +133,6 @@ begin
   PMFonts(Result)^ := PMOCR(Params^[0])^.Fonts;
 end;
 
-//Write: property Fonts : TMFonts read GetFonts write SetFonts;
-procedure TMOCR_Fonts_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PMOCR(Params^[0])^.Fonts := PMFonts(Params^[1])^;
-end;
-
 //procedure Free();
 procedure TMOCR_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -152,13 +145,13 @@ begin
   PPointArray(Result)^ := PMOCR(Params^[0])^.TextToFontTPA(PlpString(Params^[1])^, PFont(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
 end;
 
-procedure Register_TMOCR(Compiler: TLapeCompiler);
+procedure Register_TMOCR(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
     addClass('TMOCR');
 
-    addGlobalFunc('procedure TMOCR.Init(Owner: TObject; UseFontBuffer: Boolean = True);', @TMOCR_Init);
+    addGlobalFunc('procedure TMOCR.Init(Owner: TObject);', @TMOCR_Init);
     addGlobalFunc('function TMOCR.GetUpTextAtEx(atX, atY: integer; shadow: boolean; fontname: string): string; constref;', @TMOCR_GetUpTextAtEx);
     addGlobalFunc('function TMOCR.GetUpTextAt(atX, atY: integer; shadow: boolean): string; constref;', @TMOCR_GetUpTextAt);
     addGlobalFunc('function TMOCR.GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing, color, tol, len: integer; font: string): string; constref;', @TMOCR_GetTextAt);
@@ -168,10 +161,14 @@ begin
     addGlobalFunc('function TMOCR.TextToFontTPA(Text: String; Font: TFont; out W, H: Int32): TPointArray; constref; overload;', @TMOCR_TextToFontTPAEx);
     addGlobalFunc('function TMOCR.TextToFontBitmap(Text, font: String): TMufasaBitmap; constref;', @TMOCR_TextToFontBitmap);
     addGlobalFunc('function TMOCR.TextToMask(Text, font: String): TMask; constref;', @TMOCR_TextToMask);
-    addClassVar('TMOCR', 'Fonts', 'TMFonts', @TMOCR_Fonts_Read, @TMOCR_Fonts_Write);
     addGlobalFunc('procedure TMOCR.Free(); constref;', @TMOCR_Free);
+
+    addClassVar('TMOCR', 'Fonts', 'TMFonts', @TMOCR_Fonts_Read);
   end;
 end;
+
+initialization
+  RegisterScriptImport(@Register_TMOCR);
 
 end.
 

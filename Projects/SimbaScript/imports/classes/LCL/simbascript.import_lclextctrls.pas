@@ -1,33 +1,39 @@
-unit lplclextctrls;
+unit simbascript.import_lclextctrls;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils,lpcompiler, lptypes, script_imports;
-
-procedure RegisterLCLExtCtrls(Compiler: TLapeCompiler);
+{$i import_uses.inc}
 
 implementation
-  uses MufasaTypes,CustomTimer,extctrls,forms,lplclsystem,lplclgraphics,lplclcontrols,lclType;
 
-  type
-   PCustomTimer = ^TCustomTimer;
-   PTimer = ^TTimer;
-   PCustomImage = ^TCustomImage;
-   PImage = ^TImage;
-   PCustomPanel = ^TCustomPanel;
-   PBevelWidth = ^TBevelWidth;
-   PPanelBevel = ^TPanelBevel;
-   PAlignment = ^TAlignMent;
-   PPanel = ^TPanel;
-   PShape = ^TShape;
-   PShapeType = ^TShapeType;
+uses
+  customtimer, extctrls, forms, lcltype, controls, graphics;
 
-   {TTimer}
+type
+  PCustomTimer = ^TCustomTimer;
+  PTimer = ^TTimer;
+  PCustomImage = ^TCustomImage;
+  PImage = ^TImage;
+  PCustomPanel = ^TCustomPanel;
+  PBevelWidth = ^TBevelWidth;
+  PPanelBevel = ^TPanelBevel;
+  PAlignment = ^TAlignMent;
+  PPanel = ^TPanel;
+  PShape = ^TShape;
+  PShapeType = ^TShapeType;
+  PRect = ^TRect;
+  PMouseMoveEvent = ^TMouseMoveEvent;
+  PBrush = ^TBrush;
+  PPicture = ^TPicture;
+  PMouseEvent = ^TMouseEvent;
+  PComponent = ^TComponent;
+  PNotifyEvent = ^TNotifyEvent;
+  PObject = ^TObject;
+  PPen = ^TPen;
 
-   //constructor Create(AOwner: TComponent);
+//constructor Create(AOwner: TComponent);
 procedure TCustomTimer_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PCustomTimer(Params^[0])^ := TCustomTimer.Create(PComponent(Params^[1])^);
@@ -99,7 +105,7 @@ begin
   PCustomTimer(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomTimer(Compiler: TLapeCompiler);
+procedure Register_TCustomTimer(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -127,7 +133,7 @@ begin
   PTimer(Params^[0])^.Free();
 end;
 
-procedure Register_TTimer(Compiler: TLapeCompiler);
+procedure Register_TTimer(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -245,7 +251,7 @@ begin
   PCustomImage(Params^[0])^.OnMouseUp := PMouseEvent(Params^[1])^;
 end;
 
-procedure Register_TCustomImage(Compiler: TLapeCompiler);
+procedure Register_TCustomImage(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -328,7 +334,7 @@ begin
   PImage(Params^[0])^.OnMouseMove := PMouseMoveEvent(Params^[1])^;
 end;
 
-procedure Register_TImage(Compiler: TLapeCompiler);
+procedure Register_TImage(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -416,7 +422,7 @@ begin
   PCustomPanel(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomPanel(Compiler: TLapeCompiler);
+procedure Register_TCustomPanel(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -443,7 +449,7 @@ begin
   PPanel(Params^[0])^.Free();
 end;
 
-procedure Register_TPanel(Compiler: TLapeCompiler);
+procedure Register_TPanel(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -508,7 +514,7 @@ begin
   PShape(Params^[0])^.Free();
 end;
 
-procedure Register_TShape(Compiler: TLapeCompiler);
+procedure Register_TShape(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -523,7 +529,7 @@ begin
   end;
 end;
 
-procedure RegisterLCLExtCtrls(Compiler: TLapeCompiler);
+procedure Register_LCLExtCtrls(Compiler: TScriptCompiler);
 begin
    with Compiler do
    begin
@@ -542,6 +548,9 @@ begin
    Register_TPanel(Compiler);
    Register_TShape(Compiler);
 end;
+
+initialization
+  RegisterScriptImport(@Register_LCLExtCtrls);
 
 end.
 

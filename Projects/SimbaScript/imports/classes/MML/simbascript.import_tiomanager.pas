@@ -1,20 +1,18 @@
-unit lptiomanager;
+unit simbascript.import_tiomanager;
 //Depends: TIOManager, TObject, string, PRGB32, TPoint, TMufasaBitmap, integer, Integer, boolean, TClickType, Word, char, Boolean, TTarget
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils, lpcompiler, lptypes, script_imports;
+{$i import_uses.inc}
 
-procedure Register_TIOManager(Compiler: TLapeCompiler);
+procedure Register_TIOManager(Compiler: TScriptCompiler);
 
 implementation
 
 uses
-  simba.target, simba.iomanager, simba.target_exported, bitmaps, graphics, mufasatypes,
-  simba.oswindow;
+  simba.target, simba.iomanager, simba.target_exported, simba.bitmap, graphics, simba.oswindow;
 
 type
   PIOManager = ^TIOManager;
@@ -297,7 +295,7 @@ begin
   PTarget(Result)^ := PIOManager(Params^[0])^.SetKeyMouseTargetEx(POSWindow(Params^[1])^);
 end;
 
-procedure Register_TIOManager(Compiler: TLapeCompiler);
+procedure Register_TIOManager(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -354,6 +352,9 @@ begin
     addGlobalFunc('procedure TIOManager.Free(); constref;', @TIOManager_Free);
   end;
 end;
+
+initialization
+  RegisterScriptImport(@Register_TIOManager);
 
 end.
 

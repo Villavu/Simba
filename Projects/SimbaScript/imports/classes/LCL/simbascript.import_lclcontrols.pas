@@ -1,13 +1,21 @@
-unit lplclcontrols;
+unit simbascript.import_lclcontrols;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils,Controls, lpcompiler, ffi, lptypes, script_imports;
+{$i import_uses.inc}
+
+implementation
+
+uses controls, forms, graphics;
 
 type
+  PScrollBarKind = ^TScrollBarKind;
+  PControlScrollBar = ^TcontrolScrollBar;
+  PScrollingWinControl = ^TScrollingWinControl;
+  PAlign = ^TAlign;
+  PCursor = ^TCursor;
   PControl = ^TControl;
   PWinControl = ^TWinControl;
   PKeyEvent = ^TkeyEvent;
@@ -16,19 +24,14 @@ type
   PMouseMoveEvent = ^TMouseMoveEvent;
   PCustomControl = ^TCustomControl;
   PGraphicControl = ^TGraphicControl;
-
-procedure RegisterLCLControls(Compiler: TLapeCompiler);
-
-implementation
-
-uses lplclsystem, lplclgraphics, forms, lplclforms;
-
-type
-  PScrollBarKind = ^TScrollBarKind;
-  PControlScrollBar = ^TcontrolScrollBar;
-  PScrollingWinControl = ^TScrollingWinControl;
-  PAlign = ^TAlign;
-  PCursor = ^TCursor;
+  PRect = ^TRect;
+  PComponent = ^TComponent;
+  PNotifyEvent = ^TNotifyEvent;
+  PHandle = ^THandle;
+  PBitmap = ^TBitmap;
+  PPersistent = ^TPersistent;
+  PBrush = ^TBrush;
+  PFormBorderStyle = ^TFormBorderStyle;
 
 {TControl}
 //procedure AdjustSize;
@@ -704,7 +707,7 @@ begin
   PControl(Params^[0])^.Free();
 end;
 
-procedure Register_TControl(Compiler: TLapeCompiler);
+procedure Register_TControl(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1256,7 +1259,7 @@ begin
   PWinControl(Params^[0])^.Free();
 end;
 
-procedure Register_TWinControl(Compiler: TLapeCompiler);
+procedure Register_TWinControl(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1376,7 +1379,7 @@ begin
   PCustomControl(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomControl(Compiler: TLapeCompiler);
+procedure Register_TCustomControl(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1535,7 +1538,7 @@ begin
   PControlScrollBar(Params^[0])^.Free();
 end;
 
-procedure Register_TControlScrollBar(Compiler: TLapeCompiler);
+procedure Register_TControlScrollBar(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1609,7 +1612,7 @@ begin
   PScrollingWinControl(Params^[0])^.Free();
 end;
 
-procedure Register_TScrollingWinControl(Compiler: TLapeCompiler);
+procedure Register_TScrollingWinControl(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1646,7 +1649,7 @@ begin
   PGraphicControl(Params^[0])^.Align := PAlign(Params^[1])^;
 end;
 
-procedure Register_TGraphicControl(Compiler: TLapeCompiler);
+procedure Register_TGraphicControl(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1658,7 +1661,7 @@ begin
   end;
 end;
 
-procedure RegisterLCLControls(Compiler: TLapeCompiler);
+procedure Register_LCLControls(Compiler: TScriptCompiler);
 begin
   with Compiler do
    begin
@@ -1686,6 +1689,9 @@ begin
   Register_TScrollingWinControl(Compiler);
   Register_TGraphicControl(Compiler);
 end;
+
+initialization
+  RegisterScriptImport(@Register_LCLControls);
 
 end.
 

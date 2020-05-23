@@ -1,19 +1,18 @@
-unit lpTMDTM;
+unit simbascript.import_tmdtm;
 //Depends: TObject
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils, lpcompiler, lptypes, script_imports;
+{$i import_uses.inc}
 
-procedure Register_TMDTM(Compiler: TLapeCompiler);
+procedure Register_TMDTM(Compiler: TScriptCompiler);
 
 implementation
 
 uses
-  dtm, MufasaTypes;
+  simba.dtm;
 
 type
   PMDTM = ^TMDTM;
@@ -134,7 +133,7 @@ begin
   PMDTM(Params^[0])^.Free();
 end;
 
-procedure Register_TMDTM(Compiler: TLapeCompiler);
+procedure Register_TMDTM(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -162,6 +161,9 @@ begin
     addGlobalFunc('procedure TMDTM.Free(); constref;', @TMDTM_Free);
   end;
 end;
+
+initialization
+  RegisterScriptImport(@Register_TMDTM);
 
 end.
 

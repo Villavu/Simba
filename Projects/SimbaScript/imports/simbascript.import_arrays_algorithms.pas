@@ -1,16 +1,15 @@
-unit script_import_arrays_algorithms;
+unit simbascript.import_arrays_algorithms;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils;
+{$i import_uses.inc}
 
 implementation
 
 uses
-  script_imports, lpcompiler, lptypes, mufasatypes, tpa, mmath;
+  simba.tpa, simba.math;
 
 procedure Lape_RAaSTPAEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -447,10 +446,12 @@ begin
   PIntegerArray(Result)^ := CombineIntArray(PIntegerArray(Params^[0])^, PIntegerArray(Params^[1])^);
 end;
 
-procedure Lape_Import_Arrays_Algorithms(Compiler: TLapeCompiler; Data: Pointer);
+procedure Lape_Import_Arrays_Algorithms(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
+    Section := 'Arrays & Algorithms';
+
     addGlobalFunc('procedure RAaSTPAEx(var a: TPointArray; const w, h: Int32);', @Lape_RAaSTPAEx);
     addGlobalFunc('procedure RAaSTPA(var a: TPointArray; const Dist: Int32);', @Lape_RAaSTPA);
     addGlobalFunc('function NearbyPointInArrayEx(const P: TPoint; w, h: Int32; const a: TPointArray): Boolean', @Lape_NearbyPointInArrayEx);
@@ -542,7 +543,7 @@ begin
 end;
 
 initialization
-  ScriptImports.Add('Arrays & Algorithms', @Lape_Import_Arrays_Algorithms);
+  RegisterScriptImport(@Lape_Import_Arrays_Algorithms);
 
 end.
 
