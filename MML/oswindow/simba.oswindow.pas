@@ -7,7 +7,7 @@ interface
 
 uses
   classes, sysutils, regexpr, lcltype,
-  mufasatypes;
+  simba.mufasatypes;
 
 type
   POSWindow = ^TOSWindow;
@@ -52,6 +52,7 @@ type
   function GetWindows: TOSWindowArray;
   function GetActiveWindow: TOSWindow;
   function GetDesktopWindow: TOSWindow;
+  function GetWindowAtCursor: TOSWindow;
   function GetTopWindows: TOSWindowArray;
 
   function FindWindow(Title: String): TOSWindowArray;

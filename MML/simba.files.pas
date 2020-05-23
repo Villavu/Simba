@@ -21,14 +21,14 @@
     Files Class for the Mufasa Macro Library
 }
 
-unit files;
+unit simba.files;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, MufasaTypes;
+  Classes, SysUtils, simba.mufasatypes;
 const
   File_AccesError = -1;
   File_EventError = -2;
@@ -39,8 +39,6 @@ type
 
   TMFiles = class(TObject)
   public
-    OpenFileEvent : TOpenFileEvent;
-    WriteFileEvent: TWriteFileEvent;
     function CreateFile(Path: string): Integer;
     function OpenFile(Path: string; Shared: Boolean): Integer;
     function RewriteFile(Path: string; Shared: Boolean): Integer;
@@ -71,17 +69,44 @@ type
   // We don't need one per object. :-)
   function GetFiles(Path, Ext: string): TStringArray;
   function GetDirectories(Path: string): TstringArray;
-  function DeleteDirectoryEx(const Directory: string; const Empty: boolean): boolean;
   function FindFile(var Filename: string; const Dirs: array of string): boolean;
+  function FindPlugin(Argument: String; SearchPaths: array of String): String;
   procedure UnZipFile(const FilePath, TargetPath: string);
+  procedure UnZipOneFile(const ArchiveFileName, FileName, OutputPath: String);
   procedure ZipFiles(const ToFolder: string; const Files: TStringArray);
 
 implementation
 uses
-  {$IFDEF MSWINDOWS}Windows,{$ENDIF} IniFiles, Client, FileUtil,
-  LazFileUtils, LazUTF8, Zipper;
+  {$IFDEF MSWINDOWS}Windows,{$ENDIF} IniFiles, simba.client, FileUtil,
+  LazFileUtils, LazUTF8, Zipper, dynlibs;
 
-{ GetFiles in independant of the TMFiles class }
+function FindPlugin(Argument: String; SearchPaths: array of String): String;
+
+  function Find(Path: String; var Plugin: String): Boolean;
+  begin
+    Path := SetDirSeparators(IncludeTrailingPathDelimiter(Path) + Argument);
+
+    if FileExists(Path) then
+      Plugin := Path
+    else
+    if FileExists(Path + '.' + SharedSuffix) then
+      Plugin := Path + '.' + SharedSuffix
+    else
+    if FileExists(Path + {$IFDEF CPU64}'64'{$ELSE}'32'{$ENDIF} + '.' + SharedSuffix) then
+      Plugin := Path + {$IFDEF CPU64}'64'{$ELSE}'32'{$ENDIF} + '.' + SharedSuffix;
+
+    Result := Plugin <> '';
+  end;
+
+var
+  i: Int32;
+begin
+  for i := 0 to High(SearchPaths) do
+    if Find(SearchPaths[i], Result) then
+      Exit;
+
+  Result := '';
+end;
 
 function GetFiles(Path, Ext: string): TstringArray;
 var
@@ -100,42 +125,6 @@ begin
     until FindNext(SearchRec) <> 0;
     SysUtils.FindClose(SearchRec);
   end;
-end;
-
-function DeleteDirectoryEx(const Directory: string; const Empty: boolean): boolean;
-var
-  FileInfo: TSearchRec;
-  CurSrcDir: String;
-  CurFilename: String;
-begin
-  if (not Empty) then
-    exit(RemoveDir(Directory));
-
-  Result := False;
-  CurSrcDir := CleanAndExpandDirectory(Directory);
-
-  if (FindFirstUTF8(CurSrcDir+GetAllFilesMask,faAnyFile,FileInfo) = 0) then
-  begin
-    repeat
-      if (FileInfo.Name <> '.') and (FileInfo.Name <> '..') and (FileInfo.Name <> '') then
-      begin
-        CurFilename := CurSrcDir + FileInfo.Name;
-
-        if (FileInfo.Attr and faDirectory)>0 then
-        begin
-          if (not DeleteDirectory(CurFilename, False)) then
-            exit();
-        end else
-        begin
-          if (not DeleteFileUTF8(CurFilename)) then
-            exit();
-        end;
-      end;
-    until (FindNextUTF8(FileInfo) <> 0);
-  end;
-
-  FindCloseUTF8(FileInfo);
-  Result := RemoveDirUTF8(Directory); // remember to delete the directory we actually wanted to
 end;
 
 function GetDirectories(Path: string): TstringArray;
@@ -188,6 +177,30 @@ begin
     UnZipper.UnZipAllFiles;
   finally
     UnZipper.Free;
+  end;
+end;
+
+procedure UnZipOneFile(const ArchiveFileName, FileName, OutputPath: String);
+var
+  UnZipper: TUnZipper;
+  Files: TStringList;
+begin
+  Files := TStringList.Create();
+  Files.Add(FileName);
+
+  try
+    UnZipper := TUnZipper.Create();
+
+    try
+      UnZipper.FileName := ArchiveFileName;
+      UnZipper.OutputPath := OutputPath;
+      UnZipper.Examine();
+      UnZipper.UnZipFiles(Files);
+    finally
+      UnZipper.Free();
+    end;
+  finally
+    Files.Free();
   end;
 end;
 
@@ -304,15 +317,7 @@ end;
 function TMFiles.CreateFile(Path: string): Integer;
 var
   FS: TFileStream;
-  Continue : Boolean;
 begin
-  if Assigned(WriteFileEvent) then
-  begin;
-    Continue := true;
-    WriteFileEvent(Self,path,continue);
-    if not Continue then
-      exit(File_EventError);
-  end;
   try
     FS := TFileStream.Create(UTF8ToSys(Path), fmCreate);
     Result := AddFileToManagedList(Path, FS, fmCreate);
@@ -332,15 +337,7 @@ function TMFiles.OpenFile(Path: string; Shared: Boolean): Integer;
 var
   FS: TFileStream;
   fMode: Integer;
-  Continue : Boolean;
 begin
-  if Assigned(OpenFileEvent) then
-  begin;
-    Continue := true;
-    OpenFileEvent(Self,path,continue);
-    if not Continue then
-      exit(File_EventError);
-  end;
   if Shared then
     fMode := fmOpenRead or fmShareDenyNone
   else
@@ -359,15 +356,7 @@ function TMFiles.AppendFile(Path: string): Integer;
 var
   FS: TFileStream;
   fMode: Integer;
-  Continue : Boolean;
 begin
-  if Assigned(WriteFileEvent) then
-  begin
-    Continue := true;
-    WriteFileEvent(Self,path,continue);
-    if not Continue then
-      exit(File_EventError);
-  end;
   fMode := fmOpenReadWrite;
   if not FileExists(Path) then
     fMode := fMode or fmCreate;
@@ -386,18 +375,9 @@ end;
 /\}
 
 function TMFiles.ReadINI(const Section, KeyName: string; FileName: string): string;
-var
-  Continue : boolean;
 begin
   FileName := ExpandFileNameUTF8(FileName);
-  
-  if Assigned(OpenFileEvent) then
-  begin
-    Continue := True;
-    OpenFileEvent(Self, FileName, Continue);
-    if not Continue then
-	  exit('');
-  end;
+
   with TINIFile.Create(FileName, True) do
     try
       Result := ReadString(Section, KeyName, '');
@@ -411,18 +391,9 @@ end;
 /\}
 
 procedure TMFiles.DeleteINI(const Section, KeyName : string; FileName : string);
-var	
-  Continue : boolean;
 begin; 
   FileName := ExpandFileNameUTF8(FileName);
-  
-  if Assigned(WriteFileEvent) then
-  begin
-    Continue := True;
-    WriteFileEvent(Self, FileName, Continue);
-    if not Continue then
-      exit;
-  end;
+
   with TIniFile.Create(FileName, True) do
     try
       if KeyName = '' then
@@ -439,18 +410,9 @@ end;
 /\}
 
 procedure TMFiles.WriteINI(const Section, KeyName, NewString : string; FileName : string);
-var
-  Continue : boolean;
 begin;
   FileName := ExpandFileNameUTF8(FileName);
-  
-  if Assigned(WriteFileEvent) then
-  begin
-    Continue := True;
-    WriteFileEvent(Self, FileName, Continue);
-    if not Continue then
-      exit;
-  end;
+
   with TINIFile.Create(FileName, True) do
     try
 	  WriteString(Section, KeyName, NewString);
@@ -469,15 +431,7 @@ function TMFiles.RewriteFile(Path: string; Shared: Boolean): Integer;
 var
   FS: TFileStream;
   fMode: Integer;
-  Continue : Boolean;
 begin
-  if Assigned(WriteFileEvent) then
-  begin;
-    Continue := true;
-    WriteFileEvent(Self,path,continue);
-    if not Continue then
-      exit(File_EventError);
-  end;
   if Shared then
     fMode := fmOpenReadWrite or fmShareDenyNone  or fmCreate
   else
@@ -493,33 +447,12 @@ begin
 end;
 
 function TMFiles.DeleteFile(Filename: string): Boolean;
-var
-  Continue : Boolean;
 begin
-  if Assigned(WriteFileEvent) then
-  begin;
-    Continue := true;
-    WriteFileEvent(Self, Filename, continue);
-    if not Continue then
-      exit(False);
-  end;
   Result := DeleteFileUTF8(Filename);
 end;
 
 function TMFiles.RenameFile(OldName, NewName: string): Boolean;
-var
-  Continue : Boolean;
 begin
-  if Assigned(WriteFileEvent) then
-  begin;
-    Continue := true;
-    WriteFileEvent(Self, OldName, continue);
-    if not Continue then
-      exit(False);
-    WriteFileEvent(Self, NewName, continue);
-    if not Continue then
-      exit(False);
-  end;
   Result := RenameFileUTF8(OldName, NewName);
 end;
 

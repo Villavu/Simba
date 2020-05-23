@@ -1,4 +1,4 @@
-unit matchTempl;
+unit simba.matchtemplate;
 {==============================================================================]
   Copyright © 2018, Jarl Krister Holta
   
@@ -19,7 +19,8 @@ unit matchTempl;
 interface
 
 uses
-  SysUtils, mtCore;
+  sysutils,
+  simba.matchtemplate_core;
 
 const
   MATCH_CCORR         = 0;
@@ -42,8 +43,7 @@ implementation
 
 uses
   math, utf8process,
-  mtMatrix, FFTPACK4, FFTW3,
-  simba_threadpool;
+  simba.matchtemplate_matrix, simba.threadpool, simba.FFTPACK4, simba.FFTW3;
 
 type
   TRANSFORM_CACHE = record

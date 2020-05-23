@@ -29,7 +29,7 @@ interface
 
 uses
   classes, sysutils, jwawinuser, windows,
-  mufasatypes, simba.oswindow, simba.target;
+  simba.mufasatypes, simba.oswindow, simba.target;
 
 type
   TWindowBuffer = class
@@ -136,6 +136,8 @@ procedure TWindowTarget.SetHandle(Value: PtrUInt);
 begin
   if (FDC > 0) then
     ReleaseDC(FWindow, FDC);
+  if (Value = 0) then
+    Value := GetDesktopWindow();
 
   FWindow := Value;
   FIsDesktop := FWindow = GetDesktopWindow();

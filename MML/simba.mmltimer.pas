@@ -1,4 +1,4 @@
-unit mmltimer;
+unit simba.mmltimer;
 //cross-platform threaded timer
 //by Cynic
 {$mode objfpc}{$H+}

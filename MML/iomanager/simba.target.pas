@@ -29,7 +29,7 @@ interface
 
 uses
   classes, sysutils,
-  mufasatypes, simba.oswindow, simba.eventhandlerlist;
+  simba.mufasatypes, simba.oswindow, simba.eventhandlerlist;
 
 type
   PTarget = ^TTarget;
@@ -106,7 +106,7 @@ type
 implementation
 
 uses
-  colour_conv;
+  simba.colormath;
 
 procedure TTarget.InvalidTarget;
 begin

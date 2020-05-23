@@ -20,14 +20,14 @@
 
     TPA functions for the Mufasa Macro Library
 }
-unit tpa;
+unit simba.tpa;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, mufasatypes;
+  Classes, SysUtils, simba.mufasatypes;
 
 function FastTPASort(const TPA: TPointArray;const Dists: TIntegerArray; maxDist: Integer; CloseFirst: Boolean): TPointArray;
 procedure QuickSort(var A: TIntegerArray; iLo, iHi: Integer);

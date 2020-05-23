@@ -13,7 +13,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.target, simba.target_exported, simba.oswindow, bitmaps, mufasatypes;
+  simba.target, simba.target_exported, simba.oswindow, simba.bitmap, simba.mufasatypes;
 
 type
   TIOManager = class(TObject)
@@ -21,6 +21,7 @@ type
     FKeyMouse: TTarget;
     FImage: TTarget;
     FFrozen: TTarget;
+    FPluginPaths: array of String;
 
     FTargetArray: array of TTarget;
 
@@ -38,7 +39,7 @@ type
 
     function SetTarget(Data: PRGB32; Size: TPoint): Int32; overload;
     function SetTarget(Bitmap: TMufasaBitmap): Int32; overload;
-    function SetTarget(Name, Data: String): Int32; overload;
+    function SetTarget(Plugin, Data: String): Int32; overload;
     function SetTarget(Window: TOSWindow): Int32; overload;
 
     function TargetValid: Boolean;
@@ -50,7 +51,7 @@ type
     procedure FreeReturnData;
 
     procedure GetDimensions(out Width, Height: Int32);
-    procedure GetPosition(var Left, Top: Int32);
+    procedure GetPosition(out Left, Top: Int32);
     procedure ActivateClient;
 
     function IsFrozen: Boolean;
@@ -106,6 +107,7 @@ type
 implementation
 
 uses
+  simba.files,
   simba.target_raw,
   simba.target_bitmap,
   simba.target_eios,
@@ -117,11 +119,13 @@ uses
 
 constructor TIOManager.Create(PluginPath: String);
 begin
-  inherited Create();
+  Create();
 
-  EIOSController.AddPath(PluginPath);
-
-  SetDesktop();
+  if PluginPath <> '' then
+  begin
+    SetLength(FPluginPaths, Length(FPluginPaths) + 1);
+    FPluginPaths[High(FPluginPaths)] := PluginPath;
+  end;
 end;
 
 constructor TIOManager.Create;
@@ -321,12 +325,15 @@ begin
   Result := SetImageTarget(TBitmapTarget.Create(Bitmap));
 end;
 
-function TIOManager.SetTarget(Name, Data: String): Int32;
+function TIOManager.SetTarget(Plugin, Data: String): Int32;
+var
+  Path: String;
 begin
-  if not EIOSController.ClientExists(Name) then
-    raise Exception.Create('EIOS Client by specified name does not exist');
+  Path := FindPlugin(Plugin, FPluginPaths);
+  if (Path = '') then
+    raise Exception.Create('EIOS plugin not found: ' + Plugin);
 
-  Result := SetBothTargets(TEIOS_Target.Create(EIOSController.GetClient(Name), Data));
+  Result := SetBothTargets(TEIOS_Target.Create(Path, Data));
 end;
 
 function TIOManager.SetTarget(Window: TOSWindow): Int32;
@@ -369,7 +376,7 @@ begin
   FImage.GetTargetDimensions(Width, Height)
 end;
 
-procedure TIOManager.GetPosition(var Left, Top: Int32);
+procedure TIOManager.GetPosition(out Left, Top: Int32);
 begin
   FImage.GetTargetPosition(Left, Top);
 end;

@@ -20,14 +20,14 @@
 
     Internets for the Mufasa Macro Library
 }
-unit internets;
+unit simba.internet;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, blcksock, MufasaTypes, math, simba.httpclient;
+  Classes, SysUtils, blcksock, simba.MufasaTypes, math, simba.httpclient;
 
 function GetPage(URL: String): String;
 
@@ -69,8 +69,6 @@ type
     Connections: TList;
     HTTPClients: TList;
   public
-    OpenConnectionEvent : TOpenConnectionEvent;
-    function GetPage(URL: String): String;
     function CreateHTTPClient(HandleCookies : boolean = true) : integer;
     function GetHTTPClient(Index : integer) : THTTPClient;
     procedure FreeHTTPClient(Index: Integer);
@@ -117,7 +115,7 @@ type
 implementation
 
 uses
-  Client;
+  simba.client;
 
 function GetPage(URL: String): String;
 var
@@ -130,20 +128,6 @@ begin
   finally
     HTTPClient.Free();
   end;
-end;
-
-function TMInternet.GetPage(URL: String): String;
-var
-  Continue : boolean = true;
-begin
-  Result := '';
-  if Assigned(OpenConnectionEvent) then
-  begin;
-    OpenConnectionEvent(Self,url,continue);
-    if not Continue then
-      exit;
-  end;
-  Result := Internets.GetPage(url);
 end;
 
 { TMInternet }

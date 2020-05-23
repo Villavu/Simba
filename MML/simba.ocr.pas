@@ -21,14 +21,14 @@
     OCR class for the Mufasa Macro Library
 }
 
-unit ocr;
+unit simba.ocr;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, MufasaTypes,MufasaBase, bitmaps, math, ocrutil, fontloader,
+  Classes, SysUtils, simba.mufasatypes, simba.bitmap, math, simba.ocrutil, simba.fontloader,
   {Begin To-Remove units. Replace ReadBmp with TMufasaBitmap stuff later.}
   graphtype, intfgraphics,graphics;
   {End To-Remove unit}
@@ -54,16 +54,13 @@ type
     Client: TObject;
     FFonts: TMFonts;
     FilterData: TOCRFilterDataArray;
-    FUseFontBuffer: Boolean;
 
-    function GetFont(Name: String; Shadow: Boolean = False): TOCRData; overload;
-    function GetFont(Font: TFont): TOCRData; overload;
-
-    procedure SetFonts(Value: TMFonts);
+    function GetFontPath: String;
+    procedure SetFontPath(Value: String);
   public
-    constructor Create(Owner: TObject; UseFontBuffer: Boolean = True);
+    constructor Create(Owner: TObject);
     destructor Destroy; override;
-    procedure SetPath(const path: string);
+
     function getTextPointsIn(sx, sy, w, h: Integer; shadow: boolean; var _chars, _shadows: T2DPointArray): Boolean;
     function GetUpTextAtEx(atX, atY: integer; shadow: boolean; fontname: string): string;
     function GetUpTextAt(atX, atY: integer; shadow: boolean): string;
@@ -87,31 +84,14 @@ type
     function TextToFontBitmap(Text, font: String): TMufasaBitmap;
     function TextToMask(Text, font: String): TMask;
 
-    property Fonts: TMFonts read FFonts write SetFonts;
-
-    {$IFDEF OCRDEBUG}
-    procedure DebugToBmp(bmp: TMufasaBitmap; hmod,h: integer);
-    public
-       debugbmp: TMufasaBitmap;
-    {$ENDIF}
+    property Fonts: TMFonts read FFonts;
+    property FontPath: String read GetFontPath write SetFontPath;
   end;
-
-  {$IFDEF OCRDEBUG}
-    {$IFDEF LINUX}
-      const OCRDebugPath = '/tmp/';
-    {$ELSE}
-      const OCRDebugPath = '';
-    {$ENDIF}
-  {$ENDIF}
 
 implementation
 
 uses
-  colour_conv, client, tpa, mufasatypesutil, simba.iomanager, syncobjs, newsimbasettings;
-
-var
-  FontBuffer: TMFonts;
-  FontBufferLock: TCriticalSection;
+  simba.colormath, simba.client, simba.tpa, simba.iomanager;
 
 const
     { Very rough limits for R, G, B }
@@ -151,12 +131,11 @@ const
     OF_HN = -1;
 
 { Constructor }
-constructor TMOCR.Create(Owner: TObject; UseFontBuffer: Boolean);
+constructor TMOCR.Create(Owner: TObject);
 begin
   inherited Create;
   Self.Client := Owner;
   Self.FFonts := TMFonts.Create(Owner);
-  Self.FUseFontBuffer := UseFontBuffer;
 
   CreateDefaultFilter();
 end;
@@ -170,86 +149,14 @@ begin
   inherited Destroy;
 end;
 
-(*
-SetPath
-~~~~~~~~
-
-.. code-block:: pascal
-
-    function TMOCR.SetPath(const path: string): boolean;
-
-SetPath sets the path for FFonts
-We don't do this in the constructor because we may not yet have the path.
-
-*)
-procedure TMOCR.SetPath(const path: string);
+function TMOCR.GetFontPath: String;
 begin
-  FFonts.Path := path;
+  Result := FFonts.Path;
 end;
 
-function TMOCR.GetFont(Name: String; Shadow: Boolean): TOCRData;
+procedure TMOCR.SetFontPath(Value: String);
 begin
-  if (not FFonts.IsFontLoaded(Name)) then
-  begin
-    if FUseFontBuffer then
-    begin
-      FontBufferLock.Enter();
-
-      try
-        if (not FontBuffer.IsFontLoaded(Name)) then
-        begin
-          FontBuffer.Path := SimbaSettings.Fonts.Path.Value;
-          if (not FontBuffer.LoadFont(Name, Shadow)) then
-            raise Exception.Create('ERROR loading font "' + Name + '"');
-        end;
-
-        FFonts.Add(FontBuffer.Copy(Name));
-      finally
-        FontBufferLock.Leave();
-      end;
-    end else
-    if (not FFonts.IsFontLoaded(Name)) and (not FFonts.LoadFont(Name, Shadow)) then
-      raise Exception.Create('ERROR loading font "' + Name + '"');
-  end;
-
-  Result := FFonts.GetFont(Name);
-end;
-
-function TMOCR.GetFont(Font: TFont): TOCRData;
-var
-  Name: String;
-begin
-  Name := Format('%s:%d:%d', [Font.Name, Font.Size, Integer(Font.Style)]);
-
-  if (not FFonts.IsFontLoaded(Name)) then
-  begin
-    if FUseFontBuffer then
-    begin
-      FontBufferLock.Enter();
-
-      try
-        if (not FontBuffer.IsFontLoaded(Name)) and (not FontBuffer.LoadSystemFont(Font, Name)) then
-          raise Exception.Create('ERROR loading font "' + Font.Name + '"');
-
-        FFonts.Add(FontBuffer.Copy(Name));
-      finally
-        FontBufferLock.Leave();
-      end;
-    end else
-    if (not FFonts.IsFontLoaded(Name)) and (not FFonts.LoadSystemFont(Font, Name)) then
-      raise Exception.Create('ERROR loading font "' + Font.Name + '"');
-  end;
-
-  Result := FFonts.GetFont(Name);
-end;
-
-{ Set new Fonts. We set it to a Copy of NewFonts }
-procedure TMOCR.SetFonts(Value: TMFonts);
-begin
-  if (Self.FFonts <> nil) then
-    Self.FFonts.Free;
-
-  Self.FFonts := Value.Copy(Self.Client);
+  FFonts.Path := Value;
 end;
 
 {
@@ -840,7 +747,7 @@ begin
       for x := 0 to high(chars_2d_b) do
       begin
         setlength(shadows,length(shadows)+1);
-        shadows[high(shadows)] :=  ConvTPAArr(chars_2d_b[x]);
+        shadows[high(shadows)] := chars_2d_b[x];
       end;
 
     end else if length(chars_2d[y]) < 70 then
@@ -928,17 +835,14 @@ begin
   { Return all the character points to chars & shadow }
   getTextPointsIn(atX, atY, ww, hh, shadow, chars, shadows);
 
-  // Get font data for analysis.
-  font := GetFont(fontname);
-
   if shadow then
   begin
-    font := GetFont(fontname + '_s');
+    font := FFonts.GetFontData(fontname + '_s');
     thachars := shadows;
   end
   else
   begin
-    font := GetFont(fontname);
+    font := FFonts.GetFontData(fontname);
     thachars := chars;
   end;
 
@@ -1028,7 +932,7 @@ var
 
 begin
   Result := '';
-  fD := GetFont(font);
+  fD := FFonts.GetFontData(font);
 
   lbset := false;
   SetLength(Result, 0);
@@ -1070,7 +974,7 @@ begin
       if (tpa[j].x) + ((tpa[j].y) * fD.width) <= high(n) then
         n[(tpa[j].x) + ((tpa[j].y) * fD.width)] := 1
       else
-        mDebugLn('The automatically split characters are too wide. Try decreasing minspacing');
+        WriteLn('The automatically split characters are too wide. Try decreasing minspacing');
     end;
     result := result + GuessGlyph(n, fD);
   end;
@@ -1124,7 +1028,7 @@ var
 
 begin
   Result := '';
-  fD := GetFont(font);
+  fD := FFonts.GetFontData(font);
   TClient(Client).IOManager.GetDimensions(w, h);
  { writeln('Dimensions: (' + inttostr(w) + ', ' + inttostr(h) + ')');    }
 
@@ -1145,7 +1049,7 @@ var
   Data: TocrData;
   Bounds: TBox;
 begin
-  Data := Self.GetFont(Font);
+  Data := FFonts.GetFontData(Font);
 
   Bounds.X1 := 0;
   Bounds.Y1 := $FFFFFF;
@@ -1268,7 +1172,7 @@ function TMOCR.TextToFontTPA(Text, Font: String; out W, H: Int32): TPointArray;
 var
   Data: TOCRData;
 begin
-  Data := GetFont(Font);
+  Data := FFonts.GetFontData(Font);
   Result := TextToFontTPA(Text, Data, W, H);
 end;
 
@@ -1276,7 +1180,7 @@ function TMOCR.TextToFontTPA(Text: String; Font: TFont; out W, H: Int32): TPoint
 var
   Data: TOCRData;
 begin
-  Data := GetFont(Font);
+  Data := FFonts.GetFontData(Font);
   Result := TextToFontTPA(Text, Data, W, H);
 end;
 
@@ -1338,14 +1242,6 @@ begin
       inc(c);
     end;
 end;
-
-initialization
-  FontBuffer := TMFonts.Create(nil);
-  FontBufferLock := TCriticalSection.Create();
-
-finalization
-  FontBuffer.Free();
-  FontBufferLock.Free();
 
 end.
 

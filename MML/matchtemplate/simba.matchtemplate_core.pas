@@ -1,4 +1,4 @@
-unit mtcore;
+unit simba.matchtemplate_core;
 {==============================================================================]
   Copyright © 2018, Jarl Krister Holta
   
@@ -19,7 +19,7 @@ unit mtcore;
 interface
 
 uses
-  SysUtils;
+  sysutils;
 
 type
   PParamArray = ^TParamArray;

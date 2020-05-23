@@ -1,4 +1,4 @@
-unit FFTPACK4_core;
+unit simba.fftpack4_core;
 {==============================================================================]
   FFTPACK4_core.pas: A set of FFT routines in FPC
   Algorithmically based on Fortran-77 FFTPACK by Paul N. Swarztrauber (V4, 1985)
@@ -8,11 +8,11 @@ unit FFTPACK4_core;
   
   Brought to Free Pascal by Jarl `slacky` Holta
 [==============================================================================}
-{$I header.inc}
+{$I ../header.inc}
 interface
 
 uses
-  SysUtils, mtCore;
+  sysutils;
 
 type
   PSingle = ^Single;

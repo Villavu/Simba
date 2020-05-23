@@ -21,15 +21,15 @@
     Fonts class for the Mufasa Macro Library
 }
 
-unit fontloader;
+unit simba.fontloader;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils,Graphics,bitmaps,
-  ocrutil,lclintf; // contains the actual `loading'
+  Classes, SysUtils,Graphics, simba.bitmap,
+  simba.ocrutil,lclintf; // contains the actual `loading'
 
 {
   We will not give any access to actual indices.
@@ -40,43 +40,48 @@ type
   public
     Name: String;
     Data: TOcrData;
+
+    function Copy: TMFont;
+
     constructor Create;
     destructor Destroy; override;
-    function Copy: TMFont;
   end;
-  { TMFonts }
+
+
 
   TMFonts = class(TObject)
   private
-    Fonts: TList;
+    FFonts: TList;
     FPath: String;
-    Client : TObject;
+    FClient : TObject;
 
-    function GetFontIndex(const Name: String): Integer;
-    function GetFontByIndex(Index : integer): TMfont;
     procedure SetPath(const aPath: String);
     function GetPath: String;
   public
-    constructor Create(Owner : TObject);
-    destructor Destroy; override;
-
     procedure Add(Font: TMFont);
-    function GetFont(const Name: String): TOcrData;
+
+    function GetFont(const Name: String): TMFont; overload;
+    function GetFont(const Font: TFont): TMFont; overload;
+    function GetFontData(const Name: String): TOcrData; overload;
+    function GetFontData(const Font: TFont): TOcrData; overload;
+
     function FreeFont(const Name: String): Boolean;
     function LoadFont(const Name: String; Shadow: Boolean): boolean;
     function LoadSystemFont(const SysFont: TFont; const FontName: String): Boolean;
     function IsFontLoaded(const Name: String): boolean;
     function Copy(Owner : TObject): TMFonts; overload;
     function Copy(const Name: String): TMFont; overload;
-    function Count : integer;
-    property Path : string read GetPath write SetPath;
-    property Font[Index : integer]: TMfont read GetFontByIndex; default;
+    function Count: integer;
+    property Path: string read GetPath write SetPath;
+
+    constructor Create(Owner: TObject);
+    destructor Destroy; override;
   end;
 
 implementation
 
 uses
-  MufasaTypes, mufasabase,  Forms;
+  simba.mufasatypes, forms;
 
 constructor TMFont.Create;
 begin
@@ -134,34 +139,40 @@ begin
   Result.Data.max_width:= Self.Data.max_width;
 end;
 
-function TMFonts.GetFontByIndex(Index : integer): TMfont;
+function TMFonts.GetFont(const Font: TFont): TMFont;
+var
+  Name: String;
 begin
-  // TODO: Check bounds?
-  result := TMfont(Fonts.Items[index]);
+  Name := Format('%s:%d:%d', [Font.Name, Font.Size, Int32(Font.Style)]);
+
+  if not IsFontLoaded(Name) then
+    LoadSystemFont(Font, Name);
+
+  Result := GetFont(Name);
 end;
 
 constructor TMFonts.Create(Owner : TObject);
 
 begin
   inherited Create;
-  Fonts := TList.Create;
-  Client := Owner;
+  FFonts := TList.Create;
+  FClient := Owner;
 end;
 
 destructor TMFonts.Destroy;
 var
   i:integer;
 begin
-  for i := 0 to Fonts.Count - 1 do
-    TMFont(Fonts.Items[i]).Free;
-  Fonts.Free;
+  for i := 0 to FFonts.Count - 1 do
+    TMFont(FFonts.Items[i]).Free();
+  FFonts.Free();
 
   inherited;
 end;
 
 procedure TMFonts.Add(Font: TMFont);
 begin
-  Fonts.Add(Font);
+  FFonts.Add(Font);
 end;
 
 procedure TMFonts.SetPath(const aPath: String);
@@ -174,65 +185,74 @@ begin
   Exit(FPath);
 end;
 
-function TMFonts.GetFontIndex(const Name: String): Integer;
+function TMFonts.GetFont(const Name: String): TMFont;
 var
-  i: integer;
+  i: Int32;
 begin
-  for i := 0 to Fonts.Count - 1 do
-  begin
-    if lowercase(Name) = lowercase(TMFont(Fonts.Items[i]).Name) then
-      Exit(i);
-  end;
-  raise Exception.Create('Font [' + Name + '] not found.');
-  Exit(-1);
+  Result := nil;
+
+  for i := 0 to FFonts.Count - 1 do
+    if SameText(TMFont(FFonts[i]).Name, Name) then
+    begin
+      Result := TMFont(FFonts[i]);
+      Exit;
+    end;
+
+  if LoadFont(Name, False) then
+    Result := TMFont(FFonts[i]);
 end;
 
-function TMFonts.GetFont(const Name: String): TOcrData;
-var
-  i: integer;
+function TMFonts.GetFontData(const Name: String): TOcrData;
 begin
-  i := GetFontIndex(Name);
-  Exit(TMFont(Fonts.Items[i]).Data);
+  Result := Default(TocrData);
+
+  if (GetFont(Name) <> nil) then
+    Result := GetFont(Name).Data;
+end;
+
+function TMFonts.GetFontData(const Font: TFont): TOcrData;
+begin
+  Result := Default(TocrData);
+
+  if (GetFont(Font) <> nil) then
+    Result := GetFont(Font).Data;
 end;
 
 function TMFonts.FreeFont(const Name: String): Boolean;
 var
   i: integer;
 begin
-  i := GetFontIndex(Name);
-  result := (i <> -1);
-  if result then
-  begin
-    TMFont(Fonts.Items[i]).Free;
-    Fonts.Delete(i);
-  end;
+  Result := False;
+
+  for i := 0 to FFonts.Count - 1 do
+    if SameText(TMFont(FFonts[i]).Name, Name) then
+    begin
+      TMFont(FFonts[i]).Free();
+      FFonts.Delete(i);
+
+      Result := True;
+      Break;
+    end;
 end;
 
 function TMFonts.LoadFont(const Name: String; Shadow: Boolean): boolean;
 var
-  f: TMFont;
+  Font: TMFont;
 begin
   Result := True;
 
-  if (not IsFontLoaded(Name)) then
-  begin
-    if (not DirectoryExists(FPath + Name)) then
-    begin
-      Result := False;
+  WriteLn('Loading font: ', Name);
 
-      raise Exception.Create('Font "' + Name + '" does not exist in path "' + FPath + '"');
-    end;
+  if (not DirectoryExists(FPath + Name)) then
+    raise Exception.Create('Font "' + Name + '" does not exist in path "' + FPath + '"');
 
-    mDebugLn('Loading font "' + Name + '"');
+  Font := TMFont.Create();
+  Font.Name := Name;
+  if Shadow then
+    Font.Name := Font.Name + '_s';
+  Font.Data := InitOCR(LoadGlyphMasks(IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(FPath) + Name), Shadow));
 
-    f := TMFont.Create();
-    f.Name := Name;
-    if Shadow then
-      f.Name := f.Name + '_s';
-    f.Data := InitOCR(LoadGlyphMasks(IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(FPath) + Name), Shadow));
-
-    Fonts.Add(f);
-  end;
+  FFonts.Add(Font);
 end;
 
 function TMFonts.LoadSystemFont(const SysFont: TFont; const FontName: String): Boolean;
@@ -286,7 +306,7 @@ begin
     F.Name := FontName;
     F.Data := InitOCR(Masks);
 
-    Fonts.Add(F);
+    FFonts.Add(F);
   finally
     BMP.Free();
     Mufasa.Free();
@@ -301,8 +321,8 @@ var
 begin
   result := false;
 
-  for i := 0 to (Fonts.Count - 1) do
-    if (lowercase(Name) = lowercase(TMFont(Fonts.Items[i]).Name)) then
+  for i := 0 to (FFonts.Count - 1) do
+    if (lowercase(Name) = lowercase(TMFont(FFonts.Items[i]).Name)) then
       exit(true);
 end;
 
@@ -313,8 +333,8 @@ var
 begin
   Result := TMFonts.Create(Owner);
   Result.Path := FPath;
-  for i := 0 to Self.Fonts.Count -1 do
-    Result.Fonts.Add(TMFont(Self.Fonts.Items[i]).Copy());
+  for i := 0 to Self.FFonts.Count -1 do
+    Result.Add(TMFont(Self.FFonts.Items[i]).Copy());
 end;
 
 function TMFonts.Copy(const Name: String): TMFont;
@@ -323,14 +343,14 @@ var
 begin
   Result := nil;
 
-  for i := 0 to Fonts.Count - 1 do
-    if SameText(Name, TMFont(Fonts.Items[i]).Name) then
-      Exit(TMFont(Fonts.Items[i]).Copy());
+  for i := 0 to FFonts.Count - 1 do
+    if SameText(Name, TMFont(FFonts.Items[i]).Name) then
+      Exit(TMFont(FFonts.Items[i]).Copy());
 end;
 
 function TMFonts.Count: integer;
 begin
-  result := Fonts.Count;
+  Result := FFonts.Count;
 end;
 
 end.

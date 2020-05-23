@@ -1,4 +1,4 @@
-unit mtMatrix;
+unit simba.matchtemplate_matrix;
 {==============================================================================]
   Copyright © 2018, Jarl Krister Holta
   
@@ -19,7 +19,8 @@ unit mtMatrix;
 interface
 
 uses
-  SysUtils, mtCore;
+  sysutils,
+  simba.matchtemplate_core;
 
 procedure Size(a: T2DIntArray; out W,H: Int32);
 procedure Size(a: T2DI64Array; out W,H: Int32);
@@ -54,8 +55,6 @@ procedure SplitRGB(Image: T2DIntArray; out R,G,B: T2DSingleArray);
 
 implementation
 
-uses
-  Math;
 
 {$I matrix/size.inc}
 {$I matrix/sums.inc}

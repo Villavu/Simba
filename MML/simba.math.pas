@@ -21,7 +21,7 @@
     Mufasa Math Unit for the Mufasa Macro Library
 }
 
-unit mmath;
+unit simba.math;
 // mufasa math
 
 {$mode objfpc}{$H+}
@@ -29,7 +29,7 @@ unit mmath;
 interface
 
 uses
-  Classes, SysUtils,MufasaTypes;
+  Classes, SysUtils, simba.MufasaTypes;
 
 function RotatePoints(const P: TPointArray;const A, cx, cy: Extended): TPointArray;
 function RotatePoint(const p: TPoint;const angle, mx, my: Extended): TPoint;

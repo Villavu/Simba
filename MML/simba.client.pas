@@ -22,15 +22,15 @@
 }
 
 
-unit Client;
+unit simba.client;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, MufasaTypes,MufasaBase,
-  simba.iomanager, Files, Finder, Bitmaps, dtm, ocr, internets;
+  Classes, SysUtils, simba.mufasatypes,
+  simba.iomanager, simba.files, simba.finder, simba.bitmap, simba.dtm, simba.ocr, simba.internet;
 
 (*
 
@@ -72,9 +72,10 @@ type
     MOCR: TMOCR;
     MInternets: TMInternet;
     MSockets: TMSocks;
-    WriteLnProc: TWritelnProc;
-    procedure WriteLn(s : string);
-    constructor Create(const plugin_dir: string = ''; const UseIOManager : TIOManager = nil);
+    WriteLnProc: TWriteLnProc;
+
+    procedure WriteLn(S: String);
+    constructor Create(const plugin_dir: string = ''; const UseIOManager: TIOManager = nil);
     destructor Destroy; override;
   end;
 
@@ -104,12 +105,12 @@ TClient.WriteLn
 
 *)
 
-procedure TClient.WriteLn(s: string);
+procedure TClient.WriteLn(S: String);
 begin
-  if (self <> nil) and Assigned(WritelnProc) then
-    WritelnProc(s)
+  if (WriteLnProc <> nil) then
+    WriteLnProc(s)
   else
-    mDebugLn(s);
+    System.WriteLn(s);
 end;
 
 (*
@@ -155,6 +156,7 @@ TClient.Destroy
 
 destructor TClient.Destroy;
 begin
+
   MOCR.Free;
   MDTMs.Free;
   MBitmaps.Free;

@@ -6,7 +6,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.target, bitmaps, mufasatypes;
+  simba.target, simba.bitmap, simba.mufasatypes;
 
 type
   PBitmapTarget = ^TBitmapTarget;

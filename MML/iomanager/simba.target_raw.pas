@@ -6,7 +6,7 @@ interface
 
 uses
   classes, sysutils,
-  mufasatypes, simba.target;
+  simba.mufasatypes, simba.target;
 
 type
   PRawTarget = ^TRawTarget;

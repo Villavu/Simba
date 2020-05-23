@@ -20,14 +20,14 @@
 
   Matrix utilities to complement methods like matchtemplate.
 }
-unit matrix;
+unit simba.matrix;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, mufasatypes;
+  Classes, SysUtils, simba.mufasatypes;
 
 procedure MatrixSetSize(var a: TSingleMatrix; Width, Height: Int32);
 procedure MatrixSize(a: TSingleMatrix; out Width, Height: Int32);
@@ -45,9 +45,6 @@ function MatrixExtract(a: TSingleMatrix; Indices: TPointArray): TSingleArray;
 procedure MatrixFill(a: TSingleMatrix; Indices: TPointArray; Values: TSingleArray);
 
 implementation
-
-uses
-  math;
 
 procedure MatrixSetSize(var a: TSingleMatrix; Width, Height: Int32);
 begin

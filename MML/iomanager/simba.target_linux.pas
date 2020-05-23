@@ -28,7 +28,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.xlib, simba.xlib_helpers, simba.xlib_display, simba.target, simba.oswindow, mufasatypes;
+  simba.xlib, simba.xlib_helpers, simba.xlib_display, simba.target, simba.oswindow, simba.mufasatypes;
 
 type
   TWindowTarget = class(TTarget)
@@ -82,6 +82,8 @@ end;
 procedure TWindowTarget.SetHandle(Value: PtrUInt);
 begin
   FWindow := Value;
+  if (FWindow = 0) then
+    FWindow := GetDesktopWindow();
 end;
 
 function TWindowTarget.GetAutoFocus: Boolean;
@@ -334,7 +336,7 @@ begin
 
   Event := Default(TXButtonEvent);
 
-  XQueryPointer(GetDisplay(), Event.Window,
+  XQueryPointer(GetDisplay(), FWindow,
                 @Event.Root, @Event.Window,
                 @Event.X_Root, @Event.Y_Root,
                 @Event.X, @Event.Y,
