@@ -1,0 +1,565 @@
+object SimbaDTMEditorForm: TSimbaDTMEditorForm
+  Left = 2622
+  Height = 800
+  Top = 531
+  Width = 1000
+  Caption = 'DTM Editor'
+  ClientHeight = 780
+  ClientWidth = 1000
+  Font.Height = -12
+  KeyPreview = True
+  Menu = MainMenu
+  OnClose = FormClose
+  OnKeyDown = FormKeyDown
+  Position = poScreenCenter
+  ShowHint = True
+  ShowInTaskBar = stAlways
+  LCLVersion = '2.0.6.0'
+  object PanelMain: TPanel
+    Left = 0
+    Height = 780
+    Top = 0
+    Width = 718
+    Align = alClient
+    BevelOuter = bvNone
+    TabOrder = 0
+  end
+  object PanelRight: TPanel
+    Left = 718
+    Height = 780
+    Top = 0
+    Width = 282
+    Align = alRight
+    Anchors = [akTop, akRight]
+    AutoSize = True
+    BevelOuter = bvNone
+    ClientHeight = 780
+    ClientWidth = 282
+    TabOrder = 1
+    object PanelZoom: TPanel
+      AnchorSideLeft.Control = PanelRight
+      AnchorSideTop.Control = PanelRight
+      Left = 5
+      Height = 102
+      Top = 5
+      Width = 102
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 5
+      BevelOuter = bvNone
+      Caption = 'PanelZoom'
+      ClientHeight = 102
+      ClientWidth = 102
+      Color = clBlack
+      ParentColor = False
+      TabOrder = 0
+      object ImageZoom: TImage
+        Left = 1
+        Height = 100
+        Top = 1
+        Width = 100
+        Align = alClient
+        BorderSpacing.Around = 1
+        OnPaint = MouseZoomPaint
+        Stretch = True
+      end
+    end
+    object Divider3: TDividerBevel
+      AnchorSideLeft.Control = PanelRight
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = PanelRight
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = ButtonUpdateImage
+      Left = 5
+      Height = 15
+      Top = 735
+      Width = 272
+      Anchors = [akLeft, akRight, akBottom]
+      BevelStyle = bsRaised
+      BorderSpacing.Left = 5
+      BorderSpacing.Right = 5
+      CaptionSpacing = 15
+      LeftIndent = 80
+      Style = gsHorLines
+    end
+    object ButtonClearImage: TButton
+      AnchorSideLeft.Control = PanelAlignment
+      AnchorSideTop.Control = ButtonUpdateImage
+      AnchorSideRight.Control = PanelRight
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = PanelRight
+      AnchorSideBottom.Side = asrBottom
+      Left = 146
+      Height = 25
+      Hint = 'Clear all drawing from the image'
+      Top = 750
+      Width = 131
+      Anchors = [akTop, akLeft, akRight]
+      AutoSize = True
+      BorderSpacing.Left = 5
+      BorderSpacing.Right = 5
+      BorderSpacing.Bottom = 5
+      Caption = 'Clear Image'
+      OnClick = ButtonClearImageClick
+      TabOrder = 1
+    end
+    object ButtonUpdateImage: TButton
+      AnchorSideLeft.Control = PanelRight
+      AnchorSideRight.Control = PanelAlignment
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = PanelRight
+      AnchorSideBottom.Side = asrBottom
+      Left = 5
+      Height = 25
+      Hint = 'Updates the image from the client'
+      Top = 750
+      Width = 132
+      Anchors = [akLeft, akRight, akBottom]
+      AutoSize = True
+      BorderSpacing.Left = 5
+      BorderSpacing.Right = 5
+      BorderSpacing.Bottom = 5
+      Caption = 'Update Image'
+      OnClick = ButtonUpdateImageClick
+      TabOrder = 2
+    end
+    object ButtonPrintDTM: TButton
+      AnchorSideLeft.Control = PanelAlignment
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = FindDTMButton
+      AnchorSideRight.Control = PanelRight
+      AnchorSideRight.Side = asrBottom
+      Left = 147
+      Height = 25
+      Top = 710
+      Width = 130
+      Anchors = [akTop, akLeft, akRight]
+      AutoSize = True
+      BorderSpacing.Left = 5
+      BorderSpacing.Right = 5
+      Caption = 'Print DTM'
+      OnClick = ButtonPrintDTMClick
+      TabOrder = 3
+    end
+    object FindDTMButton: TButton
+      AnchorSideLeft.Control = PanelRight
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = PanelAlignment
+      AnchorSideBottom.Control = Divider3
+      Left = 5
+      Height = 25
+      Top = 710
+      Width = 131
+      Anchors = [akLeft, akRight, akBottom]
+      AutoSize = True
+      BorderSpacing.Left = 5
+      BorderSpacing.Right = 5
+      Caption = 'Find DTM'
+      OnClick = FindDTMClick
+      TabOrder = 4
+    end
+    object PanelColorZoom: TPanel
+      AnchorSideLeft.Control = PanelZoom
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = PanelRight
+      AnchorSideBottom.Control = ListBox
+      Left = 112
+      Height = 102
+      Top = 5
+      Width = 170
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 5
+      BevelOuter = bvNone
+      ClientHeight = 102
+      ClientWidth = 170
+      Constraints.MinHeight = 102
+      TabOrder = 5
+      object LabelColorZoom: TLabel
+        Left = 5
+        Height = 102
+        Top = 0
+        Width = 1
+        Align = alLeft
+        BorderSpacing.Left = 5
+        BorderSpacing.Top = -1
+        BorderSpacing.Right = 5
+        ParentColor = False
+        WordWrap = True
+      end
+    end
+    object ListBox: TListBox
+      AnchorSideLeft.Control = PanelRight
+      AnchorSideTop.Control = PanelColorZoom
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = PanelRight
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = ButtonDeletePoints
+      Left = 5
+      Height = 354
+      Top = 112
+      Width = 272
+      Anchors = [akTop, akLeft, akRight, akBottom]
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 5
+      BorderSpacing.Right = 5
+      BorderSpacing.Bottom = 5
+      ItemHeight = 0
+      OnSelectionChange = ListBoxSelectionChange
+      Options = []
+      TabOrder = 6
+    end
+    object PanelSelectedPoint: TPanel
+      AnchorSideLeft.Control = PanelRight
+      AnchorSideRight.Control = PanelRight
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = Divider1
+      Left = 5
+      Height = 142
+      Top = 553
+      Width = 277
+      Anchors = [akLeft, akRight, akBottom]
+      AutoSize = True
+      BorderSpacing.Left = 5
+      BevelOuter = bvNone
+      ClientHeight = 142
+      ClientWidth = 277
+      Enabled = False
+      TabOrder = 7
+      object EditPointX: TEdit
+        AnchorSideLeft.Control = LabelTolerance
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = PanelSelectedPoint
+        AnchorSideRight.Control = EditPointY
+        AnchorSideRight.Side = asrBottom
+        Left = 55
+        Height = 23
+        Top = 2
+        Width = 151
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Left = 5
+        BorderSpacing.Top = 2
+        OnChange = PointEditChanged
+        TabOrder = 0
+      end
+      object LabelX: TLabel
+        AnchorSideLeft.Control = PanelSelectedPoint
+        AnchorSideTop.Control = EditPointX
+        AnchorSideBottom.Control = EditPointX
+        AnchorSideBottom.Side = asrBottom
+        Left = 0
+        Height = 23
+        Top = 2
+        Width = 7
+        Anchors = [akTop, akLeft, akBottom]
+        Caption = 'X'
+        Layout = tlCenter
+        ParentColor = False
+      end
+      object EditPointY: TEdit
+        AnchorSideLeft.Control = LabelTolerance
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = EditPointX
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = EditPointColor
+        AnchorSideRight.Side = asrBottom
+        Left = 55
+        Height = 23
+        Top = 30
+        Width = 151
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Left = 5
+        BorderSpacing.Top = 5
+        OnChange = PointEditChanged
+        TabOrder = 1
+      end
+      object LabelY: TLabel
+        AnchorSideLeft.Control = PanelSelectedPoint
+        AnchorSideTop.Control = EditPointY
+        AnchorSideBottom.Control = EditPointY
+        AnchorSideBottom.Side = asrBottom
+        Left = 0
+        Height = 23
+        Top = 30
+        Width = 7
+        Anchors = [akTop, akLeft, akBottom]
+        Caption = 'Y'
+        Layout = tlCenter
+        ParentColor = False
+      end
+      object EditPointColor: TEdit
+        AnchorSideLeft.Control = LabelTolerance
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = EditPointY
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = EditPointTolerance
+        AnchorSideRight.Side = asrBottom
+        Left = 55
+        Height = 23
+        Top = 58
+        Width = 151
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Left = 5
+        BorderSpacing.Top = 5
+        OnChange = PointEditChanged
+        TabOrder = 2
+      end
+      object LabelColor: TLabel
+        AnchorSideLeft.Control = PanelSelectedPoint
+        AnchorSideTop.Control = EditPointColor
+        AnchorSideBottom.Control = EditPointColor
+        AnchorSideBottom.Side = asrBottom
+        Left = 0
+        Height = 23
+        Top = 58
+        Width = 29
+        Anchors = [akTop, akLeft, akBottom]
+        Caption = 'Color'
+        Layout = tlCenter
+        ParentColor = False
+      end
+      object LabelTolerance: TLabel
+        AnchorSideLeft.Control = PanelSelectedPoint
+        AnchorSideTop.Control = EditPointTolerance
+        AnchorSideBottom.Control = EditPointTolerance
+        AnchorSideBottom.Side = asrBottom
+        Left = 0
+        Height = 23
+        Top = 86
+        Width = 50
+        Anchors = [akTop, akLeft, akBottom]
+        Caption = 'Tolerance'
+        Layout = tlCenter
+        ParentColor = False
+      end
+      object EditPointTolerance: TEdit
+        AnchorSideLeft.Control = LabelTolerance
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = EditPointColor
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = EditPointSize
+        AnchorSideRight.Side = asrBottom
+        Left = 55
+        Height = 23
+        Top = 86
+        Width = 151
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Left = 5
+        BorderSpacing.Top = 5
+        OnChange = PointEditChanged
+        TabOrder = 3
+      end
+      object LabelSize: TLabel
+        AnchorSideLeft.Control = PanelSelectedPoint
+        AnchorSideTop.Control = EditPointSize
+        AnchorSideBottom.Control = EditPointSize
+        AnchorSideBottom.Side = asrBottom
+        Left = 0
+        Height = 23
+        Top = 114
+        Width = 20
+        Anchors = [akTop, akLeft, akBottom]
+        Caption = 'Size'
+        Layout = tlCenter
+        ParentColor = False
+      end
+      object EditPointSize: TEdit
+        AnchorSideLeft.Control = LabelTolerance
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = EditPointTolerance
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = ButtonDebugColor
+        AnchorSideBottom.Control = PanelSelectedPoint
+        AnchorSideBottom.Side = asrBottom
+        Left = 55
+        Height = 23
+        Top = 114
+        Width = 151
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Left = 5
+        BorderSpacing.Top = 5
+        BorderSpacing.Right = 5
+        BorderSpacing.Bottom = 5
+        OnChange = PointEditChanged
+        TabOrder = 4
+      end
+      object ButtonDebugColor: TButton
+        AnchorSideLeft.Control = EditPointColor
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = EditPointColor
+        AnchorSideRight.Control = PanelSelectedPoint
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = EditPointColor
+        AnchorSideBottom.Side = asrBottom
+        Left = 211
+        Height = 23
+        Top = 58
+        Width = 61
+        Anchors = [akTop, akRight, akBottom]
+        AutoSize = True
+        BorderSpacing.Right = 5
+        Caption = 'Debug'
+        OnClick = ButtonDebugColorClick
+        TabOrder = 5
+      end
+    end
+    object Divider1: TDividerBevel
+      AnchorSideLeft.Control = PanelRight
+      AnchorSideRight.Control = PanelRight
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = FindDTMButton
+      Left = 5
+      Height = 15
+      Top = 695
+      Width = 272
+      Anchors = [akLeft, akRight, akBottom]
+      BorderSpacing.Left = 5
+      BorderSpacing.Right = 5
+      Style = gsHorLines
+    end
+    object Divider2: TDividerBevel
+      AnchorSideLeft.Control = PanelRight
+      AnchorSideRight.Control = PanelRight
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = PanelSelectedPoint
+      Left = 5
+      Height = 15
+      Top = 533
+      Width = 272
+      Caption = 'Selected Point'
+      Anchors = [akLeft, akRight, akBottom]
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 7
+      BorderSpacing.Right = 5
+      BorderSpacing.Bottom = 5
+      Style = gsHorLines
+      OnResize = CenterDivider
+    end
+    object ButtonDeletePoints: TButton
+      AnchorSideLeft.Control = PanelRight
+      AnchorSideRight.Control = PanelRight
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = ButtonDeletePoint
+      Left = 5
+      Height = 25
+      Top = 471
+      Width = 272
+      Anchors = [akLeft, akRight, akBottom]
+      AutoSize = True
+      BorderSpacing.Left = 5
+      BorderSpacing.Right = 5
+      Caption = 'Delete Points'
+      OnClick = ButtonDeletePointsClick
+      TabOrder = 8
+    end
+    object PanelAlignment: TPanel
+      AnchorSideLeft.Control = PanelRight
+      AnchorSideLeft.Side = asrCenter
+      AnchorSideTop.Control = FindDTMButton
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = FindDTMButton
+      AnchorSideBottom.Side = asrBottom
+      Left = 141
+      Height = 25
+      Top = 710
+      Width = 1
+      Anchors = [akTop, akLeft, akBottom]
+      BevelOuter = bvNone
+      Constraints.MaxWidth = 1
+      TabOrder = 9
+    end
+    object ButtonDeletePoint: TButton
+      AnchorSideLeft.Control = PanelRight
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = PanelRight
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = Divider2
+      Left = 5
+      Height = 25
+      Top = 501
+      Width = 272
+      Anchors = [akLeft, akRight, akBottom]
+      AutoSize = True
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 5
+      BorderSpacing.Right = 5
+      Caption = 'Delete Selected Point'
+      OnClick = ButtonDeletePointClick
+      TabOrder = 10
+    end
+  end
+  object MainMenu: TMainMenu
+    left = 40
+    top = 24
+    object MenuDTM: TMenuItem
+      Caption = 'DTM'
+      object MenuItemLoadDTM: TMenuItem
+        Caption = 'Load DTM'
+        OnClick = LoadDTMClick
+      end
+      object MenuItemOffsetDTM: TMenuItem
+        Caption = 'Offset DTM'
+        OnClick = MenuItemOffsetDTMClick
+      end
+      object MenuItemFindDTM: TMenuItem
+        Caption = 'Find DTM'
+        OnClick = FindDTMClick
+      end
+      object MenuItemPrintDTM: TMenuItem
+        Caption = 'Print DTM'
+        OnClick = ButtonPrintDTMClick
+      end
+    end
+    object MenuItemImage: TMenuItem
+      Caption = 'Image'
+      object MenuItemLoadImage: TMenuItem
+        Caption = 'Load Image'
+        OnClick = MenuItemLoadImageClick
+      end
+      object MenuItemUpdateImage: TMenuItem
+        Caption = 'Update Image'
+        ShortCut = 116
+        OnClick = ButtonUpdateImageClick
+      end
+      object MenuItemClearImage: TMenuItem
+        Caption = 'Clear Image'
+        OnClick = ButtonClearImageClick
+      end
+      object MenuItemSeperator: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemDrawColor: TMenuItem
+        Caption = 'Draw Color'
+        object MenuItemColorRed: TMenuItem
+          AutoCheck = True
+          Caption = 'Red'
+          Checked = True
+          ShowAlwaysCheckable = True
+          OnClick = ChangeDrawColor
+        end
+        object MenuItemColorGreen: TMenuItem
+          AutoCheck = True
+          Caption = 'Green'
+          ShowAlwaysCheckable = True
+          OnClick = ChangeDrawColor
+        end
+        object MenuItemColorBlue: TMenuItem
+          AutoCheck = True
+          Caption = 'Blue'
+          ShowAlwaysCheckable = True
+          OnClick = ChangeDrawColor
+        end
+        object MenuItemColorYellow: TMenuItem
+          AutoCheck = True
+          Caption = 'Yellow'
+          ShowAlwaysCheckable = True
+          OnClick = ChangeDrawColor
+        end
+      end
+    end
+  end
+  object PointFlashTimer: TTimer
+    Interval = 300
+    OnTimer = PointFlash
+    left = 120
+    top = 24
+  end
+end
