@@ -1,318 +1,175 @@
-unit ACA;
+unit simba.aca;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, FileUtil, DividerBevel, LResources, Forms, Controls,
-  Graphics, Dialogs, ExtCtrls, ComCtrls, StdCtrls, Menus, ColorBox,
-  Types, client, mufasatypes, GraphType, Buttons, clipbrd, LCLType,
-  simba.iomanager;
+  classes, sysutils, fileutil, dividerbevel, lresources, forms, controls,
+  graphics, dialogs, extctrls, comctrls, stdctrls, menus, colorbox, lcltype,
+  simba.client, simba.imagebox_overlay, simba.mufasatypes;
 
 type
-  TACAResult = procedure(CTS, Color, Tolerance: Int32; Hue, Sat: Extended) of object;
-
-  TACAForm = class(TForm)
-    btnFindBestColor: TButton;
-    btnCTS2: TButton;
-    btnUpdateImage: TButton;
-    btnCTS1: TButton;
-    btnClearImage: TButton;
-    btnCTS0: TButton;
-    listColors: TColorListBox;
+  TSimbaACAForm = class(TForm)
+    ButtonDebugColor: TButton;
+    ButtonUpdateImage: TButton;
+    ButtonClearImage: TButton;
+    ButtonDeleteColors: TButton;
+    ButtonDeleteSelectedColor: TButton;
+    ColorListBox: TColorListBox;
     Divider1: TDividerBevel;
     Divider2: TDividerBevel;
-    editColor: TEdit;
-    editTolerance: TEdit;
-    editHue: TEdit;
-    editSat: TEdit;
-    imgClient: TImage;
-    imgMouseZoom: TImage;
-    lblColor: TLabel;
-    lblTolerance: TLabel;
-    lblHue: TLabel;
-    lblSat: TLabel;
-    lblMouseZoom: TLabel;
+    EditColor: TEdit;
+    EditTolerance: TEdit;
+    EditHue: TEdit;
+    EditSat: TEdit;
+    ImageZoom: TImage;
+    LabelColor: TLabel;
+    LabelTolerance: TLabel;
+    LabelHue: TLabel;
+    LabelSat: TLabel;
+    ColorLabel: TLabel;
     MainMenu: TMainMenu;
-    menuImage: TMenuItem;
-    menuColors: TMenuItem;
-    menuColorAdd: TMenuItem;
-    menuColorDelete: TMenuItem;
-    menuColorClear: TMenuItem;
-    menuFile: TMenuItem;
-    menuNew: TMenuItem;
-    menuSeperator2: TMenuItem;
-    menuCopyBestColor: TMenuItem;
-    menuOpen: TMenuItem;
-    menuSave: TMenuItem;
-    OpenDialog: TOpenDialog;
-    popupColorClear: TMenuItem;
-    popupColorDelete: TMenuItem;
-    popupColorAdd: TMenuItem;
-    menuUpdate: TMenuItem;
-    menuClear: TMenuItem;
-    menuSeperator1: TMenuItem;
-    menuDrawColor: TMenuItem;
-    menuColorRed: TMenuItem;
-    menuColorGreen: TMenuItem;
-    menuColorBlue: TMenuItem;
-    menuColorYellow: TMenuItem;
-    pnlMain: TPanel;
-    pnlRight: TPanel;
-    pnlZoom: TPanel;
-    PopupColors: TPopupMenu;
-    SaveDialog: TSaveDialog;
-    ScrollBox: TScrollBox;
-    StatusBar: TStatusBar;
+    MenuImage: TMenuItem;
+    MenuColors: TMenuItem;
+    MenuItemUpdateImage: TMenuItem;
+    MenuItemLoadColors: TMenuItem;
+    MenuItemSaveColors: TMenuItem;
+    MenuItemCopyBestColor: TMenuItem;
+    ColorLabelPanel: TPanel;
+    PanelAlignment: TPanel;
+    MenuItemLoadImage: TMenuItem;
+    MenuItemClearImage: TMenuItem;
+    MenuItemSeperator: TMenuItem;
+    MenuItemDrawColor: TMenuItem;
+    MenuItemColorRed: TMenuItem;
+    MenuItemColorGreen: TMenuItem;
+    MenuItemColorBlue: TMenuItem;
+    MenuItemColorYellow: TMenuItem;
+    PanelMain: TPanel;
+    PanelRight: TPanel;
+    PanelZoom: TPanel;
+    ButtonCTS0: TRadioButton;
+    ButtonCTS1: TRadioButton;
+    ButtonCTS2: TRadioButton;
 
-    procedure AddColor(Sender: TObject);
-    procedure ClearColors(Sender: TObject);
-    procedure CalculateBestColor(Sender: TObject);
-    procedure DeleteColor(Sender: TObject);
-    procedure FindBestColorClick(Sender: TObject);
+    procedure ButtonClearImageClick(Sender: TObject);
+    procedure ButtonDeleteColorsClick(Sender: TObject);
+    procedure ButtonDeleteSelectedColorClick(Sender: TObject);
+    procedure ButtonLoadImageClick(Sender: TObject);
+    procedure ButtonLoadColorsClick(Sender: TObject);
+    procedure CenterDivider(Sender: TObject);
+    procedure ButtonDebugColorClick(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure LoadColors(Sender: TObject);
-    procedure menuColorsClick(Sender: TObject);
-    procedure menuCopyBestColorClick(Sender: TObject);
+    procedure ButtonSaveColorsClick(Sender: TObject);
     procedure MouseZoomPaint(Sender: TObject);
-    procedure PopupColorsPopup(Sender: TObject);
-    procedure SaveColors(Sender: TObject);
-    procedure SelectColor(Sender: TObject; User: Boolean);
+    procedure ButtonCTSClick(Sender: TObject);
+    procedure CopyBestColorClick(Sender: TObject);
+    procedure ColorSelectionChanged(Sender: TObject; User: Boolean);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure ChangeDrawColor(Sender: TObject);
-    procedure ClientImageClear(Sender: TObject);
-    procedure ClientImageUpdate(Sender: TObject);
-    procedure ClientImageMouseLeave(Sender: TObject);
+    procedure ButtonUpdateImageClick(Sender: TObject);
     procedure ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-    procedure ClientImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure ClientImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure ClientImageScrollDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure ClientImageScrollUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure ClientImageCenter(Sender: TObject);
   protected
-    FScroll: record
-      X, Y: Int32;
-      Active: Boolean;
-    end;
-
-    FZoom: record
-      Previous: Double;
-      Current: Double;
-    end;
-
     FClient: TClient;
-    FManager: TIOManager;
-    FDrawColor: TColor;
-    FCTS: PtrInt;
+    FImageBox: TSimbaImageBox_Overlay;
+
+    procedure FontChanged(Sender: TObject); override;
+
+    procedure CalculateBestColor;
 
     function GetColors: TIntegerArray;
-
-    procedure Status(S: String);
-    procedure Coords(X, Y: Int32);
-    procedure Dimensions(W, H: Int32);
-
-    procedure DrawTPA(TPA: TPointArray);
-    procedure FindColor(Col, Tolerance: Int32; Hue, Sat: Extended);
-    procedure ApplyZoom(Reset: Boolean = False);
   public
-    OnGetResult: TACAResult;
+    OnCalculateBestColor: procedure(CTS: Int32; Color, Tolerance: Int32; Hue, Sat: Extended) of object;
 
-    constructor Create(AManager: TIOManager); overload; reintroduce;
+    constructor Create(TargetWindow: THandle); reintroduce;
     destructor Destroy; override;
   end;
-
-var
-  ACAForm: TACAForm;
 
 implementation
 
 uses
-  aca_math, mmisc, colour_conv, bitmaps;
+  math, clipbrd,
+  simba.aca_math, simba.colormath;
 
-type
-  TBitmap_Helper = class helper for TBitmap
-    procedure FromBitmap(Bitmap: TMufasaBitmap);
-    procedure FromWindow(Manager: TIOManager; Buffer: TMufasaBitmap);
-  end;
-
-procedure TBitmap_Helper.FromBitmap(Bitmap: TMufasaBitmap);
-var
-  RawImage: TRawImage;
-begin
-  RawImage.Init();
-  RawImage.Description.Init_BPP32_B8G8R8_BIO_TTB(Bitmap.Width, Bitmap.Height);
-  RawImage.DataSize := RawImage.Description.Width * RawImage.Description.Height * (RawImage.Description.BitsPerPixel shr 3);
-  RawImage.Data := PByte(Bitmap.FData);
-
-  LoadFromRawImage(RawImage, False);
-end;
-
-procedure TBitmap_Helper.FromWindow(Manager: TIOManager; Buffer: TMufasaBitmap);
-var
-  W, H: Int32;
-begin
-  if Manager.TargetValid() then
-  begin
-    Manager.GetDimensions(W, H);
-
-    Buffer.CopyClientToBitmap(Manager, True, 0, 0, W-1, H-1);
-  end;
-
-  FromBitmap(Buffer);
-end;
-
-procedure TACAForm.ApplyZoom(Reset: Boolean);
-var
-  X, Y, W, H: Int32;
-begin
-  if Reset then
-  begin
-    FZoom.Previous := 1;
-    FZoom.Current := 1;
-  end;
-
-  X := imgClient.ScreenToClient(Mouse.CursorPos).X;
-  Y := imgClient.ScreenToClient(Mouse.CursorPos).Y;
-  W := imgClient.Width;
-  H := imgClient.Height;
-
-  imgClient.Width := Trunc(FClient.MBitmaps[0].Width * FZoom.Current);
-  imgClient.Height := Trunc(FClient.MBitmaps[0].Height * FZoom.Current);
-
-  if (FZoom.Previous <> FZoom.Current) then
-  begin
-    ScrollBox.HorzScrollBar.Position := Round(X * imgClient.Width / W) - Round(ScrollBox.ClientWidth / 2);
-    ScrollBox.VertScrollBar.Position := Round(Y * imgClient.Height / H) - Round(ScrollBox.ClientHeight / 2);
-  end;
-
-  ClientImageCenter(nil);
-end;
-
-procedure TACAForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaACAForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
   R, G, B: Byte;
   H, S, L: Extended;
   localX, localY, globalX, globalY: Int32;
 begin
-  if FScroll.Active then
+  if FImageBox.Image.PointInBitmap(X, Y) then
   begin
-    if (Abs(FScroll.Y - Y) > 0) then
-      ScrollBox.VertScrollBar.Position := ScrollBox.VertScrollBar.Position + (FScroll.Y - Y);
-    if (Abs(FScroll.X - X) > 0) then
-      ScrollBox.HorzScrollBar.Position := ScrollBox.HorzScrollBar.Position + (FScroll.X - X);
-  end else
-  begin
-    X := Trunc(X / FZoom.Current);
-    Y := Trunc(Y / FZoom.Current);
+    ImageZoom.Picture.Bitmap.BeginUpdate(True);
+    ImageZoom.Tag := PtrInt(True);
 
-    if FClient.MBitmaps[0].PointInBitmap(X, Y) then
-    begin
-      imgMouseZoom.Picture.Bitmap.BeginUpdate(True);
-      imgMouseZoom.Tag := PtrInt(True);
+    try
+      ImageZoom.Picture.Bitmap.Canvas.Clear();
 
-      try
-        imgMouseZoom.Picture.Bitmap.Canvas.Clear();
+      for localX := 0 to 5 do
+        for localY := 0 to 5 do
+        begin
+          globalX := X + localX - 2;
+          globalY := Y + localY - 2;
 
-        for localX := 0 to 5 do
-          for localY := 0 to 5 do
-          begin
-            globalX := X + localX - 2;
-            globalY := Y + localY - 2;
-
-            if FClient.MBitmaps[0].PointInBitmap(globalX, globalY) then
-              imgMouseZoom.Picture.Bitmap.Canvas.Pixels[localX, localY] := FClient.MBitmaps[0].FastGetPixel(globalX, globalY)
-            else
-              imgMouseZoom.Picture.Bitmap.Canvas.Pixels[localX, localY] := clBlack;
-          end;
-      finally
-        imgMouseZoom.Picture.Bitmap.EndUpdate(False);
-      end;
-
-      ColorToRGB(FClient.MBitmaps[0].FastGetPixel(X, Y), R, G, B);
-      ColorToHSL(FClient.MBitmaps[0].FastGetPixel(X, Y), H, S, L);
-
-      lblMouseZoom.Caption := Format('Color: %d', [FClient.MBitmaps[0].FastGetPixel(X, Y)]) + LineEnding +
-                              Format('RGB: [%d, %d, %d]', [R, G, B])                        + LineEnding +
-                              Format('HSL: [%f, %f, %f]', [H, S, L])                        + LineEnding;
+          if FImageBox.Image.PointInBitmap(globalX, globalY) then
+            ImageZoom.Picture.Bitmap.Canvas.Pixels[localX, localY] := FImageBox.Image.FastGetPixel(globalX, globalY)
+          else
+            ImageZoom.Picture.Bitmap.Canvas.Pixels[localX, localY] := clBlack;
+        end;
+    finally
+      ImageZoom.Picture.Bitmap.EndUpdate(False);
     end;
 
-    Coords(X, Y);
+    ColorToRGB(FImageBox.Image.FastGetPixel(X, Y), R, G, B);
+    ColorToHSL(FImageBox.Image.FastGetPixel(X, Y), H, S, L);
+
+    ColorLabel.Caption := Format('Color: %d', [FImageBox.Image.FastGetPixel(X, Y)]) + LineEnding +
+                          Format('RGB: %d, %d, %d', [R, G, B])                           + LineEnding +
+                          Format('HSL: %.2f, %.2f, %.2f', [H, S, L])                     + LineEnding;
   end;
 end;
 
-procedure TACAForm.ClientImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaACAForm.ClientImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  Pixel: Int32;
 begin
-  X := Trunc(X / FZoom.Current);
-  Y := Trunc(Y / FZoom.Current);
-
-  case Button of
-    mbRight:
-      begin
-        imgClient.Cursor := crSizeAll;
-
-        FScroll.X := Trunc(X * FZoom.Current);
-        FScroll.Y := Trunc(Y * FZoom.Current);
-        FScroll.Active := True;
-      end;
-
-    mbLeft:
-      with FClient.MBitmaps[0] do
-      begin
-        if FClient.MBitmaps[0].PointInBitmap(X, Y) and (listColors.Items.IndexOf(IntToStr(FastGetPixel(X, Y))) = -1) then
-          listColors.AddItem(IntToStr(FastGetPixel(X, Y)), TObject(PtrUInt(FastGetPixel(X, Y))));
-      end;
-  end;
-end;
-
-procedure TACAForm.ClientImageScrollDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-begin
-  Handled := True;
-
-  if (ssCtrl in Shift) then
+  if (Button = mbLeft) and FImageBox.Image.PointInBitmap(X, Y) then
   begin
-    FZoom.Previous := FZoom.Current;
-    FZoom.Current /= 2.00;
-    if (FZoom.Current < 0.0625) then
-      FZoom.Current := 0.0625;
+    Pixel := FImageBox.Image.FastGetPixel(X, Y);
 
-    ApplyZoom();
+    if ColorListBox.Items.IndexOf(Pixel.ToString()) = -1 then
+      ColorListBox.ItemIndex := ColorListBox.Items.AddObject(Pixel.ToString(), TObject(PtrUInt(Pixel)));
   end;
 end;
 
-procedure TACAForm.ClientImageScrollUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+procedure TSimbaACAForm.FontChanged(Sender: TObject);
 begin
-  Handled := True;
+  inherited FontChanged(Sender);
 
-  if (ssCtrl in Shift) then
+  if (not (csLoading in ComponentState)) then
   begin
-    FZoom.Previous := FZoom.Current;
-    FZoom.Current *= 2.00;
-    // Lazarus image stretching SUCKS on linux
-    if (FZoom.Current > {$IFDEF LINUX}4.00{$ELSE}32.00{$ENDIF}) then
-      FZoom.Current := {$IFDEF LINUX}4.00{$ELSE}32.00{$ENDIF};
-    // limitation in SetBounds
-    if (Trunc(FClient.MBitmaps[0].Width * FZoom.Current) > 100000) or (Trunc(FClient.MBitmaps[0].Height * FZoom.Current) > 100000) then
-      FZoom.Current := FZoom.Previous;
+    with Canvas.TextExtent(' HSL: 100.00, 100.00, 100.00 ') do
+    begin
+      ColorListBox.ItemHeight := CY + 10;
+      ColorListBox.ColorRectWidth := ColorListBox.ItemHeight - (ColorListBox.ColorRectOffset * 2);
 
-    ApplyZoom();
+      ColorLabelPanel.Width := CX;
+      ColorLabelPanel.Height := CY * 3;
+    end;
+
+    if ColorLabelPanel.Height > PanelZoom.Height then
+    begin
+      PanelZoom.Width := (ColorLabelPanel.Height-5) + (5 - (ColorLabelPanel.Height-5) mod 5);
+      PanelZoom.Height := (ColorLabelPanel.Height-5) + (5 - (ColorLabelPanel.Height-5) mod 5);
+      PanelZoom.Height := PanelZoom.Height + 2;
+      PanelZoom.Width := PanelZoom.Height + 2;
+    end;
   end;
 end;
 
-procedure TACAForm.ClientImageCenter(Sender: TObject);
-begin
-  if (imgClient.Width < ScrollBox.ClientWidth) then
-    imgClient.Left := (ScrollBox.ClientWidth div 2) - (imgClient.Width div 2)
-  else
-    imgClient.Left := 0;
-
-  if (imgClient.Height < ScrollBox.ClientHeight) then
-    imgClient.Top := (ScrollBox.ClientHeight div 2) - (imgClient.Height div 2)
-  else
-    imgClient.Top := 0;
-end;
-
-procedure TACAForm.ChangeDrawColor(Sender: TObject);
+procedure TSimbaACAForm.ChangeDrawColor(Sender: TObject);
 var
   i: Int32;
 begin
@@ -323,304 +180,278 @@ begin
         Parent[i].Checked := False;
 
     case Caption of
-      'Red': FDrawColor := clRed;
-      'Green': FDrawColor := clGreen;
-      'Blue': FDrawColor := clBlue;
-      'Yellow': FDrawColor := clYellow;
+      'Red': FImageBox.Overlay.Pen.Color := clRed;
+      'Green': FImageBox.Overlay.Pen.Color := clGreen;
+      'Blue': FImageBox.Overlay.Pen.Color := clBlue;
+      'Yellow': FImageBox.Overlay.Pen.Color := clYellow;
     end;
   end;
 end;
 
-procedure TACAForm.Status(S: String);
-begin
-  StatusBar.Panels[2].Text := S;
-end;
-
-procedure TACAForm.Coords(X, Y: Int32);
-begin
-  StatusBar.Panels[0].Text := Format('(%d, %d)', [X, Y]);
-end;
-
-procedure TACAForm.Dimensions(W, H: Int32);
-begin
-  StatusBar.Panels[1].Text := IntToStr(W) + 'x' + IntToStr(H);
-end;
-
-procedure TACAForm.FindColor(Col, Tolerance: Int32; Hue, Sat: Extended);
-var
-  W, H: Int32;
-  TPA: TPointArray;
-  T: Double;
-begin
-  T := MarkTime();
-
-  FClient.IOManager.GetDimensions(W, H);
-
-  FClient.MFinder.SetToleranceSpeed(FCTS);
-  FClient.MFinder.SetToleranceSpeed2Modifiers(Hue, Sat);
-  FClient.MFinder.FindColorsTolerance(TPA, Col, 0, 0, W-1, H-1, Tolerance);
-
-  Status(Format('Found %d matches in %f ms', [Length(TPA), MarkTime() - T]));
-
-  DrawTPA(TPA);
-end;
-
-procedure TACAForm.DrawTPA(TPA: TPointArray);
-var
-  P: TPoint;
-  Data: PByte;
-  BytesPerLine, BytesPerPixel: Int32;
-  RGB: TRGB24;
-begin
-  imgClient.Picture.Bitmap.FromBitmap(FClient.MBitmaps[0]);
-  imgClient.Picture.Bitmap.BeginUpdate(False);
-
-  Data := imgClient.Picture.Bitmap.RawImage.Data;
-  BytesPerLine := imgClient.Picture.Bitmap.RawImage.Description.BytesPerLine;
-  BytesPerPixel := imgClient.Picture.Bitmap.RawImage.Description.BitsPerPixel div 8;
-
-  try
-    ColorToRGB(FDrawColor, RGB.R, RGB.G, RGB.B);
-
-    for P in TPA do
-      Move(RGB, Data[P.Y * BytesPerLine + P.X * BytesPerPixel], SizeOf(TRGB24));
-  finally
-    imgClient.Picture.Bitmap.EndUpdate(False);
-  end;
-end;
-
-function TACAForm.GetColors: TIntegerArray;
+function TSimbaACAForm.GetColors: TIntegerArray;
 var
   i: Int32;
 begin
-  SetLength(Result, listColors.Count);
-  for i := 0 to listColors.Count - 1 do
-    Result[i] := listColors.Colors[i];
+  SetLength(Result, ColorListBox.Count);
+  for i := 0 to ColorListBox.Count - 1 do
+    Result[i] := ColorListBox.Colors[i];
 end;
 
-procedure TACAForm.ClientImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaACAForm.ButtonUpdateImageClick(Sender: TObject);
+var
+  W, H: Int32;
 begin
-  case Button of
-    mbRight:
-      begin
-        FScroll.Active := not FScroll.Active;
-        if (not FScroll.Active) then
-          imgClient.Cursor := crDefault;
-      end;
-  end;
+  if not FClient.IOManager.TargetValid then
+    FClient.IOManager.SetDesktop();
+
+  FClient.IOManager.GetDimensions(W, H);
+
+  FImageBox.Image.CopyClientToBitmap(FClient.IOManager, True, 0, 0, W-1, H-1);
+  FImageBox.Changed();
 end;
 
-procedure TACAForm.ClientImageUpdate(Sender: TObject);
-begin
-  imgClient.Picture.Bitmap.FromWindow(FManager, FClient.MBitmaps[0]);
-
-  Dimensions(FClient.MBitmaps[0].Width, FClient.MBitmaps[0].Height);
-  ApplyZoom(True);
-end;
-
-procedure TACAForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+procedure TSimbaACAForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   CloseAction := caFree;
-
-  if (OnGetResult <> nil) then
-    OnGetResult(FCTS, StrToIntDef(editColor.Text, -1), StrToIntDef(editTolerance.Text, -1), StrToFloatDef(editHue.Text, -1), StrToFloatDef(editSat.Text, -1));
 end;
 
-procedure TACAForm.MouseZoomPaint(Sender: TObject);
+procedure TSimbaACAForm.MouseZoomPaint(Sender: TObject);
 begin
   with Sender as TGraphicControl do
     if Boolean(Tag) then
     begin
-      Canvas.Pen.Color := FDrawColor;
-      Canvas.Frame(40, 40, 60, 60);
+      Canvas.Pen.Color := FImageBox.Overlay.Pen.Color;
+      Canvas.Frame(
+        (Width div 2) - Floor(Width / 5 / 2),
+        (Height div 2) - Floor(Width / 5 / 2),
+        (Width div 2) + Ceil(Width / 5 / 2),
+        (Height div 2) + Ceil(Width / 5 / 2)
+      );
     end;
 end;
 
-procedure TACAForm.PopupColorsPopup(Sender: TObject);
+procedure TSimbaACAForm.ButtonCTSClick(Sender: TObject);
 begin
-  popupColorDelete.Enabled := listColors.ItemIndex >= 0;
+  CalculateBestColor();
 end;
 
-procedure TACAForm.SaveColors(Sender: TObject);
+procedure TSimbaACAForm.CopyBestColorClick(Sender: TObject);
 begin
-  if SaveDialog.Execute() then
-    listColors.Items.SaveToFile(SaveDialog.FileName);
+  if ButtonCTS0.Checked then Clipboard.AsText := Format('CTS0(%s, %s)', [EditColor.Text, EditTolerance.Text]);
+  if ButtonCTS1.Checked then Clipboard.AsText := Format('CTS1(%s, %s)', [EditColor.Text, EditTolerance.Text]);
+  if ButtonCTS2.Checked then Clipboard.AsText := Format('CTS2(%s, %s, %s, %s)', [EditColor.Text, EditTolerance.Text, EditHue.Text, EditSat.Text]);
 end;
 
-procedure TACAForm.SelectColor(Sender: TObject; User: Boolean);
+procedure TSimbaACAForm.ColorSelectionChanged(Sender: TObject; User: Boolean);
 var
   R, G, B: Int32;
   H, S, L: Extended;
 begin
-  if TColorListBox(Sender).ItemIndex >= 0 then
+  if User and (ColorListBox.ItemIndex >= 0) then
   begin
-    imgMouseZoom.Tag := PtrInt(False);
-    imgMouseZoom.Canvas.Brush.Color := TColorListBox(Sender).Selected;
-    imgMouseZoom.Canvas.Clear();
+    ImageZoom.Tag := PtrInt(False);
+    ImageZoom.Canvas.Brush.Color := ColorListBox.Selected;
+    ImageZoom.Canvas.Clear();
 
-    ColorToRGB(TColorListBox(Sender).Selected, R, G, B);
-    ColorToHSL(TColorListBox(Sender).Selected, H, S, L);
+    ColorToRGB(ColorListBox.Selected, R, G, B);
+    ColorToHSL(ColorListBox.Selected, H, S, L);
 
-    lblMouseZoom.Caption := Format('Color: %d', [TColorListBox(Sender).Selected]) + LineEnding +
-                            Format('RGB: [%d, %d, %d]', [R, G, B])                + LineEnding +
-                            Format('HSL: [%f, %f, %f]', [H, S, L])                + LineEnding;
+    ColorLabel.Caption := Format('Color: %d', [ColorListBox.Selected]) + LineEnding +
+                          Format('RGB: %d, %d, %d', [R, G, B])         + LineEnding +
+                          Format('HSL: %.2f, %.2f, %.2f', [H, S, L])   + LineEnding;
   end;
+
+  CalculateBestColor();
 end;
 
-procedure TACAForm.ClientImageMouseLeave(Sender: TObject);
-begin
-  Coords(-1, -1);
-
-  FScroll.Active := False;
-end;
-
-procedure TACAForm.FindBestColorClick(Sender: TObject);
+procedure TSimbaACAForm.ButtonDebugColorClick(Sender: TObject);
 var
-  Col, Tolerance: Int32;
+  CTS: Int32;
+  Col, Tol: Int32;
   Hue, Sat: Extended;
+  Benchmark: TSimbaImageOverlayBenchmark;
 begin
-  try
-    Col := StrToInt(editColor.Text);
-    Tolerance := StrToInt(editTolerance.Text);
+  if ButtonCTS0.Checked then CTS := 0;
+  if ButtonCTS1.Checked then CTS := 1;
+  if ButtonCTS2.Checked then CTS := 2;
 
-    if (FCTS = 2) then
-    begin
-      Hue := StrToFloat(editHue.Text);
-      Sat := StrToFloat(editSat.Text);
-    end;
-  except
-    Exit;
+  Col := StrToIntDef(EditColor.Text, -1);
+  Tol := StrToIntDef(EditTolerance.Text, -1);
+  Hue := StrToFloatDef(EditHue.Text, -1);
+  Sat := StrToFloatDef(EditSat.Text, -1);
+
+  case CTS of
+    0: Benchmark := FImageBox.Overlay.DebugColorCTS0(Col, Tol);
+    1: Benchmark := FImageBox.Overlay.DebugColorCTS1(Col, Tol);
+    2: Benchmark := FImageBox.Overlay.DebugColorCTS2(Col, Tol, Hue, Sat);
   end;
 
-  FindColor(Col, Tolerance, Hue, Sat);
+  FImageBox.StatusPanel.Text := Format('Found %.0n matches in %f ms', [Double(Benchmark.Matches), Benchmark.Time]);
 end;
 
-procedure TACAForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TSimbaACAForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if (Key = VK_DELETE) then
   begin
-    if listColors.ItemIndex >= 0 then
-      listColors.Items.Delete(listColors.ItemIndex);
+    ColorListBox.DeleteSelected();
+    ColorListBox.OnSelectionChange(Sender, False);
 
     Key := VK_UNKNOWN;
   end;
 end;
 
-procedure TACAForm.LoadColors(Sender: TObject);
+procedure TSimbaACAForm.ButtonSaveColorsClick(Sender: TObject);
 var
   i: Int32;
 begin
-  if OpenDialog.Execute() and FileExists(OpenDialog.FileName) then
-  begin
-    listColors.Items.BeginUpdate();
-    listColors.Items.Clear();
-    listColors.Items.LoadFromFile(OpenDialog.FileName);
+  try
+    with TSaveDialog.Create(Self) do
+    try
+      if Execute() then
+      begin
+        ColorListBox.Items.BeginUpdate();
+        ColorListBox.Items.Clear();
+        ColorListBox.Items.LoadFromFile(FileName);
 
-    for i := 0 to listColors.Items.Count - 1 do
-      listColors.Items.Objects[i] := TObject(PtrInt(StrToIntDef(listColors.Items[i], 0)));
+        for i := 0 to ColorListBox.Items.Count - 1 do
+        try
+          ColorListBox.Items.Objects[i] := TObject(PtrInt(ColorListBox.Items[i].ToInteger()));
+        except
+        end;
 
-    listColors.Items.EndUpdate();
+        ColorListBox.Items.EndUpdate();
+      end;
+    finally
+      Free();
+    end;
+  except
   end;
 end;
 
-procedure TACAForm.menuColorsClick(Sender: TObject);
-begin
-  menuColorDelete.Enabled := listColors.ItemIndex >= 0;
-end;
-
-procedure TACAForm.menuCopyBestColorClick(Sender: TObject);
-begin
-  case FCTS of
-    0: Clipboard.AsText := Format('CTS0(%s, %s)', [editColor.Text, editTolerance.Text]);
-    1: Clipboard.AsText := Format('CTS1(%s, %s)', [editColor.Text, editTolerance.Text]);
-    2: Clipboard.AsText := Format('CTS2(%s, %s, %s, %s)', [editColor.Text, editTolerance.Text, editHue.Text, editSat.Text]);
-  end;
-end;
-
-procedure TACAForm.CalculateBestColor(Sender: TObject);
+procedure TSimbaACAForm.CalculateBestColor;
 var
-  Col, Tolerance: Int32;
+  CTS: Int32;
+  Col, Tol: Int32;
   Hue, Sat: Extended;
 begin
   if Length(GetColors()) = 0 then
   begin
-    editColor.Text := '';
-    editTolerance.Text := '';
-    editHue.Text := '';
-    editSat.Text := '';
+    EditColor.Text := '';
+    EditTolerance.Text := '';
+    EditHue.Text := '';
+    EditSat.Text := '';
   end else
   begin
-    FCTS := TButton(Sender).Tag;
+    if ButtonCTS0.Checked then CTS := 0;
+    if ButtonCTS1.Checked then CTS := 1;
+    if ButtonCTS2.Checked then CTS := 2;
 
-    case FCTS of
-      0: BestColor_CTS0(GetColors(), Col, Tolerance);
-      1: BestColor_CTS1(GetColors(), Col, Tolerance);
-      2: BestColor_CTS2(GetColors(), Col, Tolerance, Hue, Sat);
+    case CTS of
+      0: BestColor_CTS0(GetColors(), Col, Tol);
+      1: BestColor_CTS1(GetColors(), Col, Tol);
+      2: BestColor_CTS2(GetColors(), Col, Tol, Hue, Sat);
     end;
 
-    editColor.Text := Format('%d', [Col]);
-    editTolerance.Text := Format('%d', [Tolerance]);
-    editHue.Text := '';
-    editSat.Text := '';
+    EditColor.Text := Format('%d', [Col]);
+    EditTolerance.Text := Format('%d', [Tol]);
 
-    if (FCTS = 2) then
+    if (CTS = 2) then
     begin
-      editHue.Text := Format('%.2f', [Hue+0.5e-2]);
-      editSat.Text := Format('%.2f', [Sat+0.5e-2]);
+      EditHue.Text := Format('%.2f', [Hue + 0.5e-2]);
+      EditSat.Text := Format('%.2f', [Sat + 0.5e-2]);
+
+      Hue := StrToFloat(EditHue.Text);
+      Sat := StrToFloat(EditSat.Text);
+    end else
+    begin
+      EditHue.Text := '';
+      EditSat.Text := '';
     end;
+
+    if (OnCalculateBestColor <> nil) then
+      OnCalculateBestColor(CTS, Col, Tol, Hue, Sat);
   end;
 end;
 
-procedure TACAForm.AddColor(Sender: TObject);
+procedure TSimbaACAForm.ButtonDeleteColorsClick(Sender: TObject);
+begin
+  ColorListBox.Clear();
+  ColorListBox.OnSelectionChange(Sender, False);
+end;
+
+procedure TSimbaACAForm.ButtonClearImageClick(Sender: TObject);
+begin
+  FImageBox.Overlay.Clear();
+  FImageBox.Overlay.Update();
+end;
+
+procedure TSimbaACAForm.ButtonDeleteSelectedColorClick(Sender: TObject);
+begin
+  ColorListBox.DeleteSelected();
+  ColorListBox.OnSelectionChange(Sender, False);
+end;
+
+procedure TSimbaACAForm.ButtonLoadImageClick(Sender: TObject);
+begin
+  with TOpenDialog.Create(Self) do
+  try
+    InitialDir := Application.Location;
+
+    if Execute() then
+    try
+      FImageBox.Image.LoadFromFile(FileName);
+      FImageBox.Changed();
+    except
+    end;
+  finally
+    Free();
+  end;
+end;
+
+procedure TSimbaACAForm.ButtonLoadColorsClick(Sender: TObject);
+begin
+  try
+    with TOpenDialog.Create(Self) do
+    try
+      if Execute() then
+        ColorListBox.Items.SaveToFile(FileName);
+    finally
+      Free();
+    end;
+  except
+  end;
+end;
+
+procedure TSimbaACAForm.CenterDivider(Sender: TObject);
 var
-  Input: String = '';
+  Divider: TDividerBevel absolute Sender;
 begin
-  if InputQuery('Add Color', 'Color:', Input) and (StrToIntDef(Input, -1) >= 0) then
-    listColors.AddItem(Input, TObject(PtrInt(StrToInt(Input))));
+  Divider.LeftIndent := (Divider.Width div 2) - (Divider.Canvas.TextWidth(Divider.Caption) div 2) - Divider.CaptionSpacing;
 end;
 
-procedure TACAForm.ClearColors(Sender: TObject);
-begin
-  listColors.Items.Clear();
-
-  editColor.Text := '';
-  editTolerance.Text := '';
-  editHue.Text := '';
-  editSat.Text := '';
-end;
-
-procedure TACAForm.DeleteColor(Sender: TObject);
-begin
-  if (listColors.ItemIndex >= 0) then
-    listColors.Items.Delete(listColors.ItemIndex);
-end;
-
-procedure TACAForm.ClientImageClear(Sender: TObject);
-begin
-  imgClient.Picture.Bitmap.FromBitmap(FClient.MBitmaps[0]);
-end;
-
-constructor TACAForm.Create(AManager: TIOManager);
+constructor TSimbaACAForm.Create(TargetWindow: THandle);
 begin
   inherited Create(Application.MainForm);
 
-  FManager := AManager;
-  FDrawColor := clRed;
+  FImageBox := TSimbaImageBox_Overlay.Create(Self);
+  FImageBox.Parent := PanelMain;
+  FImageBox.Align := alClient;
+  FImageBox.OnImageMouseDown := @ClientImageMouseDown;
+  FImageBox.OnImageMouseMove := @ClientImageMouseMove;
+  FImageBox.Overlay.Pen.Color := clRed;
+
   FClient := TClient.Create();
-  FClient.MBitmaps.AddBMP(TMufasaBitmap.Create()); // MBitmaps[0] will be our client image.
-  FClient.IOManager.SetTarget(FClient.MBitmaps[0]);
+  FClient.IOManager.SetTarget(TargetWindow);
 
-  imgMouseZoom.Picture.Bitmap.Width := 5;
-  imgMouseZoom.Picture.Bitmap.Height := 5;
+  ImageZoom.Picture.Bitmap.Width := 5;
+  ImageZoom.Picture.Bitmap.Height := 5;
 
-  listColors.Options := listColors.Options - [lboDrawFocusRect];
+  ColorListBox.Options := [];
 
-  ScrollBox.DoubleBuffered := True;
-
-  ClientImageUpdate(nil);
+  ButtonUpdateImage.Click();
 end;
 
-destructor TACAForm.Destroy;
+destructor TSimbaACAForm.Destroy;
 begin
   FClient.Free();
 
@@ -628,7 +459,7 @@ begin
 end;
 
 initialization
-  {$I aca.lrs}
+  {$I simba.aca.lrs}
 
 end.
 

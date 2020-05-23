@@ -1,11 +1,11 @@
-unit aca_math;
+unit simba.aca_math;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  mufasatypes;
+  simba.mufasatypes;
 
 procedure BestColor_CTS0(Colors: TIntegerArray; out Color, Tolerance: Int32);
 procedure BestColor_CTS1(Colors: TIntegerArray; out Color, Tolerance: Int32);
@@ -15,7 +15,7 @@ implementation
 
 uses
   math,
-  colour_conv, mmath;
+  simba.colormath, simba.math;
 
 procedure BestColor_CTS0(Colors: TIntegerArray; out Color, Tolerance: Int32);
 type
