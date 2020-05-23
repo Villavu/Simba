@@ -1,6 +1,15 @@
-[submodule "autobuild/travis-lazarus"]
-	path = autobuild/travis-lazarus
-	url = https://github.com/nielsAD/travis-lazarus.git
-[submodule "Units/lape"]
-	path = Units/lape
+[submodule "Modules/EncConv"]
+	path = Modules/EncConv
+	url = https://github.com/Alexey-T/EncConv
+[submodule "Modules/ATFlatControls"]
+	path = Modules/ATFlatControls
+	url = https://github.com/Alexey-T/ATFlatControls
+[submodule "Modules/ATSynEdit"]
+	path = Modules/ATSynEdit
+	url = https://github.com/Alexey-T/ATSynEdit
+[submodule "Modules/lape"]
+	path = Modules/lape
 	url = https://github.com/nielsAD/lape
+[submodule "Modules/travis-lazarus"]
+	path = Modules/travis-lazarus
+	url = https://github.com/nielsAD/travis-lazarus
