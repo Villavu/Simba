@@ -1,20 +1,19 @@
-unit lplclprocess;
+unit simbascript.import_lclprocess;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils, lpCompiler, lpTypes, script_imports;
-
-procedure RegisterLCLProcess(Compiler: TLapeCompiler);
+{$i import_uses.inc}
 
 implementation
 
 uses
-  lplclcontrols, lplclsystem, Process, Pipes;
+  process, pipes;
 
 type
+  PSeekOrigin = ^TSeekOrigin;
+  PComponent = ^TComponent;
   PProcess = ^TProcess;
   PRect = ^TRect;
   PHandle = ^THandle;
@@ -54,7 +53,7 @@ begin
   POutputPipeStream(Params^[0])^.Free();
 end;
 
-procedure Register_TOutputPipeStream(Compiler: TLapeCompiler);
+procedure Register_TOutputPipeStream(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -103,7 +102,7 @@ begin
   PInputPipeStream(Params^[0])^.Free();
 end;
 
-procedure Register_TInputPipeStream(Compiler: TLapeCompiler);
+procedure Register_TInputPipeStream(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -526,7 +525,7 @@ begin
   PinputPipeStream(Result)^ := PProcess(Params^[0])^.Stderr;
 end;
 
-procedure Register_TProcess(Compiler: TLapeCompiler);
+procedure Register_TProcess(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -579,7 +578,7 @@ begin
   end;
 end;
 
-procedure RegisterLCLProcess(Compiler: TLapeCompiler);
+procedure Register_LCLProcess(Compiler: TScriptCompiler);
 begin
   with Compiler do
    begin
@@ -595,6 +594,9 @@ begin
   Register_TOutputPipeStream(Compiler);
   Register_TProcess(Compiler);
 end;
+
+initialization
+  RegisterScriptImport(@Register_LCLProcess);
 
 end.
 

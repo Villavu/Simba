@@ -1,16 +1,15 @@
-unit script_import_crypto;
+unit simbascript.import_crypto;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils;
+{$i import_uses.inc}
 
 implementation
 
 uses
-  script_imports, lpcompiler, lptypes, BlowFish, md5, sha1;
+  blowfish, md5, sha1;
 
 procedure Lape_BlowFish_Encrypt(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 var
@@ -18,11 +17,11 @@ var
   Output: TStringStream;
   Encrypt: TBlowFishEncryptStream;
 begin
-  Data := PString(Params^[1])^;
+  Data := PString(Params^[0])^;
   Output := TStringStream.Create('');
 
   try
-    Encrypt := TBlowFishEncryptStream.Create(PString(Params^[2])^, Output);
+    Encrypt := TBlowFishEncryptStream.Create(PString(Params^[1])^, Output);
 
     try
       Encrypt.Write(Data[1], Length(Data));
@@ -41,10 +40,10 @@ var
   Input: TStringStream;
   Decrypt: TBlowFishDeCryptStream;
 begin
-  Input := TStringStream.Create(PString(Params^[1])^);
+  Input := TStringStream.Create(PString(Params^[0])^);
 
   try
-    Decrypt := TBlowFishDeCryptStream.Create(PString(Params^[2])^, Input);
+    Decrypt := TBlowFishDeCryptStream.Create(PString(Params^[1])^, Input);
 
     try
       SetLength(PString(Result)^, Input.Size);
@@ -60,41 +59,42 @@ end;
 
 procedure Lape_MD5String(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := MD5Print(MD5String(PString(Params^[1])^));
+  PString(Result)^ := MD5Print(MD5String(PString(Params^[0])^));
 end;
 
 procedure Lape_MD5File(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  if FileExists(PString(Params^[1])^) then
-    PString(Result)^ := MD5Print(MD5File(PString(Params^[1])^));
+  if FileExists(PString(Params^[0])^) then
+    PString(Result)^ := MD5Print(MD5File(PString(Params^[0])^));
 end;
 
 procedure Lape_SHA1String(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := SHA1Print(SHA1String(PString(Params^[1])^));
+  PString(Result)^ := SHA1Print(SHA1String(PString(Params^[0])^));
 end;
 
 procedure Lape_SHA1File(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  if FileExists(PString(Params^[1])^) then
-    PString(Result)^ := SHA1Print(SHA1File(PString(Params^[1])^));
+  if FileExists(PString(Params^[0])^) then
+    PString(Result)^ := SHA1Print(SHA1File(PString(Params^[0])^));
 end;
 
-procedure Lape_Import_Crypto(Compiler: TLapeCompiler; Data: Pointer);
+procedure Lape_Import_Crypto(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
-    addGlobalMethod('function BlowFish_Encrypt(constref Data, Password: String): String;', @Lape_BlowFish_Encrypt, Data);
-    addGlobalMethod('function BlowFish_Decrypt(constref Data, Password: String): String;', @Lape_BlowFish_Decrypt, Data);
-    addGlobalMethod('function MD5String(constref Data: String): String;', @Lape_MD5String, Data);
-    addGlobalMethod('function MD5File(constref FilePath: String): String;', @Lape_MD5File, Data);
-    addGlobalMethod('function SHA1String(constref Data: String): String;', @Lape_SHA1String, Data);
-    addGlobalMethod('function SHA1File(constref FilePath: String): String;', @Lape_SHA1File, Data);
+    Section := 'Crypto';
+
+    addGlobalFunc('function BlowFish_Encrypt(constref Data, Password: String): String;', @Lape_BlowFish_Encrypt);
+    addGlobalFunc('function BlowFish_Decrypt(constref Data, Password: String): String;', @Lape_BlowFish_Decrypt);
+    addGlobalFunc('function MD5String(constref Data: String): String;', @Lape_MD5String);
+    addGlobalFunc('function MD5File(constref FilePath: String): String;', @Lape_MD5File);
+    addGlobalFunc('function SHA1String(constref Data: String): String;', @Lape_SHA1String);
+    addGlobalFunc('function SHA1File(constref FilePath: String): String;', @Lape_SHA1File);
   end;
 end;
 
 initialization
-  ScriptImports.Add('Crypto', @Lape_Import_Crypto);
+  RegisterScriptImport(@Lape_Import_Crypto);
 
 end.
-

@@ -1,19 +1,18 @@
-unit lpTMufasaBitmap;
+unit simbascript.import_tmufasabitmap;
 //Depends: TMufasaBitmap, TObject, procedure(Bitmap : TMufasaBitmap) of object, PRGB32, string, integer, Integer, PtrUInt, TBox, TColor, TPoint, TPointArray, TIntegerArray, T2DPointArray, TCanvas, boolean, Extended, T2DExtendedArray, TBitmap, TRawImage, byte
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils, lpcompiler, lptypes, script_imports;
+{$i import_uses.inc}
 
-procedure Register_TMufasaBitmap(Compiler: TLapeCompiler);
+procedure Register_TMufasaBitmap(Compiler: TScriptCompiler);
 
 implementation
 
 uses
-  MufasaTypes, bitmaps, Graphics, GraphType;
+  simba.bitmap, graphics, graphtype;
 
 type
   PObject = ^TObject;
@@ -522,7 +521,7 @@ begin
   PMufasaBitmap(Params^[0])^.Free();
 end;
 
-procedure Register_TMufasaBitmap(Compiler: TLapeCompiler);
+procedure Register_TMufasaBitmap(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -632,6 +631,9 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.Free(); constref;', @TMufasaBitmap_Free);
   end;
 end;
+
+initialization
+  RegisterScriptImport(@Register_TMufasaBitmap);
 
 end.
 

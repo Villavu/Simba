@@ -1,16 +1,15 @@
-unit lplclcomctrls;
+unit simbascript.import_lclcomctrls;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils, lpcompiler, lptypes, ffi, script_imports;
-
-procedure RegisterLCLComCtrls(Compiler: TLapeCompiler);
+{$i import_uses.inc}
 
 implementation
-  uses MufasaTypes,stdctrls,forms,lplclsystem,lplclgraphics,lplclcontrols, lplclstdctrls, ComCtrls, CheckLst, Controls;
+
+uses
+  stdctrls, forms, comctrls, checklst, controls, graphics;
 
 type
   PCustomProgressBar = ^TCustomProgressBar;
@@ -53,6 +52,12 @@ type
   PPanelPart = ^TPanelPart;
   PPanelParts = ^TPanelParts;
   PCaption = ^TCaption;
+  PComponent = ^TComponent;
+  PNotifyEvent = ^TNotifyEvent;
+  PPen = ^TPen;
+  PPersistent = ^TPersistent;
+  PRect = ^TRect;
+  PCollection = ^TCollection;
 
 procedure TCustomProgressBar_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -173,7 +178,7 @@ begin
   PCustomProgressBar(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomProgressBar(Compiler: TLapeCompiler);
+procedure Register_TCustomProgressBar(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -205,7 +210,7 @@ begin
   PProgressBar(Params^[0])^.Free();
 end;
 
-procedure Register_TProgressBar(Compiler: TLapeCompiler);
+procedure Register_TProgressBar(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -414,7 +419,7 @@ begin
   PCustomTrackBar(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomTrackBar(Compiler: TLapeCompiler);
+procedure Register_TCustomTrackBar(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -453,7 +458,7 @@ begin
   PTrackBar(Params^[0])^.Free();
 end;
 
-procedure Register_TTrackBar(Compiler: TLapeCompiler);
+procedure Register_TTrackBar(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -565,7 +570,7 @@ begin
   PCustomCheckListBox(Params^[0])^.OnItemClick := PCheckListClicked(Params^[1])^;
 end;
 
-procedure Register_TCustomCheckListBox(Compiler: TLapeCompiler);
+procedure Register_TCustomCheckListBox(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -597,7 +602,7 @@ begin
   PCheckListBox(Params^[0])^.Free();
 end;
 
-procedure Register_TCheckListBox(Compiler: TLapeCompiler);
+procedure Register_TCheckListBox(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -694,7 +699,7 @@ begin
   PCustomPage(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomPage(Compiler: TLapeCompiler);
+procedure Register_TCustomPage(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -895,7 +900,7 @@ begin
   PCustomTabControl(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomTabControl(Compiler: TLapeCompiler);
+procedure Register_TCustomTabControl(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -945,7 +950,7 @@ begin
   PTabSheet(Params^[0])^.Free();
 end;
 
-procedure Register_TTabSheet(Compiler: TLapeCompiler);
+procedure Register_TTabSheet(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1004,7 +1009,7 @@ begin
   PPageControl(Params^[0])^.Free();
 end;
 
-procedure Register_TPageControl(Compiler: TLapeCompiler);
+procedure Register_TPageControl(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1018,7 +1023,7 @@ begin
   end;
 end;
 
-procedure Register_TStatusBar_Forward(Compiler: TLapeCompiler);
+procedure Register_TStatusBar_Forward(Compiler: TScriptCompiler);
 begin
   with Compiler do
     addClass('TStatusBar', 'TWinControl');
@@ -1102,7 +1107,7 @@ begin
   PStatusPanel(Params^[0])^.Free();
 end;
 
-procedure Register_TStatusPanel(Compiler: TLapeCompiler);
+procedure Register_TStatusPanel(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1155,7 +1160,7 @@ begin
   PStatusPanels(Params^[0])^.Free();
 end;
 
-procedure Register_TStatusPanels(Compiler: TLapeCompiler);
+procedure Register_TStatusPanels(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1295,7 +1300,7 @@ begin
   PStatusBar(Params^[0])^.Free();
 end;
 
-procedure Register_TStatusBar(Compiler: TLapeCompiler);
+procedure Register_TStatusBar(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1317,7 +1322,7 @@ begin
   end;
 end;
 
-procedure RegisterLCLComCtrls(Compiler: TLapeCompiler);
+procedure Register_LCLComCtrls(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1354,5 +1359,8 @@ begin
   Register_TStatusPanels(Compiler);
   Register_TStatusBar(Compiler);
 end;
+
+initialization
+  RegisterScriptImport(@Register_LCLComCtrls);
 
 end.

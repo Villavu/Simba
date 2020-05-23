@@ -1,17 +1,15 @@
-unit script_import_oswindow;
+unit simbascript.import_oswindow;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils;
+{$i import_uses.inc}
 
 implementation
 
 uses
-  lptypes, lpcompiler, lpparser, script_imports,
-  simba.oswindow, mufasatypes;
+  simba.oswindow;
 
 procedure Lape_OSWindow_Activate(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -158,10 +156,12 @@ begin
   PBoolean(Result)^ := FindChildWindow(PString(Params^[0])^, PString(Params^[1])^, POSWindow(Params^[2])^);
 end;
 
-procedure Lape_Import_Web(Compiler: TLapeCompiler; Data: Pointer);
+procedure Lape_Import_OSWindow(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
+    Section := 'OSWindow';
+
     addGlobalType('type PtrUInt', 'TOSWindow');
     addGlobalType('array of TOSWindow', 'TOSWindowArray');
 
@@ -204,7 +204,7 @@ begin
 end;
 
 initialization
-  ScriptImports.Add('OSWindow', @Lape_Import_Web);
+  RegisterScriptImport(@Lape_Import_OSWindow);
 
 end.
 

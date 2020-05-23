@@ -1,19 +1,16 @@
-unit lpTMFinder;
+unit simbascript.import_tmfinder;
 //Depends: TMFinder, TObject, boolean, integer, Integer, TPointArray, TMask, TMufasaBitmap, Boolean, Extended, TMDTM, T2DExtendedArray, array of integer, TPRGB32Array
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils, lpcompiler, lptypes, script_imports;
-
-procedure Register_TMFinder(Compiler: TLapeCompiler);
+{$i import_uses.inc}
 
 implementation
 
 uses
-  finder, bitmaps, dtm, MufasaTypes;
+  simba.finder, simba.bitmap, simba.dtm;
 
 type
   PMFinder = ^TMFinder;
@@ -268,7 +265,7 @@ begin
   PMFinder(Params^[0])^.Free();
 end;
 
-procedure Register_TMFinder(Compiler: TLapeCompiler);
+procedure Register_TMFinder(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -320,6 +317,9 @@ begin
     addGlobalFunc('procedure TMFinder.Free(); constref;', @TMFinder_Free);
   end;
 end;
+
+initialization
+  RegisterScriptImport(@Register_TMFinder);
 
 end.
 

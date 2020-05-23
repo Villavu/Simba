@@ -1,17 +1,15 @@
-unit script_import_string;
+unit simbascript.import_string;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils;
+{$i import_uses.inc}
 
 implementation
 
 uses
-  script_imports, lpcompiler, lptypes, stringutil, mufasatypes,
-  StrUtils, RegExpr;
+  simba.stringutil, strutils, regexpr;
 
 procedure Lape_Capitalize(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -130,10 +128,12 @@ begin
   PAnsiString(Result)^ := UTF8Encode(PWideString(Params^[0])^);
 end;
 
-procedure Lape_Import_String(Compiler: TLapeCompiler; Data: Pointer);
+procedure Lape_Import_String(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
+    Section := 'String';
+
     addGlobalType('(Numbers, Letters, Others)', 'StrExtr');
 
     addGlobalFunc('function Capitalize(S: String): String', @Lape_Capitalize);
@@ -163,7 +163,7 @@ begin
 end;
 
 initialization
-  ScriptImports.Add('String', @Lape_Import_String);
+  RegisterScriptImport(@Lape_Import_String);
 
 end.
 

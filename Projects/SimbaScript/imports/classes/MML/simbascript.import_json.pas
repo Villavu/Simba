@@ -1,22 +1,23 @@
-unit lpjson;
+unit simbascript.import_json;
 
 {$mode objfpc}{$H+}
 
 interface
 
+{$i import_uses.inc}
+
+procedure Register_JSON(Compiler: TScriptCompiler);
+
+implementation
+
 uses
-  Classes, SysUtils,ujson, lpcompiler, lptypes, script_imports;
+  simba.jsonparser;
+
 type
   PJSONObject = ^TJSONObject;
   PJSONArray = ^TJSONArray;
   PZAbstractObject = ^TZAbstractObject;
   PStringList = ^TStringList;
-
- Procedure Register_JSON(Compiler: TLapeCompiler);
-
-
-
-implementation
 
 //constructor create ; overload;
 procedure TJSONArray_create(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -253,7 +254,7 @@ begin
   PJSONArray(Params^[0])^.Free();
 end;
 
-procedure Register_TJSONArray(Compiler: TLapeCompiler);
+procedure Register_TJSONArray(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -554,7 +555,7 @@ begin
   PJSONObject(Params^[0])^.Free();
 end;
 
-procedure Register_TJSONObject(Compiler: TLapeCompiler);
+procedure Register_TJSONObject(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -602,12 +603,14 @@ begin
   end;
 end;
 
-Procedure Register_JSON(Compiler: TLapeCompiler);
+Procedure Register_JSON(Compiler: TScriptCompiler);
 begin
   Register_TJSONArray(Compiler);
   Register_TJSONObject(Compiler);
 end;
 
+initialization
+  RegisterScriptImport(@Register_JSON);
 
 end.
 

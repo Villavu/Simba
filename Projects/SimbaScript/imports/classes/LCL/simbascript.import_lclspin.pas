@@ -1,18 +1,18 @@
-unit lplclspin;
+unit simbascript.import_lclspin;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils, lpCompiler, lpTypes, script_imports;
-
-procedure RegisterLCLSpinCtrls(Compiler: TLapeCompiler);
+{$i import_uses.inc}
 
 implementation
-  uses MufasaTypes, lplclsystem, lplclstdctrls, Spin;
+
+uses
+  spin;
 
 type
+  PComponent = ^TComponent;
   PCustomFloatSpinEdit = ^TCustomFloatSpinEdit;
   PFloatSpinEdit = ^TFloatSpinEdit;
   PSpinEdit = ^TSpinEdit;
@@ -120,7 +120,7 @@ begin
   PCustomFloatSpinEdit(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomFloatSpinEdit(Compiler: TLapeCompiler);
+procedure Register_TCustomFloatSpinEdit(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -152,7 +152,7 @@ begin
   PFloatSpinEdit(Params^[0])^.Free();
 end;
 
-procedure Register_TFloatSpinEdit(Compiler: TLapeCompiler);
+procedure Register_TFloatSpinEdit(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -223,7 +223,7 @@ begin
   PCustomSpinEdit(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomSpinEdit(Compiler: TLapeCompiler);
+procedure Register_TCustomSpinEdit(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -250,7 +250,7 @@ begin
   PSpinEdit(Params^[0])^.Free();
 end;
 
-procedure Register_TSpinEdit(Compiler: TLapeCompiler);
+procedure Register_TSpinEdit(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -261,13 +261,16 @@ begin
   end;
 end;
 
-procedure RegisterLCLSpinCtrls(Compiler: TLapeCompiler);
+procedure Register_LCLSpinCtrls(Compiler: TScriptCompiler);
 begin
   Register_TCustomFloatSpinEdit(Compiler);
   Register_TFloatSpinEdit(Compiler);
   Register_TCustomSpinEdit(Compiler);
   Register_TSpinEdit(Compiler);
 end;
+
+initialization
+  RegisterScriptImport(@Register_LCLSpinCtrls);
 
 end.
 

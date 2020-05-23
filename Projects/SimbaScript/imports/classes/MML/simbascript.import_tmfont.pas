@@ -1,19 +1,18 @@
-unit lpTMFont;
+unit simbascript.import_tmfont;
 //Depends: TMFont, TObject, String, TOcrData
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils, lpcompiler, lptypes, script_imports;
+{$i import_uses.inc}
 
-procedure Register_TMFont(Compiler: TLapeCompiler);
+procedure Register_TMFont(Compiler: TScriptCompiler);
 
 implementation
 
 uses
-  fontloader, ocrutil, MufasaTypes;
+  simba.fontloader, simba.ocrutil;
 
 type
   PMFont = ^TMFont;
@@ -61,7 +60,7 @@ begin
   PMFont(Params^[0])^.Free();
 end;
 
-procedure Register_TMFont(Compiler: TLapeCompiler);
+procedure Register_TMFont(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -78,6 +77,9 @@ begin
     addGlobalFunc('procedure TMFont.Free(); constref;', @TMFont_Free);
   end;
 end;
+
+initialization
+  RegisterScriptImport(@Register_TMFont);
 
 end.
 

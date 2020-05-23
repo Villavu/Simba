@@ -1,13 +1,12 @@
-unit lpTObject;
+unit simbascript.import_tobject;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils, lpcompiler, lptypes, script_imports;
+{$i import_uses.inc}
 
-procedure Register_TObject(Compiler: TLapeCompiler);
+procedure Register_TObject(Compiler: TScriptCompiler);
 
 implementation
 
@@ -29,10 +28,12 @@ begin
   PlpString(Result)^ := PObject(Params^[0])^.ToString();
 end;
 
-procedure Register_TObject(Compiler: TLapeCompiler);
+procedure Register_TObject(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
+    Section := 'Classes';
+
     addClass('TObject', 'Pointer');
 
     addGlobalFunc('procedure TObject.Init();', @TObject_Init);
@@ -40,6 +41,9 @@ begin
     addGlobalFunc('function TObject.ToString(): string; constref;', @TObject_ToString);
   end;
 end;
+
+initialization
+  RegisterScriptImport(@Register_TObject);
 
 end.
 

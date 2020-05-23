@@ -1,16 +1,15 @@
-unit script_import_matrix;
+unit simbascript.import_matrix;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils;
+{$i import_uses.inc}
 
 implementation
 
 uses
-  script_imports, lpcompiler, lptypes, mufasatypes, matrix;
+  simba.matrix;
 
 //procedure SetSize(a: TSingleMatrix; Width, Height: Int32);
 procedure Lape_MatrixSetSize(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -108,10 +107,12 @@ begin
   MatrixFill(TSingleMatrix(Params^[0]^), TPointArray(Params^[1]^), TSingleArray(Params^[2]^));
 end;
 
-procedure Lape_Import_Matrix(Compiler: TLapeCompiler; Data: Pointer);
+procedure Lape_Import_Matrix(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
+    Section := 'Matrix';
+
     addGlobalFunc('procedure TSingleMatrix.SetSize(Width, Height: Int32);', @Lape_MatrixSetSize);
     addGlobalFunc('procedure TSingleMatrix.Size(out Width, Height: Int32); constref;', @Lape_MatrixSize);
     addGlobalFunc('function TSingleMatrix.Width(): Int32; constref;', @Lape_MatrixWidth);
@@ -132,7 +133,7 @@ begin
 end;
 
 initialization
-  ScriptImports.Add('Matrix', @Lape_Import_Matrix);
+  RegisterScriptImport(@Lape_Import_Matrix);
 
 end.
 

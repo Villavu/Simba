@@ -11,7 +11,7 @@ interface
 uses
   Classes, SysUtils, lpcompiler, lptypes, lpClassHelper;
 
-procedure Register_$ClassName(Compiler: TLapeCompiler);
+procedure Register_$ClassName(Compiler: TScriptCompiler);
 
 implementation
 
@@ -20,7 +20,7 @@ type
 
 $Methods
 
-procedure Register_$ClassName(Compiler: TLapeCompiler);
+procedure Register_$ClassName(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin

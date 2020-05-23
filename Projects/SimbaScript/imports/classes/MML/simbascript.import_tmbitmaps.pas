@@ -1,19 +1,18 @@
-unit lpTMBitmaps;
+unit simbascript.import_tmbitmaps;
 //Depends: TMBitmaps, TObject, Array of integer, TMufasaBmpArray, integer, integer]: TMufasaBitmap, TMufasaBitmap, Integer, TBmpMirrorStyle, string
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils, lpcompiler, lptypes, script_imports;
+{$i import_uses.inc}
 
-procedure Register_TMBitmaps(Compiler: TLapeCompiler);
+procedure Register_TMBitmaps(Compiler: TScriptCompiler);
 
 implementation
 
 uses
-  bitmaps, MufasaTypes;
+  simba.bitmap;
 
 type
   PMBitmaps = ^TMBitmaps;
@@ -92,7 +91,7 @@ begin
   PMBitmaps(Params^[0])^.Free();
 end;
 
-procedure Register_TMBitmaps(Compiler: TLapeCompiler);
+procedure Register_TMBitmaps(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -112,6 +111,9 @@ begin
     addGlobalFunc('procedure TMBitmaps.Free(); constref;', @TMBitmaps_Free);
   end;
 end;
+
+initialization
+  RegisterScriptImport(@Register_TMBitmaps);
 
 end.
 

@@ -1,21 +1,19 @@
-unit script_import_colormath;
+unit simbascript.import_colormath;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils;
+{$i import_uses.inc}
 
 implementation
 
 uses
-  script_imports, lpcompiler, lptypes, colour_conv,
-  graphics;
+  graphics, simba.colormath;
 
 procedure Lape_ColorToRGB(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  colour_conv.ColorToRGB(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^);
+  ColorToRGB(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^);
 end;
 
 procedure Lape_RGBtoColor(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -118,10 +116,12 @@ begin
   PColor(Result)^ := ColorToGray(PInt32(Params^[0])^);
 end;
 
-procedure Lape_Import_ColorMath(Compiler: TLapeCompiler; Data: Pointer);
+procedure Lape_Import_ColorMath(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
+    Section := 'Color Math';
+
     addGlobalFunc('procedure ColorToRGB(Color: Int32; var r, g, b: Int32);', @Lape_ColorToRGB);
     addGlobalFunc('function RGBtoColor(r, g, b: Int32): TColor', @Lape_RGBtoColor);
     addGlobalFunc('procedure ColorToHSL(Color: Int32; var h, s, l: Extended);', @Lape_ColorToHSL);
@@ -147,7 +147,7 @@ begin
 end;
 
 initialization
-  ScriptImports.Add('Color Math', @Lape_Import_ColorMath);
+  RegisterScriptImport(@Lape_Import_ColorMath);
 
 end.
 

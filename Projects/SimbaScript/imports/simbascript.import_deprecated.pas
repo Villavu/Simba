@@ -1,18 +1,16 @@
-unit script_import_deprecated;
+unit simbascript.import_deprecated;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils;
+{$i import_uses.inc}
 
 implementation
 
 uses
-  script_imports, lpcompiler, lptypes, script_thread,
   DCPcrypt2, DCPmd4, DCPmd5, DCPtiger, DCPsha1, DCPsha256, DCPsha512, DCPhaval, DCPripemd128, DCPripemd160, DCPrc2,
-  forms, tpa, mufasatypes, math {$IFDEF WINDOWS}, windows{$ENDIF},
+  forms, simba.tpa, math {$IFDEF WINDOWS}, windows{$ENDIF},
   simba.iomanager;
 
 type
@@ -20,7 +18,7 @@ type
                htSHA1, htSHA256, htSHA384, htSHA512, htTiger);
   PHashType = ^THashType;
 
-procedure _Encrypt(CipherType: TDCP_cipherclass; HashType: TDCP_hashclass; const Key: string; var Data: string); inline;
+procedure _Encrypt(CipherType: TDCP_cipherclass; HashType: TDCP_hashclass; const Key: string; var Data: string);
 begin
   with CipherType.Create(nil) do
   try
@@ -32,7 +30,7 @@ begin
   end;
 end;
 
-procedure _Decrypt(CipherType: TDCP_cipherclass; HashType: TDCP_hashclass; const Key: string; var Data: string); inline;
+procedure _Decrypt(CipherType: TDCP_cipherclass; HashType: TDCP_hashclass; const Key: string; var Data: string);
 begin
   with CipherType.Create(nil) do
   try
@@ -44,7 +42,7 @@ begin
   end;
 end;
 
-function _Hash(HashType: TDCP_hashclass; Data: string): string; inline;
+function _Hash(HashType: TDCP_hashclass; Data: string): string;
 var
   Digest: Pointer;
   I, Size: LongInt;
@@ -145,27 +143,27 @@ end;
 
 procedure Lape_rc2_encrypt(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  _Encrypt(TDCP_RC2, _HashType2Class(PHashType(Params^[0])^), PString(Params^[0])^, PString(Params^[2])^);
+  _Encrypt(TDCP_RC2, _HashType2Class(PHashType(Params^[0])^), PString(Params^[1])^, PString(Params^[2])^);
 end;
 
 procedure Lape_rc2_decrypt(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  _Decrypt(TDCP_RC2, _HashType2Class(PHashType(Params^[0])^), PString(Params^[0])^, PString(Params^[2])^);
+  _Decrypt(TDCP_RC2, _HashType2Class(PHashType(Params^[0])^), PString(Params^[1])^, PString(Params^[2])^);
 end;
 
 procedure Lape_rs_GetUpText(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := TMMLScriptThread(Params^[0]).Client.MOCR.GetUpTextAt(7, 7, True);
+  PString(Result)^ := Script.Client.MOCR.GetUpTextAt(7, 7, True);
 end;
 
 procedure Lape_rs_GetUpTextAt(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := TMMLScriptThread(Params^[0]).Client.MOCR.GetUpTextAt(PInt32(Params^[0])^, PInt32(Params^[1])^, True);
+  PString(Result)^ := Script.Client.MOCR.GetUpTextAt(PInt32(Params^[0])^, PInt32(Params^[1])^, True);
 end;
 
 procedure Lape_rs_GetUpTextAtEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := TMMLScriptThread(Params^[0]).Client.MOCR.GetUpTextAtEx(PInt32(Params^[0])^, PInt32(Params^[1])^, True, PString(Params^[2])^);
+  PString(Result)^ := Script.Client.MOCR.GetUpTextAtEx(PInt32(Params^[0])^, PInt32(Params^[1])^, True, PString(Params^[2])^);
 end;
 
 type
@@ -226,9 +224,12 @@ threadvar
 function EnumProcess(WindowHandle: HWND; Param: LPARAM): WINBOOL; stdcall;
 var
   I: integer;
-  pPid: DWORD;
-  r: TRect;
+  PID: DWORD;
+  R: TRect;
 begin
+  R := Default(TRect);
+  PID := 0;
+
   Result := (not ((WindowHandle = 0) or (WindowHandle = null)));
   if ((Result) and (IsWindowVisible(WindowHandle))) then
   begin
@@ -240,8 +241,8 @@ begin
     GetWindowRect(WindowHandle, R);
     ProcArr[i].Width := R.Right - R.Left;
     ProcArr[i].Height := R.Bottom - R.Top;
-    GetWindowThreadProcessId(WindowHandle, pPid);
-    ProcArr[I].Pid := pPid;
+    GetWindowThreadProcessId(WindowHandle, PID);
+    ProcArr[I].Pid := PID;
   end;
 end;
 {$ENDIF}
@@ -263,10 +264,12 @@ begin
   Pinteger(Result)^ := TIOManager(Params^[0]^).SetTarget(PPtrUInt(Params^[1])^);
 end;
 
-procedure Lape_Import_Deprecated(Compiler: TLapeCompiler; Data: Pointer);
+procedure Lape_Import_Deprecated(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
+    Section := 'Deprecated';
+
     addGlobalType('(htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160, htSHA1, htSHA256, htSHA384, htSHA512, htTiger)', 'THashType');
 
     addGlobalFunc('function GetProcesses: TSysProcArr; deprecated ' + #39 + 'Use TOSWindow' + #39 + ';', @Lape_GetProcesses);
@@ -294,9 +297,9 @@ begin
     addGlobalFunc('procedure rc2_encrypt(const Key: string; const HashType: THashType; var Data: string); deprecated;', @Lape_rc2_encrypt);
     addGlobalFunc('procedure rc2_decrypt(const Key: string; const HashType: THashType; var Data: string); deprecated;', @Lape_rc2_decrypt);
 
-    addGlobalMethod('function rs_GetUpText: string; deprecated;', @Lape_rs_GetUpText, Data);
-    addGlobalMethod('function rs_GetUpTextAt(x, y : integer): string; deprecated;', @Lape_rs_GetUpTextAt, Data);
-    addGlobalMethod('function rs_GetUpTextAtEx(x, y: integer; shadow: boolean; fontname: string): string; deprecated;', @Lape_rs_GetUpTextAtEx, Data);
+    addGlobalFunc('function rs_GetUpText: string; deprecated;', @Lape_rs_GetUpText);
+    addGlobalFunc('function rs_GetUpTextAt(x, y : integer): string; deprecated;', @Lape_rs_GetUpTextAt);
+    addGlobalFunc('function rs_GetUpTextAtEx(x, y: integer; shadow: boolean; fontname: string): string; deprecated;', @Lape_rs_GetUpTextAtEx);
 
     addGlobalFunc('function MessageBox(Text, Caption: String; Flags: Int32): Int32; deprecated '+ #39 + 'Replace with `MessageDlg`' + #39 + ';', @Lape_MessageBox);
 
@@ -319,7 +322,7 @@ begin
                    '  case Prop of'                                                                                                                           + LineEnding +
                    '    SP_OnTerminate:'                                                                                                                      + LineEnding +
                    '      for i := 0 to High(OnTerminateStrings) do'                                                                                          + LineEnding +
-                   '        Value += OnTerminateStrings[i].Method;'                                                                                                  + LineEnding +
+                   '        Value += OnTerminateStrings[i];'                                                                                                  + LineEnding +
                    '  end;'                                                                                                                                   + LineEnding +
                    'end;'                                                                                                                                     + LineEnding +
                    ''                                                                                                                                         + LineEnding +
@@ -393,6 +396,7 @@ begin
                    'end;'                                                                                                                                     + LineEnding +
                    ''                                                                                                                                         + LineEnding +
                    'procedure EdgeFromBoxWrap(const Box: TBox; var Res: TPointArray); deprecated;'                                                            + LineEnding +
+
                    'begin'                                                                                                                                    + LineEnding +
                    '  Res := EdgeFromBox(Box);'                                                                                                               + LineEnding +
                    'end;'                                                                                                                                     + LineEnding +
@@ -451,7 +455,6 @@ begin
 end;
 
 initialization
-  ScriptImports.Add('Deprecated', @Lape_Import_Deprecated);
+  RegisterScriptImport(@Lape_Import_Deprecated);
 
 end.
-

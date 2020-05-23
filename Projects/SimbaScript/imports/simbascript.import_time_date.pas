@@ -1,25 +1,24 @@
-unit script_import_time_date;
+unit simbascript.import_time_date;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils;
+{$i import_uses.inc}
 
 implementation
 
 uses
-  script_imports,lpcompiler, lptypes, mmisc;
+  simba.misc;
 
 procedure Lape_ConvertTime(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  ConvertTime(PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^);
+  ConvertTime(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^);
 end;
 
 procedure Lape_ConvertTime64(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  ConvertTime64(PUInt64(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^, PInt32(Params^[8])^);
+  ConvertTime64(PUInt64(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^);
 end;
 
 procedure Lape_GetSystemTime(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -27,18 +26,26 @@ begin
   PUInt64(Result)^ := GetTickCount64();
 end;
 
-procedure Lape_Import_Time_Date(Compiler: TLapeCompiler; Data: Pointer);
+procedure Lape_GetTimeRunning(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PUInt64(Result)^ := GetTickCount64() - Script.StartTime;
+end;
+
+procedure Lape_Import_Time_Date(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
-    addGlobalMethod('procedure ConvertTime(Time: Int32; var h, m, s: Int32);', @Lape_ConvertTime, Data);
-    addGlobalMethod('procedure ConvertTime64(Time: UInt64; var y, m, w, d, h, min, s: Int32);', @Lape_ConvertTime64, Data);
-    addGlobalMethod('function GetSystemTime: UInt64;', @Lape_GetSystemTime, Data);
+    Section := 'Time & Date';
+
+    addGlobalFunc('procedure ConvertTime(Time: Int32; var h, m, s: Int32);', @Lape_ConvertTime);
+    addGlobalFunc('procedure ConvertTime64(Time: UInt64; var y, m, w, d, h, min, s: Int32);', @Lape_ConvertTime64);
+    addGlobalFunc('function GetSystemTime: UInt64;', @Lape_GetSystemTime);
+    addGlobalFunc('function GetTimeRunning: UInt64;', @Lape_GetTimeRunning);
   end;
 end;
 
 initialization
-  ScriptImports.Add('Time & Date', @Lape_Import_Time_Date);
+  RegisterScriptImport(@Lape_Import_Time_Date);
 
 end.
 

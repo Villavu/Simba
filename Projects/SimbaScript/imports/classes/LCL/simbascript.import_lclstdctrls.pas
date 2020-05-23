@@ -1,18 +1,20 @@
-unit lplclstdctrls;
+unit simbascript.import_lclstdctrls;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils, lpcompiler, lptypes, ffi, script_imports;
-
-procedure RegisterLCLStdCtrls(Compiler: TLapeCompiler);
+{$i import_uses.inc}
 
 implementation
-  uses MufasaTypes,stdctrls,forms,lplclsystem,lplclgraphics,lplclcontrols, Buttons;
+
+uses
+  stdctrls, forms, buttons, controls, graphics;
 
 type
+  PObject = ^TObject;
+  PComponent = ^TComponent;
+  PNotifyEvent = ^TNotifyEvent;
   PCustomScrollBar = ^TCustomScrollBar;
   PScrollBarKind = ^TScrollBarKind;
   PScrollEvent = ^TScrollEvent;
@@ -60,6 +62,10 @@ type
   PDrawItemEvent = ^TDrawItemEvent;
   // TRadioButton
   PRadioButton = ^TRadioButton;
+  PWinControl = ^TWinControl;
+  PControl = ^TControl;
+  PBitmap = ^TBitmap;
+  PRect = ^TRect;
 
 {TCustomScrollBar}
 
@@ -195,7 +201,7 @@ begin
   PCustomScrollBar(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomScrollBar(Compiler: TLapeCompiler);
+procedure Register_TCustomScrollBar(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -231,7 +237,7 @@ begin
   PScrollBar(Params^[0])^.Free();
 end;
 
-procedure Register_TScrollBar(Compiler: TLapeCompiler);
+procedure Register_TScrollBar(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -484,7 +490,7 @@ begin
   PCustomComboBox(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomComboBox(Compiler: TLapeCompiler);
+procedure Register_TCustomComboBox(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -530,7 +536,7 @@ begin
   PComboBox(Params^[0])^.Free();
 end;
 
-procedure Register_TComboBox(Compiler: TLapeCompiler);
+procedure Register_TComboBox(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -805,7 +811,7 @@ begin
   PCustomListBox(Params^[0])^.OnDrawItem := PDrawItemEvent(Params^[1])^;
 end;
 
-procedure Register_TCustomListBox(Compiler: TLapeCompiler);
+procedure Register_TCustomListBox(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -859,7 +865,7 @@ begin
   PListBox(Params^[0])^.Free();
 end;
 
-procedure Register_TListBox(Compiler: TLapeCompiler);
+procedure Register_TListBox(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1063,7 +1069,7 @@ begin
   PCustomEdit(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomEdit(Compiler: TLapeCompiler);
+procedure Register_TCustomEdit(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1115,7 +1121,7 @@ begin
   PEdit(Params^[0])^.Free();
 end;
 
-procedure Register_TEdit(Compiler: TLapeCompiler);
+procedure Register_TEdit(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1137,7 +1143,7 @@ begin
   PCustomGroupBox(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomGroupBox(Compiler: TLapeCompiler);
+procedure Register_TCustomGroupBox(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1159,7 +1165,7 @@ begin
   PGroupBox(Params^[0])^.Free();
 end;
 
-procedure Register_TGroupBox(Compiler: TLapeCompiler);
+procedure Register_TGroupBox(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1183,7 +1189,7 @@ begin
   PMemoScrollbar(Params^[0])^.Free();
 end;
 
-procedure Register_TMemoScrollbar(Compiler: TLapeCompiler);
+procedure Register_TMemoScrollbar(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1296,7 +1302,7 @@ begin
   PCustomMemo(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomMemo(Compiler: TLapeCompiler);
+procedure Register_TCustomMemo(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1327,7 +1333,7 @@ begin
   PMemo(Params^[0])^.Free();
 end;
 
-procedure Register_TMemo(Compiler: TLapeCompiler);
+procedure Register_TMemo(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1412,7 +1418,7 @@ begin
   PCustomStaticText(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomStaticText(Compiler: TLapeCompiler);
+procedure Register_TCustomStaticText(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1440,7 +1446,7 @@ begin
   PStaticText(Params^[0])^.Free();
 end;
 
-procedure Register_TStaticText(Compiler: TLapeCompiler);
+procedure Register_TStaticText(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1466,7 +1472,7 @@ begin
   PButtonControl(Params^[0])^.Free();
 end;
 
-procedure Register_TButtonControl(Compiler: TLapeCompiler);
+procedure Register_TButtonControl(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1549,7 +1555,7 @@ begin
   PCustomButton(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomButton(Compiler: TLapeCompiler);
+procedure Register_TCustomButton(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1580,7 +1586,7 @@ begin
   PButton(Params^[0])^.Free();
 end;
 
-procedure Register_TButton(Compiler: TLapeCompiler);
+procedure Register_TButton(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1640,7 +1646,7 @@ begin
   PCustomCheckBox(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomCheckBox(Compiler: TLapeCompiler);
+procedure Register_TCustomCheckBox(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1666,7 +1672,7 @@ begin
   PCheckBox(Params^[0])^.Free();
 end;
 
-procedure Register_TCheckBox(Compiler: TLapeCompiler);
+procedure Register_TCheckBox(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1714,7 +1720,7 @@ begin
   PCustomLabel(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomLabel(Compiler: TLapeCompiler);
+procedure Register_TCustomLabel(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1740,7 +1746,7 @@ begin
   PLabel(Params^[0])^.Free();
 end;
 
-procedure Register_TLabel(Compiler: TLapeCompiler);
+procedure Register_TLabel(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1919,7 +1925,7 @@ begin
   PCustomSpeedButton(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomSpeedButton(Compiler: TLapeCompiler);
+procedure Register_TCustomSpeedButton(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1956,7 +1962,7 @@ begin
   PSpeedButton(Params^[0])^.Free();
 end;
 
-procedure Register_TSpeedButton(Compiler: TLapeCompiler);
+procedure Register_TSpeedButton(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1979,7 +1985,7 @@ begin
   PRadioButton(Params^[0])^.Free();
 end;
 
-procedure Register_TRadioButton(Compiler: TLapeCompiler);
+procedure Register_TRadioButton(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1990,7 +1996,7 @@ begin
   end;
 end;
 
-procedure RegisterLCLStdCtrls(Compiler: TLapeCompiler);
+procedure Register_LCLStdCtrls(Compiler: TScriptCompiler);
 begin
   with Compiler do
    begin
@@ -2033,5 +2039,8 @@ begin
   Register_TSpeedButton(Compiler);
   Register_TRadioButton(Compiler);
 end;
+
+initialization
+  RegisterScriptImport(@Register_LCLStdCtrls);
 
 end.

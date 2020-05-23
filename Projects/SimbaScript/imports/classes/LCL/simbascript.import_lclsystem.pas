@@ -1,11 +1,10 @@
-unit lplclsystem;
+unit simbascript.import_lclsystem;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils, lpcompiler, lptypes, ffi, script_imports;
+{$i import_uses.inc}
 
 type
   PComponent = ^TComponent;
@@ -29,12 +28,7 @@ type
   PCollectionItem = ^TCollectionItem;
   PCollection = ^TCollection;
 
-procedure RegisterLCLSystem(Compiler: TLapeCompiler);
-
 implementation
-
-uses
-  lpTObject, MufasaTypes;
 
 {TPersistent}
 //procedure Assign(Source: TPersistent);
@@ -61,7 +55,7 @@ begin
   PPersistent(Params^[0])^.Free();
 end;
 
-procedure Register_TPersistent(Compiler: TLapeCompiler);
+procedure Register_TPersistent(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -243,7 +237,7 @@ begin
   PStream(Params^[0])^.Free();
 end;
 
-procedure Register_TStream(Compiler: TLapeCompiler);
+procedure Register_TStream(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -314,7 +308,7 @@ begin
   PHandleStream(Params^[0])^.Free();
 end;
 
-procedure Register_THandleStream(Compiler: TLapeCompiler);
+procedure Register_THandleStream(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -355,7 +349,7 @@ begin
   PFileStream(Params^[0])^.Free();
 end;
 
-procedure Register_TFileStream(Compiler: TLapeCompiler);
+procedure Register_TFileStream(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -412,7 +406,7 @@ begin
   PCustomMemoryStream(Params^[0])^.Free();
 end;
 
-procedure Register_TCustomMemoryStream(Compiler: TLapeCompiler);
+procedure Register_TCustomMemoryStream(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -471,7 +465,7 @@ begin
   PMemoryStream(Params^[0])^.Free();
 end;
 
-procedure Register_TMemoryStream(Compiler: TLapeCompiler);
+procedure Register_TMemoryStream(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -536,7 +530,7 @@ begin
   PStringStream(Params^[0])^.Free();
 end;
 
-procedure Register_TStringStream(Compiler: TLapeCompiler);
+procedure Register_TStringStream(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -752,7 +746,7 @@ begin
   PStrings(Params^[0])^.Free();
 end;
 
-procedure Register_TStrings(Compiler: TLapeCompiler);
+procedure Register_TStrings(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -920,7 +914,7 @@ begin
   PStringList(Params^[0])^.Free();
 end;
 
-procedure Register_TStringList(Compiler: TLapeCompiler);
+procedure Register_TStringList(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1051,7 +1045,7 @@ begin
   PComponent(Params^[0])^.Free();
 end;
 
-procedure Register_TComponent(Compiler: TLapeCompiler);
+procedure Register_TComponent(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1077,7 +1071,7 @@ begin
   end;
 end;
 
-procedure Register_TCollection_Forward(Compiler: TLapeCompiler);
+procedure Register_TCollection_Forward(Compiler: TScriptCompiler);
 begin
   with Compiler do
     addClass('TCollection', 'TPersistent');
@@ -1143,7 +1137,7 @@ begin
   PCollectionItem(Params^[0])^.Free();
 end;
 
-procedure Register_TCollectionItem(Compiler: TLapeCompiler);
+procedure Register_TCollectionItem(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1249,7 +1243,7 @@ begin
   PCollection(Params^[0])^.Free();
 end;
 
-procedure Register_TCollection(Compiler: TLapeCompiler);
+procedure Register_TCollection(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1271,7 +1265,7 @@ begin
 end;
 
 {Registration classes procedure}
-procedure RegisterLCLSystem(Compiler: TLapeCompiler);
+procedure Register_LCLSystem(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -1297,6 +1291,9 @@ begin
     Register_TCollection(Compiler);
   end;
 end;
+
+initialization
+  RegisterScriptImport(@Register_LCLSystem);
 
 end.
 

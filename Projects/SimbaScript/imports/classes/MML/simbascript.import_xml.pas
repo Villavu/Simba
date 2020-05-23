@@ -1,17 +1,18 @@
-unit lpxml;
+unit simbascript.import_xml;
 //Depends: TXmlNode, TObject, String, String): TXmlNode; virtual
 
 {$mode objfpc}{$H+}
-{$I Simba.inc}
 
 interface
 
-uses
-  Classes, SysUtils,uxml, lpcompiler, lptypes, script_imports;
+{$i import_uses.inc}
 
-procedure Register_TXml(Compiler: TLapeCompiler);
+procedure Register_TXml(Compiler: TScriptCompiler);
 
 implementation
+
+uses
+  simba.xmlparser;
 
 type
   PXmlNode = ^TXmlNode;
@@ -115,7 +116,7 @@ begin
   PlpString(Result)^ := PXmlNode(Params^[0])^[PlpString(Params^[1])^];
 end;
 
-procedure Register_TXmlNode(Compiler: TLapeCompiler);
+procedure Register_TXmlNode(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -214,7 +215,7 @@ begin
   PXMLNodeList(Params^[0])^.Free();
 end;
 
-procedure Register_TXMLNodeList(Compiler: TLapeCompiler);
+procedure Register_TXMLNodeList(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -321,7 +322,7 @@ begin
   PVerySimpleXml(Params^[0])^.Free();
 end;
 
-procedure Register_TXml(Compiler: TLapeCompiler);
+procedure Register_TXml(Compiler: TScriptCompiler);
 begin
   Register_TXmlNode(Compiler);
   Register_TXmlNodeList(Compiler);
@@ -343,6 +344,9 @@ begin
     addGlobalFunc('procedure TXml.Free();', @TVerySimpleXml_Free);
   end;
 end;
+
+initialization
+  RegisterScriptImport(@Register_TXml);
 
 end.
 

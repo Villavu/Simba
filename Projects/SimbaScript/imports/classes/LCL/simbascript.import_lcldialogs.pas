@@ -1,18 +1,21 @@
-unit lplcldialogs;
+unit simbascript.import_lcldialogs;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils, lpcompiler, lptypes, script_imports;
-
-procedure RegisterLCLDialogs(Compiler: TLapeCompiler);
+{$i import_uses.inc}
 
 implementation
-  uses MufasaTypes, stdctrls, forms, lplclsystem, lplclgraphics, ComCtrls, Dialogs, LCLClasses;
+
+uses
+  stdctrls, forms, comctrls, dialogs, lclclasses;
 
 type
+  PHandle = ^THandle;
+  PNotifyEvent = ^TNotifyEvent;
+  PObject = ^TObject;
+  PComponent = ^TComponent;
   PCommonDialog = ^TCommonDialog;
   PCloseQueryEvent = ^TCloseQueryEvent;
   PLCLComponent = ^TLCLComponent;
@@ -60,7 +63,7 @@ begin
   PLCLComponent(Params^[0])^.Free();
 end;
 
-procedure Register_TLCLComponent(Compiler: TLapeCompiler);
+procedure Register_TLCLComponent(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -220,7 +223,7 @@ begin
   PCommonDialog(Params^[0])^.Free();
 end;
 
-procedure Register_TCommonDialog(Compiler: TLapeCompiler);
+procedure Register_TCommonDialog(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -377,7 +380,7 @@ begin
   PFileDialog(Params^[0])^.Free();
 end;
 
-procedure Register_TFileDialog(Compiler: TLapeCompiler);
+procedure Register_TFileDialog(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -466,7 +469,7 @@ begin
   POpenDialog(Params^[0])^.Free();
 end;
 
-procedure Register_TOpenDialog(Compiler: TLapeCompiler);
+procedure Register_TOpenDialog(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -518,7 +521,7 @@ begin
   PColorDialog(Params^[0])^.Free();
 end;
 
-procedure Register_TColorDialog(Compiler: TLapeCompiler);
+procedure Register_TColorDialog(Compiler: TScriptCompiler);
 begin
    with Compiler do
    begin
@@ -531,7 +534,7 @@ begin
    end;
 end;
 
-procedure RegisterLCLDialogs(Compiler: TLapeCompiler);
+procedure Register_LCLDialogs(Compiler: TScriptCompiler);
 begin
   with Compiler do
    begin
@@ -544,5 +547,8 @@ begin
   Register_TOpenDialog(Compiler);
   Register_TColorDialog(Compiler);
 end;
+
+initialization
+  RegisterScriptImport(@Register_LCLDialogs);
 
 end.

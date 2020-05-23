@@ -1,19 +1,18 @@
-unit lpTTarget;
+unit simbascript.import_ttarget;
 //Depends: TTarget, TObject, integer, Integer, TClickType, string, char
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils, lpcompiler, lptypes, script_imports;
+{$i import_uses.inc}
 
-procedure Register_TTarget(Compiler: TLapeCompiler);
+procedure Register_TTarget(Compiler: TScriptCompiler);
 
 implementation
 
 uses
-  simba.target, graphics, mufasatypes, simba.iomanager;
+  simba.target, graphics, simba.iomanager;
 
 type
   PColor = ^TColor;
@@ -200,7 +199,7 @@ begin
   PBoolean(Result)^ := PTarget(Params^[0])^.AutoFocus;
 end;
 
-procedure Register_TTarget(Compiler: TLapeCompiler);
+procedure Register_TTarget(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -242,6 +241,9 @@ begin
     addGlobalFunc('procedure TTarget.Free(); constref;', @TTarget_Free);
   end;
 end;
+
+initialization
+  RegisterScriptImport(@Register_TTarget);
 
 end.
 

@@ -1,18 +1,17 @@
-unit lpTMMLTimer;
+unit simbascript.import_tmmltimer;
 
 {$mode objfpc}{$H+}
 
 interface
 
-uses
-  Classes, SysUtils, lpcompiler, lptypes, script_imports;
+{$i import_uses.inc}
 
-procedure Register_TMMLTimer(Compiler: TLapeCompiler);
+procedure Register_TMMLTimer(Compiler: TScriptCompiler);
 
 implementation
 
 uses
-  MMLTimer;
+  simba.mmltimer;
 
 type
   PMMLTimer = ^TMMLTimer;
@@ -79,7 +78,7 @@ begin
   PMMLTimer(Params^[0])^.OnTimer := PNotifyEvent(Params^[1])^;
 end;
 
-procedure Register_TMMLTimer(Compiler: TLapeCompiler);
+procedure Register_TMMLTimer(Compiler: TScriptCompiler);
 begin
   with Compiler do
   begin
@@ -97,6 +96,9 @@ begin
     addGlobalFunc('procedure TMMLTimer.Free(); constref;', @TMMLTimer_Free);
   end;
 end;
+
+initialization
+  RegisterScriptImport(@Register_TMMLTimer);
 
 end.
 
