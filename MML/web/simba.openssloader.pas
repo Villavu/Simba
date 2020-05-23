@@ -49,6 +49,8 @@ end;
 
 function TSimbaOpenSSLLoader.Load: Boolean;
 begin
+  Exit(True);
+  {
   // unpack and install from resource files. (project options > resources)
   with TUnZipper.Create() do
   try
@@ -75,7 +77,7 @@ begin
   DLLSSLName := ExtractFileName(DLLSSLName);
   DLLUtilName := ExtractFileName(DLLUtilName);
 
-  Exit(False);
+  Exit(False); }
 end;
 
 end.

@@ -21,7 +21,7 @@
     Finder class for the Mufasa Macro Library
 }
 
-unit finder;
+unit simba.finder;
 
 {$mode objfpc}{$H+}
 {$INLINE ON}
@@ -30,7 +30,7 @@ interface
 
 {$define CheckAllBackground}//Undefine this to only check the first white point against the background (in masks).
 uses
-  colour_conv, Classes, SysUtils, bitmaps, DTM, MufasaTypes; // Types
+  simba.colormath, classes, sysutils, simba.bitmap, simba.dtm, simba.mufasatypes; // types
 
 { TMFinder Class }
 
@@ -167,11 +167,11 @@ type
 implementation
 
 uses
-  Client,             // For the client casting.
+  simba.client,             // For the client casting.
   math,               // min/max
-  tpa,                //TPABounds
-  dtmutil,
-  matchTempl, matrix; //template matching
+  simba.tpa,                //TPABounds
+  simba.dtmutil,
+  simba.matchtemplate, simba.matrix; //template matching
 
 var
   Percentage : array[0..255] of Extended;
@@ -1558,7 +1558,7 @@ begin
   for y:=0 to TemplImage.Height-1 do
     Move(TemplImage.FData[y*TemplImage.Width], Templ[y,0], TemplImage.Width*SizeOf(TRGB32));
 
-  xcorr := MatchTempl.MatchTemplate(Image, Templ, Ord(Formula));
+  xcorr := MatchTemplate(Image, Templ, Ord(Formula));
 
 
   if Formula in [TM_SQDIFF, TM_SQDIFF_NORMED] then

@@ -1,7 +1,6 @@
 unit simba.httpclient;
 
 {$mode objfpc}{$H+}
-{$i Simba.inc}
 
 interface
 
@@ -145,12 +144,33 @@ type
     destructor Destroy; override;
   end;
 
+  function InitializeOpenSSL(Directory: String): Boolean;
+
 implementation
 
 uses
-  mufasabase, simbaunit,
-  simba.zip, simba.tar, simba.tar_gz, simba.tar_bz2,
-  simba.environment, simba.openssloader, simba.opensslsockets;
+  simba.mufasabase,
+  simba.zip, simba.tar, simba.tar_gz, simba.tar_bz2, simba.opensslsockets, simba.openssl;
+
+function InitializeOpenSSL(Directory: String): Boolean;
+begin
+  Result := False;
+
+  DLLUtilName := Directory + DLLUtilName;
+  DLLSSLName := Directory + DLLSSLName;
+
+  try
+    InitSSLInterface();
+  except
+  end;
+
+  if IsSSLLoaded() then
+    Exit(True);
+
+  // if error revert back to searching on the system.
+  DLLSSLName := ExtractFileName(DLLSSLName);
+  DLLUtilName := ExtractFileName(DLLUtilName);
+end;
 
 type
   TSimbaHTTPClientBase = class(TFPHTTPClient) // default will raise a exception on a response code that isn't HTTP_OK or HTTP_FOUND.
@@ -382,17 +402,6 @@ begin
 
   inherited Destroy();
 end;
-
-initialization
-  {$IFDEF SIMBA_OPENSSL}
-  with TSimbaOpenSSLLoader.Create() do
-  try
-    if not Load() then
-      WriteLn('[WEB]: OpenSSL initialization failed. Falling back to system libaries');
-  finally
-    Free();
-  end;
-  {$ENDIF}
 
 end.
 

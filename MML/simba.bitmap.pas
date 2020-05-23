@@ -21,14 +21,15 @@
     Bitmaps class for the Mufasa Macro Library
 }
 
-unit bitmaps;
+unit simba.bitmap;
 
 {$mode objfpc}{$H+}
 {$inline on}
 
 interface
+
 uses
-  Classes, SysUtils, FPImage,IntfGraphics,graphtype,MufasaTypes,MufasaBase,graphics;
+  classes, sysutils, fpimage, intfgraphics, graphtype, simba.mufasatypes, graphics;
 
 type
   TMBitmaps = class;
@@ -121,10 +122,13 @@ type
     function ToTBitmap: TBitmap;
     function ToString : string; override;
     function ToMatrix: T2DIntegerArray;
+    function ToRawImage: TRawImage;
+
     procedure DrawMatrix(const matrix: T2DIntegerArray);
     procedure DrawMatrix(const Matrix: TSingleMatrix; ColorMapID: Int32 = 0); overload;
     procedure ThresholdAdaptive(Alpha, Beta: Byte; InvertIt: Boolean; Method: TBmpThreshMethod; C: Integer);
     function RowPtrs : TPRGB32Array;
+    procedure LoadFromMemory(Memory: PRGB32; AWidth, AHeight: Int32);
     procedure LoadFromTBitmap(bmp: TBitmap);
     procedure LoadFromRawImage(RawImage: TRawImage);
     function CreateTMask : TMask;
@@ -175,11 +179,11 @@ type
 implementation
 
 uses
-  paszlib, DCPbase64, math,
-  client, tpa,
-  colour_conv, simba.iomanager, mufasatypesutil,
+  math, base64,
+  simba.client, simba.tpa, simba.stringutil,
+  simba.colormath, simba.iomanager,
   FileUtil, LazUTF8,
-  matchTempl, matrix;
+  simba.matchtemplate, simba.matrix;
 
 
 // Needs more fixing. We need to either copy the memory ourself, or somehow
@@ -457,112 +461,37 @@ begin
       result := Assigned(BmpArray[Index]);
 end;
 
-function TMBitmaps.CreateBMPFromString(width, height: integer; Data: string): integer;
+function TMBitmaps.CreateBMPFromString(Width, Height: integer; Data: string): integer;
 var
-  I,II: LongWord;
-  DestLen : LongWord;
-  Dest,Source : string;
-  DestPoint, Point : PByte;
-  MufRaw : PRGB24;
-  MufDest : PRGB32;
-
-
+  i: Int32;
+  Source: String;
+  SourcePtr: PRGB24;
+  DestPtr: PRGB32;
 begin
-  Result := CreateBMP(width,height);
-  if (Data <> '') and (Length(Data) <> 6) then
-  begin;
-    Point := Pointer(BmpArray[Result].FData);
-    if (Data[1] = 'b') or (Data[1] = 'm') then
-    begin;
-      Source := Base64DecodeStr(Copy(Data,2,Length(Data) - 1));
-      Destlen := Width * Height * 3;
-      Setlength(Dest,DestLen);
-      if uncompress(PChar(Dest),Destlen,pchar(Source), Length(Source)) = Z_OK then
-      begin;
-        if data[1] = 'm' then //Our encrypted bitmap! Winnor.
-        begin
-          MufRaw:= @Dest[1];
-          MufDest:= PRGB32(Point);
-          for i := width * height - 1 downto 0 do
-          begin
-            MufDest[i].R:= MufRaw[i].R;
-            MufDest[i].G := MufRaw[i].G;
-            MufDest[i].B := MufRaw[i].B;
-          end;
-        end else
-        if Data[1] = 'b'then
-        begin
-          DestPoint := @Dest[1];
-          i := 0;
-          ii := 2;
-          Dec(DestLen);
-          if DestLen > 2 then
-          begin;
-            while (ii < DestLen) do
-            Begin;
-              Point[i]:= DestPoint[ii+2];
-              Point[i+1]:= DestPoint[ii+1];
-              Point[i+2]:= DestPoint[ii];
-              ii := ii + 3;
-              i := i + 4;
-            end;
-            Point[i] := DestPoint[1];
-            Point[i+1] := DestPoint[0];
-            Point[i+2] := DestPoint[ii];
-          end else if (Width = 1) and (Height =1 ) then
-          begin;
-            Point[0] := DestPoint[1];
-            Point[1] := DestPoint[0];
-            Point[2] := DestPoint[2];
-          end;
-        end;
-      end;
-    end else if Data[1] = 'z' then
-    begin;
-      Destlen := Width * Height * 3 *2;
-      Setlength(Dest,DestLen);
-      ii := (Length(Data) - 1) div 2;
-      SetLength(Source,ii);
-      for i := 1 to ii do
-        Source[i] := Chr(HexToInt(Data[i * 2] + Data[i * 2+1]));
-      if uncompress(PChar(Dest),Destlen,pchar(Source), ii) = Z_OK then
-      begin;
-        ii := 1;
-        i := 0;
-        while (II < DestLen) do
-        begin;
-          Point[i+2]:= HexToInt(Dest[ii] + Dest[ii + 1]);
-          Point[i+1]:= HexToInt(Dest[ii+2] + Dest[ii + 3]);
-          Point[i]:= HexToInt(Dest[ii+4] + Dest[ii + 5]);
-          ii := ii + 6;
-          i := i + 4;
-        end;
-      end;
-    end else if LongWord(Length(Data)) = LongWord((Width * Height * 3 * 2)) then
-    begin;
-      ii := 1;
-      i := 0;
-      Destlen := Width * Height * 3 * 2;
-      while (II < DestLen) do
-      begin;
-        Point[i+2]:= HexToInt(Data[ii] + Data[ii + 1]);
-        Point[i+1]:= HexToInt(Data[ii+2] + Data[ii + 3]);
-        Point[i]:= HexToInt(Data[ii+4] + Data[ii + 5]);
-        ii := ii + 6;
-        i := i + 4;
-      end;
+  Result := CreateBMP(Width, Height);
+
+  if (Data <> '') then
+  begin
+    Source := '';
+    if Data[1] = 'm' then
+      Source := DecompressString(Base64Decode(Data.Remove(0, 1)), False);
+
+    if Source = '' then
+      raise Exception.Create('Invalid bitmap string');
+
+    SourcePtr := @Source[1];
+    DestPtr := PRGB32(BmpArray[Result].FData);
+
+    for i := Width * Height - 1 downto 0 do
+    begin
+      DestPtr[i].R := SourcePtr[i].R;
+      DestPtr[i].G := SourcePtr[i].G;
+      DestPtr[i].B := SourcePtr[i].B;
     end;
-  end else
-  begin;
-    if Length(data) = 6 then
-      BmpArray[Result].FastDrawClear(HexToInt(Data));
-//    else
-//      FastDrawClear(Result,clBlack);
   end;
 end;
 
-function TMBitmaps.CreateBMPFromString(BmpName: string; width, height: integer;
-  Data: string): integer;
+function TMBitmaps.CreateBMPFromString(BmpName: string; width, height: integer; Data: string): integer;
 begin
   Result := Self.CreateBMPFromString(width,height,data);
   Bmp[Result].Name:= BmpName;
@@ -604,6 +533,8 @@ begin
   try
     if not Image.SaveToFile(FileName) then
       raise Exception.CreateFmt('TMufasaBitmap.SaveToFile: Image format "%s" is not supported', [ExtractFileExt(FileName)]);
+
+    Result := True;
   finally
     Image.Free();
   end;
@@ -747,27 +678,21 @@ end;
 
 function TMufasaBitmap.ToString: string;
 var
-  i : integer;
-  DestLen : longword;
-  DataStr : string;
-  CorrectData : PRGB24;
+  i: Int32;
+  Data: string;
+  DataPtr: PRGB24;
 begin
-  SetLength(DataStr,FWidth*FHeight*3);
-  CorrectData:= PRGB24(@DataStr[1]);
-  for i := FWidth*FHeight - 1 downto 0 do
+  SetLength(Data, FWidth * FHeight * 3);
+
+  DataPtr := PRGB24(@Data[1]);
+  for i := FWidth * FHeight - 1 downto 0 do
   begin
-    CorrectData[i].R := FData[i].R;
-    CorrectData[i].G := FData[i].G;
-    CorrectData[i].B := FData[i].B;
+    DataPtr[i].R := FData[i].R;
+    DataPtr[i].G := FData[i].G;
+    DataPtr[i].B := FData[i].B;
   end;
-  DestLen := BufferLen;
-  if compress(BufferString,destlen,PChar(DataStr),FWidth*FHeight*3) = Z_OK then
-  begin;
-    SetLength(DataStr,DestLen);
-    move(bufferstring[0],dataStr[1],DestLen);
-    result := 'm' + Base64EncodeStr(datastr);
-    SetLength(datastr,0);
-  end;
+
+  Result := 'm' + Base64Encode(CompressString(Data, False));
 end;
 
 function TMufasaBitmap.ToMatrix: T2DIntegerArray;
@@ -782,6 +707,11 @@ begin
   for y := 0 to hei do
     for x := 0 to wid do
       result[y][x] := BGRToRGB(self.FData[y * FWidth + x]);
+end;
+
+function TMufasaBitmap.ToRawImage: TRawImage;
+begin
+  ArrDataToRawImage(FData, Point(Width, Height), Result);
 end;
 
 procedure TMufasaBitmap.DrawMatrix(const matrix: T2DIntegerArray);
@@ -861,6 +791,13 @@ begin;
   setlength(result,FHeight);
   for i := 0 to FHeight - 1 do
     result[i] := FData + FWidth * i;
+end;
+
+procedure TMufasaBitmap.LoadFromMemory(Memory: PRGB32; AWidth, AHeight: Int32);
+begin
+  SetSize(AWidth, AHeight);
+
+  Move(Memory^, FData^, AWidth * AHeight * SizeOf(TRGB32));
 end;
 
 procedure TMufasaBitmap.LoadFromRawImage(RawImage: TRawImage);
@@ -1248,7 +1185,7 @@ begin
   end else
   begin
     for y := 0 to (hi-1) do
-      Move(Data.Ptr[y * Data.RowLen], FData[y * self.FWidth],wi * SizeOf(TRGB32));
+      Move(Data.Ptr[y * Data.RowLen], FData[y * self.FWidth], wi * SizeOf(TRGB32));
     
     TIOManager(MWindow).FreeReturnData();
   end;
@@ -1962,7 +1899,7 @@ begin
   for y:=0 to Other.Height-1 do
     Move(Other.FData[y*Other.Width], Templ[y,0], Other.Width*SizeOf(Int32));
   
-  Result := MatchTempl.MatchTemplate(Image, Templ, Int32(Formula));
+  Result := simba.matchtemplate.MatchTemplate(Image, Templ, Int32(Formula));
 end;
 
 function TMufasaBitmap.FindTemplate(Other: TMufasaBitmap; Formula: ETMFormula; MinMatch: Extended): TPoint;
@@ -2209,6 +2146,7 @@ begin
   begin
     SetLength(WriteStr, Length(WriteStr) - 1);
     WriteStr[Length(writeStr)] := ']';
+
     TClient(Client).Writeln(Format('The following bitmaps were not freed: %s', [WriteStr]));
   end;
 

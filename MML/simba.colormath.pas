@@ -21,7 +21,7 @@
     Colour Conversion Utilities for the Mufasa Macro Library
 }
 
-unit colour_conv;
+unit simba.colormath;
 
 {$mode objfpc}{$H+}
 {$Inline on}
@@ -30,7 +30,7 @@ interface
 
 uses
   Classes, SysUtils,
-  Graphics, mufasatypes,
+  Graphics, simba.mufasatypes,
   Math;
 
 

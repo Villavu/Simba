@@ -21,41 +21,41 @@
     String Util for Mufasa Macro Library
 }
 
-unit stringutil;
+unit simba.stringutil;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils,  StrUtils, mufasatypes;
+  Classes, SysUtils, StrUtils, simba.mufasatypes;
 
 type
-  StrExtr =(Numbers, Letters, Others);
+  StrExtr = (Numbers, Letters, Others);
   PStrExtr = ^StrExtr;
 
-function ExtractFromStr( Str : string; Extract : StrExtr) : string;
-function Capitalize(str : string) : string;
-function Implode(Glue : string; Pieces: TStringArray): string;
-function Explode(del, str: string): TStringArray;
-function CompressString(const Str : string) : string;
-function DecompressString(const Compressed : string) : string;
-function Base64Encode(const str : string) : string;
-function Base64Decode(const str : string) : string;
-function LevDistance(src, target: string): Integer;
-function NormLevDistance(src, target: string): Extended;
-function StringMatch(checkCompare, goalCompare: string): extended;
-function MultiBetween(str, s1, s2: string): TStringArray;
-function IsArrInStr(strArr: TStringArray; s: string): boolean;
-function IsStrInArr(const s: string; const UsePos: Boolean; const Arr: TStringArray): boolean;
+function ExtractFromStr(Str : String; Extract : StrExtr) : String;
+function Capitalize(str: String) : String;
+function Implode(Glue: String; Pieces: TStringArray): String;
+function Explode(del, str: String): TStringArray;
+function CompressString(const Str: String; Header: Boolean = True): String;
+function DecompressString(const Str: String; Header: Boolean = True) : String;
+function Base64Encode(const str : String) : String;
+function Base64Decode(const str : String) : String;
+function LevDistance(src, target: String): Integer;
+function NormLevDistance(src, target: String): Extended;
+function StringMatch(checkCompare, goalCompare: String): extended;
+function MultiBetween(str, s1, s2: String): TStringArray;
+function IsArrInStr(strArr: TStringArray; s: String): boolean;
+function IsStrInArr(const s: String; const UsePos: Boolean; const Arr: TStringArray): boolean;
 function PosMulti(const SubStr, Text:String): TIntegerArray;
-function Between(s1, s2, str: string): string;
+function Between(s1, s2, str: String): String;
 
 implementation
 uses
-  paszlib,  DCPbase64, math;
+  math, base64, zstream;
 
-function Implode(Glue: string;Pieces: TStringArray): string;
+function Implode(Glue: String;Pieces: TStringArray): String;
 var
   I, Len : integer;
 begin
@@ -68,7 +68,7 @@ begin
     result := result + Glue + Pieces[i];
 end;
 
-function Explode(del, str: string): TStringArray;
+function Explode(del, str: String): TStringArray;
 var
   i,ii : integer;
   lastpos : integer;
@@ -105,64 +105,104 @@ begin;
         if i = lenstr then //This was the trailing delimiter
           exit;
       end;
-    end else //We cannot possibly find a delimiter anymore, thus copy the rest of the string and exit
+    end else //We cannot possibly find a delimiter anymore, thus copy the rest of the String and exit
       Break;
     inc(i);
   end;
-  //Copy the rest of the string (if it's not a delimiter)
+  //Copy the rest of the String (if it's not a delimiter)
   inc(lenres);
   setlength(result,lenres);
   result[lenres-1] := Copy(str,lastpos,lenstr - lastpos + 1);
 end;
 
-function CompressString(const Str: string): string;
+function CompressString(const Str: String; Header: Boolean): String;
 var
-  Destlen:longword;
+  Len: Int32;
+  Output: TMemoryStream;
+  Stream: TCompressionStream;
 begin
-  result := '';
-  Destlen :=BufferLen;
-  if length(str) <  1 then
-    exit;
-  if compress(BufferString,destlen,PChar(Str),length(str)) = Z_OK then
-  begin
-    setlength(result,Destlen + SizeOf(Integer));
-    PInteger(@result[1])^ := Length(str);
-    Move(bufferstring[0],result[5],Destlen);
+  Len := Length(Str);
+  if (Len = 0) then
+    Exit;
+
+  Output := nil;
+  Stream := nil;
+
+  try
+    Output := TMemoryStream.Create();
+    if Header then
+      Output.Write(Len, SizeOf(Int32)); // preappends the uncompressed string length for backwards compatibility (streams are now used - not needed)
+
+    Stream := TCompressionStream.Create(clDefault, Output);
+    Stream.Write(Str[1], Len);
+    Stream.Flush();
+
+    SetLength(Result, Output.Size);
+
+    Output.Position := 0;
+    Output.Read(Result[1], Output.Size);
+  except
   end;
+
+  if (Stream <> nil) then
+    Stream.Free() // Stream will free Output too
+  else
+  if (Output <> nil) then
+    Output.Free();
 end;
 
-function DecompressString(const Compressed: string): string;
+function DecompressString(const Str: String; Header: Boolean): String;
 var
-  destlen : Longword;
-  len,dest : integer;
-  Compress : PChar;
+  Input: TStringStream;
+  Stream: TDeCompressionStream;
+  Buffer: array[1..4096] of Char;
+  Count: Int32;
 begin
-  result := '';
-  len := Length(Compressed);
-  Compress := PChar(Compressed);
-  if len < 5 then
-    exit;
-  dest := PInteger(@compress[0])^;
-  Inc(Compress,sizeof(integer));
-  if dest < 1 then
-    exit;
-  destlen := dest;
-  setlength(result,destlen);
-  if uncompress(PChar(result),destlen,Compress,len) <> z_OK then
-    result := '';
+  Result := '';
+  if Str = '' then
+    Exit;
+
+  Input := nil;
+  Stream := nil;
+
+  try
+    Input := TStringStream.Create(Str);
+    if Header then
+      Input.Position := 4; // skip preappended uncompressed string length. (not used anymore)
+
+    Stream := TDeCompressionStream.Create(Input);
+
+    repeat
+      Count := Stream.Read(Buffer[1], Length(Buffer));
+      if Count > 0 then
+        Result := Result + System.Copy(Buffer, 1, Count);
+    until Count = 0;
+  except
+  end;
+
+  if (Stream <> nil) then
+    Stream.Free();
+  if (Input <> nil) then
+    Input.Free();
 end;
 
-function Base64Encode(const str: string): string;
+function Base64Encode(const str: String): String;
 begin
-  result := Base64EncodeStr(str);
+  if Str = '' then
+    Result := ''
+  else
+    Result := EncodeStringBase64(str);
 end;
 
-function Base64Decode(const str: string): string;
+function Base64Decode(const str: String): String;
 begin
-  result := Base64DecodeStr(str);
+  if Str = '' then
+    Result := ''
+  else
+    Result := DecodeStringBase64(str);
 end;
 
-function Capitalize(str : string) : string;
+function Capitalize(str : String) : String;
 var
   i , l : integer;
   cap : boolean;
@@ -181,7 +221,7 @@ begin;
       cap := true;
 end;
 
-function ExtractFromStr( Str : string; Extract : StrExtr) : string;
+function ExtractFromStr( Str : String; Extract : StrExtr) : String;
 var
   Range : set of char;
   i : integer;
@@ -206,7 +246,7 @@ Number of deletions, insertions, or substitutions to transform src into target.
 Uses Levenshtein, original code taken from:
 www.merriampark.com/lddelphi.htm
 *)
-function LevDistance(src, target: string): Integer;
+function LevDistance(src, target: String): Integer;
 
   function min3(a, b, c: Integer): Integer;
   begin
@@ -269,7 +309,7 @@ end;
 {/\
   Uses Levenshtein to work out the match % between the two strings.
 /\}
-function StringMatch(checkCompare, goalCompare: string): extended;
+function StringMatch(checkCompare, goalCompare: String): extended;
 var
   mismatch, len: extended;
 begin
@@ -285,12 +325,12 @@ begin
 end;
 
 {/\
-  Splits a string into an array of strings by giving it an begin and an end
+  Splits a String into an array of strings by giving it an begin and an end
   tag. Useful for data reading.
 /\}
-function MultiBetween(str, s1, s2: string): TStringArray;
+function MultiBetween(str, s1, s2: String): TStringArray;
 
-  function Between(s1, s2, str: string): string;
+  function Between(s1, s2, str: String): String;
   var
     I,J : integer;
   begin;
@@ -342,7 +382,7 @@ begin
   SetLength(Result, r);
 end;
 
-function IsArrInStr(strArr: TStringArray; s: string): boolean;
+function IsArrInStr(strArr: TStringArray; s: String): boolean;
 var
   i, h: integer;
 begin
@@ -357,7 +397,7 @@ begin
   result := false;
 end;
 
-function IsStrInArr(const s: string; const UsePos: Boolean; const Arr: TStringArray): boolean;
+function IsStrInArr(const s: String; const UsePos: Boolean; const Arr: TStringArray): boolean;
 var
   i, h: integer;
 begin
@@ -408,7 +448,7 @@ begin
   SetLength(Result, h);
 end;
 
-function Between(s1, s2, str: string): string;
+function Between(s1, s2, str: String): String;
 var
   I,J : integer;
 begin;

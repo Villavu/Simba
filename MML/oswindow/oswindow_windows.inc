@@ -222,6 +222,16 @@ begin
   Result := Windows.GetDesktopWindow();
 end;
 
+function GetWindowAtCursor: TOSWindow;
+var
+  Cursor: TPoint;
+begin
+  Result := 0;
+
+  if GetCursorPos(Cursor) then
+    Result := WindowFromPoint(Cursor);
+end;
+
 function __GetTopWindows(Window: HWND; Data: LPARAM): WINBOOL; stdcall;
 begin
   Result := True;

@@ -20,7 +20,7 @@
 
     MMisc for the Mufasa Macro Library
 }
-unit mmisc;
+unit simba.misc;
 
 {$mode objfpc}{$H+}
 
@@ -28,9 +28,9 @@ interface
 
 uses
   Classes,
-  SysUtils, bzip2,
-  bzip2comn, bzip2stream,
-  libtar, mufasabase, mufasatypes,
+  SysUtils,
+  bzip2comn, bzip2stream, process,
+  libtar, simba.mufasatypes,
   LazUTF8;
 
 function DecompressBZip2(const input : TStream; const BlockSize : Cardinal = 4096) : TMemoryStream;
@@ -40,7 +40,12 @@ function UnTar(const Input : TStream;const outputdir : string; overwrite : boole
 procedure ConvertTime(Time : int64; var h,m,s : integer);
 procedure ConvertTime64(time: int64; var y, m, w, d, h, min, s: integer);
 function TimeStamp(Time: Int64): String;
-function MarkTime: Double;
+function PerformanceTimer: Double;
+function GetCommandLine: TStringArray;
+function RunCommand(CurrentDirectory: String; CommandLine: String; out Output: String): Int32;
+procedure RunCommand(CurrentDirectory: String; CommandLine: String);
+function OpenDirectory(Path: String): Boolean;
+function ShortTimeStamp(Time: Int64): String;
 
 type
   { TProcThread }
@@ -100,7 +105,7 @@ type
 implementation
 
 uses
-  FileUtil, Internets,
+  FileUtil, simba.internet,
   {$IFDEF WINDOWS} Windows {$ELSE} BaseUnix, Unix {$ENDIF};
 
 function DecompressBZip2(const input: TStream; const BlockSize: Cardinal): TMemoryStream;
@@ -115,7 +120,7 @@ begin
   except
     on e : exception do
     begin;
-      mDebugLn(e.message);
+      WriteLn(e.message);
       exit;
     end;
   end;
@@ -189,7 +194,7 @@ begin;
         break;
       end;
     end else
-      mDebugLn(format('Unknown filetype in archive. %s',[dirrec.name]));
+      WriteLn(format('Unknown filetype in archive. %s',[dirrec.name]));
   end;
   Tar.Free;
   Result := Succ;
@@ -328,6 +333,20 @@ end;
 
 function TimeStamp(Time: Int64): String;
 var
+  Hours, Mins, Secs, Milliseconds: Int32;
+begin
+  Hours := Time div 3600000;
+  Time  := Time mod 3600000;
+  Mins  := Time div 60000;
+  Time  := Time mod 60000;
+  Secs  := Time div 1000;
+  Milliseconds  := Time mod 1000;
+
+  Result := Format('[%.2d:%.2d:%.2d:%.3d] ', [Hours, Mins, Secs, Milliseconds]);
+end;
+
+function ShortTimeStamp(Time: Int64): String;
+var
   Hours, Mins, Secs: Int32;
 begin
   Hours := Time div 3600000;
@@ -335,12 +354,11 @@ begin
   Mins  := Time div 60000;
   Time  := Time mod 60000;
   Secs  := Time div 1000;
-  Time  := Time mod 1000;
 
-  Result := Format('[%.2d:%.2d:%.2d:%.3d] ', [Hours, Mins, Secs, Time]);
+  Result := Format('%.2d:%.2d:%.2d', [Hours, Mins, Secs]);
 end;
 
-function MarkTime: Double;
+function PerformanceTimer: Double;
 var
   Frequency, Count: Int64;
   {$IFDEF UNIX}
@@ -358,6 +376,101 @@ begin
   Count := Int64(TV.tv_sec) * 1000000 + Int64(TV.tv_usec);
   Result := Count / 1000;
   {$ENDIF}
+end;
+
+function GetCommandLine: TStringArray;
+var
+  i: Int32;
+begin
+  SetLength(Result, ParamCount + 1);
+  for i := 0 to ParamCount do
+    Result[i] := ParamStr(i);
+end;
+
+function RunCommand(CurrentDirectory: String; CommandLine: String; out Output: String): Int32;
+var
+  List: TStringList;
+  Commands: array of String;
+  i: Int32;
+begin
+  Result := -1;
+
+  List := TStringList.Create();
+
+  CommandToList(CommandLine, List);
+
+  if List.Count > 0 then
+  try
+    SetLength(Commands, List.Count - 1);
+    for i := 1 to List.Count - 1 do
+      Commands[i - 1] := List[i];
+
+    RunCommandInDir(CurrentDirectory, List[0], Commands, Output, Result);
+  finally
+    List.Free();
+  end;
+end;
+
+procedure ManageProcess(Data: Pointer);
+var
+  Process: TProcess absolute Data;
+  Buffer: array[1..1024] of Char;
+begin
+  while Process.Running do
+  begin
+    while Process.Output.NumBytesAvailable > 0 do
+      Process.Output.Read(Buffer[1], Length(Buffer));
+
+    Sleep(500);
+  end;
+
+  Process.Free();
+end;
+
+procedure RunCommand(CurrentDirectory: String; CommandLine: String);
+var
+  Params: TStringList;
+  Process: TProcess;
+  i: Int32;
+begin
+  Params := TStringList.Create();
+
+  CommandToList(CommandLine, Params);
+
+  if Params.Count > 0 then
+  begin
+    Process := TProcess.Create(nil);
+    Process.Options := Process.Options + [poUsePipes, poStderrToOutPut, poNewProcessGroup];
+    Process.Executable := Params[0];
+    for i := 1 to Params.Count - 1 do
+      Process.Parameters.Add(Params[i]);
+    Process.Execute();
+
+    TThread.ExecuteInThread(@ManageProcess, Process);
+  end;
+
+  Params.Free();
+end;
+
+function OpenDirectory(Path: String): Boolean;
+var
+  Executable: String = '';
+  Output: String;
+  ExitStatus: Int32;
+begin
+  {$IFDEF WINDOWS}
+  Executable := 'explorer.exe';
+  Path := '/root,"' + Path + '"';
+  {$ENDIF}
+
+  {$IFDEF LINUX}
+  Executable := 'xdg-open';
+  {$ENDIF}
+
+  if Executable = '' then
+    raise Exception.Create('OpenDirectory is unsupported on this system.');
+
+  Result := RunCommandInDir('', Executable, [Path], Output, ExitStatus) = 0;
 end;
 
 end.

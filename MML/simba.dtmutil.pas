@@ -21,19 +21,18 @@
     DTM Utilities for the Mufasa Macro Library
 }
 
-unit dtmutil;
+unit simba.dtmutil;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, dtm,tpa,MufasaTypes;
+  Classes, SysUtils, simba.dtm, simba.tpa, simba.mufasatypes;
 
 
 function MDTMToSDTM(Const DTM: TMDTM): TSDTM;
 function SDTMToMDTM(Const DTM: TSDTM): TMDTM;
-procedure PrintDTM(const aDTM : TMDTM);
 function CreateDTMPoint(x,y,c,t,asz : integer; bp : boolean) : TMDTMPoint;
 
 {procedure iniTSDTM(out d: TMDTM; len: integer);}
@@ -52,7 +51,9 @@ const
     dtm_Triangle = 4;
 
 implementation
-uses math,MufasaBase;
+
+uses
+  math;
 
 
 function CreateDTMPoint(x,y,c,t,asz : integer; bp : boolean) : TMDTMPoint;
@@ -63,20 +64,6 @@ begin
   result.t := t;
   result.asz := asz;
   result.bp := bp;
-end;
-
-procedure PrintDTM(const aDTM : TMDTM);
-var
-  i : integer;
-begin;
-  i := 0;
-  if aDTM.count = 0 then
-    exit;
-  if adtm.Name <> '' then
-    mDebugLn('Name: ' + aDTM.name);
-  mDebugLn('MainPoint ' + inttostr(aDTM.Points[i].x) + ', ' + inttostr(aDTM.Points[i].y) + ' col: ' + inttostr(aDTM.Points[i].c) + ', tol: ' + inttostr(aDTM.Points[i].t) + ', asize: ' + inttostr(aDTM.Points[i].asz)+ ', Bad Point: ' + BoolToStr(aDTM.Points[i].bp));
-  for I := 1 to High(aDTM.Points) do
-    mDebugLn('SubPoint['+IntToStr(I) + '] ' + inttostr(aDTM.Points[i].x) + ', ' + inttostr(aDTM.Points[i].y) + ' col: ' + inttostr(aDTM.Points[i].c) + ', tol: ' + inttostr(aDTM.Points[i].t) +', asize: ' + inttostr(aDTM.Points[i].asz) + ', Bad Point: ' + BoolToStr(aDTM.Points[i].bp));
 end;
 
 function MDTMToSDTM(Const DTM: TMDTM): TSDTM;

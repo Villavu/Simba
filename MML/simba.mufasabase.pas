@@ -21,7 +21,7 @@
     MufasaBase for the Mufasa Macro Library
 }
 
-unit mufasabase;
+unit simba.mufasabase;
 
 {$mode objfpc}{$H+}
 
@@ -30,11 +30,9 @@ interface
 uses
   Classes, SysUtils;
 
-{$I Simba.inc}
-
 const
-  SimbaVersion = 1302;
-  SimbaMajor = 1300; // this should be 980 even if SimbaVersion is 981, etc
+  SimbaVersion = 1400;
+  SimbaMajor = 1400; // this should be 980 even if SimbaVersion is 981, etc
 
   SimbaURL = {$IFDEF WINDOWS}
                 {$IFDEF CPU32}
@@ -54,24 +52,7 @@ const
                 {$ENDIF}
              {$ENDIF};
 
-var
-  mDebugging: Boolean = True;
-
-procedure mDebugLn(constref S: String); overload;
-procedure mDebugLn(constref S: String; Args: array of const); overload;
-
 implementation
-
-procedure mDebugLn(constref S: String);
-begin
-  if mDebugging then
-    Writeln(s);
-end;
-
-procedure mDebugLn(constref S: String; Args: array of const);
-begin
-  mDebugLn(Format(S, Args));
-end;
 
 end.
 

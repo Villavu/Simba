@@ -40,7 +40,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.target, mufasatypes, libloader, dynlibs;
+  simba.target, simba.mufasatypes, dynlibs;
 
 type
   PEIOS_Client = ^TEIOS_Client;
@@ -57,7 +57,7 @@ type
 
     GetMousePosition: procedure(Target: Pointer; var X, Y: Int32); stdcall;
     MoveMouse: procedure(Target: Pointer; X, Y: Int32); stdcall;
-    ScrollMouse: procedure(target : pointer; X, Y: Int32; Lines: Int32); stdcall;
+    ScrollMouse: procedure(Target : pointer; X, Y: Int32; Lines: Int32); stdcall;
     HoldMouse: procedure(Target: Pointer; X, Y: Int32; Button: Int32); stdcall;
     ReleaseMouse: procedure(Target: Pointer; X, Y: Int32; Button: Int32); stdcall;
     IsMouseButtonHeld: function(Target: Pointer; Button: Int32): Boolean; stdcall;
@@ -69,28 +69,17 @@ type
     GetKeyCode: function(Target: Pointer; Character: Char): Int32; stdcall;
   end;
 
-  PEIOS_Controller = ^TEIOS_Client;
-  TEIOS_Controller = class(TGenericLoader)
-  protected
-    Clients: array of TEIOS_Client;
-
-    function InitPlugin(Plugin: TLibHandle): Boolean; override;
-    function FindClient(Name: String): Int32;
-  public
-    function ClientExists(Name: String): Boolean;
-    function GetClient(Name: String): TEIOS_Client;
-  end;
-
   PEIOS_Target = ^TEIOS_Target;
   TEIOS_Target = class(TTarget)
   protected
+    FLib: TLibHandle;
     FClient: TEIOS_Client;
     FTarget: Pointer;
     FBuffer: PRGB32;
 
     procedure GetTargetBounds(out Bounds: TBox); override;
   public
-    constructor Create(Client: TEIOS_Client; Data: String);
+    constructor Create(Plugin: String; Data: String);
     destructor Destroy; override;
 
     function ReturnData(X, Y, Width, Height: Int32): TRetData; override;
@@ -111,63 +100,7 @@ type
     function GetHandle: PtrUInt; override;
   end;
 
-var
-  EIOSController: TEIOS_Controller;
-
 implementation
-
-function TEIOS_Controller.InitPlugin(Plugin: TLibHandle): Boolean;
-var
-  Count: Int32;
-begin
-  Count := Length(Clients);
-  SetLength(Clients, Count + 1);
-
-  with Clients[Count] do
-  begin
-    Pointer(RequestTarget) := GetProcAddress(Plugin, PChar('EIOS_RequestTarget'));
-    Pointer(ReleaseTarget) := GetProcAddress(Plugin, PChar('EIOS_ReleaseTarget'));
-
-    Pointer(GetTargetPosition) := GetProcAddress(Plugin, PChar('EIOS_GetTargetPosition'));
-    Pointer(GetTargetDimensions) := GetProcAddress(Plugin, PChar('EIOS_GetTargetDimensions'));
-    Pointer(GetImageBuffer) := GetProcAddress(Plugin, PChar('EIOS_GetImageBuffer'));
-    Pointer(UpdateImageBuffer) := GetProcAddress(Plugin, PChar('EIOS_UpdateImageBuffer'));
-    Pointer(UpdateImageBufferEx) := GetProcAddress(Plugin, PChar('EIOS_UpdateImageBufferEx'));
-    Pointer(UpdateImageBufferBounds) := GetProcAddress(Plugin, PChar('EIOS_UpdateImageBufferBounds'));
-
-    Pointer(GetMousePosition) := GetProcAddress(Plugin, PChar('EIOS_GetMousePosition'));
-    Pointer(MoveMouse) := GetProcAddress(Plugin, PChar('EIOS_MoveMouse'));
-    Pointer(ScrollMouse) := GetProcAddress(Plugin,PChar('EIOS_ScrollMouse'));
-    Pointer(HoldMouse) := GetProcAddress(Plugin, PChar('EIOS_HoldMouse'));
-    Pointer(ReleaseMouse) := GetProcAddress(Plugin, PChar('EIOS_ReleaseMouse'));
-
-    Pointer(SendString) := GetProcAddress(Plugin, PChar('EIOS_SendString'));
-    Pointer(HoldKey) := GetProcAddress(Plugin, PChar('EIOS_HoldKey'));
-    Pointer(ReleaseKey) := GetProcAddress(Plugin, PChar('EIOS_ReleaseKey'));
-    Pointer(IsKeyHeld) := GetProcAddress(Plugin, PChar('EIOS_IsKeyHeld'));
-  end;
-
-  Result := True;
-end;
-
-function TEIOS_Controller.FindClient(Name: String): Int32;
-begin
-  Result := LoadPlugin(Name);
-end;
-
-function TEIOS_Controller.ClientExists(Name: String): Boolean;
-begin
-  Result := FindClient(Name) >= 0;
-end;
-
-function TEIOS_Controller.GetClient(Name: String): TEIOS_Client;
-var
-  i: Int32;
-begin
-  i := FindClient(Name);
-  if i >= 0 then
-    Result := Clients[i]
-end;
 
 procedure TEIOS_Target.GetTargetBounds(out Bounds: TBox);
 begin
@@ -188,11 +121,38 @@ begin
     raise Exception.Create('EIOS_GetTargetDimensions not available');
 end;
 
-constructor TEIOS_Target.Create(Client: TEIOS_Client; Data: String);
+constructor TEIOS_Target.Create(Plugin: String; Data: String);
 begin
   inherited Create();
 
-  FClient := Client;
+  FLib := LoadLibrary(Plugin);
+  if (FLib = NilHandle) then
+    raise Exception.Create('TEIOS_Target.Create: Unable to load plugin: ' + Plugin);
+
+  with FClient do
+  begin
+    Pointer(RequestTarget) := GetProcedureAddress(FLib, 'EIOS_RequestTarget');
+    Pointer(ReleaseTarget) := GetProcedureAddress(FLib, 'EIOS_ReleaseTarget');
+
+    Pointer(GetTargetPosition) := GetProcedureAddress(FLib, 'EIOS_GetTargetPosition');
+    Pointer(GetTargetDimensions) := GetProcedureAddress(FLib, 'EIOS_GetTargetDimensions');
+    Pointer(GetImageBuffer) := GetProcedureAddress(FLib, 'EIOS_GetImageBuffer');
+    Pointer(UpdateImageBuffer) := GetProcedureAddress(FLib, 'EIOS_UpdateImageBuffer');
+    Pointer(UpdateImageBufferEx) := GetProcedureAddress(FLib, 'EIOS_UpdateImageBufferEx');
+    Pointer(UpdateImageBufferBounds) := GetProcedureAddress(FLib, 'EIOS_UpdateImageBufferBounds');
+
+    Pointer(GetMousePosition) := GetProcedureAddress(FLib, 'EIOS_GetMousePosition');
+    Pointer(MoveMouse) := GetProcedureAddress(FLib, 'EIOS_MoveMouse');
+    Pointer(ScrollMouse) := GetProcedureAddress(FLib,'EIOS_ScrollMouse');
+    Pointer(HoldMouse) := GetProcedureAddress(FLib, 'EIOS_HoldMouse');
+    Pointer(ReleaseMouse) := GetProcedureAddress(FLib, 'EIOS_ReleaseMouse');
+
+    Pointer(SendString) := GetProcedureAddress(FLib, 'EIOS_SendString');
+    Pointer(HoldKey) := GetProcedureAddress(FLib, 'EIOS_HoldKey');
+    Pointer(ReleaseKey) := GetProcedureAddress(FLib, 'EIOS_ReleaseKey');
+    Pointer(IsKeyHeld) := GetProcedureAddress(FLib, 'EIOS_IsKeyHeld');
+  end;
+
   FTarget := nil;
   FBuffer := nil;
 
@@ -210,6 +170,9 @@ end;
 
 destructor TEIOS_Target.Destroy;
 begin
+  if (FLib <> NilHandle) then
+    FreeLibrary(FLib);
+
   if (FClient.ReleaseTarget <> nil) and (FTarget <> nil) then
     FClient.ReleaseTarget(FTarget);
 
@@ -397,12 +360,6 @@ function TEIOS_Target.GetHandle: PtrUInt;
 begin
   Result := PtrUInt(FTarget);
 end;
-
-initialization
-  EIOSController := TEIOS_Controller.Create();
-
-finalization
-  EIOSController.Free();
 
 end.
 

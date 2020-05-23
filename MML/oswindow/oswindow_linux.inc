@@ -142,6 +142,24 @@ begin
   Result := XDefaultRootWindow(GetDisplay());
 end;
 
+function GetWindowAtCursor: TOSWindow;
+var
+  Root, Child: TWindow;
+  x_root, y_root, x, y: Int32;
+  mask: UInt32;
+begin
+  XQueryPointer(GetDisplay(), XDefaultRootWindow(GetDisplay()), @Root, @Result, @x_root, @y_root, @x, @y, @mask);
+
+  Child := Result;
+
+  while (Child <> 0) do
+  begin
+    Result := Child;
+
+    XQueryPointer(GetDisplay(), Result, @Root, @Child, @x_root, @y_root, @x, @y, @mask);
+  end;
+end;
+
 function GetTopWindows: TOSWindowArray;
 
   function IsVisible(var Window: TOSWindow): Boolean;

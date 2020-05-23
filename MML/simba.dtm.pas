@@ -21,14 +21,14 @@
     DTM class for the Mufasa Macro Library
 }
 
-unit dtm;
+unit simba.dtm;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, MufasaTypes;
+  Classes, SysUtils, simba.mufasatypes;
 
 type
 
@@ -79,15 +79,11 @@ type
 
 implementation
 uses
-    dtmutil, paszlib,
-    client,
-    DCPbase64,
-    graphics, // for TColor
-    math // for max
-    ;
-
-
-
+    simba.dtmutil, paszlib,
+    simba.client, simba.stringutil,
+    base64,
+    graphics,
+    math;
 
 constructor TMDTMS.Create(Owner: TObject);
 begin
@@ -248,27 +244,30 @@ end;
 
 function TMDTM.ToString: string;
 var
-  i,len : integer;
-  Ptr,Start : Pointer;
-  Destlen : Longword;
-procedure WriteInteger(int : integer);
-begin
-  PLongInt(Ptr)^ := int;
-  Inc(ptr,sizeof(int));
-end;
-procedure WriteBool(bool : boolean);
-begin;
-  PBoolean(Ptr)^ := bool;
-  inc(ptr,sizeof(boolean));
-end;
+  i: Int32;
+  Ptr: Pointer;
 
+  procedure WriteInteger(int : integer);
+  begin
+    PLongInt(Ptr)^ := int;
+    Inc(ptr,sizeof(int));
+  end;
+  procedure WriteBool(bool : boolean);
+  begin;
+    PBoolean(Ptr)^ := bool;
+    inc(ptr,sizeof(boolean));
+  end;
+
+var
+  Data: String;
 begin
-  result := '';
+  Result := '';
   if Count < 1 then
-    exit;
-  len := Count * TMDTMPointSize + SizeOf(Integer);
-  Start:= GetMem(len);
-  Ptr := Start;
+    Exit;
+
+  SetLength(Data, Count * TMDTMPointSize + SizeOf(Integer));
+  Ptr := @Data[1];
+
   WriteInteger(FLen);
   for i := 0 to FLen-1 do
     WriteInteger(FPoints[i].x);
@@ -282,17 +281,8 @@ begin
     WriteInteger(FPoints[i].asz);
   for i := 0 to FLen-1 do
     WriteBool(FPoints[i].bp);
-  Destlen :=BufferLen;
-  if compress(BufferString,destlen,pchar(start),len) = Z_OK then
-  begin
-    setlength(result,Destlen + SizeOf(Integer));
-    PInteger(@result[1])^ := len;
-    Move(bufferstring[0],result[1 + sizeof(integer)],Destlen);
-    //We now have Size + Compressed data.. Lets Base64Encrypt it!
-    Result := 'm' + Base64EncodeStr(result);
-    //It now looks like m + base64encoded data! The 'm' is to indicate we used this encryption method.
-  end;
-  Freemem(start,len);
+
+  Result := 'm' + Base64Encode(CompressString(Data));
 end;
 
 function TMDTM.SaveToFile(const FileName: string): boolean;
@@ -302,93 +292,56 @@ end;
 
 function TMDTM.LoadFromString(const s: string): boolean;
 var
-  MDTM : TMDTM;
   Source : String;
-  DestLen : longword;
-  i,ii,c : integer;
-  DPoints : PMDTMPoint;
+  i,c : integer;
   Ptr : Pointer;
+
   function ReadInteger : integer;
   begin
     Result := PInteger(ptr)^;
+    WRiteln(Result);
     inc(ptr,sizeof(integer));
   end;
   function ReadBoolean : boolean;
   begin
     result := PBoolean(ptr)^;
+    WRiteln(Result);
     inc(ptr,sizeof(boolean));
   end;
 
 begin
-  Result := false;
-  ii := Length(S);
-  if (ii = 0) then
-    exit;
+  Result := False;
+  if (Length(S) = 0) then
+    Exit;
+
   if S[1] = 'm' then
   begin
-    if ii < 9 then
-      raise Exception.CreateFMT('Invalid DTM-String passed to StringToDTM: %s',[s]);
-    Source := Base64DecodeStr(copy(s,2,ii-1));
-    i:= PLongint(@source[1])^; //The 4 four bytes should contain the dest len!
-    if i < 1 then
-      raise Exception.CreateFMT('Invalid DTM-String passed to StringToDTM: %s',[s]);
-    DestLen := BufferLen;
-    ptr := @Source[1 + sizeof(longint)];
-    if uncompress(BufferString,DestLen,ptr,length(source)-sizeof(integer)) = Z_OK then
+    Source := DecompressString(Base64Decode(s.Remove(0, 1)), True);
+    if (Source <> '') then
     begin
-      ptr := BufferString;
-      Self.Count:= ReadInteger;
-      ii := Self.Count;
-      if (Self.Count * TMDTMPointSize) <> (Destlen - SizeOf(integer)) then
-        raise Exception.CreateFMT('Invalid DTM-String passed to StringToDTM: %s',[s]);
-      DPoints := Self.PPoints;
-      for i := 0 to ii-1 do
-        DPoints[i].x := ReadInteger;
-      for i := 0 to ii-1 do
-        DPoints[i].y := ReadInteger;
-      for i := 0 to ii-1 do
-        DPoints[i].c := ReadInteger;
-      for i := 0 to ii-1 do
-        DPoints[i].t := ReadInteger;
-      for i := 0 to ii-1 do
-        DPoints[i].asz := ReadInteger;
-      for i := 0 to ii-1 do
-        DPoints[i].bp := ReadBoolean;
-      Result := true;
-    end;
-  end else
-  begin
-    if (ii mod 2 <> 0) then
-      exit;
-    ii := ii div 2;
-    SetLength(Source,ii);
-    for i := 1 to ii do
-      Source[i] := Chr(HexToInt(S[i * 2 - 1] + S[i * 2]));
-    DestLen := BufferLen;
-    if uncompress(Bufferstring,Destlen,pchar(Source), ii) = Z_OK then
-    begin;
-      if (Destlen mod 36) > 0 then
-        raise Exception.CreateFMT('Invalid DTM-String passed to StringToDTM: %s',[s]);
-      DestLen := DestLen div 36;
-      Self.Count:= DestLen;
-      DPoints := Self.PPoints;
-      ptr := bufferstring;
-      for i := 0 to DestLen - 1 do
-      begin;
-        DPoints[i].x :=PInteger(ptr + 1)^;
-        DPoints[i].y := PInteger(ptr + 5)^;
-        DPoints[i].asz := PInteger(ptr + 12)^;
-  //    DPoints.ash[i] := PInteger(@b^[c+16])^;
-        DPoints[i].c := PInteger(ptr + 20)^;
-        DPoints[i].t := PInteger(ptr + 24)^;
-        DPoints[i].bp := False;
-        inc(ptr,36);
-      end;
-      Result := true;
+      ptr := @Source[1];
+      Self.Count:= ReadInteger();
+      for i := 0 to Self.Count-1 do
+        Self.PPoints[i].x := ReadInteger();
+      for i := 0 to Self.Count-1 do
+        Self.PPoints[i].y := ReadInteger();
+      for i := 0 to Self.Count-1 do
+        Self.PPoints[i].c := ReadInteger();
+      for i := 0 to Self.Count-1 do
+        Self.PPoints[i].t := ReadInteger();
+      for i := 0 to Self.Count-1 do
+        Self.PPoints[i].asz := ReadInteger();
+      for i := 0 to Self.Count-1 do
+        Self.PPoints[i].bp := ReadBoolean();
+
+      Result := True;
     end;
   end;
-  if result then
-    Normalize;
+
+  if not Result then
+    raise Exception.Create('Invalid DTM string: "' + S + '"');
+
+  Normalize();
 end;
 
 procedure TMDTM.Normalize;

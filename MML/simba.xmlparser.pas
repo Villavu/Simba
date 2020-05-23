@@ -1,4 +1,4 @@
-unit uxml;
+unit simba.xmlparser;
 
 { VerySimpleXML v1.1 - a lightweight, one-unit XML reader/writer
   by Dennis Spreen

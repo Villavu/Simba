@@ -1,4 +1,4 @@
-unit ujson;
+unit simba.jsonparser;
 {
   Copyright (C) 2005 Fabio Almeida
   fabiorecife@yahoo.com.br
@@ -2357,17 +2357,23 @@ var
   i: integer;
   obj: TObject;
 begin
+  writeln('destroy');
   while myArrayList.Count > 0 do
   begin
+    writeln('reference');
     obj := myArrayList[0];
     myArrayList[0] := nil;
     if (obj <> CONST_FALSE) and (obj <> CONST_TRUE) and (obj <> CNULL) then
     begin
+      writeln('free');
       obj.Free;
     end;
+    writeln('delete 0');
     myArrayList.Delete(0);
   end;
+  writeln('free');
   myArrayList.Free;
+  writeln('inherited');
   inherited;
 end;
 

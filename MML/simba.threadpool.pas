@@ -1,4 +1,4 @@
-unit simba_threadpool;
+unit simba.threadpool;
 
 {$mode objfpc}{$H+}
 
@@ -212,8 +212,6 @@ begin
 end;
 
 initialization
-  WriteLn('[THREADPOOL]: Allocating ', GetSystemThreadCount(), ' threads');
-
   SimbaThreadPool := TSimbaThreadPool.Create(GetSystemThreadCount());
 
 finalization

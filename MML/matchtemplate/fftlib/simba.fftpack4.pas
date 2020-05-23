@@ -1,4 +1,4 @@
-unit FFTPACK4;
+unit simba.fftpack4;
 {==============================================================================]
   Copyright © 2018, Jarl Krister Holta
   
@@ -14,11 +14,12 @@ unit FFTPACK4;
   See the License for the specific language governing permissions and
   limitations under the License.
 [==============================================================================}
-{$I header.inc}
+{$I ../header.inc}
 interface
 
 uses
-  SysUtils, FFTPACK4_core, mtCore;
+  sysutils,
+  simba.fftpack4_core, simba.matchtemplate_core;
 
 type
   CFFT_FUNC = function(data, plan: TComplexArray; Inplace:Boolean=False): TComplexArray;
@@ -54,8 +55,8 @@ var
 implementation
 
 uses
- math, utf8process,
- mtMatrix, simba_threadpool;
+  math, utf8process,
+  simba.matchtemplate_matrix, simba.threadpool;
 
 
 const

@@ -1,4 +1,4 @@
-unit FFTW3;
+unit simba.fftw3;
 {==============================================================================]
   Copyright © 2018, Jarl Krister Holta
   
@@ -14,11 +14,14 @@ unit FFTW3;
   See the License for the specific language governing permissions and
   limitations under the License.
 [==============================================================================}
-{$I header.inc}
+
+{$I ../header.inc}
+
 interface
 
 uses
-  SysUtils, dynlibs, mtCore;
+  sysutils, dynlibs,
+  simba.matchtemplate_core;
 
 
 type
@@ -99,7 +102,7 @@ implementation
 
 uses
   math, utf8process,
-  mtMatrix;
+  simba.matchtemplate_matrix;
 
 
 const

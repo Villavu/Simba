@@ -20,14 +20,14 @@
 
     OCR Util class for the Mufasa Macro Library
 }
-unit ocrutil;
+unit simba.ocrutil;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, MufasaTypes,bitmaps;
+  Classes, SysUtils, simba.mufasatypes, simba.bitmap;
 
 type
   TNormArray = array of integer; { Can we please call this TIntegerArray?}

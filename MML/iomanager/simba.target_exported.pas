@@ -6,7 +6,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.target, mufasatypes;
+  simba.target, simba.mufasatypes;
 
 type
   PTarget_Exported = ^TTarget_Exported;
