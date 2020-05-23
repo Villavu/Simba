@@ -2,7 +2,7 @@ program new;
 
 Procedure ShowStream(WhatTest: string;ss: TStringStream);
 begin
- WriteLn(WhatTest + ' : '+ ss.getDataString());
+ WritdfsfdeLn(WhatTest + ' : '+ ss.getDataString());
 end;
 
 procedure XMLGenSaveTest(ss: TStringStream);
@@ -109,5 +109,6 @@ begin
  finally
   ss.Free;
  end;
+ Writeln(ScriptName);
 end.
 
