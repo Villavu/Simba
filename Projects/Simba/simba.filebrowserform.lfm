@@ -1,0 +1,61 @@
+object SimbaFileBrowserForm: TSimbaFileBrowserForm
+  Left = 486
+  Height = 247
+  Top = 39
+  Width = 321
+  Caption = 'File Browser'
+  ClientHeight = 247
+  ClientWidth = 321
+  LCLVersion = '2.0.4.0'
+  object Panel1: TPanel
+    Left = 0
+    Height = 224
+    Top = 0
+    Width = 321
+    Align = alClient
+    BevelOuter = bvNone
+    TabOrder = 0
+  end
+  object Edit1: TEdit
+    Left = 0
+    Height = 23
+    Top = 224
+    Width = 321
+    Align = alBottom
+    OnChange = Edit1Change
+    TabOrder = 1
+    TextHint = '(search)'
+  end
+  object Popup: TPopupMenu
+    OnPopup = PopupPopup
+    left = 88
+    top = 37
+    object MenuItem_Open: TMenuItem
+      Caption = 'Open'
+      ImageIndex = 2
+      OnClick = MenuItemOpenClick
+    end
+    object MenuItem_OpenExternally: TMenuItem
+      Caption = 'Open Externally'
+      OnClick = MenuItemOpenExternallyClick
+    end
+    object MenuItem2: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemCopyPath: TMenuItem
+      Caption = 'Copy Path'
+      OnClick = MenuCopyPathClick
+    end
+    object MenuItemCopyRelativePath: TMenuItem
+      Caption = 'Copy Relative Path'
+      OnClick = MenuItemCopyRelativePathClick
+    end
+    object MenuItem_Seperator: TMenuItem
+      Caption = '-'
+    end
+    object MenuItem_Refresh: TMenuItem
+      Caption = 'Refresh'
+      OnClick = MenuItemRefreshClick
+    end
+  end
+end

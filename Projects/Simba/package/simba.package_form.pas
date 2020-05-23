@@ -18,7 +18,7 @@ interface
 uses
   classes, sysutils, dividerbevel, lresources, forms, controls, graphics,
   dialogs, stdctrls, buttons, buttonpanel, extctrls, comctrls, menus,
-  simba.package;
+  simba.package, Types;
 
 // Eventually we can populate from a webpage, but this will do for now.
 const
@@ -31,6 +31,7 @@ const
 type
   TSimbaPackageForm = class(TForm)
   published
+    ReleasesList: TComboBox;
     IgnoreListEdit: TEdit;
     Images: TImageList;
     InstallButton: TButton;
@@ -40,13 +41,13 @@ type
     DisabledLabel: TLabel;
     IgnoreListLabel: TLabel;
     PackageListPopup: TPopupMenu;
-    ReleasesList: TComboBox;
     SelectDirectoryButton: TButton;
     FlatExtractionButton: TCheckBox;
     InstallDirectoryList: TComboBox;
     OptionsGroup: TGroupBox;
     installationDivider: TDividerBevel;
     InstallNameEdit: TEdit;
+    UpdateTimer: TTimer;
     UpdatePackageLabel: TLabel;
     InstallDiretoryLabel: TLabel;
     InstallNameLabel: TLabel;
@@ -78,14 +79,10 @@ type
     procedure DoRemovePackageClick(Sender: TObject);
     // Installs the active package
     procedure DoInstallPackageClick(Sender: TObject);
-    // Disable button flashing when not showing
-    procedure DoFormHide(Sender: TObject);
     // Load packages on show. This is for a better interface between multiple running Simba's
     procedure DoFormShow(Sender: TObject);
     // Force update active package releases
     procedure DoUpdateClick(Sender: TObject);
-    // Show the package form
-    procedure DoToolbarButtonClick(Sender: TObject);
     // Don't show popup menu if no item is selected
     procedure DoPackageListPopup(Sender: TObject; Mouse: TPoint; var Handled: Boolean);
     procedure HandePackageListMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -98,9 +95,16 @@ type
     // Underline when update label is hovered
     procedure DoUpdateLabelMouseEnter(Sender: TObject);
     procedure DoUpdateLabelMouseLeave(Sender: TObject);
+
+    procedure DoUpdateTimer(Sender: TObject);
   protected
     FPackages: TSimbaPackageList;
     FProgress: String; // UpdateDownloadProgress and UpdateExtractProgress will update this.
+
+    FUpdates: TStringList;
+    FUpdateThread: TThread;
+
+    procedure FontChanged(Sender: TObject); override;
 
     function GetSelectedPackage: TSimbaPackage;
 
@@ -109,8 +113,16 @@ type
     procedure UpdateSelectedPackage;
     procedure UpdateDownloadProgress(Sender: TObject; URL: String; APosition, ASize: Int64);
     procedure UpdateExtractProgress(Sender: TObject; FileName: String; APosition, ASize: Int64);
+
+    // Check for package updates. This is called on another thread
+    procedure DoPackageUpdate;
+    // Package updating has finished. This is synchronized so components are updated here.
+    procedure DoPackageUpdateFinished(Sender: TObject);
   public
     property SelectedPackage: TSimbaPackage read GetSelectedPackage;
+
+    // Callback for TSimbaPackage to download a page. No progress is shown.
+    function GetPageSilent(URL: String; AllowedResponseCodes: array of Int32): String;
 
     // Callback for TSimbaPackage to download a page. Progress is shown with Status
     function GetPage(URL: String; AllowedResponseCodes: array of Int32): String;
@@ -130,7 +142,7 @@ type
     procedure Status(Message: String); overload;
 
     // Initalize dynamic components.
-    constructor Create(AOwner: TComponent; ToolBar: TToolBar); reintroduce;
+    constructor Create(AOwner: TComponent); override;
     // Free package list
     destructor Destroy; override;
   end;
@@ -141,8 +153,8 @@ var
 implementation
 
 uses
-  dateutils, lcltype, lclintf, lazfileutils, fileutil,
-  simba.httpclient_async, simba.environment, simba.httpclient, simba.package_buttons;
+  dateutils, lcltype, lclintf, lazfileutils, fileutil, simba.main,
+  simba.httpclient_async, simba.settings, simba.httpclient;
 
 procedure TSimbaPackageForm.DoSelectedPackageChanged(Sender: TObject; User: Boolean);
 begin
@@ -292,6 +304,7 @@ begin
     Options.Path := IncludeTrailingPathDelimiter(Application.Location + SetDirSeparators(InstallDirectoryList.Text));
     if InstallNameEdit.Text <> '' then
       Options.Path := Options.Path + IncludeTrailingPathDelimiter(InstallNameEdit.Text);
+
     Options.Flat := FlatExtractionButton.Checked;
     Options.Version := ReleasesList.Text;
     Options.IgnoreList := IgnoreListEdit.Text;
@@ -309,13 +322,10 @@ begin
         Status('Succesfully installed ' + Package.Name);
       end else
         Status('Failed to install ' + Package.Name);
+
+      UpdateTimer.Interval := 1000;
     end;
   end;
-end;
-
-procedure TSimbaPackageForm.DoFormHide(Sender: TObject);
-begin
-  AddPackageButton.Flashing := False;
 end;
 
 procedure TSimbaPackageForm.DoFormShow(Sender: TObject);
@@ -390,6 +400,69 @@ end;
 procedure TSimbaPackageForm.DoUpdateLabelMouseLeave(Sender: TObject);
 begin
   TLabel(Sender).Font.Underline := False;
+end;
+
+procedure TSimbaPackageForm.DoPackageUpdateFinished(Sender: TObject);
+begin
+  SimbaForm.PackageButton.Hint := FUpdates.Text.Trim();
+
+  if FUpdates.Count = 1 then
+    SimbaForm.PackageButton.ImageIndex := IMAGE_PACKAGE
+  else
+    SimbaForm.PackageButton.ImageIndex := IMAGE_PACKAGE_NOTIFCATION;
+
+  FUpdateThread := nil;
+end;
+
+procedure TSimbaPackageForm.DoPackageUpdate;
+var
+  Packages: TSimbaPackageList;
+  Package: TSimbaPackage;
+begin
+  Packages := TSimbaPackageList.Create();
+  Packages.Load();
+
+  try
+    FUpdates.Clear();
+    FUpdates.Add('Simba Packages');
+
+    for Package in Packages do
+    begin
+      Package.GetPage := @Self.GetPageSilent;
+      if Package.InstalledVersion = 'master' then
+        Continue;
+
+      with Package.Releases.LatestRelease do
+        if (Time > Package.InstalledVersionTime) then
+          FUpdates.Add('%s (%s) can be updated to version %s', [Package.Name, Package.InstalledVersion, Version]);
+    end;
+  finally
+    Packages.Free();
+  end;
+end;
+
+procedure TSimbaPackageForm.DoUpdateTimer(Sender: TObject);
+begin
+  if (FUpdateThread = nil) then
+    FUpdateThread := TThread.ExecuteInThread(@DoPackageUpdate, @DoPackageUpdateFinished);
+
+  TTimer(Sender).Interval := 5 * 60000;
+end;
+
+procedure TSimbaPackageForm.FontChanged(Sender: TObject);
+begin
+  inherited FontChanged(Sender);
+
+  UpdatePackageLabel.Font.Color := clNavy;
+
+  with TBitmap.Create() do
+  try
+    Canvas.Font := Self.Font;
+
+    ReleasesList.ItemHeight := Canvas.TextHeight('Fj');
+  finally
+    Free();
+  end;
 end;
 
 procedure TSimbaPackageForm.UpdateSelectedRelease;
@@ -479,7 +552,6 @@ begin
   ReleasesPanel.Visible := PackagesListBox.ItemIndex > -1;
   InstallationPanel.Visible := PackagesListBox.ItemIndex > -1;
   DisabledLabel.Visible := PackagesListBox.ItemIndex = -1;
-  AddPackageButton.Flashing := PackagesListBox.Items.Count = 0;
 end;
 
 procedure TSimbaPackageForm.UpdateDownloadProgress(Sender: TObject; URL: String; APosition, ASize: Int64);
@@ -515,9 +587,20 @@ begin
   Application.ProcessMessages();
 end;
 
-procedure TSimbaPackageForm.DoToolbarButtonClick(Sender: TObject);
+function TSimbaPackageForm.GetPageSilent(URL: String; AllowedResponseCodes: array of Int32): String;
+var
+  HTTPRequest: TSimbaHTTPRequest;
 begin
-  Self.Show();
+  HTTPRequest := TSimbaHTTPRequest.Create(URL);
+
+  try
+    while HTTPRequest.Running do
+      Sleep(25);
+
+    Result := HTTPRequest.Contents;
+  finally
+    HTTPRequest.Free();
+  end;
 end;
 
 function TSimbaPackageForm.GetPage(URL: String; AllowedResponseCodes: array of Int32): String;
@@ -540,55 +623,65 @@ begin
 
   HTTPRequest := TSimbaHTTPRequest.Create(URL, @UpdateDownloadProgress);
 
-  while HTTPRequest.Running do
-  begin
-    UpdateProgress();
+  try
+    while HTTPRequest.Running do
+    begin
+      UpdateProgress();
 
-    Sleep(25);
+      Sleep(25);
+    end;
+
+    Status('');
+
+    if HTTPRequest.Exception <> nil then
+      Self.Error('Request failed: HTTP error %d', [HTTPRequest.ResponseCode])
+    else
+    if not IsAllowedResponseCode(HTTPRequest.ResponseCode) then
+      Self.Error(Format('Request failed: HTTP error %d', [HTTPRequest.ResponseCode]))
+    else
+    if HTTPRequest.ResponseCode = HTTP_OK then
+      Result := HTTPRequest.Contents;
+  finally
+    HTTPRequest.Free();
   end;
-
-  Status('');
-
-  if HTTPRequest.Exception <> nil then
-    Self.Error('Request failed: HTTP error %d', [HTTPRequest.ResponseCode])
-  else
-  if not IsAllowedResponseCode(HTTPRequest.ResponseCode) then
-    Self.Error(Format('Request failed: HTTP error %d', [HTTPRequest.ResponseCode]))
-  else
-  if HTTPRequest.ResponseCode = HTTP_OK then
-    Result := HTTPRequest.Contents;
-
-  HTTPRequest.Free();
 end;
 
 function TSimbaPackageForm.GetZIP(URL, OutputPath: String; Flat: Boolean): Boolean;
 var
   HTTPRequest: TSimbaHTTPRequestZIP;
 begin
-  HTTPRequest := TSimbaHTTPRequestZIP.Create(URL, OutputPath, Flat, @UpdateDownloadProgress, @UpdateExtractProgress);
+  InstallButton.Enabled := False;
 
-  while HTTPRequest.Running do
-  begin
-    UpdateProgress();
+  try
+    HTTPRequest := TSimbaHTTPRequestZIP.Create(URL, OutputPath, Flat, @UpdateDownloadProgress, @UpdateExtractProgress);
 
-    Sleep(25);
+    try
+      while HTTPRequest.Running do
+      begin
+        UpdateProgress();
+
+        Sleep(25);
+      end;
+
+      Status('');
+
+      if HTTPRequest.Exception <> nil then
+      begin
+        if HTTPRequest.Exception is EFCreateError then
+          Self.Error('Install failed: %s. A file is most likely in use. Restart Simba(s) and try again.', [HTTPRequest.Exception.Message])
+        else
+          Self.Error('Install failed: %s', [HTTPRequest.Exception.Message]);
+      end else
+      if HTTPRequest.ResponseCode <> HTTP_OK then
+        Self.Error('Install failed: HTTP error %d', [HTTPRequest.ResponseCode]);
+
+      Result := HTTPRequest.ResponseCode = HTTP_OK;
+    finally
+      HTTPRequest.Free();
+    end;
+  finally
+    InstallButton.Enabled := True;
   end;
-
-  Status('');
-
-  if HTTPRequest.Exception <> nil then
-  begin
-    if HTTPRequest.Exception is EFCreateError then
-      Self.Error('Install failed: %s. A file is most likely in use. Restart Simba(s) and try again.', [HTTPRequest.Exception.Message])
-    else
-      Self.Error('Install failed: %s', [HTTPRequest.Exception.Message]);
-  end else
-  if HTTPRequest.ResponseCode <> HTTP_OK then
-    Self.Error('Install failed: HTTP error %d', [HTTPRequest.ResponseCode]);
-
-  Result := HTTPRequest.ResponseCode = HTTP_OK;
-
-  HTTPRequest.Free();
 end;
 
 procedure TSimbaPackageForm.Debug(Message: String; Args: array of const);
@@ -621,7 +714,7 @@ begin
   StatusLabel.Caption := Message;
 end;
 
-constructor TSimbaPackageForm.Create(AOwner: TComponent; ToolBar: TToolBar);
+constructor TSimbaPackageForm.Create(AOwner: TComponent);
 
   function GetRootDirectories: TStringArray;
   var
@@ -640,16 +733,14 @@ constructor TSimbaPackageForm.Create(AOwner: TComponent; ToolBar: TToolBar);
 begin
   inherited Create(AOwner);
 
-  with TSimbaPackage_ToolButton.Create(ToolBar) do
-    OnClick := @DoToolbarButtonClick;
-
-  AddPackageButton.Flasher.BaseColor := ColorToRGB(clBtnFace);
-  AddPackageButton.Flasher.BlendColor := $EBDFBD;
+  Width := 800;
+  Height := 650;
 
   InstallDirectoryList.Items.AddStrings(GetRootDirectories());
   InstallDirectoryList.ItemIndex := InstallDirectoryList.Items.IndexOf(IncludeTrailingPathDelimiter('Includes'));
 
   FPackages := TSimbaPackageList.Create(False);
+  FUpdates := TStringList.Create();
 end;
 
 destructor TSimbaPackageForm.Destroy;

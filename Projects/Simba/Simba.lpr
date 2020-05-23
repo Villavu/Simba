@@ -27,42 +27,50 @@ program Simba;
 
 {$I Simba.inc}
 {$R Simba.res}
+{$R ../SimbaResources/SimbaResources.res}
 
 uses
   {$IFDEF UNIX}
-  cthreads, cmem, linux_startup,
+  cthreads, cmem, simba.linux_initialization,
   {$ENDIF}
-  Interfaces, Forms,
-  simbaunit, colourhistory, about, debugimage, bitmapconv, updateform, simbasettingsold, simbasettingssimple,
-  {$IFDEF USE_FORMDESIGNER}
-  design_frm, frmdesigner,
-  {$ENDIF}
-  // initialize in import order.
-  script_import_system, script_import_classes, script_import_target, script_import_input,
-  script_import_finder, script_import_web, script_import_arrays_algorithms, script_import_matrix,
-  script_import_math, script_import_time_date, script_import_ocr, script_import_string,
-  script_import_simba, script_import_colormath, script_import_bitmap, script_import_settings,
-  script_import_dtm, script_import_file, script_import_other, script_import_script,
-  script_import_crypto, script_import_deprecated, script_import_oswindow;
+  classes, interfaces, forms,
+  simba.settings, simba.main, simba.aboutform, simba.debugimage, simba.bitmapconv,
+  simba.updateform, simba.splashform, simba.functionlistform, simba.scripttabsform,
+  simba.debugform, simba.filebrowserform, simba.notesform, simba.settingsform,
+  simba.package_form, simba.colorpicker_historyform
+  {$IFDEF USE_FORMDESIGNER},
+  simba.formdesigner
+  {$ENDIF};
 
 begin
   {$IF DECLARED(SetHeapTraceOutput)}
-  SetHeapTraceOutput('trace.trc');
+  if FileExists('memoryleaks.trc') then
+    DeleteFile('memoryleaks.trc');
+
+  SetHeapTraceOutput('memoryleaks.trc');
   {$ENDIF}
 
+  Application.ShowMainForm := False;
   Application.Initialize();
+  Application.CreateForm(TSimbaSplashForm, SimbaSplashForm);
   Application.CreateForm(TSimbaForm, SimbaForm);
-  Application.CreateForm(TColourHistoryForm, ColourHistoryForm);
+  Application.CreateForm(TSimbaFunctionListForm, SimbaFunctionListForm);
+  Application.CreateForm(TSimbaDebugImageForm, SimbaDebugImageForm);
+  Application.CreateForm(TSimbaNotesForm, SimbaNotesForm);
+  Application.CreateForm(TSimbaScriptTabsForm, SimbaScriptTabsForm);
+  Application.CreateForm(TSimbaDebugForm, SimbaDebugForm);
+  Application.CreateForm(TSimbaFileBrowserForm, SimbaFileBrowserForm);
   Application.CreateForm(TAboutForm, AboutForm);
-  Application.CreateForm(TDebugImgForm, DebugImgForm);
   Application.CreateForm(TBitmapConvForm, BitmapConvForm);
   Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
-  Application.CreateForm(TSettingsForm, SettingsForm);
-  Application.CreateForm(TSettingsSimpleForm, SettingsSimpleForm);
+  Application.CreateForm(TSimbaSettingsForm, SimbaSettingsForm);
+  Application.CreateForm(TSimbaPackageForm, SimbaPackageForm);
+  Application.CreateForm(TSimbaColorHistoryForm, SimbaColorHistoryForm);
   {$IFDEF USE_FORMDESIGNER}
   Application.CreateForm(TCompForm, CompForm);
   {$ENDIF}
 
+  Application.QueueASyncCall(@SimbaForm.Init, 0);
   Application.Run();
 end.
 

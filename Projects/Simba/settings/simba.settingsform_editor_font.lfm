@@ -1,0 +1,105 @@
+object EditorFontFrame: TEditorFontFrame
+  Left = 0
+  Height = 240
+  Top = 0
+  Width = 320
+  ClientHeight = 240
+  ClientWidth = 320
+  TabOrder = 0
+  DesignLeft = 1547
+  DesignTop = 189
+  object Panel1: TPanel
+    Left = 0
+    Height = 85
+    Top = 0
+    Width = 320
+    Align = alTop
+    AutoSize = True
+    BevelOuter = bvNone
+    ClientHeight = 85
+    ClientWidth = 320
+    TabOrder = 0
+    object Label1: TLabel
+      AnchorSideLeft.Control = Panel1
+      AnchorSideTop.Control = FontsComboBox
+      AnchorSideBottom.Control = FontsComboBox
+      AnchorSideBottom.Side = asrBottom
+      Left = 0
+      Height = 23
+      Top = 5
+      Width = 59
+      Anchors = [akTop, akLeft, akBottom]
+      Caption = 'Font Name'
+      Layout = tlCenter
+      ParentColor = False
+    end
+    object FontsComboBox: TComboBox
+      AnchorSideLeft.Control = FontHeightEdit
+      AnchorSideTop.Control = Panel1
+      AnchorSideRight.Control = Panel1
+      AnchorSideRight.Side = asrBottom
+      Left = 68
+      Height = 23
+      Top = 5
+      Width = 247
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 5
+      BorderSpacing.Right = 5
+      BorderSpacing.Bottom = 5
+      ItemHeight = 15
+      OnChange = FontsComboBoxChange
+      TabOrder = 0
+    end
+    object FontHeightEdit: TSpinEdit
+      AnchorSideLeft.Control = Label2
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = FontsComboBox
+      AnchorSideTop.Side = asrBottom
+      Left = 68
+      Height = 23
+      Top = 33
+      Width = 100
+      BorderSpacing.Left = 5
+      BorderSpacing.Bottom = 5
+      OnChange = FontHeightEditChange
+      TabOrder = 1
+    end
+    object Label2: TLabel
+      AnchorSideLeft.Control = Panel1
+      AnchorSideTop.Control = FontHeightEdit
+      AnchorSideBottom.Control = FontHeightEdit
+      AnchorSideBottom.Side = asrBottom
+      Left = 0
+      Height = 23
+      Top = 33
+      Width = 63
+      Anchors = [akTop, akLeft, akBottom]
+      Caption = 'Font Height'
+      Layout = tlCenter
+      ParentColor = False
+    end
+    object FontAntiAliasedCheckbox: TCheckBox
+      AnchorSideLeft.Control = Panel1
+      AnchorSideTop.Control = FontHeightEdit
+      AnchorSideTop.Side = asrBottom
+      Left = 0
+      Height = 19
+      Top = 61
+      Width = 85
+      BorderSpacing.Top = 5
+      BorderSpacing.Bottom = 5
+      Caption = 'Anti-Aliased'
+      OnChange = FontAntiAliasedCheckboxChange
+      TabOrder = 2
+    end
+  end
+  object EditorPanel: TPanel
+    Left = 0
+    Height = 155
+    Top = 85
+    Width = 320
+    Align = alClient
+    BevelOuter = bvNone
+    TabOrder = 1
+  end
+end

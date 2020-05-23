@@ -1,0 +1,82 @@
+{ This is an automatically generated lazarus resource file }
+
+LazarusResources.Add('TEditorGeneralFrame','FORMDATA',[
+  'TPF0'#19'TEditorGeneralFrame'#18'EditorGeneralFrame'#4'Left'#2#0#6'Height'#3
+  +'u'#1#3'Top'#2#0#5'Width'#3#1#2#12'ClientHeight'#3'u'#1#11'ClientWidth'#3#1#2
+  +#8'TabOrder'#2#0#10'DesignLeft'#3#159#4#9'DesignTop'#3#154#1#0#9'TCheckBox'
+  +#20'CaretPastEOLCheckBox'#22'AnchorSideLeft.Control'#7#5'Owner'#21'AnchorSid'
+  +'eTop.Control'#7#13'DividerBevel2'#18'AnchorSideTop.Side'#7#9'asrBottom'#4'L'
+  +'eft'#2#0#6'Height'#2#19#3'Top'#2#20#5'Width'#3#130#0#17'BorderSpacing.Top'#2
+  +#5#7'Caption'#6#20'Allow Caret Past EOL'#8'TabOrder'#2#0#0#0#13'TDividerBeve'
+  +'l'#13'DividerBevel1'#22'AnchorSideLeft.Control'#7#5'Owner'#21'AnchorSideTop'
+  +'.Control'#7#17'DefaultScriptEdit'#18'AnchorSideTop.Side'#7#9'asrBottom'#23
+  +'AnchorSideRight.Control'#7#5'Owner'#20'AnchorSideRight.Side'#7#9'asrBottom'
+  +#4'Left'#2#0#6'Height'#2#15#3'Top'#3#222#0#5'Width'#3#1#2#7'Caption'#6#10'Co'
+  +'de Tools'#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#0#17'BorderSpacing.To'
+  +'p'#2#10#5'Style'#7#10'gsHorLines'#0#0#6'TLabel'#6'Label1'#22'AnchorSideLeft'
+  +'.Control'#7#5'Owner'#21'AnchorSideTop.Control'#7#17'DefaultScriptEdit'#24'A'
+  +'nchorSideBottom.Control'#7#17'DefaultScriptEdit'#21'AnchorSideBottom.Side'#7
+  +#9'asrBottom'#4'Left'#2#0#6'Height'#2#23#3'Top'#3#189#0#5'Width'#2'G'#7'Anch'
+  +'ors'#11#5'akTop'#6'akLeft'#8'akBottom'#0#7'Caption'#6#14'Default Script'#6
+  +'Layout'#7#8'tlCenter'#11'ParentColor'#8#0#0#5'TEdit'#17'DefaultScriptEdit'
+  +#22'AnchorSideLeft.Control'#7#6'Label1'#19'AnchorSideLeft.Side'#7#9'asrBotto'
+  +'m'#21'AnchorSideTop.Control'#7#13'DividerBevel3'#18'AnchorSideTop.Side'#7#9
+  +'asrBottom'#23'AnchorSideRight.Control'#7#23'OpenDefaultScriptButton'#4'Left'
+  +#2'L'#6'Height'#2#23#3'Top'#3#189#0#5'Width'#3#141#1#7'Anchors'#11#5'akTop'#6
+  +'akLeft'#7'akRight'#0#18'BorderSpacing.Left'#2#5#17'BorderSpacing.Top'#2#5#19
+  +'BorderSpacing.Right'#2#5#8'TabOrder'#2#1#0#0#9'TCheckBox'#26'ShowParameterH'
+  +'intsCheckbox'#22'AnchorSideLeft.Control'#7#5'Owner'#21'AnchorSideTop.Contro'
+  +'l'#7#13'DividerBevel1'#18'AnchorSideTop.Side'#7#9'asrBottom'#4'Left'#2#0#6
+  +'Height'#2#19#3'Top'#3#242#0#5'Width'#3#214#0#17'BorderSpacing.Top'#2#5#7'Ca'
+  +'ption'#6'"Automatically Show Parameter Hints'#8'TabOrder'#2#2#0#0#9'TCheckB'
+  +'ox'#26'OpenAutoCompletionCheckbox'#22'AnchorSideLeft.Control'#7#5'Owner'#21
+  +'AnchorSideTop.Control'#7#26'ShowParameterHintsCheckbox'#18'AnchorSideTop.Si'
+  +'de'#7#9'asrBottom'#4'Left'#2#0#6'Height'#2#19#3'Top'#3#10#1#5'Width'#3#221#0
+  +#17'BorderSpacing.Top'#2#5#7'Caption'#6'"Automatically Open Auto Completion'
+  +#8'TabOrder'#2#3#0#0#13'TDividerBevel'#13'DividerBevel2'#22'AnchorSideLeft.C'
+  +'ontrol'#7#5'Owner'#21'AnchorSideTop.Control'#7#5'Owner'#23'AnchorSideRight.'
+  +'Control'#7#5'Owner'#20'AnchorSideRight.Side'#7#9'asrBottom'#4'Left'#2#0#6'H'
+  +'eight'#2#15#3'Top'#2#0#5'Width'#3#1#2#7'Caption'#6#7'Options'#7'Anchors'#11
+  +#5'akTop'#6'akLeft'#7'akRight'#0#5'Style'#7#10'gsHorLines'#0#0#13'TDividerBe'
+  +'vel'#13'DividerBevel3'#22'AnchorSideLeft.Control'#7#5'Owner'#21'AnchorSideT'
+  +'op.Control'#7#15'RightMarginEdit'#18'AnchorSideTop.Side'#7#9'asrBottom'#23
+  +'AnchorSideRight.Control'#7#5'Owner'#20'AnchorSideRight.Side'#7#9'asrBottom'
+  +#4'Left'#2#0#6'Height'#2#15#3'Top'#3#169#0#5'Width'#3#1#2#7'Caption'#6#7'Def'
+  +'ault'#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#0#17'BorderSpacing.Top'#2
+  +#10#5'Style'#7#10'gsHorLines'#0#0#7'TButton'#23'OpenDefaultScriptButton'#19
+  +'AnchorSideLeft.Side'#7#9'asrBottom'#21'AnchorSideTop.Control'#7#17'DefaultS'
+  +'criptEdit'#23'AnchorSideRight.Control'#7#5'Owner'#20'AnchorSideRight.Side'#7
+  +#9'asrBottom'#24'AnchorSideBottom.Control'#7#17'DefaultScriptEdit'#21'Anchor'
+  +'SideBottom.Side'#7#9'asrBottom'#4'Left'#3#222#1#6'Height'#2#23#3'Top'#3#189
+  +#0#5'Width'#2'#'#7'Anchors'#11#5'akTop'#7'akRight'#8'akBottom'#0#8'AutoSize'
+  +#9#7'Caption'#6#3'...'#7'OnClick'#7#28'OpenDefaultScriptButtonClick'#8'TabOr'
+  +'der'#2#4#0#0#9'TCheckBox'#31'SaveScriptAutomaticallyCheckbox'#22'AnchorSide'
+  +'Left.Control'#7#5'Owner'#21'AnchorSideTop.Control'#7#20'CaretPastEOLCheckBo'
+  +'x'#18'AnchorSideTop.Side'#7#9'asrBottom'#4'Left'#2#0#6'Height'#2#19#3'Top'#2
+  +','#5'Width'#3#243#0#17'BorderSpacing.Top'#2#5#7'Caption'#6'''Save Script Au'
+  +'tomatically When Compiled'#8'TabOrder'#2#5#0#0#9'TCheckBox'#26'VisibleRight'
+  +'MarginCheckbox'#22'AnchorSideLeft.Control'#7#5'Owner'#21'AnchorSideTop.Cont'
+  +'rol'#7#13'DividerBevel4'#18'AnchorSideTop.Side'#7#9'asrBottom'#4'Left'#2#0#6
+  +'Height'#2#19#3'Top'#2'p'#5'Width'#2'6'#17'BorderSpacing.Top'#2#5#7'Caption'
+  +#6#7'Visible'#8'TabOrder'#2#6#0#0#9'TSpinEdit'#15'RightMarginEdit'#22'Anchor'
+  +'SideLeft.Control'#7#6'Label2'#19'AnchorSideLeft.Side'#7#9'asrBottom'#21'Anc'
+  +'horSideTop.Control'#7#26'VisibleRightMarginCheckbox'#18'AnchorSideTop.Side'
+  +#7#9'asrBottom'#4'Left'#2'!'#6'Height'#2#23#3'Top'#3#136#0#5'Width'#2'd'#18
+  +'BorderSpacing.Left'#2#5#17'BorderSpacing.Top'#2#5#8'MaxValue'#3#232#3#8'Tab'
+  +'Order'#2#7#0#0#6'TLabel'#6'Label2'#22'AnchorSideLeft.Control'#7#5'Owner'#21
+  +'AnchorSideTop.Control'#7#15'RightMarginEdit'#24'AnchorSideBottom.Control'#7
+  ,#15'RightMarginEdit'#21'AnchorSideBottom.Side'#7#9'asrBottom'#4'Left'#2#0#6
+  +'Height'#2#23#3'Top'#3#136#0#5'Width'#2#28#7'Anchors'#11#5'akTop'#6'akLeft'#8
+  +'akBottom'#0#7'Caption'#6#5'Value'#6'Layout'#7#8'tlCenter'#11'ParentColor'#8
+  +#0#0#13'TDividerBevel'#13'DividerBevel4'#22'AnchorSideLeft.Control'#7#5'Owne'
+  +'r'#21'AnchorSideTop.Control'#7#22'DividerVisibleCheckbox'#18'AnchorSideTop.'
+  +'Side'#7#9'asrBottom'#23'AnchorSideRight.Control'#7#5'Owner'#20'AnchorSideRi'
+  +'ght.Side'#7#9'asrBottom'#4'Left'#2#0#6'Height'#2#15#3'Top'#2'\'#5'Width'#3#1
+  +#2#7'Caption'#6#12'Right Margin'#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'
+  +#0#17'BorderSpacing.Top'#2#5#5'Style'#7#10'gsHorLines'#0#0#9'TCheckBox'#22'D'
+  +'ividerVisibleCheckbox'#22'AnchorSideLeft.Control'#7#5'Owner'#21'AnchorSideT'
+  +'op.Control'#7#31'SaveScriptAutomaticallyCheckbox'#18'AnchorSideTop.Side'#7#9
+  +'asrBottom'#4'Left'#2#0#6'Height'#2#19#3'Top'#2'D'#5'Width'#3#152#0#17'Borde'
+  +'rSpacing.Top'#2#5#7'Caption'#6#26'Horizontal Divider Visible'#8'TabOrder'#2
+  +#8#0#0#0
+]);

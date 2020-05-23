@@ -1,11 +1,9 @@
 ssSettings = 'Settings/';
 ssLastConfig = 'LastConfig/';
-ssScriptManager = 'ScriptManager/';
 
 ssUpdater = 'Updater/';
 ssFonts = 'Fonts/';
 ssIncludes = 'Includes/';
-ssInterpreter = 'Interpreter/';
 ssTabs = 'Tabs/';
 ssColourPicker = 'ColourPicker/';
 ssScripts = 'Scripts/';
@@ -42,6 +40,14 @@ ssColourPickerAddColourToClipBoard = ssSettings + ssColourPicker + 'AddColourToC
 
 ssScriptsPath = ssSettings + ssScripts + 'Path';
 
+ssScriptExectuable = ssSettings + 'ScriptExectuable/';
+ssScriptExectuablePath = ssScriptExectuable + 'Path';
+ssScriptExectuableExtractOnStartup = ssScriptExectuable + 'ExtractOnStartup';
+
+ssOpenSSL = ssSettings + 'OpenSSL/';
+ssOpenSSLExtractOnStartup = ssOpenSSL + 'ExtractOnStartup';
+ssOpenSSLInitalizeOnStartup = ssOpenSSL + 'InitalizeOnStartup';
+
 ssCodeHintsShowAutomatically = ssSettings + ssCodeInsight + 'CodeHints/ShowAutomatically';
 ssCodeCompletionShowAutomatically = ssSettings + ssCodeInsight + 'CodeCompletion/ShowAutomatically';
 
@@ -59,7 +65,10 @@ ssTrayAlwaysVisible = ssSettings + ssTray + 'AlwaysVisible';
 
 ssConsoleVisible = ssLastConfig + ssConsole + 'Visible';
 
-ssMainFormPosition = ssLastConfig + ssMainForm + 'Position';
+ssMainFormLeft = ssLastConfig + ssMainForm + 'Left';
+ssMainFormTop = ssLastConfig + ssMainForm + 'Top';
+ssMainFormWidth = ssLastConfig + ssMainForm + 'Width';
+ssMainFormHeight = ssLastConfig + ssMainForm + 'Height';
 ssMainFormState = ssLastConfig + ssMainForm + 'State';
 ssMainFormNormalSize = ssSettings + ssMainForm + 'NormalSize';
 ssFunctionListShown = ssLastConfig + ssMainForm + 'FunctionListShown';
@@ -67,10 +76,7 @@ ssFunctionListShown = ssLastConfig + ssMainForm + 'FunctionListShown';
 ssCodeInsightShowHidden = ssSettings + ssCodeInsight + 'ShowHidden';
 ssFunctionListShowOnStart = ssSettings + ssCodeInsight + ssFunctionList + 'ShowOnStart';
 
-ssMaxRecentFiles = ssSettings + 'General/MaxRecentFiles';
 ssRecentFiles = ssLastConfig + ssMainForm + 'RecentFiles';
-ssRecentFilesCount = ssLastConfig + ssMainForm + 'RecentFiles/Count';
-ssRecentFile = ssLastConfig + ssMainForm + 'RecentFiles/File';
 
 ssNotesContent = ssSettings + ssNotes + 'Content';
 ssNotesVisible = ssSettings + ssNotes + 'Visible';
@@ -81,8 +87,3 @@ ssMiscRestartScriptIfStarted = ssSettings + ssMisc + 'RestartScriptIfStarted';
 ssMiscWarnIfRunning = ssSettings + ssMisc + 'WarnIfRunning';
 ssMiscWarnIfModified = ssSettings + ssMisc + 'WarnIfModified';
 ssSaveScriptOnCompile = ssSettings + ssMisc + 'SaveScriptOnCompile';
-
-ssSMURL = ssScriptManager + 'URL';
-ssSMPath = ssScriptManager + 'Path';
-ssSMFile = ssScriptManager + 'File';
-ssFRun = ssScriptManager + 'FirstRun';

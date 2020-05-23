@@ -1,0 +1,75 @@
+object GUIFrame: TGUIFrame
+  Left = 0
+  Height = 204
+  Top = 0
+  Width = 457
+  ClientHeight = 204
+  ClientWidth = 457
+  TabOrder = 0
+  DesignLeft = 1217
+  DesignTop = 662
+  object ToolbarSizeTrackBar: TTrackBar
+    AnchorSideLeft.Control = Label1
+    AnchorSideTop.Control = Label1
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Side = asrBottom
+    Left = 2
+    Height = 25
+    Top = 25
+    Width = 455
+    Max = 32
+    OnChange = ToolbarSizeTrackBarChange
+    Position = 0
+    Align = alCustom
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 2
+    BorderSpacing.Top = 5
+    TabOrder = 0
+  end
+  object FontSizeTrackBar: TTrackBar
+    AnchorSideLeft.Control = Label2
+    AnchorSideTop.Control = Label2
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Label2
+    AnchorSideBottom.Side = asrBottom
+    Left = 2
+    Height = 25
+    Top = 75
+    Width = 455
+    Max = 20
+    OnChange = FontSizeTrackBarChange
+    Position = 0
+    Align = alCustom
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 2
+    BorderSpacing.Top = 5
+    TabOrder = 1
+  end
+  object Label2: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = ToolbarSizeTrackBar
+    AnchorSideTop.Side = asrBottom
+    Left = 0
+    Height = 15
+    Top = 55
+    Width = 96
+    BorderSpacing.Top = 5
+    Caption = 'Font Size (Default)'
+    ParentColor = False
+  end
+  object Label1: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    Left = 0
+    Height = 15
+    Top = 5
+    Width = 111
+    BorderSpacing.Top = 5
+    Caption = 'Toolbar Size (Default)'
+    ParentColor = False
+  end
+end

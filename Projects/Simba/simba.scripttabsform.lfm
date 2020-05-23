@@ -1,0 +1,364 @@
+object SimbaScriptTabsForm: TSimbaScriptTabsForm
+  Left = 8
+  Height = 252
+  Top = 599
+  Width = 564
+  AllowDropFiles = True
+  Caption = 'Editor'
+  ClientHeight = 252
+  ClientWidth = 564
+  OnDropFiles = HandleDropFiles
+  LCLVersion = '2.0.6.0'
+  object Notebook: TExtendedNotebook
+    Left = 0
+    Height = 187
+    Top = 0
+    Width = 564
+    Align = alClient
+    Images = SimbaForm.Images
+    PopupMenu = TabPopupMenu
+    TabOrder = 0
+    OnChange = NotebookChange
+    OnChanging = NotebookChanging
+    Options = [nboDoChangeOnSetIndex]
+    TabDragMode = dmAutomatic
+    TabDragAcceptMode = dmAutomatic
+  end
+  object FindPanel: TPanel
+    Left = 0
+    Height = 43
+    Top = 187
+    Width = 564
+    Align = alBottom
+    AutoSize = True
+    BevelOuter = bvNone
+    ClientHeight = 43
+    ClientWidth = 564
+    ParentColor = False
+    TabOrder = 1
+    Visible = False
+    object FindPanel_Label: TLabel
+      AnchorSideLeft.Control = FindPanel
+      AnchorSideTop.Control = FindEdit
+      AnchorSideBottom.Control = FindEdit
+      AnchorSideBottom.Side = asrBottom
+      Left = 10
+      Height = 23
+      Top = 10
+      Width = 26
+      Anchors = [akTop, akLeft, akBottom]
+      BorderSpacing.Left = 10
+      Caption = 'Find:'
+      Layout = tlCenter
+      ParentColor = False
+    end
+    object FindEdit: TEdit
+      AnchorSideLeft.Control = FindPanel_Label
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = FindPanel_UpButton
+      AnchorSideBottom.Control = FindPanel
+      AnchorSideBottom.Side = asrBottom
+      Left = 41
+      Height = 23
+      Top = 10
+      Width = 150
+      Anchors = [akLeft, akBottom]
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 10
+      BorderSpacing.Bottom = 10
+      OnChange = FindPanel_SearchChanged
+      OnKeyDown = FindEditKeyDown
+      TabOrder = 0
+    end
+    object FindPanel_UpButton: TButton
+      AnchorSideLeft.Control = FindEdit
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = FindEdit
+      AnchorSideBottom.Control = FindEdit
+      AnchorSideBottom.Side = asrBottom
+      Left = 201
+      Height = 23
+      Top = 10
+      Width = 34
+      Anchors = [akTop, akLeft, akBottom]
+      AutoSize = True
+      BorderSpacing.Left = 10
+      Caption = '⯆'
+      OnClick = FindPanel_UpButtonClick
+      ParentFont = False
+      TabOrder = 1
+    end
+    object FindPanel_DownButton: TButton
+      AnchorSideLeft.Control = FindPanel_UpButton
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = FindPanel_UpButton
+      AnchorSideBottom.Control = FindPanel_UpButton
+      AnchorSideBottom.Side = asrBottom
+      Left = 240
+      Height = 23
+      Top = 10
+      Width = 34
+      Anchors = [akTop, akLeft, akBottom]
+      AutoSize = True
+      BorderSpacing.Left = 5
+      Caption = '⯅'
+      OnClick = FindPanel_DownButtonClick
+      ParentFont = False
+      TabOrder = 2
+    end
+    object FindCaseSenstiveButton: TCheckBox
+      AnchorSideLeft.Control = FindPanel_DownButton
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = FindPanel_UpButton
+      AnchorSideBottom.Control = FindPanel_UpButton
+      AnchorSideBottom.Side = asrBottom
+      Left = 284
+      Height = 23
+      Top = 10
+      Width = 82
+      Anchors = [akTop, akLeft, akBottom]
+      BorderSpacing.Left = 10
+      Caption = 'Match Case'
+      OnChange = FindPanel_SearchChanged
+      TabOrder = 3
+    end
+    object FindPanel_CloseButton: TSpeedButton
+      AnchorSideTop.Control = FindPanel
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = FindPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 534
+      Height = 20
+      Top = 11
+      Width = 20
+      Anchors = [akTop, akRight]
+      BorderSpacing.Right = 10
+      Flat = True
+      Glyph.Data = {
+        36090000424D3609000000000000360000002800000018000000180000000100
+        2000000000000009000064000000640000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00FF0000000000000000000000000000000000000000000000FF000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000FF0000
+        00FF000000FF000000000000000000000000000000FF000000FF000000FF0000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00FF000000FF000000FF00000000000000FF000000FF000000FF000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000FF000000FF000000FF000000FF000000FF00000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000FF000000FF000000FF0000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000FF000000FF000000FF000000FF000000FF00000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00FF000000FF000000FF00000000000000FF000000FF000000FF000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000FF0000
+        00FF000000FF000000000000000000000000000000FF000000FF000000FF0000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00FF0000000000000000000000000000000000000000000000FF000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000
+      }
+      OnClick = FindPanel_CloseButtonClick
+    end
+  end
+  object StatusBar: TPanel
+    Left = 0
+    Height = 20
+    Top = 230
+    Width = 564
+    Align = alBottom
+    Anchors = [akRight]
+    BorderSpacing.Bottom = 2
+    BevelOuter = bvNone
+    ClientHeight = 20
+    ClientWidth = 564
+    ParentColor = False
+    TabOrder = 2
+    OnPaint = StatusBarPaint
+    object StatusPanelCaret: TPanel
+      Left = 5
+      Height = 20
+      Top = 0
+      Width = 170
+      Align = alLeft
+      Alignment = taLeftJustify
+      BorderSpacing.Left = 5
+      BevelOuter = bvNone
+      TabOrder = 0
+      OnPaint = StatusPanelPaint
+    end
+    object StatusPanelFileName: TPanel
+      Left = 355
+      Height = 20
+      Top = 0
+      Width = 209
+      Align = alClient
+      Alignment = taLeftJustify
+      BorderSpacing.Left = 5
+      BevelOuter = bvNone
+      TabOrder = 1
+    end
+    object StatusPanelState: TPanel
+      Left = 180
+      Height = 20
+      Top = 0
+      Width = 170
+      Align = alLeft
+      Alignment = taLeftJustify
+      BorderSpacing.Left = 5
+      BevelOuter = bvNone
+      TabOrder = 2
+      OnPaint = StatusPanelPaint
+    end
+  end
+  object ReplaceDialog: TReplaceDialog
+    Options = [frDown, frFindNext, frHideUpDown, frEntireScope, frPromptOnReplace]
+    OnReplace = HandleReplace
+    left = 168
+    top = 16
+  end
+  object TabPopupMenu: TPopupMenu
+    Images = SimbaForm.Images
+    OnPopup = TabPopupMenuPopup
+    left = 256
+    top = 16
+    object TabPopupItem_NewTab: TMenuItem
+      Caption = 'New Tab'
+      OnClick = HandleTabPopupClick
+    end
+    object TabPopupItem_CloseTab: TMenuItem
+      Caption = 'Close Tab'
+      ImageIndex = 8
+      OnClick = HandleTabPopupClick
+    end
+    object TabPopupItem_CloseOtherTabs: TMenuItem
+      Caption = 'Close All Other Tabs'
+      ImageIndex = 9
+      OnClick = HandleTabPopupClick
+    end
+  end
+  object EditorPopupMenu: TPopupMenu
+    Images = SimbaForm.Images
+    OnPopup = EditorPopupShow
+    left = 352
+    top = 16
+    object EditorPopupFindDeclaration: TMenuItem
+      Caption = 'Find Declaration'
+      OnClick = EditorPopupClick
+    end
+    object MenuItem2: TMenuItem
+      Caption = '-'
+    end
+    object EditorPopupUndo: TMenuItem
+      Caption = 'Undo'
+      ImageIndex = 17
+      ShortCut = 24666
+      OnClick = EditorPopupClick
+    end
+    object EditorPopupRedo: TMenuItem
+      Caption = 'Redo'
+      ImageIndex = 13
+      ShortCut = 16474
+      OnClick = EditorPopupClick
+    end
+    object MenuItem6: TMenuItem
+      Caption = '-'
+    end
+    object EditorPopupCut: TMenuItem
+      Caption = 'Cut'
+      ImageIndex = 3
+      ShortCut = 16472
+      OnClick = EditorPopupClick
+    end
+    object EditorPopupCopy: TMenuItem
+      Caption = 'Copy'
+      ImageIndex = 2
+      ShortCut = 16451
+      OnClick = EditorPopupClick
+    end
+    object EditorPopupPaste: TMenuItem
+      Caption = 'Paste'
+      ImageIndex = 5
+      ShortCut = 16470
+      OnClick = EditorPopupClick
+    end
+    object EditorPopupDelete: TMenuItem
+      Caption = 'Delete'
+      OnClick = EditorPopupClick
+    end
+    object MenuItem3: TMenuItem
+      Caption = '-'
+    end
+    object EditorPopupSelectAll: TMenuItem
+      Caption = 'Select All'
+      ShortCut = 16449
+      OnClick = EditorPopupClick
+    end
+    object MenuItem1: TMenuItem
+      Caption = '-'
+    end
+    object EditorPopupFind: TMenuItem
+      Caption = 'Find ...'
+      ImageIndex = 18
+      ShortCut = 16454
+      OnClick = EditorPopupClick
+    end
+    object EditorPopupReplace: TMenuItem
+      Caption = 'Replace ...'
+      ShortCut = 16466
+      OnClick = EditorPopupClick
+    end
+  end
+end

@@ -1,0 +1,24 @@
+{ This is an automatically generated lazarus resource file }
+
+LazarusResources.Add('TSimbaSettingsForm','FORMDATA',[
+  'TPF0'#18'TSimbaSettingsForm'#17'SimbaSettingsForm'#4'Left'#3#236#3#6'Height'
+  +#3#244#1#3'Top'#2'{'#5'Width'#3'X'#2#7'Caption'#6#14'Simba Settings'#12'Clie'
+  +'ntHeight'#3#244#1#11'ClientWidth'#3'X'#2#11'Font.Height'#2#243#6'OnShow'#7#8
+  +'FormShow'#8'Position'#7#14'poScreenCenter'#10'LCLVersion'#6#7'2.0.4.0'#0#9
+  +'TTreeView'#8'TreeView'#4'Left'#2#0#6'Height'#3#197#1#3'Top'#2#0#5'Width'#3
+  +#150#0#5'Align'#7#6'alLeft'#10'AutoExpand'#9#19'BorderSpacing.Right'#2#1#8'R'
+  +'eadOnly'#9#10'ScrollBars'#7#10'ssAutoBoth'#8'TabOrder'#2#0#7'OnClick'#7#13
+  +'TreeViewClick'#7'Options'#11#13'tvoAutoExpand'#17'tvoAutoItemHeight'#16'tvo'
+  +'HideSelection'#21'tvoKeepCollapsedNodes'#11'tvoReadOnly'#14'tvoShowButtons'
+  +#12'tvoShowLines'#11'tvoShowRoot'#11'tvoToolTips'#13'tvoThemedDraw'#0#0#0#9
+  +'TNotebook'#8'Notebook'#4'Left'#3#159#0#6'Height'#3#197#1#3'Top'#2#0#5'Width'
+  +#3#180#1#5'Align'#7#8'alClient'#18'BorderSpacing.Left'#2#3#19'BorderSpacing.'
+  +'Right'#2#5#8'TabOrder'#2#1#0#0#12'TButtonPanel'#12'ButtonPanel1'#4'Left'#2#6
+  +#6'Height'#2'#'#3'Top'#3#203#1#5'Width'#3'L'#2#13'OKButton.Name'#6#8'OKButto'
+  +'n'#23'OKButton.DefaultCaption'#9#16'OKButton.OnClick'#7#13'OKButtonClick'#15
+  +'HelpButton.Name'#6#10'HelpButton'#25'HelpButton.DefaultCaption'#9#16'CloseB'
+  +'utton.Name'#6#11'CloseButton'#26'CloseButton.DefaultCaption'#9#17'CancelBut'
+  +'ton.Name'#6#12'CancelButton'#27'CancelButton.DefaultCaption'#9#8'TabOrder'#2
+  +#2#11'ShowButtons'#11#4'pbOK'#8'pbCancel'#0#0#0#9'TSplitter'#9'Splitter1'#4
+  +'Left'#3#151#0#6'Height'#3#197#1#3'Top'#2#0#5'Width'#2#5#0#0#0
+]);

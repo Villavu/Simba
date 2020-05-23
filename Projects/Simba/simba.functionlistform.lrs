@@ -1,0 +1,19 @@
+{ This is an automatically generated lazarus resource file }
+
+LazarusResources.Add('TSimbaFunctionListForm','FORMDATA',[
+  'TPF0'#22'TSimbaFunctionListForm'#21'SimbaFunctionListForm'#4'Left'#2'='#6'He'
+  +'ight'#3#241#0#3'Top'#3#166#3#5'Width'#3'@'#1#7'Caption'#6#13'Function List'
+  +#12'ClientHeight'#3#241#0#11'ClientWidth'#3'@'#1#10'LCLVersion'#6#7'2.0.6.0'
+  +#0#9'TTreeView'#8'TreeView'#4'Left'#2#0#6'Height'#3#218#0#3'Top'#2#0#5'Width'
+  +#3'@'#1#5'Align'#7#8'alClient'#11'BorderStyle'#7#6'bsNone'#6'Images'#7#16'Si'
+  +'mbaForm.Images'#8'ReadOnly'#9#8'TabOrder'#2#0#10'OnDblClick'#7#16'TreeViewD'
+  +'blClick'#12'OnMouseLeave'#7#16'HandleMouseLeave'#11'OnMouseMove'#7#10'Handl'
+  +'eHint'#7'Options'#11#17'tvoAutoItemHeight'#16'tvoHideSelection'#21'tvoKeepC'
+  +'ollapsedNodes'#11'tvoReadOnly'#14'tvoShowButtons'#12'tvoShowLines'#11'tvoSh'
+  +'owRoot'#11'tvoToolTips'#13'tvoThemedDraw'#0#0#0#15'TTreeFilterEdit'#14'Tree'
+  +'FilterEdit'#4'Left'#2#0#6'Height'#2#23#3'Top'#3#218#0#5'Width'#3'@'#1#11'Bu'
+  +'ttonWidth'#2#0#5'Align'#7#8'alBottom'#9'NumGlyphs'#2#1#9'MaxLength'#2#0#7'S'
+  +'pacing'#2#0#8'TabOrder'#2#1#8'OnChange'#7#20'TreeFilterEditChange'#9'OnKeyD'
+  +'own'#7#21'TreeFilterEditKeyDown'#8'TextHint'#6#8'(search)'#16'FilteredTreev'
+  +'iew'#7#8'TreeView'#18'ExpandAllInitially'#9#0#0#0
+]);

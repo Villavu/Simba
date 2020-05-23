@@ -75,7 +75,7 @@ implementation
 
 uses
   fileutil,
-  simba.package_form, simba.package_github_url, simba.environment;
+  simba.package_form, simba.package_github_url, simba.settings;
 
 function TSimbaPackage.Install(Options: TSimbaPackage_InstallOptions): Boolean;
 var
@@ -170,7 +170,7 @@ end;
 
 constructor TSimbaPackage_Config.Create;
 begin
-  inherited Create(SimbaEnvironment.PackagePath + 'packages.ini');
+  inherited Create(SimbaSettings.Environment.PackagePath.Value + 'packages.ini');
 
   CacheUpdates := True;
 end;
