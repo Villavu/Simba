@@ -41,7 +41,10 @@ Known Issues:
 
 unit CastaliaPasLex;
 
-{$include ValistusDefines.inc}
+{$DEFINE D8_NEWER}
+{$DEFINE D9_NEWER}
+{$DEFINE D10_NEWER}
+
 {$IFDEF FPC}
   {$mode delphi}
 {$ENDIF}
@@ -273,7 +276,9 @@ type
     function GetIsRelativeOperator: Boolean;
     function GetIsCompilerDirective: Boolean;
     function GetIsOrdinalType: Boolean;
-    function GetGenID: TptTokenKind;procedure SetOnElseIfDirect(const Value: TDirectiveEvent);
+    function GetGenID: TptTokenKind;
+
+    procedure SetOnElseIfDirect(const Value: TDirectiveEvent);
 
     function IsDefined(const ADefine: string): Boolean;
     procedure EnterDefineBlock(ADefined: Boolean);
@@ -304,10 +309,10 @@ type
     constructor Create;
     destructor Destroy; override;
     function CharAhead: AnsiChar;
-    procedure Next;
-    procedure NextID(ID: TptTokenKind);
-    procedure NextNoJunk;
-    procedure NextNoSpace;
+    procedure Next; inline;
+    procedure NextID(ID: TptTokenKind); inline;
+    procedure NextNoJunk; inline;
+    procedure NextNoSpace; inline;
     procedure Init;
     procedure InitFrom(ALexer: TmwBasePasLex);
     function FirstInLine: Boolean;
@@ -1409,7 +1414,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TmwBasePasLex.DoProcTable(AChar: AnsiChar);
+procedure TmwBasePasLex.DoProcTable(AChar: AnsiChar); inline;
 begin
   if AChar <= #255 then
     fProcTable[AChar]
@@ -1813,7 +1818,7 @@ begin
     Result := Ord(AChar);
 end;
 
-procedure TmwBasePasLex.IdentProc;
+procedure TmwBasePasLex.IdentProc; inline;
 begin
   fTokenID := IdentKind;
 end;
@@ -1914,8 +1919,6 @@ begin
 end;
 
 procedure TmwBasePasLex.PointerSymbolProc;
-var
-  Temp: LongInt;
 begin
   Inc(Run);
   fTokenID := tokPointerSymbol;
@@ -2249,58 +2252,61 @@ begin
    FOnMessage(Self, meError, 'Unknown Character', PosXY.X, PosXY.Y);
 end;
 
-procedure TmwBasePasLex.Next;
+procedure TmwBasePasLex.Next; inline;
 begin
   fExID := tokUnKnown;
   fTokenPos := Run;
 
-  if (MaxPos > -1) and (fTokenPos > MaxPos) then
-    fTokenID := tok_DONE
+  case fCommentState of
+    csNo:
+    begin
+      DoProcTable(fOrigin[Run]);
+     (*{$IFDEF D10_NEWER}
+     if fOrigin[Run] < #256 then
+       fProcTable[fOrigin[Run]]
+     else //non-ASCII unicode char
+       IdentProc;
+     {$ELSE}
+     fProcTable[fOrigin[Run]];
+     {$ENDIF}*)
+    end;
   else
     case fCommentState of
-      csNo:
-      begin
-        DoProcTable(fOrigin[Run]);
-       (*{$IFDEF D10_NEWER}
-       if fOrigin[Run] < #256 then
-         fProcTable[fOrigin[Run]]
-       else //non-ASCII unicode char
-         IdentProc;
-       {$ELSE}
-       fProcTable[fOrigin[Run]];
-       {$ENDIF}*)
-      end;
-    else
-      case fCommentState of
-        csBor: BorProc;
-        csAnsi: AnsiProc;
-      end;
+      csBor: BorProc;
+      csAnsi: AnsiProc;
     end;
+  end;
+
+  // if (MaxPos > -1) and (fTokenPos > MaxPos) and (not IsJunk) then
+//begin
+  //   WritelN('DONE');
+  ///    fTokenID := tok_DONE
+  // end;
 end;
 
 
-function TmwBasePasLex.GetIsJunk: Boolean;
+function TmwBasePasLex.GetIsJunk: Boolean; inline;
 begin
   result := IsTokenIDJunk(FTokenID) or (FUseDefines and (FDefineStack > 0) and (TokenID <> tokNull) and (TokenID <> tok_DONE));
 //  Result := fTokenID in [tokAnsiComment, tokBorComment, tokCRLF, tokCRLFCo, tokSlashesComment, tokSpace]; //XM 20001210
 end;
 
-function TmwBasePasLex.GetIsSpace: Boolean;
+function TmwBasePasLex.GetIsSpace: Boolean; inline;
 begin
   Result := fTokenID in [tokCRLF, tokSpace];
 end;
 
-function TmwBasePasLex.GetToken: string;
+function TmwBasePasLex.GetToken: string; inline;
 begin
   SetString(Result, (FOrigin + fTokenPos), GetTokenLen);
 end;
 
-function TmwBasePasLex.GetTokenLen: Integer;
+function TmwBasePasLex.GetTokenLen: Integer; inline;
 begin
   Result := Run - fTokenPos;
 end;
 
-procedure TmwBasePasLex.NextID(ID: TptTokenKind);
+procedure TmwBasePasLex.NextID(ID: TptTokenKind); inline;
 begin
   repeat
     case fTokenID of
@@ -2310,14 +2316,14 @@ begin
   until fTokenID = ID;
 end;
 
-procedure TmwBasePasLex.NextNoJunk;
+procedure TmwBasePasLex.NextNoJunk; inline;
 begin
   repeat
     Next;
   until not IsJunk;
 end;
 
-procedure TmwBasePasLex.NextNoSpace;
+procedure TmwBasePasLex.NextNoSpace; inline;
 begin
   repeat
     Next;
