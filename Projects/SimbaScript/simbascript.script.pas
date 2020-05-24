@@ -377,7 +377,7 @@ end;
 function TSimbaScript.HandleFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
 begin
   Result := nil;
-  if (not FindFile(FileName, [IncludeTrailingPathDelimiter(ExtractFileDir(Sender.Tokenizer.FileName)), FIncludePath, FAppPath])) then
+  if (not FindFile(FileName, '', [IncludeTrailingPathDelimiter(ExtractFileDir(Sender.Tokenizer.FileName)), FIncludePath, FAppPath])) then
     FileName := '';
 end;
 
@@ -423,7 +423,7 @@ begin
             if InIgnore then
               Exit;
 
-            if not TSimbaScriptPlugin.FindFile(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), FPluginPath, FAppPath]) then
+            if not FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), FPluginPath, FAppPath]) then
               raise Exception.Create('Plugin "' + Argument + '" not found');
 
             Plugin := TSimbaScriptPlugin.Create(Argument);
@@ -435,7 +435,7 @@ begin
 
         'IFHASLIB':
           begin
-            if TSimbaScriptPlugin.FindFile(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), FPluginPath, FAppPath]) then
+            if not FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), FPluginPath, FAppPath]) then
               FCompiler.pushConditional((not InIgnore) and True, Sender.DocPos)
             else
               FCompiler.pushConditional((not InIgnore) and False, Sender.DocPos);
@@ -443,7 +443,7 @@ begin
 
         'IFHASFILE':
           begin
-            FCompiler.pushConditional((not InIgnore) and FindFile(Argument, [IncludeTrailingPathDelimiter(ExtractFileDir(Sender.Tokenizer.FileName)), FIncludePath, FAppPath]), Sender.DocPos);
+            FCompiler.pushConditional((not InIgnore) and FindFile(Argument, '', [IncludeTrailingPathDelimiter(ExtractFileDir(Sender.Tokenizer.FileName)), FIncludePath, FAppPath]), Sender.DocPos);
           end;
       end;
     except

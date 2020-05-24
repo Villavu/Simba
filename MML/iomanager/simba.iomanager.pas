@@ -106,7 +106,7 @@ type
 implementation
 
 uses
-  simba.scriptpluginloader,
+  simba.files,
   simba.target_raw,
   simba.target_bitmap,
   simba.target_eios,
@@ -330,7 +330,7 @@ end;
 
 function TIOManager.SetTarget(Plugin, Data: String): Int32;
 begin
-  if not TSimbaScriptPluginLoader.FindFile(Plugin, FPluginPaths) then
+  if not FindPlugin(Plugin, FPluginPaths) then
     raise Exception.Create('EIOS plugin not found: ' + Plugin);
 
   Result := SetBothTargets(TEIOS_Target.Create(Plugin, Data));
