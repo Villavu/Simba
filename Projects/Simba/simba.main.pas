@@ -309,7 +309,7 @@ uses
   simba.dtmeditor, simba.scriptinstance, simba.package_form, simba.aboutform,
   simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.colorpicker, simba.ci_includecache,
-  simba.highlighter, simba.scriptpluginloader, simba.stringutil, simba.script_common,
+  simba.highlighter, simba.stringutil, simba.script_common,
   simba.scriptformatter
   {$IFDEF WINDOWS},
   windows, shellapi
@@ -570,12 +570,12 @@ end;
 
 function TSimbaForm.CodeTools_OnFindInclude(Sender: TObject; var FileName: String): Boolean;
 begin
-  Result := FindFile(FileName, [ExtractFileDir(TCodeParser(Sender).Lexer.FileName), SimbaSettings.Environment.IncludePath.Value, Application.Location]);
+  Result := FindFile(FileName, '', [ExtractFileDir(TCodeParser(Sender).Lexer.FileName), SimbaSettings.Environment.IncludePath.Value, Application.Location]);
 end;
 
 function TSimbaForm.CodeTools_OnFindLibrary(Sender: TObject; var FileName: String): Boolean;
 begin
-  Result := TSimbaScriptPluginLoader.FindFile(FileName, [ExtractFileDir(TCodeParser(Sender).Lexer.FileName), SimbaSettings.Environment.PluginPath.Value, Application.Location]);
+  Result := FindPlugin(FileName, [ExtractFileDir(TCodeParser(Sender).Lexer.FileName), SimbaSettings.Environment.PluginPath.Value, Application.Location]);
 end;
 
 procedure TSimbaForm.CodeTools_OnLoadLibrary(Sender: TObject; FileName: String; var Contents: String);

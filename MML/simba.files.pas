@@ -69,7 +69,8 @@ type
   // We don't need one per object. :-)
   function GetFiles(Path, Ext: string): TStringArray;
   function GetDirectories(Path: string): TstringArray;
-  function FindFile(var FileName: string; const Dirs: array of String): Boolean; overload;
+  function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
+  function FindPlugin(var FileName: String; const Directories: array of String): Boolean;
   procedure UnZipFile(const FilePath, TargetPath: string);
   procedure UnZipOneFile(const ArchiveFileName, FileName, OutputPath: String);
   procedure ZipFiles(const ToFolder: string; const Files: TStringArray);
@@ -79,20 +80,33 @@ uses
   {$IFDEF MSWINDOWS}Windows,{$ENDIF} IniFiles, simba.client, FileUtil,
   LazFileUtils, LazUTF8, Zipper, dynlibs;
 
-function FindFile(var FileName: string; const Dirs: array of String): Boolean;
+function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
 var
-  I, H: LongInt;
-begin;
+  I: Int32;
+begin
   Result := False;
 
-  H := High(Dirs);
-  for I := 0 to H do
-    if FileExistsUTF8(IncludeTrailingPathDelimiter(Dirs[I]) + Filename) then
+  if FileExistsUTF8(FileName) then
+  begin
+    FileName := ExpandFileName(FileName);
+    Result := True;
+    Exit;
+  end;
+
+  for I := 0 to High(Directories) do
+    if FileExistsUTF8(IncludeTrailingPathDelimiter(Directories[I]) + FileName + Extension) then
     begin
-      Filename := ExpandFileName(IncludeTrailingPathDelimiter(Dirs[I]) + Filename);
+      FileName := ExpandFileName(IncludeTrailingPathDelimiter(Directories[I]) + FileName + Extension);
       Result := True;
       Exit;
     end;
+end;
+
+function FindPlugin(var FileName: String; const Directories: array of String): Boolean;
+begin
+  Result := FindFile(FileName, '', Directories) or
+            FindFile(FileName, '.' + SharedSuffix, Directories) or
+            FindFile(FileName, {$IFDEF CPU32}'32'{$ELSE}'64'{$ENDIF} + '.' + SharedSuffix, Directories);
 end;
 
 function GetFiles(Path, Ext: string): TStringArray;
@@ -138,16 +152,16 @@ var
   UnZipper: TUnZipper;
 begin
   if (not FileExistsUTF8(FilePath)) then
-    raise exception.createfmt('UnZipFile: FilePath "%s" Doesn''t exist', [FilePath]);
+    raise Exception.CreateFmt('UnZipFile: FilePath "%s" Doesn''t exist', [FilePath]);
 
-  UnZipper := TUnZipper.Create;
+  UnZipper := TUnZipper.Create();
   try
     UnZipper.FileName := FilePath;
     UnZipper.OutputPath := TargetPath;
-    UnZipper.Examine;
-    UnZipper.UnZipAllFiles;
+    UnZipper.Examine();
+    UnZipper.UnZipAllFiles();
   finally
-    UnZipper.Free;
+    UnZipper.Free();
   end;
 end;
 
