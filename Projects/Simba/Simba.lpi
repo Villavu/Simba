@@ -39,12 +39,16 @@
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
-            <Checks>
-              <RangeChecks Value="True"/>
-            </Checks>
+            <SmartLinkUnit Value="True"/>
             <TargetCPU Value="i386"/>
             <TargetOS Value="win32"/>
           </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
           <Other>
             <CompilerMessages>
               <IgnoredMessages idx5024="True" idx4055="True"/>
@@ -70,12 +74,16 @@
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
-            <Checks>
-              <RangeChecks Value="True"/>
-            </Checks>
+            <SmartLinkUnit Value="True"/>
             <TargetCPU Value="aarch64"/>
             <TargetOS Value="linux"/>
           </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
           <Other>
             <CompilerMessages>
               <IgnoredMessages idx5024="True" idx4055="True"/>
@@ -101,12 +109,16 @@
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
-            <Checks>
-              <RangeChecks Value="True"/>
-            </Checks>
+            <SmartLinkUnit Value="True"/>
             <TargetCPU Value="x86_64"/>
             <TargetOS Value="linux"/>
           </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
           <Other>
             <CompilerMessages>
               <IgnoredMessages idx5024="True" idx4055="True"/>
@@ -135,12 +147,16 @@
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
-            <Checks>
-              <RangeChecks Value="True"/>
-            </Checks>
+            <SmartLinkUnit Value="True"/>
             <TargetCPU Value="x86_64"/>
             <TargetOS Value="darwin"/>
           </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
           <Other>
             <CompilerMessages>
               <IgnoredMessages idx5024="True" idx4055="True"/>
@@ -150,6 +166,10 @@
               <ShowAllMessages Value="True"/>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="sh -c &quot;chmod +x macos-bundle.sh; ./macos-bundle.sh&quot;"/>
+              <CompileReasons Run="False"/>
+            </ExecuteAfter>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
@@ -396,12 +416,19 @@
       <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
-      <Checks>
-        <RangeChecks Value="True"/>
-      </Checks>
+      <SmartLinkUnit Value="True"/>
       <TargetCPU Value="x86_64"/>
       <TargetOS Value="win64"/>
+      <Optimizations>
+        <OptimizationLevel Value="3"/>
+      </Optimizations>
     </CodeGeneration>
+    <Linking>
+      <Debugging>
+        <GenerateDebugInfo Value="False"/>
+      </Debugging>
+      <LinkSmart Value="True"/>
+    </Linking>
     <Other>
       <CompilerMessages>
         <IgnoredMessages idx5024="True" idx4055="True"/>
