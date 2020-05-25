@@ -115,7 +115,7 @@ type
 implementation
 
 uses
-  forms, dialogs, math,
+  forms, dialogs,
   simba.script_simbamethod, simba.debugform, simba.settings;
 
 procedure TSimbaScriptMethodThread.Execute;
@@ -374,16 +374,22 @@ end;
 
 procedure TSimbaScriptInstance.Resume;
 begin
+  FState := SIMBA_SCRIPT_STATE_RUNNING;
+
   FProcess.Input.Write(SIMBA_SCRIPT_RESUME, SizeOf(UInt8));
 end;
 
 procedure TSimbaScriptInstance.Pause;
 begin
+  FState := SIMBA_SCRIPT_STATE_PAUSED;
+
   FProcess.Input.Write(SIMBA_SCRIPT_PAUSE, SizeOf(UInt8));
 end;
 
 procedure TSimbaScriptInstance.Stop;
 begin
+  FState := SIMBA_SCRIPT_STATE_STOPPING;
+
   FProcess.Input.Write(SIMBA_SCRIPT_STOP, SizeOf(UInt8));
 end;
 
