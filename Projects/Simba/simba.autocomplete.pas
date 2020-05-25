@@ -49,6 +49,7 @@ type
     procedure HandleCompletion(var Value: string; SourceValue: string; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
     procedure HandleFiltering(var APosition: Int32);
     procedure HandleExecute(Sender: TObject);
+    procedure HandleTab(Sender: TObject);
   public
     property Parser: TCodeInsight read FParser write SetParser;
 
@@ -241,6 +242,12 @@ begin
   end;
 end;
 
+procedure TSimbaAutoComplete.HandleTab(Sender: TObject);
+begin
+  if (OnValidate <> nil) then
+    OnValidate(TheForm, '', []);
+end;
+
 procedure TSimbaAutoComplete.FillGlobalDeclarations;
 var
   Declaration: TDeclaration;
@@ -315,6 +322,7 @@ begin
   OnCodeCompletion := @HandleCompletion;
   OnSearchPosition := @HandleFiltering;
   OnExecute := @HandleExecute;
+  OnKeyCompletePrefix := @HandleTab;
 
   TStringList(ItemList).Duplicates := dupAccept;
   TStringList(ItemList).OwnsObjects := False;
