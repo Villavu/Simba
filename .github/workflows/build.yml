@@ -1,0 +1,151 @@
+﻿# FPC & Lazarus is built on each platform (takes ~15mins) then stored in cache.
+# Cache is removed if not used in 7 days and is restricted to 5gb. Each lazarus install is ~500mb.
+
+name: Build
+
+on: [push, pull_request]
+
+jobs:
+  Build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    env: 
+      OS: ${{ matrix.config.os }}
+      NAME: ${{ matrix.config.name }}
+      LAZ_VER: ${{ matrix.config.LAZ_VER }}
+      FPC_VER: ${{ matrix.config.FPC_VER }}
+      LAZ_OPT: ${{ matrix.config.LAZ_OPT }}
+      ARTIFACT: ${{ matrix.config.ARTIFACT }}
+      TESTS: ${{ matrix.config.TESTS }}
+      FPCUP: ${{ matrix.config.FPCUP }}
+      FPCUP_OPT: ${{ matrix.config.FPCUP_OPT }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: windows-latest
+            name: 'Windows 32'
+            FPCUP: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.2v/fpclazup-i386-win32.exe'
+            FPC_VER: 'https://svn.freepascal.org/svn/fpc/tags/release_3_0_4'
+            LAZ_VER: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_8/'
+            LAZ_OPT: '--build-mode=SIMBA_WIN32'
+            TESTS: 'true'
+            ARTIFACT: 'Simba-Win32.exe'
+
+          - os: windows-latest
+            name: 'Windows 64'
+            FPCUP: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.4f/fpclazup-x86_64-win64.exe'
+            FPC_VER: 'https://svn.freepascal.org/svn/fpc/tags/release_3_0_4'
+            LAZ_VER: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_8/'
+            LAZ_OPT: '--build-mode=SIMBA_WIN64'
+            TESTS: 'true'
+            ARTIFACT: 'Simba-Win64.exe'
+
+          - os: ubuntu-latest
+            name: 'Linux 64'
+            FPCUP: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.4f/fpclazup-x86_64-linux'
+            FPC_VER: 'https://svn.freepascal.org/svn/fpc/tags/release_3_0_4'
+            LAZ_VER: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_8/'
+            LAZ_OPT: '--build-mode=SIMBA_LINUX64'
+            TESTS: 'true'
+            ARTIFACT: 'Simba-Linux64'
+
+          - os: macos-latest
+            name: 'MacOS 64'
+            FPCUP: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.4f/fpclazup-x86_64-darwin'
+            FPCUP_OPT: '--lclplatform=cocoa'
+            FPC_VER: 'https://svn.freepascal.org/svn/fpc/tags/release_3_0_4'
+            LAZ_VER: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_8/'
+            LAZ_OPT: '--build-mode=SIMBA_DARWIN64'
+            TESTS: 'true'
+            ARTIFACT: 'Simba-Darwin64.zip'
+
+          - os: ubuntu-latest
+            name: 'AArch64'
+            FPCUP: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.4f/fpclazup-x86_64-linux'
+            FPC_VER: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0_rc1'
+            LAZ_VER: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_8/'
+            LAZ_OPT: '--build-mode=SIMBA_ARM64'
+            ARTIFACT: 'Simba-Arm64'
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Cache
+      id: cache
+      uses: actions/cache@v1.2.0
+      with:
+        path: lazarus/
+        key: ${{ env.FPCUP }}-${{ env.FPC_VER }}-${{ env.LAZ_VER }}-${{ env.NAME }}
+
+    - name: Install Dependencies
+      if: env.OS == 'ubuntu-latest'
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install libgtk2.0-dev libpango1.0-dev libffi-dev libxtst-dev xvfb 
+        Xvfb :1 &
+
+    - name: Install Lazarus
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        curl --retry 5 -L -o fpcup ${{ env.FPCUP }}
+        chmod +x fpcup
+        ./fpcup --installdir=lazarus/ --fpcURL=${{ env.FPC_VER }} --lazURL=${{ env.LAZ_VER }} ${{ env.FPCUP_OPT }} --noconfirm --verbose
+
+    - name: Install AArch64 Cross Compiler
+      if: steps.cache.outputs.cache-hit != 'true' && env.NAME == 'AArch64'
+      shell: bash
+      run: |
+        curl --retry 5 -L -o libs.zip https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/crosslibs_v1.1/CrossLibsLinuxAarch64.zip && unzip libs.zip -d lazarus/
+        curl --retry 5 -L -o bins.zip https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/linuxx64crossbins_v1.0/CrossBinsLinuxAarch64.zip && unzip bins.zip -d lazarus/cross/bin
+        ./fpcup --installdir=lazarus/ --ostarget=linux --cputarget=aarch64 --only="FPCCleanOnly,FPCBuildOnly" --crossbindir=lazarus/cross/bin --crosslibdir=lazarus/cross/lib/aarch64-linux --noconfirm --verbose
+
+    - name: Build Simba
+      shell: bash
+      run: |
+        ./lazarus/lazarus/lazbuild ${{ env.LAZ_OPT }} "Projects/Simba/Simba.lpi"
+
+    - name: Test Simba
+      if: env.TESTS == 'true'
+      shell: bash
+      run: |
+        export DISPLAY=:1
+        chmod +x Projects/SimbaScript/SimbaScript
+        ./Projects/SimbaScript/SimbaScript --run Tests/simba
+
+    - name: Store Binary
+      uses: actions/upload-artifact@v2.0.1
+      with:
+        path: ${{ env.ARTIFACT }}
+
+  Upload:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Wait for builds to complete
+      uses: Brandon-T/wait-for-check-action@v1
+      with: 
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        check_names: '["Windows 32", "Windows 64", "Linux 64", "MacOS 64", "AArch64"]'
+        statuses: '["completed", "completed", "completed", "completed", "completed"]'
+        conclusions: '["success", "success", "success", "success", "success"]'
+        timeout: 1500
+        poll_interval: 10
+
+    - name: Download binaries
+      uses: actions/download-artifact@v2
+
+    - name: Upload binaries
+      uses: Brandon-T/update-release-action@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        release_name: 'autobuild'
+        file: 'artifact/*'
+        is_file_glob: true
+        release_notes: 'Binaries for the latest commit.'
+        deletes_existing_release: true
+        tag: 'autobuild'
+        retry_count: 5

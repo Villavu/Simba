@@ -1,10 +1,11 @@
 #!/bin/sh
 
-rm -rf Simba.app
+rm -rf ../../Simba.app
+rm ../../Simba.zip
 
-app_name=Simba
+app_name=../../Simba
 plist_file=$app_name.app/Contents/Info.plist
-app_file=Simba-Darwin64
+app_file=../../Simba-Darwin64
 app_version=1.4
 app_build=1400
 
@@ -17,7 +18,7 @@ mkdir -p $app_name.app/Contents/Frameworks
 mkdir -p $app_name.app/Contents/Resources
 
 cp $app_file $app_name.app/Contents/MacOS/$app_name
-cp Images/Simba.icns $app_name.app/Contents/Resources
+cp ../../Images/Simba.icns $app_name.app/Contents/Resources
 
 echo $pkg_info_contents > $app_name.app/Contents/PkgInfo
 echo '<?xml version="1.0" encoding="UTF-8"?>' >> $plist_file
@@ -67,3 +68,5 @@ echo '	<key>NSHighResolutionCapable</key>' >> $plist_file
 echo '	<true/>' >> $plist_file
 echo '</dict>' >> $plist_file
 echo '</plist>' >> $plist_file
+
+zip -r ../../Simba-Darwin64.zip ../../Simba.app
