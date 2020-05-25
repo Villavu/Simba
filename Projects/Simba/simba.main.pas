@@ -309,7 +309,7 @@ uses
   simba.dtmeditor, simba.scriptinstance, simba.package_form, simba.aboutform,
   simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.colorpicker, simba.ci_includecache,
-  simba.highlighter, simba.stringutil, simba.script_common,
+  simba.highlighter,
   simba.scriptformatter
   {$IFDEF WINDOWS},
   windows, shellapi
@@ -505,7 +505,7 @@ procedure TSimbaForm.CustomExceptionHandler(Sender: TObject; E: Exception);
 var
   Trace, LogName: string;
   MsgDlgRet: Integer;
-
+  Aborted: Boolean;
 begin
   WriteLn('');
   WriteLn('Something went wrong...');
@@ -541,8 +541,8 @@ begin
   if MsgDlgRet = mrOK then
   begin
     try
-     // Self.CloseTabs; // Save scripts
-      SimbaForm.Free;
+      SimbaScriptTabsForm.RemoveAllTabs(Aborted); // Save scripts
+      SimbaForm.Free();
     finally
       WriteLn('Finally Free...');
     end;
@@ -552,8 +552,7 @@ begin
   end;
 end;
 
-procedure TSimbaForm.CodeTools_OnMessage(Sender: TObject;
-  const Typ: TMessageEventType; const Message: String; X, Y: Integer);
+procedure TSimbaForm.CodeTools_OnMessage(Sender: TObject; const Typ: TMessageEventType; const Message: String; X, Y: Integer);
 var
   Parser: TCodeParser absolute Sender;
 begin
@@ -707,7 +706,7 @@ begin
   try
     if (ScriptInstance = nil) then
     begin
-      if FileName <> '' then
+      if (FileName <> '') then
         Save(FileName);
 
       ScriptInstance := TSimbaScriptInstance.Create();
@@ -767,13 +766,13 @@ end;
 procedure TSimbaForm.StopScript;
 begin
   with SimbaScriptTabsForm.CurrentTab do
-   if (ScriptInstance <> nil) then
-   begin
-     if ScriptInstance.State = SIMBA_SCRIPT_STATE_STOPPING then
-       ScriptInstance.Kill()
-     else
-       ScriptInstance.Stop();
-   end;
+    if (ScriptInstance <> nil) then
+    begin
+      if (ScriptInstance.State = SIMBA_SCRIPT_STATE_STOPPING) then
+        ScriptInstance.Kill()
+      else
+        ScriptInstance.Stop();
+    end;
 end;
 
 procedure TSimbaForm.AddRecentFile(const FileName: String);
@@ -823,13 +822,13 @@ end;
 
 procedure TSimbaForm.MenuCopyClick(Sender: TObject);
 begin
-  if SimbaScriptTabsForm.CurrentEditor <> nil then
+  if (SimbaScriptTabsForm.CurrentEditor <> nil) then
     SimbaScriptTabsForm.CurrentEditor.CopyToClipboard();
 end;
 
 procedure TSimbaForm.MenuCutClick(Sender: TObject);
 begin
-  if SimbaScriptTabsForm.CurrentEditor <> nil then
+  if (SimbaScriptTabsForm.CurrentEditor <> nil) then
     SimbaScriptTabsForm.CurrentEditor.CutToClipboard();
 end;
 
