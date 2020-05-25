@@ -31,45 +31,53 @@ implementation
 
 procedure TSimbaScriptTabHistory.Add(Tab: TSimbaScriptTab);
 begin
-  while FHistory.Count > FIndex + 1 do
-    FHistory.Delete(FHistory.Count - 1);
-
-  if FHistory.Count > 25 then
+  // duplicate
+  if (FIndex >= 0) and (FIndex < FHistory.Count) then
   begin
-    FHistory.Delete(0);
-
-    Dec(FIndex);
+    if (FHistory[FIndex] = Format('%d:%d', [Tab.Editor.CaretX, Tab.Editor.CaretY])) and
+       (FHistory.Objects[FIndex] = Tab) then
+      Exit;
   end;
 
-  FHistory.AddObject(Format('%d:%d', [Tab.Editor.CaretX, Tab.Editor.CaretY]), Tab);
-  if (FHistory.Count > 1) then
-    FIndex += 1;
+  if (FHistory.Count > 50) then
+  begin
+    if (FIndex > (FHistory.Count div 2)) then
+    begin
+      FHistory.Delete(0);
+
+      Dec(FIndex);
+    end else
+      FHistory.Delete(FHistory.Count - 1);
+  end;
+
+  FHistory.InsertObject(FIndex, Format('%d:%d', [Tab.Editor.CaretX, Tab.Editor.CaretY]), Tab);
+
+  Inc(FIndex);
 end;
 
 procedure TSimbaScriptTabHistory.Clear(Tab: TSimbaScriptTab);
 var
-  i: Int32;
+  I: Int32;
 begin
   while FHistory.IndexOfObject(Tab) > -1 do
   begin
-    i := FHistory.IndexOfObject(Tab);
-    if i < FIndex then
+    I := FHistory.IndexOfObject(Tab);
+    if (I < FIndex) then
       Dec(FIndex);
 
-    FHistory.Delete(i);
+    FHistory.Delete(I);
   end;
 end;
 
 procedure TSimbaScriptTabHistory.GoBack;
 begin
   Dec(FIndex);
-
   if (FIndex < 0) then
     FIndex := 0;
   if (FIndex >= FHistory.Count) then
     FIndex := FHistory.Count - 1;
 
-  if FHistory.Count > 0 then
+  if (FHistory.Count > 0) then
     with FHistory.Objects[FIndex] as TSimbaScriptTab do
     begin
       MakeVisible();
@@ -83,13 +91,12 @@ end;
 procedure TSimbaScriptTabHistory.GoForward;
 begin
   Inc(FIndex);
-
   if (FIndex < 0) then
     FIndex := 0;
   if (FIndex >= FHistory.Count) then
     FIndex := FHistory.Count - 1;
 
-  if FHistory.Count > 0 then
+  if (FHistory.Count > 0) then
     with FHistory.Objects[FIndex] as TSimbaScriptTab do
     begin
       MakeVisible();
@@ -117,6 +124,7 @@ initialization
 
 finalization
   ScriptTabHistory.Free();
+  ScriptTabHistory := nil;
 
 end.
 

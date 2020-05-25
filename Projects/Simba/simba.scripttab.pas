@@ -22,6 +22,8 @@ type
     FFunctionListState: TSimbaFunctionList_State;
     FDebuggingForm: TSimbaDebuggerForm;
 
+    procedure DoShow; override;
+
     procedure HandleEditorClick(Sender: TObject);
     procedure HandleEditorChange(Sender: TObject);
     procedure HandleEditorLinkMouse(Sender: TObject; X, Y: Integer; var AllowMouseLink: Boolean);
@@ -78,7 +80,6 @@ implementation
 uses
   synedit, lazfileutils, SynEditMouseCmds, InterfaceBase, forms, simba.scripttabsform,
   simba.settings, simba.scripttabhistory, simba.main, simba.parser_misc, simba.debugform;
-
 
 procedure TSimbaScriptTab.HandleCodeJump(Data: PtrInt);
 var
@@ -238,9 +239,17 @@ begin
   FFunctionListState := Value;
 end;
 
+procedure TSimbaScriptTab.DoShow;
+begin
+  inherited DoShow();
+
+  ScriptTabHistory.Add(Self);
+end;
+
 procedure TSimbaScriptTab.HandleEditorClick(Sender: TObject);
 begin
-  ScriptTabHistory.Add(Self);
+  if (ScriptTabHistory <> nil) then
+    ScriptTabHistory.Add(Self);
 end;
 
 procedure TSimbaScriptTab.HandleEditorChange(Sender: TObject);
@@ -323,7 +332,7 @@ begin
 
     if SaveDialog.Execute then
     begin
-      if ExtractFileName(SaveDialog.FileName) = '' then
+      if ExtractFileExt(SaveDialog.FileName) = '' then
         SaveDialog.FileName := SaveDialog.FileName + '.simba';
 
       Self.Save(SaveDialog.FileName);
@@ -457,6 +466,9 @@ end;
 
 destructor TSimbaScriptTab.Destroy;
 begin
+  if (ScriptTabHistory <> nil) then
+    ScriptTabHistory.Clear(Self);
+
   FunctionListState := nil;
 
   inherited Destroy();
