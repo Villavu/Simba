@@ -1456,8 +1456,10 @@ end;
 
 procedure TSimbaForm.Initialize(Data: PtrInt);
 var
-  I: Int32;
+  I, J: Int32;
   Site: TSimbaAnchorDockHostSite;
+  Key: UInt16;
+  Shift: TShiftState;
 begin
   Initialize_Console();
   Initialize_Docking();
@@ -1468,6 +1470,21 @@ begin
 
   {$IFDEF WINDOWS}
   Self.MenuItemAssociateScripts.Enabled := True;
+  {$ENDIF}
+
+  {$IFDEF DARWIN}
+  for I := 0 to MainMenu.Items.Count - 1 do
+    for J := 0 to MainMenu.Items[I].Count - 1 do
+    begin
+      ShortCutToKey(MainMenu.Items[I].Items[J].ShortCut, Key, Shift);
+
+      if ssCtrl in Shift then
+      begin
+        Shift := Shift - [ssCtrl] + [ssMeta];
+
+        MainMenu.Items[I].Items[J].ShortCut := ShortCut(Key, Shift);
+      end;
+    end;
   {$ENDIF}
 
   Self.ToolBar.Images := TImageList.Create(ToolBar);

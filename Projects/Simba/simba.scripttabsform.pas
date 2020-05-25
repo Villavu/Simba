@@ -499,6 +499,8 @@ begin
   if (TabCount = 1) then
   begin
     ScriptTab.Reset();
+    ScriptTab.Editor.PopupMenu := EditorPopupMenu;
+    ScriptTab.Editor.AddHandlerOnCaretChange(@CaretChanged);
     if (Notebook.OnChange <> nil) then
       Notebook.OnChange(Self);
   end else
@@ -607,8 +609,27 @@ begin
 end;
 
 constructor TSimbaScriptTabsForm.Create(TheOwner: TComponent);
+var
+  I, J: Int32;
+  Key: UInt16;
+  Shift: TShiftState;
 begin
   inherited Create(TheOwner);
+
+  {$IFDEF DARWIN}
+  for I := 0 to EditorPopupMenu.Items.Count - 1 do
+    for J := 0 to EditorPopupMenu.Items[I].Count - 1 do
+    begin
+      ShortCutToKey(EditorPopupMenu.Items[I].Items[J].ShortCut, Key, Shift);
+
+      if ssCtrl in Shift then
+      begin
+        Shift := Shift - [ssCtrl] + [ssMeta];
+
+        EditorPopupMenu.Items[I].Items[J].ShortCut := ShortCut(Key, Shift);
+      end;
+    end;
+  {$ENDIF}
 
   AddTab();
 end;

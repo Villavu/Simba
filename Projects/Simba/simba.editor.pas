@@ -96,7 +96,7 @@ implementation
 
 uses
   SynEditMarkupHighAll, SynEditMarkupFoldColoring, SynEditPointClasses, SynGutter,
-  dialogs, inifiles, math,
+  dialogs, inifiles, math, menus,
   simba.settings, simba.editor_attributes, simba.scripttabhistory;
 
 type
@@ -477,7 +477,9 @@ end;
 
 constructor TSimbaEditor.Create(AOwner: TComponent);
 var
-  i: Int32;
+  I: Int32;
+  Key: UInt16;
+  Shift: TShiftState;
 begin
   inherited Create(AOwner);
 
@@ -558,7 +560,9 @@ begin
   // Defaults
   CaretColor := clDefault;
   IndentColor := clGray;
-  MouseOptions := MouseOptions + [emShowCtrlMouseLinks, emCtrlWheelZoom];
+
+  MouseOptions := MouseOptions + [emUseMouseActions, emShowCtrlMouseLinks, emCtrlWheelZoom];
+  ResetMouseActions();
 
   // Remapping
   with Keystrokes[KeyStrokes.FindCommand(ecNormalSelect)] do
@@ -588,10 +592,28 @@ begin
     Command := ecCommentCode;
   end;
 
+  {$IFDEF DARWIN}
+  for I := 0 to Keystrokes.Count - 1 do
+  begin
+    ShortCutToKey(Keystrokes[I].ShortCut, Key, Shift);
+
+    if ssCtrl in Shift then
+    begin
+      Shift := Shift - [ssCtrl] + [ssMeta];
+
+      Keystrokes[I].ShortCut := ShortCut(Key, Shift);
+    end;
+  end;
+
+  MouseActions.AddCommand(emcWheelZoomOut, False, mbXWheelDown, ccAny,    cdDown, [ssMeta], [ssMeta]);
+  MouseActions.AddCommand(emcWheelZoomIn,  False, mbXWheelUp,   ccAny,    cdDown, [ssMeta], [ssMeta]);
+  MouseActions.AddCommand(emcMouseLink,    False, mbXLeft,      ccSingle, cdUp,   [ssMeta], [ssShift, ssAlt, ssMeta]);
+  {$ENDIF}
+
   LoadDefaultScript();
 
-  for i := 0 to FAttributes.Count - 1 do
-    FAttributes[i].Changed();
+  for I := 0 to FAttributes.Count - 1 do
+    FAttributes[I].Changed();
 
   AddSettingChangeHandlers();
 end;
