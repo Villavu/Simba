@@ -102,7 +102,8 @@ function TPAFromEllipse(const CX, CY, XRadius, YRadius : Integer): TPointArray;
 function TPAFromCircle(const CX, CY, Radius: Integer): TPointArray;
 function TPAFromPolygon(const shape: TPointArray): TPointArray;
 procedure FillEllipse(var TPA: TPointArray);
-function FindTPAEdges(const p: TPointArray): TPointArray;
+function FindTPAEdges(const TPA: TPointArray): TPointArray;
+function TPAErode(constref TPA: TPointArray; Amount: Int32): TPointArray;
 function PointInTPA(const p: TPoint;const arP: TPointArray): Boolean;
 function ClearTPAFromTPA(const arP, ClearPoints: TPointArray): TPointArray;
 procedure ClearDoubleTPA(var TPA: TPointArray);
@@ -2899,49 +2900,135 @@ End;
 
 {/\
   Returns the edges of the given TPA.
+  Edge-points are points that are not completely surrounded by other points (8 way).
 /\}
-
-function FindTPAEdges(const p: TPointArray): TPointArray;
+function FindTPAEdges(const TPA: TPointArray): TPointArray;
 var
-  b: T2DBoolArray;
-  i, x, y, l, c: Integer;
-  Box: TBox;
+  Matrix: TIntegerMatrix;
+  B: TBox;
+  I: Int32;
+  P: TPoint;
+  W, H, C: Int32;
 begin
-  SetLength(Result, 0);
-  l := Length(p);
-  if (l = 0) then Exit;
-  Box := GetTPABounds(p);
-  x := (Box.x2 - Box.x1) + 3;
-  y := (Box.y2 - Box.y1) + 3;
-  SetLength(b, x);
-  for i := 0 to x -1 do
+  SetLength(Result, Length(TPA));
+
+  B := GetTPABounds(TPA);
+
+  SetLength(Matrix, B.Y2 - B.Y1 + 1, B.X2 - B.X1 + 1);
+  for I := 0 to High(TPA) do
+    Matrix[TPA[I].Y - B.Y1, TPA[I].X - B.X1] := 1;
+
+  W := High(Matrix[0]);
+  H := High(Matrix);
+  C := 0;
+
+  for I := 0 to High(TPA) do
   begin
-    SetLength(b[i], y);
-    FillChar(b[i][0],y,0);
-  end;
-  for i := 0 to l -1 do
-    b[p[i].x +1 - Box.x1][p[i].y +1 - Box.y1] := True;
-  SetLength(Result, l);
-  c := 0;
-  for i := 0 to l -1 do
-  begin
-    x := -1;
-    while (x <= 1) do
+    P.X := TPA[I].X - B.X1;
+    P.Y := TPA[I].Y - B.Y1;
+
+    if (P.X = 0) or (P.Y = 0) or (P.X = W) or (P.Y = H) then
     begin
-      for y := -1 to 1 do
-        try
-          if not b[p[i].x + 1 + x - Box.x1][p[i].y + 1 + y - Box.y1] then
-          begin
-            Result[c] := p[i];
-            Inc(c);
-            x := 2;
-            Break;
-          end;
-        except end;
-      Inc(x);
+      Result[C] := TPA[I];
+      Inc(C);
+    end else
+    begin
+      if (Matrix[P.Y - 1, P.X - 1] = 0) or (Matrix[P.Y - 1, P.X] = 0) or (Matrix[P.Y - 1, P.X + 1] = 0) or
+         (Matrix[P.Y, P.X - 1] = 0)     or (Matrix[P.Y, P.X + 1] = 0) or
+         (Matrix[P.Y + 1, P.X - 1] = 0) or (Matrix[P.Y + 1, P.X] = 0) or (Matrix[P.Y + 1, P.X + 1] = 0) then
+      begin
+        Result[C] := TPA[I];
+        Inc(C);
+      end;
     end;
   end;
-  SetLength(Result, c);
+
+  SetLength(Result, C);
+end;
+
+function TPAErode(constref TPA: TPointArray; Amount: Int32): TPointArray;
+var
+  W, H: Int32;
+  B: TBox;
+  Matrix: T2DIntegerArray;
+  Edges: TPointArray;
+  Removed: TBoolArray;
+
+  function RemoveEdges: Boolean;
+  var
+    P: TPoint;
+    I: Int32;
+    Count: Int32;
+  begin
+    Result := False;
+
+    Count := 0;
+
+    for I := 0 to High(TPA) do
+    begin
+      if Removed[I] then
+        Continue;
+
+      P.X := TPA[I].X - B.X1;
+      P.Y := TPA[I].Y - B.Y1;
+
+      if (P.X > 0) and (P.Y > 0) and (P.X < W) and (P.Y < H) then
+      begin
+        if (Matrix[P.Y - 1, P.X - 1] = 1) and (Matrix[P.Y - 1, P.X] = 1) and (Matrix[P.Y - 1, P.X + 1] = 1) and
+           (Matrix[P.Y, P.X - 1] = 1)     and (Matrix[P.Y, P.X + 1] = 1) and
+           (Matrix[P.Y + 1, P.X - 1] = 1) and (Matrix[P.Y + 1, P.X] = 1) and (Matrix[P.Y + 1, P.X + 1] = 1) then
+          Continue;
+      end;
+
+      Removed[I] := True;
+
+      Edges[Count].X := P.X;
+      Edges[Count].Y := P.Y;
+      Inc(Count);
+
+      Result := True; // Found a edge
+    end;
+
+    for I := 0 to Count - 1 do
+      Matrix[Edges[I].Y, Edges[I].X] := 0;
+  end;
+
+var
+  I: Int32;
+  Count: Int32;
+begin
+  Result := Default(TPointArray);
+
+  if (Amount > 0) and (Length(TPA) > 0) then
+  begin
+    B := GetTPABounds(TPA);
+
+    SetLength(Matrix, B.Y2 - B.Y1 + 1, B.X2 - B.X1 + 1);
+    for I := 0 to High(TPA) do
+      Matrix[TPA[I].Y - B.Y1, TPA[I].X - B.X1] := 1;
+
+    W := High(Matrix[0]);
+    H := High(Matrix);
+
+    SetLength(Result, Length(TPA));
+    SetLength(Edges, Length(TPA));
+    SetLength(Removed, Length(TPA));
+
+    for I := 1 to Amount do
+      if not RemoveEdges() then
+        Break;
+
+    Count := 0;
+
+    for I := 0 to High(TPA) do
+      if not Removed[I] then
+      begin
+        Result[Count] := TPA[I];
+        Inc(Count);
+      end;
+
+    SetLength(Result, Count);
+  end;
 end;
 
 {/\
