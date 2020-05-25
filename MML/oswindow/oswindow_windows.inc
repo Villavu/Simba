@@ -66,10 +66,26 @@ function TOSWindow_Helper.GetBounds(out Bounds: TBox): Boolean;
 var
   R: TRect;
 begin
-  if DwmCompositionEnabled and (Self = Self.GetRootWindow()) then
-    Result := DwmGetWindowAttribute(Self, DWMWA_EXTENDED_FRAME_BOUNDS, @R, SizeOf(TRect)) = S_OK
-  else
-    Result := GetWindowRect(Self, R);
+  if (Self = GetDesktopWindow()) then
+  begin
+    Bounds.X1 := GetSystemMetrics(SM_XVIRTUALSCREEN);
+    Bounds.Y1 := GetSystemMetrics(SM_YVIRTUALSCREEN);
+    Bounds.X2 := GetSystemMetrics(SM_CXVIRTUALSCREEN);
+    Bounds.Y2 := GetSystemMetrics(SM_CYVIRTUALSCREEN);
+
+    if Bounds.X1 < 0 then
+      Bounds.X2 += Bounds.X1;
+    if Bounds.Y1 < 0 then
+      Bounds.Y2 += Bounds.Y1;
+
+    Exit(True);
+  end else
+  begin
+    if (Self = Self.GetRootWindow()) and DwmCompositionEnabled then
+      Result := DwmGetWindowAttribute(Self, DWMWA_EXTENDED_FRAME_BOUNDS, @R, SizeOf(TRect)) = S_OK
+    else
+      Result := GetWindowRect(Self, R);
+  end;
 
   if Result then
   begin
