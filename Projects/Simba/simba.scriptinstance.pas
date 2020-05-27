@@ -212,18 +212,23 @@ begin
   Remaining := '';
 
   try
-    while True do
+    while (not Terminated) or (FScript.Process.Output.NumBytesAvailable > 0) do
     begin
-      Output.Clear();
+      while (FScript.Process.Output.NumBytesAvailable > 0) do
+      begin
+        Output.Clear();
 
-      Count := FScript.Process.Output.Read(Buffer[1], Length(Buffer));
-      if (Count = 0) then
-        Break;
+        Count := FScript.Process.Output.Read(Buffer[1], Length(Buffer));
+        if (Count = 0) then
+          Break;
 
-      Remaining := Process(Remaining + Copy(Buffer, 1, Count));
+        Remaining := Process(Remaining + Copy(Buffer, 1, Count));
 
-      if (Output.Count > 0) then
-        SimbaDebugForm.Add(Output);
+        if (Output.Count > 0) then
+          SimbaDebugForm.Add(Output);
+      end;
+
+      Sleep(250);
     end;
   except
     on E: Exception do
@@ -292,6 +297,7 @@ end;
 
 procedure TSimbaScriptInstance.OnDestroyProcess(Sender: TObject);
 begin
+  FOutputThread.Terminate();
   FOutputThread.WaitFor();
   FOutputThread.Free();
 end;
