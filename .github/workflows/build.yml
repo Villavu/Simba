@@ -75,7 +75,7 @@ jobs:
 
     - name: Cache
       id: cache
-      uses: actions/cache@v1.2.0
+      uses: actions/cache@v2.0.0
       with:
         path: lazarus/
         key: ${{ env.FPCUP }}-${{ env.FPC_VER }}-${{ env.LAZ_VER }}-${{ env.NAME }}
@@ -142,6 +142,7 @@ jobs:
       uses: Brandon-T/update-release-action@v1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
+        suffix_branch_name: true
         release_name: 'autobuild'
         file: 'artifact/*'
         is_file_glob: true
