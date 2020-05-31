@@ -43,6 +43,7 @@ type
     function GetBounds(out Bounds: TBox): Boolean; overload;
     function GetBounds: TBox; overload;
     function GetChildren(Recursive: Boolean = True): TOSWindowArray;
+    function GetRelativeCursorPos: TPoint;
     procedure SetBounds(Bounds: TBox);
     function Activate: Boolean;
     procedure Kill;
@@ -75,7 +76,6 @@ implementation
 
 {$IFDEF DARWIN}
   {$INCLUDE oswindow_darwin.inc}
-
 {$ENDIF}
 
 function TOSWindowArray_Helper.GetByTitle(Title: String; out Window: TOSWindow): Boolean;

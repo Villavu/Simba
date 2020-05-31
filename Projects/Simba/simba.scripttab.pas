@@ -19,9 +19,10 @@ type
     FScriptInstance: TSimbaScriptInstance;
     FScriptErrorLine: Int32;
     FMouseLinkXY: TPoint;
-    FFunctionListState: TSimbaFunctionList_State;
+    FFunctionList: TSimbaFunctionList;
     FDebuggingForm: TSimbaDebuggerForm;
 
+    procedure DoHide; override;
     procedure DoShow; override;
 
     procedure HandleEditorClick(Sender: TObject);
@@ -41,9 +42,9 @@ type
 
     procedure SetScript(Value: String);
     procedure SetScriptErrorLine(Value: Int32);
-    procedure SetFunctionListState(Value: TSimbaFunctionList_State);
   public
     property DebuggingForm: TSimbaDebuggerForm read FDebuggingForm;
+    property FunctionList: TSimbaFunctionList read FFunctionList;
 
     property FileName: String read GetFileName;
     property ScriptChanged: Boolean read GetScriptChanged;
@@ -53,7 +54,6 @@ type
     property ScriptErrorLine: Int32 read FScriptErrorLine write SetScriptErrorLine;
     property Editor: TSimbaEditor read FEditor;
     property MouseLinkXY: TPoint read FMouseLinkXY write FMouseLinkXY;
-    property FunctionListState: TSimbaFunctionList_State read FFunctionListState write SetFunctionListState;
 
     procedure HandleCodeJump(Data: PtrInt);
 
@@ -61,6 +61,7 @@ type
     function Save(AFileName: String): Boolean;
     function Load(AFileName: String): Boolean;
 
+    function GetParser: TCodeInsight;
     function ParseScript: TCodeInsight;
 
     procedure MakeVisible;
@@ -233,17 +234,29 @@ begin
   Result := FEditor.Text <> FSavedText;
 end;
 
-procedure TSimbaScriptTab.SetFunctionListState(Value: TSimbaFunctionList_State);
+procedure TSimbaScriptTab.DoHide;
 begin
-  FFunctionListState.Free();
-  FFunctionListState := Value;
+  inherited DoHide();
+
+  if (FFunctionList <> nil) then
+    FFunctionList.Hide();
 end;
 
 procedure TSimbaScriptTab.DoShow;
 begin
   inherited DoShow();
 
-  ScriptTabHistory.Add(Self);
+  if (FFunctionList <> nil) then
+  begin
+    FFunctionList.Show();
+    FFunctionList.ChangeStamp := 0; // Force update
+  end;
+
+  if (ScriptTabHistory <> nil) then
+    ScriptTabHistory.Add(Self);
+
+  if (FEditor <> nil) and FEditor.CanSetFocus then
+    FEditor.SetFocus();
 end;
 
 procedure TSimbaScriptTab.HandleEditorClick(Sender: TObject);
@@ -376,6 +389,21 @@ begin
   end;
 end;
 
+function TSimbaScriptTab.GetParser: TCodeInsight;
+begin
+  Result := TCodeInsight.Create();
+  Result.Lexer.FileName := FileName;
+  if Result.Lexer.FileName = '' then
+    Result.Lexer.FileName := ScriptName;
+  // Result.OnMessage := @SimbaForm.CodeTools_OnMessage;
+  Result.OnFindInclude := @SimbaForm.CodeTools_OnFindInclude;
+  Result.OnFindLibrary := @SimbaForm.CodeTools_OnFindLibrary;
+  Result.OnLoadLibrary := @SimbaForm.CodeTools_OnLoadLibrary;
+  Result.Lexer.CaretPos := FEditor.SelStart - 1;
+ // Result.Lexer.MaxPos := FEditor.SelStart - 1;
+  Result.Lexer.Script := FEditor.Text;
+end;
+
 function TSimbaScriptTab.ParseScript: TCodeInsight;
 begin
   Result := TCodeInsight.Create();
@@ -432,8 +460,6 @@ begin
   FSavedText := Editor.Text;
 
   Caption := FScriptName;
-
-  FunctionListState := nil;
 end;
 
 function TSimbaScriptTab.CreateDebuggingForm: TSimbaDebuggerForm;
@@ -460,6 +486,10 @@ begin
   FScriptName := 'Untitled';
   FSavedText := Editor.Text;
 
+  FFunctionList := TSimbaFunctionList.Create(Self);
+  FFunctionList.Parent := SimbaFunctionListForm;
+  FFunctionList.Align := alClient;
+
   Caption := FScriptName;
   ImageIndex := IMAGE_SIMBA;
 end;
@@ -468,8 +498,6 @@ destructor TSimbaScriptTab.Destroy;
 begin
   if (ScriptTabHistory <> nil) then
     ScriptTabHistory.Clear(Self);
-
-  FunctionListState := nil;
 
   inherited Destroy();
 end;

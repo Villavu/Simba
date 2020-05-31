@@ -1,14 +1,7 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TSimbaFunctionListForm','FORMDATA',[
-  'TPF0'#22'TSimbaFunctionListForm'#21'SimbaFunctionListForm'#4'Left'#2'z'#6'He'
-  +'ight'#3#241#0#3'Top'#3's'#2#5'Width'#3'@'#1#7'Caption'#6#13'Function List'
-  +#12'ClientHeight'#3#241#0#11'ClientWidth'#3'@'#1#10'LCLVersion'#6#7'2.0.6.0'
-  +#0#9'TTreeView'#8'TreeView'#4'Left'#2#0#6'Height'#3#241#0#3'Top'#2#0#5'Width'
-  +#3'@'#1#5'Align'#7#8'alClient'#11'BorderStyle'#7#6'bsNone'#6'Images'#7#16'Si'
-  +'mbaForm.Images'#8'ReadOnly'#9#8'TabOrder'#2#0#8'ToolTips'#8#10'OnDblClick'#7
-  +#16'TreeViewDblClick'#12'OnMouseLeave'#7#16'HandleMouseLeave'#11'OnMouseMove'
-  +#7#10'HandleHint'#7'Options'#11#17'tvoAutoItemHeight'#16'tvoHideSelection'#21
-  +'tvoKeepCollapsedNodes'#11'tvoReadOnly'#14'tvoShowButtons'#12'tvoShowLines'
-  +#11'tvoShowRoot'#13'tvoThemedDraw'#0#0#0#0
+  'TPF0'#22'TSimbaFunctionListForm'#21'SimbaFunctionListForm'#4'Left'#3#204#0#6
+  +'Height'#3#241#0#3'Top'#3#188#0#5'Width'#3'@'#1#7'Caption'#6#13'Function Lis'
+  +'t'#5'Color'#7#8'clWindow'#10'LCLVersion'#6#7'2.0.8.0'#0#0
 ]);

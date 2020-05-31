@@ -214,3 +214,16 @@ begin
     end;
   end;
 end;
+
+function TOSWindow_Helper.GetRelativeCursorPos: TPoint;
+var
+  B: TBox;
+begin
+  GetCursorPos(Result.X, Result.Y);
+
+  with Self.GetBounds() do
+  begin
+    Result.X := Result.X - X1;
+    Result.Y := Result.Y - Y1;
+  end;
+end;

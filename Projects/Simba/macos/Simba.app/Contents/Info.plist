@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>Simba-Darwin64</string>
+	<key>CFBundleName</key>
+	<string>Simba</string>
+	<key>CFBundleIdentifier</key>
+	<string>Simba-Darwin64</string>
+	<key>CFBundleIconFile</key>
+	<string>Simba.icns</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>Simba</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.4</string>
+	<key>CFBundleVersion</key>
+	<string>1400</string>
+	<key>CSResourcesFileMapped</key>
+	<false/>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleTypeName</key>
+			<string>Simba Script</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>simba</string>
+			</array>
+			<key>CFBundleTypeIconFiles</key>
+			<array>
+				<string>Simba.icns</string>
+			</array>
+		</dict>
+	</array>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+</dict>
+</plist>

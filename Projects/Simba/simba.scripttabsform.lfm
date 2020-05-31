@@ -8,7 +8,7 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
   ClientHeight = 252
   ClientWidth = 564
   OnDropFiles = DoOnDropFiles
-  LCLVersion = '2.0.6.0'
+  LCLVersion = '2.0.8.0'
   object Notebook: TExtendedNotebook
     Left = 0
     Height = 230
@@ -19,7 +19,6 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
     PopupMenu = TabPopupMenu
     TabOrder = 0
     OnChange = DoOnTabChange
-    OnChanging = DoOnTabChanging
     Options = [nboDoChangeOnSetIndex]
     TabDragMode = dmAutomatic
     TabDragAcceptMode = dmAutomatic
@@ -183,5 +182,11 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
     OnFind = DoOnFindDialog
     left = 168
     top = 88
+  end
+  object CursorTimer: TTimer
+    Interval = 500
+    OnTimer = DoCursorTimer
+    left = 440
+    top = 16
   end
 end

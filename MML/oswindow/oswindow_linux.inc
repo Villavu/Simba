@@ -142,6 +142,17 @@ begin
   Result := XDefaultRootWindow(GetDisplay());
 end;
 
+function TOSWindow_Helper.GetRelativeCursorPos: TPoint;
+var
+  Root: TWindow;
+  x_root, y_root: Int32;
+  mask: UInt32;
+begin
+  Result := Default(TPoint);
+
+  XQueryPointer(GetDisplay(), Self, @Root, @Result, @x_root, @y_root, @Result.X, @Result.Y, @mask);
+end;
+
 function GetWindowAtCursor: TOSWindow;
 var
   Root, Child: TWindow;

@@ -5,7 +5,7 @@ unit simba.ci_includecache;
 interface
 
 uses
-  Classes, SysUtils, syncobjs, castaliapaslex, castaliapaslextypes,
+  Classes, SysUtils, syncobjs, castaliapaslex, castaliapaslextypes, sha1,
   simba.generics, simba.codeparser;
 
 type
@@ -13,9 +13,12 @@ type
   protected
     FInDefines: TSaveDefinesRec;
     FOutDefines: TSaveDefinesRec;
+    FHash: TSHA1Digest;
+    FHashed: Boolean;
 
     procedure HandleMessage(Sender: TObject; const Typ: TMessageEventType; const Message: String; X, Y: Integer);
 
+    function GetHash: TSHA1Digest;
     function GetOutdated: Boolean;
   public
     RefCount: Int32;
@@ -28,6 +31,8 @@ type
     property Outdated: Boolean read GetOutdated;
     property InDefines: TSaveDefinesRec read FInDefines write FInDefines;
     property OutDefines: TSaveDefinesRec read FOutDefines write FOutDefines;
+
+    property Hash: TSHA1Digest read GetHash;
 
     constructor Create;
   end;
@@ -97,6 +102,27 @@ var
   Parser: TCodeParser absolute Sender;
 begin
   Messages := Messages + Format('"%s" at line %d, column %d in file "%s"', [Message, Y + 1, X, Parser.Lexer.FileName]) + LineEnding;
+end;
+
+function TCodeInsight_Include.GetHash: TSHA1Digest;
+var
+  Info: String;
+  I: Int32;
+begin
+  if not FHashed then
+  begin
+    Info := Lexer.UseCodeToolsIDEDirective.ToString()       +
+            InDefines.Defines  + InDefines.Stack.ToString() +
+            OutDefines.Defines + OutDefines.Stack.ToString();
+
+    for I := 0 to FFiles.Count - 1 do
+      Info := Info + FFiles[I] + IntToStr(PtrUInt(FFiles.Objects[I]));
+
+    FHash := SHA1String(Info);
+    FHashed := True;
+  end;
+
+  Result := FHash;
 end;
 
 function TCodeInsight_Include.GetOutdated: Boolean;

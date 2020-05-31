@@ -80,7 +80,7 @@ jobs:
         path: lazarus/
         key: ${{ env.FPCUP }}-${{ env.FPC_VER }}-${{ env.LAZ_VER }}-${{ env.NAME }}
 
-    - name: Install Dependencies
+    - name: Install Linux Dependencies
       if: env.OS == 'ubuntu-latest'
       shell: bash
       run: |
@@ -117,7 +117,7 @@ jobs:
         chmod +x Projects/SimbaScript/SimbaScript
         ./Projects/SimbaScript/SimbaScript --run Tests/simba
 
-    - name: Store Binary
+    - name: Upload Artifact 
       uses: actions/upload-artifact@v2.0.1
       with:
         path: ${{ env.ARTIFACT }}
@@ -132,13 +132,15 @@ jobs:
         check_names: '["Windows 32", "Windows 64", "Linux 64", "MacOS 64", "AArch64"]'
         statuses: '["completed", "completed", "completed", "completed", "completed"]'
         conclusions: '["success", "success", "success", "success", "success"]'
-        timeout: 1500
+        timeout: 1600
         poll_interval: 10
 
-    - name: Download binaries
+    - name: Download Artifacts
+      if: github.event_name == 'push'
       uses: actions/download-artifact@v2
 
-    - name: Upload binaries
+    - name: Update Release
+      if: github.event_name == 'push'
       uses: Brandon-T/update-release-action@v1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -146,7 +148,8 @@ jobs:
         release_name: 'autobuild'
         file: 'artifact/*'
         is_file_glob: true
-        release_notes: 'Binaries for the latest commit.'
-        deletes_existing_release: true
+        release_notes: "Binaries for the most recent commit of this branch. Don't worry about the release date, it's wrong!"
         tag: 'autobuild'
         retry_count: 5
+        bump_tag: true
+        overwrite: true

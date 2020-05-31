@@ -2132,6 +2132,7 @@ begin
     tokAnd, tokAs, tokDiv, tokMod, tokShl, tokShr, tokSlash, tokStar, tokStarStar,
     tokEqual, tokGreater, tokGreaterEqual, tokLower, tokLowerEqual,
     tokIn, tokIs, tokNotEqual,
+    tokAssign,
     tokDivAsgn,
     tokMulAsgn,
     tokPlusAsgn,

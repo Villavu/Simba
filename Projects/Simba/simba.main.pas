@@ -1221,6 +1221,9 @@ begin
       SimbaSettings.GUI.RecentFiles.Value := SimbaSettings.GUI.RecentFiles.Value + ',' + MenuItemOpenRecent[i].Caption;
 
     SaveLayout();
+
+    Visible := False;
+    Application.ProcessMessages();
   end;
 end;
 
@@ -1358,13 +1361,10 @@ begin
       Parser.Run(List.ValueFromIndex[I], List.Names[I]);
 
       if (List.Names[I] <> 'Classes') and (List.Names[I] <> '') then
-        SimbaFunctionListForm.addDeclarations(Parser.Items, SimbaFunctionListForm.addSimbaSection(Parser.Lexer.FileName), False, True, False);
+        TCodeInsight.AddFunctionListSection(Parser);
 
       TCodeInsight.AddBaseInclude(Parser);
     end;
-
-    SimbaFunctionListForm.SimbaNode.AlphaSort();
-    SimbaFunctionListForm.SimbaNode.Expanded := True;
 
     List.Free();
   except

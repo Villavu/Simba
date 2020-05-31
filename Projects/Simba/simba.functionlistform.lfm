@@ -1,26 +1,9 @@
 object SimbaFunctionListForm: TSimbaFunctionListForm
-  Left = 122
+  Left = 204
   Height = 241
-  Top = 627
+  Top = 188
   Width = 320
   Caption = 'Function List'
-  ClientHeight = 241
-  ClientWidth = 320
-  LCLVersion = '2.0.6.0'
-  object TreeView: TTreeView
-    Left = 0
-    Height = 241
-    Top = 0
-    Width = 320
-    Align = alClient
-    BorderStyle = bsNone
-    Images = SimbaForm.Images
-    ReadOnly = True
-    TabOrder = 0
-    ToolTips = False
-    OnDblClick = TreeViewDblClick
-    OnMouseLeave = HandleMouseLeave
-    OnMouseMove = HandleHint
-    Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoThemedDraw]
-  end
+  Color = clWindow
+  LCLVersion = '2.0.8.0'
 end

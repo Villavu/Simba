@@ -1246,6 +1246,9 @@ begin
             Expected(tokSemiColon);
         end else
           DeclarationSection;
+
+        if (TokenID = tok_DONE) then
+          Break;
       end;
     end;
   end;
