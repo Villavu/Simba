@@ -3,7 +3,7 @@ unit simba.codeinsight;
 interface
 
 uses
-  sysutils, classes,
+  sysutils, classes, sha1,
   castaliapaslex, castaliapaslextypes,
   simba.codeparser, simba.parser_misc,
   simba.ci_includecache;
@@ -13,6 +13,7 @@ type
   protected
   class var
     FIncludeCache: TCodeInsight_IncludeCache;
+    FFunctionListSections: TCodeInsight_IncludeArray;
     FBaseIncludes: TCodeInsight_IncludeArray;
     FBaseDefines: TStringList;
   protected
@@ -23,6 +24,8 @@ type
     procedure DoLibrary(Sender: TObject; FileName: String; var Handled: Boolean);
 
     procedure Reset;
+
+    function GetIncludesHash: TSHA1Digest;
 
     function GetGlobals: TDeclarationArray;
     function GetGlobalByName(Name: String): TDeclaration;
@@ -35,6 +38,9 @@ type
     class procedure CreateClassVariables;
     class procedure DestroyClassVariables;
     class procedure AddBaseInclude(Include: TCodeInsight_Include);
+    class procedure AddFunctionListSection(Include: TCodeInsight_Include);
+
+    class property FunctionListSections: TCodeInsight_IncludeArray read FFunctionListSections;
 
     function GetMembersOfType(Declaration: TDeclaration): TDeclarationArray; overload;
     function GetMembersOfType(Declaration: TDeclaration; Name: String): TDeclarationArray; overload;
@@ -52,6 +58,7 @@ type
     procedure Run; overload; override;
 
     property Includes: TCodeInsight_IncludeArray read FIncludes;
+    property IncludesHash: TSHA1Digest read GetIncludesHash;
 
     property Globals: TDeclarationArray read GetGlobals;
     property GlobalsByName[Name: String]: TDeclarationArray read GetGlobalsByName;
@@ -94,6 +101,11 @@ class procedure TCodeInsight.AddBaseInclude(Include: TCodeInsight_Include);
 begin
   FBaseIncludes := FBaseIncludes + Include;
   FBaseDefines.AddStrings(Include.Lexer.Defines);
+end;
+
+class procedure TCodeInsight.AddFunctionListSection(Include: TCodeInsight_Include);
+begin
+  FFunctionListSections := FFunctionListSections + Include;
 end;
 
 function TCodeInsight.GetGlobalsByName(Name: String): TDeclarationArray;
@@ -183,6 +195,18 @@ begin
 
   FGlobals.Clear();
   FLocals.Clear();
+end;
+
+function TCodeInsight.GetIncludesHash: TSHA1Digest;
+var
+  I: Int32;
+  Buffer: array of TSHA1Digest;
+begin
+  SetLength(Buffer, Length(FIncludes));
+  for I := 0 to High(FIncludes) do
+    Buffer[I] := FIncludes[I].Hash;
+
+  Result := SHA1Buffer(Buffer[0], Length(Buffer) * SizeOf(TSHA1Digest));
 end;
 
 function TCodeInsight.ParseExpression(Expressions: TExpressionArray): TDeclaration;

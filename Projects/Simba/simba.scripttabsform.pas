@@ -38,7 +38,9 @@ type
     ReplaceDialog: TReplaceDialog;
     Notebook: TExtendedNotebook;
     EditorPopupMenu: TPopupMenu;
+    CursorTimer: TTimer;
 
+    procedure DoCursorTimer(Sender: TObject);
     procedure DoOnFindDialog(Sender: TObject);
     procedure DoOnReplaceText(Sender: TObject; const ASearch, AReplace: string; Line, Column: integer; var ReplaceAction: TSynReplaceAction);
     procedure DoOnReplaceDialog(Sender: TObject);
@@ -46,12 +48,17 @@ type
     procedure DoEditorPopupShow(Sender: TObject);
     procedure DoOnDropFiles(Sender: TObject; const FileNames: array of String);
     procedure DoOnTabChange(Sender: TObject);
-    procedure DoOnTabChanging(Sender: TObject; var AllowChange: Boolean);
     procedure DoTabPopupClick(Sender: TObject);
     procedure DoStatusBarPaint(Sender: TObject);
     procedure DoStatusPanelPaint(Sender: TObject);
     procedure DoTabPopupOpen(Sender: TObject);
   protected
+    FEditing: Boolean;
+    FInvalidWindowSelection: THandle;
+
+    procedure DoEditorMouseEnter(Sender: TObject);
+    procedure DoEditorMouseLeave(Sender: TObject);
+
     procedure CaretChanged(Sender: TObject);
     procedure FontChanged(Sender: TObject); override;
 
@@ -82,7 +89,8 @@ type
     procedure Open(FileName: String; CheckOtherTabs: Boolean = True); overload;
     procedure Open; overload;
 
-    procedure OpenDeclaration(Declaration: TDeclaration);
+    procedure OpenDeclaration(Header: String; StartPos, EndPos, Line: Int32; FileName: String; Internal: Boolean); overload;
+    procedure OpenDeclaration(Declaration: TDeclaration); overload;
 
     constructor Create(TheOwner: TComponent); override;
   end;
@@ -94,7 +102,7 @@ implementation
 
 uses
   syneditpointclasses,
-  simba.settings, simba.main, simba.debugform, simba.functionlistform, simba.scripttabhistory;
+  simba.settings, simba.main, simba.debugform, simba.scripttabhistory, simba.oswindow;
 
 procedure TSimbaScriptTabsForm.DoEditorPopupShow(Sender: TObject);
 var
@@ -164,6 +172,24 @@ begin
     Editor.SetFocus();
 end;
 
+procedure TSimbaScriptTabsForm.DoCursorTimer(Sender: TObject);
+var
+  P: TPoint;
+begin
+  if not FEditing then
+  begin
+    if (FInvalidWindowSelection <> SimbaForm.WindowSelection) and (not SimbaForm.WindowSelection.IsValid()) then
+      FInvalidWindowSelection := SimbaForm.WindowSelection;
+
+    if (SimbaForm.WindowSelection <> FInvalidWindowSelection) then
+      P := SimbaForm.WindowSelection.GetRelativeCursorPos()
+    else
+      P := GetDesktopWindow().GetRelativeCursorPos();
+
+    StatusPanelCaret.Caption := IntToStr(P.X) + ', ' + IntToStr(P.Y);
+  end;
+end;
+
 procedure TSimbaScriptTabsForm.DoEditorPopupClick(Sender: TObject);
 begin
   if (CurrentEditor = nil) then
@@ -171,7 +197,7 @@ begin
 
   if (Sender = MenuItemFindDeclaration) then CurrentEditor.FindDeclaration(CurrentEditor.CaretXY);
   if (Sender = MenuItemUndo)            then CurrentEditor.Undo();
-  if (Sender = MenuItemRedo)         then CurrentEditor.Redo();
+  if (Sender = MenuItemRedo)            then CurrentEditor.Redo();
   if (Sender = MenuItemCut)             then CurrentEditor.CutToClipboard();
   if (Sender = MenuItemCopy)            then CurrentEditor.CopyToClipboard();
   if (Sender = MenuItemPaste)           then CurrentEditor.PasteFromClipboard();
@@ -229,7 +255,7 @@ end;
 
 procedure TSimbaScriptTabsForm.DoOnTabChange(Sender: TObject);
 begin
-  if CurrentTab.FileName <> '' then
+  if (CurrentTab.FileName <> '') then
     StatusPanelFileName.Caption := CurrentTab.FileName
   else
     StatusPanelFileName.Caption := CurrentTab.ScriptName;
@@ -238,19 +264,6 @@ begin
 
   SimbaForm.MenuItemSaveAll.Enabled := TabCount > 1;
   SimbaForm.SaveAllButton.Enabled := TabCount > 1;
-
-  SimbaFunctionListForm.State := CurrentTab.FunctionListState;
-
-  if CurrentEditor.CanSetFocus() then
-    CurrentEditor.SetFocus();
-end;
-
-procedure TSimbaScriptTabsForm.DoOnTabChanging(Sender: TObject; var AllowChange: Boolean);
-begin
-  if CurrentTab.TabIndex > -1 then
-    CurrentTab.FunctionListState := SimbaFunctionListForm.State;
-
-  AllowChange := True;
 end;
 
 procedure TSimbaScriptTabsForm.DoTabPopupClick(Sender: TObject);
@@ -296,6 +309,18 @@ begin
   MenuItemCloseOtherTabs.Enabled := Notebook.IndexOfPageAt(NoteBook.ScreenToClient(TabPopupMenu.PopupPoint)) >= 0;
 end;
 
+procedure TSimbaScriptTabsForm.DoEditorMouseEnter(Sender: TObject);
+begin
+  FEditing := True;
+
+  CaretChanged(CurrentEditor.GetCaretObj());
+end;
+
+procedure TSimbaScriptTabsForm.DoEditorMouseLeave(Sender: TObject);
+begin
+  FEditing := False;
+end;
+
 procedure TSimbaScriptTabsForm.CaretChanged(Sender: TObject);
 begin
   with TSynEditCaret(Sender) do
@@ -314,8 +339,8 @@ begin
       with Canvas.TextExtent('0') do
       begin
         StatusBar.Height := Round(CY * 1.35);
-        StatusPanelCaret.Width := CX * 10;
-        StatusPanelState.Width := CX * 15;
+        StatusPanelCaret.Width := Round(CX * 12.5);
+        StatusPanelState.Width := Round(CX * 15);
       end;
     finally
       Free();
@@ -434,7 +459,9 @@ begin
   Result := TSimbaScriptTab.Create(Notebook);
   Result.Parent := Notebook;
   Result.Editor.PopupMenu := EditorPopupMenu;
-  Result.Editor.AddHandlerOnCaretChange(@CaretChanged);
+  Result.Editor.GetCaretObj().AddChangeHandler(@CaretChanged);
+  Result.Editor.OnMouseLeave := @DoEditorMouseLeave;
+  Result.Editor.OnMouseEnter := @DoEditorMouseEnter;
 
   NoteBook.TabIndex := Result.TabIndex;
 end;
@@ -500,7 +527,9 @@ begin
   begin
     ScriptTab.Reset();
     ScriptTab.Editor.PopupMenu := EditorPopupMenu;
-    ScriptTab.Editor.AddHandlerOnCaretChange(@CaretChanged);
+    ScriptTab.Editor.GetCaretObj().AddChangeHandler(@CaretChanged);
+    ScriptTab.Editor.OnMouseLeave := @DoEditorMouseLeave;
+    ScriptTab.Editor.OnMouseEnter := @DoEditorMouseEnter;
     if (Notebook.OnChange <> nil) then
       Notebook.OnChange(Self);
   end else
@@ -569,6 +598,35 @@ begin
   except
     on E: Exception do
       ShowMessage('Exception while opening file: ' + E.Message);
+  end;
+end;
+
+procedure TSimbaScriptTabsForm.OpenDeclaration(Header: String; StartPos, EndPos, Line: Int32; FileName: String; Internal: Boolean);
+begin
+  if not Internal then
+  begin
+    if FileExists(FileName) then
+      Open(FileName);
+
+    with CurrentEditor do
+    begin
+      SelStart := StartPos + 1;
+      SelEnd := EndPos + 1;
+      TopLine := (Line + 1) - (LinesInWindow div 2);
+      if CanSetFocus() then
+        SetFocus();
+
+      ScriptTabHistory.Add(CurrentTab);
+    end;
+  end else
+  begin
+    if FileExists(FileName) then
+      SimbaDebugForm.Add('Declared internally in plugin: ' + ExtractFileName(FileName))
+    else
+      SimbaDebugForm.Add('Declared internally in Simba: ' + FileName);
+
+    SimbaDebugForm.Add('Declaration: ');
+    SimbaDebugForm.Add(Header);
   end;
 end;
 

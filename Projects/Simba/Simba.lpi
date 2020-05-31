@@ -167,7 +167,7 @@
               <CompileReasons Run="False"/>
             </ExecuteBefore>
             <ExecuteAfter>
-              <Command Value="sh -c &quot;chmod +x macos-bundle.sh; ./macos-bundle.sh&quot;"/>
+              <Command Value="macos/make-bundle.sh"/>
               <CompileReasons Run="False"/>
             </ExecuteAfter>
             <CreateMakefileOnBuild Value="True"/>

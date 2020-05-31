@@ -177,6 +177,20 @@ begin
   CloseHandle(Handle);
 end;
 
+function TOSWindow_Helper.GetRelativeCursorPos: TPoint;
+var
+  B: TBox;
+begin
+  Result := Default(TPoint);
+
+  if GetCursorPos(Result) then
+    with Self.GetBounds() do
+    begin
+      Result.X := Result.X - X1;
+      Result.Y := Result.Y - Y1;
+    end;
+end;
+
 function __GetVisibleWindows(Window: HWND; Data: LPARAM): WINBOOL; stdcall;
 begin
   Result := True;

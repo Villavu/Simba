@@ -16,10 +16,17 @@ type
     IsDirectory: Boolean;
   end;
 
+  TSimbaFileBrowser_Hint = class(TSimbaHintWindow)
+  protected
+    procedure DoHide; override;
+  public
+    Node: TTreeNode;
+  end;
+
   TSimbaFileBrowser = class(TTreeView)
   protected
     FRoot: String;
-    FHint: TSimbaHintWindow;
+    FHint: TSimbaFileBrowser_Hint;
 
     procedure MouseLeave; override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
@@ -70,6 +77,13 @@ uses
   fileutil, lclintf, lcltype, clipbrd, lazfileutils, AnchorDocking,
   simba.misc, simba.scripttabsform, simba.main;
 
+procedure TSimbaFileBrowser_Hint.DoHide;
+begin
+  inherited DoHide();
+
+  Node := nil;
+end;
+
 procedure TSimbaFileBrowser.MouseLeave;
 begin
   inherited MouseLeave();
@@ -80,30 +94,22 @@ end;
 procedure TSimbaFileBrowser.MouseMove(Shift: TShiftState; X, Y: Integer);
 var
   Node: TSimbaFileBrowser_Node;
-  P: TPoint;
   R: TRect;
-  Path: String;
 begin
   inherited MouseMove(Shift, X, Y);
 
   Node := TSimbaFileBrowser_Node(GetNodeAt(X, Y));
+  if (Node = FHint.Node) then
+    Exit;
 
   if (Node <> nil) then
   begin
-    Path := CreateRelativePath(Node.Path, Application.Location);
-    with Node.DisplayRect(True) do
-      P := ClientToScreen(TopLeft);
+    R := Node.DisplayRect(True);
+    R.TopLeft := ClientToScreen(R.TopLeft);
+    R.BottomRight := ClientToScreen(R.BottomRight);
 
-    R.Left := P.X;
-    R.Top := P.Y - 3;
-    R.Right := R.Left + Canvas.TextWidth(Path) + 8;
-    R.Bottom := R.Top + Canvas.TextHeight(Path) + 8;
-
-    with Screen.MonitorFromPoint(R.TopLeft).BoundsRect do
-      if R.Right > Right then
-        R.Right := Right;
-
-    FHint.ActivateHint(R, Path);
+    FHint.Node := Node;
+    FHint.ActivateHint(R, CreateRelativePath(Node.Path, Application.Location));
   end else
     FHint.Hide();
 end;
@@ -203,7 +209,7 @@ constructor TSimbaFileBrowser.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  FHint := TSimbaHintWindow.Create(Self);
+  FHint := TSimbaFileBrowser_Hint.Create(Self);
 end;
 
 procedure TSimbaFileBrowserForm.MenuItemOpenClick(Sender: TObject);
@@ -324,6 +330,7 @@ begin
   FFileBrowser.ReadOnly := True;
   FFileBrowser.OnDblClick := @HandleFileBrowserDoubleClick;
   FFileBrowser.Options := FFileBrowser.Options + [tvoAutoItemHeight] - [tvoToolTips];
+  FFileBrowser.BorderStyle := bsNone;
 end;
 
 initialization

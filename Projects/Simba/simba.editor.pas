@@ -8,7 +8,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics, Controls, LCLType,
-  SynEdit, SynGutterLineOverview, SynEditMarks, SynEditMiscClasses, SynEditMouseCmds, SynEditKeyCmds, SynEditHighlighter,
+  SynEdit, SynGutterLineOverview, SynEditMarks, SynEditMiscClasses, SynEditMouseCmds, SynEditKeyCmds, SynEditHighlighter, SynEditPointClasses,
   simba.highlighter, simba.generics, simba.autocomplete, simba.parameterhint;
 
 const
@@ -20,8 +20,6 @@ type
   TSimbaEditor_AttributeList = class(specialize TSimbaObjectList<TSynHighlighterAttributes>);
 
   TSimbaEditor = class(TSynEdit)
-  private
-    function GetFontName: String;
   protected
     FDividerColor: TColor;
     FIndentColor: TColor;
@@ -42,6 +40,8 @@ type
 
     procedure HandleRightGutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
     function HandleMouseAction(AnAction: TSynEditMouseAction; var AnInfo: TSynEditMouseActionInfo): Boolean;
+
+    function GetFontName: String;
 
     procedure SetCaretColor(Value: TColor);
     procedure SetIndentColor(Value: TColor);
@@ -82,11 +82,11 @@ type
 
     procedure LoadDefaultScript;
 
+    function GetCaretObj: TSynEditCaret; reintroduce;
+
     procedure CommentCode;
 
     procedure CommandProcessor(Command: TSynEditorCommand; AChar: TUTF8Char; Data: Pointer; ASkipHooks: THookedCommandFlags = []); override;
-
-    procedure AddHandlerOnCaretChange(Event: TNotifyEvent);
 
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -95,7 +95,7 @@ type
 implementation
 
 uses
-  SynEditMarkupHighAll, SynEditMarkupFoldColoring, SynEditPointClasses, SynGutter,
+  SynEditMarkupHighAll, SynEditMarkupFoldColoring, SynGutter,
   dialogs, inifiles, math, menus,
   simba.settings, simba.editor_attributes, simba.scripttabhistory;
 
@@ -250,11 +250,6 @@ begin
         CommentCode();
       end;
   end;
-end;
-
-procedure TSimbaEditor.AddHandlerOnCaretChange(Event: TNotifyEvent);
-begin
-  GetCaretObj().AddChangeHandler(Event);
 end;
 
 function TSimbaEditor.HandleMouseAction(AnAction: TSynEditMouseAction; var AnInfo: TSynEditMouseActionInfo): Boolean;
@@ -473,6 +468,11 @@ begin
   end;
 
   FFileName := '';
+end;
+
+function TSimbaEditor.GetCaretObj: TSynEditCaret;
+begin
+  Result := inherited GetCaretObj();
 end;
 
 constructor TSimbaEditor.Create(AOwner: TComponent);
