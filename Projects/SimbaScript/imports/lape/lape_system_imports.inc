@@ -41,5 +41,6 @@
 'function Dec(var X: Ordinal): Ordinal; overload; begin end;' + LineEnding +
 'function Inc(var X: Ordinal; Amount: SizeInt): Ordinal; overload; begin end;' + LineEnding +
 'function Dec(var X: Ordinal; Amount: SizeInt): Ordinal; overload; begin end;' + LineEnding +
-'function Ord(X: Ordinal): Int32; begin end;';
+'function Ord(X: Ordinal): Int32; begin end;' + LineEnding +
+'function WaitUntil(Condition: Expression; Interval, Timeout: Int32): Boolean;';
 
