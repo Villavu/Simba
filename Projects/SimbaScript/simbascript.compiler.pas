@@ -50,13 +50,14 @@ type
     property Debugging: Boolean read FDebugging write FDebugging;
     property DebuggingMethods: TSimbaScript_DebuggingMethods read FDebuggingMethods;
 
+    constructor Create(ATokenizer: TLapeTokenizerBase; ManageTokenizer: Boolean = True; AEmitter: TLapeCodeEmitter = nil; ManageEmitter: Boolean = True); reintroduce; override;
     destructor Destroy; override;
   end;
 
 implementation
 
 uses
-  lpffi, lputils,
+  lpffi, lputils, lpmessages,
 
   // Base types
   simbascript.import_types,
@@ -117,6 +118,118 @@ uses
   simbascript.import_dialog,
   simbascript.import_simba,
   simbascript.import_process;
+
+type
+  TLapeTree_InternalMethod_WaitUntil = class(TLapeTree_InternalMethod)
+  public
+    function resType: TLapeType; override;
+    function Compile(var Offset: Integer): TResVar; override;
+  end;
+
+function TLapeTree_InternalMethod_WaitUntil.resType: TLapeType;
+begin
+  if (FResType = nil) then
+    FResType := FCompiler.getBaseType(ltEvalBool);
+
+  Result := inherited;
+end;
+
+function TLapeTree_InternalMethod_WaitUntil.Compile(var Offset: Integer): TResVar;
+var
+  Loop: TLapeTree_While;
+  Assignment: TLapeTree_Operator;
+  Condition: TLapeTree_Operator;
+  Interval, Timeout, Limit: TResVar;
+begin
+  Result := NullResVar;
+  Dest := NullResVar;
+
+  if (FParams.Count <> 3) then
+    LapeException('Three parameters expected (Condition, Interval, Timeout)', DocPos);
+  if (FParams[0].resType() = nil) or (not (FParams[0].resType().BaseType in LapeBoolTypes)) then
+    LapeException('Condition parameter is invalid', DocPos);
+  if not (FParams[1].resType().BaseType in LapeIntegerTypes) then
+    LapeException('Interval parameter is invalid', DocPos);
+  if not (FParams[2].resType().BaseType in LapeIntegerTypes) then
+    LapeException('Timeout parameter is invalid', DocPos);
+
+  Result := _ResVar.New(FCompiler.getTempVar(resType()));
+
+  FCompiler.VarToDefault(Result, Offset, @Self._DocPos);
+
+  Interval := FParams[1].Compile(Offset);
+  Timeout := FParams[2].Compile(Offset);
+
+  if not (FParams[0] is TLapeTree_Operator) then
+  begin
+    Condition := TLapeTree_Operator.Create(op_cmp_Equal, Self);
+    Condition.Left := FParams[0];
+    Condition.Right := TLapeTree_GlobalVar.Create('True', ltEvalBool, Self);
+  end else
+    Condition := TLapeTree_Operator(FParams[0]);
+
+  // Limit := GetTickCount();
+  with TLapeTree_Invoke.Create('GetTickCount', Self) do
+  try
+    Limit := Compile(Offset);
+    Limit.Writeable := True;
+  finally
+    Free();
+  end;
+
+  // Limit := Limit + Timeout;
+  with TLapeTree_Operator.Create(op_AssignPlus, Self) do
+  try
+    Left := TLapeTree_ResVar.Create(Limit.IncLock(), Self);
+    Right := TLapeTree_ResVar.Create(Timeout.IncLock(), Self);
+    Limit := Compile(Offset);
+  finally
+    Free();
+  end;
+
+  Loop := TLapeTree_While.Create(Self);
+
+  try
+    // while GetTickCount() < Limit do
+    Loop.Condition := TLapeTree_Operator.Create(op_cmp_LessThan, Self);
+    with TLapeTree_Operator(Loop.Condition) do
+    begin
+      Left := TLapeTree_Invoke.Create('GetTickCount', Self);
+      Right := TLapeTree_ResVar.Create(Limit.IncLock(), Self);
+    end;
+
+    Loop.Body := TLapeTree_If.Create(Self);
+
+    TLapeTree_If(Loop.Body).Condition := Condition;
+    TLapeTree_If(Loop.Body).Body := TLapeTree_StatementList.Create(Self);
+
+    // If Condition then
+    // Result := True
+    // Break;
+    with TLapeTree_If(Loop.Body) do
+    begin
+      Assignment := TLapeTree_Operator.Create(op_Assign, Self);
+      Assignment.Left := TLapeTree_ResVar.Create(Result.IncLock(), Self);
+      Assignment.Right := TLapeTree_GlobalVar.Create('True', ltEvalBool, Self);
+
+      TLapeTree_StatementList(Body).addStatement(Assignment);
+      TLapeTree_StatementList(Body).addStatement(TLapeTree_InternalMethod_Break.Create(Body));
+    end;
+
+    // Else Sleep(Interval)
+    TLapeTree_If(Loop.Body).ElseBody := TLapeTree_Invoke.Create('Sleep', Self);
+    with TLapeTree_If(Loop.Body) do
+      TLapeTree_Invoke(ElseBody).addParam(TLapeTree_ResVar.Create(Interval.IncLock(), Self));
+
+    Loop.Compile(Offset).Spill(1);
+  finally
+    Loop.Free();
+  end;
+
+  Limit.Spill(2);
+  Interval.Spill(1);
+  Timeout.Spill(1);
+end;
 
 function TSimbaScript_Compiler.addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar;
 begin
@@ -305,6 +418,13 @@ begin
     @Lape_Import_Simba,
     @Lape_Import_Process
   ], Data);
+end;
+
+constructor TSimbaScript_Compiler.Create(ATokenizer: TLapeTokenizerBase; ManageTokenizer: Boolean; AEmitter: TLapeCodeEmitter; ManageEmitter: Boolean);
+begin
+  inherited Create(ATokenizer, ManageTokenizer, AEmitter, ManageEmitter);
+
+  FInternalMethodMap['WaitUntil'] := TLapeTree_InternalMethod_WaitUntil;
 end;
 
 procedure TSimbaScript_Compiler.pushConditional(AEval: Boolean; ADocPos: TDocPos);
