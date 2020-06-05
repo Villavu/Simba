@@ -24,8 +24,6 @@ unit simba.main;
 
 {$mode objfpc}{$H+}
 
-{$I Simba.inc}
-
 interface
 
 uses
