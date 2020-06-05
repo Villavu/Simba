@@ -25,7 +25,6 @@ program Simba;
 
 {$mode objfpc}{$H+}
 
-{$I Simba.inc}
 {$R Simba.res}
 {$R ../SimbaResources/SimbaResources.res}
 
@@ -43,10 +42,7 @@ uses
   simba.settings, simba.main, simba.aboutform, simba.debugimage, simba.bitmapconv,
   simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
   simba.notesform, simba.package_form, simba.colorpicker_historyform, simba.mufasabase,
-  simba.settingsform
-  {$IFDEF USE_FORMDESIGNER},
-  simba.formdesigner
-  {$ENDIF};
+  simba.settingsform;
 
 type
   TApplicationHelper = class helper for TApplication

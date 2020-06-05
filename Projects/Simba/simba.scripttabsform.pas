@@ -1,6 +1,9 @@
 unit simba.scripttabsform;
 
 {$mode objfpc}{$H+}
+{$IFDEF DARWIN}
+  {$DEFINE USE_SIMPLE_DIALOG}
+{$ENDIF}
 
 interface
 
@@ -102,7 +105,7 @@ implementation
 
 uses
   syneditpointclasses,
-  simba.settings, simba.main, simba.debugform, simba.scripttabhistory, simba.oswindow;
+  simba.settings, simba.main, simba.debugform, simba.scripttabhistory, simba.oswindow, simba.simplefiledialog;
 
 procedure TSimbaScriptTabsForm.DoEditorPopupShow(Sender: TObject);
 var
@@ -588,6 +591,20 @@ var
   I: Int32;
 begin
   try
+    {$IFDEF USE_SIMPLE_DIALOG}
+    with TSimbaFileDialog.Create(Self) do
+    try
+      if (CurrentTab.FileName = '') then
+        ChangeDirectory(SimbaSettings.Environment.ScriptPath.Value)
+      else
+        ChangeDirectory(ExtractFileDir(CurrentTab.FileName));
+
+      if Execute() and FileExists(FileName) then
+        Open(FileName);
+    finally
+      Free();
+    end;
+    {$ELSE}
     OpenDialog.InitialDir := ExtractFileDir(CurrentTab.FileName);
     if OpenDialog.InitialDir = '' then
       OpenDialog.InitialDir := SimbaSettings.Environment.ScriptPath.Value;
@@ -595,6 +612,7 @@ begin
     if OpenDialog.Execute() then
       for I := 0 to OpenDialog.Files.Count - 1 do
         Open(OpenDialog.Files[I], True);
+    {$ENDIF}
   except
     on E: Exception do
       ShowMessage('Exception while opening file: ' + E.Message);
