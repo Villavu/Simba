@@ -453,6 +453,11 @@ begin
   PPointArray(Result)^ := TPAErode(PPointArray(Params^[1])^, PInt32(Params^[2])^);
 end;
 
+procedure Lape_TPAGrow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := TPAGrow(PPointArray(Params^[1])^, PInt32(Params^[2])^);
+end;
+
 procedure Lape_Import_Arrays_Algorithms(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
@@ -547,6 +552,7 @@ begin
     addGlobalMethod('function AverageTIA(const Arr: TIntegerArray): Int32', @Lape_AverageTIA, Data);
     addGlobalMethod('function AverageExtended(const Arr: TExtendedArray): Extended', @Lape_AverageExtended, Data);
     addGlobalMethod('function TPAErode(constref TPA: TPointArray; Amount: Int32): TPointArray;', @Lape_TPAErode, Data);
+    addGlobalMethod('function TPAGrow(constref TPA: TPointArray; Amount: Int32): TPointArray;', @Lape_TPAGrow, Data);
   end;
 end;
 
