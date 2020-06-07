@@ -104,6 +104,7 @@ function TPAFromPolygon(const shape: TPointArray): TPointArray;
 procedure FillEllipse(var TPA: TPointArray);
 function FindTPAEdges(const TPA: TPointArray): TPointArray;
 function TPAErode(constref TPA: TPointArray; Amount: Int32): TPointArray;
+function TPAGrow(constref TPA: TPointArray; Amount: Int32): TPointArray;
 function PointInTPA(const p: TPoint;const arP: TPointArray): Boolean;
 function ClearTPAFromTPA(const arP, ClearPoints: TPointArray): TPointArray;
 procedure ClearDoubleTPA(var TPA: TPointArray);
@@ -2946,6 +2947,10 @@ begin
   SetLength(Result, C);
 end;
 
+{/\
+  Removes the edges of the given TPA a specified `Amount` of times.
+  Uses the FindTPAEdges method.
+/\}
 function TPAErode(constref TPA: TPointArray; Amount: Int32): TPointArray;
 var
   W, H: Int32;
@@ -3032,10 +3037,75 @@ begin
 end;
 
 {/\
+  A simple and lazy but fast way to grow a TPA.
+
+  For each point of the TPA, a filled circle at the X/Y with radius `Amount` is added to the TPA.
+/\}
+function TPAGrow(constref TPA: TPointArray; Amount: Int32): TPointArray;
+var
+  Matrix: T2DIntegerArray;
+  Template: TPointArray;
+  I, J, H: INt32;
+  X, Y: Int32;
+  TemplateX, TemplateY: Int32;
+  Size, Count: Int32;
+  B: TBox;
+  Hit: ^Int32;
+begin
+  Result := Default(TPointArray);
+
+  if (Amount > 0) then
+  begin
+    Template := TPAFromCircle(0, 0, Amount);
+    FillEllipse(Template);
+
+    Count := 0;
+    Size := Length(TPA) * 4;
+    SetLength(Result, Size);
+
+    H := High(Template);
+    B := GetTPABounds(TPA);
+
+    SetLength(Matrix, (B.Y2 - B.Y1 + 1) + (Amount * 2),
+                      (B.X2 - B.X1 + 1) + (Amount * 2));
+
+    for I := 0 to High(TPA) do
+    begin
+      X := (TPA[I].X - B.X1) + Amount;
+      Y := (TPA[I].Y - B.Y1) + Amount;
+
+      for J := 0 to H do
+      begin
+        TemplateX := X + Template[J].X;
+        TemplateY := Y + Template[J].Y;
+
+        Hit := @Matrix[TemplateY][TemplateX];
+
+        if (Hit^ = 0) then
+        begin
+          Result[Count].X := (TemplateX + B.X1) - Amount;
+          Result[Count].Y := (TemplateY + B.Y1) - Amount;
+
+          Inc(Count);
+          if (Count = Size) then
+          begin
+            Size *= 2;
+            SetLength(Result, Size);
+          end;
+
+          Hit^ := 1;
+        end;
+      end;
+    end;
+
+    SetLength(Result, Count);
+  end;
+end;
+
+{/\
   Results true if a point is in a TPointArray.
   Notes: In actuallys means IN the array, not in the box shaped by the array.
 /\}
-
 function PointInTPA(const p: TPoint;const arP: TPointArray): Boolean;
 var
   i, l: Integer;
