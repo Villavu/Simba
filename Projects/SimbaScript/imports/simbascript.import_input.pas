@@ -83,9 +83,11 @@ begin
   begin
     Section := 'Input';
 
-    addGlobalConst(ps_mouse_right, 'MOUSE_RIGHT');
-    addGlobalConst(ps_mouse_left, 'MOUSE_LEFT');
-    addGlobalConst(ps_mouse_middle, 'MOUSE_MIDDLE');
+    addGlobalConst(Ord(MOUSE_RIGHT),       'MOUSE_RIGHT');
+    addGlobalConst(Ord(MOUSE_LEFT),        'MOUSE_LEFT');
+    addGlobalConst(Ord(MOUSE_MIDDLE),      'MOUSE_MIDDLE');
+    addGlobalConst(Ord(MOUSE_EXTRA_1),     'MOUSE_EXTRA_1');
+    addGlobalConst(Ord(MOUSE_EXTRA_2),     'MOUSE_EXTRA_2');
 
     addGlobalMethod('procedure MoveMouse(X, Y: Int32);', @Lape_MoveMouse, Data);
     addGlobalMethod('procedure ScrollMouse(X, Y: Int32; Clicks: Int32);', @Lape_ScrollMouse, Data);

@@ -56,7 +56,7 @@ jobs:
             FPCUP_OPT: '--lclplatform=cocoa'
             FPC_VER: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
             LAZ_VER: 'trunk'
-            LAZ_OPT: '--build-mode=SIMBA_DARWIN64'
+            LAZ_OPT: '--build-mode=SIMBA_DARWIN64_DEBUG'
             TESTS: 'true'
             ARTIFACT: 'Simba-Darwin64.zip'
 

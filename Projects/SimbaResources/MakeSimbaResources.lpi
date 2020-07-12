@@ -15,7 +15,7 @@
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
-    <BuildModes Count="5">
+    <BuildModes Count="10">
       <Item1 Name="SIMBA_WIN64" Default="True"/>
       <Item2 Name="SIMBA_WIN32">
         <CompilerOptions>
@@ -147,8 +147,163 @@
           </Other>
         </CompilerOptions>
       </Item5>
+      <Item6 Name="SIMBA_WIN64_DEBUG">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="MakeSimbaResources"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dSIMBA_WIN64"/>
+            <ExecuteAfter>
+              <Command Value="$MakeExe(MakeSimbaResources)"/>
+              <ShowAllMessages Value="True"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item6>
+      <Item7 Name="SIMBA_WIN32_DEBUG">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="MakeSimbaResources"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dSIMBA_WIN32"/>
+            <OtherDefines Count="4">
+              <Define0 Value="SIMBA_WIN64"/>
+              <Define1 Value="SIMBA_WIN32"/>
+              <Define2 Value="SIMBA_LINUX64"/>
+              <Define3 Value="SIMBA_DARWIN64"/>
+            </OtherDefines>
+            <ExecuteAfter>
+              <Command Value="$MakeExe(MakeSimbaResources)"/>
+              <ShowAllMessages Value="True"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item7>
+      <Item8 Name="SIMBA_ARM64_DEBUG">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="MakeSimbaResources"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dSIMBA_ARM64"/>
+            <OtherDefines Count="5">
+              <Define0 Value="SIMBA_WIN64"/>
+              <Define1 Value="SIMBA_WIN32"/>
+              <Define2 Value="SIMBA_LINUX64"/>
+              <Define3 Value="SIMBA_DARWIN64"/>
+              <Define4 Value="SIMBA_ARM64"/>
+            </OtherDefines>
+            <ExecuteAfter>
+              <Command Value="$MakeExe(MakeSimbaResources)"/>
+              <ShowAllMessages Value="True"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item8>
+      <Item9 Name="SIMBA_DARWIN64_DEBUG">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="cocoa"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="MakeSimbaResources"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dSIMBA_DARWIN64"/>
+            <OtherDefines Count="5">
+              <Define0 Value="SIMBA_WIN64"/>
+              <Define1 Value="SIMBA_WIN32"/>
+              <Define2 Value="SIMBA_LINUX64"/>
+              <Define3 Value="SIMBA_DARWIN64"/>
+              <Define4 Value="SIMBA_ARM64"/>
+            </OtherDefines>
+            <ExecuteAfter>
+              <Command Value="$MakeExe(MakeSimbaResources)"/>
+              <ShowAllMessages Value="True"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item9>
+      <Item10 Name="SIMBA_LINUX64_DEBUG">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="MakeSimbaResources"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dSIMBA_LINUX64"/>
+            <OtherDefines Count="5">
+              <Define0 Value="SIMBA_WIN64"/>
+              <Define1 Value="SIMBA_WIN32"/>
+              <Define2 Value="SIMBA_LINUX64"/>
+              <Define3 Value="SIMBA_DARWIN64"/>
+              <Define4 Value="SIMBA_ARM64"/>
+            </OtherDefines>
+            <ExecuteAfter>
+              <Command Value="$MakeExe(MakeSimbaResources)"/>
+              <ShowAllMessages Value="True"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item10>
       <SharedMatrixOptions Count="1">
-        <Item1 ID="991754391576" Modes="SIMBA_DARWIN64" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
+        <Item1 ID="991754391576" Modes="SIMBA_DARWIN64,SIMBA_DARWIN64_DEBUG" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>

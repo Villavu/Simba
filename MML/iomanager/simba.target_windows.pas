@@ -367,7 +367,7 @@ begin
   MouseClientAreaOffset(X, Y);
 
   Input := Default(TInput);
-  Input.type_ := INPUT_MOUSE;
+  Input._Type := INPUT_MOUSE;
   Input.mi.dx := Bounds.X1 + X;
   Input.mi.dy := Bounds.Y1 + Y;
   Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_WHEEL;
@@ -389,7 +389,7 @@ begin
   MouseClientAreaOffset(X, Y);
 
   Input := Default(TInput);
-  Input.type_ := INPUT_MOUSE;
+  Input._Type := INPUT_MOUSE;
   Input.mi.dx := Bounds.X1 + X;
   Input.mi.dy := Bounds.Y1 + Y;
 
@@ -397,6 +397,16 @@ begin
     MOUSE_LEFT: Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTDOWN;
     MOUSE_MIDDLE: Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_MIDDLEDOWN;
     MOUSE_RIGHT: Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_RIGHTDOWN;
+    MOUSE_EXTRA_1:
+      begin
+        Input.mi.mouseData := XBUTTON1;
+        Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or  MOUSEEVENTF_XDOWN;
+      end;
+    MOUSE_EXTRA_2:
+      begin
+        Input.mi.mouseData := XBUTTON2;
+        Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or  MOUSEEVENTF_XDOWN;
+      end;
   end;
 
   SendInput(1, @Input, SizeOf(Input));
@@ -415,7 +425,7 @@ begin
   MouseClientAreaOffset(X, Y);
 
   Input := Default(TInput);
-  Input.type_ := INPUT_MOUSE;
+  Input._Type := INPUT_MOUSE;
   Input.mi.dx := Bounds.X1 + X;
   Input.mi.dy := Bounds.Y1 + Y;
 
@@ -423,6 +433,16 @@ begin
     MOUSE_LEFT: Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTUP;
     MOUSE_MIDDLE: Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_MIDDLEUP;
     MOUSE_RIGHT: Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_RIGHTUP;
+    MOUSE_EXTRA_1:
+      begin
+        Input.mi.mouseData := XBUTTON1;
+        Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or  MOUSEEVENTF_XUP;
+      end;
+    MOUSE_EXTRA_2:
+      begin
+        Input.mi.mouseData := XBUTTON2;
+        Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_XUP;
+      end;
   end;
 
   SendInput(1, @Input, SizeOf(Input));
@@ -431,9 +451,11 @@ end;
 function TWindowTarget.IsMouseButtonHeld(Button: TClickType): Boolean;
 begin
   case Button of
-    MOUSE_LEFT: Result := (GetAsyncKeyState(VK_LBUTTON) and $8000 <> 0);
-    MOUSE_MIDDLE: Result := (GetAsyncKeyState(VK_MBUTTON) and $8000 <> 0);
-    MOUSE_RIGHT: Result := (GetAsyncKeyState(VK_RBUTTON) and $8000 <> 0);
+    MOUSE_LEFT:    Result := (GetAsyncKeyState(VK_LBUTTON) and $8000 <> 0);
+    MOUSE_MIDDLE:  Result := (GetAsyncKeyState(VK_MBUTTON) and $8000 <> 0);
+    MOUSE_RIGHT:   Result := (GetAsyncKeyState(VK_RBUTTON) and $8000 <> 0);
+    MOUSE_EXTRA_1: Result := (GetAsyncKeyState(VK_XBUTTON1) and $8000 <> 0);
+    MOUSE_EXTRA_2: Result := (GetAsyncKeyState(VK_XBUTTON2) and $8000 <> 0);
   end;
 end;
 
@@ -491,7 +513,7 @@ begin
     ActivateClient();
 
   Input := Default(TInput);
-  Input.type_ := INPUT_KEYBOARD;
+  Input._Type := INPUT_KEYBOARD;
   Input.ki.dwFlags := 0;
   Input.ki.wVk := Key;
 
@@ -506,7 +528,7 @@ begin
     ActivateClient();
 
   Input := Default(TInput);
-  Input.type_ := INPUT_KEYBOARD;
+  Input._Type := INPUT_KEYBOARD;
   Input.ki.dwFlags := KEYEVENTF_KEYUP;
   Input.ki.wVk := Key;
 

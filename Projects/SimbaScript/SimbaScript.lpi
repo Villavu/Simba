@@ -15,7 +15,7 @@
       </XPManifest>
       <Icon Value="0"/>
     </General>
-    <BuildModes Count="5">
+    <BuildModes Count="10">
       <Item1 Name="SIMBA_WIN64" Default="True"/>
       <Item2 Name="SIMBA_WIN32">
         <CompilerOptions>
@@ -185,8 +185,217 @@
           </Other>
         </CompilerOptions>
       </Item5>
+      <Item6 Name="SIMBA_WIN64_DEBUG">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="SimbaScript"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);..\..\Modules\lape;imports;imports\lape"/>
+            <Libraries Value="..\..\Modules\lape\extensions\ffi\bin\$(TargetOS)"/>
+            <OtherUnitFiles Value="..\Simba;imports;imports\classes\MML;imports\classes\LCL;..\..\MML\matchtemplate\fftlib;..\..\MML\matchtemplate;..\..\MML;..\..\MML\iomanager;..\..\MML\dtmeditor;..\..\MML\aca;..\..\MML\oswindow;..\..\MML\web;..\..\MML\web\fpc;..\..\MML\archive;..\..\Modules\lape;..\..\Modules\lape\extensions\ffi;..\..\Modules\Synapse;..\..\Modules\DCPCrypt;..\..\Modules\DCPCrypt\Ciphers;..\..\Modules\DCPCrypt\Hashes;..\..\MML\linux;..\..\MML\darwin"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="win64"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <IgnoredMessages idx5024="True"/>
+            </CompilerMessages>
+            <CustomOptions Value="-dLape_CDECL
+-dStaticFFI"/>
+            <ExecuteAfter>
+              <Command Value="$MakeExe($(LazarusDir)lazbuild) --build-mode=$(BuildMode) ..\SimbaResources\MakeSimbaResources.lpi"/>
+              <ShowAllMessages Value="True"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item6>
+      <Item7 Name="SIMBA_WIN32_DEBUG">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="SimbaScript"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);..\..\Modules\lape;imports;imports\lape"/>
+            <Libraries Value="..\..\Modules\lape\extensions\ffi\bin\$(TargetOS)"/>
+            <OtherUnitFiles Value="..\Simba;imports;imports\classes\MML;imports\classes\LCL;..\..\MML\matchtemplate\fftlib;..\..\MML\matchtemplate;..\..\MML;..\..\MML\iomanager;..\..\MML\dtmeditor;..\..\MML\aca;..\..\MML\oswindow;..\..\MML\web;..\..\MML\web\fpc;..\..\MML\archive;..\..\Modules\lape;..\..\Modules\lape\extensions\ffi;..\..\Modules\Synapse;..\..\Modules\DCPCrypt;..\..\Modules\DCPCrypt\Ciphers;..\..\Modules\DCPCrypt\Hashes;..\..\MML\linux;..\..\MML\darwin"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="win32"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <IgnoredMessages idx5024="True"/>
+            </CompilerMessages>
+            <CustomOptions Value="-dLape_CDECL
+-dStaticFFI"/>
+            <OtherDefines Count="2">
+              <Define0 Value="Lape_CDECL"/>
+              <Define1 Value="DEBUG_MT"/>
+            </OtherDefines>
+            <ExecuteAfter>
+              <Command Value="$MakeExe($(LazarusDir)lazbuild) --build-mode=$(BuildMode) ..\SimbaResources\MakeSimbaResources.lpi"/>
+              <ShowAllMessages Value="True"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item7>
+      <Item8 Name="SIMBA_ARM64_DEBUG">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="SimbaScript"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);..\..\Modules\lape;imports;imports\lape"/>
+            <Libraries Value="..\..\Modules\lape\extensions\ffi\bin\$(TargetOS)"/>
+            <OtherUnitFiles Value="..\Simba;imports;imports\classes\MML;imports\classes\LCL;..\..\MML\matchtemplate\fftlib;..\..\MML\matchtemplate;..\..\MML;..\..\MML\iomanager;..\..\MML\dtmeditor;..\..\MML\aca;..\..\MML\oswindow;..\..\MML\web;..\..\MML\web\fpc;..\..\MML\archive;..\..\Modules\lape;..\..\Modules\lape\extensions\ffi;..\..\Modules\Synapse;..\..\Modules\DCPCrypt;..\..\Modules\DCPCrypt\Ciphers;..\..\Modules\DCPCrypt\Hashes;..\..\MML\linux;..\..\MML\darwin"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="aarch64"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <IgnoredMessages idx5024="True"/>
+            </CompilerMessages>
+            <CustomOptions Value="-dLape_CDECL"/>
+            <ExecuteAfter>
+              <Command Value="$MakeExe($(LazarusDir)lazbuild) --build-mode=$(BuildMode) ..\SimbaResources\MakeSimbaResources.lpi"/>
+              <ShowAllMessages Value="True"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item8>
+      <Item9 Name="SIMBA_LINUX64_DEBUG">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="SimbaScript"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);..\..\Modules\lape;imports;imports\lape"/>
+            <Libraries Value="..\..\Modules\lape\extensions\ffi\bin\$(TargetOS)"/>
+            <OtherUnitFiles Value="..\Simba;imports;imports\classes\MML;imports\classes\LCL;..\..\MML\matchtemplate\fftlib;..\..\MML\matchtemplate;..\..\MML;..\..\MML\iomanager;..\..\MML\dtmeditor;..\..\MML\aca;..\..\MML\oswindow;..\..\MML\web;..\..\MML\web\fpc;..\..\MML\archive;..\..\Modules\lape;..\..\Modules\lape\extensions\ffi;..\..\Modules\Synapse;..\..\Modules\DCPCrypt;..\..\Modules\DCPCrypt\Ciphers;..\..\Modules\DCPCrypt\Hashes;..\..\MML\linux;..\..\MML\darwin"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <IgnoredMessages idx5024="True"/>
+            </CompilerMessages>
+            <CustomOptions Value="-dLape_CDECL"/>
+            <ExecuteAfter>
+              <Command Value="$MakeExe($(LazarusDir)lazbuild) --build-mode=$(BuildMode) ..\SimbaResources\MakeSimbaResources.lpi"/>
+              <ShowAllMessages Value="True"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item9>
+      <Item10 Name="SIMBA_DARWIN64_DEBUG">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="cocoa"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="SimbaScript"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);..\..\Modules\lape;imports;imports\lape"/>
+            <Libraries Value="..\..\Modules\lape\extensions\ffi\bin\$(TargetOS)"/>
+            <OtherUnitFiles Value="..\Simba;imports;imports\classes\MML;imports\classes\LCL;..\..\MML\matchtemplate\fftlib;..\..\MML\matchtemplate;..\..\MML;..\..\MML\iomanager;..\..\MML\dtmeditor;..\..\MML\aca;..\..\MML\oswindow;..\..\MML\web;..\..\MML\web\fpc;..\..\MML\archive;..\..\Modules\lape;..\..\Modules\lape\extensions\ffi;..\..\Modules\Synapse;..\..\Modules\DCPCrypt;..\..\Modules\DCPCrypt\Ciphers;..\..\Modules\DCPCrypt\Hashes;..\..\MML\linux;..\..\MML\darwin"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="darwin"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <IgnoredMessages idx5024="True"/>
+            </CompilerMessages>
+            <CustomOptions Value="-dLape_CDECL"/>
+            <ExecuteAfter>
+              <Command Value="$MakeExe($(LazarusDir)lazbuild) --build-mode=$(BuildMode) ..\SimbaResources\MakeSimbaResources.lpi"/>
+              <ShowAllMessages Value="True"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item10>
       <SharedMatrixOptions Count="1">
-        <Item1 ID="170947543068" Modes="SIMBA_DARWIN64" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
+        <Item1 ID="170947543068" Modes="SIMBA_DARWIN64,SIMBA_DARWIN64_DEBUG" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>
