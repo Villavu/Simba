@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="12"/>
+    <Version Value="11"/>
     <General>
       <Flags>
         <MainUnitHasUsesSectionForAllUnits Value="False"/>
         <LRSInOutputDirectory Value="False"/>
-        <CompatibilityMode Value="True"/>
       </Flags>
       <SessionStorage Value="InIDEConfig"/>
+      <MainUnit Value="0"/>
       <Title Value="Simba"/>
       <UseXPManifest Value="True"/>
       <XPManifest>
@@ -25,7 +25,7 @@
       <CharSet Value="04B0"/>
       <StringTable CompanyName="Villavu.com" FileDescription="Simba: http://wizzup.org/simba/" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="1.3 RC2"/>
     </VersionInfo>
-    <BuildModes Count="5">
+    <BuildModes Count="10">
       <Item1 Name="SIMBA_WIN64" Default="True"/>
       <Item2 Name="SIMBA_WIN32">
         <CompilerOptions>
@@ -190,8 +190,178 @@
           </Other>
         </CompilerOptions>
       </Item5>
+      <Item6 Name="SIMBA_WIN64_DEBUG">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../../Simba-Win64"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;../../MML/matchtemplate;../../MML/matchtemplate/fftlib;../../MML;../../MML/iomanager;../../MML/oswindow;../../MML/dtmeditor;../../MML/aca;../../MML/generics;../../MML/web;../../MML/web/fpc;../../MML/archive;../../MML/linux;../../MML/darwin;../../Modules/Synapse"/>
+            <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="win64"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <StripSymbols Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <IgnoredMessages idx5024="True" idx4055="True"/>
+            </CompilerMessages>
+            <ExecuteBefore>
+              <Command Value="$MakeExe($(LazarusDir)lazbuild) --cpu=$(TargetCPU) --os=$(TargetOS) --widgetset=$(LCLWidgetType) --build-mode=$(BuildMode) ../SimbaScript/SimbaScript.lpi"/>
+              <ShowAllMessages Value="True"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+            <CreateMakefileOnBuild Value="True"/>
+          </Other>
+        </CompilerOptions>
+      </Item6>
+      <Item7 Name="SIMBA_WIN32_DEBUG">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../../Simba-Win32"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;../../MML/matchtemplate;../../MML/matchtemplate/fftlib;../../MML;../../MML/iomanager;../../MML/oswindow;../../MML/dtmeditor;../../MML/aca;../../MML/generics;../../MML/web;../../MML/web/fpc;../../MML/archive;../../MML/linux;../../MML/darwin;../../Modules/Synapse"/>
+            <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="win32"/>
+          </CodeGeneration>
+          <Linking>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <IgnoredMessages idx5024="True" idx4055="True"/>
+            </CompilerMessages>
+            <ExecuteBefore>
+              <Command Value="$MakeExe($(LazarusDir)lazbuild) --cpu=$(TargetCPU) --os=$(TargetOS) --widgetset=$(LCLWidgetType) --build-mode=$(BuildMode) ../SimbaScript/SimbaScript.lpi"/>
+              <ShowAllMessages Value="True"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+            <CreateMakefileOnBuild Value="True"/>
+          </Other>
+        </CompilerOptions>
+      </Item7>
+      <Item8 Name="SIMBA_ARM64_DEBUG">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../../Simba-Arm64"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;../../MML/matchtemplate;../../MML/matchtemplate/fftlib;../../MML;../../MML/iomanager;../../MML/oswindow;../../MML/dtmeditor;../../MML/aca;../../MML/generics;../../MML/web;../../MML/web/fpc;../../MML/archive;../../MML/linux;../../MML/darwin;../../Modules/Synapse"/>
+            <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="aarch64"/>
+            <TargetOS Value="linux"/>
+          </CodeGeneration>
+          <Linking>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <IgnoredMessages idx5024="True" idx4055="True"/>
+            </CompilerMessages>
+            <ExecuteBefore>
+              <Command Value="$MakeExe($(LazarusDir)lazbuild) --cpu=$(TargetCPU) --os=$(TargetOS) --widgetset=$(LCLWidgetType) --build-mode=$(BuildMode) ../SimbaScript/SimbaScript.lpi"/>
+              <ShowAllMessages Value="True"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+            <CreateMakefileOnBuild Value="True"/>
+          </Other>
+        </CompilerOptions>
+      </Item8>
+      <Item9 Name="SIMBA_LINUX64_DEBUG">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../../Simba-Linux64"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;../../MML/matchtemplate;../../MML/matchtemplate/fftlib;../../MML;../../MML/iomanager;../../MML/oswindow;../../MML/dtmeditor;../../MML/aca;../../MML/generics;../../MML/web;../../MML/web/fpc;../../MML/archive;../../MML/linux;../../MML/darwin;../../Modules/Synapse"/>
+            <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="linux"/>
+          </CodeGeneration>
+          <Linking>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <IgnoredMessages idx5024="True" idx4055="True"/>
+            </CompilerMessages>
+            <ExecuteBefore>
+              <Command Value="$MakeExe($(LazarusDir)lazbuild) --cpu=$(TargetCPU) --os=$(TargetOS) --widgetset=$(LCLWidgetType) --build-mode=$(BuildMode) ../SimbaScript/SimbaScript.lpi"/>
+              <ShowAllMessages Value="True"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+            <CreateMakefileOnBuild Value="True"/>
+          </Other>
+        </CompilerOptions>
+      </Item9>
+      <Item10 Name="SIMBA_DARWIN64_DEBUG">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="cocoa"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../../Simba-Darwin64"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;../../MML/matchtemplate;../../MML/matchtemplate/fftlib;../../MML;../../MML/iomanager;../../MML/oswindow;../../MML/dtmeditor;../../MML/aca;../../MML/generics;../../MML/web;../../MML/web/fpc;../../MML/archive;../../MML/linux;../../MML/darwin;../../Modules/Synapse"/>
+            <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="darwin"/>
+          </CodeGeneration>
+          <Linking>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <IgnoredMessages idx5024="True" idx4055="True"/>
+            </CompilerMessages>
+            <ExecuteBefore>
+              <Command Value="$MakeExe($(LazarusDir)lazbuild) --cpu=$(TargetCPU) --os=$(TargetOS) --widgetset=$(LCLWidgetType) --build-mode=$(BuildMode) ../SimbaScript/SimbaScript.lpi"/>
+              <ShowAllMessages Value="True"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="macos/make-bundle.sh"/>
+              <CompileReasons Run="False"/>
+            </ExecuteAfter>
+            <CreateMakefileOnBuild Value="True"/>
+          </Other>
+        </CompilerOptions>
+      </Item10>
       <SharedMatrixOptions Count="1">
-        <Item1 ID="674268197612" Modes="SIMBA_DARWIN64" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
+        <Item1 ID="674268197612" Modes="SIMBA_DARWIN64,SIMBA_DARWIN64_DEBUG" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>
@@ -199,13 +369,13 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <LaunchingApplication PathPlusParams="/usr/bin/gnome-terminal -t &apos;Lazarus Run Output&apos; -e &apos;$(LazarusDir)/tools/runwait.sh $(TargetCmdLine)&apos;"/>
+        <LaunchingApplication PathPlusParams="/usr/bin/gnome-terminal -t 'Lazarus Run Output' -e '$(LazarusDir)/tools/runwait.sh $(TargetCmdLine)'"/>
       </local>
       <FormatVersion Value="2"/>
       <Modes Count="1">
         <Mode0 Name="default">
           <local>
-            <LaunchingApplication PathPlusParams="/usr/bin/gnome-terminal -t &apos;Lazarus Run Output&apos; -e &apos;$(LazarusDir)/tools/runwait.sh $(TargetCmdLine)&apos;"/>
+            <LaunchingApplication PathPlusParams="/usr/bin/gnome-terminal -t 'Lazarus Run Output' -e '$(LazarusDir)/tools/runwait.sh $(TargetCmdLine)'"/>
           </local>
         </Mode0>
       </Modes>

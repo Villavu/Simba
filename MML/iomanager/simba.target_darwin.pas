@@ -312,8 +312,8 @@ begin
   if FAutoFocus then
     ActivateClient();
 
-  case button of
-    mouse_Left:
+  case Button of
+    MOUSE_LEFT:
       begin
         eventType := 1 {kCGEventLeftMouseDown};
         mouseButton := kCGMouseButtonLeft;
@@ -346,8 +346,8 @@ begin
   if FAutoFocus then
     ActivateClient();
 
-  case button of
-    mouse_Left:
+  case Button of
+    MOUSE_LEFT:
       begin
         eventType := 2 {kCGEventLeftMouseUp};
         mouseButton := kCGMouseButtonLeft;
@@ -376,10 +376,10 @@ var
   mouseButton: UInt32;
   buttonStateResult: CBool;
 begin
-  case button of
-    mouse_Left:   mouseButton := kCGMouseButtonLeft;
-    mouse_Middle: mouseButton := kCGMouseButtonCenter;
-    mouse_Right:  mouseButton := kCGMouseButtonRight;
+  case Button of
+    MOUSE_LEFT:   mouseButton := kCGMouseButtonLeft;
+    MOUSE_MIDDLE: mouseButton := kCGMouseButtonCenter;
+    MOUSE_RIGHT:  mouseButton := kCGMouseButtonRight;
   else
     Result := False;
   end;

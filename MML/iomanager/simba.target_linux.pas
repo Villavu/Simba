@@ -74,6 +74,14 @@ implementation
 uses
   x;
 
+const
+  Button8 = 8;
+  Button9 = 9;
+
+const
+  Button8Mask = 1 << 15;
+  Button9Mask = 1 << 16;
+
 function TWindowTarget.GetHandle: PtrUInt;
 begin
   Result := FWindow;
@@ -227,9 +235,9 @@ begin
   MouseClientAreaOffset(X, Y);
 
   if Lines > 0 then
-    Button := mouse_ScrollDown
+    Button := MOUSE_SCROLL_DOWN
   else
-    Button := mouse_ScrollUp;
+    Button := MOUSE_SCROLL_UP;
 
   for i := 1 to Abs(Lines) do
   begin
@@ -260,11 +268,13 @@ begin
   Event.SubWindow := FWindow;
 
   case Button of
-    mouse_Left:       Event.Button := Button1;
-    mouse_Middle:     Event.Button := Button2;
-    mouse_Right:      Event.Button := Button3;
-    mouse_ScrollDown: Event.Button := Button5;
-    mouse_ScrollUp:   Event.Button := Button4;
+    MOUSE_LEFT:        Event.Button := Button1;
+    MOUSE_MIDDLE:      Event.Button := Button2;
+    MOUSE_RIGHT:       Event.Button := Button3;
+    MOUSE_SCROLL_DOWN: Event.Button := Button5;
+    MOUSE_SCROLL_UP:   Event.Button := Button4;
+    MOUSE_EXTRA_1:     Event.Button := Button8;
+    MOUSE_EXTRA_2:     Event.Button := Button9;
   end;
 
   while (Event.SubWindow <> None) do
@@ -295,11 +305,13 @@ begin
   Event.SubWindow := FWindow;
 
   case Button of
-    mouse_Left:       Event.Button := Button1;
-    mouse_Middle:     Event.Button := Button2;
-    mouse_Right:      Event.Button := Button3;
-    mouse_ScrollDown: Event.Button := Button5;
-    mouse_ScrollUp:   Event.Button := Button4;
+    MOUSE_LEFT:        Event.Button := Button1;
+    MOUSE_MIDDLE:      Event.Button := Button2;
+    MOUSE_RIGHT:       Event.Button := Button3;
+    MOUSE_SCROLL_DOWN: Event.Button := Button5;
+    MOUSE_SCROLL_UP:   Event.Button := Button4;
+    MOUSE_EXTRA_1:     Event.Button := Button8;
+    MOUSE_EXTRA_2:     Event.Button := Button9;
   end;
 
   while (Event.SubWindow <> None) do
@@ -327,11 +339,13 @@ begin
   XSync(GetDisplay(), 0);
 
   case Button of
-    mouse_Left:       Mask := Button1Mask;
-    mouse_Middle:     Mask := Button2Mask;
-    mouse_Right:      Mask := Button3Mask;
-    mouse_ScrollDown: Mask := Button4Mask;
-    mouse_ScrollUp:   Mask := Button5Mask;
+    MOUSE_LEFT:        begin Event.Button := Button1; Mask := Button1Mask; end;
+    MOUSE_MIDDLE:      begin Event.Button := Button2; Mask := Button2Mask; end;
+    MOUSE_RIGHT:       begin Event.Button := Button3; Mask := Button3Mask; end;
+    MOUSE_SCROLL_UP:   begin Event.Button := Button4; Mask := Button4Mask; end;
+    MOUSE_SCROLL_DOWN: begin Event.Button := Button5; Mask := Button5Mask; end;
+    MOUSE_EXTRA_1:     raise Exception.Create('Xlib doesn''t support this?'); //begin Event.Button := Button8; Mask := Button8Mask; end;
+    MOUSE_EXTRA_2:     raise Exception.Create('Xlib doesn''t support this?'); //begin Event.Button := Button9; Mask := Button9Mask; end;
   end;
 
   Event := Default(TXButtonEvent);

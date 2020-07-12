@@ -31,13 +31,6 @@ interface
 uses
   Classes, SysUtils, Graphics;
 
-const
-  ps_mouse_right = 0;
-  ps_mouse_left = 1;
-  ps_mouse_middle = 2;
-
-{ Overloaded Operators}
-
 { TPoint add }
 operator + (PT1,PT2 : TPoint) : TPoint;
 
@@ -82,9 +75,9 @@ type
   T2DHSLArray = array of array of THSL;
 
   TRetData = record
-    Ptr : PRGB32;
-    IncPtrWith : integer;
-    RowLen : integer;
+    Ptr: PRGB32;
+    IncPtrWith: Integer;
+    RowLen: Integer;
   end;
 
 const
@@ -98,7 +91,15 @@ type
   PColor = ^TColor;
   PCanvas = ^TCanvas;
 
-  TClickType = (MOUSE_RIGHT, MOUSE_LEFT, MOUSE_MIDDLE, MOUSE_SCROLLUP, MOUSE_SCROLLDOWN);
+  TClickType = (
+    MOUSE_RIGHT,
+    MOUSE_LEFT,
+    MOUSE_MIDDLE,
+    MOUSE_EXTRA_1,
+    MOUSE_EXTRA_2,
+    MOUSE_SCROLL_UP,
+    MOUSE_SCROLL_DOWN
+  );
 
   TMousePress = (MOUSE_DOWN, MOUSE_UP);
 
@@ -129,12 +130,12 @@ type
 
   TBoolArray = array of boolean;
   TBooleanArray = TBoolArray;
-  T2DBoolArray = Array of TBoolArray;
+  T2DBoolArray = array of TBoolArray;
 
   PExtendedArray = ^TExtendedArray;
-  TExtendedArray = Array of Extended;
+  TExtendedArray = array of Extended;
   P2DExtendedArray = ^T2DExtendedArray;
-  T2DExtendedArray = Array of Array of Extended;
+  T2DExtendedArray = array of array of Extended;
 
   {Tempalte matching}
   PSingleArray  = ^TSingleArray;
@@ -167,7 +168,7 @@ type
     FS: TFileStream;
     BytesRead, Mode: Integer;
   end;
-  TMufasaFilesArray = Array Of TMufasaFile;
+  TMufasaFilesArray = array of TMufasaFile;
 
   { DTM Types }
   {
@@ -235,10 +236,6 @@ type
     Str : string;
     Key : byte;
   end;
-
-type
-   TBufferByteArray = Array[0..524287] of Byte;
-   PBufferByteArray = ^TBufferByteArray;
 
   TOCRFilterData = packed record
       _type: integer;

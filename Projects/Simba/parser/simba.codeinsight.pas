@@ -202,11 +202,14 @@ var
   I: Int32;
   Buffer: array of TSHA1Digest;
 begin
-  SetLength(Buffer, Length(FIncludes));
-  for I := 0 to High(FIncludes) do
-    Buffer[I] := FIncludes[I].Hash;
+  if (Length(FIncludes) > 0) then
+  begin
+    SetLength(Buffer, Length(FIncludes));
+    for I := 0 to High(FIncludes) do
+      Buffer[I] := FIncludes[I].Hash;
 
-  Result := SHA1Buffer(Buffer[0], Length(Buffer) * SizeOf(TSHA1Digest));
+    Result := SHA1Buffer(Buffer[0], Length(Buffer) * SizeOf(TSHA1Digest));
+  end;
 end;
 
 function TCodeInsight.ParseExpression(Expressions: TExpressionArray): TDeclaration;
