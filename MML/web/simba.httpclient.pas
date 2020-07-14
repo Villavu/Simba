@@ -144,6 +144,9 @@ type
     // Post string (form data) and writes response to stream
     procedure Post(URL: String; Data: String; Response: TMemoryStream); overload;
 
+    function FormPost(const URL, FieldName, FileName: string): String; overload;
+    function FormPost(const URL, FieldName, FileName: string; Stream: TStream): String; overload;
+
     constructor Create;
     destructor Destroy; override;
   end;
@@ -401,6 +404,42 @@ begin
   FURL := URL;
 
   FHTTPClient.FormPost(FURL, Data, Response);
+end;
+
+function TSimbaHTTPClient.FormPost(const URL, FieldName, FileName: string): String;
+var
+  Response: TStringStream;
+begin
+  Result := '';
+
+  Response := TStringStream.Create();
+
+  try
+    FURL := URL;
+    FHTTPClient.FileFormPost(URL, FieldName, FileName, Response);
+  finally
+    Result := Response.DataString;
+
+    Response.Free();
+  end;
+end;
+
+function TSimbaHTTPClient.FormPost(const URL, FieldName, FileName: string; Stream: TStream): String;
+var
+  Response: TStringStream;
+begin
+  Result := '';
+
+  Response := TStringStream.Create();
+
+  try
+    FURL := URL;
+    FHTTPClient.StreamFormPost(URL, FieldName, FileName, Stream, Response);
+  finally
+    Result := Response.DataString;
+
+    Response.Free();
+  end;
 end;
 
 constructor TSimbaHTTPClient.Create;

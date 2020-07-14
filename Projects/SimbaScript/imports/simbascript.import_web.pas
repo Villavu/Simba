@@ -164,6 +164,18 @@ begin
   TSimbaScript(Params^[0]).Client.MInternets.GetHTTPClient(PInt32(Params^[1])^).RequestHeader[PString(Params^[2])^] := PString(Params^[3])^;
 end;
 
+procedure Lape_FormPost(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PString(Result)^ := TSimbaScript(Params^[0]).Client.MInternets.GetHTTPClient(PInt32(Params^[1])^).FormPost(PString(Params^[2])^, PString(Params^[3])^, PString(Params^[4])^);
+end;
+
+procedure Lape_FormPostEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+type
+  PStream = ^TStream;
+begin
+  PString(Result)^ := TSimbaScript(Params^[0]).Client.MInternets.GetHTTPClient(PInt32(Params^[1])^).FormPost(PString(Params^[2])^, PString(Params^[3])^, PString(Params^[4])^, PStream(Params^[5])^);
+end;
+
 procedure Lape_Import_Web(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
@@ -183,6 +195,8 @@ begin
     addGlobalMethod('function PostHTTPPageEx(Client: Int32; URL: String): String', @Lape_PostHTTPPageEx, Data);
     addGlobalMethod('procedure SetHTTPContentType(Client: Int32; Value: String);', @Lape_SetHTTPContentType, Data);
     addGlobalMethod('procedure SetHTTPHeader(Client: Int32; Name: String; Value: String);', @Lape_SetHTTPHeader, Data);
+    addGlobalMethod('function PostHTTPForm(Client: Int32; const URL, FieldName, FileName: string): String; overload;', @Lape_FormPost, Data);
+    addGlobalMethod('function PostHTTPForm(Client: Int32; const URL, FieldName, FileName: string; Stream: TStream): String; overload;', @Lape_FormPostEx, Data);
 
     addGlobalMethod('procedure ClearPostData(Client: Int32);', @Lape_ClearPostData, Data);
     addGlobalMethod('procedure AddPostVariable(Client: Int32; VariableName, VariableValue: String);', @Lape_AddPostVariable, Data);

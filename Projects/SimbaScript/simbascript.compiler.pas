@@ -5,7 +5,7 @@ unit simbascript.compiler;
 interface                         
 
 uses
-  classes, sysutils, typinfo, fgl,
+  classes, sysutils, typinfo,
   ffi, lpcompiler, lptypes, lpvartypes, lpparser, lptree, lpffiwrappers;
 
 type
