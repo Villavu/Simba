@@ -60,6 +60,9 @@ type
     function PostHTTPPage(URL: String; PostData: String): String; overload;
     function PostHTTPPage(URL: String): String; overload;
 
+    function FormPost(const URL, FieldName, FileName: string): String; overload;
+    function FormPost(const URL, FieldName, FileName: string; Stream: TStream): String; overload;
+
     procedure ClearPostData;
     procedure AddPostVariable(Name, Value: String);
 
@@ -308,6 +311,16 @@ begin
     SetLength(PostData, Length(PostData) - 1);
 
   Result := PostHTTPPage(URL, PostData);
+end;
+
+function THTTPClient.FormPost(const URL, FieldName, FileName: string): String;
+begin
+  Result := FHTTPClient.FormPost(URL, FieldName, FileName);
+end;
+
+function THTTPClient.FormPost(const URL, FieldName, FileName: string; Stream: TStream): String;
+begin
+  Result := FHTTPClient.FormPost(URL, FieldName, FileName, Stream);
 end;
 
 procedure THTTPClient.SetProxy(Host, Port: String);
