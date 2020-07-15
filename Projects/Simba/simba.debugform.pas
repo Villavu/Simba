@@ -68,13 +68,13 @@ end;
 
 procedure TSimbaDebugForm.Add(Strings: TStrings);
 var
-  Line: String;
+  I: Int32;
 begin
   FLock.Enter();
 
   try
-    for Line in Strings.Text.Split([LineEnding]) do
-      FStrings.Add(Line);
+    for I := 0 to Strings.Count - 1 do
+      FStrings.Add(Strings[I]);
   finally
     FLock.Leave();
   end;
@@ -123,6 +123,7 @@ begin
       FStrings.Clear();
 
       Editor.EndUpdate();
+      Editor.Invalidate();
     end;
   finally
     FLock.Leave();

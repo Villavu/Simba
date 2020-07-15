@@ -105,6 +105,10 @@ end;
 function FindPlugin(var FileName: String; const Directories: array of String): Boolean;
 begin
   Result := FindFile(FileName, '', Directories) or
+            {$IFDEF CPUAARCH64} 
+            FindFile(FileName, '.' + SharedSuffix + '.aarch64', Directories) or
+            FindFile(FileName, {$IFDEF CPU32}'32'{$ELSE}'64'{$ENDIF} + '.' + SharedSuffix + '.aarch64', Directories) or
+            {$ENDIF}
             FindFile(FileName, '.' + SharedSuffix, Directories) or
             FindFile(FileName, {$IFDEF CPU32}'32'{$ELSE}'64'{$ENDIF} + '.' + SharedSuffix, Directories);
 end;
