@@ -490,21 +490,16 @@ end;
 
 procedure TSimbaScript.Invoke(Message: Int32; Params, Result: TMemoryStream);
 begin
+  if (FSimbaIPC = nil) then
+    raise Exception.Create('Method "' + GetEnumName(TypeInfo(ESimbaMethod), Message) + '" unavailable when running detached from Simba');
+
+  FSimbaIPCLock.Enter();
+
   try
-    if (FSimbaIPC = nil) then
-      raise Exception.Create('Method "' + GetEnumName(TypeInfo(ESimbaMethod), Message) + '" unavailable when running detached from Simba');
-
-    FSimbaIPCLock.Enter();
-
-    try
-      FSimbaIPC.WriteMessage(Message, Params);
-      FSimbaIPC.ReadMessage(Message, Result);
-    finally
-      FSimbaIPCLock.Leave();
-    end;
-  except
-    on E: Exception do
-      HandleException(E);
+    FSimbaIPC.WriteMessage(Message, Params);
+    FSimbaIPC.ReadMessage(Message, Result);
+  finally
+    FSimbaIPCLock.Leave();
   end;
 end;
 

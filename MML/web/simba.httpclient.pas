@@ -6,7 +6,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.fphttpclient, simba.archive;
+  fphttpclient, simba.archive;
 
 const
   // Information
@@ -156,8 +156,8 @@ type
 implementation
 
 uses
-  simba.mufasabase,
-  simba.zip, simba.tar, simba.tar_gz, simba.tar_bz2, simba.opensslsockets, simba.openssl;
+  opensslsockets, openssl,
+  simba.mufasabase, simba.zip, simba.tar, simba.tar_gz, simba.tar_bz2;
 
 function InitializeOpenSSL(Directory: String): Boolean;
 begin

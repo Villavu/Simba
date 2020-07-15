@@ -92,9 +92,10 @@ begin
 
   Message := Header.Message;
 
-  Data.Clear();
+  Data.Size := Header.Size;
+  Data.Position := 0;
 
-  while Data.Size < Header.Size do
+  while Data.Position < Header.Size do
   begin
     Count := Read(Buffer[0], Length(Buffer));
     if (Count = PIPE_TERMINATED) then
@@ -124,7 +125,8 @@ begin
   Header.Message := Message;
 
   FOutputStream.Write(Header, SizeOf(TMessageHeader));
-  FOutputStream.Write(PByte(Data.Memory)^, Data.Size);
+  if Data.Size > 0 then
+    FOutputStream.Write(PByte(Data.Memory)^, Data.Size);
 end;
 
 constructor TSimbaIPC_Client.Create(Server: String);

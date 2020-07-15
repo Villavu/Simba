@@ -116,7 +116,7 @@ implementation
 
 uses
   forms, dialogs,
-  simba.script_simbamethod, simba.debugform, simba.settings;
+  simba.script_simbamethod, simba.debugform, simba.settings, simba.stringutil;
 
 procedure TSimbaScriptMethodThread.Execute;
 var
@@ -191,7 +191,7 @@ var
   begin
     Result := '';
 
-    Lines := Data.Split([LineEnding]);
+    Lines := Explode(LineEnding, Data);
     for I := 0 to High(Lines) - 1 do
       Output.Add(Lines[I]);
 
