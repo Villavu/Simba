@@ -634,7 +634,7 @@ begin
       if CanSetFocus() then
         SetFocus();
 
-      ScriptTabHistory.Add(CurrentTab);
+      SimbaScriptTabHistory.Add(CurrentTab);
     end;
   end else
   begin
@@ -667,7 +667,7 @@ begin
     if CurrentEditor.CanSetFocus() then
       CurrentEditor.SetFocus();
 
-    ScriptTabHistory.Add(CurrentTab);
+    SimbaScriptTabHistory.Add(CurrentTab);
   end else
   begin
     if IsLibrary then

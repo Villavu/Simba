@@ -228,8 +228,8 @@ end;
 procedure TSimbaEditor.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   case Button of
-    mbExtra1: ScriptTabHistory.GoBack();
-    mbExtra2: ScriptTabHistory.GoForward();
+    mbExtra1: SimbaScriptTabHistory.GoBack();
+    mbExtra2: SimbaScriptTabHistory.GoForward();
     else
       inherited MouseDown(Button, Shift, X, Y);
   end;

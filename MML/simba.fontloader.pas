@@ -235,8 +235,6 @@ var
 begin
   Result := True;
 
-  WriteLn('Loading font: ', Name);
-
   // Allow user to pass a filename too
   if DirectoryExists(Name) then
   begin
