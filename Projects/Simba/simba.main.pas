@@ -28,7 +28,7 @@ interface
 
 uses
   classes, sysutils, fileutil, lresources, forms, controls, graphics, dialogs,
-  stdctrls, menus, comctrls, extctrls, actnlist, buttons, imglist,
+  stdctrls, menus, comctrls, extctrls, buttons, imglist,
   simba.windowselector, simba.scripttab, simba.oswindow, castaliapaslextypes;
 
 const
@@ -120,7 +120,6 @@ type
     MenuItemFind: TMenuItem;
     MenuItemFindNext: TMenuItem;
     MenuItemFindPrev: TMenuItem;
-    MenuItemFormDesigner: TMenuItem;
     MenuItemFunctionList: TMenuItem;
     MenuItemGoto: TMenuItem;
     MenuItemMainExit: TMenuItem;
@@ -215,7 +214,6 @@ type
     procedure SaveAllButtonClick(Sender: TObject);
     procedure MenuSaveAsClick(Sender: TObject);
     procedure ShowDTMEditor(Sender: TObject);
-    procedure ShowFormDesigner(Sender: TObject);
     procedure HandleRunningScripts(Sender: TObject);
     procedure MenuItemBitmapConvClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -253,12 +251,13 @@ type
     FWindowSelection: TOSWindow;
     FProcessSelection: UInt32;
     FScriptState: TScriptButtonState;
+    FExceptionMessage: TStringList;
 
-    procedure RemoveTabASync(Data: PtrInt);
+    procedure DoRemoveTab(Data: PtrInt);
+    procedure DoPrintDTM(constref DTM: String);
+    procedure DoExceptionHandler(Sender: TObject; E: Exception);
 
-    procedure PrintDTM(constref DTM: String);
-
-    procedure CustomExceptionHandler(Sender: TObject; E: Exception);
+    procedure HandleException;
 
     function LoadLayout: Boolean;
     procedure SaveLayout;
@@ -307,13 +306,9 @@ uses
   simba.dtmeditor, simba.scriptinstance, simba.package_form, simba.aboutform,
   simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.colorpicker, simba.ci_includecache,
-  simba.highlighter,
-  simba.scriptformatter
+  simba.highlighter, simba.scriptformatter
   {$IFDEF WINDOWS},
   windows, shellapi
-  {$ENDIF}
-  {$IFDEF USE_FORMDESIGNER},
-  simba.formdesigner
   {$ENDIF}
   {$IFDEF UNIX},
   baseunix
@@ -478,76 +473,59 @@ begin
   end;
 end;
 
-procedure TSimbaForm.CustomExceptionHandler(Sender: TObject; E: Exception);
-
-  function DumpExceptionCallStack(E: Exception): string;
-  var
-    I: Integer;
-    Frames: PPointer;
-    Report: string;
-  begin
-    Report := 'Program exception! ' + LineEnding +
-      'Stacktrace:' + LineEnding + LineEnding;
-    if E <> nil then begin
-      Report := Report + 'Exception class: ' + E.ClassName + LineEnding +
-      'Message: ' + E.Message + LineEnding;
-    end;
-    Report := Report + BackTraceStrFunc(ExceptAddr);
-    Frames := ExceptFrames;
-    for I := 0 to ExceptFrameCount - 1 do
-      Report := Report + LineEnding + BackTraceStrFunc(Frames[I]);
-
-    result := report;
-  end;
-
+procedure TSimbaForm.DoExceptionHandler(Sender: TObject; E: Exception);
 var
-  Trace, LogName: string;
-  MsgDlgRet: Integer;
+  I: Integer;
+  Frames: PPointer;
+begin
+  if (FExceptionMessage <> nil) then
+    Exit;
+
+  FExceptionMessage := TStringList.Create();
+  FExceptionMessage.Add('');
+  FExceptionMessage.Add('Simba ' + IntToStr(SimbaVersion) + ' encountered an unhandled exception.');
+  FExceptionMessage.Add('');
+
+  if (E <> nil) then
+  begin
+    FExceptionMessage.Add('Exception class: ' + E.ClassName);
+    FExceptionMessage.Add('Exception message: ' + E.Message);
+  end else
+    FExceptionMessage.Add('Exception: nil');
+
+  FExceptionMessage.Add(BackTraceStrFunc(ExceptAddr));
+
+  Frames := ExceptFrames;
+  for I := 0 to ExceptFrameCount - 1 do
+    FExceptionMessage.Add(BackTraceStrFunc(Frames[I]));
+
+  WriteLn(FExceptionMessage.Text);
+
+  TThread.Synchronize(TThread.CurrentThread, @HandleException);
+end;
+
+procedure TSimbaForm.HandleException;
+var
+  FileName: String;
+  I: Int32;
   Aborted: Boolean;
 begin
-  WriteLn('');
-  WriteLn('Something went wrong...');
-  WriteLn('');
-
-  Trace := DumpExceptionCallStack(E);
-  Trace += LineEnding + 'Simba Version: ' + IntToStr(SimbaVersion) + LineEnding;
-
-  LogName := SimbaSettings.Environment.DataPath.Value + 'ErrorLog_' + FormatDateTime('dd-mm-yy_hh-nn-ss', Now) + '.txt';
-  WriteLn(Format('Going to try to save the error information to "%s".', [LogName]));
-
-  try
-    with TFileStream.Create(LogName, fmOpenWrite or fmOpenReadWrite or fmCreate) do
-    try
-      Write(Trace[1], Length(Trace));
-    finally
-      Free;
-    end;
-  except
-    WriteLn(Format('Unable to save log file! [%s]', [LogName]));
-  end;
-
-  MsgDlgRet := mrOk;
-  Application.DisableIdleHandler;
-  try
-     MsgDlgRet := MessageDlg('Something went wrong in Simba. ' +
-     'If you press OK, Simba will try to save your scripts and then close. (Recommended) ' +
-     'See ' + LogName + ' for more information.' , mtError, mbOKCancel, 0);
-  finally
-    Application.EnableIdleHandler;
-  end;
-
-  if MsgDlgRet = mrOK then
+  for I := 1 to 100 do
   begin
-    try
-      SimbaScriptTabsForm.RemoveAllTabs(Aborted); // Save scripts
-      SimbaForm.Free();
-    finally
-      WriteLn('Finally Free...');
-    end;
-
-    { Stop Simba }
-    Halt(1); // Error code 1
+    FileName := SimbaSettings.Environment.DataPath.Value + Format('crash-log-%d.txt', [I]);
+    if not FileExists(FileName) then
+      Break;
   end;
+
+  FExceptionMessage.SaveToFile(FileName);
+
+  if MessageDlg('Something went wrong in Simba. If you press OK, Simba will try to save your scripts before closing. (Recommended) ' +
+                'See "' + ExtractRelativePath(ExtractFileDir(Application.Location), FileName) + '" for more information.', mtError, mbOKCancel, 0) = mrOK then
+  begin
+    SimbaScriptTabsForm.RemoveAllTabs(Aborted);
+  end;
+
+  Halt(1); // Calls finalization sections
 end;
 
 procedure TSimbaForm.CodeTools_OnMessage(Sender: TObject; const Typ: TMessageEventType; const Message: String; X, Y: Integer);
@@ -801,7 +779,7 @@ end;
 
 procedure TSimbaForm.MenuCloseTabClick(Sender: TObject);
 begin
-  Application.QueueAsyncCall(@RemoveTabASync, 0);
+  Application.QueueAsyncCall(@DoRemoveTab, 0);
 end;
 
 procedure TSimbaForm.MenuCompileClick(Sender: TObject);
@@ -986,14 +964,14 @@ begin
   CalculatePreferredSize(Result.X, Result.Y, True);
 end;
 
-procedure TSimbaForm.RemoveTabASync(Data: PtrInt);
+procedure TSimbaForm.DoRemoveTab(Data: PtrInt);
 var
   Aborted: Boolean;
 begin
   SimbaScriptTabsForm.RemoveTab(SimbaScriptTabsForm.CurrentTab, Aborted);
 end;
 
-procedure TSimbaForm.PrintDTM(constref DTM: String);
+procedure TSimbaForm.DoPrintDTM(constref DTM: String);
 begin
   SimbaDebugForm.Add('DTM := DTMFromString(' + #39 + DTM + #39 + ');');
 end;
@@ -1136,16 +1114,9 @@ begin
   with TSimbaDTMEditorForm.Create(WindowSelection) do
   begin
     Font := Self.Font;
-    OnPrintDTM := @PrintDTM;
+    OnPrintDTM := @DoPrintDTM;
     ShowOnTop();
   end;
-end;
-
-procedure TSimbaForm.ShowFormDesigner(Sender: TObject);
-begin
-  {$IFDEF USE_FORMDESIGNER}
-  CompForm.ShowOnTop();
-  {$ENDIF}
 end;
 
 procedure TSimbaForm.HandleRunningScripts(Sender: TObject);
@@ -1489,7 +1460,7 @@ begin
   Self.ToolBar.Images.Assign(Self.Images);
   Self.ToolBar.Images.Scaled := False;
 
-  Application.OnException := @CustomExceptionHandler;
+  Application.OnException := @DoExceptionHandler;
   Application.QueueAsyncCall(@ResetDockingSplitters, 0);
 
   // Everything should be loaded. Display our forms!
@@ -1527,6 +1498,9 @@ end;
 
 procedure TSimbaForm.FormDestroy(Sender: TObject);
 begin
+  if (FExceptionMessage <> nil) then
+    FExceptionMessage.Free();
+
   RemoveSettingChangeHandlers();
 end;
 

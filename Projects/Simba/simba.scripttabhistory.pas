@@ -5,14 +5,21 @@ unit simba.scripttabhistory;
 interface
 
 uses
-  classes, sysutils,
+  classes, sysutils, fgl,
   simba.scripttab;
 
 type
   TSimbaScriptTabHistory = class
   protected
+  type
+    THistoryPoint = class
+      Tab: TSimbaScriptTab;
+      CaretX, CaretY: Int32;
+    end;
+    THistoryList = specialize TFPGObjectList<THistoryPoint>;
+  protected
     FIndex: Int32;
-    FHistory: TStringList;
+    FHistory: THistoryList;
   public
     procedure Add(Tab: TSimbaScriptTab);
     procedure Clear(Tab: TSimbaScriptTab);
@@ -25,17 +32,26 @@ type
   end;
 
 var
-  ScriptTabHistory: TSimbaScriptTabHistory;
+  SimbaScriptTabHistory: TSimbaScriptTabHistory;
 
 implementation
 
 procedure TSimbaScriptTabHistory.Add(Tab: TSimbaScriptTab);
+var
+  Point: THistoryPoint;
 begin
-  // duplicate
+  if (Tab.Editor.CaretX = 1) and (Tab.Editor.CaretY = 1) then
+    Exit;
+
   if (FIndex >= 0) and (FIndex < FHistory.Count) then
   begin
-    if (FHistory[FIndex] = Format('%d:%d', [Tab.Editor.CaretX, Tab.Editor.CaretY])) and
-       (FHistory.Objects[FIndex] = Tab) then
+    // duplicate
+    if (FHistory[FIndex].CaretX = Tab.Editor.CaretX) and (FHistory[FIndex].CaretY = Tab.Editor.CaretY) and
+       (FHistory[FIndex].Tab = Tab) then
+      Exit;
+
+    // not enough movement
+    if (FHistory[FIndex].Tab = Tab) and (Abs(Tab.Editor.CaretY - FHistory[FIndex].CaretY) < 20) then
       Exit;
   end;
 
@@ -50,7 +66,12 @@ begin
       FHistory.Delete(FHistory.Count - 1);
   end;
 
-  FHistory.InsertObject(FIndex, Format('%d:%d', [Tab.Editor.CaretX, Tab.Editor.CaretY]), Tab);
+  Point := THistoryPoint.Create();
+  Point.Tab := Tab;
+  Point.CaretX := Tab.Editor.CaretX;
+  Point.CaretY := Tab.Editor.CaretY;
+
+  FHistory.Insert(FIndex, Point);
 
   Inc(FIndex);
 end;
@@ -59,14 +80,14 @@ procedure TSimbaScriptTabHistory.Clear(Tab: TSimbaScriptTab);
 var
   I: Int32;
 begin
-  while FHistory.IndexOfObject(Tab) > -1 do
-  begin
-    I := FHistory.IndexOfObject(Tab);
-    if (I < FIndex) then
-      Dec(FIndex);
+  for I := FHistory.Count - 1 downto 0 do
+    if (FHistory[I].Tab = Tab) then
+    begin
+      if (I < FIndex) then
+        Dec(FIndex);
 
-    FHistory.Delete(I);
-  end;
+      FHistory.Delete(I);
+    end;
 end;
 
 procedure TSimbaScriptTabHistory.GoBack;
@@ -77,15 +98,18 @@ begin
   if (FIndex >= FHistory.Count) then
     FIndex := FHistory.Count - 1;
 
-  if (FHistory.Count > 0) then
-    with FHistory.Objects[FIndex] as TSimbaScriptTab do
-    begin
-      MakeVisible();
+  while (FIndex > 0) and
+        (FHistory[FIndex].Tab.Editor.CaretX = FHistory[FIndex].CaretX) and
+        (FHistory[FIndex].Tab.Editor.CaretY = FHistory[FIndex].CaretY) do
+    Dec(FIndex);
 
-      Editor.CaretX := StrToInt(FHistory[FIndex].Split(':')[0]);
-      Editor.CaretY := StrToInt(FHistory[FIndex].Split(':')[1]);
-      Editor.TopLine := Editor.CaretY - (Editor.LinesInWindow div 2);
-    end;
+  if (FHistory.Count > 0) then
+  begin
+    FHistory[FIndex].Tab.Editor.CaretX  := FHistory[FIndex].CaretX;
+    FHistory[FIndex].Tab.Editor.CaretY  := FHistory[FIndex].CaretY;
+    FHistory[FIndex].Tab.Editor.TopLine := FHistory[FIndex].CaretY - (FHistory[FIndex].Tab.Editor.LinesInWindow div 2);
+    FHistory[FIndex].Tab.MakeVisible();
+  end;
 end;
 
 procedure TSimbaScriptTabHistory.GoForward;
@@ -96,35 +120,39 @@ begin
   if (FIndex >= FHistory.Count) then
     FIndex := FHistory.Count - 1;
 
-  if (FHistory.Count > 0) then
-    with FHistory.Objects[FIndex] as TSimbaScriptTab do
-    begin
-      MakeVisible();
+  while (FIndex < FHistory.Count - 1) and
+        (FHistory[FIndex].Tab.Editor.CaretX = FHistory[FIndex].CaretX) and
+        (FHistory[FIndex].Tab.Editor.CaretY = FHistory[FIndex].CaretY) do
+    Inc(FIndex);
 
-      Editor.CaretX := StrToInt(FHistory[FIndex].Split(':')[0]);
-      Editor.CaretY := StrToInt(FHistory[FIndex].Split(':')[1]);
-      Editor.TopLine := Editor.CaretY - (Editor.LinesInWindow div 2);
-    end;
+  if (FHistory.Count > 0) then
+  begin
+    FHistory[FIndex].Tab.Editor.CaretX  := FHistory[FIndex].CaretX;
+    FHistory[FIndex].Tab.Editor.CaretY  := FHistory[FIndex].CaretY;
+    FHistory[FIndex].Tab.Editor.TopLine := FHistory[FIndex].CaretY - (FHistory[FIndex].Tab.Editor.LinesInWindow div 2);
+    FHistory[FIndex].Tab.MakeVisible();
+  end;
 end;
 
 constructor TSimbaScriptTabHistory.Create;
 begin
-  FHistory := TStringList.Create();
+  FHistory := THistoryList.Create();
 end;
 
 destructor TSimbaScriptTabHistory.Destroy;
 begin
-  FHistory.Free();
+  if (FHistory <> nil) then
+    FHistory.Free();
 
   inherited Destroy();
 end;
 
 initialization
-  ScriptTabHistory := TSimbaScriptTabHistory.Create();
+  SimbaScriptTabHistory := TSimbaScriptTabHistory.Create();
 
 finalization
-  ScriptTabHistory.Free();
-  ScriptTabHistory := nil;
+  SimbaScriptTabHistory.Free();
+  SimbaScriptTabHistory := nil;
 
 end.
 

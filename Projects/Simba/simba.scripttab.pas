@@ -256,8 +256,8 @@ begin
     FFunctionList.ChangeStamp := 0; // Force update
   end;
 
-  if (ScriptTabHistory <> nil) then
-    ScriptTabHistory.Add(Self);
+  if (SimbaScriptTabHistory <> nil) then
+    SimbaScriptTabHistory.Add(Self);
 
   if (FEditor <> nil) and FEditor.CanSetFocus then
     FEditor.SetFocus();
@@ -265,8 +265,8 @@ end;
 
 procedure TSimbaScriptTab.HandleEditorClick(Sender: TObject);
 begin
-  if (ScriptTabHistory <> nil) then
-    ScriptTabHistory.Add(Self);
+  if (SimbaScriptTabHistory <> nil) then
+    SimbaScriptTabHistory.Add(Self);
 end;
 
 procedure TSimbaScriptTab.HandleEditorChange(Sender: TObject);
@@ -527,8 +527,8 @@ end;
 
 destructor TSimbaScriptTab.Destroy;
 begin
-  if (ScriptTabHistory <> nil) then
-    ScriptTabHistory.Clear(Self);
+  if (SimbaScriptTabHistory <> nil) then
+    SimbaScriptTabHistory.Clear(Self);
 
   inherited Destroy();
 end;
