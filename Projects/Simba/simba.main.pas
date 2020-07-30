@@ -299,7 +299,7 @@ var
 implementation
 
 uses
-  lclintf, synexporthtml, anchordocking, xmlconf, xmlpropstorage, anchordockstorage,
+  lclintf, synexporthtml, anchordocking, xmlconf, xmlpropstorage, anchordockstorage, resource, resreader,
   simba.mufasatypes, simba.misc, simba.mufasabase, simba.settings, simba.httpclient,
   simba.files, simba.resourceextractor, simba.codeparser, simba.codeinsight,
   simba.debugimage, simba.bitmapconv, simba.colorpicker_historyform, simba.aca,
@@ -608,7 +608,7 @@ const
 begin
   {$IFDEF WINDOWS}
   if MessageDlg('Associate Scripts', Message, mtConfirmation, mbYesNo, 0) = mrYes then
-    RunAsAdmin(Handle, 'SimbaAssociate.exe', '"' + Application.ExeName + '"');
+    RunAsAdmin(Handle, Application.ExeName, '--associate');
   {$ENDIF}
 end;
 
@@ -1350,12 +1350,10 @@ begin
 end;
 
 procedure TSimbaForm.Initialize_Resources;
-var
-  SimbaResourceExtractor: TSimbaResourceExtractor;
 begin
   if SimbaSettings.Resources.ExtractOnLaunch.Value then
   try
-    SimbaResourceExtractor.Extract();
+    ExtractSimbaResources();
 
     {$IFDEF UNIX}
     if fpchmod(SimbaSettings.Environment.ScriptExecutablePath.Value, &755) <> 0 then //rwxr-xr-x

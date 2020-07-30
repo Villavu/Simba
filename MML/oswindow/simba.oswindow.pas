@@ -78,10 +78,29 @@ implementation
   {$INCLUDE oswindow_darwin.inc}
 {$ENDIF}
 
+// Workaround for https://github.com/andgineer/TRegExpr/pull/138 that did not make it into FPC 3.2
+function FindRegex(const ARegExpr, AInputStr: RegExprString): Boolean;
+var
+  r: TRegExpr;
+begin
+  if AInputStr = '' then
+    Exit(False);
+
+  r := TRegExpr.Create;
+  try
+    r.Expression := ARegExpr;
+    r.InputString := AInputStr;
+
+    Result := r.Exec();
+  finally
+    r.Free;
+  end;
+end;
+
 function TOSWindowArray_Helper.GetByTitle(Title: String; out Window: TOSWindow): Boolean;
 begin
   for Window in Self do
-    if ExecRegExpr(Title, Window.GetTitle()) then
+    if FindRegex(Title, Window.GetTitle()) then
       Exit(True);
 
   Exit(False);
@@ -94,14 +113,14 @@ begin
   SetLength(Result, 0);
 
   for Window in Self do
-    if ExecRegExpr(Title, Window.GetTitle()) then
+    if FindRegex(Title, Window.GetTitle()) then
       Result += Window;
 end;
 
 function TOSWindowArray_Helper.GetByClass(ClassName: String; out Window: TOSWindow): Boolean;
 begin
   for Window in Self do
-    if ExecRegExpr(ClassName, Window.GetClassName()) then
+    if FindRegex(ClassName, Window.GetClassName()) then
       Exit(True);
 
   Exit(False);
@@ -114,14 +133,14 @@ begin
   SetLength(Result, 0);
 
   for Window in Self do
-    if ExecRegExpr(ClassName, Window.GetClassName()) then
+    if FindRegex(ClassName, Window.GetClassName()) then
       Result += Window;
 end;
 
 function TOSWindowArray_Helper.GetByTitleAndClass(Title, ClassName: String; out Window: TOSWindow): Boolean;
 begin
   for Window in Self do
-    if ExecRegExpr(Title, Window.GetTitle()) and ExecRegExpr(ClassName, Window.GetClassName()) then
+    if FindRegex(Title, Window.GetTitle()) and FindRegex(ClassName, Window.GetClassName()) then
       Exit(True);
 
   Exit(False);
@@ -134,7 +153,7 @@ begin
   SetLength(Result, 0);
 
   for Window in Self do
-    if ExecRegExpr(Title, Window.GetTitle()) and ExecRegExpr(ClassName, Window.GetClassName()) then
+    if FindRegex(Title, Window.GetTitle()) and FindRegex(ClassName, Window.GetClassName()) then
       Result += Window;
 end;
 

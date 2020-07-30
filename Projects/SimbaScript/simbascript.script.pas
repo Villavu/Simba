@@ -74,6 +74,7 @@ type
     FIncludePath: String;
     FFontPath: String;
     FPluginPath: String;
+    FScriptPath: String;
 
     FIsTerminating: Boolean;
     FIsUserTerminated: Boolean;
@@ -117,6 +118,7 @@ type
     property FontPath: String read FFontPath write FFontPath;
     property PluginPath: String read FPluginPath write FPluginPath;
     property IncludePath: String read FIncludePath write FIncludePath;
+    property ScriptPath: String read FScriptPath write FScriptPath;
 
     property SimbaIPC: TSimbaIPC_Client read FSimbaIPC write FSimbaIPC;
 

@@ -202,6 +202,7 @@ begin
       addGlobalVar('TClient', @Script.Client, 'Client');
 
       addGlobalConst(Script.ScriptFile, 'ScriptFile');
+      addGlobalConst(Script.ScriptPath, 'ScriptPath');
       addGlobalConst(Script.IncludePath, 'IncludePath');
       addGlobalConst(Script.PluginPath, 'PluginPath');
       addGlobalConst(Script.FontPath, 'FontPath');
@@ -211,6 +212,7 @@ begin
       addDelayedCode('var Client: TClient;');
 
       addDelayedCode('const ScriptFile = "";');
+      addDelayedCode('const ScriptPath = "";');
       addDelayedCode('const IncludePath = "";');
       addDelayedCode('const PluginPath = "";');
       addDelayedCode('const FontPath = "";');

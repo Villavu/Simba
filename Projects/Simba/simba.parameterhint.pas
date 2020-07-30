@@ -424,20 +424,30 @@ end;
 
 procedure TSimbaParameterHint.Execute(BracketPoint: TPoint; Methods: TDeclarationArray);
 var
-  i: Int32;
+  i, Count: Int32;
 begin
   LastParameterIndex := -1;
 
   if Length(Methods) > 0 then
   begin
+    Count := 0;
+
     SetLength(FDeclarations, Length(Methods));
     SetLength(FParameters, Length(Methods));
 
     for i := 0 to High(Methods) do
     begin
+      if (tokOverride in TciProcedureDeclaration(Methods[i]).Directives) then
+        Continue;
+
       FDeclarations[i] := TciProcedureDeclaration(Methods[i]);
       FParameters[i] := TciProcedureDeclaration(Methods[i]).GetParamDeclarations();
+
+      Inc(Count);
     end;
+
+    SetLength(FDeclarations, Count);
+    SetLength(FParameters, Count);
 
     FStartPoint := Point(BracketPoint.X - Length(Methods[0].Name), BracketPoint.Y);
     FBracketPoint := BracketPoint;

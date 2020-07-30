@@ -81,6 +81,10 @@ begin
     if IncludePath = '' then
       IncludePath := IncludeTrailingPathDelimiter(Application.Location) + 'Includes';
 
+    ScriptPath := Application.GetOptionValue('scriptpath');
+    if ScriptPath = '' then
+      ScriptPath := IncludeTrailingPathDelimiter(Application.Location) + 'Scripts';
+
     if Application.HasOption('target') then
       Target := Application.GetOptionValue('target').ToInt64();
 
@@ -194,6 +198,7 @@ begin
         '  --pluginpath:   Defaults to AppPath/Plugins'                  + LineEnding +
         '  --fontpath:     Defaults to AppPath/Fonts'                    + LineEnding +
         '  --includepath:  Defaults to AppPath/Includes'                 + LineEnding +
+        '  --scriptpath:   Defaults to AppPath/Scripts/'                 + LineEnding +
         ''                                                               + LineEnding +
         'Example:'                                                       + LineEnding +
         '  SimbaScript.exe --run "script.simba"'                         + LineEnding +
