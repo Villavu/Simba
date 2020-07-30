@@ -5,104 +5,78 @@ unit simba.resourceextractor;
 interface
 
 uses
-  classes, sysutils, zipper;
+  classes, sysutils;
 
-type
-  TSimbaResourceExtractor = object
-  protected
-    procedure OpenInput(Sender: TObject; var Stream: TStream);
-    procedure CloseInput(Sender: TObject; var Stream: TStream);
-
-    procedure OpenOutput(Sender: TObject; var Stream: TStream; Item: TFullZipFileEntry);
-    procedure CloseOutput(Sender : TObject; var Stream: TStream; Item: TFullZipFileEntry);
-  public
-    procedure Extract;
-  end;
+procedure ExtractSimbaResources;
 
 implementation
 
 uses
-  lcltype, fileutil, dialogs, forms,
+  dialogs, forms, lcltype,
   simba.debugform;
 
-procedure TSimbaResourceExtractor.OpenInput(Sender: TObject; var Stream: TStream);
-begin
-  Stream := TResourceStream.Create(HInstance, 'SIMBARESOURCES', RT_RCDATA);
-  if (Stream.Size = 0) then
-    raise Exception.Create('Simba resources are missing');
-end;
+function LoadSimbaResource(ResourceHandle: TFPResourceHMODULE; ResourceType, ResourceName: PChar; Param: PtrInt): LongBool; stdcall;
 
-procedure TSimbaResourceExtractor.CloseInput(Sender: TObject; var Stream: TStream);
-begin
-  Stream.Free();
-end;
-
-procedure TSimbaResourceExtractor.OpenOutput(Sender: TObject; var Stream: TStream; Item: TFullZipFileEntry);
-begin
-  Stream := TMemoryStream.Create();
-end;
-
-procedure TSimbaResourceExtractor.CloseOutput(Sender: TObject; var Stream: TStream; Item: TFullZipFileEntry);
-
-  function SameFile(Path: String; Stream: TMemoryStream): Boolean;
+  function SameFile(Path: String; Stream: TResourceStream): Boolean;
   begin
     with TMemoryStream.Create() do
     try
       LoadFromFile(Path);
 
-      Result := (Stream.Size = Size) and CompareMem(Stream.Memory, Memory, Size);
+      Result := (Stream.Size - Stream.Position = Size) and CompareMem(Stream.Memory + Stream.Position, Memory, Size);
     finally
       Free();
     end;
   end;
 
 var
-  FileName: String;
+  Name: String;
+  FileName: ShortString = '';
+  Stream: TResourceStream;
 begin
-  Stream.Position := 0;
+  Result := True; // Loop all resources
 
-  try
-    FileName := Application.Location + Item.DiskFileName;
-    if FileExists(FileName) and SameFile(FileName, TMemoryStream(Stream)) then
-      Exit;
-
-    SimbaDebugForm.Add('Writing file: ' + FileName);
+  Name := ResourceName;
+  if Name.StartsWith('SIMBA-RESOURCE') then
+  begin
+    Stream := TResourceStream.Create(HINSTANCE, ResourceName, ResourceType);
 
     try
-      with TFileStream.Create(FileName, fmCreate or fmOpenWrite or fmShareDenyWrite) do
-      try
-        CopyFrom(Stream, Stream.Size);
-      finally
-        Free();
-      end;
-    except
-      on E: EFOpenError do
+      if Stream.Read(FileName, SizeOf(ShortString)) = SizeOf(ShortString) then // Filename
       begin
-        WriteLn(E.Message, ' (', E.ClassName, ')');
+        FileName := Application.Location + FileName;
+        Writeln(FileName);
+        if FileExists(FileName) and SameFile(FileName, Stream) then
+          Exit;
 
-        SimbaDebugForm.Add('Unable to write file ' + FileName + '.');
-        SimbaDebugForm.Add('The file is likely in use, close all Simba''s and try again.');
+        try
+          SimbaDebugForm.Add('Writing file: ' + FileName);
+
+          with TFileStream.Create(FileName, fmCreate or fmOpenWrite or fmShareDenyWrite) do
+          try
+            CopyFrom(Stream, Stream.Size - Stream.Position);
+          finally
+            Free();
+          end;
+        except
+          on E: EFOpenError do
+          begin
+            WriteLn(E.Message, ' (', E.ClassName, ')');
+
+            SimbaDebugForm.Add('Unable to write file ' + FileName + '.');
+            SimbaDebugForm.Add('The file is likely in use, close all Simba''s and try again.');
+          end;
+        end;
       end;
+    finally
+      Stream.Free();
     end;
-  finally
-    Stream.Free();
   end;
 end;
 
-procedure TSimbaResourceExtractor.Extract;
+procedure ExtractSimbaResources;
 begin
-  with TUnZipper.Create() do
-  try
-    OnOpenInputStream := @Self.OpenInput;
-    // OnCloseInputStream := @Self.CloseInput; // Stream is handled by UnZipper
-
-    OnCreateStream := @Self.OpenOutput;
-    OnDoneStream := @Self.CloseOutput;
-
-    UnZipAllFiles();
-  finally
-    Free();
-  end;
+  EnumResourceNames(HINSTANCE, RT_RCDATA, @LoadSimbaResource, 0);
 end;
 
 end.

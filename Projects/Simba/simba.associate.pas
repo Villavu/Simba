@@ -1,11 +1,23 @@
-program SimbaAssociate;
+unit simba.associate;
 
 {$mode objfpc}{$H+}
 
-uses
-  Classes, Registry, ShlObj;
+interface
 
-procedure RegisterFileType(FileType: string; Application: string);
+uses
+  classes;
+
+procedure AssociateFileType(FileType: String);
+
+implementation
+
+{$IFDEF WINDOWS}
+uses
+  registry, shlobj;
+{$ENDIF}
+
+procedure AssociateFileType(FileType: String);
+{$IFDEF WINDOWS}
 var
   Reg: TRegistry;
 begin
@@ -18,10 +30,10 @@ begin
     Reg.CloseKey();
     Reg.CreateKey(FileType + 'file');
     Reg.OpenKey(FileType + 'file\DefaultIcon', True);
-    Reg.WriteString('', Application + ',0');
+    Reg.WriteString('', ParamStr(0) + ',0');
     Reg.CloseKey();
     Reg.OpenKey(FileType + 'file\shell\open\command', True);
-    Reg.WriteString('', Application + ' "%1"');
+    Reg.WriteString('', ParamStr(0) + ' "%1"');
     Reg.CloseKey();
   finally
     Reg.Free();
@@ -29,10 +41,10 @@ begin
 
   SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, nil, nil);
 end;
-
-{$R *.res}
-
+{$ELSE}
 begin
-  RegisterFileType('simba', ParamStr(1));
+end;
+{$ENDIF}
+
 end.
 

@@ -158,6 +158,11 @@ begin
   PBoolean(Result)^ := FindChildWindow(PString(Params^[1])^, PString(Params^[2])^, POSWindow(Params^[3])^);
 end;
 
+procedure Lape_GetWindowAtCursor(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  POSWindow(Result)^ := GetWindowAtCursor();
+end;
+
 procedure Lape_Import_OSWindow(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
@@ -197,6 +202,7 @@ begin
     addGlobalMethod('function GetWindows: TOSWindowArray;', @Lape_GetWindows, Data);
     addGlobalMethod('function GetActiveWindow: TOSWindow;', @Lape_GetActiveWindow, Data);
     addGlobalMethod('function GetDesktopWindow: TOSWindow;', @Lape_GetDesktopWindow, Data);
+    addGlobalMethod('function GetWindowAtCursor: TOSWindow;', @Lape_GetWindowAtCursor, Data);
 
     addGlobalMethod('function FindWindow(Title: String): TOSWindowArray; overload;', @Lape_FindWindow, Data);
     addGlobalMethod('function FindWindow(Title: String; out Window: TOSWindow): Boolean; overload;', @Lape_FindWindowEx, Data);

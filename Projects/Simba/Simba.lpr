@@ -42,7 +42,7 @@ uses
   simba.settings, simba.main, simba.aboutform, simba.debugimage, simba.bitmapconv,
   simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
   simba.notesform, simba.package_form, simba.colorpicker_historyform, simba.mufasabase,
-  simba.settingsform;
+  simba.settingsform, simba.associate;
 
 type
   TApplicationHelper = class helper for TApplication
@@ -78,20 +78,26 @@ begin
       { valid options }
     else
     begin
-      WriteLn(
-        'Options:'                               + LineEnding +
-        '  --open:    Opens the given script'    + LineEnding +
-        '  --run:     Runs the given script'     + LineEnding +
-        '  --compile: Compiles the given script' + LineEnding +
-        ''                                       + LineEnding +
-        'Example:'                               + LineEnding +
-        '  Simba.exe --run "script.simba"'       + LineEnding +
-        ''
-      );
+      if (Application.ParamCount = 1) and Application.HasOption('associate') then
+        AssociateFileType('simba')
+      else
+      begin
+        WriteLn(
+          'Options:'                               + LineEnding +
+          '  --open:    Opens the given script'    + LineEnding +
+          '  --run:     Runs the given script'     + LineEnding +
+          '  --compile: Compiles the given script' + LineEnding +
+          ''                                       + LineEnding +
+          'Example:'                               + LineEnding +
+          '  Simba.exe --run "script.simba"'       + LineEnding +
+          ''
+        );
+      end;
 
       Halt(0);
     end;
   end;
+
 
   Application.Title := 'Simba';
   Application.Scaled := True;
