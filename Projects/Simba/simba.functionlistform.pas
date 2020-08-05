@@ -198,7 +198,7 @@ begin
   for I := 0 to SimbaScriptTabsForm.TabCount - 1 do
   begin
     Tab := SimbaScriptTabsForm.Tabs[I];
-    if (not Tab.Visible) then
+    if (Tab = nil) or (not Tab.Visible) then
       Continue;
 
     FFunctionList := Tab.FunctionList;

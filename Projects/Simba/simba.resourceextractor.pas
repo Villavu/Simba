@@ -31,7 +31,7 @@ function LoadSimbaResource(ResourceHandle: TFPResourceHMODULE; ResourceType, Res
 
 var
   Name: String;
-  FileName: ShortString = '';
+  FileName: ShortString;
   Stream: TResourceStream;
 begin
   Result := True; // Loop all resources
@@ -45,7 +45,6 @@ begin
       if Stream.Read(FileName, SizeOf(ShortString)) = SizeOf(ShortString) then // Filename
       begin
         FileName := Application.Location + FileName;
-        Writeln(FileName);
         if FileExists(FileName) and SameFile(FileName, Stream) then
           Exit;
 

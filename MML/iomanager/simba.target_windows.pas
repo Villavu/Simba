@@ -74,10 +74,10 @@ type
     procedure ActivateClient; override;
     procedure GetMousePosition(out X, Y: Int32); override;
     procedure MoveMouse(X, Y: Int32); override;
-    procedure ScrollMouse(X, Y, Lines : Int32); override;
+    procedure ScrollMouse(X, Y, Lines: Int32); override;
     procedure HoldMouse(X, Y: Int32; Button: TClickType); override;
     procedure ReleaseMouse(X, Y: Int32; Button: TClickType); override;
-    function IsMouseButtonHeld(Button: TClickType) : Boolean; override;
+    function IsMouseButtonHeld(Button: TClickType): Boolean; override;
 
     procedure SendString(Text: String; KeyWait, KeyModWait: Int32); override;
     procedure HoldKey(Key: Int32); override;
@@ -371,7 +371,7 @@ begin
   Input.mi.dx := Bounds.X1 + X;
   Input.mi.dy := Bounds.Y1 + Y;
   Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_WHEEL;
-  Input.mi.mouseData := Lines * WHEEL_DELTA;
+  Input.mi.mouseData := -Lines * WHEEL_DELTA;
 
   SendInput(1, @Input, SizeOf(Input));
 end;

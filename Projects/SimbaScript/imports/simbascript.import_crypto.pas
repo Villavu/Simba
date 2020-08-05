@@ -11,7 +11,7 @@ procedure Lape_Import_Crypto(Compiler: TSimbaScript_Compiler; Data: Pointer = ni
 implementation
 
 uses
-  blowfish, md5, sha1;
+  blowfish, md5, sha1, hmac;
 
 procedure Lape_BlowFish_Encrypt(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 var
@@ -81,6 +81,16 @@ begin
     PString(Result)^ := SHA1Print(SHA1File(PString(Params^[1])^));
 end;
 
+procedure Lape_HMACMD5(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PString(Result)^ := HMACMD5(PString(Params^[1])^, PString(Params^[2])^);
+end;
+
+procedure Lape_HMACSHA1(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PString(Result)^ := HMACSHA1(PString(Params^[1])^, PString(Params^[2])^);
+end;
+
 procedure Lape_Import_Crypto(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
@@ -93,6 +103,8 @@ begin
     addGlobalMethod('function MD5File(constref FilePath: String): String;', @Lape_MD5File, Data);
     addGlobalMethod('function SHA1String(constref Data: String): String;', @Lape_SHA1String, Data);
     addGlobalMethod('function SHA1File(constref FilePath: String): String;', @Lape_SHA1File, Data);
+    addGlobalMethod('function HMACMD5(const Key, Message: string): String;', @Lape_HMACMD5, Data);
+    addGlobalMethod('function HMACSHA1(const Key, Message: string): String;', @Lape_HMACSHA1, Data);
   end;
 end;
 
