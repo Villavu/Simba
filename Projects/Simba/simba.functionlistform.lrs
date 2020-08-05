@@ -3,5 +3,5 @@
 LazarusResources.Add('TSimbaFunctionListForm','FORMDATA',[
   'TPF0'#22'TSimbaFunctionListForm'#21'SimbaFunctionListForm'#4'Left'#3#204#0#6
   +'Height'#3#241#0#3'Top'#3#188#0#5'Width'#3'@'#1#7'Caption'#6#13'Function Lis'
-  +'t'#5'Color'#7#8'clWindow'#10'LCLVersion'#6#7'2.0.8.0'#0#0
+  +'t'#5'Color'#7#8'clWindow'#10'LCLVersion'#6#8'2.0.10.0'#0#0
 ]);

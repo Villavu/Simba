@@ -5,5 +5,5 @@ object SimbaFunctionListForm: TSimbaFunctionListForm
   Width = 320
   Caption = 'Function List'
   Color = clWindow
-  LCLVersion = '2.0.8.0'
+  LCLVersion = '2.0.10.0'
 end
