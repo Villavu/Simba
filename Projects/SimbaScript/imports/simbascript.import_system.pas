@@ -171,6 +171,9 @@ begin
     addBaseDefine('SIMBA' + Format('%d', [SimbaVersion]));
     addBaseDefine('SIMBAMAJOR' + Format('%d', [SimbaMajor]));
 
+    if (Script <> nil) and Script.Headless then
+      addBaseDefine('SIMBAHEADLESS');
+
     {$IFDEF CPU32}
     addBaseDefine('CPU32');
     addBaseDefine('CPU386');

@@ -48,6 +48,7 @@ type
     end;
 
     Environment: record
+      FirstLaunch: TSimbaSetting_Boolean;
       DataPath: TSimbaSetting_Directory;
       FontPath: TSimbaSetting_Directory;
       IncludePath: TSimbaSetting_Directory;
@@ -123,6 +124,9 @@ begin
   FINI.CacheUpdates := True;
 
   // Environment
+  Environment.FirstLaunch := addBooleanSetting('Environment', 'FirstLaunch');
+  Environment.FirstLaunch.DefaultValue := True;
+
   Environment.DataPath := addDirectorySetting('Environment', 'DataPath');
   Environment.DataPath.DefaultValue := Application.Location + 'Data' + DirectorySeparator;
 
