@@ -12,6 +12,9 @@ uses
   {$IFDEF DARWIN}
   simba.darwin_initialization,
   {$ENDIF}
+  {$IFDEF WINDOWS}
+  windows,
+  {$ENDIF}
   sysutils, classes, interfaces, forms,
   simbascript.script, simba.ipc, simbascript.dumper;
 
@@ -101,7 +104,20 @@ begin
 end;
 
 procedure TApplicationHelper.Terminate(Data: PtrInt);
+var
+  PID: UInt32;
 begin
+  {$IFDEF WINDOWS}
+  GetWindowThreadProcessId(GetConsoleWindow(), PID);
+  if (PID = GetCurrentProcessID()) then
+  begin
+    WriteLn('');
+    WriteLn('Press enter to exit');
+
+    ReadLn();
+  end;
+  {$ENDIF}
+
   Halt(ExitCode);
 end;
 
@@ -153,6 +169,7 @@ end;
 
 var
   I: Int32;
+  PID, Mode: UInt32;
 
 begin
   try
@@ -207,6 +224,17 @@ begin
 
       Halt(0);
     end;
+
+    {$IFDEF WINDOWS}
+    GetWindowThreadProcessId(GetConsoleWindow(), PID);
+    if (PID = GetCurrentProcessID()) then
+    begin
+      GetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), Mode);
+      SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), Mode and not (ENABLE_QUICK_EDIT_MODE or ENABLE_INSERT_MODE));
+
+      SetConsoleTitle(PChar(ExtractFileName(Application.Params[Application.ParamCount])));
+    end;
+    {$ENDIF}
 
     Application.Run();
   except

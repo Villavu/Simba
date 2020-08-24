@@ -92,6 +92,8 @@ type
     function HandleFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
     function HandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
 
+    function GetHeadless: Boolean;
+
     procedure SetState(Value: TInitBool);
   public
     CompileOnly: Boolean;
@@ -106,6 +108,7 @@ type
     property State: TInitBool read FState write SetState;
     property StartTime: UInt64 read FStartTime;
     property Client: TClient read FClient;
+    property Headless: Boolean read GetHeadless;
 
     property IsUserTerminated: Boolean read FIsUserTerminated write FIsUserTerminated;
     property IsTerminating: Boolean read FIsTerminating write FIsTerminating;
@@ -456,6 +459,11 @@ begin
     Result := True;
   end else
     Result := False;
+end;
+
+function TSimbaScript.GetHeadless: Boolean;
+begin
+  Result := (FSimbaIPC = nil);
 end;
 
 procedure TSimbaScript.HandleSimbaState;

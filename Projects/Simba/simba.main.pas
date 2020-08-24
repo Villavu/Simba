@@ -259,6 +259,7 @@ type
 
     procedure HandleException;
 
+    procedure FirstLaunch(Data: PtrInt);
     function LoadLayout: Boolean;
     procedure SaveLayout;
     procedure SetupLayout(Reset: Boolean = False);
@@ -306,7 +307,7 @@ uses
   simba.dtmeditor, simba.scriptinstance, simba.package_form, simba.aboutform,
   simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.colorpicker, simba.ci_includecache,
-  simba.highlighter, simba.scriptformatter
+  simba.highlighter, simba.scriptformatter, simba.associate
   {$IFDEF WINDOWS},
   windows, shellapi
   {$ENDIF}
@@ -526,6 +527,13 @@ begin
   end;
 
   Halt(1); // Calls finalization sections
+end;
+
+procedure TSimbaForm.FirstLaunch(Data: PtrInt);
+begin
+  {$IFDEF WINDOWS}
+  MenuItemAssociateScripts.Click();
+  {$ENDIF}
 end;
 
 procedure TSimbaForm.CodeTools_OnMessage(Sender: TObject; const Typ: TMessageEventType; const Message: String; X, Y: Integer);
@@ -1479,6 +1487,13 @@ begin
 
   Self.Visible := True;
   Self.ScriptProcessorTimer.Enabled := True;
+
+  if SimbaSettings.Environment.FirstLaunch.Value then
+  begin
+    Application.QueueAsyncCall(@FirstLaunch, 0);
+
+    SimbaSettings.Environment.FirstLaunch.Value := False;
+  end;
 
   WriteLn('');
 end;

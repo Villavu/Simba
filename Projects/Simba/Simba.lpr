@@ -79,7 +79,7 @@ begin
     else
     begin
       if (Application.ParamCount = 1) and Application.HasOption('associate') then
-        AssociateFileType('simba')
+        Associate()
       else
       begin
         WriteLn(
@@ -116,9 +116,6 @@ begin
   Application.CreateForm(TSimbaBitmapConversionForm, SimbaBitmapConversionForm);
   Application.CreateForm(TSimbaPackageForm, SimbaPackageForm);
   Application.CreateForm(TSimbaColorHistoryForm, SimbaColorHistoryForm);
-  {$IFDEF USE_FORMDESIGNER}
-  Application.CreateForm(TCompForm, CompForm);
-  {$ENDIF}
 
   WriteLn('');
 

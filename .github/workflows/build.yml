@@ -73,23 +73,23 @@ jobs:
       with:
         submodules: true
 
-    - name: Generate Cache Hash
-      run: echo ${{ env.FPCUP }}${{ env.FPCUP_OPT }}${{ env.FPC_VER }}${{ env.LAZ_VER }}${{ env.NAME }} > cache
-
-    - name: Cache
-      id: cache
-      uses: actions/cache@v2.1.0
-      with:
-        path: lazarus/
-        key: ${{ hashFiles('cache') }}
-
-    - name: Install Dependencies
+    - name: Install Dependencies (Linux)
       if: env.OS == 'ubuntu-latest'
       shell: bash
       run: |
         sudo apt-get update
         sudo apt-get -y install libgtk2.0-dev libpango1.0-dev libffi-dev libxtst-dev xvfb 
         Xvfb :1 &
+    
+    - name: Generate Cache Hash
+      run: echo ${{ env.FPCUP }}${{ env.FPCUP_OPT }}${{ env.FPC_VER }}${{ env.LAZ_VER }}${{ env.NAME }}1 > cache
+    
+    - name: Cache
+      id: cache
+      uses: actions/cache@v2.1.1
+      with:
+        path: lazarus/
+        key: ${{ hashFiles('cache') }}
 
     - name: Install Lazarus
       if: steps.cache.outputs.cache-hit != 'true'
@@ -104,8 +104,8 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true' && env.NAME == 'AArch64'
       shell: bash
       run: |
-        curl --retry 5 -L -o libs.zip https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/crosslibs_v1.1/CrossLibsLinuxAarch64.zip && unzip libs.zip -d lazarus/
-        curl --retry 5 -L -o bins.zip https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/linuxx64crossbins_v1.0/CrossBinsLinuxAarch64.zip && unzip bins.zip -d lazarus/cross/bin
+        curl --retry 5 -L -o libs.zip https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/crosslibs_v1.1/CrossLibsLinuxAarch64.zip && unzip -o libs.zip -d lazarus/
+        curl --retry 5 -L -o bins.zip https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/linuxx64crossbins_v1.0/CrossBinsLinuxAarch64.zip && unzip -o bins.zip -d lazarus/cross/bin
         ./fpcup --installdir=lazarus --ostarget=linux --cputarget=aarch64 --only="FPCCleanOnly,FPCBuildOnly" --crossbindir=lazarus/cross/bin --crosslibdir=lazarus/cross/lib/aarch64-linux --noconfirm --verbose
 
     - name: Build Simba
