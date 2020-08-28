@@ -341,10 +341,14 @@ begin
     if not FFILoaded then
       raise Exception.Create('libFFI is missing or incompatible');
 
-    addGlobalVar('array of ShortString', @FDebuggingMethods, '_DebuggingMethods');
+    // Debugger stuff
+    Options := Options - [lcoHints];
 
-    addDelayedCode('{$HINTS OFF} procedure _EnterMethod(constref Index: Int32); begin end;');
-    addDelayedCode('{$HINTS OFF} procedure _LeaveMethod(constref Index: Int32); begin end;');
+    addGlobalVar('array of ShortString', @FDebuggingMethods, '_DebuggingMethods');
+    addDelayedCode('procedure _EnterMethod(constref Index: Int32); begin end;');
+    addDelayedCode('procedure _LeaveMethod(constref Index: Int32); begin end;');
+
+    Options := Options + [lcoHints];
 
     InitializeFFI(Self);
     InitializePascalScriptBasics(Self, [psiTypeAlias, psiSettings, psiMagicMethod, psiFunctionWrappers, psiExceptions]);

@@ -193,6 +193,9 @@ type
     property Height: Int32 read GetHeight;
   end;
 
+  function Box(constref X1, Y1, X2, Y2: Int32): TBox;
+
+type
   TSysProc = record
     Title: WideString;
     Handle: UInt32;
@@ -432,6 +435,7 @@ var
 
 
 implementation
+
 operator+(PT1, PT2: TPoint): TPoint;
 begin
   Result.x := PT1.x + PT2.x;
@@ -482,6 +486,14 @@ end;
 function TBoxHelper.Contains(X, Y: Int32): Boolean;
 begin
   Result := (X >= Self.X1) and (Y >= Self.Y1) and (X <= Self.X2) and (Y <= Self.Y2);
+end;
+
+function Box(constref X1, Y1, X2, Y2: Int32): TBox; inline;
+begin
+  Result.X1 := X1;
+  Result.Y1 := Y1;
+  Result.X2 := X2;
+  Result.Y2 := Y2;
 end;
 
 end.

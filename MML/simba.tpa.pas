@@ -60,8 +60,8 @@ procedure InvertTPA(var a: TPointArray);
 procedure InvertATPA(var a: T2DPointArray);
 function MiddleTPAEx(const TPA: TPointArray; var x, y: Integer): Boolean;
 function MiddleTPA(const tpa: TPointArray): TPoint;
-procedure MedianTPAEx(var tpa: TPointArray; out x, y: integer);
-function MedianTPA(var tpa: TPointArray): TPoint;
+procedure MedianTPAEx(constref TPA: TPointArray; out X, Y: Integer);
+function MedianTPA(constref TPA: TPointArray): TPoint;
 procedure SortATPASize(var a: T2DPointArray; const BigFirst: Boolean);
 procedure SortATPAFromSize(var a: T2DPointArray; const Size: Integer; CloseFirst: Boolean);
 procedure FilterTPAsBetween(var atpa: T2DPointArray; const minLength, maxLength: integer);
@@ -75,8 +75,7 @@ function SplitTPAEx(const arr: TPointArray; w, h: Integer): T2DPointArray;
 function SplitTPA(const arr: TPointArray; Dist: Integer): T2DPointArray;
 function ClusterTPAEx(const TPA: TPointArray; width, height: Integer): T2DPointArray;
 function ClusterTPA(const TPA: TPointArray; dist: Integer): T2DPointArray;
-function  TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer = -1;
-          const IsSortedAscending: Boolean = False): Integer;
+function TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer = -1; const IsSortedAscending: Boolean = False): Integer;
 function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;
 function FloodFillTPA(const TPA : TPointArray) : T2DPointArray;
 procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer; Natural: Boolean);
@@ -122,11 +121,54 @@ procedure OffsetATPA(var ATPA : T2DPointArray; const Offset : TPoint);
 function PartitionTPA(const TPA:TPointArray; BoxWidth, BoxHeight:Integer): T2DPointArray;
 function CopyTPA(const TPA : TPointArray) : TPointArray;
 function CopyATPA(const ATPA : T2DPointArray) : T2DPointArray;
+function PointsInRangeOf(Points, Other: TPointArray; MinDist, MaxDist: Double): TPointArray; overload;
+function PointsInRangeOf(Points, Other: TPointArray; MinDistX, MinDistY, MaxDistX, MaxDistY: Double): TPointArray; overload;
 
 implementation
 
 uses
-  math;
+  math,
+  simba.slacktree;
+
+function PointsInRangeOf(Points, Other: TPointArray; MinDist, MaxDist: Double): TPointArray; overload;
+var
+  Tree: TSlackTree;
+  I: Int32;
+  Matches: T2DPointArray;
+begin
+  Result := Default(TPointArray);
+
+  if (Length(Points) > 0) and (Length(Other) > 0) then
+  begin
+    SetLength(Matches, Length(Other));
+
+    Tree.Init(Copy(Points));
+    for I := 0 to High(Other) do
+      Matches[I] := Tree.RangeQueryEx(Other[I], MinDist, MinDist, MaxDist, MaxDist, True);
+
+    Result := MergeATPA(Matches);
+  end;
+end;
+
+function PointsInRangeOf(Points, Other: TPointArray; MinDistX, MinDistY, MaxDistX, MaxDistY: Double): TPointArray; overload;
+var
+  Tree: TSlackTree;
+  I: Int32;
+  Matches: T2DPointArray;
+begin
+  Result := Default(TPointArray);
+
+  if (Length(Points) > 0) and (Length(Other) > 0) then
+  begin
+    SetLength(Matches, Length(Other));
+
+    Tree.Init(Copy(Points));
+    for I := 0 to High(Other) do
+      Matches[I] := Tree.RangeQueryEx(Other[I], MinDistX, MinDistY, MaxDistX, MaxDistY, True);
+
+    Result := MergeATPA(Matches);
+  end;
+end;
 
 function CopyTPA(const TPA : TPointArray) : TPointArray;
 begin
@@ -870,29 +912,45 @@ end;
 {/\
   Returns the x and y coords of the point in the tpa which is closest to the middle of the tpa.
 /\}
-procedure MedianTPAEx(var tpa: TPointArray; out x, y: integer);
+procedure MedianTPAEx(constref TPA: TPointArray; out X, Y: Integer);
 var
-  p: TPoint;
+  I: Int32;
+  Dist: Double;
+  Best: record
+    Index: Int32;
+    Dist: Double;
+  end;
 begin
-  x := -1;
-  y := -1;
+  X := 0;
+  Y := 0;
+  if Length(TPA) = 0 then
+    Exit;
 
-  if (length(tpa) < 1) then
-    exit;
+  Best.Index := 0;
+  Best.Dist := $FFFFFF;
 
-  p := middleTPA(tpa);
-  sortTPAFrom(tpa, p);
+  MiddleTPAEx(TPA, X, Y);
 
-  x := tpa[0].x;
-  y := tpa[0].y;
+  for I := 0 to High(TPA) do
+  begin
+    Dist := Hypot(TPA[I].X - X, TPA[I].Y - Y);
+    if Dist < Best.Dist then
+    begin
+      Best.Dist := Dist;
+      Best.Index := I;
+    end;
+  end;
+
+  X := TPA[Best.Index].X;
+  Y := TPA[Best.Index].Y;
 end;
 
 {/\
   Returns the *point in the tpa* closest to the middle of the tpa.
 /\}
-function MedianTPA(var tpa: TPointArray): TPoint;
+function MedianTPA(constref TPA: TPointArray): TPoint;
 begin
-  MedianTPAEx(tpa, result.x, result.y);
+  MedianTPAEx(TPA, Result.X, Result.Y);
 end;
 
 {/\

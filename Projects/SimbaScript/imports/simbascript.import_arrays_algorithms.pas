@@ -238,11 +238,6 @@ begin
   PPointArray(Result)^ := MergeATPA(P2DPointArray(Params^[1])^);
 end;
 
-procedure Lape_AppendTPA(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  AppendTPA(PPointArray(Params^[1])^, PPointArray(Params^[2])^);
-end;
-
 procedure Lape_TPAFromLine(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PPointArray(Result)^ := TPAFromLine(PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^);
@@ -331,16 +326,6 @@ end;
 procedure Lape_OffsetATPA(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   OffsetATPA(P2DPointArray(Params^[1])^, PPoint(Params^[2])^);
-end;
-
-procedure Lape_CopyTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PPointArray(Result)^ := CopyTPA(PPointArray(Params^[1])^);
-end;
-
-procedure Lape_CopyATPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  P2DPointArray(Result)^ := CopyATPA(P2DPointArray(Params^[1])^);
 end;
 
 procedure Lape_TPAPosNext(const Params: PParamArray;const Result: pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -438,16 +423,6 @@ begin
   PBoolean(Result)^ := InIntArray(PIntegerArray(Params^[1])^, PInt32(Params^[2])^);
 end;
 
-procedure Lape_ClearSameIntegers(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  ClearSameIntegers(PIntegerArray(Params^[1])^);
-end;
-
-procedure Lape_CombineIntArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PIntegerArray(Result)^ := CombineIntArray(PIntegerArray(Params^[1])^, PIntegerArray(Params^[2])^);
-end;
-
 procedure Lape_TPAErode(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PPointArray(Result)^ := TPAErode(PPointArray(Params^[1])^, PInt32(Params^[2])^);
@@ -456,6 +431,21 @@ end;
 procedure Lape_TPAGrow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PPointArray(Result)^ := TPAGrow(PPointArray(Params^[1])^, PInt32(Params^[2])^);
+end;
+
+procedure Lape_PointsInRangeOf(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := PointsInRangeOf(PPointArray(Params^[1])^, PPointArray(Params^[2])^, PDouble(Params^[3])^, PDouble(Params^[4])^);
+end;
+
+procedure Lape_PointsInRangeOfEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := PointsInRangeOf(PPointArray(Params^[1])^, PPointArray(Params^[2])^, PDouble(Params^[3])^, PDouble(Params^[4])^, PDouble(Params^[5])^, PDouble(Params^[6])^);
+end;
+
+procedure Lape_ClearSameIntegers(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  ClearSameIntegers(PIntegerArray(Params^[1])^);
 end;
 
 procedure Lape_Import_Arrays_Algorithms(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
@@ -483,9 +473,9 @@ begin
     addGlobalMethod('procedure InvertTPA(var a: TPointArray);', @Lape_InvertTPA, Data);
     addGlobalMethod('procedure InvertATPA(var a: T2DPointArray);', @Lape_InvertATPA, Data);
     addGlobalMethod('function MiddleTPAEx(const TPA: TPointArray; var x, y: Int32): Boolean', @Lape_MiddleTPAEx, Data);
-    addGlobalMethod('function MiddleTPA(const tpa: TPointArray): TPoint', @Lape_MiddleTPA, Data);
-    addGlobalMethod('procedure MedianTPAEx(var tpa: TPointArray; out x, y: Int32);', @Lape_MedianTPAEx, Data);
-    addGlobalMethod('function MedianTPA(var tpa: TPointArray): TPoint;', @Lape_MedianTPA, Data);
+    addGlobalMethod('function MiddleTPA(const TPA: TPointArray): TPoint', @Lape_MiddleTPA, Data);
+    addGlobalMethod('procedure MedianTPAEx(constref TPA: TPointArray; out x, y: Int32);', @Lape_MedianTPAEx, Data);
+    addGlobalMethod('function MedianTPA(constref TPA: TPointArray): TPoint;', @Lape_MedianTPA, Data);
     addGlobalMethod('procedure SortATPASize(var a: T2DPointArray; const BigFirst: Boolean);', @Lape_SortATPASize, Data);
     addGlobalMethod('procedure SortATPAFromSize(var a: T2DPointArray; const Size: Int32; CloseFirst: Boolean);', @Lape_SortATPAFromSize, Data);
     addGlobalMethod('procedure FilterTPAsBetween(var atpa: T2DPointArray; const minLength, maxLength: Int32);', @Lape_FilterTPAsBetween, Data);
@@ -502,22 +492,20 @@ begin
     addGlobalMethod('function GetATPABounds(const ATPA: T2DPointArray): TBox', @Lape_GetATPABounds, Data);
     addGlobalMethod('function GetTPABounds(const TPA: TPointArray): TBox', @Lape_GetTPABounds, Data);
     addGlobalMethod('function FindTPAinTPA(const SearchTPA, TotalTPA: TPointArray; var Matches: TPointArray): Boolean', @Lape_FindTPAinTPA, Data);
-    addGlobalMethod('function GetSamePointsATPA(const ATPA: T2DPointArray; var Matches: TPointArray): boolean', @Lape_GetSamePointsATPA, Data);
+    addGlobalMethod('function GetSamePointsATPA(const ATPA: T2DPointArray; var Matches: TPointArray): Boolean', @Lape_GetSamePointsATPA, Data);
     addGlobalMethod('function FindTextTPAinTPA(Height: Int32; const SearchTPA, TotalTPA: TPointArray; var Matches: TPointArray): Boolean', @Lape_FindTextTPAinTPA, Data);
-    addGlobalMethod('procedure SortCircleWise(var tpa: TPointArray; const cx, cy, StartDegree: Int32; SortUp, ClockWise: Boolean);', @Lape_SortCircleWise, Data);
-    addGlobalMethod('procedure LinearSort(var tpa: TPointArray; cx, cy, sd: Int32; SortUp: Boolean);', @Lape_LinearSort, Data);
+    addGlobalMethod('procedure SortCircleWise(var TPA: TPointArray; const cx, cy, StartDegree: Int32; SortUp, ClockWise: Boolean);', @Lape_SortCircleWise, Data);
+    addGlobalMethod('procedure LinearSort(var TPA: TPointArray; cx, cy, sd: Int32; SortUp: Boolean);', @Lape_LinearSort, Data);
     addGlobalMethod('function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint', @Lape_RotatePoint, Data);
     addGlobalMethod('function ChangeDistPT(const PT: TPoint; mx,my: Int32; newdist: extended): TPoint', @Lape_ChangeDistPT, Data);
     addGlobalMethod('function ChangeDistTPA(var TPA: TPointArray; mx,my: Int32; newdist: extended): boolean', @Lape_ChangeDistTPA, Data);
     addGlobalMethod('function FindGapsTPA(const TPA: TPointArray; MinPixels: Int32): T2DPointArray', @Lape_FindGapsTPA, Data);
     addGlobalMethod('function RemoveDistTPointArray(x, y, dist: Int32; const ThePoints: TPointArray; RemoveHigher: Boolean): TPointArray', @Lape_RemoveDistTPointArray, Data);
-    addGlobalMethod('function CombineTPA(const Ar1, Ar2: TPointArray): TPointArray', @Lape_CombineTPA, Data);
     addGlobalMethod('function ReArrangeandShortenArrayEx(const a: TPointArray; w, h: Int32): TPointArray', @Lape_ReArrangeandShortenArrayEx, Data);
     addGlobalMethod('function ReArrangeandShortenArray(const a: TPointArray; Dist: Int32): TPointArray', @Lape_ReArrangeandShortenArray, Data);
     addGlobalMethod('function TPAtoATPAEx(const TPA: TPointArray; w, h: Int32): T2DPointArray', @Lape_TPAtoATPAEx, Data);
     addGlobalMethod('function TPAtoATPA(const TPA: TPointArray; Dist: Int32): T2DPointArray', @Lape_TPAtoATPA, Data);
     addGlobalMethod('function MergeATPA(const ATPA: T2DPointArray): TPointArray', @Lape_MergeATPA, Data);
-    addGlobalMethod('procedure AppendTPA(var TPA: TPointArray; const ToAppend: TPointArray);', @Lape_AppendTPA, Data);
     addGlobalMethod('function TPAFromLine(const x1, y1, x2, y2: Int32): TPointArray', @Lape_TPAFromLine, Data);
     addGlobalMethod('function EdgeFromBox(const Box: TBox): TPointArray', @Lape_EdgeFromBox, Data);
     addGlobalMethod('function TPAFromBox(const Box: TBox): TPointArray', @Lape_TPAFromBox, Data);
@@ -527,8 +515,8 @@ begin
     addGlobalMethod('procedure FillEllipse(var a: TPointArray);', @Lape_FillEllipse, Data);
     addGlobalMethod('function RotatePoints(const P: TPointArray; A, cx, cy: Extended): TPointArray', @Lape_RotatePoints, Data);
     addGlobalMethod('function FindTPAEdges(const p: TPointArray): TPointArray', @Lape_FindTPAEdges, Data);
-    addGlobalMethod('function ClearTPAFromTPA(const arP, ClearPoints: TPointArray): TPointArray', @Lape_ClearTPAFromTPA, Data);
-    addGlobalMethod('function ReturnPointsNotInTPA(Const TotalTPA: TPointArray; const Box: TBox): TPointArray', @Lape_ReturnPointsNotInTPA, Data);
+    addGlobalMethod('function ClearTPAFromTPA(const Points, PointsToClear: TPointArray): TPointArray', @Lape_ClearTPAFromTPA, Data);
+    addGlobalMethod('function ReturnPointsNotInTPA(const TotalTPA: TPointArray; const Box: TBox): TPointArray', @Lape_ReturnPointsNotInTPA, Data);
     addGlobalMethod('function PointInTPA(p: TPoint; const arP: TPointArray): Boolean', @Lape_PointInTPA, Data);
     addGlobalMethod('procedure ClearDoubleTPA(var TPA: TPointArray);', @Lape_ClearDoubleTPA, Data);
     addGlobalMethod('procedure TPACountSort(var TPA: TPointArray; const max: TPoint; Const SortOnX: Boolean);', @Lape_TPACountSort, Data);
@@ -537,22 +525,18 @@ begin
     addGlobalMethod('function TPAInATPA(const TPA: TPointArray; const InATPA: T2DPointArray; var Index: LongInt): Boolean', @Lape_TPAInATPA, Data);
     addGlobalMethod('procedure OffsetTPA(var TPA: TPointArray; const Offset: TPoint);', @Lape_OffsetTPA, Data);
     addGlobalMethod('procedure OffsetATPA(var ATPA: T2DPointArray; const Offset: TPoint);', @Lape_OffsetATPA, Data);
-    addGlobalMethod('function CopyTPA(const TPA: TPointArray): TPointArray', @Lape_CopyTPA, Data);
-    addGlobalMethod('function CopyATPA(const ATPA: T2DPointArray): T2DPointArray', @Lape_CopyATPA, Data);
-    addGlobalMethod('function TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Int32;const IsSortedAscending: Boolean): Int32;',@Lape_TPAPosNext, Data);
-    addGlobalMethod('function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending, byDifference: Boolean): TPointArray;',@Lape_GlueTPAs, Data);
     addGlobalMethod('function PartitionTPA(const TPA: TPointArray; BoxWidth, BoxHeight: Int32): T2DPointArray;', @Lape_PartitionTPA, Data);
     addGlobalMethod('procedure Quicksort(var Arr: TIntegerArray);', @Lape_Quicksort, Data);
     addGlobalMethod('function InIntArrayEx(const Arr: TIntegerArray; var Index: Int32; const Number: Int32): Boolean', @Lape_InIntArrayEx, Data);
     addGlobalMethod('function InIntArray(const Arr: TIntegerArray; Number: Int32): Boolean', @Lape_InIntArray, Data);
     addGlobalMethod('procedure ClearSameIntegers(var Arr: TIntegerArray);', @Lape_ClearSameIntegers, Data);
-    addGlobalMethod('function CombineIntArray(const Arr1, Arr2: TIntegerArray): TIntegerArray', @Lape_CombineIntArray, Data);
     addGlobalMethod('procedure InvertTIA(var Arr: TIntegerArray);', @Lape_InvertTIA, Data);
-    addGlobalMethod('function SumIntegerArray(const Arr: TIntegerArray): Int32', @Lape_SumIntegerArray, Data);
     addGlobalMethod('function AverageTIA(const Arr: TIntegerArray): Int32', @Lape_AverageTIA, Data);
     addGlobalMethod('function AverageExtended(const Arr: TExtendedArray): Extended', @Lape_AverageExtended, Data);
     addGlobalMethod('function TPAErode(constref TPA: TPointArray; Amount: Int32): TPointArray;', @Lape_TPAErode, Data);
     addGlobalMethod('function TPAGrow(constref TPA: TPointArray; Amount: Int32): TPointArray;', @Lape_TPAGrow, Data);
+    addGlobalMethod('function PointsInRangeOf(constref Points, Other: TPointArray; MinDist, MaxDist: Double): TPointArray; overload;', @Lape_PointsInRangeOf, Data);
+    addGlobalMethod('function PointsInRangeOf(constref Points, Other: TPointArray; MinDistX, MinDistY, MaxDistX, MaxDistY: Double): TPointArray; overload;', @Lape_PointsInRangeOfEx, Data);
   end;
 end;
 

@@ -266,7 +266,48 @@ begin
   Pinteger(Result)^ := TIOManager(Params^[1]^).SetTarget(PPtrUInt(Params^[2])^);
 end;
 
+procedure Lape_TPAPosNext(const Params: PParamArray;const Result: pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+ PInt32(Result)^:= TPAPosNext(PPoint(Params^[1])^, PPointArray(Params^[2])^, PInt32(Params^[3])^, System.PBoolean(Params^[4])^);
+end;
+
+procedure Lape_GlueTPAs(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+ PPointArray(Result)^:= GlueTPAs(PPointArray(Params^[1])^, PPointArray(Params^[2])^, System.PBoolean(Params^[3])^, System.PBoolean(Params^[4])^);
+end;
+
+procedure Lape_CombineIntArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PIntegerArray(Result)^ := CombineIntArray(PIntegerArray(Params^[1])^, PIntegerArray(Params^[2])^);
+end;
+
+procedure Lape_CopyTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := CopyTPA(PPointArray(Params^[1])^);
+end;
+
+procedure Lape_CopyATPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  P2DPointArray(Result)^ := CopyATPA(P2DPointArray(Params^[1])^);
+end;
+
+procedure Lape_AppendTPA(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  AppendTPA(PPointArray(Params^[1])^, PPointArray(Params^[2])^);
+end;
+
+procedure Lape_CombineTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := CombineTPA(PPointArray(Params^[1])^, PPointArray(Params^[2])^);
+end;
+
 procedure Lape_Import_Deprecated(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+
+  function Deprecated(Message: String): String;
+  begin
+    Result := ' deprecated ' + #39 + Message + #39 + ';';
+  end;
+
 begin
   with Compiler do
   begin
@@ -274,16 +315,26 @@ begin
 
     addGlobalType('(htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160, htSHA1, htSHA256, htSHA384, htSHA512, htTiger)', 'THashType');
 
-    addGlobalMethod('function GetProcesses: TSysProcArr; deprecated ' + #39 + 'Use TOSWindow' + #39 + ';', @Lape_GetProcesses, Data);
-    addGlobalMethod('function TIOManager.GetProcesses: TSysProcArr; constref; deprecated ' + #39 + 'Use TOSWindow' + #39 + ';', @Lape_GetProcesses, Data);
-    addGlobalMethod('function TIOManager.SetTarget2(target: TNativeWindow): integer; constref; deprecated ' + #39 + 'Use `TIOManager.SetTarget`' + #39, @TIOManager_SetTargetHandle, Data);
+    addGlobalMethod('function GetProcesses: TSysProcArr;' + Deprecated('Use TOSWindow'), @Lape_GetProcesses, Data);
+    addGlobalMethod('function TIOManager.GetProcesses: TSysProcArr; constref;' + Deprecated('Use TOSWindow'), @Lape_GetProcesses, Data);
+    addGlobalMethod('function TIOManager.SetTarget2(target: TNativeWindow): integer; constref;' + Deprecated('TIOManager.SetTarget'), @TIOManager_SetTargetHandle, Data);
 
-    addGlobalMethod('procedure tSwap(var a, b: TPoint); deprecated ' + #39 + 'Replace with `Swap`' + #39 + ';', @Lape_tSwap, Data);
-    addGlobalMethod('procedure tpaSwap(var a, b: TPointArray); deprecated ' + #39 + 'Replace with `Swap`' + #39 + ';', @Lape_tpaSwap, Data);
-    addGlobalMethod('procedure SwapE(var a, b: Extended); deprecated ' + #39 + 'Replace with `Swap`' + #39 + ';', @Lape_SwapE, Data);
+    addGlobalMethod('procedure tSwap(var a, b: TPoint); ' + Deprecated('Use Swap'), @Lape_tSwap, Data);
+    addGlobalMethod('procedure tpaSwap(var a, b: TPointArray); ' + Deprecated('Use Swap'), @Lape_tpaSwap, Data);
+    addGlobalMethod('procedure SwapE(var a, b: Extended); ' + Deprecated('Use Swap'), @Lape_SwapE, Data);
 
-    addGlobalMethod('function MinE(a, b: Extended): Extended; deprecated ' + #39 + 'Replace with `Min`' + #39 + ';', @Lape_MinE, Data);
-    addGlobalMethod('function MaxE(a, b: Extended): Extended; deprecated ' + #39 + 'Replace with `Max`' + #39 + ';', @Lape_MaxE, Data);
+    addGlobalMethod('function CopyTPA(const TPA: TPointArray): TPointArray;' + Deprecated('Use Copy'), @Lape_CopyTPA, Data);
+    addGlobalMethod('function CopyATPA(const ATPA: T2DPointArray): T2DPointArray;' + Deprecated('Use Copy'), @Lape_CopyATPA, Data);
+
+    addGlobalMethod('function TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Int32;const IsSortedAscending: Boolean): Int32; deprecated;', @Lape_TPAPosNext, Data);
+    addGlobalMethod('function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending, byDifference: Boolean): TPointArray; deprecated;', @Lape_GlueTPAs, Data);
+
+    addGlobalMethod('function CombineTPA(const Ar1, Ar2: TPointArray): TPointArray;' + Deprecated('Use + operator'), @Lape_CombineTPA, Data);
+    addGlobalMethod('function CombineIntArray(const Arr1, Arr2: TIntegerArray): TIntegerArray;' + Deprecated('Use + operator'), @Lape_CombineIntArray, Data);
+    addGlobalMethod('procedure AppendTPA(var TPA: TPointArray; const ToAppend: TPointArray);' + Deprecated('Use + operator'), @Lape_AppendTPA, Data);
+
+    addGlobalMethod('function MinE(a, b: Extended): Extended; ' + Deprecated('Use Min'), @Lape_MinE, Data);
+    addGlobalMethod('function MaxE(a, b: Extended): Extended; ' + Deprecated('Use Min'), @Lape_MaxE, Data);
 
     addGlobalMethod('function hash(const HashType: THashType; const Data: string): string; deprecated;', @Lape_hash, Data);
     addGlobalMethod('function haval(const Data: string): string; deprecated;', @Lape_haval, Data);
@@ -303,22 +354,23 @@ begin
     addGlobalMethod('function rs_GetUpTextAt(x, y : integer): string; deprecated;', @Lape_rs_GetUpTextAt, Data);
     addGlobalMethod('function rs_GetUpTextAtEx(x, y: integer; shadow: boolean; fontname: string): string; deprecated;', @Lape_rs_GetUpTextAtEx, Data);
 
-    addGlobalMethod('function MessageBox(Text, Caption: String; Flags: Int32): Int32; deprecated '+ #39 + 'Replace with `MessageDlg`' + #39 + ';', @Lape_MessageBox, Data);
+    addGlobalMethod('function MessageBox(Text, Caption: String; Flags: Int32): Int32;' + Deprecated('Use MessageDlg'), @Lape_MessageBox, Data);
 
-    addDelayedCode('type'                                                                                                                                      + LineEnding +
-                   '  TSP_Property = (SP_OnTerminate, SP_WriteTimeStamp);'                                                                                     + LineEnding +
-                   ''                                                                                                                                          + LineEnding +
-                   'procedure SetScriptProp(Prop: TSP_Property; Value: TVariantArray); deprecated ' + #39 + 'Replace with `AddOnTerminate` or `WriteTimeStamp`' + #39 + ';' + LineEnding +
-                   'begin'                                                                                                                                     + LineEnding +
-                   '  case Prop of'                                                                                                                            + LineEnding +
-                   '    SP_OnTerminate:'                                                                                                                       + LineEnding +
-                   '      AddOnTerminate(Value[0]);'                                                                                                           + LineEnding +
-                   '    SP_WriteTimeStamp:'                                                                                                                    + LineEnding +
-                   '      ;'                                                                                                           + LineEnding +
-                   '  end;'                                                                                                                                    + LineEnding +
-                   'end;'                                                                                                                                      + LineEnding +
-                   ''                                                                                                                                          + LineEnding +
-                   'procedure GetScriptProp(Prop: TSP_Property; var Value: TVariantArray); deprecated ' + #39 + 'Replace with `OnTerminateStrings` variable' + #39 + ';' + LineEnding +
+    addDelayedCode('{$HINTS OFF}'                                                                                                                             + LineEnding +
+                   'type'                                                                                                                                     + LineEnding +
+                   '  TSP_Property = (SP_OnTerminate, SP_WriteTimeStamp);'                                                                                    + LineEnding +
+                   ''                                                                                                                                         + LineEnding +
+                   'procedure SetScriptProp(Prop: TSP_Property; Value: TVariantArray); deprecated;'                                                           + LineEnding +
+                   'begin'                                                                                                                                    + LineEnding +
+                   '  case Prop of'                                                                                                                           + LineEnding +
+                   '    SP_OnTerminate:'                                                                                                                      + LineEnding +
+                   '      AddOnTerminate(Value[0]);'                                                                                                          + LineEnding +
+                   '    SP_WriteTimeStamp:'                                                                                                                   + LineEnding +
+                   '      ;'                                                                                                                                  + LineEnding +
+                   '  end;'                                                                                                                                   + LineEnding +
+                   'end;'                                                                                                                                     + LineEnding +
+                   ''                                                                                                                                         + LineEnding +
+                   'procedure GetScriptProp(Prop: TSP_Property; var Value: TVariantArray); deprecated;'                                                       + LineEnding +
                    'var i: Int32;'                                                                                                                            + LineEnding +
                    'begin'                                                                                                                                    + LineEnding +
                    '  case Prop of'                                                                                                                           + LineEnding +
@@ -352,7 +404,7 @@ begin
                    '  Res :=  RemoveDistTPointArray(X,Y,Dist,TPA,Higher);'                                                                                    + LineEnding +
                    'end;'                                                                                                                                     + LineEnding +
                    ''                                                                                                                                         + LineEnding +
-                   'procedure CombineTPAWrap(const Ar1, Ar2: TPointArray; var Res :  TPointArray); deprecated;'                                               + LineEnding +
+                   'procedure CombineTPAWrap(const Ar1, Ar2: TPointArray; var Res: TPointArray); deprecated;'                                                 + LineEnding +
                    'begin'                                                                                                                                    + LineEnding +
                    '  Res := CombineTPA(Ar1,Ar2);'                                                                                                            + LineEnding +
                    'end;'                                                                                                                                     + LineEnding +
@@ -398,7 +450,6 @@ begin
                    'end;'                                                                                                                                     + LineEnding +
                    ''                                                                                                                                         + LineEnding +
                    'procedure EdgeFromBoxWrap(const Box: TBox; var Res: TPointArray); deprecated;'                                                            + LineEnding +
-
                    'begin'                                                                                                                                    + LineEnding +
                    '  Res := EdgeFromBox(Box);'                                                                                                               + LineEnding +
                    'end;'                                                                                                                                     + LineEnding +

@@ -1,6 +1,7 @@
 unit simba.parameterhint;
 
 {$mode objfpc}{$H+}
+{$modeswitch arrayoperators}
 
 interface
 
@@ -27,7 +28,7 @@ type
     procedure HandleEditorKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure HandleEditorCaretChange(Sender: TObject);
 
-    procedure DrawHints(var Bounds: TRect);
+    procedure DrawHints(var Bounds: TRect; Measure: Boolean);
     function PrepareParamString(Index: Int32; out Str: String): Integer;
 
     procedure SetEditor(Value: TSynEdit);
@@ -69,7 +70,10 @@ var
   i, ii, Group: Int32;
 begin
   Result := -1;
+
   if (FSynEdit = nil) then
+    Exit;
+  if (Index < 0) or (Index >= Length(FParameters)) then
     Exit;
 
   Lexer := TmwPasLex.Create();
@@ -94,7 +98,7 @@ begin
           begin
             Dec(BracketCount);
             if BracketCount =0 then
-              exit;
+              Exit;
           end;
 
         tokComma:
@@ -151,15 +155,15 @@ begin
     end;
 
     if TypeDecl <> nil then
-      TypeStr := ': ' + typedecl.ShortText
+      TypeStr := ': ' + TypeDecl.ShortText
     else
       TypeStr := '';
 
     Params := '';
     for ii := 0 to high(ParamNames) do
-    begin;
-      if parameterindex = ParamC then //Found the current parameter index in the parameterdecl!
-      begin;
+    begin
+      if ParameterIndex = ParamC then //Found the current parameter index in the parameterdecl!
+      begin
         if s <> '' then
           s := '\' + s + '\'; //If it has a const/var/in/out thingy, bold this as well
         if TypeStr <> '' then        //If has a type then bold the type
@@ -169,7 +173,7 @@ begin
         else
           Params := '\' + ParamNames[ii] + '\';
       end else
-      begin;
+      begin
         if Params <> '' then
           Params := Params +', ' +  ParamNames[ii]
         else
@@ -177,10 +181,11 @@ begin
       end;
       inc(ParamC);
     end;
+
     if str <> '' then
-      str := str + '; ' + s + Params + typestr
+      str := str + '; ' + s + Params + TypeStr
     else
-      str := s + params + typestr;
+      str := s + params + TypeStr;
   end;
 
   if (FDeclarations[Index] <> nil) then
@@ -194,6 +199,7 @@ begin
     TypeStr := '';
 
   str :=  '(' +  str + ')' + TypeStr + ';';
+
   if (FDeclarations[Index] <> nil) and (FDeclarations[Index].Name <> '') then
     str := FDeclarations[Index].Name + str;
   str := StringReplace(str, '\\', '', [rfReplaceAll]); //Delete all the \\, something like \const \\x\ is the same as \const x\
@@ -215,6 +221,9 @@ procedure TSimbaParameterHint.SetParser(Value: TCodeInsight);
 begin
   if (FParser <> nil) then
     FParser.Free();
+
+  SetLength(FParameters, 0);
+  SetLength(FDeclarations, 0);
 
   FParser := Value;
 end;
@@ -249,7 +258,7 @@ begin
   R.Left := ScreenPoint.X - FBorderX;
   R.Top := ScreenPoint.Y;
 
-  DrawHints(R);
+  DrawHints(R, True);
 
   if R.Left < MonitorRect.Left then
     R.Left := MonitorRect.Left;
@@ -312,7 +321,7 @@ begin
     Self.Hide();
 end;
 
-procedure TSimbaParameterHint.DrawHints(var Bounds: TRect);
+procedure TSimbaParameterHint.DrawHints(var Bounds: TRect; Measure: Boolean);
 var
   CharacterSize: TSize;
 
@@ -378,7 +387,8 @@ var
         Y := Y + CharacterSize.CY;
       end;
 
-      DrawWord(Words[i], X, Offset + Y);
+      if not Measure then
+        DrawWord(Words[i], X, Offset + Y);
 
       X := X + MeasureWord(Words[i]);
     end;
@@ -417,49 +427,41 @@ begin
 
   Canvas.Brush.Color := $F0F0F0;
   Canvas.Pen.Color := clBlack;
-  Canvas.Rectangle(ClientRect);
+  Canvas.Rectangle(R);
 
-  DrawHints(R);
+  DrawHints(R, False);
 end;
 
 procedure TSimbaParameterHint.Execute(BracketPoint: TPoint; Methods: TDeclarationArray);
 var
-  i, Count: Int32;
+  I: Int32;
 begin
   LastParameterIndex := -1;
 
-  if Length(Methods) > 0 then
+  SetLength(FDeclarations, 0);
+  SetLength(FParameters, 0);
+
+  for I := 0 to High(Methods) do
   begin
-    Count := 0;
+    if (tokOverride in TciProcedureDeclaration(Methods[I]).Directives) then
+      Continue;
 
-    SetLength(FDeclarations, Length(Methods));
-    SetLength(FParameters, Length(Methods));
+    FDeclarations += [TciProcedureDeclaration(Methods[I])];
+    FParameters += [TciProcedureDeclaration(Methods[I]).GetParamDeclarations()];
+  end;
 
-    for i := 0 to High(Methods) do
-    begin
-      if (tokOverride in TciProcedureDeclaration(Methods[i]).Directives) then
-        Continue;
-
-      FDeclarations[i] := TciProcedureDeclaration(Methods[i]);
-      FParameters[i] := TciProcedureDeclaration(Methods[i]).GetParamDeclarations();
-
-      Inc(Count);
-    end;
-
-    SetLength(FDeclarations, Count);
-    SetLength(FParameters, Count);
-
+  if (Length(FDeclarations) > 0) and (Length(FParameters) > 0) then
+  begin
     FStartPoint := Point(BracketPoint.X - Length(Methods[0].Name), BracketPoint.Y);
     FBracketPoint := BracketPoint;
 
     CalculateBounds();
+  end;
 
-    Self.Visible := True;
+  Self.Visible := (Length(FDeclarations) > 0) and (Length(FParameters) > 0);
 
-    if FSynEdit.CanFocus then
-      FSynEdit.SetFocus();
-  end else
-    Self.Visible := False;
+  if FSynEdit.CanFocus then
+    FSynEdit.SetFocus();
 end;
 
 end.
