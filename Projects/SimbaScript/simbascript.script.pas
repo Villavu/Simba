@@ -138,7 +138,7 @@ type
 implementation
 
 uses
-  fileutil, simba.misc, simba.files, fpexprpars, typinfo, ffi;
+  fileutil, simba.misc, simba.files, typinfo, ffi;
 
 procedure TDebuggerThread.Execute;
 
@@ -388,77 +388,72 @@ end;
 
 function TSimbaScript.HandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
 var
-  Arguments: TStringArray;
-  Parser: TFPExpressionParser;
   Plugin: TSimbaScriptPlugin;
 begin
-  if (UpperCase(Directive) = 'LOADLIB') or (UpperCase(Directive) = 'IFHASLIB') or
-     (UpperCase(Directive) = 'IFVALUE') or (UpperCase(Directive) = 'ERROR') or
-     (UpperCase(Directive) = 'IFHASFILE') then
-  begin
-    if InPeek or (Argument = '') then
-      Exit(True);
+  Result := True;
 
-    try
-      case UpperCase(Directive) of
-        'IFVALUE':
-          begin
-            Arguments := Argument.Split(['<>', '>=', '<=', '=', '<', '>']);
-            if Length(Arguments) <> 2 then
-              raise Exception.Create('IFVALUE directive must have two arguments');
+  try
+    case UpperCase(Directive) of
+      'ERROR':
+        begin
+          if InIgnore or InPeek or (Argument = '') then
+            Exit;
 
-            Parser := TFPExpressionParser.Create(nil);
-            Parser.Expression := Argument.Replace(Arguments[0].Trim(), Sender.Defines[Arguments[0].Trim()]);
+          raise Exception.Create('User defined error: "' + Argument + '"');
+        end;
 
-            try
-              FCompiler.pushConditional((not InIgnore) and Parser.AsBoolean, Sender.DocPos);
-            finally
-              Parser.Free();
-            end;
-          end;
+      'LOADLIB':
+        begin
+          if InIgnore or InPeek or (Argument = '') then
+            Exit;
 
-        'ERROR':
-          begin
-            if (not InIgnore) then
-              raise Exception.Create('User defined error: "' + Argument + '"');
-          end;
+          if not FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), FPluginPath, FAppPath]) then
+            raise Exception.Create('Plugin "' + Argument + '" not found');
 
-        'LOADLIB':
-          begin
-            if InIgnore then
-              Exit;
+          Plugin := TSimbaScriptPlugin.Create(Argument);
+          Plugin.Import(FCompiler);
 
-            if not FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), FPluginPath, FAppPath]) then
-              raise Exception.Create('Plugin "' + Argument + '" not found');
+          SetLength(FPlugins, Length(FPlugins) + 1);
+          FPlugins[High(FPlugins)] := Plugin;
+        end;
 
-            Plugin := TSimbaScriptPlugin.Create(Argument);
-            Plugin.Import(FCompiler);
+      'LIBPATH':
+        begin
+         if InIgnore or InPeek or (Argument = '') then
+           Exit;
 
-            SetLength(FPlugins, Length(FPlugins) + 1);
-            FPlugins[High(FPlugins)] := Plugin;
-          end;
+          if not FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), FPluginPath, FAppPath]) then
+            Argument := '';
 
-        'IFHASLIB':
-          begin
-            if not FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), FPluginPath, FAppPath]) then
-              FCompiler.pushConditional((not InIgnore) and True, Sender.DocPos)
-            else
-              FCompiler.pushConditional((not InIgnore) and False, Sender.DocPos);
-          end;
+          FCompiler.pushTokenizer(TLapeTokenizerString.Create(#39 + Argument + #39));
+        end;
 
-        'IFHASFILE':
-          begin
-            FCompiler.pushConditional((not InIgnore) and FindFile(Argument, '', [IncludeTrailingPathDelimiter(ExtractFileDir(Sender.Tokenizer.FileName)), FIncludePath, FAppPath]), Sender.DocPos);
-          end;
-      end;
-    except
-      on E: Exception do
-        raise lpException.Create(E.Message, Sender.DocPos);
+      'IFHASLIB':
+        begin
+          if InIgnore or InPeek or (Argument = '') then
+            Exit;
+
+          if not FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), FPluginPath, FAppPath]) then
+            FCompiler.pushConditional((not InIgnore) and True, Sender.DocPos)
+          else
+            FCompiler.pushConditional((not InIgnore) and False, Sender.DocPos);
+        end;
+
+      'IFHASFILE':
+        begin
+          if InIgnore or InPeek or (Argument = '') then
+            Exit;
+
+          FCompiler.pushConditional((not InIgnore) and FindFile(Argument, '', [IncludeTrailingPathDelimiter(ExtractFileDir(Sender.Tokenizer.FileName)), FIncludePath, FAppPath]), Sender.DocPos);
+        end;
+
+      else
+        Result := False;
     end;
-
-    Result := True;
-  end else
-    Result := False;
+  except
+    on E: Exception do
+      raise lpException.Create(E.Message, Sender.DocPos);
+  end;
 end;
 
 function TSimbaScript.GetHeadless: Boolean;

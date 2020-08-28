@@ -429,7 +429,7 @@ function TCodeInsight.FindMethods(Expr: String): TDeclarationArray;
   begin
     Result := nil;
 
-    if not (Declaration is TciProcedureDeclaration) then
+    if (Declaration <> nil) and not (Declaration is TciProcedureDeclaration) then
     begin
       Declaration := ResolveType(Declaration);
 

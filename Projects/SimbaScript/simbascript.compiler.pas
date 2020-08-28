@@ -20,6 +20,7 @@ type
     FDebugging: Boolean;
     FDebuggingMethods: TSimbaScript_DebuggingMethods;
   public
+    procedure pushTokenizer(ATokenizer: TLapeTokenizerBase); reintroduce;
     procedure pushConditional(AEval: Boolean; ADocPos: TDocPos); reintroduce;
 
     function ParseMethod(FuncForwards: TLapeFuncForwards; FuncHeader: TLapeType_Method; FuncName: lpString; isExternal: Boolean): TLapeTree_Method; override;
@@ -425,6 +426,11 @@ begin
   inherited Create(ATokenizer, ManageTokenizer, AEmitter, ManageEmitter);
 
   FInternalMethodMap['WaitUntil'] := TLapeTree_InternalMethod_WaitUntil;
+end;
+
+procedure TSimbaScript_Compiler.pushTokenizer(ATokenizer: TLapeTokenizerBase);
+begin
+  inherited pushTokenizer(ATokenizer);
 end;
 
 procedure TSimbaScript_Compiler.pushConditional(AEval: Boolean; ADocPos: TDocPos);
