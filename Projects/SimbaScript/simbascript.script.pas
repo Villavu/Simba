@@ -242,18 +242,19 @@ procedure TSimbaScript.SetState(Value: TInitBool);
 begin
   FState := Value;
 
-  with TSimbaMethod.Create(SIMBA_METHOD_SCRIPT_STATE_CHANGED) do
-  try
-    case FState of
-      bTrue:    Params.Write(SIMBA_SCRIPT_RUNNING,  SizeOf(UInt8));
-      bFalse:   Params.Write(SIMBA_SCRIPT_STOPPING, SizeOf(UInt8));
-      bUnknown: Params.Write(SIMBA_SCRIPT_PAUSED,   SizeOf(UInt8));
-    end;
+  if not Headless then
+    with TSimbaMethod.Create(SIMBA_METHOD_SCRIPT_STATE_CHANGED) do
+    try
+      case FState of
+        bTrue:    Params.Write(SIMBA_SCRIPT_RUNNING,  SizeOf(UInt8));
+        bFalse:   Params.Write(SIMBA_SCRIPT_STOPPING, SizeOf(UInt8));
+        bUnknown: Params.Write(SIMBA_SCRIPT_PAUSED,   SizeOf(UInt8));
+      end;
 
-    Invoke(Self);
-  finally
-    Free();
-  end;
+      Invoke(Self);
+    finally
+      Free();
+    end;
 end;
 
 procedure TSimbaScript.Execute;
@@ -268,7 +269,7 @@ begin
     FSimbaIPCLock := TCriticalSection.Create();
 
     if Debugging then
-       FDebuggerThread := TDebuggerThread.Create(Self);
+      FDebuggerThread := TDebuggerThread.Create(Self);
 
     FClient := TClient.Create(FPluginPath);
     FClient.MOCR.FontPath := FFontPath;
@@ -349,7 +350,7 @@ begin
   Param.Line := -1;
   Param.Column := -1;
 
-  if (FSimbaIPC <> nil) then
+  if not Headless then
   begin
     if (E is lpException) then
     begin
@@ -495,8 +496,8 @@ end;
 
 procedure TSimbaScript.Invoke(Message: Int32; Params, Result: TMemoryStream);
 begin
-  if (FSimbaIPC = nil) then
-    raise Exception.Create('Method "' + GetEnumName(TypeInfo(ESimbaMethod), Message) + '" unavailable when running detached from Simba');
+  if Headless then
+    raise Exception.Create('Method "' + GetEnumName(TypeInfo(ESimbaMethod), Message) + '" unavailable when running headless');
 
   FSimbaIPCLock.Enter();
 
@@ -523,11 +524,14 @@ begin
     for I := 0 to High(FPlugins) do
       FPlugins[I].Free();
 
-    FCompiler.Free();
-    FClient.Free();
-
-    FSimbaIPC.Free();
-    FSimbaIPCLock.Free();
+    if (FCompiler <> nil) then
+      FreeAndNil(FCompiler);
+    if (FClient <> nil) then
+      FreeAndNil(FClient);
+    if (FSimbaIPC <> nil) then
+      FreeAndNil(FSimbaIPC);
+    if (FSimbaIPCLock <> nil) then
+      FreeAndNil(FSimbaIPCLock);
   except
     // The process is ending anyway...
   end;
