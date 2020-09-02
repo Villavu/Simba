@@ -290,7 +290,7 @@ begin
 
   Event._Type := ButtonPress;
 
-  XSendEvent(GetDisplay(), PointerWindow, True, ButtonPressMask, @Event);
+  XSendEvent(GetDisplay(), PointerWindow, TBool(True), ButtonPressMask, @Event);
   XFlush(GetDisplay());
 end;
 
@@ -327,7 +327,7 @@ begin
 
   Event._Type := ButtonRelease;
 
-  XSendEvent(GetDisplay(), PointerWindow, True, ButtonPressMask, @Event);
+  XSendEvent(GetDisplay(), PointerWindow, TBool(True), ButtonPressMask, @Event);
   XFlush(GetDisplay());
 end;
 
@@ -360,6 +360,13 @@ begin
 end;
 
 procedure TWindowTarget.SendString(Text: String; KeyWait, KeyModWait: Int32);
+
+  procedure KeyEvent(KeyCode: UInt32; Press: Boolean);
+  begin
+    XTestFakeKeyEvent(GetDisplay(), KeyCode, TBool(Press), 0);
+    XSync(GetDisplay(), 0);
+  end;
+
 var
   i: Int32;
   Key, Modifier: TKeyCode;
@@ -373,24 +380,18 @@ begin
 
     if (Modifier <> 0) then
     begin
-      XTestFakeKeyEvent(GetDisplay(), Modifier, True, 0);
-      XSync(GetDisplay(), 0);
+      KeyEvent(Modifier, True);
       if KeyModWait > 0 then
         Sleep(KeyModWait div 2);
     end;
 
-    XTestFakeKeyEvent(GetDisplay(), Key, True, 0);
-    XSync(GetDisplay(), 0);
-
+    KeyEvent(Key, True);
     Sleep(KeyWait);
-
-    XTestFakeKeyEvent(GetDisplay(), Key, False, 0);
-    XSync(GetDisplay(), 0);
+    KeyEvent(Key, False);
 
     if (Modifier <> 0) then
     begin
-      XTestFakeKeyEvent(GetDisplay(), Modifier, False, 0);
-      XSync(GetDisplay(), 0);
+      KeyEvent(Modifier, False);
       if KeyModWait > 0 then
         Sleep(KeyModWait div 2);
     end;
@@ -402,8 +403,8 @@ begin
   if FAutoFocus then
     ActivateClient();
 
-  XTestFakeKeyEvent(GetDisplay(), XGetKeyCode(GetDisplay(), Key), True, 0);
-  XFlush(GetDisplay());
+  XTestFakeKeyEvent(GetDisplay(), XGetKeyCode(GetDisplay(), Key), TBool(True), 0);
+  XSync(GetDisplay(), 0);
 end;
 
 procedure TWindowTarget.ReleaseKey(Key: Int32);
@@ -411,8 +412,8 @@ begin
   if FAutoFocus then
     ActivateClient();
 
-  XTestFakeKeyEvent(GetDisplay(), XGetKeyCode(GetDisplay(), Key), False, 0);
-  XFlush(GetDisplay());
+  XTestFakeKeyEvent(GetDisplay(), XGetKeyCode(GetDisplay(), Key), TBool(False), 0);
+  XSync(GetDisplay(), 0);
 end;
 
 function TWindowTarget.IsKeyHeld(Key: Int32): Boolean;

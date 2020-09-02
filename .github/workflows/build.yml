@@ -78,7 +78,7 @@ jobs:
       shell: bash
       run: |
         sudo apt-get update
-        sudo apt-get -y install libgtk2.0-dev libpango1.0-dev libffi-dev libxtst-dev xvfb 
+        sudo apt-get -m -y install libgtk2.0-dev libpango1.0-dev libffi-dev libxtst-dev xvfb 
         Xvfb :1 &
     
     - name: Generate Cache Hash

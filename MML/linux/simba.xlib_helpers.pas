@@ -73,7 +73,7 @@ end;
 
 function XHasWindowProperty(Display: PDisplay; Window: TWindow; Name: String): Boolean;
 begin
-  Result := XGetWindowProperty(Display, Window, XInternAtom(Display, PChar(Name), False)) > 0;
+  Result := XGetWindowProperty(Display, Window, XInternAtom(Display, PChar(Name), TBool(False))) > 0;
 end;
 
 procedure XGetKeyCode(Display: PDisplay; Key: Char; out KeyCode, ModifierCode: TKeyCode);
@@ -218,20 +218,20 @@ begin
   Event._Type := ClientMessage;
   Event.Display := Display;
   Event.Window := Window;
-  Event.Message_Type := XInternAtom(Display, '_NET_ACTIVE_WINDOW', False);
+  Event.Message_Type := XInternAtom(Display, '_NET_ACTIVE_WINDOW', TBool(False));
   Event.Format := 32;
   Event.Data.L[0] := 2;
   Event.Data.L[1] := CurrentTime;
 
   if XGetWindowAttributes(Display, Window, @Struct) <> 0 then
-    XSendEvent(Display, Struct.Screen^.Root, False, SubstructureNotifyMask or SubstructureRedirectMask, @Event);
+    XSendEvent(Display, Struct.Screen^.Root, TBool(False), SubstructureNotifyMask or SubstructureRedirectMask, @Event);
 
   XSync(Display, 0);
 end;
 
 function XGetActiveWindow(Display: PDisplay): TWindow;
 begin
-  Result := XGetWindowProperty(Display, XDefaultRootWindow(Display), XInternAtom(Display, '_NET_ACTIVE_WINDOW', False));
+  Result := XGetWindowProperty(Display, XDefaultRootWindow(Display), XInternAtom(Display, '_NET_ACTIVE_WINDOW', TBool(False)));
 end;
 
 function XGetKeyCode(Display: PDisplay; VirtualKey: UInt16): TKeyCode;
