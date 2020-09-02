@@ -195,13 +195,13 @@ var
   XFreeStringList: procedure(para1:PPchar); cdecl;
   XFree:function(para1:pointer):cint; cdecl;
   XGetClassHint: function(para1:PDisplay; para2:TWindow; para3:PXClassHint):TStatus; cdecl;
-  XInternAtom: function(para1:PDisplay; para2:Pchar; para3:Boolean): TAtom; cdecl;
+  XInternAtom: function(para1:PDisplay; para2:Pchar; para3:TBool): TAtom; cdecl;
   XDestroyImage: function(ximage: PXImage): cint; cdecl;
-  XSendEvent: function(para1: PDisplay; para2: TWindow; para3: Boolean; para4: clong; para5: Pointer): TStatus; cdecl;
+  XSendEvent: function(para1: PDisplay; para2: TWindow; para3: TBool; para4: clong; para5: Pointer): TStatus; cdecl;
   XSync: function(para1: PDisplay; para2: TBool): cint; cdecl;
   XInitThreads: function: cint; cdecl;
 
-  XTestFakeKeyEvent: function(Display: PDisplay; KeyCode: UInt32; Is_Press: Boolean; Delay: UInt32): Int32; cdecl;
+  XTestFakeKeyEvent: function(Display: PDisplay; KeyCode: UInt32; Is_Press: TBool; Delay: UInt32): Int32; cdecl;
 
 implementation
 

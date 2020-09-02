@@ -39,7 +39,7 @@ end;
 
 function TOSWindow_Helper.GetPID: UInt32;
 begin
-  Result := XGetWindowProperty(GetDisplay(), XGetRootWindow(GetDisplay(), Self), XInternAtom(GetDisplay(), PChar('_NET_WM_PID'), False));
+  Result := XGetWindowProperty(GetDisplay(), XGetRootWindow(GetDisplay(), Self), XInternAtom(GetDisplay(), PChar('_NET_WM_PID'), TBool(False)));
 end;
 
 function TOSWindow_Helper.GetRootWindow: TOSWindow;
@@ -199,7 +199,7 @@ var
 begin
   SetLength(Result, 0);
 
-  Windows := XGetChildren(GetDisplay(), GetDesktopWindow, FAlse);
+  Windows := XGetChildren(GetDisplay(), GetDesktopWindow, False);
   for i := High(Windows) downto 0 do
     if IsVisible(Windows[i]) then
     begin
