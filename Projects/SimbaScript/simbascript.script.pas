@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, simba.client, Forms, lptypes, lpinterpreter, lpparser, lpcompiler, lpvartypes, lpmessages,
-  simbascript.compiler, simba.ipc, syncobjs, simba.script_common, simbascript.plugin;
+  simbascript.compiler, simba.ipc, syncobjs, simba.script_common, simbascript.plugin, simbascript.task;
 
 const
   SIMBA_SCRIPT_RESUME = UInt8(0);
@@ -49,7 +49,7 @@ type
     destructor Destroy; override;
   end;
 
-  TSimbaScript = class(TThread)
+  TSimbaScript = class(TSimbaScriptTask)
   protected
     FCompiler: TSimbaScript_Compiler;
     FTokenizier: TLapeTokenizerString;
@@ -354,25 +354,21 @@ begin
   begin
     if (E is lpException) then
     begin
-      Param.Message := E.Message;
-
       with E as lpException do
       begin
         Param.FileName := DocPos.FileName;
         Param.Line := DocPos.Line;
         Param.Column := DocPos.Col;
       end;
-    end else
-      Param.Message := E.Message + ' (' + E.ClassName + ')';
-
-    WriteLn(Param.Message);
+    end;
 
     Method := TSimbaMethod.Create(SIMBA_METHOD_SCRIPT_ERROR);
     Method.Params.Write(Param, SizeOf(Param));
     Method.Invoke(Self);
     Method.Free();
-  end else
-    WriteLn(E.Message);
+  end;
+
+  WriteLn(E.Message);
 end;
 
 procedure TSimbaScript.HandleHint(Sender: TLapeCompilerBase; Hint: lpString);

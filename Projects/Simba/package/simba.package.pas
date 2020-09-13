@@ -87,8 +87,11 @@ begin
 
     if Result then
     begin
-      for FileName in Options.IgnoreList.Split(',') do
+      for FileName in Options.IgnoreList.Split([','], TStringSplitOptions.ExcludeEmpty) do
       begin
+        if FileName = '' then
+          Continue; // FPC bug...
+
         if FileExists(Options.Path + FileName) then
           DeleteFile(Options.Path + FileName)
         else

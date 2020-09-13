@@ -125,9 +125,11 @@ type
     function ToMatrix: T2DIntegerArray;
     function ToRawImage: TRawImage;
 
-    procedure DrawMatrix(const matrix: T2DIntegerArray);
+    procedure DrawMatrix(const Matrix: T2DIntegerArray);
     procedure DrawMatrix(const Matrix: TSingleMatrix; ColorMapID: Int32 = 0); overload;
-    procedure ThresholdAdaptive(Alpha, Beta: Byte; InvertIt: Boolean; Method: TBmpThreshMethod; C: Integer);
+    procedure ThresholdAdaptive(Alpha, Beta: Byte; DoInvert: Boolean; Method: TBmpThreshMethod; C: Integer);
+    procedure Pad(Amount: Int32);
+
     function RowPtrs : TPRGB32Array;
     procedure LoadFromMemory(Memory: PRGB32; AWidth, AHeight: Int32);
     procedure LoadFromTBitmap(bmp: TBitmap);
@@ -791,7 +793,7 @@ begin
   ArrDataToRawImage(FData, Point(Width, Height), Result);
 end;
 
-procedure TMufasaBitmap.DrawMatrix(const matrix: T2DIntegerArray);
+procedure TMufasaBitmap.DrawMatrix(const Matrix: T2DIntegerArray);
 var
   x, y, wid, hei: integer;
 begin
@@ -2319,7 +2321,7 @@ begin
   b := t;
 end;
 
-procedure TMufasaBitmap.ThresholdAdaptive(Alpha, Beta: Byte; InvertIt: Boolean; Method: TBmpThreshMethod; C: Integer);
+procedure TMufasaBitmap.ThresholdAdaptive(Alpha, Beta: Byte; DoInvert: Boolean; Method: TBmpThreshMethod; C: Integer);
 var
   i,size: Int32;
   upper: PtrUInt;
@@ -2369,7 +2371,7 @@ begin
     end;
   end;
 
-  if InvertIt then Swap(Alpha, Beta);
+  if DoInvert then Swap(Alpha, Beta);
   for i:=0 to (Threshold-1) do Tab[i] := Alpha;
   for i:=Threshold to 255 do Tab[i] := Beta;
 
@@ -2381,6 +2383,28 @@ begin
     ptr^.B := 0;
     ptr^.A := 0;
     Inc(ptr);
+  end;
+end;
+
+procedure TMufasaBitmap.Pad(Amount: Int32);
+var
+  OldWidth, OldHeight: Int32;
+  Y: Int32;
+begin
+  OldWidth := FWidth;
+  OldHeight := FHeight;
+
+  SetSize(FWidth + (Amount * 2), FHeight + (Amount * 2));
+
+  for Y := OldHeight downto 0 do
+  begin
+    Move(FData[Y * FWidth], FData[(Y + Amount) * FWidth + Amount], OldWidth * SizeOf(TRGB32));
+
+    // clear old pixels
+    if Y < Amount then
+      FillByte(FData[Y * FWidth], OldWidth * SizeOf(TRGB32), 0)
+    else
+      FillByte(FData[Y * FWidth], Amount * SizeOf(TRGB32), 0);
   end;
 end;
 

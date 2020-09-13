@@ -86,19 +86,23 @@ var
 begin
   Result := False;
 
-  if FileExistsUTF8(FileName) then
+  if FileExists(FileName) then
   begin
     FileName := ExpandFileName(FileName);
-    Result := True;
-    Exit;
+    if not FilenamesCaseSensitive then
+      FileName := LowerCase(FileName);
+
+    Exit(True);
   end;
 
   for I := 0 to High(Directories) do
-    if FileExistsUTF8(IncludeTrailingPathDelimiter(Directories[I]) + FileName + Extension) then
+    if FileExists(IncludeTrailingPathDelimiter(Directories[I]) + FileName + Extension) then
     begin
       FileName := ExpandFileName(IncludeTrailingPathDelimiter(Directories[I]) + FileName + Extension);
-      Result := True;
-      Exit;
+      if not FilenamesCaseSensitive then
+        FileName := LowerCase(FileName);
+
+      Exit(True);
     end;
 end;
 

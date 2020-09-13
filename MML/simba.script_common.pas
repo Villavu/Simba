@@ -36,7 +36,6 @@ type
   TSimbaScript_DebuggerEventArray = array of TSimbaScript_DebuggerEvent;
 
   TSimbaMethod_ScriptError = packed record
-    Message: array[1..2048] of Char;
     FileName: ShortString;
     Line: Int32;
     Column: Int32;

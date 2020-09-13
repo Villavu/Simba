@@ -297,9 +297,12 @@ end;
 
 procedure TSimbaScriptInstance.OnDestroyProcess(Sender: TObject);
 begin
-  FOutputThread.Terminate();
-  FOutputThread.WaitFor();
-  FOutputThread.Free();
+  if (FOutputThread <> nil) then
+  begin
+    FOutputThread.Terminate();
+    FOutputThread.WaitFor();
+    FOutputThread.Free();
+  end;
 end;
 
 function TSimbaScriptInstance.GetTimeRunning: UInt64;

@@ -125,6 +125,7 @@ type
   T2DIntegerArray = T2DIntArray;
   P2DIntegerArray = ^T2DIntegerArray;
 
+  PByteArray = ^TByteArray;
   TByteArray = array of Byte;
   T2DByteArray = array of TByteArray;
 

@@ -106,7 +106,7 @@ end;
 
 procedure TOSWindow_Helper.Kill;
 begin
-  fpkill(Self.GetPID(), SIGTERM);
+  fpkill(Self.GetPID(), SIGKILL);
 end;
 
 function GetWindows: TOSWindowArray;
