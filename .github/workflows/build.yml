@@ -6,134 +6,129 @@ name: Build
 on: [push, pull_request]
 
 jobs:
-  Build:
+  build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
-    env: 
-      OS: ${{ matrix.config.os }}
-      NAME: ${{ matrix.config.name }}
-      LAZ_VER: ${{ matrix.config.LAZ_VER }}
-      FPC_VER: ${{ matrix.config.FPC_VER }}
-      LAZ_OPT: ${{ matrix.config.LAZ_OPT }}
-      ARTIFACT: ${{ matrix.config.ARTIFACT }}
-      TESTS: ${{ matrix.config.TESTS }}
-      FPCUP: ${{ matrix.config.FPCUP }}
-      FPCUP_OPT: ${{ matrix.config.FPCUP_OPT }}
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
         config:
           - os: windows-latest
             name: 'Windows 32'
-            FPCUP: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.8z/fpclazup-i386-win32.exe'
-            FPC_VER: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
-            LAZ_VER: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
-            LAZ_OPT: '--build-mode=SIMBA_WIN32'
-            TESTS: 'true'
-            ARTIFACT: 'Simba-Win32.exe'
+            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.8z/fpclazup-i386-win32.exe'
+            fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
+            laz-url: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
+            simba-opt: '--build-mode=SIMBA_WIN32'
+            run-tests: 'true'
+            binary: 'Simba-Win32.exe'
 
           - os: windows-latest
             name: 'Windows 64'
-            FPCUP: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.8z/fpclazup-x86_64-win64.exe'
-            FPC_VER: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
-            LAZ_VER: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
-            LAZ_OPT: '--build-mode=SIMBA_WIN64'
-            TESTS: 'true'
-            ARTIFACT: 'Simba-Win64.exe'
+            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.8z/fpclazup-x86_64-win64.exe'
+            fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
+            laz-url: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
+            simba-opt: '--build-mode=SIMBA_WIN64'
+            run-tests: 'true'
+            binary: 'Simba-Win64.exe'
 
           - os: ubuntu-latest
             name: 'Linux 64'
-            FPCUP: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.8z/fpclazup-x86_64-linux'
-            FPC_VER: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
-            LAZ_VER: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
-            LAZ_OPT: '--build-mode=SIMBA_LINUX64'
-            TESTS: 'true'
-            ARTIFACT: 'Simba-Linux64'
+            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.8z/fpclazup-x86_64-linux'
+            fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
+            laz-url: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
+            simba-opt: '--build-mode=SIMBA_LINUX64'
+            run-tests: 'true'
+            binary: 'Simba-Linux64'
 
           - os: macos-latest
             name: 'MacOS 64'
-            FPCUP: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.8z/fpclazup-x86_64-darwin'
-            FPCUP_OPT: '--lclplatform=cocoa --fpcOPT="-g -gl"'
-            FPC_VER: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
-            LAZ_VER: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
-            LAZ_OPT: '--build-mode=SIMBA_DARWIN64'
-            TESTS: 'true'
-            ARTIFACT: 'Simba-Darwin64.zip'
+            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.8z/fpclazup-x86_64-darwin'
+            fpcup-opt: '--lclplatform=cocoa'
+            fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
+            laz-url: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
+            simba-opt: '--build-mode=SIMBA_DARWIN64'
+            run-tests: 'true'
+            binary: 'Simba-Darwin64.zip'
 
           - os: ubuntu-latest
             name: 'AArch64'
-            FPCUP: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.8z/fpclazup-x86_64-linux'
-            FPC_VER: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
-            LAZ_VER: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
-            LAZ_OPT: '--build-mode=SIMBA_AARCH64'
-            ARTIFACT: 'Simba-AArch64'
+            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.8z/fpclazup-x86_64-linux'
+            fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
+            laz-url: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
+            simba-opt: '--build-mode=SIMBA_AARCH64'
+            binary: 'Simba-AArch64'
 
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
 
-    - name: Install Dependencies (Linux)
-      if: env.OS == 'ubuntu-latest'
-      shell: bash
+    - name: Install Dependencies (Ubuntu)
+      if: matrix.config.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
         sudo apt-get -m -y install libgtk2.0-dev libpango1.0-dev libffi-dev libxtst-dev xvfb 
         Xvfb :1 &
-    
-    - name: Generate Cache Hash
-      run: echo ${{ env.FPCUP }}${{ env.FPCUP_OPT }}${{ env.FPC_VER }}${{ env.LAZ_VER }}${{ env.NAME }}1 > cache
-    
+
     - name: Cache
       id: cache
       uses: actions/cache@v2.1.1
       with:
-        path: lazarus/
-        key: ${{ hashFiles('cache') }}
+        path: lazarus.tar.gz
+        key: "${{ matrix.config.fpcup-url }}${{ matrix.config.fpcup-opt }}${{ matrix.config.fpc-url }}${{ matrix.config.laz-url }}${{ matrix.config.name }}"
+
+    - name: Extract Lazarus
+      if: steps.cache.outputs.cache-hit == 'true'
+      run: |
+        tar -zxvf lazarus.tar.gz
 
     - name: Install Lazarus
       if: steps.cache.outputs.cache-hit != 'true'
-      shell: bash
       run: |
-        curl --retry 5 -L -o fpcup ${{ env.FPCUP }}
-        mkdir lazarus || true
+        curl --retry 5 -L -o fpcup ${{ matrix.config.fpcup-url }}
         chmod +x fpcup
-        ./fpcup --installdir=lazarus --fpcURL=${{ env.FPC_VER }} --lazURL=${{ env.LAZ_VER }} ${{ env.FPCUP_OPT }} --noconfirm --verbose
+        mkdir lazarus
+        ./fpcup --installdir=lazarus --fpcURL=${{ matrix.config.fpc-url }} --lazURL=${{ matrix.config.laz-url }} ${{ matrix.config.fpcup-opt }} --noconfirm --verbose
 
     - name: Install AArch64 Cross Compiler
-      if: steps.cache.outputs.cache-hit != 'true' && env.NAME == 'AArch64'
-      shell: bash
+      if: steps.cache.outputs.cache-hit != 'true' && matrix.config.NAME == 'AArch64'
       run: |
         curl --retry 5 -L -o libs.zip https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/crosslibs_v1.1/CrossLibsLinuxAarch64.zip && unzip -o libs.zip -d lazarus/
         curl --retry 5 -L -o bins.zip https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/linuxx64crossbins_v1.0/CrossBinsLinuxAarch64.zip && unzip -o bins.zip -d lazarus/cross/bin
         ./fpcup --installdir=lazarus --ostarget=linux --cputarget=aarch64 --only="FPCCleanOnly,FPCBuildOnly" --crossbindir=lazarus/cross/bin --crosslibdir=lazarus/cross/lib/aarch64-linux --noconfirm --verbose
 
     - name: Build Simba
-      shell: bash
       run: |
-        ./lazarus/lazarus/lazbuild ${{ env.LAZ_OPT }} "Projects/Simba/Simba.lpi"
+        ./lazarus/lazarus/lazbuild ${{ matrix.config.simba-opt }} "Projects/Simba/Simba.lpi"
 
     - name: Test Simba
-      if: env.TESTS == 'true'
-      shell: bash
+      if: matrix.config.run-tests == 'true'
       run: |
         export DISPLAY=:1
         chmod +x Projects/SimbaScript/SimbaScript
         ./Projects/SimbaScript/SimbaScript --run Tests/simba
+        
+    - name: Compress Lazarus
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        tar zcvf lazarus.tar.gz lazarus
 
     - name: Upload Artifact 
       uses: actions/upload-artifact@v2.1.3
       with:
-        path: ${{ env.ARTIFACT }}
+        path: ${{ matrix.config.binary }}
 
-  Upload:
+  upload:
     runs-on: ubuntu-latest
     steps:
     - name: Wait for builds to complete
       uses: Brandon-T/wait-for-check-action@v1
       with: 
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_names: '["Windows 32", "Windows 64", "Linux 64", "MacOS 64", "AArch64"]'
+        check_names: '["Windows 32", "Windows 64", "Linux 64", "AArch64", "MacOS 64"]'
         statuses: '["completed", "completed", "completed", "completed", "completed"]'
         conclusions: '["success", "success", "success", "success", "success"]'
         timeout: 1500

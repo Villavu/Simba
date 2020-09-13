@@ -34,8 +34,12 @@ var
   Tar: TTarArchive;
   Entry: TTarDirRec;
   Path, Directory: String;
+  Position, Size: Int64;
 begin
   inherited Extract();
+
+  Position := 0;
+  Size := 0;
 
   Stream := Self.Decompress();
 
@@ -48,11 +52,11 @@ begin
       begin
         if Entry.Name = HEADER_FILENAME then
         begin
-          FSize := FSize + Entry.Size;
+          Size := Size + Entry.Size;
 
           if Tar.FindNext(Entry) then
           begin
-            FSize := FSize + Entry.Size;
+            Size := Size + Entry.Size;
 
             Directory := Entry.Name;
           end;
@@ -61,7 +65,7 @@ begin
 
         while Tar.FindNext(Entry) do
         begin
-          FSize := FSize + Entry.Size;
+          Size := Size + Entry.Size;
           if (Copy(Entry.Name, 1, Length(Directory)) <> Directory) then
             Directory := '';
         end;
@@ -88,9 +92,9 @@ begin
             ForceDirectories(Path);
         end;
 
-        FPosition := FPosition + Entry.Size;
+        Position := Position + Entry.Size;
         if (FOnProgress <> nil) then
-          FOnProgress(Self, Path, FPosition, FSize);
+          FOnProgress(Self, Path, Position, Size);
       end;
     finally
       Tar.Free();

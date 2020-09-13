@@ -5,30 +5,23 @@ unit simbascript.dumper;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils,
+  simbascript.task;
 
 type
-  TSimbaScript_PluginDumper = class(TThread)
+  TSimbaScript_PluginDumper = class(TSimbaScriptTask)
   protected
     procedure Execute; override;
   public
-    OnDestroyed: TNotifyEvent;
-
     Plugin: String;
     Output: String;
-
-    destructor Destroy; override;
   end;
 
-  TSimbaScript_CompilerDumper = class(TThread)
+  TSimbaScript_CompilerDumper = class(TSimbaScriptTask)
   protected
     procedure Execute; override;
   public
-    OnDestroyed: TNotifyEvent;
-
     Output: String;
-
-    destructor Destroy; override;
   end;
 
 implementation
@@ -40,14 +33,6 @@ procedure TSimbaScript_PluginDumper.Execute;
 begin
   with TSimbaScriptPlugin.Create(Plugin) do // Don't free plugin, it's not worth it. Let the OS clean up...
     Dump.SaveToFile(Output);
-end;
-
-destructor TSimbaScript_PluginDumper.Destroy;
-begin
-  inherited Destroy();
-
-  if (OnDestroyed <> nil) then
-    OnDestroyed(Self);
 end;
 
 procedure TSimbaScript_CompilerDumper.Execute;
@@ -62,14 +47,6 @@ begin
     if (Compiler <> nil) then
       Compiler.Free();
   end;
-end;
-
-destructor TSimbaScript_CompilerDumper.Destroy;
-begin
-  inherited Destroy();
-
-  if (OnDestroyed <> nil) then
-    OnDestroyed(Self);
 end;
 
 end.

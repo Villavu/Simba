@@ -26,11 +26,11 @@ type
     FOutputPath: String;
     FFlat: Boolean;
     FOnProgress: TSimbaArchiveProgressEvent;
-    FPosition: Int32;
-    FSize: Int32;
+
+    procedure SetOutputPath(Value: String);
   public
     property InputStream: TStream read FInputStream write FInputStream;
-    property OutputPath: String read FOutputPath write FOutputPath;
+    property OutputPath: String read FOutputPath write SetOutputPath;
     property Flat: Boolean read FFlat write FFlat;
     property OnProgress: TSimbaArchiveProgressEvent read FOnProgress write FOnProgress;
 
@@ -39,11 +39,13 @@ type
 
 implementation
 
+procedure TSimbaArchiveExtractor.SetOutputPath(Value: String);
+begin
+  FOutputPath := SetDirSeparators(IncludeTrailingPathDelimiter(Value));
+end;
+
 procedure TSimbaArchiveExtractor.Extract;
 begin
-  FPosition := 0;
-  FSize := 0;
-  FOutputPath := SetDirSeparators(IncludeTrailingPathDelimiter(FOutputPath));
   FInputStream.Position := 0;
 end;
 

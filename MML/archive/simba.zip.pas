@@ -11,76 +11,76 @@ uses
 type
   TSimbaZipExtractor = class(TSimbaArchiveExtractor)
   protected
-    FDirectory: String;
-    FIsDirectory: Boolean;
+    FRootIsDirectory: Int32;
 
-    procedure CreateFileStream(Sender: TObject; var Stream: TStream; Item: TFullZipFileEntry);
-    procedure CreateInputStream(Sender: TObject; var Stream: TStream);
+    procedure DoProgress(Sender : TObject; const Position, Size: Int64);
+    procedure DoCreateInputStream(Sender: TObject; var Stream: TStream);
+    procedure DoCreateFileStream(Sender: TObject; var Stream: TStream; Item: TFullZipFileEntry);
   public
     procedure Extract; override;
   end;
 
 implementation
 
-procedure TSimbaZipExtractor.CreateFileStream(Sender: TObject; var Stream: TStream; Item: TFullZipFileEntry);
+procedure TSimbaZipExtractor.DoProgress(Sender: TObject; const Position, Size: Int64);
 begin
-  if FFlat then
-    Item.DiskFileName := FOutputPath + ExtractFileName(Item.ArchiveFileName)
-  else
-  if FIsDirectory then
-    Item.DiskFileName := FOutputPath + Item.ArchiveFileName.SubString(Length(FDirectory))
-  else
-    Item.DiskFileName := FOutputPath + Item.ArchiveFileName;
-
-  ForceDirectories(ExtractFilePath(Item.DiskFileName));
-
-  if Item.IsDirectory then
-    Stream := TStringStream.Create('')
-  else
-    Stream := TFileStream.Create(Item.DiskFileName, fmCreate);
-
-  FPosition := FPosition + Item.Size;
-
-  if (FOnProgress <> nil) then
-    FOnProgress(Self, Item.DiskFileName, FPosition, FSize);
+  if (OnProgress <> nil) then
+    OnProgress(Self, '', Position, Size);
 end;
 
-procedure TSimbaZipExtractor.CreateInputStream(Sender: TObject; var Stream: TStream);
+procedure TSimbaZipExtractor.DoCreateInputStream(Sender: TObject; var Stream: TStream);
 begin
   Stream := TMemoryStream.Create();
   Stream.CopyFrom(FInputStream, 0);
 end;
 
+procedure TSimbaZipExtractor.DoCreateFileStream(Sender: TObject; var Stream: TStream; Item: TFullZipFileEntry);
+var
+  FileName: String;
+begin
+  if FFlat then
+  begin
+    if not Item.IsDirectory then
+      Stream := TFileStream.Create(FOutputPath + ExtractFileName(Item.DiskFileName), fmCreate);
+  end else
+  begin
+    FileName := FOutputPath + Copy(Item.DiskFileName, FRootIsDirectory, Length(Item.DiskFileName));
+    if Item.IsDirectory then
+      ForceDirectories(FileName)
+    else
+      Stream := TFileStream.Create(FileName, fmCreate);
+  end;
+end;
+
 procedure TSimbaZipExtractor.Extract;
 var
   Zipper: TUnZipper;
-  i: Int32;
+  I: Int32;
 begin
   inherited Extract();
 
-  FOutputPath := SetDirSeparators(IncludeTrailingPathDelimiter(FOutputPath));
-  FIsDirectory := False;
-  FDirectory := '';
-
   Zipper := TUnZipper.Create();
-  Zipper.OnCreateStream := @CreateFileStream;
-  Zipper.OnOpenInputStream := @CreateInputStream;
+  Zipper.OutputPath := FOutputPath;
+  Zipper.OnOpenInputStream := @DoCreateInputStream;
+  Zipper.OnCreateStream := @DoCreateFileStream;
+  Zipper.OnProgressEx := @DoProgress;
+
+  ForceDirectories(FOutputPath);
 
   try
     Zipper.Examine();
 
-    if Zipper.Entries.Count > 0 then
+    if (Zipper.Entries.Count > 0) then
     begin
-      FDirectory := Zipper.Entries[0].ArchiveFileName;
+      FRootIsDirectory := Length(Zipper.Entries[0].ArchiveFileName) + 1;
 
-      for i := 0 to Zipper.Entries.Count - 1 do
-      begin
-        FSize := FSize + Zipper.Entries[i].Size;
-        if Copy(Zipper.Entries[i].ArchiveFileName, 1, Length(FDirectory)) <> FDirectory then
-          FDirectory := '';
-      end;
+      for I := 1 to Zipper.Entries.Count - 1 do
+        if not Zipper.Entries[I].ArchiveFileName.StartsWith(Zipper.Entries[0].ArchiveFileName) then
+        begin
+          FRootIsDirectory := 0;
 
-      FIsDirectory := FDirectory <> '';
+          Break;
+        end;
     end;
 
     Zipper.UnZipAllFiles();
