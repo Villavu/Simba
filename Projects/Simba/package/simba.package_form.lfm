@@ -1,16 +1,16 @@
 object SimbaPackageForm: TSimbaPackageForm
   Tag = 1
-  Left = 479
+  Left = 3
   Height = 542
-  Top = 739
+  Top = 701
   Width = 800
-  Caption = 'Simba Packages'
+  Caption = 'Packages'
   ClientHeight = 542
   ClientWidth = 800
   OnShow = DoFormShow
   Position = poScreenCenter
   ShowHint = True
-  LCLVersion = '2.0.4.0'
+  LCLVersion = '2.0.10.0'
   object DisabledLabel: TLabel
     AnchorSideLeft.Control = PackagesListBox
     AnchorSideLeft.Side = asrBottom
@@ -471,13 +471,13 @@ object SimbaPackageForm: TSimbaPackageForm
     end
   end
   object SelectDirectoryDialog: TSelectDirectoryDialog
-    left = 56
-    top = 176
+    Left = 56
+    Top = 176
   end
   object PackageListPopup: TPopupMenu
     Images = Images
-    left = 56
-    top = 56
+    Left = 56
+    Top = 56
     object PackageListPopup_VistRepository: TMenuItem
       Caption = 'Visit Repository'
       ImageIndex = 2
@@ -491,8 +491,8 @@ object SimbaPackageForm: TSimbaPackageForm
   end
   object Images: TImageList
     Scaled = True
-    left = 56
-    top = 120
+    Left = 56
+    Top = 120
     Bitmap = {
       4C69040000001000000010000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
@@ -748,7 +748,7 @@ object SimbaPackageForm: TSimbaPackageForm
   end
   object UpdateTimer: TTimer
     OnTimer = DoUpdateTimer
-    left = 56
-    top = 236
+    Left = 56
+    Top = 236
   end
 end

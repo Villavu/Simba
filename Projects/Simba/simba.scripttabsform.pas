@@ -1,9 +1,6 @@
 unit simba.scripttabsform;
 
 {$mode objfpc}{$H+}
-{$IFDEF DARWIN}
-  {$DEFINE USE_SIMPLE_DIALOG}
-{$ENDIF}
 
 interface
 
@@ -95,7 +92,7 @@ type
     procedure OpenDeclaration(Header: String; StartPos, EndPos, Line: Int32; FileName: String; Internal: Boolean); overload;
     procedure OpenDeclaration(Declaration: TDeclaration); overload;
 
-    constructor Create(TheOwner: TComponent); override;
+    constructor Create(AOwner: TComponent); override;
   end;
 
 var
@@ -105,7 +102,7 @@ implementation
 
 uses
   syneditpointclasses,
-  simba.settings, simba.main, simba.debugform, simba.scripttabhistory, simba.oswindow, simba.simplefiledialog;
+  simba.settings, simba.main, simba.debugform, simba.scripttabhistory, simba.oswindow;
 
 procedure TSimbaScriptTabsForm.DoEditorPopupShow(Sender: TObject);
 var
@@ -591,20 +588,6 @@ var
   I: Int32;
 begin
   try
-    {$IFDEF USE_SIMPLE_DIALOG}
-    with TSimbaFileDialog.Create(Self) do
-    try
-      if (CurrentTab.FileName = '') then
-        ChangeDirectory(SimbaSettings.Environment.ScriptPath.Value)
-      else
-        ChangeDirectory(ExtractFileDir(CurrentTab.FileName));
-
-      if Execute() and FileExists(FileName) then
-        Open(FileName);
-    finally
-      Free();
-    end;
-    {$ELSE}
     OpenDialog.InitialDir := ExtractFileDir(CurrentTab.FileName);
     if OpenDialog.InitialDir = '' then
       OpenDialog.InitialDir := SimbaSettings.Environment.ScriptPath.Value;
@@ -612,7 +595,6 @@ begin
     if OpenDialog.Execute() then
       for I := 0 to OpenDialog.Files.Count - 1 do
         Open(OpenDialog.Files[I], True);
-    {$ENDIF}
   except
     on E: Exception do
       ShowMessage('Exception while opening file: ' + E.Message);
@@ -684,28 +666,9 @@ begin
   end;
 end;
 
-constructor TSimbaScriptTabsForm.Create(TheOwner: TComponent);
-var
-  I, J: Int32;
-  Key: UInt16;
-  Shift: TShiftState;
+constructor TSimbaScriptTabsForm.Create(AOwner: TComponent);
 begin
-  inherited Create(TheOwner);
-
-  {$IFDEF DARWIN}
-  for I := 0 to EditorPopupMenu.Items.Count - 1 do
-    for J := 0 to EditorPopupMenu.Items[I].Count - 1 do
-    begin
-      ShortCutToKey(EditorPopupMenu.Items[I].Items[J].ShortCut, Key, Shift);
-
-      if ssCtrl in Shift then
-      begin
-        Shift := Shift - [ssCtrl] + [ssMeta];
-
-        EditorPopupMenu.Items[I].Items[J].ShortCut := ShortCut(Key, Shift);
-      end;
-    end;
-  {$ENDIF}
+  inherited Create(AOwner);
 
   AddTab();
 end;

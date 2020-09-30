@@ -1,22 +1,21 @@
 object SimbaForm: TSimbaForm
-  Left = 797
-  Height = 276
-  Top = 433
-  Width = 443
+  Left = 749
+  Height = 430
+  Top = 386
+  Width = 515
   Caption = 'Simba'
-  ClientHeight = 256
-  ClientWidth = 443
+  ClientHeight = 410
+  ClientWidth = 515
   Menu = MainMenu
   OnClose = FormClose
+  OnCreate = FormCreate
   OnDestroy = FormDestroy
-  OnResize = FormResize
-  Position = poScreenCenter
   LCLVersion = '2.0.10.0'
   object ToolBar: TToolBar
     Left = 0
     Height = 36
     Top = 0
-    Width = 443
+    Width = 515
     AutoSize = True
     ButtonHeight = 32
     ButtonWidth = 32
@@ -27,7 +26,7 @@ object SimbaForm: TSimbaForm
     ParentShowHint = False
     ShowHint = True
     TabOrder = 0
-    OnResize = FormResize
+    OnResize = DoToolbarResize
     object RunButton: TToolButton
       Left = 171
       Hint = 'Run Script (Shift + Ctrl + R)'
@@ -350,10 +349,10 @@ object SimbaForm: TSimbaForm
     object MenuTools: TMenuItem
       Caption = '&Tools'
       SubMenuImages = Images
-      object MenuItemSettingsSimpleButton: TMenuItem
+      object MenuItemSettings: TMenuItem
         Caption = 'Settings'
         ImageIndex = 21
-        OnClick = MenuItemSettingsSimpleButtonClick
+        OnClick = MenuItemSettingsClick
       end
       object MenuItem6: TMenuItem
         Caption = '-'
@@ -372,11 +371,11 @@ object SimbaForm: TSimbaForm
       end
       object MenuItemACA: TMenuItem
         Caption = 'ACA'
-        OnClick = ShowACA
+        OnClick = DoMenuItemACAClick
       end
       object MenuItemDTMEditor: TMenuItem
         Caption = 'DTM Editor'
-        OnClick = ShowDTMEditor
+        OnClick = DoMenuItemDTMEditorClick
       end
       object MenuItemDivider10: TMenuItem
         Caption = '-'
@@ -410,37 +409,30 @@ object SimbaForm: TSimbaForm
       object MenuItemColourHistory: TMenuItem
         AutoCheck = True
         Caption = '&Colour History'
-        OnClick = HandleMenuViewClick
       end
       object MenuItemDebugImage: TMenuItem
         AutoCheck = True
         Caption = '&Debug Image'
-        OnClick = HandleMenuViewClick
       end
       object MenuItemEditor: TMenuItem
         AutoCheck = True
         Caption = 'Editor'
-        OnClick = HandleMenuViewClick
       end
       object MenuItemFunctionList: TMenuItem
         AutoCheck = True
         Caption = '&Function List'
-        OnClick = HandleMenuViewClick
       end
       object MenuItemNotes: TMenuItem
         AutoCheck = True
         Caption = '&Notes'
-        OnClick = HandleMenuViewClick
       end
       object MenuItemFileBrowser: TMenuItem
         AutoCheck = True
         Caption = 'File Browser'
-        OnClick = HandleMenuViewClick
       end
       object MenuItemOutput: TMenuItem
         AutoCheck = True
         Caption = 'Output'
-        OnClick = HandleMenuViewClick
       end
       object MenuItemDebugger: TMenuItem
         Caption = 'Debugger'
@@ -451,7 +443,7 @@ object SimbaForm: TSimbaForm
       end
       object MenuItemResetLayout: TMenuItem
         Caption = 'Reset Layout'
-        OnClick = HandleResetLayoutClick
+        OnClick = DoResetLayoutClick
       end
       object MenuItemLockLayout: TMenuItem
         AutoCheck = True
@@ -518,43 +510,6 @@ object SimbaForm: TSimbaForm
     OnClick = TrayIconClick
     Left = 88
     Top = 48
-  end
-  object TrayPopup: TPopupMenu
-    OnPopup = TrayPopupPopup
-    Left = 744
-    Top = 48
-    object TrayStop: TMenuItem
-      Caption = '&Stop'
-      Enabled = False
-      ShortCut = 113
-      OnClick = MenuStopClick
-    end
-    object TrayPause: TMenuItem
-      Caption = '&Pause'
-      Enabled = False
-      OnClick = MenuPauseClick
-    end
-    object TrayPlay: TMenuItem
-      Caption = '&Run'
-      ShortCut = 120
-      OnClick = MenuRunClick
-    end
-    object TrayDivider: TMenuItem
-      Caption = '-'
-    end
-    object MenuItemShow: TMenuItem
-      Caption = 'Show'
-      OnClick = MenuItemShowClick
-    end
-    object MenuItemHide: TMenuItem
-      Caption = 'Hide'
-      OnClick = MenuItemHideClick
-    end
-    object MenuItemExit: TMenuItem
-      Caption = '&Exit'
-      ImageIndex = 25
-      OnClick = MenuExitClick
-    end
   end
   object ScriptProcessorTimer: TTimer
     Enabled = False
@@ -3395,5 +3350,15 @@ object SimbaForm: TSimbaForm
       F6A98A5F566E45DA57456EDBC37C99A59CF71655F9BB048EE2F7A06F059698DD
       9688AFD1A195C6FBB2CD3E9572CEFFA3EB7F0062B083FD
     }
+  end
+  object TrayPopup: TPopupMenu
+    Images = Images
+    Left = 226
+    Top = 48
+    object TrayPopupExit: TMenuItem
+      Caption = 'Exit'
+      ImageIndex = 8
+      OnClick = DoTrayPopupExit
+    end
   end
 end

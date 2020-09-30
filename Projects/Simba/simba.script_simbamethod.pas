@@ -37,10 +37,10 @@ type
 implementation
 
 uses
-  graphtype, extctrls, forms,
+  extctrls, forms,
   simba.debugimage, simba.debugform, simba.scripttabsform, simba.mufasatypes,
   simba.main, simba.scripttab, simba.bitmap, simba.oswindow, simba.scriptinstance,
-  simba.debuggerform;
+  simba.debuggerform, simba.dockinghelpers;
 
 procedure TSimbaMethod._GetPID;
 begin
@@ -119,11 +119,14 @@ begin
   Params.Read(Width, SizeOf(Int32));
   Params.Read(Height, SizeOf(Int32));
 
-  SimbaForm.ShowForm(SimbaDebugImageForm);
+  SimbaDockingHelper.ShowOnTop(SimbaDebugImageForm);
 
   // Only resize if needed
   if (Width <> SimbaDebugImageForm.ImageBox.Background.Width) or (Height <> SimbaDebugImageForm.ImageBox.Background.Height) then
-    SimbaDebugImageForm.SetDimensions(Width, Height);
+  begin
+    SimbaDockingHelper.Resize(SimbaDebugImageForm, Width, Height);
+    SimbaDockingHelper.EnsureVisible(SimbaDebugForm);
+  end;
 
   SimbaDebugImageForm.ImageBox.Background.LoadFromPointer(PRGB32(Params.Memory + Params.Position), Width, Height);
   SimbaDebugImageForm.ImageBox.BackgroundChanged(False);
@@ -149,9 +152,9 @@ begin
   Params.Read(Width, SizeOf(Int32));
   Params.Read(Height, SizeOf(Int32));
 
-  SimbaDebugImageForm.SetDimensions(Width, Height);
-
-  SimbaForm.ShowForm(SimbaDebugImageForm);
+  SimbaDockingHelper.Resize(SimbaDebugImageForm, Width, Height);
+  SimbaDockingHelper.EnsureVisible(SimbaDebugForm);
+  SimbaDockingHelper.ShowOnTop(SimbaDebugImageForm);
 end;
 
 procedure TSimbaMethod._DebugImageClear;

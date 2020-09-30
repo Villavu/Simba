@@ -194,6 +194,8 @@ begin
   Assert(GetCurrentThreadId() = MainThreadID);
 
   FUpdating := False;
+  if (SimbaScriptTabsForm = nil) then
+    Exit;
 
   for I := 0 to SimbaScriptTabsForm.TabCount - 1 do
   begin

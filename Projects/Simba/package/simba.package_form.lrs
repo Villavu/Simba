@@ -1,327 +1,327 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TSimbaPackageForm','FORMDATA',[
-  'TPF0'#17'TSimbaPackageForm'#16'SimbaPackageForm'#3'Tag'#2#1#4'Left'#3#223#1#6
-  +'Height'#3#30#2#3'Top'#3#227#2#5'Width'#3' '#3#7'Caption'#6#14'Simba Package'
-  +'s'#12'ClientHeight'#3#30#2#11'ClientWidth'#3' '#3#6'OnShow'#7#10'DoFormShow'
-  +#8'Position'#7#14'poScreenCenter'#8'ShowHint'#9#10'LCLVersion'#6#7'2.0.4.0'#0
-  +#6'TLabel'#13'DisabledLabel'#22'AnchorSideLeft.Control'#7#15'PackagesListBox'
-  +#19'AnchorSideLeft.Side'#7#9'asrBottom'#21'AnchorSideTop.Control'#7#15'Packa'
-  +'gesListBox'#23'AnchorSideRight.Control'#7#5'Owner'#20'AnchorSideRight.Side'
-  +#7#9'asrBottom'#24'AnchorSideBottom.Control'#7#15'PackagesListBox'#21'Anchor'
-  +'SideBottom.Side'#7#9'asrBottom'#4'Left'#3#144#0#6'Height'#3#216#1#3'Top'#2
-  +#24#5'Width'#3#144#2#9'Alignment'#7#8'taCenter'#7'Anchors'#11#5'akTop'#6'akL'
-  +'eft'#7'akRight'#8'akBottom'#0#7'Caption'#6#21'(no package selected)'#6'Layo'
-  +'ut'#7#8'tlCenter'#11'ParentColor'#8#0#0#8'TListBox'#15'PackagesListBox'#22
-  +'AnchorSideLeft.Control'#7#5'Owner'#21'AnchorSideTop.Control'#7#16'AddPackag'
-  +'eButton'#18'AnchorSideTop.Side'#7#9'asrBottom'#24'AnchorSideBottom.Control'
-  +#7#11'ButtonPanel'#4'Left'#2#5#6'Height'#3#216#1#3'Top'#2#24#5'Width'#3#139#0
-  +#7'Anchors'#11#5'akTop'#6'akLeft'#8'akBottom'#0#18'BorderSpacing.Left'#2#5#10
-  +'ItemHeight'#2#0#14'OnContextPopup'#7#18'DoPackageListPopup'#11'OnMouseDown'
-  +#7#25'HandePackageListMouseDown'#17'OnSelectionChange'#7#24'DoSelectedPackag'
-  +'eChanged'#7'Options'#11#0#9'PopupMenu'#7#16'PackageListPopup'#8'TabOrder'#2
-  +#0#0#0#12'TSpeedButton'#16'AddPackageButton'#21'AnchorSideTop.Control'#7#5'O'
-  +'wner'#23'AnchorSideRight.Control'#7#15'PackagesListBox'#20'AnchorSideRight.'
-  +'Side'#7#9'asrBottom'#4'Left'#2'z'#6'Height'#2#22#4'Hint'#6#11'Add Package'#3
-  +'Top'#2#1#5'Width'#2#22#7'Anchors'#11#5'akTop'#7'akRight'#0#18'BorderSpacing'
-  +'.Left'#2#1#17'BorderSpacing.Top'#2#1#20'BorderSpacing.Bottom'#2#1#4'Flat'#9
-  +#6'Images'#7#6'Images'#10'ImageIndex'#2#0#7'OnClick'#7#17'DoAddPackageClick'
-  +#10'ParentFont'#8#0#0#12'TButtonPanel'#11'ButtonPanel'#3'Tag'#2#1#4'Left'#2#6
-  +#6'Height'#2'"'#3'Top'#3#246#1#5'Width'#3#20#3#13'OKButton.Name'#6#8'OKButto'
-  +'n'#23'OKButton.DefaultCaption'#9#15'HelpButton.Name'#6#10'HelpButton'#25'He'
-  +'lpButton.DefaultCaption'#9#16'CloseButton.Name'#6#11'CloseButton'#15'CloseB'
-  +'utton.Tag'#2#1#26'CloseButton.DefaultCaption'#9#17'CancelButton.Name'#6#12
-  +'CancelButton'#27'CancelButton.DefaultCaption'#9#8'TabOrder'#2#1#11'ShowButt'
-  +'ons'#11#7'pbClose'#0#0#6'TLabel'#11'StatusLabel'#3'Tag'#2#1#22'AnchorSideLe'
-  +'ft.Control'#7#11'ButtonPanel'#21'AnchorSideTop.Control'#7#11'ButtonPanel'#23
-  +'AnchorSideRight.Control'#7#11'ButtonPanel'#20'AnchorSideRight.Side'#7#9'asr'
-  +'Bottom'#24'AnchorSideBottom.Control'#7#11'ButtonPanel'#21'AnchorSideBottom.'
-  +'Side'#7#9'asrBottom'#4'Left'#2#5#6'Height'#2#20#3'Top'#2#10#5'Width'#3#171#2
-  +#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#8'akBottom'#0#8'AutoSize'#8#18
-  +'BorderSpacing.Left'#2#5#17'BorderSpacing.Top'#2#10#19'BorderSpacing.Right'#2
-  +'d'#20'BorderSpacing.Bottom'#2#4#6'Layout'#7#8'tlCenter'#11'ParentColor'#8#0
-  +#0#0#12'TSpeedButton'#19'RemovePackageButton'#21'AnchorSideTop.Control'#7#16
-  +'AddPackageButton'#23'AnchorSideRight.Control'#7#16'AddPackageButton'#4'Left'
-  +#2'c'#6'Height'#2#22#4'Hint'#6#14'Remove Package'#3'Top'#2#1#5'Width'#2#22#7
-  +'Anchors'#11#5'akTop'#7'akRight'#0#4'Flat'#9#6'Images'#7#6'Images'#10'ImageI'
-  +'ndex'#2#1#7'OnClick'#7#20'DoRemovePackageClick'#0#0#6'TPanel'#13'ReleasesPa'
-  +'nel'#22'AnchorSideLeft.Control'#7#15'PackagesListBox'#19'AnchorSideLeft.Sid'
-  +'e'#7#9'asrBottom'#21'AnchorSideTop.Control'#7#15'PackagesListBox'#23'Anchor'
-  +'SideRight.Control'#7#5'Owner'#20'AnchorSideRight.Side'#7#9'asrBottom'#24'An'
-  +'chorSideBottom.Control'#7#17'InstallationPanel'#4'Left'#3#149#0#6'Height'#3
-  +#244#0#3'Top'#2#24#5'Width'#3#134#2#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRig'
-  +'ht'#8'akBottom'#0#8'AutoSize'#9#18'BorderSpacing.Left'#2#5#19'BorderSpacing'
-  +'.Right'#2#5#10'BevelOuter'#7#6'bvNone'#12'ClientHeight'#3#244#0#11'ClientWi'
-  +'dth'#3#134#2#8'TabOrder'#2#2#0#6'TLabel'#17'ReleasesListLabel'#22'AnchorSid'
-  +'eLeft.Control'#7#13'ReleasesPanel'#21'AnchorSideTop.Control'#7#12'ReleasesL'
-  +'ist'#18'AnchorSideTop.Side'#7#9'asrCenter'#21'AnchorSideBottom.Side'#7#9'as'
-  +'rBottom'#4'Left'#2#0#6'Height'#2#15#3'Top'#2'+'#5'Width'#2'K'#7'Caption'#6
-  +#15'Select Version:'#6'Layout'#7#8'tlCenter'#11'ParentColor'#8#0#0#5'TMemo'#9
-  +'NotesMemo'#22'AnchorSideLeft.Control'#7#13'ReleasesPanel'#21'AnchorSideTop.'
-  +'Control'#7#12'ReleasesList'#18'AnchorSideTop.Side'#7#9'asrBottom'#23'Anchor'
-  +'SideRight.Control'#7#13'ReleasesPanel'#20'AnchorSideRight.Side'#7#9'asrBott'
-  +'om'#24'AnchorSideBottom.Control'#7#13'ReleasesPanel'#21'AnchorSideBottom.Si'
-  +'de'#7#9'asrBottom'#4'Left'#2#0#6'Height'#3#173#0#3'Top'#2'B'#5'Width'#3#134
-  +#2#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#8'akBottom'#0#17'BorderSpacin'
-  +'g.Top'#2#5#20'BorderSpacing.Bottom'#2#5#8'ReadOnly'#9#10'ScrollBars'#7#10's'
-  +'sVertical'#8'TabOrder'#2#0#0#0#6'TLabel'#21'InstalledVersionLabel'#22'Ancho'
-  ,'rSideLeft.Control'#7#13'ReleasesPanel'#21'AnchorSideTop.Control'#7#18'Lates'
-  +'tVersionLabel'#18'AnchorSideTop.Side'#7#9'asrBottom'#4'Left'#2#0#6'Height'#2
-  +#15#3'Top'#2#20#5'Width'#2'X'#17'BorderSpacing.Top'#2#5#7'Caption'#6#18'Inst'
-  +'alled Version:'#11'ParentColor'#8#0#0#6'TLabel'#18'LatestVersionLabel'#22'A'
-  +'nchorSideLeft.Control'#7#13'ReleasesPanel'#21'AnchorSideTop.Control'#7#13'R'
-  +'eleasesPanel'#4'Left'#2#0#6'Height'#2#15#3'Top'#2#0#5'Width'#2'N'#7'Caption'
-  +#6#16'Latest Version: '#11'ParentColor'#8#0#0#6'TLabel'#18'UpdatePackageLabe'
-  +'l'#22'AnchorSideLeft.Control'#7#18'LatestVersionLabel'#19'AnchorSideLeft.Si'
-  +'de'#7#9'asrBottom'#21'AnchorSideTop.Control'#7#18'LatestVersionLabel'#24'An'
-  +'chorSideBottom.Control'#7#18'LatestVersionLabel'#21'AnchorSideBottom.Side'#7
-  +#9'asrBottom'#4'Left'#2'Q'#6'Height'#2#15#3'Top'#2#0#5'Width'#2'f'#7'Anchors'
-  +#11#5'akTop'#6'akLeft'#8'akBottom'#0#18'BorderSpacing.Left'#2#3#7'Caption'#6
-  +#19'(check for updates)'#6'Layout'#7#8'tlCenter'#11'ParentColor'#8#7'OnClick'
-  +#7#13'DoUpdateClick'#12'OnMouseEnter'#7#23'DoUpdateLabelMouseEnter'#12'OnMou'
-  +'seLeave'#7#23'DoUpdateLabelMouseLeave'#0#0#9'TComboBox'#12'ReleasesList'#22
-  +'AnchorSideLeft.Control'#7#17'ReleasesListLabel'#19'AnchorSideLeft.Side'#7#9
-  +'asrBottom'#21'AnchorSideTop.Control'#7#21'InstalledVersionLabel'#18'AnchorS'
-  +'ideTop.Side'#7#9'asrBottom'#23'AnchorSideRight.Control'#7#13'ReleasesPanel'
-  +#20'AnchorSideRight.Side'#7#9'asrBottom'#21'AnchorSideBottom.Side'#7#9'asrBo'
-  +'ttom'#4'Left'#2'P'#6'Height'#2#21#3'Top'#2'('#5'Width'#3'6'#2#7'Anchors'#11
-  +#5'akTop'#6'akLeft'#7'akRight'#0#18'BorderSpacing.Left'#2#5#17'BorderSpacing'
-  +'.Top'#2#5#10'ItemHeight'#2#15#8'OnChange'#7#24'DoSelectedReleaseChanged'#10
-  +'OnDrawItem'#7#18'DoReleasesListDraw'#5'Style'#7#16'csOwnerDrawFixed'#8'TabO'
-  +'rder'#2#1#0#0#0#6'TPanel'#17'InstallationPanel'#22'AnchorSideLeft.Control'#7
-  +#13'ReleasesPanel'#18'AnchorSideTop.Side'#7#9'asrBottom'#23'AnchorSideRight.'
-  +'Control'#7#13'ReleasesPanel'#20'AnchorSideRight.Side'#7#9'asrBottom'#24'Anc'
-  +'horSideBottom.Control'#7#11'ButtonPanel'#4'Left'#3#149#0#6'Height'#3#228#0#3
-  +'Top'#3#12#1#5'Width'#3#134#2#7'Anchors'#11#6'akLeft'#7'akRight'#8'akBottom'
-  +#0#8'AutoSize'#9#10'BevelOuter'#7#6'bvNone'#12'ClientHeight'#3#228#0#11'Clie'
-  +'ntWidth'#3#134#2#8'TabOrder'#2#3#0#7'TButton'#13'InstallButton'#22'AnchorSi'
-  +'deLeft.Control'#7#17'InstallationPanel'#21'AnchorSideTop.Control'#7#12'Opti'
-  +'onsGroup'#18'AnchorSideTop.Side'#7#9'asrBottom'#23'AnchorSideRight.Control'
-  +#7#17'InstallationPanel'#20'AnchorSideRight.Side'#7#9'asrBottom'#24'AnchorSi'
-  +'deBottom.Control'#7#17'InstallationPanel'#21'AnchorSideBottom.Side'#7#9'asr'
-  +'Bottom'#4'Left'#2#0#6'Height'#2#25#3'Top'#3#203#0#5'Width'#3#134#2#7'Anchor'
+  'TPF0'#17'TSimbaPackageForm'#16'SimbaPackageForm'#3'Tag'#2#1#4'Left'#2#3#6'He'
+  +'ight'#3#30#2#3'Top'#3#189#2#5'Width'#3' '#3#7'Caption'#6#8'Packages'#12'Cli'
+  +'entHeight'#3#30#2#11'ClientWidth'#3' '#3#6'OnShow'#7#10'DoFormShow'#8'Posit'
+  +'ion'#7#14'poScreenCenter'#8'ShowHint'#9#10'LCLVersion'#6#8'2.0.10.0'#0#6'TL'
+  +'abel'#13'DisabledLabel'#22'AnchorSideLeft.Control'#7#15'PackagesListBox'#19
+  +'AnchorSideLeft.Side'#7#9'asrBottom'#21'AnchorSideTop.Control'#7#15'Packages'
+  +'ListBox'#23'AnchorSideRight.Control'#7#5'Owner'#20'AnchorSideRight.Side'#7#9
+  +'asrBottom'#24'AnchorSideBottom.Control'#7#15'PackagesListBox'#21'AnchorSide'
+  +'Bottom.Side'#7#9'asrBottom'#4'Left'#3#144#0#6'Height'#3#216#1#3'Top'#2#24#5
+  +'Width'#3#144#2#9'Alignment'#7#8'taCenter'#7'Anchors'#11#5'akTop'#6'akLeft'#7
+  +'akRight'#8'akBottom'#0#7'Caption'#6#21'(no package selected)'#6'Layout'#7#8
+  +'tlCenter'#11'ParentColor'#8#0#0#8'TListBox'#15'PackagesListBox'#22'AnchorSi'
+  +'deLeft.Control'#7#5'Owner'#21'AnchorSideTop.Control'#7#16'AddPackageButton'
+  +#18'AnchorSideTop.Side'#7#9'asrBottom'#24'AnchorSideBottom.Control'#7#11'But'
+  +'tonPanel'#4'Left'#2#5#6'Height'#3#216#1#3'Top'#2#24#5'Width'#3#139#0#7'Anch'
+  +'ors'#11#5'akTop'#6'akLeft'#8'akBottom'#0#18'BorderSpacing.Left'#2#5#10'Item'
+  +'Height'#2#0#14'OnContextPopup'#7#18'DoPackageListPopup'#11'OnMouseDown'#7#25
+  +'HandePackageListMouseDown'#17'OnSelectionChange'#7#24'DoSelectedPackageChan'
+  +'ged'#7'Options'#11#0#9'PopupMenu'#7#16'PackageListPopup'#8'TabOrder'#2#0#0#0
+  +#12'TSpeedButton'#16'AddPackageButton'#21'AnchorSideTop.Control'#7#5'Owner'
+  +#23'AnchorSideRight.Control'#7#15'PackagesListBox'#20'AnchorSideRight.Side'#7
+  +#9'asrBottom'#4'Left'#2'z'#6'Height'#2#22#4'Hint'#6#11'Add Package'#3'Top'#2
+  +#1#5'Width'#2#22#7'Anchors'#11#5'akTop'#7'akRight'#0#18'BorderSpacing.Left'#2
+  +#1#17'BorderSpacing.Top'#2#1#20'BorderSpacing.Bottom'#2#1#4'Flat'#9#6'Images'
+  +#7#6'Images'#10'ImageIndex'#2#0#7'OnClick'#7#17'DoAddPackageClick'#10'Parent'
+  +'Font'#8#0#0#12'TButtonPanel'#11'ButtonPanel'#3'Tag'#2#1#4'Left'#2#6#6'Heigh'
+  +'t'#2'"'#3'Top'#3#246#1#5'Width'#3#20#3#13'OKButton.Name'#6#8'OKButton'#23'O'
+  +'KButton.DefaultCaption'#9#15'HelpButton.Name'#6#10'HelpButton'#25'HelpButto'
+  +'n.DefaultCaption'#9#16'CloseButton.Name'#6#11'CloseButton'#15'CloseButton.T'
+  +'ag'#2#1#26'CloseButton.DefaultCaption'#9#17'CancelButton.Name'#6#12'CancelB'
+  +'utton'#27'CancelButton.DefaultCaption'#9#8'TabOrder'#2#1#11'ShowButtons'#11
+  +#7'pbClose'#0#0#6'TLabel'#11'StatusLabel'#3'Tag'#2#1#22'AnchorSideLeft.Contr'
+  +'ol'#7#11'ButtonPanel'#21'AnchorSideTop.Control'#7#11'ButtonPanel'#23'Anchor'
+  +'SideRight.Control'#7#11'ButtonPanel'#20'AnchorSideRight.Side'#7#9'asrBottom'
+  +#24'AnchorSideBottom.Control'#7#11'ButtonPanel'#21'AnchorSideBottom.Side'#7#9
+  +'asrBottom'#4'Left'#2#5#6'Height'#2#20#3'Top'#2#10#5'Width'#3#171#2#7'Anchor'
+  +'s'#11#5'akTop'#6'akLeft'#7'akRight'#8'akBottom'#0#8'AutoSize'#8#18'BorderSp'
+  +'acing.Left'#2#5#17'BorderSpacing.Top'#2#10#19'BorderSpacing.Right'#2'd'#20
+  +'BorderSpacing.Bottom'#2#4#6'Layout'#7#8'tlCenter'#11'ParentColor'#8#0#0#0#12
+  +'TSpeedButton'#19'RemovePackageButton'#21'AnchorSideTop.Control'#7#16'AddPac'
+  +'kageButton'#23'AnchorSideRight.Control'#7#16'AddPackageButton'#4'Left'#2'c'
+  +#6'Height'#2#22#4'Hint'#6#14'Remove Package'#3'Top'#2#1#5'Width'#2#22#7'Anch'
+  +'ors'#11#5'akTop'#7'akRight'#0#4'Flat'#9#6'Images'#7#6'Images'#10'ImageIndex'
+  +#2#1#7'OnClick'#7#20'DoRemovePackageClick'#0#0#6'TPanel'#13'ReleasesPanel'#22
+  +'AnchorSideLeft.Control'#7#15'PackagesListBox'#19'AnchorSideLeft.Side'#7#9'a'
+  +'srBottom'#21'AnchorSideTop.Control'#7#15'PackagesListBox'#23'AnchorSideRigh'
+  +'t.Control'#7#5'Owner'#20'AnchorSideRight.Side'#7#9'asrBottom'#24'AnchorSide'
+  +'Bottom.Control'#7#17'InstallationPanel'#4'Left'#3#149#0#6'Height'#3#244#0#3
+  +'Top'#2#24#5'Width'#3#134#2#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#8'ak'
+  +'Bottom'#0#8'AutoSize'#9#18'BorderSpacing.Left'#2#5#19'BorderSpacing.Right'#2
+  +#5#10'BevelOuter'#7#6'bvNone'#12'ClientHeight'#3#244#0#11'ClientWidth'#3#134
+  +#2#8'TabOrder'#2#2#0#6'TLabel'#17'ReleasesListLabel'#22'AnchorSideLeft.Contr'
+  +'ol'#7#13'ReleasesPanel'#21'AnchorSideTop.Control'#7#12'ReleasesList'#18'Anc'
+  +'horSideTop.Side'#7#9'asrCenter'#21'AnchorSideBottom.Side'#7#9'asrBottom'#4
+  +'Left'#2#0#6'Height'#2#15#3'Top'#2'+'#5'Width'#2'K'#7'Caption'#6#15'Select V'
+  +'ersion:'#6'Layout'#7#8'tlCenter'#11'ParentColor'#8#0#0#5'TMemo'#9'NotesMemo'
+  +#22'AnchorSideLeft.Control'#7#13'ReleasesPanel'#21'AnchorSideTop.Control'#7
+  +#12'ReleasesList'#18'AnchorSideTop.Side'#7#9'asrBottom'#23'AnchorSideRight.C'
+  +'ontrol'#7#13'ReleasesPanel'#20'AnchorSideRight.Side'#7#9'asrBottom'#24'Anch'
+  +'orSideBottom.Control'#7#13'ReleasesPanel'#21'AnchorSideBottom.Side'#7#9'asr'
+  +'Bottom'#4'Left'#2#0#6'Height'#3#173#0#3'Top'#2'B'#5'Width'#3#134#2#7'Anchor'
   +'s'#11#5'akTop'#6'akLeft'#7'akRight'#8'akBottom'#0#17'BorderSpacing.Top'#2#5
-  +#7'Caption'#6#7'Install'#7'OnClick'#7#21'DoInstallPackageClick'#8'TabOrder'#2
-  +#0#0#0#13'TDividerBevel'#19'installationDivider'#22'AnchorSideLeft.Control'#7
-  +#17'InstallationPanel'#21'AnchorSideTop.Control'#7#17'InstallationPanel'#23
-  +'AnchorSideRight.Control'#7#17'InstallationPanel'#20'AnchorSideRight.Side'#7
-  +#9'asrBottom'#4'Left'#2#0#6'Height'#2#15#3'Top'#2#0#5'Width'#3#134#2#7'Capti'
-  +'on'#6#12'Installation'#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#0#5'Styl'
-  +'e'#7#10'gsHorLines'#0#0#9'TGroupBox'#12'OptionsGroup'#22'AnchorSideLeft.Con'
-  +'trol'#7#17'InstallationPanel'#21'AnchorSideTop.Control'#7#19'CustomInstallB'
-  +'utton'#18'AnchorSideTop.Side'#7#9'asrBottom'#23'AnchorSideRight.Control'#7
-  +#17'InstallationPanel'#20'AnchorSideRight.Side'#7#9'asrBottom'#4'Left'#2#0#6
-  +'Height'#3#129#0#3'Top'#2'E'#5'Width'#3#134#2#7'Anchors'#11#5'akTop'#6'akLef'
-  +'t'#7'akRight'#0#8'AutoSize'#9#17'BorderSpacing.Top'#2#5#7'Caption'#6#7'Opti'
-  +'ons'#12'ClientHeight'#2'm'#11'ClientWidth'#3#130#2#8'TabOrder'#2#1#0#6'TLab'
-  +'el'#16'InstallNameLabel'#22'AnchorSideLeft.Control'#7#12'OptionsGroup'#21'A'
-  +'nchorSideTop.Control'#7#15'InstallNameEdit'#24'AnchorSideBottom.Control'#7
-  +#15'InstallNameEdit'#21'AnchorSideBottom.Side'#7#9'asrBottom'#4'Left'#2#5#6
-  +'Height'#2#23#3'Top'#2#5#5'Width'#2'#'#7'Anchors'#11#5'akTop'#6'akLeft'#8'ak'
-  +'Bottom'#0#18'BorderSpacing.Left'#2#5#7'Caption'#6#5'Name:'#6'Layout'#7#8'tl'
-  +'Center'#11'ParentColor'#8#0#0#9'TComboBox'#20'InstallDirectoryList'#22'Anch'
-  +'orSideLeft.Control'#7#14'IgnoreListEdit'#21'AnchorSideTop.Control'#7#15'Ins'
-  +'tallNameEdit'#18'AnchorSideTop.Side'#7#9'asrBottom'#23'AnchorSideRight.Cont'
-  +'rol'#7#21'SelectDirectoryButton'#4'Left'#2'A'#6'Height'#2#23#4'Hint'#6'?The'
-  +' directory to install into. Relative from Simba''s directory.'#3'Top'#2#31#5
-  +'Width'#3#16#2#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#0#17'BorderSpacin'
-  +'g.Top'#2#3#19'BorderSpacing.Right'#2#5#10'ItemHeight'#2#15#8'OnChange'#7#24
-  +'DoInstallationModeChange'#8'TabOrder'#2#1#0#0#6'TLabel'#20'InstallDiretoryL'
-  +'abel'#22'AnchorSideLeft.Control'#7#12'OptionsGroup'#21'AnchorSideTop.Contro'
-  +'l'#7#20'InstallDirectoryList'#24'AnchorSideBottom.Control'#7#20'InstallDire'
-  ,'ctoryList'#21'AnchorSideBottom.Side'#7#9'asrBottom'#4'Left'#2#5#6'Height'#2
-  +#23#3'Top'#2#31#5'Width'#2'0'#7'Anchors'#11#5'akTop'#6'akLeft'#8'akBottom'#0
-  +#18'BorderSpacing.Left'#2#5#7'Caption'#6#9'Directory'#6'Layout'#7#8'tlCenter'
-  +#11'ParentColor'#8#0#0#9'TCheckBox'#20'FlatExtractionButton'#22'AnchorSideLe'
-  +'ft.Control'#7#12'OptionsGroup'#21'AnchorSideTop.Control'#7#14'IgnoreListEdi'
-  +'t'#18'AnchorSideTop.Side'#7#9'asrBottom'#23'AnchorSideRight.Control'#7#12'O'
-  +'ptionsGroup'#20'AnchorSideRight.Side'#7#9'asrBottom'#24'AnchorSideBottom.Co'
-  +'ntrol'#7#12'OptionsGroup'#21'AnchorSideBottom.Side'#7#9'asrBottom'#4'Left'#2
-  +#5#6'Height'#2#19#4'Hint'#6#27'Flatten directory structure'#3'Top'#2'U'#5'Wi'
-  +'dth'#3'}'#2#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#8'akBottom'#0#18'Bo'
-  +'rderSpacing.Left'#2#5#17'BorderSpacing.Top'#2#5#20'BorderSpacing.Bottom'#2#5
-  +#7'Caption'#6#12'Extract Flat'#8'TabOrder'#2#3#0#0#7'TButton'#21'SelectDirec'
-  +'toryButton'#22'AnchorSideLeft.Control'#7#20'InstallDirectoryList'#19'Anchor'
-  +'SideLeft.Side'#7#9'asrBottom'#21'AnchorSideTop.Control'#7#20'InstallDirecto'
-  +'ryList'#23'AnchorSideRight.Control'#7#12'OptionsGroup'#20'AnchorSideRight.S'
-  +'ide'#7#9'asrBottom'#24'AnchorSideBottom.Control'#7#20'InstallDirectoryList'
-  +#21'AnchorSideBottom.Side'#7#9'asrBottom'#4'Left'#3'V'#2#6'Height'#2#23#3'To'
-  +'p'#2#31#5'Width'#2''''#7'Anchors'#11#5'akTop'#7'akRight'#8'akBottom'#0#19'B'
-  +'orderSpacing.Right'#2#5#7'Caption'#6#3'...'#7'OnClick'#7#26'SelectDirectory'
-  +'ButtonClick'#14'ParentShowHint'#8#8'TabOrder'#2#4#0#0#5'TEdit'#15'InstallNa'
-  +'meEdit'#22'AnchorSideLeft.Control'#7#14'IgnoreListEdit'#21'AnchorSideTop.Co'
-  +'ntrol'#7#12'OptionsGroup'#23'AnchorSideRight.Control'#7#21'SelectDirectoryB'
-  +'utton'#4'Left'#2'A'#6'Height'#2#23#4'Hint'#6'VThe package name to install u'
-  +'nder. Can be empty to install directly into the directory'#3'Top'#2#5#5'Wid'
-  +'th'#3#16#2#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#0#17'BorderSpacing.T'
-  +'op'#2#5#19'BorderSpacing.Right'#2#5#8'OnChange'#7#24'DoInstallationModeChan'
-  +'ge'#8'TabOrder'#2#0#0#0#5'TEdit'#14'IgnoreListEdit'#22'AnchorSideLeft.Contr'
-  +'ol'#7#15'IgnoreListLabel'#19'AnchorSideLeft.Side'#7#9'asrBottom'#21'AnchorS'
-  +'ideTop.Control'#7#20'InstallDirectoryList'#18'AnchorSideTop.Side'#7#9'asrBo'
-  +'ttom'#23'AnchorSideRight.Control'#7#21'SelectDirectoryButton'#4'Left'#2'A'#6
-  +'Height'#2#23#4'Hint'#6'9Files or directories not to install delimited with '
-  +'commas'#3'Top'#2'9'#5'Width'#3#16#2#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRi'
-  +'ght'#0#18'BorderSpacing.Left'#2#5#17'BorderSpacing.Top'#2#3#19'BorderSpacin'
-  +'g.Right'#2#5#8'TabOrder'#2#2#0#0#6'TLabel'#15'IgnoreListLabel'#22'AnchorSid'
-  +'eLeft.Control'#7#12'OptionsGroup'#21'AnchorSideTop.Control'#7#14'IgnoreList'
-  +'Edit'#24'AnchorSideBottom.Control'#7#14'IgnoreListEdit'#21'AnchorSideBottom'
-  +'.Side'#7#9'asrBottom'#4'Left'#2#5#6'Height'#2#23#3'Top'#2'9'#5'Width'#2'7'#7
-  +'Anchors'#11#5'akTop'#6'akLeft'#8'akBottom'#0#18'BorderSpacing.Left'#2#5#7'C'
-  +'aption'#6#11'Ignore List'#6'Layout'#7#8'tlCenter'#11'ParentColor'#8#0#0#0#12
-  +'TRadioButton'#18'BasicInstallButton'#22'AnchorSideLeft.Control'#7#17'Instal'
-  +'lationPanel'#21'AnchorSideTop.Control'#7#19'installationDivider'#18'AnchorS'
-  +'ideTop.Side'#7#9'asrBottom'#23'AnchorSideRight.Control'#7#17'InstallationPa'
-  +'nel'#20'AnchorSideRight.Side'#7#9'asrBottom'#4'Left'#2#0#6'Height'#2#20#4'H'
-  +'int'#6'hOne click installation. Reads options from .simbapackage providing '
-  +'it exists the root of the repository.'#3'Top'#2#20#5'Width'#3#134#2#7'Ancho'
-  +'rs'#11#5'akTop'#6'akLeft'#7'akRight'#0#8'AutoSize'#8#17'BorderSpacing.Top'#2
-  +#5#7'Caption'#6#5'Basic'#7'Checked'#9#8'OnChange'#7#24'DoInstallationModeCha'
-  +'nge'#7'OnClick'#7#27'InstallationModeChangedUser'#8'TabOrder'#2#3#7'TabStop'
-  +#9#0#0#12'TRadioButton'#19'CustomInstallButton'#22'AnchorSideLeft.Control'#7
-  +#17'InstallationPanel'#21'AnchorSideTop.Control'#7#18'BasicInstallButton'#18
-  +'AnchorSideTop.Side'#7#9'asrBottom'#23'AnchorSideRight.Control'#7#17'Install'
-  +'ationPanel'#20'AnchorSideRight.Side'#7#9'asrBottom'#4'Left'#2#0#6'Height'#2
-  +#19#3'Top'#2'-'#5'Width'#3#134#2#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'
-  +#0#17'BorderSpacing.Top'#2#5#7'Caption'#6#6'Custom'#8'OnChange'#7#24'DoInsta'
-  +'llationModeChange'#8'TabOrder'#2#2#0#0#0#22'TSelectDirectoryDialog'#21'Sele'
-  +'ctDirectoryDialog'#4'left'#2'8'#3'top'#3#176#0#0#0#10'TPopupMenu'#16'Packag'
-  +'eListPopup'#6'Images'#7#6'Images'#4'left'#2'8'#3'top'#2'8'#0#9'TMenuItem'#31
-  +'PackageListPopup_VistRepository'#7'Caption'#6#16'Visit Repository'#10'Image'
-  +'Index'#2#2#7'OnClick'#7#23'DoPackageListPopupClick'#0#0#9'TMenuItem'#28'Pac'
-  +'kageListPopup_SubmitIssue'#7'Caption'#6#12'Submit Issue'#10'ImageIndex'#2#3
-  +#7'OnClick'#7#23'DoPackageListPopupClick'#0#0#0#10'TImageList'#6'Images'#6'S'
-  +'caled'#9#4'left'#2'8'#3'top'#2'x'#6'Bitmap'#10#14#16#0#0'Li'#4#0#0#0#16#0#0
-  +#0#16#0#0#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
-  +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
-  ,#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
-  +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
-  +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
+  +#20'BorderSpacing.Bottom'#2#5#8'ReadOnly'#9#10'ScrollBars'#7#10'ssVertical'#8
+  +'TabOrder'#2#0#0#0#6'TLabel'#21'InstalledVersionLabel'#22'AnchorSideLeft.Con'
+  ,'trol'#7#13'ReleasesPanel'#21'AnchorSideTop.Control'#7#18'LatestVersionLabel'
+  +#18'AnchorSideTop.Side'#7#9'asrBottom'#4'Left'#2#0#6'Height'#2#15#3'Top'#2#20
+  +#5'Width'#2'X'#17'BorderSpacing.Top'#2#5#7'Caption'#6#18'Installed Version:'
+  +#11'ParentColor'#8#0#0#6'TLabel'#18'LatestVersionLabel'#22'AnchorSideLeft.Co'
+  +'ntrol'#7#13'ReleasesPanel'#21'AnchorSideTop.Control'#7#13'ReleasesPanel'#4
+  +'Left'#2#0#6'Height'#2#15#3'Top'#2#0#5'Width'#2'N'#7'Caption'#6#16'Latest Ve'
+  +'rsion: '#11'ParentColor'#8#0#0#6'TLabel'#18'UpdatePackageLabel'#22'AnchorSi'
+  +'deLeft.Control'#7#18'LatestVersionLabel'#19'AnchorSideLeft.Side'#7#9'asrBot'
+  +'tom'#21'AnchorSideTop.Control'#7#18'LatestVersionLabel'#24'AnchorSideBottom'
+  +'.Control'#7#18'LatestVersionLabel'#21'AnchorSideBottom.Side'#7#9'asrBottom'
+  +#4'Left'#2'Q'#6'Height'#2#15#3'Top'#2#0#5'Width'#2'f'#7'Anchors'#11#5'akTop'
+  +#6'akLeft'#8'akBottom'#0#18'BorderSpacing.Left'#2#3#7'Caption'#6#19'(check f'
+  +'or updates)'#6'Layout'#7#8'tlCenter'#11'ParentColor'#8#7'OnClick'#7#13'DoUp'
+  +'dateClick'#12'OnMouseEnter'#7#23'DoUpdateLabelMouseEnter'#12'OnMouseLeave'#7
+  +#23'DoUpdateLabelMouseLeave'#0#0#9'TComboBox'#12'ReleasesList'#22'AnchorSide'
+  +'Left.Control'#7#17'ReleasesListLabel'#19'AnchorSideLeft.Side'#7#9'asrBottom'
+  +#21'AnchorSideTop.Control'#7#21'InstalledVersionLabel'#18'AnchorSideTop.Side'
+  +#7#9'asrBottom'#23'AnchorSideRight.Control'#7#13'ReleasesPanel'#20'AnchorSid'
+  +'eRight.Side'#7#9'asrBottom'#21'AnchorSideBottom.Side'#7#9'asrBottom'#4'Left'
+  +#2'P'#6'Height'#2#21#3'Top'#2'('#5'Width'#3'6'#2#7'Anchors'#11#5'akTop'#6'ak'
+  +'Left'#7'akRight'#0#18'BorderSpacing.Left'#2#5#17'BorderSpacing.Top'#2#5#10
+  +'ItemHeight'#2#15#8'OnChange'#7#24'DoSelectedReleaseChanged'#10'OnDrawItem'#7
+  +#18'DoReleasesListDraw'#5'Style'#7#16'csOwnerDrawFixed'#8'TabOrder'#2#1#0#0#0
+  +#6'TPanel'#17'InstallationPanel'#22'AnchorSideLeft.Control'#7#13'ReleasesPan'
+  +'el'#18'AnchorSideTop.Side'#7#9'asrBottom'#23'AnchorSideRight.Control'#7#13
+  +'ReleasesPanel'#20'AnchorSideRight.Side'#7#9'asrBottom'#24'AnchorSideBottom.'
+  +'Control'#7#11'ButtonPanel'#4'Left'#3#149#0#6'Height'#3#228#0#3'Top'#3#12#1#5
+  +'Width'#3#134#2#7'Anchors'#11#6'akLeft'#7'akRight'#8'akBottom'#0#8'AutoSize'
+  +#9#10'BevelOuter'#7#6'bvNone'#12'ClientHeight'#3#228#0#11'ClientWidth'#3#134
+  +#2#8'TabOrder'#2#3#0#7'TButton'#13'InstallButton'#22'AnchorSideLeft.Control'
+  +#7#17'InstallationPanel'#21'AnchorSideTop.Control'#7#12'OptionsGroup'#18'Anc'
+  +'horSideTop.Side'#7#9'asrBottom'#23'AnchorSideRight.Control'#7#17'Installati'
+  +'onPanel'#20'AnchorSideRight.Side'#7#9'asrBottom'#24'AnchorSideBottom.Contro'
+  +'l'#7#17'InstallationPanel'#21'AnchorSideBottom.Side'#7#9'asrBottom'#4'Left'
+  +#2#0#6'Height'#2#25#3'Top'#3#203#0#5'Width'#3#134#2#7'Anchors'#11#5'akTop'#6
+  +'akLeft'#7'akRight'#8'akBottom'#0#17'BorderSpacing.Top'#2#5#7'Caption'#6#7'I'
+  +'nstall'#7'OnClick'#7#21'DoInstallPackageClick'#8'TabOrder'#2#0#0#0#13'TDivi'
+  +'derBevel'#19'installationDivider'#22'AnchorSideLeft.Control'#7#17'Installat'
+  +'ionPanel'#21'AnchorSideTop.Control'#7#17'InstallationPanel'#23'AnchorSideRi'
+  +'ght.Control'#7#17'InstallationPanel'#20'AnchorSideRight.Side'#7#9'asrBottom'
+  +#4'Left'#2#0#6'Height'#2#15#3'Top'#2#0#5'Width'#3#134#2#7'Caption'#6#12'Inst'
+  +'allation'#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#0#5'Style'#7#10'gsHor'
+  +'Lines'#0#0#9'TGroupBox'#12'OptionsGroup'#22'AnchorSideLeft.Control'#7#17'In'
+  +'stallationPanel'#21'AnchorSideTop.Control'#7#19'CustomInstallButton'#18'Anc'
+  +'horSideTop.Side'#7#9'asrBottom'#23'AnchorSideRight.Control'#7#17'Installati'
+  +'onPanel'#20'AnchorSideRight.Side'#7#9'asrBottom'#4'Left'#2#0#6'Height'#3#129
+  +#0#3'Top'#2'E'#5'Width'#3#134#2#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#0
+  +#8'AutoSize'#9#17'BorderSpacing.Top'#2#5#7'Caption'#6#7'Options'#12'ClientHe'
+  +'ight'#2'm'#11'ClientWidth'#3#130#2#8'TabOrder'#2#1#0#6'TLabel'#16'InstallNa'
+  +'meLabel'#22'AnchorSideLeft.Control'#7#12'OptionsGroup'#21'AnchorSideTop.Con'
+  +'trol'#7#15'InstallNameEdit'#24'AnchorSideBottom.Control'#7#15'InstallNameEd'
+  +'it'#21'AnchorSideBottom.Side'#7#9'asrBottom'#4'Left'#2#5#6'Height'#2#23#3'T'
+  +'op'#2#5#5'Width'#2'#'#7'Anchors'#11#5'akTop'#6'akLeft'#8'akBottom'#0#18'Bor'
+  +'derSpacing.Left'#2#5#7'Caption'#6#5'Name:'#6'Layout'#7#8'tlCenter'#11'Paren'
+  +'tColor'#8#0#0#9'TComboBox'#20'InstallDirectoryList'#22'AnchorSideLeft.Contr'
+  +'ol'#7#14'IgnoreListEdit'#21'AnchorSideTop.Control'#7#15'InstallNameEdit'#18
+  +'AnchorSideTop.Side'#7#9'asrBottom'#23'AnchorSideRight.Control'#7#21'SelectD'
+  +'irectoryButton'#4'Left'#2'A'#6'Height'#2#23#4'Hint'#6'?The directory to ins'
+  +'tall into. Relative from Simba''s directory.'#3'Top'#2#31#5'Width'#3#16#2#7
+  +'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#0#17'BorderSpacing.Top'#2#3#19'Bo'
+  +'rderSpacing.Right'#2#5#10'ItemHeight'#2#15#8'OnChange'#7#24'DoInstallationM'
+  +'odeChange'#8'TabOrder'#2#1#0#0#6'TLabel'#20'InstallDiretoryLabel'#22'Anchor'
+  +'SideLeft.Control'#7#12'OptionsGroup'#21'AnchorSideTop.Control'#7#20'Install'
+  +'DirectoryList'#24'AnchorSideBottom.Control'#7#20'InstallDirectoryList'#21'A'
+  ,'nchorSideBottom.Side'#7#9'asrBottom'#4'Left'#2#5#6'Height'#2#23#3'Top'#2#31
+  +#5'Width'#2'0'#7'Anchors'#11#5'akTop'#6'akLeft'#8'akBottom'#0#18'BorderSpaci'
+  +'ng.Left'#2#5#7'Caption'#6#9'Directory'#6'Layout'#7#8'tlCenter'#11'ParentCol'
+  +'or'#8#0#0#9'TCheckBox'#20'FlatExtractionButton'#22'AnchorSideLeft.Control'#7
+  +#12'OptionsGroup'#21'AnchorSideTop.Control'#7#14'IgnoreListEdit'#18'AnchorSi'
+  +'deTop.Side'#7#9'asrBottom'#23'AnchorSideRight.Control'#7#12'OptionsGroup'#20
+  +'AnchorSideRight.Side'#7#9'asrBottom'#24'AnchorSideBottom.Control'#7#12'Opti'
+  +'onsGroup'#21'AnchorSideBottom.Side'#7#9'asrBottom'#4'Left'#2#5#6'Height'#2
+  +#19#4'Hint'#6#27'Flatten directory structure'#3'Top'#2'U'#5'Width'#3'}'#2#7
+  +'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#8'akBottom'#0#18'BorderSpacing.Le'
+  +'ft'#2#5#17'BorderSpacing.Top'#2#5#20'BorderSpacing.Bottom'#2#5#7'Caption'#6
+  +#12'Extract Flat'#8'TabOrder'#2#3#0#0#7'TButton'#21'SelectDirectoryButton'#22
+  +'AnchorSideLeft.Control'#7#20'InstallDirectoryList'#19'AnchorSideLeft.Side'#7
+  +#9'asrBottom'#21'AnchorSideTop.Control'#7#20'InstallDirectoryList'#23'Anchor'
+  +'SideRight.Control'#7#12'OptionsGroup'#20'AnchorSideRight.Side'#7#9'asrBotto'
+  +'m'#24'AnchorSideBottom.Control'#7#20'InstallDirectoryList'#21'AnchorSideBot'
+  +'tom.Side'#7#9'asrBottom'#4'Left'#3'V'#2#6'Height'#2#23#3'Top'#2#31#5'Width'
+  +#2''''#7'Anchors'#11#5'akTop'#7'akRight'#8'akBottom'#0#19'BorderSpacing.Righ'
+  +'t'#2#5#7'Caption'#6#3'...'#7'OnClick'#7#26'SelectDirectoryButtonClick'#14'P'
+  +'arentShowHint'#8#8'TabOrder'#2#4#0#0#5'TEdit'#15'InstallNameEdit'#22'Anchor'
+  +'SideLeft.Control'#7#14'IgnoreListEdit'#21'AnchorSideTop.Control'#7#12'Optio'
+  +'nsGroup'#23'AnchorSideRight.Control'#7#21'SelectDirectoryButton'#4'Left'#2
+  +'A'#6'Height'#2#23#4'Hint'#6'VThe package name to install under. Can be empt'
+  +'y to install directly into the directory'#3'Top'#2#5#5'Width'#3#16#2#7'Anch'
+  +'ors'#11#5'akTop'#6'akLeft'#7'akRight'#0#17'BorderSpacing.Top'#2#5#19'Border'
+  +'Spacing.Right'#2#5#8'OnChange'#7#24'DoInstallationModeChange'#8'TabOrder'#2
+  +#0#0#0#5'TEdit'#14'IgnoreListEdit'#22'AnchorSideLeft.Control'#7#15'IgnoreLis'
+  +'tLabel'#19'AnchorSideLeft.Side'#7#9'asrBottom'#21'AnchorSideTop.Control'#7
+  +#20'InstallDirectoryList'#18'AnchorSideTop.Side'#7#9'asrBottom'#23'AnchorSid'
+  +'eRight.Control'#7#21'SelectDirectoryButton'#4'Left'#2'A'#6'Height'#2#23#4'H'
+  +'int'#6'9Files or directories not to install delimited with commas'#3'Top'#2
+  +'9'#5'Width'#3#16#2#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#0#18'BorderS'
+  +'pacing.Left'#2#5#17'BorderSpacing.Top'#2#3#19'BorderSpacing.Right'#2#5#8'Ta'
+  +'bOrder'#2#2#0#0#6'TLabel'#15'IgnoreListLabel'#22'AnchorSideLeft.Control'#7
+  +#12'OptionsGroup'#21'AnchorSideTop.Control'#7#14'IgnoreListEdit'#24'AnchorSi'
+  +'deBottom.Control'#7#14'IgnoreListEdit'#21'AnchorSideBottom.Side'#7#9'asrBot'
+  +'tom'#4'Left'#2#5#6'Height'#2#23#3'Top'#2'9'#5'Width'#2'7'#7'Anchors'#11#5'a'
+  +'kTop'#6'akLeft'#8'akBottom'#0#18'BorderSpacing.Left'#2#5#7'Caption'#6#11'Ig'
+  +'nore List'#6'Layout'#7#8'tlCenter'#11'ParentColor'#8#0#0#0#12'TRadioButton'
+  +#18'BasicInstallButton'#22'AnchorSideLeft.Control'#7#17'InstallationPanel'#21
+  +'AnchorSideTop.Control'#7#19'installationDivider'#18'AnchorSideTop.Side'#7#9
+  +'asrBottom'#23'AnchorSideRight.Control'#7#17'InstallationPanel'#20'AnchorSid'
+  +'eRight.Side'#7#9'asrBottom'#4'Left'#2#0#6'Height'#2#20#4'Hint'#6'hOne click'
+  +' installation. Reads options from .simbapackage providing it exists the roo'
+  +'t of the repository.'#3'Top'#2#20#5'Width'#3#134#2#7'Anchors'#11#5'akTop'#6
+  +'akLeft'#7'akRight'#0#8'AutoSize'#8#17'BorderSpacing.Top'#2#5#7'Caption'#6#5
+  +'Basic'#7'Checked'#9#8'OnChange'#7#24'DoInstallationModeChange'#7'OnClick'#7
+  +#27'InstallationModeChangedUser'#8'TabOrder'#2#3#7'TabStop'#9#0#0#12'TRadioB'
+  +'utton'#19'CustomInstallButton'#22'AnchorSideLeft.Control'#7#17'Installation'
+  +'Panel'#21'AnchorSideTop.Control'#7#18'BasicInstallButton'#18'AnchorSideTop.'
+  +'Side'#7#9'asrBottom'#23'AnchorSideRight.Control'#7#17'InstallationPanel'#20
+  +'AnchorSideRight.Side'#7#9'asrBottom'#4'Left'#2#0#6'Height'#2#19#3'Top'#2'-'
+  +#5'Width'#3#134#2#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#0#17'BorderSpa'
+  +'cing.Top'#2#5#7'Caption'#6#6'Custom'#8'OnChange'#7#24'DoInstallationModeCha'
+  +'nge'#8'TabOrder'#2#2#0#0#0#22'TSelectDirectoryDialog'#21'SelectDirectoryDia'
+  +'log'#4'Left'#2'8'#3'Top'#3#176#0#0#0#10'TPopupMenu'#16'PackageListPopup'#6
+  +'Images'#7#6'Images'#4'Left'#2'8'#3'Top'#2'8'#0#9'TMenuItem'#31'PackageListP'
+  +'opup_VistRepository'#7'Caption'#6#16'Visit Repository'#10'ImageIndex'#2#2#7
+  +'OnClick'#7#23'DoPackageListPopupClick'#0#0#9'TMenuItem'#28'PackageListPopup'
+  +'_SubmitIssue'#7'Caption'#6#12'Submit Issue'#10'ImageIndex'#2#3#7'OnClick'#7
+  +#23'DoPackageListPopupClick'#0#0#0#10'TImageList'#6'Images'#6'Scaled'#9#4'Le'
+  +'ft'#2'8'#3'Top'#2'x'#6'Bitmap'#10#14#16#0#0'Li'#4#0#0#0#16#0#0#0#16#0#0#0
   +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
   +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
-  +#252#0#255#255#247#0#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255#255#255
-  +#247#0#255#255#252#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
-  +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#251#0#255
-  +#255#242#0#138'bE'#255#232#205#184#255#232#205#184#255#138'bE'#255#255#255
-  +#242#0#255#255#250#0#255#255#255#0#255#255#254#0#255#255#255#0#255#255#255#0
-  +#255#255#255#0#255#255#255#0#255#255#252#0#255#255#251#0#255#255#245#0#255
-  +#255#237#0#138'bE'#255#232#205#184#255#232#205#184#255#138'bE'#255#255#255
-  +#235#0#255#255#245#0#255#255#249#0#255#255#252#0#255#255#255#0#255#255#255#0
-  +#255#255#255#0#255#255#255#0#255#255#247#0#255#255#242#0#255#255#235#0#255
-  +#255#230#0#138'bE'#255#232#205#184#255#232#205#184#255#138'bE'#255#255#255
-  +#230#0#255#255#235#0#255#255#241#0#255#255#247#0#255#255#255#0#255#255#255#0
-  +#255#255#255#0#255#255#255#0#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255
-  +#138'bE'#255#232#205#184#255#232#205#184#255#138'bE'#255#138'bE'#255#138'bE'
-  +#255#138'bE'#255#138'bE'#255#255#255#255#0#255#255#255#0#255#255#255#0#255
-  +#255#255#0#138'bE'#255#232#205#184#255#232#205#184#255#232#205#184#255#232
-  +#205#184#255#232#205#184#255#232#205#184#255#232#205#184#255#232#205#184#255
-  +#232#205#184#255#232#205#184#255#138'bE'#255#255#255#255#0#255#255#255#0#255
-  +#255#255#0#255#255#255#0#138'bE'#255#232#205#184#255#232#205#184#255#232#205
-  +#184#255#232#205#184#255#232#205#184#255#232#205#184#255#232#205#184#255#232
-  +#205#184#255#232#205#184#255#232#205#184#255#138'bE'#255#255#255#255#0#255
-  +#255#255#0#255#255#255#0#255#255#255#0#138'bE'#255#138'bE'#255#138'bE'#255
-  +#138'bE'#255#138'bE'#255#232#205#184#255#232#205#184#255#138'bE'#255#138'bE'
-  +#255#138'bE'#255#138'bE'#255#138'bE'#255#255#255#255#0#255#255#255#0#255#255
-  +#255#0#255#255#255#0#255#255#248#0#255#255#242#0#255#255#237#0#255#255#230#0
-  +#138'bE'#255#232#205#184#255#232#205#184#255#138'bE'#255#255#255#230#0#255
-  +#255#237#0#255#255#242#0#255#255#247#0#255#255#255#0#255#255#255#0#255#255
-  +#255#0#255#255#255#0#255#255#252#0#255#255#251#0#255#255#245#0#255#255#237#0
-  +#138'bE'#255#232#205#184#255#232#205#184#255#138'bE'#255#255#255#235#0#255
-  +#255#245#0#255#255#251#0#255#255#252#0#255#255#255#0#255#255#255#0#255#255
+  ,#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
+  +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
+  +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
+  +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
+  +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#252#0#255
+  +#255#247#0#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255#255#255#247#0#255
+  +#255#252#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
   +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#251#0#255#255#242#0
   +#138'bE'#255#232#205#184#255#232#205#184#255#138'bE'#255#255#255#242#0#255
-  +#255#251#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
-  +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#252#0#255#255#247#0
-  +#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255#255#255#247#0#255#255#252#0
-  +#253#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
-  +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
-  +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
-  +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
-  +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
-  +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
-  +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
-  +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
-  +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
-  +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
-  +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
-  +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
-  +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
-  +#255#255#0#255#255#255#0#255#255#255#0#255#255#252#0#255#255#247#0#138'bE'#0
-  +#138'bE'#0#138'bE'#0#138'bE'#0#255#255#247#0#255#255#252#0#255#255#255#0#255
-  +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
-  +#255#0#255#255#255#0#255#255#251#0#255#255#242#0#138'bE'#0#207#172#139#0#207
-  +#172#139#0#138'bE'#0#255#255#242#0#255#255#250#0#255#255#255#0#255#255#254#0
-  +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#252#0#255
-  +#255#251#0#255#255#245#0#255#255#237#0#138'bE'#0#207#172#139#0#207#172#139#0
-  +#138'bE'#0#255#255#235#0#255#255#245#0#255#255#249#0#255#255#252#0#255#255
-  +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#247#0#255#255#242#0
-  +#255#255#235#0#255#255#230#0#138'bE'#0#207#172#139#0#207#172#139#0#138'bE'#0
-  +#255#255#230#0#255#255#235#0#255#255#241#0#255#255#247#0#255#255#255#0#255
-  +#255#255#0#255#255#255#0#255#255#255#0#138'bE'#255#138'bE'#255#138'bE'#255
-  ,#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255#138
-  +'bE'#255#138'bE'#255#138'bE'#255#255#255#255#0#255#255#255#0#255#255#255#0
+  +#255#250#0#255#255#255#0#255#255#254#0#255#255#255#0#255#255#255#0#255#255
+  +#255#0#255#255#255#0#255#255#252#0#255#255#251#0#255#255#245#0#255#255#237#0
+  +#138'bE'#255#232#205#184#255#232#205#184#255#138'bE'#255#255#255#235#0#255
+  +#255#245#0#255#255#249#0#255#255#252#0#255#255#255#0#255#255#255#0#255#255
+  +#255#0#255#255#255#0#255#255#247#0#255#255#242#0#255#255#235#0#255#255#230#0
+  +#138'bE'#255#232#205#184#255#232#205#184#255#138'bE'#255#255#255#230#0#255
+  +#255#235#0#255#255#241#0#255#255#247#0#255#255#255#0#255#255#255#0#255#255
+  +#255#0#255#255#255#0#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'
+  +#255#232#205#184#255#232#205#184#255#138'bE'#255#138'bE'#255#138'bE'#255#138
+  +'bE'#255#138'bE'#255#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
+  +#138'bE'#255#232#205#184#255#232#205#184#255#232#205#184#255#232#205#184#255
+  +#232#205#184#255#232#205#184#255#232#205#184#255#232#205#184#255#232#205#184
+  +#255#232#205#184#255#138'bE'#255#255#255#255#0#255#255#255#0#255#255#255#0
   +#255#255#255#0#138'bE'#255#232#205#184#255#232#205#184#255#232#205#184#255
   +#232#205#184#255#232#205#184#255#232#205#184#255#232#205#184#255#232#205#184
   +#255#232#205#184#255#232#205#184#255#138'bE'#255#255#255#255#0#255#255#255#0
-  +#255#255#255#0#255#255#255#0#138'bE'#255#232#205#184#255#232#205#184#255#232
-  +#205#184#255#232#205#184#255#232#205#184#255#232#205#184#255#232#205#184#255
-  +#232#205#184#255#232#205#184#255#232#205#184#255#138'bE'#255#255#255#255#0
-  +#255#255#255#0#255#255#255#0#255#255#255#0#138'bE'#255#138'bE'#255#138'bE'
-  +#255#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255
-  +#138'bE'#255#138'bE'#255#138'bE'#255#255#255#255#0#255#255#255#0#255#255#255
-  +#0#255#255#255#0#255#255#248#0#255#255#242#0#255#255#237#0#255#255#230#0#138
-  +'bE'#0#207#172#139#0#207#172#139#0#138'bE'#0#255#255#230#0#255#255#237#0#255
-  +#255#242#0#255#255#247#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
-  +#255#0#255#255#252#0#255#255#251#0#255#255#245#0#255#255#237#0#138'bE'#0#207
-  +#172#139#0#207#172#139#0#138'bE'#0#255#255#235#0#255#255#245#0#255#255#251#0
-  +#255#255#252#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
-  +#255#255#0#255#255#255#0#255#255#251#0#255#255#242#0#138'bE'#0#207#172#139#0
-  +#207#172#139#0#138'bE'#0#255#255#242#0#255#255#251#0#255#255#255#0#255#255
+  +#255#255#255#0#255#255#255#0#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255
+  +#138'bE'#255#232#205#184#255#232#205#184#255#138'bE'#255#138'bE'#255#138'bE'
+  +#255#138'bE'#255#138'bE'#255#255#255#255#0#255#255#255#0#255#255#255#0#255
+  +#255#255#0#255#255#248#0#255#255#242#0#255#255#237#0#255#255#230#0#138'bE'
+  +#255#232#205#184#255#232#205#184#255#138'bE'#255#255#255#230#0#255#255#237#0
+  +#255#255#242#0#255#255#247#0#255#255#255#0#255#255#255#0#255#255#255#0#255
+  +#255#255#0#255#255#252#0#255#255#251#0#255#255#245#0#255#255#237#0#138'bE'
+  +#255#232#205#184#255#232#205#184#255#138'bE'#255#255#255#235#0#255#255#245#0
+  +#255#255#251#0#255#255#252#0#255#255#255#0#255#255#255#0#255#255#255#0#255
+  +#255#255#0#255#255#255#0#255#255#255#0#255#255#251#0#255#255#242#0#138'bE'
+  +#255#232#205#184#255#232#205#184#255#138'bE'#255#255#255#242#0#255#255#251#0
+  +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
+  +#255#255#0#255#255#255#0#255#255#255#0#255#255#252#0#255#255#247#0#138'bE'
+  +#255#138'bE'#255#138'bE'#255#138'bE'#255#255#255#247#0#255#255#252#0#253#255
   +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
-  +#255#255#255#0#255#255#252#0#255#255#247#0#138'bE'#0#138'bE'#0#138'bE'#0#138
-  +'bE'#0#255#255#247#0#255#255#252#0#253#255#255#0#255#255#255#0#255#255#255#0
   +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
   +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
   +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
   +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
   +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
   +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
-  +#255#255#255#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#22#21#23'7'#22#21#23#156#22#21
-  +#23#221#22#21#23#252#22#21#23#252#22#21#23#221#22#21#23#156#22#21#23'7'#0#0#0
-  +#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#22#21#23#12#22#21#23#162#22#21#23
+  +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
+  +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
+  +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
+  +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
+  +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
+  +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
+  +#255#255#255#0#255#255#255#0#255#255#252#0#255#255#247#0#138'bE'#0#138'bE'#0
+  +#138'bE'#0#138'bE'#0#255#255#247#0#255#255#252#0#255#255#255#0#255#255#255#0
+  +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
+  +#255#255#0#255#255#251#0#255#255#242#0#138'bE'#0#207#172#139#0#207#172#139#0
+  +#138'bE'#0#255#255#242#0#255#255#250#0#255#255#255#0#255#255#254#0#255#255
+  +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#252#0#255#255#251#0
+  +#255#255#245#0#255#255#237#0#138'bE'#0#207#172#139#0#207#172#139#0#138'bE'#0
+  +#255#255#235#0#255#255#245#0#255#255#249#0#255#255#252#0#255#255#255#0#255
+  +#255#255#0#255#255#255#0#255#255#255#0#255#255#247#0#255#255#242#0#255#255
+  +#235#0#255#255#230#0#138'bE'#0#207#172#139#0#207#172#139#0#138'bE'#0#255#255
+  +#230#0#255#255#235#0#255#255#241#0#255#255#247#0#255#255#255#0#255#255#255#0
+  +#255#255#255#0#255#255#255#0#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255
+  ,#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255#138
+  +'bE'#255#138'bE'#255#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
+  +#138'bE'#255#232#205#184#255#232#205#184#255#232#205#184#255#232#205#184#255
+  +#232#205#184#255#232#205#184#255#232#205#184#255#232#205#184#255#232#205#184
+  +#255#232#205#184#255#138'bE'#255#255#255#255#0#255#255#255#0#255#255#255#0
+  +#255#255#255#0#138'bE'#255#232#205#184#255#232#205#184#255#232#205#184#255
+  +#232#205#184#255#232#205#184#255#232#205#184#255#232#205#184#255#232#205#184
+  +#255#232#205#184#255#232#205#184#255#138'bE'#255#255#255#255#0#255#255#255#0
+  +#255#255#255#0#255#255#255#0#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255
+  +#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255#138'bE'#255#138
+  +'bE'#255#138'bE'#255#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
+  +#255#255#248#0#255#255#242#0#255#255#237#0#255#255#230#0#138'bE'#0#207#172
+  +#139#0#207#172#139#0#138'bE'#0#255#255#230#0#255#255#237#0#255#255#242#0#255
+  +#255#247#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
+  +#252#0#255#255#251#0#255#255#245#0#255#255#237#0#138'bE'#0#207#172#139#0#207
+  +#172#139#0#138'bE'#0#255#255#235#0#255#255#245#0#255#255#251#0#255#255#252#0
+  +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
+  +#255#255#0#255#255#251#0#255#255#242#0#138'bE'#0#207#172#139#0#207#172#139#0
+  +#138'bE'#0#255#255#242#0#255#255#251#0#255#255#255#0#255#255#255#0#255#255
+  +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
+  +#255#255#252#0#255#255#247#0#138'bE'#0#138'bE'#0#138'bE'#0#138'bE'#0#255#255
+  +#247#0#255#255#252#0#253#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
+  +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
+  +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
+  +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
+  +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
+  +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
+  +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
+  +#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#22#21#23'7'#22#21#23#156#22#21#23#221#22#21
+  +#23#252#22#21#23#252#22#21#23#221#22#21#23#156#22#21#23'7'#0#0#0#0#0#0#0#0#0
+  +#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#22#21#23#12#22#21#23#162#22#21#23#255#22#21#23
   +#255#22#21#23#255#22#21#23#255#22#21#23#255#22#21#23#255#22#21#23#255#22#21
-  +#23#255#22#21#23#255#22#21#23#162#22#21#23#12#0#0#0#0#0#0#0#0#0#0#0#0#22#21
-  +#23#13#22#21#23#201#22#21#23#255#22#21#23#255#22#21#23#255#22#21#23#255#22#21
-  +#23#255#22#21#23#255#22#21#23#255#22#21#23#255#22#21#23#255#22#21#23#255#22
-  +#21#23#201#22#21#23#13#0#0#0#0#0#0#0#0#22#21#23#163#22#21#23#255#22#21#23#204
-  +#22#21#23'i'#22#21#23#210#22#21#23#252#22#21#23#228#22#21#23#228#22#21#23#252
-  +#22#21#23#210#22#21#23'i'#22#21#23#204#22#21#23#255#22#21#23#163#0#0#0#0#22
-  +#21#23'9'#22#21#23#255#22#21#23#255#22#21#23#153#0#0#0#0#22#21#23#4#22#21#23
-  +#11#0#0#0#0#0#0#0#0#22#21#23#11#22#21#23#4#0#0#0#0#22#21#23#153#22#21#23#255
-  +#22#21#23#255#22#21#23'9'#22#21#23#159#22#21#23#255#22#21#23#255#22#21#23#149
-  +#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#22#21#23#149
-  +#22#21#23#255#22#21#23#255#22#21#23#159#22#21#23#223#22#21#23#255#22#21#23
-  +#254#22#21#23#28#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0
-  +#0#0#22#21#23#28#22#21#23#254#22#21#23#255#22#21#23#223#22#21#23#253#22#21#23
-  +#255#22#21#23#239#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0
-  +#0#0#0#0#0#0#0#0#0#0#22#21#23#239#22#21#23#255#22#21#23#253#22#21#23#252#22
-  +#21#23#255#22#21#23#252#22#21#23#6#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0
-  +#0#0#0#0#0#0#0#0#0#0#0#22#21#23#6#22#21#23#252#22#21#23#255#22#21#23#252#22
-  +#21#23#219#22#21#23#255#22#21#23#255#22#21#23'M'#0#0#0#0#0#0#0#0#0#0#0#0#0#0
-  +#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#22#21#23'M'#22#21#23#255#22#21#23#255#22
-  +#21#23#219#22#21#23#151#22#21#23#255#22#21#23#255#22#21#23#227#22#21#23'1'#0
-  +#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#22#21#23'1'#22#21#23#227#22#21
-  +#23#255#22#21#23#255#22#21#23#151#22#21#23'-'#22#21#23#253#22#21#23#143#22#21
-  +#23#164#22#21#23#254#22#21#23#195#22#21#23':'#0#0#0#0#0#0#0#0#22#21#23'<'#22
-  +#21#23#197#22#21#23#254#22#21#23#255#22#21#23#255#22#21#23#253#22#21#23'-'#0
-  +#0#0#0#22#21#23#145#22#21#23#255#22#21#23'E'#22#21#23#149#22#21#23#176#22#21
-  +#23#16#0#0#0#0#0#0#0#0#22#21#23#21#22#21#23#255#22#21#23#255#22#21#23#255#22
-  +#21#23#255#22#21#23#145#0#0#0#0#0#0#0#0#22#21#23#6#22#21#23#181#22#21#23#219
-  +#22#21#23'N'#22#21#23'6'#22#21#23#2#0#0#0#0#0#0#0#0#22#21#23#8#22#21#23#255
-  +#22#21#23#255#22#21#23#255#22#21#23#181#22#21#23#6#0#0#0#0#0#0#0#0#0#0#0#0#22
-  +#21#23#5#22#21#23#135#22#21#23#250#22#21#23#255#22#21#23#8#0#0#0#0#0#0#0#0#22
-  +#21#23#8#22#21#23#255#22#21#23#250#22#21#23#135#22#21#23#5#0#0#0#0#0#0#0#0
-  +#188#188#188#0#188#188#188#0#188#188#188#0#188#188#188#0#22#21#23' '#22#21#23
-  ,'r'#24#23#25#2#188#188#188#0#188#188#188#0#24#23#25#2#22#21#23'r'#22#21#23' '
+  +#23#255#22#21#23#162#22#21#23#12#0#0#0#0#0#0#0#0#0#0#0#0#22#21#23#13#22#21#23
+  +#201#22#21#23#255#22#21#23#255#22#21#23#255#22#21#23#255#22#21#23#255#22#21
+  +#23#255#22#21#23#255#22#21#23#255#22#21#23#255#22#21#23#255#22#21#23#201#22
+  +#21#23#13#0#0#0#0#0#0#0#0#22#21#23#163#22#21#23#255#22#21#23#204#22#21#23'i'
+  +#22#21#23#210#22#21#23#252#22#21#23#228#22#21#23#228#22#21#23#252#22#21#23
+  +#210#22#21#23'i'#22#21#23#204#22#21#23#255#22#21#23#163#0#0#0#0#22#21#23'9'
+  +#22#21#23#255#22#21#23#255#22#21#23#153#0#0#0#0#22#21#23#4#22#21#23#11#0#0#0
+  +#0#0#0#0#0#22#21#23#11#22#21#23#4#0#0#0#0#22#21#23#153#22#21#23#255#22#21#23
+  +#255#22#21#23'9'#22#21#23#159#22#21#23#255#22#21#23#255#22#21#23#149#0#0#0#0
+  +#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#22#21#23#149#22#21
+  +#23#255#22#21#23#255#22#21#23#159#22#21#23#223#22#21#23#255#22#21#23#254#22
+  +#21#23#28#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#22
+  +#21#23#28#22#21#23#254#22#21#23#255#22#21#23#223#22#21#23#253#22#21#23#255#22
+  +#21#23#239#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0
+  +#0#0#0#0#0#0#0#22#21#23#239#22#21#23#255#22#21#23#253#22#21#23#252#22#21#23
+  +#255#22#21#23#252#22#21#23#6#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0
+  +#0#0#0#0#0#0#0#0#22#21#23#6#22#21#23#252#22#21#23#255#22#21#23#252#22#21#23
+  +#219#22#21#23#255#22#21#23#255#22#21#23'M'#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0
+  +#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#22#21#23'M'#22#21#23#255#22#21#23#255#22#21#23
+  +#219#22#21#23#151#22#21#23#255#22#21#23#255#22#21#23#227#22#21#23'1'#0#0#0#0
+  +#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#22#21#23'1'#22#21#23#227#22#21#23
+  +#255#22#21#23#255#22#21#23#151#22#21#23'-'#22#21#23#253#22#21#23#143#22#21#23
+  +#164#22#21#23#254#22#21#23#195#22#21#23':'#0#0#0#0#0#0#0#0#22#21#23'<'#22#21
+  +#23#197#22#21#23#254#22#21#23#255#22#21#23#255#22#21#23#253#22#21#23'-'#0#0#0
+  +#0#22#21#23#145#22#21#23#255#22#21#23'E'#22#21#23#149#22#21#23#176#22#21#23
+  +#16#0#0#0#0#0#0#0#0#22#21#23#21#22#21#23#255#22#21#23#255#22#21#23#255#22#21
+  +#23#255#22#21#23#145#0#0#0#0#0#0#0#0#22#21#23#6#22#21#23#181#22#21#23#219#22
+  +#21#23'N'#22#21#23'6'#22#21#23#2#0#0#0#0#0#0#0#0#22#21#23#8#22#21#23#255#22
+  +#21#23#255#22#21#23#255#22#21#23#181#22#21#23#6#0#0#0#0#0#0#0#0#0#0#0#0#22#21
+  +#23#5#22#21#23#135#22#21#23#250#22#21#23#255#22#21#23#8#0#0#0#0#0#0#0#0#22#21
+  +#23#8#22#21#23#255#22#21#23#250#22#21#23#135#22#21#23#5#0#0#0#0#0#0#0#0#188
+  +#188#188#0#188#188#188#0#188#188#188#0#188#188#188#0#22#21#23' '#22#21#23'r'
+  ,#24#23#25#2#188#188#188#0#188#188#188#0#24#23#25#2#22#21#23'r'#22#21#23' '
   +#188#188#188#0#188#188#188#0#188#188#188#0#188#188#188#0#0#0#0#0#0#0#0#0#0#0
   +#0#0#0#0#0#0#0#0#0#0#0#139#0#22#0#130#0'1'#0#135#0'$'#0#133#0#25#0#0#0#0#0#0
   +#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0
@@ -524,5 +524,5 @@ LazarusResources.Add('TSimbaPackageForm','FORMDATA',[
   +#178#255#176#248#207'iiip'#23'>'#195#239#230'U'#182#230'U'#28'*'#202#175#250
   +#240#150#203'u'#245#203#158#187'dv'#214#131'O'#207'{'#192#225#136'b'#255'c'
   +#191#31#1's'#150#12'P'#0#0#6'TTimer'#11'UpdateTimer'#7'OnTimer'#7#13'DoUpdat'
-  +'eTimer'#4'left'#2'8'#3'top'#3#236#0#0#0#0
+  +'eTimer'#4'Left'#2'8'#3'Top'#3#236#0#0#0#0
 ]);

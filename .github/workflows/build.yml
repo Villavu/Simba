@@ -83,7 +83,7 @@ jobs:
     - name: Extract Lazarus
       if: steps.cache.outputs.cache-hit == 'true'
       run: |
-        tar -zxvf lazarus.tar.gz
+        tar -zxf lazarus.tar.gz
 
     - name: Install Lazarus
       if: steps.cache.outputs.cache-hit != 'true'
@@ -114,7 +114,7 @@ jobs:
     - name: Compress Lazarus
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
-        tar zcvf lazarus.tar.gz lazarus
+        tar zcf lazarus.tar.gz lazarus
 
     - name: Upload Artifact 
       uses: actions/upload-artifact@v2.1.3

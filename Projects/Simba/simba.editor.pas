@@ -478,8 +478,10 @@ end;
 constructor TSimbaEditor.Create(AOwner: TComponent);
 var
   I: Int32;
+  {$IFDEF DARWIN}
   Key: UInt16;
   Shift: TShiftState;
+  {$ENDIF}
 begin
   inherited Create(AOwner);
 

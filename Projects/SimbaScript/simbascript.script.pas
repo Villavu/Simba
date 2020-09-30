@@ -367,8 +367,6 @@ begin
     Method.Invoke(Self);
     Method.Free();
   end;
-
-  WriteLn(E.Message);
 end;
 
 procedure TSimbaScript.HandleHint(Sender: TLapeCompilerBase; Hint: lpString);
