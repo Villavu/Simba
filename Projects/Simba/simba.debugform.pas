@@ -177,20 +177,6 @@ begin
   Editor.Font.Quality := fqDefault; // weird one, I know
   {$ENDIF}
 
-  {$IFDEF DARWIN}
-  for I := 0 to Editor.Keystrokes.Count - 1 do
-  begin
-    ShortCutToKey(Editor.Keystrokes[I].ShortCut, Key, Shift);
-
-    if ssCtrl in Shift then
-    begin
-      Shift := Shift - [ssCtrl] + [ssMeta];
-
-      Editor.Keystrokes[I].ShortCut := ShortCut(Key, Shift);
-    end;
-  end;
-  {$ENDIF}
-
   SimbaSettings.Editor.FontName.AddHandlerOnChange(@SettingChanged_EditorFont);
   SimbaSettings.Editor.FontHeight.AddHandlerOnChange(@SettingChanged_EditorFontHeight);
 end;

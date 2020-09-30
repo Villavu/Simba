@@ -2,10 +2,6 @@ unit simba.scripttab;
 
 {$mode objfpc}{$H+}
 
-{$IFDEF DARWIN}
-  {$DEFINE USE_SIMPLE_DIALOG}
-{$ENDIF}
-
 interface
 
 uses
@@ -83,7 +79,7 @@ type
 implementation
 
 uses
-  synedit, lazfileutils, SynEditMouseCmds, InterfaceBase, forms, simba.scripttabsform, simba.simplefiledialog,
+  synedit, lazfileutils, SynEditMouseCmds, InterfaceBase, forms, simba.scripttabsform,
   simba.settings, simba.scripttabhistory, simba.main, simba.parser_misc, simba.debugform;
 
 procedure TSimbaScriptTab.HandleCodeJump(Data: PtrInt);
@@ -337,36 +333,10 @@ end;
 procedure TSimbaScriptTab.SaveAs;
 var
   SaveDialog: TSaveDialog;
-  Path: String;
 begin
   SaveDialog := nil;
 
   try
-    {$IFDEF USE_SIMPLE_DIALOG}
-    with TSimbaFileDialog.Create(Self) do
-    try
-      if (FScriptFile = '') then
-        ChangeDirectory(SimbaSettings.Environment.ScriptPath.Value)
-      else
-        ChangeDirectory(ExtractFileDir(FScriptFile));
-
-      if Execute() then
-      begin
-        Path := FileName;
-        if ExtractFileExt(FileName) = '' then
-          Path := Path + '.simba';
-
-        if FileExists(Path) then
-        begin
-          if MessageDlg('Overrite File', 'Overwrite this file? ' + Path, mtConfirmation, mbYesNo, 0) = mrYes then
-            Self.Save(Path);
-        end else
-          Self.Save(Path);
-      end;
-    finally
-      Free();
-    end;
-    {$ELSE}
     SaveDialog := TSaveDialog.Create(nil);
     SaveDialog.Filter := 'Simba Files|*.simba;*.pas;*.inc;|Any Files|*.*';
     SaveDialog.InitialDir := FScriptFile;
@@ -380,7 +350,6 @@ begin
 
       Self.Save(SaveDialog.FileName);
     end;
-    {$ENDIF}
   except
     on E: Exception do
       ShowMessage('Error while saving file as: ' + E.Message);

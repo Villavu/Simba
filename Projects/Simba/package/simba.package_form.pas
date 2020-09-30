@@ -18,7 +18,7 @@ interface
 uses
   classes, sysutils, dividerbevel, lresources, forms, controls, graphics,
   dialogs, stdctrls, buttons, buttonpanel, extctrls, comctrls, menus,
-  simba.package, Types;
+  simba.package, types;
 
 // Eventually we can populate from a webpage, but this will do for now.
 const

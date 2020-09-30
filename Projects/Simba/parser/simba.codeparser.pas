@@ -396,9 +396,6 @@ operator + (Left: TDeclarationArray; Right: TDeclarationArray): TDeclarationArra
 
 implementation
 
-uses
-  simba.main;
-
 operator + (Left: TDeclarationArray; Right: TDeclaration): TDeclarationArray;
 begin
   SetLength(Result, Length(Left) + 1);

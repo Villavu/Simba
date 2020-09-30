@@ -144,7 +144,11 @@ end;
 
 function TMInternet.CreateHTTPClient(HandleCookies: boolean = true): integer;
 begin
-  Result := HTTPClients.Add(THTTPClient.Create(Client,HandleCookies));
+  Result := HTTPClients.IndexOf(nil);
+  if (Result = -1) then
+    Result := HTTPClients.Add(nil);
+
+  HTTPClients[Result] := THTTPClient.Create(Client, HandleCookies);
 end;
 
 function TMInternet.GetHTTPClient(Index: integer): THTTPClient;

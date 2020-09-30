@@ -119,7 +119,7 @@ begin
 
   WriteLn('');
 
-  Application.QueueASyncCall(@SimbaForm.Initialize, 0);
+  Application.QueueASyncCall(@SimbaForm.Setup, 0);
   Application.Run();
 end.
 

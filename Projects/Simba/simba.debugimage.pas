@@ -27,9 +27,8 @@ unit simba.debugimage;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, ComCtrls, Buttons,
-  simba.mufasatypes, simba.imagebox;
+  classes, sysutils, lresources, forms, controls, dialogs,
+  simba.imagebox;
 
 type
   TSimbaDebugImageForm = class(TForm)
@@ -41,8 +40,6 @@ type
   public
     ImageBox: TSimbaImageBox;
 
-    procedure SetDimensions(W, H: Int32);
-
     constructor Create(AOwner: TComponent); override;
   end;
 
@@ -52,8 +49,7 @@ var
 implementation
 
 uses
-  anchordocking, lcltype,
-  simba.debugform, simba.main;
+  simba.debugform;
 
 procedure TSimbaDebugImageForm.ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Int32);
 begin
@@ -64,24 +60,6 @@ end;
 procedure TSimbaDebugImageForm.ImageDoubleClick(Sender: TObject);
 begin
   SimbaDebugForm.Add('Debug Image Click: ' + IntToStr(FMouseX) + ', ' + IntToStr(FMouseY));
-end;
-
-procedure TSimbaDebugImageForm.SetDimensions(W, H: Int32);
-begin
-  if (W < 200) then
-    W := 200;
-  if (H < 200) then
-    H := 200;
-
-  if (DockMaster.GetAnchorSite(Self) <> nil) then
-  begin
-    DockMaster.GetAnchorSite(Self).Width := W;
-    DockMaster.GetAnchorSite(Self).Height := H + DockMaster.GetAnchorSite(Self).Header.Height + ImageBox.StatusBar.Height;
-  end else
-  begin
-    Width := W;
-    Height := H + ImageBox.StatusBar.Height;
-  end;
 end;
 
 constructor TSimbaDebugImageForm.Create(AOwner: TComponent);

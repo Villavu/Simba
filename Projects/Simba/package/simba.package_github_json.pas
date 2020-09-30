@@ -67,38 +67,37 @@ function ParseJSON(Contents: String): TJSONArray;
 var
   JSON: TJSONData;
 begin
+  Result := nil;
+
   try
     JSON := GetJSON(Contents);
-
-    if (JSON <> nil) then
-    begin
-      if (JSON is TJSONArray) and (JSON.Count > 0) then
-        Exit(JSON as TJSONArray);
-
-      JSON.Free();
-    end;
   except
-    // bad json
+    JSON := nil;
   end;
 
-  Exit(nil);
+  if (JSON is TJSONArray) then
+    Result := TJSONArray(JSON)
+  else
+    JSON.Free();
 end;
 
 function TJSONObject_Helper.GetDownloadURL: String;
 begin
+  Result := '';
+
   try
     Result := Strings['zipball_url'];
   except
-    Result := '';
   end;
 end;
 
 function TJSONObject_Helper.GetNotes: String;
 begin
+  Result := '';
+
   try
     Result := Strings['body'];
   except
-    Result := '';
   end;
 end;
 
@@ -121,10 +120,11 @@ end;
 
 function TJSONObject_Helper.GetVersion: String;
 begin
+  Result := '';
+
   try
     Result := Strings['tag_name'];
   except
-    Result := '';
   end
 end;
 
