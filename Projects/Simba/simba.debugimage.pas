@@ -27,7 +27,7 @@ unit simba.debugimage;
 interface
 
 uses
-  classes, sysutils, lresources, forms, controls, dialogs,
+  classes, sysutils, lresources, forms, controls, dialogs, math,
   simba.imagebox;
 
 type
@@ -40,6 +40,8 @@ type
   public
     ImageBox: TSimbaImageBox;
 
+    procedure Resize(AWidth, AHeight: Int32; AShowOnTop: Boolean);
+
     constructor Create(AOwner: TComponent); override;
   end;
 
@@ -49,7 +51,7 @@ var
 implementation
 
 uses
-  simba.debugform;
+  simba.debugform, simba.dockinghelpers;
 
 procedure TSimbaDebugImageForm.ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Int32);
 begin
@@ -60,6 +62,14 @@ end;
 procedure TSimbaDebugImageForm.ImageDoubleClick(Sender: TObject);
 begin
   SimbaDebugForm.Add('Debug Image Click: ' + IntToStr(FMouseX) + ', ' + IntToStr(FMouseY));
+end;
+
+procedure TSimbaDebugImageForm.Resize(AWidth, AHeight: Int32; AShowOnTop: Boolean);
+begin
+  SimbaDockingHelper.Resize(Self, Max(200, AWidth), Max(200, AHeight + ImageBox.StatusBar.Height));
+  SimbaDockingHelper.EnsureVisible(Self);
+  if AShowOnTop then
+    SimbaDockingHelper.ShowOnTop(Self);
 end;
 
 constructor TSimbaDebugImageForm.Create(AOwner: TComponent);

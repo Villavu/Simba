@@ -16,17 +16,17 @@ uses
 
 procedure Lape_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  TSimbaScript(Params^[0]).Write(PString(Params^[1])^);
+  ScriptInstance.Write(PString(Params^[0])^);
 end;
 
 procedure Lape_WriteLn(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  TSimbaScript(Params^[0]).WriteLn('');
+  ScriptInstance.WriteLn('');
 end;
 
 procedure Lape_GetEnvironmentVariable(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PString(Result)^ := GetEnvironmentVariableUTF8(PString(Params^[1])^);
+  PString(Result)^ := GetEnvironmentVariableUTF8(PString(Params^[0])^);
 end;
 
 procedure Lape_GetCurrentThreadID(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -40,7 +40,7 @@ end;
 
 procedure Lape_Wait(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Sleep(PUInt32(Params^[1])^);
+  Sleep(PUInt32(Params^[0])^);
 end;
 
 type
@@ -54,7 +54,7 @@ procedure TSync.Execute;
 type
   TSyncProcedure = procedure; {$IF DEFINED(CPU32) and DEFINED(LAPE_CDECL)}cdecl;{$ENDIF}
 begin
-  TSyncProcedure(PPointer(Params^[1])^)();
+  TSyncProcedure(PPointer(Params^[0])^)();
 end;
 
 // procedure Sync(Method: procedure);
@@ -81,7 +81,7 @@ procedure TSyncObject.Execute;
 type
   TSyncProcedure = procedure of object; {$IF DEFINED(CPU32) and DEFINED(LAPE_CDECL)}cdecl;{$ENDIF}
 begin
-  TSyncProcedure(Params^[1]^)();
+  TSyncProcedure(Params^[0]^)();
 end;
 
 // procedure Sync(Method: procedure);
@@ -99,32 +99,32 @@ end;
 
 procedure Lape_PauseScript(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  TSimbaScript(Params^[0]).State := bUnknown;
+  ScriptInstance.State := bUnknown;
 end;
 
 procedure Lape_TerminateScript(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  TSimbaScript(Params^[0]).State := bFalse;
+  ScriptInstance.State := bFalse;
 end;
 
 procedure Lape_IsTerminated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := TSimbaScript(Params^[0]).IsTerminating;
+  PBoolean(Result)^ := ScriptInstance.IsTerminating;
 end;
 
 procedure Lape_IsUserTerminated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := (TSimbaScript(Params^[0]).IsTerminating and TSimbaScript(Params^[0]).IsUserTerminated)
+  PBoolean(Result)^ := (ScriptInstance.IsTerminating and ScriptInstance.IsUserTerminated)
 end;
 
 procedure Lape_EnterMethod(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 var
   Event: TSimbaScript_DebuggerEvent;
 begin
-  with TSimbaScript(Params^[0]) do
+  with ScriptInstance do
   begin
     _DebuggingIndent += 1;
-    _DebuggingMethod := PUInt16(Params^[1])^;
+    _DebuggingMethod := PUInt16(Params^[0])^;
 
     Event.Method := _DebuggingMethod;
     Event.Indent := _DebuggingIndent;
@@ -137,9 +137,9 @@ procedure Lape_LeaveMethod(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;
 var
   Event: TSimbaScript_DebuggerEvent;
 begin
-  with TSimbaScript(Params^[0]) do
+  with ScriptInstance do
   begin
-    Event.Method := PUInt16(Params^[1])^;
+    Event.Method := PUInt16(Params^[0])^;
     Event.Indent := _DebuggingIndent;
 
     if Event.Method <> _DebuggingMethod then
@@ -202,7 +202,7 @@ begin
 
     if (Script <> nil) then
     begin
-      addGlobalVar('TClient', @Script.Client, 'Client');
+      addGlobalVar('TClient', @ScriptInstance.Client, 'Client');
 
       addGlobalConst(Script.ScriptFile, 'ScriptFile');
       addGlobalConst(Script.ScriptPath, 'ScriptPath');
@@ -224,8 +224,8 @@ begin
 
     addGlobalConst(LineEnding, 'LineEnding');
 
-    addGlobalMethod('procedure _Write(S: string); override;', @Lape_Write, Data);
-    addGlobalMethod('procedure _WriteLn; override;', @Lape_WriteLn, Data);
+    addGlobalFunc('procedure _Write(S: string); override;', @Lape_Write);
+    addGlobalFunc('procedure _WriteLn; override;', @Lape_WriteLn);
 
     addGlobalType('record'                                                       + LineEnding +
                   '  CurrencyFormat: Byte;'                                      + LineEnding +
@@ -260,10 +260,10 @@ begin
 
     addGlobalVar('TFormatSettings', @FormatSettings, 'FormatSettings');
 
-    addGlobalMethod('function GetCurrThreadID: PtrUInt;', @Lape_GetCurrentThreadID, Data);
-    addGlobalMethod('function GetCurrentThreadID: PtrUInt;', @Lape_GetCurrentThreadID, Data);
-    addGlobalMethod('function GetEnvironmentVariable(const Name: String): String;', @Lape_GetEnvironmentVariable, Data);
-    addGlobalMethod('procedure Wait(Milliseconds: UInt32);', @Lape_Wait, Data);
+    addGlobalFunc('function GetCurrThreadID: PtrUInt;', @Lape_GetCurrentThreadID);
+    addGlobalFunc('function GetCurrentThreadID: PtrUInt;', @Lape_GetCurrentThreadID);
+    addGlobalFunc('function GetEnvironmentVariable(const Name: String): String;', @Lape_GetEnvironmentVariable);
+    addGlobalFunc('procedure Wait(Milliseconds: UInt32);', @Lape_Wait);
 
     {$IF DEFINED(CPU32) and DEFINED(LAPE_CDECL)}
     addGlobalType('procedure();', 'TSyncMethod', FFI_CDECL);
@@ -273,16 +273,16 @@ begin
     addGlobalType('procedure() of object;', 'TSyncObjectMethod', FFI_DEFAULT_ABI);
     {$ENDIF}
 
-    addGlobalMethod('procedure Sync(Method: TSyncMethod); overload;', @Lape_Sync, Data);
-    addGlobalMethod('procedure Sync(Method: TSyncObjectMethod); overload;', @Lape_SyncObject, Data);
+    addGlobalFunc('procedure Sync(Method: TSyncMethod); overload;', @Lape_Sync);
+    addGlobalFunc('procedure Sync(Method: TSyncObjectMethod); overload;', @Lape_SyncObject);
 
-    addGlobalMethod('procedure TerminateScript;', @Lape_TerminateScript, Data);
-    addGlobalMethod('procedure PauseScript;', @Lape_PauseScript, Data);
-    addGlobalMethod('function IsTerminated: Boolean;', @Lape_IsTerminated, Data);
-    addGlobalMethod('function IsUserTerminated: Boolean;', @Lape_IsUserTerminated, Data);
+    addGlobalFunc('procedure TerminateScript;', @Lape_TerminateScript);
+    addGlobalFunc('procedure PauseScript;', @Lape_PauseScript);
+    addGlobalFunc('function IsTerminated: Boolean;', @Lape_IsTerminated);
+    addGlobalFunc('function IsUserTerminated: Boolean;', @Lape_IsUserTerminated);
 
-    addGlobalMethod('procedure _EnterMethod(constref Index: Int32); override;', @Lape_EnterMethod, Data);
-    addGlobalMethod('procedure _LeaveMethod(constref Index: Int32); override;', @Lape_LeaveMethod, Data);
+    addGlobalFunc('procedure _EnterMethod(constref Index: Int32); override;', @Lape_EnterMethod);
+    addGlobalFunc('procedure _LeaveMethod(constref Index: Int32); override;', @Lape_LeaveMethod);
 
     addDelayedCode(
       'var'                                                                      + LineEnding +

@@ -37,7 +37,7 @@ type
 implementation
 
 uses
-  extctrls, forms,
+  extctrls, forms, math,
   simba.debugimage, simba.debugform, simba.scripttabsform, simba.mufasatypes,
   simba.main, simba.scripttab, simba.bitmap, simba.oswindow, simba.scriptinstance,
   simba.debuggerform, simba.dockinghelpers;
@@ -119,14 +119,7 @@ begin
   Params.Read(Width, SizeOf(Int32));
   Params.Read(Height, SizeOf(Int32));
 
-  SimbaDockingHelper.ShowOnTop(SimbaDebugImageForm);
-
-  // Only resize if needed
-  if (Width <> SimbaDebugImageForm.ImageBox.Background.Width) or (Height <> SimbaDebugImageForm.ImageBox.Background.Height) then
-  begin
-    SimbaDockingHelper.Resize(SimbaDebugImageForm, Width, Height);
-    SimbaDockingHelper.EnsureVisible(SimbaDebugForm);
-  end;
+  SimbaDebugImageForm.Resize(Max(Width, SimbaDebugImageForm.ImageBox.Background.Width), Max(Height, SimbaDebugImageForm.ImageBox.Background.Height), True);
 
   SimbaDebugImageForm.ImageBox.Background.LoadFromPointer(PRGB32(Params.Memory + Params.Position), Width, Height);
   SimbaDebugImageForm.ImageBox.BackgroundChanged(False);
@@ -152,9 +145,7 @@ begin
   Params.Read(Width, SizeOf(Int32));
   Params.Read(Height, SizeOf(Int32));
 
-  SimbaDockingHelper.Resize(SimbaDebugImageForm, Width, Height);
-  SimbaDockingHelper.EnsureVisible(SimbaDebugForm);
-  SimbaDockingHelper.ShowOnTop(SimbaDebugImageForm);
+  SimbaDebugImageForm.Resize(Width, Height, True);
 end;
 
 procedure TSimbaMethod._DebugImageClear;

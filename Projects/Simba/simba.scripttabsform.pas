@@ -400,7 +400,8 @@ begin
       FindDialog.Options := FindDialog.Options + [frEntireScope];
 
     FindDialog.FindText := CurrentEditor.GetWordAtRowCol(CurrentEditor.CaretXY);
-    FindDialog.Execute();
+    if FindDialog.Execute() then
+      StatusPanelFileName.Caption := 'Find: Use F3 (Forward) or Shift + F3 (Backwards) to traverse through matches';
   end;
 end;
 

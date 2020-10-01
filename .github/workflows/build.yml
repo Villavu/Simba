@@ -73,17 +73,21 @@ jobs:
         sudo apt-get -m -y install libgtk2.0-dev libpango1.0-dev libffi-dev libxtst-dev xvfb 
         Xvfb :1 &
 
+    - name: Install Dependenices (macOS)
+      if: matrix.config.os == 'macos-latest'
+      run: |
+        brew install gnu-tar
+        echo "::add-path::/usr/local/opt/gnu-tar/libexec/gnubin"
+        
+    - name: Generate Cache Hash
+      run: echo "${{ matrix.config.fpcup-url }}${{ matrix.config.fpcup-opt }}${{ matrix.config.fpc-url }}${{ matrix.config.laz-url }}${{ matrix.config.name }}" > .cache
+
     - name: Cache
       id: cache
       uses: actions/cache@v2.1.1
       with:
-        path: lazarus.tar.gz
-        key: "${{ matrix.config.fpcup-url }}${{ matrix.config.fpcup-opt }}${{ matrix.config.fpc-url }}${{ matrix.config.laz-url }}${{ matrix.config.name }}"
-
-    - name: Extract Lazarus
-      if: steps.cache.outputs.cache-hit == 'true'
-      run: |
-        tar -zxf lazarus.tar.gz
+        path: lazarus
+        key: ${{ hashFiles('.cache') }}
 
     - name: Install Lazarus
       if: steps.cache.outputs.cache-hit != 'true'
@@ -110,11 +114,6 @@ jobs:
         export DISPLAY=:1
         chmod +x Projects/SimbaScript/SimbaScript
         ./Projects/SimbaScript/SimbaScript --run Tests/simba
-        
-    - name: Compress Lazarus
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: |
-        tar zcf lazarus.tar.gz lazarus
 
     - name: Upload Artifact 
       uses: actions/upload-artifact@v2.1.3
@@ -132,7 +131,7 @@ jobs:
         statuses: '["completed", "completed", "completed", "completed", "completed"]'
         conclusions: '["success", "success", "success", "success", "success"]'
         timeout: 1500
-        poll_interval: 10
+        poll_interval: 5
 
     - name: Download Artifacts
       if: github.event_name == 'push'

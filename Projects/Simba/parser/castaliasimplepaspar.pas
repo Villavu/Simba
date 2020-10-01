@@ -2799,6 +2799,12 @@ end;
 
 procedure TmwSimplePasPar.QualifiedIdentifier;
 begin //mw 12/7/2000
+  if (TokenID = tokType) then
+  begin
+    TypeDeclaration;
+    Exit;
+  end;
+
   Expected(tokIdentifier);
   case TokenID of
     tokPoint:
@@ -3108,6 +3114,12 @@ end;
 
 procedure TmwSimplePasPar.Expression;
 begin
+  if (TokenID = tokType) then
+  begin
+    TypeDeclaration;
+    Exit;
+  end;
+
   SimpleExpression;
 
   //JT 2006-07-17 The Delphi language guide has this as
@@ -4494,12 +4506,13 @@ end;
 
 procedure TmwSimplePasPar.TypeDeclaration;
 begin
-  TypeName;
-  //For generics
-//  if TokenId = tokLower then
-//    TypeParams;
-  //end generics
-  Expected(tokEqual);
+  if (TokenID <> tokType) then
+  begin
+    TypeName;
+    Expected(tokEqual);
+  end else
+    NextToken();
+
   Lexer.InitAhead;
 
   // Some types have their own tokens which messes when declarating base types: `type Currency = Currency`
