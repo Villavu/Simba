@@ -14,7 +14,7 @@ uses
 type
   TSimbaScriptTask = class(TThread)
   public
-    constructor Create; reintroduce;
+    constructor Create; virtual; reintroduce;
     destructor Destroy; override;
   end;
 

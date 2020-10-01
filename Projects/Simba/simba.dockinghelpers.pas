@@ -145,6 +145,7 @@ begin
 
   Form.Position := poScreenCenter;
   Form.MoveToDefaultPosition();
+  Form.ShowOnTop();
 end;
 
 class function SimbaDockingHelper.IsVisible(Form: TCustomForm): Boolean;

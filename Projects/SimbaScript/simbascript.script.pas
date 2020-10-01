@@ -133,7 +133,11 @@ type
     procedure Invoke(Message: Int32; Params, Result: TMemoryStream);
 
     destructor Destroy; override;
+    constructor Create; override;
   end;
+
+var
+  ScriptInstance: TSimbaScript = nil;
 
 implementation
 
@@ -534,6 +538,16 @@ begin
 
   if (OnDestroyed <> nil) then
     OnDestroyed(Self);
+end;
+
+constructor TSimbaScript.Create;
+begin
+  inherited Create();
+
+  if (ScriptInstance <> nil) then
+    raise Exception.Create('Only supports one script per instance!');
+
+  ScriptInstance := Self;
 end;
 
 initialization

@@ -24,7 +24,7 @@ type
 
 procedure TInputQuery.Execute;
 begin
-  PBoolean(Return)^ := InputQuery(PString(Params^[1])^, PString(Params^[2])^, PString(Params^[3])^);
+  PBoolean(Return)^ := InputQuery(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
 end;
 
 // function InputQuery(const ACaption, APrompt: String; var Value: String): Boolean
@@ -54,7 +54,7 @@ type
   PMsgDlgType = ^TMsgDlgType;
   PMsgDlgButtons = ^TMsgDlgButtons;
 begin
-  PInt32(Result)^ := MessageDlg(PString(Params^[1])^, PString(Params^[2])^, PMsgDlgType(Params^[3])^, PMsgDlgButtons(Params^[4])^, '');
+  PInt32(Result)^ := MessageDlg(PString(Params^[0])^, PString(Params^[1])^, PMsgDlgType(Params^[2])^, PMsgDlgButtons(Params^[3])^, '');
 end;
 
 // function MessageDlg(const Caption, Message: string; DialogType: TMsgDlgType; Buttons: TMsgDlgButtons): Int32
@@ -80,7 +80,7 @@ type
 
 procedure TShowMessage.Execute;
 begin
-  ShowMessage(PString(Params^[1])^);
+  ShowMessage(PString(Params^[0])^);
 end;
 
 // procedure ShowMessage(const Message: String);
@@ -106,21 +106,21 @@ type
 
 procedure TACA.CalculateBestColor(CTS, Color, Tolerance: Int32; Hue, Sat: Extended);
 begin
-  PInt32(Params^[2])^ := CTS;
-  PInt32(Params^[3])^ := Color;
-  PInt32(Params^[4])^ := Tolerance;
+  PInt32(Params^[1])^ := CTS;
+  PInt32(Params^[2])^ := Color;
+  PInt32(Params^[3])^ := Tolerance;
 
-  PExtended(Params^[5])^ := Hue;
-  PExtended(Params^[6])^ := Sat;
+  PExtended(Params^[4])^ := Hue;
+  PExtended(Params^[5])^ := Sat;
 end;
 
 procedure TACA.Execute;
 begin
-  with TSimbaACAForm.Create(TSimbaScript(Params^[0]).Client.IOManager.GetImageTarget().Handle) do
+  with TSimbaACAForm.Create(ScriptInstance.Client.IOManager.GetImageTarget().Handle) do
   begin
     OnCalculateBestColor := @CalculateBestColor;
-    if (PString(Params^[1])^ <> '') then
-      Caption := 'Auto Color Aid - ' + PString(Params^[1])^;
+    if (PString(Params^[0])^ <> '') then
+      Caption := 'Auto Color Aid - ' + PString(Params^[0])^;
     ShowModal();
   end;
 end;
@@ -139,10 +139,10 @@ end;
 
 procedure Lape_ACAEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  case PInt32(Params^[2])^ of
-    0: BestColor_CTS0(PIntegerArray(Params^[1])^, PInt32(Params^[3])^, PInt32(Params^[4])^);
-    1: BestColor_CTS1(PIntegerArray(Params^[1])^, PInt32(Params^[3])^, PInt32(Params^[4])^);
-    2: BestColor_CTS2(PIntegerArray(Params^[1])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PExtended(Params^[5])^, PExtended(Params^[6])^);
+  case PInt32(Params^[1])^ of
+    0: BestColor_CTS0(PIntegerArray(Params^[0])^, PInt32(Params^[2])^, PInt32(Params^[3])^);
+    1: BestColor_CTS1(PIntegerArray(Params^[0])^, PInt32(Params^[2])^, PInt32(Params^[3])^);
+    2: BestColor_CTS2(PIntegerArray(Params^[0])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
   end;
 end;
 
@@ -156,16 +156,16 @@ type
 
 procedure TDTMEditor.GetResult(constref DTM: String);
 begin
-  PString(Params^[2])^ := DTM;
+  PString(Params^[1])^ := DTM;
 end;
 
 procedure TDTMEditor.Execute;
 begin
-  with TSimbaDTMEditorForm.Create(TSimbaScript(Params^[0]).Client.IOManager.GetImageTarget().Handle) do
+  with TSimbaDTMEditorForm.Create(ScriptInstance.Client.IOManager.GetImageTarget().Handle) do
   begin
     OnPrintDTM := @GetResult;
-    if (PString(Params^[1])^ <> '') then
-      Caption := 'DTM Editor - ' + PString(Params^[1])^;
+    if (PString(Params^[0])^ <> '') then
+      Caption := 'DTM Editor - ' + PString(Params^[0])^;
     ShowModal();
   end;
 end;
@@ -204,16 +204,17 @@ begin
     addGlobalType('set of (mbYes, mbNo, mbOK, mbCancel, mbAbort, mbRetry, mbIgnore, mbAll, mbNoToAll, mbYesToAll, mbHelp, mbClose)', 'TMsgDlgButtons');
     addGlobalType('(mtWarning, mtError, mtInformation, mtConfirmation, mtCustom)', 'TMsgDlgType');
 
-    addGlobalMethod('procedure ShowMessage(const Message: String);', @Lape_ShowMessage, Data);
-    addGlobalMethod('function InputQuery(const Caption, Prompt: String; var Value: String): Boolean;', @Lape_InputQuery, Data);
-    addGlobalMethod('function MessageDlg(const Caption, Message: string; DialogType: TMsgDlgType; Buttons: TMsgDlgButtons): Int32;', @Lape_MessageDlg, Data);
+    addGlobalFunc('procedure ShowMessage(const Message: String);', @Lape_ShowMessage);
+    addGlobalFunc('function InputQuery(const Caption, Prompt: String; var Value: String): Boolean;', @Lape_InputQuery);
+    addGlobalFunc('function MessageDlg(const Caption, Message: string; DialogType: TMsgDlgType; Buttons: TMsgDlgButtons): Int32;', @Lape_MessageDlg);
 
-    addGlobalMethod('procedure DTMEditor(Title: String; out DTM: String);', @Lape_DTMEditor, Data);
-    addGlobalMethod('procedure ACAGUI(Title: String; out CTS, Color, Tolerance: Int32; out Hue, Sat: Extended);', @Lape_ACA, Data);
-    addGlobalMethod('procedure ACA(Colors: TIntegerArray; CTS: Int32; out Color, Tolerance: Int32; out Hue, Sat: Extended);', @Lape_ACAEx, Data);
+    addGlobalFunc('procedure DTMEditor(Title: String; out DTM: String);', @Lape_DTMEditor);
+    addGlobalFunc('procedure ACAGUI(Title: String; out CTS, Color, Tolerance: Int32; out Hue, Sat: Extended);', @Lape_ACA);
+    addGlobalFunc('procedure ACA(Colors: TIntegerArray; CTS: Int32; out Color, Tolerance: Int32; out Hue, Sat: Extended);', @Lape_ACAEx);
   end;
 end;
 
 end.
+
 
 

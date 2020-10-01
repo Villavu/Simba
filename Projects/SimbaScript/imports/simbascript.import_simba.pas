@@ -18,11 +18,11 @@ var
   Method: TSimbaMethod;
   Status: ShortString;
 begin
-  Status := PString(Params^[1])^;
+  Status := PString(Params^[0])^;
 
   Method := TSimbaMethod.Create(SIMBA_METHOD_STATUS);
   Method.Params.Write(Status, SizeOf(ShortString));
-  Method.Invoke(TSimbaScript(Params^[0]));
+  Method.Invoke(ScriptInstance);
   Method.Free();
 end;
 
@@ -31,15 +31,15 @@ var
   Method: TSimbaMethod;
   Title, Hint: ShortString;
 begin
-  Title := PString(Params^[1])^;
-  Hint := PString(Params^[2])^;
+  Title := PString(Params^[0])^;
+  Hint := PString(Params^[1])^;
 
   Method := TSimbaMethod.Create(SIMBA_METHOD_BALLOON_HINT);
   Method.Params.Write(Title, SizeOf(ShortString));
   Method.Params.Write(Hint, SizeOf(ShortString));
+  Method.Params.Write(PInt32(Params^[2])^, SizeOf(Int32));
   Method.Params.Write(PInt32(Params^[3])^, SizeOf(Int32));
-  Method.Params.Write(PInt32(Params^[4])^, SizeOf(Int32));
-  Method.Invoke(TSimbaScript(Params^[0]));
+  Method.Invoke(ScriptInstance);
   Method.Free();
 end;
 
@@ -48,7 +48,7 @@ var
   Method: TSimbaMethod;
 begin
   Method := TSimbaMethod.Create(SIMBA_METHOD_CLEAR_DEBUG);
-  Method.Invoke(TSimbaScript(Params^[0]));
+  Method.Invoke(ScriptInstance);
   Method.Free();
 end;
 
@@ -57,11 +57,11 @@ var
   Method: TSimbaMethod;
   Title: ShortString;
 begin
-  Title := PString(Params^[1])^;
+  Title := PString(Params^[0])^;
 
   Method := TSimbaMethod.Create(SIMBA_METHOD_DISGUISE);
   Method.Params.Write(Title, SizeOf(ShortString));
-  Method.Invoke(TSimbaScript(Params^[0]));
+  Method.Invoke(ScriptInstance);
   Method.Free();
 end;
 
@@ -70,13 +70,13 @@ var
   Bitmap: TMufasaBitmap;
   Method: TSimbaMethod;
 begin
-  Bitmap := PMufasaBitmap(Params^[1])^;
+  Bitmap := PMufasaBitmap(Params^[0])^;
 
   Method := TSimbaMethod.Create(SIMBA_METHOD_DEBUG_IMAGE);
   Method.Params.Write(Bitmap.Width, SizeOf(Int32));
   Method.Params.Write(Bitmap.Height, SizeOf(Int32));
   Method.Params.Write(Bitmap.FData^, Bitmap.Width * Bitmap.Height * SizeOf(TRGB32));
-  Method.Invoke(TSimbaScript(Params^[0]));
+  Method.Invoke(ScriptInstance);
   Method.Free();
 end;
 
@@ -85,14 +85,14 @@ var
   Bitmap: TMufasaBitmap;
   Method: TSimbaMethod;
 begin
-  with TSimbaScript(Params^[0]).Client do
-    Bitmap := MBitmaps[PInt32(Params^[1])^];
+  with ScriptInstance.Client do
+    Bitmap := MBitmaps[PInt32(Params^[0])^];
 
   Method := TSimbaMethod.Create(SIMBA_METHOD_DEBUG_IMAGE);
   Method.Params.Write(Bitmap.Width, SizeOf(Int32));
   Method.Params.Write(Bitmap.Height, SizeOf(Int32));
   Method.Params.Write(Bitmap.FData^, Bitmap.Width * Bitmap.Height * SizeOf(TRGB32));
-  Method.Invoke(TSimbaScript(Params^[0]));
+  Method.Invoke(ScriptInstance);
   Method.Free();
 end;
 
@@ -101,9 +101,9 @@ var
   Method: TSimbaMethod;
 begin
   Method := TSimbaMethod.Create(SIMBA_METHOD_DEBUG_IMAGE_DISPLAY);
+  Method.Params.Write(PInt32(Params^[0])^, SizeOf(Int32));
   Method.Params.Write(PInt32(Params^[1])^, SizeOf(Int32));
-  Method.Params.Write(PInt32(Params^[2])^, SizeOf(Int32));
-  Method.Invoke(TSimbaScript(Params^[0]));
+  Method.Invoke(ScriptInstance);
   Method.Free();
 end;
 
@@ -112,14 +112,14 @@ var
   Bitmap: TMufasaBitmap;
   Method: TSimbaMethod;
 begin
-  with TSimbaScript(Params^[0]).Client do
-    Bitmap := MBitmaps[PInt32(Params^[1])^];
+  with ScriptInstance.Client do
+    Bitmap := MBitmaps[PInt32(Params^[0])^];
 
   Method := TSimbaMethod.Create(SIMBA_METHOD_DEBUG_IMAGE_DRAW);
   Method.Params.Write(Bitmap.Width, SizeOf(Int32));
   Method.Params.Write(Bitmap.Height, SizeOf(Int32));
   Method.Params.Write(Bitmap.FData^, Bitmap.Width * Bitmap.Height * SizeOf(TRGB32));
-  Method.Invoke(TSimbaScript(Params^[0]));
+  Method.Invoke(ScriptInstance);
   Method.Free();
 end;
 
@@ -129,11 +129,11 @@ var
   Width, Height: Int32;
   Method: TSimbaMethod;
 begin
-  with TSimbaScript(Params^[0]).Client do
+  with ScriptInstance.Client do
     Bitmap := MBitmaps[MBitmaps.CreateBMP(0, 0)];
 
   Method := TSimbaMethod.Create(SIMBA_METHOD_DEBUG_IMAGE_GET);
-  Method.Invoke(TSimbaScript(Params^[0]));
+  Method.Invoke(ScriptInstance);
   Method.Result.Read(Width, SizeOf(Int32));
   Method.Result.Read(Height, SizeOf(Int32));
 
@@ -149,7 +149,7 @@ var
   Method: TSimbaMethod;
 begin
   Method := TSimbaMethod.Create(SIMBA_METHOD_DEBUG_IMAGE_CLEAR);
-  Method.Invoke(TSimbaScript(Params^[0]));
+  Method.Invoke(ScriptInstance);
   Method.Free();
 end;
 
@@ -158,7 +158,7 @@ var
   Method: TSimbaMethod;
 begin
   Method := TSimbaMethod.Create(SIMBA_METHOD_GET_PID);
-  Method.Invoke(TSimbaScript(Params^[0]));
+  Method.Invoke(ScriptInstance);
   Method.Result.Read(PPtrUInt(Result)^, SizeOf(PtrUInt));
   Method.Free();
 end;
@@ -168,7 +168,7 @@ var
   Method: TSimbaMethod;
 begin
   Method := TSimbaMethod.Create(SIMBA_METHOD_GET_TARGET_PID);
-  Method.Invoke(TSimbaScript(Params^[0]));
+  Method.Invoke(ScriptInstance);
   Method.Result.Read(PUInt32(Result)^, SizeOf(UInt32));
   Method.Free();
 end;
@@ -178,7 +178,7 @@ var
   Method: TSimbaMethod;
 begin
   Method := TSimbaMethod.Create(SIMBA_METHOD_GET_TARGET_WINDOW);
-  Method.Invoke(TSimbaScript(Params^[0]));
+  Method.Invoke(ScriptInstance);
   Method.Result.Read(POSWindow(Result)^, SizeOf(TOSWindow));
   Method.Free();
 end;
@@ -191,21 +191,23 @@ begin
 
     addGlobalType('(bfNone, bfInfo, bfWarning, bfError)', 'TBalloonFlags');
 
-    addGlobalMethod('procedure Status(const Status: String);', @Lape_Status, Data);
-    addGlobalMethod('procedure ShowBalloonHint(const Title, Hint: String; const Timeout: Int32; const Flags: TBalloonFlags);', @Lape_ShowBalloonHint, Data);
-    addGlobalMethod('procedure ClearDebug;', @Lape_ClearDebug, Data);
-    addGlobalMethod('procedure Disguise(const Caption: String);', @Lape_Disguise, Data);
-    addGlobalMethod('procedure ShowBitmap(BMP: TMufasaBitmap); overload;', @Lape_ShowBitmap, Data);
-    addGlobalMethod('procedure ShowBitmap(BMP: Int32); overload;', @Lape_ShowBitmapEx, Data);
-    addGlobalMethod('procedure DisplayDebugImgWindow(W, H: Int32);', @Lape_DisplayDebugImgWindow, Data);
-    addGlobalMethod('procedure DrawBitmapDebugImg(BMP: Int32);', @Lape_DrawBitmapDebugImg, Data);
-    addGlobalMethod('function GetDebugBitmap: Int32;', @Lape_GetDebugBitmap, Data);
-    addGlobalMethod('procedure ClearDebugImg;', @Lape_ClearDebugImg, Data);
-    addGlobalMethod('function GetSimbaPID: PtrUInt;', @Lape_GetSimbaPID, Data);
-    addGlobalMethod('function GetSimbaTargetPID: UInt32;', @Lape_GetSimbaTargetPID, Data);
-    addGlobalMethod('function GetSimbaTargetWindow: TOSWindow;', @Lape_GetSimbaTargetWindow, Data);
+    addGlobalFunc('procedure Status(const Status: String);', @Lape_Status);
+    addGlobalFunc('procedure ShowBalloonHint(const Title, Hint: String; const Timeout: Int32; const Flags: TBalloonFlags);', @Lape_ShowBalloonHint);
+    addGlobalFunc('procedure ClearDebug;', @Lape_ClearDebug);
+    addGlobalFunc('procedure Disguise(const Caption: String);', @Lape_Disguise);
+    addGlobalFunc('procedure ShowBitmap(BMP: TMufasaBitmap); overload;', @Lape_ShowBitmap);
+    addGlobalFunc('procedure ShowBitmap(BMP: Int32); overload;', @Lape_ShowBitmapEx);
+    addGlobalFunc('procedure DisplayDebugImgWindow(W, H: Int32);', @Lape_DisplayDebugImgWindow);
+    addGlobalFunc('procedure DrawBitmapDebugImg(BMP: Int32);', @Lape_DrawBitmapDebugImg);
+    addGlobalFunc('function GetDebugBitmap: Int32;', @Lape_GetDebugBitmap);
+    addGlobalFunc('procedure ClearDebugImg;', @Lape_ClearDebugImg);
+    addGlobalFunc('function GetSimbaPID: PtrUInt;', @Lape_GetSimbaPID);
+    addGlobalFunc('function GetSimbaTargetPID: UInt32;', @Lape_GetSimbaTargetPID);
+    addGlobalFunc('function GetSimbaTargetWindow: TOSWindow;', @Lape_GetSimbaTargetWindow);
   end;
 end;
 
 end.
+
+
 
