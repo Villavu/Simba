@@ -30,7 +30,7 @@ unit simba.bitmap;
 interface
 
 uses
-  classes, sysutils, fpimage, intfgraphics, graphtype, simba.mufasatypes, graphics;
+  classes, sysutils, fpimage, intfgraphics, graphtype, simba.mufasatypes, graphics, simba.matchtemplate;
 
 type
   TMBitmaps = class;
@@ -192,6 +192,9 @@ type
   function CalculatePixelTolerance(Bmp1,Bmp2 : TMufasaBitmap; CompareBox : TBox; CTS : integer) : extended;
   function CalculatePixelToleranceTPA(Bmp1, Bmp2: TMufasaBitmap; CPoints: TPointArray; CTS: integer): extended;
 
+  function MatchTemplate(Image, Templ: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
+  function MatchTemplate(Image, Templ: TMufasaBitmap; Formula: ETMFormula; var Cache: TMatchTemplateImageCache): TSingleMatrix;
+
 implementation
 
 uses
@@ -199,7 +202,7 @@ uses
   simba.client, simba.tpa, simba.stringutil,
   simba.colormath, simba.iomanager,
   FileUtil, LazUTF8,
-  simba.matchtemplate, simba.matrix;
+  simba.matrix;
 
 function TBitmap_Helper.DataFormat: TBitmapDataFormat;
 var
@@ -268,7 +271,7 @@ end;
 // Needs more fixing. We need to either copy the memory ourself, or somehow
 // find a TRawImage feature to skip X bytes after X bytes read. (Most likely a
 // feature)
-Procedure ArrDataToRawImage(Ptr: PRGB32; Size: TPoint; out RawImage: TRawImage);
+procedure ArrDataToRawImage(Ptr: PRGB32; Size: TPoint; out RawImage: TRawImage);
 Begin
   RawImage.Init; { Calls raw.Description.Init as well }
 
@@ -425,6 +428,40 @@ begin
           Result := Result / ((bounds.x2 - bounds.x1 + 1) * (bounds.y2-bounds.y1 + 1)); //We want the value for the whole Pixel;
         end;
   end;
+end;
+
+function MatchTemplate(Image, Templ: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
+var
+  ImageMatrix, TemplateMatrix: T2DIntegerArray;
+  Y: Int32;
+begin
+  SetLength(ImageMatrix, Image.Height, Image.Width);
+  SetLength(TemplateMatrix, Templ.Height, Templ.Width);
+
+  for Y := 0 to Image.Height - 1 do
+    Move(Image.FData[Y * Image.Width], ImageMatrix[Y, 0], Image.Width * SizeOf(Int32));
+
+  for Y := 0 to Templ.Height - 1 do
+    Move(Templ.FData[Y * Templ.Width], TemplateMatrix[Y, 0], Templ.Width * SizeOf(Int32));
+
+  Result := simba.matchtemplate.MatchTemplate(ImageMatrix, TemplateMatrix, Int32(Formula));
+end;
+
+function MatchTemplate(Image, Templ: TMufasaBitmap; Formula: ETMFormula; var Cache: TMatchTemplateImageCache): TSingleMatrix;
+var
+  ImageMatrix, TemplateMatrix: T2DIntegerArray;
+  Y: Int32;
+begin
+  SetLength(ImageMatrix, Image.Height, Image.Width);
+  SetLength(TemplateMatrix, Templ.Height, Templ.Width);
+
+  for Y := 0 to Image.Height - 1 do
+    Move(Image.FData[Y * Image.Width], ImageMatrix[Y, 0], Image.Width * SizeOf(Int32));
+
+  for Y := 0 to Templ.Height - 1 do
+    Move(Templ.FData[Y * Templ.Width], TemplateMatrix[Y, 0], Templ.Width * SizeOf(Int32));
+
+  Result := simba.matchtemplate.MatchTemplate(ImageMatrix, TemplateMatrix, Int32(Formula), Cache);
 end;
 
 { TMBitmaps }
