@@ -118,7 +118,8 @@ uses
   simbascript.import_oswindow,
   simbascript.import_dialog,
   simbascript.import_simba,
-  simbascript.import_process;
+  simbascript.import_process,
+  simbascript.import_matchtemplate;
 
 type
   TLapeTree_InternalMethod_WaitUntil = class(TLapeTree_InternalMethod)
@@ -421,7 +422,8 @@ begin
     @Lape_Import_Deprecated,
     @Lape_Import_Dialogs,
     @Lape_Import_Simba,
-    @Lape_Import_Process
+    @Lape_Import_Process,
+    @Lape_Import_MatchTemplate
   ], Data);
 end;
 

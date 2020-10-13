@@ -8,7 +8,7 @@ unit simba.fftpack4_core;
   
   Brought to Free Pascal by Jarl `slacky` Holta
 [==============================================================================}
-{$I ../header.inc}
+{$I header.inc}
 interface
 
 uses

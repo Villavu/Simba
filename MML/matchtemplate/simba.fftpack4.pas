@@ -14,7 +14,7 @@ unit simba.fftpack4;
   See the License for the specific language governing permissions and
   limitations under the License.
 [==============================================================================}
-{$I ../header.inc}
+{$I header.inc}
 interface
 
 uses
@@ -275,7 +275,7 @@ end;
 // Initialize unit
 
 initialization
-  FFTPACK.Init(Min(4, GetSystemThreadCount()));
+  FFTPACK.Init(GetSystemThreadCount());
 
 
 end.

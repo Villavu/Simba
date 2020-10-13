@@ -212,7 +212,7 @@ begin
 end;
 
 initialization
-  SimbaThreadPool := TSimbaThreadPool.Create(GetSystemThreadCount());
+  SimbaThreadPool := TSimbaThreadPool.Create(Min(4, GetSystemThreadCount()));
 
 finalization
   SimbaThreadPool.Free();
