@@ -1,13 +1,10 @@
 ppas.bat
-*.res
 *.trc
 *.lps
 *.DS_Store
 backup/
 build/
 lib/
-/ssleay32.dll
-/libeay32.dll
 /libcrypto*
 /libssl*
 /Includes/
@@ -16,7 +13,5 @@ lib/
 /Data/
 /Fonts/
 /Simba*
-/Projects/SimbaResources/SimbaResources.exe
-/Projects/SimbaResources/SimbaResources
-/Projects/SimbaScript/SimbaScript.exe
-/Projects/SimbaScript/SimbaScript
+/Tools/makeresourcefile.exe
+/Tools/makeresourcefile

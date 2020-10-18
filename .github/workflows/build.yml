@@ -1,6 +1,8 @@
 ﻿# FPC & Lazarus is built on each platform (takes ~15mins) then stored in cache.
 # Cache is removed if not used in 7 days and is restricted to 5gb. Each lazarus install is ~500mb.
 
+# https://github.com/actions/cache/issues/92 Will improve this once implemented.
+
 name: Build
 
 on: [push, pull_request]
@@ -21,8 +23,7 @@ jobs:
             fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.8z/fpclazup-i386-win32.exe'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
             laz-url: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
-            simba-opt: '--build-mode=SIMBA_WIN32'
-            run-tests: 'true'
+            build-mode: 'SIMBA_WIN32'
             binary: 'Simba-Win32.exe'
 
           - os: windows-latest
@@ -30,8 +31,7 @@ jobs:
             fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.8z/fpclazup-x86_64-win64.exe'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
             laz-url: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
-            simba-opt: '--build-mode=SIMBA_WIN64'
-            run-tests: 'true'
+            build-mode: 'SIMBA_WIN64'
             binary: 'Simba-Win64.exe'
 
           - os: ubuntu-latest
@@ -39,8 +39,7 @@ jobs:
             fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.8z/fpclazup-x86_64-linux'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
             laz-url: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
-            simba-opt: '--build-mode=SIMBA_LINUX64'
-            run-tests: 'true'
+            build-mode: 'SIMBA_LINUX64'
             binary: 'Simba-Linux64'
 
           - os: macos-latest
@@ -49,8 +48,7 @@ jobs:
             fpcup-opt: '--lclplatform=cocoa'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
             laz-url: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
-            simba-opt: '--build-mode=SIMBA_DARWIN64'
-            run-tests: 'true'
+            build-mode: 'SIMBA_DARWIN64'
             binary: 'Simba-Darwin64.zip'
 
           - os: ubuntu-latest
@@ -58,7 +56,7 @@ jobs:
             fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.8z/fpclazup-x86_64-linux'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
             laz-url: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
-            simba-opt: '--build-mode=SIMBA_AARCH64'
+            build-mode: 'SIMBA_AARCH64'
             binary: 'Simba-AArch64'
 
     steps:
@@ -98,7 +96,7 @@ jobs:
         ./fpcup --installdir=lazarus --fpcURL=${{ matrix.config.fpc-url }} --lazURL=${{ matrix.config.laz-url }} ${{ matrix.config.fpcup-opt }} --noconfirm --verbose
 
     - name: Install AArch64 Cross Compiler
-      if: steps.cache.outputs.cache-hit != 'true' && matrix.config.NAME == 'AArch64'
+      if: steps.cache.outputs.cache-hit != 'true' && matrix.config.name == 'AArch64'
       run: |
         curl --retry 5 -L -o libs.zip https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/crosslibs_v1.1/CrossLibsLinuxAarch64.zip && unzip -o libs.zip -d lazarus/
         curl --retry 5 -L -o bins.zip https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/linuxx64crossbins_v1.0/CrossBinsLinuxAarch64.zip && unzip -o bins.zip -d lazarus/cross/bin
@@ -106,14 +104,14 @@ jobs:
 
     - name: Build Simba
       run: |
-        ./lazarus/lazarus/lazbuild ${{ matrix.config.simba-opt }} "Projects/Simba/Simba.lpi"
+        ./lazarus/lazarus/lazbuild --build-mode=${{ matrix.config.build-mode }} "Source/Simba/Simba.lpi"
 
     - name: Test Simba
-      if: matrix.config.run-tests == 'true'
+      if: matrix.config.name != 'AArch64'
       run: |
         export DISPLAY=:1
-        chmod +x Projects/SimbaScript/SimbaScript
-        ./Projects/SimbaScript/SimbaScript --run Tests/simba
+        chmod +x ${{ matrix.config.binary }}
+        ./${{ matrix.config.binary }} --run Tests/simba
 
     - name: Upload Artifact 
       uses: actions/upload-artifact@v2.1.3
