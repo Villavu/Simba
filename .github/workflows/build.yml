@@ -25,6 +25,7 @@ jobs:
             laz-url: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
             build-mode: 'SIMBA_WIN32'
             binary: 'Simba-Win32.exe'
+            test: 'Simba-Win32.exe'
 
           - os: windows-latest
             name: 'Windows 64'
@@ -33,6 +34,7 @@ jobs:
             laz-url: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
             build-mode: 'SIMBA_WIN64'
             binary: 'Simba-Win64.exe'
+            test: 'Simba-Win64.exe'
 
           - os: ubuntu-latest
             name: 'Linux 64'
@@ -41,6 +43,7 @@ jobs:
             laz-url: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
             build-mode: 'SIMBA_LINUX64'
             binary: 'Simba-Linux64'
+            test: 'Simba-Linux64'
 
           - os: macos-latest
             name: 'MacOS 64'
@@ -50,6 +53,7 @@ jobs:
             laz-url: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
             build-mode: 'SIMBA_DARWIN64'
             binary: 'Simba-Darwin64.zip'
+            test: 'Simba-Darwin64'
 
           - os: ubuntu-latest
             name: 'AArch64'
@@ -107,11 +111,11 @@ jobs:
         ./lazarus/lazarus/lazbuild --build-mode=${{ matrix.config.build-mode }} "Source/Simba/Simba.lpi"
 
     - name: Test Simba
-      if: matrix.config.name != 'AArch64'
+      if: matrix.config.test != ''
       run: |
         export DISPLAY=:1
-        chmod +x ${{ matrix.config.binary }}
-        ./${{ matrix.config.binary }} --run Tests/simba
+        chmod +x ${{ matrix.config.test }}
+        ./${{ matrix.config.test }} --run Tests/simba
 
     - name: Upload Artifact 
       uses: actions/upload-artifact@v2.1.3
