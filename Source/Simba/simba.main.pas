@@ -274,7 +274,7 @@ implementation
 
 uses
   lclintf, synexporthtml, anchordocking, simba.script_dump, simba.openssl,
-  simba.mufasatypes, simba.misc, simba.mufasabase, simba.settings, simba.httpclient,
+  simba.mufasatypes, simba.misc, simba.mufasabase, simba.settings,
   simba.files, simba.codeparser, simba.codeinsight,
   simba.debugimage, simba.bitmapconv, simba.colorpicker_historyform, simba.aca,
   simba.dtmeditor, simba.scriptinstance, simba.package_form, simba.aboutform,
@@ -283,9 +283,6 @@ uses
   simba.highlighter, simba.scriptformatter, simba.dockinghelpers
   {$IFDEF WINDOWS},
   windows, shellapi
-  {$ENDIF}
-  {$IFDEF UNIX},
-  baseunix
   {$ENDIF};
 
 type
@@ -420,7 +417,7 @@ procedure TSimbaAnchorDockSplitter.Paint;
 var
   Center: Int32;
 begin
-  Canvas.Brush.Color := clForm;
+  Canvas.Brush.Color := Self.Color;
   Canvas.FillRect(ClientRect);
   Canvas.Brush.Color := cl3DShadow;
 
@@ -557,6 +554,20 @@ procedure TSimbaForm.Docking_Setup;
       MenuItem := Item;
   end;
 
+  procedure RemoveDocking(Form: TCustomForm);
+  var
+    I: Int32;
+  begin
+    SimbaDockingHelper.Hide(Form);
+
+    if DockMaster.GetAnchorSite(Form) <> nil then
+      Form := DockMaster.GetAnchorSite(Form);
+
+    for I := Form.ControlCount - 1 downto 0 do
+      if (Form.Controls[I] is TAnchorDockHostSite) then
+        Form.Controls[I].Free();
+  end;
+
 var
   I: Int32;
   Site: TSimbaAnchorDockHostSite;
@@ -579,7 +590,22 @@ begin
   MakeDockable(SimbaDebugImageForm, MenuItemDebugImage);
   MakeDockable(SimbaColorHistoryForm, MenuItemColourHistory);
 
-  if not SimbaDockingHelper.LoadLayoutFromString(SimbaSettings.GUI.Layout.Value) then
+  if SimbaSettings.GUI.Layout.Value <> '' then
+  try
+    SimbaDockingHelper.LoadLayoutFromString(SimbaSettings.GUI.Layout.Value);
+  except
+    SimbaSettings.GUI.Layout.Value := '';
+    SimbaSettings.Save();
+
+    for I := 0 to DockMaster.ControlCount - 1 do
+      if DockMaster.Controls[I] is TCustomForm then
+        RemoveDocking(DockMaster.Controls[I] as TCustomForm);
+
+    if MessageDlg('Simba', 'Docking somehow got corrupted. Simba must restart.', mtError, mbYesNo, 0) = mrYes then
+      RunCommand(Application.ExeName);
+
+    Halt;
+  end else
     Docking_SetDefault();
 
   // Show everything at once if menu item is checked
@@ -643,7 +669,7 @@ begin
   Dump := SysUtils.GetTempFileName(SimbaSettings.Environment.DataPath.Value, '.dump');
 
   try
-    RunCommand(Format('"%s" --nogui --dump="%s" "%s"', [Application.ExeName, FileName, Dump]), Output);
+    RunCommand(Format('"%s" --dump="%s" "%s"', [Application.ExeName, FileName, Dump]), Output);
 
     Contents := ReadFileToString(Dump);
     if (Contents = '') then
@@ -753,11 +779,11 @@ end;
 
 procedure TSimbaForm.FormDestroy(Sender: TObject);
 begin
-  SimbaSettings.GUI.TrayIconVisible.RemoveHandlerOnChange(@Settings_TrayIconVisible_Changed);
-  SimbaSettings.GUI.ConsoleVisible.RemoveHandlerOnChange(@Settings_ConsoleVisible_Changed);
-  SimbaSettings.GUI.LayoutLocked.RemoveHandlerOnChange(@Settings_LayoutLocked_Changed);
-  SimbaSettings.GUI.CustomFontSize.RemoveHandlerOnChange(@Settings_CustomFontSize_Changed);
-  SimbaSettings.GUI.CustomToolbarSize.RemoveHandlerOnChange(@Settings_CustomToolbarSize_Changed);
+  SimbaSettings.GUI.TrayIconVisible.RemoveOnChangeHandler(@Settings_TrayIconVisible_Changed);
+  SimbaSettings.GUI.ConsoleVisible.RemoveOnChangeHandler(@Settings_ConsoleVisible_Changed);
+  SimbaSettings.GUI.LayoutLocked.RemoveOnChangeHandler(@Settings_LayoutLocked_Changed);
+  SimbaSettings.GUI.CustomFontSize.RemoveOnChangeHandler(@Settings_CustomFontSize_Changed);
+  SimbaSettings.GUI.CustomToolbarSize.RemoveOnChangeHandler(@Settings_CustomToolbarSize_Changed);
 end;
 
 procedure TSimbaForm.MenuItemDebuggerClick(Sender: TObject);
@@ -1195,11 +1221,11 @@ begin
   for RecentFile in SimbaSettings.GUI.RecentFiles.Value.Split([',']) do
     AddRecentFile(RecentFile);
 
-  SimbaSettings.GUI.TrayIconVisible.AddHandlerOnChange(@Settings_TrayIconVisible_Changed);
-  SimbaSettings.GUI.ConsoleVisible.AddHandlerOnChange(@Settings_ConsoleVisible_Changed);
-  SimbaSettings.GUI.LayoutLocked.AddHandlerOnChange(@Settings_LayoutLocked_Changed);
-  SimbaSettings.GUI.CustomFontSize.AddHandlerOnChange(@Settings_CustomFontSize_Changed);
-  SimbaSettings.GUI.CustomToolbarSize.AddHandlerOnChange(@Settings_CustomToolbarSize_Changed);
+  SimbaSettings.GUI.TrayIconVisible.AddOnChangeHandler(@Settings_TrayIconVisible_Changed).Changed();
+  SimbaSettings.GUI.ConsoleVisible.AddOnChangeHandler(@Settings_ConsoleVisible_Changed).Changed();
+  SimbaSettings.GUI.LayoutLocked.AddOnChangeHandler(@Settings_LayoutLocked_Changed).Changed();
+  SimbaSettings.GUI.CustomFontSize.AddOnChangeHandler(@Settings_CustomFontSize_Changed).Changed();
+  SimbaSettings.GUI.CustomToolbarSize.AddOnChangeHandler(@Settings_CustomToolbarSize_Changed).Changed();
 end;
 
 procedure TSimbaForm.Settings_TrayIconVisible_Changed(Value: Boolean);
@@ -1300,36 +1326,18 @@ end;
 
 procedure TSimbaForm.Setup(Data: PtrInt);
 begin
-  InitializeOpenSSL();
+  if SimbaSettings.Environment.OpenSSLOnLaunch.Value then
+    InitializeOpenSSL();
 
-  {
-  // Extract resources
-  if SimbaSettings.Resources.ExtractOnLaunch.Value then
-  try
-    ExtractSimbaResources();
-
-    {$IFDEF UNIX}
-    if fpchmod(SimbaSettings.Environment.ScriptExecutablePath.Value, &755) <> 0 then //rwxr-xr-x
-      SimbaDebugForm.Add('Unable to make SimbaScript executable');
-    {$ENDIF}
-
-    if not InitializeOpenSSL(Application.Location) then
-      SimbaDebugForm.Add('Failed to initialize OpenSSL, falling back to using system libraries');
-  except
-    on E: Exception do
-      SimbaDebugForm.Add('Failed to extract resources: ' + E.Message);
-  end;
-   }
   // Command line
   if (Application.ParamCount > 0) then
   begin
     if (Application.ParamCount = 1) and FileExists(Application.Params[1]) then
       SimbaScriptTabsForm.Open(Application.Params[1])
     else
-    if (Application.ParamCount = 2) and FileExists(Application.Params[2]) and
-       (Application.HasOption('compile') or Application.HasOption('run')) then
+    if Application.HasOption('open') and FileExists(Application.Params[Application.ParamCount]) then
     begin
-      SimbaScriptTabsForm.Open(Application.Params[2]);
+      SimbaScriptTabsForm.Open(Application.Params[Application.ParamCount]);
 
       if Application.HasOption('compile') then
         Self.CompileScript();

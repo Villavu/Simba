@@ -7,9 +7,9 @@ unit simba.editor;
 interface
 
 uses
-  Classes, SysUtils, Graphics, Controls, LCLType,
+  Classes, SysUtils, Graphics, Controls, LCLType, inifiles, generics.collections,
   SynEdit, SynGutterLineOverview, SynEditMarks, SynEditMiscClasses, SynEditMouseCmds, SynEditKeyCmds, SynEditHighlighter, SynEditPointClasses,
-  simba.highlighter, simba.generics, simba.autocomplete, simba.parameterhint;
+  simba.highlighter, simba.autocomplete, simba.parameterhint, simba.editor_attributes;
 
 const
   ecAutoComplete  = ecUserFirst + 1;
@@ -17,8 +17,6 @@ const
   ecCommentCode   = ecUserFirst + 3;
 
 type
-  TSimbaEditor_AttributeList = class(specialize TSimbaObjectList<TSynHighlighterAttributes>);
-
   TSimbaEditor = class(TSynEdit)
   protected
     FDividerColor: TColor;
@@ -30,7 +28,7 @@ type
     FOnForward: TNotifyEvent;
     FOnRedo: TNotifyEvent;
     FOnUndo: TNotifyEvent;
-    FAttributes: TSimbaEditor_AttributeList;
+    FAttributes: TSimbaEditor_AttributesList;
     FParameterHint: TSimbaParameterHint;
     FAutoComplete: TSimbaAutoComplete;
     FAntiAliasing: Boolean;
@@ -54,7 +52,7 @@ type
     procedure SettingChanged_CaretPastEOL(Value: Boolean);
     procedure SettingChanged_AntiAliasing(Value: Boolean);
     procedure SettingChanged_FontName(Value: String);
-    procedure SettingChanged_FontHeight(Value: Int64);
+    procedure SettingChanged_FontSize(Value: Int64);
     procedure SettingChanged_DividerVisible(Value: Boolean);
 
     procedure AddSettingChangeHandlers;
@@ -66,7 +64,7 @@ type
     property AutoComplete: TSimbaAutoComplete read FAutoComplete;
     property ParameterHint: TSimbaParameterHint read FParameterHint;
 
-    property Attributes: TSimbaEditor_AttributeList read FAttributes;
+    property Attributes: TSimbaEditor_AttributesList read FAttributes;
     property CaretColor: TColor read FCaretColor write SetCaretColor;
     property IndentColor: TColor read FIndentColor write SetIndentColor;
     property AntiAliasing: Boolean read FAntiAliasing write SetAntiAliasing;
@@ -79,6 +77,7 @@ type
 
     procedure SaveColors(AFileName: String);
     procedure LoadColors(AFileName: String);
+    procedure LoadColorsFromSettings;
 
     procedure LoadDefaultScript;
 
@@ -92,20 +91,18 @@ type
     destructor Destroy; override;
   end;
 
-implementation
-
-uses
-  SynEditMarkupHighAll, SynEditMarkupFoldColoring, SynGutter,
-  dialogs, inifiles, math, menus,
-  simba.settings, simba.editor_attributes, simba.scripttabhistory;
-
-type
   TSynHighlighterAttributes_Helper = class helper for TSynHighlighterAttributes
   public
     procedure Save(INI: TINIFile);
     procedure Load(INI: TINIFile);
     procedure Changed;
   end;
+
+implementation
+
+uses
+  SynEditMarkupHighAll, SynEditMarkupFoldColoring, SynGutter, dialogs, math, menus,
+  simba.settings, simba.scripttabhistory;
 
 type
   TSynGutterLineOverview_Helper = class helper for TSynGutterLineOverview
@@ -258,10 +255,10 @@ begin
 
   case AnAction.Command of
     emcWheelZoomIn:
-      SimbaSettings.Editor.FontHeight.Value := Max(10, SimbaSettings.Editor.FontHeight.Value + 1);
+      SimbaSettings.Editor.FontSize.Value := Max(5, SimbaSettings.Editor.FontSize.Value + 1);
 
     emcWheelZoomOut:
-      SimbaSettings.Editor.FontHeight.Value := Max(10, SimbaSettings.Editor.FontHeight.Value - 1);
+      SimbaSettings.Editor.FontSize.Value := Max(5, SimbaSettings.Editor.FontSize.Value - 1);
   end;
 end;
 
@@ -340,9 +337,9 @@ begin
     Font.Name := Value;
 end;
 
-procedure TSimbaEditor.SettingChanged_FontHeight(Value: Int64);
+procedure TSimbaEditor.SettingChanged_FontSize(Value: Int64);
 begin
-  Font.Height := Value;
+  Font.Size := Value;
 end;
 
 procedure TSimbaEditor.SettingChanged_DividerVisible(Value: Boolean);
@@ -352,14 +349,14 @@ end;
 
 procedure TSimbaEditor.AddSettingChangeHandlers;
 begin
-  SimbaSettings.Editor.ColorsPath.AddHandlerOnChange(@SettingChanged_Colors);
-  SimbaSettings.Editor.RightMargin.AddHandlerOnChange(@SettingChanged_RightMargin);
-  SimbaSettings.Editor.RightMarginVisible.AddHandlerOnChange(@SettingChanged_RightMarginVisible);
-  SimbaSettings.Editor.AllowCaretPastEOL.AddHandlerOnChange(@SettingChanged_CaretPastEOL);
-  SimbaSettings.Editor.AntiAliasing.AddHandlerOnChange(@SettingChanged_AntiAliasing);
-  SimbaSettings.Editor.FontName.AddHandlerOnChange(@SettingChanged_FontName);
-  SimbaSettings.Editor.FontHeight.AddHandlerOnChange(@SettingChanged_FontHeight);
-  SimbaSettings.Editor.DividerVisible.AddHandlerOnChange(@SettingChanged_DividerVisible);
+  SimbaSettings.Editor.ColorsPath.AddOnChangeHandler(@SettingChanged_Colors);
+  SimbaSettings.Editor.RightMargin.AddOnChangeHandler(@SettingChanged_RightMargin).Changed();
+  SimbaSettings.Editor.RightMarginVisible.AddOnChangeHandler(@SettingChanged_RightMarginVisible).Changed();
+  SimbaSettings.Editor.AllowCaretPastEOL.AddOnChangeHandler(@SettingChanged_CaretPastEOL).Changed();
+  SimbaSettings.Editor.AntiAliasing.AddOnChangeHandler(@SettingChanged_AntiAliasing).Changed();
+  SimbaSettings.Editor.FontName.AddOnChangeHandler(@SettingChanged_FontName).Changed();
+  SimbaSettings.Editor.FontSize.AddOnChangeHandler(@SettingChanged_FontSize).Changed();
+  SimbaSettings.Editor.DividerVisible.AddOnChangeHandler(@SettingChanged_DividerVisible).Changed();
 end;
 
 procedure TSimbaEditor.RemoveSettingChangeHandlers;
@@ -367,14 +364,14 @@ begin
   if SimbaSettings = nil then
     Exit;
 
-  SimbaSettings.Editor.ColorsPath.RemoveHandlerOnChange(@SettingChanged_Colors);
-  SimbaSettings.Editor.RightMargin.RemoveHandlerOnChange(@SettingChanged_RightMargin);
-  SimbaSettings.Editor.RightMarginVisible.RemoveHandlerOnChange(@SettingChanged_RightMarginVisible);
-  SimbaSettings.Editor.AllowCaretPastEOL.RemoveHandlerOnChange(@SettingChanged_CaretPastEOL);
-  SimbaSettings.Editor.AntiAliasing.RemoveHandlerOnChange(@SettingChanged_AntiAliasing);
-  SimbaSettings.Editor.FontName.RemoveHandlerOnChange(@SettingChanged_FontName);
-  SimbaSettings.Editor.FontHeight.RemoveHandlerOnChange(@SettingChanged_FontHeight);
-  SimbaSettings.Editor.DividerVisible.RemoveHandlerOnChange(@SettingChanged_DividerVisible);
+  SimbaSettings.Editor.ColorsPath.RemoveOnChangeHandler(@SettingChanged_Colors);
+  SimbaSettings.Editor.RightMargin.RemoveOnChangeHandler(@SettingChanged_RightMargin);
+  SimbaSettings.Editor.RightMarginVisible.RemoveOnChangeHandler(@SettingChanged_RightMarginVisible);
+  SimbaSettings.Editor.AllowCaretPastEOL.RemoveOnChangeHandler(@SettingChanged_CaretPastEOL);
+  SimbaSettings.Editor.AntiAliasing.RemoveOnChangeHandler(@SettingChanged_AntiAliasing);
+  SimbaSettings.Editor.FontName.RemoveOnChangeHandler(@SettingChanged_FontName);
+  SimbaSettings.Editor.FontSize.RemoveOnChangeHandler(@SettingChanged_FontSize);
+  SimbaSettings.Editor.DividerVisible.RemoveOnChangeHandler(@SettingChanged_DividerVisible);
 end;
 
 function TSimbaEditor.Save(AFileName: String): Boolean;
@@ -454,6 +451,12 @@ begin
   end;
 end;
 
+procedure TSimbaEditor.LoadColorsFromSettings;
+begin
+  if SimbaSettings.Editor.ColorsPath.Value <> '' then
+    LoadColors(SimbaSettings.Editor.ColorsPath.Value);
+end;
+
 procedure TSimbaEditor.LoadDefaultScript;
 begin
   if FileExists(SimbaSettings.Editor.DefaultScriptPath.Value) then
@@ -512,7 +515,7 @@ begin
   FAutoComplete.Width := 500;
   FAutoComplete.LinesInWindow := 8;
 
-  FAttributes := TSimbaEditor_SimbaAttributesList.Create(Self);
+  FAttributes := TSimbaEditor_AttributesList.Create(Self);
 
   with MarkupByClass[TSynEditMarkupHighlightAllCaret] as TSynEditMarkupHighlightAllCaret do
   begin

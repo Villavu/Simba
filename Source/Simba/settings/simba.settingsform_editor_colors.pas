@@ -11,6 +11,7 @@ uses
 
 type
   TEditorColorsFrame = class(TFrame)
+    ResetDarkButton: TButton;
     FrameColorBox: TColorListBox;
     Label4: TLabel;
     ResetButton: TButton;
@@ -30,6 +31,7 @@ type
     Panel3: TPanel;
     TreeView: TTreeView;
 
+    procedure ResetDarkButtonClick(Sender: TObject);
     procedure FrameColorBoxSelectionChange(Sender: TObject; User: boolean);
     procedure ResetButtonClick(Sender: TObject);
     procedure SaveAsButtonClick(Sender: TObject);
@@ -41,7 +43,7 @@ type
   protected
     FEditor: TSimbaEditor;
 
-    procedure Reset(Colors: Boolean);
+    procedure Reset;
 
     procedure AddCustomColor(CustomColor: TColor; ColorListBox: TColorListBox);
     function SelectedAttr: TSynHighlighterAttributes;
@@ -54,7 +56,276 @@ type
 implementation
 
 uses
+  inifiles,
   simba.settings, simba.editor_attributes;
+
+const
+  DARK_DEFAULT =
+    '[Highlighter.Assembler]                     ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=536870911                        ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Highlighter.Case label]                    ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=536870911                        ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Highlighter.Comment]                       ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=6189429                          ' + LineEnding +
+    'Style=1                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Highlighter.Directive]                     ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=2070525                          ' + LineEnding +
+    'Style=1                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Highlighter.IDE Directive]                 ' + LineEnding +
+    'Background=3292478                          ' + LineEnding +
+    'Foreground=2070525                          ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Highlighter.Identifier]                    ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=15923448                         ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Highlighter.Method Type]                   ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=1562982                          ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Highlighter.Number]                        ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=7658470                          ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Highlighter.Reserved word]                 ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=15718758                         ' + LineEnding +
+    'Style=1                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Highlighter.Space]                         ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=536870911                        ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Highlighter.String]                        ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=7658470                          ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Highlighter.Symbol]                        ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=5506787                          ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Editor.Word Group]                         ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=536870911                        ' + LineEnding +
+    'Style=2                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=16744878                              ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Editor.Highlight All Caret]                ' + LineEnding +
+    'Background=8421504                          ' + LineEnding +
+    'Foreground=536870911                        ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=8421504                               ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Editor.Line Highlight]                     ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=536870911                        ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Editor.Folded Code]                        ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=1562982                          ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=59900                                 ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Editor.Folded Code Line]                   ' + LineEnding +
+    'Background=4081737                          ' + LineEnding +
+    'Foreground=536870911                        ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Editor.Bracket Match]                      ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=536870911                        ' + LineEnding +
+    'Style=3                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=255                                   ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Editor.Selected]                           ' + LineEnding +
+    'Background=7697781                          ' + LineEnding +
+    'Foreground=536870911                        ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Editor.Highlight All]                      ' + LineEnding +
+    'Background=-2147483635                      ' + LineEnding +
+    'Foreground=-2147483634                      ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Editor.Mouse Link]                         ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=16711680                         ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Editor.Background]                         ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=3815994                          ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Editor.Indent Line]                        ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=536870911                        ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Editor.Caret]                              ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=15718758                         ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Editor.Right Edge]                         ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=6189429                          ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Editor.Divider]                            ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=6189429                          ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[AutoComplete.Background]                   ' + LineEnding +
+    'Background=7697781                          ' + LineEnding +
+    'Foreground=3815994                          ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=0                                     ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[AutoComplete.Border]                       ' + LineEnding +
+    'Background=0                                ' + LineEnding +
+    'Foreground=6579300                          ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=0                                     ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[AutoComplete.Identifier]                   ' + LineEnding +
+    'Background=0                                ' + LineEnding +
+    'Foreground=11162978                         ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=0                                     ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[AutoComplete.Filter]                       ' + LineEnding +
+    'Background=0                                ' + LineEnding +
+    'Foreground=5263440                          ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=0                                     ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[AutoComplete.Alternating]                  ' + LineEnding +
+    'Background=7697781                          ' + LineEnding +
+    'Foreground=3815994                          ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=0                                     ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[AutoComplete.Selected]                     ' + LineEnding +
+    'Background=0                                ' + LineEnding +
+    'Foreground=4934475                          ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=0                                     ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Gutter.Background]                         ' + LineEnding +
+    'Background=0                                ' + LineEnding +
+    'Foreground=3815994                          ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=0                                     ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Gutter.Seperator]                          ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=536870911                        ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Gutter.Changes]                            ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=32768                            ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=59900                                 ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Gutter.Marks]                              ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=2070525                          ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Gutter.Code Fold]                          ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=6189429                          ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ' + LineEnding +
+    '                                            ' + LineEnding +
+    '[Gutter.Line Number]                        ' + LineEnding +
+    'Background=536870911                        ' + LineEnding +
+    'Foreground=6189429                          ' + LineEnding +
+    'Style=0                                     ' + LineEnding +
+    'StyleMask=0                                 ' + LineEnding +
+    'Frame=536870911                             ';
 
 procedure TEditorColorsFrame.TreeViewSelectionChanged(Sender: TObject);
 begin
@@ -81,13 +352,13 @@ begin
       FrameColorBox.ItemIndex := 0;
     end;
 
-    Panel3.Visible := SelectedAttr is TSimbaEditor_CustomColorAttribute;
+    Panel3.Visible := SelectedAttr is TSimbaEditor_Attribute;
     if Panel3.Visible then
       Panel3.BringToFront()
     else
       Panel3.SendToBack();
 
-    if SelectedAttr is TSimbaEditor_CustomColorAttribute then
+    if SelectedAttr is TSimbaEditor_Attribute then
       Label1.Caption := 'Color:'
     else
       Label1.Caption := 'Foreground:';
@@ -99,7 +370,7 @@ begin
   end;
 end;
 
-procedure TEditorColorsFrame.Reset(Colors: Boolean);
+procedure TEditorColorsFrame.Reset();
 
   procedure AddAttribute(Attri: TSynHighlighterAttributes);
   var
@@ -136,7 +407,7 @@ begin
             '{$I SRL/osr.simba}                                      '+ LineEnding +
             '                                                        '+ LineEnding +
             '// this function does stuff                             '+ LineEnding +
-            'procedure Test(var i: Int32);                           '+ LineEnding +
+            'procedure Test(var I: Int32);                           '+ LineEnding +
             'var                                                     '+ LineEnding +
             '  x: Int32;                                             '+ LineEnding +
             '  s: String;                                            '+ LineEnding +
@@ -153,9 +424,9 @@ begin
             '  end;                                                  '+ LineEnding +
             'end;                                                    '+ LineEnding +
             '                                                        '+ LineEnding +
-            'function TPoint.Test: Boolean; static;                  '+ LineEnding +
+            '(* this is an object method *)                          '+ LineEnding +
+            'function TPoint.Test: Boolean; overload;                '+ LineEnding +
             'begin                                                   '+ LineEnding +
-            '  Result := [100, 100];                                 '+ LineEnding +
             'end;                                                    ';
   end;
 
@@ -169,13 +440,13 @@ end;
 
 procedure TEditorColorsFrame.AddCustomColor(CustomColor: TColor; ColorListBox: TColorListBox);
 var
-  i: Int32;
+  I: Int32;
 begin
-  for i := 1 to ColorListBox.Count - 1 do
+  for I := 1 to ColorListBox.Count - 1 do
   begin
-    if (CustomColor = ColorListBox.Colors[i]) then
+    if (CustomColor = ColorListBox.Colors[I]) then
     begin
-      ColorListBox.ItemIndex := i;
+      ColorListBox.ItemIndex := I;
 
       Exit;
     end;
@@ -275,16 +546,30 @@ begin
     AddCustomColor(FrameColorBox.Selected, FrameColorBox);
 end;
 
+procedure TEditorColorsFrame.ResetDarkButtonClick(Sender: TObject);
+var
+  INI: TIniFile;
+  I: Int32;
+begin
+  INI := TIniFile.Create(TStringStream.Create(DARK_DEFAULT));
+
+  for I := 0 to FEditor.Attributes.Count - 1 do
+    FEditor.Attributes[I].Load(INI);
+
+  INI.Stream.Free();
+  INI.Free();
+end;
+
 procedure TEditorColorsFrame.ResetButtonClick(Sender: TObject);
 begin
-  Reset(False);
+  Reset();
 end;
 
 constructor TEditorColorsFrame.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  Reset(True);
+  Reset();
 
   BackgroundColorBox.Items.AddObject('Transparent', TObject(PtrUInt(clNone)));
   ForegoundColorBox.Items.AddObject('Transparent', TObject(PtrUInt(clNone)));

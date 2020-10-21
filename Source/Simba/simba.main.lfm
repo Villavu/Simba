@@ -1,10 +1,10 @@
 object SimbaForm: TSimbaForm
-  Left = 749
+  Left = 1117
   Height = 430
-  Top = 386
+  Top = 473
   Width = 515
   Caption = 'Simba'
-  ClientHeight = 410
+  ClientHeight = 408
   ClientWidth = 515
   Menu = MainMenu
   OnClose = FormClose

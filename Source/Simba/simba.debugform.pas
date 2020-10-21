@@ -31,7 +31,7 @@ type
     FStrings: TStringList;
 
     procedure SettingChanged_EditorFont(Value: String);
-    procedure SettingChanged_EditorFontHeight(Value: Int64);
+    procedure SettingChanged_EditorFontSize(Value: Int64);
   public
     procedure Clear;
 
@@ -141,9 +141,9 @@ begin
     Editor.Font.Name := Value;
 end;
 
-procedure TSimbaDebugForm.SettingChanged_EditorFontHeight(Value: Int64);
+procedure TSimbaDebugForm.SettingChanged_EditorFontSize(Value: Int64);
 begin
-  Editor.Font.Height := Value;
+  Editor.Font.Size := Value;
 end;
 
 procedure TSimbaDebugForm.Clear;
@@ -177,8 +177,8 @@ begin
   Editor.Font.Quality := fqDefault; // weird one, I know
   {$ENDIF}
 
-  SimbaSettings.Editor.FontName.AddHandlerOnChange(@SettingChanged_EditorFont);
-  SimbaSettings.Editor.FontHeight.AddHandlerOnChange(@SettingChanged_EditorFontHeight);
+  SimbaSettings.Editor.FontName.AddOnChangeHandler(@SettingChanged_EditorFont).Changed();
+  SimbaSettings.Editor.FontSize.AddOnChangeHandler(@SettingChanged_EditorFontSize).Changed();
 end;
 
 destructor TSimbaDebugForm.Destroy;

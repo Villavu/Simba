@@ -455,6 +455,7 @@ begin
   FEditor.TabWidth := 2;
   FEditor.BlockIndent := 2;
   FEditor.BorderStyle := bsNone;
+  FEditor.LoadColorsFromSettings();
 
   FScriptName := 'Untitled';
   FSavedText := Editor.Text;

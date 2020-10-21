@@ -235,7 +235,7 @@ begin
   try
     while not FUpdateThread.CheckTerminated do
     begin
-      TThread.Synchronize(FUpdateThread, @BeginUpdate);
+      TThread.Synchronize(TThread.CurrentThread, @BeginUpdate);
 
       if FUpdating then
       try
@@ -270,7 +270,7 @@ begin
 
         FFunctionList.ExpandedState := ExpandedState;
       finally
-        TThread.Synchronize(FUpdateThread, @EndUpdate);
+        TThread.Synchronize(TThread.CurrentThread, @EndUpdate);
 
         if (FParser <> nil) then
         begin
