@@ -26,19 +26,19 @@ begin
   try
     Reg.RootKey := HKEY_CLASSES_ROOT;
     Reg.OpenKey('.simba', True);
-    Reg.WriteString('', 'Simba');
+    Reg.WriteString('', 'simbafile');
     Reg.CloseKey();
-    Reg.CreateKey('Simba');
-    Reg.OpenKey('Simba\DefaultIcon', True);
+    Reg.CreateKey('simbafile');
+    Reg.OpenKey('simbafile\DefaultIcon', True);
     Reg.WriteString('', ParamStr(0) + ',0');
     Reg.CloseKey();
-    Reg.OpenKey('Simba\shell\Open\command', True);
+    Reg.OpenKey('simbafile\shell\Open\command', True);
     Reg.WriteString('', ParamStr(0) + ' "%1"');
     Reg.CloseKey();
-    Reg.OpenKey('Simba\shell\Run\command', True);
+    Reg.OpenKey('simbafile\shell\Run\command', True);
     Reg.WriteString('', ParamStr(0) + ' --open --run "%1"');
     Reg.CloseKey();
-    Reg.OpenKey('Simba\shell\Run (Headless)\command', True);
+    Reg.OpenKey('simbafile\shell\Run (Headless)\command', True);
     Reg.WriteString('', ParamStr(0) + ' --run "%1"');
     Reg.CloseKey();
   finally

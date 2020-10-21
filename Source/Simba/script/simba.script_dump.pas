@@ -89,7 +89,10 @@ function TCompilerDump.addGlobalType(Str: lpString; AName: lpString): TLapeType;
 begin
   Result := inherited addGlobalType(Str, AName);
 
-  Write(Format('type %s = %s;', [AName, Str]));
+  if not Str.EndsWith(';') then
+    Str := Str + ';';
+
+  Write(Format('type %s = %s', [AName, Str]));
 end;
 
 function TCompilerDump.addGlobalVar(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar;

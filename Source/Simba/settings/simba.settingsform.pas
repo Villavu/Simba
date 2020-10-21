@@ -47,8 +47,8 @@ end;
 
 procedure TSimbaSettingsForm.FormShow(Sender: TObject);
 begin
-  EditorFontFrame.FontHeightEdit.Value := SimbaSettings.Editor.FontHeight.Value;
-  EditorFontFrame.FontHeightEdit.OnChange(nil);
+  EditorFontFrame.FontSizeEdit.Value := SimbaSettings.Editor.FontSize.Value;
+  EditorFontFrame.FontSizeEdit.OnChange(nil);
   EditorFontFrame.FontAntiAliasedCheckbox.Checked := SimbaSettings.Editor.AntiAliasing.Value;
   EditorFontFrame.FontAntiAliasedCheckbox.OnChange(nil);
 
@@ -56,8 +56,7 @@ begin
   EnvironmentFrame.PluginPathEdit.Text := SimbaSettings.Environment.PluginPath.Value;
   EnvironmentFrame.FontPathEdit.Text := SimbaSettings.Environment.FontPath.Value;
   EnvironmentFrame.ScriptPathEdit.Text := SimbaSettings.Environment.ScriptPath.Value;
-  EnvironmentFrame.ScriptExecutableEdit.Text := SimbaSettings.Environment.ScriptExecutablePath.Value;
-  EnvironmentFrame.ExtractResourcesOnLaunchCheckbox.Checked := SimbaSettings.Resources.ExtractOnLaunch.Value;
+  EnvironmentFrame.OpenSSLOnLaunch.Checked := SimbaSettings.Environment.OpenSSLOnLaunch.Value;
 
   EditorGeneralFrame.RightMarginEdit.Value := SimbaSettings.Editor.RightMargin.Value;
   EditorGeneralFrame.VisibleRightMarginCheckbox.Checked := SimbaSettings.Editor.RightMarginVisible.Value;
@@ -78,12 +77,10 @@ begin
   SimbaSettings.Environment.PluginPath.Value := EnvironmentFrame.PluginPathEdit.Text;
   SimbaSettings.Environment.FontPath.Value := EnvironmentFrame.FontPathEdit.Text;
   SimbaSettings.Environment.ScriptPath.Value := EnvironmentFrame.ScriptPathEdit.Text;
-  SimbaSettings.Environment.ScriptExecutablePath.Value := EnvironmentFrame.ScriptExecutableEdit.Text;
-
-  SimbaSettings.Resources.ExtractOnLaunch.Value := EnvironmentFrame.ExtractResourcesOnLaunchCheckbox.Checked;
+  SimbaSettings.Environment.OpenSSLOnLaunch.Value := EnvironmentFrame.OpenSSLOnLaunch.Checked;
 
   SimbaSettings.Editor.FontName.Value := EditorFontFrame.Editor.FontName;
-  SimbaSettings.Editor.FontHeight.Value := EditorFontFrame.Editor.Font.Height;
+  SimbaSettings.Editor.FontSize.Value := EditorFontFrame.Editor.Font.Size;
   SimbaSettings.Editor.AntiAliasing.Value := EditorFontFrame.Editor.AntiAliasing;
 
   SimbaSettings.Editor.AllowCaretPastEOL.Value := EditorGeneralFrame.CaretPastEOLCheckBox.Checked;

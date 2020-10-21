@@ -14,19 +14,16 @@ type
     PluginPathOpenButton: TButton;
     FontPathOpenButton: TButton;
     ScriptPathOpenButton: TButton;
-    ScriptExecutableOpenButton: TButton;
-    ExtractResourcesOnLaunchCheckbox: TCheckBox;
+    OpenSSLOnLaunch: TCheckBox;
     DividerBevel1: TDividerBevel;
     IncludePathEdit: TEdit;
     PluginPathEdit: TEdit;
     FontPathEdit: TEdit;
     ScriptPathEdit: TEdit;
-    ScriptExecutableEdit: TEdit;
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
-    Label5: TLabel;
     procedure OpenButtonClick(Sender: TObject);
   private
 
@@ -61,24 +58,6 @@ begin
       Edit.Text := Directory;
 
     Exit;
-  end;
-
-  if (Sender = ScriptExecutableOpenButton) then Edit := ScriptExecutableEdit;
-
-  if (Edit <> nil) then
-  begin
-    with TOpenDialog.Create(Self) do
-    try
-      Directory := ExtractFileDir(Edit.Text);
-      if (not DirectoryExists(Directory)) then
-        Directory := Application.Location;
-
-      InitialDir := Directory;
-      if Execute and FileExists(FileName) then
-        Edit.Text := FileName;
-    finally
-      Free();
-    end;
   end;
 end;
 

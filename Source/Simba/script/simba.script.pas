@@ -36,6 +36,7 @@ type
 
     procedure HandleSimbaState;
     procedure HandleHint(Sender: TLapeCompilerBase; Hint: lpString);
+    procedure HandleException(Ex: Exception);
 
     function HandleFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
     function HandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
@@ -75,7 +76,6 @@ type
     procedure Invoke(Method: TSimbaMethod);
 
     constructor Create; reintroduce;
-    destructor Destroy; override;
   end;
 
 var
@@ -89,7 +89,7 @@ uses
 
 function TSimbaScript.GetHeadless: Boolean;
 begin
-  Result := FSimbaMethods <> nil;
+  Result := FSimbaMethods = nil;
 end;
 
 procedure TSimbaScript.SetSimbaMethods(Value: String);
@@ -101,6 +101,25 @@ end;
 procedure TSimbaScript.HandleHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
   WriteLn(Hint);
+end;
+
+procedure TSimbaScript.HandleException(Ex: Exception);
+var
+  Method: TSimbaMethod;
+begin
+  WriteLn(Ex.Message);
+
+  if (Ex is lpException) and (not Headless) then
+    with Ex as lpException do
+    begin
+      Method := TSimbaMethod_ScriptError.Create(GetProcessID(), DocPos.Line, DocPos.Col, DocPos.FileName);
+
+      try
+        Self.Invoke(Method);
+      finally
+        Method.Free();
+      end;
+    end;
 end;
 
 function TSimbaScript.HandleFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
@@ -165,41 +184,46 @@ end;
 
 procedure TSimbaScript.Execute;
 begin
-  TThread.ExecuteInThread(@HandleSimbaState);
+  try
+    TThread.ExecuteInThread(@HandleSimbaState);
 
-  FClient := TClient.Create();
-  FClient.MOCR.FontPath := FFontPath;
-  FClient.WriteLnProc := @_WriteLn;
-  FClient.IOManager.SetTarget(StrToIntDef(Target, 0));
+    FClient := TClient.Create();
+    FClient.MOCR.FontPath := FFontPath;
+    FClient.WriteLnProc := @_WriteLn;
+    FClient.IOManager.SetTarget(StrToIntDef(Target, 0));
 
-  if (FScriptName <> '') then
-    FCompiler := TSimbaScript_Compiler.Create(TLapeTokenizerString.Create(FScript, FScriptName))
-  else
-    FCompiler := TSimbaScript_Compiler.Create(TLapeTokenizerString.Create(FScript, FScriptFile));
+    if (FScriptName <> '') then
+      FCompiler := TSimbaScript_Compiler.Create(TLapeTokenizerString.Create(FScript, FScriptName))
+    else
+      FCompiler := TSimbaScript_Compiler.Create(TLapeTokenizerString.Create(FScript, FScriptFile));
 
-  FCompiler.OnFindFile := @HandleFindFile;
-  FCompiler.OnHint := @HandleHint;
-  FCompiler.OnHandleDirective := @HandleDirective;
+    FCompiler.OnFindFile := @HandleFindFile;
+    FCompiler.OnHint := @HandleHint;
+    FCompiler.OnHandleDirective := @HandleDirective;
 
-  FStartTime := GetTickCount64();
+    FStartTime := GetTickCount64();
 
-  if (not FCompiler.Compile()) then
-    raise Exception.Create('Compiling failed');
+    if (not FCompiler.Compile()) then
+      raise Exception.Create('Compiling failed');
 
-  WriteLn(Format('Succesfully compiled in %d milliseconds.', [GetTickCount64() - FStartTime]));
+    WriteLn(Format('Succesfully compiled in %d milliseconds.', [GetTickCount64() - FStartTime]));
 
-  if FCompileOnly then
-    Exit;
+    if FCompileOnly then
+      Exit;
 
-  FStartTime := GetTickCount64();
-  FState := bTrue;
+    FStartTime := GetTickCount64();
+    FState := bTrue;
 
-  RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, FState);
+    RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, FState);
 
-  if (GetTickCount64() - FStartTime < 10000) then
-    WriteLn(Format('Succesfully executed in %d milliseconds.', [GetTickCount64() - FStartTime]))
-  else
-    WriteLn(Format('Succesfully executed in %s.', [TimeStamp(GetTickCount64() - FStartTime)]));
+    if (GetTickCount64() - FStartTime < 10000) then
+      WriteLn(Format('Succesfully executed in %d milliseconds.', [GetTickCount64() - FStartTime]))
+    else
+      WriteLn(Format('Succesfully executed in %s.', [TimeStamp(GetTickCount64() - FStartTime)]));
+  except
+    on E: Exception do
+      HandleException(E);
+  end;
 end;
 
 procedure TSimbaScript.HandleSimbaState;
@@ -230,12 +254,15 @@ end;
 
 procedure TSimbaScript.SetScriptFile(Value: String);
 begin
-  if FScriptFile = Value then
+  if (FScriptFile = Value) then
     Exit;
 
   FScriptFile := Value;
   if FileExists(FScriptFile) then
     FScript := ReadFileToString(FScriptFile);
+
+  if FScriptFile.EndsWith('.tmp') and (FScriptName <> '') then
+    DeleteFile(FScriptFile);
 end;
 
 procedure TSimbaScript.SetTarget(Value: String);
@@ -266,31 +293,6 @@ begin
   inherited Create(True);
 
   FreeOnTerminate := True;
-end;
-
-destructor TSimbaScript.Destroy;
-var
-  Method: TSimbaMethod;
-begin
-  if (FatalException <> nil) then
-  begin
-    with FatalException as Exception do
-      WriteLn(Message);
-
-    if (FatalException is lpException) then
-      with FatalException as lpException do
-      begin
-        Method := TSimbaMethod_ScriptError.Create(GetProcessID(), DocPos.Line, DocPos.Col, DocPos.FileName);
-
-        try
-          Self.Invoke(Method);
-        finally
-          Method.Free();
-        end;
-      end;
-  end;
-
-  inherited Destroy();
 end;
 
 end.

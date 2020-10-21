@@ -40,12 +40,13 @@ uses
   {$IFDEF DARWIN}
   simba.darwin_initialization, cocoaint,
   {$ENDIF}
-  classes, interfaces, forms, sysutils,
-  // Simba
+  {$IFDEF WINDOWS}
+  windows,
+  {$ENDIF}
+  classes, interfaces, forms,
   simba.main, simba.aboutform, simba.debugimage, simba.bitmapconv, simba.functionlistform,
   simba.scripttabsform, simba.debugform, simba.filebrowserform, simba.notesform,
   simba.package_form, simba.colorpicker_historyform, simba.settingsform, simba.associate,
-  // Simba Script
   simba.script, simba.script_dump;
 
 type
@@ -62,7 +63,21 @@ begin
 end;
 
 procedure TApplicationHelper.Terminate(Sender: TObject);
+{$IFDEF WINDOWS}
+var
+  PID: UInt32;
+{$ENDIF}
 begin
+  {$IFDEF WINDOWS}
+  GetWindowThreadProcessId(GetConsoleWindow(), PID);
+  if (PID = GetCurrentProcessID()) then
+  begin
+    WriteLn('Press enter to exit');
+
+    ReadLn();
+  end;
+  {$ENDIF}
+
   inherited Terminate();
 
   if (WakeMainThread <> nil) then
@@ -79,7 +94,42 @@ begin
   Application.ShowMainForm := False;
   Application.Initialize();
 
-  if Application.HasOption('open') or (Application.ParamCount <= 1) then
+  if Application.HasOption('dump') then
+  begin
+    with DumpPlugin(Application.GetOptionValue('dump')) do
+      SaveToFile(Application.Params[Application.ParamCount]);
+
+    Halt();
+  end;
+
+  if Application.HasOption('associate') then
+  begin
+    Associate();
+
+    Halt();
+  end;
+
+  if not Application.HasOption('open') and Application.HasOption('run') or Application.HasOption('compile') then
+  begin
+    SimbaScript := TSimbaScript.Create();
+    SimbaScript.OnTerminate := @Application.Terminate;
+
+    SimbaScript.ScriptName    := Application.GetOptionValue('scriptname');
+    SimbaScript.ScriptFile    := Application.Params[Application.ParamCount];
+
+    SimbaScript.AppPath       := Application.GetOptionValue('apppath');
+    SimbaScript.DataPath      := Application.GetOptionValue('datapath');
+    SimbaScript.PluginPath    := Application.GetOptionValue('pluginpath');
+    SimbaScript.FontPath      := Application.GetOptionValue('fontpath');
+    SimbaScript.IncludePath   := Application.GetOptionValue('includepath');
+    SimbaScript.ScriptPath    := Application.GetOptionValue('scriptpath');
+
+    SimbaScript.CompileOnly   := Application.HasOption('compile');
+    SimbaScript.SimbaMethods  := Application.GetOptionValue('simbamethods');
+    SimbaScript.Target        := Application.GetOptionValue('target');
+
+    SimbaScript.Start();
+  end else
   begin
     Application.CreateForm(TSimbaForm, SimbaForm);
     Application.CreateForm(TSimbaFunctionListForm, SimbaFunctionListForm);
@@ -95,40 +145,6 @@ begin
     Application.CreateForm(TSimbaColorHistoryForm, SimbaColorHistoryForm);
 
     Application.QueueASyncCall(@SimbaForm.Setup, 0);
-  end else
-  if Application.HasOption('run') or Application.HasOption('compile') then
-  begin
-    SimbaScript := TSimbaScript.Create();
-    SimbaScript.OnTerminate := @Application.Terminate;
-
-    SimbaScript.ScriptFile    := Application.Params[Application.ParamCount];
-    SimbaScript.ScriptName    := Application.GetOptionValue('scriptname');
-
-    SimbaScript.AppPath       := Application.GetOptionValue('apppath');
-    SimbaScript.DataPath      := Application.GetOptionValue('datapath');
-    SimbaScript.PluginPath    := Application.GetOptionValue('pluginpath');
-    SimbaScript.FontPath      := Application.GetOptionValue('fontpath');
-    SimbaScript.IncludePath   := Application.GetOptionValue('includepath');
-    SimbaScript.ScriptPath    := Application.GetOptionValue('scriptpath');
-
-    SimbaScript.CompileOnly   := Application.HasOption('compile');
-    SimbaScript.SimbaMethods  := Application.GetOptionValue('simbamethods');
-    SimbaScript.Target        := Application.GetOptionValue('target');
-
-    SimbaScript.Start();
-  end else
-  if Application.HasOption('dump') then
-  begin
-    with DumpPlugin(Application.GetOptionValue('dump')) do
-      SaveToFile(Application.Params[Application.ParamCount]);
-
-    Halt();
-  end else
-  if Application.HasOption('associate') then
-  begin
-    Associate();
-
-    Halt();
   end;
 
   Application.Run();

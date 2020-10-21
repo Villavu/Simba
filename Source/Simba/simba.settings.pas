@@ -5,21 +5,13 @@ unit simba.settings;
 interface
 
 uses
-  Classes, SysUtils, IniFiles, Graphics,
+  classes, sysutils, inifiles, graphics,
   simba.setting;
 
 type
   TSimbaSettings = class
   protected
-    FINI: TINIFile;
-    FSettings: TSimbaSettingsList;
-
-    function addIntegerSetting(Section, Name: String): TSimbaSetting_Int64;
-    function addStringSetting(Section, Name: String): TSimbaSetting_String;
-    function addCompressedStringSetting(Section, Name: String): TSimbaSetting_CompressedString;
-    function addBooleanSetting(Section, Name: String): TSimbaSetting_Boolean;
-    function addDirectorySetting(Section, Name: String): TSimbaSetting_Directory;
-    function addFileSetting(Section, Name: String): TSimbaSetting_File;
+    FManager: TSimbaSettingManager;
   public
     GUI: record
       ConsoleVisible: TSimbaSetting_Boolean;
@@ -35,7 +27,7 @@ type
     Editor: record
       DefaultScriptPath: TSimbaSetting_File;
       ColorsPath: TSimbaSetting_String;
-      FontHeight: TSimbaSetting_Int64;
+      FontSize: TSimbaSetting_Int64;
       FontName: TSimbaSetting_String;
       RightMargin: TSimbaSetting_Int64;
       RightMarginVisible: TSimbaSetting_Boolean;
@@ -54,14 +46,12 @@ type
       IncludePath: TSimbaSetting_Directory;
       PluginPath: TSimbaSetting_Directory;
       ScriptPath: TSimbaSetting_Directory;
-      ScriptExecutablePath: TSimbaSetting_String;
       PackagePath: TSimbaSetting_Directory;
       OpenSSLPath: TSimbaSetting_Directory;
+      OpenSSLOnLaunch: TSimbaSetting_Boolean;
     end;
 
-    Resources: record
-      ExtractOnLaunch: TSimbaSetting_Boolean;
-    end;
+    procedure Save;
 
     constructor Create;
     destructor Destroy; override;
@@ -75,81 +65,44 @@ implementation
 uses
   forms;
 
-function TSimbaSettings.addIntegerSetting(Section, Name: String): TSimbaSetting_Int64;
+procedure TSimbaSettings.Save;
 begin
-  Result := TSimbaSetting_Int64.Create(FINI, Section, Name);
-
-  FSettings.Add(Result);
-end;
-
-function TSimbaSettings.addStringSetting(Section, Name: String): TSimbaSetting_String;
-begin
-  Result := TSimbaSetting_String.Create(FINI, Section, Name);
-
-  FSettings.Add(Result);
-end;
-
-function TSimbaSettings.addCompressedStringSetting(Section, Name: String): TSimbaSetting_CompressedString;
-begin
-  Result := TSimbaSetting_CompressedString.Create(FINI, Section, Name);
-
-  FSettings.Add(Result);
-end;
-
-function TSimbaSettings.addBooleanSetting(Section, Name: String): TSimbaSetting_Boolean;
-begin
-  Result := TSimbaSetting_Boolean.Create(FINI, Section, Name);
-
-  FSettings.Add(Result);
-end;
-
-function TSimbaSettings.addDirectorySetting(Section, Name: String): TSimbaSetting_Directory;
-begin
-  Result := TSimbaSetting_Directory.Create(FINI, Section, Name);
-
-  FSettings.Add(Result);
-end;
-
-function TSimbaSettings.addFileSetting(Section, Name: String): TSimbaSetting_File;
-begin
-  Result := TSimbaSetting_File.Create(FINI, Section, Name);
-
-  FSettings.Add(Result);
+  try
+    FManager.INIFile.UpdateFile();
+  except
+  end;
 end;
 
 constructor TSimbaSettings.Create;
 begin
-  FSettings := TSimbaSettingsList.Create(True);
-
-  FINI := TINIFile.Create(Application.Location + 'Data' + DirectorySeparator + 'settings.ini');
-  FINI.CacheUpdates := True;
+  FManager := TSimbaSettingManager.Create(Application.Location + 'Data' + DirectorySeparator + 'settings.ini');
 
   // Environment
-  Environment.FirstLaunch := addBooleanSetting('Environment', 'FirstLaunch');
+  Environment.FirstLaunch := TSimbaSetting_Boolean.Create(FManager, 'Environment', 'FirstLaunch');
   Environment.FirstLaunch.DefaultValue := True;
 
-  Environment.DataPath := addDirectorySetting('Environment', 'DataPath');
+  Environment.DataPath := TSimbaSetting_Directory.Create(FManager, 'Environment', 'DataPath');
   Environment.DataPath.DefaultValue := Application.Location + 'Data' + DirectorySeparator;
 
-  Environment.IncludePath := addDirectorySetting('Environment', 'IncludePath');
+  Environment.IncludePath := TSimbaSetting_Directory.Create(FManager, 'Environment', 'IncludePath');
   Environment.IncludePath.DefaultValue := Application.Location + 'Includes' + DirectorySeparator;
 
-  Environment.PluginPath := addDirectorySetting('Environment', 'PluginPath');
+  Environment.PluginPath := TSimbaSetting_Directory.Create(FManager, 'Environment', 'PluginPath');
   Environment.PluginPath.DefaultValue := Application.Location + 'Plugins' + DirectorySeparator;
 
-  Environment.FontPath := addDirectorySetting('Environment', 'FontPath');
+  Environment.FontPath := TSimbaSetting_Directory.Create(FManager, 'Environment', 'FontPath');
   Environment.FontPath.DefaultValue := Application.Location + 'Fonts' + DirectorySeparator;
 
-  Environment.ScriptPath := addDirectorySetting('Environment', 'ScriptPath');
+  Environment.ScriptPath := TSimbaSetting_Directory.Create(FManager, 'Environment', 'ScriptPath');
   Environment.ScriptPath.DefaultValue := Application.Location + 'Scripts' + DirectorySeparator;
 
-  Environment.ScriptExecutablePath := addFileSetting('Environment', 'ScriptExecutablePath');
-  Environment.ScriptExecutablePath.DefaultValue := Application.Location + 'SimbaScript' {$IFDEF WINDOWS} + '.exe' {$ENDIF};
-
-  Environment.PackagePath := addDirectorySetting('Environment', 'PackagePath');
+  Environment.PackagePath := TSimbaSetting_Directory.Create(FManager, 'Environment', 'PackagePath');
   Environment.PackagePath.DefaultValue := Application.Location + 'Data' + DirectorySeparator + 'packages' + DirectorySeparator;
 
-  Environment.OpenSSLPath := addDirectorySetting('Environment', 'OpenSSLPath');
+  Environment.OpenSSLOnLaunch := TSimbaSetting_Boolean.Create(FManager, 'Environment', 'OpenSSLOnLaunch');
+  Environment.OpenSSLOnLaunch.DefaultValue := True;
+
+  Environment.OpenSSLPath := TSimbaSetting_Directory.Create(FManager, 'Environment', 'OpenSSLPath');
   {$IFDEF WINDOWS}
   Environment.OpenSSLPath.Value := Application.Location + 'Data' + DirectorySeparator + {$IFDEF CPU32}'32'{$ELSE}'64'{$ENDIF} + DirectorySeparator;
   {$ELSE}
@@ -157,58 +110,63 @@ begin
   {$ENDIF}
 
   // GUI
-  GUI.ConsoleVisible := addBooleanSetting('GUI', 'ConsoleVisible');
+  GUI.ConsoleVisible := TSimbaSetting_Boolean.Create(FManager, 'GUI', 'ConsoleVisible');
   GUI.ConsoleVisible.DefaultValue := True;
-  GUI.TrayIconVisible := addBooleanSetting('GUI', 'TrayIconVisible');
+
+  GUI.TrayIconVisible := TSimbaSetting_Boolean.Create(FManager, 'GUI', 'TrayIconVisible');
   GUI.TrayIconVisible.DefaultValue := True;
-  GUI.Layout := addCompressedStringSetting('GUI', 'Layout');
-  GUI.LayoutLocked := addBooleanSetting('GUI', 'LayoutLocked');
-  GUI.Notes := addCompressedStringSetting('GUI', 'Notes');
-  GUI.RecentFiles := addStringSetting('GUI', 'RecentFiles');
-  GUI.CustomFontSize := addIntegerSetting('GUI', 'CustomFontSize');
+
+  GUI.Layout := TSimbaSetting_CompressedString.Create(FManager, 'GUI', 'Layout');
+  GUI.LayoutLocked := TSimbaSetting_Boolean.Create(FManager, 'GUI', 'LayoutLocked');
+  GUI.Notes := TSimbaSetting_CompressedString.Create(FManager, 'GUI', 'Notes');
+  GUI.RecentFiles := TSimbaSetting_String.Create(FManager, 'GUI', 'RecentFiles');
+
+  GUI.CustomFontSize := TSimbaSetting_Int64.Create(FManager, 'GUI', 'CustomFontSize');
   GUI.CustomFontSize.DefaultValue := 0;
-  GUI.CustomToolbarSize := addIntegerSetting('GUI', 'CustomToolbarSize');
+
+  GUI.CustomToolbarSize := TSimbaSetting_Int64.Create(FManager, 'GUI', 'CustomToolbarSize');
   GUI.CustomToolbarSize.DefaultValue := 0;
 
   // Editor
-  Editor.ColorsPath := addStringSetting('Editor', 'ColorsPath');
-  Editor.DefaultScriptPath := addFileSetting('Editor', 'DefaultScriptPath');
+  Editor.ColorsPath := TSimbaSetting_String.Create(FManager, 'Editor', 'ColorsPath');
+
+  Editor.DefaultScriptPath := TSimbaSetting_File.Create(FManager, 'Editor', 'DefaultScriptPath');
   Editor.DefaultScriptPath.DefaultValue := Environment.DataPath.Value + 'default.simba';
-  Editor.FontHeight := addIntegerSetting('Editor', 'FontHeight');
-  Editor.FontHeight.DefaultValue := 20;
-  Editor.FontName := addStringSetting('Editor', 'FontName');
-  Editor.AntiAliasing := addBooleanSetting('Editor', 'AntiAliasing');
+
+  Editor.FontSize := TSimbaSetting_Int64.Create(FManager, 'Editor', 'FontSize');
+  Editor.FontSize.DefaultValue := 15;
+  Editor.FontName := TSimbaSetting_String.Create(FManager, 'Editor', 'FontName');
+
+  Editor.AntiAliasing := TSimbaSetting_Boolean.Create(FManager, 'Editor', 'AntiAliasing');
   Editor.AntiAliasing.DefaultValue := True;
-  Editor.IgnoreCodeToolsIDEDirective := addBooleanSetting('Editor', 'IgnoreCodeToolsIDEDirective');
+
+  Editor.IgnoreCodeToolsIDEDirective := TSimbaSetting_Boolean.Create(FManager, 'Editor', 'IgnoreCodeToolsIDEDirective');
   Editor.IgnoreCodeToolsIDEDirective.DefaultValue := False;
-  Editor.AllowCaretPastEOL := addBooleanSetting('Editor', 'AllowCaretPastEOL');
+
+  Editor.AllowCaretPastEOL := TSimbaSetting_Boolean.Create(FManager, 'Editor', 'AllowCaretPastEOL');
   Editor.AllowCaretPastEOL.DefaultValue := True;
-  Editor.AutomaticallyOpenAutoCompletion := addBooleanSetting('Editor', 'AutomaticallyOpenAutoCompletion');
+
+  Editor.AutomaticallyOpenAutoCompletion := TSimbaSetting_Boolean.Create(FManager, 'Editor', 'AutomaticallyOpenAutoCompletion');
   Editor.AutomaticallyOpenAutoCompletion.DefaultValue := True;
-  Editor.AutomaticallyShowParameterHints := addBooleanSetting('Editor', 'AutomaticallyShowParameterHints');
+
+  Editor.AutomaticallyShowParameterHints := TSimbaSetting_Boolean.Create(FManager, 'Editor', 'AutomaticallyShowParameterHints');
   Editor.AutomaticallyShowParameterHints.DefaultValue := True;
-  Editor.RightMargin := addIntegerSetting('Editor', 'Right Margin');
+
+  Editor.RightMargin := TSimbaSetting_Int64.Create(FManager, 'Editor', 'Right Margin');
   Editor.RightMargin.DefaultValue := 80;
-  Editor.RightMarginVisible := addBooleanSetting('Editor', 'HideRightMargin');
+
+  Editor.RightMarginVisible := TSimbaSetting_Boolean.Create(FManager, 'Editor', 'HideRightMargin');
   Editor.RightMarginVisible.DefaultValue := True;
-  Editor.DividerVisible := addBooleanSetting('Editor', 'DividerVisible');
+
+  Editor.DividerVisible := TSimbaSetting_Boolean.Create(FManager, 'Editor', 'DividerVisible');
   Editor.DividerVisible.DefaultValue := True;
 
-  Resources.ExtractOnLaunch := addBooleanSetting('Resources', 'ExtractOnLaunch');
-  Resources.ExtractOnLaunch.DefaultValue := True;
-
-  try
-    FINI.UpdateFile();
-  except
-  end;
+  Save(); // Update file with default values
 end;
 
 destructor TSimbaSettings.Destroy;
 begin
-  FSettings.Free();
-
-  FINI.UpdateFile();
-  FINI.Free();
+  FManager.Free();
 end;
 
 initialization
@@ -216,7 +174,6 @@ initialization
 
 finalization
   SimbaSettings.Free();
-  SimbaSettings := nil;
 
 end.
 

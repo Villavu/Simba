@@ -6,15 +6,15 @@ object EnvironmentFrame: TEnvironmentFrame
   ClientHeight = 440
   ClientWidth = 569
   TabOrder = 0
-  DesignLeft = 40
-  DesignTop = 356
+  DesignLeft = 1972
+  DesignTop = 597
   object Label1: TLabel
     AnchorSideLeft.Control = IncludePathEdit
     AnchorSideTop.Control = Owner
     Left = 0
-    Height = 15
+    Height = 19
     Top = 5
-    Width = 66
+    Width = 76
     BorderSpacing.Top = 5
     BorderSpacing.Bottom = 2
     Caption = 'Include Path'
@@ -27,8 +27,8 @@ object EnvironmentFrame: TEnvironmentFrame
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = IncludePathOpenButton
     Left = 0
-    Height = 23
-    Top = 22
+    Height = 27
+    Top = 26
     Width = 529
     Anchors = [akTop, akLeft, akRight]
     TabOrder = 0
@@ -41,8 +41,8 @@ object EnvironmentFrame: TEnvironmentFrame
     AnchorSideBottom.Control = IncludePathEdit
     AnchorSideBottom.Side = asrBottom
     Left = 534
-    Height = 23
-    Top = 22
+    Height = 27
+    Top = 26
     Width = 35
     Anchors = [akTop, akRight, akBottom]
     AutoSize = True
@@ -57,8 +57,8 @@ object EnvironmentFrame: TEnvironmentFrame
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = PluginPathOpenButton
     Left = 0
-    Height = 23
-    Top = 67
+    Height = 27
+    Top = 79
     Width = 529
     Anchors = [akTop, akLeft, akRight]
     TabOrder = 2
@@ -68,9 +68,9 @@ object EnvironmentFrame: TEnvironmentFrame
     AnchorSideTop.Control = IncludePathEdit
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 15
-    Top = 50
-    Width = 61
+    Height = 19
+    Top = 58
+    Width = 70
     BorderSpacing.Top = 5
     BorderSpacing.Bottom = 2
     Caption = 'Plugin Path'
@@ -85,8 +85,8 @@ object EnvironmentFrame: TEnvironmentFrame
     AnchorSideBottom.Control = PluginPathEdit
     AnchorSideBottom.Side = asrBottom
     Left = 534
-    Height = 23
-    Top = 67
+    Height = 27
+    Top = 79
     Width = 35
     Anchors = [akTop, akRight, akBottom]
     AutoSize = True
@@ -101,8 +101,8 @@ object EnvironmentFrame: TEnvironmentFrame
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = FontPathOpenButton
     Left = 0
-    Height = 23
-    Top = 112
+    Height = 27
+    Top = 132
     Width = 529
     Anchors = [akTop, akLeft, akRight]
     TabOrder = 4
@@ -115,8 +115,8 @@ object EnvironmentFrame: TEnvironmentFrame
     AnchorSideBottom.Control = FontPathEdit
     AnchorSideBottom.Side = asrBottom
     Left = 534
-    Height = 23
-    Top = 112
+    Height = 27
+    Top = 132
     Width = 35
     Anchors = [akTop, akRight, akBottom]
     AutoSize = True
@@ -130,9 +130,9 @@ object EnvironmentFrame: TEnvironmentFrame
     AnchorSideTop.Control = PluginPathEdit
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 15
-    Top = 95
-    Width = 51
+    Height = 19
+    Top = 111
+    Width = 60
     BorderSpacing.Top = 5
     BorderSpacing.Bottom = 2
     Caption = 'Font Path'
@@ -145,8 +145,8 @@ object EnvironmentFrame: TEnvironmentFrame
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = ScriptPathOpenButton
     Left = 0
-    Height = 23
-    Top = 157
+    Height = 27
+    Top = 185
     Width = 529
     Anchors = [akTop, akLeft, akRight]
     TabOrder = 6
@@ -156,9 +156,9 @@ object EnvironmentFrame: TEnvironmentFrame
     AnchorSideTop.Control = FontPathEdit
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 15
-    Top = 140
-    Width = 57
+    Height = 19
+    Top = 164
+    Width = 66
     BorderSpacing.Top = 5
     BorderSpacing.Bottom = 2
     Caption = 'Script Path'
@@ -173,8 +173,8 @@ object EnvironmentFrame: TEnvironmentFrame
     AnchorSideBottom.Control = ScriptPathEdit
     AnchorSideBottom.Side = asrBottom
     Left = 534
-    Height = 23
-    Top = 157
+    Height = 27
+    Top = 185
     Width = 35
     Anchors = [akTop, akRight, akBottom]
     AutoSize = True
@@ -183,78 +183,34 @@ object EnvironmentFrame: TEnvironmentFrame
     OnClick = OpenButtonClick
     TabOrder = 7
   end
-  object ScriptExecutableEdit: TEdit
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Label5
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = ScriptExecutableOpenButton
-    Left = 0
-    Height = 23
-    Top = 202
-    Width = 529
-    Anchors = [akTop, akLeft, akRight]
-    TabOrder = 8
-  end
-  object Label5: TLabel
-    AnchorSideLeft.Control = ScriptExecutableEdit
-    AnchorSideTop.Control = ScriptPathEdit
-    AnchorSideTop.Side = asrBottom
-    Left = 0
-    Height = 15
-    Top = 185
-    Width = 117
-    BorderSpacing.Top = 5
-    BorderSpacing.Bottom = 2
-    Caption = 'Script Executable Path'
-    Layout = tlCenter
-    ParentColor = False
-  end
-  object ScriptExecutableOpenButton: TButton
-    AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = ScriptExecutableEdit
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    AnchorSideBottom.Control = ScriptExecutableEdit
-    AnchorSideBottom.Side = asrBottom
-    Left = 534
-    Height = 23
-    Top = 202
-    Width = 35
-    Anchors = [akTop, akRight, akBottom]
-    AutoSize = True
-    BorderSpacing.Left = 5
-    Caption = '...'
-    OnClick = OpenButtonClick
-    TabOrder = 9
-  end
   object DividerBevel1: TDividerBevel
     AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = ScriptExecutableEdit
+    AnchorSideTop.Control = ScriptPathEdit
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 0
-    Height = 15
-    Top = 235
+    Height = 19
+    Top = 222
     Width = 569
-    Caption = 'Resources'
+    Caption = 'OpenSSL'
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 10
     Style = gsHorLines
   end
-  object ExtractResourcesOnLaunchCheckbox: TCheckBox
+  object OpenSSLOnLaunch: TCheckBox
     AnchorSideLeft.Control = DividerBevel1
     AnchorSideTop.Control = DividerBevel1
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 19
+    Height = 23
     Hint = 'On launch, automatically extract Simba''s resources (SimbaScript, OpenSSL).'
-    Top = 255
-    Width = 117
+    Top = 246
+    Width = 144
     BorderSpacing.Top = 5
-    Caption = 'Extract On Launch'
+    Caption = 'Initialize On Launch'
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 10
+    TabOrder = 8
   end
 end

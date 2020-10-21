@@ -5,8 +5,7 @@ unit simba.settingsform_editor_font;
 interface
 
 uses
-  Classes, SysUtils, LResources, Forms, Controls, ExtCtrls, StdCtrls, Graphics,
-  Spin,
+  Classes, SysUtils, LResources, Forms, Controls, ExtCtrls, StdCtrls, Graphics, Spin,
   simba.editor;
 
 type
@@ -17,10 +16,10 @@ type
     Label2: TLabel;
     Panel1: TPanel;
     EditorPanel: TPanel;
-    FontHeightEdit: TSpinEdit;
+    FontSizeEdit: TSpinEdit;
     procedure FontAntiAliasedCheckboxChange(Sender: TObject);
     procedure FontsComboBoxChange(Sender: TObject);
-    procedure FontHeightEditChange(Sender: TObject);
+    procedure FontSizeEditChange(Sender: TObject);
   protected
     FEditor: TSimbaEditor;
     FFonts: TStringList;
@@ -60,9 +59,9 @@ begin
   FEditor.Font.Name := FontsComboBox.Text;
 end;
 
-procedure TEditorFontFrame.FontHeightEditChange(Sender: TObject);
+procedure TEditorFontFrame.FontSizeEditChange(Sender: TObject);
 begin
-  FEditor.Font.Height := FontHeightEdit.Value;
+  FEditor.Font.Size := FontSizeEdit.Value;
 end;
 
 procedure TEditorFontFrame.PopulateFonts;
@@ -77,7 +76,7 @@ begin
   DC := GetDC(0);
 
   try
-    EnumFontFamiliesEX(DC, @LogFont, @EnumFontsFixedPitchNoDups, PtrUInt(FFonts), 0);
+    EnumFontFamiliesEx(DC, @LogFont, @EnumFontsFixedPitchNoDups, PtrUInt(FFonts), 0);
   finally
     ReleaseDC(0, DC);
   end;
@@ -126,9 +125,9 @@ begin
             '  end;                                                  '+ LineEnding +
             'end;                                                    '+ LineEnding +
             '                                                        '+ LineEnding +
+            '(* this is an object method *)                          '+ LineEnding +
             'function TPoint.Test: Boolean; overload;                '+ LineEnding +
             'begin                                                   '+ LineEnding +
-            '  Result := inherited();                                '+ LineEnding +
             'end;                                                    ';
   end;
 

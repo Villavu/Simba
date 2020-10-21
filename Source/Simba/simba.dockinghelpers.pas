@@ -53,7 +53,7 @@ begin
   if DockMaster.GetAnchorSite(Form) <> nil then
     Form := DockMaster.GetAnchorSite(Form);
 
-  if (Form.Left < Form.Monitor.Left) or (Form.Top < Form.Monitor.Top) then
+  if (not Form.Visible) or (Form.Left < Form.Monitor.Left) or (Form.Top < Form.Monitor.Top) then
   begin
     if (Form.Position <> poScreenCenter) then
       Form.Position := poScreenCenter;
@@ -91,21 +91,16 @@ var
   Stream: TStringStream;
 begin
   Result := False;
-  if (Layout = '') then
-    Exit;
 
   Stream := TStringStream.Create(Layout);
   Config := TXMLConfigStorage.Create(Stream);
 
   try
     Result := DockMaster.LoadLayoutFromConfig(Config, True);
-  except
-    on E: Exception do
-      WriteLn('Exception whilst loading layout: ' + E.Message);
+  finally
+    Config.Free();
+    Stream.Free();
   end;
-
-  Config.Free();
-  Stream.Free();
 end;
 
 class procedure SimbaDockingHelper.Show(Form: TCustomForm);
