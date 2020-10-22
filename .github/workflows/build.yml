@@ -20,46 +20,50 @@ jobs:
         config:
           - os: windows-latest
             name: 'Windows 32'
-            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.8z/fpclazup-i386-win32.exe'
+            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2d/fpclazup-i386-win32.exe'
+            fpcup-opt: '--lazrevision=64045'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
-            laz-url: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
+            laz-url: 'trunk'
             build-mode: 'SIMBA_WIN32'
             binary: 'Simba-Win32.exe'
             test: 'Simba-Win32.exe'
 
           - os: windows-latest
             name: 'Windows 64'
-            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.8z/fpclazup-x86_64-win64.exe'
+            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2d/fpclazup-x86_64-win64.exe'
+            fpcup-opt: '--lazrevision=64045'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
-            laz-url: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
+            laz-url: 'trunk'
             build-mode: 'SIMBA_WIN64'
             binary: 'Simba-Win64.exe'
             test: 'Simba-Win64.exe'
 
           - os: ubuntu-latest
             name: 'Linux 64'
-            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.8z/fpclazup-x86_64-linux'
+            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2d/fpclazup-x86_64-linux'
+            fpcup-opt: '--lazrevision=64045'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
-            laz-url: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
+            laz-url: 'trunk'
             build-mode: 'SIMBA_LINUX64'
             binary: 'Simba-Linux64'
             test: 'Simba-Linux64'
 
           - os: macos-latest
             name: 'MacOS 64'
-            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.8z/fpclazup-x86_64-darwin'
-            fpcup-opt: '--lclplatform=cocoa'
+            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2d/fpclazup-x86_64-darwin'
+            fpcup-opt: '--lclplatform=cocoa --lazrevision=64045'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
-            laz-url: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
+            laz-url: 'trunk'
             build-mode: 'SIMBA_DARWIN64'
             binary: 'Simba-Darwin64.zip'
             test: 'Simba-Darwin64'
 
           - os: ubuntu-latest
             name: 'AArch64'
-            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.6.8z/fpclazup-x86_64-linux'
+            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2d/fpclazup-x86_64-linux'
+            fpcup-opt: '--lazrevision=64045'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
-            laz-url: 'https://svn.freepascal.org/svn/lazarus/tags/lazarus_2_0_10/'
+            laz-url: 'trunk'
             build-mode: 'SIMBA_AARCH64'
             binary: 'Simba-AArch64'
 
@@ -97,7 +101,7 @@ jobs:
         curl --retry 5 -L -o fpcup ${{ matrix.config.fpcup-url }}
         chmod +x fpcup
         mkdir lazarus
-        ./fpcup --installdir=lazarus --fpcURL=${{ matrix.config.fpc-url }} --lazURL=${{ matrix.config.laz-url }} ${{ matrix.config.fpcup-opt }} --noconfirm --verbose
+        ./fpcup --installdir=lazarus --fpcURL=${{ matrix.config.fpc-url }} --lazURL=${{ matrix.config.laz-url }} ${{ matrix.config.fpcup-opt }} --only=docker --noconfirm --verbose
 
     - name: Install AArch64 Cross Compiler
       if: steps.cache.outputs.cache-hit != 'true' && matrix.config.name == 'AArch64'
