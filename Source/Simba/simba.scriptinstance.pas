@@ -57,14 +57,13 @@ type
 
     function GetTimeRunning: UInt64;
     function GetExitCode: Int32;
-    function GetRunning: Boolean;
+    function GetPID: UInt32;
 
     procedure SetScript(Value: String);
   public
     property DebuggerForm: TSimbaDebuggerForm read FDebuggingForm;
     property Process: TSimbaScriptProcess read FProcess;
     property State: TSimbaScriptState read FState write FState;
-    property Running: Boolean read GetRunning;
 
     // Parameters to pass to script
     property Script: String write FScript;
@@ -75,6 +74,7 @@ type
     // Stats
     property TimeRunning: UInt64 read GetTimeRunning;
     property ExitCode: Int32 read GetExitCode;
+    property PID: UInt32 read GetPID;
 
     // Start
     procedure Run(DebuggingForm: TSimbaDebuggerForm = nil);
@@ -89,6 +89,7 @@ type
     function IsPaused: Boolean;
     function IsStopping: Boolean;
     function IsRunning: Boolean;
+    function IsFinished: Boolean;
 
     constructor Create;
     destructor Destroy; override;
@@ -235,9 +236,9 @@ begin
   Result := FProcess.ExitCode;
 end;
 
-function TSimbaScriptInstance.GetRunning: Boolean;
+function TSimbaScriptInstance.GetPID: UInt32;
 begin
-  Result := FProcess.Running;
+  Result := FProcess.ProcessID;
 end;
 
 procedure TSimbaScriptInstance.Run(DebuggingForm: TSimbaDebuggerForm);
@@ -321,6 +322,7 @@ end;
 
 constructor TSimbaScriptInstance.Create;
 begin
+  FState := STATE_RUNNING;
   FSimbaMethods := TSimbaMethodServer.Create();
 
   FProcess := TSimbaScriptProcess.Create();
@@ -361,8 +363,16 @@ begin
   Result := FState = STATE_RUNNING;
 end;
 
+function TSimbaScriptInstance.IsFinished: Boolean;
+begin
+  Result := not FProcess.Running;
+end;
+
 destructor TSimbaScriptInstance.Destroy;
 begin
+  if (FSimbaMethods <> nil) then
+    FSimbaMethods.Free();
+
   if (FProcess <> nil) then
   begin
     if FProcess.Running then
@@ -370,9 +380,6 @@ begin
 
     FProcess.Free();
   end;
-
-  if (FSimbaMethods <> nil) then
-    FSimbaMethods.Free();
 
   inherited Destroy();
 end;

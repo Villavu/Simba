@@ -174,6 +174,7 @@ initialization
 
 finalization
   SimbaSettings.Free();
+  SimbaSettings := nil;
 
 end.
 

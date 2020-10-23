@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils, syncobjs, castaliapaslex, castaliapaslextypes, sha1,
-  simba.generics, simba.codeparser;
+  generics.collections,
+  simba.codeparser;
 
 type
   TCodeInsight_Include = class(TCodeParser)
@@ -38,12 +39,12 @@ type
   end;
 
   TCodeInsight_IncludeArray = array of TCodeInsight_Include;
-  TCodeInsight_IncludeMap = specialize TSimbaStringMap<TCodeInsight_Include>;
+  TCodeInsight_IncludeList = specialize TObjectList<TCodeInsight_Include>;
 
   TCodeInsight_IncludeCache = class
   protected
     FLock: TCriticalSection;
-    FCachedIncludes: TCodeInsight_IncludeMap;
+    FCachedIncludes: TCodeInsight_IncludeList;
 
     procedure Purge;
 
@@ -179,7 +180,7 @@ var
 begin
   for i := FCachedIncludes.Count - 1 downto 0 do
   begin
-    Include := FCachedIncludes.ItemsI[i];
+    Include := FCachedIncludes.Items[i];
     if (Include.RefCount > 0) then
       Continue;
     if (Include.LastUsed < 25) and (not Include.Outdated) then
@@ -187,7 +188,7 @@ begin
 
     WriteLn('Purge include "', Include.Lexer.FileName, '"');
 
-    FCachedIncludes.Delete(i).Free();
+    FCachedIncludes.Delete(I);
   end;
 end;
 
@@ -197,22 +198,24 @@ var
 begin
   Result := nil;
 
-  for Include in FCachedIncludes.ItemsOfKey(FileName) do
-  begin
-    if (Include.InDefines.Defines <> Sender.Lexer.SaveDefines.Defines) or
-       (Include.InDefines.Stack <> Sender.Lexer.SaveDefines.Stack) or
-       (Include.Lexer.UseCodeToolsIDEDirective <> Sender.Lexer.UseCodeToolsIDEDirective) then
+  for Include in FCachedIncludes do
+    if Include.Lexer.FileName = FileName then
     begin
-      Include.LastUsed := Include.LastUsed + 1; // When this reaches 10 the include will be destroyed.
-      Continue;
+      if (Include.InDefines.Defines <> Sender.Lexer.SaveDefines.Defines) or
+         (Include.InDefines.Stack <> Sender.Lexer.SaveDefines.Stack) or
+         (Include.Lexer.UseCodeToolsIDEDirective <> Sender.Lexer.UseCodeToolsIDEDirective) then
+      begin
+        Include.LastUsed := Include.LastUsed + 1; // When this reaches 10 the include will be destroyed.
+
+        Continue;
+      end;
+
+      if Include.Outdated then
+        Continue;
+
+      Result := Include;
+      Break;
     end;
-
-    if Include.Outdated then
-      Continue;
-
-    Result := Include;
-    Break;
-  end;
 end;
 
 function TCodeInsight_IncludeCache.GetInclude(Sender: TCodeParser; FileName: String): TCodeInsight_Include;
@@ -236,7 +239,7 @@ begin
       Result.OutDefines := Result.Lexer.SaveDefines;
       Result.InDefines := Sender.Lexer.SaveDefines;
 
-      FCachedIncludes.Add(FileName, Result);
+      FCachedIncludes.Add(Result);
     end;
 
     Sender.Lexer.CloneDefinesFrom(Result.Lexer);
@@ -293,7 +296,7 @@ begin
         Result.InDefines := Sender.Lexer.SaveDefines;
         Result.Lexer.IsLibrary := True;
 
-        FCachedIncludes.Add(FileName, Result);
+        FCachedIncludes.Add(Result);
       end;
     end;
 
@@ -317,16 +320,11 @@ begin
   inherited Create();
 
   FLock := TCriticalSection.Create();
-  FCachedIncludes := TCodeInsight_IncludeMap.Create();
+  FCachedIncludes := TCodeInsight_IncludeList.Create();
 end;
 
 destructor TCodeInsight_IncludeCache.Destroy;
-var
-  I: Int32;
 begin
-  for I := 0 to FCachedIncludes.Count - 1 do
-    FCachedIncludes.ItemsI[I].Free();
-
   FLock.Free();
   FCachedIncludes.Free();
 

@@ -285,7 +285,15 @@ end;
 
 procedure TSimbaScript.Invoke(Method: TSimbaMethod);
 begin
-  FSimbaMethods.Invoke(Method);
+  try
+    FSimbaMethods.Invoke(Method);
+  except
+    on E: Exception do
+    begin
+      WriteLn('Exception executing Simba method: ', Method.ClassName);
+      WriteLn(E.Message);
+    end;
+  end;
 end;
 
 constructor TSimbaScript.Create;
