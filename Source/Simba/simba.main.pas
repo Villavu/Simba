@@ -669,7 +669,7 @@ begin
   Dump := SysUtils.GetTempFileName(SimbaSettings.Environment.DataPath.Value, '.dump');
 
   try
-    RunCommand(Format('"%s" --dump="%s" "%s"', [Application.ExeName, FileName, Dump]), Output);
+    RunCommandTimeout(Application.ExeName, ['--dump=' + FileName, Dump], Output, 1500);
 
     Contents := ReadFileToString(Dump);
     if (Contents = '') then
@@ -1120,17 +1120,17 @@ begin
   for I := 0 to SimbaScriptTabsForm.TabCount - 1 do
     with SimbaScriptTabsForm.Tabs[I] do
     begin
-      if (ScriptInstance <> nil) and (not ScriptInstance.Running) then
+      if (ScriptInstance <> nil) and ScriptInstance.IsFinished then
       begin
         ScriptInstance.Free();
         ScriptInstance := nil;
       end;
 
+      // Update buttons if current tab
       if SimbaScriptTabsForm.Tabs[I] <> SimbaScriptTabsForm.CurrentTab then
         Continue;
 
-      // Update buttons & state
-      if (ScriptInstance <> nil) and ScriptInstance.Running then
+      if (ScriptInstance <> nil) then
       begin
         if ScriptInstance.IsStopping then
         begin

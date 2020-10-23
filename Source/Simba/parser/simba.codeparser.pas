@@ -4,25 +4,23 @@ unit simba.codeparser;
 
 {$mode objfpc}{$H+}
 {$modeswitch typehelpers}
+{$modeswitch arrayoperators}
 
 interface
 
 uses
   SysUtils, Classes,
   CastaliaPasLex, CastaliaSimplePasPar, CastaliaPasLexTypes,
-  simba.generics;
+  generics.collections, generics.defaults;
 
 type
   TDeclaration = class;
   TDeclarationArray = array of TDeclaration;
   TDeclarationClass = class of TDeclaration;
 
-  TDeclarationStack = class(specialize TSimbaStack<TDeclaration>)
-  protected
-    function getCurItem: TDeclaration; override;
-  end;
+  TDeclarationStack = specialize TStack<TDeclaration>;
 
-  TDeclarationList = class(specialize TSimbaObjectList<TDeclaration>)
+  TDeclarationList = class(specialize TObjectList<TDeclaration>)
   public
     function GetItemsOfClass(AClass: TDeclarationClass; SubSearch: Boolean = False): TDeclarationArray;
     function GetFirstItemOfClass(AClass: TDeclarationClass; SubSearch: Boolean = False): TDeclaration;
@@ -33,7 +31,24 @@ type
     function GetShortText(AClass: TDeclarationClass): String;
   end;
 
-  TDeclarationMap = specialize TSimbaStringMap<TDeclaration>;
+  TDeclarationMap = class
+  protected
+  type
+    TDict = specialize TDictionary<String, TDeclarationArray>;
+  protected
+    FDictionary: TDict;
+  public
+    procedure Clear;
+
+    procedure Add(Name: String; Declaration: TDeclaration);
+
+    function GetAll: TDeclarationArray; overload;
+    function GetAll(Name: String): TDeclarationArray; overload;
+    function Get(Name: String): TDeclaration;
+
+    constructor Create;
+    destructor Destroy; override;
+  end;
 
   TciTypeDeclaration = class;
   TciProcedureDeclaration = class;
@@ -180,7 +195,6 @@ type
     function GetReturnType: TciReturnType;
   public
     function GetParamDeclarations: TDeclarationArray;
-    function IsObjectName(Value: String): Boolean;
 
     property IsFunction: Boolean read FIsFunction write FIsFunction;
     property IsOperator: Boolean read FIsOperator write FIsOperator;
@@ -391,32 +405,64 @@ type
     destructor Destroy; override;
   end;
 
-operator + (Left: TDeclarationArray; Right: TDeclaration): TDeclarationArray;
-operator + (Left: TDeclarationArray; Right: TDeclarationArray): TDeclarationArray;
-
 implementation
 
-operator + (Left: TDeclarationArray; Right: TDeclaration): TDeclarationArray;
+procedure TDeclarationMap.Clear;
 begin
-  SetLength(Result, Length(Left) + 1);
-
-  if Length(Left) > 0 then
-    Move(Left[0], Result[0], Length(Left) * SizeOf(TDeclaration));
-
-  Result[High(Result)] := Right;
+  FDictionary.Clear();
 end;
 
-operator + (Left: TDeclarationArray; Right: TDeclarationArray): TDeclarationArray;
+procedure TDeclarationMap.Add(Name: String; Declaration: TDeclaration);
+var
+  Declarations: TDeclarationArray;
 begin
-  SetLength(Result, Length(Left) + Length(Right));
+  Name := UpperCase(Name);
+  if FDictionary.TryGetValue(Name, Declarations) then
+    Declarations := Declarations + [Declaration]
+  else
+    Declarations := [Declaration];
 
-  if Length(Result) > 0 then
-  begin
-    if Length(Left) > 0 then
-      Move(Left[0], Result[0], Length(Left) * SizeOf(TDeclarationArray));
-    if Length(Right) > 0 then
-      Move(Right[0], Result[Length(Left)], Length(Right) * SizeOf(TDeclarationArray));
-  end;
+  FDictionary.AddOrSetValue(Name, Declarations);
+end;
+
+function TDeclarationMap.GetAll: TDeclarationArray;
+var
+  Declarations: TDeclarationArray;
+begin
+  Result := nil;
+
+  for Declarations in FDictionary.Values.ToArray() do
+    Result := Result + Declarations;
+end;
+
+function TDeclarationMap.GetAll(Name: String): TDeclarationArray;
+begin
+  Result := nil;
+
+  Name := UpperCase(Name);
+  if FDictionary.ContainsKey(Name) then
+    Result := FDictionary.Items[Name];
+end;
+
+function TDeclarationMap.Get(Name: String): TDeclaration;
+begin
+  Result := nil;
+
+  Name := UpperCase(Name);
+  if FDictionary.ContainsKey(Name) then
+    Result := FDictionary.Items[Name][0];
+end;
+
+constructor TDeclarationMap.Create;
+begin
+  FDictionary := TDict.Create();
+end;
+
+destructor TDeclarationMap.Destroy;
+begin
+  FDictionary.Free();
+
+  inherited Destroy();
 end;
 
 function TciPointerType.GetType: TDeclaration;
@@ -469,14 +515,6 @@ begin
   Result := nil;
   if Items.Count > 0 then
     Result := Items[0];
-end;
-
-function TDeclarationStack.getCurItem: TDeclaration;
-begin
-  if FCur >= 0 then
-    Result := FArr[FCur]
-  else
-    Result := nil;
 end;
 
 function TciEnumElement.GetName: string;
@@ -700,7 +738,7 @@ begin
   l := 0;
   SetLength(Result, 0);
 
-  for i := 0 to FCount - 1 do
+  for i := 0 to FLength - 1 do
     SearchItem(AClass, SubSearch, FItems[i], Result, l);
 end;
 
@@ -732,7 +770,7 @@ var
 begin
   Result := nil;
 
-  for i := 0 to FCount - 1 do
+  for i := 0 to FLength - 1 do
     if SearchItem(AClass, SubSearch, FItems[i], Result) then
       Exit;
 end;
@@ -757,7 +795,7 @@ var
 begin
   Result := nil;
 
-  for I := 0 to FCount - 1 do
+  for I := 0 to FLength - 1 do
     if (Position >= FItems[I].StartPos) and (Position <= FItems[I].EndPos) then
       Search(FItems[I], Result);
 end;
@@ -1033,44 +1071,29 @@ begin
   if Declaration <> nil then
     for i := 0 to Declaration.Items.Count - 1 do
       if (Declaration.Items[i] is TciParameter) then
-        Result := Result + Declaration.Items[i];
-end;
-
-function TciProcedureDeclaration.IsObjectName(Value: String): Boolean; inline;
-begin
-  Result := UpperCase(Value) = UpperCase(Self.ObjectName);
+        Result := Result + [Declaration.Items[i]];
 end;
 
 function TCodeParser.InDeclaration(AClass: TDeclarationClass): Boolean;
 begin
-  if (FStack.Top = nil) then
-    Result := (AClass = nil)
+  if (AClass = nil) then
+    Result := (FStack.Count = 0)
   else
-    Result := (FStack.Top is AClass);
+    Result := (FStack.Count > 0) and (FStack.Peek() is AClass);
 end;
 
 function TCodeParser.InDeclarations(AClassArray: array of TDeclarationClass): Boolean;
 var
-  i: Integer;
-  t: TDeclaration;
+  AClass: TDeclarationClass;
 begin
   Result := False;
-  t := FStack.Top;
-  if (t = nil) then
-  begin
-    for i := Low(AClassArray) to High(AClassArray) do
-      if (AClassArray[i] = nil) then
-      begin
-        Result := True;
-        Break;
-      end;
-    Exit;
-  end;
-  for i := Low(AClassArray) to High(AClassArray) do
-    if (t is AClassArray[i]) then
+
+  for AClass in AClassArray do
+    if InDeclaration(AClass) then
     begin
       Result := True;
-      Break;
+
+      Exit;
     end;
 end;
 
@@ -1079,12 +1102,17 @@ begin
   if (AStart = -1) then
     AStart := FLexer.TokenPos;
 
-  Result := AClass.Create(FLexer, FStack.Top, Lexer.Origin, AStart);
+  if (FStack.Count > 0) then
+  begin
+    Result := AClass.Create(FLexer, FStack.Peek(), Lexer.Origin, AStart);
 
-  if (FStack.Top <> nil) then
-    FStack.Top.Items.Add(Result)
-  else
+    FStack.Peek().Items.Add(Result);
+  end else
+  begin
+    Result := AClass.Create(FLexer, nil, Lexer.Origin, AStart);
+
     FItems.Add(Result);
+  end;
 
   FStack.Push(Result);
 end;
@@ -1164,10 +1192,8 @@ begin
   if (AEnd = -1) then
     AEnd := FTokenPos;
 
-  if (FStack.Top <> nil) then
-    FStack.Top.EndPos := AEnd;
-
-  FStack.Pop();
+  if (FStack.Count > 0) then
+    FStack.Pop().EndPos := AEnd;
 end;
 
 constructor TCodeParser.Create;
@@ -1474,7 +1500,7 @@ end;
 procedure TCodeParser.ProceduralDirective;
 begin
   if InDeclaration(TciProcedureDeclaration) then
-    with FStack.Top as TciProcedureDeclaration do
+    with FStack.Peek as TciProcedureDeclaration do
       Directives := Directives + [ExID];
 
   inherited ProceduralDirective;
@@ -1635,7 +1661,7 @@ begin
     Exit;
   end;
 
-  TciProcedureDeclaration(FStack.Top).IsMethodOfType := True;
+  TciProcedureDeclaration(FStack.Peek).IsMethodOfType := True;
 
   PushStack(TciProcedureClassName);
   inherited;

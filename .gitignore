@@ -15,3 +15,5 @@ lib/
 /Simba*
 /Tools/makeresourcefile.exe
 /Tools/makeresourcefile
+/link.res
+/Source/Simba/Simba.res

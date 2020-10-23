@@ -1,5 +1,8 @@
 unit simba.codeinsight;
 
+{$mode objfpc}{$H+}
+{$modeswitch arrayoperators}
+
 interface
 
 uses
@@ -99,13 +102,13 @@ end;
 
 class procedure TCodeInsight.AddBaseInclude(Include: TCodeInsight_Include);
 begin
-  FBaseIncludes := FBaseIncludes + Include;
+  FBaseIncludes := FBaseIncludes + [Include];
   FBaseDefines.AddStrings(Include.Lexer.Defines);
 end;
 
 class procedure TCodeInsight.AddFunctionListSection(Include: TCodeInsight_Include);
 begin
-  FFunctionListSections := FFunctionListSections + Include;
+  FFunctionListSections := FFunctionListSections + [Include];
 end;
 
 function TCodeInsight.GetGlobalsByName(Name: String): TDeclarationArray;
@@ -115,32 +118,35 @@ begin
   Result := nil;
 
   for Include in FBaseIncludes + FIncludes do
-    Result := Result + Include.Globals.ItemsOfKey(Name);
-  Result := Result + FGlobals.ItemsOfKey(Name);
+    Result := Result + Include.Globals.GetAll(Name);
+
+  Result := Result + FGlobals.GetAll(Name);
 end;
 
 function TCodeInsight.GetGlobalByName(Name: String): TDeclaration;
 var
   Include: TCodeInsight_Include;
 begin
+  Result := nil;
+
   for Include in FBaseIncludes + FIncludes do
   begin
-    Result := Include.Globals[Name];
+    Result := Include.Globals.Get(Name);
     if Result <> nil then
       Exit;
   end;
 
-  Result := FGlobals[Name];
-end;
-
-function TCodeInsight.GetLocalByName(Name: String): TDeclaration;
-begin
-  Result := FLocals[Name];
+  Result := FGlobals.Get(Name);
 end;
 
 function TCodeInsight.GetLocalsByName(Name: String): TDeclarationArray;
 begin
-  Result := FLocals.ItemsOfKey(Name);
+  Result := FLocals.GetAll(Name);
+end;
+
+function TCodeInsight.GetLocalByName(Name: String): TDeclaration;
+begin
+  Result := FLocals.Get(Name);
 end;
 
 function TCodeInsight.GetGlobals: TDeclarationArray;
@@ -148,15 +154,16 @@ var
   Include: TCodeInsight_Include;
 begin
   Result := nil;
-  for Include in FBaseIncludes + FIncludes do
-    Result := Result + Include.Globals.ExportToArrays.Items;
 
-  Result := Result + FGlobals.ExportToArrays.Items;
+  for Include in FBaseIncludes + FIncludes do
+    Result += Include.Globals.GetAll();
+
+  Result += FGlobals.GetAll();
 end;
 
 function TCodeInsight.GetLocals: TDeclarationArray;
 begin
-  Result := FLocals.ExportToArrays.Items;
+  Result := FLocals.GetAll();
 end;
 
 procedure TCodeInsight.DoInclude(Sender: TObject; FileName: String; var Handled: Boolean);
@@ -165,7 +172,7 @@ var
 begin
   Include := FIncludeCache.GetInclude(Self, FileName);
   if (Include <> nil) then
-    FIncludes := FIncludes + Include;
+    FIncludes := FIncludes + [Include];
 
   Handled := True;
 end;
@@ -178,7 +185,7 @@ begin
   begin
     Include := FIncludeCache.GetLibrary(Self, FileName);
     if (Include <> nil) then
-      FIncludes := FIncludes + Include;
+      FIncludes := FIncludes + [Include];
   end;
 
   Handled := True;
@@ -322,7 +329,7 @@ function TCodeInsight.GetMembersOfType(Declaration: TDeclaration): TDeclarationA
       Declarations := GlobalsByName['!' + Declaration.Name];
       for I := 0 to High(Declarations) do
         if Declarations[I] is TciProcedureDeclaration then
-          Result := Result + Declarations[I];
+          Result := Result + [Declarations[I]];
 
       if Declaration.RecordType <> nil then
         GetFields(Declaration.RecordType);
@@ -397,7 +404,7 @@ begin
   Declarations := GetMembersOfType(Declaration);
   for i := 0 to High(Declarations) do
     if Declarations[i].IsName(Name) then
-      Result := Result + Declarations[i];
+      Result := Result + [Declarations[i]];
 end;
 
 function TCodeInsight.FindDeclarations(Expr: String): TDeclarationArray;
@@ -478,7 +485,7 @@ begin
           Declaration := nil;
       end;
       if (Declaration <> nil) then
-        Result := Result + Declaration;
+        Result := Result + [Declaration];
     end;
   end;
 end;
@@ -571,20 +578,20 @@ procedure TCodeInsight.Run;
 
     while (Method <> nil) do
     begin
-      if (tokStatic in Method.Directives) then
-        Break;
-
       Declarations := Declarations + Method.Items.GetItemsOfClass(TciVarDeclaration);
       Declarations := Declarations + Method.Items.GetItemsOfClass(TciTypeDeclaration);
       Declarations := Declarations + Method.Items.GetItemsOfClass(TciProcedureDeclaration);
       Declarations := Declarations + Method.Items.GetItemsOfClass(TciReturnType);
       Declarations := Declarations + Method.GetParamDeclarations();
 
+      if (tokStatic in Method.Directives) then
+        Break;
+
       Declaration := Method.Items.GetFirstItemOfClass(TciProcedureClassName);
 
       if Declaration <> nil then
       begin
-        Declarations := Declarations + Declaration;
+        Declarations := Declarations + [Declaration];
         Declarations := Declarations + GetMembersOfType(Declaration);
       end;
 
@@ -648,7 +655,7 @@ begin
 
       Declarations := Declaration.GetOwnersOfClass(TciWithStatement);
       if Declaration is TciWithStatement then
-        Declarations := Declarations + Declaration;
+        Declarations := Declarations + [Declaration];
 
       for I := 0 to High(Declarations) do
         GetWithVariables(Declarations[I].Items.GetItemsOfClass(TciVariable));

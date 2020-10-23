@@ -89,6 +89,10 @@ begin
 end;
 
 begin
+  {$IF DECLARED(SetHeapTraceOutput)}
+  SetHeapTraceOutput('memory-leaks.trc');
+  {$ENDIF}
+
   Application.Title := 'Simba';
   Application.Scaled := True;
   Application.ShowMainForm := False;

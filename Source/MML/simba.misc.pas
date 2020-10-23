@@ -38,7 +38,7 @@ function RunCommandInDir(Directory: String; CommandLine: String; out OutputStrin
 procedure RunCommandInDir(Directory: String; CommandLine: String); overload;
 function RunCommand(CommandLine: String; out OutputString: String): Int32; overload;
 procedure RunCommand(CommandLine: String); overload;
-
+function RunCommandTimeout(Executable: TProcessString; Commands: array of TProcessString; out OutputString: String; Timeout: Int32): Boolean;
 function OpenDirectory(Path: String): Boolean;
 
 implementation
@@ -265,6 +265,48 @@ begin
     raise Exception.Create('OpenDirectory is unsupported on this system.');
 
   Result := RunCommandInDir('', Executable, [Path], Output, ExitStatus) = 0;
+end;
+
+type
+  TProcessTimeout = class(TProcess)
+  public
+    Timeout: UInt64;
+
+    procedure Idle(Sender, Context: TObject; Status: TRunCommandEventCode; const Message: string);
+  end;
+
+procedure TProcessTimeout.Idle(Sender, Context: TObject; Status: TRunCommandEventCode; const Message: string);
+begin
+  if Status = RunCommandIdle then
+  begin
+    if GetTickCount64() > Timeout then
+      Terminate(255);
+
+    Sleep(RunCommandSleepTime);
+  end;
+end;
+
+function RunCommandTimeout(Executable: TProcessString; Commands: array of TProcessString; out OutputString: String; Timeout: Int32): Boolean;
+Var
+  Process: TProcessTimeout;
+  ExitStatus: Int32;
+  ErrorString: String;
+  Command: TProcessString;
+begin
+  Process := TProcessTimeout.Create(nil);
+  Process.OnRunCommandEvent := @Process.Idle;
+  Process.Timeout := GetTickCount() + Timeout;
+  Process.Options := Process.Options + [poRunIdle];
+  Process.Executable := Executable;
+
+  for Command in Commands do
+    Process.Parameters.Add(Command);
+
+  try
+    Result := (Process.RunCommandLoop(OutputString, ErrorString, ExitStatus) = 0) and (ExitStatus = 0) and (GetTickCount64() < Process.Timeout);
+  finally
+    Process.Free();
+  end;
 end;
 
 end.

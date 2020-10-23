@@ -193,7 +193,8 @@ begin
   Params.Read(State, SizeOf(TSimbaScriptState));
 
   for I := 0 to SimbaScriptTabsForm.TabCount - 1 do
-    if SimbaScriptTabsForm.Tabs[I].ScriptInstance.Process.ProcessID = PID then
+    if (SimbaScriptTabsForm.Tabs[I].ScriptInstance <> nil) and
+       (SimbaScriptTabsForm.Tabs[I].ScriptInstance.PID = PID) then
       SimbaScriptTabsForm.Tabs[I].ScriptInstance.State := State;
 end;
 
@@ -293,7 +294,8 @@ begin
 
   for I := 0 to SimbaScriptTabsForm.TabCount - 1 do
   begin
-    if SimbaScriptTabsForm.Tabs[I].ScriptInstance.Process.ProcessID = PID then
+    if (SimbaScriptTabsForm.Tabs[I].ScriptInstance <> nil) and
+       (SimbaScriptTabsForm.Tabs[I].ScriptInstance.PID = PID) then
     begin
       if (SimbaScriptTabsForm.Tabs[I].ScriptName = FileName) then
         SimbaScriptTabsForm.Tabs[I].MakeVisible()
@@ -504,7 +506,7 @@ var
   Method: TSimbaMethod;
 begin
   try
-    while (FInputStream.Read(Header, SizeOf(TMessageHeader)) = SizeOf(TMessageHeader)) and (not FThread.CheckTerminated) do
+    while (FInputStream.Read(Header, SizeOf(TMessageHeader)) = SizeOf(TMessageHeader)) and (not TThread.CheckTerminated) do
     begin
       Method := GetMethod(Header.Method);
 
@@ -543,7 +545,7 @@ begin
   while not FThread.Finished do
   begin
     try
-      FInputClient.WriteByte(0); // Wake from read.
+      FInputClient.WriteByte(0); // Wake from Read()
     except
     end;
 
@@ -554,6 +556,7 @@ begin
 
   FInputStream.Free();
   FInputClient.Free();
+
   FOutputStream.Free();
   FOutputClient.Free();
 

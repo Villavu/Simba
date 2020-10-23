@@ -267,7 +267,7 @@ begin
     FDeclarations.Add(Declaration);
   end;
 
-  FDeclarations.Extend(FParser.Locals);
+  FDeclarations.AddRange(FParser.Locals);
 end;
 
 procedure TSimbaAutoComplete.FillTypeDeclarations(TypeDeclaration: TDeclaration);
