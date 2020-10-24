@@ -12,7 +12,7 @@ procedure Lape_Import_System(Compiler: TSimbaScript_Compiler; Data: Pointer = ni
 implementation
 
 uses
-  forms, lazutf8,
+  forms, lazutf8, lpvartypes,
   simba.mufasabase;
 
 procedure Lape_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -110,12 +110,12 @@ end;
 
 procedure Lape_IsTerminated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  //PBoolean(Result)^ := SimbaScript.IsTerminating;
+  PBoolean(Result)^ := SimbaScript.Terminated;
 end;
 
 procedure Lape_IsUserTerminated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  //PBoolean(Result)^ := (SimbaScript.IsTerminating and SimbaScript.IsUserTerminated)
+  PBoolean(Result)^ := SimbaScript.Terminated and SimbaScript.UserTerminated;
 end;
 
 procedure Lape_EnterMethod(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -151,6 +151,90 @@ begin
 
     _DebuggingIndent -= 1;
   end; }
+end;
+
+procedure Lape_AddOnTerminate_String(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+type
+  TProcedureArray = array of procedure;
+var
+  Global: TLapeGlobalVar;
+begin
+  Global := SimbaScript.Compiler.Globals[PString(Params^[0])^];
+
+  if (Global <> nil) and (Global.VarType is TLapeType_Method) then
+  begin
+     Insert(
+       TProcedure(PPointer(Global.Ptr)^),
+       TProcedureArray(SimbaScript.Compiler.Globals['_OnTerminateProcedures'].Ptr^),
+       High(Integer)
+     );
+  end else
+    raise Exception.Create('AddOnTerminate: Global not found');
+end;
+
+procedure Lape_AddOnTerminate_Procedure(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+type
+  TProcedureArray = array of procedure;
+var
+  Method: Pointer;
+  Declarations: TLapeDeclarationList;
+  Global: TLapeGlobalVar;
+  I: Int32;
+begin
+  Method := PPointer(Params^[0])^;
+
+  Declarations := SimbaScript.Compiler.GlobalDeclarations;
+
+  for I := 0 to Declarations.Count - 1 do
+    if (Declarations[I] is TLapeGlobalVar) then
+    begin
+      Global := TLapeGlobalVar(Declarations[I]);
+      if (Global.Ptr <> nil) and (PPointer(Global.Ptr^) = Method) then
+      begin
+        Insert(
+           TProcedure(Method),
+           TProcedureArray(SimbaScript.Compiler.Globals['_OnTerminateProcedures'].Ptr^),
+           High(Integer)
+         );
+
+        Exit;
+      end;
+    end;
+
+  raise Exception.Create('AddOnTerminate: Global not found');
+end;
+
+procedure Lape_AddOnTerminate_ProcedureOfObject(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+type
+  TProcedureArray = array of procedure of object;
+var
+  Method: TMethod;
+  Declarations: TLapeDeclarationList;
+  Global: TLapeGlobalVar;
+  I: Int32;
+begin
+  Method := PMethod(Params^[0])^;
+
+  Declarations := SimbaScript.Compiler.GlobalDeclarations;
+
+  for I := 0 to Declarations.Count - 1 do
+    if (Declarations[I] is TLapeGlobalVar) then
+    begin
+      Global := TLapeGlobalVar(Declarations[I]);
+
+      if (Global.Ptr <> nil) and (Global.Ptr = Method.Data) then
+      begin
+        Insert(
+           TProcedureOfObject(Method),
+           TProcedureArray(SimbaScript.Compiler.Globals['_OnTerminateProcedureOfObjects'].Ptr^),
+           High(Integer)
+         );
+
+        Exit;
+      end;
+    end;
+
+  raise Exception.Create('AddOnTerminate: Global not found');
 end;
 
 procedure Lape_Import_System(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
@@ -256,60 +340,22 @@ begin
     addGlobalFunc('procedure _LeaveMethod(constref Index: Int32); override;', @Lape_LeaveMethod);
 
     addDelayedCode(
-      'var'                                                                      + LineEnding +
-      '  OnTerminateStrings: array of String;'                                   + LineEnding +
-      '  OnTerminateProcedures: array of procedure;'                             + LineEnding +
-      '  OnTerminateProceduresOfObject: array of procedure of object;'           + LineEnding +
-      ''                                                                         + LineEnding +
-      'procedure __OnTerminate;'                                                 + LineEnding +
-      'var i: Int32;'                                                            + LineEnding +
-      'begin'                                                                    + LineEnding +
-      '  for i := 0 to High(OnTerminateStrings) do'                              + LineEnding +
-      '    VariantInvoke(OnTerminateStrings[i], []);'                            + LineEnding +
-      '  for i := 0 to High(OnTerminateProcedures) do'                           + LineEnding +
-      '    OnTerminateProcedures[i]();'                                          + LineEnding +
-      '  for i := 0 to High(OnTerminateProceduresOfObject) do'                   + LineEnding +
-      '    OnTerminateProceduresOfObject[i]()'                                   + LineEnding +
-      'end;'                                                                     + LineEnding +
-      ''                                                                         + LineEnding +
-      'procedure AddOnTerminate(Method: String); overload;'                      + LineEnding +
-      'begin'                                                                    + LineEnding +
-      '  OnTerminateStrings += Method;'                                          + LineEnding +
-      'end;'                                                                     + LineEnding +
-      ''                                                                         + LineEnding +
-      'procedure AddOnTerminate(Method: procedure); overload;'                   + LineEnding +
-      'begin'                                                                    + LineEnding +
-      '  OnTerminateProcedures += @Method;'                                      + LineEnding +
-      'end;'                                                                     + LineEnding +
-      ''                                                                         + LineEnding +
-      'procedure AddOnTerminate(Method: procedure of object); overload;'         + LineEnding +
-      'begin'                                                                    + LineEnding +
-      '  OnTerminateProceduresOfObject += @Method;'                              + LineEnding +
-      'end;'                                                                     + LineEnding +
-      ''                                                                         + LineEnding +
-      'procedure DeleteOnTerminate(Method: String); overload;'                   + LineEnding +
-      'var i: Int32;'                                                            + LineEnding +
-      'begin'                                                                    + LineEnding +
-      '  for i := High(OnTerminateStrings) downto 0 do'                          + LineEnding +
-      '    if SameText(OnTerminateStrings[i], Method) then'                      + LineEnding +
-      '      Delete(OnTerminateStrings, i, 1);'                                  + LineEnding +
-      'end;'                                                                     + LineEnding +
-      ''                                                                         + LineEnding +
-      'procedure DeleteOnTerminate(Method: procedure); overload;'                + LineEnding +
-      'var i: Int32;'                                                            + LineEnding +
-      'begin'                                                                    + LineEnding +
-      '  for i := High(OnTerminateProcedures) downto 0 do'                       + LineEnding +
-      '    if @OnTerminateProcedures[i] = @Method then'                          + LineEnding +
-      '      Delete(OnTerminateProcedures, i, 1);'                               + LineEnding +
-      'end;'                                                                     + LineEnding +
-      ''                                                                         + LineEnding +
-      'procedure DeleteOnTerminate(Method: procedure of object); overload;'      + LineEnding +
-      'var i: Int32;'                                                            + LineEnding +
-      'begin'                                                                    + LineEnding +
-      '  for i := High(OnTerminateProceduresOfObject) downto 0 do'               + LineEnding +
-      '    if @OnTerminateProceduresOfObject[i] = @Method then'                  + LineEnding +
-      '      Delete(OnTerminateProceduresOfObject, i, 1);'                       + LineEnding +
-      'end;', 'OnTerminate', False);
+      'var _OnTerminateProcedures: array of procedure;'                   + LineEnding +
+      'var _OnTerminateProcedureOfObjects: array of procedure of object;' + LineEnding +
+      ''                                                                  + LineEnding +
+      'procedure _OnTerminate;'                                           + LineEnding +
+      'var I: Int32;'                                                     + LineEnding +
+      'begin'                                                             + LineEnding +
+      '  for I := 0 to High(_OnTerminateProcedures) do'                   + LineEnding +
+      '    _OnTerminateProcedures[I]();'                                  + LineEnding +
+      '  for I := 0 to High(_OnTerminateProcedureOfObjects) do'           + LineEnding +
+      '    _OnTerminateProcedureOfObjects[I]();'                          + LineEnding +
+      'end;'
+    );
+
+    addGlobalFunc('procedure AddOnTerminate(Proc: String); overload;', @Lape_AddOnTerminate_String);
+    addGlobalFunc('procedure AddOnTerminate(Proc: procedure); overload;', @Lape_AddOnTerminate_Procedure);
+    addGlobalFunc('procedure AddOnTerminate(Proc: procedure of object); overload;', @Lape_AddOnTerminate_ProcedureOfObject);
 
     addDelayedCode(
       'procedure MemMove(constref Src; var Dst; Size: SizeInt);'                + LineEnding +
