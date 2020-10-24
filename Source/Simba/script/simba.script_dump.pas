@@ -52,9 +52,10 @@ type
     procedure addBaseDefine(Define: lpString); override;
     procedure addBaseDefine(Define: lpString; Value: lpString); override;
 
-    procedure Dump(List: TStringList); overload;
+    procedure Dump(Strings: TStringList); overload;
 
     constructor Create; reintroduce;
+    destructor Destroy; override;
   end;
 
 procedure TCompilerDump.Write(Header: String);
@@ -247,7 +248,8 @@ constructor TCompilerDump.Create;
 begin
   inherited Create(TLapeTokenizerString.Create('begin end.', ''));
 
-  Section := 'System';
+  FList := TStringList.Create();
+  FSection := 'System';
 
   Write('{$DEFINE Lape}');
   Write('{$DEFINE Sesquipedalian}');
@@ -573,11 +575,19 @@ begin
   Write('procedure VarArraySet(var A: Variant; const Value: Variant; Indices: array of Int32); external;');
 end;
 
-procedure TCompilerDump.Dump(List: TStringList);
+destructor TCompilerDump.Destroy;
 begin
-  FList := List;
+  FList.Free();
 
+  inherited Destroy();
+end;
+
+procedure TCompilerDump.Dump(Strings: TStringList);
+begin
   Compile();
+
+  Strings.Clear();
+  Strings.AddStrings(FList);
 end;
 
 function DumpCompiler: TStringList;

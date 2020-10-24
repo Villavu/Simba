@@ -34,6 +34,9 @@ type
     FClient: TClient;
     FSimbaMethods: TSimbaMethodClient;
 
+    FTerminated: Boolean;
+    FUserTerminated: Boolean;
+
     procedure HandleSimbaState;
     procedure HandleHint(Sender: TLapeCompilerBase; Hint: lpString);
     procedure HandleException(Ex: Exception);
@@ -50,6 +53,12 @@ type
     procedure SetTarget(Value: String);
     procedure SetSimbaMethods(Value: String);
   public
+    // Script is terminating
+    property Terminated: Boolean read FTerminated;
+    // Stop button has been clicked
+    property UserTerminated: Boolean read FUserTerminated;
+
+    property Compiler: TSimbaScript_Compiler read FCompiler;
     property CompileOnly: Boolean read FCompileOnly write FCompileOnly;
 
     property SimbaMethods: String write SetSimbaMethods;
@@ -214,7 +223,13 @@ begin
     FStartTime := GetTickCount64();
     FState := bTrue;
 
-    RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, FState);
+    try
+      RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, FState);
+    finally
+      FTerminated := True;
+
+      RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, TByteArray(nil), TCodePos(FCompiler['_OnTerminate'].Ptr^));
+    end;
 
     if (GetTickCount64() - FStartTime < 10000) then
       WriteLn(Format('Succesfully executed in %d milliseconds.', [GetTickCount64() - FStartTime]))
@@ -233,7 +248,11 @@ var
 begin
   Stream := THandleStream.Create(StdInputHandle);
   while Stream.Read(Value, SizeOf(Int32)) = SizeOf(Int32) do
+  begin
     Self.State := TInitBool(Value);
+    if Self.State = bFalse then
+      FUserTerminated := True;
+  end;
 
   Stream.Free();
 end;

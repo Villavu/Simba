@@ -341,8 +341,6 @@ begin
   addDelayedCode('procedure _EnterMethod(constref Index: Int32); begin end;');
   addDelayedCode('procedure _LeaveMethod(constref Index: Int32); begin end;');
 
-  ExposeGlobals(Self, [egmInvoke]);
-
   StartImporting();
 
   try

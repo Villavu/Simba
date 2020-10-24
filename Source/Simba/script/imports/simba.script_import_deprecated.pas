@@ -370,16 +370,6 @@ begin
                    '  end;'                                                                                                                                   + LineEnding +
                    'end;'                                                                                                                                     + LineEnding +
                    ''                                                                                                                                         + LineEnding +
-                   'procedure GetScriptProp(Prop: TSP_Property; var Value: TVariantArray); deprecated;'                                                       + LineEnding +
-                   'var i: Int32;'                                                                                                                            + LineEnding +
-                   'begin'                                                                                                                                    + LineEnding +
-                   '  case Prop of'                                                                                                                           + LineEnding +
-                   '    SP_OnTerminate:'                                                                                                                      + LineEnding +
-                   '      for i := 0 to High(OnTerminateStrings) do'                                                                                          + LineEnding +
-                   '        Value += OnTerminateStrings[i];'                                                                                                  + LineEnding +
-                   '  end;'                                                                                                                                   + LineEnding +
-                   'end;'                                                                                                                                     + LineEnding +
-                   ''                                                                                                                                         + LineEnding +
                    'function GetTClient: TClient; deprecated ' + #39 + 'Replace with `Client` variable' + #39 + ';'                                           + LineEnding +
                    'begin'                                                                                                                                    + LineEnding +
                    '  Result := Client;'                                                                                                                      + LineEnding +
