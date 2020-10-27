@@ -12,7 +12,7 @@ procedure Lape_Import_TTarget(Compiler: TSimbaScript_Compiler; Data: Pointer = n
 implementation
 
 uses
-  simba.target, graphics, simba.iomanager;
+  simba.target, graphics;
 
 type
   PColor = ^TColor;

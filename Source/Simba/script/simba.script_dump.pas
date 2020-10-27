@@ -50,7 +50,6 @@ type
     function addGlobalConst(Value: UnicodeString; AName: lpString): TLapeGlobalVar; override;
 
     procedure addBaseDefine(Define: lpString); override;
-    procedure addBaseDefine(Define: lpString; Value: lpString); override;
 
     procedure Dump(Strings: TStringList); overload;
 
@@ -233,13 +232,6 @@ end;
 procedure TCompilerDump.addBaseDefine(Define: lpString);
 begin
   inherited addBaseDefine(Define);
-
-  Write(Format('{$DEFINE %s}', [Define]));
-end;
-
-procedure TCompilerDump.addBaseDefine(Define: lpString; Value: lpString);
-begin
-  inherited addBaseDefine(Define, Value);
 
   Write(Format('{$DEFINE %s}', [Define]));
 end;

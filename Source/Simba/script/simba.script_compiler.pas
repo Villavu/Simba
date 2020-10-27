@@ -1,6 +1,7 @@
 unit simba.script_compiler;
 
 {$mode objfpc}{$H+}
+{$modeswitch arrayoperators}
 
 interface                         
 
@@ -9,14 +10,22 @@ uses
   ffi, lpcompiler, lptypes, lpvartypes, lpparser, lptree, lpffiwrappers;
 
 type
-  TSimbaScript_DebuggingMethods = array of ShortString;
-
   TSimbaScript_Compiler = class(TLapeCompiler)
+  public
+  type
+    TEnterMethodEvent = procedure(Sender: TObject; Index: Int32) of object;
+    TLeaveMethodEvent = procedure(Sender: TObject; Index: Int32; Exception: Boolean) of object;
+
+    TManagedImportClosure = class(TLapeDeclaration)
+      Closure: TImportClosure;
+    end;
   protected
-    FManagedClosures: array of TImportClosure;
     FSection: String;
     FDebugging: Boolean;
-    FDebuggingMethods: TSimbaScript_DebuggingMethods;
+    FDebuggingMethods: TStringArray;
+
+    FOnEnterMethod: TEnterMethodEvent;
+    FOnLeaveMethod: TLeaveMethodEvent;
 
     function ParseMethod(FuncForwards: TLapeFuncForwards; FuncHeader: TLapeType_Method; FuncName: lpString; isExternal: Boolean): TLapeTree_Method; override;
   public
@@ -36,20 +45,20 @@ type
     function addGlobalConst(Value: UnicodeString; AName: lpString): TLapeGlobalVar; virtual; overload;
     function addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType; virtual; overload;
 
-    procedure addBaseDefine(Define: lpString; Value: lpString); virtual; overload;
-
     procedure addClass(const Name: String; const Parent: String = 'TObject');
     procedure addClassVar(const Obj, Item, Typ: String; const ARead: Pointer; const AWrite: Pointer = nil; const Arr: Boolean = False; const ArrType: string = 'UInt32');
+
+    function Compile: Boolean; override;
 
     property Section: String read FSection write FSection;
 
     property Debugging: Boolean read FDebugging write FDebugging;
-    property DebuggingMethods: TSimbaScript_DebuggingMethods read FDebuggingMethods;
+    property DebuggingMethods: TStringArray read FDebuggingMethods;
 
-    function Compile: Boolean; override;
+    property OnEnterMethod: TEnterMethodEvent read FOnEnterMethod write FOnEnterMethod;
+    property OnLeaveMethod: TLeaveMethodEvent read FOnLeaveMethod write FOnLeaveMethod;
 
     constructor Create(ATokenizer: TLapeTokenizerBase; ManageTokenizer: Boolean = True; AEmitter: TLapeCodeEmitter = nil; ManageEmitter: Boolean = True); override;
-    destructor Destroy; override;
   end;
 
 implementation
@@ -117,6 +126,24 @@ uses
   simba.script_import_simba,
   simba.script_import_process,
   simba.script_import_matchtemplate;
+
+procedure Lape_EnterMethod(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+var
+  Compiler: TSimbaScript_Compiler;
+begin
+  Compiler := TSimbaScript_Compiler(Params^[0]);
+  if (Compiler.OnEnterMethod <> nil) then
+    Compiler.OnEnterMethod(Compiler, PInt32(Params^[1])^);
+end;
+
+procedure Lape_LeaveMethod(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+var
+  Compiler: TSimbaScript_Compiler;
+begin
+  Compiler := TSimbaScript_Compiler(Params^[0]);
+  if (Compiler.OnLeaveMethod <> nil) then
+    Compiler.OnLeaveMethod(Compiler, PInt32(Params^[1])^, PBoolean(Params^[2])^);
+end;
 
 type
   TLapeTree_InternalMethod_WaitUntil = class(TLapeTree_InternalMethod)
@@ -231,16 +258,14 @@ begin
 end;
 
 function TSimbaScript_Compiler.addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar;
+var
+  Closure: TManagedImportClosure;
 begin
-  SetLength(FManagedClosures, Length(FManagedClosures) + 1);
-  FManagedClosures[High(FManagedClosures)] := LapeImportWrapper(Value, Self, Header, ABI);
+  Closure := TManagedImportClosure.Create();
+  Closure.Closure := LapeImportWrapper(Value, Self, Header, ABI);
 
-  Result := inherited addGlobalFunc(Header, FManagedClosures[High(FManagedClosures)].Func);
-end;
-
-procedure TSimbaScript_Compiler.addBaseDefine(Define: lpString; Value: lpString);
-begin
-  FBaseDefines[Define] := Trim(Value);
+  with TManagedImportClosure(addManagedDecl(Closure)) do
+    Result := inherited addGlobalFunc(Header, Closure.Func);
 end;
 
 function TSimbaScript_Compiler.addGlobalConst(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar;
@@ -337,9 +362,11 @@ begin
   InitializeFFI(Self);
   InitializePascalScriptBasics(Self, [psiTypeAlias, psiSettings, psiMagicMethod, psiFunctionWrappers, psiExceptions]);
 
-  addGlobalVar('array of ShortString', @FDebuggingMethods, '_DebuggingMethods');
-  addDelayedCode('procedure _EnterMethod(constref Index: Int32); begin end;');
-  addDelayedCode('procedure _LeaveMethod(constref Index: Int32); begin end;');
+  addGlobalVar('array of String', @FDebuggingMethods, '_DebuggingMethods');
+  addGlobalMethod('procedure _EnterMethod(constref Index: Int32);', @Lape_EnterMethod, Self);
+  addGlobalMethod('procedure _LeaveMethod(constref Index: Int32; Exception: Boolean);', @Lape_LeaveMethod, Self);
+  if FDebugging then
+    addBaseDefine('DEBUGGING');
 
   StartImporting();
 
@@ -427,28 +454,33 @@ function TSimbaScript_Compiler.ParseMethod(FuncForwards: TLapeFuncForwards; Func
 var
   EnterMethod, LeaveMethod: TLapeTree_Invoke;
   Statement: TLapeTree_Try;
+  Test: TLapeTree_Operator;
 begin
   Result := inherited ParseMethod(FuncForwards, FuncHeader, FuncName, isExternal);
 
-  if FDebugging then
+  if hasDefine('DEBUGGING') then
   begin
-    if (Result <> nil) and (Result.Statements <> nil) and hasDefine('DEBUGGING') then
+    if (Result <> nil) and (Result.Statements <> nil) then
     begin
       FuncName := UpperCase(FuncName);
-      if (FuncName[1] = '!') or (FuncName = '_ENTERMETHOD') or (FuncName = '_LEAVEMETHOD') then
+      if (FuncName = '') or (FuncName[1] = '!') or (FuncName = '_ENTERMETHOD') or (FuncName = '_LEAVEMETHOD') then
         Exit;
 
       if (FuncHeader <> nil) and (FuncHeader is TLapeType_MethodOfType) then
         FuncName := UpperCase(TLapeType_MethodOfType(FuncHeader).ObjectType.Name) + '.' + FuncName;
 
-      SetLength(FDebuggingMethods, Length(FDebuggingMethods) + 1);
-      FDebuggingMethods[High(FDebuggingMethods)] := FuncName;
+      FDebuggingMethods += [FuncName];
 
       EnterMethod := TLapeTree_Invoke.Create('_EnterMethod', Self);
       EnterMethod.addParam(TLapeTree_Integer.Create(High(FDebuggingMethods), EnterMethod));
 
+      Test := TLapeTree_Operator.Create(op_cmp_NotEqual, Self);
+      Test.Left := TLapeTree_InternalMethod_GetExceptionMessage.Create(Test);
+      Test.Right := TLapeTree_String.Create('', Test);
+
       LeaveMethod := TLapeTree_Invoke.Create('_LeaveMethod', Self);
       LeaveMethod.addParam(TLapeTree_Integer.Create(High(FDebuggingMethods), LeaveMethod));
+      LeaveMethod.addParam(Test);
 
       Result.Statements.addStatement(EnterMethod, True);
 
@@ -460,16 +492,6 @@ begin
       Result.Statements.AddStatement(Statement);
     end;
   end;
-end;
-
-destructor TSimbaScript_Compiler.Destroy;
-var
-  I: Int32;
-begin
-  for I := 0 to High(FManagedClosures) do
-    FManagedClosures[I].Free();
-
-  inherited Destroy();
 end;
 
 end.

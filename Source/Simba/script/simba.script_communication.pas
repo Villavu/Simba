@@ -1,103 +1,144 @@
-unit simba.script_ipc;
+unit simba.script_communication;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  classes, sysutils, pipes, extctrls,
+  classes, sysutils, pipes, extctrls, syncobjs,
   simba.bitmap;
 
 type
-  TSimbaScriptState = (STATE_PAUSED, STATE_STOP, STATE_RUNNING);
+  ESimbaScriptState = (STATE_PAUSED, STATE_STOP, STATE_RUNNING);
+
+  PSimbaScriptDebuggerEvent = ^TSimbaScriptDebuggerEvent;
+  TSimbaScriptDebuggerEvent = packed record
+    Method: Int16;
+    Depth: Int16;
+    Exception: Boolean;
+  end;
+  TSimbaScriptDebuggerEvents = array of TSimbaScriptDebuggerEvent;
 
   TSimbaMethod = class
+  protected
+    procedure DoInvoke; virtual; abstract;
   public
     Params: TMemoryStream;
     Result: TMemoryStream;
 
-    procedure Invoke; virtual; abstract;
+    procedure Invoke; virtual;
 
     constructor Create;
     destructor Destroy; override;
   end;
 
   TSimbaMethod_Status = class(TSimbaMethod)
+  protected
+    procedure DoInvoke; override;
   public
-    procedure Invoke; override;
     constructor Create(Status: ShortString); overload;
   end;
 
   TSimbaMethod_Disguse = class(TSimbaMethod)
+  protected
+    procedure DoInvoke; override;
   public
-    procedure Invoke; override;
     constructor Create(Title: ShortString); overload;
   end;
 
   TSimbaMethod_ShowBalloonHint = class(TSimbaMethod)
+  protected
+    procedure DoInvoke; override;
   public
-    procedure Invoke; override;
     constructor Create(Title, Hint: ShortString; Timeout: Int32; Flags: TBalloonFlags); overload;
   end;
 
   TSimbaMethod_GetSimbaPID = class(TSimbaMethod)
+  protected
+    procedure DoInvoke; override;
   public
-    procedure Invoke; override;
     constructor Create; overload;
   end;
 
   TSimbaMethod_ClearDebug = class(TSimbaMethod)
+  protected
+    procedure DoInvoke; override;
   public
-    procedure Invoke; override;
     constructor Create; overload;
   end;
 
   TSimbaMethod_GetSimbaTargetPID = class(TSimbaMethod)
+  protected
+    procedure DoInvoke; override;
   public
-    procedure Invoke; override;
     constructor Create; overload;
   end;
 
   TSimbaMethod_GetSimbaTargetWindow = class(TSimbaMethod)
+  protected
+    procedure DoInvoke; override;
   public
-    procedure Invoke; override;
     constructor Create; overload;
   end;
 
   TSimbaMethod_ScriptError = class(TSimbaMethod)
+  protected
+    procedure DoInvoke; override;
   public
-    procedure Invoke; override;
-    constructor Create(PID: SizeUInt; Line, Col: Int32; FileName: ShortString); overload;
+    constructor Create(Line, Col: Int32; FileName: ShortString); overload;
   end;
 
   TSimbaMethod_ShowBitmap = class(TSimbaMethod)
+  protected
+    procedure DoInvoke; override;
   public
-    procedure Invoke; override;
     constructor Create(Bitmap: TMufasaBitmap); overload;
   end;
 
   TSimbaMethod_ClearDebugImage = class(TSimbaMethod)
+  protected
+    procedure DoInvoke; override;
   public
-    procedure Invoke; override;
     constructor Create; overload;
   end;
 
   TSimbaMethod_DisplayDebugImage = class(TSimbaMethod)
+  protected
+    procedure DoInvoke; override;
   public
-    procedure Invoke; override;
     constructor Create(Width, Height: Int32); overload;
   end;
 
   TSimbaMethod_UpdateDebugImage = class(TSimbaMethod)
+  protected
+    procedure DoInvoke; override;
   public
-    procedure Invoke; override;
     constructor Create(Bitmap: TMufasaBitmap); overload;
   end;
 
   TSimbaMethod_ScriptStateChanged = class(TSimbaMethod)
+  protected
+    procedure DoInvoke; override;
   public
-    procedure Invoke; override;
-    constructor Create(PID: SizeUInt; State: Int32); overload;
+    constructor Create(State: Int32); overload;
+  end;
+
+  TSimbaMethod_DebuggingMethod = class(TSimbaMethod)
+  protected
+    procedure DoInvoke; override;
+  public
+    procedure Invoke; override; // No need to synchronize
+
+    constructor Create(Method: ShortString); overload;
+  end;
+
+  TSimbaMethod_DebuggerEvents = class(TSimbaMethod)
+  protected
+    procedure DoInvoke; override;
+  public
+    procedure Invoke; override; // No need to synchronize
+
+    constructor Create(Events: TMemoryStream);
   end;
 
   TSimbaMethodClass = class of TSimbaMethod;
@@ -117,17 +158,18 @@ const
     TSimbaMethod_ClearDebugImage,
     TSimbaMethod_DisplayDebugImage,
     TSimbaMethod_UpdateDebugImage,
-    TSimbaMethod_ScriptStateChanged
+    TSimbaMethod_ScriptStateChanged,
+    TSimbaMethod_DebuggingMethod,
+    TSimbaMethod_DebuggerEvents
   );
 
 type
-  TSimbaMethodServer = class
-  protected
-  type
-    TMessageHeader = packed record
-      Size: Int32;
-      Method: String[60];
-    end;
+  TSimbaCommunicationHeader = packed record
+    Size: Int32;
+    Method: String[60];
+  end;
+
+  TSimbaCommunicationServer = class
   protected
     FInputClient: TOutputPipeStream;
     FInputStream: TInputPipeStream;
@@ -136,29 +178,26 @@ type
 
     FClient: String;
     FThread: TThread;
+    FScript: TObject;
 
     procedure Execute;
   public
     property Client: String read FClient;
 
-    constructor Create;
+    constructor Create(Script: TObject);
     destructor Destroy; override;
   end;
 
-  TSimbaMethodClient = class
-  protected
-  type
-    TMessageHeader = packed record
-      Size: Int32;
-      Method: String[60];
-    end;
+  TSimbaCommunicationClient = class
   protected
     FInputStream: TInputPipeStream;
     FOutputStream: TOutputPipeStream;
+    FLock: TCriticalSection;
   public
     procedure Invoke(Method: TSimbaMethod);
 
     constructor Create(Server: String);
+    destructor Destroy; override;
   end;
 
 implementation
@@ -169,7 +208,7 @@ uses
   {$ENDIF}
   forms, math,
   simba.main, simba.debugform, simba.debugimage,
-  simba.scripttabsform, simba.mufasatypes;
+  simba.scripttabsform, simba.mufasatypes, simba.scriptinstance;
 
 function DuplicateHandle(Handle: THandle): THandle;
 begin
@@ -183,30 +222,30 @@ begin
   {$ENDIF}
 end;
 
-procedure TSimbaMethod_ScriptStateChanged.Invoke;
-var
-  PID: SizeUInt;
-  State: TSimbaScriptState;
-  I: Int32;
+procedure TSimbaMethod.Invoke;
 begin
-  Params.Read(PID, SizeOf(Int32));
-  Params.Read(State, SizeOf(TSimbaScriptState));
-
-  for I := 0 to SimbaScriptTabsForm.TabCount - 1 do
-    if (SimbaScriptTabsForm.Tabs[I].ScriptInstance <> nil) and
-       (SimbaScriptTabsForm.Tabs[I].ScriptInstance.PID = PID) then
-      SimbaScriptTabsForm.Tabs[I].ScriptInstance.State := State;
+  TThread.Synchronize(TThread.CurrentThread, @DoInvoke);
 end;
 
-constructor TSimbaMethod_ScriptStateChanged.Create(PID: SizeUInt; State: Int32);
+procedure TSimbaMethod_ScriptStateChanged.DoInvoke;
+var
+  State: ESimbaScriptState;
+  Script: TSimbaScriptInstance;
+begin
+  Params.Read(State, SizeOf(ESimbaScriptState));
+  Params.Read(Script, SizeOf(TSimbaScriptInstance));
+
+  Script.State := State;
+end;
+
+constructor TSimbaMethod_ScriptStateChanged.Create(State: Int32);
 begin
   inherited Create();
 
-  Params.Write(GetProcessID(), SizeOf(SizeUInt));
   Params.Write(State, SizeOf(Int32));
 end;
 
-procedure TSimbaMethod_UpdateDebugImage.Invoke;
+procedure TSimbaMethod_UpdateDebugImage.DoInvoke;
 var
   Width, Height: Int32;
 begin
@@ -227,7 +266,7 @@ begin
   Params.Write(Bitmap.FData^, Bitmap.Width * Bitmap.Height * SizeOf(TRGB32));
 end;
 
-procedure TSimbaMethod_DisplayDebugImage.Invoke;
+procedure TSimbaMethod_DisplayDebugImage.DoInvoke;
 var
   Width, Height: Int32;
 begin
@@ -245,7 +284,7 @@ begin
   Params.Write(Height, SizeOf(Int32));
 end;
 
-procedure TSimbaMethod_ClearDebugImage.Invoke;
+procedure TSimbaMethod_ClearDebugImage.DoInvoke;
 begin
   SimbaDebugImageForm.ImageBox.Background.Canvas.Brush.Color := 0;
   SimbaDebugImageForm.ImageBox.Background.Canvas.Clear();
@@ -257,7 +296,7 @@ begin
   inherited Create();
 end;
 
-procedure TSimbaMethod_ShowBitmap.Invoke;
+procedure TSimbaMethod_ShowBitmap.DoInvoke;
 var
   Width, Height: Int32;
 begin;
@@ -280,22 +319,21 @@ begin
   Params.Write(Bitmap.FData^, Bitmap.Width * Bitmap.Height * SizeOf(TRGB32));
 end;
 
-procedure TSimbaMethod_ScriptError.Invoke;
+procedure TSimbaMethod_ScriptError.DoInvoke;
 var
   Line, Col: Int32;
   FileName: ShortString;
-  PID: SizeUInt;
   I: Int32;
+  Script: TSimbaScriptInstance;
 begin
-  Params.Read(PID, SizeOf(SizeUInt));
   Params.Read(Line, SizeOf(Int32));
   Params.Read(Col, SizeOf(Int32));
   Params.Read(FileName, SizeOf(ShortString));
+  Params.Read(Script, SizeOf(TSimbaScriptInstance));
 
   for I := 0 to SimbaScriptTabsForm.TabCount - 1 do
   begin
-    if (SimbaScriptTabsForm.Tabs[I].ScriptInstance <> nil) and
-       (SimbaScriptTabsForm.Tabs[I].ScriptInstance.PID = PID) then
+    if (SimbaScriptTabsForm.Tabs[I].ScriptInstance = Script) then
     begin
       if (SimbaScriptTabsForm.Tabs[I].ScriptName = FileName) then
         SimbaScriptTabsForm.Tabs[I].MakeVisible()
@@ -316,17 +354,16 @@ begin
   end;
 end;
 
-constructor TSimbaMethod_ScriptError.Create(PID: SizeUInt; Line, Col: Int32; FileName: ShortString);
+constructor TSimbaMethod_ScriptError.Create(Line, Col: Int32; FileName: ShortString);
 begin
   inherited Create();
 
-  Params.Write(PID, SizeOf(SizeUInt));
   Params.Write(Line, SizeOf(Int32));
   Params.Write(Col, SizeOf(Int32));
   Params.Write(FileName, SizeOf(ShortString));
 end;
 
-procedure TSimbaMethod_GetSimbaTargetWindow.Invoke;
+procedure TSimbaMethod_GetSimbaTargetWindow.DoInvoke;
 begin
   Result.Write(SimbaForm.WindowSelection, SizeOf(PtrUInt));
 end;
@@ -336,7 +373,7 @@ begin
   inherited Create();
 end;
 
-procedure TSimbaMethod_GetSimbaTargetPID.Invoke;
+procedure TSimbaMethod_GetSimbaTargetPID.DoInvoke;
 begin
   Result.Write(SimbaForm.ProcessSelection, SizeOf(PtrUInt));
 end;
@@ -346,7 +383,7 @@ begin
   inherited Create();
 end;
 
-procedure TSimbaMethod_ClearDebug.Invoke;
+procedure TSimbaMethod_ClearDebug.DoInvoke;
 begin
   SimbaDebugForm.Clear();
 end;
@@ -356,7 +393,7 @@ begin
   inherited Create();
 end;
 
-procedure TSimbaMethod_GetSimbaPID.Invoke;
+procedure TSimbaMethod_GetSimbaPID.DoInvoke;
 begin
   Result.Write(GetProcessID(), SizeOf(PtrUInt));
 end;
@@ -366,7 +403,7 @@ begin
   inherited Create();
 end;
 
-procedure TSimbaMethod_ShowBalloonHint.Invoke;
+procedure TSimbaMethod_ShowBalloonHint.DoInvoke;
 var
   Title, Hint: ShortString;
   Timeout: Int32;
@@ -394,7 +431,7 @@ begin
   Params.Write(Flags, SizeOf(TBalloonFlags));
 end;
 
-procedure TSimbaMethod_Status.Invoke;
+procedure TSimbaMethod_Status.DoInvoke;
 var
   Status: ShortString;
 begin
@@ -410,7 +447,7 @@ begin
   Params.Write(Status, SizeOf(ShortString));
 end;
 
-procedure TSimbaMethod_Disguse.Invoke;
+procedure TSimbaMethod_Disguse.DoInvoke;
 var
   Title: ShortString;
 begin
@@ -424,6 +461,51 @@ begin
   inherited Create();
 
   Params.Write(Title, SizeOf(ShortString));
+end;
+
+procedure TSimbaMethod_DebuggingMethod.DoInvoke;
+var
+  Method: ShortString;
+  Script: TSimbaScriptInstance;
+begin
+  Params.Read(Method, SizeOf(ShortString));
+  Params.Read(Script, SizeOf(TSimbaScriptInstance));
+
+  Script.DebuggerForm.AddMethod(Method);
+end;
+
+procedure TSimbaMethod_DebuggingMethod.Invoke;
+begin
+  DoInvoke();
+end;
+
+constructor TSimbaMethod_DebuggingMethod.Create(Method: ShortString);
+begin
+  inherited Create();
+
+  Params.Write(Method, SizeOf(ShortString));
+end;
+
+procedure TSimbaMethod_DebuggerEvents.DoInvoke;
+var
+  Script: TSimbaScriptInstance;
+begin
+  Params.Position := Params.Size - SizeOf(TSimbaScriptInstance);
+  Params.Read(Script, SizeOf(TSimbaScriptInstance));
+
+  Script.DebuggerForm.AddEvents(Params.Memory, (Params.Size - SizeOf(TSimbaScriptInstance)) div SizeOf(TSimbaScriptDebuggerEvent));
+end;
+
+procedure TSimbaMethod_DebuggerEvents.Invoke;
+begin
+  DoInvoke();
+end;
+
+constructor TSimbaMethod_DebuggerEvents.Create(Events: TMemoryStream);
+begin
+  inherited Create();
+
+  Params.Write(Events.Memory^, Events.Position);
 end;
 
 constructor TSimbaMethod.Create;
@@ -440,38 +522,58 @@ begin
   inherited Destroy();
 end;
 
-procedure TSimbaMethodClient.Invoke(Method: TSimbaMethod);
+procedure TSimbaCommunicationClient.Invoke(Method: TSimbaMethod);
 var
-  Header: TMessageHeader;
+  Header: TSimbaCommunicationHeader;
 begin
-  // Send request
-  Header.Size := Method.Params.Size;
-  Header.Method := Method.ClassName;
+  FLock.Enter();
 
-  FOutputStream.Write(Header, SizeOf(TMessageHeader));
-  FOutputStream.Write(Method.Params.Memory^, Method.Params.Size);
+  try
+    // Send request
+    Header.Size := Method.Params.Size;
+    Header.Method := Method.ClassName;
 
-  // Read result
-  FInputStream.Read(Header, SizeOf(TMessageHeader));
+    FOutputStream.Write(Header, SizeOf(TSimbaCommunicationHeader));
+    FOutputStream.Write(Method.Params.Memory^, Method.Params.Size);
 
-  if Header.Size > 0 then
-  begin
-    Method.Result.CopyFrom(FInputStream, Header.Size);
-    Method.Result.Position := 0;
+    // Read result
+    FInputStream.Read(Header, SizeOf(TSimbaCommunicationHeader));
+
+    if Header.Size > 0 then
+    begin
+      Method.Result.CopyFrom(FInputStream, Header.Size);
+      Method.Result.Position := 0;
+    end;
+  finally
+    FLock.Leave();
   end;
 end;
 
-constructor TSimbaMethodClient.Create(Server: String);
+constructor TSimbaCommunicationClient.Create(Server: String);
 begin
+  FLock := syncobjs.TCriticalSection.Create();
+
   FOutputStream := TOutputPipeStream.Create(StrToInt('$' + Server.SubString(0, 16)));
   FInputStream := TInputPipeStream.Create(StrToInt('$' + Server.SubString(16, 16)));
 end;
 
-constructor TSimbaMethodServer.Create;
+destructor TSimbaCommunicationClient.Destroy;
+begin
+  FLock.Free();
+
+  FOutputStream.Free();
+  FInputStream.Free();
+
+  inherited Destroy();
+end;
+
+constructor TSimbaCommunicationServer.Create(Script: TObject);
 var
   InputHandle: THandle = 0;
   OutputHandle: THandle = 0;
 begin
+  FScript := Script;
+
   // Input
   if (not CreatePipeHandles(InputHandle, OutputHandle, 1024 * 64)) then
     raise Exception.Create('Unable to create input pipe');
@@ -490,7 +592,7 @@ begin
   FThread := TThread.ExecuteInThread(@Execute);
 end;
 
-procedure TSimbaMethodServer.Execute;
+procedure TSimbaCommunicationServer.Execute;
 
   function GetMethod(Name: ShortString): TSimbaMethod;
   var
@@ -502,28 +604,30 @@ procedure TSimbaMethodServer.Execute;
   end;
 
 var
-  Header: TMessageHeader;
+  Header: TSimbaCommunicationHeader;
   Method: TSimbaMethod;
 begin
   try
-    while (FInputStream.Read(Header, SizeOf(TMessageHeader)) = SizeOf(TMessageHeader)) and (not TThread.CheckTerminated) do
+    while (FInputStream.Read(Header, SizeOf(TSimbaCommunicationHeader)) = SizeOf(TSimbaCommunicationHeader)) and (not TThread.CheckTerminated) do
     begin
       Method := GetMethod(Header.Method);
 
       // Copy parameters
       if (Header.Size > 0) then
-      begin
         Method.Params.CopyFrom(FInputStream, Header.Size);
-        Method.Params.Position := 0;
-      end;
 
-      TThread.Synchronize(TThread.CurrentThread, @Method.Invoke);
+      // Append script instance
+      Method.Params.Write(FScript, SizeOf(TObject));
+      Method.Params.Position := 0;
+
+      // Invoke
+      Method.Invoke();
 
       // Write result header
       Header.Size := Method.Result.Size;
       Header.Method := Method.ClassName;
 
-      FOutputStream.Write(Header, SizeOf(TMessageHeader));
+      FOutputStream.Write(Header, SizeOf(TSimbaCommunicationHeader));
 
       // Write result data
       if (Method.Result.Size > 0) then
@@ -533,11 +637,11 @@ begin
     end;
   except
     on E: Exception do
-      WriteLn('TSimbaMethodServer.Execute ' + E.Message);
+      WriteLn('TSimbaCommunicationServer.Execute ' + E.Message);
   end;
 end;
 
-destructor TSimbaMethodServer.Destroy;
+destructor TSimbaCommunicationServer.Destroy;
 begin
   FThread.FreeOnTerminate := False;
   FThread.Terminate();

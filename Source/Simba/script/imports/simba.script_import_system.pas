@@ -17,12 +17,14 @@ uses
 
 procedure Lape_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScript._Write(PString(Params^[0])^);
+  Write(PString(Params^[0])^);
 end;
 
 procedure Lape_WriteLn(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScript._WriteLn('');
+  WriteLn('');
+
+  Flush(Output);
 end;
 
 procedure Lape_GetEnvironmentVariable(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -32,11 +34,17 @@ end;
 
 procedure Lape_GetCurrentThreadID(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  {$IFDEF DARWIN}
-  PPtrUInt(Result)^ := 0;
-  {$ELSE}
-  PPtrUInt(Result)^ := GetCurrentThreadID();
-  {$ENDIF}
+  PPtrUInt(Result)^ := PtrUInt(GetCurrentThreadID());
+end;
+
+procedure Lape_GetMainThreadID(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPtrUInt(Result)^ := PtrUInt(MainThreadID);
+end;
+
+procedure Lape_GetProcessorCount(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPtrUInt(Result)^ := TThread.ProcessorCount;
 end;
 
 procedure Lape_Wait(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -116,41 +124,6 @@ end;
 procedure Lape_IsUserTerminated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PBoolean(Result)^ := SimbaScript.Terminated and SimbaScript.UserTerminated;
-end;
-
-procedure Lape_EnterMethod(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-//var
-//  Event: TSimbaScript_DebuggerEvent;
-begin
-  {
-  with ScriptInstance do
-  begin
-    _DebuggingIndent += 1;
-    _DebuggingMethod := PUInt16(Params^[0])^;
-
-    Event.Method := _DebuggingMethod;
-    Event.Indent := _DebuggingIndent;
-
-    FDebuggerThread.Queue(Event);
-  end;
-  }
-end;
-
-procedure Lape_LeaveMethod(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-//var
-//  Event: TSimbaScript_DebuggerEvent;
-begin
-  {
-  with ScriptInstance do
-  begin
-    Event.Method := PUInt16(Params^[0])^;
-    Event.Indent := _DebuggingIndent;
-
-    if Event.Method <> _DebuggingMethod then
-      FDebuggerThread.Queue(Event);
-
-    _DebuggingIndent -= 1;
-  end; }
 end;
 
 procedure Lape_AddOnTerminate_String(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -279,7 +252,7 @@ begin
 
     if (SimbaScript <> nil) then
     begin
-      if SimbaScript.Headless then
+      if SimbaScript.SimbaCommunicationServer = '' then
         addBaseDefine('SIMBAHEADLESS');
 
       addGlobalVar('TClient', @SimbaScript.Client, 'Client');
@@ -305,18 +278,13 @@ begin
 
     addGlobalConst(LineEnding, 'LineEnding');
 
-    addGlobalFunc('procedure _Write(S: string); override;', @Lape_Write);
+    addGlobalFunc('procedure _Write(S: String); override;', @Lape_Write);
     addGlobalFunc('procedure _WriteLn; override;', @Lape_WriteLn);
 
-    addGlobalConst(TThread.ProcessorCount, 'ProcessorCount');
-
-    {$IFDEF DARWIN}
-    addGlobalConst(0, 'MainThreadID');
-    {$ELSE}
-    addGlobalConst(MainThreadID, 'MainThreadID');
-    {$ENDIF}
-
+    addGlobalFunc('function GetProcessorCount: Int32;', @Lape_GetProcessorCount);
+    addGlobalFunc('function GetMainThreadID: PtrUInt;', @Lape_GetMainThreadID);
     addGlobalFunc('function GetCurrentThreadID: PtrUInt;', @Lape_GetCurrentThreadID);
+
     addGlobalFunc('function GetEnvironmentVariable(const Name: String): String;', @Lape_GetEnvironmentVariable);
     addGlobalFunc('procedure Wait(Milliseconds: UInt32);', @Lape_Wait);
 
@@ -336,20 +304,17 @@ begin
     addGlobalFunc('function IsTerminated: Boolean;', @Lape_IsTerminated);
     addGlobalFunc('function IsUserTerminated: Boolean;', @Lape_IsUserTerminated);
 
-    addGlobalFunc('procedure _EnterMethod(constref Index: Int32); override;', @Lape_EnterMethod);
-    addGlobalFunc('procedure _LeaveMethod(constref Index: Int32); override;', @Lape_LeaveMethod);
-
     addDelayedCode(
-      'var _OnTerminateProcedures: array of procedure;'                   + LineEnding +
-      'var _OnTerminateProcedureOfObjects: array of procedure of object;' + LineEnding +
-      ''                                                                  + LineEnding +
-      'procedure _OnTerminate;'                                           + LineEnding +
-      'var I: Int32;'                                                     + LineEnding +
-      'begin'                                                             + LineEnding +
-      '  for I := 0 to High(_OnTerminateProcedures) do'                   + LineEnding +
-      '    _OnTerminateProcedures[I]();'                                  + LineEnding +
-      '  for I := 0 to High(_OnTerminateProcedureOfObjects) do'           + LineEnding +
-      '    _OnTerminateProcedureOfObjects[I]();'                          + LineEnding +
+      'var _OnTerminateProcedures: array of procedure;'                          + LineEnding +
+      'var _OnTerminateProcedureOfObjects: array of procedure of object;'        + LineEnding +
+      ''                                                                         + LineEnding +
+      'procedure _OnTerminate;'                                                  + LineEnding +
+      'var I: Int32;'                                                            + LineEnding +
+      'begin'                                                                    + LineEnding +
+      '  for I := 0 to High(_OnTerminateProcedures) do'                          + LineEnding +
+      '    _OnTerminateProcedures[I]();'                                         + LineEnding +
+      '  for I := 0 to High(_OnTerminateProcedureOfObjects) do'                  + LineEnding +
+      '    _OnTerminateProcedureOfObjects[I]();'                                 + LineEnding +
       'end;'
     );
 
@@ -358,10 +323,11 @@ begin
     addGlobalFunc('procedure AddOnTerminate(Proc: procedure of object); overload;', @Lape_AddOnTerminate_ProcedureOfObject);
 
     addDelayedCode(
-      'procedure MemMove(constref Src; var Dst; Size: SizeInt);'                + LineEnding +
-      'begin'                                                                   + LineEnding +
-      '  Move(Src, Dst, Size);'                                                 + LineEnding +
-      'end;', 'MemMove', False);
+      'procedure MemMove(constref Src; var Dst; Size: SizeInt);'                 + LineEnding +
+      'begin'                                                                    + LineEnding +
+      '  Move(Src, Dst, Size);'                                                  + LineEnding +
+      'end;'
+    );
   end;
 end;
 

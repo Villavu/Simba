@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  ComCtrls, StdCtrls, Menus, syncobjs;
+  ComCtrls, StdCtrls, Menus, syncobjs,
+  simba.script_communication;
 
 type
   TSimbaDebuggerList = class(TScrollBox)
@@ -17,7 +18,7 @@ type
     FCount: Int32;
     FMethods: TStringArray;
 
-   // FEvents: TSimbaScript_DebuggerEventArray;
+    FEvents: TSimbaScriptDebuggerEvents;
 
     procedure FontChanged(Sender: TObject); override;
 
@@ -32,7 +33,7 @@ type
     procedure ClearMethods;
 
     procedure AddMethod(Method: String);
-    //procedure AddEvents(Events: TSimbaScript_DebuggerEventArray; Length: Int32);
+    procedure AddEvents(Events: TSimbaScriptDebuggerEvents; Length: Int32);
 
     procedure GetPreferredSize(var PreferredWidth, PreferredHeight: Integer; Raw: Boolean = False; WithThemeSpace: Boolean = True); override;
     procedure Paint; override;
@@ -57,11 +58,11 @@ type
   protected
     FList: TSimbaDebuggerList;
     FLock: TCriticalSection;
-    //FBuffer: TSimbaScript_DebuggerEventArray;
+    FBuffer: TSimbaScriptDebuggerEvents;
     FEventCount: Int32;
     FHasEvents: Boolean;
   public
-   // procedure AddEvents(constref Events: PSimbaScript_DebuggerEvent; constref Count: Int32);
+    procedure AddEvents(constref Events: PSimbaScriptDebuggerEvent; constref Count: Int32);
     procedure AddMethod(Method: String);
 
     procedure Clear;
@@ -75,8 +76,7 @@ implementation
 uses
   math, clipbrd;
 
-{
-procedure TSimbaDebuggerList.AddEvents(Events: TSimbaScript_DebuggerEventArray; Length: Int32);
+procedure TSimbaDebuggerList.AddEvents(Events: TSimbaScriptDebuggerEvents; Length: Int32);
 begin
   FLock.Enter();
 
@@ -89,7 +89,7 @@ begin
   end;
 
   Invalidate();
-end;    }
+end;
 
 procedure TSimbaDebuggerList.FontChanged(Sender: TObject);
 begin
@@ -146,14 +146,14 @@ begin
   S := '';
 
   FLock.Enter();
-   {
+
   try
     for I := 0 to FCount - 1 do
-      S := S + StringOfChar(' ', FEvents[I].Indent * 2) + FMethods[FEvents[I].Method] + LineEnding;
+      S := S + StringOfChar(' ', FEvents[I].Depth * 2) + FMethods[FEvents[I].Method] + LineEnding;
   finally
     FLock.Leave();
   end;
-  }
+
   try
     Clipboard.AsText := S;
   except
@@ -197,13 +197,22 @@ var
   I: Int32;
 begin
   if FLock.TryEnter() then
-  try  {
+  try
     if Count > 0 then
     begin
       Index := VertScrollBar.Position div FItemHeight;
+
       for I := Index to Min(FCount - 1, Index + VisibleLines) do
-        Canvas.TextOut(2 + (FIndentWidth * (FEvents[I].Indent * 2)), I * FItemHeight, FMethods[FEvents[I].Method]);
-    end; }
+      begin
+        if FEvents[I].Exception then
+          Canvas.Brush.Color := 1446122
+        else
+          Canvas.Brush.Color := clWindow;
+
+        Canvas.FillRect(0, I * FItemHeight, 2000, (I * FItemHeight)+FItemHeight);
+        Canvas.TextOut(2 + (FIndentWidth * (FEvents[I].Depth * 2)), I * FItemHeight, FMethods[FEvents[I].Method]);
+      end;
+    end;
   finally
     FLock.Leave();
   end;
@@ -231,10 +240,9 @@ begin
   FLock.Enter();
 
   try
-    {
     if FHasEvents then
       FList.AddEvents(Copy(FBuffer), FEventCount);
-      }
+
     FHasEvents := False;
   finally
     FLock.Leave();
@@ -250,25 +258,25 @@ procedure TSimbaDebuggerForm.PopupItemClearClick(Sender: TObject);
 begin
   Clear();
 end;
-{
-procedure TSimbaDebuggerForm.AddEvents(constref Events: PSimbaScript_DebuggerEvent; constref Count: Int32);
+
+procedure TSimbaDebuggerForm.AddEvents(constref Events: PSimbaScriptDebuggerEvent; constref Count: Int32);
 begin
   FLock.Enter();
 
   try
     if FEventCount + Count < Length(FBuffer) then
     begin
-      Move(Events[0], FBuffer[FEventCount], Count * SizeOf(TSimbaScript_DebuggerEvent));
+      Move(Events[0], FBuffer[FEventCount], Count * SizeOf(TSimbaScriptDebuggerEvent));
 
       FEventCount := FEventCount + Count;
     end else
     begin
       if Count >= Length(FBuffer) then
-        Move(Events[Count - Length(FBuffer)], FBuffer[0], Length(FBuffer) * SizeOf(TSimbaScript_DebuggerEvent))
+        Move(Events[Count - Length(FBuffer)], FBuffer[0], Length(FBuffer) * SizeOf(TSimbaScriptDebuggerEvent))
       else
       begin
-        Move(FBuffer[Count], FBuffer[0], (Length(FBuffer) - Count) * SizeOf(TSimbaScript_DebuggerEvent));
-        Move(Events[0], FBuffer[Length(FBuffer) - Count], Count * SizeOf(TSimbaScript_DebuggerEvent));
+        Move(FBuffer[Count], FBuffer[0], (Length(FBuffer) - Count) * SizeOf(TSimbaScriptDebuggerEvent));
+        Move(Events[0], FBuffer[Length(FBuffer) - Count], Count * SizeOf(TSimbaScriptDebuggerEvent));
       end;
 
       FEventCount := Length(FBuffer);
@@ -279,7 +287,7 @@ begin
     FLock.Leave();
   end;
 end;
-}
+
 procedure TSimbaDebuggerForm.AddMethod(Method: String);
 begin
   FList.AddMethod(Method);
@@ -310,9 +318,8 @@ begin
   FList.Color := clWindow;
   FList.Font.Color := clWindowText;
   FList.PopupMenu := Popup;
-  {
+
   SetLength(FBuffer, 32768);
-  }
 end;
 
 destructor TSimbaDebuggerForm.Destroy;

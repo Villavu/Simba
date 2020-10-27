@@ -7,7 +7,7 @@ unit simba.editor;
 interface
 
 uses
-  Classes, SysUtils, Graphics, Controls, LCLType, inifiles, generics.collections,
+  Classes, SysUtils, Graphics, Controls, LCLType, inifiles,
   SynEdit, SynGutterLineOverview, SynEditMarks, SynEditMiscClasses, SynEditMouseCmds, SynEditKeyCmds, SynEditHighlighter, SynEditPointClasses,
   simba.highlighter, simba.autocomplete, simba.parameterhint, simba.editor_attributes;
 

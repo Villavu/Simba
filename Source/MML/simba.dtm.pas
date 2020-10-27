@@ -122,7 +122,7 @@ begin
   begin
     SetLength(WriteStr,length(WriteStr)-1);
     WriteStr[Length(writeStr)] := ']';
-    TClient(Client).Writeln(Format('The following DTMs were not freed: %s',[WriteStr]));
+    Writeln(Format('The following DTMs were not freed: %s',[WriteStr]));
   end;
   SetLength(DTMList, 0);
   SetLength(FreeSpots, 0);

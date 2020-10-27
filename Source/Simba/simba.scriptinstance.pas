@@ -6,7 +6,7 @@ interface
 
 uses
   classes, sysutils, process,
-  simba.script_ipc, simba.debuggerform;
+  simba.script_communication, simba.debuggerform;
 
 const
   OUTPUT_BUFFER_SIZE = 16 * 1024;
@@ -38,7 +38,7 @@ type
   protected
     FProcess: TSimbaScriptProcess;
 
-    FSimbaMethods: TSimbaMethodServer;
+    FSimbaCommunication: TSimbaCommunicationServer;
     FOutputThread: TSimbaScriptOutputThread;
 
     FTarget: THandle;
@@ -48,7 +48,7 @@ type
     FScriptFile: String;
     FScriptName: String;
 
-    FState: TSimbaScriptState;
+    FState: ESimbaScriptState;
 
     FDebuggingForm: TSimbaDebuggerForm;
 
@@ -63,7 +63,7 @@ type
   public
     property DebuggerForm: TSimbaDebuggerForm read FDebuggingForm;
     property Process: TSimbaScriptProcess read FProcess;
-    property State: TSimbaScriptState read FState write FState;
+    property State: ESimbaScriptState read FState write FState;
 
     // Parameters to pass to script
     property Script: String write FScript;
@@ -323,7 +323,7 @@ end;
 constructor TSimbaScriptInstance.Create;
 begin
   FState := STATE_RUNNING;
-  FSimbaMethods := TSimbaMethodServer.Create();
+  FSimbaCommunication := TSimbaCommunicationServer.Create(Self);
 
   FProcess := TSimbaScriptProcess.Create();
   FProcess.PipeBufferSize := OUTPUT_BUFFER_SIZE;
@@ -332,7 +332,7 @@ begin
   FProcess.CurrentDirectory := Application.Location;
   FProcess.Options := FProcess.Options + [poUsePipes, poStderrToOutPut];
 
-  FProcess.Parameters.Add('--simbamethods=%s', [FSimbaMethods.Client]);
+  FProcess.Parameters.Add('--simbacommunication=%s', [FSimbaCommunication.Client]);
   FProcess.Parameters.Add('--apppath=%s', [Application.Location]);
   FProcess.Parameters.Add('--datapath=%s', [SimbaSettings.Environment.DataPath.Value]);
   FProcess.Parameters.Add('--includepath=%s', [SimbaSettings.Environment.IncludePath.Value]);
@@ -370,8 +370,8 @@ end;
 
 destructor TSimbaScriptInstance.Destroy;
 begin
-  if (FSimbaMethods <> nil) then
-    FSimbaMethods.Free();
+  if (FSimbaCommunication <> nil) then
+    FSimbaCommunication.Free();
 
   if (FProcess <> nil) then
   begin

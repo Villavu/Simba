@@ -233,8 +233,6 @@ type
     SubPoints: TSDTMPointDefArray;
   end;
 
-  TWritelnProc = procedure(S: String) of object;
-
 type
   VirtualKeyInfo = record
     Str : string;

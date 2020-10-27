@@ -118,19 +118,20 @@ begin
     SimbaScript := TSimbaScript.Create();
     SimbaScript.OnTerminate := @Application.Terminate;
 
-    SimbaScript.ScriptName    := Application.GetOptionValue('scriptname');
-    SimbaScript.ScriptFile    := Application.Params[Application.ParamCount];
+    SimbaScript.ScriptName := Application.GetOptionValue('scriptname');
+    SimbaScript.ScriptFile := Application.Params[Application.ParamCount];
 
-    SimbaScript.AppPath       := Application.GetOptionValue('apppath');
-    SimbaScript.DataPath      := Application.GetOptionValue('datapath');
-    SimbaScript.PluginPath    := Application.GetOptionValue('pluginpath');
-    SimbaScript.FontPath      := Application.GetOptionValue('fontpath');
-    SimbaScript.IncludePath   := Application.GetOptionValue('includepath');
-    SimbaScript.ScriptPath    := Application.GetOptionValue('scriptpath');
+    SimbaScript.AppPath     := Application.GetOptionValue('apppath');
+    SimbaScript.DataPath    := Application.GetOptionValue('datapath');
+    SimbaScript.PluginPath  := Application.GetOptionValue('pluginpath');
+    SimbaScript.FontPath    := Application.GetOptionValue('fontpath');
+    SimbaScript.IncludePath := Application.GetOptionValue('includepath');
+    SimbaScript.ScriptPath  := Application.GetOptionValue('scriptpath');
 
-    SimbaScript.CompileOnly   := Application.HasOption('compile');
-    SimbaScript.SimbaMethods  := Application.GetOptionValue('simbamethods');
-    SimbaScript.Target        := Application.GetOptionValue('target');
+    SimbaScript.Debugging                := Application.HasOption('debugging');
+    SimbaScript.CompileOnly              := Application.HasOption('compile');
+    SimbaScript.SimbaCommunicationServer := Application.GetOptionValue('simbacommunication');
+    SimbaScript.Target                   := Application.GetOptionValue('target');
 
     SimbaScript.Start();
   end else

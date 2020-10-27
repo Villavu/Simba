@@ -232,11 +232,11 @@ begin;
   For I := 0 To High(MFiles) Do
     if MFiles[i].FS <> nil then
     begin
-      TClient(Client).Writeln(Format('File[%s] has not been freed in the script, freeing it now.',[MFiles[i].Path]));
+      Writeln(Format('File[%s] has not been freed in the script, freeing it now.',[MFiles[i].Path]));
       try
         MFiles[I].FS.Free;
       except
-        TClient(Client).Writeln('FreeFileList - Exception when freeing FileStream');
+        Writeln('FreeFileList - Exception when freeing FileStream');
       end;
     end;
   SetLength(MFiles, 0);
@@ -295,7 +295,7 @@ begin
   try
     Result := MFiles[FileNum].FS.Seek(cChars, Origin);
   except
-    TClient(Client).Writeln('SetFileCharPointer - Exception Occured.');
+    Writeln('SetFileCharPointer - Exception Occured.');
     Result := File_AccesError;
   end;
   //Result := FileSeek(Files[FileNum].Handle, cChars, Origin);
@@ -316,7 +316,7 @@ begin
     Result := AddFileToManagedList(Path, FS, fmCreate);
   except
     Result := File_AccesError;
-    TClient(Client).Writeln(Format('CreateFile - Exception. Could not create file: %s',[path]));
+    Writeln(Format('CreateFile - Exception. Could not create file: %s',[path]));
   end;
 end;
 
@@ -339,7 +339,7 @@ begin
       FS := TFileStream.Create(UTF8ToSys(Path), fMode)
   except
     Result := File_AccesError;
-    TClient(Client).Writeln(Format('OpenFile - Exception. Could not open file: %s',[path]));
+    Writeln(Format('OpenFile - Exception. Could not open file: %s',[path]));
     Exit;
   end;
   Result := AddFileToManagedList(Path, FS, fMode);
@@ -359,7 +359,7 @@ begin
     Result := AddFileToManagedList(Path, FS, fMode);
   except
     Result := File_AccesError;
-    TClient(Client).Writeln(Format('AppendFile - Exception. Could not create file: %s',[path]));
+    Writeln(Format('AppendFile - Exception. Could not create file: %s',[path]));
   end;
 end;
 
@@ -435,7 +435,7 @@ begin
     Result := AddFileToManagedList(Path, FS, fMode);
   except
     Result := File_AccesError;
-    TClient(Client).Writeln(Format('ReWriteFile - Exception. Could not create file: %s',[path]));
+    WriteLn(Format('ReWriteFile - Exception. Could not create file: %s',[path]));
   end;
 end;
 
@@ -461,7 +461,7 @@ begin
     SetLength(FreeSpots, Length(FreeSpots) + 1);
     FreeSpots[High(FreeSpots)] := FileNum;
   except
-    TClient(Client).Writeln(Format('CloseFile, exception when freeing the file: %d',[filenum]));
+    WriteLn(Format('CloseFile, exception when freeing the file: %d',[filenum]));
   end;
 end;
 
@@ -475,7 +475,7 @@ begin
   CheckFileNum(filenum);
   if MFiles[FileNum].FS = nil then
   begin
-    TClient(Client).Writeln(format('EndOfFile: Invalid Internal Handle of File: %d',[filenum]));
+    WriteLn(format('EndOfFile: Invalid Internal Handle of File: %d',[filenum]));
     Result := True;
     Exit;
   end;
@@ -491,7 +491,7 @@ begin
   CheckFileNum(filenum);
   if MFiles[FileNum].FS = nil then
   begin
-    TClient(Client).Writeln(format('FileSize: Invalid Internal Handle of File: %d',[filenum]));
+    WriteLn(format('FileSize: Invalid Internal Handle of File: %d',[filenum]));
     Result := File_AccesError;
     Exit;
   end;
@@ -504,14 +504,14 @@ begin
   CheckFileNum(filenum);
   if MFiles[FileNum].FS = nil then
   begin
-    TClient(Client).Writeln(format('FilePointerPos: Invalid Internal Handle of File: %d',[filenum]));
+    WriteLn(format('FilePointerPos: Invalid Internal Handle of File: %d',[filenum]));
     Result := File_AccesError;
     Exit;
   end;
   try
     Result := MFiles[FileNum].FS.Seek(0, fsFromCurrent);
   except
-    TClient(Client).Writeln('Exception in FilePointerPos');
+    WriteLn('Exception in FilePointerPos');
   end;
 end;
 
@@ -524,7 +524,7 @@ begin
   CheckFileNum(filenum);
   if MFiles[FileNum].FS = nil then
   begin
-    TClient(Client).Writeln(format('ReadFileString: Invalid Internal Handle of File: %d',[filenum]));
+    WriteLn(format('ReadFileString: Invalid Internal Handle of File: %d',[filenum]));
     Exit;
   end;
 
@@ -545,7 +545,7 @@ begin
   CheckFileNum(filenum);
   if(MFiles[FileNum].FS = nil) then
   begin
-    TClient(Client).Writeln(format('WriteFileString: Invalid Internal Handle of File: %d',[filenum]));
+    WriteLn(format('WriteFileString: Invalid Internal Handle of File: %d',[filenum]));
     Exit;
   end;
   if (MFiles[FileNum].Mode and (fmOpenWrite or fmOpenReadWrite)) = 0 then //Checks if we have write rights..
@@ -553,7 +553,7 @@ begin
   try
     Result := MFiles[FileNum].FS.Write(S[1], Length(S)) <> 1;
   except
-    TClient(Client).Writeln('Exception - WriteFileString.');
+    WriteLn('Exception - WriteFileString.');
     Result := False;
   end;
 end;

@@ -20,8 +20,6 @@
 
     Client class for the Mufasa Macro Library
 }
-
-
 unit simba.client;
 
 {$mode objfpc}{$H+}
@@ -72,9 +70,7 @@ type
     MOCR: TMOCR;
     MInternets: TMInternet;
     MSockets: TMSocks;
-    WriteLnProc: TWriteLnProc;
 
-    procedure WriteLn(S: String);
     constructor Create(const plugin_dir: string = ''; const UseIOManager: TIOManager = nil);
     destructor Destroy; override;
   end;
@@ -93,26 +89,6 @@ type
 
 implementation
 
-
-(*
-
-TClient.WriteLn
-~~~~~~~~~~~~~~~
-
-.. code-block:: pascal
-
-    procedure TClient.WriteLn(s: string);
-
-*)
-
-procedure TClient.WriteLn(S: String);
-begin
-  if (WriteLnProc <> nil) then
-    WriteLnProc(s)
-  else
-    System.WriteLn(s);
-end;
-
 (*
 
 TClient.Create
@@ -128,12 +104,14 @@ TClient.Create
 constructor TClient.Create(const plugin_dir: string = ''; const UseIOManager : TIOManager = nil);
 begin
   inherited Create;
-  WritelnProc:= nil;
+
   if UseIOManager = nil then
     IOManager := TIOManager.Create(plugin_dir)
   else
     IOManager := UseIOManager;
+
   FOwnIOManager := (UseIOManager = nil);
+
   MFiles := TMFiles.Create(self);
   MFinder := TMFinder.Create(Self);
   MBitmaps := TMBitmaps.Create(Self);

@@ -186,13 +186,13 @@ begin
     if Connections[i] <> nil then
     begin
       TObject(Connections[i]).Free;
-      TClient(Client).Writeln(Format('Connection[%d] has not been freed in the script, freeing it now.',[i]));
+      Writeln(Format('Connection[%d] has not been freed in the script, freeing it now.',[i]));
     end;
   for i := HTTPClients.Count -1 downto 0 do
     if HTTPClients[i] <> nil then
     begin
       THTTPClient(HTTPClients[i]).Free;
-      TClient(Client).Writeln(Format('HTTPClient[%d] has not been freed in the script, freeing it now.',[i]));
+      Writeln(Format('HTTPClient[%d] has not been freed in the script, freeing it now.',[i]));
     end;
   Connections.Free;
   HTTPClients.Free;
@@ -253,10 +253,7 @@ begin
     Result := FHTTPClient.Get(URL);
   except
     on e: Exception do
-      if (FClient <> nil) then
-        TClient(FClient).Writeln('THTTPClient Exception: ' + e.Message)
-      else
-        WriteLn('THTTPClient Exception: ' + e.Message);
+      WriteLn('THTTPClient Exception: ' + e.Message);
   end;
 end;
 
@@ -272,10 +269,7 @@ begin
     FHTTPClient.Get(URL, FilePath);
   except
     on e: Exception do
-      if (FClient <> nil) then
-        TClient(FClient).Writeln('THTTPClient Exception: ' + e.Message)
-      else
-        WriteLn('THTTPClient Exception: ' + e.Message);
+      WriteLn('THTTPClient Exception: ' + e.Message);
   end;
 
   Result := FHTTPClient.ResponseCode;
@@ -296,8 +290,6 @@ begin
   except
     on e: Exception do
       if (FClient <> nil) then
-        TClient(FClient).Writeln('THTTPClient Exception: ' + e.Message)
-      else
         WriteLn('THTTPClient Exception: ' + e.Message);
   end;
 end;
@@ -413,7 +405,7 @@ begin
     if SockList[i] <> nil then
     begin
       TSock(SockList[i]).Free;
-      TClient(Client).WriteLn(Format('Socket[%d] has not been freed in the script, freeing it now.',[i]));
+      WriteLn(Format('Socket[%d] has not been freed in the script, freeing it now.',[i]));
     end;
   SockList.Free;
   inherited Destroy;
