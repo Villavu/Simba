@@ -1285,8 +1285,7 @@ begin
   TIOManager(MWindow).GetDimensions(TargetWidth, TargetHeight);
   if (xs + wi > TargetWidth) or (ys + hi > TargetHeight) then
   begin
-    if (FList <> nil) and (FList.Client <> nil) then
-      TClient(FList.Client).WriteLn('Warning! The area passed to `CopyClientToBitmap` exceeds the clients bounds');
+    WriteLn('Warning! The area passed to `CopyClientToBitmap` exceeds the clients bounds');
 
     xe := Min(xe, TargetWidth - 1);
     ye := Min(ye, TargetHeight - 1);
@@ -1296,8 +1295,7 @@ begin
 
   if (Data = NullReturnData) then
   begin
-    if (FList <> nil) and (FList.Client <> nil) then
-      TClient(FList.Client).WriteLn('Warning! ReturnData returned null');
+    WriteLn('Warning! ReturnData returned null');
   end else
   begin
     for y := 0 to (hi-1) do
@@ -1325,7 +1323,7 @@ begin
   if (xs + wi > TargetWidth) or (ys + hi > TargetHeight) then
   begin
     if (FList <> nil) and (FList.Client <> nil) then
-      TClient(FList.Client).WriteLn('Warning! The area passed to `CopyClientToBitmap` exceeds the clients bounds');
+      WriteLn('Warning! The area passed to `CopyClientToBitmap` exceeds the clients bounds');
 
     xe := Min(xe, TargetWidth - 1);
     ye := Min(ye, TargetHeight - 1);
@@ -1336,7 +1334,7 @@ begin
   if (Data = NullReturnData) then
   begin
     if (FList <> nil) and (FList.Client <> nil) then
-      TClient(FList.Client).WriteLn('Warning! ReturnData returned null');
+      WriteLn('Warning! ReturnData returned null');
   end else
   begin
     for yy := 0 to (hi-1) do
@@ -2263,7 +2261,7 @@ begin
     SetLength(WriteStr, Length(WriteStr) - 1);
     WriteStr[Length(writeStr)] := ']';
 
-    TClient(Client).Writeln(Format('The following bitmaps were not freed: %s', [WriteStr]));
+    WriteLn(Format('The following bitmaps were not freed: %s', [WriteStr]));
   end;
 
   SetLength(BmpArray, 0);

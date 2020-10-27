@@ -666,7 +666,7 @@ end;
 procedure TMFinder.Error(Message: String; Args: array of const);
 begin
   if WarnOnly then
-    TClient(Client).WriteLn(Format(Message, Args))
+    WriteLn(Format(Message, Args))
   else
     raise Exception.Create(Format(Message, ARgs));
 end;

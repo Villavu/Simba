@@ -59,35 +59,10 @@ type
     destructor Destroy; override;
   end;
 
-operator + (Left: TCodeInsight_IncludeArray; Right: TCodeInsight_Include): TCodeInsight_IncludeArray;
-operator + (Left: TCodeInsight_IncludeArray; Right: TCodeInsight_IncludeArray): TCodeInsight_IncludeArray;
-
 implementation
 
 uses
   simba.settings, simba.debugform;
-
-operator + (Left: TCodeInsight_IncludeArray; Right: TCodeInsight_Include): TCodeInsight_IncludeArray;
-begin
-  SetLength(Result, Length(Left) + 1);
-  if Length(Left) > 0 then
-    Move(Left[0], Result[0], Length(Left) * SizeOf(TCodeInsight_Include));
-
-  Result[High(Result)] := Right;
-end;
-
-operator + (Left: TCodeInsight_IncludeArray; Right: TCodeInsight_IncludeArray): TCodeInsight_IncludeArray;
-begin
-  SetLength(Result, Length(Left) + Length(Right));
-
-  if Length(Result) > 0 then
-  begin
-    if Length(Left) > 0 then
-      Move(Left[0], Result[0], Length(Left) * SizeOf(TCodeInsight_IncludeArray));
-    if Length(Right) > 0 then
-      Move(Right[0], Result[Length(Left)], Length(Right) * SizeOf(TCodeInsight_IncludeArray));
-  end;
-end;
 
 procedure TCodeInsight_Include.Assign(From: TObject);
 begin

@@ -12,7 +12,7 @@ implementation
 
 uses
   extctrls,
-  simba.bitmap, simba.script_ipc;
+  simba.bitmap, simba.script_communication;
 
 procedure Lape_Status(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 var

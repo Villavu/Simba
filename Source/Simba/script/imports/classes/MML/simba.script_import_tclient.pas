@@ -22,7 +22,6 @@ type
   PMBitmaps = ^TMBitmaps;
   PMDTMS = ^TMDTMS;
   PMOCR = ^TMOCR;
-  PWriteLnProc = ^TWriteLnProc;
 
 //Read: IOManager: TIOManager;
 procedure TClient_IOManager_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -96,24 +95,6 @@ begin
   PClient(Params^[0])^.MOCR := PMOCR(Params^[1])^;
 end;
 
-//Read: WritelnProc : TWritelnProc;
-procedure TClient_WritelnProc_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PWritelnProc(Result)^ := PClient(Params^[0])^.WritelnProc;
-end;
-
-//Write: WritelnProc : TWritelnProc;
-procedure TClient_WritelnProc_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PClient(Params^[0])^.WritelnProc := PWritelnProc(Params^[1])^;
-end;
-
-//procedure WriteLn(s : string);
-procedure TClient_WriteLn(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PClient(Params^[0])^.WriteLn(PlpString(Params^[1])^);
-end;
-
 //constructor Create(const plugin_dir: string = ''; const UseIOManager : TIOManager = nil);
 procedure TClient_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -132,16 +113,12 @@ begin
   begin
     addClass('TClient');
 
-    addGlobalType('procedure(s: string)', 'TWriteLnProc', FFI_DEFAULT_ABI);
-
     addClassVar('TClient', 'IOManager', 'TIOManager', @TClient_IOManager_Read, @TClient_IOManager_Write);
     addClassVar('TClient', 'MFiles', 'TMFiles', @TClient_MFiles_Read, @TClient_MFiles_Write);
     addClassVar('TClient', 'MFinder', 'TMFinder', @TClient_MFinder_Read, @TClient_MFinder_Write);
     addClassVar('TClient', 'MBitmaps', 'TMBitmaps', @TClient_MBitmaps_Read, @TClient_MBitmaps_Write);
     addClassVar('TClient', 'MDTMs', 'TMDTMS', @TClient_MDTMs_Read, @TClient_MDTMs_Write);
     addClassVar('TClient', 'MOCR', 'TMOCR', @TClient_MOCR_Read, @TClient_MOCR_Write);
-    addClassVar('TClient', 'WriteLnProc', 'TWriteLnProc', @TClient_WritelnProc_Read, @TClient_WritelnProc_Write);
-    addGlobalFunc('procedure TClient.WriteLn(s : string); constref;', @TClient_WriteLn);
     addGlobalFunc('procedure TClient.Init(const plugin_dir: string = ''''; const UseIOManager: TIOManager = nil);', @TClient_Init);
     //addGlobalFunc('procedure TClient.Free(); constref;', @TClient_Free);
   end;

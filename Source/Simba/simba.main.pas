@@ -338,6 +338,8 @@ begin
 end;
 
 constructor TSimbaAnchorDockHeader.Create(AOwner: TComponent);
+var
+  I: Int32;
 begin
   inherited Create(AOwner);
 
@@ -345,7 +347,8 @@ begin
   PopupMenu := nil;
   Color := clForm;
 
-  CloseButton.Parent := nil;
+  for I := ControlCount - 1 downto 0 do
+    Controls[I].Parent := nil;
 end;
 
 procedure TSimbaAnchorDockHostSite.DoMenuItemDestroyed(Sender: TObject);
@@ -616,6 +619,8 @@ begin
     if (Screen.CustomForms[I] is TSimbaAnchorDockHostSite) then
     begin
       Site := Screen.CustomForms[I] as TSimbaAnchorDockHostSite;
+      if (Site.ControlCount = 1) then // only header
+        Continue;
       if (Site.MenuItem <> nil) and (not Site.MenuItem.Checked) then
         Continue;
 
