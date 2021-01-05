@@ -20,8 +20,8 @@ jobs:
         config:
           - os: windows-latest
             name: 'Windows 32'
-            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2d/fpclazup-i386-win32.exe'
-            fpcup-opt: '--lazrevision=64045'
+            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2g/fpclazup-i386-win32.exe'
+            fpcup-opt: '--lazrevision=64339'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
             laz-url: 'trunk'
             build-mode: 'SIMBA_WIN32'
@@ -30,8 +30,8 @@ jobs:
 
           - os: windows-latest
             name: 'Windows 64'
-            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2d/fpclazup-x86_64-win64.exe'
-            fpcup-opt: '--lazrevision=64045'
+            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2g/fpclazup-x86_64-win64.exe'
+            fpcup-opt: '--lazrevision=64339'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
             laz-url: 'trunk'
             build-mode: 'SIMBA_WIN64'
@@ -40,8 +40,8 @@ jobs:
 
           - os: ubuntu-latest
             name: 'Linux 64'
-            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2d/fpclazup-x86_64-linux'
-            fpcup-opt: '--lazrevision=64045'
+            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2g/fpclazup-x86_64-linux'
+            fpcup-opt: '--lazrevision=64339'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
             laz-url: 'trunk'
             build-mode: 'SIMBA_LINUX64'
@@ -50,8 +50,8 @@ jobs:
 
           - os: macos-latest
             name: 'MacOS 64'
-            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2d/fpclazup-x86_64-darwin'
-            fpcup-opt: '--lclplatform=cocoa --lazrevision=64045'
+            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2g/fpclazup-x86_64-darwin'
+            fpcup-opt: '--lazrevision=64339'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
             laz-url: 'trunk'
             build-mode: 'SIMBA_DARWIN64'
@@ -60,15 +60,15 @@ jobs:
 
           - os: ubuntu-latest
             name: 'AArch64'
-            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2d/fpclazup-x86_64-linux'
-            fpcup-opt: '--lazrevision=64045'
+            fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2g/fpclazup-x86_64-linux'
+            fpcup-opt: '--lazrevision=64339'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
             laz-url: 'trunk'
             build-mode: 'SIMBA_AARCH64'
             binary: 'Simba-AArch64'
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v2.3.4
       with:
         submodules: true
 
@@ -79,18 +79,19 @@ jobs:
         sudo apt-get -m -y install libgtk2.0-dev libpango1.0-dev libffi-dev libxtst-dev xvfb 
         Xvfb :1 &
 
+    # https://github.com/actions/cache/issues/403
     - name: Install Dependenices (macOS)
       if: matrix.config.os == 'macos-latest'
       run: |
-        brew install gnu-tar
-        echo "::add-path::/usr/local/opt/gnu-tar/libexec/gnubin"
+        brew update && brew install gnu-tar
+        echo PATH="/usr/local/opt/gnu-tar/libexec/gnubin:$PATH" >> $GITHUB_ENV
         
     - name: Generate Cache Hash
       run: echo "${{ matrix.config.fpcup-url }}${{ matrix.config.fpcup-opt }}${{ matrix.config.fpc-url }}${{ matrix.config.laz-url }}${{ matrix.config.name }}" > .cache
 
     - name: Cache
       id: cache
-      uses: actions/cache@v2.1.1
+      uses: actions/cache@v2.1.3
       with:
         path: lazarus
         key: ${{ hashFiles('.cache') }}
@@ -122,7 +123,7 @@ jobs:
         ./${{ matrix.config.test }} --run Tests/simba
 
     - name: Upload Artifact 
-      uses: actions/upload-artifact@v2.1.3
+      uses: actions/upload-artifact@v2.2.2
       with:
         path: ${{ matrix.config.binary }}
 
@@ -141,7 +142,7 @@ jobs:
 
     - name: Download Artifacts
       if: github.event_name == 'push'
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v2.0.8
 
     - name: Update Release
       if: github.event_name == 'push'

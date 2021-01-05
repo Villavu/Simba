@@ -27,7 +27,9 @@ type
     function addDelayedCode(Code: lpString; AFileName: lpString = ''; AfterCompilation: Boolean = True; IsGlobal: Boolean = True): TLapeTree_Base; override;
 
     function addGlobalFunc(Header: lpString; Value: Pointer): TLapeGlobalVar; overload; override;
+
     function addGlobalType(Str: lpString; AName: lpString): TLapeType; overload; override;
+    function addGlobalType(Typ: TLapeType; AName: lpString = ''; ACopy: Boolean = True): TLapeType; overload; override;
 
     function addGlobalVar(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar; overload; override;
     function addGlobalVar(Value: Int32; AName: lpString): TLapeGlobalVar; overload; override;
@@ -93,6 +95,14 @@ begin
     Str := Str + ';';
 
   Write(Format('type %s = %s', [AName, Str]));
+end;
+
+function TCompilerDump.addGlobalType(Typ: TLapeType; AName: lpString; ACopy: Boolean): TLapeType;
+begin
+  Result := inherited addGlobalType(Typ, AName, ACopy);
+
+  if (not AName.StartsWith('!')) then
+    Write(Format('type %s = %s;', [AName, Typ.Name]));
 end;
 
 function TCompilerDump.addGlobalVar(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar;
@@ -310,36 +320,9 @@ begin
   Write('type AnsiChar = AnsiChar;');
   Write('type WideChar = WideChar;');
   Write('type Pointer = Pointer;');
-  Write('type ConstPointer = ConstPointer;');
   Write('type AnsiString = AnsiString;');
   Write('type ShortString = ShortString;');
   Write('type UnicodeString = UnicodeString;');
-  Write('type String = AnsiString;');
-  Write('type Char = Char;');
-  Write('type EvalBool = LongBool;');
-  {$IFDEF CPU64}
-  Write('type SizeInt = Int64;');
-  Write('type SizeUInt = UInt64;');
-  Write('type NativeInt = Int64;');
-  Write('type NativeUInt = UInt64;');
-  Write('type PtrInt = Int64;');
-  Write('type PtrUInt = UInt64;');
-  {$ELSE}
-  Write('type SizeInt = Int32;');
-  Write('type SizeUInt = UInt32;');
-  Write('type NativeInt = Int32;');
-  Write('type NativeUInt = UInt32;');
-  Write('type PtrInt = Int32;');
-  Write('type PtrUInt = UInt32;');
-  {$ENDIF}
-  Write('type Byte = UInt8;');
-  Write('type ShortInt = Int8;');
-  Write('type Word = UInt16;');
-  Write('type SmallInt = Int16;');
-  Write('type LongWord = UInt32;');
-  Write('type LongInt = Int32;');
-  Write('type Cardinal = UInt32;');
-  Write('type PChar = PChar;');
   Write('type TMethod = packed record Method, Self: Pointer; end;');
   Write('var True: Boolean;');
   Write('var False: Boolean;');
@@ -469,7 +452,6 @@ begin
   Write('var SecsPerDay: Int32 = 86400;');
   Write('var MSecsPerDay: Int32 = 86400000;');
   Write('var DateDelta: Int32 = 693594;');
-  Write('type TDateTime = type Double;');
   Write('function EncodeDate(Year, Month, Day: UInt16): TDateTime; external;');
   Write('function EncodeTime(Hour, Min, Sec, MSec: UInt16): TDateTime; external;');
   Write('procedure DecodeDate(DateTime: TDateTime; var Year, Month, Day: UInt16); external;');
@@ -492,10 +474,10 @@ begin
   Write('function StrToDateTime(s: string): TDateTime; external;');
   Write('function StrToDateTimeDef(s: string; Default: TDateTime): TDateTime; external;');
 
+  Section := 'Variant';
+
   Write('var Null: Variant;');
   Write('var Unassigned: Variant;');
-  Write('type HRESULT = Int32;');
-  Write('type TVarType = UInt16;');
   Write('type TVariantRelationship = (vrEqual, vrLessThan, vrGreaterThan, vrNotEqual);');
   Write('var VarEmpty: Int32 = 0;');
   Write('var VarNull: Int32 = 1;');

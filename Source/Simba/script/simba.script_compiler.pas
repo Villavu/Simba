@@ -359,9 +359,13 @@ begin
   if not FFILoaded then
     raise Exception.Create('ERROR: libffi is missing or incompatible');
 
+  FSection := 'External';
   InitializeFFI(Self);
+
+  FSection := 'Types';
   InitializePascalScriptBasics(Self, [psiTypeAlias, psiSettings, psiMagicMethod, psiFunctionWrappers, psiExceptions]);
 
+  FSection := '';
   addGlobalVar('array of String', @FDebuggingMethods, '_DebuggingMethods');
   addGlobalMethod('procedure _EnterMethod(constref Index: Int32);', @Lape_EnterMethod, Self);
   addGlobalMethod('procedure _LeaveMethod(constref Index: Int32; Exception: Boolean);', @Lape_LeaveMethod, Self);
@@ -407,6 +411,7 @@ begin
     Lape_Import_OSWindow(Self);
     Lape_Import_Target(Self);
     Lape_Import_Input(Self);
+    Lape_Import_MatchTemplate(Self);
     Lape_Import_Finder(Self);
     Lape_Import_Web(Self);
     Lape_Import_Arrays_Algorithms(Self);
@@ -425,7 +430,6 @@ begin
     Lape_Import_Dialogs(Self);
     Lape_Import_Simba(Self);
     Lape_Import_Process(Self);
-    Lape_Import_MatchTemplate(Self);
   finally
     EndImporting();
   end;

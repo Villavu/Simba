@@ -26,6 +26,10 @@ begin
     addGlobalType('array of TCharArray', 'T2DCharArray');
     addGlobalType('array of Byte', 'TByteArray');
     addGlobalType('array of TByteArray', 'T2DByteArray');
+    addGlobalType('array of Single', 'TSingleArray');
+    addGlobalType('array of TSingleArray', 'T2DSingleArray');
+    addGlobalType('array of Double', 'TDoubleArray');
+    addGlobalType('array of TDoubleArray', 'T2DDoubleArray');
     addGlobalType('array of Extended', 'TExtendedArray');
     addGlobalType('array of TExtendedArray', 'T2DExtendedArray');
     addGlobalType('array of Boolean', 'TBoolArray');
@@ -51,11 +55,9 @@ begin
 
     addGlobalType('array of Boolean', 'TBooleanMatrix');
     addGlobalType('array of TIntegerArray', 'TIntegerMatrix');
-
-    addGlobalType('array of Single', 'TSingleArray');
+    addGlobalType('array of TByteArray', 'TByteMatrix');
     addGlobalType('array of TSingleArray', 'TSingleMatrix');
 
-    addGlobalType('(TM_CCORR, TM_CCORR_NORMED, TM_CCOEFF, TM_CCOEFF_NORMED, TM_SQDIFF, TM_SQDIFF_NORMED)', 'ETMFormula');
     addGlobalType('(__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__)', 'EComparator');
   end;
 end;
