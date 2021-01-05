@@ -27,7 +27,8 @@ unit simba.matrix;
 interface
 
 uses
-  Classes, SysUtils, simba.mufasatypes;
+  Classes, SysUtils,
+  simba.mufasatypes;
 
 procedure MatrixSetSize(var a: TSingleMatrix; Width, Height: Int32);
 procedure MatrixSize(a: TSingleMatrix; out Width, Height: Int32);
@@ -42,9 +43,85 @@ function MatrixArgMin(a: TSingleMatrix): TPoint;
 function MatrixNormMinMax(a: TSingleMatrix; Alpha, Beta: Single): TSingleMatrix;
 function MatrixIndices(a: TSingleMatrix; Value: Single; Comparator: EComparator): TPointArray;
 function MatrixExtract(a: TSingleMatrix; Indices: TPointArray): TSingleArray;
-procedure MatrixFill(a: TSingleMatrix; Indices: TPointArray; Values: TSingleArray);
+procedure MatrixFill(a: TSingleMatrix; Indices: TPointArray; Values: TSingleArray); overload;
+procedure MatrixFill(a: TSingleMatrix; Area: TBox; Value: Single); overload;
+function MatrixArgMulti(a: TSingleMatrix; Count: Int32; HiLo: Boolean): TPointArray;
 
 implementation
+
+uses
+  math, simba.heaparray;
+
+// IsNan & IsInfinite
+function IsNumber(constref N: Single): Boolean; inline;
+begin
+  Result := (LongWord(N) and $7fffffff) < $7f800000;
+end;
+
+procedure MatrixFill(a: TSingleMatrix; Area: TBox; Value: Single);
+var
+  Y: Int32;
+begin
+  Area.X1 := Max(0, Area.X1);
+  Area.Y1 := Max(0, Area.Y1);
+  Area.X2 := Min(A.Width - 1,  Area.X2);
+  Area.Y2 := Min(A.Height - 1, Area.Y2);
+
+  for Y := Area.Y1 to Area.Y2 do
+    FillDWord(a[Y, Area.X1], Area.X2 - Area.X1 + 1, LongWord(Value));
+end;
+
+function MatrixArgMulti(a: TSingleMatrix; Count: Int32; HiLo: Boolean): TPointArray;
+var
+  W, H, I, Y, X, Width: Int32;
+  HeapArray: TSimbaHeapArrayF;
+begin
+  H := High(a);
+  if (H = 0) then
+    Exit;
+  W := High(a[0]);
+  if (H = 0) then
+    Exit;
+
+  Width := W + 1;
+
+  HeapArray := TSimbaHeapArrayF.Create();
+
+  case HiLo of
+    True:
+      for Y := 0 to H do
+        for X := 0 to W do
+          if IsNumber(a[Y, X]) and ((Length(HeapArray.Data) < Count) or (a[Y, X] > HeapArray.Peek.Value)) then
+          begin
+            if (Length(HeapArray.Data) = Count) then
+              HeapArray.Pop(True);
+
+            HeapArray.Push(a[Y, X], Y*Width+X, True);
+          end;
+
+    False:
+      for Y := 0 to H do
+        for X := 0 to W do
+          if IsNumber(a[Y, X]) and ((Length(HeapArray.Data) < Count) or (a[Y, X] < HeapArray.Peek.Value)) then
+          begin
+            if (Length(HeapArray.Data) = Count) then
+              HeapArray.Pop(False);
+
+            HeapArray.Push(a[Y, X], Y*Width+X, False);
+          end;
+  end;
+
+  W += 1;
+  H += 1;
+  SetLength(Result, Length(HeapArray.Data));
+  for I := 0 to High(HeapArray.Data) do
+  begin
+    Result[I].Y := HeapArray.Data[I].Index div W;
+    Result[I].X := HeapArray.Data[I].Index mod W;
+  end;
+
+  HeapArray.Free();
+end;
 
 procedure MatrixSetSize(var a: TSingleMatrix; Width, Height: Int32);
 begin
@@ -91,7 +168,9 @@ begin
   MatrixSize(a, W,H);
   sum := 0;
   for i:=0 to h-1 do
-    for j:=0 to w-1 do sum += a[i,j];
+    for j:=0 to w-1 do
+      if IsNumber(a[i,j]) then
+        sum += a[i,j];
   Result := sum / (W*H);
 end;
 
@@ -103,12 +182,16 @@ begin
   MatrixSize(a, W,H);
   sum := 0;
   for i:=0 to h-1 do
-    for j:=0 to w-1 do sum += a[i,j];
+    for j:=0 to w-1 do
+      if IsNumber(a[i,j]) then
+        sum += a[i,j];
   Mean := sum / (W*H);
 
   square := 0;
   for i:=0 to h-1 do
-    for j:=0 to w-1 do square += Sqr(a[i,j] - Mean);
+    for j:=0 to w-1 do
+      if IsNumber(a[i,j]) then
+        square += Sqr(a[i,j] - Mean);
   Stdev := Sqrt(square / (W*H));
 end;
 
@@ -124,10 +207,11 @@ begin
   vMin := a[0,0]; vMax := a[0,0];
   for i:=0 to h-1 do
     for j:=0 to w-1 do
-    begin
-      if a[i,j] > vMax then vMax := a[i,j];
-      if a[i,j] < vMin then vMin := a[i,j];
-    end;
+      if IsNumber(a[i,j]) then
+      begin
+        if a[i,j] > vMax then vMax := a[i,j];
+        if a[i,j] < vMin then vMin := a[i,j];
+      end;
 end; 
 
 function MatrixArgMax(a: TSingleMatrix): TPoint;
@@ -138,7 +222,7 @@ begin
 
   for Y:=0 to H-1 do
     for X:=0 to W-1 do
-      if a[Y,X] > a[Result.y,Result.x] then
+      if IsNumber(a[Y,X]) and (a[Y,X] > a[Result.y,Result.x]) then
       begin
         Result.x := x;
         Result.y := y;
@@ -153,7 +237,7 @@ begin
 
   for Y:=0 to H-1 do
     for X:=0 to W-1 do
-      if a[Y,X] < a[Result.y,Result.x] then
+      if IsNumber(a[Y,X]) and (a[Y,X] < a[Result.y,Result.x]) then
       begin
         Result.x := x;
         Result.y := y;
@@ -177,7 +261,8 @@ begin
   
   for Y:=0 to H-1 do
     for X:=0 to W-1 do
-      Result[Y,X] := (a[Y,X] - lo) / oldRange * newRange + Alpha;
+      if IsNumber(a[Y,X]) then
+        Result[Y,X] := (a[Y,X] - lo) / oldRange * newRange + Alpha;
 end;
 
 function MatrixIndices(a: TSingleMatrix; Value: Single; Comparator: EComparator): TPointArray;
@@ -193,24 +278,25 @@ begin
   c := 0;
   for Y:=0 to H-1 do
     for X:=0 to W-1 do
-    begin
-      Match := False;
-      case Comparator of
-        __LT__: Match := a[y,x] < Value;
-        __GT__: Match := a[y,x] > Value;
-        __EQ__: Match := a[y,x] = Value;
-        __LE__: Match := a[y,x] <= Value;
-        __GE__: Match := a[y,x] >= Value;
-        __NE__: Match := a[y,x] <> Value;
-      end;
-
-      if Match then
+      if IsNumber(a[Y,X]) then
       begin
-        if c = Length(Result) then
-          SetLength(Result, 2*c);
-        Result[c] := Point(x,y);
-        Inc(c);
-      end;
+        Match := False;
+        case Comparator of
+          __LT__: Match := a[y,x] < Value;
+          __GT__: Match := a[y,x] > Value;
+          __EQ__: Match := a[y,x] = Value;
+          __LE__: Match := a[y,x] <= Value;
+          __GE__: Match := a[y,x] >= Value;
+          __NE__: Match := a[y,x] <> Value;
+        end;
+
+        if Match then
+        begin
+          if c = Length(Result) then
+            SetLength(Result, 2*c);
+          Result[c] := Point(x,y);
+          Inc(c);
+        end;
     end;
   SetLength(Result, c);
 end;

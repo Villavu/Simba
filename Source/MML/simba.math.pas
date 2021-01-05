@@ -29,7 +29,8 @@ unit simba.math;
 interface
 
 uses
-  Classes, SysUtils, simba.MufasaTypes;
+  Classes, SysUtils,
+  simba.mufasatypes;
 
 function RotatePoints(const P: TPointArray;const A, cx, cy: Extended): TPointArray;
 function RotatePoint(const p: TPoint;const angle, mx, my: Extended): TPoint;
@@ -61,10 +62,25 @@ function IntInBox(x, y: Integer; Box: TBox): Boolean;
 function PointToBox(topLeft,bottomRight: TPoint): TBox;
 function PointInBox(PT : TPoint; Box: TBox): Boolean;
 function DecRet(e: Extended): Extended;
+function NextPow2(n: Int32): Int32;
 
 implementation
+
 uses
   math;
+
+function NextPow2(n: Int32): Int32;
+begin
+  n := n - 1;
+  n := n or (n shr 1);
+  n := n or (n shr 2);
+  n := n or (n shr 4);
+  n := n or (n shr 8);
+  n := n or (n shr 16);
+  n := n or (n shr 32);
+  Result := n + 1;
+end;
+
 {/\
   Returns a GaussianMatrix with size of X*X, where X is Nth odd-number.
 /\}

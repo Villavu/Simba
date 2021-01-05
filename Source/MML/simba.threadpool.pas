@@ -18,16 +18,15 @@ type
 
   TSimbaThreadPool_Thread = class(TThread)
   protected
-    FEvent: TEventObject;
+    FEvent: TSimpleEvent;
     FMethod: TSimbaThreadPool_Method;
     FParameters: TParamArray;
-    FActive: Boolean;
     FTemporary: Boolean;
     FLo, FHi: Int32;
+    FFinished: TSimpleEvent;
 
     procedure Execute; override;
   public
-    property Active: Boolean read FActive write FActive;
     property Temporary: Boolean read FTemporary;
 
     procedure Run(Method: TSimbaThreadPool_Method; Parameters: array of Pointer; Lo, Hi: Int32);
@@ -44,7 +43,7 @@ type
   public
     function GetAvailableThread: TSimbaThreadPool_Thread;
 
-    procedure RunParallel(Method: TSimbaThreadPool_Method; Args: array of Pointer; Lo, Hi: Int32; ThreadCount: UInt8; Fallback: Boolean);
+    procedure RunParallel(Method: TSimbaThreadPool_Method; Args: array of Pointer; Lo, Hi: Int32; Fallback: Boolean; ThreadCount: Int32 = -1);
 
     constructor Create(ThreadCount: Int32);
     destructor Destroy; override;
@@ -56,7 +55,7 @@ var
 implementation
 
 uses
-  math, utf8process;
+  math;
 
 procedure TSimbaThreadPool_Thread.Execute;
 begin
@@ -74,8 +73,7 @@ begin
     end;
 
     FEvent.ResetEvent();
-
-    FActive := False;
+    FFinished.SetEvent();
   end;
 end;
 
@@ -102,7 +100,9 @@ end;
 constructor TSimbaThreadPool_Thread.Create(IsTemporary: Boolean);
 begin
   FTemporary := IsTemporary;
-  FEvent := TEventObject.Create(nil, True, False, '');
+  FEvent := TSimpleEvent.Create();
+  FFinished := TSimpleEvent.Create();
+  FFinished.SetEvent();
 
   inherited Create(False, 1024 * 512); // default = 4MiB, we set 512KiB
 end;
@@ -110,6 +110,7 @@ end;
 destructor TSimbaThreadPool_Thread.Destroy;
 begin
   FEvent.Free();
+  FFinished.Free();
 
   inherited Destroy;
 end;
@@ -122,15 +123,15 @@ begin
 
   try
     for i := 0 to High(FThreads) do
-      if (not FThreads[i].Active) then
+      if (FThreads[i].FFinished.WaitFor(0) = wrSignaled) then
       begin
         Result := FThreads[i];
-        Result.Active := True;
+        Result.FFinished.ResetEvent();
+
         Exit;
       end;
 
     Result := TSimbaThreadPool_Thread.Create(True);
-    Result.Active := True;
   finally
     FLock.Leave();
   end;
@@ -171,19 +172,19 @@ begin
   inherited Destroy();
 end;
 
-procedure TSimbaThreadPool.RunParallel(Method: TSimbaThreadPool_Method; Args: array of Pointer; Lo, Hi: Int32; ThreadCount: UInt8; Fallback: Boolean);
+procedure TSimbaThreadPool.RunParallel(Method: TSimbaThreadPool_Method; Args: array of Pointer; Lo, Hi: Int32; Fallback: Boolean; ThreadCount: Int32);
 var
   i, Step, A, B: Int32;
   Threads: TSimbaThreadPool_ThreadArray;
 begin
-  if (ThreadCount < 1) then
-    ThreadCount := 1;
-
-  if (Fallback) or (ThreadCount = 1) then
+  if Fallback or (ThreadCount = 1) then
   begin
     Method(@Args, Lo, Hi);
     Exit;
   end;
+
+  if (ThreadCount = -1) or (ThreadCount > Length(FThreads)) then
+    ThreadCount := Length(FThreads);
 
   A := Lo;
   B := Lo;
@@ -203,16 +204,17 @@ begin
 
   for i := 0 to High(Threads) do
   begin
-    while Threads[i].Active do
-      Sleep(1);
-
+    Threads[i].FFinished.WaitFor(INFINITE);
     if Threads[i].Temporary then
       Threads[i].Free();
   end;
 end;
 
 initialization
-  SimbaThreadPool := TSimbaThreadPool.Create(Min(4, GetSystemThreadCount()));
+  if TThread.ProcessorCount < 4 then
+    SimbaThreadPool := TSimbaThreadPool.Create(TThread.ProcessorCount)
+  else
+    SimbaThreadPool := TSimbaThreadPool.Create(4);
 
 finalization
   SimbaThreadPool.Free();

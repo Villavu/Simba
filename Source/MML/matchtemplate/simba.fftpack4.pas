@@ -19,18 +19,10 @@ interface
 
 uses
   sysutils,
-  simba.fftpack4_core, simba.matchtemplate_core;
+  simba.fftpack4_core, simba.mufasatypes;
 
 type
-  CFFT_FUNC = function(data, plan: TComplexArray; Inplace:Boolean=False): TComplexArray;
-
   TFFTPACK = record
-    MaxThreads: Int32;
-    MinThreadingSize: Int32;
-
-    procedure Init(AMaxThreads:Int32);
-    procedure Free();
-
     function OptimalDFTSize(target: Int32): Int32;
 
     function InitFFT(n: Int32): TComplexArray;
@@ -55,9 +47,8 @@ var
 implementation
 
 uses
-  math, utf8process,
-  simba.matchtemplate_matrix, simba.threadpool;
-
+  math,
+  simba.matchtemplate_matrix, simba.math, simba.threadpool;
 
 const
   __OptimalDFT: array[0..168] of Int32 = (
@@ -77,23 +68,8 @@ const
     8192, 8640, 8748, 9000, 9216, 9375, 9600, 9720, 10000
   );
 
-
 {$DEFINE CPLX_BUFFSZ := 2*n + 15}
 {$DEFINE REAL_BUFFSZ := 2*n + 15}
-
-
-procedure TFFTPACK.Init(AMaxThreads: Int32);
-begin
-  Self.MaxThreads := AMaxThreads;
-  Self.MinThreadingSize := MIN_THREDING_SZ;
-end;
-
-procedure TFFTPACK.Free();
-begin
-  Self.MaxThreads := 0;
-  Self.MinThreadingSize := 0;
-end;
-
 
 // --------------------------------------------------------------------------------
 // Compute the optimal size for FFT
@@ -240,23 +216,25 @@ end;
 
 function TFFTPACK.FFT2MT(m: T2DComplexArray; Inverse: Boolean): T2DComplexArray;
 var
-  W,H,tc: Int32;
+  W,H: Int32;
   plan: TComplexArray;
 begin
-  tc := Self.MaxThreads;
+  W := M.Width;
+  H := M.Height;
 
-  Size(m, W,H);
   plan := InitFFT(W);
-  SimbaThreadPool.RunParallel(@Parallel_FFT2, [@m, @plan, @inverse], 0,H-1, tc, Area(m) < Self.MinThreadingSize);
+  SimbaThreadPool.RunParallel(@Parallel_FFT2, [@m, @plan, @inverse], 0, H-1, Area(m) < MIN_THREDING_SZ);
 
   m := Rot90(m);
-  Size(m, W,H);
+
+  W := M.Width;
+  H := M.Height;
+
   plan := InitFFT(W);
-  SimbaThreadPool.RunParallel(@Parallel_FFT2, [@m, @plan, @inverse], 0,H-1, tc, Area(m) < Self.MinThreadingSize);
+  SimbaThreadPool.RunParallel(@Parallel_FFT2, [@m, @plan, @inverse], 0, H-1, Area(m) < MIN_THREDING_SZ);
 
   Result := Rot90(m);
 end;
-
 
 function TFFTPACK.FFT2(m: T2DComplexArray): T2DComplexArray;
 begin
@@ -269,13 +247,5 @@ begin
   if Length(m) = 0 then Exit;
   Result := FFT2MT(m, True);
 end;
-
-
-// ----------------------------------------------------------------------------
-// Initialize unit
-
-initialization
-  FFTPACK.Init(GetSystemThreadCount());
-
 
 end.

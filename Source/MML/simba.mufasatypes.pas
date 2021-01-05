@@ -25,6 +25,7 @@ unit simba.mufasatypes;
 
 {$mode objfpc}{$H+}
 {$modeswitch advancedrecords}
+{$modeswitch typehelpers}
 
 interface
 
@@ -84,6 +85,7 @@ const
   NullReturnData: TRetData = (Ptr: nil; IncPtrWith: -1; RowLen: -1);
 
 operator =(Left, Right: TRetData): Boolean;
+operator =(Left, Right: TRGB32): Boolean;
 
 type
   PStrings = ^TStrings;
@@ -127,7 +129,10 @@ type
 
   PByteArray = ^TByteArray;
   TByteArray = array of Byte;
+  P2DByteArray = ^T2DByteArray;
   T2DByteArray = array of TByteArray;
+
+  TByteMatrix = T2DByteArray;
 
   TBoolArray = array of boolean;
   TBooleanArray = TBoolArray;
@@ -144,10 +149,48 @@ type
   PSingleMatrix = ^TSingleMatrix;
   TSingleMatrix = array of TSingleArray;
 
+  TSingleMatrix_Helper = type Helper for TSingleMatrix
+    function Width: Int32; inline;
+    function Height: Int32; inline;
+  end;
+
+  TDoubleArray = array of Double;
+  T2DDoubleArray = array of TDoubleArray;
+
+  TDoubleMatrix = T2DDoubleArray;
+
+  TDoubleMatrix_Helper = type Helper for TDoubleMatrix
+    function Width: Int32; inline;
+    function Height: Int32; inline;
+  end;
+
   PIntegerMatrix = ^TIntegerMatrix;
   TIntegerMatrix = array of TIntegerArray;
 
-  ETMFormula  = (TM_CCORR, TM_CCORR_NORMED, TM_CCOEFF, TM_CCOEFF_NORMED, TM_SQDIFF, TM_SQDIFF_NORMED);
+  TIntegerMatrix_Helper = type Helper for TIntegerMatrix
+    function Width: Int32; inline;
+    function Height: Int32; inline;
+  end;
+
+  TByteMatrix_Helper = type Helper for TByteMatrix
+    function Width: Int32; inline;
+    function Height: Int32; inline;
+  end;
+
+  TComplex = packed record
+    Re, Im: Single;
+  end;
+
+  TComplexArray   = array of TComplex;
+  T2DComplexArray = array of TComplexArray;
+
+  TComplexMatrix = T2DComplexArray;
+
+  TComplexMatrix_Helper = type Helper for TComplexMatrix
+    function Width: Int32; inline;
+    function Height: Int32; inline;
+  end;
+
   EComparator = (__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__);
 
   { Crypto }
@@ -465,6 +508,76 @@ end;
 operator =(Left, Right: TRetData): Boolean;
 begin
   Result := (Left.Ptr = Right.Ptr) and (Left.RowLen = Right.RowLen) and (Left.IncPtrWith = Right.IncPtrWith);
+end;
+
+operator =(Left, Right: TRGB32): Boolean; inline;
+begin
+  Result := Int32(Left) = Int32(Right);
+end;
+
+function TDoubleMatrix_Helper.Width: Int32;
+begin
+  if Length(Self) > 0 then
+    Result := Length(Self[0])
+  else
+    Result := 0;
+end;
+
+function TDoubleMatrix_Helper.Height: Int32;
+begin
+  Result := Length(Self);
+end;
+
+function TComplexMatrix_Helper.Width: Int32;
+begin
+  if Length(Self) > 0 then
+    Result := Length(Self[0])
+  else
+    Result := 0;
+end;
+
+function TComplexMatrix_Helper.Height: Int32;
+begin
+  Result := Length(Self);
+end;
+
+function TSingleMatrix_Helper.Width: Int32;
+begin
+  if Length(Self) > 0 then
+    Result := Length(Self[0])
+  else
+    Result := 0;
+end;
+
+function TSingleMatrix_Helper.Height: Int32;
+begin
+  Result := Length(Self);
+end;
+
+function TByteMatrix_Helper.Width: Int32;
+begin
+  if Length(Self) > 0 then
+    Result := Length(Self[0])
+  else
+    Result := 0;
+end;
+
+function TByteMatrix_Helper.Height: Int32;
+begin
+  Result := Length(Self);
+end;
+
+function TIntegerMatrix_Helper.Width: Int32;
+begin
+  if Length(Self) > 0 then
+    Result := Length(Self[0])
+  else
+    Result := 0;
+end;
+
+function TIntegerMatrix_Helper.Height: Int32;
+begin
+  Result := Length(Self);
 end;
 
 function TBoxHelper.GetWidth: Int32;

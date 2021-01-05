@@ -11,7 +11,7 @@ procedure Lape_Import_Finder(Compiler: TSimbaScript_Compiler; Data: Pointer = ni
 implementation
 
 uses
-  simba.bitmap;
+  simba.bitmap, simba.matchtemplate;
 
 procedure Lape_FindDTM(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin

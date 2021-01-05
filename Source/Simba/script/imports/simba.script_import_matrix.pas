@@ -109,6 +109,16 @@ begin
   MatrixFill(TSingleMatrix(Params^[0]^), TPointArray(Params^[1]^), TSingleArray(Params^[2]^));
 end;
 
+procedure Lape_MatrixFillEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  MatrixFill(TSingleMatrix(Params^[0]^), TBox(Params^[1]^), Single(Params^[2]^));
+end;
+
+procedure Lape_ArgMulti(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  TPointArray(Result^) := MatrixArgMulti(TSingleMatrix(Params^[0]^), Int32(Params^[1]^), Boolean(Params^[2]^));
+end;
+
 procedure Lape_Import_Matrix(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
 begin
   with Compiler do
@@ -117,20 +127,22 @@ begin
 
     addGlobalFunc('procedure TSingleMatrix.SetSize(Width, Height: Int32);', @Lape_MatrixSetSize);
     addGlobalFunc('procedure TSingleMatrix.Size(out Width, Height: Int32); constref;', @Lape_MatrixSize);
-    addGlobalFunc('function TSingleMatrix.Width(): Int32; constref;', @Lape_MatrixWidth);
-    addGlobalFunc('function TSingleMatrix.Height(): Int32; constref;', @Lape_MatrixHeight);
-    addGlobalFunc('function TSingleMatrix.ToInt(): T2DIntArray; constref;', @Lape_MatrixToInt);
-    addGlobalFunc('function TSingleMatrix.Mean(): Single; constref;', @Lape_MatrixMean);
+    addGlobalFunc('function TSingleMatrix.Width: Int32; constref;', @Lape_MatrixWidth);
+    addGlobalFunc('function TSingleMatrix.Height: Int32; constref;', @Lape_MatrixHeight);
+    addGlobalFunc('function TSingleMatrix.ToInt: T2DIntArray; constref;', @Lape_MatrixToInt);
+    addGlobalFunc('function TSingleMatrix.Mean: Single; constref;', @Lape_MatrixMean);
     addGlobalFunc('procedure TSingleMatrix.MeanStdev(out Mean, Stdev: Double); constref;', @Lape_MatrixMeanStdev);
-    addGlobalFunc('procedure TSingleMatrix.MinMax(out vMin,vMax: Single); constref;', @Lape_MatrixMinMax);
-    addGlobalFunc('function TSingleMatrix.Min(): Single; constref;', @Lape_MatrixMin);
-    addGlobalFunc('function TSingleMatrix.Max(): Single; constref;', @Lape_MatrixMax);
-    addGlobalFunc('function TSingleMatrix.ArgMax(): TPoint; constref;', @Lape_MatrixArgMax);
-    addGlobalFunc('function TSingleMatrix.ArgMin(): TPoint; constref;', @Lape_MatrixArgMin);
+    addGlobalFunc('procedure TSingleMatrix.MinMax(out vMin, vMax: Single); constref;', @Lape_MatrixMinMax);
+    addGlobalFunc('function TSingleMatrix.Min: Single; constref;', @Lape_MatrixMin);
+    addGlobalFunc('function TSingleMatrix.Max: Single; constref;', @Lape_MatrixMax);
+    addGlobalFunc('function TSingleMatrix.ArgMax: TPoint; constref;', @Lape_MatrixArgMax);
+    addGlobalFunc('function TSingleMatrix.ArgMin: TPoint; constref;', @Lape_MatrixArgMin);
     addGlobalFunc('function TSingleMatrix.NormMinMax(Alpha, Beta: Single): TSingleMatrix; constref;', @Lape_NormMinMax);
     addGlobalFunc('function TSingleMatrix.Indices(Value: Single; Comparator: EComparator): TPointArray; constref;', @Lape_MatrixIndices);
     addGlobalFunc('function TSingleMatrix.Extract(Indices: TPointArray): TSingleArray; constref;', @Lape_MatrixExtract);
-    addGlobalFunc('procedure TSingleMatrix.Fill(Indices: TPointArray; Values: TSingleArray); constref;', @Lape_MatrixFill);
+    addGlobalFunc('procedure TSingleMatrix.Fill(Indices: TPointArray; Values: TSingleArray); constref; overload;', @Lape_MatrixFill);
+    addGlobalFunc('procedure TSingleMatrix.Fill(Area: TBox; Value: Single); constref; overload;', @Lape_MatrixFillEx);
+    addGlobalFunc('function TSingleMatrix.ArgMulti(Count: Int32; HiLo: Boolean): TPointArray; constref;', @Lape_ArgMulti);
   end;
 end;
 
