@@ -49,6 +49,7 @@ procedure ColorToXYZ(color: Integer; out X, Y, Z: Extended); inline;
 function XYZToColor(X, Y, Z: Extended): TColor; inline;
 function HSLToColor(H, S, L: Extended): TColor; inline;
 function BGRToRGB(BGR : TRGB32) : TColor; inline;
+function RGBToBGR(Color : TColor) : TRGB32; inline;
 procedure XYZToHSL(X, Y, Z: Extended; out H, S, L: Extended); inline;
 procedure HSLToXYZ(H, S, L: Extended; out X, Y, Z: Extended); inline;
 procedure XYZtoCIELab(X, Y, Z: Extended; out L, a, b: Extended);
@@ -73,6 +74,14 @@ Const
 function BGRToRGB(BGR : TRGB32) : TColor;inline;
 begin;
   Result := BGR.R or BGR.g shl 8 or BGR.b shl 16;
+end;
+
+function RGBToBGR(Color : TColor) : TRGB32; inline;
+begin;
+  Result.R := Color and $ff;
+  Result.G := Color shr 8 and $ff;
+  Result.B := Color shr 16 and $ff;
+  Result.A := 0;
 end;
 
 Function RGBtoColor(r,g,b : byte): TColor; overload; inline;

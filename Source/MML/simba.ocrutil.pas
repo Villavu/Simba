@@ -198,7 +198,7 @@ begin
 
   for j := 0 to size-1 do
   begin
-    color := bmp.FData[j];
+    color := bmp.Data[j];
     {
     The character colour is white (255,255,255) if it is a character, red if it
     is a shadow.

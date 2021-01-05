@@ -55,7 +55,7 @@ begin
 
   if Bounds.Contains(Bounds.X1 + X, Bounds.Y1 + Y, Width, Height) then
   begin
-    Result.Ptr := @FBitmap.FData[Y * Bounds.X2 + X];
+    Result.Ptr := @FBitmap.Data[Y * Bounds.X2 + X];
     Result.RowLen := Bounds.X2;
     Result.IncPtrWith := Bounds.X2 - Width;
   end else
@@ -75,7 +75,7 @@ begin
   begin
     Result := GetMem(Width * Height * SizeOf(TRGB32));
     for Loop := 0 to Height - 1 do
-      Move(FBitmap.FData[(Y + Loop) * Bounds.X2 + X], Result[Loop * Width], Width * SizeOf(TRGB32));
+      Move(FBitmap.Data[(Y + Loop) * Bounds.X2 + X], Result[Loop * Width], Width * SizeOf(TRGB32));
   end else
     Result := nil;
 end;

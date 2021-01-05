@@ -30,7 +30,7 @@ interface
 
 {$define CheckAllBackground}//Undefine this to only check the first white point against the background (in masks).
 uses
-  simba.colormath, classes, sysutils, simba.bitmap, simba.dtm, simba.mufasatypes; // types
+  simba.colormath, classes, sysutils, simba.bitmap, simba.dtm, simba.mufasatypes, simba.matchtemplate; // types
 
 { TMFinder Class }
 
@@ -171,7 +171,7 @@ uses
   math,               // min/max
   simba.tpa,                //TPABounds
   simba.dtmutil,
-  simba.matchtemplate, simba.matrix; //template matching
+  simba.matrix; //template matching
 
 var
   Percentage : array[0..255] of Extended;
@@ -527,7 +527,7 @@ begin;
   b := 0;
   if Bitmap.TransparentColorSet then
     ColorToRGB(Bitmap.GetTransparentColor,r,g,b);
-  Ptr := Bitmap.FData;
+  Ptr := Bitmap.Data;
   SetLength(SkipCoords,Bitmap.Height,Bitmap.Width);
   for y := 0 to Bitmap.Height - 1 do
     for x := 0 to Bitmap.Width - 1 do
@@ -556,7 +556,7 @@ begin;
   TotalC := 0;
   if Bitmap.TransparentColorSet then
     ColorToRGB(Bitmap.GetTransparentColor,r,g,b);
-  Ptr := Bitmap.FData;
+  Ptr := Bitmap.Data;
   SetLength(SkipCoords,Bitmap.Height,Bitmap.Width);
   SetLength(PointsLeft,Bitmap.Height,Bitmap.Width);
   for y := 0 to Bitmap.Height - 1 do
@@ -1556,10 +1556,9 @@ begin
     Move(PtrData.Ptr[y * PtrData.RowLen], Image[y,0], W*SizeOf(TRGB32));
 
   for y:=0 to TemplImage.Height-1 do
-    Move(TemplImage.FData[y*TemplImage.Width], Templ[y,0], TemplImage.Width*SizeOf(TRGB32));
+    Move(TemplImage.Data[y*TemplImage.Width], Templ[y,0], TemplImage.Width*SizeOf(TRGB32));
 
-  xcorr := MatchTemplate(Image, Templ, Ord(Formula));
-
+  xcorr := MatchTemplate(Image, Templ, Formula);
 
   if Formula in [TM_SQDIFF, TM_SQDIFF_NORMED] then
   begin
