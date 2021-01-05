@@ -263,7 +263,7 @@ begin
 
   Params.Write(Bitmap.Width, SizeOf(Int32));
   Params.Write(Bitmap.Height, SizeOf(Int32));
-  Params.Write(Bitmap.FData^, Bitmap.Width * Bitmap.Height * SizeOf(TRGB32));
+  Params.Write(Bitmap.Data^, Bitmap.Width * Bitmap.Height * SizeOf(TRGB32));
 end;
 
 procedure TSimbaMethod_DisplayDebugImage.DoInvoke;
@@ -316,7 +316,7 @@ begin
 
   Params.Write(Bitmap.Width, SizeOf(Int32));
   Params.Write(Bitmap.Height, SizeOf(Int32));
-  Params.Write(Bitmap.FData^, Bitmap.Width * Bitmap.Height * SizeOf(TRGB32));
+  Params.Write(Bitmap.Data^, Bitmap.Width * Bitmap.Height * SizeOf(TRGB32));
 end;
 
 procedure TSimbaMethod_ScriptError.DoInvoke;
