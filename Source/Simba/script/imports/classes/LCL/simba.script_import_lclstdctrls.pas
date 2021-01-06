@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_LCLStdCtrls(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLStdCtrls(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -202,7 +202,7 @@ begin
   PCustomScrollBar(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomScrollBar(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomScrollBar(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -238,7 +238,7 @@ begin
   PScrollBar(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TScrollBar(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TScrollBar(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -491,7 +491,7 @@ begin
   PCustomComboBox(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomComboBox(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomComboBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -537,7 +537,7 @@ begin
   PComboBox(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TComboBox(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TComboBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -812,7 +812,7 @@ begin
   PCustomListBox(Params^[0])^.OnDrawItem := PDrawItemEvent(Params^[1])^;
 end;
 
-procedure Lape_Import_TCustomListBox(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomListBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -866,7 +866,7 @@ begin
   PListBox(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TListBox(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TListBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1070,7 +1070,7 @@ begin
   PCustomEdit(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomEdit(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomEdit(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1122,7 +1122,7 @@ begin
   PEdit(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TEdit(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TEdit(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1144,7 +1144,7 @@ begin
   PCustomGroupBox(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomGroupBox(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomGroupBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1166,7 +1166,7 @@ begin
   PGroupBox(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TGroupBox(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TGroupBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1190,7 +1190,7 @@ begin
   PMemoScrollbar(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TMemoScrollbar(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TMemoScrollbar(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1303,7 +1303,7 @@ begin
   PCustomMemo(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomMemo(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomMemo(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1334,7 +1334,7 @@ begin
   PMemo(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TMemo(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TMemo(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1419,7 +1419,7 @@ begin
   PCustomStaticText(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomStaticText(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomStaticText(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1447,7 +1447,7 @@ begin
   PStaticText(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TStaticText(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TStaticText(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1473,7 +1473,7 @@ begin
   PButtonControl(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TButtonControl(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TButtonControl(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1556,7 +1556,7 @@ begin
   PCustomButton(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomButton(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomButton(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1587,7 +1587,7 @@ begin
   PButton(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TButton(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TButton(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1647,7 +1647,7 @@ begin
   PCustomCheckBox(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomCheckBox(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomCheckBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1673,7 +1673,7 @@ begin
   PCheckBox(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCheckBox(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCheckBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1721,7 +1721,7 @@ begin
   PCustomLabel(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomLabel(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomLabel(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1747,7 +1747,7 @@ begin
   PLabel(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TLabel(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TLabel(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1926,7 +1926,7 @@ begin
   PCustomSpeedButton(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomSpeedButton(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomSpeedButton(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1963,7 +1963,7 @@ begin
   PSpeedButton(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TSpeedButton(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TSpeedButton(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1986,7 +1986,7 @@ begin
   PRadioButton(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TRadioButton(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TRadioButton(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1997,7 +1997,7 @@ begin
   end;
 end;
 
-procedure Lape_Import_LCLStdCtrls(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLStdCtrls(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
    begin

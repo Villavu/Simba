@@ -7,7 +7,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_XML(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_XML(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -116,7 +116,7 @@ begin
   PlpString(Result)^ := PXmlNode(Params^[0])^[PlpString(Params^[1])^];
 end;
 
-procedure Lape_Import_TXmlNode(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TXmlNode(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -215,7 +215,7 @@ begin
   PXMLNodeList(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TXMLNodeList(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TXMLNodeList(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -322,7 +322,7 @@ begin
   PVerySimpleXml(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_XML(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_XML(Compiler: TSimbaScript_Compiler);
 begin
   Lape_Import_TXmlNode(Compiler);
   Lape_Import_TXmlNodeList(Compiler);

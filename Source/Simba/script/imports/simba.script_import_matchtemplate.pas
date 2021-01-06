@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_MatchTemplate(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_MatchTemplate(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -58,7 +58,7 @@ begin
   PSingleMatrix(Result)^ := PMufasaBitmap(Params^[0])^.MatchTemplateMask(PMufasaBitmap(Params^[1])^, PTMFormula(Params^[2])^);
 end;
 
-procedure Lape_Import_MatchTemplate(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_MatchTemplate(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin

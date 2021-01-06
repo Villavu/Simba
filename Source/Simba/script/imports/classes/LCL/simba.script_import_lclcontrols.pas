@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_LCLControls(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLControls(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -709,7 +709,7 @@ begin
   PControl(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TControl(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TControl(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1261,7 +1261,7 @@ begin
   PWinControl(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TWinControl(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TWinControl(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1381,7 +1381,7 @@ begin
   PCustomControl(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomControl(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomControl(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1540,7 +1540,7 @@ begin
   PControlScrollBar(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TControlScrollBar(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TControlScrollBar(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1614,7 +1614,7 @@ begin
   PScrollingWinControl(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TScrollingWinControl(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TScrollingWinControl(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1651,7 +1651,7 @@ begin
   PGraphicControl(Params^[0])^.Align := PAlign(Params^[1])^;
 end;
 
-procedure Lape_Import_TGraphicControl(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TGraphicControl(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1663,7 +1663,7 @@ begin
   end;
 end;
 
-procedure Lape_Import_LCLControls(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLControls(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
    begin

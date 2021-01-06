@@ -154,18 +154,29 @@ type
 implementation
 
 uses
-  opensslsockets,
-  simba.mufasabase, simba.zip, simba.tar, simba.tar_gz, simba.tar_bz2;
+  openssl, ssockets, opensslsockets,
+  simba.openssl, simba.mufasabase, simba.zip, simba.tar, simba.tar_gz, simba.tar_bz2;
 
 type
-  TSimbaHTTPClientBase = class(TFPHTTPClient) // default will raise a exception on a response code that isn't HTTP_OK or HTTP_FOUND.
+  TSimbaHTTPClientBase = class(TFPHTTPClient)
   protected
+    // FPC will raise a exception on a response code that is not HTTP_OK or HTTP_FOUND.
     function CheckResponseCode(ACode: Integer; const AllowedResponseCodes: array of Integer): Boolean; override;
+    // Load Simba's SSL if needed
+    function GetSocketHandler(const UseSSL: Boolean): TSocketHandler; override;
   end;
 
 function TSimbaHTTPClientBase.CheckResponseCode(ACode: Integer; const AllowedResponseCodes: array of Integer): Boolean;
 begin
   Result := True;
+end;
+
+function TSimbaHTTPClientBase.GetSocketHandler(const UseSSL: Boolean): TSocketHandler;
+begin
+  if UseSSL and (not IsSSLLoaded) then
+    InitializeOpenSSL(False);
+
+  Result := inherited GetSocketHandler(UseSSL);
 end;
 
 function TSimbaHTTPClient.GetResponseHeaders: TStrings;

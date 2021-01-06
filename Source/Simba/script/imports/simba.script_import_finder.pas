@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_Finder(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Finder(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -273,7 +273,7 @@ begin
     PIntegerMatrix(Result)^ := IOManager.ReturnMatrix(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^ - PInt32(Params^[0])^ + 1, PInt32(Params^[3])^ - PInt32(Params^[1])^ + 1);
 end;
 
-procedure Lape_Import_Finder(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Finder(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin

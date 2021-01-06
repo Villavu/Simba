@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_DTM(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_DTM(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -63,7 +63,7 @@ begin
   PBoolean(Result)^ := SimbaScript.Client.MDTMs.ExistsDTM(PInt32(Params^[0])^);
 end;
 
-procedure Lape_Import_DTM(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_DTM(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin

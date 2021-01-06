@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_Arrays_Algorithms(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Arrays_Algorithms(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -123,11 +123,6 @@ begin
   P2DPointArray(Result)^ := SplitTPA(PPointArray(Params^[0])^, PInt32(Params^[1])^);
 end;
 
-procedure Lape_FloodFillTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  P2DPointArray(Result)^ := FloodFillTPA(PPointArray(Params^[0])^);
-end;
-
 procedure Lape_FilterPointsPie(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   FilterPointsPie(PPointArray(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, False);
@@ -166,11 +161,6 @@ end;
 procedure Lape_GetSamePointsATPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   Pboolean(Result)^ := GetSamePointsATPA(P2DPointArray(Params^[0])^, PPointArray(Params^[1])^);
-end;
-
-procedure Lape_FindTextTPAinTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := FindTextTPAinTPA(PInt32(Params^[0])^, PPointArray(Params^[1])^, PPointArray(Params^[2])^, PPointArray(Params^[3])^);
 end;
 
 procedure Lape_SortCircleWise(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -448,7 +438,7 @@ begin
   ClearSameIntegers(PIntegerArray(Params^[0])^);
 end;
 
-procedure Lape_Import_Arrays_Algorithms(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Arrays_Algorithms(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -483,7 +473,6 @@ begin
     addGlobalFunc('function SplitTPA(const arr: TPointArray; Dist: Int32): T2DPointArray', @Lape_SplitTPA);
     addGlobalFunc('function ClusterTPAEx(const TPA: TPointArray; width, height: Int32): T2DPointArray;', @Lape_ClusterTPAEx);
     addGlobalFunc('function ClusterTPA(const TPA: TPointArray; dist: Int32): T2DPointArray;', @Lape_ClusterTPA);
-    addGlobalFunc('function FloodFillTPA(const TPA: TPointArray): T2DPointArray', @Lape_FloodFillTPA);
     addGlobalFunc('procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Int32);', @Lape_FilterPointsPie);
     addGlobalFunc('procedure FilterPointsDist(var Points: TPointArray; const MinDist, MaxDist: Extended; Mx, My: Int32);', @Lape_FilterPointsDist);
     addGlobalFunc('procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Int32);', @Lape_FilterPointsLine);
@@ -493,7 +482,6 @@ begin
     addGlobalFunc('function GetTPABounds(const TPA: TPointArray): TBox', @Lape_GetTPABounds);
     addGlobalFunc('function FindTPAinTPA(const SearchTPA, TotalTPA: TPointArray; var Matches: TPointArray): Boolean', @Lape_FindTPAinTPA);
     addGlobalFunc('function GetSamePointsATPA(const ATPA: T2DPointArray; var Matches: TPointArray): Boolean', @Lape_GetSamePointsATPA);
-    addGlobalFunc('function FindTextTPAinTPA(Height: Int32; const SearchTPA, TotalTPA: TPointArray; var Matches: TPointArray): Boolean', @Lape_FindTextTPAinTPA);
     addGlobalFunc('procedure SortCircleWise(var TPA: TPointArray; const cx, cy, StartDegree: Int32; SortUp, ClockWise: Boolean);', @Lape_SortCircleWise);
     addGlobalFunc('procedure LinearSort(var TPA: TPointArray; cx, cy, sd: Int32; SortUp: Boolean);', @Lape_LinearSort);
     addGlobalFunc('function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint', @Lape_RotatePoint);

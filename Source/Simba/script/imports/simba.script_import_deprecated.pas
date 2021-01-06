@@ -6,14 +6,14 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_Deprecated(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Deprecated(Compiler: TSimbaScript_Compiler);
 
 implementation
 
 uses
   DCPcrypt2, DCPmd4, DCPmd5, DCPtiger, DCPsha1, DCPsha256, DCPsha512, DCPhaval, DCPripemd128, DCPripemd160, DCPrc2,
   forms, simba.tpa, math {$IFDEF WINDOWS}, windows{$ENDIF},
-  simba.iomanager;
+  simba.iomanager, simba.bitmap;
 
 type
   THashType = (htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160,
@@ -168,6 +168,11 @@ begin
   PString(Result)^ := SimbaScript.Client.MOCR.GetUpTextAtEx(PInt32(Params^[0])^, PInt32(Params^[1])^, True, PString(Params^[2])^);
 end;
 
+procedure Lape_FloodFillTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  P2DPointArray(Result)^ := FloodFillTPA(PPointArray(Params^[0])^);
+end;
+
 type
   TMessageBox = class
     Params: PParamArray;
@@ -301,7 +306,18 @@ begin
   PPointArray(Result)^ := CombineTPA(PPointArray(Params^[0])^, PPointArray(Params^[1])^);
 end;
 
-procedure Lape_Import_Deprecated(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_FindTextTPAinTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  system.PBoolean(Result)^ := FindTextTPAinTPA(PInt32(Params^[0])^, PPointArray(Params^[1])^, PPointArray(Params^[2])^, PPointArray(Params^[3])^);
+end;
+
+procedure Lape_FilterUpTextByCharacteristics(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  with SimbaScript.Client do
+    MOCR.FilterUpTextByCharacteristics(PMufasaBitmap(Params^[0])^);
+end;
+
+procedure Lape_Import_Deprecated(Compiler: TSimbaScript_Compiler);
 
   function Deprecated(Message: String): String;
   begin
@@ -355,10 +371,33 @@ begin
     addGlobalFunc('function rs_GetUpTextAtEx(x, y: integer; shadow: boolean; fontname: string): string; deprecated;', @Lape_rs_GetUpTextAtEx);
 
     addGlobalFunc('function MessageBox(Text, Caption: String; Flags: Int32): Int32;' + Deprecated('Use MessageDlg'), @Lape_MessageBox);
+    addGlobalFunc('procedure ocr_FilterUpTextByCharacteristics(bmp: TMufasaBitmap); deprecated;', @Lape_FilterUpTextByCharacteristics);
+    addGlobalFunc('function FindTextTPAinTPA(Height: Int32; const SearchTPA, TotalTPA: TPointArray; var Matches: TPointArray): Boolean;' + Deprecated('Use FindText*'), @Lape_FindTextTPAinTPA);
+    addGlobalFunc('function FloodFillTPA(const TPA: TPointArray): T2DPointArray;' + Deprecated('Use ClusterTPA(TPA,1)'), @Lape_FloodFillTPA);
 
     addDelayedCode('{$HINTS OFF}'                                                                                                                             + LineEnding +
                    'type'                                                                                                                                     + LineEnding +
                    '  TSP_Property = (SP_OnTerminate, SP_WriteTimeStamp);'                                                                                    + LineEnding +
+                   ''                                                                                                                                         + LineEnding +
+                   'procedure IncEx(var X: Int32; Increase: Int32); deprecated ' + #39 + 'Replace with Inc' + #39 + ';'                                       + LineEnding +
+                   'begin'                                                                                                                                    + LineEnding +
+                   '  Inc(X, Increase);'                                                                                                                      + LineEnding +
+                   'end;'                                                                                                                                     + LineEnding +
+                   ''                                                                                                                                         + LineEnding +
+                   'procedure DecEx(var X: Int32; Decrease: Int32); deprecated ' + #39 + 'Replace with Dec' + #39 + ';'                                       + LineEnding +
+                   'begin'                                                                                                                                    + LineEnding +
+                   '  Dec(X, Decrease);'                                                                                                                      + LineEnding +
+                   'end;'                                                                                                                                     + LineEnding +
+                   ''                                                                                                                                         + LineEnding +
+                   'function RandomE: Extended; deprecated ' + #39 + 'Replace with Random' + #39 + ';'                                                        + LineEnding +
+                   'begin'                                                                                                                                    + LineEnding +
+                   '  Result := Random();'                                                                                                                    + LineEnding +
+                   'end;'                                                                                                                                     + LineEnding +
+                   ''                                                                                                                                         + LineEnding +
+                   'function Pow(Base, Exponent: Extended): Extended; deprecated ' + #39 + 'Replace with Power OR ** operator' + #39 + ';'                    + LineEnding +
+                   'begin'                                                                                                                                    + LineEnding +
+                   '  Result := Power(Base, Exponent);'                                                                                                       + LineEnding +
+                   'end;'                                                                                                                                     + LineEnding +
                    ''                                                                                                                                         + LineEnding +
                    'procedure SetScriptProp(Prop: TSP_Property; Value: TVariantArray); deprecated;'                                                           + LineEnding +
                    'begin'                                                                                                                                    + LineEnding +

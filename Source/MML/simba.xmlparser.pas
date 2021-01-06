@@ -30,7 +30,7 @@ unit simba.xmlparser;
 interface
 
 uses
-  Classes, {$ifndef FPC}Generics.Defaults, Generics.Collections{$else}fgl{$endif};
+  Classes,  Generics.Collections;
 
 type
   TXmlNodeList = class;
@@ -41,7 +41,7 @@ type
     Value: String; // Attribute value (always as String)
   end;
 
-  TXmlAttributeList = class({$ifndef FPC}TObjectList<TXmlAttribute>{$else}TFPGObjectList<TXMLAttribute>{$endif})
+  TXmlAttributeList = class(TObjectList<TXmlAttribute>)
   public
     function Find(AttrName: String): TXmlAttribute;
     // Find an Attribute by Name (not case sensitive)

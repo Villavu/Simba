@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_LCLProcess(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLProcess(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -55,7 +55,7 @@ begin
   POutputPipeStream(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TOutputPipeStream(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TOutputPipeStream(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -104,7 +104,7 @@ begin
   PInputPipeStream(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TInputPipeStream(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TInputPipeStream(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -527,7 +527,7 @@ begin
   PinputPipeStream(Result)^ := PProcess(Params^[0])^.Stderr;
 end;
 
-procedure Lape_Import_TProcess(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TProcess(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -580,7 +580,7 @@ begin
   end;
 end;
 
-procedure Lape_Import_LCLProcess(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLProcess(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
    begin

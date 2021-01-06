@@ -6,17 +6,12 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_Math(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Math(Compiler: TSimbaScript_Compiler);
 
 implementation
 
 uses
   simba.math, math;
-
-procedure Lape_pow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  Pextended(Result)^ := pow(PExtended(Params^[0])^, PExtended(Params^[1])^);
-end;
 
 procedure Lape_RiemannGauss(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -61,16 +56,6 @@ end;
 procedure Lape_ArcTan2(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PExtended(Result)^ := ArcTan2(PExtended(Params^[0])^, PExtended(Params^[1])^);
-end;
-
-procedure Lape_IncEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  IncEx(PInt32(Params^[0])^, PInt32(Params^[1])^);
-end;
-
-procedure Lape_DecEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  DecEx(PInt32(Params^[0])^, PInt32(Params^[1])^);
 end;
 
 procedure Lape_Factorial(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -268,22 +253,18 @@ begin
   PPoint(Result)^ := MiddleBox(PBox(Params^[0])^);
 end;
 
-procedure Lape_Import_Math(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Math(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
     Section := 'Math';
 
-    addGlobalFunc('function Pow(base, exponent: Extended): Extended', @Lape_pow);
     addGlobalFunc('function RiemannGauss(Xstart, StepSize, Sigma: Extended; AmountSteps: Int32): Extended', @Lape_RiemannGauss);
     addGlobalFunc('function DiscreteGauss(Xstart, Xend: Int32; sigma: Extended): TExtendedArray', @Lape_DiscreteGauss);
     addGlobalFunc('function GaussMatrix(N: Int32; sigma: Extended): T2DExtendedArray', @Lape_GaussMatrix);
     addGlobalFunc('function Point(x, y: Int32): TPoint', @Lape_Point);
     addGlobalFunc('function Distance(x1, y1, x2, y2: Int32): Int32', @Lape_Distance);
     addGlobalFunc('function RandomRange(const aFrom, aTo: Int32): Int32', @Lape_RandomRange);
-    addGlobalFunc('function RandomE: Extended', @Lape_RandomE);
-    addGlobalFunc('procedure IncEx(var x: Int32; increase: Int32);', @Lape_IncEx);
-    addGlobalFunc('procedure DecEx(var x: Int32; Decrease: Int32);', @Lape_DecEx);
     addGlobalFunc('function Factorial(number: longword): Int64', @Lape_Factorial);
     addGlobalFunc('function BinCoe(a, b: LongInt): Extended', @Lape_BinCoe);
     addGlobalFunc('function FixD(Degrees: Extended): Extended', @Lape_FixD);

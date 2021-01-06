@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_Crypto(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Crypto(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -91,7 +91,7 @@ begin
   PString(Result)^ := HMACSHA1(PString(Params^[0])^, PString(Params^[1])^);
 end;
 
-procedure Lape_Import_Crypto(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Crypto(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin

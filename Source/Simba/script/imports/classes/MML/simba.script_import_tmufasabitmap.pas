@@ -7,7 +7,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_TMufasaBitmap(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TMufasaBitmap(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -542,7 +542,7 @@ begin
   PPoint(Result)^ := PMufasaBitmap(Params^[0])^.Center;
 end;
 
-procedure Lape_Import_TMufasaBitmap(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TMufasaBitmap(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin

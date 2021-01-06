@@ -5,7 +5,7 @@ unit simba.package;
 interface
 
 uses
-  classes, sysutils, fgl, inifiles,
+  classes, sysutils, generics.collections, inifiles,
   simba.package_github_releases;
 
 type
@@ -59,7 +59,7 @@ type
     constructor Create(INI: TINIFile; Section: String); overload;
   end;
 
-  TSimbaPackageList = class(specialize TFPGObjectList<TSimbaPackage>)
+  TSimbaPackageList = class(specialize TObjectList<TSimbaPackage>)
   public
     // Fills from packages.ini
     procedure Load;

@@ -5,7 +5,7 @@ unit simba.scripttabhistory;
 interface
 
 uses
-  classes, sysutils, fgl,
+  classes, sysutils, generics.collections,
   simba.scripttab;
 
 type
@@ -16,7 +16,7 @@ type
       Tab: TSimbaScriptTab;
       CaretX, CaretY: Int32;
     end;
-    THistoryList = specialize TFPGObjectList<THistoryPoint>;
+    THistoryList = specialize TObjectList<THistoryPoint>;
   protected
     FIndex: Int32;
     FHistory: THistoryList;

@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_Time_Date(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Time_Date(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -54,7 +54,7 @@ begin
   PInt64(Result)^ := DateTimeToUnix(PDateTime(Params^[0])^, PBoolean(Params^[1])^);
 end;
 
-procedure Lape_Import_Time_Date(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Time_Date(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
