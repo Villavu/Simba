@@ -19,7 +19,7 @@ interface
 uses
   Classes, SysUtils;
 
-procedure InitializeOpenSSL;
+procedure InitializeOpenSSL(Extract: Boolean);
 
 implementation
 
@@ -78,9 +78,10 @@ begin
   Result := True; // Loop all resources
 end;
 
-procedure InitializeOpenSSL;
+procedure InitializeOpenSSL(Extract: Boolean);
 begin
-  EnumResourceNames(HINSTANCE, RT_RCDATA, @ExtractOpenSSL, 0);
+  if Extract then
+    EnumResourceNames(HINSTANCE, RT_RCDATA, @ExtractOpenSSL, 0);
 
   DLLUtilName := SimbaSettings.Environment.OpenSSLPath.Value + DLLUtilName;
   DLLSSLName := SimbaSettings.Environment.OpenSSLPath.Value + DLLSSLName;

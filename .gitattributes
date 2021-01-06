@@ -1,9 +1,3 @@
-* text=auto
-
-*.bmp binary
-*.png binary
 *.lrs binary
-
+*.res binary
 *.simba linguist-language=Pascal
-*.sex linguist-language=Pascal
-*.sei linguist-language=Pascal

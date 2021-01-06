@@ -7,7 +7,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_System(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_System(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -210,7 +210,7 @@ begin
   raise Exception.Create('AddOnTerminate: Global not found');
 end;
 
-procedure Lape_Import_System(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_System(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin

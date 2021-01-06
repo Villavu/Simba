@@ -210,6 +210,7 @@ begin
     if FCompiler.Compile() then
     begin
       WriteLn(Format('Succesfully compiled in %d milliseconds.', [GetTickCount64() - FStartTime]));
+      Flush(Output);
       if FCompileOnly then
         Exit;
 
@@ -235,6 +236,8 @@ begin
     on E: Exception do
       HandleException(E);
   end;
+
+  Flush(Output);
 end;
 
 procedure TSimbaScript.DoStateThread;

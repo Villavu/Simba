@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_SimbaImageBox(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_SimbaImageBox(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -43,7 +43,7 @@ begin
   PSimbaImageBox_Background(Params^[0])^.LoadFromPointer(PPRGB32(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[2])^);
 end;
 
-procedure Lape_Import_TSimbaImageBox_Background(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TSimbaImageBox_Background(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -88,7 +88,7 @@ begin
   PInteger(Result)^ := PSimbaImageBox_Overlay(Params^[0])^.DebugDTM(PMDTM(Params^[1])^);
 end;
 
-procedure Lape_Import_TSimbaImageBox_Overlay(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TSimbaImageBox_Overlay(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -238,10 +238,10 @@ begin
   PSimbaImageBox(Params^[0])^.OnDblClick := PNotifyEvent(Params^[1])^;
 end;
 
-procedure Lape_Import_SimbaImageBox(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_SimbaImageBox(Compiler: TSimbaScript_Compiler);
 begin
-  Lape_Import_TSimbaImageBox_Background(Compiler, Data);
-  Lape_Import_TSimbaImageBox_Overlay(Compiler, Data);
+  Lape_Import_TSimbaImageBox_Background(Compiler);
+  Lape_Import_TSimbaImageBox_Overlay(Compiler);
 
   with Compiler do
   begin

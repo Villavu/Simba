@@ -5,13 +5,13 @@ unit simba.eventhandlerlist;
 interface
 
 uses
-  classes, sysutils, fgl, syncobjs;
+  classes, sysutils, generics.collections, syncobjs;
 
 type
   TNotifyEventHandlers = class
   protected
   type
-    TNotifyEventList = specialize TFPGList<TNotifyEvent>;
+    TNotifyEventList = specialize TList<TNotifyEvent>;
   protected
     FList: TNotifyEventList;
     FLock: TCriticalSection;

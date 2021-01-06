@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_Process(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Process(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -38,7 +38,7 @@ begin
   PStringArray(Result)^ := GetCommandLine();
 end;
 
-procedure Lape_Import_Process(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Process(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin

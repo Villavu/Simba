@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_LCLForms(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLForms(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -202,7 +202,7 @@ begin
   PSizeConstraints(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TSizeConstraints(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TSizeConstraints(Compiler: TSimbaScript_Compiler);
 begin
  with Compiler do
  begin
@@ -731,7 +731,7 @@ begin
   PCustomForm(Params^[0])^.Free;
 end;
 
-procedure Lape_Import_TCustomForm(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomForm(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1194,7 +1194,7 @@ begin
   PKeyPressEvent(Result)^ := PForm(Params^[0])^.OnKeyPress;
 end;
 
-procedure Lape_Import_TForm(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TForm(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1254,7 +1254,7 @@ begin
   PScrollBox(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TScrollBox(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TScrollBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1265,7 +1265,7 @@ begin
   end;
 end;
 
-procedure Lape_Import_LCLForms(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLForms(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin

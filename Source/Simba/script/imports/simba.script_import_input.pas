@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_Input(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Input(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -75,7 +75,7 @@ begin
   PInt32(Result)^ := SimbaScript.Client.IOManager.GetKeyCode(PChar(Params^[0])^);
 end;
 
-procedure Lape_Import_Input(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Input(Compiler: TSimbaScript_Compiler);
 var
   i: Int32;
 begin

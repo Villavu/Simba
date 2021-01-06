@@ -7,7 +7,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_TMOCR(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TMOCR(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -145,7 +145,7 @@ begin
   PPointArray(Result)^ := PMOCR(Params^[0])^.TextToFontTPA(PlpString(Params^[1])^, PFont(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
 end;
 
-procedure Lape_Import_TMOCR(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TMOCR(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin

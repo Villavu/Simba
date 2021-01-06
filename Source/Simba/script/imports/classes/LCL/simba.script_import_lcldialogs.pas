@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_LCLDialogs(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLDialogs(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -65,7 +65,7 @@ begin
   PLCLComponent(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TLCLComponent(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TLCLComponent(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -225,7 +225,7 @@ begin
   PCommonDialog(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCommonDialog(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCommonDialog(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -382,7 +382,7 @@ begin
   PFileDialog(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TFileDialog(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TFileDialog(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -471,7 +471,7 @@ begin
   POpenDialog(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TOpenDialog(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TOpenDialog(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -523,7 +523,7 @@ begin
   PColorDialog(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TColorDialog(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TColorDialog(Compiler: TSimbaScript_Compiler);
 begin
    with Compiler do
    begin
@@ -536,7 +536,7 @@ begin
    end;
 end;
 
-procedure Lape_Import_LCLDialogs(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLDialogs(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
    begin

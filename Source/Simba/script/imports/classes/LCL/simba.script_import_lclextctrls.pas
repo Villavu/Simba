@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_LCLExtCtrls(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLExtCtrls(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -107,7 +107,7 @@ begin
   PCustomTimer(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomTimer(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomTimer(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -135,7 +135,7 @@ begin
   PTimer(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TTimer(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TTimer(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -253,7 +253,7 @@ begin
   PCustomImage(Params^[0])^.OnMouseUp := PMouseEvent(Params^[1])^;
 end;
 
-procedure Lape_Import_TCustomImage(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomImage(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -335,7 +335,7 @@ begin
   PImage(Params^[0])^.OnMouseMove := PMouseMoveEvent(Params^[1])^;
 end;
 
-procedure Lape_Import_TImage(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TImage(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -423,7 +423,7 @@ begin
   PCustomPanel(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomPanel(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomPanel(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -450,7 +450,7 @@ begin
   PPanel(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TPanel(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TPanel(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -515,7 +515,7 @@ begin
   PShape(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TShape(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TShape(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -530,7 +530,7 @@ begin
   end;
 end;
 
-procedure Lape_Import_LCLExtCtrls(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLExtCtrls(Compiler: TSimbaScript_Compiler);
 begin
    with Compiler do
    begin

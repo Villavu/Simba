@@ -87,7 +87,6 @@ function RemoveDistTPointArray(x, y, dist: Integer;const ThePoints: TPointArray;
 function GetATPABounds(const ATPA: T2DPointArray): TBox;
 function GetTPABounds(const TPA: TPointArray): TBox;
 function FindTPAinTPA(SearchTPA: TPointArray; const TotalTPA: TPointArray; var Matches: TPointArray): Boolean;
-function FindTextTPAinTPA(Height : integer;const SearchTPA, TotalTPA: TPointArray; var Matches: TPointArray): Boolean;
 function GetSamePointsATPA(const ATPA : T2DPointArray; var Matches : TPointArray) : boolean;
 function FindGapsTPA(const TPA: TPointArray; MinPixels: Integer): T2DPointArray;
 procedure SortCircleWise(var tpa: TPointArray; const cx, cy, StartDegree: Integer; SortUp, ClockWise: Boolean);
@@ -123,6 +122,7 @@ function CopyTPA(const TPA : TPointArray) : TPointArray;
 function CopyATPA(const ATPA : T2DPointArray) : T2DPointArray;
 function PointsInRangeOf(Points, Other: TPointArray; MinDist, MaxDist: Double): TPointArray; overload;
 function PointsInRangeOf(Points, Other: TPointArray; MinDistX, MinDistY, MaxDistX, MaxDistY: Double): TPointArray; overload;
+function FindTextTPAinTPA(Height : integer;const SearchTPA, TotalTPA: TPointArray; var Matches: TPointArray): Boolean;
 
 implementation
 

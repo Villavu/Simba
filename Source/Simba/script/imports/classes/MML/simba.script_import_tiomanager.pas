@@ -7,7 +7,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_TIOManager(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TIOManager(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -295,7 +295,7 @@ begin
   PTarget(Result)^ := PIOManager(Params^[0])^.SetKeyMouseTargetEx(POSWindow(Params^[1])^);
 end;
 
-procedure Lape_Import_TIOManager(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TIOManager(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin

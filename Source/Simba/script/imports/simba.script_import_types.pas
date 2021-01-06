@@ -6,11 +6,11 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_Types(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Types(Compiler: TSimbaScript_Compiler);
 
 implementation
 
-procedure Lape_Import_Types(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Types(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin

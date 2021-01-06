@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_LCLComCtrls(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLComCtrls(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -180,7 +180,7 @@ begin
   PCustomProgressBar(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomProgressBar(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomProgressBar(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -212,7 +212,7 @@ begin
   PProgressBar(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TProgressBar(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TProgressBar(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -421,7 +421,7 @@ begin
   PCustomTrackBar(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomTrackBar(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomTrackBar(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -460,7 +460,7 @@ begin
   PTrackBar(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TTrackBar(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TTrackBar(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -572,7 +572,7 @@ begin
   PCustomCheckListBox(Params^[0])^.OnItemClick := PCheckListClicked(Params^[1])^;
 end;
 
-procedure Lape_Import_TCustomCheckListBox(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomCheckListBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -604,7 +604,7 @@ begin
   PCheckListBox(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCheckListBox(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCheckListBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -701,7 +701,7 @@ begin
   PCustomPage(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomPage(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomPage(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -902,7 +902,7 @@ begin
   PCustomTabControl(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomTabControl(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomTabControl(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -952,7 +952,7 @@ begin
   PTabSheet(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TTabSheet(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TTabSheet(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1011,7 +1011,7 @@ begin
   PPageControl(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TPageControl(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TPageControl(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1025,7 +1025,7 @@ begin
   end;
 end;
 
-procedure Lape_Import_TStatusBar_Forward(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TStatusBar_Forward(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
     addClass('TStatusBar', 'TWinControl');
@@ -1109,7 +1109,7 @@ begin
   PStatusPanel(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TStatusPanel(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TStatusPanel(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1162,7 +1162,7 @@ begin
   PStatusPanels(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TStatusPanels(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TStatusPanels(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1302,7 +1302,7 @@ begin
   PStatusBar(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TStatusBar(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TStatusBar(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1324,7 +1324,7 @@ begin
   end;
 end;
 
-procedure Lape_Import_LCLComCtrls(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLComCtrls(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin

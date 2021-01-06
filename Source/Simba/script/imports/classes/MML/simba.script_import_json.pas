@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_JSON(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_JSON(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -254,7 +254,7 @@ begin
   PJSONArray(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TJSONArray(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TJSONArray(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -555,7 +555,7 @@ begin
   PJSONObject(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TJSONObject(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TJSONObject(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -603,7 +603,7 @@ begin
   end;
 end;
 
-Procedure Lape_Import_JSON(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+Procedure Lape_Import_JSON(Compiler: TSimbaScript_Compiler);
 begin
   Lape_Import_TJSONArray(Compiler);
   Lape_Import_TJSONObject(Compiler);

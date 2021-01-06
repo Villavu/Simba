@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_Matrix(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Matrix(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -119,7 +119,7 @@ begin
   TPointArray(Result^) := MatrixArgMulti(TSingleMatrix(Params^[0]^), Int32(Params^[1]^), Boolean(Params^[2]^));
 end;
 
-procedure Lape_Import_Matrix(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Matrix(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin

@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_LCLGraphics(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLGraphics(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -87,7 +87,7 @@ begin
   PGraphicsObject(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TGraphicsObject(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TGraphicsObject(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -281,7 +281,7 @@ begin
   PFont(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TFont(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TFont(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -401,7 +401,7 @@ begin
   PPen(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TPen(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TPen(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -462,7 +462,7 @@ begin
   PBrush(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TBrush(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TBrush(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -880,7 +880,7 @@ begin
   PAntialiasingMode(Result)^ := PCanvas(Params^[0])^.AntialiasingMode;
 end;
 
-procedure Lape_Import_TCanvas(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCanvas(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1081,7 +1081,7 @@ begin
     PGraphic(Params^[0])^.LoadFromClipboardFormat(CF_Bitmap);
 end;
 
-procedure Lape_Import_TGraphic(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TGraphic(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1318,7 +1318,7 @@ begin
   PBitmap(Params^[0])^.Mask(PInteger(Params^[3])^);
 end;
 
-procedure Lape_Import_TBitmap(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TBitmap(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1455,7 +1455,7 @@ begin
   PPicture(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TPicture(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TPicture(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1478,7 +1478,7 @@ begin
   end;
 end;
 
-procedure Lape_Import_LCLGraphics(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLGraphics(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin

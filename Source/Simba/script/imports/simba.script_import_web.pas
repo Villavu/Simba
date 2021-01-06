@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_Web(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Web(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -176,7 +176,7 @@ begin
   PString(Result)^ := SimbaScript.Client.MInternets.GetHTTPClient(PInt32(Params^[0])^).FormPost(PString(Params^[1])^, PString(Params^[2])^, PString(Params^[3])^, PStream(Params^[4])^);
 end;
 
-procedure Lape_Import_Web(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Web(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin

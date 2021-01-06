@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_OCR(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_OCR(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -67,13 +67,7 @@ begin
     PBoolean(Result)^ := MOCR.Fonts.IsFontLoaded(Pstring(Params^[0])^);
 end;
 
-procedure Lape_FilterUpTextByCharacteristics(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  with SimbaScript.Client do
-    MOCR.FilterUpTextByCharacteristics(PMufasaBitmap(Params^[0])^);
-end;
-
-procedure Lape_Import_OCR(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_OCR(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -88,7 +82,6 @@ begin
     addGlobalFunc('function LoadFont(FontName: String; Shadow: Boolean): Boolean', @Lape_LoadFont);
     addGlobalFunc('function FreeFont(FontName: String): Boolean', @Lape_FreeFont);
     addGlobalFunc('function IsFontLoaded(FontName: String): Boolean;', @Lape_IsFontLoaded);
-    addGlobalFunc('procedure ocr_FilterUpTextByCharacteristics(bmp: TMufasaBitmap);', @Lape_FilterUpTextByCharacteristics);
   end;
 end;
 

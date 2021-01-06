@@ -43,7 +43,7 @@ uses
   {$IFDEF WINDOWS}
   windows,
   {$ENDIF}
-  classes, interfaces, forms,
+  classes, interfaces, forms, sysutils,
   simba.main, simba.aboutform, simba.debugimage, simba.bitmapconv, simba.functionlistform,
   simba.scripttabsform, simba.debugform, simba.filebrowserform, simba.notesform,
   simba.package_form, simba.colorpicker_historyform, simba.settingsform, simba.associate,
@@ -92,6 +92,8 @@ begin
   {$IF DECLARED(SetHeapTraceOutput)}
   SetHeapTraceOutput('memory-leaks.trc');
   {$ENDIF}
+
+  FormatSettings.DecimalSeparator := '.';
 
   Application.Title := 'Simba';
   Application.Scaled := True;

@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_LCLSystem(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLSystem(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -57,7 +57,7 @@ begin
   PPersistent(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TPersistent(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TPersistent(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -239,7 +239,7 @@ begin
   PStream(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TStream(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TStream(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -310,7 +310,7 @@ begin
   PHandleStream(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_THandleStream(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_THandleStream(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -351,7 +351,7 @@ begin
   PFileStream(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TFileStream(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TFileStream(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -408,7 +408,7 @@ begin
   PCustomMemoryStream(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomMemoryStream(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomMemoryStream(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -467,7 +467,7 @@ begin
   PMemoryStream(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TMemoryStream(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TMemoryStream(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -532,7 +532,7 @@ begin
   PStringStream(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TStringStream(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TStringStream(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -748,7 +748,7 @@ begin
   PStrings(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TStrings(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TStrings(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -916,7 +916,7 @@ begin
   PStringList(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TStringList(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TStringList(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1047,7 +1047,7 @@ begin
   PComponent(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TComponent(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TComponent(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1073,7 +1073,7 @@ begin
   end;
 end;
 
-procedure Lape_Import_TCollection_Forward(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCollection_Forward(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
     addClass('TCollection', 'TPersistent');
@@ -1139,7 +1139,7 @@ begin
   PCollectionItem(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCollectionItem(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCollectionItem(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1245,7 +1245,7 @@ begin
   PCollection(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCollection(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCollection(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1266,7 +1266,7 @@ begin
   end;
 end;
 
-procedure Lape_Import_LCLSystem(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLSystem(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin

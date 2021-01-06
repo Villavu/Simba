@@ -1332,7 +1332,7 @@ end;
 procedure TSimbaForm.Setup(Data: PtrInt);
 begin
   if SimbaSettings.Environment.OpenSSLOnLaunch.Value then
-    InitializeOpenSSL();
+    InitializeOpenSSL(True);
 
   // Command line
   if (Application.ParamCount > 0) then

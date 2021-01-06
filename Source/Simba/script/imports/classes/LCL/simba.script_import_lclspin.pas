@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_LCLSpinCtrls(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLSpinCtrls(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -122,7 +122,7 @@ begin
   PCustomFloatSpinEdit(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomFloatSpinEdit(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomFloatSpinEdit(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -154,7 +154,7 @@ begin
   PFloatSpinEdit(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TFloatSpinEdit(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TFloatSpinEdit(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -225,7 +225,7 @@ begin
   PCustomSpinEdit(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TCustomSpinEdit(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TCustomSpinEdit(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -252,7 +252,7 @@ begin
   PSpinEdit(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TSpinEdit(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TSpinEdit(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -263,7 +263,7 @@ begin
   end;
 end;
 
-procedure Lape_Import_LCLSpinCtrls(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLSpinCtrls(Compiler: TSimbaScript_Compiler);
 begin
   Lape_Import_TCustomFloatSpinEdit(Compiler);
   Lape_Import_TFloatSpinEdit(Compiler);

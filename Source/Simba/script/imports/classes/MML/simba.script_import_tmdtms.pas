@@ -7,7 +7,7 @@ interface
 
 {$i import_uses}
 
-procedure Lape_Import_TMDTMS(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TMDTMS(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -68,7 +68,7 @@ begin
   PMDTMS(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TMDTMS(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TMDTMS(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin

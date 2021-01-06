@@ -7,7 +7,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_TTarget(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TTarget(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -199,7 +199,7 @@ begin
   PBoolean(Result)^ := PTarget(Params^[0])^.AutoFocus;
 end;
 
-procedure Lape_Import_TTarget(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TTarget(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin

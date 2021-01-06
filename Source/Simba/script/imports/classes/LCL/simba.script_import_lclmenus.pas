@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_LCLMenus(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLMenus(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -24,7 +24,7 @@ type
   TMenuItemArray = array of TMenuItem;
   PMenuItemArray = ^TMenuItemArray;
 
-procedure Lape_Import_Lape_TMenu_Forward(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_Lape_TMenu_Forward(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -375,7 +375,7 @@ begin
   PMenuItem(Params^[0])^.Add(PMenuItem(Result)^);
 end;
 
-procedure Lape_Import_TMenuItem(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TMenuItem(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -543,7 +543,7 @@ begin
   PMenu(Params^[0])^.Items.Add(PMenuItem(Result)^);
 end;
 
-procedure Lape_Import_TMenu(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TMenu(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -576,7 +576,7 @@ begin
   PMainMenu(Params^[0])^.Free();
 end;
 
-procedure Lape_Import_TMainMenu(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_TMainMenu(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -587,7 +587,7 @@ begin
   end;
 end;
 
-procedure Lape_Import_LCLMenus(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_LCLMenus(Compiler: TSimbaScript_Compiler);
 begin
   Lape_Import_Lape_TMenu_Forward(Compiler);
   Lape_Import_TMenuItem(Compiler);

@@ -6,7 +6,7 @@ interface
 
 {$i import_uses.inc}
 
-procedure Lape_Import_ColorMath(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_ColorMath(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -118,7 +118,7 @@ begin
   PColor(Result)^ := ColorToGray(PInt32(Params^[0])^);
 end;
 
-procedure Lape_Import_ColorMath(Compiler: TSimbaScript_Compiler; Data: Pointer = nil);
+procedure Lape_Import_ColorMath(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
