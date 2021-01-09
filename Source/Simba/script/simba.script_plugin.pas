@@ -3,12 +3,13 @@ unit simba.script_plugin;
 {$DEFINE DEPRECATED}
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
 uses
   classes, sysutils, dynlibs,
-  simba.script_compiler, simba.mufasabase;
+  simba.script_compiler;
 
 type
   TSimbaSynchronizeMethod = procedure(Data: Pointer); cdecl;
@@ -365,9 +366,9 @@ begin
   FSimbaMethods.MemSize := @_MemSize;
   FSimbaMethods.ReAllocMem := @_ReAllocMem;
 
-  FSimbaInfomation.FileName := @FFileName[1];
-  FSimbaInfomation.SimbaMajor := SimbaMajor;
-  FSimbaInfomation.SimbaVersion := SimbaVersion;
+  FSimbaInfomation.FileName := PChar(FFileName);
+  FSimbaInfomation.SimbaMajor := SIMBA_MAJOR;
+  FSimbaInfomation.SimbaVersion := SIMBA_VERSION;
 
   {$IFDEF DEPRECATED}
   FSimbaMemoryAllocators.GetMem := @_GetMem;

@@ -50,7 +50,7 @@ uses
   simba.script, simba.script_dump;
 
 type
-  TApplicationHelper = class Helper for TApplication
+  TApplicationHelper = class helper for TApplication
     procedure CreateForm(InstanceClass: TComponentClass; out Reference);
     procedure Terminate(Sender: TObject);
   end;

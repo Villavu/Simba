@@ -23,6 +23,7 @@
 unit simba.main;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
@@ -274,7 +275,7 @@ implementation
 
 uses
   lclintf, synexporthtml, anchordocking, simba.script_dump, simba.openssl,
-  simba.mufasatypes, simba.misc, simba.mufasabase, simba.settings,
+  simba.mufasatypes, simba.misc, simba.settings,
   simba.files, simba.codeparser, simba.codeinsight,
   simba.debugimage, simba.bitmapconv, simba.colorpicker_historyform, simba.aca,
   simba.dtmeditor, simba.scriptinstance, simba.package_form, simba.aboutform,
@@ -445,7 +446,7 @@ begin
 
   FExceptionMessage := TStringList.Create();
   FExceptionMessage.Add('');
-  FExceptionMessage.Add('Simba ' + IntToStr(SimbaVersion) + ' encountered an unhandled exception.');
+  FExceptionMessage.Add('Simba ' + IntToStr(SIMBA_VERSION) + ' encountered an unhandled exception.');
   FExceptionMessage.Add('');
 
   if (E <> nil) then

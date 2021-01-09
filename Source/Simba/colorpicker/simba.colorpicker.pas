@@ -29,9 +29,9 @@ type
     FColor: Int32;
     FPoint: TPoint;
     FIOManager: TIOManager;
-    FOffset: TPoint;
     FHint: TSimbaColorPickerHint;
     FImage: TImage;
+
     procedure ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   public
@@ -119,11 +119,13 @@ procedure TSimbaColorPicker.ImageMouseMove(Sender: TObject; Shift: TShiftState; 
 var
   PixelX, PixelY: Int32;
 begin
-  FHint.Left := X + 15;
+  FIOManager.GetMousePos(FPoint.X, FPoint.Y);
+
+  FHint.Left := X + 20;
   FHint.Top := Y - (FHint.Height div 2);
 
   FHint.ColorLabel.Caption := 'Color: ' + IntToStr(FImage.Picture.Bitmap.Canvas.Pixels[X, Y]);
-  FHint.PositionLabel.Caption := 'Position: ' + IntToStr(X - FOffset.X) + ', ' + IntToStr(Y - FOffset.Y);
+  FHint.PositionLabel.Caption := 'Position: ' + IntToStr(FPoint.X) + ', ' + IntToStr(FPoint.Y);
 
   FHint.Image.Picture.Bitmap.BeginUpdate(True);
   FHint.Image.Picture.Bitmap.Canvas.AntialiasingMode := amOff;
@@ -141,8 +143,7 @@ end;
 
 procedure TSimbaColorPicker.ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  FPoint.X := FForm.Left + X - FOffset.X;
-  FPoint.Y := FForm.Top + Y - FOffset.Y;
+  FIOManager.GetMousePos(FPoint.X, FPoint.Y);
 
   FColor := TImage(Sender).Picture.Bitmap.Canvas.Pixels[X, Y];
 
@@ -192,8 +193,6 @@ begin
   FIOManager.SetTarget(TargetWindow);
   if not FIOManager.TargetValid() then
     FIOManager.SetDesktop();
-
-  FIOManager.GetPosition(FOffset.X, FOffset.Y);
 
   FHint := TSimbaColorPickerHint.CreateNew(nil);
   FHint.Show();

@@ -76,9 +76,9 @@ type
   procedure ZipFiles(const ToFolder: string; const Files: TStringArray);
 
 implementation
+
 uses
-  {$IFDEF MSWINDOWS}Windows,{$ENDIF} IniFiles, simba.client, FileUtil,
-  LazFileUtils, LazUTF8, Zipper, dynlibs;
+  IniFiles, FileUtil, LazFileUtils, LazUTF8, Zipper, dynlibs;
 
 function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
 var

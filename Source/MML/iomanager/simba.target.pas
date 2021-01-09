@@ -29,7 +29,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.mufasatypes, simba.oswindow, simba.eventhandlerlist;
+  simba.mufasatypes, simba.eventhandlerlist;
 
 type
   PTarget = ^TTarget;

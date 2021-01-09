@@ -24,7 +24,7 @@
 unit simba.aboutform;
 
 {$mode objfpc}{$H+}
-{$MACRO ON}
+{$i simba.inc}
 
 interface
 
@@ -48,16 +48,13 @@ var
 
 implementation
 
-uses
-  simba.mufasabase;
-
 procedure TSimbaAboutForm.FormCreate(Sender: TObject);
 begin
-  Self.Caption := Format('About Simba r%d', [SimbaVersion]);
-  Self.LabelRevision.Caption := Format('Revision %d', [SimbaVersion]);
+  Self.Caption := Format('About Simba r%d', [SIMBA_VERSION]);
+  Self.LabelRevision.Caption := Format('Revision %d', [SIMBA_VERSION]);
 
   AboutMemo.Lines.Add('Simba is released under the GPL license.');
-  AboutMemo.Lines.Add(Format('You are currently using version: %d',[SimbaVersion]));
+  AboutMemo.Lines.Add(Format('You are currently using version: %d',[SIMBA_VERSION]));
   AboutMemo.Lines.Add(Format('Compiled with FPC version %d.%d.%d', [FPC_VERSION, FPC_RELEASE, FPC_PATCH]));
   AboutMemo.Lines.Add('');
   AboutMemo.Lines.Add('Please report bugs at: http://bugs.villavu.com/');

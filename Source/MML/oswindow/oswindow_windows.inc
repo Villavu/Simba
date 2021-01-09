@@ -178,8 +178,6 @@ begin
 end;
 
 function TOSWindow_Helper.GetRelativeCursorPos: TPoint;
-var
-  B: TBox;
 begin
   Result := Default(TPoint);
 
