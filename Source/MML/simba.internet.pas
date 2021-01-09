@@ -124,9 +124,6 @@ type
 
 implementation
 
-uses
-  simba.client;
-
 function GetPage(URL: String): String;
 var
   HTTPClient: TSimbaHTTPClient;

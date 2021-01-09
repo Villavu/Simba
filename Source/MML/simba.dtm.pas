@@ -80,7 +80,7 @@ type
 implementation
 
 uses
-  simba.dtmutil, simba.client, simba.stringutil,
+  simba.dtmutil, simba.stringutil,
   graphics, math;
 
 constructor TMDTMS.Create(Owner: TObject);

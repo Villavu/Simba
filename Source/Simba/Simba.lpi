@@ -12,11 +12,10 @@
       <Title Value="Simba"/>
       <UseXPManifest Value="True"/>
       <XPManifest>
-        <DpiAware Value="True"/>
+        <DpiAware Value="True/PM"/>
       </XPManifest>
       <Icon Value="0"/>
     </General>
-    <LazDoc Paths="../../LazDoc"/>
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <MajorVersionNr Value="1"/>
@@ -36,7 +35,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
             <Libraries Value="../../Modules/lape/extensions/ffi/bin/win32"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/generics;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -59,10 +58,6 @@
             </CompilerMessages>
             <CustomOptions Value="-dStaticFFI
 -dLape_CDECL"/>
-            <ExecuteBefore>
-              <ShowAllMessages Value="True"/>
-              <CompileReasons Run="False"/>
-            </ExecuteBefore>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
@@ -75,7 +70,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/generics;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -113,7 +108,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/generics;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -135,10 +130,6 @@
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dLape_CDECL"/>
-            <ExecuteBefore>
-              <ShowAllMessages Value="True"/>
-              <CompileReasons Run="False"/>
-            </ExecuteBefore>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
@@ -154,7 +145,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/generics;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -176,10 +167,6 @@
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dLape_CDECL"/>
-            <ExecuteBefore>
-              <ShowAllMessages Value="True"/>
-              <CompileReasons Run="False"/>
-            </ExecuteBefore>
             <ExecuteAfter>
               <Command Value="macos/make-bundle.sh"/>
               <CompileReasons Run="False"/>
@@ -197,7 +184,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
             <Libraries Value="../../Modules/lape/extensions/ffi/bin/win64"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/generics;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -214,10 +201,6 @@
             </CompilerMessages>
             <CustomOptions Value="-dStaticFFI
 -dLape_CDECL"/>
-            <ExecuteBefore>
-              <ShowAllMessages Value="True"/>
-              <CompileReasons Run="False"/>
-            </ExecuteBefore>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
@@ -231,7 +214,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
             <Libraries Value="../../Modules/lape/extensions/ffi/bin/win32"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/generics;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -248,10 +231,6 @@
             </CompilerMessages>
             <CustomOptions Value="-dStaticFFI
 -dLape_CDECL"/>
-            <ExecuteBefore>
-              <ShowAllMessages Value="True"/>
-              <CompileReasons Run="False"/>
-            </ExecuteBefore>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
@@ -264,7 +243,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/generics;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -280,10 +259,6 @@
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dLape_CDECL"/>
-            <ExecuteBefore>
-              <ShowAllMessages Value="True"/>
-              <CompileReasons Run="False"/>
-            </ExecuteBefore>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
@@ -296,7 +271,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/generics;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -312,10 +287,6 @@
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dLape_CDECL"/>
-            <ExecuteBefore>
-              <ShowAllMessages Value="True"/>
-              <CompileReasons Run="False"/>
-            </ExecuteBefore>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
@@ -328,7 +299,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/generics;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -344,10 +315,6 @@
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dLape_CDECL"/>
-            <ExecuteBefore>
-              <ShowAllMessages Value="True"/>
-              <CompileReasons Run="False"/>
-            </ExecuteBefore>
             <ExecuteAfter>
               <Command Value="macos/make-bundle.sh"/>
               <CompileReasons Run="False"/>
@@ -391,7 +358,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="47">
+    <Units Count="49">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -628,6 +595,14 @@
         <Filename Value="../MML/simba.heaparray.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit46>
+      <Unit47>
+        <Filename Value="../MML/windows/simba.windows_helpers.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit47>
+      <Unit48>
+        <Filename Value="simba.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit48>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -638,7 +613,7 @@
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
       <Libraries Value="../../Modules/lape/extensions/ffi/bin/win64"/>
-      <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/generics;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes"/>
+      <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
       <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
@@ -661,10 +636,6 @@
       </CompilerMessages>
       <CustomOptions Value="-dStaticFFI
 -dLape_CDECL"/>
-      <ExecuteBefore>
-        <ShowAllMessages Value="True"/>
-        <CompileReasons Run="False"/>
-      </ExecuteBefore>
       <CreateMakefileOnBuild Value="True"/>
     </Other>
   </CompilerOptions>

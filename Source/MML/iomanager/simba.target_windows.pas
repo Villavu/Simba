@@ -28,7 +28,7 @@ unit simba.target_windows;
 interface
 
 uses
-  classes, sysutils, jwawinuser, windows,
+  classes, sysutils, windows,
   simba.mufasatypes, simba.oswindow, simba.target;
 
 type
@@ -54,8 +54,6 @@ type
     FWindow: TOSWindow;
     FAutoFocus: Boolean;
     FDC: HDC;
-    FIsDesktop: Boolean;
-    FIsRoot: Boolean;
     FBuffer: TWindowBuffer;
 
     function GetHandle: PtrUInt; override;
@@ -93,7 +91,7 @@ type
 implementation
 
 uses
-  dwmapi;
+  simba.windows_helpers;
 
 constructor TWindowBuffer.Create(AWidth, AHeight: Int32);
 begin
@@ -140,13 +138,15 @@ begin
     Value := GetDesktopWindow();
 
   FWindow := Value;
-  FIsDesktop := FWindow = GetDesktopWindow();
-  FIsRoot := FWindow = FWindow.GetRootWindow();
 
-  if FIsDesktop then
+  if (FWindow = GetDesktopWindow()) then
     FDC := GetDC(FWindow)
   else
     FDC := GetWindowDC(FWindow);
+
+  if (FWindow > 0) and SimbaWindowsHelpers.IsScaledAndDPIAware(FWindow) then
+    WriteLn('WARNING: Target window is performing it''s own scaling.' + LineEnding +
+            '         This script might not work if another display scaling level is used');
 end;
 
 function TWindowTarget.GetAutoFocus: Boolean;
@@ -173,64 +173,15 @@ procedure TWindowTarget.GetTargetBounds(out Bounds: TBox);
 var
   Attempts: Int32;
 begin
-  if FIsDesktop then
-  begin
-    Bounds.X1 := GetSystemMetrics(SM_XVIRTUALSCREEN);
-    Bounds.Y1 := GetSystemMetrics(SM_YVIRTUALSCREEN);
-    Bounds.X2 := GetSystemMetrics(SM_XVIRTUALSCREEN) + GetSystemMetrics(SM_CXVIRTUALSCREEN);
-    Bounds.Y2 := GetSystemMetrics(SM_YVIRTUALSCREEN) + GetSystemMetrics(SM_CYVIRTUALSCREEN);
-
-    Exit;
-  end;
-
   for Attempts := 1 to 5 do
   begin
-    if FWindow.GetBounds(Bounds) then
+    if SimbaWindowsHelpers.GetWindowBounds(FWindow, Bounds) then
       Exit;
 
     Self.InvalidTarget();
   end;
 
   raise Exception.CreateFmt('Invalid window handle: %d', [FWindow]);
-end;
-
-function __GetDesktopOffset(Handle: THandle; DC: HDC; Rect: PRect; Data: LParam): LongBool; stdcall;
-begin
-  with PPoint(Data)^ do
-  begin
-    if Rect^.Left < X then
-      X := Rect^.Left;
-    if Rect^.Top < Y then
-      Y := Rect^.Top;
-  end;
-
-  Result := True;
-end;
-
-// If using multi monitors with monitor on the left of the primary it will be in the negative values.
-procedure GetDesktopOffset(DC: HWND; var X, Y: Int32);
-var
-  Offset: TPoint;
-begin
-  Offset := Default(TPoint);
-
-  if EnumDisplayMonitors(DC, nil, @__GetDesktopOffset, PtrInt(@Offset)) then
-  begin
-    Inc(X, Offset.X);
-    Inc(Y, Offset.Y);
-  end;
-end;
-
-procedure GetRootOffset(Window: TOSWindow; var X, Y: Int32);
-var
-  R: array[0..1] of TRect;
-begin
-  if DwmCompositionEnabled() and (DwmGetWindowAttribute(Window, DWMWA_EXTENDED_FRAME_BOUNDS, @R[0], SizeOf(TRect)) = S_OK) then
-    if GetWindowRect(Window, R[1]) then
-    begin
-      Inc(X, R[0].Left - R[1].Left);
-      Inc(Y, R[0].Top - R[1].Top);
-    end;
 end;
 
 function TWindowTarget.ReturnData(X, Y, Width, Height: Int32): TRetData;
@@ -254,15 +205,7 @@ begin
 
   if Bounds.Contains(Bounds.X1 + X, Bounds.Y1 + Y, Width, Height) then
   begin
-    // BitBlt uses GetWindowRect area so must offset to real bounds if DwmCompositionEnabled.
-    if FIsRoot then
-      GetRootOffset(FWindow, X, Y);
-
-    // Multi monitor support.
-    if FIsDesktop then
-      GetDesktopOffset(FDC, X, Y);
-
-    if BitBlt(FBuffer.DC, 0, 0, Width, Height, FDC, X, Y, SRCCOPY) then
+    if SimbaWindowsHelpers.GetWindowImage(FWindow, FDC, FBuffer.DC, X, Y, Width, Height) then
     begin
       Result.Ptr := FBuffer.Data;
       Result.IncPtrWith := FBuffer.Width - Width;
@@ -289,15 +232,7 @@ begin
   begin
     Buffer := TWindowBuffer.Create(Width, Height);
 
-    // BitBlt uses GetWindowRect area so must offset to real bounds if DwmCompositionEnabled.
-    if FIsRoot then
-      GetRootOffset(FWindow, X, Y);
-
-    // Multi monitor support.
-    if FIsDesktop then
-      GetDesktopOffset(FDC, X, Y);
-
-    if BitBlt(Buffer.DC, 0, 0, Width, Height, FDC, X, Y, SRCCOPY) then
+    if SimbaWindowsHelpers.GetWindowImage(FWindow, FDC, FBuffer.DC, X, Y, Width, Height) then
     begin
       Result := GetMem(Width * Height * 4);
 
@@ -311,21 +246,11 @@ end;
 procedure TWindowTarget.GetMousePosition(out X, Y: Int32);
 var
   Position: TPoint;
-  Bounds: TBox;
 begin
-  GetCursorPos(Position);
+  Position := SimbaWindowsHelpers.GetMousePosition(FWindow);
 
-  if FIsDesktop then
-  begin
-    X := Position.X;
-    Y := Position.Y;
-  end else
-  begin
-    GetTargetBounds(Bounds);
-
-    X := Position.X - Bounds.X1;
-    Y := Position.Y - Bounds.Y1;
-  end;
+  X := Position.X;
+  Y := Position.Y;
 
   if FMouseClientAreaSet then
   begin
@@ -335,41 +260,28 @@ begin
 end;
 
 procedure TWindowTarget.MoveMouse(X, Y: Int32);
-var
-  Bounds: TBox;
 begin
   if FAutoFocus then
     ActivateClient();
 
   MouseClientAreaOffset(X, Y);
 
-  if FIsDesktop then
-    SetCursorPos(X, Y)
-  else
-  begin
-    GetTargetBounds(Bounds);
-    SetCursorPos(Bounds.X1 + X, Bounds.Y1 + Y);
-  end;
+  SimbaWindowsHelpers.SetMousePosition(FWindow, TPoint.Create(X, Y));
 end;
 
 procedure TWindowTarget.ScrollMouse(X, Y, Lines: Int32);
-const
-  MOUSEEVENTF_WHEEL = $800;
 var
   Input: TInput;
-  Bounds: TBox;
+  RealMousePos: TPoint;
 begin
-  GetTargetBounds(Bounds);
+  MoveMouse(X, Y);
 
-  if FAutoFocus then
-    ActivateClient();
-
-  MouseClientAreaOffset(X, Y);
+  GetCursorPos(RealMousePos); // unscaled etc
 
   Input := Default(TInput);
   Input._Type := INPUT_MOUSE;
-  Input.mi.dx := Bounds.X1 + X;
-  Input.mi.dy := Bounds.Y1 + Y;
+  Input.mi.dx := RealMousePos.X;
+  Input.mi.dy := RealMousePos.Y;
   Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_WHEEL;
   Input.mi.mouseData := -Lines * WHEEL_DELTA;
 
@@ -379,19 +291,16 @@ end;
 procedure TWindowTarget.HoldMouse(X, Y: Int32; Button: TClickType);
 var
   Input: TInput;
-  Bounds: TBox;
+  RealMousePos: TPoint;
 begin
-  GetTargetBounds(Bounds);
+  MoveMouse(X, Y);
 
-  if FAutoFocus then
-    ActivateClient();
-
-  MouseClientAreaOffset(X, Y);
+  GetCursorPos(RealMousePos); // unscaled etc
 
   Input := Default(TInput);
   Input._Type := INPUT_MOUSE;
-  Input.mi.dx := Bounds.X1 + X;
-  Input.mi.dy := Bounds.Y1 + Y;
+  Input.mi.dx := RealMousePos.X;
+  Input.mi.dy := RealMousePos.Y;
 
   case Button of
     MOUSE_LEFT: Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTDOWN;
@@ -400,12 +309,12 @@ begin
     MOUSE_EXTRA_1:
       begin
         Input.mi.mouseData := XBUTTON1;
-        Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or  MOUSEEVENTF_XDOWN;
+        Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_XDOWN;
       end;
     MOUSE_EXTRA_2:
       begin
         Input.mi.mouseData := XBUTTON2;
-        Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or  MOUSEEVENTF_XDOWN;
+        Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_XDOWN;
       end;
   end;
 
@@ -415,19 +324,16 @@ end;
 procedure TWindowTarget.ReleaseMouse(X, Y: Int32; Button: TClickType);
 var
   Input: TInput;
-  Bounds: TBox;
+  RealMousePos: TPoint;
 begin
-  GetTargetBounds(Bounds);
+  MoveMouse(X, Y);
 
-  if FAutoFocus then
-    ActivateClient();
-
-  MouseClientAreaOffset(X, Y);
+  GetCursorPos(RealMousePos); // unscaled etc
 
   Input := Default(TInput);
   Input._Type := INPUT_MOUSE;
-  Input.mi.dx := Bounds.X1 + X;
-  Input.mi.dy := Bounds.Y1 + Y;
+  Input.mi.dx := RealMousePos.X;
+  Input.mi.dy := RealMousePos.Y;
 
   case Button of
     MOUSE_LEFT: Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTUP;
@@ -436,7 +342,7 @@ begin
     MOUSE_EXTRA_1:
       begin
         Input.mi.mouseData := XBUTTON1;
-        Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or  MOUSEEVENTF_XUP;
+        Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_XUP;
       end;
     MOUSE_EXTRA_2:
       begin
@@ -482,7 +388,7 @@ begin
     begin
       if ssShift in Modifiers then Keybd_Event(VK_SHIFT,   $2A, 0, 0);
       if ssCtrl  in Modifiers then Keybd_Event(VK_CONTROL, $2A, 0, 0);
-      if ssALT   in Modifiers then Keybd_Event(VK_MENU,    $2A, 0, 0);
+      if ssAlt   in Modifiers then Keybd_Event(VK_MENU,    $2A, 0, 0);
 
       Sleep(KeyModWait div 2);
     end;
@@ -498,7 +404,7 @@ begin
     begin
       Sleep(KeyModWait div 2);
 
-      if ssALT   in Modifiers then Keybd_Event(VK_MENU,    $2A, KEYEVENTF_KEYUP, 0);
+      if ssAlt   in Modifiers then Keybd_Event(VK_MENU,    $2A, KEYEVENTF_KEYUP, 0);
       if ssCtrl  in Modifiers then Keybd_Event(VK_CONTROL, $2A, KEYEVENTF_KEYUP, 0);
       if ssShift in Modifiers then Keybd_Event(VK_SHIFT,   $2A, KEYEVENTF_KEYUP, 0);
     end;

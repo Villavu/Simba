@@ -1,6 +1,7 @@
 unit simba.httpclient;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
@@ -155,7 +156,7 @@ implementation
 
 uses
   openssl, ssockets, opensslsockets,
-  simba.openssl, simba.mufasabase, simba.zip, simba.tar, simba.tar_gz, simba.tar_bz2;
+  simba.openssl, simba.zip, simba.tar, simba.tar_gz, simba.tar_bz2;
 
 type
   TSimbaHTTPClientBase = class(TFPHTTPClient)
@@ -435,7 +436,7 @@ begin
   FHTTPClient.AllowRedirect := True;
   FHTTPClient.OnDataReceived := @DoDownloadProgress;
   FHTTPClient.OnRedirect := @DoRedirect;
-  FHTTPClient.AddHeader('User-Agent', Format('Mozilla/5.0 (compatible; Simba/%d; Target/%s)', [SimbaVersion, {$I %FPCTARGETOS%} + '-' + {$I %FPCTARGETCPU%}]));
+  FHTTPClient.AddHeader('User-Agent', Format('Mozilla/5.0 (compatible; Simba/%d; Target/%s)', [SIMBA_VERSION, {$I %FPCTARGETOS%} + '-' + {$I %FPCTARGETCPU%}]));
 end;
 
 destructor TSimbaHTTPClient.Destroy;

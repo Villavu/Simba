@@ -237,11 +237,6 @@ begin
   end;
 end;
 
-initialization
-  {$IFDEF WINDOWS}
-  InitDwmLibrary();
-  {$ENDIF}
-
 end.
 
 

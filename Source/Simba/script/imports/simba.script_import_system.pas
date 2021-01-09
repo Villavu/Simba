@@ -1,7 +1,7 @@
 unit simba.script_import_system;
 
 {$mode objfpc}{$H+}
-{$macro ON}
+{$i simba.inc}
 
 interface
 
@@ -12,8 +12,7 @@ procedure Lape_Import_System(Compiler: TSimbaScript_Compiler);
 implementation
 
 uses
-  forms, lazutf8, lpvartypes,
-  simba.mufasabase;
+  forms, lazutf8, lpvartypes;
 
 procedure Lape_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -142,7 +141,7 @@ begin
        High(Integer)
      );
   end else
-    raise Exception.Create('AddOnTerminate: Global not found');
+    raise Exception.Create('AddOnTerminate: The method passed is not global');
 end;
 
 procedure Lape_AddOnTerminate_Procedure(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -174,7 +173,7 @@ begin
       end;
     end;
 
-  raise Exception.Create('AddOnTerminate: Global not found');
+  raise Exception.Create('AddOnTerminate: The method passed is not global');
 end;
 
 procedure Lape_AddOnTerminate_ProcedureOfObject(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -207,7 +206,7 @@ begin
       end;
     end;
 
-  raise Exception.Create('AddOnTerminate: Global not found');
+  raise Exception.Create('AddOnTerminate: The method passed is not global');
 end;
 
 procedure Lape_Import_System(Compiler: TSimbaScript_Compiler);
@@ -216,8 +215,8 @@ begin
   begin
     Section := 'System';
 
-    addBaseDefine('SIMBA' + Format('%d', [SimbaVersion]));
-    addBaseDefine('SIMBAMAJOR' + Format('%d', [SimbaMajor]));
+    addBaseDefine('SIMBA' + Format('%d', [SIMBA_VERSION]));
+    addBaseDefine('SIMBAMAJOR' + Format('%d', [SIMBA_MAJOR]));
 
     addBaseDefine('FPCFULLVERSION' + Format('%d', [FPC_FULLVERSION]));
     addBaseDefine('FPCVERSION' + Format('%d', [FPC_VERSION]));
