@@ -75,9 +75,18 @@ end;
 
 procedure TCodeInsight_Include.HandleMessage(Sender: TObject; const Typ: TMessageEventType; const Message: String; X, Y: Integer);
 var
-  Parser: TCodeParser absolute Sender;
+  FileName: String = '';
 begin
-  Messages := Messages + Format('"%s" at line %d, column %d in file "%s"', [Message, Y + 1, X, Parser.Lexer.FileName]) + LineEnding;
+  if (Sender is TCodeParser) and (TCodeParser(Sender).Lexer <> nil) then
+    FileName := TCodeParser(Sender).Lexer.FileName
+  else
+  if (Sender is TmwPasLex) then
+    FileName := TmwPasLex(Sender).FileName;
+
+  if (FileName <> '') then
+    Messages := Messages + Format('"%s" at line %d, column %d in file "%s"', [Message, Y + 1, X, FileName]) + LineEnding
+  else
+    Messages := Messages + Format('"%s" at line %d, column %d', [Message, Y + 1, X]) + LineEnding;
 end;
 
 function TCodeInsight_Include.GetHash: TSHA1Digest;

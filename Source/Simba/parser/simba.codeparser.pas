@@ -134,6 +134,8 @@ type
   protected
     function GetElements: TDeclarationArray;
   public
+    Scoped: Boolean;
+
     property Elements: TDeclarationArray read GetElements;
   end;
 
@@ -1949,8 +1951,12 @@ begin
 end;
 
 procedure TCodeParser.EnumeratedType;
+var
+  Declaration: TDeclaration;
 begin
-  PushStack(TciEnumType);
+  Declaration := PushStack(TciEnumType);
+  if Lexer.Defines.IndexOf('!SCOPEDENUMS') > -1 then
+    TciEnumType(Declaration).Scoped := True;
   inherited;
   PopStack;
 end;
@@ -1991,6 +1997,9 @@ begin
     if (Declaration is TciTypeDeclaration) and (TciTypeDeclaration(Declaration).EnumType <> nil) then
     begin
       FGlobals.Add(Declaration.Name, Declaration);
+      if TciTypeDeclaration(Declaration).EnumType.Scoped then
+        Continue;
+
       for Declaration in TciTypeDeclaration(Declaration).EnumType.Elements do
         FGlobals.Add(Declaration.Name, Declaration);
     end

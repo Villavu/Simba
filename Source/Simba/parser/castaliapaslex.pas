@@ -1632,6 +1632,16 @@ begin
 
     tokCompDirect:
       begin
+        if FUseDefines and (FDefineStack = 0) then
+        begin
+          Def := CompilerDirective;
+          if (Def = '$S+') or (Def = '$SCOPEDENUMS ON') then
+            AddDefine('!SCOPEDENUMS')
+          else
+          if (Def = '$S-') or (Def = '$SCOPEDENUMS OFF') then
+            RemoveDefine('!SCOPEDENUMS');
+        end;
+
         if Assigned(fOnCompDirect) and (FDefineStack = 0) then
           fOnCompDirect(Self);
       end;

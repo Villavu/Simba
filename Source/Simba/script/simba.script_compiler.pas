@@ -146,11 +146,21 @@ begin
 end;
 
 type
+  TLapeTree_WaitUntil_Operator = class(TLapeTree_Operator) // Dont take ownership of FLeft
+  protected
+    procedure setLeft(Node: TLapeTree_ExprBase); override;
+  end;
+
   TLapeTree_InternalMethod_WaitUntil = class(TLapeTree_InternalMethod)
   public
     function resType: TLapeType; override;
     function Compile(var Offset: Integer): TResVar; override;
   end;
+
+procedure TLapeTree_WaitUntil_Operator.setLeft(Node: TLapeTree_ExprBase);
+begin
+  FLeft := Node;
+end;
 
 function TLapeTree_InternalMethod_WaitUntil.resType: TLapeType;
 begin
@@ -172,12 +182,12 @@ begin
 
   if (FParams.Count <> 3) then
     LapeException('Three parameters expected (Condition, Interval, Timeout)', DocPos);
-  if (FParams[0].resType() = nil) or (not (FParams[0].resType().BaseType in LapeBoolTypes)) then
-    LapeException('Condition parameter is invalid', DocPos);
-  if not (FParams[1].resType().BaseType in LapeIntegerTypes) then
-    LapeException('Interval parameter is invalid', DocPos);
-  if not (FParams[2].resType().BaseType in LapeIntegerTypes) then
-    LapeException('Timeout parameter is invalid', DocPos);
+  if isEmpty(FParams[0]) or (FParams[0].resType() = nil) or (not (FParams[0].resType().BaseType in LapeBoolTypes)) then
+    LapeException('Condition parameter is invalid, Boolean expression expected.', DocPos);
+  if isEmpty(FParams[1]) or (FParams[1].resType() = nil) or (not (FParams[1].resType().BaseType in LapeIntegerTypes)) then
+    LapeException('Interval parameter is invalid, Integer expected.', DocPos);
+  if isEmpty(FParams[2]) or (FParams[2].resType() = nil) or (not (FParams[2].resType().BaseType in LapeIntegerTypes)) then
+    LapeException('Timeout parameter is invalid, Integer expected.', DocPos);
 
   Result := _ResVar.New(FCompiler.getTempVar(resType()));
 
@@ -186,13 +196,9 @@ begin
   Interval := FParams[1].Compile(Offset);
   Timeout := FParams[2].Compile(Offset);
 
-  if not (FParams[0] is TLapeTree_Operator) then
-  begin
-    Condition := TLapeTree_Operator.Create(op_cmp_Equal, Self);
-    Condition.Left := FParams[0];
-    Condition.Right := TLapeTree_GlobalVar.Create('True', ltEvalBool, Self);
-  end else
-    Condition := TLapeTree_Operator(FParams[0]);
+  Condition := TLapeTree_WaitUntil_Operator.Create(op_cmp_Equal, Self);
+  Condition.Left := FParams[0];
+  Condition.Right := TLapeTree_GlobalVar.Create('True', ltEvalBool, Self);
 
   // Limit := GetTickCount();
   with TLapeTree_Invoke.Create('GetTickCount', Self) do

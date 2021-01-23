@@ -130,14 +130,15 @@ begin
   i := 0;
   while (i < Length(FParameters[Index])) do
   begin
-    if (FParameters[Index][i] is TciConstRefParameter) then
-      s := 'constref '
-    else if (FParameters[Index][i] is TciConstParameter) then
-      s := 'const '
-    else if (FParameters[Index][i] is TciOutParameter) then
+    // Seems pointless to show these. Just clutter.
+    //if (FParameters[Index][i] is TciConstRefParameter) then
+    //  s := 'constref '
+    //else if (FParameters[Index][i] is TciConstParameter) then
+    //  s := 'const '
+    if (FParameters[Index][i] is TciOutParameter) then
       s := 'out '
-    else if (FParameters[Index][i] is TciInParameter) then
-      s := 'in '
+    //else if (FParameters[Index][i] is TciInParameter) then
+    //  s := 'in '
     else if (FParameters[Index][i] is TciVarParameter) then
       s := 'var '
     else

@@ -66,6 +66,7 @@ type
     FStatusBar: TStatusBar;
     FMousePanel: TStatusPanel;
     FDimensionsPanel: TStatusPanel;
+    FZoomPanel: TStatusPanel;
     FStatusPanel: TStatusPanel;
     FZoom: Double;
     FWidth: Int32;
@@ -115,7 +116,7 @@ type
     procedure MoveTo(X, Y: Int32);
     function IsVisible(X, Y: Int32): Boolean; overload;
 
-    procedure BackgroundChanged(UpdateOverlay: Boolean = True);
+    procedure BackgroundChanged(UpdateOverlay: Boolean = True; Reset: Boolean = True);
 
     procedure Update; override;
 
@@ -510,7 +511,7 @@ begin
   if (Value = 0.50) or (Value = 1.00) or (Value = 2.00) or (Value = 4.00) or (Value = 8.00) or (Value = 16.00) then
   begin
     FZoom := Value;
-
+    FZoomPanel.Text := IntToStr(Round(Value * 100)) + '%';
     FScrollBox.SetSize(Trunc(FBackground.Width * FZoom), Trunc(FBackground.Height * FZoom));
 
     if (Current.X <> -1) and (Current.Y <> -1) then
@@ -572,7 +573,7 @@ begin
   );
 end;
 
-procedure TSimbaImageBox.BackgroundChanged(UpdateOverlay: Boolean);
+procedure TSimbaImageBox.BackgroundChanged(UpdateOverlay: Boolean; Reset: Boolean);
 begin
   if (FBackground.Width <> FWidth) or (FBackground.Height <> FHeight) then
   begin
@@ -581,8 +582,11 @@ begin
 
     FDimensionsPanel.Text := Format('%dx%d', [FBackground.Width, FBackground.Height]);
 
-    Zoom := 1;
-    MoveTo(0, 0);
+    if Reset then
+    begin
+      Zoom := 1;
+      MoveTo(0, 0);
+    end;
   end;
 
   if UpdateOverlay then
@@ -596,14 +600,18 @@ procedure TSimbaImageBox.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
 
-  if (FMousePanel <> nil) and (FDimensionsPanel <> nil) and (FStatusBar <> nil) then
+  if (FMousePanel <> nil) and (FDimensionsPanel <> nil) and (FZoomPanel <> nil) and (FStatusBar <> nil) then
     with TBitmap.Create() do
     try
       Canvas.Font := Self.Font;
 
-      FMousePanel.Width := Canvas.TextWidth('9999x9999') * 2;
-      FDimensionsPanel.Width := Canvas.TextWidth('9999x9999') * 2;
-      FStatusBar.Height := Round(Canvas.TextHeight('9999x9999') * 1.5);
+      with Canvas.TextExtent('999x999') do
+      begin
+        FMousePanel.Width := Width*2;
+        FDimensionsPanel.Width := Width*2;
+        FZoomPanel.Width := Width;
+        FStatusBar.Height := Height;
+      end;
     finally
       Free();
     end;
@@ -825,6 +833,8 @@ begin
   FMousePanel.Text := '(-1, -1)';
   FDimensionsPanel := FStatusBar.Panels.Add();
   FDimensionsPanel.Text := '(0, 0)';
+  FZoomPanel := FStatusBar.Panels.Add();
+  FZoomPanel.Text := '100%';
   FStatusPanel := FStatusBar.Panels.Add();
 
   FWidth := 0;

@@ -323,6 +323,7 @@ begin
   Write('type AnsiString = AnsiString;');
   Write('type ShortString = ShortString;');
   Write('type UnicodeString = UnicodeString;');
+  Write('type String = AnsiString;');
   Write('type TMethod = packed record Method, Self: Pointer; end;');
   Write('var True: Boolean;');
   Write('var False: Boolean;');
