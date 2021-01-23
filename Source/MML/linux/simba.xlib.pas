@@ -202,6 +202,7 @@ var
   XInitThreads: function: cint; cdecl;
 
   XTestFakeKeyEvent: function(Display: PDisplay; KeyCode: UInt32; Is_Press: TBool; Delay: UInt32): Int32; cdecl;
+  XTestFakeButtonEvent: function(Display: PDisplay; Button: UInt32; Is_Press: TBool; Delay: UInt32): Int32; cdecl;
 
 implementation
 
@@ -299,6 +300,7 @@ begin
     raise Exception.Create('Error loading Xtst');
 
   Pointer(XTestFakeKeyEvent) := dlsym(XTst, 'XTestFakeKeyEvent');
+  Pointer(XTestFakeButtonEvent) := dlsym(XTst, 'XTestFakeButtonEvent');
 end;
 
 procedure UnloadXtst;

@@ -108,7 +108,7 @@ begin
     FHistory[FIndex].Tab.Editor.CaretX  := FHistory[FIndex].CaretX;
     FHistory[FIndex].Tab.Editor.CaretY  := FHistory[FIndex].CaretY;
     FHistory[FIndex].Tab.Editor.TopLine := FHistory[FIndex].CaretY - (FHistory[FIndex].Tab.Editor.LinesInWindow div 2);
-    FHistory[FIndex].Tab.MakeVisible();
+    FHistory[FIndex].Tab.Show();
   end;
 end;
 
@@ -130,7 +130,7 @@ begin
     FHistory[FIndex].Tab.Editor.CaretX  := FHistory[FIndex].CaretX;
     FHistory[FIndex].Tab.Editor.CaretY  := FHistory[FIndex].CaretY;
     FHistory[FIndex].Tab.Editor.TopLine := FHistory[FIndex].CaretY - (FHistory[FIndex].Tab.Editor.LinesInWindow div 2);
-    FHistory[FIndex].Tab.MakeVisible();
+    FHistory[FIndex].Tab.Show();
   end;
 end;
 

@@ -347,14 +347,21 @@ function TSimbaAutoComplete.HandlePainting(const AKey: String; Canvas: TCanvas; 
   end;
 
   procedure PaintProcedure(Declaration: TciProcedureDeclaration);
+  var
+    Hack: String;
   begin
+    // Seems pointless to show these. Just clutter.
+    Hack := Declaration.Items.GetShortText(TciParameterList);
+    Hack := Hack.Replace('constref ', '', [rfReplaceAll]);
+    Hack := Hack.Replace('const ', '', [rfReplaceAll]);
+
     if Declaration.IsFunction then
       PaintColumn(Canvas, X, Y, 'function', clTeal)
     else
       PaintColumn(Canvas, X, Y, 'procedure', clNavy);
 
     PaintName(Canvas, X, Y, Declaration.Name);
-    PaintText(Canvas, X, Y, Declaration.Items.GetShortText(TciParameterList));
+    PaintText(Canvas, X, Y, Hack);
     if Declaration.ReturnType <> nil then
       PaintText(Canvas, X, Y, ': ' + Declaration.Items.GetShortText(TciReturnType));
   end;

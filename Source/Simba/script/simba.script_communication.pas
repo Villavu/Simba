@@ -203,10 +203,10 @@ type
 implementation
 
 uses
+  math,
   {$IFDEF WINDOWS}
   windows,
   {$ENDIF}
-  forms, math,
   simba.main, simba.debugform, simba.debugimage,
   simba.scripttabsform, simba.mufasatypes, simba.scriptinstance;
 
@@ -253,7 +253,7 @@ begin
   Params.Read(Height, SizeOf(Int32));
 
   SimbaDebugImageForm.ImageBox.Background.LoadFromPointer(PRGB32(Params.Memory + Params.Position), Width, Height);
-  SimbaDebugImageForm.ImageBox.BackgroundChanged(False);
+  SimbaDebugImageForm.ImageBox.BackgroundChanged(False, False);
   SimbaDebugImageForm.ImageBox.Update();
 end;
 
@@ -299,14 +299,18 @@ end;
 procedure TSimbaMethod_ShowBitmap.DoInvoke;
 var
   Width, Height: Int32;
-begin;
+begin
   Params.Read(Width, SizeOf(Int32));
   Params.Read(Height, SizeOf(Int32));
 
-  SimbaDebugImageForm.Resize(Max(Width, SimbaDebugImageForm.ImageBox.Background.Width), Max(Height, SimbaDebugImageForm.ImageBox.Background.Height), True);
+  SimbaDebugImageForm.Resize(
+    Max(Width, SimbaDebugImageForm.ImageBox.Width),
+    Max(Height, SimbaDebugImageForm.ImageBox.Height - SimbaDebugImageForm.ImageBox.StatusBar.Height),
+    True
+  );
 
   SimbaDebugImageForm.ImageBox.Background.LoadFromPointer(PRGB32(Params.Memory + Params.Position), Width, Height);
-  SimbaDebugImageForm.ImageBox.BackgroundChanged(False);
+  SimbaDebugImageForm.ImageBox.BackgroundChanged(False, False);
   SimbaDebugImageForm.ImageBox.Update();
 end;
 
@@ -333,25 +337,31 @@ begin
 
   for I := 0 to SimbaScriptTabsForm.TabCount - 1 do
   begin
-    if (SimbaScriptTabsForm.Tabs[I].ScriptInstance = Script) then
+    if (SimbaScriptTabsForm.Tabs[I].ScriptInstance <> Script) then
+      Continue;
+
+    // Main script
+    if (SimbaScriptTabsForm.Tabs[I].ScriptName = FileName) then
     begin
-      if (SimbaScriptTabsForm.Tabs[I].ScriptName = FileName) then
-        SimbaScriptTabsForm.Tabs[I].MakeVisible()
-      else
-      begin
-        if not FileExists(FileName) then
-          Exit;
+      SimbaScriptTabsForm.Tabs[I].Show();
+      SimbaScriptTabsForm.Tabs[I].SetError(Line, Col);
 
-        SimbaScriptTabsForm.Open(FileName);
-      end;
+      Break;
+    end;
 
-      SimbaScriptTabsForm.CurrentTab.ScriptErrorLine := Line;
-      SimbaScriptTabsForm.CurrentEditor.CaretX := Col;
-      SimbaScriptTabsForm.CurrentEditor.CaretY := Line;
+    // Include file
+    if FileExists(FileName) then
+    begin
+      SimbaScriptTabsForm.Open(FileName);
+      SimbaScriptTabsForm.CurrentTab.SetError(Line, Col);
 
-      SimbaDebugForm.Editor.TopLine := SimbaDebugForm.Editor.Lines.Count; // ensure error message is visible
+      Break;
     end;
   end;
+
+  // ensure error message is visible
+  SimbaDebugForm.Editor.CaretX := 0;
+  SimbaDebugForm.Editor.CaretY := SimbaDebugForm.Editor.Lines.Count;
 end;
 
 constructor TSimbaMethod_ScriptError.Create(Line, Col: Int32; FileName: ShortString);

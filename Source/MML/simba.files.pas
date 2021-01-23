@@ -89,8 +89,6 @@ begin
   if FileExists(FileName) then
   begin
     FileName := ExpandFileName(FileName);
-    if not FilenamesCaseSensitive then
-      FileName := LowerCase(FileName);
 
     Exit(True);
   end;
@@ -99,8 +97,6 @@ begin
     if FileExists(IncludeTrailingPathDelimiter(Directories[I]) + FileName + Extension) then
     begin
       FileName := ExpandFileName(IncludeTrailingPathDelimiter(Directories[I]) + FileName + Extension);
-      if not FilenamesCaseSensitive then
-        FileName := LowerCase(FileName);
 
       Exit(True);
     end;

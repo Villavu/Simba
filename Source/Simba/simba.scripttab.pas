@@ -41,7 +41,6 @@ type
     function GetScriptChanged: Boolean;
 
     procedure SetScript(Value: String);
-    procedure SetScriptErrorLine(Value: Int32);
   public
     property DebuggingForm: TSimbaDebuggerForm read FDebuggingForm;
     property FunctionList: TSimbaFunctionList read FFunctionList;
@@ -51,7 +50,6 @@ type
     property ScriptInstance: TSimbaScriptInstance read FScriptInstance write FScriptInstance;
     property ScriptName: String read FScriptName;
     property Script: String read GetScript write SetScript;
-    property ScriptErrorLine: Int32 read FScriptErrorLine write SetScriptErrorLine;
     property Editor: TSimbaEditor read FEditor;
     property MouseLinkXY: TPoint read FMouseLinkXY write FMouseLinkXY;
 
@@ -64,7 +62,7 @@ type
     function GetParser: TCodeInsight;
     function ParseScript: TCodeInsight;
 
-    procedure MakeVisible;
+    procedure SetError(Line, Col: Int32);
 
     procedure Undo;
     procedure Redo;
@@ -219,16 +217,6 @@ begin
   FEditor.Text := Value;
 end;
 
-procedure TSimbaScriptTab.SetScriptErrorLine(Value: Int32);
-begin
-  if (Value = FScriptErrorLine) then
-    Exit;
-
-  FScriptErrorLine := Value;
-
-  Invalidate();
-end;
-
 function TSimbaScriptTab.GetScriptChanged: Boolean;
 begin
   Result := FEditor.Text <> FSavedText;
@@ -263,6 +251,13 @@ procedure TSimbaScriptTab.HandleEditorClick(Sender: TObject);
 begin
   if (SimbaScriptTabHistory <> nil) then
     SimbaScriptTabHistory.Add(Self);
+
+  if (FScriptErrorLine > -1) then
+  begin
+    FScriptErrorLine := -1;
+
+    FEditor.Invalidate();
+  end;
 end;
 
 procedure TSimbaScriptTab.HandleEditorChange(Sender: TObject);
@@ -281,8 +276,12 @@ begin
     SimbaForm.SaveButton.Enabled := False;
   end;
 
-  if FScriptErrorLine > -1 then
-    ScriptErrorLine := -1;
+  if (FScriptErrorLine > -1) then
+  begin
+    FScriptErrorLine := -1;
+
+    FEditor.Invalidate();
+  end;
 end;
 
 procedure TSimbaScriptTab.HandleEditorLinkMouse(Sender: TObject; X, Y: Integer; var AllowMouseLink: Boolean);
@@ -419,9 +418,14 @@ begin
   Result.Run(Script, Result.Lexer.FileName);
 end;
 
-procedure TSimbaScriptTab.MakeVisible;
+procedure TSimbaScriptTab.SetError(Line, Col: Int32);
 begin
-  PageControl.ActivePage := Self;
+  FScriptErrorLine := Line;
+
+  FEditor.CaretX := Col;
+  FEditor.CaretY := Line;
+  FEditor.TopLine := Line - (FEditor.LinesInWindow div 2);
+  FEditor.Invalidate();
 end;
 
 procedure TSimbaScriptTab.Undo;

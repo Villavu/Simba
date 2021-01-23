@@ -485,7 +485,7 @@ begin
 
   if (ScriptTab.ScriptInstance <> nil) then
   begin
-    ScriptTab.MakeVisible();
+    ScriptTab.Show();
 
     Application.MainForm.Enabled := False;
 
@@ -495,7 +495,7 @@ begin
         case MessageDlg('Script is still running', 'Do you want to forcefully stop the script?', mtConfirmation, [mbYes, mbNo, mbAbort], 0) of
           mrYes: ScriptTab.ScriptInstance.Kill();
           mrNo: Exit;
-          mrAbort:
+          mrAbort, mrCancel:
             begin
               Abort := True;
 
@@ -510,12 +510,12 @@ begin
 
   if ScriptTab.ScriptChanged then
   begin
-    ScriptTab.MakeVisible();
+    ScriptTab.Show();
 
     case MessageDlg('Script has been modified.', 'Do you want to save the script?', mtConfirmation, [mbYes, mbNo, mbAbort], 0) of
       mrYes: ScriptTab.Save(ScriptTab.FileName);
       mrNo: { nothing };
-      mrAbort:
+      mrAbort, mrCancel:
         begin
           Abort := True;
 
@@ -551,7 +551,7 @@ begin
         Exit;
     end;
 
-  Exclude.MakeVisible();
+  Exclude.Show();
 end;
 
 procedure TSimbaScriptTabsForm.Open(FileName: String; CheckOtherTabs: Boolean);

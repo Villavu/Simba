@@ -78,13 +78,6 @@ jobs:
         sudo apt-get update
         sudo apt-get -m -y install libgtk2.0-dev libpango1.0-dev libffi-dev libxtst-dev xvfb 
         Xvfb :1 &
-
-    # https://github.com/actions/cache/issues/403
-    - name: Install Dependenices (macOS)
-      if: matrix.config.os == 'macos-latest'
-      run: |
-        brew update && brew install gnu-tar
-        echo PATH="/usr/local/opt/gnu-tar/libexec/gnubin:$PATH" >> $GITHUB_ENV
         
     - name: Generate Cache Hash
       run: echo "${{ matrix.config.fpcup-url }}${{ matrix.config.fpcup-opt }}${{ matrix.config.fpc-url }}${{ matrix.config.laz-url }}${{ matrix.config.name }}" > .cache

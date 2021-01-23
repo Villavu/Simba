@@ -259,75 +259,43 @@ end;
 
 procedure TWindowTarget.HoldMouse(X, Y: Int32; Button: TClickType);
 var
-  Event: TXButtonEvent;
+  Number: Int32;
 begin
   if FAutoFocus then
     ActivateClient();
 
-  Event := Default(TXButtonEvent);
-  Event.SubWindow := FWindow;
-
   case Button of
-    MOUSE_LEFT:        Event.Button := Button1;
-    MOUSE_MIDDLE:      Event.Button := Button2;
-    MOUSE_RIGHT:       Event.Button := Button3;
-    MOUSE_SCROLL_DOWN: Event.Button := Button5;
-    MOUSE_SCROLL_UP:   Event.Button := Button4;
-    MOUSE_EXTRA_1:     Event.Button := Button8;
-    MOUSE_EXTRA_2:     Event.Button := Button9;
+    MOUSE_LEFT:        Number := Button1;
+    MOUSE_MIDDLE:      Number := Button2;
+    MOUSE_RIGHT:       Number := Button3;
+    MOUSE_SCROLL_DOWN: Number := Button5;
+    MOUSE_SCROLL_UP:   Number := Button4;
+    MOUSE_EXTRA_1:     Number := Button8;
+    MOUSE_EXTRA_2:     Number := Button9;
   end;
 
-  while (Event.SubWindow <> None) do
-  begin
-    Event.Window := Event.SubWindow;
-
-    XQueryPointer(GetDisplay(), Event.Window,
-                  @Event.Root, @Event.SubWindow,
-                  @Event.X_Root, @Event.Y_Root,
-                  @Event.X, @Event.Y,
-                  @Event.State);
-  end;
-
-  Event._Type := ButtonPress;
-
-  XSendEvent(GetDisplay(), PointerWindow, TBool(True), ButtonPressMask, @Event);
+  XTestFakeButtonEvent(GetDisplay(), Number, TBool(True), CurrentTime);
   XFlush(GetDisplay());
 end;
 
 procedure TWindowTarget.ReleaseMouse(X, Y: Int32; Button: TClickType);
 var
-  Event: TXButtonEvent;
+  Number: Int32;
 begin
   if FAutoFocus then
     ActivateClient();
 
-  Event := Default(TXButtonEvent);
-  Event.SubWindow := FWindow;
-
   case Button of
-    MOUSE_LEFT:        Event.Button := Button1;
-    MOUSE_MIDDLE:      Event.Button := Button2;
-    MOUSE_RIGHT:       Event.Button := Button3;
-    MOUSE_SCROLL_DOWN: Event.Button := Button5;
-    MOUSE_SCROLL_UP:   Event.Button := Button4;
-    MOUSE_EXTRA_1:     Event.Button := Button8;
-    MOUSE_EXTRA_2:     Event.Button := Button9;
+    MOUSE_LEFT:        Number := Button1;
+    MOUSE_MIDDLE:      Number := Button2;
+    MOUSE_RIGHT:       Number := Button3;
+    MOUSE_SCROLL_DOWN: Number := Button5;
+    MOUSE_SCROLL_UP:   Number := Button4;
+    MOUSE_EXTRA_1:     Number := Button8;
+    MOUSE_EXTRA_2:     Number := Button9;
   end;
 
-  while (Event.SubWindow <> None) do
-  begin
-    Event.Window := Event.SubWindow;
-
-    XQueryPointer(GetDisplay(), Event.Window,
-                  @Event.Root, @Event.SubWindow,
-                  @Event.X_Root, @Event.Y_Root,
-                  @Event.X, @Event.Y,
-                  @Event.State);
-  end;
-
-  Event._Type := ButtonRelease;
-
-  XSendEvent(GetDisplay(), PointerWindow, TBool(True), ButtonPressMask, @Event);
+  XTestFakeButtonEvent(GetDisplay(), Number, TBool(False), CurrentTime);
   XFlush(GetDisplay());
 end;
 

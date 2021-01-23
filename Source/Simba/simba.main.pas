@@ -1106,7 +1106,7 @@ begin
     begin
       if (SimbaScriptTabsForm.Tabs[I].FileName = '') then
       begin
-        SimbaScriptTabsForm.Tabs[I].MakeVisible();
+        SimbaScriptTabsForm.Tabs[I].Show();
         SimbaScriptTabsForm.Tabs[I].SaveAs();
       end else
         SimbaScriptTabsForm.Tabs[I].Save(SimbaScriptTabsForm.Tabs[I].FileName);
