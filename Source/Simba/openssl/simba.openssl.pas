@@ -1,16 +1,17 @@
 unit simba.openssl;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
-{$IF DEFINED(WINDOWS) AND DEFINED(CPU32)}
+{$IF DEFINED(SIMBA_WIN32)}
   {$R openssl-win32}
-{$ELSEIF DEFINED(WINDOWS) AND DEFINED(CPU64)}
+{$ELSEIF DEFINED(SIMBA_WIN64)}
   {$R openssl-win64}
-{$ELSEIF DEFINED(DARWIN) AND DEFINED(CPU64)}
+{$ELSEIF DEFINED(SIMBA_DARWIN64)}
   {$R openssl-darwin64}
-{$ELSEIF DEFINED(LINUX) AND DEFINED(CPU64)}
+{$ELSEIF DEFINED(SIMBA_LINUX64)}
   {$R openssl-linux64}
-{$ELSEIF DEFINED(LINUX) AND DEFINED(CPUAARCH64)}
+{$ELSEIF DEFINED(SIMBA_AARCH64)}
   {$R openssl-aarch64}
 {$ENDIF}
 
@@ -24,8 +25,8 @@ procedure InitializeOpenSSL(Extract: Boolean);
 implementation
 
 uses
-  openssl, forms, LCLType,
-  simba.settings;
+  openssl, lcltype,
+  simba.files;
 
 function ExtractOpenSSL(ResourceHandle: TFPResourceHMODULE; ResourceType, ResourceName: PChar; Param: PtrInt): LongBool; stdcall;
 
@@ -53,7 +54,7 @@ begin
     Stream := TResourceStream.Create(HINSTANCE, ResourceName, ResourceType);
 
     try
-      FileName := SimbaSettings.Environment.OpenSSLPath.Value + Name;
+      FileName := GetOpenSSLBinaryPath() + Name;
       if FileExists(FileName) and SameFile(FileName, Stream) then
         Exit;
 
@@ -83,12 +84,14 @@ begin
   if Extract then
     EnumResourceNames(HINSTANCE, RT_RCDATA, @ExtractOpenSSL, 0);
 
-  DLLUtilName := SimbaSettings.Environment.OpenSSLPath.Value + DLLUtilName;
-  DLLSSLName := SimbaSettings.Environment.OpenSSLPath.Value + DLLSSLName;
+  DLLUtilName := GetOpenSSLBinaryPath() + DLLUtilName;
+  DLLSSLName := GetOpenSSLBinaryPath() + DLLSSLName;
 
   try
     InitSSLInterface();
   except
+    on E: Exception do
+      WriteLn('Exception whilst loading OpenSSL: ', E.Message);
   end;
 
   if IsSSLLoaded() then

@@ -179,24 +179,18 @@ type
     procedure MenuSaveAsDefaultClick(Sender: TObject);
     procedure MenuCloseAllTabsClick(Sender: TObject);
     procedure MenuCloseTabClick(Sender: TObject);
-    procedure MenuCompileClick(Sender: TObject);
-
     procedure MenuCopyClick(Sender: TObject);
     procedure MenuCutClick(Sender: TObject);
     procedure MenuExitClick(Sender: TObject);
     procedure MenuGotoClick(Sender: TObject);
     procedure MenuNewClick(Sender: TObject);
     procedure MenuOpenClick(Sender: TObject);
-    procedure MenuPauseClick(Sender: TObject);
     procedure MenuFindClick(Sender: TObject);
     procedure MenuItemFindNextClick(Sender: TObject);
     procedure MenuItemFindPrevClick(Sender: TObject);
     procedure MenuPasteClick(Sender: TObject);
     procedure MenuRedoClick(Sender: TObject);
-    procedure MenuRunClick(Sender: TObject);
-    procedure MenuRunWithDebuggingClick(Sender: TObject);
     procedure MenuSaveClick(Sender: TObject);
-    procedure MenuStopClick(Sender: TObject);
     procedure MenuReplaceClick(Sender: TObject);
     procedure MenuSelectAllClick(Sender: TObject);
     procedure MenuUndoClick(Sender: TObject);
@@ -221,6 +215,7 @@ type
     procedure ButtonPickClick(Sender: TObject);
     procedure ButtonSelectorDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure DoMenuItemACAClick(Sender: TObject);
+    procedure DoChangeScriptState(Sender: TObject);
   protected
     FWindowSelection: TOSWindow;
     FProcessSelection: UInt32;
@@ -241,11 +236,6 @@ type
     property Title: String write SetTitle;
 
     procedure AddRecentFile(FileName: String);
-
-    procedure RunScript(Debugging: Boolean);
-    procedure CompileScript;
-    procedure PauseScript;
-    procedure StopScript;
 
     procedure Docking_Setup;
     procedure Docking_AdjustForToolBar;
@@ -533,7 +523,7 @@ var
 begin
   for I := 1 to 100 do
   begin
-    FileName := SimbaSettings.Environment.DataPath.Value + Format('crash-log-%d.txt', [I]);
+    FileName := GetDataPath() + Format('crash-log-%d.txt', [I]);
     if not FileExists(FileName) then
       Break;
   end;
@@ -660,19 +650,19 @@ end;
 
 function TSimbaForm.CodeTools_OnFindInclude(Sender: TObject; var FileName: String): Boolean;
 begin
-  Result := FindFile(FileName, '', [ExtractFileDir(TCodeParser(Sender).Lexer.FileName), SimbaSettings.Environment.IncludePath.Value, Application.Location]);
+  Result := FindFile(FileName, '', [ExtractFileDir(TCodeParser(Sender).Lexer.FileName), GetIncludePath(), GetSimbaPath()]);
 end;
 
 function TSimbaForm.CodeTools_OnFindLibrary(Sender: TObject; var FileName: String): Boolean;
 begin
-  Result := FindPlugin(FileName, [ExtractFileDir(TCodeParser(Sender).Lexer.FileName), SimbaSettings.Environment.PluginPath.Value, Application.Location]);
+  Result := FindPlugin(FileName, [ExtractFileDir(TCodeParser(Sender).Lexer.FileName), GetPluginPath(), GetSimbaPath()]);
 end;
 
 procedure TSimbaForm.CodeTools_OnLoadLibrary(Sender: TObject; FileName: String; var Contents: String);
 var
   Output, Dump: String;
 begin
-  Dump := SysUtils.GetTempFileName(SimbaSettings.Environment.DataPath.Value, '.dump');
+  Dump := SysUtils.GetTempFileName(GetDataPath(), '.dump');
 
   try
     RunCommandTimeout(Application.ExeName, ['--dump=' + FileName, Dump], Output, 1500);
@@ -719,7 +709,7 @@ const
   Message = 'Would you like to accociate scripts with this Simba?' + LineEnding +
             'This means when opening a script, the script will be opened using this Simba executable.';
 begin
-  if MessageDlg('Associate Scripts', Message, mtConfirmation, mbYesNo, 0) = mrYes then
+  if MessageDlg('Associate?', Message, mtConfirmation, mbYesNo, 0) = mrYes then
     RunAsAdmin(Handle, Application.ExeName, '--associate');
 end;
 {$ELSE}
@@ -771,6 +761,8 @@ end;
 
 procedure TSimbaForm.FormCreate(Sender: TObject);
 begin
+  SimbaSettings := TSimbaSettings.Create();
+
   Application.OnException := @DoExceptionHandler;
   Screen.AddHandlerFormAdded(@DoScreenFormAdded);
 
@@ -803,79 +795,52 @@ begin
   TSimbaACAForm.Create(WindowSelection).ShowOnTop();
 end;
 
-procedure TSimbaForm.RunScript(Debugging: Boolean);
+procedure TSimbaForm.DoChangeScriptState(Sender: TObject);
 begin
-  with SimbaScriptTabsForm.CurrentTab do
   try
-    if (ScriptInstance = nil) then
+    with SimbaScriptTabsForm.CurrentTab do
     begin
-      if (FileName <> '') then
-        Save(FileName);
+      // Already started
+      if (ScriptInstance <> nil) then
+      begin
+        if (Sender = MenuItemRun) or (Sender = RunButton) then
+          ScriptInstance.Resume()
+        else
+        if (Sender = MenuItemPause) or (Sender = PauseButton) then
+          ScriptInstance.Pause()
+        else
+        if (Sender = MenuItemStop) or (Sender = StopButton) then
+          ScriptInstance.Stop();
+      end else
+      // Start
+      begin
+        if (FileName <> '') then
+          Save(FileName);
 
-      ScriptInstance := TSimbaScriptInstance.Create();
-      ScriptInstance.Target := Self.WindowSelection;
-      ScriptInstance.ScriptName := ScriptName;
+        ScriptInstance := TSimbaScriptInstance.Create();
+        ScriptInstance.Target := Self.WindowSelection;
 
-      if (FileName <> '') then
-        ScriptInstance.ScriptFile := FileName
-      else
-        ScriptInstance.Script := Script;
+        if (FileName = '') then
+        begin
+          ScriptInstance.ScriptName := ScriptName;
+          ScriptInstance.ScriptFile := CreateTempFile(Script, '.script');
+        end else
+          ScriptInstance.ScriptFile := FileName;
 
-      if Debugging then
-        ScriptInstance.Run(CreateDebuggingForm())
-      else
-        ScriptInstance.Run();
-    end else
-      ScriptInstance.Resume();
+        if (Sender = MenuItemCompile) or (Sender = CompileButton) then
+          ScriptInstance.Compile()
+        else
+        if (Sender = MenuItemRun) or (Sender = RunButton) then
+          ScriptInstance.Run()
+        else
+        if (Sender = MenuItemRunWithDebugging) then
+          ScriptInstance.Run(CreateDebuggingForm());
+      end;
+    end;
   except
     on E: Exception do
-      MessageDlg('Run Script Error: ' + E.Message, mtError, [mbOK], 0);
+      MessageDlg('Exception while changing script state: ' + E.Message, mtError, [mbOK], 0);
   end;
-end;
-
-procedure TSimbaForm.CompileScript;
-begin
-  with SimbaScriptTabsForm.CurrentTab do
-  try
-    if (ScriptInstance = nil) then
-    begin
-      if (FileName <> '') then
-        Save(FileName);
-
-      ScriptInstance := TSimbaScriptInstance.Create();
-      ScriptInstance.Target := Self.WindowSelection;
-      ScriptInstance.ScriptName := ScriptName;
-
-      if (FileName <> '') then
-        ScriptInstance.ScriptFile := FileName
-      else
-        ScriptInstance.Script := Script;
-
-      ScriptInstance.Compile();
-    end;
-  except
-    on e: Exception do
-      MessageDlg('Compile Script Error: ' + e.Message, mtError, [mbOK], 0);
-  end;
-end;
-
-procedure TSimbaForm.PauseScript;
-begin
-  with SimbaScriptTabsForm.CurrentTab do
-    if (ScriptInstance <> nil) then
-      ScriptInstance.Pause();
-end;
-
-procedure TSimbaForm.StopScript;
-begin
-  with SimbaScriptTabsForm.CurrentTab do
-    if (ScriptInstance <> nil) then
-    begin
-      if ScriptInstance.IsStopping() then
-        ScriptInstance.Kill()
-      else
-        ScriptInstance.Stop();
-    end;
 end;
 
 procedure TSimbaForm.AddRecentFile(FileName: String);
@@ -909,11 +874,6 @@ var
   Aborted: Boolean;
 begin
   SimbaScriptTabsForm.RemoveTab(SimbaScriptTabsForm.CurrentTab, Aborted);
-end;
-
-procedure TSimbaForm.MenuCompileClick(Sender: TObject);
-begin
-  Self.CompileScript();
 end;
 
 procedure TSimbaForm.MenuCopyClick(Sender: TObject);
@@ -997,11 +957,6 @@ begin
   SimbaScriptTabsForm.Open();
 end;
 
-procedure TSimbaForm.MenuPauseClick(Sender: TObject);
-begin
-  Self.PauseScript();
-end;
-
 procedure TSimbaForm.MenuFindClick(Sender: TObject);
 begin
   SimbaScriptTabsForm.Find();
@@ -1034,16 +989,6 @@ begin
     SimbaScriptTabsForm.CurrentEditor.Redo();
 end;
 
-procedure TSimbaForm.MenuRunClick(Sender: TObject);
-begin
-  Self.RunScript(False);
-end;
-
-procedure TSimbaForm.MenuRunWithDebuggingClick(Sender: TObject);
-begin
-  Self.RunScript(True);
-end;
-
 procedure TSimbaForm.MenuSaveClick(Sender: TObject);
 begin
   if SimbaScriptTabsForm.CurrentTab <> nil then
@@ -1053,11 +998,6 @@ begin
     else
       SimbaScriptTabsForm.CurrentTab.Save(SimbaScriptTabsForm.CurrentTab.FileName);
   end;
-end;
-
-procedure TSimbaForm.MenuStopClick(Sender: TObject);
-begin
-  Self.StopScript();
 end;
 
 procedure TSimbaForm.MenuSelectAllClick(Sender: TObject);
@@ -1331,7 +1271,13 @@ begin
 end;
 
 procedure TSimbaForm.Setup(Data: PtrInt);
+var
+  Directory: String;
 begin
+  // Create base directories
+  for Directory in [GetDataPath(), GetOpenSSLBinaryPath(), GetPackagePath(), GetIncludePath(), GetFontPath(), GetScriptPath()] do
+    CreateDir(Directory);
+
   if SimbaSettings.Environment.OpenSSLOnLaunch.Value then
     InitializeOpenSSL(True);
 
@@ -1346,9 +1292,9 @@ begin
       SimbaScriptTabsForm.Open(Application.Params[Application.ParamCount]);
 
       if Application.HasOption('compile') then
-        Self.CompileScript();
+        Self.CompileButton.Click();
       if Application.HasOption('run') then
-        Self.RunScript(False);
+        Self.RunButton.Click();
     end;
   end;
 

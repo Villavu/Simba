@@ -12,7 +12,8 @@ procedure Lape_Import_System(Compiler: TSimbaScript_Compiler);
 implementation
 
 uses
-  forms, lazutf8, lpvartypes;
+  forms, lazutf8, lpvartypes,
+  simba.files;
 
 procedure Lape_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -251,29 +252,24 @@ begin
 
     if (SimbaScript <> nil) then
     begin
-      if SimbaScript.SimbaCommunicationServer = '' then
+      if (SimbaScript.SimbaCommunicationServer = '') then
         addBaseDefine('SIMBAHEADLESS');
 
       addGlobalVar('TClient', @SimbaScript.Client, 'Client');
-
       addGlobalConst(SimbaScript.ScriptFile, 'ScriptFile');
-      addGlobalConst(SimbaScript.ScriptPath, 'ScriptPath');
-      addGlobalConst(SimbaScript.IncludePath, 'IncludePath');
-      addGlobalConst(SimbaScript.PluginPath, 'PluginPath');
-      addGlobalConst(SimbaScript.FontPath, 'FontPath');
-      addGlobalConst(SimbaScript.AppPath, 'AppPath');
     end else
     begin
       addDelayedCode(
-        'var Client: TClient;'    + LineEnding +
-        'const ScriptFile  = "";' + LineEnding +
-        'const ScriptPath  = "";' + LineEnding +
-        'const IncludePath = "";' + LineEnding +
-        'const PluginPath  = "";' + LineEnding +
-        'const FontPath    = "";' + LineEnding +
-        'const AppPath     = "";' + LineEnding
+        'const Client: TClient = nil;' + LineEnding +
+        'const ScriptFile: String = "";'
       );
     end;
+
+    addGlobalConst(GetIncludePath(), 'IncludePath');
+    addGlobalConst(GetPluginPath(), 'PluginPath');
+    addGlobalConst(GetFontPath(), 'FontPath');
+    addGlobalConst(GetSimbaPath(), 'AppPath');
+    addGlobalConst(GetScriptPath(), 'ScriptPath');
 
     addGlobalConst(LineEnding, 'LineEnding');
 

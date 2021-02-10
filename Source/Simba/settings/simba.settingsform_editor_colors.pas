@@ -57,7 +57,7 @@ implementation
 
 uses
   inifiles,
-  simba.settings, simba.editor_attributes;
+  simba.settings, simba.editor_attributes, simba.files;
 
 const
   DARK_DEFAULT =
@@ -466,7 +466,7 @@ procedure TEditorColorsFrame.SaveAsButtonClick(Sender: TObject);
 begin
   with TSaveDialog.Create(Self) do
   try
-    InitialDir := SimbaSettings.Environment.DataPath.Value;
+    InitialDir := GetDataPath();
     Title := 'Save Editor Colors';
     Filter := 'INI Files (*.ini)|*.ini';
     DefaultExt := 'ini';
@@ -488,7 +488,7 @@ procedure TEditorColorsFrame.LoadButtonClick(Sender: TObject);
 begin
   with TOpenDialog.Create(Self) do
   try
-    InitialDir := SimbaSettings.Environment.DataPath.Value;
+    InitialDir := GetDataPath();
     Title := 'Load Editor Colors';
     Filter := 'INI Files (*.ini)|*.ini';
 

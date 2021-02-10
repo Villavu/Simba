@@ -13,11 +13,9 @@ uses
   CocoaAll;
 
 type
-  NSActivityOptions = UInt64;
-  NSActivityOptionsPtr = ^NSActivityOptions;
 
   NSProcessInfo_NSObject = objccategory external (NSProcessInfo)
-    function beginActivityWithOptions_reason(options: NSActivityOptions; reason: NSString): NSObjectProtocol; message 'beginActivityWithOptions:reason:';
+    function beginActivityWithOptions_reason(options: UInt64; reason: NSString): NSObjectProtocol; message 'beginActivityWithOptions:reason:';
     procedure endActivity(activity: NSObjectProtocol); message 'endActivity:';
   end;
 
@@ -30,7 +28,7 @@ var
   Token: NSObjectProtocol;
 
 initialization
-  Token := NSProcessInfo.processInfo.beginActivityWithOptions_reason(NSActivityUserInitiatedAllowingIdleSystemSleep, NSSTR('Don''t want to sleep'));
+  Token := NSProcessInfo.processInfo.beginActivityWithOptions_reason(NSActivityUserInitiatedAllowingIdleSystemSleep, NSSTR('Sleeping will pause scripts!'));
 
 finalization
   NSProcessInfo.processInfo.endActivity(Token);

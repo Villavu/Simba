@@ -149,9 +149,9 @@ begin
   UnZipFile(PString(Params^[0])^, PString(Params^[1])^);
 end;
 
-procedure Lape_UnZipOneFile(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure Lape_UnZipOneFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  UnZipOneFile(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
+  PBoolean(Result)^ := UnZipOneFile(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
 end;
 
 procedure Lape_ZipFiles(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -212,9 +212,9 @@ begin
     addGlobalFunc('function ReadINI(Section, KeyName, FileName: String): String', @Lape_ReadINI);
     addGlobalFunc('procedure DeleteINI(Section, KeyName, FileName: String);', @Lape_DeleteINI);
     addGlobalFunc('function DeleteDirectory(Dir: String; Empty: Boolean): Boolean;', @Lape_DeleteDirectory);
-    addGlobalFunc('procedure ZipFiles(ToFolder: String; Files: TStringArray);', @Lape_ZipFiles);
-    addGlobalFunc('procedure UnZipFile(FilePath, TargetPath: String);', @Lape_UnZipFile);
-    addGlobalFunc('procedure UnZipOneFile(const ArchiveFileName, FileName, OutputPath: String);', @Lape_UnZipOneFile);
+    addGlobalFunc('procedure ZipFiles(constref ArchiveFileName: String; constref Files: TStringArray);', @Lape_ZipFiles);
+    addGlobalFunc('procedure UnZipFile(constref ArchiveFileName, OutputDirectory: String);', @Lape_UnZipFile);
+    addGlobalFunc('function UnZipOneFile(constref ArchiveFileName, FileName, OutputDirectory: String): Boolean;', @Lape_UnZipOneFile);
     addGlobalFunc('function FindFile(Path, Mask: String; SearchSubDirs: Boolean = True; CaseSenstive: Boolean = False): TStringArray;', @Lape_FindFile);
   end;
 end;

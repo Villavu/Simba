@@ -41,13 +41,6 @@ type
 
     Environment: record
       FirstLaunch: TSimbaSetting_Boolean;
-      DataPath: TSimbaSetting_Directory;
-      FontPath: TSimbaSetting_Directory;
-      IncludePath: TSimbaSetting_Directory;
-      PluginPath: TSimbaSetting_Directory;
-      ScriptPath: TSimbaSetting_Directory;
-      PackagePath: TSimbaSetting_Directory;
-      OpenSSLPath: TSimbaSetting_Directory;
       OpenSSLOnLaunch: TSimbaSetting_Boolean;
     end;
 
@@ -63,7 +56,7 @@ var
 implementation
 
 uses
-  forms;
+  simba.files;
 
 procedure TSimbaSettings.Save;
 begin
@@ -75,39 +68,14 @@ end;
 
 constructor TSimbaSettings.Create;
 begin
-  FManager := TSimbaSettingManager.Create(Application.Location + 'Data' + DirectorySeparator + 'settings.ini');
+  FManager := TSimbaSettingManager.Create(GetDataPath() + 'settings.ini');
 
   // Environment
   Environment.FirstLaunch := TSimbaSetting_Boolean.Create(FManager, 'Environment', 'FirstLaunch');
   Environment.FirstLaunch.DefaultValue := True;
 
-  Environment.DataPath := TSimbaSetting_Directory.Create(FManager, 'Environment', 'DataPath');
-  Environment.DataPath.DefaultValue := Application.Location + 'Data' + DirectorySeparator;
-
-  Environment.IncludePath := TSimbaSetting_Directory.Create(FManager, 'Environment', 'IncludePath');
-  Environment.IncludePath.DefaultValue := Application.Location + 'Includes' + DirectorySeparator;
-
-  Environment.PluginPath := TSimbaSetting_Directory.Create(FManager, 'Environment', 'PluginPath');
-  Environment.PluginPath.DefaultValue := Application.Location + 'Plugins' + DirectorySeparator;
-
-  Environment.FontPath := TSimbaSetting_Directory.Create(FManager, 'Environment', 'FontPath');
-  Environment.FontPath.DefaultValue := Application.Location + 'Fonts' + DirectorySeparator;
-
-  Environment.ScriptPath := TSimbaSetting_Directory.Create(FManager, 'Environment', 'ScriptPath');
-  Environment.ScriptPath.DefaultValue := Application.Location + 'Scripts' + DirectorySeparator;
-
-  Environment.PackagePath := TSimbaSetting_Directory.Create(FManager, 'Environment', 'PackagePath');
-  Environment.PackagePath.DefaultValue := Application.Location + 'Data' + DirectorySeparator + 'packages' + DirectorySeparator;
-
   Environment.OpenSSLOnLaunch := TSimbaSetting_Boolean.Create(FManager, 'Environment', 'OpenSSLOnLaunch');
   Environment.OpenSSLOnLaunch.DefaultValue := True;
-
-  Environment.OpenSSLPath := TSimbaSetting_Directory.Create(FManager, 'Environment', 'OpenSSLPath');
-  {$IFDEF WINDOWS}
-  Environment.OpenSSLPath.Value := Application.Location + 'Data' + DirectorySeparator + {$IFDEF CPU32}'32'{$ELSE}'64'{$ENDIF} + DirectorySeparator;
-  {$ELSE}
-  Environment.OpenSSLPath.Value := Application.Location;
-  {$ENDIF}
 
   // GUI
   GUI.ConsoleVisible := TSimbaSetting_Boolean.Create(FManager, 'GUI', 'ConsoleVisible');
@@ -131,7 +99,7 @@ begin
   Editor.ColorsPath := TSimbaSetting_String.Create(FManager, 'Editor', 'ColorsPath');
 
   Editor.DefaultScriptPath := TSimbaSetting_File.Create(FManager, 'Editor', 'DefaultScriptPath');
-  Editor.DefaultScriptPath.DefaultValue := Environment.DataPath.Value + 'default.simba';
+  Editor.DefaultScriptPath.DefaultValue := GetDataPath() + 'default.simba';
 
   Editor.FontSize := TSimbaSetting_Int64.Create(FManager, 'Editor', 'FontSize');
   Editor.FontSize.DefaultValue := 15;
@@ -169,12 +137,9 @@ begin
   FManager.Free();
 end;
 
-initialization
-  SimbaSettings := TSimbaSettings.Create();
-
 finalization
-  SimbaSettings.Free();
-  SimbaSettings := nil;
+  if (SimbaSettings <> nil) then
+    FreeAndNil(SimbaSettings);
 
 end.
 

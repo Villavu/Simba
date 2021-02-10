@@ -3,78 +3,16 @@
 LazarusResources.Add('TEnvironmentFrame','FORMDATA',[
   'TPF0'#17'TEnvironmentFrame'#16'EnvironmentFrame'#4'Left'#2#0#6'Height'#3#184
   +#1#3'Top'#2#0#5'Width'#3'9'#2#12'ClientHeight'#3#184#1#11'ClientWidth'#3'9'#2
-  +#8'TabOrder'#2#0#10'DesignLeft'#3#180#7#9'DesignTop'#3'U'#2#0#6'TLabel'#6'La'
-  +'bel1'#22'AnchorSideLeft.Control'#7#15'IncludePathEdit'#21'AnchorSideTop.Con'
-  +'trol'#7#5'Owner'#4'Left'#2#0#6'Height'#2#19#3'Top'#2#5#5'Width'#2'L'#17'Bor'
-  +'derSpacing.Top'#2#5#20'BorderSpacing.Bottom'#2#2#7'Caption'#6#12'Include Pa'
-  +'th'#6'Layout'#7#8'tlCenter'#11'ParentColor'#8#0#0#5'TEdit'#15'IncludePathEd'
-  +'it'#22'AnchorSideLeft.Control'#7#5'Owner'#21'AnchorSideTop.Control'#7#6'Lab'
-  +'el1'#18'AnchorSideTop.Side'#7#9'asrBottom'#23'AnchorSideRight.Control'#7#21
-  +'IncludePathOpenButton'#4'Left'#2#0#6'Height'#2#27#3'Top'#2#26#5'Width'#3#17
-  +#2#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#0#8'TabOrder'#2#0#0#0#7'TButt'
-  +'on'#21'IncludePathOpenButton'#19'AnchorSideLeft.Side'#7#9'asrBottom'#21'Anc'
-  +'horSideTop.Control'#7#15'IncludePathEdit'#23'AnchorSideRight.Control'#7#5'O'
-  +'wner'#20'AnchorSideRight.Side'#7#9'asrBottom'#24'AnchorSideBottom.Control'#7
-  +#15'IncludePathEdit'#21'AnchorSideBottom.Side'#7#9'asrBottom'#4'Left'#3#22#2
-  +#6'Height'#2#27#3'Top'#2#26#5'Width'#2'#'#7'Anchors'#11#5'akTop'#7'akRight'#8
-  +'akBottom'#0#8'AutoSize'#9#18'BorderSpacing.Left'#2#5#7'Caption'#6#3'...'#7
-  +'OnClick'#7#15'OpenButtonClick'#8'TabOrder'#2#1#0#0#5'TEdit'#14'PluginPathEd'
-  +'it'#22'AnchorSideLeft.Control'#7#5'Owner'#21'AnchorSideTop.Control'#7#6'Lab'
-  +'el2'#18'AnchorSideTop.Side'#7#9'asrBottom'#23'AnchorSideRight.Control'#7#20
-  +'PluginPathOpenButton'#4'Left'#2#0#6'Height'#2#27#3'Top'#2'O'#5'Width'#3#17#2
-  +#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#0#8'TabOrder'#2#2#0#0#6'TLabel'
-  +#6'Label2'#22'AnchorSideLeft.Control'#7#14'PluginPathEdit'#21'AnchorSideTop.'
-  +'Control'#7#15'IncludePathEdit'#18'AnchorSideTop.Side'#7#9'asrBottom'#4'Left'
-  +#2#0#6'Height'#2#19#3'Top'#2':'#5'Width'#2'F'#17'BorderSpacing.Top'#2#5#20'B'
-  +'orderSpacing.Bottom'#2#2#7'Caption'#6#11'Plugin Path'#6'Layout'#7#8'tlCente'
-  +'r'#11'ParentColor'#8#0#0#7'TButton'#20'PluginPathOpenButton'#19'AnchorSideL'
-  +'eft.Side'#7#9'asrBottom'#21'AnchorSideTop.Control'#7#14'PluginPathEdit'#23
-  +'AnchorSideRight.Control'#7#5'Owner'#20'AnchorSideRight.Side'#7#9'asrBottom'
-  +#24'AnchorSideBottom.Control'#7#14'PluginPathEdit'#21'AnchorSideBottom.Side'
-  +#7#9'asrBottom'#4'Left'#3#22#2#6'Height'#2#27#3'Top'#2'O'#5'Width'#2'#'#7'An'
-  +'chors'#11#5'akTop'#7'akRight'#8'akBottom'#0#8'AutoSize'#9#18'BorderSpacing.'
-  +'Left'#2#5#7'Caption'#6#3'...'#7'OnClick'#7#15'OpenButtonClick'#8'TabOrder'#2
-  +#3#0#0#5'TEdit'#12'FontPathEdit'#22'AnchorSideLeft.Control'#7#5'Owner'#21'An'
-  +'chorSideTop.Control'#7#6'Label3'#18'AnchorSideTop.Side'#7#9'asrBottom'#23'A'
-  +'nchorSideRight.Control'#7#18'FontPathOpenButton'#4'Left'#2#0#6'Height'#2#27
-  +#3'Top'#3#132#0#5'Width'#3#17#2#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#0
-  +#8'TabOrder'#2#4#0#0#7'TButton'#18'FontPathOpenButton'#19'AnchorSideLeft.Sid'
-  +'e'#7#9'asrBottom'#21'AnchorSideTop.Control'#7#12'FontPathEdit'#23'AnchorSid'
-  +'eRight.Control'#7#5'Owner'#20'AnchorSideRight.Side'#7#9'asrBottom'#24'Ancho'
-  +'rSideBottom.Control'#7#12'FontPathEdit'#21'AnchorSideBottom.Side'#7#9'asrBo'
-  +'ttom'#4'Left'#3#22#2#6'Height'#2#27#3'Top'#3#132#0#5'Width'#2'#'#7'Anchors'
-  +#11#5'akTop'#7'akRight'#8'akBottom'#0#8'AutoSize'#9#18'BorderSpacing.Left'#2
-  +#5#7'Caption'#6#3'...'#7'OnClick'#7#15'OpenButtonClick'#8'TabOrder'#2#5#0#0#6
-  +'TLabel'#6'Label3'#22'AnchorSideLeft.Control'#7#12'FontPathEdit'#21'AnchorSi'
-  +'deTop.Control'#7#14'PluginPathEdit'#18'AnchorSideTop.Side'#7#9'asrBottom'#4
-  +'Left'#2#0#6'Height'#2#19#3'Top'#2'o'#5'Width'#2'<'#17'BorderSpacing.Top'#2#5
-  +#20'BorderSpacing.Bottom'#2#2#7'Caption'#6#9'Font Path'#6'Layout'#7#8'tlCent'
-  +'er'#11'ParentColor'#8#0#0#5'TEdit'#14'ScriptPathEdit'#22'AnchorSideLeft.Con'
-  +'trol'#7#5'Owner'#21'AnchorSideTop.Control'#7#6'Label4'#18'AnchorSideTop.Sid'
-  +'e'#7#9'asrBottom'#23'AnchorSideRight.Control'#7#20'ScriptPathOpenButton'#4
-  +'Left'#2#0#6'Height'#2#27#3'Top'#3#185#0#5'Width'#3#17#2#7'Anchors'#11#5'akT'
-  +'op'#6'akLeft'#7'akRight'#0#8'TabOrder'#2#6#0#0#6'TLabel'#6'Label4'#22'Ancho'
-  +'rSideLeft.Control'#7#14'ScriptPathEdit'#21'AnchorSideTop.Control'#7#12'Font'
-  +'PathEdit'#18'AnchorSideTop.Side'#7#9'asrBottom'#4'Left'#2#0#6'Height'#2#19#3
-  +'Top'#3#164#0#5'Width'#2'B'#17'BorderSpacing.Top'#2#5#20'BorderSpacing.Botto'
-  +'m'#2#2#7'Caption'#6#11'Script Path'#6'Layout'#7#8'tlCenter'#11'ParentColor'
-  +#8#0#0#7'TButton'#20'ScriptPathOpenButton'#19'AnchorSideLeft.Side'#7#9'asrBo'
-  +'ttom'#21'AnchorSideTop.Control'#7#14'ScriptPathEdit'#23'AnchorSideRight.Con'
-  +'trol'#7#5'Owner'#20'AnchorSideRight.Side'#7#9'asrBottom'#24'AnchorSideBotto'
-  +'m.Control'#7#14'ScriptPathEdit'#21'AnchorSideBottom.Side'#7#9'asrBottom'#4
-  +'Left'#3#22#2#6'Height'#2#27#3'Top'#3#185#0#5'Width'#2'#'#7'Anchors'#11#5'ak'
-  +'Top'#7'akRight'#8'akBottom'#0#8'AutoSize'#9#18'BorderSpacing.Left'#2#5#7'Ca'
-  +'ption'#6#3'...'#7'OnClick'#7#15'OpenButtonClick'#8'TabOrder'#2#7#0#0#13'TDi'
-  ,'viderBevel'#13'DividerBevel1'#22'AnchorSideLeft.Control'#7#5'Owner'#21'Anch'
-  +'orSideTop.Control'#7#14'ScriptPathEdit'#18'AnchorSideTop.Side'#7#9'asrBotto'
-  +'m'#23'AnchorSideRight.Control'#7#5'Owner'#20'AnchorSideRight.Side'#7#9'asrB'
-  +'ottom'#4'Left'#2#0#6'Height'#2#19#3'Top'#3#222#0#5'Width'#3'9'#2#7'Caption'
-  +#6#7'OpenSSL'#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#0#17'BorderSpacing'
-  +'.Top'#2#10#5'Style'#7#10'gsHorLines'#0#0#9'TCheckBox'#15'OpenSSLOnLaunch'#22
-  +'AnchorSideLeft.Control'#7#13'DividerBevel1'#21'AnchorSideTop.Control'#7#13
-  +'DividerBevel1'#18'AnchorSideTop.Side'#7#9'asrBottom'#4'Left'#2#0#6'Height'#2
-  +#23#4'Hint'#6'JOn launch, automatically extract Simba''s resources (SimbaScr'
-  +'ipt, OpenSSL).'#3'Top'#3#246#0#5'Width'#3#144#0#17'BorderSpacing.Top'#2#5#7
-  +'Caption'#6#20'Initialize On Launch'#14'ParentShowHint'#8#8'ShowHint'#9#8'Ta'
-  +'bOrder'#2#8#0#0#0
+  +#8'TabOrder'#2#0#10'DesignLeft'#3't'#11#9'DesignTop'#3#219#1#0#13'TDividerBe'
+  +'vel'#13'DividerBevel1'#22'AnchorSideLeft.Control'#7#5'Owner'#21'AnchorSideT'
+  +'op.Control'#7#5'Owner'#23'AnchorSideRight.Control'#7#5'Owner'#20'AnchorSide'
+  +'Right.Side'#7#9'asrBottom'#4'Left'#2#0#6'Height'#2#19#3'Top'#2#0#5'Width'#3
+  +'9'#2#7'Caption'#6#7'OpenSSL'#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#0#5
+  +'Style'#7#10'gsHorLines'#0#0#9'TCheckBox'#15'OpenSSLOnLaunch'#22'AnchorSideL'
+  +'eft.Control'#7#13'DividerBevel1'#21'AnchorSideTop.Control'#7#13'DividerBeve'
+  +'l1'#18'AnchorSideTop.Side'#7#9'asrBottom'#4'Left'#2#0#6'Height'#2#23#4'Hint'
+  +#6'JOn launch, automatically extract Simba''s resources (SimbaScript, OpenSS'
+  +'L).'#3'Top'#2#24#5'Width'#3#144#0#17'BorderSpacing.Top'#2#5#7'Caption'#6#20
+  +'Initialize On Launch'#14'ParentShowHint'#8#8'ShowHint'#9#8'TabOrder'#2#0#0#0
+  +#0
 ]);

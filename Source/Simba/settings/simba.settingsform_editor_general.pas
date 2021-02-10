@@ -35,13 +35,13 @@ implementation
 
 uses
   dialogs,
-  simba.settings;
+  simba.files;
 
 procedure TEditorGeneralFrame.OpenDefaultScriptButtonClick(Sender: TObject);
 var
   Directory: String;
 begin
-  if SelectDirectory('Default Script', SimbaSettings.Environment.ScriptPath.Value, Directory) then
+  if SelectDirectory('Default Script', GetScriptPath(), Directory) then
     DefaultScriptEdit.Text := Directory;
 end;
 

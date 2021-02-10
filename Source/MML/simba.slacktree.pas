@@ -1,5 +1,5 @@
 {==============================================================================]
-  Copyright (c) 2016, Jarl `slacky` Holta
+  Copyright (c) 2021, Jarl `slacky` Holta
   Project: SlackTree
   License: GNU Lesser GPL (http://www.gnu.org/licenses/lgpl.html)
 [==============================================================================}

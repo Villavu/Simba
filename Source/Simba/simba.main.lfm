@@ -33,7 +33,7 @@ object SimbaForm: TSimbaForm
       Top = 2
       Caption = '&Run'
       ImageIndex = 14
-      OnClick = MenuRunClick
+      OnClick = DoChangeScriptState
     end
     object PauseButton: TToolButton
       Left = 203
@@ -42,7 +42,7 @@ object SimbaForm: TSimbaForm
       Caption = '&Pause'
       Enabled = False
       ImageIndex = 12
-      OnClick = MenuPauseClick
+      OnClick = DoChangeScriptState
     end
     object StopButton: TToolButton
       Left = 235
@@ -51,7 +51,7 @@ object SimbaForm: TSimbaForm
       Caption = '&Stop'
       Enabled = False
       ImageIndex = 16
-      OnClick = MenuStopClick
+      OnClick = DoChangeScriptState
     end
     object ButtonSeperator1: TToolButton
       Left = 166
@@ -146,7 +146,7 @@ object SimbaForm: TSimbaForm
       Hint = 'Compile Script (Shift + Ctrl + C)'
       Top = 2
       ImageIndex = 0
-      OnClick = MenuCompileClick
+      OnClick = DoChangeScriptState
     end
     object ButtonSeperator5: TToolButton
       Left = 267
@@ -318,24 +318,24 @@ object SimbaForm: TSimbaForm
         Hint = 'Compile Script'
         ImageIndex = 0
         ShortCut = 24643
-        OnClick = MenuCompileClick
+        OnClick = DoChangeScriptState
       end
       object MenuItemRun: TMenuItem
         Caption = '&Run'
         ImageIndex = 14
         ShortCut = 24658
-        OnClick = MenuRunClick
+        OnClick = DoChangeScriptState
       end
       object MenuItemPause: TMenuItem
         Caption = '&Pause'
         ImageIndex = 12
-        OnClick = MenuPauseClick
+        OnClick = DoChangeScriptState
       end
       object MenuItemStop: TMenuItem
         Caption = '&Stop'
         ImageIndex = 16
         ShortCut = 24659
-        OnClick = MenuStopClick
+        OnClick = DoChangeScriptState
       end
       object MenuItem5: TMenuItem
         Caption = '-'
@@ -343,7 +343,7 @@ object SimbaForm: TSimbaForm
       object MenuItemRunWithDebugging: TMenuItem
         Caption = 'Run with Debugging'
         ImageIndex = 37
-        OnClick = MenuRunWithDebuggingClick
+        OnClick = DoChangeScriptState
       end
     end
     object MenuTools: TMenuItem

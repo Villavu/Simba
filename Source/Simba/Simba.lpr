@@ -24,75 +24,31 @@ program Simba;
 
 {$mode objfpc}{$H+}
 
-{$IFDEF DARWIN}
-  {$modeswitch objectivec2}
-{$ENDIF}
-
 {$R Simba.res}
 
 uses
-  {$IFDEF UNIX}
-  cthreads, cmem,
-  {$ENDIF}
-  {$IFDEF LINUX}
-  simba.linux_initialization,
-  {$ENDIF}
-  {$IFDEF DARWIN}
-  simba.darwin_initialization, cocoaint,
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-  windows,
-  {$ENDIF}
-  classes, interfaces, forms, sysutils,
-  simba.main, simba.aboutform, simba.debugimage, simba.bitmapconv, simba.functionlistform,
-  simba.scripttabsform, simba.debugform, simba.filebrowserform, simba.notesform,
-  simba.package_form, simba.colorpicker_historyform, simba.settingsform, simba.associate,
-  simba.script, simba.script_dump;
+  simba.init, // Things that must happen before other units are initialized
+  classes, sysutils, interfaces, forms,
+  simba.main, simba.aboutform, simba.debugimage, simba.bitmapconv,
+  simba.functionlistform, simba.scripttabsform, simba.debugform,
+  simba.filebrowserform, simba.notesform, simba.package_form,
+  simba.colorpicker_historyform, simba.settingsform,
+  simba.associate, simba.script, simba.script_dump;
 
 type
   TApplicationHelper = class helper for TApplication
-    function GetOptionValueDef(const Option, Def: String): String;
-    procedure CreateForm(InstanceClass: TComponentClass; out Reference);
     procedure Terminate(Sender: TObject);
   end;
 
-function TApplicationHelper.GetOptionValueDef(const Option, Def: String): String;
-begin
-  Result := GetOptionValue(Option);
-  if Result = '' then
-    Result := Def;
-end;
-
-procedure TApplicationHelper.CreateForm(InstanceClass: TComponentClass; out Reference);
-begin
-  WriteLn('Creating ' + InstanceClass.ClassName);
-
-  inherited CreateForm(InstanceClass, Reference);
-end;
-
 procedure TApplicationHelper.Terminate(Sender: TObject);
-{$IFDEF WINDOWS}
-var
-  PID: UInt32;
-{$ENDIF}
 begin
-  {$IFDEF WINDOWS}
-  GetWindowThreadProcessId(GetConsoleWindow(), PID);
-  if (PID = GetCurrentProcessID()) then
-  begin
-    WriteLn('Press enter to exit');
-
-    ReadLn();
-  end;
-  {$ENDIF}
-
   inherited Terminate();
 
   if (WakeMainThread <> nil) then
     WakeMainThread(Self);
 
   {$IFDEF DARWIN}
-  CocoaWidgetSet.NSApp.Terminate(nil);  // MacOS needs extra help
+  Halt(ExitCode); // MacOS needs extra help?
   {$ENDIF}
 end;
 
@@ -100,8 +56,6 @@ begin
   {$IF DECLARED(SetHeapTraceOutput)}
   SetHeapTraceOutput('memory-leaks.trc');
   {$ENDIF}
-
-  FormatSettings.DecimalSeparator := '.';
 
   Application.Title := 'Simba';
   Application.Scaled := True;
@@ -125,19 +79,18 @@ begin
 
   if not Application.HasOption('open') and Application.HasOption('run') or Application.HasOption('compile') then
   begin
+    if not FileExists(Application.Params[Application.ParamCount]) then
+    begin
+      WriteLn('Script "' + Application.Params[Application.ParamCount] + '" does not exist.');
+
+      Halt();
+    end;
+
     SimbaScript := TSimbaScript.Create();
     SimbaScript.OnTerminate := @Application.Terminate;
 
-    SimbaScript.ScriptName := Application.GetOptionValue('scriptname');
-    SimbaScript.ScriptFile := Application.Params[Application.ParamCount];
-
-    SimbaScript.AppPath     := Application.GetOptionValueDef('apppath', Application.Location);
-    SimbaScript.DataPath    := Application.GetOptionValueDef('datapath', Application.Location + 'Data');
-    SimbaScript.PluginPath  := Application.GetOptionValueDef('pluginpath', Application.Location + 'Plugins');
-    SimbaScript.FontPath    := Application.GetOptionValueDef('fontpath', Application.Location + 'Fonts');
-    SimbaScript.IncludePath := Application.GetOptionValueDef('includepath', Application.Location + 'Includes');
-    SimbaScript.ScriptPath  := Application.GetOptionValueDef('scriptpath', Application.Location + 'Scripts');
-
+    SimbaScript.ScriptFile               := Application.Params[Application.ParamCount];
+    SimbaScript.ScriptName               := Application.GetOptionValue('scriptname');
     SimbaScript.Debugging                := Application.HasOption('debugging');
     SimbaScript.CompileOnly              := Application.HasOption('compile');
     SimbaScript.SimbaCommunicationServer := Application.GetOptionValue('simbacommunication');

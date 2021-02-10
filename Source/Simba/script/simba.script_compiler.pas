@@ -10,6 +10,11 @@ uses
   ffi, lpcompiler, lptypes, lpvartypes, lpparser, lptree, lpffiwrappers;
 
 type
+  TSimbaScript_Tokenzier = class(TLapeTokenizerFile)
+  public
+    constructor Create(AScript, AScriptName: String); reintroduce;
+  end;
+
   TSimbaScript_Compiler = class(TLapeCompiler)
   public
   type
@@ -126,6 +131,14 @@ uses
   simba.script_import_simba,
   simba.script_import_process,
   simba.script_import_matchtemplate;
+
+constructor TSimbaScript_Tokenzier.Create(AScript, AScriptName: String);
+begin
+  inherited Create(AScript);
+
+  if (AScriptName <> '') then
+    FFileName := AScriptName;
+end;
 
 procedure Lape_EnterMethod(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 var
