@@ -8,7 +8,8 @@ interface
 
 uses
   Classes, SysUtils, Graphics, Controls, LCLType, inifiles,
-  SynEdit, SynGutterLineOverview, SynEditMarks, SynEditMiscClasses, SynEditMouseCmds, SynEditKeyCmds, SynEditHighlighter, SynEditPointClasses,
+  SynEdit, SynGutterLineOverview, SynEditMarks, SynEditMiscClasses, SynEditMouseCmds,
+  SynEditKeyCmds, SynEditHighlighter, SynEditPointClasses, SynEditTypes,
   simba.highlighter, simba.autocomplete, simba.parameterhint, simba.editor_attributes;
 
 const

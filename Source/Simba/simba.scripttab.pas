@@ -5,9 +5,10 @@ unit simba.scripttab;
 interface
 
 uses
-  classes, sysutils, comctrls, controls, syneditmiscclasses, syneditkeycmds, lcltype, dialogs, simba.functionlistform,
-  simba.editor, simba.scriptinstance, simba.codeinsight, simba.codeparser, simba.parameterhint, simba.autocomplete,
-  simba.debuggerform;
+  classes, sysutils, comctrls, controls, dialogs, lcltype,
+  syneditmiscclasses, syneditkeycmds,
+  simba.editor, simba.scriptinstance, simba.codeinsight, simba.parameterhint,
+  simba.debuggerform, simba.functionlistform;
 
 type
   TSimbaScriptTab = class(TTabSheet)
@@ -77,8 +78,10 @@ type
 implementation
 
 uses
-  synedit, lazfileutils, SynEditMouseCmds, InterfaceBase, forms, simba.scripttabsform,
-  simba.settings, simba.scripttabhistory, simba.main, simba.parser_misc, simba.debugform;
+  interfacebase, forms, lazfileutils,
+  synedit, synedittypes, syneditmousecmds,
+  simba.scripttabsform, simba.codeparser, simba.autocomplete, simba.settings,
+  simba.scripttabhistory, simba.main, simba.parser_misc, simba.files;
 
 procedure TSimbaScriptTab.HandleCodeJump(Data: PtrInt);
 var
@@ -340,7 +343,7 @@ begin
     SaveDialog.Filter := 'Simba Files|*.simba;*.pas;*.inc;|Any Files|*.*';
     SaveDialog.InitialDir := FScriptFile;
     if (FScriptFile = '') then
-      SaveDialog.InitialDir := SimbaSettings.Environment.ScriptPath.Value;
+      SaveDialog.InitialDir := GetScriptPath();
 
     if SaveDialog.Execute then
     begin

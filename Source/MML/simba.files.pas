@@ -66,18 +66,29 @@ type
     function AddFileToManagedList(Path: string; FS: TFileStream; Mode: Integer): Integer;
   end;
 
-  // We don't need one per object. :-)
   function GetFiles(Path, Ext: string): TStringArray;
   function GetDirectories(Path: string): TstringArray;
   function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
   function FindPlugin(var FileName: String; const Directories: array of String): Boolean;
-  procedure UnZipFile(const FilePath, TargetPath: string);
-  procedure UnZipOneFile(const ArchiveFileName, FileName, OutputPath: String);
-  procedure ZipFiles(const ToFolder: string; const Files: TStringArray);
+  procedure ZipFiles(constref ArchiveFileName: String; constref Files: TStringArray);
+  procedure UnZipFile(constref ArchiveFileName, OutputDirectory: String);
+  function UnZipOneFile(constref ArchiveFileName, FileName, OutputDirectory: String): Boolean;
+
+  function CreateTempFile(constref Contents, Prefix: String): String;
+
+  function GetSimbaPath: String;
+  function GetDataPath: String;
+  function GetIncludePath: String;
+  function GetPluginPath: String;
+  function GetFontPath: String;
+  function GetScriptPath: String;
+  function GetPackagePath: String;
+  function GetOpenSSLBinaryPath: String;
 
 implementation
 
 uses
+  Forms,
   IniFiles, FileUtil, LazFileUtils, LazUTF8, Zipper, dynlibs;
 
 function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
@@ -151,17 +162,17 @@ begin
   end;
 end;
 
-procedure UnZipFile(const FilePath, TargetPath: string);
+procedure UnZipFile(constref ArchiveFileName, OutputDirectory: String);
 var
   UnZipper: TUnZipper;
 begin
-  if (not FileExistsUTF8(FilePath)) then
-    raise Exception.CreateFmt('UnZipFile: FilePath "%s" Doesn''t exist', [FilePath]);
+  if (not FileExistsUTF8(ArchiveFileName)) then
+    raise Exception.CreateFmt('UnZipFile: Archive "%s" does not exist', [ArchiveFileName]);
 
   UnZipper := TUnZipper.Create();
   try
-    UnZipper.FileName := FilePath;
-    UnZipper.OutputPath := TargetPath;
+    UnZipper.FileName := ArchiveFileName;
+    UnZipper.OutputPath := OutputDirectory;
     UnZipper.Examine();
     UnZipper.UnZipAllFiles();
   finally
@@ -169,48 +180,110 @@ begin
   end;
 end;
 
-procedure UnZipOneFile(const ArchiveFileName, FileName, OutputPath: String);
+function UnZipOneFile(constref ArchiveFileName, FileName, OutputDirectory: String): Boolean;
 var
   UnZipper: TUnZipper;
-  Files: TStringList;
+  I: Int32;
 begin
-  Files := TStringList.Create();
-  Files.Add(FileName);
+  Result := False;
+
+  UnZipper := TUnZipper.Create();
+  UnZipper.Files.Add(FileName);
 
   try
-    UnZipper := TUnZipper.Create();
+    UnZipper.FileName := ArchiveFileName;
+    UnZipper.OutputPath := OutputDirectory;
+    UnZipper.Examine();
 
-    try
-      UnZipper.FileName := ArchiveFileName;
-      UnZipper.OutputPath := OutputPath;
-      UnZipper.Examine();
-      UnZipper.UnZipFiles(Files);
-    finally
-      UnZipper.Free();
-    end;
+    for I := 0 to UnZipper.Entries.Count - 1 do
+      if (UnZipper.Entries[I].ArchiveFileName = FileName) then
+      begin
+        UnZipper.UnZipAllFiles();
+
+        Result := True;
+        Break;
+      end;
   finally
-    Files.Free();
+    UnZipper.Free();
   end;
 end;
 
-procedure ZipFiles(const ToFolder: string; const Files: TStringArray);
+procedure ZipFiles(constref ArchiveFileName: String; constref Files: TStringArray);
 var
-  OurZipper: TZipper;
+  Zipper: TZipper;
   I: Integer;
 begin
   if (Length(Files) = 0) then
-    raise exception.create('ZipFiles: No Files to zip; Files length = 0');
+    raise Exception.Create('ZipFiles: No files to zip');
 
-  OurZipper := TZipper.Create;
+  Zipper := TZipper.Create;
   try
-    OurZipper.FileName := ToFolder;
+    Zipper.FileName := ArchiveFileName;
     for I := 0 to High(Files) do
-      OurZipper.Entries.AddFileEntry(Files[i], ExtractFileNameOnly(Files[i]) + ExtractFileExt(Files[i]));
+      Zipper.Entries.AddFileEntry(Files[I], Files[I]);
 
-    OurZipper.ZipAllFiles();
+    Zipper.ZipAllFiles();
   finally
-    OurZipper.Free;
+    Zipper.Free;
   end;
+end;
+
+function CreateTempFile(constref Contents, Prefix: String): String;
+begin
+  Result := GetTempFileName(GetDataPath(), Prefix);
+
+  with TStringList.Create() do
+  try
+    Text := Contents;
+
+    SaveToFile(Result);
+  finally
+    Free();
+  end;
+end;
+
+function GetSimbaPath: String;
+begin
+  Result := IncludeTrailingPathDelimiter(Application.Location);
+end;
+
+function GetDataPath: String;
+begin
+  Result := GetSimbaPath() + 'Data' + DirectorySeparator;
+end;
+
+function GetIncludePath: String;
+begin
+  Result := GetSimbaPath() + 'Includes' + DirectorySeparator;
+end;
+
+function GetPluginPath: String;
+begin
+  Result := GetSimbaPath() + 'Plugins' + DirectorySeparator;
+end;
+
+function GetFontPath: String;
+begin
+  Result := GetSimbaPath() + 'Fonts' + DirectorySeparator;
+end;
+
+function GetScriptPath: String;
+begin
+  Result := GetSimbaPath() + 'Scripts' + DirectorySeparator;
+end;
+
+function GetPackagePath: String;
+begin
+  Result := GetDataPath() + 'packages' + DirectorySeparator;
+end;
+
+function GetOpenSSLBinaryPath: String;
+begin
+  {$IFDEF WINDOWS}
+  Result := GetDataPath() + {$IFDEF CPU32}'32'{$ELSE}'64'{$ENDIF} + DirectorySeparator;
+  {$ELSE}
+  Result := GetSimbaPath();
+  {$ENDIF}
 end;
 
 constructor TMFiles.Create(Owner : TObject);

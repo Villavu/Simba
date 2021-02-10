@@ -44,7 +44,6 @@ type
     FTarget: THandle;
 
     FStartTime: UInt64;
-    FScript: String;
     FScriptFile: String;
     FScriptName: String;
 
@@ -58,15 +57,12 @@ type
     function GetTimeRunning: UInt64;
     function GetExitCode: Int32;
     function GetPID: UInt32;
-
-    procedure SetScript(Value: String);
   public
     property DebuggerForm: TSimbaDebuggerForm read FDebuggingForm;
     property Process: TSimbaScriptProcess read FProcess;
     property State: ESimbaScriptState read FState write FState;
 
     // Parameters to pass to script
-    property Script: String write FScript;
     property ScriptName: String write FScriptName;
     property ScriptFile: String write FScriptFile;
     property Target: THandle write FTarget;
@@ -99,7 +95,7 @@ implementation
 
 uses
   forms,
-  simba.stringutil, simba.debugform, simba.settings;
+  simba.stringutil, simba.debugform;
 
 procedure TSimbaScriptOutputThread.Execute;
 var
@@ -193,24 +189,6 @@ begin
   inherited Destroy();
 end;
 
-procedure TSimbaScriptInstance.SetScript(Value: String);
-var
-  FileName: String;
-begin
-  FileName := GetTempFileName(SimbaSettings.Environment.DataPath.Value, '.script');
-
-  with TStringList.Create() do
-  try
-    Text := Value;
-
-    SaveToFile(FileName);
-  finally
-    Free();
-  end;
-
-  FProcess.Parameters.Add('--scriptfile=' + FileName);
-end;
-
 procedure TSimbaScriptInstance.OnExecuteProcess(Sender: TObject);
 begin
   FOutputThread := TSimbaScriptOutputThread.Create(Self);
@@ -243,30 +221,16 @@ end;
 
 procedure TSimbaScriptInstance.Run(DebuggingForm: TSimbaDebuggerForm);
 begin
-  if (FScript <> '') then
+  if (DebuggingForm <> nil) then
   begin
-    FScriptFile := GetTempFileName(SimbaSettings.Environment.DataPath.Value, '.script');
-
-    with TStringList.Create() do
-    try
-      Text := FScript;
-
-      SaveToFile(FScriptFile);
-    finally
-      Free();
-    end;
-
-    FProcess.Parameters.Add('--scriptname=' + FScriptName);
-  end;
-
-  FDebuggingForm := DebuggingForm;
-
-  if (FDebuggingForm <> nil) then
-  begin
+    FDebuggingForm := DebuggingForm;
     FDebuggingForm.Clear();
 
     FProcess.Parameters.Add('--debugging');
   end;
+
+  if (FScriptName <> '') then
+    FProcess.Parameters.Add('--scriptname=' + FScriptName);
 
   FProcess.Parameters.Add('--target=' + IntToStr(FTarget));
   FProcess.Parameters.Add('--run');
@@ -278,21 +242,8 @@ end;
 
 procedure TSimbaScriptInstance.Compile;
 begin
-  if (FScript <> '') then
-  begin
-    FScriptFile := GetTempFileName(SimbaSettings.Environment.DataPath.Value, '.script');
-
-    with TStringList.Create() do
-    try
-      Text := FScript;
-
-      SaveToFile(FScriptFile);
-    finally
-      Free();
-    end;
-
+  if (FScriptName <> '') then
     FProcess.Parameters.Add('--scriptname=' + FScriptName);
-  end;
 
   FProcess.Parameters.Add('--target=' + IntToStr(FTarget));
   FProcess.Parameters.Add('--compile');
@@ -316,8 +267,13 @@ end;
 
 procedure TSimbaScriptInstance.Stop;
 begin
-  FState := STATE_STOP;
-  FProcess.Input.Write(FState, SizeOf(Int32));
+  if IsStopping() then
+    FProcess.Terminate(0)
+  else
+  begin
+    FState := STATE_STOP;
+    FProcess.Input.Write(FState, SizeOf(Int32));
+  end;
 end;
 
 constructor TSimbaScriptInstance.Create;
@@ -333,11 +289,6 @@ begin
   FProcess.Options := FProcess.Options + [poUsePipes, poStderrToOutPut];
 
   FProcess.Parameters.Add('--simbacommunication=%s', [FSimbaCommunication.Client]);
-  FProcess.Parameters.Add('--apppath=%s', [Application.Location]);
-  FProcess.Parameters.Add('--datapath=%s', [SimbaSettings.Environment.DataPath.Value]);
-  FProcess.Parameters.Add('--includepath=%s', [SimbaSettings.Environment.IncludePath.Value]);
-  FProcess.Parameters.Add('--pluginpath=%s', [SimbaSettings.Environment.PluginPath.Value]);
-  FProcess.Parameters.Add('--fontpath=%s', [SimbaSettings.Environment.FontPath.Value]);
 
   FProcess.Executable := Application.ExeName;
 end;

@@ -33,7 +33,6 @@ uses
   Graphics, simba.mufasatypes,
   Math;
 
-
 Function RGBtoColor(r,g,b : byte) : TColor; overload; inline;
 Function RGBtoColor(r,g,b : integer) : TColor; overload; inline;
 Procedure ColorToRGB(Color : integer;out r,g,b : byte); overload; inline;
@@ -64,14 +63,14 @@ procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended); inline;
 procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended); inline;
 function ColorToGray(const Color: Integer): Byte; inline;
 
-
 implementation
 
-Const
+const
   OneDivThree = 1/3.0;
   TwoDivThree = 2 / 3.0;
   OneDivTwoPointFour = 1 / 2.4;
-function BGRToRGB(BGR : TRGB32) : TColor;inline;
+
+function BGRToRGB(BGR : TRGB32) : TColor; inline;
 begin;
   Result := BGR.R or BGR.g shl 8 or BGR.b shl 16;
 end;

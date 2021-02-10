@@ -21,7 +21,7 @@ jobs:
           - os: windows-latest
             name: 'Windows 32'
             fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2g/fpclazup-i386-win32.exe'
-            fpcup-opt: '--lazrevision=64339'
+            fpcup-opt: '--lazrevision=64521'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
             laz-url: 'trunk'
             build-mode: 'SIMBA_WIN32'
@@ -31,7 +31,7 @@ jobs:
           - os: windows-latest
             name: 'Windows 64'
             fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2g/fpclazup-x86_64-win64.exe'
-            fpcup-opt: '--lazrevision=64339'
+            fpcup-opt: '--lazrevision=64521'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
             laz-url: 'trunk'
             build-mode: 'SIMBA_WIN64'
@@ -41,7 +41,7 @@ jobs:
           - os: ubuntu-latest
             name: 'Linux 64'
             fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2g/fpclazup-x86_64-linux'
-            fpcup-opt: '--lazrevision=64339'
+            fpcup-opt: '--lazrevision=64521'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
             laz-url: 'trunk'
             build-mode: 'SIMBA_LINUX64'
@@ -51,7 +51,7 @@ jobs:
           - os: macos-latest
             name: 'MacOS 64'
             fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2g/fpclazup-x86_64-darwin'
-            fpcup-opt: '--lazrevision=64339'
+            fpcup-opt: '--lazrevision=64521'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
             laz-url: 'trunk'
             build-mode: 'SIMBA_DARWIN64'
@@ -61,7 +61,7 @@ jobs:
           - os: ubuntu-latest
             name: 'AArch64'
             fpcup-url: 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/1.8.2g/fpclazup-x86_64-linux'
-            fpcup-opt: '--lazrevision=64339'
+            fpcup-opt: '--lazrevision=64521'
             fpc-url: 'https://svn.freepascal.org/svn/fpc/tags/release_3_2_0'
             laz-url: 'trunk'
             build-mode: 'SIMBA_AARCH64'
@@ -84,7 +84,7 @@ jobs:
 
     - name: Cache
       id: cache
-      uses: actions/cache@v2.1.3
+      uses: actions/cache@v2.1.4
       with:
         path: lazarus
         key: ${{ hashFiles('.cache') }}

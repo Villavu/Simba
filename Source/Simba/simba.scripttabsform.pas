@@ -102,7 +102,7 @@ implementation
 
 uses
   syneditpointclasses,
-  simba.settings, simba.main, simba.debugform, simba.scripttabhistory, simba.oswindow;
+  simba.files, simba.main, simba.debugform, simba.scripttabhistory, simba.oswindow;
 
 procedure TSimbaScriptTabsForm.DoEditorPopupShow(Sender: TObject);
 var
@@ -591,7 +591,7 @@ begin
   try
     OpenDialog.InitialDir := ExtractFileDir(CurrentTab.FileName);
     if OpenDialog.InitialDir = '' then
-      OpenDialog.InitialDir := SimbaSettings.Environment.ScriptPath.Value;
+      OpenDialog.InitialDir := GetScriptPath();
 
     if OpenDialog.Execute() then
       for I := 0 to OpenDialog.Files.Count - 1 do

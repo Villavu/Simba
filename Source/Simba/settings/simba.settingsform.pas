@@ -52,10 +52,6 @@ begin
   EditorFontFrame.FontAntiAliasedCheckbox.Checked := SimbaSettings.Editor.AntiAliasing.Value;
   EditorFontFrame.FontAntiAliasedCheckbox.OnChange(nil);
 
-  EnvironmentFrame.IncludePathEdit.Text := SimbaSettings.Environment.IncludePath.Value;
-  EnvironmentFrame.PluginPathEdit.Text := SimbaSettings.Environment.PluginPath.Value;
-  EnvironmentFrame.FontPathEdit.Text := SimbaSettings.Environment.FontPath.Value;
-  EnvironmentFrame.ScriptPathEdit.Text := SimbaSettings.Environment.ScriptPath.Value;
   EnvironmentFrame.OpenSSLOnLaunch.Checked := SimbaSettings.Environment.OpenSSLOnLaunch.Value;
 
   EditorGeneralFrame.RightMarginEdit.Value := SimbaSettings.Editor.RightMargin.Value;
@@ -73,10 +69,6 @@ end;
 
 procedure TSimbaSettingsForm.OKButtonClick(Sender: TObject);
 begin
-  SimbaSettings.Environment.IncludePath.Value := EnvironmentFrame.IncludePathEdit.Text;
-  SimbaSettings.Environment.PluginPath.Value := EnvironmentFrame.PluginPathEdit.Text;
-  SimbaSettings.Environment.FontPath.Value := EnvironmentFrame.FontPathEdit.Text;
-  SimbaSettings.Environment.ScriptPath.Value := EnvironmentFrame.ScriptPathEdit.Text;
   SimbaSettings.Environment.OpenSSLOnLaunch.Value := EnvironmentFrame.OpenSSLOnLaunch.Checked;
 
   SimbaSettings.Editor.FontName.Value := EditorFontFrame.Editor.FontName;

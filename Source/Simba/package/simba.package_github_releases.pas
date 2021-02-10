@@ -43,7 +43,7 @@ implementation
 
 uses
   dateutils,
-  simba.httpclient, simba.settings, simba.package, simba.package_github_json, simba.package_github_url;
+  simba.httpclient, simba.settings, simba.package, simba.package_github_json, simba.package_github_url, simba.files;
 
 function TSimbaPackage_GithubReleases.GetRelease(Version: String): TSimbaPackage_GithubRelease;
 var
@@ -187,7 +187,7 @@ begin
   FPackage := Package;
   FUseCache := True;
   with FPackage as TSimbaPackage do
-    FCacheFile := SimbaSettings.Environment.PackagePath.Value + Owner + '-' + Name;
+    FCacheFile := GetPackagePath() + Owner + '-' + Name;
 end;
 
 end.

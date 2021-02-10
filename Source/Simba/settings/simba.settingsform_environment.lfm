@@ -6,196 +6,19 @@ object EnvironmentFrame: TEnvironmentFrame
   ClientHeight = 440
   ClientWidth = 569
   TabOrder = 0
-  DesignLeft = 1972
-  DesignTop = 597
-  object Label1: TLabel
-    AnchorSideLeft.Control = IncludePathEdit
-    AnchorSideTop.Control = Owner
-    Left = 0
-    Height = 19
-    Top = 5
-    Width = 76
-    BorderSpacing.Top = 5
-    BorderSpacing.Bottom = 2
-    Caption = 'Include Path'
-    Layout = tlCenter
-    ParentColor = False
-  end
-  object IncludePathEdit: TEdit
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Label1
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = IncludePathOpenButton
-    Left = 0
-    Height = 27
-    Top = 26
-    Width = 529
-    Anchors = [akTop, akLeft, akRight]
-    TabOrder = 0
-  end
-  object IncludePathOpenButton: TButton
-    AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = IncludePathEdit
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    AnchorSideBottom.Control = IncludePathEdit
-    AnchorSideBottom.Side = asrBottom
-    Left = 534
-    Height = 27
-    Top = 26
-    Width = 35
-    Anchors = [akTop, akRight, akBottom]
-    AutoSize = True
-    BorderSpacing.Left = 5
-    Caption = '...'
-    OnClick = OpenButtonClick
-    TabOrder = 1
-  end
-  object PluginPathEdit: TEdit
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Label2
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = PluginPathOpenButton
-    Left = 0
-    Height = 27
-    Top = 79
-    Width = 529
-    Anchors = [akTop, akLeft, akRight]
-    TabOrder = 2
-  end
-  object Label2: TLabel
-    AnchorSideLeft.Control = PluginPathEdit
-    AnchorSideTop.Control = IncludePathEdit
-    AnchorSideTop.Side = asrBottom
-    Left = 0
-    Height = 19
-    Top = 58
-    Width = 70
-    BorderSpacing.Top = 5
-    BorderSpacing.Bottom = 2
-    Caption = 'Plugin Path'
-    Layout = tlCenter
-    ParentColor = False
-  end
-  object PluginPathOpenButton: TButton
-    AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = PluginPathEdit
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    AnchorSideBottom.Control = PluginPathEdit
-    AnchorSideBottom.Side = asrBottom
-    Left = 534
-    Height = 27
-    Top = 79
-    Width = 35
-    Anchors = [akTop, akRight, akBottom]
-    AutoSize = True
-    BorderSpacing.Left = 5
-    Caption = '...'
-    OnClick = OpenButtonClick
-    TabOrder = 3
-  end
-  object FontPathEdit: TEdit
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Label3
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = FontPathOpenButton
-    Left = 0
-    Height = 27
-    Top = 132
-    Width = 529
-    Anchors = [akTop, akLeft, akRight]
-    TabOrder = 4
-  end
-  object FontPathOpenButton: TButton
-    AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = FontPathEdit
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    AnchorSideBottom.Control = FontPathEdit
-    AnchorSideBottom.Side = asrBottom
-    Left = 534
-    Height = 27
-    Top = 132
-    Width = 35
-    Anchors = [akTop, akRight, akBottom]
-    AutoSize = True
-    BorderSpacing.Left = 5
-    Caption = '...'
-    OnClick = OpenButtonClick
-    TabOrder = 5
-  end
-  object Label3: TLabel
-    AnchorSideLeft.Control = FontPathEdit
-    AnchorSideTop.Control = PluginPathEdit
-    AnchorSideTop.Side = asrBottom
-    Left = 0
-    Height = 19
-    Top = 111
-    Width = 60
-    BorderSpacing.Top = 5
-    BorderSpacing.Bottom = 2
-    Caption = 'Font Path'
-    Layout = tlCenter
-    ParentColor = False
-  end
-  object ScriptPathEdit: TEdit
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Label4
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = ScriptPathOpenButton
-    Left = 0
-    Height = 27
-    Top = 185
-    Width = 529
-    Anchors = [akTop, akLeft, akRight]
-    TabOrder = 6
-  end
-  object Label4: TLabel
-    AnchorSideLeft.Control = ScriptPathEdit
-    AnchorSideTop.Control = FontPathEdit
-    AnchorSideTop.Side = asrBottom
-    Left = 0
-    Height = 19
-    Top = 164
-    Width = 66
-    BorderSpacing.Top = 5
-    BorderSpacing.Bottom = 2
-    Caption = 'Script Path'
-    Layout = tlCenter
-    ParentColor = False
-  end
-  object ScriptPathOpenButton: TButton
-    AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = ScriptPathEdit
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    AnchorSideBottom.Control = ScriptPathEdit
-    AnchorSideBottom.Side = asrBottom
-    Left = 534
-    Height = 27
-    Top = 185
-    Width = 35
-    Anchors = [akTop, akRight, akBottom]
-    AutoSize = True
-    BorderSpacing.Left = 5
-    Caption = '...'
-    OnClick = OpenButtonClick
-    TabOrder = 7
-  end
+  DesignLeft = 2932
+  DesignTop = 475
   object DividerBevel1: TDividerBevel
     AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = ScriptPathEdit
-    AnchorSideTop.Side = asrBottom
+    AnchorSideTop.Control = Owner
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 0
     Height = 19
-    Top = 222
+    Top = 0
     Width = 569
     Caption = 'OpenSSL'
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 10
     Style = gsHorLines
   end
   object OpenSSLOnLaunch: TCheckBox
@@ -205,12 +28,12 @@ object EnvironmentFrame: TEnvironmentFrame
     Left = 0
     Height = 23
     Hint = 'On launch, automatically extract Simba''s resources (SimbaScript, OpenSSL).'
-    Top = 246
+    Top = 24
     Width = 144
     BorderSpacing.Top = 5
     Caption = 'Initialize On Launch'
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 8
+    TabOrder = 0
   end
 end

@@ -76,12 +76,6 @@ type
     procedure SetValue(AValue: String); override;
   end;
 
-  TSimbaSetting_Directory = class(TSimbaSetting_String)
-  protected
-    procedure SetValue(AValue: String); override;
-    function GetValue: String; override;
-  end;
-
   TSimbaSetting_File = class(TSimbaSetting_String)
   protected
     function GetValue: String; override;
@@ -203,25 +197,6 @@ begin
   FIniFile.WriteString(FSection, FName, AValue);
 
   Changed();
-end;
-
-procedure TSimbaSetting_Directory.SetValue(AValue: String);
-begin
-  inherited SetValue(AValue);
-
-  ForceDirectories(AValue);
-end;
-
-function TSimbaSetting_Directory.GetValue: String;
-begin
-  Result := inherited GetValue;
-
-  if (FDefaultValue <> '') and (not DirectoryExists(Result)) then
-  begin
-    Value := FDefaultValue;
-
-    Result := inherited GetValue();
-  end;
 end;
 
 function TSimbaSetting_File.GetValue: String;

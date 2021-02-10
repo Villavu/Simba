@@ -18,14 +18,6 @@ type
 
     FScriptFile: String;
     FScriptName: String;
-    FScript: String;
-
-    FAppPath: String;
-    FDataPath: String;
-    FIncludePath: String;
-    FFontPath: String;
-    FPluginPath: String;
-    FScriptPath: String;
 
     FCompiler: TSimbaScript_Compiler;
     FCompileOnly: Boolean;
@@ -43,14 +35,15 @@ type
     procedure DoStateThread;
 
     procedure HandleHint(Sender: TLapeCompilerBase; Hint: lpString);
-    procedure HandleException(Ex: Exception);
+    procedure HandleException(E: Exception);
 
     function HandleFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
     function HandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
 
-    procedure Execute; override;
-
     procedure SetState(Value: TInitBool);
+
+    procedure DoTerminate; override;
+    procedure Execute; override;
   public
     // Script is terminating
     property Terminated: Boolean read FTerminated;
@@ -71,13 +64,6 @@ type
     property ScriptFile: String read FScriptFile write FScriptFile;
     property ScriptName: String read FScriptName write FScriptName;
 
-    property AppPath: String read FAppPath write FAppPath;
-    property DataPath: String read FDataPath write FDataPath;
-    property FontPath: String read FFontPath write FFontPath;
-    property PluginPath: String read FPluginPath write FPluginPath;
-    property IncludePath: String read FIncludePath write FIncludePath;
-    property ScriptPath: String read FScriptPath write FScriptPath;
-
     procedure Invoke(Method: TSimbaMethod);
 
     constructor Create; reintroduce;
@@ -90,37 +76,43 @@ var
 implementation
 
 uses
-  fileutil,
-  simba.files, simba.script_plugin, simba.misc, simba.script_debugger;
+  simba.files, simba.script_plugin, simba.misc, simba.script_debugger
+  {$IFDEF WINDOWS},
+  windows
+  {$ENDIF};
 
 procedure TSimbaScript.HandleHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
   WriteLn(Hint);
 end;
 
-procedure TSimbaScript.HandleException(Ex: Exception);
+procedure TSimbaScript.HandleException(E: Exception);
 var
   Method: TSimbaMethod;
 begin
-  WriteLn(Ex.Message);
+  WriteLn(E.Message);
 
-  if (Ex is lpException) and (FSimbaCommunication <> nil) then
-    with Ex as lpException do
-    begin
-      Method := TSimbaMethod_ScriptError.Create(DocPos.Line, DocPos.Col, DocPos.FileName);
+  if (FSimbaCommunication <> nil) then
+  begin
+    if (E is lpException) then
+      with E as lpException do
+      begin
+        Method := TSimbaMethod_ScriptError.Create(DocPos.Line, DocPos.Col, DocPos.FileName);
 
-      try
-        Self.Invoke(Method);
-      finally
-        Method.Free();
+        try
+          Self.Invoke(Method);
+        finally
+          Method.Free();
+        end;
       end;
-    end;
+  end else
+    ExitCode := 1;
 end;
 
 function TSimbaScript.HandleFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
 begin
   Result := nil;
-  if (not FindFile(FileName, '', [IncludeTrailingPathDelimiter(ExtractFileDir(Sender.Tokenizer.FileName)), FIncludePath, FAppPath])) then
+  if (not FindFile(FileName, '', [IncludeTrailingPathDelimiter(ExtractFileDir(Sender.Tokenizer.FileName)), GetIncludePath(), GetSimbaPath()])) then
     FileName := '';
 end;
 
@@ -138,7 +130,7 @@ begin
     case Directive.ToUpper() of
       'LOADLIB':
         begin
-          if not FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), FPluginPath, FAppPath]) then
+          if not FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), GetPluginPath(), GetSimbaPath()]) then
             raise Exception.Create('Plugin "' + Argument + '" not found');
 
           Plugin := TSimbaScriptPlugin.Create(Argument);
@@ -147,7 +139,7 @@ begin
 
       'LIBPATH':
         begin
-          if not FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), FPluginPath, FAppPath]) then
+          if not FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), GetPluginPath(), GetSimbaPath()]) then
             Argument := '';
 
           FCompiler.pushTokenizer(TLapeTokenizerString.Create(#39 + Argument + #39));
@@ -155,7 +147,7 @@ begin
 
       'IFHASLIB':
         begin
-          if not FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), FPluginPath, FAppPath]) then
+          if not FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), GetPluginPath(), GetSimbaPath()]) then
             FCompiler.pushConditional((not InIgnore) and True, Sender.DocPos)
           else
             FCompiler.pushConditional((not InIgnore) and False, Sender.DocPos);
@@ -163,7 +155,7 @@ begin
 
       'IFHASFILE':
         begin
-          FCompiler.pushConditional((not InIgnore) and FindFile(Argument, '', [IncludeTrailingPathDelimiter(ExtractFileDir(Sender.Tokenizer.FileName)), FIncludePath, FAppPath]), Sender.DocPos);
+          FCompiler.pushConditional((not InIgnore) and FindFile(Argument, '', [IncludeTrailingPathDelimiter(ExtractFileDir(Sender.Tokenizer.FileName)), GetIncludePath(), GetSimbaPath()]), Sender.DocPos);
         end;
 
       'ERROR':
@@ -177,7 +169,26 @@ begin
   end;
 end;
 
+procedure TSimbaScript.DoTerminate;
+var
+  PID: UInt32;
+begin
+  {$IFDEF WINDOWS}
+  GetWindowThreadProcessId(GetConsoleWindow(), PID);
+  if (PID = GetCurrentProcessID()) then
+  begin
+    WriteLn('Press enter to exit');
+
+    ReadLn();
+  end;
+  {$ENDIF}
+
+  inherited DoTerminate();
+end;
+
 procedure TSimbaScript.Execute;
+var
+  Tokenizer: TSimbaScript_Tokenzier;
 begin
   FState := bTrue;
 
@@ -187,19 +198,15 @@ begin
     if (FSimbaCommunicationServer <> '') then
       FSimbaCommunication := TSimbaCommunicationClient.Create(FSimbaCommunicationServer);
 
-    FScript := ReadFileToString(FScriptFile);
-    if (FScriptName <> '') then
-    begin
-      DeleteFile(FScriptFile);
+    Tokenizer := TSimbaScript_Tokenzier.Create(FScriptFile, FScriptName);
+    if ExtractFileExt(FScriptFile) = '.tmp' then // Delete temp script file
+      SysUtils.DeleteFile(FScriptFile);
 
-      FScriptFile := FScriptName;
-    end;
-
-    FClient := TClient.Create();
-    FClient.MOCR.FontPath := FFontPath;
+    FClient := TClient.Create(GetPluginPath());
+    FClient.MOCR.FontPath := GetFontPath();
     FClient.IOManager.SetTarget(StrToIntDef(Target, 0));
 
-    FCompiler := TSimbaScript_Compiler.Create(TLapeTokenizerFile.Create(FScript, FScriptFile));
+    FCompiler := TSimbaScript_Compiler.Create(Tokenizer);
     FCompiler.OnFindFile := @HandleFindFile;
     FCompiler.OnHint := @HandleHint;
     FCompiler.OnHandleDirective := @HandleDirective;
@@ -262,7 +269,7 @@ var
 begin
   FState := Value;
 
-  if FSimbaCommunication <> nil then
+  if (FSimbaCommunication <> nil) then
   begin
     Method := TSimbaMethod_ScriptStateChanged.Create(Ord(FState));
 
@@ -303,9 +310,6 @@ begin
 
   inherited Destroy();
 end;
-
-initialization
-  Randomize();
 
 end.
 
