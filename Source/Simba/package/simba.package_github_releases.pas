@@ -1,193 +1,140 @@
+{
+	This file is part of the Mufasa Macro Library (MML)
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
+
+    MML is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    MML is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with MML.  If not, see <http://www.gnu.org/licenses/>.
+
+	See the file COPYING, included in this distribution,
+	for details about the copyright.
+
+    Parses Githubs releases JSON into a simple array.
+}
 unit simba.package_github_releases;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
 uses
-  classes, sysutils, fpjson;
+  Classes, SysUtils;
 
 type
-  TSimbaPackage_GithubRelease = record
+  TGithubRelease = record
     Version: String;
     Notes: String;
     Time: TDateTime;
+    TimeStamp: String;
     DownloadURL: String;
   end;
 
-  TSimbaPackage_GithubReleases = class
-  protected
-    FPackage: TObject;
-    FURL: String;
-    FUseCache: Boolean;
-    FCacheFile: String;
+  TGithubReleases = array of TGithubRelease;
 
-    function GetReleasesJSON: TJSONArray;
-    function GetOptions(Version: String): String;
-    function GetRelease(Version: String): TSimbaPackage_GithubRelease;
-    function GetLatestRelease: TSimbaPackage_GithubRelease;
-    function GetVersions: TStringArray;
-    function GetCacheAge: TDateTime;
+  TGithubReleasesHelper = type helper for TGithubReleases
   public
-    property Release[Version: String]: TSimbaPackage_GithubRelease read GetRelease; default;
-    property Options[Version: String]: String read GetOptions;
-    property Versions: TStringArray read GetVersions;
-    property CacheAge: TDateTime read GetCacheAge;
-    property LatestRelease: TSimbaPackage_GithubRelease read GetLatestRelease;
-    property UseCache: Boolean read FUseCache write FUseCache;
-
-    constructor Create(Package: TObject);
+    procedure Fill(Data: String); // Parse JSON array
+    procedure Add(Version, Download, Notes, TimeStamp: String);
+    procedure SaveToFile(FileName: String);
+    procedure LoadFromFile(FileName: String);
   end;
+
+const
+  NullRelease: TGithubRelease = (Version: ''; Notes: ''; Time: 0; TimeStamp: ''; DownloadURL: '');
+  NullReleases: TGithubReleases = ();
 
 implementation
 
 uses
-  dateutils,
-  simba.httpclient, simba.settings, simba.package, simba.package_github_json, simba.package_github_url, simba.files;
+  fpjson, dateutils,
+  simba.files;
 
-function TSimbaPackage_GithubReleases.GetRelease(Version: String): TSimbaPackage_GithubRelease;
+procedure TGithubReleasesHelper.Add(Version, Download, Notes, TimeStamp: String);
 var
-  i: Int32;
+  Release: TGithubRelease;
+begin
+  Release.TimeStamp := TimeStamp;
+  Release.Time := ISO8601ToDateDef(TimeStamp, 0, False);
+  Release.Notes := Notes;
+  Release.Version := Version;
+  Release.DownloadURL := Download;
+
+  Self := Self + [Release];
+end;
+
+procedure TGithubReleasesHelper.SaveToFile(FileName: String);
+var
+  Release: TGithubRelease;
   JSON: TJSONArray;
 begin
-  Result := Default(TSimbaPackage_GithubRelease);
+  JSON := TJSONArray.Create();
 
-  JSON := GetReleasesJSON();
-
-  if (JSON <> nil) then
   try
-    for i := 0 to JSON.Count - 1 do
-      if (JSON[i] is TJSONObject) and (TJSONObject(JSON[i]).Version = Version) then
-      begin
-        Result.Version := TJSONObject(JSON[i]).Version;
-        Result.Time := TJSONObject(JSON[i]).Time;
-        Result.Notes := TJSONObject(JSON[i]).Notes;
-        Result.DownloadURL := TJSONObject(JSON[i]).DownloadURL;
-      end;
+    for Release in Self do
+      JSON.Add(TJSONObject.Create(
+        ['zipball_url',  Release.DownloadURL,
+         'body',         Release.Notes,
+         'published_at', Release.TimeStamp,
+         'tag_name',     Release.Version])
+      );
+
+    WriteFile(FileName, JSON.FormatJSON());
   finally
     JSON.Free();
   end;
 end;
 
-function TSimbaPackage_GithubReleases.GetVersions: TStringArray;
-var
-  i: Int32;
-  JSON: TJSONArray;
+procedure TGithubReleasesHelper.LoadFromFile(FileName: String);
 begin
-  Result := Default(TStringArray);
+  Fill(ReadFile(FileName));
+end;
 
-  JSON := GetReleasesJSON();
+procedure TGithubReleasesHelper.Fill(Data: String);
+var
+  JSON: TJSONData;
+  Download, Notes, Time, Version: TJSONData;
+  I: Int32;
+begin
+  Self := NullReleases;
 
-  if (JSON <> nil) then
   try
-    for i := 0 to JSON.Count - 1 do
-      if (JSON[i] is TJSONObject) and (TJSONObject(JSON[i]).Version <> '') then
-      begin
-        SetLength(Result, Length(Result) + 1);
-        Result[High(Result)] := TJSONObject(JSON[i]).Version;
-      end;
-  finally
-    JSON.Free();
+    JSON := GetJSON(Data);
+  except
+    JSON := nil;
   end;
-end;
 
-function TSimbaPackage_GithubReleases.GetCacheAge: TDateTime;
-begin
-  if not FileAge(FCacheFile, Result) then
-    Result := -1;
-end;
-
-function TSimbaPackage_GithubReleases.GetLatestRelease: TSimbaPackage_GithubRelease;
-var
-  JSON: TJSONArray;
-begin
-  Result := Default(TSimbaPackage_GithubRelease);
-
-  JSON := GetReleasesJSON();
-
-  if (JSON <> nil) then
-  try
-    if (JSON.Count > 0) and (JSON[0] is TJSONObject) then
-    begin
-      Result.Version := TJSONObject(JSON[0]).Version;
-      Result.Time := TJSONObject(JSON[0]).Time;
-      Result.Notes := TJSONObject(JSON[0]).Notes;
-      Result.DownloadURL := TJSONObject(JSON[0]).DownloadURL;
-    end;
-  finally
-    JSON.Free();
-  end;
-end;
-
-function TSimbaPackage_GithubReleases.GetOptions(Version: String): String;
-begin
-  with FPackage as TSimbaPackage do
-    Result := GetPage(Format(GITHUB_URL_PACKAGE_OPTIONS, [Owner, Name, Version]), [HTTP_OK, HTTP_NOT_FOUND]);
-end;
-
-function TSimbaPackage_GithubReleases.GetReleasesJSON: TJSONArray;
-var
-  Master: TJSONObject;
-  Stream: TFileStream;
-  Contents, JSON: String;
-begin
-  Result := nil;
-
-  // If using cache and is less than 60 minutes old use it
-  if FUseCache then
+  if (JSON is TJSONArray) then
   begin
-    if MinutesBetween(Now(), CacheAge) < 60 then
-    begin
-      Result := LoadJSON(FCacheFile);
-      if (Result <> nil) then
-        Exit;
-    end;
-  end;
-
-  // Download new releases
-  with FPackage as TSimbaPackage do
-  begin
-    Contents := GetPage(ReleasesURL, [HTTP_OK]);
-
-    if (Contents <> '') then
-    begin
-      Result := ParseJSON(Contents);
-      if (Result = nil) then
-        Result := TJSONArray.Create();
-
-      // Append master branch
-      Master := TJSONObject.Create();
-      with Master do
+    for I := 0 to JSON.Count - 1 do
+      if (JSON.Items[I] is TJSONObject) then
       begin
-        DownloadURL := Format(GITHUB_URL_DOWNLOAD_MASTER, [Owner, Name]);
-        Version := 'master';
-        Time := 0;
-        Notes := Format(GITHUB_URL_REPOSITORY, [Owner, Name, 'master']);
+        with TJSONObject(JSON.Items[I]) do
+        begin
+          Download := Find('zipball_url');
+          Notes := Find('body');
+          Time := Find('published_at');
+          Version := Find('tag_name');
+        end;
+
+        if (Download = nil) or (Notes = nil) or (Time = nil) or (Version = nil) then
+          Continue;
+
+        Self.Add(Version.AsString, Download.AsString, Notes.AsString, Time.AsString);
       end;
-
-      Result.Add(Master);
-
-      // Update cache
-      try
-        JSON := Result.FormatJSON();
-
-        Stream := TFileStream.Create(FCacheFile, fmCreate or fmShareDenyWrite);
-        Stream.Write(JSON[1], Length(JSON));
-        Stream.Size := Length(JSON);
-        Stream.Free();
-      except
-        // File being written
-      end;
-    end;
   end;
-end;
 
-constructor TSimbaPackage_GithubReleases.Create(Package: TObject);
-begin
-  FPackage := Package;
-  FUseCache := True;
-  with FPackage as TSimbaPackage do
-    FCacheFile := GetPackagePath() + Owner + '-' + Name;
+  if (JSON <> nil) then
+    JSON.Free();
 end;
 
 end.

@@ -7,6 +7,8 @@
 }
 unit simba.tokenizer;
 
+{$mode objfpc}{$H+}
+
 interface
 
 uses

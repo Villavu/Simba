@@ -122,7 +122,7 @@ begin
   with PEnumWindowData(Data)^ do
   begin
     if Recursive or (not Recursive and (GetAncestor(Window, GA_PARENT) = Parent)) then
-      Windows += Window;
+      Windows += [Window];
   end;
 end;
 
@@ -197,7 +197,7 @@ begin
   begin
     if IsWindowVisible(Window) and (not IsIconic(Window)) then
     begin
-      Windows += Window;
+      Windows += [Window];
 
       EnumChildWindows(Window, @__GetChildren, Data);
     end;
@@ -222,7 +222,7 @@ begin
 
   with PEnumWindowData(Data)^ do
   begin
-    Windows += Window;
+    Windows += [Window];
 
     EnumChildWindows(Window, @__GetChildren, Data);
   end;
@@ -267,7 +267,7 @@ begin
   with PEnumWindowData(Data)^ do
   begin
     if IsWindowVisible(Window) and (not IsIconic(Window)) and (GetAncestor(Window, GA_ROOT) = Window) then
-      Windows += Window;
+      Windows += [Window];
   end;
 end;
 

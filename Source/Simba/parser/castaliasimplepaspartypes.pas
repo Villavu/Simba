@@ -17,6 +17,12 @@ unit CastaliaPasLexTypes;
 
 unit castaliasimplepaspartypes;
 
+{$mode DELPHI}
+
+{$DEFINE D8_NEWER}
+{$DEFINE D9_NEWER}
+{$DEFINE D10_NEWER}
+
 interface
 
 uses SysUtils, TypInfo;

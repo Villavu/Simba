@@ -41,13 +41,11 @@ Known Issues:
 
 unit castaliapaslex;
 
+{$mode DELPHI}
+
 {$DEFINE D8_NEWER}
 {$DEFINE D9_NEWER}
 {$DEFINE D10_NEWER}
-
-{$IFDEF FPC}
-  {$mode delphi}
-{$ENDIF}
 
 interface
 

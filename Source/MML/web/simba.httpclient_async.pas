@@ -34,6 +34,7 @@ type
     FURL: String;
     FOutputPath: String;
     FFlat: Boolean;
+    FIgnoreList: TStringArray;
     FRunning: Boolean;
     FHTTPClient: TSimbaHTTPClient;
     FResponseCode: Int32;
@@ -45,7 +46,7 @@ type
     property ResponseCode: Int32 read FResponseCode;
     property Exception: Exception read FException;
 
-    constructor Create(URL: String; OutputPath: String; Flat: Boolean; OnDownloadProgress: TSimbaHTTPProgressEvent = nil; OnExtractProgress: TSimbaHTTPProgressEvent = nil);
+    constructor Create(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray; OnDownloadProgress: TSimbaHTTPProgressEvent = nil; OnExtractProgress: TSimbaHTTPProgressEvent = nil);
     destructor Destroy; override;
   end;
 
@@ -85,7 +86,7 @@ end;
 procedure TSimbaHTTPRequestZIP.Execute;
 begin
   try
-    FHTTPClient.GetZip(FURL, FOutputPath, FFlat);
+    FHTTPClient.GetZip(FURL, FOutputPath, FFlat, FIgnoreList);
   except
     FException := SysUtils.Exception(AcquireExceptionObject());
   end;
@@ -94,7 +95,7 @@ begin
   FRunning := False;
 end;
 
-constructor TSimbaHTTPRequestZIP.Create(URL: String; OutputPath: String; Flat: Boolean; OnDownloadProgress: TSimbaHTTPProgressEvent; OnExtractProgress: TSimbaHTTPProgressEvent);
+constructor TSimbaHTTPRequestZIP.Create(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray; OnDownloadProgress: TSimbaHTTPProgressEvent; OnExtractProgress: TSimbaHTTPProgressEvent);
 begin
   FHTTPClient := TSimbaHTTPClient.Create();
   FHTTPClient.OnDownloadProgress := OnDownloadProgress;
@@ -102,6 +103,7 @@ begin
   FURL := URL;
   FOutputPath := OutputPath;
   FFlat := Flat;
+  FIgnoreList := IgnoreList;
   FRunning := True;
 
   TThread.ExecuteInThread(@Self.Execute);

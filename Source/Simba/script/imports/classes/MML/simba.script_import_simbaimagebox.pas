@@ -25,11 +25,6 @@ type
   PStatusBar = ^TStatusBar;
   PStatusPanel = ^TStatusPanel;
   PComponent = ^TComponent;
-  PPen = ^TPen;
-  PBrush = ^TBrush;
-  PBitmap = ^TBitmap;
-  PImage = ^TImage;
-  PClient = ^TClient;
   PCursor = ^TCursor;
   PNotifyEvent = ^TNotifyEvent;
 

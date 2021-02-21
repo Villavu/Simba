@@ -128,10 +128,7 @@ begin
 
   for Window in GetWindows() do
     if Window.IsVisible() then
-    begin
-      SetLength(Result, Length(Result) + 1);
-      Result[High(Result)] := Window;
-    end;
+      Result += [Window];
 end;
 
 function GetActiveWindow: TOSWindow;
@@ -172,10 +169,7 @@ begin
 
   for i := 0 to High(Windows) do
     if IsVisible(TOSWindow(Windows[i])) then
-    begin
-      SetLength(Result, Length(Result) + 1);
-      Result[High(Result)] := TOSWindow(Windows[i]);
-    end;
+      Result += [TOSWindow(Windows[i])];
 end;
 
 function GetWindowAtCursor: TOSWindow;

@@ -3,8 +3,7 @@ unit simba.codeparser;
 {$DEFINE PARSER_SEPERATE_VARIABLES}
 
 {$mode objfpc}{$H+}
-{$modeswitch typehelpers}
-{$modeswitch arrayoperators}
+{$i simba.inc}
 
 interface
 

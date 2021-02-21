@@ -1,7 +1,7 @@
 unit simba.codeinsight;
 
 {$mode objfpc}{$H+}
-{$modeswitch arrayoperators}
+{$i simba.inc}
 
 interface
 

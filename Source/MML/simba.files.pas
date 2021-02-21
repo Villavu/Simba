@@ -74,6 +74,8 @@ type
   procedure UnZipFile(constref ArchiveFileName, OutputDirectory: String);
   function UnZipOneFile(constref ArchiveFileName, FileName, OutputDirectory: String): Boolean;
 
+  function ReadFile(constref FileName: String): String;
+  function WriteFile(constref FileName, Contents: String): Boolean;
   function CreateTempFile(constref Contents, Prefix: String): String;
 
   function GetSimbaPath: String;
@@ -226,6 +228,46 @@ begin
   finally
     Zipper.Free;
   end;
+end;
+
+function ReadFile(constref FileName: String): String;
+var
+  Stream: TFileStream;
+begin
+  Result := '';
+  if not FileExists(FileName) then
+    Exit;
+
+  Stream := nil;
+  try
+    Stream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
+
+    SetLength(Result, Stream.Size);
+    if Length(Result) > 0 then
+      Stream.Read(Result[1], Length(Result));
+  except
+  end;
+
+  if (Stream <> nil) then
+    Stream.Free();
+end;
+
+function WriteFile(constref FileName, Contents: String): Boolean;
+var
+  Stream: TFileStream;
+begin
+  Result := False;
+
+  Stream := nil;
+  try
+    Stream := TFileStream.Create(FileName, fmCreate or fmShareDenyWrite);
+    if Stream.Write(Contents[1], Length(Contents)) = Length(Contents) then
+      Result := True;
+  except
+  end;
+
+  if (Stream <> nil) then
+    Stream.Free();
 end;
 
 function CreateTempFile(constref Contents, Prefix: String): String;

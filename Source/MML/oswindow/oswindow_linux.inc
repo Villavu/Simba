@@ -126,10 +126,7 @@ begin
 
   for Window in GetWindows() do
     if Window.IsVisible() then
-    begin
-      SetLength(Result, Length(Result) + 1);
-      Result[High(Result)] := Window;
-    end;
+      Result += [Window];
 end;
 
 function GetActiveWindow: TOSWindow;
@@ -202,8 +199,5 @@ begin
   Windows := XGetChildren(GetDisplay(), GetDesktopWindow, False);
   for i := High(Windows) downto 0 do
     if IsVisible(Windows[i]) then
-    begin
-      SetLength(Result, Length(Result) + 1);
-      Result[High(Result)] := Windows[i];
-    end;
+      Result += [Windows[i]];
 end;

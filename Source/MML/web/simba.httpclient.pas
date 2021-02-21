@@ -119,19 +119,19 @@ type
     procedure Get(URL: String; FileName: String); overload;
 
     // Extracts page contents to file using a TSimbaArchiveExtract class
-    procedure GetArchive(URL: String; OutputPath: String; Flat: Boolean; ExtractorClass: TSimbaArchiveExtractorClass);
+    procedure GetArchive(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray; ExtractorClass: TSimbaArchiveExtractorClass);
 
     // Extracts page contents to file treating contents as .zip
-    procedure GetZip(URL: String; OutputPath: String; Flat: Boolean);
+    procedure GetZip(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
 
     // Extracts page contents to file treating contents as .tar
-    procedure GetTar(URL: String; OutputPath: String; Flat: Boolean);
+    procedure GetTar(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
 
     // Extracts page contents to file treating contents as .tar.gz
-    procedure GetTarGZ(URL: String; OutputPath: String; Flat: Boolean);
+    procedure GetTarGZ(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
 
     // Extracts page contents to file treating contents as .tar.bz2
-    procedure GetTarBZ2(URL: String; OutputPath: String; Flat: Boolean);
+    procedure GetTarBZ2(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
 
     // Post string (URL parameters) returns response
     function Post(URL: String; Parameters: TStringArray): String; overload;
@@ -297,7 +297,7 @@ begin
   FHTTPClient.Get(FURL, FileName);
 end;
 
-procedure TSimbaHTTPClient.GetArchive(URL: String; OutputPath: String; Flat: Boolean; ExtractorClass: TSimbaArchiveExtractorClass);
+procedure TSimbaHTTPClient.GetArchive(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray; ExtractorClass: TSimbaArchiveExtractorClass);
 var
   Stream: TMemoryStream;
   Extractor: TSimbaArchiveExtractor;
@@ -314,6 +314,7 @@ begin
       Extractor.InputStream := Stream;
       Extractor.OutputPath := OutputPath;
       Extractor.Flat := Flat;
+      Extractor.IgnoreList.AddStrings(IgnoreList);
 
       try
         Extractor.Extract();
@@ -326,24 +327,24 @@ begin
   end;
 end;
 
-procedure TSimbaHTTPClient.GetZip(URL: String; OutputPath: String; Flat: Boolean);
+procedure TSimbaHTTPClient.GetZip(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
 begin
-  GetArchive(URL, OutputPath, Flat, TSimbaZipExtractor);
+  GetArchive(URL, OutputPath, Flat, IgnoreList, TSimbaZipExtractor);
 end;
 
-procedure TSimbaHTTPClient.GetTar(URL: String; OutputPath: String; Flat: Boolean);
+procedure TSimbaHTTPClient.GetTar(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
 begin
-  GetArchive(URL, OutputPath, Flat, TSimbaTarExtractor);
+  GetArchive(URL, OutputPath, Flat, IgnoreList, TSimbaTarExtractor);
 end;
 
-procedure TSimbaHTTPClient.GetTarGZ(URL: String; OutputPath: String; Flat: Boolean);
+procedure TSimbaHTTPClient.GetTarGZ(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
 begin
-  GetArchive(URL, OutputPath, Flat, TSimbaTarGZExtractor);
+  GetArchive(URL, OutputPath, Flat, IgnoreList, TSimbaTarGZExtractor);
 end;
 
-procedure TSimbaHTTPClient.GetTarBZ2(URL: String; OutputPath: String; Flat: Boolean);
+procedure TSimbaHTTPClient.GetTarBZ2(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
 begin
-  GetArchive(URL, OutputPath, Flat, TSimbaTarBZ2Extractor);
+  GetArchive(URL, OutputPath, Flat, IgnoreList, TSimbaTarBZ2Extractor);
 end;
 
 function TSimbaHTTPClient.Post(URL: String; Parameters: TStringArray): String;

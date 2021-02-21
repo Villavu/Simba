@@ -24,8 +24,7 @@
 unit simba.mufasatypes;
 
 {$mode objfpc}{$H+}
-{$modeswitch advancedrecords}
-{$modeswitch typehelpers}
+{$i simba.inc}
 
 interface
 
@@ -231,6 +230,7 @@ type
     function GetWidth: Int32;
     function GetHeight: Int32;
   public
+    function Expand(Amount: Int32): TBox;
     function Contains(X, Y, Width, Height: Int32): Boolean; overload;
     function Contains(X, Y: Int32): Boolean; overload;
     property Width: Int32 read GetWidth;
@@ -588,6 +588,14 @@ end;
 function TBoxHelper.GetHeight: Int32;
 begin
   Result := (Self.Y2 - Self.Y1) + 1;
+end;
+
+function TBoxHelper.Expand(Amount: Int32): TBox;
+begin
+  Result.X1 := Self.X1 - Amount;
+  Result.Y1 := Self.Y1 - Amount;
+  Result.X2 := Self.X2 + Amount;
+  Result.Y2 := Self.Y2 + Amount;
 end;
 
 function TBoxHelper.Contains(X, Y, Width, Height: Int32): Boolean;
