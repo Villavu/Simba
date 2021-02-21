@@ -135,10 +135,11 @@ Known Issues:
 -----------------------------------------------------------------------------}
 unit castaliasimplepaspar;
 
+{$mode DELPHI}
+
 {$DEFINE D8_NEWER}
 {$DEFINE D9_NEWER}
 {$DEFINE D10_NEWER}
-
 
 interface
 
@@ -624,7 +625,7 @@ begin
   except
     on E: Exception do
     begin
-      if (fOnMessage <> nil) then
+      if Assigned(fOnMessage) then
         fOnMessage(Self, meError, E.Message, Lexer.PosXY.X, LExer.PosXY.Y);
     end;
   end;

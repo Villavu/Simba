@@ -1,7 +1,7 @@
 unit simba.oswindow;
 
 {$mode objfpc}{$H+}
-{$modeswitch typehelpers}
+{$i simba.inc}
 
 interface
 
@@ -61,9 +61,6 @@ type
   function FindChildWindow(Title: String; ClassName: String): TOSWindowArray;
   function FindChildWindow(Title: String; ClassName: String; out Child: TOSWindow): Boolean;
 
-  operator +(Left: TOSWindowArray; Right: TOSWindow): TOSWindowArray;
-  operator +(Left: TOSWindowArray; Right: TOSWindowArray): TOSWindowArray;
-
 implementation
 
 {$IFDEF LINUX}
@@ -114,7 +111,7 @@ begin
 
   for Window in Self do
     if FindRegex(Title, Window.GetTitle()) then
-      Result += Window;
+      Result += [Window];
 end;
 
 function TOSWindowArray_Helper.GetByClass(ClassName: String; out Window: TOSWindow): Boolean;
@@ -134,7 +131,7 @@ begin
 
   for Window in Self do
     if FindRegex(ClassName, Window.GetClassName()) then
-      Result += Window;
+      Result += [Window];
 end;
 
 function TOSWindowArray_Helper.GetByTitleAndClass(Title, ClassName: String; out Window: TOSWindow): Boolean;
@@ -154,7 +151,7 @@ begin
 
   for Window in Self do
     if FindRegex(Title, Window.GetTitle()) and FindRegex(ClassName, Window.GetClassName()) then
-      Result += Window;
+      Result += [Window];
 end;
 
 function TOSWindowArray_Helper.ToString: String;
@@ -211,30 +208,6 @@ begin
       Exit(True);
 
   Exit(False);
-end;
-
-operator +(Left: TOSWindowArray; Right: TOSWindow): TOSWindowArray;
-var
-  Count: Int32;
-begin
-  Result := Left;
-
-  Count := Length(Result);
-  SetLength(Result, Count + 1);
-  Result[Count] := Right;
-end;
-
-operator +(Left: TOSWindowArray; Right: TOSWindowArray): TOSWindowArray;
-begin
-  SetLength(Result, Length(Left) + Length(Right));
-
-  if Length(Result) > 0 then
-  begin
-    if Length(Left) > 0 then
-      Move(Left[0], Result[0], Length(Left) * SizeOf(TOSWindow));
-    if Length(Right) > 0 then
-      Move(Right[0], Result[Length(Left)], Length(Right) * SizeOf(TOSWindow));
-  end;
 end;
 
 end.

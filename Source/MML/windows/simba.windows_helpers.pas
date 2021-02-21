@@ -1,7 +1,7 @@
 unit simba.windows_helpers;
 
 {$mode objfpc}{$H+}
-{$modeswitch advancedrecords}
+{$i simba.inc}
 
 interface
 

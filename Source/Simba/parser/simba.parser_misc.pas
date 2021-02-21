@@ -1,7 +1,7 @@
 unit simba.parser_misc;
 
 {$mode objfpc}{$H+}
-{$modeswitch typehelpers}
+{$i simba.inc}
 
 interface
 

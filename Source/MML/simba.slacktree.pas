@@ -6,7 +6,7 @@
 unit simba.slacktree;
 
 {$mode objfpc}{$H+}
-{$modeswitch advancedrecords}
+{$i simba.inc}
 
 interface
 

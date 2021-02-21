@@ -38,6 +38,11 @@
             <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <CStyleMacros Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <TargetCPU Value="i386"/>
@@ -73,6 +78,12 @@
             <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <SyntaxMode Value="DelphiUnicode"/>
+              <CStyleMacros Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <TargetCPU Value="aarch64"/>
@@ -111,6 +122,11 @@
             <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <CStyleMacros Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <TargetCPU Value="x86_64"/>
@@ -148,6 +164,11 @@
             <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <CStyleMacros Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <TargetCPU Value="x86_64"/>
@@ -187,6 +208,11 @@
             <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <CStyleMacros Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <TargetCPU Value="x86_64"/>
@@ -217,6 +243,11 @@
             <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <CStyleMacros Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <TargetCPU Value="i386"/>
@@ -246,6 +277,11 @@
             <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <CStyleMacros Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <TargetCPU Value="aarch64"/>
@@ -274,6 +310,11 @@
             <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <CStyleMacros Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <TargetCPU Value="x86_64"/>
@@ -302,6 +343,11 @@
             <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <CStyleMacros Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <TargetCPU Value="x86_64"/>
@@ -358,7 +404,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="50">
+    <Units Count="53">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -607,6 +653,18 @@
         <Filename Value="../MML/simba.init.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit49>
+      <Unit50>
+        <Filename Value="../MML/simba.textdrawer.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit50>
+      <Unit51>
+        <Filename Value="../MML/simba.fastarray.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit51>
+      <Unit52>
+        <Filename Value="package/simba.package_github_releases.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit52>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -620,6 +678,11 @@
       <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
       <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <CStyleMacros Value="True"/>
+      </SyntaxOptions>
+    </Parsing>
     <CodeGeneration>
       <SmartLinkUnit Value="True"/>
       <TargetCPU Value="x86_64"/>

@@ -1,7 +1,7 @@
 unit simba.script_compiler;
 
 {$mode objfpc}{$H+}
-{$modeswitch arrayoperators}
+{$i simba.inc}
 
 interface                         
 

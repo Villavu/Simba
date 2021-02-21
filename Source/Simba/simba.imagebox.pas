@@ -1,7 +1,7 @@
 unit simba.imagebox;
 
 {$mode objfpc}{$H+}
-{$modeswitch nestedprocvars}
+{$i simba.inc}
 
 interface
 
