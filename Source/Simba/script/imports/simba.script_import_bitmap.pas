@@ -396,18 +396,6 @@ begin
     MBitmaps[PInt32(Params^[0])^].Rectangle(PBox(Params^[1])^, PInt32(Params^[2])^, PExtended(Params^[3])^);
 end;
 
-procedure Lape_DrawTextBitmap(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  with SimbaScript.Client do
-    MBitmaps[PInt32(Params^[0])^].DrawText(PString(Params^[1])^, PString(Params^[2])^, PPoint(Params^[3])^, PBoolean(Params^[4])^, PInt32(Params^[5])^);
-end;
-
-procedure Lape_DrawSystemTextBitmap(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  with SimbaScript.Client do
-    MBitmaps[PInt32(Params^[0])^].DrawSystemText(PString(Params^[1])^, PString(Params^[2])^, PInt32(Params^[3])^, PPoint(Params^[4])^, PBoolean(Params^[5])^, PInt32(Params^[6])^);
-end;
-
 procedure Lape_BitmapFromClient(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with SimbaScript.Client do
@@ -485,8 +473,6 @@ begin
     addGlobalFunc('procedure ThresholdAdaptiveBitmap(const bmp: Int32; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Int32);', @Lape_ThresholdAdaptiveBitmap);
     addGlobalFunc('procedure CropBitmap(const bmp: Int32; const xs, ys, xe, ye: Int32);', @Lape_CropBitmap);
     addGlobalFunc('procedure BlurBitmap(const bmp, block: Int32);', @Lape_BlurBitmap);
-    addGlobalFunc('procedure DrawTextBitmap(const Bitmap: Int32; const Text, FontName: string; const pnt: TPoint; const Shadow: Boolean; const Color: Int32);', @Lape_DrawTextBitmap);
-    addGlobalFunc('procedure DrawSystemTextBitmap(const Bitmap: Int32; const Text, FontName: string; const FontSize: Int32; const pnt: TPoint; const Shadow: Boolean; const Color: Int32); ', @Lape_DrawSystemTextBitmap);
     addGlobalFunc('function CalculatePixelShift(Bmp1, Bmp2: Int32; CompareBox: TBox): Int32', @Lape_CalculatePixelShift);
     addGlobalFunc('function CalculatePixelShiftTPA(Bmp1, Bmp2: Int32; CPoints: TPointArray) : Int32;', @Lape_CalculatePixelShiftTPA);
     addGlobalFunc('function CalculatePixelTolerance(Bmp1, Bmp2: Int32; CompareBox: TBox; CTS: Int32): extended', @Lape_CalculatePixelTolerance);
