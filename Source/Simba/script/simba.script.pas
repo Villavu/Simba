@@ -1,13 +1,14 @@
 unit simba.script;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
 uses
   Classes, SysUtils,
   lptypes, lpvartypes, lpcompiler, lpparser, lpinterpreter, lpmessages,
-  simba.script_compiler, simba.script_communication, simba.client;
+  simba.script_compiler, simba.script_communication, simba.script_debugger, simba.client;
 
 type
   TSimbaScript = class(TThread)
@@ -22,7 +23,6 @@ type
     FCompiler: TSimbaScript_Compiler;
     FCompileOnly: Boolean;
 
-    FWriteBuffer: String;
     FClient: TClient;
     FSimbaCommunicationServer: String;
     FSimbaCommunication: TSimbaCommunicationClient;
@@ -30,24 +30,20 @@ type
     FTerminated: Boolean;
     FUserTerminated: Boolean;
     FDebugging: Boolean;
-    FDebugger: TThread;
+    FDebugger: TSimbaScript_Debugger;
 
-    procedure DoStateThread;
+    procedure Execute; override;
 
-    procedure HandleHint(Sender: TLapeCompilerBase; Hint: lpString);
+    procedure HandleTerminate(Sender: TObject);
     procedure HandleException(E: Exception);
-
+    procedure HandleStateThread;
+    procedure HandleHint(Sender: TLapeCompilerBase; Hint: lpString);
     function HandleFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
     function HandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
 
     procedure SetState(Value: TInitBool);
-
-    procedure DoTerminate; override;
-    procedure Execute; override;
   public
-    // Script is terminating
     property Terminated: Boolean read FTerminated;
-    // Stop button has been clicked
     property UserTerminated: Boolean read FUserTerminated;
 
     property Compiler: TSimbaScript_Compiler read FCompiler;
@@ -64,7 +60,7 @@ type
     property ScriptFile: String read FScriptFile write FScriptFile;
     property ScriptName: String read FScriptName write FScriptName;
 
-    procedure Invoke(Method: TSimbaMethod);
+    procedure Invoke(Method: TSimbaMethod; DoFree: Boolean = False);
 
     constructor Create; reintroduce;
     destructor Destroy; override;
@@ -76,10 +72,8 @@ var
 implementation
 
 uses
-  simba.files, simba.script_plugin, simba.misc, simba.script_debugger
-  {$IFDEF WINDOWS},
-  windows
-  {$ENDIF};
+  fileutil, forms,
+  simba.files, simba.misc, simba.script_plugin, simba.script_compiler_onterminate;
 
 procedure TSimbaScript.HandleHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
@@ -87,8 +81,6 @@ begin
 end;
 
 procedure TSimbaScript.HandleException(E: Exception);
-var
-  Method: TSimbaMethod;
 begin
   WriteLn(E.Message);
 
@@ -96,15 +88,7 @@ begin
   begin
     if (E is lpException) then
       with E as lpException do
-      begin
-        Method := TSimbaMethod_ScriptError.Create(DocPos.Line, DocPos.Col, DocPos.FileName);
-
-        try
-          Self.Invoke(Method);
-        finally
-          Method.Free();
-        end;
-      end;
+        Self.Invoke(TSimbaMethod_ScriptError.Create(DocPos.Line, DocPos.Col, DocPos.FileName), True);
   end else
     ExitCode := 1;
 end;
@@ -169,13 +153,10 @@ begin
   end;
 end;
 
-procedure TSimbaScript.DoTerminate;
-var
-  PID: UInt32;
+procedure TSimbaScript.HandleTerminate(Sender: TObject);
 begin
   {$IFDEF WINDOWS}
-  GetWindowThreadProcessId(GetConsoleWindow(), PID);
-  if (PID = GetCurrentProcessID()) then
+  if (StartupConsoleMode <> 0) then
   begin
     WriteLn('Press enter to exit');
 
@@ -183,34 +164,41 @@ begin
   end;
   {$ENDIF}
 
-  inherited DoTerminate();
+  Application.Terminate();
+  if (WakeMainThread <> nil) then
+    WakeMainThread(Self);
+
+  {$IFDEF DARWIN}
+  Halt(0); // TODO check if still needed.
+  {$ENDIF}
 end;
 
 procedure TSimbaScript.Execute;
-var
-  Tokenizer: TSimbaScript_Tokenzier;
 begin
-  FState := bTrue;
-
-  TThread.ExecuteInThread(@DoStateThread);
+  TThread.ExecuteInThread(@HandleStateThread);
 
   try
     if (FSimbaCommunicationServer <> '') then
       FSimbaCommunication := TSimbaCommunicationClient.Create(FSimbaCommunicationServer);
 
-    Tokenizer := TSimbaScript_Tokenzier.Create(FScriptFile, FScriptName);
-    if ExtractFileExt(FScriptFile) = '.tmp' then // Delete temp script file
-      SysUtils.DeleteFile(FScriptFile);
-
     FClient := TClient.Create(GetPluginPath());
     FClient.MOCR.FontPath := GetFontPath();
     FClient.IOManager.SetTarget(StrToIntDef(Target, 0));
 
-    FCompiler := TSimbaScript_Compiler.Create(Tokenizer);
+    FCompiler := TSimbaScript_Compiler.Create(TLapeTokenizerFile.Create(FScriptFile));
+    if (FScriptName <> '') then
+    begin
+      FCompiler.Tokenizer.FileName := FScriptName;
+      if (ExtractFileExt(FScriptFile) = '.tmp') and FileIsInDirectory(FScriptFile, GetDataPath()) then
+        DeleteFile(FScriptFile);
+    end;
+
     FCompiler.OnFindFile := @HandleFindFile;
     FCompiler.OnHint := @HandleHint;
     FCompiler.OnHandleDirective := @HandleDirective;
-    FCompiler.Debugging := FDebugging;
+
+    if FDebugging then
+      FDebugger := TSimbaScript_Debugger.Create(Self);
 
     FStartTime := GetTickCount64();
 
@@ -221,17 +209,23 @@ begin
       if FCompileOnly then
         Exit;
 
-      if FDebugging then
-        FDebugger := TSimbaScript_Debugger.Create(Self);
-
       FStartTime := GetTickCount64();
 
       try
+        if FDebugging then
+          FDebugger.Start();
+
         RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, FState);
+
+        if FDebugging then
+        begin
+          FDebugger.Terminate();
+          FDebugger.WaitFor();
+        end;
       finally
         FTerminated := True;
 
-        RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, [], PCodePos(FCompiler['_OnTerminate'].Ptr)^);
+        CallOnTerminateMethods(FCompiler);
       end;
 
       if (GetTickCount64() - FStartTime < 10000) then
@@ -247,7 +241,7 @@ begin
   Flush(Output);
 end;
 
-procedure TSimbaScript.DoStateThread;
+procedure TSimbaScript.HandleStateThread;
 var
   Stream: THandleStream;
   Value: UInt8;
@@ -264,29 +258,24 @@ begin
 end;
 
 procedure TSimbaScript.SetState(Value: TInitBool);
-var
-  Method: TSimbaMethod;
 begin
   FState := Value;
 
   if (FSimbaCommunication <> nil) then
-  begin
-    Method := TSimbaMethod_ScriptStateChanged.Create(Ord(FState));
-
-    try
-      FSimbaCommunication.Invoke(Method);
-    finally
-      Method.Free();
-    end;
-  end;
+    FSimbaCommunication.Invoke(TSimbaMethod_ScriptStateChanged.Create(Ord(FState)));
 end;
 
-procedure TSimbaScript.Invoke(Method: TSimbaMethod);
+procedure TSimbaScript.Invoke(Method: TSimbaMethod; DoFree: Boolean);
 begin
-  if (FSimbaCommunication = nil) then
-    raise Exception.Create(Method.ClassName + ' not available when running headless');
+  try
+    if (FSimbaCommunication = nil) then
+      raise Exception.Create(Method.ClassName + ' not available when running headless');
 
-  FSimbaCommunication.Invoke(Method);
+    FSimbaCommunication.Invoke(Method);
+  finally
+    if DoFree then
+      Method.Free();
+  end;
 end;
 
 constructor TSimbaScript.Create;
@@ -294,17 +283,22 @@ begin
   inherited Create(True);
 
   FreeOnTerminate := True;
+  OnTerminate := @HandleTerminate;
+
+  FState := bTrue;
 end;
 
 destructor TSimbaScript.Destroy;
 begin
   try
-    if (FDebugger <> nil) then
-      FDebugger.Free();
     if (FSimbaCommunication <> nil) then
-      FSimbaCommunication.Free();
+      FreeAndNil(FSimbaCommunication);
+    if (FDebugger <> nil) then
+      FreeAndNil(FDebugger);
+    if (FClient <> nil) then
+      FreeAndNil(FClient);
     if (FCompiler <> nil) then
-      FCompiler.Free();
+      FreeAndNil(FCompiler);
   except
   end;
 

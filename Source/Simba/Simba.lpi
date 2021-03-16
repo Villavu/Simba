@@ -48,7 +48,7 @@
             <TargetCPU Value="i386"/>
             <TargetOS Value="win32"/>
             <Optimizations>
-              <OptimizationLevel Value="2"/>
+              <OptimizationLevel Value="3"/>
             </Optimizations>
           </CodeGeneration>
           <Linking>
@@ -61,7 +61,8 @@
             <CompilerMessages>
               <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-dStaticFFI
+            <CustomOptions Value="-OoNOLOOPUNROLL
+-dStaticFFI
 -dLape_CDECL"/>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
@@ -89,7 +90,7 @@
             <TargetCPU Value="aarch64"/>
             <TargetOS Value="linux"/>
             <Optimizations>
-              <OptimizationLevel Value="2"/>
+              <OptimizationLevel Value="3"/>
             </Optimizations>
           </CodeGeneration>
           <Linking>
@@ -102,7 +103,8 @@
             <CompilerMessages>
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-dLape_CDECL"/>
+            <CustomOptions Value="-OoNOLOOPUNROLL
+-dLape_CDECL"/>
             <ExecuteBefore>
               <ShowAllMessages Value="True"/>
               <CompileReasons Run="False"/>
@@ -132,7 +134,7 @@
             <TargetCPU Value="x86_64"/>
             <TargetOS Value="linux"/>
             <Optimizations>
-              <OptimizationLevel Value="2"/>
+              <OptimizationLevel Value="3"/>
             </Optimizations>
           </CodeGeneration>
           <Linking>
@@ -145,7 +147,8 @@
             <CompilerMessages>
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-dLape_CDECL"/>
+            <CustomOptions Value="-OoNOLOOPUNROLL
+-dLape_CDECL"/>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
@@ -174,7 +177,7 @@
             <TargetCPU Value="x86_64"/>
             <TargetOS Value="darwin"/>
             <Optimizations>
-              <OptimizationLevel Value="2"/>
+              <OptimizationLevel Value="3"/>
             </Optimizations>
           </CodeGeneration>
           <Linking>
@@ -187,7 +190,8 @@
             <CompilerMessages>
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-dLape_CDECL"/>
+            <CustomOptions Value="-OoNOLOOPUNROLL
+-dLape_CDECL"/>
             <ExecuteAfter>
               <Command Value="macos/make-bundle.sh"/>
               <CompileReasons Run="False"/>
@@ -225,7 +229,8 @@
             <CompilerMessages>
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-dStaticFFI
+            <CustomOptions Value="-OoNOLOOPUNROLL
+-dStaticFFI
 -dLape_CDECL"/>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
@@ -260,7 +265,8 @@
             <CompilerMessages>
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-dStaticFFI
+            <CustomOptions Value="-OoNOLOOPUNROLL
+-dStaticFFI
 -dLape_CDECL"/>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
@@ -294,7 +300,8 @@
             <CompilerMessages>
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-dLape_CDECL"/>
+            <CustomOptions Value="-OoNOLOOPUNROLL
+-dLape_CDECL"/>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
@@ -327,7 +334,8 @@
             <CompilerMessages>
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-dLape_CDECL"/>
+            <CustomOptions Value="-OoNOLOOPUNROLL
+-dLape_CDECL"/>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
@@ -360,7 +368,8 @@
             <CompilerMessages>
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-dLape_CDECL"/>
+            <CustomOptions Value="-OoNOLOOPUNROLL
+-dLape_CDECL"/>
             <ExecuteAfter>
               <Command Value="macos/make-bundle.sh"/>
               <CompileReasons Run="False"/>
@@ -404,7 +413,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="53">
+    <Units Count="56">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -665,6 +674,18 @@
         <Filename Value="package/simba.package_github_releases.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit52>
+      <Unit53>
+        <Filename Value="script/simba.script_compiler_onterminate.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit53>
+      <Unit54>
+        <Filename Value="script/simba.script_compiler_waituntil.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit54>
+      <Unit55>
+        <Filename Value="script/simba.script_compiler_debugger.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit55>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -688,7 +709,7 @@
       <TargetCPU Value="x86_64"/>
       <TargetOS Value="win64"/>
       <Optimizations>
-        <OptimizationLevel Value="2"/>
+        <OptimizationLevel Value="3"/>
       </Optimizations>
     </CodeGeneration>
     <Linking>
@@ -701,7 +722,8 @@
       <CompilerMessages>
         <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
       </CompilerMessages>
-      <CustomOptions Value="-dStaticFFI
+      <CustomOptions Value="-OoNOLOOPUNROLL
+-dStaticFFI
 -dLape_CDECL"/>
       <CreateMakefileOnBuild Value="True"/>
     </Other>

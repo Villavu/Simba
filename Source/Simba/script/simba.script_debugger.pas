@@ -6,80 +6,82 @@ interface
 
 uses
   classes, sysutils, syncobjs,
-  simba.script, simba.script_communication;
+  simba.script_communication;
 
 type
   TSimbaScript_Debugger = class(TThread)
   protected
+    FScript: TObject;
     FStream: TMemoryStream;
     FLock: TCriticalSection;
     FWarned: Boolean;
-    FScript: TSimbaScript;
     FDepth: Int32;
+    FMethods: TStringArray;
+    FStartEvent: TSimpleEvent;
 
-    procedure EnterMethod(Sender: TObject; Index: Int32);
-    procedure LeaveMethod(Sender: TObject; Index: Int32; Exception: Boolean);
+    procedure Write(constref Event: TSimbaScriptDebuggerEvent);
+
+    procedure EnterMethod(Index: Int32);
+    procedure LeaveMethod(Index: Int32; Exception: Boolean);
 
     procedure Execute; override;
   public
-    procedure Queue(constref Event: TSimbaScriptDebuggerEvent);
+    procedure Start;
 
-    constructor Create(Script: TSimbaScript); reintroduce;
+    constructor Create(Script: TObject); reintroduce;
     destructor Destroy; override;
   end;
 
 implementation
 
-procedure TSimbaScript_Debugger.EnterMethod(Sender: TObject; Index: Int32);
+uses
+  simba.script, simba.script_compiler_debugger;
+
+procedure TSimbaScript_Debugger.EnterMethod(Index: Int32);
 var
   Event: TSimbaScriptDebuggerEvent;
 begin
-  if FScript.Terminated then
-    Exit;
-
   Inc(FDepth);
 
   Event.Depth := FDepth;
   Event.Method := Index;
   Event.Exception := False;
 
-  Queue(Event);
+  Write(Event);
 end;
 
-procedure TSimbaScript_Debugger.LeaveMethod(Sender: TObject; Index: Int32; Exception: Boolean);
+procedure TSimbaScript_Debugger.LeaveMethod(Index: Int32; Exception: Boolean);
 var
   Event: TSimbaScriptDebuggerEvent;
 begin
-  if FScript.Terminated then
-    Exit;
-
   Event.Depth := FDepth;
   Event.Method := Index;
   Event.Exception := Exception;
 
-  Queue(Event);
+  Write(Event);
 
   Dec(FDepth);
 end;
 
 procedure TSimbaScript_Debugger.Execute;
 var
-  Method: TSimbaMethod;
+  I: Int32;
 begin
-  while (not Terminated) or (FStream.Position > 0) do
+  for I := 0 to High(FMethods) do
+    with TSimbaScript(FScript) do
+      Invoke(TSimbaMethod_DebuggingMethod.Create(FMethods[I]), True);
+
+  FStartEvent.SetEvent();
+
+  while (FStream.Position > 0) or (not Terminated) do
   begin
     FLock.Enter();
 
     try
       if (FStream.Position > 0) then
       begin
-        Method := TSimbaMethod_DebuggerEvents.Create(FStream);
-
-        try
-          FScript.Invoke(Method);
-        finally
-          Method.Free();
-        end;
+        with TSimbaScript(FScript) do
+          Invoke(TSimbaMethod_DebuggerEvents.Create(FStream), True);
 
         FStream.Position := 0;
       end;
@@ -91,13 +93,20 @@ begin
   end;
 end;
 
-procedure TSimbaScript_Debugger.Queue(constref Event: TSimbaScriptDebuggerEvent);
+procedure TSimbaScript_Debugger.Start;
+begin
+  inherited Start();
+
+  FStartEvent.WaitFor(INFINITE);
+end;
+
+procedure TSimbaScript_Debugger.Write(constref Event: TSimbaScriptDebuggerEvent);
 begin
   if FStream.Position >= 1024 * 1024 then
   begin
     if not FWarned then
     begin
-      WriteLn('Debugger cannot keep up with the scripts function calling!');
+      WriteLn('Debugger cannot keep up with function calling.');
       WriteLn('Script will be paused until data has been processed.');
 
       FWarned := True;
@@ -116,40 +125,25 @@ begin
   end;
 end;
 
-constructor TSimbaScript_Debugger.Create(Script: TSimbaScript);
-var
-  I: Int32;
-  Method: TSimbaMethod;
+constructor TSimbaScript_Debugger.Create(Script: TObject);
 begin
-  inherited Create(False);
+  inherited Create(True);
 
   FDepth := -1;
   FStream := TMemoryStream.Create();
   FLock := TCriticalSection.Create();
-
   FScript := Script;
-  FScript.Compiler.OnEnterMethod := @EnterMethod;
-  FScript.Compiler.OnLeaveMethod := @LeaveMethod;
+  FStartEvent := TSimpleEvent.Create();
 
-  for I := 0 to High(FScript.Compiler.DebuggingMethods) do
-  begin
-    Method := TSimbaMethod_DebuggingMethod.Create(FScript.Compiler.DebuggingMethods[I]);
-
-    try
-      FScript.Invoke(Method);
-    finally
-      Method.Free();
-    end;
-  end;
+  with TSimbaScript(FScript) do
+    InitializeDebugger(Compiler, @FMethods, @Self.EnterMethod, @Self.LeaveMethod);
 end;
 
 destructor TSimbaScript_Debugger.Destroy;
 begin
-  Self.Terminate();
-  Self.WaitFor();
-
   FStream.Free();
   FLock.Free();
+  FStartEvent.Free();
 
   inherited Destroy();
 end;

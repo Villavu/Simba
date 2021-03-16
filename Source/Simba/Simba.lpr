@@ -35,23 +35,6 @@ uses
   simba.colorpicker_historyform, simba.settingsform,
   simba.associate, simba.script, simba.script_dump;
 
-type
-  TApplicationHelper = class helper for TApplication
-    procedure Terminate(Sender: TObject);
-  end;
-
-procedure TApplicationHelper.Terminate(Sender: TObject);
-begin
-  inherited Terminate();
-
-  if (WakeMainThread <> nil) then
-    WakeMainThread(Self);
-
-  {$IFDEF DARWIN}
-  Halt(ExitCode); // MacOS needs extra help?
-  {$ENDIF}
-end;
-
 begin
   {$IF DECLARED(SetHeapTraceOutput)}
   SetHeapTraceOutput('memory-leaks.trc');
@@ -87,7 +70,6 @@ begin
     end;
 
     SimbaScript := TSimbaScript.Create();
-    SimbaScript.OnTerminate := @Application.Terminate;
 
     SimbaScript.ScriptFile               := Application.Params[Application.ParamCount];
     SimbaScript.ScriptName               := Application.GetOptionValue('scriptname');

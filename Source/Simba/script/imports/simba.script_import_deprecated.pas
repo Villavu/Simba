@@ -376,8 +376,6 @@ begin
     addGlobalFunc('function FloodFillTPA(const TPA: TPointArray): T2DPointArray;' + Deprecated('Use ClusterTPA(TPA,1)'), @Lape_FloodFillTPA);
 
     addDelayedCode('{$HINTS OFF}'                                                                                                                             + LineEnding +
-                   'type'                                                                                                                                     + LineEnding +
-                   '  TSP_Property = (SP_OnTerminate, SP_WriteTimeStamp);'                                                                                    + LineEnding +
                    ''                                                                                                                                         + LineEnding +
                    'procedure IncEx(var X: Int32; Increase: Int32); deprecated ' + #39 + 'Replace with Inc' + #39 + ';'                                       + LineEnding +
                    'begin'                                                                                                                                    + LineEnding +
@@ -397,16 +395,6 @@ begin
                    'function Pow(Base, Exponent: Extended): Extended; deprecated ' + #39 + 'Replace with Power OR ** operator' + #39 + ';'                    + LineEnding +
                    'begin'                                                                                                                                    + LineEnding +
                    '  Result := Power(Base, Exponent);'                                                                                                       + LineEnding +
-                   'end;'                                                                                                                                     + LineEnding +
-                   ''                                                                                                                                         + LineEnding +
-                   'procedure SetScriptProp(Prop: TSP_Property; Value: TVariantArray); deprecated;'                                                           + LineEnding +
-                   'begin'                                                                                                                                    + LineEnding +
-                   '  case Prop of'                                                                                                                           + LineEnding +
-                   '    SP_OnTerminate:'                                                                                                                      + LineEnding +
-                   '      AddOnTerminate(Value[0]);'                                                                                                          + LineEnding +
-                   '    SP_WriteTimeStamp:'                                                                                                                   + LineEnding +
-                   '      ;'                                                                                                                                  + LineEnding +
-                   '  end;'                                                                                                                                   + LineEnding +
                    'end;'                                                                                                                                     + LineEnding +
                    ''                                                                                                                                         + LineEnding +
                    'function GetTClient: TClient; deprecated ' + #39 + 'Replace with `Client` variable' + #39 + ';'                                           + LineEnding +

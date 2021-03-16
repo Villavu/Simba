@@ -375,6 +375,7 @@ procedure TSimbaFunctionList.DoTreeViewMouseMove(Sender: TObject; Shift: TShiftS
 var
   Node: TTreeNode;
   R: TRect;
+  Header: String;
 begin
   Node := FTreeView.GetNodeAt(X, Y);
   if (Node = FHint.Node) then
@@ -382,6 +383,14 @@ begin
 
   if (Node is TSimbaFunctionList_DeclarationNode) and (Node <> FHint.Node) then
   begin
+    Header := TSimbaFunctionList_DeclarationNode(Node).Header;
+    if Length(Header) > 3500 then
+    begin
+      FHint.Hide();
+
+      Exit;
+    end;
+
     R := Node.DisplayRect(True);
     R.TopLeft := FTreeView.ClientToScreen(R.TopLeft);
     R.BottomRight := FTreeView.ClientToScreen(R.BottomRight);
