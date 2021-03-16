@@ -604,7 +604,7 @@ end;
 
 procedure TSimbaCommunicationServer.Execute;
 
-  function GetMethod(Name: ShortString): TSimbaMethod;
+  function GetMethod(Name: ShortString): TSimbaMethod; inline;
   var
     I: Int32;
   begin
