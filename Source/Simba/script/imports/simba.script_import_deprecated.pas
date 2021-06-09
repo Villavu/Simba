@@ -271,16 +271,6 @@ begin
   Pinteger(Result)^ := TIOManager(Params^[0]^).SetTarget(PPtrUInt(Params^[1])^);
 end;
 
-procedure Lape_TPAPosNext(const Params: PParamArray;const Result: pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
- PInt32(Result)^:= TPAPosNext(PPoint(Params^[0])^, PPointArray(Params^[1])^, PInt32(Params^[2])^, System.PBoolean(Params^[3])^);
-end;
-
-procedure Lape_GlueTPAs(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
- PPointArray(Result)^:= GlueTPAs(PPointArray(Params^[0])^, PPointArray(Params^[1])^, System.PBoolean(Params^[2])^, System.PBoolean(Params^[3])^);
-end;
-
 procedure Lape_CombineIntArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PIntegerArray(Result)^ := CombineIntArray(PIntegerArray(Params^[0])^, PIntegerArray(Params^[1])^);
@@ -341,9 +331,6 @@ begin
 
     addGlobalFunc('function CopyTPA(const TPA: TPointArray): TPointArray;' + Deprecated('Use Copy'), @Lape_CopyTPA);
     addGlobalFunc('function CopyATPA(const ATPA: T2DPointArray): T2DPointArray;' + Deprecated('Use Copy'), @Lape_CopyATPA);
-
-    addGlobalFunc('function TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Int32;const IsSortedAscending: Boolean): Int32; deprecated;', @Lape_TPAPosNext);
-    addGlobalFunc('function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending, byDifference: Boolean): TPointArray; deprecated;', @Lape_GlueTPAs);
 
     addGlobalFunc('function CombineTPA(const Ar1, Ar2: TPointArray): TPointArray;' + Deprecated('Use + operator'), @Lape_CombineTPA);
     addGlobalFunc('function CombineIntArray(const Arr1, Arr2: TIntegerArray): TIntegerArray;' + Deprecated('Use + operator'), @Lape_CombineIntArray);

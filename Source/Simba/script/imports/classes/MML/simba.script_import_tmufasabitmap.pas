@@ -185,7 +185,7 @@ end;
 //function GetAreaColors(xs,ys,xe,ye : Int32) : T2DIntArray;
 procedure TMufasaBitmap_GetAreaColors(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  P2DIntArray(Result)^ := PMufasaBitmap(Params^[0])^.GetAreaColors(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
+  P2DIntegerArray(Result)^ := PMufasaBitmap(Params^[0])^.GetAreaColors(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
 end;
 
 //function GetHSLValues(xs, ys, xe, ye: Int32): T2DHSLArray;
@@ -365,7 +365,7 @@ end;
 //function ToMatrix: T2DIntegerArray;
 procedure TMufasaBitmap_ToMatrix(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  P2DIntArray(Result)^ := PMufasaBitmap(Params^[0])^.ToMatrix();
+  P2DIntegerArray(Result)^ := PMufasaBitmap(Params^[0])^.ToMatrix();
 end;
 
 procedure TMufasaBitmap_ToGreyMatrix(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -376,7 +376,7 @@ end;
 //procedure DrawMatrix(matrix: T2DIntegerArray);
 procedure TMufasaBitmap_DrawMatrix(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PMufasaBitmap(Params^[0])^.DrawMatrix(P2DIntArray(Params^[1])^);
+  PMufasaBitmap(Params^[0])^.DrawMatrix(P2DIntegerArray(Params^[1])^);
 end;
 
 //procedure DrawMatrix(matrix: T2DIntegerArray; ColorMapID: Int32 = 0); overload;

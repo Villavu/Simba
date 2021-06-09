@@ -103,6 +103,14 @@ begin
   begin
     Section := 'System';
 
+    addBaseDefine('SIMBA_DIRECTORY',   #39 + GetSimbaPath()   + #39);
+    addBaseDefine('DATA_DIRECTORY',    #39 + GetDataPath()    + #39);
+    addBaseDefine('INCLUDE_DIRECTORY', #39 + GetIncludePath() + #39);
+    addBaseDefine('PLUGIN_DIRECTORY',  #39 + GetPluginPath()  + #39);
+    addBaseDefine('FONT_DIRECTORY',    #39 + GetFontPath()    + #39);
+    addBaseDefine('SCRIPT_DIRECTORY',  #39 + GetScriptPath()  + #39);
+    addBaseDefine('PACKAGE_DIRECTORY', #39 + GetPackagePath() + #39);
+
     addBaseDefine('SIMBA' + Format('%d', [SIMBA_VERSION]));
     addBaseDefine('SIMBAMAJOR' + Format('%d', [SIMBA_MAJOR]));
 
@@ -143,7 +151,7 @@ begin
         addBaseDefine('SIMBAHEADLESS');
 
       addGlobalVar('TClient', @SimbaScript.Client, 'Client');
-      addGlobalConst(SimbaScript.ScriptFile, 'ScriptFile');
+      addGlobalVar(SimbaScript.ScriptFile, 'ScriptFile').isConstant := True;
     end else
     begin
       addDelayedCode(
@@ -152,13 +160,11 @@ begin
       );
     end;
 
-    addGlobalConst(GetIncludePath(), 'IncludePath');
-    addGlobalConst(GetPluginPath(), 'PluginPath');
-    addGlobalConst(GetFontPath(), 'FontPath');
-    addGlobalConst(GetSimbaPath(), 'AppPath');
-    addGlobalConst(GetScriptPath(), 'ScriptPath');
-
-    addGlobalConst(LineEnding, 'LineEnding');
+    addGlobalVar(GetIncludePath(), 'IncludePath').isConstant := True;
+    addGlobalVar(GetPluginPath(), 'PluginPath').isConstant := True;
+    addGlobalVar(GetFontPath(), 'FontPath').isConstant := True;
+    addGlobalVar(GetSimbaPath(), 'AppPath').isConstant := True;
+    addGlobalVar(GetScriptPath(), 'ScriptPath').isConstant := True;
 
     addGlobalFunc('procedure _Write(S: String); override;', @Lape_Write);
     addGlobalFunc('procedure _WriteLn; override;', @Lape_WriteLn);

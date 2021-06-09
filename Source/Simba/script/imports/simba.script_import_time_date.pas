@@ -11,7 +11,6 @@ procedure Lape_Import_Time_Date(Compiler: TSimbaScript_Compiler);
 implementation
 
 uses
-  dateutils, LazSysUtils,
   simba.misc;
 
 procedure Lape_ConvertTime(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -34,26 +33,6 @@ begin
   PUInt64(Result)^ := GetTickCount64() - SimbaScript.StartTime;
 end;
 
-procedure Lape_NowUTC(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PDateTime(Result)^ := NowUTC();
-end;
-
-procedure Lape_UnixTime(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PInt64(Result)^ := DateTimeToUnix(NowUTC());
-end;
-
-procedure Lape_UnixToDateTime(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PDateTime(Result)^ := UnixToDateTime(PInt64(Params^[0])^, PBoolean(Params^[1])^);
-end;
-
-procedure Lape_DateTimeToUnix(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PInt64(Result)^ := DateTimeToUnix(PDateTime(Params^[0])^, PBoolean(Params^[1])^);
-end;
-
 procedure Lape_Import_Time_Date(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -64,10 +43,6 @@ begin
     addGlobalFunc('procedure ConvertTime64(Time: UInt64; var y, m, w, d, h, min, s: Int32);', @Lape_ConvertTime64);
     addGlobalFunc('function GetSystemTime: UInt64;', @Lape_GetSystemTime);
     addGlobalFunc('function GetTimeRunning: UInt64;', @Lape_GetTimeRunning);
-    addGlobalFunc('function NowUTC: TDateTime;', @Lape_NowUTC);
-    addGlobalFunc('function UnixTime: Int64;', @Lape_UnixTime);
-    addGlobalFunc('function DateTimeToUnix(const Value: TDateTime; IsUTC: Boolean = True): Int64;', @Lape_DateTimeToUnix);
-    addGlobalFunc('function UnixToDateTime(const Value: Int64; ReturnUTC: Boolean = True): TDateTime;', @Lape_UnixToDateTime);
   end;
 end;
 

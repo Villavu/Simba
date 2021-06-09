@@ -265,13 +265,13 @@ implementation
 
 uses
   lclintf, synexporthtml, anchordocking, simba.script_dump, simba.openssl,
-  simba.mufasatypes, simba.misc, simba.settings,
+  simba.mufasatypes, simba.process, simba.settings,
   simba.files, simba.codeparser, simba.codeinsight,
   simba.debugimage, simba.bitmapconv, simba.colorpicker_historyform, simba.aca,
   simba.dtmeditor, simba.scriptinstance, simba.package_form, simba.aboutform,
   simba.functionlistform, simba.scripttabsform, simba.debugform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.colorpicker, simba.ci_includecache,
-  simba.highlighter, simba.scriptformatter, simba.dockinghelpers
+  simba.highlighter, simba.scriptformatter, simba.dockinghelpers, simba.misc
   {$IFDEF WINDOWS},
   windows, shellapi
   {$ENDIF};
@@ -596,7 +596,7 @@ begin
         RemoveDocking(DockMaster.Controls[I] as TCustomForm);
 
     if MessageDlg('Simba', 'Docking somehow got corrupted. Simba must restart.', mtError, mbYesNo, 0) = mrYes then
-      RunCommand(Application.ExeName);
+      SimbaProcess.RunCommand(Application.ExeName, []);
 
     Halt;
   end else
@@ -665,7 +665,7 @@ begin
   Dump := SysUtils.GetTempFileName(GetDataPath(), '.dump');
 
   try
-    RunCommandTimeout(Application.ExeName, ['--dump=' + FileName, Dump], Output, 1500);
+    SimbaProcess.RunCommandTimeout(Application.ExeName, ['--dump=' + FileName, Dump], Output, 3500);
 
     Contents := ReadFileToString(Dump);
     if (Contents = '') then

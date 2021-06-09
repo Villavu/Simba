@@ -16,6 +16,7 @@ type
 
   TSimbaFunctionList_DeclarationNode = class(TSimbaFunctionList_Node)
   public
+    DeclarationClass: TDeclarationClass;
     StartPos, EndPos: Int32;
     Line: Int32;
     Header: String;
@@ -58,6 +59,9 @@ type
     FSimbaNode: TTreeNode;
 
     FUpdating: Boolean;
+
+    function SortMethodNodesByName(A, B: TTreeNode): Integer;
+    function SortNodesByGroup(A, B: TTreeNode): Integer;
 
     function AddDeclaration(ParentNode: TTreeNode; Declaration: TDeclaration): TTreeNode;
     function AddInternalFile(ParentNode: TTreeNode; FileName: String): TTreeNode;
@@ -144,6 +148,7 @@ constructor TSimbaFunctionList_DeclarationNode.Create(AOwner: TTreeNodes; ADecla
 begin
   inherited Create(AOwner);
 
+  DeclarationClass := TDeclarationClass(ADeclaration.ClassType);
   StartPos := ADeclaration.StartPos;
   EndPos := ADeclaration.EndPos;
   Line := ADeclaration.Line;
@@ -356,6 +361,37 @@ begin
     SimbaScriptTabsForm.StatusPanelFileName.Caption := TSimbaFunctionList_DeclarationNode(FTreeView.Selected).Header;
 end;
 
+function TSimbaFunctionList.SortMethodNodesByName(A, B: TTreeNode): Integer;
+begin
+  Result := 0;
+  if (TSimbaFunctionList_DeclarationNode(A).DeclarationClass = TSimbaFunctionList_DeclarationNode(B).DeclarationClass) then
+    Result := CompareText(A.Text, B.Text);
+end;
+
+function TSimbaFunctionList.SortNodesByGroup(A, B: TTreeNode): Integer;
+
+  function Weigh(A, B: TDeclarationClass): Integer;
+  begin
+    Result := 0;
+
+    if (A = TciTypeDeclaration)      then Inc(Result, 1);
+    if (A = TciConstantDeclaration)  then Inc(Result, 2);
+    if (A = TciVarDeclaration)       then Inc(Result, 3);
+    if (A = TciProcedureDeclaration) then Inc(Result, 4);
+
+    if (B = TciTypeDeclaration)      then Dec(Result, 1);
+    if (B = TciConstantDeclaration)  then Dec(Result, 2);
+    if (B = TciVarDeclaration)       then Dec(Result, 3);
+    if (B = TciProcedureDeclaration) then Dec(Result, 4);
+  end;
+
+begin
+  Result := Weigh(
+    TSimbaFunctionList_DeclarationNode(A).DeclarationClass,
+    TSimbaFunctionList_DeclarationNode(B).DeclarationClass
+  );
+end;
+
 function TSimbaFunctionList.AddDeclaration(ParentNode: TTreeNode; Declaration: TDeclaration): TTreeNode;
 begin
   Result := FTreeView.Items.AddNode(TSimbaFunctionList_DeclarationNode.Create(FTreeView.Items, Declaration), ParentNode, Declaration.Name, Pointer(nil), naAddChild);
@@ -536,7 +572,12 @@ begin
   Node.ImageIndex := IMAGE_FILE;
   Node.SelectedIndex := IMAGE_FILE;
 
-  AddDeclarations(Include.Items, Node, False, True, False);
+  AddDeclarations(Include.Items, Node, False, False, False);
+
+  // Sort in order of, types, consts, vars, methods
+  Node.CustomSort(@Self.SortNodesByGroup);
+  // Alpha sort methods
+  Node.CustomSort(@Self.SortMethodNodesByName);
 end;
 
 procedure TSimbaFunctionList.DoAfterFilter(Sender: TObject);

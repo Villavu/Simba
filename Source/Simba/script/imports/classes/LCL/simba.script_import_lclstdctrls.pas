@@ -531,6 +531,16 @@ begin
   PComboBox(Params^[0])^ := TComboBox.Create(PComponent(Params^[1])^);
 end;
 
+procedure Lape_TCustomComboBox_OnChange_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PNotifyEvent(Result)^ := PComboBox(Params^[0])^.OnChange;
+end;
+
+procedure Lape_TCustomComboBox_OnChange_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PComboBox(Params^[0])^.OnChange := PNotifyEvent(Params^[1])^;
+end;
+
 //procedure Free();
 procedure Lape_TComboBox_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -544,6 +554,7 @@ begin
     addClass('TComboBox', 'TCustomComboBox');
 
     addGlobalFunc('procedure TComboBox.Init(TheOwner: TComponent); override;', @Lape_TComboBox_Init);
+    addClassVar('TComboBox', 'OnChange', 'TNotifyEvent', @Lape_TCustomComboBox_OnChange_Read, @Lape_TCustomComboBox_OnChange_Write);
     //addGlobalFunc('procedure TComboBox.Free(); constref;', @Lape_TComboBox_Free);
   end;
 end;

@@ -77,6 +77,7 @@ begin
     SimbaScript.CompileOnly              := Application.HasOption('compile');
     SimbaScript.SimbaCommunicationServer := Application.GetOptionValue('simbacommunication');
     SimbaScript.Target                   := Application.GetOptionValue('target');
+    SimbaScript.Log                      := Application.GetOptionValue('log');
 
     SimbaScript.Start();
   end else

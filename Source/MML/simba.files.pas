@@ -145,7 +145,7 @@ begin
   end;
 end;
 
-function GetDirectories(Path: string): TstringArray;
+function GetDirectories(Path: string): TStringArray;
 var
     SearchRec : TSearchRec;
     c : integer;

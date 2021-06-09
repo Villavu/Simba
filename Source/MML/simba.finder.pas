@@ -543,7 +543,7 @@ end;
 { Points left holds the amount of points that are "left" to be checked
    (Including the point itself.. So for example Pointsleft[0][0] would
     hold the total amount of pixels that are to be checked. }
-procedure CalculateBitmapSkipCoordsEx(Bitmap : TMufasaBitmap; out SkipCoords : T2DBoolArray;out TotalPoints : Integer; out PointsLeft : T2DIntArray);
+procedure CalculateBitmapSkipCoordsEx(Bitmap : TMufasaBitmap; out SkipCoords : T2DBoolArray;out TotalPoints : Integer; out PointsLeft : T2DIntegerArray);
 var
   x,y : Integer;
   R,G,B : byte;
@@ -1424,7 +1424,7 @@ var
   yStart,yEnd,xStart,xEnd : Integer;
   TotalC : Integer;
   SkipCoords : T2DBoolArray;
-  PointsLeft : T2DIntArray;
+  PointsLeft : T2DIntegerArray;
   ctsinfoarray: TCTSInfo2DArray;
   compare: TCTSCompareFunction;
 
@@ -1534,7 +1534,7 @@ end;
 function TMFinder.FindTemplateEx(TemplImage: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
 var
   y,w,h: Int32;
-  Image, Templ: T2DIntArray;
+  Image, Templ: T2DIntegerArray;
   xcorr: TSingleMatrix;
   PtrData : TRetData;
   maxLo,maxHi: Single;

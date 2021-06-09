@@ -20,7 +20,7 @@ end;
 
 procedure Lape_MatchTemplateRGBCache_Create(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PMatchTemplateRGBCache(Result)^ := TMatchTemplateRGBCache.Create(P2DIntArray(Params^[0])^, P2DIntArray(Params^[1])^);
+  PMatchTemplateRGBCache(Result)^ := TMatchTemplateRGBCache.Create(P2DIntegerArray(Params^[0])^, P2DIntegerArray(Params^[1])^);
 end;
 
 procedure Lape_MatchTemplateMaskGrey(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -35,17 +35,17 @@ end;
 
 procedure Lape_MatchTemplateMaskRGB(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PSingleMatrix(Result)^ := MatchTemplateMask(PMatchTemplateRGBCache(Params^[0])^, P2DIntArray(Params^[1])^, PTMFormula(Params^[2])^);
+  PSingleMatrix(Result)^ := MatchTemplateMask(PMatchTemplateRGBCache(Params^[0])^, P2DIntegerArray(Params^[1])^, PTMFormula(Params^[2])^);
 end;
 
 procedure Lape_MatchTemplateMaskRGBEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PSingleMatrix(Result)^ := MatchTemplateMask(P2DIntArray(Params^[0])^, P2DIntArray(Params^[1])^, P2DIntArray(Params^[2])^, PTMFormula(Params^[3])^);
+  PSingleMatrix(Result)^ := MatchTemplateMask(P2DIntegerArray(Params^[0])^, P2DIntegerArray(Params^[1])^, P2DIntegerArray(Params^[2])^, PTMFormula(Params^[3])^);
 end;
 
 procedure Lape_MatchTemplate(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PSingleMatrix(Result)^ := MatchTemplate(P2DIntArray(Params^[0])^, P2DIntArray(Params^[1])^, PTMFormula(Params^[2])^);
+  PSingleMatrix(Result)^ := MatchTemplate(P2DIntegerArray(Params^[0])^, P2DIntegerArray(Params^[1])^, PTMFormula(Params^[2])^);
 end;
 
 procedure Lape_TMufasaBitmap_MatchTemplate(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

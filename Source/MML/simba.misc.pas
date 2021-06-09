@@ -33,17 +33,12 @@ procedure ConvertTime(Time: Int64; var h, m, s: Int32);
 procedure ConvertTime64(Time: Int64; var y, m, w, d, h, min, s: Int32);
 function TimeStamp(Time: Int64; IncludeMilliseconds: Boolean = False): String;
 function PerformanceTimer: Double;
-function GetCommandLine: TStringArray;
-function RunCommandInDir(Directory: String; CommandLine: String; out OutputString: String): Int32; overload;
-procedure RunCommandInDir(Directory: String; CommandLine: String); overload;
-function RunCommand(CommandLine: String; out OutputString: String): Int32; overload;
-procedure RunCommand(CommandLine: String); overload;
-function RunCommandTimeout(Executable: TProcessString; Commands: array of TProcessString; out OutputString: String; Timeout: Int32): Boolean;
 function OpenDirectory(Path: String): Boolean;
 
 implementation
 
 uses
+  Forms,
   {$IFDEF WINDOWS}
   Windows
   {$ENDIF}
@@ -125,123 +120,6 @@ begin
   {$ENDIF}
 end;
 
-function GetCommandLine: TStringArray;
-var
-  i: Int32;
-begin
-  SetLength(Result, ParamCount + 1);
-  for i := 0 to ParamCount do
-    Result[i] := ParamStr(i);
-end;
-
-function RunCommandInDir(Directory: String; CommandLine: String; out OutputString: String): Int32;
-const
-  BUFFER_SIZE = 1024 * 16;
-var
-  Commands: TStringList;
-  I, Count: Int32;
-  Buffer: array[1..BUFFER_SIZE] of Char;
-begin
-  Result := -1;
-  SetLength(OutputString, 0);
-
-  Commands := TStringList.Create();
-
-  try
-    CommandToList(CommandLine, Commands);
-    if (Commands.Count = 0) then
-      Exit;
-
-    with TProcess.Create(nil) do
-    try
-      Options := [poUsePipes];
-      PipeBufferSize := BUFFER_SIZE;
-      CurrentDirectory := Directory;
-      Executable := Commands[0];
-
-      {$IFDEF WINDOWS}
-      if ExtractFileExt(Executable) = '' then
-        Executable := Executable + '.exe';
-      {$ENDIF}
-
-      for I := 1 to Commands.Count - 1 do
-        Parameters.Add(Commands[I]);
-
-      Execute();
-
-      while Running do
-      begin
-        while (Output.NumBytesAvailable > 0) do
-        begin
-          Count := Output.Read(Buffer[1], BUFFER_SIZE);
-          if Count > 0 then
-            OutputString := OutputString + Copy(Buffer, 1, Count);
-        end;
-
-        Sleep(50);
-      end;
-
-      // Make sure we empty the output
-      while (Output.NumBytesAvailable > 0) do
-      begin
-        Count := Output.Read(Buffer[1], BUFFER_SIZE);
-        if (Count > 0) then
-          OutputString := OutputString + Copy(Buffer, 1, Count);
-      end;
-
-      Result := ExitStatus;
-    finally
-      Free();
-    end;
-  finally
-    Commands.Free();
-  end;
-end;
-
-procedure RunCommandInDir(Directory: String; CommandLine: String);
-var
-  Commands: TStringList;
-  I: Int32;
-begin
-  Commands := TStringList.Create();
-
-  try
-    CommandToList(CommandLine, Commands);
-    if (Commands.Count = 0) then
-      Exit;
-
-    with TProcess.Create(nil) do
-    try
-      CurrentDirectory := Directory;
-      Executable := Commands[0];
-
-      {$IFDEF WINDOWS}
-      if ExtractFileExt(Executable) = '' then
-        Executable := Executable + '.exe';
-      {$ENDIF}
-
-      for I := 1 to Commands.Count - 1 do
-        Parameters.Add(Commands[I]);
-
-      Execute();
-    finally
-      Free();
-    end;
-  finally
-    Commands.Free();
-  end;
-end;
-
-function RunCommand(CommandLine: String; out OutputString: String): Int32;
-begin
-  Result := RunCommandInDir(GetCurrentDir(), CommandLine, OutputString);
-end;
-
-procedure RunCommand(CommandLine: String);
-begin
-  RunCommandInDir(GetCurrentDir(), CommandLine);
-end;
-
 function OpenDirectory(Path: String): Boolean;
 var
   Executable: String = '';
@@ -265,48 +143,6 @@ begin
     raise Exception.Create('OpenDirectory is unsupported on this system.');
 
   Result := RunCommandInDir('', Executable, [Path], Output, ExitStatus) = 0;
-end;
-
-type
-  TProcessTimeout = class(TProcess)
-  public
-    Timeout: UInt64;
-
-    procedure Idle(Sender, Context: TObject; Status: TRunCommandEventCode; const Message: string);
-  end;
-
-procedure TProcessTimeout.Idle(Sender, Context: TObject; Status: TRunCommandEventCode; const Message: string);
-begin
-  if Status = RunCommandIdle then
-  begin
-    if GetTickCount64() > Timeout then
-      Terminate(255);
-
-    Sleep(RunCommandSleepTime);
-  end;
-end;
-
-function RunCommandTimeout(Executable: TProcessString; Commands: array of TProcessString; out OutputString: String; Timeout: Int32): Boolean;
-Var
-  Process: TProcessTimeout;
-  ExitStatus: Int32;
-  ErrorString: String;
-  Command: TProcessString;
-begin
-  Process := TProcessTimeout.Create(nil);
-  Process.OnRunCommandEvent := @Process.Idle;
-  Process.Timeout := GetTickCount() + Timeout;
-  Process.Options := Process.Options + [poRunIdle];
-  Process.Executable := Executable;
-
-  for Command in Commands do
-    Process.Parameters.Add(Command);
-
-  try
-    Result := (Process.RunCommandLoop(OutputString, ErrorString, ExitStatus) = 0) and (ExitStatus = 0) and (GetTickCount64() < Process.Timeout);
-  finally
-    Process.Free();
-  end;
 end;
 
 end.

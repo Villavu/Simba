@@ -27,9 +27,6 @@ type
   PStartupOption = ^TStartupOption;
   POutputPipeStream = ^TOutputPipeStream;
   PInputPipeStream = ^TInputPipeStream;
-  PInt64 = ^Int64;
-  PLongInt = ^LongInt;
-
 
 //function Seek(const Offset: int64; Origin: TSeekOrigin): int64; override;
 procedure Lape_TOutputPipeStream_Seek(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -524,7 +521,12 @@ end;
 //Read: Property Stderr : TinputPipeStream  Read FStderrStream;
 procedure Lape_TProcess_Stderr_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PinputPipeStream(Result)^ := PProcess(Params^[0])^.Stderr;
+  PInputPipeStream(Result)^ := PProcess(Params^[0])^.Stderr;
+end;
+
+procedure Lape_TProcess_ExitCode_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PInteger(Result)^ := PProcess(Params^[0])^.ExitCode;
 end;
 
 procedure Lape_Import_TProcess(Compiler: TSimbaScript_Compiler);
@@ -551,6 +553,7 @@ begin
     addClassVar('TProcess', 'Output', 'TInputPipeStream', @Lape_TProcess_Output_Read, nil);
     addClassVar('TProcess', 'Stderr', 'TinputPipeStream', @Lape_TProcess_Stderr_Read, nil);
     addClassVar('TProcess', 'ExitStatus', 'Integer', @Lape_TProcess_ExitStatus_Read, nil);
+    addClassVar('TProcess', 'ExitCode', 'Integer', @Lape_TProcess_ExitCode_Read, nil);
     addClassVar('TProcess', 'InheritHandles', 'Boolean', @Lape_TProcess_InheritHandles_Read, @Lape_TProcess_InheritHandles_Write);
     addClassVar('TProcess', 'PipeBufferSize', 'cardinal', @Lape_TProcess_PipeBufferSize_Read, @Lape_TProcess_PipeBufferSize_Write);
     addClassVar('TProcess', 'Active', 'Boolean', @Lape_TProcess_Active_Read, @Lape_TProcess_Active_Write);
@@ -575,7 +578,7 @@ begin
     addClassVar('TProcess', 'WindowWidth', 'Cardinal', @Lape_TProcess_WindowWidth_Read, @Lape_TProcess_WindowWidth_Write);
     addClassVar('TProcess', 'FillAttribute', 'Cardinal', @Lape_TProcess_FillAttribute_Read, @Lape_TProcess_FillAttribute_Write);
     addClassVar('TProcess', 'XTermProgram', 'String', @Lape_TProcess_XTermProgram_Read, @Lape_TProcess_XTermProgram_Write);
-    addGlobalFunc('procedure TProcess.Init(AOwner : TComponent); overrride;', @Lape_TProcess_Init);
+    addGlobalFunc('procedure TProcess.Init(AOwner : TComponent); override;', @Lape_TProcess_Init);
     //addGlobalFunc('procedure TProcess.Free(); constref;', @Lape_TProcess_Free);
   end;
 end;
@@ -584,7 +587,7 @@ procedure Lape_Import_LCLProcess(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
    begin
-     addGlobalType('(poRunSuspended,poWaitOnExit, poUsePipes,poStderrToOutPut, poNoConsole,poNewConsole, poDefaultErrorMode,poNewProcessGroup, poDebugProcess,poDebugOnlyThisProcess)', 'TProcessOption');
+     addGlobalType('(oRunSuspended,poWaitOnExit,poUsePipes,poStderrToOutPut,poNoConsole,poNewConsole,poDefaultErrorMode,poNewProcessGroup,poDebugProcess,poDebugOnlyThisProcess,poDetached,poPassInput,poRunIdle)', 'TProcessOption');
      addGlobalType('(swoNone,swoHIDE,swoMaximize,swoMinimize,swoRestore,swoShow, swoShowDefault,swoShowMaximized,swoShowMinimized, swoshowMinNOActive,swoShowNA,swoShowNoActivate,swoShowNormal)', 'TShowWindowOptions');
      addGlobalType('(suoUseShowWindow,suoUseSize,suoUsePosition, suoUseCountChars,suoUseFillAttribute)', 'TStartupOption');
      addGlobalType('(ppHigh,ppIdle,ppNormal,ppRealTime)', 'TProcessPriority');

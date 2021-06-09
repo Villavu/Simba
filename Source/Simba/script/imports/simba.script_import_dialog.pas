@@ -188,18 +188,18 @@ begin
   begin
     Section := 'Dialogs';
 
-    addGlobalConst(mrNone, 'mrNone');
-    addGlobalConst(mrOK, 'mrOK');
-    addGlobalConst(mrCancel, 'mrCancel');
-    addGlobalConst(mrAbort, 'mrAbort');
-    addGlobalConst(mrRetry, 'mrRetry');
-    addGlobalConst(mrIgnore,'mrIgnore');
-    addGlobalConst(mrYes, 'mrYes');
-    addGlobalConst(mrNo, 'mrNo');
-    addGlobalConst(mrAll,'mrAll');
-    addGlobalConst(mrNoToAll, 'mrNoToAll');
-    addGlobalConst(mrYesToAll, 'mrYesToAll');
-    addGlobalConst(mrClose, 'mrClose');
+    addGlobalVar(mrNone, 'mrNone').isConstant := True;
+    addGlobalVar(mrOK, 'mrOK').isConstant := True;
+    addGlobalVar(mrCancel, 'mrCancel').isConstant := True;
+    addGlobalVar(mrAbort, 'mrAbort').isConstant := True;
+    addGlobalVar(mrRetry, 'mrRetry').isConstant := True;
+    addGlobalVar(mrIgnore,'mrIgnore').isConstant := True;
+    addGlobalVar(mrYes, 'mrYes').isConstant := True;
+    addGlobalVar(mrNo, 'mrNo').isConstant := True;
+    addGlobalVar(mrAll,'mrAll').isConstant := True;
+    addGlobalVar(mrNoToAll, 'mrNoToAll').isConstant := True;
+    addGlobalVar(mrYesToAll, 'mrYesToAll').isConstant := True;
+    addGlobalVar(mrClose, 'mrClose').isConstant := True;
 
     addGlobalType('set of (mbYes, mbNo, mbOK, mbCancel, mbAbort, mbRetry, mbIgnore, mbAll, mbNoToAll, mbYesToAll, mbHelp, mbClose)', 'TMsgDlgButtons');
     addGlobalType('(mtWarning, mtError, mtInformation, mtConfirmation, mtCustom)', 'TMsgDlgType');
