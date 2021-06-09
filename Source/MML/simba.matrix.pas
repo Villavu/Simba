@@ -34,7 +34,7 @@ procedure MatrixSetSize(var a: TSingleMatrix; Width, Height: Int32);
 procedure MatrixSize(a: TSingleMatrix; out Width, Height: Int32);
 function MatrixWidth(a: TSingleMatrix): Int32;
 function MatrixHeight(a: TSingleMatrix): Int32;
-function MatrixToInt(a: TSingleMatrix): T2DIntArray;
+function MatrixToInt(a: TSingleMatrix): T2DIntegerArray;
 function MatrixMean(a: TSingleMatrix): Single;
 procedure MatrixMeanStdev(a: TSingleMatrix; out Mean, Stdev: Single);
 procedure MatrixMinMax(a: TSingleMatrix; out vMin,vMax: Single);
@@ -149,7 +149,7 @@ begin
   Result := Length(a);
 end;
 
-function MatrixToInt(a: TSingleMatrix): T2DIntArray;
+function MatrixToInt(a: TSingleMatrix): T2DIntegerArray;
 var
   X,Y,W,H: Int32;
 begin

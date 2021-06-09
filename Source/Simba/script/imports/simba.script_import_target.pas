@@ -13,11 +13,6 @@ implementation
 uses
   simba.iomanager, simba.bitmap, simba.target, simba.target_exported, simba.oswindow;
 
-procedure Lape_GetProcessID(const Params : PParamArray; const Result : Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PSizeUInt(Result)^ := GetProcessID();
-end;
-
 procedure Lape_SetTarget(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   SimbaScript.Client.IOManager.SetTargetEx(PSysProc(Params^[0])^);
@@ -170,7 +165,6 @@ begin
   begin
     Section := 'Target';
 
-    addGlobalFunc('function GetProcessID: SizeUInt', @Lape_GetProcessID);
     addGlobalFunc('procedure SetTarget(Proc: TSysProc);', @Lape_SetTarget);
     addGlobalFunc('procedure SetDesktopAsClient;', @Lape_SetDesktopAsClient);
     addGlobalFunc('function SetTargetArray(P: PtrUInt; W, H: Int32): Int32', @Lape_SetTargetArray);

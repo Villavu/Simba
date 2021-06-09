@@ -83,11 +83,11 @@ begin
   begin
     Section := 'Input';
 
-    addGlobalConst(Ord(MOUSE_RIGHT),       'MOUSE_RIGHT');
-    addGlobalConst(Ord(MOUSE_LEFT),        'MOUSE_LEFT');
-    addGlobalConst(Ord(MOUSE_MIDDLE),      'MOUSE_MIDDLE');
-    addGlobalConst(Ord(MOUSE_EXTRA_1),     'MOUSE_EXTRA_1');
-    addGlobalConst(Ord(MOUSE_EXTRA_2),     'MOUSE_EXTRA_2');
+    addGlobalVar(Ord(MOUSE_RIGHT),   'MOUSE_RIGHT').isConstant := True;
+    addGlobalVar(Ord(MOUSE_LEFT),    'MOUSE_LEFT').isConstant := True;
+    addGlobalVar(Ord(MOUSE_MIDDLE),  'MOUSE_MIDDLE').isConstant := True;
+    addGlobalVar(Ord(MOUSE_EXTRA_1), 'MOUSE_EXTRA_1').isConstant := True;
+    addGlobalVar(Ord(MOUSE_EXTRA_2), 'MOUSE_EXTRA_2').isConstant := True;
 
     addGlobalFunc('procedure MoveMouse(X, Y: Int32);', @Lape_MoveMouse);
     addGlobalFunc('procedure ScrollMouse(X, Y: Int32; Clicks: Int32);', @Lape_ScrollMouse);
@@ -98,7 +98,7 @@ begin
     addGlobalFunc('function IsMouseButtonDown(Button: Int32): boolean', @Lape_IsMouseButtonDown);
 
     for i := 0 to High(VirtualKeys) do
-      addGlobalConst(VirtualKeys[i].Key, Format('VK_%S', [VirtualKeys[i].Str]));
+      addGlobalVar(VirtualKeys[i].Key, Format('VK_%S', [VirtualKeys[i].Str])).isConstant := True;
 
     addGlobalFunc('procedure KeyDown(Key: UInt16);', @Lape_KeyDown);
     addGlobalFunc('procedure KeyUp(Key: UInt16);', @Lape_KeyUp);

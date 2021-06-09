@@ -35,8 +35,7 @@ begin
     Add('        ProcObj();');
     Add('      if (ProcName <> "") then');
     Add('        case UpperCase(ProcName) of');
-
-    for Decl in Compiler.GlobalDeclarations.getByClass(TLapeGlobalVar, bTrue) do
+    for Decl in Compiler.GlobalDeclarations.GetByClass(TLapeGlobalVar, bTrue) do
     begin
       if (TLapeGlobalVar(Decl).VarType.ClassType = TLapeType_Method) then
         with TLapeType_Method(TLapeGlobalVar(Decl).VarType) do
@@ -47,7 +46,6 @@ begin
           Add('          "' + UpperCase(Name) + '": ' + Name + '();');
         end;
     end;
-
     Add('          else raise "Only a procedure with no parameters can be passed to AddOnTerminate";');
     Add('        end;');
     Add('    end;');
@@ -71,7 +69,11 @@ begin
     '                                                                         ' + LineEnding +
     'procedure _CallOnTerminateMethods;                                       ' + LineEnding +
     'begin                                                                    ' + LineEnding +
-    'end;                                                                     ' + LineEnding +
+    'end;                                                                     ',
+    '!AddOnTerminate'
+  );
+
+  Compiler.addDelayedCode(
     '                                                                         ' + LineEnding +
     'procedure AddOnTerminate(Proc: procedure); overload;                     ' + LineEnding +
     'begin                                                                    ' + LineEnding +

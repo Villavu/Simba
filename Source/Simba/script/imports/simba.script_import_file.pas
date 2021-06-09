@@ -79,26 +79,6 @@ begin
     PInt32(Result)^ := MFiles.FilePointerPos(PInt32(Params^[0])^);
 end;
 
-procedure Lape_FileExists(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := FileExists(PString(Params^[0])^);
-end;
-
-procedure Lape_DirectoryExists(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := DirectoryExists(PString(Params^[0])^);
-end;
-
-procedure Lape_CreateDirectory(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := CreateDir(PString(Params^[0])^);
-end;
-
-procedure Lape_ForceDirectories(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := ForceDirectories(PString(Params^[0])^);
-end;
-
 procedure Lape_GetFiles(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PStringArray(Result)^ := GetFiles(PString(Params^[0])^, PString(Params^[1])^);
@@ -107,18 +87,6 @@ end;
 procedure Lape_GetDirectories(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PStringArray(Result)^ := GetDirectories(PString(Params^[0])^);
-end;
-
-procedure Lape_DeleteFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  with SimbaScript.Client do
-    PBoolean(Result)^ := MFiles.DeleteFile(PString(Params^[0])^);
-end;
-
-procedure Lape_RenameFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  with SimbaScript.Client do
-    PBoolean(Result)^ := MFiles.RenameFile(PString(Params^[0])^, PString(Params^[1])^);
 end;
 
 procedure Lape_WriteINI(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -137,11 +105,6 @@ procedure Lape_DeleteINI(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$
 begin
   with SimbaScript.Client do
     MFiles.DeleteINI(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
-end;
-
-procedure Lape_DeleteDirectory(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := DeleteDirectory(PString(Params^[0])^, PBoolean(Params^[1])^);
 end;
 
 procedure Lape_UnZipFile(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -200,18 +163,11 @@ begin
     addGlobalFunc('function WriteFileString(FileNum: Int32; s: String): Boolean', @Lape_WriteFileString);
     addGlobalFunc('function SetFileCharPointer(FileNum, cChars, Origin: Int32): Int32', @Lape_SetFileCharPointer);
     addGlobalFunc('function FilePointerPos(FileNum: Int32): Int32', @Lape_FilePointerPos);
-    addGlobalFunc('function FileExists(FileName: String): Boolean', @Lape_FileExists);
-    addGlobalFunc('function DirectoryExists(Directory: String): Boolean', @Lape_DirectoryExists);
-    addGlobalFunc('function CreateDirectory(Directory: String): Boolean', @Lape_CreateDirectory);
-    addGlobalFunc('function ForceDirectories(Directory: String): Boolean', @Lape_ForceDirectories);
     addGlobalFunc('function GetFiles(Path, Ext: String): TStringArray', @Lape_GetFiles);
     addGlobalFunc('function GetDirectories(Path: String): TStringArray', @Lape_GetDirectories);
-    addGlobalFunc('function DeleteFile(Filename: String): Boolean',  @Lape_DeleteFile);
-    addGlobalFunc('function RenameFile(Oldname, NewName: String): Boolean;', @Lape_RenameFile);
     addGlobalFunc('procedure WriteINI(Section, KeyName, NewString, FileName: String);', @Lape_WriteINI);
     addGlobalFunc('function ReadINI(Section, KeyName, FileName: String): String', @Lape_ReadINI);
     addGlobalFunc('procedure DeleteINI(Section, KeyName, FileName: String);', @Lape_DeleteINI);
-    addGlobalFunc('function DeleteDirectory(Dir: String; Empty: Boolean): Boolean;', @Lape_DeleteDirectory);
     addGlobalFunc('procedure ZipFiles(constref ArchiveFileName: String; constref Files: TStringArray);', @Lape_ZipFiles);
     addGlobalFunc('procedure UnZipFile(constref ArchiveFileName, OutputDirectory: String);', @Lape_UnZipFile);
     addGlobalFunc('function UnZipOneFile(constref ArchiveFileName, FileName, OutputDirectory: String): Boolean;', @Lape_UnZipOneFile);

@@ -882,6 +882,9 @@ function TDeclaration.GetShortText: string;
       Result := StringReplace(Result, #9, #32, [rfReplaceAll]);
     while (Pos(#32#32, Result) > 0) do
       Result := StringReplace(Result, #32#32, #32, [rfReplaceAll]);
+
+    Result := StringReplace(Result, '( ', '(', [rfReplaceAll]);
+    Result := StringReplace(Result, ' )', ')', [rfReplaceAll]);
   end;
 
 begin

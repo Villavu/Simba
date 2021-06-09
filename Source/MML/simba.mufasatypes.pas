@@ -31,18 +31,6 @@ interface
 uses
   Classes, SysUtils, Graphics;
 
-{ TPoint add }
-operator + (PT1,PT2 : TPoint) : TPoint;
-
-{ TPoint sub }
-operator - (PT1,PT2 : TPoint) : TPoint;
-
-{ TPoint comp}
-operator = (PT1,PT2 : TPoint) : boolean;
-
-operator >(PT1, PT2: TPoint): boolean;
-operator <(PT1, PT2: TPoint): boolean;
-
 type
   PRGB24 = ^TRGB24;
   TRGB24 = packed record
@@ -62,7 +50,7 @@ type
   TRGB32Array = array of TRGB32;
 
   PPRGB32Array = ^TPRGB32Array;
-  TPRGB32Array = array of PRGB32; //Array of Pointers
+  TPRGB32Array = array of PRGB32; //array of Pointers
 
   THSL = packed record
     H, S, L: extended;
@@ -83,8 +71,8 @@ type
 const
   NullReturnData: TRetData = (Ptr: nil; IncPtrWith: -1; RowLen: -1);
 
-operator =(Left, Right: TRetData): Boolean;
-operator =(Left, Right: TRGB32): Boolean;
+operator =(Left, Right: TRetData): Boolean; inline;
+operator =(Left, Right: TRGB32): Boolean; inline;
 
 type
   PStrings = ^TStrings;
@@ -116,14 +104,12 @@ type
   P2DPointArray = ^T2DPointArray;
   T2DPointArray = array of TPointArray;
 
-  TVariantArray = Array of Variant;
+  TVariantArray = array of Variant;
   PVariantArray = ^TVariantArray;
 
   PIntegerArray = ^TIntegerArray;
-  TIntegerArray = Array of Integer;
-  P2DIntArray = ^T2DIntArray;
-  T2DIntArray = array of TIntegerArray;
-  T2DIntegerArray = T2DIntArray;
+  TIntegerArray = array of Integer;
+  T2DIntegerArray = array of TIntegerArray;
   P2DIntegerArray = ^T2DIntegerArray;
 
   PByteArray = ^TByteArray;
@@ -142,7 +128,6 @@ type
   P2DExtendedArray = ^T2DExtendedArray;
   T2DExtendedArray = array of array of Extended;
 
-  {Tempalte matching}
   PSingleArray  = ^TSingleArray;
   TSingleArray  = array of Single;
   PSingleMatrix = ^TSingleMatrix;
@@ -192,11 +177,6 @@ type
 
   EComparator = (__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__);
 
-  { Crypto }
-  THashType = (htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160,
-               htSHA1, htSHA256, htSHA384, htSHA512, htTiger);
-  PHashType = ^THashType;
-
   { Mask Types }
   PMask = ^TMask;
   TMask = record
@@ -213,11 +193,6 @@ type
   end;
   TMufasaFilesArray = array of TMufasaFile;
 
-  { DTM Types }
-  {
-    Possibly add .name too?
-    Then one could give DTM names, which would be easy for debugging.
-  }
   PBox = ^TBox;
   TBox = record
     X1, Y1, X2, Y2: Integer;
@@ -268,7 +243,7 @@ type
     x, y, Color, Tolerance, AreaSize, AreaShape: integer;
   end;
 
-  TSDTMPointDefArray = Array Of TSDTMPointDef;
+  TSDTMPointDefArray = array of TSDTMPointDef;
 
   PSDTM = ^TSDTM;
   TSDTM = record
@@ -478,39 +453,12 @@ var
 
 implementation
 
-operator+(PT1, PT2: TPoint): TPoint;
-begin
-  Result.x := PT1.x + PT2.x;
-  Result.y := Pt1.y + PT2.y;
-end;
-
-operator-(PT1, PT2: TPoint): TPoint;
-begin
-  Result.x := PT1.x - PT2.x;
-  Result.y := Pt1.y - PT2.y;
-end;
-
-operator=(PT1, PT2: TPoint): boolean;
-begin
-  result := ((PT1.x = PT2.x) and (pt1.y = pt2.y));
-end;
-
-operator >(PT1, PT2: TPoint): boolean;
-begin
-  Result := ((PT1.X > PT2.X) and (PT1.Y > PT2.Y));
-end;
-
-operator <(PT1, PT2: TPoint): boolean;
-begin
-  Result := ((PT1.X < PT2.X) and (PT1.Y < PT2.Y));
-end;
-
 operator =(Left, Right: TRetData): Boolean;
 begin
   Result := (Left.Ptr = Right.Ptr) and (Left.RowLen = Right.RowLen) and (Left.IncPtrWith = Right.IncPtrWith);
 end;
 
-operator =(Left, Right: TRGB32): Boolean; inline;
+operator =(Left, Right: TRGB32): Boolean;
 begin
   Result := Int32(Left) = Int32(Right);
 end;
@@ -608,7 +556,7 @@ begin
   Result := (X >= Self.X1) and (Y >= Self.Y1) and (X <= Self.X2) and (Y <= Self.Y2);
 end;
 
-function Box(constref X1, Y1, X2, Y2: Int32): TBox; inline;
+function Box(constref X1, Y1, X2, Y2: Int32): TBox;
 begin
   Result.X1 := X1;
   Result.Y1 := Y1;

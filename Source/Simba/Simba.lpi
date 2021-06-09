@@ -54,6 +54,7 @@
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
           </Linking>
@@ -61,8 +62,7 @@
             <CompilerMessages>
               <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-OoNOLOOPUNROLL
--dStaticFFI
+            <CustomOptions Value="-dStaticFFI
 -dLape_CDECL"/>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
@@ -96,6 +96,7 @@
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
           </Linking>
@@ -103,8 +104,7 @@
             <CompilerMessages>
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-OoNOLOOPUNROLL
--dLape_CDECL"/>
+            <CustomOptions Value="-dLape_CDECL"/>
             <ExecuteBefore>
               <ShowAllMessages Value="True"/>
               <CompileReasons Run="False"/>
@@ -140,6 +140,7 @@
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
           </Linking>
@@ -147,8 +148,7 @@
             <CompilerMessages>
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-OoNOLOOPUNROLL
--dLape_CDECL"/>
+            <CustomOptions Value="-dLape_CDECL"/>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
@@ -183,6 +183,7 @@
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
           </Linking>
@@ -190,8 +191,7 @@
             <CompilerMessages>
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-OoNOLOOPUNROLL
--dLape_CDECL"/>
+            <CustomOptions Value="-dLape_CDECL"/>
             <ExecuteAfter>
               <Command Value="macos/make-bundle.sh"/>
               <CompileReasons Run="False"/>
@@ -214,6 +214,7 @@
           </SearchPaths>
           <Parsing>
             <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
               <CStyleMacros Value="True"/>
             </SyntaxOptions>
           </Parsing>
@@ -229,8 +230,7 @@
             <CompilerMessages>
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-OoNOLOOPUNROLL
--dStaticFFI
+            <CustomOptions Value="-dStaticFFI
 -dLape_CDECL"/>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
@@ -250,6 +250,7 @@
           </SearchPaths>
           <Parsing>
             <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
               <CStyleMacros Value="True"/>
             </SyntaxOptions>
           </Parsing>
@@ -265,8 +266,7 @@
             <CompilerMessages>
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-OoNOLOOPUNROLL
--dStaticFFI
+            <CustomOptions Value="-dStaticFFI
 -dLape_CDECL"/>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
@@ -285,6 +285,7 @@
           </SearchPaths>
           <Parsing>
             <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
               <CStyleMacros Value="True"/>
             </SyntaxOptions>
           </Parsing>
@@ -300,8 +301,7 @@
             <CompilerMessages>
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-OoNOLOOPUNROLL
--dLape_CDECL"/>
+            <CustomOptions Value="-dLape_CDECL"/>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
@@ -319,6 +319,7 @@
           </SearchPaths>
           <Parsing>
             <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
               <CStyleMacros Value="True"/>
             </SyntaxOptions>
           </Parsing>
@@ -334,13 +335,15 @@
             <CompilerMessages>
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-OoNOLOOPUNROLL
--dLape_CDECL"/>
+            <CustomOptions Value="-dLape_CDECL"/>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
       </Item9>
       <Item10 Name="SIMBA_DARWIN64_DEBUG">
+        <MacroValues Count="1">
+          <Macro2 Name="LCLWidgetType" Value="cocoa"/>
+        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -353,6 +356,7 @@
           </SearchPaths>
           <Parsing>
             <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
               <CStyleMacros Value="True"/>
             </SyntaxOptions>
           </Parsing>
@@ -368,8 +372,7 @@
             <CompilerMessages>
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-OoNOLOOPUNROLL
--dLape_CDECL"/>
+            <CustomOptions Value="-dLape_CDECL"/>
             <ExecuteAfter>
               <Command Value="macos/make-bundle.sh"/>
               <CompileReasons Run="False"/>
@@ -378,8 +381,9 @@
           </Other>
         </CompilerOptions>
       </Item10>
-      <SharedMatrixOptions Count="1">
-        <Item1 ID="674268197612" Modes="SIMBA_DARWIN64" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
+      <SharedMatrixOptions Count="2">
+        <Item1 ID="157994458805" Modes="SIMBA_DARWIN64" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
+        <Item2 ID="444724025705" Modes="SIMBA_DARWIN64_DEBUG" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>
@@ -413,7 +417,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="56">
+    <Units Count="57">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -686,6 +690,10 @@
         <Filename Value="script/simba.script_compiler_debugger.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit55>
+      <Unit56>
+        <Filename Value="../MML/simba.process.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit56>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -715,6 +723,7 @@
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
+        <StripSymbols Value="True"/>
       </Debugging>
       <LinkSmart Value="True"/>
     </Linking>
@@ -722,8 +731,7 @@
       <CompilerMessages>
         <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
       </CompilerMessages>
-      <CustomOptions Value="-OoNOLOOPUNROLL
--dStaticFFI
+      <CustomOptions Value="-dStaticFFI
 -dLape_CDECL"/>
       <CreateMakefileOnBuild Value="True"/>
     </Other>

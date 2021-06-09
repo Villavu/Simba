@@ -40,7 +40,7 @@ end;
 //function ToInt(a: TSingleMatrix): T2DIntArray;
 procedure Lape_MatrixToInt(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  T2DIntArray(Result^) := MatrixToInt(TSingleMatrix(Params^[0]^));
+  T2DIntegerArray(Result^) := MatrixToInt(TSingleMatrix(Params^[0]^));
 end;
 
 //function Mean(a: TSingleMatrix): Single;

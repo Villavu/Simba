@@ -107,7 +107,7 @@ type
     function FindColors(out Points: TPointArray; Color: TColor): Boolean;
     function FastGetPixel(x,y: Int32): TColor;
     function FastGetPixels(Points: TPointArray): TIntegerArray;
-    function GetAreaColors(xs,ys,xe,ye: Int32): T2DIntArray;
+    function GetAreaColors(xs,ys,xe,ye: Int32): T2DIntegerArray;
     function GetColors: TIntegerArray;
     function GetHSLValues(xs, ys, xe, ye: Int32): T2DHSLArray;
     procedure FastDrawClear(Color: TColor);
@@ -1230,7 +1230,7 @@ begin
     Result[i] := BGRToRGB(FData[Points[i].y*FWidth + Points[i].x]);
 end;
 
-function TMufasaBitmap.GetAreaColors(xs, ys, xe, ye: Int32): T2DIntArray;
+function TMufasaBitmap.GetAreaColors(xs, ys, xe, ye: Int32): T2DIntegerArray;
 var
   x,y: Int32;
 begin

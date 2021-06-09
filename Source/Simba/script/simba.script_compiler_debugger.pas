@@ -86,8 +86,8 @@ procedure InitializeDebugger(Compiler: TLapeCompiler; Methods: PStringArray; OnE
 var
   EnterMethod, LeaveMethod: TLapeGlobalVar;
 begin
-  EnterMethod := TLapeGlobalVar(Compiler.addManagedVar(TLapeGlobalVar.Create(Compiler.getGlobalType('TMethod'))));
-  LeaveMethod := TLapeGlobalVar(Compiler.addManagedVar(TLapeGlobalVar.Create(Compiler.getGlobalType('TMethod'))));
+  EnterMethod := TLapeGlobalVar(Compiler.addManagedDecl(TLapeGlobalVar.Create(Compiler.getGlobalType('TMethod'))));
+  LeaveMethod := TLapeGlobalVar(Compiler.addManagedDecl(TLapeGlobalVar.Create(Compiler.getGlobalType('TMethod'))));
 
   PMethod(EnterMethod.Ptr)^ := TMethod(OnEnterMethod);
   PMethod(LeaveMethod.Ptr)^ := TMethod(OnLeaveMethod);
