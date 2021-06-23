@@ -4,7 +4,7 @@ object SimbaForm: TSimbaForm
   Top = 424
   Width = 515
   Caption = 'Simba'
-  ClientHeight = 408
+  ClientHeight = 430
   ClientWidth = 515
   Menu = MainMenu
   OnClose = FormClose
@@ -55,7 +55,7 @@ object SimbaForm: TSimbaForm
     end
     object ButtonSeperator1: TToolButton
       Left = 166
-      Height = 32
+      Height = 5
       Top = 2
       Caption = 'ButtonSeperator1'
       Style = tbsDivider
@@ -86,7 +86,7 @@ object SimbaForm: TSimbaForm
     end
     object ButtonSeperator2: TToolButton
       Left = 373
-      Height = 32
+      Height = 5
       Top = 2
       Caption = 'ButtonSeperator2'
       Style = tbsDivider
@@ -103,7 +103,7 @@ object SimbaForm: TSimbaForm
     end
     object ButtonSeperator3: TToolButton
       Left = 129
-      Height = 32
+      Height = 5
       Top = 2
       Caption = 'ButtonSeperator3'
       Style = tbsDivider
@@ -136,7 +136,7 @@ object SimbaForm: TSimbaForm
     end
     object ButtonSeperator4: TToolButton
       Left = 336
-      Height = 32
+      Height = 5
       Top = 2
       Caption = 'ButtonSeperator4'
       Style = tbsDivider
@@ -150,7 +150,7 @@ object SimbaForm: TSimbaForm
     end
     object ButtonSeperator5: TToolButton
       Left = 267
-      Height = 32
+      Height = 5
       Top = 2
       Caption = 'ButtonSeperator5'
       Style = tbsDivider
@@ -175,6 +175,10 @@ object SimbaForm: TSimbaForm
         Caption = '&New'
         ImageIndex = 11
         OnClick = MenuNewClick
+      end
+      object MenuItem7: TMenuItem
+        Caption = 'New Template ...'
+        OnClick = MenuNewTemplateClick
       end
       object MenuItemDivider11: TMenuItem
         Caption = '-'

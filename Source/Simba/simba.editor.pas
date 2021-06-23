@@ -59,7 +59,7 @@ type
     procedure AddSettingChangeHandlers;
     procedure RemoveSettingChangeHandlers;
   public
-    property FileName: String read FFileName;
+    property FileName: String read FFileName write FFileName;
     property FontName: String read GetFontName;
 
     property AutoComplete: TSimbaAutoComplete read FAutoComplete;
