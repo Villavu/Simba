@@ -33,7 +33,7 @@ uses
   simba.functionlistform, simba.scripttabsform, simba.debugform,
   simba.filebrowserform, simba.notesform, simba.package_form,
   simba.colorpicker_historyform, simba.settingsform,
-  simba.associate, simba.script, simba.script_dump;
+  simba.associate, simba.script, simba.script_dump, simba.scripttemplateform;
 
 begin
   {$IF DECLARED(SetHeapTraceOutput)}
@@ -94,6 +94,7 @@ begin
     Application.CreateForm(TSimbaBitmapConversionForm, SimbaBitmapConversionForm);
     Application.CreateForm(TSimbaPackageForm, SimbaPackageForm);
     Application.CreateForm(TSimbaColorHistoryForm, SimbaColorHistoryForm);
+    Application.CreateForm(TSimbaScriptTemplateForm, SimbaScriptTemplateForm);
 
     Application.QueueASyncCall(@SimbaForm.Setup, 0);
   end;

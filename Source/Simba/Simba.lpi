@@ -417,7 +417,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="57">
+    <Units Count="58">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -694,6 +694,13 @@
         <Filename Value="../MML/simba.process.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit56>
+      <Unit57>
+        <Filename Value="simba.scripttemplateform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SimbaScriptTemplateForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit57>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

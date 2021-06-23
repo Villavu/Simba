@@ -41,15 +41,16 @@ type
     function GetScript: String;
     function GetScriptChanged: Boolean;
 
+    procedure SetFileName(Value: String);
     procedure SetScript(Value: String);
   public
     property DebuggingForm: TSimbaDebuggerForm read FDebuggingForm;
     property FunctionList: TSimbaFunctionList read FFunctionList;
 
-    property FileName: String read GetFileName;
+    property FileName: String read GetFileName write SetFileName;
     property ScriptChanged: Boolean read GetScriptChanged;
     property ScriptInstance: TSimbaScriptInstance read FScriptInstance write FScriptInstance;
-    property ScriptName: String read FScriptName;
+    property ScriptName: String read FScriptName write FScriptName;
     property Script: String read GetScript write SetScript;
     property Editor: TSimbaEditor read FEditor;
     property MouseLinkXY: TPoint read FMouseLinkXY write FMouseLinkXY;
@@ -223,6 +224,11 @@ end;
 function TSimbaScriptTab.GetScriptChanged: Boolean;
 begin
   Result := FEditor.Text <> FSavedText;
+end;
+
+procedure TSimbaScriptTab.SetFileName(Value: String);
+begin
+  FEditor.FileName := '';
 end;
 
 procedure TSimbaScriptTab.DoHide;

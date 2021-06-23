@@ -77,6 +77,7 @@ type
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
     MenuItem5: TMenuItem;
+    MenuItem7: TMenuItem;
     TrayPopupExit: TMenuItem;
     MenuItemDebugger: TMenuItem;
     MenuItemRunWithDebugging: TMenuItem;
@@ -172,6 +173,7 @@ type
     procedure MenuItemDebuggerClick(Sender: TObject);
     procedure MenuItemFormatScriptClick(Sender: TObject);
     procedure MenuItemAssociateScriptsClick(Sender: TObject);
+    procedure MenuNewTemplateClick(Sender: TObject);
     procedure MenuViewClick(Sender: TObject);
     procedure RecentFileItemsClick(Sender: TObject);
     procedure MenuClearOutputClick(Sender: TObject);
@@ -265,7 +267,7 @@ implementation
 
 uses
   lclintf, synexporthtml, anchordocking, simba.script_dump, simba.openssl,
-  simba.mufasatypes, simba.process, simba.settings,
+  simba.mufasatypes, simba.process, simba.settings, simba.scripttemplateform,
   simba.files, simba.codeparser, simba.codeinsight,
   simba.debugimage, simba.bitmapconv, simba.colorpicker_historyform, simba.aca,
   simba.dtmeditor, simba.scriptinstance, simba.package_form, simba.aboutform,
@@ -716,6 +718,11 @@ end;
 begin
 end;
 {$ENDIF}
+
+procedure TSimbaForm.MenuNewTemplateClick(Sender: TObject);
+begin
+  SimbaScriptTemplateForm.ShowModal();
+end;
 
 procedure TSimbaForm.MenuViewClick(Sender: TObject);
 begin
@@ -1487,5 +1494,10 @@ begin
 end;
 
 {$R *.lfm}
+
+initialization
+  Randomize();
+
+  FormatSettings.DecimalSeparator := '.';
 
 end.

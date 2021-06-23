@@ -1,27 +1,22 @@
 unit simba.init;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
+{$IFDEF UNIX}
 uses
-  {$IFDEF UNIX}
   cthreads, cmem
-  {$ENDIF}
   {$IFDEF LINUX},
-  simba.linux_initialization,
+  simba.linux_initialization
   {$ENDIF}
   {$IFDEF DARWIN},
-  simba.darwin_initialization,
-  {$ENDIF}
-  Classes, SysUtils;
+  simba.darwin_initialization
+  {$ENDIF};
+{$ENDIF}
 
 implementation
-
-initialization
-  Randomize();
-
-  FormatSettings.DecimalSeparator := '.';
 
 end.
 

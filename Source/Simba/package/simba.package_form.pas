@@ -1,14 +1,16 @@
 unit simba.package_form;
 
 (* .simbapackage
-  // The package name to install under. Can be empty to install directly into the directory
+  // The package name to install under.
   name=SRL
-  // The directory to install into from simba's executable location.
+  // The path to install into, from the working directory.
   directory=Includes
-  // flat extraction.
+  // flat extraction into directory
   flat=false
-  // Files or directories not to install delimited with commas.
-  ignore=.gitignore,.simbapackage
+  // files not to install
+  ignore=.git,.gitignore,.simbapackage,.gitattributes
+  // path to script templates in this repo.
+  templates=templates
 *)
 
 {$mode objfpc}{$H+}
@@ -390,6 +392,7 @@ var
   Packages: TSimbaPackageList;
   Package: TSimbaPackage;
   Releases: TGithubReleases;
+  InstalledData: TSimbaPackage_InstalledData;
 begin
   Packages := TSimbaPackageList.Create();
   Packages.Load(@Self.GetPageSilent, @Self.GetZIP);
@@ -400,13 +403,14 @@ begin
 
     for Package in Packages do
     begin
-      if Package.InstalledVersion = 'master' then
+      InstalledData := Package.InstalledData;
+      if (InstalledData.Version = 'master') then
         Continue;
 
       Releases := Package.Releases;
       if Length(Package.Releases) > 1 then // Has more than Master
-        if (Releases[0].Time > Package.InstalledVersionTime) then
-          FUpdates.Add('%s (%s) can be updated to version %s', [Package.Name, Package.InstalledVersion, Releases[0].Version]);
+        if (Releases[0].Time > InstalledData.VersionTime) then
+          FUpdates.Add('%s (%s) can be updated to version %s', [Package.Name, InstalledData.Version, Releases[0].Version]);
     end;
   finally
     Packages.Free();
@@ -499,10 +503,11 @@ begin
     begin
       LatestVersionLabel.Caption := 'Latest Version: ' + ReleasesList.Items[0];
 
-      if Package.InstalledVersion <> '' then
-        InstalledVersionLabel.Caption := 'Installed Version: ' + Package.InstalledVersion
-      else
-        InstalledVersionLabel.Caption := 'Installed Version: Not Installed';
+      with Package.InstalledData do
+        if (Version <> '') then
+          InstalledVersionLabel.Caption := 'Installed Version: ' + Version
+        else
+          InstalledVersionLabel.Caption := 'Installed Version: Not Installed';
 
       UpdatePackageLabel.Hint := Format('Click to check for updates. Automatically checked hourly. (checked %d minutes ago)', [Package.CacheAge]);
     end else
