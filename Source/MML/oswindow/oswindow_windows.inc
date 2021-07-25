@@ -45,21 +45,15 @@ begin
 end;
 
 function TOSWindow_Helper.GetClassName: WideString;
-var
-  Buffer: array[0..255] of WideChar;
 begin
-  GetClassNameW(Self, @Buffer[0], Length(Buffer));
-
-  Result := WideString(Buffer);
+  SetLength(Result, 255);
+  SetLength(Result, GetClassNameW(Self, PWideChar(Result), Length(Result)));
 end;
 
 function TOSWindow_Helper.GetTitle: WideString;
-var
-  Buffer: array[0..255] of WideChar;
 begin
-  GetWindowTextW(Self, @Buffer[0], Length(Buffer));
-
-  Result := WideString(Buffer);
+  SetLength(Result, 255);
+  SetLength(Result, GetWindowTextW(Self, PWideChar(Result), Length(Result)));
 end;
 
 function TOSWindow_Helper.GetBounds(out Bounds: TBox): Boolean;

@@ -4,11 +4,13 @@ unit simba.editor_attributes;
 // This includes highlighter attributes. Basically any TSynHighlighterAttributes.
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
 uses
-  classes, sysutils, synedithighlighter, synedit, generics.collections;
+  classes, sysutils,
+  synedit, synedithighlighter;
 
 type
   TSimbaEditor_Attribute = class(TSynHighlighterAttributes)
@@ -88,17 +90,29 @@ type
     procedure Init; override;
   end;
 
-  TSimbaEditor_AttributesList = class(specialize TList<TSynHighlighterAttributes>)
+  TSimbaEditor_AttributeArray = array of TSynHighlighterAttributes;
+  TSimbaEditor_Attributes = class
+  protected
+    FAttributes: TSimbaEditor_AttributeArray;
   public
-    constructor Create(Editor: TSynEdit); reintroduce;
+    constructor Create(Editor: TSynEdit);
     destructor Destroy; override;
+
+    property Attributes: TSimbaEditor_AttributeArray read FAttributes;
+
+    procedure LoadFromFile(FileName: String);
+    procedure SaveToFile(FileName: String);
   end;
 
 implementation
 
 uses
-  graphics, syneditmarkupwordgroup, syneditmarkuphighall,
+  graphics, syneditmarkupwordgroup, syneditmarkuphighall, SynEditPointClasses, SynEditMarkupFoldColoring, inifiles,
   simba.editor;
+
+type
+  TSynAttributeProtectedAccess = class(TSynHighlighterAttributes);
+  TSynEditProtectedAccess = class(TSynEdit);
 
 procedure TSimbaEditor_RightEdgeColorAttribute.DoChange;
 begin
@@ -133,11 +147,32 @@ begin
 end;
 
 procedure TSimbaEditor_IndentColorAttribute.DoChange;
+var
+  MarkupFoldColors: TSynEditMarkupFoldColors;
 begin
-  if (Editor <> nil) then
+  if (Editor = nil) then
+    Exit;
+
+  with Editor do
   begin
-    TSimbaEditor(Editor).IndentColor := Foreground;
-    TSimbaEditor(Editor).Invalidate();
+    // Create markup
+    if (MarkupByClass[TSynEditMarkupFoldColors] = nil) then
+    begin
+      MarkupFoldColors := TSynEditMarkupFoldColors.Create(Editor);
+      MarkupFoldColors.ColorCount := 1;
+      with MarkupFoldColors.Color[0] do
+      begin
+        Foreground := clNone;
+        Background := clNone;
+      end;
+
+      MarkupManager.AddMarkUp(MarkupFoldColors);
+    end;
+
+    with MarkupByClass[TSynEditMarkupFoldColors] as TSynEditMarkupFoldColors do
+      LineColor[0].Color := Foreground;
+
+    Invalidate();
   end;
 end;
 
@@ -166,10 +201,26 @@ end;
 
 procedure TSimbaEditor_CaretColorAttribute.DoChange;
 begin
-  if (Editor <> nil) then
+  if (Editor = nil) then
+    Exit;
+
+  with TSynEditProtectedAccess(Editor) do
   begin
-    TSimbaEditor(Editor).CaretColor := Foreground;
-    TSimbaEditor(Editor).Invalidate;
+    if (Foreground = clDefault) or (Foreground = clNone) then
+    begin
+      FScreenCaretPainterClass := TSynEditScreenCaretPainterSystem;
+      if FScreenCaret.Painter.ClassType <> TSynEditScreenCaretPainterSystem then
+        FScreenCaret.ChangePainter(TSynEditScreenCaretPainterSystem);
+    end else
+    begin
+      FScreenCaretPainterClass := TSynEditScreenCaretPainterInternal;
+      if FScreenCaret.Painter.ClassType <> TSynEditScreenCaretPainterInternal then
+        FScreenCaret.ChangePainter(TSynEditScreenCaretPainterInternal);
+
+      TSynEditScreenCaretPainterInternal(FScreenCaret.Painter).Color := Foreground;
+    end;
+
+    Editor.Invalidate();
   end;
 end;
 
@@ -259,32 +310,50 @@ begin
 end;
 
 procedure TSimbaEditor_DividerAttribute.DoChange;
+var
+  I: Integer;
 begin
-  if (Editor <> nil) then
-    TSimbaEditor(Editor).DividerColor := Foreground;
+  if (Editor = nil) or (Editor.Highlighter = nil) then
+    Exit;
+
+  with Editor do
+  begin
+    for I := 0 to Highlighter.DividerDrawConfigCount - 1 do
+    begin
+      Highlighter.DividerDrawConfig[I].TopColor := Foreground;
+      Highlighter.DividerDrawConfig[I].NestColor := Foreground;
+    end;
+
+    Invalidate();
+  end;
 end;
 
 procedure TSimbaEditor_DividerAttribute.Init;
 begin
   inherited Init();
 
-  Foreground := clGray;
+  Foreground := clNone;
 end;
 
 // Create the list from the editor
-constructor TSimbaEditor_AttributesList.Create(Editor: TSynEdit);
+constructor TSimbaEditor_Attributes.Create(Editor: TSynEdit);
 
-  procedure Add(Name: String; Attribute: TSynHighlighterAttributes);
+  procedure Add(AName: String; Attribute: TSynHighlighterAttributes);
   begin
-    Attribute.StoredName := Name;
     if Attribute is TSimbaEditor_Attribute then
       TSimbaEditor_Attribute(Attribute).Editor := Editor;
 
-    Self.Add(Attribute);
+    with TSynAttributeProtectedAccess(Attribute) do
+    begin
+      StoredName := AName;
+      Changed();
+    end;
+
+    FAttributes += [Attribute];
   end;
 
 var
-  I: Int32;
+  I: Integer;
 begin
   inherited Create();
 
@@ -325,15 +394,73 @@ begin
   Add('Gutter.Line Number', Editor.Gutter.LineNumberPart().MarkupInfo);
 end;
 
-destructor TSimbaEditor_AttributesList.Destroy;
+destructor TSimbaEditor_Attributes.Destroy;
 var
-  I: Int32;
+  I: Integer;
 begin
-  for I := 0 to Count - 1 do
-    if Self[I] is TSimbaEditor_Attribute then
-      Self[I].Free();
+  for I := 0 to High(FAttributes) do
+    if FAttributes[I] is TSimbaEditor_Attribute then
+      TSimbaEditor_Attribute(FAttributes[I]).Free();
+
+  FAttributes := nil;
 
   inherited Destroy();
+end;
+
+procedure TSimbaEditor_Attributes.LoadFromFile(FileName: String);
+var
+  INI: TINIFile;
+  I: Integer;
+begin
+  if FileExists(FileName) then
+  try
+    INI := TIniFile.Create(FileName);
+
+    for I := 0 to High(FAttributes) do
+      with TSynAttributeProtectedAccess(FAttributes[I]) do
+      begin
+        Background := INI.ReadInteger(StoredName, 'Background', Background);
+        Foreground := INI.ReadInteger(StoredName, 'Foreground', Foreground);
+
+        IntegerStyle     := INI.ReadInteger(StoredName, 'Style', IntegerStyle);
+        IntegerStyleMask := INI.ReadInteger(StoredName, 'StyleMask', IntegerStyleMask);
+
+        FrameColor := INI.ReadInteger(StoredName, 'Frame', FrameColor);
+
+        Changed();
+      end;
+
+    INI.Free();
+  except
+  end;
+end;
+
+procedure TSimbaEditor_Attributes.SaveToFile(FileName: String);
+var
+  INI: TINIFile;
+  I: Integer;
+begin
+  try
+    Writeln(FileName);
+    INI := TIniFile.Create(FileName);
+    INI.CacheUpdates := True;
+
+    for I := 0 to High(FAttributes) do
+      with TSynHighlighterAttributes(FAttributes[I]) do
+      begin
+        INI.WriteInteger(StoredName, 'Background', Background);
+        INI.WriteInteger(StoredName, 'Foreground', Foreground);
+
+        INI.WriteInteger(StoredName, 'Style', IntegerStyle);
+        INI.WriteInteger(StoredName, 'StyleMask', IntegerStyleMask);
+
+        INI.WriteInteger(StoredName, 'Frame', FrameColor);
+      end;
+
+    INI.UpdateFile();
+    INI.Free();
+  except
+  end;
 end;
 
 end.

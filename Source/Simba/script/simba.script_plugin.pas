@@ -81,7 +81,6 @@ type
   protected
     FFileName: String;
     FHandle: TLibHandle;
-    FDump: TStringList;
 
     FSimbaInfomation: TSimbaInfomation;
     FSimbaMethods: TSimbaMethods;
@@ -116,10 +115,8 @@ type
     FCode: String;
     FTypes: TSimbaScriptPluginLoader_Types;
     FMethods: TSimbaScriptPluginLoader_Methods;
-
-    function GetDump: TStringList;
   public
-    property Dump: TStringList read GetDump;
+    function Dump: TStringList;
 
     procedure Import(Compiler: TSimbaScript_Compiler);
     procedure Load;
@@ -311,23 +308,19 @@ begin
   if Assigned(FExports.OnAttach) then FExports.OnAttach(nil);
 end;
 
-function TSimbaScriptPlugin.GetDump: TStringList;
+function TSimbaScriptPlugin.Dump: TStringList;
 var
   I: Int32;
 begin
-  if (FDump = nil) then
-  begin
-    FDump := TStringList.Create();
+  Result := TStringList.Create();
 
-    for I := 0 to High(FTypes) do
-      FDump.Add('type ' + FTypes[i].Name + ' = ' + FTypes[i].Str);
-    for I := 0 to High(FMethods) do
-      FDump.Add(FMethods[i].Header + 'external;');
+  for I := 0 to High(FTypes) do
+    Result.Add('type ' + FTypes[i].Name + ' = ' + FTypes[i].Str);
+  for I := 0 to High(FMethods) do
+    Result.Add(FMethods[i].Header + 'external;');
 
-    FDump.Add(FCode);
-  end;
-
-  Result := FDump;
+  if (FCode <> '') then
+    Result.Add(FCode);
 end;
 
 procedure TSimbaScriptPlugin.Import(Compiler: TSimbaScript_Compiler);
@@ -384,9 +377,6 @@ end;
 
 destructor TSimbaScriptPlugin.Destroy;
 begin
-  if (FDump <> nil) then
-    FDump.Free();
-
   if Assigned(FExports.OnDetach) then
   try
     FExports.OnDetach();

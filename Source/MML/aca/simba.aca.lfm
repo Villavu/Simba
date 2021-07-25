@@ -1,12 +1,11 @@
 object SimbaACAForm: TSimbaACAForm
-  Left = 1140
-  Height = 800
-  Top = 354
+  Left = 52
+  Height = 759
+  Top = 177
   Width = 1000
   Caption = 'Auto Color Aid'
-  ClientHeight = 780
+  ClientHeight = 736
   ClientWidth = 1000
-  Font.Height = -12
   KeyPreview = True
   Menu = MainMenu
   OnClose = FormClose
@@ -14,10 +13,10 @@ object SimbaACAForm: TSimbaACAForm
   Position = poScreenCenter
   ShowHint = True
   ShowInTaskBar = stAlways
-  LCLVersion = '2.0.6.0'
+  LCLVersion = '2.2.0.1'
   object PanelMain: TPanel
     Left = 0
-    Height = 780
+    Height = 736
     Top = 0
     Width = 748
     Align = alClient
@@ -26,7 +25,7 @@ object SimbaACAForm: TSimbaACAForm
   end
   object PanelRight: TPanel
     Left = 748
-    Height = 780
+    Height = 736
     Top = 0
     Width = 252
     Align = alRight
@@ -34,7 +33,7 @@ object SimbaACAForm: TSimbaACAForm
     AutoSize = True
     BevelInner = bvLowered
     BevelOuter = bvNone
-    ClientHeight = 780
+    ClientHeight = 736
     ClientWidth = 252
     TabOrder = 1
     object PanelZoom: TPanel
@@ -73,7 +72,7 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ButtonDeleteColors
       Left = 6
-      Height = 335
+      Height = 226
       Top = 111
       Width = 240
       Style = []
@@ -94,8 +93,8 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ButtonCTS0
       Left = 6
-      Height = 15
-      Top = 511
+      Height = 20
+      Top = 412
       Width = 240
       Caption = 'Best Color'
       Anchors = [akLeft, akRight, akBottom]
@@ -114,14 +113,13 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideBottom.Control = EditColor
       AnchorSideBottom.Side = asrBottom
       Left = 6
-      Height = 23
-      Top = 597
-      Width = 29
+      Height = 28
+      Top = 518
+      Width = 36
       Anchors = [akTop, akLeft, akBottom]
       BorderSpacing.Left = 5
       Caption = 'Color'
       Layout = tlCenter
-      ParentColor = False
     end
     object LabelTolerance: TLabel
       AnchorSideLeft.Control = PanelRight
@@ -129,14 +127,13 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideBottom.Control = EditTolerance
       AnchorSideBottom.Side = asrBottom
       Left = 6
-      Height = 23
-      Top = 625
-      Width = 50
+      Height = 28
+      Top = 551
+      Width = 64
       Anchors = [akTop, akLeft, akBottom]
       BorderSpacing.Left = 5
       Caption = 'Tolerance'
       Layout = tlCenter
-      ParentColor = False
     end
     object LabelHue: TLabel
       AnchorSideLeft.Control = PanelRight
@@ -145,15 +142,14 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideBottom.Control = EditHue
       AnchorSideBottom.Side = asrBottom
       Left = 6
-      Height = 23
-      Top = 653
-      Width = 50
+      Height = 28
+      Top = 584
+      Width = 64
       Anchors = [akTop, akLeft, akRight, akBottom]
       BorderSpacing.Left = 5
       BorderSpacing.Right = 5
       Caption = 'Hue'
       Layout = tlCenter
-      ParentColor = False
     end
     object LabelSat: TLabel
       AnchorSideLeft.Control = PanelRight
@@ -162,15 +158,14 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideBottom.Control = EditSat
       AnchorSideBottom.Side = asrBottom
       Left = 6
-      Height = 23
-      Top = 681
-      Width = 50
+      Height = 28
+      Top = 617
+      Width = 64
       Anchors = [akTop, akLeft, akRight, akBottom]
       BorderSpacing.Left = 5
       BorderSpacing.Right = 5
       Caption = 'Sat'
       Layout = tlCenter
-      ParentColor = False
     end
     object EditColor: TEdit
       AnchorSideLeft.Control = EditTolerance
@@ -178,10 +173,10 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideRight.Control = PanelRight
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = EditTolerance
-      Left = 61
-      Height = 23
-      Top = 597
-      Width = 185
+      Left = 75
+      Height = 28
+      Top = 518
+      Width = 171
       Anchors = [akLeft, akRight, akBottom]
       BorderSpacing.Top = 5
       BorderSpacing.Right = 5
@@ -195,10 +190,10 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideRight.Control = PanelRight
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = EditHue
-      Left = 61
-      Height = 23
-      Top = 625
-      Width = 185
+      Left = 75
+      Height = 28
+      Top = 551
+      Width = 171
       Anchors = [akLeft, akRight, akBottom]
       BorderSpacing.Left = 5
       BorderSpacing.Top = 5
@@ -213,10 +208,10 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideRight.Control = PanelRight
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = EditSat
-      Left = 61
-      Height = 23
-      Top = 653
-      Width = 185
+      Left = 75
+      Height = 28
+      Top = 584
+      Width = 171
       Anchors = [akLeft, akRight, akBottom]
       BorderSpacing.Right = 5
       TabOrder = 4
@@ -228,10 +223,10 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideRight.Control = PanelRight
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ButtonDebugColor
-      Left = 61
-      Height = 23
-      Top = 681
-      Width = 185
+      Left = 75
+      Height = 28
+      Top = 617
+      Width = 171
       Anchors = [akLeft, akRight, akBottom]
       BorderSpacing.Top = 5
       BorderSpacing.Right = 5
@@ -245,8 +240,8 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ButtonUpdateImage
       Left = 6
-      Height = 15
-      Top = 734
+      Height = 20
+      Top = 680
       Width = 240
       Anchors = [akLeft, akRight, akBottom]
       BevelStyle = bsRaised
@@ -265,9 +260,9 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideBottom.Control = PanelRight
       AnchorSideBottom.Side = asrBottom
       Left = 131
-      Height = 25
+      Height = 30
       Hint = 'Clear all drawing from the image'
-      Top = 749
+      Top = 700
       Width = 115
       Anchors = [akTop, akLeft, akRight]
       AutoSize = True
@@ -285,9 +280,9 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideBottom.Control = PanelRight
       AnchorSideBottom.Side = asrBottom
       Left = 6
-      Height = 25
+      Height = 30
       Hint = 'Updates the image from the client'
-      Top = 749
+      Top = 700
       Width = 116
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
@@ -304,9 +299,9 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = Divider2
       Left = 6
-      Height = 25
+      Height = 30
       Hint = 'Displays best color matches'
-      Top = 709
+      Top = 650
       Width = 240
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
@@ -320,9 +315,9 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideLeft.Control = PanelRight
       AnchorSideBottom.Control = ButtonCTS1
       Left = 6
-      Height = 19
-      Top = 531
-      Width = 49
+      Height = 24
+      Top = 437
+      Width = 61
       Anchors = [akLeft, akBottom]
       BorderSpacing.Left = 5
       Caption = 'CTS 0'
@@ -333,9 +328,9 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideLeft.Control = PanelRight
       AnchorSideBottom.Control = ButtonCTS2
       Left = 6
-      Height = 19
-      Top = 552
-      Width = 49
+      Height = 24
+      Top = 463
+      Width = 61
       Anchors = [akLeft, akBottom]
       BorderSpacing.Left = 5
       BorderSpacing.Top = 2
@@ -347,9 +342,9 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideLeft.Control = PanelRight
       AnchorSideBottom.Control = EditColor
       Left = 6
-      Height = 19
-      Top = 573
-      Width = 49
+      Height = 24
+      Top = 489
+      Width = 61
       Anchors = [akLeft, akBottom]
       BorderSpacing.Left = 5
       BorderSpacing.Top = 2
@@ -383,7 +378,6 @@ object SimbaACAForm: TSimbaACAForm
         BorderSpacing.Left = 5
         BorderSpacing.Top = -1
         BorderSpacing.Right = 5
-        ParentColor = False
       end
     end
     object ButtonDeleteColors: TButton
@@ -392,8 +386,8 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ButtonDeleteSelectedColor
       Left = 6
-      Height = 25
-      Top = 451
+      Height = 30
+      Top = 342
       Width = 240
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
@@ -410,8 +404,8 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = Divider1
       Left = 6
-      Height = 25
-      Top = 481
+      Height = 30
+      Top = 377
       Width = 240
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
@@ -428,8 +422,8 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideBottom.Control = ButtonUpdateImage
       AnchorSideBottom.Side = asrBottom
       Left = 126
-      Height = 25
-      Top = 749
+      Height = 30
+      Top = 700
       Width = 1
       Anchors = [akTop, akLeft, akBottom]
       BevelOuter = bvNone
@@ -437,8 +431,8 @@ object SimbaACAForm: TSimbaACAForm
     end
   end
   object MainMenu: TMainMenu
-    left = 32
-    top = 16
+    Left = 32
+    Top = 16
     object MenuColors: TMenuItem
       Caption = 'Colors'
       object MenuItemLoadColors: TMenuItem

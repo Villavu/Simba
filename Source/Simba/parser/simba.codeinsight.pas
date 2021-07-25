@@ -6,7 +6,7 @@ unit simba.codeinsight;
 interface
 
 uses
-  sysutils, classes, sha1,
+  sysutils, classes,
   castaliapaslex, castaliapaslextypes,
   simba.codeparser, simba.parser_misc,
   simba.ci_includecache;
@@ -28,7 +28,7 @@ type
 
     procedure Reset;
 
-    function GetIncludesHash: TSHA1Digest;
+    function GetIncludesHash: String;
 
     function GetGlobals: TDeclarationArray;
     function GetGlobalByName(Name: String): TDeclaration;
@@ -61,7 +61,7 @@ type
     procedure Run; overload; override;
 
     property Includes: TCodeInsight_IncludeArray read FIncludes;
-    property IncludesHash: TSHA1Digest read GetIncludesHash;
+    property IncludesHash: String read GetIncludesHash;
 
     property Globals: TDeclarationArray read GetGlobals;
     property GlobalsByName[Name: String]: TDeclarationArray read GetGlobalsByName;
@@ -204,19 +204,13 @@ begin
   FLocals.Clear();
 end;
 
-function TCodeInsight.GetIncludesHash: TSHA1Digest;
+function TCodeInsight.GetIncludesHash: String;
 var
   I: Int32;
-  Buffer: array of TSHA1Digest;
 begin
-  if (Length(FIncludes) > 0) then
-  begin
-    SetLength(Buffer, Length(FIncludes));
-    for I := 0 to High(FIncludes) do
-      Buffer[I] := FIncludes[I].Hash;
-
-    Result := SHA1Buffer(Buffer[0], Length(Buffer) * SizeOf(TSHA1Digest));
-  end;
+  Result := '';
+  for I := 0 to High(FIncludes) do
+    Result := Result + FIncludes[I].Hash;
 end;
 
 function TCodeInsight.ParseExpression(Expressions: TExpressionArray): TDeclaration;

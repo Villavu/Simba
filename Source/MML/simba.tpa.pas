@@ -23,6 +23,7 @@
 unit simba.tpa;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
@@ -1743,7 +1744,7 @@ begin
     SetLength(Points, L);
     Points := G;
   end;
-  FilterPointsDist(Points, MinR, MaxR, Mx, My);   //TODO: move this to the MMLAddon section, this doesn't belong in FilterPointsPie
+  FilterPointsDist(Points, MinR, MaxR, Mx, My);
 end;
 
 {/\

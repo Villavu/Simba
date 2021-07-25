@@ -9,23 +9,34 @@ uses
   classes, sysutils;
 
 type
+  PProcessID = ^TProcessID;
+  PProcessExitStatus = ^TProcessExitStatus;
+
+  TProcessID = type SizeUInt;
+  TProcessExitStatus = type Integer;
+
   TSimbaProcess = record
-    function GetProcessID: SizeUInt;
-    function GetProcessParameters: TStringArray;
-    function GetProcessParameter(Name: String): String;
+    function GetScriptPID: TProcessID;
+    function GetScriptParameters: TStringArray;
+    function GetScriptParameter(Name: String): String;
 
-    function IsProcessRunning(PID: SizeUInt): Boolean;
+    function IsProcess64Bit(PID: TProcessID): Boolean;
+    function IsProcessRunning(PID: TProcessID): Boolean;
+    function GetProcessPath(PID: TProcessID): String;
+    procedure TerminateProcess(PID: TProcessID);
 
-    function RunCommandInDir(Directory, Executable: String; Commands: TStringArray; out Output: String): Int32; overload;
-    function RunCommandInDir(Directory, Executable: String; Commands: TStringArray): Boolean; overload;
+    function RunCommandInDir(Directory, Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus; overload;
+    function RunCommandInDir(Directory, Executable: String; Commands: TStringArray): TProcessID; overload;
 
-    function RunCommand(Executable: String; Commands: TStringArray; out Output: String): Int32; overload;
-    function RunCommand(Executable: String; Commands: TStringArray): Boolean; overload;
+    function RunCommand(Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus; overload;
+    function RunCommand(Executable: String; Commands: TStringArray): TProcessID; overload;
 
     function RunCommandTimeout(Executable: String; Commands: TStringArray; out Output: String; Timeout: Int32): Boolean;
 
-    procedure RunScript(Script: String; Parameters: TStringArray);
-    procedure RunScriptOutputToFile(Script: String; Parameters: TStringArray; OutputFileName: String);
+    function RunDump(Commands: TStringArray): TStringList;
+
+    function RunScript(Script: String; Parameters: TStringArray): TProcessID;
+    function RunScriptOutputToFile(Script: String; Parameters: TStringArray; OutputFileName: String): TProcessID;
   end;
 
 var
@@ -34,12 +45,16 @@ var
 implementation
 
 uses
-  forms, process
-  {$IFDEF WINDOWS},
-  Windows
+  forms, process, lazloggerbase,
+  simba.files,
+  {$IFDEF WINDOWS}
+  simba.process_helpers_windows
   {$ENDIF}
-  {$IFDEF UNIX},
-  BaseUnix
+  {$IFDEF LINUX}
+  simba.process_helpers_linux
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  simba.process_helpers_darwin
   {$ENDIF};
 
 type
@@ -84,13 +99,12 @@ begin
   end;
 end;
 
-// TSimbaProcess
-function TSimbaProcess.GetProcessID: SizeUInt;
+function TSimbaProcess.GetScriptPID: TProcessID;
 begin
-  Result := System.GetProcessID();
+  Result := GetProcessID();
 end;
 
-function TSimbaProcess.GetProcessParameters: TStringArray;
+function TSimbaProcess.GetScriptParameters: TStringArray;
 var
   I: Integer;
 begin
@@ -99,71 +113,74 @@ begin
     Result[I] := ParamStr(I);
 end;
 
-function TSimbaProcess.GetProcessParameter(Name: String): String;
+function TSimbaProcess.GetScriptParameter(Name: String): String;
 begin
   Result := Application.GetOptionValue(Name);
 end;
 
-function TSimbaProcess.IsProcessRunning(PID: SizeUInt): Boolean;
-{$IF DEFINED(UNIX)}
+function TSimbaProcess.IsProcess64Bit(PID: TProcessID): Boolean;
 begin
-  Result := fpkill(PID, 0) <> 0;
+  Result := SimbaProcessHelpers.IsProcess64Bit(PID);
 end;
-{$ELSEIF DEFINED(WINDOWS)}
-var
-  Handle: THandle;
-  ExitCode: UInt32 = 0;
-begin
-  Handle := OpenProcess(SYNCHRONIZE or PROCESS_QUERY_LIMITED_INFORMATION, False, PID);
 
-  if (Handle > 0) then
-  try
-    Result := GetExitCodeProcess(Handle, ExitCode) and (ExitCode = STILL_ACTIVE);
-  finally
-    CloseHandle(Handle);
-  end;
-end;
-{$ELSE}
+function TSimbaProcess.IsProcessRunning(PID: TProcessID): Boolean;
 begin
-  raise Exception.Create('TSimbaProcess.IsProcessRunning not supported on this system');
+  Result := SimbaProcessHelpers.IsProcessRunning(PID);
 end;
-{$ENDIF}
 
-function TSimbaProcess.RunCommandInDir(Directory, Executable: String; Commands: TStringArray; out Output: String): Int32;
+function TSimbaProcess.GetProcessPath(PID: TProcessID): String;
+begin
+  Result := SimbaProcessHelpers.GetProcessPath(PID);
+end;
+
+procedure TSimbaProcess.TerminateProcess(PID: TProcessID);
+begin
+  SimbaProcessHelpers.TerminateProcess(PID);
+end;
+
+function TSimbaProcess.RunCommandInDir(Directory, Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus;
 begin
   Process.RunCommandInDir(Directory, Executable, Commands, Output, Result);
 end;
 
-function TSimbaProcess.RunCommandInDir(Directory, Executable: String; Commands: TStringArray): Boolean;
+function TSimbaProcess.RunCommandInDir(Directory, Executable: String; Commands: TStringArray): TProcessID;
 var
   Process: TProcess;
 begin
+  Result := 0;
+
   Process := TProcess.Create(nil);
   try
     Process.CurrentDirectory := Directory;
     Process.Executable := Executable;
     Process.Parameters.AddStrings(Commands);
     Process.Execute();
+
+    Result := Process.ProcessID;
   finally
     Process.Free();
   end;
 end;
 
-function TSimbaProcess.RunCommand(Executable: String; Commands: TStringArray; out Output: String): Int32;
+function TSimbaProcess.RunCommand(Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus;
 begin
   Process.RunCommandInDir(Application.Location, Executable, Commands, Output, Result);
 end;
 
-function TSimbaProcess.RunCommand(Executable: String; Commands: TStringArray): Boolean;
+function TSimbaProcess.RunCommand(Executable: String; Commands: TStringArray): TProcessID;
 var
   Process: TProcess;
 begin
+  Result := 0;
+
   Process := TProcess.Create(nil);
   try
     Process.CurrentDirectory := Application.Location;
     Process.Executable := Executable;
     Process.Parameters.AddStrings(Commands);
     Process.Execute();
+
+    Result := Process.ProcessID;
   finally
     Process.Free();
   end;
@@ -192,7 +209,35 @@ begin
   end;
 end;
 
-procedure TSimbaProcess.RunScript(Script: String; Parameters: TStringArray);
+function TSimbaProcess.RunDump(Commands: TStringArray): TStringList;
+var
+  ProcessOutput, FileName: String;
+begin
+  Result := nil;
+
+  FileName := GetTempFileName(GetDataPath(), 'dump');
+
+  try
+    if not SimbaProcess.RunCommandTimeout(Application.ExeName, Commands + [FileName], ProcessOutput, 5000) then
+      raise Exception.Create('Timed out');
+
+    Result := TStringList.Create();
+    Result.LineBreak := #0;
+    Result.LoadFromFile(FileName);
+  except
+    on E: Exception do
+    begin
+      raise Exception.Create(E.Message + ' :: ' + ProcessOutput);
+
+      if (Result <> nil) then
+        FreeAndNil(Result);
+    end;
+  end;
+
+  DeleteFile(FileName);
+end;
+
+function TSimbaProcess.RunScript(Script: String; Parameters: TStringArray): TProcessID;
 var
   I: Integer;
 begin
@@ -201,16 +246,32 @@ begin
     if (Length(Parameters[I].Split('=')) <> 2) then
       raise Exception.Create('TSimbaProcess.RunScript: Invalid parameter "' + Parameters[I] + '". Expected "name=value"');
 
-    if not Parameters[I].StartsWith('--') then
-      Parameters[I] := '--' + Parameters[I];
+    while (not Parameters[I].StartsWith('--')) do
+      Parameters[I] := '-' + Parameters[I]
   end;
 
-  Self.RunCommandInDir(Application.Location, Application.ExeName, Parameters + ['--run', Script]);
+  Result := Self.RunCommandInDir(Application.Location, Application.ExeName, Parameters + ['--run', Script]);
 end;
 
-procedure TSimbaProcess.RunScriptOutputToFile(Script: String; Parameters: TStringArray; OutputFileName: String);
+function TSimbaProcess.RunScriptOutputToFile(Script: String; Parameters: TStringArray; OutputFileName: String): TProcessID;
+var
+  I: Integer;
 begin
-  Self.RunScript(Script, Parameters + ['log=' + OutputFileName]);
+  for I := 0 to High(Parameters) do
+  begin
+    if (Length(Parameters[I].Split('=')) <> 2) then
+      raise Exception.Create('TSimbaProcess.RunScript: Invalid parameter "' + Parameters[I] + '". Expected "name=value"');
+
+    while (not Parameters[I].StartsWith('--')) do
+      Parameters[I] := '-' + Parameters[I];
+  end;
+
+  {$IFDEF UNIX}
+  Result := Self.RunCommandInDir(Application.Location, GetEnvironmentVariable('SHELL'), ['-c', Application.ExeName + ' ' + String.Join(' ', Parameters) + ' --run ' + Script + ' > ' + OutputFileName]);
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+  Result := Self.RunCommandInDir(Application.Location, GetEnvironmentVariable('COMSPEC'), ['/c', Application.ExeName + ' ' + String.Join(' ', Parameters) + ' --run ' + Script + ' > ' + OutputFileName]);
+  {$ENDIF}
 end;
 
 end.

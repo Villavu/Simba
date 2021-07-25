@@ -1,14 +1,14 @@
 unit simba.settingsform;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
 uses
-  Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ComCtrls,
-  ExtCtrls, ButtonPanel,
-  simba.settingsform_editor_font, simba.settingsform_editor_colors, simba.settingsform_environment, simba.settingsform_editor_general,
-  simba.settingsform_gui;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, ExtCtrls, ButtonPanel, Spin,
+  simba.settingsform_editor_font, simba.settingsform_editor_colors,
+  simba.settingsform_editor_general, simba.settingsform_gui;
 
 type
   TSimbaSettingsForm = class(TForm)
@@ -25,7 +25,6 @@ type
     EditorFontFrame: TEditorFontFrame;
     EditorColorsFrame: TEditorColorsFrame;
 
-    EnvironmentFrame: TEnvironmentFrame;
     GUIFrame: TGUIFrame;
 
     constructor Create(AOwner: TComponent); override;
@@ -36,8 +35,10 @@ var
 
 implementation
 
+{$R *.lfm}
+
 uses
-  simba.settings, simba.editor;
+  simba.settings, simba.fonthelpers;
 
 procedure TSimbaSettingsForm.TreeViewClick(Sender: TObject);
 begin
@@ -47,97 +48,100 @@ end;
 
 procedure TSimbaSettingsForm.FormShow(Sender: TObject);
 begin
-  EditorFontFrame.FontSizeEdit.Value := SimbaSettings.Editor.FontSize.Value;
-  EditorFontFrame.FontSizeEdit.OnChange(nil);
-  EditorFontFrame.FontAntiAliasedCheckbox.Checked := SimbaSettings.Editor.AntiAliasing.Value;
-  EditorFontFrame.FontAntiAliasedCheckbox.OnChange(nil);
+  if (EditorFontFrame.FontsNameComboBox.Items.Count = 0) then
+  begin
+    EditorFontFrame.FontsNameComboBox.Items.AddStrings(SimbaFontHelpers.GetFixedFonts());
+    EditorFontFrame.FontsNameComboBox.ItemIndex := EditorFontFrame.FontsNameComboBox.Items.IndexOf(SimbaSettings.Editor.FontName.Value);
+    if (EditorFontFrame.FontsNameComboBox.ItemIndex < 0) then
+      EditorFontFrame.FontsNameComboBox.ItemIndex := 0;
+  end;
 
-  EnvironmentFrame.OpenSSLOnLaunch.Checked := SimbaSettings.Environment.OpenSSLOnLaunch.Value;
+  EditorFontFrame.FontSizeSpinEdit.Value := SimbaSettings.Editor.FontSize.Value;
+  EditorFontFrame.FontAntiAliasedCheckbox.Checked := SimbaSettings.Editor.AntiAliased.Value;
+
+  //EnvironmentFrame.OpenSSLOnLaunch.Checked := SimbaSettings.Environment.OpenSSLOnLaunch.Value;
 
   EditorGeneralFrame.RightMarginEdit.Value := SimbaSettings.Editor.RightMargin.Value;
   EditorGeneralFrame.VisibleRightMarginCheckbox.Checked := SimbaSettings.Editor.RightMarginVisible.Value;
-  EditorGeneralFrame.DefaultScriptEdit.Text := SimbaSettings.Editor.DefaultScriptPath.Value;
   EditorGeneralFrame.CaretPastEOLCheckBox.Checked := SimbaSettings.Editor.AllowCaretPastEOL.Value;
   EditorGeneralFrame.OpenAutoCompletionCheckbox.Checked := SimbaSettings.Editor.AutomaticallyOpenAutoCompletion.Value;
   EditorGeneralFrame.ShowParameterHintsCheckbox.Checked := SimbaSettings.Editor.AutomaticallyShowParameterHints.Value;
-  EditorGeneralFrame.DividerVisibleCheckbox.Checked := SimbaSettings.Editor.DividerVisible.Value;
   EditorGeneralFrame.IgnoreCodeToolsDirectiveCheckbox.Checked := SimbaSettings.Editor.IgnoreCodeToolsIDEDirective.Value;
 
-  GUIFrame.ToolbarSizeTrackBar.Position := SimbaSettings.GUI.CustomToolbarSize.Value;
+  GUIFrame.ToolbarSizeTrackBar.Position := SimbaSettings.GUI.ToolbarSize.Value;
   GUIFrame.FontSizeTrackBar.Position := SimbaSettings.GUI.CustomFontSize.Value;
 end;
 
 procedure TSimbaSettingsForm.OKButtonClick(Sender: TObject);
 begin
-  SimbaSettings.Environment.OpenSSLOnLaunch.Value := EnvironmentFrame.OpenSSLOnLaunch.Checked;
+  //SimbaSettings.Environment.OpenSSLOnLaunch.Value := EnvironmentFrame.OpenSSLOnLaunch.Checked;
 
-  SimbaSettings.Editor.FontName.Value := EditorFontFrame.Editor.FontName;
-  SimbaSettings.Editor.FontSize.Value := EditorFontFrame.Editor.Font.Size;
-  SimbaSettings.Editor.AntiAliasing.Value := EditorFontFrame.Editor.AntiAliasing;
+  SimbaSettings.Editor.FontName.Value := EditorFontFrame.FontsNameComboBox.Text;
+  SimbaSettings.Editor.FontSize.Value := EditorFontFrame.FontSizeSpinEdit.Value;
+  SimbaSettings.Editor.AntiAliased.Value := EditorFontFrame.FontAntiAliasedCheckbox.Checked;
 
   SimbaSettings.Editor.AllowCaretPastEOL.Value := EditorGeneralFrame.CaretPastEOLCheckBox.Checked;
   SimbaSettings.Editor.RightMargin.Value := EditorGeneralFrame.RightMarginEdit.Value;
   SimbaSettings.Editor.RightMarginVisible.Value := EditorGeneralFrame.VisibleRightMarginCheckbox.Checked;
-  SimbaSettings.Editor.DefaultScriptPath.Value := EditorGeneralFrame.DefaultScriptEdit.Text;
   SimbaSettings.Editor.AutomaticallyOpenAutoCompletion.Value := EditorGeneralFrame.OpenAutoCompletionCheckbox.Checked;
   SimbaSettings.Editor.AutomaticallyShowParameterHints.Value := EditorGeneralFrame.ShowParameterHintsCheckbox.Checked;
-  SimbaSettings.Editor.DividerVisible.Value := EditorGeneralFrame.DividerVisibleCheckbox.Checked;
   SimbaSettings.Editor.IgnoreCodeToolsIDEDirective.Value := EditorGeneralFrame.IgnoreCodeToolsDirectiveCheckbox.Checked;
 
-  SimbaSettings.GUI.CustomToolbarSize.Value := GUIFrame.ToolbarSizeTrackBar.Position;
-  SimbaSettings.GUI.CustomFontSize.Value := GUIFrame.FontSizeTrackBar.Position;
+  if (GUIFrame.ToolbarSizeTrackBar.Position = GUIFrame.ToolbarSizeTrackBar.Min) then
+    SimbaSettings.GUI.ToolbarSize.Value := SimbaSettings.GUI.ToolbarSize.DefaultValue
+  else
+    SimbaSettings.GUI.ToolbarSize.Value := GUIFrame.ToolbarSizeTrackBar.Position;
+
+  if (GUIFrame.FontSizeTrackBar.Position = GUIFrame.FontSizeTrackBar.Min) then
+    SimbaSettings.GUI.CustomFontSize.Value := SimbaSettings.GUI.CustomFontSize.DefaultValue
+  else
+    SimbaSettings.GUI.CustomFontSize.Value := GUIFrame.FontSizeTrackBar.Position;
 end;
 
 constructor TSimbaSettingsForm.Create(AOwner: TComponent);
 
-  function AddPage(Name: String; ParentNode: TTreeNode = nil): TPage;
+  function AddPage(Name: String; ParentNode: TTreeNode): TPage;
   var
     Node: TTreeNode;
   begin
-    if ParentNode = nil then
-      Node := TreeView.Items.Add(nil, Name)
-    else
-      Node := TreeView.Items.AddChild(ParentNode, Name);
-
     Result := TPage.Create(Notebook);
     Result.Parent := Notebook;
 
+    Node := TreeView.Items.AddChild(ParentNode, Name);
     Node.Data := Result;
+
+    if (ParentNode.Data = nil) then
+      ParentNode.Data := Result;
   end;
 
 var
-  EditorNode: TTreeNode;
+  Node: TTreeNode;
 begin
   inherited Create(AOwner);
 
   Width := 950;
   Height := 650;
 
-  EditorNode := TreeView.Items.Add(nil, 'Editor');
-
-  EnvironmentFrame := TEnvironmentFrame.Create(Self);
-  EnvironmentFrame.Parent := AddPage('Environment');
-  EnvironmentFrame.Align := alClient;
+  Node := TreeView.Items.Add(nil, 'Editor');
 
   EditorGeneralFrame := TEditorGeneralFrame.Create(Self);
-  EditorGeneralFrame.Parent := AddPage('General', EditorNode);
+  EditorGeneralFrame.Parent := AddPage('General', Node);
   EditorGeneralFrame.Align := alClient;
 
   EditorFontFrame := TEditorFontFrame.Create(Self);
-  EditorFontFrame.Parent := AddPage('Font', EditorNode);
+  EditorFontFrame.Parent := AddPage('Font', Node);
   EditorFontFrame.Align := alClient;
 
   EditorColorsFrame := TEditorColorsFrame.Create(Self);
-  EditorColorsFrame.Parent := AddPage('Colors', EditorNode);
+  EditorColorsFrame.Parent := AddPage('Colors', Node);
   EditorColorsFrame.Align := alClient;
 
+  Node := TreeView.Items.Add(nil, 'Window');
+
   GUIFrame := TGUIFrame.Create(Self);
-  GUIFrame.Parent := AddPage('GUI');
+  GUIFrame.Parent := AddPage('General', Node);
   GUIFrame.Align := alClient;
 end;
-
-initialization
-  {$I simba.settingsform.lrs}
 
 end.
 

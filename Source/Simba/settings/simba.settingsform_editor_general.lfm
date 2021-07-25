@@ -6,88 +6,58 @@ object EditorGeneralFrame: TEditorGeneralFrame
   ClientHeight = 373
   ClientWidth = 513
   TabOrder = 0
-  DesignLeft = 51
-  DesignTop = 980
+  DesignLeft = 46
+  DesignTop = 504
   object CaretPastEOLCheckBox: TCheckBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = DividerBevel2
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 19
-    Top = 20
-    Width = 130
+    Height = 23
+    Top = 24
+    Width = 153
     BorderSpacing.Top = 5
     Caption = 'Allow Caret Past EOL'
     TabOrder = 0
   end
   object DividerBevel1: TDividerBevel
     AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = DefaultScriptEdit
+    AnchorSideTop.Control = RightMarginEdit
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 0
-    Height = 15
-    Top = 198
+    Height = 19
+    Top = 141
     Width = 513
     Caption = 'Code Tools'
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 10
     Style = gsHorLines
   end
-  object Label1: TLabel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = DefaultScriptEdit
-    AnchorSideBottom.Control = DefaultScriptEdit
-    AnchorSideBottom.Side = asrBottom
-    Left = 0
-    Height = 23
-    Top = 165
-    Width = 71
-    Anchors = [akTop, akLeft, akBottom]
-    Caption = 'Default Script'
-    Layout = tlCenter
-    ParentColor = False
-  end
-  object DefaultScriptEdit: TEdit
-    AnchorSideLeft.Control = Label1
-    AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = DividerBevel3
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = OpenDefaultScriptButton
-    Left = 76
-    Height = 23
-    Top = 165
-    Width = 397
-    Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Left = 5
-    BorderSpacing.Top = 5
-    BorderSpacing.Right = 5
-    TabOrder = 1
-  end
   object ShowParameterHintsCheckbox: TCheckBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = DividerBevel1
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 19
-    Top = 218
-    Width = 214
+    Height = 23
+    Top = 165
+    Width = 247
     BorderSpacing.Top = 5
     Caption = 'Automatically Show Parameter Hints'
-    TabOrder = 2
+    TabOrder = 1
   end
   object OpenAutoCompletionCheckbox: TCheckBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = ShowParameterHintsCheckbox
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 19
-    Top = 242
-    Width = 221
+    Height = 23
+    Top = 193
+    Width = 254
     BorderSpacing.Top = 5
     Caption = 'Automatically Open Auto Completion'
-    TabOrder = 3
+    TabOrder = 2
   end
   object DividerBevel2: TDividerBevel
     AnchorSideLeft.Control = Owner
@@ -95,70 +65,38 @@ object EditorGeneralFrame: TEditorGeneralFrame
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 0
-    Height = 15
+    Height = 19
     Top = 0
     Width = 513
     Caption = 'Options'
     Anchors = [akTop, akLeft, akRight]
     Style = gsHorLines
   end
-  object DividerBevel3: TDividerBevel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = RightMarginEdit
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    Left = 0
-    Height = 15
-    Top = 145
-    Width = 513
-    Caption = 'Default'
-    Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 10
-    Style = gsHorLines
-  end
-  object OpenDefaultScriptButton: TButton
-    AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = DefaultScriptEdit
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    AnchorSideBottom.Control = DefaultScriptEdit
-    AnchorSideBottom.Side = asrBottom
-    Left = 478
-    Height = 23
-    Top = 165
-    Width = 35
-    Anchors = [akTop, akRight, akBottom]
-    AutoSize = True
-    Caption = '...'
-    OnClick = OpenDefaultScriptButtonClick
-    TabOrder = 4
-  end
   object VisibleRightMarginCheckbox: TCheckBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = DividerBevel4
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 19
-    Top = 88
-    Width = 54
+    Height = 23
+    Top = 76
+    Width = 63
     BorderSpacing.Top = 5
     Caption = 'Visible'
-    TabOrder = 5
+    TabOrder = 3
   end
   object RightMarginEdit: TSpinEdit
     AnchorSideLeft.Control = Label2
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = VisibleRightMarginCheckbox
     AnchorSideTop.Side = asrBottom
-    Left = 33
-    Height = 23
-    Top = 112
+    Left = 38
+    Height = 27
+    Top = 104
     Width = 100
     BorderSpacing.Left = 5
     BorderSpacing.Top = 5
     MaxValue = 1000
-    TabOrder = 6
+    TabOrder = 4
   end
   object Label2: TLabel
     AnchorSideLeft.Control = Owner
@@ -166,51 +104,38 @@ object EditorGeneralFrame: TEditorGeneralFrame
     AnchorSideBottom.Control = RightMarginEdit
     AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 23
-    Top = 112
-    Width = 28
+    Height = 27
+    Top = 104
+    Width = 33
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Value'
     Layout = tlCenter
-    ParentColor = False
   end
   object DividerBevel4: TDividerBevel
     AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = DividerVisibleCheckbox
+    AnchorSideTop.Control = CaretPastEOLCheckBox
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 0
-    Height = 15
-    Top = 68
+    Height = 19
+    Top = 52
     Width = 513
     Caption = 'Right Margin'
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 5
     Style = gsHorLines
   end
-  object DividerVisibleCheckbox: TCheckBox
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = CaretPastEOLCheckBox
-    AnchorSideTop.Side = asrBottom
-    Left = 0
-    Height = 19
-    Top = 44
-    Width = 152
-    BorderSpacing.Top = 5
-    Caption = 'Horizontal Divider Visible'
-    TabOrder = 7
-  end
   object IgnoreCodeToolsDirectiveCheckbox: TCheckBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = OpenAutoCompletionCheckbox
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 19
-    Top = 266
-    Width = 185
+    Height = 23
+    Top = 221
+    Width = 218
     BorderSpacing.Top = 5
     Caption = 'Ignore Code Tools IDE Directive'
-    TabOrder = 8
+    TabOrder = 5
   end
 end

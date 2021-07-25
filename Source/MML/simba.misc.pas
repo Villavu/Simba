@@ -34,6 +34,7 @@ procedure ConvertTime64(Time: Int64; var y, m, w, d, h, min, s: Int32);
 function TimeStamp(Time: Int64; IncludeMilliseconds: Boolean = False): String;
 function PerformanceTimer: Double;
 function OpenDirectory(Path: String): Boolean;
+procedure SetTerminalVisible(Value: Boolean);
 
 implementation
 
@@ -143,6 +144,23 @@ begin
     raise Exception.Create('OpenDirectory is unsupported on this system.');
 
   Result := RunCommandInDir('', Executable, [Path], Output, ExitStatus) = 0;
+end;
+
+procedure SetTerminalVisible(Value: Boolean);
+var
+  PID: UInt32;
+begin
+  {$IFDEF WINDOWS}
+  GetWindowThreadProcessId(GetConsoleWindow(), PID);
+
+  if (PID = GetCurrentProcessID()) then
+  begin
+    case Value of
+      True: ShowWindow(GetConsoleWindow(), SW_SHOWNORMAL);
+      False: ShowWindow(GetConsoleWindow(), SW_HIDE);
+    end;
+  end;
+  {$ENDIF}
 end;
 
 end.

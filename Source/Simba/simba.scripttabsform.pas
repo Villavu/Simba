@@ -1,11 +1,12 @@
 unit simba.scripttabsform;
 
 {$mode objfpc}{$H+}
+{$I simba.inc}
 
 interface
 
 uses
-  classes, sysutils, lresources, forms, controls, graphics, dialogs,
+  classes, sysutils, forms, controls, graphics, dialogs,
   stdctrls, extctrls, comctrls, extendednotebook, menus, synedit, synedittypes,
   simba.scripttab, simba.editor, simba.codeparser;
 
@@ -27,10 +28,6 @@ type
     MenuItemDelete: TMenuItem;
     MenuItemSeperator2: TMenuItem;
     OpenDialog: TOpenDialog;
-    StatusPanelState: TPanel;
-    StatusPanelFileName: TPanel;
-    StatusPanelCaret: TPanel;
-    StatusBar: TPanel;
     MenuItemNewTab: TMenuItem;
     MenuItemCloseTab: TMenuItem;
     MenuItemCloseOtherTabs: TMenuItem;
@@ -38,9 +35,8 @@ type
     ReplaceDialog: TReplaceDialog;
     Notebook: TExtendedNotebook;
     EditorPopupMenu: TPopupMenu;
-    CursorTimer: TTimer;
+    ClearLineMarksTimer: TTimer;
 
-    procedure DoCursorTimer(Sender: TObject);
     procedure DoOnFindDialog(Sender: TObject);
     procedure DoOnReplaceText(Sender: TObject; const ASearch, AReplace: string; Line, Column: integer; var ReplaceAction: TSynReplaceAction);
     procedure DoOnReplaceDialog(Sender: TObject);
@@ -49,28 +45,33 @@ type
     procedure DoOnDropFiles(Sender: TObject; const FileNames: array of String);
     procedure DoOnTabChange(Sender: TObject);
     procedure DoTabPopupClick(Sender: TObject);
-    procedure DoStatusBarPaint(Sender: TObject);
-    procedure DoStatusPanelPaint(Sender: TObject);
     procedure DoTabPopupOpen(Sender: TObject);
+    procedure HandleClearMarksTimer(Sender: TObject);
+    procedure ReplaceDialogShow(Sender: TObject);
   protected
-    FEditing: Boolean;
-    FInvalidWindowSelection: THandle;
+    FOnEditorAdded: TNotifyEvent;
+    FOnEditorChanged: TNotifyEvent;
+    FOnEditorLoaded: TNotifyEvent;
+    FOnEditorCaretChanged: TNotifyEvent;
+    FOnEditorSearch: TNotifyEvent;
 
-    procedure DoEditorMouseEnter(Sender: TObject);
-    procedure DoEditorMouseLeave(Sender: TObject);
+    procedure CaretMoved(Sender: TObject; Changes: TSynStatusChanges);
 
-    procedure CaretChanged(Sender: TObject);
-    procedure FontChanged(Sender: TObject); override;
-
-    function GetTabCount: Int32;
-    function GetTab(Index: Int32): TSimbaScriptTab;
+    function GetTabCount: Integer;
+    function GetTab(Index: Integer): TSimbaScriptTab;
     function GetCurrentTab: TSimbaScriptTab;
     function GetCurrentEditor: TSimbaEditor;
 
     procedure SetCurrentTab(Value: TSimbaScriptTab);
   public
-    property TabCount: Int32 read GetTabCount;
-    property Tabs[Index: Int32]: TSimbaScriptTab read GetTab;
+    property OnEditorAdded: TNotifyEvent read FOnEditorAdded write FOnEditorAdded;
+    property OnEditorLoaded: TNotifyEvent read FOnEditorLoaded write FOnEditorLoaded;
+    property OnEditorChanged: TNotifyEvent read FOnEditorChanged write FOnEditorChanged;
+    property OnEditorCaretChanged: TNotifyEvent read FOnEditorCaretChanged write FOnEditorCaretChanged;
+    property OnEditorSearch: TNotifyEvent read FOnEditorSearch write FOnEditorSearch;
+
+    property TabCount: Integer read GetTabCount;
+    property Tabs[Index: Integer]: TSimbaScriptTab read GetTab;
 
     property CurrentTab: TSimbaScriptTab read GetCurrentTab write SetCurrentTab;
     property CurrentEditor: TSimbaEditor read GetCurrentEditor;
@@ -80,19 +81,20 @@ type
     procedure FindNext;
     procedure FindPrevious;
 
+    function FindTab(ScriptInstance: TObject): TSimbaScriptTab;
+
     function AddTab: TSimbaScriptTab;
 
-    procedure RemoveTab(ScriptTab: TSimbaScriptTab; out Abort: Boolean); overload;
-    procedure RemoveAllTabs(out Aborted: Boolean);
-    procedure RemoveOtherTabs(Exclude: TSimbaScriptTab);
+    function CloseTab(Tab: TSimbaScriptTab): Boolean;
+    function CloseOtherTabs(Tab: TSimbaScriptTab): Boolean;
+    function CloseAllTabs: Boolean;
 
-    procedure Open(FileName: String; CheckOtherTabs: Boolean = True); overload;
+    function Open(FileName: String; CheckOtherTabs: Boolean = True): Boolean; overload;
     procedure Open; overload;
 
-    procedure OpenDeclaration(Header: String; StartPos, EndPos, Line: Int32; FileName: String; Internal: Boolean); overload;
+    procedure OpenDeclaration(Header: String; StartPos, EndPos, Line: Integer; FileName: String); overload;
+    procedure OpenInternalDeclaration(Header: String; FileName: String);
     procedure OpenDeclaration(Declaration: TDeclaration); overload;
-
-    constructor Create(AOwner: TComponent); override;
   end;
 
 var
@@ -100,9 +102,11 @@ var
 
 implementation
 
+{$R *.lfm}
+
 uses
-  syneditpointclasses,
-  simba.files, simba.main, simba.debugform, simba.scripttabhistory, simba.oswindow;
+  syneditsearch, LCLStrConsts,
+  simba.debugform, simba.scripttabhistory, simba.files;
 
 procedure TSimbaScriptTabsForm.DoEditorPopupShow(Sender: TObject);
 var
@@ -135,7 +139,7 @@ end;
 
 procedure TSimbaScriptTabsForm.DoOnReplaceText(Sender: TObject; const ASearch, AReplace: string; Line, Column: integer; var ReplaceAction: TSynReplaceAction);
 begin
-  case MessageDlg('Replace', Format('Replace "%s" with "%s"?', [ReplaceDialog.FindText, ReplaceDialog.ReplaceText]), mtConfirmation, [mbYes, mbYesToAll, mbNo, mbCancel], 0) of
+  case MessageDlg('Replace', Format('Replace "%s" with "%s"?', [ASearch, AReplace]), mtConfirmation, [mbYes, mbYesToAll, mbNo, mbCancel], 0) of
     mrYes:      ReplaceAction := raReplace;
     mrYesToAll: ReplaceAction := raReplaceAll;
     mrNo:       ReplaceAction := raSkip;
@@ -144,6 +148,49 @@ begin
 end;
 
 procedure TSimbaScriptTabsForm.DoOnFindDialog(Sender: TObject);
+
+  procedure AddLineMarks(CaseSensitive, WholeWorld: Boolean; Pattern: String);
+  var
+    Search: TSynEditSearch;
+    SearchStart, SearchEnd, FoundStart, FoundEnd: TPoint;
+  begin
+    Search := TSynEditSearch.Create();
+
+    try
+      Search.Sensitive := CaseSensitive;
+      Search.Whole := WholeWorld;
+      Search.Pattern := Pattern;
+      Search.IdentChars := CurrentEditor.IdentChars;
+
+      with CurrentEditor, TextView do
+      begin
+        if SelAvail then
+        begin
+          SearchStart := BlockBegin;
+          SearchEnd := BlockEnd;
+        end else
+        begin
+          SearchStart := Point(1, 1);
+          SearchEnd := CaretMax;
+        end;
+
+        while Search.FindNextOne(TextView, SearchStart, SearchEnd, FoundStart, FoundEnd, True) do
+        begin
+          ModifiedLinesGutter.AddLineMark(FoundStart.Y + (FoundEnd.Y - FoundStart.Y), RGBToColor(206,0,206));
+
+          SearchStart := FoundEnd;
+        end;
+      end;
+    finally
+      Search.Free();
+    end;
+
+    CurrentEditor.ModifiedLinesGutter.DrawLineMarks := True;
+
+    ClearLineMarksTimer.Enabled := False;
+    ClearLineMarksTimer.Enabled := True;
+  end;
+
 var
   Options: TSynSearchOptions;
   Editor: TSimbaEditor;
@@ -153,18 +200,21 @@ begin
   if (Editor <> nil) then
   begin
     Options := [];
-
     if (frMatchCase in FindDialog.Options) then
       Options := Options + [ssoMatchCase];
     if (frWholeWord in FindDialog.Options) then
       Options := Options + [ssoWholeWord];
 
-    if (frEntireScope in FindDialog.Options) then
-    begin
-      if Editor.SearchReplace(FindDialog.FindText, '', Options - [ssoSelectedOnly]) = 0 then
-        Editor.SearchReplaceEx(FindDialog.FindText, '', Options - [ssoSelectedOnly], TPoint.Zero);
-    end else
-      Editor.SearchReplace(FindDialog.FindText, '', Options + [ssoSelectedOnly]);
+    AddLineMarks(frMatchCase in FindDialog.Options, frWholeWord in FindDialog.Options, FindDialog.FindText);
+
+    if (FOnEditorSearch <> nil) then
+      FOnEditorSearch(Editor);
+
+    if Editor.SelAvail then
+      Editor.SearchReplace(FindDialog.FindText, '', Options + [ssoSelectedOnly])
+    else
+    if Editor.SearchReplace(FindDialog.FindText, '', Options + [ssoEntireScope]) = 0 then
+      Editor.SearchReplaceEx(FindDialog.FindText, '', Options + [ssoEntireScope], Point(1, 1));
   end;
 
   FindDialog.CloseDialog();
@@ -172,30 +222,12 @@ begin
     Editor.SetFocus();
 end;
 
-procedure TSimbaScriptTabsForm.DoCursorTimer(Sender: TObject);
-var
-  P: TPoint;
-begin
-  if not FEditing then
-  begin
-    if (FInvalidWindowSelection <> SimbaForm.WindowSelection) and (not SimbaForm.WindowSelection.IsValid()) then
-      FInvalidWindowSelection := SimbaForm.WindowSelection;
-
-    if (SimbaForm.WindowSelection <> FInvalidWindowSelection) then
-      P := SimbaForm.WindowSelection.GetRelativeCursorPos()
-    else
-      P := GetDesktopWindow().GetRelativeCursorPos();
-
-    StatusPanelCaret.Caption := IntToStr(P.X) + ', ' + IntToStr(P.Y);
-  end;
-end;
-
 procedure TSimbaScriptTabsForm.DoEditorPopupClick(Sender: TObject);
 begin
   if (CurrentEditor = nil) then
     Exit;
 
-  if (Sender = MenuItemFindDeclaration) then CurrentEditor.FindDeclaration(CurrentEditor.CaretXY);
+  if (Sender = MenuItemFindDeclaration) then CurrentEditor.OnClickLink(Self, mbLeft, [], CurrentEditor.CaretX, CurrentEditor.CaretY);
   if (Sender = MenuItemUndo)            then CurrentEditor.Undo();
   if (Sender = MenuItemRedo)            then CurrentEditor.Redo();
   if (Sender = MenuItemCut)             then CurrentEditor.CutToClipboard();
@@ -209,10 +241,10 @@ end;
 
 procedure TSimbaScriptTabsForm.DoOnDropFiles(Sender: TObject; const FileNames: array of String);
 var
-  i: Int32;
+  I: Integer;
 begin
-  for i := 0 to High(FileNames) do
-    Self.Open(FileNames[i], True);
+  for I := 0 to High(FileNames) do
+    Self.Open(FileNames[I], True);
 end;
 
 procedure TSimbaScriptTabsForm.DoOnReplaceDialog(Sender: TObject);
@@ -237,10 +269,8 @@ begin
     Editor.OnReplaceText := @DoOnReplaceText;
 
     try
-      if (frEntireScope in FindDialog.Options) then
-        Editor.SearchReplaceEx(ReplaceDialog.FindText, ReplaceDialog.ReplaceText, Options - [ssoSelectedOnly], TPoint.Zero)
-      else
-        Editor.SearchReplace(ReplaceDialog.FindText, ReplaceDialog.ReplaceText, Options + [ssoSelectedOnly]);
+      if Editor.SearchReplace(ReplaceDialog.FindText, ReplaceDialog.ReplaceText, Options) = 0 then
+        Editor.SearchReplaceEx(ReplaceDialog.FindText, ReplaceDialog.ReplaceText, Options, Point(1, 1));
     finally
       Editor.OnReplaceText := nil;
     end;
@@ -255,20 +285,13 @@ end;
 
 procedure TSimbaScriptTabsForm.DoOnTabChange(Sender: TObject);
 begin
-  if (CurrentTab.FileName <> '') then
-    StatusPanelFileName.Caption := CurrentTab.FileName
-  else
-    StatusPanelFileName.Caption := CurrentTab.ScriptName;
-
-  StatusPanelCaret.Caption := IntToStr(CurrentEditor.CaretY) + ': ' + IntToStr(CurrentEditor.CaretX);
-
-  SimbaForm.MenuItemSaveAll.Enabled := TabCount > 1;
-  SimbaForm.SaveAllButton.Enabled := TabCount > 1;
+  if (FOnEditorChanged <> nil) then
+    FOnEditorChanged(CurrentTab);
 end;
 
 procedure TSimbaScriptTabsForm.DoTabPopupClick(Sender: TObject);
 var
-  Tab: Int32;
+  Tab: Integer;
   Abort: Boolean;
 begin
   if (Sender = MenuItemNewTab) then
@@ -279,27 +302,9 @@ begin
 
     if (Tab >= 0) and (Tab < TabCount) then
     begin
-      if (Sender = MenuItemCloseTab)       then RemoveTab(Tabs[Tab], Abort);
-      if (Sender = MenuItemCloseOtherTabs) then RemoveOtherTabs(Tabs[Tab]);
+      if (Sender = MenuItemCloseTab)       then CloseTab(Tabs[Tab]);
+      if (Sender = MenuItemCloseOtherTabs) then CloseOtherTabs(Tabs[Tab]);
     end;
-  end;
-end;
-
-procedure TSimbaScriptTabsForm.DoStatusBarPaint(Sender: TObject);
-begin
-  with TPanel(Sender) do
-  begin
-    Canvas.Pen.Color := RGBToColor(217, 217, 217);
-    Canvas.Line(0, ClientHeight-1, ClientWidth, ClientHeight-1);
-  end;
-end;
-
-procedure TSimbaScriptTabsForm.DoStatusPanelPaint(Sender: TObject);
-begin
-  with TPanel(Sender) do
-  begin
-    Canvas.Pen.Color := RGBToColor(217, 217, 217);
-    Canvas.Line(ClientWidth-1, 0, ClientWidth-1, ClientHeight-1);
   end;
 end;
 
@@ -309,42 +314,62 @@ begin
   MenuItemCloseOtherTabs.Enabled := Notebook.IndexOfPageAt(NoteBook.ScreenToClient(TabPopupMenu.PopupPoint)) >= 0;
 end;
 
-procedure TSimbaScriptTabsForm.DoEditorMouseEnter(Sender: TObject);
+procedure TSimbaScriptTabsForm.HandleClearMarksTimer(Sender: TObject);
+var
+  I: Integer;
 begin
-  FEditing := True;
+  for I := 0 to TabCount - 1 do
+    Tabs[I].Editor.ModifiedLinesGutter.DrawLineMarks := False;
 
-  CaretChanged(CurrentEditor.GetCaretObj());
+  ClearLineMarksTimer.Enabled := False;
 end;
 
-procedure TSimbaScriptTabsForm.DoEditorMouseLeave(Sender: TObject);
+type
+  TReplaceDialogHack = class(TReplaceDialog);
+
+procedure TSimbaScriptTabsForm.ReplaceDialogShow(Sender: TObject);
+var
+  I: Integer;
+  Button: TButton;
+  ReplaceButton, ReplaceAllButton, FindMoreButton: TButton;
 begin
-  FEditing := False;
-end;
+  ReplaceButton    := nil;
+  ReplaceAllButton := nil;
+  FindMoreButton   := nil;
 
-procedure TSimbaScriptTabsForm.CaretChanged(Sender: TObject);
-begin
-  with TSynEditCaret(Sender) do
-    StatusPanelCaret.Caption := IntToStr(LinePos) + ': ' + IntToStr(CharPos);
-end;
-
-procedure TSimbaScriptTabsForm.FontChanged(Sender: TObject);
-begin
-  inherited FontChanged(Sender);
-
-  if (StatusBar <> nil) and (StatusPanelCaret <> nil) and (StatusPanelState <> nil) then
-    with TBitmap.Create() do
-    try
-      Canvas.Font := Self.Font;
-
-      with Canvas.TextExtent('0') do
+  with TReplaceDialogHack(Sender).FFindForm do
+    for I := 0 to ComponentCount - 1 do
+    begin
+      if (Components[I] is TButton) then
       begin
-        StatusBar.Height := Round(CY * 1.35);
-        StatusPanelCaret.Width := Round(CX * 12.5);
-        StatusPanelState.Width := Round(CX * 15);
+        Button := TButton(Components[I]);
+
+        if (Button.Caption = rsReplace)    then ReplaceButton := Button;
+        if (Button.Caption = rsReplaceAll) then ReplaceAllButton := Button;
+        if (Button.Caption = rsFindMore)   then FindMoreButton := Button;
       end;
-    finally
-      Free();
     end;
+
+  if (FindMoreButton <> nil) then
+    FindMoreButton.Hide();
+
+  if (ReplaceButton <> nil) and (ReplaceAllButton <> nil) then
+  begin
+    ReplaceButton.Anchors := ReplaceButton.Anchors + [akLeft];
+    ReplaceButton.AnchorSide[akLeft].Control := ReplaceAllButton;
+    ReplaceButton.AnchorSide[akLeft].Side := asrLeft;
+
+    ReplaceButton.BorderSpacing.Top := 0;
+    ReplaceButton.BorderSpacing.Bottom := 0;
+    ReplaceAllButton.BorderSpacing.Top := 0;
+    ReplaceAllButton.BorderSpacing.Bottom := 0;
+  end;
+end;
+
+procedure TSimbaScriptTabsForm.CaretMoved(Sender: TObject; Changes: TSynStatusChanges);
+begin
+  if (FOnEditorCaretChanged <> nil) then
+    FOnEditorCaretChanged(Sender);
 end;
 
 procedure TSimbaScriptTabsForm.SetCurrentTab(Value: TSimbaScriptTab);
@@ -352,12 +377,12 @@ begin
   Notebook.ActivePage := Value;
 end;
 
-function TSimbaScriptTabsForm.GetTabCount: Int32;
+function TSimbaScriptTabsForm.GetTabCount: Integer;
 begin
   Result := Notebook.PageCount;
 end;
 
-function TSimbaScriptTabsForm.GetTab(Index: Int32): TSimbaScriptTab;
+function TSimbaScriptTabsForm.GetTab(Index: Integer): TSimbaScriptTab;
 begin
   Result := Notebook.Pages[Index] as TSimbaScriptTab;
 end;
@@ -394,14 +419,8 @@ procedure TSimbaScriptTabsForm.Find;
 begin
   if (CurrentEditor <> nil) then
   begin
-    if CurrentEditor.SelAvail then
-      FindDialog.Options := FindDialog.Options - [frEntireScope]
-    else
-      FindDialog.Options := FindDialog.Options + [frEntireScope];
-
     FindDialog.FindText := CurrentEditor.GetWordAtRowCol(CurrentEditor.CaretXY);
-    if FindDialog.Execute() then
-      StatusPanelFileName.Caption := 'Find: Use F3 (Forward) or Shift + F3 (Backwards) to traverse through matches';
+    FindDialog.Execute();
   end;
 end;
 
@@ -415,18 +434,18 @@ begin
   if (Editor <> nil) then
   begin
     Options := [ssoFindContinue];
-
     if (frMatchCase in FindDialog.Options) then
       Options := Options + [ssoMatchCase];
     if (frWholeWord in FindDialog.Options) then
       Options := Options + [ssoWholeWord];
 
-    if (frEntireScope in FindDialog.Options) then
-    begin
-      if Editor.SearchReplace(FindDialog.FindText, '', Options - [ssoSelectedOnly]) = 0 then
-        Editor.SearchReplaceEx(FindDialog.FindText, '', Options - [ssoSelectedOnly], TPoint.Zero);
-    end else
-      Editor.SearchReplace(FindDialog.FindText, '', Options + [ssoSelectedOnly]);
+    if Editor.SearchReplace(FindDialog.FindText, '', Options) = 0 then
+      Editor.SearchReplaceEx(FindDialog.FindText, '', Options, Point(1, 1));
+
+    Editor.ModifiedLinesGutter.DrawLineMarks := True;
+
+    ClearLineMarksTimer.Enabled := False;
+    ClearLineMarksTimer.Enabled := True;
   end;
 end;
 
@@ -446,13 +465,28 @@ begin
     if (frWholeWord in FindDialog.Options) then
       Options := Options + [ssoWholeWord];
 
-    if (frEntireScope in FindDialog.Options) then
-    begin
-      if Editor.SearchReplace(FindDialog.FindText, '', Options - [ssoSelectedOnly]) = 0 then
-        Editor.SearchReplaceEx(FindDialog.FindText, '', Options - [ssoSelectedOnly], TPoint.Zero);
-    end else
-      Editor.SearchReplace(FindDialog.FindText, '', Options + [ssoSelectedOnly]);
+    if Editor.SearchReplace(FindDialog.FindText, '', Options) = 0 then
+      Editor.SearchReplaceEx(FindDialog.FindText, '', Options, Editor.CaretMax);
+
+    Editor.ModifiedLinesGutter.DrawLineMarks := True;
+
+    ClearLineMarksTimer.Enabled := False;
+    ClearLineMarksTimer.Enabled := True;
   end;
+end;
+
+function TSimbaScriptTabsForm.FindTab(ScriptInstance: TObject): TSimbaScriptTab;
+var
+  I: Integer;
+begin
+  for I := 0 to TabCount - 1 do
+    if (Tabs[I].ScriptInstance = ScriptInstance) then
+    begin
+      Result := Tabs[I];
+      Exit;
+    end;
+
+  Result := nil;
 end;
 
 function TSimbaScriptTabsForm.AddTab: TSimbaScriptTab;
@@ -460,136 +494,94 @@ begin
   Result := TSimbaScriptTab.Create(Notebook);
   Result.Parent := Notebook;
   Result.Editor.PopupMenu := EditorPopupMenu;
-  Result.Editor.GetCaretObj().AddChangeHandler(@CaretChanged);
-  Result.Editor.OnMouseLeave := @DoEditorMouseLeave;
-  Result.Editor.OnMouseEnter := @DoEditorMouseEnter;
+  Result.Editor.RegisterStatusChangedHandler(@CaretMoved, [scCaretX, scCaretY]);
 
-  NoteBook.TabIndex := Result.TabIndex;
-end;
-
-procedure TSimbaScriptTabsForm.RemoveAllTabs(out Aborted: Boolean);
-var
-  i: Int32;
-begin
-  for i := TabCount - 1 downto 0 do
+  if (Result.TabIndex = 0) then
   begin
-    RemoveTab(Tabs[i], Aborted);
-    if Aborted then
-      Exit;
-  end;
-end;
-
-procedure TSimbaScriptTabsForm.RemoveTab(ScriptTab: TSimbaScriptTab; out Abort: Boolean);
-begin
-  Abort := False;
-
-  if (ScriptTab.ScriptInstance <> nil) then
-  begin
-    ScriptTab.Show();
-
-    Application.MainForm.Enabled := False;
-
-    try
-      if ScriptTab.ScriptInstance.IsFinished then
-      begin
-        case MessageDlg('Script is still running', 'Do you want to forcefully stop the script?', mtConfirmation, [mbYes, mbNo, mbAbort], 0) of
-          mrYes: ScriptTab.ScriptInstance.Kill();
-          mrNo: Exit;
-          mrAbort, mrCancel:
-            begin
-              Abort := True;
-
-              Exit;
-            end;
-        end;
-      end;
-    finally
-      Application.MainForm.Enabled := True;
-    end;
-  end;
-
-  if ScriptTab.ScriptChanged then
-  begin
-    ScriptTab.Show();
-
-    case MessageDlg('Script has been modified.', 'Do you want to save the script?', mtConfirmation, [mbYes, mbNo, mbAbort], 0) of
-      mrYes: ScriptTab.Save(ScriptTab.FileName);
-      mrNo: { nothing };
-      mrAbort, mrCancel:
-        begin
-          Abort := True;
-
-          Exit;
-        end;
-    end;
-  end;
-
-  if (TabCount = 1) then
-  begin
-    ScriptTab.Reset();
-    ScriptTab.Editor.PopupMenu := EditorPopupMenu;
-    ScriptTab.Editor.GetCaretObj().AddChangeHandler(@CaretChanged);
-    ScriptTab.Editor.OnMouseLeave := @DoEditorMouseLeave;
-    ScriptTab.Editor.OnMouseEnter := @DoEditorMouseEnter;
+    NoteBook.TabIndex := Result.TabIndex;
     if (Notebook.OnChange <> nil) then
-      Notebook.OnChange(Self);
+      NoteBook.OnChange(Self);
   end else
-    ScriptTab.Free();
+    NoteBook.TabIndex := Result.TabIndex;
 end;
 
-procedure TSimbaScriptTabsForm.RemoveOtherTabs(Exclude: TSimbaScriptTab);
-var
-  Abort: Boolean;
-var
-  i: Int32;
+function TSimbaScriptTabsForm.CloseTab(Tab: TSimbaScriptTab): Boolean;
 begin
-  for i := TabCount - 1 downto 0 do
-    if (Tabs[i] <> Exclude) then
+  Result := Tab.CanClose();
+
+  if Result then
+  begin
+    if (TabCount = 1) then
     begin
-      RemoveTab(Tabs[i], Abort);
-      if Abort then
-        Exit;
-    end;
-
-  Exclude.Show();
+      Tab.Reset();
+      if (Notebook.OnChange <> nil) then
+        Notebook.OnChange(Self);
+    end else
+      Tab.Free();
+  end;
 end;
 
-procedure TSimbaScriptTabsForm.Open(FileName: String; CheckOtherTabs: Boolean);
+function TSimbaScriptTabsForm.CloseOtherTabs(Tab: TSimbaScriptTab): Boolean;
 var
-  I: Int32;
+  I: Integer;
 begin
-  if FileExists(FileName) then
-    FileName := ExpandFileName(FileName);
+  Result := True;
+
+  for I := TabCount - 1 downto 0 do
+    if (Tabs[I] <> Tab) and (not CloseTab(Tabs[I])) then
+    begin
+      Result := False;
+      Exit;
+    end;
+end;
+
+function TSimbaScriptTabsForm.CloseAllTabs: Boolean;
+var
+  I: Integer;
+begin
+  Result := True;
+
+  for I := TabCount - 1 downto 0 do
+    if not CloseTab(Tabs[I]) then
+    begin
+      Result := False;
+      Exit;
+    end;
+end;
+
+function TSimbaScriptTabsForm.Open(FileName: String; CheckOtherTabs: Boolean): Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+
+  FileName := ExpandFileName(FileName);
 
   if CheckOtherTabs then
-  begin
     for I := 0 to TabCount - 1 do
-      if Tabs[I].FileName = FileName then
+      if SameFileName(Tabs[I].ScriptFileName, FileName) then
       begin
-        CurrentTab := Tabs[i];
-
+        CurrentTab := Tabs[I];
         Exit;
       end;
-  end;
 
   if FileExists(FileName) then
   begin
-    if (CurrentTab.FileName <> '') or CurrentTab.ScriptChanged then // Use current tab if default
+    if (CurrentTab.ScriptFileName <> '') or CurrentTab.ScriptChanged then // Use current tab if default
       CurrentTab := AddTab();
 
-    CurrentTab.Load(FileName);
-
-    SimbaForm.AddRecentFile(FileName);
-    Notebook.OnChange(Notebook);
+    Result := CurrentTab.Load(FileName);
+    if Result and (FOnEditorLoaded <> nil) then
+      FOnEditorLoaded(CurrentTab);
   end;
 end;
 
 procedure TSimbaScriptTabsForm.Open;
 var
-  I: Int32;
+  I: Integer;
 begin
   try
-    OpenDialog.InitialDir := ExtractFileDir(CurrentTab.FileName);
+    OpenDialog.InitialDir := ExtractFileDir(CurrentTab.ScriptFileName);
     if OpenDialog.InitialDir = '' then
       OpenDialog.InitialDir := GetScriptPath();
 
@@ -602,33 +594,31 @@ begin
   end;
 end;
 
-procedure TSimbaScriptTabsForm.OpenDeclaration(Header: String; StartPos, EndPos, Line: Int32; FileName: String; Internal: Boolean);
+procedure TSimbaScriptTabsForm.OpenDeclaration(Header: String; StartPos, EndPos, Line: Integer; FileName: String);
 begin
-  if not Internal then
+  if FileExists(FileName) then
+    Open(FileName);
+
+  with CurrentEditor do
   begin
-    if FileExists(FileName) then
-      Open(FileName);
+    SelStart := StartPos + 1;
+    SelEnd := EndPos + 1;
+    TopLine := (Line + 1) - (LinesInWindow div 2);
+    if CanSetFocus() then
+      SetFocus();
 
-    with CurrentEditor do
-    begin
-      SelStart := StartPos + 1;
-      SelEnd := EndPos + 1;
-      TopLine := (Line + 1) - (LinesInWindow div 2);
-      if CanSetFocus() then
-        SetFocus();
-
-      SimbaScriptTabHistory.Add(CurrentTab);
-    end;
-  end else
-  begin
-    if FileExists(FileName) then
-      SimbaDebugForm.Add('Declared internally in plugin: ' + ExtractFileName(FileName))
-    else
-      SimbaDebugForm.Add('Declared internally in Simba: ' + FileName);
-
-    SimbaDebugForm.Add('Declaration: ');
-    SimbaDebugForm.Add(Header);
+    SimbaScriptTabHistory.Add(CurrentTab);
   end;
+end;
+
+procedure TSimbaScriptTabsForm.OpenInternalDeclaration(Header: String; FileName: String);
+begin
+  if (Header = '') then
+    Exit;
+
+  SimbaDebugForm.Add('Declared internally in Simba: ' + FileName);
+  SimbaDebugForm.Add('Declaration:');
+  SimbaDebugForm.Add(Header);
 end;
 
 procedure TSimbaScriptTabsForm.OpenDeclaration(Declaration: TDeclaration);
@@ -666,16 +656,6 @@ begin
       SimbaDebugForm.Add(Declaration.RawText);
   end;
 end;
-
-constructor TSimbaScriptTabsForm.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-
-  AddTab();
-end;
-
-initialization
-  {$I simba.scripttabsform.lrs}
 
 end.
 

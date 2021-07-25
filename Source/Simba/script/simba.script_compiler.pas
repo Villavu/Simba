@@ -22,7 +22,6 @@ type
     procedure pushTokenizer(ATokenizer: TLapeTokenizerBase); reintroduce;
     procedure pushConditional(AEval: Boolean; ADocPos: TDocPos); reintroduce;
 
-    function addGlobalFunc(AHeader: lpString; Value: Pointer): TLapeGlobalVar; override;
     function addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar; virtual; overload;
     function addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType; virtual; overload;
 
@@ -235,20 +234,6 @@ end;
 procedure TSimbaScript_Compiler.pushConditional(AEval: Boolean; ADocPos: TDocPos);
 begin
   inherited pushConditional(AEval, ADocPos);
-end;
-
-function TSimbaScript_Compiler.addGlobalFunc(AHeader: lpString; Value: Pointer): TLapeGlobalVar;
-var
-  wasLooseSemicolon: Boolean;
-begin
-  wasLooseSemicolon := lcoLooseSemicolon in FOptions;
-  if wasLooseSemicolon then
-   Exclude(FOptions, lcoLooseSemicolon);
-
-  Result := inherited addGlobalFunc(AHeader, Value);
-
-  if wasLooseSemicolon then
-    Include(FOptions, lcoLooseSemicolon);
 end;
 
 end.

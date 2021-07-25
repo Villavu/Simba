@@ -5,7 +5,7 @@ unit simba.ci_includecache;
 interface
 
 uses
-  Classes, SysUtils, syncobjs, castaliapaslex, castaliapaslextypes, sha1,
+  Classes, SysUtils, syncobjs, castaliapaslex, castaliapaslextypes,
   generics.collections,
   simba.codeparser;
 
@@ -14,12 +14,11 @@ type
   protected
     FInDefines: TSaveDefinesRec;
     FOutDefines: TSaveDefinesRec;
-    FHash: TSHA1Digest;
-    FHashed: Boolean;
+    FHash: String;
 
     procedure HandleMessage(Sender: TObject; const Typ: TMessageEventType; const Message: String; X, Y: Integer);
 
-    function GetHash: TSHA1Digest;
+    function GetHash: String;
     function GetOutdated: Boolean;
   public
     RefCount: Int32;
@@ -33,7 +32,7 @@ type
     property InDefines: TSaveDefinesRec read FInDefines write FInDefines;
     property OutDefines: TSaveDefinesRec read FOutDefines write FOutDefines;
 
-    property Hash: TSHA1Digest read GetHash;
+    property Hash: String read GetHash;
 
     constructor Create;
   end;
@@ -62,6 +61,7 @@ type
 implementation
 
 uses
+  lazloggerbase,
   simba.settings, simba.debugform;
 
 procedure TCodeInsight_Include.Assign(From: TObject);
@@ -89,22 +89,26 @@ begin
     Messages := Messages + Format('"%s" at line %d, column %d', [Message, Y + 1, X]) + LineEnding;
 end;
 
-function TCodeInsight_Include.GetHash: TSHA1Digest;
+function TCodeInsight_Include.GetHash: String;
 var
-  Info: String;
   I: Int32;
+  List: TStringList;
 begin
-  if not FHashed then
+  if (FHash = '') then
   begin
-    Info := Lexer.UseCodeToolsIDEDirective.ToString()       +
-            InDefines.Defines  + InDefines.Stack.ToString() +
-            OutDefines.Defines + OutDefines.Stack.ToString();
+    List := TStringList.Create();
+    List.LineBreak := '';
+    List.Add(Lexer.UseCodeToolsIDEDirective.ToString());
+    List.Add(InDefines.Defines  + InDefines.Stack.ToString());
+    List.Add(OutDefines.Defines + OutDefines.Stack.ToString());
 
+    List.AddStrings(FFiles);
     for I := 0 to FFiles.Count - 1 do
-      Info := Info + FFiles[I] + IntToStr(PtrUInt(FFiles.Objects[I]));
+      List.Add(IntToStr(PtrUInt(FFiles.Objects[I])));
 
-    FHash := SHA1String(Info);
-    FHashed := True;
+    FHash := List.Text;
+
+    List.Free();
   end;
 
   Result := FHash;
@@ -170,7 +174,7 @@ begin
     if (Include.LastUsed < 25) and (not Include.Outdated) then
       Continue;
 
-    WriteLn('Purge include "', Include.Lexer.FileName, '"');
+    DebugLn('Purge include: ', Include.Lexer.FileName);
 
     FCachedIncludes.Delete(I);
   end;
@@ -215,7 +219,7 @@ begin
 
     if (Result = nil) then
     begin
-      WriteLn('Caching Include "' + FileName + '"');
+      DebugLn('Caching Include: ', FileName);
 
       Result := TCodeInsight_Include.Create();
       Result.Assign(Sender);
@@ -231,7 +235,7 @@ begin
     Result.RefCount := Result.RefCount + 1;
     Result.LastUsed := 0;
 
-    if Result.Messages <> '' then
+    if (Result.Messages <> '') then
     begin
       SimbaDebugForm.Add('Simba''s code parser encountered errors in a include. This could break code tools:');
       SimbaDebugForm.Add(Result.Messages);
@@ -254,7 +258,7 @@ end;
 
 function TCodeInsight_IncludeCache.GetLibrary(Sender: TCodeParser; FileName: String): TCodeInsight_Include;
 var
-  Contents: String = '';
+  Contents: String;
 begin
   Result := nil;
 
@@ -267,7 +271,7 @@ begin
 
     if (Result = nil) then
     begin
-      WriteLn('Caching Library "' + FileName + '"');
+      DebugLn('Caching Library: ', FileName);
 
       if (Sender.OnLoadLibrary <> nil) then
       begin

@@ -1,24 +1,21 @@
 unit simba.colorpicker;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
-  simba.iomanager, simba.oswindow;
+  simba.iomanager, simba.oswindow, simba.imageboxzoom;
 
 type
   TSimbaColorPickerHint = class(TForm)
-  const
-    ZOOM_PIXELS = 3; // 3, 5, 7, 9 ...
   protected
-    procedure ImagePaint(Sender: TObject);
     procedure Paint; override;
   public
-    Image: TImage;
-    ColorLabel: TLabel;
-    PositionLabel: TLabel;
+    Zoom: TSimbaImageBoxZoom;
+    Info: TLabel;
 
     constructor CreateNew(AOwner: TComponent; Num: Integer = 0); override;
   end;
@@ -45,100 +42,52 @@ type
 implementation
 
 uses
-  math,
-  simba.bitmap, simba.main ;
-
-procedure TSimbaColorPickerHint.ImagePaint(Sender: TObject);
-begin
-  with Image do
-  begin
-    Canvas.Pen.Color := clBlack;
-    Canvas.Frame(ClientRect);
-    Canvas.Pen.Color := clRed;
-
-    Canvas.Frame(
-      (Width div 2)  - Floor(Width / ZOOM_PIXELS / 2),
-      (Height div 2) - Floor(Width / ZOOM_PIXELS / 2),
-      (Width div 2)  + Ceil(Width / ZOOM_PIXELS / 2),
-      (Height div 2) + Ceil(Width / ZOOM_PIXELS / 2)
-    );
-  end;
-end;
+  simba.bitmap;
 
 procedure TSimbaColorPickerHint.Paint;
 begin
-  inherited Paint();
-
   Canvas.Pen.Color := clBlack;
-  Canvas.Frame(ClientRect);
+  Canvas.Brush.Color := clForm;
+  Canvas.Rectangle(ClientRect);
+
+  inherited Paint();
 end;
 
 constructor TSimbaColorPickerHint.CreateNew(AOwner: TComponent; Num: Integer);
 begin
   inherited CreateNew(AOwner);
 
-  Self.BorderStyle := bsNone;
-  Self.Font := SimbaForm.Font;
+  BorderStyle := bsNone;
+  AutoSize := True;
 
-  Image := TImage.Create(Self);
-  Image.Parent := Self;
-  Image.Stretch := True;
-  Image.Picture.Bitmap.Width := ZOOM_PIXELS;
-  Image.Picture.Bitmap.Height := ZOOM_PIXELS;
-  Image.OnPaint := @ImagePaint;
-  Image.AntialiasingMode := amOff;
+  Zoom := TSimbaImageBoxZoom.Create(Self);
+  Zoom.Parent := Self;
+  Zoom.Align := alLeft;
+  Zoom.SetZoom(4, 5);
+  Zoom.BorderSpacing.Around := 10;
 
-  Image.Top := 5;
-  Image.Left := Canvas.TextWidth('Position: 99999, 99999');
-  Image.Width := Canvas.TextHeight('Position: 99999, 99999') * 2 + 2;
-  Image.Height := Canvas.TextHeight('Position: 99999, 99999') * 2 + 2;
-  Image.Width := Image.Width + (ZOOM_PIXELS - Image.Width mod ZOOM_PIXELS);
-  Image.Height := Image.Height + (ZOOM_PIXELS - Image.Height mod ZOOM_PIXELS);
-
-  Width := Image.Left + Image.Width + 5;
-  Height := Image.Height + Image.Top + 5;
-
-  ColorLabel := TLabel.Create(Self);
-  ColorLabel.Parent := Self;
-  ColorLabel.Left := 5;
-  ColorLabel.Anchors := [akLeft, akTop];
-  ColorLabel.AnchorSide[akTop].Side := asrTop;
-  ColorLabel.AnchorSide[akTop].Control := Image;
-  ColorLabel.BorderSpacing.Top := 2;
-
-  PositionLabel := TLabel.Create(Self);
-  PositionLabel.Left := 5;
-  PositionLabel.Parent := Self;
-  PositionLabel.Anchors := [akLeft, akBottom];
-  PositionLabel.AnchorSide[akBottom].Side := asrBottom;
-  PositionLabel.AnchorSide[akBottom].Control := Image;
-  PositionLabel.BorderSpacing.Bottom := 2;
+  Info := TLabel.Create(Self);
+  Info.Parent := Self;
+  Info.BorderSpacing.Right:=10;
+  Info.AnchorToNeighbour(akLeft, 10, Zoom);
+  Info.AnchorVerticalCenterTo(Zoom);
 end;
 
 procedure TSimbaColorPicker.ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-var
-  PixelX, PixelY: Int32;
+const
+  INFO = 'Color: %d' + LineEnding +
+         'Position: %d, %d';
 begin
   FIOManager.GetMousePos(FPoint.X, FPoint.Y);
 
-  FHint.Left := X + 20;
-  FHint.Top := Y - (FHint.Height div 2);
-
-  FHint.ColorLabel.Caption := 'Color: ' + IntToStr(FImage.Picture.Bitmap.Canvas.Pixels[X, Y]);
-  FHint.PositionLabel.Caption := 'Position: ' + IntToStr(FPoint.X) + ', ' + IntToStr(FPoint.Y);
-
-  FHint.Image.Picture.Bitmap.BeginUpdate(True);
-  FHint.Image.Picture.Bitmap.Canvas.AntialiasingMode := amOff;
-
-  try
-    FHint.Image.Picture.Bitmap.Canvas.Clear();
-
-    for PixelX := 0 to FHint.Image.Picture.Bitmap.Width - 1 do
-      for PixelY := 0 to FHint.Image.Picture.Bitmap.Height - 1 do
-        FHint.Image.Picture.Bitmap.Canvas.Pixels[PixelX, PixelY] := FImage.Picture.Bitmap.Canvas.Pixels[X + PixelX - (FHint.Image.Picture.Bitmap.Width div 2),                                                                                          Y + PixelY - (FHint.Image.Picture.Bitmap.Height div 2)];
-  finally
-    FHint.Image.Picture.Bitmap.EndUpdate(False);
+  with FImage.ClientToScreen(TPoint.Create(X + 25, Y - (FHint.Height div 2))) do
+  begin
+    FHint.Left := X;
+    FHint.Top := Y;
   end;
+
+  FHint.Info.Caption := Format(INFO, [FImage.Picture.Bitmap.Canvas.Pixels[X, Y], FPoint.X, FPoint.Y]);
+  FHint.Zoom.Move(Sender as TImage, X, Y);
 end;
 
 procedure TSimbaColorPicker.ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -162,6 +111,7 @@ begin
   with FForm do
   begin
     BorderStyle := bsNone;
+
     Left := DesktopLeft;
     Top := DesktopTop;
     Width := DesktopWidth;
@@ -188,11 +138,11 @@ begin
     end;
   end;
 
-  FForm.ShowOnTop();
-
   FIOManager.SetTarget(TargetWindow);
   if not FIOManager.TargetValid() then
     FIOManager.SetDesktop();
+
+  FForm.ShowOnTop();
 
   FHint := TSimbaColorPickerHint.CreateNew(nil);
   FHint.Show();

@@ -1,91 +1,285 @@
 unit simba.dockinghelpers;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
 uses
-  classes, sysutils, forms;
+  classes, sysutils, controls, menus, forms, graphics,
+  anchordocking;
 
 type
-  SimbaDockingHelper = class
-    class procedure Resize(Form: TCustomForm; Width, Height: Int32);
-    class procedure EnsureVisible(Form: TCustomForm);
-    class function SaveLayoutToString: String;
-    class function LoadLayoutFromString(Layout: String): Boolean;
-    class procedure Show(Form: TCustomForm);
-    class procedure ShowOnTop(Form: TCustomForm);
-    class procedure Hide(Form: TCustomForm);
-    class procedure Center(Form: TCustomForm);
-    class function IsVisible(Form: TCustomForm): Boolean;
+  TSimbaAnchorDockHeader = class(TAnchorDockHeader)
+  protected
+    procedure Paint; override;
+
+    procedure SetAlign(Value: TAlign); override;
+  public
+    constructor Create(AOwner: TComponent); override;
+  end;
+
+  TSimbaAnchorDockHostSite = class(TAnchorDockHostSite)
+  protected
+    FMenuItem: TMenuItem;
+    FNeedDefaultPosition: Boolean;
+
+    procedure DoMenuItemDestroyed(Sender: TObject);
+    procedure DoMenuItemClicked(Sender: TObject);
+
+    procedure SetMenuItem(Value: TMenuItem);
+    procedure SetVisible(Value: Boolean); override;
+    procedure SetParent(Value: TWinControl); override;
+  public
+    constructor CreateNew(AOwner: TComponent; Num: Integer=0); override;
+
+    property MenuItem: TMenuItem read FMenuItem write SetMenuItem;
+    property NeedDefaultPosition: Boolean read FNeedDefaultPosition write FNeedDefaultPosition;
+  end;
+
+  TSimbaAnchorDockSplitter = class(TAnchorDockSplitter)
+  protected
+  const
+    GRIPPER_SIZE = 100;
+  protected
+    procedure Paint; override;
+  end;
+
+  TAnchorDockMasterHelper = class helper for TAnchorDockMaster
+  private
+    procedure OnFormClose(Sender: TObject; var CloseAction: TCloseAction);
+  public
+    procedure MakeDockable(Form: TCustomForm; MenuItem: TMenuItem);
+
+    function SaveLayout: String;
+    function LoadLayout(Layout: String): Boolean;
   end;
 
 implementation
 
 uses
-  anchordocking, anchordockstorage, xmlpropstorage;
+  anchordockstorage, xmlpropstorage, lazloggerbase, lazconfigstorage;
 
-type
-  TCustomFormHelper = class helper for TCustomForm
-    procedure MoveToDefaultPosition;
-  end;
-
-procedure TCustomFormHelper.MoveToDefaultPosition;
+procedure TSimbaAnchorDockHeader.Paint;
+var
+  Style: TTextStyle;
 begin
-  inherited MoveToDefaultPosition;
+  Style := Canvas.TextStyle;
+  Style.Layout := tlCenter;
+  Style.Alignment := taCenter;
+
+  Canvas.TextRect(ClientRect, 0, 0, Self.Caption, Style);
 end;
 
-class procedure SimbaDockingHelper.Resize(Form: TCustomForm; Width, Height: Int32);
+procedure TSimbaAnchorDockHeader.SetAlign(Value: TAlign);
 begin
-  if DockMaster.GetAnchorSite(Form) <> nil then
+  inherited SetAlign(alTop);
+end;
+
+constructor TSimbaAnchorDockHeader.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  PopupMenu := nil;
+
+  CloseButton.Parent := nil;
+  MinimizeButton.Parent := nil;
+
+  BorderSpacing.Top := 2;
+  BorderSpacing.Bottom := 2;
+end;
+
+procedure TSimbaAnchorDockHostSite.DoMenuItemDestroyed(Sender: TObject);
+begin
+  FMenuItem := nil;
+end;
+
+procedure TSimbaAnchorDockHostSite.DoMenuItemClicked(Sender: TObject);
+begin
+  Visible := TMenuItem(Sender).Checked;
+
+  if Visible then
   begin
-    Form := DockMaster.GetAnchorSite(Form);
-    if TAnchorDockHostSite(Form).Header <> nil then
-      Height := Height + TAnchorDockHostSite(Form).Header.Height;
-  end;
+    if FNeedDefaultPosition then
+    begin
+      with Application.MainForm.Monitor.WorkareaRect.CenterPoint do
+        BoundsRect := TRect.Create(X - (Width div 2), Y - (Height div 2), X + (Width div 2), Y + (Height div 2));
 
-  Form.Width := Width;
-  Form.Height := Height;
+      FNeedDefaultPosition := False;
+    end;
+
+    EnsureVisible();
+  end;
 end;
 
-class procedure SimbaDockingHelper.EnsureVisible(Form: TCustomForm);
+procedure TSimbaAnchorDockHostSite.SetMenuItem(Value: TMenuItem);
 begin
-  if DockMaster.GetAnchorSite(Form) <> nil then
-    Form := DockMaster.GetAnchorSite(Form);
-
-  if (not Form.Visible) or (Form.Left < Form.Monitor.Left) or (Form.Top < Form.Monitor.Top) then
-  begin
-    if (Form.Position <> poScreenCenter) then
-      Form.Position := poScreenCenter;
-
-    Form.MoveToDefaultPosition();
-  end;
-
-  if (Form.Left < Form.Monitor.Left) then
-    Form.Left := 0;
-  if (Form.Top < Form.Monitor.Top) then
-    Form.Top := 0;
+  FMenuItem := Value;
+  FMenuItem.Checked := False;
+  FMenuItem.AddHandlerOnDestroy(@DoMenuItemDestroyed);
+  FMenuItem.OnClick := @DoMenuItemClicked;
 end;
 
-class function SimbaDockingHelper.SaveLayoutToString: String;
+procedure TSimbaAnchorDockHostSite.SetVisible(Value: Boolean);
+begin
+  inherited SetVisible(Value);
+
+  if (MenuItem <> nil) then
+    MenuItem.Checked := Value;
+
+  if (Parent <> nil) then
+    ShowInTaskBar := stNever
+  else
+    ShowInTaskBar := stAlways;
+end;
+
+procedure TSimbaAnchorDockHostSite.SetParent(Value: TWinControl);
+begin
+  if (Value <> nil) then
+    ShowInTaskBar := stNever
+  else
+    ShowInTaskBar := stAlways;
+
+  inherited SetParent(Value);
+end;
+
+constructor TSimbaAnchorDockHostSite.CreateNew(AOwner: TComponent; Num: Integer);
+begin
+  inherited CreateNew(AOwner, Num);
+
+  FNeedDefaultPosition := True;
+end;
+
+procedure TSimbaAnchorDockSplitter.Paint;
+var
+  CenterW, CenterH: Integer;
+begin
+  Canvas.Brush.Color := Color;
+  Canvas.FillRect(ClientRect);
+  Canvas.Brush.Color := cl3DShadow;
+
+  CenterW := Width div 2;
+  CenterH := Height div 2;
+
+  case ResizeAnchor of
+    // vertical
+    akLeft, akRight:
+      Canvas.FillRect(
+        CenterW - 1, CenterH - GRIPPER_SIZE,
+        CenterW + 1, CenterH + GRIPPER_SIZE
+      );
+
+    // horz
+    akTop, akBottom:
+      Canvas.FillRect(
+        CenterW - GRIPPER_SIZE, CenterH - 1,
+        CenterW + GRIPPER_SIZE, CenterH + 1
+      );
+  end;
+end;
+
+procedure TAnchorDockMasterHelper.MakeDockable(Form: TCustomForm; MenuItem: TMenuItem);
+begin
+  inherited MakeDockable(Form, False);
+
+  if Form.HostDockSite is TSimbaAnchorDockHostSite then
+  begin
+    Form.AddHandlerClose(@OnFormClose, True);
+
+    TSimbaAnchorDockHostSite(Form.HostDockSite).MenuItem := MenuItem;
+  end;
+end;
+
+function TAnchorDockMasterHelper.SaveLayout: String;
 var
   Config: TXMLConfigStorage;
   Stream: TStringStream;
+  I: Integer;
 begin
+  Result := '';
+
   Stream := TStringStream.Create();
   Config := TXMLConfigStorage.Create('', False);
 
-  DockMaster.SaveLayoutToConfig(Config);
+  try
+    RestoreLayouts.Clear();
+    for I := 0 to Screen.CustomFormCount-1 do
+      if (Screen.CustomForms[I].HostDockSite is TSimbaAnchorDockHostSite) then
+        if TSimbaAnchorDockHostSite(Screen.CustomForms[I].HostDockSite).Floating then
+          RestoreLayouts.Add(CreateRestoreLayout(Screen.CustomForms[I].HostDockSite), True);
 
-  Config.SaveToStream(Stream);
+    SaveLayoutToConfig(Config);
 
-  Result := Stream.DataString;
+    Config.SaveToStream(Stream);
 
-  Stream.Free();
-  Config.Free();
+    Result := Stream.DataString;
+  finally
+    Stream.Free();
+    Config.Free();
+  end;
 end;
 
-class function SimbaDockingHelper.LoadLayoutFromString(Layout: String): Boolean;
+procedure TAnchorDockMasterHelper.OnFormClose(Sender: TObject; var CloseAction: TCloseAction);
+var
+  Form: TCustomForm;
+begin
+  CloseAction := caHide;
+
+  if (Sender is TCustomForm) then
+  begin
+    Form := TCustomForm(Sender);
+
+    if (Form.HostDockSite is TSimbaAnchorDockHostSite) then
+    begin
+      DebugLn('simba.dockinghelpers :: OnFormClose : ', TAnchorDockHostSite(Form.HostDockSite).Header.Caption);
+
+      with TSimbaAnchorDockHostSite(Form.HostDockSite) do
+        CloseSite();
+
+      CloseAction := caNone;
+    end;
+  end;
+end;
+
+function TAnchorDockMasterHelper.LoadLayout(Layout: String): Boolean;
+
+  procedure LoadRestoredBounds(Config: TConfigStorage);
+  var
+    i, j: Integer;
+    R: TRect;
+    Form: TCustomForm;
+  begin
+    Config.AppendBasePath('Restores');
+
+    for i := 1 to Config.GetValue('Count', 0) do
+    begin
+      Config.AppendBasePath('Item' + IntToStr(i) + '/');
+
+      Form := Screen.FindForm(Config.GetValue('Names', ''));
+      if (Form <> nil) and (Form.HostDockSite is TSimbaAnchorDockHostSite) then
+      begin
+        Config.AppendBasePath('Nodes/Bounds/');
+
+        R.Left := Config.GetValue('Left', 0);
+        R.Top := Config.GetValue('Top', 0);
+        R.Width := Config.GetValue('Width', 0);
+        R.Height := Config.GetValue('Height', 0);
+
+        Config.UndoAppendBasePath();
+
+        if R.IsEmpty() then
+          Continue;
+
+        TSimbaAnchorDockHostSite(Form.HostDockSite).NeedDefaultPosition := False;
+        TSimbaAnchorDockHostSite(Form.HostDockSite).BoundsRect := R;
+      end;
+
+      Config.UndoAppendBasePath();
+    end;
+
+    Config.UndoAppendBasePath();
+  end;
+
 var
   Config: TXMLConfigStorage;
   Stream: TStringStream;
@@ -96,59 +290,13 @@ begin
   Config := TXMLConfigStorage.Create(Stream);
 
   try
-    Result := DockMaster.LoadLayoutFromConfig(Config, True);
+    LoadRestoredBounds(Config);
+
+    Result := LoadLayoutFromConfig(Config, True);
   finally
     Config.Free();
     Stream.Free();
   end;
-end;
-
-class procedure SimbaDockingHelper.Show(Form: TCustomForm);
-begin
-  if DockMaster.GetAnchorSite(Form) <> nil then
-    Form := DockMaster.GetAnchorSite(Form);
-
-  if not Form.Visible then
-    Form.ShowOnTop();
-end;
-
-class procedure SimbaDockingHelper.ShowOnTop(Form: TCustomForm);
-begin
-  if DockMaster.GetAnchorSite(Form) <> nil then
-    Form := DockMaster.GetAnchorSite(Form);
-
-  Form.ShowOnTop();
-end;
-
-class procedure SimbaDockingHelper.Hide(Form: TCustomForm);
-begin
-  if DockMaster.GetAnchorSite(Form) <> nil then
-  begin
-    Form := DockMaster.GetAnchorSite(Form);
-
-    DockMaster.RestoreLayouts.Add(DockMaster.CreateRestoreLayout(Form), True);
-    with Form as TAnchorDockHostSite do
-      CloseSite();
-  end else
-    Form.Hide();
-end;
-
-class procedure SimbaDockingHelper.Center(Form: TCustomForm);
-begin
-  if DockMaster.GetAnchorSite(Form) <> nil then
-    Form := DockMaster.GetAnchorSite(Form);
-
-  Form.Position := poScreenCenter;
-  Form.MoveToDefaultPosition();
-  Form.ShowOnTop();
-end;
-
-class function SimbaDockingHelper.IsVisible(Form: TCustomForm): Boolean;
-begin
-  if DockMaster.GetAnchorSite(Form) <> nil then
-    Form := DockMaster.GetAnchorSite(Form);
-
-  Result := Form.Visible;
 end;
 
 end.

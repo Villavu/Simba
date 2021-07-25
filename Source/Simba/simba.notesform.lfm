@@ -1,18 +1,20 @@
 object SimbaNotesForm: TSimbaNotesForm
-  Left = 718
-  Height = 240
-  Top = 305
-  Width = 320
+  Left = 1723
+  Height = 174
+  Top = 94
+  Width = 517
   Caption = 'Notes'
-  ClientHeight = 240
-  ClientWidth = 320
+  ClientHeight = 174
+  ClientWidth = 517
   Font.CharSet = ANSI_CHARSET
-  LCLVersion = '2.0.4.0'
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  LCLVersion = '2.2.0.1'
   object Memo: TMemo
     Left = 0
-    Height = 240
+    Height = 174
     Top = 0
-    Width = 320
+    Width = 517
     Align = alClient
     BorderStyle = bsNone
     TabOrder = 0

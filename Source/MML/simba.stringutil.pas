@@ -24,6 +24,7 @@
 unit simba.stringutil;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
@@ -51,7 +52,11 @@ function IsStrInArr(const s: String; const UsePos: Boolean; const Arr: TStringAr
 function PosMulti(const SubStr, Text:String): TIntegerArray;
 function Between(s1, s2, str: String): String;
 
+function StrToBinary(Str: String): String;
+function StrFromBinary(BinaryStr: String): String;
+
 implementation
+
 uses
   math, base64, zstream;
 
@@ -121,6 +126,8 @@ var
   Output: TMemoryStream;
   Stream: TCompressionStream;
 begin
+  Result := '';
+
   Len := Length(Str);
   if (Len = 0) then
     Exit;
@@ -158,7 +165,8 @@ var
   Count: Int32;
 begin
   Result := '';
-  if Str = '' then
+
+  if (Str = '') then
     Exit;
 
   Input := nil;
@@ -459,6 +467,37 @@ begin;
     j := posex(s2,str,i);
     if j > 0 then
       Result := copy(str,i,j-i);
+  end;
+end;
+
+function StrToBinary(Str: String): String;
+var
+  I, J: Integer;
+begin
+  SetLength(Result, Length(Str) * 2);
+
+  J := 1;
+  for I := 1 to Length(Str) do
+  begin
+    Result[J] := IntToHex(Ord(Str[I]), 2)[1];
+    Result[J+1] := IntToHex(Ord(Str[I]), 2)[2];
+
+    Inc(J, 2);
+  end;
+end;
+
+function StrFromBinary(BinaryStr: String): String;
+var
+  I, J: Integer;
+begin
+  SetLength(Result, Length(BinaryStr) div 2);
+
+  J := 1;
+  for I := 1 to Length(Result) do
+  begin
+    Result[I] := Chr(StrToInt('$' + BinaryStr[J] + BinaryStr[J+1]));
+
+    Inc(J, 2);
   end;
 end;
 

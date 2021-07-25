@@ -5,16 +5,13 @@ unit simba.notesform;
 interface
 
 uses
-  Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, StdCtrls;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls;
 
 type
   TSimbaNotesForm = class(TForm)
     Memo: TMemo;
-  protected
-    procedure SetVisible(Value: Boolean); override;
-  public
-    constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   end;
 
 var
@@ -22,34 +19,21 @@ var
 
 implementation
 
+{$R *.lfm}
+
 uses
   AnchorDocking,
   simba.settings;
 
-procedure TSimbaNotesForm.SetVisible(Value: Boolean);
-begin
-  inherited SetVisible(Value);
-
-  if DockMaster.GetAnchorSite(Self) <> nil then
-    DockMaster.GetAnchorSite(Self).Visible := Value;
-end;
-
-constructor TSimbaNotesForm.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-
-  Memo.Lines.Text := SimbaSettings.GUI.Notes.Value;
-end;
-
-destructor TSimbaNotesForm.Destroy;
+procedure TSimbaNotesForm.FormDestroy(Sender: TObject);
 begin
   SimbaSettings.GUI.Notes.Value := Memo.Lines.Text;
-
-  inherited Destroy();
 end;
 
-initialization
-  {$I simba.notesform.lrs}
+procedure TSimbaNotesForm.FormCreate(Sender: TObject);
+begin
+  Memo.Lines.Text := SimbaSettings.GUI.Notes.Value;
+end;
 
 end.
 

@@ -3,16 +3,24 @@ unit simba.openssl;
 {$mode objfpc}{$H+}
 {$i simba.inc}
 
-{$IF DEFINED(SIMBA_WIN32)}
-  {$R openssl-win32}
-{$ELSEIF DEFINED(SIMBA_WIN64)}
-  {$R openssl-win64}
-{$ELSEIF DEFINED(SIMBA_DARWIN64)}
-  {$R openssl-darwin64}
-{$ELSEIF DEFINED(SIMBA_LINUX64)}
-  {$R openssl-linux64}
-{$ELSEIF DEFINED(SIMBA_AARCH64)}
-  {$R openssl-aarch64}
+{$IFDEF SIMBA_WIN32}
+  {$R resources/win32}
+{$ENDIF}
+
+{$IFDEF SIMBA_WIN64}
+  {$R resources/win64}
+{$ENDIF}
+
+{$IFDEF SIMBA_DARWIN64}
+  {$R resources/darwin64}
+{$ENDIF}
+
+{$IFDEF SIMBA_LINUX64}
+  {$R resources/linux64}
+{$ENDIF}
+
+{$IFDEF SIMBA_AARCH64}
+  {$R resources/aarch64}
 {$ENDIF}
 
 interface
@@ -20,86 +28,117 @@ interface
 uses
   Classes, SysUtils;
 
-procedure InitializeOpenSSL(Extract: Boolean);
+procedure InitializeOpenSSL;
 
 implementation
 
 uses
-  openssl, lcltype,
-  simba.files;
+  openssl, lcltype, LazLoggerBase, sha1,
+  simba.gz_stream, simba.settings, simba.files;
 
-function ExtractOpenSSL(ResourceHandle: TFPResourceHMODULE; ResourceType, ResourceName: PChar; Param: PtrInt): LongBool; stdcall;
+const
+  BUF_SIZE = 512 * 512;
 
-  function SameFile(Path: String; Stream: TResourceStream): Boolean;
-  begin
-    with TMemoryStream.Create() do
+function IsFileHash(FileName: String; Hash: String): Boolean;
+begin
+  Result := FileExists(FileName) and (SHA1Print(SHA1File(FileName, BUF_SIZE)) = Hash);
+end;
+
+function Uncompress(Stream: TStream; FileName: String): String;
+var
+  Buffer: array[1..BUF_SIZE] of Byte;
+  Count: Integer;
+begin
+  Result := '';
+
+  DebugLn('Extracting: ', FileName);
+
+  Stream := TGZFileStream.Create(Stream, False);
+  try
+    with TFileStream.Create(FileName, fmCreate or fmOpenWrite or fmShareDenyWrite) do
     try
-      LoadFromFile(Path);
-
-      Result := (Stream.Size - Stream.Position = Size) and CompareMem(Stream.Memory + Stream.Position, Memory, Size);
+      repeat
+        Count := Stream.Read(Buffer[1], Length(Buffer));
+        if (Count > 0) then
+          Write(Buffer[1], Count);
+      until (Count = 0);
     finally
       Free();
     end;
+
+    Result := SHA1Print(SHA1File(FileName, BUF_SIZE));
+  finally
+    Stream.Free();
   end;
-
-var
-  Name: String;
-  FileName: ShortString;
-  Stream: TResourceStream;
-begin
-  Name := LowerCase(ResourceName);
-
-  if Name.StartsWith(DLLSSLName) or Name.StartsWith(DLLUtilName) then
-  begin
-    Stream := TResourceStream.Create(HINSTANCE, ResourceName, ResourceType);
-
-    try
-      FileName := GetOpenSSLBinaryPath() + Name;
-      if FileExists(FileName) and SameFile(FileName, Stream) then
-        Exit;
-
-      try
-        WriteLn('Writing file: ' + FileName);
-
-        with TFileStream.Create(FileName, fmCreate or fmOpenWrite or fmShareDenyWrite) do
-        try
-          CopyFrom(Stream, Stream.Size);
-        finally
-          Free();
-        end;
-      except
-        on E: EFOpenError do
-          WriteLn('Unable to write file ' + FileName + '.');
-      end;
-    finally
-      Stream.Free();
-    end;
-  end;
-
-  Result := True; // Loop all resources
 end;
 
-procedure InitializeOpenSSL(Extract: Boolean);
+function ExtractLibCrypto(ResourceHandle: TFPResourceHMODULE; ResourceType, ResourceName: PChar; Param: PtrInt): LongBool; stdcall;
+var
+  Name: String;
 begin
-  if Extract then
-    EnumResourceNames(HINSTANCE, RT_RCDATA, @ExtractOpenSSL, 0);
+  Name := LowerCase(ResourceName);
+  if Name.StartsWith('libcrypto') then
+  begin
+    DLLUtilName := GetSimbaPath() + Name;
+    if not IsFileHash(DLLUtilName, SimbaSettings.Environment.LibCryptoHash.Value) then
+      SimbaSettings.Environment.LibCryptoHash.Value := Uncompress(TResourceStream.Create(HINSTANCE, ResourceName, ResourceType), DLLUtilName);
 
-  DLLUtilName := GetOpenSSLBinaryPath() + DLLUtilName;
-  DLLSSLName := GetOpenSSLBinaryPath() + DLLSSLName;
+    Result := False;
+  end else
+    Result := True; // Continue looping
+end;
+
+function ExtractLibSSL(ResourceHandle: TFPResourceHMODULE; ResourceType, ResourceName: PChar; Param: PtrInt): LongBool; stdcall;
+var
+  Name: String;
+begin
+  Name := LowerCase(ResourceName);
+  if Name.StartsWith('libssl') then
+  begin
+    DLLSSLName := GetSimbaPath() + Name;
+    if not IsFileHash(DLLSSLName, SimbaSettings.Environment.LibSSLHash.Value) then
+      SimbaSettings.Environment.LibSSLHash.Value := Uncompress(TResourceStream.Create(HINSTANCE, ResourceName, ResourceType), DLLSSLName);
+
+    Result := False;
+  end else
+    Result := True; // Continue looping
+end;
+
+procedure InitializeOpenSSL;
+var
+  OldSSLName, OldUtilName: String;
+begin
+  DebugLn('simba.openssl :: InitializeOpenSSL');
+
+  OldSSLName := DLLSSLName;
+  OldUtilName := DLLUtilName;
 
   try
+    EnumResourceNames(HINSTANCE, RT_RCDATA, @ExtractLibCrypto, 0);
+    EnumResourceNames(HINSTANCE, RT_RCDATA, @ExtractLibSSL, 0);
+
+    {$IFDEF DARWIN}
+    while ExtractFileExt(DLLSSLName) <> '' do
+      SetLength(DLLSSLName, Length(DLLSSLName) - Length(ExtractFileExt(DLLSSLName)));
+    while ExtractFileExt(DLLUtilName) <> '' do
+      SetLength(DLLUtilName, Length(DLLUtilName) - Length(ExtractFileExt(DLLUtilName)));
+    {$ENDIF}
+
+    DebugLn('Loading: ', DLLSSLName);
+    DebugLn('Loading: ', DLLUtilName);
+
     InitSSLInterface();
   except
     on E: Exception do
-      WriteLn('Exception whilst loading OpenSSL: ', E.Message);
+      DebugLn('Exception raised while loading OpenSSL: ', E.Message);
   end;
 
   if IsSSLLoaded() then
-    Exit;
+    DebugLn('OpenSSL Loaded');
 
-  // Revert back to using system libraries
-  DLLSSLName := ExtractFileName(DLLSSLName);
-  DLLUtilName := ExtractFileName(DLLUtilName);
+  // Restore to FPC defaults
+  DLLSSLName := OldSSLName;
+  DLLUtilName := OldUtilName;
 end;
 
 end.

@@ -865,14 +865,11 @@ begin
 end;
 
 procedure TMufasaBitmap.LoadFromRawImage(RawImage: TRawImage);
-
 var
   x,y: Int32;
   _24_old_p: PByte;
   rs,gs,bs:byte;
   NewData: PRGB32;
-
-
 begin
   // clear data
   Self.SetSize(0,0);
@@ -886,8 +883,6 @@ begin
 
  { writeln(format('LineOrder: theirs: %d, ours: %d', [RawImage.Description.LineOrder, riloTopToBottom]));  }
 
-
- // Todo, add support for other alignments.
  { if RawImage.Description.LineEnd <> rileDWordBoundary then
     raise Exception.Create('TMufasaBitmap.LoadFromRawImage - LineEnd is not rileDWordBoundary');         }
 

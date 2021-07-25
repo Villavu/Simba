@@ -20,7 +20,6 @@
 
     about form for the Mufasa Macro Library
 }
-
 unit simba.aboutform;
 
 {$mode objfpc}{$H+}
@@ -29,18 +28,22 @@ unit simba.aboutform;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
   StdCtrls, ExtCtrls;
 
 type
   TSimbaAboutForm = class(TForm)
     AboutMemo: TMemo;
-    ButtonClose: TButton;
+    ButtonExit: TButton;
     ImageSimba: TImage;
+    VersionLabel: TLabel;
     LabelTitle: TLabel;
-    LabelRevision: TLabel;
+    procedure ButtonExitClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure OkButtonClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure VersionLabelClick(Sender: TObject);
+    procedure VersionLabelMouseEnter(Sender: TObject);
+    procedure VersionLabelMouseLeave(Sender: TObject);
   end; 
 
 var
@@ -48,27 +51,59 @@ var
 
 implementation
 
-procedure TSimbaAboutForm.FormCreate(Sender: TObject);
-begin
-  Self.Caption := Format('About Simba r%d', [SIMBA_VERSION]);
-  Self.LabelRevision.Caption := Format('Revision %d', [SIMBA_VERSION]);
+{$R *.lfm}
 
+uses
+  LCLIntf, LazVersion,
+  simba.main;
+
+procedure TSimbaAboutForm.FormShow(Sender: TObject);
+begin
+  LabelTitle.Caption := Format('Simba %d', [SIMBA_VERSION]);
+  if (SIMBA_COMMIT <> '') then
+    {%H-}VersionLabel.Caption := Format('(%s)', [SIMBA_COMMIT]);
+
+  AboutMemo.Lines.Clear();
   AboutMemo.Lines.Add('Simba is released under the GPL license.');
-  AboutMemo.Lines.Add(Format('You are currently using version: %d',[SIMBA_VERSION]));
-  AboutMemo.Lines.Add(Format('Compiled with FPC version %d.%d.%d', [FPC_VERSION, FPC_RELEASE, FPC_PATCH]));
+  AboutMemo.Lines.Add('');
+  AboutMemo.Lines.Add('You are currently using version: %d', [SIMBA_VERSION]);
+  AboutMemo.Lines.Add('');
+  AboutMemo.Lines.Add('SHA1:');
+  AboutMemo.Lines.Add('  %s', [SimbaForm.BinaryHash]);
+  AboutMemo.Lines.Add('');
+  AboutMemo.Lines.Add('Built with:');
+  AboutMemo.Lines.Add('  FPC %d.%d.%d', [FPC_VERSION, FPC_RELEASE, FPC_PATCH]);
+  AboutMemo.Lines.Add('  Lazarus version %s', [LAZ_VERSION]);
   AboutMemo.Lines.Add('');
   AboutMemo.Lines.Add('Please report bugs at: http://bugs.villavu.com/');
-  AboutMemo.ReadOnly := True;
 end;
 
-procedure TSimbaAboutForm.OkButtonClick(Sender: TObject);
+procedure TSimbaAboutForm.ButtonExitClick(Sender: TObject);
 begin
-  Self.ModalResult := mrOK;
-  Self.Hide;
+  Close();
 end;
 
-initialization
-  {$R *.lfm}
+procedure TSimbaAboutForm.FormCreate(Sender: TObject);
+begin
+  Width := 500;
+  Height := 450;
+end;
+
+procedure TSimbaAboutForm.VersionLabelClick(Sender: TObject);
+begin
+  if (SIMBA_COMMIT <> '') then
+    {%H-}OpenURL(SIMBA_COMMIT_URL);
+end;
+
+procedure TSimbaAboutForm.VersionLabelMouseEnter(Sender: TObject);
+begin
+  TLabel(Sender).Font.Underline := True;
+end;
+
+procedure TSimbaAboutForm.VersionLabelMouseLeave(Sender: TObject);
+begin
+  TLabel(Sender).Font.Underline := False;
+end;
 
 end.
 

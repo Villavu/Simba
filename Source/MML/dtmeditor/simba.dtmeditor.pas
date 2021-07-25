@@ -5,7 +5,7 @@ unit simba.dtmeditor;
 interface
 
 uses
-  classes, sysutils, fileutil, dividerbevel, lresources, forms, controls,
+  classes, sysutils, fileutil, dividerbevel, forms, controls,
   graphics, dialogs, extctrls, comctrls, stdctrls, menus, lcltype,
   simba.client, simba.dtm, simba.imagebox, simba.mufasatypes;
 
@@ -99,13 +99,15 @@ type
 
     procedure DrawDTM;
   public
-    OnPrintDTM: procedure(constref DTM: String) of object;
+    OnPrintDTM: procedure(DTM: String) of object;
 
     constructor Create(TargetWindow: THandle); reintroduce;
     destructor Destroy; override;
   end;
 
 implementation
+
+{$R *.lfm}
 
 uses
   math,
@@ -640,9 +642,6 @@ begin
 
   inherited Destroy();
 end;
-
-initialization
-  {$I simba.dtmeditor.lrs}
 
 end.
 

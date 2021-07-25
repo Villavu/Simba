@@ -1,18 +1,21 @@
 object SimbaDebugForm: TSimbaDebugForm
-  Left = 64
+  Left = -807
   Height = 371
-  Top = 593
+  Top = 622
   Width = 541
   Caption = 'Output'
   ClientHeight = 371
   ClientWidth = 541
-  LCLVersion = '2.0.6.0'
+  LCLVersion = '2.2.0.1'
   inline Editor: TSynEdit
-    Left = 0
-    Height = 371
+    Left = 3
+    Height = 368
     Top = 0
-    Width = 541
+    Width = 535
     Align = alClient
+    BorderSpacing.Left = 3
+    BorderSpacing.Right = 3
+    BorderSpacing.Bottom = 3
     Color = clWindow
     Font.Height = -13
     Font.Name = 'Courier New'
@@ -510,8 +513,8 @@ object SimbaDebugForm: TSimbaDebugForm
     end
   end
   object EditorPopupMenu: TPopupMenu
-    left = 40
-    top = 24
+    Left = 56
+    Top = 24
     object MenuItemCut: TMenuItem
       Caption = 'Cut'
       OnClick = MenuItemCutClick
@@ -537,9 +540,9 @@ object SimbaDebugForm: TSimbaDebugForm
     end
   end
   object Timer: TTimer
-    Interval = 350
+    Interval = 300
     OnTimer = TimerExecute
-    left = 144
-    top = 24
+    Left = 144
+    Top = 24
   end
 end

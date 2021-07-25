@@ -5,11 +5,12 @@
     <General>
       <Flags>
         <MainUnitHasUsesSectionForAllUnits Value="False"/>
-        <LRSInOutputDirectory Value="False"/>
-        <CompatibilityMode Value="True"/>
+        <MainUnitHasTitleStatement Value="False"/>
+        <MainUnitHasScaledStatement Value="False"/>
       </Flags>
       <SessionStorage Value="InIDEConfig"/>
       <Title Value="Simba"/>
+      <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
       <XPManifest>
         <DpiAware Value="True/PM"/>
@@ -19,14 +20,14 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <MajorVersionNr Value="1"/>
-      <MinorVersionNr Value="4"/>
+      <MinorVersionNr Value="5"/>
       <Language Value="0809"/>
       <CharSet Value="04B0"/>
-      <StringTable CompanyName="Villavu.com" FileDescription="Simba: http://wizzup.org/simba/" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="1.4"/>
+      <StringTable CompanyName="Villavu.com" FileDescription="Simba: http://wizzup.org/simba/" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="1.5"/>
     </VersionInfo>
-    <BuildModes Count="10">
-      <Item1 Name="SIMBA_WIN64" Default="True"/>
-      <Item2 Name="SIMBA_WIN32">
+    <BuildModes>
+      <Item Name="SIMBA_WIN64" Default="True"/>
+      <Item Name="SIMBA_WIN32">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -35,7 +36,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
             <Libraries Value="../../Modules/lape/extensions/ffi/bin/win32"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -48,13 +49,13 @@
             <TargetCPU Value="i386"/>
             <TargetOS Value="win32"/>
             <Optimizations>
-              <OptimizationLevel Value="3"/>
+              <OptimizationLevel Value="2"/>
             </Optimizations>
           </CodeGeneration>
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
-              <StripSymbols Value="True"/>
+              <DebugInfoType Value="dsDwarf2Set"/>
             </Debugging>
             <LinkSmart Value="True"/>
           </Linking>
@@ -67,8 +68,8 @@
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
-      </Item2>
-      <Item3 Name="SIMBA_AARCH64">
+      </Item>
+      <Item Name="SIMBA_AARCH64">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -76,11 +77,12 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
             <SyntaxOptions>
+              <SyntaxMode Value="DelphiUnicode"/>
               <CStyleMacros Value="True"/>
             </SyntaxOptions>
           </Parsing>
@@ -89,13 +91,12 @@
             <TargetCPU Value="aarch64"/>
             <TargetOS Value="linux"/>
             <Optimizations>
-              <OptimizationLevel Value="3"/>
+              <OptimizationLevel Value="2"/>
             </Optimizations>
           </CodeGeneration>
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
-              <StripSymbols Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
           </Linking>
@@ -104,15 +105,11 @@
               <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dLape_CDECL"/>
-            <ExecuteBefore>
-              <ShowAllMessages Value="True"/>
-              <CompileReasons Run="False"/>
-            </ExecuteBefore>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
-      </Item3>
-      <Item4 Name="SIMBA_LINUX64">
+      </Item>
+      <Item Name="SIMBA_LINUX64">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -120,7 +117,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -133,13 +130,12 @@
             <TargetCPU Value="x86_64"/>
             <TargetOS Value="linux"/>
             <Optimizations>
-              <OptimizationLevel Value="3"/>
+              <OptimizationLevel Value="2"/>
             </Optimizations>
           </CodeGeneration>
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
-              <StripSymbols Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
           </Linking>
@@ -151,8 +147,8 @@
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
-      </Item4>
-      <Item5 Name="SIMBA_DARWIN64">
+      </Item>
+      <Item Name="SIMBA_DARWIN64">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -163,7 +159,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -176,13 +172,12 @@
             <TargetCPU Value="x86_64"/>
             <TargetOS Value="darwin"/>
             <Optimizations>
-              <OptimizationLevel Value="3"/>
+              <OptimizationLevel Value="2"/>
             </Optimizations>
           </CodeGeneration>
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
-              <StripSymbols Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
           </Linking>
@@ -192,14 +187,14 @@
             </CompilerMessages>
             <CustomOptions Value="-dLape_CDECL"/>
             <ExecuteAfter>
-              <Command Value="macosbundle/make.sh"/>
+              <Command Value="macos/make-bundle.sh"/>
               <CompileReasons Run="False"/>
             </ExecuteAfter>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
-      </Item5>
-      <Item6 Name="SIMBA_WIN64_DEBUG">
+      </Item>
+      <Item Name="SIMBA_WIN64_DEBUG">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -208,7 +203,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
             <Libraries Value="../../Modules/lape/extensions/ffi/bin/win64"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -223,6 +218,9 @@
             <TargetOS Value="win64"/>
           </CodeGeneration>
           <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+            </Debugging>
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
@@ -234,8 +232,8 @@
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
-      </Item6>
-      <Item7 Name="SIMBA_WIN32_DEBUG">
+      </Item>
+      <Item Name="SIMBA_WIN32_DEBUG">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -244,7 +242,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
             <Libraries Value="../../Modules/lape/extensions/ffi/bin/win32"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -259,6 +257,9 @@
             <TargetOS Value="win32"/>
           </CodeGeneration>
           <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+            </Debugging>
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
@@ -270,8 +271,8 @@
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
-      </Item7>
-      <Item8 Name="SIMBA_AARCH64_DEBUG">
+      </Item>
+      <Item Name="SIMBA_AARCH64_DEBUG">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -279,7 +280,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -304,8 +305,8 @@
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
-      </Item8>
-      <Item9 Name="SIMBA_LINUX64_DEBUG">
+      </Item>
+      <Item Name="SIMBA_LINUX64_DEBUG">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -313,7 +314,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -338,8 +339,8 @@
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
-      </Item9>
-      <Item10 Name="SIMBA_DARWIN64_DEBUG">
+      </Item>
+      <Item Name="SIMBA_DARWIN64_DEBUG">
         <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -350,7 +351,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -379,7 +380,7 @@
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
-      </Item10>
+      </Item>
       <SharedMatrixOptions Count="2">
         <Item1 ID="157994458805" Modes="SIMBA_DARWIN64" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
         <Item2 ID="444724025705" Modes="SIMBA_DARWIN64_DEBUG" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
@@ -389,317 +390,263 @@
       <Version Value="2"/>
     </PublishOptions>
     <RunParams>
-      <local>
-        <LaunchingApplication PathPlusParams="/usr/bin/gnome-terminal -t &apos;Lazarus Run Output&apos; -e &apos;$(LazarusDir)/tools/runwait.sh $(TargetCmdLine)&apos;"/>
-      </local>
       <FormatVersion Value="2"/>
-      <Modes Count="1">
-        <Mode0 Name="default">
+      <Modes>
+        <Mode Name="default">
           <local>
             <LaunchingApplication PathPlusParams="/usr/bin/gnome-terminal -t &apos;Lazarus Run Output&apos; -e &apos;$(LazarusDir)/tools/runwait.sh $(TargetCmdLine)&apos;"/>
           </local>
-        </Mode0>
+        </Mode>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="4">
-      <Item1>
-        <PackageName Value="AnchorDocking"/>
-      </Item1>
-      <Item2>
-        <PackageName Value="LazControls"/>
-      </Item2>
-      <Item3>
+    <RequiredPackages>
+      <Item>
         <PackageName Value="SynEdit"/>
-        <MinVersion Major="1" Valid="True"/>
-      </Item3>
-      <Item4>
+      </Item>
+      <Item>
+        <PackageName Value="AnchorDocking"/>
+      </Item>
+      <Item>
+        <PackageName Value="LazControls"/>
+      </Item>
+      <Item>
         <PackageName Value="LCL"/>
-      </Item4>
+      </Item>
     </RequiredPackages>
-    <Units Count="58">
-      <Unit0>
+    <Units>
+      <Unit>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
-      </Unit0>
-      <Unit1>
+      </Unit>
+      <Unit>
         <Filename Value="simba.main.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit1>
-      <Unit2>
-        <Filename Value="colorpicker/simba.colorpicker_historyform.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="SimbaColorHistoryForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-      </Unit2>
-      <Unit3>
+      </Unit>
+      <Unit>
         <Filename Value="simba.aboutform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaAboutForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit3>
-      <Unit4>
+      </Unit>
+      <Unit>
         <Filename Value="simba.debugimage.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaDebugImageForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit4>
-      <Unit5>
+      </Unit>
+      <Unit>
         <Filename Value="simba.scriptinstance.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit5>
-      <Unit6>
-        <Filename Value="simba.resourceextractor.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit6>
-      <Unit7>
-        <Filename Value="../../MML/generics/simba.generics.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit7>
-      <Unit8>
-        <Filename Value="../../MML/generics/simbastack.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit8>
-      <Unit9>
+      </Unit>
+      <Unit>
         <Filename Value="simba.autocomplete.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit9>
-      <Unit10>
+      </Unit>
+      <Unit>
         <Filename Value="simba.scripttab.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit10>
-      <Unit11>
+      </Unit>
+      <Unit>
         <Filename Value="simba.editor.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit11>
-      <Unit12>
+      </Unit>
+      <Unit>
         <Filename Value="simba.scripttabhistory.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit12>
-      <Unit13>
+      </Unit>
+      <Unit>
         <Filename Value="simba.scripttabsform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaScriptTabsForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit13>
-      <Unit14>
+      </Unit>
+      <Unit>
         <Filename Value="simba.debugform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaDebugForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit14>
-      <Unit15>
+      </Unit>
+      <Unit>
         <Filename Value="simba.functionlistform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaFunctionListForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit15>
-      <Unit16>
+      </Unit>
+      <Unit>
         <Filename Value="simba.filebrowserform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaFileBrowserForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit16>
-      <Unit17>
+      </Unit>
+      <Unit>
         <Filename Value="simba.notesform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaNotesForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit17>
-      <Unit18>
+      </Unit>
+      <Unit>
         <Filename Value="simba.settings.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit18>
-      <Unit19>
+      </Unit>
+      <Unit>
         <Filename Value="settings/simba.settingsform_editor_font.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="EditorFontFrame"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-      </Unit19>
-      <Unit20>
+      </Unit>
+      <Unit>
         <Filename Value="settings/simba.settingsform_editor_colors.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="EditorColorsFrame"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-      </Unit20>
-      <Unit21>
-        <Filename Value="settings/simba.settingsform_environment.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="EnvironmentFrame"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Frame"/>
-      </Unit21>
-      <Unit22>
+      </Unit>
+      <Unit>
         <Filename Value="settings/simba.settingsform_editor_general.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="EditorGeneralFrame"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-      </Unit22>
-      <Unit23>
+      </Unit>
+      <Unit>
         <Filename Value="settings/simba.settingsform_gui.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="GUIFrame"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-      </Unit23>
-      <Unit24>
-        <Filename Value="simba.setting.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit24>
-      <Unit25>
+      </Unit>
+      <Unit>
         <Filename Value="simba.editor_attributes.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit25>
-      <Unit26>
+      </Unit>
+      <Unit>
         <Filename Value="colorpicker/simba.colorpicker.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit26>
-      <Unit27>
-        <Filename Value="simba.simbamethods.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit27>
-      <Unit28>
-        <Filename Value="../../Components/simba.imagebox.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit28>
-      <Unit29>
-        <Filename Value="../../MML/simba.bitmap_helpers.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit29>
-      <Unit30>
-        <Filename Value="../../Components/simba.imagebox_overlay.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit30>
-      <Unit31>
+      </Unit>
+      <Unit>
         <Filename Value="parser/simba.ci_includecache.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit31>
-      <Unit32>
-        <Filename Value="../../MML/oswindow/oswindow_darwin.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit32>
-      <Unit33>
-        <Filename Value="../../MML/simba.scriptpluginloader.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit33>
-      <Unit34>
+      </Unit>
+      <Unit>
         <Filename Value="simba.scriptformatter.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit34>
-      <Unit35>
-        <Filename Value="simba.tokenizer.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit35>
-      <Unit36>
+      </Unit>
+      <Unit>
         <Filename Value="simba.debuggerform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaDebuggerForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit36>
-      <Unit37>
-        <Filename Value="simba.simplefiledialog.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="SimbaFileDialog"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-      </Unit37>
-      <Unit38>
+      </Unit>
+      <Unit>
         <Filename Value="simba.associate.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit38>
-      <Unit39>
+      </Unit>
+      <Unit>
         <Filename Value="script/simba.script.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit39>
-      <Unit40>
-        <Filename Value="script/simba.script_base.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit40>
-      <Unit41>
+      </Unit>
+      <Unit>
         <Filename Value="script/simba.script_dump.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit41>
-      <Unit42>
+      </Unit>
+      <Unit>
         <Filename Value="openssl/simba.openssl.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit42>
-      <Unit43>
+      </Unit>
+      <Unit>
         <Filename Value="script/simba.script_debugger.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit43>
-      <Unit44>
-        <Filename Value="../MML/matchtemplate/simba.matchtemplate_rgbimage.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit44>
-      <Unit45>
-        <Filename Value="../MML/matchtemplate/simba.matchtemplate_greyimage.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit45>
-      <Unit46>
+      </Unit>
+      <Unit>
         <Filename Value="../MML/simba.heaparray.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit46>
-      <Unit47>
+      </Unit>
+      <Unit>
         <Filename Value="../MML/windows/simba.windows_helpers.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit47>
-      <Unit48>
+      </Unit>
+      <Unit>
         <Filename Value="simba.inc"/>
         <IsPartOfProject Value="True"/>
-      </Unit48>
-      <Unit49>
+      </Unit>
+      <Unit>
         <Filename Value="../MML/simba.init.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit49>
-      <Unit50>
+      </Unit>
+      <Unit>
         <Filename Value="../MML/simba.textdrawer.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit50>
-      <Unit51>
+      </Unit>
+      <Unit>
         <Filename Value="../MML/simba.fastarray.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit51>
-      <Unit52>
+      </Unit>
+      <Unit>
         <Filename Value="package/simba.package_github_releases.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit52>
-      <Unit53>
+      </Unit>
+      <Unit>
         <Filename Value="script/simba.script_compiler_onterminate.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit53>
-      <Unit54>
+      </Unit>
+      <Unit>
         <Filename Value="script/simba.script_compiler_waituntil.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit54>
-      <Unit55>
+      </Unit>
+      <Unit>
         <Filename Value="script/simba.script_compiler_debugger.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit55>
-      <Unit56>
+      </Unit>
+      <Unit>
         <Filename Value="../MML/simba.process.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit56>
-      <Unit57>
-        <Filename Value="simba.scripttemplateform.pas"/>
+      </Unit>
+      <Unit>
+        <Filename Value="simba.openexampleform.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="SimbaScriptTemplateForm"/>
+        <ComponentName Value="SimbaOpenExampleForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit57>
+      </Unit>
+      <Unit>
+        <Filename Value="../MML/process_helpers/simba.process_helpers_linux.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../MML/process_helpers/simba.process_helpers_darwin.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="simba.fonthelpers.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="simba.colorpickerhistoryform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SimbaColorPickerHistoryForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit>
+      <Unit>
+        <Filename Value="simba.imageboxzoom.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="simba.functionlistupdater.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -710,7 +657,7 @@
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
       <Libraries Value="../../Modules/lape/extensions/ffi/bin/win64"/>
-      <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/matchtemplate;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows"/>
+      <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
       <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -723,13 +670,13 @@
       <TargetCPU Value="x86_64"/>
       <TargetOS Value="win64"/>
       <Optimizations>
-        <OptimizationLevel Value="3"/>
+        <OptimizationLevel Value="2"/>
       </Optimizations>
     </CodeGeneration>
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
-        <StripSymbols Value="True"/>
+        <DebugInfoType Value="dsDwarf2Set"/>
       </Debugging>
       <LinkSmart Value="True"/>
     </Linking>
@@ -743,25 +690,13 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="6">
-      <Item1>
-        <Name Value="lpException"/>
-      </Item1>
-      <Item2>
+    <Exceptions>
+      <Item>
         <Name Value="EHTTPClient"/>
-      </Item2>
-      <Item3>
-        <Name Value="ESocketError"/>
-      </Item3>
-      <Item4>
+      </Item>
+      <Item>
         <Name Value="ESyntaxError"/>
-      </Item4>
-      <Item5>
-        <Name Value="EAnchorDockLayoutError"/>
-      </Item5>
-      <Item6>
-        <Name Value="Exception"/>
-      </Item6>
+      </Item>
     </Exceptions>
   </Debugging>
 </CONFIG>

@@ -14,13 +14,14 @@ function DumpPlugin(Plugin: String): TStringList;
 implementation
 
 uses
-  lpparser, lptypes, lpvartypes, lptree,
+  lazloggerbase,
+  lpparser, lptypes, lpvartypes, lptree, Contnrs,
   simba.script_compiler, simba.script_plugin;
 
 type
   TCompilerDump = class(TSimbaScript_Compiler)
   protected
-    FList: TStringList;
+    FHashList: TFPHashObjectList;
 
     procedure InitBaseDefinitions; override;
     procedure InitBaseMath; override;
@@ -32,7 +33,7 @@ type
     procedure WriteMethod(Header: String);
     procedure Write(Header: String);
   public
-    procedure addBaseDefine(Define: lpString; AValue: lpString = ''); override;
+    procedure addBaseDefine(Define: lpString; Value: lpString = ''); override;
 
     function addDelayedCode(Code: lpString; AFileName: lpString = ''; AfterCompilation: Boolean = True; IsGlobal: Boolean = True): TLapeTree_Base; override;
     function addGlobalFunc(Header: lpString; Value: Pointer): TLapeGlobalVar; override;
@@ -41,18 +42,24 @@ type
     function addGlobalVar(AVar: TLapeGlobalVar; AName: lpString = ''): TLapeGlobalVar; override;
     function addGlobalVar(Typ: lpString; Value: lpString; AName: lpString): TLapeGlobalVar; override;
 
-    procedure Dump(Strings: TStringList);
+    function Dump: TStringList;
 
     constructor Create; reintroduce;
     destructor Destroy; override;
   end;
 
 procedure TCompilerDump.Write(Header: String);
+var
+  List: TObject;
 begin
-  if (FList = nil) or (FSection = '') then
+  if (FHashList = nil) or (FSection = '') then
     Exit;
 
-  FList.Values[FSection] := FList.Values[FSection] + Header + LineEnding;
+  List := FHashList.Find(FSection);
+  if (List = nil) then
+    List := FHashList[FHashList.Add(FSection, TStringList.Create())];
+
+  TStringList(List).Add(Header);
 end;
 
 procedure TCompilerDump.InitBaseDefinitions;
@@ -105,15 +112,12 @@ end;
 
 procedure TCompilerDump.WriteMethod(Header: String);
 begin
-  if (FList = nil) or (FSection = '') then
-    Exit;
-
   Header := Trim(Header);
   if not Header.EndsWith(';') then
     Header := Header + ';';
   Header := Header + ' external;';
 
-  FList.Values[FSection] := FList.Values[FSection] + Header + LineEnding;
+  Write(Header);
 end;
 
 function TCompilerDump.addGlobalFunc(Header: lpString; Value: Pointer): TLapeGlobalVar;
@@ -164,16 +168,16 @@ begin
     Write(Code);
 end;
 
-procedure TCompilerDump.addBaseDefine(Define: lpString; AValue: lpString);
+procedure TCompilerDump.addBaseDefine(Define: lpString; Value: lpString);
 begin
-  inherited addBaseDefine(Define, AValue);
+  inherited addBaseDefine(Define, Value);
 
   Write(Format('{$DEFINE %s}', [Define]));
 end;
 
 constructor TCompilerDump.Create;
 begin
-  FList := TStringList.Create();
+  FHashList := TFPHashObjectList.Create();
 
   inherited Create(TLapeTokenizerString.Create('begin end.', ''));
 
@@ -214,14 +218,16 @@ end;
 
 destructor TCompilerDump.Destroy;
 begin
-  FList.Free();
+  if (FHashList <> nil) then
+    FreeAndNil(FHashList);
 
   inherited Destroy();
 end;
 
-procedure TCompilerDump.Dump(Strings: TStringList);
+function TCompilerDump.Dump: TStringList;
 var
   Decl: TLapeDeclaration;
+  I: Integer;
 begin
   Import();
 
@@ -233,8 +239,7 @@ begin
       if (FSection = '') or (FSection[1] = '!') then
         Continue;
 
-      if (Name = '') or (Name = 'nil') or (VarType.Name = '') or
-         (BaseType in [ltUnknown, ltScriptMethod, ltImportedMethod]) then
+      if (Name = '') or (Name = 'nil') or (VarType.Name = '') or (BaseType in [ltUnknown, ltScriptMethod, ltImportedMethod]) then
         Continue;
 
       if isConstant then
@@ -244,30 +249,35 @@ begin
     end;
   end;
 
-  Strings.Clear();
-  Strings.AddStrings(FList);
+  Result := TStringList.Create();
+  Result.LineBreak := #0;
+  for I := 0 to FHashList.Count - 1 do
+    Result.Values[FHashList.NameOfIndex(I)] := TStringList(FHashList[I]).Text;
 end;
 
 function DumpCompiler: TStringList;
 begin
-  Result := TStringList.Create();
+  Result := nil;
 
-  with TCompilerDump.Create() do
   try
-    Dump(Result);
-  finally
-    Free();
+    with TCompilerDump.Create() do
+      Result := Dump();
+  except
+    on E: Exception do
+      DebugLn('DumpCompiler: ', E.Message);
   end;
 end;
 
 function DumpPlugin(Plugin: String): TStringList;
 begin
-  Result := TStringList.Create();
+  Result := nil;
 
   try
     with TSimbaScriptPlugin.Create(Plugin) do
-      Result.AddStrings(Dump);
+      Result := Dump();
   except
+    on E: Exception do
+      DebugLn('DumpPlugin: ', E.Message);
   end;
 end;
 

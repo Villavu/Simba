@@ -1,36 +1,39 @@
+// Originally by Nielsie95 at http://villavu.com/forum/showthread.php?t=35513
 unit simba.scriptformatter;
 
-{
-  Original Code Thread: http://villavu.com/forum/showthread.php?t=35513
-  by Nielsie95
-}
-
 {$mode objfpc}{$H+}
+{$I simba.inc}
 
 interface
 
 uses
-  classes, sysutils,
-  simba.tokenizer;
+  classes, sysutils;
+
+function FormatScript(const Script: String): String;
+
+implementation
+
+uses
+  simba.paslex;
 
 type
   TSimbaCodeFormatter = class
   protected
   type
-    EInType = (None, InFunc, InFuncDecl, InVar);
+    EBlockType = (None, InFuncBlock, InFuncHeaderBlock, InVarBlock);
   protected
     FOutput: String;
-    FTokenizer: TSimbaTokenizerString;
+    FLexer: TPasLexer;
 
-    FInType: EInType;
+    FInBlock: EBlockType;
 
-    FIndents: array[0..1000] of Int32;
-    FIndent: Int32;
-    FProcIndents: array[0..1000] of Int32;
-    FProcIndent: Int32;
-    FElseIndent: Int32;
+    FIndents: array[0..1000] of Integer;
+    FIndent: Integer;
+    FProcIndents: array[0..1000] of Integer;
+    FProcIndent: Integer;
+    FElseIndent: Integer;
 
-    FBeginCount: Int32;
+    FBeginCount: Integer;
 
     FFirstInLine: Boolean;
 
@@ -41,142 +44,60 @@ type
     procedure Add;
     procedure AddLine;
     procedure AddDirective;
-    procedure AddComment;
   public
-    function Format(constref Script: String): String;
+    function Format(Script: String): String;
 
     constructor Create;
     destructor Destroy; override;
   end;
 
-function FormatScript(constref Script: String): String;
-
-implementation
-
-const
-  Formatter_Keywords = ParserToken_Keywords + ParserToken_Operators - [tk_op_Dot, tk_op_Index];
-
-type
-  TSimbaFormatter_Tokenizer = class(TSimbaTokenizerString)
-    function HandleDirective: Boolean; override;
- end;
-
-function TSimbaFormatter_Tokenizer.HandleDirective: Boolean;
-begin
-  Result := True;
-
-  while (not (getChar(1) in ['}', #0])) do
-  begin
-    Inc(FPos);
-
-    if (CurChar in [#10, #13]) then
-    begin
-      if (CurChar = #13) and (getChar(1) = #10) then
-        Inc(FPos);
-
-      Inc(FDocPos.Line);
-    end;
-  end;
-
-  Inc(FPos);
-end;
-
-procedure TSimbaCodeFormatter.AddLine();
-begin
-  if (FOutput <> '') then
-    FOutput := FOutput + LineEnding;
-
-  FFirstInLine := True;
-end;
-
-procedure TSimbaCodeFormatter.AddDirective;
-begin
-  FOutput := FOutput + FTokenizer.TokString;
-
-  FFirstInLine := False;
-  FLastAsSpace := False;
-  FLastWasKeyword := False;
-
-  AddLine();
-end;
-
-procedure TSimbaCodeFormatter.AddComment;
-begin
-  case FTokenizer.TokString.StartsWith('//') of
-    False:
-      begin
-        if (not FLastWasComment) and (FInType <> InFunc) and (not FFirstInLine) then
-          AddLine();
-        if (FInType <> InFunc) then
-          AddLine()
-        else if (not FFirstInLine) then
-          AddLine();
-
-        FOutput := FOutput + FTokenizer.TokString;
-      end;
-
-    True:
-      begin
-        if (not FFirstInLine) then
-          AddLine();
-
-        FOutput := FOutput + StringOfChar(' ', 2 * (FIndents[FIndent] + FElseIndent)) + FTokenizer.TokString;
-      end;
-  end;
-
-  FFirstInLine := False;
-  FLastAsSpace := False;
-  FLastWasKeyword := False;
-  FLastWasComment := True;
-end;
-
 procedure TSimbaCodeFormatter.Add;
 var
   IsKeyword: Boolean;
 begin
-  IsKeyword := FTokenizer.Tok in Formatter_Keywords;
+  IsKeyword := FLexer.TokenID in PasTokens_Keywords;
   if FLastWasComment and (not FFirstInLine) then
     AddLine();
 
   FLastWasComment := False;
 
   if FFirstInLine then
-    if (FTokenizer.Tok in [tk_kw_End, tk_kw_Until]) then
+    if (FLexer.TokenID in [tkEnd, tkUntil]) then
       FOutput := FOutput + StringOfChar(' ', 2 * (FIndents[FIndent] + FElseIndent - 1))
     else
       FOutput := FOutput + StringOfChar(' ', 2 * (FIndents[FIndent] + FElseIndent));
 
   if IsKeyWord then
   begin
-    if (FFirstInLine or FLastAsSpace) and (not (FTokenizer.Tok in [tk_op_Assign, tk_op_AssignDiv, tk_op_AssignMinus, tk_op_AssignMul, tk_op_AssignPlus])) then  // =+ etc
-      FOutput := FOutput + LowerCase(FTokenizer.TokString)
+    if (FFirstInLine or FLastAsSpace) and (not (FLexer.TokenID in [tkAssign, tkAssignPlus, tkAssignDiv, tkAssignMinus, tkAssignMul])) then
+      FOutput := FOutput + LowerCase(FLexer.Token)
     else
-      FOutput := FOutput + ' ' + LowerCase(FTokenizer.TokString);
+      FOutput := FOutput + ' ' + LowerCase(FLexer.Token);
 
     FLastAsSpace := False;
   end else
   begin
-    case FTokenizer.Tok of
-      tk_sym_ParenthesisOpen, tk_sym_BracketOpen:
+    case FLexer.TokenID of
+      tkRoundOpen, tkSquareOpen:
         begin
           if FLastWasKeyword then
-            FOutput := FOutput + ' ' + FTokenizer.TokString
+            FOutput := FOutput + ' ' + FLexer.Token
           else
-            FOutput := FOutput + FTokenizer.TokString;
+            FOutput := FOutput + FLexer.Token;
 
           FLastAsSpace := True;
         end;
 
-      tk_sym_Dot:
+      tkDot, tkDotDot:
         begin
-          FOutput := FOutput + FTokenizer.TokString;
+          FOutput := FOutput + FLexer.Token;
 
           FLastAsSpace := True;
         end;
 
-      tk_sym_Comma:
+      tkComma:
         begin
-          FOutput := FOutput + FTokenizer.TokString;
+          FOutput := FOutput + FLexer.Token;
 
           FFirstInLine := False;
           FLastAsSpace := False;
@@ -185,17 +106,30 @@ begin
           Exit;
         end;
 
-      tk_sym_Colon, tk_sym_SemiColon, tk_sym_ParenthesisClose, tk_sym_BracketClose:
+      tkColon, tkSemiColon, tkRoundClose, tkSquareClose:
         begin
-          FOutput := FOutput + FTokenizer.TokString;
+          FOutput := FOutput + FLexer.Token;
 
           FLastAsSpace := False;
         end;
 
-      tk_op_Assign, tk_op_AssignDiv, tk_op_AssignMinus, tk_op_AssignMul, tk_op_AssignPlus,
-      tk_op_Divide, tk_op_Multiply, tk_op_Minus, tk_op_Plus:
+      tkDiv, tkStar, tkMinus, tkPlus:
         begin
-          FOutput := FOutput + ' ' + FTokenizer.TokString;
+          //if (FLexer.TokenPos > 1) and (FLexer.Origin[FLexer.TokenPos - 1] <> #32) then
+          //  FOutput := FOutput + FLexer.Token
+          //else
+            FOutput := FOutput + ' ' + FLexer.Token;
+
+          FFirstInLine := False;
+          FLastAsSpace := False;
+          FLastWasKeyword := False;
+
+          Exit;
+        end;
+
+      tkAssign, tkAssignPlus, tkAssignDiv, tkAssignMinus, tkAssignMul:
+        begin
+          FOutput := FOutput + ' ' + FLexer.Token;
           FFirstInLine := False;
           FLastAsSpace := False;
           FLastWasKeyword := True;
@@ -205,9 +139,9 @@ begin
       else
       begin
         if FFirstInLine or FLastAsSpace then
-          FOutput := FOutput + FTokenizer.TokString
+          FOutput := FOutput + FLexer.Token
         else
-          FOutput := FOutput + ' ' + FTokenizer.TokString;
+          FOutput := FOutput + ' ' + FLexer.Token;
 
         FLastAsSpace := False;
       end;
@@ -218,7 +152,26 @@ begin
   FLastWasKeyword := IsKeyword;
 end;
 
-function TSimbaCodeFormatter.Format(constref Script: String): String;
+procedure TSimbaCodeFormatter.AddLine;
+begin
+  if (FOutput <> '') and (not FOutput.EndsWith(LineEnding+LineEnding)) then
+    FOutput := FOutput + LineEnding;
+
+  FFirstInLine := True;
+end;
+
+procedure TSimbaCodeFormatter.AddDirective;
+begin
+  FOutput := FOutput + FLexer.Token;
+
+  FFirstInLine := False;
+  FLastAsSpace := False;
+  FLastWasKeyword := False;
+
+  AddLine();
+end;
+
+function TSimbaCodeFormatter.Format(Script: String): String;
 
   procedure Reset;
   begin
@@ -229,7 +182,7 @@ function TSimbaCodeFormatter.Format(constref Script: String): String;
     FLastWasComment := False;
 
     FBeginCount := 0;
-    FInType := None;
+    FInBlock := None;
     FFirstInLine := True;
 
     FElseIndent := 0;
@@ -241,32 +194,39 @@ function TSimbaCodeFormatter.Format(constref Script: String): String;
   end;
 
   procedure Next;
+  var
+    EmptyLineCount: Integer = 0;
   begin
     repeat
-      FTokenizer.Next();
-    until (not (FTokenizer.Tok in [tk_NewLine, tk_WhiteSpace]));
+      FLexer.Next();
+      if (FLexer.TokenID = tkLineEnding) then
+        Inc(EmptyLineCount);
+    until (not (FLexer.TokenID in [tkLineEnding, tkSpace]));
+
+    if (EmptyLineCount > 1) then
+    begin
+      if not FOutput.EndsWith(LineEnding) then
+        FOutput += LineEnding;
+      FOutput += LineEnding;
+    end;
   end;
 
 var
   BraceCount: Integer;
 begin
-  FTokenizer.Doc := Script;
-
   Reset();
-  Next();
 
-  while (FTokenizer.Tok <> tk_NULL) do
+  FLexer.Origin := PChar(Script);
+
+  while (FLexer.TokenID <> tkNull) do
   begin
-    case FTokenizer.Tok of
-      tk_Directive:
+    case FLexer.TokenID of
+      tkDirective:
         AddDirective();
 
-      tk_Comment:
-        AddComment();
-
-      tk_kw_Procedure, tk_kw_Function, tk_kw_Operator:
+      tkProcedure, tkFunction, tkOperator:
         begin
-          if (FInType = InVar) and (FIndent > 0) then
+          if (FInBlock = InVarBlock) and (FIndent > 0) then
             Dec(FIndent);
 
           FElseIndent := 0;
@@ -284,23 +244,23 @@ begin
           Next();
           Add();
 
-          FInType := InFuncDecl;
+          FInBlock := InFuncHeaderBlock;
         end;
 
-      tk_sym_ParenthesisOpen:
+      tkRoundOpen:
         begin
-          if (FInType = InVar) then
+          if (FInBlock = InVarBlock) then
             FLastWasKeyword := True;
 
           Add();
           Next();
           BraceCount := 1;
 
-          while (FTokenizer.Tok <> tk_NULL) and (BraceCount > 0) do
+          while (FLexer.TokenID <> tkNull) and (BraceCount > 0) do
           begin
-            if (FTokenizer.Tok = tk_sym_ParenthesisOpen) then
+            if (FLexer.TokenID = tkRoundOpen) then
               Inc(BraceCount)
-            else if (FTokenizer.Tok = tk_sym_ParenthesisClose) then
+            else if (FLexer.TokenID = tkRoundClose) then
               Dec(BraceCount);
 
             Add();
@@ -310,14 +270,14 @@ begin
           Continue;
         end;
 
-      tk_kw_Do, tk_kw_Then:
+      tkDo, tkThen:
         begin
           Add();
           Next();
 
-          if (FTokenizer.Tok = tk_kw_Begin) then
+          if (FLexer.TokenID = tkBegin) then
             Continue
-          else if (FTokenizer.Tok in [tk_kw_Try, tk_kw_Repeat]) then
+          else if (FLexer.TokenID in [tkTry, tkRepeat]) then
           begin
             Inc(FElseIndent);
             Continue;
@@ -330,7 +290,7 @@ begin
           end;
         end;
 
-      tk_kw_Else:
+      tkElse:
         begin
           if (not FFirstInLine) then
             AddLine();
@@ -340,9 +300,9 @@ begin
           Add();
           Next();
 
-          if (FTokenizer.Tok in [tk_kw_Begin, tk_kw_If]) then
+          if (FLexer.TokenID in [tkBegin, tkIf]) then
             Continue
-          else if (FTokenizer.Tok in [tk_kw_Try, tk_kw_Repeat]) then
+          else if (FLexer.TokenID in [tkTry, tkRepeat]) then
           begin
             Inc(FElseIndent);
             Continue;
@@ -354,14 +314,14 @@ begin
           end;
         end;
 
-      tk_sym_Colon:
+      tkColon:
         begin
           Add();
 
-          if (FInType = InFunc) and (FBeginCount > 1) then
+          if (FInBlock = InFuncBlock) and (FBeginCount > 1) then
           begin
             Next();
-            if (FTokenizer.Tok in Formatter_Keywords) then
+            if (FLexer.TokenID in PasTokens_Keywords) then
             begin
               Inc(FElseIndent);
               AddLine();
@@ -371,14 +331,14 @@ begin
           end;
         end;
 
-      tk_kw_Of:
+      tkOf:
         begin
-          if (FInType = InVar) or (FInType = InFuncDecl) then
+          if (FInBlock = InVarBlock) or (FInBlock = InFuncHeaderBlock) then
             FLastAsSpace := False;
 
           Add();
 
-          if (FInType <> InVar) and (FInType <> InFuncDecl) then
+          if (FInBlock <> InVarBlock) and (FInBlock <> InFuncHeaderBlock) then
           begin
             Inc(FBeginCount);
             Inc(FIndent);
@@ -388,15 +348,15 @@ begin
           end;
         end;
 
-      tk_kw_Begin, tk_kw_Repeat:
+      tkBegin, tkRepeat:
         begin
-          if (FInType <> InFunc) or (FBeginCount = 0) then
+          if (FInBlock <> InFuncBlock) or (FBeginCount = 0) then
           begin
             FIndent := 0;
             FElseIndent := 0;
           end;
 
-          if (not FFirstInLine) or (FInType = None) then
+          if (not FFirstInLine) or (FInBlock = None) then
             AddLine();
 
           Add();
@@ -405,10 +365,10 @@ begin
           FIndents[FIndent] := FIndents[FIndent - 1] + FElseIndent + 1;
           AddLine();
           FElseIndent := 0;
-          FInType := InFunc;
+          FInBlock := InFuncBlock;
         end;
 
-      tk_kw_Try:
+      tkTry:
         begin
           if (not FFirstInLine) then
             AddLine();
@@ -421,7 +381,7 @@ begin
           FElseIndent := 0;
         end;
 
-      tk_kw_Except, tk_kw_Finally:
+      tkExcept, tkFinally:
         begin
           if (not FFirstInLine) then
             AddLine();
@@ -432,12 +392,12 @@ begin
           AddLine();
         end;
 
-      tk_kw_End, tk_kw_Until:
+      tkEnd, tkUntil:
         begin
           if (FBeginCount > 0) then
             Dec(FBeginCount);
-          if (FBeginCount = 0) and (FInType = InFunc) then
-            FInType := None;
+          if (FBeginCount = 0) and (FInBlock = InFuncBlock) then
+            FInBlock := None;
 
           if (not FFirstInLine) then
             AddLine();
@@ -450,60 +410,63 @@ begin
 
           if (FProcIndent > 0) and (FIndents[FIndent] = FProcIndents[FProcIndent]) then
           begin
-            if FIndents[FIndent] > 0 then
+            if (FIndents[FIndent] > 0) then
               FIndents[FIndent] := FIndents[FIndent] - 1;
             Dec(FProcIndent);
           end;
 
-          if (FTokenizer.Tok = tk_kw_End) then
+          if (FLexer.TokenID = tkEnd) then
           begin
             Next();
-            if (FTokenizer.Tok <> tk_sym_SemiColon) and (FTokenizer.Tok <> tk_sym_Dot) then
+            if (FLexer.TokenID <> tkSemiColon) and (FLexer.TokenID <> tkDot) then
               AddLine();
 
             Continue;
           end;
         end;
 
-      tk_kw_Var, tk_kw_Type, tk_kw_Label, tk_kw_Const:
+      tkVar, tkConst, tkType, tkLabel:
         begin
           FIndent := 0;
           FElseIndent := 0;
 
-          if (FInType <> InFuncDecl) then
+          if (FInBlock <> InFuncHeaderBlock) then
             AddLine()
-          else if (not FFirstInLine) then
+          else
+          if (not FFirstInLine) then
             AddLine();
 
-          FInType := InVar;
+          FInBlock := InVarBlock;
+
           Add();
           Inc(FIndent);
           FIndents[FIndent] := FIndents[FIndent - 1] + FElseIndent + 1;
           AddLine();
         end;
 
-      tk_kw_Record:
+      tkRecord:
         begin
           FElseIndent := 0;
-          FInType := InVar;
+          FInBlock := InVarBlock;
+
           Add();
           Inc(FIndent);
           FIndents[FIndent] := FIndents[FIndent - 1] + FElseIndent + 1;
           AddLine();
         end;
 
-      tk_sym_SemiColon:
+      tkSemiColon:
         begin
           if (not FFirstInLine) then
           begin
             Add();
             Next();
 
-            if (FTokenizer.Tok in [tk_kw_External, tk_kw_Forward, tk_kw_Overload, tk_kw_Override, tk_kw_Static, tk_kw_ConstRef]) then
+            if (FLexer.TokenID in [tkExternal, tkForward, tkOverload, tkOverride, tkStatic, tkConstRef]) then
             begin
-              if (FTokenizer.Tok in [tk_kw_External, tk_kw_Forward]) then
+              if (FLexer.TokenID in [tkExternal, tkForward]) then
               begin
-                FInType := None;
+                FInBlock := None;
 
                 if (FIndents[FIndent] > 0) then
                   FIndents[FIndent] := FIndents[FIndent] - 1;
@@ -511,7 +474,7 @@ begin
                 if (FProcIndent > 0) then
                   Dec(FProcIndent);
               end else
-                FInType := InFuncDecl;
+                FInBlock := InFuncHeaderBlock;
             end else
             begin
               FElseIndent := 0;
@@ -534,19 +497,18 @@ end;
 
 constructor TSimbaCodeFormatter.Create;
 begin
-  inherited Create();
-
-  FTokenizer := TSimbaFormatter_Tokenizer.Create('');
+  FLexer := TPasLexer.Create();
 end;
 
 destructor TSimbaCodeFormatter.Destroy;
 begin
-  FTokenizer.Free();
+  if (FLexer <> nil) then
+    FreeAndNil(FLexer);
 
-  inherited Destroy();
+  inherited Destroy;
 end;
 
-function FormatScript(constref Script: String): String;
+function FormatScript(const Script: String): String;
 var
   Formatter: TSimbaCodeFormatter;
 begin

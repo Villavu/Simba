@@ -5,7 +5,7 @@ unit simba.debuggerform;
 interface
 
 uses
-  Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls,
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   ComCtrls, StdCtrls, Menus, syncobjs,
   simba.script_communication;
 
@@ -72,6 +72,8 @@ type
   end;
 
 implementation
+
+{$R *.lfm}
 
 uses
   math, clipbrd;
@@ -328,9 +330,6 @@ begin
 
   inherited Destroy();
 end;
-
-initialization
-  {$I simba.debuggerform.lrs}
 
 end.
 

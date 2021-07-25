@@ -1,6 +1,7 @@
 unit simba.package_form;
 
 (* .simbapackage
+
   // The package name to install under.
   name=SRL
   // The path to install into, from the working directory.
@@ -9,8 +10,6 @@ unit simba.package_form;
   flat=false
   // files not to install
   ignore=.git,.gitignore,.simbapackage,.gitattributes
-  // path to script templates in this repo.
-  templates=templates
 *)
 
 {$mode objfpc}{$H+}
@@ -19,7 +18,7 @@ unit simba.package_form;
 interface
 
 uses
-  classes, sysutils, dividerbevel, lresources, forms, controls, graphics,
+  classes, sysutils, dividerbevel, forms, controls, graphics,
   dialogs, stdctrls, buttons, buttonpanel, extctrls, menus,
   simba.package;
 
@@ -102,13 +101,14 @@ type
     // Create a thread to check for updates every 5mins
     procedure DoUpdateTimer(Sender: TObject);
   protected
-    FPackages: TSimbaPackageList;
     FProgress: String; // UpdateDownloadProgress and UpdateExtractProgress will update this.
 
     FUpdates: TStringList;
     FUpdateThread: TThread;
 
     procedure FontChanged(Sender: TObject); override;
+
+    procedure SizeComponents;
 
     procedure UpdateProgress;
     procedure UpdateSelectedRelease;
@@ -128,14 +128,12 @@ type
     property SelectedRelease: String read GetSelectedRelease;
 
     // Callback for TSimbaPackage to download a page. No progress is shown.
-    function GetPageSilent(URL: String; AllowedResponseCodes: array of Int32; out ResponseCode: Int32): String;
+    function GetPageSilent(URL: String; AllowedResponseCodes: array of Integer; out ResponseCode: Integer): String;
     // Callback for TSimbaPackage to download a page. Progress is shown with Status
-    function GetPage(URL: String; AllowedResponseCodes: array of Int32; out ResponseCode: Int32): String;
+    function GetPage(URL: String; AllowedResponseCodes: array of Integer; out ResponseCode: Integer): String;
     // Callback for TSimbaPackage to download and extract a zip. Progress is shown with Status
     function GetZIP(URL, OutputPath: String; Flat: Boolean; IgnoreList: TStringArray): Boolean;
 
-    // Write to console
-    procedure Debug(Message: String; Args: array of const);
     // Show error dialog
     procedure Error(Message: String; Args: array of const);
     // Update status (bottom left)
@@ -150,9 +148,11 @@ var
 
 implementation
 
+{$R *.lfm}
+
 uses
-  dateutils, lcltype, lclintf, lazfileutils,
-  simba.main, simba.files, simba.httpclient_async, simba.settings, simba.httpclient, simba.package_github_releases;
+  dateutils, lcltype, lclintf, lazfileutils, types,
+  simba.main, simba.files, simba.httpclient_async, simba.httpclient;
 
 procedure TSimbaPackageForm.DoSelectedPackageChanged(Sender: TObject; User: Boolean);
 begin
@@ -166,9 +166,8 @@ end;
 
 procedure TSimbaPackageForm.DoReleasesListDraw(Control: TWinControl; Index: Integer; R: TRect; State: TOwnerDrawState);
 var
-  Days: Int32;
+  Days: Integer;
   Package: TSimbaPackage;
-  Time: TDateTime;
 begin
   Package := SelectedPackage;
 
@@ -193,19 +192,21 @@ begin
       Canvas.TextOut(R.Left + 2, R.Top, Items[Index]);
       Canvas.Font.Italic := True;
 
-      Time := Package.Release[Items[Index]].Time;
+      R.Left := R.Left + Canvas.TextWidth(Items[Index] + ' ') + 4;
 
-      if (Time > 0) then
-      begin
-        Days := DaysBetween(Now(), Time);
+      with Package.Release[Items[Index]] do
+        if (Time > 0) then
+        begin
+          Days := DaysBetween(Now(), Time);
 
-        case Days of
-          0: Canvas.TextOut(R.Left + Canvas.TextWidth(Items[Index] + ' ') + 2, R.Top, '(today)');
-          1: Canvas.TextOut(R.Left + Canvas.TextWidth(Items[Index] + ' ') + 2, R.Top, '(yeserday)');
-          else
-             Canvas.TextOut(R.Left + Canvas.TextWidth(Items[Index] + ' ') + 2, R.Top, '(' + IntToStr(Days) + ' days ago)');
-        end;
-      end;
+          case Days of
+            0: Canvas.TextOut(R.Left, R.Top, '(today)');
+            1: Canvas.TextOut(R.Left, R.Top, '(yeserday)');
+            else
+               Canvas.TextOut(R.Left, R.Top, '(' + IntToStr(Days) + ' days ago)');
+          end;
+        end else
+          Canvas.TextOut(R.Left, R.Top, '(branch)');
     end;
   end;
 end;
@@ -215,43 +216,46 @@ var
   Package: TSimbaPackage;
 begin
   Package := SelectedPackage;
+  if (Package = nil) then
+    Exit;
 
-  if (Package <> nil) then
-  begin
-    if (Sender = PackageListPopup_SubmitIssue)    then OpenURL(Package.IssuesURL);
-    if (Sender = PackageListPopup_VistRepository) then OpenURL(Package.URL);
-  end;
+  if (Sender = PackageListPopup_SubmitIssue) then
+    OpenURL(Package.IssuesURL);
+  if (Sender = PackageListPopup_VistRepository) then
+    OpenURL(Package.URL);
 end;
 
 procedure TSimbaPackageForm.DoAddPackageClick(Sender: TObject);
 var
   URL: String;
+  URLPath: TStringArray;
   Package: TSimbaPackage;
-  Releases: TGithubReleases;
 begin
-  URL := InputComboEx('Add Package', 'Enter or select package URL:', SUGGESTED_PACKAGES, True);
+  URL := InputComboEx('Add Package', 'Enter or select package URL:', SUGGESTED_PACKAGES, True).Trim([' ', '/']);
+  URLPath := URL.Split('/');
+  while (Length(URLPath) > 2) do
+    URLPath := Copy(URLPath, 1);
 
-  if (Length(URL.Split(['/'])) >= 2) then // at least ollydev/simba
+  if (Length(URLPath) = 2) then // ollydev/simba
   begin
-    Package := TSimbaPackage.Create(URL, @GetPage, @GetZIP);
-    Releases := Package.Releases;
+    Package := TSimbaPackage.Create(URLPath[0] + '/' + URLPath[1]);
+    Package.GetPageFunction := @Self.GetPage;
+    Package.GetZIPFunction := @Self.GetZIP;
 
-    case Length(Releases) of
-      0: Status('Package not found: %s', [URL]);
-      1: Status('Added package %s. (Master branch only)', [Package.Name])
-      else
-         Status('Added package %s. (%d releases)', [Package.Name, Length(Releases) - 1]);
-    end;
-
-    if Length(Releases) > 0 then
+    if Package.LoadReleases() then
     begin
-      FPackages.Add(Package);
-
       PackagesListBox.AddItem(Package.Name, Package);
       PackagesListBox.ItemIndex := PackagesListBox.Count - 1;
+
+      Status('Added package %s. (%d versions)', [Package.Name, Package.Releases.Count]);
     end else
+    begin
+      Status('Package not found: %s', [URL]);
+
       Package.Free();
-  end;
+    end;
+  end else
+    Status('Invalid URL: %s', [URL]);
 end;
 
 procedure TSimbaPackageForm.DoRemovePackageClick(Sender: TObject);
@@ -267,10 +271,13 @@ begin
 
     if MessageDlg('Remove Package', Message, mtConfirmation, mbYesNo, '') = mrYes then
     begin
-      Package.Remove();
-
       PackagesListBox.ItemIndex := -1;
       PackagesListBox.Items.Delete(PackagesListBox.Items.IndexOfObject(Package));
+
+      Package.Remove();
+      Package.Free();
+
+      UpdateTimer.Interval := 1000;
 
       Status('Removed package: %s', [Package.Name]);
     end;
@@ -311,13 +318,22 @@ end;
 
 procedure TSimbaPackageForm.DoFormShow(Sender: TObject);
 var
-  Package: TSimbaPackage;
+  Packages: TSimbaPackageList;
+  I: Integer;
 begin
-  FPackages.Load(@GetPage, @GetZIP);
-
+  for I := 0 to PackagesListBox.Items.Count - 1 do
+    PackagesListBox.Items.Objects[I].Free();
   PackagesListBox.Clear();
-  for Package in FPackages do
-    PackagesListBox.AddItem(Package.Name, Package);
+
+  Packages := LoadPackages();
+  Packages.FreeObjects := False;
+  for I := 0 to Packages.Count - 1 do
+  begin
+    Packages[I].GetPageFunction := @Self.GetPage;
+    Packages[I].GetZIPFunction := @Self.GetZIP;
+
+    PackagesListBox.AddItem(Packages[I].Name, Packages[I]);
+  end;
 
   UpdateSelectedPackage();
 end;
@@ -326,7 +342,7 @@ procedure TSimbaPackageForm.DoUpdateClick(Sender: TObject);
 begin
   if (SelectedPackage <> nil) then
   begin
-    SelectedPackage.UpdateReleases(False);
+    SelectedPackage.LoadReleases(False);
 
     UpdateSelectedPackage();
   end;
@@ -357,7 +373,7 @@ end;
 
 procedure TSimbaPackageForm.DoInstallationModeChange(Sender: TObject);
 var
-  i: Int32;
+  i: Integer;
 begin
   for i := 0 to OptionsGroup.ControlCount - 1 do
     OptionsGroup.Controls[i].Enabled := CustomInstallButton.Checked;
@@ -377,12 +393,12 @@ end;
 
 procedure TSimbaPackageForm.DoPackageUpdateFinished(Sender: TObject);
 begin
-  SimbaForm.PackageButton.Hint := FUpdates.Text.Trim();
+  SimbaForm.ToolbarButtonPackages.Hint := FUpdates.Text.Trim();
 
-  if FUpdates.Count = 1 then
-    SimbaForm.PackageButton.ImageIndex := IMAGE_PACKAGE
+  if (FUpdates.Count = 1) then // Only master
+    SimbaForm.ToolbarButtonPackages.ImageIndex := IMAGE_PACKAGE
   else
-    SimbaForm.PackageButton.ImageIndex := IMAGE_PACKAGE_NOTIFCATION;
+    SimbaForm.ToolbarButtonPackages.ImageIndex := IMAGE_PACKAGE_NOTIFCATION;
 
   FUpdateThread := nil;
 end;
@@ -390,27 +406,24 @@ end;
 procedure TSimbaPackageForm.DoPackageUpdate;
 var
   Packages: TSimbaPackageList;
-  Package: TSimbaPackage;
-  Releases: TGithubReleases;
-  InstalledData: TSimbaPackage_InstalledData;
+  I: Integer;
 begin
-  Packages := TSimbaPackageList.Create();
-  Packages.Load(@Self.GetPageSilent, @Self.GetZIP);
+  Packages := LoadPackages();
 
   try
     FUpdates.Clear();
     FUpdates.Add('Simba Packages');
 
-    for Package in Packages do
+    for I := 0 to Packages.Count - 1 do
     begin
-      InstalledData := Package.InstalledData;
-      if (InstalledData.Version = 'master') then
-        Continue;
+      Packages[I].GetPageFunction := @Self.GetPageSilent;
 
-      Releases := Package.Releases;
-      if Length(Package.Releases) > 1 then // Has more than Master
-        if (Releases[0].Time > InstalledData.VersionTime) then
-          FUpdates.Add('%s (%s) can be updated to version %s', [Package.Name, InstalledData.Version, Releases[0].Version]);
+      if DirectoryExists(Packages[I].InstalledVersion.Path) and (Packages[I].InstalledVersion.VersionTime > 0) then // Not a branch
+      begin
+        Packages[I].LoadReleases();
+        if (Packages[I].Releases.Count > 1) and (Packages[I].Releases.First.Time > Packages[I].InstalledVersion.VersionTime) then
+          FUpdates.Add('%s (%s) can be updated to version %s', [Packages[I].Name, Packages[I].InstalledVersion.Version, Packages[I].Releases.First.Version]);
+      end;
     end;
   finally
     Packages.Free();
@@ -429,19 +442,29 @@ procedure TSimbaPackageForm.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
 
-  if (UpdatePackageLabel <> nil) and (ReleasesList <> nil) then
-  begin
-    UpdatePackageLabel.Font.Color := clNavy;
+  SizeComponents();
+end;
 
-    with TBitmap.Create() do
-    try
-      Canvas.Font := Self.Font;
+procedure TSimbaPackageForm.SizeComponents;
+var
+  Size: TSize;
+begin
+  if (ControlCount = 0) then
+    Exit;
 
-      ReleasesList.ItemHeight := Canvas.TextHeight('Fj');
-    finally
-      Free();
-    end;
+  with TBitmap.Create() do
+  try
+    Canvas.Font := Self.Font;
+
+    Size := Canvas.TextExtent('TaylorSwift');
+  finally
+    Free();
   end;
+
+  ReleasesList.ItemHeight := Size.Height;
+
+  UpdatePackageLabel.Font.Size := Self.Font.Size;
+  UpdatePackageLabel.Font.Color := clNavy;
 end;
 
 procedure TSimbaPackageForm.UpdateSelectedRelease;
@@ -471,15 +494,17 @@ begin
 
     BasicInstallButton.Checked := Options.Loaded;
     BasicInstallButton.Enabled := Options.Loaded;
+    BasicInstallButton.OnChange(BasicInstallButton);
 
     CustomInstallButton.Checked := not Options.Loaded;
 
-    if (Package.Release[SelectedRelease].Notes = '') then
+    NotesMemo.Font.Italic := False;
+    NotesMemo.Text := Package.Release[SelectedRelease].Notes;
+    if (NotesMemo.Text = '') then
     begin
       NotesMemo.Text := '(no release notes)';
       NotesMemo.Font.Italic := True;
-    end else
-      NotesMemo.Text := Package.Release[SelectedRelease].Notes;
+    end;
 
     NotesMemo.SelStart := 0;
   end;
@@ -488,22 +513,24 @@ end;
 procedure TSimbaPackageForm.UpdateSelectedPackage;
 var
   Package: TSimbaPackage;
-  Rel: TGithubRelease;
+  I: Integer;
 begin
   Package := SelectedPackage;
 
   if (Package <> nil) then
   begin
+    Package.LoadReleases();
+
     ReleasesList.Items.BeginUpdate();
     ReleasesList.Items.Clear();
-    for Rel in Package.Releases do
-      ReleasesList.Items.Add(Rel.Version);
+    for I := 0 to Package.Releases.Count - 1 do
+      ReleasesList.Items.Add(Package.Releases[I].Version);
 
     if (ReleasesList.Items.Count > 0) then
     begin
       LatestVersionLabel.Caption := 'Latest Version: ' + ReleasesList.Items[0];
 
-      with Package.InstalledData do
+      with Package.InstalledVersion do
         if (Version <> '') then
           InstalledVersionLabel.Caption := 'Installed Version: ' + Version
         else
@@ -522,6 +549,11 @@ begin
   ReleasesPanel.Visible := PackagesListBox.ItemIndex > -1;
   InstallationPanel.Visible := PackagesListBox.ItemIndex > -1;
   DisabledLabel.Visible := PackagesListBox.ItemIndex = -1;
+
+  if (PackagesListBox.Count > 0) then
+    DisabledLabel.Caption := '(no package selected)'
+  else
+    DisabledLabel.Caption := '(no packages added)';
 end;
 
 procedure TSimbaPackageForm.UpdateDownloadProgress(Sender: TObject; URL: String; APosition, ASize: Int64);
@@ -562,7 +594,7 @@ begin
   Application.ProcessMessages();
 end;
 
-function TSimbaPackageForm.GetPageSilent(URL: String; AllowedResponseCodes: array of Int32; out ResponseCode: Int32): String;
+function TSimbaPackageForm.GetPageSilent(URL: String; AllowedResponseCodes: array of Integer; out ResponseCode: Integer): String;
 var
   HTTPRequest: TSimbaHTTPRequest;
 begin
@@ -580,11 +612,11 @@ begin
   end;
 end;
 
-function TSimbaPackageForm.GetPage(URL: String; AllowedResponseCodes: array of Int32; out ResponseCode: Int32): String;
+function TSimbaPackageForm.GetPage(URL: String; AllowedResponseCodes: array of Integer; out ResponseCode: Integer): String;
 
-  function IsAllowedResponseCode(ResponseCode: Int32): Boolean;
+  function IsAllowedResponseCode(ResponseCode: Integer): Boolean;
   var
-    i: Int32;
+    i: Integer;
   begin
     for i := 0 to High(AllowedResponseCodes) do
       if ResponseCode = AllowedResponseCodes[i] then
@@ -663,11 +695,6 @@ begin
   end;
 end;
 
-procedure TSimbaPackageForm.Debug(Message: String; Args: array of const);
-begin
-  WriteLn('[PACKAGES]: ' + Format(Message, Args));
-end;
-
 procedure TSimbaPackageForm.Error(Message: String; Args: array of const);
 begin
   MessageDlg('Package Error', Format(Message, Args), mtError, [mbOK], 0);
@@ -685,28 +712,24 @@ begin
   Width := 800;
   Height := 650;
 
+  SizeComponents();
+
   InstallDirectoryList.Items.Add(CreateRelativePath(GetIncludePath(), Application.Location));
   InstallDirectoryList.Items.Add(CreateRelativePath(GetPluginPath(), Application.Location));
   InstallDirectoryList.Items.Add(CreateRelativePath(GetScriptPath(), Application.Location));
   InstallDirectoryList.Items.Add(CreateRelativePath(GetFontPath(), Application.Location));
   InstallDirectoryList.ItemIndex := 0;
 
-  FPackages := TSimbaPackageList.Create(False);
   FUpdates := TStringList.Create();
 end;
 
 destructor TSimbaPackageForm.Destroy;
 begin
-  if (FPackages <> nil) then
-    FPackages.Free();
   if (FUpdates <> nil) then
     FUpdates.Free();
 
   inherited Destroy();
 end;
-
-initialization
-  {$i simba.package_form.lrs}
 
 end.
 

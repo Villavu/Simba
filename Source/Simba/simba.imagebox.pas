@@ -95,6 +95,7 @@ type
     function GetCursor: TCursor; override;
     procedure SetCursor(Value: TCursor); override;
 
+    procedure SetParent(Value: TWinControl); override;
     procedure SetZoom(Value: Double);
   published
     property OnMouseDown;
@@ -127,7 +128,7 @@ type
 implementation
 
 uses
-  types, math, GraphType, lclintf, FPimage, simba.colormath;
+  types, math, GraphType, lclintf, FPimage, simba.colormath, LazLoggerBase;
 
 procedure TSimbaImageBox_Background.LoadFromFile(const Filename: string);
 var
@@ -597,24 +598,30 @@ begin
 end;
 
 procedure TSimbaImageBox.FontChanged(Sender: TObject);
+var
+  Measurement: TSize;
 begin
   inherited FontChanged(Sender);
 
-  if (FMousePanel <> nil) and (FDimensionsPanel <> nil) and (FZoomPanel <> nil) and (FStatusBar <> nil) then
-    with TBitmap.Create() do
-    try
-      Canvas.Font := Self.Font;
+  if (ControlCount = 0) then
+    Exit;
 
-      with Canvas.TextExtent('999x999') do
-      begin
-        FMousePanel.Width := Width*2;
-        FDimensionsPanel.Width := Width*2;
-        FZoomPanel.Width := Width;
-        FStatusBar.Height := Height;
-      end;
-    finally
-      Free();
-    end;
+  DebugLn('simba.imagebox :: TSimbaImageBox.FontChanged');
+
+  with TBitmap.Create() do
+  try
+    Canvas.Font := Self.Font;
+
+    Measurement := Canvas.TextExtent('TaylorSwift');
+
+    FMousePanel.Width := Round(Measurement.Width * 1.35);
+    FDimensionsPanel.Width := Round(Measurement.Width * 1.35);
+    FZoomPanel.Width := Round(Measurement.Width * 0.75);
+    FStatusBar.Height := Round(Measurement.Height * 1.2);
+    FStatusBar.Font := Self.Font;
+  finally
+    Free();
+  end;
 end;
 
 procedure TSimbaImageBox.ImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -747,6 +754,14 @@ begin
   FScrollBox.Cursor := Value;
 end;
 
+procedure TSimbaImageBox.SetParent(Value: TWinControl);
+begin
+  inherited SetParent(Value);
+
+  if (Value <> nil) then
+    Font := Value.Font;
+end;
+
 function TSimbaImageBox.GetCursor: TCursor;
 begin
   Result := FScrollBox.Cursor;
@@ -828,6 +843,7 @@ begin
   FStatusBar.Parent := Self;
   FStatusBar.Align := alBottom;
   FStatusBar.SimplePanel := False;
+  FStatusBar.AutoSize := False;
 
   FMousePanel := FStatusBar.Panels.Add();
   FMousePanel.Text := '(-1, -1)';

@@ -1,35 +1,14 @@
 object SimbaFileBrowserForm: TSimbaFileBrowserForm
-  Left = 23
+  Left = -799
   Height = 247
-  Top = 22
+  Top = 571
   Width = 321
   Caption = 'File Browser'
-  ClientHeight = 247
-  ClientWidth = 321
-  LCLVersion = '2.0.8.0'
-  object Panel1: TPanel
-    Left = 0
-    Height = 224
-    Top = 0
-    Width = 321
-    Align = alClient
-    BevelOuter = bvNone
-    TabOrder = 0
-  end
-  object Edit1: TEdit
-    Left = 0
-    Height = 23
-    Top = 224
-    Width = 321
-    Align = alBottom
-    OnChange = Edit1Change
-    TabOrder = 1
-    TextHint = '(search)'
-  end
+  LCLVersion = '2.2.0.1'
   object Popup: TPopupMenu
     OnPopup = PopupPopup
-    left = 88
-    top = 37
+    Left = 88
+    Top = 37
     object MenuItem_Open: TMenuItem
       Caption = 'Open'
       ImageIndex = 2

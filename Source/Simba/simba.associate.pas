@@ -1,6 +1,7 @@
 unit simba.associate;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
@@ -13,41 +14,54 @@ implementation
 
 {$IFDEF WINDOWS}
 uses
-  registry, shlobj;
-{$ENDIF}
+  forms, registry, windows, shellapi;
 
 procedure Associate;
-{$IFDEF WINDOWS}
 var
-  Reg: TRegistry;
+  Info: TShellExecuteInfo;
 begin
-  Reg := TRegistry.Create();
+  if not Application.HasOption('associate') then
+  begin
+    Info := Default(TShellExecuteInfo);
+    Info.cbSize := SizeOf(TShellExecuteInfo);
+    Info.Wnd := Application.MainFormHandle;
+    Info.fMask := SEE_MASK_FLAG_DDEWAIT or SEE_MASK_FLAG_NO_UI or SEE_MASK_NO_CONSOLE;
+    Info.lpVerb := 'runas';
+    Info.lpFile := PAnsiChar(Application.ExeName);
+    Info.lpParameters := PAnsiChar('--associate');
+    Info.nShow := SW_HIDE;
 
-  try
-    Reg.RootKey := HKEY_CLASSES_ROOT;
-    Reg.OpenKey('.simba', True);
-    Reg.WriteString('', 'simbafile');
-    Reg.CloseKey();
-    Reg.CreateKey('simbafile');
-    Reg.OpenKey('simbafile\DefaultIcon', True);
-    Reg.WriteString('', ParamStr(0) + ',0');
-    Reg.CloseKey();
-    Reg.OpenKey('simbafile\shell\Open\command', True);
-    Reg.WriteString('', ParamStr(0) + ' "%1"');
-    Reg.CloseKey();
-    Reg.OpenKey('simbafile\shell\Run\command', True);
-    Reg.WriteString('', ParamStr(0) + ' --open --run "%1"');
-    Reg.CloseKey();
-    Reg.OpenKey('simbafile\shell\Run (Headless)\command', True);
-    Reg.WriteString('', ParamStr(0) + ' --run "%1"');
-    Reg.CloseKey();
-  finally
-    Reg.Free();
+    ShellExecuteExA(@Info);
+  end else
+  begin
+    with TRegistry.Create() do
+    try
+      RootKey := HKEY_CLASSES_ROOT;
+      OpenKey('.simba', True);
+      WriteString('', 'simbafile');
+      CloseKey();
+      CreateKey('simbafile');
+      OpenKey('simbafile\DefaultIcon', True);
+      WriteString('', ParamStr(0) + ',0');
+      CloseKey();
+      OpenKey('simbafile\shell\Open\command', True);
+      WriteString('', ParamStr(0) + ' "%1"');
+      CloseKey();
+      OpenKey('simbafile\shell\Run\command', True);
+      WriteString('', ParamStr(0) + ' --open --run "%1"');
+      CloseKey();
+      OpenKey('simbafile\shell\Run (Headless)\command', True);
+      WriteString('', ParamStr(0) + ' --run "%1"');
+      CloseKey();
+    finally
+      Free();
+    end;
+
+    SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, nil, nil);
   end;
-
-  SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, nil, nil);
 end;
 {$ELSE}
+procedure Associate;
 begin
 end;
 {$ENDIF}

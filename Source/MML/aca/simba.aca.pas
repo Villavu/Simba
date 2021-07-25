@@ -5,7 +5,7 @@ unit simba.aca;
 interface
 
 uses
-  classes, sysutils, fileutil, dividerbevel, lresources, forms, controls,
+  classes, sysutils, fileutil, dividerbevel, forms, controls,
   graphics, dialogs, extctrls, comctrls, stdctrls, menus, colorbox, lcltype,
   simba.client, simba.imagebox, simba.mufasatypes;
 
@@ -88,6 +88,8 @@ type
   end;
 
 implementation
+
+{$R *.lfm}
 
 uses
   math, clipbrd, simba.bitmap,
@@ -463,9 +465,6 @@ begin
 
   inherited Destroy();
 end;
-
-initialization
-  {$I simba.aca.lrs}
 
 end.
 

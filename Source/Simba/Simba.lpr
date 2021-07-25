@@ -23,29 +23,49 @@
 program Simba;
 
 {$mode objfpc}{$H+}
-
+{$I simba.inc}
 {$R Simba.res}
 
 uses
-  simba.init, // Things that must happen before other units are initialized
-  classes, sysutils, interfaces, forms,
-  simba.main, simba.aboutform, simba.debugimage, simba.bitmapconv,
-  simba.functionlistform, simba.scripttabsform, simba.debugform,
-  simba.filebrowserform, simba.notesform, simba.package_form,
-  simba.colorpicker_historyform, simba.settingsform,
-  simba.associate, simba.script, simba.script_dump, simba.scripttemplateform;
+  simba.init,
+  classes, sysutils, interfaces, forms, lazloggerbase,
+  simba.settings, simba.main, simba.aboutform, simba.debugimage,
+  simba.bitmapconv, simba.functionlistform, simba.scripttabsform,
+  simba.debugform, simba.colorpickerhistoryform, simba.filebrowserform,
+  simba.notesform, simba.package_form, simba.settingsform, simba.associate,
+  simba.script, simba.script_dump, simba.openexampleform;
+
+type
+  TApplicationHelper = class helper for TApplication
+    procedure HandleException(Sender: TObject; E: Exception);
+  end;
+
+procedure TApplicationHelper.HandleException(Sender: TObject; E: Exception);
+begin
+  { no graphical error message at this point }
+end;
 
 begin
   {$IF DECLARED(SetHeapTraceOutput)}
   SetHeapTraceOutput('memory-leaks.trc');
   {$ENDIF}
 
-  Application.ShowMainForm := False;
+  Application.OnException := @Application.HandleException;
+  Application.Title := 'Simba';
+  Application.Scaled := True;
   Application.Initialize();
 
-  if Application.HasOption('dump') then
+  if Application.HasOption('dumpcompiler') then
   begin
-    with DumpPlugin(Application.GetOptionValue('dump')) do
+    with DumpCompiler() do
+      SaveToFile(Application.Params[Application.ParamCount]);
+
+    Halt();
+  end;
+
+  if Application.HasOption('dumpplugin') then
+  begin
+    with DumpPlugin(Application.GetOptionValue('dumpplugin')) do
       SaveToFile(Application.Params[Application.ParamCount]);
 
     Halt();
@@ -62,7 +82,7 @@ begin
   begin
     if not FileExists(Application.Params[Application.ParamCount]) then
     begin
-      WriteLn('Script "' + Application.Params[Application.ParamCount] + '" does not exist.');
+      DebugLn('Script "' + Application.Params[Application.ParamCount] + '" does not exist.');
 
       Halt();
     end;
@@ -71,11 +91,10 @@ begin
 
     SimbaScript.ScriptFile               := Application.Params[Application.ParamCount];
     SimbaScript.ScriptName               := Application.GetOptionValue('scriptname');
-    SimbaScript.Debugging                := Application.HasOption('debugging');
-    SimbaScript.CompileOnly              := Application.HasOption('compile');
     SimbaScript.SimbaCommunicationServer := Application.GetOptionValue('simbacommunication');
     SimbaScript.Target                   := Application.GetOptionValue('target');
-    SimbaScript.Log                      := Application.GetOptionValue('log');
+    SimbaScript.Debugging                := Application.HasOption('debugging');
+    SimbaScript.CompileOnly              := Application.HasOption('compile');
 
     SimbaScript.Start();
   end else
@@ -91,10 +110,8 @@ begin
     Application.CreateForm(TSimbaSettingsForm, SimbaSettingsForm);
     Application.CreateForm(TSimbaBitmapConversionForm, SimbaBitmapConversionForm);
     Application.CreateForm(TSimbaPackageForm, SimbaPackageForm);
-    Application.CreateForm(TSimbaColorHistoryForm, SimbaColorHistoryForm);
-    Application.CreateForm(TSimbaScriptTemplateForm, SimbaScriptTemplateForm);
-
-    Application.QueueASyncCall(@SimbaForm.Setup, 0);
+    Application.CreateForm(TSimbaOpenExampleForm, SimbaOpenExampleForm);
+    Application.CreateForm(TSimbaColorPickerHistoryForm, SimbaColorPickerHistoryForm);
   end;
 
   Application.Run();

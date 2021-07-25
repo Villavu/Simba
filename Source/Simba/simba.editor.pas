@@ -1,253 +1,427 @@
 unit simba.editor;
 
-// This unit enchances TSynEdit for Simba's usage
-
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
 uses
-  Classes, SysUtils, Graphics, Controls, LCLType, inifiles,
-  SynEdit, SynGutterLineOverview, SynEditMarks, SynEditMiscClasses, SynEditMouseCmds,
-  SynEditKeyCmds, SynEditHighlighter, SynEditPointClasses, SynEditTypes,
-  simba.highlighter, simba.autocomplete, simba.parameterhint, simba.editor_attributes;
+  Classes, SysUtils, LazSynEditMouseCmdsTypes, Graphics, Controls, LCLType, fgl,
+  SynEdit, SynGutterLineOverview, SynEditMouseCmds,
+  SynEditKeyCmds, SynEditHighlighter, SynPluginMultiCaret,
+  simba.highlighter, simba.autocomplete, simba.parameterhint, simba.editor_attributes, simba.settings;
 
 const
-  ecAutoComplete  = ecUserFirst + 1;
-  ecParameterHint = ecUserFirst + 2;
-  ecCommentCode   = ecUserFirst + 3;
+  ecAutoComplete      = ecUserFirst + 1;
+  ecAutoCompleteChar  = ecUserFirst + 2;
+  ecParameterHint     = ecUserFirst + 3;
+  ecParameterHintChar = ecUserFirst + 4;
+  ecCommentBlock      = ecUserFirst + 5;
+  ecDocumentation     = ecUserFirst + 6;
+
+  emcJumpForward      = TSynEditorMouseCommand(emcPluginFirst + 1);
+  emcJumpBack         = TSynEditorMouseCommand(emcPluginFirst + 2);
 
 type
+  TSimbaEditor_LineMark = record
+    Line: Integer;
+    Color: Integer;
+
+    class operator <> (const Left, Right: TSimbaEditor_LineMark): Boolean;
+  end;
+
+  TSimbaEditor_ModifiedLinesGutter = class(TSynGutterLOvProviderModifiedLines)
+  protected
+  type
+    TLineMarkList = specialize TFPGList<TSimbaEditor_LineMark>;
+  protected
+    FLineMarks: TLineMarkList;
+    FDrawLineMarks: Boolean;
+
+    procedure Paint(Canvas: TCanvas; AClip: TRect; TopOffset: integer); override;
+
+    function GetLineMarkCount: Int32;
+    function GetDrawLineMarks: Boolean;
+    procedure SetDrawLineMarks(Value: Boolean);
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+
+    procedure ClearLineMarks;
+    procedure AddLineMark(ALine, AColor: Integer);
+
+    property DrawLineMarks: Boolean read GetDrawLineMarks write SetDrawLineMarks;
+    property LineMarkCount: Integer read GetLineMarkCount;
+    procedure ReCalc; override;
+  end;
+
   TSimbaEditor = class(TSynEdit)
   protected
-    FDividerColor: TColor;
-    FIndentColor: TColor;
-    FCaretColor: TColor;
-    FHighlightAllCaretColor: TColor;
-    FHighlightCurrentWordColor: TColor;
-    FOnBack: TNotifyEvent;
-    FOnForward: TNotifyEvent;
-    FOnRedo: TNotifyEvent;
-    FOnUndo: TNotifyEvent;
-    FAttributes: TSimbaEditor_AttributesList;
+    FAttributes: TSimbaEditor_Attributes;
     FParameterHint: TSimbaParameterHint;
     FAutoComplete: TSimbaAutoComplete;
-    FAntiAliasing: Boolean;
-    FFileName: String;
+    FMultiCaret: TSynPluginMultiCaret;
+    FModifiedLinesGutter: TSimbaEditor_ModifiedLinesGutter;
 
-    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+    procedure AddDocumentation;
+    procedure CommentBlock;
 
-    procedure HandleRightGutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
+    procedure HandleCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
+    procedure HandleZoomInOut(Data: PtrInt);
     function HandleMouseAction(AnAction: TSynEditMouseAction; var AnInfo: TSynEditMouseActionInfo): Boolean;
 
-    function GetFontName: String;
+    procedure SimbaSettingChanged(Setting: TSimbaSetting);
 
-    procedure SetCaretColor(Value: TColor);
-    procedure SetIndentColor(Value: TColor);
-    procedure SetAntiAliasing(Value: Boolean);
-    procedure SetDividerColor(Value: TColor);
-
-    procedure SettingChanged_Colors(Value: String);
-    procedure SettingChanged_RightMargin(Value: Int64);
-    procedure SettingChanged_RightMarginVisible(Value: Boolean);
-    procedure SettingChanged_CaretPastEOL(Value: Boolean);
-    procedure SettingChanged_AntiAliasing(Value: Boolean);
-    procedure SettingChanged_FontName(Value: String);
-    procedure SettingChanged_FontSize(Value: Int64);
-    procedure SettingChanged_DividerVisible(Value: Boolean);
-
-    procedure AddSettingChangeHandlers;
-    procedure RemoveSettingChangeHandlers;
+    function GetCaretMax: TPoint;
+    function GetExpressionAt(X, Y: Integer): String;
   public
-    property FileName: String read FFileName write FFileName;
-    property FontName: String read GetFontName;
-
+    property TextView;
+    property CaretMax: TPoint read GetCaretMax;
+    property ModifiedLinesGutter: TSimbaEditor_ModifiedLinesGutter read FModifiedLinesGutter;
     property AutoComplete: TSimbaAutoComplete read FAutoComplete;
     property ParameterHint: TSimbaParameterHint read FParameterHint;
 
-    property Attributes: TSimbaEditor_AttributesList read FAttributes;
-    property CaretColor: TColor read FCaretColor write SetCaretColor;
-    property IndentColor: TColor read FIndentColor write SetIndentColor;
-    property AntiAliasing: Boolean read FAntiAliasing write SetAntiAliasing;
-    property DividerColor: TColor read FDividerColor write SetDividerColor;
+    property Attributes: TSimbaEditor_Attributes read FAttributes;
+    property Expression[X, Y: Integer]: String read GetExpressionAt;
 
-    function Save(AFileName: String): Boolean;
-    function Load(AFileName: String): Boolean;
-
-    procedure FindDeclaration(XY: TPoint);
-
-    procedure SaveColors(AFileName: String);
-    procedure LoadColors(AFileName: String);
-    procedure LoadColorsFromSettings;
-
-    procedure LoadDefaultScript;
-
-    function GetCaretObj: TSynEditCaret; reintroduce;
-
-    procedure CommentCode;
-
-    procedure CommandProcessor(Command: TSynEditorCommand; AChar: TUTF8Char; Data: Pointer; ASkipHooks: THookedCommandFlags = []); override;
+    procedure SetMacOSKeystrokes;
 
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
   end;
 
-  TSynHighlighterAttributes_Helper = class helper for TSynHighlighterAttributes
-  public
-    procedure Save(INI: TINIFile);
-    procedure Load(INI: TINIFile);
-    procedure Changed;
-  end;
-
 implementation
 
 uses
-  SynEditMarkupHighAll, SynEditMarkupFoldColoring, SynGutter, dialogs, math, menus,
-  simba.settings, simba.scripttabhistory;
+  SynEditMarkupHighAll, dialogs, math, menus, System.UITypes, SynGutter, SynEditTypes, LazLoggerBase,
+  simba.scripttabhistory, Forms, simba.fonthelpers, simba.parser_misc, simba.codeparser;
 
 type
-  TSynGutterLineOverview_Helper = class helper for TSynGutterLineOverview
+  TSimbaEditor_GutterSeparator = class(TSynGutterSeparator)
+  protected
+    FWidth: Integer;
+
+    function PreferedWidth: Integer; override;
   public
-    function PixelToLine(Pixel: Int32): Int32;
+    constructor Create(AOwner: TComponent; AWidth, APosition: Integer); reintroduce;
+
+    procedure Paint(Canvas: TCanvas; AClip: TRect; FirstLine, LastLine: integer); override;
   end;
 
-procedure TSynHighlighterAttributes_Helper.Save(INI: TINIFile);
+class operator TSimbaEditor_LineMark.<>(const Left, Right: TSimbaEditor_LineMark): Boolean;
 begin
-  INI.WriteInteger(StoredName, 'Background', Background);
-  INI.WriteInteger(StoredName, 'Foreground', Foreground);
-  INI.WriteInteger(StoredName, 'Style', IntegerStyle);
-  INI.WriteInteger(StoredName, 'StyleMask', IntegerStyleMask);
-  INI.WriteInteger(StoredName, 'Frame', FrameColor);
+  Result := (Left.Color <> Right.Color) and (Left.Line <> Right.Line);
 end;
 
-procedure TSynHighlighterAttributes_Helper.Load(INI: TINIFile);
+function TSimbaEditor_GutterSeparator.PreferedWidth: Integer;
 begin
-  if INI.ValueExists(StoredName, 'Background') then
-    Background := INI.ReadInteger(StoredName, 'Background', clWindow);
-  if INI.ValueExists(StoredName, 'Foreground') then
-    Foreground := INI.ReadInteger(StoredName, 'Foreground', clWindowText);
-  if INI.ValueExists(StoredName, 'Style') then
-    IntegerStyle := INI.ReadInteger(StoredName, 'Style', 0);
-  if INI.ValueExists(StoredName, 'StyleMask') then
-    IntegerStyleMask := INI.ReadInteger(StoredName, 'StyleMask', 0);
-  if INI.ValueExists(StoredName, 'Frame') then
-    FrameColor := INI.ReadInteger(StoredName, 'Frame', clRed);
+  Result := FWidth;
 end;
 
-procedure TSynHighlighterAttributes_Helper.Changed;
+procedure TSimbaEditor_GutterSeparator.Paint(Canvas: TCanvas; AClip: TRect; FirstLine, LastLine: integer);
 begin
-  DoChange();
+  Canvas.Brush.Color := Gutter.Color;
+  Canvas.Brush.Style := bsSolid;
+  Canvas.FillRect(AClip);
 end;
 
-function TSynGutterLineOverview_Helper.PixelToLine(Pixel: Int32): Int32;
+constructor TSimbaEditor_GutterSeparator.Create(AOwner: TComponent; AWidth, APosition: Integer);
 begin
-  Result := PixelLineToText(Pixel);
+  inherited Create(AOwner);
+
+  FWidth := AWidth;
+  GutterParts.Move(Index, APosition);
 end;
 
-procedure TSimbaEditor.CommentCode;
+function TSimbaEditor_ModifiedLinesGutter.GetDrawLineMarks: Boolean;
+begin
+  Result := FDrawLineMarks;
+end;
+
+procedure TSimbaEditor_ModifiedLinesGutter.SetDrawLineMarks(Value: Boolean);
+begin
+  FDrawLineMarks := Value;
+
+  SynEdit.InvalidateGutter();
+end;
+
+procedure TSimbaEditor_ModifiedLinesGutter.Paint(Canvas: TCanvas; AClip: TRect; TopOffset: integer);
 var
-  i, Start, Stop, ColStart, Temp: integer;
-  StartStr, CurrLineStr: String;
-  XY: TPoint;
+  I, Y1, Y2: Integer;
 begin
-  XY := CaretXY;
+  inherited Paint(Canvas, AClip, TopOffset);
 
-  Start := BlockBegin.Y;
-  Stop := BlockEnd.Y;
+  if not DrawLineMarks then
+    Exit;
 
-  if (Start > Stop) then
+  for I := 0 to FLineMarks.Count - 1 do
+    with FLineMarks[I] do
+    begin
+      Y1 := TextLineToPixel(Line) - 2;
+      Y2 := TextLineToPixelEnd(Line) + 2;
+
+      Canvas.Brush.Color := Color;
+      Canvas.FillRect(AClip.Left, Y1, AClip.Right, Y2);
+    end;
+end;
+
+constructor TSimbaEditor_ModifiedLinesGutter.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  FLineMarks := TLineMarkList.Create();
+end;
+
+destructor TSimbaEditor_ModifiedLinesGutter.Destroy;
+begin
+  if (FLineMarks <> nil) then
+    FreeAndNil(FLineMarks);
+
+  inherited Destroy();
+end;
+
+procedure TSimbaEditor_ModifiedLinesGutter.AddLineMark(ALine, AColor: Integer);
+var
+  LineMark: TSimbaEditor_LineMark;
+begin
+  LineMark.Line := ALine;
+  LineMark.Color := TColor(ColorToRGB(AColor));
+
+  FLineMarks.Add(LineMark);
+end;
+
+procedure TSimbaEditor_ModifiedLinesGutter.ReCalc;
+begin
+  inherited ReCalc;
+end;
+
+procedure TSimbaEditor_ModifiedLinesGutter.ClearLineMarks;
+begin
+  if (FLineMarks.Count > 0) then
   begin
-    Temp := SelStart;
+    FLineMarks.Clear();
 
-    Start := Stop;
-    Stop := Temp;
+    SynEdit.InvalidateGutter();
   end;
+end;
+
+function TSimbaEditor_ModifiedLinesGutter.GetLineMarkCount: Int32;
+begin
+  Result := FLineMarks.Count;
+end;
+
+procedure TSimbaEditor.AddDocumentation;
+const
+  DOC_TEMPLATE =
+    '(*'             + LineEnding +
+    '%s'             + LineEnding +
+    '%s'             + LineEnding +
+    '.. pascal:: %s' + LineEnding +
+    ''               + LineEnding +
+    'DESC'           + LineEnding +
+    ''               + LineEnding +
+    'Example'        + LineEnding +
+    '-------'        + LineEnding +
+    ''               + LineEnding +
+    '  EXAMPLE'      + LineEnding +
+    '*)'             + LineEnding;
+var
+  Parser: TCodeParser;
+  Decl: TDeclaration;
+  FullName, Header: String;
+begin
+  Parser := TCodeParser.Create();
+  try
+    Parser.Run(Text, '');
+
+    Decl := Parser.Items.GetItemInPosition(SelStart - 1);
+    if (Decl <> nil) and Decl.HasOwnerClass(TciProcedureDeclaration, Decl, True) then
+    begin
+      CaretXY := CharIndexToRowCol(Decl.StartPos);
+
+      Header := TciProcedureDeclaration(Decl).Header;
+      if TciProcedureDeclaration(Decl).IsMethodOfType then
+        FullName := TciProcedureDeclaration(Decl).ObjectName + '.' + TciProcedureDeclaration(Decl).Name
+      else
+        FullName := TciProcedureDeclaration(Decl).Name;
+
+      InsertTextAtCaret(Format(DOC_TEMPLATE, [FullName, StringOfChar('~', Length(FullName)), Header]));
+    end;
+  except
+  end;
+
+  if (Parser <> nil) then
+    Parser.Free();
+end;
+
+// From Lazarus source
+procedure TSimbaEditor.CommentBlock;
+var
+  OldCaretPos, OldBlockStart, OldBlockEnd: TPoint;
+  WasSelAvail: Boolean;
+  WasSelMode: TSynSelectionMode;
+  BlockBeginLine: Integer;
+  BlockEndLine: Integer;
+  CommonIndent: Integer;
+
+  function FirstNonBlankPos(const Text: String; Start: Integer = 1): Integer;
+  var
+    i: Integer;
+  begin
+    for i := Start to Length(Text) do
+      if (Text[i] <> #32) and (Text[i] <> #9) then
+        Exit(i);
+    Result := -1;
+  end;
+
+  function MinCommonIndent: Integer;
+  var
+    i, j: Integer;
+  begin
+    If CommonIndent = 0 then begin
+      CommonIndent := Max(FirstNonBlankPos(Lines[BlockBeginLine - 1]), 1);
+      for i := BlockBeginLine + 1 to BlockEndLine do begin
+        j := FirstNonBlankPos(Lines[i - 1]);
+        if (j < CommonIndent) and (j > 0) then
+          CommonIndent := j;
+      end;
+    end;
+    Result := CommonIndent;
+  end;
+
+  function InsertPos(ALine: Integer): Integer;
+  begin
+    if not WasSelAvail then
+      Result := MinCommonIndent
+    else case WasSelMode of
+      smColumn: // CommonIndent is not used otherwise
+        begin
+          if CommonIndent = 0 then
+            CommonIndent := Min(LogicalToPhysicalPos(OldBlockStart).X, LogicalToPhysicalPos(OldBlockEnd).X);
+          Result := PhysicalToLogicalPos(Point(CommonIndent, ALine)).X;
+        end;
+      smNormal:
+        begin
+          Result := MinCommonIndent;
+        end;
+       else
+         Result := 1;
+    end;
+  end;
+
+  function DeletePos(ALine: Integer): Integer;
+  var
+    Line: String;
+  begin
+    Line := Lines[ALine - 1];
+    Result := FirstNonBlankPos(Line, InsertPos(ALine));
+    if (WasSelMode = smColumn) and((Result < 1) or (Result > length(Line) - 1)) then
+      Result := length(Line) - 1;
+    Result := Max(1, Result);
+    if (Length(Line) < Result +1) or
+       (Line[Result] <> '/') or (Line[Result+1] <> '/') then
+      Result := -1;
+  end;
+
+var
+  i: Integer;
+  NonBlankStart: Integer;
+  CommentOn: Boolean;
+begin
+  if ReadOnly then
+    Exit;
+
+  OldCaretPos   := CaretXY;
+  OldBlockStart := BlockBegin;
+  OldBlockEnd   := BlockEnd;
+  WasSelAvail := SelAvail;
+  WasSelMode  := SelectionMode;
+  CommonIndent := 0;
+
+  BlockBeginLine := OldBlockStart.Y;
+  BlockEndLine := OldBlockEnd.Y;
+  if (OldBlockEnd.X = 1) and (BlockEndLine > BlockBeginLine) and (SelectionMode <> smLine) then
+    Dec(BlockEndLine);
+
+  CommentOn := False;
+  for i := BlockBeginLine to BlockEndLine do
+    if DeletePos(i) < 0 then
+    begin
+      CommentOn := True;
+      Break;
+    end;
 
   BeginUpdate();
+  BeginUndoBlock();
 
-  try
-    BeginUndoBlock();
+  SelectionMode := smNormal;
 
-    try
-      StartStr := Lines[Start - 1].TrimLeft();
-      ColStart := -1;
-
-      for i := Start to Stop do
-      begin
-        CurrLineStr := Lines[i - 1].TrimLeft();
-        Temp := Lines[i - 1].IndexOf(CurrLineStr) + 1;
-        if (ColStart < 0) or (ColStart > Temp) then
-          ColStart := Temp;
-      end;
-
-      if StartStr.StartsWith('//') then
-      begin
-        for i := Start to Stop do
-          if Lines[i - 1].TrimLeft().StartsWith('//') then
-            TextBetweenPoints[Point(ColStart, i), Point(ColStart + 2, i)] := '';
-      end
-      else
-        for i := Start to Stop do
-          TextBetweenPoints[Point(ColStart, i), Point(ColStart, i)] := '//';
-    finally
-      EndUndoBlock();
-    end;
-  finally
-    EndUpdate();
-  end;
-
-  CaretXY := XY;
-end;
-
-procedure TSimbaEditor.SetDividerColor(Value: TColor);
-var
-  i: Int32;
-begin
-  FDividerColor := Value;
-  if not SimbaSettings.Editor.DividerVisible.Value then
-    Value := clNone;
-
-  if (Highlighter <> nil) then
-    for i := 0 to Highlighter.DividerDrawConfigCount - 1 do
+  if CommentOn then
+  begin
+    for i := BlockEndLine downto BlockBeginLine do
+      TextBetweenPoints[Point(InsertPos(i), i), Point(InsertPos(i), i)] := '//';
+    if OldCaretPos.X > InsertPos(OldCaretPos.Y) then
+      OldCaretPos.x := OldCaretPos.X + 2;
+    if OldBlockStart.X > InsertPos(OldBlockStart.Y) then
+      OldBlockStart.X := OldBlockStart.X + 2;
+    if OldBlockEnd.X > InsertPos(OldBlockEnd.Y) then
+      OldBlockEnd.X := OldBlockEnd.X + 2;
+  end else
+  begin
+    for i := BlockEndLine downto BlockBeginLine do
     begin
-      Highlighter.DividerDrawConfig[i].TopColor := Value;
-      Highlighter.DividerDrawConfig[i].NestColor := Value;
+      NonBlankStart := DeletePos(i);
+      if NonBlankStart < 1 then Continue;
+      TextBetweenPoints[Point(NonBlankStart, i), Point(NonBlankStart + 2, i)] := '';
+      if (OldCaretPos.Y = i) and (OldCaretPos.X > NonBlankStart) then
+        OldCaretPos.x := Max(OldCaretPos.X - 2, NonBlankStart);
+      if (OldBlockStart.Y = i) and (OldBlockStart.X > NonBlankStart) then
+        OldBlockStart.X := Max(OldBlockStart.X - 2, NonBlankStart);
+      if (OldBlockEnd.Y = i) and (OldBlockEnd.X > NonBlankStart) then
+        OldBlockEnd.X := Max(OldBlockEnd.X - 2, NonBlankStart);
     end;
-end;
-
-function TSimbaEditor.GetFontName: String;
-begin
-  if Font.Name <> '' then
-    Result := Font.Name
-  else
-    Result := SynDefaultFontName;
-end;
-
-procedure TSimbaEditor.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-  case Button of
-    mbExtra1: SimbaScriptTabHistory.GoBack();
-    mbExtra2: SimbaScriptTabHistory.GoForward();
-    else
-      inherited MouseDown(Button, Shift, X, Y);
   end;
+
+  EndUndoBlock();
+  EndUpdate();
+
+  CaretXY := OldCaretPos;
+  BlockBegin := OldBlockStart;
+  BlockEnd := OldBlockEnd;
+  SelectionMode := WasSelMode;
 end;
 
-procedure TSimbaEditor.HandleRightGutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
+procedure TSimbaEditor.HandleCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
 begin
-  Self.TopLine := TSynGutterLineOverview(Sender).PixelToLine(Y);
-end;
-
-procedure TSimbaEditor.CommandProcessor(Command: TSynEditorCommand; AChar: TUTF8Char; Data: Pointer; ASkipHooks: THookedCommandFlags);
-begin
-  inherited CommandProcessor(Command, AChar, Data, ASkipHooks);
-
   case Command of
-    ecCommentCode:
-      begin
-        CommentCode();
+    ecDocumentation: AddDocumentation();
+    ecCommentBlock: CommentBlock();
+    ecChar:
+      case AChar of
+        '(': if SimbaSettings.Editor.AutomaticallyShowParameterHints.Value then
+               CommandProcessor(ecParameterHintChar, AChar, Data);
+        '.': if SimbaSettings.Editor.AutomaticallyOpenAutoCompletion.Value then
+               CommandProcessor(ecAutoCompleteChar, AChar, Data);
       end;
   end;
+end;
+
+procedure TSimbaEditor.HandleZoomInOut(Data: PtrInt);
+begin
+  SimbaSettings.Editor.FontSize.Value := Font.Size;
+end;
+
+procedure TSimbaEditor.SetMacOSKeystrokes;
+var
+  I: Integer;
+begin
+  for I := 0 to Keystrokes.Count - 1 do
+    if ssCtrl in Keystrokes[i].Shift then
+      Keystrokes[I].Shift := Keystrokes[I].Shift - [ssCtrl] + [ssMeta];
+
+  for I := 0 to MouseActions.Count - 1 do
+    if ssCtrl in MouseActions[i].Shift then
+      MouseActions[I].Shift := MouseActions[I].Shift - [ssCtrl] + [ssMeta];
 end;
 
 function TSimbaEditor.HandleMouseAction(AnAction: TSynEditMouseAction; var AnInfo: TSynEditMouseActionInfo): Boolean;
@@ -255,242 +429,89 @@ begin
   Result := False;
 
   case AnAction.Command of
-    emcWheelZoomIn:
-      SimbaSettings.Editor.FontSize.Value := Max(5, SimbaSettings.Editor.FontSize.Value + 1);
+    emcWheelZoomIn, emcWheelZoomOut:
+      Application.QueueAsyncCall(@HandleZoomInOut, 0);
 
-    emcWheelZoomOut:
-      SimbaSettings.Editor.FontSize.Value := Max(5, SimbaSettings.Editor.FontSize.Value - 1);
+    emcJumpForward: SimbaScriptTabHistory.GoForward();
+    emcJumpBack: SimbaScriptTabHistory.GoBack();
   end;
 end;
 
-procedure TSimbaEditor.SetCaretColor(Value: TColor);
+procedure TSimbaEditor.SimbaSettingChanged(Setting: TSimbaSetting);
 begin
-  FCaretColor := Value;
+  if (Setting = SimbaSettings.Editor.FontSize) then
+    Font.Size := Setting.Value;
 
-  if (FCaretColor = clDefault) or (FCaretColor = clNone) then
+  if (Setting = SimbaSettings.Editor.FontName) then
   begin
-    FScreenCaretPainterClass := TSynEditScreenCaretPainterSystem;
-    if ScreenCaret.Painter.ClassType <> TSynEditScreenCaretPainterSystem then
-      ScreenCaret.ChangePainter(TSynEditScreenCaretPainterSystem);
-  end else
+    if SimbaFontHelpers.IsFontFixed(Setting.Value) then
+      Font.Name := Setting.Value;
+  end;
+
+  if (Setting = SimbaSettings.Editor.AntiAliased) then
   begin
-    FScreenCaretPainterClass := TSynEditScreenCaretPainterInternal;
-    if ScreenCaret.Painter.ClassType <> TSynEditScreenCaretPainterInternal then
-      ScreenCaret.ChangePainter(TSynEditScreenCaretPainterInternal);
-
-    TSynEditScreenCaretPainterInternal(ScreenCaret.Painter).Color := FCaretColor;
+    if Setting.Value then
+      Font.Quality := fqAntialiased
+    else
+      Font.Quality := fqNonAntialiased;
   end;
-end;
 
-procedure TSimbaEditor.SetIndentColor(Value: TColor);
-begin
-  FIndentColor := Value;
-  with MarkupByClass[TSynEditMarkupFoldColors] as TSynEditMarkupFoldColors do
-    LineColor[0].Color := FIndentColor;
-
-  Invalidate();
-end;
-
-procedure TSimbaEditor.SetAntiAliasing(Value: Boolean);
-begin
-  FAntiAliasing := Value;
-
-  if FAntiAliasing then
-    Font.Quality := fqDefault
-  else
-    Font.Quality := fqNonAntialiased;
-end;
-
-procedure TSimbaEditor.SettingChanged_Colors(Value: String);
-begin
-  LoadColors(Value);
-end;
-
-procedure TSimbaEditor.SettingChanged_RightMargin(Value: Int64);
-begin
-  RightEdge := Value;
-end;
-
-procedure TSimbaEditor.SettingChanged_RightMarginVisible(Value: Boolean);
-begin
-  if Value then
-    Options := Options - [eoHideRightMargin]
-  else
-    Options := Options + [eoHideRightMargin];
-end;
-
-procedure TSimbaEditor.SettingChanged_CaretPastEOL(Value: Boolean);
-begin
-  if Value then
-    Options := Options + [eoTrimTrailingSpaces, eoScrollPastEol]
-  else
-    Options := Options - [eoTrimTrailingSpaces, eoScrollPastEol];
-end;
-
-procedure TSimbaEditor.SettingChanged_AntiAliasing(Value: Boolean);
-begin
-  AntiAliasing := Value;
-end;
-
-procedure TSimbaEditor.SettingChanged_FontName(Value: String);
-begin
-  if Value <> '' then
-    Font.Name := Value;
-end;
-
-procedure TSimbaEditor.SettingChanged_FontSize(Value: Int64);
-begin
-  Font.Size := Value;
-end;
-
-procedure TSimbaEditor.SettingChanged_DividerVisible(Value: Boolean);
-begin
-  DividerColor := DividerColor;
-end;
-
-procedure TSimbaEditor.AddSettingChangeHandlers;
-begin
-  SimbaSettings.Editor.ColorsPath.AddOnChangeHandler(@SettingChanged_Colors);
-  SimbaSettings.Editor.RightMargin.AddOnChangeHandler(@SettingChanged_RightMargin).Changed();
-  SimbaSettings.Editor.RightMarginVisible.AddOnChangeHandler(@SettingChanged_RightMarginVisible).Changed();
-  SimbaSettings.Editor.AllowCaretPastEOL.AddOnChangeHandler(@SettingChanged_CaretPastEOL).Changed();
-  SimbaSettings.Editor.AntiAliasing.AddOnChangeHandler(@SettingChanged_AntiAliasing).Changed();
-  SimbaSettings.Editor.FontName.AddOnChangeHandler(@SettingChanged_FontName).Changed();
-  SimbaSettings.Editor.FontSize.AddOnChangeHandler(@SettingChanged_FontSize).Changed();
-  SimbaSettings.Editor.DividerVisible.AddOnChangeHandler(@SettingChanged_DividerVisible).Changed();
-end;
-
-procedure TSimbaEditor.RemoveSettingChangeHandlers;
-begin
-  if SimbaSettings = nil then
-    Exit;
-
-  SimbaSettings.Editor.ColorsPath.RemoveOnChangeHandler(@SettingChanged_Colors);
-  SimbaSettings.Editor.RightMargin.RemoveOnChangeHandler(@SettingChanged_RightMargin);
-  SimbaSettings.Editor.RightMarginVisible.RemoveOnChangeHandler(@SettingChanged_RightMarginVisible);
-  SimbaSettings.Editor.AllowCaretPastEOL.RemoveOnChangeHandler(@SettingChanged_CaretPastEOL);
-  SimbaSettings.Editor.AntiAliasing.RemoveOnChangeHandler(@SettingChanged_AntiAliasing);
-  SimbaSettings.Editor.FontName.RemoveOnChangeHandler(@SettingChanged_FontName);
-  SimbaSettings.Editor.FontSize.RemoveOnChangeHandler(@SettingChanged_FontSize);
-  SimbaSettings.Editor.DividerVisible.RemoveOnChangeHandler(@SettingChanged_DividerVisible);
-end;
-
-function TSimbaEditor.Save(AFileName: String): Boolean;
-begin
-  Result := False;
-  if AFileName = '' then
-    Exit;
-
-  try
-    Lines.SaveToFile(AFileName);
-    MarkTextAsSaved();
-    FFileName := AFileName;
-    Result := True;
-  except
-    on E: Exception do
-      MessageDlg('Unable to save script: ' + E.Message, mtError, [mbOK], 0);
-  end;
-end;
-
-function TSimbaEditor.Load(AFileName: String): Boolean;
-begin
-  Result := False;
-  if AFileName = '' then
-    Exit;
-
-  if FileExists(AFileName) then
-  try
-    Lines.LoadFromFile(AFileName);
-    MarkTextAsSaved();
-    FFileName := AFileName;
-    Result := True;
-  except
-    on E: Exception do
-      MessageDlg('Unable to load script: ' + E.Message, mtError, [mbOK], 0);
-  end;
-end;
-
-procedure TSimbaEditor.FindDeclaration(XY: TPoint);
-var
-  AllowMouseLink: Boolean;
-begin
-  if (OnMouseLink <> nil) then OnMouseLink(Self, XY.X, XY.Y, AllowMouseLink);
-  if (OnClickLink <> nil) then OnClickLink(Self, mbLeft, [], XY.X, XY.Y);
-end;
-
-procedure TSimbaEditor.SaveColors(AFileName: String);
-var
-  INI: TINIFile;
-  i: Int32;
-begin
-  try
-    INI := TIniFile.Create(AFileName);
-    INI.CacheUpdates := True;
-
-    for i := 0 to FAttributes.Count - 1 do
-      FAttributes[i].Save(INI);
-
-    INI.Free();
-  except
-  end;
-end;
-
-procedure TSimbaEditor.LoadColors(AFileName: String);
-var
-  i: Int32;
-  INI: TINIFile;
-begin
-  if FileExists(AFileName) then
-  try
-    INI := TIniFile.Create(AFileName);
-
-    for i := 0 to FAttributes.Count - 1 do
-      FAttributes[i].Load(INI);
-
-    INI.Free();
-  except
-  end;
-end;
-
-procedure TSimbaEditor.LoadColorsFromSettings;
-begin
-  if SimbaSettings.Editor.ColorsPath.Value <> '' then
-    LoadColors(SimbaSettings.Editor.ColorsPath.Value);
-end;
-
-procedure TSimbaEditor.LoadDefaultScript;
-begin
-  if FileExists(SimbaSettings.Editor.DefaultScriptPath.Value) then
-    Load(SimbaSettings.Editor.DefaultScriptPath.Value)
-  else
+  if (Setting = SimbaSettings.Editor.CustomColors) then
   begin
-    Text := 'program new;' + LineEnding +
-            'begin' + LineEnding +
-            'end.';
-
-    MarkTextAsSaved();
+    FAttributes.LoadFromFile(Setting.Value);
   end;
 
-  FFileName := '';
+  if (Setting = SimbaSettings.Editor.RightMarginVisible) then
+  begin
+    if Setting.Value then
+      Options := Options - [eoHideRightMargin]
+    else
+      Options := Options + [eoHideRightMargin];
+  end;
+
+  if (Setting = SimbaSettings.Editor.AllowCaretPastEOL) then
+  begin
+    if Setting.Value then
+      Options := Options + [eoTrimTrailingSpaces, eoScrollPastEol]
+    else
+      Options := Options - [eoTrimTrailingSpaces, eoScrollPastEol];
+  end;
+
+  if (Setting = SimbaSettings.Editor.RightMargin) then
+  begin
+    RightEdge := Setting.Value;
+  end;
 end;
 
-function TSimbaEditor.GetCaretObj: TSynEditCaret;
+function TSimbaEditor.GetCaretMax: TPoint;
 begin
-  Result := inherited GetCaretObj();
+  Result.Y := TextView.Count;
+  Result.X := Length(TextView[TextView.Count - 1]) + 1;
+end;
+
+function TSimbaEditor.GetExpressionAt(X, Y: Integer): String;
+var
+  StartX, EndX: Integer;
+begin
+  GetWordBoundsAtRowCol(TPoint.Create(X, Y), StartX, EndX);
+
+  Result := GetExpression(Text, RowColToCharIndex(TPoint.Create(EndX - 1, Y)));
 end;
 
 constructor TSimbaEditor.Create(AOwner: TComponent);
-var
-  I: Int32;
-  {$IFDEF DARWIN}
-  Key: UInt16;
-  Shift: TShiftState;
-  {$ENDIF}
 begin
   inherited Create(AOwner);
 
-  Highlighter := TSynFreePascalSyn.Create(Self);
+  MouseOptions := [emAltSetsColumnMode, emUseMouseActions, emShowCtrlMouseLinks, emCtrlWheelZoom];
+  ResetMouseActions();
 
+  Options := Options + [eoTabIndent, eoKeepCaretX, eoDragDropEditing, eoScrollPastEof] - [eoSmartTabs, eoHideRightMargin];
+  Options2 := Options2 + [eoCaretSkipsSelection];
+
+  TabWidth := 2;
+  BlockIndent := 2;
+
+  Highlighter := TSynFreePascalSyn.Create(Self);
   with Highlighter as TSynFreePascalSyn do
   begin
     CommentAttri.Foreground := clBlue;
@@ -501,9 +522,16 @@ begin
     SymbolAttri.Foreground := clRed;
     DirectiveAttri.Foreground := clRed;
     DirectiveAttri.Style := [fsBold];
-    NestedComments := False;
+    NestedComments := True;
     StringKeywordMode := spsmNone;
   end;
+
+  Gutter.MarksPart.Visible := False;
+  Gutter.SeparatorPart.Visible := False;
+  Gutter.LeftOffset := 10;
+
+  TSimbaEditor_GutterSeparator.Create(Gutter.Parts, 4, 2);
+  TSimbaEditor_GutterSeparator.Create(Gutter.Parts, 1, 4);
 
   FParameterHint := TSimbaParameterHint.Create(nil);
   FParameterHint.Editor := Self;
@@ -515,8 +543,6 @@ begin
   FAutoComplete.ShowSizeDrag := True;
   FAutoComplete.Width := 500;
   FAutoComplete.LinesInWindow := 8;
-
-  FAttributes := TSimbaEditor_AttributesList.Create(Self);
 
   with MarkupByClass[TSynEditMarkupHighlightAllCaret] as TSynEditMarkupHighlightAllCaret do
   begin
@@ -535,47 +561,36 @@ begin
     end;
   end;
 
-  // Indent Line
-  MarkupManager.AddMarkUp(TSynEditMarkupFoldColors.Create(Self));
+  FAttributes := TSimbaEditor_Attributes.Create(Self);
+  FAttributes.LoadFromFile(SimbaSettings.Editor.CustomColors.Value);
 
-  with MarkupByClass[TSynEditMarkupFoldColors] as TSynEditMarkupFoldColors do
-  begin
-    ColorCount := 1;
-
-    with Color[0] do
-    begin
-      Foreground := clNone;
-      Background := clNone;
-    end;
-  end;
-
-  // Right Gutter
-  TSynGutterSeparator.Create(RightGutter.Parts).Width := 20;
+  Gutter.ChangesPart.AutoSize := False;
+  Gutter.ChangesPart.Width := 2;
+  Gutter.ChangesPart.ModifiedColor := RGBToColor(190, 0, 0);
+  Gutter.ChangesPart.SavedColor := RGBToColor(2, 100, 64);
 
   with TSynGutterLineOverview.Create(RightGutter.Parts) do
   begin
-    OnGutterClick := @HandleRightGutterClick;
+    FModifiedLinesGutter := TSimbaEditor_ModifiedLinesGutter.Create(Providers);
+    FModifiedLinesGutter.Priority := 1;
+    FModifiedLinesGutter.Color := Gutter.ChangesPart.ModifiedColor;
+    FModifiedLinesGutter.ColorSaved := Gutter.ChangesPart.SavedColor;
 
-    TSynGutterLOvProviderCurrentPage.Create(Providers).Priority := 1;
-    TSynGutterLOvProviderModifiedLines.Create(Providers).Priority := 2;
+    TSynGutterLOvProviderCurrentPage.Create(Providers);
+
+    AutoSize := False;
+    Width := 6;
   end;
 
-  // Hooks
+  MouseActions.AddCommand(emcOverViewGutterScrollTo, False, LazSynEditMouseCmdsTypes.mbLeft, ccSingle, cdDown,[],[]);
+  MouseActions.AddCommand(emcJumpBack, False, LazSynEditMouseCmdsTypes.mbExtra1, ccSingle, cdDown, [], []);
+  MouseActions.AddCommand(emcJumpForward, False, LazSynEditMouseCmdsTypes.mbExtra2, ccSingle, cdDown, [], []);
+
+  RegisterCommandHandler(@HandleCommand, nil, [hcfPostExec]);
   RegisterMouseActionExecHandler(@HandleMouseAction);
 
-  // Defaults
-  CaretColor := clDefault;
-  IndentColor := clGray;
-
-  MouseOptions := MouseOptions + [emUseMouseActions, emShowCtrlMouseLinks, emCtrlWheelZoom];
-  ResetMouseActions();
-
-  // Remapping
-  with Keystrokes[KeyStrokes.FindCommand(ecNormalSelect)] do
-    Shift := [ssShift, ssAlt];
-
-  with Keystrokes[KeyStrokes.FindCommand(ecColumnSelect)] do
-    Shift := [ssShift, ssAlt];
+  Keystrokes.Delete(KeyStrokes.FindCommand(ecNormalSelect));
+  Keystrokes.Delete(KeyStrokes.FindCommand(ecColumnSelect));
 
   with KeyStrokes.Add() do
   begin
@@ -595,43 +610,68 @@ begin
   begin
     Key := VK_LCL_SLASH;
     Shift := [ssCtrl];
-    Command := ecCommentCode;
+    Command := ecCommentBlock;
   end;
 
-  {$IFDEF DARWIN}
-  for I := 0 to Keystrokes.Count - 1 do
+  with Keystrokes.Add() do
   begin
-    ShortCutToKey(Keystrokes[I].ShortCut, Key, Shift);
+    Key := VK_D;
+    Shift := [ssCtrl];
+    Command := ecDocumentation;
+  end;
 
-    if ssCtrl in Shift then
+  FMultiCaret := TSynPluginMultiCaret.Create(Self);
+  FMultiCaret.MouseActions.Clear();
+  FMultiCaret.KeyStrokes.Clear();
+  with FMultiCaret.KeyStrokes do
+  begin
+    with Add() do
     begin
-      Shift := Shift - [ssCtrl] + [ssMeta];
+      Command := ecPluginMultiCaretSetCaret;
+      Key     := VK_INSERT;
+      Shift   := [ssShift, ssCtrl];
+    end;
 
-      Keystrokes[I].ShortCut := ShortCut(Key, Shift);
+    with Add() do
+    begin
+      Command := ecPluginMultiCaretClearAll;
+      Key     := VK_ESCAPE;
     end;
   end;
 
-  MouseActions.AddCommand(emcWheelZoomOut, False, mbXWheelDown, ccAny,    cdDown, [ssMeta], [ssMeta]);
-  MouseActions.AddCommand(emcWheelZoomIn,  False, mbXWheelUp,   ccAny,    cdDown, [ssMeta], [ssMeta]);
-  MouseActions.AddCommand(emcMouseLink,    False, mbXLeft,      ccSingle, cdUp,   [ssMeta], [ssShift, ssAlt, ssMeta]);
-  {$ENDIF}
+  if SimbaSettings.Editor.AllowCaretPastEOL.Value then
+    Options := Options + [eoTrimTrailingSpaces, eoScrollPastEol]
+  else
+    Options := Options - [eoTrimTrailingSpaces, eoScrollPastEol];
 
-  LoadDefaultScript();
+  if SimbaSettings.Editor.RightMarginVisible.Value then
+    Options := Options + [eoHideRightMargin]
+  else
+    Options := Options - [eoHideRightMargin];
 
-  for I := 0 to FAttributes.Count - 1 do
-    FAttributes[I].Changed();
+  if SimbaSettings.Editor.AntiAliased.Value then
+    Font.Quality := fqCleartypeNatural
+  else
+    Font.Quality := fqNonAntialiased;
 
-  AddSettingChangeHandlers();
+  Font.Size := SimbaSettings.Editor.FontSize.Value;
+  if SimbaFontHelpers.IsFontFixed(SimbaSettings.Editor.FontName.Value) then
+    Font.Name := SimbaSettings.Editor.FontName.Value;
+
+  SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
 end;
 
 destructor TSimbaEditor.Destroy;
 begin
-  RemoveSettingChangeHandlers();
+  if (SimbaSettings <> nil) then
+    SimbaSettings.UnRegisterChangeHandler(@SimbaSettingChanged);
 
-  FAutoComplete.Free();
-  FParameterHint.Free();
-
-  FAttributes.Free();
+  if (FAutoComplete <> nil) then
+    FreeAndNil(FAutoComplete);
+  if (FParameterHint <> nil) then
+    FreeAndNil(FParameterHint);
+  if (FAttributes <> nil) then
+    FreeAndNil(FAttributes);
 
   inherited Destroy();
 end;

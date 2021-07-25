@@ -1,20 +1,23 @@
 object SimbaScriptTabsForm: TSimbaScriptTabsForm
-  Left = 14
+  Left = 1918
   Height = 252
-  Top = 1030
+  Top = 183
   Width = 564
   AllowDropFiles = True
   Caption = 'Editor'
   ClientHeight = 252
   ClientWidth = 564
   OnDropFiles = DoOnDropFiles
-  LCLVersion = '2.0.8.0'
+  LCLVersion = '2.2.0.1'
   object Notebook: TExtendedNotebook
-    Left = 0
-    Height = 230
+    Left = 3
+    Height = 249
     Top = 0
-    Width = 564
+    Width = 558
     Align = alClient
+    BorderSpacing.Left = 3
+    BorderSpacing.Right = 3
+    BorderSpacing.Bottom = 3
     Images = SimbaForm.Images
     PopupMenu = TabPopupMenu
     TabOrder = 0
@@ -23,67 +26,18 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
     TabDragMode = dmAutomatic
     TabDragAcceptMode = dmAutomatic
   end
-  object StatusBar: TPanel
-    Left = 0
-    Height = 20
-    Top = 230
-    Width = 564
-    Align = alBottom
-    Anchors = [akRight]
-    BorderSpacing.Bottom = 2
-    BevelOuter = bvNone
-    ClientHeight = 20
-    ClientWidth = 564
-    ParentColor = False
-    TabOrder = 1
-    OnPaint = DoStatusBarPaint
-    object StatusPanelCaret: TPanel
-      Left = 5
-      Height = 20
-      Top = 0
-      Width = 170
-      Align = alLeft
-      Alignment = taLeftJustify
-      BorderSpacing.Left = 5
-      BevelOuter = bvNone
-      TabOrder = 0
-      OnPaint = DoStatusPanelPaint
-    end
-    object StatusPanelFileName: TPanel
-      Left = 355
-      Height = 20
-      Top = 0
-      Width = 209
-      Align = alClient
-      Alignment = taLeftJustify
-      BorderSpacing.Left = 5
-      BevelOuter = bvNone
-      TabOrder = 1
-    end
-    object StatusPanelState: TPanel
-      Left = 180
-      Height = 20
-      Top = 0
-      Width = 170
-      Align = alLeft
-      Alignment = taLeftJustify
-      BorderSpacing.Left = 5
-      BevelOuter = bvNone
-      TabOrder = 2
-      OnPaint = DoStatusPanelPaint
-    end
-  end
   object ReplaceDialog: TReplaceDialog
+    OnShow = ReplaceDialogShow
     Options = [frDown, frHideUpDown, frHideEntireScope, frPromptOnReplace]
     OnReplace = DoOnReplaceDialog
-    left = 168
-    top = 16
+    Left = 168
+    Top = 16
   end
   object TabPopupMenu: TPopupMenu
     Images = SimbaForm.Images
     OnPopup = DoTabPopupOpen
-    left = 256
-    top = 16
+    Left = 256
+    Top = 16
     object MenuItemNewTab: TMenuItem
       Caption = 'New Tab'
       OnClick = DoTabPopupClick
@@ -102,8 +56,8 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
   object EditorPopupMenu: TPopupMenu
     Images = SimbaForm.Images
     OnPopup = DoEditorPopupShow
-    left = 352
-    top = 16
+    Left = 352
+    Top = 16
     object MenuItemFindDeclaration: TMenuItem
       Caption = 'Find Declaration'
       OnClick = DoEditorPopupClick
@@ -174,19 +128,20 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
   object OpenDialog: TOpenDialog
     Filter = 'Simba Files|*.simba;*.pas;*.inc|All Files|*.*'
     Options = [ofAllowMultiSelect, ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
-    left = 88
-    top = 16
+    Left = 88
+    Top = 16
   end
   object FindDialog: TFindDialog
     Options = [frDown, frHideUpDown, frHideEntireScope]
     OnFind = DoOnFindDialog
-    left = 168
-    top = 88
+    Left = 168
+    Top = 88
   end
-  object CursorTimer: TTimer
-    Interval = 500
-    OnTimer = DoCursorTimer
-    left = 440
-    top = 16
+  object ClearLineMarksTimer: TTimer
+    Enabled = False
+    Interval = 5000
+    OnTimer = HandleClearMarksTimer
+    Left = 277
+    Top = 104
   end
 end
