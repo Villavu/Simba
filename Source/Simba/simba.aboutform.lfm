@@ -1,70 +1,82 @@
 object SimbaAboutForm: TSimbaAboutForm
-  Left = 622
-  Height = 400
-  Top = 270
-  Width = 400
+  Left = 159
+  Height = 487
+  Top = 313
+  Width = 481
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'About'
-  ClientHeight = 400
-  ClientWidth = 400
+  ClientHeight = 487
+  ClientWidth = 481
   OnCreate = FormCreate
-  LCLVersion = '2.0.6.0'
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '2.2.0.1'
   object AboutMemo: TMemo
-    AnchorSideBottom.Control = ButtonClose
-    Left = 10
-    Height = 270
-    Top = 50
-    Width = 380
-    Align = alClient
+    AnchorSideTop.Control = VersionLabel
+    AnchorSideTop.Side = asrBottom
+    AnchorSideBottom.Control = ImageSimba
+    Left = 8
+    Height = 343
+    Top = 60
+    Width = 461
+    Align = alCustom
+    Anchors = [akTop, akLeft, akRight, akBottom]
     BorderSpacing.Left = 10
-    BorderSpacing.Top = 50
+    BorderSpacing.Top = 10
     BorderSpacing.Right = 10
-    BorderSpacing.Bottom = 80
+    BorderSpacing.Bottom = 10
+    ReadOnly = True
     TabOrder = 0
+    WordWrap = False
   end
-  object ButtonClose: TButton
-    AnchorSideLeft.Control = AboutMemo
-    AnchorSideLeft.Side = asrCenter
-    AnchorSideRight.Control = AboutMemo
-    AnchorSideRight.Side = asrCenter
-    Left = 297
-    Height = 28
-    Top = 346
-    Width = 93
-    Anchors = [akTop]
-    Caption = 'Ok'
+  object ButtonExit: TButton
+    AnchorSideLeft.Control = ImageSimba
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 186
+    Height = 29
+    Top = 448
+    Width = 285
+    Anchors = [akLeft, akRight, akBottom]
+    AutoSize = True
+    BorderSpacing.Left = 10
+    BorderSpacing.Right = 10
+    BorderSpacing.Bottom = 10
+    Caption = 'Exit'
     ModalResult = 1
+    OnClick = ButtonExitClick
     TabOrder = 1
   end
   object LabelTitle: TLabel
-    Left = 8
-    Height = 26
-    Top = 16
-    Width = 63
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    Left = 10
+    Height = 32
+    Top = 5
+    Width = 66
+    BorderSpacing.Left = 10
+    BorderSpacing.Top = 5
     Caption = 'Simba'
-    Font.Height = -23
-    Font.Name = 'Sans'
-    ParentColor = False
-    ParentFont = False
-  end
-  object LabelRevision: TLabel
-    Left = 291
-    Height = 19
-    Top = 20
-    Width = 99
-    Anchors = [akRight]
-    Caption = 'Revision XXX'
-    Font.Height = -17
-    Font.Name = 'Sans'
-    ParentColor = False
+    Font.Height = -24
     ParentFont = False
   end
   object ImageSimba: TImage
-    Left = 16
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Side = asrBottom
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 10
     Height = 64
-    Top = 328
+    Top = 413
     Width = 166
+    Anchors = [akLeft, akBottom]
+    AutoSize = True
+    BorderSpacing.Left = 10
+    BorderSpacing.Bottom = 10
     Picture.Data = {
       0A544A706567496D616765FA2C0000FFD8FFE000104A46494600010101012C01
       2C0000FFE1057A4578696600004D4D002A000000080007011200030000000100
@@ -428,5 +440,21 @@ object SimbaAboutForm: TSimbaAboutForm
       BBBEB6C3DA4F75EC3C702DCC8CCAB2C7858D91C02A649BA1B5ED1DD163D2F7F8
       1DC8EDBEFF003FFFD9
     }
+  end
+  object VersionLabel: TLabel
+    AnchorSideLeft.Control = LabelTitle
+    AnchorSideTop.Control = LabelTitle
+    AnchorSideTop.Side = asrBottom
+    Left = 10
+    Height = 13
+    Top = 37
+    Width = 40
+    Caption = '(master)'
+    Font.Color = clNavy
+    Font.Height = -11
+    ParentFont = False
+    OnClick = VersionLabelClick
+    OnMouseEnter = VersionLabelMouseEnter
+    OnMouseLeave = VersionLabelMouseLeave
   end
 end

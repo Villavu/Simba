@@ -1,19 +1,19 @@
-object SimbaScriptTemplateForm: TSimbaScriptTemplateForm
-  Left = 92
-  Height = 680
-  Top = 613
-  Width = 960
-  Caption = 'Open Template'
-  ClientHeight = 680
-  ClientWidth = 960
+object SimbaOpenExampleForm: TSimbaOpenExampleForm
+  Left = 1614
+  Height = 600
+  Top = 22
+  Width = 900
+  Caption = 'Open Example/Tool'
+  ClientHeight = 600
+  ClientWidth = 900
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '2.0.10.0'
+  LCLVersion = '2.2.0.1'
   object TreeView: TTreeView
     Left = 0
-    Height = 631
+    Height = 550
     Top = 0
     Width = 180
     Align = alLeft
@@ -21,17 +21,19 @@ object SimbaScriptTemplateForm: TSimbaScriptTemplateForm
     Images = SimbaForm.Images
     ReadOnly = True
     ScrollBars = ssAutoBoth
+    ShowButtons = False
     ShowRoot = False
     TabOrder = 0
     OnCreateNodeClass = TreeViewCreateNodeClass
+    OnDblClick = ButtonOkClick
     OnSelectionChanged = TreeViewSelectionChanged
-    Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoToolTips, tvoThemedDraw]
+    Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowLines, tvoToolTips, tvoNoDoubleClickExpand, tvoThemedDraw]
   end
   object ButtonPanel: TButtonPanel
     Left = 6
-    Height = 37
-    Top = 637
-    Width = 948
+    Height = 38
+    Top = 556
+    Width = 888
     OKButton.Name = 'OKButton'
     OKButton.DefaultCaption = True
     OKButton.OnClick = ButtonOkClick
@@ -46,26 +48,26 @@ object SimbaScriptTemplateForm: TSimbaScriptTemplateForm
   end
   object Splitter: TSplitter
     Left = 180
-    Height = 631
+    Height = 550
     Top = 0
     Width = 5
   end
   object EditorPanel: TPanel
     Left = 185
-    Height = 631
+    Height = 550
     Top = 0
-    Width = 775
+    Width = 715
     Align = alClient
     BevelOuter = bvNone
-    Caption = '(no template selected)'
-    ClientHeight = 631
-    ClientWidth = 775
+    Caption = '(no file selected)'
+    ClientHeight = 550
+    ClientWidth = 715
     TabOrder = 3
     inline Editor: TSynEdit
       Left = 0
-      Height = 631
+      Height = 550
       Top = 0
-      Width = 775
+      Width = 715
       Align = alClient
       Font.Height = -13
       Font.Name = 'Courier New'
@@ -76,6 +78,7 @@ object SimbaScriptTemplateForm: TSimbaScriptTemplateForm
       TabOrder = 0
       Gutter.Width = 57
       Gutter.MouseActions = <>
+      RightGutter.Visible = False
       RightGutter.Width = 0
       RightGutter.MouseActions = <>
       Highlighter = Highlighter
@@ -566,6 +569,7 @@ object SimbaScriptTemplateForm: TSimbaScriptTemplateForm
     Enabled = False
     CompilerMode = pcmObjFPC
     NestedComments = True
+    TypeHelpers = False
     Left = 680
     Top = 24
   end

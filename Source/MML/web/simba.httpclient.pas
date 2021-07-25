@@ -175,7 +175,7 @@ end;
 function TSimbaHTTPClientBase.GetSocketHandler(const UseSSL: Boolean): TSocketHandler;
 begin
   if UseSSL and (not IsSSLLoaded) then
-    InitializeOpenSSL(False);
+    InitSSLInterface();
 
   Result := inherited GetSocketHandler(UseSSL);
 end;

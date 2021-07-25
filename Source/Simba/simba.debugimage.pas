@@ -23,11 +23,12 @@
 unit simba.debugimage;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
 uses
-  classes, sysutils, lresources, forms, controls, dialogs, math,
+  classes, sysutils, forms, controls, dialogs, math,
   simba.imagebox;
 
 type
@@ -40,7 +41,7 @@ type
   public
     ImageBox: TSimbaImageBox;
 
-    procedure Resize(AWidth, AHeight: Int32; AShowOnTop: Boolean);
+    procedure Display(AWidth, AHeight: Int32; AShow: Boolean);
 
     constructor Create(AOwner: TComponent); override;
   end;
@@ -49,6 +50,8 @@ var
   SimbaDebugImageForm: TSimbaDebugImageForm;
 
 implementation
+
+{$R *.lfm}
 
 uses
   simba.debugform, simba.dockinghelpers;
@@ -64,12 +67,31 @@ begin
   SimbaDebugForm.Add('Debug Image Click: ' + IntToStr(FMouseX) + ', ' + IntToStr(FMouseY));
 end;
 
-procedure TSimbaDebugImageForm.Resize(AWidth, AHeight: Int32; AShowOnTop: Boolean);
+procedure TSimbaDebugImageForm.Display(AWidth, AHeight: Int32; AShow: Boolean);
+var
+  Form: TCustomForm;
 begin
-  SimbaDockingHelper.Resize(Self, Max(200, AWidth), Max(200, AHeight + ImageBox.StatusBar.Height));
-  SimbaDockingHelper.EnsureVisible(Self);
-  if AShowOnTop then
-    SimbaDockingHelper.ShowOnTop(Self);
+  if (AWidth < 250) then
+    AWidth := 250;
+  if (AHeight < 250) then
+    AHeight := 250;
+
+  if (HostDockSite is TSimbaAnchorDockHostSite) then
+  begin
+    Form := TSimbaAnchorDockHostSite(HostDockSite);
+    if (TSimbaAnchorDockHostSite(Form).Header <> nil) then
+    begin
+      AHeight := AHeight + TSimbaAnchorDockHostSite(Form).Header.Height +
+                           TSimbaAnchorDockHostSite(Form).Header.BorderSpacing.Top +
+                           TSimbaAnchorDockHostSite(Form).Header.BorderSpacing.Bottom;
+    end;
+  end else
+    Form := Self;
+
+  Form.Width := AWidth;
+  Form.Height := AHeight + ImageBox.StatusBar.Height;
+  if AShow then
+    Form.ShowOnTop();
 end;
 
 constructor TSimbaDebugImageForm.Create(AOwner: TComponent);
@@ -82,9 +104,6 @@ begin
   ImageBox.OnMouseMove := @ImageMouseMove;
   ImageBox.OnDblClick := @ImageDoubleClick;
 end;
-
-initialization
-  {$R *.lfm}
 
 end.
 

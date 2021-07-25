@@ -1,0 +1,9 @@
+FPCRes was used to convert binaries to resource files.
+
+gzip too!
+
+C:\lazarus\fpc\3.2.2\bin\x86_64-win64\fpcres.exe aarch64.rc -of res
+C:\lazarus\fpc\3.2.2\bin\x86_64-win64\fpcres.exe darwin64.rc -of res
+C:\lazarus\fpc\3.2.2\bin\x86_64-win64\fpcres.exe linux64.rc -of res
+C:\lazarus\fpc\3.2.2\bin\x86_64-win64\fpcres.exe win32.rc -of res
+C:\lazarus\fpc\3.2.2\bin\x86_64-win64\fpcres.exe win64.rc -of res

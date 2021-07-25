@@ -12,18 +12,6 @@ implementation
 uses
   CocoaAll;
 
-type
-
-  NSProcessInfo_NSObject = objccategory external (NSProcessInfo)
-    function beginActivityWithOptions_reason(options: UInt64; reason: NSString): NSObjectProtocol; message 'beginActivityWithOptions:reason:';
-    procedure endActivity(activity: NSObjectProtocol); message 'endActivity:';
-  end;
-
-const
-  NSActivityIdleSystemSleepDisabled = 1 shl 20;
-  NSActivityUserInitiated = $00FFFFFF + NSActivityIdleSystemSleepDisabled;
-  NSActivityUserInitiatedAllowingIdleSystemSleep = NSActivityUserInitiated and (not NSActivityIdleSystemSleepDisabled);
-
 var
   Token: NSObjectProtocol;
 

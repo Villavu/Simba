@@ -1,6 +1,7 @@
 unit simba.script_communication;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
@@ -9,7 +10,7 @@ uses
   simba.bitmap;
 
 type
-  ESimbaScriptState = (STATE_PAUSED, STATE_STOP, STATE_RUNNING);
+  ESimbaScriptState = (STATE_PAUSED, STATE_STOP, STATE_RUNNING, STATE_NONE);
 
   PSimbaScriptDebuggerEvent = ^TSimbaScriptDebuggerEvent;
   TSimbaScriptDebuggerEvent = packed record
@@ -203,12 +204,12 @@ type
 implementation
 
 uses
-  math,
+  math, forms,
   {$IFDEF WINDOWS}
   windows,
   {$ENDIF}
   simba.main, simba.debugform, simba.debugimage,
-  simba.scripttabsform, simba.mufasatypes, simba.scriptinstance;
+  simba.scripttabsform, simba.scripttab, simba.mufasatypes, simba.scriptinstance;
 
 function DuplicateHandle(Handle: THandle): THandle;
 begin
@@ -273,7 +274,7 @@ begin
   Params.Read(Width, SizeOf(Int32));
   Params.Read(Height, SizeOf(Int32));
 
-  SimbaDebugImageForm.Resize(Width, Height, True);
+  SimbaDebugImageForm.Display(Width, Height, True);
 end;
 
 constructor TSimbaMethod_DisplayDebugImage.Create(Width, Height: Int32);
@@ -303,9 +304,9 @@ begin
   Params.Read(Width, SizeOf(Int32));
   Params.Read(Height, SizeOf(Int32));
 
-  SimbaDebugImageForm.Resize(
-    Max(Width, SimbaDebugImageForm.ImageBox.Width),
-    Max(Height, SimbaDebugImageForm.ImageBox.Height - SimbaDebugImageForm.ImageBox.StatusBar.Height),
+  SimbaDebugImageForm.Display(
+    SimbaDebugImageForm.ImageBox.Width,
+    SimbaDebugImageForm.ImageBox.Height - SimbaDebugImageForm.ImageBox.StatusBar.Height,
     True
   );
 
@@ -327,39 +328,27 @@ procedure TSimbaMethod_ScriptError.DoInvoke;
 var
   Line, Col: Int32;
   FileName: ShortString;
-  I: Int32;
-  Script: TSimbaScriptInstance;
+  ScriptInstance: TSimbaScriptInstance;
+  ScriptTab: TSimbaScriptTab;
 begin
   Params.Read(Line, SizeOf(Int32));
   Params.Read(Col, SizeOf(Int32));
   Params.Read(FileName, SizeOf(ShortString));
-  Params.Read(Script, SizeOf(TSimbaScriptInstance));
+  Params.Read(ScriptInstance, SizeOf(TSimbaScriptInstance));
 
-  for I := 0 to SimbaScriptTabsForm.TabCount - 1 do
+  ScriptTab := SimbaScriptTabsForm.FindTab(ScriptInstance);
+  if (ScriptTab <> nil) then
   begin
-    if (SimbaScriptTabsForm.Tabs[I].ScriptInstance <> Script) then
-      Continue;
-
-    // Main script
-    if (SimbaScriptTabsForm.Tabs[I].ScriptName = FileName) then
+    if (ScriptTab.ScriptFileName = FileName) or ((ScriptTab.ScriptFileName = '') and (ScriptTab.ScriptTitle = FileName)) or SimbaScriptTabsForm.Open(FileName) then
     begin
-      SimbaScriptTabsForm.Tabs[I].Show();
-      SimbaScriptTabsForm.Tabs[I].SetError(Line, Col);
+      if (ScriptTab.ScriptFileName = FileName) then
+        ScriptTab.Show();
 
-      Break;
-    end;
-
-    // Include file
-    if FileExists(FileName) then
-    begin
-      SimbaScriptTabsForm.Open(FileName);
       SimbaScriptTabsForm.CurrentTab.SetError(Line, Col);
-
-      Break;
     end;
   end;
 
-  // ensure error message is visible
+  // Ensure error message is visible
   SimbaDebugForm.Editor.CaretX := 0;
   SimbaDebugForm.Editor.CaretY := SimbaDebugForm.Editor.Lines.Count;
 end;
@@ -447,7 +436,7 @@ var
 begin
   Params.Read(Status, SizeOf(ShortString));
 
-  SimbaScriptTabsForm.StatusPanelFileName.Caption := Status;
+  SimbaForm.StatusPanelFileName.Caption := Status;
 end;
 
 constructor TSimbaMethod_Status.Create(Status: ShortString);
@@ -463,7 +452,7 @@ var
 begin
   Params.Read(Title, SizeOf(ShortString));
 
-  SimbaForm.Title := Title;
+  Application.Title := Title;
 end;
 
 constructor TSimbaMethod_Disguse.Create(Title: ShortString);
@@ -500,10 +489,11 @@ procedure TSimbaMethod_DebuggerEvents.DoInvoke;
 var
   Script: TSimbaScriptInstance;
 begin
+  {
   Params.Position := Params.Size - SizeOf(TSimbaScriptInstance);
   Params.Read(Script, SizeOf(TSimbaScriptInstance));
 
-  Script.DebuggerForm.AddEvents(Params.Memory, (Params.Size - SizeOf(TSimbaScriptInstance)) div SizeOf(TSimbaScriptDebuggerEvent));
+  Script.DebuggerForm.AddEvents(Params.Memory, (Params.Size - SizeOf(TSimbaScriptInstance)) div SizeOf(TSimbaScriptDebuggerEvent));       }
 end;
 
 procedure TSimbaMethod_DebuggerEvents.Invoke;

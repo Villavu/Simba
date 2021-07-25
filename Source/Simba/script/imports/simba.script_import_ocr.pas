@@ -10,9 +10,6 @@ procedure Lape_Import_OCR(Compiler: TSimbaScript_Compiler);
 
 implementation
 
-uses
-  simba.bitmap;
-
 procedure Lape_MaskFromText(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with SimbaScript.Client do

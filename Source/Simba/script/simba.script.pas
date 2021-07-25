@@ -31,7 +31,6 @@ type
     FUserTerminated: Boolean;
     FDebugging: Boolean;
     FDebugger: TSimbaScript_Debugger;
-    FLog: String;
 
     procedure Execute; override;
 
@@ -57,7 +56,6 @@ type
     property StartTime: UInt64 read FStartTime;
     property Target: String read FTarget write FTarget;
     property Debugging: Boolean read FDebugging write FDebugging;
-    property Log: String read FLog write FLog;
 
     property ScriptFile: String read FScriptFile write FScriptFile;
     property ScriptName: String read FScriptName write FScriptName;
@@ -176,19 +174,10 @@ begin
 end;
 
 procedure TSimbaScript.Execute;
-var
-  LogFile: THandle;
 begin
   TThread.ExecuteInThread(@HandleStateThread);
 
   try
-    if (FLog <> '') then
-    begin
-      LogFile := FileCreate(FLog, fmShareDenyWrite);
-      if (LogFile > 0) then
-        TTextRec(Output).Handle := LogFile;
-    end;
-
     if (FSimbaCommunicationServer <> '') then
       FSimbaCommunication := TSimbaCommunicationClient.Create(FSimbaCommunicationServer);
 
@@ -207,6 +196,7 @@ begin
     FCompiler.OnFindFile := @HandleFindFile;
     FCompiler.OnHint := @HandleHint;
     FCompiler.OnHandleDirective := @HandleDirective;
+
     FCompiler.Import();
 
     if FDebugging then

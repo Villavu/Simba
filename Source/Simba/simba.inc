@@ -1,5 +1,9 @@
-{$DEFINE SIMBA_MAJOR := 1400}   // this should be 980 even if SimbaVersion is 981, etc
-{$DEFINE SIMBA_VERSION := 1400}
+{$DEFINE SIMBA_MAJOR := 1500} // this should be 980 even if SimbaVersion is 981, etc
+{$DEFINE SIMBA_VERSION := 1500}
+
+// GITHUB_XXX env variables are available when building in github actions
+{$DEFINE SIMBA_COMMIT := {$include %GITHUB_SHORT_SHA%}}
+{$DEFINE SIMBA_COMMIT_URL := {$include %GITHUB_SERVER_URL%} + '/' + {$include %GITHUB_REPOSITORY%} + '/commit/' + {$include %GITHUB_SHORT_SHA%}}
 
 {$MODESWITCH ADVANCEDRECORDS}
 {$MODESWITCH TYPEHELPERS}
@@ -17,3 +21,4 @@
 {$ELSEIF DEFINED(LINUX) AND DEFINED(CPUAARCH64)}
   {$DEFINE SIMBA_AARCH64}
 {$ENDIF}
+

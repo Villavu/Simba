@@ -1,11 +1,12 @@
 unit simba.settingsform_gui;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
 uses
-  Classes, SysUtils, LResources, Forms, Controls, StdCtrls, ComCtrls, ExtCtrls;
+  Classes, SysUtils, Forms, Controls, StdCtrls, ComCtrls, ExtCtrls;
 
 type
   TGUIFrame = class(TFrame)
@@ -21,9 +22,11 @@ type
 
 implementation
 
+{$R *.lfm}
+
 procedure TGUIFrame.FontSizeTrackBarChange(Sender: TObject);
 begin
-  if FontSizeTrackBar.Position = 0 then
+  if (FontSizeTrackBar.Position = FontSizeTrackBar.Min) then
     Label2.Caption := 'Font Size (Default)'
   else
     Label2.Caption := 'Font Size (' + IntToStr(FontSizeTrackBar.Position) + ')';
@@ -31,14 +34,11 @@ end;
 
 procedure TGUIFrame.ToolbarSizeTrackBarChange(Sender: TObject);
 begin
-  if ToolbarSizeTrackBar.Position = 0 then
+  if (ToolbarSizeTrackBar.Position = ToolbarSizeTrackBar.Min) then
     Label1.Caption := 'Toolbar Size (Default)'
   else
     Label1.Caption := 'Toolbar Size (' + IntToStr(ToolbarSizeTrackBar.Position) + ')';
 end;
-
-initialization
-  {$I simba.settingsform_gui.lrs}
 
 end.
 

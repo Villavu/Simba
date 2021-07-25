@@ -150,11 +150,11 @@ type
   TDTMEditor = class
     Params: PParamArray;
 
-    procedure GetResult(constref DTM: String);
+    procedure GetResult(DTM: String);
     procedure Execute;
   end;
 
-procedure TDTMEditor.GetResult(constref DTM: String);
+procedure TDTMEditor.GetResult(DTM: String);
 begin
   PString(Params^[1])^ := DTM;
 end;

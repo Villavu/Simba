@@ -1,12 +1,14 @@
 unit simba.debugform;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
 uses
-  Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, SynEdit, Menus, syncobjs;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs,
+  ExtCtrls, SynEdit, Menus, syncobjs, pipes,
+  simba.settings;
 
 type
   TSimbaDebugForm = class(TForm)
@@ -30,13 +32,14 @@ type
     FLock: TCriticalSection;
     FStrings: TStringList;
 
-    procedure SettingChanged_EditorFont(Value: String);
-    procedure SettingChanged_EditorFontSize(Value: Int64);
+    procedure SimbaSettingChanged(Setting: TSimbaSetting);
   public
     procedure Clear;
 
-    procedure Add(constref S: String); overload;
-    procedure Add(Strings: TStrings); overload;
+    function Listen(Pipe: TInputPipeStream): TThread;
+
+    procedure Add(const S: String); overload;
+    procedure Add(const Strings: TStrings); overload;
 
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -47,14 +50,115 @@ var
 
 implementation
 
-uses
-  simba.settings;
+{$R *.lfm}
 
-procedure TSimbaDebugForm.Add(constref S: String);
+uses
+  lazloggerbase,
+  simba.fonthelpers;
+
+type
+  TListenerThread = class(TThread)
+  protected
+    FInputPipe: TInputPipeStream;
+
+    procedure Execute; override;
+  public
+    constructor Create(InputPipe: TInputPipeStream); reintroduce;
+    destructor Destroy; override;
+  end;
+
+procedure TListenerThread.Execute;
+
+  function Process(const Data: String): String;
+  var
+    I: Int32;
+    Lines: TStringArray;
+  begin
+    Lines := Data.Split([LineEnding], TStringSplitOptions.ExcludeLastEmpty);
+
+    with SimbaDebugForm do
+    begin
+      FLock.Enter();
+
+      try
+        if Data.EndsWith(LineEnding) then
+        begin
+          for I := 0 to High(Lines) do
+            FStrings.Add(Lines[I]);
+
+          Result := '';
+        end else
+        begin
+          // Pipe buffer is full! Carry over last line.
+          for I := 0 to High(Lines) - 1 do
+            FStrings.Add(Lines[I]);
+
+          Result := Lines[High(Lines)];
+        end;
+      finally
+        FLock.Leave();
+      end;
+    end;
+  end;
+
+var
+  Buffer, Remaining: String;
+  Count: Int32;
+begin
+  Remaining := '';
+
+  SetLength(Buffer, 1024);
+
+  while (not Terminated) or (FInputPipe.NumBytesAvailable > 0) do
+  begin
+    while (FInputPipe.NumBytesAvailable > 0) do
+    begin
+      Count := FInputPipe.Read(Buffer[1], Length(Buffer));
+      if (Count = 0) then
+        Break;
+      if (Count = Length(Buffer)) then
+        SetLength(Buffer, Round(Length(Buffer) * 1.5));
+
+      Remaining := Process(Remaining + Copy(Buffer, 1, Count));
+    end;
+
+    Sleep(500);
+  end;
+
+  if (Remaining <> '') then
+    with SimbaDebugForm do
+    begin
+      FLock.Enter();
+      try
+        FStrings.Add(Remaining);
+      finally
+        FLock.Leave();
+      end;
+    end;
+end;
+
+constructor TListenerThread.Create(InputPipe: TInputPipeStream);
+begin
+  inherited Create(False);
+
+  FreeOnTerminate := False;
+
+  FInputPipe := InputPipe;
+end;
+
+destructor TListenerThread.Destroy;
+begin
+  Terminate();
+  WaitFor();
+
+  inherited Destroy();
+end;
+
+procedure TSimbaDebugForm.Add(const S: String);
 var
   Line: String;
 begin
-  WriteLn(S);
+  DebugLn(S);
 
   FLock.Enter();
 
@@ -66,7 +170,7 @@ begin
   end;
 end;
 
-procedure TSimbaDebugForm.Add(Strings: TStrings);
+procedure TSimbaDebugForm.Add(const Strings: TStrings);
 var
   I: Int32;
 begin
@@ -108,7 +212,7 @@ begin
   FLock.Enter();
 
   try
-    if FStrings.Count > 0 then
+    if (FStrings.Count > 0) then
     begin
       Editor.BeginUpdate(False);
 
@@ -130,20 +234,29 @@ begin
   end;
 end;
 
+procedure TSimbaDebugForm.SimbaSettingChanged(Setting: TSimbaSetting);
+begin
+  if (Setting = SimbaSettings.Editor.FontSize) then
+    Editor.Font.Size := Setting.Value;
+
+  if (Setting = SimbaSettings.Editor.FontName) then
+  begin
+    if SimbaFontHelpers.IsFontFixed(Setting.Value) then
+      Editor.Font.Name := Setting.Value;
+  end;
+
+  if (Setting = SimbaSettings.Editor.AntiAliased) then
+  begin
+    if Setting.Value then
+      Editor.Font.Quality := fqCleartypeNatural
+    else
+      Editor.Font.Quality := fqNonAntialiased;
+  end;
+end;
+
 procedure TSimbaDebugForm.MenuItemCopyClick(Sender: TObject);
 begin
   Editor.CopyToClipboard();
-end;
-
-procedure TSimbaDebugForm.SettingChanged_EditorFont(Value: String);
-begin
-  if Value <> '' then
-    Editor.Font.Name := Value;
-end;
-
-procedure TSimbaDebugForm.SettingChanged_EditorFontSize(Value: Int64);
-begin
-  Editor.Font.Size := Value;
 end;
 
 procedure TSimbaDebugForm.Clear;
@@ -159,38 +272,44 @@ begin
   Editor.Clear();
 end;
 
+function TSimbaDebugForm.Listen(Pipe: TInputPipeStream): TThread;
+begin
+  Result := TListenerThread.Create(Pipe);
+end;
+
 constructor TSimbaDebugForm.Create(AOwner: TComponent);
-var
-  Key: UInt16;
-  Shift: TShiftState;
-  I: Int32;
 begin
   inherited Create(AOwner);
 
   FStrings := TStringList.Create();
   FLock := TCriticalSection.Create();
 
-  Editor.Font.Color := clWindowText;
-  {$IFDEF DARWIN}
-  Editor.Font.Quality := fqAntialiased;
-  {$ELSE}
-  Editor.Font.Quality := fqDefault; // weird one, I know
-  {$ENDIF}
+  if SimbaSettings.Editor.AntiAliased.Value then
+    Editor.Font.Quality := fqCleartypeNatural
+  else
+    Editor.Font.Quality := fqNonAntialiased;
 
-  SimbaSettings.Editor.FontName.AddOnChangeHandler(@SettingChanged_EditorFont).Changed();
-  SimbaSettings.Editor.FontSize.AddOnChangeHandler(@SettingChanged_EditorFontSize).Changed();
+  if SimbaFontHelpers.IsFontFixed(SimbaSettings.Editor.FontName.Value) then
+    Editor.Font.Name := SimbaSettings.Editor.FontName.Value;
+
+  Editor.Font.Color := clWindowText;
+  Editor.Font.Size := SimbaSettings.Editor.FontSize.Value;
+
+  SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
 end;
 
 destructor TSimbaDebugForm.Destroy;
 begin
-  FLock.Free();
-  FStrings.Free();
+  if (FLock <> nil) then
+    FreeAndNil(FLock);
+  if (FStrings <> nil) then
+    FreeAndNil(FStrings);
+
+  if (SimbaSettings <> nil) then
+    SimbaSettings.UnRegisterChangeHandler(@SimbaSettingChanged);
 
   inherited Destroy();
 end;
-
-initialization
-  {$I simba.debugform.lrs}
 
 end.
 

@@ -1,11 +1,12 @@
 unit simba.filebrowserform;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
 uses
-  Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ComCtrls,
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls,
   Menus, ExtCtrls, StdCtrls,
   simba.hintwindow;
 
@@ -28,6 +29,8 @@ type
     FRoot: String;
     FHint: TSimbaFileBrowser_Hint;
 
+    function Sort(ALeft,ARight: TTreeNode): Integer;
+
     procedure MouseLeave; override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
     procedure Expand(Node: TTreeNode); override;
@@ -41,7 +44,6 @@ type
   end;
 
   TSimbaFileBrowserForm = class(TForm)
-    Edit1: TEdit;
     MenuItemCopyRelativePath: TMenuItem;
     MenuItemCopyPath: TMenuItem;
     MenuItem2: TMenuItem;
@@ -49,7 +51,6 @@ type
     MenuItem_OpenExternally: TMenuItem;
     MenuItem_Seperator: TMenuItem;
     MenuItem_Refresh: TMenuItem;
-    Panel1: TPanel;
     Popup: TPopupMenu;
 
     procedure Edit1Change(Sender: TObject);
@@ -62,8 +63,7 @@ type
     procedure HandleFileBrowserDoubleClick(Sender: TObject);
   protected
     FFileBrowser: TSimbaFileBrowser;
-
-    procedure SetVisible(Value: Boolean); override;
+    FFilter: TEdit;
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -73,8 +73,10 @@ var
 
 implementation
 
+{$R *.lfm}
+
 uses
-  fileutil, lclintf, lcltype, clipbrd, lazfileutils, AnchorDocking,
+  fileutil, lclintf, lcltype, clipbrd, lazfileutils,
   simba.misc, simba.scripttabsform, simba.main;
 
 procedure TSimbaFileBrowser_Hint.DoHide;
@@ -82,6 +84,21 @@ begin
   inherited DoHide();
 
   Node := nil;
+end;
+
+function TSimbaFileBrowser.Sort(ALeft, ARight: TTreeNode): Integer;
+var
+  LeftWeight, RightWeight: Integer;
+begin
+  LeftWeight := 0;
+  RightWeight := 0;
+  if not TSimbaFileBrowser_Node(ALeft).IsDirectory then
+    LeftWeight += 100000;
+  if not TSimbaFileBrowser_Node(ARight).IsDirectory then
+    RightWeight += 100000;
+
+  Result := CompareText(ALeft.Text, ARight.Text);
+  Result += LeftWeight - RightWeight;
 end;
 
 procedure TSimbaFileBrowser.MouseLeave;
@@ -93,25 +110,34 @@ end;
 
 procedure TSimbaFileBrowser.MouseMove(Shift: TShiftState; X, Y: Integer);
 var
-  Node: TSimbaFileBrowser_Node;
+  Node: TTreeNode;
   R: TRect;
+  FileName: String;
 begin
   inherited MouseMove(Shift, X, Y);
 
-  Node := TSimbaFileBrowser_Node(GetNodeAt(X, Y));
-  if (Node = FHint.Node) then
-    Exit;
-
-  if (Node <> nil) then
+  Node := GetNodeAt(X, Y);
+  if (Node is TSimbaFileBrowser_Node) then
   begin
-    R := Node.DisplayRect(True);
-    R.TopLeft := ClientToScreen(R.TopLeft);
-    R.BottomRight := ClientToScreen(R.BottomRight);
+    if (FHint.Node = Node) then
+      Exit;
 
-    FHint.Node := Node;
-    FHint.ActivateHint(R, CreateRelativePath(Node.Path, Application.Location));
-  end else
-    FHint.Hide();
+    FileName := CreateRelativePath(TSimbaFileBrowser_Node(Node).Path, Application.Location);
+
+    if (FileName <> '') then
+    begin
+      R := Node.DisplayRect(True);
+      R.TopLeft := ClientToScreen(R.TopLeft);
+      R.BottomRight := ClientToScreen(R.BottomRight);
+
+      FHint.Node := Node;
+      FHint.ActivateHint(R, FileName);
+
+      Exit;
+    end;
+  end;
+
+  FHint.Hide();
 end;
 
 procedure TSimbaFileBrowser.Expand(Node: TTreeNode);
@@ -163,7 +189,7 @@ begin
       Populate(Node, FindAllFiles(TSimbaFileBrowser_Node(Node).Path, '', False), False, True);
       Populate(Node, FindAllDirectories(TSimbaFileBrowser_Node(Node).Path, False), True, True);
 
-      Node.AlphaSort();
+      Node.CustomSort(@Sort);
     finally
       EndUpdate();
     end;
@@ -231,9 +257,9 @@ begin
   FFileBrowser.Items.BeginUpdate();
   FFileBrowser.Items.Clear();
 
-  if Edit1.Caption <> '' then
+  if FFilter.Caption <> '' then
   begin
-    List := FindAllFiles(FFileBrowser.Root, '*' + Edit1.Caption + '*', True);
+    List := FindAllFiles(FFileBrowser.Root, '*' + FFilter.Caption + '*', True);
 
     for i := 0 to List.Count - 1 do
     begin
@@ -308,33 +334,29 @@ begin
     end;
 end;
 
-procedure TSimbaFileBrowserForm.SetVisible(Value: Boolean);
-begin
-  inherited SetVisible(Value);
-
-  if DockMaster.GetAnchorSite(Self) <> nil then
-    DockMaster.GetAnchorSite(Self).Visible := Value;
-end;
-
 constructor TSimbaFileBrowserForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
   FFileBrowser := TSimbaFileBrowser.Create(Self);
-  FFileBrowser.Parent := Panel1;
+  FFileBrowser.Parent := Self;
   FFileBrowser.Align := alClient;
+  FFileBrowser.BorderSpacing.Left := 3;
+  FFileBrowser.BorderSpacing.Right := 3;
   FFileBrowser.Root := Application.Location;
   FFileBrowser.Images := SimbaForm.Images;
-  FFileBrowser.Options := FFileBrowser.Options + [tvoRightClickSelect];
+  FFileBrowser.Options := FFileBrowser.Options + [tvoRightClickSelect, tvoReadOnly, tvoAutoItemHeight] - [tvoToolTips];
   FFileBrowser.PopupMenu := Popup;
-  FFileBrowser.ReadOnly := True;
   FFileBrowser.OnDblClick := @HandleFileBrowserDoubleClick;
-  FFileBrowser.Options := FFileBrowser.Options + [tvoAutoItemHeight] - [tvoToolTips];
   FFileBrowser.BorderStyle := bsNone;
-end;
 
-initialization
-  {$I simba.filebrowserform.lrs}
+  FFilter := TEdit.Create(Self);
+  FFilter.BorderSpacing.Around := 3;
+  FFilter.Parent := Self;
+  FFilter.Align := alBottom;
+  FFilter.OnChange := @Edit1Change;
+  FFilter.TextHint := '(search)';
+end;
 
 end.
 

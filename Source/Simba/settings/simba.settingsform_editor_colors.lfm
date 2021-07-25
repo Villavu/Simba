@@ -6,8 +6,8 @@ object EditorColorsFrame: TEditorColorsFrame
   ClientHeight = 404
   ClientWidth = 634
   TabOrder = 0
-  DesignLeft = 1230
-  DesignTop = 421
+  DesignLeft = 1644
+  DesignTop = 248
   object Panel1: TPanel
     Left = 0
     Height = 389
@@ -48,7 +48,6 @@ object EditorColorsFrame: TEditorColorsFrame
       BorderSpacing.Top = 5
       Caption = 'Foreground'
       Layout = tlCenter
-      ParentColor = False
     end
     object BackgroundColorBox: TColorListBox
       AnchorSideLeft.Control = Label1
@@ -152,7 +151,6 @@ object EditorColorsFrame: TEditorColorsFrame
       Top = 332
       Width = 67
       Caption = 'Font Styles'
-      ParentColor = False
     end
     object TreeView: TTreeView
       Left = 0
@@ -197,7 +195,6 @@ object EditorColorsFrame: TEditorColorsFrame
       BorderSpacing.Top = 5
       Caption = 'Background'
       Layout = tlCenter
-      ParentColor = False
     end
     object LoadButton: TButton
       AnchorSideLeft.Control = SaveAsButton
@@ -241,7 +238,6 @@ object EditorColorsFrame: TEditorColorsFrame
       Top = 223
       Width = 38
       Caption = 'Frame'
-      ParentColor = False
     end
     object FrameColorBox: TColorListBox
       AnchorSideLeft.Control = Label1

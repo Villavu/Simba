@@ -1,70 +1,51 @@
 unit simba.functionlistform;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
 uses
-  classes, sysutils, lresources, forms, controls, stdctrls, comctrls, treefilteredit, sha1,
-  simba.codeinsight, simba.codeparser, simba.hintwindow;
+  classes, sysutils, forms, controls, comctrls, extctrls, treefilteredit,
+  simba.codeparser, simba.hintwindow;
 
 type
-  TSimbaFunctionList_Node = class(TTreeNode)
-  public
-    procedure Open; virtual; abstract;
-  end;
+  TSimbaFunctionList = class;
+  TSimbaFunctionListForm = class(TForm);
 
-  TSimbaFunctionList_DeclarationNode = class(TSimbaFunctionList_Node)
-  public
-    DeclarationClass: TDeclarationClass;
-    StartPos, EndPos: Int32;
-    Line: Int32;
-    Header: String;
-
-    procedure Open; override;
-
-    constructor Create(AOwner: TTreeNodes; ADeclaration: TDeclaration); reintroduce;
-  end;
-
-  TSimbaFunctionList_FileNode = class(TSimbaFunctionList_Node)
-  public
-    FileName: String;
-
-    procedure Open; override;
-
-    constructor Create(AOwner: TTreeNodes; AFileName: String); reintroduce;
-  end;
-
-  TSimbaFunctionList_InternalFileNode = class(TSimbaFunctionList_FileNode)
-  public
-    procedure Open; override;
-  end;
-
-  TSimbaFunctionList_Hint = class(TSimbaHintWindow)
+  TSimbaFunctionListNode = class(TTreeNode)
   protected
-    procedure DoHide; override;
+    FFileName: String;
+    FDeclarationClass: TDeclarationClass;
+    FStartPos, FEndPos: Integer;
+    FLine: Integer;
+    FHeader: String;
+    FFunctionList: TSimbaFunctionList;
   public
-    Node: TTreeNode;
+    constructor Create(FunctionList: TSimbaFunctionList; Declaration: TDeclaration); reintroduce; overload;
+    constructor Create(FunctionList: TSimbaFunctionList; FileName: String); reintroduce; overload;
+
+    procedure Open;
+
+    property FunctionList: TSimbaFunctionList read FFunctionList;
+    property Hint: String read FHeader;
+    property DeclarationClass: TDeclarationClass read FDeclarationClass;
   end;
 
   TSimbaFunctionList = class(TCustomControl)
   protected
     FTreeView: TTreeView;
     FFilter: TTreeFilterEdit;
-    FHint: TSimbaFunctionList_Hint;
+    FHint: TSimbaHintWindow;
 
     FScriptNode: TTreeNode;
     FPluginsNode: TTreeNode;
     FIncludesNode: TTreeNode;
     FSimbaNode: TTreeNode;
 
-    FUpdating: Boolean;
-
-    function SortMethodNodesByName(A, B: TTreeNode): Integer;
-    function SortNodesByGroup(A, B: TTreeNode): Integer;
+    function CustomSort(A, B: TTreeNode): Integer;
 
     function AddDeclaration(ParentNode: TTreeNode; Declaration: TDeclaration): TTreeNode;
-    function AddInternalFile(ParentNode: TTreeNode; FileName: String): TTreeNode;
     function AddFile(ParentNode: TTreeNode; FileName: String): TTreeNode;
 
     procedure DoTreeViewSelectionChanged(Sender: TObject);
@@ -72,18 +53,7 @@ type
     procedure DoTreeViewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure DoTreeViewMouseLeave(Sender: TObject);
     procedure DoAfterFilter(Sender: TObject);
-
-    function GetExpandedState: TTreeNodeExpandedState;
-    procedure SetExpandedState(Value: TTreeNodeExpandedState);
-
-    procedure SetVisible(Value: Boolean); override;
   public
-    IncludesHash: TSHA1Digest; // Current hash of the includes displayed
-    ChangeStamp: Int64;        // Current change stamp of the script displayed
-
-    procedure BeginUpdate;
-    procedure EndUpdate;
-
     procedure AddMethod(Declaration: TciProcedureDeclaration; ParentNode: TTreeNode);
     procedure AddType(Declaration: TciTypeDeclaration; ParentNode: TTreeNode);
     procedure AddVar(Declaration: TciVarDeclaration; ParentNode: TTreeNode);
@@ -92,33 +62,14 @@ type
     procedure AddInclude(Include: TCodeParser);
     procedure AddSimbaSection(Include: TCodeParser);
 
+    property TreeView: TTreeView read FTreeView;
+
     property SimbaNode: TTreeNode read FSimbaNode;
     property ScriptNode: TTreeNode read FScriptNode;
     property PluginsNode: TTreeNode read FPluginsNode;
     property IncludesNode: TTreeNode read FIncludesNode;
 
-    property ExpandedState: TTreeNodeExpandedState read GetExpandedState write SetExpandedState;
-
     constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
-  end;
-
-  TSimbaFunctionListForm = class(TForm)
-  protected
-    FFunctionList: TSimbaFunctionList;
-    FParser: TCodeInsight;
-    FUpdating: Boolean;
-    FUpdateThread: TThread;
-    FUpdateThreadFinished: Boolean;
-
-    procedure BeginUpdate;
-    procedure EndUpdate;
-
-    procedure DoUpdateThread;
-    procedure DoUpdateThreadTerminated(Sender: TObject);
-  public
-    constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
   end;
 
 var
@@ -126,285 +77,103 @@ var
 
 implementation
 
+{$R *.lfm}
+
 uses
-  graphics, lazfileutils,
-  simba.main, simba.scripttabsform, simba.scripttab, simba.debugform;
+  lazfileutils,
+  simba.main, simba.scripttabsform;
 
-procedure TSimbaFunctionList_DeclarationNode.Open;
-var
-  FileName: String;
-  Internal: Boolean;
+procedure TSimbaFunctionListNode.Open;
 begin
-  FileName := '';
-  if (Parent is TSimbaFunctionList_FileNode) then
-    FileName := TSimbaFunctionList_FileNode(Parent).FileName;
-
-  Internal := Parent is TSimbaFunctionList_InternalFileNode;
-
-  SimbaScriptTabsForm.OpenDeclaration(Header, StartPos, EndPos, Line, FileName, Internal);
-end;
-
-constructor TSimbaFunctionList_DeclarationNode.Create(AOwner: TTreeNodes; ADeclaration: TDeclaration);
-begin
-  inherited Create(AOwner);
-
-  DeclarationClass := TDeclarationClass(ADeclaration.ClassType);
-  StartPos := ADeclaration.StartPos;
-  EndPos := ADeclaration.EndPos;
-  Line := ADeclaration.Line;
-
-  if ADeclaration.ClassType = TciProcedureDeclaration then
-    Header := TciProcedureDeclaration(ADeclaration).Header
-  else
-  if ADeclaration.ClassType = TciTypeDeclaration then
-    Header := 'type ' + ADeclaration.ShortText
-  else
-  if ADeclaration.ClassType = TciConstantDeclaration then
-    Header := 'const ' + ADeclaration.ShortText
-  else
-  if ADeclaration.ClassType = TciVarDeclaration then
-    Header := 'var ' + ADeclaration.ShortText;
-end;
-
-procedure TSimbaFunctionList_FileNode.Open;
-begin
-  SimbaScriptTabsForm.Open(FileName);
-end;
-
-constructor TSimbaFunctionList_FileNode.Create(AOwner: TTreeNodes; AFileName: String);
-begin
-  inherited Create(AOwner);
-
-  FileName := AFileName;
-end;
-
-procedure TSimbaFunctionList_InternalFileNode.Open;
-begin
-  { nothing }
-end;
-
-procedure TSimbaFunctionList_Hint.DoHide;
-begin
-  inherited DoHide();
-
-  Node := nil;
-end;
-
-
-procedure TSimbaFunctionListForm.BeginUpdate;
-var
-  I: Int32;
-  Tab: TSimbaScriptTab;
-begin
-  Assert(GetCurrentThreadId() = MainThreadID);
-
-  FUpdating := False;
-  if (SimbaScriptTabsForm = nil) then
-    Exit;
-
-  for I := 0 to SimbaScriptTabsForm.TabCount - 1 do
+  if (FDeclarationClass <> nil) then
   begin
-    Tab := SimbaScriptTabsForm.Tabs[I];
-    if (Tab = nil) or (not Tab.Visible) then
-      Continue;
-
-    FFunctionList := Tab.FunctionList;
-    if (FFunctionList = nil) or (FFunctionList.ChangeStamp = Tab.Editor.ChangeStamp) then
-      Continue;
-
-    FParser := Tab.GetParser();
-    if (FParser = nil) then
-      Continue;
-
-    FFunctionList.ChangeStamp := Tab.Editor.ChangeStamp;
-    FFunctionList.BeginUpdate();
-
-    FUpdating := True;
-
-    Exit;
-  end;
+    if HasAsParent(FFunctionList.SimbaNode) or HasAsParent(FFunctionList.PluginsNode) then
+      SimbaScriptTabsForm.OpenInternalDeclaration(FHeader, FFileName)
+    else
+      SimbaScriptTabsForm.OpenDeclaration(FHeader, FStartPos, FEndPos, FLine, FFileName);
+  end else
+  if HasAsParent(FFunctionList.ScriptNode) or HasAsParent(FFunctionList.IncludesNode) then
+    SimbaScriptTabsForm.Open(FFileName);
 end;
 
-procedure TSimbaFunctionListForm.EndUpdate;
+constructor TSimbaFunctionListNode.Create(FunctionList: TSimbaFunctionList; Declaration: TDeclaration);
 begin
-  Assert(GetCurrentThreadId() = MainThreadID);
+  inherited Create(FunctionList.TreeView.Items);
 
-  FFunctionList.EndUpdate();
+  FFunctionList := FunctionList;
+  FDeclarationClass := TDeclarationClass(Declaration.ClassType);
+  FStartPos := Declaration.StartPos;
+  FEndPos := Declaration.EndPos;
+  FLine := Declaration.Line;
+  FFileName := Declaration.Lexer.FileName;
+
+  if (FDeclarationClass = TciProcedureDeclaration) then
+    FHeader := TciProcedureDeclaration(Declaration).Header
+  else
+  if (FDeclarationClass = TciTypeDeclaration) then
+    FHeader := 'type ' + Declaration.ShortText
+  else
+  if (FDeclarationClass = TciConstantDeclaration) then
+    FHeader := 'const ' + Declaration.ShortText
+  else
+  if (FDeclarationClass = TciVarDeclaration) then
+    FHeader := 'var ' + Declaration.ShortText;
 end;
 
-procedure TSimbaFunctionListForm.DoUpdateThread;
-var
-  I: Int32;
-  ExpandedState: TTreeNodeExpandedState;
+constructor TSimbaFunctionListNode.Create(FunctionList: TSimbaFunctionList; FileName: String);
 begin
-  try
-    while not FUpdateThread.CheckTerminated do
-    begin
-      TThread.Synchronize(TThread.CurrentThread, @BeginUpdate);
+  inherited Create(FunctionList.TreeView.Items);
 
-      if FUpdating then
-      try
-        //WriteLn('Update script');
-
-        ExpandedState := FFunctionList.ExpandedState;
-
-        FParser.Run();
-        FFunctionList.AddDeclarations(FParser.Items, FFunctionList.ScriptNode, True, False, True);
-
-        if (not SHA1Match(FFunctionList.IncludesHash, FParser.IncludesHash)) then
-        begin
-          // WriteLn('Update includes');
-
-          FFunctionList.IncludesNode.DeleteChildren();
-          FFunctionList.PluginsNode.DeleteChildren();
-
-          for I := 0 to High(FParser.Includes) do
-            FFunctionList.AddInclude(FParser.Includes[I]);
-
-          FFunctionList.IncludesHash := FParser.IncludesHash;
-        end;
-
-        if (FFunctionList.SimbaNode.Count = 0) then
-        begin
-          for I := 0 to High(FParser.FunctionListSections) do
-            FFunctionList.AddSimbaSection(FParser.FunctionListSections[I]);
-
-          FFunctionList.SimbaNode.AlphaSort();
-          FFunctionList.SimbaNode.Expanded := True;
-        end;
-
-        FFunctionList.ExpandedState := ExpandedState;
-      finally
-        TThread.Synchronize(TThread.CurrentThread, @EndUpdate);
-
-        if (FParser <> nil) then
-        begin
-          FParser.Free();
-          FParser := nil;
-        end;
-      end;
-
-      Sleep(500);
-    end;
-  except
-    on E: Exception do
-      SimbaDebugForm.Add('Function list updater crashed: ' + E.Message);
-  end;
-end;
-
-procedure TSimbaFunctionListForm.DoUpdateThreadTerminated(Sender: TObject);
-begin
-  FUpdateThreadFinished := True;
-end;
-
-constructor TSimbaFunctionListForm.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-
-  FUpdateThread := TThread.ExecuteInThread(@DoUpdateThread, @DoUpdateThreadTerminated);
-end;
-
-destructor TSimbaFunctionListForm.Destroy;
-begin
-  FUpdateThread.Terminate();
-
-  if not FUpdateThreadFinished then
-  begin
-    WriteLn('Waiting for function list thread to finish...');
-    while not FUpdateThreadFinished do
-      CheckSynchronize(50); // TThread.OnTerminate is synchronized
-  end;
-
-  inherited Destroy();
-end;
-
-function TSimbaFunctionList.GetExpandedState: TTreeNodeExpandedState;
-begin
-  Result := TTreeNodeExpandedState.Create(FTreeView);
-end;
-
-procedure TSimbaFunctionList.SetExpandedState(Value: TTreeNodeExpandedState);
-begin
-  Value.Apply(FTreeView);
-  Value.Free();
-  Value := nil;
-end;
-
-procedure TSimbaFunctionList.SetVisible(Value: Boolean);
-begin
-  FHint.Hide();
-
-  inherited SetVisible(Value);
+  FFunctionList := FunctionList;
+  FFileName := FileName;
 end;
 
 function TSimbaFunctionList.AddFile(ParentNode: TTreeNode; FileName: String): TTreeNode;
 begin
   Assert(ParentNode <> nil);
 
-  Result := FTreeView.Items.AddNode(TSimbaFunctionList_FileNode.Create(FTreeView.Items, FileName), ParentNode, ExtractFileNameOnly(FileName), nil, naAddChild);
-  Result.ImageIndex := IMAGE_FILE;
-  Result.SelectedIndex := IMAGE_FILE;
-end;
-
-function TSimbaFunctionList.AddInternalFile(ParentNode: TTreeNode; FileName: String): TTreeNode;
-begin
-  Assert(ParentNode <> nil);
-
-  Result := FTreeView.Items.AddNode(TSimbaFunctionList_InternalFileNode.Create(FTreeView.Items, FileName), ParentNode, ExtractFileNameOnly(FileName), nil, naAddChild);
+  Result := FTreeView.Items.AddNode(TSimbaFunctionListNode.Create(Self, FileName), ParentNode, ExtractFileNameOnly(FileName), nil, naAddChild);
   Result.ImageIndex := IMAGE_FILE;
   Result.SelectedIndex := IMAGE_FILE;
 end;
 
 procedure TSimbaFunctionList.DoTreeViewSelectionChanged(Sender: TObject);
 begin
-  if (FTreeView.Selected is TSimbaFunctionList_DeclarationNode) then
-    SimbaScriptTabsForm.StatusPanelFileName.Caption := TSimbaFunctionList_DeclarationNode(FTreeView.Selected).Header;
+  if (FTreeView.Selected is TSimbaFunctionListNode) then
+    SimbaForm.StatusPanelFileName.Caption := ' ' + TSimbaFunctionListNode(FTreeView.Selected).Hint;
 end;
 
-function TSimbaFunctionList.SortMethodNodesByName(A, B: TTreeNode): Integer;
+function TSimbaFunctionList.CustomSort(A, B: TTreeNode): Integer;
+var
+  Weights: array of TDeclarationClass;
+  I: Integer;
+  LeftNode: TSimbaFunctionListNode absolute A;
+  RightNode: TSimbaFunctionListNode absolute B;
 begin
   Result := 0;
-  if (TSimbaFunctionList_DeclarationNode(A).DeclarationClass = TSimbaFunctionList_DeclarationNode(B).DeclarationClass) then
-    Result := CompareText(A.Text, B.Text);
-end;
 
-function TSimbaFunctionList.SortNodesByGroup(A, B: TTreeNode): Integer;
-
-  function Weigh(A, B: TDeclarationClass): Integer;
+  Weights := [TciTypeDeclaration, TciConstantDeclaration, TciVarDeclaration, TciProcedureDeclaration];
+  for I := 0 to High(Weights) do
   begin
-    Result := 0;
-
-    if (A = TciTypeDeclaration)      then Inc(Result, 1);
-    if (A = TciConstantDeclaration)  then Inc(Result, 2);
-    if (A = TciVarDeclaration)       then Inc(Result, 3);
-    if (A = TciProcedureDeclaration) then Inc(Result, 4);
-
-    if (B = TciTypeDeclaration)      then Dec(Result, 1);
-    if (B = TciConstantDeclaration)  then Dec(Result, 2);
-    if (B = TciVarDeclaration)       then Dec(Result, 3);
-    if (B = TciProcedureDeclaration) then Dec(Result, 4);
+    if (Weights[I] = LeftNode.DeclarationClass) then
+      Inc(Result, I+1);
+    if (Weights[I] = RightNode.DeclarationClass) then
+      Dec(Result, I+1);
   end;
 
-begin
-  Result := Weigh(
-    TSimbaFunctionList_DeclarationNode(A).DeclarationClass,
-    TSimbaFunctionList_DeclarationNode(B).DeclarationClass
-  );
+  if (LeftNode.DeclarationClass = RightNode.DeclarationClass) then
+    Inc(Result, CompareText(LeftNode.Text, RightNode.Text));
 end;
 
 function TSimbaFunctionList.AddDeclaration(ParentNode: TTreeNode; Declaration: TDeclaration): TTreeNode;
 begin
-  Result := FTreeView.Items.AddNode(TSimbaFunctionList_DeclarationNode.Create(FTreeView.Items, Declaration), ParentNode, Declaration.Name, Pointer(nil), naAddChild);
+  Result := FTreeView.Items.AddNode(TSimbaFunctionListNode.Create(Self, Declaration), ParentNode, Declaration.Name, Pointer(nil), naAddChild);
 end;
 
 procedure TSimbaFunctionList.DoTreeViewDoubleClick(Sender: TObject);
 begin
-  if (FTreeView.Selected is TSimbaFunctionList_Node) then
-  begin
-    FTreeView.Selected.Expanded := not FTreeView.Selected.Expanded;
-
-    TSimbaFunctionList_Node(FTreeView.Selected).Open();
-  end;
+  if (FTreeView.Selected is TSimbaFunctionListNode) then
+    TSimbaFunctionListNode(FTreeView.Selected).Open();
 end;
 
 procedure TSimbaFunctionList.DoTreeViewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -414,25 +183,21 @@ var
   Header: String;
 begin
   Node := FTreeView.GetNodeAt(X, Y);
-  if (Node = FHint.Node) then
-    Exit;
 
-  if (Node is TSimbaFunctionList_DeclarationNode) and (Node <> FHint.Node) then
+  if (Node is TSimbaFunctionListNode) then
   begin
-    Header := TSimbaFunctionList_DeclarationNode(Node).Header;
-    if Length(Header) > 3500 then
-    begin
-      FHint.Hide();
-
+    Header := TSimbaFunctionListNode(Node).Hint;
+    if (Header = '') then
       Exit;
-    end;
+
+    if (Length(Header) > 180) then
+      Header := Copy(Header, 1, 180) + ' ...';
 
     R := Node.DisplayRect(True);
     R.TopLeft := FTreeView.ClientToScreen(R.TopLeft);
     R.BottomRight := FTreeView.ClientToScreen(R.BottomRight);
 
-    FHint.Node := Node;
-    FHint.ActivateHint(R, TSimbaFunctionList_DeclarationNode(Node).Header);
+    FHint.ActivateHint(R, Header);
   end else
     FHint.Hide();
 end;
@@ -542,7 +307,7 @@ begin
       CurrentFile := Declaration.Lexer.FileName;
 
       if Declaration.Lexer.IsLibrary then
-        CurrentNode := AddInternalFile(FPluginsNode, CurrentFile)
+        CurrentNode := AddFile(FPluginsNode, CurrentFile)
       else
         CurrentNode := AddFile(FIncludesNode, CurrentFile);
     end;
@@ -568,16 +333,13 @@ procedure TSimbaFunctionList.AddSimbaSection(Include: TCodeParser);
 var
   Node: TTreeNode;
 begin
-  Node := AddInternalFile(FSimbaNode, Include.Lexer.FileName);
+  Node := AddFile(FSimbaNode, Include.Lexer.FileName);
   Node.ImageIndex := IMAGE_FILE;
   Node.SelectedIndex := IMAGE_FILE;
 
   AddDeclarations(Include.Items, Node, False, False, False);
 
-  // Sort in order of, types, consts, vars, methods
-  Node.CustomSort(@Self.SortNodesByGroup);
-  // Alpha sort methods
-  Node.CustomSort(@Self.SortMethodNodesByName);
+  Node.CustomSort(@CustomSort);
 end;
 
 procedure TSimbaFunctionList.DoAfterFilter(Sender: TObject);
@@ -593,35 +355,13 @@ begin
   end;
 end;
 
-procedure TSimbaFunctionList.BeginUpdate;
-begin
-  Assert(GetCurrentThreadID() = MainThreadID);
-
-  FUpdating := True;
-  FTreeView.BeginUpdate();
-end;
-
-procedure TSimbaFunctionList.EndUpdate;
-begin
-  Assert(GetCurrentThreadID() = MainThreadID);
-
-  FUpdating := False;
-  FTreeView.EndUpdate();
-end;
-
-destructor TSimbaFunctionList.Destroy;
-begin
-  while FUpdating do
-    Application.ProcessMessages();
-
-  inherited Destroy();
-end;
-
 constructor TSimbaFunctionList.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
   FTreeView := TTreeView.Create(Self);
+  FTreeView.BorderSpacing.Left := 3;
+  FTreeView.BorderSpacing.Right := 3;
   FTreeView.Parent := Self;
   FTreeView.Align := alClient;
   FTreeView.BorderStyle := bsNone;
@@ -632,8 +372,10 @@ begin
   FTreeView.OnSelectionChanged := @DoTreeViewSelectionChanged;
   FTreeView.OnMouseMove := @DoTreeViewMouseMove;
   FTreeView.OnMouseLeave := @DoTreeViewMouseLeave;
+  FTreeView.Options := FTreeView.Options + [tvoNoDoubleClickExpand];
 
   FFilter := TTreeFilterEdit.Create(Self);
+  FFilter.BorderSpacing.Around := 3;
   FFilter.Parent := Self;
   FFilter.Align := alBottom;
   FFilter.FilteredTreeview := FTreeView;
@@ -642,7 +384,7 @@ begin
   FFilter.Spacing := 0;
   FFilter.TextHint := '(search)';
 
-  FHint := TSimbaFunctionList_Hint.Create(Self);
+  FHint := TSimbaHintWindow.Create(Self);
 
   FScriptNode := FTreeView.Items.Add(nil, 'Script');
   FScriptNode.ImageIndex := IMAGE_DIRECTORY;
@@ -662,9 +404,6 @@ begin
   FSimbaNode.SelectedIndex := IMAGE_DIRECTORY;
   FSimbaNode.Expanded := True;
 end;
-
-initialization
-  {$I simba.functionlistform.lrs}
 
 end.
 

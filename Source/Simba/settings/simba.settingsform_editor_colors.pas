@@ -1,11 +1,12 @@
 unit simba.settingsform_editor_colors;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
 uses
-  Classes, SysUtils, LResources, Forms, Controls, ComCtrls, ExtCtrls, StdCtrls, Graphics,
+  Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, StdCtrls, Graphics,
   Dialogs, ColorBox, SynEditHighlighter,
   simba.editor;
 
@@ -54,6 +55,8 @@ type
   end;
 
 implementation
+
+{$R *.lfm}
 
 uses
   inifiles,
@@ -402,38 +405,38 @@ begin
     Parent := Panel2;
     Align := alClient;
     ReadOnly := True;
-    Text := 'program Highlight;                                      '+ LineEnding +
-            '{comment}                                               '+ LineEnding +
-            '{$I SRL/osr.simba}                                      '+ LineEnding +
-            '                                                        '+ LineEnding +
-            '// this function does stuff                             '+ LineEnding +
-            'procedure Test(var I: Int32);                           '+ LineEnding +
-            'var                                                     '+ LineEnding +
-            '  x: Int32;                                             '+ LineEnding +
-            '  s: String;                                            '+ LineEnding +
-            'begin                                                   '+ LineEnding +
-            '  x := 1000 * (5 + 7);                                  '+ LineEnding +
-            '  s := ' + #39 + 'The number is :' + #39 + ' +ToStr(x); '+ LineEnding +
-            '                                                        '+ LineEnding +
-            '  Inc(x);                                               '+ LineEnding +
-            '  {$R+}                                                 '+ LineEnding +
-            '  case x of                                             '+ LineEnding +
-            '    1: ;                                                '+ LineEnding +
-            '    2: ;                                                '+ LineEnding +
-            '    3: ;                                                '+ LineEnding +
-            '  end;                                                  '+ LineEnding +
-            'end;                                                    '+ LineEnding +
-            '                                                        '+ LineEnding +
-            '(* this is an object method *)                          '+ LineEnding +
-            'function TPoint.Test: Boolean; overload;                '+ LineEnding +
-            'begin                                                   '+ LineEnding +
+    Text := 'program Highlight;                                      ' + LineEnding +
+            '{comment}                                               ' + LineEnding +
+            '{$I SRL/osr.simba}                                      ' + LineEnding +
+            '                                                        ' + LineEnding +
+            '// this function does stuff                             ' + LineEnding +
+            'procedure Test(var i: Int32);                           ' + LineEnding +
+            'var                                                     ' + LineEnding +
+            '  x: Int32;                                             ' + LineEnding +
+            '  s: String;                                            ' + LineEnding +
+            'begin                                                   ' + LineEnding +
+            '  x := 1000 * (5 + 7);                                  ' + LineEnding +
+            '  s := ' + #39 + 'The number is :' + #39 + ' +ToStr(x); ' + LineEnding +
+            '                                                        ' + LineEnding +
+            '  Inc(x);                                               ' + LineEnding +
+            '  {$RANGECHECKS ON}                                     ' + LineEnding +
+            '  case x of                                             ' + LineEnding +
+            '    1: ;                                                ' + LineEnding +
+            '    2: ;                                                ' + LineEnding +
+            '    3: ;                                                ' + LineEnding +
+            '  end;                                                  ' + LineEnding +
+            'end;                                                    ' + LineEnding +
+            '                                                        ' + LineEnding +
+            '(* object method! *)                                    ' + LineEnding +
+            'function TPoint.Test: Boolean; overload;                ' + LineEnding +
+            'begin                                                   ' + LineEnding +
             'end;                                                    ';
   end;
 
   TreeView.Items.Clear();
 
-  for I := 0 to FEditor.Attributes.Count - 1 do
-    AddAttribute(FEditor.Attributes[I]);
+  for I := 0 to High(FEditor.Attributes.Attributes) do
+    AddAttribute(FEditor.Attributes.Attributes[I]);
 
   TreeView.AlphaSort();
 end;
@@ -468,16 +471,16 @@ begin
   try
     InitialDir := GetDataPath();
     Title := 'Save Editor Colors';
-    Filter := 'INI Files (*.ini)|*.ini';
-    DefaultExt := 'ini';
+    Filter := 'Colors Files (*.ini)|*.ini';
+    FileName := 'colors';
+    Options := [ofOverwritePrompt];
 
     if Execute then
     begin
-      if ExtractFileExt(FileName) <> '.ini' then
-        FileName := FileName + '.ini';
-      FEditor.SaveColors(FileName);
+      FileName := ChangeFileExt(FileName, '.ini');
 
-      SimbaSettings.Editor.ColorsPath.Value := FileName;
+      FEditor.Attributes.SaveToFile(FileName);
+      SimbaSettings.Editor.CustomColors.Value := FileName;
     end;
   finally
     Free();
@@ -492,8 +495,8 @@ begin
     Title := 'Load Editor Colors';
     Filter := 'INI Files (*.ini)|*.ini';
 
-    if Execute then
-      FEditor.LoadColors(FileName);
+    //if Execute then
+    //  FEditor.LoadColors(FileName);
   finally
     Free();
   end;
@@ -553,9 +556,10 @@ var
 begin
   INI := TIniFile.Create(TStringStream.Create(DARK_DEFAULT));
 
+   {
   for I := 0 to FEditor.Attributes.Count - 1 do
     FEditor.Attributes[I].Load(INI);
-
+   }
   INI.Stream.Free();
   INI.Free();
 end;
@@ -579,9 +583,6 @@ begin
   ForegoundColorBox.Height := Scale96ToScreen(ForegoundColorBox.Height);
   FrameColorBox.Height := Scale96ToScreen(FrameColorBox.Height);
 end;
-
-initialization
-  {$I simba.settingsform_editor_colors.lrs}
 
 end.
 

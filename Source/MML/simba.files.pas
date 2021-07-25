@@ -24,6 +24,7 @@
 unit simba.files;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
@@ -70,13 +71,15 @@ type
   function GetDirectories(Path: string): TstringArray;
   function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
   function FindPlugin(var FileName: String; const Directories: array of String): Boolean;
-  procedure ZipFiles(constref ArchiveFileName: String; constref Files: TStringArray);
-  procedure UnZipFile(constref ArchiveFileName, OutputDirectory: String);
-  function UnZipOneFile(constref ArchiveFileName, FileName, OutputDirectory: String): Boolean;
+  procedure ZipFiles(const ArchiveFileName: String; const Files: TStringArray);
+  procedure UnZipFile(const ArchiveFileName, OutputDirectory: String);
+  function UnZipOneFile(const ArchiveFileName, FileName, OutputDirectory: String): Boolean;
 
-  function ReadFile(constref FileName: String): String;
-  function WriteFile(constref FileName, Contents: String): Boolean;
-  function CreateTempFile(constref Contents, Prefix: String): String;
+  function ReadFile(const FileName: String): String;
+  function WriteFile(const FileName, Contents: String): Boolean;
+  function CreateTempFile(const Contents, Prefix: String): String;
+
+  procedure DeleteFiles(const Directory, Mask: String);
 
   function GetSimbaPath: String;
   function GetDataPath: String;
@@ -85,7 +88,8 @@ type
   function GetFontPath: String;
   function GetScriptPath: String;
   function GetPackagePath: String;
-  function GetOpenSSLBinaryPath: String;
+
+  procedure CreateBaseDirectories;
 
 implementation
 
@@ -132,6 +136,7 @@ var
   c : integer;
 begin
   c := 0;
+  Path := IncludeTrailingPathDelimiter(Path);
   if FindFirst(Path + '*.' + ext, faAnyFile, SearchRec) = 0 then
   begin
     repeat
@@ -145,7 +150,7 @@ begin
   end;
 end;
 
-function GetDirectories(Path: string): TStringArray;
+function GetDirectories(Path: string): TstringArray;
 var
     SearchRec : TSearchRec;
     c : integer;
@@ -164,7 +169,7 @@ begin
   end;
 end;
 
-procedure UnZipFile(constref ArchiveFileName, OutputDirectory: String);
+procedure UnZipFile(const ArchiveFileName, OutputDirectory: String);
 var
   UnZipper: TUnZipper;
 begin
@@ -182,7 +187,7 @@ begin
   end;
 end;
 
-function UnZipOneFile(constref ArchiveFileName, FileName, OutputDirectory: String): Boolean;
+function UnZipOneFile(const ArchiveFileName, FileName, OutputDirectory: String): Boolean;
 var
   UnZipper: TUnZipper;
   I: Int32;
@@ -210,7 +215,7 @@ begin
   end;
 end;
 
-procedure ZipFiles(constref ArchiveFileName: String; constref Files: TStringArray);
+procedure ZipFiles(const ArchiveFileName: String; const Files: TStringArray);
 var
   Zipper: TZipper;
   I: Integer;
@@ -230,7 +235,7 @@ begin
   end;
 end;
 
-function ReadFile(constref FileName: String): String;
+function ReadFile(const FileName: String): String;
 var
   Stream: TFileStream;
 begin
@@ -252,7 +257,7 @@ begin
     Stream.Free();
 end;
 
-function WriteFile(constref FileName, Contents: String): Boolean;
+function WriteFile(const FileName, Contents: String): Boolean;
 var
   Stream: TFileStream;
 begin
@@ -270,7 +275,7 @@ begin
     Stream.Free();
 end;
 
-function CreateTempFile(constref Contents, Prefix: String): String;
+function CreateTempFile(const Contents, Prefix: String): String;
 begin
   Result := GetTempFileName(GetDataPath(), Prefix);
 
@@ -279,6 +284,19 @@ begin
     Text := Contents;
 
     SaveToFile(Result);
+  finally
+    Free();
+  end;
+end;
+
+procedure DeleteFiles(const Directory, Mask: String);
+var
+  I: Integer;
+begin
+  with FindAllFiles(Directory, Mask, False) do
+  try
+    for I := 0 to Count - 1 do
+      DeleteFile(Strings[I]);
   finally
     Free();
   end;
@@ -319,13 +337,21 @@ begin
   Result := GetDataPath() + 'packages' + DirectorySeparator;
 end;
 
-function GetOpenSSLBinaryPath: String;
+procedure CreateBaseDirectories;
+var
+  Directory: String;
 begin
-  {$IFDEF WINDOWS}
-  Result := GetDataPath() + {$IFDEF CPU32}'32'{$ELSE}'64'{$ENDIF} + DirectorySeparator;
-  {$ELSE}
-  Result := GetSimbaPath();
+  {$IFDEF SIMBA_DEBUG}
+  WriteLn('Create base directories');
   {$ENDIF}
+
+  for Directory in [GetDataPath(), GetPackagePath(), GetIncludePath(), GetFontPath(), GetScriptPath()] do
+    if not DirectoryExists(Directory) then
+    begin
+      WriteLn('Create Directory: ', Directory);
+
+      ForceDirectory(Directory);
+    end;
 end;
 
 constructor TMFiles.Create(Owner : TObject);

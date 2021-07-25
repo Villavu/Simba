@@ -5,40 +5,24 @@ unit simba.hintwindow;
 interface
 
 uses
-  Classes, SysUtils, StdCtrls, Graphics, Forms;
+  Classes, SysUtils, Controls, StdCtrls, Graphics, Forms;
 
 type
   TSimbaHintWindow = class(THintWindowRendered)
   protected
-    FApplicationActivated: Boolean;
     FLabel: TLabel;
 
-    procedure SetVisible(Value: Boolean); override;
-
-    procedure ApplicationActivate(Sender: TObject);
-    procedure ApplicationDeactivate(Sender: TObject);
-  public
     procedure Paint; override;
 
-    procedure ActivateHint(ARect: TRect; const AHint: String); override;
+    procedure HandleNeedHide(Sender: TObject);
+  public
+    procedure ActivateHint(ARect: TRect; const AHint: String); override;  //Rename
 
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
   end;
 
 implementation
-
-procedure TSimbaHintWindow.ApplicationActivate(Sender: TObject);
-begin
-  FApplicationActivated := True;
-end;
-
-procedure TSimbaHintWindow.ApplicationDeactivate(Sender: TObject);
-begin
-  Visible := False;
-
-  FApplicationActivated := False;
-end;
 
 procedure TSimbaHintWindow.Paint;
 begin
@@ -49,23 +33,27 @@ begin
   inherited Paint();
 end;
 
+// Dont use activate rendered
 procedure TSimbaHintWindow.ActivateHint(ARect: TRect; const AHint: String);
 begin
+  if Visible and (FLabel.Caption = AHint) then
+    Exit;
   FLabel.Caption := AHint;
-  HintRect := ARect;
 
-  ActivateRendered();
+  ActivateWithBounds(ARect, AHint);
 end;
 
-procedure TSimbaHintWindow.SetVisible(Value: Boolean);
+procedure TSimbaHintWindow.HandleNeedHide(Sender: TObject);
 begin
-  if FApplicationActivated then
-    inherited SetVisible(Value);
+  Visible := False;
 end;
 
 constructor TSimbaHintWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+
+  if (AOwner is TControl) then
+    TControl(AOwner).AddHandlerOnVisibleChanged(@HandleNeedHide);
 
   AutoSize := True;
 
@@ -81,16 +69,12 @@ begin
   FLabel.AutoSize := True;
   FLabel.Transparent := True;
 
-  FApplicationActivated := True;
-
-  Application.AddOnActivateHandler(@ApplicationActivate);
-  Application.AddOnDeactivateHandler(@ApplicationDeactivate);
+  Application.AddOnDeactivateHandler(@HandleNeedHide);
 end;
 
 destructor TSimbaHintWindow.Destroy;
 begin
-  Application.RemoveOnActivateHandler(@ApplicationActivate);
-  Application.RemoveOnDeactivateHandler(@ApplicationDeactivate);
+  Application.RemoveOnDeactivateHandler(@HandleNeedHide);
 
   inherited Destroy();
 end;

@@ -23,12 +23,13 @@
 unit simba.bitmapconv;
 
 {$mode objfpc}{$h+}
+{$i simba.inc}
 
 interface
 
 uses
-  Classes, SysUtils, FileUtil, simba.bitmap, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, EditBtn, ExtDlgs, ExtCtrls;
+  Classes, SysUtils, FileUtil, simba.bitmap, Forms, Controls, Graphics, Dialogs,
+  StdCtrls, ExtDlgs, ExtCtrls;
 
 type
   TSimbaBitmapConversionForm = class(TForm)
@@ -51,6 +52,8 @@ var
   SimbaBitmapConversionForm: TSimbaBitmapConversionForm;
 
 implementation
+
+{$R *.lfm}
 
 uses
   clipbrd, lclintf, lcltype,
@@ -126,8 +129,6 @@ begin
     SimbaDebugForm.Add(str + strend);
   end;
 end;
-
-{$R *.lfm}
 
 end.
 
