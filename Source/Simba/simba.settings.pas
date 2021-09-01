@@ -41,8 +41,6 @@ type
     FFileName: String;
     FChangeEventList: TMethodList;
     FSettingsArray: array of TSimbaSetting;
-
-    procedure Changed(Setting: TSimbaSetting);
   public
     Settings: record
       Version: TSimbaSetting;
@@ -57,11 +55,11 @@ type
       RecentFiles: TSimbaSetting;
       CustomFontSize: TSimbaSetting;
       ToolbarSize: TSimbaSetting;
-      ColorPickerHistory: TSimbaSetting_BinaryString;
+      ColorPickerHistory: TSimbaSetting;
     end;
 
     Editor: record
-      DefaultScript: TSimbaSetting_BinaryString;
+      DefaultScript: TSimbaSetting;
       CustomColors: TSimbaSetting;
       FontSize: TSimbaSetting;
       FontName: TSimbaSetting;
@@ -84,6 +82,8 @@ type
     procedure RegisterChangeHandler(Event: TSimbaSettingChangedEvent);
     procedure UnRegisterChangeHandler(Event: TSimbaSettingChangedEvent);
 
+    procedure Changed(Setting: TSimbaSetting);
+
     procedure Validate;
     procedure Load;
     procedure Save;
@@ -105,9 +105,9 @@ procedure TSimbaSetting.SetValue(AValue: Variant);
 type
   TVarIsFunction = function(const V: Variant): Boolean;
 
-  procedure AssertType(VarIs: TVarIsFunction);
+  procedure AssertType(CheckType: TVarIsFunction);
   begin
-    if not VarIs(AValue) then
+    if not CheckType(AValue) then
       raise Exception.Create('Invalid setting value for ' + FName + ' Expected ' + ClassName);
   end;
 
@@ -293,7 +293,7 @@ begin
   Editor.AutomaticallyShowParameterHints := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyShowParameterHints', True);
 
   Editor.RightMargin := TSimbaSetting_Integer.Create(Self, 'Editor', 'RightMargin', 80);
-  Editor.RightMarginVisible := TSimbaSetting_Boolean.Create(Self, 'Editor', 'RightMarginVisible', True);
+  Editor.RightMarginVisible := TSimbaSetting_Boolean.Create(Self, 'Editor', 'RightMarginVisible', False);
 
   Load();
 end;
@@ -302,13 +302,13 @@ destructor TSimbaSettings.Destroy;
 var
   Setting: TSimbaSetting;
 begin
+  if (FChangeEventList <> nil) then
+    FreeAndNil(FChangeEventList);
+
   for Setting in FSettingsArray do
     if (Setting <> nil) then
       Setting.Free();
   FSettingsArray := nil;
-
-  if (FChangeEventList <> nil) then
-    FreeAndNil(FChangeEventList);
 
   inherited Destroy();
 end;

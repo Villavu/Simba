@@ -520,9 +520,9 @@
         <ResourceBaseClass Value="Frame"/>
       </Unit>
       <Unit>
-        <Filename Value="settings/simba.settingsform_gui.pas"/>
+        <Filename Value="settings/simba.settingsform_simba_general.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="GUIFrame"/>
+        <ComponentName Value="SimbaGeneralFrame"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
       </Unit>
@@ -645,6 +645,10 @@
       </Unit>
       <Unit>
         <Filename Value="simba.functionlistupdater.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="simba.editorcolorpresets.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>

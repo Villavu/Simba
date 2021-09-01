@@ -1,22 +1,22 @@
 object EditorColorsFrame: TEditorColorsFrame
   Left = 0
-  Height = 404
+  Height = 475
   Top = 0
   Width = 634
-  ClientHeight = 404
+  ClientHeight = 475
   ClientWidth = 634
   TabOrder = 0
-  DesignLeft = 1644
-  DesignTop = 248
+  DesignLeft = -1536
+  DesignTop = 456
   object Panel1: TPanel
     Left = 0
-    Height = 389
+    Height = 364
     Top = 0
     Width = 634
     Align = alTop
     AutoSize = True
     BevelOuter = bvNone
-    ClientHeight = 389
+    ClientHeight = 364
     ClientWidth = 634
     TabOrder = 0
     object Panel3: TPanel
@@ -27,9 +27,9 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideBottom.Control = BoldCheckBox
       AnchorSideBottom.Side = asrBottom
       Left = 210
-      Height = 265
-      Top = 114
-      Width = 274
+      Height = 249
+      Top = 105
+      Width = 290
       Anchors = [akTop, akLeft, akRight, akBottom]
       BevelOuter = bvNone
       TabOrder = 8
@@ -41,9 +41,9 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideTop.Control = Panel1
       AnchorSideBottom.Side = asrBottom
       Left = 210
-      Height = 19
+      Height = 20
       Top = 5
-      Width = 72
+      Width = 77
       BorderSpacing.Left = 10
       BorderSpacing.Top = 5
       Caption = 'Foreground'
@@ -57,9 +57,9 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Side = asrBottom
       Left = 210
-      Height = 80
-      Top = 138
-      Width = 274
+      Height = 70
+      Top = 130
+      Width = 290
       ColorRectWidth = 25
       Style = [cbStandardColors, cbCustomColor, cbPrettyNames]
       Anchors = [akTop, akLeft, akRight]
@@ -78,9 +78,9 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideBottom.Control = BackgroundColorBox
       AnchorSideBottom.Side = asrBottom
       Left = 210
-      Height = 80
-      Top = 29
-      Width = 274
+      Height = 70
+      Top = 30
+      Width = 290
       ColorRectWidth = 25
       Style = [cbStandardColors, cbCustomColor, cbPrettyNames]
       Anchors = [akTop, akLeft, akRight]
@@ -94,9 +94,9 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideTop.Control = Label3
       AnchorSideTop.Side = asrBottom
       Left = 210
-      Height = 23
-      Top = 356
-      Width = 51
+      Height = 24
+      Top = 330
+      Width = 55
       BorderSpacing.Top = 5
       BorderSpacing.Bottom = 10
       Caption = 'Bold'
@@ -107,10 +107,10 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideLeft.Control = UnderlineCheckBox
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = BoldCheckBox
-      Left = 432
-      Height = 23
-      Top = 356
-      Width = 52
+      Left = 444
+      Height = 24
+      Top = 330
+      Width = 56
       BorderSpacing.Left = 10
       Caption = 'Italic'
       OnMouseUp = FontStyleChangeHandler
@@ -120,10 +120,10 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideLeft.Control = StrikeCheckBox
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = BoldCheckBox
-      Left = 339
-      Height = 23
-      Top = 356
-      Width = 83
+      Left = 346
+      Height = 24
+      Top = 330
+      Width = 88
       BorderSpacing.Left = 10
       Caption = 'Underline'
       OnMouseUp = FontStyleChangeHandler
@@ -133,10 +133,10 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideLeft.Control = BoldCheckBox
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = BoldCheckBox
-      Left = 271
-      Height = 23
-      Top = 356
-      Width = 58
+      Left = 275
+      Height = 24
+      Top = 330
+      Width = 61
       BorderSpacing.Left = 10
       Caption = 'Strike'
       OnMouseUp = FontStyleChangeHandler
@@ -147,14 +147,14 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideTop.Control = FrameColorBox
       AnchorSideTop.Side = asrBottom
       Left = 210
-      Height = 19
-      Top = 332
-      Width = 67
+      Height = 20
+      Top = 305
+      Width = 71
       Caption = 'Font Styles'
     end
     object TreeView: TTreeView
       Left = 0
-      Height = 384
+      Height = 359
       Top = 0
       Width = 200
       Align = alLeft
@@ -171,10 +171,10 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = Panel1
       AnchorSideBottom.Side = asrBottom
-      Left = 512
-      Height = 29
-      Top = 355
-      Width = 122
+      Left = 503
+      Height = 30
+      Top = 329
+      Width = 131
       Anchors = [akRight, akBottom]
       AutoSize = True
       BorderSpacing.Top = 5
@@ -189,9 +189,9 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideTop.Side = asrBottom
       AnchorSideBottom.Side = asrBottom
       Left = 210
-      Height = 19
-      Top = 114
-      Width = 73
+      Height = 20
+      Top = 105
+      Width = 79
       BorderSpacing.Top = 5
       Caption = 'Background'
       Layout = tlCenter
@@ -201,10 +201,10 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideRight.Control = SaveAsButton
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = SaveAsButton
-      Left = 512
-      Height = 29
-      Top = 321
-      Width = 122
+      Left = 503
+      Height = 30
+      Top = 294
+      Width = 131
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
       Caption = 'Load'
@@ -217,10 +217,10 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideRight.Control = SaveAsButton
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = LoadButton
-      Left = 512
-      Height = 29
+      Left = 503
+      Height = 30
       Top = 5
-      Width = 122
+      Width = 131
       Anchors = [akTop, akLeft, akRight]
       AutoSize = True
       BorderSpacing.Top = 5
@@ -234,9 +234,9 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideTop.Control = BackgroundColorBox
       AnchorSideTop.Side = asrBottom
       Left = 210
-      Height = 19
-      Top = 223
-      Width = 38
+      Height = 20
+      Top = 205
+      Width = 41
       Caption = 'Frame'
     end
     object FrameColorBox: TColorListBox
@@ -247,9 +247,9 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Side = asrBottom
       Left = 210
-      Height = 80
-      Top = 247
-      Width = 274
+      Height = 70
+      Top = 230
+      Width = 290
       ColorRectWidth = 25
       Style = [cbStandardColors, cbCustomColor, cbPrettyNames]
       Anchors = [akTop, akLeft, akRight]
@@ -265,10 +265,10 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideTop.Side = asrBottom
       AnchorSideRight.Control = SaveAsButton
       AnchorSideRight.Side = asrBottom
-      Left = 512
-      Height = 29
-      Top = 39
-      Width = 122
+      Left = 503
+      Height = 30
+      Top = 40
+      Width = 131
       Anchors = [akTop, akLeft, akRight]
       AutoSize = True
       Caption = 'Reset (Dark)'
@@ -276,10 +276,10 @@ object EditorColorsFrame: TEditorColorsFrame
       TabOrder = 12
     end
   end
-  object Panel2: TPanel
+  object EditorPanel: TPanel
     Left = 0
-    Height = 15
-    Top = 389
+    Height = 111
+    Top = 364
     Width = 634
     Align = alClient
     BevelOuter = bvNone

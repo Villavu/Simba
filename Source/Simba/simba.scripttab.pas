@@ -76,12 +76,12 @@ type
     function CanClose: Boolean;
 
     procedure Reset;
-    function CreateDebuggingForm: TSimbaDebuggerForm;
 
     function ScriptState: ESimbaScriptState;
     function ScriptTimeRunning: UInt64;
 
     procedure Run(Target: THandle);
+    procedure RunWithDebugging(Target: THandle);
     procedure Compile;
     procedure Pause;
     procedure Stop;
@@ -122,12 +122,12 @@ begin
 
     Declaration := FEditor.AutoComplete.Parser.ParseExpression(Expression);
     if Declaration <> nil then
-      FEditor.AutoComplete.FillTypeDeclarations(Declaration);
+      FEditor.AutoComplete.FillMembers(Declaration);
   end else
   begin
     Filter := Expression;
 
-    FEditor.AutoComplete.FillGlobalDeclarations();
+    FEditor.AutoComplete.FillGlobals();
   end;
 
   if Filter = '' then
@@ -562,21 +562,6 @@ begin
   UpdateSavedText();
 end;
 
-function TSimbaScriptTab.CreateDebuggingForm: TSimbaDebuggerForm;
-begin
-  if (FDebuggingForm = nil) then
-  begin
-    FDebuggingForm := TSimbaDebuggerForm.Create(Self);
-    FDebuggingForm.Font := Self.Font;
-    FDebuggingForm.ShowOnTop();
-  end;
-
-  FDebuggingForm.Caption := 'Debugger - ' + FScriptTitle;
-  FDebuggingForm.ShowOnTop();
-
-  Result := FDebuggingForm;
-end;
-
 function TSimbaScriptTab.ScriptState: ESimbaScriptState;
 begin
   Result := STATE_NONE;
@@ -611,6 +596,27 @@ begin
 
     FScriptInstance.Run();
   end;
+end;
+
+procedure TSimbaScriptTab.RunWithDebugging(Target: THandle);
+begin
+  if (FDebuggingForm = nil) then
+    FDebuggingForm := TSimbaDebuggerForm.Create(Self);
+  FDebuggingForm.Caption := 'Debugger - ' + FScriptTitle;
+  FDebuggingForm.Clear();
+  FDebuggingForm.ShowOnTop();
+
+  FScriptInstance := TSimbaScriptInstance.Create(Self);
+  FScriptInstance.Target := Target;
+
+  if (FScriptFileName = '') then
+  begin
+    FScriptInstance.ScriptName := ScriptTitle;
+    FScriptInstance.ScriptFile := CreateTempFile(Script, 'script');
+  end else
+    FScriptInstance.ScriptFile := ScriptFileName;
+
+  FScriptInstance.Run(FDebuggingForm);
 end;
 
 procedure TSimbaScriptTab.Compile;

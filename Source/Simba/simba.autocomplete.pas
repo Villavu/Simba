@@ -1,176 +1,271 @@
 unit simba.autocomplete;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
 uses
-  classes, sysutils, graphics, lcltype, synedit, syncompletion, synedithighlighter, syneditkeycmds,
-  simba.codeparser, simba.codeinsight;
+  classes, sysutils, graphics, controls, lcltype,
+  synedit, syncompletion, syneditkeycmds,
+  simba.codeparser, simba.codeinsight, simba.settings;
 
 type
-  TSimbaAutoComplete_Form = class(TSynCompletionForm)
-  public
-    constructor Create(AOwner: TComponent); override;
-  end;
+  TSimbaAutoComplete_Form = class;
 
   TSimbaAutoComplete_ItemList = class(TStringList)
-  protected
-    FOwner: TSimbaAutoComplete_Form;
   public
-    property Owner: TSimbaAutoComplete_Form read FOwner;
+    CurrentString: String;
 
-    constructor Create(AOwner: TComponent); reintroduce;
+    constructor Create;
+  end;
+
+  TSimbaAutoComplete_Hint = class(TSynBaseCompletionHint)
+  protected
+    FCompletionForm: TSimbaAutoComplete_Form;
+    FText: String;
+  public
+    constructor Create(AOwner: TComponent); override;
+
+    function CalcHintRect(MaxWidth: Integer; const AHint: String; AData: Pointer): TRect; override;
+
+    procedure Paint; override;
+    procedure SetBounds(ALeft, ATop, AWidth, AHeight: Integer); override;
+  end;
+
+  TSimbaAutoComplete_Form = class(TSynCompletionForm)
+  protected
+    FColumnWidth: Integer;
+
+    procedure SimbaSettingChanged(Setting: TSimbaSetting);
+
+    procedure FontChanged(Sender: TObject); override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+
+    property ColumnWidth: Integer read FColumnWidth;
   end;
 
   TSimbaAutoComplete = class(TSynCompletion)
   protected
-    FSynEdit: TSynEdit;
     FParser: TCodeInsight;
     FDeclarations: TDeclarationList;
-    FColumnWidth: Int32;
-    FIdentifierColor: TColor;
-    FFilterColor: TColor;
-    FAlternatingColor: TColor;
-    FBackgroundColor: TColor;
-    FSelectedColor: TColor;
+
+    function HandlePaintList(const Key: String; Canvas: TCanvas; X, Y: Integer; Selected: Boolean; Index: Integer): Boolean;
+
+    procedure HandleCompletion(var Value: String; SourceValue: String; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
+    procedure HandleFiltering(var NewPosition: Integer);
+    procedure HandleTab(Sender: TObject);
 
     function GetCompletionFormClass: TSynBaseCompletionFormClass; override;
+    function GetColumnWidth: Integer;
 
-    procedure SetEditor(const Value: TCustomSynEdit); override;
     procedure SetParser(Value: TCodeInsight);
-
-    procedure PaintName(Canvas: TCanvas; var X, Y: Int32; AName: String);
-    procedure PaintColumn(Canvas: TCanvas; var X, Y: Int32; Column: String; Color: Int32); overload;
-    procedure PaintText(Canvas: TCanvas; var X, Y: Int32; AText: String); overload;
-
-    function HandlePainting(const AKey: String; Canvas: TCanvas; X, Y: Integer; Selected: Boolean; Index: Integer): Boolean;
-
-    procedure HandleCompletion(var Value: string; SourceValue: string; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
-    procedure HandleFiltering(var APosition: Int32);
-    procedure HandleExecute(Sender: TObject);
-    procedure HandleTab(Sender: TObject);
   public
-    property Parser: TCodeInsight read FParser write SetParser;
-
-    property BackgroundColor: TColor read FBackgroundColor write FBackgroundColor;
-    property AlternatingColor: TColor read FAlternatingColor write FAlternatingColor;
-    property IdentifierColor: TColor read FIdentifierColor write FIdentifierColor;
-    property FilterColor: TColor read FFilterColor write FFilterColor;
-
-    procedure FillGlobalDeclarations;
-    procedure FillTypeDeclarations(TypeDeclaration: TDeclaration);
-
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+
+    procedure FillGlobals;
+    procedure FillMembers(TypeDeclaration: TDeclaration);
+
+    property ColumnWidth: Integer read GetColumnWidth;
+    property Parser: TCodeInsight read FParser write SetParser;
   end;
 
 implementation
 
 uses
-  castaliapaslextypes;
+  castaliapaslextypes, simba.fonthelpers;
 
-constructor TSimbaAutoComplete_ItemList.Create(AOwner: TComponent);
+procedure TSimbaAutoComplete_Hint.SetBounds(ALeft, ATop, AWidth, AHeight: Integer);
+begin
+  if (FCompletionForm <> nil) then
+    with FCompletionForm do
+    begin
+      if (FText <> '') then
+      begin
+        ALeft := HintRect.Left + DrawBorderWidth + ColumnWidth - 2;
+        ATop := HintRect.Top + DrawBorderWidth;
+        AWidth := Self.Canvas.TextWidth(FText) + 4;
+        AHeight := FontHeight - 3;
+      end;
+    end;
+
+  inherited SetBounds(ALeft, ATop, AWidth, AHeight);
+end;
+
+function TSimbaAutoComplete_Hint.CalcHintRect(MaxWidth: Integer; const AHint: String; AData: Pointer): TRect;
+
+  function GetProcedureText(Decl: TciProcedureDeclaration): String;
+  begin
+    Result := Decl.Name + Decl.Items.GetShortText(TciParameterList);
+    Result := Result.Replace('constref ', '', [rfReplaceAll]);
+    Result := Result.Replace('const ', '', [rfReplaceAll]);
+
+    if (Decl.ReturnType <> nil) then
+      Result := Result + ': ' + Decl.Items.GetShortText(TciReturnType);
+  end;
+
+  function GetVariableText(Decl: TciVarDeclaration): String;
+  begin
+    Result := Decl.Name;
+    if (Decl.VarType <> nil) then
+      Result := Result + ': ' + Decl.VarType.ShortText;
+  end;
+
+  function GetTypeText(Decl: TciTypeDeclaration): String;
+  begin
+    Result := Decl.Name + ' = ' + Decl.Items.GetShortText(TciTypeKind);
+  end;
+
+  function GetEnumText(Decl: TciEnumElement): String;
+  var
+    TypeDecl: TDeclaration;
+  begin
+    Result := Decl.Name;
+    if Decl.HasOwnerClass(TciTypeDeclaration, TypeDecl, True) then
+      Result := Result + ': ' + TypeDecl.Name;
+  end;
+
+var
+  Decl: TDeclaration;
+begin
+  Result := TRect.Empty;
+
+  Decl := FCompletionForm.ItemList.Objects[Index] as TDeclaration;
+  if Decl is TciProcedureDeclaration then
+    FText := GetProcedureText(Decl as TciProcedureDeclaration)
+  else
+  if Decl is TciVarDeclaration then
+    FText := GetVariableText(Decl as TciVarDeclaration)
+  else
+  if Decl is TciTypeDeclaration then
+    FText := GetTypeText(Decl as TciTypeDeclaration)
+  else
+  if Decl is TciEnumElement then
+    FText := GetEnumText(Decl as TciEnumElement)
+  else
+    FText := '';
+
+  if (FText <> '') then
+    Result.Right := 100000; // Always show
+end;
+
+procedure TSimbaAutoComplete_Hint.Paint;
+begin
+  Canvas.Brush.Color := FCompletionForm.ClSelect;
+  Canvas.FillRect(ClientRect);
+
+  Canvas.Font.Color := FCompletionForm.TextColor;
+  Canvas.Brush.Style := bsClear;
+  Canvas.TextOut(2, 0, FText);
+end;
+
+{$IFDEF WINDOWS}
+function SetClassLong(hWnd:HWND; nIndex:longint=-26; dwNewLong:Integer=0):DWORD; stdcall; external 'user32' name 'SetClassLongA';
+{$ENDIF}
+
+constructor TSimbaAutoComplete_Hint.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  FCompletionForm := AOwner as TSimbaAutoComplete_Form;
+
+  Color := clForm;
+
+  {$IFDEF WINDOWS}
+  SetClassLong(Handle); // Clear CS_DROPSHADOW
+  {$ENDIF}
+end;
+
+constructor TSimbaAutoComplete_ItemList.Create;
 begin
   inherited Create();
 
-  FOwner := AOwner as TSimbaAutoComplete_Form;
+  OwnsObjects := False;
+  UseLocale := False;
+  CaseSensitive := False;
+  Duplicates := dupAccept;
+end;
+
+destructor TSimbaAutoComplete_Form.Destroy;
+begin
+  SimbaSettings.UnRegisterChangeHandler(@SimbaSettingChanged);
+
+  inherited Destroy();
+end;
+
+procedure TSimbaAutoComplete_Form.SimbaSettingChanged(Setting: TSimbaSetting);
+begin
+  if (Setting = SimbaSettings.Editor.FontSize) then
+    Font.Size := Setting.Value;
+
+  if (Setting = SimbaSettings.Editor.FontName) then
+  begin
+    if SimbaFontHelpers.IsFontFixed(Setting.Value) then
+      Font.Name := Setting.Value;
+  end;
+
+  if SimbaSettings.Editor.AntiAliased.Value then
+    Font.Quality := fqCleartypeNatural
+  else
+    Font.Quality := fqNonAntialiased;
+end;
+
+procedure TSimbaAutoComplete_Form.FontChanged(Sender: TObject);
+begin
+  inherited FontChanged(Sender);
+
+  FFontHeight := FFontHeight + 2;
+  if (FHint <> nil) then
+    FHint.Font := Font;
+
+  with TBitmap.Create() do
+  try
+    Canvas.Font := Self.Font;
+
+    FColumnWidth := Canvas.TextWidth('procedure  ');
+  finally
+    Free();
+  end;
 end;
 
 constructor TSimbaAutoComplete_Form.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  FItemList.Free();
-  FItemList := TSimbaAutoComplete_ItemList.Create(Self);
+  if (FItemList <> nil) then
+    FreeAndNil(FItemList);
+  FItemList := TSimbaAutoComplete_ItemList.Create();
+
+  if (FHint <> nil) then
+    FreeAndNil(FHint);
+  FHint := TSimbaAutoComplete_Hint.Create(Self);
+
+  DrawBorderWidth := 4;
+  DrawBorderColor := RGBToColor(240, 240, 240);
+  BackgroundColor := RGBToColor(240, 240, 240);
+  ClSelect := RGBToColor(159, 180, 208);
+
+  TextColor := clBlack;
+  TextSelectedColor := clBlack;
+
+  SimbaSettingChanged(SimbaSettings.Editor.FontSize);
+  SimbaSettingChanged(SimbaSettings.Editor.FontName);
+  SimbaSettingChanged(SimbaSettings.Editor.AntiAliased);
+
+  SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
 end;
 
-procedure TSimbaAutoComplete.PaintName(Canvas: TCanvas; var X, Y: Int32; AName: String);
-var
-  i: Int32;
-  Start, Stop: Int32;
-begin
-  Start := Pos(UpperCase(CurrentString), UpperCase(AName));
-  Stop := Start + Length(CurrentString) - 1;
-
-  Canvas.Font.Style := [fsBold];
-  Canvas.Brush.Style := bsClear;
-
-  for i := 1 to Length(AName) do
-  begin
-    if (i >= Start) and (i <= Stop) then
-      Canvas.Font.Color := FFilterColor
-    else
-      Canvas.Font.Color := FIdentifierColor;
-
-    Canvas.TextOut(X, Y, AName[i]);
-
-    Inc(X, Canvas.TextWidth(AName[i]));
-  end;
-
-  Inc(X);
-end;
-
-procedure TSimbaAutoComplete.PaintColumn(Canvas: TCanvas; var X, Y: Int32; Column: String; Color: Int32);
-begin
-  Canvas.Font.Color := Color;
-  Canvas.Font.Style := [];
-  Canvas.TextOut(X, Y, Column);
-
-  X := FColumnWidth;
-end;
-
-procedure TSimbaAutoComplete.PaintText(Canvas: TCanvas; var X, Y: Int32; AText: String);
-var
-  Highlighter: TSynCustomHighlighter;
-  TokStart: PChar;
-  TokLen: Int32;
-  TokString: String;
-begin
-  Highlighter := FSynEdit.Highlighter;
-  Highlighter.ResetRange();
-  Highlighter.SetLine(AText, 0);
-
-  while (not Highlighter.GetEol()) do
-  begin
-    Highlighter.GetTokenEx(TokStart, TokLen);
-
-    if (TokLen > 0) then
-    begin
-      SetLength(TokString, TokLen);
-
-      Move(TokStart^, TokString[1], TokLen);
-
-      with Highlighter.GetTokenAttribute() do
-      begin
-        if (Foreground = clNone) then
-          Canvas.Font.Color := clBlack
-        else
-          Canvas.Font.Color := ColorToRGB(Foreground);
-
-        Canvas.Font.Style := [];
-        Canvas.TextOut(X, Y, TokString);
-
-        X := X + Canvas.TextWidth(TokString);
-      end;
-    end;
-
-    Highlighter.Next();
-  end;
-end;
-
-procedure TSimbaAutoComplete.HandleCompletion(var Value: string; SourceValue: string; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
+procedure TSimbaAutoComplete.HandleCompletion(var Value: String; SourceValue: String; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
 begin
   if UpperCase(Value) <> UpperCase(SourceValue) then
-    FSynEdit.TextBetweenPointsEx[SourceStart, SourceEnd, scamEnd] := Value;
+    Editor.TextBetweenPointsEx[SourceStart, SourceEnd, scamEnd] := Value;
 
-  FSynEdit.CommandProcessor(ecChar, KeyChar, nil);
-
-  if KeyChar <> '.' then
-  begin
-    if FSynEdit.CanFocus then
-      FSynEdit.SetFocus();
-  end;
+  Editor.CommandProcessor(ecChar, KeyChar, nil);
+  if (KeyChar <> '.') and Editor.CanSetFocus() then
+    Editor.SetFocus();
 
   SourceStart := Point(0, 0);
   SourceEnd := Point(0, 0);
@@ -178,67 +273,58 @@ begin
   Value := '';
 end;
 
-function Sort(List: TStringList; Left, Right: Integer): Integer;
+function CustomSorter(List: TSimbaAutoComplete_ItemList; Left, Right: integer): integer;
 var
-  Filter: String;
   LeftName, RightName: String;
   LeftDeclaration, RightDeclaration: TDeclaration;
-  LeftWeight, RightWeight: Int32;
+  LeftWeight, RightWeight: Integer;
   Declaration: TDeclaration;
 begin
-  Filter := UpperCase(TSimbaAutoComplete_ItemList(List).Owner.CurrentString);
-
   LeftDeclaration := TDeclaration(List.Objects[Left]);
-  LeftName := UpperCase(LeftDeclaration.Name);
-  LeftWeight := ((100 - Round(Length(Filter) / Length(LeftName) * 100)) + (Pos(Filter, LeftName) * 100));
-
-  if LeftDeclaration.HasOwnerClass(TciProcedureDeclaration, Declaration) then
-    LeftWeight -= $FFFF;
+  LeftName := LeftDeclaration.NameUpper;
+  LeftWeight := (Length(LeftName)-Length(List.CurrentString))+Pos(LeftName, List.CurrentString);
 
   RightDeclaration := TDeclaration(List.Objects[Right]);
-  RightName := UpperCase(RightDeclaration.Name);
-  RightWeight := ((100 - Round(Length(Filter) / Length(RightName) * 100)) + (Pos(Filter, RightName) * 100));
+  RightName := RightDeclaration.NameUpper;
+  RightWeight := (Length(RightName)-Length(List.CurrentString))+Pos(RightName, List.CurrentString);
+
+  // Locals have priority
+  if LeftDeclaration.HasOwnerClass(TciProcedureDeclaration, Declaration) then
+    LeftWeight -= $FFFF;
 
   if RightDeclaration.HasOwnerClass(TciProcedureDeclaration, Declaration) then
     RightWeight -= $FFFF;
 
-  Result := LeftWeight - RightWeight;
+  Result := (LeftWeight - RightWeight);
+  if CompareText(LeftName, RightName) > 0 then
+    Result := Result + 1;
 end;
 
-procedure TSimbaAutoComplete.HandleFiltering(var APosition: Int32);
+procedure TSimbaAutoComplete.HandleFiltering(var NewPosition: Integer);
 var
-  i: Int32;
-  Filter: String;
+  I: Integer;
 begin
-  Filter := UpperCase(CurrentString);
-
-  ItemList.BeginUpdate();
-  ItemList.Clear();
-
-  for i := 0 to FDeclarations.Count - 1 do
-    if (Filter = '') or UpperCase(FDeclarations[i].Name).Contains(Filter) then
-      ItemList.AddObject(FDeclarations[i].Name, FDeclarations[i]);
-
-  if (Filter <> '') then
-    TStringList(ItemList).CustomSort(@Sort)
-  else
-    TStringList(ItemList).Sort();
-
-  ItemList.EndUpdate();
-
-  if ItemList.Count > 0 then
-    APosition := 0
-  else
-    APosition := -1;
-end;
-
-procedure TSimbaAutoComplete.HandleExecute(Sender: TObject);
-begin
-  with TheForm do
+  with ItemList as TSimbaAutoComplete_ItemList do
   begin
-    Font := FSynEdit.Font;
+    CurrentString := UpperCase(Self.CurrentString);
 
-    FColumnWidth := Canvas.TextWidth('procedure  ');
+    BeginUpdate();
+    Clear();
+
+    for I := 0 to FDeclarations.Count - 1 do
+      if (CurrentString = '') or FDeclarations[I].NameUpper.Contains(CurrentString) then
+        AddObject(FDeclarations[i].Name, FDeclarations[i]);
+
+    if (Count > 0) then
+    begin
+      if (CurrentString <> '') then
+        CustomSort(TStringListSortCompare(@CustomSorter))
+      else
+        Sort();
+
+      NewPosition := 0
+    end else
+      NewPosition := -1;
   end;
 end;
 
@@ -248,7 +334,7 @@ begin
     OnValidate(TheForm, '', []);
 end;
 
-procedure TSimbaAutoComplete.FillGlobalDeclarations;
+procedure TSimbaAutoComplete.FillGlobals;
 var
   Declaration: TDeclaration;
   Method: TciProcedureDeclaration;
@@ -270,7 +356,7 @@ begin
   FDeclarations.AddRange(FParser.Locals);
 end;
 
-procedure TSimbaAutoComplete.FillTypeDeclarations(TypeDeclaration: TDeclaration);
+procedure TSimbaAutoComplete.FillMembers(TypeDeclaration: TDeclaration);
 var
   Declaration: TDeclaration;
 begin
@@ -290,11 +376,9 @@ begin
   Result := TSimbaAutoComplete_Form;
 end;
 
-procedure TSimbaAutoComplete.SetEditor(const Value: TCustomSynEdit);
+function TSimbaAutoComplete.GetColumnWidth: Integer;
 begin
-  inherited SetEditor(Value);
-
-  FSynEdit := Value as TSynEdit;
+  Result := TSimbaAutoComplete_Form(TheForm).ColumnWidth;
 end;
 
 procedure TSimbaAutoComplete.SetParser(Value: TCodeInsight);
@@ -302,11 +386,7 @@ begin
   FDeclarations.Clear();
 
   if (FParser <> nil) then
-  begin
     FParser.Free();
-    FParser := nil;
-  end;
-
   FParser := Value;
 end;
 
@@ -315,130 +395,75 @@ begin
   inherited Create(AOwner);
 
   FDeclarations := TDeclarationList.Create(False);
-  FIdentifierColor := clBlack;
-  FFilterColor := clMaroon;
 
-  OnPaintItem := @HandlePainting;
+  OnPaintItem := @HandlePaintList;
   OnCodeCompletion := @HandleCompletion;
   OnSearchPosition := @HandleFiltering;
-  OnExecute := @HandleExecute;
   OnKeyCompletePrefix := @HandleTab;
-
-  TStringList(ItemList).Duplicates := dupAccept;
-  TStringList(ItemList).OwnsObjects := False;
 end;
 
 destructor TSimbaAutoComplete.Destroy;
 begin
   SetParser(nil);
 
-  FDeclarations.Free();
+  if (FDeclarations <> nil) then
+    FreeAndNil(FDeclarations);
 
   inherited Destroy();
 end;
 
-function TSimbaAutoComplete.HandlePainting(const AKey: String; Canvas: TCanvas; X, Y: Integer; Selected: Boolean; Index: Integer): Boolean;
-
-  procedure PaintType(Declaration: TciTypeDeclaration);
-  begin
-    PaintColumn(Canvas, X, Y, 'type', clMaroon);
-    PaintName(Canvas, X, Y, Declaration.Name);
-    PaintText(Canvas, X, Y, ': ' + Declaration.Items.GetShortText(TciTypeKind));
+function TSimbaAutoComplete.HandlePaintList(const Key: String; Canvas: TCanvas; X, Y: Integer; Selected: Boolean; Index: Integer): Boolean;
+type
+  TColumnFormat = record
+    Text: String;
+    Color: TColor;
   end;
 
-  procedure PaintProcedure(Declaration: TciProcedureDeclaration);
-  var
-    Hack: String;
-  begin
-    // Seems pointless to show these. Just clutter.
-    Hack := Declaration.Items.GetShortText(TciParameterList);
-    Hack := Hack.Replace('constref ', '', [rfReplaceAll]);
-    Hack := Hack.Replace('const ', '', [rfReplaceAll]);
-
-    if Declaration.IsFunction then
-      PaintColumn(Canvas, X, Y, 'function', clTeal)
-    else
-      PaintColumn(Canvas, X, Y, 'procedure', clNavy);
-
-    PaintName(Canvas, X, Y, Declaration.Name);
-    PaintText(Canvas, X, Y, Hack);
-    if Declaration.ReturnType <> nil then
-      PaintText(Canvas, X, Y, ': ' + Declaration.Items.GetShortText(TciReturnType));
-  end;
-
-  procedure PaintVariable(Declaration: TciVarDeclaration);
-  begin
-    if Declaration is TciConstantDeclaration then
-      PaintColumn(Canvas, X, Y, 'constant', $0F8CA8)
-    else
-      PaintColumn(Canvas, X, Y, 'variable', clPurple);
-
-    PaintName(Canvas, X, Y, Declaration.Name);
-
-    if Declaration.VarType <> nil then
-      PaintText(Canvas, X, Y, ': ' + Declaration.VarType.ShortText);
-  end;
-
-  procedure PaintProcedureVariable(Declaration: TciTypeKind);
-  begin
-    PaintColumn(Canvas, X, Y, 'variable', clPurple);
-    PaintName(Canvas, X, Y, Declaration.Name);
-    PaintText(Canvas, X, Y, ': ' + Declaration.ShortText);
-  end;
-
-  procedure PaintEnumElement(Declaration: TciEnumElement);
-  var
-    TypeDeclaration: TDeclaration;
-  begin
-    PaintColumn(Canvas, X, Y, 'enum', $0094E5);
-    PaintName(Canvas, X, Y, Declaration.Name);
-    if Declaration.HasOwnerClass(TciTypeDeclaration, TypeDeclaration, True) then
-      PaintText(Canvas, X, Y, ': ' + TypeDeclaration.Name);
-  end;
-
+const
+  COLUMN_VAR:   TColumnFormat = (Text: 'var';       Color: clPurple);
+  COLUMN_FUNC:  TColumnFormat = (Text: 'function';  Color: clTeal);
+  COLUMN_PROC:  TColumnFormat = (Text: 'procedure'; Color: clNavy);
+  COLUMN_TYPE:  TColumnFormat = (Text: 'type';      Color: clMaroon);
+  COLUMN_ENUM:  TColumnFormat = (Text: 'enum';      Color: clGreen);
+  COLUMN_CONST: TColumnFormat = (Text: 'const';     Color: clOlive);
 var
   Declaration: TDeclaration;
+  Column: TColumnFormat;
 begin
+  Column := Default(TColumnFormat);
+
   Declaration := ItemList.Objects[Index] as TDeclaration;
-
-  if Selected then
-    Canvas.Brush.Color := SelectedColor
-  else
-  if Odd(Index) then
-    Canvas.Brush.Color := AlternatingColor
-  else
-    Canvas.Brush.Color := BackgroundColor;
-
-  {
-  if Selected then
-    Canvas.Brush.Color := $BE9270
-  else
-  if Odd(Index) then
-    Canvas.Brush.Color := $F0F0F0
-  else
-    Canvas.Brush.Color := $FFFFFF;
-  }
-  Canvas.FillRect(X, Y, TheForm.Width, Y + FontHeight);
-
-  X := 3;
-
   if (Declaration is TciProcedureDeclaration) then
-    PaintProcedure(Declaration as TciProcedureDeclaration)
+  begin
+    if TciProcedureDeclaration(Declaration).IsFunction then
+      Column := COLUMN_FUNC
+    else
+      Column := COLUMN_PROC;
+  end
   else
-  if (Declaration is TciTypeDeclaration) then
-    PaintType(Declaration as TciTypeDeclaration)
-  else
-  if (Declaration is TciVarDeclaration) then
-    PaintVariable(Declaration as TciVarDeclaration)
-  else
-  if (Declaration is TciEnumElement) then
-    PaintEnumElement(Declaration as TciEnumElement)
-  else
-  if (Declaration is TciReturnType) or (Declaration is TciProcedureClassName) then
-    PaintProcedureVariable(Declaration as TciTypeKind);
+  begin
+    if (Declaration is TciTypeDeclaration) then
+      Column := COLUMN_TYPE
+    else
+    if (Declaration is TciConstantDeclaration) then
+      Column := COLUMN_CONST
+    else
+    if (Declaration is TciVarDeclaration) then
+      Column := COLUMN_VAR
+    else
+    if (Declaration is TciEnumElement) then
+      Column := COLUMN_ENUM;
+  end;
+
+  Canvas.Brush.Style := bsClear;
+
+  Canvas.Font.Color := Column.Color;
+  Canvas.TextOut(X, Y, Column.Text);
+
+  Canvas.Font.Color := TheForm.TextColor;
+  Canvas.TextOut(X + ColumnWidth, Y, Key);
 
   Result := True;
 end;
 
 end.
-

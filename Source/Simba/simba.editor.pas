@@ -50,9 +50,10 @@ type
     procedure ClearLineMarks;
     procedure AddLineMark(ALine, AColor: Integer);
 
+    procedure ReCalc; override;
+
     property DrawLineMarks: Boolean read GetDrawLineMarks write SetDrawLineMarks;
     property LineMarkCount: Integer read GetLineMarkCount;
-    procedure ReCalc; override;
   end;
 
   TSimbaEditor = class(TSynEdit)
@@ -86,7 +87,7 @@ type
 
     procedure SetMacOSKeystrokes;
 
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(AOwner: TComponent; LoadColors: Boolean = True); reintroduce;
     destructor Destroy; override;
   end;
 
@@ -451,15 +452,13 @@ begin
   if (Setting = SimbaSettings.Editor.AntiAliased) then
   begin
     if Setting.Value then
-      Font.Quality := fqAntialiased
+      Font.Quality := fqCleartypeNatural
     else
       Font.Quality := fqNonAntialiased;
   end;
 
   if (Setting = SimbaSettings.Editor.CustomColors) then
-  begin
     FAttributes.LoadFromFile(Setting.Value);
-  end;
 
   if (Setting = SimbaSettings.Editor.RightMarginVisible) then
   begin
@@ -498,7 +497,7 @@ begin
   Result := GetExpression(Text, RowColToCharIndex(TPoint.Create(EndX - 1, Y)));
 end;
 
-constructor TSimbaEditor.Create(AOwner: TComponent);
+constructor TSimbaEditor.Create(AOwner: TComponent; LoadColors: Boolean);
 begin
   inherited Create(AOwner);
 
@@ -562,7 +561,6 @@ begin
   end;
 
   FAttributes := TSimbaEditor_Attributes.Create(Self);
-  FAttributes.LoadFromFile(SimbaSettings.Editor.CustomColors.Value);
 
   Gutter.ChangesPart.AutoSize := False;
   Gutter.ChangesPart.Width := 2;
@@ -639,24 +637,14 @@ begin
     end;
   end;
 
-  if SimbaSettings.Editor.AllowCaretPastEOL.Value then
-    Options := Options + [eoTrimTrailingSpaces, eoScrollPastEol]
-  else
-    Options := Options - [eoTrimTrailingSpaces, eoScrollPastEol];
+  if LoadColors then
+    SimbaSettingChanged(SimbaSettings.Editor.CustomColors);
 
-  if SimbaSettings.Editor.RightMarginVisible.Value then
-    Options := Options + [eoHideRightMargin]
-  else
-    Options := Options - [eoHideRightMargin];
-
-  if SimbaSettings.Editor.AntiAliased.Value then
-    Font.Quality := fqCleartypeNatural
-  else
-    Font.Quality := fqNonAntialiased;
-
-  Font.Size := SimbaSettings.Editor.FontSize.Value;
-  if SimbaFontHelpers.IsFontFixed(SimbaSettings.Editor.FontName.Value) then
-    Font.Name := SimbaSettings.Editor.FontName.Value;
+  SimbaSettingChanged(SimbaSettings.Editor.AllowCaretPastEOL);
+  SimbaSettingChanged(SimbaSettings.Editor.RightMarginVisible);
+  SimbaSettingChanged(SimbaSettings.Editor.AntiAliased);
+  SimbaSettingChanged(SimbaSettings.Editor.FontSize);
+  SimbaSettingChanged(SimbaSettings.Editor.FontName);
 
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
 end;

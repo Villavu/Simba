@@ -64,6 +64,7 @@ type
     FEndPos: Integer;
     FItems: TDeclarationList;
     FName: String;
+    FNameUpper: String;
     FNameCached: Boolean;
     FLine: Int32;
     FLexer: TmwPasLex;
@@ -72,12 +73,15 @@ type
     function GetCleanText: string; virtual;
     function GetShortText: string; virtual;
     function GetName: string; virtual;
+
+    function GetNameProp: string;
+    function GetNameUpperProp: string;
   public
     function HasOwnerClass(AClass: TDeclarationClass; out Declaration: TDeclaration; Recursive: Boolean = False): Boolean;
     function GetOwnersOfClass(AClass: TDeclarationClass): TDeclarationArray;
 
     function Clone(AOwner: TDeclaration): TDeclaration; inline;
-    function IsName(constref Value: String): Boolean; inline;
+    function IsName(const Value: String): Boolean; inline;
 
     property Lexer: TmwPasLex read FLexer;
     property Owner: TDeclaration read FOwner write FOwner;
@@ -89,7 +93,8 @@ type
     property StartPos: Integer read FStartPos write FStartPos;
     property EndPos: Integer read FEndPos write FEndPos;
     property Items: TDeclarationList read FItems;
-    property Name: String read GetName;
+    property Name: String read GetNameProp;
+    property NameUpper: String read GetNameUpperProp;
     property Line: Int32 read FLine;
 
     constructor Create(ALexer: TmwPasLex; AOwner: TDeclaration; AOrigin: PAnsiChar; AStart: Integer; AEnd: Integer = -1); overload; virtual;
@@ -182,7 +187,7 @@ type
 
   TciProcedureDeclaration = class(TDeclaration)
   private
-    fObjectName: String;
+    FObjectName: String;
     FProcedureDirectives: EProcedureDirectives;
     FIsFunction: Boolean;
     FIsOperator: Boolean;
@@ -520,13 +525,7 @@ end;
 
 function TciEnumElement.GetName: string;
 begin
-  if (not FNameCached) then
-  begin
-    FNameCached := True;
-    FName := RawText;
-  end;
-
-  Result := FName;
+  Result := RawText;
 end;
 
 function TciProcedureClassName.GetName: string;
@@ -584,16 +583,9 @@ function TciVarDeclaration.GetName: string;
 var
   Declaration: TDeclaration;
 begin
-  if (not FNameCached) then
-  begin
-    FNameCached := True;
-
-    Declaration := FItems.GetFirstItemOfClass(TciVarName);
-    if Declaration <> nil then
-      FName := Declaration.CleanText;
-  end;
-
-  Result := FName;
+  Declaration := FItems.GetFirstItemOfClass(TciVarName);
+  if (Declaration <> nil) then
+    Result := Declaration.CleanText;
 end;
 
 function TciTypeDeclaration.GetAliasType: TciTypeAlias;
@@ -688,16 +680,9 @@ function TciTypeDeclaration.GetName: String;
 var
   Declaration: TDeclaration;
 begin
-  if (not FNameCached) then
-  begin
-    FNameCached := True;
-
-    Declaration := FItems.GetFirstItemOfClass(TciTypeName);
-    if Declaration <> nil then
-      FName := Declaration.CleanText;
-  end;
-
-  Result := FName;
+  Declaration := FItems.GetFirstItemOfClass(TciTypeName);
+  if (Declaration <> nil) then
+    Result := Declaration.CleanText;
 end;
 
 function TciTypeDeclaration.GetType: TDeclaration;
@@ -834,6 +819,30 @@ begin
     Result := Declaration.ShortText;
 end;
 
+function TDeclaration.GetNameProp: string;
+begin
+  if not FNameCached then
+  begin
+    FName := GetName;
+    FNameUpper := UpperCase(FName);
+    FNameCached := True;
+  end;
+
+  Result := FName;
+end;
+
+function TDeclaration.GetNameUpperProp: string;
+begin
+  if not FNameCached then
+  begin
+    FName := GetName;
+    FNameUpper := UpperCase(FName);
+    FNameCached := True;
+  end;
+
+  Result := FNameUpper;
+end;
+
 function TDeclaration.GetRawText: string;
 begin
   if FRawText = '' then
@@ -960,9 +969,9 @@ begin
     Result.Items.Add(Self.Items[i].Clone(Result));
 end;
 
-function TDeclaration.IsName(constref Value: String): Boolean;
+function TDeclaration.IsName(const Value: String): Boolean;
 begin
-  Result := UpperCase(Value) = UpperCase(Self.Name);
+  Result := UpperCase(Value) = FNameUpper;
 end;
 
 constructor TDeclaration.Create(ALexer: TmwPasLex; AOwner: TDeclaration; AOrigin: PAnsiChar; AStart: Integer; AEnd: Integer);
@@ -1032,30 +1041,23 @@ function TciProcedureDeclaration.GetName: String;
 var
   Declaration: TDeclaration;
 begin
-  if (not FNameCached) then
-  begin
-    FNameCached := True;
-
-    Declaration := FItems.GetFirstItemOfClass(TciProcedureName);
-    if (Declaration <> nil) then
-      FName := Declaration.CleanText;
-  end;
-
-  Result := FName;
+  Declaration := FItems.GetFirstItemOfClass(TciProcedureName);
+  if (Declaration <> nil) then
+    Result := Declaration.CleanText;
 end;
 
 function TciProcedureDeclaration.GetObjectName: String;
 var
   Declaration: TDeclaration;
 begin
-  if FIsMethodOfType and (fObjectName = '') then
+  if FIsMethodOfType and (FObjectName = '') then
   begin
     Declaration := FItems.GetFirstItemOfClass(TciProcedureClassName);
     if Declaration <> nil then
-      fObjectName := Declaration.CleanText;
+      FObjectName := Declaration.CleanText;
   end;
 
-  Result := fObjectName;
+  Result := FObjectName;
 end;
 
 function TciProcedureDeclaration.GetReturnType: TciReturnType;

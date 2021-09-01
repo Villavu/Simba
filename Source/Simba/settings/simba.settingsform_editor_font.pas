@@ -62,31 +62,29 @@ begin
     Align := alClient;
     BorderStyle := bsNone;
     ReadOnly := True;
-    Text := 'program Highlight;                                      ' + LineEnding +
-            '{comment}                                               ' + LineEnding +
+    Text := 'program Font;                                           ' + LineEnding +
+            '{  brace }                                              ' + LineEnding +
+            '(* round *)                                             ' + LineEnding +
+            '// slash                                                ' + LineEnding +
+            '                                                        ' + LineEnding +
             '{$I SRL/osr.simba}                                      ' + LineEnding +
             '                                                        ' + LineEnding +
-            '// this function does stuff                             ' + LineEnding +
             'procedure Test(var i: Int32);                           ' + LineEnding +
             'var                                                     ' + LineEnding +
-            '  x: Int32;                                             ' + LineEnding +
             '  s: String;                                            ' + LineEnding +
             'begin                                                   ' + LineEnding +
-            '  x := 1000 * (5 + 7);                                  ' + LineEnding +
-            '  s := ' + #39 + 'The number is :' + #39 + ' +ToStr(x); ' + LineEnding +
+            '  i := 1000 * (5 + 7);                                  ' + LineEnding +
+            '  s := ' + #39 + 'The number is :' + #39 + ' + ToStr(i);' + LineEnding +
             '                                                        ' + LineEnding +
-            '  Inc(x);                                               ' + LineEnding +
-            '  {$RANGECHECKS ON}                                     ' + LineEnding +
-            '  case x of                                             ' + LineEnding +
+            '  case Random(5) of                                     ' + LineEnding +
             '    1: ;                                                ' + LineEnding +
-            '    2: ;                                                ' + LineEnding +
-            '    3: ;                                                ' + LineEnding +
+            '    2..4: ;                                             ' + LineEnding +
             '  end;                                                  ' + LineEnding +
             'end;                                                    ' + LineEnding +
             '                                                        ' + LineEnding +
-            '(* object method! *)                                    ' + LineEnding +
             'function TPoint.Test: Boolean; overload;                ' + LineEnding +
             'begin                                                   ' + LineEnding +
+            '  Result := True;                                       ' + LineEnding +
             'end;                                                    ';
   end;
 end;
