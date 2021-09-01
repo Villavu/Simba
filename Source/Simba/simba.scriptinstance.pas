@@ -114,7 +114,6 @@ begin
   if (DebuggingForm <> nil) then
   begin
     FDebuggingForm := DebuggingForm;
-    FDebuggingForm.Clear();
 
     Start(['--debugging', '--run']);
   end else

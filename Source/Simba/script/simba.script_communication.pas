@@ -489,11 +489,10 @@ procedure TSimbaMethod_DebuggerEvents.DoInvoke;
 var
   Script: TSimbaScriptInstance;
 begin
-  {
   Params.Position := Params.Size - SizeOf(TSimbaScriptInstance);
   Params.Read(Script, SizeOf(TSimbaScriptInstance));
 
-  Script.DebuggerForm.AddEvents(Params.Memory, (Params.Size - SizeOf(TSimbaScriptInstance)) div SizeOf(TSimbaScriptDebuggerEvent));       }
+  Script.DebuggerForm.AddEvents(Params.Memory, (Params.Size - SizeOf(TSimbaScriptInstance)) div SizeOf(TSimbaScriptDebuggerEvent));
 end;
 
 procedure TSimbaMethod_DebuggerEvents.Invoke;

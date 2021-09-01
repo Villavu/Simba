@@ -7,25 +7,25 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, ExtCtrls, ButtonPanel, Spin,
-  simba.settingsform_editor_font, simba.settingsform_editor_colors,
-  simba.settingsform_editor_general, simba.settingsform_gui;
+  simba.settingsform_editor_font, simba.settingsform_editor_colors, simba.settingsform_editor_general,
+  simba.settingsform_simba_general;
 
 type
   TSimbaSettingsForm = class(TForm)
-    ButtonPanel1: TButtonPanel;
+    ButtonPanel: TButtonPanel;
     Notebook: TNotebook;
-    Splitter1: TSplitter;
+    Splitter: TSplitter;
     TreeView: TTreeView;
 
     procedure FormShow(Sender: TObject);
     procedure OKButtonClick(Sender: TObject);
     procedure TreeViewClick(Sender: TObject);
   public
+    SimbaGeneralFrame: TSimbaGeneralFrame;
+
     EditorGeneralFrame: TEditorGeneralFrame;
     EditorFontFrame: TEditorFontFrame;
     EditorColorsFrame: TEditorColorsFrame;
-
-    GUIFrame: TGUIFrame;
 
     constructor Create(AOwner: TComponent); override;
   end;
@@ -38,6 +38,7 @@ implementation
 {$R *.lfm}
 
 uses
+  openssl,
   simba.settings, simba.fonthelpers;
 
 procedure TSimbaSettingsForm.TreeViewClick(Sender: TObject);
@@ -59,8 +60,6 @@ begin
   EditorFontFrame.FontSizeSpinEdit.Value := SimbaSettings.Editor.FontSize.Value;
   EditorFontFrame.FontAntiAliasedCheckbox.Checked := SimbaSettings.Editor.AntiAliased.Value;
 
-  //EnvironmentFrame.OpenSSLOnLaunch.Checked := SimbaSettings.Environment.OpenSSLOnLaunch.Value;
-
   EditorGeneralFrame.RightMarginEdit.Value := SimbaSettings.Editor.RightMargin.Value;
   EditorGeneralFrame.VisibleRightMarginCheckbox.Checked := SimbaSettings.Editor.RightMarginVisible.Value;
   EditorGeneralFrame.CaretPastEOLCheckBox.Checked := SimbaSettings.Editor.AllowCaretPastEOL.Value;
@@ -68,14 +67,14 @@ begin
   EditorGeneralFrame.ShowParameterHintsCheckbox.Checked := SimbaSettings.Editor.AutomaticallyShowParameterHints.Value;
   EditorGeneralFrame.IgnoreCodeToolsDirectiveCheckbox.Checked := SimbaSettings.Editor.IgnoreCodeToolsIDEDirective.Value;
 
-  GUIFrame.ToolbarSizeTrackBar.Position := SimbaSettings.GUI.ToolbarSize.Value;
-  GUIFrame.FontSizeTrackBar.Position := SimbaSettings.GUI.CustomFontSize.Value;
+  SimbaGeneralFrame.ToolbarSizeTrackBar.Position := SimbaSettings.GUI.ToolbarSize.Value;
+  SimbaGeneralFrame.FontSizeTrackBar.Position := SimbaSettings.GUI.CustomFontSize.Value;
+  SimbaGeneralFrame.OpenSSLStartupCheckbox.Checked := SimbaSettings.Environment.OpenSSLOnLaunch.Value;
+  SimbaGeneralFrame.OpenSSLoadedValueCaption.Caption := BoolToStr(IsSSLLoaded, 'True', 'False');
 end;
 
 procedure TSimbaSettingsForm.OKButtonClick(Sender: TObject);
 begin
-  //SimbaSettings.Environment.OpenSSLOnLaunch.Value := EnvironmentFrame.OpenSSLOnLaunch.Checked;
-
   SimbaSettings.Editor.FontName.Value := EditorFontFrame.FontsNameComboBox.Text;
   SimbaSettings.Editor.FontSize.Value := EditorFontFrame.FontSizeSpinEdit.Value;
   SimbaSettings.Editor.AntiAliased.Value := EditorFontFrame.FontAntiAliasedCheckbox.Checked;
@@ -87,15 +86,17 @@ begin
   SimbaSettings.Editor.AutomaticallyShowParameterHints.Value := EditorGeneralFrame.ShowParameterHintsCheckbox.Checked;
   SimbaSettings.Editor.IgnoreCodeToolsIDEDirective.Value := EditorGeneralFrame.IgnoreCodeToolsDirectiveCheckbox.Checked;
 
-  if (GUIFrame.ToolbarSizeTrackBar.Position = GUIFrame.ToolbarSizeTrackBar.Min) then
+  if (SimbaGeneralFrame.ToolbarSizeTrackBar.Position = SimbaGeneralFrame.ToolbarSizeTrackBar.Min) then
     SimbaSettings.GUI.ToolbarSize.Value := SimbaSettings.GUI.ToolbarSize.DefaultValue
   else
-    SimbaSettings.GUI.ToolbarSize.Value := GUIFrame.ToolbarSizeTrackBar.Position;
+    SimbaSettings.GUI.ToolbarSize.Value := SimbaGeneralFrame.ToolbarSizeTrackBar.Position;
 
-  if (GUIFrame.FontSizeTrackBar.Position = GUIFrame.FontSizeTrackBar.Min) then
+  if (SimbaGeneralFrame.FontSizeTrackBar.Position = SimbaGeneralFrame.FontSizeTrackBar.Min) then
     SimbaSettings.GUI.CustomFontSize.Value := SimbaSettings.GUI.CustomFontSize.DefaultValue
   else
-    SimbaSettings.GUI.CustomFontSize.Value := GUIFrame.FontSizeTrackBar.Position;
+    SimbaSettings.GUI.CustomFontSize.Value := SimbaGeneralFrame.FontSizeTrackBar.Position;
+
+  SimbaSettings.Environment.OpenSSLOnLaunch.Value := SimbaGeneralFrame.OpenSSLStartupCheckbox.Checked;
 end;
 
 constructor TSimbaSettingsForm.Create(AOwner: TComponent);
@@ -122,6 +123,12 @@ begin
   Width := 950;
   Height := 650;
 
+  Node := TreeView.Items.Add(nil, 'Simba');
+
+  SimbaGeneralFrame := TSimbaGeneralFrame.Create(Self);
+  SimbaGeneralFrame.Parent := AddPage('General', Node);
+  SimbaGeneralFrame.Align := alClient;
+
   Node := TreeView.Items.Add(nil, 'Editor');
 
   EditorGeneralFrame := TEditorGeneralFrame.Create(Self);
@@ -136,11 +143,7 @@ begin
   EditorColorsFrame.Parent := AddPage('Colors', Node);
   EditorColorsFrame.Align := alClient;
 
-  Node := TreeView.Items.Add(nil, 'Window');
-
-  GUIFrame := TGUIFrame.Create(Self);
-  GUIFrame.Parent := AddPage('General', Node);
-  GUIFrame.Align := alClient;
+  TreeView.Selected := TreeView.Items.GetFirstNode();
 end;
 
 end.

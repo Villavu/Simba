@@ -42,8 +42,9 @@ begin
         Method := TLapeTree_Method(DelayedTree.Statements[I]);
 
         Name := UpperCase(Method.Method.Name);
-        if (Name = '') or (Name[1] = '!') or (Name = '_ENTERMETHOD') or (Name = '_LEAVEMETHOD') then
+        if (Name = '') or (Method.DocPos.FileName.StartsWith('!') and Name.StartsWith('_')) then
           Continue;
+
         if (Method.Method.VarType is TLapeType_MethodOfType) then
           Name := UpperCase(TLapeType_MethodOfType(Method.Method.VarType).ObjectType.Name) + '.' + Name;
 

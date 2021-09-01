@@ -54,31 +54,13 @@ type
     procedure Init; override;
   end;
 
-  TSimbaEditor_AutoCompleteAlternatingAttribute = class(TSimbaEditor_Attribute)
-  protected
-    procedure DoChange; override;
-    procedure Init; override;
-  end;
-
-  TSimbaEditor_AutoCompleteBorderAttribute = class(TSimbaEditor_Attribute)
-  protected
-    procedure DoChange; override;
-    procedure Init; override;
-  end;
-
-  TSimbaEditor_AutoCompleteIdentifierAttribute = class(TSimbaEditor_Attribute)
-  protected
-    procedure DoChange; override;
-    procedure Init; override;
-  end;
-
-  TSimbaEditor_AutoCompleteFilterAttribute = class(TSimbaEditor_Attribute)
-  protected
-    procedure DoChange; override;
-    procedure Init; override;
-  end;
-
   TSimbaEditor_AutoCompleteSelectedAttribute = class(TSimbaEditor_Attribute)
+  protected
+    procedure DoChange; override;
+    procedure Init; override;
+  end;
+
+  TSimbaEditor_AutoCompleteTextAttribute = class(TSimbaEditor_Attribute)
   protected
     procedure DoChange; override;
     procedure Init; override;
@@ -98,10 +80,12 @@ type
     constructor Create(Editor: TSynEdit);
     destructor Destroy; override;
 
-    property Attributes: TSimbaEditor_AttributeArray read FAttributes;
-
+    procedure LoadFromStream(Stream: TStream; ManageStream: Boolean);
     procedure LoadFromFile(FileName: String);
+
     procedure SaveToFile(FileName: String);
+
+    property Attributes: TSimbaEditor_AttributeArray read FAttributes;
   end;
 
 implementation
@@ -234,66 +218,17 @@ end;
 procedure TSimbaEditor_AutoCompleteBackgroundAttribute.DoChange;
 begin
   if (Editor <> nil) then
-    TSimbaEditor(Editor).AutoComplete.BackgroundColor := Foreground;
+  begin
+    TSimbaEditor(Editor).AutoComplete.TheForm.BackgroundColor := Foreground;
+    TSimbaEditor(Editor).AutoComplete.TheForm.DrawBorderColor := Foreground;
+  end;
 end;
 
 procedure TSimbaEditor_AutoCompleteBackgroundAttribute.Init;
 begin
   inherited Init();
 
-  Foreground := clWhite;
-end;
-
-procedure TSimbaEditor_AutoCompleteAlternatingAttribute.DoChange;
-begin
-  if (Editor <> nil) then
-    TSimbaEditor(Editor).AutoComplete.AlternatingColor := Foreground;
-end;
-
-procedure TSimbaEditor_AutoCompleteAlternatingAttribute.Init;
-begin
-  inherited Init();
-
-  Foreground := $F0F0F0;
-end;
-
-procedure TSimbaEditor_AutoCompleteBorderAttribute.DoChange;
-begin
-  if (Editor <> nil) then
-    TSimbaEditor(Editor).AutoComplete.TheForm.DrawBorderColor := Foreground;
-end;
-
-procedure TSimbaEditor_AutoCompleteBorderAttribute.Init;
-begin
-  inherited Init();
-
-  Foreground := clBlack;
-end;
-
-procedure TSimbaEditor_AutoCompleteIdentifierAttribute.DoChange;
-begin
-  if (Editor <> nil) then
-    TSimbaEditor(Editor).AutoComplete.IdentifierColor := Foreground;
-end;
-
-procedure TSimbaEditor_AutoCompleteIdentifierAttribute.Init;
-begin
-  inherited Init();
-
-  Foreground := clBlack;
-end;
-
-procedure TSimbaEditor_AutoCompleteFilterAttribute.DoChange;
-begin
-  if (Editor <> nil) then
-    TSimbaEditor(Editor).AutoComplete.FilterColor := Foreground;
-end;
-
-procedure TSimbaEditor_AutoCompleteFilterAttribute.Init;
-begin
-  inherited Init();
-
-  Foreground := clMaroon;
+  Foreground := RGBToColor(240, 240, 240);
 end;
 
 procedure TSimbaEditor_AutoCompleteSelectedAttribute.DoChange;
@@ -306,7 +241,23 @@ procedure TSimbaEditor_AutoCompleteSelectedAttribute.Init;
 begin
   inherited Init();
 
-  Foreground := $BE9270;
+  Foreground := RGBToColor(159, 180, 208);
+end;
+
+procedure TSimbaEditor_AutoCompleteTextAttribute.Init;
+begin
+  inherited Init();
+
+  Foreground := clBlack;
+end;
+
+procedure TSimbaEditor_AutoCompleteTextAttribute.DoChange;
+begin
+  if (Editor <> nil) then
+  begin
+    TSimbaEditor(Editor).AutoComplete.TheForm.TextColor := Foreground;
+    TSimbaEditor(Editor).AutoComplete.TheForm.TextSelectedColor := Foreground;
+  end;
 end;
 
 procedure TSimbaEditor_DividerAttribute.DoChange;
@@ -335,7 +286,6 @@ begin
   Foreground := clNone;
 end;
 
-// Create the list from the editor
 constructor TSimbaEditor_Attributes.Create(Editor: TSynEdit);
 
   procedure Add(AName: String; Attribute: TSynHighlighterAttributes);
@@ -380,11 +330,8 @@ begin
   Add('Editor.Divider', TSimbaEditor_DividerAttribute.Create());
 
   Add('AutoComplete.Background', TSimbaEditor_AutoCompleteBackgroundAttribute.Create());
-  Add('AutoComplete.Border', TSimbaEditor_AutoCompleteBorderAttribute.Create());
-  Add('AutoComplete.Identifier', TSimbaEditor_AutoCompleteIdentifierAttribute.Create());
-  Add('AutoComplete.Filter', TSimbaEditor_AutoCompleteFilterAttribute.Create());
-  Add('AutoComplete.Alternating', TSimbaEditor_AutoCompleteAlternatingAttribute.Create());
   Add('AutoComplete.Selected', TSimbaEditor_AutoCompleteSelectedAttribute.Create());
+  Add('AutoComplete.Text', TSimbaEditor_AutoCompleteTextAttribute.Create());
 
   Add('Gutter.Background', TSimbaEditor_GutterColorAttribute.Create());
   Add('Gutter.Seperator', Editor.Gutter.SeparatorPart().MarkupInfo);
@@ -407,32 +354,35 @@ begin
   inherited Destroy();
 end;
 
-procedure TSimbaEditor_Attributes.LoadFromFile(FileName: String);
+procedure TSimbaEditor_Attributes.LoadFromStream(Stream: TStream; ManageStream: Boolean);
 var
   INI: TINIFile;
   I: Integer;
 begin
+  INI := TINIFile.Create(Stream);
+  for I := 0 to High(FAttributes) do
+    with TSynAttributeProtectedAccess(FAttributes[I]) do
+    begin
+      Background := INI.ReadInteger(StoredName, 'Background', Background);
+      Foreground := INI.ReadInteger(StoredName, 'Foreground', Foreground);
+
+      IntegerStyle     := INI.ReadInteger(StoredName, 'Style', IntegerStyle);
+      IntegerStyleMask := INI.ReadInteger(StoredName, 'StyleMask', IntegerStyleMask);
+
+      FrameColor := INI.ReadInteger(StoredName, 'Frame', FrameColor);
+
+      Changed();
+    end;
+
+  INI.Free();
+  if ManageStream then
+    Stream.Free();
+end;
+
+procedure TSimbaEditor_Attributes.LoadFromFile(FileName: String);
+begin
   if FileExists(FileName) then
-  try
-    INI := TIniFile.Create(FileName);
-
-    for I := 0 to High(FAttributes) do
-      with TSynAttributeProtectedAccess(FAttributes[I]) do
-      begin
-        Background := INI.ReadInteger(StoredName, 'Background', Background);
-        Foreground := INI.ReadInteger(StoredName, 'Foreground', Foreground);
-
-        IntegerStyle     := INI.ReadInteger(StoredName, 'Style', IntegerStyle);
-        IntegerStyleMask := INI.ReadInteger(StoredName, 'StyleMask', IntegerStyleMask);
-
-        FrameColor := INI.ReadInteger(StoredName, 'Frame', FrameColor);
-
-        Changed();
-      end;
-
-    INI.Free();
-  except
-  end;
+    LoadFromStream(TFileStream.Create(FileName, fmOpenRead), True);
 end;
 
 procedure TSimbaEditor_Attributes.SaveToFile(FileName: String);
@@ -441,7 +391,6 @@ var
   I: Integer;
 begin
   try
-    Writeln(FileName);
     INI := TIniFile.Create(FileName);
     INI.CacheUpdates := True;
 

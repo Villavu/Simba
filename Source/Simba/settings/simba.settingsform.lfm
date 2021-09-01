@@ -11,7 +11,7 @@ object SimbaSettingsForm: TSimbaSettingsForm
   LCLVersion = '2.2.0.1'
   object TreeView: TTreeView
     Left = 0
-    Height = 451
+    Height = 450
     Top = 0
     Width = 150
     Align = alLeft
@@ -25,7 +25,7 @@ object SimbaSettingsForm: TSimbaSettingsForm
   end
   object Notebook: TNotebook
     Left = 159
-    Height = 451
+    Height = 450
     Top = 0
     Width = 436
     Align = alClient
@@ -33,10 +33,10 @@ object SimbaSettingsForm: TSimbaSettingsForm
     BorderSpacing.Right = 5
     TabOrder = 1
   end
-  object ButtonPanel1: TButtonPanel
+  object ButtonPanel: TButtonPanel
     Left = 6
-    Height = 37
-    Top = 457
+    Height = 38
+    Top = 456
     Width = 588
     OKButton.Name = 'OKButton'
     OKButton.DefaultCaption = True
@@ -50,9 +50,9 @@ object SimbaSettingsForm: TSimbaSettingsForm
     TabOrder = 2
     ShowButtons = [pbOK, pbCancel]
   end
-  object Splitter1: TSplitter
+  object Splitter: TSplitter
     Left = 151
-    Height = 451
+    Height = 450
     Top = 0
     Width = 5
   end

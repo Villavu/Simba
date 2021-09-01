@@ -598,8 +598,8 @@ end;
 
 procedure TSimbaForm.MenuItemDebuggerClick(Sender: TObject);
 begin
-  //if (SimbaScriptTabsForm.CurrentTab.DebuggingForm <> nil) then
-  //  SimbaScriptTabsForm.CurrentTab.DebuggingForm.ShowOnTop();
+  if (SimbaScriptTabsForm.CurrentTab.DebuggingForm <> nil) then
+    SimbaScriptTabsForm.CurrentTab.DebuggingForm.ShowOnTop();
 end;
 
 procedure TSimbaForm.MenuItemACAClick(Sender: TObject);
@@ -616,17 +616,23 @@ begin
     Exit;
 
   try
-    if (Sender = MenuItemCompile) or (Sender = ToolbarButtonCompile) then
-      Tab.Compile()
-    else
-    if (Sender = MenuItemRun) or (Sender = ToolbarButtonRun) then
-      Tab.Run(FWindowSelection)
-    else
-    if (Sender = MenuItemPause) or (Sender = ToolbarButtonPause) then
-      Tab.Pause()
-    else
-    if (Sender = MenuItemStop) or (Sender = StopButtonStop) then
-      Tab.Stop();
+    with SimbaScriptTabsForm.CurrentTab do
+    begin
+      if (Sender = MenuItemCompile) or (Sender = ToolbarButtonCompile) then
+        Compile()
+      else
+      if (Sender = MenuItemRun) or (Sender = ToolbarButtonRun) then
+        Run(FWindowSelection)
+      else
+      if (Sender = MenuItemRunWithDebugging) then
+        RunWithDebugging(FWindowSelection)
+      else
+      if (Sender = MenuItemPause) or (Sender = ToolbarButtonPause) then
+        Pause()
+      else
+      if (Sender = MenuItemStop) or (Sender = StopButtonStop) then
+        Stop()
+    end;
   except
     on E: Exception do
       MessageDlg('Exception while changing script state: ' + E.Message, mtError, [mbOK], 0);
