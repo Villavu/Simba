@@ -78,9 +78,10 @@ jobs:
           Xvfb :1 & sleep 2
           
           chmod +x ${{ matrix.config.test }}
-          ./${{ matrix.config.test }} --run Tests/simba
+          ./${{ matrix.config.test }} --silent --run "Tests/runner"
 
       - name: Upload Binary 
         uses: actions/upload-artifact@v2.2.4
         with:
+          name: ${{ matrix.config.binary }}
           path: ${{ matrix.config.binary }}

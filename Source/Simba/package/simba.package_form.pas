@@ -168,45 +168,51 @@ procedure TSimbaPackageForm.DoReleasesListDraw(Control: TWinControl; Index: Inte
 var
   Days: Integer;
   Package: TSimbaPackage;
+  ReleaseTime: TDateTime;
+  ReleaseName: String;
 begin
   Package := SelectedPackage;
 
   if (Package <> nil) then
   begin
+    ReleaseName := ReleasesList.Items[Index];
+    ReleaseTime := Package.Release[ReleaseName].Time;
+
     with ReleasesList do
     begin
       if (odSelected in State) then
       begin
-        Canvas.Pen.Color := clHighlight;
         Canvas.Brush.Color := clHighlight;
         Canvas.Font.Color := clHighlightText;
       end else
       begin
-        Canvas.Pen.Color := clWindow;
-        Canvas.Brush.Color := clWindow;
+        if (ReleaseTime = 0) then
+          Canvas.Brush.Color := $EDEDED
+        else
+          Canvas.Brush.Color := clWindow;
+
         Canvas.Font.Color := clWindowText;
       end;
 
-      Canvas.Rectangle(R);
+      Canvas.FillRect(R);
       Canvas.Font.Italic := False;
-      Canvas.TextOut(R.Left + 2, R.Top, Items[Index]);
+      Canvas.Brush.Style := bsClear;
+      Canvas.TextOut(R.Left + 2, R.Top, ReleaseName);
+
+      Inc(R.Left, Canvas.TextWidth(ReleaseName + '  '));
+
       Canvas.Font.Italic := True;
 
-      R.Left := R.Left + Canvas.TextWidth(Items[Index] + ' ') + 4;
-
-      with Package.Release[Items[Index]] do
-        if (Time > 0) then
-        begin
-          Days := DaysBetween(Now(), Time);
-
-          case Days of
-            0: Canvas.TextOut(R.Left, R.Top, '(today)');
-            1: Canvas.TextOut(R.Left, R.Top, '(yeserday)');
-            else
-               Canvas.TextOut(R.Left, R.Top, '(' + IntToStr(Days) + ' days ago)');
-          end;
-        end else
-          Canvas.TextOut(R.Left, R.Top, '(branch)');
+      if (ReleaseTime > 0) then
+      begin
+        case DaysBetween(Now(), ReleaseTime) of
+          0: Canvas.TextOut(R.Left, R.Top, '(today)');
+          1: Canvas.TextOut(R.Left, R.Top, '(yeserday)');
+          else
+             Canvas.TextOut(R.Left, R.Top, '(' + IntToStr(DaysBetween(Now(), ReleaseTime)) + ' days ago)');
+        end;
+      end else
+        Canvas.TextOut(R.Left, R.Top, '(branch)');
     end;
   end;
 end;
@@ -726,7 +732,7 @@ end;
 destructor TSimbaPackageForm.Destroy;
 begin
   if (FUpdates <> nil) then
-    FUpdates.Free();
+    FreeAndNil(FUpdates);
 
   inherited Destroy();
 end;

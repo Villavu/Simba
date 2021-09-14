@@ -32,6 +32,7 @@ uses
   simba.ocrutil,lclintf; // contains the actual `loading'
 
 type
+  PMFont = ^TMFont;
   TMFont = class(TObject)
   public
     Name: String;
@@ -43,6 +44,7 @@ type
     destructor Destroy; override;
   end;
 
+  PMFonts = ^TMFonts;
   TMFonts = class(TObject)
   private
     FFonts: TList;

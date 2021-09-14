@@ -47,6 +47,7 @@ type
     // Find an Attribute by Name (not case sensitive)
   end;
 
+  PXMLNode = ^TXMLNode;
   TXmlNode = class(TObject)
   private
     FAttributes: TXmlAttributeList;
@@ -78,6 +79,7 @@ type
       write SetAttr; default;// Attributes of a Node, accessible by attribute name
   end;
 
+  PXMLNodeList = ^TXmlNodeList;
   TXMLNodeList = class
   private
     FItems: TList;
@@ -100,6 +102,7 @@ type
 
   { TVerySimpleXml }
 
+  PVerySimpleXml = ^TVerySimpleXml;
   TVerySimpleXml = class(TObject)
   private
     FRoot: TXMLNode;

@@ -28,22 +28,23 @@ unit simba.debugimage;
 interface
 
 uses
-  classes, sysutils, forms, controls, dialogs, math,
+  classes, sysutils, forms, controls,
   simba.imagebox;
 
 type
   TSimbaDebugImageForm = class(TForm)
   protected
     FMouseX, FMouseY: Int32;
+    FImageBox: TSimbaImageBox;
 
     procedure ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Int32);
     procedure ImageDoubleClick(Sender: TObject);
   public
-    ImageBox: TSimbaImageBox;
+    constructor Create(AOwner: TComponent); override;
 
     procedure Display(AWidth, AHeight: Int32; AShow: Boolean);
 
-    constructor Create(AOwner: TComponent); override;
+    property ImageBox: TSimbaImageBox read FImageBox;
   end;
 
 var
@@ -89,20 +90,20 @@ begin
     Form := Self;
 
   Form.Width := AWidth;
-  Form.Height := AHeight + ImageBox.StatusBar.Height;
+  Form.Height := AHeight;
   if AShow then
-    Form.ShowOnTop();
+    Form.EnsureVisible(True);
 end;
 
 constructor TSimbaDebugImageForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  ImageBox := TSimbaImageBox.Create(Self);
-  ImageBox.Parent := Self;
-  ImageBox.Align := alClient;
-  ImageBox.OnMouseMove := @ImageMouseMove;
-  ImageBox.OnDblClick := @ImageDoubleClick;
+  FImageBox := TSimbaImageBox.Create(Self);
+  FImageBox.Parent := Self;
+  FImageBox.Align := alClient;
+  FImageBox.OnMouseMove := @ImageMouseMove;
+  FImageBox.OnDblClick := @ImageDoubleClick;
 end;
 
 end.

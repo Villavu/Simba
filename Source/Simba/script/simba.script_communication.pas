@@ -300,16 +300,20 @@ end;
 procedure TSimbaMethod_ShowBitmap.DoInvoke;
 var
   Width, Height: Int32;
+  DisplayWidth, DisplayHeight: Int32;
 begin
   Params.Read(Width, SizeOf(Int32));
   Params.Read(Height, SizeOf(Int32));
 
-  SimbaDebugImageForm.Display(
-    SimbaDebugImageForm.ImageBox.Width,
-    SimbaDebugImageForm.ImageBox.Height - SimbaDebugImageForm.ImageBox.StatusBar.Height,
-    True
-  );
+  // Only resize debug image if imagebox is too small.
+  DisplayWidth := SimbaDebugImageForm.ImageBox.Width;
+  if (Width > SimbaDebugImageForm.ImageBox.Width) then
+    DisplayWidth := Width;
+  DisplayHeight:= SimbaDebugImageForm.ImageBox.Height;
+  if (Height > SimbaDebugImageForm.ImageBox.Height + SimbaDebugImageForm.ImageBox.StatusBar.Height) then
+    DisplayHeight := Height + SimbaDebugImageForm.ImageBox.StatusBar.Height;
 
+  SimbaDebugImageForm.Display(DisplayWidth, DisplayHeight, True);
   SimbaDebugImageForm.ImageBox.Background.LoadFromPointer(PRGB32(Params.Memory + Params.Position), Width, Height);
   SimbaDebugImageForm.ImageBox.BackgroundChanged(False, False);
   SimbaDebugImageForm.ImageBox.Update();
@@ -339,13 +343,13 @@ begin
   ScriptTab := SimbaScriptTabsForm.FindTab(ScriptInstance);
   if (ScriptTab <> nil) then
   begin
-    if (ScriptTab.ScriptFileName = FileName) or ((ScriptTab.ScriptFileName = '') and (ScriptTab.ScriptTitle = FileName)) or SimbaScriptTabsForm.Open(FileName) then
+    if (ScriptTab.ScriptFileName = FileName) or ((ScriptTab.ScriptFileName = '') and (ScriptTab.ScriptTitle = FileName)) then
     begin
-      if (ScriptTab.ScriptFileName = FileName) then
-        ScriptTab.Show();
-
+      ScriptTab.Show();
+      ScriptTab.SetError(Line, Col);
+    end else
+    if SimbaScriptTabsForm.Open(FileName) then
       SimbaScriptTabsForm.CurrentTab.SetError(Line, Col);
-    end;
   end;
 
   // Ensure error message is visible

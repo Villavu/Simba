@@ -31,51 +31,50 @@ uses
   Classes, SysUtils, simba.mufasatypes;
 
 type
+  PMDTMPointArray = ^TMDTMPointArray;
+  PPMDTMPoint = ^PMDTMPoint;
+  PMDTM = ^TMDTM;
+  TMDTM = class(TObject)
+  private
+    FPoints : TMDTMPointArray;
+    FLen    : integer;
+    function GetPointerPoints: PMDTMPoint;
+    procedure SetPointCount(const AValue: integer);
+  public
+    Name : string;
+    Index : integer;
+    function ToString : string;
+    function SaveToFile(const FileName : string) : boolean;
+    function LoadFromString(const s : string) : boolean;
+    procedure Normalize;
+    function Valid : boolean;
+    procedure DeletePoint(Point : integer);
+    procedure SwapPoint(p1, p2: integer);
+    procedure MovePoint(fromIndex, toIndex: integer);
+    function AddPoint(Point: TMDTMPoint): integer;
+    property PPoints : PMDTMPoint read GetPointerPoints;
+    property Count : integer read FLen write SetPointCount;
+    property Points : TMDTMPointArray read FPoints;
+  end;
 
-    { TMDTM }
-
-    PMDTM = ^TMDTM;
-    TMDTM = class(TObject)
-    private
-      FPoints : TMDTMPointArray;
-      FLen    : integer;
-      function GetPointerPoints: PMDTMPoint;
-      procedure SetPointCount(const AValue: integer);
-    public
-      Name : string;
-      Index : integer;
-      function ToString : string;
-      function SaveToFile(const FileName : string) : boolean;
-      function LoadFromString(const s : string) : boolean;
-      procedure Normalize;
-      function Valid : boolean;
-      procedure DeletePoint(Point : integer);
-      procedure SwapPoint(p1, p2: integer);
-      procedure MovePoint(fromIndex, toIndex: integer);
-      function AddPoint(Point: TMDTMPoint): integer;
-      property PPoints : PMDTMPoint read GetPointerPoints;
-      property Count : integer read FLen write SetPointCount;
-      property Points : TMDTMPointArray read FPoints;
-    end;
-    { TMDTMS }
-
-    TMDTMS = class(TObject) //Manages the DTMs   TMufasaDTMs
-    private
-      Client: TObject;
-      DTMList: Array Of TMDTM;
-      FreeSpots: Array Of Integer;
-      procedure CheckIndex(index : integer);
-    public
-      function AddDTM(const d: TSDTM): Integer;overload;
-      function AddDTM(const d: TMDTM): Integer;overload;
-	  function ExistsDTM(index : integer) : boolean;
-      function GetDTM(index: Integer) :TMDTM;
-      procedure FreeDTM(DTM: Integer);
-      function StringToDTM(const S: String): Integer;
-      property DTM[Index : integer]: TMDTM read GetDTM; default;
-      constructor Create(Owner: TObject);
-      destructor Destroy; override;
-    end;
+  PMDTMS = ^TMDTMS;
+  TMDTMS = class(TObject)
+  private
+    Client: TObject;
+    DTMList: Array Of TMDTM;
+    FreeSpots: Array Of Integer;
+    procedure CheckIndex(index : integer);
+  public
+    function AddDTM(const d: TSDTM): Integer;overload;
+    function AddDTM(const d: TMDTM): Integer;overload;
+  function ExistsDTM(index : integer) : boolean;
+    function GetDTM(index: Integer) :TMDTM;
+    procedure FreeDTM(DTM: Integer);
+    function StringToDTM(const S: String): Integer;
+    property DTM[Index : integer]: TMDTM read GetDTM; default;
+    constructor Create(Owner: TObject);
+    destructor Destroy; override;
+  end;
 
 implementation
 

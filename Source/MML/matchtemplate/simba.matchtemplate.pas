@@ -28,7 +28,7 @@ interface
 
 uses
   classes, sysutils, math,
-  simba.mufasatypes, simba.matchtemplate_matrix, simba.bitmap;
+  simba.mufasatypes, simba.matchtemplate_matrix, simba.bitmap, simba.type_matrix;
 
 type
   PTMFormula = ^ETMFormula;
@@ -60,7 +60,7 @@ type
     ImgNormCorr: TSingleMatrix;
     ImgMaskCorr: TSingleMatrix;
 
-    class function Create(constref Image, Mask: TByteMatrix): TMatchTemplateGreyCache; static;
+    class function Create(const Image, Mask: TByteMatrix): TMatchTemplateGreyCache; static;
   end;
 
   PMatchTemplateRGBCache = ^TMatchTemplateRGBCache;
@@ -82,16 +82,16 @@ type
     ImgNormCorr: TSingleMatrix;
     ImgMaskCorr: TRGBMatrix;
 
-    class function Create(constref Image, Mask: TIntegerMatrix): TMatchTemplateRGBCache; static;
+    class function Create(const Image, Mask: TIntegerMatrix): TMatchTemplateRGBCache; static;
   end;
 
-function MatchTemplateMask(constref Cache: TMatchTemplateGreyCache; constref Templ: TByteMatrix;  Formula: ETMFormula): TSingleMatrix;
-function MatchTemplateMask(constref Image, Templ, Mask: TByteMatrix; Formula: ETMFormula): TSingleMatrix;
+function MatchTemplateMask(const Cache: TMatchTemplateGreyCache; const Templ: TByteMatrix;  Formula: ETMFormula): TSingleMatrix;
+function MatchTemplateMask(const Image, Templ, Mask: TByteMatrix; Formula: ETMFormula): TSingleMatrix;
 
-function MatchTemplateMask(constref Cache: TMatchTemplateRGBCache; constref Templ: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
-function MatchTemplateMask(constref Image, Templ, Mask: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
+function MatchTemplateMask(const Cache: TMatchTemplateRGBCache; const Templ: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
+function MatchTemplateMask(const Image, Templ, Mask: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
 
-function MatchTemplate(constref Image, Templ: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
+function MatchTemplate(const Image, Templ: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
 
 type
   TMufasaBitmap_Helper = class helper for TMufasaBitmap
@@ -104,7 +104,7 @@ type
 implementation
 
 uses
-  simba.threadpool, simba.FFTPACK4, simba.matrix, simba.colormath;
+  simba.threadpool, simba.FFTPACK4, simba.colormath, simba.type_singlematrix;
 
 {$DEFINE VALIDATE :=
   if (Image.Width = 0) or (Image.Height = 0) then
@@ -209,7 +209,7 @@ begin
       end;
 end;
 
-function MulSpectrumConj(constref A, B: TComplexMatrix): TComplexMatrix;
+function MulSpectrumConj(const A, B: TComplexMatrix): TComplexMatrix;
 begin
   SetLength(Result, A.Height, A.Width);
 
@@ -219,7 +219,7 @@ end;
 // -----------------------------------------------------------------------------
 // cross correlate
 
-function CCORR(constref Image, Templ: TSingleMatrix): TSingleMatrix;
+function CCORR(const Image, Templ: TSingleMatrix): TSingleMatrix;
 var
   Spec: TComplexMatrix;
 begin
@@ -228,7 +228,7 @@ begin
   Result := DoIFFT2(Spec, Image.Width - Templ.Width + 1, Image.Height - Templ.Height + 1);
 end;
 
-function CCORR(ImageWidth, ImageHeight: Int32; constref Image: TComplexMatrix; constref Templ: TSingleMatrix): TSingleMatrix;
+function CCORR(ImageWidth, ImageHeight: Int32; const Image: TComplexMatrix; const Templ: TSingleMatrix): TSingleMatrix;
 var
   Spec: TComplexMatrix;
 begin
@@ -262,7 +262,7 @@ begin
       Result[y,x] := xR[y,x] + xG[y,x] + xB[y,x];
 end;
 
-function CCORR_RGB(ImageWidth, ImageHeight: Int32; constref ImageR, ImageG, ImageB: TComplexMatrix; Templ: TRGBMatrix): TRGBMatrix;
+function CCORR_RGB(ImageWidth, ImageHeight: Int32; const ImageR, ImageG, ImageB: TComplexMatrix; Templ: TRGBMatrix): TRGBMatrix;
 begin
   Result.R := CCORR(ImageWidth, ImageHeight, ImageR, Templ.R);
   Result.G := CCORR(ImageWidth, ImageHeight, ImageG, Templ.G);
@@ -508,7 +508,7 @@ begin
     end;
 end;
 
-class function TMatchTemplateGreyCache.Create(constref Image, Mask: TByteMatrix): TMatchTemplateGreyCache;
+class function TMatchTemplateGreyCache.Create(const Image, Mask: TByteMatrix): TMatchTemplateGreyCache;
 var
   Grey: TSingleMatrix;
   X, Y: Int32;
@@ -546,7 +546,7 @@ begin
   );
 end;
 
-class function TMatchTemplateRGBCache.Create(constref Image, Mask: TIntegerMatrix): TMatchTemplateRGBCache;
+class function TMatchTemplateRGBCache.Create(const Image, Mask: TIntegerMatrix): TMatchTemplateRGBCache;
 var
   R, G, B: TSingleMatrix;
   X, Y, W, H: Int32;
@@ -593,7 +593,7 @@ begin
   );
 end;
 
-function MatchTemplateMask(constref Cache: TMatchTemplateGreyCache; constref Templ: TByteMatrix; Formula: ETMFormula): TSingleMatrix;
+function MatchTemplateMask(const Cache: TMatchTemplateGreyCache; const Templ: TByteMatrix; Formula: ETMFormula): TSingleMatrix;
 var
   TemplChannel, TemplxMask: TSingleMatrix;
   TemplxMaskSum: Double;
@@ -625,12 +625,12 @@ begin
   end;
 end;
 
-function MatchTemplateMask(constref Image, Templ, Mask: TByteMatrix; Formula: ETMFormula): TSingleMatrix;
+function MatchTemplateMask(const Image, Templ, Mask: TByteMatrix; Formula: ETMFormula): TSingleMatrix;
 begin
   Result := MatchTemplateMask(TMatchTemplateGreyCache.Create(Image, Mask), Templ, Formula);
 end;
 
-function MatchTemplateMask(constref Cache: TMatchTemplateRGBCache; constref Templ: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
+function MatchTemplateMask(const Cache: TMatchTemplateRGBCache; const Templ: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
 var
   TemplChannel, TemplxMask, Corr: TRGBMatrix;
   MaskTemplSum, TemplxMaskSum: TDoubleArray;
@@ -669,12 +669,12 @@ begin
   end;
 end;
 
-function MatchTemplateMask(constref Image, Templ, Mask: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
+function MatchTemplateMask(const Image, Templ, Mask: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
 begin
   Result := MatchTemplateMask(TMatchTemplateRGBCache.Create(Image, Mask), Templ, Formula);
 end;
 
-function MatchTemplate(constref Image, Templ: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
+function MatchTemplate(const Image, Templ: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
 begin
   VALIDATE
 
@@ -751,12 +751,12 @@ begin
 
   if Formula in [TM_SQDIFF, TM_SQDIFF_NORMED] then
   begin
-    Result := MatrixArgMin(Corr);
+    Result := Corr.ArgMin();
     if Corr[Result.Y, Result.X] > MinMatch then
       Result := Point(-1, -1);
   end else
   begin
-    Result := MatrixArgMax(Corr);
+    Result := Corr.ArgMax();
     if Corr[Result.Y, Result.X] < MinMatch then
       Result := Point(-1, -1);
   end;
@@ -770,12 +770,12 @@ begin
 
   if Formula in [TM_SQDIFF, TM_SQDIFF_NORMED] then
   begin
-    Result := MatrixArgMin(Corr);
+    Result := Corr.ArgMin();
     if Corr[Result.Y, Result.X] > MinMatch then
       Result := Point(-1, -1);
   end else
   begin
-    Result := MatrixArgMax(Corr);
+    Result := Corr.ArgMax();
     if Corr[Result.Y, Result.X] < MinMatch then
       Result := Point(-1, -1);
   end;

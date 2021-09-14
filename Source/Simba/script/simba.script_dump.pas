@@ -214,6 +214,13 @@ begin
   Write('procedure Sort(var A: array of Anything; CompareFunc: function(constref L, R: Anything): Int32); overload; external;');
   Write('function Sorted(constref A: array of Anything): array of Anything; overload; external;');
   Write('function Sorted(constref A: array of Anything; CompareFunc: function(constref L, R: Anything): Int32): array of Anything; overload; external;');
+
+  // These require the SimbaScript variable which isn't created when dumping.
+  Write('const ScriptFile = ""');
+
+  FSection := 'Target';
+
+  Write('var Client: TClient');
 end;
 
 destructor TCompilerDump.Destroy;

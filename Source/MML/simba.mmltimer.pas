@@ -9,6 +9,7 @@ uses
   Classes;
 
 type
+  PMMLTimer = ^TMMLTimer;
   TMMLTimer = class; // forward declaration
 
 

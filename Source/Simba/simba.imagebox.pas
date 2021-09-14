@@ -10,6 +10,7 @@ uses
   simba.client, simba.mufasatypes, simba.bitmap, simba.dtm;
 
 type
+  PSimbaImageBox = ^TSimbaImageBox;
   TSimbaImageBox = class;
 
   TSimbaImageBox_ScrollBox = class(TScrollBox)
@@ -27,6 +28,7 @@ type
     constructor Create(ImageBox: TSimbaImageBox); reintroduce;
   end;
 
+  PSimbaImageBox_Background = ^TSimbaImageBox_Background;
   TSimbaImageBox_Background = class(TBitmap)
   public
     procedure LoadFromFile(const Filename: string); override;
@@ -34,6 +36,7 @@ type
     procedure LoadFromPointer(Data: PRGB32; AWidth, AHeight: Int32);
   end;
 
+  PSimbaImageBox_Overlay = ^TSimbaImageBox_Overlay;
   TSimbaImageBox_Overlay = class
   protected
     FImageBox: TSimbaImageBox;
@@ -58,6 +61,7 @@ type
     destructor Destroy; override;
   end;
 
+  PSimbaImageBox_PaintArea = ^TSimbaImageBox_PaintArea;
   TSimbaImageBox_PaintArea = procedure(Sender: TObject; ACanvas: TCanvas; R: TRect) of object;
 
   TSimbaImageBox = class(TCustomControl)

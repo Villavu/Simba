@@ -4,6 +4,7 @@
 unit simba.heaparray;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 

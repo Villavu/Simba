@@ -57,7 +57,7 @@ An image tells more than a thousands words:
 *)
 
 type
-
+  PClient = ^TClient;
   TClient = class(TObject)
   private
     FOwnIOManager: Boolean;

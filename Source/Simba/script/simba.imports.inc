@@ -1,0 +1,53 @@
+{%MainUnit simba.script_compiler}
+
+{$i simba.imports_system.inc}
+{$i simba.imports_matrix.inc}
+
+{$i simba.imports_lclobject.inc}
+{$i simba.imports_lclsystem.inc}
+{$i simba.imports_lclgraphics.inc}
+{$i simba.imports_lclcontrols.inc}
+{$i simba.imports_lclforms.inc}
+{$i simba.imports_lclstdctrls.inc}
+{$i simba.imports_lclextctrls.inc}
+{$i simba.imports_lclcomctrls.inc}
+{$i simba.imports_lcldialogs.inc}
+{$i simba.imports_lclspin.inc}
+{$i simba.imports_lclprocess.inc}
+
+{$i simba.imports_tmdtm.inc}
+{$i simba.imports_tmdtms.inc}
+{$i simba.imports_tmufasabitmap.inc}
+{$i simba.imports_tmbitmaps.inc}
+{$i simba.imports_tmfiles.inc}
+{$i simba.imports_tmfinder.inc}
+{$i simba.imports_tmfont.inc}
+{$i simba.imports_tmfonts.inc}
+{$i simba.imports_tmocr.inc}
+{$i simba.imports_ttarget.inc}
+{$i simba.imports_tiomanager.inc}
+{$i simba.imports_tclient.inc}
+{$i simba.imports_tmmltimer.inc}
+{$i simba.imports_xml.inc}
+{$i simba.imports_json.inc}
+{$i simba.imports_simbaimagebox.inc}
+
+{$i simba.imports_oswindow.inc}
+{$i simba.imports_target.inc}
+{$i simba.imports_input.inc}
+{$i simba.imports_matchtemplate.inc}
+{$i simba.imports_finder.inc}
+{$i simba.imports_web.inc}
+{$i simba.imports_arrays_algorithms.inc}
+{$i simba.imports_math.inc}
+{$i simba.imports_time_date.inc}
+{$i simba.imports_ocr.inc}
+{$i simba.imports_string.inc}
+{$i simba.imports_colormath.inc}
+{$i simba.imports_bitmap.inc}
+{$i simba.imports_dtm.inc}
+{$i simba.imports_file.inc}
+{$i simba.imports_other.inc}
+{$i simba.imports_crypto.inc}
+{$i simba.imports_dialog.inc}
+{$i simba.imports_process.inc}

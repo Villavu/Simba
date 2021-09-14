@@ -52,6 +52,7 @@ type
     inited : boolean; //This char has been loaded.
   end;
 
+  POCRData = ^TOCRData;
   TocrData = record
     ascii: array[0..255] of TocrGlyphMetric; {Why is this also named ascii? :(}
     pos: array of array of integer;

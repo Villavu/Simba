@@ -28,15 +28,11 @@ unit simba.tpa;
 interface
 
 uses
-  Classes, SysUtils, simba.mufasatypes;
+  Classes, SysUtils, simba.mufasatypes, simba.type_matrix;
 
 function FastTPASort(const TPA: TPointArray;const Dists: TIntegerArray; maxDist: Integer; CloseFirst: Boolean): TPointArray;
 procedure QuickSort(var A: TIntegerArray; iLo, iHi: Integer);
 
-//Start Wizzyplugin
-procedure tSwap(var a, b: TPoint);
-procedure tpaSwap(var a, b: TPointArray);
-procedure SwapE(var a, b: Extended);
 procedure RAaSTPAEx(var a: TPointArray; const w, h: Integer);
 procedure RAaSTPA(var a: TPointArray; const Dist: Integer);
 function NearbyPointInArrayEx(const P: TPoint; w, h:Integer; a: TPointArray): Boolean;
@@ -1577,7 +1573,7 @@ function FloodFillTPA(const TPA : TPointArray) : T2DPointArray;
 var
   x,y,i,CurrentArray, LengthTPA,CurrentStack : integer;
   TempBox : TBox;
-  PointsToFill : T2DBoolArray;
+  PointsToFill : TBooleanMatrix;
   Lengths : TIntegerArray;
   TempTPA : TPointArray;
   Stack : TPointArray;
@@ -1783,7 +1779,7 @@ var
   I, Hi, Ind, y: Integer;
   P: TPointArray;
   Box: TBox;
-  B: T2DBoolArray;
+  B: TBooleanMatrix;
   SinAngle,CosAngle : Extended;
 begin
   if Length(Points) < 1 then
@@ -2005,7 +2001,7 @@ function FindTPAinTPA(SearchTPA : TPointArray; const TotalTPA: TPointArray; var 
 var
   Len, I,II,LenSearch,xOff,yOff : integer;
   tx,ty,MatchCount : integer;
-  Screen : T2DBoolArray;
+  Screen : TBooleanMatrix;
   ScreenBox,SearchBox : TBox;
   Found: Boolean;
 begin;
@@ -2085,7 +2081,7 @@ var
   Len, I,II,LenSearch,LenTPA,xOff,yOff,x,y: integer;
   tx,ty,MatchCount : integer;
   Found : boolean;
-  Screen : T2DBoolArray;
+  Screen : TBooleanMatrix;
   ScreenBox,SearchBox : TBox;
   InversedTPA : TPointArray;
 begin;
@@ -2256,7 +2252,7 @@ end;
 function FindGapsTPA(const TPA: TPointArray; MinPixels: Integer): T2DPointArray;
 var
   Len,TotalLen,LenRes,I,II,III : integer;
-  Screen : T2DBoolArray;
+  Screen : TBooleanMatrix;
   Height,Width : Integer;
   Box : TBox;
 begin;
@@ -2688,7 +2684,7 @@ var
   x, y, h, i, l, r, z: Integer;
   o: TPointArray;
   f: Boolean;
-  t: array of TBoolArray;
+  t: TBooleanMatrix;
   e: Extended;
   q, p, d: TPoint;
 begin
@@ -2896,7 +2892,7 @@ var
   B: TBox;
   Matrix: T2DIntegerArray;
   Edges: TPointArray;
-  Removed: TBoolArray;
+  Removed: TBooleanArray;
 
   function RemoveEdges: Boolean;
   var
@@ -3065,7 +3061,7 @@ end;
 function ClearTPAFromTPA(const arP, ClearPoints: TPointArray): TPointArray;
 var
   v, h, r, l, x, y: Integer;
-  B: array of TBoolArray;
+  B: array of TBooleanArray;
   bx, tmp: TBox;
 begin;
   r := 0;
@@ -3118,7 +3114,7 @@ end;
 procedure ClearDoubleTPA(var TPA: TPointArray);
 var
   v, h, r: Integer;
-  B: array of TBoolArray;
+  B: array of TBooleanArray;
   bx: TBox;
 begin;
   h := high(TPA);
@@ -3168,7 +3164,7 @@ end;
 
 function ReturnPointsNotInTPA(const TPA: TPointArray; Area: TBox): TPointArray;
 var
-  Matrix: T2DBoolArray;
+  Matrix: TBooleanMatrix;
   i, W, H, X, Y: Integer;
 begin
   W := (Area.X2 - Area.X1) + 1;

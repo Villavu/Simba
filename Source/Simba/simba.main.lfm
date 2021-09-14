@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 1789
+  Left = -1078
   Height = 396
-  Top = 755
+  Top = 878
   Width = 922
   Caption = 'Simba'
   ClientHeight = 373
@@ -180,6 +180,7 @@ object SimbaForm: TSimbaForm
       Alignment = taLeftJustify
       BorderSpacing.Top = 1
       BevelOuter = bvNone
+      Color = clForm
       ParentColor = False
       TabOrder = 0
     end
@@ -194,6 +195,7 @@ object SimbaForm: TSimbaForm
       BorderSpacing.Top = 1
       BevelOuter = bvNone
       Caption = ' Stopped'
+      Color = clForm
       ParentColor = False
       TabOrder = 1
     end
@@ -207,6 +209,7 @@ object SimbaForm: TSimbaForm
       BorderSpacing.Left = 1
       BorderSpacing.Top = 1
       BevelOuter = bvNone
+      Color = clForm
       ParentColor = False
       TabOrder = 2
     end
@@ -220,6 +223,7 @@ object SimbaForm: TSimbaForm
       BorderSpacing.Left = 1
       BorderSpacing.Top = 1
       BevelOuter = bvNone
+      Color = clForm
       ParentColor = False
       TabOrder = 3
     end

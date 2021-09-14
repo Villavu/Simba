@@ -29,13 +29,18 @@ interface
 
 uses
   classes, sysutils, graphtype, graphics,
-  simba.mufasatypes, simba.textdrawer;
+  simba.mufasatypes, simba.textdrawer, simba.type_matrix;
 
 type
   TMBitmaps = class;
 
+  PBmpMirrorStyle = ^TBmpMirrorStyle;
   TBmpMirrorStyle  = (MirrorWidth, MirrorHeight, MirrorLine);
+
+  PBmpThreshMethod =  ^TBmpThreshMethod;
   TBmpThreshMethod = (TM_Mean, TM_MinMax);
+
+  PBmpResizeMethod = ^TBmpResizeMethod;
   TBmpResizeMethod = (RM_Nearest, RM_Bilinear);
 
   PMufasaBitmap = ^TMufasaBitmap;
@@ -167,7 +172,7 @@ type
   end;
   TMufasaBmpArray = Array of TMufasaBitmap;
   
-  { TMBitmaps }
+  PMBitmaps = ^TMBitmaps;
   TMBitmaps = class(TObject)
   protected
     Client: TObject;
@@ -209,14 +214,11 @@ type
   function CalculatePixelTolerance(Bmp1,Bmp2: TMufasaBitmap; CompareBox: TBox; CTS: Int32): extended;
   function CalculatePixelToleranceTPA(Bmp1, Bmp2: TMufasaBitmap; CPoints: TPointArray; CTS: Int32): extended;
 
-const
-  MASK_REMOVE_ALPHA = $000000FF;
-
 implementation
 
 uses
   math, intfgraphics,
-  simba.tpa, simba.stringutil, simba.colormath, simba.iomanager,simba.matrix, simba.fastarray;
+  simba.tpa, simba.stringutil, simba.colormath, simba.iomanager, simba.fastarray, simba.type_singlematrix;
 
 function TBitmap_Helper.DataFormat: TBitmapDataFormat;
 var
@@ -806,13 +808,10 @@ var
 begin
   SetSize(Matrix.Width, Matrix.Height);
 
-  W := FWidth - 1;
-  H := FHeight - 1;
+  Normed := Matrix.NormMinMax(0, 1);
 
-  Normed := MatrixNormMinMax(Matrix, 0,1);
-
-  for Y := 0 to H do
-    for X := 0 to W do
+  for Y := 0 to H-1 do
+    for X := 0 to W-1 do
     begin
       case ColorMapID of
         0:begin //cold blue to red

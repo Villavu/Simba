@@ -20,7 +20,6 @@
 
     Files Class for the Mufasa Macro Library
 }
-
 unit simba.files;
 
 {$mode objfpc}{$H+}
@@ -29,7 +28,9 @@ unit simba.files;
 interface
 
 uses
-  Classes, SysUtils, simba.mufasatypes;
+  classes, sysutils,
+  simba.mufasatypes;
+
 const
   File_AccesError = -1;
   File_EventError = -2;
@@ -38,6 +39,7 @@ type
 
   { TMFiles }
 
+  PMFiles = ^TMFiles;
   TMFiles = class(TObject)
   public
     function CreateFile(Path: string): Integer;
@@ -68,7 +70,7 @@ type
   end;
 
   function GetFiles(Path, Ext: string): TStringArray;
-  function GetDirectories(Path: string): TstringArray;
+  function GetDirectories(Path: string): TStringArray;
   function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
   function FindPlugin(var FileName: String; const Directories: array of String): Boolean;
   procedure ZipFiles(const ArchiveFileName: String; const Files: TStringArray);
@@ -79,8 +81,6 @@ type
   function WriteFile(const FileName, Contents: String): Boolean;
   function CreateTempFile(const Contents, Prefix: String): String;
 
-  procedure DeleteFiles(const Directory, Mask: String);
-
   function GetSimbaPath: String;
   function GetDataPath: String;
   function GetIncludePath: String;
@@ -88,14 +88,14 @@ type
   function GetFontPath: String;
   function GetScriptPath: String;
   function GetPackagePath: String;
+  function GetDumpPath: String;
 
   procedure CreateBaseDirectories;
 
 implementation
 
 uses
-  Forms,
-  IniFiles, FileUtil, LazFileUtils, LazUTF8, Zipper, dynlibs;
+  forms, lazloggerbase, inifiles, fileutil, lazfileutils, zipper, dynlibs;
 
 function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
 var
@@ -289,19 +289,6 @@ begin
   end;
 end;
 
-procedure DeleteFiles(const Directory, Mask: String);
-var
-  I: Integer;
-begin
-  with FindAllFiles(Directory, Mask, False) do
-  try
-    for I := 0 to Count - 1 do
-      DeleteFile(Strings[I]);
-  finally
-    Free();
-  end;
-end;
-
 function GetSimbaPath: String;
 begin
   Result := IncludeTrailingPathDelimiter(Application.Location);
@@ -337,21 +324,24 @@ begin
   Result := GetDataPath() + 'packages' + DirectorySeparator;
 end;
 
+function GetDumpPath: String;
+begin
+  Result := GetDataPath() + 'dumps' + DirectorySeparator;
+end;
+
 procedure CreateBaseDirectories;
 var
   Directory: String;
 begin
-  {$IFDEF SIMBA_DEBUG}
-  WriteLn('Create base directories');
-  {$ENDIF}
+  for Directory in [GetDumpPath(), GetPackagePath(), GetIncludePath(), GetFontPath(), GetScriptPath(), GetPluginPath()] do
+  begin
+    if DirectoryExists(Directory) then
+      Continue;
 
-  for Directory in [GetDataPath(), GetPackagePath(), GetIncludePath(), GetFontPath(), GetScriptPath()] do
-    if not DirectoryExists(Directory) then
-    begin
-      WriteLn('Create Directory: ', Directory);
+    DebugLn('simba.files :: Create base directory: ', Directory);
 
-      ForceDirectory(Directory);
-    end;
+    ForceDirectories(Directory);
+  end;
 end;
 
 constructor TMFiles.Create(Owner : TObject);
@@ -365,7 +355,7 @@ end;
 procedure TMFiles.FreeFileList;
 var
   I : integer;
-begin;
+begin
   For I := 0 To High(MFiles) Do
     if MFiles[i].FS <> nil then
     begin
@@ -449,7 +439,7 @@ var
   FS: TFileStream;
 begin
   try
-    FS := TFileStream.Create(UTF8ToSys(Path), fmCreate);
+    FS := TFileStream.Create(Path, fmCreate);
     Result := AddFileToManagedList(Path, FS, fmCreate);
   except
     Result := File_AccesError;
@@ -473,7 +463,7 @@ begin
   else
     fMode := fmOpenRead or fmShareExclusive;
   try
-      FS := TFileStream.Create(UTF8ToSys(Path), fMode)
+      FS := TFileStream.Create(Path, fMode)
   except
     Result := File_AccesError;
     Writeln(Format('OpenFile - Exception. Could not open file: %s',[path]));
@@ -491,7 +481,7 @@ begin
   if not FileExists(Path) then
     fMode := fMode or fmCreate;
   try
-    FS := TFileStream.Create(UTF8ToSys(Path), fMode);
+    FS := TFileStream.Create(Path, fMode);
     FS.Seek(0, fsFromEnd);
     Result := AddFileToManagedList(Path, FS, fMode);
   except
@@ -521,7 +511,7 @@ end;
 /\}
 
 procedure TMFiles.DeleteINI(const Section, KeyName : string; FileName : string);
-begin; 
+begin 
   FileName := ExpandFileNameUTF8(FileName);
 
   with TIniFile.Create(FileName, True) do
@@ -540,7 +530,7 @@ end;
 /\}
 
 procedure TMFiles.WriteINI(const Section, KeyName, NewString : string; FileName : string);
-begin;
+begin
   FileName := ExpandFileNameUTF8(FileName);
 
   with TINIFile.Create(FileName, True) do
@@ -567,7 +557,7 @@ begin
   else
     fMode := fmOpenReadWrite or fmShareDenyWrite or fmShareDenyRead or fmCreate;
   try
-    FS := TFileStream.Create(UTF8ToSys(Path), fMode);
+    FS := TFileStream.Create(Path, fMode);
     FS.Size:=0;
     Result := AddFileToManagedList(Path, FS, fMode);
   except

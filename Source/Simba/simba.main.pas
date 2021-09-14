@@ -424,7 +424,7 @@ var
 begin
   Contents := '';
 
-  CacheFileName := GetDataPath() + SHA1Print(SHA1File(FileName)) + '.plugin';
+  CacheFileName := GetDumpPath() + SHA1Print(SHA1File(FileName));
 
   try
     List := nil;
@@ -458,7 +458,7 @@ var
 begin
   List := nil;
 
-  FileName := GetDataPath() + FBinaryHash + '.compiler';
+  FileName := GetDumpPath() + FBinaryHash;
 
   try
     if FileExists(FileName) then
@@ -468,8 +468,6 @@ begin
       List.LoadFromFile(FileName);
     end else
     begin
-      DeleteFiles(GetDataPath(), '*.compiler');
-
       List := SimbaProcess.RunDump(['--dumpcompiler']);
       List.SaveToFile(FileName);
     end;
@@ -504,8 +502,10 @@ const
   Message = 'Would you like to associate scripts with this Simba?' + LineEnding +
             'This means when opening a script, the script will be opened using this Simba executable.';
 begin
+  {$IFDEF WINDOWS}
   if MessageDlg(Message, mtConfirmation, mbYesNo, 0) = mrYes then
     Associate();
+  {$ENDIF}
 end;
 
 procedure TSimbaForm.MenuNewTemplateClick(Sender: TObject);
@@ -515,7 +515,7 @@ end;
 
 procedure TSimbaForm.MenuViewClick(Sender: TObject);
 begin
- // MenuItemDebugger.Enabled := SimbaScriptTabsForm.CurrentTab.DebuggingForm <> nil;
+  MenuItemDebugger.Enabled := SimbaScriptTabsForm.CurrentTab.DebuggingForm <> nil;
 end;
 
 procedure TSimbaForm.MenuItemFormatScriptClick(Sender: TObject);
@@ -559,7 +559,7 @@ begin
   Application.OnException := @SimbaForm.HandleException;
   Screen.AddHandlerFormAdded(@SimbaForm.HandleFormCreated, True);
 
-  FBinaryHash := SHA1Print(SHA1File(Application.ExeName, 1024*1024));
+  FBinaryHash := SHA1Print(SHA1File(Application.ExeName, 512*512));
 
   FRecentFiles := TStringList.Create();
   FRecentFiles.Text := SimbaSettings.GUI.RecentFiles.Value;
@@ -1186,7 +1186,7 @@ procedure TSimbaForm.SetupCompleted(Sender: TObject);
 begin
   Timer.Enabled := True;
 
-  if SimbaSettings.Environment.FirstLaunch.Value then
+  if SimbaSettings.FirstLaunch then
     MenuItemAssociateScripts.Click();
 
   if (Application.ParamCount > 0) then
