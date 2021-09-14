@@ -1,0 +1,32 @@
+FSection := 'Math';
+
+addGlobalFunc('function RiemannGauss(Xstart, StepSize, Sigma: Extended; AmountSteps: Int32): Extended', @_LapeRiemannGauss);
+addGlobalFunc('function DiscreteGauss(Xstart, Xend: Int32; sigma: Extended): TExtendedArray', @_LapeDiscreteGauss);
+addGlobalFunc('function GaussMatrix(N: Int32; sigma: Extended): T2DExtendedArray', @_LapeGaussMatrix);
+addGlobalFunc('function Point(x, y: Int32): TPoint', @_LapePoint);
+addGlobalFunc('function Distance(x1, y1, x2, y2: Int32): Int32', @_LapeDistance);
+addGlobalFunc('function RandomRange(const min, max: Int32): Int32', @_LapeRandomRange);
+addGlobalFunc('function Factorial(number: UInt32): Int64', @_LapeFactorial);
+addGlobalFunc('function BinCoe(a, b: Integer): Extended', @_LapeBinCoe);
+addGlobalFunc('function FixD(Degrees: Extended): Extended', @_LapeFixD);
+addGlobalFunc('function InRange(const Value, Min, Max: Int32): boolean', @_LapeInRange);
+addGlobalFunc('function IntToBox(x1, y1, x2, y2: Int32): TBox', @_LapeIntToBox);
+addGlobalFunc('function IntInBox(x, y: Int32; Box: TBox): Boolean', @_LapeIntInBox);
+addGlobalFunc('function PointToBox(PT1, PT2: TPoint): TBox', @_LapePointToBox);
+addGlobalFunc('function PointInBox(PT: TPoint; Box: TBox): Boolean', @_LapePointInBox);
+addGlobalFunc('function logn(base, x: Extended): Extended', @_Lapelogn);
+addGlobalFunc('function sar(num: Integer; shift: byte): Integer', @_Lapesar);
+addGlobalFunc('function ror(num: UInt32; shift: byte): UInt32', @_Laperor);
+addGlobalFunc('function rol(num: UInt32; shift: byte): UInt32', @_Laperol);
+addGlobalFunc('function radians(e: Extended): Extended', @_Laperadians);
+addGlobalFunc('function degrees(e: Extended): Extended', @_Lapedegrees);
+addGlobalFunc('function Csc(e: Extended): Extended', @_LapeCsc);
+addGlobalFunc('function DecRet(e: Extended): Extended', @_LapeDecRet);
+addGlobalFunc('function log10(f: Extended): Extended', @_Lapelog10);
+addGlobalFunc('function MinA(Arr: TIntegerArray): Int32', @_LapeMinA);
+addGlobalFunc('function MaxA(Arr: TIntegerArray): Int32', @_LapeMaxA);
+addGlobalFunc('function Sum64IntArr(const Arr: TIntegerArray): Int64', @_LapeSum64IntArr);
+addGlobalFunc('function FixRad(rad: Extended): Extended', @_LapeFixRad);
+addGlobalFunc('function MiddleBox(b: TBox): TPoint', @_LapeMiddleBox);
+addGlobalFunc('function NextPow2(n: Integer): Integer', @_LapeNextPow2);
+

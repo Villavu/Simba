@@ -34,9 +34,9 @@
             <Filename Value="../../Simba-Win32"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../../Modules/lape;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes"/>
             <Libraries Value="../../Modules/lape/extensions/ffi/bin/win32"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../MML/windows;../MML/process_helpers;../MML/matchtemplate;../MML/types"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -76,8 +76,8 @@
             <Filename Value="../../Simba-AArch64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../../Modules/lape;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../MML/windows;../MML/process_helpers;../MML/matchtemplate;../MML/types"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -116,8 +116,8 @@
             <Filename Value="../../Simba-Linux64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../../Modules/lape;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../MML/windows;../MML/process_helpers;../MML/matchtemplate;../MML/types"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -158,8 +158,8 @@
             <Filename Value="../../Simba-Darwin64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../../Modules/lape;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../MML/windows;../MML/process_helpers;../MML/matchtemplate;../MML/types"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -201,9 +201,9 @@
             <Filename Value="../../Simba-Win64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../../Modules/lape;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes"/>
             <Libraries Value="../../Modules/lape/extensions/ffi/bin/win64"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../MML/windows;../MML/process_helpers;../MML/matchtemplate;../MML/types"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -240,9 +240,9 @@
             <Filename Value="../../Simba-Win32"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../../Modules/lape;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes"/>
             <Libraries Value="../../Modules/lape/extensions/ffi/bin/win32"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../MML/windows;../MML/process_helpers;../MML/matchtemplate;../MML/types"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -279,8 +279,8 @@
             <Filename Value="../../Simba-AArch64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../../Modules/lape;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../MML/windows;../MML/process_helpers;../MML/matchtemplate;../MML/types"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -313,8 +313,8 @@
             <Filename Value="../../Simba-Linux64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../../Modules/lape;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../MML/windows;../MML/process_helpers;../MML/matchtemplate;../MML/types"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -350,8 +350,8 @@
             <Filename Value="../../Simba-Darwin64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../../Modules/lape;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes"/>
+            <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../MML/windows;../MML/process_helpers;../MML/matchtemplate;../MML/types"/>
             <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -651,6 +651,26 @@
         <Filename Value="simba.editorcolorpresets.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
+      <Unit>
+        <Filename Value="script/wrappers_lcl_classes/simba.wrappers_lclobject.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../MML/simba.matrixhelper_header.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../MML/simba.matrixhelpers_body.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../MML/types/simba.type_matrix.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../MML/types/simba.type_singlematrix.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -659,9 +679,9 @@
       <Filename Value="../../Simba-Win64"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/imports;../../Modules/lape"/>
+      <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../../Modules/lape;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes"/>
       <Libraries Value="../../Modules/lape/extensions/ffi/bin/win64"/>
-      <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;script/imports;script/imports/classes/LCL;script/imports/classes/MML;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../../Modules/DCPCrypt;../../Modules/DCPCrypt/Ciphers;../../Modules/DCPCrypt/Hashes;../MML/windows;../MML/process_helpers;../MML/matchtemplate"/>
+      <OtherUnitFiles Value="$(ProjPath);package;parser;colorpicker;settings;openssl;script;../MML;../MML/iomanager;../MML/oswindow;../MML/dtmeditor;../MML/aca;../MML/web;../MML/archive;../MML/linux;../MML/darwin;../../Modules/Synapse;../../Modules/lape;../../Modules/lape/extensions/ffi;../MML/windows;../MML/process_helpers;../MML/matchtemplate;../MML/types"/>
       <UnitOutputDirectory Value="$(ProjPath)../../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

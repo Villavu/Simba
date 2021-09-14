@@ -1,2 +1,2 @@
-"libssl.1.1.so"    RCDATA "libssl.so.1.1.gz"
-"libcrypto.1.1.so" RCDATA "libcrypto.so.1.1.gz"
+"libssl.so.1.1"    RCDATA "libssl.so.1.1.gz"
+"libcrypto.so.1.1" RCDATA "libcrypto.so.1.1.gz"

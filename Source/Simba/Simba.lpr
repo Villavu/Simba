@@ -95,6 +95,7 @@ begin
     SimbaScript.Target                   := Application.GetOptionValue('target');
     SimbaScript.Debugging                := Application.HasOption('debugging');
     SimbaScript.CompileOnly              := Application.HasOption('compile');
+    SimbaScript.Silent                   := Application.HasOption('silent');
 
     SimbaScript.Start();
   end else

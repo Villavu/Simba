@@ -164,6 +164,8 @@ end;
 
 procedure TSimbaScriptInstance.Kill;
 begin
+  DebugLn('TSimbaScriptInstance.Kill');
+
   FProcess.Terminate(0);
 end;
 

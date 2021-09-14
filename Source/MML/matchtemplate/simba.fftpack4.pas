@@ -19,7 +19,7 @@ interface
 
 uses
   sysutils,
-  simba.fftpack4_core, simba.mufasatypes;
+  simba.fftpack4_core, simba.mufasatypes, simba.type_matrix;
 
 type
   TFFTPACK = record
@@ -33,9 +33,9 @@ type
     function RFFT(a, wsave: TSingleArray; Inplace: Boolean=False): TSingleArray;
     function IRFFT(a, wsave: TSingleArray; Inplace: Boolean=False): TSingleArray;
 
-    function FFT2MT(m: T2DComplexArray; Inverse: Boolean): T2DComplexArray;
-    function FFT2(m: T2DComplexArray): T2DComplexArray;
-    function IFFT2(m: T2DComplexArray): T2DComplexArray;
+    function FFT2MT(m: TComplexMatrix; Inverse: Boolean): TComplexMatrix;
+    function FFT2(m: TComplexMatrix): TComplexMatrix;
+    function IFFT2(m: TComplexMatrix): TComplexMatrix;
   end;
 
 const
@@ -198,10 +198,10 @@ end;
 procedure Parallel_FFT2(params: PParamArray; iLow, iHigh: Int32);
 var
   y: Int32;
-  data: T2DComplexArray;
+  data: TComplexMatrix;
   plan: TComplexArray;
 begin
-  data := T2DComplexArray(Params^[0]^);
+  data := TComplexMatrix(Params^[0]^);
   plan := Copy(TComplexArray(Params^[1]^)); //copy plan/workbase as it's also a buffer
 
   {if not inverse}
@@ -214,7 +214,7 @@ begin
       FFTPACK.IFFT(data[y], plan, True);
 end;
 
-function TFFTPACK.FFT2MT(m: T2DComplexArray; Inverse: Boolean): T2DComplexArray;
+function TFFTPACK.FFT2MT(m: TComplexMatrix; Inverse: Boolean): TComplexMatrix;
 var
   W,H: Int32;
   plan: TComplexArray;
@@ -236,13 +236,13 @@ begin
   Result := Rot90(m);
 end;
 
-function TFFTPACK.FFT2(m: T2DComplexArray): T2DComplexArray;
+function TFFTPACK.FFT2(m: TComplexMatrix): TComplexMatrix;
 begin
   if Length(m) = 0 then Exit;
   Result := FFT2MT(m, False);
 end;
 
-function TFFTPACK.IFFT2(m: T2DComplexArray): T2DComplexArray;
+function TFFTPACK.IFFT2(m: TComplexMatrix): TComplexMatrix;
 begin
   if Length(m) = 0 then Exit;
   Result := FFT2MT(m, True);

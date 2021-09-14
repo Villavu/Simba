@@ -31,6 +31,7 @@ Type
   { @abstract(Classe pai de todas as classes em uJSON , resolve o problema de
     impedвncia entre a classe java Object e a classe delphi TObject)
   }
+  PZAbstractObject = ^TZAbstractObject;
   TZAbstractObject = class
     { retorna true se value й igual ao objeto }
     function equals(const Value: TZAbstractObject): Boolean; virtual;
@@ -66,6 +67,7 @@ Type
   NotImplmentedFeature = class(Exception)
   end;
 
+  PJSONArray = ^TJSONArray;
   TJSONArray = class;
   _Number = class;
   _String = class;
@@ -120,6 +122,7 @@ Type
   end;
 
   { @abstract(Classe que representa um objeto JSON) }
+  PJSONObject = ^TJSONObject;
   TJSONObject = class(TZAbstractObject)
   private
     myHashMap: TStringList;
@@ -2354,7 +2357,6 @@ end;
 
 destructor TJSONArray.destroy;
 var
-  i: integer;
   obj: TObject;
 begin
   while myArrayList.Count > 0 do

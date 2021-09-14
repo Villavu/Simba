@@ -23,6 +23,7 @@
 unit simba.misc;
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
@@ -35,13 +36,15 @@ function TimeStamp(Time: Int64; IncludeMilliseconds: Boolean = False): String;
 function PerformanceTimer: Double;
 function OpenDirectory(Path: String): Boolean;
 procedure SetTerminalVisible(Value: Boolean);
+procedure PlaySound(FileName: String);
+procedure StopSound;
 
 implementation
 
 uses
   Forms,
   {$IFDEF WINDOWS}
-  Windows
+  Windows, MMSystem
   {$ENDIF}
   {$IFDEF UNIX}
   BaseUnix, Unix
@@ -160,6 +163,20 @@ begin
       False: ShowWindow(GetConsoleWindow(), SW_HIDE);
     end;
   end;
+  {$ENDIF}
+end;
+
+procedure PlaySound(FileName: String);
+begin
+  {$IFDEF WINDOWS}
+  sndPlaySound(PChar(FileName), SND_ASYNC or SND_NODEFAULT);
+  {$ENDIF}
+end;
+
+procedure StopSound;
+begin
+  {$IFDEF WINDOWS}
+  sndPlaySound(nil, 0);
   {$ENDIF}
 end;
 

@@ -79,6 +79,7 @@ type
   TCTSCompareFunction = function (ctsInfo: Pointer; C2: PRGB32): Boolean;
 
 type
+  PMFinder = ^TMFinder;
   TMFinder = class(TObject)
   private
     Client: TObject;
@@ -171,7 +172,7 @@ uses
   math,               // min/max
   simba.tpa,                //TPABounds
   simba.dtmutil,
-  simba.matrix; //template matching
+  simba.type_matrix, simba.type_singlematrix; //template matching
 
 var
   Percentage : array[0..255] of Extended;
@@ -516,7 +517,7 @@ begin
 end;
 
 //SkipCoords[y][x] = False/True; True means its "transparent" and therefore not needed to be checked.
-procedure CalculateBitmapSkipCoords(Bitmap : TMufasaBitmap; out SkipCoords : T2DBoolArray);
+procedure CalculateBitmapSkipCoords(Bitmap : TMufasaBitmap; out SkipCoords : TBooleanMatrix);
 var
   x,y : Integer;
   R,G,B : byte;
@@ -543,7 +544,7 @@ end;
 { Points left holds the amount of points that are "left" to be checked
    (Including the point itself.. So for example Pointsleft[0][0] would
     hold the total amount of pixels that are to be checked. }
-procedure CalculateBitmapSkipCoordsEx(Bitmap : TMufasaBitmap; out SkipCoords : T2DBoolArray;out TotalPoints : Integer; out PointsLeft : T2DIntegerArray);
+procedure CalculateBitmapSkipCoordsEx(Bitmap : TMufasaBitmap; out SkipCoords : TBooleanMatrix;out TotalPoints : Integer; out PointsLeft : T2DIntegerArray);
 var
   x,y : Integer;
   R,G,B : byte;
@@ -1247,7 +1248,7 @@ var
   xBmp,yBmp : Integer;
   tmpY : Integer;
   dX, dY,  xx, yy: Integer;
-  SkipCoords : T2DBoolArray;
+  SkipCoords : TBooleanMatrix;
   ctsinfoarray: TCTSInfo2DArray;
   compare: TCTSCompareFunction;
 label
@@ -1340,7 +1341,7 @@ var
   tmpY : Integer;
   dX, dY,  i,HiSpiral: Integer;
   FoundC : Integer;
-  SkipCoords : T2DBoolArray;
+  SkipCoords : TBooleanMatrix;
   ctsinfoarray: TCTSInfo2DArray;
   compare: TCTSCompareFunction;
 
@@ -1423,7 +1424,7 @@ var
   RangeX,RangeY : Integer;
   yStart,yEnd,xStart,xEnd : Integer;
   TotalC : Integer;
-  SkipCoords : T2DBoolArray;
+  SkipCoords : TBooleanMatrix;
   PointsLeft : T2DIntegerArray;
   ctsinfoarray: TCTSInfo2DArray;
   compare: TCTSCompareFunction;
@@ -1564,19 +1565,19 @@ begin
   begin
     if DynamicAdjust then
     begin
-      MatrixMinMax(xcorr, maxLo, maxHi);
+      xcorr.MinMax(maxLo, maxHi);
       MinMatch := Min(MinMatch, maxLo + 0.1e-2);
     end;
-    TPA := MatrixIndices(xcorr, MinMatch, __LE__)
+    TPA := xcorr.Indices(MinMatch, __LE__)
   end
   else
   begin
     if DynamicAdjust then
     begin
-      MatrixMinMax(xcorr, maxLo, maxHi);
+      xcorr.MinMax(maxLo, maxHi);
       MinMatch := Max(MinMatch, maxHi - 0.1e-2);
     end;
-    TPA := MatrixIndices(xcorr, MinMatch, __GE__);
+    TPA := xcorr.Indices(MinMatch, __GE__);
   end;
 
   Result := Length(TPA) > 0;

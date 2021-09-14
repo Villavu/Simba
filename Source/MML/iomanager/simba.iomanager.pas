@@ -13,9 +13,10 @@ interface
 
 uses
   classes, sysutils,
-  simba.target, simba.target_exported, simba.oswindow, simba.bitmap, simba.mufasatypes;
+  simba.target, simba.target_exported, simba.oswindow, simba.bitmap, simba.mufasatypes, simba.type_matrix;
 
 type
+  PIOManager = ^TIOManager;
   TIOManager = class(TObject)
   private
     FKeyMouse: TTarget;
@@ -34,8 +35,6 @@ type
     function GetTargetIdx(Target: TTarget): Int32;
     function GetIdxTarget(Index: Int32): TTarget;
   public
-    procedure SetTargetEx(Proc: TSysProc);
-
     function SetTarget(Data: PRGB32; Size: TPoint): Int32; overload;
     function SetTarget(Bitmap: TMufasaBitmap): Int32; overload;
     function SetTarget(Plugin, Data: String): Int32; overload;
@@ -495,11 +494,6 @@ end;
 function TIOManager.GetKeyCode(Character: Char): Int32;
 begin
   Result := FKeyMouse.GetKeyCode(Character);
-end;
-
-procedure TIOManager.SetTargetEx(Proc: TSysProc);
-begin
-  SetTarget(Proc.Handle);
 end;
 
 end.

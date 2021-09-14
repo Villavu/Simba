@@ -20,7 +20,7 @@ interface
 
 uses
   sysutils,
-  simba.mufasatypes;
+  simba.mufasatypes, simba.type_matrix;
 
 function Area(a: TIntegerMatrix): Int32;
 function Area(a: TSingleMatrix): Int32;

@@ -35,7 +35,8 @@ type
 
     function RunDump(Commands: TStringArray): TStringList;
 
-    function RunScript(Script: String; Parameters: TStringArray): TProcessID;
+    function RunScript(Script: String; Parameters: TStringArray; out Output: String): TProcessExitStatus; overload;
+    function RunScript(Script: String; Parameters: TStringArray): TProcessID; overload;
     function RunScriptOutputToFile(Script: String; Parameters: TStringArray; OutputFileName: String): TProcessID;
   end;
 
@@ -215,7 +216,8 @@ var
 begin
   Result := nil;
 
-  FileName := GetTempFileName(GetDataPath(), 'dump');
+  ForceDirectories(GetDumpPath());
+  FileName := GetTempFileName(GetDumpPath(), 'dump');
 
   try
     if not SimbaProcess.RunCommandTimeout(Application.ExeName, Commands + [FileName], ProcessOutput, 5000) then
@@ -235,6 +237,22 @@ begin
   end;
 
   DeleteFile(FileName);
+end;
+
+function TSimbaProcess.RunScript(Script: String; Parameters: TStringArray; out Output: String): TProcessExitStatus;
+var
+  I: Integer;
+begin
+  for I := 0 to High(Parameters) do
+  begin
+    if (Length(Parameters[I].Split('=')) <> 2) then
+      raise Exception.Create('TSimbaProcess.RunScript: Invalid parameter "' + Parameters[I] + '". Expected "name=value"');
+
+    while (not Parameters[I].StartsWith('--')) do
+      Parameters[I] := '-' + Parameters[I]
+  end;
+
+  Result := Self.RunCommandInDir(Application.Location, Application.ExeName, Parameters + ['--run', Script], Output);
 end;
 
 function TSimbaProcess.RunScript(Script: String; Parameters: TStringArray): TProcessID;

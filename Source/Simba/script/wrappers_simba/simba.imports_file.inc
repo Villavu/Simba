@@ -1,0 +1,22 @@
+FSection := 'File';
+addGlobalFunc('function CreateFile(Path: String): Int32', @_LapeCreateFile);
+addGlobalFunc('function OpenFile(Path: String; Shared: Boolean): Int32', @_LapeOpenFile);
+addGlobalFunc('function RewriteFile(Path: String; Shared: Boolean): Int32', @_LapeRewriteFile);
+addGlobalFunc('function AppendFile(Path: String): Int32', @_LapeAppendFile);
+addGlobalFunc('procedure CloseFile(FileNum: Int32)', @_LapeCloseFile);
+addGlobalFunc('function EndOfFile(FileNum: Int32): Boolean', @_LapeEndOfFile);
+addGlobalFunc('function FileSize(FileNum: Int32): LongInt', @_LapeFileSize);
+addGlobalFunc('function ReadFileString(FileNum: Int32; var s: String; x: Int32): Boolean', @_LapeReadFileString);
+addGlobalFunc('function WriteFileString(FileNum: Int32; s: String): Boolean', @_LapeWriteFileString);
+addGlobalFunc('function SetFileCharPointer(FileNum, cChars, Origin: Int32): Int32', @_LapeSetFileCharPointer);
+addGlobalFunc('function FilePointerPos(FileNum: Int32): Int32', @_LapeFilePointerPos);
+addGlobalFunc('function GetFiles(Path, Ext: String): TStringArray', @_LapeGetFiles);
+addGlobalFunc('function GetDirectories(Path: String): TStringArray', @_LapeGetDirectories);
+addGlobalFunc('procedure WriteINI(Section, KeyName, NewString, FileName: String)', @_LapeWriteINI);
+addGlobalFunc('function ReadINI(Section, KeyName, FileName: String): String', @_LapeReadINI);
+addGlobalFunc('procedure DeleteINI(Section, KeyName, FileName: String)', @_LapeDeleteINI);
+addGlobalFunc('procedure ZipFiles(constref ArchiveFileName: String; constref Files: TStringArray)', @_LapeZipFiles);
+addGlobalFunc('procedure UnZipFile(constref ArchiveFileName, OutputDirectory: String)', @_LapeUnZipFile);
+addGlobalFunc('function UnZipOneFile(constref ArchiveFileName, FileName, OutputDirectory: String): Boolean', @_LapeUnZipOneFile);
+addGlobalFunc('function FindFile(Path, Mask: String; SearchSubDirs: Boolean = True; CaseSenstive: Boolean = False): TStringArray', @_LapeFindFile);
+

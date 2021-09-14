@@ -13,6 +13,7 @@ uses
 type
   TSimbaScript = class(TThread)
   protected
+    FSilent: Boolean;
     FState: TInitBool;
     FTarget: String;
     FStartTime: UInt64;
@@ -43,6 +44,7 @@ type
 
     procedure SetState(Value: TInitBool);
   public
+    property Silent: Boolean read FSilent write FSilent;
     property Terminated: Boolean read FTerminated;
     property UserTerminated: Boolean read FUserTerminated;
 
@@ -60,6 +62,7 @@ type
     property ScriptFile: String read FScriptFile write FScriptFile;
     property ScriptName: String read FScriptName write FScriptName;
 
+    procedure Info(const S: String);
     procedure Invoke(Method: TSimbaMethod; DoFree: Boolean = False);
 
     constructor Create; reintroduce;
@@ -72,12 +75,12 @@ var
 implementation
 
 uses
-  fileutil, forms,
+  fileutil, forms, lazloggerbase,
   simba.files, simba.misc, simba.script_plugin, simba.script_compiler_onterminate;
 
 procedure TSimbaScript.HandleHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
-  WriteLn(Hint);
+  Info(Hint);
 end;
 
 procedure TSimbaScript.HandleException(E: Exception);
@@ -199,6 +202,12 @@ begin
 
     FCompiler.Import();
 
+    if (FSimbaCommunicationServer = '') then
+      FCompiler.addBaseDefine('SIMBAHEADLESS');
+
+    FCompiler.addGlobalVar(FScriptFile, 'ScriptFile').isConstant := True;
+    FCompiler.addGlobalVar('TClient', @FClient, 'Client');
+
     if FDebugging then
       FDebugger := TSimbaScript_Debugger.Create(Self);
 
@@ -206,8 +215,7 @@ begin
 
     if FCompiler.Compile() then
     begin
-      WriteLn(Format('Succesfully compiled in %d milliseconds.', [GetTickCount64() - FStartTime]));
-      Flush(Output);
+      Info(Format('Succesfully compiled in %d milliseconds.', [GetTickCount64() - FStartTime]));
       if FCompileOnly then
         Exit;
 
@@ -231,9 +239,9 @@ begin
       end;
 
       if (GetTickCount64() - FStartTime < 10000) then
-        WriteLn(Format('Succesfully executed in %d milliseconds.', [GetTickCount64() - FStartTime]))
+        Info(Format('Succesfully executed in %d milliseconds.', [GetTickCount64() - FStartTime]))
       else
-        WriteLn(Format('Succesfully executed in %s.', [TimeStamp(GetTickCount64() - FStartTime)]));
+        Info(Format('Succesfully executed in %s.', [TimeStamp(GetTickCount64() - FStartTime)]));
     end;
   except
     on E: Exception do
@@ -265,6 +273,15 @@ begin
 
   if (FSimbaCommunication <> nil) then
     FSimbaCommunication.Invoke(TSimbaMethod_ScriptStateChanged.Create(Ord(FState)));
+end;
+
+procedure TSimbaScript.Info(const S: String);
+begin
+  if FSilent then
+    Exit;
+
+  WriteLn(S);
+  Flush(Output);
 end;
 
 procedure TSimbaScript.Invoke(Method: TSimbaMethod; DoFree: Boolean);

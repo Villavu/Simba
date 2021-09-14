@@ -292,7 +292,6 @@ end;
 procedure TSimbaScriptTabsForm.DoTabPopupClick(Sender: TObject);
 var
   Tab: Integer;
-  Abort: Boolean;
 begin
   if (Sender = MenuItemNewTab) then
     AddTab()
@@ -562,6 +561,7 @@ begin
       if SameFileName(Tabs[I].ScriptFileName, FileName) then
       begin
         CurrentTab := Tabs[I];
+        Result := True;
         Exit;
       end;
 

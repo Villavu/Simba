@@ -26,27 +26,24 @@ unit simba.openssl;
 interface
 
 uses
-  Classes, SysUtils;
+  classes, sysutils;
 
 procedure InitializeOpenSSL;
 
 implementation
 
 uses
-  openssl, lcltype, LazLoggerBase, sha1,
+  openssl, lcltype, lazloggerbase, sha1,
   simba.gz_stream, simba.settings, simba.files;
-
-const
-  BUF_SIZE = 512 * 512;
 
 function IsFileHash(FileName: String; Hash: String): Boolean;
 begin
-  Result := FileExists(FileName) and (SHA1Print(SHA1File(FileName, BUF_SIZE)) = Hash);
+  Result := FileExists(FileName) and (SHA1Print(SHA1File(FileName, 512*512)) = Hash);
 end;
 
 function Uncompress(Stream: TStream; FileName: String): String;
 var
-  Buffer: array[1..BUF_SIZE] of Byte;
+  Buffer: array[1..512*512] of Byte;
   Count: Integer;
 begin
   Result := '';
@@ -66,7 +63,7 @@ begin
       Free();
     end;
 
-    Result := SHA1Print(SHA1File(FileName, BUF_SIZE));
+    Result := SHA1Print(SHA1File(FileName, Length(Buffer)));
   finally
     Stream.Free();
   end;
@@ -117,24 +114,25 @@ begin
     EnumResourceNames(HINSTANCE, RT_RCDATA, @ExtractLibCrypto, 0);
     EnumResourceNames(HINSTANCE, RT_RCDATA, @ExtractLibSSL, 0);
 
-    {$IFDEF DARWIN}
+    {$IFDEF UNIX}
     while ExtractFileExt(DLLSSLName) <> '' do
       SetLength(DLLSSLName, Length(DLLSSLName) - Length(ExtractFileExt(DLLSSLName)));
     while ExtractFileExt(DLLUtilName) <> '' do
       SetLength(DLLUtilName, Length(DLLUtilName) - Length(ExtractFileExt(DLLUtilName)));
     {$ENDIF}
 
-    DebugLn('Loading: ', DLLSSLName);
-    DebugLn('Loading: ', DLLUtilName);
-
     InitSSLInterface();
   except
     on E: Exception do
-      DebugLn('Exception raised while loading OpenSSL: ', E.Message);
+      DebugLn('Loading OpenSSL exception: ', E.Message);
   end;
 
-  if IsSSLLoaded() then
-    DebugLn('OpenSSL Loaded');
+  if not IsSSLLoaded() then
+  begin
+    DebugLn('Failed to load OpenSSL');
+    DebugLn('LibSSL: ', DLLSSLName);
+    DebugLn('LibCrypto: ', DLLUtilName);
+  end;
 
   // Restore to FPC defaults
   DLLSSLName := OldSSLName;

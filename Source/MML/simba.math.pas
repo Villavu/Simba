@@ -20,11 +20,10 @@
 
     Mufasa Math Unit for the Mufasa Macro Library
 }
-
 unit simba.math;
-// mufasa math
 
 {$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
@@ -41,19 +40,12 @@ function DiscreteGauss(Xstart,Xend : integer; sigma : extended) : TExtendedArray
 function GaussMatrix(N : integer; sigma : extended) : T2DExtendedArray;
 function MinA(a: TIntegerArray): Integer;
 function MaxA(a: TIntegerArray): Integer;
-function fixRad(rad: Extended): Extended; 
-function InAbstractBox(x1, y1, x2, y2, x3, y3, x4, y4: Integer; x, y: Integer): Boolean;
+function fixRad(rad: Extended): Extended;
 function MiddleBox(b : TBox): TPoint;
-function pow(base,exponent : extended) : extended;
 function Distance(x1,y1,x2,y2 : integer) : integer;
-procedure IncEx(var x : integer; increase : integer);
-procedure DecEx(var x : integer; Decrease : integer);
 function Factorial(number: longword): Int64;
 function BinCoe(a, b: LongInt): Extended;
 function FixD(Degrees : extended) : Extended;
-function sar(AValue : longint; shift : byte) : longint;
-function ror(num : longword; shift : byte) : LongWord;
-function rol(num : longword; shift : byte) : LongWord;
 function radians(e: extended): extended;
 function degrees(e: extended): extended;
 function Sum64IntArr(const Arr: TIntegerArray): Int64;
@@ -62,14 +54,16 @@ function IntInBox(x, y: Integer; Box: TBox): Boolean;
 function PointToBox(topLeft,bottomRight: TPoint): TBox;
 function PointInBox(PT : TPoint; Box: TBox): Boolean;
 function DecRet(e: Extended): Extended;
-function NextPow2(n: Int32): Int32;
+function NextPow2(n: Integer): Integer;
+function IsNumber(const n: Single): Boolean; inline; overload;
+function IsNumber(const n: Double): Boolean; inline; overload;
 
 implementation
 
 uses
   math;
 
-function NextPow2(n: Int32): Int32;
+function NextPow2(n: Integer): Integer;
 begin
   n := n - 1;
   n := n or (n shr 1);
@@ -79,6 +73,17 @@ begin
   n := n or (n shr 16);
   n := n or (n shr 32);
   Result := n + 1;
+end;
+
+function IsNumber(const n: Single): Boolean;
+begin
+  // Result := (not IsNan(b)) and (not IsInfinite(b));
+  Result := (LongWord(n) and $7fffffff) < $7f800000; // faster
+end;
+
+function IsNumber(const n: Double): Boolean;
+begin
+  Result := (not IsNan(n)) and (not IsInfinite(n));
 end;
 
 {/\
@@ -142,12 +147,9 @@ end;
 {/\
   Rotates the given points (P) by A (in radians) around the point defined by cx, cy.
 /\}
-
 function RotatePoints(const P: TPointArray;const A, cx, cy: Extended): TPointArray;
-
 var
    I, L: Integer;
-
 begin
   L := High(P);
   SetLength(Result, L + 1);
@@ -161,9 +163,7 @@ end;
 {/\
   Rotates the given point (p) by A (in radians) around the point defined by cx, cy.
 /\}
-
 function RotatePoint(const p: TPoint;const angle, mx, my: Extended): TPoint;
-
 begin
   Result.X := Round(mx + cos(angle) * (p.x - mx) - sin(angle) * (p.y - my));
   Result.Y := Round(my + sin(angle) * (p.x - mx) + cos(angle) * (p.y- my));
@@ -240,74 +240,14 @@ begin
     result := result + (3.14159265358979320 * 2.0);
 end;
 
-function InAbstractBox(x1, y1, x2, y2, x3, y3, x4, y4: Integer; x, y: Integer): Boolean;
-var
-  U, D, R, L: Boolean;
-  UB, DB, LB, RB, UM, DM, LM, RM, PI: Extended;
-begin
-  U := False;
-  D := False;
-  R := False;
-  L := False;
-
-  PI := 3.14159265358979320;
-  UM := (-y1 - -y2) div (x1 - x2);
-  DM := (-y4 - -y3) div (x4 - x3);
-  if x1 - x4 <> 0 then
-  begin
-    LM := (-y1 - -y4) div (x1 - x4);
-  end else
-  begin
-    LM := Pi;
-  end;
-  if x2 - x3 <> 0 then
-  begin
-    RM := (-y2 - -y3) div (x2 - x3);
-  end else
-  begin
-    RM := Pi;
-  end;
-  UB := -(UM * x1) + -y1;
-  RB := -(RM * x2) + -y2;
-  DB := -(DM * x3) + -y3;
-  LB := -(LM * x4) + -y4;
-  if (UM * x + UB >= -y) then U := True;
-  if (DM * x + DB <= -y) then D := True;
-  if (RM <> Pi) and (RM >= 0) and (RM * x + RB <= -y) then R := True;
-  if (RM <> Pi) and (RM < 0) and (RM * x + RB >= -y) then R := True;
-  if (RM = Pi) and (x < x2) then R := True;
-  if (LM <> Pi) and (LM >= 0) and (LM * x + LB >= -y) then L := True;
-  if (LM <> Pi) and (LM < 0) and (LM * x + LB <= -y) then L := True;
-  if (LM = Pi) and (x > x1) then L := True;
-  if U and D and L and R then Result := True;
-end;
-
 function MiddleBox(b : TBox): TPoint;
 begin
   result := point((b.x2+b.x1) div 2,(b.y2+b.y1) div 2);
 end;
 
-function pow(base,exponent : extended) : extended;
-begin
-  if (exponent=0) then
-    result := 1
-  else
-    result := power(base,exponent);
-end;
-
 function Distance(x1,y1,x2,y2 : integer) : integer;
 begin
   Result := Round(Sqrt(Sqr(x2-x1) + Sqr(y2-y1)));
-end;
-
-procedure IncEx(var x : integer; increase : integer);
-begin
-  x := x + increase;
-end;
-
-procedure DecEx(var x : integer; Decrease : integer);
-begin
-  x := x - Decrease;
 end;
 
 function Factorial(number: longword): Int64;
@@ -331,22 +271,6 @@ begin
     Result := Result + 360;
   while Result > 360 do
     Result := Result - 360;
-end;
-
-function sar(AValue : longint; shift : byte) : longint;
-begin
-  Shift:=Shift and 31;
-  Result:=longint(dword(dword(dword(AValue) shr Shift) or (dword(longint(dword(0-dword(dword(AValue) shr 31)) and dword(longint(0-(ord(Shift<>0){ and 1}))))) shl (32-Shift))));
-end;
-
-function ror(num : longword; shift : byte) : LongWord;
-begin
-  result := RorDWord(num,shift);
-end;
-
-function rol(num : longword; shift : byte) : LongWord;
-begin
-  result := RolDWord(num,shift);
 end;
 
 function radians(e: extended): extended;
@@ -392,7 +316,7 @@ begin;
 end;
 
 function PointInBox(PT : TPoint; Box: TBox): Boolean;
-begin;
+begin
   result := (((PT.x >= Box.x1) and(PT.x <= Box.x2)) and ((PT.y>= box.y1) and (PT.y <= box.y2)));
 end;
 

@@ -36,7 +36,6 @@ type
   PStrExtr = ^StrExtr;
 
 function ExtractFromStr(Str : String; Extract : StrExtr) : String;
-function Capitalize(str: String) : String;
 function Implode(Glue: String; Pieces: TStringArray): String;
 function Explode(del, str: String): TStringArray;
 function CompressString(const Str: String; Header: Boolean = True): String;
@@ -51,9 +50,6 @@ function IsArrInStr(strArr: TStringArray; s: String): boolean;
 function IsStrInArr(const s: String; const UsePos: Boolean; const Arr: TStringArray): boolean;
 function PosMulti(const SubStr, Text:String): TIntegerArray;
 function Between(s1, s2, str: String): String;
-
-function StrToBinary(Str: String): String;
-function StrFromBinary(BinaryStr: String): String;
 
 implementation
 
@@ -122,7 +118,7 @@ end;
 
 function CompressString(const Str: String; Header: Boolean): String;
 var
-  Len: Int32;
+  Len: Integer;
   Output: TMemoryStream;
   Stream: TCompressionStream;
 begin
@@ -138,7 +134,7 @@ begin
   try
     Output := TMemoryStream.Create();
     if Header then
-      Output.Write(Len, SizeOf(Int32)); // preappends the uncompressed string length for backwards compatibility (streams are now used - not needed)
+      Output.Write(Len, SizeOf(Integer)); // preappends the uncompressed string length for backwards compatibility (streams are now used - not needed)
 
     Stream := TCompressionStream.Create(clDefault, Output);
     Stream.Write(Str[1], Len);
@@ -162,7 +158,7 @@ var
   Input: TStringStream;
   Stream: TDeCompressionStream;
   Buffer: array[1..4096] of Char;
-  Count: Int32;
+  Count: Integer;
 begin
   Result := '';
 
@@ -195,7 +191,7 @@ end;
 
 function Base64Encode(const str: String): String;
 begin
-  if Str = '' then
+  if (Str = '') then
     Result := ''
   else
     Result := EncodeStringBase64(str);
@@ -203,29 +199,10 @@ end;
 
 function Base64Decode(const str: String): String;
 begin
-  if Str = '' then
+  if (Str = '') then
     Result := ''
   else
     Result := DecodeStringBase64(str);
-end;
-
-function Capitalize(str : String) : String;
-var
-  i , l : integer;
-  cap : boolean;
-  Range : set of char;
-begin;
-  result := str;
-  l := length(str);
-  cap := true;
-  Range :=  ['a'..'z','A'..'Z'];
-  for i := 1 to l do
-    if cap and (str[i] in Range) then
-    begin;
-      result[i] := UpperCase(str[i])[1];
-      cap := false;
-    end else if not (str[i] in Range) then
-      cap := true;
 end;
 
 function ExtractFromStr( Str : String; Extract : StrExtr) : String;
@@ -467,37 +444,6 @@ begin;
     j := posex(s2,str,i);
     if j > 0 then
       Result := copy(str,i,j-i);
-  end;
-end;
-
-function StrToBinary(Str: String): String;
-var
-  I, J: Integer;
-begin
-  SetLength(Result, Length(Str) * 2);
-
-  J := 1;
-  for I := 1 to Length(Str) do
-  begin
-    Result[J] := IntToHex(Ord(Str[I]), 2)[1];
-    Result[J+1] := IntToHex(Ord(Str[I]), 2)[2];
-
-    Inc(J, 2);
-  end;
-end;
-
-function StrFromBinary(BinaryStr: String): String;
-var
-  I, J: Integer;
-begin
-  SetLength(Result, Length(BinaryStr) div 2);
-
-  J := 1;
-  for I := 1 to Length(Result) do
-  begin
-    Result[I] := Chr(StrToInt('$' + BinaryStr[J] + BinaryStr[J+1]));
-
-    Inc(J, 2);
   end;
 end;
 

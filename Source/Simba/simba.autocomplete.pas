@@ -273,31 +273,29 @@ begin
   Value := '';
 end;
 
-function CustomSorter(List: TSimbaAutoComplete_ItemList; Left, Right: integer): integer;
+function CustomSortCallback(List: TSimbaAutoComplete_ItemList; Left, Right: Integer): Integer;
 var
   LeftName, RightName: String;
-  LeftDeclaration, RightDeclaration: TDeclaration;
+  LeftDeclaration, RightDeclaration, Declaration: TDeclaration;
   LeftWeight, RightWeight: Integer;
-  Declaration: TDeclaration;
 begin
+  Result := 0;
+
   LeftDeclaration := TDeclaration(List.Objects[Left]);
   LeftName := LeftDeclaration.NameUpper;
-  LeftWeight := (Length(LeftName)-Length(List.CurrentString))+Pos(LeftName, List.CurrentString);
+  LeftWeight := ((100 - Round(Length(List.CurrentString) / Length(LeftName) * 100)) + (Pos(List.CurrentString, LeftName) * 100));
 
   RightDeclaration := TDeclaration(List.Objects[Right]);
   RightName := RightDeclaration.NameUpper;
-  RightWeight := (Length(RightName)-Length(List.CurrentString))+Pos(RightName, List.CurrentString);
+  RightWeight := ((100 - Round(Length(List.CurrentString) / Length(RightName) * 100)) + (Pos(List.CurrentString, RightName) * 100));
 
-  // Locals have priority
+  // Locals always first
   if LeftDeclaration.HasOwnerClass(TciProcedureDeclaration, Declaration) then
     LeftWeight -= $FFFF;
-
   if RightDeclaration.HasOwnerClass(TciProcedureDeclaration, Declaration) then
     RightWeight -= $FFFF;
 
-  Result := (LeftWeight - RightWeight);
-  if CompareText(LeftName, RightName) > 0 then
-    Result := Result + 1;
+  Result := LeftWeight - RightWeight;
 end;
 
 procedure TSimbaAutoComplete.HandleFiltering(var NewPosition: Integer);
@@ -318,7 +316,7 @@ begin
     if (Count > 0) then
     begin
       if (CurrentString <> '') then
-        CustomSort(TStringListSortCompare(@CustomSorter))
+        CustomSort(TStringListSortCompare(@CustomSortCallback))
       else
         Sort();
 

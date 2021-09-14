@@ -584,6 +584,9 @@ begin
     FScriptInstance.Resume()
   else
   begin
+    if (FScriptFileName <> '') then
+      Save(FScriptFileName);
+
     FScriptInstance := TSimbaScriptInstance.Create(Self);
     FScriptInstance.Target := Target;
 
@@ -600,11 +603,19 @@ end;
 
 procedure TSimbaScriptTab.RunWithDebugging(Target: THandle);
 begin
+  DebugLn('TSimbaScriptTab.RunWithDebugging :: ', ScriptTitle, ' ', ScriptFileName);
+
+  if (FScriptInstance <> nil) then // Already running
+    Exit;
+
   if (FDebuggingForm = nil) then
     FDebuggingForm := TSimbaDebuggerForm.Create(Self);
   FDebuggingForm.Caption := 'Debugger - ' + FScriptTitle;
   FDebuggingForm.Clear();
   FDebuggingForm.ShowOnTop();
+
+  if (FScriptFileName <> '') then
+    Save(FScriptFileName);
 
   FScriptInstance := TSimbaScriptInstance.Create(Self);
   FScriptInstance.Target := Target;
@@ -625,6 +636,9 @@ begin
 
   if (FScriptInstance = nil) then
   begin
+    if (FScriptFileName <> '') then
+      Save(FScriptFileName);
+
     FScriptInstance := TSimbaScriptInstance.Create(Self);
 
     if (FScriptFileName = '') then
