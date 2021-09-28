@@ -69,7 +69,7 @@ jobs:
         run: |
           export GITHUB_SHORT_SHA=$(git rev-parse --short HEAD)
           
-          lazbuild --build-mode=${{ matrix.config.build-mode }} "Source/Simba/Simba.lpi"
+          lazbuild --build-mode=${{ matrix.config.build-mode }} "Source/Simba.lpi"
 
       - name: Test Simba
         if: matrix.config.test != ''

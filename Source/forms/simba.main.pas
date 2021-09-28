@@ -275,7 +275,7 @@ implementation
 
 uses
   types, lclintf, sha1, lazloggerbase, lazfileutils, anchordocking,
-  simba.openssl,simba.files, simba.mufasatypes, simba.process,
+  simba.openssl, simba.files, simba.mufasatypes, simba.process,
   simba.openexampleform, simba.colorpickerhistoryform, simba.codeparser,
   simba.codeinsight, simba.associate, simba.scripttab, simba.debugimage,
   simba.bitmapconv, simba.aca, simba.windowselector, simba.dtmeditor,
