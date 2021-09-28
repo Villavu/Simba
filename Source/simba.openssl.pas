@@ -4,23 +4,23 @@ unit simba.openssl;
 {$i simba.inc}
 
 {$IFDEF SIMBA_WIN32}
-  {$R resources/win32}
+  {$R resourcefiles/win32}
 {$ENDIF}
 
 {$IFDEF SIMBA_WIN64}
-  {$R resources/win64}
+  {$R resourcefiles/win64}
 {$ENDIF}
 
 {$IFDEF SIMBA_DARWIN64}
-  {$R resources/darwin64}
+  {$R resourcefiles/darwin64}
 {$ENDIF}
 
 {$IFDEF SIMBA_LINUX64}
-  {$R resources/linux64}
+  {$R resourcefiles/linux64}
 {$ENDIF}
 
 {$IFDEF SIMBA_AARCH64}
-  {$R resources/aarch64}
+  {$R resourcefiles/aarch64}
 {$ENDIF}
 
 interface
