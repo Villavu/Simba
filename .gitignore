@@ -2,9 +2,6 @@
 *.trc
 *.lps
 *.DS_Store
-*.so
-*.dylib
-*.dll
 backup/
 build/
 /Includes/
@@ -13,3 +10,5 @@ build/
 /Data/
 /Fonts/
 /Simba*
+/libssl*
+/libcrypto*
