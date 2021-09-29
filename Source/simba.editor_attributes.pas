@@ -1,9 +1,13 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.editor_attributes;
 
 // Store all attributes in a nicely named list.
 // This includes highlighter attributes. Basically any TSynHighlighterAttributes.
 
-{$mode objfpc}{$H+}
 {$i simba.inc}
 
 interface

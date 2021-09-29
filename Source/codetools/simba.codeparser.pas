@@ -1,8 +1,12 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.codeparser;
 
 {$DEFINE PARSER_SEPERATE_VARIABLES}
 
-{$mode objfpc}{$H+}
 {$i simba.inc}
 
 interface

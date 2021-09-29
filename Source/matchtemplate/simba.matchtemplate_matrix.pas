@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.matchtemplate_matrix;
 {==============================================================================]
   Copyright © 2021, Jarl Krister Holta
@@ -14,12 +19,12 @@ unit simba.matchtemplate_matrix;
   See the License for the specific language governing permissions and
   limitations under the License.
 [==============================================================================}
-{$I header.inc}
+{$i simba.inc}
 
 interface
 
 uses
-  sysutils,
+  classes, sysutils,
   simba.mufasatypes, simba.type_matrix;
 
 function Area(a: TIntegerMatrix): Int32;
@@ -71,7 +76,7 @@ operator *(Left: TSingleMatrix; Right: Double): TSingleMatrix;
 operator -(Left: TSingleMatrix; Right: Double): TSingleMatrix;
 operator -(Left: TSingleMatrix; Right: TSingleMatrix): TSingleMatrix;
 operator *(Left: TSingleMatrix; Right: TSingleMatrix): TSingleMatrix;
-operator +(Left: TSingleMatrix; Right: TSingleMatrix): TSingleMatrix;
+//operator +(Left: TSingleMatrix; Right: TSingleMatrix): TSingleMatrix;
 operator /(Left: TSingleMatrix; Right: TSingleMatrix): TSingleMatrix;
 operator /(Left: TSingleMatrix; Right: Double): TSingleMatrix;
 
@@ -466,6 +471,7 @@ begin
       Result[Y, X] := Left[Y, X] - Right;
 end;
 
+{
 operator+(Left: TSingleMatrix; Right: TSingleMatrix): TSingleMatrix;
 var
   X, Y, W, H: Int32;
@@ -478,7 +484,7 @@ begin
   for Y := 0 to H do
     for X := 0 to W do
       Result[Y, X] := Left[Y, X] + Right[Y, X];
-end;
+end; }
 
 operator/(Left: TSingleMatrix; Right: TSingleMatrix): TSingleMatrix;
 var

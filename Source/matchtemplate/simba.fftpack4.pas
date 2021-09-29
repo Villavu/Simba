@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.fftpack4;
 {==============================================================================]
   Copyright © 2021, Jarl Krister Holta
@@ -14,7 +19,8 @@ unit simba.fftpack4;
   See the License for the specific language governing permissions and
   limitations under the License.
 [==============================================================================}
-{$I header.inc}
+{$i simba.inc}
+
 interface
 
 uses

@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.xlib;
 
 (* GTK can receive x errors caused by a script and halt thinking it caused a
@@ -10,7 +15,7 @@ unit simba.xlib;
    or do this which I think is much more efficient.
  *)
 
-{$mode objfpc}{$H+}
+{$i simba.inc}
 
 interface
 
