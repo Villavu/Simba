@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
+    runs-on: ${{ matrix.config.runs-on }}
     defaults:
       run:
         shell: bash
@@ -20,34 +20,34 @@ jobs:
       matrix:
         config:            
           - name: Windows 64
-            os: windows-latest
+            runs-on: windows-latest
             cpu: x86_64
             build-mode: SIMBA_WIN64
             binary: Simba-Win64.exe
             test: Simba-Win64.exe
             
           - name: Windows 32  
-            os: windows-latest
+            runs-on: windows-latest
             cpu: i386
             build-mode: SIMBA_WIN32
             binary: Simba-Win32.exe
             test: Simba-Win32.exe
 
           - name: Linux 64
-            os: ubuntu-latest
+            runs-on: ubuntu-latest
             cpu: x86_64
             build-mode: SIMBA_LINUX64
             binary: Simba-Linux64
             test: Simba-Linux64
           
           - name: AArch64  
-            os: ubuntu-latest
+            runs-on: ubuntu-latest
             cpu: aarch64
             build-mode: SIMBA_AARCH64
             binary: Simba-AArch64
             
           - name: MacOS 64
-            os: macos-latest
+            runs-on: macos-latest
             cpu: x86_64
             build-mode: SIMBA_DARWIN64
             binary: Simba-Darwin64.zip
@@ -59,11 +59,11 @@ jobs:
           submodules: true
       
       - name: Install Lazarus
-        uses: ollydev/setup-lazarus-fpcup@v2.1
+        uses: ollydev/setup-lazarus-fpcup@v2.3
         with:
           cpu: ${{ matrix.config.cpu }}
-          laz-branch: lazarus_2_2_0_RC1
-          fpc-branch: release_3_2_2_rc1
+          laz-branch: fixes_2_2
+          fpc-branch: fixes_3_2
     
       - name: Build Simba
         run: |

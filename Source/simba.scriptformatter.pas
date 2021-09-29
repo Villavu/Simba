@@ -1,8 +1,12 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 // Originally by Nielsie95 at http://villavu.com/forum/showthread.php?t=35513
 unit simba.scriptformatter;
 
-{$mode objfpc}{$H+}
-{$I simba.inc}
+{$i simba.inc}
 
 interface
 

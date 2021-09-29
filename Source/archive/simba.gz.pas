@@ -1,4 +1,9 @@
 {
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
+{
   Copyright 2013-2018 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".

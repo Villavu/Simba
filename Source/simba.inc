@@ -1,14 +1,21 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
+{$mode ObjFPC}{$H+}
+
+{$MODESWITCH ADVANCEDRECORDS}
+{$MODESWITCH TYPEHELPERS}
+{$MODESWITCH ARRAYOPERATORS}
+{$MODESWITCH NESTEDPROCVARS}
+
 {$DEFINE SIMBA_MAJOR := 1500} // this should be 980 even if SimbaVersion is 981, etc
 {$DEFINE SIMBA_VERSION := 1500}
 
 // GITHUB_XXX env variables are available when building in github actions
 {$DEFINE SIMBA_COMMIT := {$include %GITHUB_SHORT_SHA%}}
 {$DEFINE SIMBA_COMMIT_URL := {$include %GITHUB_SERVER_URL%} + '/' + {$include %GITHUB_REPOSITORY%} + '/commit/' + {$include %GITHUB_SHORT_SHA%}}
-
-{$MODESWITCH ADVANCEDRECORDS}
-{$MODESWITCH TYPEHELPERS}
-{$MODESWITCH ARRAYOPERATORS}
-{$MODESWITCH NESTEDPROCVARS}
 
 {$IF DEFINED(WINDOWS) AND DEFINED(CPU32)}
   {$DEFINE SIMBA_WIN32}
