@@ -183,11 +183,6 @@ begin
   PPointArray(Result)^ := RemoveDistTPointArray(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PPointArray(Params^[3])^, PBoolean(Params^[4])^);
 end;
 
-procedure _LapeCombineTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PPointArray(Result)^ := CombineTPA(PPointArray(Params^[0])^, PPointArray(Params^[1])^);
-end;
-
 procedure _LapeReArrangeandShortenArrayEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PPointArray(Result)^ := ReArrangeandShortenArrayEx(PPointArray(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^);
@@ -271,16 +266,6 @@ end;
 procedure _LapeClearDoubleTPA(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   ClearDoubleTPA(PPointArray(Params^[0])^);
-end;
-
-procedure _LapeTPACountSort(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  TPACountSort(PPointArray(Params^[0])^, PPoint(Params^[1])^, PBoolean(Params^[2])^);
-end;
-
-procedure _LapeTPACountSortBase(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  TPACountSortBase(PPointArray(Params^[0])^, PPoint(Params^[1])^, PPoint(Params^[2])^, PBoolean(Params^[3])^);
 end;
 
 procedure _LapeSameTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

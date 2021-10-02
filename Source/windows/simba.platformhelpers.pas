@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.windows_helpers;
+unit simba.platformhelpers;
 
 {$i simba.inc}
 
@@ -14,7 +14,7 @@ uses
   simba.mufasatypes;
 
 type
-  TSimbaWindowsHelpers = record
+  TSimbaPlatformHelpers = record
   private
     procedure ApplyDPI(Window: HWND; var X1, Y1, X2, Y2: Int32);
     procedure RemoveDPI(Window: HWND; var X1, Y1, X2, Y2: Int32);
@@ -24,10 +24,17 @@ type
     function GetWindowBounds(Window: HWND; out Bounds: TBox): Boolean;
     function GetMousePosition(Window: HWND): TPoint;
     procedure SetMousePosition(Window: HWND; Position: TPoint);
+
+    function GetProcessPath(PID: SizeUInt): String;
+    function IsProcess64Bit(PID: SizeUInt): Boolean;
+    function IsProcessRunning(PID: SizeUInt): Boolean;
+    procedure TerminateProcess(PID: SizeUInt);
+
+    function HighResolutionTime: Double;
   end;
 
 var
-  SimbaWindowsHelpers: TSimbaWindowsHelpers;
+  SimbaPlatformHelpers: TSimbaPlatformHelpers;
 
 implementation
 
@@ -58,7 +65,7 @@ var
 
   DPIEnabled: Boolean;
 
-procedure TSimbaWindowsHelpers.ApplyDPI(Window: HWND; var X1, Y1, X2, Y2: Int32);
+procedure TSimbaPlatformHelpers.ApplyDPI(Window: HWND; var X1, Y1, X2, Y2: Int32);
 var
   DPI: record X, Y: UINT; end;
 begin
@@ -73,7 +80,7 @@ begin
   end;
 end;
 
-procedure TSimbaWindowsHelpers.RemoveDPI(Window: HWND; var X1, Y1, X2, Y2: Int32);
+procedure TSimbaPlatformHelpers.RemoveDPI(Window: HWND; var X1, Y1, X2, Y2: Int32);
 var
   DPI: record X, Y: UINT; end;
 begin
@@ -88,7 +95,7 @@ begin
   end;
 end;
 
-function TSimbaWindowsHelpers.IsScaledAndDPIAware(Window: HWND): Boolean;
+function TSimbaPlatformHelpers.IsScaledAndDPIAware(Window: HWND): Boolean;
 var
   DPI: record X, Y: UINT; end;
 begin
@@ -96,7 +103,7 @@ begin
                            (GetDpiForMonitor(MonitorFromWindow(Window, MONITOR_DEFAULTTONEAREST), MDT_EFFECTIVE_DPI, DPI.X, DPI.Y) = S_OK) and ((DPI.X <> 96) or (DPI.Y <> 96));
 end;
 
-function TSimbaWindowsHelpers.GetWindowBounds(Window: HWND; out Bounds: TBox): Boolean;
+function TSimbaPlatformHelpers.GetWindowBounds(Window: HWND; out Bounds: TBox): Boolean;
 var
   R: TRect;
 begin
@@ -127,7 +134,7 @@ begin
   end;
 end;
 
-function TSimbaWindowsHelpers.GetMousePosition(Window: HWND): TPoint;
+function TSimbaPlatformHelpers.GetMousePosition(Window: HWND): TPoint;
 var
   Bounds: TBox;
   _: Int32;
@@ -142,7 +149,7 @@ begin
   Result.Y := Result.Y - Bounds.Y1;
 end;
 
-procedure TSimbaWindowsHelpers.SetMousePosition(Window: HWND; Position: TPoint);
+procedure TSimbaPlatformHelpers.SetMousePosition(Window: HWND; Position: TPoint);
 var
   Bounds: TBox;
 begin
@@ -167,7 +174,7 @@ begin
   Result := True;
 end;
 
-function TSimbaWindowsHelpers.GetWindowImage(Window: HWND; WindowDC, BufferDC: HDC; X, Y, Width, Height: Int32): Boolean;
+function TSimbaPlatformHelpers.GetWindowImage(Window: HWND; WindowDC, BufferDC: HDC; X, Y, Width, Height: Int32): Boolean;
 
   // BitBlt uses GetWindowRect area so must offset to real bounds if DwmCompositionEnabled.
   procedure ApplyRootOffset(Window: HWND; var X, Y: Int32);
@@ -203,6 +210,87 @@ begin
     ApplyDesktopOffset(WindowDC, X, Y);
 
   Result := BitBlt(BufferDC, 0, 0, Width, Height, WindowDC, X, Y, SRCCOPY);
+end;
+
+function TSimbaPlatformHelpers.GetProcessPath(PID: SizeUInt): String;
+var
+  Buffer: array[1..MAX_PATH] of Char;
+  BufferSize: UInt32 = MAX_PATH;
+  Handle: THandle;
+begin
+  Result := '';
+
+  Handle := OpenProcess(SYNCHRONIZE or PROCESS_QUERY_LIMITED_INFORMATION, False, PID);
+  if (Handle > 0) then
+  begin
+    if QueryFullProcessImageNameA(Handle, 0, @Buffer[1], @BufferSize) then
+      Result := Copy(Buffer, 1, BufferSize);
+
+    CloseHandle(Handle);
+  end;
+end;
+
+function TSimbaPlatformHelpers.IsProcess64Bit(PID: SizeUInt): Boolean;
+const
+  PROCESSOR_ARCHITECTURE_AMD64 = 9;
+var
+  Handle: THandle;
+  SystemInfo: TSystemInfo;
+  Wow64Process: LongBool;
+begin
+  Result := False;
+
+  GetNativeSystemInfo(@SystemInfo);
+
+  if (SystemInfo.wProcessorArchitecture = PROCESSOR_ARCHITECTURE_AMD64) then
+  begin
+    Handle := OpenProcess(SYNCHRONIZE or PROCESS_QUERY_LIMITED_INFORMATION, False, PID);
+    if (Handle = 0) then
+      Exit;
+
+    Result := IsWow64Process(Handle, @Wow64Process) and (not Wow64Process);
+
+    CloseHandle(Handle);
+  end;
+end;
+
+function TSimbaPlatformHelpers.IsProcessRunning(PID: SizeUInt): Boolean;
+var
+  Handle: THandle;
+  ExitCode: UInt32 = 0;
+begin
+  Result := False;
+
+  Handle := OpenProcess(SYNCHRONIZE or PROCESS_QUERY_LIMITED_INFORMATION, False, PID);
+  if (Handle = 0) then
+    Exit;
+
+  Result := GetExitCodeProcess(Handle, ExitCode) and (ExitCode = STILL_ACTIVE);
+
+  CloseHandle(Handle);
+end;
+
+procedure TSimbaPlatformHelpers.TerminateProcess(PID: SizeUInt);
+var
+  Handle: THandle;
+begin
+  Handle := OpenProcess(PROCESS_TERMINATE, False, PID);
+  if (Handle = 0) then
+    Exit;
+
+  Windows.TerminateProcess(Handle, 0);
+
+  CloseHandle(Handle);
+end;
+
+function TSimbaPlatformHelpers.HighResolutionTime: Double;
+var
+  Frequency, Count: Int64;
+begin
+  QueryPerformanceFrequency(Frequency);
+  QueryPerformanceCounter(Count);
+
+  Result := Count / Frequency * 1000;
 end;
 
 procedure InitDPI;

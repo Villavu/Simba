@@ -36,7 +36,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
             <Libraries Value="../Modules/lape/extensions/ffi/bin/win64"/>
-            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;windows;darwin;linux;iomanager;types;oswindow;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;windows;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -76,7 +76,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;windows;darwin;linux;iomanager;types;oswindow;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;linux"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -115,7 +115,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;windows;darwin;linux;iomanager;types;oswindow;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;linux"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -157,7 +157,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;windows;darwin;linux;iomanager;types;oswindow;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;darwin"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -313,6 +313,22 @@
         <Filename Value="script/wrappers_lcl_classes/simba.wrappers_lclobject.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
+      <Unit>
+        <Filename Value="linux/simba.oswindow.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="oswindow_header.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="oswindow_body.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="darwin/simba.oswindow.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -323,7 +339,7 @@
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
       <Libraries Value="../Modules/lape/extensions/ffi/bin/win32"/>
-      <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;windows;darwin;linux;iomanager;types;oswindow;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+      <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;windows;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
       <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -342,6 +358,7 @@
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
+        <DebugInfoType Value="dsDwarf2Set"/>
       </Debugging>
       <LinkSmart Value="True"/>
     </Linking>

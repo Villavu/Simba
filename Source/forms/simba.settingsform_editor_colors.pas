@@ -65,7 +65,7 @@ implementation
 uses
   simba.settings, simba.editor_attributes, simba.files;
 
-{$i simba.editorcolorpresets.inc}
+{$i simba.editor_colorpresets.inc}
 
 procedure TEditorColorsFrame.TreeViewSelectionChanged(Sender: TObject);
 begin

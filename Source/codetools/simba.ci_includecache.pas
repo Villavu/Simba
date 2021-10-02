@@ -67,7 +67,7 @@ implementation
 
 uses
   lazloggerbase,
-  simba.settings, simba.debugform;
+  simba.settings, simba.outputform;
 
 procedure TCodeInsight_Include.Assign(From: TObject);
 begin
@@ -242,8 +242,8 @@ begin
 
     if (Result.Messages <> '') then
     begin
-      SimbaDebugForm.Add('Simba''s code parser encountered errors in a include. This could break code tools:');
-      SimbaDebugForm.Add(Result.Messages);
+      SimbaOutputForm.Add('Simba''s code parser encountered errors in a include. This could break code tools:');
+      SimbaOutputForm.Add(Result.Messages);
     end;
   finally
     FLock.Leave();
@@ -300,8 +300,8 @@ begin
 
     if Result.Messages <> '' then
     begin
-      SimbaDebugForm.Add('Simba''s code parser encountered errors in a plugin. This could break code tools:');
-      SimbaDebugForm.Add(Result.Messages);
+      SimbaOutputForm.Add('Simba''s code parser encountered errors in a plugin. This could break code tools:');
+      SimbaOutputForm.Add(Result.Messages);
     end;
   finally
     FLock.Leave();

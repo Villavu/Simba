@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.darwin_inputhelpers;
+unit simba.platformhelpers;
 
 {$i simba.inc}
 {$modeswitch objectivec2}
@@ -35,38 +35,52 @@ type
   TWindow = type PtrUInt;
   TWindowArray = array of TWindow;
 
-  //Input functions
-  function VirtualKeyCodeToMac(AKey: Word): Word;
-  function VirtualKeyCodeToCharCode(AKey: Word): Word;
+type
+  TSimbaPlatformHelpers = record
+    function GetProcessPath(PID: SizeUInt): String;
+    function IsProcess64Bit(PID: SizeUInt): Boolean;
+    function IsProcessRunning(PID: SizeUInt): Boolean;
+    procedure TerminateProcess(PID: SizeUInt);
+    function HighResolutionTime: Double;
 
-  //Window functions
-  function isWindowActive(windowId: CGWindowID): Boolean;
-  function SetWindowActive(windowId: CGWindowID): Boolean;
-  procedure GetCursorPos(out X, Y: Int32);
-  function IsMouseButtonDown(Button: CGMouseButton): Boolean;
-  function GetWindowInfo(windowId: CGWindowID): TWindowInfo;
-  function GetOnScreenWindows(): TWindowArray;
-  function GetChildWindows(parent: CGWindowID): TWindowArray;
+    function VirtualKeyCodeToMac(AKey: Word): Word;
+    function VirtualKeyCodeToCharCode(AKey: Word): Word;
 
-  //AX functions
-  function GetChildWindowsAX(parent: CGWindowID): TWindowArray;
-  function GetActiveWindowAX(): CGWindowID;
-  procedure SetWindowBoundsAX(window: CGWindowID; X, Y, Width, Height: Integer);
+    function IsWindowActive(windowId: CGWindowID): Boolean;
+    function SetWindowActive(windowId: CGWindowID): Boolean;
+    procedure GetCursorPos(out X, Y: Int32);
+    function IsMouseButtonDown(Button: CGMouseButton): Boolean;
+    function GetWindowInfo(windowId: CGWindowID): TWindowInfo;
+    function GetOnScreenWindows: TWindowArray;
+    function GetChildWindows(parent: CGWindowID): TWindowArray;
 
-  //Private API..
-  function AXUIElementGetWindow(element: AXUIElementRef; var windowId: CGWindowID): AXError; external name '__AXUIElementGetWindow';
+    function GetChildWindowsAX(parent: CGWindowID): TWindowArray;
+    function GetActiveWindowAX: CGWindowID;
+    procedure SetWindowBoundsAX(window: CGWindowID; X, Y, Width, Height: Integer);
+  end;
+
+var
+  SimbaPlatformHelpers: TSimbaPlatformHelpers;
 
 implementation
 
 uses
-  LCLType, cocoaall, cocoautils;
+  baseunix, unix, LCLType, cocoaall, cocoautils;
+
+function AXUIElementGetWindow(element: AXUIElementRef; var windowId: CGWindowID): AXError; external name '__AXUIElementGetWindow';
 
 type
-  NSWorkspaceFix = objccategory external (NSWorkspace)
-    function frontmostApplication(): NSRunningApplication; message 'frontmostApplication';
+  TTimebaseInfoData = packed record
+    numer: UInt32;
+    denom: UInt32;
   end;
 
-function VirtualKeyCodeToMac(AKey: Word): Word;
+var timeInfo: TTimebaseInfoData;
+
+function mach_timebase_info(var TimebaseInfoData: TTimebaseInfoData): Int64; cdecl; external 'libc';
+function mach_absolute_time: QWORD; cdecl; external 'libc';
+
+function TSimbaPlatformHelpers.VirtualKeyCodeToMac(AKey: Word): Word;
 begin
   case AKey of
     VK_LBUTTON:             Result := $FFFF;
@@ -250,7 +264,7 @@ begin
   end;
 end;
 
-function VirtualKeyCodeToCharCode(AKey: Word): Word;
+function TSimbaPlatformHelpers.VirtualKeyCodeToCharCode(AKey: Word): Word;
 begin
   case AKey of
     VK_CANCEL:              Result := $18;
@@ -329,7 +343,7 @@ begin
   end;
 end;
 
-function GetWindowInfo(windowId: CGWindowID): TWindowInfo;
+function TSimbaPlatformHelpers.GetWindowInfo(windowId: CGWindowID): TWindowInfo;
 var
   windowIds, windows: CFArrayRef;
   windowInfo: CFDictionaryRef;
@@ -372,7 +386,7 @@ begin
   LocalPool.release;
 end;
 
-function isWindowActive(windowId: CGWindowID): Boolean;
+function TSimbaPlatformHelpers.IsWindowActive(windowId: CGWindowID): Boolean;
 var
   LocalPool: NSAutoReleasePool;
 begin
@@ -382,7 +396,7 @@ begin
 end;
 
 //Does not actually set the window active.. It sets ALL windows of the process active..
-function SetWindowActive(windowId: CGWindowID): Boolean;
+function TSimbaPlatformHelpers.SetWindowActive(windowId: CGWindowID): Boolean;
 var
   app: NSRunningApplication;
   LocalPool: NSAutoReleasePool;
@@ -393,7 +407,7 @@ begin
   LocalPool.release;
 end;
 
-procedure GetCursorPos(out X, Y: Int32);
+procedure TSimbaPlatformHelpers.GetCursorPos(out X, Y: Int32);
 var
   event: CGEventRef;
   point: CGPoint;
@@ -405,13 +419,13 @@ begin
   CFRelease(event);
 end;
 
-function IsMouseButtonDown(Button: CGMouseButton): Boolean;
+function TSimbaPlatformHelpers.IsMouseButtonDown(Button: CGMouseButton): Boolean;
 begin
   Result := CGEventSourceButtonState(kCGEventSourceStateCombinedSessionState, Button) > 0;
 end;
 
 //Return every single window that is on screen..
-function GetOnScreenWindows(): TWindowArray;
+function TSimbaPlatformHelpers.GetOnScreenWindows: TWindowArray;
 var
   Windows: CFArrayRef;
   WindowInfo: CFDictionaryRef;
@@ -434,7 +448,7 @@ begin
 end;
 
 //Retrieve child windows of a parent with the same PID..
-function GetChildWindows(parent: CGWindowID): TWindowArray;
+function TSimbaPlatformHelpers.GetChildWindows(parent: CGWindowID): TWindowArray;
 var
   ParentPid: Integer;
   Windows: CFArrayRef;
@@ -463,7 +477,7 @@ begin
 end;
 
 //Can actually retrieve child windows of a parent.. not the non-sense above..
-function GetChildWindowsAX(parent: CGWindowID): TWindowArray;
+function TSimbaPlatformHelpers.GetChildWindowsAX(parent: CGWindowID): TWindowArray;
 var
   ParentPid: Integer;
   application: AXUIElementRef;
@@ -504,7 +518,7 @@ begin
   LocalPool.release;
 end;
 
-function GetActiveWindowAX(): CGWindowID;
+function TSimbaPlatformHelpers.GetActiveWindowAX: CGWindowID;
 var
   error: AXError;
   systemWide: AXUIElementRef;
@@ -520,7 +534,7 @@ begin
   AXUIElementCopyAttributeValue(FocusedApplication, CFStringRef(NSAccessibilityFocusedWindowAttribute), FocusedWindow);
   error := AXUIElementGetWindow(FocusedWindow, Result);
   if error <> kAXErrorSuccess then
-     Result := kCGNullWindowID;
+    Result := kCGNullWindowID;
 
   CFRelease(FocusedApplication);
   CFRelease(FocusedWindow);
@@ -528,7 +542,7 @@ begin
   LocalPool.release;
 end;
 
-procedure SetWindowBoundsAX(window: CGWindowID; X, Y, Width, Height: Integer);
+procedure TSimbaPlatformHelpers.SetWindowBoundsAX(window: CGWindowID; X, Y, Width, Height: Integer);
 var
   application: AXUIElementRef;
   windows: CFArrayRef;
@@ -569,6 +583,48 @@ begin
     CFRelease(windows);
   end;
 end;
+
+function proc_pidpath(pid: longint; buffer: pbyte; bufferSize: longword): longint; cdecl; external 'libproc.dylib' name 'proc_pidpath';
+
+function TSimbaPlatformHelpers.GetProcessPath(PID: SizeUInt): String;
+const
+  PROC_PIDPATHINFO_MAXSIZE = 4096;
+var
+  Buffer: array[1..PROC_PIDPATHINFO_MAXSIZE] of Char;
+  Len: Int32;
+begin
+  Result := '';
+
+  Len := proc_pidpath(PID, @Buffer[1], Length(Buffer));
+  if (Len > 0) then
+    Result := Copy(Buffer, 1, Len);
+end;
+
+function TSimbaPlatformHelpers.IsProcess64Bit(PID: SizeUInt): Boolean;
+begin
+  Result := True;
+end;
+
+function TSimbaPlatformHelpers.IsProcessRunning(PID: SizeUInt): Boolean;
+begin
+  Result := fpkill(PID, 0) <> 0;
+end;
+
+procedure TSimbaPlatformHelpers.TerminateProcess(PID: SizeUInt);
+begin
+  fpkill(PID, SIGKILL);
+end;
+
+function TSimbaPlatformHelpers.HighResolutionTime: Double;
+begin
+  Result := Double((mach_absolute_time * timeInfo.numer) / ((1000*1000) * timeInfo.denom));
+end;
+
+initialization
+  timeInfo.numer := 0;
+  timeInfo.denom := 0;
+
+  mach_timebase_info(timeInfo);
 
 end.
 

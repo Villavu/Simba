@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.textdrawer;
+unit simba.bitmap_textdrawer;
 
 {$i simba.inc}
 
@@ -241,7 +241,7 @@ constructor TSimbaTextDrawer.Create(Bitmap: TObject);
 begin
   FBitmap := Bitmap;
 
-  FFontSize := 22.5;
+  FFontSize := 18;
   FFontAntialised := True;
 end;
 

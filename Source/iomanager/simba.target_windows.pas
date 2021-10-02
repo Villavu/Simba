@@ -73,7 +73,7 @@ type
 implementation
 
 uses
-  simba.windows_helpers;
+  simba.platformhelpers;
 
 constructor TWindowBuffer.Create(AWidth, AHeight: Int32);
 begin
@@ -126,7 +126,7 @@ begin
   else
     FDC := GetWindowDC(FWindow);
 
-  if (FWindow > 0) and SimbaWindowsHelpers.IsScaledAndDPIAware(FWindow) then
+  if (FWindow > 0) and SimbaPlatformHelpers.IsScaledAndDPIAware(FWindow) then
     WriteLn('WARNING: Target window is performing it''s own scaling.' + LineEnding +
             '         This script might not work if another display scaling level is used');
 end;
@@ -157,7 +157,7 @@ var
 begin
   for Attempts := 1 to 5 do
   begin
-    if SimbaWindowsHelpers.GetWindowBounds(FWindow, Bounds) then
+    if SimbaPlatformHelpers.GetWindowBounds(FWindow, Bounds) then
       Exit;
 
     Self.InvalidTarget();
@@ -187,7 +187,7 @@ begin
 
   if Bounds.Contains(Bounds.X1 + X, Bounds.Y1 + Y, Width, Height) then
   begin
-    if SimbaWindowsHelpers.GetWindowImage(FWindow, FDC, FBuffer.DC, X, Y, Width, Height) then
+    if SimbaPlatformHelpers.GetWindowImage(FWindow, FDC, FBuffer.DC, X, Y, Width, Height) then
     begin
       Result.Ptr := FBuffer.Data;
       Result.IncPtrWith := FBuffer.Width - Width;
@@ -214,7 +214,7 @@ begin
   begin
     Buffer := TWindowBuffer.Create(Width, Height);
 
-    if SimbaWindowsHelpers.GetWindowImage(FWindow, FDC, FBuffer.DC, X, Y, Width, Height) then
+    if SimbaPlatformHelpers.GetWindowImage(FWindow, FDC, FBuffer.DC, X, Y, Width, Height) then
     begin
       Result := GetMem(Width * Height * 4);
 
@@ -229,7 +229,7 @@ procedure TWindowTarget.GetMousePosition(out X, Y: Int32);
 var
   Position: TPoint;
 begin
-  Position := SimbaWindowsHelpers.GetMousePosition(FWindow);
+  Position := SimbaPlatformHelpers.GetMousePosition(FWindow);
 
   X := Position.X;
   Y := Position.Y;
@@ -248,7 +248,7 @@ begin
 
   MouseClientAreaOffset(X, Y);
 
-  SimbaWindowsHelpers.SetMousePosition(FWindow, TPoint.Create(X, Y));
+  SimbaPlatformHelpers.SetMousePosition(FWindow, TPoint.Create(X, Y));
 end;
 
 procedure TWindowTarget.ScrollMouse(X, Y, Lines: Int32);

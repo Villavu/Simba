@@ -1,4 +1,4 @@
-object SimbaDebugForm: TSimbaDebugForm
+object SimbaOutputForm: TSimbaOutputForm
   Left = -807
   Height = 371
   Top = 622

@@ -1,8 +1,3 @@
-{
-  Author: Raymond van Venetië and Merlijn Wajer
-  Project: Simba (https://github.com/MerlijnWajer/Simba)
-  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
-}
 unit simba.matchtemplate;
 {==============================================================================]
   Copyright © 2021, Jarl Krister Holta
@@ -33,7 +28,7 @@ interface
 
 uses
   classes, sysutils, math,
-  simba.mufasatypes, simba.matchtemplate_matrix, simba.bitmap, simba.type_matrix;
+  simba.mufasatypes, simba.matchtemplate_matrix, simba.bitmap, simba.matrix;
 
 type
   PTMFormula = ^ETMFormula;
@@ -109,7 +104,7 @@ type
 implementation
 
 uses
-  simba.threadpool, simba.FFTPACK4, simba.colormath, simba.type_singlematrix;
+  simba.FFTPACK4, simba.threadpool, simba.colormath, simba.matrix_single;
 
 {$DEFINE VALIDATE :=
   if (Image.Width = 0) or (Image.Height = 0) then

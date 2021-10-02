@@ -1,8 +1,3 @@
-{
-  Author: Raymond van Venetië and Merlijn Wajer
-  Project: Simba (https://github.com/MerlijnWajer/Simba)
-  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
-}
 unit simba.fftpack4;
 {==============================================================================]
   Copyright © 2021, Jarl Krister Holta
@@ -25,7 +20,7 @@ interface
 
 uses
   sysutils,
-  simba.fftpack4_core, simba.mufasatypes, simba.type_matrix;
+  simba.fftpack4_core, simba.mufasatypes, simba.matrix;
 
 type
   TFFTPACK = record

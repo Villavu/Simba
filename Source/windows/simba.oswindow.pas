@@ -2,11 +2,25 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+
+  Windows implementation of TOSWindow
 }
-{%MainUnit simba.oswindow}
+unit simba.oswindow;
+
+{$i simba.inc}
+
+interface
 
 uses
-  windows, dwmapi;
+  Classes, SysUtils,
+  simba.platformhelpers, simba.mufasatypes;
+
+{$i oswindow_header.inc}
+
+implementation
+
+uses
+  regexpr, windows, dwmapi;
 
 function TOSWindow_Helper.IsValid: Boolean;
 begin
@@ -280,3 +294,8 @@ begin
 
   Result := Data.Windows;
 end;
+
+{$i oswindow_body.inc}
+
+end.
+

@@ -59,7 +59,7 @@ type
 implementation
 
 uses
-  simba.darwin_inputhelpers, dialogs;
+  simba.platformhelpers, dialogs;
 
 procedure SendKeyInput(Key: Word; Down: Boolean);
 var
@@ -76,7 +76,7 @@ begin
     Char := Ord('0') + Key - VK_0;
   end;
 
-  CGPostKeyboardEvent(Char, VirtualKeyCodeToMac(Key), boolean_t(Down));
+  CGPostKeyboardEvent(Char, SimbaPlatformHelpers.VirtualKeyCodeToMac(Key), boolean_t(Down));
 end;
 
 function TWindowTarget.GetHandle: PtrUInt;
@@ -90,7 +90,7 @@ begin
   if (FWindow = 0) then
   begin
     FWindow := GetDesktopWindow();
-    FCursorWindow := GetOnScreenWindows()[0]; // Cursor is always topmost
+    FCursorWindow := SimbaPlatformHelpers.GetOnScreenWindows()[0]; // Cursor is always topmost
   end;
 end;
 
@@ -454,7 +454,7 @@ end;
 
 function TWindowTarget.IsKeyHeld(Key: Int32): Boolean;
 begin
-  Result := Boolean(CGEventSourceKeyState(kCGEventSourceStateCombinedSessionState, VirtualKeyCodeToMac(key)));
+  Result := Boolean(CGEventSourceKeyState(kCGEventSourceStateCombinedSessionState, SimbaPlatformHelpers.VirtualKeyCodeToMac(key)));
 end;
 
 function TWindowTarget.GetKeyCode(Character: Char): Int32;

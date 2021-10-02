@@ -48,10 +48,10 @@ uses
   simba.oswindow, simba.matchtemplate, simba.tpa,
   simba.target_exported, simba.math, simba.colormath, simba.stringutil,
   simba.internet, simba.misc, simba.dtm, simba.dtmutil, simba.iomanager,
-  simba.aca, simba.aca_math, simba.dtmeditor, simba.script_communication,
+  simba.aca, simba.dtmeditor, simba.script_communication,
   simba.imagebox, simba.client,simba.jsonparser, simba.xmlparser,
   simba.mmltimer, simba.finder, simba.target,  simba.fontloader, simba.ocr,
-  simba.ocrutil, simba.type_matrix, simba.type_singlematrix,
+  simba.ocrutil, simba.matrix, simba.matrix_single, simba.platformhelpers,
 
   simba.script_compiler_onterminate,
   simba.script_compiler_waituntil;

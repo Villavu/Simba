@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.type_singlematrix;
+unit simba.matrix_single;
 
 {$i simba.inc}
 
@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.type_matrix, simba.mufasatypes;
+  simba.matrix, simba.mufasatypes;
 
 type
   TSingleMatrixHelper = type helper(TSingleMatrix_BaseHelper) for TSingleMatrix

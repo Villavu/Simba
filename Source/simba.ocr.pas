@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, graphics,
-  simba.mufasatypes, simba.bitmap, math, simba.ocrutil, simba.fontloader, simba.type_matrix;
+  simba.mufasatypes, simba.bitmap, math, simba.ocrutil, simba.fontloader;
 
 type
   PMOCR = ^TMOCR;
@@ -43,7 +43,7 @@ type
 implementation
 
 uses
-  simba.colormath, simba.client, simba.tpa, simba.iomanager;
+  simba.client, simba.tpa, simba.iomanager;
 
 constructor TMOCR.Create(Owner: TObject);
 begin

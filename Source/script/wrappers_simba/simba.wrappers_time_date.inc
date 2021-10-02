@@ -18,3 +18,7 @@ begin
   PUInt64(Result)^ := GetTickCount64() - SimbaScript.StartTime;
 end;
 
+procedure _LapeHighResolutionTime(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PDouble(Result)^ := SimbaPlatformHelpers.HighResolutionTime();
+end;
