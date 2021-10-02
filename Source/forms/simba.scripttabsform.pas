@@ -110,7 +110,7 @@ implementation
 
 uses
   syneditsearch, LCLStrConsts,
-  simba.debugform, simba.scripttabhistory, simba.files;
+  simba.outputform, simba.scripttabhistory, simba.files;
 
 procedure TSimbaScriptTabsForm.DoEditorPopupShow(Sender: TObject);
 var
@@ -620,9 +620,9 @@ begin
   if (Header = '') then
     Exit;
 
-  SimbaDebugForm.Add('Declared internally in Simba: ' + FileName);
-  SimbaDebugForm.Add('Declaration:');
-  SimbaDebugForm.Add(Header);
+  SimbaOutputForm.Add('Declared internally in Simba: ' + FileName);
+  SimbaOutputForm.Add('Declaration:');
+  SimbaOutputForm.Add(Header);
 end;
 
 procedure TSimbaScriptTabsForm.OpenDeclaration(Declaration: TDeclaration);
@@ -648,16 +648,16 @@ begin
   end else
   begin
     if IsLibrary then
-      SimbaDebugForm.Add('Declared internally in plugin: ' + FileName)
+      SimbaOutputForm.Add('Declared internally in plugin: ' + FileName)
     else
-      SimbaDebugForm.Add('Declared internally in Simba: ' + FileName);
+      SimbaOutputForm.Add('Declared internally in Simba: ' + FileName);
 
-    SimbaDebugForm.Add('Declaration:');
+    SimbaOutputForm.Add('Declaration:');
 
     if Declaration is TciProcedureDeclaration then
-      SimbaDebugForm.Add(TciProcedureDeclaration(Declaration).Header)
+      SimbaOutputForm.Add(TciProcedureDeclaration(Declaration).Header)
     else
-      SimbaDebugForm.Add(Declaration.RawText);
+      SimbaOutputForm.Add(Declaration.RawText);
   end;
 end;
 

@@ -15,7 +15,6 @@ uses
 procedure ConvertTime(Time: Int64; var h, m, s: Int32);
 procedure ConvertTime64(Time: Int64; var y, m, w, d, h, min, s: Int32);
 function TimeStamp(Time: Int64; IncludeMilliseconds: Boolean = False): String;
-function PerformanceTimer: Double;
 function OpenDirectory(Path: String): Boolean;
 procedure SetTerminalVisible(Value: Boolean);
 procedure PlaySound(FileName: String);
@@ -24,12 +23,9 @@ procedure StopSound;
 implementation
 
 uses
-  Forms,
-  {$IFDEF WINDOWS}
+  Forms
+  {$IFDEF WINDOWS},
   Windows, MMSystem
-  {$ENDIF}
-  {$IFDEF UNIX}
-  BaseUnix, Unix
   {$ENDIF};
 
 procedure ConvertTime(Time: Int64; var h, m, s: Int32);
@@ -80,30 +76,6 @@ begin
     Result := Format('[%.2d:%.2d:%.2d:%.3d]', [Hours, Mins, Secs, Milliseconds])
   else
     Result := Format('[%.2d:%.2d:%.2d]', [Hours, Mins, Secs]);
-end;
-
-function PerformanceTimer: Double;
-var
-  Frequency, Count: Int64;
-  {$IFDEF UNIX}
-  TV: TTimeVal;
-  TZ: PTimeZone;
-  {$ENDIF}
-begin
-  Result := 0;
-
-  {$IFDEF WINDOWS}
-  QueryPerformanceFrequency(Frequency);
-  QueryPerformanceCounter(Count);
-  Result := Count / Frequency * 1000;
-  {$ENDIF}
-
-  {$IFDEF UNIX}
-  TZ := nil;
-  fpGetTimeOfDay(@TV, TZ);
-  Count := Int64(TV.tv_sec) * 1000000 + Int64(TV.tv_usec);
-  Result := Count / 1000;
-  {$ENDIF}
 end;
 
 function OpenDirectory(Path: String): Boolean;

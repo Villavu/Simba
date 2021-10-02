@@ -135,12 +135,12 @@ end;
 
 procedure _LapeTarget_AddHandlerInvalidTarget(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInt32(Result)^ := PTarget(Params^[0])^.AddHandlerInvalidTarget(TNotifyEvent(Params^[1]^));
+  PTarget(Params^[0])^.AddHandlerInvalidTarget(PNotifyEvent(Params^[1])^);
 end;
 
 procedure _LapeTarget_RemoveHandlerInvalidTarget(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PTarget(Params^[0])^.RemoveHandlerInvalidTarget(PInt32(Params^[1])^);
+  PTarget(Params^[0])^.RemoveHandlerInvalidTarget(PNotifyEvent(Params^[1])^);
 end;
 
 procedure _LapeTarget_SetAutoFocus(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

@@ -10,14 +10,14 @@ unit simba.target;
 interface
 
 uses
-  classes, sysutils,
-  simba.mufasatypes, simba.eventhandlerlist, simba.type_matrix;
+  classes, sysutils, lazmethodlist,
+  simba.mufasatypes;
 
 type
   PTarget = ^TTarget;
   TTarget = class(TObject)
   protected
-    FInvalidTargetHandlers: TNotifyEventHandlers;
+    FInvalidTargetHandlers: TMethodList;
 
     FMouseClientAreaSet: Boolean;
     FMouseClientArea: TBox;
@@ -75,8 +75,8 @@ type
     function TargetValid: Boolean; virtual;
 
     // Events
-    function AddHandlerInvalidTarget(Handler: TNotifyEvent): Int32; virtual;
-    procedure RemoveHandlerInvalidTarget(Index: Int32); virtual;
+    procedure AddHandlerInvalidTarget(Handler: TNotifyEvent); virtual;
+    procedure RemoveHandlerInvalidTarget(Handler: TNotifyEvent); virtual;
 
     property Handle: PtrUInt read GetHandle write SetHandle;
     property AutoFocus: Boolean read GetAutoFocus write SetAutoFocus;
@@ -92,7 +92,7 @@ uses
 
 procedure TTarget.InvalidTarget;
 begin
-  FInvalidTargetHandlers.Call(Self);
+  FInvalidTargetHandlers.CallNotifyEvents(Self);
 end;
 
 procedure TTarget.GetTargetPosition(out Left, Top: Int32);
@@ -341,24 +341,25 @@ begin
   end;
 end;
 
-function TTarget.AddHandlerInvalidTarget(Handler: TNotifyEvent): Int32;
+procedure TTarget.AddHandlerInvalidTarget(Handler: TNotifyEvent);
 begin
-  Result := FInvalidTargetHandlers.Add(Handler);
+  FInvalidTargetHandlers.Add(TMethod(Handler));
 end;
 
-procedure TTarget.RemoveHandlerInvalidTarget(Index: Int32);
+procedure TTarget.RemoveHandlerInvalidTarget(Handler: TNotifyEvent);
 begin
-  FInvalidTargetHandlers.Remove(Index);
+  FInvalidTargetHandlers.Remove(TMethod(Handler));
 end;
 
 constructor TTarget.Create;
 begin
-  FInvalidTargetHandlers := TNotifyEventHandlers.Create();
+  FInvalidTargetHandlers := TMethodList.Create();
 end;
 
 destructor TTarget.Destroy;
 begin
-  FInvalidTargetHandlers.Free();
+  if (FInvalidTargetHandlers <> nil) then
+    FreeAndNil(FInvalidTargetHandlers);
 
   inherited Destroy();
 end;

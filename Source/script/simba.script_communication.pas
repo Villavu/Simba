@@ -212,7 +212,7 @@ uses
   {$IFDEF WINDOWS}
   windows,
   {$ENDIF}
-  simba.main, simba.debugform, simba.debugimage,
+  simba.main, simba.outputform, simba.debugimageform,
   simba.scripttabsform, simba.scripttab, simba.mufasatypes, simba.scriptinstance;
 
 function DuplicateHandle(Handle: THandle): THandle;
@@ -357,8 +357,8 @@ begin
   end;
 
   // Ensure error message is visible
-  SimbaDebugForm.Editor.CaretX := 0;
-  SimbaDebugForm.Editor.CaretY := SimbaDebugForm.Editor.Lines.Count;
+  SimbaOutputForm.Editor.CaretX := 0;
+  SimbaOutputForm.Editor.CaretY := SimbaOutputForm.Editor.Lines.Count;
 end;
 
 constructor TSimbaMethod_ScriptError.Create(Line, Col: Int32; FileName: ShortString);
@@ -392,7 +392,7 @@ end;
 
 procedure TSimbaMethod_ClearDebug.DoInvoke;
 begin
-  SimbaDebugForm.Clear();
+  SimbaOutputForm.Clear();
 end;
 
 constructor TSimbaMethod_ClearDebug.Create;

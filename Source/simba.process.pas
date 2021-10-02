@@ -51,16 +51,7 @@ implementation
 
 uses
   forms, process, lazloggerbase,
-  simba.files,
-  {$IFDEF WINDOWS}
-  simba.process_helpers_windows
-  {$ENDIF}
-  {$IFDEF LINUX}
-  simba.process_helpers_linux
-  {$ENDIF}
-  {$IFDEF DARWIN}
-  simba.process_helpers_darwin
-  {$ENDIF};
+  simba.files, simba.platformhelpers;
 
 type
   TProcessTimeout = class(TProcess)
@@ -125,22 +116,22 @@ end;
 
 function TSimbaProcess.IsProcess64Bit(PID: TProcessID): Boolean;
 begin
-  Result := SimbaProcessHelpers.IsProcess64Bit(PID);
+  Result := SimbaPlatformHelpers.IsProcess64Bit(PID);
 end;
 
 function TSimbaProcess.IsProcessRunning(PID: TProcessID): Boolean;
 begin
-  Result := SimbaProcessHelpers.IsProcessRunning(PID);
+  Result := SimbaPlatformHelpers.IsProcessRunning(PID);
 end;
 
 function TSimbaProcess.GetProcessPath(PID: TProcessID): String;
 begin
-  Result := SimbaProcessHelpers.GetProcessPath(PID);
+  Result := SimbaPlatformHelpers.GetProcessPath(PID);
 end;
 
 procedure TSimbaProcess.TerminateProcess(PID: TProcessID);
 begin
-  SimbaProcessHelpers.TerminateProcess(PID);
+  SimbaPlatformHelpers.TerminateProcess(PID);
 end;
 
 function TSimbaProcess.RunCommandInDir(Directory, Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus;

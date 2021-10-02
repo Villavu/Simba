@@ -80,56 +80,78 @@ type
   P2DPointArray = ^T2DPointArray;
   T2DPointArray = array of TPointArray;
 
-  TVariantArray = array of Variant;
-  PVariantArray = ^TVariantArray;
-
-  PIntegerArray = ^TIntegerArray;
-  TIntegerArray = array of Integer;
-  T2DIntegerArray = array of TIntegerArray;
-  P2DIntegerArray = ^T2DIntegerArray;
-
+  // Byte
   PByteArray = ^TByteArray;
   TByteArray = array of Byte;
+
   P2DByteArray = ^T2DByteArray;
   T2DByteArray = array of TByteArray;
 
+  PByteMatrix = ^TByteMatrix;
+  TByteMatrix = array of array of Byte;
+
   // Boolean
+  PBooleanArray = ^TBooleanArray;
   TBooleanArray = array of Boolean;
+
+  P2DBooleanArray = ^T2DBooleanArray;
   T2DBooleanArray = array of TBooleanArray;
 
-  PBooleanArray = ^TBooleanArray;
-  P2DBooleanArray = ^T2DBooleanArray;
+  PBooleanMatrix = ^TBooleanMatrix;
+  TBooleanMatrix = array of array of Boolean;
+
+  // Integer
+  PIntegerArray = ^TIntegerArray;
+  TIntegerArray = array of Integer;
+
+  P2DIntegerArray = ^T2DIntegerArray;
+  T2DIntegerArray = array of TIntegerArray;
+
+  PIntegerMatrix = ^TIntegerMatrix;
+  TIntegerMatrix = array of array of Integer;
 
   // Single
+  PSingleArray = ^TSingleArray;
   TSingleArray = array of Single;
+
+  P2DSingleArray = ^T2DSingleArray;
   T2DSingleArray = array of TSingleArray;
 
-  PSingleArray = ^TSingleArray;
-  P2DSingleArray = ^T2DSingleArray;
+  PSingleMatrix = ^TSingleMatrix;
+  TSingleMatrix = array of array of Single;
 
   // Double
+  PDoubleArray = ^TDoubleArray;
   TDoubleArray = array of Double;
+
+  P2DDoubleArray = ^T2DDoubleArray;
   T2DDoubleArray = array of TDoubleArray;
 
-  PDoubleArray = ^TDoubleArray;
-  P2DDoubleArray = ^T2DDoubleArray;
+  PDoubleMatrix = ^TDoubleMatrix;
+  TDoubleMatrix = array of array of Double;
 
   // Extended
+  PExtendedArray = ^TExtendedArray;
   TExtendedArray = array of Extended;
+
+  P2DExtendedArray = ^T2DExtendedArray;
   T2DExtendedArray = array of TExtendedArray;
 
-  PExtendedArray = ^TExtendedArray;
-  P2DExtendedArray = ^T2DExtendedArray;
+  PExtendedMatrix = ^TExtendedMatrix;
+  TExtendedMatrix = array of array of Extended;
 
   // Complex
   TComplex = packed record
     Re, Im: Single;
   end;
-  TComplexArray = array of TComplex;
-  T2DComplexArray = array of TComplexArray;
-
   PComplexArray = ^TComplexArray;
-  P2DComplexArray = ^T2DComplexArray;
+  TComplexArray = array of TComplex;
+
+  PComplexMatrix = ^TComplexMatrix;
+  TComplexMatrix = array of array of TComplex;
+
+
+
 
   PComparator = ^EComparator;
   EComparator = (__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__);

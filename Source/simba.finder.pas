@@ -150,11 +150,11 @@ type
 implementation
 
 uses
-  simba.client,             // For the client casting.
-  math,               // min/max
-  simba.tpa,                //TPABounds
+  simba.client,
+  math,
+  simba.tpa,
   simba.dtmutil,
-  simba.type_matrix, simba.type_singlematrix; //template matching
+  simba.matrix, simba.matrix_single;
 
 var
   Percentage : array[0..255] of Extended;

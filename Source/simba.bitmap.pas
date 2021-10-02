@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, graphtype, graphics,
-  simba.mufasatypes, simba.textdrawer, simba.type_matrix;
+  simba.mufasatypes, simba.bitmap_textdrawer;
 
 type
   TMBitmaps = class;
@@ -123,8 +123,8 @@ type
     procedure Downsample(DownScale: Int32; TargetBitmap: TMufasaBitmap); overload;
     function Downsample(DownScale: Int32; BlendTransparentColor: Boolean = True): TMufasaBitmap; overload;
     function Copy(const xs,ys,xe,ye: Int32): TMufasaBitmap; overload;
-    function Copy: TMufasaBitmap;overload;
-    procedure Blur(const Block, xs, ys, xe, ye: Int32);
+    function Copy: TMufasaBitmap; overload;
+    procedure Blur(const Block, xs, ys, xe, ye: Int32); overload;
     procedure Blur(const Block: Int32); overload;
     procedure Crop(const xs, ys, xe, ye: Int32);
 
@@ -200,7 +200,8 @@ implementation
 
 uses
   math, intfgraphics,
-  simba.tpa, simba.stringutil, simba.colormath, simba.iomanager, simba.fastarray, simba.type_singlematrix;
+  simba.tpa, simba.stringutil, simba.colormath, simba.iomanager, simba.overallocatearray,
+  simba.matrix, simba.matrix_single;
 
 function TBitmap_Helper.DataFormat: TBitmapDataFormat;
 var
@@ -792,6 +793,9 @@ begin
 
   Normed := Matrix.NormMinMax(0, 1);
 
+  W := FWidth - 1;
+  H := FHeight - 1;
+
   for Y := 0 to H-1 do
     for X := 0 to W-1 do
     begin
@@ -1162,13 +1166,14 @@ function TMufasaBitmap.FindColors(out Points: TPointArray; Color: TColor): Boole
 var
   X, Y, W, H: Int32;
   P: TPoint;
-  FastArray: specialize TSimbaFastArray<TPoint>;
+  Arr: specialize TSimbaOverAllocateArray<TPoint>;
 begin
+  Arr.Init();
+
   Color := RGB32ToTColor(RGBToBGR(Color));
 
-  W := FWidth-1;
-  H := FHeight-1;
-
+  W := FWidth - 1;
+  H := FHeight - 1;
   for Y := 0 to H do
     for X := 0 to W do
     begin
@@ -1177,13 +1182,13 @@ begin
         P.X := X;
         P.Y := Y;
 
-        FastArray.Add(P);
+        Arr.Add(P);
       end;
     end;
 
-  Points := FastArray;
+  Points := Arr.Trim();
 
-  Result := Length(Points) > 0;
+  Result := Arr.Count > 0;
 end;
 
 function TMufasaBitmap.FastGetPixel(x, y: Int32): TColor;

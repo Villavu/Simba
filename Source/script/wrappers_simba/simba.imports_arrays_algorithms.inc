@@ -62,8 +62,6 @@ addGlobalFunc('function ClearTPAFromTPA(const Points, PointsToClear: TPointArray
 addGlobalFunc('function ReturnPointsNotInTPA(const TotalTPA: TPointArray; const Box: TBox): TPointArray', @_LapeReturnPointsNotInTPA);
 addGlobalFunc('function PointInTPA(p: TPoint; const arP: TPointArray): Boolean', @_LapePointInTPA);
 addGlobalFunc('procedure ClearDoubleTPA(var TPA: TPointArray)', @_LapeClearDoubleTPA);
-addGlobalFunc('procedure TPACountSort(var TPA: TPointArray; const max: TPoint; Const SortOnX: Boolean)', @_LapeTPACountSort);
-addGlobalFunc('procedure TPACountSortBase(var TPA: TPointArray; const maxx, base: TPoint; const SortOnX: Boolean)', @_LapeTPACountSortBase);
 addGlobalFunc('function SameTPA(const aTPA, bTPA: TPointArray): Boolean', @_LapeSameTPA);
 addGlobalFunc('function TPAInATPA(const TPA: TPointArray; const InATPA: T2DPointArray; var Index: LongInt): Boolean', @_LapeTPAInATPA);
 addGlobalFunc('procedure OffsetTPA(var TPA: TPointArray; const Offset: TPoint)', @_LapeOffsetTPA);

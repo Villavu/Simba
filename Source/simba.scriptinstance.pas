@@ -72,7 +72,7 @@ implementation
 
 uses
   forms, lazloggerbase,
-  simba.debugform;
+  simba.outputform;
 
 procedure TSimbaScriptInstance.ManageProcess;
 begin
@@ -107,7 +107,7 @@ begin
   FProcess.Parameters.Add(FScriptFile);
   FProcess.Execute();
 
-  FListen := SimbaDebugForm.Listen(FProcess.Output);
+  FListen := SimbaOutputForm.Listen(FProcess.Output);
   TThread.ExecuteInThread(@ManageProcess);
 
   FStartTime := GetTickCount64();

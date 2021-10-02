@@ -39,7 +39,7 @@ implementation
 
 uses
   clipbrd, lclintf, lcltype,
-  simba.debugform;
+  simba.outputform;
 
 const
   BmpSizeTxt = '(%dx%d)';
@@ -103,12 +103,12 @@ begin
     if PadOutput.Checked then
       while Len > 65 do
       begin
-        SimbaDebugForm.Add(Copy(str,1,62) + #39 + ' +');
+        SimbaOutputForm.Add(Copy(str,1,62) + #39 + ' +');
         delete(str,1,62);
         str := StringOfChar(' ',8) + #39 + str;
         len := length(str);
       end;
-    SimbaDebugForm.Add(str + strend);
+    SimbaOutputForm.Add(str + strend);
   end;
 end;
 

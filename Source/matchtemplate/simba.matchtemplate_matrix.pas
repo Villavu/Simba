@@ -1,8 +1,3 @@
-{
-  Author: Raymond van Venetië and Merlijn Wajer
-  Project: Simba (https://github.com/MerlijnWajer/Simba)
-  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
-}
 unit simba.matchtemplate_matrix;
 {==============================================================================]
   Copyright © 2021, Jarl Krister Holta
@@ -25,7 +20,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.mufasatypes, simba.type_matrix;
+  simba.mufasatypes, simba.matrix;
 
 function Area(a: TIntegerMatrix): Int32;
 function Area(a: TSingleMatrix): Int32;

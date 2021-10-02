@@ -8,12 +8,19 @@ program Simba;
 {$i simba.inc}
 {$R Simba.res}
 
+// font helper unit... Find a home?
+// mufasatypes rename
+// codetool file renames
+// formrenames, some aren't prefixed with form or Simba etc
+// macos keymapping for Brandon
+// clean up settings form a lil
+
 uses
   simba.init,
   classes, sysutils, interfaces, forms, lazloggerbase,
-  simba.settings, simba.main, simba.aboutform, simba.debugimage,
+  simba.settings, simba.main, simba.aboutform, simba.debugimageform,
   simba.bitmapconv, simba.functionlistform, simba.scripttabsform,
-  simba.debugform, simba.colorpickerhistoryform, simba.filebrowserform,
+  simba.outputform, simba.colorpickerhistoryform, simba.filebrowserform,
   simba.notesform, simba.package_form, simba.settingsform, simba.associate,
   simba.script, simba.script_dump, simba.openexampleform;
 
@@ -87,7 +94,7 @@ begin
     Application.CreateForm(TSimbaDebugImageForm, SimbaDebugImageForm);
     Application.CreateForm(TSimbaNotesForm, SimbaNotesForm);
     Application.CreateForm(TSimbaScriptTabsForm, SimbaScriptTabsForm);
-    Application.CreateForm(TSimbaDebugForm, SimbaDebugForm);
+    Application.CreateForm(TSimbaOutputForm, SimbaOutputForm);
     Application.CreateForm(TSimbaFileBrowserForm, SimbaFileBrowserForm);
     Application.CreateForm(TSimbaAboutForm, SimbaAboutForm);
     Application.CreateForm(TSimbaSettingsForm, SimbaSettingsForm);

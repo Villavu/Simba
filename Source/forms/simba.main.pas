@@ -259,10 +259,10 @@ uses
   types, lclintf, sha1, lazloggerbase, lazfileutils, anchordocking,
   simba.openssl, simba.files, simba.mufasatypes, simba.process,
   simba.openexampleform, simba.colorpickerhistoryform, simba.codeparser,
-  simba.codeinsight, simba.associate, simba.scripttab, simba.debugimage,
+  simba.codeinsight, simba.associate, simba.scripttab, simba.debugimageform,
   simba.bitmapconv, simba.aca, simba.windowselector, simba.dtmeditor,
   simba.package_form, simba.aboutform, simba.functionlistform,
-  simba.scripttabsform, simba.debugform, simba.filebrowserform,
+  simba.scripttabsform, simba.outputform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.colorpicker, simba.ci_includecache,
   simba.script_communication, simba.scriptformatter,
   simba.editor, simba.dockinghelpers, simba.misc;
@@ -374,12 +374,12 @@ var
 begin
   if (Parser.Lexer.TokenPos + Parser.Lexer.TokenLen < Parser.Lexer.CaretPos) then
   begin
-    SimbaDebugForm.Add('Simba''s code parser encountered an error. This could break code tools:');
+    SimbaOutputForm.Add('Simba''s code parser encountered an error. This could break code tools:');
 
     if (Parser.Lexer.FileName <> '') then
-      SimbaDebugForm.Add(Format('"%s" at line %d, column %d in file "%s"', [Message, Y + 1, X, Parser.Lexer.FileName]))
+      SimbaOutputForm.Add(Format('"%s" at line %d, column %d in file "%s"', [Message, Y + 1, X, Parser.Lexer.FileName]))
     else
-      SimbaDebugForm.Add(Format('"%s" at line %d, column %d', [Message, Y + 1, X]));
+      SimbaOutputForm.Add(Format('"%s" at line %d, column %d', [Message, Y + 1, X]));
   end;
 end;
 
@@ -702,7 +702,7 @@ end;
 
 procedure TSimbaForm.MenuClearOutputClick(Sender: TObject);
 begin
-  SimbaDebugForm.Clear();
+  SimbaOutputForm.Clear();
 end;
 
 procedure TSimbaForm.MenuFileClick(Sender: TObject);
@@ -752,7 +752,7 @@ end;
 
 procedure TSimbaForm.HandlePrintDTM(DTM: String);
 begin
-  SimbaDebugForm.Add('DTM := DTMFromString(' + #39 + DTM + #39 + ');');
+  SimbaOutputForm.Add('DTM := DTMFromString(' + #39 + DTM + #39 + ');');
 end;
 
 procedure TSimbaForm.MenuItemDTMEditorClick(Sender: TObject);
@@ -1048,7 +1048,7 @@ begin
     try
       SimbaColorPickerHistoryForm.Add(Point, Color, True);
 
-      SimbaDebugForm.Add('Color picked: ' + IntToStr(Color) + ' at (' + IntToStr(Point.X) + ', ' + IntToStr(Point.Y) + ')');
+      SimbaOutputForm.Add('Color picked: ' + IntToStr(Color) + ' at (' + IntToStr(Point.X) + ', ' + IntToStr(Point.Y) + ')');
     finally
       Free();
     end;
@@ -1092,7 +1092,7 @@ begin
         ShowMessage('Exception while selecting window: ' + E.Message + ' (' + E.ClassName + ')');
     end;
 
-    SimbaDebugForm.Add(Lines);
+    SimbaOutputForm.Add(Lines);
 
     Lines.Free();
   end;
@@ -1123,7 +1123,7 @@ begin
     DockMaster.MakeDockPanel(DockPanel, admrpChild);
 
     DockMaster.MakeDockable(SimbaScriptTabsForm, MenuItemEditor);
-    DockMaster.MakeDockable(SimbaDebugForm, MenuItemOutput);
+    DockMaster.MakeDockable(SimbaOutputForm, MenuItemOutput);
     DockMaster.MakeDockable(SimbaFileBrowserForm, MenuItemFileBrowser);
     DockMaster.MakeDockable(SimbaFunctionListForm, MenuItemFunctionList);
     DockMaster.MakeDockable(SimbaNotesForm, MenuItemNotes);
@@ -1134,15 +1134,15 @@ begin
     begin
       DockMaster.GetAnchorSite(SimbaFileBrowserForm).Width := 175;
       DockMaster.GetAnchorSite(SimbaFunctionListForm).Width := 175;
-      DockMaster.GetAnchorSite(SimbaDebugForm).Height := 80;
+      DockMaster.GetAnchorSite(SimbaOutputForm).Height := 80;
 
       DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaScriptTabsForm), DockPanel, alClient);
-      DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaDebugForm), DockPanel, alBottom);
+      DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaOutputForm), DockPanel, alBottom);
       DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaFunctionListForm), DockPanel, alLeft);
       DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaFileBrowserForm), DockPanel, alRight);
 
       DockMaster.MakeVisible(SimbaScriptTabsForm, False);
-      DockMaster.MakeVisible(SimbaDebugForm, False);
+      DockMaster.MakeVisible(SimbaOutputForm, False);
       DockMaster.MakeVisible(SimbaFunctionListForm, False);
       DockMaster.MakeVisible(SimbaFileBrowserForm, False);
 

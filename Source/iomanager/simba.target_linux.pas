@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.xlib, simba.xlib_helpers, simba.xlib_display, simba.target, simba.oswindow, simba.mufasatypes;
+  simba.xlib, simba.platformhelpers, simba.target, simba.oswindow, simba.mufasatypes;
 
 type
   TWindowTarget = class(TTarget)
@@ -118,7 +118,7 @@ function TWindowTarget.TargetValid: Boolean;
 var
   Attributes: TXWindowAttributes;
 begin
-  Result := XGetWindowAttributes(GetDisplay(), FWindow, @Attributes) <> 0;
+  Result := SimbaXLib.XGetWindowAttributes(FWindow, @Attributes) <> 0;
 end;
 
 procedure TWindowTarget.ActivateClient;
@@ -142,7 +142,7 @@ begin
 
   if Bounds.Contains(Bounds.X1 + X, Bounds.Y1 + Y, Width, Height) then
   begin
-    Image := XGetImage(GetDisplay(), FWindow, X, Y, Width, Height, AllPlanes, ZPixmap);
+    Image := SimbaXLib.XGetImage(FWindow, X, Y, Width, Height, AllPlanes, ZPixmap);
 
     if (Image <> nil) then
     begin
@@ -151,7 +151,7 @@ begin
 
         Move(Image^.Data^, Result^, Width * Height * SizeOf(TRGB32));
       finally
-        XDestroyImage(Image);
+        SimbaXLib.XDestroyImage(Image);
       end;
     end;
   end;
@@ -175,7 +175,7 @@ begin
     if (FImage <> nil) then
       raise Exception.Create('FreeReturnData has not been called');
 
-    FImage := XGetImage(GetDisplay(), FWindow, X, Y, Width, Height, AllPlanes, ZPixmap);
+    FImage := SimbaXLib.XGetImage(FWindow, X, Y, Width, Height, AllPlanes, ZPixmap);
 
     if (FImage <> nil) then
     begin
@@ -189,7 +189,7 @@ end;
 procedure TWindowTarget.FreeReturnData;
 begin
   if (FImage <> nil) then
-    XDestroyImage(FImage);
+    SimbaXLib.XDestroyImage(FImage);
 
   FImage := nil;
 end;
@@ -198,11 +198,11 @@ procedure TWindowTarget.GetMousePosition(out X, Y: Int32);
 var
   Event: TXButtonEvent;
 begin
-  XQueryPointer(GetDisplay(), FWindow,
-                @Event.Root, @Event.Window,
-                @Event.X_Root, @Event.Y_Root,
-                @X, @Y,
-                @Event.State);
+  SimbaXLib.XQueryPointer(FWindow,
+                          @Event.Root, @Event.Window,
+                          @Event.X_Root, @Event.Y_Root,
+                          @X, @Y,
+                          @Event.State);
 
   MouseClientAreaOffset(X, Y);
 end;
@@ -236,8 +236,8 @@ begin
 
   MouseClientAreaOffset(X, Y);
 
-  XWarpPointer(GetDisplay(), None, FWindow, 0, 0, 0, 0, X, Y);
-  XFlush(GetDisplay());
+  SimbaXLib.XWarpPointer(None, FWindow, 0, 0, 0, 0, X, Y);
+  SimbaXLib.XFlush();
 end;
 
 procedure TWindowTarget.HoldMouse(X, Y: Int32; Button: TClickType);
@@ -257,8 +257,8 @@ begin
     MOUSE_EXTRA_2:     Number := Button9;
   end;
 
-  XTestFakeButtonEvent(GetDisplay(), Number, TBool(True), CurrentTime);
-  XFlush(GetDisplay());
+  SimbaXLib.XTestFakeButtonEvent(Number, TBool(True), CurrentTime);
+  SimbaXLib.XFlush();
 end;
 
 procedure TWindowTarget.ReleaseMouse(X, Y: Int32; Button: TClickType);
@@ -278,8 +278,8 @@ begin
     MOUSE_EXTRA_2:     Number := Button9;
   end;
 
-  XTestFakeButtonEvent(GetDisplay(), Number, TBool(False), CurrentTime);
-  XFlush(GetDisplay());
+  SimbaXLib.XTestFakeButtonEvent(Number, TBool(False), CurrentTime);
+  SimbaXLib.XFlush();
 end;
 
 function TWindowTarget.IsMouseButtonHeld(Button: TClickType): Boolean;
@@ -287,7 +287,7 @@ var
   Mask: Int32;
   Event: TXButtonEvent;
 begin
-  XSync(GetDisplay(), 0);
+  SimbaXLib.XSync(0);
 
   case Button of
     MOUSE_LEFT:        begin Event.Button := Button1; Mask := Button1Mask; end;
@@ -301,11 +301,11 @@ begin
 
   Event := Default(TXButtonEvent);
 
-  XQueryPointer(GetDisplay(), FWindow,
-                @Event.Root, @Event.Window,
-                @Event.X_Root, @Event.Y_Root,
-                @Event.X, @Event.Y,
-                @Event.State);
+  SimbaXLib.XQueryPointer(FWindow,
+                          @Event.Root, @Event.Window,
+                          @Event.X_Root, @Event.Y_Root,
+                          @Event.X, @Event.Y,
+                          @Event.State);
 
   Result := ((Event.State and Mask) > 0);
 end;
@@ -314,8 +314,8 @@ procedure TWindowTarget.SendString(Text: String; KeyWait, KeyModWait: Int32);
 
   procedure KeyEvent(KeyCode: UInt32; Press: Boolean);
   begin
-    XTestFakeKeyEvent(GetDisplay(), KeyCode, TBool(Press), 0);
-    XSync(GetDisplay(), 0);
+    SimbaXLib.XTestFakeKeyEvent(KeyCode, TBool(Press), 0);
+    SimbaXLib.XSync(0);
   end;
 
 var
@@ -327,7 +327,7 @@ begin
 
   for i := 1 to Length(Text) do
   begin
-    XGetKeyCode(GetDisplay(), Text[i], Key, Modifier);
+    SimbaXLib.XGetKeyCode(Text[i], Key, Modifier);
 
     if (Modifier <> 0) then
     begin
@@ -354,8 +354,8 @@ begin
   if FAutoFocus then
     ActivateClient();
 
-  XTestFakeKeyEvent(GetDisplay(), XGetKeyCode(GetDisplay(), Key), TBool(True), 0);
-  XSync(GetDisplay(), 0);
+  SimbaXLib.XTestFakeKeyEvent(SimbaXLib.XGetKeyCode(Key), TBool(True), 0);
+  SimbaXLib.XSync(0);
 end;
 
 procedure TWindowTarget.ReleaseKey(Key: Int32);
@@ -363,8 +363,8 @@ begin
   if FAutoFocus then
     ActivateClient();
 
-  XTestFakeKeyEvent(GetDisplay(), XGetKeyCode(GetDisplay(), Key), TBool(False), 0);
-  XSync(GetDisplay(), 0);
+  SimbaXLib.XTestFakeKeyEvent(SimbaXLib.XGetKeyCode(Key), TBool(False), 0);
+  SimbaXLib.XSync(0);
 end;
 
 function TWindowTarget.IsKeyHeld(Key: Int32): Boolean;
@@ -372,10 +372,10 @@ var
   Code: TKeySym;
   Keys: CharArr32;
 begin
-  Code := XGetKeyCode(GetDisplay(), Key);
+  Code := SimbaXLib.XGetKeyCode(Key);
 
-  XSync(GetDisplay(), 0);
-  XQueryKeymap(GetDisplay(), CharArr32(Keys));
+  SimbaXLib.XSync(0);
+  SimbaXLib.XQueryKeymap(CharArr32(Keys));
 
   Result := (Keys[Code shr 3] shr (Code and $07)) and $01 > 0;
 end;
@@ -384,7 +384,7 @@ function TWindowTarget.GetKeyCode(Character: Char): Int32;
 var
   KeyCode, Modifier: TKeyCode;
 begin
-  XGetKeyCode(GetDisplay(), Character, KeyCode, Modifier);
+  SimbaXLib.XGetKeyCode(Character, KeyCode, Modifier);
 
   Result := KeyCode;
 end;

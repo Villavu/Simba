@@ -10,7 +10,7 @@ unit simba.tpa;
 interface
 
 uses
-  Classes, SysUtils, simba.mufasatypes, simba.type_matrix;
+  Classes, SysUtils, simba.mufasatypes;
 
 function FastTPASort(const TPA: TPointArray;const Dists: TIntegerArray; maxDist: Integer; CloseFirst: Boolean): TPointArray;
 procedure QuickSort(var A: TIntegerArray; iLo, iHi: Integer);
@@ -44,8 +44,6 @@ function MedianTPA(constref TPA: TPointArray): TPoint;
 procedure SortATPASize(var a: T2DPointArray; const BigFirst: Boolean);
 procedure SortATPAFromSize(var a: T2DPointArray; const Size: Integer; CloseFirst: Boolean);
 procedure FilterTPAsBetween(var atpa: T2DPointArray; const minLength, maxLength: integer);
-function CombineTPA(const Ar1, Ar2: TPointArray): TPointArray;
-function CombineIntArray(const Ar1, Ar2: TIntegerArray): TIntegerArray;
 function InIntArrayEx(const a: TIntegerArray; var Where: Integer; const Number: Integer): Boolean;
 function InIntArray(const a: TIntegerArray; Number: Integer): Boolean;
 procedure ClearSameIntegers(var a: TIntegerArray);
@@ -84,8 +82,6 @@ function PointInTPA(const p: TPoint;const arP: TPointArray): Boolean;
 function ClearTPAFromTPA(const arP, ClearPoints: TPointArray): TPointArray;
 procedure ClearDoubleTPA(var TPA: TPointArray);
 function ReturnPointsNotInTPA(const TPA: TPointArray; Area: TBox): TPointArray;
-Procedure TPACountSort(Var TPA: TPointArray;const max: TPoint;Const SortOnX : Boolean);
-Procedure TPACountSortBase(Var TPA: TPointArray;const maxx, base: TPoint; const SortOnX : Boolean);
 procedure InvertTIA(var tI: TIntegerArray);
 function SumIntegerArray(const Ints : TIntegerArray): Integer;
 function AverageTIA(const tI: TIntegerArray): Integer;
@@ -95,8 +91,6 @@ function TPAInATPA(const TPA: TPointArray;const InATPA: T2DPointArray; var Index
 procedure OffsetTPA(var TPA : TPointArray; const Offset : TPoint);
 procedure OffsetATPA(var ATPA : T2DPointArray; const Offset : TPoint);
 function PartitionTPA(const TPA:TPointArray; BoxWidth, BoxHeight:Integer): T2DPointArray;
-function CopyTPA(const TPA : TPointArray) : TPointArray;
-function CopyATPA(const ATPA : T2DPointArray) : T2DPointArray;
 function PointsInRangeOf(Points, Other: TPointArray; MinDist, MaxDist: Double): TPointArray; overload;
 function PointsInRangeOf(Points, Other: TPointArray; MinDistX, MinDistY, MaxDistX, MaxDistY: Double): TPointArray; overload;
 function FindTextTPAinTPA(Height : integer;const SearchTPA, TotalTPA: TPointArray; var Matches: TPointArray): Boolean;
@@ -146,22 +140,6 @@ begin
     Result := MergeATPA(Matches);
   end;
 end;
-
-function CopyTPA(const TPA : TPointArray) : TPointArray;
-begin
-  result := Copy(TPA,0,Length(TPA));
-end;
-
-function CopyATPA(const ATPA : T2DPointArray) : T2DPointArray;
-var
-  i,l : integer;
-begin
-  l := high(ATPA);
-  SetLength(result,l+1);
-  for i := 0 to l do
-    result[i] := copy(ATPA[i],0,Length(ATPA[i]));
-end;
-
 
 {/\
    Very Fast TPA Sort, uses an adepted CountSort algorithm.
@@ -994,38 +972,6 @@ begin
   end;
 
   atpa := tmpATPA;
-end;
-
-{/\
-  Combines the TPointArrays Ar1 and Ar2, and results the combination.
-/\}
-
-function CombineTPA(const Ar1, Ar2: TPointArray): TPointArray;
-var
-  i, l1, l2: Integer;
-begin
-  Result := Copy(Ar1);
-  l1 := Length(Result);
-  l2 := Length(Ar2);
-  SetLength(Result, l1 + l2);
-  for i := 0 to l2 -1 do
-    Result[i + l1] := Ar2[i];
-end;
-
-{/\
-  Combines the TIntegerArrays Ar1 and Ar2, and results the combination.
-/\}
-
-function CombineIntArray(const Ar1, Ar2: TIntegerArray): TIntegerArray;
-var
-  i, l1, l2: Integer;
-begin
-  Result := Copy(Ar1);
-  l1 := Length(Result);
-  l2 := Length(Ar2);
-  SetLength(Result, l1 + l2);
-  for i := 0 to l2 -1 do
-    Result[i + l1] := Ar2[i];
 end;
 
 {/\
@@ -3171,103 +3117,6 @@ begin
 
   SetLength(Result, i);
 end;
-
-{/\
-  Sorts a TPointArray by either X or Y. You have to define the max Point as well.
-/\}
-
-Procedure TPACountSort(Var TPA: TPointArray;const max: TPoint;Const SortOnX : Boolean);
-Var
-   c: T2DIntegerArray;
-   I, II, III, hTPA, cc: Integer;
-Begin
-  hTPA := High(TPA);
-  if hTPA < 1 then
-    Exit;
-  SetLength(c, max.X + 1,max.Y + 1);
-  for i := max.x downto 0 do
-    FillChar(c[i][0],(max.y+1)*sizeof(Integer),0);
-  For I := 0 To hTPA Do
-    c[TPA[I].x][TPA[I].y] := c[TPA[i].x][TPA[i].y] + 1;
-
-  cc := 0;
-  if SortOnX then
-  begin
-    For I := 0 To max.X  Do
-      For II := 0 To max.Y  Do
-      Begin
-        For III := 0 To c[I][II] - 1 Do
-        Begin
-          TPA[cc].x := I;
-          TPA[cc].y := II;
-          cc := cc + 1;
-        End;
-      End;
-  end else
-  begin;
-    For II := 0 To max.Y  Do
-      For I := 0 To max.X  Do
-      Begin
-        For III := 0 To c[I][II] - 1 Do
-        Begin
-          TPA[cc].x := I;
-          TPA[cc].y := II;
-          cc := cc + 1;
-        End;
-      End;
-  end;
-End;
-
-
-{/\
-  Sorts a TPointArray by either X or Y. Allows one to pass a Base.
-/\}
-
-Procedure TPACountSortBase(Var TPA: TPointArray;const maxx, base: TPoint; const SortOnX : Boolean);
-Var
-   c: T2DIntegerArray;
-   I, II, III, hTPA, cc: Integer;
-   Max : TPoint;
-Begin
-  hTPA := High(TPA);
-  if hTPA < 1 then
-    Exit;
-  max.X := maxx.X - base.X;
-  max.Y := maxx.Y - base.Y;
-  SetLength(c, max.X + 1,max.Y + 1);
-  for i := max.x downto 0 do
-    FillChar(c[i][0],(max.y+1)*sizeof(integer),0);
-  hTPA := High(TPA);
-  For I := 0 To hTPA Do
-    c[TPA[I].x - base.X][TPA[I].y - base.Y] := c[TPA[i].x- base.X][TPA[i].y- base.Y] + 1;
-
-  cc := 0;
-  if SortOnX then
-  begin
-    For I := 0 To max.X  Do
-      For II := 0 To max.Y  Do
-      Begin
-        For III := 0 To c[I][II] - 1 Do
-        Begin
-          TPA[cc].x := I + base.X;
-          TPA[cc].y := II + base.Y;
-          cc := cc + 1;
-        End;
-      End;
-  end else
-  begin;
-    For II := 0 To max.Y  Do
-      For I := 0 To max.X  Do
-      Begin
-        For III := 0 To c[I][II] - 1 Do
-        Begin
-          TPA[cc].x := I + base.X;
-          TPA[cc].y := II + base.Y;
-          cc := cc + 1;
-        End;
-      End;
-  end;
-End;
 
 {/\
   Returns the sum of all integers in the array

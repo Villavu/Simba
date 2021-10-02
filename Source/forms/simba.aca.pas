@@ -97,8 +97,8 @@ implementation
 {$R *.lfm}
 
 uses
-  math, clipbrd, simba.bitmap,
-  simba.aca_math, simba.colormath;
+  math, clipbrd,
+  simba.bitmap, simba.colormath;
 
 procedure TSimbaACAForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var

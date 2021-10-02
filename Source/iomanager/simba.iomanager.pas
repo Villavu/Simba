@@ -18,7 +18,8 @@ interface
 
 uses
   classes, sysutils,
-  simba.target, simba.target_exported, simba.oswindow, simba.bitmap, simba.mufasatypes, simba.type_matrix;
+  simba.target, simba.target_exported, simba.oswindow, simba.bitmap,
+  simba.mufasatypes;
 
 type
   PIOManager = ^TIOManager;
@@ -110,6 +111,7 @@ type
 implementation
 
 uses
+  simba.matrix_single,
   simba.files,
   simba.target_raw,
   simba.target_bitmap,

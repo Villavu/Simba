@@ -2,12 +2,26 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+
+  MacOS implementation of TOSWindow
 }
-{%MainUnit simba.oswindow}
+unit simba.oswindow;
+
+{$i simba.inc}
+
+interface
 
 uses
-  baseunix, CocoaAll,
-  macosall, simba.darwin_inputhelpers;
+  Classes, SysUtils,
+  simba.platformhelpers, simba.mufasatypes;
+
+{$i oswindow_header.inc}
+
+implementation
+
+uses
+  regexpr, baseunix, CocoaAll,
+  macosall;
 
 function TOSWindow_Helper.IsValid: Boolean;
 var
@@ -23,7 +37,7 @@ end;
 
 function TOSWindow_Helper.IsActive: Boolean;
 begin
-  Result := isWindowActive(Self);
+  Result := SimbaPlatformHelpers.IsWindowActive(Self);
 end;
 
 function TOSWindow_Helper.IsActive(Time: Int32): Boolean;
@@ -44,12 +58,12 @@ end;
 
 function TOSWindow_Helper.IsVisible: Boolean;
 begin
-  Result := GetWindowInfo(Self).onScreen; //No other way unless we check if any windows are on top of it..
+  Result := SimbaPlatformHelpers.GetWindowInfo(Self).onScreen; //No other way unless we check if any windows are on top of it..
 end;
 
 function TOSWindow_Helper.GetPID: UInt32;
 begin
-  Result := GetWindowInfo(Self).ownerPid;
+  Result := SimbaPlatformHelpers.GetWindowInfo(Self).ownerPid;
 end;
 
 function TOSWindow_Helper.GetRootWindow: TOSWindow;
@@ -64,14 +78,14 @@ end;
 
 function TOSWindow_Helper.GetTitle: WideString;
 begin
-  Result := GetWindowInfo(Self).title;
+  Result := SimbaPlatformHelpers.GetWindowInfo(Self).title;
 end;
 
 function TOSWindow_Helper.GetBounds(out Bounds: TBox): Boolean;
 var
   info: TWindowInfo;
 begin
-  info := GetWindowInfo(Self);
+  info := SimbaPlatformHelpers.GetWindowInfo(Self);
   if info.id <> high(CGWindowID) then
   begin
     Bounds.X1 := info.x;
@@ -101,28 +115,28 @@ end;
 
 function TOSWindow_Helper.GetChildren(Recursive: Boolean): TOSWindowArray;
 begin
-  Result := GetChildWindows(Self);
+  Result := SimbaPlatformHelpers.GetChildWindows(Self);
 end;
 
 procedure TOSWindow_Helper.SetBounds(Bounds: TBox);
 begin
-  SetWindowBoundsAX(Self, Bounds.X1, Bounds.Y1, Bounds.X2 - Bounds.X1, Bounds.Y2 - Bounds.Y1);
+  SimbaPlatformHelpers.SetWindowBoundsAX(Self, Bounds.X1, Bounds.Y1, Bounds.X2 - Bounds.X1, Bounds.Y2 - Bounds.Y1);
 end;
 
 function TOSWindow_Helper.Activate: Boolean;
 begin
-  SetWindowActive(Self);
+  SimbaPlatformHelpers.SetWindowActive(Self);
   Result := Self.IsActive(1000);
 end;
 
 procedure TOSWindow_Helper.Kill;
 begin
-  fpkill(Self.GetPID(), SIGTERM);
+  SimbaPlatformHelpers.TerminateProcess(Self.GetPID());
 end;
 
 function GetWindows: TOSWindowArray;
 begin
-  Result := GetOnScreenWindows();
+  Result := SimbaPlatformHelpers.GetOnScreenWindows();
 end;
 
 function GetVisibleWindows: TOSWindowArray;
@@ -138,7 +152,7 @@ end;
 
 function GetActiveWindow: TOSWindow;
 begin
-  Result := GetActiveWindowAX();
+  Result := SimbaPlatformHelpers.GetActiveWindowAX();
 end;
 
 function GetDesktopWindow: TOSWindow;
@@ -156,7 +170,7 @@ function GetTopWindows: TOSWindowArray;
     Result := Window.IsVisible();
     if (not Result) then
     begin
-      Windows := GetChildWindows(Window);
+      Windows := SimbaPlatformHelpers.GetChildWindows(Window);
       for i := 0 to High(Windows) do
       begin
         Window := Windows[i];
@@ -170,7 +184,7 @@ var
   i: Int32;
 begin
   SetLength(Result, 0);
-  Windows := GetOnScreenWindows();
+  Windows := SimbaPlatformHelpers.GetOnScreenWindows();
 
   for i := 0 to High(Windows) do
     if IsVisible(TOSWindow(Windows[i])) then
@@ -188,7 +202,7 @@ var
 begin
   Result := 0;
 
-  GetCursorPos(X, Y);
+  SimbaPlatformHelpers.GetCursorPos(X, Y);
 
   Desktop := GetDesktopWindow().GetBounds();
   Windows := GetTopWindows();
@@ -218,7 +232,7 @@ function TOSWindow_Helper.GetRelativeCursorPos: TPoint;
 var
   B: TBox;
 begin
-  GetCursorPos(Result.X, Result.Y);
+  SimbaPlatformHelpers.GetCursorPos(Result.X, Result.Y);
 
   with Self.GetBounds() do
   begin
@@ -226,3 +240,8 @@ begin
     Result.Y := Result.Y - Y1;
   end;
 end;
+
+{$i oswindow_body.inc}
+
+end.
+

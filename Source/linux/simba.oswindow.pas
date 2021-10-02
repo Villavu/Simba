@@ -2,23 +2,37 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+
+  Linux implementation of TOSWindow
 }
-{%MainUnit simba.oswindow}
+unit simba.oswindow;
+
+{$i simba.inc}
+
+interface
 
 uses
-  x, baseunix,
-  simba.xlib, simba.xlib_helpers, simba.xlib_display;
+  Classes, SysUtils,
+  simba.platformhelpers, simba.mufasatypes;
+
+{$i oswindow_header.inc}
+
+implementation
+
+uses
+  regexpr, x,
+  simba.xlib;
 
 function TOSWindow_Helper.IsValid: Boolean;
 var
   Attributes: TXWindowAttributes;
 begin
-  Result := XGetWindowAttributes(GetDisplay(), Self, @Attributes) <> 0;
+  Result := SimbaXLib.XGetWindowAttributes(Self, @Attributes) <> 0;
 end;
 
 function TOSWindow_Helper.IsActive: Boolean;
 begin
-  Result := XGetRootWindow(GetDisplay(), XGetActiveWindow(GetDisplay())) = XGetRootWindow(GetDisplay(), Self);
+  Result := SimbaXLib.XGetRootWindow(SimbaXLib.XGetActiveWindow()) = SimbaXLib.XGetRootWindow(Self);
 end;
 
 function TOSWindow_Helper.IsActive(Time: Int32): Boolean;
@@ -39,27 +53,27 @@ end;
 
 function TOSWindow_Helper.IsVisible: Boolean;
 begin
-  Result := XHasWindowProperty(GetDisplay(), XGetRootWindow(GetDisplay(), Self), 'WM_STATE');
+  Result := SimbaXLib.XHasWindowProperty(SimbaXLib.XGetRootWindow(Self), 'WM_STATE');
 end;
 
 function TOSWindow_Helper.GetPID: UInt32;
 begin
-  Result := XGetWindowProperty(GetDisplay(), XGetRootWindow(GetDisplay(), Self), XInternAtom(GetDisplay(), PChar('_NET_WM_PID'), TBool(False)));
+  Result := SimbaXLib.XGetWindowProperty(SimbaXLib.XGetRootWindow(Self), SimbaXLib.XInternAtom(PChar('_NET_WM_PID'), TBool(False)));
 end;
 
 function TOSWindow_Helper.GetRootWindow: TOSWindow;
 begin
-  Result := XGetRootWindow(GetDisplay(), Self);
+  Result := SimbaXLib.XGetRootWindow(Self);
 end;
 
 function TOSWindow_Helper.GetClassName: WideString;
 begin
-  Result := XGetWindowClass(GetDisplay(), Self);
+  Result := SimbaXLib.XGetWindowClass(Self);
 end;
 
 function TOSWindow_Helper.GetTitle: WideString;
 begin
-  Result := XGetWindowTitle(GetDisplay(), Self);
+  Result := SimbaXLib.XGetWindowTitle(Self);
 end;
 
 function TOSWindow_Helper.GetBounds(out Bounds: TBox): Boolean;
@@ -68,8 +82,8 @@ var
   X, Y: Int32;
   Attributes: TXWindowAttributes;
 begin
-  Result := (XGetWindowAttributes(GetDisplay(), Self, @Attributes) <> 0) and
-            (XTranslateCoordinates(GetDisplay(), Self, Attributes.Root, -Attributes.Border_Width, -Attributes.Border_Width, @X, @Y, @Child) <> 0);
+  Result := (SimbaXLib.XGetWindowAttributes(Self, @Attributes) <> 0) and
+            (SimbaXLib.XTranslateCoordinates(Self, Attributes.Root, -Attributes.Border_Width, -Attributes.Border_Width, @X, @Y, @Child) <> 0);
 
   if Result then
   begin
@@ -93,32 +107,32 @@ end;
 
 function TOSWindow_Helper.GetChildren(Recursive: Boolean): TOSWindowArray;
 begin
-  Result := XGetChildren(GetDisplay(), Self, Recursive);
+  Result := SimbaXLib.XGetChildren(Self, Recursive);
 end;
 
 procedure TOSWindow_Helper.SetBounds(Bounds: TBox);
 begin
-  XMoveResizeWindow(GetDisplay(), Self, Bounds.X1, Bounds.Y1, Bounds.X2 - Bounds.X1, Bounds.Y2 - Bounds.Y1);
-  XSync(GetDisplay(), 0);
+  SimbaXLib.XMoveResizeWindow(Self, Bounds.X1, Bounds.Y1, Bounds.X2 - Bounds.X1, Bounds.Y2 - Bounds.Y1);
+  SimbaXLib.XSync(0);
 end;
 
 function TOSWindow_Helper.Activate: Boolean;
 begin
-  XSetActiveWindow(GetDisplay(), Self.GetRootWindow());
+  SimbaXLib.XSetActiveWindow(Self.GetRootWindow());
 
   Result := Self.IsActive(1000);
 end;
 
 procedure TOSWindow_Helper.Kill;
 begin
-  fpkill(Self.GetPID(), SIGKILL);
+  SimbaPlatformHelpers.TerminateProcess(Self.GetPID());
 end;
 
 function GetWindows: TOSWindowArray;
 var
   Window: TOSWindow;
 begin
-  Window := XDefaultRootWindow(GetDisplay());
+  Window := SimbaXLib.XDefaultRootWindow();
 
   Result := Window.GetChildren();
 end;
@@ -136,12 +150,12 @@ end;
 
 function GetActiveWindow: TOSWindow;
 begin
-  Result := XGetActiveWindow(GetDisplay());
+  Result := SimbaXLib.XGetActiveWindow();
 end;
 
 function GetDesktopWindow: TOSWindow;
 begin
-  Result := XDefaultRootWindow(GetDisplay());
+  Result := SimbaXLib.XDefaultRootWindow();
 end;
 
 function TOSWindow_Helper.GetRelativeCursorPos: TPoint;
@@ -152,7 +166,7 @@ var
 begin
   Result := Default(TPoint);
 
-  XQueryPointer(GetDisplay(), Self, @Root, @Result, @x_root, @y_root, @Result.X, @Result.Y, @mask);
+  SimbaXLib.XQueryPointer(Self, @Root, @Result, @x_root, @y_root, @Result.X, @Result.Y, @mask);
 end;
 
 function GetWindowAtCursor: TOSWindow;
@@ -161,7 +175,7 @@ var
   x_root, y_root, x, y: Int32;
   mask: UInt32;
 begin
-  XQueryPointer(GetDisplay(), XDefaultRootWindow(GetDisplay()), @Root, @Result, @x_root, @y_root, @x, @y, @mask);
+  SimbaXLib.XQueryPointer(SimbaXLib.XDefaultRootWindow(), @Root, @Result, @x_root, @y_root, @x, @y, @mask);
 
   Child := Result;
 
@@ -169,7 +183,7 @@ begin
   begin
     Result := Child;
 
-    XQueryPointer(GetDisplay(), Result, @Root, @Child, @x_root, @y_root, @x, @y, @mask);
+    SimbaXLib.XQueryPointer(Result, @Root, @Child, @x_root, @y_root, @x, @y, @mask);
   end;
 end;
 
@@ -184,7 +198,7 @@ function GetTopWindows: TOSWindowArray;
 
     if (not Result) then
     begin
-      Windows := XGetChildren(GetDisplay(), Window, False);
+      Windows := SimbaXLib.XGetChildren(Window, False);
 
       for i := High(Windows) downto 0 do
       begin
@@ -201,8 +215,13 @@ var
 begin
   SetLength(Result, 0);
 
-  Windows := XGetChildren(GetDisplay(), GetDesktopWindow, False);
+  Windows := SimbaXLib.XGetChildren(GetDesktopWindow, False);
   for i := High(Windows) downto 0 do
     if IsVisible(Windows[i]) then
       Result += [Windows[i]];
 end;
+
+{$i oswindow_body.inc}
+
+end.
+

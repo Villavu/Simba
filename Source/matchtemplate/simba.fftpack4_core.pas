@@ -1,8 +1,3 @@
-{
-  Author: Raymond van Venetië and Merlijn Wajer
-  Project: Simba (https://github.com/MerlijnWajer/Simba)
-  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
-}
 unit simba.fftpack4_core;
 {==============================================================================]
   FFTPACK4_core.pas: A set of FFT routines in FPC

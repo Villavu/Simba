@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.debugimage;
+unit simba.debugimageform;
 
 {$i simba.inc}
 
@@ -37,7 +37,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.debugform, simba.dockinghelpers;
+  simba.outputform, simba.dockinghelpers;
 
 procedure TSimbaDebugImageForm.ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Int32);
 begin
@@ -47,7 +47,7 @@ end;
 
 procedure TSimbaDebugImageForm.ImageDoubleClick(Sender: TObject);
 begin
-  SimbaDebugForm.Add('Debug Image Click: ' + IntToStr(FMouseX) + ', ' + IntToStr(FMouseY));
+  SimbaOutputForm.Add('Debug Image Click: ' + IntToStr(FMouseX) + ', ' + IntToStr(FMouseY));
 end;
 
 procedure TSimbaDebugImageForm.Display(AWidth, AHeight: Int32; AShow: Boolean);

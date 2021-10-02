@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.debugform;
+unit simba.outputform;
 
 {$i simba.inc}
 
@@ -15,7 +15,7 @@ uses
   simba.settings;
 
 type
-  TSimbaDebugForm = class(TForm)
+  TSimbaOutputForm = class(TForm)
     Editor: TSynEdit;
     EditorPopupMenu: TPopupMenu;
     MenuItemSeperator: TMenuItem;
@@ -50,7 +50,7 @@ type
   end;
 
 var
-  SimbaDebugForm: TSimbaDebugForm;
+  SimbaOutputForm: TSimbaOutputForm;
 
 implementation
 
@@ -80,7 +80,7 @@ procedure TListenerThread.Execute;
   begin
     Lines := Data.Split([LineEnding], TStringSplitOptions.ExcludeLastEmpty);
 
-    with SimbaDebugForm do
+    with SimbaOutputForm do
     begin
       FLock.Enter();
 
@@ -130,7 +130,7 @@ begin
   end;
 
   if (Remaining <> '') then
-    with SimbaDebugForm do
+    with SimbaOutputForm do
     begin
       FLock.Enter();
       try
@@ -158,7 +158,7 @@ begin
   inherited Destroy();
 end;
 
-procedure TSimbaDebugForm.Add(const S: String);
+procedure TSimbaOutputForm.Add(const S: String);
 var
   Line: String;
 begin
@@ -174,7 +174,7 @@ begin
   end;
 end;
 
-procedure TSimbaDebugForm.Add(const Strings: TStrings);
+procedure TSimbaOutputForm.Add(const Strings: TStrings);
 var
   I: Int32;
 begin
@@ -188,27 +188,27 @@ begin
   end;
 end;
 
-procedure TSimbaDebugForm.MenuItemCutClick(Sender: TObject);
+procedure TSimbaOutputForm.MenuItemCutClick(Sender: TObject);
 begin
   Editor.CutToClipboard();
 end;
 
-procedure TSimbaDebugForm.MenuItemDeleteClick(Sender: TObject);
+procedure TSimbaOutputForm.MenuItemDeleteClick(Sender: TObject);
 begin
   Editor.ClearSelection();
 end;
 
-procedure TSimbaDebugForm.MenuItemPasteClick(Sender: TObject);
+procedure TSimbaOutputForm.MenuItemPasteClick(Sender: TObject);
 begin
   Editor.PasteFromClipboard();
 end;
 
-procedure TSimbaDebugForm.MenuItemSelectAllClick(Sender: TObject);
+procedure TSimbaOutputForm.MenuItemSelectAllClick(Sender: TObject);
 begin
   Editor.SelectAll();
 end;
 
-procedure TSimbaDebugForm.TimerExecute(Sender: TObject);
+procedure TSimbaOutputForm.TimerExecute(Sender: TObject);
 var
   Scroll: Boolean;
   I: Int32;
@@ -238,7 +238,7 @@ begin
   end;
 end;
 
-procedure TSimbaDebugForm.SimbaSettingChanged(Setting: TSimbaSetting);
+procedure TSimbaOutputForm.SimbaSettingChanged(Setting: TSimbaSetting);
 begin
   if (Setting = SimbaSettings.Editor.FontSize) then
     Editor.Font.Size := Setting.Value;
@@ -258,12 +258,12 @@ begin
   end;
 end;
 
-procedure TSimbaDebugForm.MenuItemCopyClick(Sender: TObject);
+procedure TSimbaOutputForm.MenuItemCopyClick(Sender: TObject);
 begin
   Editor.CopyToClipboard();
 end;
 
-procedure TSimbaDebugForm.Clear;
+procedure TSimbaOutputForm.Clear;
 begin
   FLock.Enter();
 
@@ -276,12 +276,12 @@ begin
   Editor.Clear();
 end;
 
-function TSimbaDebugForm.Listen(Pipe: TInputPipeStream): TThread;
+function TSimbaOutputForm.Listen(Pipe: TInputPipeStream): TThread;
 begin
   Result := TListenerThread.Create(Pipe);
 end;
 
-constructor TSimbaDebugForm.Create(AOwner: TComponent);
+constructor TSimbaOutputForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
@@ -302,7 +302,7 @@ begin
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
 end;
 
-destructor TSimbaDebugForm.Destroy;
+destructor TSimbaOutputForm.Destroy;
 begin
   if (FLock <> nil) then
     FreeAndNil(FLock);
