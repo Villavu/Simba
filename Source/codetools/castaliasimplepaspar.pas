@@ -353,7 +353,6 @@ type
     procedure MainUsedUnitStatement; virtual;
     procedure MainUsesClause; virtual;
     procedure MultiplicativeOperator; virtual;
-    procedure NewFormalParameterType; virtual;
     procedure Number; virtual;
     procedure NativeType; virtual;
     procedure ObjectConstructorHeading; virtual;
@@ -1922,7 +1921,7 @@ begin
     tokColon:
       begin
         NextToken;
-        NewFormalParameterType;
+        OldFormalParameterType;
         if TokenID = tokEqual then
         begin
           NextToken;
@@ -1940,7 +1939,7 @@ begin
     tokColon:
       begin
         NextToken;
-        NewFormalParameterType;
+        OldFormalParameterType;
         if TokenID = tokEqual then
         begin
           NextToken;
@@ -1958,7 +1957,7 @@ begin
     tokColon:
       begin
         NextToken;
-        NewFormalParameterType;
+        OldFormalParameterType;
       end
   end;
 end;
@@ -1971,7 +1970,7 @@ begin
     tokColon:
       begin
         NextToken;
-        NewFormalParameterType;
+        OldFormalParameterType;
       end
   end;
 end;
@@ -1987,7 +1986,7 @@ begin
           tokColon:
             begin
               NextToken;
-              NewFormalParameterType;
+              OldFormalParameterType;
               if TokenID = tokEqual then
               begin
                 NextToken;
@@ -1997,7 +1996,7 @@ begin
         end;
 
         {Expected(tokColon);
-        NewFormalParameterType;
+        OldFormalParameterType;
         if TokenID = tokEqual then
         begin
           NextToken;
@@ -2024,31 +2023,6 @@ end;
 procedure TmwSimplePasPar.ParameterName;
 begin
   Expected(tokIdentifier);
-end;
-
-procedure TmwSimplePasPar.NewFormalParameterType;
-begin
-  case TokenID of
-    tokArray:
-      begin
-        NextToken;
-        Expected(tokOf);
-        case TokenID of
-          tokConst: (*new in ObjectPascal80*)
-            begin
-              NextToken;
-            end;
-        else
-          begin
-            OldFormalParameterType;
-          end;
-        end;
-      end;
-  else
-    begin
-      OldFormalParameterType;
-    end;
-  end;
 end;
 
 procedure TmwSimplePasPar.OldFormalParameterType;
@@ -2508,7 +2482,7 @@ begin
     tokColon:
       begin
         NextToken;
-        NewFormalParameterType;
+        OldFormalParameterType;
         if TokenID = tokEqual then
         begin
           NextToken;
@@ -3413,8 +3387,12 @@ begin
     end;
     Expected(tokSquareClose);
   end;
-  Expected(tokOf);
-  TypeKind;
+
+  if (TokenID = tokOf) then
+  begin
+    Expected(tokOf);
+    TypeKind;
+  end;
 end;
 
 procedure TmwSimplePasPar.EnumeratedType;
@@ -4055,7 +4033,14 @@ begin
     while TokenID in [tokClass, tokConstructor, tokDestructor, tokFunction,
       tokProcedure, tokProperty{$IFDEF D8_NEWER}, tokSquareOpen, tokVar, tokConst{$ENDIF}] do
     begin
-      ClassMethodOrProperty;
+      if (TokenID = tokVar) then
+      begin
+        NextToken;
+        ClassField;
+        SEMICOLON;
+      end
+      else
+        ClassMethodOrProperty;
     end;
     {$IFDEF D8_NEWER}//JThurman 2004-03-22
     {Nested types for D8}
@@ -4089,8 +4074,8 @@ begin
         NextToken;
         while (TokenID = tokIdentifier) and (ExID = tokUnknown) do
         begin
-          ClassField;
-          SemiColon;
+          VarDeclaration;
+          NextToken;
         end;
       end;
     tokConst:
@@ -4099,7 +4084,7 @@ begin
         while (TokenID = tokIdentifier) and (ExID = tokUnknown) do
         begin
           ConstantDeclaration;
-          SemiColon;
+          NextToken;
         end;
       end;
     {$ENDIF}

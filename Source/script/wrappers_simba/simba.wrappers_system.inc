@@ -36,7 +36,7 @@ begin
 end;
 
 type
-  TSync = class
+  TSync = object
     Params: PParamArray;
 
     procedure Execute;

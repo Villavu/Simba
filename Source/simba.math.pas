@@ -285,12 +285,12 @@ begin
 end;
 
 function IntInBox(x, y: Integer; Box: TBox): Boolean;
-begin;
+begin
   result := (((x >= Box.x1) and(x <= Box.x2)) and ((y >= box.y1) and (y <= box.y2)));
 end;
 
 function PointToBox(topLeft,bottomRight: TPoint): TBox;
-begin;
+begin
   result.x1 := topLeft.x;
   result.y1 := topLeft.y;
   result.x2 := bottomRight.x;

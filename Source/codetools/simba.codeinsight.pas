@@ -305,7 +305,7 @@ function TCodeInsight.GetMembersOfType(Declaration: TDeclaration): TDeclarationA
 
   procedure GetFields(Declaration: TciRecordType);
   begin
-    Result := Result + Declaration.Items.GetItemsOfClass(TciClassField);
+    Result := Result +  Declaration.Items.GetItemsOfClass(TciVarDeclaration);
   end;
 
   procedure GetEnumElements(Declaration: TciTypeDeclaration);
@@ -322,7 +322,7 @@ function TCodeInsight.GetMembersOfType(Declaration: TDeclaration): TDeclarationA
   begin
     Depth := 0;
 
-    while (Declaration <> nil) and (Depth < 50) do
+    while (Declaration <> nil) and (Depth < 20) do
     begin
       Declarations := GlobalsByName['!' + Declaration.Name];
       for I := 0 to High(Declarations) do
@@ -351,7 +351,7 @@ function TCodeInsight.GetMembersOfType(Declaration: TDeclaration): TDeclarationA
       Inc(Depth);
     end;
 
-    if Depth >= 50 then
+    if Depth >= 20 then
       WriteLn('Recursive type detected');
   end;
 

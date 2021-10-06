@@ -376,7 +376,7 @@ type
     procedure InParameter; override;                                            //Procedure/Function Parameters
     procedure VarParameter; override;                                           //Procedure/Function Parameters
     procedure ParameterName; override;                                          //Procedure/Function Parameters
-    procedure NewFormalParameterType; override;                                 //Procedure/Function Parameters
+    procedure OldFormalParameterType; override;                                 //Procedure/Function Parameters
     procedure FormalParameterList; override;                                    //Procedure/Function Parameter List
     procedure ArrayType; override;                                              //Array
     procedure ArrayConstant; override;                                          //Array Const
@@ -1831,7 +1831,7 @@ begin
   PopStack;
 end;
 
-procedure TCodeParser.NewFormalParameterType;
+procedure TCodeParser.OldFormalParameterType;
 begin
   if (not InDeclarations([TciConstParameter, TciOutParameter, TciFormalParameter, TciInParameter, TciVarParameter, TciConstRefParameter])) then
   begin

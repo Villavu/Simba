@@ -229,7 +229,7 @@ begin
   try
     Canvas.Font := Self.Font;
 
-    FColumnWidth := Canvas.TextWidth('procedure  ');
+    FColumnWidth := Canvas.TextWidth('class const ');
   finally
     Free();
   end;
@@ -422,12 +422,14 @@ type
   end;
 
 const
-  COLUMN_VAR:   TColumnFormat = (Text: 'var';       Color: clPurple);
-  COLUMN_FUNC:  TColumnFormat = (Text: 'function';  Color: clTeal);
-  COLUMN_PROC:  TColumnFormat = (Text: 'procedure'; Color: clNavy);
-  COLUMN_TYPE:  TColumnFormat = (Text: 'type';      Color: clMaroon);
-  COLUMN_ENUM:  TColumnFormat = (Text: 'enum';      Color: clGreen);
-  COLUMN_CONST: TColumnFormat = (Text: 'const';     Color: clOlive);
+  COLUMN_VAR:         TColumnFormat = (Text: 'var';         Color: clPurple);
+  COLUMN_FUNC:        TColumnFormat = (Text: 'function';    Color: clTeal);
+  COLUMN_PROC:        TColumnFormat = (Text: 'procedure';   Color: clNavy);
+  COLUMN_TYPE:        TColumnFormat = (Text: 'type';        Color: clMaroon);
+  COLUMN_ENUM:        TColumnFormat = (Text: 'enum';        Color: clGreen);
+  COLUMN_CONST:       TColumnFormat = (Text: 'const';       Color: clOlive);
+  COLUMN_CLASS_VAR:   TColumnFormat = (Text: 'class var';   Color: clPurple);
+  COLUMN_CLASS_CONST: TColumnFormat = (Text: 'class const'; Color: clOlive);
 var
   Declaration: TDeclaration;
   Column: TColumnFormat;
@@ -441,20 +443,30 @@ begin
       Column := COLUMN_FUNC
     else
       Column := COLUMN_PROC;
-  end
-  else
+  end else
+  if (Declaration.Owner is TciRecordType) then
+  begin
+    if (Declaration is TciClassField) then
+      Column := COLUMN_VAR
+    else
+    if (Declaration is TciConstantDeclaration) then
+      Column := COLUMN_CLASS_CONST
+    else
+    if (Declaration is TciVarDeclaration) then
+      Column := COLUMN_CLASS_VAR;
+  end else
   begin
     if (Declaration is TciTypeDeclaration) then
       Column := COLUMN_TYPE
+    else
+    if (Declaration is TciEnumElement) then
+      Column := COLUMN_ENUM
     else
     if (Declaration is TciConstantDeclaration) then
       Column := COLUMN_CONST
     else
     if (Declaration is TciVarDeclaration) then
-      Column := COLUMN_VAR
-    else
-    if (Declaration is TciEnumElement) then
-      Column := COLUMN_ENUM;
+      Column := COLUMN_VAR;
   end;
 
   Canvas.Brush.Style := bsClear;

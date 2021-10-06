@@ -73,12 +73,11 @@ begin
     '                                                                         ' + LineEnding +
     'procedure _CallOnTerminateMethods;                                       ' + LineEnding +
     'begin                                                                    ' + LineEnding +
-    'end;                                                                     ',
+    'end;',
     '!AddOnTerminate'
   );
 
   Compiler.addDelayedCode(
-    '                                                                         ' + LineEnding +
     'procedure AddOnTerminate(Proc: procedure); overload;                     ' + LineEnding +
     'begin                                                                    ' + LineEnding +
     '  SetLength(_OnTerminateMethods, Length(_OnTerminateMethods) + 1);       ' + LineEnding +

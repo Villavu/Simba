@@ -189,17 +189,17 @@ begin
 
   // Internal methods
   Write('{$DEFINE Lape}');
-  Write('procedure Delete(A: array of Anything; Index: Int32; Count: Int32 = Length(A)); external;');
-  Write('procedure Insert(Item: Anything; A: array of Anything; Index: Int32); external;');
-  Write('procedure Copy(A: array of Anything; Index: Int32 = 0; Count: Int32 = Length(A)); overload; external;');
+  Write('procedure Delete(A: array; Index: Int32; Count: Int32 = Length(A)); external;');
+  Write('procedure Insert(Item: Anything; A: array; Index: Int32); external;');
+  Write('procedure Copy(A: array; Index: Int32 = 0; Count: Int32 = Length(A)); overload; external;');
   Write('procedure Copy(S: String; Index: Int32 = 1; Count: Int32 = Length(S)); overload; external;');
-  Write('procedure SetLength(A: Array of Anything; Length: Int32); overload; external;');
+  Write('procedure SetLength(A: array; Length: Int32); overload; external;');
   Write('procedure SetLength(S: String; Length: Int32); overload; external;');
-  Write('function Low(A: array of Anything): Int32; external;');
+  Write('function Low(A: array): Int32; external;');
   Write('function Low(A: String): Int32; external;');
-  Write('function High(A: array of Anything): Int32; external;');
+  Write('function High(A: array): Int32; external;');
   Write('function High(A: String): Int32; external;');
-  Write('function Length(A: array of Anything): Int32; overload; external;');
+  Write('function Length(A: array): Int32; overload; external;');
   Write('function Length(S: String): Int32; overload; external;');
   Write('procedure WriteLn(Args: Anything); external;');
   Write('procedure Write(Args: Anything); external;');
@@ -214,10 +214,15 @@ begin
   Write('function Dec(var X: Ordinal; Amount: SizeInt): Ordinal; overload; external;');
   Write('function Ord(X: Ordinal): Int32; external;');
   Write('function WaitUntil(Condition: Expression; Interval, Timeout: Int32): Boolean; external;');
-  Write('procedure Sort(var A: array of Anything); overload; external;');
-  Write('procedure Sort(var A: array of Anything; CompareFunc: function(constref L, R: Anything): Int32); overload; external;');
-  Write('function Sorted(constref A: array of Anything): array of Anything; overload; external;');
-  Write('function Sorted(constref A: array of Anything; CompareFunc: function(constref L, R: Anything): Int32): array of Anything; overload; external;');
+  Write('function Default(T: AnyType): AnyType; external;');
+  Write('procedure Sort(var A: array); overload; external;');
+  Write('procedure Sort(var A: array; CompareFunc: function(constref L, R: Anything): Int32); overload; external;');
+  Write('procedure Sort(var A: array; Weights: array of Int64); overload; external;');
+  Write('procedure Sort(var A: array; Weights: array of Extended); overload; external;');
+  Write('function Sorted(constref A: array): array; overload; external;');
+  Write('function Sorted(constref A: array; CompareFunc: function(constref L, R: Anything): Int32): array; overload; external;');
+  Write('function Sorted(constref A: array; Weights: array of Int64): array; overload; external;');
+  Write('function Sorted(constref A: array; Weights: array of Extended): array; overload; external;');
 
   // These require the SimbaScript variable which isn't created when dumping.
   Write('const ScriptFile = ""');
