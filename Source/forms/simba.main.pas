@@ -211,6 +211,8 @@ type
     FRecentFiles: TStringList;
     FBinaryHash: String;
 
+    procedure ShowColorPickerHistoryASync(Data: PtrInt);
+
     procedure FontChanged(Sender: TObject); override;
 
     procedure SizeComponents;
@@ -619,6 +621,12 @@ begin
     on E: Exception do
       MessageDlg('Exception while changing script state: ' + E.Message, mtError, [mbOK], 0);
   end;
+end;
+
+procedure TSimbaForm.ShowColorPickerHistoryASync(Data: PtrInt);
+begin
+  MenuItemColourHistory.Checked := True;
+  MenuItemColourHistory.OnClick(MenuItemColourHistory);
 end;
 
 procedure TSimbaForm.FontChanged(Sender: TObject);
@@ -1046,18 +1054,16 @@ begin
   try
     with TSimbaColorPicker.Create(FWindowSelection) do
     try
-      SimbaColorPickerHistoryForm.Add(Point, Color, True);
+      if not Picked then
+        Exit;
 
+      SimbaColorPickerHistoryForm.Add(Point, Color, True);
       SimbaOutputForm.Add('Color picked: ' + IntToStr(Color) + ' at (' + IntToStr(Point.X) + ', ' + IntToStr(Point.Y) + ')');
     finally
       Free();
     end;
 
-    if (not MenuItemColourHistory.Checked) then
-    begin
-      MenuItemColourHistory.Checked := True;
-      MenuItemColourHistory.OnClick(MenuItemColourHistory);
-    end;
+    Application.QueueAsyncCall(@ShowColorPickerHistoryASync, 0);
   except
     on E: Exception do
       ShowMessage('Exception while picking color: ' + E.Message + '(' + E.ClassName + ')');

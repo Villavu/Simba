@@ -514,8 +514,8 @@ begin
   TabWidth := 2;
   BlockIndent := 2;
 
-  Highlighter := TSynFreePascalSyn.Create(Self);
-  with Highlighter as TSynFreePascalSyn do
+  Highlighter := TSynPasSyn.Create(Self);
+  with Highlighter as TSynPasSyn do
   begin
     CommentAttri.Foreground := clBlue;
     CommentAttri.Style := [fsBold];

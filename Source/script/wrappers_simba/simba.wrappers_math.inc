@@ -43,11 +43,6 @@ begin
   PExtended(Result)^ := FixD(PExtended(Params^[0])^);
 end;
 
-procedure _LapeInRange(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  Pboolean(Result)^ := InRange(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
 procedure _LapeIntToBox(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PBox(Result)^ := IntToBox(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);

@@ -14,14 +14,14 @@ uses
   simba.iomanager, simba.oswindow, simba.imageboxzoom;
 
 type
-  TSimbaColorPickerHint = class(TForm)
+  TSimbaColorPickerHint = class(THintWindow)
   protected
     procedure Paint; override;
   public
     Zoom: TSimbaImageBoxZoom;
     Info: TLabel;
 
-    constructor CreateNew(AOwner: TComponent; Num: Integer = 0); override;
+    constructor Create(AOwner: TComponent); override;
   end;
 
   TSimbaColorPicker = class
@@ -32,12 +32,18 @@ type
     FIOManager: TIOManager;
     FHint: TSimbaColorPickerHint;
     FImage: TImage;
+    FPicked: Boolean;
+    FImageX, FImageY: Integer;
+
+    procedure FormClosed(Sender: TObject; var CloseAction: TCloseAction);
+    procedure HintKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 
     procedure ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   public
     property Color: Int32 read FColor;
     property Point: TPoint read FPoint;
+    property Picked: Boolean read FPicked;
 
     constructor Create(TargetWindow: TOSWindow);
     destructor Destroy; override;
@@ -46,6 +52,7 @@ type
 implementation
 
 uses
+  lcltype,
   simba.bitmap;
 
 procedure TSimbaColorPickerHint.Paint;
@@ -57,9 +64,9 @@ begin
   inherited Paint();
 end;
 
-constructor TSimbaColorPickerHint.CreateNew(AOwner: TComponent; Num: Integer);
+constructor TSimbaColorPickerHint.Create(AOwner: TComponent);
 begin
-  inherited CreateNew(AOwner);
+  inherited Create(AOwner);
 
   BorderStyle := bsNone;
   AutoSize := True;
@@ -72,9 +79,39 @@ begin
 
   Info := TLabel.Create(Self);
   Info.Parent := Self;
-  Info.BorderSpacing.Right:=10;
+  Info.BorderSpacing.Right := 10;
   Info.AnchorToNeighbour(akLeft, 10, Zoom);
   Info.AnchorVerticalCenterTo(Zoom);
+end;
+
+procedure TSimbaColorPicker.FormClosed(Sender: TObject; var CloseAction: TCloseAction);
+begin
+  if FPicked then
+  begin
+    FIOManager.GetMousePos(FPoint.X, FPoint.Y);
+    FColor := FImage.Picture.Bitmap.Canvas.Pixels[FImageX, FImageY];
+  end;
+
+  CloseAction := caFree;
+end;
+
+procedure TSimbaColorPicker.HintKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  case Key of
+    VK_UP:     Mouse.CursorPos := Mouse.CursorPos + TPoint.Create(0, -1);
+    VK_LEFT:   Mouse.CursorPos := Mouse.CursorPos + TPoint.Create(-1, 0);
+    VK_RIGHT:  Mouse.CursorPos := Mouse.CursorPos + TPoint.Create(1, 0);
+    VK_DOWN:   Mouse.CursorPos := Mouse.CursorPos + TPoint.Create(0, 1);
+    VK_ESCAPE: FForm.Close();
+    VK_RETURN:
+      begin
+        FPicked := True;
+
+        FForm.Close();
+      end;
+  end;
+
+  Key := VK_UNKNOWN;
 end;
 
 procedure TSimbaColorPicker.ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -82,6 +119,9 @@ const
   INFO = 'Color: %d' + LineEnding +
          'Position: %d, %d';
 begin
+  FImageX := X;
+  FImageY := Y;
+
   FIOManager.GetMousePos(FPoint.X, FPoint.Y);
 
   with FImage.ClientToScreen(TPoint.Create(X + 25, Y - (FHint.Height div 2))) do
@@ -96,9 +136,7 @@ end;
 
 procedure TSimbaColorPicker.ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  FIOManager.GetMousePos(FPoint.X, FPoint.Y);
-
-  FColor := TImage(Sender).Picture.Bitmap.Canvas.Pixels[X, Y];
+  FPicked := True;
 
   FForm.Close();
 end;
@@ -114,12 +152,14 @@ begin
   FForm := TForm.CreateNew(nil);
   with FForm do
   begin
-    BorderStyle := bsNone;
-
     Left := DesktopLeft;
     Top := DesktopTop;
     Width := DesktopWidth;
     Height := DesktopHeight;
+
+    BorderStyle := bsNone;
+
+    OnClose := @FormClosed;
   end;
 
   FImage := TImage.Create(FForm);
@@ -148,7 +188,8 @@ begin
 
   FForm.ShowOnTop();
 
-  FHint := TSimbaColorPickerHint.CreateNew(nil);
+  FHint := TSimbaColorPickerHint.Create(FForm);
+  FHint.OnKeyDown := @HintKeyDown;
   FHint.Show();
   FHint.BringToFront();
 
@@ -162,8 +203,6 @@ end;
 
 destructor TSimbaColorPicker.Destroy;
 begin
-  FForm.Free();
-  FHint.Free();
   FIOManager.Free();
 
   inherited Destroy();

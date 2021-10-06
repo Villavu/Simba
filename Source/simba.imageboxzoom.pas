@@ -98,14 +98,14 @@ end;
 
 procedure TSimbaImageBoxZoom.Move(Image: TImage; X, Y: Integer);
 var
-  LoopX, LoopY, StartX, StartY: Integer;
+  LoopX, LoopY: Integer;
 begin
-  StartX := X - FPixelCount;
-  StartY := Y - FPixelCount;
+  Dec(X, FPixelCount div 2);
+  Dec(Y, FPixelCount div 2);
 
-  for LoopX := StartX to X + FPixelCount do
-    for LoopY := StartY to Y + FPixelCount do
-      FBitmap.Canvas.Pixels[LoopX - StartX, LoopY - StartY] := Image.Canvas.Pixels[LoopX, LoopY];
+  for LoopX := 0 to FBitmap.Width - 1 do
+    for LoopY := 0 to FBitmap.Height - 1 do
+      FBitmap.Canvas.Pixels[LoopX, LoopY] := Image.Canvas.Pixels[X + LoopX, Y + LoopY];
 
   Invalidate();
 end;

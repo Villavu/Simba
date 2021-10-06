@@ -32,6 +32,8 @@ type
     procedure addClass(Name: lpString; Parent: lpString = 'TObject'); virtual;
     procedure addClassVar(Obj, Item, Typ: lpString; ARead: Pointer; AWrite: Pointer = nil; Arr: Boolean = False; ArrType: lpString = 'UInt32'); virtual;
 
+    function HandleDirective(Sender: TLapeTokenizerBase; Directive, Argument: lpString): Boolean; reintroduce;
+
     procedure Import; virtual;
     function Compile: Boolean; override;
   end;
@@ -94,6 +96,11 @@ begin
 
   if (AWrite <> nil) then
     addGlobalFunc(Format('procedure %s.set%s(%sconst Value: %s); constref;', [Obj, Item, Param, Typ]), AWrite);
+end;
+
+function TSimbaScript_Compiler.HandleDirective(Sender: TLapeTokenizerBase; Directive, Argument: lpString): Boolean;
+begin
+  Result := inherited HandleDirective(Sender, Directive, Argument);
 end;
 
 procedure TSimbaScript_Compiler.Import;

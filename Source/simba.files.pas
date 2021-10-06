@@ -54,6 +54,7 @@ type
   function GetFiles(Path, Ext: string): TStringArray;
   function GetDirectories(Path: string): TStringArray;
   function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
+  function FindFiles(Directories: TStringArray; WildCard: String; Recursive: Boolean = False): TStringArray;
   function FindPlugin(var FileName: String; const Directories: array of String): Boolean;
   procedure ZipFiles(const ArchiveFileName: String; const Files: TStringArray);
   procedure UnZipFile(const ArchiveFileName, OutputDirectory: String);
@@ -101,6 +102,41 @@ begin
     end;
 end;
 
+function FindFiles(Directories: TStringArray; WildCard: String; Recursive: Boolean): TStringArray;
+var
+  I: Integer;
+  Path: String;
+begin
+  Result := Default(TStringArray);
+  if Length(Directories) = 0 then
+    Exit;
+
+  I := Pos('*', WildCard) - 1;
+  if (I > 0) then
+  begin
+    Path := Copy(Wildcard, 1, I);
+    Wildcard := Copy(WildCard, I+1);
+  end else
+    Path := '';
+
+  for I := 0 to High(Directories) do
+    if DirectoryExists(Directories[I]) then
+    begin
+      Directories[I] := ExpandFileName(ConcatPaths([Directories[I], Path]));
+
+      with FindAllFiles(Directories[I], WildCard, Recursive) do
+      try
+        Sort(); // sort, else it's dependant on how filesystem orders
+
+        Result := ToStringArray();
+        if Length(Result) > 0 then
+          Exit;
+      finally
+        Free();
+      end;
+    end;
+end;
+
 function FindPlugin(var FileName: String; const Directories: array of String): Boolean;
 begin
   Result := FindFile(FileName, '', Directories) or
@@ -119,6 +155,8 @@ var
 begin
   c := 0;
   Path := IncludeTrailingPathDelimiter(Path);
+  Ext := Ext.TrimLeft(['.']);
+
   if FindFirst(Path + '*.' + ext, faAnyFile, SearchRec) = 0 then
   begin
     repeat
@@ -132,7 +170,7 @@ begin
   end;
 end;
 
-function GetDirectories(Path: string): TstringArray;
+function GetDirectories(Path: string): TStringArray;
 var
     SearchRec : TSearchRec;
     c : integer;

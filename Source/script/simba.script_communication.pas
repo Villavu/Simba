@@ -347,7 +347,7 @@ begin
   ScriptTab := SimbaScriptTabsForm.FindTab(ScriptInstance);
   if (ScriptTab <> nil) then
   begin
-    if (ScriptTab.ScriptFileName = FileName) or ((ScriptTab.ScriptFileName = '') and (ScriptTab.ScriptTitle = FileName)) then
+    if (SameFileName(ScriptTab.ScriptFileName, FileName)) or ((ScriptTab.ScriptFileName = '') and (ScriptTab.ScriptTitle = FileName)) then
     begin
       ScriptTab.Show();
       ScriptTab.SetError(Line, Col);
@@ -356,9 +356,7 @@ begin
       SimbaScriptTabsForm.CurrentTab.SetError(Line, Col);
   end;
 
-  // Ensure error message is visible
-  SimbaOutputForm.Editor.CaretX := 0;
-  SimbaOutputForm.Editor.CaretY := SimbaOutputForm.Editor.Lines.Count;
+  SimbaOutputForm.Editor.TopLine := SimbaOutputForm.Editor.Lines.Count;
 end;
 
 constructor TSimbaMethod_ScriptError.Create(Line, Col: Int32; FileName: ShortString);

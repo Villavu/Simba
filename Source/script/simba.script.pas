@@ -110,18 +110,30 @@ end;
 function TSimbaScript.HandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
 var
   Plugin: TSimbaScriptPlugin;
+  CurrentDirectory, FileName: String;
 begin
-  Result := Directive.ToUpper().IndexOfAny(['ERROR', 'LOADLIB', 'LIBPATH', 'IFHASLIB', 'IFHASFILE']) > -1;
+  Result := Directive.ToUpper().IndexOfAny(['ERROR', 'LOADLIB', 'LIBPATH', 'IFHASLIB', 'IFHASFILE', 'INCLUDE_ALL']) > -1;
 
   if Result then
   try
     if InIgnore or InPeek or (Argument = '') then
       Exit;
 
+    if FileExists(Sender.Tokenizer.FileName) then
+      CurrentDirectory := ExtractFileDir(Sender.Tokenizer.FileName)
+    else
+      CurrentDirectory := '';
+
     case Directive.ToUpper() of
+      'INCLUDE_ALL':
+        begin
+          for FileName in FindFiles([CurrentDirectory, GetIncludePath(), GetSimbaPath()], Argument) do // {$include_all foo/*.pas;*.foo}
+            FCompiler.HandleDirective(FCompiler.Tokenizer, 'include', FileName);
+        end;
+
       'LOADLIB':
         begin
-          if not FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), GetPluginPath(), GetSimbaPath()]) then
+          if not FindPlugin(Argument, [CurrentDirectory, GetPluginPath(), GetSimbaPath()]) then
             raise Exception.Create('Plugin "' + Argument + '" not found');
 
           Plugin := TSimbaScriptPlugin.Create(Argument);
@@ -130,7 +142,7 @@ begin
 
       'LIBPATH':
         begin
-          if not FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), GetPluginPath(), GetSimbaPath()]) then
+          if not FindPlugin(Argument, [CurrentDirectory, GetPluginPath(), GetSimbaPath()]) then
             Argument := '';
 
           FCompiler.pushTokenizer(TLapeTokenizerString.Create(#39 + Argument + #39));
@@ -138,7 +150,7 @@ begin
 
       'IFHASLIB':
         begin
-          if not FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName), GetPluginPath(), GetSimbaPath()]) then
+          if not FindPlugin(Argument, [CurrentDirectory, GetPluginPath(), GetSimbaPath()]) then
             FCompiler.pushConditional((not InIgnore) and True, Sender.DocPos)
           else
             FCompiler.pushConditional((not InIgnore) and False, Sender.DocPos);
@@ -146,7 +158,7 @@ begin
 
       'IFHASFILE':
         begin
-          FCompiler.pushConditional((not InIgnore) and FindFile(Argument, '', [IncludeTrailingPathDelimiter(ExtractFileDir(Sender.Tokenizer.FileName)), GetIncludePath(), GetSimbaPath()]), Sender.DocPos);
+          FCompiler.pushConditional((not InIgnore) and FindFile(Argument, '', [CurrentDirectory, GetIncludePath(), GetSimbaPath()]), Sender.DocPos);
         end;
 
       'ERROR':
