@@ -78,7 +78,7 @@ procedure TSimbaScriptInstance.ManageProcess;
 begin
   FProcess.WaitOnExit();
   DebugLn('TSimbaScriptProcess.ManageProcess: Process %d terminated (%d)', [FProcess.ProcessID, FProcess.ExitCode]);
-  Free();
+  TThread.Synchronize(TThread.CurrentThread, @Free);
 end;
 
 function TSimbaScriptInstance.GetTimeRunning: UInt64;

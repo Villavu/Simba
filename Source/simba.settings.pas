@@ -100,7 +100,7 @@ var
 implementation
 
 uses
-  lazloggerbase,
+  lazloggerbase, synedit,
   simba.stringutil, simba.files;
 
 procedure TSimbaSetting.SetValue(AValue: Variant);
@@ -266,14 +266,14 @@ begin
   GUI.Layout := TSimbaSetting_BinaryString.Create(Self, 'GUI', 'Layout', '');
   GUI.Notes := TSimbaSetting_BinaryString.Create(Self, 'GUI', 'Notes', '');
   GUI.RecentFiles := TSimbaSetting_BinaryString.Create(Self, 'GUI', 'RecentFiles', '');
-  GUI.CustomFontSize := TSimbaSetting_Integer.Create(Self, 'GUI', 'CustomFontSize', {$IFDEF WINDOWS}11{$ELSE}0{$ENDIF});
+  GUI.CustomFontSize := TSimbaSetting_Integer.Create(Self, 'GUI', 'CustomFontSize', 0);
   GUI.ToolbarSize := TSimbaSetting_Integer.Create(Self, 'GUI', 'ToolbarSize', 24);
   GUI.ColorPickerHistory := TSimbaSetting_BinaryString.Create(Self, 'GUI', 'ColorPickerHistory', '');
 
   // Editor
   Editor.DefaultScript := TSimbaSetting_BinaryString.Create(Self, 'Editor', 'DefaultScript', 'program new;' + LineEnding + 'begin' + LineEnding + 'end.');
   Editor.CustomColors := TSimbaSetting_String.Create(Self, 'Editor', 'CustomColors', '');
-  Editor.FontSize := TSimbaSetting_Integer.Create(Self, 'Editor', 'FontSize', {$IFDEF WINDOWS}13{$ELSE}0{$ENDIF});
+  Editor.FontSize := TSimbaSetting_Integer.Create(Self, 'Editor', 'FontSize', SynDefaultFontSize + 1);
   Editor.FontName := TSimbaSetting_String.Create(Self, 'Editor', 'FontName', {$IFDEF WINDOWS}'Consolas'{$ELSE}''{$ENDIF});
   Editor.AntiAliased := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AntiAliased', True);
   Editor.IgnoreCodeToolsIDEDirective := TSimbaSetting_Boolean.Create(Self, 'Editor', 'IgnoreCodeToolsIDEDirective', False);

@@ -1,31 +1,32 @@
 object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
-  Left = 1842
-  Height = 344
-  Top = 363
-  Width = 664
+  Left = 1225
+  Height = 430
+  Top = 540
+  Width = 830
   ActiveControl = ColorListBox
   Caption = 'Color Picker History'
-  ClientHeight = 344
-  ClientWidth = 664
+  ClientHeight = 430
+  ClientWidth = 830
+  DesignTimePPI = 120
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '2.2.0.1'
+  LCLVersion = '2.2.0.2'
   object ColorListBox: TColorListBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
     AnchorSideRight.Control = ColorPanel
     AnchorSideBottom.Control = ButtonDelete
-    Left = 5
-    Height = 304
+    Left = 6
+    Height = 388
     Top = 0
-    Width = 427
-    ColorRectWidth = 14
+    Width = 534
+    ColorRectWidth = 18
     Selected = -1
     Style = []
     Align = alCustom
     Anchors = [akTop, akLeft, akRight, akBottom]
-    BorderSpacing.Left = 5
-    BorderSpacing.Bottom = 5
+    BorderSpacing.Left = 6
+    BorderSpacing.Bottom = 6
     ClickOnSelChange = False
     ExtendedSelect = False
     ItemHeight = 0
@@ -36,14 +37,14 @@ object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
     AnchorSideLeft.Control = Owner
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 5
+    Left = 6
     Height = 30
-    Top = 309
+    Top = 394
     Width = 70
     Anchors = [akLeft, akBottom]
     AutoSize = True
-    BorderSpacing.Left = 5
-    BorderSpacing.Bottom = 5
+    BorderSpacing.Left = 6
+    BorderSpacing.Bottom = 6
     Caption = 'Delete'
     OnClick = HandleButtonDeleteClick
     TabOrder = 1
@@ -53,53 +54,53 @@ object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
     AnchorSideLeft.Side = asrBottom
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 80
+    Left = 82
     Height = 30
-    Top = 309
+    Top = 394
     Width = 60
     Align = alCustom
     Anchors = [akLeft, akBottom]
     AutoSize = True
-    BorderSpacing.Left = 5
-    BorderSpacing.Bottom = 5
+    BorderSpacing.Left = 6
+    BorderSpacing.Bottom = 6
     Caption = 'Clear'
     OnClick = HandleButtonClearClick
     TabOrder = 2
   end
   object ColorPanel: TPanel
-    Left = 432
-    Height = 344
+    Left = 540
+    Height = 430
     Top = 0
-    Width = 232
+    Width = 290
     Align = alRight
     BevelOuter = bvNone
-    ClientHeight = 344
-    ClientWidth = 232
+    ClientHeight = 430
+    ClientWidth = 290
     TabOrder = 3
     object ButtonExit: TButton
-      Left = 5
+      Left = 6
       Height = 30
-      Top = 309
-      Width = 222
+      Top = 394
+      Width = 278
       Align = alBottom
       AutoSize = True
-      BorderSpacing.Left = 5
-      BorderSpacing.Right = 5
-      BorderSpacing.Bottom = 5
+      BorderSpacing.Left = 6
+      BorderSpacing.Right = 6
+      BorderSpacing.Bottom = 6
       Caption = 'Exit'
       OnClick = HandleButtonExitClick
       TabOrder = 0
     end
     object ButtonPickColor: TButton
-      Left = 5
+      Left = 6
       Height = 30
-      Top = 274
-      Width = 222
+      Top = 358
+      Width = 278
       Align = alBottom
       AutoSize = True
-      BorderSpacing.Left = 5
-      BorderSpacing.Right = 5
-      BorderSpacing.Bottom = 5
+      BorderSpacing.Left = 6
+      BorderSpacing.Right = 6
+      BorderSpacing.Bottom = 6
       Caption = 'Pick Color'
       OnClick = HandleButtonPickColorClick
       TabOrder = 1
@@ -110,28 +111,32 @@ object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
       AnchorSideRight.Control = ColorPanel
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ButtonPickColor
-      Left = 5
-      Height = 269
-      Top = 5
-      Width = 222
+      Left = 6
+      Height = 352
+      Top = 6
+      Width = 278
       Align = alTop
       Anchors = [akTop, akLeft, akRight, akBottom]
       AutoFillColumns = True
-      BorderSpacing.Left = 5
-      BorderSpacing.Top = 5
-      BorderSpacing.Right = 5
+      BorderSpacing.Left = 6
+      BorderSpacing.Top = 6
+      BorderSpacing.Right = 6
       BorderStyle = bsNone
       Color = clForm
       ColCount = 2
       Columns = <      
         item
+          MinSize = 12
+          MaxSize = 250
           SizePriority = 0
           Title.Caption = 'Title'
-          Width = 111
+          Width = 139
         end      
         item
+          MinSize = 12
+          MaxSize = 250
           Title.Caption = 'Title'
-          Width = 111
+          Width = 139
         end>
       DefaultDrawing = False
       FixedColor = clForm
@@ -139,26 +144,28 @@ object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
       FixedRows = 0
       GridLineWidth = 0
       Options = [goEditing, goAlwaysShowEditor]
-      RowCount = 4
       TabOrder = 2
       OnKeyDown = StringGridKeyDown
       ColWidths = (
-        111
-        111
+        139
+        139
       )
       Cells = (
-        4
+        5
         0
         0
         'Color:'
         0
         1
-        'RGB:'
+        'Hex:'
         0
         2
-        'HSL:'
+        'RGB:'
         0
         3
+        'HSL:'
+        0
+        4
         'Point:'
       )
     end

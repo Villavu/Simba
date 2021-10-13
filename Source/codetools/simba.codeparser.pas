@@ -975,7 +975,7 @@ end;
 
 function TDeclaration.IsName(const Value: String): Boolean;
 begin
-  Result := UpperCase(Value) = FNameUpper;
+  Result := UpperCase(Value) = GetNameUpperProp;
 end;
 
 constructor TDeclaration.Create(ALexer: TmwPasLex; AOwner: TDeclaration; AOrigin: PAnsiChar; AStart: Integer; AEnd: Integer);

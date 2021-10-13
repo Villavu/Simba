@@ -84,7 +84,7 @@ implementation
 {$R *.lfm}
 
 uses
-  lazfileutils,
+  lazfileutils, EditBtn,
   simba.main, simba.scripttabsform;
 
 procedure TSimbaFunctionListNode.Open;
@@ -384,9 +384,9 @@ begin
   FFilter.Align := alBottom;
   FFilter.FilteredTreeview := FTreeView;
   FFilter.OnAfterFilter := @DoAfterFilter;
-  FFilter.ButtonWidth := 0;
-  FFilter.Spacing := 0;
+  FFilter.Spacing := 2;
   FFilter.TextHint := '(search)';
+  FFilter.Flat := True;
 
   FHint := TSimbaHintWindow.Create(Self);
 
