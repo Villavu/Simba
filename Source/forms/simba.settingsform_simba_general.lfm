@@ -1,13 +1,15 @@
 object SimbaGeneralFrame: TSimbaGeneralFrame
   Left = 0
-  Height = 204
+  Height = 255
   Top = 0
-  Width = 457
-  ClientHeight = 204
-  ClientWidth = 457
+  Width = 571
+  ClientHeight = 255
+  ClientWidth = 571
+  DesignTimePPI = 120
+  ParentFont = False
   TabOrder = 0
-  DesignLeft = 510
-  DesignTop = 987
+  DesignLeft = 1925
+  DesignTop = 20
   object ToolbarSizeTrackBar: TTrackBar
     AnchorSideLeft.Control = ToolbarSizeCaption
     AnchorSideLeft.Side = asrBottom
@@ -16,10 +18,11 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Side = asrBottom
-    Left = 84
-    Height = 25
-    Top = 35
-    Width = 373
+    Left = 147
+    Height = 31
+    Top = 45
+    Width = 424
+    AutoSize = True
     Max = 32
     Min = 12
     OnChange = ToolbarSizeTrackBarChange
@@ -28,7 +31,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Align = alCustom
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 2
-    BorderSpacing.Top = 5
+    BorderSpacing.Top = 8
     TabOrder = 0
   end
   object FontSizeTrackBar: TTrackBar
@@ -39,10 +42,11 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = FontSizeLabel
     AnchorSideBottom.Side = asrBottom
-    Left = 84
-    Height = 25
-    Top = 5
-    Width = 373
+    Left = 147
+    Height = 31
+    Top = 6
+    Width = 424
+    AutoSize = True
     Max = 25
     Min = 5
     OnChange = FontSizeTrackBarChange
@@ -51,7 +55,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Align = alCustom
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 2
-    BorderSpacing.Top = 5
+    BorderSpacing.Top = 6
     TabOrder = 1
   end
   object FontSizeLabel: TLabel
@@ -60,12 +64,12 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Control = FontSizeTrackBar
     AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 25
-    Top = 5
-    Width = 60
+    Height = 31
+    Top = 6
+    Width = 123
     Align = alCustom
     Anchors = [akTop, akLeft, akBottom]
-    Caption = 'Font Size'
+    Caption = 'Font Size (Default)'
     Layout = tlCenter
   end
   object ToolbarSizeCaption: TLabel
@@ -74,11 +78,11 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Control = ToolbarSizeTrackBar
     AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 25
-    Top = 35
-    Width = 82
+    Height = 31
+    Top = 45
+    Width = 145
     Anchors = [akTop, akLeft, akBottom]
-    Caption = 'Toolbar Size'
+    Caption = 'Toolbar Size (Default)'
     Layout = tlCenter
   end
   object OpenSSLStartupCheckbox: TCheckBox
@@ -87,13 +91,13 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideTop.Side = asrBottom
     Left = 0
     Height = 24
-    Top = 115
+    Top = 140
     Width = 191
-    BorderSpacing.Top = 5
+    BorderSpacing.Top = 8
     Caption = 'Load OpenSSL At Startup'
     TabOrder = 2
   end
-  object Divider: TDividerBevel
+  object OpenSSLDivider: TDividerBevel
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = ToolbarSizeCaption
     AnchorSideTop.Side = asrBottom
@@ -101,35 +105,64 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Side = asrBottom
     Left = 0
     Height = 20
-    Top = 65
-    Width = 457
+    Top = 84
+    Width = 571
     Caption = 'Open SSL'
     Align = alCustom
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 5
+    BorderSpacing.Top = 8
     Style = gsHorLines
   end
   object OpenSSLLoadedCaption: TLabel
     AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Divider
+    AnchorSideTop.Control = OpenSSLDivider
     AnchorSideTop.Side = asrBottom
     Left = 0
     Height = 20
-    Top = 90
+    Top = 112
     Width = 57
-    BorderSpacing.Top = 5
+    BorderSpacing.Top = 8
     Caption = 'Loaded: '
   end
   object OpenSSLoadedValueCaption: TLabel
     AnchorSideLeft.Control = OpenSSLLoadedCaption
     AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = Divider
-    AnchorSideTop.Side = asrBottom
+    AnchorSideTop.Control = OpenSSLLoadedCaption
+    AnchorSideBottom.Control = OpenSSLLoadedCaption
+    AnchorSideBottom.Side = asrBottom
     Left = 57
     Height = 20
-    Top = 90
+    Top = 112
     Width = 32
-    BorderSpacing.Top = 5
+    Anchors = [akTop, akLeft, akBottom]
     Caption = 'False'
+  end
+  object KeystrokesDivider: TDividerBevel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = OpenSSLStartupCheckbox
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = ToolbarSizeTrackBar
+    AnchorSideRight.Side = asrBottom
+    Left = 0
+    Height = 20
+    Top = 172
+    Width = 571
+    Caption = 'Keystrokes'
+    Align = alCustom
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Top = 8
+    Style = gsHorLines
+  end
+  object UseMacOSCommandKey: TCheckBox
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = KeystrokesDivider
+    AnchorSideTop.Side = asrBottom
+    Left = 0
+    Height = 24
+    Top = 200
+    Width = 200
+    BorderSpacing.Top = 8
+    Caption = 'Use MacOS Command Key'
+    TabOrder = 3
   end
 end

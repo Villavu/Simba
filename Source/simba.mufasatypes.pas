@@ -80,6 +80,10 @@ type
   P2DPointArray = ^T2DPointArray;
   T2DPointArray = array of TPointArray;
 
+  // Int64
+  PInt64Array = ^TInt64Array;
+  TInt64Array = array of Int64;
+
   // Byte
   PByteArray = ^TByteArray;
   TByteArray = array of Byte;
@@ -149,9 +153,6 @@ type
 
   PComplexMatrix = ^TComplexMatrix;
   TComplexMatrix = array of array of TComplex;
-
-
-
 
   PComparator = ^EComparator;
   EComparator = (__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__);

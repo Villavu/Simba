@@ -57,47 +57,30 @@ type
   TSimbaForm = class(TForm)
     DockPanel: TAnchorDockPanel;
     Images: TImageList;
-    MenuItem1: TMenuItem;
-    MenuItem2: TMenuItem;
-    MenuItem5: TMenuItem;
-    MenuItem7: TMenuItem;
-    MenuItem8: TMenuItem;
-    MenuItemExample: TMenuItem;
-    StatusPanelFileName: TPanel;
-    StatusPanelCursor: TPanel;
-    StatusPanelState: TPanel;
-    StatusPanelCaret: TPanel;
-    StatusBar: TPanel;
-    Timer: TTimer;
-    TrayPopupExit: TMenuItem;
-    MenuItemDebugger: TMenuItem;
-    MenuItemRunWithDebugging: TMenuItem;
-    MenuItemFormatScript: TMenuItem;
-    MenuItemAssociateScripts: TMenuItem;
-    MenuItem6: TMenuItem;
-    MenuItemEditor: TMenuItem;
-    MenuItemReplace: TMenuItem;
-    MenuItemConsole: TMenuItem;
-    MenuItemTrayIcon: TMenuItem;
-    MenuItem4: TMenuItem;
     MainMenu: TMainMenu;
-    MenuItemDTMEditor: TMenuItem;
     MenuEdit: TMenuItem;
     MenuFile: TMenuItem;
     MenuHelp: TMenuItem;
-    MenuItemLockLayout: TMenuItem;
-    MenuItemOutput: TMenuItem;
-    MenuItemResetLayout: TMenuItem;
+    MenuItem1: TMenuItem;
+    MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
+    MenuItem4: TMenuItem;
+    MenuItem5: TMenuItem;
+    MenuItem6: TMenuItem;
+    MenuItem7: TMenuItem;
+    MenuItem8: TMenuItem;
     MenuItemAbout: TMenuItem;
     MenuItemACA: TMenuItem;
+    MenuItemAssociateScripts: TMenuItem;
     MenuItemBitmapConv: TMenuItem;
     MenuItemCloseTab: TMenuItem;
     MenuItemCloseTabs: TMenuItem;
     MenuItemColourHistory: TMenuItem;
     MenuItemCompile: TMenuItem;
+    MenuItemConsole: TMenuItem;
     MenuItemCopy: TMenuItem;
     MenuItemCut: TMenuItem;
+    MenuItemDebugger: TMenuItem;
     MenuItemDebugImage: TMenuItem;
     MenuItemDivider10: TMenuItem;
     MenuItemDivider11: TMenuItem;
@@ -107,22 +90,32 @@ type
     MenuItemDivider4: TMenuItem;
     MenuItemDivider5: TMenuItem;
     MenuItemDivider6: TMenuItem;
+    MenuItemDTMEditor: TMenuItem;
+    MenuItemEditor: TMenuItem;
+    MenuItemExample: TMenuItem;
     MenuItemFileBrowser: TMenuItem;
     MenuItemFind: TMenuItem;
     MenuItemFindNext: TMenuItem;
     MenuItemFindPrev: TMenuItem;
+    MenuItemFormatScript: TMenuItem;
     MenuItemFunctionList: TMenuItem;
     MenuItemGoto: TMenuItem;
+    MenuItemLockLayout: TMenuItem;
     MenuItemMainExit: TMenuItem;
     MenuItemNew: TMenuItem;
     MenuItemNotes: TMenuItem;
     MenuItemOpen: TMenuItem;
     MenuItemOpenRecent: TMenuItem;
+    MenuItemOutput: TMenuItem;
+    MenuItemPackages: TMenuItem;
     MenuItemPaste: TMenuItem;
     MenuItemPause: TMenuItem;
     MenuItemRedo: TMenuItem;
+    MenuItemReplace: TMenuItem;
     MenuItemReportBug: TMenuItem;
+    MenuItemResetLayout: TMenuItem;
     MenuItemRun: TMenuItem;
+    MenuItemRunWithDebugging: TMenuItem;
     MenuItemSave: TMenuItem;
     MenuItemSaveAll: TMenuItem;
     MenuItemSaveAs: TMenuItem;
@@ -131,85 +124,92 @@ type
     MenuItemSelectAll: TMenuItem;
     MenuItemSettings: TMenuItem;
     MenuItemStop: TMenuItem;
+    MenuItemTrayIcon: TMenuItem;
     MenuItemUndo: TMenuItem;
     MenuTools: TMenuItem;
     MenuView: TMenuItem;
-    TrayPopup: TPopupMenu;
+    StatusBar: TPanel;
+    StatusPanelCaret: TPanel;
+    StatusPanelCursor: TPanel;
+    StatusPanelFileName: TPanel;
+    StatusPanelState: TPanel;
+    StopButtonStop: TToolButton;
+    Timer: TTimer;
+    ToolBar: TToolBar;
     ToolbarButtonClearOutput: TToolButton;
+    ToolbarButtonColorPicker: TToolButton;
     ToolbarButtonCompile: TToolButton;
     ToolbarButtonNew: TToolButton;
     ToolbarButtonOpen: TToolButton;
+    ToolbarButtonPackages: TToolButton;
     ToolbarButtonPause: TToolButton;
-    ToolbarButtonColorPicker: TToolButton;
     ToolbarButtonRun: TToolButton;
     ToolbarButtonSave: TToolButton;
     ToolbarButtonSaveAll: TToolButton;
     ToolbarButtonTargetSelector: TToolButton;
-    StopButtonStop: TToolButton;
-    ToolBar: TToolBar;
     ToolbarDivider1: TToolButton;
-    ToolbarDivider5: TToolButton;
-    ToolbarDivider3: TToolButton;
     ToolbarDivider2: TToolButton;
+    ToolbarDivider3: TToolButton;
     ToolbarDivider4: TToolButton;
-    ToolbarButtonPackages: TToolButton;
+    ToolbarDivider5: TToolButton;
     TrayIcon: TTrayIcon;
+    TrayPopup: TPopupMenu;
+    TrayPopupExit: TMenuItem;
 
-    procedure TrayPopupExitClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure MenuItemAboutClick(Sender: TObject);
-    procedure MenuItemDebuggerClick(Sender: TObject);
-    procedure MenuItemFormatScriptClick(Sender: TObject);
-    procedure MenuItemAssociateScriptsClick(Sender: TObject);
-    procedure MenuNewTemplateClick(Sender: TObject);
-    procedure MenuViewClick(Sender: TObject);
     procedure MenuClearOutputClick(Sender: TObject);
-    procedure MenuFileClick(Sender: TObject);
-    procedure MenuSaveAsDefaultClick(Sender: TObject);
     procedure MenuCloseAllTabsClick(Sender: TObject);
     procedure MenuCloseTabClick(Sender: TObject);
     procedure MenuCopyClick(Sender: TObject);
     procedure MenuCutClick(Sender: TObject);
+    procedure MenuEditClick(Sender: TObject);
     procedure MenuExitClick(Sender: TObject);
-    procedure MenuGotoClick(Sender: TObject);
-    procedure MenuNewClick(Sender: TObject);
-    procedure MenuOpenClick(Sender: TObject);
+    procedure MenuFileClick(Sender: TObject);
     procedure MenuFindClick(Sender: TObject);
+    procedure MenuGotoClick(Sender: TObject);
+    procedure MenuItemAboutClick(Sender: TObject);
+    procedure MenuItemACAClick(Sender: TObject);
+    procedure MenuItemAssociateScriptsClick(Sender: TObject);
+    procedure MenuItemBitmapConvClick(Sender: TObject);
+    procedure MenuItemCloseTabsClick(Sender: TObject);
+    procedure MenuItemConsoleClick(Sender: TObject);
+    procedure MenuItemDebuggerClick(Sender: TObject);
+    procedure MenuItemDTMEditorClick(Sender: TObject);
     procedure MenuItemFindNextClick(Sender: TObject);
     procedure MenuItemFindPrevClick(Sender: TObject);
+    procedure MenuItemFormatScriptClick(Sender: TObject);
+    procedure MenuItemLockLayoutClick(Sender: TObject);
+    procedure MenuItemReportBugClick(Sender: TObject);
+    procedure MenuItemResetLayoutClick(Sender: TObject);
+    procedure MenuItemScriptStateClick(Sender: TObject);
+    procedure MenuItemSettingsClick(Sender: TObject);
+    procedure MenuItemTrayIconClick(Sender: TObject);
+    procedure MenuNewClick(Sender: TObject);
+    procedure MenuNewTemplateClick(Sender: TObject);
+    procedure MenuOpenClick(Sender: TObject);
     procedure MenuPasteClick(Sender: TObject);
     procedure MenuRedoClick(Sender: TObject);
-    procedure MenuSaveClick(Sender: TObject);
     procedure MenuReplaceClick(Sender: TObject);
+    procedure MenuSaveAsClick(Sender: TObject);
+    procedure MenuSaveAsDefaultClick(Sender: TObject);
+    procedure MenuSaveClick(Sender: TObject);
     procedure MenuSelectAllClick(Sender: TObject);
     procedure MenuUndoClick(Sender: TObject);
-    procedure MenuItemResetLayoutClick(Sender: TObject);
-    procedure MenuItemConsoleClick(Sender: TObject);
-    procedure MenuItemLockLayoutClick(Sender: TObject);
-    procedure MenuItemTrayIconClick(Sender: TObject);
+    procedure MenuViewClick(Sender: TObject);
     procedure TimerTimer(Sender: TObject);
+    procedure ToolbarButtonColorPickerClick(Sender: TObject);
     procedure ToolbarButtonPackagesClick(Sender: TObject);
     procedure ToolbarButtonSaveAllClick(Sender: TObject);
-    procedure MenuSaveAsClick(Sender: TObject);
-    procedure MenuItemDTMEditorClick(Sender: TObject);
-    procedure MenuItemBitmapConvClick(Sender: TObject);
-    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
-    procedure MenuEditClick(Sender: TObject);
-    procedure MenuItemCloseTabsClick(Sender: TObject);
-    procedure MenuItemReportBugClick(Sender: TObject);
-    procedure MenuItemSettingsClick(Sender: TObject);
-    procedure TrayIconClick(Sender: TObject);
-    procedure ToolbarButtonColorPickerClick(Sender: TObject);
     procedure ToolbarButtonSelectTargetClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure MenuItemACAClick(Sender: TObject);
-    procedure MenuItemScriptStateClick(Sender: TObject);
+    procedure TrayIconClick(Sender: TObject);
+    procedure TrayPopupExitClick(Sender: TObject);
   protected
     FWindowSelection: TOSWindow;
     FProcessSelection: UInt32;
     FDockingReset: Boolean;
     FRecentFiles: TStringList;
-    FBinaryHash: String;
 
     procedure ShowColorPickerHistoryASync(Data: PtrInt);
 
@@ -233,8 +233,8 @@ type
     procedure SetConsoleVisible(Value: Boolean);
     procedure SetLayoutLocked(Value: Boolean);
     procedure SetTrayIconVisible(Value: Boolean);
+    procedure SetMacOSKeystokes(Value: Boolean);
   public
-    property BinaryHash: String read FBinaryHash;
     property WindowSelection: TOSWindow read FWindowSelection;
     property ProcessSelection: UInt32 read FProcessSelection;
 
@@ -258,15 +258,15 @@ implementation
 {$R *.lfm}
 
 uses
-  types, lclintf, sha1, lazloggerbase, lazfileutils, anchordocking,
+  types, lclintf, lazloggerbase, lazfileutils, anchordocking,
   simba.openssl, simba.files, simba.mufasatypes, simba.process,
   simba.openexampleform, simba.colorpickerhistoryform, simba.codeparser,
   simba.codeinsight, simba.associate, simba.scripttab, simba.debugimageform,
   simba.bitmapconv, simba.aca, simba.windowselector, simba.dtmeditor,
   simba.package_form, simba.aboutform, simba.functionlistform,
   simba.scripttabsform, simba.outputform, simba.filebrowserform,
-  simba.notesform, simba.settingsform, simba.colorpicker, simba.ci_includecache,
-  simba.script_communication, simba.scriptformatter,
+  simba.notesform, simba.settingsform, simba.colorpicker,
+  simba.ci_includecache, simba.script_communication, simba.scriptformatter,
   simba.editor, simba.dockinghelpers, simba.misc;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
@@ -370,6 +370,35 @@ begin
   TrayIcon.Visible := Value;
 end;
 
+procedure TSimbaForm.SetMacOSKeystokes(Value: Boolean);
+var
+  Find: TShiftStateEnum;
+  Replace: TShiftStateEnum;
+
+  procedure SetMacOSKeystroke(const MenuItem: TMenuItem);
+  var
+    I: Integer;
+    Key: Word;
+    Shift: TShiftState;
+  begin
+    if (MenuItem.ShortCut > 0) then
+    begin
+      ShortCutToKey(MenuItem.ShortCut, Key, Shift);
+      if (Find in Shift) then
+        MenuItem.ShortCut := ShortCut(Key, Shift - [Find] + [Replace]);
+    end;
+
+    for I := 0 to MenuItem.Count - 1 do
+      SetMacOSKeystroke(MenuItem.Items[I]);
+  end;
+
+begin
+  if Value then Find := ssCtrl else Find := ssMeta;
+  if Value then Replace := ssMeta else Replace := ssCtrl;
+
+  SetMacOSKeystroke(MainMenu.Items);
+end;
+
 procedure TSimbaForm.CodeTools_OnMessage(Sender: TObject; const Typ: TMessageEventType; const Message: String; X, Y: Integer);
 var
   Parser: TCodeParser absolute Sender;
@@ -408,7 +437,7 @@ var
 begin
   Contents := '';
 
-  CacheFileName := GetDumpPath() + SHA1Print(SHA1File(FileName));
+  CacheFileName := GetDumpPath() + HashFile(FileName);
 
   try
     List := nil;
@@ -442,7 +471,7 @@ var
 begin
   List := nil;
 
-  FileName := GetDumpPath() + FBinaryHash;
+  FileName := GetDumpPath() + HashFile(Application.ExeName);
 
   try
     if FileExists(FileName) then
@@ -543,8 +572,6 @@ begin
   Application.OnException := @SimbaForm.HandleException;
   Screen.AddHandlerFormAdded(@SimbaForm.HandleFormCreated, True);
 
-  FBinaryHash := SHA1Print(SHA1File(Application.ExeName, 512*512));
-
   FRecentFiles := TStringList.Create();
   FRecentFiles.Text := SimbaSettings.GUI.RecentFiles.Value;
 
@@ -565,6 +592,9 @@ begin
   SimbaSettingChanged(SimbaSettings.GUI.LockLayout);
   SimbaSettingChanged(SimbaSettings.GUI.TrayIconVisible);
   SimbaSettingChanged(SimbaSettings.GUI.ConsoleVisible);
+
+  if SimbaSettings.GUI.MacOSKeystrokes.Value then
+    SimbaSettingChanged(SimbaSettings.GUI.MacOSKeystrokes);
 end;
 
 procedure TSimbaForm.FormDestroy(Sender: TObject);
@@ -593,14 +623,13 @@ end;
 
 procedure TSimbaForm.MenuItemScriptStateClick(Sender: TObject);
 var
-  Tab: TSimbaScriptTab;
+  CurrentTab: TSimbaScriptTab;
 begin
-  Tab := SimbaScriptTabsForm.CurrentTab;
-  if (Tab = nil) then
-    Exit;
+  CurrentTab := SimbaScriptTabsForm.CurrentTab;
 
+  if (CurrentTab <> nil) then
   try
-    with SimbaScriptTabsForm.CurrentTab do
+    with CurrentTab do
     begin
       if (Sender = MenuItemCompile) or (Sender = ToolbarButtonCompile) then
         Compile()
@@ -643,8 +672,6 @@ begin
   if (ControlCount = 0) then
     Exit;
 
-  DebugLn('simba.main :: TSimbaForm.SizeComponents');
-
   with TBitmap.Create() do
   try
     Canvas.Font := Self.Font;
@@ -672,6 +699,8 @@ begin
     SetLayoutLocked(Setting.Value);
   if (Setting = SimbaSettings.GUI.TrayIconVisible) then
     SetTrayIconVisible(Setting.Value);
+  if (Setting = SimbaSettings.GUI.MacOSKeystrokes) then
+    SetMacOSKeystokes(Setting.Value);
 end;
 
 procedure TSimbaForm.MenuCloseTabClick(Sender: TObject);
@@ -1034,7 +1063,7 @@ end;
 
 procedure TSimbaForm.MenuItemReportBugClick(Sender: TObject);
 begin
-  OpenURL('https://github.com/MerlijnWajer/Simba/issues/new');
+  OpenURL(SIMBA_BUGS_URL);
 end;
 
 procedure TSimbaForm.MenuItemSettingsClick(Sender: TObject);

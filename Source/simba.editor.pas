@@ -68,12 +68,13 @@ type
     FMultiCaret: TSynPluginMultiCaret;
     FModifiedLinesGutter: TSimbaEditor_ModifiedLinesGutter;
 
-    procedure AddDocumentation;
     procedure CommentBlock;
 
     procedure HandleCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
     procedure HandleZoomInOut(Data: PtrInt);
     function HandleMouseAction(AnAction: TSynEditMouseAction; var AnInfo: TSynEditMouseActionInfo): Boolean;
+
+    procedure SetMacOSKeystrokes(Value: Boolean);
 
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
 
@@ -89,7 +90,7 @@ type
     property Attributes: TSimbaEditor_Attributes read FAttributes;
     property Expression[X, Y: Integer]: String read GetExpressionAt;
 
-    procedure SetMacOSKeystrokes;
+    procedure InsertDocumentation;
 
     constructor Create(AOwner: TComponent; LoadColors: Boolean = True); reintroduce;
     destructor Destroy; override;
@@ -215,7 +216,7 @@ begin
   Result := FLineMarks.Count;
 end;
 
-procedure TSimbaEditor.AddDocumentation;
+procedure TSimbaEditor.InsertDocumentation;
 const
   DOC_TEMPLATE =
     '(*'             + LineEnding +
@@ -399,7 +400,7 @@ end;
 procedure TSimbaEditor.HandleCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
 begin
   case Command of
-    ecDocumentation: AddDocumentation();
+    ecDocumentation: InsertDocumentation();
     ecCommentBlock: CommentBlock();
     ecChar:
       case AChar of
@@ -416,17 +417,22 @@ begin
   SimbaSettings.Editor.FontSize.Value := Font.Size;
 end;
 
-procedure TSimbaEditor.SetMacOSKeystrokes;
+procedure TSimbaEditor.SetMacOSKeystrokes(Value: Boolean);
 var
+  Find: TShiftStateEnum;
+  Replace: TShiftStateEnum;
   I: Integer;
 begin
+  if Value then Find := ssCtrl else Find := ssMeta;
+  if Value then Replace := ssMeta else Replace := ssCtrl;
+
   for I := 0 to Keystrokes.Count - 1 do
-    if ssCtrl in Keystrokes[i].Shift then
-      Keystrokes[I].Shift := Keystrokes[I].Shift - [ssCtrl] + [ssMeta];
+    if (Find in Keystrokes[i].Shift) then
+      Keystrokes[I].Shift := Keystrokes[I].Shift - [Find] + [Replace];
 
   for I := 0 to MouseActions.Count - 1 do
-    if ssCtrl in MouseActions[i].Shift then
-      MouseActions[I].Shift := MouseActions[I].Shift - [ssCtrl] + [ssMeta];
+    if (Find in MouseActions[i].Shift) then
+      MouseActions[I].Shift := MouseActions[I].Shift - [Find] + [Replace];
 end;
 
 function TSimbaEditor.HandleMouseAction(AnAction: TSynEditMouseAction; var AnInfo: TSynEditMouseActionInfo): Boolean;
@@ -484,6 +490,9 @@ begin
   begin
     RightEdge := Setting.Value;
   end;
+
+  if (Setting = SimbaSettings.GUI.MacOSKeystrokes) then
+    SetMacOSKeystrokes(Setting.Value);
 end;
 
 function TSimbaEditor.GetCaretMax: TPoint;
@@ -640,6 +649,9 @@ begin
       Key     := VK_ESCAPE;
     end;
   end;
+
+  if SimbaSettings.GUI.MacOSKeystrokes.Value then
+    SimbaSettingChanged(SimbaSettings.GUI.MacOSKeystrokes);
 
   if LoadColors then
     SimbaSettingChanged(SimbaSettings.Editor.CustomColors);

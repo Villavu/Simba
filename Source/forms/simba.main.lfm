@@ -240,8 +240,8 @@ object SimbaForm: TSimbaForm
     TabOrder = 2
   end
   object MainMenu: TMainMenu
-    Left = 190
-    Top = 60
+    Left = 31
+    Top = 216
     object MenuFile: TMenuItem
       Caption = '&File'
       SubMenuImages = Images
@@ -439,6 +439,11 @@ object SimbaForm: TSimbaForm
         ImageIndex = 21
         OnClick = MenuItemSettingsClick
       end
+      object MenuItemPackages: TMenuItem
+        Caption = 'Packages'
+        ImageIndex = 1
+        OnClick = ToolbarButtonPackagesClick
+      end
       object MenuItem6: TMenuItem
         Caption = '-'
       end
@@ -590,8 +595,8 @@ object SimbaForm: TSimbaForm
     }
     Visible = True
     OnClick = TrayIconClick
-    Left = 110
-    Top = 60
+    Left = 31
+    Top = 136
   end
   object Images: TImageList
     Scaled = True
@@ -2585,8 +2590,8 @@ object SimbaForm: TSimbaForm
   end
   object TrayPopup: TPopupMenu
     Images = Images
-    Left = 283
-    Top = 60
+    Left = 31
+    Top = 296
     object TrayPopupExit: TMenuItem
       Caption = 'Exit'
       ImageIndex = 8
@@ -2596,7 +2601,7 @@ object SimbaForm: TSimbaForm
   object Timer: TTimer
     Enabled = False
     OnTimer = TimerTimer
-    Left = 360
-    Top = 60
+    Left = 31
+    Top = 376
   end
 end

@@ -614,8 +614,6 @@ begin
   if (ControlCount = 0) then
     Exit;
 
-  DebugLn('simba.imagebox :: TSimbaImageBox.FontChanged');
-
   with TBitmap.Create() do
   try
     Canvas.Font := Self.Font;

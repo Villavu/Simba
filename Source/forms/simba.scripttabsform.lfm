@@ -1,23 +1,24 @@
 object SimbaScriptTabsForm: TSimbaScriptTabsForm
-  Left = 1918
-  Height = 252
-  Top = 183
-  Width = 564
+  Left = 1085
+  Height = 315
+  Top = 319
+  Width = 705
   AllowDropFiles = True
   Caption = 'Editor'
-  ClientHeight = 252
-  ClientWidth = 564
+  ClientHeight = 315
+  ClientWidth = 705
+  DesignTimePPI = 120
   OnDropFiles = DoOnDropFiles
-  LCLVersion = '2.2.0.1'
+  LCLVersion = '2.2.0.2'
   object Notebook: TExtendedNotebook
-    Left = 3
-    Height = 249
+    Left = 4
+    Height = 311
     Top = 0
-    Width = 558
+    Width = 697
     Align = alClient
-    BorderSpacing.Left = 3
-    BorderSpacing.Right = 3
-    BorderSpacing.Bottom = 3
+    BorderSpacing.Left = 4
+    BorderSpacing.Right = 4
+    BorderSpacing.Bottom = 4
     Images = SimbaForm.Images
     PopupMenu = TabPopupMenu
     TabOrder = 0
@@ -30,14 +31,14 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
     OnShow = ReplaceDialogShow
     Options = [frDown, frHideUpDown, frHideEntireScope, frPromptOnReplace]
     OnReplace = DoOnReplaceDialog
-    Left = 168
-    Top = 16
+    Left = 210
+    Top = 20
   end
   object TabPopupMenu: TPopupMenu
     Images = SimbaForm.Images
     OnPopup = DoTabPopupOpen
-    Left = 256
-    Top = 16
+    Left = 320
+    Top = 20
     object MenuItemNewTab: TMenuItem
       Caption = 'New Tab'
       OnClick = DoTabPopupClick
@@ -56,8 +57,8 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
   object EditorPopupMenu: TPopupMenu
     Images = SimbaForm.Images
     OnPopup = DoEditorPopupShow
-    Left = 352
-    Top = 16
+    Left = 440
+    Top = 20
     object MenuItemFindDeclaration: TMenuItem
       Caption = 'Find Declaration'
       OnClick = DoEditorPopupClick
@@ -124,24 +125,31 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
       ShortCut = 16466
       OnClick = DoEditorPopupClick
     end
+    object MenuItem1: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemDocumentation: TMenuItem
+      Caption = 'Insert Documentation'
+      ShortCut = 16452
+    end
   end
   object OpenDialog: TOpenDialog
     Filter = 'Simba Files|*.simba;*.pas;*.inc|All Files|*.*'
     Options = [ofAllowMultiSelect, ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
-    Left = 88
-    Top = 16
+    Left = 110
+    Top = 20
   end
   object FindDialog: TFindDialog
     Options = [frDown, frHideUpDown, frHideEntireScope]
     OnFind = DoOnFindDialog
-    Left = 168
-    Top = 88
+    Left = 210
+    Top = 110
   end
   object ClearLineMarksTimer: TTimer
     Enabled = False
     Interval = 5000
     OnTimer = HandleClearMarksTimer
-    Left = 277
-    Top = 104
+    Left = 344
+    Top = 110
   end
 end

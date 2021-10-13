@@ -1,4 +1,11 @@
 FSection := 'Arrays & Algorithms';
+
+addGlobalFunc('procedure _Sort(var a: TIntegerArray); overload;', @_LapeSortIntegerArray);
+addGlobalFunc('procedure _Sort(var a: TPointArray; constref Weights: array of Int64); overload;', @_LapeSortWeightedTPA);
+addGlobalFunc('procedure _Sort(var a: T2DPointArray; constref Weights: array of Int64); overload;', @_LapeSortWeightedATPA);
+addGlobalFunc('procedure _Sort(var a: TPointArray; constref Weights: array of Extended); overload;', @_LapeSortWeightedTPAF);
+addGlobalFunc('procedure _Sort(var a: T2DPointArray; constref Weights: array of Extended); overload;', @_LapeSortWeightedATPAF);
+
 addGlobalFunc('procedure RAaSTPAEx(var a: TPointArray; const w, h: Int32)', @_LapeRAaSTPAEx);
 addGlobalFunc('procedure RAaSTPA(var a: TPointArray; const Dist: Int32)', @_LapeRAaSTPA);
 addGlobalFunc('function NearbyPointInArrayEx(const P: TPoint; w, h: Int32; const a: TPointArray): Boolean', @_LapeNearbyPointInArrayEx);
@@ -35,7 +42,6 @@ addGlobalFunc('procedure FilterPointsBox(var points: TPointArray; x1, y1, x2, y2
 addGlobalFunc('procedure FilterTPADist(var TPA: TPointArray; maxDist: Int32)', @_LapeFilterTPADist);
 addGlobalFunc('function GetATPABounds(const ATPA: T2DPointArray): TBox', @_LapeGetATPABounds);
 addGlobalFunc('function GetTPABounds(const TPA: TPointArray): TBox', @_LapeGetTPABounds);
-addGlobalFunc('function FindTPAinTPA(const SearchTPA, TotalTPA: TPointArray; var Matches: TPointArray): Boolean', @_LapeFindTPAinTPA);
 addGlobalFunc('function GetSamePointsATPA(const ATPA: T2DPointArray; var Matches: TPointArray): Boolean', @_LapeGetSamePointsATPA);
 addGlobalFunc('procedure SortCircleWise(var TPA: TPointArray; const cx, cy, StartDegree: Int32; SortUp, ClockWise: Boolean)', @_LapeSortCircleWise);
 addGlobalFunc('procedure LinearSort(var TPA: TPointArray; cx, cy, sd: Int32; SortUp: Boolean)', @_LapeLinearSort);
@@ -71,8 +77,9 @@ addGlobalFunc('procedure Quicksort(var Arr: TIntegerArray)', @_LapeQuicksort);
 addGlobalFunc('function InIntArrayEx(const Arr: TIntegerArray; var Index: Int32; const Number: Int32): Boolean', @_LapeInIntArrayEx);
 addGlobalFunc('function InIntArray(const Arr: TIntegerArray; Number: Int32): Boolean', @_LapeInIntArray);
 addGlobalFunc('procedure ClearSameIntegers(var Arr: TIntegerArray)', @_LapeClearSameIntegers);
+addGlobalFunc('procedure SumIntegerArray(constref Arr: TIntegerArray): Int64', @_LapeSumIntegerArray);
 addGlobalFunc('procedure InvertTIA(var Arr: TIntegerArray)', @_LapeInvertTIA);
-addGlobalFunc('function AverageTIA(const Arr: TIntegerArray): Int32', @_LapeAverageTIA);
+addGlobalFunc('function AverageTIA(const Arr: TIntegerArray): Int64', @_LapeAverageTIA);
 addGlobalFunc('function AverageExtended(const Arr: TExtendedArray): Extended', @_LapeAverageExtended);
 addGlobalFunc('function TPAErode(constref TPA: TPointArray; Amount: Int32): TPointArray', @_LapeTPAErode);
 addGlobalFunc('function TPAGrow(constref TPA: TPointArray; Amount: Int32): TPointArray', @_LapeTPAGrow);

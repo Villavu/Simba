@@ -26,14 +26,6 @@ uses
   dialogs, stdctrls, buttons, buttonpanel, extctrls, menus,
   simba.package;
 
-// Eventually we can populate from a webpage, but this will do for now.
-const
-  SUGGESTED_PACKAGES: TStringArray = (
-    'https://github.com/SRL/SRL',
-    'https://github.com/SRL/SRL-Plugins',
-    'https://github.com/SRL/SRL-Fonts'
-  );
-
 type
   TSimbaPackageForm = class(TForm)
   published
@@ -109,6 +101,8 @@ type
 
     FUpdates: TStringList;
     FUpdateThread: TThread;
+
+    FSuggestedPackages: TStringArray;
 
     procedure FontChanged(Sender: TObject); override;
 
@@ -240,8 +234,12 @@ var
   URL: String;
   URLPath: TStringArray;
   Package: TSimbaPackage;
+  ResponseCode: Integer;
 begin
-  URL := InputComboEx('Add Package', 'Enter or select package URL:', SUGGESTED_PACKAGES, True).Trim([' ', '/']);
+  if (Length(FSuggestedPackages) = 0) then
+    FSuggestedPackages := GetPage(SIMBA_SUGGESTEDPACKAGES_URL, [HTTP_OK], ResponseCode).Split([#10]);
+
+  URL := InputComboEx('Add Package', 'Enter or select package URL:', FSuggestedPackages, True).Trim([' ', '/']);
   URLPath := URL.Split('/');
   while (Length(URLPath) > 2) do
     URLPath := Copy(URLPath, 1);

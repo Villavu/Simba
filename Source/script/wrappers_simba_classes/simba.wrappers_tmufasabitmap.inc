@@ -120,7 +120,12 @@ end;
 
 procedure _LapeMufasaBitmap_FindColors(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(result)^ := PMufasaBitmap(Params^[0])^.FindColors(PPointArray(Params^[1])^, PColor(Params^[2])^);
+  PBoolean(Result)^ := PMufasaBitmap(Params^[0])^.FindColors(PPointArray(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure _LapeMufasaBitmap_FindColorsTolerance(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PMufasaBitmap(Params^[0])^.FindColors(PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 procedure _LapeMufasaBitmap_FastGetPixel(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

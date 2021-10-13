@@ -15,28 +15,24 @@ uses
 
 function RotatePoints(const P: TPointArray;const A, cx, cy: Extended): TPointArray;
 function RotatePoint(const p: TPoint;const angle, mx, my: Extended): TPoint;
-function ChangeDistPT(const PT : TPoint; mx,my : integer; newdist : extended) : TPoint;
-function ChangeDistTPA(var TPA : TPointArray; mx,my : integer; newdist : extended) : boolean;
-function RiemannGauss(Xstart,StepSize,Sigma : extended; AmountSteps : integer) : extended;
-function DiscreteGauss(Xstart,Xend : integer; sigma : extended) : TExtendedArray;
-function GaussMatrix(N : integer; sigma : extended) : T2DExtendedArray;
-function MinA(a: TIntegerArray): Integer;
-function MaxA(a: TIntegerArray): Integer;
-function fixRad(rad: Extended): Extended;
+function ChangeDistPT(const PT : TPoint; mx, my: Integer; newdist : Extended): TPoint;
+function ChangeDistTPA(var TPA : TPointArray; mx,my : Integer; newdist : Extended): boolean;
+function RiemannGauss(Xstart,StepSize,Sigma : Extended; AmountSteps : Integer): Extended;
+function DiscreteGauss(Xstart,Xend : Integer; sigma : Extended) : TExtendedArray;
+function GaussMatrix(N : Integer; sigma : Extended) : T2DExtendedArray;
+function FixRad(const Rad: Extended): Extended;
+function FixD(const Degrees: Extended): Extended;
 function MiddleBox(b : TBox): TPoint;
-function Distance(x1,y1,x2,y2 : integer) : integer;
+function Distance(x1,y1,x2,y2 : Integer): Integer;
 function Factorial(number: longword): Int64;
 function BinCoe(a, b: LongInt): Extended;
-function FixD(Degrees : extended) : Extended;
-function radians(e: extended): extended;
-function degrees(e: extended): extended;
-function Sum64IntArr(const Arr: TIntegerArray): Int64;
-function IntToBox(x1,y1,x2,y2 : integer) : TBox;
+function Radians(e: Extended): Extended;
+function Degrees(e: Extended): Extended;
+function IntToBox(x1,y1,x2,y2 : Integer) : TBox;
 function IntInBox(x, y: Integer; Box: TBox): Boolean;
 function PointToBox(topLeft,bottomRight: TPoint): TBox;
 function PointInBox(PT : TPoint; Box: TBox): Boolean;
-function DecRet(e: Extended): Extended;
-function NextPow2(n: Integer): Integer;
+function NextPow2(n: Integer): Integer; inline;
 function IsNumber(const n: Single): Boolean; inline; overload;
 function IsNumber(const n: Double): Boolean; inline; overload;
 
@@ -71,7 +67,7 @@ end;
 {/\
   Returns a GaussianMatrix with size of X*X, where X is Nth odd-number.
 /\}
-function GaussMatrix(N:Integer; Sigma:Extended): T2DExtendedArray;
+function GaussMatrix(N: Integer; sigma: Extended): T2DExtendedArray;
 var
   hkernel:Array of Extended;
   Size,i,x,y:Integer;
@@ -99,9 +95,9 @@ end;
 {/\
   Returns the discrete Gaussian values, uses RiemanGauss with 100 steps.
 /\}
-function DiscreteGauss(Xstart,Xend : integer; sigma : extended) : TExtendedArray;
+function DiscreteGauss(Xstart,Xend : Integer; sigma : Extended) : TExtendedArray;
 var
-  i : integer;
+  i : Integer;
 begin
   setlength(Result,Xend-xstart+1);
   for i := xstart to xend do
@@ -111,10 +107,10 @@ end;
 {/\
   RiemannGauss integrates the Gaussian function using the Riemann method.
 /\}
-function RiemannGauss(Xstart,StepSize,Sigma : extended; AmountSteps : integer) : extended;
+function RiemannGauss(Xstart,StepSize,Sigma : Extended; AmountSteps : Integer) : Extended;
 var
-  i : integer;
-  x : extended;
+  i : Integer;
+  x : Extended;
 begin
   result := 0;
   x := xstart - 0.5 * stepsize;
@@ -151,19 +147,19 @@ begin
   Result.Y := Round(my + sin(angle) * (p.x - mx) + cos(angle) * (p.y- my));
 end;
 
-function ChangeDistPT(const PT : TPoint; mx,my : integer; newdist : extended) : TPoint;
+function ChangeDistPT(const PT : TPoint; mx,my : Integer; newdist : Extended) : TPoint;
 var
-  angle : extended;
+  angle : Extended;
 begin
   angle := ArcTan2(pt.y-my,pt.x-mx);
   result.x := round(cos(angle) * newdist) + mx;
   result.y := round(sin(angle) * newdist) + my;
 end;
 
-function ChangeDistTPA(var TPA : TPointArray; mx,my : integer; newdist : extended) : boolean;
+function ChangeDistTPA(var TPA : TPointArray; mx,my : Integer; newdist : Extended) : boolean;
 var
-  angle : extended;
-  i : integer;
+  angle : Extended;
+  i : Integer;
 begin
   result := false;
   if length(TPA) < 1 then
@@ -181,53 +177,22 @@ begin
   end;
 end;
 
-function MinA(a: TIntegerArray): Integer;
-var
-  L, i: Integer;
+function FixRad(const Rad: Extended): Extended;
+const
+  PI_MUL_2 = PI*2;
 begin
-  L := High(a);
-  if (L < 0) then
-    Exit(0);
-
-  Result := a[0];
-
-  for i := 1 to L do
-    if (a[i] < Result) then
-      Result := a[i];
-end;
-
-function MaxA(a: TIntegerArray): Integer;
-var
-  L, i: Integer;
-begin
-  L := High(a);
-  if (L < 0) then
-    exit(0);
-
-  Result := a[0];
-
-  for i := 1 to L do
-    if (a[i] > Result) then
-      Result := a[i];
-end;
-
-function FixRad(rad: Extended): Extended;
-begin
-  result := rad;
-
-  while (result >= (3.14159265358979320 * 2.0)) do
-    result := result - (3.14159265358979320 * 2.0);
-
-  while (result < 0) do
-    result := result + (3.14159265358979320 * 2.0);
+  if (Rad <> PI_MUL_2) then
+    Result := Rad - Int(Rad / PI_MUL_2) * PI_MUL_2;
+  if (Result < 0) then
+    Result := Result + PI_MUL_2;
 end;
 
 function MiddleBox(b : TBox): TPoint;
 begin
-  result := point((b.x2+b.x1) div 2,(b.y2+b.y1) div 2);
+  result := Point((b.x2+b.x1) div 2,(b.y2+b.y1) div 2);
 end;
 
-function Distance(x1,y1,x2,y2 : integer) : integer;
+function Distance(x1,y1,x2,y2 : Integer) : Integer;
 begin
   Result := Round(Sqrt(Sqr(x2-x1) + Sqr(y2-y1)));
 end;
@@ -246,37 +211,22 @@ begin
   result := Factorial(a) / (Factorial(b) * Factorial(a-b));
 end;
 
-function FixD(Degrees : extended) : Extended;
+function FixD(const Degrees: Extended): Extended;
 begin
-  Result := Degrees;
-  while Result < 0 do
-    Result := Result + 360;
-  while Result > 360 do
-    Result := Result - 360;
+  Result := DegNormalize(Degrees);
 end;
 
-function radians(e: extended): extended;
+function Radians(e: Extended): Extended;
 begin
-  result := e / 180.0 * pi;
+  Result := DegToRad(e);
 end;
 
-function degrees(e: extended): extended;
+function Degrees(e: Extended): Extended;
 begin
-  result := e * 180.0 / pi;
+  Result := RadToDeg(e);
 end;
 
-function Sum64IntArr(const Arr: TIntegerArray): Int64;
-var
-  H, I: LongInt;
-begin
-  Result := 0;
-
-  H := High(Arr);
-  for I := 0 to H do
-    Result += Arr[I];
-end;
-
-function IntToBox(x1,y1,x2,y2 : integer) : TBox;
+function IntToBox(x1,y1,x2,y2 : Integer) : TBox;
 begin
   result.x1 := x1;
   result.y1 := y1;
@@ -300,11 +250,6 @@ end;
 function PointInBox(PT : TPoint; Box: TBox): Boolean;
 begin
   result := (((PT.x >= Box.x1) and(PT.x <= Box.x2)) and ((PT.y>= box.y1) and (PT.y <= box.y2)));
-end;
-
-function DecRet(e: Extended): Extended;
-begin
-  result := e - Trunc(e);
 end;
 
 end.

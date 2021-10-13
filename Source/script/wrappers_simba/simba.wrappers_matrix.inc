@@ -14,6 +14,16 @@ begin
   PIntegerMatrix(Params^[0])^.SetSize(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
+procedure _LapeIntegerMatrix_Area(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PInteger(Result)^ := PIntegerMatrix(Params^[0])^.Area();
+end;
+
+procedure _LapeIntegerMatrix_Size(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PIntegerMatrix(Params^[0])^.Size(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
 procedure _LapeIntegerMatrix_GetValues(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PIntegerArray(Result)^ := PIntegerMatrix(Params^[0])^.GetValues(PPointArray(Params^[1])^);
@@ -44,6 +54,11 @@ begin
   PIntegerArray(Result)^ := PIntegerMatrix(Params^[0])^.Flatten;
 end;
 
+procedure _LapeIntegerMatrix_Indices(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := PIntegerMatrix(Params^[0])^.Indices(PInteger(Params^[1])^, PComparator(Params^[2])^);
+end;
+
 // Byte
 procedure _LapeByteMatrix_Width(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -60,34 +75,14 @@ begin
   PByteMatrix(Params^[0])^.SetSize(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-procedure _LapeByteMatrix_GetValues(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeByteMatrix_Area(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PByteArray(Result)^ := PByteMatrix(Params^[0])^.GetValues(PPointArray(Params^[1])^);
+  PInteger(Result)^ := PByteMatrix(Params^[0])^.Area();
 end;
 
-procedure _LapeByteMatrix_SetValuesArray(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeByteMatrix_Size(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PByteMatrix(Params^[0])^.SetValues(PPointArray(Params^[1])^, PByteArray(Params^[2])^);
-end;
-
-procedure _LapeByteMatrix_SetValues(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PByteMatrix(Params^[0])^.SetValues(PPointArray(Params^[1])^, PByte(Params^[2])^);
-end;
-
-procedure _LapeByteMatrix_FillArea(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PByteMatrix(Params^[0])^.Fill(PBox(Params^[1])^, PByte(Params^[2])^);
-end;
-
-procedure _LapeByteMatrix_Fill(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PByteMatrix(Params^[0])^.Fill(PByte(Params^[1])^);
-end;
-
-procedure _LapeByteMatrix_Flatten(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PByteArray(Result)^ := PByteMatrix(Params^[0])^.Flatten;
+  PBoolean(Result)^ := PByteMatrix(Params^[0])^.Size(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 // Boolean
@@ -106,34 +101,14 @@ begin
   PBooleanMatrix(Params^[0])^.SetSize(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-procedure _LapeBooleanMatrix_GetValues(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeBooleanMatrix_Area(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBooleanArray(Result)^ := PBooleanMatrix(Params^[0])^.GetValues(PPointArray(Params^[1])^);
+  PInteger(Result)^ := PBooleanMatrix(Params^[0])^.Area();
 end;
 
-procedure _LapeBooleanMatrix_SetValuesArray(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeBooleanMatrix_Size(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBooleanMatrix(Params^[0])^.SetValues(PPointArray(Params^[1])^, PBooleanArray(Params^[2])^);
-end;
-
-procedure _LapeBooleanMatrix_SetValues(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PBooleanMatrix(Params^[0])^.SetValues(PPointArray(Params^[1])^, PBoolean(Params^[2])^);
-end;
-
-procedure _LapeBooleanMatrix_FillArea(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PBooleanMatrix(Params^[0])^.Fill(PBox(Params^[1])^, PBoolean(Params^[2])^);
-end;
-
-procedure _LapeBooleanMatrix_Fill(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PBooleanMatrix(Params^[0])^.Fill(PBoolean(Params^[1])^);
-end;
-
-procedure _LapeBooleanMatrix_Flatten(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PBooleanArray(Result)^ := PBooleanMatrix(Params^[0])^.Flatten;
+  PBoolean(Result)^ := PBooleanMatrix(Params^[0])^.Size(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 // Single
@@ -150,6 +125,16 @@ end;
 procedure _LapeSingleMatrix_SetSize(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PSingleMatrix(Params^[0])^.SetSize(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure _LapeSingleMatrix_Area(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PInteger(Result)^ := PSingleMatrix(Params^[0])^.Area();
+end;
+
+procedure _LapeSingleMatrix_Size(const Params: PParamArray ; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PSingleMatrix(Params^[0])^.Size(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeSingleMatrix_GetValues(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -182,10 +167,9 @@ begin
   PSingleArray(Result)^ := PSingleMatrix(Params^[0])^.Flatten;
 end;
 
-// Single (Extra)
 procedure _LapeSingleMatrix_ToIntegerMatrix(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PIntegerMatrix(Result)^ := PSingleMatrix(Params^[0])^.ToIntegerMatrix;
+  PIntegerMatrix(Result)^ := PSingleMatrix(Params^[0])^.ToIntegerMatrix();
 end;
 
 procedure _LapeSingleMatrix_Mean(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -254,33 +238,13 @@ begin
   PDoubleMatrix(Params^[0])^.SetSize(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-procedure _LapeDoubleMatrix_GetValues(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeDoubleMatrix_Area(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PDoubleArray(Result)^ := PDoubleMatrix(Params^[0])^.GetValues(PPointArray(Params^[1])^);
+  PInteger(Result)^ := PDoubleMatrix(Params^[0])^.Area();
 end;
 
-procedure _LapeDoubleMatrix_SetValuesArray(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeDoubleMatrix_Size(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PDoubleMatrix(Params^[0])^.SetValues(PPointArray(Params^[1])^, PDoubleArray(Params^[2])^);
-end;
-
-procedure _LapeDoubleMatrix_SetValues(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PDoubleMatrix(Params^[0])^.SetValues(PPointArray(Params^[1])^, PDouble(Params^[2])^);
-end;
-
-procedure _LapeDoubleMatrix_FillArea(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PDoubleMatrix(Params^[0])^.Fill(PBox(Params^[1])^, PDouble(Params^[2])^);
-end;
-
-procedure _LapeDoubleMatrix_Fill(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PDoubleMatrix(Params^[0])^.Fill(PDouble(Params^[1])^);
-end;
-
-procedure _LapeDoubleMatrix_Flatten(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PDoubleArray(Result)^ := PDoubleMatrix(Params^[0])^.Flatten;
+  PBoolean(Result)^ := PDoubleMatrix(Params^[0])^.Size(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 

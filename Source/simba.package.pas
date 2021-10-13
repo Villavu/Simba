@@ -13,12 +13,12 @@ uses
   classes, sysutils, fgl;
 
 const
-  GITHUB_API_BRANCHES          = 'https://api.github.com/repos/%s/%s/branches';              // {Owner} {Name}
-  GITHUB_API_RELEASES          = 'https://api.github.com/repos/%s/%s/releases';              // {Owner} {Name}
-  GITHUB_URL_REPOSITORY        = 'https://github.com/%s/%s';                                 // {Owner} {Name}
-  GITHUB_URL_REPOSITORY_ISSUES = 'https://github.com/%s/%s/issues';                          // {Owner} {Name}
-  GITHUB_URL_DOWNLOAD_BRANCH   = 'https://github.com/%s/%s/archive/%s.zip';                  // {Owner} {Name} {Branch}
-  GITHUB_URL_PACKAGE_OPTIONS   = 'https://raw.githubusercontent.com/%s/%s/%s/.simbapackage'; // {Owner} {Name} {Version}
+  GITHUB_API_BRANCHES           = 'https://api.github.com/repos/%s/%s/branches';              // {Owner} {Name}
+  GITHUB_API_RELEASES           = 'https://api.github.com/repos/%s/%s/releases';              // {Owner} {Name}
+  GITHUB_URL_REPOSITORY         = 'https://github.com/%s/%s';                                 // {Owner} {Name}
+  GITHUB_URL_REPOSITORY_ISSUES  = 'https://github.com/%s/%s/issues';                          // {Owner} {Name}
+  GITHUB_URL_DOWNLOAD_BRANCH    = 'https://github.com/%s/%s/archive/%s.zip';                  // {Owner} {Name} {Branch}
+  GITHUB_URL_PACKAGE_OPTIONS    = 'https://raw.githubusercontent.com/%s/%s/%s/.simbapackage'; // {Owner} {Name} {Version}
 
 type
   TSimbaPackage_Options = record

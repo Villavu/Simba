@@ -110,8 +110,6 @@ var
   Value: TColorHistoryValue;
   Stream: TMemoryStream;
 begin
-  DebugLn('simba.colorpickerhistoryform :: TSimbaColorPickerHistoryForm.FormCreate');
-
   Width := 600;
   Height := 300;
 
@@ -135,8 +133,6 @@ var
   Value: TColorHistoryValue;
   Stream: TStringStream;
 begin
-  DebugLn('simba.colorpickerhistoryform :: TSimbaColorPickerHistoryForm.FormDestroy');
-
   Stream := TStringStream.Create(AnsiString(''));
 
   for I := 0 to ColorCount - 1 do
@@ -190,8 +186,6 @@ var
 begin
   if (ControlCount = 0) then
     Exit;
-
-  DebugLn('simba.colorpickerhistoryform :: TSimbaColorPickerHistoryForm.SizeComponents');
 
   with TBitmap.Create() do
   try

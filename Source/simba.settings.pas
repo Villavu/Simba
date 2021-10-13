@@ -61,6 +61,7 @@ type
       CustomFontSize: TSimbaSetting;
       ToolbarSize: TSimbaSetting;
       ColorPickerHistory: TSimbaSetting;
+      MacOSKeystrokes: TSimbaSetting;
     end;
 
     Editor: record
@@ -269,6 +270,7 @@ begin
   GUI.CustomFontSize := TSimbaSetting_Integer.Create(Self, 'GUI', 'CustomFontSize', 0);
   GUI.ToolbarSize := TSimbaSetting_Integer.Create(Self, 'GUI', 'ToolbarSize', 24);
   GUI.ColorPickerHistory := TSimbaSetting_BinaryString.Create(Self, 'GUI', 'ColorPickerHistory', '');
+  GUI.MacOSKeystrokes := TSimbaSetting_Boolean.Create(Self, 'GUI', 'MacOSKeystrokes', {$IFDEF DARWIN}True{$ELSE}False{$ENDIF});
 
   // Editor
   Editor.DefaultScript := TSimbaSetting_BinaryString.Create(Self, 'Editor', 'DefaultScript', 'program new;' + LineEnding + 'begin' + LineEnding + 'end.');

@@ -91,7 +91,8 @@ type
     procedure DrawBoxFilled(B: TBox; Invert: Boolean; Color: TColor);
     procedure DrawToCanvas(x,y: Int32; Canvas: TCanvas);
     procedure LineTo(Src,Dst: TPoint;Color: TColor);
-    function FindColors(out Points: TPointArray; Color: TColor): Boolean;
+    function FindColors(out Points: TPointArray; Color: Integer): Boolean; overload;
+    function FindColors(out Points: TPointArray; Color, Tolerance: Integer): Boolean; overload;
     function FastGetPixel(x,y: Int32): TColor;
     function FastGetPixels(Points: TPointArray): TIntegerArray;
     function GetAreaColors(xs,ys,xe,ye: Int32): T2DIntegerArray;
@@ -201,7 +202,7 @@ implementation
 uses
   math, intfgraphics,
   simba.tpa, simba.stringutil, simba.colormath, simba.iomanager, simba.overallocatearray,
-  simba.matrix, simba.matrix_single;
+  simba.matrixhelpers;
 
 function TBitmap_Helper.DataFormat: TBitmapDataFormat;
 var
@@ -1162,7 +1163,7 @@ begin
   Result := TColor(RGB) and $FFFFFF; // Remove alpha value
 end;
 
-function TMufasaBitmap.FindColors(out Points: TPointArray; Color: TColor): Boolean;
+function TMufasaBitmap.FindColors(out Points: TPointArray; Color: Integer): Boolean;
 var
   X, Y, W, H: Int32;
   P: TPoint;
@@ -1184,6 +1185,38 @@ begin
 
         Arr.Add(P);
       end;
+    end;
+
+  Points := Arr.Trim();
+
+  Result := Arr.Count > 0;
+end;
+
+function TMufasaBitmap.FindColors(out Points: TPointArray; Color, Tolerance: Integer): Boolean;
+var
+  X, Y, W, H: Int32;
+  P: TPoint;
+  RGB: TRGB32;
+  Arr: specialize TSimbaOverAllocateArray<TPoint>;
+begin
+  Arr.Init();
+
+  RGB := RGBToBGR(Color);
+  Tolerance := Sqr(Tolerance);
+
+  W := FWidth - 1;
+  H := FHeight - 1;
+  for Y := 0 to H do
+    for X := 0 to W do
+    begin
+      with Self.FData[Y * FWidth + X] do
+        if (Sqr(R - RGB.R) + Sqr(G - RGB.G) + Sqr(B - RGB.B) <= Tolerance) then
+        begin
+          P.X := X;
+          P.Y := Y;
+
+          Arr.Add(P);
+        end;
     end;
 
   Points := Arr.Trim();
