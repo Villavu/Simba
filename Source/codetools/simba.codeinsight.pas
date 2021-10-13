@@ -305,12 +305,13 @@ function TCodeInsight.GetMembersOfType(Declaration: TDeclaration): TDeclarationA
 
   procedure GetFields(Declaration: TciRecordType);
   begin
-    Result := Result +  Declaration.Items.GetItemsOfClass(TciVarDeclaration);
+    if (Declaration <> nil) then
+      Result := Result + Declaration.Items.GetItemsOfClass(TciVarDeclaration);
   end;
 
   procedure GetEnumElements(Declaration: TciTypeDeclaration);
   begin
-    if Declaration.EnumType <> nil then
+    if (Declaration.EnumType <> nil) then
       Result := Result + Declaration.EnumType.Elements;
   end;
 

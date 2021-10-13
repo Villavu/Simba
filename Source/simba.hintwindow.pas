@@ -68,7 +68,7 @@ begin
   FLabel.BorderSpacing.Top := 2;
   FLabel.BorderSpacing.Left := 5;
   FLabel.BorderSpacing.Right := 5;
-  FLabel.BorderSpacing.Bottom := 4;
+  FLabel.BorderSpacing.Bottom := 2;
   FLabel.Parent := Self;
   FLabel.OptimalFill := True;
   FLabel.AutoSize := True;

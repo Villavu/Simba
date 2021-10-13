@@ -77,9 +77,10 @@ begin
   ColorToHSL(Color[Selected], H, S, L);
 
   StringGrid.Cells[1, 0] := Format('%d', [Color[Selected]]);
-  StringGrid.Cells[1, 1] := Format('%d, %d, %d', [R, G, B]);
-  StringGrid.Cells[1, 2] := Format('%.2f, %.2f, %.2f', [H, S, L]);
-  StringGrid.Cells[1, 3] := Format('%d, %d', [Point[Selected].X, Point[Selected].Y]);
+  StringGrid.Cells[1, 1] := Format('$%s', [HexStr(Color[Selected], 6)]);
+  StringGrid.Cells[1, 2] := Format('%d, %d, %d', [R, G, B]);
+  StringGrid.Cells[1, 3] := Format('%.2f, %.2f, %.2f', [H, S, L]);
+  StringGrid.Cells[1, 4] := Format('%d, %d', [Point[Selected].X, Point[Selected].Y]);
 end;
 
 procedure TSimbaColorPickerHistoryForm.HandleButtonClearClick(Sender: TObject);

@@ -125,10 +125,6 @@ begin
     FDC := GetDC(FWindow)
   else
     FDC := GetWindowDC(FWindow);
-
-  if (FWindow > 0) and SimbaPlatformHelpers.IsScaledAndDPIAware(FWindow) then
-    WriteLn('WARNING: Target window is performing it''s own scaling.' + LineEnding +
-            '         This script might not work if another display scaling level is used');
 end;
 
 function TWindowTarget.GetAutoFocus: Boolean;
