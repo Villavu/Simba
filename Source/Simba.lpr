@@ -8,13 +8,6 @@ program Simba;
 {$i simba.inc}
 {$R Simba.res}
 
-// font helper unit... Find a home?
-// mufasatypes rename
-// codetool file renames
-// formrenames, some aren't prefixed with form or Simba etc
-// macos keymapping for Brandon
-// clean up settings form a lil
-
 uses
   simba.init,
   classes, sysutils, interfaces, forms, lazloggerbase,
@@ -22,16 +15,35 @@ uses
   simba.bitmapconv, simba.functionlistform, simba.scripttabsform,
   simba.outputform, simba.colorpickerhistoryform, simba.filebrowserform,
   simba.notesform, simba.package_form, simba.settingsform, simba.associate,
-  simba.script, simba.script_dump, simba.openexampleform;
+  simba.script, simba.script_dump, simba.openexampleform, simba.httpclient;
 
 type
   TApplicationHelper = class helper for TApplication
     procedure HandleException(Sender: TObject; E: Exception);
+    procedure HandleAnalytics(Data: PtrInt);
+    procedure SendAnalytics;
   end;
 
 procedure TApplicationHelper.HandleException(Sender: TObject; E: Exception);
 begin
   { no graphical error message at this point }
+end;
+
+procedure TApplicationHelper.HandleAnalytics(Data: PtrInt);
+begin
+  TThread.ExecuteInThread(@SendAnalytics);
+end;
+
+procedure TApplicationHelper.SendAnalytics;
+begin
+  with TSimbaHTTPClient.Create() do
+  try
+    // Simple HTTP request - nothing extra is sent.
+    // Only used for logging very basic (ide) launch metrics.
+    Get(SIMBA_ANALYTICS_URL);
+  finally
+    Free();
+  end;
 end;
 
 begin
@@ -102,6 +114,8 @@ begin
     Application.CreateForm(TSimbaPackageForm, SimbaPackageForm);
     Application.CreateForm(TSimbaOpenExampleForm, SimbaOpenExampleForm);
     Application.CreateForm(TSimbaColorPickerHistoryForm, SimbaColorPickerHistoryForm);
+
+    Application.QueueAsyncCall(@Application.HandleAnalytics, 0);
   end;
 
   Application.Run();

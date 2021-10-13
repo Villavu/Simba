@@ -1,16 +1,17 @@
 object SimbaPackageForm: TSimbaPackageForm
   Tag = 1
-  Left = 480
-  Height = 542
-  Top = 711
-  Width = 800
+  Left = 1330
+  Height = 678
+  Top = 518
+  Width = 1000
   Caption = 'Packages'
-  ClientHeight = 542
-  ClientWidth = 800
+  ClientHeight = 678
+  ClientWidth = 1000
+  DesignTimePPI = 120
   OnShow = DoFormShow
   Position = poScreenCenter
   ShowHint = True
-  LCLVersion = '2.2.0.1'
+  LCLVersion = '2.2.0.2'
   object DisabledLabel: TLabel
     AnchorSideLeft.Control = PackagesListBox
     AnchorSideLeft.Side = asrBottom
@@ -19,10 +20,10 @@ object SimbaPackageForm: TSimbaPackageForm
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = PackagesListBox
     AnchorSideBottom.Side = asrBottom
-    Left = 144
-    Height = 468
-    Top = 24
-    Width = 656
+    Left = 180
+    Height = 594
+    Top = 30
+    Width = 820
     Alignment = taCenter
     Anchors = [akTop, akLeft, akRight, akBottom]
     Caption = '(no package selected)'
@@ -33,12 +34,12 @@ object SimbaPackageForm: TSimbaPackageForm
     AnchorSideTop.Control = AddPackageButton
     AnchorSideTop.Side = asrBottom
     AnchorSideBottom.Control = ButtonPanel
-    Left = 5
-    Height = 468
-    Top = 24
-    Width = 139
+    Left = 6
+    Height = 594
+    Top = 30
+    Width = 174
     Anchors = [akTop, akLeft, akBottom]
-    BorderSpacing.Left = 5
+    BorderSpacing.Left = 6
     ItemHeight = 0
     OnContextPopup = DoPackageListPopup
     OnMouseDown = DoPackageListMouseDown
@@ -51,11 +52,11 @@ object SimbaPackageForm: TSimbaPackageForm
     AnchorSideTop.Control = Owner
     AnchorSideRight.Control = PackagesListBox
     AnchorSideRight.Side = asrBottom
-    Left = 122
-    Height = 22
+    Left = 152
+    Height = 28
     Hint = 'Add Package'
     Top = 1
-    Width = 22
+    Width = 28
     Anchors = [akTop, akRight]
     BorderSpacing.Left = 1
     BorderSpacing.Top = 1
@@ -68,10 +69,11 @@ object SimbaPackageForm: TSimbaPackageForm
   end
   object ButtonPanel: TButtonPanel
     Tag = 1
-    Left = 6
+    Left = 8
     Height = 38
-    Top = 498
-    Width = 788
+    Top = 632
+    Width = 984
+    BorderSpacing.Around = 8
     OKButton.Name = 'OKButton'
     OKButton.DefaultCaption = True
     HelpButton.Name = 'HelpButton'
@@ -91,27 +93,27 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ButtonPanel
       AnchorSideBottom.Side = asrBottom
-      Left = 5
-      Height = 24
-      Top = 10
-      Width = 683
+      Left = 6
+      Height = 21
+      Top = 12
+      Width = 853
       Anchors = [akTop, akLeft, akRight, akBottom]
       AutoSize = False
-      BorderSpacing.Left = 5
-      BorderSpacing.Top = 10
-      BorderSpacing.Right = 100
-      BorderSpacing.Bottom = 4
+      BorderSpacing.Left = 6
+      BorderSpacing.Top = 12
+      BorderSpacing.Right = 125
+      BorderSpacing.Bottom = 5
       Layout = tlCenter
     end
   end
   object RemovePackageButton: TSpeedButton
     AnchorSideTop.Control = AddPackageButton
     AnchorSideRight.Control = AddPackageButton
-    Left = 99
-    Height = 22
+    Left = 123
+    Height = 28
     Hint = 'Remove Package'
     Top = 1
-    Width = 22
+    Width = 28
     Anchors = [akTop, akRight]
     Flat = True
     Images = Images
@@ -125,17 +127,17 @@ object SimbaPackageForm: TSimbaPackageForm
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = InstallationPanel
-    Left = 149
-    Height = 201
-    Top = 24
-    Width = 646
+    Left = 186
+    Height = 319
+    Top = 30
+    Width = 808
     Anchors = [akTop, akLeft, akRight, akBottom]
     AutoSize = True
-    BorderSpacing.Left = 5
-    BorderSpacing.Right = 5
+    BorderSpacing.Left = 6
+    BorderSpacing.Right = 6
     BevelOuter = bvNone
-    ClientHeight = 201
-    ClientWidth = 646
+    ClientHeight = 319
+    ClientWidth = 808
     TabOrder = 2
     object ReleasesListLabel: TLabel
       AnchorSideLeft.Control = ReleasesPanel
@@ -144,7 +146,7 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideBottom.Side = asrBottom
       Left = 0
       Height = 20
-      Top = 51
+      Top = 55
       Width = 95
       Caption = 'Select Version:'
       Layout = tlCenter
@@ -158,12 +160,12 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideBottom.Control = ReleasesPanel
       AnchorSideBottom.Side = asrBottom
       Left = 0
-      Height = 119
-      Top = 77
-      Width = 646
+      Height = 229
+      Top = 84
+      Width = 808
       Anchors = [akTop, akLeft, akRight, akBottom]
-      BorderSpacing.Top = 5
-      BorderSpacing.Bottom = 5
+      BorderSpacing.Top = 6
+      BorderSpacing.Bottom = 6
       ReadOnly = True
       ScrollBars = ssVertical
       TabOrder = 0
@@ -174,9 +176,9 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideTop.Side = asrBottom
       Left = 0
       Height = 20
-      Top = 25
+      Top = 26
       Width = 111
-      BorderSpacing.Top = 5
+      BorderSpacing.Top = 6
       Caption = 'Installed Version:'
     end
     object LatestVersionLabel: TLabel
@@ -196,12 +198,12 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = LatestVersionLabel
       AnchorSideBottom.Side = asrBottom
-      Left = 101
+      Left = 102
       Height = 20
       Top = 0
-      Width = 545
+      Width = 706
       Anchors = [akTop, akLeft, akRight, akBottom]
-      BorderSpacing.Left = 3
+      BorderSpacing.Left = 4
       Caption = '(check for updates)'
       Layout = tlCenter
       OnClick = DoUpdateClick
@@ -216,14 +218,14 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideRight.Control = ReleasesPanel
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Side = asrBottom
-      Left = 100
-      Height = 22
-      Top = 50
-      Width = 546
+      Left = 101
+      Height = 26
+      Top = 52
+      Width = 707
       Anchors = [akTop, akLeft, akRight]
-      BorderSpacing.Left = 5
-      BorderSpacing.Top = 5
-      ItemHeight = 16
+      BorderSpacing.Left = 6
+      BorderSpacing.Top = 6
+      ItemHeight = 20
       OnChange = DoSelectedReleaseChanged
       OnDrawItem = DoReleasesListDraw
       ReadOnly = True
@@ -237,15 +239,15 @@ object SimbaPackageForm: TSimbaPackageForm
     AnchorSideRight.Control = ReleasesPanel
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = ButtonPanel
-    Left = 149
-    Height = 267
-    Top = 225
-    Width = 646
+    Left = 186
+    Height = 275
+    Top = 349
+    Width = 808
     Anchors = [akLeft, akRight, akBottom]
     AutoSize = True
     BevelOuter = bvNone
-    ClientHeight = 267
-    ClientWidth = 646
+    ClientHeight = 275
+    ClientWidth = 808
     TabOrder = 3
     object InstallButton: TButton
       AnchorSideLeft.Control = InstallationPanel
@@ -257,10 +259,10 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideBottom.Side = asrBottom
       Left = 0
       Height = 30
-      Top = 237
-      Width = 646
+      Top = 245
+      Width = 808
       Anchors = [akTop, akLeft, akRight, akBottom]
-      BorderSpacing.Top = 5
+      BorderSpacing.Top = 6
       Caption = 'Install'
       OnClick = DoInstallPackageClick
       TabOrder = 0
@@ -273,7 +275,7 @@ object SimbaPackageForm: TSimbaPackageForm
       Left = 0
       Height = 20
       Top = 0
-      Width = 646
+      Width = 808
       Caption = 'Installation'
       Anchors = [akTop, akLeft, akRight]
       Style = gsHorLines
@@ -285,27 +287,27 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideRight.Control = InstallationPanel
       AnchorSideRight.Side = asrBottom
       Left = 0
-      Height = 154
-      Top = 78
-      Width = 646
+      Height = 159
+      Top = 80
+      Width = 808
       Anchors = [akTop, akLeft, akRight]
       AutoSize = True
-      BorderSpacing.Top = 5
+      BorderSpacing.Top = 6
       Caption = 'Options'
-      ClientHeight = 129
-      ClientWidth = 642
+      ClientHeight = 134
+      ClientWidth = 804
       TabOrder = 1
       object InstallNameLabel: TLabel
         AnchorSideLeft.Control = OptionsGroup
         AnchorSideTop.Control = InstallNameEdit
         AnchorSideBottom.Control = InstallNameEdit
         AnchorSideBottom.Side = asrBottom
-        Left = 5
+        Left = 6
         Height = 28
-        Top = 5
+        Top = 6
         Width = 43
         Anchors = [akTop, akLeft, akBottom]
-        BorderSpacing.Left = 5
+        BorderSpacing.Left = 6
         Caption = 'Name:'
         Layout = tlCenter
       end
@@ -314,14 +316,14 @@ object SimbaPackageForm: TSimbaPackageForm
         AnchorSideTop.Control = InstallNameEdit
         AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = SelectDirectoryButton
-        Left = 79
+        Left = 81
         Height = 28
         Hint = 'The directory to install into. Relative from Simba''s directory.'
-        Top = 36
-        Width = 514
+        Top = 38
+        Width = 662
         Anchors = [akTop, akLeft, akRight]
-        BorderSpacing.Top = 3
-        BorderSpacing.Right = 5
+        BorderSpacing.Top = 4
+        BorderSpacing.Right = 6
         ItemHeight = 20
         OnChange = DoInstallationModeChange
         TabOrder = 1
@@ -331,12 +333,12 @@ object SimbaPackageForm: TSimbaPackageForm
         AnchorSideTop.Control = InstallDirectoryList
         AnchorSideBottom.Control = InstallDirectoryList
         AnchorSideBottom.Side = asrBottom
-        Left = 5
+        Left = 6
         Height = 28
-        Top = 36
+        Top = 38
         Width = 61
         Anchors = [akTop, akLeft, akBottom]
-        BorderSpacing.Left = 5
+        BorderSpacing.Left = 6
         Caption = 'Directory'
         Layout = tlCenter
       end
@@ -348,15 +350,15 @@ object SimbaPackageForm: TSimbaPackageForm
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = OptionsGroup
         AnchorSideBottom.Side = asrBottom
-        Left = 5
+        Left = 6
         Height = 24
         Hint = 'Flatten directory structure'
-        Top = 100
-        Width = 637
+        Top = 104
+        Width = 798
         Anchors = [akTop, akLeft, akRight, akBottom]
-        BorderSpacing.Left = 5
-        BorderSpacing.Top = 5
-        BorderSpacing.Bottom = 5
+        BorderSpacing.Left = 6
+        BorderSpacing.Top = 6
+        BorderSpacing.Bottom = 6
         Caption = 'Extract Flat'
         TabOrder = 3
       end
@@ -368,12 +370,12 @@ object SimbaPackageForm: TSimbaPackageForm
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = InstallDirectoryList
         AnchorSideBottom.Side = asrBottom
-        Left = 598
+        Left = 749
         Height = 28
-        Top = 36
-        Width = 39
+        Top = 38
+        Width = 49
         Anchors = [akTop, akRight, akBottom]
-        BorderSpacing.Right = 5
+        BorderSpacing.Right = 6
         Caption = '...'
         OnClick = DoSelectDirectoryClick
         ParentShowHint = False
@@ -383,14 +385,14 @@ object SimbaPackageForm: TSimbaPackageForm
         AnchorSideLeft.Control = IgnoreListEdit
         AnchorSideTop.Control = OptionsGroup
         AnchorSideRight.Control = SelectDirectoryButton
-        Left = 79
+        Left = 81
         Height = 28
         Hint = 'The package name to install under. Can be empty to install directly into the directory'
-        Top = 5
-        Width = 514
+        Top = 6
+        Width = 662
         Anchors = [akTop, akLeft, akRight]
-        BorderSpacing.Top = 5
-        BorderSpacing.Right = 5
+        BorderSpacing.Top = 6
+        BorderSpacing.Right = 6
         OnChange = DoInstallationModeChange
         TabOrder = 0
       end
@@ -400,15 +402,15 @@ object SimbaPackageForm: TSimbaPackageForm
         AnchorSideTop.Control = InstallDirectoryList
         AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = SelectDirectoryButton
-        Left = 79
+        Left = 81
         Height = 28
         Hint = 'Files or directories not to install delimited with commas'
-        Top = 67
-        Width = 514
+        Top = 70
+        Width = 662
         Anchors = [akTop, akLeft, akRight]
-        BorderSpacing.Left = 5
-        BorderSpacing.Top = 3
-        BorderSpacing.Right = 5
+        BorderSpacing.Left = 6
+        BorderSpacing.Top = 4
+        BorderSpacing.Right = 6
         TabOrder = 2
       end
       object IgnoreListLabel: TLabel
@@ -416,12 +418,12 @@ object SimbaPackageForm: TSimbaPackageForm
         AnchorSideTop.Control = IgnoreListEdit
         AnchorSideBottom.Control = IgnoreListEdit
         AnchorSideBottom.Side = asrBottom
-        Left = 5
+        Left = 6
         Height = 28
-        Top = 67
+        Top = 70
         Width = 69
         Anchors = [akTop, akLeft, akBottom]
-        BorderSpacing.Left = 5
+        BorderSpacing.Left = 6
         Caption = 'Ignore List'
         Layout = tlCenter
       end
@@ -435,10 +437,10 @@ object SimbaPackageForm: TSimbaPackageForm
       Left = 0
       Height = 24
       Hint = 'One click installation. Reads options from .simbapackage providing it exists the root of the repository.'
-      Top = 25
-      Width = 646
+      Top = 26
+      Width = 808
       Anchors = [akTop, akLeft, akRight]
-      BorderSpacing.Top = 5
+      BorderSpacing.Top = 6
       Caption = 'Basic'
       Checked = True
       OnChange = DoInstallationModeChange
@@ -454,8 +456,8 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideRight.Side = asrBottom
       Left = 0
       Height = 24
-      Top = 49
-      Width = 646
+      Top = 50
+      Width = 808
       Anchors = [akTop, akLeft, akRight]
       Caption = 'Custom'
       OnChange = DoInstallationModeChange
@@ -463,13 +465,13 @@ object SimbaPackageForm: TSimbaPackageForm
     end
   end
   object SelectDirectoryDialog: TSelectDirectoryDialog
-    Left = 56
-    Top = 176
+    Left = 70
+    Top = 220
   end
   object PackageListPopup: TPopupMenu
     Images = Images
-    Left = 56
-    Top = 56
+    Left = 70
+    Top = 70
     object PackageListPopup_VistRepository: TMenuItem
       Caption = 'Visit Repository'
       ImageIndex = 2
@@ -483,8 +485,8 @@ object SimbaPackageForm: TSimbaPackageForm
   end
   object Images: TImageList
     Scaled = True
-    Left = 56
-    Top = 120
+    Left = 70
+    Top = 150
     Bitmap = {
       4C7A040000001000000010000000B60300000000000078DAD5966B48536118C7
       1F97B34823232FF3028B0A3243428524A98F961F5A2BC84AB2EC4E4644F4A520
@@ -642,7 +644,7 @@ object SimbaPackageForm: TSimbaPackageForm
   end
   object UpdateTimer: TTimer
     OnTimer = DoUpdateTimer
-    Left = 56
-    Top = 236
+    Left = 70
+    Top = 295
   end
 end

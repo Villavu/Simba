@@ -7,7 +7,6 @@ unit simba.openssl;
 
 {$i simba.inc}
 
-
 {$IFDEF SIMBA_WIN32}
   {$R resourcefiles/win32}
 {$ENDIF}
@@ -38,7 +37,7 @@ procedure InitializeOpenSSL;
 implementation
 
 uses
-  openssl, lcltype, lazloggerbase, sha1,
+  openssl, lcltype, lazloggerbase, sha1, dynlibs,
   simba.gz_stream, simba.settings, simba.files;
 
 function IsFileHash(FileName: String; Hash: String): Boolean;
@@ -135,6 +134,7 @@ begin
   if not IsSSLLoaded() then
   begin
     DebugLn('Failed to load OpenSSL');
+    DebugLn('Error: ', GetLoadErrorStr());
     DebugLn('LibSSL: ', DLLSSLName);
     DebugLn('LibCrypto: ', DLLUtilName);
   end;

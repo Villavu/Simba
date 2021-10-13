@@ -98,11 +98,6 @@ begin
   PExtended(Result)^ := Csc(PExtended(Params^[0])^);
 end;
 
-procedure _LapeDecRet(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PExtended(Result)^ := DecRet(PExtended(Params^[0])^);
-end;
-
 procedure _Lapelog10(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PExtended(Result)^ := log10(PExtended(Params^[0])^);
@@ -110,17 +105,12 @@ end;
 
 procedure _LapeMaxA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := MaxA(TIntegerArray(Params^[0]^));
+  PInteger(Result)^ := specialize MaxA<Integer>(TIntegerArray(Params^[0]^));
 end;
 
 procedure _LapeMinA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := MinA(TIntegerArray(Params^[0]^));
-end;
-
-procedure _LapeSum64IntArr(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PInt64(Result)^ := Sum64IntArr(PIntegerArray(Params^[0])^);
+  PInteger(Result)^ := specialize MinA<Integer>(TIntegerArray(Params^[0]^));
 end;
 
 procedure _LapeFixRad(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

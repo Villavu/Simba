@@ -72,9 +72,12 @@ begin
   EditorGeneralFrame.IgnoreCodeToolsDirectiveCheckbox.Checked := SimbaSettings.Editor.IgnoreCodeToolsIDEDirective.Value;
 
   SimbaGeneralFrame.ToolbarSizeTrackBar.Position := SimbaSettings.GUI.ToolbarSize.Value;
+  SimbaGeneralFrame.ToolbarSizeTrackBar.OnChange(nil);
   SimbaGeneralFrame.FontSizeTrackBar.Position := SimbaSettings.GUI.CustomFontSize.Value;
+  SimbaGeneralFrame.ToolbarSizeTrackBar.OnChange(nil);
   SimbaGeneralFrame.OpenSSLStartupCheckbox.Checked := SimbaSettings.Environment.OpenSSLOnLaunch.Value;
   SimbaGeneralFrame.OpenSSLoadedValueCaption.Caption := BoolToStr(IsSSLLoaded, 'True', 'False');
+  SimbaGeneralFrame.UseMacOSCommandKey.Checked := SimbaSettings.GUI.MacOSKeystrokes.Value;
 end;
 
 procedure TSimbaSettingsForm.OKButtonClick(Sender: TObject);
@@ -101,6 +104,7 @@ begin
     SimbaSettings.GUI.CustomFontSize.Value := SimbaGeneralFrame.FontSizeTrackBar.Position;
 
   SimbaSettings.Environment.OpenSSLOnLaunch.Value := SimbaGeneralFrame.OpenSSLStartupCheckbox.Checked;
+  SimbaSettings.GUI.MacOSKeystrokes.Value := SimbaGeneralFrame.UseMacOSCommandKey.Checked;
 end;
 
 constructor TSimbaSettingsForm.Create(AOwner: TComponent);
@@ -132,6 +136,10 @@ begin
   SimbaGeneralFrame := TSimbaGeneralFrame.Create(Self);
   SimbaGeneralFrame.Parent := AddPage('General', Node);
   SimbaGeneralFrame.Align := alClient;
+  {$IFNDEF DARWIN}
+  SimbaGeneralFrame.KeystrokesDivider.Visible := False;
+  SimbaGeneralFrame.UseMacOSCommandKey.Visible := False;
+  {$ENDIF}
 
   Node := TreeView.Items.Add(nil, 'Editor');
 

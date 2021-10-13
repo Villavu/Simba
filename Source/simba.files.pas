@@ -18,9 +18,6 @@ const
   File_EventError = -2;
 
 type
-
-  { TMFiles }
-
   PMFiles = ^TMFiles;
   TMFiles = class(TObject)
   public
@@ -60,6 +57,7 @@ type
   procedure UnZipFile(const ArchiveFileName, OutputDirectory: String);
   function UnZipOneFile(const ArchiveFileName, FileName, OutputDirectory: String): Boolean;
 
+  function HashFile(const FileName: String): String;
   function ReadFile(const FileName: String): String;
   function WriteFile(const FileName, Contents: String): Boolean;
   function CreateTempFile(const Contents, Prefix: String): String;
@@ -78,7 +76,7 @@ type
 implementation
 
 uses
-  forms, lazloggerbase, inifiles, fileutil, lazfileutils, zipper, dynlibs;
+  forms, lazloggerbase, inifiles, fileutil, lazfileutils, zipper, dynlibs, sha1;
 
 function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
 var
@@ -172,8 +170,8 @@ end;
 
 function GetDirectories(Path: string): TStringArray;
 var
-    SearchRec : TSearchRec;
-    c : integer;
+  SearchRec : TSearchRec;
+  c : integer;
 begin
   c := 0;
   if FindFirst(Path + '*', faDirectory, SearchRec) = 0 then
@@ -252,6 +250,16 @@ begin
     Zipper.ZipAllFiles();
   finally
     Zipper.Free;
+  end;
+end;
+
+function HashFile(const FileName: String): String;
+begin
+  Result := '';
+  try
+    Result := SHA1Print(SHA1File(FileName, 256*256));
+  except
+    { Return empty string on file not found }
   end;
 end;
 

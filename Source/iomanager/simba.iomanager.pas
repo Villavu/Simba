@@ -111,7 +111,6 @@ type
 implementation
 
 uses
-  simba.matrix_single,
   simba.files,
   simba.target_raw,
   simba.target_bitmap,

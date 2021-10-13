@@ -17,6 +17,8 @@ uses
 type
   TSimbaScriptTabsForm = class(TForm)
     FindDialog: TFindDialog;
+    MenuItem1: TMenuItem;
+    MenuItemDocumentation: TMenuItem;
     MenuItemUndo: TMenuItem;
     MenuItemCopy: TMenuItem;
     MenuItemPaste: TMenuItem;
@@ -239,6 +241,7 @@ begin
   if (Sender = MenuItemPaste)           then CurrentEditor.PasteFromClipboard();
   if (Sender = MenuItemDelete)          then CurrentEditor.ClearSelection();
   if (Sender = MenuItemSelectAll)       then CurrentEditor.SelectAll();
+  if (Sender = MenuItemDocumentation)   then CurrentEditor.InsertDocumentation();
   if (Sender = MenuItemFind)            then Self.Find();
   if (Sender = MenuItemReplace)         then Self.Replace();
 end;
@@ -413,7 +416,8 @@ begin
     else
       FindDialog.Options := FindDialog.Options + [frEntireScope];
 
-    ReplaceDialog.FindText := CurrentEditor.GetWordAtRowCol(CurrentEditor.CaretXY);
+    if CurrentEditor.GetWordAtRowCol(CurrentEditor.CaretXY) <> '' then
+      ReplaceDialog.FindText := CurrentEditor.GetWordAtRowCol(CurrentEditor.CaretXY);
     ReplaceDialog.Execute();
   end;
 end;
@@ -422,7 +426,8 @@ procedure TSimbaScriptTabsForm.Find;
 begin
   if (CurrentEditor <> nil) then
   begin
-    FindDialog.FindText := CurrentEditor.GetWordAtRowCol(CurrentEditor.CaretXY);
+    if CurrentEditor.GetWordAtRowCol(CurrentEditor.CaretXY) <> '' then
+      FindDialog.FindText := CurrentEditor.GetWordAtRowCol(CurrentEditor.CaretXY);
     FindDialog.Execute();
   end;
 end;

@@ -1,3 +1,28 @@
+procedure _LapeSortIntegerArray(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  specialize QuickSort<Integer>(PIntegerArray(Params^[0])^, Low(PIntegerArray(Params^[0])^), High(PIntegerArray(Params^[0])^));
+end;
+
+procedure _LapeSortWeightedTPA(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  specialize QuickSortWeighted<TPoint, Int64>(PPointArray(Params^[0])^, PInt64Array(Params^[1])^, Low(PPointArray(Params^[0])^), High(PPointArray(Params^[0])^));
+end;
+
+procedure _LapeSortWeightedATPA(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  specialize QuickSortWeighted<TPointArray, Int64>(P2DPointArray(Params^[0])^, PInt64Array(Params^[1])^, Low(P2DPointArray(Params^[0])^), High(P2DPointArray(Params^[0])^));
+end;
+
+procedure _LapeSortWeightedTPAF(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  specialize QuickSortWeighted<TPoint, Extended>(PPointArray(Params^[0])^, PExtendedArray(Params^[1])^, Low(PPointArray(Params^[0])^), High(PPointArray(Params^[0])^));
+end;
+
+procedure _LapeSortWeightedATPAF(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  specialize QuickSortWeighted<TPointArray, Extended>(P2DPointArray(Params^[0])^, PExtendedArray(Params^[1])^, Low(P2DPointArray(Params^[0])^), High(P2DPointArray(Params^[0])^));
+end;
+
 procedure _LapeRAaSTPAEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   RAaSTPAEx(PPointArray(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^);
@@ -136,11 +161,6 @@ end;
 procedure _LapeGetTPABounds(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PBox(Result)^ := GetTPABounds(PPointArray(Params^[0])^);
-end;
-
-procedure _LapeFindTPAinTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := FindTPAinTPA(PPointArray(Params^[0])^, PPointArray(Params^[1])^, PPointArray(Params^[2])^);
 end;
 
 procedure _LapeGetSamePointsATPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -343,14 +363,9 @@ begin
   InvertTIA(PIntegerArray(Params^[0])^);
 end;
 
-procedure _LapeSumIntegerArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PInt32(Result)^ := SumIntegerArray(PIntegerArray(Params^[0])^);
-end;
-
 procedure _LapeAverageTIA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInt32(Result)^ := AverageTIA(PIntegerArray(Params^[0])^);
+  PInt64(Result)^ := AverageTIA(PIntegerArray(Params^[0])^);
 end;
 
 procedure _LapeAverageExtended(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -360,7 +375,7 @@ end;
 
 procedure _LapeQuicksort(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Quicksort(PIntegerArray(Params^[0])^, Low(PIntegerArray(Params^[0])^), High(PIntegerArray(Params^[0])^));
+  specialize Quicksort<Integer>(PIntegerArray(Params^[0])^, Low(PIntegerArray(Params^[0])^), High(PIntegerArray(Params^[0])^));
 end;
 
 procedure _LapeInIntArrayEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -391,6 +406,11 @@ end;
 procedure _LapePointsInRangeOfEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PPointArray(Result)^ := PointsInRangeOf(PPointArray(Params^[0])^, PPointArray(Params^[1])^, PDouble(Params^[2])^, PDouble(Params^[3])^, PDouble(Params^[4])^, PDouble(Params^[5])^);
+end;
+
+procedure _LapeSumIntegerArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PInt64(Result)^ := SumIntegerArray(PIntegerArray(Params^[0])^);
 end;
 
 procedure _LapeClearSameIntegers(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

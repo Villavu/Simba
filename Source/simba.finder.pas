@@ -6,11 +6,10 @@
 unit simba.finder;
 
 {$i simba.inc}
-{$INLINE ON}
+{$define CheckAllBackground}//Undefine this to only check the first white point against the background (in masks).
 
 interface
 
-{$define CheckAllBackground}//Undefine this to only check the first white point against the background (in masks).
 uses
   simba.colormath, classes, sysutils, simba.bitmap, simba.dtm, simba.mufasatypes, simba.matchtemplate; // types
 
@@ -26,39 +25,39 @@ uses
 
 type
   TCTSNoInfo = record    //No tolerance
-      B, G, R, A:byte;
+    B, G, R, A:Byte;
   end;
   PCTSNoInfo = ^TCTSNoInfo;
 
   TCTS0Info = record
-      B, G, R, A: byte;
-      Tol: Integer;
+    B, G, R, A: Byte;
+    Tol: Integer;
   end;
   PCTS0Info = ^TCTS0Info;
 
   TCTS1Info = record
-      B, G, R, A: byte;
-      Tol: Integer; { Squared }
+    B, G, R, A: Byte;
+    Tol: Integer; { Squared }
   end;
   PCTS1Info = ^TCTS1Info;
 
   TCTS2Info = record
-      H, S, L: extended;
-      hueMod, satMod: extended;
-      Tol: Integer;
+    H, S, L: Extended;
+    hueMod, satMod: Extended;
+    Tol: Integer;
   end;
   PCTS2Info = ^TCTS2Info;
 
   TCTS3Info = record
-      L, A, B: extended;
-      Tol: Integer; { Squared * CTS3Modifier}
+    L, A, B: Extended;
+    Tol: Integer; { Squared * CTS3Modifier}
   end;
   PCTS3Info = ^TCTS3Info;
 
   TCTSInfo = Pointer;
-  TCTSInfoArray = Array of TCTSInfo;
-  TCTSInfo2DArray = Array of TCTSInfoArray;
-  TCTSCompareFunction = function (ctsInfo: Pointer; C2: PRGB32): Boolean;
+  TCTSInfoArray = array of TCTSInfo;
+  TCTSInfo2DArray = array of TCTSInfoArray;
+  TCTSCompareFunction = function(const ctsInfo: Pointer; const C2: PRGB32): Boolean;
 
 type
   PMFinder = ^TMFinder;
@@ -104,16 +103,16 @@ type
     procedure CheckMask(const Mask : TMask);
 
     //Bitmap functions
-    function FindBitmap(bitmap: TMufasaBitmap; out x, y: Integer): Boolean;
-    function FindBitmapIn(bitmap: TMufasaBitmap; out x, y: Integer;  xs, ys, xe, ye: Integer): Boolean;
-    function FindBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean;
-    function FindBitmapSpiral(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean;
-    function FindBitmapSpiralTolerance(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye,tolerance : Integer): Boolean;
-    function FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x, y: Integer; out Points : TPointArray; xs, ys, xe, ye,tolerance: Integer; maxToFind: Integer = 0): Boolean;
-    function FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; out accuracy: Extended): Boolean;
+    function FindBitmap(Bitmap: TMufasaBitmap; out x, y: Integer): Boolean;
+    function FindBitmapIn(Bitmap: TMufasaBitmap; out x, y: Integer;  xs, ys, xe, ye: Integer): Boolean;
+    function FindBitmapToleranceIn(Bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean;
+    function FindBitmapSpiral(Bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean;
+    function FindBitmapSpiralTolerance(Bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye,tolerance : Integer): Boolean;
+    function FindBitmapsSpiralTolerance(Bitmap: TMufasaBitmap; x, y: Integer; out Points : TPointArray; xs, ys, xe, ye,tolerance: Integer; maxToFind: Integer = 0): Boolean;
+    function FindDeformedBitmapToleranceIn(Bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; out accuracy: Extended): Boolean;
 
-    function FindTemplateEx(TemplImage: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula;   xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
-    function FindTemplate(TemplImage: TMufasaBitmap; out X,Y: Integer; Formula: ETMFormula;  xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
+    function FindTemplateEx(TemplImage: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
+    function FindTemplate(TemplImage: TMufasaBitmap; out X,Y: Integer; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
 
     function FindTextMatrix(Text, Font: String; Matrix: T2DIntegerArray; out Bounds: TBox): Single;
     function FindTextColor(Text, Font: String; Color, Tolerance: Int32; X1, Y1, X2, Y2: Int32; out Bounds: TBox): Single; overload;
@@ -150,17 +149,13 @@ type
 implementation
 
 uses
-  simba.client,
   math,
-  simba.tpa,
-  simba.dtmutil,
-  simba.matrix, simba.matrix_single;
+  simba.client, simba.tpa, simba.dtmutil, simba.matrixhelpers;
 
 var
   Percentage : array[0..255] of Extended;
 
-{ Colour Same functions }
-function ColorSame_ctsNo(ctsInfo: Pointer; C2: PRGB32): Boolean; inline;
+function ColorSame_ctsNo(const ctsInfo: Pointer; const C2: PRGB32): Boolean; inline;
 var
   C1: TCTSNoInfo;
 begin
@@ -170,7 +165,7 @@ begin
         and (C1.R = C2^.R);
 end;
 
-function ColorSame_cts0(ctsInfo: Pointer; C2: PRGB32): Boolean; inline;
+function ColorSame_cts0(const ctsInfo: Pointer; const C2: PRGB32): Boolean; inline;
 var
   C1: TCTS0Info;
 begin
@@ -180,7 +175,7 @@ begin
         and (Abs(C1.R - C2^.R) <= C1.Tol);
 end;
 
-function ColorSame_cts1(ctsInfo: Pointer; C2: PRGB32): Boolean; inline;
+function ColorSame_cts1(const ctsInfo: Pointer; const C2: PRGB32): Boolean; inline;
 var
   C1: TCTS1Info;
   r,g,b: Integer;
@@ -192,11 +187,11 @@ begin
   Result := (b*b + g*g + r*r) <= C1.Tol;
 end;
 
-function ColorSame_cts2(ctsInfo: Pointer; C2: PRGB32): Boolean; inline;
+function ColorSame_cts2(const ctsInfo: Pointer; const C2: PRGB32): Boolean; inline;
 var
-  r,g ,b: extended;
-  CMin, CMax,D : extended;
-  h,s,l : extended;
+  r,g ,b: Extended;
+  CMin, CMax,D : Extended;
+  h,s,l : Extended;
   i: TCTS2Info;
 begin
   i := PCTS2Info(ctsInfo)^;
@@ -214,14 +209,14 @@ begin
   l := 0.5 * (Cmax + Cmin);
   //The L-value is already calculated, lets see if the current point meats the requirements!
   if abs(l*100 - i.L) > i.Tol then
-    exit(false);
+    Exit(false);
   if Cmax = Cmin then
   begin
     //S and H are both zero, the color is gray, so ignore hue and leave it to saturation tolerance.
     if (i.S <= i.satMod) then
-      exit(true)
+      Exit(true)
     else
-      exit(false);
+      Exit(false);
   end;
   D := Cmax - Cmin;
   if l < 0.5 then
@@ -230,7 +225,7 @@ begin
     s := D / (2 - Cmax - Cmin);
   // We've Calculated the S, check match
   if abs(S*100 - i.S) > i.satMod then
-    exit(false);
+    Exit(False);
   if R = Cmax then
     h := (G - B) / D
   else
@@ -246,15 +241,15 @@ begin
   h := h * 100;
 
   if h > i.H then
-    Result := min(h - i.H, abs(h - (i.H + 100) )) <= i.hueMod
+    Result := Min(h - i.H, abs(h - (i.H + 100) )) <= i.hueMod
   else
-    Result := min(i.H - h, abs(i.H - (h + 100) )) <= i.hueMod;
+    Result := Min(i.H - h, abs(i.H - (h + 100) )) <= i.hueMod;
 end;
 
-function ColorSame_cts3(ctsInfo: Pointer; C2: PRGB32): Boolean; inline;
+function ColorSame_cts3(const ctsInfo: Pointer; const C2: PRGB32): Boolean; inline;
 var
   i: TCTS3Info;
-  r, g, b : extended;
+  r, g, b : Extended;
   x, y, z, L, A, bb: Extended;
 begin
   i := PCTS3Info(ctsInfo)^;
@@ -305,7 +300,7 @@ begin
   Result := (L*L + A*A + bB*Bb) <= i.Tol;
 end;
 
-function Create_CTSInfo_helper(cts: Integer; Color, Tol: Integer; hueMod, satMod, CTS3Modifier: extended): Pointer; overload;
+function Create_CTSInfo_helper(cts: Integer; Color, Tol: Integer; hueMod, satMod, CTS3Modifier: Extended): Pointer; overload;
 var
   R, G, B: Integer;
   X, Y, Z: Extended;
@@ -349,13 +344,13 @@ begin
       RGBToXYZ(R, G, B, X, Y, Z);
       XYZToCIELab(X, Y, Z, PCTS3Info(Result)^.L, PCTS3Info(Result)^.A,
                 PCTS3Info(Result)^.B);
-      { XXX: TODO: Make all Tolerance extended }
+      { XXX: TODO: Make all Tolerance Extended }
       PCTS3Info(Result)^.Tol := Ceil(Sqr(Tol*CTS3Modifier));
     end;
   end;
 end;
 
-function Create_CTSInfo_helper(cts: Integer; R, G, B, Tol: Integer; hueMod, satMod, CTS3Modifier: extended): Pointer; overload;
+function Create_CTSInfo_helper(cts: Integer; R, G, B, Tol: Integer; hueMod, satMod, CTS3Modifier: Extended): Pointer; overload;
 var
   Color: Integer;
 begin
@@ -372,7 +367,7 @@ begin
 end;
 
 { TODO: Not universal, mainly for DTM }
-function Create_CTSInfoArray_helper(cts: Integer; color, tolerance: array of Integer; hueMod, satMod, CTS3Modifier: extended): TCTSInfoArray;
+function Create_CTSInfoArray_helper(cts: Integer; color, tolerance: array of Integer; hueMod, satMod, CTS3Modifier: Extended): TCTSInfoArray;
 var
    i: Integer;
 begin
@@ -480,8 +475,7 @@ begin
     CurrBox.y1 := Starty-Ring;
     CurrBox.x2 := Startx+Ring;
     CurrBox.y2 := Starty+Ring;
-  until (Currbox.x1 < x1) and (Currbox.x2 > x2) and (currbox.y1 < y1)
-        and (currbox.y2 > y2);
+  until (Currbox.x1 < x1) and (Currbox.x2 > x2) and (currbox.y1 < y1) and (currbox.y2 > y2);
 end;
 
 function CalculateRowPtrs(ReturnData: TRetData; RowCount: Integer) : TPRGB32Array; overload;
@@ -502,7 +496,7 @@ end;
 procedure CalculateBitmapSkipCoords(Bitmap : TMufasaBitmap; out SkipCoords : TBooleanMatrix);
 var
   x,y : Integer;
-  R,G,B : byte;
+  R,G,B : Byte;
   Ptr : PRGB32;
 begin;
   r := 0;
@@ -518,7 +512,7 @@ begin;
       if (Ptr^.r = r) and (Ptr^.g = g) and (Ptr^.b = b) then
         SkipCoords[y][x] := True
       else
-        SkipCoords[y][x] := false;
+        SkipCoords[y][x] := False;
       inc(ptr);
     end;
 end;
@@ -529,7 +523,7 @@ end;
 procedure CalculateBitmapSkipCoordsEx(Bitmap : TMufasaBitmap; out SkipCoords : TBooleanMatrix;out TotalPoints : Integer; out PointsLeft : T2DIntegerArray);
 var
   x,y : Integer;
-  R,G,B : byte;
+  R,G,B : Byte;
   Ptr : PRGB32;
   TotalC : Integer;
 begin;
@@ -549,7 +543,7 @@ begin;
         SkipCoords[y][x] := True
       else
       begin;
-        SkipCoords[y][x] := false;
+        SkipCoords[y][x] := False;
         inc(TotalC);
       end;
       inc(ptr);
@@ -772,7 +766,7 @@ begin
   compare := Get_CTSCompare(Self.CTS);
 
   for yy := ys to ye do
-  begin;
+  begin
     for xx := xs to xe do
     begin
       if compare(ctsinfo, Ptr) then
@@ -901,7 +895,7 @@ var
   ctsinfo: TCTSInfo;
   label Hit;
 begin
-  Result := false;
+  Result := False;
   if (not GetData(PtrData, xs, ys, xe, ye)) then
     Exit;
 
@@ -963,9 +957,9 @@ begin
   compare := Get_CTSCompare(Self.CTS);
 
   for yy := ys to ye do
-  begin;
+  begin
     for xx := xs to xe do
-    begin;
+    begin
       NotFound := False;
       // Colour comparison here.
       if compare(ctsinfo, Ptr) then
@@ -1042,9 +1036,9 @@ begin
       begin
         ClientTPA[c].x := xx;
         ClientTPA[c].y := yy;
-        inc(c);
+        Inc(c);
       end;
-      inc(Ptr);
+      Inc(Ptr);
     end;
     Inc(Ptr, PtrInc);
   end;
@@ -1087,11 +1081,11 @@ begin
   SpiralHi := (dx + 1) * (dy + 1) - 1;
   for i := 0 to SpiralHi do
     if compare(ctsinfo, @RowData[ClientTPA[i].y][ClientTPA[i].x]) then
-    begin;
+    begin
       { We can re-use the ClientTPA to store results. }
       ClientTPA[c].x := ClientTPA[i].x + xs;
       ClientTPA[c].y := ClientTPA[i].y + ys;
-      inc(c);
+      Inc(c);
     end;
 
   Result := C > 0;
@@ -1151,7 +1145,7 @@ begin
   dY := dY - MaskH;
   for yy := 0 to dY do
     for xx := 0 to dX do
-    begin;
+    begin
       CheckerWhite := MainRowdata[yy + mask.White[0].y][xx + mask.white[0].x];
       CheckerBlack := MainRowdata[yy + mask.Black[0].y][xx + mask.Black[0].x];
       //Just check two 'random' points against eachother, might be a time saver in some circumstances.
@@ -1159,7 +1153,7 @@ begin
           <= ContourTolerance) then //The Tol between the white and black is lower than the minimum difference, so continue with looking!
         continue;
       for i := 0 to mask.WhiteHi do
-      begin;
+      begin
         CurrWhite := MainRowdata[yy + mask.White[i].y][xx + mask.white[i].x];
         if (Sqrt(sqr(CheckerWhite.r-CurrWhite.r) + sqr(CheckerWhite.G-CurrWhite.G) + sqr(CheckerWhite.b-CurrWhite.B))
             > Tolerance) then //The white checkpoint n' this point aren't in the same tol range -> goto nomatch;
@@ -1200,28 +1194,28 @@ begin
     raise exception.CreateFMT('Mask is invalid. Width/Height: (%d,%d). WhiteHi/BlackHi: (%d,%d)',[Mask.W,Mask.H,Mask.WhiteHi,Mask.BlackHi]);
 end;
 
-function TMFinder.FindBitmap(bitmap: TMufasaBitmap; out x, y: Integer): Boolean;
+function TMFinder.FindBitmap(Bitmap: TMufasaBitmap; out x, y: Integer): Boolean;
 var
   w,h : Integer;
 begin
   TClient(Client).IOManager.GetDimensions(w,h);
-  Result := Self.FindBitmapIn(bitmap,x,y,0,0,w-1,h-1);
+  Result := Self.FindBitmapIn(Bitmap,x,y,0,0,w-1,h-1);
 end;
 
-function TMFinder.FindBitmapIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer): Boolean;
+function TMFinder.FindBitmapIn(Bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer): Boolean;
 var
   temp: Integer;
 begin
   temp := Self.CTS;
   Self.CTS := -1;
   try
-    Result := FindBitmapToleranceIn(bitmap, x, y, xs, ys, xe, ye, 0);
+    Result := FindBitmapToleranceIn(Bitmap, x, y, xs, ys, xe, ye, 0);
   finally
     Self.CTS := temp;
   end;
 end;
 
-function TMFinder.FindBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean;
+function TMFinder.FindBitmapToleranceIn(Bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean;
 var
   MainRowdata : TPRGB32Array;
   BmpRowData : TPRGB32Array;
@@ -1246,11 +1240,11 @@ begin
 
   //Caculate the row ptrs
   MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
-  BmpRowData:= CalculateRowPtrs(bitmap);
+  BmpRowData:= CalculateRowPtrs(Bitmap);
   //Get the 'fixed' bmp size
-  BmpW := bitmap.Width - 1;
-  BmpH := bitmap.Height - 1;
-  //Heck our bitmap cannot be outside the search area
+  BmpW := Bitmap.Width - 1;
+  BmpH := Bitmap.Height - 1;
+  //Heck our Bitmap cannot be outside the search area
   dX := dX - bmpW;
   dY := dY - bmpH;
 
@@ -1261,9 +1255,9 @@ begin
   CalculateBitmapSkipCoords(Bitmap,SkipCoords);
   for yy := 0 to dY do
     for xx := 0 to dX do
-    begin;
+    begin
       for yBmp:= 0 to BmpH do
-      begin;
+      begin
         tmpY := yBmp + yy;
         for xBmp := 0 to BmpW do
           if not SkipCoords[yBmp][xBmp] then
@@ -1288,24 +1282,24 @@ begin
   TClient(Client).IOManager.FreeReturnData;
 end;
 
-function TMFinder.FindBitmapSpiral(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean;
+function TMFinder.FindBitmapSpiral(Bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean;
 var
   temp: Integer;
 begin
   temp := Self.CTS;
   Self.CTS := -1;
   try
-    Result := FindBitmapSpiralTolerance(bitmap, x, y, xs, ys, xe, ye, 0);
+    Result := FindBitmapSpiralTolerance(Bitmap, x, y, xs, ys, xe, ye, 0);
   finally
     Self.CTS := temp;
   end;
 end;
 
-function TMFinder.FindBitmapSpiralTolerance(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye, tolerance: Integer): Boolean;
+function TMFinder.FindBitmapSpiralTolerance(Bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye, tolerance: Integer): Boolean;
 var
   p: TPointArray;
 begin
-  Result := FindBitmapsSpiralTolerance(bitmap, x, y, p, xs, ys, xe, ye, tolerance, 1);
+  Result := FindBitmapsSpiralTolerance(Bitmap, x, y, p, xs, ys, xe, ye, tolerance, 1);
   if Result then
   begin
     x := p[0].x;
@@ -1313,7 +1307,7 @@ begin
   end;
 end;
 
-function TMFinder.FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x, y: Integer; out Points: TPointArray; xs, ys, xe, ye, tolerance: Integer; maxToFind: Integer): Boolean;
+function TMFinder.FindBitmapsSpiralTolerance(Bitmap: TMufasaBitmap; x, y: Integer; out Points: TPointArray; xs, ys, xe, ye, tolerance: Integer; maxToFind: Integer): Boolean;
 var
   MainRowdata : TPRGB32Array;
   BmpRowData : TPRGB32Array;
@@ -1342,11 +1336,11 @@ begin
 
   //Caculate the row ptrs
   MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
-  BmpRowData:= CalculateRowPtrs(bitmap);
+  BmpRowData:= CalculateRowPtrs(Bitmap);
   //Get the 'fixed' bmp size
-  BmpW := bitmap.Width - 1;
-  BmpH := bitmap.Height - 1;
-  //Heck, our bitmap cannot be outside the search area
+  BmpW := Bitmap.Width - 1;
+  BmpH := Bitmap.Height - 1;
+  //Heck, our Bitmap cannot be outside the search area
   dX := dX - bmpW;
   dY := dY - bmpH;
   //Load the spiral into memory
@@ -1360,9 +1354,9 @@ begin
   //Get the "skip coords".
   CalculateBitmapSkipCoords(Bitmap,SkipCoords);
   for i := 0 to HiSpiral do
-  begin;
+  begin
     for yBmp:= 0 to BmpH do
-      begin;
+      begin
         tmpY := yBmp + ClientTPA[i].y;
         for xBmp := 0 to BmpW do
           if not SkipCoords[yBmp][xBmp] then
@@ -1374,7 +1368,7 @@ begin
     //We did find the Bmp, otherwise we would be at the part below
     ClientTPA[FoundC].x := ClientTPA[i].x + xs;
     ClientTPA[FoundC].y := ClientTPA[i].y + ys;
-    inc(FoundC);
+    Inc(FoundC);
     if FoundC = maxToFind then
         goto TheEnd;
 
@@ -1391,7 +1385,7 @@ begin
   TClient(Client).IOManager.FreeReturnData;
 end;
 
-function TMFinder.FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer;  AllowPartialAccuracy: Boolean; out accuracy: Extended): Boolean;
+function TMFinder.FindDeformedBitmapToleranceIn(Bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer;  AllowPartialAccuracy: Boolean; out accuracy: Extended): Boolean;
 var
   MainRowdata : TPRGB32Array;
   BmpRowData : TPRGB32Array;
@@ -1427,11 +1421,11 @@ begin
 
   //Caculate the row ptrs
   MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
-  BmpRowData:= CalculateRowPtrs(bitmap);
+  BmpRowData:= CalculateRowPtrs(Bitmap);
   //Get the 'fixed' bmp size
-  BmpW := bitmap.Width - 1;
-  BmpH := bitmap.Height - 1;
-  //Heck our bitmap cannot be outside the search area
+  BmpW := Bitmap.Width - 1;
+  BmpH := Bitmap.Height - 1;
+  //Heck our Bitmap cannot be outside the search area
   dX := dX - bmpW;
   dY := dY - bmpH;
   //Reset the accuracy :-)
@@ -1447,27 +1441,27 @@ begin
 
   for yy := 0 to dY do
     for xx := 0 to dX do
-    begin;
+    begin
       GoodCount := 0;
       for yBmp:= 0 to BmpH do
-      begin;
+      begin
         for xBmp := 0 to BmpW do
-        begin;
+        begin
           //We do not have to check this point, win win win <--- triple win <-- JACKPOT!
           if SkipCoords[yBmp][xBmp] then
             Continue;
           //Calculate points of the BMP left against Goodcount (if it cannot possibly get more points skip this x,y?
           if bestCount > (GoodCount + PointsLeft[yBmp][xBmp]) then
             goto Madness;
-          //The point on the bitmap + the the coordinate we are on at the "screen" minus the range.
+          //The point on the Bitmap + the the coordinate we are on at the "screen" minus the range.
           yStart := max(yBmp + yy-Range,0);
           yEnd := Min(yBmp + yy+range,SearchdY);
           for RangeY := yStart to yEnd do
-          begin;
+          begin
             xStart := max(xx-Range + xBmp,0);
             xEnd := Min(xx+range + xBmp,SearchdX);
             for RangeX := xStart to xEnd do
-            begin;
+            begin
             if compare(ctsinfoarray[yBmp][xBmp],
                            @MainRowData[rangeY][rangeX]) then
                 goto FoundBMPPoint;
@@ -1477,13 +1471,13 @@ begin
           Continue;
           FoundBMPPoint:
           //We found a pooint woot!
-          inc(GoodCount);
+          Inc(GoodCount);
         end;
       end;
       //If we jumped to Madness it means we did not have enuf points left to beat tha fu-king score.
       Madness:
       if GoodCount > BestCount then //This x,y has the best Acc so far!
-      begin;
+      begin
         BestCount := GoodCount;
         BestPT := Point(xx+xs,yy+ys);
         if GoodCount = TotalC then
@@ -1512,7 +1506,7 @@ begin
 end;
 
 {
-  Tries to find the given bitmap / template using MatchTemplate
+  Tries to find the given Bitmap / template using MatchTemplate
 }
 function TMFinder.FindTemplateEx(TemplImage: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
 var
@@ -1880,10 +1874,10 @@ begin
       //Mainpoint can have area size as well, so we must check that just like any subpoint.
       for i := 0 to Len - 1 do
       begin //change to use other areashapes too.
-        Found := false;
+        Found := False;
         //With area it can go out of bounds, therefore this max/min check
-        StartX := max(0,xx - DPoints[i].asz + DPoints[i].x);
-        StartY := max(0,yy - DPoints[i].asz + DPoints[i].y);
+        StartX := Max(0,xx - DPoints[i].asz + DPoints[i].x);
+        StartY := Max(0,yy - DPoints[i].asz + DPoints[i].y);
         EndX := Min(MaxX,xx + DPoints[i].asz + DPoints[i].x);
         EndY := Min(MaxY,yy + DPoints[i].asz + DPoints[i].y);
         for xxx := StartX to EndX do //The search area for the subpoint
@@ -1991,7 +1985,7 @@ var
    PtrData: TRetData;
 
    //If we search alternating, we start in the middle and then +,-,+,- the angle step outwars
-   MiddleAngle : extended;
+   MiddleAngle : Extended;
    //Count the amount of anglesteps, mod 2 determines whether it's a + or a - search, and div 2 determines the amount of steps
    //you have to take.
    AngleSteps : Integer;
@@ -2000,7 +1994,7 @@ var
    pc: Integer = 0;
 
    goodPoints: Array of Boolean;
-   s: extended;
+   s: Extended;
 
    col_arr, tol_arr: Array of Integer;
    ctsinfoarray: TCTSInfoArray;
@@ -2093,10 +2087,10 @@ begin
         //Mainpoint can have area size as well, so we must check that just like any subpoint.
         for i := 0 to Len - 1 do
         begin //change to use other areashapes too.
-          Found := false;
+          Found := False;
           //With area it can go out of bounds, therefore this max/min check
-          StartX := max(0,xx - DPoints[i].asz + RotTPA[i].x);
-          StartY := max(0,yy - DPoints[i].asz + RotTPA[i].y);
+          StartX := Max(0,xx - DPoints[i].asz + RotTPA[i].x);
+          StartY := Max(0,yy - DPoints[i].asz + RotTPA[i].y);
           EndX := Min(MaxX,xx + DPoints[i].asz + RotTPA[i].x);
           EndY := Min(MaxY,yy + DPoints[i].asz + RotTPA[i].y);
           for xxx := StartX to EndX do //The search area for the subpoint
@@ -2119,23 +2113,23 @@ begin
                 //Check if it was supposed to be a goodpoint..
                 if GoodPoints[i] then
                 begin
-                  Found := true;
-                  break;
+                  Found := True;
+                  Break;
                 end else //It was not supposed to match!!
                   goto AnotherLoopEnd;
               end;
             end;
-            if Found then Break; //Optimalisation, we must break out of this second for loop, since we already found the subpoint
+            if Found then Break; //Optimalisation, we must Break out of this second for loop, since we already found the subpoint
           end;
           if (not found) and (GoodPoints[i]) then      //This sub-point wasn't found, while it should.. Exit this mainpoint search
             goto AnotherLoopEnd;
         end;
         //We survived the sub-point search, add this mainpoint to the results.
         Inc(pc);
-        setlength(Points,pc);
+        SetLength(Points,pc);
         Points[pc-1] := Point(xx + x1, yy + y1);
-        Setlength(aFound, pc);
-        setlength(aFound[pc-1],1);
+        SetLength(aFound, pc);
+        SetLength(aFound[pc-1],1);
         aFound[pc-1][0] := s;
         if(pc = maxToFind) then
           goto theEnd;
@@ -2147,7 +2141,7 @@ begin
         s := MiddleAngle + (aStep * (anglesteps div 2 + 1))  //Angle steps starts at 0, so we must add 1.
       else
         s := MiddleAngle - (aStep * (anglesteps div 2 + 1)); //We must search in the negative direction
-      inc(AngleSteps);
+      Inc(AngleSteps);
     end else
       s := s + aStep;
   end;
@@ -2188,7 +2182,7 @@ begin
   TClient(Client).IOManager.FreeReturnData;
 end;
 
-function TMFinder.GetColor(const X, Y: Int32): Integer;
+function TMFinder.GetColor(const X, Y: Integer): Integer;
 begin
   Result := TClient(Client).IOManager.GetColor(X, Y);
 end;
