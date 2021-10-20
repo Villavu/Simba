@@ -23,12 +23,14 @@ unit simba.matchtemplate;
 
 [==============================================================================}
 {$i simba.inc}
+{$MODESWITCH ARRAYOPERATORS OFF}
+{$OPTIMIZATION LEVEL4}
 
 interface
 
 uses
   classes, sysutils, math,
-  simba.mufasatypes, simba.matchtemplate_matrix, simba.bitmap, simba.matrix;
+  simba.mufasatypes, simba.matchtemplate_matrix, simba.bitmap;
 
 type
   PTMFormula = ^ETMFormula;
@@ -104,7 +106,7 @@ type
 implementation
 
 uses
-  simba.FFTPACK4, simba.threadpool, simba.colormath, simba.matrix_single;
+  simba.FFTPACK4, simba.threadpool, simba.colormath, simba.matrixhelpers;
 
 {$DEFINE VALIDATE :=
   if (Image.Width = 0) or (Image.Height = 0) then
@@ -170,20 +172,6 @@ begin
       Result[Y, X] := Spec[Y, X].Re;
 end;
 
-procedure InitMatrix(out Matrix: TSingleMatrix; H, W: Int32; InitValue: Int32);
-var
-  X, Y: Int32;
-begin
-  SetLength(Matrix, H, W);
-
-  Dec(W);
-  Dec(H);
-
-  for Y := 0 to H do
-    for X := 0 to W do
-      Matrix[Y, X] := InitValue;
-end;
-
 // -----------------------------------------------------------------------------
 // a * conj(b)
 
@@ -213,7 +201,7 @@ function MulSpectrumConj(const A, B: TComplexMatrix): TComplexMatrix;
 begin
   SetLength(Result, A.Height, A.Width);
 
-  SimbaThreadPool.RunParallel(@Parallel_MulSpecConj, [@A, @B, @Result], Low(A), High(B), Area(A) < 300*300, 2);
+  SimbaThreadPool.RunParallel(@Parallel_MulSpecConj, [@A, @B, @Result], Low(A), High(B), A.Area < 300*300, 2);
 end;
 
 // -----------------------------------------------------------------------------
@@ -289,18 +277,18 @@ begin
 
   invSize := Double(1.0) / Double(tw*th);
 
-  MeanStdev(tR, mR, sR); tR := nil;
-  MeanStdev(tG, mG, sG); tG := nil;
-  MeanStdev(tB, mB, sB); tB := nil;
+  tR.MeanStdev(mR, sR);
+  tG.MeanStdev(mG, sG);
+  tB.MeanStdev(mB, sB);
 
   tplMean := Sqr(mR) + Sqr(mG) + Sqr(mB);
   tplSdv  := Sqr(sR) + Sqr(sG) + Sqr(sB);
 
   tplSigma := Sqrt(tplSdv + tplMean) / Sqrt(invSize);
 
-  SumsPd(aR, sum2r); aR := nil;
-  SumsPd(aG, sum2g); aG := nil;
-  SumsPd(aB, sum2b); aB := nil;
+  SumsPd(aR, sum2r);
+  SumsPd(aG, sum2g);
+  SumsPd(aB, sum2b);
 
   aw := sum2r.Width;
   ah := sum2r.Height;
@@ -339,12 +327,13 @@ begin
   th := Templ.Height;
 
   invSize := Double(1.0) / Double(tw*th);
-  MeanStdev(Templ, tplMean, tplSdv);
+  Templ.MeanStdev(tplMean, tplSdv);
   tplSigma := tplSdv / Sqrt(invSize);
 
   if tplSdv < 0.00001 then
   begin
-    InitMatrix(Result, Length(xcorr), Length(xcorr[0]), 1);
+    Result.SetSize(xCorr.Width, xcorr.Height);
+    Result.Fill(1);
     Exit;
   end;
 
@@ -397,30 +386,31 @@ begin
 
   if not Normed then
   begin
-    mR := Mean(tR); tR := nil;
-    mG := Mean(tG); tG := nil;
-    mB := Mean(tB); tB := nil;
+    mR := tR.Mean();
+    mG := tG.Mean();
+    mB := tB.Mean();
     tplSigma := 0;
   end else
   begin
-    MeanStdev(tR, mR, sR); tR := nil;
-    MeanStdev(tG, mG, sG); tG := nil;
-    MeanStdev(tB, mB, sB); tB := nil;
+    tR.MeanStdev(mR, sR);
+    tG.MeanStdev(mG, sG);
+    tB.MeanStdev(mB, sB);
 
     tplSdv  := Sqr(sR) + Sqr(sG) + Sqr(sB);
 
     if tplSdv < 0.00001 then
     begin
-      InitMatrix(Result, Length(xcorr), Length(xcorr[0]), 1);
+      Result.SetSize(xCorr.Width, xcorr.Height);
+      Result.Fill(1);
       Exit;
     end;
 
     tplSigma := Sqrt(tplSdv) / Sqrt(invSize);
   end;
 
-  sumR := SumsPd(aR, sum2r); aR := nil;
-  sumG := SumsPd(aG, sum2g); aG := nil;
-  sumB := SumsPd(aB, sum2b); aB := nil;
+  sumR := SumsPd(aR, sum2r);
+  sumG := SumsPd(aG, sum2g);
+  sumB := SumsPd(aB, sum2b);
 
   aw := sumR.Width;
   ah := sumR.Height;
@@ -471,9 +461,9 @@ begin
 
   invSize := Double(1.0) / Double(tw*th);
 
-  MeanStdev(tR, mR, sR); tR := nil;
-  MeanStdev(tG, mG, sG); tG := nil;
-  MeanStdev(tB, mB, sB); tB := nil;
+  tR.MeanStdev(mR, sR);
+  tG.MeanStdev(mG, sG);
+  tB.MeanStdev(mB, sB);
 
   tplMean := Sqr(mR) + Sqr(mG) + Sqr(mB);
   tplSdv  := Sqr(sR) + Sqr(sG) + Sqr(sB);
@@ -481,9 +471,9 @@ begin
   tplSigma := Sqrt(tplSdv + tplMean) / Sqrt(invSize);
   tplSum2  := (tplSdv + tplMean) / invSize;
 
-  SumsPd(aR, sum2r); aR := nil;
-  SumsPd(aG, sum2g); aG := nil;
-  SumsPd(aB, sum2b); aB := nil;
+  SumsPd(aR, sum2r);
+  SumsPd(aG, sum2g);
+  SumsPd(aB, sum2b);
 
   aw := sum2r.Width;
   ah := sum2r.Height;

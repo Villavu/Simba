@@ -15,12 +15,14 @@ unit simba.fftpack4;
   limitations under the License.
 [==============================================================================}
 {$i simba.inc}
+{$MODESWITCH ARRAYOPERATORS OFF}
+{$OPTIMIZATION LEVEL4}
 
 interface
 
 uses
   sysutils,
-  simba.fftpack4_core, simba.mufasatypes, simba.matrix;
+  simba.fftpack4_core, simba.mufasatypes, simba.matrixhelpers;
 
 type
   TFFTPACK = record
@@ -224,7 +226,7 @@ begin
   H := M.Height;
 
   plan := InitFFT(W);
-  SimbaThreadPool.RunParallel(@Parallel_FFT2, [@m, @plan, @inverse], 0, H-1, Area(m) < MIN_THREDING_SZ);
+  SimbaThreadPool.RunParallel(@Parallel_FFT2, [@m, @plan, @inverse], 0, H-1, m.Area < MIN_THREDING_SZ);
 
   m := Rot90(m);
 
@@ -232,20 +234,20 @@ begin
   H := M.Height;
 
   plan := InitFFT(W);
-  SimbaThreadPool.RunParallel(@Parallel_FFT2, [@m, @plan, @inverse], 0, H-1, Area(m) < MIN_THREDING_SZ);
+  SimbaThreadPool.RunParallel(@Parallel_FFT2, [@m, @plan, @inverse], 0, H-1, m.Area < MIN_THREDING_SZ);
 
   Result := Rot90(m);
 end;
 
 function TFFTPACK.FFT2(m: TComplexMatrix): TComplexMatrix;
 begin
-  if Length(m) = 0 then Exit;
+  if Length(m) = 0 then Exit(nil);
   Result := FFT2MT(m, False);
 end;
 
 function TFFTPACK.IFFT2(m: TComplexMatrix): TComplexMatrix;
 begin
-  if Length(m) = 0 then Exit;
+  if Length(m) = 0 then Exit(nil);
   Result := FFT2MT(m, True);
 end;
 

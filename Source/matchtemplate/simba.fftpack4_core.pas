@@ -9,6 +9,8 @@ unit simba.fftpack4_core;
   Brought to Free Pascal by Jarl `slacky` Holta
 [==============================================================================}
 {$i simba.inc}
+{$MODESWITCH ARRAYOPERATORS OFF}
+{$OPTIMIZATION LEVEL4}
 
 interface
 
@@ -16,20 +18,16 @@ uses
   sysutils;
 
 type
-  PSingle = ^Single;
-  PInt32  = ^Int32;
-  RealArrayRef = ^Single;
+  RealArrayRef = PSingle;
   IntArrayRef  = PInt32;
 
+procedure cfftf(const n: Int32; const c, wsave: RealArrayRef);
+procedure cfftb(const n: Int32; const c, wsave: RealArrayRef);
+procedure cffti(const n: Int32; const wsave: RealArrayRef);
 
-procedure cfftf(n: Int32; c, wsave: RealArrayRef);
-procedure cfftb(n: Int32; c, wsave: RealArrayRef);
-procedure cffti(n: Int32; wsave: RealArrayRef);
-
-procedure rfftf(n: Int32; r, wsave: RealArrayRef);
-procedure rfftb(n: Int32; r, wsave: RealArrayRef);
-procedure rffti(n: Int32; wsave: RealArrayRef);
-
+procedure rfftf(const n: Int32; const r, wsave: RealArrayRef);
+procedure rfftb(const n: Int32; const r, wsave: RealArrayRef);
+procedure rffti(const n: Int32; const wsave: RealArrayRef);
 
 implementation
 
@@ -42,48 +40,14 @@ const
   NSPECIAL = 4;   // number of factors for which we have special-case routines
 
 type
-  TSPECIAL = array [0..NSPECIAL-1] of Int32; 
-
-  
-{$IF FPC_VERSION < 3}
-
-  {$ASMMODE INTEL}
-
-  {$IF Defined(CPU386)}  //"overload" for i386, so we get a float32 version
-    procedure SinCos(Theta: Single; out FSin, FCos: Single); assembler;
-    asm
-      fld Theta;
-      fsincos;
-      fstp [FCos];
-      fstp [FSin];
-      fwait;
-    end;
-  {$ELSEIF Defined(CPUX86_64)}
-    procedure SinCos(Theta: Single; out FSin, FCos: Single); assembler;
-    var t: Single;
-    asm
-      movss dword ptr t,xmm0
-      fld dword ptr t
-      fsincos
-      fstp dword ptr [FCos]
-      fstp dword ptr [FSin]
-      fwait
-    end;
-  {$ELSE}
-    procedure SinCos(Theta: Single; out FSin, FCos: Single); inline;
-    begin
-      FSin := Sin(Theta);
-      FCos := Cos(Theta);
-    end;
-  {$ENDIF}
-{$ENDIF}
+  TSPECIAL = array[0..NSPECIAL-1] of Int32;
 
 (* ----------------------------------------------------------------------
    passf2, passf3, passf4, passf5, passf. Complex FFT passes fwd and bwd.
 ---------------------------------------------------------------------- *)
 
 // isign = +1 for backward transform and -1 for forward transforms
-procedure passf2(ido, l1: Int32; cc,ch,wa1: RealArrayRef; isign: Int32);
+procedure passf2(const ido, l1: Int32; const cc,ch,wa1: RealArrayRef; const isign: Int32);
 var
   i,k: Int32;
   re,im: Single;
@@ -124,7 +88,7 @@ end; // passf2
 
 
 // isign = +1 for backward transform and -1 for forward transforms
-procedure passf3(ido, l1: Int32; cc, ch, wa1,wa2: RealArrayRef; isign: Int32);
+procedure passf3(const ido, l1: Int32; const cc, ch, wa1,wa2: RealArrayRef; const isign: Int32);
 const
   taur: Single =-0.5;
   taui: Single = 0.866025403784439;
@@ -187,7 +151,7 @@ end; (* passf3 *)
 
 
 // isign = +1 for backward transform and -1 for forward transforms
-procedure passf4(o1, l1: Int32; cc, ch, wa1, wa2, wa3: RealArrayRef; isign: Int32);
+procedure passf4(const o1, l1: Int32; const cc, ch, wa1, wa2, wa3: RealArrayRef; const isign: Int32);
 var
   i,k,o2,o3,d1,d2,d3: Int32;
   ci2,ci3,ci4,cr2,cr3,cr4: Single;
@@ -282,7 +246,7 @@ end; (* passf4 *)
 
 
 // isign = +1 for backward transform and -1 for forward transforms
-procedure passf5(ido, l1: Int32; cc,ch,wa1,wa2,wa3,wa4: RealArrayRef; isign: Int32);
+procedure passf5(const ido, l1: Int32; const cc,ch,wa1,wa2,wa3,wa4: RealArrayRef; const isign: Int32);
 const
   tr11: Single = 0.309016994374947;
   ti11: Single = 0.951056516295154;
@@ -384,8 +348,9 @@ begin
   end;
 end; (* passf5 *)
 
+
 // isign = +1 for backward transform and -1 for forward transforms
-procedure passf(out nac: Boolean; ido,ip,l1,idl1: Int32;  cc,ch,wa: RealArrayRef; isign: Int32);
+procedure passf(out nac: Boolean; const ido,ip,l1,idl1: Int32; const cc,ch,wa: RealArrayRef; const isign: Int32);
 var
   idij,idlj, idot,ipph, i,j,k,l,jc,lc,ik, idj,idl,ic,idp, t1,t2,t3,t4: Int32;
   wai, war: Single;
@@ -554,9 +519,7 @@ end; (* passf *)
 radf2,radb2, radf3,radb3, radf4,radb4, radf5,radb5, radfg,radbg.
 Treal FFT passes fwd and bwd.
 ---------------------------------------------------------------------- *)
-
-
-procedure radf2(ido, l1: Int32; cc,ch,wa1: RealArrayRef);
+procedure radf2(const ido, l1: Int32; const cc,ch,wa1: RealArrayRef);
 var
   i,k,ic: Int32;
   ti2,tr2: Single;
@@ -597,7 +560,7 @@ begin
 end; (* radf2 *)
 
 
-procedure radb2(ido, l1: Int32; cc,ch,wa1: RealArrayRef);
+procedure radb2(const ido, l1: Int32; const cc,ch,wa1: RealArrayRef);
 var
   i,k,ic: Int32;
   ti2,tr2: Single;
@@ -638,7 +601,7 @@ begin
 end; (* radb2 *)
 
 
-procedure radf3(ido,l1: Int32; cc,ch,wa1,wa2: RealArrayRef);
+procedure radf3(const ido,l1: Int32; const cc,ch,wa1,wa2: RealArrayRef);
 const
   TAUR: Single = -0.5;
   TAUI: Single = 0.866025403784439;
@@ -684,7 +647,7 @@ begin
 end; (* radf3 *)
 
 
-procedure radb3(ido,l1: Int32; cc,ch,wa1,wa2: RealArrayRef);
+procedure radb3(const ido,l1: Int32; const cc,ch,wa1,wa2: RealArrayRef);
 const
   TAUR: Single = -0.5;
   TAUI: Single = 0.866025403784439;
@@ -733,7 +696,7 @@ begin
 end; (* radb3 *)
 
 
-procedure radf4(ido,l1: Int32; cc,ch,wa1,wa2,wa3: RealArrayRef);
+procedure radf4(const ido,l1: Int32; const cc,ch,wa1,wa2,wa3: RealArrayRef);
 const
   hsqt2: Single = 0.7071067811865475;
 var
@@ -804,7 +767,7 @@ begin
 end; (* radf4 *)
 
 
-procedure radb4(ido,l1: Int32;  cc,ch,wa1,wa2,wa3: RealArrayRef);
+procedure radb4(const ido,l1: Int32; const cc,ch,wa1,wa2,wa3: RealArrayRef);
 const
   SQRT2: Single = 1.414213562373095;
 var
@@ -879,7 +842,7 @@ begin
 end;(* radb4 *)
 
 
-procedure radf5(ido,l1: Int32; cc,ch,wa1,wa2,wa3,wa4: RealArrayRef);
+procedure radf5(const ido,l1: Int32; const cc,ch,wa1,wa2,wa3,wa4: RealArrayRef);
 const
   tr11: Single = 0.309016994374947;
   ti11: Single = 0.951056516295154;
@@ -957,7 +920,7 @@ begin
 end;(* radf5 *)
 
 
-procedure radb5(ido,l1: Int32; cc,ch,wa1,wa2,wa3,wa4: RealArrayRef);
+procedure radb5(const ido,l1: Int32; const cc,ch,wa1,wa2,wa3,wa4: RealArrayRef);
 const
   tr11: Single = 0.309016994374947;
   ti11: Single = 0.951056516295154;
@@ -1035,10 +998,10 @@ begin
       Inc(i, 2);
     end;
   end;
-end; (* radb5 *)
+end;(* radb5 *)
 
 
-procedure radfg(ido,ip,l1,idl1: Int32;  cc,ch,wa: RealArrayRef);
+procedure radfg(const ido,ip,l1,idl1: Int32; const cc,ch,wa: RealArrayRef);
 var
   idij,ipph,i,j,k,l,j2,ic,jc,lc,ik,iz,nbd: Int32;
   dc2,ds2,dcp,arg,dsp,ar1h,ar2h: Single;
@@ -1254,7 +1217,7 @@ end;
 (* radfg *)
 
 
-procedure radbg(ido,ip,l1,idl1: Int32; cc,ch,wa: RealArrayRef);
+procedure radbg(const ido,ip,l1,idl1: Int32; const cc,ch,wa: RealArrayRef);
 var
   idij,ipph,i,j,k,l,j2,ic,jc,lc,ik,iz: Int32;
   dc2,ds2,nbd,dcp,arg,dsp,ar1h,ar2h: Single;
@@ -1464,12 +1427,11 @@ begin
   end;
 end; (* radbg *)
 
+
 (* ----------------------------------------------------------------------
 cfftf1, cfftf, cfftb, cffti1, cffti. Complex FFTs.
 ---------------------------------------------------------------------- *)
-
-
-procedure cfftf1(n: Int32; c,ch,wa: RealArrayRef; ifac:IntArrayRef; isign: Int32);
+procedure cfftf1(const n: Int32; const c,ch,wa: RealArrayRef; const ifac: IntArrayRef; const isign: Int32);
 var
   na, nac: Boolean;
   idot,i,k1,l1,l2,nf,ip,iw, ix2,ix3,ix4,ido,idl1: Int32;
@@ -1533,8 +1495,7 @@ begin
 end; (* cfftf1 *)
 
 
-
-procedure cfftf(n: Int32; c, wsave: RealArrayRef);
+procedure cfftf(const n: Int32; const c, wsave: RealArrayRef);
 var iw1,iw2: Int32;
 begin
   if n=1 then Exit;
@@ -1544,7 +1505,7 @@ begin
 end; (* cfftf *)
 
 
-procedure cfftb(n: Int32; c, wsave: RealArrayRef);
+procedure cfftb(const n: Int32; const c, wsave: RealArrayRef);
 var iw1, iw2: Int32;
 begin
   if n=1 then Exit;
@@ -1560,7 +1521,7 @@ end; (* cfftb *)
   the factors start from ifac[2].
 *)
                             //ifac[MAXFAC+2]     ntryh[NSPECIAL])
-procedure Factorize(n: Int32; ifac: IntArrayRef; ntryh: TSPECIAL);
+procedure Factorize(const n: Int32; const ifac: IntArrayRef; const ntryh: TSPECIAL);
 var
   ntry,i,j,ib,nf,nl,nq,nr: Int32;
 label
@@ -1571,7 +1532,8 @@ begin
   nf := 0;
   nl := n;
 
-startloop:
+  startloop:
+
   if(j < NSPECIAL) then
     ntry := ntryh[j]
   else
@@ -1602,7 +1564,7 @@ startloop:
 end;
 
 
-procedure cffti1(n: Int32;  wa: RealArrayRef;  ifac: IntArrayRef);
+procedure cffti1(const n: Int32; const wa: RealArrayRef; const ifac: IntArrayRef);
 const
   twopi: Single = 2*PI;
   ntryh: TSPECIAL = (3,4,2,5); // Do not change the order of these.
@@ -1652,7 +1614,7 @@ begin
 end; (* cffti1 *)
 
 
-procedure cffti(n: Int32; wsave: RealArrayRef);
+procedure cffti(const n: Int32; const wsave: RealArrayRef);
 var
   iw1,iw2: Int32;
 begin
@@ -1662,12 +1624,11 @@ begin
   cffti1(n,wsave+iw1, IntArrayRef(wsave+iw2));
 end; (* cffti *)
 
+
 (* ----------------------------------------------------------------------
 rfftf1, rfftb1, rfftf, rfftb, rffti1, rffti. Treal FFTs.
 ---------------------------------------------------------------------- *)
-
-
-procedure rfftf1(n: Int32; c,ch,wa: RealArrayRef; ifac: IntArrayRef);
+procedure rfftf1(const n: Int32; const c,ch,wa: RealArrayRef; const ifac: IntArrayRef);
 var
   na: Boolean;
   i,k1,l1,l2,kh,nf,ip,iw,ix2,ix3,ix4,ido,idl1: Int32;
@@ -1740,7 +1701,7 @@ begin
 end; (* rfftf1 *)
 
 
-procedure rfftb1(n: Int32; c,ch,wa: RealArrayRef; ifac: IntArrayRef);
+procedure rfftb1(const n: Int32; const c,ch,wa: RealArrayRef; const ifac: IntArrayRef);
 var
   na: Boolean;
   i,k1,l1,l2,nf,ip,iw,ix2,ix3,ix4,ido,idl1: Int32;
@@ -1806,21 +1767,21 @@ begin
 end; (* rfftb1 *)
 
 
-procedure rfftf(n: Int32; r, wsave: RealArrayRef);
+procedure rfftf(const n: Int32; const r, wsave: RealArrayRef);
 begin
   if n=1 then Exit;
   rfftf1(n,r,wsave,wsave+n, IntArrayRef(wsave+2*n));
 end; (* rfftf *)
 
 
-procedure rfftb(n: Int32; r, wsave: RealArrayRef);
+procedure rfftb(const n: Int32; const r, wsave: RealArrayRef);
 begin
   if n=1 then Exit;
   rfftb1(n,r,wsave, wsave+n, IntArrayRef(wsave+2*n));
 end; (* rfftb *)
 
 
-procedure rffti1(n: Int32; wa: RealArrayRef; ifac: IntArrayRef);
+procedure rffti1(const n: Int32; const wa: RealArrayRef; const ifac: IntArrayRef);
 const
   ntryh: TSPECIAL = (4,2,3,5); (* Do not change the order of these. *)
 var
@@ -1864,7 +1825,7 @@ begin
 end; (* rffti1 *)
 
 
-procedure rffti(n: Int32; wsave: RealArrayRef);
+procedure rffti(const n: Int32; const wsave: RealArrayRef);
 begin
   if n=1 then Exit;
   rffti1(n, wsave+n, IntArrayRef(wsave+2*n));
