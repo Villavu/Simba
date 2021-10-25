@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, controls, menus, forms, graphics,
-  anchordocking;
+  anchordocking, AnchorDockPanel;
 
 type
   TSimbaAnchorDockHeader = class(TAnchorDockHeader)
@@ -35,7 +35,9 @@ type
     procedure SetVisible(Value: Boolean); override;
     procedure SetParent(Value: TWinControl); override;
   public
-    constructor CreateNew(AOwner: TComponent; Num: Integer=0); override;
+    constructor CreateNew(AOwner: TComponent; Num: Integer = 0); override;
+
+    function ExecuteDock(NewControl, DropOnControl: TControl; DockAlign: TAlign): Boolean; override;
 
     property MenuItem: TMenuItem read FMenuItem write SetMenuItem;
     property NeedDefaultPosition: Boolean read FNeedDefaultPosition write FNeedDefaultPosition;
@@ -54,6 +56,7 @@ type
     procedure OnFormClose(Sender: TObject; var CloseAction: TCloseAction);
   public
     procedure MakeDockable(Form: TCustomForm; MenuItem: TMenuItem);
+    procedure ManualDockPanel(SrcSite: TAnchorDockHostSite; TargetPanel: TAnchorDockPanel; Align: TAlign; TargetControl: TControl = nil);
 
     function SaveLayout: String;
     function LoadLayout(Layout: String): Boolean;
@@ -87,7 +90,7 @@ begin
   PopupMenu := nil;
 
   CloseButton.Parent := nil;
-  MinimizeButton.Parent := nil;
+  //MinimizeButton.Parent := nil;
 
   BorderSpacing.Top := 2;
   BorderSpacing.Bottom := 2;
@@ -154,6 +157,11 @@ begin
   FNeedDefaultPosition := True;
 end;
 
+function TSimbaAnchorDockHostSite.ExecuteDock(NewControl, DropOnControl: TControl; DockAlign: TAlign): Boolean;
+begin
+  Result := inherited;
+end;
+
 procedure TSimbaAnchorDockSplitter.Paint;
 var
   CenterW, CenterH: Integer;
@@ -191,6 +199,55 @@ begin
     Form.AddHandlerClose(@OnFormClose, True);
 
     TSimbaAnchorDockHostSite(Form.HostDockSite).MenuItem := MenuItem;
+  end;
+end;
+
+procedure TAnchorDockMasterHelper.ManualDockPanel(SrcSite: TAnchorDockHostSite; TargetPanel: TAnchorDockPanel; Align: TAlign; TargetControl: TControl);
+var
+  Site: TSimbaAnchorDockHostSite;
+  aManager: TAnchorDockManager;
+  DockObject: TDragDockObject;
+begin
+  {$IFDEF VerboseAnchorDocking}
+  debugln(['TAnchorDockMaster.ManualDock SrcSite=',DbgSName(SrcSite),' TargetPanel=',DbgSName(TargetPanel),' Align=',dbgs(Align),' TargetControl=',DbgSName(TargetControl)]);
+  {$ENDIF}
+  if SrcSite.IsParentOf(TargetPanel) then
+    raise Exception.Create('TAnchorDockMaster.ManualDock SrcSite.IsParentOf(TargetSite)');
+  if TargetPanel.IsParentOf(SrcSite) then
+    raise Exception.Create('TAnchorDockMaster.ManualDock TargetSite.IsParentOf(SrcSite)');
+
+
+  aManager:=TAnchorDockManager(TargetPanel.DockManager);
+  Site:=aManager.GetChildSite as TSimbaAnchorDockHostSite;
+  if Site=nil then begin
+    // dock as first site into AnchorDockPanel
+    {$IFDEF VerboseAnchorDocking}
+    debugln(['TAnchorDockMaster.ManualDock dock as first site into AnchorDockPanel: SrcSite=',DbgSName(SrcSite),' TargetPanel=',DbgSName(TargetPanel),' Align=',dbgs(Align)]);
+    {$ENDIF}
+    BeginUpdate;
+    try
+      DockObject := TDragDockObject.Create(SrcSite);
+      try
+        DockObject.DropAlign:=alClient;
+        DockObject.DockRect:=SrcSite.BoundsRect;
+        DockObject.Control.Dock(TargetPanel, SrcSite.BoundsRect);
+        aManager.InsertControl(DockObject);
+      finally
+        DockObject.Free;
+      end;
+    finally
+      EndUpdate;
+    end;
+    exit;
+  end;
+
+  if AutoFreedIfControlIsRemoved(Site,SrcSite) then
+    raise Exception.Create('TAnchorDockMaster.ManualDock TargetPanel depends on SrcSite');
+  BeginUpdate;
+  try
+    Site.ExecuteDock(SrcSite,TargetControl,Align);
+  finally
+    EndUpdate;
   end;
 end;
 

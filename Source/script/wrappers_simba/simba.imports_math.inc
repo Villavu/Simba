@@ -1,29 +1,34 @@
 FSection := 'Math';
 
-addGlobalFunc('function RiemannGauss(Xstart, StepSize, Sigma: Extended; AmountSteps: Integer): Extended', @_LapeRiemannGauss);
-addGlobalFunc('function DiscreteGauss(Xstart, Xend: Integer; sigma: Extended): TExtendedArray', @_LapeDiscreteGauss);
-addGlobalFunc('function GaussMatrix(N: Integer; sigma: Extended): T2DExtendedArray', @_LapeGaussMatrix);
-addGlobalFunc('function Point(x, y: Integer): TPoint', @_LapePoint);
-addGlobalFunc('function Distance(x1, y1, x2, y2: Integer): Integer', @_LapeDistance);
-addGlobalFunc('function RandomRange(const min, max: Integer): Integer', @_LapeRandomRange);
-addGlobalFunc('function Factorial(number: UInt32): Int64', @_LapeFactorial);
-addGlobalFunc('function BinCoe(a, b: Integer): Extended', @_LapeBinCoe);
+addGlobalFunc('function GaussMatrix(N: Integer; Sigma: Extended): TExtendedMatrix', @_LapeGaussMatrix);
+addGlobalFunc('function Distance(const X1, Y1, X2, Y2: Integer): Integer; overload', @_LapeDistance);
+addGlobalFunc('function Distance(const P1, P2: TPoint): Integer; overload', @_LapeDistanceEx);
+addGlobalFunc('function RandomRange(const Min, Max: Integer): Integer', @_LapeRandomRange);
 addGlobalFunc('function FixD(Degrees: Extended): Extended', @_LapeFixD);
-addGlobalFunc('function IntToBox(x1, y1, x2, y2: Integer): TBox', @_LapeIntToBox);
-addGlobalFunc('function IntInBox(x, y: Integer; Box: TBox): Boolean', @_LapeIntInBox);
-addGlobalFunc('function PointToBox(PT1, PT2: TPoint): TBox', @_LapePointToBox);
-addGlobalFunc('function PointInBox(PT: TPoint; Box: TBox): Boolean', @_LapePointInBox);
-addGlobalFunc('function logn(base, x: Extended): Extended', @_Lapelogn);
-addGlobalFunc('function sar(num: Integer; shift: byte): Integer', @_Lapesar);
-addGlobalFunc('function ror(num: UInt32; shift: byte): UInt32', @_Laperor);
-addGlobalFunc('function rol(num: UInt32; shift: byte): UInt32', @_Laperol);
-addGlobalFunc('function radians(e: Extended): Extended', @_Laperadians);
-addGlobalFunc('function degrees(e: Extended): Extended', @_Lapedegrees);
-addGlobalFunc('function Csc(e: Extended): Extended', @_LapeCsc);
-addGlobalFunc('function log10(f: Extended): Extended', @_Lapelog10);
-addGlobalFunc('function MinA(Arr: TIntegerArray): Integer', @_LapeMinA);
-addGlobalFunc('function MaxA(Arr: TIntegerArray): Integer', @_LapeMaxA);
+addGlobalFunc('function LogN(base, x: Extended): Extended', @_LapeLogn);
+addGlobalFunc('function Sar(num: Integer; shift: byte): Integer', @_LapeSar);
+addGlobalFunc('function Ror(num: UInt32; shift: byte): UInt32', @_LapeRor);
+addGlobalFunc('function Rol(num: UInt32; shift: byte): UInt32', @_LapeRol);
+addGlobalFunc('function Radians(e: Extended): Extended', @_LapeRadians);
+addGlobalFunc('function Degrees(e: Extended): Extended', @_LapeDegrees);
+addGlobalFunc('function Log10(f: Extended): Extended', @_LapeLog10);
 addGlobalFunc('function FixRad(rad: Extended): Extended', @_LapeFixRad);
-addGlobalFunc('function MiddleBox(b: TBox): TPoint', @_LapeMiddleBox);
-addGlobalFunc('function NextPow2(n: Integer): Integer', @_LapeNextPow2);
+addGlobalFunc('function NextPowerOf2(const n: Integer): Integer', @_LapeNextPowerOf2);
+
+addGlobalFunc('function MinA(const Arr: TIntegerArray): Integer; overload', @_LapeMinA);
+addGlobalFunc('function MaxA(const Arr: TIntegerArray): Integer; overload', @_LapeMaxA);
+
+addGlobalFunc('function MinA(const Arr: TExtendedArray): Extended; overload', @_LapeMinAF);
+addGlobalFunc('function MaxA(const Arr: TExtendedArray): Extended; overload', @_LapeMaxAF);
+
+addGlobalFunc('function Modulo(const X, Y: Integer): Integer; overload', @_LapeModulo);
+addGlobalFunc('function Modulo(const X, Y: Extended): Extended; overload', @_LapeModuloF);
+
+addGlobalFunc('function Mode(const Arr: TIntegerArray): Integer', @_LapeMode);
+
+addGlobalFunc('function Sum(const Arr: TIntegerArray): Int64; overload', @_LapeSum);
+addGlobalFunc('function Sum(const Arr: TExtendedArray): Extended; overload', @_LapeSumF);
+
+addGlobalFunc('function Average(const Arr: TIntegerArray): Int64; overload', @_LapeAverage);
+addGlobalFunc('function Average(const Arr: TExtendedArray): Extended; overload', @_LapeAverageF);
 

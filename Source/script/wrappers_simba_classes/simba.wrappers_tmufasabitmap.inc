@@ -108,6 +108,11 @@ begin
   PMufasaBitmap(Params^[0])^.DrawTPA(PPointArray(Params^[1])^, PColor(Params^[2])^);
 end;
 
+procedure _LapeMufasaBitmap_DrawRect(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PMufasaBitmap(Params^[0])^.DrawRect(PRectangle(Params^[1])^, PColor(Params^[2])^);
+end;
+
 procedure _LapeMufasaBitmap_DrawToCanvas(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PMufasaBitmap(Params^[0])^.DrawToCanvas(Pinteger(Params^[1])^, Pinteger(Params^[2])^, PCanvas(Params^[3])^);

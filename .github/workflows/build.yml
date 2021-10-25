@@ -21,49 +21,44 @@ jobs:
         config:            
           - name: Windows 64
             runs-on: windows-latest
-            cpu: x86_64
-            build-mode: SIMBA_WIN64
+            build-mode: WIN64
             binary: Simba-Win64.exe
             test: Simba-Win64.exe
             
           - name: Windows 32  
             runs-on: windows-latest
-            cpu: i386
-            build-mode: SIMBA_WIN32
+            build-mode: WIN32
             binary: Simba-Win32.exe
             test: Simba-Win32.exe
 
           - name: Linux 64
             runs-on: ubuntu-latest
-            cpu: x86_64
-            build-mode: SIMBA_LINUX64
+            build-mode: LINUX64
             binary: Simba-Linux64
             test: Simba-Linux64
           
           - name: AArch64  
             runs-on: ubuntu-latest
-            cpu: aarch64
-            build-mode: SIMBA_AARCH64
+            build-mode: AARCH64
             binary: Simba-AArch64
             
           - name: MacOS 64
             runs-on: macos-latest
-            cpu: x86_64
-            build-mode: SIMBA_DARWIN64
+            build-mode: DARWIN64
             binary: Simba-Darwin64.zip
             test: Simba-Darwin64
             
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.4.0
         with: 
           submodules: true
       
       - name: Install Lazarus
-        uses: ollydev/setup-lazarus-fpcup@v2.3
+        uses: ollydev/setup-lazarus-fpcup@v2.4
         with:
-          cpu: ${{ matrix.config.cpu }}
-          laz-branch: fixes_2_2
-          fpc-branch: fixes_3_2
+          laz-branch: lazarus_2_0_12
+          fpc-branch: release_3_2_2
+          fpcup-release: v2.2.0c
     
       - name: Build Simba
         run: |
@@ -74,10 +69,14 @@ jobs:
       - name: Test Simba
         if: matrix.config.test != ''
         run: |
-          export DISPLAY=:1
-          Xvfb :1 & sleep 2
+          if [ "${{ matrix.config.runs-on }}" = "ubuntu-latest" ]; then
+              export DISPLAY=:1
+              Xvfb :1 & sleep 2
+          fi
+          if [ "${{ matrix.config.runs-on }}" != "windows-latest" ]; then
+              chmod +x ${{ matrix.config.test }}
+          fi
           
-          chmod +x ${{ matrix.config.test }}
           ./${{ matrix.config.test }} --silent --run "Tests/runner"
 
       - name: Upload Binary 

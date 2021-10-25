@@ -168,7 +168,7 @@ procedure TSimbaScriptTabsForm.DoOnFindDialog(Sender: TObject);
       Search.Pattern := Pattern;
       Search.IdentChars := CurrentEditor.IdentChars;
 
-      with CurrentEditor, TextView do
+      with CurrentEditor do
       begin
         if SelAvail then
         begin
@@ -180,7 +180,7 @@ procedure TSimbaScriptTabsForm.DoOnFindDialog(Sender: TObject);
           SearchEnd := CaretMax;
         end;
 
-        while Search.FindNextOne(TextView, SearchStart, SearchEnd, FoundStart, FoundEnd, True) do
+        while Search.FindNextOne(Lines, SearchStart, SearchEnd, FoundStart, FoundEnd, True) do
         begin
           ModifiedLinesGutter.AddLineMark(FoundStart.Y + (FoundEnd.Y - FoundStart.Y), RGBToColor(206,0,206));
 

@@ -217,19 +217,27 @@ begin
   Write('function Default(T: AnyType): AnyType; external;');
   Write('procedure Sort(var A: array); overload; external;');
   Write('procedure Sort(var A: array; CompareFunc: function(constref L, R: Anything): Int32); overload; external;');
-  Write('procedure Sort(var A: array; Weights: array of Int64); overload; external;');
-  Write('procedure Sort(var A: array; Weights: array of Extended); overload; external;');
-  Write('function Sorted(constref A: array): array; overload; external;');
-  Write('function Sorted(constref A: array; CompareFunc: function(constref L, R: Anything): Int32): array; overload; external;');
-  Write('function Sorted(constref A: array; Weights: array of Int64): array; overload; external;');
-  Write('function Sorted(constref A: array; Weights: array of Extended): array; overload; external;');
+  Write('procedure Sort(var A: array; Weights: TIntegerArray); overload; external;');
+  Write('procedure Sort(var A: array; Weights: TExtendedArray); overload; external;');
+  Write('function Sorted(const A: array): array; overload; external;');
+  Write('function Sorted(const A: array; CompareFunc: function(constref L, R: Anything): Int32): array; overload; external;');
+  Write('function Sorted(const A: array; Weights: TIntegerArray): array; overload; external;');
+  Write('function Sorted(const A: array; Weights: TExtendedArray): array; overload; external;');
+
+  Write('function Unique(const A: array): array; overload; external;');
+
+  Write('procedure Reverse(var A: array); overload; external;');
+  Write('function Reversed(const A: array): array; overload; external;');
+
+  Write('function IndexOf(const Item: T; const A: array): Integer; overload; external;');
+  Write('function IndicesOf(const Item: T; const A: array): TIntegerArray; overload; external;');
 
   // These require the SimbaScript variable which isn't created when dumping.
-  Write('const ScriptFile = ""');
+  Write('const ScriptFile = "";');
 
   FSection := 'Target';
 
-  Write('var Client: TClient');
+  Write('var Client: TClient;');
 end;
 
 destructor TCompilerDump.Destroy;

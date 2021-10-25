@@ -1,25 +1,25 @@
 object SimbaScriptTabsForm: TSimbaScriptTabsForm
   Left = 1085
-  Height = 315
+  Height = 252
   Top = 319
-  Width = 705
+  Width = 564
   AllowDropFiles = True
   Caption = 'Editor'
-  ClientHeight = 315
-  ClientWidth = 705
-  DesignTimePPI = 120
+  ClientHeight = 252
+  ClientWidth = 564
   OnDropFiles = DoOnDropFiles
-  LCLVersion = '2.2.0.2'
+  LCLVersion = '2.0.12.0'
   object Notebook: TExtendedNotebook
-    Left = 4
-    Height = 311
+    Left = 3
+    Height = 249
     Top = 0
-    Width = 697
+    Width = 558
     Align = alClient
-    BorderSpacing.Left = 4
-    BorderSpacing.Right = 4
-    BorderSpacing.Bottom = 4
+    BorderSpacing.Left = 3
+    BorderSpacing.Right = 3
+    BorderSpacing.Bottom = 3
     Images = SimbaForm.Images
+    ParentFont = False
     PopupMenu = TabPopupMenu
     TabOrder = 0
     OnChange = DoOnTabChange
@@ -31,14 +31,14 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
     OnShow = ReplaceDialogShow
     Options = [frDown, frHideUpDown, frHideEntireScope, frPromptOnReplace]
     OnReplace = DoOnReplaceDialog
-    Left = 210
-    Top = 20
+    Left = 168
+    Top = 16
   end
   object TabPopupMenu: TPopupMenu
     Images = SimbaForm.Images
     OnPopup = DoTabPopupOpen
-    Left = 320
-    Top = 20
+    Left = 256
+    Top = 16
     object MenuItemNewTab: TMenuItem
       Caption = 'New Tab'
       OnClick = DoTabPopupClick
@@ -57,8 +57,8 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
   object EditorPopupMenu: TPopupMenu
     Images = SimbaForm.Images
     OnPopup = DoEditorPopupShow
-    Left = 440
-    Top = 20
+    Left = 352
+    Top = 16
     object MenuItemFindDeclaration: TMenuItem
       Caption = 'Find Declaration'
       OnClick = DoEditorPopupClick
@@ -136,20 +136,20 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
   object OpenDialog: TOpenDialog
     Filter = 'Simba Files|*.simba;*.pas;*.inc|All Files|*.*'
     Options = [ofAllowMultiSelect, ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
-    Left = 110
-    Top = 20
+    Left = 88
+    Top = 16
   end
   object FindDialog: TFindDialog
     Options = [frDown, frHideUpDown, frHideEntireScope]
     OnFind = DoOnFindDialog
-    Left = 210
-    Top = 110
+    Left = 168
+    Top = 88
   end
   object ClearLineMarksTimer: TTimer
     Enabled = False
     Interval = 5000
     OnTimer = HandleClearMarksTimer
-    Left = 344
-    Top = 110
+    Left = 275
+    Top = 88
   end
 end

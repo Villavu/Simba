@@ -184,11 +184,7 @@ begin
         Canvas.Font.Color := clHighlightText;
       end else
       begin
-        if (ReleaseTime = 0) then
-          Canvas.Brush.Color := $EDEDED
-        else
-          Canvas.Brush.Color := clWindow;
-
+        Canvas.Brush.Color := clWindow;
         Canvas.Font.Color := clWindowText;
       end;
 
@@ -237,9 +233,12 @@ var
   ResponseCode: Integer;
 begin
   if (Length(FSuggestedPackages) = 0) then
-    FSuggestedPackages := GetPage(SIMBA_SUGGESTEDPACKAGES_URL, [HTTP_OK], ResponseCode).Split([#10]);
+    FSuggestedPackages := GetPage(SIMBA_SUGGESTEDPACKAGES_URL, [HTTP_OK], ResponseCode).Trim().Split([#10]);
 
   URL := InputComboEx('Add Package', 'Enter or select package URL:', FSuggestedPackages, True).Trim([' ', '/']);
+  if (URL = '') then
+    Exit;
+
   URLPath := URL.Split('/');
   while (Length(URLPath) > 2) do
     URLPath := Copy(URLPath, 1);
@@ -717,8 +716,8 @@ constructor TSimbaPackageForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  Width := 800;
-  Height := 650;
+  Width := 900;
+  Height := 800;
 
   SizeComponents();
 

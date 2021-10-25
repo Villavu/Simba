@@ -13,6 +13,11 @@ uses
   Classes, SysUtils, Graphics;
 
 type
+  PRectangle = ^TRectangle;
+  TRectangle = record
+    Top, Right, Btm, Left: TPoint;
+  end;
+
   PRGB24 = ^TRGB24;
   TRGB24 = packed record
     B, G, R : byte;

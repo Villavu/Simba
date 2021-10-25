@@ -142,7 +142,7 @@ begin;
   { +1 because splittpa will not split well if we use 0 space ;) }
   STPA := SplitTPAEx(TPA, minvspacing+1, hspacing+1);
 
-  SortATPAFrom(STPA, Point(0, ys));
+  //SortATPAFrom(STPA, Point(0, ys));
   SortATPAFromFirstPoint(STPA, Point(0, ys));
   result := gettextatpa(STPA,maxvspacing,font);
 end;

@@ -11,15 +11,22 @@ interface
 
 uses
   classes, sysutils, forms, controls, graphics, dialogs, comctrls, menus,
-  extctrls, treefilteredit, gtree,
+  extctrls, treefilteredit,
   simba.hintwindow;
 
 type
   TFileInfo = record
     FileName: String;
     Name: String;
-    Directory: Boolean;
     ImageIndex: Integer;
+    Directory: Boolean;
+  end;
+
+  PDirectoryInfo = ^TDirectoryInfo;
+  TDirectoryInfo = record
+    Info: TFileInfo;
+    Files: array of TFileInfo;
+    Directories: array of TDirectoryInfo;
   end;
 
   TSimbaFileBrowserNode = class(TTreeNode)
@@ -29,16 +36,12 @@ type
 
   TSimbaFileBrowser = class(TTreeView)
   protected
-  type
-    TFileTree = specialize TTree<TFileInfo>;
-    TFileTreeNode = TFileTree.TTreeNodeType;
-  protected
-    FRoot: String;
     FHint: TSimbaHintWindow;
-    FFileTree: TFileTree;
+    FFiles: TDirectoryInfo;
+    FUpdating: Boolean;
 
-    procedure DoBuildFileTree;
-    procedure DoFill(Sender: TObject);
+    procedure DoFindFiles;
+    procedure DoPopluateTreeView(Sender: TObject);
     procedure DoCreateNodeClass(var NodeClass: TTreeNodeClass); override;
 
     procedure MouseLeave; override;
@@ -87,9 +90,9 @@ begin
   NodeClass := TSimbaFileBrowserNode;
 end;
 
-procedure TSimbaFileBrowser.DoBuildFileTree;
+procedure TSimbaFileBrowser.DoFindFiles;
 
-  function CreateFileInfo(FileName: String; Directory: Boolean): TFileInfo; inline;
+  function FileInfo(const FileName: String; const Directory: Boolean): TFileInfo; inline;
   begin
     Result.FileName := FileName;
     Result.Directory := Directory;
@@ -104,100 +107,81 @@ procedure TSimbaFileBrowser.DoBuildFileTree;
       Result.ImageIndex := IMAGE_FILE;
   end;
 
-  procedure BuildFileTree(parent: TFileTreeNode; Directory: String);
+  procedure Build(const Node: PDirectoryInfo);
   var
-    Rec: TSearchRec;
-    Node: TFileTreeNode;
+    Files, Directories: TStringList;
+    I: Integer;
   begin
-    if (Directory = FRoot) then
-      Node := FFileTree.Root
-    else
+    Files := FindAllFiles(node^.Info.FileName, '', False);
+    Directories := FindAllDirectories(node^.Info.FileName, False);
+
+    SetLength(Node^.Files, Files.Count);
+    SetLength(Node^.Directories, Directories.Count);
+
+    for I := 0 to Directories.Count - 1 do
     begin
-      Node := TFileTreeNode.Create(CreateFileInfo(Directory, True));
+      Node^.Directories[I].Info := FileInfo(Directories[I], True);
 
-      Parent.Children.Insert(0, Node);
+      Build(@Node^.Directories[I]);
     end;
 
-    if (FindFirst(Directory + '*', faAnyFile, Rec) = 0) then
-    try
-      repeat
-        if (Rec.Attr and faDirectory <> 0) then
-        begin
-          if (Rec.Name <> '.') and (Rec.Name <> '..') then
-            BuildFileTree(Node, Directory + Rec.Name + DirectorySeparator);
-        end else
-          Node.Children.PushBack(TFileTreeNode.Create(CreateFileInfo(Directory + Rec.Name, False)));
-      until (FindNext(Rec) <> 0);
-    finally
-      FindClose(Rec);
-    end;
+    for I := 0 to Files.Count - 1 do
+      Node^.Files[I] := FileInfo(Files[I], False);
+
+    Files.Free();
+    Directories.Free();
   end;
 
 begin
-  FFileTree.Root := TFileTreeNode.Create(CreateFileInfo(FRoot, True));
+  FFiles.Info := FileInfo(Application.Location, True);
 
-  BuildFileTree(FFileTree.Root, FRoot);
+  Build(@FFiles);
 end;
 
-procedure TSimbaFileBrowser.DoFill(Sender: TObject);
-var
-  RootNode: TTreeNode;
+procedure TSimbaFileBrowser.DoPopluateTreeView(Sender: TObject);
 
-  procedure Populate(ParentNode: TTreeNode; Node: TFileTreeNode);
+  procedure Populate(ParentNode: TTreeNode; Dir: TDirectoryInfo);
   var
     I: Integer;
   begin
-    if Node.Data.Directory then
+    if (ParentNode = nil) then
+      ParentNode := Items.Add(nil, 'Simba')
+    else
+      ParentNode := Items.AddChild(ParentNode, Dir.Info.Name);
+
+    with TSimbaFileBrowserNode(ParentNode) do
     begin
-      ParentNode := Items.AddChild(ParentNode, Node.Data.Name);
+      FileInfo := Dir.Info;
 
-      with TSimbaFileBrowserNode(ParentNode) do
-      begin
-        FileInfo := Node.Data;
-
-        SelectedIndex := Node.Data.ImageIndex;
-        ImageIndex := Node.Data.ImageIndex;
-      end;
-    end else
-    begin
-      with TSimbaFileBrowserNode(Items.AddChild(ParentNode, Node.Data.Name)) do
-      begin
-        FileInfo := Node.Data;
-
-        SelectedIndex := Node.Data.ImageIndex;
-        ImageIndex := Node.Data.ImageIndex;
-      end;
+      SelectedIndex := FileInfo.ImageIndex;
+      ImageIndex := FileInfo.ImageIndex;
     end;
 
-    for I := 0 to Node.Children.Size - 1 do
-      Populate(ParentNode, Node.Children[I]);
+    for I := 0 to High(Dir.Directories) do
+      Populate(ParentNode, Dir.Directories[i]);
+
+    for I := 0 to High(Dir.Files) do
+      with TSimbaFileBrowserNode(Items.AddChild(ParentNode, Dir.Files[i].Name)) do
+      begin
+        FileInfo := Dir.Files[i];
+
+        SelectedIndex := FileInfo.ImageIndex;
+        ImageIndex := FileInfo.ImageIndex;
+      end;
   end;
 
-var
-  Node: TFileTreeNode;
 begin
-  Assert(GetCurrentThreadID() = MainThreadID);
-  Assert(FFileTree <> nil);
-
   Items.BeginUpdate();
   Items.Clear();
 
-  if (FFileTree.Root <> nil) then
-  begin
-    RootNode := Items.Add(nil, FFileTree.Root.Data.Name);
-    RootNode.SelectedIndex := FFileTree.Root.Data.ImageIndex;
-    RootNode.ImageIndex := FFileTree.Root.Data.ImageIndex;
+  Populate(nil, FFiles);
 
-    for Node in FFileTree.Root.Children do
-      Populate(RootNode, Node);
-
-    RootNode.Expanded := True;
-  end;
-
+  if (Items.GetFirstNode() <> nil) then
+    Items.GetFirstNode().Expanded := True;
   Items.EndUpdate();
 
-  FFileTree.Free();
-  FFileTree := nil;
+  FFiles := Default(TDirectoryInfo);
+  FUpdating := False;
 end;
 
 procedure TSimbaFileBrowser.MouseLeave;
@@ -233,14 +217,11 @@ end;
 
 procedure TSimbaFileBrowser.Fill;
 begin
-  Assert(GetCurrentThreadID() = MainThreadID);
+  if FUpdating then
+    Exit;
+  FUpdating := True;
 
-  if (FFileTree = nil) then
-  begin
-    FFileTree := TFileTree.Create();
-
-    TThread.ExecuteInThread(@DoBuildFileTree, @DoFill);
-  end;
+  TThread.ExecuteInThread(@DoFindFiles, @DoPopluateTreeView);
 end;
 
 constructor TSimbaFileBrowser.Create(AOwner: TComponent);
@@ -248,7 +229,6 @@ begin
   inherited Create(AOwner);
 
   FHint := TSimbaHintWindow.Create(Self);
-  FRoot := Application.Location;
 end;
 
 procedure TSimbaFileBrowserForm.PopupItemClick(Sender: TObject);
