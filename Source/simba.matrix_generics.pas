@@ -5,7 +5,7 @@
 
   Basic matrix methods to be added to matrix types.
 }
-unit simba.matrix;
+unit simba.matrix_generics;
 
 {$i simba.inc}
 

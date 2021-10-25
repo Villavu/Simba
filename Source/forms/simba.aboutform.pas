@@ -57,6 +57,7 @@ begin
   AboutMemo.Lines.Add('  Lazarus version %s', [LAZ_VERSION]);
   AboutMemo.Lines.Add('');
   AboutMemo.Lines.Add('Binary hash: %s', [HashFile(Application.ExeName)]);
+
   if (SIMBA_COMMIT <> '') then
   begin
     AboutMemo.Lines.Add('Commit hash: %s', [SIMBA_COMMIT]);
@@ -73,7 +74,7 @@ procedure TSimbaAboutForm.FormCreate(Sender: TObject);
 begin
   AddHandlerFirstShow(@DoFirstShow, True);
 
-  Width := 500;
+  Width := 550;
   Height := 450;
 end;
 

@@ -84,7 +84,7 @@ begin
   if (target <= 6) then
     Exit(target);
   
-  if NextPow2(target) = target then
+  if NextPowerOf2(target) = target then
     Exit(target);
   
   n := 0;
@@ -102,7 +102,7 @@ begin
     while p35 < target do
     begin
       quotient := Ceil(target / p35);
-      p2 := NextPow2(quotient);
+      p2 := NextPowerOf2(quotient);
       N := p2 * p35;
 
       if N = target then Exit(N);

@@ -128,7 +128,7 @@ var
 begin
   inherited Create(AOwner);
 
-  Width := 950;
+  Width := 850;
   Height := 650;
 
   Node := TreeView.Items.Add(nil, 'Simba');

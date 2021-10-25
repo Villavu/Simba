@@ -52,7 +52,6 @@ begin
   {$ENDIF}
 
   Application.OnException := @Application.HandleException;
-  Application.Title := 'Simba';
   Application.Scaled := True;
   Application.Initialize();
 

@@ -51,3 +51,4 @@
 {$i simba.imports_crypto.inc}
 {$i simba.imports_dialog.inc}
 {$i simba.imports_process.inc}
+{$i simba.imports_geometry.inc}

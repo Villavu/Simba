@@ -488,7 +488,6 @@ begin
     for I := 0 to List.Count - 1 do
     begin
       Parser := TCodeInsight_Include.Create();
-      Parser.OnMessage := @Self.CodeTools_OnMessage;
       Parser.Run(List.ValueFromIndex[I], List.Names[I]);
 
       if (List.Names[I] <> 'Classes') then
@@ -743,6 +742,32 @@ begin
 end;
 
 procedure TSimbaForm.MenuFileClick(Sender: TObject);
+
+  function ShortDisplayFilename(const FileName: string; Limit: Integer = 100): string;
+  var
+    StartLen, EndLen, SepCnt: Integer;
+  begin
+    if Length(FileName) > Limit then
+    begin
+      StartLen := 1;
+      SepCnt := 0;
+      while StartLen < Length(FileName) - (Limit div 2) do
+      begin
+        if FileName[StartLen] in AllowDirectorySeparators then
+        begin
+          Inc(SepCnt);
+          if SepCnt = 2 then Break;
+        end;
+        Inc(StartLen);
+      end;
+      EndLen := Limit - StartLen - 3;
+      Result := Copy(FileName, 1, StartLen) + '...'
+              + Copy(FileName, Length(FileName)-EndLen+1, EndLen);
+    end
+    else
+      Result := FileName;
+  end;
+
 var
   I: Integer;
   Item: TMenuItem;
@@ -1171,10 +1196,10 @@ begin
       DockMaster.GetAnchorSite(SimbaFunctionListForm).Width := 175;
       DockMaster.GetAnchorSite(SimbaOutputForm).Height := 80;
 
-      DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaScriptTabsForm), DockPanel, alClient);
-      DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaOutputForm), DockPanel, alBottom);
-      DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaFunctionListForm), DockPanel, alLeft);
-      DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaFileBrowserForm), DockPanel, alRight);
+      DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaScriptTabsForm), DockPanel, alClient);
+      DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaOutputForm), DockPanel, alBottom);
+      DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaFunctionListForm), DockPanel, alLeft);
+      DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaFileBrowserForm), DockPanel, alRight);
 
       DockMaster.MakeVisible(SimbaScriptTabsForm, False);
       DockMaster.MakeVisible(SimbaOutputForm, False);

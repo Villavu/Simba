@@ -83,12 +83,13 @@ type
     procedure FloodFill(const StartPT: TPoint; const SearchCol, ReplaceCol: TColor);
     procedure FastSetPixel(X, Y: Int32; Color: TColor);
     procedure FastSetPixels(Points: TPointArray; Colors: TIntegerArray);
-    procedure DrawATPA(ATPA: T2DPointArray; Colors: TIntegerArray);overload;
-    procedure DrawATPA(ATPA: T2DPointArray);overload;
+    procedure DrawATPA(ATPA: T2DPointArray; Colors: TIntegerArray); overload;
+    procedure DrawATPA(ATPA: T2DPointArray); overload;
     procedure DrawTPA(Points: TPointArray; Color: TColor);
     procedure DrawPolyFilled(Poly: TPointArray; Invert: Boolean; Color: TColor);
     procedure DrawCircleFilled(X, Y, Radius: Int32; Invert: Boolean; Color: TColor);
     procedure DrawBoxFilled(B: TBox; Invert: Boolean; Color: TColor);
+    procedure DrawRect(R: TRectangle; Color: TColor);
     procedure DrawToCanvas(x,y: Int32; Canvas: TCanvas);
     procedure LineTo(Src,Dst: TPoint;Color: TColor);
     function FindColors(out Points: TPointArray; Color: Integer): Boolean; overload;
@@ -101,22 +102,22 @@ type
     procedure FastDrawClear(Color: TColor);
     procedure FastDrawTransparent(x, y: Int32; TargetBitmap: TMufasaBitmap);
     procedure FastReplaceColor(OldColor, NewColor: TColor);
-    procedure CopyClientToBitmap(MWindow: TObject;Resize: Boolean; xs, ys, xe, ye: Int32);overload;
-    procedure CopyClientToBitmap(MWindow: TObject;Resize: Boolean;x,y: Int32; xs, ys, xe, ye: Int32);overload;
+    procedure CopyClientToBitmap(MWindow: TObject;Resize: Boolean; xs, ys, xe, ye: Int32); overload;
+    procedure CopyClientToBitmap(MWindow: TObject;Resize: Boolean;x,y: Int32; xs, ys, xe, ye: Int32); overload;
     procedure RotateBitmap(angle: Extended; TargetBitmap: TMufasaBitmap);
     procedure RotateBitmapEx(Angle: Single; Expand: Boolean; Smooth: Boolean; TargetBitmap: TMufasaBitmap);
     procedure Desaturate(TargetBitmap: TMufasaBitmap); overload;
-    procedure Desaturate;overload;
+    procedure Desaturate; overload;
     procedure GreyScale(TargetBitmap: TMufasaBitmap);overload;
     procedure GreyScale;
     procedure Brightness(TargetBitmap: TMufasaBitmap; br: Int32); overload;
-    procedure Brightness(br: Int32);overload;
-    procedure Contrast(TargetBitmap: TMufasaBitmap; co: Extended);overload;
-    procedure Contrast(co: Extended);overload;
-    procedure Invert(TargetBitmap: TMufasaBitmap);overload;
-    procedure Invert;overload;
-    procedure Posterize(TargetBitmap: TMufasaBitmap; Po: Int32);overload;
-    procedure Posterize(Po: Int32);overload;
+    procedure Brightness(br: Int32); overload;
+    procedure Contrast(TargetBitmap: TMufasaBitmap; co: Extended); overload;
+    procedure Contrast(co: Extended); overload;
+    procedure Invert(TargetBitmap: TMufasaBitmap); overload;
+    procedure Invert; overload;
+    procedure Posterize(TargetBitmap: TMufasaBitmap; Po: Int32); overload;
+    procedure Posterize(Po: Int32); overload;
     procedure Convolute(TargetBitmap: TMufasaBitmap; Matrix: T2DExtendedArray);
 
     procedure Blend(Points: TPointArray; Size: Int32);
@@ -1138,6 +1139,11 @@ begin
           FillDWord(FData[Y * FWidth + B.X1], Size, Color);
       end;
   end;
+end;
+
+procedure TMufasaBitmap.DrawRect(R: TRectangle; Color: TColor);
+begin
+  Self.DrawTPA(TPAConnect([R.Top, R.Right, R.Btm, R.Left]), Color);
 end;
 
 procedure TMufasaBitmap.DrawToCanvas(x,y: Int32; Canvas: TCanvas);

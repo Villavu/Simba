@@ -27,8 +27,8 @@ addGlobalFunc('function TMufasaBitmap.TextHeight(Text: String): Integer; constre
 addGlobalFunc('function TMufasaBitmap.TextSize(Text: String): TPoint; constref', @_LapeMufasaBitmap_TextSize);
 addGlobalFunc('procedure TMufasaBitmap.DrawText(Text: String; Position: TPoint; Color: TColor); constref; overload', @_LapeMufasaBitmap_DrawText);
 addGlobalFunc('procedure TMufasaBitmap.DrawText(Text: String; Box: TBox; Center: Boolean; Color: TColor); constref; overload', @_LapeMufasaBitmap_DrawTextEx);
-addGlobalFunc('procedure TMufasaBitmap.SetSize(AWidth,AHeight: Integer); constref', @_LapeMufasaBitmap_SetSize);
-addGlobalFunc('procedure TMufasaBitmap.StretchResize(AWidth,AHeight: Integer); constref', @_LapeMufasaBitmap_StretchResize);
+addGlobalFunc('procedure TMufasaBitmap.SetSize(AWidth, AHeight: Integer); constref', @_LapeMufasaBitmap_SetSize);
+addGlobalFunc('procedure TMufasaBitmap.StretchResize(AWidth, AHeight: Integer); constref', @_LapeMufasaBitmap_StretchResize);
 addGlobalFunc('procedure TMufasaBitmap.SetPersistentMemory(mem: PtrUInt; awidth, aheight: Integer); constref', @_LapeMufasaBitmap_SetPersistentMemory);
 addGlobalFunc('procedure TMufasaBitmap.ResetPersistentMemory; constref', @_LapeMufasaBitmap_ResetPersistentMemory);
 addGlobalFunc('function TMufasaBitmap.PointInBitmap(x, y: Integer): boolean; constref', @_LapeMufasaBitmap_PointInBitmap);
@@ -43,6 +43,7 @@ addGlobalFunc('procedure TMufasaBitmap.SetPixels(Points: TPointArray; Colors: TI
 addGlobalFunc('procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray; Colors: TIntegerArray); constref', @_LapeMufasaBitmap_DrawATPA);
 addGlobalFunc('procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray); constref; overload', @_LapeMufasaBitmap_DrawATPAEx);
 addGlobalFunc('procedure TMufasaBitmap.DrawTPA(Points: TPointArray; Color: TColor); constref', @_LapeMufasaBitmap_DrawTPA);
+addGlobalFunc('procedure TMufasaBitmap.DrawRect(Rect: TRectangle; Color: TColor); constref', @_LapeMufasaBitmap_DrawRect);
 addGlobalFunc('procedure TMufasaBitmap.DrawToCanvas(x, y: Integer; Canvas: TCanvas); constref', @_LapeMufasaBitmap_DrawToCanvas);
 addGlobalFunc('procedure TMufasaBitmap.LineTo(Src, Dst: TPoint;Color: TColor); constref', @_LapeMufasaBitmap_LineTo);
 addGlobalFunc('function TMufasaBitmap.FindColors(out Points: TPointArray; const Color: Integer): Boolean; constref; overload', @_LapeMufasaBitmap_FindColors);
@@ -86,7 +87,7 @@ addGlobalFunc('procedure TMufasaBitmap.Crop(xs, ys, xe, ye: Integer); constref',
 addGlobalFunc('function TMufasaBitmap.GetColors: TIntegerArray; constref', @_LapeMufasaBitmap_GetColors);
 addGlobalFunc('function TMufasaBitmap.ToMatrix: TIntegerMatrix; constref', @_LapeMufasaBitmap_ToMatrix);
 addGlobalFunc('function TMufasaBitmap.ToGreyMatrix: TByteMatrix; constref', @_LapeMufasaBitmap_ToGreyMatrix);
-addGlobalFunc('procedure TMufasaBitmap.DrawMatrix(const Matrix: TIntegerMatrix); constref', @_LapeMufasaBitmap_DrawMatrix);
+addGlobalFunc('procedure TMufasaBitmap.DrawMatrix(const Matrix: TIntegerMatrix); constref; overload', @_LapeMufasaBitmap_DrawMatrix);
 addGlobalFunc('procedure TMufasaBitmap.DrawMatrix(const Matrix: TSingleMatrix; ColorMapID: Integer = 0); constref; overload', @_LapeMufasaBitmap_DrawMatrixF);
 addGlobalFunc('procedure TMufasaBitmap.ThresholdAdaptive(Alpha, Beta: Byte; DoInvert: Boolean; Method: TBmpThreshMethod; C: Integer); constref', @_LapeMufasaBitmap_ThresholdAdaptive);
 addGlobalFunc('procedure TMufasaBitmap.Pad(Amount: Integer)', @_LapeMufasaBitmap_Pad);

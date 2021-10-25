@@ -1,23 +1,23 @@
 object SimbaSettingsForm: TSimbaSettingsForm
   Left = 719
-  Height = 625
+  Height = 500
   Top = 203
-  Width = 750
+  Width = 600
   Caption = 'Settings'
-  ClientHeight = 625
-  ClientWidth = 750
-  DesignTimePPI = 120
+  ClientHeight = 500
+  ClientWidth = 600
   OnShow = FormShow
   Position = poScreenCenter
-  LCLVersion = '2.2.0.2'
+  LCLVersion = '2.0.12.0'
   object TreeView: TTreeView
     Left = 0
-    Height = 571
+    Height = 450
     Top = 0
-    Width = 188
+    Width = 150
     Align = alLeft
     AutoExpand = True
     BorderSpacing.Right = 1
+    ParentFont = False
     ReadOnly = True
     ScrollBars = ssAutoBoth
     TabOrder = 0
@@ -25,21 +25,20 @@ object SimbaSettingsForm: TSimbaSettingsForm
     Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
   end
   object Notebook: TNotebook
-    Left = 199
-    Height = 571
+    Left = 159
+    Height = 450
     Top = 0
-    Width = 545
+    Width = 436
     Align = alClient
-    BorderSpacing.Left = 4
-    BorderSpacing.Right = 6
+    BorderSpacing.Left = 3
+    BorderSpacing.Right = 5
     TabOrder = 1
   end
   object ButtonPanel: TButtonPanel
-    Left = 8
+    Left = 6
     Height = 38
-    Top = 579
-    Width = 734
-    BorderSpacing.Around = 8
+    Top = 456
+    Width = 588
     OKButton.Name = 'OKButton'
     OKButton.DefaultCaption = True
     OKButton.OnClick = OKButtonClick
@@ -53,9 +52,9 @@ object SimbaSettingsForm: TSimbaSettingsForm
     ShowButtons = [pbOK, pbCancel]
   end
   object Splitter: TSplitter
-    Left = 189
-    Height = 571
+    Left = 151
+    Height = 450
     Top = 0
-    Width = 6
+    Width = 5
   end
 end

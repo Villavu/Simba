@@ -518,8 +518,10 @@ type
   public
     constructor Create;
     destructor Destroy; override;
+
     procedure Assign(From: TObject); virtual;
     procedure SynError(Error: TmwParseError); virtual;
+    procedure DefaultOnMessage(Sender: TObject; const Typ: TMessageEventType; const Msg: String; X, Y: Integer);
 
     procedure Run; virtual; overload;
     procedure Run(Script: String; FileName: String); virtual; overload;
@@ -530,12 +532,12 @@ type
     property OnMessage: TMessageEvent read FOnMessage write FOnMessage;
     property LastNoJunkPos: Integer read fLastNoJunkPos;
     property LastNoJunkLen: Integer read fLastNoJunkLen;
-  published
   end;
 
 implementation
 
-{ ESyntaxError }
+uses
+  LazLoggerBase;
 
 constructor ESyntaxError.Create(const Msg: string);
 begin
@@ -668,6 +670,7 @@ constructor TmwSimplePasPar.Create;
 begin
   inherited Create;
   fLexer := TmwPasLex.Create;
+  //fOnMessage := DefaultOnMessage;
 end;
 
 destructor TmwSimplePasPar.Destroy;
@@ -974,6 +977,14 @@ begin
     FOnMessage(Self, meError, ParserErrorName(Error) + ' found ' + fLexer.Token, fLexer.PosXY.X,
       fLexer.PosXY.Y);
 
+end;
+
+procedure TmwSimplePasPar.DefaultOnMessage(Sender: TObject; const Typ: TMessageEventType; const Msg: String; X, Y: Integer);
+begin
+  if (fLexer.FileName <> '') then
+    DebugLn('"%s" at line %d, column %d in file "%s"', [Msg, Y + 1, X, fLexer.FileName])
+  else
+    DebugLn('"%s" at line %d, column %d', [Msg, Y + 1, X]);
 end;
 
 (******************************************************************************

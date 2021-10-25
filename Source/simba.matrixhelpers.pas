@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.matrix, simba.mufasatypes;
+  simba.matrix_generics, simba.mufasatypes;
 
 type
   TSingleMatrixHelper = type helper for TSingleMatrix

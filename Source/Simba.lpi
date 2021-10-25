@@ -7,6 +7,7 @@
         <MainUnitHasUsesSectionForAllUnits Value="False"/>
         <MainUnitHasTitleStatement Value="False"/>
         <MainUnitHasScaledStatement Value="False"/>
+        <CompatibilityMode Value="True"/>
       </Flags>
       <SessionStorage Value="InIDEConfig"/>
       <Title Value="Simba"/>
@@ -25,9 +26,9 @@
       <CharSet Value="04B0"/>
       <StringTable CompanyName="villavu.com" FileDescription="Simba: http://wizzup.org/simba/" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="1.5"/>
     </VersionInfo>
-    <BuildModes>
-      <Item Name="SIMBA_WIN32" Default="True"/>
-      <Item Name="SIMBA_WIN64">
+    <BuildModes Count="5">
+      <Item1 Name="WIN32" Default="True"/>
+      <Item2 Name="WIN64">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -36,7 +37,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
             <Libraries Value="../Modules/lape/extensions/ffi/bin/win64"/>
-            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;windows;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+            <OtherUnitFiles Value="$(ProjPath);windows;script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -55,59 +56,22 @@
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <StripSymbols Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
             <CompilerMessages>
-              <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True"/>
+              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dStaticFFI
 -dLape_CDECL"/>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
-      </Item>
-      <Item Name="SIMBA_AARCH64">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <Target>
-            <Filename Value="../Simba-AArch64"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;linux"/>
-            <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <Parsing>
-            <SyntaxOptions>
-              <CStyleMacros Value="True"/>
-            </SyntaxOptions>
-          </Parsing>
-          <CodeGeneration>
-            <SmartLinkUnit Value="True"/>
-            <TargetCPU Value="aarch64"/>
-            <TargetOS Value="linux"/>
-            <Optimizations>
-              <OptimizationLevel Value="3"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-            </Debugging>
-            <LinkSmart Value="True"/>
-          </Linking>
-          <Other>
-            <CompilerMessages>
-              <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
-            </CompilerMessages>
-            <CustomOptions Value="-dLape_CDECL"/>
-            <CreateMakefileOnBuild Value="True"/>
-          </Other>
-        </CompilerOptions>
-      </Item>
-      <Item Name="SIMBA_LINUX64">
+      </Item2>
+      <Item3 Name="LINUX64">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -115,7 +79,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;linux"/>
+            <OtherUnitFiles Value="$(ProjPath);linux;script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -134,19 +98,20 @@
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
             <CompilerMessages>
-              <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
+              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dLape_CDECL"/>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
-      </Item>
-      <Item Name="SIMBA_DARWIN64">
+      </Item3>
+      <Item4 Name="DARWIN64">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -157,7 +122,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;darwin"/>
+            <OtherUnitFiles Value="$(ProjPath);darwin;script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -176,25 +141,66 @@
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
             <CompilerMessages>
-              <IgnoredMessages idx6058="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
+              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dLape_CDECL"/>
             <ExecuteAfter>
               <Command Value="macosbundle/make.sh"/>
+              <ShowAllMessages Value="True"/>
               <CompileReasons Run="False"/>
             </ExecuteAfter>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
-      </Item>
-      <SharedMatrixOptions Count="2">
-        <Item1 ID="157994458805" Modes="SIMBA_DARWIN64" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
-        <Item2 ID="444724025705" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
+      </Item4>
+      <Item5 Name="AARCH64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../Simba-AArch64"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
+            <OtherUnitFiles Value="$(ProjPath);linux;script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+            <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <CStyleMacros Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="aarch64"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="3"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
+            </CompilerMessages>
+            <CustomOptions Value="-dLape_CDECL"/>
+            <CreateMakefileOnBuild Value="True"/>
+          </Other>
+        </CompilerOptions>
+      </Item5>
+      <SharedMatrixOptions Count="1">
+        <Item1 ID="760724751738" Modes="DARWIN64" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>
@@ -202,133 +208,142 @@
     </PublishOptions>
     <RunParams>
       <FormatVersion Value="2"/>
-      <Modes>
-        <Mode Name="default">
-          <local>
-            <LaunchingApplication PathPlusParams="/usr/bin/gnome-terminal -t &apos;Lazarus Run Output&apos; -e &apos;$(LazarusDir)/tools/runwait.sh $(TargetCmdLine)&apos;"/>
-          </local>
-        </Mode>
-      </Modes>
     </RunParams>
-    <RequiredPackages>
-      <Item>
+    <RequiredPackages Count="4">
+      <Item1>
         <PackageName Value="SynEdit"/>
-      </Item>
-      <Item>
+      </Item1>
+      <Item2>
         <PackageName Value="AnchorDocking"/>
-      </Item>
-      <Item>
+      </Item2>
+      <Item3>
         <PackageName Value="LazControls"/>
-      </Item>
-      <Item>
+      </Item3>
+      <Item4>
         <PackageName Value="LCL"/>
-      </Item>
+      </Item4>
     </RequiredPackages>
-    <Units>
-      <Unit>
+    <Units Count="21">
+      <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="simba.scriptinstance.pas"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="forms/simba.aboutform.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="simba.autocomplete.pas"/>
+        <ComponentName Value="SimbaAboutForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="forms/simba.aca.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="simba.scripttab.pas"/>
+        <HasResources Value="True"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="forms/simba.bitmapconv.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="simba.editor.pas"/>
+        <HasResources Value="True"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="forms/simba.colorpickerhistoryform.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="simba.scripttabhistory.pas"/>
+        <HasResources Value="True"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="forms/simba.debuggerform.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="simba.settings.pas"/>
+        <HasResources Value="True"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="forms/simba.debugimageform.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="simba.editor_attributes.pas"/>
+        <HasResources Value="True"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="forms/simba.dtmeditor.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="simba.scriptformatter.pas"/>
+        <HasResources Value="True"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="forms/simba.filebrowserform.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="simba.associate.pas"/>
+        <HasResources Value="True"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="forms/simba.functionlistform.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="script/simba.script.pas"/>
+        <HasResources Value="True"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="forms/simba.main.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="script/simba.script_dump.pas"/>
+        <ComponentName Value="SimbaForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="forms/simba.notesform.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="script/simba.script_debugger.pas"/>
+        <HasResources Value="True"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="forms/simba.openexampleform.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="simba.inc"/>
+        <HasResources Value="True"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="forms/simba.outputform.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="script/simba.script_compiler_onterminate.pas"/>
+        <HasResources Value="True"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="forms/simba.package_form.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="script/simba.script_compiler_waituntil.pas"/>
+        <HasResources Value="True"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="forms/simba.scripttabsform.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="script/simba.script_compiler_debugger.pas"/>
+        <ComponentName Value="SimbaScriptTabsForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="forms/simba.settingsform.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="simba.fonthelpers.pas"/>
+        <ComponentName Value="SimbaSettingsForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="forms/simba.settingsform_editor_colors.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="simba.imageboxzoom.pas"/>
+        <ComponentName Value="EditorColorsFrame"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="forms/simba.settingsform_editor_font.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="simba.functionlistupdater.pas"/>
+        <ComponentName Value="EditorFontFrame"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="forms/simba.settingsform_editor_general.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="simba.editorcolorpresets.inc"/>
+        <ComponentName Value="EditorGeneralFrame"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="forms/simba.settingsform_simba_general.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="script/wrappers_lcl_classes/simba.wrappers_lclobject.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="linux/simba.oswindow.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="oswindow_header.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="oswindow_body.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="darwin/simba.oswindow.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
+        <ComponentName Value="SimbaGeneralFrame"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+      </Unit20>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -339,7 +354,7 @@
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
       <Libraries Value="../Modules/lape/extensions/ffi/bin/win32"/>
-      <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;windows;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+      <OtherUnitFiles Value="$(ProjPath);windows;script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
       <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -358,7 +373,7 @@
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
-        <DebugInfoType Value="dsDwarf2Set"/>
+        <StripSymbols Value="True"/>
       </Debugging>
       <LinkSmart Value="True"/>
     </Linking>
@@ -371,14 +386,4 @@
       <CreateMakefileOnBuild Value="True"/>
     </Other>
   </CompilerOptions>
-  <Debugging>
-    <Exceptions>
-      <Item>
-        <Name Value="EHTTPClient"/>
-      </Item>
-      <Item>
-        <Name Value="ESyntaxError"/>
-      </Item>
-    </Exceptions>
-  </Debugging>
 </CONFIG>

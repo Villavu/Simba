@@ -5,6 +5,7 @@ addGlobalType('array of TIntegerArray', 'TIntegerMatrix');
 addGlobalType('array of TBooleanArray', 'TBooleanMatrix');
 addGlobalType('array of TByteArray', 'TByteMatrix');
 addGlobalType('array of TDoubleArray', 'TDoubleMatrix');
+addGlobalType('array of TExtendedArray', 'TExtendedMatrix');
 
 // single
 addGlobalFunc('function TSingleMatrix.Width: Integer; constref', @_LapeSingleMatrix_Width);

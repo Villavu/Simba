@@ -81,7 +81,6 @@ type
     function GetCaretMax: TPoint;
     function GetExpressionAt(X, Y: Integer): String;
   public
-    property TextView;
     property CaretMax: TPoint read GetCaretMax;
     property ModifiedLinesGutter: TSimbaEditor_ModifiedLinesGutter read FModifiedLinesGutter;
     property AutoComplete: TSimbaAutoComplete read FAutoComplete;
@@ -99,7 +98,7 @@ type
 implementation
 
 uses
-  SynEditMarkupHighAll, dialogs, math, menus, System.UITypes, SynGutter, SynEditTypes, LazLoggerBase,
+  SynEditMarkupHighAll, dialogs, math, menus, SynGutter, SynEditTypes, LazLoggerBase,
   simba.scripttabhistory, Forms, simba.fonthelpers, simba.parser_misc, simba.codeparser;
 
 type
@@ -148,7 +147,7 @@ procedure TSimbaEditor_ModifiedLinesGutter.SetDrawLineMarks(Value: Boolean);
 begin
   FDrawLineMarks := Value;
 
-  SynEdit.InvalidateGutter();
+  InvalidateTextLines(-1, -1);
 end;
 
 procedure TSimbaEditor_ModifiedLinesGutter.Paint(Canvas: TCanvas; AClip: TRect; TopOffset: integer);
@@ -207,7 +206,7 @@ begin
   begin
     FLineMarks.Clear();
 
-    SynEdit.InvalidateGutter();
+    InvalidateTextLines(-1, -1);
   end;
 end;
 
@@ -600,6 +599,7 @@ begin
   RegisterCommandHandler(@HandleCommand, nil, [hcfPostExec]);
   RegisterMouseActionExecHandler(@HandleMouseAction);
 
+  Keystrokes.Delete(KeyStrokes.FindCommand(ecInsertLine));
   Keystrokes.Delete(KeyStrokes.FindCommand(ecNormalSelect));
   Keystrokes.Delete(KeyStrokes.FindCommand(ecColumnSelect));
 

@@ -50,3 +50,4 @@
 {$i simba.wrappers_crypto.inc}
 {$i simba.wrappers_dialog.inc}
 {$i simba.wrappers_process.inc}
+{$i simba.wrappers_geometry.inc}

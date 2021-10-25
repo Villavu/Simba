@@ -45,6 +45,7 @@ type
     property items[i:Int32]: PNode read GetItem; default;
 
     function InitBranch: Int32; inline; //dummy
+    function Copy: TSlackTree;
 
     procedure Init(TPA:TPointArray);
 
@@ -148,6 +149,11 @@ begin
   Inc(self.size);
 end;
 
+function TSlackTree.Copy: TSlackTree;
+begin
+  Result.Data := System.Copy(Data);
+  Result.Size := Size;
+end;
 
 procedure TSlackTree.Init(TPA:TPointArray);
   procedure __build(var node:TNode; left, right:Int32; depth:Int32=0);
@@ -376,7 +382,7 @@ begin
 end;
 
 
-function TSlackTree.RangeQueryEx(query:TPoint; xrad,yrad:Double; hide:Boolean=False): TPointArray;
+function TSlackTree.RangeQueryEx(query: TPoint; xRad, yRad: Double; hide: Boolean): TPointArray;
 var
   i,c:Int32;
   nodes:TNodeRefArray;

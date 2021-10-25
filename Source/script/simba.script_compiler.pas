@@ -41,7 +41,7 @@ type
 implementation
 
 uses
-  dialogs, extctrls, system.uitypes, graphtype, controls, comctrls, graphics,
+  dialogs, extctrls, uitypes, graphtype, controls, comctrls, graphics,
   stdctrls, buttons, customtimer, checklst, lclclasses, spin, pipes,
   lclintf, math, regexpr, strutils, lazfileutils, fileutil, clipbrd,
   blowfish, md5, sha1, hmac, forms, process,
@@ -52,8 +52,9 @@ uses
   simba.internet, simba.misc, simba.dtm, simba.dtmutil, simba.iomanager,
   simba.aca, simba.dtmeditor, simba.script_communication,
   simba.imagebox, simba.client,simba.jsonparser, simba.xmlparser,
-  simba.mmltimer, simba.finder, simba.target,  simba.fontloader, simba.ocr,
-  simba.ocrutil, simba.matrixhelpers, simba.platformhelpers,
+  simba.mmltimer, simba.finder, simba.target, simba.fontloader, simba.ocr,
+  simba.ocrutil, simba.matrixhelpers, simba.platformhelpers, simba.geometry,
+  simba.array_generics,
 
   simba.script_compiler_onterminate,
   simba.script_compiler_waituntil;
