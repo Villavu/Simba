@@ -10,7 +10,7 @@ program Simba;
 
 uses
   simba.init,
-  classes, sysutils, interfaces, forms, lazloggerbase,
+  classes, sysutils, interfaces, forms, lazlogger,
   simba.settings, simba.main, simba.aboutform, simba.debugimageform,
   simba.bitmapconv, simba.functionlistform, simba.scripttabsform,
   simba.outputform, simba.colorpickerhistoryform, simba.filebrowserform,
@@ -22,6 +22,8 @@ type
     procedure HandleException(Sender: TObject; E: Exception);
     procedure HandleAnalytics(Data: PtrInt);
     procedure SendAnalytics;
+
+    procedure DebugLnSilent(Sender: TObject; S: string; var Handled: Boolean);
   end;
 
 procedure TApplicationHelper.HandleException(Sender: TObject; E: Exception);
@@ -39,11 +41,16 @@ begin
   with TSimbaHTTPClient.Create() do
   try
     // Simple HTTP request - nothing extra is sent.
-    // Only used for logging very basic (ide) launch metrics.
+    // Only used for logging very basic (ide) launch count.
     Get(SIMBA_ANALYTICS_URL);
   finally
     Free();
   end;
+end;
+
+procedure TApplicationHelper.DebugLnSilent(Sender: TObject; S: string; var Handled: Boolean);
+begin
+  Handled := True;
 end;
 
 begin
@@ -78,6 +85,10 @@ begin
     Halt();
   end;
 
+  DebugLogger.CloseLogFileBetweenWrites := True;
+  if Application.HasOption('silent') then
+    DebugLogger.OnDebugLn := @Application.DebugLnSilent;
+
   if not Application.HasOption('open') and Application.HasOption('run') or Application.HasOption('compile') then
   begin
     if not FileExists(Application.Params[Application.ParamCount]) then
@@ -95,7 +106,6 @@ begin
     SimbaScript.Target                   := Application.GetOptionValue('target');
     SimbaScript.Debugging                := Application.HasOption('debugging');
     SimbaScript.CompileOnly              := Application.HasOption('compile');
-    SimbaScript.Silent                   := Application.HasOption('silent');
 
     SimbaScript.Start();
   end else

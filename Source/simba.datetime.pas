@@ -3,30 +3,20 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.misc;
+unit simba.datetime;
 
 {$i simba.inc}
 
 interface
 
 uses
-  classes, sysutils, process;
+  classes, sysutils;
 
 procedure ConvertTime(Time: Int64; var h, m, s: Int32);
 procedure ConvertTime64(Time: Int64; var y, m, w, d, h, min, s: Int32);
 function TimeStamp(Time: Int64; IncludeMilliseconds: Boolean = False): String;
-function OpenDirectory(Path: String): Boolean;
-procedure SetTerminalVisible(Value: Boolean);
-procedure PlaySound(FileName: String);
-procedure StopSound;
 
 implementation
-
-uses
-  Forms
-  {$IFDEF WINDOWS},
-  Windows, MMSystem
-  {$ENDIF};
 
 procedure ConvertTime(Time: Int64; var h, m, s: Int32);
 var
@@ -76,62 +66,6 @@ begin
     Result := Format('[%.2d:%.2d:%.2d:%.3d]', [Hours, Mins, Secs, Milliseconds])
   else
     Result := Format('[%.2d:%.2d:%.2d]', [Hours, Mins, Secs]);
-end;
-
-function OpenDirectory(Path: String): Boolean;
-var
-  Executable: String = '';
-  Output: String;
-  ExitStatus: Int32;
-begin
-  {$IFDEF WINDOWS}
-  Executable := 'explorer.exe';
-  Path := '/root,"' + Path + '"';
-  {$ENDIF}
-
-  {$IFDEF LINUX}
-  Executable := 'xdg-open';
-  {$ENDIF}
-
-  {$IFDEF DARWIN}
-  Executable := 'open';
-  {$ENDIF}
-
-  if (Executable = '') then
-    raise Exception.Create('OpenDirectory is unsupported on this system.');
-
-  Result := RunCommandInDir('', Executable, [Path], Output, ExitStatus) = 0;
-end;
-
-procedure SetTerminalVisible(Value: Boolean);
-var
-  PID: UInt32;
-begin
-  {$IFDEF WINDOWS}
-  GetWindowThreadProcessId(GetConsoleWindow(), PID);
-
-  if (PID = GetCurrentProcessID()) then
-  begin
-    case Value of
-      True: ShowWindow(GetConsoleWindow(), SW_SHOWNORMAL);
-      False: ShowWindow(GetConsoleWindow(), SW_HIDE);
-    end;
-  end;
-  {$ENDIF}
-end;
-
-procedure PlaySound(FileName: String);
-begin
-  {$IFDEF WINDOWS}
-  sndPlaySound(PChar(FileName), SND_ASYNC or SND_NODEFAULT);
-  {$ENDIF}
-end;
-
-procedure StopSound;
-begin
-  {$IFDEF WINDOWS}
-  sndPlaySound(nil, 0);
-  {$ENDIF}
 end;
 
 end.

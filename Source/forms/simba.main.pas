@@ -12,7 +12,7 @@ interface
 uses
   classes, sysutils, fileutil, anchordockpanel, forms, controls, graphics, dialogs,
   stdctrls, menus, comctrls, extctrls, buttons, imglist, castaliapaslextypes,
-  simba.settings, simba.oswindow;
+  simba.settings, simba.windowhandlehelpers, simba.mufasatypes;
 
 const
   IMAGE_COMPILE             = 0;
@@ -206,8 +206,8 @@ type
     procedure TrayIconClick(Sender: TObject);
     procedure TrayPopupExitClick(Sender: TObject);
   protected
-    FWindowSelection: TOSWindow;
-    FProcessSelection: UInt32;
+    FWindowSelection: TWindowHandle;
+    FProcessSelection: Integer;
     FDockingReset: Boolean;
     FRecentFiles: TStringList;
 
@@ -235,8 +235,8 @@ type
     procedure SetTrayIconVisible(Value: Boolean);
     procedure SetMacOSKeystokes(Value: Boolean);
   public
-    property WindowSelection: TOSWindow read FWindowSelection;
-    property ProcessSelection: UInt32 read FProcessSelection;
+    property WindowSelection: TWindowHandle read FWindowSelection;
+    property ProcessSelection: Integer read FProcessSelection;
 
     procedure SetupScriptTabs(Sender: TObject);
     procedure SetupDocking(Sender: TObject);
@@ -259,7 +259,7 @@ implementation
 
 uses
   types, lclintf, lazloggerbase, lazfileutils, anchordocking,
-  simba.openssl, simba.files, simba.mufasatypes, simba.process,
+  simba.openssl, simba.files, simba.process,
   simba.openexampleform, simba.colorpickerhistoryform, simba.codeparser,
   simba.codeinsight, simba.associate, simba.scripttab, simba.debugimageform,
   simba.bitmapconv, simba.aca, simba.windowselector, simba.dtmeditor,
@@ -267,7 +267,7 @@ uses
   simba.scripttabsform, simba.outputform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.colorpicker,
   simba.ci_includecache, simba.script_communication, simba.scriptformatter,
-  simba.editor, simba.dockinghelpers, simba.misc;
+  simba.editor, simba.dockinghelpers, simba.datetime, simba.nativeinterface;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 
@@ -352,7 +352,10 @@ procedure TSimbaForm.SetConsoleVisible(Value: Boolean);
 begin
   MenuItemConsole.Checked := Value;
 
-  SetTerminalVisible(Value);
+  if Value then
+    SimbaNativeInterface.ShowTerminal()
+  else
+    SimbaNativeInterface.HideTerminal();
 end;
 
 procedure TSimbaForm.SetLayoutLocked(Value: Boolean);
@@ -1139,7 +1142,7 @@ begin
         Lines.Add(' - Dimensions: %dx%d', [Selected.GetBounds().Width - 1, Selected.GetBounds().Height - 1]);
         Lines.Add(' - Title: "%s"', [Selected.GetTitle()]);
         Lines.Add(' - Class: "%s"', [Selected.GetClassName()]);
-        Lines.Add(' - PID: %d (%s bit)', [Selected.GetPID, BoolToStr(SimbaProcess.IsProcess64Bit(Selected.GetPID()), '64', '32')]);
+        Lines.Add(' - PID: %d (%s bit)', [Selected.GetPID(), BoolToStr(SimbaProcess.IsProcess64Bit(Selected.GetPID()), '64', '32')]);
         Lines.Add(' - Executable: "%s"', [SimbaProcess.GetProcessPath(Selected.GetPID())]);
 
         FWindowSelection := Selected;

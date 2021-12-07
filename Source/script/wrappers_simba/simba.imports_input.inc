@@ -10,8 +10,9 @@ addGlobalFunc('function IsMouseButtonDown(Button: Integer): boolean', @_LapeIsMo
 addGlobalFunc('procedure KeyDown(Key: UInt16)', @_LapeKeyDown);
 addGlobalFunc('procedure KeyUp(Key: UInt16)', @_LapeKeyUp);
 addGlobalFunc('procedure SendKeys(const S: String; KeyWait, KeyModWait: Integer)', @_LapeSendKeys);
+addGlobalFunc('procedure SendKeysEx(const S: String; MinKeyWait, MaxKeyWait: Integer)', @_LapeSendKeysEx);
 addGlobalFunc('procedure PressKey(Key: UInt16)', @_LapePressKey);
-addGlobalFunc('function IsKeyDown(Key: UInt16): Boolean', @_LapeisKeyDown);
+addGlobalFunc('function IsKeyDown(Key: UInt16): Boolean', @_LapeIsKeyDown);
 addGlobalFunc('function GetKeyCode(C: Char): Integer', @_LapeGetKeyCode);
 
 addGlobalVar(Ord(MOUSE_RIGHT),   'MOUSE_RIGHT').isConstant := True;

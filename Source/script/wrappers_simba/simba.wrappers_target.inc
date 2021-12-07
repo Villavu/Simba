@@ -131,11 +131,11 @@ end;
 
 procedure _LapeGetTargetWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  POSWindow(Result)^ := SimbaScript.Client.IOManager.GetImageTarget().Handle;
+  PWindowHandle(Result)^ := SimbaScript.Client.IOManager.GetImageTarget().Handle;
 end;
 
 procedure _LapeGetTargetPID(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PUInt32(Result)^ := TOSWindow(SimbaScript.Client.IOManager.GetImageTarget().Handle).GetPID();
+  PUInt32(Result)^ := TWindowHandle(SimbaScript.Client.IOManager.GetImageTarget().Handle).GetPID();
 end;
 

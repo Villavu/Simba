@@ -220,11 +220,11 @@ end;
 
 procedure _LapeIOManager_SetImageTargetEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PTarget(Result)^ := PIOManager(Params^[0])^.SetImageTargetEx(POSWindow(Params^[1])^);
+  PTarget(Result)^ := PIOManager(Params^[0])^.SetImageTargetEx(PWindowHandle(Params^[1])^);
 end;
 
 procedure _LapeIOManager_SetKeyMouseTargetEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PTarget(Result)^ := PIOManager(Params^[0])^.SetKeyMouseTargetEx(POSWindow(Params^[1])^);
+  PTarget(Result)^ := PIOManager(Params^[0])^.SetKeyMouseTargetEx(PWindowHandle(Params^[1])^);
 end;
 

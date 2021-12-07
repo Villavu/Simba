@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="12"/>
+    <Version Value="11"/>
     <General>
       <Flags>
         <MainUnitHasUsesSectionForAllUnits Value="False"/>
         <MainUnitHasTitleStatement Value="False"/>
         <MainUnitHasScaledStatement Value="False"/>
-        <CompatibilityMode Value="True"/>
       </Flags>
       <SessionStorage Value="InIDEConfig"/>
+      <MainUnit Value="0"/>
       <Title Value="Simba"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
@@ -56,7 +56,6 @@
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
-              <DebugInfoType Value="dsDwarf2Set"/>
               <StripSymbols Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
@@ -208,6 +207,7 @@
     </PublishOptions>
     <RunParams>
       <FormatVersion Value="2"/>
+      <Modes Count="0"/>
     </RunParams>
     <RequiredPackages Count="4">
       <Item1>
@@ -223,7 +223,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="21">
+    <Units Count="29">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -238,7 +238,9 @@
       <Unit2>
         <Filename Value="forms/simba.aca.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="SimbaACAForm"/>
         <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
       </Unit2>
       <Unit3>
         <Filename Value="forms/simba.bitmapconv.pas"/>
@@ -344,6 +346,38 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
       </Unit20>
+      <Unit21>
+        <Filename Value="simba.stringhelper_body.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="simba.pointhelper_body.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="simba.boxhelper_body.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="simba.rectanglehelper_body.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="simba.colorfinders.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="script/wrappers_simba/simba.imports_debugimage.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="simba.nativeinterface.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="windows/simba.crossplatformmethods_windows.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit28>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -386,4 +420,14 @@
       <CreateMakefileOnBuild Value="True"/>
     </Other>
   </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="2">
+      <Item1>
+        <Name Value="ESyntaxError"/>
+      </Item1>
+      <Item2>
+        <Name Value="ESocketError"/>
+      </Item2>
+    </Exceptions>
+  </Debugging>
 </CONFIG>

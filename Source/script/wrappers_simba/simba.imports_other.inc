@@ -19,5 +19,5 @@ addGlobalFunc('procedure DisplayDebugImgWindow(W, H: Int32)', @_LapeDisplayDebug
 addGlobalFunc('procedure ClearDebugImg', @_LapeClearDebugImg);
 addGlobalFunc('function GetSimbaPID: PtrUInt', @_LapeGetSimbaPID);
 addGlobalFunc('function GetSimbaTargetPID: PtrUInt', @_LapeGetSimbaTargetPID);
-addGlobalFunc('function GetSimbaTargetWindow: TOSWindow', @_LapeGetSimbaTargetWindow);
+addGlobalFunc('function GetSimbaTargetWindow: TWindowHandle', @_LapeGetSimbaTargetWindow);
 

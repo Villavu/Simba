@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, controls, forms, graphics,
-  simba.oswindow, simba.mufasatypes, simba.iomanager;
+  simba.windowhandlehelpers, simba.mufasatypes, simba.iomanager;
 
 type
   TSimbaWindowSelector = class
@@ -20,13 +20,16 @@ type
     FIOManager: TIOManager;
     FBorderSize: Int32;
   public
-    Selected: TOSWindow;
+    Selected: TWindowHandle;
 
     constructor Create(BorderSize: Int32 = 4);
     destructor Destroy; override;
   end;
 
 implementation
+
+uses
+  math;
 
 constructor TSimbaWindowSelector.Create(BorderSize: Int32);
 
@@ -40,7 +43,7 @@ constructor TSimbaWindowSelector.Create(BorderSize: Int32);
   end;
 
 var
-  Window: TOSWindow;
+  Window: TWindowHandle;
 begin
   FBorderSize := BorderSize;
 

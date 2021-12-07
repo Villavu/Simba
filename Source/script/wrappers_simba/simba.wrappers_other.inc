@@ -1,11 +1,11 @@
 procedure _LapePlaySound(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PlaySound(PString(Params^[0])^);
+  SimbaNativeInterface.PlaySound(PString(Params^[0])^);
 end;
 
 procedure _LapeStopSound(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  StopSound;
+  SimbaNativeInterface.StopSound();
 end;
 
 procedure _LapeSetSupressExceptions(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

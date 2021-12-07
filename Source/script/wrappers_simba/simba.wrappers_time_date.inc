@@ -20,5 +20,5 @@ end;
 
 procedure _LapeHighResolutionTime(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PDouble(Result)^ := SimbaPlatformHelpers.HighResolutionTime();
+  PDouble(Result)^ := SimbaNativeInterface.HighResolutionTime();
 end;

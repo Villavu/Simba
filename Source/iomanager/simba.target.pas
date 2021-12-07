@@ -24,6 +24,8 @@ type
     FImageClientAreaSet: Boolean;
     FImageClientArea: TBox;
 
+    function ValidateImageCapture(var X, Y, Width, Height: Integer; out TargetBounds: TBox): Boolean; virtual;
+
     procedure InvalidTarget; virtual;
 
     function GetHandle: PtrUInt; virtual;
@@ -35,38 +37,38 @@ type
     procedure GetTargetBounds(out Bounds: TBox); virtual; // raw bounds. (no image client area etc)
   public
     // Client area
-    procedure MouseClientAreaOffset(var X, Y: Int32); virtual;
-    function MouseSetClientArea(X1, Y1, X2, Y2: Int32): Boolean; virtual;
+    procedure MouseClientAreaOffset(var X, Y: Integer); virtual;
+    function MouseSetClientArea(X1, Y1, X2, Y2: Integer): Boolean; virtual;
     procedure MouseResetClientArea; virtual;
-    procedure ImageClientAreaOffset(var X, Y: Int32); virtual;
-    function ImageSetClientArea(X1, Y1, X2, Y2: Int32): Boolean; virtual;
+    procedure ImageClientAreaOffset(var X, Y: Integer); virtual;
+    function ImageSetClientArea(X1, Y1, X2, Y2: Integer): Boolean; virtual;
     procedure ImageResetClientArea; virtual;
 
     // Position, Dimensions
-    procedure GetTargetDimensions(out Width, Height: Int32); virtual;
-    procedure GetTargetPosition(out Left, Top: Int32); virtual;
+    procedure GetTargetDimensions(out Width, Height: Integer); virtual;
+    procedure GetTargetPosition(out Left, Top: Integer); virtual;
 
     // Colors
-    function GetColor(X, Y: Int32): Int32; virtual;
-    function CopyData(X, Y, Width, Height: Int32): PRGB32; virtual;
-    function ReturnData(X, Y, Width, Height: Int32): TRetData; virtual;
-    function ReturnMatrix(X, Y, Width, Height: Int32): TIntegerMatrix; virtual;
-    procedure FreeReturnData; virtual;
+    function GetColor(X, Y: Integer): Integer; virtual;
+    function CopyData(X, Y, Width, Height: Integer): PRGB32; virtual;
+    function ReturnData(X, Y, Width, Height: Integer): TRetData; virtual;
+    function ReturnMatrix(X, Y, Width, Height: Integer): TIntegerMatrix; virtual;
 
     // Mouse
-    procedure GetMousePosition(out X, Y: Int32); virtual;
-    procedure MoveMouse(X, Y: Int32); virtual;
-    procedure ScrollMouse(X, Y: Int32; Lines: Int32); virtual;
-    procedure HoldMouse(X, Y: Int32; Button: TClickType); virtual;
-    procedure ReleaseMouse(X, Y: Int32; Button: TClickType); virtual;
+    procedure GetMousePosition(out X, Y: Integer); virtual;
+    procedure MoveMouse(X, Y: Integer); virtual;
+    procedure ScrollMouse(X, Y: Integer; Lines: Integer); virtual;
+    procedure HoldMouse(X, Y: Integer; Button: TClickType); virtual;
+    procedure ReleaseMouse(X, Y: Integer; Button: TClickType); virtual;
     function IsMouseButtonHeld(Button: TClickType): Boolean; virtual;
 
     // Keyboard
-    procedure SendString(Text: String; KeyWait, KeyModWait: Int32); virtual;
-    procedure HoldKey(Key: Int32); virtual;
-    procedure ReleaseKey(Key: Int32); virtual;
-    function IsKeyHeld(Key: Int32): Boolean; virtual;
-    function GetKeyCode(Character: Char) : Int32; virtual;
+    procedure SendString(Text: String; KeyWait, KeyModWait: Integer); virtual;
+    procedure SendStringEx(Text: String; MinKeyWait, MaxKeyWait: Integer); virtual;
+    procedure HoldKey(Key: Integer); virtual;
+    procedure ReleaseKey(Key: Integer); virtual;
+    function IsKeyHeld(Key: Integer): Boolean; virtual;
+    function GetKeyCode(Character: Char) : Integer; virtual;
 
     // Activate
     procedure ActivateClient; virtual;
@@ -81,9 +83,11 @@ type
     property Handle: PtrUInt read GetHandle write SetHandle;
     property AutoFocus: Boolean read GetAutoFocus write SetAutoFocus;
 
-    constructor Create;
+    constructor Create; virtual;
     destructor Destroy; override;
   end;
+
+  TTargetArray = array of TTarget;
 
 implementation
 
@@ -95,7 +99,7 @@ begin
   FInvalidTargetHandlers.CallNotifyEvents(Self);
 end;
 
-procedure TTarget.GetTargetPosition(out Left, Top: Int32);
+procedure TTarget.GetTargetPosition(out Left, Top: Integer);
 var
   Bounds: TBox;
 begin
@@ -112,7 +116,7 @@ begin
   end;
 end;
 
-procedure TTarget.GetTargetDimensions(out Width, Height: Int32);
+procedure TTarget.GetTargetDimensions(out Width, Height: Integer);
 var
   Bounds: TBox;
 begin
@@ -134,32 +138,42 @@ begin
   raise Exception.Create('GetTargetBounds not available for this target');
 end;
 
-function TTarget.GetColor(X, Y: Int32): Int32;
+function TTarget.ValidateImageCapture(var X, Y, Width, Height: Integer; out TargetBounds: TBox): Boolean;
 begin
+  GetTargetBounds(TargetBounds);
   ImageClientAreaOffset(X, Y);
-  with ReturnData(X, Y, 1, 1) do
-    Result := RGBToColor(Ptr[0].R, Ptr[0].G, Ptr[0].B);
 
-  FreeReturnData();
+  Result := (TargetBounds.X1 + X >= TargetBounds.X1) and (TargetBounds.Y1 + Y >= TargetBounds.Y1) and (X + Width <= TargetBounds.X2) and (Y + Height <= TargetBounds.Y2);
 end;
 
-function TTarget.CopyData(X, Y, Width, Height: Int32): PRGB32;
+function TTarget.GetColor(X, Y: Integer): Integer;
+var
+  Data: TRetData;
+begin
+  Data := ReturnData(X, Y, 1, 1);
+  if (Data.Ptr <> nil) then
+    Result := RGBToColor(Data.Ptr^.R, Data.Ptr^.G, Data.Ptr^.B)
+  else
+    Result := 0;
+end;
+
+function TTarget.CopyData(X, Y, Width, Height: Integer): PRGB32;
 begin
   raise Exception.Create('CopyData not availble for this target');
 end;
 
-function TTarget.ReturnData(X, Y, Width, Height: Int32): TRetData;
+function TTarget.ReturnData(X, Y, Width, Height: Integer): TRetData;
 begin
   raise Exception.Create('ReturnData not available for this target');
 end;
 
-function TTarget.ReturnMatrix(X, Y, Width, Height: Int32): TIntegerMatrix;
+function TTarget.ReturnMatrix(X, Y, Width, Height: Integer): TIntegerMatrix;
 var
   Data: TRetData;
   Dest: PInt32;
   Source: PRGB32;
-  SourceInc: Int32;
-  LoopX, LoopY: Int32;
+  SourceInc: Integer;
+  LoopX, LoopY: Integer;
 begin
   SetLength(Result, Height, Width);
 
@@ -168,7 +182,7 @@ begin
   Source := Data.Ptr;
   SourceInc := Data.IncPtrWith;
 
-  if (Data <> NullReturnData) then
+  if (Data.Ptr <> nil) then
   begin
     for LoopY := 0 to Height - 1 do
     begin
@@ -184,14 +198,7 @@ begin
 
       Inc(Source, SourceInc);
     end;
-
-    FreeReturnData();
   end;
-end;
-
-procedure TTarget.FreeReturnData;
-begin
-  {do nothing by default}
 end;
 
 procedure TTarget.ActivateClient;
@@ -204,7 +211,7 @@ begin
   Result := True;
 end;
 
-function TTarget.MouseSetClientArea(X1, Y1, X2, Y2: Int32): Boolean;
+function TTarget.MouseSetClientArea(X1, Y1, X2, Y2: Integer): Boolean;
 begin
   Result := True;
 
@@ -226,7 +233,7 @@ begin
   FMouseClientArea.Y2 := 0;
 end;
 
-procedure TTarget.ImageClientAreaOffset(var X, Y: Int32);
+procedure TTarget.ImageClientAreaOffset(var X, Y: Integer);
 begin
   if FImageClientAreaSet then
   begin
@@ -235,7 +242,7 @@ begin
   end;
 end;
 
-function TTarget.ImageSetClientArea(X1, Y1, X2, Y2: Int32): Boolean;
+function TTarget.ImageSetClientArea(X1, Y1, X2, Y2: Integer): Boolean;
 begin
   Result := True;
 
@@ -257,27 +264,27 @@ begin
   FImageClientArea.Y2 := 0;
 end;
 
-procedure TTarget.GetMousePosition(out X, Y: Int32);
+procedure TTarget.GetMousePosition(out X, Y: Integer);
 begin
   raise Exception.Create('GetMousePosition not available for this target');
 end;
 
-procedure TTarget.MoveMouse(X, Y: Int32);
+procedure TTarget.MoveMouse(X, Y: Integer);
 begin
   raise Exception.Create('MoveMouse not available for this target');
 end;
 
-procedure TTarget.ScrollMouse(X, Y: Int32; Lines: Int32);
+procedure TTarget.ScrollMouse(X, Y: Integer; Lines: Integer);
 begin
   raise Exception.Create('ScrollMouse is not available for this target');
 end;
 
-procedure TTarget.HoldMouse(X, Y: Int32; Button: TClickType);
+procedure TTarget.HoldMouse(X, Y: Integer; Button: TClickType);
 begin
   raise Exception.Create('HoldMouse not available for this target');
 end;
 
-procedure TTarget.ReleaseMouse(X, Y: Int32; Button: TClickType);
+procedure TTarget.ReleaseMouse(X, Y: Integer; Button: TClickType);
 begin
   raise Exception.Create('ReleaseMouse not available for this target');
 end;
@@ -287,27 +294,32 @@ begin
   raise Exception.Create('IsMouseButtonHeld not available for this target');
 end;
 
-procedure TTarget.SendString(Text: String; KeyWait, KeyModWait: Int32);
+procedure TTarget.SendString(Text: String; KeyWait, KeyModWait: Integer);
 begin
   raise Exception.Create('SendString not available for this target');
 end;
 
-procedure TTarget.HoldKey(Key: Int32);
+procedure TTarget.SendStringEx(Text: String; MinKeyWait, MaxKeyWait: Integer);
+begin
+  raise Exception.Create('SendStringEx not available for this target');
+end;
+
+procedure TTarget.HoldKey(Key: Integer);
 begin
   raise Exception.Create('HoldKey not available for this target');
 end;
 
-procedure TTarget.ReleaseKey(Key: Int32);
+procedure TTarget.ReleaseKey(Key: Integer);
 begin
   raise Exception.Create('ReleaseKey not available for this target');
 end;
 
-function TTarget.IsKeyHeld(Key: Int32): Boolean;
+function TTarget.IsKeyHeld(Key: Integer): Boolean;
 begin
   raise Exception.Create('IsKeyHeld not available for this target');
 end;
 
-function TTarget.GetKeyCode(Character: Char): Int32;
+function TTarget.GetKeyCode(Character: Char): Integer;
 begin
   raise Exception.Create('GetKeyCode is not available for this target');
 end;
@@ -332,7 +344,7 @@ begin
   raise Exception.Create('SetAutoFocus is not available for this target');
 end;
 
-procedure TTarget.MouseClientAreaOffset(var X, Y: Int32);
+procedure TTarget.MouseClientAreaOffset(var X, Y: Integer);
 begin
   if FMouseClientAreaSet then
   begin

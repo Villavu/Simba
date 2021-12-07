@@ -51,7 +51,7 @@ implementation
 
 uses
   forms, process, lazloggerbase,
-  simba.files, simba.platformhelpers;
+  simba.files, simba.nativeinterface;
 
 type
   TProcessTimeout = class(TProcess)
@@ -116,22 +116,22 @@ end;
 
 function TSimbaProcess.IsProcess64Bit(PID: TProcessID): Boolean;
 begin
-  Result := SimbaPlatformHelpers.IsProcess64Bit(PID);
+  Result := SimbaNativeInterface.IsProcess64Bit(PID);
 end;
 
 function TSimbaProcess.IsProcessRunning(PID: TProcessID): Boolean;
 begin
-  Result := SimbaPlatformHelpers.IsProcessRunning(PID);
+  Result := SimbaNativeInterface.IsProcessRunning(PID);
 end;
 
 function TSimbaProcess.GetProcessPath(PID: TProcessID): String;
 begin
-  Result := SimbaPlatformHelpers.GetProcessPath(PID);
+  Result := SimbaNativeInterface.GetProcessPath(PID);
 end;
 
 procedure TSimbaProcess.TerminateProcess(PID: TProcessID);
 begin
-  SimbaPlatformHelpers.TerminateProcess(PID);
+  SimbaNativeInterface.TerminateProcess(PID);
 end;
 
 function TSimbaProcess.RunCommandInDir(Directory, Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus;
@@ -209,29 +209,25 @@ function TSimbaProcess.RunDump(Commands: TStringArray): TStringList;
 var
   ProcessOutput, FileName: String;
 begin
-  Result := nil;
+  Result := TStringList.Create();
+  Result.LineBreak := #0;
 
-  ForceDirectories(GetDumpPath());
+  if not DirectoryExists(GetDumpPath()) then
+    ForceDirectories(GetDumpPath());
+
   FileName := GetTempFileName(GetDumpPath(), 'dump');
-
   try
     if not SimbaProcess.RunCommandTimeout(Application.ExeName, Commands + [FileName], ProcessOutput, 5000) then
       raise Exception.Create('Timed out');
 
-    Result := TStringList.Create();
-    Result.LineBreak := #0;
     Result.LoadFromFile(FileName);
   except
     on E: Exception do
-    begin
       raise Exception.Create(E.Message + ' :: ' + ProcessOutput);
-
-      if (Result <> nil) then
-        FreeAndNil(Result);
-    end;
   end;
 
-  DeleteFile(FileName);
+  if FileExists(FileName) then
+    DeleteFile(FileName);
 end;
 
 function TSimbaProcess.RunScript(Script: String; Parameters: TStringArray; out Output: String): TProcessExitStatus;
