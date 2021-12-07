@@ -12,3 +12,4 @@ build/
 /Simba*
 /libssl*
 /libcrypto*
+/*.res

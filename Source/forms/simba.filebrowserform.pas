@@ -82,8 +82,8 @@ implementation
 {$R *.lfm}
 
 uses
-  fileutil, clipbrd, lclintf, lazfileutils,
-  simba.misc, simba.scripttabsform, simba.main;
+  fileutil, clipbrd, lazfileutils,
+  simba.scripttabsform, simba.main, simba.nativeinterface;
 
 procedure TSimbaFileBrowser.DoCreateNodeClass(var NodeClass: TTreeNodeClass);
 begin
@@ -245,9 +245,9 @@ begin
     if (Sender = PopupMenu_OpenExternally) then
     begin
       if FileInfo.Directory then
-        OpenDirectory(FileInfo.FileName)
+        SimbaNativeInterface.OpenDirectory(FileInfo.FileName)
       else
-        OpenDocument(FileInfo.FileName);
+        SimbaNativeInterface.OpenFile(FileInfo.FileName);
     end else
     if (Sender = PopupMenu_CopyPath) then
       Clipboard.AsText := FileInfo.FileName

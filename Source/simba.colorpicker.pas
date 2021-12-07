@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
-  simba.iomanager, simba.oswindow, simba.imageboxzoom;
+  simba.iomanager, simba.windowhandlehelpers, simba.imageboxzoom, simba.mufasatypes;
 
 type
   TSimbaColorPickerHint = class(THintWindow)
@@ -45,7 +45,7 @@ type
     property Point: TPoint read FPoint;
     property Picked: Boolean read FPicked;
 
-    constructor Create(TargetWindow: TOSWindow);
+    constructor Create(TargetWindow: TWindowHandle);
     destructor Destroy; override;
   end;
 
@@ -79,6 +79,7 @@ begin
 
   Info := TLabel.Create(Self);
   Info.Parent := Self;
+  Info.Font.Color := clBlack;
   Info.BorderSpacing.Right := 10;
   Info.AnchorToNeighbour(akLeft, 10, Zoom);
   Info.AnchorVerticalCenterTo(Zoom);
@@ -141,7 +142,7 @@ begin
   FForm.Close();
 end;
 
-constructor TSimbaColorPicker.Create(TargetWindow: TOSWindow);
+constructor TSimbaColorPicker.Create(TargetWindow: TWindowHandle);
 var
   DesktopLeft, DesktopTop, DesktopWidth, DesktopHeight: Int32;
 begin

@@ -6,6 +6,9 @@
 unit simba.script;
 
 {$i simba.inc}
+{$IFDEF DARWIN}
+  {$modeswitch objectivec1}
+{$ENDIF}
 
 interface
 
@@ -17,7 +20,6 @@ uses
 type
   TSimbaScript = class(TThread)
   protected
-    FSilent: Boolean;
     FState: TInitBool;
     FTarget: String;
     FStartTime: UInt64;
@@ -79,8 +81,11 @@ var
 implementation
 
 uses
+  {$IFDEF DARWIN}
+  cocoaall, cocoaint, cocoautils,
+  {$ENDIF}
   fileutil, forms, lazloggerbase,
-  simba.files, simba.misc, simba.script_plugin, simba.script_compiler_onterminate;
+  simba.files, simba.datetime, simba.script_plugin, simba.script_compiler_onterminate;
 
 procedure TSimbaScript.HandleHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
@@ -188,7 +193,13 @@ begin
     WakeMainThread(Self);
 
   {$IFDEF DARWIN}
-  Halt(0); // TODO check if still needed.
+  // https://gitlab.com/freepascal.org/lazarus/lazarus/-/issues/39496
+  NSApplication.sharedApplication.postEvent_AtStart(
+    nsEvent.otherEventWithType_location_modifierFlags_timestamp_windowNumber_context_subtype_data1_data2(
+      NSApplicationDefined, GetNSPoint(0, 0), 0, NSTimeIntervalSince1970, 0, nil, 0, 0, 0
+    ),
+    True
+  );
   {$ENDIF}
 end;
 

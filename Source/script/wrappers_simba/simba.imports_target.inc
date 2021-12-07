@@ -23,6 +23,6 @@ addGlobalFunc('procedure ActivateClient', @_LapeActivateClient);
 addGlobalFunc('function IsTargetValid: Boolean', @_LapeIsTargetValid);
 addGlobalFunc('function GetNativeWindow: PtrUInt', @_LapeGetNativeWindow);
 addGlobalFunc('procedure SaveScreenshot(FileName: string)', @_LapeSaveScreenshot);
-addGlobalFunc('function GetTargetWindow: TOSWindow', @_LapeGetTargetWindow);
+addGlobalFunc('function GetTargetWindow: TWindowHandle', @_LapeGetTargetWindow);
 addGlobalFunc('function GetTargetPID: UInt32', @_LapeGetTargetPID);
 

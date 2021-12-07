@@ -13,40 +13,19 @@ uses
   Classes, SysUtils, Graphics;
 
 type
-  PRectangle = ^TRectangle;
-  TRectangle = record
-    Top, Right, Btm, Left: TPoint;
-  end;
-
-  PRGB24 = ^TRGB24;
-  TRGB24 = packed record
-    B, G, R : byte;
-  end;
-
-  PPRGB32 = ^PRGB32;
+  PPRGB32 = ^PRGB32; // Pointer to PRGB32
   PRGB32 = ^TRGB32;
   TRGB32 = packed record
     B, G, R, A: Byte;
-  end;
 
-  TARGB32 = packed record A, R, G, B: Byte; end;
-  PARGB32 = ^TARGB32;
+    class operator = (const Left, Right: TRGB32): Boolean; inline;
+  end;
 
   PRGB32Array = ^TRGB32Array;
-  TRGB32Array = array of TRGB32;
+  TRGB32Array = array of TRGB32;  // array of TRGB32
 
   PPRGB32Array = ^TPRGB32Array;
-  TPRGB32Array = array of PRGB32; //array of Pointers
-
-  THSL = packed record
-    H, S, L: extended;
-  end;
-  PHSL = ^THSL;
-
-  PHSLArray = ^THSLArray;
-  THSLArray = array of THSL;
-  P2DHSLArray = ^T2DHSLArray;
-  T2DHSLArray = array of array of THSL;
+  TPRGB32Array = array of PRGB32; // array of PRGB32
 
   PRetData = ^TRetData;
   TRetData = record
@@ -55,11 +34,11 @@ type
     RowLen: Integer;
   end;
 
-const
-  NullReturnData: TRetData = (Ptr: nil; IncPtrWith: -1; RowLen: -1);
+  PWindowHandle = ^TWindowHandle;
+  PWindowHandleArray = ^TWindowHandleArray;
 
-operator =(Left, Right: TRetData): Boolean; inline;
-operator =(Left, Right: TRGB32): Boolean; inline;
+  TWindowHandle = type PtrUInt;
+  TWindowHandleArray = array of TWindowHandle;
 
 type
   PClickType = ^TClickType;
@@ -93,18 +72,12 @@ type
   PByteArray = ^TByteArray;
   TByteArray = array of Byte;
 
-  P2DByteArray = ^T2DByteArray;
-  T2DByteArray = array of TByteArray;
-
   PByteMatrix = ^TByteMatrix;
   TByteMatrix = array of array of Byte;
 
   // Boolean
   PBooleanArray = ^TBooleanArray;
   TBooleanArray = array of Boolean;
-
-  P2DBooleanArray = ^T2DBooleanArray;
-  T2DBooleanArray = array of TBooleanArray;
 
   PBooleanMatrix = ^TBooleanMatrix;
   TBooleanMatrix = array of array of Boolean;
@@ -123,18 +96,12 @@ type
   PSingleArray = ^TSingleArray;
   TSingleArray = array of Single;
 
-  P2DSingleArray = ^T2DSingleArray;
-  T2DSingleArray = array of TSingleArray;
-
   PSingleMatrix = ^TSingleMatrix;
   TSingleMatrix = array of array of Single;
 
   // Double
   PDoubleArray = ^TDoubleArray;
   TDoubleArray = array of Double;
-
-  P2DDoubleArray = ^T2DDoubleArray;
-  T2DDoubleArray = array of TDoubleArray;
 
   PDoubleMatrix = ^TDoubleMatrix;
   TDoubleMatrix = array of array of Double;
@@ -162,7 +129,6 @@ type
   PComparator = ^EComparator;
   EComparator = (__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__);
 
-  { Mask Types }
   PMask = ^TMask;
   TMask = record
     White, Black : TPointArray;
@@ -170,7 +136,6 @@ type
     W,H : integer;
   end;
 
-  { File types }
   TMufasaFile = record
     Path: String;
     FS: TFileStream;
@@ -178,99 +143,229 @@ type
   end;
   TMufasaFilesArray = array of TMufasaFile;
 
+  TRegExprMatch = record
+    Position: Integer;
+    Length: Integer;
+    Match: String;
+  end;
+  TRegExprMatchArray = array of TRegExprMatch;
+
+  PRectangle = ^TRectangle;
+  TRectangle = record
+    Top, Right, Btm, Left: TPoint;
+  end;
+  PRectangleArray = ^TRectangleArray;
+  TRectangleArray = array of TRectangle;
+
   PBox = ^TBox;
   TBox = record
     X1, Y1, X2, Y2: Integer;
   end;
+  PBoxArray = ^TBoxArray;
+  TBoxArray = array of TBox;
 
-  { TBoxHelper }
-
-  TBoxHelper = record Helper for TBox
-  protected
-    function GetWidth: Int32;
-    function GetHeight: Int32;
+  TBoxHelper = record helper for TBox
   public
-    function Expand(Amount: Int32): TBox;
-    function Contains(X, Y, Width, Height: Int32): Boolean; overload;
-    function Contains(X, Y: Int32): Boolean; overload;
-    property Width: Int32 read GetWidth;
-    property Height: Int32 read GetHeight;
+    function Width: Integer;
+    function Height: Integer;
+    function Middle: TPoint;
+
+    function Area: Integer;
+    function Offset(X, Y: Integer): TBox; overload;
+    function Offset(P: TPoint): TBox; overload;
+
+    function Contains(X, Y: Integer): Boolean; overload;
+    function Contains(P: TPoint): Boolean; overload;
+    function Contains(B: TBox): Boolean; overload;
+
+    function Expand(Size: Integer): TBox; overload;
+    function Expand(Size: Integer; MaxBounds: TBox): TBox; overload;
+
+    function Expand(WidthMod, HeightMod: Integer): TBox; overload;
+    function Expand(WidthMod, HeightMod: Integer; MaxBounds: TBox): TBox; overload;
+
+    function Combine(Other: TBox): TBox;
+    function ToRectangle: TRectangle;
+
+    procedure Clip(Other: TBox);
+    procedure Normalize;
   end;
 
-  function Box(const X1, Y1, X2, Y2: Int32): TBox;
+  TRectangleHelper = record helper for TRectangle
+  public
+    function ToTPA: TPointArray;
+    function Bounds: TBox;
+    function Middle: TPoint;
+    function Offset(X, Y: Integer): TRectangle; overload;
+    function Offset(P: TPoint): TRectangle; overload;
+    function Expand(Amount: Integer): TRectangle;
+    function Contains(X, Y: Integer): Boolean; overload;
+    function Contains(P: TPoint): Boolean; overload;
+    function Contains(Box: TBox): Boolean; overload;
+    function LongSideLen: Integer;
+    function ShortSideLen: Integer;
+    function Area: Integer;
+    function Rotate(Radians: Double): TRectangle;
+    function RotateFast(Degrees: Integer): TRectangle;
 
-const
-  TMDTMPointSize = 5*SizeOf(integer)+Sizeof(boolean);
-type
-  TMDTMPoint = record //TMufasaDTMPoint
-    x,y,c,t,asz : integer;
-    bp : boolean;
+    procedure Normalize;
   end;
 
-  PMDTMPoint = ^TMDTMPoint; //PointerMufasaDTMPoint
-  TMDTMPointArray = array of TMDTMPoint; //TMufasaDTMPointArray
-
-
-  { Other DTM Types }
-
-  TSDTMPointDef = record
-    x, y, Color, Tolerance, AreaSize, AreaShape: integer;
+  TPointHelper = record helper for TPoint
+  public
+    function Offset(X, Y: Integer): TPoint; overload;
+    function Offset(P: TPoint): TPoint; overload;
+    function Rotate(Radians: Double; Center: TPoint): TPoint;
+    function RotateFast(Degrees: Integer; Center: TPoint): TPoint;
+    function DistanceTo(Other: TPoint): Integer;
+    function AngleBetween(Other: TPoint): Double;
+    function InBox(B: TBox): Boolean;
+    function InCircle(Center: TPoint; Radius: Integer): Boolean;
+    function InRect(R: TRectangle): Boolean;
+    function Scale(Radians: Double; Radius: Integer): TPoint;
   end;
 
-  TSDTMPointDefArray = array of TSDTMPointDef;
+  TStringHelper = type helper for String
+  public
+    class function NumberChars: String; static;
+    class function AlphaChars: String; static;
 
-  PSDTM = ^TSDTM;
-  TSDTM = record
-    MainPoint: TSDTMPointDef;
-    SubPoints: TSDTMPointDefArray;
+    function Upper: String;
+    function Lower: String;
+
+    function Before(const Value: String): String;
+    function After(const Value: String): String;
+
+    function Between(const S1, S2: String): String;
+    function BetweenAll(const S1, S2: String): TStringArray;
+
+    function RegExprSplit(const Pattern: String): TStringArray;
+    function RegExprFindAll(const Pattern: String): TRegExprMatchArray;
+    function RegExprFind(const Pattern: String): TRegExprMatch;
+
+    function IndexOfAny(const Values: TStringArray): Integer; overload;
+    function IndexOfAny(const Values: TStringArray; Offset: Integer): Integer; overload;
+
+    function IndexOf(const Value: String): Integer; overload;
+    function IndexOf(const Value: String; Offset: Integer): Integer; overload;
+    function LastIndexOf(const Value: String): Integer; overload;
+    function LastIndexOf(const Value: String; Offset: Integer): Integer; overload;
+
+    function IndicesOf(const Value: String): TIntegerArray;
+    function IndicesOf(const Value: String; Offset: Integer): TIntegerArray;
+
+    function Extract(const Characters: String): String;
+    function ExtractNumber(Default: Int64 = -1): Int64; overload;
+    function ExtractNumber(const ANumberChars: String; Default: Int64 = -1): Int64; overload;
+
+    function Trim: String; overload;
+    function Trim(const TrimChars: array of Char): String; overload;
+
+    function TrimLeft: String; overload;
+    function TrimLeft(const TrimChars: array of Char): String; overload;
+
+    function TrimRight: String; overload;
+    function TrimRight(const TrimChars: array of Char): String; overload;
+
+    function StartsWith(const Value: String; CaseSenstive: Boolean = True): Boolean;
+    function EndsWith(const Value: String; CaseSenstive: Boolean = True): Boolean;
+
+    function Replace(const OldValue: String; const NewValue: String): String; overload;
+    function Replace(const OldValue: String; const NewValue: String; ReplaceFlags: TReplaceFlags): String; overload;
+
+    function Contains(const Value: String; CaseSenstive: Boolean = True): Boolean;
+    function ContainsAny(const Values: TStringArray; CaseSenstive: Boolean = True): Boolean;
+
+    function Split(const Seperator: String): TStringArray;
+
+    function Copy: String; overload;
+    function Copy(StartIndex, Count: Integer): String; overload;
+    function Copy(StartIndex: Integer): String; overload;
+    function CopyRange(StartIndex, EndIndex: Integer): String;
+
+    procedure Delete(StartIndex, Count: Integer);
+    procedure DeleteRange(StartIndex, EndIndex: Integer);
+
+    procedure Insert(const Value: String; Index: Integer);
+
+    function PadLeft(Count: Integer; PaddingChar: Char = #32): String; overload;
+    function PadRight(Count: Integer; PaddingChar: Char = #32): String; overload;
   end;
+
+  function Box(const X1, Y1, X2, Y2: Integer): TBox; inline;
+  function Point(const X, Y: Integer): TPoint; inline;
+
+  procedure Swap(var A, B: Byte); overload;
+  procedure Swap(var A, B: Integer); overload;
+  procedure Swap(var A, B: Extended); overload;
+  procedure Swap(var A, B: TPoint); overload;
+  procedure Swap(var A, B: Pointer); overload;
+
+  generic procedure Swap<T>(var A, B: T);
 
 implementation
 
-operator =(Left, Right: TRetData): Boolean;
-begin
-  Result := (Left.Ptr = Right.Ptr) and (Left.RowLen = Right.RowLen) and (Left.IncPtrWith = Right.IncPtrWith);
-end;
+uses
+  math, uregexpr, strutils,
+  simba.math, simba.tpa, simba.geometry;
 
-operator =(Left, Right: TRGB32): Boolean;
+{$i simba.stringhelper_body.inc}
+{$i simba.pointhelper_body.inc}
+{$i simba.boxhelper_body.inc}
+{$i simba.rectanglehelper_body.inc}
+
+class operator TRGB32.=(const Left, Right: TRGB32): Boolean;
 begin
   Result := Int32(Left) = Int32(Right);
 end;
 
-function TBoxHelper.GetWidth: Int32;
+function Point(const X, Y: Integer): TPoint;
 begin
-  Result := (Self.X2 - Self.X1) + 1;
+  Result.X := X;
+  Result.Y := Y;
 end;
 
-function TBoxHelper.GetHeight: Int32;
-begin
-  Result := (Self.Y2 - Self.Y1) + 1;
-end;
-
-function TBoxHelper.Expand(Amount: Int32): TBox;
-begin
-  Result.X1 := Self.X1 - Amount;
-  Result.Y1 := Self.Y1 - Amount;
-  Result.X2 := Self.X2 + Amount;
-  Result.Y2 := Self.Y2 + Amount;
-end;
-
-function TBoxHelper.Contains(X, Y, Width, Height: Int32): Boolean;
-begin
-  Result := (X >= Self.X1) and (Y >= Self.Y1) and (X + Width <= Self.X2) and (Y + Height <= Self.Y2);
-end;
-
-function TBoxHelper.Contains(X, Y: Int32): Boolean;
-begin
-  Result := (X >= Self.X1) and (Y >= Self.Y1) and (X <= Self.X2) and (Y <= Self.Y2);
-end;
-
-function Box(const X1, Y1, X2, Y2: Int32): TBox;
+function Box(const X1, Y1, X2, Y2: Integer): TBox;
 begin
   Result.X1 := X1;
   Result.Y1 := Y1;
   Result.X2 := X2;
   Result.Y2 := Y2;
+end;
+
+generic procedure Swap<T>(var A, B: T);
+var
+  C: T;
+begin
+  C := A;
+
+  A := B;
+  B := C;
+end;
+
+procedure Swap(var A, B: Byte);
+begin
+  specialize Swap<Byte>(A, B);
+end;
+
+procedure Swap(var A, B: Integer);
+begin
+  specialize Swap<Integer>(A, B);
+end;
+
+procedure Swap(var A, B: Extended);
+begin
+  specialize Swap<Extended>(A, B);
+end;
+
+procedure Swap(var A, B: TPoint);
+begin
+  specialize Swap<TPoint>(A, B);
+end;
+
+procedure Swap(var A, B: Pointer);
+begin
+  specialize Swap<Pointer>(A, B);
 end;
 
 end.

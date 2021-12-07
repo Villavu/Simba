@@ -48,12 +48,17 @@ begin
   SimbaScript.Client.IOManager.SendText(PString(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
+procedure _LapeSendKeysEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  SimbaScript.Client.IOManager.SendTextEx(PString(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
 procedure _LapePressKey(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   SimbaScript.Client.IOManager.PressKey(PUInt16(Params^[0])^);
 end;
 
-procedure _LapeisKeyDown(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeIsKeyDown(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   Pboolean(Result)^ := SimbaScript.Client.IOManager.isKeyDown(PUInt16(Params^[0])^);
 end;

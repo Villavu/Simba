@@ -30,7 +30,7 @@ type
     function addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType; virtual; overload;
 
     procedure addClass(Name: lpString; Parent: lpString = 'TObject'); virtual;
-    procedure addClassVar(Obj, Item, Typ: lpString; ARead: Pointer; AWrite: Pointer = nil; Arr: Boolean = False; ArrType: lpString = 'UInt32'); virtual;
+    procedure addClassVar(Obj, Item, Typ: lpString; ARead: Pointer; AWrite: Pointer = nil; Arr: Boolean = False; ArrType: lpString = 'Integer'); virtual;
 
     function HandleDirective(Sender: TLapeTokenizerBase; Directive, Argument: lpString): Boolean; reintroduce;
 
@@ -44,16 +44,16 @@ uses
   dialogs, extctrls, uitypes, graphtype, controls, comctrls, graphics,
   stdctrls, buttons, customtimer, checklst, lclclasses, spin, pipes,
   lclintf, math, regexpr, strutils, lazfileutils, fileutil, clipbrd,
-  blowfish, md5, sha1, hmac, forms, process,
+  blowfish, md5, sha1, hmac, forms, process, lazloggerbase,
 
   simba.mufasatypes, simba.script, simba.files, simba.process, simba.bitmap,
-  simba.oswindow, simba.matchtemplate, simba.tpa,
+  simba.windowhandlehelpers, simba.matchtemplate, simba.tpa,
   simba.target_exported, simba.math, simba.colormath, simba.stringutil,
-  simba.internet, simba.misc, simba.dtm, simba.dtmutil, simba.iomanager,
+  simba.internet, simba.datetime, simba.dtm, simba.iomanager,
   simba.aca, simba.dtmeditor, simba.script_communication,
   simba.imagebox, simba.client,simba.jsonparser, simba.xmlparser,
   simba.mmltimer, simba.finder, simba.target, simba.fontloader, simba.ocr,
-  simba.ocrutil, simba.matrixhelpers, simba.platformhelpers,
+  simba.ocrutil, simba.matrixhelpers, simba.nativeinterface, simba.geometry,
   simba.array_generics,
 
   simba.script_compiler_onterminate,
@@ -90,13 +90,13 @@ begin
     Param := 'const Index: ' + ArrType;
 
   if (ARead <> nil) then
-    addGlobalFunc(Format('function %s.get%s(%s): %s; constref;', [Obj, Item, Param, Typ]), ARead);
+    addGlobalFunc(Format('function %s.Get%s(%s): %s; constref;', [Obj, Item, Param, Typ]), ARead);
 
   if Arr then
     Param += '; ';
 
   if (AWrite <> nil) then
-    addGlobalFunc(Format('procedure %s.set%s(%sconst Value: %s); constref;', [Obj, Item, Param, Typ]), AWrite);
+    addGlobalFunc(Format('procedure %s.Set%s(%sconst Value: %s); constref;', [Obj, Item, Param, Typ]), AWrite);
 end;
 
 function TSimbaScript_Compiler.HandleDirective(Sender: TLapeTokenizerBase; Directive, Argument: lpString): Boolean;
@@ -108,10 +108,12 @@ procedure TSimbaScript_Compiler.Import;
 begin
   StartImporting();
 
+  FSection := 'External';
+  InitializeFFI(Self);
+
   FSection := 'System';
 
-  InitializeFFI(Self);
-  InitializePascalScriptBasics(Self, [psiTypeAlias, psiSettings, psiFunctionWrappers, psiExceptions]);
+  InitializePascalScriptBasics(Self, [psiTypeAlias, psiSettings]);
   InitializeAddOnTerminate(Self);
   InitializeWaitUntil(Self);
 
