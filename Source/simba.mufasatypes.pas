@@ -242,6 +242,7 @@ type
     function RegExprSplit(const Pattern: String): TStringArray;
     function RegExprFindAll(const Pattern: String): TRegExprMatchArray;
     function RegExprFind(const Pattern: String): TRegExprMatch;
+    function RegExprExists(const Pattern: String): Boolean;
 
     function IndexOfAny(const Values: TStringArray): Integer; overload;
     function IndexOfAny(const Values: TStringArray; Offset: Integer): Integer; overload;

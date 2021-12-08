@@ -235,13 +235,14 @@ var
   I: Integer;
 begin
   for I := 0 to High(Parameters) do
-  begin
-    if (Length(Parameters[I].Split('=')) <> 2) then
-      raise Exception.Create('TSimbaProcess.RunScript: Invalid parameter "' + Parameters[I] + '". Expected "name=value"');
+    if (Parameters[I] <> '') then
+    begin
+      if (Length(Parameters[I].Split('=')) <> 2) then
+        raise Exception.Create('TSimbaProcess.RunScript: Invalid parameter "' + Parameters[I] + '". Expected "name=value"');
 
-    while (not Parameters[I].StartsWith('--')) do
-      Parameters[I] := '-' + Parameters[I]
-  end;
+      while (not Parameters[I].StartsWith('--')) do
+        Parameters[I] := '-' + Parameters[I]
+    end;
 
   Result := Self.RunCommandInDir(Application.Location, Application.ExeName, Parameters + ['--run', Script], Output);
 end;
@@ -251,13 +252,14 @@ var
   I: Integer;
 begin
   for I := 0 to High(Parameters) do
-  begin
-    if (Length(Parameters[I].Split('=')) <> 2) then
-      raise Exception.Create('TSimbaProcess.RunScript: Invalid parameter "' + Parameters[I] + '". Expected "name=value"');
+    if (Parameters[I] <> '') then
+    begin
+      if (Length(Parameters[I].Split('=')) <> 2) then
+        raise Exception.Create('TSimbaProcess.RunScript: Invalid parameter "' + Parameters[I] + '". Expected "name=value"');
 
-    while (not Parameters[I].StartsWith('--')) do
-      Parameters[I] := '-' + Parameters[I]
-  end;
+      while (not Parameters[I].StartsWith('--')) do
+        Parameters[I] := '-' + Parameters[I]
+    end;
 
   Result := Self.RunCommandInDir(Application.Location, Application.ExeName, Parameters + ['--run', Script]);
 end;
@@ -267,13 +269,14 @@ var
   I: Integer;
 begin
   for I := 0 to High(Parameters) do
-  begin
-    if (Length(Parameters[I].Split('=')) <> 2) then
-      raise Exception.Create('TSimbaProcess.RunScript: Invalid parameter "' + Parameters[I] + '". Expected "name=value"');
+    if (Parameters[I] <> '') then
+    begin
+      if (Length(Parameters[I].Split('=')) <> 2) then
+        raise Exception.Create('TSimbaProcess.RunScript: Invalid parameter "' + Parameters[I] + '". Expected "name=value"');
 
-    while (not Parameters[I].StartsWith('--')) do
-      Parameters[I] := '-' + Parameters[I];
-  end;
+      while (not Parameters[I].StartsWith('--')) do
+        Parameters[I] := '-' + Parameters[I];
+    end;
 
   {$IFDEF UNIX}
   Result := Self.RunCommandInDir(Application.Location, GetEnvironmentVariable('SHELL'), ['-c', Application.ExeName + ' ' + String.Join(' ', Parameters) + ' --run ' + Script + ' > ' + OutputFileName]);

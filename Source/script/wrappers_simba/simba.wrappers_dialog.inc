@@ -110,8 +110,15 @@ begin
 end;
 
 procedure TACA.Execute;
+var
+  WindowHandle: TWindowHandle;
 begin
-  with TSimbaACAForm.Create(SimbaScript.Client.IOManager.GetImageTarget().Handle) do
+  if (SimbaScript.Client.IOManager.GetImageTarget() is TWindowTarget) then
+    WindowHandle := TWindowTarget(SimbaScript.Client.IOManager.GetImageTarget()).WindowHandle
+  else
+    WindowHandle := GetDesktopWindow();
+
+  with TSimbaACAForm.Create(WindowHandle) do
   begin
     OnCalculateBestColor := @CalculateBestColor;
     if (PString(Params^[0])^ <> '') then
@@ -152,8 +159,15 @@ begin
 end;
 
 procedure TDTMEditor.Execute;
+var
+  WindowHandle: TWindowHandle;
 begin
-  with TSimbaDTMEditorForm.Create(SimbaScript.Client.IOManager.GetImageTarget().Handle) do
+  if (SimbaScript.Client.IOManager.GetImageTarget() is TWindowTarget) then
+    WindowHandle := TWindowTarget(SimbaScript.Client.IOManager.GetImageTarget()).WindowHandle
+  else
+    WindowHandle := GetDesktopWindow();
+
+  with TSimbaDTMEditorForm.Create(WindowHandle) do
   begin
     OnPrintDTM := @GetResult;
     if (PString(Params^[0])^ <> '') then

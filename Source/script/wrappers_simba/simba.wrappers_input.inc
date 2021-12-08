@@ -15,32 +15,32 @@ end;
 
 procedure _LapeHoldMouse(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScript.Client.IOManager.HoldMouse(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+  SimbaScript.Client.IOManager.HoldMouse(PInteger(Params^[0])^, PInteger(Params^[1])^, PClickType(Params^[2])^);
 end;
 
 procedure _LapeReleaseMouse(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScript.Client.IOManager.ReleaseMouse(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+  SimbaScript.Client.IOManager.ReleaseMouse(PInteger(Params^[0])^, PInteger(Params^[1])^, PClickType(Params^[2])^);
 end;
 
 procedure _LapeClickMouse(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScript.Client.IOManager.ClickMouse(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+  SimbaScript.Client.IOManager.ClickMouse(PInteger(Params^[0])^, PInteger(Params^[1])^, PClickType(Params^[2])^);
 end;
 
 procedure _LapeIsMouseButtonDown(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pboolean(Result)^ := SimbaScript.Client.IOManager.IsMouseButtonDown(PInteger(Params^[0])^);
+  Pboolean(Result)^ := SimbaScript.Client.IOManager.IsMouseButtonDown(PClickType(Params^[0])^);
 end;
 
 procedure _LapeKeyDown(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScript.Client.IOManager.KeyDown(PUInt16(Params^[0])^);
+  SimbaScript.Client.IOManager.KeyDown(PInteger(Params^[0])^);
 end;
 
 procedure _LapeKeyUp(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScript.Client.IOManager.KeyUp(PUInt16(Params^[0])^);
+  SimbaScript.Client.IOManager.KeyUp(PInteger(Params^[0])^);
 end;
 
 procedure _LapeSendKeys(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -55,12 +55,12 @@ end;
 
 procedure _LapePressKey(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScript.Client.IOManager.PressKey(PUInt16(Params^[0])^);
+  SimbaScript.Client.IOManager.PressKey(PInteger(Params^[0])^);
 end;
 
 procedure _LapeIsKeyDown(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pboolean(Result)^ := SimbaScript.Client.IOManager.isKeyDown(PUInt16(Params^[0])^);
+  Pboolean(Result)^ := SimbaScript.Client.IOManager.IsKeyDown(PInteger(Params^[0])^);
 end;
 
 procedure _LapeGetKeyCode(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

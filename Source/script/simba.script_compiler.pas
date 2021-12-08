@@ -54,7 +54,7 @@ uses
   simba.imagebox, simba.client,simba.jsonparser, simba.xmlparser,
   simba.mmltimer, simba.finder, simba.target, simba.fontloader, simba.ocr,
   simba.ocrutil, simba.matrixhelpers, simba.nativeinterface, simba.geometry,
-  simba.array_generics,
+  simba.array_generics, simba.target_window,
 
   simba.script_compiler_onterminate,
   simba.script_compiler_waituntil;

@@ -110,8 +110,8 @@ var
   Value: TColorHistoryValue;
   Stream: TMemoryStream;
 begin
-  Width := 600;
-  Height := 300;
+  Width := 750;
+  Height := 400;
 
   Stream := TStringStream.Create(AnsiString(SimbaSettings.GUI.ColorPickerHistory.Value));
   while Stream.Read(Value, SizeOf(TColorHistoryValue)) = SizeOf(TColorHistoryValue) do

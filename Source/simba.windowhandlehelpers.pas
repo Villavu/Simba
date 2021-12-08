@@ -19,7 +19,7 @@ type
     function IsValid: Boolean;
     function IsActive: Boolean;
     function IsVisible: Boolean;
-    function GetPID: Int32;
+    function GetPID: Integer;
     function GetRootWindow: TWindowHandle;
     function GetClassName: String;
     function GetTitle: String;
@@ -65,7 +65,7 @@ begin
   Result := SimbaNativeInterface.IsWindowVisible(Self);
 end;
 
-function TWindowHandleHelper.GetPID: Int32;
+function TWindowHandleHelper.GetPID: Integer;
 begin
   Result := SimbaNativeInterface.GetWindowPID(Self);
 end;
@@ -162,7 +162,7 @@ var
 begin
   Windows := GetTopWindows();
   for I := 0 to High(Windows) do
-    if (Windows[I].GetTitle().RegExprFind(Title).Position > 0) then
+    if Windows[I].GetTitle().RegExprExists(Title) then
     begin
       Window := Windows[I];
 
@@ -182,7 +182,7 @@ begin
 
   Windows := GetTopWindows();
   for I := 0 to High(Windows) do
-    if (Windows[I].GetTitle().RegExprFind(Title).Position > 0) then
+    if Windows[I].GetTitle().RegExprExists(Title) then
       Result := Result + [Windows[I]];
 end;
 
@@ -197,7 +197,7 @@ begin
   begin
     ChildWindows := Windows[I].GetChildren();
     for J := 0 to High(ChildWindows) do
-      if (ChildWindows[J].GetClassName().RegExprFind(ClassName).Position > 0) then
+      if ChildWindows[J].GetClassName().RegExprExists(ClassName) then
       begin
         Child := ChildWindows[J];
 
@@ -221,7 +221,7 @@ begin
   begin
     ChildWindows := Windows[I].GetChildren();
     for J := 0 to High(ChildWindows) do
-      if (ChildWindows[J].GetClassName().RegExprFind(ClassName).Position > 0) then
+      if ChildWindows[J].GetClassName().RegExprExists(ClassName) then
         Result := Result + [ChildWindows[J]];
   end;
 end;

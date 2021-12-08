@@ -234,6 +234,8 @@ begin
     '|': Result := VK_OEM_5;
     '}': Result := VK_OEM_6;
     '~': Result := VK_OEM_3;
+    else
+      Result := VK_UNKNOWN;
   end;
 end;
 

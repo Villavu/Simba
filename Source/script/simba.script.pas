@@ -50,7 +50,6 @@ type
 
     procedure SetState(Value: TInitBool);
   public
-    property Silent: Boolean read FSilent write FSilent;
     property Terminated: Boolean read FTerminated;
     property UserTerminated: Boolean read FUserTerminated;
 
@@ -68,11 +67,9 @@ type
     property ScriptFile: String read FScriptFile write FScriptFile;
     property ScriptName: String read FScriptName write FScriptName;
 
-    procedure Info(const S: String);
     procedure Invoke(Method: TSimbaMethod; DoFree: Boolean = False);
 
     constructor Create; reintroduce;
-    destructor Destroy; override;
   end;
 
 var
@@ -89,12 +86,13 @@ uses
 
 procedure TSimbaScript.HandleHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
-  Info(Hint);
+  DebugLn(Hint);
 end;
 
 procedure TSimbaScript.HandleException(E: Exception);
 begin
-  WriteLn(E.Message);
+  if (TextRec(Output).Mode <> fmClosed) then
+    WriteLn(E.Message);
 
   if (FSimbaCommunication <> nil) then
   begin
@@ -179,18 +177,21 @@ end;
 
 procedure TSimbaScript.HandleTerminate(Sender: TObject);
 begin
+  if (FatalException is Exception) then
+    DebugLn('Note: Script thread did not exit cleanly: ', Exception(FatalException).Message);
+
   {$IFDEF WINDOWS}
   if (StartupConsoleMode <> 0) then
   begin
-    WriteLn('Press enter to exit');
+    DebugLn('Press enter to exit');
 
     ReadLn();
   end;
   {$ENDIF}
 
   Application.Terminate();
-  if (WakeMainThread <> nil) then
-    WakeMainThread(Self);
+  while not Application.Terminated do
+    Application.ProcessMessages();
 
   {$IFDEF DARWIN}
   // https://gitlab.com/freepascal.org/lazarus/lazarus/-/issues/39496
@@ -213,7 +214,8 @@ begin
 
     FClient := TClient.Create(GetPluginPath());
     FClient.MOCR.FontPath := GetFontPath();
-    FClient.IOManager.SetTarget(StrToIntDef(Target, 0));
+    if StrToInt64Def(Target, 0) <> 0 then
+      FClient.IOManager.SetTarget(StrToInt64Def(Target, 0));
 
     FCompiler := TSimbaScript_Compiler.Create(TLapeTokenizerFile.Create(FScriptFile));
     if (FScriptName <> '') then
@@ -232,8 +234,8 @@ begin
     if (FSimbaCommunicationServer = '') then
       FCompiler.addBaseDefine('SIMBAHEADLESS');
 
-    FCompiler.addGlobalVar(FScriptFile, 'ScriptFile').isConstant := True;
-    FCompiler.addGlobalVar('TClient', @FClient, 'Client');
+    PClient(FCompiler['Client'].Ptr)^ := FClient;
+    PString(FCompiler['ScriptFile'].Ptr)^ := FScriptFile;
 
     if FDebugging then
       FDebugger := TSimbaScript_Debugger.Create(Self);
@@ -242,7 +244,7 @@ begin
 
     if FCompiler.Compile() then
     begin
-      Info(Format('Succesfully compiled in %d milliseconds.', [GetTickCount64() - FStartTime]));
+      DebugLn(Format('Succesfully compiled in %d milliseconds.', [GetTickCount64() - FStartTime]));
       if FCompileOnly then
         Exit;
 
@@ -266,16 +268,23 @@ begin
       end;
 
       if (GetTickCount64() - FStartTime < 10000) then
-        Info(Format('Succesfully executed in %d milliseconds.', [GetTickCount64() - FStartTime]))
+        DebugLn(Format('Succesfully executed in %d milliseconds.', [GetTickCount64() - FStartTime]))
       else
-        Info(Format('Succesfully executed in %s.', [TimeStamp(GetTickCount64() - FStartTime)]));
+        DebugLn(Format('Succesfully executed in %s.', [TimeStamp(GetTickCount64() - FStartTime)]));
     end;
   except
     on E: Exception do
       HandleException(E);
   end;
 
-  Flush(Output);
+  if (FSimbaCommunication <> nil) then
+    FreeAndNil(FSimbaCommunication);
+  if (FDebugger <> nil) then
+    FreeAndNil(FDebugger);
+  if (FClient <> nil) then
+    FreeAndNil(FClient);
+  if (FCompiler <> nil) then
+    FreeAndNil(FCompiler);
 end;
 
 procedure TSimbaScript.HandleStateThread;
@@ -302,15 +311,6 @@ begin
     FSimbaCommunication.Invoke(TSimbaMethod_ScriptStateChanged.Create(Ord(FState)));
 end;
 
-procedure TSimbaScript.Info(const S: String);
-begin
-  if FSilent then
-    Exit;
-
-  WriteLn(S);
-  Flush(Output);
-end;
-
 procedure TSimbaScript.Invoke(Method: TSimbaMethod; DoFree: Boolean);
 begin
   try
@@ -332,23 +332,6 @@ begin
   OnTerminate := @HandleTerminate;
 
   FState := bTrue;
-end;
-
-destructor TSimbaScript.Destroy;
-begin
-  try
-    if (FSimbaCommunication <> nil) then
-      FreeAndNil(FSimbaCommunication);
-    if (FDebugger <> nil) then
-      FreeAndNil(FDebugger);
-    if (FClient <> nil) then
-      FreeAndNil(FClient);
-    if (FCompiler <> nil) then
-      FreeAndNil(FCompiler);
-  except
-  end;
-
-  inherited Destroy();
 end;
 
 end.

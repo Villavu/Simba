@@ -82,14 +82,12 @@ TClient.Create
   constructor TClient.Create(const plugin_dir: string = ''; const UseIOManager : TIOManager = nil);
 
 *)
-
-// Possibly pass arguments to a default window.
 constructor TClient.Create(const plugin_dir: string = ''; const UseIOManager : TIOManager = nil);
 begin
   inherited Create;
 
   if UseIOManager = nil then
-    IOManager := TIOManager.Create(plugin_dir)
+    IOManager := TIOManager.Create()
   else
     IOManager := UseIOManager;
 
@@ -105,7 +103,6 @@ begin
 end;
 
 (*
-
 TClient.Destroy
 ~~~~~~~~~~~~~~~
 
@@ -114,7 +111,6 @@ TClient.Destroy
     destructor TClient.Destroy;
 
 *)
-
 destructor TClient.Destroy;
 begin
 

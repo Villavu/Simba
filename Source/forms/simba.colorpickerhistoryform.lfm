@@ -1,7 +1,7 @@
 object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
-  Left = 1225
+  Left = 978
   Height = 430
-  Top = 540
+  Top = 578
   Width = 830
   ActiveControl = ColorListBox
   Caption = 'Color Picker History'
@@ -10,7 +10,7 @@ object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
   DesignTimePPI = 120
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '2.2.0.2'
+  LCLVersion = '2.0.12.0'
   object ColorListBox: TColorListBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
@@ -21,7 +21,7 @@ object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
     Top = 0
     Width = 534
     ColorRectWidth = 18
-    Selected = -1
+    Selected = clForeground
     Style = []
     Align = alCustom
     Anchors = [akTop, akLeft, akRight, akBottom]
