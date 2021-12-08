@@ -24,12 +24,6 @@ addGlobalFunc('procedure TTarget.HoldKey(key: integer); constref', @_LapeTarget_
 addGlobalFunc('procedure TTarget.ReleaseKey(key: integer); constref', @_LapeTarget_ReleaseKey);
 addGlobalFunc('function TTarget.IsKeyHeld(key: integer): boolean; constref', @_LapeTarget_IsKeyHeld);
 addGlobalFunc('function TTarget.GetKeyCode(C : char): integer; constref', @_LapeTarget_GetKeyCode);
-addGlobalFunc('function TTarget.GetHandle: PtrUInt; constref', @_LapeTarget_GetHandle);
-addGlobalFunc('procedure TTarget.SetHandle(Value: PtrUInt); constref', @_LapeTarget_SetHandle);
-addGlobalFunc('procedure TTarget.AddHandlerInvalidTarget(Handler: TNotifyEvent); constref', @_LapeTarget_AddHandlerInvalidTarget);
-addGlobalFunc('procedure TTarget.RemoveHandlerInvalidTarget(Handler: TNotifyEvent); constref', @_LapeTarget_RemoveHandlerInvalidTarget);
-addGlobalFunc('procedure TTarget.SetAutoFocus(Value: Boolean); constref', @_LapeTarget_SetAutoFocus);
-addGlobalFunc('function TTarget.GetAutoFocus: Boolean; constref', @_LapeTarget_GetAutoFocus);
 addGlobalFunc('procedure TTarget.Init()', @_LapeTarget_Init);
 // addGlobalFunc('procedure TTarget.Free; constref', @_LapeTarget_Free);
 

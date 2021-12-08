@@ -17,18 +17,21 @@ unit simba.iomanager;
 interface
 
 uses
-  classes, sysutils,
+  classes, sysutils, lazmethodlist,
   simba.target, simba.target_exported, simba.bitmap, simba.mufasatypes;
 
 type
   PIOManager = ^TIOManager;
-  TIOManager = class(TObject)
+  TIOManager = class
   protected
+    FInvalidTargetHandlers: TMethodList;
     FKeyMouse: TTarget;
     FImage: TTarget;
     FFrozen: TTarget;
-    FPluginPaths: array of String;
     FTargetArray: TTargetArray;
+    FAutoActivate: Boolean;
+
+    procedure ValidateTarget;
 
     function AddTarget(Target: TTarget): Integer;
 
@@ -37,9 +40,6 @@ type
 
     function GetTarget(Index: Integer): TTarget;
     function GetTargetIndex(Target: TTarget): Integer;
-
-    function GetAutoFocus: Boolean;
-    procedure SetAutoFocus(Value: Boolean);
   public
     function SetTarget(Data: PRGB32; Size: TPoint): Integer; overload;
     function SetTarget(Bitmap: TMufasaBitmap): Integer; overload;
@@ -68,21 +68,17 @@ type
     procedure GetMousePos(var X, Y: Integer);
     procedure MoveMouse(X, Y: Integer);
     procedure ScrollMouse(X, Y: Integer; Lines: Integer);
-    procedure HoldMouse(X, Y: Integer; Button: TClickType); overload;
-    procedure HoldMouse(X, Y, Button: Integer); overload;
-    procedure ReleaseMouse(X, Y: Integer; Button: TClickType); overload;
-    procedure ReleaseMouse(X, Y, Button: Integer); overload;
-    procedure ClickMouse(X, Y: Integer; Button: TClickType); overload;
-    procedure ClickMouse(X, Y, Button: Integer); overload;
-    function IsMouseButtonDown(Button: TClickType): Boolean; overload;
-    function IsMouseButtonDown(Button: Integer): Boolean; overload;
+    procedure HoldMouse(X, Y: Integer; Button: TClickType);
+    procedure ReleaseMouse(X, Y: Integer; Button: TClickType);
+    procedure ClickMouse(X, Y: Integer; Button: TClickType);
+    function IsMouseButtonDown(Button: TClickType): Boolean;
 
-    procedure KeyUp(Key: Word);
-    procedure KeyDown(Key: Word);
-    procedure PressKey(Key: Word);
+    procedure KeyUp(Key: Integer);
+    procedure KeyDown(Key: Integer);
+    procedure PressKey(Key: Integer);
     procedure SendText(Text: String; KeyWait, KeyModWait: Integer);
     procedure SendTextEx(Text: String; MinKeyWait, MaxKeyWait: Integer);
-    function IsKeyDown(Key: Word): Boolean;
+    function IsKeyDown(Key: Integer): Boolean;
     function GetKeyCode(Character: Char): Integer;
 
     function GetImageTarget: TTarget;
@@ -96,15 +92,14 @@ type
     procedure SetKeyMouseTarget(Index: Integer);
     procedure FreeTarget(Index: Integer);
 
-    function SetImageTargetEx(Window: TWindowHandle): TTarget;
-    function SetKeyMouseTargetEx(Window: TWindowHandle): TTarget;
-
     function SetDesktop: Integer;
 
-    property AutoFocus: Boolean read GetAutoFocus write SetAutoFocus;
+    function AddHandlerInvalidTarget(Handler: TNotifyEvent): TNotifyEvent;
+    procedure RemoveHandlerInvalidTarget(Handler: TNotifyEvent);
+
+    property AutoActivate: Boolean read FAutoActivate write FAutoActivate;
 
     constructor Create;
-    constructor Create(PluginPath: String);
     destructor Destroy; override;
   end;
 
@@ -119,18 +114,9 @@ constructor TIOManager.Create;
 begin
   inherited Create();
 
+  FInvalidTargetHandlers := TMethodList.Create();
+
   SetDesktop();
-end;
-
-constructor TIOManager.Create(PluginPath: String);
-begin
-  Create();
-
-  if PluginPath <> '' then
-  begin
-    SetLength(FPluginPaths, Length(FPluginPaths) + 1);
-    FPluginPaths[High(FPluginPaths)] := PluginPath;
-  end;
 end;
 
 destructor TIOManager.Destroy;
@@ -149,6 +135,9 @@ begin
   if (Leaks > 5) then
     DebugLn('Warning: You might be leaking targets! Use FreeTarget');
 
+  if (FInvalidTargetHandlers <> nil) then
+    FreeAndNil(FInvalidTargetHandlers);
+
   inherited Destroy();
 end;
 
@@ -165,20 +154,6 @@ begin
   FreeAndNil(FTargetArray[Index]);
 end;
 
-function TIOManager.SetImageTargetEx(Window: TWindowHandle): TTarget;
-begin
-  Result := GetTarget(AddTarget(TWindowTarget.Create(Window)));
-
-  FImage := Result;
-end;
-
-function TIOManager.SetKeyMouseTargetEx(Window: TWindowHandle): TTarget;
-begin
-  Result := GetTarget(AddTarget(TWindowTarget.Create(Window)));
-
-  FKeyMouse := Result;
-end;
-
 function TIOManager.SetImageTarget(Target: TTarget): Integer;
 begin
   if IsFrozen then
@@ -186,6 +161,53 @@ begin
 
   Result := GetTargetIndex(Target);
   FImage := Target;
+end;
+
+procedure TIOManager.ValidateTarget;
+var
+  Attempt: Integer;
+begin
+  if (FImage <> nil) and (not FImage.TargetValid) then
+  begin
+    if (FInvalidTargetHandlers.Count > 0) then
+    begin
+      Attempt := 1;
+      for Attempt := 1 to 5 do
+      begin
+        FInvalidTargetHandlers.CallNotifyEvents(Self);
+        if FImage.TargetValid() then
+          Break;
+      end;
+    end;
+
+    if (not FImage.TargetValid) then
+    begin
+      if (FImage is TWindowTarget) then
+        raise Exception.CreateFmt('Invalid window target: %d', [TWindowTarget(FKeyMouse).WindowHandle])
+      else
+        raise Exception.Create('Invalid image target');
+    end;
+  end;
+
+  if FAutoActivate then
+  begin
+    if (FImage is TWindowTarget) then
+      FImage.ActivateClient();
+    if (FKeyMouse is TWindowTarget) then
+      FKeyMouse.ActivateClient();
+  end;
+end;
+
+function TIOManager.AddHandlerInvalidTarget(Handler: TNotifyEvent): TNotifyEvent;
+begin
+  Result := Handler;
+
+  FInvalidTargetHandlers.Add(TMethod(Result));
+end;
+
+procedure TIOManager.RemoveHandlerInvalidTarget(Handler: TNotifyEvent);
+begin
+  FInvalidTargetHandlers.Remove(TMethod(Handler));
 end;
 
 function TIOManager.AddTarget(Target: TTarget): Integer;
@@ -228,17 +250,6 @@ begin
     end;
 
   raise Exception.CreateFmt('TIOManager.GetTargetIndex: Invalid target "%s"', [HexStr(Target)]);
-end;
-
-function TIOManager.GetAutoFocus: Boolean;
-begin
-  Result := (FKeyMouse <> nil) and FKeyMouse.AutoFocus;
-end;
-
-procedure TIOManager.SetAutoFocus(Value: Boolean);
-begin
-  if (FKeyMouse <> nil) then
-    FKeyMouse.AutoFocus := Value;
 end;
 
 function TIOManager.GetImageTarget: TTarget;
@@ -298,16 +309,22 @@ end;
 
 function TIOManager.GetColor(X, Y: Integer): Integer;
 begin
+  ValidateTarget();
+
   Result := FImage.GetColor(X, Y);
 end;
 
 function TIOManager.CopyData(X, Y, Width, Height: Integer): PRGB32;
 begin
+  ValidateTarget();
+
   Result := FImage.CopyData(X, Y, Width, Height);
 end;
 
 function TIOManager.ReturnData(X, Y, Width, Height: Integer): TRetData;
 begin
+  ValidateTarget();
+
   Result := FImage.ReturnData(X, Y, Width, Height);
 end;
 
@@ -328,7 +345,7 @@ end;
 
 function TIOManager.SetTarget(Plugin, Data: String): Integer;
 begin
-  if not FindPlugin(Plugin, FPluginPaths) then
+  if not FindPlugin(Plugin, [GetSimbaPath(), GetPluginPath()]) then
     raise Exception.CreateFmt('TIOManager.SetTarget: EIOS plugin not found "%s"', [Plugin]);
 
   Result := AddTarget(TEIOS_Target.Create(Plugin, Data));
@@ -372,25 +389,29 @@ end;
 
 function TIOManager.TargetValid: Boolean;
 begin
-  Result := False;
-  if (FKeyMouse <> nil) and (FImage <> nil) then
-    Result := FKeyMouse.TargetValid() and FImage.TargetValid();
+  Result := FKeyMouse.TargetValid() and FImage.TargetValid();
 end;
 
 procedure TIOManager.GetDimensions(out Width, Height: Integer);
 begin
+  ValidateTarget();
+
   FImage.GetTargetDimensions(Width, Height)
 end;
 
 procedure TIOManager.GetPosition(out Left, Top: Integer);
 begin
+  ValidateTarget();
+
   FImage.GetTargetPosition(Left, Top);
 end;
 
 procedure TIOManager.ActivateClient;
 begin
+  ValidateTarget();
+
   FKeyMouse.ActivateClient();
-  {not sure if FImage needs activation or not, if its a native window FKeyMouse == FImage so it should be good.}
+  FImage.ActivateClient();
 end;
 
 function TIOManager.MouseSetClientArea(X1, Y1, X2, Y2: Integer): Boolean;
@@ -415,37 +436,37 @@ end;
 
 procedure TIOManager.GetMousePos(var X, Y: Integer);
 begin
+  ValidateTarget();
+
   FKeyMouse.GetMousePosition(X, Y)
 end;
 
 procedure TIOManager.MoveMouse(X, Y: Integer);
 begin
+  ValidateTarget();
+
   FKeyMouse.MoveMouse(X, Y);
 end;
 
 procedure TIOManager.ScrollMouse(X, Y: Integer; Lines: Integer);
 begin
+  ValidateTarget();
+
   FKeyMouse.ScrollMouse(X, Y,lines);
 end;
 
 procedure TIOManager.HoldMouse(X, Y: Integer; Button: TClickType);
 begin
-  FKeyMouse.HoldMouse(X, Y, Button);
-end;
+  ValidateTarget();
 
-procedure TIOManager.HoldMouse(X, Y, Button: Integer);
-begin
-  FKeyMouse.HoldMouse(X, Y, TClickType(Button));
+  FKeyMouse.HoldMouse(X, Y, Button);
 end;
 
 procedure TIOManager.ReleaseMouse(X, Y: Integer; Button: TClickType);
 begin
-  FKeyMouse.ReleaseMouse(X, Y, Button);
-end;
+  ValidateTarget();
 
-procedure TIOManager.ReleaseMouse(X, Y, Button: Integer);
-begin
-  FKeyMouse.ReleaseMouse(X, Y, TClickType(Button));
+  FKeyMouse.ReleaseMouse(X, Y, Button);
 end;
 
 procedure TIOManager.ClickMouse(X, Y: Integer; Button: TClickType);
@@ -455,34 +476,28 @@ begin
   ReleaseMouse(X, Y, Button);
 end;
 
-procedure TIOManager.ClickMouse(X, Y, Button: Integer);
-begin
-  HoldMouse(X, Y, TClickType(Button));
-  //BenLand100 note: probably should wait here
-  ReleaseMouse(X, Y, TClickType(Button));
-end;
-
 function TIOManager.IsMouseButtonDown(Button: TClickType): Boolean;
 begin
+  ValidateTarget();
+
   Result := FKeyMouse.IsMouseButtonHeld(Button);
 end;
 
-function TIOManager.IsMouseButtonDown(Button: Integer): Boolean;
+procedure TIOManager.KeyUp(Key: Integer);
 begin
-  Result := FKeyMouse.IsMouseButtonHeld(TClickType(Button));
+  ValidateTarget();
+
+  FKeyMouse.ReleaseKey(Key);
 end;
 
-procedure TIOManager.KeyUp(Key: Word);
+procedure TIOManager.KeyDown(Key: Integer);
 begin
-  FKeyMouse.ReleaseKey(Key)
+  ValidateTarget();
+
+  FKeyMouse.HoldKey(Key);
 end;
 
-procedure TIOManager.KeyDown(Key: Word);
-begin
-  FKeyMouse.HoldKey(Key)
-end;
-
-procedure TIOManager.PressKey(Key: Word);
+procedure TIOManager.PressKey(Key: Integer);
 begin
   KeyDown(Key);
   KeyUp(Key);
@@ -490,16 +505,22 @@ end;
 
 procedure TIOManager.SendText(Text: String; KeyWait, KeyModWait: Integer);
 begin
+  ValidateTarget();
+
   FKeyMouse.SendString(Text, KeyWait, KeyModWait);
 end;
 
 procedure TIOManager.SendTextEx(Text: String; MinKeyWait, MaxKeyWait: Integer);
 begin
+  ValidateTarget();
+
   FKeyMouse.SendStringEx(Text, MinKeyWait, MaxKeyWait);
 end;
 
-function TIOManager.IsKeyDown(Key: Word): Boolean;
+function TIOManager.IsKeyDown(Key: Integer): Boolean;
 begin
+  ValidateTarget();
+
   Result := FKeyMouse.IsKeyHeld(Key);
 end;
 

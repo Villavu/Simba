@@ -62,7 +62,11 @@ initialization
   {$ENDIF}
 
   Randomize();
+
+  FormatSettings.ThousandSeparator := ',';
   FormatSettings.DecimalSeparator := '.';
+  FormatSettings.DateSeparator := '-';
+  FormatSettings.TimeSeparator := ':';
 
 finalization
   {$IFDEF DARWIN}

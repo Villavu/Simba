@@ -3,16 +3,16 @@ FSection := 'Input';
 addGlobalFunc('procedure MoveMouse(X, Y: Integer)', @_LapeMoveMouse);
 addGlobalFunc('procedure ScrollMouse(X, Y: Integer; Clicks: Integer)', @_LapeScrollMouse);
 addGlobalFunc('procedure GetMousePos(var X, Y: Integer)', @_LapeGetMousePos);
-addGlobalFunc('procedure HoldMouse(X, Y: Integer; clickType: Integer)', @_LapeHoldMouse);
-addGlobalFunc('procedure ReleaseMouse(X, Y: Integer; clickType: Integer)', @_LapeReleaseMouse);
-addGlobalFunc('procedure ClickMouse(X, Y: Integer; clickType: Integer)', @_LapeClickMouse);
+addGlobalFunc('procedure HoldMouse(X, Y: Integer; ClickType: Integer)', @_LapeHoldMouse);
+addGlobalFunc('procedure ReleaseMouse(X, Y: Integer; ClickType: Integer)', @_LapeReleaseMouse);
+addGlobalFunc('procedure ClickMouse(X, Y: Integer; ClickType: Integer)', @_LapeClickMouse);
 addGlobalFunc('function IsMouseButtonDown(Button: Integer): boolean', @_LapeIsMouseButtonDown);
-addGlobalFunc('procedure KeyDown(Key: UInt16)', @_LapeKeyDown);
-addGlobalFunc('procedure KeyUp(Key: UInt16)', @_LapeKeyUp);
+addGlobalFunc('procedure KeyDown(Key: Integer)', @_LapeKeyDown);
+addGlobalFunc('procedure KeyUp(Key: Integer)', @_LapeKeyUp);
 addGlobalFunc('procedure SendKeys(const S: String; KeyWait, KeyModWait: Integer)', @_LapeSendKeys);
 addGlobalFunc('procedure SendKeysEx(const S: String; MinKeyWait, MaxKeyWait: Integer)', @_LapeSendKeysEx);
-addGlobalFunc('procedure PressKey(Key: UInt16)', @_LapePressKey);
-addGlobalFunc('function IsKeyDown(Key: UInt16): Boolean', @_LapeIsKeyDown);
+addGlobalFunc('procedure PressKey(Key: Integer)', @_LapePressKey);
+addGlobalFunc('function IsKeyDown(Key: Integer): Boolean', @_LapeIsKeyDown);
 addGlobalFunc('function GetKeyCode(C: Char): Integer', @_LapeGetKeyCode);
 
 addGlobalVar(Ord(MOUSE_RIGHT),   'MOUSE_RIGHT').isConstant := True;
@@ -20,6 +20,8 @@ addGlobalVar(Ord(MOUSE_LEFT),    'MOUSE_LEFT').isConstant := True;
 addGlobalVar(Ord(MOUSE_MIDDLE),  'MOUSE_MIDDLE').isConstant := True;
 addGlobalVar(Ord(MOUSE_EXTRA_1), 'MOUSE_EXTRA_1').isConstant := True;
 addGlobalVar(Ord(MOUSE_EXTRA_2), 'MOUSE_EXTRA_2').isConstant := True;
+
+FSection := 'Virtual Keys';
 
 addGlobalVar(0, 'VK_UNKNOWN').isConstant := True;
 addGlobalVar(1, 'VK_LBUTTON').isConstant := True;

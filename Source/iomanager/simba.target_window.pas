@@ -17,14 +17,7 @@ type
   TWindowTarget = class(TTarget)
   protected
     FWindowHandle: TWindowHandle;
-    FAutoFocus: Boolean;
     FBuffer: PRGB32;
-
-    function GetHandle: PtrUInt; override;
-    procedure SetHandle(Value: PtrUInt); override;
-
-    function GetAutoFocus: Boolean; override;
-    procedure SetAutoFocus(Value: Boolean); override;
 
     procedure GetTargetBounds(out Bounds: TBox); override;
   public
@@ -48,34 +41,16 @@ type
     function IsKeyHeld(Key: Integer): Boolean; override;
     function GetKeyCode(Key: Char): Integer; override;
 
-    constructor Create(WindowHandle: TWindowHandle); reintroduce;
+    property WindowHandle: TWindowHandle read FWindowHandle;
+
+    constructor Create(Handle: TWindowHandle); reintroduce;
     destructor Destroy; override;
   end;
 
 implementation
 
 uses
-  simba.math, simba.nativeinterface;
-
-function TWindowTarget.GetHandle: PtrUInt;
-begin
-  Result := FWindowHandle;
-end;
-
-procedure TWindowTarget.SetHandle(Value: PtrUInt);
-begin
-  FWindowHandle := Value;
-end;
-
-function TWindowTarget.GetAutoFocus: Boolean;
-begin
-  Result := FAutoFocus;
-end;
-
-procedure TWindowTarget.SetAutoFocus(Value: Boolean);
-begin
-  FAutoFocus := Value;
-end;
+  simba.nativeinterface;
 
 function TWindowTarget.TargetValid: Boolean;
 begin
@@ -88,18 +63,8 @@ begin
 end;
 
 procedure TWindowTarget.GetTargetBounds(out Bounds: TBox);
-var
-  Attempts: Integer;
 begin
-  for Attempts := 1 to 5 do
-  begin
-    if SimbaNativeInterface.GetWindowBounds(FWindowHandle, Bounds) then
-      Exit;
-
-    Self.InvalidTarget();
-  end;
-
-  raise Exception.CreateFmt('Invalid window handle: %d', [FWindowHandle]);
+  SimbaNativeInterface.GetWindowBounds(FWindowHandle, Bounds);
 end;
 
 function TWindowTarget.ReturnData(X, Y, Width, Height: Integer): TRetData;
@@ -107,9 +72,6 @@ var
   Bounds: TBox;
 begin
   Result := Default(TRetData);
-
-  if FAutoFocus then
-    ActivateClient();
 
   if ValidateImageCapture(X, Y, Width, Height, Bounds) and SimbaNativeInterface.GetWindowImage(FWindowHandle, X, Y, Width, Height, FBuffer) then
   begin
@@ -124,9 +86,6 @@ var
   Bounds: TBox;
 begin
   Result := nil;
-
-  if FAutoFocus then
-    ActivateClient();
 
   if ValidateImageCapture(X, Y, Width, Height, Bounds) then
     SimbaNativeInterface.GetWindowImage(FWindowHandle, X, Y, Width, Height, Result);
@@ -150,9 +109,6 @@ end;
 
 procedure TWindowTarget.MoveMouse(X, Y: Integer);
 begin
-  if FAutoFocus then
-    ActivateClient();
-
   MouseClientAreaOffset(X, Y);
 
   SimbaNativeInterface.SetMousePosition(FWindowHandle, TPoint.Create(X, Y));
@@ -186,33 +142,21 @@ end;
 
 procedure TWindowTarget.SendString(Text: String; KeyWait, KeyModWait: Integer);
 begin
-  if FAutoFocus then
-    ActivateClient();
-
   SimbaNativeInterface.SendString(Text, KeyWait, KeyModWait);
 end;
 
 procedure TWindowTarget.SendStringEx(Text: String; MinKeyWait, MaxKeyWait: Integer);
 begin
-  if FAutoFocus then
-    ActivateClient();
-
   SimbaNativeInterface.SendStringEx(Text, MinKeyWait, MaxKeyWait);
 end;
 
 procedure TWindowTarget.HoldKey(Key: Integer);
 begin
-  if FAutoFocus then
-    ActivateClient();
-
   SimbaNativeInterface.HoldKey(Key);
 end;
 
 procedure TWindowTarget.ReleaseKey(Key: Integer);
 begin
-  if FAutoFocus then
-    ActivateClient();
-
   SimbaNativeInterface.ReleaseKey(Key);
 end;
 
@@ -226,11 +170,11 @@ begin
   Result := SimbaNativeInterface.GetVirtualKeyCode(Key);
 end;
 
-constructor TWindowTarget.Create(WindowHandle: TWindowHandle);
+constructor TWindowTarget.Create(Handle: TWindowHandle);
 begin
   inherited Create();
 
-  Handle := WindowHandle;
+  FWindowHandle := Handle;
 end;
 
 destructor TWindowTarget.Destroy;

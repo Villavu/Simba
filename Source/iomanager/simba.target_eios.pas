@@ -53,25 +53,25 @@ type
     RequestTarget: function(Data: PChar): Pointer; stdcall;
     ReleaseTarget: procedure(Target: Pointer); stdcall;
 
-    GetTargetDimensions: procedure(Target: Pointer; var Width, Height: Int32); stdcall;
-    GetTargetPosition: procedure(Target: Pointer; var Left, Top: Int32); stdcall;
+    GetTargetDimensions: procedure(Target: Pointer; var Width, Height: Integer); stdcall;
+    GetTargetPosition: procedure(Target: Pointer; var Left, Top: Integer); stdcall;
     GetImageBuffer: function(Target: Pointer): PRGB32; stdcall;
     UpdateImageBuffer: procedure(Target: Pointer); stdcall;
     UpdateImageBufferEx: function(Target: Pointer): PRGB32; stdcall;
-    UpdateImageBufferBounds: procedure(Target: Pointer; X1, Y1, X2, Y2: Int32); stdcall;
+    UpdateImageBufferBounds: procedure(Target: Pointer; X1, Y1, X2, Y2: Integer); stdcall;
 
-    GetMousePosition: procedure(Target: Pointer; var X, Y: Int32); stdcall;
-    MoveMouse: procedure(Target: Pointer; X, Y: Int32); stdcall;
-    ScrollMouse: procedure(Target : pointer; X, Y: Int32; Lines: Int32); stdcall;
-    HoldMouse: procedure(Target: Pointer; X, Y: Int32; Button: Int32); stdcall;
-    ReleaseMouse: procedure(Target: Pointer; X, Y: Int32; Button: Int32); stdcall;
-    IsMouseButtonHeld: function(Target: Pointer; Button: Int32): Boolean; stdcall;
+    GetMousePosition: procedure(Target: Pointer; var X, Y: Integer); stdcall;
+    MoveMouse: procedure(Target: Pointer; X, Y: Integer); stdcall;
+    ScrollMouse: procedure(Target: pointer; X, Y: Integer; Lines: Integer); stdcall;
+    HoldMouse: procedure(Target: Pointer; X, Y: Integer; Button: Integer); stdcall;
+    ReleaseMouse: procedure(Target: Pointer; X, Y: Integer; Button: Integer); stdcall;
+    IsMouseButtonHeld: function(Target: Pointer; Button: Integer): Boolean; stdcall;
 
-    SendString: procedure(Target: Pointer; str: PChar; KeyWait, KeyModWait: Int32); stdcall;
-    HoldKey: procedure(Target: Pointer; Key: Int32); stdcall;
-    ReleaseKey: procedure(Target: Pointer; Key: Int32); stdcall;
-    IsKeyHeld: function(Target: Pointer; Key: Int32): Boolean; stdcall;
-    GetKeyCode: function(Target: Pointer; Character: Char): Int32; stdcall;
+    SendString: procedure(Target: Pointer; str: PChar; KeyWait, KeyModWait: Integer); stdcall;
+    HoldKey: procedure(Target: Pointer; Key: Integer); stdcall;
+    ReleaseKey: procedure(Target: Pointer; Key: Integer); stdcall;
+    IsKeyHeld: function(Target: Pointer; Key: Integer): Boolean; stdcall;
+    GetKeyCode: function(Target: Pointer; Character: Char): Integer; stdcall;
   end;
 
   PEIOS_Target = ^TEIOS_Target;
@@ -87,25 +87,28 @@ type
     constructor Create(Plugin: String; Data: String);
     destructor Destroy; override;
 
-    function ReturnData(X, Y, Width, Height: Int32): TRetData; override;
-    function CopyData(X, Y, Width, Height: Int32): PRGB32; override;
+    function ReturnData(X, Y, Width, Height: Integer): TRetData; override;
+    function CopyData(X, Y, Width, Height: Integer): PRGB32; override;
 
-    procedure GetMousePosition(out X, Y: Int32); override;
-    procedure MoveMouse(X, Y: Int32); override;
-    procedure ScrollMouse(X, Y: Int32; Lines: Int32); override;
-    procedure HoldMouse(X, Y: Int32; Button: TClickType); override;
-    procedure ReleaseMouse(X, Y: Int32; Button: TClickType); override;
+    procedure GetMousePosition(out X, Y: Integer); override;
+    procedure MoveMouse(X, Y: Integer); override;
+    procedure ScrollMouse(X, Y: Integer; Lines: Integer); override;
+    procedure HoldMouse(X, Y: Integer; Button: TClickType); override;
+    procedure ReleaseMouse(X, Y: Integer; Button: TClickType); override;
     function IsMouseButtonHeld(Button: TClickType) : Boolean;override;
 
-    procedure SendString(Text: String; KeyWait, KeyModWait: Int32); override;
-    procedure HoldKey(Key: Int32); override;
-    procedure ReleaseKey(Key: Int32); override;
-    function IsKeyHeld(Key: Int32): Boolean; override;
-    function GetKeyCode(Character: Char) : Int32; override;
-    function GetHandle: PtrUInt; override;
+    procedure SendString(Text: String; KeyWait, KeyModWait: Integer); override;
+    procedure SendStringEx(Text: String; MinKeyWait, MaxKeyWait: Integer); override;
+    procedure HoldKey(Key: Integer); override;
+    procedure ReleaseKey(Key: Integer); override;
+    function IsKeyHeld(Key: Integer): Boolean; override;
+    function GetKeyCode(Character: Char) : Integer; override;
   end;
 
 implementation
+
+uses
+  simba.math;
 
 procedure TEIOS_Target.GetTargetBounds(out Bounds: TBox);
 begin
@@ -186,7 +189,7 @@ begin
   inherited Destroy();
 end;
 
-function TEIOS_Target.ReturnData(X, Y, Width, Height: Int32): TRetData;
+function TEIOS_Target.ReturnData(X, Y, Width, Height: Integer): TRetData;
 var
   Bounds: TBox;
 begin
@@ -216,10 +219,10 @@ begin
     Result := NullReturnData;
 end;
 
-function TEIOS_Target.CopyData(X, Y, Width, Height: Int32): PRGB32;
+function TEIOS_Target.CopyData(X, Y, Width, Height: Integer): PRGB32;
 var
   Bounds: TBox;
-  Loop: Int32;
+  Loop: Integer;
 begin
   GetTargetBounds(Bounds);
 
@@ -247,7 +250,7 @@ begin
     Result := nil;
 end;
 
-procedure TEIOS_Target.GetMousePosition(out X, Y: Int32);
+procedure TEIOS_Target.GetMousePosition(out X, Y: Integer);
 begin
   if Pointer(FClient.GetMousePosition) <> nil then
   begin
@@ -259,7 +262,7 @@ begin
     inherited GetMousePosition(X, Y);
 end;
 
-procedure TEIOS_Target.MoveMouse(X, Y: Int32);
+procedure TEIOS_Target.MoveMouse(X, Y: Integer);
 begin
   MouseClientAreaOffset(X, Y);
 
@@ -269,7 +272,7 @@ begin
     inherited MoveMouse(X, Y);
 end;
 
-procedure TEIOS_Target.ScrollMouse(X, Y: Int32; Lines: Int32);
+procedure TEIOS_Target.ScrollMouse(X, Y: Integer; Lines: Integer);
 begin
   MouseClientAreaOffset(X, Y);
 
@@ -279,7 +282,7 @@ begin
     inherited ScrollMouse(X, Y, Lines);
 end;
 
-procedure TEIOS_Target.HoldMouse(X, Y: Int32; Button: TClickType);
+procedure TEIOS_Target.HoldMouse(X, Y: Integer; Button: TClickType);
 begin
   MouseClientAreaOffset(X, Y);
 
@@ -294,7 +297,7 @@ begin
     inherited HoldMouse(X, Y, Button);
 end;
 
-procedure TEIOS_Target.ReleaseMouse(X, Y: Int32; Button: TClickType);
+procedure TEIOS_Target.ReleaseMouse(X, Y: Integer; Button: TClickType);
 begin
   MouseClientAreaOffset(X, Y);
 
@@ -322,7 +325,7 @@ begin
     Result := inherited IsMouseButtonHeld(Button);
 end;
 
-procedure TEIOS_Target.SendString(Text: String; KeyWait, KeyModWait: Int32);
+procedure TEIOS_Target.SendString(Text: String; KeyWait, KeyModWait: Integer);
 begin
   if Pointer(FClient.SendString) <> nil then
     FClient.SendString(FTarget, PChar(Text), KeyWait, KeyModWait)
@@ -330,7 +333,21 @@ begin
     inherited SendString(Text, KeyWait, KeyModWait);
 end;
 
-procedure TEIOS_Target.HoldKey(Key: Int32);
+procedure TEIOS_Target.SendStringEx(Text: String; MinKeyWait, MaxKeyWait: Integer);
+
+  function GetRandomWait: Integer;
+  begin
+    Result := Trunc(TruncatedGauss(MinKeyWait, MaxKeyWait));
+  end;
+
+var
+  Character: Char;
+begin
+  for Character in Text do
+    SendString(Character, GetRandomWait(), GetRandomWait());
+end;
+
+procedure TEIOS_Target.HoldKey(Key: Integer);
 begin
   if Pointer(FClient.HoldKey) <> nil then
     FClient.HoldKey(FTarget, Key)
@@ -338,7 +355,7 @@ begin
     inherited HoldKey(Key);
 end;
 
-procedure TEIOS_Target.ReleaseKey(Key: Int32);
+procedure TEIOS_Target.ReleaseKey(Key: Integer);
 begin
   if Pointer(FClient.ReleaseKey) <> nil then
     FClient.ReleaseKey(FTarget, Key)
@@ -346,7 +363,7 @@ begin
     inherited ReleaseKey(Key);
 end;
 
-function TEIOS_Target.IsKeyHeld(Key: Int32): Boolean;
+function TEIOS_Target.IsKeyHeld(Key: Integer): Boolean;
 begin
   if Pointer(FClient.IsKeyHeld) <> nil then
     Result := FClient.IsKeyHeld(FTarget, Key)
@@ -354,17 +371,12 @@ begin
     Result := inherited IsKeyHeld(Key);
 end;
 
-function TEIOS_Target.GetKeyCode(Character: Char): Int32;
+function TEIOS_Target.GetKeyCode(Character: Char): Integer;
 begin
   if Pointer(FClient.GetKeyCode) <> nil then
     Result := FClient.GetKeyCode(FTarget, Character)
   else
     Result := inherited GetKeyCode(Character);
-end;
-
-function TEIOS_Target.GetHandle: PtrUInt;
-begin
-  Result := PtrUInt(FTarget);
 end;
 
 end.

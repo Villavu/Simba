@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.nativeinterface_windows;
 
 {$i simba.inc}
@@ -16,14 +21,14 @@ type
 
     procedure ApplyDPI(Window: TWindowHandle; var X1, Y1, X2, Y2: Integer);
     procedure RemoveDPI(Window: TWindowHandle; var X1, Y1, X2, Y2: Integer);
+  public
+    constructor Create;
 
     procedure HoldKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer = 0); override;
     procedure ReleaseKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer = 0); override;
 
     function VirtualKeyToNativeKeyCode(VirtualKey: Integer): Integer; override;
     function GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean; override;
-  public
-    constructor Create;
 
     function GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean; override;
     function GetWindowBounds(Window: TWindowHandle): TBox; override; overload;
@@ -38,7 +43,6 @@ type
     procedure HoldMouse(Button: TClickType); override;
     procedure ReleaseMouse(Button: TClickType); override;
     function IsMouseButtonHeld(Button: TClickType): Boolean; override;
-
     function IsKeyHeld(Key: Integer): Boolean; override;
 
     procedure HoldKey(VirtualKey: Integer; WaitTime: Integer = 0); override;
@@ -84,7 +88,7 @@ implementation
 
 uses
   windows, dwmapi, multimon, mmsystem,
-  simba.process, simba.math;
+  simba.process;
 
 type
   MONITOR_DPI_TYPE = (

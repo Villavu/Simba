@@ -1,27 +1,32 @@
-procedure _LapeSetDesktopAsClient(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSetDesktopAsClient(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScript.Client.IOManager.SetDesktop();
+  PInteger(Result)^ := SimbaScript.Client.IOManager.SetDesktop();
+end;
+
+procedure _LapeSetTargetWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PInteger(Result)^ := SimbaScript.Client.IOManager.SetTarget(PWindowHandle(Params^[0])^);
 end;
 
 procedure _LapeSetTargetArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInt32(Result)^ := SimbaScript.Client.IOManager.SetTarget(PRGB32(PPtrUInt(Params^[0])^), Point(PInt32(Params^[1])^, PInt32(Params^[2])^));
+  PInteger(Result)^ := SimbaScript.Client.IOManager.SetTarget(PRGB32(PPtrUInt(Params^[0])^), Point(PInteger(Params^[1])^, PInteger(Params^[2])^));
 end;
 
 procedure _LapeSetTargetBitmap(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with SimbaScript.Client do
-    PInt32(Result)^ := IOManager.SetTarget(MBitmaps[PInt32(Params^[0])^]);
+    PInteger(Result)^ := IOManager.SetTarget(MBitmaps[PInteger(Params^[0])^]);
 end;
 
 procedure _LapeSetEIOSTarget(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInt32(Result)^ := SimbaScript.Client.IOManager.SetTarget(Pstring(Params^[0])^, Pstring(Params^[1])^);
+  PInteger(Result)^ := SimbaScript.Client.IOManager.SetTarget(Pstring(Params^[0])^, Pstring(Params^[1])^);
 end;
 
 procedure _LapeMouseSetClientArea(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := SimbaScript.Client.IOManager.MouseSetClientArea(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^);
+  PBoolean(Result)^ := SimbaScript.Client.IOManager.MouseSetClientArea(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 procedure _LapeMouseResetClientArea(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -31,7 +36,7 @@ end;
 
 procedure _LapeImageSetClientArea(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := SimbaScript.Client.IOManager.ImageSetClientArea(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^);
+  PBoolean(Result)^ := SimbaScript.Client.IOManager.ImageSetClientArea(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 procedure _LapeImageResetClientArea(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -41,22 +46,22 @@ end;
 
 procedure _LapeSetImageTarget(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-   SimbaScript.Client.IOManager.SetImageTarget(PInt32(Params^[0])^);
+   SimbaScript.Client.IOManager.SetImageTarget(PInteger(Params^[0])^);
 end;
 
 procedure _LapeSetKeyMouseTarget(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScript.Client.IOManager.SetKeyMouseTarget(PInt32(Params^[0])^);
+  SimbaScript.Client.IOManager.SetKeyMouseTarget(PInteger(Params^[0])^);
 end;
 
 procedure _LapeGetImageTarget(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScript.Client.IOManager.GetImageTarget(PInt32(Result)^);
+  SimbaScript.Client.IOManager.GetImageTarget(PInteger(Result)^);
 end;
 
 procedure _LapeGetKeyMouseTarget(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScript.Client.IOManager.GetKeyMouseTarget(PInt32(Result)^);
+  SimbaScript.Client.IOManager.GetKeyMouseTarget(PInteger(Result)^);
 end;
 
 procedure _LapeExportImageTarget(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -71,17 +76,17 @@ end;
 
 procedure _LapeFreeTarget(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScript.Client.IOManager.FreeTarget(PInt32(Params^[0])^);
+  SimbaScript.Client.IOManager.FreeTarget(PInteger(Params^[0])^);
 end;
 
 procedure _LapeGetClientDimensions(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScript.Client.IOManager.GetDimensions(PInt32(Params^[0])^, PInt32(Params^[1])^);
+  SimbaScript.Client.IOManager.GetDimensions(PInteger(Params^[0])^, PInteger(Params^[1])^);
 end;
 
 procedure _LapeGetClientPosition(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScript.Client.IOManager.GetPosition(PInt32(Params^[0])^, PInt32(Params^[1])^);
+  SimbaScript.Client.IOManager.GetPosition(PInteger(Params^[0])^, PInteger(Params^[1])^);
 end;
 
 procedure _LapeFreeze(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -102,11 +107,6 @@ end;
 procedure _LapeIsTargetValid(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PBoolean(Result)^ := SimbaScript.Client.IOManager.TargetValid();
-end;
-
-procedure _LapeGetNativeWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PPtrUInt(Result)^ := SimbaScript.Client.IOManager.GetImageTarget.Handle;
 end;
 
 procedure _LapeSaveScreenshot(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -131,11 +131,35 @@ end;
 
 procedure _LapeGetTargetWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PWindowHandle(Result)^ := SimbaScript.Client.IOManager.GetImageTarget().Handle;
+  if SimbaScript.Client.IOManager.GetImageTarget() is TWindowTarget then
+    PWindowHandle(Result)^ := TWindowTarget(SimbaScript.Client.IOManager.GetImageTarget()).WindowHandle;
 end;
 
 procedure _LapeGetTargetPID(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PUInt32(Result)^ := TWindowHandle(SimbaScript.Client.IOManager.GetImageTarget().Handle).GetPID();
+  if SimbaScript.Client.IOManager.GetImageTarget() is TWindowTarget then
+    PInteger(Result)^ := TWindowTarget(SimbaScript.Client.IOManager.GetImageTarget()).WindowHandle.GetPID();
 end;
+
+procedure _LapeAddHandlerInvalidTarget(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PNotifyEvent(Result)^ := SimbaScript.Client.IOManager.AddHandlerInvalidTarget(PNotifyEvent(Params^[0])^);
+end;
+
+procedure _LapeRemoveHandlerInvalidTarget(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  SimbaScript.Client.IOManager.RemoveHandlerInvalidTarget(PNotifyEvent(Params^[0])^);
+end;
+
+procedure _LapeSetAutoActivateClient(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  SimbaScript.Client.IOManager.AutoActivate := PBoolean(Params^[0])^;
+end;
+
+procedure _LapeGetAutoActivateClient(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := SimbaScript.Client.IOManager.AutoActivate;
+end;
+
+
 

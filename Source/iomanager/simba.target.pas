@@ -10,29 +10,19 @@ unit simba.target;
 interface
 
 uses
-  classes, sysutils, lazmethodlist,
+  classes, sysutils,
   simba.mufasatypes;
 
 type
   PTarget = ^TTarget;
   TTarget = class(TObject)
   protected
-    FInvalidTargetHandlers: TMethodList;
-
     FMouseClientAreaSet: Boolean;
     FMouseClientArea: TBox;
     FImageClientAreaSet: Boolean;
     FImageClientArea: TBox;
 
     function ValidateImageCapture(var X, Y, Width, Height: Integer; out TargetBounds: TBox): Boolean; virtual;
-
-    procedure InvalidTarget; virtual;
-
-    function GetHandle: PtrUInt; virtual;
-    procedure SetHandle(Value: PtrUInt); virtual;
-
-    function GetAutoFocus: Boolean; virtual;
-    procedure SetAutoFocus(Value: Boolean); virtual;
 
     procedure GetTargetBounds(out Bounds: TBox); virtual; // raw bounds. (no image client area etc)
   public
@@ -75,16 +65,6 @@ type
 
     // Valid
     function TargetValid: Boolean; virtual;
-
-    // Events
-    procedure AddHandlerInvalidTarget(Handler: TNotifyEvent); virtual;
-    procedure RemoveHandlerInvalidTarget(Handler: TNotifyEvent); virtual;
-
-    property Handle: PtrUInt read GetHandle write SetHandle;
-    property AutoFocus: Boolean read GetAutoFocus write SetAutoFocus;
-
-    constructor Create; virtual;
-    destructor Destroy; override;
   end;
 
   TTargetArray = array of TTarget;
@@ -92,12 +72,7 @@ type
 implementation
 
 uses
-  simba.colormath;
-
-procedure TTarget.InvalidTarget;
-begin
-  FInvalidTargetHandlers.CallNotifyEvents(Self);
-end;
+  simba.colormath, simba.matrixhelpers;
 
 procedure TTarget.GetTargetPosition(out Left, Top: Integer);
 var
@@ -170,29 +145,28 @@ end;
 function TTarget.ReturnMatrix(X, Y, Width, Height: Integer): TIntegerMatrix;
 var
   Data: TRetData;
-  Dest: PInt32;
   Source: PRGB32;
   SourceInc: Integer;
   LoopX, LoopY: Integer;
+  W, H: Integer;
 begin
-  SetLength(Result, Height, Width);
+  Result.SetSize(Width, Height);
 
   Data := ReturnData(X, Y, Width, Height);
-
-  Source := Data.Ptr;
-  SourceInc := Data.IncPtrWith;
-
   if (Data.Ptr <> nil) then
   begin
-    for LoopY := 0 to Height - 1 do
+    W := Width - 1;
+    H := Height - 1;
+
+    Source := Data.Ptr;
+    SourceInc := Data.IncPtrWith;
+
+    for LoopY := 0 to H do
     begin
-      Dest := @Result[LoopY][0];
-
-      for LoopX := 0 to Width - 1 do
+      for LoopX := 0 to W do
       begin
-        Dest^ := BGRToRGB(Source^);
+        Result[LoopY][LoopX] := BGRToRGB(Source^);
 
-        Inc(Dest);
         Inc(Source);
       end;
 
@@ -324,26 +298,6 @@ begin
   raise Exception.Create('GetKeyCode is not available for this target');
 end;
 
-function TTarget.GetHandle: PtrUInt;
-begin
-  raise Exception.Create('GetHandle is not available for this target');
-end;
-
-procedure TTarget.SetHandle(Value: PtrUInt);
-begin
-  raise Exception.Create('SetHandle is not available for this target: ' +Self.ClassName);
-end;
-
-function TTarget.GetAutoFocus: Boolean;
-begin
-  raise Exception.Create('GetAutoFocus is not available for this target');
-end;
-
-procedure TTarget.SetAutoFocus(Value: Boolean);
-begin
-  raise Exception.Create('SetAutoFocus is not available for this target');
-end;
-
 procedure TTarget.MouseClientAreaOffset(var X, Y: Integer);
 begin
   if FMouseClientAreaSet then
@@ -353,28 +307,6 @@ begin
   end;
 end;
 
-procedure TTarget.AddHandlerInvalidTarget(Handler: TNotifyEvent);
-begin
-  FInvalidTargetHandlers.Add(TMethod(Handler));
-end;
-
-procedure TTarget.RemoveHandlerInvalidTarget(Handler: TNotifyEvent);
-begin
-  FInvalidTargetHandlers.Remove(TMethod(Handler));
-end;
-
-constructor TTarget.Create;
-begin
-  FInvalidTargetHandlers := TMethodList.Create();
-end;
-
-destructor TTarget.Destroy;
-begin
-  if (FInvalidTargetHandlers <> nil) then
-    FreeAndNil(FInvalidTargetHandlers);
-
-  inherited Destroy();
-end;
 
 end.
 
