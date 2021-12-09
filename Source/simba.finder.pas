@@ -11,17 +11,8 @@ unit simba.finder;
 interface
 
 uses
-  simba.colormath, classes, sysutils, simba.bitmap, simba.dtm, simba.mufasatypes, simba.matchtemplate; // types
-
-{ TMFinder Class }
-
-{
-  Should be 100% OS independant, as all OS dependant code is in the IO Manager.
-  Let's try not to use any OS-specific defines here? ;)
-
-  TODO: Check that each procedure calling Create_CTSInfo also calls
-  Free_CTSInfo().
-}
+  simba.colormath, classes, sysutils, simba.bitmap, simba.dtm, simba.mufasatypes, simba.matchtemplate,
+  simba.colorfinders; // types
 
 type
   TCTSNoInfo = record    //No tolerance
@@ -81,7 +72,7 @@ type
     procedure DefaultOperations(var xs, ys, xe, ye: Integer);
 
     function GetData(out Data: TRetData; var xs, ys, xe, ye: Int32): Boolean;
-    function GetMatrix(out Matrix: T2DIntegerArray; xs, ys, xe, ye: Int32): Boolean;
+    function GetMatrix(out Matrix: TIntegerMatrix; xs, ys, xe, ye: Int32): Boolean;
 
     function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
     function CountColor(Color, xs, ys, xe, ye: Integer): Integer;
@@ -114,7 +105,7 @@ type
     function FindTemplateEx(TemplImage: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
     function FindTemplate(TemplImage: TMufasaBitmap; out X,Y: Integer; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
 
-    function FindTextMatrix(Text, Font: String; Matrix: T2DIntegerArray; out Bounds: TBox): Single;
+    function FindTextMatrix(Text, Font: String; Matrix: TIntegerMatrix; out Bounds: TBox): Single;
     function FindTextColor(Text, Font: String; Color, Tolerance: Int32; X1, Y1, X2, Y2: Int32; out Bounds: TBox): Single; overload;
     function FindTextColor(Text, Font: String; Color, Tolerance: Int32; X1, Y1, X2, Y2: Int32; MinMatch: Single = 1): Boolean; overload;
     function FindText(Text, Font: String; X1, Y1, X2, Y2: Int32; out Bounds: TBox): Single; overload;
@@ -143,17 +134,16 @@ type
     function Create_CTSInfo2DArray(w, h: Integer; data: TPRGB32Array; Tolerance: Integer): TCTSInfo2DArray;
 
     constructor Create(aClient: TObject);
-    destructor Destroy; override;
   end;
 
 implementation
 
 uses
   math,
-  simba.client, simba.tpa, simba.dtmutil, simba.matrixhelpers;
+  simba.client, simba.tpa, simba.matrixhelpers;
 
 var
-  Percentage : array[0..255] of Extended;
+  Percentage: array[0..255] of Extended;
 
 function ColorSame_ctsNo(const ctsInfo: Pointer; const C2: PRGB32): Boolean; inline;
 var
@@ -520,7 +510,7 @@ end;
 { Points left holds the amount of points that are "left" to be checked
    (Including the point itself.. So for example Pointsleft[0][0] would
     hold the total amount of pixels that are to be checked. }
-procedure CalculateBitmapSkipCoordsEx(Bitmap : TMufasaBitmap; out SkipCoords : TBooleanMatrix;out TotalPoints : Integer; out PointsLeft : T2DIntegerArray);
+procedure CalculateBitmapSkipCoordsEx(Bitmap : TMufasaBitmap; out SkipCoords : TBooleanMatrix;out TotalPoints : Integer; out PointsLeft : TIntegerMatrix);
 var
   x,y : Integer;
   R,G,B : Byte;
@@ -560,30 +550,16 @@ end;
 
 { Initialise the variables for TMFinder }
 constructor TMFinder.Create(aClient: TObject);
-var
-  I: Integer;
 begin
   inherited Create;
 
   WarnOnly := False;
+
   Self.Client := aClient;
   Self.CTS := 1;
   Self.hueMod := 0.2;
   Self.satMod := 0.2;
   Self.CTS3Modifier := 1;
-  if (Percentage[255] <> 1) then
-    for i := 0 to 255 do
-      Percentage[i] := i / 255;
-end;
-
-destructor TMFinder.Destroy;
-begin
-    {   We don't really have to free stuff here.
-        The array is managed, so that is automatically freed.
-        The rest is either references to objects we may not destroy
-    }
-
-  inherited;
 end;
 
 procedure TMFinder.SetToleranceSpeed(nCTS: Integer);
@@ -655,15 +631,6 @@ begin
   SetLength(ClientTPA,NewWidth * NewHeight);
 end;
 
-procedure Swap(var A,B : Integer);
-var
-  c : Integer;
-begin
-  c := a;
-  a := b;
-  b := c;
-end;
-
 procedure TMFinder.DefaultOperations(var xs, ys, xe, ye: Integer);
 var
   w, h: Integer;
@@ -714,21 +681,21 @@ begin
   DefaultOperations(xs, ys, xe, ye);
 
   Data := TClient(Self.Client).IOManager.ReturnData(xs, ys, xe - xs + 1, ye - ys + 1);
-  if (Data = NullReturnData) then
-    Error('Warning! ReturnData returned null. Is the target resizing?', []);
 
-  Result := Data <> NullReturnData;
+  Result := Data.Ptr <> nil;
+  if (not Result) then
+    Error('Warning! ReturnData returned null. Is the target resizing?', []);
 end;
 
-function TMFinder.GetMatrix(out Matrix: T2DIntegerArray; xs, ys, xe, ye: Int32): Boolean;
+function TMFinder.GetMatrix(out Matrix: TIntegerMatrix; xs, ys, xe, ye: Int32): Boolean;
 begin
   DefaultOperations(xs, ys, xe, ye);
 
   Matrix := TClient(Self.Client).IOManager.ReturnMatrix(xs, ys, xe - xs + 1, ye - ys + 1);
-  if (Length(Matrix) = 0) then
-    Error('Warning! ReturnMatrix returned null. Is the target resizing?', []);
 
   Result := Length(Matrix) > 0;
+  if (not Result) then
+    Error('Warning! ReturnMatrix returned null. Is the target resizing?', []);
 end;
 
 function TMFinder.SimilarColors(Color1, Color2, Tolerance: Integer) : Boolean;
@@ -777,47 +744,48 @@ begin
   end;
 
   Free_CTSInfo(ctsinfo);
-  TClient(Client).IOManager.FreeReturnData;
 end;
 
 function TMFinder.CountColor(Color, xs, ys, xe, ye: Integer): Integer;
 var
-  temp : Integer;
+  Temp: Integer;
 begin
-   temp := Self.CTS;
-   Self.CTS := -1;
-   try
-       Result := CountColorTolerance(color,xs,ys,xe,ye,0);
-   finally
-       Self.CTS := temp;
-   end;
+  Temp := Self.CTS;
+
+  Self.CTS := -1;
+  try
+    Result := CountColorTolerance(color,xs,ys,xe,ye,0);
+  finally
+    Self.CTS := Temp;
+  end;
 end;
 
 function TMFinder.FindColor(out x, y: Integer; Color, xs, ys, xe, ye: Integer): Boolean;
 var
-  temp : Integer;
+  Temp: Integer;
 begin
-   temp := Self.CTS;
-   Self.CTS := -1;
-   try
-     Result := FindColorTolerance(x,y,color,xs,ys,xe,ye,0);
-   finally
-     Self.CTS := temp;
-   end;
+  Temp := Self.CTS;
+
+  Self.CTS := -1;
+  try
+    Result := FindColorTolerance(x,y,color,xs,ys,xe,ye,0);
+  finally
+    Self.CTS := Temp;
+  end;
 end;
 
-function TMFinder.FindColorSpiral(var x, y: Integer; color, xs, ys, xe,
-  ye: Integer): Boolean;
+function TMFinder.FindColorSpiral(var x, y: Integer; color, xs, ys, xe, ye: Integer): Boolean;
 var
-  temp : Integer;
+  Temp: Integer;
 begin
-   temp := Self.CTS;
-   Self.CTS := -1;
-   try
-     Result := FindColorSpiralTolerance(x,y,color,xs,ys,xe,ye,0);
-   finally
-     Self.CTS := temp;
-   end;
+  Temp := Self.CTS;
+
+  Self.CTS := -1;
+  try
+    Result := FindColorSpiralTolerance(x,y,color,xs,ys,xe,ye,0);
+  finally
+    Self.CTS := Temp;
+  end;
 end;
 
 function TMFinder.FindColorSpiralTolerance(var x, y: Integer; color, xs, ys, xe, ye, Tol: Integer): Boolean;
@@ -861,14 +829,13 @@ begin
   if i = -1 then
   begin
     Result := False;
-    TClient(Client).IOManager.FreeReturnData;
     Exit;
   end else
   begin
     Result := True;
+
     x := ClientTPA[i].x + xs;
     y := ClientTPA[i].y + ys;
-    TClient(Client).IOManager.FreeReturnData;
   end;
 end;
 
@@ -920,15 +887,14 @@ begin
 
   Result := False;
   Free_CTSInfo(ctsinfo);
-  TClient(Client).IOManager.FreeReturnData;
   Exit;
 
   Hit:
-    Result := True;
-    x := xx;
-    y := yy;
-    Free_CTSInfo(ctsinfo);
-    TClient(Client).IOManager.FreeReturnData;
+
+  Result := True;
+  x := xx;
+  y := yy;
+  Free_CTSInfo(ctsinfo);
 end;
 
 function TMFinder.FindColoredAreaTolerance(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea, tol: Integer): Boolean;
@@ -995,30 +961,52 @@ begin
 
   Result := False;
   Free_CTSInfo(ctsinfo);
-  TClient(Client).IOManager.FreeReturnData;
   Exit;
 
   Hit:
-    Result := True;
-    x := xx;
-    y := yy;
-    Free_CTSInfo(ctsinfo);
-    TClient(Client).IOManager.FreeReturnData;
+
+  Result := True;
+  x := xx;
+  y := yy;
+  Free_CTSInfo(ctsinfo);
 end;
 
 function TMFinder.FindColorsTolerance(out Points: TPointArray; Color, xs, ys, xe, ye, Tol: Integer): Boolean;
 var
   PtrData: TRetData;
+  Buffer: TFindColorBuffer;
+  {
   Ptr: PRGB32;
   PtrInc,C: Integer;
   xx, yy: Integer;
   compare: TCTSCompareFunction;
   ctsinfo: TCTSInfo;
+  Buffer: TFindColorBuffer;
+  }
 begin
   Result := False;
   if (not GetData(PtrData, xs, ys, xe, ye)) then
     Exit;
 
+  Buffer.Ptr := PtrData.Ptr;
+  Buffer.PtrInc := PtrData.IncPtrWith;
+  Buffer.X1 := xs;
+  Buffer.Y1 := ys;
+  Buffer.X2 := xe;
+  Buffer.Y2 := ye;
+
+  if (Tol = 0) then
+    Result := Buffer.Find(Points, Color)
+  else
+  begin
+    case Self.CTS of
+      0: Result := Buffer.FindCTS0(Points, Color, Tol);
+      1: Result := Buffer.FindCTS1(Points, Color, Tol);
+      2: Result := Buffer.FindCTS2(Points, Color, Tol, Self.HueMod, Self.SatMod);
+    end;
+  end;
+
+  {
   // Do we want to "cache" these vars?
   // We will, for now. Easier to type.
   Ptr := PtrData.Ptr;
@@ -1049,7 +1037,7 @@ begin
     Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
 
   Free_CTSInfo(ctsinfo);
-  TClient(Client).IOManager.FreeReturnData;
+}
 end;
 
 function TMFinder.FindColorsSpiralTolerance(x, y: Integer; out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tol: Integer): Boolean;
@@ -1094,7 +1082,6 @@ begin
     Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
 
   Free_CTSInfo(ctsinfo);
-  TClient(Client).IOManager.FreeReturnData;
 end;
 
 function TMFinder.FindColors(var TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
@@ -1180,12 +1167,10 @@ begin
       //We have found the mask appearntly, otherwise we would have jumped! Gna Gna.
       x := xx + xs;
       y := yy + ys;
-      TClient(Client).IOManager.FreeReturnData;
       Exit(true);
       //Bah not found the mask, lets do nothing and continue!
       NotFoundMask:
     end;
-  TClient(Client).IOManager.FreeReturnData;
 end;
 
 procedure TMFinder.CheckMask(const Mask: TMask);
@@ -1269,7 +1254,6 @@ begin
       //We did find the Bmp, otherwise we would be at the part below
 
       Free_CTSInfo2DArray(ctsinfoarray);
-      TClient(Client).IOManager.FreeReturnData;
 
       x := xx + xs;
       y := yy + ys;
@@ -1279,7 +1263,6 @@ begin
     end;
 
   Free_CTSInfo2DArray(ctsinfoarray);
-  TClient(Client).IOManager.FreeReturnData;
 end;
 
 function TMFinder.FindBitmapSpiral(Bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean;
@@ -1382,7 +1365,6 @@ begin
     Move(ClientTPA[0], Points[0], FoundC * SizeOf(TPoint));
 
   Free_CTSInfo2DArray(ctsinfoarray);
-  TClient(Client).IOManager.FreeReturnData;
 end;
 
 function TMFinder.FindDeformedBitmapToleranceIn(Bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer;  AllowPartialAccuracy: Boolean; out accuracy: Extended): Boolean;
@@ -1401,7 +1383,7 @@ var
   yStart,yEnd,xStart,xEnd : Integer;
   TotalC : Integer;
   SkipCoords : TBooleanMatrix;
-  PointsLeft : T2DIntegerArray;
+  PointsLeft : TIntegerMatrix;
   ctsinfoarray: TCTSInfo2DArray;
   compare: TCTSCompareFunction;
 
@@ -1483,7 +1465,6 @@ begin
         if GoodCount = TotalC then
         begin
           Free_CTSInfo2DArray(ctsinfoarray);
-          TClient(Client).IOManager.FreeReturnData;
           x := BestPT.x;
           y := BestPT.y;
           accuracy:= 1;
@@ -1493,7 +1474,6 @@ begin
     end;
 
   Free_CTSInfo2DArray(ctsinfoarray);
-  TClient(Client).IOManager.FreeReturnData;
   if BestCount = 0 then
     Exit;
   accuracy := BestCount / TotalC;
@@ -1511,7 +1491,7 @@ end;
 function TMFinder.FindTemplateEx(TemplImage: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
 var
   y,w,h: Int32;
-  Image, Templ: T2DIntegerArray;
+  Image, Templ: TIntegerMatrix;
   xcorr: TSingleMatrix;
   PtrData : TRetData;
   maxLo,maxHi: Single;
@@ -1558,7 +1538,6 @@ begin
 
   Result := Length(TPA) > 0;
   OffsetTPA(TPA, Point(xs,ys));
-  TClient(Client).IOManager.FreeReturnData;
 end;
 
 function TMFinder.FindTemplate(TemplImage: TMufasaBitmap; out X,Y: Integer; Formula: ETMFormula;
@@ -1579,12 +1558,12 @@ begin
   end;
 end;
 
-function TMFinder.FindTextMatrix(Text, Font: String; Matrix: T2DIntegerArray; out Bounds: TBox): Single;
+function TMFinder.FindTextMatrix(Text, Font: String; Matrix: TIntegerMatrix; out Bounds: TBox): Single;
 var
   X, Y, Color, Bad, dX, dY, i: Int32;
   P: TPoint;
   Match: Single;
-  TextMatrix: T2DIntegerArray;
+  TextMatrix: TIntegerMatrix;
   CharacterIndices, OtherIndices: TPointArray;
   CharacterCount, OtherCount: Int32;
 label
@@ -1681,7 +1660,7 @@ function TMFinder.FindTextColor(Text, Font: String; Color, Tolerance: Int32; X1,
 var
   R, G, B: Int32;
   W, H, X, Y: Int32;
-  Matrix: T2DIntegerArray;
+  Matrix: TIntegerMatrix;
   CTSInfo: Pointer;
   CTSCompare: TCTSCompareFunction;
 begin
@@ -1731,7 +1710,7 @@ end;
 
 function TMFinder.FindText(Text, Font: String; X1, Y1, X2, Y2: Int32; out Bounds: TBox): Single;
 var
-  Matrix: T2DIntegerArray;
+  Matrix: TIntegerMatrix;
 begin
   Result := 0;
 
@@ -1773,12 +1752,35 @@ begin
   end;
 end;
 
+function ValidMainPointBox(const TPA: TPointArray; const X1, Y1, X2, Y2: Integer): TBox;
+var
+  B: TBox;
+begin
+  B := GetTPABounds(TPA);
+  Result.X1 := X1 - B.X1;
+  Result.Y1 := Y1 - B.Y1;
+  Result.X2 := X2 - B.X2;
+  Result.Y2 := Y2 - B.Y2;
+end;
+
+function ValidMainPointBox(var DTM: TMDTM; const X1, Y1, X2, Y2: Integer): TBox;
+var
+  TPA: TPointArray;
+  I: Integer;
+begin
+  SetLength(TPA, DTM.PointCount);
+  for I := 0 to High(TPA) do
+    TPA[I] := Point(DTM.Points[I].X, DTM.Points[I].Y);
+
+  Result := ValidMainPointBox(TPA, X1, Y1, X2, Y2);
+end;
+
 //MaxToFind, if it's < 1 it won't stop looking
 function TMFinder.FindDTMs(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; maxToFind: Integer): Boolean;
 var
   //Cache DTM stuff
   Len : Integer;       //Len of the points
-  DPoints : PMDTMPoint; //DTM Points
+  DPoints : TMDTMPointArray; //DTM Points
 
   // Bitwise
   b: Array of Array of Integer;
@@ -1818,14 +1820,14 @@ begin
   if (not GetData(PtrData, x1, y1, x2, y2)) then
     Exit;
 
-  if not DTM.Valid then
-    raise Exception.CreateFmt('FindDTMs: DTM[%s] is not valid.', [DTM.name]);
-
   // Get the area we should search in for the Main Point.
   MA := ValidMainPointBox(DTM, x1, y1, x2, y2);
   //Load the DTM-cache variables
-  Len := dtm.Count;
-  DPoints:= dtm.PPoints;
+  DPoints:= dtm.Points;
+  Len := Length(DPoints);
+  if (Len = 0) then
+    Exit;
+
   // Turn the bp into a more usable array.
   setlength(goodPoints, Len);
   for i := 0 to Len - 1 do
@@ -1868,8 +1870,8 @@ begin
   MaxY := y2-y1;
   //MA is now fixed to the new (0,0) box...
 
-  for yy := MA.y1  to MA.y2  do //Coord of the mainpoint in the search area
-    for xx := MA.x1  to MA.x2 do
+  for yy := MA.y1 to MA.y2  do //Coord of the mainpoint in the search area
+    for xx := MA.x1 to MA.x2 do
     begin
       //Mainpoint can have area size as well, so we must check that just like any subpoint.
       for i := 0 to Len - 1 do
@@ -1920,7 +1922,6 @@ begin
   TheEnd:
 
   Free_CTSInfoArray(ctsinfoarray);
-  TClient(Client).IOManager.FreeReturnData;
 
   SetLength(Points, pc);
   if pc > 0 then
@@ -1943,8 +1944,7 @@ begin
   Exit(True);
 end;
 
-procedure RotPoints_DTM(const P: TPointArray;var RotTPA : TPointArray; const A:
-    Extended); inline;
+procedure RotPoints_DTM(const P: TPointArray;var RotTPA : TPointArray; const A: Extended); inline;
 var
    I, L: Integer;
 begin
@@ -1960,7 +1960,7 @@ function TMFinder.FindDTMsRotated(DTM: TMDTM; out Points: TPointArray; x1, y1, x
 var
    //Cached variables
    Len : Integer;
-   DPoints : PMDTMPoint;
+   DPoints : TMDTMPointArray;
    DTPA : TPointArray;
    RotTPA: TPointArray;
 
@@ -2009,13 +2009,10 @@ begin
   if (not GetData(PtrData, x1, y1, x2, y2)) then
     Exit;
 
-  if not dtm.Valid then
-    raise Exception.CreateFmt('FindDTMs: DTM[%s] is not consistent.', [DTM.name]);
-
-  dtm.Normalize;;
-
-  Len := DTM.Count;
-  DPoints:= DTM.PPoints;
+  DPoints:= dtm.Points;
+  Len := Length(DPoints);
+  if (Len = 0) then
+    Exit;
 
   setlength(goodPoints, Len);
   for i := 0 to Len - 1 do
@@ -2148,7 +2145,6 @@ begin
   TheEnd:
 
   Free_CTSInfoArray(ctsinfoarray);
-  TClient(Client).IOManager.FreeReturnData;
 
   Result := (pc > 0);
   { Don't forget to pre calculate the rotated points at the start.
@@ -2178,13 +2174,22 @@ begin
     //Result[i] := TClient(Client).IOManager.GetColor(coords[i].x, coords[i].y);
     //Result[i] := BGRToRGB(Ptr[(Coords[i].y - Box.y1)*w + (Coords[i].x - Box.x1)]);
     Result[i] := BGRToRGB(cd[Coords[i].y - Box.y1][Coords[i].x - Box.x1]);
-
-  TClient(Client).IOManager.FreeReturnData;
 end;
 
 function TMFinder.GetColor(const X, Y: Integer): Integer;
 begin
   Result := TClient(Client).IOManager.GetColor(X, Y);
 end;
+
+procedure LoadPercentages;
+var
+  I: Integer;
+begin
+  for I := 0 to 255 do
+    Percentage[I] := I / 255;
+end;
+
+initialization
+  LoadPercentages();
 
 end.
