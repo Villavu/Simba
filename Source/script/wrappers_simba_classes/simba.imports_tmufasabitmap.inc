@@ -43,7 +43,6 @@ addGlobalFunc('procedure TMufasaBitmap.SetPixels(Points: TPointArray; Colors: TI
 addGlobalFunc('procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray; Colors: TIntegerArray); constref', @_LapeMufasaBitmap_DrawATPA);
 addGlobalFunc('procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray); constref; overload', @_LapeMufasaBitmap_DrawATPAEx);
 addGlobalFunc('procedure TMufasaBitmap.DrawTPA(Points: TPointArray; Color: TColor); constref', @_LapeMufasaBitmap_DrawTPA);
-addGlobalFunc('procedure TMufasaBitmap.DrawRect(Rect: TRectangle; Color: TColor); constref', @_LapeMufasaBitmap_DrawRect);
 addGlobalFunc('procedure TMufasaBitmap.DrawToCanvas(x, y: Integer; Canvas: TCanvas); constref', @_LapeMufasaBitmap_DrawToCanvas);
 addGlobalFunc('procedure TMufasaBitmap.LineTo(Src, Dst: TPoint;Color: TColor); constref', @_LapeMufasaBitmap_LineTo);
 addGlobalFunc('function TMufasaBitmap.FindColors(out Points: TPointArray; const Color: Integer): Boolean; constref; overload', @_LapeMufasaBitmap_FindColors);

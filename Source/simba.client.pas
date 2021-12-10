@@ -10,7 +10,7 @@ unit simba.client;
 interface
 
 uses
-  Classes, SysUtils, simba.mufasatypes,
+  classes, sysutils,
   simba.iomanager, simba.files, simba.finder, simba.bitmap, simba.dtm, simba.ocr, simba.internet;
 
 (*

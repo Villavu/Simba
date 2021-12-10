@@ -69,7 +69,7 @@ end;
 
 procedure TTarget_Exported_FreeReturnData(Target: Pointer); stdcall;
 begin
-  TTarget(Target).FreeReturnData;
+  //TTarget(Target).FreeReturnData;
 end;
 
 procedure TTarget_Exported_GetMousePosition(Target: Pointer; var X, Y: Int32); stdcall;

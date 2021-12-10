@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="11"/>
+    <Version Value="12"/>
     <General>
       <Flags>
         <MainUnitHasUsesSectionForAllUnits Value="False"/>
-        <MainUnitHasTitleStatement Value="False"/>
-        <MainUnitHasScaledStatement Value="False"/>
+        <CompatibilityMode Value="True"/>
       </Flags>
       <SessionStorage Value="InIDEConfig"/>
-      <MainUnit Value="0"/>
       <Title Value="Simba"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
@@ -46,19 +44,13 @@
             </SyntaxOptions>
           </Parsing>
           <CodeGeneration>
-            <SmartLinkUnit Value="True"/>
             <TargetCPU Value="x86_64"/>
             <TargetOS Value="win64"/>
-            <Optimizations>
-              <OptimizationLevel Value="3"/>
-            </Optimizations>
           </CodeGeneration>
           <Linking>
             <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <StripSymbols Value="True"/>
+              <DebugInfoType Value="dsDwarf2Set"/>
             </Debugging>
-            <LinkSmart Value="True"/>
           </Linking>
           <Other>
             <CompilerMessages>
@@ -207,7 +199,6 @@
     </PublishOptions>
     <RunParams>
       <FormatVersion Value="2"/>
-      <Modes Count="0"/>
     </RunParams>
     <RequiredPackages Count="4">
       <Item1>
@@ -223,7 +214,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="29">
+    <Units Count="30">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -250,7 +241,9 @@
       <Unit4>
         <Filename Value="forms/simba.colorpickerhistoryform.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="SimbaColorPickerHistoryForm"/>
         <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
       </Unit4>
       <Unit5>
         <Filename Value="forms/simba.debuggerform.pas"/>
@@ -265,7 +258,9 @@
       <Unit7>
         <Filename Value="forms/simba.dtmeditor.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="SimbaDTMEditorForm"/>
         <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
       </Unit7>
       <Unit8>
         <Filename Value="forms/simba.filebrowserform.pas"/>
@@ -378,6 +373,10 @@
         <Filename Value="windows/simba.crossplatformmethods_windows.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit28>
+      <Unit29>
+        <Filename Value="script/simba.scriptthread.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit29>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

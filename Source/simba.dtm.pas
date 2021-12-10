@@ -49,7 +49,7 @@ type
   public
     function AddDTM(const d: TSDTM): Integer;overload;
     function AddDTM(const d: TMDTM): Integer;overload;
-  function ExistsDTM(index : integer) : boolean;
+    function ExistsDTM(index : integer) : boolean;
     function GetDTM(index: Integer) :TMDTM;
     procedure FreeDTM(DTM: Integer);
     function StringToDTM(const S: String): Integer;

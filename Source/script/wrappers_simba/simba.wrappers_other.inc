@@ -10,7 +10,7 @@ end;
 
 procedure _LapeSetSupressExceptions(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScript.Client.MFinder.WarnOnly := PBoolean(Params^[0])^;
+  SimbaScriptThread.Script.Client.MFinder.WarnOnly := PBoolean(Params^[0])^;
 end;
 
 procedure _LapeSimba(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -48,7 +48,7 @@ begin
   Method := TSimbaMethod_Status.Create(PString(Params^[0])^);
 
   try
-    SimbaScript.Invoke(Method);
+    SimbaScriptThread.Script.Invoke(Method);
   finally
     Method.Free();
   end;
@@ -61,7 +61,7 @@ begin
   Method := TSimbaMethod_ShowBalloonHint.Create(PString(Params^[0])^, PString(Params^[1])^, PInt32(Params^[2])^, TBalloonFlags(Params^[3]^));
 
   try
-    SimbaScript.Invoke(Method);
+    SimbaScriptThread.Script.Invoke(Method);
   finally
     Method.Free();
   end;
@@ -74,7 +74,7 @@ begin
   Method := TSimbaMethod_ClearDebug.Create();
 
   try
-    SimbaScript.Invoke(Method);
+    SimbaScriptThread.Script.Invoke(Method);
   finally
     Method.Free();
   end;
@@ -87,7 +87,7 @@ begin
   Method := TSimbaMethod_Disguse.Create(PString(Params^[0])^);
 
   try
-    SimbaScript.Invoke(Method);
+    SimbaScriptThread.Script.Invoke(Method);
   finally
     Method.Free();
   end;
@@ -100,7 +100,7 @@ begin
   Method := TSimbaMethod_ShowBitmap.Create(PMufasaBitmap(Params^[0])^);
 
   try
-    SimbaScript.Invoke(Method);
+    SimbaScriptThread.Script.Invoke(Method);
   finally
     Method.Free();
   end;
@@ -111,13 +111,13 @@ var
   Bitmap: TMufasaBitmap;
   Method: TSimbaMethod;
 begin
-  with SimbaScript.Client do
+  with SimbaScriptThread.Script.Client do
     Bitmap := MBitmaps[PInt32(Params^[0])^];
 
   Method := TSimbaMethod_ShowBitmap.Create(Bitmap);
 
   try
-    SimbaScript.Invoke(Method);
+    SimbaScriptThread.Script.Invoke(Method);
   finally
     Method.Free();
   end;
@@ -130,7 +130,7 @@ begin
   Method := TSimbaMethod_DisplayDebugImage.Create(PInt32(Params^[0])^, PInt32(Params^[1])^);
 
   try
-    SimbaScript.Invoke(Method);
+    SimbaScriptThread.Script.Invoke(Method);
   finally
     Method.Free();
   end;
@@ -143,7 +143,7 @@ begin
   Method := TSimbaMethod_UpdateDebugImage.Create(PMufasaBitmap(Params^[0])^);
 
   try
-    SimbaScript.Invoke(Method);
+    SimbaScriptThread.Script.Invoke(Method);
   finally
     Method.Free();
   end;
@@ -154,13 +154,13 @@ var
   Bitmap: TMufasaBitmap;
   Method: TSimbaMethod;
 begin
-  with SimbaScript.Client do
+  with SimbaScriptThread.Script.Client do
     Bitmap := MBitmaps[PInt32(Params^[0])^];
 
   Method := TSimbaMethod_UpdateDebugImage.Create(Bitmap);
 
   try
-    SimbaScript.Invoke(Method);
+    SimbaScriptThread.Script.Invoke(Method);
   finally
     Method.Free();
   end;
@@ -173,7 +173,7 @@ begin
   Method := TSimbaMethod_ClearDebugImage.Create();
 
   try
-    SimbaScript.Invoke(Method);
+    SimbaScriptThread.Script.Invoke(Method);
   finally
     Method.Free();
   end;
@@ -186,7 +186,7 @@ begin
   Method := TSimbaMethod_GetSimbaPID.Create();
 
   try
-    SimbaScript.Invoke(Method);
+    SimbaScriptThread.Script.Invoke(Method);
 
     Method.Result.Read(Result^, SizeOf(PtrUint));
   finally
@@ -201,7 +201,7 @@ begin
   Method := TSimbaMethod_GetSimbaTargetPID.Create();
 
   try
-    SimbaScript.Invoke(Method);
+    SimbaScriptThread.Script.Invoke(Method);
 
     Method.Result.Read(Result^, SizeOf(PtrUInt));
   finally
@@ -216,7 +216,7 @@ begin
   Method := TSimbaMethod_GetSimbaTargetWindow.Create();
 
   try
-    SimbaScript.Invoke(Method);
+    SimbaScriptThread.Script.Invoke(Method);
 
     Method.Result.Read(Result^, SizeOf(PtrUInt));
   finally

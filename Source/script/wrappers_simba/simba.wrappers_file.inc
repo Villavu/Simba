@@ -1,66 +1,66 @@
 procedure _LapeCreateFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  with SimbaScript.Client do
+  with SimbaScriptThread.Script.Client do
     PInt32(Result)^ := MFiles.CreateFile(PString(Params^[0])^);
 end;
 
 procedure _LapeOpenFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  with SimbaScript.Client do
+  with SimbaScriptThread.Script.Client do
     PInt32(Result)^ := MFiles.OpenFile(PString(Params^[0])^, PBoolean(Params^[1])^);
 end;
 
 procedure _LapeRewriteFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  with SimbaScript.Client do
+  with SimbaScriptThread.Script.Client do
     PInt32(Result)^ := MFiles.RewriteFile(PString(Params^[0])^, PBoolean(Params^[1])^);
 end;
 
 procedure _LapeAppendFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  with SimbaScript.Client do
+  with SimbaScriptThread.Script.Client do
     PInt32(Result)^ := MFiles.AppendFile(PString(Params^[0])^);
 end;
 
 procedure _LapeCloseFile(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  with SimbaScript.Client do
+  with SimbaScriptThread.Script.Client do
     MFiles.CloseFile(PInt32(Params^[0])^);
 end;
 
 procedure _LapeEndOfFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  with SimbaScript.Client do
+  with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFiles.EndOfFile(PInt32(Params^[0])^);
 end;
 
 procedure _LapeFileSize(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  with SimbaScript.Client do
+  with SimbaScriptThread.Script.Client do
     PInt32(Result)^ := MFiles.FileSizeMuf(PInt32(Params^[0])^);
 end;
 
 procedure _LapeReadFileString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  with SimbaScript.Client do
+  with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFiles.ReadFileString(PInt32(Params^[0])^, PString(Params^[1])^, PInt32(Params^[2])^);
 end;
 
 procedure _LapeWriteFileString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  with SimbaScript.Client do
+  with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFiles.WriteFileString(PInt32(Params^[0])^, PString(Params^[1])^);
 end;
 
 procedure _LapeSetFileCharPointer(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  with SimbaScript.Client do
+  with SimbaScriptThread.Script.Client do
     PInt32(Result)^ := MFiles.SetFileCharPointer(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^);
 end;
 
 procedure _LapeFilePointerPos(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  with SimbaScript.Client do
+  with SimbaScriptThread.Script.Client do
     PInt32(Result)^ := MFiles.FilePointerPos(PInt32(Params^[0])^);
 end;
 
@@ -76,19 +76,19 @@ end;
 
 procedure _LapeWriteINI(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  with SimbaScript.Client do
+  with SimbaScriptThread.Script.Client do
     MFiles.WriteINI(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^, PString(Params^[3])^);
 end;
 
 procedure _LapeReadINI(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  with SimbaScript.Client do
+  with SimbaScriptThread.Script.Client do
     PString(Result)^ := MFiles.ReadINI(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
 end;
 
 procedure _LapeDeleteINI(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  with SimbaScript.Client do
+  with SimbaScriptThread.Script.Client do
     MFiles.DeleteINI(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
 end;
 

@@ -25,7 +25,7 @@ end;
 
 procedure _LapeTarget_FreeReturnData(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PTarget(Params^[0])^.FreeReturnData();
+  //PTarget(Params^[0])^.FreeReturnData();
 end;
 
 procedure _LapeTarget_ActivateClient(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

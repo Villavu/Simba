@@ -130,6 +130,9 @@ type
 
     OnAttach: procedure(Data: Pointer); cdecl;
     OnDetach: procedure; cdecl;
+    OnPause: procedure; cdecl;
+    OnResume: procedure; cdecl;
+    OnStop: procedure; cdecl;
   end;
 
   TSimbaScriptPluginMethod = record
@@ -171,6 +174,12 @@ type
   end;
 
   TSimbaScriptPluginArray = array of TSimbaScriptPlugin;
+  TSimbaScriptPluginArrayHelper = type helper for TSimbaScriptPluginArray
+  public
+    procedure CallOnPause;
+    procedure CallOnResume;
+    procedure CallOnStop;
+  end;
 
 implementation
 
@@ -396,6 +405,9 @@ begin
     Pointer(SetPluginMemManager) := GetProcedureAddress(FHandle, 'SetPluginMemManager');
     Pointer(OnAttach)            := GetProcedureAddress(FHandle, 'OnAttach');
     Pointer(OnDetach)            := GetProcedureAddress(FHandle, 'OnDetach');
+    Pointer(OnPause)             := GetProcedureAddress(FHandle, 'OnPause');
+    Pointer(OnResume)            := GetProcedureAddress(FHandle, 'OnResume');
+    Pointer(OnStop)              := GetProcedureAddress(FHandle, 'OnStop');
     Pointer(RegisterSimbaPlugin) := GetProcedureAddress(FHandle, 'RegisterSimbaPlugin');
   end;
 
@@ -520,6 +532,33 @@ begin
     FreeLibrary(FHandle);
 
   inherited Destroy();
+end;
+
+procedure TSimbaScriptPluginArrayHelper.CallOnPause;
+var
+  I: Integer;
+begin
+  for I := 0 to High(Self) do
+    if Assigned(Self[I].FExports.OnPause) then
+      Self[I].FExports.OnPause();
+end;
+
+procedure TSimbaScriptPluginArrayHelper.CallOnResume;
+var
+  I: Integer;
+begin
+  for I := 0 to High(Self) do
+    if Assigned(Self[I].FExports.OnResume) then
+      Self[I].FExports.OnResume();
+end;
+
+procedure TSimbaScriptPluginArrayHelper.CallOnStop;
+var
+  I: Integer;
+begin
+  for I := 0 to High(Self) do
+    if Assigned(Self[I].FExports.OnStop) then
+      Self[I].FExports.OnStop();
 end;
 
 finalization

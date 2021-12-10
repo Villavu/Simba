@@ -45,7 +45,7 @@ end;
 
 procedure _LapeIOManager_FreeReturnData(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PIOManager(Params^[0])^.FreeReturnData();
+  //PIOManager(Params^[0])^.FreeReturnData();
 end;
 
 procedure _LapeIOManager_GetDimensions(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

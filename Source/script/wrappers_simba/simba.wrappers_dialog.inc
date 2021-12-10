@@ -113,8 +113,8 @@ procedure TACA.Execute;
 var
   WindowHandle: TWindowHandle;
 begin
-  if (SimbaScript.Client.IOManager.GetImageTarget() is TWindowTarget) then
-    WindowHandle := TWindowTarget(SimbaScript.Client.IOManager.GetImageTarget()).WindowHandle
+  if (SimbaScriptThread.Script.Client.IOManager.GetImageTarget() is TWindowTarget) then
+    WindowHandle := TWindowTarget(SimbaScriptThread.Script.Client.IOManager.GetImageTarget()).WindowHandle
   else
     WindowHandle := GetDesktopWindow();
 
@@ -162,8 +162,8 @@ procedure TDTMEditor.Execute;
 var
   WindowHandle: TWindowHandle;
 begin
-  if (SimbaScript.Client.IOManager.GetImageTarget() is TWindowTarget) then
-    WindowHandle := TWindowTarget(SimbaScript.Client.IOManager.GetImageTarget()).WindowHandle
+  if (SimbaScriptThread.Script.Client.IOManager.GetImageTarget() is TWindowTarget) then
+    WindowHandle := TWindowTarget(SimbaScriptThread.Script.Client.IOManager.GetImageTarget()).WindowHandle
   else
     WindowHandle := GetDesktopWindow();
 

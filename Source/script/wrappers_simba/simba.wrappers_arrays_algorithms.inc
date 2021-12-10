@@ -183,16 +183,6 @@ begin
   PPoint(Result)^ := RotatePoint(PPoint(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^);
 end;
 
-procedure _LapeChangeDistPT(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PPoint(Result)^ := ChangeDistPT(PPoint(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, Pextended(Params^[3])^);
-end;
-
-procedure _LapeChangeDistTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  Pboolean(Result)^ := ChangeDistTPA(PPointArray(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, Pextended(Params^[3])^);
-end;
-
 procedure _LapeFindGapsTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   P2DPointArray(Result)^ := FindGapsTPA(PPointArray(Params^[0])^, PInt32(Params^[1])^);

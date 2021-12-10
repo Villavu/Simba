@@ -46,14 +46,15 @@ uses
   lclintf, math, regexpr, strutils, lazfileutils, fileutil, clipbrd,
   blowfish, md5, sha1, hmac, forms, process, lazloggerbase,
 
-  simba.mufasatypes, simba.script, simba.files, simba.process, simba.bitmap,
+  simba.mufasatypes, simba.script, simba.scriptthread,
+  simba.files, simba.process, simba.bitmap,
   simba.windowhandlehelpers, simba.matchtemplate, simba.tpa,
   simba.target_exported, simba.math, simba.colormath, simba.stringutil,
-  simba.internet, simba.datetime, simba.dtm, simba.iomanager,
+  simba.internet, simba.datetime, simba.dtmutil, simba.dtm, simba.iomanager,
   simba.aca, simba.dtmeditor, simba.script_communication,
   simba.imagebox, simba.client,simba.jsonparser, simba.xmlparser,
   simba.mmltimer, simba.finder, simba.target, simba.fontloader, simba.ocr,
-  simba.ocrutil, simba.matrixhelpers, simba.nativeinterface, simba.geometry,
+  simba.ocrutil, simba.matrixhelpers, simba.nativeinterface,
   simba.array_generics, simba.target_window,
 
   simba.script_compiler_onterminate,
