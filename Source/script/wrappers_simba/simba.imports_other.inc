@@ -8,14 +8,14 @@ addGlobalFunc('function GetClipBoard: String', @_LapeGetClipBoard);
 
 addGlobalType('(bfNone, bfInfo, bfWarning, bfError)', 'TBalloonFlags');
 addGlobalFunc('procedure Status(const Status: String)', @_LapeStatus);
-addGlobalFunc('procedure ShowBalloonHint(const Title, Hint: String; const Timeout: Int32; const Flags: TBalloonFlags)', @_LapeShowBalloonHint);
+addGlobalFunc('procedure ShowBalloonHint(const Title, Hint: String; const Timeout: Integer; const Flags: TBalloonFlags)', @_LapeShowBalloonHint);
 addGlobalFunc('procedure ClearDebug', @_LapeClearDebug);
 addGlobalFunc('procedure Disguise(const Caption: String)', @_LapeDisguise);
 addGlobalFunc('procedure ShowBitmap(Bitmap: TMufasaBitmap); overload', @_LapeShowBitmap);
-addGlobalFunc('procedure ShowBitmap(Bitmap: Int32); overload', @_LapeShowBitmapEx);
+addGlobalFunc('procedure ShowBitmap(Bitmap: Integer); overload', @_LapeShowBitmapEx);
 addGlobalFunc('procedure DrawBitmapDebugImg(Bitmap: TMufasaBitmap); overload', @_LapeDrawBitmapDebugImg);
-addGlobalFunc('procedure DrawBitmapDebugImg(Bitmap: Int32); overload', @_LapeDrawBitmapDebugImgEx);
-addGlobalFunc('procedure DisplayDebugImgWindow(W, H: Int32)', @_LapeDisplayDebugImgWindow);
+addGlobalFunc('procedure DrawBitmapDebugImg(Bitmap: Integer); overload', @_LapeDrawBitmapDebugImgEx);
+addGlobalFunc('procedure DisplayDebugImgWindow(W, H: Integer)', @_LapeDisplayDebugImgWindow);
 addGlobalFunc('procedure ClearDebugImg', @_LapeClearDebugImg);
 addGlobalFunc('function GetSimbaPID: PtrUInt', @_LapeGetSimbaPID);
 addGlobalFunc('function GetSimbaTargetPID: PtrUInt', @_LapeGetSimbaTargetPID);

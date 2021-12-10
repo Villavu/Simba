@@ -63,6 +63,11 @@ end;
 
 procedure InitializeAddOnTerminate(Compiler: TLapeCompiler);
 begin
+  Compiler.AddDelayedCode(
+    'const IsTerminated: Boolean = False;                                     ' + LineEnding +
+    'const IsTerminatedByUser: Boolean = False;                               '
+  );
+
   Compiler.AfterParsing.AddProc(@AddCallOnTerminateMethods);
   Compiler.addDelayedCode(
     'var _OnTerminateMethods: array of record                                 ' + LineEnding +
@@ -102,6 +107,9 @@ procedure CallOnTerminateMethods(Compiler: TLapeCompiler);
 var
   Method: TLapeGlobalVar;
 begin
+  if (Compiler['IsTerminated'] <> nil) then
+    PBoolean(Compiler['IsTerminated'].Ptr)^ := True;
+
   Method := Compiler['_CallOnTerminateMethods'];
   if (Method <> nil) then
     RunCode(Compiler.Emitter.Code, Compiler.Emitter.CodeLen, [], PCodePos(Method.Ptr)^);

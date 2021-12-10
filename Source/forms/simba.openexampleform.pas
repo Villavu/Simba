@@ -44,7 +44,7 @@ implementation
 
 uses
   lazfileutils, lazloggerbase,
-  simba.files, simba.fonthelpers, simba.main, simba.package_form, simba.package, simba.scripttabsform;
+  simba.files, simba.fonthelpers, simba.main, simba.package, simba.scripttabsform;
 
 type
   TFileTreeNode = class(TTreeNode)

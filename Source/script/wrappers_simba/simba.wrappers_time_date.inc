@@ -15,7 +15,7 @@ end;
 
 procedure _LapeGetTimeRunning(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PUInt64(Result)^ := GetTickCount64() - SimbaScript.StartTime;
+  //PUInt64(Result)^ := Round(HighResolutionTime() - SimbaScript.StartTime);
 end;
 
 procedure _LapeHighResolutionTime(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

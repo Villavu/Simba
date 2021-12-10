@@ -40,8 +40,6 @@ addGlobalFunc('function GetSamePointsATPA(const ATPA: T2DPointArray; var Matches
 addGlobalFunc('procedure SortCircleWise(var TPA: TPointArray; const cx, cy, StartDegree: Int32; SortUp, ClockWise: Boolean)', @_LapeSortCircleWise);
 addGlobalFunc('procedure LinearSort(var TPA: TPointArray; cx, cy, sd: Int32; SortUp: Boolean)', @_LapeLinearSort);
 addGlobalFunc('function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint', @_LapeRotatePoint);
-addGlobalFunc('function ChangeDistPT(const PT: TPoint; mx,my: Int32; newdist: extended): TPoint', @_LapeChangeDistPT);
-addGlobalFunc('function ChangeDistTPA(var TPA: TPointArray; mx,my: Int32; newdist: extended): boolean', @_LapeChangeDistTPA);
 addGlobalFunc('function FindGapsTPA(const TPA: TPointArray; MinPixels: Int32): T2DPointArray', @_LapeFindGapsTPA);
 addGlobalFunc('function RemoveDistTPointArray(x, y, dist: Int32; const ThePoints: TPointArray; RemoveHigher: Boolean): TPointArray', @_LapeRemoveDistTPointArray);
 addGlobalFunc('function ReArrangeandShortenArrayEx(const a: TPointArray; w, h: Int32): TPointArray', @_LapeReArrangeandShortenArrayEx);

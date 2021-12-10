@@ -21,7 +21,6 @@ object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
     Top = 0
     Width = 534
     ColorRectWidth = 18
-    Selected = clForeground
     Style = []
     Align = alCustom
     Anchors = [akTop, akLeft, akRight, akBottom]

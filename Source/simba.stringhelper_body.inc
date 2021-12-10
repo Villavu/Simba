@@ -225,15 +225,25 @@ end;
 
 class function TStringHelper.AlphaChars: String;
 begin
-  Result := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' + 'abcdefghijklmnopqrstuvwxyz';
+  Result := LowerChars() + UpperChars();
 end;
 
-function TStringHelper.Upper: String;
+class function TStringHelper.LowerChars: String;
+begin
+ Result := 'abcdefghijklmnopqrstuvwxyz';
+end;
+
+class function TStringHelper.UpperChars: String;
+begin
+ Result := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+end;
+
+function TStringHelper.ToUpper: String;
 begin
   Result := UpperCase(Self);
 end;
 
-function TStringHelper.Lower: String;
+function TStringHelper.ToLower: String;
 begin
   Result := LowerCase(Self);
 end;
@@ -384,7 +394,7 @@ begin
 
     False:
       for I := 0 to High(Values) do
-        if Self.Lower().IndexOf(Values[I].Lower()) > 0 then
+        if Self.ToLower().IndexOf(Values[I].ToLower()) > 0 then
           Exit(True);
   end;
 

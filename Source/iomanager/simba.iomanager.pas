@@ -288,10 +288,10 @@ begin
 
   if MakeFrozen then
   begin
-    FFrozen := FImage;
-    FFrozen.GetTargetDimensions(Width, Height);
-    with FFrozen.ReturnData(0, 0, Width - 1, Height - 1) do
-      FImage := TBitmapTarget.Create(Ptr, Width, Height, True);
+    //FFrozen := FImage;
+    //FFrozen.GetTargetDimensions(Width, Height);
+    //with FFrozen.ReturnData(0, 0, Width - 1, Height - 1) do
+    //  FImage := TBitmapTarget.Create(Ptr, Width, Height, True);
   end else
   if IsFrozen() then
   begin
@@ -335,12 +335,12 @@ end;
 
 function TIOManager.SetTarget(Data: PRGB32; Size: TPoint): Integer;
 begin
-  Result := SetImageTarget(AddTarget(TBitmapTarget.Create(Data, Size.X, Size.Y, True)));
+  //Result := SetImageTarget(AddTarget(TBitmapTarget.Create(Data, Size.X, Size.Y, True)));
 end;
 
 function TIOManager.SetTarget(Bitmap: TMufasaBitmap): Integer;
 begin
-  Result := SetImageTarget(AddTarget(TBitmapTarget.Create(Bitmap)));
+  //Result := SetImageTarget(AddTarget(TBitmapTarget.Create(Bitmap)));
 end;
 
 function TIOManager.SetTarget(Plugin, Data: String): Integer;

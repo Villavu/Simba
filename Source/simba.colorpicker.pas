@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
-  simba.iomanager, simba.windowhandlehelpers, simba.imageboxzoom, simba.mufasatypes;
+  simba.iomanager, simba.imageboxzoom, simba.mufasatypes;
 
 type
   TSimbaColorPickerHint = class(THintWindow)

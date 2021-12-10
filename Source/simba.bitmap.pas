@@ -89,7 +89,6 @@ type
     procedure DrawPolyFilled(Poly: TPointArray; Invert: Boolean; Color: TColor);
     procedure DrawCircleFilled(X, Y, Radius: Int32; Invert: Boolean; Color: TColor);
     procedure DrawBoxFilled(B: TBox; Invert: Boolean; Color: TColor);
-    procedure DrawRect(R: TRectangle; Color: TColor);
     procedure DrawToCanvas(x,y: Int32; Canvas: TCanvas);
     procedure LineTo(Src,Dst: TPoint;Color: TColor);
     function FindColors(out Points: TPointArray; Color: Integer): Boolean; overload;
@@ -1141,11 +1140,6 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.DrawRect(R: TRectangle; Color: TColor);
-begin
-  //Self.DrawTPA(TPAConnect([R.Top, R.Right, R.Btm, R.Left]), Color);
-end;
-
 procedure TMufasaBitmap.DrawToCanvas(x,y: Int32; Canvas: TCanvas);
 var
   Bitmap: Graphics.TBitmap;
@@ -1401,7 +1395,7 @@ begin
     for y := 0 to (hi-1) do
       Move(RetData.Ptr[y * RetData.RowLen], FData[y * self.FWidth], wi * SizeOf(TRGB32));
 
-    TIOManager(MWindow).FreeReturnData();
+   // TIOManager(MWindow).FreeReturnData();
   end;
 end;
 
@@ -1440,7 +1434,7 @@ begin
     for yy := 0 to (hi-1) do
       Move(RetData.Ptr[yy * (RetData.RowLen)], FData[(yy + y) * self.FWidth + x], wi * SizeOf(TRGB32));
 
-    TIOManager(MWindow).FreeReturnData();
+    //TIOManager(MWindow).FreeReturnData();
   end;
 end;
 

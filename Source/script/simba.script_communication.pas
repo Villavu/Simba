@@ -347,6 +347,7 @@ begin
   ScriptTab := SimbaScriptTabsForm.FindTab(ScriptInstance);
   if (ScriptTab <> nil) then
   begin
+    // Check error is not in a include
     if (SameFileName(ScriptTab.ScriptFileName, FileName)) or ((ScriptTab.ScriptFileName = '') and (ScriptTab.ScriptTitle = FileName)) then
     begin
       ScriptTab.Show();

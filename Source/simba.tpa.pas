@@ -89,11 +89,15 @@ function PartitionTPA(const TPA:TPointArray; BoxWidth, BoxHeight:Integer): T2DPo
 function PointsInRangeOf(Points, Other: TPointArray; MinDist, MaxDist: Double): TPointArray; overload;
 function PointsInRangeOf(Points, Other: TPointArray; MinDistX, MinDistY, MaxDistX, MaxDistY: Double): TPointArray; overload;
 
+function Unique(const Arr: TIntegerArray): TIntegerArray;
+function Unique(const Arr: TDoubleArray): TDoubleArray;
+function Unique(const Points: TPointArray): TPointArray;
+
 implementation
 
 uses
   math,
-  simba.slacktree, simba.matrixhelpers, simba.overallocatearray, simba.array_generics;
+  simba.math, simba.slacktree, simba.matrixhelpers, simba.overallocatearray, simba.array_generics;
 
 function PointsInRangeOf(Points, Other: TPointArray; MinDist, MaxDist: Double): TPointArray; overload;
 var
@@ -2314,40 +2318,6 @@ begin
 end;
 
 {/\
-  Rotate the given TPA with A radians.
-/\}
-
-Function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray ;
-
-Var
-   I, L: Integer;
-   CosA,SinA : extended;
-
-Begin
-  L := High(P);
-  SetLength(Result, L + 1);
-  CosA := Cos(a);
-  SinA := Sin(a);
-  For I := 0 To L Do
-  Begin
-    Result[I].X := Trunc(cx + CosA * (p[i].x - cx) - SinA * (p[i].y - cy));
-    Result[I].Y := Trunc(cy + SinA * (p[i].x - cx) + CosA * (p[i].y - cy));
-  End;
-  // I recon it's faster than Point().
-End;
-
-{/\
-  Rotate the given Point with A radians.
-/\}
-
-Function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint;
-
-Begin
-  Result.X := Trunc(mx + cos(angle) * (p.x - mx) - sin(angle) * (p.y - my));
-  Result.Y := Trunc(my + sin(angle) * (p.x - mx) + cos(angle) * (p.y- my));
-End;
-
-{/\
   Returns the edges of the given TPA.
   Edge-points are points that are not completely surrounded by other points (8 way).
 /\}
@@ -2814,6 +2784,98 @@ begin
     SetLength(Result[ID], L+1);
     Result[ID][L] := TPA[i];
   end;
+end;
+
+function Unique(const Points: TPointArray): TPointArray;
+var
+  Matrix: TBooleanMatrix;
+  I, Count: Integer;
+begin
+  SetLength(Result, Length(Points));
+
+  if (Length(Points) > 0) then
+  begin
+    Count := 0;
+
+    with GetTPABounds(Points) do
+    begin
+      Matrix.SetSize(Width, Height);
+
+      for I := 0 to High(Points) do
+        if not Matrix[Points[I].Y - Y1, Points[I].X - X1] then
+        begin
+          Matrix[Points[I].Y - Y1, Points[I].X - X1] := True;
+          Result[Count] := Points[I];
+          Inc(Count);
+        end;
+    end;
+
+    SetLength(Result, Count);
+  end;
+end;
+
+function Unique(const Arr: TIntegerArray): TIntegerArray;
+var
+  I, J, Value, Size, Len: Int32;
+  Table: T2DIntegerArray;
+  Bucket: PIntegerArray;
+  Buffer: specialize TSimbaOverAllocateArray<Integer>;
+label
+  Next;
+begin
+  Buffer.Init();
+
+  SetLength(Table, NextPowerOf2(Length(Arr)));
+  Size := High(Table);
+
+  for i := 0 to High(Arr) do
+  begin
+    Value := Arr[i];
+    Bucket := @Table[Value and Size];
+    Len := Length(Bucket^);
+
+    for J := 0 to Len - 1 do
+      if Bucket^[J] = Value then
+        goto Next;
+
+    SetLength(Bucket^, Len + 1);
+    Bucket^[Len] := Value;
+
+    Buffer.Add(Value);
+
+    Next:
+  end;
+
+  Result := Buffer.Trim();
+end;
+
+function Unique(const Arr: TDoubleArray): TDoubleArray;
+var
+  i,j,last:Integer;
+begin
+  Result := Copy(Arr);
+
+  last := Length(Result);
+
+  i:=0;
+  while (i < last) do
+  begin
+    j := i+1;
+    while (j < last) do
+    begin
+      if SameValue(Result[i], Result[j]) then
+      begin
+        Result[j] := Result[last-1];
+        dec(last);
+        dec(j);
+      end;
+
+      Inc(j);
+    end;
+    Inc(i);
+  end;
+
+  SetLength(Result, last);
 end;
 
 end.

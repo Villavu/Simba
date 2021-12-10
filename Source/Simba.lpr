@@ -15,7 +15,7 @@ uses
   simba.bitmapconv, simba.functionlistform, simba.scripttabsform,
   simba.outputform, simba.colorpickerhistoryform, simba.filebrowserform,
   simba.notesform, simba.package_form, simba.settingsform, simba.associate,
-  simba.script, simba.script_dump, simba.openexampleform, simba.httpclient;
+  simba.script, simba.scriptthread, simba.script_dump, simba.openexampleform, simba.httpclient;
 
 type
   TApplicationHelper = class helper for TApplication
@@ -59,7 +59,6 @@ begin
   {$ENDIF}
 
   Application.OnException := @Application.HandleException;
-  Application.Scaled := True;
   Application.Initialize();
 
   if Application.HasOption('dumpcompiler') then
@@ -98,16 +97,13 @@ begin
       Halt();
     end;
 
-    SimbaScript := TSimbaScript.Create();
-
-    SimbaScript.ScriptFile               := Application.Params[Application.ParamCount];
-    SimbaScript.ScriptName               := Application.GetOptionValue('scriptname');
-    SimbaScript.SimbaCommunicationServer := Application.GetOptionValue('simbacommunication');
-    SimbaScript.Target                   := Application.GetOptionValue('target');
-    SimbaScript.Debugging                := Application.HasOption('debugging');
-    SimbaScript.CompileOnly              := Application.HasOption('compile');
-
-    SimbaScript.Start();
+    SimbaScriptThread := TSimbaScriptThread.Create(
+      Application.Params[Application.ParamCount],
+      Application.GetOptionValue('simbacommunication'),
+      Application.GetOptionValue('target'),
+      Application.HasOption('compile'),
+      Application.HasOption('debugging')
+    );
   end else
   begin
     Application.CreateForm(TSimbaForm, SimbaForm);

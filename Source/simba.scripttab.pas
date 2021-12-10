@@ -97,8 +97,7 @@ type
 implementation
 
 uses
-  interfacebase, forms, lazfileutils, lazloggerbase,
-  synedit, syneditmousecmds, SynEditTextBuffer,
+  interfacebase, forms, lazfileutils, lazloggerbase, synedit, syneditmousecmds,
   simba.scripttabsform, simba.autocomplete, simba.settings, simba.mufasatypes,
   simba.scripttabhistory, simba.main, simba.parser_misc, simba.files;
 
@@ -593,12 +592,9 @@ begin
 
     FScriptInstance := TSimbaScriptInstance.Create(Self);
     FScriptInstance.Target := Target;
-
     if (FScriptFileName = '') then
-    begin
-      FScriptInstance.ScriptName := ScriptTitle;
-      FScriptInstance.ScriptFile := CreateTempFile(Script, 'script');
-    end else
+      FScriptInstance.ScriptFile := CreateTempFile(Script, ScriptTitle)
+    else
       FScriptInstance.ScriptFile := ScriptFileName;
 
     FScriptInstance.Run();
@@ -625,10 +621,8 @@ begin
   FScriptInstance.Target := Target;
 
   if (FScriptFileName = '') then
-  begin
-    FScriptInstance.ScriptName := ScriptTitle;
-    FScriptInstance.ScriptFile := CreateTempFile(Script, 'script');
-  end else
+    FScriptInstance.ScriptFile := CreateTempFile(Script, ScriptTitle)
+  else
     FScriptInstance.ScriptFile := ScriptFileName;
 
   FScriptInstance.Run(FDebuggingForm);
@@ -646,10 +640,8 @@ begin
     FScriptInstance := TSimbaScriptInstance.Create(Self);
 
     if (FScriptFileName = '') then
-    begin
-      FScriptInstance.ScriptName := ScriptTitle;
-      FScriptInstance.ScriptFile := CreateTempFile(Script, '.script');
-    end else
+      FScriptInstance.ScriptFile := CreateTempFile(Script, ScriptTitle)
+    else
       FScriptInstance.ScriptFile := ScriptFileName;
 
     FScriptInstance.Compile();

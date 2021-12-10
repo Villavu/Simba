@@ -304,8 +304,16 @@ begin
 end;
 
 function CreateTempFile(const Contents, Prefix: String): String;
+var
+  Number: Integer = 0;
 begin
-  Result := GetTempFileName(GetDataPath(), Prefix);
+  Result := Format('%s%s.%d', [GetDataPath(), Prefix, Number]);
+  while FileExists(Result) do
+  begin
+    Inc(Number);
+
+    Result := Format('%s%s.%d', [GetDataPath(), Prefix, Number]);
+  end;
 
   with TStringList.Create() do
   try

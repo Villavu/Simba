@@ -1768,7 +1768,7 @@ var
   TPA: TPointArray;
   I: Integer;
 begin
-  SetLength(TPA, DTM.PointCount);
+  SetLength(TPA, DTM.Count);
   for I := 0 to High(TPA) do
     TPA[I] := Point(DTM.Points[I].X, DTM.Points[I].Y);
 

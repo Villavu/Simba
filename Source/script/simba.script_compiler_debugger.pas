@@ -16,8 +16,8 @@ uses
 type
   PStringArray = ^TStringArray;
 
-  TLapeEnterMethod = procedure(Index: Int32) of object;
-  TLapeLeaveMethod = procedure(Index: Int32; Exception: Boolean) of object;
+  TLapeEnterMethod = procedure(const Index: Integer) of object;
+  TLapeLeaveMethod = procedure(const Index: Integer; const Exception: Boolean) of object;
 
 procedure InitializeDebugger(Compiler: TLapeCompiler; Methods: PStringArray; OnEnterMethod: TLapeEnterMethod; OnLeaveMethod: TLapeLeaveMethod);
 
@@ -31,7 +31,7 @@ var
   EnterMethod, LeaveMethod: TLapeTree_Invoke;
   Statement: TLapeTree_Try;
   IsException: TLapeTree_Operator;
-  I: Int32;
+  I: Integer;
   Name: String;
   Method: TLapeTree_Method;
   Methods: ^TStringArray;
@@ -79,12 +79,12 @@ end;
 
 procedure Lape_EnterMethod(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  TLapeEnterMethod(PMethod(Params^[0])^)(PInt32(Params^[1])^);
+  TLapeEnterMethod(PMethod(Params^[0])^)(PInteger(Params^[1])^);
 end;
 
 procedure Lape_LeaveMethod(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  TLapeLeaveMethod(PMethod(Params^[0])^)(PInt32(Params^[1])^, PBoolean(Params^[2])^);
+  TLapeLeaveMethod(PMethod(Params^[0])^)(PInteger(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 procedure InitializeDebugger(Compiler: TLapeCompiler; Methods: PStringArray; OnEnterMethod: TLapeEnterMethod; OnLeaveMethod: TLapeLeaveMethod);
@@ -99,8 +99,8 @@ begin
 
   Compiler.AfterParsing.AddProc(@AddDebuggingMethods);
   Compiler.addGlobalVar('array of String', Methods, '_DebuggingMethods');
-  Compiler.addGlobalMethod('procedure _EnterMethod(constref Index: Int32);', @Lape_EnterMethod, EnterMethod.Ptr);
-  Compiler.addGlobalMethod('procedure _LeaveMethod(constref Index: Int32; Exception: Boolean);', @Lape_LeaveMethod, LeaveMethod.Ptr);
+  Compiler.addGlobalMethod('procedure _EnterMethod(const Index: Integer);', @Lape_EnterMethod, EnterMethod.Ptr);
+  Compiler.addGlobalMethod('procedure _LeaveMethod(const Index: Integer; Exception: Boolean);', @Lape_LeaveMethod, LeaveMethod.Ptr);
 end;
 
 end.

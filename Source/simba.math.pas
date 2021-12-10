@@ -16,7 +16,10 @@ uses
 const
   HALF_PI = PI / 2;
 
-function GaussMatrix(N: Integer; sigma: Extended): TExtendedMatrix;
+function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray;
+function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint;
+
+function GaussMatrix(N: Integer; sigma: Extended): T2DExtendedArray;
 function FixRad(const Rad: Extended): Extended;
 function FixD(const Degrees: Extended): Extended;
 function MiddleBox(const B: TBox): TPoint;
@@ -50,6 +53,8 @@ function Average(const Arr: TIntegerArray): Int64; overload;
 function Average(const Arr: TExtendedArray): Extended; overload;
 
 function Mode(const Arr: TIntegerArray): Integer;
+
+procedure Sort(var Arr: TIntegerArray);
 
 function TruncatedGauss(Left:Double=0; Right:Double=1; CUTOFF:Single=4): Double;
 
@@ -96,10 +101,45 @@ begin
   Result := Result + 1;
 end;
 
+
+{/\
+  Rotate the given TPA with A radians.
+/\}
+
+Function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray;
+
+Var
+   I, L: Integer;
+   CosA,SinA : extended;
+
+Begin
+  L := High(P);
+  SetLength(Result, L + 1);
+  CosA := Cos(a);
+  SinA := Sin(a);
+  For I := 0 To L Do
+  Begin
+    Result[I].X := Trunc(cx + CosA * (p[i].x - cx) - SinA * (p[i].y - cy));
+    Result[I].Y := Trunc(cy + SinA * (p[i].x - cx) + CosA * (p[i].y - cy));
+  End;
+  // I recon it's faster than Point().
+End;
+
+{/\
+  Rotate the given Point with A radians.
+/\}
+
+Function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint;
+Begin
+  Result.X := Trunc(mx + cos(angle) * (p.x - mx) - sin(angle) * (p.y - my));
+  Result.Y := Trunc(my + sin(angle) * (p.x - mx) + cos(angle) * (p.y- my));
+End;
+
+
 {/\
   Returns a GaussianMatrix with size of X*X, where X is Nth odd-number.
 /\}
-function GaussMatrix(N: Integer; sigma: Extended): TExtendedMatrix;
+function GaussMatrix(N: Integer; sigma: Extended): T2DExtendedArray;
 var
   hkernel: TExtendedArray;
   Size,i,x,y:Integer;
@@ -241,7 +281,8 @@ begin
 
   if Length(Arr) > 0 then
   begin
-    Self := Sorted(Arr);
+    Self := Copy(Arr);
+    Sort(Self);
 
     Current := Self[0];
     Hits := 1;
@@ -267,6 +308,11 @@ begin
     if (Hits > Best) then
       Result := Current;
   end;
+end;
+
+procedure Sort(var Arr: TIntegerArray);
+begin
+  specialize QuickSort<Integer>(Arr, Low(Arr), High(Arr));
 end;
 
 function TruncatedGauss(Left:Double=0; Right:Double=1; CUTOFF:Single=4): Double;

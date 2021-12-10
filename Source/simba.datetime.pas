@@ -15,8 +15,17 @@ uses
 procedure ConvertTime(Time: Int64; var h, m, s: Int32);
 procedure ConvertTime64(Time: Int64; var y, m, w, d, h, min, s: Int32);
 function TimeStamp(Time: Int64; IncludeMilliseconds: Boolean = False): String;
+function HighResolutionTime: Double;
 
 implementation
+
+uses
+  simba.nativeinterface;
+
+function HighResolutionTime: Double;
+begin
+  Result := SimbaNativeInterface.HighResolutionTime;
+end;
 
 procedure ConvertTime(Time: Int64; var h, m, s: Int32);
 var

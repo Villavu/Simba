@@ -6,116 +6,105 @@
 unit simba.script;
 
 {$i simba.inc}
-{$IFDEF DARWIN}
-  {$modeswitch objectivec1}
-{$ENDIF}
 
 interface
 
 uses
-  Classes, SysUtils,
+  classes, sysutils,
   lptypes, lpvartypes, lpcompiler, lpparser, lpinterpreter, lpmessages,
-  simba.script_compiler, simba.script_communication, simba.script_debugger, simba.client;
+  simba.script_compiler, simba.script_communication, simba.script_debugger,
+  simba.client, simba.script_plugin, simba.mufasatypes;
 
 type
-  TSimbaScript = class(TThread)
-  protected
-    FState: TInitBool;
-    FTarget: String;
-    FStartTime: UInt64;
+  TSimbaScriptState = TInitBool;
 
-    FScriptFile: String;
-    FScriptName: String;
+const
+  SCRIPT_STATE_RUN   = bTrue;
+  SCRIPT_STATE_STOP  = bFalse;
+  SCRIPT_STATE_PAUSE = bUnknown;
+
+type
+  TSimbaScript = class
+  protected
+    FState: TSimbaScriptState;
+    FTargetWindow: TWindowHandle;
+
+    FScript: String;
+    FScriptFileName: String;
 
     FCompiler: TSimbaScript_Compiler;
-    FCompileOnly: Boolean;
+    FCompileTime: Double;
+    FRunningTime: Double;
 
     FClient: TClient;
-    FSimbaCommunicationServer: String;
     FSimbaCommunication: TSimbaCommunicationClient;
 
-    FTerminated: Boolean;
-    FUserTerminated: Boolean;
-    FDebugging: Boolean;
     FDebugger: TSimbaScript_Debugger;
+    FPlugins: TSimbaScriptPluginArray;
 
-    procedure Execute; override;
+    procedure Resumed; virtual;
+    procedure Paused; virtual;
+    procedure Stopped; virtual;
 
-    procedure HandleTerminate(Sender: TObject);
-    procedure HandleException(E: Exception);
-    procedure HandleStateThread;
-    procedure HandleHint(Sender: TLapeCompilerBase; Hint: lpString);
-    function HandleFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
-    function HandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
+    procedure DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
+    function DoCompilerFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
+    function DoCompilerHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
 
-    procedure SetState(Value: TInitBool);
+    procedure SetSimbaCommunication(Value: String);
+    procedure SetTargetWindow(Value: String);
+    procedure SetState(Value: TSimbaScriptState);
   public
-    property Terminated: Boolean read FTerminated;
-    property UserTerminated: Boolean read FUserTerminated;
+    property CompileTime: Double read FCompileTime;
+    property RunningTime: Double read FRunningTime;
 
     property Compiler: TSimbaScript_Compiler read FCompiler;
-    property CompileOnly: Boolean read FCompileOnly write FCompileOnly;
 
-    property SimbaCommunicationServer: String read FSimbaCommunicationServer write FSimbaCommunicationServer;
+    property SimbaCommunication: String write SetSimbaCommunication;
 
     property Client: TClient read FClient;
-    property State: TInitBool read FState write SetState;
-    property StartTime: UInt64 read FStartTime;
-    property Target: String read FTarget write FTarget;
-    property Debugging: Boolean read FDebugging write FDebugging;
+    property TargetWindow: String write SetTargetWindow;
+    property Debugger: TSimbaScript_Debugger read FDebugger write FDebugger;
 
-    property ScriptFile: String read FScriptFile write FScriptFile;
-    property ScriptName: String read FScriptName write FScriptName;
-
+    function CanInvoke: Boolean;
     procedure Invoke(Method: TSimbaMethod; DoFree: Boolean = False);
 
-    constructor Create; reintroduce;
-  end;
+    function Compile: Boolean;
+    function Run: Boolean;
 
-var
-  SimbaScript: TSimbaScript;
+    property State: TSimbaScriptState read FState write SetState;
+    property Script: String read FScript write FScript;
+    property ScriptFileName: String read FScriptFileName write FScriptFileName;
+
+    constructor Create;
+    destructor Destroy; override;
+  end;
 
 implementation
 
 uses
-  {$IFDEF DARWIN}
-  cocoaall, cocoaint, cocoautils,
-  {$ENDIF}
   fileutil, forms, lazloggerbase,
-  simba.files, simba.datetime, simba.script_plugin, simba.script_compiler_onterminate;
+  simba.files, simba.datetime, simba.script_compiler_onterminate;
 
-procedure TSimbaScript.HandleHint(Sender: TLapeCompilerBase; Hint: lpString);
+procedure TSimbaScript.DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
   DebugLn(Hint);
 end;
 
-procedure TSimbaScript.HandleException(E: Exception);
-begin
-  if (TextRec(Output).Mode <> fmClosed) then
-    WriteLn(E.Message);
-
-  if (FSimbaCommunication <> nil) then
-  begin
-    if (E is lpException) then
-      with E as lpException do
-        Self.Invoke(TSimbaMethod_ScriptError.Create(DocPos.Line, DocPos.Col, DocPos.FileName), True);
-  end else
-    ExitCode := 1;
-end;
-
-function TSimbaScript.HandleFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
+function TSimbaScript.DoCompilerFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
 begin
   Result := nil;
   if (not FindFile(FileName, '', [IncludeTrailingPathDelimiter(ExtractFileDir(Sender.Tokenizer.FileName)), GetIncludePath(), GetSimbaPath()])) then
     FileName := '';
 end;
 
-function TSimbaScript.HandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
+function TSimbaScript.DoCompilerHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
 var
   Plugin: TSimbaScriptPlugin;
   CurrentDirectory, FileName: String;
 begin
-  Result := Directive.ToUpper().IndexOfAny(['ERROR', 'LOADLIB', 'LIBPATH', 'IFHASLIB', 'IFHASFILE', 'INCLUDE_ALL']) > -1;
+  Directive := UpperCase(Directive);
+
+  Result := Directive.IndexOfAny(['ERROR', 'LOADLIB', 'LIBPATH', 'IFHASLIB', 'IFHASFILE', 'INCLUDE_ALL', 'ENV']) > -1;
 
   if Result then
   try
@@ -141,6 +130,8 @@ begin
 
           Plugin := TSimbaScriptPlugin.Create(Argument);
           Plugin.Import(FCompiler);
+
+          FPlugins := FPlugins + [Plugin];
         end;
 
       'LIBPATH':
@@ -168,6 +159,11 @@ begin
         begin
           raise Exception.Create('User defined error: "' + Argument + '"');
         end;
+
+      'ENV':
+        begin
+          FCompiler.pushTokenizer(TLapeTokenizerString.Create(#39 + GetEnvironmentVariable(Argument) + #39));
+        end;
     end;
   except
     on E: Exception do
@@ -175,140 +171,127 @@ begin
   end;
 end;
 
-procedure TSimbaScript.HandleTerminate(Sender: TObject);
+procedure TSimbaScript.SetSimbaCommunication(Value: String);
 begin
-  if (FatalException is Exception) then
-    DebugLn('Note: Script thread did not exit cleanly: ', Exception(FatalException).Message);
+  if (Value = '') then
+    Exit;
 
-  {$IFDEF WINDOWS}
-  if (StartupConsoleMode <> 0) then
-  begin
-    DebugLn('Press enter to exit');
-
-    ReadLn();
-  end;
-  {$ENDIF}
-
-  Application.Terminate();
-  while not Application.Terminated do
-    Application.ProcessMessages();
-
-  {$IFDEF DARWIN}
-  // https://gitlab.com/freepascal.org/lazarus/lazarus/-/issues/39496
-  NSApplication.sharedApplication.postEvent_AtStart(
-    nsEvent.otherEventWithType_location_modifierFlags_timestamp_windowNumber_context_subtype_data1_data2(
-      NSApplicationDefined, GetNSPoint(0, 0), 0, NSTimeIntervalSince1970, 0, nil, 0, 0, 0
-    ),
-    True
-  );
-  {$ENDIF}
+  FSimbaCommunication := TSimbaCommunicationClient.Create(Value);
 end;
 
-procedure TSimbaScript.Execute;
+procedure TSimbaScript.SetTargetWindow(Value: String);
 begin
-  TThread.ExecuteInThread(@HandleStateThread);
+  if (Value = '') then
+    Exit;
 
+  FTargetWindow := StrToInt64Def(Value, 0);
+end;
+
+function TSimbaScript.Compile: Boolean;
+begin
+  FCompiler := TSimbaScript_Compiler.Create(TLapeTokenizerString.Create(FScript, FScriptFileName));
+  FCompiler.OnFindFile := @DoCompilerFindFile;
+  FCompiler.OnHint := @DoCompilerHint;
+  FCompiler.OnHandleDirective := @DoCompilerHandleDirective;
+
+  if (FSimbaCommunication = nil) then
+    FCompiler.addBaseDefine('SIMBAHEADLESS');
+
+  FCompiler.Import();
+  if (FDebugger <> nil) then
+    FDebugger.Compile();
+
+  FCompileTime := HighResolutionTime();
+  FCompiler.Compile();
+  FCompileTime := HighResolutionTime() - FCompileTime;
+
+  Result := True;
+end;
+
+function TSimbaScript.Run: Boolean;
+begin
+  FClient := TClient.Create();
+  FClient.MOCR.FontPath := GetFontPath();
+  if (FTargetWindow > 0) then
+    FClient.IOManager.SetTarget(FTargetWindow);
+
+  // Only available at runtime
+  PClient(FCompiler['Client'].Ptr)^ := FClient;
+  PString(FCompiler['ScriptFile'].Ptr)^ := FScriptFileName;
+
+  FRunningTime := HighResolutionTime();
   try
-    if (FSimbaCommunicationServer <> '') then
-      FSimbaCommunication := TSimbaCommunicationClient.Create(FSimbaCommunicationServer);
+    if (FDebugger <> nil) then
+      FDebugger.Run();
 
-    FClient := TClient.Create(GetPluginPath());
-    FClient.MOCR.FontPath := GetFontPath();
-    if StrToInt64Def(Target, 0) <> 0 then
-      FClient.IOManager.SetTarget(StrToInt64Def(Target, 0));
+    RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, FState);
+  finally
+    FRunningTime := HighResolutionTime() - FRunningTime;
 
-    FCompiler := TSimbaScript_Compiler.Create(TLapeTokenizerFile.Create(FScriptFile));
-    if (FScriptName <> '') then
-    begin
-      FCompiler.Tokenizer.FileName := FScriptName;
-      if (ExtractFileExt(FScriptFile) = '.tmp') and FileIsInDirectory(FScriptFile, GetDataPath()) then
-        DeleteFile(FScriptFile);
-    end;
-
-    FCompiler.OnFindFile := @HandleFindFile;
-    FCompiler.OnHint := @HandleHint;
-    FCompiler.OnHandleDirective := @HandleDirective;
-
-    FCompiler.Import();
-
-    if (FSimbaCommunicationServer = '') then
-      FCompiler.addBaseDefine('SIMBAHEADLESS');
-
-    PClient(FCompiler['Client'].Ptr)^ := FClient;
-    PString(FCompiler['ScriptFile'].Ptr)^ := FScriptFile;
-
-    if FDebugging then
-      FDebugger := TSimbaScript_Debugger.Create(Self);
-
-    FStartTime := GetTickCount64();
-
-    if FCompiler.Compile() then
-    begin
-      DebugLn(Format('Succesfully compiled in %d milliseconds.', [GetTickCount64() - FStartTime]));
-      if FCompileOnly then
-        Exit;
-
-      FStartTime := GetTickCount64();
-
-      try
-        if FDebugging then
-          FDebugger.Start();
-
-        RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, FState);
-
-        if FDebugging then
-        begin
-          FDebugger.Terminate();
-          FDebugger.WaitFor();
-        end;
-      finally
-        FTerminated := True;
-
-        CallOnTerminateMethods(FCompiler);
-      end;
-
-      if (GetTickCount64() - FStartTime < 10000) then
-        DebugLn(Format('Succesfully executed in %d milliseconds.', [GetTickCount64() - FStartTime]))
-      else
-        DebugLn(Format('Succesfully executed in %s.', [TimeStamp(GetTickCount64() - FStartTime)]));
-    end;
-  except
-    on E: Exception do
-      HandleException(E);
+    Stopped();
   end;
 
-  if (FSimbaCommunication <> nil) then
-    FreeAndNil(FSimbaCommunication);
-  if (FDebugger <> nil) then
-    FreeAndNil(FDebugger);
+  Result := True;
+end;
+
+constructor TSimbaScript.Create;
+begin
+  inherited Create();
+
+  FState := SCRIPT_STATE_RUN;
+end;
+
+destructor TSimbaScript.Destroy;
+begin
   if (FClient <> nil) then
     FreeAndNil(FClient);
   if (FCompiler <> nil) then
     FreeAndNil(FCompiler);
+  if (FSimbaCommunication <> nil) then
+    FreeAndNil(FSimbaCommunication);
+
+  inherited Destroy();
 end;
 
-procedure TSimbaScript.HandleStateThread;
-var
-  Stream: THandleStream;
-  Value: UInt8;
+procedure TSimbaScript.Resumed;
 begin
-  Stream := THandleStream.Create(StdInputHandle);
-  while Stream.Read(Value, SizeOf(Int32)) = SizeOf(Int32) do
-  begin
-    Self.State := TInitBool(Value);
-    if Self.State = bFalse then
-      FUserTerminated := True;
-  end;
-
-  Stream.Free();
+  FPlugins.CallOnResume();
 end;
 
-procedure TSimbaScript.SetState(Value: TInitBool);
+procedure TSimbaScript.Paused;
+begin
+  FPlugins.CallOnPause();
+end;
+
+procedure TSimbaScript.Stopped;
+begin
+  FPlugins.CallOnStop();
+
+  CallOnTerminateMethods(FCompiler);
+
+  if (FDebugger <> nil) then
+  begin
+    FDebugger.Terminate();
+    FDebugger.WaitFor();
+  end;
+end;
+
+procedure TSimbaScript.SetState(Value: TSimbaScriptState);
 begin
   FState := Value;
 
+  case FState of
+    SCRIPT_STATE_PAUSE: Paused();
+    SCRIPT_STATE_RUN:   Resumed();
+  end;
+
   if (FSimbaCommunication <> nil) then
     FSimbaCommunication.Invoke(TSimbaMethod_ScriptStateChanged.Create(Ord(FState)));
+end;
+
+function TSimbaScript.CanInvoke: Boolean;
+begin
+  Result := FSimbaCommunication <> nil;
 end;
 
 procedure TSimbaScript.Invoke(Method: TSimbaMethod; DoFree: Boolean);
@@ -322,16 +305,6 @@ begin
     if DoFree then
       Method.Free();
   end;
-end;
-
-constructor TSimbaScript.Create;
-begin
-  inherited Create(True);
-
-  FreeOnTerminate := True;
-  OnTerminate := @HandleTerminate;
-
-  FState := bTrue;
 end;
 
 end.

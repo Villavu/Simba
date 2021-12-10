@@ -5,7 +5,7 @@
 }
 unit simba.dockinghelpers;
 
-{$i simba.inc}
+{$I simba.inc}
 
 interface
 
@@ -306,15 +306,15 @@ function TAnchorDockMasterHelper.LoadLayout(Layout: String): Boolean;
 
   procedure LoadRestoredBounds(Config: TConfigStorage);
   var
-    i, j: Integer;
+    I: Integer;
     R: TRect;
     Form: TCustomForm;
   begin
     Config.AppendBasePath('Restores');
 
-    for i := 1 to Config.GetValue('Count', 0) do
+    for I := 1 to Config.GetValue('Count', 0) do
     begin
-      Config.AppendBasePath('Item' + IntToStr(i) + '/');
+      Config.AppendBasePath('Item' + IntToStr(I) + '/');
 
       Form := Screen.FindForm(Config.GetValue('Names', ''));
       if (Form <> nil) and (Form.HostDockSite is TSimbaAnchorDockHostSite) then

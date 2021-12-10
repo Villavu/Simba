@@ -20,18 +20,19 @@ type
     FStream: TMemoryStream;
     FLock: TCriticalSection;
     FWarned: Boolean;
-    FDepth: Int32;
+    FDepth: Integer;
     FMethods: TStringArray;
-    FStartEvent: TSimpleEvent;
+    FStarted: Boolean;
 
-    procedure Write(constref Event: TSimbaScriptDebuggerEvent);
+    procedure Write(const Event: TSimbaScriptDebuggerEvent);
 
-    procedure EnterMethod(Index: Int32);
-    procedure LeaveMethod(Index: Int32; Exception: Boolean);
+    procedure EnterMethod(const Index: Integer);
+    procedure LeaveMethod(const Index: Integer; const Exception: Boolean);
 
     procedure Execute; override;
   public
-    procedure Start;
+    procedure Compile;
+    procedure Run;
 
     constructor Create(Script: TObject); reintroduce;
     destructor Destroy; override;
@@ -40,9 +41,10 @@ type
 implementation
 
 uses
+  lazloggerbase,
   simba.script, simba.script_compiler_debugger;
 
-procedure TSimbaScript_Debugger.EnterMethod(Index: Int32);
+procedure TSimbaScript_Debugger.EnterMethod(const Index: Integer);
 var
   Event: TSimbaScriptDebuggerEvent;
 begin
@@ -55,7 +57,7 @@ begin
   Write(Event);
 end;
 
-procedure TSimbaScript_Debugger.LeaveMethod(Index: Int32; Exception: Boolean);
+procedure TSimbaScript_Debugger.LeaveMethod(const Index: Integer; const Exception: Boolean);
 var
   Event: TSimbaScriptDebuggerEvent;
 begin
@@ -68,18 +70,30 @@ begin
   Dec(FDepth);
 end;
 
+procedure TSimbaScript_Debugger.Compile;
+begin
+  with TSimbaScript(FScript) do
+    InitializeDebugger(Compiler, @FMethods, @Self.EnterMethod, @Self.LeaveMethod);
+end;
+
+procedure TSimbaScript_Debugger.Run;
+begin
+  Start();
+  while not FStarted do
+    Sleep(100);
+end;
+
 procedure TSimbaScript_Debugger.Execute;
 var
-  I: Int32;
+  I: Integer;
 begin
+  // Send method names
   for I := 0 to High(FMethods) do
     with TSimbaScript(FScript) do
       Invoke(TSimbaMethod_DebuggingMethod.Create(FMethods[I]), True);
 
-  FStartEvent.SetEvent();
-
-  while (FStream.Position > 0) or (not Terminated) do
-  begin
+  FStarted := True;
+  repeat
     FLock.Enter();
 
     try
@@ -95,24 +109,22 @@ begin
     end;
 
     Sleep(500);
-  end;
+  until Terminated;
+
+  // Empty stream. Shouldn't need lock.
+  if (FStream.Position > 0) then
+    with TSimbaScript(FScript) do
+      Invoke(TSimbaMethod_DebuggerEvents.Create(FStream), True);
 end;
 
-procedure TSimbaScript_Debugger.Start;
-begin
-  inherited Start();
-
-  FStartEvent.WaitFor(INFINITE);
-end;
-
-procedure TSimbaScript_Debugger.Write(constref Event: TSimbaScriptDebuggerEvent);
+procedure TSimbaScript_Debugger.Write(const Event: TSimbaScriptDebuggerEvent);
 begin
   if FStream.Position >= 1024 * 1024 then
   begin
     if not FWarned then
     begin
-      WriteLn('Debugger cannot keep up with function calling.');
-      WriteLn('Script will be paused until data has been processed.');
+      DebugLn('Debugger cannot keep up with function calling.');
+      DebugLn('Script will be paused until data has been processed.');
 
       FWarned := True;
     end;
@@ -134,21 +146,20 @@ constructor TSimbaScript_Debugger.Create(Script: TObject);
 begin
   inherited Create(True);
 
+  FreeOnTerminate := True;
+
   FDepth := -1;
   FStream := TMemoryStream.Create();
   FLock := TCriticalSection.Create();
   FScript := Script;
-  FStartEvent := TSimpleEvent.Create();
-
-  with TSimbaScript(FScript) do
-    InitializeDebugger(Compiler, @FMethods, @Self.EnterMethod, @Self.LeaveMethod);
 end;
 
 destructor TSimbaScript_Debugger.Destroy;
 begin
-  FStream.Free();
-  FLock.Free();
-  FStartEvent.Free();
+  if (FStream <> nil) then
+    FreeAndNil(FStream);
+  if (FLock <> nil) then
+    FreeAndNil(FLock);
 
   inherited Destroy();
 end;
