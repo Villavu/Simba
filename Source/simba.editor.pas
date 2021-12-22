@@ -40,24 +40,19 @@ type
     TLineMarkList = specialize TFPGList<TSimbaEditor_LineMark>;
   protected
     FLineMarks: TLineMarkList;
-    FDrawLineMarks: Boolean;
+    FPaintMarks: Boolean;
 
     procedure Paint(Canvas: TCanvas; AClip: TRect; TopOffset: integer); override;
-
-    function GetLineMarkCount: Int32;
-    function GetDrawLineMarks: Boolean;
-    procedure SetDrawLineMarks(Value: Boolean);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
-    procedure ClearLineMarks;
-    procedure AddLineMark(ALine, AColor: Integer);
+    procedure HideMarks;
+    procedure ShowMarks;
 
-    procedure ReCalc; override;
+    procedure ClearMarks;
 
-    property DrawLineMarks: Boolean read GetDrawLineMarks write SetDrawLineMarks;
-    property LineMarkCount: Integer read GetLineMarkCount;
+    procedure AddMark(ALine, AColor: Integer);
   end;
 
   TSimbaEditor = class(TSynEdit)
@@ -78,10 +73,9 @@ type
 
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
 
-    function GetCaretMax: TPoint;
     function GetExpressionAt(X, Y: Integer): String;
   public
-    property CaretMax: TPoint read GetCaretMax;
+    property TextView;
     property ModifiedLinesGutter: TSimbaEditor_ModifiedLinesGutter read FModifiedLinesGutter;
     property AutoComplete: TSimbaAutoComplete read FAutoComplete;
     property ParameterHint: TSimbaParameterHint read FParameterHint;
@@ -138,36 +132,24 @@ begin
   GutterParts.Move(Index, APosition);
 end;
 
-function TSimbaEditor_ModifiedLinesGutter.GetDrawLineMarks: Boolean;
-begin
-  Result := FDrawLineMarks;
-end;
-
-procedure TSimbaEditor_ModifiedLinesGutter.SetDrawLineMarks(Value: Boolean);
-begin
-  FDrawLineMarks := Value;
-
-  InvalidateTextLines(-1, -1);
-end;
-
 procedure TSimbaEditor_ModifiedLinesGutter.Paint(Canvas: TCanvas; AClip: TRect; TopOffset: integer);
 var
   I, Y1, Y2: Integer;
 begin
   inherited Paint(Canvas, AClip, TopOffset);
 
-  if not DrawLineMarks then
-    Exit;
+  if FPaintMarks then
+  begin
+    for I := 0 to FLineMarks.Count - 1 do
+      with FLineMarks[I] do
+      begin
+        Y1 := TextLineToPixel(Line) - 2;
+        Y2 := TextLineToPixelEnd(Line) + 2;
 
-  for I := 0 to FLineMarks.Count - 1 do
-    with FLineMarks[I] do
-    begin
-      Y1 := TextLineToPixel(Line) - 2;
-      Y2 := TextLineToPixelEnd(Line) + 2;
-
-      Canvas.Brush.Color := Color;
-      Canvas.FillRect(AClip.Left, Y1, AClip.Right, Y2);
-    end;
+        Canvas.Brush.Color := Color;
+        Canvas.FillRect(AClip.Left, Y1, AClip.Right, Y2);
+      end;
+  end;
 end;
 
 constructor TSimbaEditor_ModifiedLinesGutter.Create(AOwner: TComponent);
@@ -185,7 +167,23 @@ begin
   inherited Destroy();
 end;
 
-procedure TSimbaEditor_ModifiedLinesGutter.AddLineMark(ALine, AColor: Integer);
+procedure TSimbaEditor_ModifiedLinesGutter.HideMarks;
+begin
+  FPaintMarks := False;
+
+  if (SynEdit is TSimbaEditor) then
+    TSimbaEditor(SynEdit).InvalidateGutter();
+end;
+
+procedure TSimbaEditor_ModifiedLinesGutter.ShowMarks;
+begin
+  FPaintMarks := True;
+
+  if (SynEdit is TSimbaEditor) then
+    TSimbaEditor(SynEdit).InvalidateGutter();
+end;
+
+procedure TSimbaEditor_ModifiedLinesGutter.AddMark(ALine, AColor: Integer);
 var
   LineMark: TSimbaEditor_LineMark;
 begin
@@ -195,24 +193,9 @@ begin
   FLineMarks.Add(LineMark);
 end;
 
-procedure TSimbaEditor_ModifiedLinesGutter.ReCalc;
+procedure TSimbaEditor_ModifiedLinesGutter.ClearMarks;
 begin
-  inherited ReCalc;
-end;
-
-procedure TSimbaEditor_ModifiedLinesGutter.ClearLineMarks;
-begin
-  if (FLineMarks.Count > 0) then
-  begin
-    FLineMarks.Clear();
-
-    InvalidateTextLines(-1, -1);
-  end;
-end;
-
-function TSimbaEditor_ModifiedLinesGutter.GetLineMarkCount: Int32;
-begin
-  Result := FLineMarks.Count;
+  FLineMarks.Clear();
 end;
 
 procedure TSimbaEditor.InsertDocumentation;
@@ -492,12 +475,6 @@ begin
 
   if (Setting = SimbaSettings.GUI.MacOSKeystrokes) then
     SetMacOSKeystrokes(Setting.Value);
-end;
-
-function TSimbaEditor.GetCaretMax: TPoint;
-begin
-  Result.Y := TextView.Count;
-  Result.X := Length(TextView[TextView.Count - 1]) + 1;
 end;
 
 function TSimbaEditor.GetExpressionAt(X, Y: Integer): String;

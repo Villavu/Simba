@@ -241,7 +241,7 @@ begin
   FSavedText := FEditor.Text;
 
   FEditor.MarkTextAsSaved();
-  FEditor.ModifiedLinesGutter.ReCalc();
+  FEditor.InvalidateGutter();
   if (FEditor.OnChange <> nil) then
     FEditor.OnChange(FEditor);
 end;

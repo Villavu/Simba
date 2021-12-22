@@ -12,11 +12,10 @@ interface
 uses
   classes, sysutils, forms, controls, graphics, dialogs,
   stdctrls, extctrls, comctrls, extendednotebook, menus, synedit, synedittypes,
-  simba.scripttab, simba.editor, simba.codeparser;
+  simba.scripttab, simba.editor, simba.codeparser, simba.editor_findreplace;
 
 type
   TSimbaScriptTabsForm = class(TForm)
-    FindDialog: TFindDialog;
     MenuItem1: TMenuItem;
     MenuItemDocumentation: TMenuItem;
     MenuItemUndo: TMenuItem;
@@ -38,28 +37,23 @@ type
     MenuItemCloseTab: TMenuItem;
     MenuItemCloseOtherTabs: TMenuItem;
     TabPopupMenu: TPopupMenu;
-    ReplaceDialog: TReplaceDialog;
     Notebook: TExtendedNotebook;
     EditorPopupMenu: TPopupMenu;
-    ClearLineMarksTimer: TTimer;
 
-    procedure DoOnFindDialog(Sender: TObject);
-    procedure DoOnReplaceText(Sender: TObject; const ASearch, AReplace: string; Line, Column: integer; var ReplaceAction: TSynReplaceAction);
-    procedure DoOnReplaceDialog(Sender: TObject);
     procedure DoEditorPopupClick(Sender: TObject);
     procedure DoEditorPopupShow(Sender: TObject);
     procedure DoOnDropFiles(Sender: TObject; const FileNames: array of String);
     procedure DoOnTabChange(Sender: TObject);
     procedure DoTabPopupClick(Sender: TObject);
     procedure DoTabPopupOpen(Sender: TObject);
-    procedure HandleClearMarksTimer(Sender: TObject);
-    procedure ReplaceDialogShow(Sender: TObject);
   protected
+    FEditorReplace: TSimbaEditorReplace;
+    FEditorFind: TSimbaEditorFind;
+
     FOnEditorAdded: TNotifyEvent;
     FOnEditorChanged: TNotifyEvent;
     FOnEditorLoaded: TNotifyEvent;
     FOnEditorCaretChanged: TNotifyEvent;
-    FOnEditorSearch: TNotifyEvent;
 
     procedure CaretMoved(Sender: TObject; Changes: TSynStatusChanges);
 
@@ -70,11 +64,12 @@ type
 
     procedure SetCurrentTab(Value: TSimbaScriptTab);
   public
+    constructor Create(AOwner: TComponent); override;
+
     property OnEditorAdded: TNotifyEvent read FOnEditorAdded write FOnEditorAdded;
     property OnEditorLoaded: TNotifyEvent read FOnEditorLoaded write FOnEditorLoaded;
     property OnEditorChanged: TNotifyEvent read FOnEditorChanged write FOnEditorChanged;
     property OnEditorCaretChanged: TNotifyEvent read FOnEditorCaretChanged write FOnEditorCaretChanged;
-    property OnEditorSearch: TNotifyEvent read FOnEditorSearch write FOnEditorSearch;
 
     property TabCount: Integer read GetTabCount;
     property Tabs[Index: Integer]: TSimbaScriptTab read GetTab;
@@ -111,7 +106,6 @@ implementation
 {$R *.lfm}
 
 uses
-  syneditsearch, LCLStrConsts,
   simba.outputform, simba.scripttabhistory, simba.files;
 
 procedure TSimbaScriptTabsForm.DoEditorPopupShow(Sender: TObject);
@@ -143,91 +137,6 @@ begin
   end;
 end;
 
-procedure TSimbaScriptTabsForm.DoOnReplaceText(Sender: TObject; const ASearch, AReplace: string; Line, Column: integer; var ReplaceAction: TSynReplaceAction);
-begin
-  case MessageDlg('Replace', Format('Replace "%s" with "%s"?', [ASearch, AReplace]), mtConfirmation, [mbYes, mbYesToAll, mbNo, mbCancel], 0) of
-    mrYes:      ReplaceAction := raReplace;
-    mrYesToAll: ReplaceAction := raReplaceAll;
-    mrNo:       ReplaceAction := raSkip;
-    mrCancel:   ReplaceAction := raCancel;
-  end;
-end;
-
-procedure TSimbaScriptTabsForm.DoOnFindDialog(Sender: TObject);
-
-  procedure AddLineMarks(CaseSensitive, WholeWorld: Boolean; Pattern: String);
-  var
-    Search: TSynEditSearch;
-    SearchStart, SearchEnd, FoundStart, FoundEnd: TPoint;
-  begin
-    Search := TSynEditSearch.Create();
-
-    try
-      Search.Sensitive := CaseSensitive;
-      Search.Whole := WholeWorld;
-      Search.Pattern := Pattern;
-      Search.IdentChars := CurrentEditor.IdentChars;
-
-      with CurrentEditor do
-      begin
-        if SelAvail then
-        begin
-          SearchStart := BlockBegin;
-          SearchEnd := BlockEnd;
-        end else
-        begin
-          SearchStart := Point(1, 1);
-          SearchEnd := CaretMax;
-        end;
-
-        while Search.FindNextOne(Lines, SearchStart, SearchEnd, FoundStart, FoundEnd, True) do
-        begin
-          ModifiedLinesGutter.AddLineMark(FoundStart.Y + (FoundEnd.Y - FoundStart.Y), RGBToColor(206,0,206));
-
-          SearchStart := FoundEnd;
-        end;
-      end;
-    finally
-      Search.Free();
-    end;
-
-    CurrentEditor.ModifiedLinesGutter.DrawLineMarks := True;
-
-    ClearLineMarksTimer.Enabled := False;
-    ClearLineMarksTimer.Enabled := True;
-  end;
-
-var
-  Options: TSynSearchOptions;
-  Editor: TSimbaEditor;
-begin
-  Editor := CurrentEditor;
-
-  if (Editor <> nil) then
-  begin
-    Options := [];
-    if (frMatchCase in FindDialog.Options) then
-      Options := Options + [ssoMatchCase];
-    if (frWholeWord in FindDialog.Options) then
-      Options := Options + [ssoWholeWord];
-
-    AddLineMarks(frMatchCase in FindDialog.Options, frWholeWord in FindDialog.Options, FindDialog.FindText);
-
-    if (FOnEditorSearch <> nil) then
-      FOnEditorSearch(Editor);
-
-    if Editor.SelAvail then
-      Editor.SearchReplace(FindDialog.FindText, '', Options + [ssoSelectedOnly])
-    else
-    if Editor.SearchReplace(FindDialog.FindText, '', Options + [ssoEntireScope]) = 0 then
-      Editor.SearchReplaceEx(FindDialog.FindText, '', Options + [ssoEntireScope], Point(1, 1));
-  end;
-
-  FindDialog.CloseDialog();
-  if Editor.CanSetFocus() then
-    Editor.SetFocus();
-end;
-
 procedure TSimbaScriptTabsForm.DoEditorPopupClick(Sender: TObject);
 begin
   if (CurrentEditor = nil) then
@@ -252,42 +161,6 @@ var
 begin
   for I := 0 to High(FileNames) do
     Self.Open(FileNames[I], True);
-end;
-
-procedure TSimbaScriptTabsForm.DoOnReplaceDialog(Sender: TObject);
-var
-  Options: TSynSearchOptions;
-  Editor: TSimbaEditor;
-begin
-  Editor := CurrentEditor;
-
-  if (Editor <> nil) then
-  begin
-    Options := [ssoReplaceAll];
-
-    if (frMatchCase in ReplaceDialog.Options) then
-      Options := Options + [ssoMatchCase];
-    if (frWholeWord in ReplaceDialog.Options) then
-      Options := Options + [ssoWholeWord];
-    if (frPromptOnReplace in ReplaceDialog.Options) then
-      Options := Options + [ssoPrompt];
-
-    Editor.BeginUndoBlock();
-    Editor.OnReplaceText := @DoOnReplaceText;
-
-    try
-      if Editor.SearchReplace(ReplaceDialog.FindText, ReplaceDialog.ReplaceText, Options) = 0 then
-        Editor.SearchReplaceEx(ReplaceDialog.FindText, ReplaceDialog.ReplaceText, Options, Point(1, 1));
-    finally
-      Editor.OnReplaceText := nil;
-    end;
-
-    Editor.EndUndoBlock();
-  end;
-
-  ReplaceDialog.CloseDialog();
-  if Editor.CanSetFocus() then
-    Editor.SetFocus();
 end;
 
 procedure TSimbaScriptTabsForm.DoOnTabChange(Sender: TObject);
@@ -320,58 +193,6 @@ begin
   MenuItemCloseOtherTabs.Enabled := Notebook.IndexOfPageAt(NoteBook.ScreenToClient(TabPopupMenu.PopupPoint)) >= 0;
 end;
 
-procedure TSimbaScriptTabsForm.HandleClearMarksTimer(Sender: TObject);
-var
-  I: Integer;
-begin
-  for I := 0 to TabCount - 1 do
-    Tabs[I].Editor.ModifiedLinesGutter.DrawLineMarks := False;
-
-  ClearLineMarksTimer.Enabled := False;
-end;
-
-type
-  TReplaceDialogHack = class(TReplaceDialog);
-
-procedure TSimbaScriptTabsForm.ReplaceDialogShow(Sender: TObject);
-var
-  I: Integer;
-  Button: TButton;
-  ReplaceButton, ReplaceAllButton, FindMoreButton: TButton;
-begin
-  ReplaceButton    := nil;
-  ReplaceAllButton := nil;
-  FindMoreButton   := nil;
-
-  with TReplaceDialogHack(Sender).FFindForm do
-    for I := 0 to ComponentCount - 1 do
-    begin
-      if (Components[I] is TButton) then
-      begin
-        Button := TButton(Components[I]);
-
-        if (Button.Caption = rsReplace)    then ReplaceButton := Button;
-        if (Button.Caption = rsReplaceAll) then ReplaceAllButton := Button;
-        if (Button.Caption = rsFindMore)   then FindMoreButton := Button;
-      end;
-    end;
-
-  if (FindMoreButton <> nil) then
-    FindMoreButton.Hide();
-
-  if (ReplaceButton <> nil) and (ReplaceAllButton <> nil) then
-  begin
-    ReplaceButton.Anchors := ReplaceButton.Anchors + [akLeft];
-    ReplaceButton.AnchorSide[akLeft].Control := ReplaceAllButton;
-    ReplaceButton.AnchorSide[akLeft].Side := asrLeft;
-
-    ReplaceButton.BorderSpacing.Top := 0;
-    ReplaceButton.BorderSpacing.Bottom := 0;
-    ReplaceAllButton.BorderSpacing.Top := 0;
-    ReplaceAllButton.BorderSpacing.Bottom := 0;
-  end;
-end;
-
 procedure TSimbaScriptTabsForm.CaretMoved(Sender: TObject; Changes: TSynStatusChanges);
 begin
   if (FOnEditorCaretChanged <> nil) then
@@ -381,6 +202,14 @@ end;
 procedure TSimbaScriptTabsForm.SetCurrentTab(Value: TSimbaScriptTab);
 begin
   Notebook.ActivePage := Value;
+end;
+
+constructor TSimbaScriptTabsForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  FEditorReplace := TSimbaEditorReplace.Create(Self);
+  FEditorFind := TSimbaEditorFind.Create(Self);
 end;
 
 function TSimbaScriptTabsForm.GetTabCount: Integer;
@@ -395,92 +224,42 @@ end;
 
 function TSimbaScriptTabsForm.GetCurrentTab: TSimbaScriptTab;
 begin
-  Result := nil;
   if (Notebook.TabIndex > -1) then
-    Result := Notebook.Pages[Notebook.TabIndex] as TSimbaScriptTab;
+    Result := Notebook.Pages[Notebook.TabIndex] as TSimbaScriptTab
+  else
+    Result := nil;
 end;
 
 function TSimbaScriptTabsForm.GetCurrentEditor: TSimbaEditor;
 begin
-  Result := nil;
   if (CurrentTab <> nil) then
-    Result := CurrentTab.Editor;
+    Result := CurrentTab.Editor
+  else
+    Result := nil;
 end;
 
 procedure TSimbaScriptTabsForm.Replace;
 begin
   if (CurrentEditor <> nil) then
-  begin
-    if CurrentEditor.SelAvail then
-      FindDialog.Options := FindDialog.Options - [frEntireScope]
-    else
-      FindDialog.Options := FindDialog.Options + [frEntireScope];
-
-    if CurrentEditor.GetWordAtRowCol(CurrentEditor.CaretXY) <> '' then
-      ReplaceDialog.FindText := CurrentEditor.GetWordAtRowCol(CurrentEditor.CaretXY);
-    ReplaceDialog.Execute();
-  end;
+    FEditorReplace.Execute(CurrentEditor);
 end;
 
 procedure TSimbaScriptTabsForm.Find;
 begin
   if (CurrentEditor <> nil) then
-  begin
-    if CurrentEditor.GetWordAtRowCol(CurrentEditor.CaretXY) <> '' then
-      FindDialog.FindText := CurrentEditor.GetWordAtRowCol(CurrentEditor.CaretXY);
-    FindDialog.Execute();
-  end;
+    FEditorFind.Execute(CurrentEditor);
 end;
 
 procedure TSimbaScriptTabsForm.FindNext;
-var
-  Options: TSynSearchOptions;
-  Editor: TSimbaEditor;
 begin
-  Editor := CurrentEditor;
-
-  if (Editor <> nil) then
-  begin
-    Options := [ssoFindContinue];
-    if (frMatchCase in FindDialog.Options) then
-      Options := Options + [ssoMatchCase];
-    if (frWholeWord in FindDialog.Options) then
-      Options := Options + [ssoWholeWord];
-
-    if Editor.SearchReplace(FindDialog.FindText, '', Options) = 0 then
-      Editor.SearchReplaceEx(FindDialog.FindText, '', Options, Point(1, 1));
-
-    Editor.ModifiedLinesGutter.DrawLineMarks := True;
-
-    ClearLineMarksTimer.Enabled := False;
-    ClearLineMarksTimer.Enabled := True;
-  end;
+  if (CurrentEditor <> nil) then
+    FEditorFind.FindNext(CurrentEditor);
 end;
 
 procedure TSimbaScriptTabsForm.FindPrevious;
-var
-  Options: TSynSearchOptions;
-  Editor: TSimbaEditor;
 begin
-  Editor := CurrentEditor;
-
-  if (Editor <> nil) then
-  begin
-    Options := [ssoFindContinue, ssoBackwards];
-
-    if (frMatchCase in FindDialog.Options) then
-      Options := Options + [ssoMatchCase];
-    if (frWholeWord in FindDialog.Options) then
-      Options := Options + [ssoWholeWord];
-
-    if Editor.SearchReplace(FindDialog.FindText, '', Options) = 0 then
-      Editor.SearchReplaceEx(FindDialog.FindText, '', Options, Editor.CaretMax);
-
-    Editor.ModifiedLinesGutter.DrawLineMarks := True;
-
-    ClearLineMarksTimer.Enabled := False;
-    ClearLineMarksTimer.Enabled := True;
-  end;
+  if (CurrentEditor <> nil) then
+    FEditorFind.FindPrev(CurrentEditor);
 end;
 
 function TSimbaScriptTabsForm.FindTab(ScriptInstance: TObject): TSimbaScriptTab;

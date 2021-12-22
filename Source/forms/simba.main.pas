@@ -226,7 +226,6 @@ type
     procedure HandleEditorChanged(Sender: TObject);
     procedure HandleEditorLoaded(Sender: TObject);
     procedure HandleEditorCaretChange(Sender: TObject);
-    procedure HandleEditorSearch(Sender: TObject);
 
     procedure SetToolbarSize(Value: Integer);
     procedure SetCustomFontSize(Value: Integer);
@@ -1062,17 +1061,6 @@ begin
     StatusPanelCaret.Caption := ' Line ' + IntToStr(CaretY) + ', Col ' + IntToStr(CaretX);
 end;
 
-procedure TSimbaForm.HandleEditorSearch(Sender: TObject);
-begin
-  with Sender as TSimbaEditor do
-  begin
-    if (ModifiedLinesGutter.LineMarkCount = 0) then
-      StatusPanelFileName.Caption := Format(' Found %d matches.', [ModifiedLinesGutter.LineMarkCount])
-    else
-      StatusPanelFileName.Caption := Format(' Found %d matches. Use F3 (Forward) or Shift + F3 (Backwards) to traverse matches', [ModifiedLinesGutter.LineMarkCount]);
-  end;
-end;
-
 procedure TSimbaForm.MenuEditClick(Sender: TObject);
 begin
   if SimbaScriptTabsForm.CurrentEditor <> nil then
@@ -1166,7 +1154,6 @@ begin
   SimbaScriptTabsForm.OnEditorLoaded := @HandleEditorLoaded;
   SimbaScriptTabsForm.OnEditorChanged := @HandleEditorChanged;
   SimbaScriptTabsForm.OnEditorCaretChanged := @HandleEditorCaretChange;
-  SimbaScriptTabsForm.OnEditorSearch := @HandleEditorSearch;
   SimbaScriptTabsForm.AddTab();
 end;
 
