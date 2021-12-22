@@ -96,13 +96,13 @@ implementation
 uses
   lcltype, lclintf,
   simba.math,
-{$IF DEFINED(WINDOWS)}
+  {$IF DEFINED(WINDOWS)}
   simba.nativeinterface_windows;
-{$ELSEIF DEFINED(LINUX)}
+  {$ELSEIF DEFINED(LINUX)}
   simba.nativeinterface_linux;
-{$ELSEIF DEFINED(DARWIN)}
+  {$ELSEIF DEFINED(DARWIN)}
   simba.nativeinterface_darwin;
-{$ENDIF}
+  {$ENDIF}
 
 procedure TSimbaNativeInterface.SendString(Text: String; KeyWait, KeyModWait: Integer);
 var
@@ -247,6 +247,10 @@ initialization
                           {$ELSEIF DEFINED(DARWIN)}
                           TSimbaNativeInterface_Darwin.Create();
                           {$ENDIF}
+
+finalization
+  if (SimbaNativeInterface <> nil) then
+    FreeAndNil(SimbaNativeInterface)
 
 end.
 
