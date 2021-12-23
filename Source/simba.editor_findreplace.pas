@@ -50,30 +50,26 @@ uses
 type
   TSimbaEditorHelper = class helper for TSimbaEditor
   public
-    procedure MarksChanging;
-    procedure MarksChanged;
-
     procedure AddMarks(CaseSensitive, WholeWorld: Boolean; Pattern: String);
-    procedure HideMarks(Sender: TObject);
+    procedure ShowMarks;
+    procedure HideMarks(Sender: TObject); overload;
+    procedure HideMarks; overload;
   end;
 
 procedure TSimbaEditorHelper.HideMarks(Sender: TObject);
 begin
   ModifiedLinesGutter.HideMarks();
 
-  TTimer(Sender).Free();
+  if (Sender <> nil) then
+    TTimer(Sender).Free();
 end;
 
-procedure TSimbaEditorHelper.MarksChanging;
-var
-  Timer: TTimer;
+procedure TSimbaEditorHelper.HideMarks;
 begin
-  Timer := TTimer(FindComponent('MarksChangedTimer'));
-  if (Timer <> nil) then
-    Timer.Enabled := False;
+  HideMarks(FindComponent('MarksChangedTimer'));
 end;
 
-procedure TSimbaEditorHelper.MarksChanged;
+procedure TSimbaEditorHelper.ShowMarks;
 var
   Timer: TTimer;
 begin
@@ -84,7 +80,6 @@ begin
   if (Timer = nil) then
   begin
     Timer := TTimer.Create(Self);
-    Timer.OnStopTimer := @HideMarks;
     Timer.Name := 'MarksChangedTimer';
   end;
 
@@ -129,7 +124,7 @@ begin
     Search.Free();
   end;
 
-  MarksChanged();
+  ShowMarks();
 end;
 
 type
@@ -244,7 +239,7 @@ procedure TSimbaEditorFind.Execute(Editor: TSynEdit);
 begin
   FEditor := Editor;
   with TSimbaEditor(FEditor) do
-    MarksChanging();
+    HideMarks();
 
   if FEditor.GetWordAtRowCol(FEditor.CaretXY) <> '' then
     FDialog.FindText := FEditor.GetWordAtRowCol(FEditor.CaretXY);
@@ -279,7 +274,7 @@ begin
     if SearchReplace(FDialog.FindText, '', SearchOptions) = 0 then
       SearchReplaceEx(FDialog.FindText, '', SearchOptions, MaxCaret);
 
-    MarksChanged();
+    ShowMarks();
   end;
 end;
 
@@ -299,7 +294,7 @@ begin
     if SearchReplace(FDialog.FindText, '', SearchOptions) = 0 then
       SearchReplaceEx(FDialog.FindText, '', SearchOptions, Point(1, 1));
 
-    MarksChanged();
+    ShowMarks();
   end;
 end;
 

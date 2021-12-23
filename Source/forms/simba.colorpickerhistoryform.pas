@@ -39,7 +39,7 @@ type
     function GetColorCount: Integer;
     function GetPoint(Index: Integer): TPoint;
   public
-    procedure Add(APoint: TPoint; AColor: TColor; Select: Boolean);
+    procedure Add(APoint: TPoint; AColor: TColor);
 
     property ColorCount: Integer read GetColorCount;
     property Color[Index: Integer]: TColor read GetColor;
@@ -110,19 +110,18 @@ var
   Value: TColorHistoryValue;
   Stream: TMemoryStream;
 begin
-  Width := 750;
-  Height := 400;
-
-  Stream := TStringStream.Create(AnsiString(SimbaSettings.GUI.ColorPickerHistory.Value));
-  while Stream.Read(Value, SizeOf(TColorHistoryValue)) = SizeOf(TColorHistoryValue) do
-    Add(Value.Point, Value.Color, False);
-
-  if (ColorListBox.Items.Count > 0) then
-    ColorListBox.Selected := ColorListBox.Colors[0];
+  Width := Scale96ToScreen(500);
+  Height := Scale96ToScreen(350);
 
   StringGrid.FocusRectVisible := False;
   StringGrid.EditorBorderStyle := bsNone;
   StringGrid.Editor.Color := clForm;
+
+  ColorListBox.Options := ColorListBox.Options - [lboDrawFocusRect];
+
+  Stream := TStringStream.Create(AnsiString(SimbaSettings.GUI.ColorPickerHistory.Value));
+  while Stream.Read(Value, SizeOf(TColorHistoryValue)) = SizeOf(TColorHistoryValue) do
+    Add(Value.Point, Value.Color);
 
   SizeComponents();
 end;
@@ -202,7 +201,7 @@ begin
     StringGrid.RowHeights[I] := Size.Height;
 end;
 
-procedure TSimbaColorPickerHistoryForm.Add(APoint: TPoint; AColor: TColor; Select: Boolean);
+procedure TSimbaColorPickerHistoryForm.Add(APoint: TPoint; AColor: TColor);
 begin
   ColorListBox.ItemIndex := ColorListBox.Items.AddObject('%d at (%d, %d)', [AColor, APoint.X, APoint.Y], TObject(PtrUInt(AColor)));
 end;
