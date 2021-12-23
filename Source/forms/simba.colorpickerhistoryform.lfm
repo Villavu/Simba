@@ -1,7 +1,7 @@
 object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
-  Left = 978
+  Left = 80
   Height = 430
-  Top = 578
+  Top = 135
   Width = 830
   ActiveControl = ColorListBox
   Caption = 'Color Picker History'
@@ -26,7 +26,6 @@ object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
     Anchors = [akTop, akLeft, akRight, akBottom]
     BorderSpacing.Left = 6
     BorderSpacing.Bottom = 6
-    ClickOnSelChange = False
     ExtendedSelect = False
     ItemHeight = 0
     OnSelectionChange = ColorListBoxSelectionChange

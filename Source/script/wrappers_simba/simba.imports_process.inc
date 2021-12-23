@@ -9,7 +9,7 @@ addGlobalFunc('function IsProcess64Bit(PID: TProcessID): Boolean', @_LapeIsProce
 addGlobalFunc('function GetProcessPath(PID: TProcessID): String', @_LapeGetProcessPath);
 addGlobalFunc('procedure TerminateProcess(PID: TProcessID)', @_LapeTerminateProcess);
 addGlobalFunc('function RunCommandInDir(Directory, Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus; overload', @_LapeRunCommandInDirOutput);
-addGlobalFunc('function RunCommandInDir(Directory, Executable: String; Commands: TStringArray): TProcessID; overload', @_LapeRunCommand);
+addGlobalFunc('function RunCommandInDir(Directory, Executable: String; Commands: TStringArray): TProcessID; overload', @_LapeRunCommandInDir);
 addGlobalFunc('function RunCommand(Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus; overload', @_LapeRunCommandOutput);
 addGlobalFunc('function RunCommand(Executable: String; Commands: TStringArray): TProcessID; overload', @_LapeRunCommand);
 addGlobalFunc('function RunCommandTimeout(Executable: String; Commands: TStringArray; out Output: String; Timeout: Int32): Boolean', @_LapeRunCommandTimeout);

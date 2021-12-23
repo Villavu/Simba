@@ -211,7 +211,7 @@ type
     FDockingReset: Boolean;
     FRecentFiles: TStringList;
 
-    procedure ShowColorPickerHistoryASync(Data: PtrInt);
+    procedure DoColorPicked(Data: PtrInt);
 
     procedure FontChanged(Sender: TObject); override;
 
@@ -335,8 +335,8 @@ procedure TSimbaForm.SetToolbarSize(Value: Integer);
 begin
   ToolBar.ImagesWidth := Value;
 
-  ToolBar.ButtonWidth  := Value + 8;
-  ToolBar.ButtonHeight := Value + 8;
+  ToolBar.ButtonWidth  := Value + Scale96ToScreen(8);
+  ToolBar.ButtonHeight := Value + Scale96ToScreen(8);
 end;
 
 procedure TSimbaForm.SetCustomFontSize(Value: Integer);
@@ -653,10 +653,13 @@ begin
   end;
 end;
 
-procedure TSimbaForm.ShowColorPickerHistoryASync(Data: PtrInt);
+procedure TSimbaForm.DoColorPicked(Data: PtrInt);
 begin
   MenuItemColourHistory.Checked := True;
   MenuItemColourHistory.OnClick(MenuItemColourHistory);
+
+  if (SimbaColorPickerHistoryForm.ColorListBox.Items.Count > 0) then
+    SimbaColorPickerHistoryForm.ColorListBox.ItemIndex := SimbaColorPickerHistoryForm.ColorListBox.Count - 1;
 end;
 
 procedure TSimbaForm.FontChanged(Sender: TObject);
@@ -1102,13 +1105,13 @@ begin
       if not Picked then
         Exit;
 
-      SimbaColorPickerHistoryForm.Add(Point, Color, True);
+      SimbaColorPickerHistoryForm.Add(Point, Color);
       SimbaOutputForm.Add('Color picked: ' + IntToStr(Color) + ' at (' + IntToStr(Point.X) + ', ' + IntToStr(Point.Y) + ')');
+
+      Application.QueueAsyncCall(@DoColorPicked, 0);
     finally
       Free();
     end;
-
-    Application.QueueAsyncCall(@ShowColorPickerHistoryASync, 0);
   except
     on E: Exception do
       ShowMessage('Exception while picking color: ' + E.Message + '(' + E.ClassName + ')');

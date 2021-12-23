@@ -623,7 +623,7 @@ begin
     FMousePanel.Width := Round(Measurement.Width * 1.35);
     FDimensionsPanel.Width := Round(Measurement.Width * 1.35);
     FZoomPanel.Width := Round(Measurement.Width * 0.75);
-    FStatusBar.Height := Round(Measurement.Height * 1.2);
+    FStatusBar.Height := Round(Measurement.Height * 1.05);
     FStatusBar.Font := Self.Font;
   finally
     Free();

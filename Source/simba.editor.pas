@@ -10,9 +10,8 @@ unit simba.editor;
 interface
 
 uses
-  Classes, SysUtils, LazSynEditMouseCmdsTypes, Graphics, Controls, LCLType, fgl,
-  SynEdit, SynGutterLineOverview, SynEditMouseCmds,
-  SynEditKeyCmds, SynEditHighlighter, SynPluginMultiCaret,
+  classes, sysutils, graphics, controls, lcltype, fgl,
+  synedit, syngutterlineoverview, lazsyneditmousecmdstypes, syneditmousecmds, syneditkeycmds, synpluginmulticaret,
   simba.highlighter, simba.autocomplete, simba.parameterhint, simba.editor_attributes, simba.settings;
 
 const
@@ -92,8 +91,8 @@ type
 implementation
 
 uses
-  SynEditMarkupHighAll, dialogs, math, menus, SynGutter, SynEditTypes, LazLoggerBase,
-  simba.scripttabhistory, Forms, simba.fonthelpers, simba.parser_misc, simba.codeparser;
+  forms, math, syneditmarkuphighall, syngutter, synedittypes,
+  simba.scripttabhistory, simba.parser_misc, simba.codeparser, simba.fonthelpers;
 
 type
   TSimbaEditor_GutterSeparator = class(TSynGutterSeparator)
@@ -499,8 +498,8 @@ begin
   TabWidth := 2;
   BlockIndent := 2;
 
-  Highlighter := TSynPasSyn.Create(Self);
-  with Highlighter as TSynPasSyn do
+  Highlighter := TSynFreePascalSyn.Create(Self);
+  with TSynFreePascalSyn(Highlighter) do
   begin
     CommentAttri.Foreground := clBlue;
     CommentAttri.Style := [fsBold];
@@ -551,8 +550,6 @@ begin
 
   FAttributes := TSimbaEditor_Attributes.Create(Self);
 
-  Gutter.ChangesPart.AutoSize := False;
-  Gutter.ChangesPart.Width := 2;
   Gutter.ChangesPart.ModifiedColor := RGBToColor(190, 0, 0);
   Gutter.ChangesPart.SavedColor := RGBToColor(2, 100, 64);
 
@@ -564,9 +561,6 @@ begin
     FModifiedLinesGutter.ColorSaved := Gutter.ChangesPart.SavedColor;
 
     TSynGutterLOvProviderCurrentPage.Create(Providers);
-
-    AutoSize := False;
-    Width := 6;
   end;
 
   MouseActions.AddCommand(emcOverViewGutterScrollTo, False, LazSynEditMouseCmdsTypes.mbLeft, ccSingle, cdDown,[],[]);
