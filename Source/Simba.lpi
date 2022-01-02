@@ -24,9 +24,51 @@
       <CharSet Value="04B0"/>
       <StringTable CompanyName="villavu.com" FileDescription="Simba: http://wizzup.org/simba/" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="1.5"/>
     </VersionInfo>
-    <BuildModes Count="5">
-      <Item1 Name="WIN32" Default="True"/>
-      <Item2 Name="WIN64">
+    <BuildModes Count="6">
+      <Item1 Name="WIN32_DEBUG" Default="True"/>
+      <Item2 Name="WIN32">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../Simba-Win32"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
+            <Libraries Value="../Modules/lape/extensions/ffi/bin/win32"/>
+            <OtherUnitFiles Value="$(ProjPath);windows;script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+            <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <CStyleMacros Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="win32"/>
+            <Optimizations>
+              <OptimizationLevel Value="3"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
+            </CompilerMessages>
+            <CustomOptions Value="-dStaticFFI
+-dLape_CDECL"/>
+            <CreateMakefileOnBuild Value="True"/>
+          </Other>
+        </CompilerOptions>
+      </Item2>
+      <Item3 Name="WIN64">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -61,8 +103,8 @@
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
-      </Item2>
-      <Item3 Name="LINUX64">
+      </Item3>
+      <Item4 Name="LINUX64">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -101,8 +143,8 @@
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
-      </Item3>
-      <Item4 Name="DARWIN64">
+      </Item4>
+      <Item5 Name="DARWIN64">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -149,8 +191,8 @@
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
-      </Item4>
-      <Item5 Name="AARCH64">
+      </Item5>
+      <Item6 Name="AARCH64">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -189,7 +231,7 @@
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
-      </Item5>
+      </Item6>
       <SharedMatrixOptions Count="1">
         <Item1 ID="760724751738" Modes="DARWIN64" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
       </SharedMatrixOptions>
@@ -287,7 +329,9 @@
       <Unit12>
         <Filename Value="forms/simba.openexampleform.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="SimbaOpenExampleForm"/>
         <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
       </Unit12>
       <Unit13>
         <Filename Value="forms/simba.outputform.pas"/>
@@ -297,7 +341,9 @@
       <Unit14>
         <Filename Value="forms/simba.package_form.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="SimbaPackageForm"/>
         <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
       </Unit14>
       <Unit15>
         <Filename Value="forms/simba.scripttabsform.pas"/>
@@ -386,7 +432,7 @@
   <CompilerOptions>
     <Version Value="11"/>
     <Target>
-      <Filename Value="../Simba-Win32"/>
+      <Filename Value="../Simba-Debug"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
@@ -400,20 +446,12 @@
       </SyntaxOptions>
     </Parsing>
     <CodeGeneration>
-      <SmartLinkUnit Value="True"/>
+      <Checks>
+        <RangeChecks Value="True"/>
+      </Checks>
       <TargetCPU Value="i386"/>
       <TargetOS Value="win32"/>
-      <Optimizations>
-        <OptimizationLevel Value="3"/>
-      </Optimizations>
     </CodeGeneration>
-    <Linking>
-      <Debugging>
-        <GenerateDebugInfo Value="False"/>
-        <StripSymbols Value="True"/>
-      </Debugging>
-      <LinkSmart Value="True"/>
-    </Linking>
     <Other>
       <CompilerMessages>
         <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>

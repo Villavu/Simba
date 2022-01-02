@@ -34,6 +34,8 @@ type
     Path: String;
     Version: String;
     VersionTime: TDateTime;
+    Scripts: String;
+    Examples: String;
   end;
 
   TSimbaPackageRelease = record
@@ -167,9 +169,11 @@ begin
   try
     with TIniFile.Create(GetPackagePath() + 'packages.ini') do
     try
-      Package.FInstalledVersion.Name    := ReadString(Package.Owner + '/' + Package.Name, 'Name', '');
-      Package.FInstalledVersion.Path    := ReadString(Package.Owner + '/' + Package.Name, 'Path', '');
-      Package.FInstalledVersion.Version := ReadString(Package.Owner + '/' + Package.Name, 'InstalledVersion', '');
+      Package.FInstalledVersion.Name     := ReadString(Package.Owner + '/' + Package.Name, 'Name', '');
+      Package.FInstalledVersion.Path     := ReadString(Package.Owner + '/' + Package.Name, 'Path', '');
+      Package.FInstalledVersion.Version  := ReadString(Package.Owner + '/' + Package.Name, 'InstalledVersion', '');
+      Package.FInstalledVersion.Scripts  := ReadString(Package.Owner + '/' + Package.Name, 'Scripts', '');
+      Package.FInstalledVersion.Examples := ReadString(Package.Owner + '/' + Package.Name, 'Examples', '');
 
       Package.FInstalledVersion.VersionTime := ReadDateTime(Package.Owner + '/' + Package.Name, 'InstalledVersionTime', 0);
     finally

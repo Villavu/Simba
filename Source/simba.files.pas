@@ -255,11 +255,10 @@ end;
 
 function HashFile(const FileName: String): String;
 begin
-  Result := '';
   try
     Result := SHA1Print(SHA1File(FileName, 256*256));
   except
-    { Return empty string on file not found }
+    Result := '';
   end;
 end;
 

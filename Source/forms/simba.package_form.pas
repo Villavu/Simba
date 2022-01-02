@@ -9,12 +9,16 @@ unit simba.package_form;
 
   // The package name to install under.
   name=SRL
-  // The path to install into, from the working directory.
+  // The path to install into, from simba's exectuable location
   directory=Includes
   // flat extraction into directory
   flat=false
   // files not to install
   ignore=.git,.gitignore,.simbapackage,.gitattributes
+  // scripts (files or directories) which will be added under a menu item.
+  scripts=docs/docgen/docgen.simba,tests/
+  // examples (files or directories) which will be added to "file > open example" form.
+  examples=examples
 *)
 
 {$i simba.inc}
@@ -24,11 +28,10 @@ interface
 uses
   classes, sysutils, dividerbevel, forms, controls, graphics,
   dialogs, stdctrls, buttons, buttonpanel, extctrls, menus,
-  simba.package;
+  simba.mufasatypes, simba.package;
 
 type
   TSimbaPackageForm = class(TForm)
-  published
     ReleasesList: TComboBox;
     IgnoreListEdit: TEdit;
     Images: TImageList;
@@ -114,10 +117,13 @@ type
     procedure UpdateDownloadProgress(Sender: TObject; URL: String; APosition, ASize: Int64);
     procedure UpdateExtractProgress(Sender: TObject; FileName: String; APosition, ASize: Int64);
 
+    procedure UpdateMenuItems;
+
     // Check for package updates. This is called on another thread
     procedure DoPackageUpdate;
     // Package updating has finished. This is synchronized so components are updated here.
     procedure DoPackageUpdateFinished(Sender: TObject);
+    procedure DoMenuItemClick(Sender: TObject);
 
     function GetSelectedPackage: TSimbaPackage;
     function GetSelectedRelease: String;
@@ -150,7 +156,7 @@ implementation
 
 uses
   dateutils, lcltype, lclintf, lazfileutils, types,
-  simba.main, simba.files, simba.httpclient_async, simba.httpclient;
+  simba.main, simba.files, simba.httpclient_async, simba.httpclient, simba.scripttabsform;
 
 procedure TSimbaPackageForm.DoSelectedPackageChanged(Sender: TObject; User: Boolean);
 begin
@@ -233,7 +239,7 @@ var
   ResponseCode: Integer;
 begin
   if (Length(FSuggestedPackages) = 0) then
-    FSuggestedPackages := GetPage(SIMBA_SUGGESTEDPACKAGES_URL, [HTTP_OK], ResponseCode).Trim().Split([#10]);
+    FSuggestedPackages := GetPage(SIMBA_SUGGESTEDPACKAGES_URL, [HTTP_OK], ResponseCode).Trim().Split(LineEnding);
 
   URL := InputComboEx('Add Package', 'Enter or select package URL:', FSuggestedPackages, True).Trim([' ', '/']);
   if (URL = '') then
@@ -406,6 +412,8 @@ begin
     SimbaForm.ToolbarButtonPackages.ImageIndex := IMAGE_PACKAGE
   else
     SimbaForm.ToolbarButtonPackages.ImageIndex := IMAGE_PACKAGE_NOTIFCATION;
+
+  UpdateMenuItems();
 
   FUpdateThread := nil;
 end;
@@ -712,12 +720,99 @@ begin
   StatusLabel.Caption := Format(Message, Args);
 end;
 
+procedure TSimbaPackageForm.DoMenuItemClick(Sender: TObject);
+begin
+  if SimbaScriptTabsForm.Open(TMenuItem(Sender).Hint, True) then
+    SimbaForm.ToolbarButtonRun.Click()
+end;
+
+procedure TSimbaPackageForm.UpdateMenuItems;
+var
+  ParentMenu: TMenuItem;
+
+  procedure AddScript(PackageName, PackagePath, Script: String);
+  var
+    Item, ItemParent: TMenuItem;
+    Scripts, Path: TStringArray;
+    I: Integer;
+  begin
+    Script := ConcatPaths([PackagePath, Script]);
+
+    if DirectoryExists(Script) then
+      Scripts := FindFiles([Script], '*.simba')
+    else
+    if FileExists(Script) then
+      Scripts := [Script];
+
+    if (Length(Scripts) = 0) then
+      Exit;
+
+    for Script in Scripts do
+    begin
+      if (ParentMenu = nil) then
+      begin
+        ParentMenu := TMenuItem.Create(SimbaForm.Menu);
+        ParentMenu.Caption := PackageName;
+        ParentMenu.Hint := 'Simba Package';
+
+        SimbaForm.Menu.Items.Add(ParentMenu);
+      end;
+
+      Path := CreateRelativePath(Script, PackagePath).Split(DirectorySeparator);
+
+      ItemParent := ParentMenu;
+      for I := 0 to High(Path) - 1 do
+      begin
+        if (ItemParent.Find(Path[I].Capitalize()) = nil) then
+        begin
+          Item := TMenuItem.Create(ItemParent);
+          Item.Caption := Path[I].Capitalize();
+
+          ItemParent.Add(Item);
+        end;
+
+        ItemParent := ItemParent.Find(Path[I].Capitalize());
+      end;
+
+      Item := TMenuItem.Create(ItemParent);
+      Item.Caption := ExtractFileName(ExcludeTrailingPathDelimiter(Script));
+      Item.Hint := Script;
+      Item.OnClick := @DoMenuItemClick;
+
+      ItemParent.Add(Item);
+    end;
+  end;
+
+var
+  I, J: Integer;
+  Packages: TSimbaPackageList;
+  Scripts: TStringArray;
+begin
+  for I := SimbaForm.Menu.Items.Count - 1 downto 0 do
+    if SimbaForm.Menu.Items[I].Hint = 'Simba Package' then
+      SimbaForm.Menu.Items[I].Free();
+
+  Packages := LoadPackages();
+  try
+    for I := 0 to Packages.Count - 1 do
+    begin
+      ParentMenu := nil;
+
+      Scripts := Packages[I].InstalledVersion.Scripts.Split(',');
+      for J := 0 to High(Scripts) do
+        AddScript(Packages[I].InstalledVersion.Name, Packages[I].InstalledVersion.Path, Scripts[J]);
+    end;
+  finally
+    Packages.Free();
+  end;
+end;
+
 constructor TSimbaPackageForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  Width := 900;
-  Height := 800;
+  Width := Scale96ToScreen(800);
+  Height := Scale96ToScreen(600);
 
   SizeComponents();
 

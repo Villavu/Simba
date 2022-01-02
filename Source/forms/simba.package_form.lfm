@@ -1,17 +1,16 @@
 object SimbaPackageForm: TSimbaPackageForm
   Tag = 1
-  Left = 1330
-  Height = 678
-  Top = 518
-  Width = 1000
+  Left = 1665
+  Height = 542
+  Top = 648
+  Width = 800
   Caption = 'Packages'
-  ClientHeight = 678
-  ClientWidth = 1000
-  DesignTimePPI = 120
+  ClientHeight = 542
+  ClientWidth = 800
   OnShow = DoFormShow
   Position = poScreenCenter
   ShowHint = True
-  LCLVersion = '2.2.0.2'
+  LCLVersion = '2.0.12.0'
   object DisabledLabel: TLabel
     AnchorSideLeft.Control = PackagesListBox
     AnchorSideLeft.Side = asrBottom
@@ -20,31 +19,34 @@ object SimbaPackageForm: TSimbaPackageForm
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = PackagesListBox
     AnchorSideBottom.Side = asrBottom
-    Left = 180
-    Height = 594
-    Top = 30
-    Width = 820
+    Left = 144
+    Height = 472
+    Top = 24
+    Width = 656
     Alignment = taCenter
     Anchors = [akTop, akLeft, akRight, akBottom]
     Caption = '(no package selected)'
     Layout = tlCenter
+    ParentColor = False
+    ParentFont = False
   end
   object PackagesListBox: TListBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = AddPackageButton
     AnchorSideTop.Side = asrBottom
     AnchorSideBottom.Control = ButtonPanel
-    Left = 6
-    Height = 594
-    Top = 30
-    Width = 174
+    Left = 5
+    Height = 472
+    Top = 24
+    Width = 139
     Anchors = [akTop, akLeft, akBottom]
-    BorderSpacing.Left = 6
+    BorderSpacing.Left = 5
     ItemHeight = 0
     OnContextPopup = DoPackageListPopup
     OnMouseDown = DoPackageListMouseDown
     OnSelectionChange = DoSelectedPackageChanged
     Options = []
+    ParentFont = False
     PopupMenu = PackageListPopup
     TabOrder = 0
   end
@@ -52,11 +54,11 @@ object SimbaPackageForm: TSimbaPackageForm
     AnchorSideTop.Control = Owner
     AnchorSideRight.Control = PackagesListBox
     AnchorSideRight.Side = asrBottom
-    Left = 152
-    Height = 28
+    Left = 122
+    Height = 22
     Hint = 'Add Package'
     Top = 1
-    Width = 28
+    Width = 22
     Anchors = [akTop, akRight]
     BorderSpacing.Left = 1
     BorderSpacing.Top = 1
@@ -69,11 +71,10 @@ object SimbaPackageForm: TSimbaPackageForm
   end
   object ButtonPanel: TButtonPanel
     Tag = 1
-    Left = 8
-    Height = 38
-    Top = 632
-    Width = 984
-    BorderSpacing.Around = 8
+    Left = 6
+    Height = 34
+    Top = 502
+    Width = 788
     OKButton.Name = 'OKButton'
     OKButton.DefaultCaption = True
     HelpButton.Name = 'HelpButton'
@@ -93,32 +94,35 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ButtonPanel
       AnchorSideBottom.Side = asrBottom
-      Left = 6
-      Height = 21
-      Top = 12
-      Width = 853
+      Left = 5
+      Height = 20
+      Top = 10
+      Width = 683
       Anchors = [akTop, akLeft, akRight, akBottom]
       AutoSize = False
-      BorderSpacing.Left = 6
-      BorderSpacing.Top = 12
-      BorderSpacing.Right = 125
-      BorderSpacing.Bottom = 5
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 10
+      BorderSpacing.Right = 100
+      BorderSpacing.Bottom = 4
       Layout = tlCenter
+      ParentColor = False
+      ParentFont = False
     end
   end
   object RemovePackageButton: TSpeedButton
     AnchorSideTop.Control = AddPackageButton
     AnchorSideRight.Control = AddPackageButton
-    Left = 123
-    Height = 28
+    Left = 99
+    Height = 22
     Hint = 'Remove Package'
     Top = 1
-    Width = 28
+    Width = 22
     Anchors = [akTop, akRight]
     Flat = True
     Images = Images
     ImageIndex = 1
     OnClick = DoRemovePackageClick
+    ParentFont = False
   end
   object ReleasesPanel: TPanel
     AnchorSideLeft.Control = PackagesListBox
@@ -127,17 +131,18 @@ object SimbaPackageForm: TSimbaPackageForm
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = InstallationPanel
-    Left = 186
-    Height = 319
-    Top = 30
-    Width = 808
+    Left = 149
+    Height = 250
+    Top = 24
+    Width = 646
     Anchors = [akTop, akLeft, akRight, akBottom]
     AutoSize = True
-    BorderSpacing.Left = 6
-    BorderSpacing.Right = 6
+    BorderSpacing.Left = 5
+    BorderSpacing.Right = 5
     BevelOuter = bvNone
-    ClientHeight = 319
-    ClientWidth = 808
+    ClientHeight = 250
+    ClientWidth = 646
+    ParentFont = False
     TabOrder = 2
     object ReleasesListLabel: TLabel
       AnchorSideLeft.Control = ReleasesPanel
@@ -145,11 +150,13 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideTop.Side = asrCenter
       AnchorSideBottom.Side = asrBottom
       Left = 0
-      Height = 20
-      Top = 55
-      Width = 95
+      Height = 15
+      Top = 44
+      Width = 75
       Caption = 'Select Version:'
       Layout = tlCenter
+      ParentColor = False
+      ParentFont = False
     end
     object NotesMemo: TMemo
       AnchorSideLeft.Control = ReleasesPanel
@@ -160,12 +167,13 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideBottom.Control = ReleasesPanel
       AnchorSideBottom.Side = asrBottom
       Left = 0
-      Height = 229
-      Top = 84
-      Width = 808
+      Height = 178
+      Top = 67
+      Width = 646
       Anchors = [akTop, akLeft, akRight, akBottom]
-      BorderSpacing.Top = 6
-      BorderSpacing.Bottom = 6
+      BorderSpacing.Top = 5
+      BorderSpacing.Bottom = 5
+      ParentFont = False
       ReadOnly = True
       ScrollBars = ssVertical
       TabOrder = 0
@@ -175,20 +183,24 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideTop.Control = LatestVersionLabel
       AnchorSideTop.Side = asrBottom
       Left = 0
-      Height = 20
-      Top = 26
-      Width = 111
-      BorderSpacing.Top = 6
+      Height = 15
+      Top = 20
+      Width = 88
+      BorderSpacing.Top = 5
       Caption = 'Installed Version:'
+      ParentColor = False
+      ParentFont = False
     end
     object LatestVersionLabel: TLabel
       AnchorSideLeft.Control = ReleasesPanel
       AnchorSideTop.Control = ReleasesPanel
       Left = 0
-      Height = 20
+      Height = 15
       Top = 0
-      Width = 98
+      Width = 78
       Caption = 'Latest Version: '
+      ParentColor = False
+      ParentFont = False
     end
     object UpdatePackageLabel: TLabel
       AnchorSideLeft.Control = LatestVersionLabel
@@ -198,14 +210,16 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = LatestVersionLabel
       AnchorSideBottom.Side = asrBottom
-      Left = 102
-      Height = 20
+      Left = 81
+      Height = 15
       Top = 0
-      Width = 706
+      Width = 565
       Anchors = [akTop, akLeft, akRight, akBottom]
-      BorderSpacing.Left = 4
+      BorderSpacing.Left = 3
       Caption = '(check for updates)'
       Layout = tlCenter
+      ParentColor = False
+      ParentFont = False
       OnClick = DoUpdateClick
       OnMouseEnter = DoUpdateLabelMouseEnter
       OnMouseLeave = DoUpdateLabelMouseLeave
@@ -218,17 +232,17 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideRight.Control = ReleasesPanel
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Side = asrBottom
-      Left = 101
-      Height = 26
-      Top = 52
-      Width = 707
+      Left = 80
+      Height = 22
+      Top = 40
+      Width = 566
       Anchors = [akTop, akLeft, akRight]
-      BorderSpacing.Left = 6
-      BorderSpacing.Top = 6
-      ItemHeight = 20
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 5
+      ItemHeight = 16
       OnChange = DoSelectedReleaseChanged
       OnDrawItem = DoReleasesListDraw
-      ReadOnly = True
+      ParentFont = False
       Style = csOwnerDrawFixed
       TabOrder = 1
     end
@@ -239,15 +253,16 @@ object SimbaPackageForm: TSimbaPackageForm
     AnchorSideRight.Control = ReleasesPanel
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = ButtonPanel
-    Left = 186
-    Height = 275
-    Top = 349
-    Width = 808
+    Left = 149
+    Height = 222
+    Top = 274
+    Width = 646
     Anchors = [akLeft, akRight, akBottom]
     AutoSize = True
     BevelOuter = bvNone
-    ClientHeight = 275
-    ClientWidth = 808
+    ClientHeight = 222
+    ClientWidth = 646
+    ParentFont = False
     TabOrder = 3
     object InstallButton: TButton
       AnchorSideLeft.Control = InstallationPanel
@@ -258,13 +273,14 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideBottom.Control = InstallationPanel
       AnchorSideBottom.Side = asrBottom
       Left = 0
-      Height = 30
-      Top = 245
-      Width = 808
+      Height = 25
+      Top = 197
+      Width = 646
       Anchors = [akTop, akLeft, akRight, akBottom]
-      BorderSpacing.Top = 6
+      BorderSpacing.Top = 5
       Caption = 'Install'
       OnClick = DoInstallPackageClick
+      ParentFont = False
       TabOrder = 0
     end
     object InstallationDivider: TDividerBevel
@@ -273,11 +289,12 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideRight.Control = InstallationPanel
       AnchorSideRight.Side = asrBottom
       Left = 0
-      Height = 20
+      Height = 15
       Top = 0
-      Width = 808
+      Width = 646
       Caption = 'Installation'
       Anchors = [akTop, akLeft, akRight]
+      ParentFont = False
       Style = gsHorLines
     end
     object OptionsGroup: TGroupBox
@@ -287,45 +304,49 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideRight.Control = InstallationPanel
       AnchorSideRight.Side = asrBottom
       Left = 0
-      Height = 159
-      Top = 80
-      Width = 808
+      Height = 129
+      Top = 63
+      Width = 646
       Anchors = [akTop, akLeft, akRight]
       AutoSize = True
-      BorderSpacing.Top = 6
+      BorderSpacing.Top = 5
       Caption = 'Options'
-      ClientHeight = 134
-      ClientWidth = 804
+      ClientHeight = 109
+      ClientWidth = 642
+      ParentFont = False
       TabOrder = 1
       object InstallNameLabel: TLabel
         AnchorSideLeft.Control = OptionsGroup
         AnchorSideTop.Control = InstallNameEdit
         AnchorSideBottom.Control = InstallNameEdit
         AnchorSideBottom.Side = asrBottom
-        Left = 6
-        Height = 28
-        Top = 6
-        Width = 43
+        Left = 5
+        Height = 23
+        Top = 5
+        Width = 35
         Anchors = [akTop, akLeft, akBottom]
-        BorderSpacing.Left = 6
+        BorderSpacing.Left = 5
         Caption = 'Name:'
         Layout = tlCenter
+        ParentColor = False
+        ParentFont = False
       end
       object InstallDirectoryList: TComboBox
         AnchorSideLeft.Control = IgnoreListEdit
         AnchorSideTop.Control = InstallNameEdit
         AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = SelectDirectoryButton
-        Left = 81
-        Height = 28
+        Left = 65
+        Height = 23
         Hint = 'The directory to install into. Relative from Simba''s directory.'
-        Top = 38
-        Width = 662
+        Top = 31
+        Width = 528
         Anchors = [akTop, akLeft, akRight]
-        BorderSpacing.Top = 4
-        BorderSpacing.Right = 6
-        ItemHeight = 20
+        BorderSpacing.Top = 3
+        BorderSpacing.Right = 5
+        ItemHeight = 15
         OnChange = DoInstallationModeChange
+        ParentFont = False
         TabOrder = 1
       end
       object InstallDiretoryLabel: TLabel
@@ -333,14 +354,16 @@ object SimbaPackageForm: TSimbaPackageForm
         AnchorSideTop.Control = InstallDirectoryList
         AnchorSideBottom.Control = InstallDirectoryList
         AnchorSideBottom.Side = asrBottom
-        Left = 6
-        Height = 28
-        Top = 38
-        Width = 61
+        Left = 5
+        Height = 23
+        Top = 31
+        Width = 48
         Anchors = [akTop, akLeft, akBottom]
-        BorderSpacing.Left = 6
+        BorderSpacing.Left = 5
         Caption = 'Directory'
         Layout = tlCenter
+        ParentColor = False
+        ParentFont = False
       end
       object FlatExtractionButton: TCheckBox
         AnchorSideLeft.Control = OptionsGroup
@@ -350,16 +373,17 @@ object SimbaPackageForm: TSimbaPackageForm
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = OptionsGroup
         AnchorSideBottom.Side = asrBottom
-        Left = 6
-        Height = 24
+        Left = 5
+        Height = 19
         Hint = 'Flatten directory structure'
-        Top = 104
-        Width = 798
+        Top = 85
+        Width = 637
         Anchors = [akTop, akLeft, akRight, akBottom]
-        BorderSpacing.Left = 6
-        BorderSpacing.Top = 6
-        BorderSpacing.Bottom = 6
+        BorderSpacing.Left = 5
+        BorderSpacing.Top = 5
+        BorderSpacing.Bottom = 5
         Caption = 'Extract Flat'
+        ParentFont = False
         TabOrder = 3
       end
       object SelectDirectoryButton: TButton
@@ -370,14 +394,15 @@ object SimbaPackageForm: TSimbaPackageForm
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = InstallDirectoryList
         AnchorSideBottom.Side = asrBottom
-        Left = 749
-        Height = 28
-        Top = 38
-        Width = 49
+        Left = 598
+        Height = 23
+        Top = 31
+        Width = 39
         Anchors = [akTop, akRight, akBottom]
-        BorderSpacing.Right = 6
+        BorderSpacing.Right = 5
         Caption = '...'
         OnClick = DoSelectDirectoryClick
+        ParentFont = False
         ParentShowHint = False
         TabOrder = 4
       end
@@ -385,15 +410,16 @@ object SimbaPackageForm: TSimbaPackageForm
         AnchorSideLeft.Control = IgnoreListEdit
         AnchorSideTop.Control = OptionsGroup
         AnchorSideRight.Control = SelectDirectoryButton
-        Left = 81
-        Height = 28
+        Left = 65
+        Height = 23
         Hint = 'The package name to install under. Can be empty to install directly into the directory'
-        Top = 6
-        Width = 662
+        Top = 5
+        Width = 528
         Anchors = [akTop, akLeft, akRight]
-        BorderSpacing.Top = 6
-        BorderSpacing.Right = 6
+        BorderSpacing.Top = 5
+        BorderSpacing.Right = 5
         OnChange = DoInstallationModeChange
+        ParentFont = False
         TabOrder = 0
       end
       object IgnoreListEdit: TEdit
@@ -402,15 +428,16 @@ object SimbaPackageForm: TSimbaPackageForm
         AnchorSideTop.Control = InstallDirectoryList
         AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = SelectDirectoryButton
-        Left = 81
-        Height = 28
+        Left = 65
+        Height = 23
         Hint = 'Files or directories not to install delimited with commas'
-        Top = 70
-        Width = 662
+        Top = 57
+        Width = 528
         Anchors = [akTop, akLeft, akRight]
-        BorderSpacing.Left = 6
-        BorderSpacing.Top = 4
-        BorderSpacing.Right = 6
+        BorderSpacing.Left = 5
+        BorderSpacing.Top = 3
+        BorderSpacing.Right = 5
+        ParentFont = False
         TabOrder = 2
       end
       object IgnoreListLabel: TLabel
@@ -418,14 +445,16 @@ object SimbaPackageForm: TSimbaPackageForm
         AnchorSideTop.Control = IgnoreListEdit
         AnchorSideBottom.Control = IgnoreListEdit
         AnchorSideBottom.Side = asrBottom
-        Left = 6
-        Height = 28
-        Top = 70
-        Width = 69
+        Left = 5
+        Height = 23
+        Top = 57
+        Width = 55
         Anchors = [akTop, akLeft, akBottom]
-        BorderSpacing.Left = 6
+        BorderSpacing.Left = 5
         Caption = 'Ignore List'
         Layout = tlCenter
+        ParentColor = False
+        ParentFont = False
       end
     end
     object BasicInstallButton: TRadioButton
@@ -435,16 +464,17 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideRight.Control = InstallationPanel
       AnchorSideRight.Side = asrBottom
       Left = 0
-      Height = 24
+      Height = 19
       Hint = 'One click installation. Reads options from .simbapackage providing it exists the root of the repository.'
-      Top = 26
-      Width = 808
+      Top = 20
+      Width = 646
       Anchors = [akTop, akLeft, akRight]
-      BorderSpacing.Top = 6
+      BorderSpacing.Top = 5
       Caption = 'Basic'
       Checked = True
       OnChange = DoInstallationModeChange
       OnClick = DoBasicInstallButtonClick
+      ParentFont = False
       TabOrder = 3
       TabStop = True
     end
@@ -455,23 +485,24 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideRight.Control = InstallationPanel
       AnchorSideRight.Side = asrBottom
       Left = 0
-      Height = 24
-      Top = 50
-      Width = 808
+      Height = 19
+      Top = 39
+      Width = 646
       Anchors = [akTop, akLeft, akRight]
       Caption = 'Custom'
       OnChange = DoInstallationModeChange
+      ParentFont = False
       TabOrder = 2
     end
   end
   object SelectDirectoryDialog: TSelectDirectoryDialog
-    Left = 70
-    Top = 220
+    Left = 56
+    Top = 176
   end
   object PackageListPopup: TPopupMenu
     Images = Images
-    Left = 70
-    Top = 70
+    Left = 56
+    Top = 56
     object PackageListPopup_VistRepository: TMenuItem
       Caption = 'Visit Repository'
       ImageIndex = 2
@@ -485,40 +516,138 @@ object SimbaPackageForm: TSimbaPackageForm
   end
   object Images: TImageList
     Scaled = True
-    Left = 70
-    Top = 150
+    Left = 56
+    Top = 120
     Bitmap = {
-      4C7A040000001000000010000000B60300000000000078DAD5966B48536118C7
-      1F97B34823232FF3028B0A3243428524A98F961F5A2BC84AB2EC4E4644F4A520
-      8A699A95A5542B192991EB6239BB40A691481704A3BB91693234140BCBA48B2C
-      DDE6DBF39E3D8BB3E399DB1AC17AE1C779CEF3FEFFE7BD9CF7D919630C584061
-      432C707C730613C3738E3E4F7E2BF25DF07F7ADE20E0F07FC7FC086946DD8CCB
-      BD43C8808CFF33F50DBB9987051C63705D9F8CBF8FFABE91D6D52F5DAFD43F76
-      3FC6FA9D7A4FFC2BBF3FF367EC17EDDFC038FB37401A8B1FEFCFEAE11C8D777E
-      AC7E9F5F7BC0D55BC0D6BF0B7F51FFF0D25422E0F0FB5CFF12BFCFF52FF1FB5E
-      FFE3F13FD4BF2FF397A97F99FDF3A9FEDDBC3FAFEB5FE6FC58FD3EBF8156FFD2
-      1615199D86542066C446982997066E1AF685215508F300D78449BC5390275E78
-      9D70ED1491DF48F967481ED24AF3EE256C94CB230DD71AC9BB50F45C03E58291
-      50D1F343798E628348CFBD1744F767C143E31A919E7BBB281E45E2BDF0C79396
-      91D74EF12078D9B8963C76DA1B46D7102FBC21124FA7683D1A2FFC1A919E7BCB
-      45F73D48F238DE64D238F5DC9B44EB28432ED1DE3C46D245BE4548B368DF9C6B
-      4FA2FE5394CBA0F7730B0917F92365CEE029C99ED4D17A96230B1085A87F92C4
-      5B27DD6BBC5722C5C8086926C9F84748A374F6353636BA807D3390BDAAE81885
-      33C7639EE37D52BD6C2B81282880642886D9500431E04B3B08F3D32B537AD57A
-      7517624EAF4CFD043A58E5C115841A150FA24F4654DB87DEB082967DEC70CB7E
-      C6E3A892887A41E5D0048D71EB602652C7C390C290BB1A5326CB6EC816E0B1B2
-      50799F74758256DA0A210EF31D7004A6E3F583AA4CC5922A920478CC73D4F71E
-      96AE9C0F70AF09A0739ECB33F2610DD28A7C4DD02730EDE50C011EA36F90F7CD
-      2A9EB55DADAEBF815EFCE1B57F04E89E2B594791225FF1535BAD657BEE6C11E0
-      B142A7F811AE8B2B35994C6DAF5EBD1D56AB475B00CCCC310F61EC2CF4F6E0B5
-      7F42C104DB8AEA156CE3CD1C011E4F3C34CDA62A335A533A9A86F987D7F18CFA
-      5A80EB2A1AB712D717897E0D8EFF8D8F99539B2DB0AC6A35EE41D59F0F666AF7
-      D3BE9A9A9A7683C11023F31E76F3B56AAE68D8D65BEB58EED54D6CF6B95A970F
-      4E9CFE61DB0EDD8D2819EF46A4197991763E8D6DBBBE892596DF74F1C69EBEF3
-      716E8E51FE3C3ADE6D229230B930BC3FF1DC35D771CFDC372B0F4C6F747B02F3
-      610B1C85A93CCC3C7671A7F674D340B0C522FC618CD73F688FCDCB9B2368BC68
-      DA5DE5B7734FB4B2B567DFBD569F79F4C2ED9CDDB4C54BB2BEF0676C286DD5AE
-      2F791D0AFFB0FD06404E6313
+      4C69040000001000000010000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FC00FFFFF7008A6245FF8A6245FF8A6245FF8A6245FFFFFFF700FFFFFC00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FB00FFFFF2008A6245FFE8CDB8FFE8CDB8FF8A6245FFFFFFF200FFFFFA00FFFF
+      FF00FFFFFE00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFC00FFFFFB00FFFF
+      F500FFFFED008A6245FFE8CDB8FFE8CDB8FF8A6245FFFFFFEB00FFFFF500FFFF
+      F900FFFFFC00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFF700FFFFF200FFFF
+      EB00FFFFE6008A6245FFE8CDB8FFE8CDB8FF8A6245FFFFFFE600FFFFEB00FFFF
+      F100FFFFF700FFFFFF00FFFFFF00FFFFFF00FFFFFF008A6245FF8A6245FF8A62
+      45FF8A6245FF8A6245FFE8CDB8FFE8CDB8FF8A6245FF8A6245FF8A6245FF8A62
+      45FF8A6245FFFFFFFF00FFFFFF00FFFFFF00FFFFFF008A6245FFE8CDB8FFE8CD
+      B8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CD
+      B8FF8A6245FFFFFFFF00FFFFFF00FFFFFF00FFFFFF008A6245FFE8CDB8FFE8CD
+      B8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CD
+      B8FF8A6245FFFFFFFF00FFFFFF00FFFFFF00FFFFFF008A6245FF8A6245FF8A62
+      45FF8A6245FF8A6245FFE8CDB8FFE8CDB8FF8A6245FF8A6245FF8A6245FF8A62
+      45FF8A6245FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFF800FFFFF200FFFF
+      ED00FFFFE6008A6245FFE8CDB8FFE8CDB8FF8A6245FFFFFFE600FFFFED00FFFF
+      F200FFFFF700FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFC00FFFFFB00FFFF
+      F500FFFFED008A6245FFE8CDB8FFE8CDB8FF8A6245FFFFFFEB00FFFFF500FFFF
+      FB00FFFFFC00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FB00FFFFF2008A6245FFE8CDB8FFE8CDB8FF8A6245FFFFFFF200FFFFFB00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FC00FFFFF7008A6245FF8A6245FF8A6245FF8A6245FFFFFFF700FFFFFC00FDFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FC00FFFFF7008A6245008A6245008A6245008A624500FFFFF700FFFFFC00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FB00FFFFF2008A624500CFAC8B00CFAC8B008A624500FFFFF200FFFFFA00FFFF
+      FF00FFFFFE00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFC00FFFFFB00FFFF
+      F500FFFFED008A624500CFAC8B00CFAC8B008A624500FFFFEB00FFFFF500FFFF
+      F900FFFFFC00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFF700FFFFF200FFFF
+      EB00FFFFE6008A624500CFAC8B00CFAC8B008A624500FFFFE600FFFFEB00FFFF
+      F100FFFFF700FFFFFF00FFFFFF00FFFFFF00FFFFFF008A6245FF8A6245FF8A62
+      45FF8A6245FF8A6245FF8A6245FF8A6245FF8A6245FF8A6245FF8A6245FF8A62
+      45FF8A6245FFFFFFFF00FFFFFF00FFFFFF00FFFFFF008A6245FFE8CDB8FFE8CD
+      B8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CD
+      B8FF8A6245FFFFFFFF00FFFFFF00FFFFFF00FFFFFF008A6245FFE8CDB8FFE8CD
+      B8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CDB8FFE8CD
+      B8FF8A6245FFFFFFFF00FFFFFF00FFFFFF00FFFFFF008A6245FF8A6245FF8A62
+      45FF8A6245FF8A6245FF8A6245FF8A6245FF8A6245FF8A6245FF8A6245FF8A62
+      45FF8A6245FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFF800FFFFF200FFFF
+      ED00FFFFE6008A624500CFAC8B00CFAC8B008A624500FFFFE600FFFFED00FFFF
+      F200FFFFF700FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFC00FFFFFB00FFFF
+      F500FFFFED008A624500CFAC8B00CFAC8B008A624500FFFFEB00FFFFF500FFFF
+      FB00FFFFFC00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FB00FFFFF2008A624500CFAC8B00CFAC8B008A624500FFFFF200FFFFFB00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FC00FFFFF7008A6245008A6245008A6245008A624500FFFFF700FFFFFC00FDFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00000000000000000000000000000000001615
+      17371615179C161517DD161517FC161517FC161517DD1615179C161517370000
+      000000000000000000000000000000000000000000001615170C161517A21615
+      17FF161517FF161517FF161517FF161517FF161517FF161517FF161517FF1615
+      17A21615170C0000000000000000000000001615170D161517C9161517FF1615
+      17FF161517FF161517FF161517FF161517FF161517FF161517FF161517FF1615
+      17FF161517C91615170D0000000000000000161517A3161517FF161517CC1615
+      1769161517D2161517FC161517E4161517E4161517FC161517D2161517691615
+      17CC161517FF161517A30000000016151739161517FF161517FF161517990000
+      0000161517041615170B00000000000000001615170B16151704000000001615
+      1799161517FF161517FF161517391615179F161517FF161517FF161517950000
+      0000000000000000000000000000000000000000000000000000000000001615
+      1795161517FF161517FF1615179F161517DF161517FF161517FE1615171C0000
+      0000000000000000000000000000000000000000000000000000000000001615
+      171C161517FE161517FF161517DF161517FD161517FF161517EF000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000161517EF161517FF161517FD161517FC161517FF161517FC161517060000
+      0000000000000000000000000000000000000000000000000000000000001615
+      1706161517FC161517FF161517FC161517DB161517FF161517FF1615174D0000
+      0000000000000000000000000000000000000000000000000000000000001615
+      174D161517FF161517FF161517DB16151797161517FF161517FF161517E31615
+      1731000000000000000000000000000000000000000000000000161517311615
+      17E3161517FF161517FF161517971615172D161517FD1615178F161517A41615
+      17FE161517C31615173A00000000000000001615173C161517C5161517FE1615
+      17FF161517FF161517FD1615172D0000000016151791161517FF161517451615
+      1795161517B016151710000000000000000016151715161517FF161517FF1615
+      17FF161517FF16151791000000000000000016151706161517B5161517DB1615
+      174E1615173616151702000000000000000016151708161517FF161517FF1615
+      17FF161517B51615170600000000000000000000000016151705161517871615
+      17FA161517FF16151708000000000000000016151708161517FF161517FA1615
+      1787161517050000000000000000BCBCBC00BCBCBC00BCBCBC00BCBCBC001615
+      17201615177218171902BCBCBC00BCBCBC00181719021615177216151720BCBC
+      BC00BCBCBC00BCBCBC00BCBCBC00000000000000000000000000000000000000
+      0000008B00160082003100870024008500190000000000000000000000000000
+      000000000000000000000000000000000000000000000000000000000000007D
+      002F3A9D32E41F941FDF1F941FDD3A9D33E80080005400000000000000000000
+      000000000000000000000000000000000000000000010080001800000000178D
+      14A8FDF5D3FF82C877FF83C878FFFDF5D3FF168B14B700000000008000180000
+      00010000000000000000000000000000000000800022008000B5000000000684
+      06B64DAC48FF59B859FF59B859FF4DAC48FF058405BB00000000008000B50080
+      0022000000000000000000000000000000000084001B008000D9008600130080
+      00E1188F18FF2D9C2DFF2D9C2DFF188F18FF008000E100860013008000DA0047
+      512F0000B9BE0000DB2B00000000000000000000000000810057008100D20081
+      00EE289428FF4FA545FF4FA545FF289428FF008000EF008100D2238723661F1F
+      B7AE0000DBFF0000FDE70000E029000000000000000000000000008000850281
+      02F44FA84FFF70B463FF70B463FF4FA84FFF028002F310801B8EACACACD6D0D0
+      D5F91F1FFEC80000DDFF0000B9BE0000000000810055008000E3008100EA0382
+      03FC50A850FF60AF5CFF60AF5CFF50A850FF077E11FC188FA3FB32D9BEF9FFFF
+      FFFFD0D0D5F91F1FB7AD0000AA18000000000080009D008600150081004D0281
+      02F14FA84FFF5CAD59FF5CAD59FF4CA256FF188FA2FC00FFFFFF00FFFFFF33E0
+      CBE6ABABABD899999919000000000000000000000000000000000080006E0080
+      00EF4DA64DFF64B05BFF5FA761FF2496ADFF00FFFFFF00FFFFFF00FFFFFF1B94
+      C1D66880AE160000000000000000000000000000000000800060008000C50080
+      00CE379B37FF65AA61FF2A97AFFF00FFFFFF00FFFFFF00FFFFFF1A92B4E7295C
+      A3190000000000000000000000000000000000000000008000B50080002A0080
+      00280A8410EA2A96A9FF00FFFFFF00FFFFFF00FFFFFF1B93BBDD057B13BC0000
+      00000000000000000000000000000000000000000000008100630088000F0000
+      00004889A16A4F92BEED04F7F7FA00FFFFFF1C94C0D81A696927008100630000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00004F6C97B15F8CD2FF5895D7D11F93C2CE295CA31900000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00003D4655EC4F6C97B15E8ED24F5D8BD10B0000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000
     }
     BitmapAdv = {
       4C69020000004C7A0400000018000000180000009C0600000000000078DAED97
@@ -644,7 +773,7 @@ object SimbaPackageForm: TSimbaPackageForm
   end
   object UpdateTimer: TTimer
     OnTimer = DoUpdateTimer
-    Left = 70
-    Top = 295
+    Left = 56
+    Top = 236
   end
 end
