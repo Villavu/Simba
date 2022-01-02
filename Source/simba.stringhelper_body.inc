@@ -248,6 +248,19 @@ begin
   Result := LowerCase(Self);
 end;
 
+function TStringHelper.Capitalize: String;
+var
+  I: Integer;
+begin
+  SetLength(Result, Length(Self));
+
+  for I := 1 to Length(Self) do
+    if (I = 1) then
+      Result[I] := UpCase(Self[I])
+    else
+      Result[I] := LowerCase(Self[I]);
+end;
+
 function TStringHelper.Extract(const Characters: String): String;
 var
   I, Count: Integer;

@@ -32,7 +32,7 @@ type
   public
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
 
-    procedure LoadTemplates;
+    procedure LoadExamples;
   end;
 
 var
@@ -52,37 +52,48 @@ type
     FileName: String;
   end;
 
-procedure TSimbaOpenExampleForm.LoadTemplates;
+procedure TSimbaOpenExampleForm.LoadExamples;
+var
+  ParentNode: TTreeNode;
 
-  procedure AddFilesInDirectory(Name, Directory: String);
+  procedure AddExample(Package: TSimbaPackage; Example: String);
   var
-    Files: TStringArray;
-    Node: TTreeNode;
-    I: Integer;
+    Examples: TStringArray;
   begin
-    Files := GetFiles(Directory, 'simba');
+    Example := ConcatPaths([Package.InstalledVersion.Path, Example]);
 
-    if (Length(Files) > 0) then
+    if DirectoryExists(Example) then
+      Examples := FindFiles([Example], '*.simba')
+    else
+    if FileExists(Example) then
+      Examples := [Example];
+
+    if (Length(Examples) = 0) then
+      Exit;
+
+    if (ParentNode = nil) then
     begin
-      Node := TreeView.Items.Add(nil, Name);
-      Node.ImageIndex := IMAGE_PACKAGE;
-      Node.SelectedIndex := IMAGE_PACKAGE;
+      ParentNode := TreeView.Items.Add(nil, Package.InstalledVersion.Name);
+      ParentNode.ImageIndex := IMAGE_PACKAGE;
+      ParentNode.SelectedIndex := IMAGE_PACKAGE;
+    end;
 
-      for I := 0 to High(Files) do
-        with TreeView.Items.AddChild(Node, ExtractFileNameOnly(Files[I])) as TFileTreeNode do
-        begin
-          SelectedIndex := IMAGE_SIMBA;
-          ImageIndex := IMAGE_SIMBA;
+    for Example in Examples do
+    begin
+      with TreeView.Items.AddChild(ParentNode, ExtractFileNameOnly(Example)) as TFileTreeNode do
+      begin
+        SelectedIndex := IMAGE_SIMBA;
+        ImageIndex := IMAGE_SIMBA;
 
-          FileName := ConcatPaths([Directory, Files[I]]);
-        end;
+        FileName := Example;
+      end;
     end;
   end;
 
 var
   Packages: TSimbaPackageList;
-  I: Integer;
-  CaseMatch: TFilenameCaseMatch;
+  Examples: TStringArray;
+  I, J: Integer;
 begin
   TreeView.BeginUpdate();
   TreeView.Items.Clear();
@@ -90,16 +101,21 @@ begin
   Packages := LoadPackages();
   try
     for I := 0 to Packages.Count - 1 do
-      if DirectoryExists(Packages[I].InstalledVersion.Path) then
+    begin
+      ParentNode := nil;
+
+      if DirectoryExists(Packages[I].InstalledVersion.Path) and (Packages[I].InstalledVersion.Examples <> '') then
       begin
-        AddFilesInDirectory(Packages[I].Name + ' - Examples', ExpandFileNameCase(Packages[I].InstalledVersion.Path + '/Examples', CaseMatch));
-        AddFilesInDirectory(Packages[I].Name + ' - Tools', ExpandFileNameCase(Packages[I].InstalledVersion.Path + '/Tools', CaseMatch));
+        Examples := Packages[I].InstalledVersion.Examples.Split(',');
+        for J := 0 to High(Examples) do
+          AddExample(Packages[I], Examples[J]);
       end;
+    end;
   finally
     Packages.Free();
   end;
 
-  TreeView.Width := TreeView.Canvas.TextWidth('SomeSection - Examples');
+  TreeView.Width := TreeView.Canvas.TextWidth('SomePackageName - Examples');
   TreeView.EndUpdate();
 
   Editor.Visible := False;
@@ -107,7 +123,7 @@ end;
 
 procedure TSimbaOpenExampleForm.FormShow(Sender: TObject);
 begin
-  LoadTemplates();
+  LoadExamples();
 end;
 
 procedure TSimbaOpenExampleForm.ButtonOkClick(Sender: TObject);
@@ -146,8 +162,8 @@ end;
 
 procedure TSimbaOpenExampleForm.FormCreate(Sender: TObject);
 begin
-  Width := 800;
-  Height := 600;
+  Width := Scale96ToScreen(800);
+  Height := Scale96ToScreen(600);
 
   with Highlighter as TSynFreePascalSyn do
   begin
@@ -191,7 +207,7 @@ begin
         Editor.Visible := True;
       except
         on E: Exception do
-          DebugLn('Error opening template: ', E.Message);
+          DebugLn('Error opening example: ', E.Message);
       end;
     end;
 end;
