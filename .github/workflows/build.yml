@@ -56,9 +56,9 @@ jobs:
       - name: Install Lazarus
         uses: ollydev/setup-lazarus-fpcup@v2.4
         with:
-          laz-branch: lazarus_2_0_12
+          laz-branch: lazarus_2_2_0
           fpc-branch: release_3_2_2
-          fpcup-release: v2.2.0c
+          fpcup-release: v2.2.0h
     
       - name: Build Simba
         run: |
@@ -80,7 +80,7 @@ jobs:
           ./${{ matrix.config.test }} --silent --run "Tests/runner"
 
       - name: Upload Binary 
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v2.3.1
         with:
           name: ${{ matrix.config.binary }}
           path: ${{ matrix.config.binary }}

@@ -37,22 +37,22 @@ procedure InitializeOpenSSL;
 implementation
 
 uses
-  openssl, lcltype, lazloggerbase, sha1, dynlibs,
+  openssl, lcltype, lazloggerbase, dynlibs,
   simba.gz_stream, simba.settings, simba.files;
 
 function IsFileHash(FileName: String; Hash: String): Boolean;
 begin
-  Result := FileExists(FileName) and (SHA1Print(SHA1File(FileName, 512*512)) = Hash);
+  Result := FileExists(FileName) and (HashFile(FileName) = Hash);
 end;
 
-function Uncompress(Stream: TStream; FileName: String): String;
+function ExtractOpenSSL(Stream: TStream; FileName: String): String;
 var
   Buffer: array[1..512*512] of Byte;
   Count: Integer;
 begin
   Result := '';
 
-  DebugLn('Extracting: ', FileName);
+  DebugLn('[ExtractOpenSSL]: Extracting "%s" ', [FileName]);
 
   Stream := TGZFileStream.Create(Stream, False);
   try
@@ -67,7 +67,7 @@ begin
       Free();
     end;
 
-    Result := SHA1Print(SHA1File(FileName, Length(Buffer)));
+    Result := HashFile(FileName);
   finally
     Stream.Free();
   end;
@@ -82,7 +82,7 @@ begin
   begin
     DLLUtilName := GetSimbaPath() + Name;
     if not IsFileHash(DLLUtilName, SimbaSettings.Environment.LibCryptoHash.Value) then
-      SimbaSettings.Environment.LibCryptoHash.Value := Uncompress(TResourceStream.Create(HINSTANCE, ResourceName, ResourceType), DLLUtilName);
+      SimbaSettings.Environment.LibCryptoHash.Value := ExtractOpenSSL(TResourceStream.Create(HINSTANCE, ResourceName, ResourceType), DLLUtilName);
 
     Result := False;
   end else
@@ -98,7 +98,7 @@ begin
   begin
     DLLSSLName := GetSimbaPath() + Name;
     if not IsFileHash(DLLSSLName, SimbaSettings.Environment.LibSSLHash.Value) then
-      SimbaSettings.Environment.LibSSLHash.Value := Uncompress(TResourceStream.Create(HINSTANCE, ResourceName, ResourceType), DLLSSLName);
+      SimbaSettings.Environment.LibSSLHash.Value := ExtractOpenSSL(TResourceStream.Create(HINSTANCE, ResourceName, ResourceType), DLLSSLName);
 
     Result := False;
   end else
@@ -109,8 +109,6 @@ procedure InitializeOpenSSL;
 var
   OldSSLName, OldUtilName: String;
 begin
-  DebugLn('simba.openssl :: InitializeOpenSSL');
-
   OldSSLName := DLLSSLName;
   OldUtilName := DLLUtilName;
 
@@ -128,15 +126,15 @@ begin
     InitSSLInterface();
   except
     on E: Exception do
-      DebugLn('Loading OpenSSL exception: ', E.Message);
+      DebugLn('[InitializeOpenSSL]: Exception "%s" ', [E.Message]);
   end;
 
   if not IsSSLLoaded() then
   begin
-    DebugLn('Failed to load OpenSSL');
-    DebugLn('Error: ', GetLoadErrorStr());
-    DebugLn('LibSSL: ', DLLSSLName);
-    DebugLn('LibCrypto: ', DLLUtilName);
+    DebugLn('[InitializeOpenSSL]: Failed to load OpenSSL');
+    DebugLn('[InitializeOpenSSL]: Error "%s"', [GetLoadErrorStr()]);
+    DebugLn('[InitializeOpenSSL]: LibSSL "%s"', [DLLSSLName]);
+    DebugLn('[InitializeOpenSSL]: LibCrypto "%s" ', [DLLUtilName]);
   end;
 
   // Restore to FPC defaults

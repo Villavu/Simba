@@ -15,7 +15,7 @@ Simba is available for:
 ------
 # Building Simba
 
-Simba is a [Lazarus](https://www.lazarus-ide.org/) project. Version 2.0.12 is available here: https://sourceforge.net/projects/lazarus/files/
+Simba is a [Lazarus](https://www.lazarus-ide.org/) project. Version 2.2 is available here: https://sourceforge.net/projects/lazarus/files/
 
 Some dependencies are required for Linux/MacOS.
 

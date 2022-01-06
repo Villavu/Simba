@@ -11,7 +11,7 @@ object SimbaOpenExampleForm: TSimbaOpenExampleForm
   OnDestroy = FormDestroy
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '2.0.12.0'
+  LCLVersion = '2.2.0.4'
   object TreeView: TTreeView
     Left = 0
     Height = 696
@@ -574,6 +574,7 @@ object SimbaOpenExampleForm: TSimbaOpenExampleForm
     Enabled = False
     CompilerMode = pcmObjFPC
     NestedComments = True
+    TypeHelpers = False
     Left = 850
     Top = 30
   end
