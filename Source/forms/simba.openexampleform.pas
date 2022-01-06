@@ -44,56 +44,20 @@ implementation
 
 uses
   lazfileutils, lazloggerbase,
-  simba.files, simba.fonthelpers, simba.main, simba.package, simba.scripttabsform;
+  simba.fonthelpers, simba.main, simba.package, simba.scripttabsform;
 
 type
-  TFileTreeNode = class(TTreeNode)
+  TCustomNode = class(TTreeNode)
   public
     FileName: String;
   end;
 
 procedure TSimbaOpenExampleForm.LoadExamples;
 var
-  ParentNode: TTreeNode;
-
-  procedure AddExample(Package: TSimbaPackage; Example: String);
-  var
-    Examples: TStringArray;
-  begin
-    Example := ConcatPaths([Package.InstalledVersion.Path, Example]);
-
-    if DirectoryExists(Example) then
-      Examples := FindFiles([Example], '*.simba')
-    else
-    if FileExists(Example) then
-      Examples := [Example];
-
-    if (Length(Examples) = 0) then
-      Exit;
-
-    if (ParentNode = nil) then
-    begin
-      ParentNode := TreeView.Items.Add(nil, Package.InstalledVersion.Name);
-      ParentNode.ImageIndex := IMAGE_PACKAGE;
-      ParentNode.SelectedIndex := IMAGE_PACKAGE;
-    end;
-
-    for Example in Examples do
-    begin
-      with TreeView.Items.AddChild(ParentNode, ExtractFileNameOnly(Example)) as TFileTreeNode do
-      begin
-        SelectedIndex := IMAGE_SIMBA;
-        ImageIndex := IMAGE_SIMBA;
-
-        FileName := Example;
-      end;
-    end;
-  end;
-
-var
   Packages: TSimbaPackageList;
   Examples: TStringArray;
   I, J: Integer;
+  ParentNode: TTreeNode;
 begin
   TreeView.BeginUpdate();
   TreeView.Items.Clear();
@@ -102,20 +66,30 @@ begin
   try
     for I := 0 to Packages.Count - 1 do
     begin
-      ParentNode := nil;
+      Examples := Packages[I].InstalledExamples;
+      if (Length(Examples) = 0) then
+        Continue;
 
-      if DirectoryExists(Packages[I].InstalledVersion.Path) and (Packages[I].InstalledVersion.Examples <> '') then
+      ParentNode := TreeView.Items.Add(nil, Packages[I].InstalledName);
+      ParentNode.ImageIndex := IMAGE_PACKAGE;
+      ParentNode.SelectedIndex := IMAGE_PACKAGE;
+
+      for J := 0 to High(Examples) do
       begin
-        Examples := Packages[I].InstalledVersion.Examples.Split(',');
-        for J := 0 to High(Examples) do
-          AddExample(Packages[I], Examples[J]);
+        with TreeView.Items.AddChild(ParentNode, ExtractFileNameOnly(Examples[J])) as TCustomNode do
+        begin
+          SelectedIndex := IMAGE_SIMBA;
+          ImageIndex := IMAGE_SIMBA;
+
+          FileName := Examples[J];
+        end;
       end;
     end;
   finally
     Packages.Free();
   end;
 
-  TreeView.Width := TreeView.Canvas.TextWidth('SomePackageName - Examples');
+  TreeView.Width := TreeView.Canvas.TextWidth('SomePackageName - Example');
   TreeView.EndUpdate();
 
   Editor.Visible := False;
@@ -128,11 +102,11 @@ end;
 
 procedure TSimbaOpenExampleForm.ButtonOkClick(Sender: TObject);
 var
-  Node: TFileTreeNode;
+  Node: TCustomNode;
 begin
-  if (TreeView.Selected is TFileTreeNode) then
+  if (TreeView.Selected is TCustomNode) then
   begin
-    Node := TreeView.Selected as TFileTreeNode;
+    Node := TreeView.Selected as TCustomNode;
 
     if FileExists(Node.FileName) then
     begin
@@ -177,6 +151,8 @@ begin
     DirectiveAttri.Style := [fsBold];
     NestedComments := True;
     StringKeywordMode := spsmNone;
+    TypeHelpers := True;
+    ExtendedKeywordsMode := True;
   end;
 
   SimbaSettingChanged(SimbaSettings.Editor.FontSize);
@@ -193,13 +169,13 @@ end;
 
 procedure TSimbaOpenExampleForm.TreeViewCreateNodeClass(Sender: TCustomTreeView; var NodeClass: TTreeNodeClass);
 begin
-  NodeClass := TFileTreeNode;
+  NodeClass := TCustomNode;
 end;
 
 procedure TSimbaOpenExampleForm.TreeViewSelectionChanged(Sender: TObject);
 begin
-  if (TreeView.Selected is TFileTreeNode) then
-    with TreeView.Selected as TFileTreeNode do
+  if (TreeView.Selected is TCustomNode) then
+    with TreeView.Selected as TCustomNode do
     begin
       if (FileName <> '') and FileExists(FileName) then
       try
@@ -207,7 +183,7 @@ begin
         Editor.Visible := True;
       except
         on E: Exception do
-          DebugLn('Error opening example: ', E.Message);
+          DebugLn('[TSimbaOpenExampleForm.TreeViewSelectionChanged]: Exception "%s"', [E.Message]);
       end;
     end;
 end;

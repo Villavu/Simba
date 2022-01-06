@@ -25,7 +25,7 @@
       <StringTable CompanyName="villavu.com" FileDescription="Simba: http://wizzup.org/simba/" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="1.5"/>
     </VersionInfo>
     <BuildModes Count="6">
-      <Item1 Name="WIN32_DEBUG" Default="True"/>
+      <Item1 Name="DEBUG" Default="True"/>
       <Item2 Name="WIN32">
         <CompilerOptions>
           <Version Value="11"/>
@@ -35,7 +35,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
             <Libraries Value="../Modules/lape/extensions/ffi/bin/win32"/>
-            <OtherUnitFiles Value="$(ProjPath);windows;script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+            <OtherUnitFiles Value="$(ProjPath);windows;script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;helpers"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -77,7 +77,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
             <Libraries Value="../Modules/lape/extensions/ffi/bin/win64"/>
-            <OtherUnitFiles Value="$(ProjPath);windows;script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+            <OtherUnitFiles Value="$(ProjPath);windows;script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;helpers"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -112,7 +112,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);linux;script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+            <OtherUnitFiles Value="$(ProjPath);linux;script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;helpers"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -155,7 +155,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);darwin;script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+            <OtherUnitFiles Value="$(ProjPath);darwin;script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;helpers"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -200,7 +200,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);linux;script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+            <OtherUnitFiles Value="$(ProjPath);linux;script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;helpers"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -256,7 +256,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="31">
+    <Units Count="33">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -427,6 +427,14 @@
         <Filename Value="simba.editor_findreplace.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit30>
+      <Unit31>
+        <Filename Value="simba.package_endpoint.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="helpers/simba.helpers_string.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit32>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -436,8 +444,8 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
-      <Libraries Value="../Modules/lape/extensions/ffi/bin/win32"/>
-      <OtherUnitFiles Value="$(ProjPath);windows;script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+      <Libraries Value="../Modules/lape/extensions/ffi/bin/win64"/>
+      <OtherUnitFiles Value="$(ProjPath);windows;script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;helpers"/>
       <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -449,8 +457,6 @@
       <Checks>
         <RangeChecks Value="True"/>
       </Checks>
-      <TargetCPU Value="i386"/>
-      <TargetOS Value="win32"/>
     </CodeGeneration>
     <Other>
       <CompilerMessages>

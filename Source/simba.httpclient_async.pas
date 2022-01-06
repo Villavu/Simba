@@ -30,6 +30,8 @@ type
     property ResponseCode: Int32 read FResponseCode;
     property Running: Boolean read FRunning;
 
+    function IsResponseCode(ResponseCodes: array of Integer): Boolean;
+
     constructor Create(URL: String; OnProgress: TSimbaHTTPProgressEvent = nil);
     destructor Destroy; override;
   end;
@@ -67,6 +69,20 @@ begin
 
   FResponseCode := FHTTPClient.ResponseCode;
   FRunning := False;
+end;
+
+function TSimbaHTTPRequest.IsResponseCode(ResponseCodes: array of Integer): Boolean;
+var
+  I: Integer;
+begin
+  for I := 0 to High(ResponseCodes) do
+    if (FResponseCode = ResponseCodes[I]) then
+    begin
+      Result := True;
+      Exit;
+    end;
+
+  Result := False;
 end;
 
 constructor TSimbaHTTPRequest.Create(URL: String; OnProgress: TSimbaHTTPProgressEvent);

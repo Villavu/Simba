@@ -581,6 +581,7 @@ begin
     InitializeOpenSSL();
 
   CodeTools_Setup();
+  SizeComponents();
 
   AddHandlerFirstShow(@SetupScriptTabs, True);
   AddHandlerFirstShow(@SetupDocking, True);
@@ -684,7 +685,7 @@ begin
     Free();
   end;
 
-  StatusBar.Height := Round(Size.Height * 1.4);
+  StatusBar.Height := Round(Size.Height * 1.3);
 
   StatusPanelCursor.Width := Round(Size.Width * 1.8);
   StatusPanelState.Width  := Round(Size.Width * 1.6);
@@ -747,32 +748,6 @@ begin
 end;
 
 procedure TSimbaForm.MenuFileClick(Sender: TObject);
-
-  function ShortDisplayFilename(const FileName: string; Limit: Integer = 100): string;
-  var
-    StartLen, EndLen, SepCnt: Integer;
-  begin
-    if Length(FileName) > Limit then
-    begin
-      StartLen := 1;
-      SepCnt := 0;
-      while StartLen < Length(FileName) - (Limit div 2) do
-      begin
-        if FileName[StartLen] in AllowDirectorySeparators then
-        begin
-          Inc(SepCnt);
-          if SepCnt = 2 then Break;
-        end;
-        Inc(StartLen);
-      end;
-      EndLen := Limit - StartLen - 3;
-      Result := Copy(FileName, 1, StartLen) + '...'
-              + Copy(FileName, Length(FileName)-EndLen+1, EndLen);
-    end
-    else
-      Result := FileName;
-  end;
-
 var
   I: Integer;
   Item: TMenuItem;
@@ -791,7 +766,7 @@ begin
     end;
 
     Item := TMenuItem.Create(MenuItemOpenRecent);
-    Item.Caption := ShortDisplayFilename(FRecentFiles[I]);
+    Item.Caption := ShortDisplayFilename(FRecentFiles[I], 100);
     Item.OnClick := @HandleRecentFileClick;
     Item.Hint := FRecentFiles[I];
 

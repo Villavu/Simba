@@ -11,7 +11,8 @@ interface
 
 uses
   classes, sysutils,
-  fphttpclient, simba.archive;
+  fphttpclient,
+  simba.archive, simba.mufasatypes;
 
 const
   // Information
@@ -160,7 +161,7 @@ implementation
 
 uses
   openssl, ssockets, opensslsockets,
-  simba.openssl, simba.zip, simba.tar, simba.tar_gz, simba.tar_bz2;
+  simba.openssl, simba.zip, simba.tar, simba.tar_gz, simba.tar_bz2, simba.helpers_string;
 
 type
   TSimbaHTTPClientBase = class(TFPHTTPClient)
@@ -265,7 +266,7 @@ begin
 
     for Header in ResponseHeaders do
       if Header.StartsWith(Name) then
-        Exit(Name.SubString(Length(Name) + 1).Trim());
+        Exit(Name.After(':'));
   end;
 end;
 
@@ -277,6 +278,9 @@ end;
 procedure TSimbaHTTPClient.Get(URL: String; Stream: TMemoryStream);
 begin
   FURL := URL;
+  if (not FURL.StartsWith('http://', False)) and (not FURL.StartsWith('https://', False)) then
+    FURL := 'http://' + FURL;
+
   if (FOnDownloadProgress <> nil) then
     FOnDownloadProgress(Self, FURL, -1, -1); // Connecting
 
@@ -286,6 +290,9 @@ end;
 function TSimbaHTTPClient.Get(URL: String): String;
 begin
   FURL := URL;
+  if (not FURL.StartsWith('http://', False)) and (not FURL.StartsWith('https://', False)) then
+    FURL := 'http://' + FURL;
+
   if (FOnDownloadProgress <> nil) then
     FOnDownloadProgress(Self, FURL, -1, -1); // Connecting
 
@@ -295,6 +302,9 @@ end;
 procedure TSimbaHTTPClient.Get(URL: String; FileName: String);
 begin
   FURL := URL;
+  if (not FURL.StartsWith('http://', False)) and (not FURL.StartsWith('https://', False)) then
+    FURL := 'http://' + FURL;
+
   if (FOnDownloadProgress <> nil) then
     FOnDownloadProgress(Self, FURL, -1, -1); // Connecting
 

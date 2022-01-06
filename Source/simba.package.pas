@@ -10,265 +10,345 @@ unit simba.package;
 interface
 
 uses
-  classes, sysutils, fgl;
-
-const
-  GITHUB_API_BRANCHES           = 'https://api.github.com/repos/%s/%s/branches';              // {Owner} {Name}
-  GITHUB_API_RELEASES           = 'https://api.github.com/repos/%s/%s/releases';              // {Owner} {Name}
-  GITHUB_URL_REPOSITORY         = 'https://github.com/%s/%s';                                 // {Owner} {Name}
-  GITHUB_URL_REPOSITORY_ISSUES  = 'https://github.com/%s/%s/issues';                          // {Owner} {Name}
-  GITHUB_URL_DOWNLOAD_BRANCH    = 'https://github.com/%s/%s/archive/%s.zip';                  // {Owner} {Name} {Branch}
-  GITHUB_URL_PACKAGE_OPTIONS    = 'https://raw.githubusercontent.com/%s/%s/%s/.simbapackage'; // {Owner} {Name} {Version}
+  classes, sysutils, fgl,
+  simba.mufasatypes, simba.package_endpoint;
 
 type
-  TSimbaPackage_Options = record
-    Loaded: Boolean;
+  TSimbaPackage = class;
+  TSimbaPackageList = specialize TFPGObjectList<TSimbaPackage>;
+
+  TSimbaPackageOptions = record
     Name: String;
     Directory: String;
     Flat: Boolean;
     IgnoreList: String;
-  end;
-
-  TSimbaPackage_InstalledVersion = record
-    Name: String;
-    Path: String;
-    Version: String;
-    VersionTime: TDateTime;
     Scripts: String;
     Examples: String;
-  end;
-
-  TSimbaPackageRelease = record
-    Version: String;
-    Notes: String;
-    Time: TDateTime;
-    TimeStamp: String;
-    DownloadURL: String;
 
     function IsEmpty: Boolean;
-    class function Empty: TSimbaPackageRelease; static;
-
-    class operator = (const Left, Right: TSimbaPackageRelease): Boolean;
-    class operator <> (const Left, Right: TSimbaPackageRelease): Boolean;
   end;
 
-  TSimbaPackageReleaseList = specialize TFPGList<TSimbaPackageRelease>;
+  TSimbaPackageRelease = class
+  protected
+    FPackage: TSimbaPackage;
 
-  TSimbaPackageGetPage = function(URL: String; AllowedResponseCodes: array of Integer; out ResponseCode: Integer): String of object;
-  TSimbaPackageGetZIP  = function(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray): Boolean of object;
+    FBranch: Boolean;
+    FVersion: String;
+    FNotes: String;
+    FTime: TDateTime;
+    FTimeStamp: String;
+    FDownloadURL: String;
+    FOptionsURL: String;
+
+    FOptions: TSimbaPackageOptions;
+    FOptionsCached: Boolean;
+
+    function GetOptions: TSimbaPackageOptions;
+  public
+    // Release
+    constructor Create(Package: TSimbaPackage; const Version, TimeStamp, Notes, DownloadURL, OptionsURL: String); overload;
+    // Branch
+    constructor Create(Package: TSimbaPackage; const Version, DownloadURL, OptionsURL: String); overload;
+
+    property Branch: Boolean read FBranch;
+    property Version: String read FVersion;
+    property Notes: String read FNotes;
+    property Time: TDateTime read FTime;
+    property TimeStamp: String read FTimeStamp;
+    property DownloadURL: String read FDownloadURL;
+    property OptionsURL: String read FOptionsURL;
+
+    property Options: TSimbaPackageOptions read GetOptions;
+  end;
+
+  TSimbaPackageReleaseList = specialize TFPGObjectList<TSimbaPackageRelease>;
 
   TSimbaPackage = class
   public
-    FOwner: String;
     FName: String;
     FURL: String;
-    FIssuesURL: String;
-    FReleasesURL: String;
-    FBranchesURL: String;
     FReleases: TSimbaPackageReleaseList;
-    FCacheFile: String;
-    FInstalledVersion: TSimbaPackage_InstalledVersion;
+    FCacheFileName: String;
+    FCacheHash: String;
 
-    function GetOptions(Version: String): TSimbaPackage_Options;
-    function GetRelease(Version: String): TSimbaPackageRelease;
+    FInstalledName: String;
+    FInstalledPath: String;
+    FInstalledScripts: String;
+    FInstalledExamples: String;
+    FInstalledVersion: String;
+    FInstalledVersionTime: TDateTime;
+
+    FEndpoint: TSimbaPackageEndpoint;
+
     function GetCacheAge: Integer;
+    function GetInstalledScripts: TStringArray;
+    function GetInstalledExamples: TStringArray;
   public
-    GetPageFunction: TSimbaPackageGetPage;
-    GetZIPFunction: TSimbaPackageGetZIP;
-
-    property InstalledVersion: TSimbaPackage_InstalledVersion read FInstalledVersion;
-    property Owner: String read FOwner;
+    property Endpoint: TSimbaPackageEndpoint read FEndpoint;
     property Name: String read FName;
-    property URL: String read FURL;
-    property IssuesURL: String read FIssuesURL;
     property Releases: TSimbaPackageReleaseList read FReleases;
-    property Release[Version: String]: TSimbaPackageRelease read GetRelease;
-    property Options[Version: String]: TSimbaPackage_Options read GetOptions;
-
     property CacheAge: Integer read GetCacheAge;
 
-    procedure AddRelease(Version, TimeStamp, Notes, DownloadURL: String);
-    function LoadReleases(UseCache: Boolean = True): Boolean;
+    function LoadReleases(UseCache: Boolean): Boolean;
 
-    function Install(Version: String; Path: String; Flat: Boolean; IgnoreList: String): Boolean;
+    function Install(Release: TSimbaPackageRelease; Path: String; Flat: Boolean; IgnoreList: String): Boolean;
+
+    procedure Load;
+    procedure Save;
     procedure Remove;
 
-    constructor Create(Repository: String);
+    property InstalledExamples: TStringArray read GetInstalledExamples;
+    property InstalledScripts: TStringArray read GetInstalledScripts;
+    property InstalledVersion: String read FInstalledVersion;
+    property InstalledVersionTime: TDateTime read FInstalledVersionTime;
+    property InstalledPath: String read FInstalledPath;
+    property InstalledName: String read FInstalledName;
+
+    constructor Create(URL: String);
     destructor Destroy; override;
   end;
 
-  TSimbaPackageList = specialize TFPGObjectList<TSimbaPackage>;
-
-  function LoadPackages: TSimbaPackageList;
+  function LoadPackages(FreeObjects: Boolean = True): TSimbaPackageList;
 
 implementation
 
 uses
-  fileutil, dateutils, lazloggerbase, inifiles, jsonparser, fpjson,
-  simba.files, simba.httpclient;
+  fileutil, dateutils, lazloggerbase, inifiles, jsonparser, fpjson, sha1,
+  simba.files, simba.helpers_string;
 
-type
-  TSimbaPackageConfig = class
-    class function LoadPackages: TSimbaPackageList; static;
-
-    class procedure LoadPackage(Package: TSimbaPackage); static;
-    class procedure SavePackage(Package: TSimbaPackage); static;
-    class procedure RemovePackage(Package: TSimbaPackage); static;
-  end;
-
-class function TSimbaPackageConfig.LoadPackages: TSimbaPackageList;
+function LoadPackages(FreeObjects: Boolean = True): TSimbaPackageList;
 var
   Sections: TStringList;
-  Repository: String;
+  Section: String;
+  URL: String;
 begin
-  Result := TSimbaPackageList.Create();
+  Result := TSimbaPackageList.Create(FreeObjects);
 
   Sections := TStringList.Create();
-
   try
     with TIniFile.Create(GetPackagePath() + 'packages.ini') do
     try
       ReadSections(Sections);
-      for Repository in Sections do
-        Result.Add(TSimbaPackage.Create(Repository));
+
+      for Section in Sections do
+      begin
+        URL := ReadString(Section, 'URL', '');
+        if (URL = '') then
+          Continue;
+
+        Result.Add(TSimbaPackage.Create(URL));
+      end;
     finally
       Free();
     end;
   except
     on E: Exception do
-      DebugLn('TSimbaPackageConfig.LoadPackages: ' + E.Message);
+      DebugLn('[LoadPackages]: Exception "%s"', [E.Message]);
   end;
 
   if (Sections <> nil) then
     Sections.Free();
 end;
 
-class procedure TSimbaPackageConfig.SavePackage(Package: TSimbaPackage);
+function TSimbaPackageOptions.IsEmpty: Boolean;
+begin
+  Result := CompareMem(@Self, @Default(TSimbaPackageOptions), SizeOf(TSimbaPackageOptions));
+end;
+
+function TSimbaPackageRelease.GetOptions: TSimbaPackageOptions;
+begin
+  if (not FOptionsCached) then
+  begin
+    FOptionsCached := True;
+
+    with TStringList.Create() do
+    try
+      Text := FPackage.Endpoint.GetPage(FOptionsURL);
+
+      if (Text <> '') then
+      begin
+        FOptions.Name       := Values['name'];
+        FOptions.Directory  := Values['directory'];
+        FOptions.IgnoreList := Values['ignore'];
+        FOptions.Examples   := Values['examples'];
+        FOptions.Scripts    := Values['scripts'];
+        FOptions.Flat       := Values['flat'].ToLower() = 'true';
+      end;
+    finally
+      Free();
+    end;
+  end;
+
+  Result := FOptions;
+end;
+
+constructor TSimbaPackageRelease.Create(Package: TSimbaPackage; const Version, TimeStamp, Notes, DownloadURL, OptionsURL: String);
+begin
+  FPackage := Package;
+
+  FVersion := Version;
+  FTimeStamp := TimeStamp;
+  FTime := ISO8601ToDateDef(FTimeStamp, 0, False);
+  FNotes := Notes;
+  FDownloadURL := DownloadURL;
+  FOptionsURL := OptionsURL;
+end;
+
+constructor TSimbaPackageRelease.Create(Package: TSimbaPackage; const Version, DownloadURL, OptionsURL: String);
+begin
+  FPackage := Package;
+
+  FBranch := True;
+  FVersion := Version;
+  FDownloadURL := DownloadURL;
+  FOptionsURL := OptionsURL;
+end;
+
+function TSimbaPackage.Install(Release: TSimbaPackageRelease; Path: String; Flat: Boolean; IgnoreList: String): Boolean;
+begin
+  Result := False;
+
+  with Release do
+  begin
+    Result := FEndpoint.GetZip(DownloadURL, Path, Flat, IgnoreList.Split(','));
+
+    if Result then
+    begin
+      FInstalledName        := FName;
+      FInstalledPath        := Path;
+      FInstalledVersion     := Version;
+      FInstalledVersionTime := Time;
+      FInstalledScripts     := Options.Scripts;
+      FInstalledExamples    := Options.Examples;
+
+       if (Options.Name <> '') then
+        FInstalledName := Options.Name;
+
+      Save();
+    end;
+  end;
+end;
+
+procedure TSimbaPackage.Load;
+var
+  Section: String;
 begin
   try
+    Section := SHA1Print(SHA1String(FURL));
+
+    with TIniFile.Create(GetPackagePath() + 'packages.ini') do
+    try
+      if not SectionExists(Section) then
+        Exit;
+
+      FInstalledName        := ReadString(Section, 'Name', '');
+      FInstalledPath        := ReadString(Section, 'Path', '');
+      FInstalledScripts     := ReadString(Section, 'Scripts', '');
+      FInstalledExamples    := ReadString(Section, 'Examples', '');
+      FInstalledVersion     := ReadString(Section, 'InstalledVersion', '');
+      FInstalledVersionTime := ReadDateTime(Section, 'InstalledVersionTime', 0);
+    finally
+      Free();
+    end;
+  except
+    on E: Exception do
+      DebugLn('[TSimbaPackage.Load]: Exception "%s"', [E.Message]);
+  end;
+end;
+
+procedure TSimbaPackage.Save;
+var
+  Section: String;
+begin
+  try
+    Section := SHA1Print(SHA1String(FURL));
+
     with TIniFile.Create(GetPackagePath() + 'packages.ini') do
     try
       CacheUpdates := True;
 
-      WriteString(Package.Owner + '/' + Package.Name, 'Name', Package.FInstalledVersion.Name);
-      WriteString(Package.Owner + '/' + Package.Name, 'Path', Package.FInstalledVersion.Path);
-      WriteString(Package.Owner + '/' + Package.Name, 'InstalledVersion', Package.FInstalledVersion.Version);
-
-      WriteDateTime(Package.Owner + '/' + Package.Name, 'InstalledVersionTime', Package.FInstalledVersion.VersionTime);
+      WriteString(Section, 'URL', FURL);
+      WriteString(Section, 'Name', FInstalledName);
+      WriteString(Section, 'Path', FInstalledPath);
+      WriteString(Section, 'Scripts', FInstalledScripts);
+      WriteString(Section, 'Examples', FInstalledExamples);
+      WriteString(Section, 'InstalledVersion', FInstalledVersion);
+      WriteDateTime(Section, 'InstalledVersionTime', FInstalledVersionTime);
     finally
       Free();
     end;
   except
     on E: Exception do
-      DebugLn('TSimbaPackageConfig.SavePackage: ' + E.Message);
+      DebugLn('[TSimbaPackage.Save]: Exception "%s"', [E.Message]);
   end;
-end;
-
-class procedure TSimbaPackageConfig.LoadPackage(Package: TSimbaPackage);
-begin
-  try
-    with TIniFile.Create(GetPackagePath() + 'packages.ini') do
-    try
-      Package.FInstalledVersion.Name     := ReadString(Package.Owner + '/' + Package.Name, 'Name', '');
-      Package.FInstalledVersion.Path     := ReadString(Package.Owner + '/' + Package.Name, 'Path', '');
-      Package.FInstalledVersion.Version  := ReadString(Package.Owner + '/' + Package.Name, 'InstalledVersion', '');
-      Package.FInstalledVersion.Scripts  := ReadString(Package.Owner + '/' + Package.Name, 'Scripts', '');
-      Package.FInstalledVersion.Examples := ReadString(Package.Owner + '/' + Package.Name, 'Examples', '');
-
-      Package.FInstalledVersion.VersionTime := ReadDateTime(Package.Owner + '/' + Package.Name, 'InstalledVersionTime', 0);
-    finally
-      Free();
-    end;
-  except
-    on E: Exception do
-      DebugLn('TSimbaPackageConfig.LoadPackage: ' + E.Message);
-  end;
-end;
-
-class procedure TSimbaPackageConfig.RemovePackage(Package: TSimbaPackage);
-begin
-  try
-    with TIniFile.Create(GetPackagePath() + 'packages.ini') do
-    try
-      EraseSection(Package.Owner + '/' + Package.Name);
-    finally
-      Free();
-    end;
-  except
-    on E: Exception do
-      DebugLn('TSimbaPackageConfig.RemovePackage: ' + E.Message);
-  end;
-end;
-
-function LoadPackages: TSimbaPackageList;
-begin
-  Result := TSimbaPackageConfig.LoadPackages();
-end;
-
-function TSimbaPackageRelease.IsEmpty: Boolean;
-begin
-  Result := Self = Default(TSimbaPackageRelease);
-end;
-
-class function TSimbaPackageRelease.Empty: TSimbaPackageRelease;
-begin
-  Result := Default(TSimbaPackageRelease);
-end;
-
-class operator TSimbaPackageRelease.=(const Left, Right: TSimbaPackageRelease): Boolean;
-begin
-  Result := (Left.Version = Right.Version) and
-            (Left.Notes = Right.Notes) and
-            (Left.Time = Right.Time) and
-            (Left.TimeStamp = Right.TimeStamp) and
-            (Left.DownloadURL = Right.DownloadURL);
-end;
-
-class operator TSimbaPackageRelease.<>(const Left, Right: TSimbaPackageRelease): Boolean;
-begin
-   Result := (Left.Version <> Right.Version) or
-             (Left.Notes <> Right.Notes) or
-             (Left.Time <> Right.Time) or
-             (Left.TimeStamp <> Right.TimeStamp) or
-             (Left.DownloadURL <> Right.DownloadURL);
-end;
-
-function TSimbaPackage.Install(Version: String; Path: String; Flat: Boolean; IgnoreList: String): Boolean;
-begin
-  Result := False;
-
-  if Release[Version].IsEmpty() then
-  begin
-    DebugLn('TSimbaPackage.Install: Empty release');
-    Exit;
-  end;
-
-  if (GetZipFunction <> nil) then
-  begin
-    with Release[Version] do
-    begin
-      Result := GetZipFunction(DownloadURL, Path, Flat, IgnoreList.Split([',']));
-
-      if Result then
-      begin
-        FInstalledVersion.Name := FName;
-        if (Options[Version].Name <> '') then
-          FInstalledVersion.Name := Options[Version].Name;
-
-        FInstalledVersion.Path        := Path;
-        FInstalledVersion.Version     := Version;
-        FInstalledVersion.VersionTime := Time;
-
-        TSimbaPackageConfig.SavePackage(Self);
-      end;
-    end;
-  end else
-    DebugLn('TSimbaPackage.Install: GetZipFunction = nil');
 end;
 
 procedure TSimbaPackage.Remove;
 begin
-  TSimbaPackageConfig.RemovePackage(Self);
+  try
+    with TIniFile.Create(GetPackagePath() + 'packages.ini') do
+    try
+      EraseSection(SHA1Print(SHA1String(FURL)));
+    finally
+      Free();
+    end;
+  except
+    on E: Exception do
+      DebugLn('[TSimbaPackage.Remove]: Exception "%s"', [E.Message]);
+  end;
+end;
+
+function TSimbaPackage.GetInstalledScripts: TStringArray;
+
+  function GetFiles(FileName: String): TStringArray;
+  begin
+    if DirectoryExists(FileName) then
+      Result := FindFiles([FileName], '*.simba')
+    else
+    if FileExists(FileName) then
+      Result := [FileName];
+  end;
+
+var
+  I, J: Integer;
+  FileName: String;
+  Scripts, FileNames: TStringArray;
+begin
+  Result := [];
+
+  Scripts := FInstalledScripts.Split(',');
+  for I := 0 to High(Scripts) do
+  begin
+    FileName := Scripts[I].After('=');
+    if (FileName = '') then
+      FileName := Scripts[I];
+    FileName := ConcatPaths([FInstalledPath, FileName]);
+
+    FileNames := GetFiles(FileName);
+    for J := 0 to High(FileNames) do
+      Result := Result + [Scripts[I].Before('='), FileNames[J]];
+  end;
+end;
+
+function TSimbaPackage.GetInstalledExamples: TStringArray;
+var
+  I: Integer;
+  FileName: String;
+  Scripts: TStringArray;
+begin
+  Result := [];
+
+  Scripts := FInstalledExamples.Split(',');
+  for I := 0 to High(Scripts) do
+  begin
+    FileName := ConcatPaths([FInstalledPath, Scripts[I]]);
+
+    if DirectoryExists(FileName) then
+      Result := Result + FindFiles([FileName], '*.simba')
+    else
+    if FileExists(FileName) then
+      Result := Result + [FileName];
+  end;
 end;
 
 function TSimbaPackage.GetCacheAge: Integer;
@@ -276,197 +356,135 @@ var
   DateTime: TDateTime;
 begin
   Result := 0;
-  if FileAge(FCacheFile, DateTime) then
+  if FileAge(FCacheFileName, DateTime) then
     Result := MinutesBetween(Now(), DateTime);
-end;
-
-procedure TSimbaPackage.AddRelease(Version, TimeStamp, Notes, DownloadURL: String);
-var
-  Item: TSimbaPackageRelease;
-begin
-  Item.Version := Version;
-  Item.TimeStamp := TimeStamp;
-  Item.Time := ISO8601ToDateDef(TimeStamp, 0, False);
-  Item.Notes := Notes;
-  Item.DownloadURL := DownloadURL;
-
-  FReleases.Add(Item);
-end;
-
-function TSimbaPackage.GetOptions(Version: String): TSimbaPackage_Options;
-var
-  ResponseCode: Integer;
-  Contents: String;
-begin
-  Result := Default(TSimbaPackage_Options);
-
-  if (GetPageFunction <> nil) then
-  begin
-    Contents := GetPageFunction(Format(GITHUB_URL_PACKAGE_OPTIONS, [FOwner, FName, Version]), [HTTP_OK, HTTP_FORBIDDEN, HTTP_NOT_FOUND, HTTP_BAD_REQUEST], ResponseCode);
-
-    if (ResponseCode = HTTP_OK) then
-      with TStringList.Create() do
-      try
-        Text := Contents;
-
-        Result.Loaded := True;
-        Result.Name := Values['name'];
-        Result.Directory := Values['directory'];
-        Result.IgnoreList := Values['ignore'];
-        Result.Flat := StrToBoolDef(Values['flat'], False);
-      finally
-        Free();
-      end;
-  end else
-    DebugLn('TSimbaPackage.GetOptions: GetPageFunction = nil');
 end;
 
 function TSimbaPackage.LoadReleases(UseCache: Boolean): Boolean;
 
-  function ParseJSON(Data: String): Boolean;
+  function AddReleases(const Data: String): Boolean;
   var
     JSON: TJSONData;
     I: Integer;
-    Download, Notes, Time, Version: TJSONData;
+    Zip, Notes, Time, Version, Branch, OptionsURL: TJSONData;
+    Options: String;
   begin
+    JSON := nil;
+
     try
       JSON := GetJSON(Data);
+
+      if (JSON is TJSONArray) then
+      begin
+        for I := 0 to JSON.Count - 1 do
+          if (JSON.Items[I] is TJSONObject) then
+          begin
+            with TJSONObject(JSON.Items[I]) do
+            begin
+              Options := '';
+              if Find('options', OptionsURL) then
+                Options := OptionsURL.AsString;
+
+              if Find('branch', Branch) and Find('zip', Zip) then
+                FReleases.Add(TSimbaPackageRelease.Create(Self, Branch.AsString, Zip.AsString, Options))
+              else
+              if Find('zip', Zip) and Find('notes', Notes) and Find('time', Time) and Find('version', Version) then
+                FReleases.Add(TSimbaPackageRelease.Create(Self, Version.AsString, Time.AsString, Notes.AsString, Zip.AsString, Options));
+            end;
+         end;
+      end;
     except
+      on E: Exception do
+        DebugLn('[TSimbaPackage.LoadReleases]: Exception "%s"', [E.Message]);
     end;
 
-    if (JSON is TJSONArray) then
-    begin
-      for I := 0 to JSON.Count - 1 do
-       if (JSON.Items[I] is TJSONObject) then
-       begin
-         with TJSONObject(JSON.Items[I]) do
-           if Find('zipball_url', Download) and Find('body', Notes) and Find('published_at', Time) and Find('tag_name', Version) then
-             AddRelease(Version.AsString, Time.AsString, Notes.AsString, Download.AsString);
-        end;
-    end;
+    if (JSON <> nil) then
+      JSON.Free();
 
     Result := FReleases.Count > 0;
-
-    if (JSON <> nil) then
-      JSON.Free();
-  end;
-
-  procedure ParseBranchesJSON(Data: String);
-  var
-    JSON, Name: TJSONData;
-    I: Integer;
-  begin
-    try
-      JSON := GetJSON(Data);
-    except
-    end;
-
-    if (JSON is TJSONArray) then
-      for I := 0 to JSON.Count - 1 do
-        if (JSON.Items[I] is TJSONObject) then
-         begin
-           with TJSONObject(JSON.Items[I]) do
-             if Find('name', Name) then
-               AddRelease(Name.AsString, '', 'Branch', Format(GITHUB_URL_DOWNLOAD_BRANCH, [FOwner, FName, Name.AsString]));
-          end;
-
-    if (JSON <> nil) then
-      JSON.Free();
   end;
 
   function LoadCache: Boolean;
   begin
-    Result := (CacheAge < 60) and ParseJSON(ReadFile(FCacheFile));
+    Result := (GetCacheAge() < 60) and AddReleases(ReadFile(FCacheFileName));
+    if Result then
+      FCacheHash := HashFile(FCacheFileName);
   end;
 
-  procedure UpdateCache;
-  var
-    JSON: TJSONArray;
-    I: Integer;
+  procedure UpdateCache(const Data: String);
   begin
-    JSON := TJSONArray.Create();
+    WriteFile(FCacheFileName, Data);
 
-    try
-      for I := 0 to FReleases.Count - 1 do
-        JSON.Add(TJSONObject.Create(
-          ['zipball_url',  FReleases[I].DownloadURL,
-           'body',         FReleases[I].Notes,
-           'published_at', FReleases[I].TimeStamp,
-           'tag_name',     FReleases[I].Version])
-        );
+    FCacheHash := HashFile(FCacheFileName);
+  end;
 
-      WriteFile(FCacheFile, JSON.FormatJSON());
-    finally
-      JSON.Free();
-    end;
+  function CacheUnchanged: Boolean;
+  begin
+    Result := (FCacheHash = HashFile(FCacheFileName));
   end;
 
 var
-  ResponseCode: Integer;
-  Contents: String;
+  Data: String;
 begin
+  if UseCache and CacheUnchanged then
+    Exit(True);
+
   FReleases.Clear();
 
-  Result := UseCache and LoadCache();
+  if UseCache and LoadCache() then
+    Exit(True);
+
+  Data := FEndpoint.GetReleasesJSON();
+
+  Result := AddReleases(Data);
   if Result then
-    Exit;
+    UpdateCache(Data);
+end;
 
-  if (GetPageFunction <> nil) then
+constructor TSimbaPackage.Create(URL: String);
+
+  function IsGithubShorthand: Boolean;
   begin
-    Contents := GetPageFunction(FReleasesURL, [HTTP_OK, HTTP_FORBIDDEN, HTTP_NOT_FOUND, HTTP_BAD_REQUEST], ResponseCode);
+    Result := (URL.Count('/') = 1) and (URL.Count('.') = 0); // "ollydev/simba"
+  end;
 
-    Result := (ResponseCode = HTTP_OK);
-    if Result then
-    begin
-      if (Contents <> '') then
-        ParseJSON(Contents);
-      // Add branches
-      ParseBranchesJSON(GetPageFunction(FBranchesURL, [HTTP_OK, HTTP_FORBIDDEN, HTTP_NOT_FOUND, HTTP_BAD_REQUEST], ResponseCode));
+  function IsGithub: Boolean;
+  begin
+    Result := URL.Contains('github.com', False) or IsGithubShorthand();
+  end;
 
-      UpdateCache();
-    end;
+begin
+  FURL := URL;
+
+  if IsGithub() then
+  begin
+    if IsGithubShorthand() then
+      FURL := 'https://github.com/' + FURL;
+
+    FEndpoint := TSimbaPackageEndpoint_Github.Create(FURL);
+    FName := TSimbaPackageEndpoint_Github(FEndpoint).Owner + '/' + TSimbaPackageEndpoint_Github(FEndpoint).Name;
   end else
-    DebugLn('TSimbaPackage.LoadReleases: GetPageFunction = nil');
-end;
+  begin
+    FEndpoint := TSimbaPackageEndpoint.Create(FURL);
 
-function TSimbaPackage.GetRelease(Version: String): TSimbaPackageRelease;
-var
-  I: Integer;
-begin
-  for I := 0 to FReleases.Count - 1 do
-    if (Version = FReleases[I].Version) then
-    begin
-      Result := FReleases[I];
-      Exit;
-    end;
+    FName := FURL;
+    FName := FName.Replace('http://', '');
+    FName := FName.Replace('https://', '');
+    FName := FName.After('/');
+    if (FName = '') then
+      FName := FURL;
+  end;
 
-  Result := TSimbaPackageRelease.Empty();
-end;
-
-constructor TSimbaPackage.Create(Repository: String);
-var
-  Args: TStringArray;
-begin
   FReleases := TSimbaPackageReleaseList.Create();
+  FCacheFileName := GetPackagePath() + SHA1Print(SHA1String(FURL));
 
-  Args := Repository.Split('/');
-  if (Length(Args) = 2) then
-  begin
-    FOwner := Args[0];
-    FName := Args[1];
-    FIssuesURL := Format(GITHUB_URL_REPOSITORY_ISSUES, [FOwner, FName]);
-    FReleasesURL := Format(GITHUB_API_RELEASES, [FOwner, FName]);
-    FBranchesURL := Format(GITHUB_API_BRANCHES, [FOwner, FName]);
-    FURL := Format(GITHUB_URL_REPOSITORY, [FOwner, FName]);
-    FCacheFile := GetPackagePath() + FOwner + '-' + FName;
-
-    TSimbaPackageConfig.LoadPackage(Self);
-  end else
-    DebugLn('TSimbaPackage.Create: Invalid Repository');
+  Load();
 end;
 
 destructor TSimbaPackage.Destroy;
 begin
+  if (FEndpoint <> nil) then
+    FreeAndNil(FEndpoint);
   if (FReleases <> nil) then
     FreeAndNil(FReleases);
 

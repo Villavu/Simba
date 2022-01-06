@@ -188,13 +188,33 @@ begin
   Result := RPosEx(Value, Self, Offset);
 end;
 
+function TStringHelper.IndicesOfChar(const Value: Char; Offset: Integer): TIntegerArray;
+var
+  Matches: specialize TSimbaOverAllocateArray<Integer>;
+  I: Integer;
+begin
+  Matches.Init(32);
+
+  if (Offset > 0) then
+    for I := Offset to Length(Self) do
+      if (Self[I] = Value) then
+        Matches.Add(I);
+
+  Result := Matches.Trim();
+end;
+
 function TStringHelper.IndicesOf(const Value: String): TIntegerArray;
 var
   Matches: SizeIntArray;
   I: Integer;
 begin
   Result := Default(TIntegerArray);
+  if (Self = '') then
+    Exit;
 
+  if Length(Value) = 1 then
+    Result := IndicesOfChar(Value[1], 1)
+  else
   if FindMatchesBoyerMooreCaseSensitive(Self, Value, Matches, True) then
   begin
     SetLength(Result, System.Length(Matches));
@@ -209,7 +229,12 @@ var
   I: Integer;
 begin
   Result := Default(TIntegerArray);
+  if (Self = '') then
+    Exit;
 
+  if Length(Value) = 1 then
+    Result := IndicesOfChar(Value[1], Offset)
+  else
   if FindMatchesBoyerMooreCaseSensitive(Self.Copy(Offset, MaxInt), Value, Matches, True) then
   begin
     SetLength(Result, System.Length(Matches));
@@ -412,6 +437,11 @@ begin
   end;
 
   Result := False;
+end;
+
+function TStringHelper.Count(const Value: String): Integer;
+begin
+  Result := Length(IndicesOf(Value));
 end;
 
 function TStringHelper.Split(const Seperator: String): TStringArray;
