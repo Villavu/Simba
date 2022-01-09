@@ -136,12 +136,12 @@ end;
 
 procedure _LapeFont_Name_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PFont(Params^[0])^.Name;
+  PString(Result)^ := PFont(Params^[0])^.Name;
 end;
 
 procedure _LapeFont_Name_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PFont(Params^[0])^.Name := PlpString(Params^[1])^;
+  PFont(Params^[0])^.Name := PString(Params^[1])^;
 end;
 
 procedure _LapeFont_Orientation_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -441,22 +441,22 @@ end;
 
 procedure _LapeCanvas_TextOut(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PCanvas(Params^[0])^.TextOut(PInteger(Params^[1])^, PInteger(Params^[2])^, PlpString(Params^[3])^);
+  PCanvas(Params^[0])^.TextOut(PInteger(Params^[1])^, PInteger(Params^[2])^, PString(Params^[3])^);
 end;
 
 procedure _LapeCanvas_TextRect(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PCanvas(Params^[0])^.TextRect(PRect(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, PlpString(Params^[4])^);
+  PCanvas(Params^[0])^.TextRect(PRect(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, PString(Params^[4])^);
 end;
 
 procedure _LapeCanvas_TextHeight(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := PCanvas(Params^[0])^.TextHeight(PlpString(Params^[1])^);
+  PInteger(Result)^ := PCanvas(Params^[0])^.TextHeight(PString(Params^[1])^);
 end;
 
 procedure _LapeCanvas_TextWidth(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := PCanvas(Params^[0])^.TextWidth(PlpString(Params^[1])^);
+  PInteger(Result)^ := PCanvas(Params^[0])^.TextWidth(PString(Params^[1])^);
 end;
 
 procedure _LapeCanvas_HandleAllocated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -661,12 +661,12 @@ end;
 
 procedure _LapeGraphic_LoadFromFile(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PGraphic(Params^[0])^.LoadFromFile(PlpString(Params^[1])^);
+  PGraphic(Params^[0])^.LoadFromFile(PString(Params^[1])^);
 end;
 
 procedure _LapeGraphic_SaveToFile(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PGraphic(Params^[0])^.SaveToFile(PlpString(Params^[1])^);
+  PGraphic(Params^[0])^.SaveToFile(PString(Params^[1])^);
 end;
 
 procedure _LapeGraphic_Empty_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -926,7 +926,7 @@ begin
       Data := (Data + Addition);
     end;
 
-  PLPString(Result)^ := Format('%d, %d, ''', [w, h]) + Data + '''';
+  PString(Result)^ := Format('%d, %d, ''', [w, h]) + Data + '''';
 end;
 
 procedure _LapeBitmap_LoadFromString(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -937,7 +937,7 @@ begin
 
   for x := (PInteger(Params^[1])^ - 1) downto 0 do
     for y := (PInteger(Params^[2])^ - 1) downto 0 do
-      PBitmap(Params^[0])^.Canvas.Pixels[x, y] := StrToInt('$' + Copy(PLPString(Params^[4])^, y * 6 + x * PInteger(Params^[2])^ * 6 + 1, 6));
+      PBitmap(Params^[0])^.Canvas.Pixels[x, y] := StrToInt('$' + Copy(PString(Params^[4])^, y * 6 + x * PInteger(Params^[2])^ * 6 + 1, 6));
 
   PBitmap(Params^[0])^.Mask(PInteger(Params^[3])^);
 end;
@@ -954,7 +954,7 @@ end;
 
 procedure _LapePicture_LoadFromFile(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PPicture(Params^[0])^.LoadFromFile(PlpString(Params^[1])^);
+  PPicture(Params^[0])^.LoadFromFile(PString(Params^[1])^);
 end;
 
 procedure _LapePicture_LoadFromStream(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -964,12 +964,12 @@ end;
 
 procedure _LapePicture_LoadFromStreamWithFileExt(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PPicture(Params^[0])^.LoadFromStreamWithFileExt(PStream(Params^[1])^, PlpString(Params^[2])^);
+  PPicture(Params^[0])^.LoadFromStreamWithFileExt(PStream(Params^[1])^, PString(Params^[2])^);
 end;
 
 procedure _LapePicture_SaveToFile(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PPicture(Params^[0])^.SaveToFile(PlpString(Params^[1])^, PlpString(Params^[2])^);
+  PPicture(Params^[0])^.SaveToFile(PString(Params^[1])^, PString(Params^[2])^);
 end;
 
 procedure _LapePicture_SaveToStream(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -979,7 +979,7 @@ end;
 
 procedure _LapePicture_SaveToStreamWithFileExt(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PPicture(Params^[0])^.SaveToStreamWithFileExt(PStream(Params^[1])^, PlpString(Params^[2])^);
+  PPicture(Params^[0])^.SaveToStreamWithFileExt(PStream(Params^[1])^, PString(Params^[2])^);
 end;
 
 procedure _LapePicture_Bitmap_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}

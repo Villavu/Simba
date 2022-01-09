@@ -82,7 +82,7 @@ begin
   Process := TProcessTimeout.Create(nil);
   Process.OnRunCommandEvent := @Process.Idle;
   Process.Timeout := GetTickCount64() + Timeout;
-  Process.Options := Process.Options + [poRunIdle];
+  Process.Options := Process.Options + [poRunIdle, poStderrToOutPut];
   Process.Executable := Executable;
 
   for Command in Commands do
@@ -136,7 +136,7 @@ end;
 
 function TSimbaProcess.RunCommandInDir(Directory, Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus;
 begin
-  Process.RunCommandInDir(Directory, Executable, Commands, Output, Result);
+  Process.RunCommandInDir(Directory, Executable, Commands, Output, Result, [poStderrToOutPut]);
 end;
 
 function TSimbaProcess.RunCommandInDir(Directory, Executable: String; Commands: TStringArray): TProcessID;
@@ -149,6 +149,7 @@ begin
   try
     Process.CurrentDirectory := Directory;
     Process.Executable := Executable;
+    Process.Options := Process.Options + [poStderrToOutPut];
     Process.Parameters.AddStrings(Commands);
     Process.Execute();
 
@@ -160,7 +161,7 @@ end;
 
 function TSimbaProcess.RunCommand(Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus;
 begin
-  Process.RunCommandInDir(Application.Location, Executable, Commands, Output, Result);
+  Process.RunCommandInDir(Application.Location, Executable, Commands, Output, Result, [poStderrToOutPut]);
 end;
 
 function TSimbaProcess.RunCommand(Executable: String; Commands: TStringArray): TProcessID;
@@ -173,6 +174,7 @@ begin
   try
     Process.CurrentDirectory := Application.Location;
     Process.Executable := Executable;
+    Process.Options := Process.Options + [poStderrToOutPut];
     Process.Parameters.AddStrings(Commands);
     Process.Execute();
 
@@ -192,7 +194,7 @@ begin
   Process := TProcessTimeout.Create(nil);
   Process.OnRunCommandEvent := @Process.Idle;
   Process.Timeout := GetTickCount64() + Timeout;
-  Process.Options := Process.Options + [poRunIdle];
+  Process.Options := Process.Options + [poRunIdle, poStderrToOutPut];
   Process.Executable := Executable;
 
   for Command in Commands do

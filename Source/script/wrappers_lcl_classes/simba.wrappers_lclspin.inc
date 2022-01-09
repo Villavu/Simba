@@ -11,12 +11,12 @@ end;
 
 procedure _LapeCustomFloatSpinEdit_ValueToStr(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PCustomFloatSpinEdit(Params^[0])^.ValueToStr(PDouble(Params^[1])^);
+  PString(Result)^ := PCustomFloatSpinEdit(Params^[0])^.ValueToStr(PDouble(Params^[1])^);
 end;
 
 procedure _LapeCustomFloatSpinEdit_StrToValue(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PDouble(Result)^ := PCustomFloatSpinEdit(Params^[0])^.StrToValue(PlpString(Params^[1])^);
+  PDouble(Result)^ := PCustomFloatSpinEdit(Params^[0])^.StrToValue(PString(Params^[1])^);
 end;
 
 procedure _LapeCustomFloatSpinEdit_DecimalPlaces_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}

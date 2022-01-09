@@ -5,7 +5,7 @@ end;
 
 procedure _LapeJSONArray_createExExEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PJSONArray(Params^[0])^ := TJSONArray.Create(PlpString(Params^[1])^);
+  PJSONArray(Params^[0])^ := TJSONArray.Create(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONArray_get(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -40,7 +40,7 @@ end;
 
 procedure _LapeJSONArray_getString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PJSONArray(Params^[0])^.getString(Pinteger(Params^[1])^);
+  PString(Result)^ := PJSONArray(Params^[0])^.getString(Pinteger(Params^[1])^);
 end;
 
 procedure _LapeJSONArray_isNull(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -50,7 +50,7 @@ end;
 
 procedure _LapeJSONArray_join(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PJSONArray(Params^[0])^.join(PlpString(Params^[1])^);
+  PString(Result)^ := PJSONArray(Params^[0])^.join(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONArray_length(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -105,12 +105,12 @@ end;
 
 procedure _LapeJSONArray_optString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PJSONArray(Params^[0])^.optString(Pinteger(Params^[1])^);
+  PString(Result)^ := PJSONArray(Params^[0])^.optString(Pinteger(Params^[1])^);
 end;
 
 procedure _LapeJSONArray_optStringEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PJSONArray(Params^[0])^.optString(Pinteger(Params^[1])^, PlpString(Params^[2])^);
+  PString(Result)^ := PJSONArray(Params^[0])^.optString(Pinteger(Params^[1])^, PString(Params^[2])^);
 end;
 
 procedure _LapeJSONArray_put(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -135,7 +135,7 @@ end;
 
 procedure _LapeJSONArray_putExExExEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PJSONArray(Result)^ := PJSONArray(Params^[0])^.put(PlpString(Params^[1])^);
+  PJSONArray(Result)^ := PJSONArray(Params^[0])^.put(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONArray_putExExExExEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -160,7 +160,7 @@ end;
 
 procedure _LapeJSONArray_putExExExExExExExExEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PJSONArray(Result)^ := PJSONArray(Params^[0])^.put(Pinteger(Params^[1])^, PlpString(Params^[2])^);
+  PJSONArray(Result)^ := PJSONArray(Params^[0])^.put(Pinteger(Params^[1])^, PString(Params^[2])^);
 end;
 
 procedure _LapeJSONArray_toJSONObject(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -170,17 +170,17 @@ end;
 
 procedure _LapeJSONArray_toString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PLpstring(Result)^ := PJSONArray(Params^[0])^.toString();
+  PString(Result)^ := PJSONArray(Params^[0])^.toString();
 end;
 
 procedure _LapeJSONArray_toStringEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PJSONArray(Params^[0])^.toString(Pinteger(Params^[1])^);
+  PString(Result)^ := PJSONArray(Params^[0])^.toString(Pinteger(Params^[1])^);
 end;
 
 procedure _LapeJSONArray_toStringExEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PJSONArray(Params^[0])^.toString(Pinteger(Params^[1])^, Pinteger(Params^[2])^);
+  PString(Result)^ := PJSONArray(Params^[0])^.toString(Pinteger(Params^[1])^, Pinteger(Params^[2])^);
 end;
 
 procedure _LapeJSONArray_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -200,7 +200,7 @@ end;
 
 procedure _LapeJSONObject_createExExExEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PJSONObject(Params^[0])^ := TJSONObject.Create(PlpString(Params^[1])^);
+  PJSONObject(Params^[0])^ := TJSONObject.Create(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONObject_clean(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -215,52 +215,52 @@ end;
 
 procedure _LapeJSONObject_accumulate(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PJSONObject(Result)^ := PJSONObject(Params^[0])^.accumulate(PlpString(Params^[1])^, PZAbstractObject(Params^[2])^);
+  PJSONObject(Result)^ := PJSONObject(Params^[0])^.accumulate(PString(Params^[1])^, PZAbstractObject(Params^[2])^);
 end;
 
 procedure _LapeJSONObject_get(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
- PZAbstractObject(Result)^ := PJSONObject(Params^[0])^.get(PlpString(Params^[1])^);
+ PZAbstractObject(Result)^ := PJSONObject(Params^[0])^.get(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONObject_getBoolean(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pboolean(Result)^ := PJSONObject(Params^[0])^.getBoolean(PlpString(Params^[1])^);
+  Pboolean(Result)^ := PJSONObject(Params^[0])^.getBoolean(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONObject_getDouble(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pdouble(Result)^ := PJSONObject(Params^[0])^.getDouble(PlpString(Params^[1])^);
+  Pdouble(Result)^ := PJSONObject(Params^[0])^.getDouble(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONObject_getInt(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pinteger(Result)^ := PJSONObject(Params^[0])^.getInt(PlpString(Params^[1])^);
+  Pinteger(Result)^ := PJSONObject(Params^[0])^.getInt(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONObject_getJSONArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PJSONArray(Result)^ := PJSONObject(Params^[0])^.getJSONArray(PlpString(Params^[1])^);
+  PJSONArray(Result)^ := PJSONObject(Params^[0])^.getJSONArray(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONObject_getJSONObject(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PJSONObject(Result)^ := PJSONObject(Params^[0])^.getJSONObject(PlpString(Params^[1])^);
+  PJSONObject(Result)^ := PJSONObject(Params^[0])^.getJSONObject(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONObject_getString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PJSONObject(Params^[0])^.getString(PlpString(Params^[1])^);
+  PString(Result)^ := PJSONObject(Params^[0])^.getString(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONObject_has(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pboolean(Result)^ := PJSONObject(Params^[0])^.has(PlpString(Params^[1])^);
+  Pboolean(Result)^ := PJSONObject(Params^[0])^.has(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONObject_isNull(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pboolean(Result)^ := PJSONObject(Params^[0])^.isNull(PlpString(Params^[1])^);
+  Pboolean(Result)^ := PJSONObject(Params^[0])^.isNull(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONObject_keys(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -280,92 +280,92 @@ end;
 
 procedure _LapeJSONObject_opt(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PZabstractObject(Result)^ := PJSONObject(Params^[0])^.opt(PlpString(Params^[1])^);
+  PZabstractObject(Result)^ := PJSONObject(Params^[0])^.opt(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONObject_optBoolean(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pboolean(Result)^ := PJSONObject(Params^[0])^.optBoolean(PlpString(Params^[1])^);
+  Pboolean(Result)^ := PJSONObject(Params^[0])^.optBoolean(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONObject_optBooleanEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pboolean(Result)^ := PJSONObject(Params^[0])^.optBoolean(PlpString(Params^[1])^, Pboolean(Params^[2])^);
+  Pboolean(Result)^ := PJSONObject(Params^[0])^.optBoolean(PString(Params^[1])^, Pboolean(Params^[2])^);
 end;
 
 procedure _LapeJSONObject_optDouble(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pdouble(Result)^ := PJSONObject(Params^[0])^.optDouble(PlpString(Params^[1])^);
+  Pdouble(Result)^ := PJSONObject(Params^[0])^.optDouble(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONObject_optDoubleEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pdouble(Result)^ := PJSONObject(Params^[0])^.optDouble(PlpString(Params^[1])^, Pdouble(Params^[2])^);
+  Pdouble(Result)^ := PJSONObject(Params^[0])^.optDouble(PString(Params^[1])^, Pdouble(Params^[2])^);
 end;
 
 procedure _LapeJSONObject_optInt(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pinteger(Result)^ := PJSONObject(Params^[0])^.optInt(PlpString(Params^[1])^);
+  Pinteger(Result)^ := PJSONObject(Params^[0])^.optInt(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONObject_optIntEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pinteger(Result)^ := PJSONObject(Params^[0])^.optInt(PlpString(Params^[1])^, Pinteger(Params^[2])^);
+  Pinteger(Result)^ := PJSONObject(Params^[0])^.optInt(PString(Params^[1])^, Pinteger(Params^[2])^);
 end;
 
 procedure _LapeJSONObject_optString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PJSONObject(Params^[0])^.optString(PlpString(Params^[1])^);
+  PString(Result)^ := PJSONObject(Params^[0])^.optString(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONObject_optStringEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PJSONObject(Params^[0])^.optString(PlpString(Params^[1])^, PlpString(Params^[2])^);
+  PString(Result)^ := PJSONObject(Params^[0])^.optString(PString(Params^[1])^, PString(Params^[2])^);
 end;
 
 procedure _LapeJSONObject_optJSONArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PJSONArray(Result)^ := PJSONObject(Params^[0])^.optJSONArray(PlpString(Params^[1])^);
+  PJSONArray(Result)^ := PJSONObject(Params^[0])^.optJSONArray(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONObject_optJSONObject(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PJSONObject(Result)^ := PJSONObject(Params^[0])^.optJSONObject(PlpString(Params^[1])^);
+  PJSONObject(Result)^ := PJSONObject(Params^[0])^.optJSONObject(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONObject_put(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PJSONObject(Result)^ := PJSONObject(Params^[0])^.put(PlpString(Params^[1])^, Pboolean(Params^[2])^);
+  PJSONObject(Result)^ := PJSONObject(Params^[0])^.put(PString(Params^[1])^, Pboolean(Params^[2])^);
 end;
 
 procedure _LapeJSONObject_putEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PJSONObject(Result)^ := PJSONObject(Params^[0])^.put(PlpString(Params^[1])^, Pdouble(Params^[2])^);
+  PJSONObject(Result)^ := PJSONObject(Params^[0])^.put(PString(Params^[1])^, Pdouble(Params^[2])^);
 end;
 
 procedure _LapeJSONObject_putExEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PJSONObject(Result)^ := PJSONObject(Params^[0])^.put(PlpString(Params^[1])^, Pinteger(Params^[2])^);
+  PJSONObject(Result)^ := PJSONObject(Params^[0])^.put(PString(Params^[1])^, Pinteger(Params^[2])^);
 end;
 
 procedure _LapeJSONObject_putExExEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PJSONObject(Result)^ := PJSONObject(Params^[0])^.put(PlpString(Params^[1])^, PlpString(Params^[2])^);
+  PJSONObject(Result)^ := PJSONObject(Params^[0])^.put(PString(Params^[1])^, PString(Params^[2])^);
 end;
 
 procedure _LapeJSONObject_putExExExEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PJSONObject(Result)^ := PJSONObject(Params^[0])^.put(PlpString(Params^[1])^, PZAbstractObject(Params^[2])^);
+  PJSONObject(Result)^ := PJSONObject(Params^[0])^.put(PString(Params^[1])^, PZAbstractObject(Params^[2])^);
 end;
 
 procedure _LapeJSONObject_putOpt(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PJSONObject(Result)^ := PJSONObject(Params^[0])^.putOpt(PlpString(Params^[1])^, PZAbstractObject(Params^[2])^);
+  PJSONObject(Result)^ := PJSONObject(Params^[0])^.putOpt(PString(Params^[1])^, PZAbstractObject(Params^[2])^);
 end;
 
 procedure _LapeJSONObject_remove(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PZAbstractObject(Result)^ := PJSONObject(Params^[0])^.remove(PlpString(Params^[1])^);
+  PZAbstractObject(Result)^ := PJSONObject(Params^[0])^.remove(PString(Params^[1])^);
 end;
 
 procedure _LapeJSONObject_assignTo(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -380,17 +380,17 @@ end;
 
 procedure _LapeJSONObject_toString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PlPstring (Result)^ := PJSONObject(Params^[0])^.toString();
+  PString (Result)^ := PJSONObject(Params^[0])^.toString();
 end;
 
 procedure _LapeJSONObject_toStringEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PJSONObject(Params^[0])^.toString(Pinteger(Params^[1])^);
+  PString(Result)^ := PJSONObject(Params^[0])^.toString(Pinteger(Params^[1])^);
 end;
 
 procedure _LapeJSONObject_toStringExEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PJSONObject(Params^[0])^.toString(Pinteger(Params^[1])^, Pinteger(Params^[2])^);
+  PString(Result)^ := PJSONObject(Params^[0])^.toString(Pinteger(Params^[1])^, Pinteger(Params^[2])^);
 end;
 
 procedure _LapeJSONObject_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

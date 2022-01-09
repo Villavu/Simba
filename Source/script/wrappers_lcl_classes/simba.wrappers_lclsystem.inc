@@ -25,7 +25,7 @@ end;
 
 procedure _LapePersistent_GetNamePath(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PPersistent(Params^[0])^.GetNamePath();
+  PString(Result)^ := PPersistent(Params^[0])^.GetNamePath();
 end;
 
 procedure _LapePersistent_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -85,7 +85,7 @@ end;
 
 procedure _LapeStream_WriteComponentRes(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PStream(Params^[0])^.WriteComponentRes(PlpString(Params^[1])^, PComponent(Params^[2])^);
+  PStream(Params^[0])^.WriteComponentRes(PString(Params^[1])^, PComponent(Params^[2])^);
 end;
 
 procedure _LapeStream_WriteDescendent(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -95,12 +95,12 @@ end;
 
 procedure _LapeStream_WriteDescendentRes(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PStream(Params^[0])^.WriteDescendentRes(PlpString(Params^[1])^, PComponent(Params^[2])^, PComponent(Params^[3])^);
+  PStream(Params^[0])^.WriteDescendentRes(PString(Params^[1])^, PComponent(Params^[2])^, PComponent(Params^[3])^);
 end;
 
 procedure _LapeStream_WriteResourceHeader(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PStream(Params^[0])^.WriteResourceHeader(PlpString(Params^[1])^, PInteger(Params^[2])^);
+  PStream(Params^[0])^.WriteResourceHeader(PString(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeStream_FixupResourceHeader(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -125,7 +125,7 @@ end;
 
 procedure _LapeStream_ReadAnsiString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PStream(Params^[0])^.ReadAnsiString();
+  PString(Result)^ := PStream(Params^[0])^.ReadAnsiString();
 end;
 
 procedure _LapeStream_WriteByte(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -145,7 +145,7 @@ end;
 
 procedure _LapeStream_WriteAnsiString(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PStream(Params^[0])^.WriteAnsiString(PlpString(Params^[1])^);
+  PStream(Params^[0])^.WriteAnsiString(PString(Params^[1])^);
 end;
 
 procedure _LapeStream_Position_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -210,17 +210,17 @@ end;
 
 procedure _LapeFileStream_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PFileStream(Params^[0])^ := TFileStream.Create(PlpString(Params^[1])^, PWord(Params^[2])^);
+  PFileStream(Params^[0])^ := TFileStream.Create(PString(Params^[1])^, PWord(Params^[2])^);
 end;
 
 procedure _LapeFileStream_InitEx(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PFileStream(Params^[0])^ := TFileStream.Create(PlpString(Params^[1])^, PWord(Params^[2])^, PCardinal(Params^[3])^);
+  PFileStream(Params^[0])^ := TFileStream.Create(PString(Params^[1])^, PWord(Params^[2])^, PCardinal(Params^[3])^);
 end;
 
 procedure _LapeFileStream_FileName_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PFileStream(Params^[0])^.FileName;
+  PString(Result)^ := PFileStream(Params^[0])^.FileName;
 end;
 
 procedure _LapeFileStream_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -245,7 +245,7 @@ end;
 
 procedure _LapeCustomMemoryStream_SaveToFile(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PCustomMemoryStream(Params^[0])^.SaveToFile(PlpString(Params^[1])^);
+  PCustomMemoryStream(Params^[0])^.SaveToFile(PString(Params^[1])^);
 end;
 
 procedure _LapeCustomMemoryStream_Memory_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -275,7 +275,7 @@ end;
 
 procedure _LapeMemoryStream_LoadFromFile(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PMemoryStream(Params^[0])^.LoadFromFile(PlpString(Params^[1])^);
+  PMemoryStream(Params^[0])^.LoadFromFile(PString(Params^[1])^);
 end;
 
 procedure _LapeMemoryStream_SetSize(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -300,7 +300,7 @@ end;
 
 procedure _LapeStringStream_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PStringStream(Params^[0])^ := TStringStream.Create(PlpString(Params^[1])^);
+  PStringStream(Params^[0])^ := TStringStream.Create(PString(Params^[1])^);
 end;
 
 procedure _LapeStringStream_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -310,7 +310,7 @@ end;
 
 procedure _LapeStringStream_ReadString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PStringStream(Params^[0])^.ReadString(PLongint(Params^[1])^);
+  PString(Result)^ := PStringStream(Params^[0])^.ReadString(PLongint(Params^[1])^);
 end;
 
 procedure _LapeStringStream_Seek(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -325,12 +325,12 @@ end;
 
 procedure _LapeStringStream_WriteString(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PStringStream(Params^[0])^.WriteString(PlpString(Params^[1])^);
+  PStringStream(Params^[0])^.WriteString(PString(Params^[1])^);
 end;
 
 procedure _LapeStringStream_DataString_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PStringStream(Params^[0])^.DataString;
+  PString(Result)^ := PStringStream(Params^[0])^.DataString;
 end;
 
 procedure _LapeStringStream_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -340,22 +340,27 @@ end;
 
 procedure _LapeStrings_Add(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := PStrings(Params^[0])^.Add(PlpString(Params^[1])^);
+  PInteger(Result)^ := PStrings(Params^[0])^.Add(PString(Params^[1])^);
 end;
 
 procedure _LapeStrings_AddObject(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := PStrings(Params^[0])^.AddObject(PlpString(Params^[1])^, PObject(Params^[2])^);
+  PInteger(Result)^ := PStrings(Params^[0])^.AddObject(PString(Params^[1])^, PObject(Params^[2])^);
 end;
 
 procedure _LapeStrings_Append(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PStrings(Params^[0])^.Append(PlpString(Params^[1])^);
+  PStrings(Params^[0])^.Append(PString(Params^[1])^);
 end;
 
 procedure _LapeStrings_AddStrings(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PStrings(Params^[0])^.AddStrings(PStrings(Params^[1])^);
+end;
+
+procedure _LapeStrings_AddStringsArray(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PStrings(Params^[0])^.AddStrings(PStringArray(Params^[1])^);
 end;
 
 procedure _LapeStrings_Assign(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -383,12 +388,7 @@ begin
   PStrings(Params^[0])^.EndUpdate();
 end;
 
-procedure _LapeStrings_EqualsObj(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PStrings(Params^[0])^.Equals(PObject(Params^[1])^);
-end;
-
-procedure _LapeStrings_EqualsStrings(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeStrings_Equals(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PBoolean(Result)^ := PStrings(Params^[0])^.Equals(PStrings(Params^[1])^);
 end;
@@ -400,12 +400,12 @@ end;
 
 procedure _LapeStrings_IndexOf(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := PStrings(Params^[0])^.IndexOf(PlpString(Params^[1])^);
+  PInteger(Result)^ := PStrings(Params^[0])^.IndexOf(PString(Params^[1])^);
 end;
 
 procedure _LapeStrings_IndexOfName(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := PStrings(Params^[0])^.IndexOfName(PlpString(Params^[1])^);
+  PInteger(Result)^ := PStrings(Params^[0])^.IndexOfName(PString(Params^[1])^);
 end;
 
 procedure _LapeStrings_IndexOfObject(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -415,17 +415,17 @@ end;
 
 procedure _LapeStrings_Insert(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PStrings(Params^[0])^.Insert(PInteger(Params^[1])^, PlpString(Params^[2])^);
+  PStrings(Params^[0])^.Insert(PInteger(Params^[1])^, PString(Params^[2])^);
 end;
 
 procedure _LapeStrings_InsertObject(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PStrings(Params^[0])^.InsertObject(PInteger(Params^[1])^, PlpString(Params^[2])^, PObject(Params^[3])^);
+  PStrings(Params^[0])^.InsertObject(PInteger(Params^[1])^, PString(Params^[2])^, PObject(Params^[3])^);
 end;
 
 procedure _LapeStrings_LoadFromFile(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PStrings(Params^[0])^.LoadFromFile(PlpString(Params^[1])^);
+  PStrings(Params^[0])^.LoadFromFile(PString(Params^[1])^);
 end;
 
 procedure _LapeStrings_LoadFromStream(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -440,12 +440,17 @@ end;
 
 procedure _LapeStrings_SaveToFile(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PStrings(Params^[0])^.SaveToFile(PlpString(Params^[1])^);
+  PStrings(Params^[0])^.SaveToFile(PString(Params^[1])^);
 end;
 
 procedure _LapeStrings_SaveToStream(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PStrings(Params^[0])^.SaveToStream(PStream(Params^[1])^);
+end;
+
+procedure _LapeStrings_ToStringArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PStringArray(Result)^ := PStrings(Params^[0])^.ToStringArray;
 end;
 
 procedure _LapeStrings_Count_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -465,32 +470,47 @@ end;
 
 procedure _LapeStrings_Strings_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PStrings(Params^[0])^.Strings[PInteger(Params^[1])^];
+  PString(Result)^ := PStrings(Params^[0])^.Strings[PInteger(Params^[1])^];
 end;
 
 procedure _LapeStrings_Strings_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PStrings(Params^[0])^.Strings[PInteger(Params^[1])^] := PlpString(Params^[2])^;
+  PStrings(Params^[0])^.Strings[PInteger(Params^[1])^] := PString(Params^[2])^;
 end;
 
 procedure _LapeStrings_Values_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PStrings(Params^[0])^.Values[PlpString(Params^[1])^];
+  PString(Result)^ := PStrings(Params^[0])^.Values[PString(Params^[1])^];
 end;
 
 procedure _LapeStrings_Values_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PStrings(Params^[0])^.Values[PlpString(Params^[1])^] := PlpString(Params^[2])^;
+  PStrings(Params^[0])^.Values[PString(Params^[1])^] := PString(Params^[2])^;
+end;
+
+procedure _LapeStrings_Names_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PString(Result)^ := PStrings(Params^[0])^.Names[PInteger(Params^[1])^];
+end;
+
+procedure _LapeStrings_ValueFromIndex_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PString(Result)^ := PStrings(Params^[0])^.ValueFromIndex[PInteger(Params^[1])^];
+end;
+
+procedure _LapeStrings_ValueFromIndex_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PStrings(Params^[0])^.ValueFromIndex[PInteger(Params^[1])^] := PString(Params^[2])^;
 end;
 
 procedure _LapeStrings_Text_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PStrings(Params^[0])^.Text;
+  PString(Result)^ := PStrings(Params^[0])^.Text;
 end;
 
 procedure _LapeStrings_Text_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PStrings(Params^[0])^.Text := PlpString(Params^[1])^;
+  PStrings(Params^[0])^.Text := PString(Params^[1])^;
 end;
 
 procedure _LapeStrings_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -505,7 +525,7 @@ end;
 
 procedure _LapeStringList_Add(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := PStringList(Params^[0])^.Add(PlpString(Params^[1])^);
+  PInteger(Result)^ := PStringList(Params^[0])^.Add(PString(Params^[1])^);
 end;
 
 procedure _LapeStringList_Clear(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -525,17 +545,17 @@ end;
 
 procedure _LapeStringList_Find(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := PStringList(Params^[0])^.Find(PlpString(Params^[1])^, PInteger(Params^[2])^);
+  PBoolean(Result)^ := PStringList(Params^[0])^.Find(PString(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeStringList_IndexOf(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := PStringList(Params^[0])^.IndexOf(PlpString(Params^[1])^);
+  PInteger(Result)^ := PStringList(Params^[0])^.IndexOf(PString(Params^[1])^);
 end;
 
 procedure _LapeStringList_Insert(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PStringList(Params^[0])^.Insert(PInteger(Params^[1])^, PlpString(Params^[2])^);
+  PStringList(Params^[0])^.Insert(PInteger(Params^[1])^, PString(Params^[2])^);
 end;
 
 procedure _LapeStringList_Sort(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -625,7 +645,7 @@ end;
 
 procedure _LapeComponent_FindComponent(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PComponent(Result)^ := PComponent(Params^[0])^.FindComponent(PlpString(Params^[1])^);
+  PComponent(Result)^ := PComponent(Params^[0])^.FindComponent(PString(Params^[1])^);
 end;
 
 procedure _LapeComponent_InsertComponent(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -700,7 +720,7 @@ end;
 
 procedure _LapeCollectionItem_GetNamePath(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLPString(Result)^ := PCollectionItem(Params^[0])^.GetNamePath();
+  PString(Result)^ := PCollectionItem(Params^[0])^.GetNamePath();
 end;
 
 procedure _LapeCollectionItem_Collection_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -730,12 +750,12 @@ end;
 
 procedure _LapeCollectionItem_DisplayName_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PCollectionItem(Params^[0])^.DisplayName;
+  PString(Result)^ := PCollectionItem(Params^[0])^.DisplayName;
 end;
 
 procedure _LapeCollectionItem_DisplayName_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PCollectionItem(Params^[0])^.DisplayName := PlpString(Params^[1])^;
+  PCollectionItem(Params^[0])^.DisplayName := PString(Params^[1])^;
 end;
 
 procedure _LapeCollectionItem_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -780,7 +800,7 @@ end;
 
 procedure _LapeCollection_GetNamePath(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLPString(Result)^ := PCollection(Params^[0])^.GetNamePath();
+  PString(Result)^ := PCollection(Params^[0])^.GetNamePath();
 end;
 
 procedure _LapeCollection_Insert(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}

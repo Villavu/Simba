@@ -189,32 +189,32 @@ end;
 
 procedure _LapeFileDialog_DefaultExt_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PFileDialog(Params^[0])^.DefaultExt;
+  PString(Result)^ := PFileDialog(Params^[0])^.DefaultExt;
 end;
 
 procedure _LapeFileDialog_DefaultExt_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PFileDialog(Params^[0])^.DefaultExt := PlpString(Params^[1])^;
+  PFileDialog(Params^[0])^.DefaultExt := PString(Params^[1])^;
 end;
 
 procedure _LapeFileDialog_FileName_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PFileDialog(Params^[0])^.FileName;
+  PString(Result)^ := PFileDialog(Params^[0])^.FileName;
 end;
 
 procedure _LapeFileDialog_FileName_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PFileDialog(Params^[0])^.FileName := PlpString(Params^[1])^;
+  PFileDialog(Params^[0])^.FileName := PString(Params^[1])^;
 end;
 
 procedure _LapeFileDialog_Filter_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PFileDialog(Params^[0])^.Filter;
+  PString(Result)^ := PFileDialog(Params^[0])^.Filter;
 end;
 
 procedure _LapeFileDialog_Filter_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PFileDialog(Params^[0])^.Filter := PlpString(Params^[1])^;
+  PFileDialog(Params^[0])^.Filter := PString(Params^[1])^;
 end;
 
 procedure _LapeFileDialog_FilterIndex_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -229,12 +229,12 @@ end;
 
 procedure _LapeFileDialog_InitialDir_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PFileDialog(Params^[0])^.InitialDir;
+  PString(Result)^ := PFileDialog(Params^[0])^.InitialDir;
 end;
 
 procedure _LapeFileDialog_InitialDir_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PFileDialog(Params^[0])^.InitialDir := PlpString(Params^[1])^;
+  PFileDialog(Params^[0])^.InitialDir := PString(Params^[1])^;
 end;
 
 procedure _LapeFileDialog_OnHelpClicked_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}

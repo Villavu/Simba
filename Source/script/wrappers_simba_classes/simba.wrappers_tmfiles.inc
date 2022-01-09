@@ -1,31 +1,31 @@
 procedure _LapeMFiles_CreateFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := PMFiles(Params^[0])^.CreateFile(PlpString(Params^[1])^);
+  PInteger(Result)^ := PMFiles(Params^[0])^.CreateFile(PString(Params^[1])^);
 end;
 
 procedure _LapeMFiles_OpenFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := PMFiles(Params^[0])^.OpenFile(PlpString(Params^[1])^, PBoolean(Params^[2])^);
+  PInteger(Result)^ := PMFiles(Params^[0])^.OpenFile(PString(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 procedure _LapeMFiles_RewriteFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := PMFiles(Params^[0])^.RewriteFile(PlpString(Params^[1])^, PBoolean(Params^[2])^);
+  PInteger(Result)^ := PMFiles(Params^[0])^.RewriteFile(PString(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 procedure _LapeMFiles_AppendFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := PMFiles(Params^[0])^.AppendFile(PlpString(Params^[1])^);
+  PInteger(Result)^ := PMFiles(Params^[0])^.AppendFile(PString(Params^[1])^);
 end;
 
 procedure _LapeMFiles_DeleteFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := PMFiles(Params^[0])^.DeleteFile(PlpString(Params^[1])^);
+  PBoolean(Result)^ := PMFiles(Params^[0])^.DeleteFile(PString(Params^[1])^);
 end;
 
 procedure _LapeMFiles_RenameFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := PMFiles(Params^[0])^.RenameFile(PlpString(Params^[1])^, PlpString(Params^[2])^);
+  PBoolean(Result)^ := PMFiles(Params^[0])^.RenameFile(PString(Params^[1])^, PString(Params^[2])^);
 end;
 
 procedure _LapeMFiles_CloseFile(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -35,17 +35,17 @@ end;
 
 procedure _LapeMFiles_WriteINI(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PMFiles(Params^[0])^.WriteINI(PlpString(Params^[1])^, PlpString(Params^[2])^, PlpString(Params^[3])^, PlpString(Params^[4])^);
+  PMFiles(Params^[0])^.WriteINI(PString(Params^[1])^, PString(Params^[2])^, PString(Params^[3])^, PString(Params^[4])^);
 end;
 
 procedure _LapeMFiles_ReadINI(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PMFiles(Params^[0])^.ReadINI(PlpString(Params^[1])^, PlpString(Params^[2])^, PlpString(Params^[3])^);
+  PString(Result)^ := PMFiles(Params^[0])^.ReadINI(PString(Params^[1])^, PString(Params^[2])^, PString(Params^[3])^);
 end;
 
 procedure _LapeMFiles_DeleteINI(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PMFiles(Params^[0])^.DeleteINI(PlpString(Params^[1])^, PlpString(Params^[2])^, PlpString(Params^[3])^);
+  PMFiles(Params^[0])^.DeleteINI(PString(Params^[1])^, PString(Params^[2])^, PString(Params^[3])^);
 end;
 
 procedure _LapeMFiles_EndOfFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -60,12 +60,12 @@ end;
 
 procedure _LapeMFiles_ReadFileString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := PMFiles(Params^[0])^.ReadFileString(PInteger(Params^[1])^, PlpString(Params^[2])^, PInteger(Params^[3])^);
+  PBoolean(Result)^ := PMFiles(Params^[0])^.ReadFileString(PInteger(Params^[1])^, PString(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 procedure _LapeMFiles_WriteFileString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := PMFiles(Params^[0])^.WriteFileString(PInteger(Params^[1])^, PlpString(Params^[2])^);
+  PBoolean(Result)^ := PMFiles(Params^[0])^.WriteFileString(PInteger(Params^[1])^, PString(Params^[2])^);
 end;
 
 procedure _LapeMFiles_SetFileCharPointer(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

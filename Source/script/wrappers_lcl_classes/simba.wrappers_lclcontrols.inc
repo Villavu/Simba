@@ -24,7 +24,7 @@ end;
 
 procedure _LapeControl_AutoSizeDelayedReport(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PControl(Params^[0])^.AutoSizeDelayedReport();
+  PString(Result)^ := PControl(Params^[0])^.AutoSizeDelayedReport();
 end;
 
 procedure _LapeControl_AutoSizeDelayedHandle(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -94,7 +94,7 @@ end;
 
 procedure _LapeControl_WriteLayoutDebugReport(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PControl(Params^[0])^.WriteLayoutDebugReport(PlpString(Params^[1])^);
+  PControl(Params^[0])^.WriteLayoutDebugReport(PString(Params^[1])^);
 end;
 
 procedure _LapeControl_ShouldAutoAdjustLeftAndTop(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -334,12 +334,12 @@ end;
 
 procedure _LapeControl_Caption_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PControl(Params^[0])^.Caption;
+  PString(Result)^ := PControl(Params^[0])^.Caption;
 end;
 
 procedure _LapeControl_Caption_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PControl(Params^[0])^.Caption := PlpString(Params^[1])^;
+  PControl(Params^[0])^.Caption := PString(Params^[1])^;
 end;
 
 procedure _LapeControl_ClientHeight_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -549,12 +549,12 @@ end;
 
 procedure _LapeControl_Hint_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLPString(Result)^ := PControl(Params^[0])^.Hint;
+  PString(Result)^ := PControl(Params^[0])^.Hint;
 end;
 
 procedure _LapeControl_Hint_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PControl(Params^[0])^.Hint := PLPString(Params^[1])^;
+  PControl(Params^[0])^.Hint := PString(Params^[1])^;
 end;
 
 procedure _LapeControl_ShowHint_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -724,7 +724,7 @@ end;
 
 procedure _LapeWinControl_AutoSizeDelayedReport(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PWinControl(Params^[0])^.AutoSizeDelayedReport();
+  PString(Result)^ := PWinControl(Params^[0])^.AutoSizeDelayedReport();
 end;
 
 procedure _LapeWinControl_AutoSizeDelayedHandle(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -814,7 +814,7 @@ end;
 
 procedure _LapeWinControl_WriteLayoutDebugReport(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PWinControl(Params^[0])^.WriteLayoutDebugReport(PlpString(Params^[1])^);
+  PWinControl(Params^[0])^.WriteLayoutDebugReport(PString(Params^[1])^);
 end;
 
 procedure _LapeWinControl_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -854,7 +854,7 @@ end;
 
 procedure _LapeWinControl_FindChildControl(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PControl(Result)^ := PWinControl(Params^[0])^.FindChildControl(PlpString(Params^[1])^);
+  PControl(Result)^ := PWinControl(Params^[0])^.FindChildControl(PString(Params^[1])^);
 end;
 
 procedure _LapeWinControl_SelectNext(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -919,7 +919,7 @@ end;
 
 procedure _LapeWinControl_GetDockCaption(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PWinControl(Params^[0])^.GetDockCaption(PControl(Params^[1])^);
+  PString(Result)^ := PWinControl(Params^[0])^.GetDockCaption(PControl(Params^[1])^);
 end;
 
 procedure _LapeWinControl_UpdateDockCaption(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}

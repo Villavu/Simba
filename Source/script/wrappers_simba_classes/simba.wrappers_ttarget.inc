@@ -90,7 +90,7 @@ end;
 
 procedure _LapeTarget_SendString(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PTarget(Params^[0])^.SendString(PlpString(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+  PTarget(Params^[0])^.SendString(PString(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 procedure _LapeTarget_HoldKey(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

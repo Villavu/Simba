@@ -117,12 +117,6 @@ begin
       CurrentDirectory := '';
 
     case Directive.ToUpper() of
-      'INCLUDE_ALL':
-        begin
-          for FileName in FindFiles([CurrentDirectory, GetIncludePath(), GetSimbaPath()], Argument) do // {$include_all foo/*.pas;*.foo}
-            FCompiler.HandleDirective(FCompiler.Tokenizer, 'include', FileName);
-        end;
-
       'LOADLIB':
         begin
           if not FindPlugin(Argument, [CurrentDirectory, GetPluginPath(), GetSimbaPath()]) then
