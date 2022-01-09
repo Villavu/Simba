@@ -5,22 +5,22 @@ end;
 
 procedure _LapeMFonts_GetFont(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  POcrData(Result)^ := PMFonts(Params^[0])^.GetFontData(PlpString(Params^[1])^);
+  POcrData(Result)^ := PMFonts(Params^[0])^.GetFontData(PString(Params^[1])^);
 end;
 
 procedure _LapeMFonts_FreeFont(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := PMFonts(Params^[0])^.FreeFont(PlpString(Params^[1])^);
+  PBoolean(Result)^ := PMFonts(Params^[0])^.FreeFont(PString(Params^[1])^);
 end;
 
 procedure _LapeMFonts_LoadFont(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pboolean(Result)^ := PMFonts(Params^[0])^.LoadFont(PlpString(Params^[1])^, PBoolean(Params^[2])^);
+  Pboolean(Result)^ := PMFonts(Params^[0])^.LoadFont(PString(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 procedure _LapeMFonts_LoadSystemFont(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pboolean(Result)^ := PMFonts(Params^[0])^.LoadSystemFont(PFont(Params^[1])^, PlpString(Params^[2])^);
+  Pboolean(Result)^ := PMFonts(Params^[0])^.LoadSystemFont(PFont(Params^[1])^, PString(Params^[2])^);
 end;
 
 procedure _LapeMFonts_Copy(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -35,12 +35,12 @@ end;
 
 procedure _LapeMFonts_Path_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PMFonts(Params^[0])^.Path;
+  PString(Result)^ := PMFonts(Params^[0])^.Path;
 end;
 
 procedure _LapeMFonts_Path_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PMFonts(Params^[0])^.Path := PlpString(Params^[1])^;
+  PMFonts(Params^[0])^.Path := PString(Params^[1])^;
 end;
 
 procedure _LapeMFonts_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

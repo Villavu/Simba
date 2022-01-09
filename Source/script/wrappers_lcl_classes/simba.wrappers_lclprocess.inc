@@ -169,22 +169,22 @@ end;
 
 procedure _LapeProcess_CommandLine_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PProcess(Params^[0])^.CommandLine;
+  PString(Result)^ := PProcess(Params^[0])^.CommandLine;
 end;
 
 procedure _LapeProcess_CommandLine_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PProcess(Params^[0])^.CommandLine := PlpString(Params^[1])^;
+  PProcess(Params^[0])^.CommandLine := PString(Params^[1])^;
 end;
 
 procedure _LapeProcess_Executable_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PProcess(Params^[0])^.Executable;
+  PString(Result)^ := PProcess(Params^[0])^.Executable;
 end;
 
 procedure _LapeProcess_Executable_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PProcess(Params^[0])^.Executable := PlpString(Params^[1])^;
+  PProcess(Params^[0])^.Executable := PString(Params^[1])^;
 end;
 
 procedure _LapeProcess_Parameters_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -199,32 +199,32 @@ end;
 
 procedure _LapeProcess_ConsoleTitle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PProcess(Params^[0])^.ConsoleTitle;
+  PString(Result)^ := PProcess(Params^[0])^.ConsoleTitle;
 end;
 
 procedure _LapeProcess_ConsoleTitle_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PProcess(Params^[0])^.ConsoleTitle := PlpString(Params^[1])^;
+  PProcess(Params^[0])^.ConsoleTitle := PString(Params^[1])^;
 end;
 
 procedure _LapeProcess_CurrentDirectory_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PProcess(Params^[0])^.CurrentDirectory;
+  PString(Result)^ := PProcess(Params^[0])^.CurrentDirectory;
 end;
 
 procedure _LapeProcess_CurrentDirectory_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PProcess(Params^[0])^.CurrentDirectory := PlpString(Params^[1])^;
+  PProcess(Params^[0])^.CurrentDirectory := PString(Params^[1])^;
 end;
 
 procedure _LapeProcess_Desktop_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PProcess(Params^[0])^.Desktop;
+  PString(Result)^ := PProcess(Params^[0])^.Desktop;
 end;
 
 procedure _LapeProcess_Desktop_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PProcess(Params^[0])^.Desktop := PlpString(Params^[1])^;
+  PProcess(Params^[0])^.Desktop := PString(Params^[1])^;
 end;
 
 procedure _LapeProcess_Environment_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -354,12 +354,12 @@ end;
 
 procedure _LapeProcess_XTermProgram_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PProcess(Params^[0])^.XTermProgram;
+  PString(Result)^ := PProcess(Params^[0])^.XTermProgram;
 end;
 
 procedure _LapeProcess_XTermProgram_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PProcess(Params^[0])^.XTermProgram := PlpString(Params^[1])^;
+  PProcess(Params^[0])^.XTermProgram := PString(Params^[1])^;
 end;
 
 procedure _LapeProcess_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}

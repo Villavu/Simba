@@ -10,7 +10,7 @@ end;
 
 procedure _LapeMenuItem_Find(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PMenuItem(Result)^ := PMenuItem(Params^[0])^.Find(PlpString(Params^[1])^);
+  PMenuItem(Result)^ := PMenuItem(Params^[0])^.Find(PString(Params^[1])^);
 end;
 
 procedure _LapeMenuItem_GetParentMenu(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -50,7 +50,7 @@ end;
 
 procedure _LapeMenuItem_IndexOfCaption(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := PMenuItem(Params^[0])^.IndexOfCaption(PlpString(Params^[1])^);
+  PInteger(Result)^ := PMenuItem(Params^[0])^.IndexOfCaption(PString(Params^[1])^);
 end;
 
 procedure _LapeMenuItem_VisibleIndexOf(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -260,7 +260,7 @@ end;
 
 procedure _LapeMenuItem_Caption_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PMenuItem(Params^[0])^.Caption;
+  PString(Result)^ := PMenuItem(Params^[0])^.Caption;
 end;
 
 procedure _LapeMenuItem_Caption_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -286,7 +286,7 @@ end;
 procedure _LapeMenuItem_AddMenu(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PMenuItem(Result)^ := TMenuItem.Create(PMenu(Params^[0])^);
-  PMenuItem(Result)^.Caption := PLPString(Params^[1])^;
+  PMenuItem(Result)^.Caption := PString(Params^[1])^;
   PMenuItem(Params^[0])^.Add(PMenuItem(Result)^);
 end;
 
@@ -383,7 +383,7 @@ end;
 procedure _LapeMenu_AddMenu(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PMenuItem(Result)^ := TMenuItem.Create(PMenu(Params^[0])^);
-  PMenuItem(Result)^.Caption := PLPString(Params^[1])^;
+  PMenuItem(Result)^.Caption := PString(Params^[1])^;
   PMenu(Params^[0])^.Items.Add(PMenuItem(Result)^);
 end;
 

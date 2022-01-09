@@ -41,7 +41,7 @@ type
 implementation
 
 uses
-  dialogs, extctrls, uitypes, graphtype, controls, comctrls, graphics,
+  dialogs, extctrls, graphtype, controls, comctrls, graphics,
   stdctrls, buttons, customtimer, checklst, lclclasses, spin, pipes,
   lclintf, math, regexpr, strutils, lazfileutils, fileutil, clipbrd,
   blowfish, md5, sha1, hmac, forms, process, lazloggerbase,

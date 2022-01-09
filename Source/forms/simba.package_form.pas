@@ -617,7 +617,7 @@ begin
           ItemParent := PackageMenu;
 
         Item := TMenuItem.Create(PackageMenu);
-        Item.Caption := ExtractFileName(ExcludeTrailingPathDelimiter(Scripts[J*2+1]));
+        Item.Caption := ExtractFileNameOnly(Scripts[J*2+1]);
         Item.Hint := Scripts[J*2+1];
         Item.OnClick := @DoMenuItemClick;
 

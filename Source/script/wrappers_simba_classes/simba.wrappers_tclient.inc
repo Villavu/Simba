@@ -60,7 +60,7 @@ end;
 
 procedure _LapeClient_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PClient(Params^[0])^ := TClient.Create(PlpString(Params^[1])^, PIOManager(Params^[2])^);
+  PClient(Params^[0])^ := TClient.Create(PString(Params^[1])^, PIOManager(Params^[2])^);
 end;
 
 procedure _LapeClient_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

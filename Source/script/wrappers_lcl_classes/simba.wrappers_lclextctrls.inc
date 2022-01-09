@@ -193,12 +193,12 @@ end;
 
 procedure _LapeImage_Hint_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PImage(Params^[0])^.Hint := PLPString(Params^[1])^;
+  PImage(Params^[0])^.Hint := PString(Params^[1])^;
 end;
 
 procedure _LapeImage_Hint_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLPString(Result)^ := PImage(Params^[0])^.Hint;
+  PString(Result)^ := PImage(Params^[0])^.Hint;
 end;
 
 procedure _LapeImage_OnMouseEnter_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}

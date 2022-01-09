@@ -512,7 +512,6 @@ begin
     NestedComments := True;
     StringKeywordMode := spsmNone;
     TypeHelpers := True;
-    ExtendedKeywordsMode := True;
   end;
 
   Gutter.MarksPart.Visible := False;

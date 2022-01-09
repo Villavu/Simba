@@ -1,11 +1,11 @@
 procedure _LapeMFont_Name_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PMFont(Params^[0])^.Name;
+  PString(Result)^ := PMFont(Params^[0])^.Name;
 end;
 
 procedure _LapeMFont_Name_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PMFont(Params^[0])^.Name := PlpString(Params^[1])^;
+  PMFont(Params^[0])^.Name := PString(Params^[1])^;
 end;
 
 procedure _LapeMFont_Data_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

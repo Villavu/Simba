@@ -721,7 +721,7 @@ end;
 
 procedure _LapeStatusPanel_Text_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLPString(Result)^ := PStatusPanel(Params^[0])^.Text;
+  PString(Result)^ := PStatusPanel(Params^[0])^.Text;
 end;
 
 procedure _LapeStatusPanel_Text_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}

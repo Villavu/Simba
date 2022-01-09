@@ -163,17 +163,17 @@ end;
 
 procedure _LapeCustomComboBox_AddItem(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PCustomComboBox(Params^[0])^.AddItem(PlpString(Params^[1])^, PObject(Params^[2])^);
+  PCustomComboBox(Params^[0])^.AddItem(PString(Params^[1])^, PObject(Params^[2])^);
 end;
 
 procedure _LapeCustomComboBox_AddHistoryItem(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PCustomComboBox(Params^[0])^.AddHistoryItem(PlpString(Params^[1])^, Pinteger(Params^[2])^, Pboolean(Params^[3])^, Pboolean(Params^[4])^);
+  PCustomComboBox(Params^[0])^.AddHistoryItem(PString(Params^[1])^, Pinteger(Params^[2])^, Pboolean(Params^[3])^, Pboolean(Params^[4])^);
 end;
 
 procedure _LapeCustomComboBox_AddHistoryItemEx(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PCustomComboBox(Params^[0])^.AddHistoryItem(PlpString(Params^[1])^, PObject(Params^[2])^, Pinteger(Params^[3])^, Pboolean(Params^[4])^, Pboolean(Params^[5])^);
+  PCustomComboBox(Params^[0])^.AddHistoryItem(PString(Params^[1])^, PObject(Params^[2])^, Pinteger(Params^[3])^, Pboolean(Params^[4])^, Pboolean(Params^[5])^);
 end;
 
 procedure _LapeCustomComboBox_Clear(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -318,12 +318,12 @@ end;
 
 procedure _LapeCustomComboBox_SelText_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PCustomComboBox(Params^[0])^.SelText;
+  PString(Result)^ := PCustomComboBox(Params^[0])^.SelText;
 end;
 
 procedure _LapeCustomComboBox_SelText_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PCustomComboBox(Params^[0])^.SelText := PlpString(Params^[1])^;
+  PCustomComboBox(Params^[0])^.SelText := PString(Params^[1])^;
 end;
 
 procedure _LapeCustomComboBox_Style_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -338,12 +338,12 @@ end;
 
 procedure _LapeCustomComboBox_Text_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PCustomComboBox(Params^[0])^.Text;
+  PString(Result)^ := PCustomComboBox(Params^[0])^.Text;
 end;
 
 procedure _LapeCustomComboBox_Text_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PCustomComboBox(Params^[0])^.Text := PlpString(Params^[1])^;
+  PCustomComboBox(Params^[0])^.Text := PString(Params^[1])^;
 end;
 
 procedure _LapeCustomComboBox_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -378,7 +378,7 @@ end;
 
 procedure _LapeCustomListBox_AddItem(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PCustomListBox(Params^[0])^.AddItem(PlpString(Params^[1])^, PObject(Params^[2])^);
+  PCustomListBox(Params^[0])^.AddItem(PString(Params^[1])^, PObject(Params^[2])^);
 end;
 
 procedure _LapeCustomListBox_Click(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -408,7 +408,7 @@ end;
 
 procedure _LapeCustomListBox_GetSelectedText(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PCustomListBox(Params^[0])^.GetSelectedText();
+  PString(Result)^ := PCustomListBox(Params^[0])^.GetSelectedText();
 end;
 
 procedure _LapeCustomListBox_ItemAtPos(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -738,22 +738,22 @@ end;
 
 procedure _LapeCustomEdit_SelText_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PCustomEdit(Params^[0])^.SelText;
+  PString(Result)^ := PCustomEdit(Params^[0])^.SelText;
 end;
 
 procedure _LapeCustomEdit_SelText_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PCustomEdit(Params^[0])^.SelText := PlpString(Params^[1])^;
+  PCustomEdit(Params^[0])^.SelText := PString(Params^[1])^;
 end;
 
 procedure _LapeCustomEdit_Text_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PCustomEdit(Params^[0])^.Text;
+  PString(Result)^ := PCustomEdit(Params^[0])^.Text;
 end;
 
 procedure _LapeCustomEdit_Text_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PCustomEdit(Params^[0])^.Text := PlpString(Params^[1])^;
+  PCustomEdit(Params^[0])^.Text := PString(Params^[1])^;
 end;
 
 procedure _LapeCustomEdit_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -818,7 +818,7 @@ end;
 
 procedure _LapeCustomMemo_Append(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PCustomMemo(Params^[0])^.Append(PlpString(Params^[1])^);
+  PCustomMemo(Params^[0])^.Append(PString(Params^[1])^);
 end;
 
 procedure _LapeCustomMemo_Lines_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -1083,7 +1083,7 @@ end;
 
 procedure _LapeCustomSpeedButton_LoadGlyphFromLazarusResource(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PCustomSpeedButton(Params^[0])^.LoadGlyphFromLazarusResource(PlpString(Params^[1])^);
+  PCustomSpeedButton(Params^[0])^.LoadGlyphFromLazarusResource(PString(Params^[1])^);
 end;
 
 procedure _LapeCustomSpeedButton_AllowAllUp_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}

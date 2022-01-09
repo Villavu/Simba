@@ -820,12 +820,12 @@ end;
 
 procedure _LapeForm_Caption_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PlpString(Result)^ := PForm(Params^[0])^.Caption;
+  PString(Result)^ := PForm(Params^[0])^.Caption;
 end;
 
 procedure _LapeForm_Caption_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PForm(Params^[0])^.Caption := PlpString(Params^[1])^;
+  PForm(Params^[0])^.Caption := PString(Params^[1])^;
 end;
 
 procedure _LapeForm_Position_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
