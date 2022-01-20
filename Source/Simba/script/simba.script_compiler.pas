@@ -29,8 +29,6 @@ type
     procedure addClass(Name: lpString; Parent: lpString = 'TObject'); virtual;
     procedure addClassVar(Obj, Item, Typ: lpString; ARead: Pointer; AWrite: Pointer = nil; Arr: Boolean = False; ArrType: lpString = 'UInt32'); virtual;
 
-    procedure addBaseDefine(Define, Value: lpString); virtual; overload;
-
     procedure Import; virtual;
     function Compile: Boolean; override;
 
@@ -251,11 +249,6 @@ begin
 
   if wasLooseSemicolon then
     Include(FOptions, lcoLooseSemicolon);
-end;
-
-procedure TSimbaScript_Compiler.addBaseDefine(Define, Value: lpString);
-begin
-  FBaseDefines[Define] := Value;
 end;
 
 end.

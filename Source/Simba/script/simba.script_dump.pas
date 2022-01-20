@@ -32,7 +32,7 @@ type
     procedure WriteMethod(Header: String);
     procedure Write(Header: String);
   public
-    procedure addBaseDefine(Define: lpString); override;
+    procedure addBaseDefine(Define: lpString; AValue: lpString = ''); override;
 
     function addDelayedCode(Code: lpString; AFileName: lpString = ''; AfterCompilation: Boolean = True; IsGlobal: Boolean = True): TLapeTree_Base; override;
     function addGlobalFunc(Header: lpString; Value: Pointer): TLapeGlobalVar; override;
@@ -164,9 +164,9 @@ begin
     Write(Code);
 end;
 
-procedure TCompilerDump.addBaseDefine(Define: lpString);
+procedure TCompilerDump.addBaseDefine(Define: lpString; AValue: lpString);
 begin
-  inherited addBaseDefine(Define);
+  inherited addBaseDefine(Define, AValue);
 
   Write(Format('{$DEFINE %s}', [Define]));
 end;

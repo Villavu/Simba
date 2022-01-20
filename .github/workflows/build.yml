@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
+    runs-on: ${{ matrix.config.runs-on }}
     defaults:
       run:
         shell: bash
@@ -20,86 +20,67 @@ jobs:
       matrix:
         config:            
           - name: Windows 64
-            os: windows-latest
-            cpu: x86_64
+            runs-on: windows-latest
             build-mode: SIMBA_WIN64
             binary: Simba-Win64.exe
             test: Simba-Win64.exe
             
           - name: Windows 32  
-            os: windows-latest
-            cpu: i386
+            runs-on: windows-latest
             build-mode: SIMBA_WIN32
             binary: Simba-Win32.exe
             test: Simba-Win32.exe
 
           - name: Linux 64
-            os: ubuntu-latest
-            cpu: x86_64
+            runs-on: ubuntu-latest
             build-mode: SIMBA_LINUX64
             binary: Simba-Linux64
             test: Simba-Linux64
           
           - name: AArch64  
-            os: ubuntu-latest
-            cpu: aarch64
+            runs-on: ubuntu-latest
             build-mode: SIMBA_AARCH64
             binary: Simba-AArch64
             
           - name: MacOS 64
-            os: macos-latest
-            cpu: x86_64
+            runs-on: macos-latest
             build-mode: SIMBA_DARWIN64
             binary: Simba-Darwin64.zip
             test: Simba-Darwin64
             
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.4.0
         with: 
           submodules: true
       
       - name: Install Lazarus
-        uses: ollydev/setup-lazarus-fpcup@v2.1
+        uses: ollydev/setup-lazarus-fpcup@v2.5
         with:
-          cpu: ${{ matrix.config.cpu }}
-          laz-branch: lazarus_2_0_12
-          fpc-branch: release_3_2_0
+          laz-branch: lazarus_2_2_0
+          fpc-branch: release_3_2_2
+          fpcup-release: v2.2.0h
     
       - name: Build Simba
         run: |
+          export GITHUB_SHORT_SHA=$(git rev-parse --short HEAD)
+          
           lazbuild --build-mode=${{ matrix.config.build-mode }} "Source/Simba/Simba.lpi"
 
       - name: Test Simba
         if: matrix.config.test != ''
         run: |
-          export DISPLAY=:1
-          Xvfb :1 &
-          chmod +x ${{ matrix.config.test }}
-          ./${{ matrix.config.test }} --run Tests/simba
+          if [ "${{ matrix.config.runs-on }}" = "ubuntu-latest" ]; then
+              export DISPLAY=:1
+              Xvfb :1 & sleep 2
+          fi
+          if [ "${{ matrix.config.runs-on }}" != "windows-latest" ]; then
+              chmod +x ${{ matrix.config.test }}
+          fi
+          
+          ./${{ matrix.config.test }} --silent --run "Tests/simba"
 
       - name: Upload Binary 
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v2.3.1
         with:
+          name: ${{ matrix.config.binary }}
           path: ${{ matrix.config.binary }}
-
-  release:
-    if: github.ref == 'refs/heads/simba1400' && github.event_name == 'push' 
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download Artifacts
-        uses: actions/download-artifact@v2.0.10
-
-      - name: Update Release
-        uses: Brandon-T/update-release-action@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          file: 'artifact/*'
-          is_file_glob: true
-          suffix_branch_name: true
-          tag: 'autobuild'
-          release_name: 'autobuild'
-          release_notes: "Binaries for the most recent commit of this branch. Don't worry about the release date, it's wrong!"
-          retry_count: 5
-          bump_tag: true
-          overwrite: true
