@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="11"/>
+    <Version Value="12"/>
     <General>
       <Flags>
         <MainUnitHasUsesSectionForAllUnits Value="False"/>
         <LRSInOutputDirectory Value="False"/>
+        <CompatibilityMode Value="True"/>
       </Flags>
       <SessionStorage Value="InIDEConfig"/>
-      <MainUnit Value="0"/>
       <Title Value="Simba"/>
       <UseXPManifest Value="True"/>
       <XPManifest>
@@ -81,7 +81,6 @@
           </SearchPaths>
           <Parsing>
             <SyntaxOptions>
-              <SyntaxMode Value="DelphiUnicode"/>
               <CStyleMacros Value="True"/>
             </SyntaxOptions>
           </Parsing>
@@ -193,7 +192,7 @@
             </CompilerMessages>
             <CustomOptions Value="-dLape_CDECL"/>
             <ExecuteAfter>
-              <Command Value="macos/make-bundle.sh"/>
+              <Command Value="macosbundle/make.sh"/>
               <CompileReasons Run="False"/>
             </ExecuteAfter>
             <CreateMakefileOnBuild Value="True"/>
@@ -391,13 +390,13 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <LaunchingApplication PathPlusParams="/usr/bin/gnome-terminal -t 'Lazarus Run Output' -e '$(LazarusDir)/tools/runwait.sh $(TargetCmdLine)'"/>
+        <LaunchingApplication PathPlusParams="/usr/bin/gnome-terminal -t &apos;Lazarus Run Output&apos; -e &apos;$(LazarusDir)/tools/runwait.sh $(TargetCmdLine)&apos;"/>
       </local>
       <FormatVersion Value="2"/>
       <Modes Count="1">
         <Mode0 Name="default">
           <local>
-            <LaunchingApplication PathPlusParams="/usr/bin/gnome-terminal -t 'Lazarus Run Output' -e '$(LazarusDir)/tools/runwait.sh $(TargetCmdLine)'"/>
+            <LaunchingApplication PathPlusParams="/usr/bin/gnome-terminal -t &apos;Lazarus Run Output&apos; -e &apos;$(LazarusDir)/tools/runwait.sh $(TargetCmdLine)&apos;"/>
           </local>
         </Mode0>
       </Modes>

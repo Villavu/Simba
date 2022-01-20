@@ -40,8 +40,6 @@ begin
   SetHeapTraceOutput('memory-leaks.trc');
   {$ENDIF}
 
-  Application.Title := 'Simba';
-  Application.Scaled := True;
   Application.ShowMainForm := False;
   Application.Initialize();
 
