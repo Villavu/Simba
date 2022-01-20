@@ -259,6 +259,8 @@ begin
   begin
     Section := 'Math';
 
+    Globals['InRange'].Free();
+
     addGlobalFunc('function RiemannGauss(Xstart, StepSize, Sigma: Extended; AmountSteps: Int32): Extended', @Lape_RiemannGauss);
     addGlobalFunc('function DiscreteGauss(Xstart, Xend: Int32; sigma: Extended): TExtendedArray', @Lape_DiscreteGauss);
     addGlobalFunc('function GaussMatrix(N: Int32; sigma: Extended): T2DExtendedArray', @Lape_GaussMatrix);
