@@ -13,7 +13,7 @@ addGlobalFunc('function Radians(e: Extended): Extended', @_LapeRadians);
 addGlobalFunc('function Degrees(e: Extended): Extended', @_LapeDegrees);
 addGlobalFunc('function Log10(f: Extended): Extended', @_LapeLog10);
 addGlobalFunc('function FixRad(rad: Extended): Extended', @_LapeFixRad);
-addGlobalFunc('function NextPowerOf2(const n: Integer): Integer', @_LapeNextPowerOf2);
+addGlobalFunc('function NextPower2(const n: Integer): Integer', @_LapeNextPower2);
 
 addGlobalFunc('function MinA(const Arr: TIntegerArray): Integer; overload', @_LapeMinA);
 addGlobalFunc('function MaxA(const Arr: TIntegerArray): Integer; overload', @_LapeMaxA);

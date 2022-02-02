@@ -15,7 +15,7 @@ uses
   simba.bitmapconv, simba.functionlistform, simba.scripttabsform,
   simba.outputform, simba.colorpickerhistoryform, simba.filebrowserform,
   simba.notesform, simba.package_form, simba.settingsform, simba.associate,
-  simba.script, simba.scriptthread, simba.script_dump, simba.openexampleform, simba.httpclient;
+  simba.script_dump, simba.openexampleform, simba.httpclient, simba.scriptthread;
 
 type
   TApplicationHelper = class helper for TApplication

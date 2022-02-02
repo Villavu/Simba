@@ -83,9 +83,9 @@ begin
   PExtended(Result)^ := FixRad(PExtended(Params^[0])^);
 end;
 
-procedure _LapeNextPowerOf2(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeNextPower2(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := NextPowerOf2(PInteger(Params^[0])^);
+  PInteger(Result)^ := NextPower2(PInteger(Params^[0])^);
 end;
 
 procedure _LapeModulo(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

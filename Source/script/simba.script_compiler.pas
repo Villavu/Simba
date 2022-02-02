@@ -47,7 +47,7 @@ uses
   blowfish, md5, sha1, hmac, forms, process, lazloggerbase,
 
   simba.mufasatypes, simba.script, simba.scriptthread,
-  simba.files, simba.process, simba.bitmap,
+  simba.files, simba.process, simba.bitmap, simba.bitmap_helpers,
   simba.windowhandlehelpers, simba.matchtemplate, simba.tpa,
   simba.target_exported, simba.math, simba.colormath, simba.stringutil,
   simba.internet, simba.datetime, simba.dtmutil, simba.dtm, simba.iomanager,

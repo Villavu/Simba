@@ -8,9 +8,10 @@ unit simba.fftpack4_core;
   
   Brought to Free Pascal by Jarl `slacky` Holta
 [==============================================================================}
+{$DEFINE SIMBA_O4}
 {$i simba.inc}
+
 {$MODESWITCH ARRAYOPERATORS OFF}
-{$OPTIMIZATION LEVEL4}
 
 interface
 

@@ -16,39 +16,49 @@ type
   PParamArray = ^TParamArray;
   TParamArray = array[Word] of Pointer;
 
-  TSimbaThreadPool_Method = procedure(Params: PParamArray; Lo, Hi: Int32);
+  TSimbaThreadPoolMethod = procedure(const Params: PParamArray; const Result: Pointer);
+  TSimbaThreadPoolTask = record
+    Method: TSimbaThreadPoolMethod;
+    Params: TParamArray;
+    Result: Pointer;
 
-  TSimbaThreadPool_Thread = class;
-  TSimbaThreadPool_ThreadArray = array of TSimbaThreadPool_Thread;
+    class function Create(AMethod: TSimbaThreadPoolMethod; AParams: array of Pointer; AResult: Pointer): TSimbaThreadPoolTask; static;
+  end;
+  TSimbaThreadPoolTasks = array of TSimbaThreadPoolTask;
 
   TSimbaThreadPool_Thread = class(TThread)
   protected
     FEvent: TSimpleEvent;
-    FMethod: TSimbaThreadPool_Method;
-    FParameters: TParamArray;
-    FTemporary: Boolean;
-    FLo, FHi: Int32;
-    FFinished: TSimpleEvent;
+    FIdleEvent: TSimpleEvent;
+    FMethod: TSimbaThreadPoolMethod;
+    FParams: TParamArray;
+    FResult: Pointer;
 
     procedure Execute; override;
+
+    procedure SetIdle(Value: Boolean);
+    function GetIdle: Boolean;
   public
-    property Temporary: Boolean read FTemporary;
-
-    procedure Run(Method: TSimbaThreadPool_Method; Parameters: array of Pointer; Lo, Hi: Int32);
-    procedure Terminate;
-
-    constructor Create(IsTemporary: Boolean); reintroduce;
+    constructor Create; reintroduce;
     destructor Destroy; override;
+
+    procedure Run(Task: TSimbaThreadPoolTask);
+    procedure WaitForIdle;
+
+    property Idle: Boolean read GetIdle write SetIdle;
   end;
 
   TSimbaThreadPool = class
   protected
-    FThreads: TSimbaThreadPool_ThreadArray;
+  type
+    TThreadArray = array of TSimbaThreadPool_Thread;
+  protected
+    FThreads: TThreadArray;
     FLock: TCriticalSection;
-  public
-    function GetAvailableThread: TSimbaThreadPool_Thread;
 
-    procedure RunParallel(Method: TSimbaThreadPool_Method; Args: array of Pointer; Lo, Hi: Int32; Fallback: Boolean; ThreadCount: Int32 = -1);
+    function GetIdleThreads(Count: Integer; out IdleThreads: TThreadArray): Boolean;
+  public
+    procedure RunParallel(Tasks: TSimbaThreadPoolTasks);
 
     constructor Create(ThreadCount: Int32);
     destructor Destroy; override;
@@ -59,170 +69,170 @@ var
 
 implementation
 
-uses
-  math;
+class function TSimbaThreadPoolTask.Create(AMethod: TSimbaThreadPoolMethod; AParams: array of Pointer; AResult: Pointer): TSimbaThreadPoolTask;
+begin
+  Result.Method := AMethod;
+  Result.Params := AParams;
+  Result.Result := AResult;
+end;
 
 procedure TSimbaThreadPool_Thread.Execute;
 begin
-  while (not Terminated) do
+  while True do
   begin
     FEvent.WaitFor(INFINITE);
+    if Terminated then
+      Exit;
 
-    if (FMethod <> nil) then
-    begin
-      FMethod(@FParameters, FLo, FHi);
-      FMethod := nil;
-
-      if FTemporary then
-        Terminate();
-    end;
+    FMethod(@FParams, FResult);
 
     FEvent.ResetEvent();
-    FFinished.SetEvent();
+    FIdleEvent.SetEvent();
   end;
 end;
 
-procedure TSimbaThreadPool_Thread.Run(Method: TSimbaThreadPool_Method; Parameters: array of Pointer; Lo, Hi: Int32);
-var
-  i: Int32;
+procedure TSimbaThreadPool_Thread.Run(Task: TSimbaThreadPoolTask);
 begin
-  FLo := Lo;
-  FHi := Hi;
-  FMethod := Method;
-  for i := 0 to High(Parameters) do
-    FParameters[i] := Parameters[i];
+  FMethod := Task.Method;
+  FParams := Task.Params;
+  FResult := Task.Result;
 
   FEvent.SetEvent(); // begin execution
 end;
 
-procedure TSimbaThreadPool_Thread.Terminate;
+procedure TSimbaThreadPool_Thread.WaitForIdle;
 begin
-  inherited Terminate();
-
-  FEvent.SetEvent(); // call event so execute loop can execute.
+  FIdleEvent.WaitFor(INFINITE);
 end;
 
-constructor TSimbaThreadPool_Thread.Create(IsTemporary: Boolean);
+function TSimbaThreadPool_Thread.GetIdle: Boolean;
 begin
-  FTemporary := IsTemporary;
-  FEvent := TSimpleEvent.Create();
-  FFinished := TSimpleEvent.Create();
-  FFinished.SetEvent();
+  Result := FIdleEvent.WaitFor(0) = wrSignaled;
+end;
 
-  inherited Create(False, 1024 * 512); // default = 4MiB, we set 512KiB
+procedure TSimbaThreadPool_Thread.SetIdle(Value: Boolean);
+begin
+  if Suspended then
+    Start();
+
+  if Value then
+    FIdleEvent.SetEvent()
+  else
+    FIdleEvent.ResetEvent();
+end;
+
+constructor TSimbaThreadPool_Thread.Create;
+begin
+  inherited Create(True, 1024 * 512); // default = 4MiB, we set 512KiB
+
+  FreeOnTerminate := False;
+
+  FEvent := TSimpleEvent.Create();
+
+  FIdleEvent := TSimpleEvent.Create();
+  FIdleEvent.SetEvent();
 end;
 
 destructor TSimbaThreadPool_Thread.Destroy;
 begin
-  FEvent.Free();
-  FFinished.Free();
+  FEvent.SetEvent(); // call event so execute loop can execute.
 
-  inherited Destroy;
+  if (not Suspended) then
+  begin
+    Terminate();
+    WaitFor();
+  end;
+
+  FEvent.Free();
+  FIdleEvent.Free();
+
+  inherited Destroy();
 end;
 
-function TSimbaThreadPool.GetAvailableThread: TSimbaThreadPool_Thread;
+function TSimbaThreadPool.GetIdleThreads(Count: Integer; out IdleThreads: TThreadArray): Boolean;
 var
-  i: Int32;
+  I, J: Integer;
 begin
   FLock.Enter();
 
   try
-    for i := 0 to High(FThreads) do
-      if (FThreads[i].FFinished.WaitFor(0) = wrSignaled) then
+    for I := 0 to High(FThreads) do
+      if FThreads[i].Idle then
       begin
-        Result := FThreads[i];
-        Result.FFinished.ResetEvent();
+        IdleThreads := IdleThreads + [FThreads[I]];
 
-        Exit;
+        if (Length(IdleThreads) = Count) then
+        begin
+          for J := 0 to High(IdleThreads) do
+            IdleThreads[J].Idle := False;
+
+          Result := True;
+          Exit;
+        end;
       end;
-
-    Result := TSimbaThreadPool_Thread.Create(True);
   finally
     FLock.Leave();
   end;
+
+  Result := False;
 end;
 
 constructor TSimbaThreadPool.Create(ThreadCount: Int32);
 var
-  i: Int32;
+  I: Integer;
 begin
   inherited Create();
 
   FLock := TCriticalSection.Create();
 
   SetLength(FThreads, ThreadCount);
-  for i := 0 to High(FThreads) do
-    FThreads[i] := TSimbaThreadPool_Thread.Create(False);
+  for I := 0 to High(FThreads) do
+    FThreads[I] := TSimbaThreadPool_Thread.Create();
 end;
 
 destructor TSimbaThreadPool.Destroy;
 var
-  i: Int32;
+  I: Integer;
 begin
-  FLock.Enter();
+  for I := 0 to High(FThreads) do
+    FThreads[I].Free();
+  FThreads := nil;
 
-  try
-    for i := 0 to High(FThreads) do
-    begin
-      FThreads[i].Terminate();
-      FThreads[i].WaitFor();
-      FThreads[i].Free();
-    end;
-  finally
-    FLock.Leave();
-  end;
-
-  FLock.Free();
+  if (FLock <> nil) then
+    FreeAndNil(FLock);
 
   inherited Destroy();
 end;
 
-procedure TSimbaThreadPool.RunParallel(Method: TSimbaThreadPool_Method; Args: array of Pointer; Lo, Hi: Int32; Fallback: Boolean; ThreadCount: Int32);
+procedure TSimbaThreadPool.RunParallel(Tasks: TSimbaThreadPoolTasks);
 var
-  i, Step, A, B: Int32;
-  Threads: TSimbaThreadPool_ThreadArray;
+  Threads: TThreadArray;
+  I: Integer;
 begin
-  if Fallback or (ThreadCount = 1) then
+  if GetIdleThreads(Length(Tasks), Threads) then
   begin
-    Method(@Args, Lo, Hi);
-    Exit;
-  end;
+    for I := 0 to High(Tasks) do
+      Threads[I].Run(Tasks[I]);
 
-  if (ThreadCount = -1) or (ThreadCount > Length(FThreads)) then
-    ThreadCount := Length(FThreads);
-
-  A := Lo;
-  B := Lo;
-  Step := Max(1, (Hi + 1) div ThreadCount);
-
-  while (B <> Hi) do
+    for I := 0 to High(Threads) do
+      Threads[I].WaitForIdle();
+  end else
   begin
-    B := Min(Hi, A + Step);
-
-    SetLength(Threads, Length(Threads) + 1);
-
-    Threads[High(Threads)] := Self.GetAvailableThread();
-    Threads[High(Threads)].Run(Method, Args, A, B);
-
-    A := B + 1;
-  end;
-
-  for i := 0 to High(Threads) do
-  begin
-    Threads[i].FFinished.WaitFor(INFINITE);
-    if Threads[i].Temporary then
-      Threads[i].Free();
+    // Not enough threads - no multithreading.
+    for I := 0 to High(Tasks) do
+      Tasks[I].Method(@Tasks[I].Params, Tasks[I].Result);
   end;
 end;
 
 initialization
-  if TThread.ProcessorCount < 4 then
-    SimbaThreadPool := TSimbaThreadPool.Create(TThread.ProcessorCount)
+  if (TThread.ProcessorCount >= 4) then
+    SimbaThreadPool := TSimbaThreadPool.Create(4)
   else
-    SimbaThreadPool := TSimbaThreadPool.Create(4);
+    SimbaThreadPool := TSimbaThreadPool.Create(TThread.ProcessorCount);
 
 finalization
-  SimbaThreadPool.Free();
+  if (SimbaThreadPool <> nil) then
+    FreeAndNil(SimbaThreadPool);
 
 end.
 

@@ -5,11 +5,8 @@
 }
 unit simba.colorfinders;
 
+{$DEFINE SIMBA_O4}
 {$i simba.inc}
-
-{$IFNDEF SIMBA_HAS_DEBUG_INFO}
-  {$OPTIMIZATION LEVEL4}
-{$ENDIF}
 
 interface
 
