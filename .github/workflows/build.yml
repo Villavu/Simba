@@ -54,7 +54,7 @@ jobs:
           submodules: true
       
       - name: Install Lazarus
-        uses: ollydev/setup-lazarus-fpcup@v2.4
+        uses: ollydev/setup-lazarus-fpcup@v2.5
         with:
           laz-branch: lazarus_2_2_0
           fpc-branch: release_3_2_2

@@ -15,8 +15,8 @@ unit simba.fftpack4;
   limitations under the License.
 [==============================================================================}
 {$i simba.inc}
+
 {$MODESWITCH ARRAYOPERATORS OFF}
-{$OPTIMIZATION LEVEL4}
 
 interface
 
@@ -36,13 +36,9 @@ type
     function RFFT(a, wsave: TSingleArray; Inplace: Boolean=False): TSingleArray;
     function IRFFT(a, wsave: TSingleArray; Inplace: Boolean=False): TSingleArray;
 
-    function FFT2MT(m: TComplexMatrix; Inverse: Boolean): TComplexMatrix;
     function FFT2(m: TComplexMatrix): TComplexMatrix;
     function IFFT2(m: TComplexMatrix): TComplexMatrix;
   end;
-
-const
-  MIN_THREDING_SZ = 333*333;
 
 var
   FFTPACK: TFFTPACK;
@@ -51,10 +47,10 @@ implementation
 
 uses
   math,
-  simba.matchtemplate_matrix, simba.math, simba.threadpool;
+  simba.matchtemplate_matrix, simba.math;
 
 const
-  __OptimalDFT: array[0..168] of Int32 = (
+  __OptimalDFT: array[0..168] of Integer = (
     8, 9, 10, 12, 15, 16, 18, 20, 24, 25, 27, 30, 32, 36, 40, 45, 48,
     50, 54, 60, 64, 72, 75, 80, 81, 90, 96, 100, 108, 120, 125, 128,
     135, 144, 150, 160, 162, 180, 192, 200, 216, 225, 240, 243, 250,
@@ -77,14 +73,14 @@ const
 // --------------------------------------------------------------------------------
 // Compute the optimal size for FFT
 
-function TFFTPACK.OptimalDFTSize(target: Int32): Int32;
+function TFFTPACK.OptimalDFTSize(target: Integer): Integer;
 var
-  n,match,quotient,p2,p5,p35: Int32;
+  n,match,quotient,p2,p5,p35: Integer;
 begin
   if (target <= 6) then
     Exit(target);
   
-  if NextPowerOf2(target) = target then
+  if NextPower2(target) = target then
     Exit(target);
   
   n := 0;
@@ -102,7 +98,7 @@ begin
     while p35 < target do
     begin
       quotient := Ceil(target / p35);
-      p2 := NextPowerOf2(quotient);
+      p2 := NextPower2(quotient);
       N := p2 * p35;
 
       if N = target then Exit(N);
@@ -121,18 +117,17 @@ begin
   Result := Min(p5, match);
 end;
 
-
 // --------------------------------------------------------------------------------
 // complex 2 complex FFT
 
-function TFFTPACK.InitFFT(n: Int32): TComplexArray;
+function TFFTPACK.InitFFT(n: Integer): TComplexArray;
 begin
   SetLength(Result, CPLX_BUFFSZ);
   cffti(n, @Result[0]);
 end;
 
 function TFFTPACK.FFT(a, wsave: TComplexArray; Inplace:Boolean=False): TComplexArray;
-var n: Int32;
+var n: Integer;
 begin
   if Inplace then Result := a
   else            Result := Copy(a);
@@ -143,7 +138,7 @@ end;
 
 function TFFTPACK.IFFT(a, wsave: TComplexArray; Inplace:Boolean=False): TComplexArray;
 var
-  n: Int32;
+  n: Integer;
   f: Single;
 begin
   if Inplace then Result := a
@@ -163,14 +158,14 @@ end;
 // --------------------------------------------------------------------------------
 // real 2 real FFT
 
-function TFFTPACK.InitRFFT(n: Int32): TSingleArray;
+function TFFTPACK.InitRFFT(n: Integer): TSingleArray;
 begin
   SetLength(Result, REAL_BUFFSZ);
   rffti(n, @Result[0]);
 end;
 
 function TFFTPACK.RFFT(a, wsave: TSingleArray; Inplace:Boolean=False): TSingleArray;
-var n: Int32;
+var n: Integer;
 begin
   if Inplace then Result := a
   else            Result := Copy(a);
@@ -181,7 +176,7 @@ end;
 
 function TFFTPACK.IRFFT(a, wsave: TSingleArray; Inplace:Boolean=False): TSingleArray;
 var
-  n: Int32;
+  n: Integer;
   f: Single;
 begin
   if Inplace then Result := a
@@ -194,39 +189,20 @@ begin
   for n:=0 to High(a) do Result[n] *= f;
 end;
 
-
 // --------------------------------------------------------------------------------
-// 2d complex fft (supports threading)
+// 2d complex fft
 
-procedure Parallel_FFT2(params: PParamArray; iLow, iHigh: Int32);
+function TFFTPACK.FFT2(m: TComplexMatrix): TComplexMatrix;
 var
-  y: Int32;
-  data: TComplexMatrix;
-  plan: TComplexArray;
-begin
-  data := TComplexMatrix(Params^[0]^);
-  plan := Copy(TComplexArray(Params^[1]^)); //copy plan/workbase as it's also a buffer
-
-  {if not inverse}
-  if not PBoolean(Params^[2])^ then
-    for y:=iLow to iHigh do
-      FFTPACK.FFT(data[y], plan, True)
-  {if inverse}
-  else
-    for y:=iLow to iHigh do
-      FFTPACK.IFFT(data[y], plan, True);
-end;
-
-function TFFTPACK.FFT2MT(m: TComplexMatrix; Inverse: Boolean): TComplexMatrix;
-var
-  W,H: Int32;
+  W,H,Y: Integer;
   plan: TComplexArray;
 begin
   W := M.Width;
   H := M.Height;
 
   plan := InitFFT(W);
-  SimbaThreadPool.RunParallel(@Parallel_FFT2, [@m, @plan, @inverse], 0, H-1, m.Area < MIN_THREDING_SZ);
+  for Y := 0 to H - 1 do
+    FFTPACK.FFT(m[Y], Plan, True);
 
   m := Rot90(m);
 
@@ -234,21 +210,34 @@ begin
   H := M.Height;
 
   plan := InitFFT(W);
-  SimbaThreadPool.RunParallel(@Parallel_FFT2, [@m, @plan, @inverse], 0, H-1, m.Area < MIN_THREDING_SZ);
+  for Y := 0 to H - 1 do
+    FFTPACK.FFT(m[Y], Plan, True);
 
   Result := Rot90(m);
 end;
 
-function TFFTPACK.FFT2(m: TComplexMatrix): TComplexMatrix;
-begin
-  if Length(m) = 0 then Exit(nil);
-  Result := FFT2MT(m, False);
-end;
-
 function TFFTPACK.IFFT2(m: TComplexMatrix): TComplexMatrix;
+var
+  W,H,Y: Integer;
+  plan: TComplexArray;
 begin
-  if Length(m) = 0 then Exit(nil);
-  Result := FFT2MT(m, True);
+  W := M.Width;
+  H := M.Height;
+
+  plan := InitFFT(W);
+  for Y := 0 to H - 1 do
+    FFTPACK.IFFT(m[Y], Plan, True);
+
+  m := Rot90(m);
+
+  W := M.Width;
+  H := M.Height;
+
+  plan := InitFFT(W);
+  for Y := 0 to H - 1 do
+    FFTPACK.IFFT(m[Y], Plan, True);
+
+  Result := Rot90(m);
 end;
 
 end.

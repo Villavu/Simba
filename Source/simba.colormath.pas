@@ -5,32 +5,32 @@
 }
 unit simba.colormath;
 
+{$DEFINE SIMBA_O4}
 {$i simba.inc}
-{$OPTIMIZATION LEVEL4}
 
 interface
 
 uses
-  classes, sysutils, graphics, math,
+  classes, sysutils, graphics,
   simba.mufasatypes;
 
-Function RGBToColor(r,g,b: Byte): TColor; overload; inline;
-Function RGBToColor(r,g,b: Integer): TColor; overload; inline;
+function BGRToRGB(BGR: TRGB32): TColor; inline;
+function RGBToBGR(Color: TColor): TRGB32; inline;
+function RGBToColor(r,g,b: Byte): TColor; overload; inline;
+function RGBToColor(r,g,b: Integer): TColor; overload; inline;
 procedure ColorToRGB(Color: Integer;out r,g,b: Byte); overload; inline;
 procedure ColorToRGB(Color: Integer;out r,g,b: Integer); overload; inline;
 procedure RGBToXYZ(R,G,B: Byte;out x,y,z: Extended); inline;
 procedure XYZToRGB(X,Y,Z: Extended;out R,G,B: Byte); overload; inline;
-procedure XYZToRGB(X,Y,Z: Extended;out R,G,B: Integer); overload; inline;
+procedure XYZToRGB(X,Y,Z: Extended;out R,G,B: Integer); overload;
 procedure RGBToHSL(RR,GG,BB: Byte;out H,S,L: Extended); overload;
 procedure RGBToHSL(R,G,B: Byte; out H,S,L: Single); overload;
 procedure RGBToHSLNonFixed(RR,GG,BB: Byte;out H,S,L: Extended); inline;
 procedure HSLtoRGB(H,S,L: extended;out R,G,B: Byte); inline;
 procedure ColorToHSL(Col: Integer; out h, s, l: Extended);
 procedure ColorToXYZ(color: Integer; out X, Y, Z: Extended);
-function XYZToColor(X, Y, Z: Extended): TColor; inline;
-function HSLToColor(H, S, L: Extended): TColor; inline;
-function BGRToRGB(BGR: TRGB32): TColor; inline;
-function RGBToBGR(Color: TColor): TRGB32; inline;
+function XYZToColor(X, Y, Z: Extended): TColor;
+function HSLToColor(H, S, L: Extended): TColor;
 procedure XYZToHSL(X, Y, Z: Extended; out H, S, L: Extended);
 procedure HSLToXYZ(H, S, L: Extended; out X, Y, Z: Extended);
 procedure XYZtoCIELab(X, Y, Z: Extended; out L, a, b: Extended);
@@ -52,6 +52,7 @@ procedure BestColor_CTS2(Colors: TIntegerArray; out Color, Tolerance: Int32; out
 implementation
 
 uses
+  math,
   simba.math;
 
 const
@@ -72,7 +73,7 @@ begin
   Result.A := 0;
 end;
 
-Function RGBToColor(r,g,b: Byte): TColor;
+function RGBToColor(r,g,b: Byte): TColor;
 begin
   Result := R or g shl 8 or b shl 16;
 end;
@@ -82,7 +83,7 @@ end;
   R, G and B are integers.
 /\}
 
-Function RGBToColor(r,g,b: Integer): TColor;
+function RGBToColor(r,g,b: Integer): TColor;
 begin
   Result := R or g shl 8 or b shl 16;
 end;
@@ -304,23 +305,22 @@ end;
 procedure HSLtoRGB(H, S, L: extended; out R, G, B: Byte);
 var
   Temp,Temp2: Extended;
-//begin
 
-Function Hue2RGB(TempHue: Extended): Integer;
-begin
-  if TempHue < 0 then
-    TempHue := TempHue + 1
-  else if TempHue > 1 then
-    TempHue := TempHue - 1;
-  if ( ( 6 * TempHue ) < 1 ) then
-    Result :=Round(255 * (( Temp + ( Temp2 - Temp ) * 6 * TempHue )))
-  else if ( ( 2 * TempHue ) < 1 ) then
-    Result :=Round(255 * Temp2)
-  else if ( ( 3 * TempHue ) < 2 ) then
-    Result :=Round(255 * (Temp + ( Temp2 - Temp ) * ( ( TwoDivThree ) - TempHue ) * 6))
-  else
-    Result :=Round(255 * Temp);
-end;
+  function Hue2RGB(TempHue: Extended): Integer;
+  begin
+    if TempHue < 0 then
+      TempHue := TempHue + 1
+    else if TempHue > 1 then
+      TempHue := TempHue - 1;
+    if ( ( 6 * TempHue ) < 1 ) then
+      Result :=Round(255 * (( Temp + ( Temp2 - Temp ) * 6 * TempHue )))
+    else if ( ( 2 * TempHue ) < 1 ) then
+      Result :=Round(255 * Temp2)
+    else if ( ( 3 * TempHue ) < 2 ) then
+      Result :=Round(255 * (Temp + ( Temp2 - Temp ) * ( ( TwoDivThree ) - TempHue ) * 6))
+    else
+      Result :=Round(255 * Temp);
+  end;
 
 begin
   H := H / 100;
@@ -438,7 +438,6 @@ begin
     Z := Power(Z, 3)
   else
     Z := ( Z - (16.0 / 116.0) ) / 7.787;
-
 
   X := 95.047 * X;
   Y := 100.000 * Y;

@@ -31,7 +31,7 @@ function IntToBox(x1,y1,x2,y2 : Integer) : TBox;
 function IntInBox(x, y: Integer; Box: TBox): Boolean;
 function PointToBox(topLeft,bottomRight: TPoint): TBox;
 function PointInBox(PT : TPoint; Box: TBox): Boolean;
-function NextPowerOf2(const n: Integer): Integer; inline;
+function NextPower2(const n: Integer): Integer; inline;
 
 function IsNumber(const n: Double): Boolean; inline; overload;
 function IsNumber(const n: Single): Boolean; inline; overload;
@@ -89,7 +89,7 @@ begin
   Result := X - Floor(X / Y) * Y;
 end;
 
-function NextPowerOf2(const n: Integer): Integer;
+function NextPower2(const n: Integer): Integer;
 begin
   Result := n - 1;
   Result := Result or (Result shr 1);
