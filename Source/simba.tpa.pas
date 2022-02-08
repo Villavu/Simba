@@ -2825,7 +2825,7 @@ label
 begin
   Buffer.Init();
 
-  SetLength(Table, NextPowerOf2(Length(Arr)));
+  SetLength(Table, NextPower2(Length(Arr)));
   Size := High(Table);
 
   for i := 0 to High(Arr) do

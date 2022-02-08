@@ -77,7 +77,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
             <Libraries Value="../Modules/lape/extensions/ffi/bin/win64"/>
-            <OtherUnitFiles Value="$(ProjPath);windows;script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;helpers;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -96,6 +96,7 @@
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
+              <DebugInfoType Value="dsDwarf2Set"/>
               <StripSymbols Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
