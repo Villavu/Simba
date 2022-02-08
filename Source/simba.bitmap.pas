@@ -27,7 +27,7 @@ type
 
   PMufasaBitmap = ^TMufasaBitmap;
   TMufasaBitmap = class(TObject)
-  private
+  protected
     FWidth,FHeight: Int32;
     FTransparentColor: TRGB32;
     FTransparentSet: Boolean;
@@ -131,6 +131,7 @@ type
 
     function ToTBitmap: TBitmap;
     function ToString: String; override;
+    function ToMatrixBGR: TIntegerMatrix;
     function ToMatrix: TIntegerMatrix;
     function ToGreyMatrix: TByteMatrix;
     function ToRawImage: TRawImage;
@@ -724,6 +725,15 @@ begin
   end;
 
   Result := 'm' + Base64Encode(CompressString(DataStr, False));
+end;
+
+function TMufasaBitmap.ToMatrixBGR: TIntegerMatrix;
+var
+  Y: Integer;
+begin
+  Result.SetSize(FWidth, FHeight);
+  for Y := 0 to FHeight - 1 do
+    Move(FData[Y * FWidth], Result[Y, 0], FWidth * SizeOf(Integer));
 end;
 
 function TMufasaBitmap.ToMatrix: TIntegerMatrix;
