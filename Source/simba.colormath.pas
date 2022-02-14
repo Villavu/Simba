@@ -14,6 +14,8 @@ uses
   classes, sysutils, graphics,
   simba.mufasatypes;
 
+function RGBDistance(const Color, OtherColor: TRGB32): Integer; inline;
+
 function BGRToRGB(BGR: TRGB32): TColor; inline;
 function RGBToBGR(Color: TColor): TRGB32; inline;
 function RGBToColor(r,g,b: Byte): TColor; overload; inline;
@@ -59,6 +61,11 @@ const
   OneDivThree = 1 / 3.0;
   TwoDivThree = 2 / 3.0;
   OneDivTwoPointFour = 1 / 2.4;
+
+function RGBDistance(const Color, OtherColor: TRGB32): Integer;
+begin
+  Result := Sqr(Color.R - OtherColor.R) + Sqr(Color.G - OtherColor.G) + Sqr(Color.B - OtherColor.B);
+end;
 
 function BGRToRGB(BGR: TRGB32): TColor;
 begin
