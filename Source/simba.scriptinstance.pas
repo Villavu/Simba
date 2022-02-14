@@ -45,7 +45,6 @@ type
     property State: ESimbaScriptState read FState write FState;
 
     // Parameters to pass to script
-    //property ScriptName: String write FScriptName;
     property ScriptFile: String write FScriptFile;
     property Target: THandle write FTarget;
 
@@ -98,9 +97,6 @@ end;
 
 procedure TSimbaScriptInstance.Start(Args: array of String);
 begin
-  // if (FScriptName <> '') then
- //   FProcess.Parameters.Add('--scriptname=' + FScriptName);
-
   FProcess.Parameters.Add('--simbacommunication=%s', [FSimbaCommunication.Client]);
   FProcess.Parameters.Add('--target=' + IntToStr(FTarget));
   FProcess.Parameters.AddStrings(Args);

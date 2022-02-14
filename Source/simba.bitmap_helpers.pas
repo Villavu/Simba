@@ -24,12 +24,15 @@ type
     function FindColors(out Points: TPointArray; Color: Integer): Boolean; overload;
     function FindColorsTolerance(out Points: TPointArray; Color, Tolerance: Integer): Boolean; overload;
     function FindColorsTolerance(out Points: TPointArray; Color, Tolerance: Integer; HueMod, SatMod: Extended): Boolean; overload;
+
+    function FindBitmap(Bitmap: TMufasaBitmap; out X, Y: Integer; Tolerance: Integer): Boolean;
+    function FindBitmaps(Bitmap: TMufasaBitmap; out Points: TPointArray; Tolerance: Integer): Boolean;
   end;
 
 implementation
 
 uses
-  simba.colorfinders;
+  simba.colorfinders, simba.bitmapfinder;
 
 function TMufasaBitmapHelpers.MatchTemplate(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
 begin
@@ -81,6 +84,34 @@ begin
   Buffer.Y2 := FHeight - 1;
 
   Result := Buffer.FindCTS2(Points, Color, Tolerance, HueMod, SatMod);
+end;
+
+function TMufasaBitmapHelpers.FindBitmap(Bitmap: TMufasaBitmap; out X, Y: Integer; Tolerance: Integer): Boolean;
+var
+  Buffer: TFindBitmapBuffer;
+begin
+  Buffer.Ptr := FData;
+  Buffer.PtrInc := 0;
+  Buffer.X1 := 0;
+  Buffer.Y1 := 0;
+  Buffer.X2 := FWidth - 1;
+  Buffer.Y2 := FHeight - 1;
+
+  Result := Buffer.Find(Bitmap, X, Y, Tolerance);
+end;
+
+function TMufasaBitmapHelpers.FindBitmaps(Bitmap: TMufasaBitmap; out Points: TPointArray; Tolerance: Integer): Boolean;
+var
+  Buffer: TFindBitmapBuffer;
+begin
+  Buffer.Ptr := FData;
+  Buffer.PtrInc := 0;
+  Buffer.X1 := 0;
+  Buffer.Y1 := 0;
+  Buffer.X2 := FWidth - 1;
+  Buffer.Y2 := FHeight - 1;
+
+  Result := Buffer.FindAll(Bitmap, Points, Tolerance);
 end;
 
 end.

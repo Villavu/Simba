@@ -522,15 +522,18 @@ end;
 
 function TSimbaScriptTab.CanClose: Boolean;
 begin
-  Result := False;
+  Result := True;
 
   if (FScriptInstance <> nil) then
   begin
     Show();
 
-    Result := MessageDlg('Script is still running. Forcefully stop this script?', mtConfirmation, [mbYes, mbNo], 0) = mrYes;
-    if not Result then
+    // Don't close if user doesn't want to focefully stop the script
+    if MessageDlg('Script is still running. Forcefully stop this script?', mtConfirmation, [mbYes, mbNo], 0) <> mrYes then
+    begin
+      Result := False;
       Exit;
+    end;
 
     if (FScriptInstance <> nil) then
       FScriptInstance.Kill();
@@ -540,11 +543,14 @@ begin
   begin
     Show();
 
+    // Ask to save the script yes/no = can close. Else cannot close.
     case MessageDlg('Script has been modified. Save this script?', mtConfirmation, [mbYes, mbNo, mbAbort], 0) of
       mrYes:
         Result := Save(FScriptFileName);
       mrNo:
         Result := True;
+      else
+        Result := False;
     end;
   end;
 end;
