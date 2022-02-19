@@ -83,7 +83,7 @@ addClassVar('TCustomForm', 'OnDestroy', 'TNotifyEvent', @_LapeCustomForm_OnDestr
 addClassVar('TCustomForm', 'OnHide', 'TNotifyEvent', @_LapeCustomForm_OnHide_Read, @_LapeCustomForm_OnHide_Write);
 addClassVar('TCustomForm', 'OnShow', 'TNotifyEvent', @_LapeCustomForm_OnShow_Read, @_LapeCustomForm_OnShow_Write);
 addClassVar('TCustomForm', 'OnWindowStateChange', 'TNotifyEvent', @_LapeCustomForm_OnWindowStateChange_Read, @_LapeCustomForm_OnWindowStateChange_Write);
-addClassVar('TCustomForm', 'PixelsPerInch', 'Longint', @_LapeCustomForm_PixelsPerInch_Read, @_LapeCustomForm_PixelsPerInch_Write);
+addClassVar('TCustomForm', 'PixelsPerInch', 'Integer', @_LapeCustomForm_PixelsPerInch_Read, @_LapeCustomForm_PixelsPerInch_Write);
 addClassVar('TCustomForm', 'RestoredLeft', 'integer', @_LapeCustomForm_RestoredLeft_Read);
 addClassVar('TCustomForm', 'RestoredTop', 'integer', @_LapeCustomForm_RestoredTop_Read);
 addClassVar('TCustomForm', 'RestoredWidth', 'integer', @_LapeCustomForm_RestoredWidth_Read);

@@ -56,11 +56,11 @@ addClassVar('TComponent', 'Tag', 'Integer', @_LapeComponent_Tag_Read, @_LapeComp
 //addGlobalFunc('procedure TComponent.Free; constref', @_LapeComponent_Free);
 
 addClass('TStream');
-addGlobalFunc('function TStream.Read(var Buffer; Count: Longint): Longint; constref', @_LapeStream_Read);
-addGlobalFunc('function TStream.Write(constref Buffer; Count: Longint): Longint; constref', @_LapeStream_Write); //test
-addGlobalFunc('function TStream.Seek(Offset: Longint; Origin: Word): Longint; constref', @_LapeStream_Seek);
-addGlobalFunc('procedure TStream.ReadBuffer(var Buffer; Count: Longint); constref', @_LapeStream_ReadBuffer);
-addGlobalFunc('procedure TStream.WriteBuffer(constref Buffer; Count: Longint); constref', @_LapeStream_WriteBuffer);
+addGlobalFunc('function TStream.Read(var Buffer; Count: Integer): Integer; constref', @_LapeStream_Read);
+addGlobalFunc('function TStream.Write(constref Buffer; Count: Integer): Integer; constref', @_LapeStream_Write); //test
+addGlobalFunc('function TStream.Seek(Offset: Integer; Origin: Int16): Integer; constref', @_LapeStream_Seek);
+addGlobalFunc('procedure TStream.ReadBuffer(var Buffer; Count: Integer); constref', @_LapeStream_ReadBuffer);
+addGlobalFunc('procedure TStream.WriteBuffer(constref Buffer; Count: Integer); constref', @_LapeStream_WriteBuffer);
 addGlobalFunc('function TStream.CopyFrom(Source: TStream; Count: Int64): Int64; constref', @_LapeStream_CopyFrom);
 addGlobalFunc('function TStream.ReadComponent(Instance: TComponent): TComponent; constref', @_LapeStream_ReadComponent);
 addGlobalFunc('function TStream.ReadComponentRes(Instance: TComponent): TComponent; constref', @_LapeStream_ReadComponentRes);
@@ -75,7 +75,7 @@ addGlobalFunc('function TStream.ReadByte: Byte; constref', @_LapeStream_ReadByte
 addGlobalFunc('function TStream.ReadDWord: UInt32; constref', @_LapeStream_ReadDWord);
 addGlobalFunc('function TStream.ReadAnsiString: String; constref', @_LapeStream_ReadAnsiString);
 addGlobalFunc('procedure TStream.WriteByte(b : Byte); constref', @_LapeStream_WriteByte);
-addGlobalFunc('procedure TStream.WriteWord(w : Word); constref', @_LapeStream_WriteWord);
+addGlobalFunc('procedure TStream.WriteWord(w : Int16); constref', @_LapeStream_WriteWord);
 addGlobalFunc('procedure TStream.WriteDWord(d : UInt32); constref', @_LapeStream_WriteDWord);
 addGlobalFunc('procedure TStream.WriteAnsiString(const S : String); constref', @_LapeStream_WriteAnsiString);
 addClassVar('TStream', 'Position', 'Integer', @_LapeStream_Position_Read, @_LapeStream_Position_Write);
@@ -85,20 +85,20 @@ addGlobalFunc('procedure TStream.Free; constref', @_LapeStream_Free);
 
 addClass('THandleStream', 'TStream');
 addGlobalFunc('procedure THandleStream.Init(AHandle: THandle)', @_LapeHandleStream_Init);
-//addGlobalFunc('function THandleStream.Read(var Buffer; Count: Longint): Longint; constref', @_LapeHandleStream_Read);
-// addGlobalFunc('function THandleStream.Write(constref Buffer; Count: Longint): Longint; constref', @_LapeHandleStream_Write);
+//addGlobalFunc('function THandleStream.Read(var Buffer; Count: Integer): Integer; constref', @_LapeHandleStream_Read);
+// addGlobalFunc('function THandleStream.Write(constref Buffer; Count: Integer): Integer; constref', @_LapeHandleStream_Write);
 addGlobalFunc('function THandleStream.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; constref', @_LapeHandleStream_Seek);
 addClassVar('THandleStream', 'Handle', 'THandle', @_LapeHandleStream_Handle_Read);
 // addGlobalFunc('procedure THandleStream.Free; constref', @_LapeHandleStream_Free);
 
 addClass('TFileStream', 'THandleStream');
-addGlobalFunc('procedure TFileStream.Init(const AFileName: string; Mode: Word)', @_LapeFileStream_Init);
-//addGlobalFunc('procedure TFileStream.Init(const AFileName: string; Mode: Word; Rights: Cardinal); overload', @_LapeFileStream_InitEx);
+addGlobalFunc('procedure TFileStream.Init(const AFileName: string; Mode: Int16)', @_LapeFileStream_Init);
+//addGlobalFunc('procedure TFileStream.Init(const AFileName: string; Mode: Int16; Rights: UInt32); overload', @_LapeFileStream_InitEx);
 addClassVar('TFileStream', 'FileName', 'String', @_LapeFileStream_FileName_Read);
 //addGlobalFunc('procedure TFileStream.Free; constref', @_LapeFileStream_Free);
 
 addClass('TCustomMemoryStream', 'TStream');
-//addGlobalFunc('function TCustomMemoryStream.Read(var Buffer; Count: LongInt): LongInt; constref', @_LapeCustomMemoryStream_Read);
+//addGlobalFunc('function TCustomMemoryStream.Read(var Buffer; Count: Integer): Integer; constref', @_LapeCustomMemoryStream_Read);
 addGlobalFunc('function TCustomMemoryStream.Seek(const Offset: Integer; Origin: TSeekOrigin): Int64; constref', @_LapeCustomMemoryStream_Seek);
 addGlobalFunc('procedure TCustomMemoryStream.SaveToStream(Stream: TStream); constref', @_LapeCustomMemoryStream_SaveToStream);
 addGlobalFunc('procedure TCustomMemoryStream.SaveToFile(const FileName: string); constref', @_LapeCustomMemoryStream_SaveToFile);
@@ -111,16 +111,16 @@ addGlobalFunc('procedure TMemoryStream.Clear; constref', @_LapeMemoryStream_Clea
 addGlobalFunc('procedure TMemoryStream.LoadFromStream(Stream: TStream); constref', @_LapeMemoryStream_LoadFromStream);
 addGlobalFunc('procedure TMemoryStream.LoadFromFile(const FileName: string); constref', @_LapeMemoryStream_LoadFromFile);
 addGlobalFunc('procedure TMemoryStream.SetSize(NewSize: PtrInt); constref', @_LapeMemoryStream_SetSize);
-// addGlobalFunc('function TMemoryStream.Write(constref Buffer; Count: LongInt): LongInt; constref', @_LapeMemoryStream_Write);
+// addGlobalFunc('function TMemoryStream.Write(constref Buffer; Count: Integer): Integer; constref', @_LapeMemoryStream_Write);
 addGlobalFunc('procedure TMemoryStream.Init; override', @_LapeMemoryStream_Init);
 // addGlobalFunc('procedure TMemoryStream.Free; constref', @_LapeMemoryStream_Free);
 
 addClass('TStringStream', 'TStream');
 addGlobalFunc('procedure TStringStream.Init(const AString: string)', @_LapeStringStream_Init);
-// addGlobalFunc('function TStringStream.Read(var Buffer; Count: Longint): Longint; constref', @_LapeStringStream_Read);
-addGlobalFunc('function TStringStream.ReadString(Count: Longint): string; constref', @_LapeStringStream_ReadString);
-//addGlobalFunc('function TStringStream.Seek(Offset: Longint; Origin: Word): Longint; constref', @_LapeStringStream_Seek);
-// addGlobalFunc('function TStringStream.Write(constref Buffer; Count: Longint): Longint; constref', @_LapeStringStream_Write);
+// addGlobalFunc('function TStringStream.Read(var Buffer; Count: Integer): Integer; constref', @_LapeStringStream_Read);
+addGlobalFunc('function TStringStream.ReadString(Count: Integer): string; constref', @_LapeStringStream_ReadString);
+//addGlobalFunc('function TStringStream.Seek(Offset: Integer; Origin: Int16): Integer; constref', @_LapeStringStream_Seek);
+// addGlobalFunc('function TStringStream.Write(constref Buffer; Count: Integer): Integer; constref', @_LapeStringStream_Write);
 addGlobalFunc('procedure TStringStream.WriteString(const AString: string); constref', @_LapeStringStream_WriteString);
 addClassVar('TStringStream', 'DataString', 'string', @_LapeStringStream_DataString_Read);
 //addGlobalFunc('procedure TStringStream.Free; constref', @_LapeStringStream_Free);

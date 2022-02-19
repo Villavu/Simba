@@ -1,7 +1,7 @@
 addClass('TMenu', 'TLCLComponent');
 
 addClass('TMenuItem', 'TLCLComponent');
-addClassVar('TMenuItem', 'FCompStyle', 'LongInt', @_LapeMenuItem_FCompStyle_Read, @_LapeMenuItem_FCompStyle_Write);
+addClassVar('TMenuItem', 'FCompStyle', 'Integer', @_LapeMenuItem_FCompStyle_Read, @_LapeMenuItem_FCompStyle_Write);
 addGlobalFunc('function TMenuItem.Find(const ACaption: string): TMenuItem; constref', @_LapeMenuItem_Find);
 addGlobalFunc('function TMenuItem.GetParentMenu: TMenu; constref', @_LapeMenuItem_GetParentMenu);
 addGlobalFunc('function TMenuItem.GetIsRightToLeft: Boolean; constref', @_LapeMenuItem_GetIsRightToLeft);
@@ -34,7 +34,7 @@ addClassVar('TMenuItem', 'Checked', 'Boolean', @_LapeMenuItem_Checked_Read, @_La
 addClassVar('TMenuItem', 'MenuIndex', 'Integer', @_LapeMenuItem_MenuIndex_Read, @_LapeMenuItem_MenuIndex_Write);
 addClassVar('TMenuItem', 'Menu', 'TMenu', @_LapeMenuItem_Menu_Read, nil);
 addClassVar('TMenuItem', 'Parent', 'TMenuItem', @_LapeMenuItem_Parent_Read, nil);
-addClassVar('TMenuItem', 'Command', 'Word', @_LapeMenuItem_Command_Read, nil);
+addClassVar('TMenuItem', 'Command', 'Int16', @_LapeMenuItem_Command_Read, nil);
 addClassVar('TMenuItem', 'AutoCheck', 'boolean', @_LapeMenuItem_AutoCheck_Read, @_LapeMenuItem_AutoCheck_Write);
 addClassVar('TMenuItem', 'Default', 'Boolean', @_LapeMenuItem_Default_Read, @_LapeMenuItem_Default_Write);
 addClassVar('TMenuItem', 'Bitmap', 'TBitmap', @_LapeMenuItem_Bitmap_Read, @_LapeMenuItem_Bitmap_Write);
@@ -46,14 +46,14 @@ addClassVar('TMenuItem', 'Caption', 'String', @_LapeMenuItem_Caption_Read, @_Lap
 addGlobalFunc('procedure TMenuItem.Init(AOwner: TComponent); override', @_LapeMenuItem_Init);
 // addGlobalFunc('procedure TMenuItem.Free; constref', @_LapeMenuItem_Free);
 
-addClassVar('TMenu', 'FCompStyle', 'LongInt', @_LapeMenu_FCompStyle_Read, @_LapeMenu_FCompStyle_Write);
+addClassVar('TMenu', 'FCompStyle', 'Integer', @_LapeMenu_FCompStyle_Read, @_LapeMenu_FCompStyle_Write);
 addGlobalFunc('procedure TMenu.DestroyHandle; constref', @_LapeMenu_DestroyHandle);
 addGlobalFunc('function TMenu.HandleAllocated: Boolean; constref', @_LapeMenu_HandleAllocated);
 addGlobalFunc('function TMenu.IsRightToLeft: Boolean; constref', @_LapeMenu_IsRightToLeft);
 addGlobalFunc('function TMenu.UseRightToLeftAlignment: Boolean; constref', @_LapeMenu_UseRightToLeftAlignment);
 addGlobalFunc('function TMenu.UseRightToLeftReading: Boolean; constref', @_LapeMenu_UseRightToLeftReading);
 addGlobalFunc('procedure TMenu.HandleNeeded; constref', @_LapeMenu_HandleNeeded);
-addGlobalFunc('function TMenu.DispatchCommand(ACommand: Word): Boolean; constref', @_LapeMenu_DispatchCommand);
+addGlobalFunc('function TMenu.DispatchCommand(ACommand: Int16): Boolean; constref', @_LapeMenu_DispatchCommand);
 addGlobalFunc('function TMenu.AddMenu(name: string): TMenuItem; constref', @_LapeMenu_AddMenu);
 addClassVar('TMenu', 'Parent', 'TComponent', @_LapeMenu_Parent_Read, @_LapeMenu_Parent_Write);
 addClassVar('TMenu', 'ShortcutHandled', 'boolean', @_LapeMenu_ShortcutHandled_Read, @_LapeMenu_ShortcutHandled_Write);

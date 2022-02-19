@@ -12,7 +12,7 @@ addGlobalFunc('procedure TMFiles.WriteINI(const Section, KeyName, NewString : st
 addGlobalFunc('function TMFiles.ReadINI(const Section, KeyName : string; FileName : string): string; constref', @_LapeMFiles_ReadINI);
 addGlobalFunc('procedure TMFiles.DeleteINI(const Section, KeyName : string; FileName : string); constref', @_LapeMFiles_DeleteINI);
 addGlobalFunc('function TMFiles.EndOfFile(FileNum: Integer): Boolean; constref', @_LapeMFiles_EndOfFile);
-addGlobalFunc('function TMFiles.FileSizeMuf(FileNum: Integer): LongInt; constref', @_LapeMFiles_FileSizeMuf);
+addGlobalFunc('function TMFiles.FileSizeMuf(FileNum: Integer): Integer; constref', @_LapeMFiles_FileSizeMuf);
 addGlobalFunc('function TMFiles.ReadFileString(FileNum: Integer; out s: string; x: Integer): Boolean; constref', @_LapeMFiles_ReadFileString);
 addGlobalFunc('function TMFiles.WriteFileString(FileNum: Integer;const s: string): Boolean; constref', @_LapeMFiles_WriteFileString);
 addGlobalFunc('function TMFiles.SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer; constref', @_LapeMFiles_SetFileCharPointer);

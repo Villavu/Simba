@@ -494,12 +494,12 @@ end;
 
 procedure _LapeCustomForm_PixelsPerInch_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLongint(Result)^ := PCustomForm(Params^[0])^.PixelsPerInch;
+  PInteger(Result)^ := PCustomForm(Params^[0])^.PixelsPerInch;
 end;
 
 procedure _LapeCustomForm_PixelsPerInch_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PCustomForm(Params^[0])^.PixelsPerInch := PLongint(Params^[1])^;
+  PCustomForm(Params^[0])^.PixelsPerInch := PInteger(Params^[1])^;
 end;
 
 procedure _LapeCustomForm_RestoredLeft_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}

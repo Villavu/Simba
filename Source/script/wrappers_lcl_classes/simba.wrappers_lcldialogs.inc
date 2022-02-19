@@ -39,12 +39,12 @@ end;
 
 procedure _LapeCommonDialog_FCompStyle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLongInt(Result)^ := PCommonDialog(Params^[0])^.FCompStyle;
+  PInteger(Result)^ := PCommonDialog(Params^[0])^.FCompStyle;
 end;
 
 procedure _LapeCommonDialog_FCompStyle_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PCommonDialog(Params^[0])^.FCompStyle := PLongInt(Params^[1])^;
+  PCommonDialog(Params^[0])^.FCompStyle := PInteger(Params^[1])^;
 end;
 
 procedure _LapeCommonDialog_Execute(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
