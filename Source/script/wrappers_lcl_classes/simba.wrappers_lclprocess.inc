@@ -14,7 +14,7 @@ end;
 
 procedure _LapeOutputPipeStream_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  Plongint(Result)^ := POutputPipeStream(Params^[0])^.Read(PLongint(Params^[1])^, PLongint(Params^[2])^);
+  PInteger(Result)^ := POutputPipeStream(Params^[0])^.Read(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeOutputPipeStream_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -29,7 +29,7 @@ end;
 
 procedure _LapeInputPipeStream_Write(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLongint(Result)^ := PInputPipeStream(Params^[0])^.Write(PLongint(Params^[1])^, PLongint(Params^[2])^);
+  PInteger(Result)^ := PInputPipeStream(Params^[0])^.Write(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeInputPipeStream_Seek(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -39,7 +39,7 @@ end;
 
 procedure _LapeInputPipeStream_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  Plongint(Result)^ := PInputPipeStream(Params^[0])^.Read(PLongint(Params^[1])^, PLongint(Params^[2])^);
+  PInteger(Result)^ := PInputPipeStream(Params^[0])^.Read(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeInputPipeStream_NumBytesAvailable_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}

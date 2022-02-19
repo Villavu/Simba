@@ -40,27 +40,27 @@ end;
 
 procedure _LapeStream_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLongint(Result)^ := PStream(Params^[0])^.Read(PLongint(Params^[1])^, PLongint(Params^[2])^);
+  PInteger(Result)^ := PStream(Params^[0])^.Read(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeStream_Write(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLongint(Result)^ := PStream(Params^[0])^.Write(PLongint(Params^[1])^, PLongint(Params^[2])^);
+  PInteger(Result)^ := PStream(Params^[0])^.Write(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeStream_Seek(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLongint(Result)^ := PStream(Params^[0])^.Seek(PLongint(Params^[1])^, PWord(Params^[2])^);
+  PInteger(Result)^ := PStream(Params^[0])^.Seek(PInteger(Params^[1])^, PWord(Params^[2])^);
 end;
 
 procedure _LapeStream_ReadBuffer(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PStream(Params^[0])^.ReadBuffer(PLongint(Params^[1])^, PLongint(Params^[2])^);
+  PStream(Params^[0])^.ReadBuffer(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeStream_WriteBuffer(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PStream(Params^[0])^.WriteBuffer(PLongint(Params^[1])^, PLongint(Params^[2])^);
+  PStream(Params^[0])^.WriteBuffer(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeStream_CopyFrom(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -185,12 +185,12 @@ end;
 
 procedure _LapeHandleStream_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLongint(Result)^ := PHandleStream(Params^[0])^.Read(Ppointer(Params^[1])^, PLongint(Params^[2])^);
+  PInteger(Result)^ := PHandleStream(Params^[0])^.Read(Ppointer(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeHandleStream_Write(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLongint(Result)^ := PHandleStream(Params^[0])^.Write(Ppointer(Params^[1])^, PLongint(Params^[2])^);
+  PInteger(Result)^ := PHandleStream(Params^[0])^.Write(Ppointer(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeHandleStream_Seek(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -230,7 +230,7 @@ end;
 
 procedure _LapeCustomMemoryStream_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLongInt(Result)^ := PCustomMemoryStream(Params^[0])^.Read(PLongInt(Params^[1])^, PLongInt(Params^[2])^);
+  PInteger(Result)^ := PCustomMemoryStream(Params^[0])^.Read(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeCustomMemoryStream_Seek(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -285,7 +285,7 @@ end;
 
 procedure _LapeMemoryStream_Write(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLongInt(Result)^ := PMemoryStream(Params^[0])^.Write(PLongInt(Params^[1])^, PLongInt(Params^[2])^);
+  PInteger(Result)^ := PMemoryStream(Params^[0])^.Write(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeMemoryStream_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -305,22 +305,22 @@ end;
 
 procedure _LapeStringStream_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLongint(Result)^ := PStringStream(Params^[0])^.Read(Plongint(Params^[1])^, PLongint(Params^[2])^);
+  PInteger(Result)^ := PStringStream(Params^[0])^.Read(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeStringStream_ReadString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PString(Result)^ := PStringStream(Params^[0])^.ReadString(PLongint(Params^[1])^);
+  PString(Result)^ := PStringStream(Params^[0])^.ReadString(PInteger(Params^[1])^);
 end;
 
 procedure _LapeStringStream_Seek(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLongint(Result)^ := PStringStream(Params^[0])^.Seek(PLongint(Params^[1])^, PWord(Params^[2])^);
+  PInteger(Result)^ := PStringStream(Params^[0])^.Seek(PInteger(Params^[1])^, PWord(Params^[2])^);
 end;
 
 procedure _LapeStringStream_Write(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLongint(Result)^ := PStringStream(Params^[0])^.Write(PLongInt(Params^[1])^, PLongint(Params^[2])^);
+  PInteger(Result)^ := PStringStream(Params^[0])^.Write(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeStringStream_WriteString(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}

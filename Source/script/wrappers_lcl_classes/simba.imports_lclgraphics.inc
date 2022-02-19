@@ -1,4 +1,4 @@
-addGlobalType('record Left,Top,Right,Bottom : Longint;end', 'TRect');
+addGlobalType('record Left,Top,Right,Bottom : Integer;end', 'TRect');
 addGlobalType('(fsBold, fsItalic, fsStrikeOut, fsUnderline)', 'TFontStyle');
 addGlobalType('(fqDefault, fqDraft, fqProof, fqNonAntialiased, fqAntialiased, fqCleartype, fqCleartypeNatural)', 'TFontQuality');
 addGlobalType('set of TFontStyle', 'TFontStyles');
@@ -139,7 +139,7 @@ addGlobalFunc('function TBitmap.BitmapHandleAllocated: boolean; constref', @_Lap
 addGlobalFunc('function TBitmap.MaskHandleAllocated: boolean; constref', @_LapeBitmap_MaskHandleAllocated);
 addGlobalFunc('function TBitmap.PaletteAllocated: boolean; constref', @_LapeBitmap_PaletteAllocated);
 addGlobalFunc('procedure TBitmap.LoadFromStream(AStream: TStream); constref', @_LapeBitmap_LoadFromStream);
-addGlobalFunc('procedure TBitmap.LoadFromStream(AStream: TStream; ASize: Cardinal);constref; overload', @_LapeBitmap_LoadFromStreamEx);
+addGlobalFunc('procedure TBitmap.LoadFromStream(AStream: TStream; ASize: UInt32);constref; overload', @_LapeBitmap_LoadFromStreamEx);
 addGlobalFunc('procedure TBitmap.SaveToStream(AStream: TStream); constref', @_LapeBitmap_SaveToStream);
 addGlobalFunc('procedure TBitmap.GetSize(var AWidth, AHeight: Integer); constref', @_LapeBitmap_GetSize);
 addGlobalFunc('procedure TBitmap.Mask(ATransparentColor: TColor); constref', @_LapeBitmap_Mask);

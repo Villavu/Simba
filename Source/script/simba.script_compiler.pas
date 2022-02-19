@@ -114,7 +114,13 @@ begin
 
   FSection := 'System';
 
-  InitializePascalScriptBasics(Self, [psiTypeAlias, psiSettings]);
+  Options := Options + LapePascalScriptCompilerOptions;
+
+  addGlobalType(getBaseType(DetermineIntType(SizeOf(Byte), False)).createCopy(), 'Byte');
+  addGlobalType(getBaseType(DetermineIntType(SizeOf(Integer), True)).createCopy(), 'Integer');
+  addGlobalType(getPointerType(ltChar, False).createCopy(), 'PChar');
+
+  //InitializePascalScriptBasics(Self, [psiTypeAlias, psiSettings]);
   InitializeAddOnTerminate(Self);
   InitializeWaitUntil(Self);
 

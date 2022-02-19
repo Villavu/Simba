@@ -7,7 +7,7 @@ addGlobalType('(stRectangle, stSquare, stRoundRect, stRoundSquare, stEllipse, st
 addClass('TCustomTimer', 'TComponent');
 addGlobalFunc('procedure TCustomTimer.Init(AOwner: TComponent); override', @_LapeCustomTimer_Init);
 addClassVar('TCustomTimer', 'Enabled', 'Boolean', @_LapeCustomTimer_Enabled_Read, @_LapeCustomTimer_Enabled_Write);
-addClassVar('TCustomTimer', 'Interval', 'Cardinal', @_LapeCustomTimer_Interval_Read, @_LapeCustomTimer_Interval_Write);
+addClassVar('TCustomTimer', 'Interval', 'UInt32', @_LapeCustomTimer_Interval_Read, @_LapeCustomTimer_Interval_Write);
 addClassVar('TCustomTimer', 'OnTimer', 'TNotifyEvent', @_LapeCustomTimer_OnTimer_Read, @_LapeCustomTimer_OnTimer_Write);
 addClassVar('TCustomTimer', 'OnStartTimer', 'TNotifyEvent', @_LapeCustomTimer_OnStartTimer_Read, @_LapeCustomTimer_OnStartTimer_Write);
 addClassVar('TCustomTimer', 'OnStopTimer', 'TNotifyEvent', @_LapeCustomTimer_OnStopTimer_Read, @_LapeCustomTimer_OnStopTimer_Write);

@@ -5,7 +5,7 @@ addGlobalFunc('function RewriteFile(Path: String; Shared: Boolean): Int32', @_La
 addGlobalFunc('function AppendFile(Path: String): Int32', @_LapeAppendFile);
 addGlobalFunc('procedure CloseFile(FileNum: Int32)', @_LapeCloseFile);
 addGlobalFunc('function EndOfFile(FileNum: Int32): Boolean', @_LapeEndOfFile);
-addGlobalFunc('function FileSize(FileNum: Int32): LongInt', @_LapeFileSize);
+addGlobalFunc('function FileSize(FileNum: Int32): Integer', @_LapeFileSize);
 addGlobalFunc('function ReadFileString(FileNum: Int32; var s: String; x: Int32): Boolean', @_LapeReadFileString);
 addGlobalFunc('function WriteFileString(FileNum: Int32; s: String): Boolean', @_LapeWriteFileString);
 addGlobalFunc('function SetFileCharPointer(FileNum, cChars, Origin: Int32): Int32', @_LapeSetFileCharPointer);

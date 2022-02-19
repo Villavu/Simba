@@ -7,14 +7,14 @@ addGlobalType('set of TStartupOption', 'TStartupOptions');
 
 addClass('TOutputPipeStream', 'THandleStream');
 // addGlobalFunc('function TOutputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64; constref', @_LapeOutputPipeStream_Seek);
-// addGlobalFunc('function TOutputPipeStream.Read(Var Buffer; Count : Longint): longint; constref', @_LapeOutputPipeStream_Read);
+// addGlobalFunc('function TOutputPipeStream.Read(Var Buffer; Count : Integer): Integer; constref', @_LapeOutputPipeStream_Read);
 addGlobalFunc('procedure TOutputPipeStream.Init(AHandle: THandle); override', @_LapeOutputPipeStream_Init);
 // addGlobalFunc('procedure TOutputPipeStream.Free; constref', @_LapeOutputPipeStream_Free);
 
 addClass('TInputPipeStream', 'THandleStream');
-//addGlobalFunc('function TInputPipeStream.Write(constref Buffer; Count : Longint): Longint; constref', @_LapeInputPipeStream_Write);
+//addGlobalFunc('function TInputPipeStream.Write(constref Buffer; Count : Integer): Integer; constref', @_LapeInputPipeStream_Write);
 //addGlobalFunc('function TInputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64; constref', @_LapeInputPipeStream_Seek);
-//addGlobalFunc('function TInputPipeStream.Read(var Buffer; Count : Longint): longint; constref', @_LapeInputPipeStream_Read);
+//addGlobalFunc('function TInputPipeStream.Read(var Buffer; Count : Integer): Integer; constref', @_LapeInputPipeStream_Read);
 addClassVar('TInputPipeStream', 'NumBytesAvailable', 'UInt32', @_LapeInputPipeStream_NumBytesAvailable_Read, nil);
 addGlobalFunc('procedure TInputPipeStream.Init(AHandle: THandle); override', @_LapeInputPipeStream_Init);
 //addGlobalFunc('procedure TInputPipeStream.Free; constref', @_LapeInputPipeStream_Free);
@@ -40,7 +40,7 @@ addClassVar('TProcess', 'Stderr', 'TinputPipeStream', @_LapeProcess_Stderr_Read,
 addClassVar('TProcess', 'ExitStatus', 'Integer', @_LapeProcess_ExitStatus_Read, nil);
 addClassVar('TProcess', 'ExitCode', 'Integer', @_LapeProcess_ExitCode_Read, nil);
 addClassVar('TProcess', 'InheritHandles', 'Boolean', @_LapeProcess_InheritHandles_Read, @_LapeProcess_InheritHandles_Write);
-addClassVar('TProcess', 'PipeBufferSize', 'cardinal', @_LapeProcess_PipeBufferSize_Read, @_LapeProcess_PipeBufferSize_Write);
+addClassVar('TProcess', 'PipeBufferSize', 'UInt32', @_LapeProcess_PipeBufferSize_Read, @_LapeProcess_PipeBufferSize_Write);
 addClassVar('TProcess', 'Active', 'Boolean', @_LapeProcess_Active_Read, @_LapeProcess_Active_Write);
 addClassVar('TProcess', 'CommandLine', 'String', @_LapeProcess_CommandLine_Read, @_LapeProcess_CommandLine_Write);
 addClassVar('TProcess', 'Executable', 'String', @_LapeProcess_Executable_Read, @_LapeProcess_Executable_Write);
@@ -54,13 +54,13 @@ addClassVar('TProcess', 'Priority', 'TProcessPriority', @_LapeProcess_Priority_R
 addClassVar('TProcess', 'StartupOptions', 'TStartupOptions', @_LapeProcess_StartupOptions_Read, @_LapeProcess_StartupOptions_Write);
 addClassVar('TProcess', 'Running', 'Boolean', @_LapeProcess_Running_Read, nil);
 addClassVar('TProcess', 'ShowWindow', 'TShowWindowOptions', @_LapeProcess_ShowWindow_Read, @_LapeProcess_ShowWindow_Write);
-addClassVar('TProcess', 'WindowColumns', 'Cardinal', @_LapeProcess_WindowColumns_Read, @_LapeProcess_WindowColumns_Write);
-addClassVar('TProcess', 'WindowHeight', 'Cardinal', @_LapeProcess_WindowHeight_Read, @_LapeProcess_WindowHeight_Write);
-addClassVar('TProcess', 'WindowLeft', 'Cardinal', @_LapeProcess_WindowLeft_Read, @_LapeProcess_WindowLeft_Write);
-addClassVar('TProcess', 'WindowRows', 'Cardinal', @_LapeProcess_WindowRows_Read, @_LapeProcess_WindowRows_Write);
-addClassVar('TProcess', 'WindowTop', 'Cardinal', @_LapeProcess_WindowTop_Read, @_LapeProcess_WindowTop_Write);
-addClassVar('TProcess', 'WindowWidth', 'Cardinal', @_LapeProcess_WindowWidth_Read, @_LapeProcess_WindowWidth_Write);
-addClassVar('TProcess', 'FillAttribute', 'Cardinal', @_LapeProcess_FillAttribute_Read, @_LapeProcess_FillAttribute_Write);
+addClassVar('TProcess', 'WindowColumns', 'UInt32', @_LapeProcess_WindowColumns_Read, @_LapeProcess_WindowColumns_Write);
+addClassVar('TProcess', 'WindowHeight', 'UInt32', @_LapeProcess_WindowHeight_Read, @_LapeProcess_WindowHeight_Write);
+addClassVar('TProcess', 'WindowLeft', 'UInt32', @_LapeProcess_WindowLeft_Read, @_LapeProcess_WindowLeft_Write);
+addClassVar('TProcess', 'WindowRows', 'UInt32', @_LapeProcess_WindowRows_Read, @_LapeProcess_WindowRows_Write);
+addClassVar('TProcess', 'WindowTop', 'UInt32', @_LapeProcess_WindowTop_Read, @_LapeProcess_WindowTop_Write);
+addClassVar('TProcess', 'WindowWidth', 'UInt32', @_LapeProcess_WindowWidth_Read, @_LapeProcess_WindowWidth_Write);
+addClassVar('TProcess', 'FillAttribute', 'UInt32', @_LapeProcess_FillAttribute_Read, @_LapeProcess_FillAttribute_Write);
 addClassVar('TProcess', 'XTermProgram', 'String', @_LapeProcess_XTermProgram_Read, @_LapeProcess_XTermProgram_Write);
 addGlobalFunc('procedure TProcess.Init(AOwner : TComponent); override', @_LapeProcess_Init);
 //addGlobalFunc('procedure TProcess.Free; constref', @_LapeProcess_Free);

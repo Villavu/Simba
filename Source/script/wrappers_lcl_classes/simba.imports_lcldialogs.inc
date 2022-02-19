@@ -10,7 +10,7 @@ addGlobalFunc('procedure TLCLComponent.Init(TheOwner: TComponent); override', @_
 //addGlobalFunc('procedure TLCLComponent.Free; constref', @_LapeLCLComponent_Free);
 
 addClass('TCommonDialog', 'TLCLComponent');
-addClassVar('TCommonDialog', 'FCompStyle', 'LongInt', @_LapeCommonDialog_FCompStyle_Read, @_LapeCommonDialog_FCompStyle_Write);
+addClassVar('TCommonDialog', 'FCompStyle', 'Integer', @_LapeCommonDialog_FCompStyle_Read, @_LapeCommonDialog_FCompStyle_Write);
 addGlobalFunc('function TCommonDialog.Execute: boolean; constref', @_LapeCommonDialog_Execute);
 addClassVar('TCommonDialog', 'Handle', 'THandle', @_LapeCommonDialog_Handle_Read, @_LapeCommonDialog_Handle_Write);
 addClassVar('TCommonDialog', 'UserChoice', 'integer', @_LapeCommonDialog_UserChoice_Read, @_LapeCommonDialog_UserChoice_Write);

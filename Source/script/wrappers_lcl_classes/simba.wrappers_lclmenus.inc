@@ -1,11 +1,11 @@
 procedure _LapeMenuItem_FCompStyle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLongInt(Result)^ := PMenuItem(Params^[0])^.FCompStyle;
+  PInteger(Result)^ := PMenuItem(Params^[0])^.FCompStyle;
 end;
 
 procedure _LapeMenuItem_FCompStyle_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PMenuItem(Params^[0])^.FCompStyle := PLongInt(Params^[1])^;
+  PMenuItem(Params^[0])^.FCompStyle := PInteger(Params^[1])^;
 end;
 
 procedure _LapeMenuItem_Find(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -292,12 +292,12 @@ end;
 
 procedure _LapeMenu_FCompStyle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PLongInt(Result)^ := PMenu(Params^[0])^.FCompStyle;
+  PInteger(Result)^ := PMenu(Params^[0])^.FCompStyle;
 end;
 
 procedure _LapeMenu_FCompStyle_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PMenu(Params^[0])^.FCompStyle := PLongInt(Params^[1])^;
+  PMenu(Params^[0])^.FCompStyle := PInteger(Params^[1])^;
 end;
 
 procedure _LapeMenu_DestroyHandle(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
