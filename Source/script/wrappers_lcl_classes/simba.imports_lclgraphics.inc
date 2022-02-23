@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addGlobalType('record Left,Top,Right,Bottom : Integer;end', 'TRect');
 addGlobalType('(fsBold, fsItalic, fsStrikeOut, fsUnderline)', 'TFontStyle');
 addGlobalType('(fqDefault, fqDraft, fqProof, fqNonAntialiased, fqAntialiased, fqCleartype, fqCleartypeNatural)', 'TFontQuality');
@@ -173,3 +175,5 @@ addClassVar('TPicture', 'Height', 'Integer', @_LapePicture_Height_Read);
 addClassVar('TPicture', 'Width', 'Integer', @_LapePicture_Width_Read);
 addClassVar('TPicture', 'OnChange', 'TNotifyEvent', @_LapePicture_OnChange_Read, @_LapePicture_OnChange_Write);
 //addGlobalFunc('procedure TPicture.Free; constref', @_LapePicture_Free);
+
+popSection();

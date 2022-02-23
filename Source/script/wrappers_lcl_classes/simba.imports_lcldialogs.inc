@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addGlobalType('(ofReadOnly, ofOverwritePrompt,ofHideReadOnly,ofNoChangeDir,ofShowHelp,ofNoValidate,ofAllowMultiSelect,ofExtensionDifferent,ofPathMustExist,ofFileMustExist,ofCreatePrompt,ofShareAware,ofNoReadOnlyReturn,ofNoTestFileCreate,ofNoNetworkButton,ofNoLongNames,ofOldStyleDialog,ofNoDereferenceLinks,ofEnableIncludeNotify,ofEnableSizing,ofDontAddToRecent,ofForceShowHidden,ofViewDetail,ofAutoPreview)', 'TOpenOption');
 addGlobalType('set of TOpenOption', 'TOpenOptions');
 
@@ -58,3 +60,4 @@ addClassVar('TColorDialog', 'CustomColors', 'TStrings', @_LapeColorDialog_Custom
 addGlobalFunc('procedure TColorDialog.Init(TheOwner: TComponent); override', @_LapeColorDialog_Init);
 //addGlobalFunc('procedure TColorDialog.Free; constref', @_LapeColorDialog_Free);
 
+popSection();

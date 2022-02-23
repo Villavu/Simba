@@ -1,4 +1,4 @@
-FSection := 'Match Template';
+pushSection('Match Template');
 
 addClass('TMatchTemplateCache');
 
@@ -14,3 +14,4 @@ addGlobalFunc('function MatchTemplate(Image, Template: TIntegerMatrix; Formula: 
 addGlobalFunc('function TMufasaBitmap.MatchTemplate(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix; constref', @_LapeMufasaBitmap_MatchTemplate);
 addGlobalFunc('function TMufasaBitmap.MatchTemplateMask(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix; constref', @_LapeMufasaBitmap_MatchTemplateMask);
 
+popSection();

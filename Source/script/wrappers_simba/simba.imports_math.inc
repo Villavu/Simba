@@ -1,4 +1,4 @@
-FSection := 'Math';
+pushSection('Math');
 
 addGlobalFunc('function GaussMatrix(N: Integer; Sigma: Extended): TExtendedMatrix', @_LapeGaussMatrix);
 addGlobalFunc('function Distance(const X1, Y1, X2, Y2: Integer): Integer; overload', @_LapeDistance);
@@ -31,4 +31,6 @@ addGlobalFunc('function Sum(const Arr: TExtendedArray): Extended; overload', @_L
 
 addGlobalFunc('function Average(const Arr: TIntegerArray): Int64; overload', @_LapeAverage);
 addGlobalFunc('function Average(const Arr: TExtendedArray): Extended; overload', @_LapeAverageF);
+
+popSection();
 

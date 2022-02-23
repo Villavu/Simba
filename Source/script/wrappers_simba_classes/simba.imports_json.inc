@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addClass('TZAbstractObject','TObject');
 addClass('TJSONObject','TZAbstractObject');
 addClass('TJSONArray','TZAbstractObject');
@@ -81,4 +83,6 @@ addGlobalFunc('function TJSONObject.toString: string ; constref; overload; overr
 addGlobalFunc('function TJSONObject.toString(indentFactor : integer): string; constref; overload', @_LapeJSONObject_toStringEx);
 addGlobalFunc('function TJSONObject.toString(indentFactor, indent : integer): string; constref; overload', @_LapeJSONObject_toStringExEx);
 //addGlobalFunc('procedure TJSONObject.Free; constref', @_LapeJSONObject_Free);
+
+popSection();
 

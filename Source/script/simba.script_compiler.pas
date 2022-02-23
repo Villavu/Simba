@@ -21,7 +21,11 @@ type
       Closure: TImportClosure;
     end;
   protected
-    FSection: lpString;
+    FSectionStack: TStringArray;
+
+    function Section: String;
+    procedure pushSection(Name: String);
+    procedure popSection;
 
     procedure InitBaseVariant; override;
   public
@@ -111,23 +115,21 @@ procedure TSimbaScript_Compiler.Import;
 begin
   StartImporting();
 
-  FSection := 'External';
-  InitializeFFI(Self);
+  try
+    Options := Options + LapePascalScriptCompilerOptions;
 
-  FSection := 'System';
+    addGlobalType(getBaseType(DetermineIntType(SizeOf(Byte), False)).createCopy(), 'Byte');
+    addGlobalType(getBaseType(DetermineIntType(SizeOf(Integer), True)).createCopy(), 'Integer');
+    addGlobalType(getPointerType(ltChar, False).createCopy(), 'PChar');
 
-  Options := Options + LapePascalScriptCompilerOptions;
+    InitializeAddOnTerminate(Self);
+    InitializeWaitUntil(Self);
+    InitializeFFI(Self);
 
-  addGlobalType(getBaseType(DetermineIntType(SizeOf(Byte), False)).createCopy(), 'Byte');
-  addGlobalType(getBaseType(DetermineIntType(SizeOf(Integer), True)).createCopy(), 'Integer');
-  addGlobalType(getPointerType(ltChar, False).createCopy(), 'PChar');
-
-  InitializeAddOnTerminate(Self);
-  InitializeWaitUntil(Self);
-
-  {$i simba.imports.inc}
-
-  EndImporting();
+    {$i simba.imports.inc}
+  finally
+    EndImporting();
+  end;
 end;
 
 function TSimbaScript_Compiler.Compile: Boolean;
@@ -141,6 +143,24 @@ begin
     raise Exception.Create('ERROR: libffi is missing or incompatible');
 
   Result := inherited Compile();
+end;
+
+function TSimbaScript_Compiler.Section: String;
+begin
+  if Length(FSectionStack) > 0 then
+    Result := FSectionStack[High(FSectionStack)]
+  else
+    Result := '';
+end;
+
+procedure TSimbaScript_Compiler.pushSection(Name: String);
+begin
+  FSectionStack := FSectionStack + [Name];
+end;
+
+procedure TSimbaScript_Compiler.popSection;
+begin
+  SetLength(FSectionStack, Length(FSectionStack) - 1);
 end;
 
 procedure TSimbaScript_Compiler.InitBaseVariant;

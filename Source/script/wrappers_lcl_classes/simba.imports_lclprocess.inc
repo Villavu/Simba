@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addGlobalType('(oRunSuspended,poWaitOnExit,poUsePipes,poStderrToOutPut,poNoConsole,poNewConsole,poDefaultErrorMode,poNewProcessGroup,poDebugProcess,poDebugOnlyThisProcess,poDetached,poPassInput,poRunIdle)', 'TProcessOption');
 addGlobalType('(swoNone,swoHIDE,swoMaximize,swoMinimize,swoRestore,swoShow, swoShowDefault,swoShowMaximized,swoShowMinimized, swoshowMinNOActive,swoShowNA,swoShowNoActivate,swoShowNormal)', 'TShowWindowOptions');
 addGlobalType('(suoUseShowWindow,suoUseSize,suoUsePosition, suoUseCountChars,suoUseFillAttribute)', 'TStartupOption');
@@ -65,3 +67,4 @@ addClassVar('TProcess', 'XTermProgram', 'String', @_LapeProcess_XTermProgram_Rea
 addGlobalFunc('procedure TProcess.Init(AOwner : TComponent); override', @_LapeProcess_Init);
 //addGlobalFunc('procedure TProcess.Free; constref', @_LapeProcess_Free);
 
+popSection();

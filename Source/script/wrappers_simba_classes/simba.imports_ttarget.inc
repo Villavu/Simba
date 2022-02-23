@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addClass('TTarget');
 addGlobalType('record Ptr: PRGB32; IncPtrWith: integer; RowLen: integer; end', 'TRetData');
 addGlobalType('UInt32', 'TClickType');
@@ -26,4 +28,6 @@ addGlobalFunc('function TTarget.IsKeyHeld(key: integer): boolean; constref', @_L
 addGlobalFunc('function TTarget.GetKeyCode(C : char): integer; constref', @_LapeTarget_GetKeyCode);
 addGlobalFunc('procedure TTarget.Init()', @_LapeTarget_Init);
 // addGlobalFunc('procedure TTarget.Free; constref', @_LapeTarget_Free);
+
+popSection();
 

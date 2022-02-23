@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addGlobalType('(ssShift, ssAlt, ssCtrl, ssLeft, ssRight, ssMiddle, ssDouble, ssMeta, ssSuper, ssHyper, ssAltGr, ssCaps, ssNum, ssScroll, ssTriple, ssQuad, ssExtra1, ssExtra2)', 'TShiftStateEnum');
 addGlobalType('set of TShiftStateEnum', 'TShiftState');
 addGlobalType('procedure(Sender: TObject; var Key: Int16; Shift: TShiftState) of object', 'TKeyEvent', FFI_DEFAULT_ABI);
@@ -215,3 +217,4 @@ addClass('TGraphicControl', 'TControl');
 addClassVar('TGraphicControl', 'Canvas', 'TCanvas', @_LapeGraphicControl_Canvas_Read);
 addClassVar('TGraphicControl', 'Alignment', 'TAlign', @_LapeGraphicControl_Align_Read, @_LapeGraphicControl_Align_Write);
 
+popSection();

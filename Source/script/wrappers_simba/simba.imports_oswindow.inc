@@ -1,4 +1,4 @@
-FSection := 'TWindowHandle';
+pushSection('TWindowHandle');
 
 addGlobalType('type PtrUInt', 'TWindowHandle');
 addGlobalType('array of TWindowHandle', 'TWindowHandleArray');
@@ -28,3 +28,4 @@ addGlobalFunc('function FindWindows(Title: String): TWindowHandleArray; overload
 addGlobalFunc('function FindChildWindow(Title: String; ClassName: String; out Child: TWindowHandle): Boolean; overload', @_LapeFindChildWindow);
 addGlobalFunc('function FindChildWindows(Title: String; ClassName: String): TWindowHandleArray; overload', @_LapeFindChildWindows);
 
+popSection();

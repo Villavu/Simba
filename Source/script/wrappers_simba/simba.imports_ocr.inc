@@ -1,4 +1,5 @@
-FSection := 'OCR';
+pushSection('OCR');
+
 addGlobalFunc('function MaskFromText(Text, Font: String): TMask', @_LapeMaskFromText);
 addGlobalFunc('function TPAFromText(Text, Font: String; var W, H: Int32): TPointArray', @_LapeTPAFromText);
 addGlobalFunc('function GetTextATPA(const ATPA: T2DPointArray; const maxvspacing: integer; const font: string): String', @_LapeGetTextATPA);
@@ -9,3 +10,4 @@ addGlobalFunc('function LoadFont(FontName: String; Shadow: Boolean): Boolean', @
 addGlobalFunc('function FreeFont(FontName: String): Boolean', @_LapeFreeFont);
 addGlobalFunc('function IsFontLoaded(FontName: String): Boolean', @_LapeIsFontLoaded);
 
+popSection();

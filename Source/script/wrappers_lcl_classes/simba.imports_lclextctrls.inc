@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addGlobalType('(bvNone, bvLowered, bvRaised, bvSpace)', 'TGraphicsBevelCut');
 addGlobalType('TGraphicsBevelCut', 'TBevelCut');
 addGlobalType('TBevelCut', 'TPanelBevel');
@@ -61,3 +63,4 @@ addClassVar('TShape', 'Shape', 'TShapeType', @_LapeShape_Shape_Read, @_LapeShape
 addGlobalFunc('procedure TShape.Init(TheOwner: TComponent); override', @_LapeShape_Init);
 // addGlobalFunc('procedure TShape.Free; constref', @_LapeShape_Free);
 
+popSection();

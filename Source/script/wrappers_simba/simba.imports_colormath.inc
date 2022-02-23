@@ -1,4 +1,5 @@
-FSection := 'Color Math';
+pushSection('Color Math');
+
 addGlobalFunc('procedure ColorToRGB(Color: Int32; var r, g, b: Int32)', @_LapeColorToRGB);
 addGlobalFunc('function RGBtoColor(r, g, b: Int32): TColor', @_LapeRGBtoColor);
 addGlobalFunc('procedure ColorToHSL(Color: Int32; var h, s, l: Extended)', @_LapeColorToHSL);
@@ -21,3 +22,4 @@ addGlobalFunc('procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended
 addGlobalFunc('procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended)', @_LapeHSLToCIELab);
 addGlobalFunc('function ColorToGray(const Color: Int32): TColor', @_LapeColorToGray);
 
+popSection();

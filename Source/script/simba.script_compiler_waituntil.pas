@@ -60,7 +60,7 @@ begin
   if isEmpty(FParams[0]) or (FParams[0].resType() = nil) or (not (FParams[0].resType().BaseType in LapeBoolTypes)) then
     LapeException('Condition parameter is invalid: Boolean expression expected.', DocPos);
   if isEmpty(FParams[1]) or (FParams[1].resType() = nil) or (not (FParams[1].resType().BaseType in LapeIntegerTypes)) then
-    LapeException('Interval parameter is invalid: nteger expected.', DocPos);
+    LapeException('Interval parameter is invalid: Integer expected.', DocPos);
   if isEmpty(FParams[2]) or (FParams[2].resType() = nil) or (not (FParams[2].resType().BaseType in LapeIntegerTypes)) then
     LapeException('Timeout parameter is invalid: Integer expected.', DocPos);
 

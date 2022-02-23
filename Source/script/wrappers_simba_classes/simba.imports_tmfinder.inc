@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addClass('TMFinder');
 addClassVar('TMFinder', 'WarnOnly', 'boolean', @_LapeMFinder_WarnOnly_Read, @_LapeMFinder_WarnOnly_Write);
 addGlobalFunc('procedure TMFinder.DefaultOperations(var xs,ys,xe,ye : integer); constref', @_LapeMFinder_DefaultOperations);
@@ -35,4 +37,6 @@ addGlobalFunc('procedure TMFinder.SetToleranceSpeed3Modifier(modifier: Extended)
 addGlobalFunc('function TMFinder.GetToleranceSpeed3Modifier: Extended; constref', @_LapeMFinder_GetToleranceSpeed3Modifier);
 addGlobalFunc('procedure TMFinder.Init(aClient: TObject)', @_LapeMFinder_Init);
 //addGlobalFunc('procedure TMFinder.Free; constref', @_LapeMFinder_Free);
+
+popSection();
 

@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addGlobalType('(caNone, caHide, caFree, caMinimize)', 'TCloseAction');
 addGlobalType('procedure(Sender: TObject; var CloseAction: TCloseAction) of object', 'TCloseEvent', FFI_DEFAULT_ABI);
 addGlobalType('procedure(Sender : TObject; var CanClose: Boolean) of object', 'TCloseQueryEvent', FFI_DEFAULT_ABI);
@@ -135,3 +137,5 @@ addClassVar('TForm', 'Position', 'TPosition', @_LapeForm_Position_Read, @_LapeFo
 addClass('TScrollBox', 'TScrollingWinControl');
 addGlobalFunc('procedure TScrollBox.Init(AOwner: TComponent); override', @_LapeScrollBox_Init);
 //addGlobalFunc('procedure TScrollBox.Free; constref', @_LapeScrollBox_Free);
+
+popSection();

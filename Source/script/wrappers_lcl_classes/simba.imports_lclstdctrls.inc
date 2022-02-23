@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addGlobalType('(ssNone, ssHorizontal, ssVertical, ssBoth,ssAutoHorizontal, ssAutoVertical, ssAutoBoth)', 'TScrollStyle');
 addGlobalType('(scLineUp,scLineDown, scPageUp,scPageDown,scPosition, scTrack,scTop,scBottom,scEndScroll)', 'TScrollCode');
 addGlobalType('procedure(Sender: TObject; ScrollCode: TScrollCode; var ScrollPos: Integer) of object', 'TScrollEvent', FFI_DEFAULT_ABI);
@@ -226,3 +228,4 @@ addClass('TRadioButton', 'TCustomCheckBox');
 addGlobalFunc('procedure TRadioButton.Init(AOwner: TComponent); override', @_LapeRadioButton_Init);
 // addGlobalFunc('procedure TRadioButton.Free; constref', @_LapeRadioButton_Free);
 
+popSection();

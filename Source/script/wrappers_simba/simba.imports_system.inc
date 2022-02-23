@@ -1,3 +1,5 @@
+pushSection('System');
+
 addBaseDefine('SIMBA' + Format('%d', [SIMBA_VERSION]));
 addBaseDefine('SIMBAMAJOR' + Format('%d', [SIMBA_MAJOR]));
 addBaseDefine('FPC' + Format('%d', [FPC_FULLVERSION]));
@@ -91,7 +93,7 @@ addDelayedCode(
 // hide from codeinsight
 // native wrappers are for speed
 
-FSection := '';
+popSection();
 
 addGlobalFunc('procedure _Write(S: String); override', @_LapeWrite);
 addGlobalFunc('procedure _WriteLn; override', @_LapeWriteLn);

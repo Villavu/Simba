@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addGlobalType('procedure(Sender: TObject) of object', 'TNotifyEvent', FFI_DEFAULT_ABI);
 addGlobalType('^TNotifyEvent', 'PNotifyEvent');
 addGlobalType('UInt32', 'THandle');
@@ -177,4 +179,6 @@ addClassVar('TStringList', 'OnChanging', 'TNotifyEvent', @_LapeStringList_OnChan
 addClassVar('TStringList', 'OwnsObjects', 'boolean', @_LapeStringList_OwnsObjects_Read, @_LapeStringList_OwnsObjects_Write);
 addGlobalFunc('procedure TStringList.Init; override', @_LapeStringList_Init);
 //addGlobalFunc('procedure TStringList.Free; constref', @_LapeStringList_Free);
+
+popSection();
 
