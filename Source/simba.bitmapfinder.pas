@@ -32,13 +32,14 @@ uses
 
 function TFindBitmapBuffer.Find(Bitmap: TMufasaBitmap; out X, Y: Integer; Tolerance: Integer): Boolean;
 var
-  BitmapWidth, BitmapHeight, TransparentColor: Integer;
+  BitmapWidth, BitmapHeight: Integer;
   BufferInc: Integer;
   LoopX, LoopY: Integer;
 
   function Match(const BufferPtr, BitmapPtr: TRGB32): Boolean; inline;
   begin
-    Result := (TransparentColor > -1) and (BitmapPtr.AsIntegerNoAlpha = TransparentColor) or (RGBDistance(BufferPtr, BitmapPtr) <= Tolerance);
+    Result := (Bitmap.TransparentColorSet and BitmapPtr.EqualsIgnoreAlpha(Bitmap.TransparentRGB)) or
+              (RGBDistance(BufferPtr, BitmapPtr) <= Tolerance);
   end;
 
   function Hit(BufferPtr: PRGB32): Boolean;
@@ -70,11 +71,6 @@ begin
     Exit(False);
 
   Tolerance := Sqr(Tolerance);
-
-  if Bitmap.TransparentColorSet then
-    TransparentColor := RGBToBGR(Bitmap.TransparentColor).AsIntegerNoAlpha
-  else
-    TransparentColor := -1;
 
   BufferInc := ((X2 - X1) + 1) - Bitmap.Width;
   PtrInc := PtrInc + (Bitmap.Width - 1);
@@ -111,14 +107,15 @@ end;
 
 function TFindBitmapBuffer.FindAll(Bitmap: TMufasaBitmap; out Points: TPointArray; Tolerance: Integer): Boolean;
 var
-  BitmapWidth, BitmapHeight, TransparentColor: Integer;
+  BitmapWidth, BitmapHeight: Integer;
   BufferInc: Integer;
   Matrix: TIntegerMatrix;
   LoopX, LoopY: Integer;
 
   function Match(const BufferPtr, BitmapPtr: TRGB32): Boolean; inline;
   begin
-    Result := (TransparentColor > -1) and (BitmapPtr.AsIntegerNoAlpha = TransparentColor) or (RGBDistance(BufferPtr, BitmapPtr) <= Tolerance);
+    Result := (Bitmap.TransparentColorSet and BitmapPtr.EqualsIgnoreAlpha(Bitmap.TransparentRGB)) or
+              (RGBDistance(BufferPtr, BitmapPtr) <= Tolerance);
   end;
 
   function Hit(BufferPtr: PRGB32): Boolean;
@@ -154,11 +151,6 @@ begin
   PointBuffer.Init(32);
   Tolerance := Sqr(Tolerance);
 
-  if Bitmap.TransparentColorSet then
-    TransparentColor := RGBToBGR(Bitmap.TransparentColor).AsIntegerNoAlpha
-  else
-    TransparentColor := -1;
-
   Matrix.SetSize((X2-X1)+1, (Y2-Y1)+1);
 
   BufferInc := ((X2 - X1) + 1) - Bitmap.Width;
@@ -176,7 +168,7 @@ begin
     begin
       if Hit(Ptr) then
       begin
-        Matrix.Fill(TBox.Create(LoopX, LoopY, LoopX + Bitmap.Width, LoopY + Bitmap.Height), 1);
+        Matrix.Fill(Box(LoopX, LoopY, LoopX + Bitmap.Width, LoopY + Bitmap.Height), 1);
         PointBuffer.Add(TPoint.Create(LoopX, LoopY));
       end;
 

@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addClass('TMFiles');
 //addClassVar('TMFiles', 'OpenFileEvent', 'TOpenFileEvent', @_LapeMFiles_OpenFileEvent_Read, @_LapeMFiles_OpenFileEvent_Write);
 //addClassVar('TMFiles', 'WriteFileEvent', 'TWriteFileEvent', @_LapeMFiles_WriteFileEvent_Read, @_LapeMFiles_WriteFileEvent_Write);
@@ -19,4 +21,6 @@ addGlobalFunc('function TMFiles.SetFileCharPointer(FileNum, cChars, Origin: Inte
 addGlobalFunc('function TMFiles.FilePointerPos(FileNum: Integer): Integer; constref', @_LapeMFiles_FilePointerPos);
 addGlobalFunc('procedure TMFiles.Init(Owner : TObject)', @_LapeMFiles_Init);
 //addGlobalFunc('procedure TMFiles.Free; constref', @_LapeMFiles_Free);
+
+popSection();
 

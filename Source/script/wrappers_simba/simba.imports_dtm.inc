@@ -1,4 +1,5 @@
-FSection := 'DTM';
+pushSection('DTM');
+
 addGlobalFunc('procedure SetDTMName(DTM: Int32; Name: String)', @_LapeSetDTMName);
 addGlobalFunc('function DTMFromString(S: String): Int32', @_LapeDTMFromString);
 addGlobalFunc('procedure FreeDTM(DTM: Int32)', @_LapeFreeDTM);
@@ -10,3 +11,4 @@ addGlobalFunc('function MDTMToSDTM(DTM: TMDTM): TSDTM', @_LapeMDTMToSDTM);
 addGlobalFunc('function SDTMToMDTM(DTM: TSDTM): TMDTM', @_LapeSDTMToMDTM);
 addGlobalFunc('function CreateDTMPoint(x,y,c,t,asz: Int32; bp: Boolean): TMDTMPoint', @_LapeCreateDTMPoint);
 
+popSection();

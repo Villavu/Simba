@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addClass('TXmlNode', 'TObject');
 addClass('TXMLNodeList', 'TObject');
 addGlobalFunc('procedure TXmlNode.Init()', @_LapeXmlNode_Init);
@@ -44,4 +46,6 @@ addClassVar('TXml', 'Root', 'TXMLNode', @_LapeVerySimpleXml_Root_Read, @_LapeVer
 addClassVar('TXml', 'Header', 'TXMLNode', @_LapeVerySimpleXml_Header_Read, @_LapeVerySimpleXml_Header_Write);
 addClassVar('TXml', 'Ident', 'string', @_LapeVerySimpleXml_Ident_Read, @_LapeVerySimpleXml_Ident_Write);
 //addGlobalFunc('procedure TXml.Free()', @_LapeVerySimpleXml_Free);
+
+popSection();
 

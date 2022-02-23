@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addClass('TMFonts');
 addGlobalFunc('procedure TMFonts.Init(Owner : TObject)', @_LapeMFonts_Init);
 addGlobalFunc('function TMFonts.GetFont(const Name: String): TOcrData; constref', @_LapeMFonts_GetFont);
@@ -8,4 +10,6 @@ addGlobalFunc('function TMFonts.Copy(Owner : TObject): TMFonts; constref', @_Lap
 addGlobalFunc('function TMFonts.Count: integer; constref', @_LapeMFonts_Count);
 addClassVar('TMFonts', 'Path', 'string', @_LapeMFonts_Path_Read, @_LapeMFonts_Path_Write);
 //addGlobalFunc('procedure TMFonts.Free; constref', @_LapeMFonts_Free);
+
+popSection();
 

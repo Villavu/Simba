@@ -1,4 +1,5 @@
-FSection := 'Other';
+pushSection('Other');
+
 addGlobalFunc('procedure PlaySound(Sound: String)', @_LapePlaySound);
 addGlobalFunc('procedure StopSound', @_LapeStopSound);
 addGlobalFunc('procedure SetSupressExceptions(Supress: Boolean)', @_LapeSetSupressExceptions);
@@ -20,4 +21,6 @@ addGlobalFunc('procedure ClearDebugImg', @_LapeClearDebugImg);
 addGlobalFunc('function GetSimbaPID: PtrUInt', @_LapeGetSimbaPID);
 addGlobalFunc('function GetSimbaTargetPID: PtrUInt', @_LapeGetSimbaTargetPID);
 addGlobalFunc('function GetSimbaTargetWindow: TWindowHandle', @_LapeGetSimbaTargetWindow);
+
+popSection();
 

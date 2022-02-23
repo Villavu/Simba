@@ -1,4 +1,5 @@
-FSection := 'String';
+pushSection('String');
+
 addGlobalType('(Numbers, Letters, Others)', 'StrExtr');
 addGlobalFunc('function CompressString(S: String): String', @_LapeCompressString);
 addGlobalFunc('function DecompressString(S: String): String', @_LapeDecompressString);
@@ -21,4 +22,6 @@ addGlobalFunc('function IsStrInArr(S: String; const UsePos: Boolean; const Arr: 
 addGlobalFunc('function PosMulti(const SubStr: String; Text: String): TIntegerArray', @_LapePosMulti);
 addGlobalFunc('function UTF8Decode(constref S: AnsiString): WideString', @_LapeUTF8Decode);
 addGlobalFunc('function UTF8Encode(constref S: WideString): AnsiString', @_LapeUTF8Encode);
+
+popSection();
 

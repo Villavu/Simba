@@ -1,4 +1,5 @@
-FSection := 'Bitmap';
+pushSection('Bitmap');
+
 addGlobalFunc('function CreateBitmapString(bmp: Int32): string', @_LapeCreateBitmapString);
 addGlobalFunc('function GetMufasaBitmap(bmp: Int32): TMufasaBitmap', @_LapeGetMufasaBitmap);
 addGlobalFunc('function CreateBitmap(w,h: Int32): Int32', @_LapeCreateBitmap);
@@ -16,7 +17,7 @@ addGlobalFunc('procedure ResetPersistentMemoryBitmap(bmp: Int32)', @_LapeResetPe
 addGlobalFunc('procedure SetBitmapName(Bmp: Int32; name: string)', @_LapeSetBitmapName);
 addGlobalFunc('function CreateMirroredBitmap(Bmp: Int32): Int32', @_LapeCreateMirroredBitmap);
 addGlobalFunc('function CreateMirroredBitmapEx(Bmp: Int32; MirrorStyle: TBmpMirrorStyle): Int32', @_LapeCreateMirroredBitmapEx);
-addGlobalFunc('function FastGetPixel(bmp,x,y: Int32): LongWord', @_LapeFastGetPixel);
+addGlobalFunc('function FastGetPixel(bmp,x,y: Int32): Integer', @_LapeFastGetPixel);
 addGlobalFunc('function FastGetPixels(bmp: Int32; TPA: TPointArray): TIntegerArray', @_LapeFastGetPixels);
 addGlobalFunc('function GetBitmapAreaColors(bmp,xs, ys, xe, ye: Int32): T2DIntegerArray', @_LapeGetBitmapAreaColors);
 addGlobalFunc('function FindColorsBitmap(bmp: Int32; var points: TPointArray; const color: Int32): boolean', @_LapeFindColorsBitmap);
@@ -58,4 +59,6 @@ addGlobalFunc('procedure DrawMatrixBitmap(const bmp: Int32; const Matrix: T2DInt
 addGlobalFunc('procedure CopyClientToBitmap(bmp, xs, ys, xe, ye: Int32)', @_LapeCopyClientToBitmap);
 addGlobalFunc('function BitmapFromClient(const xs, ys, xe, ye: Int32): Int32', @_LapeBitmapFromClient);
 addGlobalFunc('function BitmapFromText(const text, font: String): Int32', @_LapeBitmapFromText);
+
+popSection();
 

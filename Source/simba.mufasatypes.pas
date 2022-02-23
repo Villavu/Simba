@@ -18,20 +18,27 @@ type
     B, G, R : byte;
   end;
 
-  PPRGB32 = ^PRGB32;
+  PPRGB32 = ^PRGB32; // Pointer to PRGB32
   PRGB32 = ^TRGB32;
   TRGB32 = packed record
-    B, G, R, A: Byte;
+    function ToString: String;
+
+    function Equals(const Other: TRGB32): Boolean; inline;
+    function EqualsIgnoreAlpha(const Other: TRGB32): Boolean; inline;
+
+    case Byte of
+      0: (B, G, R, A: Byte);
+      1: (AsInteger: Integer);
   end;
+
+  PRGB32Array = ^TRGB32Array;
+  TRGB32Array = array of TRGB32;  // array of TRGB32
+
+  PPRGB32Array = ^TPRGB32Array;
+  TPRGB32Array = array of PRGB32; // array of PRGB32
 
   TARGB32 = packed record A, R, G, B: Byte; end;
   PARGB32 = ^TARGB32;
-
-  PRGB32Array = ^TRGB32Array;
-  TRGB32Array = array of TRGB32;
-
-  PPRGB32Array = ^TPRGB32Array;
-  TPRGB32Array = array of PRGB32; //array of Pointers
 
   THSL = packed record
     H, S, L: extended;
@@ -434,6 +441,21 @@ var
 
 
 implementation
+
+function TRGB32.ToString: String;
+begin
+  Result := '[' + IntToStr(B) + ',' + IntToStr(G) + ',' + IntToStr(R) + ',' + IntToStr(A) + ']';
+end;
+
+function TRGB32.Equals(const Other: TRGB32): Boolean;
+begin
+  Result := AsInteger = Other.AsInteger;
+end;
+
+function TRGB32.EqualsIgnoreAlpha(const Other: TRGB32): Boolean;
+begin
+  Result := (AsInteger and $FFFFFF) = (Other.AsInteger and $FFFFFF);
+end;
 
 operator =(Left, Right: TRetData): Boolean;
 begin

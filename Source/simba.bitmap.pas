@@ -149,6 +149,7 @@ type
     procedure SetTransparentColor(Col: TColor);
     function GetTransparentColor: TColor;
     property TransparentColorSet: Boolean read FTransparentSet;
+    property TransparentRGB: TRGB32 read FTransparentColor;
     property List: TMBitmaps read FList write FList;
     procedure SetAlphaValue(const value: byte);
     constructor Create;

@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addClass('TMOCR');
 addGlobalFunc('procedure TMOCR.Init(Owner: TObject)', @_LapeMOCR_Init);
 addGlobalFunc('function TMOCR.GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing, color, tol, len: integer; font: string): string; constref', @_LapeMOCR_GetTextAt);
@@ -9,4 +11,6 @@ addGlobalFunc('function TMOCR.TextToFontBitmap(Text, font: String): TMufasaBitma
 addGlobalFunc('function TMOCR.TextToMask(Text, font: String): TMask; constref', @_LapeMOCR_TextToMask);
 //addGlobalFunc('procedure TMOCR.Free; constref', @_LapeMOCR_Free);
 addClassVar('TMOCR', 'Fonts', 'TMFonts', @_LapeMOCR_Fonts_Read);
+
+popSection();
 

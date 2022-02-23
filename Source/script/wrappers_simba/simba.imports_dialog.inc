@@ -1,4 +1,5 @@
-FSection := 'Dialogs';
+pushSection('Dialogs');
+
 addGlobalVar(mrNone, 'mrNone').isConstant := True;
 addGlobalVar(mrOK, 'mrOK').isConstant := True;
 addGlobalVar(mrCancel, 'mrCancel').isConstant := True;
@@ -21,3 +22,4 @@ addGlobalFunc('procedure DTMEditor(Title: String; out DTM: String)', @_LapeDTMEd
 addGlobalFunc('procedure ACAGUI(Title: String; out CTS, Color, Tolerance: Integer; out Hue, Sat: Extended)', @_LapeACA);
 addGlobalFunc('procedure ACA(Colors: TIntegerArray; CTS: Integer; out Color, Tolerance: Integer; out Hue, Sat: Extended)', @_LapeACAEx);
 
+popSection();

@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addGlobalType('(pbHorizontal, pbVertical, pbRightToLeft, pbTopDown)', 'TProgressBarOrientation');
 addGlobalType('(pbstNormal, pbstMarquee)', 'TProgressBarStyle');
 addGlobalType('(trHorizontal, trVertical)', 'TTrackBarOrientation');
@@ -157,3 +159,5 @@ addClassVar('TStatusBar', 'SizeGrip', 'Boolean', @_LapeStatusBar_SizeGrip_Read, 
 addClassVar('TStatusBar', 'OnHint', 'TNotifyEvent', @_LapeStatusBar_OnHint_Read, @_LapeStatusBar_OnHint_Write);
 addGlobalFunc('procedure TStatusBar.Init(TheOwner: TComponent); override', @_LapeStatusBar_Init);
 //addGlobalFunc('procedure TStatusBar.Free; constref', @_LapeStatusBar_Free);
+
+popSection();

@@ -1,4 +1,5 @@
-FSection := 'Web';
+pushSection('Web');
+
 addGlobalFunc('procedure OpenWebPage(URL: String)', @_LapeOpenWebPage);
 addGlobalFunc('function GetPage(URL: String): String', @_LapeGetPage);
 addGlobalFunc('function InitializeHTTPClient(HandleCookies: Boolean = True): Int32', @_LapeInitializeHTTPClient);
@@ -31,4 +32,6 @@ addGlobalFunc('function AcceptSocket(Client: Int32): Int32', @_LapeAcceptSocket)
 addGlobalFunc('procedure SocketInfo(Client: Int32; out IP, Port: string)', @_LapeSocketInfo);
 addGlobalFunc('function CreateSocket: Int32', @_LapeCreateSocket);
 addGlobalFunc('procedure FreeSocket(Client: Int32)', @_LapeFreeSocket);
+
+popSection();
 

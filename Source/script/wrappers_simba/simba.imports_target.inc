@@ -1,4 +1,4 @@
-FSection := 'Target';
+pushSection('Target');
 
 addGlobalFunc('function SetDesktopAsClient: Integer', @_LapeSetDesktopAsClient);
 addGlobalFunc('function SetTargetWindow(Window: TWindowHandle): Integer', @_LapeSetTargetWindow);
@@ -29,3 +29,5 @@ addGlobalFunc('function AddHandlerInvalidTarget(Handler: TNotifyEvent): TNotifyE
 addGlobalFunc('procedure RemoveHandlerInvalidTarget(Handler: TNotifyEvent);', @_LapeRemoveHandlerInvalidTarget);
 addGlobalFunc('procedure SetAutoActivateClient(Value: Boolean);', @_LapeSetAutoActivateClient);
 addGlobalFunc('function GetAutoActivateClient: Boolean;', @_LapeGetAutoActivateClient);
+
+popSection();

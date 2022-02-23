@@ -1,4 +1,5 @@
-FSection := 'Finder';
+pushSection('Finder');
+
 addGlobalFunc('function FindDTM(DTM: Int32; var x, y: Int32; xs, ys, xe, ye: Int32): Boolean', @_LapeFindDTM);
 addGlobalFunc('function FindDTMs(DTM: Int32; var p: TPointArray; xs, ys, xe, ye: Int32): Boolean', @_LapeFindDTMs);
 addGlobalFunc('function FindDTMRotatedAlternating(DTM: Int32; var x, y: Int32; xs, ys, xe, ye: Int32; sAngle, eAngle, aStep: Extended; var aFound: Extended): Boolean', @_LapeFindDTMRotatedAlternating);
@@ -43,3 +44,4 @@ addGlobalFunc('function FindTextColor(Text, Font: String; Color, Tolerance: Int3
 addGlobalFunc('function FindText(Text, Font: String; X1, Y1, X2, Y2: Int32; out Bounds: TBox): Single; overload', @_LapeFindText);
 addGlobalFunc('function FindText(Text, Font: String; X1, Y1, X2, Y2: Int32; MinMatch: Single = 1): Boolean; overload', @_LapeFindTextEx);
 
+popSection();

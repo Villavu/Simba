@@ -34,7 +34,8 @@ type
     procedure InitBaseVariant; override;
     procedure InitBaseFile; override;
 
-    procedure WriteMethod(Header: String);
+    procedure WriteMethod(Header, Name: String);
+    procedure WriteType(Str, Name: String);
     procedure Write(Header: String);
   public
     procedure addBaseDefine(Define: lpString; Value: lpString = ''); override;
@@ -44,7 +45,6 @@ type
     function addGlobalType(Str: lpString; AName: lpString): TLapeType; override;
     function addGlobalType(Typ: TLapeType; AName: lpString = ''; ACopy: Boolean = True): TLapeType; override;
     function addGlobalVar(AVar: TLapeGlobalVar; AName: lpString = ''): TLapeGlobalVar; override;
-    function addGlobalVar(Typ: lpString; Value: lpString; AName: lpString): TLapeGlobalVar; override;
 
     function Dump: TStringList;
 
@@ -56,66 +56,21 @@ procedure TCompilerDump.Write(Header: String);
 var
   List: TObject;
 begin
-  if (FHashList = nil) or (FSection = '') then
+  if (FHashList = nil) or (Section = '') then
     Exit;
 
-  List := FHashList.Find(FSection);
+  List := FHashList.Find(Section);
   if (List = nil) then
-    List := FHashList[FHashList.Add(FSection, TStringList.Create())];
+    List := FHashList[FHashList.Add(FSectionStack[High(FSectionStack)], TStringList.Create())];
 
   TStringList(List).Add(Header);
 end;
 
-procedure TCompilerDump.InitBaseDefinitions;
-var
-  BaseType: ELapeBaseType;
+procedure TCompilerDump.WriteMethod(Header, Name: String);
 begin
-  FSection := 'System';
+  if (Section = 'System') and Name.StartsWith('_') then
+    Exit;
 
-  for BaseType in ELapeBaseType do
-    if (FBaseTypes[BaseType] <> nil) then
-      Write(Format('type %s = %s;', [LapeTypeToString(BaseType), LapeTypeToString(BaseType)]));
-
-  inherited InitBaseDefinitions();
-end;
-
-procedure TCompilerDump.InitBaseMath;
-begin
-  FSection := 'Math';
-
-  inherited InitBaseMath();
-end;
-
-procedure TCompilerDump.InitBaseString;
-begin
-  FSection := 'String';
-
-  inherited InitBaseString();
-end;
-
-procedure TCompilerDump.InitBaseDateTime;
-begin
-  FSection := 'Date & Time';
-
-  inherited InitBaseDateTime();
-end;
-
-procedure TCompilerDump.InitBaseVariant;
-begin
-  FSection := 'Variant';
-
-  inherited InitBaseVariant();
-end;
-
-procedure TCompilerDump.InitBaseFile;
-begin
-  FSection := 'File';
-
-  inherited InitBaseFile();
-end;
-
-procedure TCompilerDump.WriteMethod(Header: String);
-begin
   Header := Trim(Header);
   if not Header.EndsWith(';') then
     Header := Header + ';';
@@ -124,45 +79,108 @@ begin
   Write(Header);
 end;
 
+procedure TCompilerDump.WriteType(Str, Name: String);
+var
+  IsSystemSection: Boolean;
+begin
+  IsSystemSection := (Section = 'System');
+  if IsSystemSection then
+    pushSection('Types');
+
+  if not Name.StartsWith('!') then
+  begin
+    Str := 'type ' + Name + ' = ' + Str;
+    if not Str.EndsWith(';') then
+      Str := Str + ';';
+
+    Write(Str);
+  end;
+
+  if IsSystemSection then
+    popSection();
+end;
+
+procedure TCompilerDump.InitBaseDefinitions;
+var
+  BaseType: ELapeBaseType;
+begin
+  for BaseType in ELapeBaseType do
+    if (FBaseTypes[BaseType] <> nil) then
+      WriteType(LapeTypeToString(BaseType), LapeTypeToString(BaseType));
+
+  inherited InitBaseDefinitions();
+end;
+
+procedure TCompilerDump.InitBaseMath;
+begin
+  pushSection('Math');
+
+  inherited InitBaseMath();
+
+  popSection();
+end;
+
+procedure TCompilerDump.InitBaseString;
+begin
+  pushSection('String');
+
+  inherited InitBaseString();
+
+  popSection();
+end;
+
+procedure TCompilerDump.InitBaseDateTime;
+begin
+  pushSection('Date & Time');
+
+  inherited InitBaseDateTime();
+
+  popSection();
+end;
+
+procedure TCompilerDump.InitBaseVariant;
+begin
+  pushSection('Variant');
+
+  inherited InitBaseVariant();
+
+  popSection();
+end;
+
+procedure TCompilerDump.InitBaseFile;
+begin
+  pushSection('File');
+
+  inherited InitBaseFile();
+
+  popSection();
+end;
+
 function TCompilerDump.addGlobalFunc(Header: lpString; Value: Pointer): TLapeGlobalVar;
 begin
   Result := inherited addGlobalFunc(Header, Value);
-  if (Result <> nil) and Result.VarType.Name.StartsWith('_') and (FSection = 'System') then
-    Exit;
 
-  WriteMethod(Header);
+  WriteMethod(Header, Result.VarType.Name);
 end;
 
 function TCompilerDump.addGlobalType(Str: lpString; AName: lpString): TLapeType;
 begin
   Result := inherited addGlobalType(Str, AName);
 
-  if not Str.EndsWith(';') then
-    Str := Str + ';';
-
-  Write(Format('type %s = %s', [AName, Str]));
+  WriteType(Str, AName);
 end;
 
 function TCompilerDump.addGlobalType(Typ: TLapeType; AName: lpString; ACopy: Boolean): TLapeType;
 begin
   Result := inherited addGlobalType(Typ, AName, ACopy);
 
-  if (not AName.StartsWith('!')) then
-    Write(Format('type %s = %s;', [AName, Typ.Name]));
+  WriteType(Result.Name, Result.Name);
 end;
 
 function TCompilerDump.addGlobalVar(AVar: TLapeGlobalVar; AName: lpString): TLapeGlobalVar;
 begin
   Result := inherited addGlobalVar(AVar, AName);
-  if (Result <> nil) then
-    Result._DocPos.FileName := FSection;
-end;
-
-function TCompilerDump.addGlobalVar(Typ: lpString; Value: lpString; AName: lpString): TLapeGlobalVar;
-begin
-  Result := inherited addGlobalVar(Typ, Value, AName);
-  if (Result <> nil) then
-    Result._DocPos.FileName := FSection;
+  Result._DocPos.FileName := Section;
 end;
 
 function TCompilerDump.addDelayedCode(Code: lpString; AFileName: lpString; AfterCompilation: Boolean; IsGlobal: Boolean): TLapeTree_Base;
@@ -176,19 +194,18 @@ procedure TCompilerDump.addBaseDefine(Define: lpString; Value: lpString);
 begin
   inherited addBaseDefine(Define, Value);
 
-  Write(Format('{$DEFINE %s}', [Define]));
+  Write('{$DEFINE ' + Define + '}');
 end;
 
 constructor TCompilerDump.Create;
 begin
   FHashList := TFPHashObjectList.Create();
 
+  pushSection('System');
+
   inherited Create(TLapeTokenizerString.Create('begin end.', ''));
 
-  FSection := 'System';
-
   // Internal methods
-  Write('{$DEFINE Lape}');
   Write('procedure Delete(A: array; Index: Int32; Count: Int32 = Length(A)); external;');
   Write('procedure Insert(Item: Anything; A: array; Index: Int32); external;');
   Write('procedure Copy(A: array; Index: Int32 = 0; Count: Int32 = Length(A)); overload; external;');
@@ -217,27 +234,18 @@ begin
   Write('function Default(T: AnyType): AnyType; external;');
   Write('procedure Sort(var A: array); overload; external;');
   Write('procedure Sort(var A: array; CompareFunc: function(constref L, R: Anything): Int32); overload; external;');
-  Write('procedure Sort(var A: array; Weights: TIntegerArray); overload; external;');
-  Write('procedure Sort(var A: array; Weights: TExtendedArray); overload; external;');
+  Write('procedure Sort(var A: array; Weights: TIntegerArray; LowToHigh: Boolean); overload; external;');
+  Write('procedure Sort(var A: array; Weights: TExtendedArray; LowToHigh: Boolean); overload; external;');
   Write('function Sorted(const A: array): array; overload; external;');
   Write('function Sorted(const A: array; CompareFunc: function(constref L, R: Anything): Int32): array; overload; external;');
-  Write('function Sorted(const A: array; Weights: TIntegerArray): array; overload; external;');
-  Write('function Sorted(const A: array; Weights: TExtendedArray): array; overload; external;');
-
-  Write('function Unique(const A: array): array; overload; external;');
-
-  Write('procedure Reverse(var A: array); overload; external;');
-  Write('function Reversed(const A: array): array; overload; external;');
-
-  Write('function IndexOf(const Item: T; const A: array): Integer; overload; external;');
-  Write('function IndicesOf(const Item: T; const A: array): TIntegerArray; overload; external;');
-
-  // These require the SimbaScript variable which isn't created when dumping.
-  Write('const ScriptFile = "";');
-
-  FSection := 'Target';
-
-  Write('var Client: TClient;');
+  Write('function Sorted(const A: array; Weights: TIntegerArray; LowToHigh: Boolean): array; overload; external;');
+  Write('function Sorted(const A: array; Weights: TExtendedArray; LowToHigh: Boolean): array; overload; external;');
+  Write('function Unique(const A: array): array; external;');
+  Write('procedure Reverse(var A: array); external;');
+  Write('function Reversed(const A: array): array; external;');
+  Write('function IndexOf(const Item: T; const A: array): Integer; external;');
+  Write('function IndicesOf(const Item: T; const A: array): TIntegerArray; external;');
+  Write('function Contains(const Item: T; const A: array): Boolean; external;');
 end;
 
 destructor TCompilerDump.Destroy;
@@ -259,17 +267,19 @@ begin
   begin
     with TLapeGlobalVar(Decl) do
     begin
-      FSection := DocPos.FileName;
-      if (FSection = '') or (FSection[1] = '!') then
+      if (DocPos.FileName = '') or (DocPos.FileName[1] = '!') then
         Continue;
-
       if (Name = '') or (Name = 'nil') or (VarType.Name = '') or (BaseType in [ltUnknown, ltScriptMethod, ltImportedMethod]) then
         Continue;
 
+      pushSection(DocPos.FileName);
+
       if isConstant then
-        Write(Format('const %s = %s;', [Name, VarType.Name]))
+        Write('const ' + Name + ' = ' + VarType.Name + ';')
       else
-        Write(Format('var %s: %s;', [Name, VarType.Name]));
+        Write('var ' + Name + ': ' + VarType.Name + ';');
+
+      popSection();
     end;
   end;
 

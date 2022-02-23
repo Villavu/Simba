@@ -1,4 +1,5 @@
-FSection := 'Process';
+pushSection('Process');
+
 addGlobalType('type SizeUInt', 'TProcessID');
 addGlobalType('type Integer', 'TProcessExitStatus');
 addGlobalFunc('function GetScriptPID: TProcessID', @_LapeGetScriptPID);
@@ -17,3 +18,4 @@ addGlobalFunc('function RunScript(Script: String; Parameters: TStringArray; out 
 addGlobalFunc('function RunScript(Script: String; Parameters: TStringArray): TProcessID; overload', @_LapeRunScriptEx);
 addGlobalFunc('function RunScriptOutputToFile(Script: String; Parameters: TStringArray; OutputFileName: String): TProcessID', @_LapeRunScriptOutputToFile);
 
+popSection();

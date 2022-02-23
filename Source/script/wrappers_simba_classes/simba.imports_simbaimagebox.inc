@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addClass('TSimbaImageBox_Background', 'TBitmap');
 addGlobalFunc('procedure TSimbaImageBox_Background.LoadFromMufasaBitmap(Bitmap: TMufasaBitmap); constref', @_LapeSimbaImageBox_Background_LoadFromMufasaBitmap);
 addGlobalFunc('procedure TSimbaImageBox_Background.LoadFromPointer(Data: PRGB32; AWidth, AHeight: Int32); constref; ', @_LapeSimbaImageBox_Background_LoadFromPointer);
@@ -31,4 +33,6 @@ addGlobalFunc('procedure TSimbaImageBox.MoveTo(X, Y: Int32); constref', @_LapeSi
 addGlobalFunc('function TSimbaImageBox.IsVisible(X, Y: Int32): Boolean; overload; constref', @_LapeSimbaImageBox_IsVisible);
 addGlobalFunc('procedure TSimbaImageBox.Init(Owner: TComponent); override', @_LapeSimbaImageBox_Init);
 //addGlobalFunc('procedure TSimbaImageBox.Free; constref', @_LapeSimbaImageBox_Free);
+
+popSection();
 

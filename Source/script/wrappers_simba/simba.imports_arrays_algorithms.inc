@@ -1,4 +1,4 @@
-FSection := 'Arrays & Algorithms';
+pushSection('Arrays & Algorithms');
 
 addGlobalFunc('procedure RAaSTPAEx(var a: TPointArray; const w, h: Int32)', @_LapeRAaSTPAEx);
 addGlobalFunc('procedure RAaSTPA(var a: TPointArray; const Dist: Int32)', @_LapeRAaSTPA);
@@ -61,7 +61,7 @@ addGlobalFunc('function ReturnPointsNotInTPA(const TotalTPA: TPointArray; const 
 addGlobalFunc('function PointInTPA(p: TPoint; const arP: TPointArray): Boolean', @_LapePointInTPA);
 addGlobalFunc('procedure ClearDoubleTPA(var TPA: TPointArray)', @_LapeClearDoubleTPA);
 addGlobalFunc('function SameTPA(const aTPA, bTPA: TPointArray): Boolean', @_LapeSameTPA);
-addGlobalFunc('function TPAInATPA(const TPA: TPointArray; const InATPA: T2DPointArray; var Index: LongInt): Boolean', @_LapeTPAInATPA);
+addGlobalFunc('function TPAInATPA(const TPA: TPointArray; const InATPA: T2DPointArray; var Index: Integer): Boolean', @_LapeTPAInATPA);
 addGlobalFunc('procedure OffsetTPA(var TPA: TPointArray; const Offset: TPoint)', @_LapeOffsetTPA);
 addGlobalFunc('procedure OffsetATPA(var ATPA: T2DPointArray; const Offset: TPoint)', @_LapeOffsetATPA);
 addGlobalFunc('function PartitionTPA(const TPA: TPointArray; BoxWidth, BoxHeight: Int32): T2DPointArray', @_LapePartitionTPA);
@@ -78,3 +78,4 @@ addGlobalFunc('function TPAGrow(constref TPA: TPointArray; Amount: Int32): TPoin
 addGlobalFunc('function PointsInRangeOf(constref Points, Other: TPointArray; MinDist, MaxDist: Double): TPointArray; overload', @_LapePointsInRangeOf);
 addGlobalFunc('function PointsInRangeOf(constref Points, Other: TPointArray; MinDistX, MinDistY, MaxDistX, MaxDistY: Double): TPointArray; overload', @_LapePointsInRangeOfEx);
 
+popSection();

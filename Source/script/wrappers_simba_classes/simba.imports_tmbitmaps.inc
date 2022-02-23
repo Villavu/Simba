@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addClass('TMBitmaps');
 addGlobalFunc('function TMBitmaps.GetBMP(Index : integer): TMufasaBitmap; constref', @_LapeMBitmaps_GetBMP);
 addGlobalFunc('function TMBitmaps.CreateBMP(w, h: integer): Integer; constref', @_LapeMBitmaps_CreateBMP);
@@ -12,3 +14,4 @@ addGlobalFunc('procedure TMBitmaps.RemoveBMP(Number: integer); constref', @_Lape
 addGlobalFunc('procedure TMBitmaps.Init(Owner : TObject)', @_LapeMBitmaps_Init);
 //addGlobalFunc('procedure TMBitmaps.Free; constref', @_LapeMBitmaps_Free);
 
+popSection();

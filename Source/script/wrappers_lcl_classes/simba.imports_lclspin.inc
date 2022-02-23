@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addClass('TCustomFloatSpinEdit', 'TCustomEdit');
 addGlobalFunc('function TCustomFloatSpinEdit.GetLimitedValue(const AValue: Double): Double; constref', @_LapeCustomFloatSpinEdit_GetLimitedValue);
 addGlobalFunc('function TCustomFloatSpinEdit.ValueToStr(const AValue: Double): String; constref', @_LapeCustomFloatSpinEdit_ValueToStr);
@@ -27,3 +29,4 @@ addClass('TSpinEdit', 'TCustomSpinEdit');
 addGlobalFunc('procedure TSpinEdit.Init(TheOwner: TComponent); override', @_LapeSpinEdit_Init);
 // addGlobalFunc('procedure TSpinEdit.Free; constref', @_LapeSpinEdit_Free);
 
+popSection();

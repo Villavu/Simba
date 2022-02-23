@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addClass('TIOManager');
 addGlobalType('record func1, func2, func3, func4, func5, func6, func7, func8, func9, func10, func11, func12, func13, func14, func15, func16: Pointer; end', 'TTarget_Exported');
 addGlobalFunc('function TIOManager.SetTarget(WindowHandle: PtrUInt): Integer; constref; overload', @_LapeIOManager_SetTargetHandle);
@@ -48,4 +50,6 @@ addGlobalFunc('procedure TIOManager.RemoveHandlerInvalidTarget(Handler: TNotifyE
 addClassVar('TIOManager', 'AutoActivate', 'Boolean', @_LapeIOManager_AutoActivate_Read, @_LapeIOManager_AutoActivate_Write);
 
 //addGlobalFunc('procedure TIOManager.Free; constref', @_LapeIOManager_Free);
+
+popSection();
 

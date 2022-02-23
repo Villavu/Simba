@@ -1,4 +1,4 @@
-FSection := 'Matrix';
+pushSection('Matrix');
 
 addGlobalType('array of TSingleArray', 'TSingleMatrix');
 addGlobalType('array of TIntegerArray', 'TIntegerMatrix');
@@ -65,4 +65,6 @@ addGlobalFunc('function TDoubleMatrix.Height: Integer; constref', @_LapeDoubleMa
 addGlobalFunc('procedure TDoubleMatrix.SetSize(Width, Height: Integer); constref', @_LapeDoubleMatrix_SetSize);
 addGlobalFunc('function TDoubleMatrix.Area: Integer;', @_LapeDoubleMatrix_Area);
 addGlobalFunc('function TDoubleMatrix.Size(out Width, Height: Integer): Boolean;', @_LapeDoubleMatrix_Size);
+
+popSection();
 
