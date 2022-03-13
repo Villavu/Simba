@@ -140,17 +140,15 @@ uses
 
 procedure TSimbaImageBox_Background.LoadFromFile(const Filename: string);
 var
-  Picture: TPicture;
+  Bitmap: TMufasaBitmap;
 begin
-  Picture := TPicture.Create();
+  Bitmap := TMufasaBitmap.Create();
+  Bitmap.LoadFromFile(FileName);
 
-  try
-    Picture.LoadFromFile(FileName);
+  LoadFromRawImage(Bitmap.ToRawImage(), True);
 
-    Self.LoadFromRawImage(Picture.Bitmap.RawImage, False);
-  finally
-    Picture.Free();
-  end;
+  Bitmap.Data := nil;
+  Bitmap.Free();
 end;
 
 procedure TSimbaImageBox_Background.LoadFromMufasaBitmap(Bitmap: TMufasaBitmap);
