@@ -10,8 +10,8 @@ unit simba.outputform;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, SynEdit, Menus, syncobjs, pipes,
+  classes, sysutils, forms, controls, graphics, dialogs,
+  extctrls, synedit, syneditmiscclasses, menus, syncobjs,
   simba.settings;
 
 type
@@ -26,6 +26,7 @@ type
     MenuItemDelete: TMenuItem;
     Timer: TTimer;
 
+    procedure DoEditorSpecialLineMarkup(Sender: TObject; Line: integer; var Special: boolean; Markup: TSynSelectedColor);
     procedure MenuItemCopyClick(Sender: TObject);
     procedure MenuItemCutClick(Sender: TObject);
     procedure MenuItemDeleteClick(Sender: TObject);
@@ -36,14 +37,18 @@ type
     FLock: TCriticalSection;
     FStrings: TStringList;
 
+    function IsMagic(const S: String): Boolean;
+    function IsClearMagic(const S: String): Boolean;
+    function IsErrorMessage(var S: String): Boolean;
+    function IsSuccessMessage(var S: String): Boolean;
+    function IsHintMessage(var S: String): Boolean;
+
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
   public
-    procedure Clear;
-
-    function Listen(Pipe: TInputPipeStream): TThread;
-
     procedure Add(const S: String); overload;
     procedure Add(const Strings: TStrings); overload;
+
+    function AddRaw(const Data: String): String;
 
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -52,110 +57,73 @@ type
 var
   SimbaOutputForm: TSimbaOutputForm;
 
+procedure DebugLnClear;
+procedure DebugLnSuccess(Msg: String); overload;
+procedure DebugLnSuccess(Msg: String; Args: array of const); overload;
+procedure DebugLnError(Msg: String); overload;
+procedure DebugLnError(Msg: String; Args: array of const); overload;
+procedure DebugLnHint(Msg: String); overload;
+procedure DebugLnHint(Msg: String; Args: array of const); overload;
+
 implementation
 
 {$R *.lfm}
 
 uses
   lazloggerbase,
-  simba.fonthelpers;
+  simba.scriptthread, simba.fonthelpers;
 
-type
-  TListenerThread = class(TThread)
-  protected
-    FInputPipe: TInputPipeStream;
+const
+  OUTPUT_SPECIAL = #0#0;
 
-    procedure Execute; override;
-  public
-    constructor Create(InputPipe: TInputPipeStream); reintroduce;
-    destructor Destroy; override;
-  end;
+  OUTPUT_CLEAR   = OUTPUT_SPECIAL + 'CLEAR';
+  OUTPUT_ERROR   = OUTPUT_SPECIAL + 'ERROR';
+  OUTPUT_SUCCESS = OUTPUT_SPECIAL + 'SUCCESS';
+  OUTPUT_HINT    = OUTPUT_SPECIAL + 'HINT';
 
-procedure TListenerThread.Execute;
-
-  function Process(const Data: String): String;
-  var
-    I: Int32;
-    Lines: TStringArray;
-  begin
-    Lines := Data.Split([LineEnding], TStringSplitOptions.ExcludeLastEmpty);
-
-    with SimbaOutputForm do
-    begin
-      FLock.Enter();
-
-      try
-        if Data.EndsWith(LineEnding) then
-        begin
-          for I := 0 to High(Lines) do
-            FStrings.Add(Lines[I]);
-
-          Result := '';
-        end else
-        begin
-          // Pipe buffer is full! Carry over last line.
-          for I := 0 to High(Lines) - 1 do
-            FStrings.Add(Lines[I]);
-
-          Result := Lines[High(Lines)];
-        end;
-      finally
-        FLock.Leave();
-      end;
-    end;
-  end;
-
-var
-  Buffer, Remaining: String;
-  Count: Int32;
+procedure DebugLnClear;
 begin
-  Remaining := '';
-
-  SetLength(Buffer, 1024);
-
-  while (not Terminated) or (FInputPipe.NumBytesAvailable > 0) do
-  begin
-    while (FInputPipe.NumBytesAvailable > 0) do
-    begin
-      Count := FInputPipe.Read(Buffer[1], Length(Buffer));
-      if (Count = 0) then
-        Break;
-      if (Count = Length(Buffer)) then
-        SetLength(Buffer, Round(Length(Buffer) * 1.5));
-
-      Remaining := Process(Remaining + Copy(Buffer, 1, Count));
-    end;
-
-    Sleep(500);
-  end;
-
-  if (Remaining <> '') then
-    with SimbaOutputForm do
-    begin
-      FLock.Enter();
-      try
-        FStrings.Add(Remaining);
-      finally
-        FLock.Leave();
-      end;
-    end;
+  if (SimbaScriptThread <> nil) and (SimbaScriptThread.Script.SimbaCommunication <> nil) then
+    DebugLn(OUTPUT_CLEAR);
 end;
 
-constructor TListenerThread.Create(InputPipe: TInputPipeStream);
+procedure DebugLnSuccess(Msg: String);
 begin
-  inherited Create(False);
-
-  FreeOnTerminate := False;
-
-  FInputPipe := InputPipe;
+  if (SimbaScriptThread <> nil) and (SimbaScriptThread.Script.SimbaCommunication <> nil) then
+    DebugLn(OUTPUT_SUCCESS + Msg)
+  else
+    DebugLn(Msg);
 end;
 
-destructor TListenerThread.Destroy;
+procedure DebugLnSuccess(Msg: String; Args: array of const);
 begin
-  Terminate();
-  WaitFor();
+  DebugLnSuccess(Format(Msg, Args));
+end;
 
-  inherited Destroy();
+procedure DebugLnError(Msg: String);
+begin
+  if (SimbaScriptThread <> nil) and (SimbaScriptThread.Script.SimbaCommunication <> nil) then
+    DebugLn(OUTPUT_ERROR + Msg)
+  else
+    DebugLn(Msg);
+end;
+
+procedure DebugLnError(Msg: String; Args: array of const);
+begin
+  DebugLnError(Format(Msg, Args));
+end;
+
+procedure DebugLnHint(Msg: String);
+begin
+  if (SimbaScriptThread <> nil) and (SimbaScriptThread.Script.SimbaCommunication <> nil) then
+    DebugLn(OUTPUT_HINT + Msg)
+  else
+    DebugLn(Msg);
+end;
+
+procedure DebugLnHint(Msg: String; Args: array of const);
+begin
+  DebugLnHint(Format(Msg, Args));
 end;
 
 procedure TSimbaOutputForm.Add(const S: String);
@@ -188,6 +156,38 @@ begin
   end;
 end;
 
+function TSimbaOutputForm.AddRaw(const Data: String): String;
+var
+  I: Integer;
+  Lines: TStringArray;
+begin
+  Lines := Data.Split([LineEnding], TStringSplitOptions.ExcludeLastEmpty);
+
+  with SimbaOutputForm do
+  begin
+    FLock.Enter();
+
+    try
+      if Data.EndsWith(LineEnding) then
+      begin
+        for I := 0 to High(Lines) do
+          FStrings.Add(Lines[I]);
+
+        Result := '';
+      end else
+      begin
+        // Pipe buffer is full! Carry over last line.
+        for I := 0 to High(Lines) - 1 do
+          FStrings.Add(Lines[I]);
+
+        Result := Lines[High(Lines)];
+      end;
+    finally
+      FLock.Leave();
+    end;
+  end;
+end;
+
 procedure TSimbaOutputForm.MenuItemCutClick(Sender: TObject);
 begin
   Editor.CutToClipboard();
@@ -211,31 +211,90 @@ end;
 procedure TSimbaOutputForm.TimerExecute(Sender: TObject);
 var
   Scroll: Boolean;
-  I: Int32;
+  I, StartIndex: Int32;
+  Line: String;
 begin
   FLock.Enter();
 
   try
     if (FStrings.Count > 0) then
     begin
+      StartIndex := -1;
+      for I := 0 to FStrings.Count - 1 do
+        if IsMagic(FStrings[I]) and IsClearMagic(FStrings[I]) then
+        begin
+          StartIndex := I;
+
+          Break;
+        end;
+
+      if (StartIndex > -1) then
+        Editor.Clear();
+
       Editor.BeginUpdate(False);
 
       // auto scroll if already scrolled to bottom.
       Scroll := (Editor.Lines.Count < Editor.LinesInWindow) or ((Editor.Lines.Count + 1) = (Editor.TopLine + Editor.LinesInWindow));
-      for I := 0 to FStrings.Count - 1 do
-        Editor.Lines.Add(FStrings[I]);
+      for I := StartIndex + 1 to FStrings.Count - 1 do
+      begin
+        Line := FStrings[I];
+
+        if IsMagic(Line) then
+        begin
+          if IsErrorMessage(Line) then
+            Editor.Lines.AddObject(Line, TObject(PtrUInt($0000A5)))
+          else
+          if IsSuccessMessage(Line) then
+            Editor.Lines.AddObject(Line, TObject(PtrUInt($228B22)))
+          else
+          if IsHintMessage(Line) then
+            Editor.Lines.AddObject(Line, TObject(PtrUInt($00BFFF)))
+        end else
+          Editor.Lines.Add(Line);
+      end;
 
       if Scroll then
         Editor.TopLine := Editor.Lines.Count;
 
-      FStrings.Clear();
-
       Editor.EndUpdate();
       Editor.Invalidate();
+
+      FStrings.Clear();
     end;
   finally
     FLock.Leave();
   end;
+end;
+
+function TSimbaOutputForm.IsMagic(const S: String): Boolean;
+begin
+  Result := (Length(S) >= 2) and (S[1] = #0) and (S[2] = #0);
+end;
+
+function TSimbaOutputForm.IsClearMagic(const S: String): Boolean;
+begin
+  Result := (S = OUTPUT_CLEAR);
+end;
+
+function TSimbaOutputForm.IsErrorMessage(var S: String): Boolean;
+begin
+  Result := S.StartsWith(OUTPUT_ERROR);
+  if Result then
+    S := Copy(S, Length(OUTPUT_ERROR) + 1);
+end;
+
+function TSimbaOutputForm.IsSuccessMessage(var S: String): Boolean;
+begin
+  Result := S.StartsWith(OUTPUT_SUCCESS);
+  if Result then
+    S := Copy(S, Length(OUTPUT_SUCCESS) + 1);
+end;
+
+function TSimbaOutputForm.IsHintMessage(var S: String): Boolean;
+begin
+  Result := S.StartsWith(OUTPUT_HINT);
+  if Result then
+    S := Copy(S, Length(OUTPUT_HINT) + 1);
 end;
 
 procedure TSimbaOutputForm.SimbaSettingChanged(Setting: TSimbaSetting);
@@ -263,22 +322,16 @@ begin
   Editor.CopyToClipboard();
 end;
 
-procedure TSimbaOutputForm.Clear;
+procedure TSimbaOutputForm.DoEditorSpecialLineMarkup(Sender: TObject; Line: integer; var Special: boolean; Markup: TSynSelectedColor);
 begin
-  FLock.Enter();
+  Special := Editor.Lines.Objects[Line-1] <> nil;
 
-  try
-    FStrings.Clear();
-  finally
-    FLock.Leave();
+  if Special then
+  begin
+    Markup.BackAlpha  := 128;
+    Markup.Background := PtrUInt(Editor.Lines.Objects[Line-1]);
+    Markup.Foreground := clNone;
   end;
-
-  Editor.Clear();
-end;
-
-function TSimbaOutputForm.Listen(Pipe: TInputPipeStream): TThread;
-begin
-  Result := TListenerThread.Create(Pipe);
 end;
 
 constructor TSimbaOutputForm.Create(AOwner: TComponent);

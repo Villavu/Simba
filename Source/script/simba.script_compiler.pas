@@ -52,7 +52,7 @@ uses
   lclintf, math, regexpr, strutils, lazfileutils, fileutil, clipbrd,
   blowfish, md5, sha1, hmac, forms, process, lazloggerbase,
 
-  simba.mufasatypes, simba.script, simba.scriptthread,
+  simba.mufasatypes, simba.script, simba.scriptthread, simba.outputform,
   simba.files, simba.process, simba.bitmap, simba.bitmap_helpers,
   simba.windowhandlehelpers, simba.matchtemplate, simba.tpa,
   simba.target_exported, simba.math, simba.colormath, simba.stringutil,

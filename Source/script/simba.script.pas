@@ -83,11 +83,11 @@ implementation
 
 uses
   fileutil, forms, lazloggerbase,
-  simba.files, simba.datetime, simba.script_compiler_onterminate;
+  simba.outputform, simba.files, simba.datetime, simba.script_compiler_onterminate;
 
 procedure TSimbaScript.DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
-  DebugLn(Hint);
+  DebugLnHint(Hint);
 end;
 
 function TSimbaScript.DoCompilerFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;

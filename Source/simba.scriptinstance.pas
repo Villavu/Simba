@@ -14,6 +14,13 @@ uses
   simba.script_communication, simba.debuggerform;
 
 type
+  TSimbaScriptError = record
+    Message: String;
+    FileName: String;
+    Line: Integer;
+    Column: Integer;
+  end;
+
   TSimbaScriptInstance = class(TComponent)
   protected
     FProcess: TProcess;
@@ -26,19 +33,25 @@ type
     FScriptFile: String;
     //FScriptName: String;
 
-    FListen: TThread;
+    FOutputThread: TThread;
 
     FState: ESimbaScriptState;
 
     FDebuggingForm: TSimbaDebuggerForm;
 
+    FErrorSet: Boolean;
+    FError: TSimbaScriptError;
+
     procedure Start(Args: array of String);
 
-    procedure ManageProcess;
+    procedure DoOutputThread;
+    procedure DoOutputThreadTerminated(Sender: TObject);
 
     function GetTimeRunning: UInt64;
     function GetExitCode: Int32;
     function GetPID: UInt32;
+
+    procedure SetError(Value: TSimbaScriptError);
   public
     property DebuggerForm: TSimbaDebuggerForm read FDebuggingForm;
     property Process: TProcess read FProcess;
@@ -52,6 +65,7 @@ type
     property TimeRunning: UInt64 read GetTimeRunning;
     property ExitCode: Int32 read GetExitCode;
     property PID: UInt32 read GetPID;
+    property Error: TSimbaScriptError read FError write SetError;
 
     // Start
     procedure Run(DebuggingForm: TSimbaDebuggerForm = nil);
@@ -71,13 +85,64 @@ implementation
 
 uses
   forms, lazloggerbase,
-  simba.outputform;
+  simba.outputform, simba.scripttabsform, simba.scripttab;
 
-procedure TSimbaScriptInstance.ManageProcess;
+procedure TSimbaScriptInstance.DoOutputThread;
+var
+  Buffer: array[1..4096] of Char;
+  Remaining: String;
+  Count: Integer;
 begin
-  FProcess.WaitOnExit();
-  DebugLn('TSimbaScriptProcess.ManageProcess: Process %d terminated (%d)', [FProcess.ProcessID, FProcess.ExitCode]);
-  TThread.Synchronize(TThread.CurrentThread, @Free);
+  try
+    Remaining := '';
+
+    repeat
+      Count := FProcess.Output.Read(Buffer[1], Length(Buffer));
+
+      if (Count > 0) then
+      begin
+        Remaining := SimbaOutputForm.AddRaw(Remaining + Copy(Buffer, 1, Count));
+        if (Count < Length(Buffer)) then
+          Sleep(500);
+      end;
+    until (Count = 0);
+  except
+    on E: Exception do
+      DebugLn('Listener thread exception: ', E.Message);
+  end;
+end;
+
+procedure TSimbaScriptInstance.DoOutputThreadTerminated(Sender: TObject);
+var
+  ScriptTab: TSimbaScriptTab;
+begin
+  Assert(GetCurrentThreadID = MainThreadID);
+
+  DebugLn('TSimbaScriptInstance.DoOutputThreadTerminated');
+
+  if FProcess.Running then
+    FProcess.Terminate(100);
+
+  if FErrorSet then
+  begin
+    ScriptTab := SimbaScriptTabsForm.FindTab(Self);
+
+    if (ScriptTab <> nil) then
+    begin
+      // Check error is not in a include
+      if (SameFileName(ScriptTab.ScriptFileName, Error.FileName)) or ((ScriptTab.ScriptFileName = '') and (ScriptTab.ScriptTitle = Error.FileName)) then
+      begin
+        ScriptTab.Show();
+        ScriptTab.SetError(Error.Line, Error.Column);
+      end else
+      if SimbaScriptTabsForm.Open(Error.FileName) then
+        SimbaScriptTabsForm.CurrentTab.SetError(Error.Line, Error.Column);
+    end;
+  end;
+
+  SimbaOutputForm.Editor.TopLine := SimbaOutputForm.Editor.Lines.Count;
+
+  Self.Free();
 end;
 
 function TSimbaScriptInstance.GetTimeRunning: UInt64;
@@ -95,6 +160,12 @@ begin
   Result := FProcess.ProcessID;
 end;
 
+procedure TSimbaScriptInstance.SetError(Value: TSimbaScriptError);
+begin
+  FErrorSet := True;
+  FError := Value;
+end;
+
 procedure TSimbaScriptInstance.Start(Args: array of String);
 begin
   FProcess.Parameters.Add('--simbacommunication=%s', [FSimbaCommunication.Client]);
@@ -103,8 +174,8 @@ begin
   FProcess.Parameters.Add(FScriptFile);
   FProcess.Execute();
 
-  FListen := SimbaOutputForm.Listen(FProcess.Output);
-  TThread.ExecuteInThread(@ManageProcess);
+  FOutputThread := TThread.ExecuteInThread(@DoOutputThread);
+  FOutputThread.OnTerminate := @DoOutputThreadTerminated;
 
   FStartTime := GetTickCount64();
 end;
@@ -173,8 +244,6 @@ destructor TSimbaScriptInstance.Destroy;
 begin
   DebugLn('TSimbaScriptInstance.Destroy');
 
-  if (FListen <> nil) then
-    FreeAndNil(FListen);
   if (FProcess <> nil) then
     FreeAndNil(FProcess);
   if (FSimbaCommunication <> nil) then
