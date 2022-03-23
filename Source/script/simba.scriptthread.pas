@@ -19,7 +19,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.script;
+  simba.script, simba.mufasatypes;
 
 type
   TSimbaScriptThread = class(TThread)
@@ -29,7 +29,7 @@ type
 
     procedure HandleTerminate(Sender: TObject);
     procedure HandleInput;
-    procedure HandleException(const E: Exception);
+    procedure HandleException(E: Exception);
 
     procedure Execute; override;
   public
@@ -51,12 +51,12 @@ uses
   cocoaall, cocoaint, cocoautils,
   {$ENDIF}
   forms, fileutil, lazloggerbase, lpmessages,
-  simba.files, simba.datetime, simba.script_communication, simba.script_debugger;
+  simba.outputform, simba.files, simba.datetime, simba.script_communication, simba.script_debugger;
 
 procedure TSimbaScriptThread.HandleTerminate(Sender: TObject);
 begin
   if (FatalException is Exception) then
-    DebugLn('Note: Script thread did not exit cleanly: ', Exception(FatalException).Message);
+    DebugLnError('Note: Script thread did not exit cleanly: ' + Exception(FatalException).Message);
 
   {$IFDEF WINDOWS}
   if (StartupConsoleMode <> 0) then
@@ -85,31 +85,33 @@ end;
 procedure TSimbaScriptThread.HandleInput;
 var
   Stream: THandleStream;
-  Value: Integer;
+  State: ESimbaScriptState;
 begin
   Stream := THandleStream.Create(StdInputHandle);
-  while Stream.Read(Value, SizeOf(Integer)) = SizeOf(Integer) do
+  while Stream.Read(State, SizeOf(ESimbaScriptState)) = SizeOf(ESimbaScriptState) do
   begin
-    FScript.State := TSimbaScriptState(Value);
+    FScript.State := State;
 
     // Stop button was clicked
-    if (FScript.State = SCRIPT_STATE_STOP) then
+    if (FScript.State = ESimbaScriptState.STATE_STOP) then
       PBoolean(FScript.Compiler['IsTerminatedByUser'].Ptr)^ := True;
   end;
 
   Stream.Free();
 end;
 
-procedure TSimbaScriptThread.HandleException(const E: Exception);
+procedure TSimbaScriptThread.HandleException(E: Exception);
 begin
-  if (TextRec(Output).Mode <> fmClosed) then // Can WriteLn
-    WriteLn(E.Message);
+  DebugLnError(E.Message);
 
-  if FScript.CanInvoke() then
+  if (FScript.SimbaCommunication <> nil) then
   begin
     if (E is lpException) then
+    begin
       with E as lpException do
-        FScript.Invoke(TSimbaMethod_ScriptError.Create(DocPos.Line, DocPos.Col, DocPos.FileName), True);
+        FScript.SimbaCommunication.ScriptError(E.Message, DocPos.Line, DocPos.Col, DocPos.FileName)
+    end else
+      FScript.SimbaCommunication.ScriptError(E.Message, 0, 0, '');
   end else
     ExitCode := 1;
 end;
@@ -121,16 +123,16 @@ begin
 
     if FScript.Compile() then
     begin
-      DebugLn('Succesfully compiled in %.2f milliseconds.', [FScript.CompileTime]);
+      DebugLnSuccess('Succesfully compiled in %.2f milliseconds.', [FScript.CompileTime]);
       if FCompileOnly then
         Exit;
 
       FScript.Run();
 
       if (Script.RunningTime < 10000) then
-        DebugLn('Succesfully executed in %.2f milliseconds.', [Script.RunningTime])
+        DebugLnSuccess('Succesfully executed in %.2f milliseconds.', [Script.RunningTime])
       else
-        DebugLn('Succesfully executed in %s.', [TimeStamp(Round(Script.RunningTime))]);
+        DebugLnSuccess('Succesfully executed in %s.', [FormatMilliseconds(Script.RunningTime, '[h:m:s]')]);
     end;
   except
     on E: Exception do
@@ -153,7 +155,7 @@ begin
   FScript := TSimbaScript.Create();
   FScript.Script := ReadFile(FileName);
   FScript.ScriptFileName := FileName;
-  FScript.SimbaCommunication := SimbaCommunication;
+  FScript.SimbaCommunicationServer := SimbaCommunication;
   FScript.TargetWindow := TargetWindow;
 
   if Debugging then

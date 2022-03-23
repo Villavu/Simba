@@ -10,7 +10,7 @@ unit simba.scripttab;
 interface
 
 uses
-  classes, sysutils, comctrls, controls, dialogs, lcltype, ExtCtrls,
+  classes, sysutils, comctrls, controls, dialogs, lcltype, extctrls, graphics,
   syneditmiscclasses, syneditkeycmds,
   simba.editor, simba.scriptinstance, simba.codeinsight, simba.codeparser, simba.parameterhint, simba.script_communication,
   simba.debuggerform, simba.functionlistform, simba.functionlistupdater;
@@ -355,9 +355,9 @@ begin
 
   if Special then
   begin
-    AMarkup.BackAlpha := 200;
-    AMarkup.Background := $0000CC;
-    AMarkup.Foreground := $000000;
+    AMarkup.BackAlpha  := 128;
+    AMarkup.Background := $0000A5;
+    AMarkup.Foreground := clNone;
   end;
 end;
 
