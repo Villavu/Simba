@@ -15,10 +15,6 @@ unit simba.openssl;
   {$R resourcefiles/win64}
 {$ENDIF}
 
-{$IFDEF SIMBA_DARWIN64}
-  {$R resourcefiles/darwin64}
-{$ENDIF}
-
 {$IFDEF SIMBA_LINUX64}
   {$R resourcefiles/linux64}
 {$ENDIF}

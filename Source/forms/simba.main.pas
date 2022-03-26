@@ -577,8 +577,11 @@ begin
   FRecentFiles.Text := SimbaSettings.GUI.RecentFiles.Value;
 
   CreateBaseDirectories();
+
+  {$IFNDEF DARWIN}
   if SimbaSettings.Environment.OpenSSLOnLaunch.Value then
     InitializeOpenSSL();
+  {$ENDIF}
 
   CodeTools_Setup();
   SizeComponents();
