@@ -11,8 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  fphttpclient,
-  simba.archive, simba.mufasatypes;
+  simba.fphttpclient, simba.archive, simba.mufasatypes;
 
 const
   // Information
@@ -77,7 +76,7 @@ type
 
   TSimbaHTTPClient = class
   protected
-    FHTTPClient: TFPHTTPClient;
+    FHTTPClient: TSimbaFPHTTPClient;
     FURL: String;
     FOnDownloadProgress: TSimbaHTTPProgressEvent;
     FOnExtractProgress: TSimbaHTTPProgressEvent;
@@ -160,30 +159,7 @@ type
 implementation
 
 uses
-  openssl, ssockets, opensslsockets,
-  simba.openssl, simba.zip, simba.tar, simba.tar_gz, simba.tar_bz2, simba.helpers_string;
-
-type
-  TSimbaHTTPClientBase = class(TFPHTTPClient)
-  protected
-    // FPC will raise a exception on a response code that is not HTTP_OK or HTTP_FOUND.
-    function CheckResponseCode(ACode: Integer; const AllowedResponseCodes: array of Integer): Boolean; override;
-    // Load Simba's SSL if needed
-    function GetSocketHandler(const UseSSL: Boolean): TSocketHandler; override;
-  end;
-
-function TSimbaHTTPClientBase.CheckResponseCode(ACode: Integer; const AllowedResponseCodes: array of Integer): Boolean;
-begin
-  Result := True;
-end;
-
-function TSimbaHTTPClientBase.GetSocketHandler(const UseSSL: Boolean): TSocketHandler;
-begin
-  if UseSSL and (not IsSSLLoaded) then
-    InitSSLInterface();
-
-  Result := inherited GetSocketHandler(UseSSL);
-end;
+  simba.zip, simba.tar, simba.tar_gz, simba.tar_bz2;
 
 function TSimbaHTTPClient.GetResponseHeaders: TStrings;
 begin
@@ -447,7 +423,9 @@ end;
 
 constructor TSimbaHTTPClient.Create;
 begin
-  FHTTPClient := TSimbaHTTPClientBase.Create(nil);
+  inherited Create();
+
+  FHTTPClient := TSimbaFPHTTPClient.Create(nil);
   FHTTPClient.AllowRedirect := True;
   FHTTPClient.OnDataReceived := @DoDownloadProgress;
   FHTTPClient.OnRedirect := @DoRedirect;
@@ -456,7 +434,8 @@ end;
 
 destructor TSimbaHTTPClient.Destroy;
 begin
-  FHTTPClient.Free();
+  if (FHTTPClient <> nil) then
+    FreeAndNil(FHTTPClient);
 
   inherited Destroy();
 end;
