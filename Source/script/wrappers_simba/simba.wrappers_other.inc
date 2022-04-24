@@ -42,185 +42,124 @@ begin
 end;
 
 procedure _LapeStatus(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-var
-  Method: TSimbaMethod;
 begin
-  Method := TSimbaMethod_Status.Create(PString(Params^[0])^);
+  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
+    raise Exception.Create('Status requires Simba communication');
 
-  try
-    SimbaScriptThread.Script.Invoke(Method);
-  finally
-    Method.Free();
-  end;
+  SimbaScriptThread.Script.SimbaCommunication.Status(PString(Params^[0])^);
 end;
 
 procedure _LapeShowBalloonHint(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-var
-  Method: TSimbaMethod;
 begin
-  Method := TSimbaMethod_ShowBalloonHint.Create(PString(Params^[0])^, PString(Params^[1])^, PInt32(Params^[2])^, TBalloonFlags(Params^[3]^));
+  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
+    raise Exception.Create('ShowBalloonHint requires Simba communication');
 
-  try
-    SimbaScriptThread.Script.Invoke(Method);
-  finally
-    Method.Free();
-  end;
+  SimbaScriptThread.Script.SimbaCommunication.ShowBalloonHint(PString(Params^[0])^, PString(Params^[1])^, PInteger(Params^[2])^, TBalloonFlags(Params^[3]^));
 end;
 
 procedure _LapeClearDebug(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-var
-  Method: TSimbaMethod;
 begin
-  Method := TSimbaMethod_ClearDebug.Create();
-
-  try
-    SimbaScriptThread.Script.Invoke(Method);
-  finally
-    Method.Free();
-  end;
+  DebugLnClear();
 end;
 
 procedure _LapeDisguise(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-var
-  Method: TSimbaMethod;
 begin
-  Method := TSimbaMethod_Disguse.Create(PString(Params^[0])^);
+  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
+    raise Exception.Create('Disguise requires Simba communication');
 
-  try
-    SimbaScriptThread.Script.Invoke(Method);
-  finally
-    Method.Free();
-  end;
-end;
-
-procedure _LapeShowBitmap(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-var
-  Method: TSimbaMethod;
-begin
-  Method := TSimbaMethod_ShowBitmap.Create(PMufasaBitmap(Params^[0])^);
-
-  try
-    SimbaScriptThread.Script.Invoke(Method);
-  finally
-    Method.Free();
-  end;
-end;
-
-procedure _LapeShowBitmapEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-var
-  Bitmap: TMufasaBitmap;
-  Method: TSimbaMethod;
-begin
-  with SimbaScriptThread.Script.Client do
-    Bitmap := MBitmaps[PInt32(Params^[0])^];
-
-  Method := TSimbaMethod_ShowBitmap.Create(Bitmap);
-
-  try
-    SimbaScriptThread.Script.Invoke(Method);
-  finally
-    Method.Free();
-  end;
-end;
-
-procedure _LapeDisplayDebugImgWindow(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-var
-  Method: TSimbaMethod;
-begin
-  Method := TSimbaMethod_DisplayDebugImage.Create(PInt32(Params^[0])^, PInt32(Params^[1])^);
-
-  try
-    SimbaScriptThread.Script.Invoke(Method);
-  finally
-    Method.Free();
-  end;
-end;
-
-procedure _LapeDrawBitmapDebugImg(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-var
-  Method: TSimbaMethod;
-begin
-  Method := TSimbaMethod_UpdateDebugImage.Create(PMufasaBitmap(Params^[0])^);
-
-  try
-    SimbaScriptThread.Script.Invoke(Method);
-  finally
-    Method.Free();
-  end;
-end;
-
-procedure _LapeDrawBitmapDebugImgEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-var
-  Bitmap: TMufasaBitmap;
-  Method: TSimbaMethod;
-begin
-  with SimbaScriptThread.Script.Client do
-    Bitmap := MBitmaps[PInt32(Params^[0])^];
-
-  Method := TSimbaMethod_UpdateDebugImage.Create(Bitmap);
-
-  try
-    SimbaScriptThread.Script.Invoke(Method);
-  finally
-    Method.Free();
-  end;
-end;
-
-procedure _LapeClearDebugImg(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-var
-  Method: TSimbaMethod;
-begin
-  Method := TSimbaMethod_ClearDebugImage.Create();
-
-  try
-    SimbaScriptThread.Script.Invoke(Method);
-  finally
-    Method.Free();
-  end;
+  SimbaScriptThread.Script.SimbaCommunication.Disguse(PString(Params^[0])^);
 end;
 
 procedure _LapeGetSimbaPID(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-var
-  Method: TSimbaMethod;
 begin
-  Method := TSimbaMethod_GetSimbaPID.Create();
+  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
+    raise Exception.Create('GetSimbaPID requires Simba communication');
 
-  try
-    SimbaScriptThread.Script.Invoke(Method);
-
-    Method.Result.Read(Result^, SizeOf(PtrUint));
-  finally
-    Method.Free();
-  end;
+  PPtrUInt(Result)^ := SimbaScriptThread.Script.SimbaCommunication.GetSimbaPID();
 end;
 
 procedure _LapeGetSimbaTargetPID(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-var
-  Method: TSimbaMethod;
 begin
-  Method := TSimbaMethod_GetSimbaTargetPID.Create();
+  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
+    raise Exception.Create('GetSimbaTargetPID requires Simba communication');
 
-  try
-    SimbaScriptThread.Script.Invoke(Method);
-
-    Method.Result.Read(Result^, SizeOf(PtrUInt));
-  finally
-    Method.Free();
-  end;
+  PPtrUInt(Result)^ := SimbaScriptThread.Script.SimbaCommunication.GetSimbaTargetPID();
 end;
 
 procedure _LapeGetSimbaTargetWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-var
-  Method: TSimbaMethod;
 begin
-  Method := TSimbaMethod_GetSimbaTargetWindow.Create();
+  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
+    raise Exception.Create('GetSimbaTargetWindow requires Simba communication');
 
-  try
-    SimbaScriptThread.Script.Invoke(Method);
-
-    Method.Result.Read(Result^, SizeOf(PtrUInt));
-  finally
-    Method.Free();
-  end;
+  PPtrUInt(Result)^ := SimbaScriptThread.Script.SimbaCommunication.GetSimbaTargetWindow();
 end;
 
+procedure _LapeShowBitmap(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
+    raise Exception.Create('ShowBitmap requires Simba communication');
+
+  SimbaScriptThread.Script.SimbaCommunication.DebugImage_Show(PMufasaBitmap(Params^[0])^);
+end;
+
+procedure _LapeShowBitmapEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
+    raise Exception.Create('ShowBitmap requires Simba communication');
+
+  with SimbaScriptThread.Script.Client do
+    SimbaScriptThread.Script.SimbaCommunication.DebugImage_Show(MBitmaps[PInteger(Params^[0])^]);
+end;
+
+procedure _LapeDrawBitmapDebugImg(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
+    raise Exception.Create('DrawBitmapDebugImg requires Simba communication');
+
+  SimbaScriptThread.Script.SimbaCommunication.DebugImage_Draw(PMufasaBitmap(Params^[0])^);
+end;
+
+procedure _LapeDrawBitmapDebugImgEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
+    raise Exception.Create('DrawBitmapDebugImg requires Simba communication');
+
+  with SimbaScriptThread.Script.Client do
+    SimbaScriptThread.Script.SimbaCommunication.DebugImage_Draw(MBitmaps[PInteger(Params^[0])^]);
+end;
+
+procedure _LapeDisplayDebugImgWindow(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
+    raise Exception.Create('DisplayDebugImgWindow requires Simba communication');
+
+  with SimbaScriptThread.Script.Client do
+    SimbaScriptThread.Script.SimbaCommunication.DebugImage_Display(PInteger(Params^[0])^, PInteger(Params^[1])^);
+end;
+
+procedure _LapeClearDebugImg(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
+    raise Exception.Create('ClearDebugImage requires Simba communication');
+
+  with SimbaScriptThread.Script.Client do
+    SimbaScriptThread.Script.SimbaCommunication.DebugImage_Clear();
+end;
+
+procedure _LapeSetDebugImgMaxSize(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
+    raise Exception.Create('SetDebugImgMaxSize requires Simba communication');
+
+  with SimbaScriptThread.Script.Client do
+    SimbaScriptThread.Script.SimbaCommunication.DebugImage_SetMaxSize(PInteger(Params^[0])^, PInteger(Params^[1])^);
+end;
+
+procedure _LapeHideDebugImg(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
+    raise Exception.Create('HideDebugImg requires Simba communication');
+
+  with SimbaScriptThread.Script.Client do
+    SimbaScriptThread.Script.SimbaCommunication.DebugImage_Hide();
+end;

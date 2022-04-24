@@ -13,6 +13,28 @@ uses
   Classes, SysUtils, Graphics;
 
 type
+  {$SCOPEDENUMS ON}
+  ESimbaScriptState = (STATE_PAUSED, STATE_STOP, STATE_RUNNING, STATE_NONE);
+
+  ESimbaCommunicationMessage = (
+    STATUS, DISGUSE,
+    SIMBA_PID, SIMBA_TARGET_PID, SIMBA_TARGET_WINDOW,
+    SCRIPT_ERROR, SCRIPT_STATE_CHANGE,
+    BALLOON_HINT,
+    DEBUGIMAGE_ZOOM, DEBUGIMAGE_MOVETO, DEBUGIMAGE_MAXSIZE, DEBUGIMAGE_DRAW, DEBUGIMAGE_SHOW, DEBUGIMAGE_HIDE,
+    DEBUGIMAGE_DISPLAY, DEBUGIMAGE_CLEAR,
+    DEBUG_METHOD_NAME, DEBUG_EVENTS
+  );
+
+  PSimbaScriptDebuggerEvent = ^TSimbaScriptDebuggerEvent;
+  TSimbaScriptDebuggerEvent = packed record
+    Method: Int16;
+    Depth: Int16;
+    Exception: Boolean;
+  end;
+  TSimbaScriptDebuggerEvents = array of TSimbaScriptDebuggerEvent;
+  {$SCOPEDENUMS OFF}
+
   PRGB24 = ^TRGB24;
   TRGB24 = packed record
     B, G, R : byte;

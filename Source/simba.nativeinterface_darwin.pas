@@ -87,7 +87,7 @@ implementation
 
 uses
   baseunix, unix, lcltype, cocoaall, cocoautils, cocoawscommon,
-  simba.process;
+  simba.process, simba.helpers_string;
 
 type
   NSEventFix = objccategory external(NSEvent)
@@ -603,7 +603,7 @@ begin
   Windows := GetTopWindows();
 
   for I := 0 to High(Windows) do
-    if GetWindowBounds(Windows[I]).Contains(MousePos) then
+    if GetWindowBounds(Windows[I]).Contains(MousePos.X, MousePos.Y) then
     begin
       Result := Windows[I];
       Exit;

@@ -7,7 +7,7 @@ unit simba.script_compiler;
 
 {$i simba.inc}
 
-interface                         
+interface
 
 uses
   classes, sysutils, typinfo,
@@ -32,6 +32,7 @@ type
     procedure pushTokenizer(ATokenizer: TLapeTokenizerBase); reintroduce;
     procedure pushConditional(AEval: Boolean; ADocPos: TDocPos); reintroduce;
 
+    function addGlobalFunc(Header, Body: lpString): TLapeTree_Method; virtual; overload;
     function addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar; virtual; overload;
     function addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType; virtual; overload;
 
@@ -54,19 +55,36 @@ uses
 
   simba.mufasatypes, simba.script, simba.scriptthread, simba.outputform,
   simba.files, simba.process, simba.bitmap, simba.bitmap_helpers,
-  simba.windowhandlehelpers, simba.matchtemplate, simba.tpa,
+  simba.helpers_windowhandle, simba.matchtemplate, simba.tpa,
   simba.target_exported, simba.math, simba.colormath, simba.stringutil,
   simba.internet, simba.datetime, simba.dtmutil, simba.dtm, simba.iomanager,
   simba.aca, simba.dtmeditor, simba.script_communication,
   simba.imagebox, simba.client,simba.jsonparser, simba.xmlparser,
-  simba.mmltimer, simba.finder, simba.target, simba.fontloader, simba.ocr,
+  simba.finder, simba.target, simba.fontloader, simba.ocr,
   simba.ocrutil, simba.matrixhelpers, simba.nativeinterface,
-  simba.array_generics, simba.target_window,
+  simba.array_generics, simba.target_window, simba.mmltimer,
 
   simba.script_compiler_onterminate,
   simba.script_compiler_waituntil;
 
 {$i simba.wrappers.inc}
+
+function TSimbaScript_Compiler.addGlobalFunc(Header, Body: lpString): TLapeTree_Method;
+var
+  OldState: Pointer;
+begin
+  Result := nil;
+
+  OldState := getTempTokenizerState(Header + Body, '!addGlobalFunc');
+  try
+    Expect([tk_kw_Function, tk_kw_Procedure, tk_kw_Operator]);
+    Result := ParseMethod(nil, False);
+    CheckAfterCompile();
+    addDelayedExpression(Result, True, True);
+  finally
+    resetTokenizerState(OldState);
+  end;
+end;
 
 function TSimbaScript_Compiler.addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar;
 var
@@ -97,13 +115,13 @@ begin
     Param := 'const Index: ' + ArrType;
 
   if (ARead <> nil) then
-    addGlobalFunc(Format('function %s.Get%s(%s): %s; constref;', [Obj, Item, Param, Typ]), ARead);
+    addGlobalFunc(Format('function %s.Get%s(%s): %s;', [Obj, Item, Param, Typ]), ARead);
 
   if Arr then
     Param += '; ';
 
   if (AWrite <> nil) then
-    addGlobalFunc(Format('procedure %s.Set%s(%sconst Value: %s); constref;', [Obj, Item, Param, Typ]), AWrite);
+    addGlobalFunc(Format('procedure %s.Set%s(%sconst Value: %s);', [Obj, Item, Param, Typ]), AWrite);
 end;
 
 function TSimbaScript_Compiler.HandleDirective(Sender: TLapeTokenizerBase; Directive, Argument: lpString): Boolean;

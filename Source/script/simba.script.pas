@@ -16,17 +16,9 @@ uses
   simba.client, simba.script_plugin, simba.mufasatypes;
 
 type
-  TSimbaScriptState = TInitBool;
-
-const
-  SCRIPT_STATE_RUN   = bTrue;
-  SCRIPT_STATE_STOP  = bFalse;
-  SCRIPT_STATE_PAUSE = bUnknown;
-
-type
   TSimbaScript = class
   protected
-    FState: TSimbaScriptState;
+    FState: TInitBool;
     FTargetWindow: TWindowHandle;
 
     FScript: String;
@@ -37,10 +29,10 @@ type
     FRunningTime: Double;
 
     FClient: TClient;
-    FSimbaCommunication: TSimbaCommunicationClient;
 
     FDebugger: TSimbaScript_Debugger;
     FPlugins: TSimbaScriptPluginArray;
+    FSimbaCommunication: TSimbaScriptCommunication;
 
     procedure Resumed; virtual;
     procedure Paused; virtual;
@@ -50,28 +42,28 @@ type
     function DoCompilerFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
     function DoCompilerHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
 
-    procedure SetSimbaCommunication(Value: String);
+    function GetState: ESimbaScriptState;
+
+    procedure SetSimbaCommunicationServer(Value: String);
     procedure SetTargetWindow(Value: String);
-    procedure SetState(Value: TSimbaScriptState);
+    procedure SetState(Value: ESimbaScriptState);
   public
     property CompileTime: Double read FCompileTime;
     property RunningTime: Double read FRunningTime;
 
     property Compiler: TSimbaScript_Compiler read FCompiler;
 
-    property SimbaCommunication: String write SetSimbaCommunication;
+    property SimbaCommunication: TSimbaScriptCommunication read FSimbaCommunication;
+    property SimbaCommunicationServer: String write SetSimbaCommunicationServer;
 
     property Client: TClient read FClient;
     property TargetWindow: String write SetTargetWindow;
     property Debugger: TSimbaScript_Debugger read FDebugger write FDebugger;
 
-    function CanInvoke: Boolean;
-    procedure Invoke(Method: TSimbaMethod; DoFree: Boolean = False);
-
     function Compile: Boolean;
     function Run: Boolean;
 
-    property State: TSimbaScriptState read FState write SetState;
+    property State: ESimbaScriptState read GetState write SetState;
     property Script: String read FScript write FScript;
     property ScriptFileName: String read FScriptFileName write FScriptFileName;
 
@@ -83,7 +75,8 @@ implementation
 
 uses
   fileutil, forms, lazloggerbase,
-  simba.outputform, simba.files, simba.datetime, simba.script_compiler_onterminate;
+  simba.outputform, simba.files, simba.datetime, simba.script_compiler_onterminate,
+  simba.helpers_string;
 
 procedure TSimbaScript.DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
@@ -100,11 +93,9 @@ end;
 function TSimbaScript.DoCompilerHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
 var
   Plugin: TSimbaScriptPlugin;
-  CurrentDirectory, FileName: String;
+  CurrentDirectory: String;
 begin
-  Directive := UpperCase(Directive);
-
-  Result := Directive.IndexOfAny(['ERROR', 'LOADLIB', 'LIBPATH', 'IFHASLIB', 'IFHASFILE', 'INCLUDE_ALL', 'ENV']) > -1;
+  Result := Directive.ContainsAny(['ERROR', 'LOADLIB', 'LIBPATH', 'IFHASLIB', 'IFHASFILE', 'ENV'], False);
 
   if Result then
   try
@@ -165,12 +156,21 @@ begin
   end;
 end;
 
-procedure TSimbaScript.SetSimbaCommunication(Value: String);
+function TSimbaScript.GetState: ESimbaScriptState;
+begin
+  case FState of
+    bTrue:    Result := ESimbaScriptState.STATE_RUNNING;
+    bFalse:   Result := ESimbaScriptState.STATE_STOP;
+    bUnknown: Result := ESimbaScriptState.STATE_PAUSED;
+  end;
+end;
+
+procedure TSimbaScript.SetSimbaCommunicationServer(Value: String);
 begin
   if (Value = '') then
     Exit;
 
-  FSimbaCommunication := TSimbaCommunicationClient.Create(Value);
+  FSimbaCommunication := TSimbaScriptCommunication.Create(Value);
 end;
 
 procedure TSimbaScript.SetTargetWindow(Value: String);
@@ -232,7 +232,7 @@ constructor TSimbaScript.Create;
 begin
   inherited Create();
 
-  FState := SCRIPT_STATE_RUN;
+  State := ESimbaScriptState.STATE_RUNNING;
 end;
 
 destructor TSimbaScript.Destroy;
@@ -270,35 +270,33 @@ begin
   end;
 end;
 
-procedure TSimbaScript.SetState(Value: TSimbaScriptState);
+procedure TSimbaScript.SetState(Value: ESimbaScriptState);
 begin
-  FState := Value;
+  case Value of
+    ESimbaScriptState.STATE_RUNNING:
+      begin
+        FState := bTrue;
 
-  case FState of
-    SCRIPT_STATE_PAUSE: Paused();
-    SCRIPT_STATE_RUN:   Resumed();
+        Resumed();
+      end;
+
+    ESimbaScriptState.STATE_STOP:
+      begin
+        FState := bFalse;
+
+        Stopped();
+      end;
+
+    ESimbaScriptState.STATE_PAUSED:
+      begin
+        FState := bUnknown;
+
+        Paused();
+      end;
   end;
 
   if (FSimbaCommunication <> nil) then
-    FSimbaCommunication.Invoke(TSimbaMethod_ScriptStateChanged.Create(Ord(FState)));
-end;
-
-function TSimbaScript.CanInvoke: Boolean;
-begin
-  Result := FSimbaCommunication <> nil;
-end;
-
-procedure TSimbaScript.Invoke(Method: TSimbaMethod; DoFree: Boolean);
-begin
-  try
-    if (FSimbaCommunication = nil) then
-      raise Exception.Create(Method.ClassName + ' not available when running headless');
-
-    FSimbaCommunication.Invoke(Method);
-  finally
-    if DoFree then
-      Method.Free();
-  end;
+    FSimbaCommunication.ScriptStateChanged(Value);
 end;
 
 end.

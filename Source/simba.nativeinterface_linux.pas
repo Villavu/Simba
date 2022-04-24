@@ -74,7 +74,7 @@ implementation
 
 uses
   x, xatom, keysym, baseunix, unix, linux, lcltype, lazloggerbase,
-  simba.process, simba.xlib;
+  simba.process, simba.xlib, simba.helpers_string;
 
 function GetWindowProperty(Window: TWindow; Prop: TAtom): Int64;
 var

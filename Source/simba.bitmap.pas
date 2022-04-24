@@ -50,7 +50,7 @@ type
   public
     property Name: String read FName write FName;
     property Index: Int32 read FIndex write FIndex;
-    property Data: PRGB32 read FData;
+    property Data: PRGB32 read FData write FData;
     property Width: Int32 read FWidth;
     property Height: Int32 read FHeight;
     property Center: TPoint read GetCenter;

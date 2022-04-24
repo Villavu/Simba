@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addClass('TMufasaBitmap');
 addGlobalType('packed record B, G, R: UInt8; end', 'TRGB24');
 addGlobalType('^TRGB24', 'PRGB24');
@@ -104,4 +106,6 @@ addGlobalFunc('procedure TMufasaBitmap.SetAlphaValue(const value: Byte); constre
 addClassVar('TMufasaBitmap', 'List', 'TObject', @_LapeMufasaBitmap_List_Read, @_LapeMufasaBitmap_List_Write);
 addGlobalFunc('procedure TMufasaBitmap.Init(List: TObject = nil)', @_LapeMufasaBitmap_Init);
 //addGlobalFunc('procedure TMufasaBitmap.Free; constref', @_LapeMufasaBitmap_Free);
+
+popSection();
 

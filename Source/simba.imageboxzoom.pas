@@ -36,7 +36,6 @@ begin
   inherited Create(AOwner);
 
   FBitmap := TBitmap.Create();
-  FTempColor := -1;
 
   SetZoom(5, 5);
   Color := clWindow;
@@ -101,8 +100,6 @@ procedure TSimbaImageBoxZoom.Move(Image: TImage; X, Y: Integer);
 var
   LoopX, LoopY: Integer;
 begin
-  FTempColor := -1;
-
   Dec(X, FPixelCount div 2);
   Dec(Y, FPixelCount div 2);
 

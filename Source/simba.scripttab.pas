@@ -12,8 +12,8 @@ interface
 uses
   classes, sysutils, comctrls, controls, dialogs, lcltype, extctrls, graphics,
   syneditmiscclasses, syneditkeycmds,
-  simba.editor, simba.scriptinstance, simba.codeinsight, simba.codeparser, simba.parameterhint, simba.script_communication,
-  simba.debuggerform, simba.functionlistform, simba.functionlistupdater;
+  simba.mufasatypes, simba.editor, simba.scriptinstance, simba.codeinsight, simba.codeparser, simba.parameterhint,
+  simba.debuggerform, simba.functionlistform, simba.functionlistupdater, simba.scriptinstance_communication;
 
 type
   TSimbaScriptTab = class(TTabSheet)
@@ -98,8 +98,8 @@ implementation
 
 uses
   interfacebase, forms, lazfileutils, lazloggerbase, synedit, syneditmousecmds,
-  simba.scripttabsform, simba.autocomplete, simba.settings, simba.mufasatypes,
-  simba.scripttabhistory, simba.main, simba.parser_misc, simba.files;
+  simba.scripttabsform, simba.autocomplete, simba.settings,
+  simba.scripttabhistory, simba.main, simba.parser_misc, simba.files, simba.helpers_string;
 
 procedure TSimbaScriptTab.HandleAutoComplete;
 var
@@ -133,7 +133,7 @@ begin
     FEditor.AutoComplete.FillGlobals();
   end;
 
-  if Filter = '' then
+  if (Filter = '') then
     P := FEditor.CaretXY
   else
     P := FEditor.CharIndexToRowCol(FEditor.SelStart - Length(Filter) - 1);
@@ -572,7 +572,7 @@ end;
 
 function TSimbaScriptTab.ScriptState: ESimbaScriptState;
 begin
-  Result := STATE_NONE;
+  Result := ESimbaScriptState.STATE_NONE;
   if (FScriptInstance <> nil) then
     Result := FScriptInstance.State;
 end;
