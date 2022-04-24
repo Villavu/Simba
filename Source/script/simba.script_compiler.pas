@@ -53,7 +53,7 @@ uses
   simba.aca, simba.dtmeditor, simba.script_communication,
   simba.imagebox, simba.client,simba.jsonparser, simba.xmlparser,
   simba.mmltimer, simba.finder, simba.target, simba.fontloader, simba.ocr,
-  simba.ocrutil, simba.matrixhelpers, simba.platformhelpers, simba.geometry,
+  simba.ocrutil, simba.matrixhelpers, simba.platformhelpers,
   simba.array_generics,
 
   simba.script_compiler_onterminate,

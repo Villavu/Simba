@@ -1,11 +1,5 @@
 FSection := 'Arrays & Algorithms';
 
-addGlobalFunc('procedure _Sort(var a: TIntegerArray); overload;', @_LapeSortIntegerArray);
-addGlobalFunc('procedure _Sort(var a: TPointArray; constref Weights: array of Int64); overload;', @_LapeSortWeightedTPA);
-addGlobalFunc('procedure _Sort(var a: T2DPointArray; constref Weights: array of Int64); overload;', @_LapeSortWeightedATPA);
-addGlobalFunc('procedure _Sort(var a: TPointArray; constref Weights: array of Extended); overload;', @_LapeSortWeightedTPAF);
-addGlobalFunc('procedure _Sort(var a: T2DPointArray; constref Weights: array of Extended); overload;', @_LapeSortWeightedATPAF);
-
 addGlobalFunc('procedure RAaSTPAEx(var a: TPointArray; const w, h: Int32)', @_LapeRAaSTPAEx);
 addGlobalFunc('procedure RAaSTPA(var a: TPointArray; const Dist: Int32)', @_LapeRAaSTPA);
 addGlobalFunc('function NearbyPointInArrayEx(const P: TPoint; w, h: Int32; const a: TPointArray): Boolean', @_LapeNearbyPointInArrayEx);

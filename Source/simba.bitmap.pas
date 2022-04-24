@@ -1143,7 +1143,7 @@ end;
 
 procedure TMufasaBitmap.DrawRect(R: TRectangle; Color: TColor);
 begin
-  Self.DrawTPA(TPAConnect([R.Top, R.Right, R.Btm, R.Left]), Color);
+  //Self.DrawTPA(TPAConnect([R.Top, R.Right, R.Btm, R.Left]), Color);
 end;
 
 procedure TMufasaBitmap.DrawToCanvas(x,y: Int32; Canvas: TCanvas);

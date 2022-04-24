@@ -5,22 +5,22 @@ end;
 
 procedure _LapeSortWeightedTPA(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  specialize QuickSortWeighted<TPoint, Int64>(PPointArray(Params^[0])^, PInt64Array(Params^[1])^, Low(PPointArray(Params^[0])^), High(PPointArray(Params^[0])^));
+  specialize QuickSortWeighted<TPoint, Int64>(PPointArray(Params^[0])^, PInt64Array(Params^[1])^, Low(PPointArray(Params^[0])^), High(PPointArray(Params^[0])^), PBoolean(Params^[2])^);
 end;
 
 procedure _LapeSortWeightedATPA(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  specialize QuickSortWeighted<TPointArray, Int64>(P2DPointArray(Params^[0])^, PInt64Array(Params^[1])^, Low(P2DPointArray(Params^[0])^), High(P2DPointArray(Params^[0])^));
+  specialize QuickSortWeighted<TPointArray, Int64>(P2DPointArray(Params^[0])^, PInt64Array(Params^[1])^, Low(P2DPointArray(Params^[0])^), High(P2DPointArray(Params^[0])^), PBoolean(Params^[2])^);
 end;
 
 procedure _LapeSortWeightedTPAF(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  specialize QuickSortWeighted<TPoint, Extended>(PPointArray(Params^[0])^, PExtendedArray(Params^[1])^, Low(PPointArray(Params^[0])^), High(PPointArray(Params^[0])^));
+  specialize QuickSortWeighted<TPoint, Extended>(PPointArray(Params^[0])^, PExtendedArray(Params^[1])^, Low(PPointArray(Params^[0])^), High(PPointArray(Params^[0])^), PBoolean(Params^[2])^);
 end;
 
 procedure _LapeSortWeightedATPAF(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  specialize QuickSortWeighted<TPointArray, Extended>(P2DPointArray(Params^[0])^, PExtendedArray(Params^[1])^, Low(P2DPointArray(Params^[0])^), High(P2DPointArray(Params^[0])^));
+  specialize QuickSortWeighted<TPointArray, Extended>(P2DPointArray(Params^[0])^, PExtendedArray(Params^[1])^, Low(P2DPointArray(Params^[0])^), High(P2DPointArray(Params^[0])^), PBoolean(Params^[2])^);
 end;
 
 procedure _LapeRAaSTPAEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

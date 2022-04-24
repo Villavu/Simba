@@ -294,7 +294,7 @@ var
   Count: Integer;
   X, Y, Width, Height: Integer;
 
-  procedure Match; inline;
+  procedure Match;
   begin
     if Count = Length(Result) then
       SetLength(Result, Count*2);
