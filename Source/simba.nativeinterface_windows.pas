@@ -88,7 +88,7 @@ implementation
 
 uses
   windows, dwmapi, multimon, mmsystem,
-  simba.process;
+  simba.process, simba.helpers_string;
 
 type
   MONITOR_DPI_TYPE = (

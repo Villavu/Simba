@@ -159,7 +159,8 @@ type
 implementation
 
 uses
-  simba.zip, simba.tar, simba.tar_gz, simba.tar_bz2;
+  simba.zip, simba.tar, simba.tar_gz, simba.tar_bz2,
+  simba.helpers_string;
 
 function TSimbaHTTPClient.GetResponseHeaders: TStrings;
 begin

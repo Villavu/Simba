@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, process,
-  simba.script_communication, simba.debuggerform;
+  simba.mufasatypes, simba.scriptinstance_communication, simba.debuggerform;
 
 type
   TSimbaScriptError = record
@@ -25,7 +25,7 @@ type
   protected
     FProcess: TProcess;
 
-    FSimbaCommunication: TSimbaCommunicationServer;
+    FSimbaCommunication: TSimbaScriptInstanceCommunication;
 
     FTarget: THandle;
 
@@ -168,7 +168,7 @@ end;
 
 procedure TSimbaScriptInstance.Start(Args: array of String);
 begin
-  FProcess.Parameters.Add('--simbacommunication=%s', [FSimbaCommunication.Client]);
+  FProcess.Parameters.Add('--simbacommunication=%s', [FSimbaCommunication.ClientID]);
   FProcess.Parameters.Add('--target=' + IntToStr(FTarget));
   FProcess.Parameters.AddStrings(Args);
   FProcess.Parameters.Add(FScriptFile);
@@ -198,23 +198,23 @@ end;
 
 procedure TSimbaScriptInstance.Resume;
 begin
-  FState := STATE_RUNNING;
+  FState := ESimbaScriptState.STATE_RUNNING;
   FProcess.Input.Write(FState, SizeOf(Int32));
 end;
 
 procedure TSimbaScriptInstance.Pause;
 begin
-  FState := STATE_PAUSED;
+  FState := ESimbaScriptState.STATE_PAUSED;
   FProcess.Input.Write(FState, SizeOf(Int32));
 end;
 
 procedure TSimbaScriptInstance.Stop;
 begin
-  if (FState = STATE_STOP) then
+  if (FState = ESimbaScriptState.STATE_STOP) then
     FProcess.Terminate(0)
   else
   begin
-    FState := STATE_STOP;
+    FState := ESimbaScriptState.STATE_STOP;
     FProcess.Input.Write(FState, SizeOf(Int32));
   end;
 end;
@@ -223,8 +223,8 @@ constructor TSimbaScriptInstance.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  FState := STATE_RUNNING;
-  FSimbaCommunication := TSimbaCommunicationServer.Create(Self);
+  FState := ESimbaScriptState.STATE_RUNNING;
+  FSimbaCommunication := TSimbaScriptInstanceCommunication.Create(Self);
 
   FProcess := TProcess.Create(nil);
   FProcess.PipeBufferSize := 16 * 1024;

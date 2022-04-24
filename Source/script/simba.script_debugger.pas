@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, syncobjs,
-  simba.script_communication;
+  simba.mufasatypes, simba.script_communication;
 
 type
   TSimbaScript_Debugger = class(TThread)
@@ -89,8 +89,7 @@ var
 begin
   // Send method names
   for I := 0 to High(FMethods) do
-    with TSimbaScript(FScript) do
-      Invoke(TSimbaMethod_DebuggingMethod.Create(FMethods[I]), True);
+    TSimbaScript(FScript).SimbaCommunication.DebugMethodName(FMethods[I]);
 
   FStarted := True;
   repeat
@@ -99,8 +98,7 @@ begin
     try
       if (FStream.Position > 0) then
       begin
-        with TSimbaScript(FScript) do
-          Invoke(TSimbaMethod_DebuggerEvents.Create(FStream), True);
+        TSimbaScript(FScript).SimbaCommunication.DebugEvents(FStream);
 
         FStream.Position := 0;
       end;
@@ -113,8 +111,7 @@ begin
 
   // Empty stream. Shouldn't need lock.
   if (FStream.Position > 0) then
-    with TSimbaScript(FScript) do
-      Invoke(TSimbaMethod_DebuggerEvents.Create(FStream), True);
+    TSimbaScript(FScript).SimbaCommunication.DebugEvents(FStream);
 end;
 
 procedure TSimbaScript_Debugger.Write(const Event: TSimbaScriptDebuggerEvent);

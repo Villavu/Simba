@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.windowhandlehelpers;
+unit simba.helpers_windowhandle;
 
 {$i simba.inc}
 
@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.mufasatypes;
+  simba.mufasatypes, simba.helpers_string;
 
 type
   TWindowHandleHelper = type Helper for TWindowHandle
@@ -160,7 +160,6 @@ var
   Windows: TWindowHandleArray;
   I: Integer;
 begin
-  {
   Windows := GetTopWindows();
   for I := 0 to High(Windows) do
     if Windows[I].GetTitle().RegExprExists(Title) then
@@ -171,7 +170,7 @@ begin
       Exit;
     end;
 
-  Result := False;}
+  Result := False;
 end;
 
 function FindWindows(Title: String): TWindowHandleArray;
@@ -179,13 +178,12 @@ var
   Windows: TWindowHandleArray;
   I: Integer;
 begin
-  {
   Result := Default(TWindowHandleArray);
 
   Windows := GetTopWindows();
   for I := 0 to High(Windows) do
     if Windows[I].GetTitle().RegExprExists(Title) then
-      Result := Result + [Windows[I]];}
+      Result := Result + [Windows[I]];
 end;
 
 function FindChildWindow(Title: String; ClassName: String; out Child: TWindowHandle): Boolean;
@@ -193,7 +191,6 @@ var
   Windows, ChildWindows: TWindowHandleArray;
   I, J: Integer;
 begin
-  {
   Windows := FindWindows(Title);
 
   for I := 0 to High(Windows) do
@@ -209,7 +206,7 @@ begin
       end;
   end;
 
-  Result := False;}
+  Result := False;
 end;
 
 function FindChildWindows(Title: String; ClassName: String): TWindowHandleArray;
@@ -217,7 +214,6 @@ var
   Windows, ChildWindows: TWindowHandleArray;
   I, J: Integer;
 begin
-  {
   Result := Default(TWindowHandleArray);
 
   Windows := FindWindows(Title);
@@ -227,7 +223,7 @@ begin
     for J := 0 to High(ChildWindows) do
       if ChildWindows[J].GetClassName().RegExprExists(ClassName) then
         Result := Result + [ChildWindows[J]];
-  end; }
+  end;
 end;
 
 end.

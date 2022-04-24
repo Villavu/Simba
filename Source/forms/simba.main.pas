@@ -12,7 +12,7 @@ interface
 uses
   classes, sysutils, fileutil, anchordockpanel, forms, controls, graphics, dialogs,
   stdctrls, menus, comctrls, extctrls, buttons, imglist, castaliapaslextypes,
-  simba.settings, simba.windowhandlehelpers, simba.mufasatypes;
+  simba.settings, simba.mufasatypes;
 
 const
   IMAGE_COMPILE             = 0;
@@ -265,8 +265,9 @@ uses
   simba.package_form, simba.aboutform, simba.functionlistform,
   simba.scripttabsform, simba.outputform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.colorpicker,
-  simba.ci_includecache, simba.script_communication, simba.scriptformatter,
-  simba.editor, simba.dockinghelpers, simba.datetime, simba.nativeinterface;
+  simba.ci_includecache, simba.scriptformatter,
+  simba.editor, simba.dockinghelpers, simba.datetime, simba.nativeinterface,
+  simba.helpers_windowhandle;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 
@@ -747,7 +748,7 @@ end;
 
 procedure TSimbaForm.MenuClearOutputClick(Sender: TObject);
 begin
-  SimbaOutputForm.Clear();
+  SimbaOutputForm.Editor.Clear();
 end;
 
 procedure TSimbaForm.MenuFileClick(Sender: TObject);
@@ -896,7 +897,7 @@ begin
     Exit;
 
   case Tab.ScriptState of
-    STATE_PAUSED:
+    ESimbaScriptState.STATE_PAUSED:
       begin
         ToolbarButtonRun.Enabled := True;
         ToolbarButtonPause.Enabled := False;
@@ -908,7 +909,7 @@ begin
         StatusPanelState.Caption := ' Paused';
       end;
 
-    STATE_STOP:
+    ESimbaScriptState.STATE_STOP:
       begin
         ToolbarButtonRun.Enabled := False;
         ToolbarButtonPause.Enabled := False;
@@ -920,7 +921,7 @@ begin
         StatusPanelState.Caption := ' Stopping';
       end;
 
-    STATE_RUNNING:
+    ESimbaScriptState.STATE_RUNNING:
       begin
         ToolbarButtonRun.Enabled := False;
         ToolbarButtonPause.Enabled := True;
@@ -929,10 +930,10 @@ begin
         StopButtonStop.Enabled := True;
         StopButtonStop.ImageIndex := IMAGE_STOP;
 
-        StatusPanelState.Caption := ' ' + TimeStamp(Tab.ScriptTimeRunning);
+        StatusPanelState.Caption := ' ' + FormatMilliseconds(Tab.ScriptTimeRunning, '[h:m:s]');
       end;
 
-    STATE_NONE:
+    ESimbaScriptState.STATE_NONE:
       begin
         ToolbarButtonRun.Enabled := True;
         ToolbarButtonPause.Enabled := False;
@@ -1000,7 +1001,9 @@ begin
       SimbaSettings.GUI.Layout.Value := '';
       SimbaSettings.GUI.LockLayout.Value := False;
     end else
+    if (WindowState <> wsMinimized) then
       SimbaSettings.GUI.Layout.Value := DockMaster.SaveLayout();
+
 
     Visible := False;
   end;

@@ -87,6 +87,7 @@ var
   Stream: THandleStream;
   State: ESimbaScriptState;
 begin
+
   Stream := THandleStream.Create(StdInputHandle);
   while Stream.Read(State, SizeOf(ESimbaScriptState)) = SizeOf(ESimbaScriptState) do
   begin
@@ -128,6 +129,7 @@ begin
         Exit;
 
       FScript.Run();
+
 
       if (Script.RunningTime < 10000) then
         DebugLnSuccess('Succesfully executed in %.2f milliseconds.', [Script.RunningTime])

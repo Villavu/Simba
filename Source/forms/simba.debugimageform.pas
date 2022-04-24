@@ -16,15 +16,19 @@ uses
 type
   TSimbaDebugImageForm = class(TForm)
   protected
-    FMouseX, FMouseY: Int32;
+    FMouseX, FMouseY: Integer;
     FImageBox: TSimbaImageBox;
+    FMaxWidth, FMaxHeight: Integer;
 
-    procedure ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Int32);
+    procedure ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure ImageDoubleClick(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
 
-    procedure Display(AWidth, AHeight: Int32; AShow: Boolean);
+    procedure Close;
+
+    procedure SetMaxSize(AWidth, AHeight: Integer);
+    procedure SetSize(AWidth, AHeight: Integer);
 
     property ImageBox: TSimbaImageBox read FImageBox;
   end;
@@ -37,9 +41,20 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.outputform, simba.dockinghelpers;
+  simba.dockinghelpers, simba.outputform;
 
-procedure TSimbaDebugImageForm.ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Int32);
+procedure TSimbaDebugImageForm.Close;
+var
+  Form: TCustomForm;
+begin
+  Form := TCustomForm(Self);
+  if (HostDockSite is TSimbaAnchorDockHostSite) then
+    Form := TSimbaAnchorDockHostSite(HostDockSite);
+
+  Form.Close();
+end;
+
+procedure TSimbaDebugImageForm.ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin
   FMouseX := X;
   FMouseY := Y;
@@ -50,42 +65,68 @@ begin
   SimbaOutputForm.Add('Debug Image Click: ' + IntToStr(FMouseX) + ', ' + IntToStr(FMouseY));
 end;
 
-procedure TSimbaDebugImageForm.Display(AWidth, AHeight: Int32; AShow: Boolean);
+procedure TSimbaDebugImageForm.SetSize(AWidth, AHeight: Integer);
 var
   Form: TCustomForm;
 begin
-  if (AWidth < 250) then
-    AWidth := 250;
-  if (AHeight < 250) then
-    AHeight := 250;
-
+  Form := TCustomForm(Self);
   if (HostDockSite is TSimbaAnchorDockHostSite) then
-  begin
     Form := TSimbaAnchorDockHostSite(HostDockSite);
-    if (TSimbaAnchorDockHostSite(Form).Header <> nil) then
-    begin
-      AHeight := AHeight + TSimbaAnchorDockHostSite(Form).Header.Height +
-                           TSimbaAnchorDockHostSite(Form).Header.BorderSpacing.Top +
-                           TSimbaAnchorDockHostSite(Form).Header.BorderSpacing.Bottom;
-    end;
-  end else
-    Form := Self;
 
-  Form.Width := AWidth;
-  Form.Height := AHeight;
-  if AShow then
-    Form.EnsureVisible(True);
+  if (Form is TSimbaAnchorDockHostSite) and (TSimbaAnchorDockHostSite(Form).Header <> nil) then
+  begin
+    AHeight := AHeight + TSimbaAnchorDockHostSite(Form).Header.Height +
+                         TSimbaAnchorDockHostSite(Form).Header.BorderSpacing.Top +
+                         TSimbaAnchorDockHostSite(Form).Header.BorderSpacing.Bottom;
+  end;
+
+  AHeight := AHeight + FImageBox.StatusBar.Height;
+
+  if (AWidth > Form.Width) then
+    Form.Width := AWidth;
+  if (AHeight > Form.Height) then
+    Form.Height := AHeight;
+
+  Form.EnsureVisible(True);
+
+  SetMaxSize(FMaxWidth, FMaxHeight);
 end;
 
 constructor TSimbaDebugImageForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
+  FMaxWidth := 1500;
+  FMaxHeight := 1500;
+
   FImageBox := TSimbaImageBox.Create(Self);
   FImageBox.Parent := Self;
   FImageBox.Align := alClient;
   FImageBox.OnMouseMove := @ImageMouseMove;
   FImageBox.OnDblClick := @ImageDoubleClick;
+end;
+
+procedure TSimbaDebugImageForm.SetMaxSize(AWidth, AHeight: Integer);
+var
+  Form: TCustomForm;
+begin
+  Form := TCustomForm(Self);
+  if (HostDockSite is TSimbaAnchorDockHostSite) then
+    Form := TSimbaAnchorDockHostSite(HostDockSite);
+
+  FMaxWidth := AWidth;
+  FMaxHeight := AHeight;
+
+  Form.Constraints.MinWidth  := 150;
+  Form.Constraints.MinHeight := 150;
+
+  Form.Constraints.MaxWidth  := FMaxWidth;
+  Form.Constraints.MaxHeight := FMaxHeight;
+
+  if (Form.Width > FMaxWidth) then
+    Form.Width := FMaxWidth;
+  if (Form.Height > FMaxHeight) then
+    Form.Height := FMaxHeight;
 end;
 
 end.

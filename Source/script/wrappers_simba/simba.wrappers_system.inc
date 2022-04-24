@@ -59,12 +59,12 @@ end;
 
 procedure _LapePauseScript(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScriptThread.Script.State := SCRIPT_STATE_PAUSE;
+  SimbaScriptThread.Script.State := ESimbaScriptState.STATE_PAUSED;
 end;
 
 procedure _LapeTerminateScript(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScriptThread.Script.State := SCRIPT_STATE_STOP;
+  SimbaScriptThread.Script.State := ESimbaScriptState.STATE_STOP;
 end;
 
 procedure _LapePoint(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   ComCtrls, StdCtrls, Menus, syncobjs,
-  simba.script_communication;
+  simba.mufasatypes;
 
 type
   TSimbaDebuggerList = class(TScrollBox)
@@ -67,7 +67,7 @@ type
     FEventCount: Int32;
     FHasEvents: Boolean;
   public
-    procedure AddEvents(constref Events: PSimbaScriptDebuggerEvent; constref Count: Int32);
+    procedure AddEvents(const Events: PSimbaScriptDebuggerEvent; const Count: Int32);
     procedure AddMethod(Method: String);
 
     procedure Clear;
@@ -266,7 +266,7 @@ begin
   Clear();
 end;
 
-procedure TSimbaDebuggerForm.AddEvents(constref Events: PSimbaScriptDebuggerEvent; constref Count: Int32);
+procedure TSimbaDebuggerForm.AddEvents(const Events: PSimbaScriptDebuggerEvent; const Count: Int32);
 begin
   FLock.Enter();
 

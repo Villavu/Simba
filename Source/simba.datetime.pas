@@ -10,17 +10,65 @@ unit simba.datetime;
 interface
 
 uses
-  classes, sysutils;
+  classes, sysutils,
+  simba.mufasatypes;
 
 procedure ConvertTime(Time: Int64; var h, m, s: Int32);
 procedure ConvertTime64(Time: Int64; var y, m, w, d, h, min, s: Int32);
-function TimeStamp(Time: Int64; IncludeMilliseconds: Boolean = False): String;
+function FormatMilliseconds(Milliseconds: Int64; Fmt: String): String; overload;
+function FormatMilliseconds(Milliseconds: Double; Fmt: String): String; overload;
 function HighResolutionTime: Double;
 
 implementation
 
 uses
   simba.nativeinterface;
+
+function FormatMilliseconds(Milliseconds: Int64; Fmt: String): String;
+
+  procedure Build(Arg: String; Value, Padding: Int64);
+  begin
+    if Result.Contains(Arg) then
+      Result := Result.Replace(Arg, IntToStr(Value).PadLeft(2, '0'));
+  end;
+
+var
+  Time, Days, Hours, Mins, Seconds: Int64;
+begin
+  Result := Fmt;
+
+  Time := Milliseconds;
+
+  if Result.Contains('d') then
+  begin
+    Days  := Time div 86400000;
+    Time  := Time mod 86400000;
+  end;
+  if Result.Contains('h') then
+  begin
+    Hours := Time div 3600000;
+    Time  := Time mod 3600000;
+  end;
+  if Result.Contains('m') then
+  begin
+    Mins  := Time div 60000;
+    Time  := Time mod 60000;
+  end;
+
+  Seconds      := Time div 1000;
+  Milliseconds := Time mod 1000;
+
+  Build('ms', MilliSeconds, 3);
+  Build('d', Days, 2);
+  Build('h', Hours, 2);
+  Build('m', Mins, 2);
+  Build('s', Seconds, 2);
+end;
+
+function FormatMilliseconds(Milliseconds: Double; Fmt: String): String;
+begin
+  Result := FormatMilliseconds(Round(Milliseconds), Fmt);
+end;
 
 function HighResolutionTime: Double;
 begin
@@ -58,23 +106,6 @@ begin
   x := x mod (60000);
   s := x div (1000); // 1000 (1 second)
   x := x mod (1000);
-end;
-
-function TimeStamp(Time: Int64; IncludeMilliseconds: Boolean): String;
-var
-  Hours, Mins, Secs, Milliseconds: Int32;
-begin
-  Hours := Time div 3600000;
-  Time  := Time mod 3600000;
-  Mins  := Time div 60000;
-  Time  := Time mod 60000;
-  Secs  := Time div 1000;
-  Milliseconds  := Time mod 1000;
-
-  if IncludeMilliseconds then
-    Result := Format('[%.2d:%.2d:%.2d:%.3d]', [Hours, Mins, Secs, Milliseconds])
-  else
-    Result := Format('[%.2d:%.2d:%.2d]', [Hours, Mins, Secs]);
 end;
 
 end.

@@ -17,6 +17,8 @@ addGlobalFunc('procedure ShowBitmap(Bitmap: Integer); overload', @_LapeShowBitma
 addGlobalFunc('procedure DrawBitmapDebugImg(Bitmap: TMufasaBitmap); overload', @_LapeDrawBitmapDebugImg);
 addGlobalFunc('procedure DrawBitmapDebugImg(Bitmap: Integer); overload', @_LapeDrawBitmapDebugImgEx);
 addGlobalFunc('procedure DisplayDebugImgWindow(W, H: Integer)', @_LapeDisplayDebugImgWindow);
+addGlobalFunc('procedure SetDebugImgMaxSize(MaxWidth, MaxHeight: Integer)', @_LapeSetDebugImgMaxSize);
+addGlobalFunc('procedure HideDebugImg', @_LapeHideDebugImg);
 addGlobalFunc('procedure ClearDebugImg', @_LapeClearDebugImg);
 addGlobalFunc('function GetSimbaPID: PtrUInt', @_LapeGetSimbaPID);
 addGlobalFunc('function GetSimbaTargetPID: PtrUInt', @_LapeGetSimbaTargetPID);

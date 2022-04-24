@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, controls, forms, graphics,
-  simba.windowhandlehelpers, simba.mufasatypes, simba.iomanager;
+  simba.helpers_windowhandle, simba.mufasatypes, simba.iomanager;
 
 type
   TSimbaWindowSelector = class
