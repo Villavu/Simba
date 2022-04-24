@@ -16,12 +16,18 @@ uses
 const
   HALF_PI = PI / 2;
 
+function RotatePoints(const P: TPointArray; const A, cx, cy: Extended): TPointArray;
+function RotatePoint(const p: TPoint; const angle, mx, my: Extended): TPoint;
+
+function ChangeDistPT(const PT : TPoint; mx,my : integer; newdist : extended) : TPoint;
+function ChangeDistTPA(var TPA : TPointArray; mx,my : integer; newdist : extended) : boolean;
+
 function GaussMatrix(N: Integer; sigma: Extended): TExtendedMatrix;
 function FixRad(const Rad: Extended): Extended;
 function FixD(const Degrees: Extended): Extended;
 function MiddleBox(const B: TBox): TPoint;
-function Distance(const X1, Y1, X2, Y2: Integer): Integer; inline; overload;
-function Distance(const P1, P2: TPoint): Integer; inline; overload;
+function Distance(const X1, Y1, X2, Y2: Integer): Integer; overload;
+function Distance(const P1, P2: TPoint): Integer; overload;
 function Radians(const e: Extended): Extended;
 function Degrees(const e: Extended): Extended;
 function IntToBox(x1,y1,x2,y2 : Integer) : TBox;
@@ -30,12 +36,12 @@ function PointToBox(topLeft,bottomRight: TPoint): TBox;
 function PointInBox(PT : TPoint; Box: TBox): Boolean;
 function NextPowerOf2(const n: Integer): Integer; inline;
 
-function IsNumber(const n: Double): Boolean; inline; overload;
-function IsNumber(const n: Single): Boolean; inline; overload;
+function IsNumber(const n: Double): Boolean; overload;
+function IsNumber(const n: Single): Boolean; overload;
 
-function Modulo(const X, Y: Double): Double; inline; overload;
-function Modulo(const X, Y: Single): Single; inline; overload;
-function Modulo(const X, Y: Integer): Integer; inline; overload;
+function Modulo(const X, Y: Double): Double; overload;
+function Modulo(const X, Y: Single): Single; overload;
+function Modulo(const X, Y: Integer): Integer; overload;
 
 function MaxA(const Arr: TIntegerArray): Integer; overload;
 function MinA(const Arr: TIntegerArray): Integer; overload;
@@ -51,10 +57,20 @@ function Average(const Arr: TExtendedArray): Extended; overload;
 
 function Mode(const Arr: TIntegerArray): Integer;
 
+procedure Sort(var Arr: TIntegerArray); overload;
+procedure Sort(var Arr: TPointArray; Weights: TIntegerArray; SortUp: Boolean = True); overload;
+procedure Sort(var Arr: T2DPointArray; Weights: TIntegerArray; SortUp: Boolean = True); overload;
+
+function Sorted(const Arr: TIntegerArray): TIntegerArray;
+
+function Unique(const Arr: TDoubleArray): TDoubleArray; overload;
+function Unique(const TIA: TIntegerArray): TIntegerArray; overload;
+function Unique(const Points: TPointArray): TPointArray; overload;
+
 implementation
 
 uses
-  simba.array_generics, simba.tpa,
+  simba.array_generics, simba.tpa, simba.overallocatearray,
   math;
 
 function IsNumber(const n: Double): Boolean;
@@ -92,6 +108,55 @@ begin
   Result := Result or (Result shr 16);
   Result := Result or (Result shr 32);
   Result := Result + 1;
+end;
+
+function RotatePoints(const P: TPointArray;const A, cx, cy: Extended): TPointArray;
+var
+   I, L: Integer;
+begin
+  L := High(P);
+  SetLength(Result, L + 1);
+  for I := 0 to L do
+  begin
+    Result[I].X := Round(cx + cos(A) * (p[i].x - cx) - sin(A) * (p[i].y - cy));
+    Result[I].Y := Round(cy + sin(A) * (p[i].x - cx) + cos(A) * (p[i].y - cy));
+  end;
+end;
+
+function RotatePoint(const p: TPoint;const angle, mx, my: Extended): TPoint;
+begin
+  Result.X := Round(mx + cos(angle) * (p.x - mx) - sin(angle) * (p.y - my));
+  Result.Y := Round(my + sin(angle) * (p.x - mx) + cos(angle) * (p.y- my));
+end;
+
+function ChangeDistPT(const PT : TPoint; mx,my : integer; newdist : extended) : TPoint;
+var
+  angle : extended;
+begin
+  angle := ArcTan2(pt.y-my,pt.x-mx);
+  result.x := round(cos(angle) * newdist) + mx;
+  result.y := round(sin(angle) * newdist) + my;
+end;
+
+function ChangeDistTPA(var TPA : TPointArray; mx,my : integer; newdist : extended) : boolean;
+var
+  angle : extended;
+  i : integer;
+begin
+  result := false;
+  if length(TPA) < 1 then
+    exit;
+  result := true;
+  try
+    for i := high(TPA) downto 0 do
+    begin
+      angle := ArcTan2(TPA[i].y-my,TPA[i].x-mx);
+      TPA[i].x := round(cos(angle) * newdist) + mx;
+      TPA[i].y := round(sin(angle) * newdist) + my;
+    end;
+  except
+    result := false;
+  end;
 end;
 
 {/\
@@ -265,6 +330,120 @@ begin
     if (Hits > Best) then
       Result := Current;
   end;
+end;
+
+
+procedure Sort(var Arr: TPointArray; Weights: TIntegerArray; SortUp: Boolean);
+begin
+  specialize QuickSortWeighted<TPoint, Integer>(Arr, Weights, Low(Arr), High(Arr), SortUp);
+end;
+
+procedure Sort(var Arr: T2DPointArray; Weights: TIntegerArray; SortUp: Boolean);
+begin
+  specialize QuickSortWeighted<TPointArray, Integer>(Arr, Weights, Low(Arr), High(Arr), SortUp);
+end;
+
+procedure Sort(var Arr: TIntegerArray);
+begin
+  specialize QuickSort<Integer>(Arr, Low(Arr), High(Arr));
+end;
+
+function Sorted(const Arr: TIntegerArray): TIntegerArray;
+begin
+  Result := Copy(Arr);
+  Sort(Result);
+end;
+
+function Unique(const TIA: TIntegerArray): TIntegerArray;
+var
+  I, J, Value, Size, Len: Int32;
+  Table: T2DIntegerArray;
+  Bucket: PIntegerArray;
+  Arr: specialize TSimbaOverAllocateArray<Integer>;
+label
+  Next;
+begin
+  Arr.Init();
+
+  SetLength(Table, NextPowerOf2(Length(TIA)));
+  Size := High(Table);
+
+  for i := 0 to High(TIA) do
+  begin
+    Value := TIA[i];
+    Bucket := @Table[Value and Size];
+    Len := Length(Bucket^);
+
+    for J := 0 to Len - 1 do
+      if Bucket^[J] = Value then
+        goto Next;
+
+    SetLength(Bucket^, Len + 1);
+    Bucket^[Len] := Value;
+
+    Arr.Add(Value);
+
+    Next:
+  end;
+
+  Result := Arr.Trim();
+end;
+
+function Unique(const Points: TPointArray): TPointArray;
+var
+  Matrix: TBooleanMatrix;
+  I, Count: Integer;
+begin
+  SetLength(Result, Length(Points));
+
+  if (Length(Points) > 0) then
+  begin
+    Count := 0;
+
+    with GetTPABounds(Points) do
+    begin
+     // Matrix.SetSize(Width, Height);
+
+      for I := 0 to High(Points) do
+        if not Matrix[Points[I].Y - Y1, Points[I].X - X1] then
+        begin
+          Matrix[Points[I].Y - Y1, Points[I].X - X1] := True;
+          Result[Count] := Points[I];
+          Inc(Count);
+        end;
+    end;
+
+    SetLength(Result, Count);
+  end;
+end;
+
+function Unique(const Arr: TDoubleArray): TDoubleArray;
+var
+  i,j,last:Integer;
+begin
+  Result := Copy(Arr);
+
+  last := Length(Result);
+
+  i:=0;
+  while (i < last) do
+  begin
+    j := i+1;
+    while (j < last) do
+    begin
+      if SameValue(Result[i], Result[j]) then
+      begin
+        Result[j] := Result[last-1];
+        dec(last);
+        dec(j);
+      end;
+
+      Inc(j);
+    end;
+    Inc(i);
+  end;
+
+  SetLength(Result, last);
 end;
 
 end.

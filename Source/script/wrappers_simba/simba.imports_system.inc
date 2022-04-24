@@ -114,7 +114,11 @@ FSection := ''; // hide from codeinsight
 addGlobalFunc('procedure _Write(S: String); override', @_LapeWrite);
 addGlobalFunc('procedure _WriteLn; override', @_LapeWriteLn);
 
-addGlobalFunc('procedure _Sort(var a: TIntegerArray); overload;', @_LapeSortTIA);
+addGlobalFunc('procedure _Sort(var a: TIntegerArray); overload;', @_LapeSortIntegerArray);
+addGlobalFunc('procedure _Sort(var a: TPointArray; constref Weights: array of Int64); overload;', @_LapeSortWeightedTPA);
+addGlobalFunc('procedure _Sort(var a: T2DPointArray; constref Weights: array of Int64); overload;', @_LapeSortWeightedATPA);
+addGlobalFunc('procedure _Sort(var a: TPointArray; constref Weights: array of Extended); overload;', @_LapeSortWeightedTPAF);
+addGlobalFunc('procedure _Sort(var a: T2DPointArray; constref Weights: array of Extended); overload;', @_LapeSortWeightedATPAF);
 
 addGlobalFunc('function _Unique(const a: TPointArray): TPointArray; overload', @_LapeUniqueTPA);
 addGlobalFunc('function _Unique(const a: TIntegerArray): TIntegerArray; overload', @_LapeUniqueTIA);
