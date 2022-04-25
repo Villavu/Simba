@@ -242,6 +242,7 @@ begin
 
   FEditor.MarkTextAsSaved();
   FEditor.InvalidateGutter();
+  FEditor.ModifiedLinesGutter.ReCalc();
   if (FEditor.OnChange <> nil) then
     FEditor.OnChange(FEditor);
 end;
