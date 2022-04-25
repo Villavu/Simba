@@ -23,7 +23,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.mufasatypes, simba.matrixhelpers;
+  simba.mufasatypes, simba.helpers_matrix;
 
 type
   TRGBMatrix = record

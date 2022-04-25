@@ -28,7 +28,7 @@ type
 implementation
 
 uses
-  simba.colormath, simba.matrixhelpers, simba.overallocatearray;
+  simba.colormath, simba.helpers_matrix, simba.overallocatearray;
 
 function TFindBitmapBuffer.Find(Bitmap: TMufasaBitmap; out X, Y: Integer; Tolerance: Integer): Boolean;
 var

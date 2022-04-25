@@ -140,7 +140,7 @@ implementation
 
 uses
   math,
-  simba.client, simba.tpa, simba.matrixhelpers;
+  simba.client, simba.tpa, simba.helpers_matrix;
 
 var
   Percentage: array[0..255] of Extended;

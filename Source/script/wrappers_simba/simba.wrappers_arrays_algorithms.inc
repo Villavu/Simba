@@ -1,6 +1,6 @@
 procedure _LapeSortIntegerArray(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  specialize QuickSort<Integer>(PIntegerArray(Params^[0])^, Low(PIntegerArray(Params^[0])^), High(PIntegerArray(Params^[0])^));
+  Sort(PIntegerArray(Params^[0])^);
 end;
 
 procedure _LapeSortWeightedTPA(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -95,12 +95,12 @@ end;
 
 procedure _LapeInvertTPA(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  InvertTPA(PPointArray(Params^[0])^);
+  Reverse(PPointArray(Params^[0])^);
 end;
 
 procedure _LapeInvertATPA(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  InvertATPA(P2DPointArray(Params^[0])^);
+  Reverse(P2DPointArray(Params^[0])^);
 end;
 
 procedure _LapeMiddleTPAEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -350,17 +350,17 @@ end;
 
 procedure _LapeInvertTIA(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  InvertTIA(PIntegerArray(Params^[0])^);
+  Reverse(PIntegerArray(Params^[0])^);
 end;
 
 procedure _LapeAverageTIA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInt64(Result)^ := AverageTIA(PIntegerArray(Params^[0])^);
+  PInt64(Result)^ := Average(PIntegerArray(Params^[0])^);
 end;
 
 procedure _LapeAverageExtended(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PExtended(Result)^ := AverageExtended(PExtendedArray(Params^[0])^);
+  PExtended(Result)^ := Average(PExtendedArray(Params^[0])^);
 end;
 
 procedure _LapeQuicksort(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -400,11 +400,11 @@ end;
 
 procedure _LapeSumIntegerArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInt64(Result)^ := SumIntegerArray(PIntegerArray(Params^[0])^);
+  PInt64(Result)^ := Sum(PIntegerArray(Params^[0])^);
 end;
 
 procedure _LapeClearSameIntegers(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  ClearSameIntegers(PIntegerArray(Params^[0])^);
+  PIntegerArray(Params^[0])^ := Unique(PIntegerArray(Params^[0])^);
 end;
 

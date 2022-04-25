@@ -3,9 +3,9 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 
-  Basic matrix methods to be added to matrix types.
+  Generic methods for matrices.
 }
-unit simba.matrix_generics;
+unit simba.generics_matrix;
 
 {$i simba.inc}
 

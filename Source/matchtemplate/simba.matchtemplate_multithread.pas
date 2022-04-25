@@ -26,7 +26,7 @@ implementation
 
 uses
   math,
-  simba.threadpool, simba.matrixhelpers;
+  simba.threadpool, simba.helpers_matrix;
 
 type
   TMatchTemplateCacheSlices = class(TMatchTemplateCache)

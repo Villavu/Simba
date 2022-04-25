@@ -22,7 +22,8 @@ interface
 
 uses
   sysutils,
-  simba.fftpack4_core, simba.mufasatypes, simba.matrixhelpers;
+  simba.fftpack4_core, simba.mufasatypes,
+  simba.helpers_matrix;
 
 type
   TFFTPACK = record

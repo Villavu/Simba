@@ -1,4 +1,11 @@
-unit simba.array_generics;
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+
+  Generic methods for arrays.
+}
+unit simba.generics_array;
 
 {$i simba.inc}
 
@@ -19,6 +26,23 @@ generic procedure Reverse<T>(var Arr: specialize TArray<T>);
 generic function Reversed<T>(const Arr: specialize TArray<T>): specialize TArray<T>;
 generic function IndexOf<_T>(const Item: _T; const Arr: specialize TArray<_T>): Integer;
 generic function IndicesOf<_T>(const Item: _T; const Arr: specialize TArray<_T>): TIntegerArray;
+generic function Mode<_T>(const Arr: specialize TArray<_T>): Integer;
+generic procedure Sort<_T>(var Arr: specialize TArray<_T>);
+generic function Sorted<_T>(const Arr: specialize TArray<_T>): specialize TArray<_T>;
+
+function MinA(const Arr: TIntegerArray): Integer; overload;
+function MinA(const Arr: TExtendedArray): Extended; overload;
+function MaxA(const Arr: TIntegerArray): Integer; overload;
+function MaxA(const Arr: TExtendedArray): Extended; overload;
+function Sum(const Arr: TIntegerArray): Int64; overload;
+function Sum(const Arr: TExtendedArray): Extended; overload;
+function Average(const Arr: TIntegerArray): Int64; overload;
+function Average(const Arr: TExtendedArray): Extended; overload;
+function Mode(const Arr: TIntegerArray): Integer;
+procedure Sort(var Arr: TIntegerArray);
+procedure Reverse(var Arr: TIntegerArray);
+procedure Reverse(var Arr: TPointArray);
+procedure Reverse(var Arr: T2DPointArray);
 
 implementation
 
@@ -264,6 +288,125 @@ begin
       Res.Add(I);
 
   Result := Res.Trim();
+end;
+
+generic procedure Sort<_T>(var Arr: specialize TArray<_T>);
+begin
+  specialize QuickSort<_T>(Arr, Low(Arr), High(Arr));
+end;
+
+generic function Sorted<_T>(const Arr: specialize TArray<_T>): specialize TArray<_T>;
+begin
+  Result := Copy(Arr);
+
+  specialize QuickSort<_T>(Result, Low(Result), High(Result));
+end;
+
+generic function Mode<_T>(const Arr: specialize TArray<_T>): Integer;
+var
+  SortedArray: specialize TArray<_T>;
+  I, Current, Hits: Integer;
+  Best: _T;
+begin
+  Result := 0;
+
+  if Length(Arr) > 0 then
+  begin
+    SortedArray := specialize Sorted<Integer>(Arr);
+
+    Current := SortedArray[0];
+    Hits := 1;
+    Best := 0;
+
+    for I := 1 to High(SortedArray) do
+    begin
+      if (SortedArray[I] <> Current) then
+      begin
+        if (Hits > Best) then
+        begin
+          Best := Hits;
+          Result := Current;
+        end;
+
+        Current := SortedArray[I];
+        Hits := 0;
+      end;
+
+      Inc(Hits);
+    end;
+
+    if (Hits > Best) then
+      Result := Current;
+  end;
+end;
+
+function MinA(const Arr: TIntegerArray): Integer;
+begin
+  Result := specialize MinA<Integer>(Arr);
+end;
+
+function MinA(const Arr: TExtendedArray): Extended;
+begin
+  Result := specialize MinA<Extended>(Arr);
+end;
+
+function MaxA(const Arr: TIntegerArray): Integer;
+begin
+  Result := specialize MaxA<Integer>(Arr);
+end;
+
+function MaxA(const Arr: TExtendedArray): Extended;
+begin
+  Result := specialize MaxA<Extended>(Arr);
+end;
+
+function Sum(const Arr: TIntegerArray): Int64;
+begin
+  Result := specialize Sum<Integer, Int64>(Arr);
+end;
+
+function Sum(const Arr: TExtendedArray): Extended;
+begin
+  Result := specialize Sum<Extended, Extended>(Arr);
+end;
+
+function Average(const Arr: TIntegerArray): Int64;
+begin
+  Result := Sum(Arr);
+  if (Result <> 0) then
+    Result := Result div Length(Arr);
+end;
+
+function Average(const Arr: TExtendedArray): Extended;
+begin
+  Result := Sum(Arr);
+  if (Result <> 0) then
+    Result := Result / Length(Arr);
+end;
+
+function Mode(const Arr: TIntegerArray): Integer;
+begin
+  Result := specialize Mode<Integer>(Arr);
+end;
+
+procedure Sort(var Arr: TIntegerArray);
+begin
+  specialize QuickSort<Integer>(Arr, Low(Arr), High(Arr));
+end;
+
+procedure Reverse(var Arr: TIntegerArray);
+begin
+  specialize Reverse<Integer>(Arr);
+end;
+
+procedure Reverse(var Arr: TPointArray);
+begin
+  specialize Reverse<TPoint>(Arr);
+end;
+
+procedure Reverse(var Arr: T2DPointArray);
+begin
+  specialize Reverse<TPointArray>(Arr);
 end;
 
 end.
