@@ -46,9 +46,10 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
+    procedure ReCalc; reintroduce;
+
     procedure HideMarks;
     procedure ShowMarks;
-
     procedure ClearMarks;
 
     procedure AddMark(ALine, AColor: Integer);
@@ -164,6 +165,11 @@ begin
     FreeAndNil(FLineMarks);
 
   inherited Destroy();
+end;
+
+procedure TSimbaEditor_ModifiedLinesGutter.ReCalc;
+begin
+  inherited ReCalc();
 end;
 
 procedure TSimbaEditor_ModifiedLinesGutter.HideMarks;
@@ -551,8 +557,7 @@ begin
 
   FAttributes := TSimbaEditor_Attributes.Create(Self);
 
-  Gutter.ChangesPart.ModifiedColor := RGBToColor(190, 0, 0);
-  Gutter.ChangesPart.SavedColor := RGBToColor(2, 100, 64);
+  Gutter.ChangesPart.ModifiedColor := RGBToColor(255, 192, 0);
 
   with TSynGutterLineOverview.Create(RightGutter.Parts) do
   begin

@@ -77,7 +77,7 @@ jobs:
               chmod +x ${{ matrix.config.test }}
           fi
           
-          ./${{ matrix.config.test }} --run "Tests/runner"
+          ./${{ matrix.config.test }} --run "Tests/tester.simba"
 
       - name: Upload Binary 
         uses: actions/upload-artifact@v3.0.0

@@ -46,6 +46,8 @@ type
     procedure DoOnTabChange(Sender: TObject);
     procedure DoTabPopupClick(Sender: TObject);
     procedure DoTabPopupOpen(Sender: TObject);
+    // Open new tab if empty tab area on the right is clicked
+    procedure DoDoubleClick(Sender: TObject);
   protected
     FEditorReplace: TSimbaEditorReplace;
     FEditorFind: TSimbaEditorFind;
@@ -193,6 +195,12 @@ begin
   MenuItemCloseOtherTabs.Enabled := Notebook.IndexOfPageAt(NoteBook.ScreenToClient(TabPopupMenu.PopupPoint)) >= 0;
 end;
 
+procedure TSimbaScriptTabsForm.DoDoubleClick(Sender: TObject);
+begin
+  if (ScreenToClient(Mouse.CursorPos).Y < NoteBook.TabRect(0).Height) then
+    AddTab();
+end;
+
 procedure TSimbaScriptTabsForm.CaretMoved(Sender: TObject; Changes: TSynStatusChanges);
 begin
   if (FOnEditorCaretChanged <> nil) then
@@ -210,6 +218,8 @@ begin
 
   FEditorReplace := TSimbaEditorReplace.Create(Self);
   FEditorFind := TSimbaEditorFind.Create(Self);
+
+  OnDblClick := @DoDoubleClick;
 end;
 
 function TSimbaScriptTabsForm.GetTabCount: Integer;
