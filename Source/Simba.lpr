@@ -19,17 +19,11 @@ uses
 
 type
   TApplicationHelper = class helper for TApplication
-    procedure HandleException(Sender: TObject; E: Exception);
     procedure HandleAnalytics(Data: PtrInt);
     procedure SendAnalytics;
 
     procedure DebugLnSilent(Sender: TObject; S: string; var Handled: Boolean);
   end;
-
-procedure TApplicationHelper.HandleException(Sender: TObject; E: Exception);
-begin
-  { no graphical error message at this point }
-end;
 
 procedure TApplicationHelper.HandleAnalytics(Data: PtrInt);
 begin
@@ -38,6 +32,9 @@ end;
 
 procedure TApplicationHelper.SendAnalytics;
 begin
+  if HasOption('Secret') then
+    Exit;
+
   with TSimbaHTTPClient.Create() do
   try
     // Simple HTTP request - nothing extra is sent.
@@ -58,7 +55,7 @@ begin
   SetHeapTraceOutput('memory-leaks.trc');
   {$ENDIF}
 
-  Application.OnException := @Application.HandleException;
+  Application.CaptureExceptions := False;
   Application.Initialize();
 
   if Application.HasOption('dumpcompiler') then
@@ -125,4 +122,3 @@ begin
 
   Application.Run();
 end.
-
