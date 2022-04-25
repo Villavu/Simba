@@ -28,7 +28,7 @@ object SimbaForm: TSimbaForm
     ShowHint = True
     TabOrder = 0
     object ToolbarButtonRun: TToolButton
-      Left = 109
+      Left = 111
       Hint = 'Run Script (Alt + R)'
       Top = 2
       Caption = '&Run'
@@ -36,7 +36,7 @@ object SimbaForm: TSimbaForm
       OnClick = MenuItemScriptStateClick
     end
     object ToolbarButtonPause: TToolButton
-      Left = 129
+      Left = 131
       Hint = 'Pause Script'
       Top = 2
       Caption = '&Pause'
@@ -45,7 +45,7 @@ object SimbaForm: TSimbaForm
       OnClick = MenuItemScriptStateClick
     end
     object StopButtonStop: TToolButton
-      Left = 149
+      Left = 151
       Hint = 'Stop Script (Alt + S)'
       Top = 2
       Caption = '&Stop'
@@ -54,13 +54,13 @@ object SimbaForm: TSimbaForm
       OnClick = MenuItemScriptStateClick
     end
     object ToolbarDivider1: TToolButton
-      Left = 105
+      Left = 106
       Height = 22
       Top = 2
       Style = tbsDivider
     end
     object ToolbarButtonClearOutput: TToolButton
-      Left = 217
+      Left = 221
       Hint = 'Clear Output'
       Top = 2
       Caption = 'Clear'
@@ -68,7 +68,7 @@ object SimbaForm: TSimbaForm
       OnClick = MenuClearOutputClick
     end
     object ToolbarButtonColorPicker: TToolButton
-      Left = 193
+      Left = 196
       Hint = 'Color Picker'
       Top = 2
       Caption = 'ToolbarButtonColorPicker'
@@ -76,7 +76,7 @@ object SimbaForm: TSimbaForm
       OnClick = ToolbarButtonColorPickerClick
     end
     object ToolbarButtonTargetSelector: TToolButton
-      Left = 173
+      Left = 176
       Hint = 'Target Selector'
       Top = 2
       Caption = 'ToolbarButtonTargetSelector'
@@ -84,7 +84,7 @@ object SimbaForm: TSimbaForm
       OnMouseDown = ToolbarButtonSelectTargetClick
     end
     object ToolbarDivider2: TToolButton
-      Left = 237
+      Left = 241
       Height = 22
       Top = 2
       Style = tbsDivider
@@ -132,26 +132,26 @@ object SimbaForm: TSimbaForm
       OnClick = ToolbarButtonSaveAllClick
     end
     object ToolbarDivider4: TToolButton
-      Left = 213
+      Left = 216
       Height = 22
       Top = 2
       Style = tbsDivider
     end
     object ToolbarButtonCompile: TToolButton
-      Left = 85
+      Left = 86
       Hint = 'Compile Script (Alt + C)'
       Top = 2
       ImageIndex = 0
       OnClick = MenuItemScriptStateClick
     end
     object ToolbarDivider5: TToolButton
-      Left = 169
+      Left = 171
       Height = 22
       Top = 2
       Style = tbsDivider
     end
     object ToolbarButtonPackages: TToolButton
-      Left = 241
+      Left = 246
       Hint = 'Open Packages'
       Top = 2
       Caption = 'ToolbarButtonPackages'

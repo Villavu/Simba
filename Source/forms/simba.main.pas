@@ -571,7 +571,9 @@ end;
 
 procedure TSimbaForm.FormCreate(Sender: TObject);
 begin
+  Application.CaptureExceptions := True;
   Application.OnException := @SimbaForm.HandleException;
+
   Screen.AddHandlerFormAdded(@SimbaForm.HandleFormCreated, True);
 
   FRecentFiles := TStringList.Create();
@@ -579,9 +581,9 @@ begin
 
   CreateBaseDirectories();
 
-  {$IFNDEF DARWIN}
+  {$IFDEF WINDOWS}
   if SimbaSettings.Environment.OpenSSLOnLaunch.Value then
-    InitializeOpenSSL();
+    ExtractOpenSSL();
   {$ENDIF}
 
   CodeTools_Setup();

@@ -1,0 +1,24 @@
+var
+  FileName, Output: String;
+  Fails: Integer;
+begin
+  for FileName in FindFiles({$macro CURRENT_DIRECTORY}, ['simba']) do
+  begin
+    if (FileName = {$macro CURRENT_FILE}) then
+      Continue;
+
+    WriteLn('Testing: ' + ExtractFileName(FileName));
+
+    if RunScript(FileName, ['--silent=true'], Output) = 0 then
+      WriteLn('Passed')
+    else
+    begin
+      WriteLn('Failed "' + Trim(Output) + '"');
+
+      Inc(Fails);
+    end;
+  end;
+
+  if (Fails > 0) then
+    raise IntToStr(Fails) + ' failed tests';
+end.
