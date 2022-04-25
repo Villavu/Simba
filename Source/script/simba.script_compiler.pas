@@ -61,8 +61,8 @@ uses
   simba.aca, simba.dtmeditor, simba.script_communication,
   simba.imagebox, simba.client,simba.jsonparser, simba.xmlparser,
   simba.finder, simba.target, simba.fontloader, simba.ocr,
-  simba.ocrutil, simba.matrixhelpers, simba.nativeinterface,
-  simba.array_generics, simba.target_window, simba.mmltimer,
+  simba.ocrutil, simba.helpers_matrix, simba.nativeinterface,
+  simba.generics_array, simba.target_window, simba.mmltimer,
 
   simba.script_compiler_onterminate,
   simba.script_compiler_waituntil;

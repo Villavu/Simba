@@ -10,7 +10,7 @@ unit simba.tpa;
 interface
 
 uses
-  Classes, SysUtils,
+  classes, sysutils,
   simba.mufasatypes;
 
 procedure RAaSTPAEx(var a: TPointArray; const w, h: Integer);
@@ -33,8 +33,6 @@ procedure SortATPAFromFirstPoint(var a: T2DPointArray; const From: TPoint);
 procedure SortATPAFromMidPoint(var a: T2DPointArray; const From: TPoint);
 procedure SortATPAFromFirstPointX(var a: T2DPointArray; const From: TPoint);
 procedure SortATPAFromFirstPointY(var a: T2DPointArray; const From: TPoint);
-procedure InvertTPA(var a: TPointArray);
-procedure InvertATPA(var a: T2DPointArray);
 function MiddleTPAEx(const TPA: TPointArray; var x, y: Integer): Boolean;
 function MiddleTPA(const tpa: TPointArray): TPoint;
 procedure MedianTPAEx(const TPA: TPointArray; out X, Y: Integer);
@@ -44,7 +42,6 @@ procedure SortATPAFromSize(var a: T2DPointArray; const Size: Integer; CloseFirst
 procedure FilterTPAsBetween(var atpa: T2DPointArray; const minLength, maxLength: integer);
 function InIntArrayEx(const a: TIntegerArray; var Where: Integer; const Number: Integer): Boolean;
 function InIntArray(const a: TIntegerArray; Number: Integer): Boolean;
-procedure ClearSameIntegers(var a: TIntegerArray);
 function SplitTPAEx(const arr: TPointArray; w, h: Integer): T2DPointArray;
 function SplitTPA(const arr: TPointArray; Dist: Integer): T2DPointArray;
 function ClusterTPAEx(const TPA: TPointArray; width, height: Integer): T2DPointArray;
@@ -77,10 +74,6 @@ function PointInTPA(const p: TPoint;const arP: TPointArray): Boolean;
 function ClearTPAFromTPA(const arP, ClearPoints: TPointArray): TPointArray;
 procedure ClearDoubleTPA(var TPA: TPointArray);
 function ReturnPointsNotInTPA(const TPA: TPointArray; Area: TBox): TPointArray;
-procedure InvertTIA(var tI: TIntegerArray);
-function SumIntegerArray(const Arr: TIntegerArray): Int64;
-function AverageTIA(const Arr: TIntegerArray): Int64;
-function AverageExtended(const Arr: TExtendedArray): Extended;
 function SameTPA(const aTPA, bTPA: TPointArray): Boolean;
 function TPAInATPA(const TPA: TPointArray;const InATPA: T2DPointArray; var Index: LongInt): Boolean;
 procedure OffsetTPA(var TPA : TPointArray; const Offset : TPoint);
@@ -97,7 +90,8 @@ implementation
 
 uses
   math,
-  simba.math, simba.slacktree, simba.matrixhelpers, simba.overallocatearray, simba.array_generics;
+  simba.math, simba.slacktree, simba.overallocatearray,
+  simba.generics_array, simba.helpers_matrix;
 
 function PointsInRangeOf(Points, Other: TPointArray; MinDist, MaxDist: Double): TPointArray; overload;
 var
@@ -629,36 +623,6 @@ begin
 end;
 
 {/\
-  Inverts / Reverses the TPointArray a.
-/\}
-procedure InvertTPA(var a: TPointArray);
-var
-  i, l: Integer;
-  b: tpointarray;
-begin
-  l := High(a);
-  if (l < 0) then Exit;
-  b := Copy(a);
-  for i := l downto 0 Do
-    a[l - i] := b[i];
-end;
-
-{/\
-  Inverts / Reverts the T2DPointArray a.
-/\}
-procedure InvertATPA(var a: T2DPointArray);
-var
-  i, l: Integer;
-  b: T2DPointArray;
-begin
-  l := High(a);
-  if (l < 0) then Exit;
-  b := Copy(a);
-  for i := l downto 0 do
-    a[l - i] := b[i];
-end;
-
-{/\
   Stores the coordinates of the middle of the TPointArray a to X and Y.
 /\}
 function MiddleTPAEx(const TPA: TPointArray; var x, y: Integer): Boolean;
@@ -846,41 +810,6 @@ begin
       Result := True;
       Exit;
     end;
-end;
-
-procedure ClearSameIntegers(var a: TIntegerArray);
-var
-  n,l,i,j,c:Int32;
-  hash: UInt32;
-  table: T2DIntegerArray;
-  Isset: Boolean;
-begin
-  n := Length(a);
-  if (n <= 1) then
-    Exit;
-
-  SetLength(Table, Trunc(Power(2, Floor(Logn(2,n)) + 1)));
-  c := 0;
-  for i:=0 to n-1 do
-  begin
-    Isset := False;
-    hash := a[i] and High(Table);
-    l := Length(Table[hash]);
-    for j:=0 to l-1 do
-      if (Table[hash][j] = a[i]) then
-      begin
-        Isset := True;
-        Break;
-      end;
-    if not(Isset) then
-    begin
-      SetLength(Table[hash], l+1);
-      Table[hash][l] := a[i];
-      a[c] := a[i];
-      Inc(c);
-    end;
-  end;
-  SetLength(a, c);
 end;
 
 {/\
@@ -1446,7 +1375,8 @@ begin
   begin
     if natural then
     begin
-      if Ccw then specialize Swap<Extended>(StartD, EndD);
+      if Ccw then
+        Swap(StartD, EndD);
       if StartD > EndD then EndD := EndD + 360;
     end;
 
@@ -2673,39 +2603,6 @@ begin
   SetLength(Result, i);
 end;
 
-function SumIntegerArray(const Arr: TIntegerArray): Int64;
-begin
-  Result := specialize Sum<Integer, Int64>(Arr);
-end;
-
-function AverageTIA(const Arr: TIntegerArray): Int64;
-begin
-  Result := specialize Sum<Integer, Int64>(Arr);
-  if (Result <> 0) then
-    Result := Result div Length(Arr);
-end;
-
-function AverageExtended(const Arr: TExtendedArray): Extended;
-begin
-  Result := specialize Sum<Extended, Extended>(Arr);
-  if (Result <> 0) then
-    Result := Result / Length(Arr);
-end;
-
-{/\
-  Inverts the IntegerArray, last becomes first etc..
-/\}
-procedure InvertTIA(var tI: TIntegerArray);
-var
-  Temp: TIntegerArray;
-  i, h: Integer;
-begin
-  h := High(tI);
-  Temp := Copy(tI);
-  for i := 0 to h do
-    tI[i] := Temp[h - i];
-end;
-
 {/\
   Returns true if the two inputed TPA's are exactly the same (so the order matters)
 /\}
@@ -2723,6 +2620,7 @@ begin
       Exit;
   Result := True;
 end;
+
 {/\
   Returns true if the TPA is found as one of ATPA's sub-TPA's.. And again, order matters
 /\}

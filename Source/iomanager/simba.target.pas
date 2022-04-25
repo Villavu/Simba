@@ -72,7 +72,7 @@ type
 implementation
 
 uses
-  simba.colormath, simba.matrixhelpers;
+  simba.colormath, simba.helpers_matrix;
 
 procedure TTarget.GetTargetPosition(out Left, Top: Integer);
 var

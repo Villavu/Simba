@@ -204,7 +204,7 @@ implementation
 uses
   math, intfgraphics,
   simba.tpa, simba.stringutil, simba.colormath, simba.iomanager, simba.overallocatearray,
-  simba.matrixhelpers;
+  simba.helpers_matrix;
 
 function TBitmap_Helper.DataFormat: TBitmapDataFormat;
 var

@@ -70,7 +70,8 @@ implementation
 
 uses
   math,
-  simba.FFTPACK4, simba.matrixhelpers, simba.matchtemplate_matrix, simba.matchtemplate_multithread;
+  simba.FFTPACK4, simba.helpers_matrix,
+  simba.matchtemplate_matrix, simba.matchtemplate_multithread;
 
 // -----------------------------------------------------------------------------
 // Helpers

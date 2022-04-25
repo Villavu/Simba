@@ -40,28 +40,11 @@ function Modulo(const X, Y: Double): Double; inline; overload;
 function Modulo(const X, Y: Single): Single; inline; overload;
 function Modulo(const X, Y: Integer): Integer; inline; overload;
 
-function MaxA(const Arr: TIntegerArray): Integer; overload;
-function MinA(const Arr: TIntegerArray): Integer; overload;
-
-function MaxA(const Arr: TExtendedArray): Extended; overload;
-function MinA(const Arr: TExtendedArray): Extended; overload;
-
-function Sum(const Arr: TIntegerArray): Int64; overload;
-function Sum(const Arr: TExtendedArray): Extended; overload;
-
-function Average(const Arr: TIntegerArray): Int64; overload;
-function Average(const Arr: TExtendedArray): Extended; overload;
-
-function Mode(const Arr: TIntegerArray): Integer;
-
-procedure Sort(var Arr: TIntegerArray);
-
 function TruncatedGauss(Left:Double=0; Right:Double=1; CUTOFF:Single=4): Double;
 
 implementation
 
 uses
-  simba.array_generics, simba.tpa,
   math;
 
 function IsNumber(const n: Double): Boolean;
@@ -224,95 +207,6 @@ end;
 function PointInBox(PT : TPoint; Box: TBox): Boolean;
 begin
   result := (((PT.x >= Box.x1) and(PT.x <= Box.x2)) and ((PT.y>= box.y1) and (PT.y <= box.y2)));
-end;
-
-function MaxA(const Arr: TIntegerArray): Integer;
-begin
-  Result := specialize MaxA<Integer>(Arr);
-end;
-
-function MinA(const Arr: TIntegerArray): Integer;
-begin
-  Result := specialize MinA<Integer>(Arr);
-end;
-
-function MaxA(const Arr: TExtendedArray): Extended;
-begin
-  Result := specialize MaxA<Extended>(Arr);
-end;
-
-function MinA(const Arr: TExtendedArray): Extended;
-begin
-  Result := specialize MinA<Extended>(Arr);
-end;
-
-function Sum(const Arr: TIntegerArray): Int64;
-begin
-  Result := specialize Sum<Integer, Int64>(Arr);
-end;
-
-function Sum(const Arr: TExtendedArray): Extended;
-begin
-  Result := specialize Sum<Extended, Extended>(Arr);
-end;
-
-function Average(const Arr: TIntegerArray): Int64;
-begin
-  Result := Sum(Arr);
-  if (Result <> 0) then
-    Result := Result div Length(Arr);
-end;
-
-function Average(const Arr: TExtendedArray): Extended;
-begin
-  Result := Sum(Arr);
-  if (Result <> 0) then
-    Result := Result / Length(Arr);
-end;
-
-function Mode(const Arr: TIntegerArray): Integer;
-var
-  Self: TIntegerArray;
-  I: Integer;
-  Current, Hits: Integer;
-  Best: Integer;
-begin
-  Result := 0;
-
-  if Length(Arr) > 0 then
-  begin
-    Self := Copy(Arr);
-    Sort(Self);
-
-    Current := Self[0];
-    Hits := 1;
-    Best := 0;
-
-    for I := 1 to High(Self) do
-    begin
-      if (Self[I] <> Current) then
-      begin
-        if (Hits > Best) then
-        begin
-          Best := Hits;
-          Result := Current;
-        end;
-
-        Current := Self[I];
-        Hits := 0;
-      end;
-
-      Inc(Hits);
-    end;
-
-    if (Hits > Best) then
-      Result := Current;
-  end;
-end;
-
-procedure Sort(var Arr: TIntegerArray);
-begin
-  specialize QuickSort<Integer>(Arr, Low(Arr), High(Arr));
 end;
 
 function TruncatedGauss(Left:Double=0; Right:Double=1; CUTOFF:Single=4): Double;
