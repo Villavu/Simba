@@ -44,7 +44,6 @@ type
     procedure DoPopluateTreeView(Sender: TObject);
     procedure DoCreateNodeClass(var NodeClass: TTreeNodeClass); override;
 
-    procedure MouseLeave; override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
   public
     procedure Fill;
@@ -184,13 +183,6 @@ begin
   FUpdating := False;
 end;
 
-procedure TSimbaFileBrowser.MouseLeave;
-begin
-  inherited MouseLeave();
-
-  FHint.Visible := False;
-end;
-
 procedure TSimbaFileBrowser.MouseMove(Shift: TShiftState; X, Y: Integer);
 var
   Node: TTreeNode;
@@ -203,16 +195,12 @@ begin
   if (Node is TSimbaFileBrowserNode) then
   begin
     FileName := CreateRelativePath(TSimbaFileBrowserNode(Node).FileInfo.FileName, Application.Location);
-    if (FileName = '') or (FHint.Visible and (FHint.Caption = FileName)) then
+    if (FileName = '')  then
       Exit;
 
-    R := Node.DisplayRect(True);
-    R.TopLeft := ClientToScreen(R.TopLeft);
-    R.BottomRight := ClientToScreen(R.BottomRight);
-
-    FHint.ActivateHint(R, FileName);
+    FHint.Show(Node, FileName);
   end else
-    FHint.Visible := False;
+    FHint.Hide();
 end;
 
 procedure TSimbaFileBrowser.Fill;

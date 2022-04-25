@@ -341,7 +341,9 @@
       <Unit13>
         <Filename Value="forms/simba.outputform.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="SimbaOutputForm"/>
         <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
       </Unit13>
       <Unit14>
         <Filename Value="forms/simba.package_form.pas"/>

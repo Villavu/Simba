@@ -55,7 +55,6 @@ type
     procedure DoTreeViewSelectionChanged(Sender: TObject);
     procedure DoTreeViewDoubleClick(Sender: TObject);
     procedure DoTreeViewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-    procedure DoTreeViewMouseLeave(Sender: TObject);
     procedure DoAfterFilter(Sender: TObject);
   public
     procedure AddMethod(Declaration: TciProcedureDeclaration; ParentNode: TTreeNode);
@@ -183,7 +182,6 @@ end;
 procedure TSimbaFunctionList.DoTreeViewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
   Node: TTreeNode;
-  R: TRect;
   Header: String;
 begin
   Node := FTreeView.GetNodeAt(X, Y);
@@ -193,22 +191,12 @@ begin
     Header := TSimbaFunctionListNode(Node).Hint;
     if (Header = '') then
       Exit;
-
     if (Length(Header) > 180) then
       Header := Copy(Header, 1, 180) + ' ...';
 
-    R := Node.DisplayRect(True);
-    R.TopLeft := FTreeView.ClientToScreen(R.TopLeft);
-    R.BottomRight := FTreeView.ClientToScreen(R.BottomRight);
-
-    FHint.ActivateHint(R, Header);
+    FHint.Show(Node, Header);
   end else
     FHint.Hide();
-end;
-
-procedure TSimbaFunctionList.DoTreeViewMouseLeave(Sender: TObject);
-begin
-  FHint.Hide();
 end;
 
 procedure TSimbaFunctionList.AddMethod(Declaration: TciProcedureDeclaration; ParentNode: TTreeNode);
@@ -375,7 +363,6 @@ begin
   FTreeView.OnDblClick := @DoTreeViewDoubleClick;
   FTreeView.OnSelectionChanged := @DoTreeViewSelectionChanged;
   FTreeView.OnMouseMove := @DoTreeViewMouseMove;
-  FTreeView.OnMouseLeave := @DoTreeViewMouseLeave;
   FTreeView.Options := FTreeView.Options + [tvoNoDoubleClickExpand];
 
   FFilter := TTreeFilterEdit.Create(Self);
@@ -388,7 +375,7 @@ begin
   FFilter.TextHint := '(search)';
   FFilter.Flat := True;
 
-  FHint := TSimbaHintWindow.Create(Self);
+  FHint := TSimbaHintWindow.Create(FTreeView);
 
   FScriptNode := FTreeView.Items.Add(nil, 'Script');
   FScriptNode.ImageIndex := IMAGE_DIRECTORY;
