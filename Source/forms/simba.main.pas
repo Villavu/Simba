@@ -198,6 +198,7 @@ type
     procedure MenuSelectAllClick(Sender: TObject);
     procedure MenuUndoClick(Sender: TObject);
     procedure MenuViewClick(Sender: TObject);
+    procedure StatusPanelPaint(Sender: TObject);
     procedure TimerTimer(Sender: TObject);
     procedure ToolbarButtonColorPickerClick(Sender: TObject);
     procedure ToolbarButtonPackagesClick(Sender: TObject);
@@ -533,6 +534,26 @@ begin
   MenuItemDebugger.Enabled := SimbaScriptTabsForm.CurrentTab.DebuggingForm <> nil;
 end;
 
+procedure TSimbaForm.StatusPanelPaint(Sender: TObject);
+var
+  Style: TTextStyle;
+begin
+  Style := Default(TTextStyle);
+  Style.Layout := tlCenter;
+
+  with Sender as TPanel do
+  begin
+    Canvas.Brush.Color := Color;
+    Canvas.FillRect(ClientRect);
+
+    Canvas.Pen.Color := clActiveBorder;
+    Canvas.Line(0, 0, ClientWidth, 0);
+    Canvas.Line(0, 0, 0, ClientHeight);
+
+    Canvas.TextRect(ClientRect, 5, 0, Caption, Style);
+  end;
+end;
+
 procedure TSimbaForm.MenuItemFormatScriptClick(Sender: TObject);
 var
   Script: String;
@@ -677,25 +698,25 @@ begin
 end;
 
 procedure TSimbaForm.SizeComponents;
-var
-  Size: TSize;
 begin
   if (ControlCount = 0) then
     Exit;
 
   with TBitmap.Create() do
   try
+    // Measure on slightly bigger font size
+    // Font size can be 0 so use GetFontData
     Canvas.Font := Self.Font;
-    Size := Canvas.TextExtent('TaylorSwift');
+    Canvas.Font.Size := Round(-GetFontData(Canvas.Font.Reference.Handle).Height * 72 / Canvas.Font.PixelsPerInch) + 3;
+
+    StatusBar.Height := Canvas.TextHeight('Taylor Swift');
+
+    StatusPanelCursor.Width := Canvas.TextWidth('(10000, 10000)');
+    StatusPanelState.Width  := Canvas.TextWidth('[000:000:000]');
+    StatusPanelCaret.Width  := Canvas.TextWidth('Line 10000, Col 10000');
   finally
     Free();
   end;
-
-  StatusBar.Height := Round(Size.Height * 1.3);
-
-  StatusPanelCursor.Width := Round(Size.Width * 1.8);
-  StatusPanelState.Width  := Round(Size.Width * 1.6);
-  StatusPanelCaret.Width  := Round(Size.Width * 2);
 end;
 
 procedure TSimbaForm.SimbaSettingChanged(Setting: TSimbaSetting);
@@ -908,7 +929,7 @@ begin
         StopButtonStop.Enabled := True;
         StopButtonStop.ImageIndex := IMAGE_STOP;
 
-        StatusPanelState.Caption := ' Paused';
+        StatusPanelState.Caption := 'Paused';
       end;
 
     ESimbaScriptState.STATE_STOP:
@@ -920,7 +941,7 @@ begin
         StopButtonStop.Enabled := True;
         StopButtonStop.ImageIndex := IMAGE_POWER;
 
-        StatusPanelState.Caption := ' Stopping';
+        StatusPanelState.Caption := 'Stopping';
       end;
 
     ESimbaScriptState.STATE_RUNNING:
@@ -932,7 +953,7 @@ begin
         StopButtonStop.Enabled := True;
         StopButtonStop.ImageIndex := IMAGE_STOP;
 
-        StatusPanelState.Caption := ' ' + FormatMilliseconds(Tab.ScriptTimeRunning, '[h:m:s]');
+        StatusPanelState.Caption := FormatMilliseconds(Tab.ScriptTimeRunning, '[h:m:s]');
       end;
 
     ESimbaScriptState.STATE_NONE:
@@ -944,7 +965,7 @@ begin
         StopButtonStop.Enabled := False;
         StopButtonStop.ImageIndex := IMAGE_STOP;
 
-        StatusPanelState.Caption := ' Stopped';
+        StatusPanelState.Caption := 'Stopped';
       end;
   end;
 
@@ -953,7 +974,7 @@ begin
       FWindowSelection := GetDesktopWindow();
 
     with FWindowSelection.GetRelativeCursorPos() do
-      StatusPanelCursor.Caption := '  (' + IntToStr(X) + ', ' + IntToStr(Y) + ')';
+      StatusPanelCursor.Caption := '(' + IntToStr(X) + ', ' + IntToStr(Y) + ')';
   except
     on E: Exception do
       DebugLn(E.Message);
@@ -1016,11 +1037,11 @@ begin
   with Sender as TSimbaScriptTab do
   begin
     if (ScriptFileName <> '') then
-      StatusPanelFileName.Caption := ' ' + ScriptFileName
+      StatusPanelFileName.Caption := ScriptFileName
     else
-      StatusPanelFileName.Caption := ' ' + ScriptTitle;
+      StatusPanelFileName.Caption := ScriptTitle;
 
-    StatusPanelCaret.Caption := ' Line ' + IntToStr(Editor.CaretY) + ', Col ' + IntToStr(Editor.CaretX);
+    StatusPanelCaret.Caption := 'Line ' + IntToStr(Editor.CaretY) + ', Col ' + IntToStr(Editor.CaretX);
 
     MenuItemSaveAll.Enabled := PageControl.PageCount > 1;
     ToolbarButtonSaveAll.Enabled := PageControl.PageCount > 1;
@@ -1031,7 +1052,7 @@ procedure TSimbaForm.HandleEditorLoaded(Sender: TObject);
 begin
   with Sender as TSimbaScriptTab do
   begin
-    StatusPanelFileName.Caption := ' ' + ScriptFileName;
+    StatusPanelFileName.Caption := ScriptFileName;
 
     if FRecentFiles.IndexOf(ScriptFileName) >= 0 then
       FRecentFiles.Delete(FRecentFiles.IndexOf(ScriptFileName));
@@ -1044,7 +1065,7 @@ end;
 procedure TSimbaForm.HandleEditorCaretChange(Sender: TObject);
 begin
   with Sender as TSimbaEditor do
-    StatusPanelCaret.Caption := ' Line ' + IntToStr(CaretY) + ', Col ' + IntToStr(CaretX);
+    StatusPanelCaret.Caption := 'Line ' + IntToStr(CaretY) + ', Col ' + IntToStr(CaretX);
 end;
 
 procedure TSimbaForm.MenuEditClick(Sender: TObject);

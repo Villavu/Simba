@@ -15,14 +15,11 @@ uses
 
 type
   TSimbaGeneralFrame = class(TFrame)
-    UseMacOSCommandKey: TCheckBox;
-    KeystrokesDivider: TDividerBevel;
-    OpenSSLoadedValueCaption: TLabel;
-    OpenSSLStartupCheckbox: TCheckBox;
-    OpenSSLDivider: TDividerBevel;
+    MacOSCommandKey: TCheckBox;
+    ExtractOpenSSLCheckbox: TCheckBox;
+    GeneralDivider: TDividerBevel;
     ToolbarSizeCaption: TLabel;
     FontSizeLabel: TLabel;
-    OpenSSLLoadedCaption: TLabel;
     ToolbarSizeTrackBar: TTrackBar;
     FontSizeTrackBar: TTrackBar;
 
