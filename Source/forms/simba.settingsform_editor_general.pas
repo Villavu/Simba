@@ -10,19 +10,23 @@ unit simba.settingsform_editor_general;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, StdCtrls, Spin, DividerBevel;
+  Classes, SysUtils, Forms, Controls, StdCtrls, Spin, ExtCtrls, DividerBevel;
 
 type
   TEditorGeneralFrame = class(TFrame)
-    IgnoreCodeToolsDirectiveCheckbox: TCheckBox;
+    CompleteBeginCheckbox: TCheckBox;
+    CompleteParenthesesCheckbox: TCheckBox;
+    CompleteIndexCheckbox: TCheckBox;
+    CompleteDivider: TDividerBevel;
+    IgnoreCodetoolsDirectiveCheckbox: TCheckBox;
     CaretPastEOLCheckBox: TCheckBox;
     DividerBevel4: TDividerBevel;
+    CompleteLabel: TLabel;
     VisibleRightMarginCheckbox: TCheckBox;
-    Label2: TLabel;
+    MarginValueLabel: TLabel;
     ShowParameterHintsCheckbox: TCheckBox;
     OpenAutoCompletionCheckbox: TCheckBox;
     DividerBevel1: TDividerBevel;
-    DividerBevel2: TDividerBevel;
     RightMarginEdit: TSpinEdit;
   private
 

@@ -32,7 +32,7 @@ end;
 
 procedure TApplicationHelper.SendAnalytics;
 begin
-  if HasOption('Secret') then
+  if HasOption('secret') then
     Exit;
 
   with TSimbaHTTPClient.Create() do

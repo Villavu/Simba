@@ -7,8 +7,8 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
   ClientWidth = 457
   ParentFont = False
   TabOrder = 0
-  DesignLeft = 1385
-  DesignTop = 424
+  DesignLeft = 1662
+  DesignTop = 583
   object ToolbarSizeTrackBar: TTrackBar
     AnchorSideLeft.Control = ToolbarSizeCaption
     AnchorSideLeft.Side = asrBottom
@@ -17,10 +17,10 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Side = asrBottom
-    Left = 160
+    Left = 128
     Height = 31
-    Top = 42
-    Width = 297
+    Top = 41
+    Width = 329
     Max = 32
     Min = 12
     OnChange = ToolbarSizeTrackBarChange
@@ -29,7 +29,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Align = alCustom
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 15
-    BorderSpacing.Top = 6
+    BorderSpacing.Top = 5
     ParentFont = False
     TabOrder = 0
   end
@@ -40,10 +40,10 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = FontSizeLabel
     AnchorSideBottom.Side = asrBottom
-    Left = 160
+    Left = 128
     Height = 31
     Top = 5
-    Width = 297
+    Width = 329
     Max = 25
     Min = 5
     OnChange = FontSizeTrackBarChange
@@ -63,12 +63,11 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Left = 0
     Height = 31
     Top = 5
-    Width = 123
+    Width = 96
     Align = alCustom
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Font Size (Default)'
     Layout = tlCenter
-    ParentColor = False
     ParentFont = False
   end
   object ToolbarSizeCaption: TLabel
@@ -78,98 +77,52 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Side = asrBottom
     Left = 0
     Height = 31
-    Top = 42
-    Width = 145
+    Top = 41
+    Width = 113
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Toolbar Size (Default)'
     Layout = tlCenter
-    ParentColor = False
     ParentFont = False
   end
-  object OpenSSLStartupCheckbox: TCheckBox
+  object ExtractOpenSSLCheckbox: TCheckBox
     AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = OpenSSLLoadedCaption
+    AnchorSideTop.Control = GeneralDivider
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 24
-    Top = 131
-    Width = 191
-    BorderSpacing.Top = 6
-    Caption = 'Load OpenSSL At Startup'
+    Height = 19
+    Top = 105
+    Width = 166
+    BorderSpacing.Top = 8
+    Caption = 'Extract OpenSSL On Launch'
     ParentFont = False
     TabOrder = 2
   end
-  object OpenSSLDivider: TDividerBevel
+  object GeneralDivider: TDividerBevel
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = ToolbarSizeCaption
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = ToolbarSizeTrackBar
     AnchorSideRight.Side = asrBottom
     Left = 0
-    Height = 20
-    Top = 79
+    Height = 15
+    Top = 82
     Width = 457
-    Caption = 'Open SSL'
+    Caption = 'General'
     Align = alCustom
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 6
+    BorderSpacing.Top = 10
     ParentFont = False
     Style = gsHorLines
   end
-  object OpenSSLLoadedCaption: TLabel
+  object MacOSCommandKey: TCheckBox
     AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = OpenSSLDivider
+    AnchorSideTop.Control = ExtractOpenSSLCheckbox
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 20
-    Top = 105
-    Width = 57
-    BorderSpacing.Top = 6
-    Caption = 'Loaded: '
-    ParentColor = False
-    ParentFont = False
-  end
-  object OpenSSLoadedValueCaption: TLabel
-    AnchorSideLeft.Control = OpenSSLLoadedCaption
-    AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = OpenSSLLoadedCaption
-    AnchorSideBottom.Control = OpenSSLLoadedCaption
-    AnchorSideBottom.Side = asrBottom
-    Left = 57
-    Height = 20
-    Top = 105
-    Width = 32
-    Anchors = [akTop, akLeft, akBottom]
-    Caption = 'False'
-    ParentColor = False
-    ParentFont = False
-  end
-  object KeystrokesDivider: TDividerBevel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = OpenSSLStartupCheckbox
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = ToolbarSizeTrackBar
-    AnchorSideRight.Side = asrBottom
-    Left = 0
-    Height = 20
-    Top = 161
-    Width = 457
-    Caption = 'Keystrokes'
-    Align = alCustom
-    Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 6
-    ParentFont = False
-    Style = gsHorLines
-  end
-  object UseMacOSCommandKey: TCheckBox
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = KeystrokesDivider
-    AnchorSideTop.Side = asrBottom
-    Left = 0
-    Height = 24
-    Top = 187
-    Width = 200
-    BorderSpacing.Top = 6
+    Height = 19
+    Top = 129
+    Width = 162
+    BorderSpacing.Top = 5
     Caption = 'Use MacOS Command Key'
     ParentFont = False
     TabOrder = 3

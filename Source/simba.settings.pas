@@ -76,6 +76,9 @@ type
       IgnoreCodeToolsIDEDirective: TSimbaSetting;
       AutomaticallyOpenAutoCompletion: TSimbaSetting;
       AutomaticallyShowParameterHints: TSimbaSetting;
+      AutomaticallyCompleteBegin: TSimbaSetting;
+      AutomaticallyCompleteParentheses: TSimbaSetting;
+      AutomaticallyCompleteIndex: TSimbaSetting;
     end;
 
     Environment: record
@@ -284,6 +287,10 @@ begin
   Editor.AutomaticallyShowParameterHints := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyShowParameterHints', True);
   Editor.RightMargin := TSimbaSetting_Integer.Create(Self, 'Editor', 'RightMargin', 80);
   Editor.RightMarginVisible := TSimbaSetting_Boolean.Create(Self, 'Editor', 'RightMarginVisible', False);
+
+  Editor.AutomaticallyCompleteBegin := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteBegin', True);
+  Editor.AutomaticallyCompleteParentheses := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteParentheses', True);
+  Editor.AutomaticallyCompleteIndex := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteIndex', True);
 
   Load();
 end;

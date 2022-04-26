@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, graphics, controls, lcltype, fgl,
-  synedit, syngutterlineoverview, lazsyneditmousecmdstypes, syneditmousecmds, syneditkeycmds, synpluginmulticaret,
+  synedit, syngutterlineoverview, lazsyneditmousecmdstypes, syneditmousecmds, syneditkeycmds, synpluginmulticaret, synedithighlighter,
   simba.highlighter, simba.autocomplete, simba.parameterhint, simba.editor_attributes, simba.settings;
 
 const
@@ -64,8 +64,8 @@ type
     FModifiedLinesGutter: TSimbaEditor_ModifiedLinesGutter;
 
     procedure CommentBlock;
-
-    procedure HandleCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
+    procedure HandleBeforeCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
+    procedure HandleAfterCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
     procedure HandleZoomInOut(Data: PtrInt);
     function HandleMouseAction(AnAction: TSynEditMouseAction; var AnInfo: TSynEditMouseActionInfo): Boolean;
 
@@ -84,6 +84,7 @@ type
     property Expression[X, Y: Integer]: String read GetExpressionAt;
 
     procedure InsertDocumentation;
+    function IsHighlighterAttribute(Values: TStringArray): Boolean;
 
     constructor Create(AOwner: TComponent; LoadColors: Boolean = True); reintroduce;
     destructor Destroy; override;
@@ -93,7 +94,7 @@ implementation
 
 uses
   forms, math, syneditmarkuphighall, syngutter, synedittypes,
-  simba.scripttabhistory, simba.parser_misc, simba.codeparser, simba.fonthelpers;
+  simba.scripttabhistory, simba.parser_misc, simba.codeparser, simba.fonthelpers, simba.helpers_string;
 
 type
   TSimbaEditor_GutterSeparator = class(TSynGutterSeparator)
@@ -247,6 +248,18 @@ begin
     Parser.Free();
 end;
 
+function TSimbaEditor.IsHighlighterAttribute(Values: TStringArray): Boolean;
+var
+  Token: String;
+  Attri: TSynHighlighterAttributes;
+  P: TPoint;
+begin
+  P := LogicalCaretXY;
+  P.X -= 1;
+
+  Result := GetHighlighterAttriAtRowCol(P, Token, Attri) and Attri.Name.ContainsAny(Values);
+end;
+
 // From Lazarus source
 procedure TSimbaEditor.CommentBlock;
 var
@@ -384,17 +397,82 @@ begin
   SelectionMode := WasSelMode;
 end;
 
-procedure TSimbaEditor.HandleCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
+procedure TSimbaEditor.HandleBeforeCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
+
+  function Whitespace(Amount: Integer): String;
+  begin
+    Result := StringOfChar(' ', Amount);
+  end;
+
+var
+  Token: String;
+  TokenPos: TPoint;
+  InsertText: String;
+begin
+  InsertText := '';
+
+  case Command of
+    ecLineBreak:
+      begin
+        if IsHighlighterAttribute(['String', 'Comment']) then
+          Exit;
+
+        TokenPos := LogicalCaretXY;
+        Token := GetWordAtRowCol(LogicalCaretXY);
+
+        if (CompareText(Token, 'BEGIN') = 0) and SimbaSettings.Editor.AutomaticallyCompleteBegin.Value then
+        begin
+          InsertText := LineEnding + LineEnding + Whitespace(TokenPos.X - Length(Token) - 1) + 'end;';
+
+          TokenPos := TPoint.Create(TokenPos.X - Length(Token) + 2, TokenPos.Y + 1);
+          Handled := True;
+        end;
+      end;
+
+    ecChar:
+      begin
+        if IsHighlighterAttribute(['String', 'Comment']) then
+          Exit;
+
+        TokenPos := LogicalCaretXY;
+        Token := UTF8Encode(AChar);
+
+        if (CompareText(Token, '(') = 0) and SimbaSettings.Editor.AutomaticallyCompleteParentheses.Value then
+          InsertText := ')'
+        else
+        if (CompareText(Token, '[') = 0) and SimbaSettings.Editor.AutomaticallyCompleteIndex.Value then
+          InsertText := ']';
+      end;
+  end;
+
+  if (InsertText <> '') then
+  begin
+    BeginUndoBlock();
+
+    try
+      InsertTextAtCaret(InsertText);
+
+      LogicalCaretXY := TokenPos;
+    finally
+      EndUndoBlock();
+    end;
+  end;
+end;
+
+procedure TSimbaEditor.HandleAfterCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
 begin
   case Command of
     ecDocumentation: InsertDocumentation();
     ecCommentBlock: CommentBlock();
     ecChar:
-      case AChar of
-        '(': if SimbaSettings.Editor.AutomaticallyShowParameterHints.Value then
-               CommandProcessor(ecParameterHintChar, AChar, Data);
-        '.': if SimbaSettings.Editor.AutomaticallyOpenAutoCompletion.Value then
-               CommandProcessor(ecAutoCompleteChar, AChar, Data);
+      begin
+        case AChar of
+          '(': if SimbaSettings.Editor.AutomaticallyShowParameterHints.Value then
+                 CommandProcessor(ecParameterHintChar, AChar, Data);
+          '.': if SimbaSettings.Editor.AutomaticallyOpenAutoCompletion.Value then
+                 CommandProcessor(ecAutoCompleteChar, AChar, Data);
+        end;
+
       end;
   end;
 end;
@@ -515,6 +593,9 @@ begin
     SymbolAttri.Foreground := clRed;
     DirectiveAttri.Foreground := clRed;
     DirectiveAttri.Style := [fsBold];
+    BracketMatchColor.Background := RGBToColor(254,193,148);
+    BracketMatchColor.Style := [];
+
     NestedComments := True;
     StringKeywordMode := spsmNone;
     TypeHelpers := True;
@@ -522,7 +603,7 @@ begin
 
   Gutter.MarksPart.Visible := False;
   Gutter.SeparatorPart.Visible := False;
-  Gutter.LeftOffset := 10;
+  Gutter.LeftOffset := 8;
 
   TSimbaEditor_GutterSeparator.Create(Gutter.Parts, 4, 2);
   TSimbaEditor_GutterSeparator.Create(Gutter.Parts, 1, 4);
@@ -573,7 +654,8 @@ begin
   MouseActions.AddCommand(emcJumpBack, False, LazSynEditMouseCmdsTypes.mbExtra1, ccSingle, cdDown, [], []);
   MouseActions.AddCommand(emcJumpForward, False, LazSynEditMouseCmdsTypes.mbExtra2, ccSingle, cdDown, [], []);
 
-  RegisterCommandHandler(@HandleCommand, nil, [hcfPostExec]);
+  RegisterCommandHandler(@HandleBeforeCommand, nil, [hcfPreExec]);
+  RegisterCommandHandler(@HandleAfterCommand, nil, [hcfPostExec]);
   RegisterMouseActionExecHandler(@HandleMouseAction);
 
   Keystrokes.Delete(KeyStrokes.FindCommand(ecInsertLine));

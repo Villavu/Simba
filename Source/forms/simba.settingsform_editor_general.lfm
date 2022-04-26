@@ -6,16 +6,15 @@ object EditorGeneralFrame: TEditorGeneralFrame
   ClientHeight = 373
   ClientWidth = 513
   TabOrder = 0
-  DesignLeft = 109
-  DesignTop = 842
+  DesignLeft = 1716
+  DesignTop = 243
   object CaretPastEOLCheckBox: TCheckBox
     AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = DividerBevel2
-    AnchorSideTop.Side = asrBottom
+    AnchorSideTop.Control = Owner
     Left = 0
-    Height = 24
-    Top = 25
-    Width = 162
+    Height = 19
+    Top = 5
+    Width = 130
     BorderSpacing.Top = 5
     Caption = 'Allow Caret Past EOL'
     TabOrder = 0
@@ -27,8 +26,8 @@ object EditorGeneralFrame: TEditorGeneralFrame
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 0
-    Height = 20
-    Top = 146
+    Height = 15
+    Top = 114
     Width = 513
     Caption = 'Code Tools'
     Anchors = [akTop, akLeft, akRight]
@@ -40,11 +39,11 @@ object EditorGeneralFrame: TEditorGeneralFrame
     AnchorSideTop.Control = DividerBevel1
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 24
-    Top = 171
-    Width = 266
-    BorderSpacing.Top = 5
-    Caption = 'Automatically Show Parameter Hints'
+    Height = 19
+    Top = 137
+    Width = 211
+    BorderSpacing.Top = 8
+    Caption = 'Automatically show parameter hints'
     TabOrder = 1
   end
   object OpenAutoCompletionCheckbox: TCheckBox
@@ -52,65 +51,51 @@ object EditorGeneralFrame: TEditorGeneralFrame
     AnchorSideTop.Control = ShowParameterHintsCheckbox
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 24
-    Top = 200
-    Width = 274
+    Height = 19
+    Top = 161
+    Width = 204
     BorderSpacing.Top = 5
-    Caption = 'Automatically Open Auto Completion'
+    Caption = 'Automatically open auto complete'
     TabOrder = 2
-  end
-  object DividerBevel2: TDividerBevel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Owner
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    Left = 0
-    Height = 20
-    Top = 0
-    Width = 513
-    Caption = 'Options'
-    Anchors = [akTop, akLeft, akRight]
-    Style = gsHorLines
   end
   object VisibleRightMarginCheckbox: TCheckBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = DividerBevel4
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 24
-    Top = 79
-    Width = 68
-    BorderSpacing.Top = 5
+    Height = 19
+    Top = 57
+    Width = 54
+    BorderSpacing.Top = 8
     Caption = 'Visible'
     TabOrder = 3
   end
   object RightMarginEdit: TSpinEdit
-    AnchorSideLeft.Control = Label2
+    AnchorSideLeft.Control = MarginValueLabel
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = VisibleRightMarginCheckbox
     AnchorSideTop.Side = asrBottom
-    Left = 41
-    Height = 28
-    Top = 108
+    Left = 39
+    Height = 23
+    Top = 81
     Width = 100
-    BorderSpacing.Left = 5
+    BorderSpacing.Left = 10
     BorderSpacing.Top = 5
     MaxValue = 1000
     TabOrder = 4
   end
-  object Label2: TLabel
+  object MarginValueLabel: TLabel
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = RightMarginEdit
     AnchorSideBottom.Control = RightMarginEdit
     AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 28
-    Top = 108
-    Width = 36
+    Height = 23
+    Top = 81
+    Width = 29
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Value'
     Layout = tlCenter
-    ParentColor = False
   end
   object DividerBevel4: TDividerBevel
     AnchorSideLeft.Control = Owner
@@ -119,24 +104,87 @@ object EditorGeneralFrame: TEditorGeneralFrame
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 0
-    Height = 20
-    Top = 54
+    Height = 15
+    Top = 34
     Width = 513
     Caption = 'Right Margin'
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 5
+    BorderSpacing.Top = 10
     Style = gsHorLines
   end
-  object IgnoreCodeToolsDirectiveCheckbox: TCheckBox
+  object IgnoreCodetoolsDirectiveCheckbox: TCheckBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = OpenAutoCompletionCheckbox
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 24
-    Top = 229
-    Width = 236
+    Height = 19
+    Top = 185
+    Width = 215
     BorderSpacing.Top = 5
-    Caption = 'Ignore Code Tools IDE Directive'
+    Caption = 'Ignore {%CODETOOLS OFF} directive'
     TabOrder = 5
+  end
+  object CompleteDivider: TDividerBevel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = IgnoreCodetoolsDirectiveCheckbox
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 0
+    Height = 15
+    Top = 214
+    Width = 513
+    Caption = 'Statement Completion'
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Top = 10
+    ParentFont = False
+  end
+  object CompleteBeginCheckbox: TCheckBox
+    AnchorSideLeft.Control = CompleteLabel
+    AnchorSideTop.Control = CompleteLabel
+    AnchorSideTop.Side = asrBottom
+    Left = 10
+    Height = 19
+    Top = 257
+    Width = 116
+    BorderSpacing.Left = 10
+    BorderSpacing.Top = 5
+    Caption = '"begin" add "end"'
+    TabOrder = 6
+  end
+  object CompleteParenthesesCheckbox: TCheckBox
+    AnchorSideLeft.Control = CompleteBeginCheckbox
+    AnchorSideTop.Control = CompleteBeginCheckbox
+    AnchorSideTop.Side = asrBottom
+    Left = 10
+    Height = 19
+    Top = 281
+    Width = 74
+    BorderSpacing.Top = 5
+    Caption = '"(" add ")"'
+    TabOrder = 7
+  end
+  object CompleteIndexCheckbox: TCheckBox
+    AnchorSideLeft.Control = CompleteParenthesesCheckbox
+    AnchorSideTop.Control = CompleteParenthesesCheckbox
+    AnchorSideTop.Side = asrBottom
+    Left = 10
+    Height = 19
+    Top = 307
+    Width = 74
+    BorderSpacing.Top = 7
+    Caption = '"[" add "]"'
+    TabOrder = 8
+  end
+  object CompleteLabel: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = CompleteDivider
+    AnchorSideTop.Side = asrBottom
+    Left = 0
+    Height = 15
+    Top = 237
+    Width = 223
+    BorderSpacing.Top = 8
+    Caption = 'Automatically complete the statement on:'
   end
 end

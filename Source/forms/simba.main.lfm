@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 642
+  Left = 1171
   Height = 556
-  Top = 251
+  Top = 85
   Width = 976
   Caption = 'Simba'
   ClientHeight = 536
@@ -165,78 +165,65 @@ object SimbaForm: TSimbaForm
     Top = 508
     Width = 976
     Align = alBottom
-    BorderSpacing.Top = 1
     BevelOuter = bvNone
     ClientHeight = 28
     ClientWidth = 976
-    Color = clActiveBorder
     ParentColor = False
-    ParentFont = False
     TabOrder = 1
     object StatusPanelCursor: TPanel
       Left = 0
-      Height = 27
-      Top = 1
+      Height = 28
+      Top = 0
       Width = 170
       Align = alLeft
       Alignment = taLeftJustify
-      BorderSpacing.Top = 1
       BevelOuter = bvNone
-      Color = clForm
+      Caption = '(-1, -1)'
       ParentColor = False
-      ParentFont = False
       TabOrder = 0
+      OnPaint = StatusPanelPaint
     end
     object StatusPanelState: TPanel
-      Left = 171
-      Height = 27
-      Top = 1
+      Left = 170
+      Height = 28
+      Top = 0
       Width = 170
       Align = alLeft
       Alignment = taLeftJustify
-      BorderSpacing.Left = 1
-      BorderSpacing.Top = 1
       BevelOuter = bvNone
-      Caption = ' Stopped'
-      Color = clForm
+      Caption = 'Stopped'
       ParentColor = False
-      ParentFont = False
       TabOrder = 1
+      OnPaint = StatusPanelPaint
     end
     object StatusPanelCaret: TPanel
-      Left = 342
-      Height = 27
-      Top = 1
+      Left = 340
+      Height = 28
+      Top = 0
       Width = 170
       Align = alLeft
       Alignment = taLeftJustify
-      BorderSpacing.Left = 1
-      BorderSpacing.Top = 1
       BevelOuter = bvNone
-      Color = clForm
       ParentColor = False
-      ParentFont = False
       TabOrder = 2
+      OnPaint = StatusPanelPaint
     end
     object StatusPanelFileName: TPanel
-      Left = 513
-      Height = 27
-      Top = 1
-      Width = 463
+      Left = 510
+      Height = 28
+      Top = 0
+      Width = 466
       Align = alClient
       Alignment = taLeftJustify
-      BorderSpacing.Left = 1
-      BorderSpacing.Top = 1
       BevelOuter = bvNone
-      Color = clForm
       ParentColor = False
-      ParentFont = False
       TabOrder = 3
+      OnPaint = StatusPanelPaint
     end
   end
   object DockPanel: TAnchorDockPanel
     Left = 0
-    Height = 481
+    Height = 482
     Top = 26
     Width = 976
     Align = alClient
