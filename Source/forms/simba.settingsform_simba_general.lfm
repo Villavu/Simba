@@ -1,14 +1,13 @@
 object SimbaGeneralFrame: TSimbaGeneralFrame
   Left = 0
-  Height = 204
+  Height = 304
   Top = 0
   Width = 457
-  ClientHeight = 204
+  ClientHeight = 304
   ClientWidth = 457
-  ParentFont = False
   TabOrder = 0
-  DesignLeft = 1662
-  DesignTop = 583
+  DesignLeft = 1765
+  DesignTop = 541
   object ToolbarSizeTrackBar: TTrackBar
     AnchorSideLeft.Control = ToolbarSizeCaption
     AnchorSideLeft.Side = asrBottom
@@ -30,7 +29,6 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 15
     BorderSpacing.Top = 5
-    ParentFont = False
     TabOrder = 0
   end
   object FontSizeTrackBar: TTrackBar
@@ -52,7 +50,6 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Align = alCustom
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 5
-    ParentFont = False
     TabOrder = 1
   end
   object FontSizeLabel: TLabel
@@ -68,7 +65,6 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Font Size (Default)'
     Layout = tlCenter
-    ParentFont = False
   end
   object ToolbarSizeCaption: TLabel
     AnchorSideLeft.Control = Owner
@@ -82,7 +78,6 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Toolbar Size (Default)'
     Layout = tlCenter
-    ParentFont = False
   end
   object ExtractOpenSSLCheckbox: TCheckBox
     AnchorSideLeft.Control = Owner
@@ -94,7 +89,6 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Width = 166
     BorderSpacing.Top = 8
     Caption = 'Extract OpenSSL On Launch'
-    ParentFont = False
     TabOrder = 2
   end
   object GeneralDivider: TDividerBevel
@@ -111,7 +105,6 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Align = alCustom
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 10
-    ParentFont = False
     Style = gsHorLines
   end
   object MacOSCommandKey: TCheckBox
@@ -124,7 +117,94 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Width = 162
     BorderSpacing.Top = 5
     Caption = 'Use MacOS Command Key'
-    ParentFont = False
     TabOrder = 3
+  end
+  object OutputDivider: TDividerBevel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = MacOSCommandKey
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = ToolbarSizeTrackBar
+    AnchorSideRight.Side = asrBottom
+    Left = 0
+    Height = 15
+    Top = 158
+    Width = 457
+    Caption = 'Output'
+    Align = alCustom
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Top = 10
+    Style = gsHorLines
+  end
+  object Label1: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = OutputFontName
+    AnchorSideBottom.Control = OutputFontName
+    AnchorSideBottom.Side = asrBottom
+    Left = 0
+    Height = 23
+    Top = 181
+    Width = 59
+    Anchors = [akTop, akLeft, akBottom]
+    Caption = 'Font Name'
+    Layout = tlCenter
+  end
+  object OutputFontName: TComboBox
+    AnchorSideLeft.Control = Label1
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = OutputDivider
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 67
+    Height = 23
+    Top = 181
+    Width = 390
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 8
+    ItemHeight = 15
+    TabOrder = 4
+    Text = 'OutputFontName'
+  end
+  object OutputFontSize: TSpinEdit
+    AnchorSideLeft.Control = Label1
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = OutputFontName
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 67
+    Height = 23
+    Top = 209
+    Width = 390
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 5
+    TabOrder = 5
+  end
+  object OutputFontAntiAliased: TCheckBox
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = OutputFontSize
+    AnchorSideTop.Side = asrBottom
+    Left = 0
+    Height = 19
+    Top = 237
+    Width = 85
+    BorderSpacing.Top = 5
+    Caption = 'Anti-Aliased'
+    TabOrder = 6
+  end
+  object Label2: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = OutputFontSize
+    AnchorSideBottom.Control = OutputFontSize
+    AnchorSideBottom.Side = asrBottom
+    Left = 0
+    Height = 23
+    Top = 209
+    Width = 47
+    Anchors = [akTop, akLeft, akBottom]
+    Caption = 'Font Size'
+    Layout = tlCenter
   end
 end

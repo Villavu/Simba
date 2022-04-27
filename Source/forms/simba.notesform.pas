@@ -10,7 +10,7 @@ unit simba.notesform;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls;
+  classes, sysutils, forms, controls, graphics, dialogs, stdctrls;
 
 type
   TSimbaNotesForm = class(TForm)
@@ -27,7 +27,6 @@ implementation
 {$R *.lfm}
 
 uses
-  AnchorDocking,
   simba.settings;
 
 procedure TSimbaNotesForm.FormDestroy(Sender: TObject);

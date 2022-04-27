@@ -6,17 +6,17 @@ object EditorFontFrame: TEditorFontFrame
   ClientHeight = 240
   ClientWidth = 320
   TabOrder = 0
-  DesignLeft = 288
-  DesignTop = 690
+  DesignLeft = 1894
+  DesignTop = 921
   object Panel1: TPanel
     Left = 0
-    Height = 97
+    Height = 85
     Top = 0
     Width = 320
     Align = alTop
     AutoSize = True
     BevelOuter = bvNone
-    ClientHeight = 97
+    ClientHeight = 85
     ClientWidth = 320
     TabOrder = 0
     object Label1: TLabel
@@ -25,9 +25,9 @@ object EditorFontFrame: TEditorFontFrame
       AnchorSideBottom.Control = FontsNameComboBox
       AnchorSideBottom.Side = asrBottom
       Left = 0
-      Height = 27
+      Height = 23
       Top = 5
-      Width = 68
+      Width = 59
       Anchors = [akTop, akLeft, akBottom]
       Caption = 'Font Name'
       Layout = tlCenter
@@ -38,16 +38,16 @@ object EditorFontFrame: TEditorFontFrame
       AnchorSideTop.Control = Panel1
       AnchorSideRight.Control = Panel1
       AnchorSideRight.Side = asrBottom
-      Left = 73
-      Height = 27
+      Left = 64
+      Height = 23
       Top = 5
-      Width = 242
+      Width = 251
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 5
       BorderSpacing.Top = 5
       BorderSpacing.Right = 5
       BorderSpacing.Bottom = 5
-      ItemHeight = 19
+      ItemHeight = 15
       OnChange = FontsNameComboBoxChange
       TabOrder = 0
     end
@@ -55,9 +55,9 @@ object EditorFontFrame: TEditorFontFrame
       AnchorSideLeft.Control = Panel1
       AnchorSideBottom.Side = asrBottom
       Left = 0
-      Height = 27
+      Height = 15
       Top = 37
-      Width = 55
+      Width = 47
       Anchors = [akTop, akLeft, akBottom]
       Caption = 'Font Size'
       Layout = tlCenter
@@ -67,9 +67,9 @@ object EditorFontFrame: TEditorFontFrame
       AnchorSideTop.Control = FontSizeSpinEdit
       AnchorSideTop.Side = asrBottom
       Left = 0
-      Height = 23
-      Top = 69
-      Width = 98
+      Height = 19
+      Top = 61
+      Width = 85
       BorderSpacing.Top = 5
       BorderSpacing.Bottom = 5
       Caption = 'Anti-Aliased'
@@ -83,10 +83,10 @@ object EditorFontFrame: TEditorFontFrame
       AnchorSideTop.Side = asrBottom
       AnchorSideRight.Control = Panel1
       AnchorSideRight.Side = asrBottom
-      Left = 73
-      Height = 27
-      Top = 37
-      Width = 242
+      Left = 64
+      Height = 23
+      Top = 33
+      Width = 251
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 5
       BorderSpacing.Right = 5
@@ -96,8 +96,8 @@ object EditorFontFrame: TEditorFontFrame
   end
   object EditorPanel: TPanel
     Left = 0
-    Height = 143
-    Top = 97
+    Height = 155
+    Top = 85
     Width = 320
     Align = alClient
     BevelOuter = bvNone

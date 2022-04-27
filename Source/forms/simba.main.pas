@@ -258,7 +258,7 @@ implementation
 {$R *.lfm}
 
 uses
-  types, lclintf, lazloggerbase, lazfileutils, anchordocking,
+  lclintf, lazloggerbase, lazfileutils, anchordocking,
   simba.openssl, simba.files, simba.process,
   simba.openexampleform, simba.colorpickerhistoryform, simba.codeparser,
   simba.codeinsight, simba.associate, simba.scripttab, simba.debugimageform,
@@ -1223,6 +1223,12 @@ end;
 
 procedure TSimbaForm.SetupCompleted(Sender: TObject);
 begin
+  {
+  ToolBar.EdgeBorders:=[];
+  for I := 0 to Toolbar.ButtonCount-1 do
+    if (ToolBar.Buttons[I].Style=tbsDivider) then
+      ToolBar.Buttons[I].Visible:=False;
+  }
   Timer.Enabled := True;
 
   if SimbaSettings.FirstLaunch then

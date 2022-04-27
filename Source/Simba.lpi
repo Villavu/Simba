@@ -33,9 +33,9 @@
             <Filename Value="../Simba-Win32"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape;editor"/>
             <Libraries Value="../Modules/lape/extensions/ffi/bin/win32"/>
-            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;editor"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -60,7 +60,7 @@
           </Linking>
           <Other>
             <CompilerMessages>
-              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
+              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dStaticFFI
 -dLape_CDECL"/>
@@ -75,9 +75,9 @@
             <Filename Value="../Simba-Win64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape;editor"/>
             <Libraries Value="../Modules/lape/extensions/ffi/bin/win64"/>
-            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;editor"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -103,7 +103,7 @@
           </Linking>
           <Other>
             <CompilerMessages>
-              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
+              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dStaticFFI
 -dLape_CDECL"/>
@@ -118,8 +118,8 @@
             <Filename Value="../Simba-Linux64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape;editor"/>
+            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;editor"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -144,7 +144,7 @@
           </Linking>
           <Other>
             <CompilerMessages>
-              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
+              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dLape_CDECL"/>
             <CreateMakefileOnBuild Value="True"/>
@@ -161,8 +161,8 @@
             <Filename Value="../Simba-Darwin64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape;editor"/>
+            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;editor"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -187,7 +187,7 @@
           </Linking>
           <Other>
             <CompilerMessages>
-              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
+              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dLape_CDECL"/>
             <ExecuteAfter>
@@ -206,8 +206,8 @@
             <Filename Value="../Simba-AArch64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
-            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape;editor"/>
+            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;editor"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -232,7 +232,7 @@
           </Linking>
           <Other>
             <CompilerMessages>
-              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
+              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dLape_CDECL"/>
             <CreateMakefileOnBuild Value="True"/>
@@ -263,7 +263,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="22">
+    <Units Count="29">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -329,7 +329,9 @@
       <Unit11>
         <Filename Value="forms/simba.notesform.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="SimbaNotesForm"/>
         <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
       </Unit11>
       <Unit12>
         <Filename Value="forms/simba.openexampleform.pas"/>
@@ -398,6 +400,34 @@
         <Filename Value="simba.bitmapfinder.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit21>
+      <Unit22>
+        <Filename Value="simba.editor_blockcompletion.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="simba.editor_docgenerator.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="simba.editor_commentblock.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="editor/simba.editor_mousewheelzoom.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="editor/simba.editor_history.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="editor/simba.editor_modifiedlinegutter.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="win32menustyler.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit28>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -406,9 +436,9 @@
       <Filename Value="../Simba-Debug"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape"/>
+      <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape;editor"/>
       <Libraries Value="../Modules/lape/extensions/ffi/bin/win64"/>
-      <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse"/>
+      <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;editor"/>
       <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -428,7 +458,7 @@
     </Linking>
     <Other>
       <CompilerMessages>
-        <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True"/>
+        <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True"/>
       </CompilerMessages>
       <CustomOptions Value="-dStaticFFI
 -dLape_CDECL"/>

@@ -32,22 +32,27 @@ begin
 end;
 
 function ExtractLib(Stream: TStream; FileName: String): String;
+var
+  Buffer: array[1..4096] of Byte;
+  InputStream, OutputStream: TStream;
+  Count: Integer;
 begin
   Result := '';
 
-  Stream := TGZFileStream.Create(Stream, False);
-  try
-    with TFileStream.Create(FileName, fmCreate or fmOpenWrite or fmShareDenyWrite) do
-    try
-      CopyFrom(Stream, Stream.Size);
-    finally
-      Free();
-    end;
+  InputStream := TGZFileStream.Create(Stream, False);
+  OutputStream := TFileStream.Create(FileName, fmCreate or fmOpenWrite or fmShareDenyWrite);
 
-    Result := HashFile(FileName);
-  finally
-    Stream.Free();
-  end;
+  Count := InputStream.Read(Buffer[1], Length(Buffer));
+  repeat
+    Count := InputStream.Read(Buffer[1], Length(Buffer));
+    if (Count > 0) then
+      OutputStream.Write(Buffer[1], Count);
+  until (Count <= 0);
+
+  InputStream.Free();
+  OutputStream.Free();
+
+  Result := HashFile(FileName);
 end;
 
 function ExtractLibCrypto(ResourceHandle: TFPResourceHMODULE; ResourceType, ResourceName: PChar; Param: PtrInt): LongBool; stdcall;

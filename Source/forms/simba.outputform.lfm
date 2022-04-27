@@ -1,24 +1,24 @@
 object SimbaOutputForm: TSimbaOutputForm
   Left = -807
-  Height = 464
+  Height = 371
   Top = 622
-  Width = 676
+  Width = 541
   Caption = 'Output'
-  ClientHeight = 464
-  ClientWidth = 676
-  DesignTimePPI = 120
+  ClientHeight = 371
+  ClientWidth = 541
   LCLVersion = '2.2.0.4'
   inline Editor: TSynEdit
-    Left = 4
-    Height = 460
+    Left = 3
+    Height = 368
     Top = 0
-    Width = 668
+    Width = 535
     Align = alClient
-    BorderSpacing.Left = 4
-    BorderSpacing.Right = 4
-    BorderSpacing.Bottom = 4
+    BorderSpacing.Left = 3
+    BorderSpacing.Right = 3
+    BorderSpacing.Bottom = 3
     Color = clWindow
-    Font.Height = -16
+    Font.Color = clWindowText
+    Font.Height = -13
     Font.Name = 'Courier New'
     Font.Pitch = fpFixed
     Font.Quality = fqNonAntialiased
@@ -28,7 +28,7 @@ object SimbaOutputForm: TSimbaOutputForm
     TabOrder = 0
     BorderStyle = bsNone
     Gutter.Visible = False
-    Gutter.Width = 72
+    Gutter.Width = 57
     Gutter.MouseActions = <>
     RightGutter.Width = 0
     RightGutter.MouseActions = <>
@@ -480,11 +480,11 @@ object SimbaOutputForm: TSimbaOutputForm
     OnSpecialLineMarkup = DoEditorSpecialLineMarkup
     inline SynLeftGutterPartList1: TSynGutterPartList
       object SynGutterMarks1: TSynGutterMarks
-        Width = 30
+        Width = 24
         MouseActions = <>
       end
       object SynGutterLineNumber1: TSynGutterLineNumber
-        Width = 21
+        Width = 17
         MouseActions = <>
         MarkupInfo.Background = clBtnFace
         MarkupInfo.Foreground = clNone
@@ -494,19 +494,18 @@ object SimbaOutputForm: TSimbaOutputForm
         LeadingZeros = False
       end
       object SynGutterChanges1: TSynGutterChanges
-        Width = 5
+        Width = 4
         MouseActions = <>
         ModifiedColor = 59900
         SavedColor = clGreen
       end
       object SynGutterSeparator1: TSynGutterSeparator
-        Width = 3
+        Width = 2
         MouseActions = <>
         MarkupInfo.Background = clWhite
         MarkupInfo.Foreground = clGray
       end
       object SynGutterCodeFolding1: TSynGutterCodeFolding
-        Width = 13
         MouseActions = <>
         MarkupInfo.Background = clNone
         MarkupInfo.Foreground = clGray
@@ -516,8 +515,8 @@ object SimbaOutputForm: TSimbaOutputForm
     end
   end
   object EditorPopupMenu: TPopupMenu
-    Left = 70
-    Top = 30
+    Left = 56
+    Top = 24
     object MenuItemCut: TMenuItem
       Caption = 'Cut'
       OnClick = MenuItemCutClick
@@ -545,7 +544,7 @@ object SimbaOutputForm: TSimbaOutputForm
   object Timer: TTimer
     Interval = 300
     OnTimer = TimerExecute
-    Left = 180
-    Top = 30
+    Left = 144
+    Top = 24
   end
 end

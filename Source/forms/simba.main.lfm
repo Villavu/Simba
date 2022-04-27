@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 1171
+  Left = 1106
   Height = 556
-  Top = 85
+  Top = 83
   Width = 976
   Caption = 'Simba'
   ClientHeight = 536
@@ -54,7 +54,7 @@ object SimbaForm: TSimbaForm
       OnClick = MenuItemScriptStateClick
     end
     object ToolbarDivider1: TToolButton
-      Left = 106
+      Left = 241
       Height = 22
       Top = 2
       Style = tbsDivider
@@ -68,7 +68,7 @@ object SimbaForm: TSimbaForm
       OnClick = MenuClearOutputClick
     end
     object ToolbarButtonColorPicker: TToolButton
-      Left = 196
+      Left = 176
       Hint = 'Color Picker'
       Top = 2
       Caption = 'ToolbarButtonColorPicker'
@@ -76,7 +76,7 @@ object SimbaForm: TSimbaForm
       OnClick = ToolbarButtonColorPickerClick
     end
     object ToolbarButtonTargetSelector: TToolButton
-      Left = 176
+      Left = 196
       Hint = 'Target Selector'
       Top = 2
       Caption = 'ToolbarButtonTargetSelector'
@@ -84,7 +84,7 @@ object SimbaForm: TSimbaForm
       OnMouseDown = ToolbarButtonSelectTargetClick
     end
     object ToolbarDivider2: TToolButton
-      Left = 241
+      Left = 171
       Height = 22
       Top = 2
       Style = tbsDivider
@@ -132,7 +132,7 @@ object SimbaForm: TSimbaForm
       OnClick = ToolbarButtonSaveAllClick
     end
     object ToolbarDivider4: TToolButton
-      Left = 216
+      Left = 106
       Height = 22
       Top = 2
       Style = tbsDivider
@@ -145,7 +145,7 @@ object SimbaForm: TSimbaForm
       OnClick = MenuItemScriptStateClick
     end
     object ToolbarDivider5: TToolButton
-      Left = 171
+      Left = 216
       Height = 22
       Top = 2
       Style = tbsDivider

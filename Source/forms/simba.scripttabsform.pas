@@ -108,7 +108,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.outputform, simba.scripttabhistory, simba.files;
+  simba.outputform, simba.scripttabhistory, simba.files, simba.editor_docgenerator;
 
 procedure TSimbaScriptTabsForm.DoEditorPopupShow(Sender: TObject);
 var
@@ -152,7 +152,7 @@ begin
   if (Sender = MenuItemPaste)           then CurrentEditor.PasteFromClipboard();
   if (Sender = MenuItemDelete)          then CurrentEditor.ClearSelection();
   if (Sender = MenuItemSelectAll)       then CurrentEditor.SelectAll();
-  if (Sender = MenuItemDocumentation)   then CurrentEditor.InsertDocumentation();
+  if (Sender = MenuItemDocumentation)   then CurrentEditor.ExecuteSimpleCommand(TSimbaEditorPlugin_DocGenerator.EditorCommand);
   if (Sender = MenuItemFind)            then Self.Find();
   if (Sender = MenuItemReplace)         then Self.Replace();
 end;

@@ -172,9 +172,17 @@ begin
 
   if Assigned(FFindForm) then
   begin
-    for I := 0 to FFindForm.ComponentCount - 1 do
-      if (FFindForm.Components[I] is TButton) and (TButton(FFindForm.Components[I]).Caption = rsFindMore) then
-        TButton(FFindForm.Components[I]).Hide();
+    for I := FFindForm.ComponentCount - 1 downto 0 do
+      if (FFindForm.Components[I] is TButton) then
+      begin
+        if (TButton(FFindForm.Components[I]).Caption = 'Find more') then
+          TButton(FFindForm.Components[I]).Free()
+        else
+        if (TButton(FFindForm.Components[I]).Caption = 'Cancel') then
+          TButton(FFindForm.Components[I]).Align:=alBottom
+        else
+          TButton(FFindForm.Components[I]).Align:=alTop;
+      end;
 
     CalcPosition(FFindForm);
 
@@ -306,7 +314,7 @@ begin
   FDialog.OnReplace := @DoReplace;
 
   // Default options
-  FDialog.Options := FDialog.Options + [frButtonsAtBottom, frHideUpDown] - [frHidePromptOnReplace];
+  FDialog.Options := FDialog.Options + [frHideUpDown] - [frHidePromptOnReplace];
 end;
 
 procedure TSimbaEditorReplace.DoConfirmReplace(Sender: TObject; const ASearch, AReplace: String; Line, Column: Integer; var ReplaceAction: TSynReplaceAction);

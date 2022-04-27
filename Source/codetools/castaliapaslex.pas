@@ -2335,13 +2335,13 @@ begin
     fTokenID := tok_DONE;
 end;
 
-function TmwBasePasLex.GetIsJunk: Boolean; inline;
+function TmwBasePasLex.GetIsJunk: Boolean;
 begin
   result := IsTokenIDJunk(FTokenID) or (FUseDefines and (FDefineStack > 0) and (TokenID <> tokNull) and (TokenID <> tok_DONE));
 //  Result := fTokenID in [tokAnsiComment, tokBorComment, tokCRLF, tokCRLFCo, tokSlashesComment, tokSpace]; //XM 20001210
 end;
 
-function TmwBasePasLex.GetIsSpace: Boolean; inline;
+function TmwBasePasLex.GetIsSpace: Boolean;
 begin
   Result := fTokenID in [tokCRLF, tokSpace];
 end;

@@ -10,7 +10,7 @@ unit simba.parameterhint;
 interface
 
 uses
-  classes, sysutils, forms, controls, graphics, stdctrls, extctrls, synedit,
+  classes, sysutils, forms, controls, graphics, extctrls, synedit,
   simba.codeinsight, simba.codeparser;
 
 type

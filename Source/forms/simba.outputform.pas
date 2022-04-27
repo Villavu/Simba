@@ -299,22 +299,17 @@ end;
 
 procedure TSimbaOutputForm.SimbaSettingChanged(Setting: TSimbaSetting);
 begin
-  if (Setting = SimbaSettings.Editor.FontSize) then
+  if (Setting = SimbaSettings.GUI.OutputFontSize) then
     Editor.Font.Size := Setting.Value;
 
-  if (Setting = SimbaSettings.Editor.FontName) then
-  begin
-    if SimbaFontHelpers.IsFontFixed(Setting.Value) then
-      Editor.Font.Name := Setting.Value;
-  end;
+  if (Setting = SimbaSettings.GUI.OutputFontName) and SimbaFontHelpers.IsFontFixed(Setting.Value) then
+    Editor.Font.Name := Setting.Value;
 
-  if (Setting = SimbaSettings.Editor.AntiAliased) then
-  begin
+  if (Setting = SimbaSettings.GUI.OutputFontAntiAliased) then
     if Setting.Value then
       Editor.Font.Quality := fqCleartypeNatural
     else
       Editor.Font.Quality := fqNonAntialiased;
-  end;
 end;
 
 procedure TSimbaOutputForm.MenuItemCopyClick(Sender: TObject);
@@ -324,7 +319,7 @@ end;
 
 procedure TSimbaOutputForm.DoEditorSpecialLineMarkup(Sender: TObject; Line: integer; var Special: boolean; Markup: TSynSelectedColor);
 begin
-  Special := Editor.Lines.Objects[Line-1] <> nil;
+  Special := Editor.Lines.Objects[Line - 1] <> nil;
 
   if Special then
   begin
@@ -341,16 +336,9 @@ begin
   FStrings := TStringList.Create();
   FLock := TCriticalSection.Create();
 
-  if SimbaSettings.Editor.AntiAliased.Value then
-    Editor.Font.Quality := fqCleartypeNatural
-  else
-    Editor.Font.Quality := fqNonAntialiased;
-
-  if SimbaFontHelpers.IsFontFixed(SimbaSettings.Editor.FontName.Value) then
-    Editor.Font.Name := SimbaSettings.Editor.FontName.Value;
-
-  Editor.Font.Color := clWindowText;
-  Editor.Font.Size := SimbaSettings.Editor.FontSize.Value;
+  SimbaSettingChanged(SimbaSettings.GUI.OutputFontSize);
+  SimbaSettingChanged(SimbaSettings.GUI.OutputFontName);
+  SimbaSettingChanged(SimbaSettings.GUI.OutputFontAntiAliased);
 
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
 end;

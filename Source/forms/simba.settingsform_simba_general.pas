@@ -10,14 +10,20 @@ unit simba.settingsform_simba_general;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, StdCtrls, ComCtrls, ExtCtrls,
+  Classes, SysUtils, Forms, Controls, StdCtrls, ComCtrls, ExtCtrls, Spin,
   DividerBevel;
 
 type
   TSimbaGeneralFrame = class(TFrame)
+    OutputFontAntiAliased: TCheckBox;
+    OutputFontName: TComboBox;
+    Label1: TLabel;
+    Label2: TLabel;
+    OutputDivider: TDividerBevel;
     MacOSCommandKey: TCheckBox;
     ExtractOpenSSLCheckbox: TCheckBox;
     GeneralDivider: TDividerBevel;
+    OutputFontSize: TSpinEdit;
     ToolbarSizeCaption: TLabel;
     FontSizeLabel: TLabel;
     ToolbarSizeTrackBar: TTrackBar;
