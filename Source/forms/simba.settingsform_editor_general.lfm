@@ -137,7 +137,6 @@ object EditorGeneralFrame: TEditorGeneralFrame
     Caption = 'Statement Completion'
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 10
-    ParentFont = False
   end
   object CompleteBeginCheckbox: TCheckBox
     AnchorSideLeft.Control = CompleteLabel

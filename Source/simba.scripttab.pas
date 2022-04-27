@@ -13,7 +13,7 @@ uses
   classes, sysutils, comctrls, controls, dialogs, lcltype, extctrls, graphics,
   syneditmiscclasses, syneditkeycmds,
   simba.mufasatypes, simba.editor, simba.scriptinstance, simba.codeinsight, simba.codeparser, simba.parameterhint,
-  simba.debuggerform, simba.functionlistform, simba.functionlistupdater, simba.scriptinstance_communication;
+  simba.debuggerform, simba.functionlistform, simba.functionlistupdater;
 
 type
   TSimbaScriptTab = class(TTabSheet)
@@ -190,7 +190,7 @@ var
   i: Int32;
 begin
   try
-    Expression := FEditor.Expression[PPoint(Data)^.X, PPoint(Data)^.Y];
+    Expression := FEditor.GetExpression(PPoint(Data)^.X, PPoint(Data)^.Y);
     if (Expression = '') then
       Exit;
 
@@ -241,8 +241,6 @@ begin
   FSavedText := FEditor.Text;
 
   FEditor.MarkTextAsSaved();
-  FEditor.InvalidateGutter();
-  FEditor.ModifiedLinesGutter.ReCalc();
   if (FEditor.OnChange <> nil) then
     FEditor.OnChange(FEditor);
 end;

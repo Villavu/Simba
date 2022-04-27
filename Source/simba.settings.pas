@@ -25,12 +25,14 @@ type
     FValue: Variant;
     FDefaultValue: Variant;
 
+    function GetName: String;
     procedure SetValue(AValue: Variant);
   public
     constructor Create(ASettings: TSimbaSettings; ASection, AName: String; DefaultValue: Variant);
 
     property DefaultValue: Variant read FDefaultValue;
     property Value: Variant read FValue write SetValue;
+    property Name: String read GetName;
   end;
 
   TSimbaSetting_Boolean      = class(TSimbaSetting);
@@ -62,6 +64,10 @@ type
       ToolbarSize: TSimbaSetting;
       ColorPickerHistory: TSimbaSetting;
       MacOSKeystrokes: TSimbaSetting;
+
+      OutputFontName: TSimbaSetting;
+      OutputFontSize: TSimbaSetting;
+      OutputFontAntiAliased: TSimbaSetting;
     end;
 
     Editor: record
@@ -106,6 +112,11 @@ implementation
 uses
   lazloggerbase, synedit,
   simba.stringutil, simba.files;
+
+function TSimbaSetting.GetName: String;
+begin
+  Result := FSection + '.' + FName;
+end;
 
 procedure TSimbaSetting.SetValue(AValue: Variant);
 type
@@ -153,7 +164,7 @@ begin
   if (FChangeEventList = nil) or (FChangeEventList.Count = 0) then
     Exit;
 
-  DebugLn('Setting changed: ', Setting.FName);
+  DebugLn('Setting changed: ', Setting.Name);
 
   i := FChangeEventList.Count;
   while FChangeEventList.NextDownIndex(i) do
@@ -274,6 +285,10 @@ begin
   GUI.ToolbarSize := TSimbaSetting_Integer.Create(Self, 'GUI', 'ToolbarSize', 24);
   GUI.ColorPickerHistory := TSimbaSetting_BinaryString.Create(Self, 'GUI', 'ColorPickerHistory', '');
   GUI.MacOSKeystrokes := TSimbaSetting_Boolean.Create(Self, 'GUI', 'MacOSKeystrokes', {$IFDEF DARWIN}True{$ELSE}False{$ENDIF});
+
+  GUI.OutputFontSize := TSimbaSetting_Integer.Create(Self, 'GUI', 'OutputFontSize', SynDefaultFontSize + 1);
+  GUI.OutputFontName := TSimbaSetting_String.Create(Self, 'GUI', 'OutputFontName', {$IFDEF WINDOWS}'Consolas'{$ELSE}''{$ENDIF});
+  GUI.OutputFontAntiAliased := TSimbaSetting_Boolean.Create(Self, 'GUI', 'OutputFontAntiAliased', True);
 
   // Editor
   Editor.DefaultScript := TSimbaSetting_BinaryString.Create(Self, 'Editor', 'DefaultScript', 'program new;' + LineEnding + 'begin' + LineEnding + 'end.');
