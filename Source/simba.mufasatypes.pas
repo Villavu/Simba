@@ -283,6 +283,11 @@ procedure Swap(var A, B: TRGB32); overload;
 
 generic procedure Swap<T>(var A, B: T);
 
+type
+  TSyncNested = procedure is nested;
+
+procedure Sync(const Method: TSyncNested);
+
 implementation
 
 function TRGB32.ToString: String;
@@ -384,6 +389,27 @@ end;
 procedure Swap(var A, B: TRGB32);
 begin
   specialize Swap<TRGB32>(A, B);
+end;
+
+type
+  TSyncObject = object
+    Proc: TSyncNested;
+
+    procedure Execute;
+  end;
+
+procedure TSyncObject.Execute;
+begin
+  Proc();
+end;
+
+procedure Sync(const Method: TSyncNested);
+var
+  SyncObject{%H-}: TSyncObject;
+begin
+  SyncObject.Proc := Method;
+
+  TThread.Synchronize(nil, @SyncObject.Execute);
 end;
 
 end.

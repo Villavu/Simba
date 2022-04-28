@@ -1,4 +1,4 @@
-{
+﻿{
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
@@ -12,9 +12,12 @@ interface
 uses
   classes, sysutils, fileutil, dividerbevel, forms, controls,
   graphics, dialogs, extctrls, comctrls, stdctrls, menus, lcltype,
-  simba.client, simba.dtm, simba.imagebox, simba.mufasatypes;
+  simba.client, simba.dtm, simba.imagebox, simba.imageboxzoom, simba.mufasatypes, simba.bitmap;
 
 type
+  TDTMPrintEvent   = procedure(DTM: String) of object;
+  TDTMPrintEventEx = procedure(DTM: String) is nested;
+
   TSimbaDTMEditorForm = class(TForm)
     ButtonUpdateImage: TButton;
     ButtonClearImage: TButton;
@@ -38,17 +41,15 @@ type
     EditPointColor: TEdit;
     EditPointTolerance: TEdit;
     EditPointSize: TEdit;
-    ImageZoom: TImage;
     LabelX: TLabel;
     LabelY: TLabel;
     LabelColor: TLabel;
     LabelTolerance: TLabel;
     LabelSize: TLabel;
-    LabelColorZoom: TLabel;
     ListBox: TListBox;
     MainMenu: TMainMenu;
     MenuItemImage: TMenuItem;
-    PanelColorZoom: TPanel;
+    PanelTop: TPanel;
     PanelSelectedPoint: TPanel;
     MenuDTM: TMenuItem;
     MenuItemLoadDTM: TMenuItem;
@@ -60,7 +61,6 @@ type
     MenuItemColorYellow: TMenuItem;
     PanelMain: TPanel;
     PanelRight: TPanel;
-    PanelZoom: TPanel;
     PointFlashTimer: TTimer;
 
     procedure ButtonClearImageClick(Sender: TObject);
@@ -77,7 +77,6 @@ type
     procedure FindDTMClick(Sender: TObject);
     procedure PointFlash(Sender: TObject);
     procedure LoadDTMClick(Sender: TObject);
-    procedure MouseZoomPaint(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure ChangeDrawColor(Sender: TObject);
     procedure ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -87,10 +86,15 @@ type
     procedure ButtonUpdateImageClick(Sender: TObject);
   protected
     FImageBox: TSimbaImageBox;
+    FImageZoom: TSimbaImageBoxZoom;
+    FZoomInfo: TLabel;
+    FManageClient: Boolean;
     FClient: TClient;
+    FClientImage: TMufasaBitmap;
     FDragging: Int32;
 
-    procedure FontChanged(Sender: TObject); override;
+    FOnPrintDTM: TDTMPrintEvent;
+    FOnPrintDTMEx: TDTMPrintEventEx;
 
     procedure AddPoint(X, Y, Col, Tol, Size: Int32); overload;
     procedure AddPoint(X, Y, Col: Int32); overload;
@@ -104,10 +108,12 @@ type
 
     procedure DrawDTM;
   public
-    OnPrintDTM: procedure(DTM: String) of object;
-
-    constructor Create(TargetWindow: THandle); reintroduce;
+    constructor Create(Client: TClient; ManageClient: Boolean); reintroduce;
+    constructor Create(Window: TWindowHandle); reintroduce;
     destructor Destroy; override;
+
+    property OnPrintDTM: TDTMPrintEvent read FOnPrintDTM write FOnPrintDTM;
+    property OnPrintDTMEx: TDTMPrintEventEx read FOnPrintDTMEx write FOnPrintDTMEx;
   end;
 
 implementation
@@ -116,37 +122,23 @@ implementation
 
 uses
   math,
-  simba.colormath;
+  simba.colormath, simba.helpers_string;
 
 procedure TSimbaDTMEditorForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
   R, G, B: Byte;
   H, S, L: Extended;
-  localX, localY, globalX, globalY: Int32;
   Point: TMDTMPoint;
 begin
-  ImageZoom.Picture.Bitmap.BeginUpdate(True);
-  ImageZoom.Tag := PtrInt(True);
-
-  try
-    for localX := 0 to 5 do
-      for localY := 0 to 5 do
-      begin
-        globalX := X + localX - 2;
-        globalY := Y + localY - 2;
-
-        ImageZoom.Picture.Bitmap.Canvas.Pixels[localX, localY] :=  FImageBox.Background.Canvas.Pixels[globalX, globalY];
-      end;
-  finally
-    ImageZoom.Picture.Bitmap.EndUpdate(False);
-  end;
+  FImageZoom.Move(FClientImage, X, Y);
 
   ColorToRGB(FImageBox.Background.Canvas.Pixels[X, Y], R, G, B);
   ColorToHSL(FImageBox.Background.Canvas.Pixels[X, Y], H, S, L);
 
-  LabelColorZoom.Caption := Format('Color: %d', [FImageBox.Background.Canvas.Pixels[X, Y]]) + LineEnding +
-                            Format('RGB: %d, %d, %d', [R, G, B])                            + LineEnding +
-                            Format('HSL: %f, %f, %f', [H, S, L])                            + LineEnding;
+  FZoomInfo.Caption := Format('Color: %d', [FImageBox.Background.Canvas.Pixels[X, Y]]) + LineEnding +
+                       Format('RGB: %d, %d, %d', [R, G, B])                            + LineEnding +
+                       Format('HSL: %.2f, %.2f, %.2f', [H, S, L])                      + LineEnding;
+
   if (FDragging > -1) then
   begin
     Point := GetPoint(FDragging);
@@ -262,15 +254,14 @@ end;
 
 procedure TSimbaDTMEditorForm.ButtonUpdateImageClick(Sender: TObject);
 var
-  W, H: Int32;
+  W, H: Integer;
 begin
-  if not FClient.IOManager.TargetValid then
+  if not FClient.IOManager.TargetValid() then
     FClient.IOManager.SetDesktop();
-
   FClient.IOManager.GetDimensions(W, H);
-  FClient.MBitmaps[0].CopyClientToBitmap(FClient.IOManager, True, 0, 0, W-1, H-1);
+  FClientImage.CopyClientToBitmap(FClient.IOManager, True, 0, 0, W-1, H-1);
 
-  FImageBox.Background.LoadFromMufasaBitmap(FClient.MBitmaps[0]);
+  FImageBox.Background.LoadFromMufasaBitmap(FClientImage);
   FImageBox.BackgroundChanged();
 
   DrawDTM();
@@ -319,10 +310,10 @@ begin
   Items := ListBox.Items[Index].Split(', ');
 
   Result.x := StrToInt(Items[0]);
-  Result.y := StrToInt(Items[2]);
-  Result.c := StrToInt(Items[4]);
-  Result.t := StrToInt(Items[6]);
-  Result.asz := StrToInt(Items[8]);
+  Result.y := StrToInt(Items[1]);
+  Result.c := StrToInt(Items[2]);
+  Result.t := StrToInt(Items[3]);
+  Result.asz := StrToInt(Items[4]);
   Result.bp := False;
 end;
 
@@ -347,53 +338,9 @@ begin
     Result.AddPoint(Points[i]);
 end;
 
-procedure TSimbaDTMEditorForm.FontChanged(Sender: TObject);
-begin
-  inherited FontChanged(Sender);
-
-  if (PanelColorZoom <> nil) and (PanelZoom <> nil) then
-  begin
-    with TBitmap.Create() do
-    try
-      Canvas.Font := Self.Font;
-
-      with Canvas.TextExtent(' HSL: 100.00, 100.00, 100.00 ') do
-      begin
-        PanelColorZoom.Width := CX;
-        PanelColorZoom.Height := CY * 3;
-      end;
-
-      if PanelColorZoom.Height > PanelZoom.Height then
-      begin
-        PanelZoom.Width := (PanelColorZoom.Height-5) + (5 - (PanelColorZoom.Height-5) mod 5);
-        PanelZoom.Height := (PanelColorZoom.Height-5) + (5 - (PanelColorZoom.Height-5) mod 5);
-        PanelZoom.Height := PanelZoom.Height + 2;
-        PanelZoom.Width := PanelZoom.Height + 2;
-      end;
-    finally
-      Free();
-    end;
-  end;
-end;
-
 procedure TSimbaDTMEditorForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   CloseAction := caFree;
-end;
-
-procedure TSimbaDTMEditorForm.MouseZoomPaint(Sender: TObject);
-begin
-  with Sender as TGraphicControl do
-    if Boolean(Tag) then
-    begin
-      Canvas.Pen.Color := FImageBox.Overlay.Canvas.Pen.Color;
-      Canvas.Frame(
-        (Width div 2)  - Floor(Width / 5 / 2),
-        (Height div 2) - Floor(Width / 5 / 2),
-        (Width div 2)  + Ceil(Width / 5 / 2),
-        (Height div 2) + Ceil(Width / 5 / 2)
-      );
-    end;
 end;
 
 procedure TSimbaDTMEditorForm.LoadDTMClick(Sender: TObject);
@@ -476,8 +423,10 @@ begin
   DTM := GetDTM();
 
   try
-    if (@OnPrintDTM <> nil) then
+    if Assigned(OnPrintDTM) then
       OnPrintDTM(DTM.ToString());
+    if Assigned(OnPrintDTMEx) then
+      OnPrintDTMEx(DTM.ToString());
   finally
     DTM.Free();
   end;
@@ -614,7 +563,19 @@ begin
   DrawDTM();
 end;
 
-constructor TSimbaDTMEditorForm.Create(TargetWindow: THandle);
+destructor TSimbaDTMEditorForm.Destroy;
+begin
+  if (FClientImage <> nil) then
+    FreeAndNil(FClientImage);
+  if FManageClient and (FClient <> nil) then
+    FreeAndNil(FClient);
+
+  inherited Destroy();
+end;
+
+constructor TSimbaDTMEditorForm.Create(Client: TClient; ManageClient: Boolean);
+var
+  W, H: Integer;
 begin
   inherited Create(Application.MainForm);
 
@@ -628,25 +589,35 @@ begin
   FImageBox.OnMouseUp := @ClientImageMouseUp;
   FImageBox.Overlay.Canvas.Pen.Color := clRed;
 
-  FClient := TClient.Create();
-  FClient.MBitmaps.CreateBMP(0, 0);
-  FClient.IOManager.SetTarget(TargetWindow);
-  if not FClient.IOManager.TargetValid then
-    FClient.IOManager.SetDesktop();
+  FImageZoom := TSimbaImageBoxZoom.Create(Self);
+  FImageZoom.Parent := PanelTop;
+  FImageZoom.SetZoom(4, 5);
+  FImageZoom.BorderSpacing.Around := 10;
 
-  ImageZoom.Picture.Bitmap.Width := 5;
-  ImageZoom.Picture.Bitmap.Height := 5;
+  FZoomInfo := TLabel.Create(Self);
+  FZoomInfo.Parent := PanelTop;
+  FZoomInfo.BorderSpacing.Right := 10;
+  FZoomInfo.AnchorToNeighbour(akLeft, 10, FImageZoom);
 
-  ButtonUpdateImage.Click();
+  FManageClient := ManageClient;
+
+  FClient := Client;
+  FClientImage := TMufasaBitmap.Create();
+  FClient.IOManager.GetDimensions(W, H);
+  FClientImage.CopyClientToBitmap(FClient.IOManager, True, 0, 0, W-1, H-1);
+
+  FImageBox.Background.LoadFromMufasaBitmap(FClientImage);
+  FImageBox.BackgroundChanged();
 end;
 
-destructor TSimbaDTMEditorForm.Destroy;
+constructor TSimbaDTMEditorForm.Create(Window: TWindowHandle);
+var
+  Client: TClient;
 begin
-  FClient.MBitmaps[0].Free();
-  FClient.Free();
+  Client := TClient.Create();
+  Client.IOManager.SetTarget(Window);
 
-  inherited Destroy();
+  Create(Client, True);
 end;
 
 end.
-
