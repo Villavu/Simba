@@ -1,28 +1,3 @@
-procedure _LapeSortIntegerArray(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  Sort(PIntegerArray(Params^[0])^);
-end;
-
-procedure _LapeSortWeightedTPA(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  specialize QuickSortWeighted<TPoint, Int64>(PPointArray(Params^[0])^, PInt64Array(Params^[1])^, Low(PPointArray(Params^[0])^), High(PPointArray(Params^[0])^), PBoolean(Params^[2])^);
-end;
-
-procedure _LapeSortWeightedATPA(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  specialize QuickSortWeighted<TPointArray, Int64>(P2DPointArray(Params^[0])^, PInt64Array(Params^[1])^, Low(P2DPointArray(Params^[0])^), High(P2DPointArray(Params^[0])^), PBoolean(Params^[2])^);
-end;
-
-procedure _LapeSortWeightedTPAF(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  specialize QuickSortWeighted<TPoint, Extended>(PPointArray(Params^[0])^, PExtendedArray(Params^[1])^, Low(PPointArray(Params^[0])^), High(PPointArray(Params^[0])^), PBoolean(Params^[2])^);
-end;
-
-procedure _LapeSortWeightedATPAF(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  specialize QuickSortWeighted<TPointArray, Extended>(P2DPointArray(Params^[0])^, PExtendedArray(Params^[1])^, Low(P2DPointArray(Params^[0])^), High(P2DPointArray(Params^[0])^), PBoolean(Params^[2])^);
-end;
-
 procedure _LapeRAaSTPAEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   RAaSTPAEx(PPointArray(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^);
@@ -45,12 +20,12 @@ end;
 
 procedure _LapeQuickTPASort(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  QuickTPASort(PIntegerArray(Params^[0])^, PPointArray(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PBoolean(Params^[4])^);
+  Sort(PPointArray(Params^[1])^, PIntegerArray(Params^[0])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PBoolean(Params^[4])^);
 end;
 
 procedure _LapeQuickATPASort(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  QuickATPASort(PIntegerArray(Params^[0])^, P2DPointArray(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PBoolean(Params^[4])^);
+  Sort(P2DPointArray(Params^[1])^, PIntegerArray(Params^[0])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PBoolean(Params^[4])^);
 end;
 
 procedure _LapeSortTPAByX(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -365,7 +340,7 @@ end;
 
 procedure _LapeQuicksort(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  specialize Quicksort<Integer>(PIntegerArray(Params^[0])^, Low(PIntegerArray(Params^[0])^), High(PIntegerArray(Params^[0])^));
+  Sort(PIntegerArray(Params^[0])^);
 end;
 
 procedure _LapeInIntArrayEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

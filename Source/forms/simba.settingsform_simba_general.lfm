@@ -6,8 +6,8 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
   ClientHeight = 304
   ClientWidth = 457
   TabOrder = 0
-  DesignLeft = 1765
-  DesignTop = 541
+  DesignLeft = 1766
+  DesignTop = 542
   object ToolbarSizeTrackBar: TTrackBar
     AnchorSideLeft.Control = ToolbarSizeCaption
     AnchorSideLeft.Side = asrBottom

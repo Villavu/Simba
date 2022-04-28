@@ -43,16 +43,6 @@ addGlobalType('array of TPointArray', 'T2DPointArray');
 addGlobalType('record X, Y: Single; end', 'TPointF');
 addGlobalType('Integer', 'TColor');
 
-addGlobalType(
-  'record'               + LineEnding +
-  '  Position: Integer;' + LineEnding +
-  '  Length: Integer;'   + LineEnding +
-  '  Match: String;'     + LineEnding +
-  'end',
-  'TRegExprMatch');
-
-addGlobalType('array of TRegExprMatch', 'TRegExprMatchArray');
-
 addGlobalType('(__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__)', 'EComparator');
 
 addGlobalFunc('function Box(const X1, Y1, X2, Y2: Integer): TBox', @_LapeBox);
@@ -90,23 +80,5 @@ addDelayedCode(
   'end;'
 );
 
-// hide from codeinsight
-// native wrappers are for speed
-
 popSection();
 
-addGlobalFunc('procedure _Write(S: String); override', @_LapeWrite);
-addGlobalFunc('procedure _WriteLn; override', @_LapeWriteLn);
-
-addGlobalFunc('procedure _Sort(var a: TIntegerArray); overload;', @_LapeSortTIA);
-
-addGlobalFunc('function _Unique(const a: TPointArray): TPointArray; overload', @_LapeUniqueTPA);
-addGlobalFunc('function _Unique(const a: TIntegerArray): TIntegerArray; overload', @_LapeUniqueTIA);
-
-addGlobalFunc('function _IndicesOf(const Item: TPoint; const a: TPointArray): TIntegerArray; overload', @_LapeIndicesOfTPA);
-addGlobalFunc('function _IndicesOf(const Item: Integer; const a: TIntegerArray): TIntegerArray; overload', @_LapeIndicesOfTIA);
-addGlobalFunc('function _IndicesOf(const Item: String; const a: TStringArray): TIntegerArray; overload', @_LapeIndicesOfTSA);
-
-addGlobalFunc('function _IndexOf(const Item: TPoint; const a: TPointArray): Integer; overload', @_LapeIndexOfTPA);
-addGlobalFunc('function _IndexOf(const Item: Integer; const a: TIntegerArray): Integer; overload', @_LapeIndexOfTIA);
-addGlobalFunc('function _IndexOf(const Item: String; const a: TStringArray): Integer; overload', @_LapeIndexOfTSA);

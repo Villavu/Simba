@@ -6,8 +6,8 @@ object EditorGeneralFrame: TEditorGeneralFrame
   ClientHeight = 373
   ClientWidth = 513
   TabOrder = 0
-  DesignLeft = 1716
-  DesignTop = 243
+  DesignLeft = 1717
+  DesignTop = 244
   object CaretPastEOLCheckBox: TCheckBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
@@ -134,7 +134,7 @@ object EditorGeneralFrame: TEditorGeneralFrame
     Height = 15
     Top = 214
     Width = 513
-    Caption = 'Statement Completion'
+    Caption = 'Block Completion'
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 10
   end
@@ -182,8 +182,8 @@ object EditorGeneralFrame: TEditorGeneralFrame
     Left = 0
     Height = 15
     Top = 237
-    Width = 223
+    Width = 199
     BorderSpacing.Top = 8
-    Caption = 'Automatically complete the statement on:'
+    Caption = 'Automatically complete the block on:'
   end
 end

@@ -35,12 +35,12 @@ end;
 procedure TSimbaEditorPlugin_BlockCompletion.DoBeforeCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUtf8Char; Data: Pointer; HandlerData: Pointer);
 var
   Token: String;
-  TokenPos: TPoint;
+  Caret: TPoint;
   InsertText: String;
 begin
   with Editor as TSimbaEditor do
   begin
-    if ReadOnly then
+    if ReadOnly or SelAvail then
       Exit;
 
     InsertText := '';
@@ -48,17 +48,20 @@ begin
     case Command of
       ecLineBreak:
         begin
-          if IsHighlighterAttribute(['String', 'Comment']) then
+          if IsHighlighterAttribute(['String', 'Comment']) or IsTextAhead(['BEGIN']) then
             Exit;
 
-          TokenPos := LogicalCaretXY;
-          Token := GetWordAtRowCol(LogicalCaretXY);
+          Token := GetWordAtRowCol(CaretXY);
 
           if (CompareText(Token, 'BEGIN') = 0) and SimbaSettings.Editor.AutomaticallyCompleteBegin.Value then
           begin
-            InsertText := LineEnding + LineEnding + StringOfChar(' ', TokenPos.X - Length(Token) - 1) + 'end;';
+            Caret := CaretXY;
+            Caret.Y += 1;
 
-            TokenPos := TPoint.Create(TokenPos.X - Length(Token) + 2, TokenPos.Y + 1);
+            InsertText := LineEnding +
+                          StringOfChar(' ', CaretX - 4) + LineEnding +
+                          StringOfChar(' ', CaretX - 6) + 'end;';
+
             Handled := True;
           end;
         end;
@@ -68,25 +71,25 @@ begin
           if IsHighlighterAttribute(['String', 'Comment']) then
             Exit;
 
-          TokenPos := LogicalCaretXY;
           Token := UTF8Encode(AChar);
+          Caret := CaretXY;
 
-          if (CompareText(Token, '(') = 0) and SimbaSettings.Editor.AutomaticallyCompleteParentheses.Value then
+          if (CompareText(Token, '(') = 0) and (not IsTextAhead(['(', ')'])) and SimbaSettings.Editor.AutomaticallyCompleteParentheses.Value then
             InsertText := ')'
           else
-          if (CompareText(Token, '[') = 0) and SimbaSettings.Editor.AutomaticallyCompleteIndex.Value then
+          if (CompareText(Token, '[') = 0) and (not IsTextAhead(['[', ']'])) and SimbaSettings.Editor.AutomaticallyCompleteIndex.Value then
             InsertText := ']';
         end;
     end;
 
-    if (InsertText <> '') and (not IsTextAhead(InsertText)) then
+    if (InsertText <> '') then
     begin
       BeginUndoBlock();
 
       try
-        InsertTextAtCaret(InsertText);
+        InsertTextAtCaret(InsertText, scamIgnore);
 
-        LogicalCaretXY := TokenPos;
+        CaretXY := Caret;
       finally
         EndUndoBlock();
       end;

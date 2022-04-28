@@ -20,7 +20,6 @@ generic procedure QuickSortWeighted<_T, _W>(var Arr: specialize TArray<_T>; var 
 generic function MinA<T>(const Arr: array of T): T;
 generic function MaxA<T>(const Arr: array of T): T;
 generic function Sum<T, R>(var AValues: array of T): R;
-generic procedure Swap<T>(var A, B: T);
 generic function Unique<T>(const Arr: specialize TArray<T>): specialize TArray<T>;
 generic procedure Reverse<T>(var Arr: specialize TArray<T>);
 generic function Reversed<T>(const Arr: specialize TArray<T>): specialize TArray<T>;
@@ -29,6 +28,12 @@ generic function IndicesOf<_T>(const Item: _T; const Arr: specialize TArray<_T>)
 generic function Mode<_T>(const Arr: specialize TArray<_T>): Integer;
 generic procedure Sort<_T>(var Arr: specialize TArray<_T>);
 generic function Sorted<_T>(const Arr: specialize TArray<_T>): specialize TArray<_T>;
+
+procedure Sort(var Arr: TIntegerArray);
+procedure Sort(var Arr: TPointArray; var Weights: TIntegerArray; SortUp: Boolean); overload;
+procedure Sort(var Arr: TPointArray; var Weights: TIntegerArray; Lo, Hi: Integer; SortUp: Boolean); overload;
+procedure Sort(var Arr: T2DPointArray; var Weights: TIntegerArray; SortUp: Boolean); overload;
+procedure Sort(var Arr: T2DPointArray; var Weights: TIntegerArray; Lo, Hi: Integer; SortUp: Boolean); overload;
 
 function MinA(const Arr: TIntegerArray): Integer; overload;
 function MinA(const Arr: TExtendedArray): Extended; overload;
@@ -39,15 +44,37 @@ function Sum(const Arr: TExtendedArray): Extended; overload;
 function Average(const Arr: TIntegerArray): Int64; overload;
 function Average(const Arr: TExtendedArray): Extended; overload;
 function Mode(const Arr: TIntegerArray): Integer;
-procedure Sort(var Arr: TIntegerArray);
 procedure Reverse(var Arr: TIntegerArray);
 procedure Reverse(var Arr: TPointArray);
 procedure Reverse(var Arr: T2DPointArray);
 
+function IndexOf(const Item: Integer; const Arr: TIntegerArray): Integer;
+function IndexOf(const Item: String; const Arr: TStringArray): Integer;
+function IndexOf(const Item: TPoint; const Arr: TPointArray): Integer;
+
+function IndicesOf(const Item: Integer; const Arr: TIntegerArray): TIntegerArray;
+function IndicesOf(const Item: String; const Arr: TStringArray): TIntegerArray;
+function IndicesOf(const Item: TPoint; const Arr: TPointArray): TIntegerArray;
+
+// TPoint: Use Matrix
+function Unique(const Arr: TPointArray): TPointArray;
+
+// Integer: Use Hashing
+function Unique(const Arr: TIntegerArray): TIntegerArray;
+
+// String: Use Hashing
+function Unique(const Arr: TStringArray): TStringArray;
+
+// Double: Use SameValue
+function IndexOf(const Item: Double; const Arr: TDoubleArray): Integer;
+function IndicesOf(const Item: Double; const Arr: TDoubleArray): TIntegerArray;
+function Unique(const Arr: TDoubleArray): TDoubleArray;
+
 implementation
 
 uses
-  simba.overallocatearray;
+  math,
+  simba.math, simba.helpers_matrix, simba.tpa, simba.overallocatearray;
 
 generic procedure QuickSort<T>(var AValues: array of T; ALeft, ARight: SizeInt);
 var
@@ -154,16 +181,6 @@ begin
   Result := Default(R);
   for I:=0 to High(AValues) do
     Result := Result + AValues[I];
-end;
-
-generic procedure Swap<T>(var A, B: T);
-var
-  C: T;
-begin
-  C := A;
-
-  A := B;
-  B := C;
 end;
 
 generic function Unique<T>(const Arr: specialize TArray<T>): specialize TArray<T>;
@@ -340,6 +357,26 @@ begin
   end;
 end;
 
+procedure Sort(var Arr: TPointArray; var Weights: TIntegerArray; SortUp: Boolean);
+begin
+  specialize QuickSortWeighted<TPoint, Integer>(Arr, Weights, Low(Arr), High(Arr), SortUp);
+end;
+
+procedure Sort(var Arr: TPointArray; var Weights: TIntegerArray; Lo, Hi: Integer; SortUp: Boolean);
+begin
+  specialize QuickSortWeighted<TPoint, Integer>(Arr, Weights, Lo, Hi, SortUp);
+end;
+
+procedure Sort(var Arr: T2DPointArray; var Weights: TIntegerArray; SortUp: Boolean);
+begin
+  specialize QuickSortWeighted<TPointArray, Integer>(Arr, Weights, Low(Arr), High(Arr), SortUp);
+end;
+
+procedure Sort(var Arr: T2DPointArray; var Weights: TIntegerArray; Lo, Hi: Integer; SortUp: Boolean);
+begin
+   specialize QuickSortWeighted<TPointArray, Integer>(Arr, Weights, Lo, Hi, SortUp);
+end;
+
 function MinA(const Arr: TIntegerArray): Integer;
 begin
   Result := specialize MinA<Integer>(Arr);
@@ -407,6 +444,214 @@ end;
 procedure Reverse(var Arr: T2DPointArray);
 begin
   specialize Reverse<TPointArray>(Arr);
+end;
+
+function IndexOf(const Item: Integer; const Arr: TIntegerArray): Integer;
+begin
+  Result := specialize IndexOf<Integer>(Item, Arr);
+end;
+
+function IndexOf(const Item: String; const Arr: TStringArray): Integer;
+begin
+  Result := specialize IndexOf<String>(Item, Arr);
+end;
+
+function IndexOf(const Item: TPoint; const Arr: TPointArray): Integer;
+begin
+  Result := specialize IndexOf<TPoint>(Item, Arr);
+end;
+
+function IndicesOf(const Item: Integer; const Arr: TIntegerArray): TIntegerArray;
+begin
+  Result := specialize IndicesOf<Integer>(Item, Arr);
+end;
+
+function IndicesOf(const Item: String; const Arr: TStringArray): TIntegerArray;
+begin
+   Result := specialize IndicesOf<String>(Item, Arr);
+end;
+
+function IndicesOf(const Item: TPoint; const Arr: TPointArray): TIntegerArray;
+begin
+   Result := specialize IndicesOf<TPoint>(Item, Arr);
+end;
+
+function Unique(const Arr: TPointArray): TPointArray;
+var
+  Matrix: TBooleanMatrix;
+  I, Count: Integer;
+begin
+  SetLength(Result, Length(Arr));
+  if (Length(Arr) = 0) then
+    Exit;
+
+  Count := 0;
+
+  with GetTPABounds(Arr) do
+  begin
+    Matrix.SetSize(Width, Height);
+
+    for I := 0 to High(Arr) do
+      if not Matrix[Arr[I].Y - Y1, Arr[I].X - X1] then
+      begin
+        Matrix[Arr[I].Y - Y1, Arr[I].X - X1] := True;
+        Result[Count] := Arr[I];
+        Inc(Count);
+      end;
+  end;
+
+  SetLength(Result, Count);
+end;
+
+function Unique(const Arr: TIntegerArray): TIntegerArray;
+var
+  I, J, Size: Integer;
+  Value: Integer;
+  Table: array of record
+    Bucket: TIntegerArray;
+    Count: Integer;
+  end;
+  Buffer: specialize TSimbaOverAllocateArray<Integer>;
+label
+  Next;
+begin
+  Buffer.Init();
+
+  SetLength(Table, NextPower2(Length(Arr)));
+  Size := High(Table);
+
+  for i := 0 to High(Arr) do
+  begin
+    Value := Arr[i];
+
+    with Table[Value and Size] do
+    begin
+      for J := 0 to Count - 1 do
+        if (Value = Bucket[J]) then
+          goto Next;
+
+      if (Count >= Length(Bucket)) then
+        SetLength(Bucket, 4 + (Length(Bucket) * 2));
+
+      Bucket[Count] := Value;
+      Inc(Count);
+
+      Buffer.Add(Value);
+    end;
+
+    Next:
+  end;
+
+  Result := Buffer.Trim();
+end;
+
+function Unique(const Arr: TStringArray): TStringArray;
+var
+  I, J, Size: Integer;
+  Value: String;
+  Table: array of record
+    Bucket: TStringArray;
+    Count: Integer;
+  end;
+  Buffer: specialize TSimbaOverAllocateArray<String>;
+label
+  Next;
+begin
+  Buffer.Init();
+
+  SetLength(Table, NextPower2(Length(Arr)));
+  Size := High(Table);
+
+  for i := 0 to High(Arr) do
+  begin
+    Value := Arr[i];
+
+    with Table[Hash(Value) and Size] do
+    begin
+      for J := 0 to Count - 1 do
+        if (Value = Bucket[J]) then
+          goto Next;
+
+      if (Count >= Length(Bucket)) then
+        SetLength(Bucket, 4 + (Length(Bucket) * 2));
+
+      Bucket[Count] := Value;
+      Inc(Count);
+
+      Buffer.Add(Value);
+    end;
+
+    Next:
+  end;
+
+  Result := Buffer.Trim();
+end;
+
+function IndexOf(const Item: Double; const Arr: TDoubleArray): Integer;
+var
+  I: Integer;
+begin
+  for I := 0 to High(Arr) do
+    if SameValue(Item, Arr[I]) then
+      Exit(I);
+
+  Result := -1;
+end;
+
+function IndicesOf(const Item: Double; const Arr: TDoubleArray): TIntegerArray;
+var
+  I: Integer;
+  Buffer: specialize TSimbaOverAllocateArray<Integer>;
+begin
+  Buffer.Init(4);
+
+  for I := 0 to High(Arr) do
+    if SameValue(Item, Arr[I]) then
+      Buffer.Add(I);
+
+  Result := Buffer.Trim();
+end;
+
+function Unique(const Arr: TDoubleArray): TDoubleArray;
+var
+  I, J, Size: Integer;
+  Value: Double;
+  Table: array of record
+    Bucket: TDoubleArray;
+    Count: Integer;
+  end;
+  Buffer: specialize TSimbaOverAllocateArray<Double>;
+label
+  Next;
+begin
+  Buffer.Init();
+
+  SetLength(Table, NextPower2(Length(Arr)));
+  Size := High(Table);
+
+  for i := 0 to High(Arr) do
+  begin
+    Value := Arr[i];
+
+    with Table[Round(Value) and Size] do
+    begin
+      for J := 0 to Count - 1 do
+        if SameValue(Value, Bucket[J]) then
+          goto Next;
+
+      if (Count >= Length(Bucket)) then
+        SetLength(Bucket, 4 + (Length(Bucket) * 2));
+
+      Bucket[Count] := Value;
+      Inc(Count);
+
+      Buffer.Add(Value);
+    end;
+
+    Next:
+  end;
+
+  Result := Buffer.Trim();
 end;
 
 end.

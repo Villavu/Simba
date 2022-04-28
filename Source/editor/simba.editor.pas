@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, graphics, controls, lcltype,
-  synedit, synedittypes,  syngutterlineoverview, lazsyneditmousecmdstypes,
+  synedit, synedittypes, syngutterlineoverview, lazsyneditmousecmdstypes,
   syneditmousecmds, syneditkeycmds, synpluginmulticaret, synedithighlighter, syneditmarkuphighall,
   simba.autocomplete, simba.parameterhint, simba.settings,
   simba.editor_attributes, simba.editor_modifiedlinegutter;
@@ -46,7 +46,7 @@ type
     // Is highlighter attribute at caret
     function IsHighlighterAttribute(Values: TStringArray): Boolean;
     // Is value ahead of caret
-    function IsTextAhead(Value: String): Boolean;
+    function IsTextAhead(Values: TStringArray): Boolean;
     // Get Expression string at X,Y
     function GetExpression(X, Y: Integer): String;
     // Execute a command that needs no extra data
@@ -77,9 +77,18 @@ begin
   Result := GetHighlighterAttriAtRowCol(P, Token, Attri) and Attri.Name.ContainsAny(Values);
 end;
 
-function TSimbaEditor.IsTextAhead(Value: String): Boolean;
+function TSimbaEditor.IsTextAhead(Values: TStringArray): Boolean;
+var
+  I: Integer;
 begin
-  Result := CompareText(Value, TextBetweenPoints[CaretXY, TPoint.Create(CaretX + Length(Value), CaretY)]) = 0;
+  for I := 0 to High(Values) do
+    if CompareText(Values[I], TextBetweenPoints[CaretXY, TPoint.Create(CaretX + Length(Values[I]), CaretY)]) = 0 then
+    begin
+      Result := True;
+      Exit;
+    end;
+
+  Result := False;
 end;
 
 procedure TSimbaEditor.ExecuteSimpleCommand(Command: TSynEditorCommand);

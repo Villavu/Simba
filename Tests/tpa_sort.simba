@@ -1,0 +1,17 @@
+{$assertions on}
+
+var
+  TPA: TPointArray;
+begin
+  TPA := [[8,8],[1,1],[0,0],[2,2],[4,4]];
+  SortTPAFrom(TPA, [0,0]); 
+  Assert(ToString(TPA) = '[{X = 0, Y = 0}, {X = 1, Y = 1}, {X = 2, Y = 2}, {X = 4, Y = 4}, {X = 8, Y = 8}]');
+ 
+  TPA := [[10,20],[-20,40],[5,5],[0,-5]];
+  SortTPAByX(TPA, True);
+  Assert(ToString(TPA) = '[{X = -20, Y = 40}, {X = 0, Y = -5}, {X = 5, Y = 5}, {X = 10, Y = 20}]');
+  
+  TPA := [[10,20],[-20,40],[5,5],[0,-5]];
+  SortTPAByY(TPA, True);
+  Assert(ToString(TPA) = '[{X = 0, Y = -5}, {X = 5, Y = 5}, {X = 10, Y = 20}, {X = -20, Y = 40}]');
+end;
