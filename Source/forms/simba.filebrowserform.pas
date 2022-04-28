@@ -186,7 +186,6 @@ end;
 procedure TSimbaFileBrowser.MouseMove(Shift: TShiftState; X, Y: Integer);
 var
   Node: TTreeNode;
-  R: TRect;
   FileName: String;
 begin
   inherited MouseMove(Shift, X, Y);

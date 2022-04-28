@@ -2,6 +2,7 @@
 
 {$i simba.imports_system.inc}
 {$i simba.imports_matrix.inc}
+{$i simba.imports_internal.inc}
 
 {$i simba.imports_lclobject.inc}
 {$i simba.imports_lclsystem.inc}

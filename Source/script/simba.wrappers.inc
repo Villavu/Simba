@@ -30,6 +30,8 @@
 {$i simba.wrappers_tclient.inc}
 
 {$i simba.wrappers_system.inc}
+{$i simba.wrappers_internal.inc}
+{$i simba.wrappers_matrix.inc}
 {$i simba.wrappers_oswindow.inc}
 {$i simba.wrappers_target.inc}
 {$i simba.wrappers_input.inc}
@@ -37,7 +39,6 @@
 {$i simba.wrappers_finder.inc}
 {$i simba.wrappers_web.inc}
 {$i simba.wrappers_arrays_algorithms.inc}
-{$i simba.wrappers_matrix.inc}
 {$i simba.wrappers_math.inc}
 {$i simba.wrappers_time_date.inc}
 {$i simba.wrappers_ocr.inc}

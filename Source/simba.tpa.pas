@@ -21,24 +21,22 @@ function ReArrangeandShortenArrayEx(const a: TPointArray; w, h: Integer): TPoint
 function ReArrangeandShortenArray(const a: TPointArray; Dist: Integer): TPointArray;
 function TPAtoATPAEx(const TPA: TPointArray; w, h: Integer): T2DPointArray;
 function TPAtoATPA(const TPA: TPointArray; Dist: Integer): T2DPointArray;
-procedure QuickTPASort(var A: TIntegerArray; var B: TPointArray; iLo, iHi: Integer; SortUp: Boolean);
-procedure QuickATPASort(var A: TIntegerArray; var B: T2DPointArray; iLo, iHi: Integer; SortUp: Boolean);
-procedure SortTPAByX(var a: TPointArray; const LowToHi: Boolean);
-procedure SortTPAByY(var a: TPointArray; const LowToHi: Boolean);
+procedure SortTPAByX(var Arr: TPointArray; const LowToHi: Boolean);
+procedure SortTPAByY(var Arr: TPointArray; const LowToHi: Boolean);
 function FindTPARows(const TPA: TPointArray): T2DPointArray;
 function FindTPAColumns(const TPA: TPointArray): T2DPointArray;
-procedure SortTPAFrom(var a: TPointArray; const From: TPoint);
-procedure SortATPAFrom(var a: T2DPointArray; const From: TPoint);
-procedure SortATPAFromFirstPoint(var a: T2DPointArray; const From: TPoint);
-procedure SortATPAFromMidPoint(var a: T2DPointArray; const From: TPoint);
-procedure SortATPAFromFirstPointX(var a: T2DPointArray; const From: TPoint);
-procedure SortATPAFromFirstPointY(var a: T2DPointArray; const From: TPoint);
+procedure SortTPAFrom(var Arr: TPointArray; const From: TPoint);
+procedure SortATPAFrom(var Arr: T2DPointArray; const From: TPoint);
+procedure SortATPAFromFirstPoint(var Arr: T2DPointArray; const From: TPoint);
+procedure SortATPAFromMidPoint(var Arr: T2DPointArray; const From: TPoint);
+procedure SortATPAFromFirstPointX(var Arr: T2DPointArray; const From: TPoint);
+procedure SortATPAFromFirstPointY(var Arr: T2DPointArray; const From: TPoint);
 function MiddleTPAEx(const TPA: TPointArray; var x, y: Integer): Boolean;
 function MiddleTPA(const tpa: TPointArray): TPoint;
 procedure MedianTPAEx(const TPA: TPointArray; out X, Y: Integer);
 function MedianTPA(const TPA: TPointArray): TPoint;
-procedure SortATPASize(var a: T2DPointArray; const BigFirst: Boolean);
-procedure SortATPAFromSize(var a: T2DPointArray; const Size: Integer; CloseFirst: Boolean);
+procedure SortATPASize(var Arr: T2DPointArray; const BigFirst: Boolean);
+procedure SortATPAFromSize(var Arr: T2DPointArray; const Size: Integer; CloseFirst: Boolean);
 procedure FilterTPAsBetween(var atpa: T2DPointArray; const minLength, maxLength: integer);
 function InIntArrayEx(const a: TIntegerArray; var Where: Integer; const Number: Integer): Boolean;
 function InIntArray(const a: TIntegerArray; Number: Integer): Boolean;
@@ -82,16 +80,12 @@ function PartitionTPA(const TPA:TPointArray; BoxWidth, BoxHeight:Integer): T2DPo
 function PointsInRangeOf(Points, Other: TPointArray; MinDist, MaxDist: Double): TPointArray; overload;
 function PointsInRangeOf(Points, Other: TPointArray; MinDistX, MinDistY, MaxDistX, MaxDistY: Double): TPointArray; overload;
 
-function Unique(const Arr: TIntegerArray): TIntegerArray;
-function Unique(const Arr: TDoubleArray): TDoubleArray;
-function Unique(const Points: TPointArray): TPointArray;
-
 implementation
 
 uses
   math,
   simba.math, simba.slacktree, simba.overallocatearray,
-  simba.generics_array, simba.helpers_matrix;
+  simba.helpers_matrix, simba.generics_array;
 
 function PointsInRangeOf(Points, Other: TPointArray; MinDist, MaxDist: Double): TPointArray; overload;
 var
@@ -361,106 +355,34 @@ begin
   end;
 end;
 
-{/\
-  Sorts the given TPointArray.
-/\}
-procedure QuickTPASort(var A: TIntegerArray; var B: TPointArray; iLo, iHi: Integer; SortUp: Boolean);
+procedure SortTPAByX(var Arr: TPointArray; const LowToHi: Boolean);
 var
-  Lo, Hi, Mid, T: Integer;
-  TP: TPoint;
+  I: Integer;
+  Weights: TIntegerArray;
 begin
-  if (Length(A) <> Length(B)) then Exit;
-  Lo := iLo;
-  Hi := iHi;
-  Mid := A[(Lo + Hi) shr 1];
-  repeat
-    if SortUp then
-    begin
-      while (A[Lo] < Mid) do Inc(Lo);
-      while (A[Hi] > Mid) do Dec(Hi);
-    end else
-    begin
-      while (A[Lo] > Mid) do Inc(Lo);
-      while (A[Hi] < Mid) do Dec(Hi);
-    end;
-    if (Lo <= Hi) then
-    begin
-      T := A[Lo];
-      A[Lo] := A[Hi];
-      A[Hi] := T;
-      TP := B[Lo];
-      B[Lo] := B[Hi];
-      B[Hi] := TP;
-      Inc(Lo);
-      Dec(Hi);
-    end;
-  until Lo > Hi;
-  if (Hi > iLo) then QuickTPASort(A, B, iLo, Hi, SortUp);
-  if (Lo < iHi) then QuickTPASort(A, B, Lo, iHi, SortUp);
+  if (Length(Arr) = 0) then
+    Exit;
+
+  SetLength(Weights, Length(Arr));
+  for I := 0 to High(Arr) do
+    Weights[I] := Arr[I].X;
+
+  Sort(Arr, Weights, LowToHi);
 end;
 
-{/\
-  Sorts the given T2DPointArray.
-/\}
-procedure QuickATPASort(var A: TIntegerArray; var B: T2DPointArray; iLo, iHi: Integer; SortUp: Boolean);
+procedure SortTPAByY(var Arr: TPointArray; const LowToHi: Boolean);
 var
-  Lo, Hi, Mid, T: Integer;
-  TP: TPointArray;
+  I: Integer;
+  Weights: TIntegerArray;
 begin
-  if (Length(A) <> Length(B)) then Exit;
-  Lo := iLo;
-  Hi := iHi;
-  Mid := A[(Lo + Hi) shr 1];
-  repeat
-    if SortUp then
-    begin
-      while (A[Lo] < Mid) do Inc(Lo);
-      while (A[Hi] > Mid) do Dec(Hi);
-    end else
-    begin
-      while (A[Lo] > Mid) do Inc(Lo);
-      while (A[Hi] < Mid) do Dec(Hi);
-    end;
-    if (Lo <= Hi) then
-    begin
-      T := A[Lo];
-      A[Lo] := A[Hi];
-      A[Hi] := T;
-      TP := B[Lo];
-      B[Lo] := B[Hi];
-      B[Hi] := TP;
-      Inc(Lo);
-      Dec(Hi);
-    end;
-  until Lo > Hi;
-  if (Hi > iLo) then QuickATPASort(A, B, iLo, Hi, SortUp);
-  if (Lo < iHi) then QuickATPASort(A, B, Lo, iHi, SortUp);
-end;
+  if (Length(Arr) = 0) then
+    Exit;
 
-procedure SortTPAByX(var a: TPointArray; const LowToHi: Boolean);
-var
-  i, l: Integer;
-  Arr: TIntegerArray;
-begin
-  l := High(a);
-  if (l < 0) then Exit;
-  SetLength(Arr, l + 1);
-  for i := 0 to l do
-    Arr[i] := a[i].x;
-  QuickTPASort(arr, a, 0, l, LowToHi);
-end;
+  SetLength(Weights, Length(Arr));
+  for I := 0 to High(Arr) do
+    Weights[I] := Arr[I].Y;
 
-procedure SortTPAByY(var a: TPointArray; const LowToHi: Boolean);
-var
-  i, l: Integer;
-  Arr: TIntegerArray;
-begin
-  l := High(a);
-  if (l < 0) then Exit;
-  SetLength(Arr, l + 1);
-  for i := 0 to l do
-    Arr[i] := a[i].y;
-  QuickTPASort(arr, a, 0, l, LowToHi);
+  Sort(Arr, Weights, LowToHi);
 end;
 
 function FindTPARows(const TPA: TPointArray): T2DPointArray;
@@ -509,117 +431,105 @@ end;
   Sorts the TPointArray a from the point From.
   Closest one to the point is [0], second closest is [1] etc.
 /\}
-procedure SortTPAFrom(var a: TPointArray; const From: TPoint);
+procedure SortTPAFrom(var Arr: TPointArray; const From: TPoint);
 var
-   i, l: Integer;
-   DistArr: TIntegerArray;
+  I: Integer;
+  Weights: TIntegerArray;
 begin
-  l := High(a);
-  if (l < 0) then Exit;
-  SetLength(DistArr, l + 1);
-  for i := 0 to l do
-    DistArr[i] := Round(Sqr(From.x - a[i].x) + Sqr(From.y - a[i].y));
-  QuickTPASort(DistArr, a, 0, l, True);
+  if Length(Arr) = 0 then
+    Exit;
+
+  SetLength(Weights, Length(Arr));
+  for i := 0 to High(Arr) do
+    Weights[i] := Round(Sqr(From.X - Arr[i].X) + Sqr(From.Y - Arr[i].Y));
+  Sort(Arr, Weights, True);
 end;
 
 {/\
   Sorts the T2DPointArray a from the point From.
 /\}
-procedure SortATPAFrom(var a: T2DPointArray; const From: TPoint);
+procedure SortATPAFrom(var Arr: T2DPointArray; const From: TPoint);
 var
-   i, l: Integer;
+  I: Integer;
 begin
-  l := High(a);
-  if (l < 0) then Exit;
-  for i := 0 to l do
-    SortTPAFrom(a[i], From);
+  for I := 0 to High(Arr) do
+    SortTPAFrom(Arr[I], From);
 end;
 
 {/\
   Sorts the T2DPointArray a from the point From.
 /\}
-procedure SortATPAFromFirstPoint(var a: T2DPointArray; const From: TPoint);
+procedure SortATPAFromFirstPoint(var Arr: T2DPointArray; const From: TPoint);
 var
-   i, l: Integer;
-   DistArr: TIntegerArray;
+  I: Integer;
+  Weights: TIntegerArray;
 begin
-  l := High(a);
-  if (l < 0) then Exit;
-  SetLength(DistArr, l + 1);
-  for i := 0 to l do
-  begin
-    if length(a[i]) = 0 then continue;
-    DistArr[i] := Round(Sqr(From.x - a[i][0].x) + Sqr(From.y - a[i][0].y));
-  end;
-  QuickATPASort(DistArr, a, 0, l, True);
+  if (Length(Arr) = 0) then
+    Exit;
+
+  SetLength(Weights, Length(Arr));
+  for i := 0 to High(Arr) do
+    if (Length(Arr[I]) > 0) then
+      Weights[i] := Round(Sqr(From.X - Arr[i][0].X) + Sqr(From.Y - Arr[i][0].Y));
+
+  Sort(Arr, Weights, True);
 end;
 
 {/\
   Sorts the T2DPointArray a from the midpoint of each TPA by From.
 /\}
-procedure SortATPAFromMidPoint(var a: T2DPointArray; const From: TPoint);
+procedure SortATPAFromMidPoint(var Arr: T2DPointArray; const From: TPoint);
 var
-   i, l: Integer;
-   DistArr: TIntegerArray;
-   MidPt: TPoint;
+  I: Integer;
+  Weights: TIntegerArray;
 begin
-  l := High(a);
-  if (l < 0) then Exit;
-  SetLength(DistArr, l + 1);
-  for i := 0 to l do
-  begin
-    MidPt := MiddleTPA(a[i]);
-    DistArr[i] := Round(Sqr(From.x - MidPt.x) + Sqr(From.y - MidPt.y));
-  end;
-  QuickATPASort(DistArr, a, 0, l, True);
+  if (Length(Arr) = 0) then
+    Exit;
+
+  SetLength(Weights, Length(Arr));
+  for I := 0 to High(Arr) do
+    with MiddleTPA(Arr[I]) do
+      Weights[I] := Round(Sqr(From.X - X) + Sqr(From.Y - Y));
+
+  Sort(Arr, Weights, True);
 end;
 
 {/\
   Sorts the T2DPointArray a from the first X point of each TPA by from.
 /\}
-procedure SortATPAFromFirstPointX(var a: T2DPointArray; const From: TPoint);
+procedure SortATPAFromFirstPointX(var Arr: T2DPointArray; const From: TPoint);
 var
-  i, l: Integer;
-  DistArr: TIntegerArray;
+  I: Integer;
+  Weights: TIntegerArray;
 begin
-  l := High(a);
-  if (l < 0) then
+  if (Length(Arr) = 0) then
     Exit;
 
-  SetLength(DistArr, l + 1);
-  for i := 0 to l do
-  begin
-    if (length(a[i]) <= 0) then
-      continue;
+  SetLength(Weights, Length(Arr));
+  for I := 0 to High(Arr) do
+    if (Length(Arr[i]) > 0) then
+      Weights[I] := Round(Sqr(From.X - Arr[i][0].X));
 
-    DistArr[i] := Round(Sqr(From.x - a[i][0].x));
-  end;
-
-  QuickATPASort(DistArr, a, 0, l, True);
+  Sort(Arr, Weights, True);
 end;
 
 {/\
   Sorts the T2DPointArray a from the first Y point of each TPA by from.
 /\}
-procedure SortATPAFromFirstPointY(var a: T2DPointArray; const From: TPoint);
+procedure SortATPAFromFirstPointY(var Arr: T2DPointArray; const From: TPoint);
 var
-  i, l: Integer;
-  DistArr: TIntegerArray;
+  I: Integer;
+  Weights: TIntegerArray;
 begin
-  l := high(a);
-  if (l < 0) then
+  if (Length(Arr) = 0) then
     Exit;
 
-  setLength(DistArr, l + 1);
-  for i := 0 to l do
-  begin
-    if (length(a[i]) <= 0) then
-      continue;
+  SetLength(Weights, Length(Arr));
+  for I := 0 to High(Arr) do
+    if (Length(Arr[i]) > 0) then
+      Weights[I] := Round(Sqr(From.Y - Arr[i][0].Y));
 
-    DistArr[i] := Round(Sqr(From.y - a[i][0].y));
-  end;
-
-  QuickATPASort(DistArr, a, 0, l, True);
+  Sort(Arr, Weights, True);
 end;
 
 {/\
@@ -712,35 +622,34 @@ end;
 {/\
   Sorts the T2DPointArray a from either largest or smallest, by the amount of points in the TPAs.
 /\}
-
-procedure SortATPASize(var a: T2DPointArray; const BigFirst: Boolean);
+procedure SortATPASize(var Arr: T2DPointArray; const BigFirst: Boolean);
 var
-   i, l: Integer;
-   SizeArr: TIntegerArray;
+  I: Integer;
+  Weights: TIntegerArray;
 begin
-  l := High(a);
-  if (l < 0) then Exit;
-  SetLength(SizeArr, l + 1);
-  for i := 0 to l do
-    SizeArr[i] := Length(a[i]);
-  QuickATPASort(SizeArr, a, 0, l, not BigFirst);
+  if (Length(Arr) = 0) then
+    Exit;
+
+  SetLength(Weights, Length(Arr));
+  for I := 0 to High(Arr) do
+    Weights[I] := Length(Arr[I]);
+
+  Sort(Arr, Weights, not BigFirst);
 end;
 
-{/\
-  Combines the TPointArrays Ar1 and Ar2, and results the combination.
-/\}
-
-procedure SortATPAFromSize(var a: T2DPointArray; const Size: Integer; CloseFirst: Boolean);
+procedure SortATPAFromSize(var Arr: T2DPointArray; const Size: Integer; CloseFirst: Boolean);
 var
-   i, l: Integer;
-   SizeArr: TIntegerArray;
+  I: Integer;
+  Weights: TIntegerArray;
 begin
-  l := High(a);
-  if (l < 0) then Exit;
-  SetLength(SizeArr, l + 1);
-  for i := 0 to l do
-    SizeArr[i] := Abs(Length(a[i]) - Size);
-  QuickATPASort(SizeArr, a, 0, l, CloseFirst);
+  if (Length(Arr) = 0) then
+    Exit;
+
+  SetLength(Weights, Length(Arr));
+  for I := 0 to High(Arr) do
+    Weights[I] :=  Abs(Length(Arr[I]) - Size);
+
+  Sort(Arr, Weights, CloseFirst);
 end;
 
 procedure FilterTPAsBetween(var atpa: T2DPointArray; const minLength, maxLength: integer);
@@ -1788,7 +1697,7 @@ begin
   SetLength(Deg, l);
   for i := 0 to l -1 do
     Dist[i] := Round(Hypot(tpa[i].x - cx, tpa[i].y - cy));
-  QuickTPASort(Dist, tpa, 0, l -1, SortUp);
+  Sort(TPA, Dist, SortUp);
   if (l = 1) then Exit;
   for i := 0 to l -1 do
   begin
@@ -1806,12 +1715,12 @@ begin
   while (i < l) do
   begin
     while (i < l) and (Abs(Dist[td] - Dist[i]) <= 1) do Inc(i);
-    QuickTPASort(Deg, tpa, td, i, False);
+    Sort(TPA, Deg, td, i, False);
     Inc(i);
     td := i;
   end;
   if (td < l) then
-    QuickTPASort(Deg, tpa, td, l, False);
+    Sort(TPA, Deg, td, l, False);
 end;
 
 {/\
@@ -1839,7 +1748,7 @@ begin
       td := td + 360;
     Deg[i] := Min(Abs(sd - td), Min(Abs(sd - (td + 360)), Abs((sd + 360) - td)))
   end;
-  QuickTPASort(Deg, tpa, 0, l -1, True);
+  Sort(TPA, Deg, 0, l -1, True);
   if (l = 1) then Exit;
   for i := 0 to l -1 do
     Dist[i] := Round(Hypot(tpa[i].x - cx, tpa[i].y - cy));
@@ -1849,12 +1758,12 @@ begin
   while (i < l) do
   begin
     while (i < l) and (Abs(Deg[td] - Deg[i]) <= 3) do Inc(i);
-    QuickTPASort(Dist, tpa, td, i, SortUp);
+    Sort(TPA, Dist, td, i, SortUp);
     Inc(i);
     td := i;
   end;
   if (td < l) then
-    QuickTPASort(Dist, tpa, td, l, SortUp);
+    Sort(TPA, Dist, td, l, SortUp);
 end;
 
 {/\
@@ -2682,98 +2591,6 @@ begin
     SetLength(Result[ID], L+1);
     Result[ID][L] := TPA[i];
   end;
-end;
-
-function Unique(const Points: TPointArray): TPointArray;
-var
-  Matrix: TBooleanMatrix;
-  I, Count: Integer;
-begin
-  SetLength(Result, Length(Points));
-
-  if (Length(Points) > 0) then
-  begin
-    Count := 0;
-
-    with GetTPABounds(Points) do
-    begin
-      Matrix.SetSize(Width, Height);
-
-      for I := 0 to High(Points) do
-        if not Matrix[Points[I].Y - Y1, Points[I].X - X1] then
-        begin
-          Matrix[Points[I].Y - Y1, Points[I].X - X1] := True;
-          Result[Count] := Points[I];
-          Inc(Count);
-        end;
-    end;
-
-    SetLength(Result, Count);
-  end;
-end;
-
-function Unique(const Arr: TIntegerArray): TIntegerArray;
-var
-  I, J, Value, Size, Len: Int32;
-  Table: T2DIntegerArray;
-  Bucket: PIntegerArray;
-  Buffer: specialize TSimbaOverAllocateArray<Integer>;
-label
-  Next;
-begin
-  Buffer.Init();
-
-  SetLength(Table, NextPower2(Length(Arr)));
-  Size := High(Table);
-
-  for i := 0 to High(Arr) do
-  begin
-    Value := Arr[i];
-    Bucket := @Table[Value and Size];
-    Len := Length(Bucket^);
-
-    for J := 0 to Len - 1 do
-      if Bucket^[J] = Value then
-        goto Next;
-
-    SetLength(Bucket^, Len + 1);
-    Bucket^[Len] := Value;
-
-    Buffer.Add(Value);
-
-    Next:
-  end;
-
-  Result := Buffer.Trim();
-end;
-
-function Unique(const Arr: TDoubleArray): TDoubleArray;
-var
-  i,j,last:Integer;
-begin
-  Result := Copy(Arr);
-
-  last := Length(Result);
-
-  i:=0;
-  while (i < last) do
-  begin
-    j := i+1;
-    while (j < last) do
-    begin
-      if SameValue(Result[i], Result[j]) then
-      begin
-        Result[j] := Result[last-1];
-        dec(last);
-        dec(j);
-      end;
-
-      Inc(j);
-    end;
-    Inc(i);
-  end;
-
-  SetLength(Result, last);
 end;
 
 end.
