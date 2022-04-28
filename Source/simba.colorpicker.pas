@@ -10,8 +10,8 @@ unit simba.colorpicker;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
-  simba.iomanager, simba.imageboxzoom, simba.mufasatypes;
+  classes, sysutils, forms, controls, graphics, dialogs, extctrls, stdctrls,
+  simba.client, simba.iomanager, simba.imageboxzoom, simba.mufasatypes;
 
 type
   TSimbaColorPickerHint = class(THintWindow)
@@ -29,7 +29,7 @@ type
     FForm: TForm;
     FColor: Int32;
     FPoint: TPoint;
-    FIOManager: TIOManager;
+    FClient: TClient;
     FHint: TSimbaColorPickerHint;
     FImage: TImage;
     FPicked: Boolean;
@@ -89,7 +89,7 @@ procedure TSimbaColorPicker.FormClosed(Sender: TObject; var CloseAction: TCloseA
 begin
   if FPicked then
   begin
-    FIOManager.GetMousePos(FPoint.X, FPoint.Y);
+    FClient.IOManager.GetMousePos(FPoint.X, FPoint.Y);
     FColor := FImage.Picture.Bitmap.Canvas.Pixels[FImageX, FImageY];
   end;
 
@@ -123,7 +123,7 @@ begin
   FImageX := X;
   FImageY := Y;
 
-  FIOManager.GetMousePos(FPoint.X, FPoint.Y);
+  FClient.IOManager.GetMousePos(FPoint.X, FPoint.Y);
 
   with FImage.ClientToScreen(TPoint.Create(X + 25, Y - (FHint.Height div 2))) do
   begin
@@ -145,10 +145,11 @@ end;
 constructor TSimbaColorPicker.Create(TargetWindow: TWindowHandle);
 var
   DesktopLeft, DesktopTop, DesktopWidth, DesktopHeight: Int32;
+  W, H: Integer;
 begin
-  FIOManager := TIOManager.Create();
-  FIOManager.GetPosition(DesktopLeft, DesktopTop);
-  FIOManager.GetDimensions(DesktopWidth, DesktopHeight);
+  FClient := TClient.Create();
+  FClient.IOManager.GetPosition(DesktopLeft, DesktopTop);
+  FClient.IOManager.GetDimensions(DesktopWidth, DesktopHeight);
 
   FForm := TForm.CreateNew(nil);
   with FForm do
@@ -173,9 +174,10 @@ begin
     OnMouseUp := @ImageMouseUp;
     OnMouseMove := @ImageMouseMove;
 
+    FClient.IOManager.GetDimensions(W, H);
     with TMufasaBitmap.Create() do
     try
-      CopyClientToBitmap(FIOManager, True, 0, 0, DesktopWidth - 1, DesktopHeight - 1);
+      CopyClientToBitmap(FClient.IOManager, True, 0, 0, W-1, H-1);
 
       Picture.Bitmap.LoadFromRawImage(ToRawImage(), False);
     finally
@@ -183,9 +185,9 @@ begin
     end;
   end;
 
-  FIOManager.SetTarget(TargetWindow);
-  if not FIOManager.TargetValid() then
-    FIOManager.SetDesktop();
+  FClient.IOManager.SetTarget(TargetWindow);
+  if not FClient.IOManager.TargetValid() then
+    FClient.IOManager.SetDesktop();
 
   FForm.ShowOnTop();
 
@@ -204,7 +206,7 @@ end;
 
 destructor TSimbaColorPicker.Destroy;
 begin
-  FIOManager.Free();
+  FClient.Free();
 
   inherited Destroy();
 end;

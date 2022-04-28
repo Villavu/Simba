@@ -1820,6 +1820,8 @@ begin
   if (not GetData(PtrData, x1, y1, x2, y2)) then
     Exit;
 
+  DTM.Normalize();
+
   // Get the area we should search in for the Main Point.
   MA := ValidMainPointBox(DTM, x1, y1, x2, y2);
   //Load the DTM-cache variables
@@ -2008,6 +2010,8 @@ begin
   Result := False;
   if (not GetData(PtrData, x1, y1, x2, y2)) then
     Exit;
+
+  DTM.Normalize();
 
   DPoints:= dtm.Points;
   Len := Length(DPoints);

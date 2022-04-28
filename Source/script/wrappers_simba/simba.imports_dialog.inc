@@ -14,12 +14,13 @@ addGlobalVar(mrYesToAll, 'mrYesToAll').isConstant := True;
 addGlobalVar(mrClose, 'mrClose').isConstant := True;
 addGlobalType('set of (mbYes, mbNo, mbOK, mbCancel, mbAbort, mbRetry, mbIgnore, mbAll, mbNoToAll, mbYesToAll, mbHelp, mbClose)', 'TMsgDlgButtons');
 addGlobalType('(mtWarning, mtError, mtInformation, mtConfirmation, mtCustom)', 'TMsgDlgType');
+addGlobalFunc('function SelectDirectory(Caption, InitialDirectory: String; out Directory: String): Boolean;', @_LapeSelectDirectory);
 addGlobalFunc('procedure ShowMessage(const Message: String)', @_LapeShowMessage);
 addGlobalFunc('function InputQuery(const Caption, Prompt: String; var Value: String): Boolean', @_LapeInputQuery);
 addGlobalFunc('function InputCombo(const Caption, Prompt: string; const List: TStringArray): Integer', @_LapeInputCombo);
 addGlobalFunc('function MessageDlg(const Caption, Message: string; DialogType: TMsgDlgType; Buttons: TMsgDlgButtons): Integer', @_LapeMessageDlg);
-addGlobalFunc('procedure DTMEditor(Title: String; out DTM: String)', @_LapeDTMEditor);
-addGlobalFunc('procedure ACAGUI(Title: String; out CTS, Color, Tolerance: Integer; out Hue, Sat: Extended)', @_LapeACA);
-addGlobalFunc('procedure ACA(Colors: TIntegerArray; CTS: Integer; out Color, Tolerance: Integer; out Hue, Sat: Extended)', @_LapeACAEx);
+addGlobalFunc('procedure ShowDTMEditor(Title: String; out DTM: String)', @_LapeShowDTMEditor);
+addGlobalFunc('procedure ShowACA(Title: String; out CTS, Color, Tolerance: Integer; out Hue, Sat: Extended)', @_LapeShowACA);
+addGlobalFunc('procedure CalculateBestColor(Colors: TIntegerArray; CTS: Integer; out Color, Tolerance: Integer; out Hue, Sat: Extended)', @_LapeCalculateBestColor);
 
 popSection();
