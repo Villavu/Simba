@@ -173,9 +173,7 @@ begin
   FParams.Read(Width, SizeOf(Integer));
   FParams.Read(Height, SizeOf(Integer));
 
-  SimbaDebugImageForm.ImageBox.Background.LoadFromPointer(FParams.Memory + FParams.Position, Width, Height);
-  SimbaDebugImageForm.ImageBox.BackgroundChanged(False, False);
-  SimbaDebugImageForm.ImageBox.Update();
+  SimbaDebugImageForm.ImageBox.SetBackground(FParams.Memory + FParams.Position, Width, Height);
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_Show;
@@ -185,9 +183,7 @@ begin
   FParams.Read(Width, SizeOf(Integer));
   FParams.Read(Height, SizeOf(Integer));
 
-  SimbaDebugImageForm.ImageBox.Background.LoadFromPointer(FParams.Memory + FParams.Position, Width, Height);
-  SimbaDebugImageForm.ImageBox.BackgroundChanged(False, False);
-  SimbaDebugImageForm.ImageBox.Update();
+  SimbaDebugImageForm.ImageBox.SetBackground(FParams.Memory + FParams.Position, Width, Height);
 
   SimbaDebugImageForm.SetSize(Width, Height);
 end;
@@ -209,9 +205,8 @@ end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_Clear;
 begin
+  SimbaDebugImageForm.ImageBox.Background.Brush.Color := 0;
   SimbaDebugImageForm.ImageBox.Background.Clear();
-  SimbaDebugImageForm.ImageBox.BackgroundChanged(False, False);
-  SimbaDebugImageForm.ImageBox.Update();
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugMethodName;

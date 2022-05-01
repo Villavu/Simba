@@ -10,8 +10,9 @@ unit simba.imagebox;
 interface
 
 uses
-  classes, sysutils, forms, controls, graphics, dialogs, extctrls, comctrls, lmessages, lcltype,
-  simba.client, simba.mufasatypes, simba.bitmap, simba.dtm;
+  classes, sysutils, forms, controls, graphics, dialogs, extctrls, comctrls,
+  lmessages, lclintf, lcltype,
+  simba.mufasatypes, simba.bitmap, simba.dtm, simba.iomanager;
 
 type
   PSimbaImageBox = ^TSimbaImageBox;
@@ -32,39 +33,6 @@ type
     constructor Create(ImageBox: TSimbaImageBox); reintroduce;
   end;
 
-  PSimbaImageBox_Background = ^TSimbaImageBox_Background;
-  TSimbaImageBox_Background = class(TBitmap)
-  public
-    procedure LoadFromFile(const Filename: string); override;
-    procedure LoadFromMufasaBitmap(Bitmap: TMufasaBitmap);
-    procedure LoadFromPointer(Data: PRGB32; AWidth, AHeight: Int32);
-  end;
-
-  PSimbaImageBox_Overlay = ^TSimbaImageBox_Overlay;
-  TSimbaImageBox_Overlay = class
-  protected
-    FImageBox: TSimbaImageBox;
-    FBitmap: TBitmap;
-
-    function GetCanvas: TCanvas;
-  public
-    property Canvas: TCanvas read GetCanvas;
-    property Bitmap: TBitmap read FBitmap;
-
-    procedure Clear;
-
-    procedure DebugTPA(TPA: TPointArray);
-
-    function DebugColorCTS0(Color, Tolerance: Int32): Int32;
-    function DebugColorCTS1(Color, Tolerance: Int32): Int32;
-    function DebugColorCTS2(Color, Tolerance: Int32; Hue, Sat: Extended): Int32;
-
-    function DebugDTM(DTM: TMDTM): Int32;
-
-    constructor Create(ImageBox: TSimbaImageBox);
-    destructor Destroy; override;
-  end;
-
   PSimbaImageBox_PaintArea = ^TSimbaImageBox_PaintArea;
   TSimbaImageBox_PaintArea = procedure(Sender: TObject; ACanvas: TCanvas; R: TRect) of object;
 
@@ -76,12 +44,14 @@ type
     FDimensionsPanel: TStatusPanel;
     FZoomPanel: TStatusPanel;
     FStatusPanel: TStatusPanel;
-    FZoom: Double;
+    FZoom: Single;
     FWidth: Int32;
     FHeight: Int32;
     FOnPaintArea: TSimbaImageBox_PaintArea;
-    FBackground: TSimbaImageBox_Background;
-    FOverlay: TSimbaImageBox_Overlay;
+    FBackground: TBitmap;
+    FBackgroundCanvas: TCanvas;
+    FOverlay: TBitmap;
+    FHasOverlay: Boolean;
     FScroll: record
       X, Y: Int32;
       Active: Boolean;
@@ -90,6 +60,7 @@ type
     procedure ScrollBoxPaint(Sender: TObject);
 
     procedure FontChanged(Sender: TObject); override;
+    procedure BackgroundChanged(Sender: TObject);
 
     procedure ImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -104,7 +75,7 @@ type
     procedure SetCursor(Value: TCursor); override;
 
     procedure SetParent(Value: TWinControl); override;
-    procedure SetZoom(Value: Double);
+    procedure SetZoom(Value: Single);
   published
     property OnMouseDown;
     property OnMouseMove;
@@ -114,332 +85,38 @@ type
     property OnDblClick;
   public
     property OnPaintArea: TSimbaImageBox_PaintArea read FOnPaintArea write FOnPaintArea;
-
-    property Background: TSimbaImageBox_Background read FBackground;
-    property Overlay: TSimbaImageBox_Overlay read FOverlay;
-
-    property Zoom: Double read FZoom write SetZoom;
+    property Zoom: Single read FZoom write SetZoom;
     property StatusBar: TStatusBar read FStatusBar;
     property StatusPanel: TStatusPanel read FStatusPanel;
+    property Background: TCanvas read FBackgroundCanvas;
 
-    procedure MoveTo(X, Y: Int32);
-    function IsVisible(X, Y: Int32): Boolean; overload;
+    procedure MoveTo(X, Y: Integer);
+    function IsVisible(X, Y: Integer): Boolean; overload;
 
-    procedure BackgroundChanged(UpdateOverlay: Boolean = True; Reset: Boolean = True);
+    procedure SetBackground(Data: PRGB32; AWidth, AHeight: Integer); overload;
+    procedure SetBackground(FileName: String); overload;
+    procedure SetBackground(Bitmap: TMufasaBitmap); overload;
+    procedure SetBackground(IOManager: TIOManager; X1, Y1, X2, Y2: Integer); overload;
+    procedure SetBackground(IOManager: TIOManager); overload;
 
-    procedure Update; override;
+    procedure DebugColor(CTS: Integer; Col, Tol: Integer; HueMod: Extended = 0.2; SatMod: Extended = 0.2);
+    procedure DebugDTM(DTM: TMDTM);
+    procedure DebugTPA(TPA: TPointArray);
 
-    constructor Create(AOwner: TComponent); override;
+    procedure Clear;
+    procedure Paint; override;
+
+    constructor Create(AOwner: TComponent); overload; override;
+    constructor CreateNoOverlay(AOwner: TComponent); overload; reintroduce;
     destructor Destroy; override;
   end;
 
 implementation
 
 uses
-  types, math, GraphType, lclintf, FPimage, simba.colormath, LazLoggerBase;
-
-procedure TSimbaImageBox_Background.LoadFromFile(const Filename: string);
-var
-  Bitmap: TMufasaBitmap;
-begin
-  Bitmap := TMufasaBitmap.Create();
-  Bitmap.LoadFromFile(FileName);
-
-  LoadFromRawImage(Bitmap.ToRawImage(), True);
-
-  Bitmap.Data := nil;
-  Bitmap.Free();
-end;
-
-procedure TSimbaImageBox_Background.LoadFromMufasaBitmap(Bitmap: TMufasaBitmap);
-begin
-  Self.LoadFromRawImage(Bitmap.ToRawImage(), False);
-end;
-
-procedure TSimbaImageBox_Background.LoadFromPointer(Data: PRGB32; AWidth, AHeight: Int32);
-var
-  Upper: PtrUInt;
-  Source, Dest: PByte;
-  SourceBytesPerLine, DestBytesPerLine: Int32;
-  Row: procedure(Source, Dest: PByte) is nested;
-
-  procedure RowARGB(Source, Dest: PByte);
-  var
-    Upper: PtrUInt;
-  begin
-    Upper := PtrUInt(Source + SourceBytesPerLine);
-
-    while PtrUInt(Source) < Upper do
-    begin
-      PARGB32(Dest)^.R := PRGB32(Source)^.R;
-      PARGB32(Dest)^.G := PRGB32(Source)^.G;
-      PARGB32(Dest)^.B := PRGB32(Source)^.B;
-
-      Inc(Source, SizeOf(TRGB32));
-      Inc(Dest, SizeOf(TARGB32));
-    end;
-  end;
-
-  procedure RowBGR(Source, Dest: PByte);
-  var
-    Upper: PtrUInt;
-  begin
-    Upper := PtrUInt(Source + SourceBytesPerLine);
-
-    while PtrUInt(Source) < Upper do
-    begin
-      PRGB24(Dest)^ := PRGB24(Source)^;
-
-      Inc(Source, SizeOf(TRGB32));
-      Inc(Dest, SizeOf(TRGB24));
-    end;
-  end;
-
-  procedure RowBGRA(Source, Dest: PByte);
-  var
-    Upper: PtrUInt;
-  begin
-    Upper := PtrUInt(Source + SourceBytesPerLine);
-
-    while PtrUInt(Source) < Upper do
-    begin
-      PRGB32(Dest)^ := PRGB32(Source)^;
-
-      Inc(Source, SizeOf(TRGB32));
-      Inc(Dest, SizeOf(TRGB32));
-    end;
-  end;
-
-begin
-  BeginUpdate();
-
-  Width := AWidth;
-  Height := AHeight;
-
-  case DataFormat of
-    dfARGB: Row := @RowARGB;
-    dfBGRA: Row := @RowBGRA;
-    dfBGR:  Row := @RowBGR;
-    else
-      raise Exception.CreateFmt('TSimbaImageBox_Background.LoadFromPointer: Bitmap format "%d" not supported', [Ord(DataFormat)]);
-  end;
-
-  Dest := RawImage.Data;
-  DestBytesPerLine := RawImage.Description.BytesPerLine;
-
-  Source := PByte(Data);
-  SourceBytesPerLine := Width * SizeOf(TRGB32);
-
-  Upper := PtrUInt(Source + (SourceBytesPerLine * Height));
-
-  while PtrUInt(Source) < Upper do
-  begin
-    Row(Source, Dest);
-
-    Inc(Source, SourceBytesPerLine);
-    Inc(Dest, DestBytesPerLine);
-  end;
-
-  EndUpdate();
-end;
-
-function TSimbaImageBox_Overlay.GetCanvas: TCanvas;
-begin
-  Result := FBitmap.Canvas;
-end;
-
-procedure TSimbaImageBox_Overlay.Clear;
-begin
-  FBitmap.Canvas.Draw(0, 0, FImageBox.Background);
-end;
-
-procedure TSimbaImageBox_Overlay.DebugTPA(TPA: TPointArray);
-var
-  R, G, B: Byte;
-
-  procedure PixelARGB(constref Ptr: Pointer);
-  var
-    Pixel: PARGB32 absolute Ptr;
-  begin
-    Pixel^.A := 0;
-    Pixel^.R := R;
-    Pixel^.G := G;
-    Pixel^.B := B;
-  end;
-
-  procedure PixelBGRA(constref Ptr: Pointer);
-  var
-    Pixel: PRGB32 absolute Ptr;
-  begin
-    Pixel^.R := R;
-    Pixel^.G := G;
-    Pixel^.B := B;
-    Pixel^.A := 0;
-  end;
-
-  procedure PixelBGR(constref Ptr: Pointer);
-  var
-    Pixel: PRGB24 absolute Ptr;
-  begin
-    Pixel^.R := R;
-    Pixel^.G := G;
-    Pixel^.B := B;
-  end;
-
-var
-  Data: PByte;
-  BytesPerLine, BytesPerPixel: Int32;
-  P: TPoint;
-  Pixel: procedure(constref Pixel: Pointer) is nested;
-begin
-  if (Length(TPA) = 0) then
-    Exit;
-
-  ColorToRGB(FBitmap.Canvas.Pen.Color, R, G, B);
-
-  case FBitmap.DataFormat of
-    dfARGB: Pixel := @PixelARGB;
-    dfBGRA: Pixel := @PixelBGRA;
-    dfBGR:  Pixel := @PixelBGR;
-    else
-      raise Exception.CreateFmt('TSimbaImageBox_Overlay.DebugTPA: Data format not supported', [Ord(FBitmap.DataFormat)]);
-  end;
-
-  FBitmap.BeginUpdate();
-
-  try
-    Data := FBitmap.RawImage.Data;
-    BytesPerLine := FBitmap.RawImage.Description.BytesPerLine;
-    BytesPerPixel := FBitmap.RawImage.Description.BitsPerPixel div 8;
-
-    for P in TPA do
-      Pixel(Pointer(Data + (P.Y * BytesPerLine + P.X * BytesPerPixel)));
-  finally
-    FBitmap.EndUpdate();
-  end;
-end;
-
-function TSimbaImageBox_Overlay.DebugDTM(DTM: TMDTM): Int32;
-var
-  Mufasa: TMufasaBitmap;
-  Client: TClient;
-  TPA: TPointArray;
-  P: TPoint;
-begin
-  Self.Clear();
-
-  Mufasa := TMufasaBitmap.Create();
-  Mufasa.LoadFromTBitmap(FImageBox.Background);
-
-  Client := TClient.Create();
-  Client.IOManager.SetTarget(Mufasa);
-
-  if Client.MFinder.FindDTMs(DTM, TPA, 0, 0, Bitmap.Width - 1, Bitmap.Height - 1) then
-  begin
-    FBitmap.BeginUpdate(True);
-
-    for P in TPA do
-    begin
-      FBitmap.Canvas.Line(P.X - 4, P.Y - 4, P.X + 5, P.Y + 5);
-      FBitmap.Canvas.Line(P.X + 4, P.Y - 4, P.X - 5, P.Y + 5);
-    end;
-
-    FBitmap.EndUpdate();
-  end;
-
-  Result := Length(TPA);
-
-  Client.Free();
-  Mufasa.Free();
-end;
-
-function TSimbaImageBox_Overlay.DebugColorCTS0(Color, Tolerance: Int32): Int32;
-var
-  Mufasa: TMufasaBitmap;
-  Client: TClient;
-  TPA: TPointArray;
-begin
-  Self.Clear();
-
-  Mufasa := TMufasaBitmap.Create();
-  Mufasa.LoadFromTBitmap(FImageBox.Background);
-
-  Client := TClient.Create();
-  Client.IOManager.SetTarget(Mufasa);
-
-  Client.MFinder.SetToleranceSpeed(0);
-  if Client.MFinder.FindColorsTolerance(TPA, Color, 0, 0, Bitmap.Width - 1, Bitmap.Height - 1, Tolerance) then
-    DebugTPA(TPA);
-
-  Result := Length(TPA);
-
-  Client.Free();
-  Mufasa.Free();
-end;
-
-function TSimbaImageBox_Overlay.DebugColorCTS1(Color, Tolerance: Int32): Int32;
-var
-  Mufasa: TMufasaBitmap;
-  Client: TClient;
-  TPA: TPointArray;
-begin
-  Self.Clear();
-
-  Mufasa := TMufasaBitmap.Create();
-  Mufasa.LoadFromTBitmap(FImageBox.Background);
-
-  Client := TClient.Create();
-  Client.IOManager.SetTarget(Mufasa);
-
-  Client.MFinder.SetToleranceSpeed(1);
-  if Client.MFinder.FindColorsTolerance(TPA, Color, 0, 0, Bitmap.Width - 1, Bitmap.Height - 1, Tolerance) then
-    DebugTPA(TPA);
-
-  Result := Length(TPA);
-
-  Client.Free();
-  Mufasa.Free();
-end;
-
-function TSimbaImageBox_Overlay.DebugColorCTS2(Color, Tolerance: Int32; Hue, Sat: Extended): Int32;
-var
-  Mufasa: TMufasaBitmap;
-  Client: TClient;
-  TPA: TPointArray;
-begin
-  Self.Clear();
-
-  Mufasa := TMufasaBitmap.Create();
-  Mufasa.LoadFromTBitmap(FImageBox.Background);
-
-  Client := TClient.Create();
-  Client.IOManager.SetTarget(Mufasa);
-
-  Client.MFinder.SetToleranceSpeed(2);
-  Client.MFinder.SetToleranceSpeed2Modifiers(Hue, Sat);
-  if Client.MFinder.FindColorsTolerance(TPA, Color, 0, 0, Bitmap.Width - 1, Bitmap.Height - 1, Tolerance) then
-    DebugTPA(TPA);
-
-  Result := Length(TPA);
-
-  Client.Free();
-  Mufasa.Free();
-end;
-
-constructor TSimbaImageBox_Overlay.Create(ImageBox: TSimbaImageBox);
-begin
-  inherited Create();
-
-  FImageBox := ImageBox;
-  FBitmap := TBitmap.Create();
-end;
-
-destructor TSimbaImageBox_Overlay.Destroy;
-begin
-  FBitmap.Free();
-
-  inherited Destroy();
-end;
+  math,
+  simba.nativeinterface, simba.bitmap_misc, simba.colorfinders,
+  simba.overallocatearray, simba.tpa, simba.finder_dtm;
 
 procedure TSimbaImageBox_ScrollBox.GetPreferredSize(var PreferredWidth, PreferredHeight: integer; Raw: boolean; WithThemeSpace: boolean);
 begin
@@ -486,7 +163,7 @@ begin
   { nothing }
 end;
 
-procedure TSimbaImageBox_ScrollBox.SetSize(AWidth, AHeight: Int32);
+procedure TSimbaImageBox_ScrollBox.SetSize(AWidth, AHeight: Integer);
 begin
   FWidth  := AWidth;
   FHeight := AHeight;
@@ -498,10 +175,12 @@ constructor TSimbaImageBox_ScrollBox.Create(ImageBox: TSimbaImageBox);
 begin
   inherited Create(ImageBox);
 
+  ControlStyle := ControlStyle + [csOpaque];
+
   FImageBox := ImageBox;
 end;
 
-procedure TSimbaImageBox.SetZoom(Value: Double);
+procedure TSimbaImageBox.SetZoom(Value: Single);
 var
   Current: TPoint;
 begin
@@ -519,21 +198,26 @@ begin
   begin
     FZoom := Value;
     FZoomPanel.Text := IntToStr(Round(Value * 100)) + '%';
-    FScrollBox.SetSize(Trunc(FBackground.Width * FZoom), Trunc(FBackground.Height * FZoom));
 
-    if (Current.X <> -1) and (Current.Y <> -1) then
-      MoveTo(Current.X, Current.Y);
+    FScrollBox.SetSize(
+      Trunc(FBackground.Width * FZoom),
+      Trunc(FBackground.Height * FZoom)
+    );
 
-    Self.Update();
+    MoveTo(Current.X, Current.Y);
+
+    Paint();
   end;
 end;
 
 procedure TSimbaImageBox.ScrollBoxPaint(Sender: TObject);
 var
   LocalRect, ScreenRect: TRect;
-  W, H: Int32;
+  W, H: Integer;
   DC: HDC;
 begin
+  SimbaNativeInterface.ClearInterpolation(FScrollBox.Canvas);
+
   W := FScrollBox.ClientWidth;
   while W mod Ceil(1 * FZoom) <> 0 do
     W += 1;
@@ -566,7 +250,7 @@ begin
     FOnPaintArea(Self, FOverlay.Canvas, LocalRect);
   end;
 
-  if (FOverlay.Bitmap.Width > 0) and (FOverlay.Bitmap.Height > 0) then
+  if FHasOverlay then
     DC := FOverlay.Canvas.Handle
   else
     DC := FBackground.Canvas.Handle;
@@ -580,32 +264,12 @@ begin
   );
 end;
 
-procedure TSimbaImageBox.BackgroundChanged(UpdateOverlay: Boolean; Reset: Boolean);
+procedure TSimbaImageBox.Paint;
 begin
-  if (FBackground.Width <> FWidth) or (FBackground.Height <> FHeight) then
-  begin
-    FWidth := FBackground.Width;
-    FHeight := FBackground.Height;
-
-    FDimensionsPanel.Text := Format('%dx%d', [FBackground.Width, FBackground.Height]);
-
-    if Reset then
-    begin
-      Zoom := 1;
-      MoveTo(0, 0);
-    end;
-  end;
-
-  if UpdateOverlay then
-  begin
-    FOverlay.Bitmap.LoadFromRawImage(FBackground.RawImage, False);
-    FOverlay.Bitmap.Canvas.AntialiasingMode := amOff;
-  end;
+  FScrollBox.Refresh();
 end;
 
 procedure TSimbaImageBox.FontChanged(Sender: TObject);
-var
-  Measurement: TSize;
 begin
   inherited FontChanged(Sender);
 
@@ -614,18 +278,42 @@ begin
 
   with TBitmap.Create() do
   try
+    // Measure on slightly bigger font size
+    // Font size can be 0 so use GetFontData
     Canvas.Font := Self.Font;
+    Canvas.Font.Size := Round(-GetFontData(Canvas.Font.Reference.Handle).Height * 72 / Canvas.Font.PixelsPerInch) + 3;
 
-    Measurement := Canvas.TextExtent('TaylorSwift');
+    FMousePanel.Width := Canvas.TextWidth('(10000, 10000)');
+    FDimensionsPanel.Width  := Canvas.TextWidth('10000x10000');
+    FZoomPanel.Width  := Canvas.TextWidth('1000%');
 
-    FMousePanel.Width := Round(Measurement.Width * 1.35);
-    FDimensionsPanel.Width := Round(Measurement.Width * 1.35);
-    FZoomPanel.Width := Round(Measurement.Width * 0.75);
-    FStatusBar.Height := Round(Measurement.Height * 1.05);
+    FStatusBar.Height := Canvas.TextHeight('TaylorSwift');
     FStatusBar.Font := Self.Font;
   finally
     Free();
   end;
+end;
+
+procedure TSimbaImageBox.BackgroundChanged(Sender: TObject);
+begin
+  if (FBackground.Width <> FWidth) or (FBackground.Height <> FHeight) then
+  begin
+    FWidth := FBackground.Width;
+    FHeight := FBackground.Height;
+    FDimensionsPanel.Text := Format('%dx%d', [FWidth, FHeight]);
+
+    FZoom := 1;
+    FZoomPanel.Text := '100%';
+
+    FScrollBox.SetSize(FBackground.Width, FBackground.Height);
+    FScrollBox.HorzScrollBar.Position := 0;
+    FScrollBox.VertScrollBar.Position := 0;
+  end;
+
+  if FHasOverlay then
+    FOverlay.LoadFromRawImage(FBackground.RawImage, False);
+
+  Paint();
 end;
 
 procedure TSimbaImageBox.ImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -665,7 +353,7 @@ end;
 
 procedure TSimbaImageBox.ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
-  Steps: Int32;
+  Steps: Integer;
 begin
   X := X + FScrollBox.HorzScrollBar.Position;
   Y := Y + FScrollBox.VertScrollBar.Position;
@@ -702,7 +390,7 @@ begin
     Update();
   end else
   begin
-    if FZoom <> 1 then
+    if (FZoom <> 1) then
     begin
       X := Trunc(X / FZoom);
       Y := Trunc(Y / FZoom);
@@ -771,36 +459,20 @@ begin
   Result := FScrollBox.Cursor;
 end;
 
-procedure TSimbaImageBox.MoveTo(X, Y: Int32);
-var
-  W, H: Int32;
+procedure TSimbaImageBox.MoveTo(X, Y: Integer);
 begin
   FScrollBox.HandleNeeded();
+  FScrollBox.HorzScrollBar.Position := Trunc(X * FZoom);
+  FScrollBox.VertScrollBar.Position := Trunc(Y * FZoom);
 
-  W := FScrollBox.ClientWidth;
-  while W mod Ceil(1 * FZoom) <> 0 do
-    W += 1;
+  if FScrollBox.HorzScrollBar.Position < (FScrollBox.HorzScrollBar.Range - FScrollBox.HorzScrollBar.Page) then
+    FScrollBox.HorzScrollBar.Position := FScrollBox.HorzScrollBar.Position - (ClientWidth div 2);
 
-  H := FScrollBox.ClientHeight;
-  while H mod Ceil(1 * FZoom) <> 0 do
-    H += 1;
-
-  if X + Ceil(W / FZoom) >= FBackground.Width then
-    X := FBackground.Width - Ceil((W div 2) / FZoom);
-  if Y + Ceil(H / FZoom) >= FBackground.Height then
-    Y := FBackground.Height - Ceil((H div 2) / FZoom);
-
-  X := Trunc(X * FZoom) - (W div 2);
-  Y := Trunc(Y * FZoom) - (H div 2);
-
-  X := (X div Ceil(Zoom)) * Ceil(Zoom);
-  Y := (Y div Ceil(Zoom)) * Ceil(Zoom);
-
-  FScrollBox.HorzScrollBar.Position := X;
-  FScrollBox.VertScrollBar.Position := Y;
+  if FScrollBox.VertScrollBar.Position < (FScrollBox.VertScrollBar.Range - FScrollBox.VertScrollBar.Page) then
+    FScrollBox.VertScrollBar.Position := FScrollBox.VertScrollBar.Position - (ClientHeight div 2);
 end;
 
-function TSimbaImageBox.IsVisible(X, Y: Int32): Boolean;
+function TSimbaImageBox.IsVisible(X, Y: Integer): Boolean;
 begin
   X := Trunc(X * FZoom);
   Y := Trunc(Y * FZoom);
@@ -809,21 +481,141 @@ begin
             InRange(Y, FScrollBox.VertScrollBar.Position, FScrollBox.VertScrollBar.Position + FScrollBox.ClientHeight);
 end;
 
-procedure TSimbaImageBox.Update;
+procedure TSimbaImageBox.SetBackground(Data: PRGB32; AWidth, AHeight: Integer);
 begin
-  {$IFDEF WINDOWS}
-  FScrollBox.Repaint();
-  {$ELSE}
-  FScrollBox.Update();
-  {$ENDIF}
+  FBackground.FromData(Data, AWidth, AHeight);
+end;
+
+procedure TSimbaImageBox.SetBackground(FileName: String);
+var
+  Bitmap: TMufasaBitmap;
+begin
+  Bitmap := TMufasaBitmap.Create();
+  Bitmap.LoadFromFile(FileName);
+
+  FBackground.FromData(Bitmap.Data, Bitmap.Width, Bitmap.Height);
+
+  Bitmap.Free();
+end;
+
+procedure TSimbaImageBox.SetBackground(Bitmap: TMufasaBitmap);
+begin
+  FBackground.FromData(Bitmap.Data, Bitmap.Width, Bitmap.Height);
+end;
+
+procedure TSimbaImageBox.SetBackground(IOManager: TIOManager; X1, Y1, X2, Y2: Integer);
+var
+  Data: PRGB32;
+begin
+  Data := IOManager.CopyData(X1, Y1, X2-X1+1, Y2-Y1+1);
+
+  if (Data <> nil) then
+  try
+    FBackground.FromData(Data, X2-X1+1, Y2-Y1+1);
+  finally
+    FreeMem(Data);
+  end;
+end;
+
+procedure TSimbaImageBox.SetBackground(IOManager: TIOManager);
+var
+  Wid, Hei: Integer;
+begin
+  IOManager.GetDimensions(Wid, Hei);
+
+  SetBackground(IOManager, 0, 0, Wid-1, Hei-1);
+end;
+
+procedure TSimbaImageBox.DebugColor(CTS: Integer; Col, Tol: Integer; HueMod: Extended; SatMod: Extended);
+var
+  Bitmap: TMufasaBitmap;
+  Buffer: TFindColorBuffer;
+  TPA: TPointArray;
+begin
+  Bitmap := FBackground.ToMufasaBitmap();
+
+  with Buffer do
+  begin
+    Buffer.Ptr := Bitmap.Data;
+    Buffer.PtrInc := 0;
+
+    X1 := 0;
+    Y1 := 0;
+    X2 := Bitmap.Width - 1;
+    Y2 := Bitmap.Height - 1;
+
+    case CTS of
+      0: FindCTS0(TPA, Col, Tol);
+      1: FindCTS1(TPA, Col, Tol);
+      2: FindCTS2(TPA, Col, Tol, HueMod, SatMod);
+    end;
+  end;
+
+  FOverlay.DrawPoints(TPA);
+  FStatusPanel.Text := Format('Found %.0n pixels (CTS%d)', [Single(Length(TPA)), CTS]);
+
+  Bitmap.Free();
+end;
+
+procedure TSimbaImageBox.DebugDTM(DTM: TMDTM);
+var
+  Bitmap: TMufasaBitmap;
+  TPA: TPointArray;
+  Buffer: TFindDTMBuffer;
+  I: Integer;
+  Crosses: specialize TSimbaOverAllocateArray<TPoint>;
+begin
+  Bitmap := FBackground.ToMufasaBitmap();
+
+  with Buffer do
+  begin
+    Buffer.Data := Bitmap.Data;
+    Buffer.LineWidth := Bitmap.Width;
+
+    X1 := 0;
+    Y1 := 0;
+    X2 := Bitmap.Width - 1;
+    Y2 := Bitmap.Height - 1;
+
+    TPA := FindDTMs(DTM);
+  end;
+
+  Crosses.Init();
+  for I := 0 to High(TPA) do
+    with TPA[I] do
+    begin
+      Crosses.Add(TPAFromLine(X - 5, Y - 5, X + 5, Y + 5));
+      Crosses.Add(TPAFromLine(X + 5, Y - 5, X - 5, Y + 5));
+    end;
+
+  FOverlay.DrawPoints(Crosses.Trim());
+  FStatusPanel.Text := Format('Found %.0n DTMs', [Single(Length(TPA))]);
+
+  Bitmap.Free();
+end;
+
+procedure TSimbaImageBox.DebugTPA(TPA: TPointArray);
+begin
+  FBackground.DrawPoints(TPA);
+end;
+
+procedure TSimbaImageBox.Clear;
+begin
+  FOverlay.Canvas.Draw(0, 0, FBackground);
 end;
 
 constructor TSimbaImageBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  FBackground := TSimbaImageBox_Background.Create();
-  FOverlay := TSimbaImageBox_Overlay.Create(Self);
+  FBackground := TBitmap.Create();
+  FBackground.OnChange := @BackgroundChanged;
+  FBackgroundCanvas := FBackground.Canvas;
+  FBackgroundCanvas.AntialiasingMode := amOff;
+
+  FOverlay := TBitmap.Create();
+
+  FHasOverlay := True;
 
   FScrollBox := TSimbaImageBox_ScrollBox.Create(Self);
   FScrollBox.Parent := Self;
@@ -841,7 +633,6 @@ begin
   FScrollBox.OnMouseLeave := @ImageMouseLeave;
   FScrollBox.OnMouseEnter := @ImageMouseEnter;
   FScrollBox.OnDblClick := @ImageDoubleClick;
-  FScrollBox.Canvas.AntialiasingMode := amOff;
 
   FStatusBar := TStatusBar.Create(Self);
   FStatusBar.Parent := Self;
@@ -859,16 +650,30 @@ begin
 
   FWidth := 0;
   FHeight := 0;
+  FZoom := 1;
 
-  Zoom := 1;
+  Canvas.Free();
+  Canvas := FOverlay.Canvas;
+  Canvas.AntialiasingMode := amOff;
 
   FontChanged(Self);
 end;
 
+constructor TSimbaImageBox.CreateNoOverlay(AOwner: TComponent);
+begin
+  Create(AOwner);
+
+  FHasOverlay := False;
+end;
+
 destructor TSimbaImageBox.Destroy;
 begin
-  FOverlay.Free();
-  FBackground.Free();
+  Canvas := nil; // is FOverlay.Canvas
+
+  if (FOverlay <> nil) then
+    FOverlay.Free();
+  if (FBackground <> nil) then
+    FBackground.Free();
 
   inherited Destroy();
 end;

@@ -52,7 +52,7 @@ end;
 
 begin
   {$IF DECLARED(SetHeapTraceOutput)}
-  SetHeapTraceOutput('memory-leaks.trc');
+  SetHeapTraceOutput(IntToStr(GetProcessID()) + '.trc');
   {$ENDIF}
 
   Application.CaptureExceptions := False;

@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Controls, ExtCtrls, Graphics,
-  simba.bitmap;
+  simba.bitmap, simba.imagebox;
 
 type
   TSimbaImageBoxZoom = class(TCustomControl)
@@ -29,11 +29,17 @@ type
 
     procedure SetTempColor(AColor: Integer);
     procedure SetZoom(PixelCount, PixelSize: Integer);
+    procedure MoveTest(ImageBox: TSimbaImageBox; X, Y: Integer);
+
     procedure Move(Image: TImage; X, Y: Integer); overload;
+    procedure Move(Image: TBitmap; X, Y: Integer); overload;
     procedure Move(Image: TMufasaBitmap; X, Y: Integer); overload;
   end;
 
 implementation
+
+uses
+  simba.nativeinterface;
 
 constructor TSimbaImageBoxZoom.Create(AOwner: TComponent);
 begin
@@ -41,6 +47,7 @@ begin
 
   FTempColor := -1;
   FBitmap := TBitmap.Create();
+  FBitmap.Canvas.AntialiasingMode := amOff;
 
   SetZoom(5, 5);
   Color := clWindow;
@@ -77,6 +84,8 @@ procedure TSimbaImageBoxZoom.Paint;
 var
   R: TRect;
 begin
+  SimbaNativeInterface.ClearInterpolation(Canvas);
+
   if (FTempColor > -1) then
   begin
     Canvas.Pen.Color := clBlack;
@@ -117,7 +126,35 @@ begin
   DoAutoSize();
 end;
 
+procedure TSimbaImageBoxZoom.MoveTest(ImageBox: TSimbaImageBox; X, Y: Integer);
+var
+  LoopX, LoopY: Integer;
+begin
+  Dec(X, FPixelCount div 2);
+  Dec(Y, FPixelCount div 2);
+
+  for LoopX := 0 to FBitmap.Width - 1 do
+    for LoopY := 0 to FBitmap.Height - 1 do
+      FBitmap.Canvas.Pixels[LoopX, LoopY] := ImageBox.Background.Pixels[X + LoopX, Y + LoopY];
+
+  Invalidate();
+end;
+
 procedure TSimbaImageBoxZoom.Move(Image: TImage; X, Y: Integer);
+var
+  LoopX, LoopY: Integer;
+begin
+  Dec(X, FPixelCount div 2);
+  Dec(Y, FPixelCount div 2);
+
+  for LoopX := 0 to FBitmap.Width - 1 do
+    for LoopY := 0 to FBitmap.Height - 1 do
+      FBitmap.Canvas.Pixels[LoopX, LoopY] := Image.Canvas.Pixels[X + LoopX, Y + LoopY];
+
+  Invalidate();
+end;
+
+procedure TSimbaImageBoxZoom.Move(Image: TBitmap; X, Y: Integer);
 var
   LoopX, LoopY: Integer;
 begin

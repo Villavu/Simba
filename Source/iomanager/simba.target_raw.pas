@@ -27,13 +27,13 @@ type
     function ReturnData(X, Y, Width, Height: Int32): TRetData; override;
     function CopyData(X, Y, Width, Height: Int32): PRGB32; override;
 
-    constructor Create(Data: PRGB32; Width, Height: Int32; Copy: Boolean = False);
+    constructor Create(Source: PRGB32; Width, Height: Int32; Copy: Boolean = False);
     destructor Destroy; override;
  end;
 
 implementation
 
-constructor TRawTarget.Create(Data: PRGB32; Width, Height: Int32; Copy: Boolean);
+constructor TRawTarget.Create(Source: PRGB32; Width, Height: Int32; Copy: Boolean);
 begin
   inherited Create();
 
@@ -45,9 +45,9 @@ begin
   begin
     FData := GetMem(FWidth * FHeight * SizeOf(TRGB32));
 
-    Move(Data^, FData^, FWidth * FHeight * SizeOf(TRGB32));
+    Move(Source^, FData^, FWidth * FHeight * SizeOf(TRGB32));
   end else
-    FData := Data;
+    FData := Source;
 end;
 
 destructor TRawTarget.Destroy;

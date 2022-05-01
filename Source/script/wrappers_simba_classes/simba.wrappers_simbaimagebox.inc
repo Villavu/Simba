@@ -1,56 +1,11 @@
-procedure _LapeSimbaImageBox_Background_LoadFromMufasaBitmap(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PSimbaImageBox_Background(Params^[0])^.LoadFromMufasaBitmap(PMufasaBitmap(Params^[1])^);
-end;
-
-procedure _LapeSimbaImageBox_Background_LoadFromPointer(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PSimbaImageBox_Background(Params^[0])^.LoadFromPointer(PPRGB32(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[2])^);
-end;
-
-procedure _LapeSimbaImageBox_Overlay_Canvas_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PCanvas(Result)^ := PSimbaImageBox_Overlay(Params^[0])^.Canvas;
-end;
-
-procedure _LapeSimbaImageBox_Overlay_Clear(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PSimbaImageBox_Overlay(Params^[0])^.Clear();
-end;
-
-procedure _LapeSimbaImageBox_Overlay_DebugTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PSimbaImageBox_Overlay(Params^[0])^.DebugTPA(PPointArray(Params^[1])^);
-end;
-
-procedure _LapeSimbaImageBox_Overlay_DebugColorCTS0(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PInteger(Result)^ := PSimbaImageBox_Overlay(Params^[0])^.DebugColorCTS0(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-procedure _LapeSimbaImageBox_Overlay_DebugColorCTS1(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PInteger(Result)^ := PSimbaImageBox_Overlay(Params^[0])^.DebugColorCTS1(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-procedure _LapeSimbaImageBox_Overlay_DebugColorCTS2(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PInteger(Result)^ := PSimbaImageBox_Overlay(Params^[0])^.DebugColorCTS2(PInteger(Params^[1])^, PInteger(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^);
-end;
-
-procedure _LapeSimbaImageBox_Overlay_DebugDTM(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PInteger(Result)^ := PSimbaImageBox_Overlay(Params^[0])^.DebugDTM(PMDTM(Params^[1])^);
-end;
-
 procedure _LapeSimbaImageBox_Zoom_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PDouble(Result)^ := PSimbaImageBox(Params^[0])^.Zoom;
+  PSingle(Result)^ := PSimbaImageBox(Params^[0])^.Zoom;
 end;
 
 procedure _LapeSimbaImageBox_Zoom_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PSimbaImageBox(Params^[0])^.Zoom := PDouble(Params^[1])^;
+  PSimbaImageBox(Params^[0])^.Zoom := PSingle(Params^[1])^;
 end;
 
 procedure _LapeSimbaImageBox_StatusBar_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -83,14 +38,54 @@ begin
   PBoolean(Result)^ := PSimbaImageBox(Params^[0])^.IsVisible(PInt32(Params^[1])^, PInt32(Params^[2])^);
 end;
 
-procedure _LapeSimbaImageBox_Background_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_DebugColor(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PSimbaImageBox_Background(Result)^ := PSimbaImageBox(Params^[0])^.Background;
+  PSimbaImageBox(Params^[0])^.DebugColor(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
 end;
 
-procedure _LapeSimbaImageBox_Overlay_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_DebugDTM(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PSimbaImageBox_Overlay(Result)^ := PSimbaImageBox(Params^[0])^.Overlay;
+  PSimbaImageBox(Params^[0])^.DebugDTM(PMDTM(Params^[1])^);
+end;
+
+procedure _LapeSimbaImageBox_DebugTPA(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBox(Params^[0])^.DebugTPA(PPointArray(Params^[1])^);
+end;
+
+procedure _LapeSimbaImageBox_Clear(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBox(Params^[0])^.Clear();
+end;
+
+procedure _LapeSimbaImageBox_Paint(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBox(Params^[0])^.Paint();
+end;
+
+procedure _LapeSimbaImageBox_SetBackground_Data(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBox(Params^[0])^.SetBackground(PPRGB32(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+end;
+
+procedure _LapeSimbaImageBox_SetBackground_FileName(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBox(Params^[0])^.SetBackground(PString(Params^[1])^);
+end;
+
+procedure _LapeSimbaImageBox_SetBackground_Bitmap(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBox(Params^[0])^.SetBackground(PMufasaBitmap(Params^[1])^);
+end;
+
+procedure _LapeSimbaImageBox_SetBackground_IOManagerArea(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBox(Params^[0])^.SetBackground(PIOManager(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
+end;
+
+procedure _LapeSimbaImageBox_SetBackground_IOManager(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBox(Params^[0])^.SetBackground(PIOManager(Params^[1])^);
 end;
 
 procedure _LapeSimbaImageBox_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -98,14 +93,14 @@ begin
   PSimbaImageBox(Params^[0])^ := TSimbaImageBox.Create(PComponent(Params^[1])^);
 end;
 
+procedure _LapeSimbaImageBox_InitNoOverlay(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBox(Params^[0])^ := TSimbaImageBox.CreateNoOverlay(PComponent(Params^[1])^);
+end;
+
 procedure _LapeSimbaImageBox_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PSimbaImageBox(Params^[0])^.Free();
-end;
-
-procedure _LapeSimbaImageBox_BackgroundChanged(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PSimbaImageBox(Params^[0])^.BackgroundChanged(PBoolean(Params^[1])^);
 end;
 
 procedure _LapeSimbaImageBox_Cursor_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

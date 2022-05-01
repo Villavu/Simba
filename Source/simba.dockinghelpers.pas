@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, controls, menus, forms, graphics,
-  anchordocking, AnchorDockPanel;
+  anchordocking, anchordockpanel;
 
 type
   TSimbaAnchorDockHeader = class(TAnchorDockHeader)
@@ -361,5 +361,3 @@ begin
 end;
 
 end.
-
-

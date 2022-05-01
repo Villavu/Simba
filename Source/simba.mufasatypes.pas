@@ -59,9 +59,6 @@ type
   PPRGB32Array = ^TPRGB32Array;
   TPRGB32Array = array of PRGB32; // array of PRGB32
 
-  TARGB32 = packed record A, R, G, B: Byte; end;
-  PARGB32 = ^TARGB32;
-
   THSL = packed record
     H, S, L: extended;
   end;
@@ -201,21 +198,24 @@ type
     X1, Y1, X2, Y2: Integer;
   end;
 
-  { TBoxHelper }
-
   TBoxHelper = record Helper for TBox
   protected
-    function GetWidth: Int32;
-    function GetHeight: Int32;
+    function GetWidth: Integer;
+    function GetHeight: Integer;
   public
-    function Expand(Amount: Int32): TBox;
-    function Contains(X, Y, Width, Height: Int32): Boolean; overload;
-    function Contains(X, Y: Int32): Boolean; overload;
-    property Width: Int32 read GetWidth;
-    property Height: Int32 read GetHeight;
+    class function Create(const X1, Y1, X2, Y2: Integer): TBox; static;
+
+    function Expand(Amount: Integer): TBox;
+    function Contains(X, Y, Width, Height: Integer): Boolean; overload;
+    function Contains(X, Y: Integer): Boolean; overload;
+
+    procedure Clip(Other: TBox);
+
+    property Width: Integer read GetWidth;
+    property Height: Integer read GetHeight;
   end;
 
-  function Box(const X1, Y1, X2, Y2: Int32): TBox;
+  function Box(const X1, Y1, X2, Y2: Integer): TBox;
 
 type
   TSysProc = record
@@ -325,7 +325,15 @@ begin
   Result := (Self.Y2 - Self.Y1) + 1;
 end;
 
-function TBoxHelper.Expand(Amount: Int32): TBox;
+class function TBoxHelper.Create(const X1, Y1, X2, Y2: Integer): TBox;
+begin
+  Result.X1 := X1;
+  Result.Y1 := Y1;
+  Result.X2 := X2;
+  Result.Y2 := Y2;
+end;
+
+function TBoxHelper.Expand(Amount: Integer): TBox;
 begin
   Result.X1 := Self.X1 - Amount;
   Result.Y1 := Self.Y1 - Amount;
@@ -333,14 +341,27 @@ begin
   Result.Y2 := Self.Y2 + Amount;
 end;
 
-function TBoxHelper.Contains(X, Y, Width, Height: Int32): Boolean;
+function TBoxHelper.Contains(X, Y, Width, Height: Integer): Boolean;
 begin
   Result := (X >= Self.X1) and (Y >= Self.Y1) and (X + Width <= Self.X2) and (Y + Height <= Self.Y2);
 end;
 
-function TBoxHelper.Contains(X, Y: Int32): Boolean;
+function TBoxHelper.Contains(X, Y: Integer): Boolean;
 begin
   Result := (X >= Self.X1) and (Y >= Self.Y1) and (X <= Self.X2) and (Y <= Self.Y2);
+end;
+
+procedure TBoxHelper.Clip(Other: TBox);
+begin
+  if (Self.X1 < Other.X1) then Self.X1 := Other.X1;
+  if (Self.X1 > Other.X2) then Self.X1 := Other.X2;
+  if (Self.X2 < Other.X1) then Self.X2 := Other.X1;
+  if (Self.X2 > Other.X2) then Self.X2 := Other.X2;
+
+  if (Self.Y1 < Other.Y1) then Self.Y1 := Other.Y1;
+  if (Self.Y1 > Other.Y2) then Self.Y1 := Other.Y2;
+  if (Self.Y2 < Other.Y1) then Self.Y2 := Other.Y1;
+  if (Self.Y2 > Other.Y2) then Self.Y2 := Other.Y2;
 end;
 
 function Box(const X1, Y1, X2, Y2: Int32): TBox;

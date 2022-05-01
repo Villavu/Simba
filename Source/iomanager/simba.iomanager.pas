@@ -58,7 +58,8 @@ type
     procedure ActivateClient;
 
     function IsFrozen: Boolean;
-    procedure SetFrozen(MakeFrozen: Boolean);
+    procedure Freeze;
+    procedure UnFreeze;
 
     function MouseSetClientArea(X1, Y1, X2, Y2: Integer): Boolean;
     procedure MouseResetClientArea;
@@ -107,7 +108,7 @@ implementation
 
 uses
   math, lazloggerbase,
-  simba.files, simba.target_bitmap, simba.target_eios, simba.target_window,
+  simba.files, simba.target_bitmap, simba.target_eios, simba.target_window, simba.target_raw,
   simba.nativeinterface;
 
 constructor TIOManager.Create;
@@ -279,27 +280,28 @@ begin
   Result := FKeyMouse.ExportKeyMouseTarget();
 end;
 
-procedure TIOManager.SetFrozen(MakeFrozen: Boolean);
+procedure TIOManager.Freeze;
 var
   Width, Height: Integer;
 begin
-  if MakeFrozen and IsFrozen() then
-    raise Exception.Create('TIOManager.SetFrozen: The window is already Frozen.');
-
-  if MakeFrozen then
-  begin
-    //FFrozen := FImage;
-    //FFrozen.GetTargetDimensions(Width, Height);
-    //with FFrozen.ReturnData(0, 0, Width - 1, Height - 1) do
-    //  FImage := TBitmapTarget.Create(Ptr, Width, Height, True);
-  end else
   if IsFrozen() then
-  begin
-    if (FImage <> nil) then
-      FreeAndNil(FImage);
+    raise Exception.Create('TIOManager.Freeze: The target is already frozen');
 
-    FImage := FFrozen;
-  end;
+  FFrozen := FImage;
+  FFrozen.GetTargetDimensions(Width, Height);
+  with FFrozen.ReturnData(0, 0, Width - 1, Height - 1) do
+    FImage := TRawTarget.Create(Ptr, Width - 1, Height - 1, True); // New image
+end;
+
+procedure TIOManager.UnFreeze;
+begin
+  if not IsFrozen() then
+    raise Exception.Create('TIOManager.Freeze: The target is not frozen');
+
+  Swap(Pointer(FImage), Pointer(FFrozen));
+
+  FFrozen.Free();
+  FFrozen := nil;
 end;
 
 function TIOManager.IsFrozen: Boolean;
@@ -334,13 +336,18 @@ begin
 end;
 
 function TIOManager.SetTarget(Data: PRGB32; Size: TPoint): Integer;
+var
+  Bitmap: TMufasaBitmap;
 begin
-  //Result := SetImageTarget(AddTarget(TBitmapTarget.Create(Data, Size.X, Size.Y, True)));
+  Bitmap := TMufasaBitmap.Create();
+  Bitmap.SetPersistentMemory(PtrUInt(Data), Size.X, Size.Y);
+
+  Result := SetImageTarget(AddTarget(TBitmapTarget.Create(Bitmap, True)));
 end;
 
 function TIOManager.SetTarget(Bitmap: TMufasaBitmap): Integer;
 begin
-  //Result := SetImageTarget(AddTarget(TBitmapTarget.Create(Bitmap)));
+  Result := SetImageTarget(AddTarget(TBitmapTarget.Create(Bitmap, False)));
 end;
 
 function TIOManager.SetTarget(Plugin, Data: String): Integer;

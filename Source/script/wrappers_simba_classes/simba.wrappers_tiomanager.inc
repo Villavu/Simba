@@ -68,9 +68,14 @@ begin
   Pboolean(Result)^ := PIOManager(Params^[0])^.IsFrozen();
 end;
 
-procedure _LapeIOManager_SetFrozen(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeIOManager_Freeze(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PIOManager(Params^[0])^.SetFrozen(Pboolean(Params^[1])^);
+  PIOManager(Params^[0])^.Freeze();
+end;
+
+procedure _LapeIOManager_UnFreeze(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PIOManager(Params^[0])^.UnFreeze();
 end;
 
 procedure _LapeIOManager_MouseSetClientArea(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

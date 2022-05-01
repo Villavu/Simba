@@ -87,6 +87,7 @@ uses
   forms, lazloggerbase,
   simba.outputform, simba.scripttabsform, simba.scripttab;
 
+// todo ensure finished
 procedure TSimbaScriptInstance.DoOutputThread;
 var
   Buffer: array[1..4096] of Char;
@@ -172,6 +173,7 @@ begin
   FProcess.Parameters.Add('--target=' + IntToStr(FTarget));
   FProcess.Parameters.AddStrings(Args);
   FProcess.Parameters.Add(FScriptFile);
+  FProcess.Environment.Add('HEAPTRC=disabled');
   FProcess.Execute();
 
   FOutputThread := TThread.ExecuteInThread(@DoOutputThread);

@@ -10,7 +10,7 @@ unit simba.nativeinterface;
 interface
 
 uses
-  classes, sysutils,
+  classes, sysutils, graphics,
   simba.mufasatypes;
 
 type
@@ -68,6 +68,8 @@ type
     procedure OpenDirectory(Path: String); virtual; abstract;
 
     // Not abstract
+     procedure ClearInterpolation(Canvas: TCanvas); virtual;
+
     procedure PlaySound(Path: String); virtual;
     procedure StopSound; virtual;
 
@@ -168,6 +170,11 @@ begin
       if (ssAlt   in KeyModifiers) then ReleaseKey(VK_MENU,    GetRandomWait());
     end;
   end;
+end;
+
+procedure TSimbaNativeInterface.ClearInterpolation(Canvas: TCanvas);
+begin
+  { not critical }
 end;
 
 procedure TSimbaNativeInterface.PlaySound(Path: String);

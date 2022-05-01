@@ -122,6 +122,7 @@ begin
   Stream := TStringStream.Create(AnsiString(SimbaSettings.GUI.ColorPickerHistory.Value));
   while Stream.Read(Value, SizeOf(TColorHistoryValue)) = SizeOf(TColorHistoryValue) do
     Add(Value.Point, Value.Color);
+  Stream.Free();
 
   SizeComponents();
 end;
@@ -195,6 +196,8 @@ begin
   end;
 
   ColorPanel.Width := Round(Size.Width * 2.75);
+  ColorListBox.ItemHeight := Size.Height;
+  ColorListBox.ColorRectWidth := Size.Height-3;
 
   StringGrid.ColWidths[0] := Round(Size.Width * 0.65);
   for I := 0 to StringGrid.RowCount - 1 do
