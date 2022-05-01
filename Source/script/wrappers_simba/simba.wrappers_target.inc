@@ -91,12 +91,12 @@ end;
 
 procedure _LapeFreeze(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScriptThread.Script.Client.IOManager.SetFrozen(True);
+  SimbaScriptThread.Script.Client.IOManager.Freeze();
 end;
 
-procedure _LapeUnfreeze(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeUnFreeze(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScriptThread.Script.Client.IOManager.SetFrozen(False);
+  SimbaScriptThread.Script.Client.IOManager.UnFreeze();
 end;
 
 procedure _LapeActivateClient(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

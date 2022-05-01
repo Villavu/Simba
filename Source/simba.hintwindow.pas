@@ -12,7 +12,7 @@ unit simba.hintwindow;
 interface
 
 uses
-  Classes, SysUtils, Controls, ComCtrls, Graphics, Forms;
+  classes, sysutils, controls, comctrls, graphics, forms;
 
 type
   TSimbaHintWindow = class(TComponent)
@@ -44,11 +44,10 @@ begin
   TextStyle := Default(TTextStyle);
   TextStyle.Layout := tlCenter;
 
+  Canvas.Font := TSimbaHintWindow(Owner).FTreeView.Font;
   Canvas.Pen.Color := clBlack;
   Canvas.Brush.Color := clWindow;
   Canvas.Rectangle(ClientRect);
-
-  Canvas.Font.Color := clWindowText;
   Canvas.TextRect(ClientRect, 3, 0, Caption, TextStyle);
 end;
 
@@ -65,12 +64,10 @@ begin
   if (not (Owner is TTreeView)) then
     raise Exception.Create('TSimbaHintWindow.Create: Owner is not a TTreeView');
 
-  FTreeView := AOwner;
-
   FHintWindow := TCustomHintWindow.Create(Self);
-  FHintWindow.Font.Color := clWindowText;
 
-  FTreeView.OnMouseLeave := @DoHide; // Could do with a handler
+  FTreeView := AOwner;
+  FTreeView.OnMouseLeave := @DoHide; // A handler would be a better
   FTreeView.AddHandlerOnVisibleChanged(@DoHide);
 
   Application.AddOnDeactivateHandler(@DoHide);

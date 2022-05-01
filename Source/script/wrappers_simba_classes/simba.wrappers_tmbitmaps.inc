@@ -38,11 +38,6 @@ begin
   Pinteger(Result)^ := PMBitmaps(Params^[0])^.CreateBMPFromString(Pinteger(Params^[1])^, Pinteger(Params^[2])^, PlpString(Params^[3])^);
 end;
 
-procedure _LapeMBitmaps_CreateBMPFromStringEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  Pinteger(Result)^ := PMBitmaps(Params^[0])^.CreateBMPFromString(PlpString(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, PlpString(Params^[4])^);
-end;
-
 procedure _LapeMBitmaps_RemoveBMP(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PMBitmaps(Params^[0])^.RemoveBMP(Pinteger(Params^[1])^);

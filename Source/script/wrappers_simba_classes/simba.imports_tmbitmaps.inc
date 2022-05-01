@@ -9,7 +9,6 @@ addGlobalFunc('function TMBitmaps.CopyBMP(Bitmap : integer): Integer; constref',
 addGlobalFunc('function TMBitmaps.CreateMirroredBitmap(bitmap: Integer; MirrorStyle : TBmpMirrorStyle): Integer; constref', @_LapeMBitmaps_CreateMirroredBitmap);
 addGlobalFunc('function TMBitmaps.CreateBMPFromFile(const Path : string): integer; constref', @_LapeMBitmaps_CreateBMPFromFile);
 addGlobalFunc('function TMBitmaps.CreateBMPFromString(width,height : integer; Data : string): integer; constref', @_LapeMBitmaps_CreateBMPFromString);
-addGlobalFunc('function TMBitmaps.CreateBMPFromString(BmpName : string; width,height : integer; Data : string): integer; constref; overload', @_LapeMBitmaps_CreateBMPFromStringEx);
 addGlobalFunc('procedure TMBitmaps.RemoveBMP(Number: integer); constref', @_LapeMBitmaps_RemoveBMP);
 addGlobalFunc('procedure TMBitmaps.Init(Owner : TObject)', @_LapeMBitmaps_Init);
 //addGlobalFunc('procedure TMBitmaps.Free; constref', @_LapeMBitmaps_Free);

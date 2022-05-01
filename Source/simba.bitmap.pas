@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, graphtype, graphics,
-  simba.mufasatypes, simba.bitmap_textdrawer;
+  simba.mufasatypes, simba.bitmap_textdrawer, simba.baseclass;
 
 type
   TMBitmaps = class;
@@ -26,13 +26,12 @@ type
   TBmpResizeMethod = (RM_Nearest, RM_Bilinear);
 
   PMufasaBitmap = ^TMufasaBitmap;
-  TMufasaBitmap = class(TObject)
+  TMufasaBitmap = class(TSimbaBaseClass)
   protected
     FWidth,FHeight: Int32;
     FTransparentColor: TRGB32;
     FTransparentSet: Boolean;
     FIndex: Int32;
-    FName: String;
     FList: TMBitmaps;
     FData: PRGB32;
     { True if we do not own FData }
@@ -48,7 +47,6 @@ type
     procedure SetFontName(Value: String);
     procedure SetFontSize(Value: Single);
   public
-    property Name: String read FName write FName;
     property Index: Int32 read FIndex write FIndex;
     property Data: PRGB32 read FData write FData;
     property Width: Int32 read FWidth;
@@ -136,6 +134,8 @@ type
     function ToGreyMatrix: TByteMatrix;
     function ToRawImage: TRawImage;
 
+    procedure FromClient(IOManager: TObject);
+
     procedure DrawMatrix(const Matrix: TIntegerMatrix);
     procedure DrawMatrix(const Matrix: TSingleMatrix; ColorMapID: Int32 = 0); overload;
     procedure ThresholdAdaptive(Alpha, Beta: Byte; DoInvert: Boolean; Method: TBmpThreshMethod; C: Int32);
@@ -160,38 +160,21 @@ type
   PMBitmaps = ^TMBitmaps;
   TMBitmaps = class(TObject)
   protected
-    Client: TObject;
-    FreeSpots: Array of Int32;
-    BmpArray: TMufasaBmpArray;
-    BmpsCurr, BmpsHigh, FreeSpotsHigh, FreeSpotsLen: Int32;
-    function GetNewIndex: Int32;
+    FClient: TObject;
+    FList: TList;
   public
     function GetBMP(Index: Int32): TMufasaBitmap;
     property Bmp[Index: Int32]: TMufasaBitmap read GetBMP; default;
     function CreateBMP(w, h: Int32): Int32;
     function ExistsBMP(Index: Int32): Boolean;
-    function AddBMP(_bmp: TMufasaBitmap): Int32;
+    function AddBMP(Bitmap: TMufasaBitmap): Int32;
     function CopyBMP( Bitmap: Int32): Int32;
     function CreateMirroredBitmap(bitmap: Int32; MirrorStyle: TBmpMirrorStyle): Int32;
     function CreateBMPFromFile(const Path: String): Int32;
     function CreateBMPFromString(width,height: Int32; Data: String): Int32;overload;
-    function CreateBMPFromString(BmpName: String; width, height: Int32; Data: String): Int32;overload;
-    function RemoveBMP(Number: Int32): TMufasaBitmap;
+    function RemoveBMP(Index: Int32): TMufasaBitmap;
     constructor Create(Owner: TObject);
     destructor Destroy;override;
-  end;
-
-  TBitmapDataFormat = (
-    dfBGR,   // color bitmap 8-8-8 B-G-R
-    dfRGB,   // color bitmap 8-8-8 R-G-B
-    dfARGB,  // color bitmap with alpha channel first 8-8-8-8 A-R-G-B
-    dfRGBA,  // color bitmap with alpha channel last 8-8-8-8 R-G-B-A
-    dfABGR,  // color bitmap with alpha channel first 8-8-8-8 A-B-G-R
-    dfBGRA   // color bitmap with alpha channel last 8-8-8-8 B-G-R-A);
-  );
-
-  TBitmap_Helper = class helper for TBitmap
-    function DataFormat: TBitmapDataFormat;
   end;
 
   function CalculatePixelShift(Bmp1,Bmp2: TMufasaBitmap; CompareBox: TBox): Int32;
@@ -205,70 +188,6 @@ uses
   math, intfgraphics,
   simba.tpa, simba.stringutil, simba.colormath, simba.iomanager, simba.overallocatearray,
   simba.helpers_matrix;
-
-function TBitmap_Helper.DataFormat: TBitmapDataFormat;
-var
-  Desc: TRawImageDescription;
-begin
-  Desc := RawImage.Description;
-
-  if Desc.BitsPerPixel = 32 then
-  begin
-    if Desc.ByteOrder = riboMSBFirst then
-    begin
-      if (Desc.AlphaShift = 0) and (Desc.RedShift = 16) and (Desc.GreenShift = 8) and (Desc.BlueShift = 0) then
-        Result := dfARGB
-      else
-      if (Desc.AlphaShift = 24) and (Desc.RedShift = 16) and (Desc.GreenShift = 8) and (Desc.BlueShift = 0) then
-        Result := dfARGB
-      else
-      if (Desc.AlphaShift = 0) and (Desc.RedShift = 24) and (Desc.GreenShift = 16) and (Desc.BlueShift = 8) then
-        Result := dfRGBA
-      else
-      if (Desc.AlphaShift = 0) and (Desc.RedShift = 8) and (Desc.GreenShift = 16)  and (Desc.BlueShift = 24) then
-        Result := dfBGRA
-      else
-        raise Exception.Create('Unknown bitmap format(32): ' + Desc.AsString);
-    end else
-    begin
-      if (Desc.AlphaShift = 0) and (Desc.RedShift = 16) and (Desc.GreenShift = 8) and (Desc.BlueShift = 0) then
-        Result := dfBGRA
-      else
-      if (Desc.AlphaShift = 24) and (Desc.RedShift = 16) and (Desc.GreenShift = 8) and (Desc.BlueShift = 0) then
-        Result := dfBGRA
-      else
-      if (Desc.AlphaShift = 0) and (Desc.RedShift = 8) and (Desc.GreenShift = 16) and (Desc.BlueShift = 24) then
-        Result := dfARGB
-      else
-      if (Desc.AlphaShift = 24) and (Desc.RedShift = 0) and (Desc.GreenShift = 8) and (Desc.BlueShift = 16) then
-        Result := dfRGBA
-      else
-        raise Exception.Create('Unknown bitmap format(32): ' + Desc.AsString);
-    end;
-  end else
-  if Desc.BitsPerPixel = 24 then
-  begin
-    if Desc.ByteOrder = riboMSBFirst then
-    begin
-      if (Desc.RedShift = 24) and (Desc.GreenShift = 16) and (Desc.BlueShift = 8) then
-        Result := dfRGB
-      else
-      if (Desc.RedShift = 8) and (Desc.GreenShift = 16) and (Desc.BlueShift = 24) then
-        Result := dfBGR
-      else
-        raise Exception.Create('Unknown bitmap format(24): ' + Desc.AsString);
-    end else
-    begin
-      if (Desc.RedShift = 16) and (Desc.GreenShift = 8) and (Desc.BlueShift = 0) then
-        Result := dfBGR
-      else
-      if (Desc.RedShift = 0) and (Desc.GreenShift = 8) and (Desc.BlueShift = 16) then
-        Result := dfRGB
-      else
-        raise Exception.Create('Unknown bitmap format(24): ' + Desc.AsString);
-    end;
-  end;
-end;
 
 function CalculatePixelShift(Bmp1, Bmp2: TMufasaBitmap; CompareBox: TBox): Int32;
 var
@@ -397,35 +316,12 @@ begin
   end;
 end;
 
-{ TMBitmaps }
-
-function TMBitmaps.GetNewIndex: Int32;
-begin
-  if BmpsCurr < BmpsHigh then
-  begin;
-    inc(BmpsCurr);
-    Result := BmpsCurr;
-  end else if (FreeSpotsHigh > -1) then
-  begin;
-    Result := FreeSpots[FreeSpotsHigh];
-    dec(FreeSpotsHigh);
-  end else
-  begin;
-    SetLength(BmpArray, BmpsHigh + 6);
-    BmpsHigh := BmpsHigh + 5;
-    inc(BmpsCurr);
-    Result := BmpsCurr;
-  end;
-end;
-
 function TMBitmaps.GetBMP(Index: Int32): TMufasaBitmap;
 begin
-  Result := nil;
-  if (Index >= 0) and (Index <= BmpsCurr) then
-    if BmpArray[Index] <> nil then
-      Result := BmpArray[Index];
-  if Result = nil then
-    raise Exception.CreateFmt('The bitmap[%d] does not exist',[Index]);
+  if not ExistsBMP(Index) then
+    raise Exception.CreateFmt('The bitmap[%d] does not exist', [Index]);
+
+  Result := TMufasaBitmap(FList[Index]);
 end;
 
 function TMBitmaps.CreateBMP(w,h: Int32): Int32;
@@ -437,13 +333,17 @@ begin
   Result := addBMP(Bitmap);
 end;
 
-function TMBitmaps.AddBMP(_bmp: TMufasaBitmap): Int32;
+function TMBitmaps.AddBMP(Bitmap: TMufasaBitmap): Int32;
 begin
-  Result := GetNewIndex;
+  Result := FList.IndexOf(nil);
+  if (Result = -1) then
+    Result := FList.Add(nil);
 
-  BmpArray[Result] := _bmp;
-  BmpArray[Result].Index := Result;
-  BmpArray[Result].List := Self;
+  FList[Result] := Bitmap;
+
+  Bitmap.List := Self;
+  Bitmap.Index := Result;
+  Bitmap.Name := 'Bitmap[' + IntToStr(Result) + ']';
 end;
 
 function TMBitmaps.CopyBMP(Bitmap: Int32): Int32;
@@ -457,21 +357,20 @@ begin
   Move(InputBMP.FData[0],OutPutBMP.FData[0],InputBMP.Width * InputBMP.Height * SizeOf(TRGB32));
 end;
 
-function TMBitmaps.CreateMirroredBitmap(bitmap: Int32;
-  MirrorStyle: TBmpMirrorStyle): Int32;
+function TMBitmaps.CreateMirroredBitmap(bitmap: Int32; MirrorStyle: TBmpMirrorStyle): Int32;
 var
   w,h: Int32;
   y,x: Int32;
   Source,Dest: PRGB32;
 begin
   Source := Bmp[Bitmap].FData;
-  w := BmpArray[Bitmap].Width;
-  h := BmpArray[Bitmap].Height;
+  w := Bmp[Bitmap].Width;
+  h := Bmp[Bitmap].Height;
   if MirrorStyle = MirrorLine then
     Result := CreateBMP(h,w)
   else
     Result := CreateBMP(w,h);
-  Dest := BmpArray[Result].FData;
+  Dest := Bmp[Result].FData;
   case MirrorStyle of
     MirrorWidth:  for y := (h-1) downto 0 do
                      for x := (w-1) downto 0 do
@@ -490,27 +389,20 @@ function TMBitmaps.CreateBMPFromFile(const Path: String): Int32;
 begin
   Result := CreateBMP(0,0);
   try
-    BmpArray[Result].LoadFromFile(Path);
+    Bmp[Result].LoadFromFile(Path);
   except
-    BmpArray[Result].Free();
+    Bmp[Result].Free();
     Result := -1; // meh
     raise;
   end;
 end;
 
-function HexToInt(HexNum: String): LongInt;inline;
-begin
-   Result:=StrToInt('$' + HexNum);
-end;
-
 function TMBitmaps.ExistsBMP(Index: Int32): Boolean;
 begin
-  Result := false;
-  if (Index >= 0) and (Index <= BmpsCurr) then
-    Result := Assigned(BmpArray[Index]);
+  Result := (Index >= 0) and (Index < FList.Count) and (FList[Index] <> nil);
 end;
 
-function TMBitmaps.CreateBMPFromString(Width, Height: Int32; Data: String): Int32;
+function TMBitmaps.CreateBMPFromString(width, height: Int32; Data: String): Int32;
 var
   i: Int32;
   Source: String;
@@ -529,7 +421,7 @@ begin
       raise Exception.Create('Invalid bitmap String');
 
     SourcePtr := @Source[1];
-    DestPtr := PRGB32(BmpArray[Result].FData);
+    DestPtr := PRGB32(Bmp[Result].FData);
 
     for i := Width * Height - 1 downto 0 do
     begin
@@ -540,31 +432,13 @@ begin
   end;
 end;
 
-function TMBitmaps.CreateBMPFromString(BmpName: String; width, height: Int32; Data: String): Int32;
+function TMBitmaps.RemoveBMP(Index: Int32): TMufasaBitmap;
 begin
-  Result := Self.CreateBMPFromString(width,height,data);
-  Bmp[Result].Name:= BmpName;
-end;
-
-function TMBitmaps.RemoveBMP(Number: Int32): TMufasaBitmap;
-begin
-  Result := GetBMP(Number);
-  if (Number < BmpsCurr) then
-  begin
-    Inc(FreeSpotsHigh);
-    if (FreeSpotsHigh = FreeSpotsLen) then
-    begin
-      Inc(FreeSpotsLen);
-      SetLength(FreeSpots, FreeSpotsLen);
-    end;
-
-    FreeSpots[FreeSpotsHigh] := Number;
-  end else
-    Dec(BmpsCurr);
-
-  BMPArray[Number] := nil;
+  Result := GetBMP(Index);
   Result.Index := -1;
   Result.List := nil;
+
+  FList[Index] := nil;
 end;
 
 function TMufasaBitmap.SaveToFile(FileName: String): Boolean;
@@ -779,6 +653,21 @@ begin
 
   Result.DataSize := Result.Description.Width * Result.Description.Height * (Result.Description.BitsPerPixel shr 3);
   Result.Data := PByte(FData);
+end;
+
+procedure TMufasaBitmap.FromClient(IOManager: TObject);
+var
+  W, H: Integer;
+begin
+  if (not (IOManager is TIOManager)) then
+    raise Exception.Create('TMufasaBitmap.FromClient: IOManager is invalid');
+
+  with TIOManager(IOManager) do
+  begin
+    GetDimensions(W, H);
+
+    CopyClientToBitmap(IOManager, True, 0, 0, W-1, H-1);
+  end;
 end;
 
 procedure TMufasaBitmap.DrawMatrix(const Matrix: TIntegerMatrix);
@@ -1403,6 +1292,7 @@ begin
     WriteLn('Warning! ReturnData returned null');
   end else
   begin
+    WriteLn(HexStr(RetData.Ptr));
     for y := 0 to (hi-1) do
       Move(RetData.Ptr[y * RetData.RowLen], FData[y * self.FWidth], wi * SizeOf(TRGB32));
 
@@ -1427,7 +1317,7 @@ begin
   TIOManager(MWindow).GetDimensions(TargetWidth, TargetHeight);
   if (xs + wi > TargetWidth) or (ys + hi > TargetHeight) then
   begin
-    if (FList <> nil) and (FList.Client <> nil) then
+    if (FList <> nil) and (FList.FClient <> nil) then
       WriteLn('Warning! The area passed to `CopyClientToBitmap` exceeds the clients bounds');
 
     xe := Min(xe, TargetWidth - 1);
@@ -1438,7 +1328,7 @@ begin
 
   if (RetData = NullReturnData) then
   begin
-    if (FList <> nil) and (FList.Client <> nil) then
+    if (FList <> nil) and (FList.FClient <> nil) then
       WriteLn('Warning! ReturnData returned null');
   end else
   begin
@@ -2336,45 +2226,18 @@ end;
 
 constructor TMBitmaps.Create(Owner: TObject);
 begin
-  inherited Create;
-  SetLength(BmpArray,50);
-  SetLength(FreeSpots, 50);
-  FreeSpotsLen := 50;
-  BmpsHigh := 49;
-  BmpsCurr := -1;
-  FreeSpotsHigh := -1;
-  Self.Client := Owner;
+  inherited Create();
+
+  FClient := Owner;
+  FList := TList.Create();
 end;
 
 destructor TMBitmaps.Destroy;
-var
-  I: Int32;
-  WriteStr: String;
 begin
-  WriteStr := '[';
-  for I := 0 to BmpsCurr do
-    if Assigned(BmpArray[I]) then
-    begin;
-      if BmpArray[I].Name = '' then
-        WriteStr := WriteStr + IntToStr(I) + ', '
-      else
-        WriteStr := WriteStr + bmpArray[I].Name + ', ';
+  if (FList <> nil) then
+    FreeAndNil(FList);
 
-      BmpArray[I].Free();
-    end;
-
-  if WriteStr <> '[' then  //Has unfreed bitmaps
-  begin
-    SetLength(WriteStr, Length(WriteStr) - 1);
-    WriteStr[Length(writeStr)] := ']';
-
-    WriteLn(Format('The following bitmaps were not freed: %s', [WriteStr]));
-  end;
-
-  SetLength(BmpArray, 0);
-  SetLength(FreeSpots, 0);
-
-  inherited Destroy;
+  inherited Destroy();
 end;
 
 function TMufasaBitmap.GetCenter: TPoint;
@@ -2656,7 +2519,6 @@ constructor TMufasaBitmap.Create;
 begin
   inherited Create();
 
-  FName := '';
   FIndex := -1;
 
   FTextDrawer := TSimbaTextDrawer.Create(Self);

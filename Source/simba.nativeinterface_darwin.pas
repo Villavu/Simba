@@ -11,7 +11,7 @@ unit simba.nativeinterface_darwin;
 interface
 
 uses
-  classes, sysutils, macosall,
+  classes, sysutils, graphics, macosall,
   simba.mufasatypes, simba.nativeinterface;
 
 type
@@ -80,13 +80,14 @@ type
 
     function HighResolutionTime: Double; override;
 
+    procedure ClearInterpolation(Canvas: TCanvas); override;
     procedure OpenDirectory(Path: String); override;
   end;
 
 implementation
 
 uses
-  baseunix, unix, lcltype, cocoaall, cocoautils, cocoawscommon,
+  baseunix, unix, lcltype, cocoaall, cocoautils, cocoawscommon, cocoagdiobjects,
   simba.process, simba.helpers_string;
 
 type
@@ -522,6 +523,15 @@ end;
 function TSimbaNativeInterface_Darwin.HighResolutionTime: Double;
 begin
   Result := Double((mach_absolute_time * timeInfo.numer) / ((1000*1000) * timeInfo.denom));
+end;
+
+procedure TSimbaNativeInterface_Darwin.ClearInterpolation(Canvas: TCanvas);
+var
+  Ctx: TCocoaContext;
+begin
+  Ctx := CheckDC(Canvas.Handle);
+  if (Ctx <> nil) and (CGContextGetInterpolationQuality(Ctx.CGContext) <> kCGInterpolationNone) then
+    CGContextSetInterpolationQuality(Ctx.CGContext, kCGInterpolationNone);
 end;
 
 function TSimbaNativeInterface_Darwin.GetWindows: TWindowHandleArray;

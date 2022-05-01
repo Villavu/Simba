@@ -10,20 +10,20 @@ unit simba.dtm;
 interface
 
 uses
-  Classes, SysUtils, simba.mufasatypes;
+  classes, sysutils,
+  simba.mufasatypes, simba.baseclass;
 
 type
   PMDTMPointArray = ^TMDTMPointArray;
   PPMDTMPoint = ^PMDTMPoint;
   PMDTM = ^TMDTM;
-  TMDTM = class(TObject)
+  TMDTM = class(TSimbaBaseClass)
   private
     FPoints : TMDTMPointArray;
     FLen    : integer;
     function GetPointerPoints: PMDTMPoint;
     procedure SetPointCount(const AValue: integer);
   public
-    Name : string;
     Index : integer;
     function ToString : string;
     function SaveToFile(const FileName : string) : boolean;
@@ -42,18 +42,16 @@ type
   PMDTMS = ^TMDTMS;
   TMDTMS = class(TObject)
   private
-    Client: TObject;
-    DTMList: Array Of TMDTM;
-    FreeSpots: Array Of Integer;
-    procedure CheckIndex(index : integer);
+    FClient: TObject;
+    FList: TList;
   public
-    function AddDTM(const d: TSDTM): Integer;overload;
-    function AddDTM(const d: TMDTM): Integer;overload;
-    function ExistsDTM(index : integer) : boolean;
-    function GetDTM(index: Integer) :TMDTM;
-    procedure FreeDTM(DTM: Integer);
+    function AddDTM(const DTM: TSDTM): Integer; overload;
+    function AddDTM(const DTM: TMDTM): Integer; overload;
+    function ExistsDTM(Index: Integer): Boolean;
+    function GetDTM(Index: Integer): TMDTM;
+    procedure FreeDTM(Index: Integer);
     function StringToDTM(const S: String): Integer;
-    property DTM[Index : integer]: TMDTM read GetDTM; default;
+    property DTM[Index: Integer]: TMDTM read GetDTM; default;
     constructor Create(Owner: TObject);
     destructor Destroy; override;
   end;
@@ -61,67 +59,22 @@ type
 implementation
 
 uses
-  simba.dtmutil, simba.stringutil,
-  graphics, math;
+  simba.dtmutil, simba.stringutil;
 
 constructor TMDTMS.Create(Owner: TObject);
 begin
   inherited Create;
-  Self.Client := Owner;
 
-  SetLength(DTMList, 0);
-  SetLength(FreeSpots, 0);
+  FClient := Owner;
+  FList := TList.Create();
 end;
 
-{$DEFINE DTM_DEBUG}
 destructor TMDTMS.Destroy;
-var
-  i, j: integer;
-  b:boolean;
-  WriteStr : string;
 begin
-  WriteStr := '[';
-  for i := 0 to high(DTMList) do
-  begin
-    b := false;
-    for j := 0 to high(freespots) do
-      if i = freespots[j] then
-      begin
-        b := true;
-        break;
-      end;
-      if not b then
-      begin;
-        if DTMList[i].name <> '' then
-          WriteStr := WriteStr + DTMList[i].name + ', '
-        else
-          WriteStr := WriteStr + inttostr(i) + ', ';
-        FreeDTM(i);
-      end;
-  end;
-  if WriteStr <> '[' then  //Has unfreed DTMs
-  begin
-    SetLength(WriteStr,length(WriteStr)-1);
-    WriteStr[Length(writeStr)] := ']';
-    Writeln(Format('The following DTMs were not freed: %s',[WriteStr]));
-  end;
-  SetLength(DTMList, 0);
-  SetLength(FreeSpots, 0);
+  if (FList <> nil) then
+    FreeAndNil(FList);
 
-  inherited Destroy;
-end;
-
-//  Rotates the given point (p) by A (in radians) around the point defined by cx, cy.
-
-function RotatePoint(const p: TPoint;const angle, mx, my: Extended): TPoint; inline;
-begin
-  Result.X := Round(mx + cos(angle) * (p.x - mx) - sin(angle) * (p.y - my));
-  Result.Y := Round(my + sin(angle) * (p.x - mx) + cos(angle) * (p.y- my));
-end;
-
-function HexToInt(const HexNum: string): LongInt;inline;
-begin
-   Result:=StrToInt('$' + HexNum);
+  inherited Destroy();
 end;
 
 function TMDTMS.StringToDTM(const S: String): Integer;
@@ -133,45 +86,31 @@ begin
   Result := AddDTM(aDTM);
 end;
 
-
-procedure TMDTMS.CheckIndex(index: integer);
+function TMDTMS.AddDTM(const DTM: TSDTM): Integer;
 begin
-  if (index < 0) or (index >= Length(DTMList)) or (DTMList[Index] = nil) then
-    raise Exception.CreateFmt('The given DTM Index[%d] doesn''t exist',[index]);
-end;
-
-function TMDTMS.AddDTM(const d: TSDTM): Integer;
-begin
-  Result := AddDTM(SDTMToMDTM(d));
+  Result := AddDTM(SDTMToMDTM(DTM));
 end;
 
 {/\
   Adds the given pDTM to the DTM Array, and returns it's index.
 /\}
 
-function TMDTMS.AddDTM(const d: TMDTM): Integer;
+function TMDTMS.AddDTM(const DTM: TMDTM): Integer;
 begin
+  Result := FList.IndexOf(nil);
+  if (Result = -1) then
+    Result := FList.Add(nil);
 
-  if Length(FreeSpots) > 0 then
-  begin
-    Result := FreeSpots[High(FreeSpots)];
-    SetLength(FreeSpots, High(FreeSpots));
-  end
-  else
-  begin
-    SetLength(DTMList, Length(DTMList) + 1);
-    Result := High(DTMList);
-  end;
-  DTMList[Result] := d;
-  DTMList[Result].Index:= Result;
-  DTMList[result].Normalize;
+  FList[Result] := DTM;
+
+  DTM.Index := Result;
+  DTM.Name := 'DTM[' + IntToStr(Result) + ']';
+  DTM.Normalize();
 end;
 
-function TMDTMS.ExistsDTM(index : integer) : boolean;
+function TMDTMS.ExistsDTM(Index: Integer): Boolean;
 begin
-  result := false;
-  if (index >= 0) and (index <= High(DTMList)) then
-    result := Assigned(DTMList[index]);
+  Result := (Index >= 0) and (Index < FList.Count) and (FList[Index] <> nil);
 end;
 
 {/\
@@ -179,28 +118,24 @@ end;
    Returns true is succesfull, false if the dtm does not exist.
 /\}
 
-function TMDTMS.GetDTM(index: Integer) :TMDTM;
+function TMDTMS.GetDTM(Index: Integer): TMDTM;
 begin
-  CheckIndex(index);
-  result := DTMList[index];
+  if not ExistsDTM(Index) then
+    raise Exception.CreateFmt('The DTM[%d] does not exist', [Index]);
+
+  Result := TMDTM(FList[Index]);
 end;
 
 {/\
   Unloads the DTM at the given index from the DTM Array.
-  Notes:
-  Will keep track of not used index, so it is very memory efficient.
 /\}
 
-procedure TMDTMS.FreeDTM(DTM: Integer);
+procedure TMDTMS.FreeDTM(Index: Integer);
 begin
-  CheckIndex(DTM);
-  DTMList[DTM].Free;
-  DTMList[DTM] := nil;
-  SetLength(FreeSpots, Length(FreeSpots) + 1);
-  FreeSpots[High(FreeSpots)] := DTM;
-end;
+  GetDTM(Index).Free();
 
-{ TMDTM }
+  FList[Index] := nil;
+end;
 
 function TMDTM.GetPointerPoints: PMDTMPoint;
 begin
@@ -210,7 +145,7 @@ begin
     result := @FPoints[0];
 end;
 
-procedure TMDTM.SetPointCount(const AValue: integer);
+procedure TMDTM.SetPointCount(const AValue: Integer);
 begin
   SetLength(FPoints,AValue);
   FLen := AValue;
@@ -226,7 +161,7 @@ var
   i: Int32;
   Ptr: Pointer;
 
-  procedure WriteInteger(int : integer);
+  procedure WriteInteger(int : Integer);
   begin
     PLongInt(Ptr)^ := int;
     Inc(ptr,sizeof(int));
@@ -272,13 +207,13 @@ end;
 function TMDTM.LoadFromString(const s: string): boolean;
 var
   Source : String;
-  i: integer;
+  i: Integer;
   Ptr : Pointer;
 
-  function ReadInteger : integer;
+  function ReadInteger : Integer;
   begin
     Result := PInteger(ptr)^;
-    inc(ptr,sizeof(integer));
+    inc(ptr,sizeof(Integer));
   end;
   function ReadBoolean : boolean;
   begin
@@ -323,7 +258,7 @@ end;
 
 procedure TMDTM.Normalize;
 var
-   i:integer;
+   i:Integer;
 begin
   if (self = nil) or (Self.count < 1) or ((Self.Points[0].x = 0) and (Self.Points[0].y = 0)) then  //Already normalized
     exit;
@@ -338,20 +273,18 @@ end;
 
 function TMDTM.Valid: boolean;
 begin
-  result := false;
-  if Count < 1 then
-    exit;
-  Normalize;
-  result := true;
+  Result := Count > 1;
+  if Result then
+    Normalize();
 end;
 
-procedure TMDTM.DeletePoint(Point: integer);
+procedure TMDTM.DeletePoint(Point: Integer);
 begin
   MovePoint(Point, FLen - 1);
   Count := Count - 1;
 end;
 
-procedure TMDTM.SwapPoint(p1, p2: integer);
+procedure TMDTM.SwapPoint(p1, p2: Integer);
 var
   tempP: TMDTMPoint;
 begin
@@ -361,9 +294,9 @@ begin
   FPoints[p2] := tempP;
 end;
 
-procedure TMDTM.MovePoint(fromIndex, toIndex: integer);
+procedure TMDTM.MovePoint(fromIndex, toIndex: Integer);
 var
-  i: integer;
+  i: Integer;
 begin
   if fromIndex > toIndex then //We are going down
   begin
@@ -374,7 +307,7 @@ begin
       SwapPoint(i, i + 1);
 end;
 
-function TMDTM.AddPoint(Point: TMDTMPoint): integer;
+function TMDTM.AddPoint(Point: TMDTMPoint): Integer;
 begin
   Count := Count + 1;
   Result := FLen - 1;

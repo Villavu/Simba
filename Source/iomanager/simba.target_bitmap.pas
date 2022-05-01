@@ -18,27 +18,32 @@ type
   TBitmapTarget = class(TTarget)
   protected
     FBitmap: TMufasaBitmap;
+    FManageBitmap: Boolean;
 
     procedure GetTargetBounds(out Bounds: TBox); override;
   public
     function ReturnData(X, Y, Width, Height: Int32): TRetData; override;
     function CopyData(X, Y, Width, Height: Int32): PRGB32; override;
 
-    constructor Create(Bitmap: TMufasaBitmap);
+    constructor Create(Bitmap: TMufasaBitmap; ManageBitmap: Boolean);
     destructor Destroy; override;
   end;
 
 implementation
 
-constructor TBitmapTarget.Create(Bitmap: TMufasaBitmap);
+constructor TBitmapTarget.Create(Bitmap: TMufasaBitmap; ManageBitmap: Boolean);
 begin
   inherited Create();
 
   FBitmap := Bitmap;
+  FManageBitmap := ManageBitmap;
 end;
 
 destructor TBitmapTarget.Destroy;
 begin
+  if FManageBitmap and (FBitmap <> nil) then
+    FreeAndNil(FBitmap);
+
   inherited Destroy();
 end;
 

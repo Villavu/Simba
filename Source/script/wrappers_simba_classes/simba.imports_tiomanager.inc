@@ -15,8 +15,9 @@ addGlobalFunc('procedure TIOManager.FreeReturnData; constref', @_LapeIOManager_F
 addGlobalFunc('procedure TIOManager.GetDimensions(out W, H: Integer); constref', @_LapeIOManager_GetDimensions);
 addGlobalFunc('procedure TIOManager.GetPosition(var Left, Top: Integer); constref', @_LapeIOManager_GetPosition);
 addGlobalFunc('procedure TIOManager.ActivateClient; constref', @_LapeIOManager_ActivateClient);
-addGlobalFunc('function TIOManager.IsFrozen: boolean; constref', @_LapeIOManager_IsFrozen);
-addGlobalFunc('procedure TIOManager.SetFrozen(makefrozen: boolean); constref', @_LapeIOManager_SetFrozen);
+addGlobalFunc('function TIOManager.IsFrozen: Boolean; constref', @_LapeIOManager_IsFrozen);
+addGlobalFunc('procedure TIOManager.Freeze; constref', @_LapeIOManager_Freeze);
+addGlobalFunc('procedure TIOManager.UnFreeze; constref', @_LapeIOManager_UnFreeze);
 addGlobalFunc('function TIOManager.MouseSetClientArea(x1, y1, x2, y2: Integer): boolean; constref', @_LapeIOManager_MouseSetClientArea);
 addGlobalFunc('procedure TIOManager.MouseResetClientArea; constref', @_LapeIOManager_MouseResetClientArea);
 addGlobalFunc('function TIOManager.ImageSetClientArea(x1, y1, x2, y2: Integer): boolean; constref', @_LapeIOManager_ImageSetClientArea);

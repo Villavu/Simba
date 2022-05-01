@@ -44,7 +44,7 @@ type
 implementation
 
 uses
-  controls, forms, stdctrls, extctrls, lclstrconsts, uitypes, graphics,
+  controls, forms, stdctrls, extctrls, graphics,
   simba.editor;
 
 type

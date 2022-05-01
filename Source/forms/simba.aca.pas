@@ -12,7 +12,7 @@ interface
 uses
   classes, sysutils, fileutil, dividerbevel, forms, controls,
   graphics, dialogs, extctrls, comctrls, stdctrls, menus, colorbox, lcltype,
-  simba.client, simba.imagebox, simba.mufasatypes, simba.bitmap, simba.imageboxzoom;
+  simba.client, simba.imagebox, simba.mufasatypes, simba.imageboxzoom;
 
 type
   TACABestColorEvent = procedure(CTS: Int32; Color, Tolerance: Int32; Hue, Sat: Extended) of object;
@@ -75,13 +75,13 @@ type
     procedure ButtonUpdateImageClick(Sender: TObject);
     procedure ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure ClientImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure PanelRightResize(Sender: TObject);
   protected
     FOnCalculateBestColor: TACABestColorEvent;
     FOnCalculateBestColorEx: TACABestColorEventEx;
 
     FManageClient: Boolean;
     FClient: TClient;
-    FClientImage: TMufasaBitmap;
     FImageBox: TSimbaImageBox;
     FImageZoom: TSimbaImageBoxZoom;
     FZoomInfo: TLabel;
@@ -103,7 +103,7 @@ implementation
 {$R *.lfm}
 
 uses
-  math, clipbrd,
+  clipbrd,
   simba.colormath;
 
 procedure TSimbaACAForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -111,14 +111,14 @@ var
   R, G, B: Byte;
   H, S, L: Extended;
 begin
-  FImageZoom.Move(FClientImage, X, Y);
+  FImageZoom.MoveTest(FImageBox, X, Y);
 
-  ColorToRGB(FImageBox.Background.Canvas.Pixels[X, Y], R, G, B);
-  ColorToHSL(FImageBox.Background.Canvas.Pixels[X, Y], H, S, L);
+  ColorToRGB(FImageBox.Background.Pixels[X, Y], R, G, B);
+  ColorToHSL(FImageBox.Background.Pixels[X, Y], H, S, L);
 
-  FZoomInfo.Caption := Format('Color: %d', [FImageBox.Background.Canvas.Pixels[X, Y]]) + LineEnding +
-                       Format('RGB: %d, %d, %d', [R, G, B])                            + LineEnding +
-                       Format('HSL: %.2f, %.2f, %.2f', [H, S, L])                      + LineEnding;
+  FZoomInfo.Caption := Format('Color: %d', [FImageBox.Background.Pixels[X, Y]]) + LineEnding +
+                       Format('RGB: %d, %d, %d', [R, G, B])                     + LineEnding +
+                       Format('HSL: %.2f, %.2f, %.2f', [H, S, L])               + LineEnding;
 end;
 
 procedure TSimbaACAForm.ClientImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -127,11 +127,16 @@ var
 begin
   if (Button = mbLeft) then
   begin
-    Pixel := FImageBox.Background.Canvas.Pixels[X, Y];
+    Pixel := FImageBox.Background.Pixels[X, Y];
 
     if ColorListBox.Items.IndexOf(Pixel.ToString()) = -1 then
       ColorListBox.ItemIndex := ColorListBox.Items.AddObject(Pixel.ToString(), TObject(PtrUInt(Pixel)));
   end;
+end;
+
+procedure TSimbaACAForm.PanelRightResize(Sender: TObject);
+begin
+  PanelRight.Constraints.MinWidth := PanelRight.Width;
 end;
 
 procedure TSimbaACAForm.ChangeDrawColor(Sender: TObject);
@@ -145,10 +150,10 @@ begin
         Parent[i].Checked := False;
 
     case Caption of
-      'Red': FImageBox.Overlay.Canvas.Pen.Color := clRed;
-      'Green': FImageBox.Overlay.Canvas.Pen.Color := clGreen;
-      'Blue': FImageBox.Overlay.Canvas.Pen.Color := clBlue;
-      'Yellow': FImageBox.Overlay.Canvas.Pen.Color := clYellow;
+      'Red': FImageBox.Canvas.Pen.Color := clRed;
+      'Green': FImageBox.Canvas.Pen.Color := clGreen;
+      'Blue': FImageBox.Canvas.Pen.Color := clBlue;
+      'Yellow': FImageBox.Canvas.Pen.Color := clYellow;
     end;
   end;
 end;
@@ -163,16 +168,11 @@ begin
 end;
 
 procedure TSimbaACAForm.ButtonUpdateImageClick(Sender: TObject);
-var
-  W, H: Integer;
 begin
   if not FClient.IOManager.TargetValid() then
     FClient.IOManager.SetDesktop();
-  FClient.IOManager.GetDimensions(W, H);
-  FClientImage.CopyClientToBitmap(FClient.IOManager, True, 0, 0, W-1, H-1);
 
-  FImageBox.Background.LoadFromMufasaBitmap(FClientImage);
-  FImageBox.BackgroundChanged();
+  FImageBox.SetBackground(FClient.IOManager);
 end;
 
 procedure TSimbaACAForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -216,8 +216,7 @@ procedure TSimbaACAForm.ButtonDebugColorClick(Sender: TObject);
 var
   CTS: Int32;
   Col, Tol: Int32;
-  Hue, Sat: Extended;
-  Matches: Int32;
+  HueMod, SatMod: Extended;
 begin
   if ButtonCTS0.Checked then CTS := 0;
   if ButtonCTS1.Checked then CTS := 1;
@@ -225,17 +224,12 @@ begin
 
   Col := StrToIntDef(EditColor.Text, -1);
   Tol := StrToIntDef(EditTolerance.Text, -1);
-  Hue := StrToFloatDef(EditHue.Text, -1);
-  Sat := StrToFloatDef(EditSat.Text, -1);
+  HueMod := StrToFloatDef(EditHue.Text, -1);
+  SatMod := StrToFloatDef(EditSat.Text, -1);
 
-  case CTS of
-    0: Matches := FImageBox.Overlay.DebugColorCTS0(Col, Tol);
-    1: Matches := FImageBox.Overlay.DebugColorCTS1(Col, Tol);
-    2: Matches := FImageBox.Overlay.DebugColorCTS2(Col, Tol, Hue, Sat);
-  end;
-
-  FImageBox.Repaint();
-  FImageBox.StatusPanel.Text := Format('Found %.0n matches', [Double(Matches)]);
+  FImageBox.Clear();
+  FImageBox.DebugColor(CTS, Col, Tol, HueMod, SatMod);
+  FImageBox.Paint();
 end;
 
 procedure TSimbaACAForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -333,8 +327,7 @@ end;
 
 procedure TSimbaACAForm.ButtonClearImageClick(Sender: TObject);
 begin
-  FImageBox.Overlay.Clear();
-  FImageBox.Update();
+  FImageBox.Clear();
 end;
 
 procedure TSimbaACAForm.ButtonDeleteSelectedColorClick(Sender: TObject);
@@ -351,8 +344,7 @@ begin
 
     if Execute() then
     try
-      FImageBox.Background.LoadFromFile(FileName);
-      FImageBox.BackgroundChanged();
+      FImageBox.SetBackground(FileName);
     except
     end;
   finally
@@ -382,8 +374,6 @@ begin
 end;
 
 constructor TSimbaACAForm.Create(Client: TClient; ManageClient: Boolean);
-var
-  W, H: Integer;
 begin
   inherited Create(Application.MainForm);
 
@@ -394,12 +384,12 @@ begin
   FImageBox.Align := alClient;
   FImageBox.OnMouseDown := @ClientImageMouseDown;
   FImageBox.OnMouseMove := @ClientImageMouseMove;
-  FImageBox.Overlay.Canvas.Pen.Color := clRed;
+  FImageBox.Canvas.Pen.Color := clRed;
 
   FImageZoom := TSimbaImageBoxZoom.Create(Self);
   FImageZoom.Parent := PanelTop;
   FImageZoom.SetZoom(4, 5);
-  FImageZoom.BorderSpacing.Around := 10;
+  FImageZoom.BorderSpacing.Around := 5;
 
   FZoomInfo := TLabel.Create(Self);
   FZoomInfo.Parent := PanelTop;
@@ -407,14 +397,9 @@ begin
   FZoomInfo.AnchorToNeighbour(akLeft, 10, FImageZoom);
 
   FManageClient := ManageClient;
-
   FClient := Client;
-  FClientImage := TMufasaBitmap.Create();
-  FClient.IOManager.GetDimensions(W, H);
-  FClientImage.CopyClientToBitmap(FClient.IOManager, True, 0, 0, W-1, H-1);
 
-  FImageBox.Background.LoadFromMufasaBitmap(FClientImage);
-  FImageBox.BackgroundChanged();
+  FImageBox.SetBackground(FClient.IOManager);
 end;
 
 constructor TSimbaACAForm.Create(Window: TWindowHandle);
@@ -429,8 +414,6 @@ end;
 
 destructor TSimbaACAForm.Destroy;
 begin
-  if (FClientImage <> nil) then
-    FreeAndNil(FClientImage);
   if (FClient <> nil) and FManageClient then
     FreeAndNil(FClient);
 

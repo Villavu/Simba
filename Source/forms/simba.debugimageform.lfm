@@ -11,5 +11,5 @@ object SimbaDebugImageForm: TSimbaDebugImageForm
   Font.Quality = fqDraft
   KeyPreview = True
   Position = poMainFormCenter
-  LCLVersion = '2.2.0.1'
+  LCLVersion = '2.2.0.4'
 end
