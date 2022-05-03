@@ -13,23 +13,23 @@ addClassVar('TSimbaImageBox', 'OnMouseLeave', 'TNotifyEvent', @_LapeSimbaImageBo
 addClassVar('TSimbaImageBox', 'OnMouseEnter', 'TNotifyEvent', @_LapeSimbaImageBox_OnMouseEnter_Read, @_LapeSimbaImageBox_OnMouseEnter_Write);
 addClassVar('TSimbaImageBox', 'OnDblClick', 'TNotifyEvent', @_LapeSimbaImageBox_OnDblClick_Read, @_LapeSimbaImageBox_OnDblClick_Write);
 //addClassVar('TSimbaImageBox', 'Cursor', 'TCursor', @_LapeSimbaImageBox_Cursor_Read, @_LapeSimbaImageBox_Cursor_Write);
-addGlobalFunc('procedure TSimbaImageBox.MoveTo(X, Y: Int32); constref', @_LapeSimbaImageBox_MoveTo);
-addGlobalFunc('function TSimbaImageBox.IsVisible(X, Y: Int32): Boolean; overload; constref', @_LapeSimbaImageBox_IsVisible);
+addGlobalFunc('procedure TSimbaImageBox.MoveTo(X, Y: Int32);', @_LapeSimbaImageBox_MoveTo);
+addGlobalFunc('function TSimbaImageBox.IsVisible(X, Y: Int32): Boolean; overload;', @_LapeSimbaImageBox_IsVisible);
 
-addGlobalFunc('procedure TSimbaImageBox.DebugColor(CTS: Integer; Col, Tol: Integer; HueMod: Extended = 0.2; SatMod: Extended = 0.2); constref', @_LapeSimbaImageBox_DebugColor);
-addGlobalFunc('procedure TSimbaImageBox.DebugDTM(DTM: TMDTM); constref', @_LapeSimbaImageBox_DebugDTM);
-addGlobalFunc('procedure TSimbaImageBox.DebugTPA(TPA: TPointArray); constref', @_LapeSimbaImageBox_DebugTPA);
-addGlobalFunc('procedure TSimbaImageBox.Clear; overload; constref', @_LapeSimbaImageBox_Clear);
-addGlobalFunc('procedure TSimbaImageBox.Paint; overload; constref', @_LapeSimbaImageBox_Paint);
+addGlobalFunc('procedure TSimbaImageBox.DebugColor(CTS: Integer; Col, Tol: Integer; HueMod: Extended = 0.2; SatMod: Extended = 0.2);', @_LapeSimbaImageBox_DebugColor);
+addGlobalFunc('procedure TSimbaImageBox.DebugDTM(DTM: TMDTM);', @_LapeSimbaImageBox_DebugDTM);
+addGlobalFunc('procedure TSimbaImageBox.DebugTPA(TPA: TPointArray);', @_LapeSimbaImageBox_DebugTPA);
+addGlobalFunc('procedure TSimbaImageBox.Clear; overload;', @_LapeSimbaImageBox_Clear);
+addGlobalFunc('procedure TSimbaImageBox.Paint; overload;', @_LapeSimbaImageBox_Paint);
 
-addGlobalFunc('procedure TSimbaImageBox.SetBackground(Data: PRGB32; AWidth, AHeight: Integer); overload; constref', @_LapeSimbaImageBox_SetBackground_Data);
-addGlobalFunc('procedure TSimbaImageBox.SetBackground(FileName: String); overload; constref', @_LapeSimbaImageBox_SetBackground_FileName);
-addGlobalFunc('procedure TSimbaImageBox.SetBackground(Bitmap: TMufasaBitmap); overload;constref', @_LapeSimbaImageBox_SetBackground_Bitmap);
-addGlobalFunc('procedure TSimbaImageBox.SetBackground(IOManager: TIOManager; X1, Y1, X2, Y2: Integer); overload; constref', @_LapeSimbaImageBox_SetBackground_IOManagerArea);
-addGlobalFunc('procedure TSimbaImageBox.SetBackground(IOManager: TIOManager); overload; constref', @_LapeSimbaImageBox_SetBackground_IOManager);
+addGlobalFunc('procedure TSimbaImageBox.SetBackground(Data: PRGB32; AWidth, AHeight: Integer); overload;', @_LapeSimbaImageBox_SetBackground_Data);
+addGlobalFunc('procedure TSimbaImageBox.SetBackground(FileName: String); overload;', @_LapeSimbaImageBox_SetBackground_FileName);
+addGlobalFunc('procedure TSimbaImageBox.SetBackground(Bitmap: TMufasaBitmap); overload;', @_LapeSimbaImageBox_SetBackground_Bitmap);
+addGlobalFunc('procedure TSimbaImageBox.SetBackground(IOManager: TIOManager; X1, Y1, X2, Y2: Integer); overload;', @_LapeSimbaImageBox_SetBackground_IOManagerArea);
+addGlobalFunc('procedure TSimbaImageBox.SetBackground(IOManager: TIOManager); overload;', @_LapeSimbaImageBox_SetBackground_IOManager);
 
 addGlobalFunc('procedure TSimbaImageBox.Init(Owner: TComponent); override', @_LapeSimbaImageBox_Init);
 addGlobalFunc('procedure TSimbaImageBox.InitNoOverlay(Owner: TComponent); overload; override', @_LapeSimbaImageBox_InitNoOverlay);
-//addGlobalFunc('procedure TSimbaImageBox.Free; constref', @_LapeSimbaImageBox_Free);
+//addGlobalFunc('procedure TSimbaImageBox.Free;', @_LapeSimbaImageBox_Free);
 
 popSection();
