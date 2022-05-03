@@ -68,7 +68,7 @@ type
     procedure OpenDirectory(Path: String); virtual; abstract;
 
     // Not abstract
-     procedure ClearInterpolation(Canvas: TCanvas); virtual;
+    procedure ClearInterpolation(Canvas: TCanvas); virtual;
 
     procedure PlaySound(Path: String); virtual;
     procedure StopSound; virtual;

@@ -42,12 +42,9 @@ begin
   InputStream := TGZFileStream.Create(Stream, False);
   OutputStream := TFileStream.Create(FileName, fmCreate or fmOpenWrite or fmShareDenyWrite);
 
-  Count := InputStream.Read(Buffer[1], Length(Buffer));
   repeat
     Count := InputStream.Read(Buffer[1], Length(Buffer));
-    if (Count > 0) then
-      OutputStream.Write(Buffer[1], Count);
-  until (Count <= 0);
+  until OutputStream.Write(Buffer[1], Count) = 0;
 
   InputStream.Free();
   OutputStream.Free();

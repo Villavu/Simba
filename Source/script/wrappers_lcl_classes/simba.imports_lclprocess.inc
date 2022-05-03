@@ -8,28 +8,28 @@ addGlobalType('set of TProcessOption', 'TProcessOptions');
 addGlobalType('set of TStartupOption', 'TStartupOptions');
 
 addClass('TOutputPipeStream', 'THandleStream');
-// addGlobalFunc('function TOutputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64; constref', @_LapeOutputPipeStream_Seek);
-// addGlobalFunc('function TOutputPipeStream.Read(Var Buffer; Count : Integer): Integer; constref', @_LapeOutputPipeStream_Read);
+// addGlobalFunc('function TOutputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64;', @_LapeOutputPipeStream_Seek);
+// addGlobalFunc('function TOutputPipeStream.Read(Var Buffer; Count : Integer): Integer;', @_LapeOutputPipeStream_Read);
 addGlobalFunc('procedure TOutputPipeStream.Init(AHandle: THandle); override', @_LapeOutputPipeStream_Init);
-// addGlobalFunc('procedure TOutputPipeStream.Free; constref', @_LapeOutputPipeStream_Free);
+// addGlobalFunc('procedure TOutputPipeStream.Free;', @_LapeOutputPipeStream_Free);
 
 addClass('TInputPipeStream', 'THandleStream');
-//addGlobalFunc('function TInputPipeStream.Write(constref Buffer; Count : Integer): Integer; constref', @_LapeInputPipeStream_Write);
-//addGlobalFunc('function TInputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64; constref', @_LapeInputPipeStream_Seek);
-//addGlobalFunc('function TInputPipeStream.Read(var Buffer; Count : Integer): Integer; constref', @_LapeInputPipeStream_Read);
+//addGlobalFunc('function TInputPipeStream.Write(constref Buffer; Count : Integer): Integer;', @_LapeInputPipeStream_Write);
+//addGlobalFunc('function TInputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64;', @_LapeInputPipeStream_Seek);
+//addGlobalFunc('function TInputPipeStream.Read(var Buffer; Count : Integer): Integer;', @_LapeInputPipeStream_Read);
 addClassVar('TInputPipeStream', 'NumBytesAvailable', 'UInt32', @_LapeInputPipeStream_NumBytesAvailable_Read, nil);
 addGlobalFunc('procedure TInputPipeStream.Init(AHandle: THandle); override', @_LapeInputPipeStream_Init);
-//addGlobalFunc('procedure TInputPipeStream.Free; constref', @_LapeInputPipeStream_Free);
+//addGlobalFunc('procedure TInputPipeStream.Free;', @_LapeInputPipeStream_Free);
 
 addClass('TProcess', 'TComponent');
-addGlobalFunc('procedure TProcess.Execute; constref', @_LapeProcess_Execute);
-addGlobalFunc('procedure TProcess.CloseInput; constref', @_LapeProcess_CloseInput);
-addGlobalFunc('procedure TProcess.CloseOutput; constref', @_LapeProcess_CloseOutput);
-addGlobalFunc('procedure TProcess.CloseStderr; constref', @_LapeProcess_CloseStderr);
-addGlobalFunc('function TProcess.Resume: Integer; constref', @_LapeProcess_Resume);
-addGlobalFunc('function TProcess.Suspend: Integer; constref', @_LapeProcess_Suspend);
-addGlobalFunc('function TProcess.Terminate(AExitCode : Integer): Boolean; constref', @_LapeProcess_Terminate);
-addGlobalFunc('function TProcess.WaitOnExit: Boolean; constref', @_LapeProcess_WaitOnExit);
+addGlobalFunc('procedure TProcess.Execute;', @_LapeProcess_Execute);
+addGlobalFunc('procedure TProcess.CloseInput;', @_LapeProcess_CloseInput);
+addGlobalFunc('procedure TProcess.CloseOutput;', @_LapeProcess_CloseOutput);
+addGlobalFunc('procedure TProcess.CloseStderr;', @_LapeProcess_CloseStderr);
+addGlobalFunc('function TProcess.Resume: Integer;', @_LapeProcess_Resume);
+addGlobalFunc('function TProcess.Suspend: Integer;', @_LapeProcess_Suspend);
+addGlobalFunc('function TProcess.Terminate(AExitCode : Integer): Boolean;', @_LapeProcess_Terminate);
+addGlobalFunc('function TProcess.WaitOnExit: Boolean;', @_LapeProcess_WaitOnExit);
 addClassVar('TProcess', 'WindowRect', 'TRect', @_LapeProcess_WindowRect_Read, @_LapeProcess_WindowRect_Write);
 addClassVar('TProcess', 'Handle', 'THandle', @_LapeProcess_Handle_Read, nil);
 addClassVar('TProcess', 'ProcessHandle', 'THandle', @_LapeProcess_ProcessHandle_Read, nil);
@@ -65,6 +65,6 @@ addClassVar('TProcess', 'WindowWidth', 'UInt32', @_LapeProcess_WindowWidth_Read,
 addClassVar('TProcess', 'FillAttribute', 'UInt32', @_LapeProcess_FillAttribute_Read, @_LapeProcess_FillAttribute_Write);
 addClassVar('TProcess', 'XTermProgram', 'String', @_LapeProcess_XTermProgram_Read, @_LapeProcess_XTermProgram_Write);
 addGlobalFunc('procedure TProcess.Init(AOwner : TComponent); override', @_LapeProcess_Init);
-//addGlobalFunc('procedure TProcess.Free; constref', @_LapeProcess_Free);
+//addGlobalFunc('procedure TProcess.Free;', @_LapeProcess_Free);
 
 popSection();

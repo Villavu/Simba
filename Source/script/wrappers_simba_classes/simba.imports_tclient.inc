@@ -9,6 +9,6 @@ addClassVar('TClient', 'MDTMs', 'TMDTMS', @_LapeClient_MDTMs_Read, @_LapeClient_
 addClassVar('TClient', 'MOCR', 'TMOCR', @_LapeClient_MOCR_Read, @_LapeClient_MOCR_Write);
 addGlobalVar('TClient', nil, 'Client');
 addGlobalFunc('procedure TClient.Init(const plugin_dir: string = ''''; const UseIOManager: TIOManager = nil)', @_LapeClient_Init);
-//addGlobalFunc('procedure TClient.Free; constref', @_LapeClient_Free);
+//addGlobalFunc('procedure TClient.Free;', @_LapeClient_Free);
 
 popSection();
