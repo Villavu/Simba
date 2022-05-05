@@ -295,6 +295,7 @@ type
     procedure DispIDSpecifier; virtual; // DR 2001-07-26
     procedure EmptyStatement; virtual;
     procedure EnumeratedType; virtual;
+    procedure EnumeratedScopedType; virtual;
     procedure EnumeratedTypeItem; virtual; // DR 2001-10-29
     procedure ExceptBlock; virtual;
     procedure ExceptionBlockElseBranch; virtual;
@@ -2508,7 +2509,7 @@ begin
   Lexer.AsmCode := True;
   Expected(tokAsm);
   { should be replaced with a Assembler lexer }
-  while TokenID <> tokEnd do
+  while (not (TokenID in [tokEnd, tok_Done])) do
     case fLexer.TokenID of
       tokBegin, tokCase, tokEnd, tokIf, tokFunction, tokProcedure, tokRepeat, tokwhile: break;
       tokAddressOp:
@@ -3418,6 +3419,20 @@ begin
   Expected(tokRoundClose);
 end;
 
+procedure TmwSimplePasPar.EnumeratedScopedType;
+begin
+  NextToken();
+
+  Expected(tokRoundOpen);
+  EnumeratedTypeItem;
+  while TokenID = tokComma do
+  begin
+    NextToken;
+    EnumeratedTypeItem;
+  end;
+  Expected(tokRoundClose);
+end;
+
 procedure TmwSimplePasPar.SubrangeType;
 begin
   ConstantExpression;
@@ -3761,7 +3776,7 @@ begin
         while Lexer.AheadTokenID <> tokSemiColon do
         begin
           case Lexer.AheadTokenID of
-            tokBegin, tokClass, tokConst, tokEnd, tokDotDot, tokIn, tokNull, tokThreadVar, tokType,
+            tokBegin, tokClass, tokConst, tokEnd, tokDotDot, tokIn, tokNull, tok_Done, tokThreadVar, tokType,
               tokVar: break;
           else
             Lexer.AheadNext;
@@ -4439,6 +4454,10 @@ begin
           end;
         end;
       end;
+    tokEnum:
+      begin
+        EnumeratedScopedType;
+      end;
     tokRoundOpen:
       begin
         EnumeratedType;
@@ -4634,7 +4653,7 @@ begin
     NextToken;
 
   case TokenID of
-    tokAsciiChar, tokFloat, tokIntegerConst, tokMinus, tokNil, tokPlus, tokSquareOpen, tokStringConst, tokRoundOpen:
+    tokAsciiChar, tokFloat, tokIntegerConst, tokMinus, tokNil, tokPlus, tokSquareOpen, tokStringConst, tokRoundOpen, tokEnum:
       begin
         SimpleType;
       end;
@@ -4688,14 +4707,14 @@ begin
         Lexer.InitAhead;
         while Lexer.AheadTokenID <> tokSemiColon do
           case Lexer.AheadTokenID of
-            tokAnd, tokBegin, tokCase, tokColon, tokEnd, tokElse, tokIf, tokMinus, tokNull,
+            tokAnd, tokBegin, tokCase, tokColon, tokEnd, tokElse, tokIf, tokMinus, tokNull, tok_Done,
               tokOr, tokPlus, tokShl, tokShr, tokSlash, tokStar, tokStarStar, tokWhile, tokWith,
               tokXor: break;
             tokRoundOpen:
               begin
                 repeat
                   case Lexer.AheadTokenID of
-                    tokBegin, tokCase, tokEnd, tokElse, tokIf, tokNull, tokWhile, tokWith: break;
+                    tokBegin, tokCase, tokEnd, tokElse, tokIf, tokNull, tok_Done, tokWhile, tokWith: break;
                   else
                     begin
                       case Lexer.AheadTokenID of
@@ -4716,7 +4735,7 @@ begin
           end;
         case Lexer.AheadTokenID of
           tokColon: RecordConstant;
-          tokNull: ;
+          tokNull, tok_Done: ;
           tokAnd, tokMinus, tokOr, tokPlus, tokShl, tokShr, tokSlash, tokStar, tokStarStar, tokXor:
             begin
               ConstantExpression;
@@ -5566,7 +5585,7 @@ end;*)
 
 procedure TmwSimplePasPar.IncludeFile;
 begin
-  while TokenID <> tokNull do
+  while (not (TokenID in [tokNull, tok_DONE])) do
     case TokenID of
       tokClass:
         begin

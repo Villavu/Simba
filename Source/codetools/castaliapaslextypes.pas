@@ -111,6 +111,7 @@ type
     tokElseDirect,
     tokEnd,
     tokEndIfDirect,
+    tokEnum,
     tokEqual,
     tokError,
     tokExcept,

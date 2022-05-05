@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, typinfo,
-  ffi, lpffi, lputils, lpcompiler, lptypes, lpvartypes, lpparser, lptree, lpffiwrappers;
+  ffi, lpffi, lpcompiler, lptypes, lpvartypes, lpparser, lptree, lpffiwrappers;
 
 type
   TSimbaScript_Compiler = class(TLapeCompiler)
@@ -134,7 +134,7 @@ begin
   StartImporting();
 
   try
-    Options := Options + LapePascalScriptCompilerOptions;
+    Options := Options + [lcoLooseSemicolon, lcoAutoInvoke, lcoExplictSelf, lcoAutoObjectify];
 
     addGlobalType(getBaseType(DetermineIntType(SizeOf(Byte), False)).createCopy(), 'Byte');
     addGlobalType(getBaseType(DetermineIntType(SizeOf(Integer), True)).createCopy(), 'Integer');

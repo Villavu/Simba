@@ -394,6 +394,7 @@ type
     procedure OrdinalType; override;                                            //Set + Array Range
 
     procedure EnumeratedType; override;                                         //Enum
+    procedure EnumeratedScopedType; override;                                   //Enum
     procedure QualifiedIdentifier; override;                                    //Enum
   public
     property Items: TDeclarationList read FItems;
@@ -1965,6 +1966,16 @@ begin
   Declaration := PushStack(TciEnumType);
   if Lexer.Defines.IndexOf('!SCOPEDENUMS') > -1 then
     TciEnumType(Declaration).Scoped := True;
+  inherited;
+  PopStack;
+end;
+
+procedure TCodeParser.EnumeratedScopedType;
+var
+  Declaration: TDeclaration;
+begin
+  Declaration := PushStack(TciEnumType);
+  TciEnumType(Declaration).Scoped := True;
   inherited;
   PopStack;
 end;

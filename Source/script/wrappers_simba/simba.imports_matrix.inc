@@ -20,11 +20,11 @@ addGlobalFunc('procedure TSingleMatrix.Fill(Area: TBox; Value: Single); overload
 addGlobalFunc('procedure TSingleMatrix.Fill(Value: Single); overload', @_LapeSingleMatrix_Fill);
 addGlobalFunc('function TSingleMatrix.Flatten: TSingleArray; overload', @_LapeSingleMatrix_Flatten);
 addGlobalFunc('function TSingleMatrix.ToIntegerMatrix: TIntegerMatrix;', @_LapeSingleMatrix_ToIntegerMatrix);
-addGlobalFunc('function TSingleMatrix.Mean: Single;', @_LapeSingleMatrix_Mean);
+addGlobalFunc('function TSingleMatrix.Mean: Single; overload;', @_LapeSingleMatrix_Mean);
 addGlobalFunc('procedure TSingleMatrix.MeanStdev(out Mean, Stdev: Double);', @_LapeSingleMatrix_MeanStdev);
 addGlobalFunc('procedure TSingleMatrix.MinMax(out MinValue, MaxValue: Single);', @_LapeSingleMatrix_MinMax);
-addGlobalFunc('function TSingleMatrix.Min: Single;', @_LapeSingleMatrix_Min);
-addGlobalFunc('function TSingleMatrix.Max: Single;', @_LapeSingleMatrix_Max);
+addGlobalFunc('function TSingleMatrix.Min: Single; overload;', @_LapeSingleMatrix_Min);
+addGlobalFunc('function TSingleMatrix.Max: Single; overload;', @_LapeSingleMatrix_Max);
 addGlobalFunc('function TSingleMatrix.ArgMax: TPoint;', @_LapeSingleMatrix_ArgMax);
 addGlobalFunc('function TSingleMatrix.ArgMin: TPoint;', @_LapeSingleMatrix_ArgMin);
 addGlobalFunc('function TSingleMatrix.NormMinMax(Alpha, Beta: Single): TSingleMatrix;', @_LapeSingleMatrix_NormMinMax);
