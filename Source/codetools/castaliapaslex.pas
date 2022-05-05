@@ -153,6 +153,7 @@ type
     function Func47: TptTokenKind;
     function Func49: TptTokenKind;
     function Func52: TptTokenKind;
+    function Func53: TptTokenKind;
     function Func54: TptTokenKind;
 	function Func55: TptTokenKind;
     function Func56: TptTokenKind;
@@ -591,6 +592,7 @@ begin
       47: fIdentFuncTable[I] := Func47;
       49: fIdentFuncTable[I] := Func49;
       52: fIdentFuncTable[I] := Func52;
+      53: fIdentFuncTable[I] := Func53;
       54: fIdentFuncTable[I] := Func54;
       55: fIdentFuncTable[I] := Func55;
       56: fIdentFuncTable[I] := Func56;
@@ -662,15 +664,20 @@ begin
 end;
 
 function TmwBasePasLex.KeyHash: Integer;
+//var
+//  s: String = '';
 begin
   Result := 0;
   while IsIdentifiers(fOrigin[Run]) do
   begin
+    //s += fOrigin[Run];
     Inc(Result, HashValue(fOrigin[Run]));
     //inc(Result, mHashTable[fOrigin[Run]]);
     inc(Run);
   end;
-end; { KeyHash }
+
+  //WRiteLN('KeyHash for ', S, ' = ', Result);
+end;
 
 function TmwBasePasLex.KeyComp(const aKey: string): Boolean;
 var
@@ -891,6 +898,12 @@ begin
   if KeyComp('Byte') then fExID := tokByte else
     if KeyComp('Raise') then Result := tokRaise else
       if KeyComp('Pascal') then fExID := tokPascal;
+end;
+
+function TmwBasePasLex.Func53: TptTokenKind;
+begin
+  Result := tokIdentifier;
+  if KeyComp('Enum') then Result := tokEnum;
 end;
 
 function TmwBasePasLex.Func54: TptTokenKind;
