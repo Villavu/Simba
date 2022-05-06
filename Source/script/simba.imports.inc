@@ -35,7 +35,8 @@
 {$i simba.imports_variant.inc}
 {$i simba.imports_oswindow.inc}
 {$i simba.imports_target.inc}
-{$i simba.imports_input.inc}
+{$i simba.imports_keyboard.inc}
+{$i simba.imports_mouse.inc}
 {$i simba.imports_matchtemplate.inc}
 {$i simba.imports_finder.inc}
 {$i simba.imports_web.inc}
@@ -52,3 +53,4 @@
 {$i simba.imports_crypto.inc}
 {$i simba.imports_dialog.inc}
 {$i simba.imports_process.inc}
+{$i simba.imports_debugimage.inc}

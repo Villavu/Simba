@@ -34,7 +34,8 @@
 {$i simba.wrappers_variant.inc}
 {$i simba.wrappers_oswindow.inc}
 {$i simba.wrappers_target.inc}
-{$i simba.wrappers_input.inc}
+{$i simba.wrappers_keyboard.inc}
+{$i simba.wrappers_mouse.inc}
 {$i simba.wrappers_matchtemplate.inc}
 {$i simba.wrappers_finder.inc}
 {$i simba.wrappers_web.inc}
@@ -51,3 +52,4 @@
 {$i simba.wrappers_crypto.inc}
 {$i simba.wrappers_dialog.inc}
 {$i simba.wrappers_process.inc}
+{$i simba.wrappers_debugimage.inc}
