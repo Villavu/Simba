@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addClass('TMDTM');
 addGlobalType('record x, y, c, t, asz: integer; bp: boolean; end', 'TMDTMPoint');
 addGlobalType('^TMDTMPoint', 'PMDTMPoint');
@@ -18,4 +20,6 @@ addClassVar('TMDTM', 'Count', 'integer', @_LapeMDTM_Count_Read, @_LapeMDTM_Count
 addClassVar('TMDTM', 'Points', 'TMDTMPointArray', @_LapeMDTM_Points_Read);
 addGlobalFunc('procedure TMDTM.Init()', @_LapeMDTM_Init);
 //addGlobalFunc('procedure TMDTM.Free;', @_LapeMDTM_Free);
+
+popSection();
 

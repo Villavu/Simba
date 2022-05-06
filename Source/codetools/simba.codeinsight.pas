@@ -17,7 +17,7 @@ uses
 
 type
   TCodeInsight = class(TCodeParser)
-  class var
+  protected class var
     FIncludeCache: TCodeInsight_IncludeCache;
     FFunctionListSections: TCodeInsight_IncludeArray;
     FBaseIncludes: TCodeInsight_IncludeArray;
