@@ -12,7 +12,7 @@ interface
 
 uses
   simba.colormath, classes, sysutils, simba.bitmap, simba.dtm, simba.mufasatypes, simba.matchtemplate,
-  simba.colorfinders; // types
+  simba.finder_color; // types
 
 type
   TCTSNoInfo = record    //No tolerance

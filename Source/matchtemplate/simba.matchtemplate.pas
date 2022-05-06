@@ -30,7 +30,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.mufasatypes;
+  simba.mufasatypes, simba.baseclass;
 
 type
   PTMFormula = ^ETMFormula;
@@ -44,7 +44,7 @@ type
   );
 
   PMatchTemplateCache = ^TMatchTemplateCache;
-  TMatchTemplateCache = class
+  TMatchTemplateCache = class(TSimbaBaseClass)
   public
     constructor Create(const Image, Templ: TIntegerMatrix); virtual; abstract;
   end;

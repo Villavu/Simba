@@ -32,7 +32,7 @@ type
 implementation
 
 uses
-  simba.colorfinders, simba.bitmapfinder;
+  simba.finder_color, simba.finder_bitmap;
 
 function TMufasaBitmapHelpers.MatchTemplate(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
 begin

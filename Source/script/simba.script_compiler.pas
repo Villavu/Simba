@@ -29,6 +29,9 @@ type
 
     procedure InitBaseVariant; override;
   public
+    function getIntegerArray: TLapeType; virtual;
+    function getFloatArray: TLapeType; virtual;
+
     procedure pushTokenizer(ATokenizer: TLapeTokenizerBase); reintroduce;
     procedure pushConditional(AEval: Boolean; ADocPos: TDocPos); reintroduce;
 
@@ -51,7 +54,7 @@ uses
   dialogs, extctrls, graphtype, controls, comctrls, graphics, lpeval,
   stdctrls, buttons, customtimer, checklst, lclclasses, spin, pipes,
   lclintf, math, regexpr, strutils, lazfileutils, fileutil, clipbrd,
-  blowfish, md5, sha1, hmac, forms, process, lazloggerbase,
+  blowfish, md5, sha1, hmac, forms, process, lazloggerbase, variants,
 
   simba.mufasatypes, simba.script, simba.scriptthread, simba.outputform,
   simba.files, simba.process, simba.bitmap, simba.bitmap_helpers,
@@ -62,7 +65,7 @@ uses
   simba.imagebox, simba.client,simba.jsonparser, simba.xmlparser,
   simba.finder, simba.target, simba.fontloader, simba.ocr,
   simba.ocrutil, simba.helpers_matrix, simba.nativeinterface,
-  simba.generics_array, simba.target_window, simba.mmltimer,
+  simba.generics_array, simba.target_window,
 
   simba.script_compiler_onterminate,
   simba.script_compiler_waituntil;
@@ -182,46 +185,18 @@ begin
 end;
 
 procedure TSimbaScript_Compiler.InitBaseVariant;
-
-  procedure addVariantType(Value: TVarType; Name: String);
-  var
-    v: TLapeGlobalVar;
-  begin
-    v := addGlobalVar(getGlobalType('TVarType').NewGlobalVarP(nil, Name));
-    v.isConstant := True;
-
-    TVarType(v.Ptr^) := Value;
-  end;
-
 begin
-  addGlobalType(getBaseType(DetermineIntType(SizeOf(TVarType), False)).createCopy(), 'TVarType');
+  { nothing }
+end;
 
-  addVariantType(VarEmpty, 'VarEmpty');
-  addVariantType(VarNull, 'VarNull');
-  addVariantType(VarSmallInt, 'VarInt16');
-  addVariantType(VarInteger, 'VarInt32');
-  addVariantType(VarSingle, 'VarSingle');
-  addVariantType(VarDouble, 'VarDouble');
-  addVariantType(VarDate, 'VarDate');
-  addVariantType(VarCurrency, 'VarCurrency');
-  addVariantType(VarBoolean, 'VarBoolean');
-  addVariantType(VarVariant, 'VarVariant');
-  addVariantType(VarUnknown, 'VarUnknown');
-  addVariantType(VarShortInt, 'VarInt8');
-  addVariantType(VarByte, 'VarUInt8');
-  addVariantType(VarWord, 'VarUInt16');
-  addVariantType(VarLongWord, 'VarUInt32');
-  addVariantType(VarInt64, 'VarInt64');
-  addVariantType(VarString, 'VarString');
-  addVariantType(VarUString, 'VarUnicodeString');
-  addVariantType(VarUInt64, 'VarUInt64');
+function TSimbaScript_Compiler.getIntegerArray: TLapeType;
+begin
+  Result := getGlobalType('TIntegerArray');
+end;
 
-  addGlobalFunc('function VarType(const V: Variant): TVarType;', @_LapeVarType);
-
-  addGlobalFunc('function VarIsOrdinal(const V: Variant): EvalBool;', @_LapeVarIsOrdinal);
-  addGlobalFunc('function VarIsFloat(const V: Variant): EvalBool;', @_LapeVarIsFloat);
-  addGlobalFunc('function VarIsNumeric(const V: Variant): EvalBool;', @_LapeVarIsNumeric);
-  addGlobalFunc('function VarIsStr(const V: Variant): EvalBool;', @_LapeVarIsStr);
+function TSimbaScript_Compiler.getFloatArray: TLapeType;
+begin
+  Result := getGlobalType('TExtendedArray');
 end;
 
 procedure TSimbaScript_Compiler.pushTokenizer(ATokenizer: TLapeTokenizerBase);

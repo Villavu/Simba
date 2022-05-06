@@ -22,7 +22,6 @@
 {$i simba.wrappers_tmfinder.inc}
 {$i simba.wrappers_tmfont.inc}
 {$i simba.wrappers_tmfonts.inc}
-{$i simba.wrappers_tmmltimer.inc}
 {$i simba.wrappers_tmocr.inc}
 {$i simba.wrappers_tmufasabitmap.inc}
 {$i simba.wrappers_ttarget.inc}
@@ -32,6 +31,7 @@
 {$i simba.wrappers_system.inc}
 {$i simba.wrappers_internal.inc}
 {$i simba.wrappers_matrix.inc}
+{$i simba.wrappers_variant.inc}
 {$i simba.wrappers_oswindow.inc}
 {$i simba.wrappers_target.inc}
 {$i simba.wrappers_input.inc}

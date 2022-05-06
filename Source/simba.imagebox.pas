@@ -115,8 +115,8 @@ implementation
 
 uses
   math,
-  simba.nativeinterface, simba.bitmap_misc, simba.colorfinders,
-  simba.overallocatearray, simba.tpa, simba.finder_dtm;
+  simba.nativeinterface, simba.bitmap_misc, simba.overallocatearray, simba.tpa,
+  simba.finder_dtm, simba.finder_color;
 
 procedure TSimbaImageBox_ScrollBox.GetPreferredSize(var PreferredWidth, PreferredHeight: integer; Raw: boolean; WithThemeSpace: boolean);
 begin

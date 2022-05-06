@@ -28,11 +28,11 @@
 {$i simba.imports_ttarget.inc}
 {$i simba.imports_tiomanager.inc}
 {$i simba.imports_tclient.inc}
-{$i simba.imports_tmmltimer.inc}
 {$i simba.imports_xml.inc}
 {$i simba.imports_json.inc}
 {$i simba.imports_simbaimagebox.inc}
 
+{$i simba.imports_variant.inc}
 {$i simba.imports_oswindow.inc}
 {$i simba.imports_target.inc}
 {$i simba.imports_input.inc}
