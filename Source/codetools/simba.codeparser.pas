@@ -164,6 +164,7 @@ type
   public
     function GetDimensionCount: Int32;
     function GetType: TciTypeKind;
+    function IsStatic: Boolean;
   end;
 
   TciTypeKind = class(TDeclaration)
@@ -572,6 +573,11 @@ begin
   Index := GetDimensionCount() - 1;
   if (Index >= 0) and (Index <= High(Declarations)) then
     Result := Declarations[Index] as TciTypeKind;
+end;
+
+function TciArrayType.IsStatic: Boolean;
+begin
+  Result := FItems.GetFirstItemOfClass(TciOrdinalType) <> nil;
 end;
 
 function TciVarDeclaration.GetValue: TDeclaration;
