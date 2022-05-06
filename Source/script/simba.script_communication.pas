@@ -34,7 +34,7 @@ type
     procedure DebugImage_SetMaxSize(Width, Height: Integer);
     procedure DebugImage_MoveTo(X, Y: Integer);
     procedure DebugImage_Draw(Bitmap: TMufasaBitmap);
-    procedure DebugImage_Show(Bitmap: TMufasaBitmap);
+    procedure DebugImage_Show(Bitmap: TMufasaBitmap; EnsureVisible: Boolean);
     procedure DebugImage_Hide;
     procedure DebugImage_Display(Width, Height: Integer);
     procedure DebugImage_Clear;
@@ -216,11 +216,13 @@ begin
   end;
 end;
 
-procedure TSimbaScriptCommunication.DebugImage_Show(Bitmap: TMufasaBitmap);
+procedure TSimbaScriptCommunication.DebugImage_Show(Bitmap: TMufasaBitmap; EnsureVisible: Boolean);
 begin
   BeginInvoke(ESimbaCommunicationMessage.DEBUGIMAGE_SHOW);
 
   try
+    FParams.Write(EnsureVisible, SizeOf(Boolean));
+
     FParams.Write(Bitmap.Width, SizeOf(Integer));
     FParams.Write(Bitmap.Height, SizeOf(Integer));
     FParams.Write(Bitmap.Data^, Bitmap.Width * Bitmap.Height * SizeOf(TRGB32));
