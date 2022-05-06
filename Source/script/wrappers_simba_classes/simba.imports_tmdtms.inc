@@ -1,3 +1,5 @@
+pushSection('Classes');
+
 addClass('TMDTMS');
 addGlobalType('record x, y, Color, Tolerance, AreaSize, AreaShape: UInt32; end', 'TSDTMPointDef');
 addGlobalType('array of TSDTMPointDef', 'TSDTMPointDefArray');
@@ -10,4 +12,6 @@ addGlobalFunc('procedure TMDTMS.FreeDTM(DTM: Integer);', @_LapeMDTMS_FreeDTM);
 addGlobalFunc('function TMDTMS.StringToDTM(const S: String): Integer;', @_LapeMDTMS_StringToDTM);
 addGlobalFunc('procedure TMDTMS.Init(Owner: TObject)', @_LapeMDTMS_Init);
 //addGlobalFunc('procedure TMDTMS.Free;', @_LapeMDTMS_Free);
+
+popSection();
 
