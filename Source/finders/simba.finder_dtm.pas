@@ -2,11 +2,10 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
-
-  Extends TMufasaBitmap with features from other Simba units.
 }
 unit simba.finder_dtm;
 
+{$DEFINE SIMBA_O4}
 {$i simba.inc}
 
 interface

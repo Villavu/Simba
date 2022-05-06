@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.bitmapfinder;
+unit simba.finder_bitmap;
 
 {$DEFINE SIMBA_O4}
 {$i simba.inc}
@@ -169,6 +169,7 @@ begin
       if Hit(Ptr) then
       begin
         Matrix.Fill(Box(LoopX, LoopY, LoopX + Bitmap.Width, LoopY + Bitmap.Height), 1);
+
         PointBuffer.Add(TPoint.Create(LoopX, LoopY));
       end;
 

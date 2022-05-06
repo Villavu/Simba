@@ -263,7 +263,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="33">
+    <Units Count="36">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -446,6 +446,18 @@
         <Filename Value="finders/simba.finder_dtm.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit32>
+      <Unit33>
+        <Filename Value="script/wrappers_simba/simba.wrappers_variant.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="script/wrappers_simba/simba.wrappers_variant.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="script/wrappers_simba/simba.imports_variant.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit35>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -484,13 +496,16 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="2">
+    <Exceptions Count="3">
       <Item1>
         <Name Value="ESyntaxError"/>
       </Item1>
       <Item2>
         <Name Value="ESocketError"/>
       </Item2>
+      <Item3>
+        <Name Value="Exception"/>
+      </Item3>
     </Exceptions>
   </Debugging>
 </CONFIG>

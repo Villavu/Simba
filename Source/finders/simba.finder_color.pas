@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.colorfinders;
+unit simba.finder_color;
 
 {$DEFINE SIMBA_O4}
 {$i simba.inc}
