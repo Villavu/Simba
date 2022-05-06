@@ -53,6 +53,7 @@ addGlobalFunc('procedure OffsetTPA(var TPA: TPointArray; const Offset: TPoint)',
 addGlobalFunc('procedure OffsetATPA(var ATPA: T2DPointArray; const Offset: TPoint)', @_LapeOffsetATPA);
 addGlobalFunc('function PartitionTPA(const TPA: TPointArray; BoxWidth, BoxHeight: Int32): T2DPointArray', @_LapePartitionTPA);
 addGlobalFunc('procedure ClearSameIntegers(var Arr: TIntegerArray)', @_LapeClearSameIntegers);
+addGlobalFunc('procedure ClearSamePoints(var Arr: TPointArray)', @_LapeClearSamePoints);
 addGlobalFunc('function TPAErode(const TPA: TPointArray; Amount: Int32): TPointArray', @_LapeTPAErode);
 addGlobalFunc('function TPAGrow(const TPA: TPointArray; Amount: Int32): TPointArray', @_LapeTPAGrow);
 addGlobalFunc('function PointsInRangeOf(const Points, Other: TPointArray; MinDist, MaxDist: Double): TPointArray; overload', @_LapePointsInRangeOf);
