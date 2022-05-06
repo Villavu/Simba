@@ -71,7 +71,7 @@ type
     destructor Destroy; override;
 
     procedure FillGlobals;
-    procedure FillMembers(TypeDeclaration: TDeclaration);
+    procedure FillMembers(TypeDeclaration: TDeclaration; IsStatic: Boolean);
 
     property ColumnWidth: Integer read GetColumnWidth;
     property Parser: TCodeInsight read FParser write SetParser;
@@ -358,7 +358,7 @@ begin
   FDeclarations.AddRange(FParser.Locals);
 end;
 
-procedure TSimbaAutoComplete.FillMembers(TypeDeclaration: TDeclaration);
+procedure TSimbaAutoComplete.FillMembers(TypeDeclaration: TDeclaration; IsStatic: Boolean);
 var
   Declaration: TDeclaration;
 begin
@@ -368,6 +368,14 @@ begin
   begin
     if (Declaration.ClassType = TciProcedureDeclaration) and (tokOverride in TciProcedureDeclaration(Declaration).Directives) then
       Continue;
+
+    if IsStatic then
+    begin
+      if (Declaration.Owner is TciRecordType) and (Declaration.ClassType = TciClassField) then
+        Continue;
+      if (Declaration.ClassType = TciProcedureDeclaration) and (not (tokStatic in TciProcedureDeclaration(Declaration).Directives)) then
+        Continue;
+    end;
 
     FDeclarations.Add(Declaration);
   end;
@@ -466,6 +474,9 @@ begin
       Column := COLUMN_CONST
     else
     if (Declaration is TciVarDeclaration) then
+      Column := COLUMN_VAR
+    else
+    if (Declaration is TciProcedureClassName) then
       Column := COLUMN_VAR;
   end;
 

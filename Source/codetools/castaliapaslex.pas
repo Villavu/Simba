@@ -115,7 +115,7 @@ type
 
   	fAsmCode : Boolean;		// DR 2002-01-14
 
-    FDefines: TStrings;
+    FDefines: TStringList;
     FDefineStack: Integer;
     FTopDefineRec: PDefineRec;
     FUseDefines: Boolean;
@@ -387,7 +387,7 @@ type
     property UseCodeToolsIDEDirective: Boolean read FUseCodeToolsIDEDirective write FUseCodeToolsIDEDirective;
     property UseDefines: Boolean read FUseDefines write FUseDefines;
 
-    property Defines: TStrings read FDefines;
+    property Defines: TStringList read FDefines;
   end;
 
   TmwPasLex = class(TmwBasePasLex)
@@ -1423,6 +1423,7 @@ begin
 
   FUseDefines := True;
   FDefines := TStringList.Create;
+  FDefines.Duplicates := dupIgnore;
   FTopDefineRec := nil;
   InitDefines;
 
@@ -1465,8 +1466,7 @@ end;
 
 procedure TmwBasePasLex.AddDefine(const ADefine: string);
 begin
-  if (FDefines.IndexOf(ADefine) < 0) then
-    FDefines.Add(ADefine);
+  FDefines.Add(ADefine);
 end;
 
 procedure TmwBasePasLex.AddressOpProc;
@@ -1655,7 +1655,13 @@ begin
             AddDefine('!SCOPEDENUMS')
           else
           if (Def = '$S-') or (Def = '$SCOPEDENUMS OFF') then
-            RemoveDefine('!SCOPEDENUMS');
+            RemoveDefine('!SCOPEDENUMS')
+          else
+          if (Def = '$EXPLICTSELF ON') then
+            AddDefine('!EXPLICTSELF')
+          else
+          if (Def = '$EXPLICTSELF OFF') then
+            RemoveDefine('!EXPLICTSELF');
         end;
 
         if Assigned(fOnCompDirect) and (FDefineStack = 0) then
@@ -2014,7 +2020,7 @@ var
   I: Integer;
 begin
   I := FDefines.IndexOf(ADefine);
-  if I > -1 then
+  if (I > -1) then
     FDefines.Delete(I);
 end;
 

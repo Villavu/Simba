@@ -88,6 +88,8 @@ class constructor TCodeInsight.Create;
 begin
   FIncludeCache := TCodeInsight_IncludeCache.Create();
   FBaseDefines := TStringList.Create();
+  FBaseDefines.Duplicates := dupIgnore;
+  FBaseDefines.Add('!EXPLICTSELF');
 end;
 
 class destructor TCodeInsight.Destroy;
@@ -612,11 +614,11 @@ procedure TCodeInsight.Run;
         Break;
 
       Declaration := Method.Items.GetFirstItemOfClass(TciProcedureClassName);
-
-      if Declaration <> nil then
+      if (Declaration <> nil) then
       begin
         Declarations := Declarations + [Declaration];
-        Declarations := Declarations + GetMembersOfType(Declaration);
+        if (Lexer.Defines.IndexOf('!EXPLICTSELF') = -1) then
+          Declarations := Declarations + GetMembersOfType(Declaration);
       end;
 
       Method.HasOwnerClass(TciProcedureDeclaration, TDeclaration(Method));

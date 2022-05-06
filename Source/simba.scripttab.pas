@@ -102,6 +102,12 @@ uses
   simba.scripttabhistory, simba.main, simba.parser_misc, simba.files, simba.helpers_string;
 
 procedure TSimbaScriptTab.HandleAutoComplete;
+
+  function IsStatic(Expression: String): Boolean;
+  begin
+    Result := (Expression.Count('.') = 1) and (FEditor.AutoComplete.Parser.GlobalByName[Expression.Before('.')] is TciTypeDeclaration);
+  end;
+
 var
   Expression, Filter: String;
   Declaration: TDeclaration;
@@ -124,8 +130,8 @@ begin
     end;
 
     Declaration := FEditor.AutoComplete.Parser.ParseExpression(Expression);
-    if Declaration <> nil then
-      FEditor.AutoComplete.FillMembers(Declaration);
+    if (Declaration <> nil) then
+      FEditor.AutoComplete.FillMembers(Declaration, IsStatic(Expression));
   end else
   begin
     Filter := Expression;
