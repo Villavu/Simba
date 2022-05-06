@@ -28,7 +28,7 @@ type
     procedure Close;
 
     procedure SetMaxSize(AWidth, AHeight: Integer);
-    procedure SetSize(AWidth, AHeight: Integer);
+    procedure SetSize(AWidth, AHeight: Integer; AEnsureVisible: Boolean = True);
 
     property ImageBox: TSimbaImageBox read FImageBox;
   end;
@@ -65,7 +65,7 @@ begin
   SimbaOutputForm.Add('Debug Image Click: ' + IntToStr(FMouseX) + ', ' + IntToStr(FMouseY));
 end;
 
-procedure TSimbaDebugImageForm.SetSize(AWidth, AHeight: Integer);
+procedure TSimbaDebugImageForm.SetSize(AWidth, AHeight: Integer; AEnsureVisible: Boolean);
 var
   Form: TCustomForm;
 begin
@@ -87,7 +87,8 @@ begin
   if (AHeight > Form.Height) then
     Form.Height := AHeight;
 
-  Form.EnsureVisible(True);
+  if AEnsureVisible then
+    Form.EnsureVisible(True);
 
   SetMaxSize(FMaxWidth, FMaxHeight);
 end;
@@ -110,6 +111,9 @@ procedure TSimbaDebugImageForm.SetMaxSize(AWidth, AHeight: Integer);
 var
   Form: TCustomForm;
 begin
+  if (FMaxWidth = AWidth) and (FMaxHeight = AHeight) then
+    Exit;
+
   Form := TCustomForm(Self);
   if (HostDockSite is TSimbaAnchorDockHostSite) then
     Form := TSimbaAnchorDockHostSite(HostDockSite);

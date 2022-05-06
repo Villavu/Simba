@@ -178,14 +178,16 @@ end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_Show;
 var
+  EnsureVisible: Boolean;
   Width, Height: Integer;
 begin
+  FParams.Read(EnsureVisible, SizeOf(Boolean));
   FParams.Read(Width, SizeOf(Integer));
   FParams.Read(Height, SizeOf(Integer));
 
   SimbaDebugImageForm.ImageBox.SetBackground(FParams.Memory + FParams.Position, Width, Height);
 
-  SimbaDebugImageForm.SetSize(Width, Height);
+  SimbaDebugImageForm.SetSize(Width, Height, EnsureVisible);
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_Hide;

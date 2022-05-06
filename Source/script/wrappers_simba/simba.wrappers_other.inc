@@ -99,7 +99,7 @@ begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('ShowBitmap requires Simba communication');
 
-  SimbaScriptThread.Script.SimbaCommunication.DebugImage_Show(PMufasaBitmap(Params^[0])^);
+  SimbaScriptThread.Script.SimbaCommunication.DebugImage_Show(PMufasaBitmap(Params^[0])^, PBoolean(Params^[1])^);
 end;
 
 procedure _LapeShowBitmapEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -108,7 +108,7 @@ begin
     raise Exception.Create('ShowBitmap requires Simba communication');
 
   with SimbaScriptThread.Script.Client do
-    SimbaScriptThread.Script.SimbaCommunication.DebugImage_Show(MBitmaps[PInteger(Params^[0])^]);
+    SimbaScriptThread.Script.SimbaCommunication.DebugImage_Show(MBitmaps[PInteger(Params^[0])^], PBoolean(Params^[1])^);
 end;
 
 procedure _LapeDrawBitmapDebugImg(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
