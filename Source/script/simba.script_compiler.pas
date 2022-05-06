@@ -29,8 +29,8 @@ type
 
     procedure InitBaseVariant; override;
   public
-    function getIntegerArray: TLapeType; virtual;
-    function getFloatArray: TLapeType; virtual;
+    function getIntegerArray: TLapeType; override;
+    function getFloatArray: TLapeType; override;
 
     procedure pushTokenizer(ATokenizer: TLapeTokenizerBase); reintroduce;
     procedure pushConditional(AEval: Boolean; ADocPos: TDocPos); reintroduce;

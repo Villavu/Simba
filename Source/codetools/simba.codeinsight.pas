@@ -17,7 +17,6 @@ uses
 
 type
   TCodeInsight = class(TCodeParser)
-  protected
   class var
     FIncludeCache: TCodeInsight_IncludeCache;
     FFunctionListSections: TCodeInsight_IncludeArray;
@@ -26,10 +25,12 @@ type
   protected
     FIncludes: TCodeInsight_IncludeArray;
     FLocals: TDeclarationMap;
+    FManagedParsers: array of TCodeParser;
 
     procedure DoInclude(Sender: TObject; FileName: String; var Handled: Boolean);
     procedure DoLibrary(Sender: TObject; FileName: String; var Handled: Boolean);
 
+    function ManageParser(Parser: TCodeParser): TCodeParser;
     procedure Reset;
 
     function GetIncludesHash: String;
@@ -42,11 +43,10 @@ type
     function GetLocalByName(Name: String): TDeclaration;
     function GetLocalsByName(Name: String): TDeclarationArray;
   public
-    class procedure CreateClassVariables;
-    class procedure DestroyClassVariables;
+    class constructor Create;
+    class destructor Destroy;
     class procedure AddBaseInclude(Include: TCodeInsight_Include);
     class procedure AddFunctionListSection(Include: TCodeInsight_Include);
-
     class property FunctionListSections: TCodeInsight_IncludeArray read FFunctionListSections;
 
     function GetMembersOfType(Declaration: TDeclaration): TDeclarationArray; overload;
@@ -82,15 +82,15 @@ type
 implementation
 
 uses
-  simba.settings;
+  simba.settings, simba.codetools_arrayhelpers, simba.helpers_string;
 
-class procedure TCodeInsight.CreateClassVariables;
+class constructor TCodeInsight.Create;
 begin
   FIncludeCache := TCodeInsight_IncludeCache.Create();
   FBaseDefines := TStringList.Create();
 end;
 
-class procedure TCodeInsight.DestroyClassVariables;
+class destructor TCodeInsight.Destroy;
 var
   I: Int32;
 begin
@@ -201,11 +201,22 @@ var
 begin
   Lexer.Init();
 
+  for I := 0 to High(FManagedParsers) do
+    FManagedParsers[I].Free();
+  FManagedParsers := nil;
+
   for i := 0 to High(FIncludes) do
     FIncludeCache.Release(FIncludes[i]);
 
   FGlobals.Clear();
   FLocals.Clear();
+end;
+
+function TCodeInsight.ManageParser(Parser: TCodeParser): TCodeParser;
+begin
+  FManagedParsers := FManagedParsers + [Parser];
+
+  Result := Parser;
 end;
 
 function TCodeInsight.GetIncludesHash: String;
@@ -323,12 +334,23 @@ function TCodeInsight.GetMembersOfType(Declaration: TDeclaration): TDeclarationA
   begin
     Depth := 0;
 
+
     while (Declaration <> nil) and (Depth < 20) do
     begin
+      case Declaration.NameUpper of
+        'STRING', 'ANSISTRING':
+          Result := Result + ManageParser(ParseStringHelpers(Declaration.Name, 'Char')).Items.ToArray;
+        'WIDESTRING', 'UNICODESTRING':
+          Result := Result + ManageParser(ParseStringHelpers(Declaration.Name, 'WideChar')).Items.ToArray;
+      end;
+
       Declarations := GlobalsByName['!' + Declaration.Name];
       for I := 0 to High(Declarations) do
         if Declarations[I] is TciProcedureDeclaration then
           Result := Result + [Declarations[I]];
+
+      if (Declaration.ArrayType <> nil) then
+        Result := Result + ManageParser(ParseArrayHelpers(Declaration.ArrayType)).Items.ToArray;
 
       if Declaration.RecordType <> nil then
         GetFields(Declaration.RecordType);
@@ -389,6 +411,9 @@ begin
   end else
   if Declaration is TciRecordType then
     GetFields(Declaration as TciRecordType)
+  else
+  if Declaration is TciArrayType then
+    Result := Result + ManageParser(ParseArrayHelpers(Declaration as TciArrayType)).Items.ToArray
   else
     WriteLn('GetMembersOfType: Unexpected type "', Declaration.ClassName, '"');
 end;
@@ -684,11 +709,5 @@ begin
 
   inherited Destroy();
 end;
-
-initialization
-  TCodeInsight.CreateClassVariables();
-
-finalization
-  TCodeInsight.DestroyClassVariables();
 
 end.
