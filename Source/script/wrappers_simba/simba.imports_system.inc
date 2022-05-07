@@ -65,7 +65,6 @@ addGlobalFunc('function GetMainThreadID: PtrUInt', @_LapeGetMainThreadID);
 addGlobalFunc('function GetCurrentThreadID: PtrUInt', @_LapeGetCurrentThreadID);
 
 addGlobalFunc('function GetEnvironmentVariable(const Name: String): String', @_LapeGetEnvironmentVariable);
-addGlobalFunc('procedure Wait(Milliseconds: UInt32)', @_LapeWait);
 
 addGlobalType('procedure() of object', 'TSyncMethod', {$IF DEFINED(CPU32) and DEFINED(LAPE_CDECL)}FFI_CDECL{$ELSE}FFI_DEFAULT_ABI{$ENDIF});
 addGlobalFunc('procedure Sync(Method: TSyncMethod)', @_LapeSync);

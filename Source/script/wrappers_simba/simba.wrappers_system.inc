@@ -23,6 +23,11 @@ begin
   Sleep(PUInt32(Params^[0])^);
 end;
 
+procedure _LapePreciseSleep(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  SimbaNativeInterface.PreciseSleep(PUInt32(Params^[0])^);
+end;
+
 type
   TSync = object
     Params: PParamArray;

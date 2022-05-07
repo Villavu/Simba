@@ -32,7 +32,6 @@
 {$i simba.imports_json.inc}
 {$i simba.imports_simbaimagebox.inc}
 
-{$i simba.imports_variant.inc}
 {$i simba.imports_oswindow.inc}
 {$i simba.imports_target.inc}
 {$i simba.imports_keyboard.inc}
@@ -42,7 +41,6 @@
 {$i simba.imports_web.inc}
 {$i simba.imports_arrays_algorithms.inc}
 {$i simba.imports_math.inc}
-{$i simba.imports_time_date.inc}
 {$i simba.imports_ocr.inc}
 {$i simba.imports_string.inc}
 {$i simba.imports_colormath.inc}

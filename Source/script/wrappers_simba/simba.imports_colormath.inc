@@ -21,5 +21,6 @@ addGlobalFunc('procedure ColorToCIELab(Color: Int32; out L, a, b: Extended)', @_
 addGlobalFunc('procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended)', @_LapeCIELabToHSL);
 addGlobalFunc('procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended)', @_LapeHSLToCIELab);
 addGlobalFunc('function ColorToGray(const Color: Int32): TColor', @_LapeColorToGray);
+addGlobalFunc('procedure CalculateBestColor(Colors: TIntegerArray; CTS: Integer; out Color, Tolerance: Integer; out Hue, Sat: Extended)', @_LapeCalculateBestColor);
 
 popSection();
