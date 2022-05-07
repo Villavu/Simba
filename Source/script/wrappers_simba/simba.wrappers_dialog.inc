@@ -20,7 +20,7 @@ begin
   Sync(@Execute);
 end;
 
-procedure _LapeMessageDlg(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeShowDialog(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 
   procedure Execute;
   begin
@@ -91,15 +91,6 @@ procedure _LapeShowACA(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$EN
 
 begin
   Sync(@Execute);
-end;
-
-procedure _LapeCalculateBestColor(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  case PInteger(Params^[1])^ of
-    0: BestColor_CTS0(PIntegerArray(Params^[0])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
-    1: BestColor_CTS1(PIntegerArray(Params^[0])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
-    2: BestColor_CTS2(PIntegerArray(Params^[0])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
-  end;
 end;
 
 procedure _LapeSelectDirectory(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

@@ -10,7 +10,8 @@ unit simba.stringutil;
 interface
 
 uses
-  Classes, SysUtils, StrUtils, simba.mufasatypes;
+  classes, sysutils, strutils,
+  simba.mufasatypes;
 
 type
   StrExtr = (Numbers, Letters, Others);
@@ -24,8 +25,6 @@ function DecompressString(const Str: String; Header: Boolean = True) : String;
 function Base64Encode(const str : String) : String;
 function Base64Decode(const str : String) : String;
 function LevDistance(src, target: String): Integer;
-function NormLevDistance(src, target: String): Extended;
-function StringMatch(checkCompare, goalCompare: String): extended;
 function MultiBetween(str, s1, s2: String): TStringArray;
 function IsArrInStr(strArr: TStringArray; s: String): boolean;
 function IsStrInArr(const s: String; const UsePos: Boolean; const Arr: TStringArray): boolean;
@@ -35,7 +34,7 @@ function Between(s1, s2, str: String): String;
 implementation
 
 uses
-  math, base64, zstream;
+  base64, zstream;
 
 function Implode(Glue: String;Pieces: TStringArray): String;
 var
@@ -263,30 +262,6 @@ begin
   end;
 
   Result := d[n, m];
-end;
-
-function NormLevDistance(src, target: String): Extended;
-begin
-  Result := Max(Length(src), Length(target)) * 1.0;
-  Result := LevDistance(src, target) / Result;
-end;
-
-{/\
-  Uses Levenshtein to work out the match % between the two strings.
-/\}
-function StringMatch(checkCompare, goalCompare: String): extended;
-var
-  mismatch, len: extended;
-begin
-  result := 0.00;
-
-  if ((length(checkCompare)=0) or (length(goalCompare)=0)) then
-    exit;
-
-  mismatch := LevDistance(checkCompare, goalCompare);
-
-  len := max(length(checkCompare), length(goalCompare));
-  result := (len-mismatch) / len;
 end;
 
 {/\

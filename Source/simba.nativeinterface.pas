@@ -70,6 +70,8 @@ type
     // Not abstract
     procedure ClearInterpolation(Canvas: TCanvas); virtual;
 
+    procedure PreciseSleep(Milliseconds: UInt32); virtual;
+
     procedure PlaySound(Path: String); virtual;
     procedure StopSound; virtual;
 
@@ -175,6 +177,11 @@ end;
 procedure TSimbaNativeInterface.ClearInterpolation(Canvas: TCanvas);
 begin
   { not critical }
+end;
+
+procedure TSimbaNativeInterface.PreciseSleep(Milliseconds: UInt32);
+begin
+  Sleep(Milliseconds);
 end;
 
 procedure TSimbaNativeInterface.PlaySound(Path: String);

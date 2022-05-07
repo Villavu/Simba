@@ -1,4 +1,4 @@
-pushSection('Classes');
+pushSection('TMufasaBitmap');
 
 addClass('TMufasaBitmap');
 addGlobalType('packed record B, G, R: UInt8; end', 'TRGB24');

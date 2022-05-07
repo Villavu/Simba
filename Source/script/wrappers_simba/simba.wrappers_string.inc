@@ -72,16 +72,6 @@ begin
   PInteger(Result)^ := LevDistance(PString(Params^[0])^, PString(Params^[1])^);
 end;
 
-procedure _LapeNormLevDist(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PExtended(Result)^ := NormLevDistance(PString(Params^[0])^, PString(Params^[1])^);
-end;
-
-procedure _LapeStringMatch(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PExtended(Result)^ := StringMatch(PString(Params^[0])^, PString(Params^[1])^);
-end;
-
 procedure _LapeMultiBetween(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PStringArray(Result)^ := MultiBetween(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);

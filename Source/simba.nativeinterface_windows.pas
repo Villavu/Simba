@@ -18,11 +18,14 @@ type
   protected
     FDPILoaded: Boolean;
     FDWMLoaded: Boolean;
+    FHasWaitableTimer: Boolean;
+    FWaitableTimer: THandle;
 
     procedure ApplyDPI(Window: TWindowHandle; var X1, Y1, X2, Y2: Integer);
     procedure RemoveDPI(Window: TWindowHandle; var X1, Y1, X2, Y2: Integer);
   public
     constructor Create;
+    destructor Destroy; override;
 
     procedure HoldKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer = 0); override;
     procedure ReleaseKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer = 0); override;
@@ -74,6 +77,7 @@ type
     function ActivateWindow(Window: TWindowHandle): Boolean; override;
 
     function HighResolutionTime: Double; override;
+    procedure PreciseSleep(Milliseconds: UInt32); override;
 
     procedure OpenDirectory(Path: String); override;
 
@@ -88,7 +92,7 @@ implementation
 
 uses
   windows, dwmapi, multimon, mmsystem,
-  simba.process, simba.helpers_string;
+  simba.process;
 
 type
   MONITOR_DPI_TYPE = (
@@ -115,6 +119,16 @@ var
   AreDpiAwarenessContextsEqual: function(A: DPI_AWARENESS_CONTEXT; B: DPI_AWARENESS_CONTEXT): LongBool; stdcall; // ^___-
   GetDpiForMonitor: function(Monitor: HMONITOR; dpiType: MONITOR_DPI_TYPE; out dpiX: UINT; out dpiY: UINT): HRESULT; stdcall;
 
+const
+  CREATE_WAITABLE_TIMER_HIGH_RESOLUTION = $00000002;
+
+  TIMER_QUERY_STATE  = $0001;
+  TIMER_MODIFY_STATE = $0002;
+  TIMER_ALL_ACCESS = STANDARD_RIGHTS_REQUIRED or SYNCHRONIZE or TIMER_QUERY_STATE or TIMER_MODIFY_STATE;
+
+var
+  CreateWaitableTimerExW: function(lpTimerAttributes: LPSECURITY_ATTRIBUTES; lpTimerName: LPCWSTR; dwFlags: DWORD; dwDesiredAccess: DWORD): THANDLE; stdcall;
+
 constructor TSimbaNativeInterface_Windows.Create;
 begin
   Pointer(GetWindowDpiAwarenessContext) := GetProcAddress(LoadLibrary('user32'), 'GetWindowDpiAwarenessContext');
@@ -123,6 +137,26 @@ begin
 
   FDPILoaded := Assigned(GetWindowDpiAwarenessContext) and Assigned(AreDpiAwarenessContextsEqual) and Assigned(MonitorFromWindow) and Assigned(GetDpiForMonitor);
   FDWMLoaded := InitDwmLibrary();
+
+  Pointer(CreateWaitableTimerExW) := GetProcAddress(LoadLibrary('kernel32'), 'CreateWaitableTimerExW');
+
+  FHasWaitableTimer := Assigned(CreateWaitableTimerExW);
+  if FHasWaitableTimer then
+  begin
+    FWaitableTimer := CreateWaitableTimerExW(nil, nil, CREATE_WAITABLE_TIMER_HIGH_RESOLUTION, TIMER_ALL_ACCESS);
+    if (FWaitableTimer = 0) then
+      FWaitableTimer := CreateWaitableTimerExW(nil, nil, 0, TIMER_ALL_ACCESS);
+
+    FHasWaitableTimer := FWaitableTimer <> 0;
+  end;
+end;
+
+destructor TSimbaNativeInterface_Windows.Destroy;
+begin
+  if FHasWaitableTimer then
+    CloseHandle(FWaitableTimer);
+
+  inherited Destroy();
 end;
 
 procedure TSimbaNativeInterface_Windows.ApplyDPI(Window: TWindowHandle; var X1, Y1, X2, Y2: Integer);
@@ -776,6 +810,24 @@ begin
   QueryPerformanceCounter(Count);
 
   Result := Count / Frequency * 1000;
+end;
+
+procedure TSimbaNativeInterface_Windows.PreciseSleep(Milliseconds: UInt32);
+var
+  Time: Int64;
+begin
+  if FHasWaitableTimer then
+  begin
+    Time := -Round((Milliseconds - 0.25) * 1000) * 10;
+
+    if SetWaitableTimer(FWaitableTimer, Time, 0, nil, nil, False) then
+    begin
+      WaitForSingleObject(FWaitableTimer, INFINITE);
+      Exit;
+    end;
+  end;
+
+  inherited PreciseSleep(Milliseconds); // Fallback to normal sleep
 end;
 
 procedure TSimbaNativeInterface_Windows.OpenDirectory(Path: String);

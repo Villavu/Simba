@@ -38,6 +38,15 @@ begin
   HSLtoRGB(Pextended(Params^[0])^, Pextended(Params^[1])^, Pextended(Params^[2])^, PByte(Params^[3])^, PByte(Params^[4])^, PByte(Params^[5])^);
 end;
 
+procedure _LapeCalculateBestColor(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  case PInteger(Params^[1])^ of
+    0: BestColor_CTS0(PIntegerArray(Params^[0])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+    1: BestColor_CTS1(PIntegerArray(Params^[0])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+    2: BestColor_CTS2(PIntegerArray(Params^[0])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+  end;
+end;
+
 procedure _LapeRGBToXYZ(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   RGBToXYZ(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);

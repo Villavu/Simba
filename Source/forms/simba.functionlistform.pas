@@ -363,7 +363,7 @@ begin
   FTreeView.OnDblClick := @DoTreeViewDoubleClick;
   FTreeView.OnSelectionChanged := @DoTreeViewSelectionChanged;
   FTreeView.OnMouseMove := @DoTreeViewMouseMove;
-  FTreeView.Options := FTreeView.Options + [tvoNoDoubleClickExpand];
+  FTreeView.Options := FTreeView.Options;
 
   FFilter := TTreeFilterEdit.Create(Self);
   FFilter.BorderSpacing.Around := 3;
