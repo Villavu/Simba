@@ -8,17 +8,22 @@ begin
   ConvertTime64(PUInt64(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^);
 end;
 
-procedure _LapeGetSystemTime(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PUInt64(Result)^ := GetTickCount64();
-end;
-
 procedure _LapeGetTimeRunning(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  //PUInt64(Result)^ := Round(HighResolutionTime() - SimbaScript.StartTime);
+  PUInt64(Result)^ := Round(HighResolutionTime() - SimbaScriptThread.Script.RunningTime);
 end;
 
-procedure _LapeHighResolutionTime(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapePerformanceTimer(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PDouble(Result)^ := SimbaNativeInterface.HighResolutionTime();
+end;
+
+procedure _LapeFormatMillisecondsF(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PString(Result)^ := FormatMilliseconds(PDouble(Params^[0])^, PString(Params^[1])^);
+end;
+
+procedure _LapeFormatMillisecondsI(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PString(Result)^ := FormatMilliseconds(PUInt64(Params^[0])^, PString(Params^[1])^);
 end;

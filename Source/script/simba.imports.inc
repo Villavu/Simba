@@ -54,3 +54,4 @@
 {$i simba.imports_dialog.inc}
 {$i simba.imports_process.inc}
 {$i simba.imports_debugimage.inc}
+{$i simba.imports_timer.inc}
