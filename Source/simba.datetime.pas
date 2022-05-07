@@ -10,8 +10,7 @@ unit simba.datetime;
 interface
 
 uses
-  classes, sysutils,
-  simba.mufasatypes;
+  classes, sysutils;
 
 procedure ConvertTime(Time: Int64; var h, m, s: Int32);
 procedure ConvertTime64(Time: Int64; var y, m, w, d, h, min, s: Int32);
@@ -25,44 +24,68 @@ uses
   simba.nativeinterface;
 
 function FormatMilliseconds(Milliseconds: Int64; Fmt: String): String;
-
-  procedure Build(Arg: String; Value, Padding: Int64);
-  begin
-    if Result.Contains(Arg) then
-      Result := Result.Replace(Arg, IntToStr(Value).PadLeft(2, '0'));
-  end;
-
 var
   Time, Days, Hours, Mins, Seconds: Int64;
+  Arg: String;
 begin
-  Result := Fmt;
+  Result := '';
 
   Time := Milliseconds;
 
-  if Result.Contains('d') then
-  begin
-    Days  := Time div 86400000;
-    Time  := Time mod 86400000;
-  end;
-  if Result.Contains('h') then
-  begin
-    Hours := Time div 3600000;
-    Time  := Time mod 3600000;
-  end;
-  if Result.Contains('m') then
-  begin
-    Mins  := Time div 60000;
-    Time  := Time mod 60000;
-  end;
+  for Arg in Fmt.Split(':') do
+    case Arg of
+      'd':
+        begin
+          Days := Time div 86400000;
+          Time := Time mod 86400000;
 
-  Seconds      := Time div 1000;
-  Milliseconds := Time mod 1000;
+          if (Result <> '') then
+            Result += ':' + IntToStr(Days).PadLeft(2, '0')
+          else
+            Result += IntToStr(Days).PadLeft(2, '0');
+        end;
 
-  Build('ms', MilliSeconds, 3);
-  Build('d', Days, 2);
-  Build('h', Hours, 2);
-  Build('m', Mins, 2);
-  Build('s', Seconds, 2);
+      'h':
+        begin
+          Hours := Time div 3600000;
+          Time  := Time mod 3600000;
+
+          if (Result <> '') then
+            Result += ':' + IntToStr(Hours).PadLeft(2, '0')
+          else
+            Result += IntToStr(Hours).PadLeft(2, '0');
+        end;
+
+      'm':
+        begin
+          Mins := Time div 60000;
+          Time := Time mod 60000;
+
+          if (Result <> '') then
+            Result += ':' + IntToStr(Mins).PadLeft(2, '0')
+          else
+            Result += IntToStr(Mins).PadLeft(2, '0');
+        end;
+
+      's':
+        begin
+          Seconds := Time div 1000;
+          Time    := Time mod 1000;
+
+          if (Result <> '') then
+            Result += ':' + IntToStr(Seconds).PadLeft(2, '0')
+          else
+            Result += IntToStr(Seconds).PadLeft(2, '0');
+        end;
+
+      'ms':
+        begin
+          if (Result <> '') then
+            Result += ':' + IntToStr(Time).PadLeft(3, '0')
+          else
+            Result += IntToStr(Time).PadLeft(3, '0');
+        end;
+    end;
 end;
 
 function FormatMilliseconds(Milliseconds: Double; Fmt: String): String;

@@ -35,6 +35,8 @@ type
     procedure pushTokenizer(ATokenizer: TLapeTokenizerBase); reintroduce;
     procedure pushConditional(AEval: Boolean; ADocPos: TDocPos); reintroduce;
 
+    procedure addDelayedCode(Code: array of lpString; AFileName: lpString); overload;
+
     function addGlobalFunc(Header, Body: lpString): TLapeTree_Method; virtual; overload;
     function addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar; virtual; overload;
     function addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType; virtual; overload;
@@ -207,6 +209,11 @@ end;
 procedure TSimbaScript_Compiler.pushConditional(AEval: Boolean; ADocPos: TDocPos);
 begin
   inherited pushConditional(AEval, ADocPos);
+end;
+
+procedure TSimbaScript_Compiler.addDelayedCode(Code: array of lpString; AFileName: lpString);
+begin
+  addDelayedCode(String.Join(LineEnding, Code), AFileName);
 end;
 
 end.
