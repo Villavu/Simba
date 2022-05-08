@@ -1,6 +1,5 @@
 pushSection('OCR');
 
-addGlobalFunc('function MaskFromText(Text, Font: String): TMask', @_LapeMaskFromText);
 addGlobalFunc('function TPAFromText(Text, Font: String; var W, H: Int32): TPointArray', @_LapeTPAFromText);
 addGlobalFunc('function GetTextATPA(const ATPA: T2DPointArray; const maxvspacing: integer; const font: string): String', @_LapeGetTextATPA);
 addGlobalFunc('function GetTextAt(const atX, atY, minvspacing, maxvspacing, hspacing, color, tol, len: integer; const font: string): String', @_LapeGetTextAt);

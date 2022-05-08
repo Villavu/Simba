@@ -38,7 +38,7 @@ var
 
   function Match(const BufferPtr, BitmapPtr: TRGB32): Boolean; inline;
   begin
-    Result := (Bitmap.TransparentColorSet and BitmapPtr.EqualsIgnoreAlpha(Bitmap.TransparentRGB)) or
+    Result := (Bitmap.TransparentColorActive and BitmapPtr.EqualsIgnoreAlpha(Bitmap.TransparentRGB)) or
               (RGBDistance(BufferPtr, BitmapPtr) <= Tolerance);
   end;
 
@@ -114,7 +114,7 @@ var
 
   function Match(const BufferPtr, BitmapPtr: TRGB32): Boolean; inline;
   begin
-    Result := (Bitmap.TransparentColorSet and BitmapPtr.EqualsIgnoreAlpha(Bitmap.TransparentRGB)) or
+    Result := (Bitmap.TransparentColorActive and BitmapPtr.EqualsIgnoreAlpha(Bitmap.TransparentRGB)) or
               (RGBDistance(BufferPtr, BitmapPtr) <= Tolerance);
   end;
 

@@ -1,111 +1,203 @@
 pushSection('TMufasaBitmap');
 
 addClass('TMufasaBitmap');
-addGlobalType('packed record B, G, R: UInt8; end', 'TRGB24');
-addGlobalType('^TRGB24', 'PRGB24');
-addGlobalType('packed record B, G, R, A: UInt8; end', 'TRGB32');
+
+addGlobalType('array of TMufasaBitmap', 'TMufasaBitmapArray');
+addGlobalType('packed record B, G, R, A: Byte; end', 'TRGB32');
 addGlobalType('^TRGB32', 'PRGB32');
-addGlobalType('array of TRGB32', 'TRGB32Array');
-addGlobalType('array of PRGB32', 'TPRGB32Array');
-addGlobalType('packed record H, S, L: Extended; end', 'THSL');
-addGlobalType('array of THSL', 'THSLArray');
-addGlobalType('array of array of THSL', 'T2DHSLArray');
 addGlobalType('(MirrorWidth, MirrorHeight, MirrorLine)', 'TBmpMirrorStyle');
 addGlobalType('(TM_Mean, TM_MinMax)', 'TBmpThreshMethod');
-addGlobalType('(RM_Nearest, RM_Bilinear)', 'TBmpResizeMethod');
-addGlobalType('record White, Black: TPointArray; WhiteHi, BlackHi: Integer; W, H: Integer; end', 'TMask');
+
 addClassVar('TMufasaBitmap', 'Data', 'PRGB32', @_LapeMufasaBitmap_Data_Read);
-addClassVar('TMufasaBitmap', 'Name', 'string', @_LapeMufasaBitmap_Name_Read, @_LapeMufasaBitmap_Name_Write);
-addClassVar('TMufasaBitmap', 'Index', 'Integer', @_LapeMufasaBitmap_Index_Read, @_LapeMufasaBitmap_Index_Write);
+addClassVar('TMufasaBitmap', 'Name', 'String', @_LapeMufasaBitmap_Name_Read, @_LapeMufasaBitmap_Name_Write);
 addClassVar('TMufasaBitmap', 'Width', 'Integer', @_LapeMufasaBitmap_Width_Read);
 addClassVar('TMufasaBitmap', 'Height', 'Integer', @_LapeMufasaBitmap_Height_Read);
 addClassVar('TMufasaBitmap', 'Center', 'TPoint', @_LapeMufasaBitmap_Center_Read);
+addClassVar('TMufasaBitmap', 'TransparentColor', 'Integer', @_LapeMufasaBitmap_GetTransparentColor, @_LapeMufasaBitmap_SetTransparentColor);
+addClassVar('TMufasaBitmap', 'TransparentColorActive', 'Boolean', @_LapeMufasaBitmap_GetTransparentColorActive, @_LapeMufasaBitmap_SetTransparentColorActive);
+addClassVar('TMufasaBitmap', 'Client', 'TObject', @_LapeMufasaBitmap_Client_Read, @_LapeMufasaBitmap_Client_Write);
+
 addClassVar('TMufasaBitmap', 'Fonts', 'TStringArray', @_LapeMufasaBitmap_Fonts_Read);
 addClassVar('TMufasaBitmap', 'FontName', 'String', @_LapeMufasaBitmap_FontName_Read, @_LapeMufasaBitmap_FontName_Write);
 addClassVar('TMufasaBitmap', 'FontSize', 'Single', @_LapeMufasaBitmap_FontSize_Read, @_LapeMufasaBitmap_FontSize_Write);
 addClassVar('TMufasaBitmap', 'FontAntialiasing', 'Boolean', @_LapeMufasaBitmap_FontAntialiasing_Read, @_LapeMufasaBitmap_FontAntialiasing_Write);
+
+addGlobalFunc('function TMufasaBitmap.Create: TMufasaBitmap; static; overload', @_LapeMufasaBitmap_Create);
+addGlobalFunc('function TMufasaBitmap.Create(Width, Height: Integer): TMufasaBitmap; static; overload', @_LapeMufasaBitmap_CreateEx);
+
+//addGlobalFunc('function TMufasaBitmap.CreateFromClient(Client: TObject): TMufasaBitmap; static; overload', @_LapeMufasaBitmap_CreateFromClient);
+//addGlobalFunc('function TMufasaBitmap.CreateFromClient(Client: TObject; Area: TBox): TMufasaBitmap; static; overload', @_LapeMufasaBitmap_CreateFromClientEx);
+
+addGlobalFunc('function TMufasaBitmap.CreateFromFile(FileName: String): TMufasaBitmap; static; overload', @_LapeMufasaBitmap_CreateFromFile);
+addGlobalFunc('function TMufasaBitmap.CreateFromString(Width, Height: Integer; Str: String): TMufasaBitmap; static; overload', @_LapeMufasaBitmap_CreateFromString);
+
+addGlobalFunc('function TMufasaBitmap.Equals(Other: TMufasaBitmap): Boolean;', @_LapeMufasaBitmap_Equals);
+
+addGlobalFunc('procedure TMufasaBitmap.SetPixel(X, Y: Integer; Color: Integer);', @_LapeMufasaBitmap_SetPixel);
+addGlobalFunc('function TMufasaBitmap.GetPixel(X, Y: Integer): Integer;', @_LapeMufasaBitmap_GetPixel);
+
+addGlobalFunc('procedure TMufasaBitmap.SetPixels(Points: TPointArray; Colors: TIntegerArray);', @_LapeMufasaBitmap_SetPixels);
+addGlobalFunc('function TMufasaBitmap.GetPixels(Points: TPointArray): TIntegerArray;', @_LapeMufasaBitmap_GetPixels);
+
+addGlobalFunc('function TMufasaBitmap.PixelDifference(Other: TMufasaBitmap): Integer; overload', @_LapeMufasaBitmap_PixelDifference);
+addGlobalFunc('function TMufasaBitmap.PixelDifference(Other: TMufasaBitmap; Tolerance: Integer): Integer; overload', @_LapeMufasaBitmap_PixelDifferenceTolerance);
+
+addGlobalFunc('function TMufasaBitmap.PixelDifferenceTPA(Other: TMufasaBitmap): TPointArray; overload', @_LapeMufasaBitmap_PixelDifferenceTPA);
+addGlobalFunc('function TMufasaBitmap.PixelDifferenceTPA(Other: TMufasaBitmap; Tolerance: Integer): TPointArray; overload', @_LapeMufasaBitmap_PixelDifferenceToleranceTPA);
+
 addGlobalFunc('function TMufasaBitmap.TextWidth(Text: String): Integer;', @_LapeMufasaBitmap_TextWidth);
 addGlobalFunc('function TMufasaBitmap.TextHeight(Text: String): Integer;', @_LapeMufasaBitmap_TextHeight);
 addGlobalFunc('function TMufasaBitmap.TextSize(Text: String): TPoint;', @_LapeMufasaBitmap_TextSize);
-addGlobalFunc('procedure TMufasaBitmap.DrawText(Text: String; Position: TPoint; Color: TColor); overload', @_LapeMufasaBitmap_DrawText);
-addGlobalFunc('procedure TMufasaBitmap.DrawText(Text: String; Box: TBox; Center: Boolean; Color: TColor); overload', @_LapeMufasaBitmap_DrawTextEx);
+addGlobalFunc('procedure TMufasaBitmap.DrawText(Text: String; Position: TPoint; Color: Integer); overload', @_LapeMufasaBitmap_DrawText);
+addGlobalFunc('procedure TMufasaBitmap.DrawText(Text: String; Box: TBox; Center: Boolean; Color: Integer); overload', @_LapeMufasaBitmap_DrawTextEx);
+addGlobalFunc('procedure TMufasaBitmap.DrawTextLines(Text: TStringArray; Position: TPoint; Color: Integer);', @_LapeMufasaBitmap_DrawTextLines);
+
+addGlobalFunc('procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray); overload', @_LapeMufasaBitmap_DrawATPA);
+addGlobalFunc('procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray; Color: Integer); overload', @_LapeMufasaBitmap_DrawATPAEx);
+addGlobalFunc('procedure TMufasaBitmap.DrawTPA(TPA: TPointArray; Color: Integer);', @_LapeMufasaBitmap_DrawTPA);
+
+addGlobalFunc('procedure TMufasaBitmap.DrawCrosshairs(ACenter: TPoint; Size: Integer; Thickness: Integer; Color: Integer);', @_LapeMufasaBitmap_DrawCrosshairs);
+addGlobalFunc('procedure TMufasaBitmap.DrawCross(ACenter: TPoint; Radius: Integer; Thickness: Integer; Color: Integer);', @_LapeMufasaBitmap_DrawCross);
+
+addGlobalFunc('procedure TMufasaBitmap.DrawLine(Start, Stop: TPoint; Color: Integer); overload', @_LapeMufasaBitmap_DrawLine);
+addGlobalFunc('procedure TMufasaBitmap.DrawLine(Start, Stop: TPoint; Thickness: Integer; Color: Integer); overload', @_LapeMufasaBitmap_DrawLineEx);
+
+addGlobalFunc('procedure TMufasaBitmap.DrawPolygon(Points: TPointArray; Color: Integer);', @_LapeMufasaBitmap_DrawPolygon);
+addGlobalFunc('procedure TMufasaBitmap.DrawPolygonFilled(Points: TPointArray; Color: Integer);', @_LapeMufasaBitmap_DrawPolygonFilled);
+addGlobalFunc('procedure TMufasaBitmap.DrawPolygonInverted(Points: TPointArray; Color: Integer);', @_LapeMufasaBitmap_DrawPolygonInverted);
+
+addGlobalFunc('procedure TMufasaBitmap.DrawCircle(ACenter: TPoint; Radius: Integer; Color: Integer);', @_LapeMufasaBitmap_DrawCircle);
+addGlobalFunc('procedure TMufasaBitmap.DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: Integer);', @_LapeMufasaBitmap_DrawCircleFilled);
+addGlobalFunc('procedure TMufasaBitmap.DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: Integer);', @_LapeMufasaBitmap_DrawCircleInverted);
+
+addGlobalFunc('procedure TMufasaBitmap.DrawBox(B: TBox; Color: Integer);', @_LapeMufasaBitmap_DrawBox);
+addGlobalFunc('procedure TMufasaBitmap.DrawBoxFilled(B: TBox; Color: Integer);', @_LapeMufasaBitmap_DrawBoxFilled);
+addGlobalFunc('procedure TMufasaBitmap.DrawBoxInverted(B: TBox; Color: Integer);', @_LapeMufasaBitmap_DrawBoxInverted);
+addGlobalFunc('procedure TMufasaBitmap.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: Integer = -1);', @_LapeMufasaBitmap_DrawBoxArray);
+addGlobalFunc('procedure TMufasaBitmap.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: Integer = -1);', @_LapeMufasaBitmap_DrawPolygonArray);
+addGlobalFunc('procedure TMufasaBitmap.DrawCircleArray(Points: TPointArray; Radius: Integer; Filled: Boolean; Color: Integer = -1);', @_LapeMufasaBitmap_DrawCircleArray);
+addGlobalFunc('procedure TMufasaBitmap.DrawCrossArray(Points: TPointArray; Radius: Integer; Thickness: Integer; Color: Integer = -1);', @_LapeMufasaBitmap_DrawCrossArray);
+
+addGlobalFunc('function TMufasaBitmap.FindColors(out Points: TPointArray; Color: Integer): Boolean;', @_LapeMufasaBitmap_FindColors);
+addGlobalFunc('function TMufasaBitmap.FindColorsTolerance(out Points: TPointArray; Color, Tolerance: Integer): Boolean; overload', @_LapeMufasaBitmap_FindColorsToleranceCTS1);
+addGlobalFunc('function TMufasaBitmap.FindColorsTolerance(out Points: TPointArray; Color, Tolerance: Integer; HueMod, SatMod: Extended): Boolean; overload', @_LapeMufasaBitmap_FindColorsToleranceCTS2);
+
+addGlobalFunc('function TMufasaBitmap.FindBitmap(Bitmap: TMufasaBitmap; out X, Y: Integer; Tolerance: Integer): Boolean;', @_LapeMufasaBitmap_FindBitmap);
+addGlobalFunc('function TMufasaBitmap.FindBitmaps(Bitmap: TMufasaBitmap; out Points: TPointArray; Tolerance: Integer): Boolean;', @_LapeMufasaBitmap_FindBitmaps);
+
+addGlobalFunc('procedure TMufasaBitmap.Clear; overload', @_LapeMufasaBitmap_Clear);
+addGlobalFunc('procedure TMufasaBitmap.Clear(Area: TBox); overload', @_LapeMufasaBitmap_ClearEx);
+addGlobalFunc('procedure TMufasaBitmap.ClearInverted(Area: TBox);', @_LapeMufasaBitmap_ClearInverted);
+
+addGlobalFunc('procedure TMufasaBitmap.DrawBitmap(Bitmap: TMufasaBitmap; Position: TPoint);', @_LapeMufasaBitmap_DrawBitmap);
+addGlobalFunc('procedure TMufasaBitmap.DrawClient(Area: TBox; Position: TPoint); overload', @_LapeMufasaBitmap_DrawClient);
+addGlobalFunc('procedure TMufasaBitmap.DrawClient(Position: TPoint); overload', @_LapeMufasaBitmap_DrawClientEx);
+
+addGlobalFunc('procedure TMufasaBitmap.DrawMatrix(Matrix: TIntegerMatrix); overload', @_LapeMufasaBitmap_DrawMatrix);
+addGlobalFunc('procedure TMufasaBitmap.DrawMatrix(Matrix: TSingleMatrix; ColorMapID: Integer = 0); overload', @_LapeMufasaBitmap_DrawMatrixF);
+addGlobalFunc('procedure TMufasaBitmap.DrawMatrix(Matrix: TByteMatrix); overload', @_LapeMufasaBitmap_DrawMatrixB);
+
+addGlobalFunc('function TMufasaBitmap.AverageBrightness: Integer;', @_LapeMufasaBitmap_AverageBrightness);
+addGlobalFunc('function TMufasaBitmap.PeakBrightness: Integer;', @_LapeMufasaBitmap_PeakBrightness);
+
 addGlobalFunc('procedure TMufasaBitmap.SetSize(AWidth, AHeight: Integer);', @_LapeMufasaBitmap_SetSize);
-addGlobalFunc('procedure TMufasaBitmap.StretchResize(AWidth, AHeight: Integer);', @_LapeMufasaBitmap_StretchResize);
-addGlobalFunc('procedure TMufasaBitmap.SetPersistentMemory(mem: PtrUInt; awidth, aheight: Integer);', @_LapeMufasaBitmap_SetPersistentMemory);
+addGlobalFunc('procedure TMufasaBitmap.Resize(AWidth, AHeight: Integer);', @_LapeMufasaBitmap_Resize);
+addGlobalFunc('procedure TMufasaBitmap.ResizeBilinear(AWidth, AHeight: Integer);', @_LapeMufasaBitmap_ResizeBilinear);
+addGlobalFunc('procedure TMufasaBitmap.SetPersistentMemory(Memory: PtrUInt; AWidth, AHeight: Integer);', @_LapeMufasaBitmap_SetPersistentMemory);
 addGlobalFunc('procedure TMufasaBitmap.ResetPersistentMemory;', @_LapeMufasaBitmap_ResetPersistentMemory);
-addGlobalFunc('function TMufasaBitmap.PointInBitmap(x, y: Integer): boolean;', @_LapeMufasaBitmap_PointInBitmap);
-addGlobalFunc('procedure TMufasaBitmap.ValidatePoint(x, y: Integer);', @_LapeMufasaBitmap_ValidatePoint);
-addGlobalFunc('function TMufasaBitmap.SaveToFile(const FileName: string): boolean;', @_LapeMufasaBitmap_SaveToFile);
-addGlobalFunc('procedure TMufasaBitmap.LoadFromFile(const FileName: string);', @_LapeMufasaBitmap_LoadFromFile);
-addGlobalFunc('procedure TMufasaBitmap.Rectangle(const B: TBox; Color: TColor);', @_LapeMufasaBitmap_Rectangle);
-addGlobalFunc('procedure TMufasaBitmap.Rectangle(const B: TBox; const Color: Integer; const Transparency: Extended); overload', @_LapeMufasaBitmap_RectangleEx);
-addGlobalFunc('procedure TMufasaBitmap.FloodFill(const StartPT: TPoint; const SearchCol, ReplaceCol: TColor);', @_LapeMufasaBitmap_FloodFill);
-addGlobalFunc('procedure TMufasaBitmap.SetPixel(x, y: Integer; Color: TColor);', @_LapeMufasaBitmap_FastSetPixel);
-addGlobalFunc('procedure TMufasaBitmap.SetPixels(Points: TPointArray; Colors: TIntegerArray);', @_LapeMufasaBitmap_FastSetPixels);
-addGlobalFunc('procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray; Colors: TIntegerArray);', @_LapeMufasaBitmap_DrawATPA);
-addGlobalFunc('procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray); overload', @_LapeMufasaBitmap_DrawATPAEx);
-addGlobalFunc('procedure TMufasaBitmap.DrawTPA(Points: TPointArray; Color: TColor);', @_LapeMufasaBitmap_DrawTPA);
-addGlobalFunc('procedure TMufasaBitmap.DrawToCanvas(x, y: Integer; Canvas: TCanvas);', @_LapeMufasaBitmap_DrawToCanvas);
-addGlobalFunc('procedure TMufasaBitmap.LineTo(Src, Dst: TPoint;Color: TColor);', @_LapeMufasaBitmap_LineTo);
-addGlobalFunc('function TMufasaBitmap.FindColors(out Points: TPointArray; const Color: Integer): Boolean; overload', @_LapeMufasaBitmap_FindColors);
-addGlobalFunc('function TMufasaBitmap.FindColors(out Points: TPointArray; const Color, Tolerance: Integer): Boolean; overload', @_LapeMufasaBitmap_FindColorsTolerance);
-addGlobalFunc('function TMufasaBitmap.GetPixel(x, y: Integer): TColor;', @_LapeMufasaBitmap_FastGetPixel);
-addGlobalFunc('function TMufasaBitmap.GetPixels(Points: TPointArray): TIntegerArray;', @_LapeMufasaBitmap_FastGetPixels);
-addGlobalFunc('function TMufasaBitmap.GetAreaColors(xs, ys, xe, ye: Integer): TIntegerMatrix;', @_LapeMufasaBitmap_GetAreaColors);
-addGlobalFunc('function TMufasaBitmap.GetHSLValues(xs, ys, xe, ye: Integer): T2DHSLArray;', @_LapeMufasaBitmap_GetHSLValues);
-addGlobalFunc('procedure TMufasaBitmap.DrawClear(Color: TColor);', @_LapeMufasaBitmap_FastDrawClear);
-addGlobalFunc('procedure TMufasaBitmap.DrawTransparent(x, y: Integer; TargetBitmap: TMufasaBitmap);', @_LapeMufasaBitmap_FastDrawTransparent);
-addGlobalFunc('procedure TMufasaBitmap.ReplaceColor(OldColor, NewColor: TColor);', @_LapeMufasaBitmap_FastReplaceColor);
-addGlobalFunc('procedure TMufasaBitmap.CopyClientToBitmap(MWindow: TObject;Resize: boolean; xs, ys, xe, ye: Integer);', @_LapeMufasaBitmap_CopyClientToBitmap);
-addGlobalFunc('procedure TMufasaBitmap.CopyClientToBitmap(MWindow: TObject;Resize: boolean;x,y: Integer; xs, ys, xe, ye: Integer); overload', @_LapeMufasaBitmap_CopyClientToBitmapEx);
-addGlobalFunc('procedure TMufasaBitmap.RotateBitmap(angle: Extended; TargetBitmap: TMufasaBitmap);', @_LapeMufasaBitmap_RotateBitmap);
-addGlobalFunc('procedure TMufasaBitmap.RotateBitmapEx(Angle: Single; Expand: Boolean; Smooth: Boolean; TargetBitmap: TMufasaBitmap);', @_LapeMufasaBitmap_RotateBitmapEx);
-addGlobalFunc('procedure TMufasaBitmap.Desaturate(TargetBitmap: TMufasaBitmap);', @_LapeMufasaBitmap_Desaturate);
+
+addGlobalFunc('procedure TMufasaBitmap.Fill(Color: Integer);', @_LapeMufasaBitmap_Fill);
+addGlobalFunc('procedure TMufasaBitmap.ReplaceColor(OldColor, NewColor: Integer);', @_LapeMufasaBitmap_ReplaceColor);
+addGlobalFunc('procedure TMufasaBitmap.ReplaceColors(OldColors, NewColors: TIntegerArray);', @_LapeMufasaBitmap_ReplaceColors);
+addGlobalFunc('procedure TMufasaBitmap.Rotate(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap);', @_LapeMufasaBitmap_Rotate);
+addGlobalFunc('procedure TMufasaBitmap.RotateBilinear(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap);', @_LapeMufasaBitmap_RotateBilinear);
+addGlobalFunc('procedure TMufasaBitmap.Desaturate(TargetBitmap: TMufasaBitmap); overload', @_LapeMufasaBitmap_Desaturate);
 addGlobalFunc('procedure TMufasaBitmap.Desaturate; overload', @_LapeMufasaBitmap_DesaturateEx);
-addGlobalFunc('procedure TMufasaBitmap.GreyScale(TargetBitmap: TMufasaBitmap);', @_LapeMufasaBitmap_GreyScale);
+addGlobalFunc('procedure TMufasaBitmap.GreyScale(TargetBitmap: TMufasaBitmap); overload', @_LapeMufasaBitmap_GreyScale);
 addGlobalFunc('procedure TMufasaBitmap.GreyScale; overload', @_LapeMufasaBitmap_GreyScaleEx);
-addGlobalFunc('procedure TMufasaBitmap.Brightness(TargetBitmap: TMufasaBitmap; br: Integer);', @_LapeMufasaBitmap_Brightness);
+addGlobalFunc('procedure TMufasaBitmap.Brightness(TargetBitmap: TMufasaBitmap; br: Integer); overload', @_LapeMufasaBitmap_Brightness);
 addGlobalFunc('procedure TMufasaBitmap.Brightness(br: Integer); overload', @_LapeMufasaBitmap_BrightnessEx);
-addGlobalFunc('procedure TMufasaBitmap.Contrast(TargetBitmap: TMufasaBitmap; co: Extended);', @_LapeMufasaBitmap_Contrast);
+addGlobalFunc('procedure TMufasaBitmap.Contrast(TargetBitmap: TMufasaBitmap; co: Extended); overload', @_LapeMufasaBitmap_Contrast);
 addGlobalFunc('procedure TMufasaBitmap.Contrast(co: Extended); overload', @_LapeMufasaBitmap_ContrastEx);
 addGlobalFunc('procedure TMufasaBitmap.Invert(TargetBitmap: TMufasaBitmap);', @_LapeMufasaBitmap_Invert);
 addGlobalFunc('procedure TMufasaBitmap.Invert; overload', @_LapeMufasaBitmap_InvertEx);
-addGlobalFunc('procedure TMufasaBitmap.Posterize(TargetBitmap: TMufasaBitmap; Po: Integer);', @_LapeMufasaBitmap_Posterize);
+addGlobalFunc('procedure TMufasaBitmap.Posterize(TargetBitmap: TMufasaBitmap; Po: Integer); overload', @_LapeMufasaBitmap_Posterize);
 addGlobalFunc('procedure TMufasaBitmap.Posterize(Po: Integer); overload', @_LapeMufasaBitmap_PosterizeEx);
-addGlobalFunc('procedure TMufasaBitmap.Blur(const Block: Integer);', @_LapeMufasaBitmap_Blur);
-addGlobalFunc('procedure TMufasaBitmap.Blur(const Block, xs, ys, xe, ye: Integer); overload', @_LapeMufasaBitmap_BlurEx);
+addGlobalFunc('procedure TMufasaBitmap.Blur(Block: Integer); overload', @_LapeMufasaBitmap_Blur);
+addGlobalFunc('procedure TMufasaBitmap.Blur(TargetBitmap: TMufasaBitmap; Block: Integer); overload', @_LapeMufasaBitmap_BlurEx);
+addGlobalFunc('procedure TMufasaBitmap.Mirror(MirrorStyle: TBmpMirrorStyle); overload', @_LapeMufasaBitmap_Mirror);
+addGlobalFunc('procedure TMufasaBitmap.Mirror(TargetBitmap: TMufasaBitmap; MirrorStyle: TBmpMirrorStyle); overload', @_LapeMufasaBitmap_MirrorEx);
+addGlobalFunc('procedure TMufasaBitmap.Downsample(Scale: Integer); overload', @_LapeMufasaBitmap_DownSample);
+addGlobalFunc('procedure TMufasaBitmap.Downsample(TargetBitmap: TMufasaBitmap; Scale: Integer); overload', @_LapeMufasaBitmap_DownSampleEx);
+addGlobalFunc('procedure TMufasaBitmap.Blend(Points: TPointArray; Size: Integer); overload', @_LapeMufasaBitmap_Blend);
+addGlobalFunc('procedure TMufasaBitmap.Blend(TargetBitmap: TMufasaBitmap; Points: TPointArray; Size: Integer); overload', @_LapeMufasaBitmap_BlendEx);
 addGlobalFunc('procedure TMufasaBitmap.Convolute(TargetBitmap: TMufasaBitmap; Matrix: T2DExtendedArray);', @_LapeMufasaBitmap_Convolute);
-addGlobalFunc('function  TMufasaBitmap.CompareAt(Other: TMufasaBitmap; Pt: TPoint; Tol: Integer): Extended', @_LapeMufasaBitmap_CompareAt);
-addGlobalFunc('procedure TMufasaBitmap.Downsample(DownScale: Integer; TargetBitmap: TMufasaBitmap); overload', @_LapeMufasaBitmap_Downsample);
-addGlobalFunc('function TMufasaBitmap.Downsample(DownScale: Integer; BlendTransparentColor: Boolean = True): TMufasaBitmap; overload', @_LapeMufasaBitmap_DownSampleEx);
-addGlobalFunc('procedure TMufasaBitmap.DrawPolyFilled(Poly: TPointArray; Invert: Boolean; Color: TColor);', @_LapeMufasaBitmap_DrawPolyFilled);
-addGlobalFunc('procedure TMufasaBitmap.DrawCircleFilled(X, Y, Radius: Integer; Invert: Boolean; Color: TColor);', @_LapeMufasaBitmap_DrawCircleFilled);
-addGlobalFunc('procedure TMufasaBitmap.DrawBoxFilled(const B: TBox; Invert: Boolean; Color: TColor);', @_LapeMufasaBitmap_DrawBoxFilled);
-addGlobalFunc('procedure TMufasaBitmap.Blend(Points: TPointArray; Size: Integer);', @_LapeMufasaBitmap_Blend);
-addGlobalFunc('function TMufasaBitmap.Copy(const xs,ys,xe,ye: Integer): TMufasaBitmap;', @_LapeMufasaBitmap_Copy);
+addGlobalFunc('function TMufasaBitmap.Copy(X1, Y1, X2, Y2: Integer): TMufasaBitmap; overload', @_LapeMufasaBitmap_Copy);
 addGlobalFunc('function TMufasaBitmap.Copy: TMufasaBitmap; overload', @_LapeMufasaBitmap_CopyEx);
-addGlobalFunc('procedure TMufasaBitmap.Crop(xs, ys, xe, ye: Integer);', @_LapeMufasaBitmap_Crop);
+addGlobalFunc('procedure TMufasaBitmap.Crop(X1, Y1, X2, Y2: Integer);', @_LapeMufasaBitmap_Crop);
 addGlobalFunc('function TMufasaBitmap.GetColors: TIntegerArray;', @_LapeMufasaBitmap_GetColors);
-addGlobalFunc('function TMufasaBitmap.ToMatrix: TIntegerMatrix;', @_LapeMufasaBitmap_ToMatrix);
+addGlobalFunc('function TMufasaBitmap.ToMatrix: TIntegerMatrix; overload', @_LapeMufasaBitmap_ToMatrix);
+addGlobalFunc('function TMufasaBitmap.ToMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix; overload', @_LapeMufasaBitmap_ToMatrixEx);
 addGlobalFunc('function TMufasaBitmap.ToGreyMatrix: TByteMatrix;', @_LapeMufasaBitmap_ToGreyMatrix);
-addGlobalFunc('procedure TMufasaBitmap.DrawMatrix(const Matrix: TIntegerMatrix); overload', @_LapeMufasaBitmap_DrawMatrix);
-addGlobalFunc('procedure TMufasaBitmap.DrawMatrix(const Matrix: TSingleMatrix; ColorMapID: Integer = 0); overload', @_LapeMufasaBitmap_DrawMatrixF);
-addGlobalFunc('procedure TMufasaBitmap.ThresholdAdaptive(Alpha, Beta: Byte; DoInvert: Boolean; Method: TBmpThreshMethod; C: Integer);', @_LapeMufasaBitmap_ThresholdAdaptive);
+addGlobalFunc('procedure TMufasaBitmap.ThresholdAdaptive(Alpha, Beta: Byte; AInvert: Boolean; Method: TBmpThreshMethod; k: Integer);', @_LapeMufasaBitmap_ThresholdAdaptive);
+addGlobalFunc('procedure TMufasaBitmap.ThresholdSauvola(Radius: Integer; AInvert: Boolean; k: Single);', @_LapeMufasaBitmap_ThresholdSauvola);
 addGlobalFunc('procedure TMufasaBitmap.Pad(Amount: Integer)', @_LapeMufasaBitmap_Pad);
-addGlobalFunc('procedure TMufasaBitmap.ResizeEx(Method: TBmpResizeMethod; NewW, NewH: Integer);', @_LapeMufasaBitmap_ResizeEx);
+
+addGlobalFunc('procedure TMufasaBitmap.LoadFromClient; overload', @_LapeMufasaBitmap_LoadFromClient);
+addGlobalFunc('procedure TMufasaBitmap.LoadFromClient(Area: TBox); overload', @_LapeMufasaBitmap_LoadFromClientEx);
+addGlobalFunc('procedure TMufasaBitmap.LoadFromFile(FileName: String); overload', @_LapeMufasaBitmap_LoadFromFile);
+addGlobalFunc('procedure TMufasaBitmap.LoadFromFile(FileName: String; Area: TBox); overload', @_LapeMufasaBitmap_LoadFromFileEx);
+addGlobalFunc('procedure TMufasaBitmap.LoadFromString(AWidth, AHeight: Integer; Str: String)', @_LapeMufasaBitmap_LoadFromString);
+addGlobalFunc('procedure TMufasaBitmap.LoadFromMemory(AWidth, AHeight: Integer; Memory: PRGB32)', @_LapeMufasaBitmap_LoadFromMemory);
+addGlobalFunc('procedure TMufasaBitmap.LoadFromBitmap(Bitmap: TMufasaBitmap);', @_LapeMufasaBitmap_LoadFromBitmap);
+
+addGlobalFunc('function TMufasaBitmap.SaveToFile(FileName: String): Boolean;', @_LapeMufasaBitmap_SaveToFile);
+addGlobalFunc('function TMufasaBitmap.SaveToString: String;', @_LapeMufasaBitmap_SaveToString);
+
 addGlobalFunc('function TMufasaBitmap.ToTBitmap: TBitmap;', @_LapeMufasaBitmap_ToTBitmap);
-addGlobalFunc('function TMufasaBitmap.ToString: string;', @_LapeMufasaBitmap_ToString);
-addGlobalFunc('function TMufasaBitmap.RowPtrs: TPRGB32Array;', @_LapeMufasaBitmap_RowPtrs);
+addGlobalFunc('procedure TMufasaBitmap.DrawToCanvas(x, y: Integer; Canvas: TCanvas);', @_LapeMufasaBitmap_DrawToCanvas);
 addGlobalFunc('procedure TMufasaBitmap.LoadFromTBitmap(bmp: TBitmap);', @_LapeMufasaBitmap_LoadFromTBitmap);
-//addGlobalFunc('procedure TMufasaBitmap.LoadFromRawImage(RawImage: TRawImage);', @_LapeMufasaBitmap_LoadFromRawImage);
-addGlobalFunc('function TMufasaBitmap.CreateTMask: TMask;', @_LapeMufasaBitmap_CreateTMask);
-addGlobalFunc('procedure TMufasaBitmap.SetTransparentColor(Col: TColor);', @_LapeMufasaBitmap_SetTransparentColor);
-addGlobalFunc('function TMufasaBitmap.GetTransparentColor: TColor;', @_LapeMufasaBitmap_GetTransparentColor);
-addClassVar('TMufasaBitmap', 'TransparentColorSet', 'Boolean', @_LapeMufasaBitmap_TransparentColorSet_Read, nil);
-addGlobalFunc('procedure TMufasaBitmap.SetAlphaValue(const value: Byte);', @_LapeMufasaBitmap_SetAlphaValue);
-addClassVar('TMufasaBitmap', 'List', 'TObject', @_LapeMufasaBitmap_List_Read, @_LapeMufasaBitmap_List_Write);
-addGlobalFunc('procedure TMufasaBitmap.Init(List: TObject = nil)', @_LapeMufasaBitmap_Init);
+
 //addGlobalFunc('procedure TMufasaBitmap.Free;', @_LapeMufasaBitmap_Free);
+
+addDelayedCode('procedure ShowBitmap(Bitmap: TMufasaBitmap; EnsureVisible: Boolean = True); begin end;', '!TMufasaBitmap');
+
+addDelayedCode(
+  'procedure TMufasaBitmap.Init; deprecated ' + #39 + 'Use TMufasaBitmap.Create' + #39 + ';                    ' + LineEnding +
+  'begin                                                                                                       ' + LineEnding +
+  '  Self := TMufasaBitmap.Create();                                                                           ' + LineEnding +
+  '  Self.SetClient(Client);                                                                                   ' + LineEnding +
+  'end;                                                                                                        ' + LineEnding +
+  '                                                                                                            ' + LineEnding +
+  'function TMufasaBitmap.Create: TMufasaBitmap; static; override;                                             ' + LineEnding +
+  'begin                                                                                                       ' + LineEnding +
+  '  Result := inherited();                                                                                    ' + LineEnding +
+  '  Result.SetClient(Client);                                                                                 ' + LineEnding +
+  'end;                                                                                                        ' + LineEnding +
+  '                                                                                                            ' + LineEnding +
+  'function TMufasaBitmap.Create(Width, Height: Integer): TMufasaBitmap; static; override;                     ' + LineEnding +
+  'begin                                                                                                       ' + LineEnding +
+  '  Result := inherited();                                                                                    ' + LineEnding +
+  '  Result.SetClient(Client);                                                                                 ' + LineEnding +
+  'end;                                                                                                        ' + LineEnding +
+  '                                                                                                            ' + LineEnding +
+  'function TMufasaBitmap.CreateFromClient: TMufasaBitmap; static; overload;                                   ' + LineEnding +
+  'begin                                                                                                       ' + LineEnding +
+  '  Result := TMufasaBitmap.Create();                                                                         ' + LineEnding +
+  '  Result.LoadFromClient();                                                                                  ' + LineEnding +
+  'end;                                                                                                        ' + LineEnding +
+  '                                                                                                            ' + LineEnding +
+  'function TMufasaBitmap.CreateFromClient(Area: TBox): TMufasaBitmap; static; overload;                       ' + LineEnding +
+  'begin                                                                                                       ' + LineEnding +
+  '  Result := TMufasaBitmap.Create();                                                                         ' + LineEnding +
+  '  Result.LoadFromClient(Area);                                                                              ' + LineEnding +
+  'end;                                                                                                        ' + LineEnding +
+  '                                                                                                            ' + LineEnding +
+  'procedure TMufasaBitmap.Show(EnsureVisible: Boolean = True);                                                 ' + LineEnding +
+  'begin                                                                                                       ' + LineEnding +
+  '  ShowBitmap(Self);                                                                                         ' + LineEnding +
+  'end;'
+);
 
 popSection();
 

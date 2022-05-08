@@ -304,8 +304,8 @@ begin
   Editor.RightMarginVisible := TSimbaSetting_Boolean.Create(Self, 'Editor', 'RightMarginVisible', False);
 
   Editor.AutomaticallyCompleteBegin := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteBegin', True);
-  Editor.AutomaticallyCompleteParentheses := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteParentheses', True);
-  Editor.AutomaticallyCompleteIndex := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteIndex', True);
+  Editor.AutomaticallyCompleteParentheses := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteParentheses', False);
+  Editor.AutomaticallyCompleteIndex := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteIndex', False);
 
   Load();
 end;

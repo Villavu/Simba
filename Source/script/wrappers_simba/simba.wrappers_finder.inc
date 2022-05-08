@@ -37,37 +37,37 @@ end;
 procedure _LapeFindBitmap(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindBitmap(MBitmaps[PInt32(Params^[0])^], PInt32(Params^[1])^, PInt32(Params^[2])^);
+    PBoolean(Result)^ := MFinder.FindBitmap(PMufasaBitmap(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^);
 end;
 
 procedure _LapeFindBitmapIn(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindBitmapIn(MBitmaps[PInt32(Params^[0])^], PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^);
+    PBoolean(Result)^ := MFinder.FindBitmapIn(PMufasaBitmap(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^);
 end;
 
 procedure _LapeFindBitmapToleranceIn(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindBitmapToleranceIn(MBitmaps[PInt32(Params^[0])^], PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^);
+    PBoolean(Result)^ := MFinder.FindBitmapToleranceIn(PMufasaBitmap(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^);
 end;
 
 procedure _LapeFindBitmapSpiral(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindBitmapSpiral(MBitmaps[PInt32(Params^[0])^], PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^);
+    PBoolean(Result)^ := MFinder.FindBitmapSpiral(PMufasaBitmap(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^);
 end;
 
 procedure _LapeFindBitmapsSpiralTolerance(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindBitmapsSpiralTolerance(MBitmaps[PInt32(Params^[0])^], PInt32(Params^[1])^, PInt32(Params^[2])^, PPointArray(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^, PInt32(Params^[8])^);
+    PBoolean(Result)^ := MFinder.FindBitmapsSpiralTolerance(PMufasaBitmap(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PPointArray(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^, PInt32(Params^[8])^);
 end;
 
 procedure _LapeFindBitmapSpiralTolerance(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindBitmapSpiralTolerance(MBitmaps[PInt32(Params^[0])^], PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^);
+    PBoolean(Result)^ := MFinder.FindBitmapSpiralTolerance(PMufasaBitmap(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^);
 end;
 
 procedure _LapeGetColor(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -190,22 +190,10 @@ begin
     PBoolean(Result)^ := MFinder.FindColoredAreaTolerance(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^, PInt32(Params^[8])^);
 end;
 
-procedure _LapeFindMaskTolerance(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindMaskTolerance(PMask(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^, PInt32(Params^[8])^);
-end;
-
-procedure _LapeFindBitmapMaskTolerance(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindMaskTolerance(MBitmaps[PInt32(Params^[0])^].CreateTMask(), PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^, PInt32(Params^[8])^);
-end;
-
 procedure _LapeFindDeformedBitmapToleranceIn(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindDeformedBitmapToleranceIn(MBitmaps[PInt32(Params^[0])^], PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^, PInt32(Params^[8])^, PBoolean(Params^[9])^, PExtended(Params^[10])^);
+    PBoolean(Result)^ := MFinder.FindDeformedBitmapToleranceIn(PMufasaBitmap(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^, PInt32(Params^[8])^, PBoolean(Params^[9])^, PExtended(Params^[10])^);
 end;
 
 procedure _LapeFindTemplateEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

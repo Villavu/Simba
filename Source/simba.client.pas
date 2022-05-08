@@ -48,7 +48,6 @@ type
     IOManager: TIOManager;
     MFiles: TMFiles;
     MFinder: TMFinder;
-    MBitmaps: TMBitmaps;
     MDTMs: TMDTMS;
     MOCR: TMOCR;
     MInternets: TMInternet;
@@ -95,7 +94,6 @@ begin
 
   MFiles := TMFiles.Create(self);
   MFinder := TMFinder.Create(Self);
-  MBitmaps := TMBitmaps.Create(Self);
   MDTMs := TMDTMS.Create(Self);
   MOCR := TMOCR.Create(Self);
   MInternets := TMInternet.Create(Self);
@@ -113,10 +111,8 @@ TClient.Destroy
 *)
 destructor TClient.Destroy;
 begin
-
   MOCR.Free;
   MDTMs.Free;
-  MBitmaps.Free;
   MFinder.Free;
   MFiles.Free;
   MInternets.Free;

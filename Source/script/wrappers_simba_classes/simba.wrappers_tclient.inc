@@ -28,16 +28,6 @@ begin
   PClient(Params^[0])^.MFinder := PMFinder(Params^[1])^;
 end;
 
-procedure _LapeClient_MBitmaps_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PMBitmaps(Result)^ := PClient(Params^[0])^.MBitmaps;
-end;
-
-procedure _LapeClient_MBitmaps_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PClient(Params^[0])^.MBitmaps := PMBitmaps(Params^[1])^;
-end;
-
 procedure _LapeClient_MDTMs_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PMDTMS(Result)^ := PClient(Params^[0])^.MDTMs;

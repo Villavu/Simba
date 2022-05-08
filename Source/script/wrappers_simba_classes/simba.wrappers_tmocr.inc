@@ -28,11 +28,6 @@ begin
   PMufasaBitmap(Result)^ := PMOCR(Params^[0])^.TextToFontBitmap(PString(Params^[1])^, PString(Params^[2])^);
 end;
 
-procedure _LapeMOCR_TextToMask(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PMask(Result)^ := PMOCR(Params^[0])^.TextToMask(PString(Params^[1])^, PString(Params^[2])^);
-end;
-
 procedure _LapeMOCR_Fonts_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PMFonts(Result)^ := PMOCR(Params^[0])^.Fonts;

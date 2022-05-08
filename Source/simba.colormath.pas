@@ -17,7 +17,8 @@ uses
 function RGBDistance(const Color, OtherColor: TRGB32): Integer; inline;
 
 function BGRToRGB(BGR: TRGB32): TColor; inline;
-function RGBToBGR(Color: TColor): TRGB32; inline;
+function RGBToBGR(const Color: TColor): TRGB32; inline;
+function RGBToBGR(const R, G, B: Integer): TRGB32; inline;
 function RGBToColor(r,g,b: Byte): TColor; overload; inline;
 function RGBToColor(r,g,b: Integer): TColor; overload; inline;
 procedure ColorToRGB(Color: Integer;out r,g,b: Byte); overload; inline;
@@ -72,11 +73,19 @@ begin
   Result := BGR.R or BGR.g shl 8 or BGR.b shl 16;
 end;
 
-function RGBToBGR(Color: TColor): TRGB32;
+function RGBToBGR(const Color: TColor): TRGB32;
 begin
   Result.R := Color and $ff;
   Result.G := Color shr 8 and $ff;
   Result.B := Color shr 16 and $ff;
+  Result.A := 0;
+end;
+
+function RGBToBGR(const R, G, B: Integer): TRGB32;
+begin
+  Result.R := R;
+  Result.G := G;
+  Result.B := B;
   Result.A := 0;
 end;
 

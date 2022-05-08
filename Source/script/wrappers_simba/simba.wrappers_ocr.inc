@@ -1,9 +1,3 @@
-procedure _LapeMaskFromText(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  with SimbaScriptThread.Script.Client do
-    PMask(Result)^ := MOCR.TextToMask(PString(Params^[0])^, PString(Params^[1])^);
-end;
-
 procedure _LapeTPAFromText(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with SimbaScriptThread.Script.Client do
