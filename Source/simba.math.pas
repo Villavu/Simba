@@ -16,10 +16,13 @@ uses
 const
   HALF_PI = PI / 2;
 
+function PointInPolygon(const P: TPoint; const Polygon: TPointArray): Boolean; inline;
+function PointInCircle(const P, Center: TPoint; const Radius: Double): Boolean; inline;
+
 function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray;
 function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint;
 
-function GaussMatrix(N: Integer; sigma: Extended): T2DExtendedArray;
+function GaussMatrix(N: Integer; sigma: Extended): TExtendedMatrix;
 function FixRad(const Rad: Extended): Extended;
 function FixD(const Degrees: Extended): Extended;
 function MiddleBox(const B: TBox): TPoint;
@@ -84,12 +87,39 @@ begin
   Result := Result + 1;
 end;
 
+function PointInPolygon(const P: TPoint; const Polygon: TPointArray): Boolean;
+var
+  I, J: Integer;
+begin
+  Result := False;
+
+  if (Length(Polygon) >= 3) then
+  begin
+    J := Length(Polygon) - 1;
+    for I := 0 to J do
+    begin
+      if ((Polygon[I].Y <= P.Y) and (P.Y < Polygon[J].Y)) or    // an upward crossing
+         ((Polygon[J].Y <= P.Y) and (P.Y < Polygon[I].Y)) then  // a downward crossing
+      begin
+        (* compute the edge-ray intersect at the x-coordinate *)
+        if (P.X - Polygon[I].X < ((Polygon[J].X - Polygon[I].X) * (P.Y - Polygon[I].Y) / (Polygon[J].Y - Polygon[I].Y))) then
+          Result := not Result;
+      end;
+      J := I;
+    end;
+  end;
+end;
+
+function PointInCircle(const P, Center: TPoint; const Radius: Double): Boolean;
+begin
+  Result := Sqr(P.X - Center.X) + Sqr(P.Y - Center.Y) <= Sqr(Radius);
+end;
 
 {/\
   Rotate the given TPA with A radians.
 /\}
 
-Function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray;
+function RotatePoints(const P: TPointArray; A, cx, cy: Extended): TPointArray;
 
 Var
    I, L: Integer;
@@ -112,7 +142,7 @@ End;
   Rotate the given Point with A radians.
 /\}
 
-Function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint;
+function RotatePoint(const p: TPoint; angle, mx, my: Extended): TPoint;
 Begin
   Result.X := Trunc(mx + cos(angle) * (p.x - mx) - sin(angle) * (p.y - my));
   Result.Y := Trunc(my + sin(angle) * (p.x - mx) + cos(angle) * (p.y- my));
@@ -122,7 +152,7 @@ End;
 {/\
   Returns a GaussianMatrix with size of X*X, where X is Nth odd-number.
 /\}
-function GaussMatrix(N: Integer; sigma: Extended): T2DExtendedArray;
+function GaussMatrix(N: Integer; sigma: Extended): TExtendedMatrix;
 var
   hkernel: TExtendedArray;
   Size,i,x,y:Integer;

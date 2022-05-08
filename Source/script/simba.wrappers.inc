@@ -15,7 +15,6 @@
 {$i simba.wrappers_json.inc}
 {$i simba.wrappers_simbaimagebox.inc}
 {$i simba.wrappers_tiomanager.inc}
-{$i simba.wrappers_tmbitmaps.inc}
 {$i simba.wrappers_tmdtm.inc}
 {$i simba.wrappers_tmdtms.inc}
 {$i simba.wrappers_tmfiles.inc}
@@ -45,7 +44,6 @@
 {$i simba.wrappers_ocr.inc}
 {$i simba.wrappers_string.inc}
 {$i simba.wrappers_colormath.inc}
-{$i simba.wrappers_bitmap.inc}
 {$i simba.wrappers_dtm.inc}
 {$i simba.wrappers_file.inc}
 {$i simba.wrappers_other.inc}

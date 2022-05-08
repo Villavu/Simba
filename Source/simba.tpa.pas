@@ -55,6 +55,7 @@ function EdgeFromBox(const Box: TBox): TPointArray;
 function TPAFromBox(const Box : TBox) : TPointArray;
 function TPAFromEllipse(const CX, CY, XRadius, YRadius : Integer): TPointArray;
 function TPAFromCircle(const CX, CY, Radius: Integer): TPointArray;
+function TPAFromCircle(Center: TPoint; Radius: Integer; Filled: Boolean): TPointArray; overload;
 function TPAFromPolygon(const Shape: TPointArray): TPointArray;
 procedure FillEllipse(var TPA: TPointArray);
 function FindTPAEdges(const TPA: TPointArray): TPointArray;
@@ -69,6 +70,7 @@ procedure OffsetATPA(var ATPA : T2DPointArray; const Offset: TPoint);
 function PartitionTPA(const TPA:TPointArray; BoxWidth, BoxHeight: Integer): T2DPointArray;
 function PointsInRangeOf(const Points, Other: TPointArray; MinDist, MaxDist: Double): TPointArray; overload;
 function PointsInRangeOf(const Points, Other: TPointArray; MinDistX, MinDistY, MaxDistX, MaxDistY: Double): TPointArray; overload;
+function TPAConnect(const TPA: TPointArray): TPointArray;
 
 implementation
 
@@ -114,6 +116,20 @@ begin
       Matches[I] := Tree.RangeQueryEx(Other[I], MinDistX, MinDistY, MaxDistX, MaxDistY, True);
 
     Result := MergeATPA(Matches);
+  end;
+end;
+
+function TPAConnect(const TPA: TPointArray): TPointArray;
+var
+  I: Integer;
+begin
+  Result := Default(TPointArray);
+
+  if (Length(TPA) > 1) then
+  begin
+    for I := 0 to High(TPA) - 1 do
+      Result += TPAFromLine(TPA[I].X, TPA[I].Y, TPA[I+1].X, TPA[I+1].Y);
+    Result += TPAFromLine(TPA[High(TPA)].X, TPA[High(TPA)].Y, TPA[0].X, TPA[0].Y);
   end;
 end;
 
@@ -1598,6 +1614,13 @@ end;
 function TPAFromCircle(const CX, CY, Radius: Integer): TPointArray;
 begin
   Result := TPAFromEllipse(CX, CY, Radius, Radius);
+end;
+
+function TPAFromCircle(Center: TPoint; Radius: Integer; Filled: Boolean): TPointArray;
+begin
+  Result := TPAFromEllipse(Center.X, Center.Y, Radius, Radius);
+  if Filled then
+    FillEllipse(Result);
 end;
 
 {/\

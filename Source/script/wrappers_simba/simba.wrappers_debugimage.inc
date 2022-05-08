@@ -6,30 +6,12 @@ begin
   SimbaScriptThread.Script.SimbaCommunication.DebugImage_Show(PMufasaBitmap(Params^[0])^, PBoolean(Params^[1])^);
 end;
 
-procedure _LapeShowBitmapEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('ShowBitmap requires Simba communication');
-
-  with SimbaScriptThread.Script.Client do
-    SimbaScriptThread.Script.SimbaCommunication.DebugImage_Show(MBitmaps[PInteger(Params^[0])^], PBoolean(Params^[1])^);
-end;
-
 procedure _LapeDrawBitmapDebugImg(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('DrawBitmapDebugImg requires Simba communication');
 
   SimbaScriptThread.Script.SimbaCommunication.DebugImage_Draw(PMufasaBitmap(Params^[0])^);
-end;
-
-procedure _LapeDrawBitmapDebugImgEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('DrawBitmapDebugImg requires Simba communication');
-
-  with SimbaScriptThread.Script.Client do
-    SimbaScriptThread.Script.SimbaCommunication.DebugImage_Draw(MBitmaps[PInteger(Params^[0])^]);
 end;
 
 procedure _LapeDisplayDebugImgWindow(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

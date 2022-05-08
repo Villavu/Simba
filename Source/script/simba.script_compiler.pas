@@ -148,6 +148,9 @@ begin
     InitializeWaitUntil(Self);
     InitializeFFI(Self);
 
+    addGlobalType('type Pointer', 'TClient');
+    addGlobalVar('TClient', nil, 'Client'); // Will be assigned later
+
     {$i simba.imports.inc}
   finally
     EndImporting();

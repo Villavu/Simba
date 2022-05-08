@@ -15,8 +15,7 @@ end;
 
 procedure _LapeSetTargetBitmap(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  with SimbaScriptThread.Script.Client do
-    PInteger(Result)^ := IOManager.SetTarget(MBitmaps[PInteger(Params^[0])^]);
+  PInteger(Result)^ := SimbaScriptThread.Script.Client.IOManager.SetTarget(PMufasaBitmap(Params^[0])^);
 end;
 
 procedure _LapeSetEIOSTarget(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -112,15 +111,10 @@ end;
 procedure _LapeSaveScreenshot(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 var
   BMP: TMufasaBitmap;
-  W, H: Int32;
 begin
   with SimbaScriptThread.Script.Client do
   begin
-    IOManager.GetDimensions(W, H);
-
-    BMP := TMufasaBitmap.Create();
-    BMP.CopyClientToBitmap(IOManager, True, 0, 0, W-1, H-1);
-
+    BMP := TMufasaBitmap.CreateFromClient(SimbaScriptThread.Script.Client);
     try
       BMP.SaveToFile(PString(Params^[0])^);
     finally

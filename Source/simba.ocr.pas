@@ -34,7 +34,6 @@ type
     function TextToFontTPA(Text, Font: String; out W, H: Int32): TPointArray; overload;
     function TextToFontTPA(Text: String; Font: TFont; out W, H: Int32): TPointArray; overload;
     function TextToFontBitmap(Text, font: String): TMufasaBitmap;
-    function TextToMask(Text, font: String): TMask;
 
     property Fonts: TMFonts read FFonts;
     property FontPath: String read GetFontPath write SetFontPath;
@@ -311,41 +310,6 @@ begin
   bmp.SetSize(w, h);
   bmp.DrawTPA(TPA, clWhite);
   result := bmp;
-end;
-
-function TMOCR.TextToMask(Text, font: String): TMask;
-var
-   TPA: TPointArray;
-   w,h: integer;
-   i,x,y : integer;
-   dx,dy : integer;
-   c : integer;
-   Pixels : array of array of boolean; //White = true
-begin
-  TPA := TextToFontTPA(text, font, w, h);
-  Result.w := w;
-  Result.h := h;
-  Result.WhiteHi:= High(TPA);//High(WhitePixels)
-  Result.BlackHi:= w*h - Length(TPA) - 1;//High(BlackPixels) = Length(blackPixels) - 1 = (TotalLength - LenWhitePixels) - 1
-  SetLength(Pixels,w,h);
-  SetLength(result.White,Result.WhiteHi + 1);
-  SetLength(result.Black,Result.BlackHi + 1);
-  for i := Result.WhiteHi downto 0 do
-  begin
-    Result.White[i] := TPA[i];
-    Pixels[TPA[i].x][TPA[i].y] := true;
-  end;
-  c := 0;
-  dx := w-1;
-  dy := h-1;
-  for y := 0 to dY do
-    for x := 0 to dX do
-    if not Pixels[x][y] then
-    begin
-      result.Black[c].x :=x;
-      result.black[c].y := y;
-      inc(c);
-    end;
 end;
 
 end.

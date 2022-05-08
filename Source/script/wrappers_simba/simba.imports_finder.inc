@@ -33,8 +33,6 @@ addGlobalFunc('function FindColorSpiralTolerance(var x, y: Int32; color, xs, ys,
 addGlobalFunc('function FindColorsSpiralTolerance(x, y: Int32; var Points: TPointArray; color, xs, ys, xe, ye: Int32; Tolerance: Int32): Boolean', @_LapeFindColorsSpiralTolerance);
 addGlobalFunc('function FindColoredArea(var x, y: Int32; color, xs, ys, xe, ye: Int32; MinArea: Int32): Boolean', @_LapeFindColoredArea);
 addGlobalFunc('function FindColoredAreaTolerance(var x, y: Int32; Color, xs, ys, xe, ye, MinArea, Tol: Int32): Boolean', @_LapeFindColoredAreaTolerance);
-addGlobalFunc('function FindMaskTolerance(const mask: TMask; var x, y: Int32; xs,ys, xe, ye: Int32; Tolerance, ContourTolerance: Int32): Boolean', @_LapeFindMaskTolerance);
-addGlobalFunc('function FindBitmapMaskTolerance(mask: Int32; var x, y: Int32; xs, ys, xe, ye: Int32; Tolerance, ContourTolerance: Int32): Boolean', @_LapeFindBitmapMaskTolerance);
 addGlobalFunc('function FindDeformedBitmapToleranceIn(bitmap: Int32; var x, y: Int32; xs, ys, xe, ye: Int32; tolerance: Int32; Range: Int32; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean', @_LapeFindDeformedBitmapToleranceIn);
 addGlobalFunc('function FindTemplate(Templ: TMufasaBitmap; out x, y: Int32; Formula: ETMFormula; xs,ys,xe,ye: Int32; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @_LapeFindTemplate);
 addGlobalFunc('function FindTemplateEx(Templ: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; xs,ys,xe,ye: Int32; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @_LapeFindTemplateEx);

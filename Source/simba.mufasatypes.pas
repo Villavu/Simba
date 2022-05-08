@@ -145,7 +145,9 @@ type
   PExtendedArray = ^TExtendedArray;
   TExtendedArray = array of Extended;
   P2DExtendedArray = ^T2DExtendedArray;
-  T2DExtendedArray = array of array of Extended;
+  T2DExtendedArray = array of TExtendedArray;
+  PExtendedMatrix = ^TExtendedMatrix;
+  TExtendedMatrix = array of TExtendedArray;
 
   PSingleArray  = ^TSingleArray;
   TSingleArray  = array of Single;
@@ -177,14 +179,6 @@ type
   EComparator = (__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__);
   PComparator = ^EComparator;
 
-  { Mask Types }
-  PMask = ^TMask;
-  TMask = record
-    White, Black : TPointArray;
-    WhiteHi,BlackHi : integer;
-    W,H : integer;
-  end;
-
   { File types }
   TMufasaFile = record
     Path: String;
@@ -197,6 +191,8 @@ type
   TBox = record
     X1, Y1, X2, Y2: Integer;
   end;
+  PBoxArray = ^TBoxArray;
+  TBoxArray = array of TBox;
 
   TBoxHelper = record Helper for TBox
   protected
@@ -205,6 +201,7 @@ type
   public
     class function Create(const X1, Y1, X2, Y2: Integer): TBox; static;
 
+    function Area: Integer;
     function Expand(Amount: Integer): TBox;
     function Contains(X, Y, Width, Height: Integer): Boolean; overload;
     function Contains(X, Y: Integer): Boolean; overload;
@@ -217,17 +214,6 @@ type
 
   function Box(const X1, Y1, X2, Y2: Integer): TBox;
 
-type
-  TSysProc = record
-    Title: WideString;
-    Handle: UInt32;
-    PID: UInt32;
-    Width, Height: integer;
-  end;
-  TSysProcArr = array of TSysProc;
-  PSysProcArr = ^TSysProcArr;
-  PSysProc = ^TSysProc;
-
 const
   TMDTMPointSize = 5*SizeOf(integer)+Sizeof(boolean);
 type
@@ -239,9 +225,6 @@ type
   PMDTMPoint = ^TMDTMPoint; //PointerMufasaDTMPoint
   TMDTMPointArray = array of TMDTMPoint; //TMufasaDTMPointArray
 
-
-  { Other DTM Types }
-
   TSDTMPointDef = record
     x, y, Color, Tolerance, AreaSize, AreaShape: integer;
   end;
@@ -252,12 +235,6 @@ type
   TSDTM = record
     MainPoint: TSDTMPointDef;
     SubPoints: TSDTMPointDefArray;
-  end;
-
-type
-  VirtualKeyInfo = record
-    Str : string;
-    Key : byte;
   end;
 
   TOCRFilterData = packed record
@@ -315,12 +292,12 @@ begin
   Result := Int32(Left) = Int32(Right);
 end;
 
-function TBoxHelper.GetWidth: Int32;
+function TBoxHelper.GetWidth: Integer;
 begin
   Result := (Self.X2 - Self.X1) + 1;
 end;
 
-function TBoxHelper.GetHeight: Int32;
+function TBoxHelper.GetHeight: Integer;
 begin
   Result := (Self.Y2 - Self.Y1) + 1;
 end;
@@ -331,6 +308,11 @@ begin
   Result.Y1 := Y1;
   Result.X2 := X2;
   Result.Y2 := Y2;
+end;
+
+function TBoxHelper.Area: Integer;
+begin
+  Result := (Width * Height);
 end;
 
 function TBoxHelper.Expand(Amount: Integer): TBox;

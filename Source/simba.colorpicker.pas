@@ -52,8 +52,7 @@ type
 implementation
 
 uses
-  lcltype,
-  simba.bitmap;
+  lcltype, simba.bitmap;
 
 procedure TSimbaColorPickerHint.Paint;
 begin
@@ -174,11 +173,8 @@ begin
     OnMouseUp := @ImageMouseUp;
     OnMouseMove := @ImageMouseMove;
 
-    FClient.IOManager.GetDimensions(W, H);
-    with TMufasaBitmap.Create() do
+    with TMufasaBitmap.CreateFromClient(FClient) do
     try
-      CopyClientToBitmap(FClient.IOManager, True, 0, 0, W-1, H-1);
-
       Picture.Bitmap.LoadFromRawImage(ToRawImage(), False);
     finally
       Free();

@@ -19,7 +19,6 @@
 {$i simba.imports_tmdtm.inc}
 {$i simba.imports_tmdtms.inc}
 {$i simba.imports_tmufasabitmap.inc}
-{$i simba.imports_tmbitmaps.inc}
 {$i simba.imports_tmfiles.inc}
 {$i simba.imports_tmfinder.inc}
 {$i simba.imports_tmfont.inc}
@@ -44,7 +43,6 @@
 {$i simba.imports_ocr.inc}
 {$i simba.imports_string.inc}
 {$i simba.imports_colormath.inc}
-{$i simba.imports_bitmap.inc}
 {$i simba.imports_dtm.inc}
 {$i simba.imports_file.inc}
 {$i simba.imports_other.inc}

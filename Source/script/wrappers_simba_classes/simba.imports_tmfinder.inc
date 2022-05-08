@@ -15,8 +15,6 @@ addGlobalFunc('function TMFinder.FindColorsSpiralTolerance(x, y: Integer; out Po
 addGlobalFunc('function TMFinder.FindColors(var TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;', @_LapeMFinder_FindColors);
 addGlobalFunc('function TMFinder.FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea: Integer): Boolean;', @_LapeMFinder_FindColoredArea);
 addGlobalFunc('function TMFinder.FindColoredAreaTolerance(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea, tol: Integer): Boolean;', @_LapeMFinder_FindColoredAreaTolerance);
-addGlobalFunc('function TMFinder.FindMaskTolerance(const mask: TMask; out x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;', @_LapeMFinder_FindMaskTolerance);
-addGlobalFunc('procedure TMFinder.CheckMask(const Mask : TMask);', @_LapeMFinder_CheckMask);
 addGlobalFunc('function TMFinder.FindBitmap(bitmap: TMufasaBitmap; out x, y: Integer): Boolean;', @_LapeMFinder_FindBitmap);
 addGlobalFunc('function TMFinder.FindBitmapIn(bitmap: TMufasaBitmap; out x, y: Integer;  xs, ys, xe, ye: Integer): Boolean;', @_LapeMFinder_FindBitmapIn);
 addGlobalFunc('function TMFinder.FindBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean;', @_LapeMFinder_FindBitmapToleranceIn);
