@@ -214,6 +214,8 @@ type
 
     function PixelDifferenceTPA(Other: TMufasaBitmap): TPointArray; overload;
     function PixelDifferenceTPA(Other: TMufasaBitmap; Tolerance: Integer): TPointArray; overload;
+
+    function PixelEdgesTPA(MinDiff: Integer): TPointArray;
   end;
 
   TMufasaBitmapArray = array of TMufasaBitmap;
@@ -766,6 +768,37 @@ begin
       Index := Y * FWidth + X;
       if (RGBDistance(FData[Index], Other.FData[Index]) > Tolerance) then
         Buffer.Add(TPoint.Create(X, Y));
+    end;
+
+  Result := Buffer.Trim();
+end;
+
+function TMufasaBitmap.PixelEdgesTPA(MinDiff: Integer): TPointArray;
+var
+  X, Y ,W, H: Integer;
+  Buffer: specialize TSimbaOverAllocateArray<TPoint>;
+begin
+  Buffer.Init();
+
+  MinDiff := Sqr(MinDiff);
+
+  W := FWidth - 1;
+  H := FHeight - 1;
+
+  for Y := 0 to H do
+    for X := 0 to W do
+    begin
+      if (X+1 < W) then
+        if RGBDistance(FData[Y*FWidth+X], FData[Y*FWidth+(X+1)]) > MinDiff then
+        begin
+          Buffer.Add(TPoint.Create(X, Y));
+
+          Continue;
+        end;
+
+      if (Y+1 < H) then
+        if RGBDistance(FData[Y*FWidth+X], FData[(Y+1)*FWidth+X]) > MinDiff then
+          Buffer.Add(TPoint.Create(X, Y));
     end;
 
   Result := Buffer.Trim();

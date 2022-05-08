@@ -38,7 +38,7 @@ type
     procedure pushTokenizer(ATokenizer: TLapeTokenizerBase); reintroduce;
     procedure pushConditional(AEval: Boolean; ADocPos: TDocPos); reintroduce;
 
-    procedure addDelayedCode(Code: array of lpString; AFileName: lpString); virtual; overload;
+    procedure addDelayedCode(Code: array of lpString; AFileName: lpString = ''); virtual; overload;
 
     function addGlobalFunc(Header, Body: lpString): TLapeTree_Method; virtual; overload;
     function addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar; virtual; overload;
