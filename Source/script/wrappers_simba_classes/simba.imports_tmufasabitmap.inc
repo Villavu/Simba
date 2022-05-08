@@ -45,6 +45,8 @@ addGlobalFunc('function TMufasaBitmap.PixelDifference(Other: TMufasaBitmap; Tole
 addGlobalFunc('function TMufasaBitmap.PixelDifferenceTPA(Other: TMufasaBitmap): TPointArray; overload', @_LapeMufasaBitmap_PixelDifferenceTPA);
 addGlobalFunc('function TMufasaBitmap.PixelDifferenceTPA(Other: TMufasaBitmap; Tolerance: Integer): TPointArray; overload', @_LapeMufasaBitmap_PixelDifferenceToleranceTPA);
 
+addGlobalFunc('function TMufasaBitmap.PixelEdgesTPA(MinDiff: Integer): TPointArray;', @_LapeMufasaBitmap_PixelEdgesTPA);
+
 addGlobalFunc('function TMufasaBitmap.TextWidth(Text: String): Integer;', @_LapeMufasaBitmap_TextWidth);
 addGlobalFunc('function TMufasaBitmap.TextHeight(Text: String): Integer;', @_LapeMufasaBitmap_TextHeight);
 addGlobalFunc('function TMufasaBitmap.TextSize(Text: String): TPoint;', @_LapeMufasaBitmap_TextSize);
@@ -160,44 +162,44 @@ addGlobalFunc('procedure TMufasaBitmap.LoadFromTBitmap(bmp: TBitmap);', @_LapeMu
 
 //addGlobalFunc('procedure TMufasaBitmap.Free;', @_LapeMufasaBitmap_Free);
 
-addDelayedCode('procedure ShowBitmap(Bitmap: TMufasaBitmap; EnsureVisible: Boolean = True); begin end;', '!TMufasaBitmap');
+addDelayedCode('{$HINTS OFF} procedure ShowBitmap(Bitmap: TMufasaBitmap; EnsureVisible: Boolean = True); begin end;', '!ShowBitmap');
 
-addDelayedCode(
-  'procedure TMufasaBitmap.Init; deprecated ' + #39 + 'Use TMufasaBitmap.Create' + #39 + ';                    ' + LineEnding +
-  'begin                                                                                                       ' + LineEnding +
-  '  Self := TMufasaBitmap.Create();                                                                           ' + LineEnding +
-  '  Self.SetClient(Client);                                                                                   ' + LineEnding +
-  'end;                                                                                                        ' + LineEnding +
-  '                                                                                                            ' + LineEnding +
-  'function TMufasaBitmap.Create: TMufasaBitmap; static; override;                                             ' + LineEnding +
-  'begin                                                                                                       ' + LineEnding +
-  '  Result := inherited();                                                                                    ' + LineEnding +
-  '  Result.SetClient(Client);                                                                                 ' + LineEnding +
-  'end;                                                                                                        ' + LineEnding +
-  '                                                                                                            ' + LineEnding +
-  'function TMufasaBitmap.Create(Width, Height: Integer): TMufasaBitmap; static; override;                     ' + LineEnding +
-  'begin                                                                                                       ' + LineEnding +
-  '  Result := inherited();                                                                                    ' + LineEnding +
-  '  Result.SetClient(Client);                                                                                 ' + LineEnding +
-  'end;                                                                                                        ' + LineEnding +
-  '                                                                                                            ' + LineEnding +
-  'function TMufasaBitmap.CreateFromClient: TMufasaBitmap; static; overload;                                   ' + LineEnding +
-  'begin                                                                                                       ' + LineEnding +
-  '  Result := TMufasaBitmap.Create();                                                                         ' + LineEnding +
-  '  Result.LoadFromClient();                                                                                  ' + LineEnding +
-  'end;                                                                                                        ' + LineEnding +
-  '                                                                                                            ' + LineEnding +
-  'function TMufasaBitmap.CreateFromClient(Area: TBox): TMufasaBitmap; static; overload;                       ' + LineEnding +
-  'begin                                                                                                       ' + LineEnding +
-  '  Result := TMufasaBitmap.Create();                                                                         ' + LineEnding +
-  '  Result.LoadFromClient(Area);                                                                              ' + LineEnding +
-  'end;                                                                                                        ' + LineEnding +
-  '                                                                                                            ' + LineEnding +
-  'procedure TMufasaBitmap.Show(EnsureVisible: Boolean = True);                                                 ' + LineEnding +
-  'begin                                                                                                       ' + LineEnding +
-  '  ShowBitmap(Self);                                                                                         ' + LineEnding +
+addDelayedCode([
+  'procedure TMufasaBitmap.Init; deprecated ' + #39 + 'Use TMufasaBitmap.Create' + #39 + ';',
+  'begin',
+  '  Self := TMufasaBitmap.Create();',
+  '  Self.SetClient(Client);',
+  'end;',
+  '',
+  'function TMufasaBitmap.Create: TMufasaBitmap; static; override;',
+  'begin',
+  '  Result := inherited();',
+  '  Result.SetClient(Client);',
+  'end;',
+  '',
+  'function TMufasaBitmap.Create(Width, Height: Integer): TMufasaBitmap; static; override;',
+  'begin',
+  '  Result := inherited();',
+  '  Result.SetClient(Client);',
+  'end;',
+  '',
+  'function TMufasaBitmap.CreateFromClient: TMufasaBitmap; static; overload;',
+  'begin',
+  '  Result := TMufasaBitmap.Create();',
+  '  Result.LoadFromClient();',
+  'end;',
+  '',
+  'function TMufasaBitmap.CreateFromClient(Area: TBox): TMufasaBitmap; static; overload;',
+  'begin',
+  '  Result := TMufasaBitmap.Create();',
+  '  Result.LoadFromClient(Area);',
+  'end;',
+  '',
+  'procedure TMufasaBitmap.Show(EnsureVisible: Boolean = True);',
+  'begin',
+  '  ShowBitmap(Self, EnsureVisible);',
   'end;'
-);
+]);
 
 popSection();
 

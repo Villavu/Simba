@@ -657,3 +657,8 @@ procedure _LapeMufasaBitmap_CreateFromString(const Params: PParamArray; const Re
 begin
   PMufasaBitmap(Result)^ := TMufasaBitmap.CreateFromString(PInteger(Params^[0])^, PInteger(Params^[1])^, PString(Params^[2])^);
 end;
+
+procedure _LapeMufasaBitmap_PixelEdgesTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := PMufasaBitmap(Params^[0])^.PixelEdgesTPA(PInteger(Params^[1])^);
+end;
