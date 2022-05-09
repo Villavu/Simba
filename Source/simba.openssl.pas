@@ -61,8 +61,8 @@ begin
   if Name.StartsWith('libcrypto') then
   begin
     FileName := GetSimbaPath() + Name;
-    if not IsFileHash(FileName, SimbaSettings.Environment.LibCryptoHash.Value) then
-      SimbaSettings.Environment.LibCryptoHash.Value := ExtractLib(TResourceStream.Create(HINSTANCE, ResourceName, ResourceType), FileName);
+    if not IsFileHash(FileName, SimbaSettings.General.OpenSSLCryptoHash.Value) then
+      SimbaSettings.General.OpenSSLCryptoHash.Value := ExtractLib(TResourceStream.Create(HINSTANCE, ResourceName, ResourceType), FileName);
 
     Result := False;
   end else
@@ -78,8 +78,8 @@ begin
   if Name.StartsWith('libssl') then
   begin
     FileName := GetSimbaPath() + Name;
-    if not IsFileHash(FileName, SimbaSettings.Environment.LibSSLHash.Value) then
-      SimbaSettings.Environment.LibSSLHash.Value := ExtractLib(TResourceStream.Create(HINSTANCE, ResourceName, ResourceType), FileName);
+    if not IsFileHash(FileName, SimbaSettings.General.OpenSSLHash.Value) then
+      SimbaSettings.General.OpenSSLHash.Value := ExtractLib(TResourceStream.Create(HINSTANCE, ResourceName, ResourceType), FileName);
 
     Result := False;
   end else

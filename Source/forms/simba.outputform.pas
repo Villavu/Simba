@@ -45,9 +45,10 @@ type
 
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
   public
+    procedure Clear;
+
     procedure Add(const S: String); overload;
     procedure Add(const Strings: TStrings); overload;
-
     function AddRaw(const Data: String): String;
 
     constructor Create(AOwner: TComponent); override;
@@ -314,6 +315,16 @@ begin
       Editor.Font.Quality := fqCleartypeNatural
     else
       Editor.Font.Quality := fqNonAntialiased;
+  end;
+end;
+
+procedure TSimbaOutputForm.Clear;
+begin
+  FLock.Enter();
+  try
+    FStrings.Add(OUTPUT_CLEAR);
+  finally
+    FLock.Leave();
   end;
 end;
 

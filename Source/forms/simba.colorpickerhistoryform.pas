@@ -119,7 +119,7 @@ begin
 
   ColorListBox.Options := ColorListBox.Options - [lboDrawFocusRect];
 
-  Stream := TStringStream.Create(AnsiString(SimbaSettings.GUI.ColorPickerHistory.Value));
+  Stream := TStringStream.Create(AnsiString(SimbaSettings.General.ColorPickerHistory.Value));
   while Stream.Read(Value, SizeOf(TColorHistoryValue)) = SizeOf(TColorHistoryValue) do
     Add(Value.Point, Value.Color);
   Stream.Free();
@@ -143,7 +143,7 @@ begin
     Stream.Write(Value, SizeOf(TColorHistoryValue));
   end;
 
-  SimbaSettings.GUI.ColorPickerHistory.Value := Stream.DataString;
+  SimbaSettings.General.ColorPickerHistory.Value := Stream.DataString;
 
   Stream.Free();
 end;

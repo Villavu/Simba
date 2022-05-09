@@ -1,13 +1,15 @@
 object SimbaGeneralFrame: TSimbaGeneralFrame
   Left = 0
-  Height = 304
+  Height = 380
   Top = 0
-  Width = 457
-  ClientHeight = 304
-  ClientWidth = 457
+  Width = 571
+  ClientHeight = 380
+  ClientWidth = 571
+  DesignTimePPI = 120
+  ParentFont = False
   TabOrder = 0
-  DesignLeft = 1766
-  DesignTop = 542
+  DesignLeft = 2862
+  DesignTop = 803
   object ToolbarSizeTrackBar: TTrackBar
     AnchorSideLeft.Control = ToolbarSizeCaption
     AnchorSideLeft.Side = asrBottom
@@ -16,10 +18,10 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Side = asrBottom
-    Left = 128
+    Left = 164
     Height = 31
-    Top = 41
-    Width = 329
+    Top = 43
+    Width = 407
     Max = 32
     Min = 12
     OnChange = ToolbarSizeTrackBarChange
@@ -27,8 +29,8 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Position = 12
     Align = alCustom
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Left = 15
-    BorderSpacing.Top = 5
+    BorderSpacing.Left = 19
+    BorderSpacing.Top = 6
     TabOrder = 0
   end
   object FontSizeTrackBar: TTrackBar
@@ -38,10 +40,10 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = FontSizeLabel
     AnchorSideBottom.Side = asrBottom
-    Left = 128
+    Left = 164
     Height = 31
-    Top = 5
-    Width = 329
+    Top = 6
+    Width = 407
     Max = 25
     Min = 5
     OnChange = FontSizeTrackBarChange
@@ -49,7 +51,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Position = 5
     Align = alCustom
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 5
+    BorderSpacing.Top = 6
     TabOrder = 1
   end
   object FontSizeLabel: TLabel
@@ -59,8 +61,8 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Side = asrBottom
     Left = 0
     Height = 31
-    Top = 5
-    Width = 96
+    Top = 6
+    Width = 123
     Align = alCustom
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Font Size (Default)'
@@ -73,66 +75,27 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Side = asrBottom
     Left = 0
     Height = 31
-    Top = 41
-    Width = 113
+    Top = 43
+    Width = 145
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Toolbar Size (Default)'
     Layout = tlCenter
   end
-  object ExtractOpenSSLCheckbox: TCheckBox
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = GeneralDivider
-    AnchorSideTop.Side = asrBottom
-    Left = 0
-    Height = 19
-    Top = 105
-    Width = 166
-    BorderSpacing.Top = 8
-    Caption = 'Extract OpenSSL On Launch'
-    TabOrder = 2
-  end
-  object GeneralDivider: TDividerBevel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = ToolbarSizeCaption
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = ToolbarSizeTrackBar
-    AnchorSideRight.Side = asrBottom
-    Left = 0
-    Height = 15
-    Top = 82
-    Width = 457
-    Caption = 'General'
-    Align = alCustom
-    Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 10
-    Style = gsHorLines
-  end
-  object MacOSCommandKey: TCheckBox
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = ExtractOpenSSLCheckbox
-    AnchorSideTop.Side = asrBottom
-    Left = 0
-    Height = 19
-    Top = 129
-    Width = 162
-    BorderSpacing.Top = 5
-    Caption = 'Use MacOS Command Key'
-    TabOrder = 3
-  end
   object OutputDivider: TDividerBevel
     AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = MacOSCommandKey
+    AnchorSideTop.Control = CheckGroup1
     AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = ToolbarSizeTrackBar
+    AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 0
-    Height = 15
-    Top = 158
-    Width = 457
+    Height = 20
+    Top = 209
+    Width = 571
     Caption = 'Output'
     Align = alCustom
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 10
+    BorderSpacing.Top = 6
+    BorderSpacing.Bottom = 6
     Style = gsHorLines
   end
   object Label1: TLabel
@@ -141,9 +104,9 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Control = OutputFontName
     AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 23
-    Top = 181
-    Width = 59
+    Height = 28
+    Top = 235
+    Width = 73
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Font Name'
     Layout = tlCenter
@@ -155,15 +118,14 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 67
-    Height = 23
-    Top = 181
-    Width = 390
+    Left = 83
+    Height = 28
+    Top = 235
+    Width = 488
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Left = 8
-    BorderSpacing.Top = 8
-    ItemHeight = 15
-    TabOrder = 4
+    BorderSpacing.Left = 10
+    ItemHeight = 20
+    TabOrder = 2
     Text = 'OutputFontName'
   end
   object OutputFontSize: TSpinEdit
@@ -173,26 +135,26 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 67
-    Height = 23
-    Top = 209
-    Width = 390
+    Left = 83
+    Height = 28
+    Top = 269
+    Width = 488
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Left = 8
-    BorderSpacing.Top = 5
-    TabOrder = 5
+    BorderSpacing.Left = 10
+    BorderSpacing.Top = 6
+    TabOrder = 3
   end
   object OutputFontAntiAliased: TCheckBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = OutputFontSize
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 19
-    Top = 237
-    Width = 85
-    BorderSpacing.Top = 5
+    Height = 24
+    Top = 303
+    Width = 106
+    BorderSpacing.Top = 6
     Caption = 'Anti-Aliased'
-    TabOrder = 6
+    TabOrder = 4
   end
   object Label2: TLabel
     AnchorSideLeft.Control = Owner
@@ -200,11 +162,49 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Control = OutputFontSize
     AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 23
-    Top = 209
-    Width = 47
+    Height = 28
+    Top = 269
+    Width = 60
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Font Size'
     Layout = tlCenter
+  end
+  object CheckGroup1: TCheckGroup
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = ToolbarSizeTrackBar
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 5
+    Height = 119
+    Top = 84
+    Width = 561
+    Anchors = [akTop, akLeft, akRight]
+    AutoFill = True
+    AutoSize = True
+    BorderSpacing.Left = 5
+    BorderSpacing.Top = 10
+    BorderSpacing.Right = 5
+    BorderSpacing.InnerBorder = 5
+    Caption = 'General'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    ClientHeight = 94
+    ClientWidth = 557
+    Items.Strings = (
+      'Clear Output On Compile'
+      'Extract OpenSSL On Launch (Windows)'
+      'Use Command Key (MacOS)'
+    )
+    TabOrder = 5
+    Data = {
+      03000000030303
+    }
   end
 end

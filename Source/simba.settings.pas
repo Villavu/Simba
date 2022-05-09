@@ -13,7 +13,7 @@ uses
   classes, sysutils, inifiles, lazmethodlist, variants, fgl;
 
 const
-  SETTINGS_VERSION = 1; // Update if settings become incompatible!
+  SETTINGS_VERSION = 1; // Increase if settings become incompatible
 
 type
   TSimbaSettings = class;
@@ -53,7 +53,7 @@ type
     procedure Load;
     procedure Save;
   public
-    GUI: record
+    General: record
       ConsoleVisible: TSimbaSetting;
       TrayIconVisible: TSimbaSetting;
       Layout: TSimbaSetting;
@@ -65,9 +65,14 @@ type
       ColorPickerHistory: TSimbaSetting;
       MacOSKeystrokes: TSimbaSetting;
 
+      OutputClearOnCompile: TSimbaSetting;
       OutputFontName: TSimbaSetting;
       OutputFontSize: TSimbaSetting;
       OutputFontAntiAliased: TSimbaSetting;
+
+      OpenSSLExtractOnLaunch: TSimbaSetting;
+      OpenSSLCryptoHash: TSimbaSetting;
+      OpenSSLHash: TSimbaSetting;
     end;
 
     Editor: record
@@ -85,12 +90,6 @@ type
       AutomaticallyCompleteBegin: TSimbaSetting;
       AutomaticallyCompleteParentheses: TSimbaSetting;
       AutomaticallyCompleteIndex: TSimbaSetting;
-    end;
-
-    Environment: record
-      OpenSSLOnLaunch: TSimbaSetting;
-      LibCryptoHash: TSimbaSetting;
-      LibSSLHash: TSimbaSetting;
     end;
 
     property FirstLaunch: Boolean read FFirstLaunch;
@@ -269,26 +268,26 @@ begin
   FList := TSimbaSettingList.Create();
   FChangeEventList := TMethodList.Create();
 
-  // Environment
-  Environment.OpenSSLOnLaunch := TSimbaSetting_Boolean.Create(Self, 'Environment', 'OpenSSLOnLaunch', True);
-  Environment.LibCryptoHash := TSimbaSetting_String.Create(Self, 'Environment', 'LibCryptoHash', '');
-  Environment.LibSSLHash := TSimbaSetting_String.Create(Self, 'Environment', 'LibSSLHash', '');
+  // General
+  General.ConsoleVisible := TSimbaSetting_Boolean.Create(Self, 'General', 'ConsoleVisible', True);
+  General.TrayIconVisible := TSimbaSetting_Boolean.Create(Self, 'General', 'TrayIconVisible', True);
+  General.LockLayout := TSimbaSetting_Boolean.Create(Self, 'General', 'LockLayout', False);
+  General.Layout := TSimbaSetting_BinaryString.Create(Self, 'General', 'Layout', '');
+  General.Notes := TSimbaSetting_BinaryString.Create(Self, 'General', 'Notes', '');
+  General.RecentFiles := TSimbaSetting_BinaryString.Create(Self, 'General', 'RecentFiles', '');
+  General.CustomFontSize := TSimbaSetting_Integer.Create(Self, 'General', 'CustomFontSize', 0);
+  General.ToolbarSize := TSimbaSetting_Integer.Create(Self, 'General', 'ToolbarSize', 24);
+  General.ColorPickerHistory := TSimbaSetting_BinaryString.Create(Self, 'General', 'ColorPickerHistory', '');
+  General.MacOSKeystrokes := TSimbaSetting_Boolean.Create(Self, 'General', 'MacOSKeystrokes', {$IFDEF DARWIN}True{$ELSE}False{$ENDIF});
 
-  // GUI
-  GUI.ConsoleVisible := TSimbaSetting_Boolean.Create(Self, 'GUI', 'ConsoleVisible', True);
-  GUI.TrayIconVisible := TSimbaSetting_Boolean.Create(Self, 'GUI', 'TrayIconVisible', True);
-  GUI.LockLayout := TSimbaSetting_Boolean.Create(Self, 'GUI', 'LockLayout', False);
-  GUI.Layout := TSimbaSetting_BinaryString.Create(Self, 'GUI', 'Layout', '');
-  GUI.Notes := TSimbaSetting_BinaryString.Create(Self, 'GUI', 'Notes', '');
-  GUI.RecentFiles := TSimbaSetting_BinaryString.Create(Self, 'GUI', 'RecentFiles', '');
-  GUI.CustomFontSize := TSimbaSetting_Integer.Create(Self, 'GUI', 'CustomFontSize', 0);
-  GUI.ToolbarSize := TSimbaSetting_Integer.Create(Self, 'GUI', 'ToolbarSize', 24);
-  GUI.ColorPickerHistory := TSimbaSetting_BinaryString.Create(Self, 'GUI', 'ColorPickerHistory', '');
-  GUI.MacOSKeystrokes := TSimbaSetting_Boolean.Create(Self, 'GUI', 'MacOSKeystrokes', {$IFDEF DARWIN}True{$ELSE}False{$ENDIF});
+  General.OutputFontSize := TSimbaSetting_Integer.Create(Self, 'General', 'OutputFontSize', SynDefaultFontSize + 1);
+  General.OutputFontName := TSimbaSetting_String.Create(Self, 'General', 'OutputFontName', {$IFDEF WINDOWS}'Consolas'{$ELSE}''{$ENDIF});
+  General.OutputFontAntiAliased := TSimbaSetting_Boolean.Create(Self, 'General', 'OutputFontAntiAliased', True);
+  General.OutputClearOnCompile := TSimbaSetting_Boolean.Create(Self, 'General', 'OutputClearOnCompile', False);
 
-  GUI.OutputFontSize := TSimbaSetting_Integer.Create(Self, 'GUI', 'OutputFontSize', SynDefaultFontSize + 1);
-  GUI.OutputFontName := TSimbaSetting_String.Create(Self, 'GUI', 'OutputFontName', {$IFDEF WINDOWS}'Consolas'{$ELSE}''{$ENDIF});
-  GUI.OutputFontAntiAliased := TSimbaSetting_Boolean.Create(Self, 'GUI', 'OutputFontAntiAliased', True);
+  General.OpenSSLExtractOnLaunch := TSimbaSetting_Boolean.Create(Self, 'General', 'OpenSSLExtractOnLaunch', True);
+  General.OpenSSLCryptoHash := TSimbaSetting_String.Create(Self, 'General', 'OpenSSLCryptoHash', '');
+  General.OpenSSLHash := TSimbaSetting_String.Create(Self, 'General', 'OpenSSLHash', '');
 
   // Editor
   Editor.DefaultScript := TSimbaSetting_BinaryString.Create(Self, 'Editor', 'DefaultScript', 'program new;' + LineEnding + 'begin' + LineEnding + 'end.');
