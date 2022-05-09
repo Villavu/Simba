@@ -45,13 +45,14 @@ addGlobalType('Integer', 'TColor');
 
 addGlobalType('(__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__)', 'EComparator');
 
-addGlobalFunc('function Box(const X1, Y1, X2, Y2: Integer): TBox', @_LapeBox);
-addGlobalFunc('function Point(const X, Y: Integer): TPoint', @_LapePoint);
-addGlobalFunc('function IntToBox(x1, y1, x2, y2: Integer): TBox', @_LapeIntToBox);
-addGlobalFunc('function IntInBox(x, y: Integer; Box: TBox): Boolean', @_LapeIntInBox);
+addGlobalFunc('function Box(X1, Y1, X2, Y2: Integer): TBox; overload', @_LapeBox);
+addGlobalFunc('function Box(Mid: TPoint; XRad, YRad: Integer): TBox; overload', @_LapeBoxEx);
+addGlobalFunc('function Point(X, Y: Integer): TPoint', @_LapePoint);
+addGlobalFunc('function IntToBox(X1, Y1, X2, Y2: Integer): TBox', @_LapeIntToBox);
+addGlobalFunc('function IntInBox(X, Y: Integer; Box: TBox): Boolean', @_LapeIntInBox);
 addGlobalFunc('function PointToBox(PT1, PT2: TPoint): TBox', @_LapePointToBox);
 addGlobalFunc('function PointInBox(PT: TPoint; Box: TBox): Boolean', @_LapePointInBox);
-addGlobalFunc('function MiddleBox(b: TBox): TPoint', @_LapeMiddleBox);
+addGlobalFunc('function MiddleBox(B: TBox): TPoint', @_LapeMiddleBox);
 
 addGlobalVar('', 'ScriptFile').isConstant := True;
 addGlobalVar(GetIncludePath(), 'IncludePath').isConstant := True;

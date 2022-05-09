@@ -1,11 +1,11 @@
 procedure _LapeNearbyPointInArrayEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := NearbyPointInArrayEx(PPoint(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PPointArray(Params^[3])^);
+  PBoolean(Result)^ := NearbyPointInArrayEx(PPoint(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PPointArray(Params^[3])^);
 end;
 
 procedure _LapeNearbyPointInArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := NearbyPointInArray(PPoint(Params^[0])^, PInt32(Params^[1])^, PPointArray(Params^[2])^);
+  PBoolean(Result)^ := NearbyPointInArray(PPoint(Params^[0])^, PInteger(Params^[1])^, PPointArray(Params^[2])^);
 end;
 
 procedure _LapeSortTPAByX(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -45,7 +45,7 @@ end;
 
 procedure _LapeMiddleTPAEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := MiddleTPAEx(PPointArray(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^);
+  PBoolean(Result)^ := MiddleTPAEx(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeMiddleTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -60,32 +60,32 @@ end;
 
 procedure _LapeSortATPAFromSize(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SortATPAFromSize(P2DPointArray(Params^[0])^, PInt32(Params^[1])^, PBoolean(Params^[2])^);
+  SortATPAFromSize(P2DPointArray(Params^[0])^, PInteger(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 procedure _LapeSplitTPAEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  P2DPointArray(Result)^ := SplitTPAEx(PPointArray(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^);
+  P2DPointArray(Result)^ := SplitTPAEx(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeSplitTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  P2DPointArray(Result)^ := SplitTPA(PPointArray(Params^[0])^, PInt32(Params^[1])^);
+  P2DPointArray(Result)^ := SplitTPA(PPointArray(Params^[0])^, PInteger(Params^[1])^);
 end;
 
 procedure _LapeFilterPointsPie(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  FilterPointsPie(PPointArray(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, False);
+  FilterPointsPie(PPointArray(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, False);
 end;
 
 procedure _LapeFilterPointsDist(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  FilterPointsDist(PPointArray(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^);
+  FilterPointsDist(PPointArray(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
 end;
 
 procedure _LapeFilterPointsLine(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  FilterPointsLine(PPointArray(Params^[0])^, PExtended(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^);
+  FilterPointsLine(PPointArray(Params^[0])^, PExtended(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
 end;
 
 procedure _LapeGetATPABounds(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -100,17 +100,7 @@ end;
 
 procedure _LapeGetSamePointsATPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pboolean(Result)^ := GetSamePointsATPA(P2DPointArray(Params^[0])^, PPointArray(Params^[1])^);
-end;
-
-procedure _LapeSortCircleWise(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  SortCircleWise(PPointArray(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PBoolean(Params^[4])^, PBoolean(Params^[5])^);
-end;
-
-procedure _LapeLinearSort(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  LinearSort(PPointArray(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PBoolean(Params^[4])^);
+  PBoolean(Result)^ := GetSamePointsATPA(P2DPointArray(Params^[0])^, PPointArray(Params^[1])^);
 end;
 
 procedure _LapeRotatePoint(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -118,24 +108,14 @@ begin
   PPoint(Result)^ := RotatePoint(PPoint(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^);
 end;
 
-procedure _LapeReArrangeandShortenArrayEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PPointArray(Result)^ := ReArrangeandShortenArrayEx(PPointArray(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^);
-end;
-
-procedure _LapeReArrangeandShortenArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PPointArray(Result)^ := ReArrangeandShortenArray(PPointArray(Params^[0])^, PInt32(Params^[1])^);
-end;
-
 procedure _LapeTPAtoATPAEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  P2DPointArray(Result)^ := TPAtoATPAEx(PPointArray(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^);
+  P2DPointArray(Result)^ := TPAtoATPAEx(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeTPAtoATPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  P2DPointArray(Result)^ := TPAtoATPA(PPointArray(Params^[0])^, PInt32(Params^[1])^);
+  P2DPointArray(Result)^ := TPAtoATPA(PPointArray(Params^[0])^, PInteger(Params^[1])^);
 end;
 
 procedure _LapeMergeATPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -145,7 +125,12 @@ end;
 
 procedure _LapeTPAFromLine(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PPointArray(Result)^ := TPAFromLine(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^);
+  PPointArray(Result)^ := TPAFromLine(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+end;
+
+procedure _LapeTPAFromLineEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := TPAFromLine(PPoint(Params^[0])^, PPoint(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeEdgeFromBox(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -160,12 +145,12 @@ end;
 
 procedure _LapeTPAFromEllipse(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PPointArray(Result)^ := TPAFromEllipse(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^);
+  PPointArray(Result)^ := TPAFromEllipse(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 procedure _LapeTPAFromCircle(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PPointArray(Result)^ := TPAFromCircle(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^);
+  PPointArray(Result)^ := TPAFromCircle(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeFillEllipse(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -225,12 +210,12 @@ end;
 
 procedure _LapeFilterTPAsBetween(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  filterTPAsBetween(P2DPointArray(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^);
+  filterTPAsBetween(P2DPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeMedianTPAEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  MedianTPAEx(PPointArray(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^);
+  MedianTPAEx(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeMedianTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -240,7 +225,7 @@ end;
 
 procedure _LapeFilterPointsBox(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  FilterPointsBox(PPointArray(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^);
+  FilterPointsBox(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
 end;
 
 procedure _LapeTPAFromPolygon(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -250,27 +235,27 @@ end;
 
 procedure _LapeClusterTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  P2DPointArray(Result)^ := ClusterTPA(PPointArray(Params^[0])^, PInt32(Params^[1])^);
+  P2DPointArray(Result)^ := ClusterTPA(PPointArray(Params^[0])^, PInteger(Params^[1])^);
 end;
 
 procedure _LapeClusterTPAEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  P2DPointArray(Result)^ := ClusterTPAEx(PPointArray(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^);
+  P2DPointArray(Result)^ := ClusterTPAEx(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapePartitionTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  P2DPointArray(Result)^ := PartitionTPA(PPointArray(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^);
+  P2DPointArray(Result)^ := PartitionTPA(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeTPAErode(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PPointArray(Result)^ := TPAErode(PPointArray(Params^[0])^, PInt32(Params^[1])^);
+  PPointArray(Result)^ := TPAErode(PPointArray(Params^[0])^, PInteger(Params^[1])^);
 end;
 
 procedure _LapeTPAGrow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PPointArray(Result)^ := TPAGrow(PPointArray(Params^[0])^, PInt32(Params^[1])^);
+  PPointArray(Result)^ := TPAGrow(PPointArray(Params^[0])^, PInteger(Params^[1])^);
 end;
 
 procedure _LapePointsInRangeOf(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -286,5 +271,60 @@ end;
 procedure _LapeClearSameIntegers(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PIntegerArray(Params^[0])^ := Unique(PIntegerArray(Params^[0])^);
+end;
+
+procedure _LapeTPADensity(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PDouble(Result)^ := TPADensity(PPointArray(Params^[0])^);
+end;
+
+procedure _LapeTPABorder(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := TPABorder(PPointArray(Params^[0])^);
+end;
+
+procedure _LapeTPAFloodFill(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := TPAFloodFill(PPointArray(Params^[0])^, PPoint(Params^[1])^);
+end;
+
+procedure _LapeTPAConnect(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := TPAConnect(PPointArray(Params^[0])^);
+end;
+
+procedure _LapeTPASkeleton(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := TPASkeleton(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure _LapeConvexHull(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := ConvexHull(PPointArray(Params^[0])^);
+end;
+
+procedure _LapeExcludePointsDist(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := ExcludePointsDist(PPointArray(Params^[0])^, PPoint(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^);
+end;
+
+procedure _LapeExcludePointsPolygon(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := ExcludePointsPolygon(PPointArray(Params^[0])^, PPointArray(Params^[1])^);
+end;
+
+procedure _LapeExcludePointsBox(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := ExcludePointsBox(PPointArray(Params^[0])^, PBox(Params^[1])^);
+end;
+
+procedure _LapeSortTPACircular(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  SortTPACircular(PPointArray(Params^[0])^, PPoint(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^);
+end;
+
+procedure _LapeTPAReduceByDistance(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := TPAReduceByDistance(PPointArray(Params^[0])^, PInteger(Params^[1])^);
 end;
 

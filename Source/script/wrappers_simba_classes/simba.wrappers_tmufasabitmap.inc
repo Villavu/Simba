@@ -1,3 +1,13 @@
+procedure _LapeMufasaBitmap_PointInBitmap(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PMufasaBitmap(Params^[0])^.PointInBitmap(PPoint(Params^[1])^);
+end;
+
+procedure _LapeMufasaBitmap_PointInBitmapEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PMufasaBitmap(Params^[0])^.PointInBitmap(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
 procedure _LapeMufasaBitmap_Data_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PPRGB32(Result)^ := PMufasaBitmap(Params^[0])^.Data;

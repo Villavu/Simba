@@ -16,6 +16,13 @@ uses
 const
   HALF_PI = PI / 2;
 
+function AngleBetween(const P1, P2: TPoint): Double; inline;
+
+function CrossProduct(const r, p, q: TPoint): Int64; inline; overload;
+function CrossProduct(const rx, ry, px, py, qx, qy: Double): Double; inline; overload;
+
+function PolygonArea(const Polygon: TPointArray): Double;
+
 function PointInPolygon(const P: TPoint; const Polygon: TPointArray): Boolean; inline;
 function PointInCircle(const P, Center: TPoint; const Radius: Double): Boolean; inline;
 
@@ -85,6 +92,37 @@ begin
   Result := Result or (Result shr 16);
   Result := Result or (Result shr 32);
   Result := Result + 1;
+end;
+
+function AngleBetween(const P1, P2: TPoint): Double;
+begin
+  Result := Modulo(Degrees(ArcTan2(P2.Y - P1.Y, P2.X - P1.X)) - 90, 360);
+end;
+
+function CrossProduct(const r, p, q: TPoint): Int64;
+begin
+  Result := (Int64(p.x) - Int64(r.x)) * (Int64(q.y) - Int64(r.y)) - (Int64(p.y) - Int64(r.y)) * (Int64(q.x) - Int64(r.x));
+end;
+
+function CrossProduct(const rx, ry, px, py, qx, qy: Double): Double;
+begin
+  Result := (px - rx) * (qy - ry) - (py - ry) * (qx - rx);
+end;
+
+function PolygonArea(const Polygon: TPointArray): Double;
+var
+  i, j: Integer;
+begin
+  Result := 0;
+
+  j := Length(Polygon) - 1;
+  for i := 0 to j do
+  begin
+    Result := Result + ((Polygon[J].X * Polygon[I].Y) - (Polygon[J].Y * Polygon[I].X));
+    j := i;
+  end;
+
+  Result := Result * 0.5;
 end;
 
 function PointInPolygon(const P: TPoint; const Polygon: TPointArray): Boolean;

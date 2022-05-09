@@ -333,11 +333,15 @@ end;
 function TSimbaScript_Compiler.getIntegerArray: TLapeType;
 begin
   Result := getGlobalType('TIntegerArray');
+  if (Result = nil) then
+    Result := inherited;
 end;
 
 function TSimbaScript_Compiler.getFloatArray: TLapeType;
 begin
   Result := getGlobalType('TExtendedArray');
+  if (Result = nil) then
+    Result := inherited;
 end;
 
 procedure TSimbaScript_Compiler.pushTokenizer(ATokenizer: TLapeTokenizerBase);
