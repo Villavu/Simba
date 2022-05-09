@@ -953,7 +953,7 @@ begin
         StopButtonStop.Enabled := True;
         StopButtonStop.ImageIndex := IMAGE_STOP;
 
-        StatusPanelState.Caption := FormatMilliseconds(Tab.ScriptTimeRunning, '[h:m:s]');
+        StatusPanelState.Caption := FormatMilliseconds(Tab.ScriptTimeRunning, 'h:m:s');
       end;
 
     ESimbaScriptState.STATE_NONE:

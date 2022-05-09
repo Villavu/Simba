@@ -212,7 +212,8 @@ type
     property Height: Integer read GetHeight;
   end;
 
-  function Box(const X1, Y1, X2, Y2: Integer): TBox;
+  function Box(X1, Y1, X2, Y2: Integer): TBox;
+  function Box(Mid: TPoint; XRad, YRad: Integer): TBox;
 
 const
   TMDTMPointSize = 5*SizeOf(integer)+Sizeof(boolean);
@@ -346,14 +347,6 @@ begin
   if (Self.Y2 > Other.Y2) then Self.Y2 := Other.Y2;
 end;
 
-function Box(const X1, Y1, X2, Y2: Int32): TBox;
-begin
-  Result.X1 := X1;
-  Result.Y1 := Y1;
-  Result.X2 := X2;
-  Result.Y2 := Y2;
-end;
-
 generic procedure Swap<T>(var A, B: T);
 var
   C: T;
@@ -362,6 +355,22 @@ begin
 
   A := B;
   B := C;
+end;
+
+function Box(X1, Y1, X2, Y2: Integer): TBox;
+begin
+  Result.X1 := X1;
+  Result.Y1 := Y1;
+  Result.X2 := X2;
+  Result.Y2 := Y2;
+end;
+
+function Box(Mid: TPoint; XRad, YRad: Integer): TBox;
+begin
+  Result.X1 := Mid.X-XRad;
+  Result.Y1 := Mid.Y-YRad;
+  Result.X2 := Mid.X+XRad;
+  Result.Y2 := Mid.Y+YRad;
 end;
 
 procedure Swap(var A, B: Byte);

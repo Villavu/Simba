@@ -76,7 +76,8 @@ type
     property FontSize: Single read GetFontSize write SetFontSize;
     property FontAntialiasing: Boolean read GetFontAntialiasing write SetFontAntialiasing;
 
-    function PointInBitmap(const X, Y: Integer): Boolean;
+    function PointInBitmap(const P: TPoint): Boolean; overload;
+    function PointInBitmap(const X, Y: Integer): Boolean; overload;
 
     function Equals(Other: TObject): Boolean; override;
     function Equals(Other: TMufasaBitmap): Boolean; overload;
@@ -2366,6 +2367,11 @@ procedure TMufasaBitmap.SetTransparentColor(Value: Integer);
 begin
   FTransparentColor := Value;
   FTransparentRGB := RGBToBGR(Value)
+end;
+
+function TMufasaBitmap.PointInBitmap(const P: TPoint): Boolean;
+begin
+  Result := (P.X >= 0) and (P.Y >= 0) and (P.X < FWidth) and (P.Y < FHeight);
 end;
 
 function TMufasaBitmap.PointInBitmap(const X, Y: Integer): Boolean;
