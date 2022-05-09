@@ -430,8 +430,8 @@ end;
 
 procedure TSimbaForm.HandleFormCreated(Sender: TObject; Form: TCustomForm);
 begin
-  if (SimbaSettings.GUI.CustomFontSize.Value > 0) then
-    Form.Font.Size := SimbaSettings.GUI.CustomFontSize.Value;
+  if (SimbaSettings.General.CustomFontSize.Value > 0) then
+    Form.Font.Size := SimbaSettings.General.CustomFontSize.Value;
 end;
 
 procedure TSimbaForm.CodeTools_OnLoadLibrary(Sender: TObject; FileName: String; var Contents: String);
@@ -598,12 +598,12 @@ begin
   Screen.AddHandlerFormAdded(@SimbaForm.HandleFormCreated, True);
 
   FRecentFiles := TStringList.Create();
-  FRecentFiles.Text := SimbaSettings.GUI.RecentFiles.Value;
+  FRecentFiles.Text := SimbaSettings.General.RecentFiles.Value;
 
   CreateBaseDirectories();
 
   {$IFDEF WINDOWS}
-  if SimbaSettings.Environment.OpenSSLOnLaunch.Value then
+  if SimbaSettings.General.OpenSSLExtractOnLaunch.Value then
     ExtractOpenSSL();
   {$ENDIF}
 
@@ -616,14 +616,14 @@ begin
 
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
 
-  SimbaSettingChanged(SimbaSettings.GUI.ToolbarSize);
-  SimbaSettingChanged(SimbaSettings.GUI.CustomFontSize);
-  SimbaSettingChanged(SimbaSettings.GUI.LockLayout);
-  SimbaSettingChanged(SimbaSettings.GUI.TrayIconVisible);
-  SimbaSettingChanged(SimbaSettings.GUI.ConsoleVisible);
+  SimbaSettingChanged(SimbaSettings.General.ToolbarSize);
+  SimbaSettingChanged(SimbaSettings.General.CustomFontSize);
+  SimbaSettingChanged(SimbaSettings.General.LockLayout);
+  SimbaSettingChanged(SimbaSettings.General.TrayIconVisible);
+  SimbaSettingChanged(SimbaSettings.General.ConsoleVisible);
 
-  if SimbaSettings.GUI.MacOSKeystrokes.Value then
-    SimbaSettingChanged(SimbaSettings.GUI.MacOSKeystrokes);
+  if SimbaSettings.General.MacOSKeystrokes.Value then
+    SimbaSettingChanged(SimbaSettings.General.MacOSKeystrokes);
 end;
 
 procedure TSimbaForm.FormDestroy(Sender: TObject);
@@ -633,7 +633,7 @@ begin
 
   if (FRecentFiles <> nil) then
   begin
-    SimbaSettings.GUI.RecentFiles.Value := FRecentFiles.Text;
+    SimbaSettings.General.RecentFiles.Value := FRecentFiles.Text;
 
     FreeAndNil(FRecentFiles);
   end;
@@ -651,6 +651,20 @@ begin
 end;
 
 procedure TSimbaForm.MenuItemScriptStateClick(Sender: TObject);
+type
+  EAction = (Unknown, Compile, Run, Debug, Pause, Stop);
+
+  function GetAction: EAction;
+  begin
+    if (Sender = MenuItemCompile) or (Sender = ToolbarButtonCompile) then Exit(Compile);
+    if (Sender = MenuItemRun)     or (Sender = ToolbarButtonRun)     then Exit(Run);
+    if (Sender = MenuItemPause)   or (Sender = ToolbarButtonPause)   then Exit(Pause);
+    if (Sender = MenuItemStop)    or (Sender = StopButtonStop)       then Exit(Stop);
+    if (Sender = MenuItemRunWithDebugging)                           then Exit(Debug);
+
+    DebugLn('[TSimbaForm.MenuItemScriptStateClick]: Unknown component "' + Sender.ClassName + '"');
+  end;
+
 var
   CurrentTab: TSimbaScriptTab;
 begin
@@ -658,22 +672,15 @@ begin
 
   if (CurrentTab <> nil) then
   try
-    with CurrentTab do
-    begin
-      if (Sender = MenuItemCompile) or (Sender = ToolbarButtonCompile) then
-        Compile()
-      else
-      if (Sender = MenuItemRun) or (Sender = ToolbarButtonRun) then
-        Run(FWindowSelection)
-      else
-      if (Sender = MenuItemRunWithDebugging) then
-        RunWithDebugging(FWindowSelection)
-      else
-      if (Sender = MenuItemPause) or (Sender = ToolbarButtonPause) then
-        Pause()
-      else
-      if (Sender = MenuItemStop) or (Sender = StopButtonStop) then
-        Stop()
+    if (GetAction() in [Compile, Run, Debug]) and SimbaSettings.General.OutputClearOnCompile.Value then
+      SimbaOutputForm.Clear();
+
+    case GetAction() of
+      Compile: CurrentTab.Compile();
+      Run:     CurrentTab.Run(FWindowSelection);
+      Debug:   CurrentTab.RunWithDebugging(FWindowSelection);
+      Pause:   CurrentTab.Pause();
+      Stop:    CurrentTab.Stop();
     end;
   except
     on E: Exception do
@@ -721,17 +728,17 @@ end;
 
 procedure TSimbaForm.SimbaSettingChanged(Setting: TSimbaSetting);
 begin
-  if (Setting = SimbaSettings.GUI.ToolbarSize) then
+  if (Setting = SimbaSettings.General.ToolbarSize) then
     SetToolbarSize(Setting.Value);
-  if (Setting = SimbaSettings.GUI.CustomFontSize) then
+  if (Setting = SimbaSettings.General.CustomFontSize) then
     SetCustomFontSize(Setting.Value);
-  if (Setting = SimbaSettings.GUI.ConsoleVisible) then
+  if (Setting = SimbaSettings.General.ConsoleVisible) then
     SetConsoleVisible(Setting.Value);
-  if (Setting = SimbaSettings.GUI.LockLayout) then
+  if (Setting = SimbaSettings.General.LockLayout) then
     SetLayoutLocked(Setting.Value);
-  if (Setting = SimbaSettings.GUI.TrayIconVisible) then
+  if (Setting = SimbaSettings.General.TrayIconVisible) then
     SetTrayIconVisible(Setting.Value);
-  if (Setting = SimbaSettings.GUI.MacOSKeystrokes) then
+  if (Setting = SimbaSettings.General.MacOSKeystrokes) then
     SetMacOSKeystokes(Setting.Value);
 end;
 
@@ -898,17 +905,17 @@ end;
 
 procedure TSimbaForm.MenuItemConsoleClick(Sender: TObject);
 begin
-  SimbaSettings.GUI.ConsoleVisible.Value := TMenuItem(Sender).Checked;
+  SimbaSettings.General.ConsoleVisible.Value := TMenuItem(Sender).Checked;
 end;
 
 procedure TSimbaForm.MenuItemLockLayoutClick(Sender: TObject);
 begin
-  SimbaSettings.GUI.LockLayout.Value := TMenuItem(Sender).Checked;
+  SimbaSettings.General.LockLayout.Value := TMenuItem(Sender).Checked;
 end;
 
 procedure TSimbaForm.MenuItemTrayIconClick(Sender: TObject);
 begin
-  SimbaSettings.GUI.TrayIconVisible.Value := TMenuItem(Sender).Checked;
+  SimbaSettings.General.TrayIconVisible.Value := TMenuItem(Sender).Checked;
 end;
 
 procedure TSimbaForm.TimerTimer(Sender: TObject);
@@ -1021,11 +1028,11 @@ begin
 
     if FDockingReset then
     begin
-      SimbaSettings.GUI.Layout.Value := '';
-      SimbaSettings.GUI.LockLayout.Value := False;
+      SimbaSettings.General.Layout.Value := '';
+      SimbaSettings.General.LockLayout.Value := False;
     end else
     if (WindowState <> wsMinimized) then
-      SimbaSettings.GUI.Layout.Value := DockMaster.SaveLayout();
+      SimbaSettings.General.Layout.Value := DockMaster.SaveLayout();
 
 
     Visible := False;
@@ -1187,7 +1194,7 @@ begin
     DockMaster.MakeDockable(SimbaDebugImageForm, MenuItemDebugImage);
     DockMaster.MakeDockable(SimbaColorPickerHistoryForm, MenuItemColourHistory);
 
-    if (SimbaSettings.GUI.Layout.Value = '') then
+    if (SimbaSettings.General.Layout.Value = '') then
     begin
       DockMaster.GetAnchorSite(SimbaFileBrowserForm).Width := 175;
       DockMaster.GetAnchorSite(SimbaFunctionListForm).Width := 175;
@@ -1206,14 +1213,14 @@ begin
       Width := 1250;
       Height := 850;
     end else
-      DockMaster.LoadLayout(SimbaSettings.GUI.Layout.Value);
+      DockMaster.LoadLayout(SimbaSettings.General.Layout.Value);
   finally
     DockMaster.EndUpdate();
 
     EndFormUpdate();
   end;
 
-  if (SimbaSettings.GUI.Layout.Value = '') then
+  if (SimbaSettings.General.Layout.Value = '') then
   begin
     Position := poScreenCenter;
 

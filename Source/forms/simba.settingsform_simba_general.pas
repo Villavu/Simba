@@ -10,19 +10,17 @@ unit simba.settingsform_simba_general;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, StdCtrls, ComCtrls, ExtCtrls, Spin,
+  Classes, SysUtils, Forms, Controls, StdCtrls, ComCtrls, ExtCtrls, Spin, CheckLst,
   DividerBevel;
 
 type
   TSimbaGeneralFrame = class(TFrame)
+    CheckGroup1: TCheckGroup;
     OutputFontAntiAliased: TCheckBox;
     OutputFontName: TComboBox;
     Label1: TLabel;
     Label2: TLabel;
     OutputDivider: TDividerBevel;
-    MacOSCommandKey: TCheckBox;
-    ExtractOpenSSLCheckbox: TCheckBox;
-    GeneralDivider: TDividerBevel;
     OutputFontSize: TSpinEdit;
     ToolbarSizeCaption: TLabel;
     FontSizeLabel: TLabel;
@@ -32,6 +30,7 @@ type
     procedure FontSizeTrackBarChange(Sender: TObject);
     procedure ToolbarSizeTrackBarChange(Sender: TObject);
   public
+    constructor Create(AOwner: TComponent); override;
   end;
 
 implementation
@@ -52,6 +51,14 @@ begin
     ToolbarSizeCaption.Caption := 'Toolbar Size (Default)'
   else
     ToolbarSizeCaption.Caption := 'Toolbar Size (' + IntToStr(ToolbarSizeTrackBar.Position) + ')';
+end;
+
+constructor TSimbaGeneralFrame.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  CheckGroup1.CheckEnabled[1] := {$IFDEF WINDOWS}True{$ELSE}False{$ENDIF};
+  CheckGroup1.CheckEnabled[2] := {$IFDEF DARWIN}True{$ELSE}False{$ENDIF};
 end;
 
 end.

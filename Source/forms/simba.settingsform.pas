@@ -75,23 +75,25 @@ begin
   EditorGeneralFrame.CompleteParenthesesCheckbox.Checked := SimbaSettings.Editor.AutomaticallyCompleteParentheses.Value;
   EditorGeneralFrame.CompleteIndexCheckbox.Checked := SimbaSettings.Editor.AutomaticallyCompleteIndex.Value;
 
-  SimbaGeneralFrame.ToolbarSizeTrackBar.Position := SimbaSettings.GUI.ToolbarSize.Value;
+  SimbaGeneralFrame.ToolbarSizeTrackBar.Position := SimbaSettings.General.ToolbarSize.Value;
   SimbaGeneralFrame.ToolbarSizeTrackBar.OnChange(nil);
-  SimbaGeneralFrame.FontSizeTrackBar.Position := SimbaSettings.GUI.CustomFontSize.Value;
+  SimbaGeneralFrame.FontSizeTrackBar.Position := SimbaSettings.General.CustomFontSize.Value;
   SimbaGeneralFrame.FontSizeTrackBar.OnChange(nil);
-  SimbaGeneralFrame.ExtractOpenSSLCheckbox.Checked := SimbaSettings.Environment.OpenSSLOnLaunch.Value;
-  SimbaGeneralFrame.MacOSCommandKey.Checked := SimbaSettings.GUI.MacOSKeystrokes.Value;
+
+  SimbaGeneralFrame.CheckGroup1.Checked[0] := SimbaSettings.General.OutputClearOnCompile.Value;
+  SimbaGeneralFrame.CheckGroup1.Checked[1] := SimbaSettings.General.OpenSSLExtractOnLaunch.Value;
+  SimbaGeneralFrame.CheckGroup1.Checked[2] := SimbaSettings.General.MacOSKeystrokes.Value;
 
   if (SimbaGeneralFrame.OutputFontName.Items.Count = 0) then
   begin
     SimbaGeneralFrame.OutputFontName.Items.AddStrings(EditorFontFrame.FontsNameComboBox.Items);
-    SimbaGeneralFrame.OutputFontName.ItemIndex := SimbaGeneralFrame.OutputFontName.Items.IndexOf(SimbaSettings.GUI.OutputFontName.Value);
+    SimbaGeneralFrame.OutputFontName.ItemIndex := SimbaGeneralFrame.OutputFontName.Items.IndexOf(SimbaSettings.General.OutputFontName.Value);
     if (SimbaGeneralFrame.OutputFontName.ItemIndex < 0) then
       SimbaGeneralFrame.OutputFontName.ItemIndex := 0;
   end;
 
-  SimbaGeneralFrame.OutputFontSize.Value := SimbaSettings.GUI.OutputFontSize.Value;
-  SimbaGeneralFrame.OutputFontAntiAliased.Checked := SimbaSettings.GUI.OutputFontAntiAliased.Value;
+  SimbaGeneralFrame.OutputFontSize.Value := SimbaSettings.General.OutputFontSize.Value;
+  SimbaGeneralFrame.OutputFontAntiAliased.Checked := SimbaSettings.General.OutputFontAntiAliased.Value;
 end;
 
 procedure TSimbaSettingsForm.OKButtonClick(Sender: TObject);
@@ -112,21 +114,22 @@ begin
   SimbaSettings.Editor.AutomaticallyCompleteParentheses.Value := EditorGeneralFrame.CompleteParenthesesCheckbox.Checked;
 
   if (SimbaGeneralFrame.ToolbarSizeTrackBar.Position = SimbaGeneralFrame.ToolbarSizeTrackBar.Min) then
-    SimbaSettings.GUI.ToolbarSize.Value := SimbaSettings.GUI.ToolbarSize.DefaultValue
+    SimbaSettings.General.ToolbarSize.Value := SimbaSettings.General.ToolbarSize.DefaultValue
   else
-    SimbaSettings.GUI.ToolbarSize.Value := SimbaGeneralFrame.ToolbarSizeTrackBar.Position;
+    SimbaSettings.General.ToolbarSize.Value := SimbaGeneralFrame.ToolbarSizeTrackBar.Position;
 
   if (SimbaGeneralFrame.FontSizeTrackBar.Position = SimbaGeneralFrame.FontSizeTrackBar.Min) then
-    SimbaSettings.GUI.CustomFontSize.Value := SimbaSettings.GUI.CustomFontSize.DefaultValue
+    SimbaSettings.General.CustomFontSize.Value := SimbaSettings.General.CustomFontSize.DefaultValue
   else
-    SimbaSettings.GUI.CustomFontSize.Value := SimbaGeneralFrame.FontSizeTrackBar.Position;
+    SimbaSettings.General.CustomFontSize.Value := SimbaGeneralFrame.FontSizeTrackBar.Position;
 
-  SimbaSettings.Environment.OpenSSLOnLaunch.Value := SimbaGeneralFrame.ExtractOpenSSLCheckbox.Checked;
-  SimbaSettings.GUI.MacOSKeystrokes.Value := SimbaGeneralFrame.MacOSCommandKey.Checked;
+  SimbaSettings.General.OutputClearOnCompile.Value := SimbaGeneralFrame.CheckGroup1.Checked[0];
+  SimbaSettings.General.OpenSSLExtractOnLaunch.Value := SimbaGeneralFrame.CheckGroup1.Checked[1];
+  SimbaSettings.General.MacOSKeystrokes.Value := SimbaGeneralFrame.CheckGroup1.Checked[2];
 
-  SimbaSettings.GUI.OutputFontName.Value := SimbaGeneralFrame.OutputFontName.Text;
-  SimbaSettings.GUI.OutputFontSize.Value := SimbaGeneralFrame.OutputFontSize.Value;
-  SimbaSettings.GUI.OutputFontAntiAliased.Value := SimbaGeneralFrame.OutputFontAntiAliased.Checked;
+  SimbaSettings.General.OutputFontName.Value := SimbaGeneralFrame.OutputFontName.Text;
+  SimbaSettings.General.OutputFontSize.Value := SimbaGeneralFrame.OutputFontSize.Value;
+  SimbaSettings.General.OutputFontAntiAliased.Value := SimbaGeneralFrame.OutputFontAntiAliased.Checked;
 end;
 
 constructor TSimbaSettingsForm.Create(AOwner: TComponent);
@@ -158,12 +161,6 @@ begin
   SimbaGeneralFrame := TSimbaGeneralFrame.Create(Self);
   SimbaGeneralFrame.Parent := AddPage('General', Node);
   SimbaGeneralFrame.Align := alClient;
-  {$IFNDEF DARWIN}
-  SimbaGeneralFrame.MacOSCommandKey.Visible := False;
-  {$ENDIF}
-  {$IFNDEF WINDOWS}
-  SimbaGeneralFrame.ExtractOpenSSLCheckbox.Visible := False;
-  {$ENDIF}
 
   Node := TreeView.Items.Add(nil, 'Editor');
 

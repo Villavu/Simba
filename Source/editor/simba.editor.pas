@@ -173,7 +173,7 @@ begin
           Options := Options - [eoTrimTrailingSpaces, eoScrollPastEol];
       end;
 
-    'GUI.MacOSKeystrokes':
+    'General.MacOSKeystrokes':
       begin
         if Setting.Value then
         begin
@@ -315,7 +315,7 @@ begin
   SimbaSettingChanged(SimbaSettings.Editor.AntiAliased);
   SimbaSettingChanged(SimbaSettings.Editor.FontSize);
   SimbaSettingChanged(SimbaSettings.Editor.FontName);
-  SimbaSettingChanged(SimbaSettings.GUI.MacOSKeystrokes);
+  SimbaSettingChanged(SimbaSettings.General.MacOSKeystrokes);
 
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
 end;

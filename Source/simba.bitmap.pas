@@ -1628,6 +1628,7 @@ begin
       B.X2 := Min(X+Block, W);
       B.Y2 := Min(Y+Block, H);
 
+      Size := B.Area;
       with SumTable.Query(B) do
         TargetBitmap.Data[Y * FWidth + X] := RGBToBGR(R div Size, G div Size, B div Size);
     end;
@@ -1658,6 +1659,7 @@ begin
       B.X2 := Min(X+Block, W);
       B.Y2 := Min(Y+Block, H);
 
+      Size := B.Area;
       with SumTable.Query(B) do
         FData[Y * FWidth + X] := RGBToBGR(R div Size, G div Size, B div Size);
     end;
