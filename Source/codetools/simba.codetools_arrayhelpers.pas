@@ -99,6 +99,7 @@ const
     'function <Array>.Stddev: Double; external;',
     'function <Array>.Slice(Start, Stop, Step: Integer): <Array>; external;',
     'function <Array>.Remove(Value: <ArrayType>): Boolean; external;',
+    'function <Array>.RemoveAll(Value: <ArrayType>): Integer; external;',
     'procedure <Array>.Delete(Index, Count: Integer); external;',
     'procedure <Array>.Delete(Index: Integer; Count: Integer = High(Integer)); external;',
     'procedure <Array>.Insert(Item: <ArrayType>; Index: Integer); external;',

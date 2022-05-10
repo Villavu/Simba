@@ -15,22 +15,17 @@ addGlobalFunc('function Log10(f: Extended): Extended', @_LapeLog10);
 addGlobalFunc('function FixRad(rad: Extended): Extended', @_LapeFixRad);
 addGlobalFunc('function NextPower2(const n: Integer): Integer', @_LapeNextPower2);
 
-addGlobalFunc('function MinA(const Arr: TIntegerArray): Integer; overload', @_LapeMinA);
-addGlobalFunc('function MaxA(const Arr: TIntegerArray): Integer; overload', @_LapeMaxA);
-
-addGlobalFunc('function MinA(const Arr: TExtendedArray): Extended; overload', @_LapeMinAF);
-addGlobalFunc('function MaxA(const Arr: TExtendedArray): Extended; overload', @_LapeMaxAF);
+addGlobalFunc('function MinA(const Arr: TIntegerArray): Integer', @_LapeMinA);
+addGlobalFunc('function MaxA(const Arr: TIntegerArray): Integer', @_LapeMaxA);
 
 addGlobalFunc('function Modulo(const X, Y: Integer): Integer; overload', @_LapeModulo);
 addGlobalFunc('function Modulo(const X, Y: Extended): Extended; overload', @_LapeModuloF);
 
-addGlobalFunc('function Mode(const Arr: TIntegerArray): Integer', @_LapeMode);
-
 addGlobalFunc('function Sum(const Arr: TIntegerArray): Int64; overload', @_LapeSum);
 addGlobalFunc('function Sum(const Arr: TExtendedArray): Extended; overload', @_LapeSumF);
 
-addGlobalFunc('function Average(const Arr: TIntegerArray): Int64; overload', @_LapeAverage);
-addGlobalFunc('function Average(const Arr: TExtendedArray): Extended; overload', @_LapeAverageF);
+addGlobalFunc('function Mean(const Arr: TIntegerArray): Int64; overload', @_LapeMean);
+addGlobalFunc('function Mean(const Arr: TExtendedArray): Extended; overload', @_LapeMeanF);
 
 popSection();
 

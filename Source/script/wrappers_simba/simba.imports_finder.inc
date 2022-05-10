@@ -33,10 +33,10 @@ addGlobalFunc('function FindColorSpiralTolerance(var x, y: Integer; color, xs, y
 addGlobalFunc('function FindColorsSpiralTolerance(x, y: Integer; var Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer): Boolean', @_LapeFindColorsSpiralTolerance);
 addGlobalFunc('function FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea: Integer): Boolean', @_LapeFindColoredArea);
 addGlobalFunc('function FindColoredAreaTolerance(var x, y: Integer; Color, xs, ys, xe, ye, MinArea, Tol: Integer): Boolean', @_LapeFindColoredAreaTolerance);
-addGlobalFunc('function FindDeformedBitmapToleranceIn(bitmap: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean', @_LapeFindDeformedBitmapToleranceIn);
+addGlobalFunc('function FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean', @_LapeFindDeformedBitmapToleranceIn);
 addGlobalFunc('function FindTemplate(Templ: TMufasaBitmap; out x, y: Integer; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @_LapeFindTemplate);
 addGlobalFunc('function FindTemplateEx(Templ: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @_LapeFindTemplateEx);
-addGlobalFunc('function FindTextMatrix(Text, Font: String; constref Matrix: T2DIntegerArray; out Bounds: TBox): Single', @_LapeFindTextMatrix);
+addGlobalFunc('function FindTextMatrix(Text, Font: String; const Matrix: T2DIntegerArray; out Bounds: TBox): Single', @_LapeFindTextMatrix);
 addGlobalFunc('function FindTextColor(Text, Font: String; Color, Tolerance: Integer; X1, Y1, X2, Y2: Integer; out Bounds: TBox): Single; overload', @_LapeFindTextColor);
 addGlobalFunc('function FindTextColor(Text, Font: String; Color, Tolerance: Integer; X1, Y1, X2, Y2: Integer; MinMatch: Single = 1): Boolean; overload', @_LapeFindTextColorEx);
 addGlobalFunc('function FindText(Text, Font: String; X1, Y1, X2, Y2: Integer; out Bounds: TBox): Single; overload', @_LapeFindText);

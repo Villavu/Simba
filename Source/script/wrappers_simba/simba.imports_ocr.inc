@@ -1,6 +1,7 @@
 pushSection('OCR');
 
 addGlobalFunc('function TPAFromText(Text, Font: String; var W, H: Int32): TPointArray', @_LapeTPAFromText);
+addGlobalFunc('function BitmapFromText(Text, Font: String): TMufasaBitmap', @_LapeBitmapFromText);
 addGlobalFunc('function GetTextATPA(const ATPA: T2DPointArray; const maxvspacing: integer; const font: string): String', @_LapeGetTextATPA);
 addGlobalFunc('function GetTextAt(const atX, atY, minvspacing, maxvspacing, hspacing, color, tol, len: integer; const font: string): String', @_LapeGetTextAt);
 addGlobalFunc('function GetTextAtEx(const xs,ys,xe,ye, minvspacing, maxvspacing, hspacing, color, tol: integer; const font: string): String', @_LapeGetTextAtEx);
