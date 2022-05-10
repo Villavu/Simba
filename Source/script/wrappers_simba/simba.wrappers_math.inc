@@ -1,6 +1,6 @@
 procedure _LapeGaussMatrix(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  P2DExtendedArray(Result)^ := GaussMatrix(PInteger(Params^[0])^, PExtended(Params^[1])^);
+  PExtendedMatrix(Result)^ := GaussMatrix(PInteger(Params^[0])^, PExtended(Params^[1])^);
 end;
 
 procedure _LapeDistance(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -30,17 +30,17 @@ end;
 
 procedure _LapeSar(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Plongint(Result)^ := SarLongint(Plongint(Params^[0])^, Pbyte(Params^[1])^);
+  Plongint(Result)^ := SarLongint(Plongint(Params^[0])^, PByte(Params^[1])^);
 end;
 
 procedure _LapeRor(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PLongWord(Result)^ := RorDWord(Plongword(Params^[0])^, Pbyte(Params^[1])^);
+  PLongWord(Result)^ := RorDWord(Plongword(Params^[0])^, PByte(Params^[1])^);
 end;
 
 procedure _LapeRol(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PLongWord(Result)^ := RolDWord(Plongword(Params^[0])^, Pbyte(Params^[1])^);
+  PLongWord(Result)^ := RolDWord(Plongword(Params^[0])^, PByte(Params^[1])^);
 end;
 
 procedure _LapeRadians(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -60,22 +60,12 @@ end;
 
 procedure _LapeMaxA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := MaxA(PIntegerArray(Params^[0])^);
+  PInteger(Result)^ := Max(PIntegerArray(Params^[0])^);
 end;
 
 procedure _LapeMinA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := MinA(PIntegerArray(Params^[0])^);
-end;
-
-procedure _LapeMaxAF(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PExtended(Result)^ := MaxA(PExtendedArray(Params^[0])^);
-end;
-
-procedure _LapeMinAF(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PExtended(Result)^ := MinA(PExtendedArray(Params^[0])^);
+  PInteger(Result)^ := Min(PIntegerArray(Params^[0])^);
 end;
 
 procedure _LapeFixRad(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -98,11 +88,6 @@ begin
   PExtended(Result)^ := Modulo(PExtended(Params^[0])^, PExtended(Params^[1])^);
 end;
 
-procedure _LapeMode(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PInteger(Result)^ := Mode(PIntegerArray(Params^[0])^);
-end;
-
 procedure _LapeSum(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PInt64(Result)^ := Sum(PIntegerArray(Params^[0])^);
@@ -113,13 +98,13 @@ begin
   PExtended(Result)^ := Sum(PExtendedArray(Params^[0])^);
 end;
 
-procedure _LapeAverage(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeMean(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInt64(Result)^ := Average(PIntegerArray(Params^[0])^);
+  PInt64(Result)^ := Mean(PIntegerArray(Params^[0])^);
 end;
 
-procedure _LapeAverageF(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeMeanF(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PExtended(Result)^ := Average(PExtendedArray(Params^[0])^);
+  PExtended(Result)^ := Mean(PExtendedArray(Params^[0])^);
 end;
 

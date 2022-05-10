@@ -4,6 +4,12 @@ begin
     PPointArray(Result)^ := MOCR.TextToFontTPA(PString(Params^[0])^, PString(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^);
 end;
 
+procedure _LapeBitmapFromText(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  with SimbaScriptThread.Script.Client do
+    PMufasaBitmap(Result)^ := MOCR.TextToFontBitmap(PString(Params^[0])^, PString(Params^[1])^);
+end;
+
 procedure _LapeGetTextATPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with SimbaScriptThread.Script.Client do
