@@ -211,7 +211,7 @@ end;
 procedure _LapeFindTextMatrix(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with SimbaScriptThread.Script.Client do
-    PSingle(Result)^ := MFinder.FindTextMatrix(PString(Params^[0])^, PString(Params^[1])^, P2DIntegerArray(Params^[2])^, PBox(Params^[3])^);
+    PSingle(Result)^ := MFinder.FindTextMatrix(PString(Params^[0])^, PString(Params^[1])^, PIntegerMatrix(Params^[2])^, PBox(Params^[3])^);
 end;
 
 procedure _LapeFindTextColor(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

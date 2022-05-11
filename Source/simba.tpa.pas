@@ -2074,7 +2074,7 @@ function TPAErode(const TPA: TPointArray; Amount: Integer): TPointArray;
 var
   W, H: Integer;
   B: TBox;
-  Matrix: T2DIntegerArray;
+  Matrix: TIntegerMatrix;
   Edges: TPointArray;
   Removed: TBooleanArray;
 
@@ -2162,7 +2162,7 @@ end;
 /\}
 function TPAGrow(const TPA: TPointArray; Amount: Integer): TPointArray;
 var
-  Matrix: T2DIntegerArray;
+  Matrix: TIntegerMatrix;
   Template: TPointArray;
   I, J, H: Integer;
   X, Y: Integer;
