@@ -255,7 +255,7 @@ end;
 
 procedure _LapeMufasaBitmap_DrawMatrix(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PMufasaBitmap(Params^[0])^.DrawMatrix(P2DIntegerArray(Params^[1])^);
+  PMufasaBitmap(Params^[0])^.DrawMatrix(PIntegerMatrix(Params^[1])^);
 end;
 
 procedure _LapeMufasaBitmap_DrawMatrixF(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

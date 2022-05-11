@@ -1161,7 +1161,7 @@ begin
       if (DestX >= 0) and (DestY >= 0) and (DestX < FWidth) and (DestY < FHeight) then
       begin
         Color := Bitmap.Data[Y * Bitmap.Width + X];
-        if not Color.EqualsIgnoreAlpha(FTransparentRGB) then
+        if (not Self.TransparentColorActive) or (not Color.EqualsIgnoreAlpha(FTransparentRGB)) then
           FData[DestY * FWidth + DestX] := Bitmap.Data[Y * Bitmap.Width + X];
       end;
     end;

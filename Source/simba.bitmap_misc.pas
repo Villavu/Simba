@@ -51,6 +51,17 @@ implementation
 uses
   BMPcomn, GraphType;
 
+type
+  PARGB = ^TARGB;
+  TARGB = packed record
+    A, R, G, B: Byte;
+  end;
+
+  PRGB24 = ^TRGB24;
+  TRGB24 = packed record
+    B, G, R : byte;
+  end;
+
 procedure LoadBitmapAreaFromFile(Bitmap: TMufasaBitmap; FileName: String; Area: TBox);
 
   function ColorRGBToBGRA(const ColorRGB: TColorRGB): TRGB32; inline;
@@ -197,12 +208,6 @@ begin
 
   raise Exception.Create('Pixel format not supported: ' + Bitmap.RawImage.Description.AsString);
 end;
-
-type
-  PARGB = ^TARGB;
-  TARGB = packed record
-    A, R, G, B: Byte;
-  end;
 
 procedure TBitmapHelper.FromData(AData: PRGB32; AWidth, AHeight: Integer);
 var

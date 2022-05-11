@@ -35,13 +35,6 @@ type
   TSimbaScriptDebuggerEvents = array of TSimbaScriptDebuggerEvent;
   {$SCOPEDENUMS OFF}
 
-  PRGB24 = ^TRGB24;
-  TRGB24 = packed record
-    B, G, R : byte;
-  end;
-
-  PPRGB32 = ^PRGB32; // Pointer to PRGB32
-  PRGB32 = ^TRGB32;
   TRGB32 = packed record
     function ToString: String;
 
@@ -53,21 +46,13 @@ type
       1: (AsInteger: Integer);
   end;
 
+  PRGB32 = ^TRGB32;
   PRGB32Array = ^TRGB32Array;
-  TRGB32Array = array of TRGB32;  // array of TRGB32
+  TRGB32Array = array of TRGB32;
 
+  PPRGB32 = ^PRGB32;
   PPRGB32Array = ^TPRGB32Array;
-  TPRGB32Array = array of PRGB32; // array of PRGB32
-
-  THSL = packed record
-    H, S, L: extended;
-  end;
-  PHSL = ^THSL;
-
-  PHSLArray = ^THSLArray;
-  THSLArray = array of THSL;
-  P2DHSLArray = ^T2DHSLArray;
-  T2DHSLArray = array of array of THSL;
+  TPRGB32Array = array of PRGB32;
 
   TRetData = record
     Ptr: PRGB32;
@@ -86,14 +71,8 @@ const
   NullReturnData: TRetData = (Ptr: nil; IncPtrWith: -1; RowLen: -1);
 
 operator =(Left, Right: TRetData): Boolean; inline;
-operator =(Left, Right: TRGB32): Boolean; inline;
 
 type
-  PStrings = ^TStrings;
-  PFont = ^TFont;
-  PColor = ^TColor;
-  PCanvas = ^TCanvas;
-
   TClickType = (
     MOUSE_RIGHT,
     MOUSE_LEFT,
@@ -124,23 +103,21 @@ type
 
   PIntegerArray = ^TIntegerArray;
   TIntegerArray = array of Integer;
-  T2DIntegerArray = array of TIntegerArray;
-  P2DIntegerArray = ^T2DIntegerArray;
+
+  PIntegerMatrix = ^TIntegerMatrix;
+  TIntegerMatrix = array of TIntegerArray;
 
   PByteArray = ^TByteArray;
   TByteArray = array of Byte;
-  P2DByteArray = ^T2DByteArray;
-  T2DByteArray = array of TByteArray;
 
-  TByteMatrix = T2DByteArray;
   PByteMatrix = ^TByteMatrix;
+  TByteMatrix = array of TByteArray;
 
-  TBoolArray = array of boolean;
-  TBooleanArray = TBoolArray;
-  T2DBoolArray = array of TBoolArray;
+  PBooleanArray = ^TBooleanArray;
+  TBooleanArray = array of Boolean;
 
-  TBooleanMatrix = array of TBoolArray;
   PBooleanMatrix = ^TBooleanMatrix;
+  TBooleanMatrix = array of TBooleanArray;
 
   PExtendedArray = ^TExtendedArray;
   TExtendedArray = array of Extended;
@@ -154,15 +131,11 @@ type
   PSingleMatrix = ^TSingleMatrix;
   TSingleMatrix = array of TSingleArray;
 
-  TDoubleArray = array of Double;
-  T2DDoubleArray = array of TDoubleArray;
   PDoubleArray = ^TDoubleArray;
+  TDoubleArray = array of Double;
 
-  TDoubleMatrix = T2DDoubleArray;
   PDoubleMatrix = ^TDoubleMatrix;
-
-  PIntegerMatrix = ^TIntegerMatrix;
-  TIntegerMatrix = array of TIntegerArray;
+  TDoubleMatrix = array of TDoubleArray;
 
   TInt64Array = array of Int64;
   PInt64Array = ^TInt64Array;
@@ -286,11 +259,6 @@ end;
 operator =(Left, Right: TRetData): Boolean;
 begin
   Result := (Left.Ptr = Right.Ptr) and (Left.RowLen = Right.RowLen) and (Left.IncPtrWith = Right.IncPtrWith);
-end;
-
-operator =(Left, Right: TRGB32): Boolean;
-begin
-  Result := Int32(Left) = Int32(Right);
 end;
 
 function TBoxHelper.GetWidth: Integer;
