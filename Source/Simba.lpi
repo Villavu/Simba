@@ -267,7 +267,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="37">
+    <Units Count="39">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -467,6 +467,14 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="SynLZ"/>
       </Unit36>
+      <Unit37>
+        <Filename Value="script/wrappers_simba/simba.imports_slacktree.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="script/wrappers_simba/simba.wrappers_slacktree.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit38>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

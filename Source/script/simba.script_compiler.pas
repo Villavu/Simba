@@ -60,7 +60,7 @@ uses
   stdctrls, buttons, customtimer, checklst, lclclasses, spin, pipes,
   lclintf, math, regexpr, strutils, lazfileutils, fileutil, clipbrd,
   blowfish, md5, sha1, hmac, forms, process, lazloggerbase, variants,
-  SynLZ,
+  synlz,
 
   simba.mufasatypes, simba.script, simba.scriptthread, simba.outputform,
   simba.files, simba.process, simba.bitmap, simba.bitmap_helpers,
@@ -71,7 +71,7 @@ uses
   simba.imagebox, simba.client,simba.jsonparser, simba.xmlparser,
   simba.finder, simba.target, simba.fontloader, simba.ocr,
   simba.ocrutil, simba.helpers_matrix, simba.nativeinterface,
-  simba.generics_array, simba.target_window,
+  simba.generics_array, simba.target_window, simba.slacktree,
 
   simba.script_compiler_onterminate,
   simba.script_compiler_waituntil;
