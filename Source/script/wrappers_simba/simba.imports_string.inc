@@ -1,10 +1,6 @@
 pushSection('String');
 
 addGlobalType('(Numbers, Letters, Others)', 'StrExtr');
-addGlobalFunc('function CompressString(S: String): String', @_LapeCompressString);
-addGlobalFunc('function DecompressString(S: String): String', @_LapeDecompressString);
-addGlobalFunc('function Base64Encode(S: String): String', @_LapeBase64Encode);
-addGlobalFunc('function Base64Decode(S: String): String', @_LapeBase64Decode);
 addGlobalFunc('function ExtractFromStr(S: String; Extract: StrExtr): String', @_LapeExtractFromStr);
 addGlobalFunc('function Between(S1, S2, S: String): String', @_LapeBetween);
 addGlobalFunc('function Implode(Glue: String; Pieces: TStringArray): String', @_LapeImplode);
@@ -20,11 +16,6 @@ addGlobalFunc('function IsStrInArr(S: String;  UsePos: Boolean; Arr: TStringArra
 addGlobalFunc('function PosMulti(Needle, Haystack: String): TIntegerArray', @_LapePosMulti);
 addGlobalFunc('function UTF8Decode(S: AnsiString): WideString', @_LapeUTF8Decode);
 addGlobalFunc('function UTF8Encode(S: WideString): AnsiString', @_LapeUTF8Encode);
-
-addDelayedCode(LapeDelayedFlags +
-  'function Chr(IntValue: UInt8):  AnsiChar; overload; begin Result := AnsiChar(IntValue); end;' + LineEnding +
-  'function Chr(IntValue: UInt16): WideChar; overload; begin Result := WideChar(IntValue); end;'
-,  '!addDelayedString');
 
 popSection();
 

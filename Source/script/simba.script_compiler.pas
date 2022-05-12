@@ -60,6 +60,7 @@ uses
   stdctrls, buttons, customtimer, checklst, lclclasses, spin, pipes,
   lclintf, math, regexpr, strutils, lazfileutils, fileutil, clipbrd,
   blowfish, md5, sha1, hmac, forms, process, lazloggerbase, variants,
+  SynLZ,
 
   simba.mufasatypes, simba.script, simba.scriptthread, simba.outputform,
   simba.files, simba.process, simba.bitmap, simba.bitmap_helpers,
@@ -314,6 +315,11 @@ begin
   addGlobalFunc('function StringReplace(S, OldPattern, NewPattern: String; Flags: TReplaceFlags): String;', @_LapeStringReplace);
   addGlobalFunc('Function IsDelimiter(Delimiters, S: String; Index: SizeInt): EvalBool;', @_LapeIsDelimiter);
   addGlobalFunc('function StringOfChar(c: Char; l: SizeInt): String;', @_LapeStringOfChar);
+
+  addDelayedCode(LapeDelayedFlags +
+    'function Chr(IntValue: UInt8):  AnsiChar; overload; begin Result := AnsiChar(IntValue); end;' + LineEnding +
+    'function Chr(IntValue: UInt16): WideChar; overload; begin Result := WideChar(IntValue); end;',
+    '!addDelayedString');
 end;
 
 procedure TSimbaScript_Compiler.InitBaseVariant;

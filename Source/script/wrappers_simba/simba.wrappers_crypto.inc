@@ -76,3 +76,22 @@ begin
   PString(Result)^ := HMACSHA1(PString(Params^[0])^, PString(Params^[1])^);
 end;
 
+procedure _LapeSynLZCompress(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PInteger(Result)^ := SynLZcompress1pas(PPAnsiChar(Params^[0])^, PInteger(Params^[1])^, PPAnsiChar(Params^[2])^);
+end;
+
+procedure _LapeSynLZDecompress(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PInteger(Result)^ := SynLZdecompress1pas(PPAnsiChar(Params^[0])^, PInteger(Params^[1])^, PPAnsiChar(Params^[2])^);
+end;
+
+procedure _LapeSynLZCompressDestLen(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PInteger(Result)^ := SynLZcompressdestlen(PInteger(Params^[0])^);
+end;
+
+procedure _LapeSynLZDecompressDestLen(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PInteger(Result)^ := SynLZdecompressdestlen(PPAnsiChar(Params^[0])^);
+end;
