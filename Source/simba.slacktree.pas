@@ -26,16 +26,16 @@ type
     Note: Might still exists some bugs here.
   *)
   PNode = ^TNode;
-  TNode = packed record
+  TNode = record
     split: TPoint;
     l,r: Int32;
     hidden: Boolean;
   end;
 
-  TNodeArray = Array of TNode;
-  TNodeRefArray = Array of PNode;
+  TNodeArray = array of TNode;
+  TNodeRefArray = array of PNode;
 
-  TSlackTree = packed record
+  TSlackTree = record
   public
     data: TNodeArray;
     size: Int32;
