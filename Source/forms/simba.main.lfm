@@ -1,11 +1,12 @@
 object SimbaForm: TSimbaForm
   Left = 1106
-  Height = 556
+  Height = 695
   Top = 83
-  Width = 976
+  Width = 1220
   Caption = 'Simba'
-  ClientHeight = 536
-  ClientWidth = 976
+  ClientHeight = 670
+  ClientWidth = 1220
+  DesignTimePPI = 120
   KeyPreview = True
   Menu = MainMenu
   OnClose = FormClose
@@ -14,11 +15,10 @@ object SimbaForm: TSimbaForm
   LCLVersion = '2.2.0.4'
   object ToolBar: TToolBar
     Left = 0
-    Height = 26
     Top = 0
-    Width = 976
+    Width = 1220
     AutoSize = True
-    ButtonHeight = 22
+    ButtonHeight = 28
     ButtonWidth = 0
     Caption = 'ToolBar'
     EdgeBorders = [ebTop, ebBottom]
@@ -28,7 +28,7 @@ object SimbaForm: TSimbaForm
     ShowHint = True
     TabOrder = 0
     object ToolbarButtonRun: TToolButton
-      Left = 111
+      Left = 113
       Hint = 'Run Script (Alt + R)'
       Top = 2
       Caption = '&Run'
@@ -36,7 +36,7 @@ object SimbaForm: TSimbaForm
       OnClick = MenuItemScriptStateClick
     end
     object ToolbarButtonPause: TToolButton
-      Left = 131
+      Left = 133
       Hint = 'Pause Script'
       Top = 2
       Caption = '&Pause'
@@ -45,7 +45,7 @@ object SimbaForm: TSimbaForm
       OnClick = MenuItemScriptStateClick
     end
     object StopButtonStop: TToolButton
-      Left = 151
+      Left = 153
       Hint = 'Stop Script (Alt + S)'
       Top = 2
       Caption = '&Stop'
@@ -54,13 +54,13 @@ object SimbaForm: TSimbaForm
       OnClick = MenuItemScriptStateClick
     end
     object ToolbarDivider1: TToolButton
-      Left = 241
-      Height = 22
+      Left = 245
+      Height = 28
       Top = 2
       Style = tbsDivider
     end
     object ToolbarButtonClearOutput: TToolButton
-      Left = 221
+      Left = 225
       Hint = 'Clear Output'
       Top = 2
       Caption = 'Clear'
@@ -68,7 +68,7 @@ object SimbaForm: TSimbaForm
       OnClick = MenuClearOutputClick
     end
     object ToolbarButtonColorPicker: TToolButton
-      Left = 176
+      Left = 179
       Hint = 'Color Picker'
       Top = 2
       Caption = 'ToolbarButtonColorPicker'
@@ -76,7 +76,7 @@ object SimbaForm: TSimbaForm
       OnClick = ToolbarButtonColorPickerClick
     end
     object ToolbarButtonTargetSelector: TToolButton
-      Left = 196
+      Left = 199
       Hint = 'Target Selector'
       Top = 2
       Caption = 'ToolbarButtonTargetSelector'
@@ -84,8 +84,8 @@ object SimbaForm: TSimbaForm
       OnMouseDown = ToolbarButtonSelectTargetClick
     end
     object ToolbarDivider2: TToolButton
-      Left = 171
-      Height = 22
+      Left = 173
+      Height = 28
       Top = 2
       Style = tbsDivider
     end
@@ -101,7 +101,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolbarDivider3: TToolButton
       Left = 81
-      Height = 22
+      Height = 28
       Top = 2
       Style = tbsDivider
     end
@@ -132,26 +132,26 @@ object SimbaForm: TSimbaForm
       OnClick = ToolbarButtonSaveAllClick
     end
     object ToolbarDivider4: TToolButton
-      Left = 106
-      Height = 22
+      Left = 107
+      Height = 28
       Top = 2
       Style = tbsDivider
     end
     object ToolbarButtonCompile: TToolButton
-      Left = 86
+      Left = 87
       Hint = 'Compile Script (Alt + C)'
       Top = 2
       ImageIndex = 0
       OnClick = MenuItemScriptStateClick
     end
     object ToolbarDivider5: TToolButton
-      Left = 216
-      Height = 22
+      Left = 219
+      Height = 28
       Top = 2
       Style = tbsDivider
     end
     object ToolbarButtonPackages: TToolButton
-      Left = 246
+      Left = 251
       Hint = 'Open Packages'
       Top = 2
       Caption = 'ToolbarButtonPackages'
@@ -161,20 +161,20 @@ object SimbaForm: TSimbaForm
   end
   object StatusBar: TPanel
     Left = 0
-    Height = 28
-    Top = 508
-    Width = 976
+    Height = 35
+    Top = 635
+    Width = 1220
     Align = alBottom
     BevelOuter = bvNone
-    ClientHeight = 28
-    ClientWidth = 976
+    ClientHeight = 35
+    ClientWidth = 1220
     ParentColor = False
     TabOrder = 1
     object StatusPanelCursor: TPanel
       Left = 0
-      Height = 28
+      Height = 35
       Top = 0
-      Width = 170
+      Width = 212
       Align = alLeft
       Alignment = taLeftJustify
       BevelOuter = bvNone
@@ -184,10 +184,10 @@ object SimbaForm: TSimbaForm
       OnPaint = StatusPanelPaint
     end
     object StatusPanelState: TPanel
-      Left = 170
-      Height = 28
+      Left = 212
+      Height = 35
       Top = 0
-      Width = 170
+      Width = 212
       Align = alLeft
       Alignment = taLeftJustify
       BevelOuter = bvNone
@@ -197,10 +197,10 @@ object SimbaForm: TSimbaForm
       OnPaint = StatusPanelPaint
     end
     object StatusPanelCaret: TPanel
-      Left = 340
-      Height = 28
+      Left = 424
+      Height = 35
       Top = 0
-      Width = 170
+      Width = 212
       Align = alLeft
       Alignment = taLeftJustify
       BevelOuter = bvNone
@@ -209,10 +209,10 @@ object SimbaForm: TSimbaForm
       OnPaint = StatusPanelPaint
     end
     object StatusPanelFileName: TPanel
-      Left = 510
-      Height = 28
+      Left = 636
+      Height = 35
       Top = 0
-      Width = 466
+      Width = 584
       Align = alClient
       Alignment = taLeftJustify
       BevelOuter = bvNone
@@ -223,17 +223,17 @@ object SimbaForm: TSimbaForm
   end
   object DockPanel: TAnchorDockPanel
     Left = 0
-    Height = 482
-    Top = 26
-    Width = 976
+    Height = 603
+    Top = 32
+    Width = 1220
     Align = alClient
     BevelOuter = bvNone
     ParentFont = False
     TabOrder = 2
   end
   object MainMenu: TMainMenu
-    Left = 25
-    Top = 173
+    Left = 31
+    Top = 216
     object MenuFile: TMenuItem
       Caption = '&File'
       SubMenuImages = Images
@@ -588,14 +588,14 @@ object SimbaForm: TSimbaForm
     }
     Visible = True
     OnClick = TrayIconClick
-    Left = 25
-    Top = 109
+    Left = 31
+    Top = 136
   end
   object Images: TImageList
     Scaled = True
     ShareImages = True
-    Left = 25
-    Top = 48
+    Left = 31
+    Top = 60
     Bitmap = {
       4C7A2600000010000000100000009E2E00000000000078DAEDBD07585447FBFF
       3D22C58E5D6CD812A262414D4CA2B1C79A2818248A2082BD478D95BAF4DE11A5
@@ -2583,8 +2583,8 @@ object SimbaForm: TSimbaForm
   end
   object TrayPopup: TPopupMenu
     Images = Images
-    Left = 25
-    Top = 237
+    Left = 31
+    Top = 296
     object TrayPopupExit: TMenuItem
       Caption = 'Exit'
       ImageIndex = 8
@@ -2594,7 +2594,7 @@ object SimbaForm: TSimbaForm
   object Timer: TTimer
     Enabled = False
     OnTimer = TimerTimer
-    Left = 25
-    Top = 301
+    Left = 31
+    Top = 376
   end
 end
