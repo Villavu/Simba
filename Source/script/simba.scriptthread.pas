@@ -134,7 +134,7 @@ begin
       if (Script.RunningTime < 10000) then
         DebugLnSuccess('Succesfully executed in %.2f milliseconds.', [Script.RunningTime])
       else
-        DebugLnSuccess('Succesfully executed in %s.', [FormatMilliseconds(Script.RunningTime, '[h:m:s]')]);
+        DebugLnSuccess('Succesfully executed in %s.', [FormatMilliseconds(Script.RunningTime, '\[hh:mm:ss\]')]);
     end;
   except
     on E: Exception do

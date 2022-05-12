@@ -9,8 +9,8 @@ addGlobalFunc('procedure ConvertTime(Time: Integer; var h, m, s: Integer)', @_La
 addGlobalFunc('procedure ConvertTime64(Time: UInt64; var y, m, w, d, h, min, s: Integer)', @_LapeConvertTime64);
 addGlobalFunc('function GetTimeRunning: UInt64', @_LapeGetTimeRunning);
 addGlobalFunc('function PerformanceTimer: Double;', @_LapePerformanceTimer);
-addGlobalFunc('function FormatMilliseconds(Milliseconds: Int64; Format: String): String; overload;', @_LapeFormatMillisecondsI);
-addGlobalFunc('function FormatMilliseconds(Milliseconds: Double; Format: String): String; overload;', @_LapeFormatMillisecondsF);
+addGlobalFunc('function FormatMilliseconds(Time: Double; Format: String): String; overload;', @_LapeFormatMilliseconds);
+addGlobalFunc('function FormatMilliseconds(Time: Double; TimeSymbols: Boolean = False): String; overload;', @_LapeFormatMillisecondsEx);
 
 addDelayedCode([
   'type',
@@ -39,7 +39,7 @@ addDelayedCode([
   '    Result := GetTickCount() - Self.StartTime;',
   'end;',
   '',
-  'function TSimbaTimer.ElapsedStr(Format: String = "ms"): String;',
+  'function TSimbaTimer.ElapsedFmt(Format: String = "uu"): String;',
   'begin',
   '  Result := FormatMilliseconds(Self.Elapsed(), Format);',
   'end;',
@@ -77,7 +77,7 @@ addDelayedCode([
   '    Result := PerformanceTimer() - Self.StartTime;',
   'end;',
   '',
-  'function TSimbaPerformanceTimer.ElapsedStr(Format: String = "ms"): String;',
+  'function TSimbaPerformanceTimer.ElapsedFmt(Format: String = "uu"): String;',
   'begin',
   '  Result := FormatMilliseconds(Self.Elapsed(), Format);',
   'end;',
