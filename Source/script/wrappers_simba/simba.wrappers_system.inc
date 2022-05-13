@@ -57,11 +57,6 @@ begin
   SimbaScriptThread.Script.State := ESimbaScriptState.STATE_PAUSED;
 end;
 
-procedure _LapeTerminateScript(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  SimbaScriptThread.Script.State := ESimbaScriptState.STATE_STOP;
-end;
-
 procedure _LapePoint(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PPoint(Result)^ := Point(PInteger(Params^[0])^, PInteger(Params^[1])^);

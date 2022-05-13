@@ -19,6 +19,7 @@ type
   TSimbaScript = class
   protected
     FState: TInitBool;
+    FUserTerminated: Boolean;
     FTargetWindow: TWindowHandle;
 
     FScript: String;
@@ -33,10 +34,6 @@ type
     FDebugger: TSimbaScript_Debugger;
     FPlugins: TSimbaScriptPluginArray;
     FSimbaCommunication: TSimbaScriptCommunication;
-
-    procedure Resumed; virtual;
-    procedure Paused; virtual;
-    procedure Stopped; virtual;
 
     procedure DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
     function DoCompilerFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
@@ -75,8 +72,7 @@ implementation
 
 uses
   fileutil, forms, lazloggerbase,
-  simba.outputform, simba.files, simba.datetime, simba.script_compiler_onterminate,
-  simba.helpers_string;
+  simba.outputform, simba.files, simba.datetime, simba.helpers_string;
 
 procedure TSimbaScript.DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
@@ -222,7 +218,17 @@ begin
   finally
     FRunningTime := HighResolutionTime() - FRunningTime;
 
-    Stopped();
+    if (FDebugger <> nil) then
+    begin
+      FDebugger.Terminate();
+      FDebugger.WaitFor();
+    end;
+
+    FPlugins.CallOnStop();
+
+    if FUserTerminated then
+      FCompiler.InvokeProcFFI('_CallOnUserTerminate');
+    FCompiler.InvokeProcFFI('_CallOnTerminate');
   end;
 
   Result := True;
@@ -232,7 +238,7 @@ constructor TSimbaScript.Create;
 begin
   inherited Create();
 
-  State := ESimbaScriptState.STATE_RUNNING;
+  FState := bTrue;
 end;
 
 destructor TSimbaScript.Destroy;
@@ -247,51 +253,29 @@ begin
   inherited Destroy();
 end;
 
-procedure TSimbaScript.Resumed;
-begin
-  FPlugins.CallOnResume();
-end;
-
-procedure TSimbaScript.Paused;
-begin
-  FPlugins.CallOnPause();
-end;
-
-procedure TSimbaScript.Stopped;
-begin
-  FPlugins.CallOnStop();
-
-  CallOnTerminateMethods(FCompiler);
-
-  if (FDebugger <> nil) then
-  begin
-    FDebugger.Terminate();
-    FDebugger.WaitFor();
-  end;
-end;
-
 procedure TSimbaScript.SetState(Value: ESimbaScriptState);
 begin
   case Value of
     ESimbaScriptState.STATE_RUNNING:
       begin
+        FPlugins.CallOnResume();
+        FCompiler.InvokeProcFFI('_CallOnResume');
+
         FState := bTrue;
-
-        Resumed();
-      end;
-
-    ESimbaScriptState.STATE_STOP:
-      begin
-        FState := bFalse;
-
-        Stopped();
       end;
 
     ESimbaScriptState.STATE_PAUSED:
       begin
         FState := bUnknown;
 
-        Paused();
+        FPlugins.CallOnPause();
+        FCompiler.InvokeProcFFI('_CallOnPause');
+      end;
+
+    ESimbaScriptState.STATE_STOP:
+      begin
+        FUserTerminated := True;
+        FState := bFalse;
       end;
   end;
 

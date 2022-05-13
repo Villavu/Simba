@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, typinfo,
-  ffi, lpffi, lpcompiler, lptypes, lpvartypes, lpparser, lptree, lpffiwrappers;
+  ffi, lpffi, lpcompiler, lptypes, lpvartypes, lpparser, lptree, lpffiwrappers, lpinterpreter;
 
 type
   TSimbaScript_Compiler = class(TLapeCompiler)
@@ -51,6 +51,9 @@ type
 
     procedure Import; virtual;
     function Compile: Boolean; override;
+
+    procedure InvokeProc(Name: String);
+    procedure InvokeProcFFI(Name: String);
   end;
 
 implementation
@@ -73,7 +76,6 @@ uses
   simba.ocrutil, simba.helpers_matrix, simba.nativeinterface,
   simba.generics_array, simba.target_window, simba.slacktree,
 
-  simba.script_compiler_onterminate,
   simba.script_compiler_waituntil;
 
 {$i simba.wrappers.inc}
@@ -145,7 +147,7 @@ begin
   try
     Options := Options + [lcoLooseSemicolon, lcoAutoInvoke, lcoExplictSelf, lcoAutoObjectify];
 
-    InitializeAddOnTerminate(Self);
+    //InitializeAddOnTerminate(Self);
     InitializeWaitUntil(Self);
     InitializeFFI(Self);
 
@@ -169,6 +171,32 @@ begin
     raise Exception.Create('ERROR: libffi is missing or incompatible');
 
   Result := inherited Compile();
+end;
+
+procedure TSimbaScript_Compiler.InvokeProc(Name: String);
+var
+  Method: TLapeGlobalVar;
+begin
+  Method := Globals[Name];
+  if (Method <> nil) then
+    RunCode(FEmitter.Code, FEmitter.CodeLen, [], PCodePos(Method.Ptr)^);
+end;
+
+procedure TSimbaScript_Compiler.InvokeProcFFI(Name: String);
+var
+  Method: TLapeGlobalVar;
+  Closure: TExportClosure;
+begin
+  Method := Globals[Name];
+
+  if (Method <> nil) then
+  try
+    Closure := LapeExportWrapper(Method);
+
+    TProcedure(Closure.Func)();
+  finally
+    Closure.Free();
+  end;
 end;
 
 function TSimbaScript_Compiler.Section: String;

@@ -52,3 +52,4 @@
 {$i simba.imports_debugimage.inc}
 {$i simba.imports_timer.inc}
 {$i simba.imports_slacktree.inc}
+{$i simba.imports_events.inc}
