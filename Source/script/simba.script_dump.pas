@@ -131,7 +131,7 @@ end;
 
 procedure TCompilerDump.InitBaseDateTime;
 begin
-  pushSection('TDateTime');
+  pushSection('DateTime');
 
   inherited InitBaseDateTime();
 

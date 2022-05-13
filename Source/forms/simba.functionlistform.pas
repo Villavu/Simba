@@ -155,7 +155,7 @@ var
 begin
   Result := 0;
 
-  Weights := [TciTypeDeclaration, TciConstantDeclaration, TciVarDeclaration, TciProcedureDeclaration];
+  Weights := [TciTypeDeclaration, TciProcedureDeclaration, TciConstantDeclaration, TciVarDeclaration];
   for I := 0 to High(Weights) do
   begin
     if (Weights[I] = LeftNode.DeclarationClass) then

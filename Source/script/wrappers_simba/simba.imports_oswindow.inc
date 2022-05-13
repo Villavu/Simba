@@ -1,4 +1,4 @@
-pushSection('TWindowHandle');
+pushSection('Window Handle');
 
 addGlobalType('type PtrUInt', 'TWindowHandle');
 addGlobalType('array of TWindowHandle', 'TWindowHandleArray');

@@ -1,4 +1,4 @@
-pushSection('TSlackTree');
+pushSection('SlackTree');
 
 addGlobalType('record Split: TPoint; L, R: Integer; hidden: Boolean; end;', 'TSlackNode');
 addGlobalType('^TSlackNode', 'PSlackNode');

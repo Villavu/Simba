@@ -64,13 +64,12 @@ addGlobalVar(GetScriptPath(), 'ScriptPath').isConstant := True;
 addGlobalFunc('function GetProcessorCount: Integer', @_LapeGetProcessorCount);
 addGlobalFunc('function GetMainThreadID: PtrUInt', @_LapeGetMainThreadID);
 addGlobalFunc('function GetCurrentThreadID: PtrUInt', @_LapeGetCurrentThreadID);
-
 addGlobalFunc('function GetEnvironmentVariable(const Name: String): String', @_LapeGetEnvironmentVariable);
 
 addGlobalType('procedure() of object', 'TSyncMethod', {$IF DEFINED(CPU32) and DEFINED(LAPE_CDECL)}FFI_CDECL{$ELSE}FFI_DEFAULT_ABI{$ENDIF});
 addGlobalFunc('procedure Sync(Method: TSyncMethod)', @_LapeSync);
 
-addGlobalFunc('procedure TerminateScript', @_LapeTerminateScript);
+addDelayedCode('procedure TerminateScript; begin Halt(); end;');
 addGlobalFunc('procedure PauseScript', @_LapePauseScript);
 
 addDelayedCode(

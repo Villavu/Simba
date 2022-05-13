@@ -1,4 +1,4 @@
-pushSection('TMufasaBitmap');
+pushSection('Bitmap');
 
 addClass('TMufasaBitmap');
 
