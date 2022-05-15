@@ -215,6 +215,6 @@ addClassVar('TScrollingWinControl', 'VertScrollBar', 'TControlScrollBar', @_Lape
 addClass('TGraphicControl', 'TControl');
 //addGlobalFunc('procedure TGraphicControl.Update;', @_LapeGraphicControl_Update);
 addClassVar('TGraphicControl', 'Canvas', 'TCanvas', @_LapeGraphicControl_Canvas_Read);
-addClassVar('TGraphicControl', 'Alignment', 'TAlign', @_LapeGraphicControl_Align_Read, @_LapeGraphicControl_Align_Write);
+addClassVar('TGraphicControl', 'Align', 'TAlign', @_LapeGraphicControl_Align_Read, @_LapeGraphicControl_Align_Write);
 
 popSection();
