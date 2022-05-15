@@ -53,6 +53,7 @@ type
   function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
   function FindFiles(Directories: TStringArray; WildCard: String; Recursive: Boolean = False): TStringArray;
   function FindPlugin(var FileName: String; const Directories: array of String): Boolean;
+  procedure CopyPlugin(var FileName: String);
   procedure ZipFiles(const ArchiveFileName: String; const Files: TStringArray);
   procedure UnZipFile(const ArchiveFileName, OutputDirectory: String);
   function UnZipOneFile(const ArchiveFileName, FileName, OutputDirectory: String): Boolean;
@@ -66,6 +67,7 @@ type
   function GetDataPath: String;
   function GetIncludePath: String;
   function GetPluginPath: String;
+  function GetPluginCopyPath: String;
   function GetFontPath: String;
   function GetScriptPath: String;
   function GetPackagePath: String;
@@ -233,6 +235,18 @@ begin
   end;
 end;
 
+// Make a copy of the plugin to data/plugins/ so we can delete/update if it's loaded
+procedure CopyPlugin(var FileName: String);
+var
+  Hash: String;
+begin
+  Hash := ConcatPaths([GetPluginCopyPath(), HashFile(FileName) + ExtractFileExt(FileName)]);
+  if not FileExists(Hash) then
+    CopyFile(FileName, Hash);
+
+  FileName := Hash;
+end;
+
 procedure ZipFiles(const ArchiveFileName: String; const Files: TStringArray);
 var
   Zipper: TZipper;
@@ -344,6 +358,11 @@ begin
   Result := GetSimbaPath() + 'Plugins' + DirectorySeparator;
 end;
 
+function GetPluginCopyPath: String;
+begin
+  Result := GetDataPath() + 'plugins' + DirectorySeparator;
+end;
+
 function GetFontPath: String;
 begin
   Result := GetSimbaPath() + 'Fonts' + DirectorySeparator;
@@ -368,7 +387,7 @@ procedure CreateBaseDirectories;
 var
   Directory: String;
 begin
-  for Directory in [GetDumpPath(), GetPackagePath(), GetIncludePath(), GetFontPath(), GetScriptPath(), GetPluginPath()] do
+  for Directory in [GetDumpPath(), GetPackagePath(), GetIncludePath(), GetFontPath(), GetScriptPath(), GetPluginPath(), GetPluginCopyPath()] do
   begin
     if DirectoryExists(Directory) then
       Continue;
