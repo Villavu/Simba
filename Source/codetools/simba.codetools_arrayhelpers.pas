@@ -104,8 +104,6 @@ const
     'procedure <Array>.Delete(Index: Integer; Count: Integer = High(Integer)); external;',
     'procedure <Array>.Insert(Item: <ArrayType>; Index: Integer); external;',
     'procedure <Array>.SetLength(NewLength: Integer); external;',
-    'function <Array>.Copy: <Array>; external;',
-    'function <Array>.Copy(StartIndex; Count: Integer = High(Integer)): <Array>; external;',
     'procedure <Array>.Pop: <ArrayType>; external;',
     'procedure <Array>.Pop(Index: Integer): <ArrayType>; external;',
     'procedure <Array>.RandomValue: <ArrayType>; external;',

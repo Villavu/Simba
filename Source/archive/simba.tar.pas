@@ -41,8 +41,6 @@ var
   Path, Directory: String;
   Position, Size: Int64;
 begin
-  inherited Extract();
-
   Position := 0;
   Size := 0;
 

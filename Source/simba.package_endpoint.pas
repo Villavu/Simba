@@ -89,7 +89,8 @@ type
 implementation
 
 uses
-  forms, lazloggerbase, fpjson;
+  forms, lazloggerbase, fpjson, fileutil,
+  simba.files;
 
 procedure TSimbaPackageEndpoint.UpdateDownloadProgress(Sender: TObject; URL: String; APosition, ASize: Int64);
 begin
@@ -104,6 +105,9 @@ end;
 
 procedure TSimbaPackageEndpoint.UpdateExtractProgress(Sender: TObject; FileName: String; APosition, ASize: Int64);
 begin
+  if (APosition = -1) and (ASize = -1) then
+    FProgress := 'Copying...'
+  else
   if (ASize > 0) then
     FProgress := Format('Extracting... (%f / %f MB)', [APosition / (1024 * 1024), ASize / (1024 * 1024)])
   else
@@ -169,13 +173,25 @@ end;
 function TSimbaPackageEndpoint.GetZip(URL, Destination: String; Flat: Boolean; IgnoreList: TStringArray): Boolean;
 var
   HTTPRequest: TSimbaHTTPRequestZIP;
+  FileName: String;
 begin
-  DebugLn('[TSimbaPackageEndpoint.GetZip]: ', URL, ' to ', Destination);
+  DebugLn('[TSimbaPackageEndpoint.GetZip]: URL "', URL, '"');
+  DebugLn('[TSimbaPackageEndpoint.GetZip]: Destination "', Destination, '"');
 
   Result := False;
 
-  HTTPRequest := TSimbaHTTPRequestZIP.Create(URL, Destination, Flat, IgnoreList, @UpdateDownloadProgress, @UpdateExtractProgress);
   try
+    if DirectoryExists(Destination) then
+    begin
+      FileName := GetDataPath() + ExtractFileName(ExcludeLeadingPathDelimiter(Destination));
+      if DirectoryExists(FileName) then
+        DeleteDirectory(FileName, False);
+
+      if (not RenameFile(Destination, FileName)) then
+        raise Exception.Create('Unable to move old files: ' + FileName);
+    end;
+
+    HTTPRequest := TSimbaHTTPRequestZIP.Create(URL, Destination, Flat, IgnoreList, @UpdateDownloadProgress, @UpdateExtractProgress);
     while HTTPRequest.Running do
     begin
       if (FOnStatus <> nil) then
@@ -191,23 +207,18 @@ begin
       FOnStatus('');
 
     if (HTTPRequest.Exception <> nil) then
-    begin
-      if HTTPRequest.Exception is EFCreateError then
-        raise Exception.CreateFmt('Install failed: %s. A file could be in use. Restart Simba(s) and try again.', [HTTPRequest.Exception.Message])
-      else
-        raise Exception.CreateFmt('Install failed: %s', [HTTPRequest.Exception.Message]);
-    end;
+      raise HTTPRequest.Exception;
+    if (HTTPRequest.ResponseCode <> HTTP_OK) then
+      raise Exception.CreateFmt('HTTP error %d', [HTTPRequest.ResponseCode]);
 
-    Result := HTTPRequest.ResponseCode = HTTP_OK;
-    if (not Result) then
-      raise Exception.CreateFmt('Install failed: HTTP error %d', [HTTPRequest.ResponseCode]);
+    Result := True;
   except
     on E: Exception do
     begin
-      DebugLn('[TSimbaPackageEndpoint.GetPage]: ', E.Message);
+      DebugLn('[TSimbaPackageEndpoint.GetZip]: ', E.Message);
 
       if (FOnError <> nil) then
-        FOnError(E.Message);
+        FOnError('Install failed: ' + E.Message);
     end;
   end;
 

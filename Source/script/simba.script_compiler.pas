@@ -147,7 +147,6 @@ begin
   try
     Options := Options + [lcoLooseSemicolon, lcoAutoInvoke, lcoExplictSelf, lcoAutoObjectify];
 
-    //InitializeAddOnTerminate(Self);
     InitializeWaitUntil(Self);
     InitializeFFI(Self);
 
