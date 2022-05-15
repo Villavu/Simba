@@ -109,6 +109,8 @@ begin
           if not FindPlugin(Argument, [CurrentDirectory, GetPluginPath(), GetSimbaPath()]) then
             raise Exception.Create('Plugin "' + Argument + '" not found');
 
+          CopyPlugin(Argument);
+
           Plugin := TSimbaScriptPlugin.Create(Argument);
           Plugin.Import(FCompiler);
 
