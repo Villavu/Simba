@@ -25,6 +25,7 @@ addGlobalType('array of TStringArray', 'T2DStringArray');
 addGlobalType('array of Integer', 'TIntegerArray');
 addGlobalType('array of TIntegerArray', 'T2DIntegerArray');
 addGlobalType('array of T2DIntegerArray', 'T3DIntegerArray');
+addGlobalType('array of Int64', 'TInt64Array');
 addGlobalType('array of Byte', 'TByteArray');
 addGlobalType('array of Single', 'TSingleArray');
 addGlobalType('array of Double', 'TDoubleArray');
