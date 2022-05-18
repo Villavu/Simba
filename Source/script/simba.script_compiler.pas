@@ -76,7 +76,12 @@ uses
   simba.ocrutil, simba.helpers_matrix, simba.nativeinterface,
   simba.generics_array, simba.target_window, simba.slacktree,
 
-  simba.script_compiler_waituntil;
+  simba.script_compiler_waituntil,
+  
+  //algorithms
+  simba.algo_difference,
+  simba.algo_symmetricdifference,
+  simba.algo_intersection;
 
 {$i simba.wrappers.inc}
 

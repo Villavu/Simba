@@ -238,8 +238,20 @@ type
   TSyncNested = procedure is nested;
 
 procedure Sync(const Method: TSyncNested);
+operator = (Left, Right: TPoint): Boolean;
+operator = (Left, Right: TBox): Boolean;
 
 implementation
+
+operator = (Left, Right: TPoint): Boolean;
+begin
+  Result := (Left.x = Right.x) and (Left.y = Right.y);
+end;
+
+operator = (Left, Right: TBox): Boolean;
+begin
+  Result := (Left.x1 = Right.x1) and (Left.y1 = Right.y1) and (Left.x2 = Right.x2) and (Left.y2 = Right.y2);
+end;
 
 function TRGB32.ToString: String;
 begin

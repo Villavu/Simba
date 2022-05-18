@@ -35,7 +35,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;script/wrappers_simba;script/wrappers_simba_classes;script/wrappers_lcl_classes;../Modules/lape;editor"/>
             <Libraries Value="../Modules/lape/extensions/ffi/bin/win32"/>
-            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;editor;finders;../Modules"/>
+            <OtherUnitFiles Value="$(ProjPath);script;macosbundle;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;algorithms;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;editor;finders;../Modules"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
