@@ -80,7 +80,7 @@ uses
   
   //algorithms
   simba.algo_difference,
-  simba.algo_symmetricdifference,
+  simba.algo_symmetricDifference,
   simba.algo_intersection;
 
 {$i simba.wrappers.inc}
