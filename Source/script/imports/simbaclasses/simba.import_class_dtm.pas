@@ -109,8 +109,6 @@ procedure ImportDTM(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Classes');
-
     addClass('TMDTM');
     addGlobalType('record x, y, c, t, asz: integer; bp: boolean; end', 'TMDTMPoint');
     addGlobalType('^TMDTMPoint', 'PMDTMPoint');
@@ -131,8 +129,6 @@ begin
     addClassVar('TMDTM', 'Points', 'TMDTMPointArray', @_LapeMDTM_Points_Read);
     addGlobalFunc('procedure TMDTM.Init()', @_LapeMDTM_Init);
     //addGlobalFunc('procedure TMDTM.Free;', @_LapeMDTM_Free);
-
-    popSection();
   end;
 end;
 

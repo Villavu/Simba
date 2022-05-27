@@ -262,9 +262,8 @@ procedure ImportIOManager(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Classes');
-
     addClass('TIOManager');
+
     addGlobalType('record func1, func2, func3, func4, func5, func6, func7, func8, func9, func10, func11, func12, func13, func14, func15, func16: Pointer; end', 'TTarget_Exported');
     addGlobalFunc('function TIOManager.SetTarget(WindowHandle: PtrUInt): Integer; overload', @_LapeIOManager_SetTargetHandle);
     addGlobalFunc('function TIOManager.SetTarget(ArrPtr: PRGB32; Size: TPoint): Integer; overload', @_LapeIOManager_SetTarget);
@@ -311,12 +310,7 @@ begin
     addGlobalFunc('procedure TIOManager.FreeTarget(idx: Integer);', @_LapeIOManager_FreeTarget);
     addGlobalFunc('function TIOManager.AddHandlerInvalidTarget(Handler: TNotifyEvent): TNotifyEvent;', @_LapeIOManager_AddHandlerInvalidTarget);
     addGlobalFunc('procedure TIOManager.RemoveHandlerInvalidTarget(Handler: TNotifyEvent);', @_LapeIOManager_RemoveHandlerInvalidTarget);
-
     addClassVar('TIOManager', 'AutoActivate', 'Boolean', @_LapeIOManager_AutoActivate_Read, @_LapeIOManager_AutoActivate_Write);
-
-    //addGlobalFunc('procedure TIOManager.Free;', @_LapeIOManager_Free);
-
-    popSection();
   end;
 end;
 

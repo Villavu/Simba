@@ -306,7 +306,9 @@
       <Unit6>
         <Filename Value="forms/simba.debugimageform.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="SimbaDebugImageForm"/>
         <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
       </Unit6>
       <Unit7>
         <Filename Value="forms/simba.dtmeditor.pas"/>

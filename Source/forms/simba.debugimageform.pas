@@ -20,6 +20,8 @@ type
     FImageBox: TSimbaImageBox;
     FMaxWidth, FMaxHeight: Integer;
 
+    procedure DefaultMaxSizeASync(Data: PtrInt);
+
     procedure ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure ImageDoubleClick(Sender: TObject);
   public
@@ -41,6 +43,7 @@ implementation
 {$R *.lfm}
 
 uses
+  lcltype,
   simba.dockinghelpers, simba.outputform;
 
 procedure TSimbaDebugImageForm.Close;
@@ -52,6 +55,18 @@ begin
     Form := TSimbaAnchorDockHostSite(HostDockSite);
 
   Form.Close();
+end;
+
+procedure TSimbaDebugImageForm.DefaultMaxSizeASync(Data: PtrInt);
+var
+  Form: TCustomForm;
+begin
+  with Monitor.WorkareaRect do
+    SetMaxSize(1000, 1000);
+
+  Form := TCustomForm(Self);
+  if (HostDockSite is TSimbaAnchorDockHostSite) then
+    Form := TSimbaAnchorDockHostSite(HostDockSite);
 end;
 
 procedure TSimbaDebugImageForm.ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -97,14 +112,13 @@ constructor TSimbaDebugImageForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  FMaxWidth := 1500;
-  FMaxHeight := 1500;
-
   FImageBox := TSimbaImageBox.Create(Self);
   FImageBox.Parent := Self;
   FImageBox.Align := alClient;
   FImageBox.OnMouseMove := @ImageMouseMove;
   FImageBox.OnDblClick := @ImageDoubleClick;
+
+  Application.QueueAsyncCall(@DefaultMaxSizeASync, 0);
 end;
 
 procedure TSimbaDebugImageForm.SetMaxSize(AWidth, AHeight: Integer);

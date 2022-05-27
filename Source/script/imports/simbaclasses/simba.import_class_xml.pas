@@ -237,8 +237,6 @@ procedure ImportXML(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Classes');
-
     addClass('TXmlNode', 'TObject');
     addClass('TXMLNodeList', 'TObject');
     addGlobalFunc('procedure TXmlNode.Init()', @_LapeXmlNode_Init);
@@ -285,8 +283,6 @@ begin
     addClassVar('TXml', 'Header', 'TXMLNode', @_LapeVerySimpleXml_Header_Read, @_LapeVerySimpleXml_Header_Write);
     addClassVar('TXml', 'Ident', 'string', @_LapeVerySimpleXml_Ident_Read, @_LapeVerySimpleXml_Ident_Write);
     //addGlobalFunc('procedure TXml.Free()', @_LapeVerySimpleXml_Free);
-
-    popSection();
   end;
 end;
 

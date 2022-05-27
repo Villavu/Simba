@@ -198,8 +198,6 @@ procedure ImportSimbaImageBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Classes');
-
     addClass('TSimbaImageBox', 'TCustomControl');
     addGlobalType('procedure(Sender: TObject; ACanvas: TCanvas; R: TRect) of object', 'TSimbaImageBox_PaintArea', FFI_DEFAULT_ABI);
     addClassVar('TSimbaImageBox', 'OnPaintArea', 'TSimbaImageBox_PaintArea', @_LapeSimbaImageBox_OnPaintArea_Read, @_LapeSimbaImageBox_OnPaintArea_Write);
@@ -231,8 +229,6 @@ begin
     addGlobalFunc('procedure TSimbaImageBox.Init(Owner: TComponent); override', @_LapeSimbaImageBox_Init);
     addGlobalFunc('procedure TSimbaImageBox.InitNoOverlay(Owner: TComponent); overload; override', @_LapeSimbaImageBox_InitNoOverlay);
     //addGlobalFunc('procedure TSimbaImageBox.Free;', @_LapeSimbaImageBox_Free);
-
-    popSection();
   end;
 end;
 

@@ -139,8 +139,6 @@ procedure ImportTarget(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Classes');
-
     addClass('TTarget');
     addGlobalType('record Ptr: PRGB32; IncPtrWith: integer; RowLen: integer; end', 'TRetData');
     addGlobalType('UInt32', 'TClickType');
@@ -169,8 +167,6 @@ begin
     addGlobalFunc('function TTarget.GetKeyCode(C : char): integer;', @_LapeTarget_GetKeyCode);
     addGlobalFunc('procedure TTarget.Init()', @_LapeTarget_Init);
     // addGlobalFunc('procedure TTarget.Free;', @_LapeTarget_Free);
-
-    popSection();
   end;
 end;
 

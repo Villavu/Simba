@@ -27,7 +27,9 @@ type
   protected
     FMenuItem: TMenuItem;
     FNeedDefaultPosition: Boolean;
+    FMaxWidth, FMaxHeight: Integer;
 
+    procedure DoWindowStateChanged(Sender: TObject);
     procedure DoMenuItemDestroyed(Sender: TObject);
     procedure DoMenuItemClicked(Sender: TObject);
 
@@ -96,6 +98,34 @@ begin
   BorderSpacing.Bottom := 2;
 end;
 
+procedure TSimbaAnchorDockHostSite.DoWindowStateChanged(Sender: TObject);
+begin
+  if (WindowState = wsMaximized) and (Constraints.MaxWidth > 0) and (Constraints.MaxHeight > 0) then
+  begin
+    BeginFormUpdate();
+
+    WindowState := wsNormal;
+
+    FMaxWidth  := Constraints.MaxWidth;
+    FMaxHeight := Constraints.MaxHeight;
+
+    Constraints.MaxWidth := 0;
+    Constraints.MaxHeight := 0;
+
+    WindowState := wsMaximized;
+
+    EndFormUpdate();
+  end else
+  if (WindowState <> wsMaximized) and (FMaxWidth > 0) and (FMaxHeight > 0) then
+  begin
+    Constraints.MaxWidth := FMaxWidth;
+    Constraints.MaxHeight := FMaxHeight;
+
+    FMaxWidth := 0;
+    FMaxHeight := 0;
+  end;
+end;
+
 procedure TSimbaAnchorDockHostSite.DoMenuItemDestroyed(Sender: TObject);
 begin
   FMenuItem := nil;
@@ -155,6 +185,8 @@ begin
   inherited CreateNew(AOwner, Num);
 
   FNeedDefaultPosition := True;
+
+  OnWindowStateChange := @DoWindowStateChanged;
 end;
 
 function TSimbaAnchorDockHostSite.ExecuteDock(NewControl, DropOnControl: TControl; DockAlign: TAlign): Boolean;
