@@ -10,7 +10,8 @@ unit simba.internet;
 interface
 
 uses
-  Classes, SysUtils, blcksock, simba.MufasaTypes, math, simba.httpclient;
+  Classes, SysUtils, blcksock, math,
+  simba.httpclient;
 
 function GetPage(URL: String): String;
 

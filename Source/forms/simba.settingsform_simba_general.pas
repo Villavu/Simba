@@ -10,7 +10,7 @@ unit simba.settingsform_simba_general;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, StdCtrls, ComCtrls, ExtCtrls, Spin, CheckLst,
+  Classes, SysUtils, Forms, Controls, StdCtrls, ComCtrls, ExtCtrls, Spin,
   DividerBevel;
 
 type

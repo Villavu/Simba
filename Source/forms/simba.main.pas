@@ -491,10 +491,13 @@ begin
 
     for I := 0 to List.Count - 1 do
     begin
+      if (List.Names[I] = '') then
+        Continue;
+
       Parser := TCodeInsight_Include.Create();
       Parser.Run(List.ValueFromIndex[I], List.Names[I]);
 
-      if (List.Names[I] <> 'Classes') then
+      if (List.Names[I][1] <> '!') then
         TCodeInsight.AddFunctionListSection(Parser);
 
       TCodeInsight.AddBaseInclude(Parser);

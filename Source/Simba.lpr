@@ -119,5 +119,6 @@ begin
 
     Application.QueueAsyncCall(@Application.HandleAnalytics, 0);
   end;
+
   Application.Run();
 end.
