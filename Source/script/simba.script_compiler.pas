@@ -10,13 +10,20 @@ unit simba.script_compiler;
 interface
 
 uses
-  classes, sysutils, typinfo,
-  ffi, lpffi, lpcompiler, lptypes, lpvartypes, lpparser, lptree, lpffiwrappers, lpinterpreter;
+  classes, sysutils, typinfo, variants,
+  ffi, lpffi, lpcompiler, lptypes, lpvartypes, lpparser, lptree, lpffiwrappers, lpinterpreter, lpeval;
 
 type
+  TSimbaScript_Compiler = class;
+  TSimbaImport = procedure(Compiler: TSimbaScript_Compiler);
+  TSimbaImportArray = array of TSimbaImport;
+
   TSimbaScript_Compiler = class(TLapeCompiler)
-  public
-  type
+  public class var
+    Imports: TSimbaImportArray;
+
+    class procedure RegisterImport(Proc: TSimbaImport);
+  public type
     TManagedImportClosure = class(TLapeDeclaration)
       Closure: TImportClosure;
     end;
@@ -24,8 +31,6 @@ type
     FSectionStack: TStringArray;
 
     function Section: String;
-    procedure pushSection(Name: String);
-    procedure popSection;
 
     procedure InitBaseDefinitions; override;
     procedure InitBaseDateTime; override;
@@ -34,6 +39,9 @@ type
   public
     function getIntegerArray: TLapeType; override;
     function getFloatArray: TLapeType; override;
+
+    procedure pushSection(Name: String);
+    procedure popSection;
 
     procedure pushTokenizer(ATokenizer: TLapeTokenizerBase); reintroduce;
     procedure pushConditional(AEval: Boolean; ADocPos: TDocPos); reintroduce;
@@ -54,36 +62,40 @@ type
 
     procedure InvokeProc(Name: String);
     procedure InvokeProcFFI(Name: String);
+
+    constructor Create(ATokenizer: TLapeTokenizerBase; ManageTokenizer: Boolean=True; AEmitter: TLapeCodeEmitter=nil; ManageEmitter: Boolean=True); reintroduce; override;
+    destructor Destroy; override;
   end;
 
 implementation
 
 uses
-  dialogs, extctrls, graphtype, controls, comctrls, graphics, lpeval,
-  stdctrls, buttons, customtimer, checklst, lclclasses, spin, pipes,
-  lclintf, math, regexpr, strutils, lazfileutils, fileutil, clipbrd,
-  blowfish, md5, sha1, hmac, forms, process, lazloggerbase, variants,
-  synlz,
+  simba.import_system,
+  simba.import_matrix,
 
-  simba.mufasatypes, simba.script, simba.scriptthread, simba.outputform,
-  simba.files, simba.process, simba.bitmap, simba.bitmap_helpers,
-  simba.helpers_windowhandle, simba.matchtemplate, simba.tpa,
-  simba.target_exported, simba.math, simba.colormath, simba.stringutil,
-  simba.internet, simba.datetime, simba.dtmutil, simba.dtm, simba.iomanager,
-  simba.aca, simba.dtmeditor, simba.script_communication,
-  simba.imagebox, simba.client,simba.jsonparser, simba.xmlparser,
-  simba.finder, simba.target, simba.fontloader, simba.ocr,
-  simba.ocrutil, simba.helpers_matrix, simba.nativeinterface,
-  simba.generics_array, simba.target_window, simba.slacktree,
+  // LCL
+  simba.import_lcl_system, simba.import_lcl_graphics, simba.import_lcl_controls,
+  simba.import_lcl_form, simba.import_lcl_stdctrls, simba.import_lcl_extctrls,
+  simba.import_lcl_comctrls, simba.import_lcl_misc,
 
-  simba.script_compiler_waituntil,
-  
-  //algorithms
-  simba.algo_difference,
-  simba.algo_symmetricDifference,
-  simba.algo_intersection;
+  // Simba classes
+  simba.import_class_bitmap, simba.import_class_dtm, simba.import_class_dtms,
+  simba.import_class_finder, simba.import_class_font, simba.import_class_fonts,
+  simba.import_class_ocr, simba.import_class_files, simba.import_class_target,
+  simba.import_class_iomanager, simba.import_class_client, simba.import_class_xml,
+  simba.import_class_json, simba.import_class_imagebox,
 
-{$i simba.wrappers.inc}
+  // Simba
+  simba.import_algorithms, simba.import_colormath, simba.import_crypto,
+  simba.import_windowhandle,
+  simba.import_debugimage, simba.import_dialogs, simba.import_dtm,
+  simba.import_events, simba.import_file,
+  simba.import_internal, simba.import_keyboard, simba.import_matchtemplate, simba.import_finder,
+  simba.import_math, simba.import_mouse, simba.import_ocr, simba.import_other,
+  simba.import_process, simba.import_slacktree, simba.import_string, simba.import_internet,
+  simba.import_target, simba.import_timing,
+
+  simba.script_compiler_waituntil;
 
 function TSimbaScript_Compiler.addGlobalFunc(Header, Body: lpString): TLapeTree_Method;
 var
@@ -146,6 +158,8 @@ begin
 end;
 
 procedure TSimbaScript_Compiler.Import;
+var
+  Proc: TSimbaImport;
 begin
   StartImporting();
 
@@ -158,7 +172,8 @@ begin
     addGlobalType('type Pointer', 'TClient');
     addGlobalVar('TClient', nil, 'Client'); // Will be assigned later
 
-    {$i simba.imports.inc}
+    for Proc in Imports do
+      Proc(Self);
   finally
     EndImporting();
   end;
@@ -201,6 +216,25 @@ begin
   finally
     Closure.Free();
   end;
+end;
+
+constructor TSimbaScript_Compiler.Create(ATokenizer: TLapeTokenizerBase; ManageTokenizer: Boolean; AEmitter: TLapeCodeEmitter; ManageEmitter: Boolean);
+begin
+  inherited Create(ATokenizer, ManageTokenizer, AEmitter, ManageEmitter);
+
+  pushSection('!Simba');
+end;
+
+destructor TSimbaScript_Compiler.Destroy;
+begin
+  popSection();
+
+  inherited Destroy();
+end;
+
+class procedure TSimbaScript_Compiler.RegisterImport(Proc: TSimbaImport);
+begin
+  Imports += [Proc];
 end;
 
 function TSimbaScript_Compiler.Section: String;

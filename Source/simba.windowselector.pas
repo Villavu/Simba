@@ -28,9 +28,6 @@ type
 
 implementation
 
-uses
-  math;
-
 constructor TSimbaWindowSelector.Create(BorderSize: Int32);
 
   function CreateEdgeForm: TForm;

@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.iomanager, simba.files, simba.finder, simba.bitmap, simba.dtm, simba.ocr, simba.internet;
+  simba.iomanager, simba.files, simba.finder, simba.dtm, simba.ocr, simba.internet;
 
 (*
 

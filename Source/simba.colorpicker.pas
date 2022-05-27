@@ -144,7 +144,6 @@ end;
 constructor TSimbaColorPicker.Create(TargetWindow: TWindowHandle);
 var
   DesktopLeft, DesktopTop, DesktopWidth, DesktopHeight: Int32;
-  W, H: Integer;
 begin
   FClient := TClient.Create();
   FClient.IOManager.GetPosition(DesktopLeft, DesktopTop);

@@ -28,7 +28,7 @@ type
 implementation
 
 uses
-  simba.tpa, simba.colormath, simba.overallocatearray;
+  simba.colormath, simba.overallocatearray;
 
 function DTMBounds(DTM: TMDTM): TBox;
 var

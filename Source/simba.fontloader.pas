@@ -21,9 +21,6 @@ type
     Data: TOcrData;
 
     function Copy: TMFont;
-
-    constructor Create;
-    destructor Destroy; override;
   end;
 
   PMFonts = ^TMFonts;
@@ -59,21 +56,7 @@ type
 implementation
 
 uses
-  simba.mufasatypes, forms;
-
-constructor TMFont.Create;
-begin
-  inherited;
-
-  Name:='';
-end;
-
-destructor TMFont.Destroy;
-begin
-  Name:='';
-
-  inherited;
-end;
+  forms;
 
 function TMFont.Copy: TMFont;
 var
