@@ -422,11 +422,8 @@ procedure ImportJSON(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Classes');
-
-    addClass('TZAbstractObject','TObject');
-    addClass('TJSONObject','TZAbstractObject');
-    addClass('TJSONArray','TZAbstractObject');
+    addClass('TJSONObject', 'TObject');
+    addClass('TJSONArray', 'TObject');
     addGlobalFunc('procedure TJSONArray.Init(); overload', @_LapeJSONArray_create);
     addGlobalFunc('procedure TJSONArray.Init(s : string); overload', @_LapeJSONArray_createExExEx);
     addGlobalFunc('function TJSONArray.get(index : integer): Pointer;', @_LapeJSONArray_get);
@@ -464,12 +461,10 @@ begin
     addGlobalFunc('function TJSONArray.toString: string; overload; override', @_LapeJSONArray_toString);
     addGlobalFunc('function TJSONArray.toString(indentFactor : integer): string; overload', @_LapeJSONArray_toStringEx);
     addGlobalFunc('function TJSONArray.toString(indentFactor, indent : integer): string; overload', @_LapeJSONArray_toStringExEx);
-    //addGlobalFunc('procedure TJSONArray.Free;', @_LapeJSONArray_Free);
 
     addGlobalFunc('procedure TJSONObject.Init(); overload', @_LapeJSONObject_create);
     addGlobalFunc('procedure TJSONObject.Init(s : string); overload', @_LapeJSONObject_createExExExEx);
     addGlobalFunc('procedure TJSONObject.clean;', @_LapeJSONObject_clean);
-    //    addGlobalFunc('function TJSONObject.clone: pointer; override', @_LapeJSONObject_clone);
     addGlobalFunc('function TJSONObject.accumulate(key : string; value : pointer): TJSONObject;', @_LapeJSONObject_accumulate);
     addGlobalFunc('function TJSONObject.get(key : string): pointer;', @_LapeJSONObject_get);
     addGlobalFunc('function TJSONObject.getBoolean(key : string): boolean;', @_LapeJSONObject_getBoolean);
@@ -506,9 +501,6 @@ begin
     addGlobalFunc('function TJSONObject.toString: string ; overload; override', @_LapeJSONObject_toString);
     addGlobalFunc('function TJSONObject.toString(indentFactor : integer): string; overload', @_LapeJSONObject_toStringEx);
     addGlobalFunc('function TJSONObject.toString(indentFactor, indent : integer): string; overload', @_LapeJSONObject_toStringExEx);
-    //addGlobalFunc('procedure TJSONObject.Free;', @_LapeJSONObject_Free);
-
-    popSection();
   end;
 end;
 

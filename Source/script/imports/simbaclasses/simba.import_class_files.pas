@@ -107,8 +107,6 @@ procedure ImportFiles(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Classes');
-
     addClass('TMFiles');
     //addClassVar('TMFiles', 'OpenFileEvent', 'TOpenFileEvent', @_LapeMFiles_OpenFileEvent_Read, @_LapeMFiles_OpenFileEvent_Write);
     //addClassVar('TMFiles', 'WriteFileEvent', 'TWriteFileEvent', @_LapeMFiles_WriteFileEvent_Read, @_LapeMFiles_WriteFileEvent_Write);
@@ -130,8 +128,6 @@ begin
     addGlobalFunc('function TMFiles.FilePointerPos(FileNum: Integer): Integer;', @_LapeMFiles_FilePointerPos);
     addGlobalFunc('procedure TMFiles.Init(Owner : TObject)', @_LapeMFiles_Init);
     //addGlobalFunc('procedure TMFiles.Free;', @_LapeMFiles_Free);
-
-    popSection();
   end;
 end;
 

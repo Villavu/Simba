@@ -7,7 +7,7 @@ interface
 implementation
 
 uses
-  classes, sysutils, graphics, lptypes,
+  classes, sysutils, graphics, lptypes, lpeval,
   simba.script_compiler, simba.mufasatypes, simba.bitmap, simba.bitmap_helpers;
 
 type
@@ -861,7 +861,11 @@ begin
 
     //addGlobalFunc('procedure TMufasaBitmap.Free;', @_LapeMufasaBitmap_Free);
 
-    addDelayedCode('{$HINTS OFF} procedure ShowBitmap(Bitmap: TMufasaBitmap; EnsureVisible: Boolean = True); begin end;', '!ShowBitmap');
+    addDelayedCode([
+      'procedure ShowBitmap(Bitmap: TMufasaBitmap; EnsureVisible: Boolean = True);',
+      'begin',
+      'end;'
+    ]);
 
     addDelayedCode([
       'procedure TMufasaBitmap.Init; deprecated ' + #39 + 'Use TMufasaBitmap.Create' + #39 + ';',

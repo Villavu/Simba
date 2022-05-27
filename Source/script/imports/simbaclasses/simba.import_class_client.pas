@@ -75,8 +75,6 @@ procedure ImportClient(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Classes');
-
     addClassVar('TClient', 'IOManager', 'TIOManager', @_LapeClient_IOManager_Read, @_LapeClient_IOManager_Write);
     addClassVar('TClient', 'MFiles', 'TMFiles', @_LapeClient_MFiles_Read, @_LapeClient_MFiles_Write);
     addClassVar('TClient', 'MFinder', 'TMFinder', @_LapeClient_MFinder_Read, @_LapeClient_MFinder_Write);
@@ -84,8 +82,6 @@ begin
     addClassVar('TClient', 'MOCR', 'TMOCR', @_LapeClient_MOCR_Read, @_LapeClient_MOCR_Write);
     addGlobalFunc('procedure TClient.Init(const plugin_dir: string = ""; const UseIOManager: TIOManager = nil)', @_LapeClient_Init);
     //addGlobalFunc('procedure TClient.Free;', @_LapeClient_Free);
-
-    popSection();
   end;
 end;
 

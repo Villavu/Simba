@@ -192,8 +192,6 @@ procedure ImportFinder(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Classes');
-
     addClass('TMFinder');
     addClassVar('TMFinder', 'WarnOnly', 'boolean', @_LapeMFinder_WarnOnly_Read, @_LapeMFinder_WarnOnly_Write);
     addGlobalFunc('procedure TMFinder.DefaultOperations(var xs,ys,xe,ye : integer);', @_LapeMFinder_DefaultOperations);
@@ -229,8 +227,6 @@ begin
     addGlobalFunc('function TMFinder.GetToleranceSpeed3Modifier: Extended;', @_LapeMFinder_GetToleranceSpeed3Modifier);
     addGlobalFunc('procedure TMFinder.Init(aClient: TObject)', @_LapeMFinder_Init);
     //addGlobalFunc('procedure TMFinder.Free;', @_LapeMFinder_Free);
-
-    popSection();
   end;
 end;
 

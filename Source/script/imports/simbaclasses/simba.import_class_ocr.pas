@@ -62,8 +62,6 @@ procedure ImportOCR(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Classes');
-
     addClass('TMOCR');
     addGlobalFunc('procedure TMOCR.Init(Owner: TObject)', @_LapeMOCR_Init);
     addGlobalFunc('function TMOCR.GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing, color, tol, len: integer; font: string): string; overload', @_LapeMOCR_GetTextAt);
@@ -74,8 +72,6 @@ begin
     addGlobalFunc('function TMOCR.TextToFontBitmap(Text, font: String): TMufasaBitmap;', @_LapeMOCR_TextToFontBitmap);
     //addGlobalFunc('procedure TMOCR.Free;', @_LapeMOCR_Free);
     addClassVar('TMOCR', 'Fonts', 'TMFonts', @_LapeMOCR_Fonts_Read);
-
-    popSection();
   end;
 end;
 

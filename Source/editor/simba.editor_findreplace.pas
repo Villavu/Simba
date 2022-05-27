@@ -147,7 +147,7 @@ begin
     FFindForm.OnClose := @DoCloseForm;
     FFindForm.OnShow  := @DoShowForm;
     FFindForm.Caption := Title;
-    FFindForm.ShowModal();
+    FFindForm.ShowOnTop();
 
     Height := FFindForm.Height;
     Width  := FFindForm.Width;
@@ -191,7 +191,7 @@ begin
     FFindForm.OnClose := @DoCloseForm;
     FFindForm.OnShow  := @DoShowForm;
     FFindForm.Caption := Title;
-    FFindForm.ShowModal();
+    FFindForm.ShowOnTop();
 
     Height := FFindForm.Height;
     Width  := FFindForm.Width;

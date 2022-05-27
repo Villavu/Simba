@@ -57,8 +57,6 @@ procedure ImportDTMs(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Classes');
-
     addClass('TMDTMS');
     addGlobalType('record x, y, Color, Tolerance, AreaSize, AreaShape: UInt32; end', 'TSDTMPointDef');
     addGlobalType('array of TSDTMPointDef', 'TSDTMPointDefArray');
@@ -71,8 +69,6 @@ begin
     addGlobalFunc('function TMDTMS.StringToDTM(const S: String): Integer;', @_LapeMDTMS_StringToDTM);
     addGlobalFunc('procedure TMDTMS.Init(Owner: TObject)', @_LapeMDTMS_Init);
     //addGlobalFunc('procedure TMDTMS.Free;', @_LapeMDTMS_Free);
-
-    popSection();
   end;
 end;
 

@@ -428,7 +428,7 @@ end;
 
 procedure TSimbaScript_Compiler.addDelayedCode(Code: array of lpString; AFileName: lpString);
 begin
-  addDelayedCode(''.Join(LineEnding, Code), AFileName);
+  addDelayedCode(LapeDelayedFlags + ''.Join(LineEnding, Code), AFileName);
 end;
 
 end.
