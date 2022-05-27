@@ -51,6 +51,7 @@ type
     procedure HoldKey(VirtualKey: Integer; WaitTime: Integer = 0); override;
     procedure ReleaseKey(VirtualKey: Integer; WaitTime: Integer = 0); override;
 
+    function GetProcessMemUsage(PID: SizeUInt): Int64; override;
     function GetProcessPath(PID: SizeUInt): String; override;
     function IsProcess64Bit(PID: SizeUInt): Boolean; override;
     function IsProcessRunning(PID: SizeUInt): Boolean; override;
@@ -91,7 +92,7 @@ type
 implementation
 
 uses
-  windows, dwmapi, multimon, mmsystem,
+  windows, jwapsapi, dwmapi, multimon, mmsystem,
   simba.process;
 
 type
@@ -540,11 +541,32 @@ begin
     Sleep(WaitTime);
 end;
 
+function TSimbaNativeInterface_Windows.GetProcessMemUsage(PID: SizeUInt): Int64;
+var
+  Handle: THandle;
+  pmcEx: PROCESS_MEMORY_COUNTERS_Ex;
+  pmc: PROCESS_MEMORY_COUNTERS absolute pmcEx;
+begin
+  Result := 0;
+
+  Handle := OpenProcess(PROCESS_VM_READ or PROCESS_QUERY_INFORMATION, False, PID);
+  if (Handle = 0) then
+    Exit;
+
+  pmcEx := Default(PROCESS_MEMORY_COUNTERS_Ex);
+  pmcEx.cb := SizeOf(PROCESS_MEMORY_COUNTERS_Ex);
+
+  if GetProcessMemoryInfo(Handle, pmc, SizeOf(pmcEx)) then
+    Result := pmcEx.PrivateUsage;
+
+  CloseHandle(Handle);
+end;
+
 function TSimbaNativeInterface_Windows.GetProcessPath(PID: SizeUInt): String;
 var
   Buffer: array[1..MAX_PATH] of Char;
   BufferSize: UInt32 = MAX_PATH;
-  Handle: TWindowHandle;
+  Handle: THandle;
 begin
   Result := '';
 
@@ -562,7 +584,7 @@ function TSimbaNativeInterface_Windows.IsProcess64Bit(PID: SizeUInt): Boolean;
 const
   PROCESSOR_ARCHITECTURE_AMD64 = 9;
 var
-  Handle: TWindowHandle;
+  Handle: THandle;
   SystemInfo: TSystemInfo;
   Wow64Process: LongBool;
 begin
@@ -584,7 +606,7 @@ end;
 
 function TSimbaNativeInterface_Windows.IsProcessRunning(PID: SizeUInt): Boolean;
 var
-  Handle: TWindowHandle;
+  Handle: THandle;
   ExitCode: UInt32;
 begin
   Handle := OpenProcess(SYNCHRONIZE or PROCESS_QUERY_LIMITED_INFORMATION, False, PID);
@@ -598,7 +620,7 @@ end;
 
 procedure TSimbaNativeInterface_Windows.TerminateProcess(PID: SizeUInt);
 var
-  Handle: TWindowHandle;
+  Handle: THandle;
 begin
   Handle := OpenProcess(PROCESS_TERMINATE, False, PID);
   if (Handle = 0) then

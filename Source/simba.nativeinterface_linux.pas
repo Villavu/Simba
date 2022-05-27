@@ -40,6 +40,7 @@ type
     procedure HoldKey(VirtualKey: Integer; WaitTime: Integer = 0); override;
     procedure ReleaseKey(VirtualKey: Integer; WaitTime: Integer = 0); override;
 
+    function GetProcessMemUsage(PID: SizeUInt): Int64; override;
     function GetProcessPath(PID: SizeUInt): String; override;
     function IsProcess64Bit(PID: SizeUInt): Boolean; override;
     function IsProcessRunning(PID: SizeUInt): Boolean; override;
@@ -73,8 +74,13 @@ type
 implementation
 
 uses
-  x, xatom, keysym, baseunix, unix, linux, lcltype, lazloggerbase,
+  x, xatom, keysym, baseunix, unix, linux, lcltype, lazloggerbase, ctypes,
   simba.process, simba.xlib, simba.helpers_string;
+
+const
+   _SC_PAGESIZE = 30;
+
+function sysconf(i: cint): clong; cdecl; external name 'sysconf';
 
 function GetWindowProperty(Window: TWindow; Prop: TAtom): Int64;
 var
@@ -500,6 +506,29 @@ begin
 
   if (WaitTime > 0) then
     Sleep(WaitTime);
+end;
+
+function TSimbaNativeInterface_Linux.GetProcessMemUsage(PID: SizeUInt): Int64;
+var
+  List: TStringList;
+  Resident, Shared: Int64;
+begin
+  Result := 0;
+  if not DirectoryExists('/proc/' + IntToStr(PID)) then
+    Exit;
+
+  List := TStringList.Create();
+  List.LineBreak := ' ';
+  try
+    List.LoadFromFile(Format('/proc/%d/statm', [PID]));
+
+    Resident := StrToInt64(List[1]) * sysconf(_SC_PAGESIZE);
+    Shared   := StrToInt64(List[2]) * sysconf(_SC_PAGESIZE);
+
+    Result := Resident - Shared;
+  finally
+    List.Free();
+  end;
 end;
 
 function TSimbaNativeInterface_Linux.GetProcessPath(PID: SizeUInt): String;

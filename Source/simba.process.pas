@@ -27,6 +27,7 @@ type
     function IsProcess64Bit(PID: TProcessID): Boolean;
     function IsProcessRunning(PID: TProcessID): Boolean;
     function GetProcessPath(PID: TProcessID): String;
+    function GetProcessMemUsage(PID: TProcessID): Int64;
     procedure TerminateProcess(PID: TProcessID);
 
     function RunCommandInDir(Directory, Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus; overload;
@@ -127,6 +128,11 @@ end;
 function TSimbaProcess.GetProcessPath(PID: TProcessID): String;
 begin
   Result := SimbaNativeInterface.GetProcessPath(PID);
+end;
+
+function TSimbaProcess.GetProcessMemUsage(PID: TProcessID): Int64;
+begin
+  Result := SimbaNativeInterface.GetProcessMemUsage(PID);
 end;
 
 procedure TSimbaProcess.TerminateProcess(PID: TProcessID);
