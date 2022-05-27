@@ -39,6 +39,7 @@ type
     procedure HoldKey(VirtualKey: Integer; WaitTime: Integer = 0); virtual; abstract;
     procedure ReleaseKey(VirtualKey: Integer; WaitTime: Integer = 0); virtual; abstract;
 
+    function GetProcessMemUsage(PID: SizeUInt): Int64; virtual; abstract;
     function GetProcessPath(PID: SizeUInt): String; virtual; abstract;
     function IsProcess64Bit(PID: SizeUInt): Boolean; virtual; abstract;
     function IsProcessRunning(PID: SizeUInt): Boolean; virtual; abstract;

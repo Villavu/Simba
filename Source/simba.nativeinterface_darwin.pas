@@ -53,6 +53,7 @@ type
     procedure HoldKey(Key: Integer; WaitTime: Integer = 0); override;
     procedure ReleaseKey(Key: Integer; WaitTime: Integer = 0); override;
 
+    function GetProcessMemUsage(PID: SizeUInt): Int64; override;
     function GetProcessPath(PID: SizeUInt): String; override;
     function IsProcess64Bit(PID: SizeUInt): Boolean; override;
     function IsProcessRunning(PID: SizeUInt): Boolean; override;
@@ -106,7 +107,34 @@ var
 function mach_timebase_info(var TimebaseInfoData: TTimebaseInfoData): Int64; cdecl; external 'libc';
 function mach_absolute_time: QWORD; cdecl; external 'libc';
 
+type
+  TProcTaskInfo = record
+    virtual_size: uint64;
+    resident_size: uint64;
+    total_user: uint64;
+    total_system: uint64;
+    threads_user: uint64;
+    threads_system: uint64;
+
+    policy: int32;
+    faults: int32;
+    pageins: int32;
+    cow_faults: int32;
+    messages_sent: int32;
+    messages_recv: int32;
+    syscalls_mach: int32;
+    syscalls_unix: int32;
+    csw: int32;
+    threadnum: int32;
+    numrunning: int32;
+    priority: int32;
+  end;
+
+const
+  PROC_PIDTASKINFO = 4;
+
 function proc_pidpath(pid: longint; buffer: pbyte; bufferSize: longword): longint; cdecl; external 'libproc';
+function proc_pidinfo(pid: longint; flavor: longint; arg: UInt64; buffer: pointer; buffersize: longint): longint; cdecl; external 'libproc';
 
 function TSimbaNativeInterface_Darwin.GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean;
 var
@@ -489,6 +517,16 @@ begin
     Code := FKeyMap[Character].KeyCode;
     Modifiers := FKeyMap[Character].Modifiers;
   end
+end;
+
+function TSimbaNativeInterface_Darwin.GetProcessMemUsage(PID: SizeUInt): Int64;
+var
+  info: TProcTaskInfo;
+begin
+  Result := 0;
+
+  if proc_pidinfo(PID, PROC_PIDTASKINFO, 0, @info, SizeOf(TProcTaskInfo)) > 0 then
+    Result := info.resident_size;
 end;
 
 function TSimbaNativeInterface_Darwin.GetProcessPath(PID: SizeUInt): String;

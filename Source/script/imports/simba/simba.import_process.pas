@@ -60,6 +60,11 @@ begin
   PString(Result)^ := SimbaProcess.GetProcessPath(PProcessID(Params^[0])^);
 end;
 
+procedure _LapeGetProcessMemUsage(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PInt64(Result)^ := SimbaProcess.GetProcessMemUsage(PProcessID(Params^[0])^);
+end;
+
 procedure _LapeTerminateProcess(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   SimbaProcess.TerminateProcess(PProcessID(Params^[0])^);
@@ -99,6 +104,7 @@ begin
     addGlobalFunc('function IsProcessRunning(PID: TProcessID): Boolean', @_LapeIsProcessRunning);
     addGlobalFunc('function IsProcess64Bit(PID: TProcessID): Boolean', @_LapeIsProcess64Bit);
     addGlobalFunc('function GetProcessPath(PID: TProcessID): String', @_LapeGetProcessPath);
+    addGlobalFunc('function GetProcessMemUsage(PID: TProcessID): Int64', @_LapeGetProcessMemUsage);
     addGlobalFunc('procedure TerminateProcess(PID: TProcessID)', @_LapeTerminateProcess);
     addGlobalFunc('function RunCommandInDir(Directory, Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus; overload', @_LapeRunCommandInDirOutput);
     addGlobalFunc('function RunCommandInDir(Directory, Executable: String; Commands: TStringArray): TProcessID; overload', @_LapeRunCommandInDir);
