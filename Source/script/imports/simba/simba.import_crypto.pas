@@ -7,9 +7,9 @@ interface
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  SynLZ, blowfish, md5, sha1, HMAC,
-  simba.script_compiler, simba.stringutil;
+  classes, sysutils, lptypes, ffi,
+  synlz, blowfish, md5, sha1, hmac,
+  simba.script_compiler, simba.stringutil, simba.compressionthread;
 
 procedure _LapeBlowFish_Encrypt(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 var
@@ -48,7 +48,7 @@ begin
     try
       SetLength(PString(Result)^, Input.Size);
 
-      Decrypt.Read(PString(Result)^[2], Input.Size);
+      Decrypt.Read(PString(Result)^[1], Input.Size);
     finally
       Decrypt.Free();
     end;
@@ -91,22 +91,22 @@ end;
 
 procedure _LapeCompressString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pstring(Result)^ := CompressString(Pstring(Params^[0])^);
+  Pstring(Result)^ := CompressString(PString(Params^[0])^);
 end;
 
 procedure _LapeDecompressString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pstring(Result)^ := DecompressString(Pstring(Params^[0])^);
+  Pstring(Result)^ := DecompressString(PString(Params^[0])^);
 end;
 
 procedure _LapeBase64Encode(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pstring(Result)^ := Base64Encode(Pstring(Params^[0])^);
+  Pstring(Result)^ := Base64Encode(PString(Params^[0])^);
 end;
 
 procedure _LapeBase64Decode(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  Pstring(Result)^ := Base64Decode(Pstring(Params^[0])^);
+  Pstring(Result)^ := Base64Decode(PString(Params^[0])^);
 end;
 
 procedure _LapeSynLZCompress(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -129,6 +129,41 @@ begin
   PInteger(Result)^ := SynLZdecompressdestlen(PPAnsiChar(Params^[0])^);
 end;
 
+procedure _LapeLZCompressionThread_Create(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PLZCompressionThread(Result)^ := TLZCompressionThread.Create();
+end;
+
+procedure _LapeLZCompressionThread_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PLZCompressionThread(Params^[0])^.Free();
+end;
+
+procedure _LapeLZCompressionThread_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PLZCompressionThread(Params^[0])^.Write(PPointer(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure _LapeLZCompressionThread_WaitCompressing(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PLZCompressionThread(Params^[0])^.WaitCompressing();
+end;
+
+procedure _LapeLZCompressionThread_IsCompressing(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PLZCompressionThread(Params^[0])^.IsCompressing;
+end;
+
+procedure _LapeLZCompressionThreadOnCompressed_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PLZCompressedEvent(Result)^ := PLZCompressionThread(Params^[0])^.OnCompressed;
+end;
+
+procedure _LapeLZCompressionThreadOnCompressed_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PLZCompressionThread(Params^[0])^.OnCompressed := PLZCompressedEvent(Params^[1])^;
+end;
+
 procedure ImportCrypto(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -149,10 +184,21 @@ begin
     addGlobalFunc('function Base64Encode(S: String): String', @_LapeBase64Encode);
     addGlobalFunc('function Base64Decode(S: String): String', @_LapeBase64Decode);
 
-    addGlobalFunc('function SynLZCompressDestLen(in_len: Integer): Integer', @_LapeSynLZCompressDestLen);
-    addGlobalFunc('function SynLZDecompressDestLen(in_p: Pointer): Integer', @_LapeSynLZDecompressDestLen);
-    addGlobalFunc('function SynLZCompress(src: Pointer; size: integer; dst: Pointer): Integer', @_LapeSynLZCompress);
-    addGlobalFunc('function SynLZDecompress(src: Pointer; size: integer; dst: Pointer): Integer', @_LapeSynLZDecompress);
+    addGlobalFunc('function LZCompressDestLen(Len: Integer): Integer', @_LapeSynLZCompressDestLen);
+    addGlobalFunc('function LZDecompressDestLen(Src: Pointer): Integer', @_LapeSynLZDecompressDestLen);
+    addGlobalFunc('function LZCompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer', @_LapeSynLZCompress);
+    addGlobalFunc('function LZDecompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer', @_LapeSynLZDecompress);
+
+    addGlobalType('type Pointer', 'TLZCompressionThread');
+    addGlobalType('procedure(Sender: TLZCompressionThread; Data: Pointer; DataSize: Integer; TimeUsed: Double) of object', 'TLZCompressedEvent', FFI_DEFAULT_ABI);
+
+    addGlobalFunc('function TLZCompressionThread.Create: TLZCompressionThread; static', @_LapeLZCompressionThread_Create);
+    addGlobalFunc('procedure TLZCompressionThread.Free;', @_LapeLZCompressionThread_Free);
+    addGlobalFunc('procedure TLZCompressionThread.Write(constref Data; DataSize: Integer)', @_LapeLZCompressionThread_Write);
+    addGlobalFunc('procedure TLZCompressionThread.WaitCompressing', @_LapeLZCompressionThread_WaitCompressing);
+    addGlobalFunc('procedure TLZCompressionThread.SetOnCompressed(Value: TLZCompressedEvent)', @_LapeLZCompressionThreadOnCompressed_Write);
+    addGlobalFunc('function TLZCompressionThread.GetOnCompressed: TLZCompressedEvent', @_LapeLZCompressionThreadOnCompressed_Read);
+    addGlobalFunc('function TLZCompressionThread.IsCompressing: Boolean', @_LapeLZCompressionThread_IsCompressing);
 
     popSection();
   end;
