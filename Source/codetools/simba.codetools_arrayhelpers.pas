@@ -23,7 +23,8 @@ const
     'procedure <Array>.SetLength(NewLength: Integer); external;',
     'function <Array>.Length: Integer; external;',
     'function <Array>.Copy: <Array>; external;',
-    'function <Array>.Copy(StartIndex; Count: Integer = High(Integer)): <Array>; external;',
+    'function <Array>.Copy(StartIndex: Integer; Count: Integer = High(Integer)): <Array>; external;',
+    'procedure <Array>.Delete(StartIndex: Integer; Count: Integer = High(Integer)); external;',
     'function <Array>.First: <ArrayType>; external;',
     'function <Array>.Last: <ArrayType>; external;',
     'function <Array>.Pop: <ArrayType>; external;',
@@ -31,9 +32,7 @@ const
     'function <Array>.RandomValue: <ArrayType>; external;',
     'procedure <Array>.Reverse; external;',
     'function <Array>.Reversed: <Array>; external;',
-    'procedure <Array>.Clear; external;',
-    'procedure <Array>.Append(Value: <ArrayType>); external;',
-    'procedure <Array>.Extend(Value: <ArrayType>); external;'
+    'procedure <Array>.Clear; external;'
   );
 
   STATIC_HELPERS: TStringArray = (
@@ -52,7 +51,7 @@ const
     'function <Array>.Sorted(Weights: TIntegerArray; LowToHigh: Boolean): <Array>; external;',
     'function <Array>.Length: Integer; external;',
     'function <Array>.Copy: <Array>; external;',
-    'function <Array>.Copy(StartIndex; Count: Integer = High(Integer)): <Array>; external;',
+    'function <Array>.Copy(StartIndex: Integer; Count: Integer = High(Integer)): <Array>; external;',
     'function <Array>.First: <ArrayType>; external;',
     'function <Array>.Last: <ArrayType>; external;',
     'function <Array>.RandomValue: <ArrayType>; external;',
@@ -84,7 +83,7 @@ const
     'function <Array>.Sorted(Weights: TIntegerArray; LowToHigh: Boolean): <Array>; external;',
     'function <Array>.Length: Integer; external;',
     'function <Array>.Copy: <Array>; external;',
-    'function <Array>.Copy(StartIndex; Count: Integer = High(Integer)): <Array>; external;',
+    'function <Array>.Copy(StartIndex: Integer; Count: Integer = High(Integer)): <Array>; external;',
     'function <Array>.First: <ArrayType>; external;',
     'function <Array>.Last: <ArrayType>; external;',
     'function <Array>.RandomValue: <ArrayType>; external;',
@@ -100,7 +99,6 @@ const
     'function <Array>.Slice(Start, Stop, Step: Integer): <Array>; external;',
     'function <Array>.Remove(Value: <ArrayType>): Boolean; external;',
     'function <Array>.RemoveAll(Value: <ArrayType>): Integer; external;',
-    'procedure <Array>.Delete(Index, Count: Integer); external;',
     'procedure <Array>.Delete(Index: Integer; Count: Integer = High(Integer)); external;',
     'procedure <Array>.Insert(Item: <ArrayType>; Index: Integer); external;',
     'procedure <Array>.SetLength(NewLength: Integer); external;',
@@ -110,7 +108,7 @@ const
     'procedure <Array>.Reverse; external;',
     'procedure <Array>.Clear; external;',
     'procedure <Array>.Append(Value: <ArrayType>); external;',
-    'procedure <Array>.Extend(Value: <ArrayType>); external;'
+    'procedure <Array>.Extend(Value: <Array>); external;'
    );
 
 function ParseArrayHelpers(Arr: TciArrayType): TCodeParser;

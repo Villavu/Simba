@@ -568,9 +568,10 @@ var
 begin
   SetSize(AWidth, AHeight);
 
-  Source := '';
-  if Str.StartsWith('m') then
-    Source := DecompressString(Base64Decode(Str.Copy(2)), False);
+  if (Str <> '') and (Str[1] = 'm') then
+    Delete(Str, 1, 1);
+
+  Source := DecompressString(Base64Decode(Str), False);
   if (Source = '') then
     raise ESimbaBitmapException.Create(sbeInvalidBitmapString);
 

@@ -1,78 +1,120 @@
 object SimbaBitmapConversionForm: TSimbaBitmapConversionForm
-  Left = 800
-  Height = 240
-  Top = 426
-  Width = 320
+  Left = 2712
+  Height = 466
+  Top = 537
+  Width = 755
+  AutoSize = True
   Caption = 'Bitmap conversion'
-  ClientHeight = 240
-  ClientWidth = 320
-  Constraints.MinHeight = 240
-  Constraints.MinWidth = 320
-  LCLVersion = '2.0.6.0'
+  ClientHeight = 466
+  ClientWidth = 755
+  Constraints.MinHeight = 360
+  Constraints.MinWidth = 560
+  DesignTimePPI = 120
+  Position = poMainFormCenter
+  LCLVersion = '2.2.2.0'
   object ToStringButton: TButton
-    Left = 216
-    Height = 36
-    Top = 184
-    Width = 89
-    Anchors = [akRight, akBottom]
-    Caption = 'To string'
+    AnchorSideTop.Control = ClipboardButton
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 622
+    Height = 30
+    Top = 428
+    Width = 125
+    Anchors = [akTop, akRight]
+    AutoSize = True
+    BorderSpacing.Right = 8
+    Caption = '      Convert      '
     OnClick = ToStringButtonClick
     TabOrder = 0
   end
   object PadOutput: TCheckBox
-    Left = 184
-    Height = 19
-    Top = 158
-    Width = 79
-    Anchors = [akRight, akBottom]
+    AnchorSideLeft.Control = ToStringButton
+    AnchorSideLeft.Side = asrCenter
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = ToStringButton
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = ToStringButton
+    Left = 636
+    Height = 24
+    Top = 396
+    Width = 97
+    Anchors = [akLeft, akBottom]
+    BorderSpacing.Top = 10
+    BorderSpacing.Bottom = 8
     Caption = 'Pad output'
     Checked = True
     State = cbChecked
     TabOrder = 1
   end
   object OpenButton: TButton
-    Left = 12
-    Height = 36
-    Top = 184
-    Width = 76
-    Anchors = [akRight, akBottom]
-    Caption = 'Open'
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = GroupBox
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = ClipboardButton
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = ClipboardButton
+    Left = 8
+    Height = 30
+    Top = 393
+    Width = 213
+    Anchors = [akLeft, akRight, akBottom]
+    AutoSize = True
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 8
+    Caption = 'Open Image'
     OnClick = OpenButtonClick
     TabOrder = 2
   end
   object GroupBox: TGroupBox
-    Left = 12
-    Height = 145
+    AnchorSideBottom.Control = OpenButton
+    Left = 8
+    Height = 377
     Top = 8
-    Width = 284
-    Anchors = [akTop, akLeft, akRight, akBottom]
+    Width = 739
+    Align = alTop
+    Anchors = [akBottom]
+    AutoSize = True
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 8
+    BorderSpacing.Right = 8
     Caption = 'Image'
-    ClientHeight = 125
-    ClientWidth = 280
+    ClientHeight = 352
+    ClientWidth = 735
     TabOrder = 3
     object ImagePreview: TImage
       Left = 0
-      Height = 125
+      Height = 352
       Top = 0
-      Width = 280
+      Width = 735
       Align = alClient
       Center = True
+      Proportional = True
+      Stretch = True
     end
   end
   object ClipboardButton: TButton
-    Left = 88
-    Height = 36
-    Top = 184
-    Width = 128
-    Anchors = [akRight, akBottom]
-    Caption = 'From Clipboard'
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = OpenButton
+    AnchorSideTop.Side = asrBottom
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 8
+    Height = 30
+    Top = 428
+    Width = 213
+    Anchors = [akLeft, akBottom]
+    AutoSize = True
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 5
+    BorderSpacing.Bottom = 8
+    Caption = 'Load Image From Clipboard'
     OnClick = ClipboardButtonClick
     TabOrder = 4
   end
   object OpenPictureDialog: TOpenPictureDialog
     FilterIndex = 2
     Options = [ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
-    left = 120
-    top = 64
+    Left = 432
+    Top = 112
   end
 end

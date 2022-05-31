@@ -25,9 +25,8 @@ type
     procedure ClipboardButtonClick(Sender: TObject);
     procedure OpenButtonClick(Sender: TObject);
     procedure ToStringButtonClick(Sender: TObject);
-  private
   public
-    dispPic : TMufasaBitmap;
+    dispPic: TMufasaBitmap;
   end; 
 
 var
@@ -89,26 +88,43 @@ begin
 end;
 
 procedure TSimbaBitmapConversionForm.ToStringButtonClick(Sender: TObject);
+const
+  PAD_WIDTH = 65;
 var
-  str : string;
-  strend : string;
-  len : integer;
+  Str: String;
+  Builder: TStringList;
+  Offset: Integer;
 begin
-  if dispPic <> nil then
+  if (dispPic <> nil) then
   begin
-    str := '  Bmp := BitmapFromString('+
-           inttostr(disppic.Width)+ ', ' + inttostr(disppic.height) +', '#39 + dispPic.ToString;
-    strend :=  #39 +');';
-    len := length(str);
+    Str := dispPic.SaveToString();
+
+    Builder := TStringList.Create();
+
     if PadOutput.Checked then
-      while Len > 65 do
+    begin
+      Builder := TStringList.Create();
+      Builder.Add('  BMP := TMufasaBitmap.CreateFromString(%d, %d,', [dispPic.Width, dispPic.Height]);
+
+      Offset := 1;
+      while (Offset < Length(Str) - PAD_WIDTH) do
       begin
-        SimbaOutputForm.Add(Copy(str,1,62) + #39 + ' +');
-        delete(str,1,62);
-        str := StringOfChar(' ',8) + #39 + str;
-        len := length(str);
+        Builder.Add('    ' + #39 + Copy(Str, Offset, PAD_WIDTH) + #39 + ' +');
+
+        Inc(Offset, PAD_WIDTH);
       end;
-    SimbaOutputForm.Add(str + strend);
+      Builder.Add('    ' + #39 + Copy(Str, Offset) + #39 + ');');
+    end else
+      Builder.Add(Format('  BMP := TMufasaBitmap.CreateFromString(%d, %d, %s);', [dispPic.Width, dispPic.Height, QuotedStr(Str)]));
+
+    SimbaOutputForm.Add(Builder);
+
+    try
+      Clipboard.AsText := Builder.Text;
+    except
+    end;
+
+    Builder.Free();
   end;
 end;
 
