@@ -173,7 +173,6 @@ begin
   FProcess.Parameters.Add('--target=' + IntToStr(FTarget));
   FProcess.Parameters.AddStrings(Args);
   FProcess.Parameters.Add(FScriptFile);
-  FProcess.Environment.Add('HEAPTRC=disabled');
   FProcess.Execute();
 
   FOutputThread := TThread.ExecuteInThread(@DoOutputThread);

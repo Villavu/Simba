@@ -202,7 +202,6 @@ begin
   Process.Timeout := GetTickCount64() + Timeout;
   Process.Options := Process.Options + [poRunIdle, poStderrToOutPut];
   Process.Executable := Executable;
-  Process.Environment.Add('HEAPTRC=disabled');
 
   for Command in Commands do
     Process.Parameters.Add(Command);

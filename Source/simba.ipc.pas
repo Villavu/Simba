@@ -66,8 +66,7 @@ type
 implementation
 
 uses
-  lazloggerbase,
-  simba.mufasatypes, simba.helpers_string;
+  lazloggerbase;
 
 procedure TSimbaIPCServer.Execute;
 var
@@ -237,8 +236,8 @@ constructor TSimbaIPCClient.Create(ServerID: String);
 begin
   FLock := TCriticalSection.Create();
 
-  FOutputStream := TOutputPipeStream.Create(StrToInt('$' + ServerID.Copy(1, 16)));
-  FInputStream := TInputPipeStream.Create(StrToInt('$' + ServerID.Copy(16+1, 16)));
+  FOutputStream := TOutputPipeStream.Create(StrToInt('$' + Copy(ServerID, 1, 16)));
+  FInputStream := TInputPipeStream.Create(StrToInt('$' + Copy(ServerID, 16+1, 16)));
 
   FParams := TMemoryStream.Create();
   FResult := TMemoryStream.Create();

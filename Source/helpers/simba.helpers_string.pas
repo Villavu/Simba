@@ -30,15 +30,22 @@ type
 
     Groups: TRegExprGroups;
   end;
-  PRegExprMatches = ^TRegExprMatches;
-  TRegExprMatches = array of TRegExprMatch;
+  PRegExprMatchArray = ^TRegExprMatchArray;
+  TRegExprMatchArray = array of TRegExprMatch;
 
   TSimbaStringHelper = type helper for String
+  public const
+    NumberChars   = '0123456789';
+    LowerChars    = 'abcdefghijklmnopqrstuvwxyz';
+    UpperChars    = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    AlphaChars    = LowerChars + UpperChars;
+    AlphaNumChars = AlphaChars + NumberChars;
   public
-    class function NumberChars: String; static;
-    class function AlphaChars: String; static;
-    class function LowerChars: String; static;
-    class function UpperChars: String; static;
+    function IsUpper: Boolean;
+    function IsLower: Boolean;
+    function IsAlphaNum: Boolean;
+    function IsInteger: Boolean;
+    function IsFloat: Boolean;
 
     function ToUpper: String;
     function ToLower: String;
@@ -51,7 +58,7 @@ type
     function BetweenAll(const S1, S2: String): TStringArray;
 
     function RegExprSplit(const Pattern: String): TStringArray;
-    function RegExprFindAll(const Pattern: String): TRegExprMatches;
+    function RegExprFindAll(const Pattern: String): TRegExprMatchArray;
     function RegExprFind(const Pattern: String): TRegExprMatch;
     function RegExprExists(const Pattern: String): Boolean;
 
@@ -63,14 +70,12 @@ type
     function LastIndexOf(const Value: String): Integer; overload;
     function LastIndexOf(const Value: String; Offset: Integer): Integer; overload;
 
-    function IndicesOfChar(const Value: Char; Offset: Integer): TIntegerArray;
-
     function IndicesOf(const Value: String): TIntegerArray; overload;
     function IndicesOf(const Value: String; Offset: Integer): TIntegerArray; overload;
 
-    function Extract(const Characters: String): String;
-    function ExtractNumber(Default: Int64 = -1): Int64; overload;
-    function IsNumber: Boolean; overload;
+    function Extract(const Chars: array of Char): String;
+    function ExtractInteger(Default: Int64 = -1): Int64;
+    function ExtractFloat(Default: Extended = -1): Extended;
 
     function Trim: String; overload;
     function Trim(const TrimChars: array of Char): String; overload;
@@ -84,6 +89,7 @@ type
     function StartsWith(const Value: String; CaseSenstive: Boolean = True): Boolean;
     function EndsWith(const Value: String; CaseSenstive: Boolean = True): Boolean;
 
+    function Partition(const Value: String): TStringArray;
     function Replace(const OldValue: String; const NewValue: String): String; overload;
     function Replace(const OldValue: String; const NewValue: String; ReplaceFlags: TReplaceFlags): String; overload;
 
@@ -91,26 +97,43 @@ type
     function ContainsAny(const Values: TStringArray; CaseSenstive: Boolean = True): Boolean;
 
     function Count(const Value: String): Integer;
+    function CountAll(const Values: TStringArray): TIntegerArray;
 
     function Split(const Seperator: String): TStringArray;
 
-    function Copy: String; overload;
-    function Copy(StartIndex, Count: Integer): String; overload;
-    function Copy(StartIndex: Integer): String; overload;
+    function Copy: String;
     function CopyRange(StartIndex, EndIndex: Integer): String;
-
-    procedure Delete(StartIndex, Count: Integer);
     procedure DeleteRange(StartIndex, EndIndex: Integer);
-
     procedure Insert(const Value: String; Index: Integer);
 
-    function PadLeft(Count: Integer; PaddingChar: Char = #32): String; overload;
-    function PadRight(Count: Integer; PaddingChar: Char = #32): String; overload;
+    procedure Extend(Value: String);
+    procedure Append(Value: Char);
+
+    function Remove(Value: String): Boolean;
+    function RemoveAll(Value: String): Integer;
+
+    function PadLeft(ACount: Integer; PaddingChar: Char = #32): String;
+    function PadRight(ACount: Integer; PaddingChar: Char = #32): String;
+
+    function Format(Args: array of const): String;
+
+    function ToBoolean: Boolean; overload;
+    function ToBoolean(Default: Boolean): Boolean; overload;
+    function ToInteger: Integer; overload;
+    function ToInteger(Default: Integer): Integer; overload;
+    function ToInt64: Int64; overload;
+    function ToInt64(Default: Int64): Int64; overload;
+    function ToSingle: Single; overload;
+    function ToSingle(Default: Single): Single; overload;
+    function ToDouble: Double; overload;
+    function ToDouble(Default: Double): Double; overload;
+    function ToExtended: Extended; overload;
+    function ToExtended(Default: Extended): Extended; overload;
   end;
 
-  operator * (Left: String; Right: Int32): String;
-  operator in(Left: String; Right: String): Boolean;
-  operator in(Left: String; Right: TStringArray): Boolean;
+  operator * (const Left: String; Right: Int32): String;
+  operator in(const Left: String; const Right: String): Boolean;
+  operator in(const Left: String; const Right: TStringArray): Boolean;
 
 implementation
 
@@ -256,7 +279,7 @@ begin
   end;
 end;
 
-function TSimbaStringHelper.RegExprFindAll(const Pattern: String): TRegExprMatches;
+function TSimbaStringHelper.RegExprFindAll(const Pattern: String): TRegExprMatchArray;
 var
   RegExpr: TRegExpr;
 
@@ -332,23 +355,9 @@ begin
   Result := RPosEx(Value, Self, Offset);
 end;
 
-function TSimbaStringHelper.IndicesOfChar(const Value: Char; Offset: Integer): TIntegerArray;
-var
-  Matches: specialize TSimbaOverAllocateArray<Integer>;
-  I: Integer;
-begin
-  Matches.Init(32);
-
-  if (Offset > 0) then
-    for I := Offset to Length(Self) do
-      if (Self[I] = Value) then
-        Matches.Add(I);
-
-  Result := Matches.Trim();
-end;
-
 function TSimbaStringHelper.IndicesOf(const Value: String): TIntegerArray;
 var
+  Buffer: specialize TSimbaOverAllocateArray<Integer>;
   Matches: SizeIntArray;
   I: Integer;
 begin
@@ -357,8 +366,17 @@ begin
     Exit;
 
   if Length(Value) = 1 then
-    Result := IndicesOfChar(Value[1], 1)
-  else
+  begin
+    Buffer.Init(32);
+
+    for I := 1 to Length(Self) do
+      if (Self[I] = Value) then
+        Buffer.Add(I);
+
+    Result := Buffer.Trim();
+    Exit;
+  end;
+
   if FindMatchesBoyerMooreCaseSensitive(Self, Value, Matches, True) then
   begin
     SetLength(Result, System.Length(Matches));
@@ -369,6 +387,7 @@ end;
 
 function TSimbaStringHelper.IndicesOf(const Value: String; Offset: Integer): TIntegerArray;
 var
+  Buffer: specialize TSimbaOverAllocateArray<Integer>;
   Matches: SizeIntArray;
   I: Integer;
 begin
@@ -377,9 +396,18 @@ begin
     Exit;
 
   if Length(Value) = 1 then
-    Result := IndicesOfChar(Value[1], Offset)
-  else
-  if FindMatchesBoyerMooreCaseSensitive(Self.Copy(Offset, MaxInt), Value, Matches, True) then
+  begin
+    Buffer.Init(32);
+
+    for I := Offset to Length(Self) do
+      if (Self[I] = Value) then
+        Buffer.Add(I);
+
+    Result := Buffer.Trim();
+    Exit;
+  end;
+
+  if FindMatchesBoyerMooreCaseSensitive(Self.CopyRange(Offset, Length(Self)), Value, Matches, True) then
   begin
     SetLength(Result, System.Length(Matches));
     for I := 0 to High(Matches) do
@@ -387,24 +415,14 @@ begin
   end;
 end;
 
-class function TSimbaStringHelper.NumberChars: String;
+function TSimbaStringHelper.IsUpper: Boolean;
 begin
-  Result := '0123456789';
+  Result := (Self = Self.ToUpper());
 end;
 
-class function TSimbaStringHelper.AlphaChars: String;
+function TSimbaStringHelper.IsLower: Boolean;
 begin
-  Result := 'abcdefghijklmnopqrstuvwxyz' + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-end;
-
-class function TSimbaStringHelper.LowerChars: String;
-begin
- Result := 'abcdefghijklmnopqrstuvwxyz';
-end;
-
-class function TSimbaStringHelper.UpperChars: String;
-begin
- Result := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  Result := (Self = Self.ToLower());
 end;
 
 function TSimbaStringHelper.ToUpper: String;
@@ -430,41 +448,91 @@ begin
       Result[I] := LowerCase(Self[I]);
 end;
 
-function TSimbaStringHelper.Extract(const Characters: String): String;
+function TSimbaStringHelper.Extract(const Chars: array of Char): String;
+type
+  TCharMap = array[Char] of Boolean;
 var
-  I, Count: Integer;
+  Hit: TCharMap;
+  I, Hits: Integer;
 begin
-  SetLength(Result, System.Length(Self));
-  Count := 1;
+  Result := '';
 
-  for I := 1 to System.Length(Self) do
-    if Pos(Self[I], Characters) > 0 then
-    begin
-      Result[Count] := Self[I];
-      Inc(Count);
-    end;
+  if (Length(Self) > 0) and (Length(Chars) > 0) then
+  begin
+    SetLength(Result, Length(Self));
+    Hits := 1;
 
-  SetLength(Result, Count - 1);
+    Hit := Default(TCharMap);
+    for I := 0 to High(Chars) Do
+      Hit[Chars[I]] := True;
+
+    for I := 1 to Length(Self) do
+      if Hit[Self[I]] then
+      begin
+        Result[Hits] := Self[I];
+        Inc(Hits);
+      end;
+
+    SetLength(Result, Hits - 1);
+  end;
 end;
 
-function TSimbaStringHelper.ExtractNumber(Default: Int64): Int64;
+function TSimbaStringHelper.ExtractInteger(Default: Int64): Int64;
 begin
-  Result := StrToIntDef(Extract('0123456789-.'), Default);
+  Result := StrToInt64Def(Self.Extract(['-','0','1','2','3','4','5','6','7','8','9']), Default);
 end;
 
-function TSimbaStringHelper.IsNumber: Boolean;
+function TSimbaStringHelper.ExtractFloat(Default: Extended): Extended;
+begin
+  Result := StrToFloatDef(Self.Extract(['.','-','0','1','2','3','4','5','6','7','8','9']), Default);
+end;
+
+function TSimbaStringHelper.IsAlphaNum: Boolean;
 var
   I: Integer;
 begin
-  Result := False;
-  if Length(Self) > 0 then
-  begin
-    for I := 1 to Length(Self) do
-      if (not (Self[I] in ['0'..'9'] + ['-', '.'])) then
-        Exit;
+  Result := True;
 
-    Result := True;
-  end;
+  for I := 1 to Length(Self) do
+    if not (Self[I] in ['0'..'9','a'..'z','A'..'Z']) then
+    begin
+      Result := False;
+      Exit;
+    end;
+end;
+
+function TSimbaStringHelper.IsInteger: Boolean;
+var
+  I: Integer;
+begin
+  for I := 1 to Length(Self) do
+    if (not (Self[I] in ['0'..'9'])) then
+    begin
+      if (I = 1) and (Self[I] = '-') then
+        Continue;
+
+      Result := False;
+      Exit;
+    end;
+
+  Result := True;
+end;
+
+function TSimbaStringHelper.IsFloat: Boolean;
+var
+  I: Integer;
+begin
+  for I := 1 to Length(Self) do
+    if (not (Self[I] in ['0'..'9', '.'])) then
+    begin
+      if (I = 1) and (Self[I] = '-') then
+        Continue;
+
+      Result := False;
+      Exit;
+    end;
+
+  Result := True;
 end;
 
 function TSimbaStringHelper.Trim: String;
@@ -546,7 +614,7 @@ end;
 function TSimbaStringHelper.StartsWith(const Value: String; CaseSenstive: Boolean): Boolean;
 begin
   case CaseSenstive of
-    False: Result := SameText(Copy(1, Length(Value)), Value);
+    False: Result := SameText(System.Copy(Self, 1, Length(Value)), Value);
     True:  Result := System.Copy(Self, 1, Length(Value)) = Value;
   end;
 end;
@@ -559,6 +627,21 @@ begin
   end;
 end;
 
+function TSimbaStringHelper.Partition(const Value: String): TStringArray;
+var
+  I: Integer;
+begin
+  Result := ['', '', ''];
+
+  I := Self.IndexOf(Value);
+  if (I > 0) then
+  begin
+    Result[0] := System.Copy(Self, 1, I-1);
+    Result[1] := System.Copy(Self, I, Length(Value));
+    Result[2] := System.Copy(Self, I+Length(Value));
+  end;
+end;
+
 function TSimbaStringHelper.Replace(const OldValue: String; const NewValue: String): String;
 begin
   Result := StringReplace(Self, OldValue, NewValue, [rfReplaceAll]);
@@ -566,7 +649,7 @@ end;
 
 function TSimbaStringHelper.Replace(const OldValue: String; const NewValue: String; ReplaceFlags: TReplaceFlags): String;
 begin
-  Result := StringReplace(Self, OldValue, NewValue, ReplaceFlags)
+  Result := StringReplace(Self, OldValue, NewValue, ReplaceFlags);
 end;
 
 function TSimbaStringHelper.Contains(const Value: String; CaseSenstive: Boolean): Boolean;
@@ -595,7 +678,16 @@ end;
 
 function TSimbaStringHelper.Count(const Value: String): Integer;
 begin
-  Result := Length(IndicesOf(Value));
+  Result := Length(Self.IndicesOf(Value));
+end;
+
+function TSimbaStringHelper.CountAll(const Values: TStringArray): TIntegerArray;
+var
+  I: Integer;
+begin
+  SetLength(Result, Length(Values));
+  for I := 0 to High(Values) do
+    Result[I] := Length(Self.IndicesOf(Values[I]));
 end;
 
 function TSimbaStringHelper.Split(const Seperator: String): TStringArray;
@@ -607,7 +699,7 @@ var
     Result := Self.IndexOf(Seperator, StartIndex);
   end;
 
-  procedure Append(const S: String);
+  procedure Add(const S: String);
   begin
     if (Len >= Length(Result)) then
       SetLength(Result, Length(Result) * 2);
@@ -625,14 +717,14 @@ begin
   Sep := NextSep(1);
   while (Sep > 0) do
   begin
-    Append(Copy(LastSep, Sep - LastSep));
+    Add(System.Copy(Self, LastSep, Sep - LastSep));
 
     LastSep := Sep + Length(Seperator);
     Sep := NextSep(LastSep);
   end;
 
   if (LastSep <= Length(Self)) then
-    Append(Copy(LastSep, MaxInt));
+    Add(System.Copy(Self, LastSep, MaxInt));
 
   if (Len > 0) and (Result[Len - 1] = '') then
     Dec(Len);
@@ -645,24 +737,9 @@ begin
   Result := System.Copy(Self, 1, Length(Self));
 end;
 
-function TSimbaStringHelper.Copy(StartIndex, Count: Integer): String;
-begin
-  Result := System.Copy(Self, StartIndex, Count);
-end;
-
-function TSimbaStringHelper.Copy(StartIndex: Integer): String;
-begin
-  Result := System.Copy(Self, StartIndex, MaxInt);
-end;
-
 function TSimbaStringHelper.CopyRange(StartIndex, EndIndex: Integer): String;
 begin
   Result := System.Copy(Self, StartIndex, (EndIndex - StartIndex) + 1);
-end;
-
-procedure TSimbaStringHelper.Delete(StartIndex, Count: Integer);
-begin
-  System.Delete(Self, StartIndex, Count);
 end;
 
 procedure TSimbaStringHelper.DeleteRange(StartIndex, EndIndex: Integer);
@@ -675,25 +752,114 @@ begin
   System.Insert(Value, Self, Index);
 end;
 
-function TSimbaStringHelper.PadLeft(Count: Integer; PaddingChar: Char): String;
+procedure TSimbaStringHelper.Extend(Value: String);
 begin
-  Count := Count - Length(Self);
-  if (Count > 0) then
-    Result := StringOfChar(PaddingChar, Count) + Self
+  Self := Self + Value;
+end;
+
+procedure TSimbaStringHelper.Append(Value: Char);
+begin
+  Self := Self + Value;
+end;
+
+function TSimbaStringHelper.Remove(Value: String): Boolean;
+var
+  ReplaceCount: Integer;
+begin
+  Self := StringReplace(Self, Value, '', [], ReplaceCount);
+
+  Result := ReplaceCount > 0;
+end;
+
+function TSimbaStringHelper.RemoveAll(Value: String): Integer;
+begin
+  Self := StringReplace(Self, Value, '', [rfReplaceAll], Result);
+end;
+
+function TSimbaStringHelper.PadLeft(ACount: Integer; PaddingChar: Char): String;
+begin
+  ACount := ACount - Length(Self);
+  if (ACount > 0) then
+    Result := StringOfChar(PaddingChar, ACount) + Self
   else
     Result := Self;
 end;
 
-function TSimbaStringHelper.PadRight(Count: Integer; PaddingChar: Char): String;
+function TSimbaStringHelper.PadRight(ACount: Integer; PaddingChar: Char): String;
 begin
-  Count := Count - Length(Self);
-  if (Count > 0) then
-    Result := Self + StringOfChar(PaddingChar, Count)
+  ACount := ACount - Length(Self);
+  if (ACount > 0) then
+    Result := Self + StringOfChar(PaddingChar, ACount)
   else
     Result := Self;
 end;
 
-operator *(Left: String; Right: Int32): String;
+function TSimbaStringHelper.Format(Args: array of const): String;
+begin
+  Result := SysUtils.Format(Self, Args);
+end;
+
+function TSimbaStringHelper.ToBoolean: Boolean;
+begin
+  Result := StrToBool(Self);
+end;
+
+function TSimbaStringHelper.ToBoolean(Default: Boolean): Boolean;
+begin
+  Result := StrToBoolDef(Self, Default);
+end;
+
+function TSimbaStringHelper.ToInteger: Integer;
+begin
+  Result := StrToInt(Self);
+end;
+
+function TSimbaStringHelper.ToInteger(Default: Integer): Integer;
+begin
+  Result := StrToIntDef(Self, Default);
+end;
+
+function TSimbaStringHelper.ToInt64: Int64;
+begin
+  Result := StrToInt64(Self);
+end;
+
+function TSimbaStringHelper.ToInt64(Default: Int64): Int64;
+begin
+  Result := StrToInt64Def(Self, Default);
+end;
+
+function TSimbaStringHelper.ToSingle: Single;
+begin
+  Result := StrToFloat(Self);
+end;
+
+function TSimbaStringHelper.ToSingle(Default: Single): Single;
+begin
+  Result := StrToFloatDef(Self, Default);
+end;
+
+function TSimbaStringHelper.ToDouble: Double;
+begin
+  Result := StrToFloat(Self);
+end;
+
+function TSimbaStringHelper.ToDouble(Default: Double): Double;
+begin
+  Result := StrToFloatDef(Self, Default);
+end;
+
+function TSimbaStringHelper.ToExtended: Extended;
+begin
+  Result := StrToFloat(Self);
+end;
+
+function TSimbaStringHelper.ToExtended(Default: Extended): Extended;
+begin
+  Result := StrToFloatDef(Self, Default);
+end;
+
+operator *(const Left: String; Right: Int32): String;
 var
   I, Len: Integer;
 begin
@@ -708,12 +874,12 @@ begin
   end;
 end;
 
-operator in(Left: String; Right: String): Boolean;
+operator in(const Left: String; const Right: String): Boolean;
 begin
   Result := Pos(Left, Right) > 0;
 end;
 
-operator in(Left: String; Right: TStringArray): Boolean;
+operator in(const Left: String; const Right: TStringArray): Boolean;
 var
   I: Integer;
 begin
