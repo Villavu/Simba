@@ -33,6 +33,21 @@ type
   PRegExprMatchArray = ^TRegExprMatchArray;
   TRegExprMatchArray = array of TRegExprMatch;
 
+  TSimbaCharHelper = type helper for Char
+  public
+    function IsUpper(): Boolean;
+    function IsLower(): Boolean;
+    function IsAlphaNum(): Boolean;
+    function IsInteger(): Boolean;
+    function IsFloat(): Boolean;
+
+    function ToUpper(): Char;
+    function ToLower(): Char;
+    function Capitalize(): Char;
+    
+    function Join(const Values: TStringArray): String;
+  end;
+
   TSimbaStringHelper = type helper for String
   public const
     NumberChars   = '0123456789';
@@ -41,15 +56,15 @@ type
     AlphaChars    = LowerChars + UpperChars;
     AlphaNumChars = AlphaChars + NumberChars;
   public
-    function IsUpper: Boolean;
-    function IsLower: Boolean;
-    function IsAlphaNum: Boolean;
-    function IsInteger: Boolean;
-    function IsFloat: Boolean;
+    function IsUpper(): Boolean;
+    function IsLower(): Boolean;
+    function IsAlphaNum(): Boolean;
+    function IsInteger(): Boolean;
+    function IsFloat(): Boolean;
 
-    function ToUpper: String;
-    function ToLower: String;
-    function Capitalize: String;
+    function ToUpper(): String;
+    function ToLower(): String;
+    function Capitalize(): String;
 
     function Before(const Value: String): String;
     function After(const Value: String): String;
@@ -98,7 +113,8 @@ type
 
     function Count(const Value: String): Integer;
     function CountAll(const Values: TStringArray): TIntegerArray;
-
+    
+    function Join(const Values: TStringArray): String;
     function Split(const Seperator: String): TStringArray;
 
     function Copy: String;
@@ -140,6 +156,63 @@ implementation
 uses
   strutils, uregexpr,
   simba.overallocatearray;
+
+(* Char helpers in the same file since there are so few and it's strongly related *)
+function TSimbaCharHelper.IsUpper(): Boolean;
+begin
+  Result := (Byte(Self) >= Byte('A')) and (Byte(Self) <= Byte('Z'));
+end;
+
+function TSimbaCharHelper.IsLower(): Boolean;
+begin
+  Result := (Byte(Self) >= Byte('a')) and (Byte(Self) <= Byte('z'));
+end;
+
+function TSimbaCharHelper.IsAlphaNum(): Boolean;
+begin               
+  Result := Self in ['0'..'9', 'a'..'z', 'A'..'Z'];
+end;
+
+function TSimbaCharHelper.IsInteger(): Boolean;
+begin
+  Result := Self in ['0'..'9'];
+end;
+
+// same as is integer for chars, here for convinience
+function TSimbaCharHelper.IsFloat(): Boolean;
+begin
+  Result := Self in ['0'..'9'];
+end;
+
+function TSimbaCharHelper.ToUpper(): Char;
+begin
+  Result := Upcase(Self);
+end;
+
+function TSimbaCharHelper.ToLower(): Char;
+begin
+  Result := Lowercase(Self);
+end;
+
+function TSimbaCharHelper.Capitalize(): Char;
+begin
+  Result := Upcase(Self);
+end;
+
+function TSimbaCharHelper.Join(const Values: TStringArray): String;
+var i: Integer;
+begin
+  Result := '';
+  for i:=0 to High(values) do
+  begin
+    Result += Values[i];
+    if i <> High(values) then
+      Result += Self;
+  end;
+end; 
+
+
+(* ---- String helpers ---- *)
 
 function TSimbaStringHelper.Before(const Value: String): String;
 var
@@ -415,27 +488,35 @@ begin
   end;
 end;
 
-function TSimbaStringHelper.IsUpper: Boolean;
+function TSimbaStringHelper.IsUpper(): Boolean;
+var i: Int32;
 begin
-  Result := (Self = Self.ToUpper());
+  for i:=1 to High(self) do
+     if not self[i].IsUpper() then
+       Exit(False);
+  Result := True;
 end;
 
-function TSimbaStringHelper.IsLower: Boolean;
+function TSimbaStringHelper.IsLower(): Boolean;
+var i: Int32;
 begin
-  Result := (Self = Self.ToLower());
+  for i:=1 to High(self) do
+     if not self[i].IsLower() then
+       Exit(False);
+  Result := True;
 end;
 
-function TSimbaStringHelper.ToUpper: String;
+function TSimbaStringHelper.ToUpper(): String;
 begin
   Result := UpperCase(Self);
 end;
 
-function TSimbaStringHelper.ToLower: String;
+function TSimbaStringHelper.ToLower(): String;
 begin
   Result := LowerCase(Self);
 end;
 
-function TSimbaStringHelper.Capitalize: String;
+function TSimbaStringHelper.Capitalize(): String;
 var
   I: Integer;
 begin
@@ -690,6 +771,18 @@ begin
     Result[I] := Length(Self.IndicesOf(Values[I]));
 end;
 
+function TSimbaStringHelper.Join(const Values: TStringArray): String;
+var i: Integer;
+begin
+  Result := '';
+  for i:=0 to High(values) do
+  begin
+    Result += Values[i];
+    if i <> High(values) then
+      Result += Self;
+  end;
+end;  
+
 function TSimbaStringHelper.Split(const Seperator: String): TStringArray;
 var
   Len: SizeInt;
@@ -880,6 +973,35 @@ begin
 end;
 
 operator in(const Left: String; const Right: TStringArray): Boolean;
+var
+  I: Integer;
+begin
+  for I := 0 to High(Right) do
+    if Pos(Left, Right[I]) > 0 then
+    begin
+      Result := True;
+      Exit;
+    end;
+
+  Result := False;
+end;
+
+
+
+operator *(const Left: Char; Right: Int32): String;
+var
+  i: Integer;
+begin
+  for i:=0 to Right-1 do
+    Result += Left;
+end;
+
+operator in(const Left: Char; const Right: String): Boolean;
+begin
+  Result := Pos(Left, Right) > 0;
+end;
+
+operator in(const Left: Char; const Right: TStringArray): Boolean;
 var
   I: Integer;
 begin
