@@ -140,6 +140,11 @@ begin
   PString(Result)^ := PString(Params^[0])^.Capitalize();
 end;
 
+procedure _LapeString_Join(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PString(Result)^ := PString(Params^[0])^.Join(PStringArray(Params^[1])^);
+end;
+
 procedure _LapeString_Split(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PStringArray(Result)^ := PString(Params^[0])^.Split(PString(Params^[1])^);
@@ -471,6 +476,74 @@ begin
   PBoolean(Result)^ := PString(Params^[0])^ in PStringArray(Params^[1])^;
 end;
 
+
+// --------------------------
+// char methods
+
+procedure _LapeChar_IsAlphaNum(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PChar(Params^[0])^.IsAlphaNum();
+end;
+
+procedure _LapeChar_IsInteger(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PChar(Params^[0])^.IsInteger();
+end;
+
+procedure _LapeChar_IsFloat(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PChar(Params^[0])^.IsFloat();
+end;
+
+procedure _LapeChar_IsUpper(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PChar(Params^[0])^.IsUpper();
+end;
+
+procedure _LapeChar_IsLower(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PChar(Params^[0])^.IsLower();
+end;
+
+procedure _LapeChar_ToUpper(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PString(Result)^ := PChar(Params^[0])^.ToUpper();
+end;
+
+procedure _LapeChar_ToLower(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PString(Result)^ := PChar(Params^[0])^.ToLower();
+end;
+
+procedure _LapeChar_Capitalize(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PString(Result)^ := PChar(Params^[0])^.Capitalize();
+end;
+
+procedure _LapeChar_Join(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PString(Result)^ := PChar(Params^[0])^.Join(PStringArray(Params^[1])^);
+end;
+
+procedure _LapeChar_MUL_Integer(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PString(Result)^ := PChar(Params^[0])^ * PInteger(Params^[1])^;
+end;
+
+procedure _LapeChar_IN_String(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PChar(Params^[0])^ in PString(Params^[1])^;
+end;
+
+procedure _LapeChar_IN_StringArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PChar(Params^[0])^ in PStringArray(Params^[1])^;
+end;
+
+
+//------------------
+//lape exports
+
 procedure ImportString(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -521,12 +594,12 @@ begin
     addGlobalFunc('function String.UpperChars: String; static;', @_LapeString_UpperChars);
     addGlobalFunc('function String.AlphaNumChars: String; static;', @_LapeString_AlphaNumChars);
 
-    addGlobalFunc('function String.IsUpper: Boolean;', @_LapeString_IsUpper);
-    addGlobalFunc('function String.IsLower: Boolean;', @_LapeString_IsLower);
+    addGlobalFunc('function String.IsUpper(): Boolean;', @_LapeString_IsUpper);
+    addGlobalFunc('function String.IsLower(): Boolean;', @_LapeString_IsLower);
 
-    addGlobalFunc('function String.ToUpper: String;', @_LapeString_ToUpper);
-    addGlobalFunc('function String.ToLower: String;', @_LapeString_ToLower);
-    addGlobalFunc('function String.Capitalize: String;', @_LapeString_Capitalize);
+    addGlobalFunc('function String.ToUpper(): String;', @_LapeString_ToUpper);
+    addGlobalFunc('function String.ToLower(): String;', @_LapeString_ToLower);
+    addGlobalFunc('function String.Capitalize(): String;', @_LapeString_Capitalize);
 
     addGlobalFunc('function String.Before(Value: String): String;', @_LapeString_Before);
     addGlobalFunc('function String.After(Value: String): String;', @_LapeString_After);
@@ -554,9 +627,9 @@ begin
     addGlobalFunc('function String.ExtractInteger(Default: Int64 = -1): Int64;', @_LapeString_ExtractInteger);
     addGlobalFunc('function String.ExtractFloat(Default: Extended = -1): Extended;', @_LapeString_ExtractFloat);
 
-    addGlobalFunc('function String.IsAlphaNum: Boolean;', @_LapeString_IsAlphaNum);
-    addGlobalFunc('function String.IsInteger: Boolean;', @_LapeString_IsInteger);
-    addGlobalFunc('function String.IsFloat: Boolean;', @_LapeString_IsFloat);
+    addGlobalFunc('function String.IsAlphaNum(): Boolean;', @_LapeString_IsAlphaNum);
+    addGlobalFunc('function String.IsInteger(): Boolean;', @_LapeString_IsInteger);
+    addGlobalFunc('function String.IsFloat(): Boolean;', @_LapeString_IsFloat);
 
     addGlobalFunc('function String.Trim: String; overload;', @_LapeString_Trim);
     addGlobalFunc('function String.Trim(TrimChars: array of Char): String; overload;', @_LapeString_TrimEx);
@@ -579,7 +652,8 @@ begin
 
     addGlobalFunc('function String.Count(Value: String): Integer;', @_LapeString_Count);
     addGlobalFunc('function String.CountAll(Values: TStringArray): TIntegerArray;', @_LapeString_CountAll);
-
+    
+    addGlobalFunc('function String.Join(Values: TStringArray): String;', @_LapeString_Join);
     addGlobalFunc('function String.Split(Seperator: String): TStringArray;', @_LapeString_Split);
 
     addGlobalFunc('function String.CopyRange(StartIndex, EndIndex: Integer): String;', @_LapeString_CopyRange);
@@ -613,6 +687,21 @@ begin
     addGlobalFunc('operator * (Left: String; Right: Integer): String', @_LapeString_MUL_Integer);
     addGlobalFunc('operator in(Left: String; Right: String): Boolean', @_LapeString_IN_String);
     addGlobalFunc('operator in(Left: String; Right: TStringArray): Boolean', @_LapeString_IN_StringArray);
+    
+    addGlobalFunc('function Char.IsUpper(): Boolean;',    @_LapeChar_IsUpper);
+    addGlobalFunc('function Char.IsLower(): Boolean;',    @_LapeChar_IsLower);
+    addGlobalFunc('function Char.ToUpper(): String;',     @_LapeChar_ToUpper);
+    addGlobalFunc('function Char.ToLower(): String;',     @_LapeChar_ToLower);
+    addGlobalFunc('function Char.Capitalize(): String;',  @_LapeChar_Capitalize);
+    addGlobalFunc('function Char.IsAlphaNum(): Boolean;', @_LapeChar_IsAlphaNum);
+    addGlobalFunc('function Char.IsInteger(): Boolean;',  @_LapeChar_IsInteger);
+    addGlobalFunc('function Char.IsFloat(): Boolean;',    @_LapeChar_IsFloat);
+    addGlobalFunc('function Char.Join(Values: TStringArray): String;', @_LapeChar_Join);
+    
+    addGlobalFunc('operator * (Left: Char; Right: Integer): String', @_LapeString_MUL_Integer);
+    addGlobalFunc('operator in(Left: Char; Right: String): Boolean', @_LapeString_IN_String);
+    addGlobalFunc('operator in(Left: Char; Right: TStringArray): Boolean', @_LapeString_IN_StringArray);
+
 
     popSection();
   end;
