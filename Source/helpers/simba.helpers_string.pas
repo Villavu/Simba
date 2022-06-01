@@ -65,6 +65,7 @@ type
     function ToUpper(): String;
     function ToLower(): String;
     function Capitalize(): String;
+    function SwapCase(): String;
 
     function Before(const Value: String): String;
     function After(const Value: String): String;
@@ -491,7 +492,7 @@ end;
 function TSimbaStringHelper.IsUpper(): Boolean;
 var i: Int32;
 begin
-  for i:=1 to High(self) do
+  for i:=1 to Length(self) do
      if not self[i].IsUpper() then
        Exit(False);
   Result := True;
@@ -500,7 +501,7 @@ end;
 function TSimbaStringHelper.IsLower(): Boolean;
 var i: Int32;
 begin
-  for i:=1 to High(self) do
+  for i:=1 to Length(self) do
      if not self[i].IsLower() then
        Exit(False);
   Result := True;
@@ -527,6 +528,21 @@ begin
       Result[I] := UpCase(Self[I])
     else
       Result[I] := LowerCase(Self[I]);
+end;
+
+function TSimbaStringHelper.SwapCase(): String;
+var
+  i: Integer;
+begin
+  SetLength(Result, Length(Self));
+
+  for i:=1 to Length(self) do
+    if Self[i].IsUpper() then
+      Result[i] := Self[i].ToLower()
+    else if Self[i].IsLower() then
+      Result[i] := Self[i].ToUpper()
+    else
+      Result[i] := Self[i];
 end;
 
 function TSimbaStringHelper.Extract(const Chars: array of Char): String;

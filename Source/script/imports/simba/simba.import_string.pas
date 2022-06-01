@@ -140,6 +140,11 @@ begin
   PString(Result)^ := PString(Params^[0])^.Capitalize();
 end;
 
+procedure _LapeString_SwapCase(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PString(Result)^ := PString(Params^[0])^.SwapCase();
+end;
+
 procedure _LapeString_Join(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PString(Result)^ := PString(Params^[0])^.Join(PStringArray(Params^[1])^);
@@ -600,6 +605,7 @@ begin
     addGlobalFunc('function String.ToUpper(): String;', @_LapeString_ToUpper);
     addGlobalFunc('function String.ToLower(): String;', @_LapeString_ToLower);
     addGlobalFunc('function String.Capitalize(): String;', @_LapeString_Capitalize);
+    addGlobalFunc('function String.SwapCase(): String;', @_LapeString_SwapCase);
 
     addGlobalFunc('function String.Before(Value: String): String;', @_LapeString_Before);
     addGlobalFunc('function String.After(Value: String): String;', @_LapeString_After);
