@@ -1119,6 +1119,8 @@ procedure ImportLCLForm(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
+    addGlobalType('(stDefault, stAlways, stNever)', 'TShowInTaskbar');
+    addGlobalType('(bsNone, bsSingle, bsSizeable, bsDialog, bsToolWindow, bsSizeToolWin)', 'TFormBorderStyle');
     addGlobalType('(caNone, caHide, caFree, caMinimize)', 'TCloseAction');
     addGlobalType('procedure(Sender: TObject; var CloseAction: TCloseAction) of object', 'TCloseEvent', FFI_DEFAULT_ABI);
     addGlobalType('procedure(Sender: TObject; var CanClose: Boolean) of object', 'TCloseQueryEvent', FFI_DEFAULT_ABI);
@@ -1136,7 +1138,6 @@ begin
     addClassVar('TSizeConstraints', 'MinWidth', 'Integer', @_LapeSizeConstraints_MinWidth_Read, @_LapeSizeConstraints_MinWidth_Write);
 
     addClass('TCustomForm', 'TScrollingWinControl');
-    addGlobalType('(stDefault, stAlways, stNever)', 'TShowInTaskbar');
     addGlobalFunc('procedure TCustomForm.Init(AOwner: TComponent); override', @_LapeCustomForm_Init);
     addGlobalFunc('procedure TCustomForm.InitNew(AOwner: TComponent; Num: Integer)', @_LapeCustomForm_CreateNew);
     addGlobalFunc('procedure TCustomForm.Close;', @_LapeCustomForm_Close);
@@ -1157,7 +1158,7 @@ begin
     addGlobalFunc('procedure TCustomForm.RemoveHandlerClose(OnCloseHandler: TCloseEvent);', @_LapeCustomForm_RemoveHandlerClose);
     addGlobalFunc('procedure TCustomForm.AddHandlerCreate(OnCreateHandler: TNotifyEvent; AsFirst: Boolean);', @_LapeCustomForm_AddHandlerCreate);
     addGlobalFunc('procedure TCustomForm.RemoveHandlerCreate(OnCreateHandler: TNotifyEvent);', @_LapeCustomForm_RemoveHandlerCreate);
-    addClassVar('TCustomForm', 'BorderStyle', 'TFormBorderStyle', @_LapeCustomForm_Read_BorderStyle);
+    addClassVar('TCustomForm', 'BorderStyle', 'TFormBorderStyle', @_LapeCustomForm_Read_BorderStyle, @_LapeCustomForm_Write_BorderStyle);
     addClassVar('TCustomForm', 'BorderIcons', 'TBorderIcons', @_LapeCustomForm_Read_BorderIcons, @_LapeCustomForm_Write_BorderIcons);
     addClassVar('TCustomForm', 'Active', 'Boolean', @_LapeCustomForm_Active_Read);
     addClassVar('TCustomForm', 'ActiveControl', 'TWinControl', @_LapeCustomForm_ActiveControl_Read, @_LapeCustomForm_ActiveControl_Write);

@@ -16,7 +16,6 @@ type
   PControlScrollBar = ^TControlScrollBar;
   PCursor = ^TCursor;
   PCustomControl = ^TCustomControl;
-  PFormBorderStyle = ^TFormBorderStyle;
   PGraphicControl = ^TGraphicControl;
   PKeyEvent = ^TKeyEvent;
   PKeyPressEvent = ^TKeyPressEvent;
@@ -859,11 +858,6 @@ begin
   PCustomControl(Params^[0])^.OnPaint := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeCustomControl_BorderStyle_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomControl(Params^[0])^.BorderStyle := PFormBorderStyle(Params^[1])^;
-end;
-
 procedure _LapeCustomControl_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PCustomControl(Params^[0])^.Free();
@@ -1052,7 +1046,6 @@ begin
     addGlobalType('procedure(Sender: TObject; Shift: TShiftState; X, Y: Integer) of object', 'TMouseMoveEvent', FFI_DEFAULT_ABI);
     addGlobalType('(sbHorizontal, sbVertical)', 'TScrollBarKind');
     addGlobalType('(alNone, alTop, alBottom, alLeft, alRight, alClient, alCustom)', 'TAlign');
-    addGlobalType('(bsNone, bsSingle, bsSizeable, bsDialog, bsToolWindow, bsSizeToolWin)', 'TFormBorderStyle');
     addGlobalType('Integer', 'TCursor');
     addGlobalVar(crDefault, 'crDefault').isConstant := True;
     addGlobalVar(crNone, 'crNone').isConstant := True;
@@ -1185,7 +1178,6 @@ begin
     addGlobalFunc('procedure TCustomControl.Init(AOwner: TComponent); override', @_LapeCustomControl_Init);
     addClassVar('TCustomControl', 'Canvas', 'TCanvas', @_LapeCustomControl_Canvas_Read, @_LapeCustomControl_Canvas_Write);
     addClassVar('TCustomControl', 'OnPaint', 'TNotifyEvent', @_LapeCustomControl_OnPaint_Read, @_LapeCustomControl_OnPaint_Write);
-    addClassVar('TCustomControl', 'BorderStyle', 'TFormBorderStyle', nil, @_LapeCustomControl_BorderStyle_Write);
 
     addClass('TControlScrollBar', 'TPersistent');
     addGlobalFunc('procedure TControlScrollBar.Init(AControl: TWinControl; AKind: TScrollBarKind)', @_LapeControlScrollBar_Init);
