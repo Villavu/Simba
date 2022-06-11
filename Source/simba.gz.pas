@@ -1,9 +1,4 @@
 {
-  Author: Raymond van Venetië and Merlijn Wajer
-  Project: Simba (https://github.com/MerlijnWajer/Simba)
-  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
-}
-{
   Copyright 2013-2018 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
@@ -32,93 +27,76 @@
 
   ----------------------------------------------------------------------------
 }
-
-{ Rework of packages/paszlib/src/gzio.pas from FPC RTL
-  to allow reading/writing gzip from/to Pascal streams (TStream)
-  instead of only normal files.
-
-  Together with CastleInternalZStream, this allows to compress/decompress by gzip
-  entirely in memory, withou any temporary files underneath.
-
-  (Yes, the original gzio.pas code looks quite old-school.
-  It is a C code translated literally to an old Pascal, without any
-  modern features like classes.)
-
-  @exclude }
 unit simba.gz;
 
 interface
 
-uses zbase, crc, zdeflate, zinflate, Classes;
+uses
+  Classes, SysUtils;
 
-type gzFile = pointer;
-type z_off_t = longint;
+type
+  EZlibError = class(EStreamError);
 
-function gzopen  (const Stream: TStream; const WriteMode: boolean) : gzFile;
-function gzread  (f:gzFile; buf:pointer; len:cardinal) : integer;
-function gzgetc  (f:gzfile) : integer;
-function gzgets  (f:gzfile; buf:Pchar; len:integer) : Pchar;
+  TGZFileStream = class(TOwnerStream)
+  private
+    FWriteMode: Boolean;
+    FFile: Pointer;
+  public
+    constructor Create(const Stream: TStream; const AWriteMode: boolean);
+    destructor Destroy; override;
 
-{$ifndef NO_DEFLATE}
-function gzwrite (f:gzFile; buf:pointer; len:cardinal) : integer;
-function gzputc  (f:gzfile; c:char) : integer;
-function gzputs  (f:gzfile; s:Pchar) : integer;
-function gzflush (f:gzFile; flush:integer)           : integer;
-{$endif}
-
-function gzerror (f:gzfile) : string;
-function gzseek  (f:gzfile; offset:z_off_t; whence:integer) : z_off_t;
-function gztell  (f:gzfile) : z_off_t;
-function gzclose (f:gzFile)                      : integer;
-function gzsetparams (f:gzfile; level:integer; strategy:integer) : integer;
-function gzrewind (f:gzFile) : integer;
-function gzeof (f:gzfile) : boolean;
-
-const
-  SEEK_SET {: z_off_t} = 0; { seek from beginning of file }
-  SEEK_CUR {: z_off_t} = 1; { seek from current position }
-  SEEK_END {: z_off_t} = 2;
+    function Read(var Buffer; Count: LongInt): LongInt; override;
+    function Write(const Buffer; Count: LongInt): Longint; override;
+    function Seek(Offset: Longint; Origin: Word): Longint; override;
+  end;
 
 implementation
 
-uses SysUtils;
+uses
+  zbase, crc, zdeflate, zinflate;
 
 const
+  SReadOnlyStream  = 'Decompression streams are read-only';
+  SWriteOnlyStream = 'Compression streams are write-only';
+  SSeekError       = 'Compression stream seek error';
+
+  SEEK_SET = 0; { seek from beginning of file }
+  SEEK_CUR = 1; { seek from current position }
+  SEEK_END = 2;
+
   Z_EOF = -1;         { same value as in STDIO.H }
   Z_BUFSIZE = 16384;
-  { Z_PRINTF_BUFSIZE = 4096; }
-
 
   gz_magic : array[0..1] of byte = ($1F, $8B); { gzip magic header }
 
-  { gzip flag byte }
-
-  //ASCII_FLAG  = $01; { bit 0 set: file probably ascii text }
   HEAD_CRC    = $02; { bit 1 set: header CRC present }
   EXTRA_FIELD = $04; { bit 2 set: extra field present }
   ORIG_NAME   = $08; { bit 3 set: original file name present }
   COMMENT     = $10; { bit 4 set: file comment present }
   RESERVED    = $E0; { bits 5..7: reserved }
 
-type gz_stream = record
-  stream      : z_stream;
-  z_err       : integer;      { error code for last stream operation }
-  z_eof       : boolean;  { set if end of input file }
-  gzStream    : TStream;     { .gz file }
-  inbuf       : Pbyte;   { input buffer }
-  outbuf      : Pbyte;   { output buffer }
-  crc         : cardinal;    { crc32 of uncompressed data }
-  msg         : string[79]; { error message - limit 79 chars }
-  transparent : boolean;  { true if input file is not a .gz file }
-  WriteMode   : boolean;  { false means that we're in read mode }
-  startpos    : longint;     { start of compressed data in file (header skipped) }
-end;
+type
+  gzFile = pointer;
+  z_off_t = longint;
 
-type gz_streamp = ^gz_stream;
+  gz_stream = record
+    stream      : z_stream;
+    z_err       : integer;      { error code for last stream operation }
+    z_eof       : boolean;  { set if end of input file }
+    gzStream    : TStream;     { .gz file }
+    inbuf       : Pbyte;   { input buffer }
+    outbuf      : Pbyte;   { output buffer }
+    crc         : cardinal;    { crc32 of uncompressed data }
+    msg         : string[79]; { error message - limit 79 chars }
+    transparent : boolean;  { true if input file is not a .gz file }
+    WriteMode   : boolean;  { false means that we're in read mode }
+    startpos    : longint;     { start of compressed data in file (header skipped) }
+  end;
+
+  gz_streamp = ^gz_stream;
 
 function destroy (var s:gz_streamp) : integer; forward;
 procedure check_header(s:gz_streamp); forward;
-
 
 { GZOPEN ====================================================================
 
@@ -1089,6 +1067,49 @@ begin
 
   s^.msg := m;
   gzerror := s^.msg;
+end;
+
+// GZFileStream
+
+constructor TGZFileStream.Create(const Stream: TStream; const AWriteMode: boolean);
+begin
+  inherited Create(Stream);
+  SourceOwner := True;
+  FWriteMode := AWriteMode;
+  FFile := gzopen(Stream, AWriteMode);
+end;
+
+destructor TGZFileStream.Destroy;
+begin
+  If FFile <> nil then
+    gzclose(FFile);
+
+  inherited Destroy();
+end;
+
+function TGZFileStream.Read(Var Buffer; Count : longint): longint;
+begin
+  If FWriteMode then
+    Raise ezliberror.create(SWriteOnlyStream);
+  Result:=gzRead(FFile,@Buffer,Count);
+  if Result < 0 then
+    raise EZlibError.Create('Gzip decompression error: ' + gzerror(FFile));
+end;
+
+function TGZFileStream.Write(const Buffer; Count: Longint): Longint;
+begin
+  If not FWriteMode then
+    Raise EzlibError.Create(SReadonlyStream);
+  Result:=gzWrite(FFile,@Buffer,Count);
+  if Result < 0 then
+    raise EZlibError.Create('Gzip compression error: ' + gzerror(FFile));
+end;
+
+function TGZFileStream.Seek(Offset: Longint; Origin: Word): Longint;
+begin
+  Result:=gzseek(FFile,Offset,Origin);
+  If Result=-1 then
+    Raise eZlibError.Create(SSeekError);
 end;
 
 end.

@@ -1,0 +1,220 @@
+object SimbaPackageInstallForm: TSimbaPackageInstallForm
+  Left = 1625
+  Height = 400
+  Top = 823
+  Width = 640
+  Caption = 'Package - Advanced Install'
+  ClientHeight = 400
+  ClientWidth = 640
+  Position = poOwnerFormCenter
+  LCLVersion = '2.2.2.0'
+  object OptionsPanel: TPanel
+    Left = 0
+    Height = 216
+    Top = 0
+    Width = 640
+    Align = alTop
+    AutoSize = True
+    BevelOuter = bvNone
+    ClientHeight = 216
+    ClientWidth = 640
+    TabOrder = 0
+    object VersionsList: TComboBox
+      AnchorSideLeft.Control = Label3
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = OptionsPanel
+      AnchorSideRight.Control = OptionsPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 70
+      Height = 23
+      Top = 7
+      Width = 538
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 10
+      BorderSpacing.Top = 7
+      BorderSpacing.Right = 32
+      ItemHeight = 15
+      OnChange = DoVersionChange
+      ReadOnly = True
+      TabOrder = 0
+    end
+    object Label4: TLabel
+      AnchorSideLeft.Control = OptionsPanel
+      AnchorSideTop.Control = VersionsList
+      AnchorSideBottom.Control = VersionsList
+      AnchorSideBottom.Side = asrBottom
+      Left = 5
+      Height = 23
+      Top = 7
+      Width = 38
+      Anchors = [akTop, akLeft, akBottom]
+      BorderSpacing.Left = 5
+      Caption = 'Version'
+      Layout = tlCenter
+      ParentColor = False
+    end
+    object InstallButton: TButton
+      AnchorSideLeft.Control = OptionsPanel
+      AnchorSideTop.Control = IgnoreListMemo
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = OptionsPanel
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Side = asrBottom
+      Left = 10
+      Height = 25
+      Top = 181
+      Width = 620
+      Anchors = [akTop, akLeft, akRight]
+      AutoSize = True
+      BorderSpacing.Left = 10
+      BorderSpacing.Top = 10
+      BorderSpacing.Right = 10
+      BorderSpacing.Bottom = 10
+      Caption = 'Install'
+      OnClick = DoInstallButtonClick
+      TabOrder = 1
+    end
+    object PathEdit: TFileNameEdit
+      AnchorSideLeft.Control = Label3
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = VersionsList
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = OptionsPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 70
+      Height = 23
+      Top = 37
+      Width = 565
+      FilterIndex = 0
+      HideDirectories = False
+      ButtonWidth = 23
+      NumGlyphs = 1
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 10
+      BorderSpacing.Top = 7
+      BorderSpacing.Right = 5
+      MaxLength = 0
+      TabOrder = 2
+    end
+    object Label2: TLabel
+      AnchorSideLeft.Control = OptionsPanel
+      AnchorSideTop.Control = PathEdit
+      AnchorSideBottom.Control = PathEdit
+      AnchorSideBottom.Side = asrBottom
+      Left = 5
+      Height = 23
+      Top = 37
+      Width = 24
+      Anchors = [akTop, akLeft, akBottom]
+      BorderSpacing.Left = 5
+      Caption = 'Path'
+      Layout = tlCenter
+      ParentColor = False
+    end
+    object Label3: TLabel
+      AnchorSideLeft.Control = OptionsPanel
+      AnchorSideTop.Control = FlatCheckbox
+      AnchorSideTop.Side = asrBottom
+      AnchorSideBottom.Side = asrBottom
+      Left = 5
+      Height = 15
+      Top = 91
+      Width = 55
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 7
+      Caption = 'Ignore List'
+      Layout = tlCenter
+      ParentColor = False
+    end
+    object FlatCheckbox: TCheckBox
+      AnchorSideLeft.Control = OptionsPanel
+      AnchorSideTop.Control = PathEdit
+      AnchorSideTop.Side = asrBottom
+      Left = 5
+      Height = 19
+      Top = 65
+      Width = 78
+      Alignment = taLeftJustify
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 5
+      Caption = 'Extract Flat'
+      TabOrder = 3
+    end
+    object IgnoreListMemo: TMemo
+      AnchorSideLeft.Control = Label3
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Label3
+      AnchorSideRight.Control = VersionsList
+      AnchorSideRight.Side = asrBottom
+      Left = 70
+      Height = 80
+      Top = 91
+      Width = 538
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 10
+      ScrollBars = ssAutoHorizontal
+      TabOrder = 4
+    end
+  end
+  inline Output: TSynEdit
+    Left = 10
+    Height = 174
+    Top = 216
+    Width = 620
+    Align = alClient
+    BorderSpacing.Left = 10
+    BorderSpacing.Right = 10
+    BorderSpacing.Bottom = 10
+    Font.Height = -13
+    Font.Name = 'Courier New'
+    Font.Pitch = fpFixed
+    Font.Quality = fqCleartypeNatural
+    ParentColor = False
+    ParentFont = False
+    TabOrder = 1
+    BorderStyle = bsNone
+    Gutter.Color = clWhite
+    Gutter.LeftOffset = 5
+    Gutter.Width = 5
+    Gutter.MouseActions = <>
+    RightGutter.Width = 0
+    RightGutter.MouseActions = <>
+    Keystrokes = <    
+      item
+        Command = ecCopy
+        ShortCut = 16451
+      end    
+      item
+        Command = ecSelectAll
+        ShortCut = 16449
+      end>
+    MouseActions = <>
+    MouseTextActions = <>
+    MouseSelActions = <>
+    VisibleSpecialChars = [vscSpace, vscTabAtLast]
+    ReadOnly = True
+    RightEdge = -1
+    RightEdgeColor = clNone
+    ScrollBars = ssVertical
+    SelectedColor.BackPriority = 50
+    SelectedColor.ForePriority = 50
+    SelectedColor.FramePriority = 50
+    SelectedColor.BoldPriority = 50
+    SelectedColor.ItalicPriority = 50
+    SelectedColor.UnderlinePriority = 50
+    SelectedColor.StrikeOutPriority = 50
+    BracketHighlightStyle = sbhsBoth
+    BracketMatchColor.Background = clNone
+    BracketMatchColor.Foreground = clNone
+    BracketMatchColor.Style = [fsBold]
+    FoldedCodeColor.Background = clNone
+    FoldedCodeColor.Foreground = clGray
+    FoldedCodeColor.FrameColor = clGray
+    MouseLinkColor.Background = clNone
+    MouseLinkColor.Foreground = clBlue
+    LineHighlightColor.Background = clNone
+    LineHighlightColor.Foreground = clNone
+    inline SynLeftGutterPartList1: TSynGutterPartList
+    end
+  end
+end

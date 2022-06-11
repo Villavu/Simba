@@ -14,36 +14,14 @@ uses
   simba.settings, simba.main, simba.aboutform, simba.debugimageform,
   simba.bitmapconv, simba.functionlistform, simba.scripttabsform,
   simba.outputform, simba.colorpickerhistoryform, simba.filebrowserform,
-  simba.notesform, simba.package_form, simba.settingsform, simba.associate,
-  simba.script_dump, simba.openexampleform, simba.httpclient, simba.scriptthread;
+  simba.notesform, simba.settingsform, simba.associate,
+  simba.script_dump, simba.openexampleform, simba.scriptthread,
+  simba.package_form;
 
 type
   TApplicationHelper = class helper for TApplication
-    procedure HandleAnalytics(Data: PtrInt);
-    procedure SendAnalytics;
-
     procedure DebugLnSilent(Sender: TObject; S: string; var Handled: Boolean);
   end;
-
-procedure TApplicationHelper.HandleAnalytics(Data: PtrInt);
-begin
-  TThread.ExecuteInThread(@SendAnalytics);
-end;
-
-procedure TApplicationHelper.SendAnalytics;
-begin
-  if HasOption('secret') then
-    Exit;
-
-  with TSimbaHTTPClient.Create() do
-  try
-    // Simple HTTP request - nothing extra is sent.
-    // Only used for logging very basic (ide) launch count.
-    Get(SIMBA_ANALYTICS_URL);
-  finally
-    Free();
-  end;
-end;
 
 procedure TApplicationHelper.DebugLnSilent(Sender: TObject; S: string; var Handled: Boolean);
 begin
@@ -103,6 +81,8 @@ begin
     );
   end else
   begin
+    Application.ShowMainForm := False;
+
     Application.CreateForm(TSimbaForm, SimbaForm);
     Application.CreateForm(TSimbaFunctionListForm, SimbaFunctionListForm);
     Application.CreateForm(TSimbaDebugImageForm, SimbaDebugImageForm);
@@ -113,11 +93,11 @@ begin
     Application.CreateForm(TSimbaAboutForm, SimbaAboutForm);
     Application.CreateForm(TSimbaSettingsForm, SimbaSettingsForm);
     Application.CreateForm(TSimbaBitmapConversionForm, SimbaBitmapConversionForm);
-    Application.CreateForm(TSimbaPackageForm, SimbaPackageForm);
     Application.CreateForm(TSimbaOpenExampleForm, SimbaOpenExampleForm);
     Application.CreateForm(TSimbaColorPickerHistoryForm, SimbaColorPickerHistoryForm);
+    Application.CreateForm(TSimbaPackageForm, SimbaPackageForm);
 
-    Application.QueueAsyncCall(@Application.HandleAnalytics, 0);
+    Application.QueueAsyncCall(@SimbaForm.Setup, 0);
   end;
 
   Application.Run();

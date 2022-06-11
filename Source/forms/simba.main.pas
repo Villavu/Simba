@@ -56,6 +56,7 @@ const
 type
   TSimbaForm = class(TForm)
     DockPanel: TAnchorDockPanel;
+    PackageImageList: TImageList;
     Images: TImageList;
     MainMenu: TMainMenu;
     MenuEdit: TMenuItem;
@@ -135,6 +136,7 @@ type
     StatusPanelState: TPanel;
     StopButtonStop: TToolButton;
     Timer: TTimer;
+    PackageMenuTimer: TTimer;
     ToolBar: TToolBar;
     ToolbarButtonClearOutput: TToolButton;
     ToolbarButtonColorPicker: TToolButton;
@@ -198,6 +200,7 @@ type
     procedure MenuSelectAllClick(Sender: TObject);
     procedure MenuUndoClick(Sender: TObject);
     procedure MenuViewClick(Sender: TObject);
+    procedure DoPackageMenuTimer(Sender: TObject);
     procedure StatusPanelPaint(Sender: TObject);
     procedure TimerTimer(Sender: TObject);
     procedure ToolbarButtonColorPickerClick(Sender: TObject);
@@ -211,6 +214,20 @@ type
     FProcessSelection: Integer;
     FDockingReset: Boolean;
     FRecentFiles: TStringList;
+
+    FPackageMenu: TStringList;
+    FPackageMenuChanged: Boolean;
+    FPackageUpdates: TStringList;
+    FPackageUpdatesChanged: Boolean;
+
+    procedure SetupAnalyticsAndOpenSSL;
+    procedure SetupCodeTools;
+    procedure SetupDocking;
+    procedure SetupCompleted;
+
+    procedure DoPackageMenuClick(Sender: TObject);
+    procedure DoPackageMenuBuilding;
+    procedure DoPackageMenuBuildingFinished(Sender: TObject);
 
     procedure DoColorPicked(Data: PtrInt);
 
@@ -238,16 +255,13 @@ type
     property WindowSelection: TWindowHandle read FWindowSelection;
     property ProcessSelection: Integer read FProcessSelection;
 
-    procedure SetupScriptTabs(Sender: TObject);
-    procedure SetupDocking(Sender: TObject);
-    procedure SetupCompleted(Sender: TObject);
-
-    procedure CodeTools_Setup;
     procedure CodeTools_OnMessage(Sender: TObject; const Typ: TMessageEventType; const Message: String; X, Y: Integer);
     procedure CodeTools_OnLoadLibrary(Sender: TObject; FileName: String; var Contents: String);
 
     function CodeTools_OnFindInclude(Sender: TObject; var FileName: String): Boolean;
     function CodeTools_OnFindLibrary(Sender: TObject; var FileName: String): Boolean;
+
+    procedure Setup(Data: PtrInt);
   end;
 
 var
@@ -258,17 +272,18 @@ implementation
 {$R *.lfm}
 
 uses
-  lclintf, lazloggerbase, lazfileutils, anchordocking,
-  simba.openssl, simba.files, simba.process,
+  lclintf, lazloggerbase, lazfileutils, anchordocking, math,
+  simba.openssl, simba.files, simba.process, simba.package_form,
   simba.openexampleform, simba.colorpickerhistoryform, simba.codeparser,
   simba.codeinsight, simba.associate, simba.scripttab, simba.debugimageform,
   simba.bitmapconv, simba.aca, simba.windowselector, simba.dtmeditor,
-  simba.package_form, simba.aboutform, simba.functionlistform,
+  simba.aboutform, simba.functionlistform,
   simba.scripttabsform, simba.outputform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.colorpicker,
   simba.ci_includecache, simba.scriptformatter,
   simba.editor, simba.dockinghelpers, simba.datetime, simba.nativeinterface,
-  simba.helpers_windowhandle;
+  simba.helpers_windowhandle, simba.httpclient, simba.functionlist_simbasection,
+  simba.package;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 
@@ -436,72 +451,13 @@ end;
 
 procedure TSimbaForm.CodeTools_OnLoadLibrary(Sender: TObject; FileName: String; var Contents: String);
 var
-  CacheFileName: String;
   List: TStringList;
-begin
-  Contents := '';
-
-  CacheFileName := GetDumpPath() + HashFile(FileName);
-
-  try
-    List := nil;
-
-    if FileExists(CacheFileName) then
-    begin
-      List := TStringList.Create();
-      List.LoadFromFile(CacheFileName);
-    end else
-    begin
-      List := SimbaProcess.RunDump(['--dumpplugin=' + FileName]);
-      List.SaveToFile(CacheFileName);
-    end;
-
-    Contents := List.Text;
-  except
-    on E: Exception do
-      DebugLn(E.Message);
-  end;
-
-  if (List <> nil) then
-    List.Free();
-end;
-
-procedure TSimbaForm.CodeTools_Setup;
-var
-  List: TStringList;
-  FileName: String;
-  I: Integer;
-  Parser: TCodeInsight_Include;
 begin
   List := nil;
-
-  FileName := GetDumpPath() + HashFile(Application.ExeName);
-
   try
-    if FileExists(FileName) then
-    begin
-      List := TStringList.Create();
-      List.LineBreak := #0;
-      List.LoadFromFile(FileName);
-    end else
-    begin
-      List := SimbaProcess.RunDump(['--dumpcompiler']);
-      List.SaveToFile(FileName);
-    end;
+    List := SimbaProcess.RunDump(HashFile(FileName), ['--dumpplugin=' + FileName]);
 
-    for I := 0 to List.Count - 1 do
-    begin
-      if (List.Names[I] = '') then
-        Continue;
-
-      Parser := TCodeInsight_Include.Create();
-      Parser.Run(List.ValueFromIndex[I], List.Names[I]);
-
-      if (List.Names[I][1] <> '!') then
-        TCodeInsight.AddFunctionListSection(Parser);
-
-      TCodeInsight.AddBaseInclude(Parser);
-    end;
+    Contents := List.Text;
   except
     on E: Exception do
       DebugLn(E.Message);
@@ -535,6 +491,11 @@ end;
 procedure TSimbaForm.MenuViewClick(Sender: TObject);
 begin
   MenuItemDebugger.Enabled := SimbaScriptTabsForm.CurrentTab.DebuggingForm <> nil;
+end;
+
+procedure TSimbaForm.DoPackageMenuTimer(Sender: TObject);
+begin
+  TThread.ExecuteInThread(@DoPackageMenuBuilding, @DoPackageMenuBuildingFinished);
 end;
 
 procedure TSimbaForm.StatusPanelPaint(Sender: TObject);
@@ -593,29 +554,74 @@ begin
   Close();
 end;
 
-procedure TSimbaForm.FormCreate(Sender: TObject);
+procedure TSimbaForm.SetupAnalyticsAndOpenSSL;
 begin
-  Application.CaptureExceptions := True;
-  Application.OnException := @SimbaForm.HandleException;
+  try
+    if SimbaSettings.General.OpenSSLExtractOnLaunch.Value then
+      ExtractOpenSSL();
+  except
+    on E: Exception do
+      DebugLn('[TSimbaForm.SetupAnalyticsAndOpenSSL]: ', E.ToString());
+  end;
 
-  Screen.AddHandlerFormAdded(@SimbaForm.HandleFormCreated, True);
+  try
+    if Application.HasOption('noanalytics') then
+      Exit;
 
-  FRecentFiles := TStringList.Create();
-  FRecentFiles.Text := SimbaSettings.General.RecentFiles.Value;
+    with TSimbaHTTPClient.Create() do
+    try
+      // Simple HTTP request - nothing extra is sent.
+      // Only used for logging very basic (ide) launch count.
+      Get(SIMBA_ANALYTICS_URL, []);
+    finally
+      Free();
+    end;
+  except
+    on E: Exception do
+      DebugLn('[TSimbaForm.SetupAnalyticsAndOpenSSL]: ', E.ToString());
+  end;
+end;
 
-  CreateBaseDirectories();
+procedure TSimbaForm.SetupCodeTools;
+var
+  List: TStringList;
+  I: Integer;
+  Parser: TCodeInsight_Include;
+begin
+  List := nil;
 
-  {$IFDEF WINDOWS}
-  if SimbaSettings.General.OpenSSLExtractOnLaunch.Value then
-    ExtractOpenSSL();
-  {$ENDIF}
+  try
+    List := SimbaProcess.RunDump(HashFile(Application.ExeName), ['--dumpcompiler']);
 
-  CodeTools_Setup();
-  SizeComponents();
+    for I := 0 to List.Count - 1 do
+    begin
+      if (List.Names[I] = '') then
+        Continue;
 
-  AddHandlerFirstShow(@SetupScriptTabs, True);
-  AddHandlerFirstShow(@SetupDocking, True);
-  AddHandlerFirstShow(@SetupCompleted, True);
+      Parser := TCodeInsight_Include.Create();
+      Parser.Run(List.ValueFromIndex[I], List.Names[I]);
+
+      TCodeInsight.AddBaseInclude(Parser);
+    end;
+
+    TSimbaFunctionList.AddSection(
+      TSimbaFunctionList_SimbaSection.Create(TCodeInsight.BaseIncludes)
+    );
+  except
+    on E: Exception do
+      DebugLn('[TSimbaForm.SetupCodeTools]: ', E.ToString());
+  end;
+
+  if (List <> nil) then
+    List.Free();
+end;
+
+procedure TSimbaForm.Setup(Data: PtrInt);
+begin
+  SimbaScriptTabsForm.OnEditorLoaded := @HandleEditorLoaded;
+  SimbaScriptTabsForm.OnEditorChanged := @HandleEditorChanged;
+  SimbaScriptTabsForm.OnEditorCaretChanged := @HandleEditorCaretChange;
+  SimbaScriptTabsForm.AddTab();
 
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
 
@@ -624,9 +630,157 @@ begin
   SimbaSettingChanged(SimbaSettings.General.LockLayout);
   SimbaSettingChanged(SimbaSettings.General.TrayIconVisible);
   SimbaSettingChanged(SimbaSettings.General.ConsoleVisible);
+  SimbaSettingChanged(SimbaSettings.General.MacOSKeystrokes);
 
-  if SimbaSettings.General.MacOSKeystrokes.Value then
-    SimbaSettingChanged(SimbaSettings.General.MacOSKeystrokes);
+  SizeComponents();
+  SetupDocking();
+  SetupCompleted();
+end;
+
+procedure TSimbaForm.DoPackageMenuClick(Sender: TObject);
+begin
+  if SimbaScriptTabsForm.Open(TMenuItem(Sender).Hint, True) and (ssCtrl in GetKeyShiftState()) then
+    MenuItemRun.Click();
+end;
+
+procedure TSimbaForm.DoPackageMenuBuilding;
+var
+  Files, Updates: TStringList;
+  Packages: TSimbaPackageArray;
+  I: Integer;
+begin
+  Updates := TStringList.Create();
+  Packages := LoadPackages();
+  for I := 0 to High(Packages) do
+    if Packages[I].HasUpdate then
+      Updates.Add('%s can be updated to version %s', [Packages[I].Info.FullName, Packages[I].LatestVersion]);
+
+  if (not Updates.Equals(FPackageUpdates)) then
+  begin
+    FPackageUpdates.AddStrings(Updates, True);
+    FPackageUpdatesChanged := True;
+  end;
+  Updates.Free();
+
+  Files := GetPackageFiles('script');
+  if (not Files.Equals(FPackageMenu)) then
+  begin
+    FPackageMenu.AddStrings(Files, True);
+    FPackageMenuChanged := True;
+  end;
+  Files.Free();
+end;
+
+procedure TSimbaForm.DoPackageMenuBuildingFinished(Sender: TObject);
+
+  function CreatePackageMenu(PackageName: String): TMenuItem;
+  var
+    I: Integer;
+  begin
+    for I := 0 to MainMenu.Items.Count - 1 do
+      if (MainMenu.Items[I].Tag = 1) and (MainMenu.Items[I].Caption = PackageName) then
+      begin
+        Result := MainMenu.Items[I];
+        Exit;
+      end;
+
+    Result := TMenuItem.Create(MainMenu);
+    Result.Tag := 1;
+    Result.Caption := PackageName;
+
+    MainMenu.Items.Add(Result);
+  end;
+
+  function CreateIcon(Num: Integer): Integer;
+  var
+    bmp16, bmp24, bmp32: TBitmap;
+  begin
+    bmp16 := TBitmap.Create();
+    bmp24 := TBitmap.Create();
+    bmp32 := TBitmap.Create();
+
+    Images.Resolution[16].GetBitmap(IMAGE_PACKAGE, bmp16);
+    Images.Resolution[24].GetBitmap(IMAGE_PACKAGE, bmp24);
+    Images.Resolution[32].GetBitmap(IMAGE_PACKAGE, bmp32);
+
+    with PackageImageList.ResolutionByIndex[0] do
+      Draw(bmp16.Canvas, bmp16.Width - Width, bmp16.Height - Height, Min(Count - 1, Num));
+    with PackageImageList.ResolutionByIndex[0] do
+      Draw(bmp24.Canvas, bmp24.Width - Width, bmp24.Height - Height, Min(Count - 1, Num));
+    with PackageImageList.ResolutionByIndex[1] do
+      Draw(bmp32.Canvas, bmp32.Width - Width, bmp32.Height - Height, Min(Count - 1, Num));
+
+    Result := Images.AddMultipleResolutions([bmp16, bmp24, bmp32]);
+
+    bmp16.Free();
+    bmp24.Free();
+    bmp32.Free();
+  end;
+
+var
+  I: Integer;
+  ParentItem, Item: TMenuItem;
+  PackageName: String;
+begin
+  if FPackageUpdatesChanged then
+  begin
+    if (ToolbarButtonPackages.ImageIndex <> IMAGE_PACKAGE) then
+      Images.Delete(ToolbarButtonPackages.ImageIndex);
+
+    if (FPackageUpdates.Count > 0) then
+    begin
+      ToolbarButtonPackages.Hint := 'Open packages' + LineEnding + FPackageUpdates.Text.Trim();
+      ToolbarButtonPackages.ImageIndex := CreateIcon(FPackageUpdates.Count);
+    end else
+    begin
+      ToolbarButtonPackages.Hint := 'Open packages';
+      ToolbarButtonPackages.ImageIndex := IMAGE_PACKAGE;
+    end;
+  end;
+
+  FPackageUpdatesChanged := False;
+
+  if FPackageMenuChanged then
+  begin
+    for I := 0 to MainMenu.Items.Count - 1 do
+      if MainMenu.Items[I].Tag = 1 then
+        MainMenu.Items.Delete(I);
+
+    ParentItem := nil;
+    for I := 0 to FPackageMenu.Count - 1 do
+    begin
+      PackageName := FPackageMenu.Names[I];
+      if (ParentItem = nil) or (ParentItem.Caption <> PackageName) then
+        ParentItem := CreatePackageMenu(PackageName);
+
+      Item := TMenuItem.Create(MainMenu);
+      Item.Caption := ExtractFileNameOnly(FPackageMenu.ValueFromIndex[I]);
+      Item.Hint := FPackageMenu.ValueFromIndex[I];
+      Item.OnClick := @DoPackageMenuClick;
+
+      ParentItem.Add(Item);
+    end;
+  end;
+
+  FPackageMenuChanged := False;
+end;
+
+procedure TSimbaForm.FormCreate(Sender: TObject);
+begin
+  CreateBaseDirectories();
+
+  Application.CaptureExceptions := True;
+  Application.OnException := @SimbaForm.HandleException;
+
+  Screen.AddHandlerFormAdded(@SimbaForm.HandleFormCreated, True);
+
+  FPackageMenu := TStringList.Create();
+  FPackageUpdates := TStringList.Create();
+
+  FRecentFiles := TStringList.Create();
+  FRecentFiles.Text := SimbaSettings.General.RecentFiles.Value;
+
+  Threaded([@SetupAnalyticsAndOpenSSL, @SetupCodeTools]);
 end;
 
 procedure TSimbaForm.FormDestroy(Sender: TObject);
@@ -993,6 +1147,7 @@ end;
 
 procedure TSimbaForm.ToolbarButtonPackagesClick(Sender: TObject);
 begin
+  SimbaPackageForm.OnHide := @DoPackageMenuTimer;
   SimbaPackageForm.Show();
 end;
 
@@ -1166,15 +1321,7 @@ begin
   end;
 end;
 
-procedure TSimbaForm.SetupScriptTabs(Sender: TObject);
-begin
-  SimbaScriptTabsForm.OnEditorLoaded := @HandleEditorLoaded;
-  SimbaScriptTabsForm.OnEditorChanged := @HandleEditorChanged;
-  SimbaScriptTabsForm.OnEditorCaretChanged := @HandleEditorCaretChange;
-  SimbaScriptTabsForm.AddTab();
-end;
-
-procedure TSimbaForm.SetupDocking(Sender: TObject);
+procedure TSimbaForm.SetupDocking;
 begin
   BeginFormUpdate();
 
@@ -1224,14 +1371,12 @@ begin
   end;
 
   if (SimbaSettings.General.Layout.Value = '') then
-  begin
     Position := poScreenCenter;
 
-    EnsureVisible();
-  end;
+  EnsureVisible();
 end;
 
-procedure TSimbaForm.SetupCompleted(Sender: TObject);
+procedure TSimbaForm.SetupCompleted;
 begin
   {
   ToolBar.EdgeBorders:=[];
@@ -1240,6 +1385,7 @@ begin
       ToolBar.Buttons[I].Visible:=False;
   }
   Timer.Enabled := True;
+  PackageMenuTimer.Enabled := True;
 
   if SimbaSettings.FirstLaunch then
     MenuItemAssociateScripts.Click();

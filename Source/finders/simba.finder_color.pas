@@ -96,13 +96,12 @@ end;
 function TFindColorBuffer.FindCTS0(out Points: TPointArray; const Color, Tolerance: Integer): Boolean;
 var
   GoalR, GoalG, GoalB: Integer;
-  GoalTolerance: Integer;
 
   function Match(const Color: TRGB32): Boolean; inline;
   begin
-    Result := (Abs(GoalR - Color.R) <= GoalTolerance) and
-              (Abs(GoalG - Color.G) <= GoalTolerance) and
-              (Abs(GoalB - Color.B) <= GoalTolerance);
+    Result := (Abs(GoalR - Color.R) <= Tolerance) and
+              (Abs(GoalG - Color.G) <= Tolerance) and
+              (Abs(GoalB - Color.B) <= Tolerance);
   end;
 
 var
@@ -112,8 +111,6 @@ begin
   PointBuffer.Init(4096);
 
   ColorToRGB(Color, GoalR, GoalG, GoalB);
-
-  GoalTolerance := Sqr(Tolerance);
 
   for Y := Y1 to Y2 do
   begin

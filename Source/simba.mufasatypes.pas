@@ -236,8 +236,15 @@ generic procedure Swap<T>(var A, B: T);
 
 type
   TSyncNested = procedure is nested;
+  TThreadedNested = procedure is nested;
 
-procedure Sync(const Method: TSyncNested);
+  TThreadedMethod = procedure of object;
+  TThreadedMethodArray = array of TThreadedMethod;
+
+procedure Sync(Method: TSyncNested);
+function Threaded(Method: TThreadedNested): TThread;
+procedure Threaded(Methods: TThreadedMethodArray; Interval: Integer = 0);
+
 operator = (Left, Right: TPoint): Boolean;
 operator = (Left, Right: TBox): Boolean;
 
@@ -395,13 +402,70 @@ begin
   Proc();
 end;
 
-procedure Sync(const Method: TSyncNested);
+procedure Sync(Method: TSyncNested);
 var
   SyncObject{%H-}: TSyncObject;
 begin
   SyncObject.Proc := Method;
 
   TThread.Synchronize(nil, @SyncObject.Execute);
+end;
+
+type
+  TThreaded = class(TThread)
+  protected
+    FProc: TThreadedMethod;
+    FNestedProc: TThreadedNested;
+
+    procedure Execute; override;
+  public
+    constructor Create(Proc: TThreadedNested); reintroduce;
+    constructor Create(Proc: TThreadedMethod); reintroduce;
+  end;
+
+procedure TThreaded.Execute;
+begin
+  if Assigned(FNestedProc) then FNestedProc();
+  if Assigned(FProc) then FProc();
+end;
+
+constructor TThreaded.Create(Proc: TThreadedNested);
+begin
+  inherited Create(False, 512*512);
+
+  FNestedProc := Proc;
+end;
+
+constructor TThreaded.Create(Proc: TThreadedMethod);
+begin
+  inherited Create(False, 512*512);
+
+  FProc := Proc;
+end;
+
+function Threaded(Method: TThreadedNested): TThread;
+begin
+  Result := TThreaded.Create(Method);
+end;
+
+procedure Threaded(Methods: TThreadedMethodArray; Interval: Integer);
+var
+  Threads: array of TThread;
+  I: Integer;
+begin
+  SetLength(Threads, Length(Methods));
+  for I := 0 to High(Threads) do
+  begin
+    Threads[I] := TThreaded.Create(Methods[I]);
+    if (Interval > 0) then
+      Sleep(Interval);
+  end;
+
+  for I := 0 to High(Threads) do
+  begin
+    Threads[I].WaitFor();
+    Threads[I].Free();
+  end;
 end;
 
 end.

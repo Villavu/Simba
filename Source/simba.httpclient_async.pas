@@ -61,6 +61,7 @@ implementation
 
 procedure TSimbaHTTPRequest.Execute;
 begin
+  {
   try
     FContents := FHTTPClient.Get(FURL);
   except
@@ -69,6 +70,7 @@ begin
 
   FResponseCode := FHTTPClient.ResponseCode;
   FRunning := False;
+  }
 end;
 
 function TSimbaHTTPRequest.IsResponseCode(ResponseCodes: array of Integer): Boolean;
@@ -120,7 +122,7 @@ constructor TSimbaHTTPRequestZIP.Create(URL: String; OutputPath: String; Flat: B
 begin
   FHTTPClient := TSimbaHTTPClient.Create();
   FHTTPClient.OnDownloadProgress := OnDownloadProgress;
-  FHTTPClient.OnExtractProgress := OnExtractProgress;
+  //FHTTPClient.OnExtractProgress := OnExtractProgress;
   FURL := URL;
   FOutputPath := OutputPath;
   FFlat := Flat;

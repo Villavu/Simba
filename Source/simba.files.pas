@@ -392,8 +392,6 @@ begin
     if DirectoryExists(Directory) then
       Continue;
 
-    DebugLn('simba.files :: Create base directory: ', Directory);
-
     ForceDirectories(Directory);
   end;
 end;

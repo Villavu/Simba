@@ -115,7 +115,7 @@ begin
   HTTPClient := TSimbaHTTPClient.Create;
 
   try
-    Result := HTTPClient.Get(URL);
+    Result := HTTPClient.Get(URL, []);
   finally
     HTTPClient.Free();
   end;
@@ -231,7 +231,7 @@ begin
     if (not FHandleCookies) then
       FHTTPClient.Cookies.Clear();
 
-    Result := FHTTPClient.Get(URL);
+    Result := FHTTPClient.Get(URL, []);
   except
     on e: Exception do
       WriteLn('THTTPClient Exception: ' + e.Message);
@@ -247,7 +247,7 @@ begin
     if (not FHandleCookies) then
       FHTTPClient.Cookies.Clear();
 
-    FHTTPClient.Get(URL, FilePath);
+    FHTTPClient.Get(URL, FilePath, []);
   except
     on e: Exception do
       WriteLn('THTTPClient Exception: ' + e.Message);

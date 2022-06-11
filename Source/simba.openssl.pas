@@ -24,7 +24,7 @@ implementation
 
 uses
   lazloggerbase, lcltype,
-  simba.gz_stream, simba.settings, simba.files;
+  simba.gz, simba.settings, simba.files;
 
 function IsFileHash(FileName: String; Hash: String): Boolean;
 begin
