@@ -116,7 +116,8 @@ type
     function CountAll(const Values: TStringArray): TIntegerArray;
     
     function Join(const Values: TStringArray): String;
-    function Split(const Seperator: String): TStringArray;
+    function Split(const Seperators: TStringArray): TStringArray; overload;
+    function Split(const Seperator: String): TStringArray; overload;
 
     function Copy: String;
     function CopyRange(StartIndex, EndIndex: Integer): String;
@@ -146,6 +147,9 @@ type
     function ToDouble(Default: Double): Double; overload;
     function ToExtended: Extended; overload;
     function ToExtended(Default: Extended): Extended; overload;
+
+    function ToSHA1: String;
+    function ToMD5: String;
   end;
 
   operator * (const Left: String; Right: Int32): String;
@@ -155,7 +159,7 @@ type
 implementation
 
 uses
-  strutils, uregexpr,
+  strutils, uregexpr, sha1, md5,
   simba.overallocatearray;
 
 (* Char helpers in the same file since there are so few and it's strongly related *)
@@ -588,6 +592,9 @@ function TSimbaStringHelper.IsAlphaNum: Boolean;
 var
   I: Integer;
 begin
+  if (Self = '') then
+    Exit(False);
+
   Result := True;
 
   for I := 1 to Length(Self) do
@@ -602,6 +609,9 @@ function TSimbaStringHelper.IsInteger: Boolean;
 var
   I: Integer;
 begin
+  if (Self = '') then
+    Exit(False);
+
   for I := 1 to Length(Self) do
     if (not (Self[I] in ['0'..'9'])) then
     begin
@@ -619,6 +629,9 @@ function TSimbaStringHelper.IsFloat: Boolean;
 var
   I: Integer;
 begin
+  if (Self = '') then
+    Exit(False);
+
   for I := 1 to Length(Self) do
     if (not (Self[I] in ['0'..'9', '.'])) then
     begin
@@ -799,13 +812,25 @@ begin
   end;
 end;  
 
-function TSimbaStringHelper.Split(const Seperator: String): TStringArray;
+function TSimbaStringHelper.Split(const Seperators: TStringArray): TStringArray;
 var
   Len: SizeInt;
 
-  function NextSep(const StartIndex: SizeInt): SizeInt;
+  function NextSep(const StartIndex: SizeInt; out SepIndex: SizeInt): SizeInt;
+  var
+    I: Integer;
   begin
-    Result := Self.IndexOf(Seperator, StartIndex);
+    Result := 0;
+
+    for I := 0 to High(Seperators) do
+    begin
+      Result := Self.IndexOf(Seperators[I], StartIndex);
+      if (Result > 0) then
+      begin
+        SepIndex := I;
+        Exit;
+      end;
+    end;
   end;
 
   procedure Add(const S: String);
@@ -817,19 +842,18 @@ var
   end;
 
 var
-  Sep, LastSep: SizeInt;
+  Sep, SepIndex, LastSep: SizeInt;
 begin
   SetLength(Result, 16);
 
   Len := 0;
   LastSep := 1;
-  Sep := NextSep(1);
+  Sep := NextSep(1, SepIndex);
   while (Sep > 0) do
   begin
     Add(System.Copy(Self, LastSep, Sep - LastSep));
-
-    LastSep := Sep + Length(Seperator);
-    Sep := NextSep(LastSep);
+    LastSep := Sep + Length(Seperators[SepIndex]);
+    Sep := NextSep(LastSep, SepIndex);
   end;
 
   if (LastSep <= Length(Self)) then
@@ -839,6 +863,11 @@ begin
     Dec(Len);
 
   SetLength(Result, Len);
+end;
+
+function TSimbaStringHelper.Split(const Seperator: String): TStringArray;
+begin
+  Result := Split([Seperator]);
 end;
 
 function TSimbaStringHelper.Copy: String;
@@ -966,6 +995,22 @@ end;
 function TSimbaStringHelper.ToExtended(Default: Extended): Extended;
 begin
   Result := StrToFloatDef(Self, Default);
+end;
+
+function TSimbaStringHelper.ToSHA1: String;
+begin
+  if (Self = '') then
+    Result := ''
+  else
+    Result := SHA1Print(SHA1String(Self));
+end;
+
+function TSimbaStringHelper.ToMD5: String;
+begin
+  if (Self = '') then
+    Result := ''
+  else
+    Result := MD5Print(MD5String(Self));
 end;
 
 operator *(const Left: String; Right: Int32): String;

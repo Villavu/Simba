@@ -19,7 +19,6 @@ type
   TCodeInsight = class(TCodeParser)
   protected class var
     FIncludeCache: TCodeInsight_IncludeCache;
-    FFunctionListSections: TCodeInsight_IncludeArray;
     FBaseIncludes: TCodeInsight_IncludeArray;
     FBaseDefines: TStringList;
   protected
@@ -46,8 +45,7 @@ type
     class constructor Create;
     class destructor Destroy;
     class procedure AddBaseInclude(Include: TCodeInsight_Include);
-    class procedure AddFunctionListSection(Include: TCodeInsight_Include);
-    class property FunctionListSections: TCodeInsight_IncludeArray read FFunctionListSections;
+    class property BaseIncludes: TCodeInsight_IncludeArray read FBaseIncludes;
 
     function GetMembersOfType(Declaration: TDeclaration): TDeclarationArray; overload;
     function GetMembersOfType(Declaration: TDeclaration; Name: String): TDeclarationArray; overload;
@@ -110,11 +108,6 @@ class procedure TCodeInsight.AddBaseInclude(Include: TCodeInsight_Include);
 begin
   FBaseIncludes := FBaseIncludes + [Include];
   FBaseDefines.AddStrings(Include.Lexer.Defines);
-end;
-
-class procedure TCodeInsight.AddFunctionListSection(Include: TCodeInsight_Include);
-begin
-  FFunctionListSections := FFunctionListSections + [Include];
 end;
 
 function TCodeInsight.GetGlobalsByName(Name: String): TDeclarationArray;

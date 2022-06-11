@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.fphttpclient, simba.archive, simba.mufasatypes;
+  simba.fphttpclient, simba.mufasatypes;
 
 const
   // Information
@@ -66,7 +66,12 @@ const
   HTTP_VERSION_NOT_SUPPORTED = 505;
 
 type
-  TSimbaHTTPProgressEvent = procedure(Sender: TObject; URL: String; Position, Size: Int64) of object; // -1, -1 for connecting.
+  THTTPClientHeadersEvent = procedure(Sender: TObject) of object;
+  THTTPClientConnectingEvent = procedure(Sender: TObject; URL: String) of object;
+  THTTPClientExtractEvent = procedure(Sender: TObject; URL: String; Percent: Double) of object;
+  THTTPClientResponseCodeEvent = procedure(Sender: TObject; ResponseCode: Integer) of object;
+
+  TSimbaHTTPProgressEvent = procedure(Sender: TObject; URL, ContentType: String; Position, Size: Int64) of object;
   TSimbaHTTPClientProxy = record
     Host: String;
     Port: Int32;
@@ -74,23 +79,33 @@ type
     Password: String;
   end;
 
+type
   TSimbaHTTPClient = class
   protected
     FHTTPClient: TSimbaFPHTTPClient;
     FURL: String;
+    FContentType: String;
     FOnDownloadProgress: TSimbaHTTPProgressEvent;
-    FOnExtractProgress: TSimbaHTTPProgressEvent;
+    FOnExtractProgress: THTTPClientExtractEvent;
+    FOnConnecting: THTTPClientConnectingEvent;
+    FOnHeaders: THTTPClientHeadersEvent;
+    FOnCopyingProgress: THTTPClientExtractEvent;
+    FOnResponseCode: THTTPClientResponseCodeEvent;
 
-    procedure DoExtractProgress(Sender: TObject; FileName: String; Position, Size: Int64);
+    procedure DoExtractProgress(Sender: TObject; FileName: String; Percent: Double);
+    procedure DoCopyingProgress(Sender: TObject; FileName: String; Percent: Double);
     procedure DoDownloadProgress(Sender: TObject; const Size, Position: Int64);
     procedure DoRedirect(Sender: TObject; const Source: String; var Dest: String);
+    procedure DoConnecting(Sender: TObject; URL: String);
+    procedure DoHeaders(Sender: TObject);
+    procedure DoResponseCode(Sender: TObject; ResponseCode: Integer);
 
     function GetResponseHeader(Name: String): String;
     function GetResponseCode: Int32;
-    function GetResponseHeaders: TStrings;
+    function GetResponseHeaders: TStringList;
     function GetRequestHeader(Name: String): String;
-    function GetRequestHeaders: TStrings;
-    function GetCookies: TStrings;
+    function GetRequestHeaders: TStringList;
+    function GetCookies: TStringList;
     function GetProxy: TSimbaHTTPClientProxy;
     function GetRequestContentType: String;
 
@@ -99,43 +114,38 @@ type
     procedure SetProxy(Value: TSimbaHTTPClientProxy);
   public
     property OnDownloadProgress: TSimbaHTTPProgressEvent read FOnDownloadProgress write FOnDownloadProgress;
-    property OnExtractProgress: TSimbaHTTPProgressEvent read FOnExtractProgress write FOnExtractProgress;
+    property OnExtractProgress: THTTPClientExtractEvent read FOnExtractProgress write FOnExtractProgress;
+    property OnConnecting: THTTPClientConnectingEvent read FOnConnecting write FOnConnecting;
+    property OnHeadersReceived: THTTPClientHeadersEvent read FOnHeaders write FOnHeaders;
+    property OnCopyingProgress: THTTPClientExtractEvent read FOnCopyingProgress write FOnCopyingProgress;
+    property OnResponseCode: THTTPClientResponseCodeEvent read FOnResponseCode write FOnResponseCode;
 
     property ResponseCode: Int32 read GetResponseCode;
     property ResponseHeader[Name: String]: String read GetResponseHeader;
-    property ResponseHeaders: TStrings read GetResponseHeaders;
+    property ResponseHeaders: TStringList read GetResponseHeaders;
 
     property RequestHeader[Name: String]: String read GetRequestHeader write SetRequestHeader;
-    property RequestHeaders: TStrings read GetRequestHeaders;
+    property RequestHeaders: TStringList read GetRequestHeaders;
 
     property RequestContentType: String read GetRequestContentType write SetRequestContentType;
 
-    property Cookies: TStrings read GetCookies;
+    property Cookies: TStringList read GetCookies;
     property Proxy: TSimbaHTTPClientProxy read GetProxy write SetProxy;
 
+    // Header request, returns response code
+    function Head(URL: String): Integer;
+
     // Writes page contents to result
-    function Get(URL: String): String; overload;
+    function Get(URL: String; AllowedResponseCodes: array of Integer): String; overload;
 
     // Writes page contents to stream.
-    procedure Get(URL: String; Stream: TMemoryStream); overload;
+    procedure Get(URL: String; Stream: TStream; AllowedResponseCodes: array of Integer); overload;
 
     // Writes page contents to a file.
-    procedure Get(URL: String; FileName: String); overload;
-
-    // Extracts page contents to file using a TSimbaArchiveExtract class
-    procedure GetArchive(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray; ExtractorClass: TSimbaArchiveExtractorClass);
+    procedure Get(URL: String; FileName: String; AllowedResponseCodes: array of Integer); overload;
 
     // Extracts page contents to file treating contents as .zip
     procedure GetZip(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
-
-    // Extracts page contents to file treating contents as .tar
-    procedure GetTar(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
-
-    // Extracts page contents to file treating contents as .tar.gz
-    procedure GetTarGZ(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
-
-    // Extracts page contents to file treating contents as .tar.bz2
-    procedure GetTarBZ2(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
 
     // Post string (URL parameters) returns response
     function Post(URL: String; Parameters: TStringArray): String; overload;
@@ -152,6 +162,8 @@ type
     function FormPost(const URL, FieldName, FileName: string): String; overload;
     function FormPost(const URL, FieldName, FileName: string; Stream: TStream): String; overload;
 
+    class function SimpleGet(URL: String; AllowedResponseCodes: array of Integer): String; static;
+
     constructor Create;
     destructor Destroy; override;
   end;
@@ -159,12 +171,11 @@ type
 implementation
 
 uses
-  simba.zip, simba.tar, simba.tar_gz, simba.tar_bz2,
-  simba.helpers_string;
+  simba.zip, simba.helpers_string;
 
-function TSimbaHTTPClient.GetResponseHeaders: TStrings;
+function TSimbaHTTPClient.GetResponseHeaders: TStringList;
 begin
-  Result := FHTTPClient.ResponseHeaders;
+  Result := FHTTPClient.ResponseHeaders as TStringList;
 end;
 
 procedure TSimbaHTTPClient.DoRedirect(Sender: TObject; const Source: String; var Dest: String);
@@ -172,19 +183,38 @@ begin
   FURL := Dest;
 end;
 
+procedure TSimbaHTTPClient.DoConnecting(Sender: TObject; URL: String);
+begin
+  if Assigned(OnConnecting) then
+    OnConnecting(Self, URL);
+end;
+
+procedure TSimbaHTTPClient.DoHeaders(Sender: TObject);
+begin
+  FContentType := ResponseHeader['Content-Type'];
+  if Assigned(OnHeadersReceived) then
+    OnHeadersReceived(Self);
+end;
+
+procedure TSimbaHTTPClient.DoResponseCode(Sender: TObject; ResponseCode: Integer);
+begin
+  if Assigned(FOnResponseCode) then
+    FOnResponseCode(Self, ResponseCode);
+end;
+
 function TSimbaHTTPClient.GetRequestHeader(Name: String): String;
 begin
   Result := FHTTPClient.GetHeader(Name);
 end;
 
-function TSimbaHTTPClient.GetRequestHeaders: TStrings;
+function TSimbaHTTPClient.GetRequestHeaders: TStringList;
 begin
-  Result := FHTTPClient.RequestHeaders;
+  Result := FHTTPClient.RequestHeaders as TStringList;
 end;
 
-function TSimbaHTTPClient.GetCookies: TStrings;
+function TSimbaHTTPClient.GetCookies: TStringList;
 begin
-  Result := FHTTPClient.Cookies;
+  Result := FHTTPClient.Cookies as TStringList;
 end;
 
 function TSimbaHTTPClient.GetProxy: TSimbaHTTPClientProxy;
@@ -208,6 +238,13 @@ begin
   FHTTPClient.Proxy.Password := Value.Password;
 end;
 
+function TSimbaHTTPClient.Head(URL: String): Integer;
+begin
+  FHTTPClient.HTTPMethod('HEAD', URL, nil, []);
+
+  Result := FHTTPClient.ResponseStatusCode;
+end;
+
 function TSimbaHTTPClient.GetRequestContentType: String;
 begin
   Result := RequestHeader['Content-Type'];
@@ -218,33 +255,27 @@ begin
   RequestHeader['Content-Type'] := Value;
 end;
 
-procedure TSimbaHTTPClient.DoExtractProgress(Sender: TObject; FileName: String; Position, Size: Int64);
+procedure TSimbaHTTPClient.DoExtractProgress(Sender: TObject; FileName: String; Percent: Double);
 begin
   if (FOnExtractProgress <> nil) then
-    FOnExtractProgress(Self, FileName, Position, Size);
+    FOnExtractProgress(Self, FileName, Percent);
+end;
+
+procedure TSimbaHTTPClient.DoCopyingProgress(Sender: TObject; FileName: String; Percent: Double);
+begin
+  if (FOnCopyingProgress <> nil) then
+    FOnCopyingProgress(Self, FileName, Percent);
 end;
 
 procedure TSimbaHTTPClient.DoDownloadProgress(Sender: TObject; const Size, Position: Int64);
 begin
   if (FOnDownloadProgress <> nil) then
-    FOnDownloadProgress(Self, FURL, Position, Size);
+    FOnDownloadProgress(Self, FURL, FContentType, Position, Size);
 end;
 
 function TSimbaHTTPClient.GetResponseHeader(Name: String): String;
-var
-  Header: String;
 begin
-  Result := '';
-
-  if Name <> '' then
-  begin
-    if Name[Length(Name)] <> ':' then
-      Name := Name + ':';
-
-    for Header in ResponseHeaders do
-      if Header.StartsWith(Name) then
-        Exit(Name.After(':'));
-  end;
+  Result := FHTTPClient.GetHeader(FHTTPClient.ResponseHeaders, Name);
 end;
 
 function TSimbaHTTPClient.GetResponseCode: Int32;
@@ -252,56 +283,58 @@ begin
   Result := FHTTPClient.ResponseStatusCode;
 end;
 
-procedure TSimbaHTTPClient.Get(URL: String; Stream: TMemoryStream);
+procedure TSimbaHTTPClient.Get(URL: String; Stream: TStream; AllowedResponseCodes: array of Integer);
 begin
   FURL := URL;
   if (not FURL.StartsWith('http://', False)) and (not FURL.StartsWith('https://', False)) then
     FURL := 'http://' + FURL;
 
-  if (FOnDownloadProgress <> nil) then
-    FOnDownloadProgress(Self, FURL, -1, -1); // Connecting
-
-  FHTTPClient.Get(FURL, Stream);
+  FHTTPClient.HTTPMethod('GET', FURL, Stream, AllowedResponseCodes);
 end;
 
-function TSimbaHTTPClient.Get(URL: String): String;
+function TSimbaHTTPClient.Get(URL: String; AllowedResponseCodes: array of Integer): String;
+var
+  Stream: TRawByteStringStream;
 begin
-  FURL := URL;
-  if (not FURL.StartsWith('http://', False)) and (not FURL.StartsWith('https://', False)) then
-    FURL := 'http://' + FURL;
+  Result := '';
 
-  if (FOnDownloadProgress <> nil) then
-    FOnDownloadProgress(Self, FURL, -1, -1); // Connecting
+  Stream := TRawByteStringStream.Create();
+  try
+    Get(URL, Stream, AllowedResponseCodes);
 
-  Result := FHTTPClient.Get(FURL);
+    Result := Stream.DataString;
+  finally
+    Stream.Free();
+  end;
 end;
 
-procedure TSimbaHTTPClient.Get(URL: String; FileName: String);
+procedure TSimbaHTTPClient.Get(URL: String; FileName: String; AllowedResponseCodes: array of Integer);
+var
+  Stream: TFileStream;
 begin
-  FURL := URL;
-  if (not FURL.StartsWith('http://', False)) and (not FURL.StartsWith('https://', False)) then
-    FURL := 'http://' + FURL;
-
-  if (FOnDownloadProgress <> nil) then
-    FOnDownloadProgress(Self, FURL, -1, -1); // Connecting
-
-  FHTTPClient.Get(FURL, FileName);
+  Stream := TFileStream.Create(FileName, fmCreate);
+  try
+    Get(URL, Stream, AllowedResponseCodes);
+  finally
+    Stream.Free();
+  end;
 end;
 
-procedure TSimbaHTTPClient.GetArchive(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray; ExtractorClass: TSimbaArchiveExtractorClass);
+procedure TSimbaHTTPClient.GetZip(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
 var
   Stream: TMemoryStream;
-  Extractor: TSimbaArchiveExtractor;
+  Extractor: TSimbaZipExtractor;
 begin
   Stream := TMemoryStream.Create();
 
   try
-    Get(URL, Stream);
+    Get(URL, Stream, [HTTP_OK]);
 
     if (ResponseCode = HTTP_OK) then
     begin
-      Extractor := ExtractorClass.Create();
+      Extractor := TSimbaZipExtractor.Create();
       Extractor.OnProgress := @DoExtractProgress;
+      Extractor.OnCopying := @DoCopyingProgress;
       Extractor.InputStream := Stream;
       Extractor.OutputPath := OutputPath;
       Extractor.Flat := Flat;
@@ -318,26 +351,6 @@ begin
   end;
 end;
 
-procedure TSimbaHTTPClient.GetZip(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
-begin
-  GetArchive(URL, OutputPath, Flat, IgnoreList, TSimbaZipExtractor);
-end;
-
-procedure TSimbaHTTPClient.GetTar(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
-begin
-  GetArchive(URL, OutputPath, Flat, IgnoreList, TSimbaTarExtractor);
-end;
-
-procedure TSimbaHTTPClient.GetTarGZ(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
-begin
-  GetArchive(URL, OutputPath, Flat, IgnoreList, TSimbaTarGZExtractor);
-end;
-
-procedure TSimbaHTTPClient.GetTarBZ2(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
-begin
-  GetArchive(URL, OutputPath, Flat, IgnoreList, TSimbaTarBZ2Extractor);
-end;
-
 function TSimbaHTTPClient.Post(URL: String; Parameters: TStringArray): String;
 var
   i: Int32;
@@ -351,7 +364,7 @@ begin
     for i := 0 to High(Parameters) do
       FURL := FURL + Parameters[i] + '&';
 
-    Result := Get(FURL);
+    Result := Get(FURL, [HTTP_OK]);
   end;
 end;
 
@@ -368,7 +381,7 @@ begin
     for i := 0 to High(Parameters) do
       FURL := FURL + '&' + Parameters[i];
 
-    Get(FURL, Response);
+    Get(FURL, Response, [HTTP_OK]);
   end;
 end;
 
@@ -411,7 +424,6 @@ begin
   Result := '';
 
   Response := TStringStream.Create();
-
   try
     FURL := URL;
     FHTTPClient.StreamFormPost(URL, FieldName, FileName, Stream, Response);
@@ -419,6 +431,18 @@ begin
     Result := Response.DataString;
 
     Response.Free();
+  end;
+end;
+
+class function TSimbaHTTPClient.SimpleGet(URL: String; AllowedResponseCodes: array of Integer): String;
+begin
+  Result := '';
+
+  with TSimbaHTTPClient.Create() do
+  try
+    Result := Get(URL, AllowedResponseCodes);
+  finally
+    Free();
   end;
 end;
 
@@ -430,6 +454,9 @@ begin
   FHTTPClient.AllowRedirect := True;
   FHTTPClient.OnDataReceived := @DoDownloadProgress;
   FHTTPClient.OnRedirect := @DoRedirect;
+  FHTTPClient.OnConnecting := @DoConnecting;
+  FHTTPClient.OnHeaders := @DoHeaders;
+  FHTTPClient.OnResponseCode := @DoResponseCode;
   FHTTPClient.AddHeader('User-Agent', Format('Mozilla/5.0 (compatible; Simba/%d; Target/%s)', [SIMBA_VERSION, {$I %FPCTARGETOS%} + '-' + {$I %FPCTARGETCPU%}]));
 end;
 

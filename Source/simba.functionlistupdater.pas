@@ -39,7 +39,7 @@ type
 implementation
 
 uses
-  LazLoggerBase;
+  LazLoggerBase, simba.functionlist_simbasection;
 
 constructor TSimbaFunctionListUpdater.Create(FunctionList: TSimbaFunctionList);
 begin
@@ -63,7 +63,7 @@ begin
   WaitFor();
 
   FEvent.Free();
-  FExpandedState.Free();;
+  FExpandedState.Free();
 
   inherited Destroy();
 end;
@@ -111,17 +111,6 @@ begin
             FFunctionList.AddInclude(FParser.Includes[I]);
 
           FIncludesHash := FParser.IncludesHash;
-        end;
-
-        if (FFunctionList.SimbaNode.Count = 0) then
-        begin
-          DebugLn('Update Simba Node');
-
-          for I := 0 to High(FParser.FunctionListSections) do
-            FFunctionList.AddSimbaSection(FParser.FunctionListSections[I]);
-
-          FFunctionList.SimbaNode.AlphaSort();
-          FFunctionList.SimbaNode.Expanded := True;
         end;
       finally
         FParser.Free();

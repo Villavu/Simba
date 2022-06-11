@@ -38,7 +38,7 @@ type
 
     function RunCommandTimeout(Executable: String; Commands: TStringArray; out Output: String; Timeout: Int32): Boolean;
 
-    function RunDump(Commands: TStringArray): TStringList;
+    function RunDump(Hash: String; Commands: TStringArray): TStringList;
 
     function RunScript(Script: String; Parameters: TStringArray; out Output: String): TProcessExitStatus; overload;
     function RunScript(Script: String; Parameters: TStringArray): TProcessID; overload;
@@ -213,17 +213,25 @@ begin
   end;
 end;
 
-function TSimbaProcess.RunDump(Commands: TStringArray): TStringList;
+function TSimbaProcess.RunDump(Hash: String; Commands: TStringArray): TStringList;
 var
   ProcessOutput, FileName: String;
 begin
+  FileName := GetDumpPath() + Hash;
+
   Result := TStringList.Create();
   Result.LineBreak := #0;
+
+  if FileExists(FileName) then
+  begin
+    Result.LoadFromFile(FileName);
+
+    Exit;
+  end;
 
   if not DirectoryExists(GetDumpPath()) then
     ForceDirectories(GetDumpPath());
 
-  FileName := GetTempFileName(GetDumpPath(), 'dump');
   try
     if not SimbaProcess.RunCommandTimeout(Application.ExeName, Commands + [FileName], ProcessOutput, 5000) then
       raise Exception.Create('Timed out');
@@ -233,9 +241,6 @@ begin
     on E: Exception do
       raise Exception.Create(E.Message + ' :: ' + ProcessOutput);
   end;
-
-  if FileExists(FileName) then
-    DeleteFile(FileName);
 end;
 
 function TSimbaProcess.RunScript(Script: String; Parameters: TStringArray; out Output: String): TProcessExitStatus;

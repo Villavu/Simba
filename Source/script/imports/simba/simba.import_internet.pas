@@ -8,7 +8,7 @@ implementation
 
 uses
   classes, sysutils, lclintf, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.scriptthread, simba.internet;
+  simba.script_compiler, simba.scriptthread, simba.internet;
 
 type
   PStream = ^TStream;
