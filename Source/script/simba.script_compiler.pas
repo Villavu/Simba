@@ -164,7 +164,7 @@ begin
   StartImporting();
 
   try
-    Options := Options + [lcoLooseSemicolon, lcoAutoInvoke, lcoExplictSelf, lcoAutoObjectify];
+    Options := Options + [lcoLooseSemicolon, lcoAutoInvoke, lcoExplicitSelf, lcoAutoObjectify];
 
     InitializeWaitUntil(Self);
     InitializeFFI(Self);
