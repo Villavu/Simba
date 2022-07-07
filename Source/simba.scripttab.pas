@@ -102,14 +102,9 @@ uses
   simba.scripttabhistory, simba.main, simba.parser_misc, simba.files, simba.helpers_string;
 
 procedure TSimbaScriptTab.HandleAutoComplete;
-
-  function IsStatic(Expression: String): Boolean;
-  begin
-    Result := (Expression.Count('.') = 1) and (FEditor.AutoComplete.Parser.GlobalByName[Expression.Before('.')] is TciTypeDeclaration);
-  end;
-
 var
   Expression, Filter: String;
+  IsStatic: Boolean;
   Declaration: TDeclaration;
   P: TPoint;
 begin
@@ -131,7 +126,15 @@ begin
 
     Declaration := FEditor.AutoComplete.Parser.ParseExpression(Expression);
     if (Declaration <> nil) then
-      FEditor.AutoComplete.FillMembers(Declaration, IsStatic(Expression));
+    begin
+      IsStatic := (Expression.Count('.') = 1) and
+                  (not FEditor.IsHighlighterAttributeEx(['String', 'Number'], TPoint.Create(-2, 0))) and
+                  (FEditor.AutoComplete.Parser.GlobalByName[Expression.Before('.')] is TciTypeDeclaration);
+
+      FEditor.AutoComplete.FillMembers(
+        Declaration, IsStatic
+      );
+    end;
   end else
   begin
     Filter := Expression;
@@ -460,7 +463,6 @@ begin
   if (Result.Lexer.FileName = '') then
     Result.Lexer.FileName := FScriptFileName;
 
-  // Result.OnMessage := @SimbaForm.CodeTools_OnMessage;
   Result.OnFindInclude := @SimbaForm.CodeTools_OnFindInclude;
   Result.OnFindLibrary := @SimbaForm.CodeTools_OnFindLibrary;
   Result.OnLoadLibrary := @SimbaForm.CodeTools_OnLoadLibrary;
@@ -475,7 +477,6 @@ begin
   if (Result.Lexer.FileName = '') then
     Result.Lexer.FileName := FScriptFileName;
 
-  Result.OnMessage := @SimbaForm.CodeTools_OnMessage;
   Result.OnFindInclude := @SimbaForm.CodeTools_OnFindInclude;
   Result.OnFindLibrary := @SimbaForm.CodeTools_OnFindLibrary;
   Result.OnLoadLibrary := @SimbaForm.CodeTools_OnLoadLibrary;

@@ -229,6 +229,7 @@ var
   Base: TExpressionItem;
   Members: TDeclarationArray;
   Declaration: TDeclaration;
+  isConst: Boolean;
 begin
   Result := nil;
 

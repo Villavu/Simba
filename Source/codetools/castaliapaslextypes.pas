@@ -1,28 +1,16 @@
 {
-  Author: Raymond van Venetië and Merlijn Wajer
-  Project: Simba (https://github.com/MerlijnWajer/Simba)
-  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+  The contents of this file are subject to the Mozilla Public License Version
+  1.1 (the "License"); you may not use this file except in compliance with the
+  License. You may obtain a copy of the License at
+  http://www.mozilla.org/NPL/NPL-1_1Final.html
+
+  Software distributed under the License is distributed on an "AS IS" basis,
+  WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
+  the specific language governing rights and limitations under the License.
 }
-{---------------------------------------------------------------------------
-The contents of this file are subject to the Mozilla Public License Version
-1.1 (the "License"); you may not use this file except in compliance with the
-License. You may obtain a copy of the License at
-http://www.mozilla.org/NPL/NPL-1_1Final.html
-
-Software distributed under the License is distributed on an "AS IS" basis,
-WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
-the specific language governing rights and limitations under the License.
-
-The Original Code is: mwPasLexTypes, released November 14, 1999.
-
-The Initial Developer of the Original Code is Martin Waldenburg
-unit CastaliaPasLexTypes;
-
-----------------------------------------------------------------------------}
-
 unit castaliapaslextypes;
 
-{$mode DELPHI}
+{$MODE DELPHI}
 
 {$DEFINE D8_NEWER}
 {$DEFINE D9_NEWER}
@@ -36,9 +24,7 @@ var
   CompTable: array[#0..#255] of byte;
 
 type
-
   TMessageEventType = (meError, meNotSupported);
-
   TMessageEvent = procedure(Sender: TObject; const Typ: TMessageEventType; const Msg: string; X, Y: integer) of object; //jdj 7/16/1999; DR 2001-11-06
 
   TCommentState = (csAnsi, csBor, csNo);
@@ -49,7 +35,6 @@ type
   end;
 
   TptTokenKind = (
-    tokAbort, //JThurman 2004-11-8 (flow control routines)
     tokAbsolute,
     tokAbstract,
     tokAdd,
@@ -57,7 +42,6 @@ type
     tokAmpersand,
     tokAnd,
     tokAnsiComment,
-    tokAnsiString,
     tokArray,
     tokAs,
     tokAsciiChar,
@@ -65,48 +49,36 @@ type
     tokAssembler,
     tokAssign,
     tokAt,
-    tokAutomated,
     tokBegin,
-    tokBoolean,
+
     tokBorComment,
     tokBraceClose,
     tokBraceOpen,
     tokBreak, //JThurman 2004-11-8 (flow control routines)
-    tokByte,
-    tokByteBool,
-    tokCardinal,
+
     tokCase,
     tokCdecl,
-    tokChar,
     tokClass,
     tokClassForward,
     tokClassFunction,
     tokClassProcedure,
     tokColon,
     tokComma,
-    tokComp,
     tokCompDirect,
     tokConst, tokConstRef,
     tokConstructor,
-    tokContains,
     tokContinue, //JThurman 2004-11-8 (flow control routines)
     tokCRLF,
     tokCRLFCo,
-    tokCurrency,
     tokDefault,
     tokDefineDirect,
     tokDeprecated, // DR 2001-10-20
     tokDestructor,
-    tokDispid,
-    tokDispinterface,
     tokDiv,
     tokDo,
     tokDotDot,
-    tokDouble,
     tokDoubleAddressOp,
     tokDownto,
-    tokDWORD,
-    tokDynamic,
     tokElse,
     tokElseDirect,
     tokEnd,
@@ -118,10 +90,7 @@ type
     tokExit, //JThurman 2004-11-8 (flow control routine)
     tokExport,
     tokExports,
-    tokExtended,
     tokExternal,
-    tokFar,
-    tokFile,
   {$IFDEF D8_NEWER}//JThurman 2004-03-20
     tokFinal,
   {$ENDIF}
@@ -154,28 +123,19 @@ type
     tokIncludeOnceDirect,
     tokLibraryDirect,
     tokIndex,
-    tokInherited,
     tokInitialization,
     tokInline,
-    tokInt64,
-    tokInteger,
     tokIntegerConst,
     tokInterface,
     tokIs,
     tokLabel,
     tokLibrary,
-    tokLocal,  // DR 2001-11-14
-    tokLongBool,
-    tokLongint,
-    tokLongword,
     tokLower,
     tokLowerEqual,
     tokMessage,
     tokMinus,
     tokMod,
     tokName,
-    tokNear,
-    tokNil,
     tokNodefault,
     tokNone,
     tokNot,
@@ -183,7 +143,6 @@ type
     tokNull,
     tokObject,
     tokOf,
-    tokOleVariant,
     tokOn,
   {$IFDEF D8_NEWER}//JThurman 2004-03-20
     tokOperator,
@@ -194,8 +153,6 @@ type
     tokOverride,
     tokPackage,
     tokPacked,
-    tokPascal,
-    tokPChar,
     tokPlatform, // DR 2001-10-20
     tokPlus,
     tokPoint,
@@ -209,9 +166,6 @@ type
     tokPublished,
     tokRaise,
     tokRead,
-    tokReadonly,
-    tokReal,
-    tokReal48,
     tokRecord,
     tokUnion,
   {$IFDEF D12_NEWER}
@@ -219,10 +173,8 @@ type
   {$ENDIF}
     tokRegister,
     tokReintroduce,
-    tokRemove,
     tokRepeat,
     tokRequires,
-    tokResident,
     tokResourceDirect,
     tokResourcestring,
     tokRoundClose,
@@ -235,13 +187,9 @@ type
     tokSemiColon,
     tokSet,
     tokShl,
-    tokShortint,
-    tokShortString,
     tokShr,
-    tokSingle,
     tokSlash,
     tokSlashesComment,
-    tokSmallint,
     tokSpace,
     tokSquareClose,
     tokSquareOpen,
@@ -255,9 +203,7 @@ type
   {$IFDEF D8_NEWER}
     tokStrict, //JThurman 2004-03-03
   {$ENDIF}
-    tokString,
     tokStringConst,
-    tokStringDQConst,  // 2002-01-14
     tokStringresource,
     tokSymbol,
     tokThen,
@@ -274,17 +220,10 @@ type
     tokUntil,
     tokUses,
     tokVar,
-    tokVarargs, // DR 2001-11-14
-    tokVariant,
+    tokWrite,
     tokVirtual,
     tokWhile,
-    tokWideChar,
-    tokWideString,
     tokWith,
-    tokWord,
-    tokWordBool,
-    tokWrite,
-    tokWriteonly,
     tokXor,
 
     tokNative,
@@ -307,21 +246,6 @@ type
     TokenPos: integer;
     TokenID: TptTokenKind;
   end;
-
-const
-  ExTypes = [tokDWORD, tokUnknown];
-
-const
-  TypeTokens = [tokReal48, tokReal, tokSingle, tokDouble, tokExtended,
-    tokCurrency, tokComp,          // Float
-    tokString, tokAnsiString, tokShortString,
-    tokWideString,                              // String
-    tokBoolean, tokByte, tokBytebool, tokCardinal,
-    tokChar, tokDWord, tokInt64,          // Ordinal
-    tokInteger, tokLongBool, tokLongInt, tokLongWord,
-    tokPChar, tokShortInt, tokSmallInt, tokWideChar,
-    tokWord, tokWordBool];
-
 
 function TokenName(Value: TptTokenKind): string;
 function tokTokenName(Value: TptTokenKind): string;

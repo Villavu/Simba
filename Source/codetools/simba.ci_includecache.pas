@@ -21,14 +21,11 @@ type
     FOutDefines: TSaveDefinesRec;
     FHash: String;
 
-    procedure HandleMessage(Sender: TObject; const Typ: TMessageEventType; const Message: String; X, Y: Integer);
-
     function GetHash: String;
     function GetOutdated: Boolean;
   public
     RefCount: Int32;
     LastUsed: Int32;
-    Messages: String;
 
     procedure Assign(From: TObject); override;
     function Equals(Obj: TObject): Boolean; override;
@@ -75,23 +72,6 @@ begin
 
   FOnInclude := nil; // No include cache
   FOnLibrary := nil; // No library cache
-  FOnMessage := @HandleMessage;
-end;
-
-procedure TCodeInsight_Include.HandleMessage(Sender: TObject; const Typ: TMessageEventType; const Message: String; X, Y: Integer);
-var
-  FileName: String = '';
-begin
-  if (Sender is TCodeParser) and (TCodeParser(Sender).Lexer <> nil) then
-    FileName := TCodeParser(Sender).Lexer.FileName
-  else
-  if (Sender is TmwPasLex) then
-    FileName := TmwPasLex(Sender).FileName;
-
-  if (FileName <> '') then
-    Messages := Messages + Format('"%s" at line %d, column %d in file "%s"', [Message, Y + 1, X, FileName]) + LineEnding
-  else
-    Messages := Messages + Format('"%s" at line %d, column %d', [Message, Y + 1, X]) + LineEnding;
 end;
 
 function TCodeInsight_Include.GetHash: String;
@@ -239,12 +219,6 @@ begin
 
     Result.RefCount := Result.RefCount + 1;
     Result.LastUsed := 0;
-
-    if (Result.Messages <> '') then
-    begin
-      SimbaOutputForm.Add('Simba''s code parser encountered errors in a include. This could break code tools:');
-      SimbaOutputForm.Add(Result.Messages);
-    end;
   finally
     FLock.Leave();
   end;
@@ -297,12 +271,6 @@ begin
 
     Result.RefCount := Result.RefCount + 1;
     Result.LastUsed := 0;
-
-    if Result.Messages <> '' then
-    begin
-      SimbaOutputForm.Add('Simba''s code parser encountered errors in a plugin. This could break code tools:');
-      SimbaOutputForm.Add(Result.Messages);
-    end;
   finally
     FLock.Leave();
   end;
