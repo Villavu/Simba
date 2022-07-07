@@ -45,6 +45,9 @@ type
 
     // Is highlighter attribute at caret
     function IsHighlighterAttribute(Values: TStringArray): Boolean;
+    // Is highlighter attribute at caret + offset
+    function IsHighlighterAttributeEx(Values: TStringArray; Offset: TPoint): Boolean;
+
     // Is value ahead of caret
     function IsTextAhead(Values: TStringArray): Boolean;
     // Get Expression string at X,Y
@@ -74,7 +77,21 @@ begin
   P := LogicalCaretXY;
   P.X -= 1;
 
-  Result := GetHighlighterAttriAtRowCol(P, Token, Attri) and Attri.Name.ContainsAny(Values);
+  Result := GetHighlighterAttriAtRowCol(P, Token, Attri) and Attri.Name.ContainsAny(Values, False);
+end;
+
+function TSimbaEditor.IsHighlighterAttributeEx(Values: TStringArray; Offset: TPoint): Boolean;
+var
+  Token: String;
+  Attri: TSynHighlighterAttributes;
+  P: TPoint;
+begin
+  P := LogicalCaretXY;
+  P.Offset(Offset);
+
+  Result := GetHighlighterAttriAtRowCol(P, Token, Attri) and Attri.Name.ContainsAny(Values, False);
+  if Assigned(Attri) then
+    WriteLn(Attri.Name);
 end;
 
 function TSimbaEditor.IsTextAhead(Values: TStringArray): Boolean;

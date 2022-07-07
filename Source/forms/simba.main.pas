@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, fileutil, anchordockpanel, forms, controls, graphics, dialogs,
-  stdctrls, menus, comctrls, extctrls, buttons, imglist, castaliapaslextypes,
+  stdctrls, menus, comctrls, extctrls, buttons, imglist,
   simba.settings, simba.mufasatypes;
 
 const
@@ -255,9 +255,7 @@ type
     property WindowSelection: TWindowHandle read FWindowSelection;
     property ProcessSelection: Integer read FProcessSelection;
 
-    procedure CodeTools_OnMessage(Sender: TObject; const Typ: TMessageEventType; const Message: String; X, Y: Integer);
     procedure CodeTools_OnLoadLibrary(Sender: TObject; FileName: String; var Contents: String);
-
     function CodeTools_OnFindInclude(Sender: TObject; var FileName: String): Boolean;
     function CodeTools_OnFindLibrary(Sender: TObject; var FileName: String): Boolean;
 
@@ -416,21 +414,6 @@ begin
   if Value then Replace := ssMeta else Replace := ssCtrl;
 
   SetMacOSKeystroke(MainMenu.Items);
-end;
-
-procedure TSimbaForm.CodeTools_OnMessage(Sender: TObject; const Typ: TMessageEventType; const Message: String; X, Y: Integer);
-var
-  Parser: TCodeParser absolute Sender;
-begin
-  if (Parser.Lexer.TokenPos + Parser.Lexer.TokenLen < Parser.Lexer.CaretPos) then
-  begin
-    SimbaOutputForm.Add('Simba''s code parser encountered an error. This could break code tools:');
-
-    if (Parser.Lexer.FileName <> '') then
-      SimbaOutputForm.Add(Format('"%s" at line %d, column %d in file "%s"', [Message, Y + 1, X, Parser.Lexer.FileName]))
-    else
-      SimbaOutputForm.Add(Format('"%s" at line %d, column %d', [Message, Y + 1, X]));
-  end;
 end;
 
 function TSimbaForm.CodeTools_OnFindInclude(Sender: TObject; var FileName: String): Boolean;

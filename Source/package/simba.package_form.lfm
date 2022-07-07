@@ -1,56 +1,57 @@
 object SimbaPackageForm: TSimbaPackageForm
-  Left = 1731
-  Height = 550
-  Top = 385
-  Width = 783
+  Left = 1012
+  Height = 825
+  Top = 379
+  Width = 1174
   Caption = 'Simba Packages'
-  ClientHeight = 550
-  ClientWidth = 783
-  Constraints.MinHeight = 250
-  Constraints.MinWidth = 250
+  ClientHeight = 825
+  ClientWidth = 1174
+  Constraints.MinHeight = 375
+  Constraints.MinWidth = 375
+  DesignTimePPI = 144
   OnShow = FormShow
   Position = poMainFormCenter
   LCLVersion = '2.2.2.0'
   object Notebook1: TNotebook
     Left = 0
-    Height = 488
+    Height = 750
     Top = 0
-    Width = 783
+    Width = 1174
     PageIndex = 0
     Align = alClient
     TabOrder = 0
     object Page1: TPage
       object ListPanel: TPanel
         Left = 0
-        Height = 315
+        Height = 472
         Top = 0
-        Width = 783
+        Width = 1174
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
       end
       object Bevel2: TBevel
         Left = 0
-        Height = 1
-        Top = 315
-        Width = 783
+        Height = 2
+        Top = 472
+        Width = 1174
         Align = alTop
         Shape = bsTopLine
       end
       object BottomNotebook: TNotebook
         Left = 0
-        Height = 172
-        Top = 316
-        Width = 783
+        Height = 276
+        Top = 474
+        Width = 1174
         PageIndex = 0
         Align = alClient
         TabOrder = 1
         object PageVersions: TPage
           object ScrollBox1: TScrollBox
             Left = 0
-            Height = 172
+            Height = 276
             Top = 0
-            Width = 783
+            Width = 1174
             HorzScrollBar.Page = 1
             VertScrollBar.Increment = 1
             VertScrollBar.Page = 1
@@ -69,8 +70,8 @@ object SimbaPackageForm: TSimbaPackageForm
             Top = 10
             Width = 780
             Align = alClient
-            BorderSpacing.Around = 10
-            Font.Height = -13
+            BorderSpacing.Around = 15
+            Font.Height = -20
             Font.Name = 'Courier New'
             Font.Pitch = fpFixed
             Font.Quality = fqCleartypeNatural
@@ -78,7 +79,7 @@ object SimbaPackageForm: TSimbaPackageForm
             ParentFont = False
             TabOrder = 0
             Gutter.Visible = False
-            Gutter.Width = 65
+            Gutter.Width = 77
             Gutter.MouseActions = <>
             RightGutter.Width = 0
             RightGutter.MouseActions = <>
@@ -121,11 +122,11 @@ object SimbaPackageForm: TSimbaPackageForm
             LineHighlightColor.Foreground = clNone
             inline SynLeftGutterPartList1: TSynGutterPartList
               object SynGutterMarks1: TSynGutterMarks
-                Width = 24
+                Width = 36
                 MouseActions = <>
               end
               object SynGutterLineNumber1: TSynGutterLineNumber
-                Width = 17
+                Width = 25
                 MouseActions = <>
                 MarkupInfo.Background = clBtnFace
                 MarkupInfo.Foreground = clNone
@@ -135,18 +136,19 @@ object SimbaPackageForm: TSimbaPackageForm
                 LeadingZeros = False
               end
               object SynGutterChanges1: TSynGutterChanges
-                Width = 4
+                Width = 6
                 MouseActions = <>
                 ModifiedColor = 59900
                 SavedColor = clGreen
               end
               object SynGutterSeparator1: TSynGutterSeparator
-                Width = 2
+                Width = 3
                 MouseActions = <>
                 MarkupInfo.Background = clWhite
                 MarkupInfo.Foreground = clGray
               end
               object SynGutterCodeFolding1: TSynGutterCodeFolding
+                Width = 15
                 MouseActions = <>
                 MarkupInfo.Background = clNone
                 MarkupInfo.Foreground = clGray
@@ -162,9 +164,9 @@ object SimbaPackageForm: TSimbaPackageForm
             Width = 780
             Align = alBottom
             AutoSize = True
-            BorderSpacing.Left = 10
-            BorderSpacing.Right = 10
-            BorderSpacing.Bottom = 10
+            BorderSpacing.Left = 15
+            BorderSpacing.Right = 15
+            BorderSpacing.Bottom = 15
             Caption = 'Installing...'
             OnClick = InstallingButtonClick
             TabOrder = 1
@@ -178,12 +180,12 @@ object SimbaPackageForm: TSimbaPackageForm
         AnchorSideLeft.Side = asrCenter
         AnchorSideTop.Control = Page2
         AnchorSideTop.Side = asrCenter
-        Left = 181
+        Left = 272
         Height = 31
-        Top = 286
+        Top = 429
         Width = 427
         Caption = 'Downloading package list. Please wait...'
-        Font.Height = -18
+        Font.Height = -27
         Font.Style = [fsBold]
         ParentColor = False
         ParentFont = False
@@ -192,21 +194,21 @@ object SimbaPackageForm: TSimbaPackageForm
   end
   object PanelBottom: TPanel
     Left = 0
-    Height = 62
-    Top = 488
-    Width = 783
+    Height = 75
+    Top = 750
+    Width = 1174
     Align = alBottom
     Anchors = [akLeft, akBottom]
     AutoSize = True
     BevelOuter = bvNone
-    ClientHeight = 62
-    ClientWidth = 783
+    ClientHeight = 75
+    ClientWidth = 1174
     TabOrder = 1
     object Bevel3: TBevel
       Left = 0
-      Height = 1
+      Height = 2
       Top = 0
-      Width = 783
+      Width = 1174
       Align = alTop
       Shape = bsTopLine
     end
@@ -215,24 +217,24 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideLeft.Side = asrCenter
       AnchorSideTop.Control = Bevel3
       AnchorSideTop.Side = asrBottom
-      Left = 321
-      Height = 61
-      Top = 1
-      Width = 141
+      Left = 481
+      Height = 73
+      Top = 2
+      Width = 212
       AutoSize = True
       BevelOuter = bvNone
-      ClientHeight = 61
-      ClientWidth = 141
+      ClientHeight = 73
+      ClientWidth = 212
       TabOrder = 0
       object ToolBar: TToolBar
         Left = 0
-        Height = 57
-        Top = 2
-        Width = 141
+        Height = 67
+        Top = 3
+        Width = 212
         Align = alBottom
         AutoSize = True
-        BorderSpacing.Top = 2
-        BorderSpacing.Bottom = 2
+        BorderSpacing.Top = 3
+        BorderSpacing.Bottom = 3
         ButtonHeight = 0
         ButtonWidth = 0
         EdgeBorders = []
@@ -253,7 +255,7 @@ object SimbaPackageForm: TSimbaPackageForm
           OnClick = ButtonRefreshClick
         end
         object ButtonAddRepository: TToolButton
-          Left = 52
+          Left = 79
           Top = 0
           AutoSize = True
           Caption = 'Add Repository'
@@ -261,7 +263,7 @@ object SimbaPackageForm: TSimbaPackageForm
           OnClick = ButtonAddRepositoryClick
         end
         object ToolButton1: TToolButton
-          Left = 47
+          Left = 67
           Height = 0
           Top = 0
           Caption = 'ToolButton1'
@@ -273,8 +275,8 @@ object SimbaPackageForm: TSimbaPackageForm
   object ImageList36: TImageList
     Height = 36
     Width = 36
-    Left = 32
-    Top = 70
+    Left = 48
+    Top = 105
     Bitmap = {
       4C7A010000002400000024000000790B00000000000078DADD980974536516C7
       BF8A5014371404443CEA5141C5238B83038A30A86C0E6EC88CB8218AB8302E08
@@ -374,8 +376,8 @@ object SimbaPackageForm: TSimbaPackageForm
   object ImageList: TImageList
     Height = 32
     Width = 32
-    Left = 32
-    Top = 133
+    Left = 48
+    Top = 200
     Bitmap = {
       4C7A020000002000000020000000980900000000000078DAED98095055E715C7
       BFF79E3C4529221AC749B489D692E8683560A78D1347DCADD1AA89BBB86F0DAE

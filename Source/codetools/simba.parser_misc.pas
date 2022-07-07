@@ -29,6 +29,7 @@ function GetExpression(Text: String; Start: Int32): String;
 var
   i: Int32;
   InIndex, InParams: Int32;
+  InStr, InMultiStr: Boolean;
 begin
   Result := '';
   if (Start > Length(Text)) then
@@ -36,9 +37,27 @@ begin
 
   InIndex := 0;
   InParams := 0;
+  InStr := False;
+  InMultiStr := False;
 
   for i := Start downto 1 do
   begin
+    if InStr then
+    begin
+      if (Text[I] <> #39) then
+        Continue;
+      InStr := False;
+      Result := 'String' + Result;
+    end;
+
+    if InMultiStr then
+    begin
+      if (Text[I] <> #34) then
+        Continue;
+      InMultiStr := False;
+      Result := 'String' + Result;
+    end;
+
     case Text[i] of
       ')':
         begin
@@ -88,17 +107,22 @@ begin
         end;
 
       else
-      begin
         if (InParams = 0) and (InIndex = 0) then
         begin
-          if (not (Text[i] in ['a'..'z', 'A'..'Z', '0'..'9', '_', '.', '^'])) then
-            Break;
-
-          Result := Text[i] + Result
+          case Text[I] of
+            #39: InStr := True;
+            #34: InMultiStr := True;
+            'a'..'z',
+            'A'..'Z',
+            '0'..'9',
+            '_', '.', '^':
+              Result := Text[i] + Result;
+            else
+              Break;
+          end;
         end;
       end;
     end;
-  end;
 end;
 
 function GetExpressionArray(Expression: String): TExpressionArray;

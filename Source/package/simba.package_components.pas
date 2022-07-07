@@ -244,13 +244,12 @@ begin
 
   FImageList.Draw(FBuffer.Canvas, 10, (ItemHeight div 2) - (ImageList.Height div 2), 0);
 
-  FBuffer.Canvas.Font.Color := clBtnText;
+  FBuffer.Canvas.Font.Color := clBlack;
   FBuffer.Canvas.Font.Bold := True;
   FBuffer.Canvas.TextOut(ImageList.Width + 20, 10, Package.Info.Name);
 
   if Package.HasUpdate() then
   begin
-    FBuffer.Canvas.Font.Color := clBtnText;
     FBuffer.Canvas.Font.Bold := True;
 
     if (FHotInstallButtonIndex = Index) then
@@ -260,13 +259,12 @@ begin
   end
   else if Package.IsInstalled() then
   begin
-    FBuffer.Canvas.Font.Color := clGrayText;
+    FBuffer.Canvas.Font.Color := clGray;
     FBuffer.Canvas.Font.Bold := False;
 
     PaintButton(GetInstallButtonRect(ARect), 'Installed', tbPushButtonDisabled);
   end
   else begin
-    FBuffer.Canvas.Font.Color := clBtnText;
     FBuffer.Canvas.Font.Bold := False;
 
     if (FHotInstallButtonIndex = Index) then
@@ -275,7 +273,7 @@ begin
       PaintButton(GetInstallButtonRect(ARect), 'Install', tbPushButtonNormal);
   end;
 
-  FBuffer.Canvas.Font.Color := clBtnText;
+  FBuffer.Canvas.Font.Color := clBlack;
   FBuffer.Canvas.Font.Bold := False;
 
   if (FHotAdvancedButtonIndex = Index) then
