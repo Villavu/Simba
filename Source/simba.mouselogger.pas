@@ -143,6 +143,7 @@ end;
 
 destructor TSimbaMouseLogger.Destroy;
 begin
+  Application.RemoveAsyncCalls(Self);
   Application.RemoveAllHandlersOfObject(Self);
 
   inherited Destroy();
