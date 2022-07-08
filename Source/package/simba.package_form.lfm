@@ -65,10 +65,10 @@ object SimbaPackageForm: TSimbaPackageForm
         end
         object PageInstalling: TPage
           inline OutputSynEdit: TSynEdit
-            Left = 10
-            Height = 213
-            Top = 10
-            Width = 780
+            Left = 15
+            Height = 196
+            Top = 15
+            Width = 1144
             Align = alClient
             BorderSpacing.Around = 15
             Font.Height = -20
@@ -79,7 +79,7 @@ object SimbaPackageForm: TSimbaPackageForm
             ParentFont = False
             TabOrder = 0
             Gutter.Visible = False
-            Gutter.Width = 77
+            Gutter.Width = 85
             Gutter.MouseActions = <>
             RightGutter.Width = 0
             RightGutter.MouseActions = <>
@@ -98,9 +98,9 @@ object SimbaPackageForm: TSimbaPackageForm
             Lines.Strings = (
               ''
             )
+            Options = [eoAutoIndent, eoBracketHighlight, eoGroupUndo, eoHideRightMargin, eoScrollPastEol, eoSmartTabs, eoTabsToSpaces, eoTrimTrailingSpaces]
             VisibleSpecialChars = [vscSpace, vscTabAtLast]
             ReadOnly = True
-            RightEdge = 10000
             ScrollBars = ssVertical
             SelectedColor.BackPriority = 50
             SelectedColor.ForePriority = 50
@@ -158,10 +158,10 @@ object SimbaPackageForm: TSimbaPackageForm
             end
           end
           object InstallingButton: TButton
-            Left = 10
-            Height = 25
-            Top = 233
-            Width = 780
+            Left = 15
+            Height = 35
+            Top = 226
+            Width = 1144
             Align = alBottom
             AutoSize = True
             BorderSpacing.Left = 15
@@ -217,20 +217,20 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideLeft.Side = asrCenter
       AnchorSideTop.Control = Bevel3
       AnchorSideTop.Side = asrBottom
-      Left = 481
+      Left = 483
       Height = 73
       Top = 2
-      Width = 212
+      Width = 208
       AutoSize = True
       BevelOuter = bvNone
       ClientHeight = 73
-      ClientWidth = 212
+      ClientWidth = 208
       TabOrder = 0
       object ToolBar: TToolBar
         Left = 0
         Height = 67
         Top = 3
-        Width = 212
+        Width = 208
         Align = alBottom
         AutoSize = True
         BorderSpacing.Top = 3
@@ -255,7 +255,7 @@ object SimbaPackageForm: TSimbaPackageForm
           OnClick = ButtonRefreshClick
         end
         object ButtonAddRepository: TToolButton
-          Left = 79
+          Left = 75
           Top = 0
           AutoSize = True
           Caption = 'Add Repository'

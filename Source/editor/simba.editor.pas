@@ -254,7 +254,7 @@ begin
     DirectiveAttri.Foreground := clRed;
     DirectiveAttri.Style := [fsBold];
     BracketMatchColor.Background := clGray;
-    BracketMatchColor.BackAlpha := 256 div 2;
+    BracketMatchColor.BackAlpha := 115;
     BracketMatchColor.Style := [];
 
     NestedComments := True;
@@ -278,7 +278,7 @@ begin
     Enabled := False;
     WaitTime := 1;
     MarkupInfo.Background := clGray;
-    MarkupInfo.BackAlpha := 256 div 2;
+    MarkupInfo.BackAlpha := 115;
   end;
 
   FAttributes := TSimbaEditor_Attributes.Create(Self);

@@ -141,7 +141,7 @@ begin
     end;
   end;
 
-  SimbaOutputForm.Editor.TopLine := SimbaOutputForm.Editor.Lines.Count;
+  SimbaOutputForm.ScrollToBottom();
 
   Self.Free();
 end;

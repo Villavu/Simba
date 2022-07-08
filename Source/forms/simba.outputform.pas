@@ -10,14 +10,28 @@ unit simba.outputform;
 interface
 
 uses
-  classes, sysutils, forms, controls, graphics, dialogs,
-  extctrls, synedit, syneditmiscclasses, menus, syncobjs,
+  classes, sysutils, forms, controls, graphics,
+  extctrls, synedit, synedittypes, syneditmiscclasses, menus, syncobjs,
   simba.settings;
 
 type
+  TSimbaOutputBox = class(TSynEdit)
+  protected
+    FMouseLink: String;
+
+    procedure DoOpenLink(Data: PtrInt);
+    procedure DoSpecialLineMarkup(Sender: TObject; Line: integer; var Special: Boolean; AMarkup: TSynSelectedColor);
+    procedure DoMouseLeave(Sender: TObject);
+    procedure DoMouseLink(Sender: TObject; X, Y: Integer; var AllowMouseLink: Boolean);
+    procedure DoMouseLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+  public
+    constructor Create(AOwner: TComponent); override;
+
+    procedure GetWordBoundsAtRowCol(const XY: TPoint; out StartX, EndX: integer); override;
+  end;
+
   TSimbaOutputForm = class(TForm)
-    Editor: TSynEdit;
-    EditorPopupMenu: TPopupMenu;
+    ContextMenu: TPopupMenu;
     MenuItemSeperator: TMenuItem;
     MenuItemCut: TMenuItem;
     MenuItemCopy: TMenuItem;
@@ -26,7 +40,6 @@ type
     MenuItemDelete: TMenuItem;
     Timer: TTimer;
 
-    procedure DoEditorSpecialLineMarkup(Sender: TObject; Line: integer; var Special: boolean; Markup: TSynSelectedColor);
     procedure MenuItemCopyClick(Sender: TObject);
     procedure MenuItemCutClick(Sender: TObject);
     procedure MenuItemDeleteClick(Sender: TObject);
@@ -34,6 +47,7 @@ type
     procedure MenuItemSelectAllClick(Sender: TObject);
     procedure TimerExecute(Sender: TObject);
   protected
+    FOutputBox: TSimbaOutputBox;
     FLock: TCriticalSection;
     FStrings: TStringList;
 
@@ -45,6 +59,7 @@ type
 
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
   public
+    procedure ScrollToBottom;
     procedure Clear;
 
     procedure Add(const S: String); overload;
@@ -71,8 +86,8 @@ implementation
 {$R *.lfm}
 
 uses
-  lazloggerbase,
-  simba.fonthelpers;
+  lazloggerbase, SynEditMouseCmds,
+  simba.fonthelpers, simba.scripttabsform, LCLIntf;
 
 const
   OUTPUT_SPECIAL = #0#0;
@@ -125,6 +140,89 @@ end;
 procedure DebugLnHint(Msg: String; Args: array of const);
 begin
   DebugLnHint(Format(Msg, Args));
+end;
+
+procedure TSimbaOutputBox.DoOpenLink(Data: PtrInt);
+begin
+  if FMouseLink.StartsWith('http') then
+    OpenURL(FMouseLink)
+  else
+  if FileExists(FMouseLink) then
+    SimbaScriptTabsForm.Open(FMouseLink);
+end;
+
+procedure TSimbaOutputBox.DoSpecialLineMarkup(Sender: TObject; Line: integer; var Special: boolean; AMarkup: TSynSelectedColor);
+begin
+  Special := Lines.Objects[Line - 1] <> nil;
+
+  if Special then
+  begin
+    AMarkup.BackAlpha  := 115;
+    AMarkup.Background := PtrUInt(Lines.Objects[Line - 1]);
+    AMarkup.Foreground := clNone;
+  end;
+end;
+
+procedure TSimbaOutputBox.DoMouseLeave(Sender: TObject);
+begin
+  LastMouseCaret := TPoint.Create(-1, -1);
+end;
+
+procedure TSimbaOutputBox.DoMouseLink(Sender: TObject; X, Y: Integer; var AllowMouseLink: Boolean);
+begin
+  AllowMouseLink := (FMouseLink <> '') and (FMouseLink.StartsWith('http') or FileExists(FMouseLink));
+end;
+
+procedure TSimbaOutputBox.DoMouseLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  Application.QueueAsyncCall(@DoOpenLink, 0);
+end;
+
+constructor TSimbaOutputBox.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  OnMouseLeave        := @DoMouseLeave;
+  OnMouseLink         := @DoMouseLink;
+  OnClickLink         := @DoMouseLinkClick;
+  OnSpecialLineMarkup := @DoSpecialLineMarkup;
+
+  BorderStyle    := bsNone;
+  Options := Options + [eoHideRightMargin];
+  Gutter.Visible := False;
+
+  MouseOptions := [emUseMouseActions];
+  ResetMouseActions();
+  with MouseTextActions.Add() do
+    Command := emcMouseLink;
+
+  MouseLinkColor.Style := [fsUnderline];
+end;
+
+procedure TSimbaOutputBox.GetWordBoundsAtRowCol(const XY: TPoint; out StartX, EndX: integer);
+var
+  QuoteStart, QuoteEnd: Integer;
+  Line: String;
+begin
+  inherited GetWordBoundsAtRowCol(XY, StartX, EndX);
+
+  FMouseLink := '';
+
+  Line := TextView[XY.Y - 1];
+  QuoteStart := Pos('"', Line);
+  if (QuoteStart = 0) then
+    Exit;
+  QuoteEnd := Pos('"', Line, QuoteStart + 1);
+  if (QuoteEnd = 0) then
+    Exit;
+
+  if (XY.X > QuoteStart) and (XY.X <= QuoteEnd) then
+  begin
+    StartX := QuoteStart + 1;
+    EndX   := QuoteEnd;
+
+    FMouseLink := Copy(Line, StartX, EndX - StartX);
+  end;
 end;
 
 procedure TSimbaOutputForm.Add(const S: String);
@@ -191,22 +289,22 @@ end;
 
 procedure TSimbaOutputForm.MenuItemCutClick(Sender: TObject);
 begin
-  Editor.CutToClipboard();
+  FOutputBox.CutToClipboard();
 end;
 
 procedure TSimbaOutputForm.MenuItemDeleteClick(Sender: TObject);
 begin
-  Editor.ClearSelection();
+  FOutputBox.ClearSelection();
 end;
 
 procedure TSimbaOutputForm.MenuItemPasteClick(Sender: TObject);
 begin
-  Editor.PasteFromClipboard();
+  FOutputBox.PasteFromClipboard();
 end;
 
 procedure TSimbaOutputForm.MenuItemSelectAllClick(Sender: TObject);
 begin
-  Editor.SelectAll();
+  FOutputBox.SelectAll();
 end;
 
 procedure TSimbaOutputForm.TimerExecute(Sender: TObject);
@@ -230,12 +328,12 @@ begin
         end;
 
       if (StartIndex > -1) then
-        Editor.Clear();
+        FOutputBox.Clear();
 
-      Editor.BeginUpdate(False);
+      FOutputBox.BeginUpdate(False);
 
       // auto scroll if already scrolled to bottom.
-      Scroll := (Editor.Lines.Count < Editor.LinesInWindow) or ((Editor.Lines.Count + 1) = (Editor.TopLine + Editor.LinesInWindow));
+      Scroll := (FOutputBox.Lines.Count < FOutputBox.LinesInWindow) or ((FOutputBox.Lines.Count + 1) = (FOutputBox.TopLine + FOutputBox.LinesInWindow));
       for I := StartIndex + 1 to FStrings.Count - 1 do
       begin
         Line := FStrings[I];
@@ -243,22 +341,22 @@ begin
         if IsMagic(Line) then
         begin
           if IsErrorMessage(Line) then
-            Editor.Lines.AddObject(Line, TObject(PtrUInt($0000A5)))
+            FOutputBox.Lines.AddObject(Line, TObject(PtrUInt($0000A5)))
           else
           if IsSuccessMessage(Line) then
-            Editor.Lines.AddObject(Line, TObject(PtrUInt($228B22)))
+            FOutputBox.Lines.AddObject(Line, TObject(PtrUInt($228B22)))
           else
           if IsHintMessage(Line) then
-            Editor.Lines.AddObject(Line, TObject(PtrUInt($00BFFF)))
+            FOutputBox.Lines.AddObject(Line, TObject(PtrUInt($00BFFF)))
         end else
-          Editor.Lines.Add(Line);
+          FOutputBox.Lines.Add(Line);
       end;
 
       if Scroll then
-        Editor.TopLine := Editor.Lines.Count;
+        FOutputBox.TopLine := FOutputBox.Lines.Count;
 
-      Editor.EndUpdate();
-      Editor.Invalidate();
+      FOutputBox.EndUpdate();
+      FOutputBox.Invalidate();
 
       FStrings.Clear();
     end;
@@ -303,23 +401,28 @@ begin
   case Setting.Name of
     'General.OutputFontSize':
       begin
-        Editor.Font.Size := Setting.Value;
+        FOutputBox.Font.Size := Setting.Value;
       end;
 
     'General.OutputFontName':
       begin
         if SimbaFontHelpers.IsFontFixed(Setting.Value) then
-          Editor.Font.Name := Setting.Value;
+          FOutputBox.Font.Name := Setting.Value;
       end;
 
     'General.OutputFontAntiAliased':
       begin
         if Setting.Value then
-          Editor.Font.Quality := fqCleartypeNatural
+          FOutputBox.Font.Quality := fqCleartypeNatural
         else
-          Editor.Font.Quality := fqNonAntialiased;
+          FOutputBox.Font.Quality := fqNonAntialiased;
       end;
   end;
+end;
+
+procedure TSimbaOutputForm.ScrollToBottom;
+begin
+  FOutputBox.TopLine := FOutputBox.Lines.Count;
 end;
 
 procedure TSimbaOutputForm.Clear;
@@ -334,19 +437,7 @@ end;
 
 procedure TSimbaOutputForm.MenuItemCopyClick(Sender: TObject);
 begin
-  Editor.CopyToClipboard();
-end;
-
-procedure TSimbaOutputForm.DoEditorSpecialLineMarkup(Sender: TObject; Line: integer; var Special: boolean; Markup: TSynSelectedColor);
-begin
-  Special := Editor.Lines.Objects[Line-1] <> nil;
-
-  if Special then
-  begin
-    Markup.BackAlpha  := 128;
-    Markup.Background := PtrUInt(Editor.Lines.Objects[Line-1]);
-    Markup.Foreground := clNone;
-  end;
+  FOutputBox.CopyToClipboard();
 end;
 
 constructor TSimbaOutputForm.Create(AOwner: TComponent);
@@ -355,6 +446,11 @@ begin
 
   FStrings := TStringList.Create();
   FLock := TCriticalSection.Create();
+
+  FOutputBox := TSimbaOutputBox.Create(Self);
+  FOutputBox.Parent := Self;
+  FOutputBox.Align := alClient;
+  FOutputBox.PopupMenu := ContextMenu;
 
   SimbaSettingChanged(SimbaSettings.General.OutputFontName);
   SimbaSettingChanged(SimbaSettings.General.OutputFontSize);

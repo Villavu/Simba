@@ -931,7 +931,7 @@ end;
 
 procedure TSimbaForm.MenuClearOutputClick(Sender: TObject);
 begin
-  SimbaOutputForm.Editor.Clear();
+  SimbaOutputForm.Clear();
 end;
 
 procedure TSimbaForm.MenuFileClick(Sender: TObject);
