@@ -4,8 +4,8 @@ object SimbaForm: TSimbaForm
   Top = 427
   Width = 1464
   Caption = 'Simba'
-  ClientHeight = 0
-  ClientWidth = 0
+  ClientHeight = 804
+  ClientWidth = 1464
   DesignTimePPI = 144
   KeyPreview = True
   Menu = MainMenu
@@ -2590,9 +2590,10 @@ object SimbaForm: TSimbaForm
       OnClick = TrayPopupExitClick
     end
   end
-  object Timer: TTimer
+  object ScriptStateTimer: TTimer
     Enabled = False
-    OnTimer = TimerTimer
+    Interval = 800
+    OnTimer = DoScriptStateTimer
     Left = 38
     Top = 452
   end

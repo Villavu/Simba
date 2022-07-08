@@ -12,7 +12,7 @@ interface
 uses
   classes, sysutils, fileutil, anchordockpanel, forms, controls, graphics, dialogs,
   stdctrls, menus, comctrls, extctrls, buttons, imglist,
-  simba.settings, simba.mufasatypes;
+  simba.settings, simba.mufasatypes, simba.mouselogger;
 
 const
   IMAGE_COMPILE             = 0;
@@ -135,7 +135,7 @@ type
     StatusPanelFileName: TPanel;
     StatusPanelState: TPanel;
     StopButtonStop: TToolButton;
-    Timer: TTimer;
+    ScriptStateTimer: TTimer;
     PackageMenuTimer: TTimer;
     ToolBar: TToolBar;
     ToolbarButtonClearOutput: TToolButton;
@@ -201,8 +201,8 @@ type
     procedure MenuUndoClick(Sender: TObject);
     procedure MenuViewClick(Sender: TObject);
     procedure DoPackageMenuTimer(Sender: TObject);
+    procedure DoScriptStateTimer(Sender: TObject);
     procedure StatusPanelPaint(Sender: TObject);
-    procedure TimerTimer(Sender: TObject);
     procedure ToolbarButtonColorPickerClick(Sender: TObject);
     procedure ToolbarButtonPackagesClick(Sender: TObject);
     procedure ToolbarButtonSaveAllClick(Sender: TObject);
@@ -220,16 +220,19 @@ type
     FPackageUpdates: TStringList;
     FPackageUpdatesChanged: Boolean;
 
+    FMouseLogger: TSimbaMouseLogger;
+
     procedure SetupAnalyticsAndOpenSSL;
     procedure SetupCodeTools;
     procedure SetupDocking;
     procedure SetupCompleted;
 
+    procedure DoColorPicked(Data: PtrInt);
+    procedure DoMouseLoggerChange(Sender: TObject; X, Y: Integer; HotkeyPressed: Boolean);
+
     procedure DoPackageMenuClick(Sender: TObject);
     procedure DoPackageMenuBuilding;
     procedure DoPackageMenuBuildingFinished(Sender: TObject);
-
-    procedure DoColorPicked(Data: PtrInt);
 
     procedure FontChanged(Sender: TObject); override;
 
@@ -270,18 +273,16 @@ implementation
 {$R *.lfm}
 
 uses
-  lclintf, lazloggerbase, lazfileutils, anchordocking, math,
+  lcltype, lclintf, lazloggerbase, lazfileutils, anchordocking, math,
   simba.openssl, simba.files, simba.process, simba.package_form,
   simba.openexampleform, simba.colorpickerhistoryform, simba.codeparser,
   simba.codeinsight, simba.associate, simba.scripttab, simba.debugimageform,
   simba.bitmapconv, simba.aca, simba.windowselector, simba.dtmeditor,
-  simba.aboutform, simba.functionlistform,
-  simba.scripttabsform, simba.outputform, simba.filebrowserform,
-  simba.notesform, simba.settingsform, simba.colorpicker,
-  simba.ci_includecache, simba.scriptformatter,
-  simba.editor, simba.dockinghelpers, simba.datetime, simba.nativeinterface,
-  simba.helpers_windowhandle, simba.httpclient, simba.functionlist_simbasection,
-  simba.package;
+  simba.aboutform, simba.functionlistform, simba.scripttabsform, simba.outputform,
+  simba.filebrowserform, simba.notesform, simba.settingsform, simba.colorpicker,
+  simba.ci_includecache, simba.scriptformatter,  simba.editor,
+  simba.dockinghelpers, simba.datetime, simba.nativeinterface, simba.httpclient,
+  simba.functionlist_simbasection, simba.package, simba.helpers_windowhandle;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 
@@ -618,6 +619,10 @@ begin
   SizeComponents();
   SetupDocking();
   SetupCompleted();
+
+  FMouseLogger := TSimbaMouseLogger.Create();
+  FMouseLogger.OnChange := @DoMouseLoggerChange;
+  FMouseLogger.Hotkey := VK_F1;
 end;
 
 procedure TSimbaForm.DoPackageMenuClick(Sender: TObject);
@@ -768,6 +773,14 @@ end;
 
 procedure TSimbaForm.FormDestroy(Sender: TObject);
 begin
+  if (FMouseLogger <> nil) then
+  begin
+    FMouseLogger.Terminate();
+    FMouseLogger.WaitFor();
+
+    FreeAndNil(FMouseLogger);
+  end;
+
   if (SimbaSettings <> nil) then
     SimbaSettings.UnRegisterChangeHandler(@SimbaSettingChanged);
 
@@ -1058,7 +1071,7 @@ begin
   SimbaSettings.General.TrayIconVisible.Value := TMenuItem(Sender).Checked;
 end;
 
-procedure TSimbaForm.TimerTimer(Sender: TObject);
+procedure TSimbaForm.DoScriptStateTimer(Sender: TObject);
 var
   Tab: TSimbaScriptTab;
 begin
@@ -1100,7 +1113,7 @@ begin
         StopButtonStop.Enabled := True;
         StopButtonStop.ImageIndex := IMAGE_STOP;
 
-        StatusPanelState.Caption := FormatMilliseconds(Tab.ScriptTimeRunning, 'hh:mm:ss');
+        StatusPanelState.Caption := FormatMilliseconds(Tab.ScriptTimeRunning(), 'hh:mm:ss');
       end;
 
     ESimbaScriptState.STATE_NONE:
@@ -1114,17 +1127,6 @@ begin
 
         StatusPanelState.Caption := 'Stopped';
       end;
-  end;
-
-  try
-    if not FWindowSelection.IsValid() then
-      FWindowSelection := GetDesktopWindow();
-
-    with FWindowSelection.GetRelativeCursorPos() do
-      StatusPanelCursor.Caption := '(' + IntToStr(X) + ', ' + IntToStr(Y) + ')';
-  except
-    on E: Exception do
-      DebugLn(E.Message);
   end;
 end;
 
@@ -1293,6 +1295,8 @@ begin
       finally
         Free();
       end;
+
+      FMouseLogger.WindowHandle := FWindowSelection;
     except
       on E: Exception do
         ShowMessage('Exception while selecting window: ' + E.Message + ' (' + E.ClassName + ')');
@@ -1367,7 +1371,7 @@ begin
     if (ToolBar.Buttons[I].Style=tbsDivider) then
       ToolBar.Buttons[I].Visible:=False;
   }
-  Timer.Enabled := True;
+  ScriptStateTimer.Enabled := True;
   PackageMenuTimer.Enabled := True;
 
   if SimbaSettings.FirstLaunch then
@@ -1388,6 +1392,13 @@ begin
         ToolbarButtonRun.Click();
     end;
   end;
+end;
+
+procedure TSimbaForm.DoMouseLoggerChange(Sender: TObject; X, Y: Integer; HotkeyPressed: Boolean);
+begin
+  StatusPanelCursor.Caption := '(' + IntToStr(X) + ', ' + IntToStr(Y) + ')';
+  if HotkeyPressed then
+    SimbaOutputForm.Add(StatusPanelCursor.Caption);
 end;
 
 end.

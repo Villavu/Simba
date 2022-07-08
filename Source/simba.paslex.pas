@@ -694,6 +694,9 @@ var
   I: Char;
 begin
   for I := #0 to #255 do
+  begin
+    FProcTable[I] := @UnknownProc;
+
     case I of
       #0:
         FProcTable[I] := @NullProc;
@@ -737,9 +740,8 @@ begin
           ']': FProcTable[I] := @SquareCloseProc;
           '^': FProcTable[I] := @PointerSymbolProc;
         end;
-      else
-        FProcTable[I] := @UnknownProc;
     end;
+  end;
 end;
 
 constructor TPasLexer.Create;
@@ -748,8 +750,6 @@ begin
 
   InitIdentTables();
   MakeMethodTables();
-
-  //Writeln(KeyHash(PChar('static')));
 end;
 
 procedure TPasLexer.SetOrigin(const NewValue: PChar);

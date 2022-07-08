@@ -519,7 +519,6 @@ begin
   Result := '';
 
   Formatter := TSimbaCodeFormatter.Create();
-
   try
     Result := Formatter.Format(Script);
   finally
