@@ -38,6 +38,7 @@ type
     procedure DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
     function DoCompilerFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
     function DoCompilerHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
+    function DoFindMacro(Sender: TLapeCompiler; Name: lpString; var Value: lpString): Boolean;
 
     function GetState: ESimbaScriptState;
 
@@ -71,8 +72,8 @@ type
 implementation
 
 uses
-  fileutil, forms, lazloggerbase,
-  simba.outputform, simba.files, simba.datetime, simba.helpers_string;
+  lazloggerbase,
+  simba.outputform, simba.files, simba.datetime, simba.helpers_string, simba.httpclient;
 
 procedure TSimbaScript.DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
@@ -87,71 +88,123 @@ begin
 end;
 
 function TSimbaScript.DoCompilerHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
-var
-  Plugin: TSimbaScriptPlugin;
-  CurrentDirectory: String;
-begin
-  Result := Directive.ContainsAny(['ERROR', 'LOADLIB', 'LIBPATH', 'IFHASLIB', 'IFHASFILE', 'ENV'], False);
 
-  if Result then
-  try
-    if InIgnore or InPeek or (Argument = '') then
+  function DoIncludeFromURL: Boolean;
+  var
+    URL, Source: String;
+  begin
+    Result := ((Directive = 'I') or (Directive = 'INCLUDE')) and (Argument.Between('URL(', ')') <> '');
+
+    if Result then
+    begin
+      URL    := Argument.Between('URL(', ')');
+      Source := TSimbaHTTPClient.SimpleGet(URL, [HTTP_OK]);
+
+      FCompiler.pushTokenizer(TLapeTokenizerString.Create(Source, '!' + URL));
+    end;
+  end;
+
+  function DoLoadLib: Boolean;
+  var
+    Plugin: TSimbaScriptPlugin;
+  begin
+    Result := True;
+    if InIgnore or InPeek then
       Exit;
 
-    if FileExists(Sender.Tokenizer.FileName) then
-      CurrentDirectory := ExtractFileDir(Sender.Tokenizer.FileName)
+    if not FindPlugin(Argument, [FCompiler.CurrentDir(), GetPluginPath(), GetSimbaPath()]) then
+      raise Exception.Create('Plugin "' + Argument + '" not found');
+
+    CopyPlugin(Argument);
+
+    Plugin := TSimbaScriptPlugin.Create(Argument);
+    Plugin.Import(FCompiler);
+
+    FPlugins := FPlugins + [Plugin];
+  end;
+
+  function DoHasLib: Boolean;
+  begin
+    Result := True;
+
+    if InIgnore then
+      FCompiler.pushConditional(False, Sender.DocPos)
     else
-      CurrentDirectory := '';
+      FCompiler.pushConditional(FindPlugin(Argument, [FCompiler.CurrentDir(), GetPluginPath(), GetSimbaPath()]), Sender.DocPos);
+  end;
 
-    case Directive.ToUpper() of
-      'LOADLIB':
-        begin
-          if not FindPlugin(Argument, [CurrentDirectory, GetPluginPath(), GetSimbaPath()]) then
-            raise Exception.Create('Plugin "' + Argument + '" not found');
+  function DoHasFile: Boolean;
+  begin
+    Result := True;
 
-          CopyPlugin(Argument);
+    if InIgnore then
+      FCompiler.pushConditional(False, Sender.DocPos)
+    else
+      FCompiler.pushConditional(FindFile(Argument, '', [FCompiler.CurrentDir(), GetIncludePath(), GetSimbaPath()]), Sender.DocPos);
+  end;
 
-          Plugin := TSimbaScriptPlugin.Create(Argument);
-          Plugin.Import(FCompiler);
+  function DoError: Boolean;
+  begin
+    Result := True;
+    if InIgnore or InPeek then
+      Exit;
 
-          FPlugins := FPlugins + [Plugin];
-        end;
+    raise Exception.Create('User defined error: "' + Argument + '"');
+  end;
 
-      'LIBPATH':
-        begin
-          if not FindPlugin(Argument, [CurrentDirectory, GetPluginPath(), GetSimbaPath()]) then
-            Argument := '';
+begin
+  Directive := UpperCase(Directive);
 
-          FCompiler.pushTokenizer(TLapeTokenizerString.Create(#39 + Argument + #39));
-        end;
+  try
+    Result := DoIncludeFromURL();
+    if Result then
+      Exit;
 
-      'IFHASLIB':
-        begin
-          if not FindPlugin(Argument, [CurrentDirectory, GetPluginPath(), GetSimbaPath()]) then
-            FCompiler.pushConditional((not InIgnore) and True, Sender.DocPos)
-          else
-            FCompiler.pushConditional((not InIgnore) and False, Sender.DocPos);
-        end;
-
-      'IFHASFILE':
-        begin
-          FCompiler.pushConditional((not InIgnore) and FindFile(Argument, '', [CurrentDirectory, GetIncludePath(), GetSimbaPath()]), Sender.DocPos);
-        end;
-
-      'ERROR':
-        begin
-          raise Exception.Create('User defined error: "' + Argument + '"');
-        end;
-
-      'ENV':
-        begin
-          FCompiler.pushTokenizer(TLapeTokenizerString.Create(#39 + GetEnvironmentVariable(Argument) + #39));
-        end;
+    case Directive of
+      'LOADLIB':   Result := DoLoadLib();
+      'IFHASLIB':  Result := DoHasLib();
+      'IFHASFILE': Result := DoHasFile();
+      'ERROR':     Result := DoError();
     end;
   except
     on E: Exception do
       raise lpException.Create(E.Message, Sender.DocPos);
   end;
+end;
+
+function TSimbaScript.DoFindMacro(Sender: TLapeCompiler; Name: lpString; var Value: lpString): Boolean;
+
+  // {$MACRO ENV(HOME)}
+  function DoEnvVar: Boolean;
+  var
+    EnvVar: String;
+  begin
+    EnvVar := Name.Between('ENV(', ')');
+
+    Result := EnvVar <> '';
+    if Result then
+      Value := '"' + GetEnvironmentVariable(EnvVar) + '"';
+  end;
+
+  // {$MACRO LIBPATH(plugin.dll)}
+  function DoLibPath: Boolean;
+  var
+    Lib: String;
+  begin
+    Lib := Name.Between('LIBPATH(', ')');
+
+    Result := Lib <> '';
+    if Result then
+    begin
+      if not FindPlugin(Lib, [FCompiler.CurrentDir(), GetPluginPath(), GetSimbaPath()]) then
+        Lib := '';
+
+      Value := '"' + Lib + '"';
+    end;
+  end;
+
+begin
+  Result := DoEnvVar() or DoLibPath();
 end;
 
 function TSimbaScript.GetState: ESimbaScriptState;
@@ -176,7 +229,7 @@ begin
   if (Value = '') then
     Exit;
 
-  FTargetWindow := StrToInt64Def(Value, 0);
+  FTargetWindow := Value.ToInt64(0);
 end;
 
 function TSimbaScript.Compile: Boolean;
@@ -185,6 +238,7 @@ begin
   FCompiler.OnFindFile := @DoCompilerFindFile;
   FCompiler.OnHint := @DoCompilerHint;
   FCompiler.OnHandleDirective := @DoCompilerHandleDirective;
+  FCompiler.OnFindMacro := @DoFindMacro;
 
   if (FSimbaCommunication = nil) then
     FCompiler.addBaseDefine('SIMBAHEADLESS');
