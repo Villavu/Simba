@@ -187,7 +187,7 @@ begin
   OnClickLink         := @DoMouseLinkClick;
   OnSpecialLineMarkup := @DoSpecialLineMarkup;
 
-  BorderStyle    := bsNone;
+  BorderStyle := bsNone;
   Options := Options + [eoHideRightMargin];
   Gutter.Visible := False;
 
@@ -232,7 +232,6 @@ begin
   DebugLn(S);
 
   FLock.Enter();
-
   try
     for Line in S.Split([LineEnding]) do
       FStrings.Add(Line);
@@ -246,7 +245,6 @@ var
   I: Integer;
 begin
   FLock.Enter();
-
   try
     for I := 0 to Strings.Count - 1 do
       FStrings.Add(Strings[I]);

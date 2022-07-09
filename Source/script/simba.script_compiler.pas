@@ -40,6 +40,8 @@ type
     function getIntegerArray: TLapeType; override;
     function getFloatArray: TLapeType; override;
 
+    function CurrentDir: String;
+
     procedure pushSection(Name: String);
     procedure popSection;
 
@@ -54,8 +56,6 @@ type
 
     procedure addClass(Name: lpString; Parent: lpString = 'TObject'); virtual;
     procedure addClassVar(Obj, Item, Typ: lpString; ARead: Pointer; AWrite: Pointer = nil; Arr: Boolean = False; ArrType: lpString = 'Integer'); virtual;
-
-    function HandleDirective(Sender: TLapeTokenizerBase; Directive, Argument: lpString): Boolean; reintroduce;
 
     procedure Import; virtual;
     function Compile: Boolean; override;
@@ -152,11 +152,6 @@ begin
     addGlobalFunc(Format('procedure %s.Set%s(%sconst Value: %s);', [Obj, Item, Param, Typ]), AWrite);
 end;
 
-function TSimbaScript_Compiler.HandleDirective(Sender: TLapeTokenizerBase; Directive, Argument: lpString): Boolean;
-begin
-  Result := inherited HandleDirective(Sender, Directive, Argument);
-end;
-
 procedure TSimbaScript_Compiler.Import;
 var
   Proc: TSimbaImport;
@@ -235,6 +230,13 @@ end;
 class procedure TSimbaScript_Compiler.RegisterImport(Proc: TSimbaImport);
 begin
   Imports += [Proc];
+end;
+
+function TSimbaScript_Compiler.CurrentDir: String;
+begin
+  Result := '';
+  if (Tokenizer <> nil) then
+    Result := ExtractFileDir(Tokenizer.FileName);
 end;
 
 function TSimbaScript_Compiler.Section: String;
