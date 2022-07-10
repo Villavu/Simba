@@ -1,0 +1,105 @@
+const
+  OUTPUT_DIR = 'DocGen/output/';
+  INPUT_DIR  = 'DocGen/input/';
+
+  SOURCE_DIRECTORIES = [
+    'Source/script/wrappers_simba/'
+  ];
+  SOURCE_EXTENSIONS = ['.inc'];
+  SOURCE_FILENAME_CLEAR = ['simba.imports_'];
+
+  CONFIG_FILE = "
+from datetime import datetime
+
+project = 'Simba'
+author = 'Simba'
+copyright = str(datetime.now().year) + ', Simba'
+templates_path = ['.']
+source_suffix = '.rst'
+master_doc = 'index'
+pygments_style = 'sphinx'
+highlight_language = 'pascal'
+html_favicon = '../images/simba.png'
+html_theme = 'sphinx_rtd_theme'
+extensions = [
+    'sphinx.ext.githubpages',
+]
+html_theme_options = {
+	'navigation_depth': 2,
+}
+";
+
+  TEMPLATE_FILE = "
+{% extends '!layout.html' %}
+  {% block footer %} {{ super() }}
+  <style>
+         .wy-nav-content { min-width: 85%; }
+  </style>
+{% endblock %}";
+
+  TOC_FILE = "
+Welcome to Simba documentation
+==============================
+.. toctree::
+   :maxdepth: 2
+
+";
+
+function ParseComments(FileName: String): Boolean;
+var
+  Str, Comments: String;
+begin
+  for Str in ReadFileContents(FileName).BetweenAll('(*', '*)') do
+  begin
+    if (Comments <> '') then
+      Comments += LineEnding + '====' + LineEnding;
+    Comments += Str;
+  end;
+
+  Result := Length(Comments) > 0;
+  if Result then
+  begin
+    for Str in ['function', 'procedure', 'operator', 'type', 'var', 'const'] do
+      Comments := Comments.Replace(LineEnding + Str + ' ', LineEnding + '::' + LineEnding +  LineEnding + '  ' + Str + ' ');
+
+    Comments := Comments.Replace('Image::', '.. figure::');
+    Comments := Comments.Replace('Note::', '.. note::');
+    Comments := Comments.Replace('Warning::', '.. warning::');
+
+    FileName := ExtractFileName(FileName);
+    for Str in SOURCE_FILENAME_CLEAR do
+      FileName := FileName.Replace(Str, '');
+    for Str in SOURCE_EXTENSIONS do
+      FileName := FileName.Replace(Str, '');
+
+    WriteFileContents(INPUT_DIR + FileName + '.rst', Comments, False);
+    WriteFileContents(INPUT_DIR + 'index.rst', '   ' + FileName + LineEnding, True);
+  end;
+end;
+
+function FindSourceFiles: TStringArray;
+var
+  Str: String;
+begin
+  for Str in SOURCE_DIRECTORIES do
+    Result := Result + FindFiles(Str, SOURCE_EXTENSIONS, True);
+  Result := Unique(Result);
+end;
+
+var
+  Str: String;
+begin
+  CreateDirectory(INPUT_DIR);
+  CreateDirectory(OUTPUT_DIR);
+
+  WriteFileContents(INPUT_DIR + 'index.rst', TOC_FILE, False);
+  WriteFileContents(INPUT_DIR + 'conf.py', CONFIG_FILE, False);
+  WriteFileContents(INPUT_DIR + 'layout.html', TEMPLATE_FILE, False);
+
+  for Str in FindSourceFiles() do
+    ParseComments(Str);
+
+  WriteLn('Sphinx exit code: ', RunCommand('sphinx-build', ['-q', '-E', INPUT_DIR, OUTPUT_DIR], Str));
+  if (Str <> '') then
+    WriteLn(Str);
+end.
