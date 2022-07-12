@@ -6,6 +6,7 @@
 unit simba.openexampleform;
 
 {$i simba.inc}
+{$R ../../Examples/examples.res}
 
 interface
 
@@ -32,7 +33,7 @@ type
   public
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
 
-    procedure LoadExamples;
+    procedure LoadPackageExamples;
   end;
 
 var
@@ -43,17 +44,19 @@ implementation
 {$R *.lfm}
 
 uses
-  lazloggerbase, lazfileutils,
-  simba.main, simba.package, simba.fonthelpers, simba.scripttabsform;
+  lazloggerbase, lazfileutils, lcltype,
+  simba.main, simba.package, simba.fonthelpers, simba.scripttabsform,
+  simba.helpers_string;
 
-procedure TSimbaOpenExampleForm.LoadExamples;
+procedure TSimbaOpenExampleForm.LoadPackageExamples;
 var
   I: Integer;
   ParentNode, Node: TTreeNode;
   Files: TStringList;
 begin
   TreeView.BeginUpdate();
-  TreeView.Items.Clear();
+  for I := 1 to TreeView.Items.TopLvlCount - 1 do
+    TreeView.Items.TopLvlItems[I].Free();
 
   Files := GetPackageFiles('example');
   for I := 0 to Files.Count - 1 do
@@ -69,9 +72,7 @@ begin
     Node := TreeView.Items.AddChild(ParentNode, ExtractFileNameOnly(Files.ValueFromIndex[I]));
     Node.ImageIndex := IMAGE_SIMBA;
     Node.SelectedIndex := IMAGE_SIMBA;
-    Node.Data := GetMem(SizeOf(ShortString));
-
-    PShortString(Node.Data)^ := Files.ValueFromIndex[I];
+    Node.Data := NewStr(Files.ValueFromIndex[I]);
   end;
   Files.Free();
 
@@ -83,31 +84,26 @@ end;
 
 procedure TSimbaOpenExampleForm.FormShow(Sender: TObject);
 begin
-  LoadExamples();
+  LoadPackageExamples();
 end;
 
 procedure TSimbaOpenExampleForm.TreeViewDeletion(Sender: TObject; Node: TTreeNode);
 begin
   if (Node <> nil) and (Node.Data <> nil) then
-    FreeMem(Node.Data);
+    DisposeStr(PString(Node.Data));
 end;
 
 procedure TSimbaOpenExampleForm.ButtonOkClick(Sender: TObject);
 var
   Node: TTreeNode;
-  FileName: String;
 begin
   Node := TreeView.Selected;
   if (Node = nil) or (Node.Data = nil) then
     Exit;
 
-  FileName := PShortString(Node.Data)^;
-  if FileExists(FileName) then
-  begin
-    SimbaScriptTabsForm.AddTab().Load(FileName, '', Node.Text);
-    if (Sender = TreeView) then
-      Close();
-  end;
+  SimbaScriptTabsForm.AddTab().Editor.Text := Editor.Text;
+  if (Sender = TreeView) then
+    Close();
 end;
 
 procedure TSimbaOpenExampleForm.SimbaSettingChanged(Setting: TSimbaSetting);
@@ -127,7 +123,30 @@ begin
     Editor.Font.Quality := fqNonAntialiased;
 end;
 
+function ExtractExamples(ResourceHandle: TFPResourceHMODULE; ResourceType, ResourceName: PChar; Param: PtrInt): LongBool; stdcall;
+var
+  Name, Value: String;
+begin
+  Name := ResourceName;
+  if Name.EndsWith('.SIMBA') then
+  begin
+    with TResourceStream.Create(HINSTANCE, ResourceName, ResourceType) do
+    try
+      SetLength(Value, Size);
+      Read(Value[1], Size);
+    finally
+      Free();
+    end;
+
+    TStringList(Param).Values[Name] := Value;
+  end;
+end;
+
 procedure TSimbaOpenExampleForm.FormCreate(Sender: TObject);
+var
+  List: TStringList;
+  SimbaNode, Node: TTreeNode;
+  I: Integer;
 begin
   Width := Scale96ToScreen(800);
   Height := Scale96ToScreen(600);
@@ -153,6 +172,23 @@ begin
   SimbaSettingChanged(SimbaSettings.Editor.AntiAliased);
 
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
+
+  List := TStringList.Create();
+  List.LineBreak := #0;
+  EnumResourceNames(HINSTANCE, RT_RCDATA, @ExtractExamples, PtrInt(List));
+
+  SimbaNode := TreeView.Items.Add(nil, 'Simba');
+  SimbaNode.ImageIndex := IMAGE_PACKAGE;
+  SimbaNode.SelectedIndex := IMAGE_PACKAGE;
+  for I := 0 to List.Count - 1 do
+  begin
+    Node := TreeView.Items.AddChild(SimbaNode, ExtractFileNameWithoutExt(List.Names[I]).ToLower());
+    Node.ImageIndex := IMAGE_SIMBA;
+    Node.SelectedIndex := IMAGE_SIMBA;
+    Node.Data := NewStr(List.ValueFromIndex[I]);
+  end;
+
+  List.Free();
 end;
 
 procedure TSimbaOpenExampleForm.FormDestroy(Sender: TObject);
@@ -163,18 +199,20 @@ end;
 procedure TSimbaOpenExampleForm.TreeViewSelectionChanged(Sender: TObject);
 var
   Node: TTreeNode;
-  FileName: String;
 begin
   Node := TreeView.Selected;
   if (Node = nil) or (Node.Data = nil) then
     Exit;
 
-  FileName := PShortString(Node.Data)^;
-  if FileExists(FileName) then
-  begin
-    Editor.Lines.LoadFromFile(FileName);
-    Editor.Visible := True;
+  try
+    if (Node.Parent.Text = 'Simba') then
+      Editor.Lines.Text := PString(Node.Data)^
+    else
+      Editor.Lines.LoadFromFile(PString(Node.Data)^);
+  except
   end;
+
+  Editor.Visible := True;
 end;
 
 end.

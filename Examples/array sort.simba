@@ -1,0 +1,20 @@
+// Will sort High to Low
+function CustomSort(constref Left, Right: Integer): Integer;
+begin
+  if Left < Right then
+    Result := 1
+  else
+    Result := -1;
+end;
+
+var
+  Arr: TIntegerArray;
+begin
+  Arr := [6,3,1,5,1,0,10];
+  Arr.Sort();
+  WriteLn('Sorted using ">" and "<" operators: ', Arr);
+
+  Arr := [6,3,1,5,1,0,10];
+  Arr.Sort(@CustomSort);
+  WriteLn('Sorted using CustomSort func: ', Arr);
+end.

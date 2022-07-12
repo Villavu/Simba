@@ -1,0 +1,17 @@
+var
+  Bitmap: TMufasaBitmap;
+begin
+  Bitmap := TMufasaBitmap.Create(500, 500);
+  Bitmap.DrawBox([100,100,400,400], $0000FF);
+  Bitmap.DrawLine([50, 50], [450, 50], 5, $00FFFF);
+
+  Bitmap.SetPixel(250, 250, $FFFFFF);
+  WriteLn Bitmap.GetPixel(250, 250);
+
+  Bitmap.SetFontSize(25);
+  Bitmap.SetFontAntialiasing(False);
+  Bitmap.DrawText('Hello world', [125, 125], $00FF00);
+
+  Bitmap.Show();
+  Bitmap.Free();
+end.
