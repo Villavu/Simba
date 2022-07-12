@@ -8,9 +8,9 @@ unit simba.openssl;
 {$i simba.inc}
 
 {$IF DEFINED(WINDOWS) AND DEFINED(CPU32)}
-  {$R resourcefiles/win32}
+  {$R ../Third-Party/openssl/win32}
 {$ELSEIF DEFINED(WINDOWS) AND DEFINED(CPU64)}
-  {$R resourcefiles/win64}
+  {$R ../Third-Party/openssl/win64}
 {$ENDIF}
 
 interface

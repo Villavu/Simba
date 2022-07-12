@@ -97,7 +97,7 @@ begin
       '  Self.StopTime := GetTickCount();',
       'end;',
       '',
-      'function TSimbaTimer.Elapsed: Integer;',
+      'function TSimbaTimer.Elapsed: UInt64;',
       'begin',
       '  if (Self.StopTime > 0) then',
       '    Result := Self.StopTime - Self.StartTime',

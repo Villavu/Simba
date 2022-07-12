@@ -90,8 +90,6 @@ begin
   P.Offset(Offset);
 
   Result := GetHighlighterAttriAtRowCol(P, Token, Attri) and Attri.Name.ContainsAny(Values, False);
-  if Assigned(Attri) then
-    WriteLn(Attri.Name);
 end;
 
 function TSimbaEditor.IsTextAhead(Values: TStringArray): Boolean;

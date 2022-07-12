@@ -56,7 +56,7 @@ type
     AheadParse: TmwSimplePasPar;
 
     fInRound: Boolean;
-
+    procedure setOnMessage(Value: TMessageEvent);
     procedure InitAhead;
 
     procedure Expected(Sym: TptTokenKind); virtual;
@@ -362,7 +362,7 @@ type
 
     property InterfaceOnly: Boolean read fInterfaceOnly write fInterfaceOnly;
     property Lexer: TmwPasLex read fLexer;
-    property OnMessage: TMessageEvent read FOnMessage write FOnMessage;
+    property OnMessage: TMessageEvent read FOnMessage write setOnMessage;
     property LastNoJunkPos: Integer read fLastNoJunkPos;
     property LastNoJunkLen: Integer read fLastNoJunkLen;
   end;
@@ -5030,6 +5030,13 @@ begin
       NextToken;
       AncestorId;
     end;
+end;
+
+procedure TmwSimplePasPar.setOnMessage(Value: TMessageEvent);
+begin
+  fOnMessage := Value;
+  if Assigned(fLexer) then
+    fLexer.OnMessage := Value;
 end;
 
 procedure TmwSimplePasPar.InitAhead;

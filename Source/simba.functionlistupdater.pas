@@ -96,6 +96,7 @@ begin
       Synchronize(@BeginUpdate);
 
       try
+        FParser.OnMessage := nil;
         FParser.Run();
 
         FFunctionList.AddDeclarations(FParser.Items, FFunctionList.ScriptNode, True, False, True);

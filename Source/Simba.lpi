@@ -33,9 +33,9 @@
             <Filename Value="../Simba-Win32"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Modules/lape;editor"/>
-            <Libraries Value="../Modules/lape/extensions/ffi/bin/win32"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;algorithms;editor;finders;../Modules;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;script/imports/lcl;script/imports/simba;script/imports/simbaclasses/Modules/lape;script/imports;script/imports/simbaclasses;package"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
+            <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win32"/>
+            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;helpers;generics;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -76,9 +76,9 @@
             <Filename Value="../Simba-Win64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Modules/lape;editor"/>
-            <Libraries Value="../Modules/lape/extensions/ffi/bin/win64"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;algorithms;editor;finders;../Modules;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
+            <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win64"/>
+            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;helpers;generics;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -119,8 +119,8 @@
             <Filename Value="../Simba-Linux64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Modules/lape;editor"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;algorithms;editor;finders;../Modules;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
+            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;helpers;generics;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -163,8 +163,8 @@
             <Filename Value="../Simba-Darwin64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Modules/lape;editor"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;algorithms;editor;finders;../Modules;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
+            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;helpers;generics;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -209,8 +209,8 @@
             <Filename Value="../Simba-AArch64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Modules/lape;editor"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;algorithms;editor;finders;../Modules;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
+            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;helpers;generics;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -712,9 +712,9 @@
       <Filename Value="../Simba-Debug"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Modules/lape;editor"/>
-      <Libraries Value="../Modules/lape/extensions/ffi/bin/win64"/>
-      <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;archive;matchtemplate;helpers;generics;algorithms;editor;finders;../Modules;../Modules/lape;../Modules/lape/extensions/ffi;../Modules/Synapse;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package"/>
+      <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
+      <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win64"/>
+      <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;helpers;generics;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse"/>
       <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

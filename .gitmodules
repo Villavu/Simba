@@ -1,3 +1,3 @@
-[submodule "Modules/lape"]
-	path = Modules/lape
+[submodule "Third-Party/lape"]
+	path = Third-Party/lape
 	url = https://github.com/nielsAD/lape
