@@ -36,6 +36,30 @@ begin
   Application.CaptureExceptions := False;
   Application.Initialize();
 
+  if Application.HasOption('help') then
+  begin
+    DebugLn('Usage:');
+    DebugLn('  simba.exe [options] "path/to/script.simba"');
+    DebugLn('');
+    DebugLn('Options:');
+    DebugLn('  --run       Run a script');
+    DebugLn('  --compile   Compile a script');
+    DebugLn('  --open      Open a script in Simba');
+    DebugLn('');
+    DebugLn('Examples:');
+    DebugLn('  Run a script without opening Simba:');
+    DebugLn('    simba.exe --run "script.simba"');
+    DebugLn('');
+    DebugLn('  Open a script in Simba');
+    DebugLn('    simba.exe --open "script.simba"');
+    DebugLn('');
+    DebugLn('  Open a script in Simba and run');
+    DebugLn('    simba.exe --open --run "script.simba"');
+    DebugLn('');
+
+    Halt();
+  end;
+
   if Application.HasOption('dumpcompiler') then
   begin
     with DumpCompiler() do
@@ -63,7 +87,7 @@ begin
   if Application.HasOption('silent') then
     DebugLogger.OnDebugLn := @Application.DebugLnSilent;
 
-  if not Application.HasOption('open') and Application.HasOption('run') or Application.HasOption('compile') then
+  if (not Application.HasOption('open')) and (Application.HasOption('run') or Application.HasOption('compile')) then
   begin
     if not FileExists(Application.Params[Application.ParamCount]) then
     begin

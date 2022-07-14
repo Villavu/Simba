@@ -104,7 +104,7 @@ implementation
 
 uses
   clipbrd,
-  simba.colormath;
+  simba.colormath, simba.helpers_windowhandle;
 
 procedure TSimbaACAForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
@@ -407,7 +407,8 @@ var
   Client: TClient;
 begin
   Client := TClient.Create();
-  Client.IOManager.SetTarget(Window);
+  if (Window > 0) and Window.IsValid() then
+    Client.IOManager.SetTarget(Window);
 
   Create(Client, True);
 end;

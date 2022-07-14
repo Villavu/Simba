@@ -122,7 +122,7 @@ implementation
 
 uses
   math,
-  simba.colormath, simba.helpers_string;
+  simba.colormath, simba.helpers_string, simba.helpers_windowhandle;
 
 procedure TSimbaDTMEditorForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
@@ -602,7 +602,8 @@ var
   Client: TClient;
 begin
   Client := TClient.Create();
-  Client.IOManager.SetTarget(Window);
+  if (Window > 0) and Window.IsValid() then
+    Client.IOManager.SetTarget(Window);
 
   Create(Client, True);
 end;
