@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, forms, controls, graphics,
-  extctrls, synedit, synedittypes, syneditmiscclasses, menus, syncobjs,
+  extctrls, synedit, synedittypes, syneditmiscclasses, syneditmousecmds, menus, syncobjs,
   simba.settings;
 
 type
@@ -86,8 +86,8 @@ implementation
 {$R *.lfm}
 
 uses
-  lazloggerbase, SynEditMouseCmds,
-  simba.fonthelpers, simba.scripttabsform, LCLIntf;
+  lazloggerbase, lclintf,
+  simba.fonthelpers, simba.scripttabsform, simba.nativeinterface;
 
 const
   OUTPUT_SPECIAL = #0#0;
@@ -147,8 +147,14 @@ begin
   if FMouseLink.StartsWith('http') then
     OpenURL(FMouseLink)
   else
+  if FMouseLink.EndsWith('.simba') then
+    SimbaScriptTabsForm.Open(FMouseLink)
+  else
+  if DirectoryExists(FMouseLink) then
+    SimbaNativeInterface.OpenDirectory(FMouseLink)
+  else
   if FileExists(FMouseLink) then
-    SimbaScriptTabsForm.Open(FMouseLink);
+    SimbaNativeInterface.OpenFile(FMouseLink);
 end;
 
 procedure TSimbaOutputBox.DoSpecialLineMarkup(Sender: TObject; Line: integer; var Special: boolean; AMarkup: TSynSelectedColor);

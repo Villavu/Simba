@@ -1177,7 +1177,6 @@ begin
     if (WindowState <> wsMinimized) then
       SimbaSettings.General.Layout.Value := DockMaster.SaveLayout();
 
-
     Visible := False;
   end;
 end;
