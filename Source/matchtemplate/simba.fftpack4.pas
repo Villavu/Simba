@@ -21,24 +21,23 @@ unit simba.fftpack4;
 interface
 
 uses
-  sysutils,
-  simba.fftpack4_core, simba.mufasatypes,
-  simba.helpers_matrix;
+  sysutils, math,
+  simba.math, simba.mufasatypes, simba.matchtemplate_matrix;
 
 type
   TFFTPACK = record
-    function OptimalDFTSize(target: Int32): Int32;
+    function OptimalDFTSize(const target: Integer): Integer;
 
-    function InitFFT(n: Int32): TComplexArray;
-    function FFT(a, wsave: TComplexArray; Inplace: Boolean=False): TComplexArray;
-    function IFFT(a, wsave: TComplexArray; Inplace: Boolean=False): TComplexArray;
+    function InitFFT(const n: Integer): TComplexArray;
+    function FFT(const a, wsave: TComplexArray; const Inplace: Boolean = False): TComplexArray;
+    function IFFT(const a, wsave: TComplexArray; const Inplace: Boolean = False): TComplexArray;
 
-    function InitRFFT(n: Int32): TSingleArray;
-    function RFFT(a, wsave: TSingleArray; Inplace: Boolean=False): TSingleArray;
-    function IRFFT(a, wsave: TSingleArray; Inplace: Boolean=False): TSingleArray;
+    function InitRFFT(const n: Integer): TSingleArray;
+    function RFFT(const a, wsave: TSingleArray; const Inplace: Boolean = False): TSingleArray;
+    function IRFFT(const a, wsave: TSingleArray; const Inplace: Boolean = False): TSingleArray;
 
-    function FFT2(m: TComplexMatrix): TComplexMatrix;
-    function IFFT2(m: TComplexMatrix): TComplexMatrix;
+    function FFT2(const m: TComplexMatrix): TComplexMatrix;
+    function IFFT2(const m: TComplexMatrix): TComplexMatrix;
   end;
 
 var
@@ -47,8 +46,7 @@ var
 implementation
 
 uses
-  math,
-  simba.matchtemplate_matrix, simba.math;
+  simba.fftpack4_core;
 
 const
   __OptimalDFT: array[0..168] of Integer = (
@@ -74,7 +72,7 @@ const
 // --------------------------------------------------------------------------------
 // Compute the optimal size for FFT
 
-function TFFTPACK.OptimalDFTSize(target: Integer): Integer;
+function TFFTPACK.OptimalDFTSize(const target: Integer): Integer;
 var
   n,match,quotient,p2,p5,p35: Integer;
 begin
@@ -121,13 +119,13 @@ end;
 // --------------------------------------------------------------------------------
 // complex 2 complex FFT
 
-function TFFTPACK.InitFFT(n: Integer): TComplexArray;
+function TFFTPACK.InitFFT(const n: Integer): TComplexArray;
 begin
   SetLength(Result, CPLX_BUFFSZ);
   cffti(n, @Result[0]);
 end;
 
-function TFFTPACK.FFT(a, wsave: TComplexArray; Inplace:Boolean=False): TComplexArray;
+function TFFTPACK.FFT(const a, wsave: TComplexArray; const Inplace: Boolean): TComplexArray;
 var n: Integer;
 begin
   if Inplace then Result := a
@@ -137,7 +135,7 @@ begin
   cfftf(n, @Result[0], @wsave[0]);
 end;
 
-function TFFTPACK.IFFT(a, wsave: TComplexArray; Inplace:Boolean=False): TComplexArray;
+function TFFTPACK.IFFT(const a, wsave: TComplexArray; const Inplace: Boolean): TComplexArray;
 var
   n: Integer;
   f: Single;
@@ -159,13 +157,13 @@ end;
 // --------------------------------------------------------------------------------
 // real 2 real FFT
 
-function TFFTPACK.InitRFFT(n: Integer): TSingleArray;
+function TFFTPACK.InitRFFT(const n: Integer): TSingleArray;
 begin
   SetLength(Result, REAL_BUFFSZ);
   rffti(n, @Result[0]);
 end;
 
-function TFFTPACK.RFFT(a, wsave: TSingleArray; Inplace:Boolean=False): TSingleArray;
+function TFFTPACK.RFFT(const a, wsave: TSingleArray; const Inplace: Boolean): TSingleArray;
 var n: Integer;
 begin
   if Inplace then Result := a
@@ -175,7 +173,7 @@ begin
   rfftf(n, @Result[0], @wsave[0]);
 end;
 
-function TFFTPACK.IRFFT(a, wsave: TSingleArray; Inplace:Boolean=False): TSingleArray;
+function TFFTPACK.IRFFT(const a, wsave: TSingleArray; const Inplace: Boolean): TSingleArray;
 var
   n: Integer;
   f: Single;
@@ -193,52 +191,40 @@ end;
 // --------------------------------------------------------------------------------
 // 2d complex fft
 
-function TFFTPACK.FFT2(m: TComplexMatrix): TComplexMatrix;
+function TFFTPACK.FFT2(const m: TComplexMatrix): TComplexMatrix;
 var
-  W,H,Y: Integer;
+  Y: Integer;
   plan: TComplexArray;
+  rot: TComplexMatrix;
 begin
-  W := M.Width;
-  H := M.Height;
-
-  plan := InitFFT(W);
-  for Y := 0 to H - 1 do
+  plan := InitFFT(m.Width);
+  for Y := 0 to m.Height - 1 do
     FFTPACK.FFT(m[Y], Plan, True);
 
-  m := Rot90(m);
+  rot := Rot90(m);
+  plan := InitFFT(rot.Width);
+  for Y := 0 to rot.Height - 1 do
+    FFTPACK.FFT(rot[Y], Plan, True);
 
-  W := M.Width;
-  H := M.Height;
-
-  plan := InitFFT(W);
-  for Y := 0 to H - 1 do
-    FFTPACK.FFT(m[Y], Plan, True);
-
-  Result := Rot90(m);
+  Result := Rot90(rot);
 end;
 
-function TFFTPACK.IFFT2(m: TComplexMatrix): TComplexMatrix;
+function TFFTPACK.IFFT2(const m: TComplexMatrix): TComplexMatrix;
 var
-  W,H,Y: Integer;
+  Y: Integer;
   plan: TComplexArray;
+  rot: TComplexMatrix;
 begin
-  W := M.Width;
-  H := M.Height;
-
-  plan := InitFFT(W);
-  for Y := 0 to H - 1 do
+  plan := InitFFT(m.Width);
+  for Y := 0 to m.Height - 1 do
     FFTPACK.IFFT(m[Y], Plan, True);
 
-  m := Rot90(m);
+  rot := Rot90(m);
+  plan := InitFFT(rot.Width);
+  for Y := 0 to rot.Height - 1 do
+    FFTPACK.IFFT(rot[Y], Plan, True);
 
-  W := M.Width;
-  H := M.Height;
-
-  plan := InitFFT(W);
-  for Y := 0 to H - 1 do
-    FFTPACK.IFFT(m[Y], Plan, True);
-
-  Result := Rot90(m);
+  Result := Rot90(rot);
 end;
 
 end.

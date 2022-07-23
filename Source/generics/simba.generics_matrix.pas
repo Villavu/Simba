@@ -182,24 +182,32 @@ generic procedure MatrixMinMax<_T>(const Matrix: specialize TMatrix<_T>; out Min
 var
   X, Y, Width, Height: Integer;
   Value: _T;
+  HasValue: Boolean;
 begin
   MinValue := Default(_T);
   MaxValue := Default(_T);
+  HasValue := False;
 
   if specialize MatrixSize<_T>(Matrix, Width, Height) then
   begin
     Width -= 1;
     Height -= 1;
 
-    MinValue := Matrix[0,0];
-    MaxValue := Matrix[0,0];
-
     for Y := 0 to Height do
       for X := 0 to Width do
       begin
         Value := Matrix[Y, X];
+
         if IsNumber(Value) then
         begin
+          if (not HasValue) then
+          begin
+            HasValue := True;
+
+            MinValue := Value;
+            MaxValue := Value;
+          end;
+
           if (Value > MaxValue) then MaxValue := Value;
           if (Value < MinValue) then MinValue := Value;
         end;

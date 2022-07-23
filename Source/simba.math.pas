@@ -64,7 +64,7 @@ end;
 
 function IsNumber(const n: Single): Boolean;
 begin
-  Result := (LongWord(n) and $7fffffff) < $7f800000; // Result := (not IsNan(b)) and (not IsInfinite(b));
+  Result := (LongWord(n) and $7fffffff) < $7f800000; // Result := (not IsNan(n)) and (not IsInfinite(n));
 end;
 
 function Modulo(const X, Y: Double): Double;

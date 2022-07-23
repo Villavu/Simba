@@ -140,15 +140,6 @@ type
   TInt64Array = array of Int64;
   PInt64Array = ^TInt64Array;
 
-  TComplex = packed record
-    Re, Im: Single;
-  end;
-
-  TComplexArray   = array of TComplex;
-  T2DComplexArray = array of TComplexArray;
-
-  TComplexMatrix = T2DComplexArray;
-
   EComparator = (__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__);
   PComparator = ^EComparator;
 

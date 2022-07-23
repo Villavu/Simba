@@ -1429,7 +1429,7 @@ begin
   for y:=0 to TemplImage.Height-1 do
     Move(TemplImage.Data[y*TemplImage.Width], Templ[y,0], TemplImage.Width*SizeOf(TRGB32));
 
-  xcorr := TSimbaMatchTemplate.MatchTemplate(Image, Templ, Formula);
+  xcorr := MatchTemplate(Image, Templ, Formula);
 
   if Formula in [TM_SQDIFF, TM_SQDIFF_NORMED] then
   begin

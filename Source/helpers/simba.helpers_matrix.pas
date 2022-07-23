@@ -7,6 +7,8 @@ unit simba.helpers_matrix;
 
 {$i simba.inc}
 
+{$MODESWITCH ARRAYOPERATORS OFF}
+
 interface
 
 uses
@@ -68,14 +70,6 @@ type
     procedure SetSize(const AWidth, AHeight: Integer);
     function Mean: Double;
     procedure MeanStdev(out MeanValue, Stdev: Double);
-  end;
-
-  TComplexMatrixHelper = type helper for TComplexMatrix
-    function Width: Integer;
-    function Height: Integer;
-    function Area: Integer;
-    function Size(out AWidth, AHeight: Integer): Boolean;
-    procedure SetSize(const AWidth, AHeight: Integer);
   end;
 
   TByteMatrixHelper = type helper for TByteMatrix
@@ -182,31 +176,6 @@ end;
 procedure TDoubleMatrixHelper.MeanStdev(out MeanValue, Stdev: Double);
 begin
   specialize MatrixMeanStdev<Double>(Self, MeanValue, Stdev);
-end;
-
-function TComplexMatrixHelper.Width: Integer;
-begin
-  Result := specialize MatrixWidth<TComplex>(Self);
-end;
-
-function TComplexMatrixHelper.Height: Integer;
-begin
-  Result := specialize MatrixHeight<TComplex>(Self);
-end;
-
-function TComplexMatrixHelper.Area: Integer;
-begin
-  Result := specialize MatrixArea<TComplex>(Self);
-end;
-
-function TComplexMatrixHelper.Size(out AWidth, AHeight: Integer): Boolean;
-begin
-  Result := specialize MatrixSize<TComplex>(Self, AWidth, AHeight);
-end;
-
-procedure TComplexMatrixHelper.SetSize(const AWidth, AHeight: Integer);
-begin
-  specialize MatrixSetSize<TComplex>(Self, AWidth, AHeight);
 end;
 
 function TIntegerMatrixHelper.Width: Integer;

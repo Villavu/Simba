@@ -1,0 +1,77 @@
+{$assertions on}
+
+var
+  img, templ: TMufasaBitmap;
+
+procedure test(formula: ETMFormula; minLoc, maxLoc: TPoint; minValue, maxValue: Single = 0);
+var
+  mat: TSingleMatrix;
+begin
+  try
+    mat := MatchTemplateMask(img.ToMatrix(), templ.ToMatrix(), formula);
+    Assert(mat.ArgMin() = minLoc);
+    Assert(mat.ArgMax() = maxLoc);
+
+    if (minValue <> 0) and (maxValue <> 0) then
+    begin
+      Assert(Abs(mat[minLoc.Y, minLoc.X] - minValue) <= 0.05);
+      Assert(Abs(mat[maxLoc.Y, maxLoc.X] - maxValue) <= 0.05);
+    end;
+  except
+    WriteLn(Formula, ' :: ', mat.ArgMin(), ', ', mat.ArgMax(), ', ', Round(mat[mat.ArgMin().Y, mat.ArgMin().X], 1), ', ', Round(mat[mat.ArgMax().Y, mat.ArgMax().X], 1));
+    raise;
+  end;
+end;
+
+procedure testCache(formula: ETMFormula; minLoc, maxLoc: TPoint; minValue, maxValue: Single = 0);
+var
+  mat: TSingleMatrix;
+  cache: TMatchTemplateCache;
+begin
+  try
+    cache := TMatchTemplateCache.Create(img.toMatrix(), templ.ToMatrix(), formula);
+    mat := MatchTemplateMask(cache, templ.ToMatrix(), formula);
+    Assert(mat.ArgMin() = minLoc);
+    Assert(mat.ArgMax() = maxLoc);
+
+    if (minValue <> 0) and (maxValue <> 0) then
+    begin
+      Assert(Abs(mat[minLoc.Y, minLoc.X] - minValue) <= 0.05);
+      Assert(Abs(mat[maxLoc.Y, maxLoc.X] - maxValue) <= 0.05);
+    end;
+  except
+    WriteLn(Formula, ' :: ', mat.ArgMin(), ', ', mat.ArgMax(), ', ', Round(mat[mat.ArgMin().Y, mat.ArgMin().X], 1), ', ', Round(mat[mat.ArgMax().Y, mat.ArgMax().X], 1));
+    raise;
+  finally
+    cache.free();
+  end;
+end;
+
+begin
+  img := TMufasaBitmap.CreateFromString(226, 149, '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');
+  templ := img.Copy(50, 50, 100, 100);
+  templ.DrawCircleInverted(templ.GetCenter(), 20, 0);
+
+  try
+    test(TM_CCOEFF, [83, 1], [50, 50]);
+    test(TM_CCOEFF_NORMED, [24, 19], [50, 50], -0.2, 1);
+
+    test(TM_CCORR, [80, 14], [53, 0]);
+    test(TM_CCORR_NORMED, [77, 1], [50, 50], 0.8, 1);
+
+    test(TM_SQDIFF, [50, 50], [54, 0]);
+    test(TM_SQDIFF_NORMED, [50, 50], [59, 0], 0, 0.4);
+
+    testCache(TM_CCOEFF, [83, 1], [50, 50]);
+    testCache(TM_CCOEFF_NORMED, [24, 19], [50, 50], -0.2, 1);
+
+    testCache(TM_CCORR, [80, 14], [53, 0]);
+    testCache(TM_CCORR_NORMED, [77, 1], [50, 50], 0.8, 1);
+
+    testCache(TM_SQDIFF, [50, 50], [54, 0]);
+    testCache(TM_SQDIFF_NORMED, [50, 50], [59, 0], 0, 0.4);
+  finally
+    img.free();
+    templ.free();
+  end;
+end.
