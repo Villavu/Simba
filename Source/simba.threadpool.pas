@@ -16,13 +16,18 @@ type
   PParamArray = ^TParamArray;
   TParamArray = array[Word] of Pointer;
 
+  TSimbaThreadPoolNestedMethod = procedure(Index: Integer) is nested;
   TSimbaThreadPoolMethod = procedure(const Params: PParamArray; const Result: Pointer);
   TSimbaThreadPoolTask = record
     Method: TSimbaThreadPoolMethod;
+    NestedMethod: TSimbaThreadPoolNestedMethod;
     Params: TParamArray;
     Result: Pointer;
 
-    class function Create(AMethod: TSimbaThreadPoolMethod; AParams: array of Pointer; AResult: Pointer): TSimbaThreadPoolTask; static;
+    procedure Execute(Index: Integer);
+
+    class function Create(AMethod: TSimbaThreadPoolNestedMethod): TSimbaThreadPoolTask; static; overload;
+    class function Create(AMethod: TSimbaThreadPoolMethod; AParams: array of Pointer; AResult: Pointer = nil): TSimbaThreadPoolTask; static; overload;
   end;
   TSimbaThreadPoolTasks = array of TSimbaThreadPoolTask;
 
@@ -30,9 +35,8 @@ type
   protected
     FEvent: TSimpleEvent;
     FIdleEvent: TSimpleEvent;
-    FMethod: TSimbaThreadPoolMethod;
-    FParams: TParamArray;
-    FResult: Pointer;
+    FTask: TSimbaThreadPoolTask;
+    FTaskIndex: Integer;
 
     procedure Execute; override;
 
@@ -42,7 +46,7 @@ type
     constructor Create; reintroduce;
     destructor Destroy; override;
 
-    procedure Run(Task: TSimbaThreadPoolTask);
+    procedure Run(Task: TSimbaThreadPoolTask; TaskIndex: Integer);
     procedure WaitForIdle;
 
     property Idle: Boolean read GetIdle write SetIdle;
@@ -69,8 +73,24 @@ var
 
 implementation
 
+uses
+  LazLoggerBase;
+
+procedure TSimbaThreadPoolTask.Execute(Index: Integer);
+begin
+  if Assigned(Method)       then Method(@Params, Result);
+  if Assigned(NestedMethod) then NestedMethod(Index);
+end;
+
+class function TSimbaThreadPoolTask.Create(AMethod: TSimbaThreadPoolNestedMethod): TSimbaThreadPoolTask;
+begin
+  Result := Default(TSimbaThreadPoolTask);
+  Result.NestedMethod := AMethod;
+end;
+
 class function TSimbaThreadPoolTask.Create(AMethod: TSimbaThreadPoolMethod; AParams: array of Pointer; AResult: Pointer): TSimbaThreadPoolTask;
 begin
+  Result := Default(TSimbaThreadPoolTask);
   Result.Method := AMethod;
   Result.Params := AParams;
   Result.Result := AResult;
@@ -84,18 +104,17 @@ begin
     if Terminated then
       Exit;
 
-    FMethod(@FParams, FResult);
+    FTask.Execute(FTaskIndex);
 
     FEvent.ResetEvent();
     FIdleEvent.SetEvent();
   end;
 end;
 
-procedure TSimbaThreadPool_Thread.Run(Task: TSimbaThreadPoolTask);
+procedure TSimbaThreadPool_Thread.Run(Task: TSimbaThreadPoolTask; TaskIndex: Integer);
 begin
-  FMethod := Task.Method;
-  FParams := Task.Params;
-  FResult := Task.Result;
+  FTask := Task;
+  FTaskIndex := TaskIndex;
 
   FEvent.SetEvent(); // begin execution
 end;
@@ -123,7 +142,7 @@ end;
 
 constructor TSimbaThreadPool_Thread.Create;
 begin
-  inherited Create(True, 1024 * 512); // default = 4MiB, we set 512KiB
+  inherited Create(True, 512 * 512); // default = 4MiB, we set 256KiB
 
   FreeOnTerminate := False;
 
@@ -211,16 +230,17 @@ var
 begin
   if GetIdleThreads(Length(Tasks), Threads) then
   begin
-    for I := 0 to High(Tasks) do
-      Threads[I].Run(Tasks[I]);
+    // DebugLn('Running %d tasks', [Length(Tasks)]);
 
+    for I := 0 to High(Tasks) do
+      Threads[I].Run(Tasks[I], I);
     for I := 0 to High(Threads) do
       Threads[I].WaitForIdle();
   end else
   begin
     // Not enough threads - no multithreading.
     for I := 0 to High(Tasks) do
-      Tasks[I].Method(@Tasks[I].Params, Tasks[I].Result);
+      Tasks[I].Execute(I);
   end;
 end;
 

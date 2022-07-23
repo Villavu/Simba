@@ -26,68 +26,63 @@ uses
   simba.mufasatypes, simba.helpers_matrix;
 
 type
+  TComplex = record
+    Re, Im: Single;
+  end;
+  TComplexArray  = array of TComplex;
+  TComplexMatrix = array of TComplexArray;
+  TComplexMatrixHelper = type helper for TComplexMatrix
+  public
+    procedure SetSize(AWidth, AHeight: Integer);
+    function Width: Integer;
+    function Height: Integer;
+  end;
+
+  TRGBComplexMatrix = record
+    Width: Integer;
+    Height: Integer;
+
+    R, G, B: TComplexMatrix;
+  end;
+
   TRGBMatrix = record
     R, G, B: TSingleMatrix;
 
-    function Width: Int32;
-    function Height: Int32;
+    function Merge: TSingleMatrix;
+    function Width: Integer;
+    function Height: Integer;
+
+    class function Create(const Image: TIntegerMatrix): TRGBMatrix; static;
   end;
 
+
+operator *(const Left: Double; const Mat: TSingleMatrix): TSingleMatrix;
 operator *(const Left: TRGBMatrix; const Right: TRGBMatrix): TRGBMatrix;
-operator *(const Left: TRGBMatrix; const Right: TDoubleArray): TRGBMatrix;
+operator *(const Left: TRGBMatrix; const Right: Single): TRGBMatrix;
 operator -(const Left: TRGBMatrix; const Right: TRGBMatrix): TRGBMatrix;
 operator -(const Left: TRGBMatrix; const Right: TDoubleArray): TRGBMatrix;
 operator +(const Left: TRGBMatrix; const Right: TRGBMatrix): TRGBMatrix;
-
 operator +(const Left: TSingleMatrix; const Right: TSingleMatrix): TSingleMatrix;
-operator -(const Left: TSingleMatrix; const Right: Double): TSingleMatrix;
+operator +(const Left: TSingleMatrix; const Right: Single): TSingleMatrix;
+operator -(const Left: TSingleMatrix; const Right: Single): TSingleMatrix;
 operator -(const Left: TSingleMatrix; const Right: TSingleMatrix): TSingleMatrix;
-operator *(const Left: TSingleMatrix; const Right: Double): TSingleMatrix;
+operator *(const Left: TSingleMatrix; const Right: Single): TSingleMatrix;
 operator *(const Left: TSingleMatrix; const Right: TSingleMatrix): TSingleMatrix;
-operator /(const Left: TSingleMatrix; const Right: Double): TSingleMatrix;
 operator /(const Left: TSingleMatrix; const Right: TSingleMatrix): TSingleMatrix;
 
-function Sum(const Matrix: TRGBMatrix): TDoubleArray;
+function SumOfSquares(const Matrix: TRGBMatrix): Double;
 function Sqrt(const Matrix: TRGBMatrix): TSingleMatrix; overload;
+function Sum(const Matrix: TSingleMatrix): Single; overload;
+function Sum(const Matrix: TRGBMatrix): TDoubleArray; overload;
 function Norm(const Matrix: TRGBMatrix): Double;
-
-function Sum(const Matrix: TSingleMatrix): Double;
-function Sqrt(const Matrix: TSingleMatrix): TSingleMatrix; overload;
-function Norm(const Matrix: TSingleMatrix): Double;
-
 function SumsPd(const Matrix: TSingleMatrix; out Square: TDoubleMatrix): TDoubleMatrix;
 function Rot90(const Matrix: TComplexMatrix): TComplexMatrix;
 
-procedure SplitRGB(const Image: TIntegerMatrix; out R, G, B: TSingleMatrix);
-
 implementation
-
-procedure SplitRGB(const Image: TIntegerMatrix; out R, G, B: TSingleMatrix);
-var
-  W,H,x,y: Int32;
-begin
-  W := Image.Width;
-  H := Image.Height;
-
-  SetLength(R, H, W);
-  SetLength(G, H, W);
-  SetLength(B, H, W);
-
-  Dec(W);
-  Dec(H);
-
-  for y:=0 to H do
-    for x:=0 to W do
-    begin
-      R[y,x] := Image[y,x]{shr 00}and $FF;
-      G[y,x] := Image[y,x] shr 08 and $FF;
-      B[y,x] := Image[y,x] shr 16 and $FF;
-    end;
-end;
 
 function SumsPd(const Matrix: TSingleMatrix; out Square: TDoubleMatrix): TDoubleMatrix;
 var
-  x,y,W,H: Int32;
+  x,y,W,H: Integer;
   sum,sqsum: Double;
 begin
   H := Length(Matrix);
@@ -139,7 +134,7 @@ end;
 
 function Sum(const Matrix: TRGBMatrix): TDoubleArray;
 var
-  X, Y, W, H: Int32;
+  X, Y, W, H: Integer;
   R, G, B: Double;
 begin
   R := 0;
@@ -160,23 +155,9 @@ begin
   Result := [R, G, B];
 end;
 
-function Sqrt(const Matrix: TRGBMatrix): TSingleMatrix;
+function SumOfSquares(const Matrix: TRGBMatrix): Double;
 var
-  X, Y, W, H: Int32;
-begin
-  SetLength(Result, Matrix.Height, Matrix.Width);
-
-  W := Matrix.Width - 1;
-  H := Matrix.Height - 1;
-
-  for Y := 0 to H do
-    for X := 0 to W do
-      Result[Y, X] := Sqrt(Matrix.R[Y, X] + Matrix.G[Y, X] + Matrix.B[Y, X]);
-end;
-
-function Norm(const Matrix: TRGBMatrix): Double;
-var
-  X, Y, W, H: Int32;
+  X, Y, W, H: Integer;
 begin
   Result := 0;
 
@@ -185,18 +166,40 @@ begin
 
   for Y := 0 to H do
     for X := 0 to W do
-    begin
-      Result += Matrix.R[Y][X] * Matrix.R[Y][X];
-      Result += Matrix.G[Y][X] * Matrix.G[Y][X];
-      Result += Matrix.B[Y][X] * Matrix.B[Y][X];
-    end;
+      Result += Sqr(Matrix.R[Y, X]) + Sqr(Matrix.G[Y, X]) + Sqr(Matrix.B[Y, X]);
+end;
 
-  Result := Sqrt(Result);
+function Sqrt(const Matrix: TRGBMatrix): TSingleMatrix;
+var
+  X, Y, W, H: Integer;
+begin
+  SetLength(Result, Matrix.Height, Matrix.Width);
+
+  W := Matrix.Width - 1;
+  H := Matrix.Height - 1;
+
+  for Y := 0 to H do
+    for X := 0 to W do
+     Result[Y, X] := Sqrt(Matrix.R[Y, X] + Matrix.G[Y, X] +  Matrix.B[Y, X]);
+end;
+
+operator*(const Left: Double; const Mat: TSingleMatrix): TSingleMatrix;
+var
+  X, Y, W, H: Integer;
+begin
+  SetLength(Result, Mat.Height, Mat.Width);
+
+  W := Mat.Width - 1;
+  H := Mat.Height - 1;
+
+  for Y := 0 to H do
+    for X := 0 to W do
+      Result[Y, X] := Mat[Y, X] * Left;
 end;
 
 operator*(const Left: TRGBMatrix; const Right: TRGBMatrix): TRGBMatrix;
 var
-  X, Y, W, H: Int32;
+  X, Y, W, H: Integer;
 begin
   SetLength(Result.R, Left.Height, Left.Width);
   SetLength(Result.G, Left.Height, Left.Width);
@@ -214,9 +217,29 @@ begin
     end;
 end;
 
+operator*(const Left: TRGBMatrix; const Right: Single): TRGBMatrix;
+var
+  X, Y, W, H: Integer;
+begin
+  SetLength(Result.R, Left.Height, Left.Width);
+  SetLength(Result.G, Left.Height, Left.Width);
+  SetLength(Result.B, Left.Height, Left.Width);
+
+  W := Left.Width - 1;
+  H := Left.Height - 1;
+
+  for Y := 0 to H do
+    for X := 0 to W do
+    begin
+      Result.R[Y, X] := Left.R[Y, X] * Right;
+      Result.G[Y, X] := Left.G[Y, X] * Right;
+      Result.B[Y, X] := Left.B[Y, X] * Right;
+    end;
+end;
+
 operator-(const Left: TRGBMatrix; const Right: TRGBMatrix): TRGBMatrix;
 var
-  X, Y, W, H: Int32;
+  X, Y, W, H: Integer;
 begin
   SetLength(Result.R, Left.Height, Left.Width);
   SetLength(Result.G, Left.Height, Left.Width);
@@ -236,7 +259,7 @@ end;
 
 operator+(const Left: TRGBMatrix; const Right: TRGBMatrix): TRGBMatrix;
 var
-  X, Y, W, H: Int32;
+  X, Y, W, H: Integer;
 begin
   SetLength(Result.R, Left.Height, Left.Width);
   SetLength(Result.G, Left.Height, Left.Width);
@@ -254,29 +277,9 @@ begin
     end;
 end;
 
-operator*(const Left: TRGBMatrix; const Right: TDoubleArray): TRGBMatrix;
-var
-  X, Y, W, H: Int32;
-begin
-  SetLength(Result.R, Left.Height, Left.Width);
-  SetLength(Result.G, Left.Height, Left.Width);
-  SetLength(Result.B, Left.Height, Left.Width);
-
-  W := Left.Width - 1;
-  H := Left.Height - 1;
-
-  for Y := 0 to H do
-    for X := 0 to W do
-    begin
-      Result.R[Y, X] := Left.R[Y, X] * Right[0];
-      Result.G[Y, X] := Left.G[Y, X] * Right[1];
-      Result.B[Y, X] := Left.B[Y, X] * Right[2];
-    end;
-end;
-
 operator-(const Left: TRGBMatrix; const Right: TDoubleArray): TRGBMatrix;
 var
-  X, Y, W, H: Int32;
+  X, Y, W, H: Integer;
 begin
   SetLength(Result.R, Left.Height, Left.Width);
   SetLength(Result.G, Left.Height, Left.Width);
@@ -294,9 +297,9 @@ begin
     end;
 end;
 
-function Sum(const Matrix: TSingleMatrix): Double;
+function Sum(const Matrix: TSingleMatrix): Single;
 var
-  W, H, X, Y: Int32;
+  W, H, X, Y: Integer;
 begin
   Result := 0;
 
@@ -308,23 +311,9 @@ begin
       Result += Matrix[Y, X];
 end;
 
-function Sqrt(const Matrix: TSingleMatrix): TSingleMatrix;
+function Norm(const Matrix: TRGBMatrix): Double;
 var
-  X, Y, W, H: Int32;
-begin
-  SetLength(Result, Matrix.Height, Matrix.Width);
-
-  W := Matrix.Width - 1;
-  H := Matrix.Height - 1;
-
-  for Y := 0 to H do
-    for X := 0 to W do
-      Result[Y, X] := System.Sqrt(Matrix[Y, X]);
-end;
-
-function Norm(const Matrix: TSingleMatrix): Double;
-var
-  W, H, X, Y: Int32;
+  X, Y, W, H: Integer;
 begin
   Result := 0;
 
@@ -333,14 +322,14 @@ begin
 
   for Y := 0 to H do
     for X := 0 to W do
-      Result += Matrix[Y][X] * Matrix[Y][X];
+      Result += Sqr(Matrix.R[Y, X]) + Sqr(Matrix.G[Y, X]) + Sqr(Matrix.B[Y, X]);
 
   Result := Sqrt(Result);
 end;
 
 operator+(const Left: TSingleMatrix; const Right: TSingleMatrix): TSingleMatrix;
 var
-  X, Y, W, H: Int32;
+  X, Y, W, H: Integer;
 begin
   W := Left.Width - 1;
   H := Left.Height - 1;
@@ -352,9 +341,9 @@ begin
       Result[Y, X] := Left[Y, X] + Right[Y, X];
 end;
 
-operator*(const Left: TSingleMatrix; const Right: Double): TSingleMatrix;
+operator*(const Left: TSingleMatrix; const Right: Single): TSingleMatrix;
 var
-  X, Y, W, H: Int32;
+  X, Y, W, H: Integer;
 begin
   W := Left.Width - 1;
   H := Left.Height - 1;
@@ -368,7 +357,7 @@ end;
 
 operator*(const Left: TSingleMatrix; const Right: TSingleMatrix): TSingleMatrix;
 var
-  W, H, X, Y: Int32;
+  W, H, X, Y: Integer;
 begin
   W := Left.Width - 1;
   H := Left.Height - 1;
@@ -382,7 +371,7 @@ end;
 
 operator-(const Left: TSingleMatrix; const Right: TSingleMatrix): TSingleMatrix;
 var
-  X, Y, W, H: Int32;
+  X, Y, W, H: Integer;
 begin
   W := Left.Width - 1;
   H := Left.Height - 1;
@@ -394,9 +383,23 @@ begin
       Result[Y, X] := Left[Y, X] - Right[Y, X];
 end;
 
-operator-(const Left: TSingleMatrix; const Right: Double): TSingleMatrix;
+operator+(const Left: TSingleMatrix; const Right: Single): TSingleMatrix;
 var
-  X, Y, W, H: Int32;
+  X, Y, W, H: Integer;
+begin
+  W := Left.Width - 1;
+  H := Left.Height - 1;
+
+  SetLength(Result, H+1, W+1);
+
+  for Y := 0 to H do
+    for X := 0 to W do
+      Result[Y, X] := Left[Y, X] + Right;
+end;
+
+operator-(const Left: TSingleMatrix; const Right: Single): TSingleMatrix;
+var
+  X, Y, W, H: Integer;
 begin
   W := Left.Width - 1;
   H := Left.Height - 1;
@@ -410,7 +413,7 @@ end;
 
 operator/(const Left: TSingleMatrix; const Right: TSingleMatrix): TSingleMatrix;
 var
-  X, Y, W, H: Int32;
+  X, Y, W, H: Integer;
 begin
   W := Left.Width - 1;
   H := Left.Height - 1;
@@ -422,21 +425,40 @@ begin
       Result[Y, X] := Left[Y, X] / Right[Y, X];
 end;
 
-operator/(const Left: TSingleMatrix; const Right: Double): TSingleMatrix;
-var
-  X, Y, W, H: Int32;
+procedure TComplexMatrixHelper.SetSize(AWidth, AHeight: Integer);
 begin
-  W := Left.Width - 1;
-  H := Left.Height - 1;
+  SetLength(Self, AHeight, AWidth);
+end;
 
-  SetLength(Result, H+1, W+1);
+function TComplexMatrixHelper.Width: Integer;
+begin
+  if (Length(Self) > 0) then
+    Result := Length(Self[0])
+  else
+    Result := 0;
+end;
+
+function TComplexMatrixHelper.Height: Integer;
+begin
+  Result := Length(Self);
+end;
+
+function TRGBMatrix.Merge: TSingleMatrix;
+var
+  X, Y, W, H: Integer;
+begin
+  W := Self.Width;
+  H := Self.Height;
+  Result.SetSize(W, H);
+  Dec(W);
+  Dec(H);
 
   for Y := 0 to H do
     for X := 0 to W do
-      Result[Y, X] := Left[Y, X] / Right;
+      Result[Y, X] := Self.R[Y, X] + Self.G[Y, X] + Self.B[Y, X];
 end;
 
-function TRGBMatrix.Width: Int32;
+function TRGBMatrix.Width: Integer;
 begin
   if Length(Self.R) > 0 then
     Result := Length(Self.R[0])
@@ -444,9 +466,31 @@ begin
     Result := 0;
 end;
 
-function TRGBMatrix.Height: Int32;
+function TRGBMatrix.Height: Integer;
 begin
   Result := Length(Self.R);
+end;
+
+class function TRGBMatrix.Create(const Image: TIntegerMatrix): TRGBMatrix;
+var
+  W, H, X, Y: Integer;
+begin
+  W := Image.Width;
+  H := Image.Height;
+
+  SetLength(Result.R, H, W);
+  SetLength(Result.G, H, W);
+  SetLength(Result.B, H, W);
+
+  Dec(W);
+  Dec(H);
+  for Y := 0 to H do
+    for X := 0 to W do
+    begin
+      Result.R[Y, X] := Image[Y, X]        and $FF;
+      Result.G[Y, X] := Image[Y, X] shr 08 and $FF;
+      Result.B[Y, X] := Image[Y, X] shr 16 and $FF;
+    end;
 end;
 
 end.

@@ -267,7 +267,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="94">
+    <Units Count="99">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -704,6 +704,26 @@
         <Filename Value="simba.mouselogger.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit93>
+      <Unit94>
+        <Filename Value="matchtemplate/simba.matchtemplate_ccorr.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit94>
+      <Unit95>
+        <Filename Value="matchtemplate/simba.matchtemplate_helpers.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit95>
+      <Unit96>
+        <Filename Value="matchtemplate/simba.matchtemplate_sqdiff.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit96>
+      <Unit97>
+        <Filename Value="matchtemplate/simba.matchtemplate_ccoeff.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit97>
+      <Unit98>
+        <Filename Value="simba.areapicker.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit98>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
