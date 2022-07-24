@@ -1152,7 +1152,9 @@ begin
   begin
     CloseAction := caFree;
 
-    SimbaSettings.GUI.Layout.Value := SimbaDockingHelper.SaveLayoutToString();
+    if (WindowState <> wsMinimized) then
+      SimbaSettings.GUI.Layout.Value := SimbaDockingHelper.SaveLayoutToString();
+
     SimbaSettings.GUI.RecentFiles.Value := '';
     for i := MenuItemOpenRecent.Count - 1 downto 0 do
       SimbaSettings.GUI.RecentFiles.Value := SimbaSettings.GUI.RecentFiles.Value + ',' + MenuItemOpenRecent[i].Caption;
