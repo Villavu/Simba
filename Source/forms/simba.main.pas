@@ -12,7 +12,7 @@ interface
 uses
   classes, sysutils, fileutil, anchordockpanel, forms, controls, graphics, dialogs,
   stdctrls, menus, comctrls, extctrls, buttons, imglist,
-  simba.settings, simba.mufasatypes, simba.mouselogger;
+  simba.settings, simba.mufasatypes, simba.mouselogger, simba.areaselector;
 
 const
   IMAGE_COMPILE             = 0;
@@ -154,6 +154,7 @@ type
     ToolbarDivider3: TToolButton;
     ToolbarDivider4: TToolButton;
     ToolbarDivider5: TToolButton;
+    ToolButtonAreaSelector: TToolButton;
     TrayIcon: TTrayIcon;
     TrayPopup: TPopupMenu;
     TrayPopupExit: TMenuItem;
@@ -207,6 +208,7 @@ type
     procedure ToolbarButtonPackagesClick(Sender: TObject);
     procedure ToolbarButtonSaveAllClick(Sender: TObject);
     procedure ToolbarButtonSelectTargetClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure ToolButtonAreaSelectorClick(Sender: TObject);
     procedure TrayIconClick(Sender: TObject);
     procedure TrayPopupExitClick(Sender: TObject);
   protected
@@ -221,6 +223,9 @@ type
     FPackageUpdatesChanged: Boolean;
 
     FMouseLogger: TSimbaMouseLogger;
+
+    FAreaSelector: TSimbaAreaSelector;
+    FAreaSelection: TBox;
 
     procedure SetupAnalyticsAndOpenSSL;
     procedure SetupCodeTools;
@@ -773,6 +778,9 @@ end;
 
 procedure TSimbaForm.FormDestroy(Sender: TObject);
 begin
+  if (FAreaSelector <> nil) then
+    FreeAndNil(FAreaSelector);
+
   if (FMouseLogger <> nil) then
   begin
     FMouseLogger.Terminate();
@@ -1304,6 +1312,21 @@ begin
     SimbaOutputForm.Add(Lines);
 
     Lines.Free();
+  end;
+end;
+
+procedure TSimbaForm.ToolButtonAreaSelectorClick(Sender: TObject);
+begin
+  try
+    if (FAreaSelector = nil) then
+      FAreaSelector := TSimbaAreaSelector.Create();
+
+    FAreaSelection := FAreaSelector.Pick(FWindowSelection);
+    with FAreaSelection do
+      SimbaOutputForm.Add('Area picked: [%d, %d, %d, %d]'.Format([X1, Y1, X2, Y2]));
+  except
+    on E: Exception do
+      ShowMessage('Exception while selecting area: ' + E.ToString());
   end;
 end;
 
