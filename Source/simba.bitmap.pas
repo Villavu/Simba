@@ -210,12 +210,12 @@ type
     procedure LoadFromBitmap(Bitmap: TMufasaBitmap);
     procedure LoadFromRawImage(RawImage: TRawImage);
 
+    function Compare(Other: TMufasaBitmap): Single;
+
     function PixelDifference(Other: TMufasaBitmap): Integer; overload;
     function PixelDifference(Other: TMufasaBitmap; Tolerance: Integer): Integer; overload;
-
     function PixelDifferenceTPA(Other: TMufasaBitmap): TPointArray; overload;
     function PixelDifferenceTPA(Other: TMufasaBitmap; Tolerance: Integer): TPointArray; overload;
-
     function PixelEdgesTPA(MinDiff: Integer): TPointArray;
   end;
 
@@ -671,6 +671,92 @@ begin
         end;
     end;
   end;
+end;
+
+// TM_CCOEFF_NORMED
+// Author: slackydev
+function TMufasaBitmap.Compare(Other: TMufasaBitmap): Single;
+var
+  invSize, sigmaR, sigmaG, sigmaB, isum, tsum: Single;
+  x, y, W, H: Integer;
+  tcR, tcG, tcB, icR, icG, icB: TSingleMatrix;
+begin
+  if (FWidth <> Other.Width) or (FHeight <> Other.Height) then
+    raise ESimbaBitmapException.Create(sbeMustBeEqualDimensions);
+
+  invSize := 1 / (FWidth * FHeight);
+
+  // compute T' for template
+  tcR.SetSize(FWidth, FHeight);
+  tcG.SetSize(FWidth, FHeight);
+  tcB.SetSize(FWidth, FHeight);
+
+  sigmaR := 0;
+  sigmaG := 0;
+  sigmaB := 0;
+
+  W := FWidth - 1;
+  H := FHeight - 1;
+  for y:=0 to H do
+    for x:=0 to W do
+      with Other.Data[y*FWidth+x] do
+      begin
+        sigmaR += R;
+        sigmaG += G;
+        sigmaB += B;
+      end;
+
+  for y:=0 to H do
+    for x:=0 to W do
+      with Other.Data[y*FWidth+x] do
+      begin
+        tcR[y,x] := R - invSize * sigmaR;
+        tcG[y,x] := G - invSize * sigmaG;
+        tcB[y,x] := B - invSize * sigmaB;
+      end;
+
+  // compute I' for image
+  icR.SetSize(Width, Height);
+  icG.SetSize(Width, Height);
+  icB.SetSize(Width, Height);
+
+  sigmaR := 0;
+  sigmaG := 0;
+  sigmaB := 0;
+
+  for y:=0 to H do
+    for x:=0 to W do
+      with FData[y*Width+x] do
+      begin
+        sigmaR += R;
+        sigmaG += G;
+        sigmaB += B;
+      end;
+
+  for y:=0 to H do
+    for x:=0 to W do
+      with FData[y*Width+x] do
+      begin
+        icR[y,x] := R - invsize * sigmaR;
+        icG[y,x] := G - invsize * sigmaG;
+        icB[y,x] := B - invsize * sigmaB;
+      end;
+
+  // ccoeff
+  Result := 0;
+  for y:=0 to H do
+    for x:=0 to W do
+      Result += ((icR[y,x] * tcR[y,x]) + (icG[y,x] * tcG[y,x]) + (icB[y,x] * tcB[y,x]));
+
+  isum := 0;
+  tsum := 0;
+  for y:=0 to H do
+    for x:=0 to W do
+    begin
+      isum += Sqr(icR[y,x]) + Sqr(icG[y,x]) + Sqr(icB[y,x]);
+      tsum += Sqr(tcR[y,x]) + Sqr(tcG[y,x]) + Sqr(tcB[y,x]);
+    end;
+  Result := Result / Sqrt(isum * tsum);
 end;
 
 function TMufasaBitmap.PixelDifference(Other: TMufasaBitmap): Integer;
