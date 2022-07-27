@@ -690,6 +690,11 @@ begin
   PPointArray(Result)^ := PMufasaBitmap(Params^[0])^.PixelEdgesTPA(PInteger(Params^[1])^);
 end;
 
+procedure _LapeMufasaBitmap_Compare(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSingle(Result)^ := PMufasaBitmap(Params^[0])^.Compare(PMufasaBitmap(Params^[1])^);
+end;
+
 procedure ImportBitmap(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -858,6 +863,7 @@ begin
     addGlobalFunc('function TMufasaBitmap.ToTBitmap: TBitmap;', @_LapeMufasaBitmap_ToTBitmap);
     addGlobalFunc('procedure TMufasaBitmap.DrawToCanvas(x, y: Integer; Canvas: TCanvas);', @_LapeMufasaBitmap_DrawToCanvas);
     addGlobalFunc('procedure TMufasaBitmap.LoadFromTBitmap(bmp: TBitmap);', @_LapeMufasaBitmap_LoadFromTBitmap);
+    addGlobalFunc('function TMufasaBitmap.Compare(Other: TMufasaBitmap): Single;', @_LapeMufasaBitmap_Compare);
 
     //addGlobalFunc('procedure TMufasaBitmap.Free;', @_LapeMufasaBitmap_Free);
 
