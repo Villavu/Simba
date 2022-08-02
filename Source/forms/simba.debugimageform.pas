@@ -20,8 +20,6 @@ type
     FImageBox: TSimbaImageBox;
     FMaxWidth, FMaxHeight: Integer;
 
-    procedure DefaultMaxSizeASync(Data: PtrInt);
-
     procedure ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure ImageDoubleClick(Sender: TObject);
   public
@@ -43,7 +41,7 @@ implementation
 {$R *.lfm}
 
 uses
-  lcltype,
+  lcltype, math,
   simba.dockinghelpers, simba.outputform;
 
 procedure TSimbaDebugImageForm.Close;
@@ -55,18 +53,6 @@ begin
     Form := TSimbaAnchorDockHostSite(HostDockSite);
 
   Form.Close();
-end;
-
-procedure TSimbaDebugImageForm.DefaultMaxSizeASync(Data: PtrInt);
-var
-  Form: TCustomForm;
-begin
-  with Monitor.WorkareaRect do
-    SetMaxSize(1000, 1000);
-
-  Form := TCustomForm(Self);
-  if (HostDockSite is TSimbaAnchorDockHostSite) then
-    Form := TSimbaAnchorDockHostSite(HostDockSite);
 end;
 
 procedure TSimbaDebugImageForm.ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -98,53 +84,43 @@ begin
   AHeight := AHeight + FImageBox.StatusBar.Height;
 
   if (AWidth > Form.Width) then
-    Form.Width := AWidth;
+    Form.Width := Min(AWidth, FMaxWidth);
   if (AHeight > Form.Height) then
-    Form.Height := AHeight;
+    Form.Height := Min(AHeight, FMaxHeight);
 
   if AEnsureVisible then
     Form.EnsureVisible(True);
-
-  SetMaxSize(FMaxWidth, FMaxHeight);
 end;
 
 constructor TSimbaDebugImageForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
+  FMaxWidth := 1500;
+  FMaxHeight := 1000;
+
   FImageBox := TSimbaImageBox.Create(Self);
   FImageBox.Parent := Self;
   FImageBox.Align := alClient;
   FImageBox.OnMouseMove := @ImageMouseMove;
   FImageBox.OnDblClick := @ImageDoubleClick;
-
-  Application.QueueAsyncCall(@DefaultMaxSizeASync, 0);
 end;
 
 procedure TSimbaDebugImageForm.SetMaxSize(AWidth, AHeight: Integer);
-var
-  Form: TCustomForm;
 begin
   if (FMaxWidth = AWidth) and (FMaxHeight = AHeight) then
     Exit;
 
-  Form := TCustomForm(Self);
   if (HostDockSite is TSimbaAnchorDockHostSite) then
-    Form := TSimbaAnchorDockHostSite(HostDockSite);
+  begin
+    FMaxWidth := AWidth;
+    FMaxHeight := AHeight;
 
-  FMaxWidth := AWidth;
-  FMaxHeight := AHeight;
-
-  Form.Constraints.MinWidth  := 150;
-  Form.Constraints.MinHeight := 150;
-
-  Form.Constraints.MaxWidth  := FMaxWidth;
-  Form.Constraints.MaxHeight := FMaxHeight;
-
-  if (Form.Width > FMaxWidth) then
-    Form.Width := FMaxWidth;
-  if (Form.Height > FMaxHeight) then
-    Form.Height := FMaxHeight;
+    if (HostDockSite.Width > FMaxWidth) then
+      HostDockSite.Width := FMaxWidth;
+    if (HostDockSite.Height > FMaxHeight) then
+      HostDockSite.Height := FMaxHeight;
+  end;
 end;
 
 end.

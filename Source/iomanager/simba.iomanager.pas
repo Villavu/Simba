@@ -41,7 +41,7 @@ type
     function GetTarget(Index: Integer): TTarget;
     function GetTargetIndex(Target: TTarget): Integer;
   public
-    function SetTarget(Data: PRGB32; Size: TPoint): Integer; overload;
+    function SetTarget(Data: PRGB32; Width, Height: Integer): Integer; overload;
     function SetTarget(Bitmap: TMufasaBitmap): Integer; overload;
     function SetTarget(Plugin, Data: String): Integer; overload;
     function SetTarget(Window: TWindowHandle): Integer; overload;
@@ -335,12 +335,12 @@ begin
   Result := FImage.ReturnMatrix(X, Y, Width, Height);
 end;
 
-function TIOManager.SetTarget(Data: PRGB32; Size: TPoint): Integer;
+function TIOManager.SetTarget(Data: PRGB32; Width, Height: Integer): Integer;
 var
   Bitmap: TMufasaBitmap;
 begin
   Bitmap := TMufasaBitmap.Create();
-  Bitmap.SetPersistentMemory(PtrUInt(Data), Size.X, Size.Y);
+  Bitmap.SetPersistentMemory(PtrUInt(Data), Width, Height);
 
   Result := SetImageTarget(AddTarget(TBitmapTarget.Create(Bitmap, True)));
 end;

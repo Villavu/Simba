@@ -20,7 +20,7 @@ end;
 
 procedure _LapeIOManager_SetTarget(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := PIOManager(Params^[0])^.SetTarget(PPRGB32(Params^[1])^, PPoint(Params^[2])^);
+  PInteger(Result)^ := PIOManager(Params^[0])^.SetTarget(PPRGB32(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 procedure _LapeIOManager_SetTargetEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -266,7 +266,7 @@ begin
 
     addGlobalType('record func1, func2, func3, func4, func5, func6, func7, func8, func9, func10, func11, func12, func13, func14, func15, func16: Pointer; end', 'TTarget_Exported');
     addGlobalFunc('function TIOManager.SetTarget(WindowHandle: PtrUInt): Integer; overload', @_LapeIOManager_SetTargetHandle);
-    addGlobalFunc('function TIOManager.SetTarget(ArrPtr: PRGB32; Size: TPoint): Integer; overload', @_LapeIOManager_SetTarget);
+    addGlobalFunc('function TIOManager.SetTarget(Data: PRGB32; Width, Height: Integer): Integer; overload', @_LapeIOManager_SetTarget);
     addGlobalFunc('function TIOManager.SetTarget(bmp : TMufasaBitmap): Integer; overload', @_LapeIOManager_SetTargetEx);
     addGlobalFunc('function TIOManager.SetTarget(name, initargs: string): Integer; overload', @_LapeIOManager_SetTargetExEx);
     addGlobalFunc('function TIOManager.TargetValid: Boolean;', @_LapeIOManager_TargetValid);

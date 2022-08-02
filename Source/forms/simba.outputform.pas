@@ -86,8 +86,9 @@ implementation
 {$R *.lfm}
 
 uses
+  SynEditMarkupBracket, SynEditMarkupWordGroup,
   lazloggerbase, lclintf,
-  simba.fonthelpers, simba.scripttabsform, simba.nativeinterface;
+  simba.fonthelpers, simba.scripttabsform, simba.nativeinterface, simba.helpers_string;
 
 const
   OUTPUT_SPECIAL = #0#0;
@@ -195,7 +196,19 @@ begin
 
   BorderStyle := bsNone;
   Options := Options + [eoHideRightMargin];
-  Gutter.Visible := False;
+
+  Gutter.ChangesPart().Visible := False;
+  Gutter.LineNumberPart().Visible := False;
+  Gutter.CodeFoldPart().Visible := False;
+  Gutter.MarksPart().Visible := False;
+
+  Gutter.SeparatorPart.AutoSize := False;
+  Gutter.SeparatorPart.Width := Scale96ToScreen(5);
+  Gutter.SeparatorPart.MarkupInfo.Background := Self.Color;
+  Gutter.SeparatorPart.MarkupInfo.Foreground := Self.Color;
+
+  MarkupByClass[TSynEditMarkupBracket].Enabled := False;
+  MarkupByClass[TSynEditMarkupWordGroup].Enabled := False;
 
   MouseOptions := [emUseMouseActions];
   ResetMouseActions();
@@ -212,23 +225,18 @@ var
 begin
   inherited GetWordBoundsAtRowCol(XY, StartX, EndX);
 
-  FMouseLink := '';
-
   Line := TextView[XY.Y - 1];
-  QuoteStart := Pos('"', Line);
-  if (QuoteStart = 0) then
-    Exit;
-  QuoteEnd := Pos('"', Line, QuoteStart + 1);
-  if (QuoteEnd = 0) then
-    Exit;
 
-  if (XY.X > QuoteStart) and (XY.X <= QuoteEnd) then
+  QuoteStart := Line.LastIndexOf('"', XY.X);
+  QuoteEnd   := Line.IndexOf('"', XY.X);
+  if (QuoteStart > 0) and (QuoteEnd > 0) then
   begin
     StartX := QuoteStart + 1;
     EndX   := QuoteEnd;
 
     FMouseLink := Copy(Line, StartX, EndX - StartX);
-  end;
+  end else
+    FMouseLink := '';
 end;
 
 procedure TSimbaOutputForm.Add(const S: String);
@@ -264,7 +272,7 @@ var
   I: Integer;
   Lines: TStringArray;
 begin
-  Lines := Data.Split([LineEnding], TStringSplitOptions.ExcludeLastEmpty);
+  Lines := Data.Split(LineEnding);
 
   with SimbaOutputForm do
   begin

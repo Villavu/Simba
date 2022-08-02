@@ -43,6 +43,7 @@ type
 
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
 
+    procedure DoHide; override;
     procedure FontChanged(Sender: TObject); override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -215,6 +216,14 @@ begin
     Font.Quality := fqCleartypeNatural
   else
     Font.Quality := fqNonAntialiased;
+end;
+
+procedure TSimbaAutoComplete_Form.DoHide;
+begin
+  inherited DoHide();
+
+  SimbaSettings.Editor.AutoCompleteWidth.Value := Scale96ToScreen(500);
+  SimbaSettings.Editor.AutoCompleteLines.Value := NbLinesInWindow;
 end;
 
 procedure TSimbaAutoComplete_Form.FontChanged(Sender: TObject);
@@ -410,6 +419,9 @@ begin
   OnCodeCompletion := @HandleCompletion;
   OnSearchPosition := @HandleFiltering;
   OnKeyCompletePrefix := @HandleTab;
+
+  LinesInWindow := SimbaSettings.Editor.AutoCompleteLines.Value;
+  Width := TheForm.Scale96ToScreen(SimbaSettings.Editor.AutoCompleteWidth.Value);
 end;
 
 destructor TSimbaAutoComplete.Destroy;

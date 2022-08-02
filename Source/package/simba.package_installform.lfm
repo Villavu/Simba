@@ -1,11 +1,11 @@
 object SimbaPackageInstallForm: TSimbaPackageInstallForm
-  Left = 1625
-  Height = 600
-  Top = 823
-  Width = 960
+  Left = 979
+  Height = 586
+  Top = 428
+  Width = 727
   Caption = 'Package - Advanced Install'
-  ClientHeight = 600
-  ClientWidth = 960
+  ClientHeight = 586
+  ClientWidth = 727
   DesignTimePPI = 144
   Position = poOwnerFormCenter
   LCLVersion = '2.2.2.0'
@@ -13,12 +13,12 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
     Left = 0
     Height = 318
     Top = 0
-    Width = 960
+    Width = 727
     Align = alTop
     AutoSize = True
     BevelOuter = bvNone
     ClientHeight = 318
-    ClientWidth = 960
+    ClientWidth = 727
     TabOrder = 0
     object VersionsList: TComboBox
       AnchorSideLeft.Control = Label3
@@ -29,7 +29,7 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
       Left = 106
       Height = 33
       Top = 10
-      Width = 806
+      Width = 573
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 15
       BorderSpacing.Top = 10
@@ -64,7 +64,7 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
       Left = 15
       Height = 35
       Top = 268
-      Width = 930
+      Width = 697
       Anchors = [akTop, akLeft, akRight]
       AutoSize = True
       BorderSpacing.Left = 15
@@ -85,7 +85,7 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
       Left = 106
       Height = 33
       Top = 53
-      Width = 846
+      Width = 613
       FilterIndex = 0
       HideDirectories = False
       ButtonWidth = 34
@@ -150,7 +150,7 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
       Left = 106
       Height = 120
       Top = 133
-      Width = 806
+      Width = 573
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 15
       ScrollBars = ssAutoHorizontal
@@ -159,9 +159,9 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
   end
   inline Output: TSynEdit
     Left = 15
-    Height = 267
+    Height = 253
     Top = 318
-    Width = 930
+    Width = 697
     Align = alClient
     BorderSpacing.Left = 15
     BorderSpacing.Right = 15

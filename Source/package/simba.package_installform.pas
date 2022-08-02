@@ -51,8 +51,8 @@ begin
   Output.Font.Name := 'Consolas';
   {$ENDIF}
 
-  Width := Scale96ToScreen(650);
-  Height := Scale96ToScreen(450);
+  Width := Scale96ToScreen(550);
+  Height := Scale96ToScreen(400);
 
   FPackage := APackage;
   FInstaller := TSimbaPackageInstaller.Create(FPackage, Output);

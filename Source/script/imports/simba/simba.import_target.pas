@@ -21,9 +21,9 @@ begin
   PInteger(Result)^ := SimbaScriptThread.Script.Client.IOManager.SetTarget(PWindowHandle(Params^[0])^);
 end;
 
-procedure _LapeSetTargetArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSetTargetData(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := SimbaScriptThread.Script.Client.IOManager.SetTarget(PRGB32(PPtrUInt(Params^[0])^), Point(PInteger(Params^[1])^, PInteger(Params^[2])^));
+  PInteger(Result)^ := SimbaScriptThread.Script.Client.IOManager.SetTarget(PPRGB32(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeSetTargetBitmap(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -176,8 +176,8 @@ begin
 
     addGlobalFunc('function SetDesktopAsClient: Integer', @_LapeSetDesktopAsClient);
     addGlobalFunc('function SetTargetWindow(Window: TWindowHandle): Integer', @_LapeSetTargetWindow);
-    addGlobalFunc('function SetTargetArray(P: PtrUInt; W, H: Integer): Integer', @_LapeSetTargetArray);
-    addGlobalFunc('function SetTargetBitmap(bitmap: Integer): Integer', @_LapeSetTargetBitmap);
+    addGlobalFunc('function SetTargetData(Data: PRGB32; W, H: Integer): Integer', @_LapeSetTargetData);
+    addGlobalFunc('function SetTargetBitmap(Bitmap: TMufasaBitmap): Integer', @_LapeSetTargetBitmap);
     addGlobalFunc('function SetEIOSTarget(Plugin, Args: String): Integer', @_LapeSetEIOSTarget);
     addGlobalFunc('function MouseSetClientArea(x1, y1, x2, y2: Integer): Boolean', @_LapeMouseSetClientArea);
     addGlobalFunc('procedure MouseResetClientArea', @_LapeMouseResetClientArea);
