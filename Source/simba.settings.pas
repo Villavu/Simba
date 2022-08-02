@@ -90,9 +90,15 @@ type
       AutomaticallyCompleteBegin: TSimbaSetting;
       AutomaticallyCompleteParentheses: TSimbaSetting;
       AutomaticallyCompleteIndex: TSimbaSetting;
+
+      AutoCompleteWidth: TSimbaSetting;
+      AutoCompleteLines: TSimbaSetting;
     end;
 
     property FirstLaunch: Boolean read FFirstLaunch;
+
+    class procedure SetSimpleSetting(Name, Value: String);
+    class function GetSimpleSetting(Name: String; DefValue: String = ''): String;
 
     procedure RegisterChangeHandler(Event: TSimbaSettingChangedEvent);
     procedure UnRegisterChangeHandler(Event: TSimbaSettingChangedEvent);
@@ -259,6 +265,33 @@ begin
   INI.Free();
 end;
 
+class procedure TSimbaSettings.SetSimpleSetting(Name, Value: String);
+begin
+  try
+    with TIniFile.Create(SimbaSettings.FFileName) do
+    try
+      WriteString('Temp', Name, Value);
+    finally
+      Free();
+    end;
+  except
+  end;
+end;
+
+class function TSimbaSettings.GetSimpleSetting(Name: String; DefValue: String): String;
+begin
+  try
+    with TIniFile.Create(SimbaSettings.FFileName) do
+    try
+      Result := ReadString('Temp', Name, DefValue);
+    finally
+      Free();
+    end;
+  except
+    Result := '';
+  end;
+end;
+
 constructor TSimbaSettings.Create(FileName: String);
 begin
   inherited Create();
@@ -305,6 +338,9 @@ begin
   Editor.AutomaticallyCompleteBegin := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteBegin', True);
   Editor.AutomaticallyCompleteParentheses := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteParentheses', False);
   Editor.AutomaticallyCompleteIndex := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteIndex', False);
+
+  Editor.AutoCompleteWidth := TSimbaSetting_Integer.Create(Self, 'Editor', 'AutoCompleteWidth', 400);
+  Editor.AutoCompleteLines := TSimbaSetting_Integer.Create(Self, 'Editor', 'AutoCompleteLines', 8);
 
   Load();
 end;

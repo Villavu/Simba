@@ -704,10 +704,9 @@ begin
     addGlobalFunc('function Char.IsFloat(): Boolean;',    @_LapeChar_IsFloat);
     addGlobalFunc('function Char.Join(Values: TStringArray): String;', @_LapeChar_Join);
     
-    addGlobalFunc('operator * (Left: Char; Right: Integer): String', @_LapeString_MUL_Integer);
-    addGlobalFunc('operator in(Left: Char; Right: String): Boolean', @_LapeString_IN_String);
-    addGlobalFunc('operator in(Left: Char; Right: TStringArray): Boolean', @_LapeString_IN_StringArray);
-
+    addGlobalFunc('operator * (Left: Char; Right: Integer): String', @_LapeChar_MUL_Integer);
+    addGlobalFunc('operator in(Left: Char; Right: String): Boolean', @_LapeChar_IN_String);
+    addGlobalFunc('operator in(Left: Char; Right: TStringArray): Boolean', @_LapeChar_IN_StringArray);
 
     popSection();
   end;

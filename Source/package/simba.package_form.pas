@@ -283,9 +283,9 @@ begin
   FListBox.OnAdvancedClick := @DoAdvancedClick;
   FListBox.ImageList := ImageList36;
 
-  ListPanel.Height := Scale96ToScreen(300);
-  Width := Scale96ToScreen(750);
-  Height := Scale96ToScreen(650);
+  ListPanel.Height := Scale96ToScreen(250);
+  Width := Scale96ToScreen(650);
+  Height := Scale96ToScreen(550);
 
   {$IFDEF WINDOWS}
   OutputSynEdit.Font.Name := 'Consolas';

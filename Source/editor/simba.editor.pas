@@ -268,8 +268,6 @@ begin
   FAutoComplete.AutoUseSingleIdent := False;
   FAutoComplete.ExecCommandID := ecNone;
   FAutoComplete.ShowSizeDrag := True;
-  FAutoComplete.Width := Scale96ToScreen(500);
-  FAutoComplete.LinesInWindow := 8;
 
   with MarkupByClass[TSynEditMarkupHighlightAllCaret] as TSynEditMarkupHighlightAllCaret do
   begin

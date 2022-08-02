@@ -7,6 +7,9 @@ interface
 uses
   classes, sysutils;
 
+const
+  PACKAGE_SETTINGS_VERSION = 1;
+
 type
   TSimbaPackageVersion = class(TInterfacedObject)
     Name: String;
@@ -174,15 +177,25 @@ begin
     with TIniFile.Create(GetPackagePath() + 'packages.ini') do
     try
       ReadSections(Sections);
+
+      if (Sections.Count > 0) then
+      begin
+        if (ReadInteger('Settings', 'Version', -1) = PACKAGE_SETTINGS_VERSION) then
+        begin
+          for I := 0 to Sections.Count - 1 do
+            if (Sections[I] <> 'Settings') and (List.IndexOf(Sections[I]) = -1) then
+              List.Add(Sections[I]);
+        end else
+        begin
+          DebugLn('Package setting versions changed (%d). Erasing!', [PACKAGE_SETTINGS_VERSION]);
+          DeleteFile(FileName);
+        end;
+      end;
     finally
       Free();
     end;
   except
   end;
-
-  for I := 0 to Sections.Count - 1 do
-    if List.IndexOf(Sections[I]) = -1 then
-      List.Add(Sections[I]);
 
   Result := List.ToStringArray();
 
@@ -266,6 +279,7 @@ begin
   try
     with TIniFile.Create(GetPackagePath() + 'packages.ini') do
     try
+      WriteInteger('Settings', 'Version', PACKAGE_SETTINGS_VERSION);
       WriteString(FURL, Key, Value);
     finally
       Free();

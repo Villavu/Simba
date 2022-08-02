@@ -8,7 +8,8 @@ implementation
 
 uses
   classes, sysutils, clipbrd, extctrls, lptypes,
-  simba.script_compiler, simba.nativeinterface, simba.scriptthread, simba.stringutil, simba.outputform;
+  simba.script_compiler, simba.nativeinterface, simba.scriptthread, simba.stringutil, simba.outputform,
+  simba.settings;
 
 procedure _LapePlaySound(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -106,6 +107,16 @@ begin
   PPtrUInt(Result)^ := SimbaScriptThread.Script.SimbaCommunication.GetSimbaTargetWindow();
 end;
 
+procedure _LapeGetSimbaSetting(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PString(Result)^ := SimbaSettings.GetSimpleSetting(PString(Params^[0])^, PString(Params^[1])^);
+end;
+
+procedure _LapeSetSimbaSetting(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  SimbaSettings.SetSimpleSetting(PString(Params^[0])^, PString(Params^[1])^);
+end;
+
 procedure ImportOther(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -127,6 +138,9 @@ begin
     addGlobalFunc('function GetSimbaPID: PtrUInt', @_LapeGetSimbaPID);
     addGlobalFunc('function GetSimbaTargetPID: PtrUInt', @_LapeGetSimbaTargetPID);
     addGlobalFunc('function GetSimbaTargetWindow: TWindowHandle', @_LapeGetSimbaTargetWindow);
+
+    addGlobalFunc('function GetSimbaSetting(Name: String; DefValue: String = ""): String', @_LapeGetSimbaSetting);
+    addGlobalFunc('procedure SetSimbaSetting(Name, Value: String);', @_LapeSetSimbaSetting);
 
     popSection();
   end;
