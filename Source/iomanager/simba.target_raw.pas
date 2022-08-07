@@ -70,11 +70,7 @@ function TRawTarget.ReturnData(X, Y, Width, Height: Int32): TRetData;
 var
   Bounds: TBox;
 begin
-  GetTargetBounds(Bounds);
-
-  ImageClientAreaOffset(X, Y);
-
-  if Bounds.Contains(Bounds.X1 + X, Bounds.Y1 + Y, Width, Height) then
+  if ValidateImageCapture(X, Y, Width, Height, Bounds) then
   begin
     Result.Ptr := @FData[Y * Bounds.X2 + X];
     Result.RowLen := Bounds.X2;
@@ -88,11 +84,7 @@ var
   Bounds: TBox;
   Loop: Int32;
 begin
-  GetTargetBounds(Bounds);
-
-  ImageClientAreaOffset(X, Y);
-
-  if Bounds.Contains(Bounds.X1 + X, Bounds.Y1 + Y, Width, Height) then
+  if ValidateImageCapture(X, Y, Width, Height, Bounds) then
   begin
     Result := GetMem(Width * Height * SizeOf(TRGB32));
     for Loop := 0 to Height - 1 do

@@ -94,6 +94,7 @@ uses
   simba.import_math, simba.import_mouse, simba.import_ocr, simba.import_other,
   simba.import_process, simba.import_slacktree, simba.import_string, simba.import_internet,
   simba.import_target, simba.import_timing,
+  simba.import_box,
 
   simba.script_compiler_waituntil;
 

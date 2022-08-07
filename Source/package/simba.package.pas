@@ -206,7 +206,7 @@ end;
 function LoadPackages: TSimbaPackageArray;
 var
   URLs: TStringArray;
-  Procs: TThreadedMethodArray;
+  Procs: TProcArray;
   Weights: TIntegerArray;
   I, J: Integer;
 begin

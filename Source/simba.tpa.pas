@@ -80,16 +80,16 @@ function TPAConnect(const TPA: TPointArray): TPointArray;
 // Author: Jarl Holta
 // https://github.com/slackydev/SimbaExt
 function ConvexHull(const Points: TPointArray): TPointArray;
-function PartitionTPA(const TPA:TPointArray; BoxWidth, BoxHeight: Integer): T2DPointArray;
+function PartitionTPA(const TPA: TPointArray; BoxWidth, BoxHeight: Integer): T2DPointArray;
 function TPASkeleton(const TPA: TPointArray; FMin: Integer = 2; FMax: Integer = 6): TPointArray;
-function TPABorder(const TPA:TPointArray): TPointArray;
+function TPABorder(const TPA: TPointArray): TPointArray;
 
 implementation
 
 uses
   math,
   simba.math, simba.slacktree, simba.overallocatearray,
-  simba.helpers_matrix, simba.generics_array;
+  simba.helpers_matrix, simba.array_general;
 
 function PointsInRangeOf(const Points, Other: TPointArray; MinDist, MaxDist: Double): TPointArray; overload;
 var
@@ -145,7 +145,7 @@ begin
   for I := 0 to High(Points) do
     Weights[I] := (AngleBetween(Points[I], Center) + StartDegrees) mod 360;
 
-  specialize QuickSortWeighted<TPoint, Double>(Points, Weights, Low(Points), High(Points), ClockWise);
+  Sort(Points, Weights, ClockWise);
 end;
 
 function ExcludePointsDist(const Points: TPointArray; Center: TPoint; MinDist, MaxDist: Extended): TPointArray;
