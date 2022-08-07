@@ -8,7 +8,7 @@ implementation
 
 uses
   classes, sysutils, lazloggerbase, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.generics_array;
+  simba.script_compiler, simba.mufasatypes, simba.array_general;
 
 procedure _LapeWrite(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin

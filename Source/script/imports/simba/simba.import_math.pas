@@ -8,7 +8,7 @@ implementation
 
 uses
   classes, sysutils, lptypes, math,
-  simba.script_compiler, simba.mufasatypes, simba.math, simba.generics_array;
+  simba.script_compiler, simba.mufasatypes, simba.math, simba.array_general;
 
 procedure _LapeGaussMatrix(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin

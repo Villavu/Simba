@@ -193,10 +193,6 @@ function TEIOS_Target.ReturnData(X, Y, Width, Height: Integer): TRetData;
 var
   Bounds: TBox;
 begin
-  GetTargetBounds(Bounds);
-
-  ImageClientAreaOffset(X, Y);
-
   if Pointer(FClient.UpdateImageBufferBounds) <> nil then
     FClient.UpdateImageBufferBounds(FTarget, X, Y, X + Width, Y + Height)
   else
@@ -208,7 +204,7 @@ begin
 
   if (FBuffer <> nil) then
   begin
-    if Bounds.Contains(Bounds.X1 + X, Bounds.Y1 + Y, Width, Height) then
+    if ValidateImageCapture(X, Y, Width, Height, Bounds) then
     begin
       Result.Ptr := @FBuffer[Y * Bounds.X2 + X];
       Result.RowLen := Bounds.X2;
@@ -224,10 +220,6 @@ var
   Bounds: TBox;
   Loop: Integer;
 begin
-  GetTargetBounds(Bounds);
-
-  ImageClientAreaOffset(X, Y);
-
   if Pointer(FClient.UpdateImageBufferBounds) <> nil then
     FClient.UpdateImageBufferBounds(FTarget, X, Y, X + Width, Y + Height)
   else
@@ -239,7 +231,7 @@ begin
 
   if (FBuffer <> nil) then
   begin
-    if Bounds.Contains(Bounds.X1 + X, Bounds.Y1 + Y, Width, Height) then
+    if ValidateImageCapture(X, Y, Width, Height, Bounds) then
     begin
       Result := GetMem(Width * Height * SizeOf(TRGB32));
       for Loop := 0 to Height - 1 do

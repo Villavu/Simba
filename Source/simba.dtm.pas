@@ -13,7 +13,29 @@ uses
   classes, sysutils,
   simba.mufasatypes, simba.baseclass;
 
+const
+  TMDTMPointSize = 5*SizeOf(integer)+Sizeof(boolean);
 type
+  TMDTMPoint = record
+    x,y,c,t,asz : integer;
+    bp : boolean;
+  end;
+
+  PMDTMPoint = ^TMDTMPoint;
+  TMDTMPointArray = array of TMDTMPoint;
+
+  TSDTMPointDef = record
+    x, y, Color, Tolerance, AreaSize, AreaShape: integer;
+  end;
+
+  TSDTMPointDefArray = array of TSDTMPointDef;
+
+  PSDTM = ^TSDTM;
+  TSDTM = record
+    MainPoint: TSDTMPointDef;
+    SubPoints: TSDTMPointDefArray;
+  end;
+
   PMDTMPointArray = ^TMDTMPointArray;
   PPMDTMPoint = ^PMDTMPoint;
   PMDTM = ^TMDTM;

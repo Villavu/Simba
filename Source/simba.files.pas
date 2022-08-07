@@ -259,7 +259,7 @@ begin
   try
     Zipper.FileName := ArchiveFileName;
     for I := 0 to High(Files) do
-      Zipper.Entries.AddFileEntry(Files[I], Files[I]);
+      Zipper.Entries.AddFileEntry(Files[I], ExtractFileName(Files[I]));
 
     Zipper.ZipAllFiles();
   finally

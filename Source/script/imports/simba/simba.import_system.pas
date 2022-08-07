@@ -74,16 +74,6 @@ begin
   PPoint(Result)^ := Point(PInteger(Params^[0])^, PInteger(Params^[1])^);
 end;
 
-procedure _LapeBox(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PBox(Result)^ := Box(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
-end;
-
-procedure _LapeBoxEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PBox(Result)^ := Box(PPoint(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
 procedure _LapeIntToBox(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PBox(Result)^ := IntToBox(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
@@ -161,9 +151,8 @@ begin
 
     addGlobalType('(__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__)', 'EComparator');
 
-    addGlobalFunc('function Box(X1, Y1, X2, Y2: Integer): TBox; overload', @_LapeBox);
-    addGlobalFunc('function Box(Mid: TPoint; XRad, YRad: Integer): TBox; overload', @_LapeBoxEx);
     addGlobalFunc('function Point(X, Y: Integer): TPoint', @_LapePoint);
+
     addGlobalFunc('function IntToBox(X1, Y1, X2, Y2: Integer): TBox', @_LapeIntToBox);
     addGlobalFunc('function IntInBox(X, Y: Integer; Box: TBox): Boolean', @_LapeIntInBox);
     addGlobalFunc('function PointToBox(PT1, PT2: TPoint): TBox', @_LapePointToBox);

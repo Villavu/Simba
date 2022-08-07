@@ -14,6 +14,16 @@ uses
   simba.mufasatypes, simba.bitmap, math, simba.ocrutil, simba.fontloader;
 
 type
+  POCRFilterData = ^TOCRFilterData;
+  TOCRFilterData = packed record
+    _type: integer;
+    is_text_color: boolean;
+    r_low,r_high,g_low,g_high,b_low,b_high,set_col: integer;
+    ref_color,tol,cts: integer;
+  end;
+  POcrFilterDataArray = ^TOCRFilterDataArray;
+  TOcrFilterDataArray = array of TOCRFilterData;
+
   PMOCR = ^TMOCR;
   TMOCR = class(TObject)
   private

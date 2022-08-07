@@ -153,68 +153,18 @@ type
 
   PBox = ^TBox;
   TBox = record
-    X1, Y1, X2, Y2: Integer;
+  case Integer of
+    0: (X1, Y1, X2, Y2: Integer);
+    1: (TopLeft, BottomRight: TPoint);
   end;
   PBoxArray = ^TBoxArray;
   TBoxArray = array of TBox;
 
-  TBoxHelper = record Helper for TBox
-  protected
-    function GetWidth: Integer;
-    function GetHeight: Integer;
-  public
-    class function Create(const X1, Y1, X2, Y2: Integer): TBox; static;
-
-    function Area: Integer;
-    function Expand(Amount: Integer): TBox;
-    function Contains(X, Y, Width, Height: Integer): Boolean; overload;
-    function Contains(X, Y: Integer): Boolean; overload;
-
-    procedure Clip(Other: TBox);
-
-    property Width: Integer read GetWidth;
-    property Height: Integer read GetHeight;
-  end;
-
-  function Box(X1, Y1, X2, Y2: Integer): TBox;
-  function Box(Mid: TPoint; XRad, YRad: Integer): TBox;
-
-const
-  TMDTMPointSize = 5*SizeOf(integer)+Sizeof(boolean);
-type
-  TMDTMPoint = record //TMufasaDTMPoint
-    x,y,c,t,asz : integer;
-    bp : boolean;
-  end;
-
-  PMDTMPoint = ^TMDTMPoint; //PointerMufasaDTMPoint
-  TMDTMPointArray = array of TMDTMPoint; //TMufasaDTMPointArray
-
-  TSDTMPointDef = record
-    x, y, Color, Tolerance, AreaSize, AreaShape: integer;
-  end;
-
-  TSDTMPointDefArray = array of TSDTMPointDef;
-
-  PSDTM = ^TSDTM;
-  TSDTM = record
-    MainPoint: TSDTMPointDef;
-    SubPoints: TSDTMPointDefArray;
-  end;
-
-  TOCRFilterData = packed record
-      _type: integer;
-      is_text_color: boolean;
-
-      r_low,r_high,g_low,g_high,b_low,b_high,set_col: integer;
-
-      ref_color,tol,cts: integer;
-  end;
-
-  POCRFilterData = ^TOCRFilterData;
-
-  TOcrFilterDataArray = array of TOCRFilterData;
-  POcrFilterDataArray = ^TOCRFilterDataArray;
+  {$DEFINE HEADER}
+    {$i generics.inc}
+    {$i box.inc}
+    {$i boxarray.inc}
+  {$UNDEF HEADER}
 
 procedure Swap(var A, B: Byte); overload;
 procedure Swap(var A, B: Integer); overload;
@@ -223,33 +173,28 @@ procedure Swap(var A, B: TPoint); overload;
 procedure Swap(var A, B: Pointer); overload;
 procedure Swap(var A, B: TRGB32); overload;
 
-generic procedure Swap<T>(var A, B: T);
-
 type
-  TSyncNested = procedure is nested;
-  TThreadedNested = procedure is nested;
+  TProc       = procedure of object;
+  TProcArray  = array of TProc;
 
-  TThreadedMethod = procedure of object;
-  TThreadedMethodArray = array of TThreadedMethod;
+  TNestedProc      = procedure is nested;
+  TNestedProcArray = array of TNestedProc;
 
-procedure Sync(Method: TSyncNested);
-function Threaded(Method: TThreadedNested): TThread;
-procedure Threaded(Methods: TThreadedMethodArray; Interval: Integer = 0);
+procedure Sync(Method: TProc); overload;
+procedure Sync(Method: TNestedProc); overload;
 
-operator = (Left, Right: TPoint): Boolean;
-operator = (Left, Right: TBox): Boolean;
+function Threaded(Method: TNestedProc): TThread; overload;
+procedure Threaded(Methods: TProcArray; Interval: Integer = 0); overload;
 
 implementation
 
-operator = (Left, Right: TPoint): Boolean;
-begin
-  Result := (Left.x = Right.x) and (Left.y = Right.y);
-end;
+uses math, simba.math, simba.overallocatearray;
 
-operator = (Left, Right: TBox): Boolean;
-begin
-  Result := (Left.x1 = Right.x1) and (Left.y1 = Right.y1) and (Left.x2 = Right.x2) and (Left.y2 = Right.y2);
-end;
+{$DEFINE BODY}
+  {$i generics.inc}
+  {$i box.inc}
+  {$i boxarray.inc}
+{$UNDEF BODY}
 
 function TRGB32.ToString: String;
 begin
@@ -269,86 +214,6 @@ end;
 operator =(Left, Right: TRetData): Boolean;
 begin
   Result := (Left.Ptr = Right.Ptr) and (Left.RowLen = Right.RowLen) and (Left.IncPtrWith = Right.IncPtrWith);
-end;
-
-function TBoxHelper.GetWidth: Integer;
-begin
-  Result := (Self.X2 - Self.X1) + 1;
-end;
-
-function TBoxHelper.GetHeight: Integer;
-begin
-  Result := (Self.Y2 - Self.Y1) + 1;
-end;
-
-class function TBoxHelper.Create(const X1, Y1, X2, Y2: Integer): TBox;
-begin
-  Result.X1 := X1;
-  Result.Y1 := Y1;
-  Result.X2 := X2;
-  Result.Y2 := Y2;
-end;
-
-function TBoxHelper.Area: Integer;
-begin
-  Result := (Width * Height);
-end;
-
-function TBoxHelper.Expand(Amount: Integer): TBox;
-begin
-  Result.X1 := Self.X1 - Amount;
-  Result.Y1 := Self.Y1 - Amount;
-  Result.X2 := Self.X2 + Amount;
-  Result.Y2 := Self.Y2 + Amount;
-end;
-
-function TBoxHelper.Contains(X, Y, Width, Height: Integer): Boolean;
-begin
-  Result := (X >= Self.X1) and (Y >= Self.Y1) and (X + Width <= Self.X2) and (Y + Height <= Self.Y2);
-end;
-
-function TBoxHelper.Contains(X, Y: Integer): Boolean;
-begin
-  Result := (X >= Self.X1) and (Y >= Self.Y1) and (X <= Self.X2) and (Y <= Self.Y2);
-end;
-
-procedure TBoxHelper.Clip(Other: TBox);
-begin
-  if (Self.X1 < Other.X1) then Self.X1 := Other.X1;
-  if (Self.X1 > Other.X2) then Self.X1 := Other.X2;
-  if (Self.X2 < Other.X1) then Self.X2 := Other.X1;
-  if (Self.X2 > Other.X2) then Self.X2 := Other.X2;
-
-  if (Self.Y1 < Other.Y1) then Self.Y1 := Other.Y1;
-  if (Self.Y1 > Other.Y2) then Self.Y1 := Other.Y2;
-  if (Self.Y2 < Other.Y1) then Self.Y2 := Other.Y1;
-  if (Self.Y2 > Other.Y2) then Self.Y2 := Other.Y2;
-end;
-
-generic procedure Swap<T>(var A, B: T);
-var
-  C: T;
-begin
-  C := A;
-
-  A := B;
-  B := C;
-end;
-
-function Box(X1, Y1, X2, Y2: Integer): TBox;
-begin
-  Result.X1 := X1;
-  Result.Y1 := Y1;
-  Result.X2 := X2;
-  Result.Y2 := Y2;
-end;
-
-function Box(Mid: TPoint; XRad, YRad: Integer): TBox;
-begin
-  Result.X1 := Mid.X-XRad;
-  Result.Y1 := Mid.Y-YRad;
-  Result.X2 := Mid.X+XRad;
-  Result.Y2 := Mid.Y+YRad;
 end;
 
 procedure Swap(var A, B: Byte);
@@ -383,17 +248,19 @@ end;
 
 type
   TSyncObject = object
-    Proc: TSyncNested;
+    Proc: TProc;
+    NestedProc: TNestedProc;
 
     procedure Execute;
   end;
 
 procedure TSyncObject.Execute;
 begin
-  Proc();
+  if Assigned(Proc) then Proc();
+  if Assigned(NestedProc) then NestedProc();
 end;
 
-procedure Sync(Method: TSyncNested);
+procedure Sync(Method: TProc);
 var
   SyncObject{%H-}: TSyncObject;
 begin
@@ -402,16 +269,25 @@ begin
   TThread.Synchronize(nil, @SyncObject.Execute);
 end;
 
+procedure Sync(Method: TNestedProc);
+var
+  SyncObject{%H-}: TSyncObject;
+begin
+  SyncObject.NestedProc := Method;
+
+  TThread.Synchronize(nil, @SyncObject.Execute);
+end;
+
 type
   TThreaded = class(TThread)
   protected
-    FProc: TThreadedMethod;
-    FNestedProc: TThreadedNested;
+    FProc: TProc;
+    FNestedProc: TNestedProc;
 
     procedure Execute; override;
   public
-    constructor Create(Proc: TThreadedNested); reintroduce;
-    constructor Create(Proc: TThreadedMethod); reintroduce;
+    constructor Create(Proc: TNestedProc); reintroduce;
+    constructor Create(Proc: TProc); reintroduce;
   end;
 
 procedure TThreaded.Execute;
@@ -420,26 +296,26 @@ begin
   if Assigned(FProc) then FProc();
 end;
 
-constructor TThreaded.Create(Proc: TThreadedNested);
+constructor TThreaded.Create(Proc: TNestedProc);
 begin
   inherited Create(False, 512*512);
 
   FNestedProc := Proc;
 end;
 
-constructor TThreaded.Create(Proc: TThreadedMethod);
+constructor TThreaded.Create(Proc: TProc);
 begin
   inherited Create(False, 512*512);
 
   FProc := Proc;
 end;
 
-function Threaded(Method: TThreadedNested): TThread;
+function Threaded(Method: TNestedProc): TThread;
 begin
   Result := TThreaded.Create(Method);
 end;
 
-procedure Threaded(Methods: TThreadedMethodArray; Interval: Integer);
+procedure Threaded(Methods: TProcArray; Interval: Integer);
 var
   Threads: array of TThread;
   I: Integer;

@@ -8,8 +8,9 @@ implementation
 
 uses
   classes, sysutils, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.tpa, simba.math, simba.generics_array,
-  simba.algo_difference, simba.algo_intersection, simba.algo_symmetricDifference;
+  simba.script_compiler, simba.mufasatypes, simba.tpa, simba.math,
+  simba.algo_difference, simba.algo_intersection, simba.algo_symmetricDifference,
+  simba.array_general;
 
 //------- array.Difference(array)
 procedure _Lape_UInt8_Difference(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
