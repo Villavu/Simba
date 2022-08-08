@@ -36,14 +36,9 @@ type
   {$SCOPEDENUMS OFF}
 
   TRGB32 = packed record
-    function ToString: String;
-
-    function Equals(const Other: TRGB32): Boolean; inline;
-    function EqualsIgnoreAlpha(const Other: TRGB32): Boolean; inline;
-
-    case Byte of
-      0: (B, G, R, A: Byte);
-      1: (AsInteger: Integer);
+  case Byte of
+    0: (B, G, R, A: Byte);
+    1: (AsInteger: Integer);
   end;
 
   PRGB32 = ^TRGB32;
@@ -67,12 +62,8 @@ type
   TWindowHandle = type PtrUInt;
   TWindowHandleArray = array of TWindowHandle;
 
-const
-  NullReturnData: TRetData = (Ptr: nil; IncPtrWith: -1; RowLen: -1);
-
-operator =(Left, Right: TRetData): Boolean; inline;
-
 type
+  PClickType = ^TClickType;
   TClickType = (
     MOUSE_RIGHT,
     MOUSE_LEFT,
@@ -82,14 +73,9 @@ type
     MOUSE_SCROLL_UP,
     MOUSE_SCROLL_DOWN
   );
-  PClickType = ^TClickType;
-
-  TMousePress = (MOUSE_DOWN, MOUSE_UP);
 
   PStringArray = ^TStringArray;
   TStringArray = array of String;
-  P2DStringArray = ^T2DStringArray;
-  T2DStringArray = array of TStringArray;
 
   PPoint = ^TPoint;
 
@@ -119,13 +105,6 @@ type
   PBooleanMatrix = ^TBooleanMatrix;
   TBooleanMatrix = array of TBooleanArray;
 
-  PExtendedArray = ^TExtendedArray;
-  TExtendedArray = array of Extended;
-  P2DExtendedArray = ^T2DExtendedArray;
-  T2DExtendedArray = array of TExtendedArray;
-  PExtendedMatrix = ^TExtendedMatrix;
-  TExtendedMatrix = array of TExtendedArray;
-
   PSingleArray  = ^TSingleArray;
   TSingleArray  = array of Single;
   PSingleMatrix = ^TSingleMatrix;
@@ -143,14 +122,6 @@ type
   EComparator = (__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__);
   PComparator = ^EComparator;
 
-  { File types }
-  TMufasaFile = record
-    Path: String;
-    FS: TFileStream;
-    BytesRead, Mode: Integer;
-  end;
-  TMufasaFilesArray = array of TMufasaFile;
-
   PBox = ^TBox;
   TBox = record
   case Integer of
@@ -165,7 +136,17 @@ type
     {$i box.inc}
     {$i boxarray.inc}
     {$i point.inc}
+    {$i rgb32.inc}
   {$UNDEF HEADER}
+
+function Min(const A, B: Integer): Integer; inline; overload;
+function Max(const A, B: Integer): Integer; inline; overload;
+function Min(const A, B: Int64): Int64; inline; overload;
+function Max(const A, B: Int64): Int64; inline; overload;
+function Min(const A, B: Single): Single; inline; overload;
+function Max(const A, B: Single): Single; inline; overload;
+function Min(const A, B: Double): Double; inline; overload;
+function Max(const A, B: Double): Double; inline; overload;
 
 procedure Swap(var A, B: Byte); overload;
 procedure Swap(var A, B: Integer); overload;
@@ -173,6 +154,9 @@ procedure Swap(var A, B: Extended); overload;
 procedure Swap(var A, B: TPoint); overload;
 procedure Swap(var A, B: Pointer); overload;
 procedure Swap(var A, B: TRGB32); overload;
+
+function Unique(const Arr: TIntegerArray): TIntegerArray; overload;
+function Unique(const Arr: TStringArray): TStringArray; overload;
 
 type
   TProc       = procedure of object;
@@ -189,33 +173,80 @@ procedure Threaded(Methods: TProcArray; Interval: Integer = 0); overload;
 
 implementation
 
-uses math, simba.math, simba.overallocatearray, simba.geometry;
+uses
+  math,
+  simba.math, simba.overallocatearray, simba.geometry;
 
 {$DEFINE BODY}
   {$i generics.inc}
   {$i box.inc}
   {$i boxarray.inc}
   {$i point.inc}
+  {$i rgb32.inc}
 {$UNDEF BODY}
 
-function TRGB32.ToString: String;
+function Min(const A, B: Integer): Integer;
 begin
-  Result := '[' + IntToStr(B) + ',' + IntToStr(G) + ',' + IntToStr(R) + ',' + IntToStr(A) + ']';
+  if A < B then
+    Result := A
+  else
+    Result := B;
 end;
 
-function TRGB32.Equals(const Other: TRGB32): Boolean;
+function Max(const A, B: Integer): Integer;
 begin
-  Result := AsInteger = Other.AsInteger;
+  if A > B then
+    Result := A
+  else
+    Result := B;
 end;
 
-function TRGB32.EqualsIgnoreAlpha(const Other: TRGB32): Boolean;
+function Min(const A, B: Int64): Int64;
 begin
-  Result := (AsInteger and $FFFFFF) = (Other.AsInteger and $FFFFFF);
+  if A < B then
+    Result := A
+  else
+    Result := B;
 end;
 
-operator =(Left, Right: TRetData): Boolean;
+function Max(const A, B: Int64): Int64;
 begin
-  Result := (Left.Ptr = Right.Ptr) and (Left.RowLen = Right.RowLen) and (Left.IncPtrWith = Right.IncPtrWith);
+  if A > B then
+    Result := A
+  else
+    Result := B;
+end;
+
+function Min(const A, B: Single): Single;
+begin
+  if A < B then
+    Result := A
+  else
+    Result := B;
+end;
+
+function Max(const A, B: Single): Single;
+begin
+  if A > B then
+    Result := A
+  else
+    Result := B;
+end;
+
+function Min(const A, B: Double): Double;
+begin
+  if A < B then
+    Result := A
+  else
+    Result := B;
+end;
+
+function Max(const A, B: Double): Double;
+begin
+  if A > B then
+    Result := A
+  else
+    Result := B;
 end;
 
 procedure Swap(var A, B: Byte);
@@ -246,6 +277,90 @@ end;
 procedure Swap(var A, B: TRGB32);
 begin
   specialize Swap<TRGB32>(A, B);
+end;
+
+function Unique(const Arr: TIntegerArray): TIntegerArray;
+var
+  I, J, Size: Integer;
+  Value: Integer;
+  Table: array of record
+    Bucket: TIntegerArray;
+    Count: Integer;
+  end;
+  Buffer: specialize TSimbaOverAllocateArray<Integer>;
+label
+  Next;
+begin
+  Buffer.Init();
+
+  SetLength(Table, NextPower2(Length(Arr)));
+  Size := High(Table);
+
+  for i := 0 to High(Arr) do
+  begin
+    Value := Arr[i];
+
+    with Table[Value and Size] do
+    begin
+      for J := 0 to Count - 1 do
+        if (Value = Bucket[J]) then
+          goto Next;
+
+      if (Count >= Length(Bucket)) then
+        SetLength(Bucket, 4 + (Length(Bucket) * 2));
+
+      Bucket[Count] := Value;
+      Inc(Count);
+
+      Buffer.Add(Value);
+    end;
+
+    Next:
+  end;
+
+  Result := Buffer.Trim();
+end;
+
+function Unique(const Arr: TStringArray): TStringArray;
+var
+  I, J, Size: Integer;
+  Value: String;
+  Table: array of record
+    Bucket: TStringArray;
+    Count: Integer;
+  end;
+  Buffer: specialize TSimbaOverAllocateArray<String>;
+label
+  Next;
+begin
+  Buffer.Init();
+
+  SetLength(Table, NextPower2(Length(Arr)));
+  Size := High(Table);
+
+  for i := 0 to High(Arr) do
+  begin
+    Value := Arr[i];
+
+    with Table[Hash(Value) and Size] do
+    begin
+      for J := 0 to Count - 1 do
+        if (Value = Bucket[J]) then
+          goto Next;
+
+      if (Count >= Length(Bucket)) then
+        SetLength(Bucket, 4 + (Length(Bucket) * 2));
+
+      Bucket[Count] := Value;
+      Inc(Count);
+
+      Buffer.Add(Value);
+    end;
+
+    Next:
+  end;
+
+  Result := Buffer.Trim();
 end;
 
 type
@@ -295,7 +410,7 @@ type
 procedure TThreaded.Execute;
 begin
   if Assigned(FNestedProc) then FNestedProc();
-  if Assigned(FProc) then FProc();
+  if Assigned(FProc)       then FProc();
 end;
 
 constructor TThreaded.Create(Proc: TNestedProc);

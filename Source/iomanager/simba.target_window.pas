@@ -71,7 +71,7 @@ function TWindowTarget.ReturnData(X, Y, Width, Height: Integer): TRetData;
 var
   Bounds: TBox;
 begin
-  Result := NullReturnData;
+  Result := Default(TRetData);
 
   if ValidateImageCapture(X, Y, Width, Height, Bounds) and SimbaNativeInterface.GetWindowImage(FWindowHandle, X, Y, Width, Height, FBuffer) then
   begin

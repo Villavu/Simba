@@ -28,6 +28,7 @@ type
 
     function NearestEdge(P: TPoint): TPoint;
     function Intersect(P: TPoint): TPoint;
+    function Corners: TPointArray;
 
     procedure Clip(Other: TBox);
     procedure Normalize;
@@ -230,6 +231,11 @@ begin
   if TSimbaGeometry.LinesIntersect(p, Self.Center, TPoint.Create(Self.X2, Self.Y1), TPoint.Create(Self.X2, Self.Y2), i) then Result := i;
   if TSimbaGeometry.LinesIntersect(p, Self.Center, TPoint.Create(Self.X2, Self.Y2), TPoint.Create(Self.X1, Self.Y2), i) then Result := i;
   if TSimbaGeometry.LinesIntersect(p, Self.Center, TPoint.Create(Self.X1, Self.Y2), TPoint.Create(Self.X1, Self.Y1), i) then Result := i;
+end;
+
+function TBoxHelper.Corners: TPointArray;
+begin
+  Result := [TPoint.Create(X1, Y1), TPoint.Create(X2, Y1), TPoint.Create(X2, Y2), TPoint.Create(X1, Y2)];
 end;
 
 procedure TBoxHelper.Clip(Other: TBox);

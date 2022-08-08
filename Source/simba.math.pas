@@ -16,10 +16,6 @@ uses
 const
   HALF_PI = PI / 2;
 
-function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray;
-function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint;
-
-function GaussMatrix(N: Integer; sigma: Extended): TExtendedMatrix;
 function FixRad(const Rad: Extended): Extended;
 function FixD(const Degrees: Extended): Extended;
 function Distance(const X1, Y1, X2, Y2: Integer): Integer; inline; overload;
@@ -77,66 +73,6 @@ begin
   Result := Result or (Result shr 16);
   Result := Result or (Result shr 32);
   Result := Result + 1;
-end;
-
-{/\
-  Rotate the given TPA with A radians.
-/\}
-function RotatePoints(const P: TPointArray; A, cx, cy: Extended): TPointArray;
-
-Var
-   I, L: Integer;
-   CosA,SinA : extended;
-
-Begin
-  L := High(P);
-  SetLength(Result, L + 1);
-  CosA := Cos(a);
-  SinA := Sin(a);
-  For I := 0 To L Do
-  Begin
-    Result[I].X := Trunc(cx + CosA * (p[i].x - cx) - SinA * (p[i].y - cy));
-    Result[I].Y := Trunc(cy + SinA * (p[i].x - cx) + CosA * (p[i].y - cy));
-  End;
-  // I recon it's faster than Point().
-End;
-
-{/\
-  Rotate the given Point with A radians.
-/\}
-function RotatePoint(const p: TPoint; angle, mx, my: Extended): TPoint;
-Begin
-  Result.X := Trunc(mx + cos(angle) * (p.x - mx) - sin(angle) * (p.y - my));
-  Result.Y := Trunc(my + sin(angle) * (p.x - mx) + cos(angle) * (p.y- my));
-End;
-
-
-{/\
-  Returns a GaussianMatrix with size of X*X, where X is Nth odd-number.
-/\}
-function GaussMatrix(N: Integer; sigma: Extended): TExtendedMatrix;
-var
-  hkernel: TExtendedArray;
-  Size,i,x,y:Integer;
-  sum:Extended;
-begin
-  Size := 2*N+1;
-  SetLength(hkernel, Size);
-  for i:=0 to Size-1 do
-    hkernel[i] := Exp(-(Sqr((i-N) / Sigma)) / 2.0);
-
-  SetLength(Result, Size, Size);
-  sum:=0;
-  for y:=0 to Size-1 do
-    for x:=0 to Size-1 do
-    begin
-      Result[y][x] := hkernel[x]*hkernel[y];
-      Sum := Sum + Result[y][x];
-    end;
-
-  for y := 0 to Size-1 do
-    for x := 0 to Size-1 do
-      Result[y][x] := Result[y][x] / sum;
 end;
 
 function FixRad(const Rad: Extended): Extended;

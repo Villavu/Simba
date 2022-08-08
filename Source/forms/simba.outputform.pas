@@ -203,7 +203,7 @@ begin
   Gutter.MarksPart().Visible := False;
 
   Gutter.SeparatorPart.AutoSize := False;
-  Gutter.SeparatorPart.Width := Scale96ToScreen(5);
+  Gutter.SeparatorPart.Width := Scale96ToScreen(3);
   Gutter.SeparatorPart.MarkupInfo.Background := Self.Color;
   Gutter.SeparatorPart.MarkupInfo.Foreground := Self.Color;
 

@@ -96,7 +96,6 @@ begin
     {$ENDIF}
 
     addGlobalType('array of String', 'TStringArray');
-    addGlobalType('array of TStringArray', 'T2DStringArray');
     addGlobalType('array of Integer', 'TIntegerArray');
     addGlobalType('array of TIntegerArray', 'T2DIntegerArray');
     addGlobalType('array of T2DIntegerArray', 'T3DIntegerArray');
@@ -105,7 +104,6 @@ begin
     addGlobalType('array of Single', 'TSingleArray');
     addGlobalType('array of Double', 'TDoubleArray');
     addGlobalType('array of Extended', 'TExtendedArray');
-    addGlobalType('array of TExtendedArray', 'T2DExtendedArray');
     addGlobalType('array of Boolean', 'TBooleanArray');
     addGlobalType('array of Variant', 'TVariantArray');
 
@@ -135,16 +133,21 @@ begin
 
     addGlobalType('procedure() of object', 'TSyncMethod', {$IF DEFINED(CPU32) and DEFINED(LAPE_CDECL)}FFI_CDECL{$ELSE}FFI_DEFAULT_ABI{$ENDIF});
     addGlobalFunc('procedure Sync(Method: TSyncMethod)', @_LapeSync);
-
-    addDelayedCode('procedure TerminateScript; begin Halt(); end;');
     addGlobalFunc('procedure PauseScript', @_LapePauseScript);
 
-    addDelayedCode(
-      'procedure MemMove(constref Src; var Dst; Size: SizeInt);' + LineEnding +
-      'begin'                                                    + LineEnding +
-      '  Move(Src, Dst, Size);'                                  + LineEnding +
+    addGlobalFunc(
+      'procedure TerminateScript;', [
+      'begin',
+      '  Halt();',
       'end;'
-    );
+    ]);
+
+    addGlobalFunc(
+      'procedure MemMove(constref Src; var Dst; Size: SizeInt);', [
+      'begin',
+      '  Move(Src, Dst, Size);',
+      'end;'
+    ]);
 
     popSection();
   end;

@@ -8,12 +8,7 @@ implementation
 
 uses
   classes, sysutils, lptypes, math,
-  simba.script_compiler, simba.mufasatypes, simba.math, simba.array_general;
-
-procedure _LapeGaussMatrix(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PExtendedMatrix(Result)^ := GaussMatrix(PInteger(Params^[0])^, PExtended(Params^[1])^);
-end;
+  simba.script_compiler, simba.mufasatypes, simba.math;
 
 procedure _LapeDistance(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -72,12 +67,12 @@ end;
 
 procedure _LapeMaxA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := Max(PIntegerArray(Params^[0])^);
+  PInteger(Result)^ := specialize MaxA<Integer>(PIntegerArray(Params^[0])^);
 end;
 
 procedure _LapeMinA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PInteger(Result)^ := Min(PIntegerArray(Params^[0])^);
+  PInteger(Result)^ := specialize MinA<Integer>(PIntegerArray(Params^[0])^);
 end;
 
 procedure _LapeFixRad(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -100,33 +95,12 @@ begin
   PExtended(Result)^ := Modulo(PExtended(Params^[0])^, PExtended(Params^[1])^);
 end;
 
-procedure _LapeSum(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PInt64(Result)^ := Sum(PIntegerArray(Params^[0])^);
-end;
-
-procedure _LapeSumF(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PExtended(Result)^ := Sum(PExtendedArray(Params^[0])^);
-end;
-
-procedure _LapeMean(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PInt64(Result)^ := Mean(PIntegerArray(Params^[0])^);
-end;
-
-procedure _LapeMeanF(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PExtended(Result)^ := Mean(PExtendedArray(Params^[0])^);
-end;
-
 procedure ImportMath(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
     pushSection('Math');
 
-    addGlobalFunc('function GaussMatrix(N: Integer; Sigma: Extended): TExtendedMatrix', @_LapeGaussMatrix);
     addGlobalFunc('function Distance(const X1, Y1, X2, Y2: Integer): Integer; overload', @_LapeDistance);
     addGlobalFunc('function Distance(const P1, P2: TPoint): Integer; overload', @_LapeDistanceEx);
     addGlobalFunc('function RandomRange(const Min, Max: Integer): Integer', @_LapeRandomRange);
@@ -146,12 +120,6 @@ begin
 
     addGlobalFunc('function Modulo(const X, Y: Integer): Integer; overload', @_LapeModulo);
     addGlobalFunc('function Modulo(const X, Y: Extended): Extended; overload', @_LapeModuloF);
-
-    addGlobalFunc('function Sum(const Arr: TIntegerArray): Int64; overload', @_LapeSum);
-    addGlobalFunc('function Sum(const Arr: TExtendedArray): Extended; overload', @_LapeSumF);
-
-    addGlobalFunc('function Mean(const Arr: TIntegerArray): Int64; overload', @_LapeMean);
-    addGlobalFunc('function Mean(const Arr: TExtendedArray): Extended; overload', @_LapeMeanF);
 
     popSection();
   end;

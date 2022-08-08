@@ -76,7 +76,7 @@ begin
     Result.RowLen := Bounds.X2;
     Result.IncPtrWith := Bounds.X2 - Width;
   end else
-    Result := NullReturnData;
+    Result := Default(TRetData);
 end;
 
 function TRawTarget.CopyData(X, Y, Width, Height: Int32): PRGB32;
