@@ -18,6 +18,13 @@ const
   File_EventError = -2;
 
 type
+  TMufasaFile = record
+    Path: String;
+    FS: TFileStream;
+    BytesRead, Mode: Integer;
+  end;
+  TMufasaFilesArray = array of TMufasaFile;
+
   PMFiles = ^TMFiles;
   TMFiles = class(TObject)
   public

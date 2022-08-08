@@ -210,9 +210,9 @@ begin
       Result.RowLen := Bounds.X2;
       Result.IncPtrWith := Bounds.X2 - Width;
     end else
-      Result := NullReturnData;
+      Result := Default(TRetData);
   end else
-    Result := NullReturnData;
+    Result := Default(TRetData);
 end;
 
 function TEIOS_Target.CopyData(X, Y, Width, Height: Integer): PRGB32;

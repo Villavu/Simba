@@ -125,6 +125,11 @@ begin
   PPoint(Result)^ := PBox(Params^[0])^.Center;
 end;
 
+procedure _LapeBox_Corners(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := PBox(Params^[0])^.Corners();
+end;
+
 procedure _LapeBoxArray_Create(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PBoxArray(Result)^ := TBoxArray.Create(PPoint(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PPoint(Params^[5])^);
@@ -225,6 +230,7 @@ begin
 
     addGlobalFunc('procedure TBox.Clip(Other: TBox);', @_LapeBox_Clip);
     addGlobalFunc('procedure TBox.Normalize;', @_LapeBox_Normalize);
+    addGlobalFunc('function TBox.Corners: TPointArray;', @_LapeBox_Corners);
 
     addGlobalFunc('function TBox.Width: Integer;', @_LapeBox_Width);
     addGlobalFunc('function TBox.Height: Integer;', @_LapeBox_Height);

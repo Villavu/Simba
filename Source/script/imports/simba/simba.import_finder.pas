@@ -37,13 +37,13 @@ end;
 procedure _LapeFindDTMsRotatedAlternating(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindDTMsRotated(MDTMs[PInteger(Params^[0])^], PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PExtended(Params^[6])^, PExtended(Params^[7])^, PExtended(Params^[7])^, P2DExtendedArray(Params^[8])^, True);
+    PBoolean(Result)^ := MFinder.FindDTMsRotated(MDTMs[PInteger(Params^[0])^], PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PExtended(Params^[6])^, PExtended(Params^[7])^, PExtended(Params^[7])^, PDoubleArray(Params^[8])^, True);
 end;
 
 procedure _LapeFindDTMsRotatedSE(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindDTMsRotated(MDTMs[PInteger(Params^[0])^], PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PExtended(Params^[6])^, PExtended(Params^[7])^, PExtended(Params^[7])^, P2DExtendedArray(Params^[8])^, False);
+    PBoolean(Result)^ := MFinder.FindDTMsRotated(MDTMs[PInteger(Params^[0])^], PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PExtended(Params^[6])^, PExtended(Params^[7])^, PExtended(Params^[7])^, PDoubleArray(Params^[8])^, False);
 end;
 
 procedure _LapeFindBitmap(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -266,8 +266,8 @@ begin
     addGlobalFunc('function FindDTMs(DTM: Integer; var p: TPointArray; xs, ys, xe, ye: Integer): Boolean', @_LapeFindDTMs);
     addGlobalFunc('function FindDTMRotatedAlternating(DTM: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: Extended): Boolean', @_LapeFindDTMRotatedAlternating);
     addGlobalFunc('function FindDTMRotatedSE(DTM: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: Extended): Boolean', @_LapeFindDTMRotatedSE);
-    addGlobalFunc('function FindDTMsRotatedAlternating(DTM: Integer; var Points: TPointArray; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray): Boolean', @_LapeFindDTMsRotatedAlternating);
-    addGlobalFunc('function FindDTMsRotatedSE(DTM: Integer; var Points: TPointArray; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray): Boolean', @_LapeFindDTMsRotatedSE);
+    addGlobalFunc('function FindDTMsRotatedAlternating(DTM: Integer; var Points: TPointArray; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: TDoubleArray): Boolean', @_LapeFindDTMsRotatedAlternating);
+    addGlobalFunc('function FindDTMsRotatedSE(DTM: Integer; var Points: TPointArray; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: TDoubleArray): Boolean', @_LapeFindDTMsRotatedSE);
     addGlobalFunc('function FindBitmap(Bitmap: TMufasaBitmap; var x, y: Integer): Boolean', @_LapeFindBitmap);
     addGlobalFunc('function FindBitmapIn(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean', @_LapeFindBitmapIn);
     addGlobalFunc('function FindBitmapToleranceIn(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean', @_LapeFindBitmapToleranceIn);

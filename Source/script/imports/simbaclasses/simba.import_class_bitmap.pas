@@ -227,7 +227,7 @@ end;
 
 procedure _LapeMufasaBitmap_Convolute(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PMufasaBitmap(Params^[0])^.Convolute(PMufasaBitmap(Params^[1])^, P2DExtendedArray(Params^[2])^);
+  PMufasaBitmap(Params^[0])^.Convolute(PMufasaBitmap(Params^[1])^, PDoubleMatrix(Params^[2])^);
 end;
 
 procedure _LapeMufasaBitmap_Copy(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -837,7 +837,7 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.Downsample(TargetBitmap: TMufasaBitmap; Scale: Integer); overload', @_LapeMufasaBitmap_DownSampleEx);
     addGlobalFunc('procedure TMufasaBitmap.Blend(Points: TPointArray; Size: Integer); overload', @_LapeMufasaBitmap_Blend);
     addGlobalFunc('procedure TMufasaBitmap.Blend(TargetBitmap: TMufasaBitmap; Points: TPointArray; Size: Integer); overload', @_LapeMufasaBitmap_BlendEx);
-    addGlobalFunc('procedure TMufasaBitmap.Convolute(TargetBitmap: TMufasaBitmap; Matrix: T2DExtendedArray);', @_LapeMufasaBitmap_Convolute);
+    addGlobalFunc('procedure TMufasaBitmap.Convolute(TargetBitmap: TMufasaBitmap; Matrix: TDoubleMatrix);', @_LapeMufasaBitmap_Convolute);
     addGlobalFunc('function TMufasaBitmap.Copy(X1, Y1, X2, Y2: Integer): TMufasaBitmap; overload', @_LapeMufasaBitmap_Copy);
     addGlobalFunc('function TMufasaBitmap.Copy: TMufasaBitmap; overload', @_LapeMufasaBitmap_CopyEx);
     addGlobalFunc('procedure TMufasaBitmap.Crop(X1, Y1, X2, Y2: Integer);', @_LapeMufasaBitmap_Crop);

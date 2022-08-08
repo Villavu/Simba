@@ -50,7 +50,7 @@ type
 
     procedure addDelayedCode(Code: array of lpString; AFileName: lpString = ''); virtual; overload;
 
-    function addGlobalFunc(Header, Body: lpString): TLapeTree_Method; virtual; overload;
+    function addGlobalFunc(Header: lpString; Body: array of lpString): TLapeTree_Method; virtual; overload;
     function addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar; virtual; overload;
     function addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType; virtual; overload;
 
@@ -98,13 +98,13 @@ uses
 
   simba.script_compiler_waituntil;
 
-function TSimbaScript_Compiler.addGlobalFunc(Header, Body: lpString): TLapeTree_Method;
+function TSimbaScript_Compiler.addGlobalFunc(Header: lpString; Body: array of lpString): TLapeTree_Method;
 var
   OldState: Pointer;
 begin
   Result := nil;
 
-  OldState := getTempTokenizerState(Header + Body, '!addGlobalFunc');
+  OldState := getTempTokenizerState(Header + ''.Join(LineEnding, Body), '!addGlobalFunc');
   try
     Expect([tk_kw_Function, tk_kw_Procedure, tk_kw_Operator]);
     Result := ParseMethod(nil, False);

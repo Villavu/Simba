@@ -159,7 +159,7 @@ type
     procedure Invert; overload;
     procedure Posterize(TargetBitmap: TMufasaBitmap; Po: Integer); overload;
     procedure Posterize(Po: Integer); overload;
-    procedure Convolute(TargetBitmap: TMufasaBitmap; Matrix: TExtendedMatrix);
+    procedure Convolute(TargetBitmap: TMufasaBitmap; Matrix: TDoubleMatrix);
 
     procedure Mirror(MirrorStyle: TBmpMirrorStyle); overload;
     procedure Mirror(TargetBitmap: TMufasaBitmap; MirrorStyle: TBmpMirrorStyle); overload;
@@ -1343,10 +1343,10 @@ var
   B: TPointArray;
 begin
   B := [
-    RotatePoint(Point(0, H), Angle, W div 2, H div 2),
-    RotatePoint(Point(W, H), Angle, W div 2, H div 2),
-    RotatePoint(Point(W, 0), Angle, W div 2, H div 2),
-    RotatePoint(Point(0, 0), Angle, W div 2, H div 2)
+    TSimbaGeometry.RotatePoint(Point(0, H), Angle, W div 2, H div 2),
+    TSimbaGeometry.RotatePoint(Point(W, H), Angle, W div 2, H div 2),
+    TSimbaGeometry.RotatePoint(Point(W, 0), Angle, W div 2, H div 2),
+    TSimbaGeometry.RotatePoint(Point(0, 0), Angle, W div 2, H div 2)
   ];
 
   Result := GetTPABounds(B);
@@ -1752,7 +1752,7 @@ begin
     end;
 end;
 
-procedure TMufasaBitmap.Convolute(TargetBitmap: TMufasaBitmap; Matrix: TExtendedMatrix);
+procedure TMufasaBitmap.Convolute(TargetBitmap: TMufasaBitmap; Matrix: TDoubleMatrix);
 var
   x,y,yy,xx,cx,cy: Integer;
   Row,RowT: TPRGB32Array;

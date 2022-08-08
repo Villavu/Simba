@@ -6,10 +6,13 @@ generic function MinA<T>(const Arr: array of T): T;
 generic function MaxA<T>(const Arr: array of T): T;
 generic function Sum<T, R>(var AValues: array of T): R;
 generic function Unique<T>(const Arr: specialize TArray<T>): specialize TArray<T>;
+generic function Unique_SameValue<T>(const Arr: specialize TArray<T>): specialize TArray<T>;
 generic procedure Reverse<T>(var Arr: specialize TArray<T>);
 generic function Reversed<T>(const Arr: specialize TArray<T>): specialize TArray<T>;
 generic function IndexOf<_T>(const Item: _T; const Arr: specialize TArray<_T>): Integer;
+generic function IndexOf_SameValue<_T>(const Item: _T; const Arr: specialize TArray<_T>): Integer;
 generic function IndicesOf<_T>(const Item: _T; const Arr: specialize TArray<_T>): TIntegerArray;
+generic function IndicesOf_SameValue<_T>(const Item: _T; const Arr: specialize TArray<_T>): TIntegerArray;
 generic function Mode<_T>(const Arr: specialize TArray<_T>): Integer;
 generic procedure Sort<_T>(var Arr: specialize TArray<_T>);
 generic function Sorted<_T>(const Arr: specialize TArray<_T>): specialize TArray<_T>;
@@ -135,31 +138,60 @@ end;
 
 generic function Unique<T>(const Arr: specialize TArray<T>): specialize TArray<T>;
 var
-  i,j,last:Integer;
+  I,J,last:Integer;
+begin
+  Result := Copy(Arr);
+  Last := Length(Result);
+
+  I := 0;
+  while (I < Last) do
+  begin
+    J := I + 1;
+    while (J < last) do
+    begin
+      if (Result[I] = Result[J]) then
+      begin
+        Result[J] := Result[Last - 1];
+
+        Dec(Last);
+        Dec(J);
+      end;
+
+      Inc(J);
+    end;
+    Inc(I);
+  end;
+
+  SetLength(Result, Last);
+end;
+
+generic function Unique_SameValue<T>(const Arr: specialize TArray<T>): specialize TArray<T>;
+var
+  I, J, Last: Integer;
 begin
   Result := Copy(Arr);
 
-  last := Length(Result);
-
-  i:=0;
-  while (i < last) do
+  Last := Length(Result);
+  I := 0;
+  while (I < last) do
   begin
-    j := i+1;
-    while (j < last) do
+    J := I + 1;
+    while (J < Last) do
     begin
-      if (Result[i] = Result[j]) then
+      if SameValue(Result[I], Result[J]) then
       begin
-        Result[j] := Result[last-1];
-        dec(last);
-        dec(j);
+        Result[J] := Result[Last - 1];
+
+        Dec(Last);
+        Dec(J);
       end;
 
-      Inc(j);
+      Inc(J);
     end;
-    Inc(i);
+    Inc(I);
   end;
 
-  SetLength(Result, last);
+  SetLength(Result, Last);
 end;
 
 generic procedure Reverse<T>(var Arr: specialize TArray<T>);
@@ -305,5 +337,30 @@ begin
     if (Hits > Best) then
       Result := Current;
   end;
+end;
+
+generic function IndexOf_SameValue<_T>(const Item: _T; const Arr: specialize TArray<_T>): Integer;
+var
+  I: Integer;
+begin
+  for I := 0 to High(Arr) do
+    if SameValue(Item, Arr[I]) then
+      Exit(I);
+
+  Result := -1;
+end;
+
+generic function IndicesOf_SameValue<_T>(const Item: _T; const Arr: specialize TArray<_T>): TIntegerArray;
+var
+  I: Integer;
+  Buffer: specialize TSimbaOverAllocateArray<Integer>;
+begin
+  Buffer.Init(4);
+
+  for I := 0 to High(Arr) do
+    if SameValue(Item, Arr[I]) then
+      Buffer.Add(I);
+
+  Result := Buffer.Trim();
 end;
 {$ENDIF}

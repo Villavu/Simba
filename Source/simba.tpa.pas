@@ -84,12 +84,60 @@ function PartitionTPA(const TPA: TPointArray; BoxWidth, BoxHeight: Integer): T2D
 function TPASkeleton(const TPA: TPointArray; FMin: Integer = 2; FMax: Integer = 6): TPointArray;
 function TPABorder(const TPA: TPointArray): TPointArray;
 
+procedure SortTPA(var Arr: TPointArray; var Weights: TDoubleArray; SortUp: Boolean); overload;
+procedure SortTPA(var Arr: TPointArray; var Weights: TIntegerArray; SortUp: Boolean); overload;
+procedure SortATPA(var Arr: T2DPointArray; var Weights: TIntegerArray; SortUp: Boolean);
+
+function UniqueTPA(const Arr: TPointArray): TPointArray;
+
 implementation
 
 uses
   math,
-  simba.math, simba.slacktree, simba.overallocatearray, simba.geometry,
-  simba.helpers_matrix, simba.array_general;
+  simba.math, simba.slacktree, simba.overallocatearray, simba.geometry, simba.helpers_matrix;
+
+procedure SortTPA(var Arr: TPointArray; var Weights: TDoubleArray; SortUp: Boolean);
+begin
+  specialize QuickSortWeighted<TPoint, Double>(Arr, Weights, Low(Arr), High(Arr), SortUp);
+end;
+
+procedure SortTPA(var Arr: TPointArray; var Weights: TIntegerArray; SortUp: Boolean);
+begin
+  specialize QuickSortWeighted<TPoint, Integer>(Arr, Weights, Low(Arr), High(Arr), SortUp);
+end;
+
+procedure SortATPA(var Arr: T2DPointArray; var Weights: TIntegerArray; SortUp: Boolean);
+begin
+  specialize QuickSortWeighted<TPointArray, Integer>(Arr, Weights, Low(Arr), High(Arr), SortUp);
+end;
+
+function UniqueTPA(const Arr: TPointArray): TPointArray;
+var
+  Matrix: TBooleanMatrix;
+  I, Count: Integer;
+begin
+  SetLength(Result, Length(Arr));
+  if (Length(Arr) = 0) then
+    Exit;
+
+  Count := 0;
+
+  with GetTPABounds(Arr) do
+  begin
+    Matrix.SetSize(Width, Height);
+
+    for I := 0 to High(Arr) do
+      if not Matrix[Arr[I].Y - Y1, Arr[I].X - X1] then
+      begin
+        Matrix[Arr[I].Y - Y1, Arr[I].X - X1] := True;
+        Result[Count] := Arr[I];
+        Inc(Count);
+      end;
+  end;
+
+  SetLength(Result, Count);
+end;
+
 
 function PointsInRangeOf(const Points, Other: TPointArray; MinDist, MaxDist: Double): TPointArray; overload;
 var
@@ -145,7 +193,7 @@ begin
   for I := 0 to High(Points) do
     Weights[I] := (TSimbaGeometry.AngleBetween(Points[I], Center) + StartDegrees) mod 360;
 
-  Sort(Points, Weights, ClockWise);
+  SortTPA(Points, Weights, ClockWise);
 end;
 
 function ExcludePointsDist(const Points: TPointArray; Center: TPoint; MinDist, MaxDist: Extended): TPointArray;
@@ -214,7 +262,7 @@ var
   Query: TPoint;
   Arr: specialize TSimbaOverAllocateArray<TPoint>;
 begin
-  Result := Unique(Points);
+  Result := UniqueTPA(Points);
 
   if (Length(Result) > 1) and (Dist > 0) then
   begin
@@ -669,7 +717,7 @@ begin
   for I := 0 to High(Arr) do
     Weights[I] := Arr[I].X;
 
-  Sort(Arr, Weights, LowToHi);
+  SortTPA(Arr, Weights, LowToHi);
 end;
 
 procedure SortTPAByY(var Arr: TPointArray; LowToHi: Boolean);
@@ -684,7 +732,7 @@ begin
   for I := 0 to High(Arr) do
     Weights[I] := Arr[I].Y;
 
-  Sort(Arr, Weights, LowToHi);
+  SortTPA(Arr, Weights, LowToHi);
 end;
 
 function FindTPARows(const TPA: TPointArray): T2DPointArray;
@@ -744,7 +792,7 @@ begin
   SetLength(Weights, Length(Arr));
   for i := 0 to High(Arr) do
     Weights[i] := Round(Sqr(From.X - Arr[i].X) + Sqr(From.Y - Arr[i].Y));
-  Sort(Arr, Weights, True);
+  SortTPA(Arr, Weights, True);
 end;
 
 {/\
@@ -763,7 +811,7 @@ begin
     if (Length(Arr[I]) > 0) then
       Weights[i] := Round(Sqr(From.X - Arr[i][0].X) + Sqr(From.Y - Arr[i][0].Y));
 
-  Sort(Arr, Weights, True);
+  SortATPA(Arr, Weights, True);
 end;
 
 {/\
@@ -782,7 +830,7 @@ begin
     with MiddleTPA(Arr[I]) do
       Weights[I] := Round(Sqr(From.X - X) + Sqr(From.Y - Y));
 
-  Sort(Arr, Weights, True);
+  SortATPA(Arr, Weights, True);
 end;
 
 {/\
@@ -801,7 +849,7 @@ begin
     if (Length(Arr[i]) > 0) then
       Weights[I] := Round(Sqr(From.X - Arr[i][0].X));
 
-  Sort(Arr, Weights, True);
+  SortATPA(Arr, Weights, True);
 end;
 
 {/\
@@ -820,7 +868,7 @@ begin
     if (Length(Arr[i]) > 0) then
       Weights[I] := Round(Sqr(From.Y - Arr[i][0].Y));
 
-  Sort(Arr, Weights, True);
+  SortATPA(Arr, Weights, True);
 end;
 
 {/\
@@ -905,7 +953,7 @@ begin
   for I := 0 to High(Arr) do
     Weights[I] := Length(Arr[I]);
 
-  Sort(Arr, Weights, not BigFirst);
+  SortATPA(Arr, Weights, not BigFirst);
 end;
 
 procedure SortATPAFromSize(var Arr: T2DPointArray; Size: Integer; CloseFirst: Boolean);
@@ -920,7 +968,7 @@ begin
   for I := 0 to High(Arr) do
     Weights[I] :=  Abs(Length(Arr[I]) - Size);
 
-  Sort(Arr, Weights, CloseFirst);
+  SortATPA(Arr, Weights, CloseFirst);
 end;
 
 procedure FilterTPAsBetween(var ATPA: T2DPointArray; minLength, maxLength: integer);
@@ -2253,7 +2301,7 @@ end;
 /\}
 procedure ClearSamePoints(var TPA: TPointArray);
 begin
-  TPA := Unique(TPA);
+  TPA := UniqueTPA(TPA);
 end;
 
 {/\

@@ -10,7 +10,7 @@ uses
   classes, sysutils, lptypes,
   simba.script_compiler, simba.mufasatypes, simba.tpa, simba.math,
   simba.algo_difference, simba.algo_intersection, simba.algo_symmetricDifference,
-  simba.array_general;
+  simba.geometry;
 
 //------- array.Difference(array)
 procedure _Lape_UInt8_Difference(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -201,7 +201,7 @@ end;
 
 procedure _LapeRotatePoint(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PPoint(Result)^ := RotatePoint(PPoint(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^);
+  PPoint(Result)^ := TSimbaGeometry.RotatePoint(PPoint(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^);
 end;
 
 procedure _LapeTPAtoATPAEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -256,7 +256,7 @@ end;
 
 procedure _LapeRotatePoints(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PPointArray(Result)^ := RotatePoints(PPointArray(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^);
+  PPointArray(Result)^ := TSimbaGeometry.RotatePoints(PPointArray(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^);
 end;
 
 procedure _LapeFindTPAEdges(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

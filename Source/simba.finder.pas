@@ -71,8 +71,8 @@ type
 
     procedure DefaultOperations(var xs, ys, xe, ye: Integer);
 
-    function GetData(out Data: TRetData; var xs, ys, xe, ye: Int32): Boolean;
-    function GetMatrix(out Matrix: TIntegerMatrix; xs, ys, xe, ye: Int32): Boolean;
+    function GetData(out Data: TRetData; var xs, ys, xe, ye: Integer): Boolean;
+    function GetMatrix(out Matrix: TIntegerMatrix; xs, ys, xe, ye: Integer): Boolean;
 
     function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
     function CountColor(Color, xs, ys, xe, ye: Integer): Integer;
@@ -102,19 +102,19 @@ type
     function FindTemplate(TemplImage: TMufasaBitmap; out X,Y: Integer; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
 
     function FindTextMatrix(Text, Font: String; Matrix: TIntegerMatrix; out Bounds: TBox): Single;
-    function FindTextColor(Text, Font: String; Color, Tolerance: Int32; X1, Y1, X2, Y2: Int32; out Bounds: TBox): Single; overload;
-    function FindTextColor(Text, Font: String; Color, Tolerance: Int32; X1, Y1, X2, Y2: Int32; MinMatch: Single = 1): Boolean; overload;
-    function FindText(Text, Font: String; X1, Y1, X2, Y2: Int32; out Bounds: TBox): Single; overload;
-    function FindText(Text, Font: String; X1, Y1, X2, Y2: Int32; MinMatch: Single = 1): Boolean; overload;
+    function FindTextColor(Text, Font: String; Color, Tolerance: Integer; X1, Y1, X2, Y2: Integer; out Bounds: TBox): Single; overload;
+    function FindTextColor(Text, Font: String; Color, Tolerance: Integer; X1, Y1, X2, Y2: Integer; MinMatch: Single = 1): Boolean; overload;
+    function FindText(Text, Font: String; X1, Y1, X2, Y2: Integer; out Bounds: TBox): Single; overload;
+    function FindText(Text, Font: String; X1, Y1, X2, Y2: Integer; MinMatch: Single = 1): Boolean; overload;
 
     function FindDTM(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
     function FindDTMs(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2 : Integer; maxToFind: Integer = 0): Boolean;
-    function FindDTMRotated(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating : Boolean): Boolean;
-    function FindDTMsRotated(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray;Alternating : Boolean; maxToFind: Integer = 0): Boolean;
+    function FindDTMRotated(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating: Boolean): Boolean;
+    function FindDTMsRotated(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: TDoubleArray; Alternating : Boolean; maxToFind: Integer = 0): Boolean;
 
     //Donno
     function GetColors(const Coords: TPointArray): TIntegerArray;
-    function GetColor(const X, Y: Int32): Integer;
+    function GetColor(const X, Y: Integer): Integer;
 
     // tol speeds
     procedure SetToleranceSpeed(nCTS: Integer);
@@ -672,7 +672,7 @@ begin
   end;
 end;
 
-function TMFinder.GetData(out Data: TRetData; var xs, ys, xe, ye: Int32): Boolean;
+function TMFinder.GetData(out Data: TRetData; var xs, ys, xe, ye: Integer): Boolean;
 begin
   DefaultOperations(xs, ys, xe, ye);
 
@@ -683,7 +683,7 @@ begin
     Error('Warning! ReturnData returned null. Is the target resizing?', []);
 end;
 
-function TMFinder.GetMatrix(out Matrix: TIntegerMatrix; xs, ys, xe, ye: Int32): Boolean;
+function TMFinder.GetMatrix(out Matrix: TIntegerMatrix; xs, ys, xe, ye: Integer): Boolean;
 begin
   DefaultOperations(xs, ys, xe, ye);
 
@@ -1404,7 +1404,7 @@ end;
 }
 function TMFinder.FindTemplateEx(TemplImage: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
 var
-  y,w,h: Int32;
+  y,w,h: Integer;
   Image, Templ: TIntegerMatrix;
   xcorr: TSingleMatrix;
   PtrData : TRetData;
@@ -1474,12 +1474,12 @@ end;
 
 function TMFinder.FindTextMatrix(Text, Font: String; Matrix: TIntegerMatrix; out Bounds: TBox): Single;
 var
-  X, Y, Color, Bad, dX, dY, i: Int32;
+  X, Y, Color, Bad, dX, dY, i: Integer;
   P: TPoint;
   Match: Single;
   TextMatrix: TIntegerMatrix;
   CharacterIndices, OtherIndices: TPointArray;
-  CharacterCount, OtherCount: Int32;
+  CharacterCount, OtherCount: Integer;
 label
   NotFound;
 begin
@@ -1570,10 +1570,10 @@ begin
   end;
 end;
 
-function TMFinder.FindTextColor(Text, Font: String; Color, Tolerance: Int32; X1, Y1, X2, Y2: Int32; out Bounds: TBox): Single;
+function TMFinder.FindTextColor(Text, Font: String; Color, Tolerance: Integer; X1, Y1, X2, Y2: Integer; out Bounds: TBox): Single;
 var
-  R, G, B: Int32;
-  W, H, X, Y: Int32;
+  R, G, B: Integer;
+  W, H, X, Y: Integer;
   Matrix: TIntegerMatrix;
   CTSInfo: Pointer;
   CTSCompare: TCTSCompareFunction;
@@ -1615,14 +1615,14 @@ begin
   end;
 end;
 
-function TMFinder.FindTextColor(Text, Font: String; Color, Tolerance: Int32; X1, Y1, X2, Y2: Int32; MinMatch: Single): Boolean;
+function TMFinder.FindTextColor(Text, Font: String; Color, Tolerance: Integer; X1, Y1, X2, Y2: Integer; MinMatch: Single): Boolean;
 var
   Bounds: TBox;
 begin
   Result := FindTextColor(Text, Font, Color, Tolerance, X1, Y1, X2, Y2, Bounds) >= MinMatch;;
 end;
 
-function TMFinder.FindText(Text, Font: String; X1, Y1, X2, Y2: Int32; out Bounds: TBox): Single;
+function TMFinder.FindText(Text, Font: String; X1, Y1, X2, Y2: Integer; out Bounds: TBox): Single;
 var
   Matrix: TIntegerMatrix;
 begin
@@ -1642,7 +1642,7 @@ begin
   end;
 end;
 
-function TMFinder.FindText(Text, Font: String; X1, Y1, X2, Y2: Int32; MinMatch: Single): Boolean;
+function TMFinder.FindText(Text, Font: String; X1, Y1, X2, Y2: Integer; MinMatch: Single): Boolean;
 var
   Bounds: TBox;
 begin
@@ -1845,16 +1845,16 @@ begin
   Result := (pc > 0);
 end;
 
-function TMFinder.FindDTMRotated(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating : Boolean): Boolean;
+function TMFinder.FindDTMRotated(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating: Boolean): Boolean;
 var
   P: TPointArray;
-  F: T2DExtendedArray;
+  F: TDoubleArray;
 begin
-  Result := FindDTMsRotated(dtm, P, x1, y1, x2, y2, sAngle, eAngle, aStep, F,Alternating,1);
+  Result := FindDTMsRotated(dtm, P, x1, y1, x2, y2, sAngle, eAngle, aStep, F, Alternating, 1);
   if not Result then
     Exit;
 
-  aFound := F[0][0];
+  aFound := F[0];
   x := P[0].x;
   y := P[0].y;
   Exit(True);
@@ -1872,7 +1872,7 @@ begin
   end;
 end;
 
-function TMFinder.FindDTMsRotated(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray;Alternating : Boolean; maxToFind: Integer): Boolean;
+function TMFinder.FindDTMsRotated(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: TDoubleArray; Alternating: Boolean; maxToFind: Integer): Boolean;
 var
    //Cached variables
    Len : Integer;
@@ -2041,11 +2041,10 @@ begin
         end;
         //We survived the sub-point search, add this mainpoint to the results.
         Inc(pc);
-        SetLength(Points,pc);
+        SetLength(Points, pc);
         Points[pc-1] := Point(xx + x1, yy + y1);
         SetLength(aFound, pc);
-        SetLength(aFound[pc-1],1);
-        aFound[pc-1][0] := s;
+        AFound[pc-1] := s;
         if(pc = maxToFind) then
           goto theEnd;
         AnotherLoopEnd:

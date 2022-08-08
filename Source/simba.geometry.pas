@@ -41,7 +41,7 @@ type
     CosTable: array[0..359] of Extended;
     SinTable: array[0..359] of Extended;
   public
-    class procedure LoadTables;
+    class constructor Create;
 
     class function PolygonArea(const Polygon: TPointArray): Double; static; inline;
     class function ExpandPolygon(const Polygon: TPointArray; Amount: Integer): TPointArray; static;
@@ -73,6 +73,17 @@ implementation
 uses
   math,
   simba.math;
+
+class constructor TSimbaGeometry.Create;
+var
+  I: Integer;
+begin
+  for I := 0 to High(CosTable) do
+  begin
+    CosTable[I] := Cos((1.0 * I) * (PI / 180));
+    SinTable[I] := Sin((1.0 * I) * (PI / 180));
+  end;
+end;
 
 class function TSimbaGeometry.RotatePointFast(const P: TPoint; Degrees: Integer; X, Y: Extended): TPoint;
 var
@@ -536,19 +547,5 @@ begin
     end;
   end;
 end;
-
-class procedure TSimbaGeometry.LoadTables;
-var
-  I: Integer;
-begin
-  for I := 0 to High(CosTable) do
-  begin
-    CosTable[I] := Cos((1.0 * I) * (PI / 180));
-    SinTable[I] := Sin((1.0 * I) * (PI / 180));
-  end;
-end;
-
-initialization
-  TSimbaGeometry.LoadTables();
 
 end.

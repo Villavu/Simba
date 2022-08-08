@@ -41,6 +41,7 @@ type
     procedure addBaseDefine(Define: lpString; Value: lpString = ''); override;
 
     function addDelayedCode(Code: lpString; AFileName: lpString = ''; AfterCompilation: Boolean = True; IsGlobal: Boolean = True): TLapeTree_Base; override;
+    function addGlobalFunc(Header: lpString; Body: array of lpString): TLapeTree_Method; override;
     function addGlobalFunc(Header: lpString; Value: Pointer): TLapeGlobalVar; override;
     function addGlobalType(Str: lpString; AName: lpString): TLapeType; override;
     function addGlobalType(Typ: TLapeType; AName: lpString = ''; ACopy: Boolean = True): TLapeType; override;
@@ -188,6 +189,13 @@ begin
   Result := inherited addDelayedCode(Code, AFileName, AfterCompilation, IsGlobal);
   if (not AFileName.StartsWith('!')) then
     Write(Code);
+end;
+
+function TCompilerDump.addGlobalFunc(Header: lpString; Body: array of lpString): TLapeTree_Method;
+begin
+  Result := inherited addGlobalFunc(Header, Body);
+
+  WriteMethod(Header, '');
 end;
 
 procedure TCompilerDump.addBaseDefine(Define: lpString; Value: lpString);
