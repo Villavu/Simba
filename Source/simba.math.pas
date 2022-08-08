@@ -16,31 +16,16 @@ uses
 const
   HALF_PI = PI / 2;
 
-function AngleBetween(const P1, P2: TPoint): Double; inline;
-
-function CrossProduct(const r, p, q: TPoint): Int64; inline; overload;
-function CrossProduct(const rx, ry, px, py, qx, qy: Double): Double; inline; overload;
-
-function PolygonArea(const Polygon: TPointArray): Double;
-
-function PointInPolygon(const P: TPoint; const Polygon: TPointArray): Boolean; inline;
-function PointInCircle(const P, Center: TPoint; const Radius: Double): Boolean; inline;
-
 function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray;
 function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint;
 
 function GaussMatrix(N: Integer; sigma: Extended): TExtendedMatrix;
 function FixRad(const Rad: Extended): Extended;
 function FixD(const Degrees: Extended): Extended;
-function MiddleBox(const B: TBox): TPoint;
 function Distance(const X1, Y1, X2, Y2: Integer): Integer; inline; overload;
 function Distance(const P1, P2: TPoint): Integer; inline; overload;
 function Radians(const e: Extended): Extended;
 function Degrees(const e: Extended): Extended;
-function IntToBox(x1,y1,x2,y2 : Integer) : TBox;
-function IntInBox(x, y: Integer; Box: TBox): Boolean;
-function PointToBox(topLeft,bottomRight: TPoint): TBox;
-function PointInBox(PT : TPoint; Box: TBox): Boolean;
 function NextPower2(const n: Integer): Integer; inline;
 
 function IsNumber(const n: Double): Boolean; inline; overload;
@@ -94,69 +79,9 @@ begin
   Result := Result + 1;
 end;
 
-function AngleBetween(const P1, P2: TPoint): Double;
-begin
-  Result := Modulo(Degrees(ArcTan2(P2.Y - P1.Y, P2.X - P1.X)) - 90, 360);
-end;
-
-function CrossProduct(const r, p, q: TPoint): Int64;
-begin
-  Result := (Int64(p.x) - Int64(r.x)) * (Int64(q.y) - Int64(r.y)) - (Int64(p.y) - Int64(r.y)) * (Int64(q.x) - Int64(r.x));
-end;
-
-function CrossProduct(const rx, ry, px, py, qx, qy: Double): Double;
-begin
-  Result := (px - rx) * (qy - ry) - (py - ry) * (qx - rx);
-end;
-
-function PolygonArea(const Polygon: TPointArray): Double;
-var
-  i, j: Integer;
-begin
-  Result := 0;
-
-  j := Length(Polygon) - 1;
-  for i := 0 to j do
-  begin
-    Result := Result + ((Polygon[J].X * Polygon[I].Y) - (Polygon[J].Y * Polygon[I].X));
-    j := i;
-  end;
-
-  Result := Result * 0.5;
-end;
-
-function PointInPolygon(const P: TPoint; const Polygon: TPointArray): Boolean;
-var
-  I, J: Integer;
-begin
-  Result := False;
-
-  if (Length(Polygon) >= 3) then
-  begin
-    J := Length(Polygon) - 1;
-    for I := 0 to J do
-    begin
-      if ((Polygon[I].Y <= P.Y) and (P.Y < Polygon[J].Y)) or    // an upward crossing
-         ((Polygon[J].Y <= P.Y) and (P.Y < Polygon[I].Y)) then  // a downward crossing
-      begin
-        (* compute the edge-ray intersect at the x-coordinate *)
-        if (P.X - Polygon[I].X < ((Polygon[J].X - Polygon[I].X) * (P.Y - Polygon[I].Y) / (Polygon[J].Y - Polygon[I].Y))) then
-          Result := not Result;
-      end;
-      J := I;
-    end;
-  end;
-end;
-
-function PointInCircle(const P, Center: TPoint; const Radius: Double): Boolean;
-begin
-  Result := Sqr(P.X - Center.X) + Sqr(P.Y - Center.Y) <= Sqr(Radius);
-end;
-
 {/\
   Rotate the given TPA with A radians.
 /\}
-
 function RotatePoints(const P: TPointArray; A, cx, cy: Extended): TPointArray;
 
 Var
@@ -179,7 +104,6 @@ End;
 {/\
   Rotate the given Point with A radians.
 /\}
-
 function RotatePoint(const p: TPoint; angle, mx, my: Extended): TPoint;
 Begin
   Result.X := Trunc(mx + cos(angle) * (p.x - mx) - sin(angle) * (p.y - my));
@@ -220,12 +144,6 @@ begin
   Result := DegToRad(DegNormalize(RadToDeg(Rad)));
 end;
 
-function MiddleBox(const B: TBox): TPoint;
-begin
-  Result.X := (B.X2 + B.X1) div 2;
-  Result.Y := (B.Y2 + B.Y1) div 2;
-end;
-
 function Distance(const X1, Y1, X2, Y2: Integer): Integer;
 begin
   Result := Round(Sqrt(Sqr(ValReal(X2) - ValReal(X1)) + Sqr(ValReal(Y2) - ValReal(Y1)))); // convert to ValReal to prevent integer overflows
@@ -249,32 +167,6 @@ end;
 function Degrees(const e: Extended): Extended;
 begin
   Result := RadToDeg(e);
-end;
-
-function IntToBox(x1,y1,x2,y2: Integer) : TBox;
-begin
-  result.x1 := x1;
-  result.y1 := y1;
-  result.x2 := x2;
-  result.y2 := y2;
-end;
-
-function IntInBox(x, y: Integer; Box: TBox): Boolean;
-begin
-  result := (((x >= Box.x1) and(x <= Box.x2)) and ((y >= box.y1) and (y <= box.y2)));
-end;
-
-function PointToBox(topLeft,bottomRight: TPoint): TBox;
-begin
-  result.x1 := topLeft.x;
-  result.y1 := topLeft.y;
-  result.x2 := bottomRight.x;
-  result.y2 := bottomRight.y;
-end;
-
-function PointInBox(PT : TPoint; Box: TBox): Boolean;
-begin
-  result := (((PT.x >= Box.x1) and(PT.x <= Box.x2)) and ((PT.y>= box.y1) and (PT.y <= box.y2)));
 end;
 
 function TruncatedGauss(Left:Double=0; Right:Double=1; CUTOFF:Single=4): Double;

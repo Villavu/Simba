@@ -69,36 +69,6 @@ begin
   SimbaScriptThread.Script.State := ESimbaScriptState.STATE_PAUSED;
 end;
 
-procedure _LapePoint(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PPoint(Result)^ := Point(PInteger(Params^[0])^, PInteger(Params^[1])^);
-end;
-
-procedure _LapeIntToBox(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PBox(Result)^ := IntToBox(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
-end;
-
-procedure _LapeIntInBox(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := IntInBox(PInteger(Params^[0])^, PInteger(Params^[1])^, PBox(Params^[2])^);
-end;
-
-procedure _LapePointToBox(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PBox(Result)^ := PointToBox(PPoint(Params^[0])^, PPoint(Params^[1])^);
-end;
-
-procedure _LapePointInBox(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PointInBox(PPoint(Params^[0])^, PBox(Params^[1])^);
-end;
-
-procedure _LapeMiddleBox(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PPoint(Result)^ := MiddleBox(PBox(Params^[0])^);
-end;
-
 procedure ImportSystem(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -150,14 +120,6 @@ begin
     addGlobalType('Integer', 'TColor');
 
     addGlobalType('(__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__)', 'EComparator');
-
-    addGlobalFunc('function Point(X, Y: Integer): TPoint', @_LapePoint);
-
-    addGlobalFunc('function IntToBox(X1, Y1, X2, Y2: Integer): TBox', @_LapeIntToBox);
-    addGlobalFunc('function IntInBox(X, Y: Integer; Box: TBox): Boolean', @_LapeIntInBox);
-    addGlobalFunc('function PointToBox(PT1, PT2: TPoint): TBox', @_LapePointToBox);
-    addGlobalFunc('function PointInBox(PT: TPoint; Box: TBox): Boolean', @_LapePointInBox);
-    addGlobalFunc('function MiddleBox(B: TBox): TPoint', @_LapeMiddleBox);
 
     addGlobalVar('', 'ScriptFile').isConstant := True;
     addGlobalVar(GetIncludePath(), 'IncludePath').isConstant := True;
