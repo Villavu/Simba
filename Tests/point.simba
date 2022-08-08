@@ -1,0 +1,21 @@
+{$assertions on}
+
+var
+  p: TPoint;
+  poly: TPointArray;
+begin
+  p := TPoint.Create(100, 150);
+  poly := [TPoint.Create(100, 100), TPoint.Create(200, 200), TPoint.Create(50, 300)];
+
+  Assert(p.InCircle(TPoint.Create(100, 100), 50) = True);
+  Assert(p.InCircle(TPoint.Create(100, 100), 49) = False);
+  Assert(p.InBox(TBox.Create(100,100,200,200)) = True);
+  Assert(p.InBox(TBox.Create(0,0, 99, 149)) = False);
+  Assert(TPoint.Create(100, 200).InPolygon(poly) = True);
+  Assert(TPoint.Create(50, 200).InPolygon(poly) = False);
+  Assert(TPoint.Create(100, 200).InTriangle(poly[0], poly[1], poly[2]) = True);
+  Assert(TPoint.Create(50, 200).InTriangle(poly[0], poly[1], poly[2]) = False);
+  Assert(p.DistanceTo(TPoint.Create(100, 100)) = 50);
+  Assert(p.Offset(-100, -150) = [0, 0]);
+  Assert(p.Offset(TPoint.Create(-100, -150)) = [0, 0]);
+end.

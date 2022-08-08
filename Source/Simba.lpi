@@ -267,7 +267,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="107">
+    <Units Count="110">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -756,6 +756,18 @@
         <Filename Value="simba.boxpacker.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit106>
+      <Unit107>
+        <Filename Value="point.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit107>
+      <Unit108>
+        <Filename Value="simba.geometry.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit108>
+      <Unit109>
+        <Filename Value="script/imports/simba/simba.import_point.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit109>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -88,7 +88,7 @@ implementation
 
 uses
   math,
-  simba.math, simba.slacktree, simba.overallocatearray,
+  simba.math, simba.slacktree, simba.overallocatearray, simba.geometry,
   simba.helpers_matrix, simba.array_general;
 
 function PointsInRangeOf(const Points, Other: TPointArray; MinDist, MaxDist: Double): TPointArray; overload;
@@ -143,7 +143,7 @@ begin
 
   SetLength(Weights, Length(Points));
   for I := 0 to High(Points) do
-    Weights[I] := (AngleBetween(Points[I], Center) + StartDegrees) mod 360;
+    Weights[I] := (TSimbaGeometry.AngleBetween(Points[I], Center) + StartDegrees) mod 360;
 
   Sort(Points, Weights, ClockWise);
 end;
@@ -172,7 +172,7 @@ begin
   Arr.Init();
 
   for I := 0 to High(Points) do
-    if PointInPolygon(Points[I], Polygon) then
+    if TSimbaGeometry.PointInPolygon(Points[I], Polygon) then
       Arr.Add(Points[I]);
 
   Result := Arr.Trim();
@@ -318,7 +318,7 @@ begin
 
   for i:=0 to h do
   begin
-    while (k >= 2) and (CrossProduct(Result[k-2], Result[k-1], pts[i]) <= 0) do
+    while (k >= 2) and (TSimbaGeometry.CrossProduct(Result[k-2], Result[k-1], pts[i]) <= 0) do
       Dec(k);
     Result[k] := pts[i];
     Inc(k)
@@ -327,7 +327,7 @@ begin
   u := k+1;
   for i:=h-1 downto 0 do
   begin
-    while (k >= u) and (CrossProduct(Result[k-2], Result[k-1], pts[i]) <= 0) do
+    while (k >= u) and (TSimbaGeometry.CrossProduct(Result[k-2], Result[k-1], pts[i]) <= 0) do
       Dec(k);
     Result[k] := pts[i];
     Inc(k);
@@ -339,7 +339,7 @@ function TPADensity(const TPA: TPointArray): Double;
 begin
   Result := 0;
   if Length(TPA) > 0 then
-    Result := Min(Length(TPA) / PolygonArea(ConvexHull(TPA)), 1);
+    Result := Min(Length(TPA) / TSimbaGeometry.PolygonArea(ConvexHull(TPA)), 1);
 end;
 
 procedure RotatingAdjecent(var Adj:TPointArray; const Curr:TPoint; const Prev: TPoint); inline;
@@ -929,10 +929,7 @@ var
   l, i, x, a: integer;
 begin
   if (minLength > maxLength) then
-  begin
-    writeln('FilterTPAsBetween: Tour min length is greater than your max length');
-    exit;
-  end;
+    Swap(minLength, maxLength);
 
   l := length(ATPA);
   a := 0;

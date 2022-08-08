@@ -222,39 +222,14 @@ begin
 end;
 
 function TBoxHelper.Intersect(P: TPoint): TPoint;
-
-  function LinesIntersect(p1,p2, q1,q2: TPoint; out i: TPoint): Boolean;
-  var
-    s, t, det: Double;
-    s1, s2: TPoint;
-  begin
-    Result := False;
-
-    s1 := p2-p1;
-    s2 := q2-q1;
-    det := (-s2.x * s1.y + s1.x * s2.y);
-    if det <> 0 then
-    begin
-      s := (-s1.y * (p1.x - q1.x) + s1.x * (p1.y - q1.y)) / det;
-      t := ( s2.x * (p1.y - q1.y) - s2.y * (p1.x - q1.x)) / det;
-      if (s >= 0) and (s <= 1) and (t >= 0) and (t <= 1) then
-      begin
-        i.x := Round(p1.x + (t * s1.x));
-        i.y := Round(p1.y + (t * s1.y));
-
-        Result := True;
-      end;
-    end;
-  end;
-
-var m,i: TPoint;
+var
+  i: TPoint;
 begin
   Result := P;
-  m := Self.Center;
-  if LinesIntersect(p, m, TPoint.Create(Self.X1, Self.Y1), TPoint.Create(Self.X2, Self.Y1), i) then Result := i;
-  if LinesIntersect(p, m, TPoint.Create(Self.X2, Self.Y1), TPoint.Create(Self.X2, Self.Y2), i) then Result := i;
-  if LinesIntersect(p, m, TPoint.Create(Self.X2, Self.Y2), TPoint.Create(Self.X1, Self.Y2), i) then Result := i;
-  if LinesIntersect(p, m, TPoint.Create(Self.X1, Self.Y2), TPoint.Create(Self.X1, Self.Y1), i) then Result := i;
+  if TSimbaGeometry.LinesIntersect(p, Self.Center, TPoint.Create(Self.X1, Self.Y1), TPoint.Create(Self.X2, Self.Y1), i) then Result := i;
+  if TSimbaGeometry.LinesIntersect(p, Self.Center, TPoint.Create(Self.X2, Self.Y1), TPoint.Create(Self.X2, Self.Y2), i) then Result := i;
+  if TSimbaGeometry.LinesIntersect(p, Self.Center, TPoint.Create(Self.X2, Self.Y2), TPoint.Create(Self.X1, Self.Y2), i) then Result := i;
+  if TSimbaGeometry.LinesIntersect(p, Self.Center, TPoint.Create(Self.X1, Self.Y2), TPoint.Create(Self.X1, Self.Y1), i) then Result := i;
 end;
 
 procedure TBoxHelper.Clip(Other: TBox);

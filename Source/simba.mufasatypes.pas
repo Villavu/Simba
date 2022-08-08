@@ -164,6 +164,7 @@ type
     {$i generics.inc}
     {$i box.inc}
     {$i boxarray.inc}
+    {$i point.inc}
   {$UNDEF HEADER}
 
 procedure Swap(var A, B: Byte); overload;
@@ -188,12 +189,13 @@ procedure Threaded(Methods: TProcArray; Interval: Integer = 0); overload;
 
 implementation
 
-uses math, simba.math, simba.overallocatearray;
+uses math, simba.math, simba.overallocatearray, simba.geometry;
 
 {$DEFINE BODY}
   {$i generics.inc}
   {$i box.inc}
   {$i boxarray.inc}
+  {$i point.inc}
 {$UNDEF BODY}
 
 function TRGB32.ToString: String;

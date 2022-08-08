@@ -237,7 +237,7 @@ const
 implementation
 
 uses
-  math, intfgraphics, lazloggerbase, simba.overallocatearray,
+  math, intfgraphics, lazloggerbase, simba.overallocatearray, simba.geometry,
   simba.tpa, simba.stringutil, simba.colormath, simba.client, simba.iomanager,
   simba.helpers_matrix, simba.helpers_string, simba.bitmap_misc, simba.math;
 
@@ -993,7 +993,7 @@ begin
 
   for X := Bounds.X1 to Bounds.X2 do
     for Y := Bounds.Y1 to Bounds.Y2 do
-      if PointInPolygon(Point(X, Y), Points) then
+      if TSimbaGeometry.PointInPolygon(Point(X, Y), Points) then
         FData[Y*FWidth+X] := RGB;
 end;
 
@@ -1016,7 +1016,7 @@ begin
 
   for X := Bounds.X1 to Bounds.X2 do
     for Y := Bounds.Y1 to Bounds.Y2 do
-      if not PointInPolygon(Point(X, Y), Points) then
+      if not TSimbaGeometry.PointInPolygon(Point(X, Y), Points) then
         FData[Y*FWidth+X] := RGB;
 end;
 
@@ -1053,7 +1053,7 @@ begin
 
   for X := Bounds.X1 to Bounds.X2 do
     for Y := Bounds.Y1 to Bounds.Y2 do
-      if not PointInCircle(Point(X, Y), ACenter, Radius) then
+      if not TSimbaGeometry.PointInCircle(Point(X, Y), ACenter, Radius) then
         FData[Y*FWidth+X] := RGB;
 end;
 
