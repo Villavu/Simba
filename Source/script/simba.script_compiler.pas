@@ -72,6 +72,7 @@ implementation
 uses
   simba.import_system,
   simba.import_matrix,
+  simba.import_box, simba.import_point,
 
   // LCL
   simba.import_lcl_system, simba.import_lcl_graphics, simba.import_lcl_controls,
@@ -94,7 +95,6 @@ uses
   simba.import_math, simba.import_mouse, simba.import_ocr, simba.import_other,
   simba.import_process, simba.import_slacktree, simba.import_string, simba.import_internet,
   simba.import_target, simba.import_timing,
-  simba.import_box, simba.import_point,
 
   simba.script_compiler_waituntil;
 
@@ -104,7 +104,7 @@ var
 begin
   Result := nil;
 
-  OldState := getTempTokenizerState(Header + ''.Join(LineEnding, Body), '!addGlobalFunc');
+  OldState := getTempTokenizerState(LapeDelayedFlags + Header + ''.Join(LineEnding, Body), '!addGlobalFunc');
   try
     Expect([tk_kw_Function, tk_kw_Procedure, tk_kw_Operator]);
     Result := ParseMethod(nil, False);

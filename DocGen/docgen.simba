@@ -3,10 +3,11 @@ const
   INPUT_DIR  = 'DocGen/input/';
 
   SOURCE_DIRECTORIES = [
-    'Source/script/wrappers_simba/'
+    'Source/script/imports/simba',
+    'Source/script/imports/simbaclasses'
   ];
-  SOURCE_EXTENSIONS = ['.inc'];
-  SOURCE_FILENAME_CLEAR = ['simba.imports_'];
+  SOURCE_EXTENSIONS = ['.pas'];
+  SOURCE_FILENAME_CLEAR = ['simba.import_class_', 'simba.import_'];
 
   CONFIG_FILE = "
 from datetime import datetime

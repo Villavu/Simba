@@ -112,3 +112,29 @@ jobs:
           user-email: 'villavu-bot'
           user-name: 'villavu-bot'
           target-branch: main
+
+  docs:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.repository == 'Villavu/Simba' && github.event_name == 'push' && github.ref_name == 'simba1500'
+    steps: 
+      - uses: actions/checkout@v3.0.2         
+      - uses: actions/download-artifact@v3
+        with:
+          name: Simba-Linux64      
+
+      - name: Build
+        run: |
+          sudo apt-get update
+          sudo apt-get -m -y install libgtk2.0-dev libpango1.0-dev libxtst-dev
+          sudo pip3 install sphinx sphinx_rtd_theme
+          export DISPLAY=:1
+          Xvfb :1 & sleep 2
+          chmod +x Simba-Linux64
+          ./Simba-Linux64 --run "DocGen/docgen.simba"
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4.4.0
+        with:
+          branch: docs
+          folder: DocGen/output/  
