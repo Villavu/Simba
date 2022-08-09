@@ -4,6 +4,7 @@
 *.DS_Store
 backup/
 build/
+/*.res
 /Includes/
 /Plugins/
 /Scripts/
@@ -12,4 +13,5 @@ build/
 /Simba*
 /libssl*
 /libcrypto*
-/*.res
+/DocGen/input
+/DocGen/output

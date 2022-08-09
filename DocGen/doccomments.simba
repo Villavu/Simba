@@ -1,0 +1,55 @@
+var
+  Contents, NewContents, Import, WrapperName, Header, HeaderName, DocComment, Line: String;
+  I: Integer;
+  Map: array of record
+    WrapperName: String;
+    DocComment: String;
+  end;
+begin
+  Contents := ReadFileContents('Source/script/imports/simba/simba.import_point.pas');
+
+  for DocComment in Contents.BetweenAll('(*','*)') do
+  begin
+    if DocComment.Contains('===') then // section title
+      Continue;
+    Contents := Contents.Replace('(*' + DocComment + '*)' + LineEnding, '');
+  end;
+
+  for Import in Contents.BetweenAll("addGlobalFunc('", ");" + LineEnding) do
+  begin
+    WrapperName := Import.After('@');
+    Header := Import.Before("'");
+
+    // Strip overload
+    if Header.EndsWith('overload') or Header.EndsWith('overload;') then
+      Header := Header.Before('overload');
+
+    Header := Header.Trim();
+    if not Header.EndsWith(';') then
+      Header += ';';
+
+    // extract "Foo.Box" from full header
+    HeaderName := Header.After(' ');
+    HeaderName := HeaderName.CopyRange(1, HeaderName.IndexOfAny(['(',':',';']) - 1);
+
+    DocComment := '(*%s%s%s%s%s%s%s*)'.format([LineEnding, HeaderName, LineEnding, '~' * Length(HeaderName), LineEnding, Header, LineEnding]);
+
+    Map += [WrapperName, DocComment];
+  end;
+
+  for Line in Contents.Split(LineEnding) do
+  begin
+    for I := 0 to High(Map) do
+      if (Line.Contains('procedure ' + Map[i].WrapperName + '(')) then
+      begin
+        NewContents += Map[I].DocComment + LineEnding;
+        Break;
+      end;
+
+    NewContents += Line + LineEnding;
+  end;
+
+  ClearDebug();
+  WriteLn(NewContents);
+  SetClipBoard(NewContents);
+end.
