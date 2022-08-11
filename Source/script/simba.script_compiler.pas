@@ -104,7 +104,7 @@ var
 begin
   Result := nil;
 
-  OldState := getTempTokenizerState(LapeDelayedFlags + Header + ''.Join(LineEnding, Body), '!addGlobalFunc');
+  OldState := getTempTokenizerState(LapeDelayedFlags + Header + ''.Join(LineEnding, Body), '!' + Header);
   try
     Expect([tk_kw_Function, tk_kw_Procedure, tk_kw_Operator]);
     Result := ParseMethod(nil, False);
