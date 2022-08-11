@@ -176,6 +176,7 @@ begin
     Result[I] := Self[I].Expand(WidMod, HeiMod);
 end;
 
+// https://github.com/mapbox/potpack
 function TBoxArrayHelper.Pack: TBoxArray;
 type
   TBlock = record X,Y,W,H: Integer; Index: Integer; end;
