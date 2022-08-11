@@ -24,6 +24,10 @@ type
   function Point(X, Y: Integer): TPoint;
 
   operator = (const Left, Right: TPoint): Boolean;
+  operator + (const Left, Right: TPoint): TPoint;
+  operator - (const Left, Right: TPoint): TPoint;
+  operator * (const Left: TPoint; const Right: Double): TPoint;
+  operator in (const Left: TPoint; const Right: TBox): Boolean;
 {$ENDIF}
 
 {$IFDEF BODY}
@@ -102,16 +106,40 @@ begin
   Result.Y := Self.Y + System.Random(Value);
 end;
 
+operator =(const Left, Right: TPoint): Boolean;
+begin
+  Result := Int64(Left) = Int64(Right);
+end;
+
+operator +(const Left, Right: TPoint): TPoint;
+begin
+  Result.X := Left.X + Right.X;
+  Result.Y := Left.Y + Right.Y;
+end;
+
+operator -(const Left, Right: TPoint): TPoint;
+begin
+  Result.X := Left.X - Right.X;
+  Result.Y := Left.Y - Right.Y;
+end;
+
+operator *(const Left: TPoint; const Right: Double): TPoint;
+begin
+  Result.X := Round(Left.X * Right);
+  Result.Y := Round(Left.Y * Right);
+end;
+
+operator in(const Left: TPoint; const Right: TBox): Boolean;
+begin
+  Result := Left.InBox(Right);
+end;
+
 function Point(X, Y: Integer): TPoint;
 begin
   Result.X := X;
   Result.Y := Y;
 end;
 
-operator = (const Left, Right: TPoint): Boolean;
-begin
-  Result := Int64(Left) = Int64(Right);
-end;
 {$ENDIF}
 
 

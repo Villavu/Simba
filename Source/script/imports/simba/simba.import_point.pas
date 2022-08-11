@@ -166,6 +166,79 @@ begin
   PPoint(Result)^ := PPoint(Params^[0])^.Random(PInteger(Params^[1])^);
 end;
 
+(*
+TPoint +
+~~~~~~~~
+operator + (L, R: TPoint): TPoint;
+*)
+procedure _LapePoint_Plus_Point(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPoint(Result)^ := PPoint(Params^[0])^ + PPoint(Params^[1])^;
+end;
+
+(*
+TPoint +=
+~~~~~~~~~
+operator += (var L: TPoint; R: TPoint): TPoint;
+*)
+procedure _LapePoint_PlusAssign_Point(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPoint(Params^[0])^ += PPoint(Params^[1])^;
+  PPoint(Result)^ := PPoint(Params^[0])^;
+end;
+
+(*
+TPoint *
+~~~~~~~~
+operator * (L: TPoint; R: Double): TPoint;
+*)
+procedure _LapePoint_Multiply_Double(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPoint(Result)^ := PPoint(Params^[0])^ * PDouble(Params^[1])^;
+end;
+
+(*
+TPoint *=
+~~~~~~~~~
+operator *= (var L: TPoint; R: Double): TPoint;
+*)
+procedure _LapePoint_MultiplyAssign_Double(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPoint(Params^[0])^ *= PDouble(Params^[1])^;
+  PPoint(Result)^ := PPoint(Params^[0])^;
+end;
+
+(*
+TPoint -
+~~~~~~~~
+operator - (L, R: TPoint): TPoint;
+*)
+procedure _LapePoint_Minus_Point(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPoint(Result)^ := PPoint(Params^[0])^ - PPoint(Params^[1])^;
+end;
+
+(*
+TPoint -=
+~~~~~~~~~
+operator -= (var L: TPoint; R: TPoint): TPoint;
+*)
+procedure _LapePoint_MinusAssign_Point(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPoint(Params^[0])^ -= PPoint(Params^[1])^;
+  PPoint(Result)^ := PPoint(Params^[0])^;
+end;
+
+(*
+TPoint in
+~~~~~~~~~
+operator in(Left: TPoint; Right: TBox): Boolean;
+*)
+procedure _LapePoint_IN_Box(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PPoint(Params^[0])^ in PBox(Params^[1])^;
+end;
+
 procedure ImportPoint(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -188,6 +261,14 @@ begin
     addGlobalFunc('function TPoint.Offset(P: TPoint): TPoint; overload;', @_LapePoint_Offset2);
     addGlobalFunc('function TPoint.Random(Min, Max: Integer): TPoint; overload;', @_LapePoint_Random1);
     addGlobalFunc('function TPoint.Random(Value: Integer): TPoint; overload;', @_LapePoint_Random2);
+
+    addGlobalFunc('operator + (L, R: TPoint): TPoint;', @_LapePoint_Plus_Point);
+    addGlobalFunc('operator += (var L: TPoint; R: TPoint): TPoint;', @_LapePoint_PlusAssign_Point);
+    addGlobalFunc('operator - (L, R: TPoint): TPoint;', @_LapePoint_Minus_Point);
+    addGlobalFunc('operator -= (var L: TPoint; R: TPoint): TPoint;', @_LapePoint_MinusAssign_Point);
+    addGlobalFunc('operator * (L: TPoint; R: Double): TPoint;', @_LapePoint_Multiply_Double);
+    addGlobalFunc('operator *= (var L: TPoint; R: Double): TPoint;', @_LapePoint_MultiplyAssign_Double);
+    addGlobalFunc('operator in(Left: TPoint; Right: TBox): Boolean;', @_LapePoint_IN_Box);
 
     popSection();
   end;
