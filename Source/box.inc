@@ -15,7 +15,9 @@ type
     function EqualDimensions(Other: TBox): Boolean;
     function Area: Integer;
     function Expand(SizeMod: Integer): TBox; overload;
+    function Expand(SizeMod: Integer; MaxBounds: TBox): TBox; overload;
     function Expand(WidMod, HeiMod: Integer): TBox; overload;
+    function Expand(WidMod, HeiMod: Integer; MaxBounds: TBox): TBox; overload;
     function Contains(Other: TBox): Boolean; overload;
     function Contains(Other: TPoint): Boolean; overload;
     function Contains(X, Y: Integer): Boolean; overload;
@@ -102,12 +104,24 @@ begin
   Result.Y2 := Self.Y2 + SizeMod;
 end;
 
+function TBoxHelper.Expand(SizeMod: Integer; MaxBounds: TBox): TBox;
+begin
+  Result := Self.Expand(SizeMod);
+  Result.Clip(MaxBounds);
+end;
+
 function TBoxHelper.Expand(WidMod, HeiMod: Integer): TBox;
 begin
   Result.X1 := Self.X1 - WidMod;
   Result.Y1 := Self.Y1 - HeiMod;
   Result.X2 := Self.X2 + WidMod;
   Result.Y2 := Self.Y2 + HeiMod;
+end;
+
+function TBoxHelper.Expand(WidMod, HeiMod: Integer; MaxBounds: TBox): TBox;
+begin
+  Result := Self.Expand(WidMod, HeiMod);
+  Result.Clip(MaxBounds);
 end;
 
 function TBoxHelper.Contains(Other: TBox): Boolean;

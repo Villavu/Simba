@@ -97,6 +97,26 @@ begin
 end;
 
 (*
+TBox.Expand
+~~~~~~~~~~~
+function TBox.Expand(SizeMod: Integer; MaxBounds: TBox): TBox;
+*)
+procedure _LapeBox_Expand3(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBox(Result)^ := PBox(Params^[0])^.Expand(PInteger(Params^[1])^, PBox(Params^[2])^);
+end;
+
+(*
+TBox.Expand
+~~~~~~~~~~~
+function TBox.Expand(WidMod, HeiMod: Integer; MaxBounds: TBox): TBox;
+*)
+procedure _LapeBox_Expand4(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBox(Result)^ := PBox(Params^[0])^.Expand(PInteger(Params^[1])^, PInteger(Params^[2])^, PBox(Params^[3])^);
+end;
+
+(*
 TBox.Contains
 ~~~~~~~~~~~~~
 function TBox.Contains(Other: TBox): Boolean;
@@ -129,7 +149,7 @@ end;
 (*
 TBox.Partition
 ~~~~~~~~~~~~~~
-function TBox.Partition(Rows, Cols: Int32): TBoxArray;
+function TBox.Partition(Rows, Cols: Integer): TBoxArray;
 *)
 procedure _LapeBox_Partition(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -259,7 +279,7 @@ end;
 (*
 TBoxArray.Create
 ~~~~~~~~~~~~~~~~
-function TBoxArray.Create(Start: TPoint; Columns, Rows, Width, Height: Int32; Spacing: TPoint): TBoxArray; static;
+function TBoxArray.Create(Start: TPoint; Columns, Rows, Width, Height: Integer; Spacing: TPoint): TBoxArray; static;
 *)
 procedure _LapeBoxArray_Create(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -411,11 +431,14 @@ begin
     addGlobalFunc('function TBox.EqualDimensions(Other: TBox): Boolean;', @_LapeBox_EqualDimensions);
     addGlobalFunc('function TBox.Area: Integer;', @_LapeBox_Area);
     addGlobalFunc('function TBox.Expand(SizeMod: Integer): TBox; overload;', @_LapeBox_Expand1);
+    addGlobalFunc('function TBox.Expand(SizeMod: Integer; MaxBounds: TBox): TBox; overload;', @_LapeBox_Expand3);
     addGlobalFunc('function TBox.Expand(WidMod, HeiMod: Integer): TBox; overload;', @_LapeBox_Expand2);
+    addGlobalFunc('function TBox.Expand(WidMod, HeiMod: Integer; MaxBounds: TBox): TBox; overload;', @_LapeBox_Expand4);
+
     addGlobalFunc('function TBox.Contains(Other: TBox): Boolean; overload;', @_LapeBox_Contains1);
     addGlobalFunc('function TBox.Contains(Other: TPoint): Boolean; overload;', @_LapeBox_Contains2);
     addGlobalFunc('function TBox.Contains(X, Y: Integer): Boolean; overload;', @_LapeBox_Contains3);
-    addGlobalFunc('function TBox.Partition(Rows, Cols: Int32): TBoxArray;', @_LapeBox_Partition);
+    addGlobalFunc('function TBox.Partition(Rows, Cols: Integer): TBoxArray;', @_LapeBox_Partition);
     addGlobalFunc('function TBox.Offset(X, Y: Integer): TBox; overload;', @_LapeBox_Offset1);
     addGlobalFunc('function TBox.Offset(P: TPoint): TBox; overload;', @_LapeBox_Offset2);
     addGlobalFunc('function TBox.Combine(Other: TBox): TBox;', @_LapeBox_Combine);
@@ -432,15 +455,15 @@ begin
     addGlobalFunc('function TBox.Height: Integer;', @_LapeBox_Height);
     addGlobalFunc('function TBox.Center: TPoint;', @_LapeBox_Center);
 
-    addGlobalFunc('function TBoxArray.Create(Start: TPoint; Columns, Rows, Width, Height: Int32; Spacing: TPoint): TBoxArray; static;', @_LapeBoxArray_Create);
+    addGlobalFunc('function TBoxArray.Create(Start: TPoint; Columns, Rows, Width, Height: Integer; Spacing: TPoint): TBoxArray; static;', @_LapeBoxArray_Create);
     addGlobalFunc('function TBoxArray.Pack: TBoxArray;', @_LapeBoxArray_Pack);
 
     addGlobalFunc('procedure TBoxArray.SortFrom(From: TPoint);', @_LapeBoxArray_SortFrom);
-    addGlobalFunc('procedure TBoxArray.SortByX(LowToHigh: Boolean);', @_LapeBoxArray_SortByX);
-    addGlobalFunc('procedure TBoxArray.SortByY(LowToHigh: Boolean);', @_LapeBoxArray_SortByY);
-    addGlobalFunc('procedure TBoxArray.SortByWidth(LowToHigh: Boolean);', @_LapeBoxArray_SortByWidth);
-    addGlobalFunc('procedure TBoxArray.SortByHeight(LowToHigh: Boolean);', @_LapeBoxArray_SortByHeight);
-    addGlobalFunc('procedure TBoxArray.SortByArea(LowToHigh: Boolean);', @_LapeBoxArray_SortByArea);
+    addGlobalFunc('procedure TBoxArray.SortByX(LowToHigh: Boolean = True);', @_LapeBoxArray_SortByX);
+    addGlobalFunc('procedure TBoxArray.SortByY(LowToHigh: Boolean = True);', @_LapeBoxArray_SortByY);
+    addGlobalFunc('procedure TBoxArray.SortByWidth(LowToHigh: Boolean = True);', @_LapeBoxArray_SortByWidth);
+    addGlobalFunc('procedure TBoxArray.SortByHeight(LowToHigh: Boolean = True);', @_LapeBoxArray_SortByHeight);
+    addGlobalFunc('procedure TBoxArray.SortByArea(LowToHigh: Boolean = True);', @_LapeBoxArray_SortByArea);
 
     addGlobalFunc('function TBoxArray.Merge: TBox;', @_LapeBoxArray_Merge);
     addGlobalFunc('function TBoxArray.Centers: TPointArray;', @_LapeBoxArray_Centers);
