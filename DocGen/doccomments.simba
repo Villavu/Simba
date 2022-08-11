@@ -6,7 +6,7 @@ var
     DocComment: String;
   end;
 begin
-  Contents := ReadFileContents('Source/script/imports/simba/simba.import_point.pas');
+  Contents := ReadFileContents('Source/script/imports/simba/simba.import_debugimage.pas');
 
   for DocComment in Contents.BetweenAll('(*','*)') do
   begin
@@ -15,10 +15,10 @@ begin
     Contents := Contents.Replace('(*' + DocComment + '*)' + LineEnding, '');
   end;
 
-  for Import in Contents.BetweenAll("addGlobalFunc('", ");" + LineEnding) do
+  for Import in Contents.BetweenAll("addGlobalFunc(", ");" + LineEnding) do
   begin
     WrapperName := Import.After('@');
-    Header := Import.Before("'");
+    Header := Import.Between(#39, #39);
 
     // Strip overload
     if Header.EndsWith('overload') or Header.EndsWith('overload;') then
@@ -43,11 +43,16 @@ begin
       if (Line.Contains('procedure ' + Map[i].WrapperName + '(')) then
       begin
         NewContents += Map[I].DocComment + LineEnding;
+        Map.Delete(I, 1);
         Break;
       end;
 
     NewContents += Line + LineEnding;
   end;
+
+  Map.Reverse();
+  for I := 0 to High(Map) do
+    NewContents := Map[I].DocComment + LineEnding*2 + NewContents;
 
   ClearDebug();
   WriteLn(NewContents);
