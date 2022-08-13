@@ -59,6 +59,7 @@ begin
     addGlobalFunc('function IsKeyDown(Key: Integer): Boolean', @_LapeIsKeyDown);
     addGlobalFunc('function GetKeyCode(C: Char): Integer', @_LapeGetKeyCode);
 
+    pushSection('Virtual Keys');
     addGlobalVar(Integer(0), 'VK_UNKNOWN').isConstant := True;
     addGlobalVar(Integer(1), 'VK_LBUTTON').isConstant := True;
     addGlobalVar(Integer(2), 'VK_RBUTTON').isConstant := True;
@@ -75,17 +76,7 @@ begin
     addGlobalVar(Integer(18), 'VK_MENU').isConstant := True;
     addGlobalVar(Integer(19), 'VK_PAUSE').isConstant := True;
     addGlobalVar(Integer(20), 'VK_CAPITAL').isConstant := True;
-    addGlobalVar(Integer(21), 'VK_KANA').isConstant := True;
-    addGlobalVar(Integer(21), 'VK_HANGUL').isConstant := True;
-    addGlobalVar(Integer(23), 'VK_JUNJA').isConstant := True;
-    addGlobalVar(Integer(24), 'VK_FINAL').isConstant := True;
-    addGlobalVar(Integer(25), 'VK_HANJA').isConstant := True;
-    addGlobalVar(Integer(25), 'VK_KANJI').isConstant := True;
     addGlobalVar(Integer(27), 'VK_ESCAPE').isConstant := True;
-    addGlobalVar(Integer(28), 'VK_CONVERT').isConstant := True;
-    addGlobalVar(Integer(29), 'VK_NONCONVERT').isConstant := True;
-    addGlobalVar(Integer(30), 'VK_ACCEPT').isConstant := True;
-    addGlobalVar(Integer(31), 'VK_MODECHANGE').isConstant := True;
     addGlobalVar(Integer(32), 'VK_SPACE').isConstant := True;
     addGlobalVar(Integer(33), 'VK_PRIOR').isConstant := True;
     addGlobalVar(Integer(34), 'VK_NEXT').isConstant := True;
@@ -204,35 +195,10 @@ begin
     addGlobalVar(Integer(177), 'VK_MEDIA_PREV_TRACK').isConstant := True;
     addGlobalVar(Integer(178), 'VK_MEDIA_STOP').isConstant := True;
     addGlobalVar(Integer(179), 'VK_MEDIA_PLAY_PAUSE').isConstant := True;
-    addGlobalVar(Integer(180), 'VK_LAUNCH_MAIL').isConstant := True;
-    addGlobalVar(Integer(181), 'VK_LAUNCH_MEDIA_SELECT').isConstant := True;
-    addGlobalVar(Integer(182), 'VK_LAUNCH_APP1').isConstant := True;
-    addGlobalVar(Integer(183), 'VK_LAUNCH_APP2').isConstant := True;
-    addGlobalVar(Integer(186), 'VK_OEM_1').isConstant := True;
-    addGlobalVar(Integer(187), 'VK_OEM_PLUS').isConstant := True;
-    addGlobalVar(Integer(188), 'VK_OEM_COMMA').isConstant := True;
-    addGlobalVar(Integer(189), 'VK_OEM_MINUS').isConstant := True;
-    addGlobalVar(Integer(190), 'VK_OEM_PERIOD').isConstant := True;
-    addGlobalVar(Integer(191), 'VK_OEM_2').isConstant := True;
-    addGlobalVar(Integer(192), 'VK_OEM_3').isConstant := True;
-    addGlobalVar(Integer(219), 'VK_OEM_4').isConstant := True;
-    addGlobalVar(Integer(220), 'VK_OEM_5').isConstant := True;
-    addGlobalVar(Integer(221), 'VK_OEM_6').isConstant := True;
-    addGlobalVar(Integer(222), 'VK_OEM_7').isConstant := True;
-    addGlobalVar(Integer(223), 'VK_OEM_8').isConstant := True;
-    addGlobalVar(Integer(226), 'VK_OEM_102').isConstant := True;
-    addGlobalVar(Integer(231), 'VK_PROCESSKEY').isConstant := True;
-    addGlobalVar(Integer(246), 'VK_ATTN').isConstant := True;
-    addGlobalVar(Integer(247), 'VK_CRSEL').isConstant := True;
-    addGlobalVar(Integer(248), 'VK_EXSEL').isConstant := True;
-    addGlobalVar(Integer(249), 'VK_EREOF').isConstant := True;
     addGlobalVar(Integer(250), 'VK_PLAY').isConstant := True;
     addGlobalVar(Integer(251), 'VK_ZOOM').isConstant := True;
-    addGlobalVar(Integer(252), 'VK_NONAME').isConstant := True;
-    addGlobalVar(Integer(253), 'VK_PA1').isConstant := True;
-    addGlobalVar(Integer(254), 'VK_OEM_CLEAR').isConstant := True;
-    addGlobalVar(Integer(254), 'VK_HIGHESTVALUE').isConstant := True;
-    addGlobalVar(Integer(255), 'VK_UNDEFINED').isConstant := True;
+
+    popSection();
 
     popSection();
   end;

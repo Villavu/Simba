@@ -287,7 +287,7 @@ uses
   simba.filebrowserform, simba.notesform, simba.settingsform, simba.colorpicker,
   simba.ci_includecache, simba.scriptformatter,  simba.editor,
   simba.dockinghelpers, simba.datetime, simba.nativeinterface, simba.httpclient,
-  simba.functionlist_simbasection, simba.package, simba.helpers_windowhandle;
+  simba.functionlist_simbasection, simba.package, simba.helpers_windowhandle, simba.functionlist_updater;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 
@@ -593,7 +593,7 @@ begin
       TCodeInsight.AddBaseInclude(Parser);
     end;
 
-    TSimbaFunctionList.AddSection(
+    TSimbaFunctionList.StaticSections.Add(
       TSimbaFunctionList_SimbaSection.Create(TCodeInsight.BaseIncludes)
     );
   except
@@ -611,6 +611,8 @@ begin
   SimbaScriptTabsForm.OnEditorChanged := @HandleEditorChanged;
   SimbaScriptTabsForm.OnEditorCaretChanged := @HandleEditorCaretChange;
   SimbaScriptTabsForm.AddTab();
+
+  SimbaFunctionListUpdater := TSimbaFunctionListUpdater.Create();
 
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
 

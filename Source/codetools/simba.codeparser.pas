@@ -1042,7 +1042,8 @@ begin
     FHeader := FHeader + ';';
 
     for Directive in Directives do
-      FHeader := FHeader + ' ' + LowerCase(TokenName(Directive)) + ';';
+      if (Directive <> tokExternal) then
+        FHeader := FHeader + ' ' + LowerCase(TokenName(Directive)) + ';';
   end;
 
   Result := FHeader;
