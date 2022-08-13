@@ -13,7 +13,7 @@ uses
   classes, sysutils, comctrls, controls, dialogs, lcltype, extctrls, graphics,
   syneditmiscclasses, syneditkeycmds,
   simba.mufasatypes, simba.editor, simba.scriptinstance, simba.codeinsight, simba.codeparser, simba.parameterhint,
-  simba.debuggerform, simba.functionlistform, simba.functionlistupdater;
+  simba.debuggerform, simba.functionlistform;
 
 type
   TSimbaScriptTab = class(TTabSheet)
@@ -25,16 +25,12 @@ type
     FScriptInstance: TSimbaScriptInstance;
     FScriptErrorLine: Int32;
     FFunctionList: TSimbaFunctionList;
-    FFunctionListUpdater: TSimbaFunctionListUpdater;
-    FFunctionListTimer: TTimer;
     FDebuggingForm: TSimbaDebuggerForm;
 
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
     procedure DoHide; override;
     procedure DoShow; override;
-
-    procedure TimerExecute(Sender: TObject);
 
     procedure HandleEditorClick(Sender: TObject);
     procedure HandleEditorChange(Sender: TObject);
@@ -53,7 +49,6 @@ type
   public
     property DebuggingForm: TSimbaDebuggerForm read FDebuggingForm;
     property FunctionList: TSimbaFunctionList read FFunctionList;
-    property FunctionListUpdater: TSimbaFunctionListUpdater read FFunctionListUpdater;
 
     property ScriptInstance: TSimbaScriptInstance read FScriptInstance;
     property ScriptTitle: String read FScriptTitle;
@@ -99,7 +94,7 @@ implementation
 uses
   interfacebase, forms, lazfileutils, lazloggerbase, synedit, syneditmousecmds,
   simba.scripttabsform, simba.autocomplete, simba.settings,
-  simba.scripttabhistory, simba.main, simba.parser_misc, simba.files, simba.helpers_string;
+  simba.scripttabhistory, simba.main, simba.parser_misc, simba.files, simba.helpers_string, simba.functionlist_updater;
 
 procedure TSimbaScriptTab.HandleAutoComplete;
 var
@@ -271,10 +266,7 @@ begin
   inherited DoHide();
 
   if (FFunctionList <> nil) then
-  begin
-    FFunctionListTimer.Enabled := False;
     FFunctionList.Hide();
-  end;
 end;
 
 procedure TSimbaScriptTab.DoShow;
@@ -282,26 +274,13 @@ begin
   inherited DoShow();
 
   if (FFunctionList <> nil) then
-  begin
-    FFunctionListUpdater.ChangeStamp := 0; // Force update
-    FFunctionListTimer.Enabled := True;
     FFunctionList.Show();
-  end;
 
   if (SimbaScriptTabHistory <> nil) then
     SimbaScriptTabHistory.Add(Self);
 
   if (FEditor <> nil) and FEditor.CanSetFocus then
     FEditor.SetFocus();
-end;
-
-procedure TSimbaScriptTab.TimerExecute(Sender: TObject);
-begin
-  if (FFunctionListUpdater = nil) then
-    Exit;
-
-  if (FEditor.ChangeStamp <> FFunctionListUpdater.ChangeStamp) then
-    FFunctionListUpdater.Update(Self.GetParser(), FEditor.ChangeStamp);
 end;
 
 procedure TSimbaScriptTab.HandleEditorClick(Sender: TObject);
@@ -693,24 +672,23 @@ begin
   FEditor.OnSpecialLineMarkup := @HandleEditorSpecialLine;
   FEditor.OnProcessUserCommand := @HandleEditorUserCommand;
 
-  FFunctionList := TSimbaFunctionList.Create(Self);
+  FFunctionList := TSimbaFunctionList.Create();
   FFunctionList.Parent := SimbaFunctionListForm;
   FFunctionList.Align := alClient;
-
-  FFunctionListUpdater := TSimbaFunctionListUpdater.Create(FFunctionList);
-  FFunctionListTimer := TTimer.Create(Self);
-  FFunctionListTimer.Interval := 750;
-  FFunctionListTimer.Enabled := False;
-  FFunctionListTimer.OnTimer := @TimerExecute;
+  //
+  //FFunctionListUpdater := TSimbaFunctionListUpdater.Create(FFunctionList);
+  //FFunctionListTimer := TTimer.Create(Self);
+  //FFunctionListTimer.Interval := 750;
+  //FFunctionListTimer.Enabled := False;
+  //FFunctionListTimer.OnTimer := @TimerExecute;
 
   Reset();
 end;
 
 destructor TSimbaScriptTab.Destroy;
 begin
-  FFunctionListTimer.Enabled := False;
-  if (FFunctionListUpdater <> nil) then
-    FreeAndNil(FFunctionListUpdater);
+  FFunctionList.DecRef();
+  FFunctionList := nil;
 
   if (SimbaScriptTabHistory <> nil) then
     SimbaScriptTabHistory.Clear(Self);

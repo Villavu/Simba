@@ -23,26 +23,23 @@ type
 implementation
 
 uses
-  simba.main, simba.mufasatypes;
+  simba.main, simba.functionlist_nodes;
 
 function TSimbaFunctionList_SimbaSection.Sort(A, B: TTreeNode): Integer;
-var
-  Weights: TIntegerArray;
-  I: Integer;
 begin
-  Result := 0;
+  Result := CompareStr(A.Text, B.Text);
 
-  Weights := [IMAGE_TYPE, IMAGE_CONSTANT, IMAGE_VARIABLE, IMAGE_PROCEDURE, IMAGE_FUNCTION];
-  for I := 0 to High(Weights) do
-  begin
-    if (Weights[I] = A.ImageIndex) then
-      Inc(Result, I+1);
-    if (Weights[I] = B.ImageIndex) then
-      Dec(Result, I+1);
+  case A.ImageIndex of
+    IMAGE_TYPE:     Dec(Result, 2000);
+    IMAGE_CONSTANT: Dec(Result, 1500);
+    IMAGE_VARIABLE: Dec(Result, 1000);
   end;
 
-  if (A.ImageIndex = B.ImageIndex) then
-    Inc(Result, CompareText(A.Text, B.Text));
+  case B.ImageIndex of
+    IMAGE_TYPE:     Inc(Result, 2000);
+    IMAGE_CONSTANT: Inc(Result, 1500);
+    IMAGE_VARIABLE: Inc(Result, 1000);
+  end;
 end;
 
 constructor TSimbaFunctionList_SimbaSection.Create(Includes: TCodeInsight_IncludeArray);
@@ -64,24 +61,27 @@ procedure TSimbaFunctionList_SimbaSection.Add(FunctionList: TSimbaFunctionList);
 var
   Section: TCodeParser;
   SimbaNode, SectionNode: TTreeNode;
+  FileName: String;
 begin
   SimbaNode := FunctionList.TreeView.Items.Add(nil, 'Simba');
   SimbaNode.ImageIndex := IMAGE_DIRECTORY;
   SimbaNode.SelectedIndex := IMAGE_DIRECTORY;
 
-  FunctionList.BeginAddingInternal();
-
   for Section in FSections do
   begin
-    SectionNode := FunctionList.AddFile(SimbaNode, Section.Lexer.FileName);
-    FunctionList.AddDeclarations(
-      Section.Items, SectionNode, False, False, False
-    );
+    if (Section.Items.Count = 0) then
+      Continue;
+
+    FileName := Section.Lexer.FileName;
+    if FileName.StartsWith('https://') or FileName.StartsWith('http://') then
+      SectionNode := FunctionList.AddNode(SimbaNode, TFunctionList_URLNode.Create(FunctionList, FileName))
+    else
+      SectionNode := FunctionList.AddNode(SimbaNode, TFunctionList_InternalFileNode.Create(FunctionList, FileName));
+
+    FunctionList.AddInternalDecls(SectionNode, Section.Items);
 
     SectionNode.CustomSort(@Sort);
   end;
-
-  FunctionList.EndAdddingInternal();
 
   SimbaNode.AlphaSort();
   SimbaNode.Expanded := True;

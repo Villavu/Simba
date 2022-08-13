@@ -114,7 +114,7 @@ begin
       Bitmap.SetSize(Area.Width, Area.Height);
 
       PixelOffset := FileHeader.bfOffset;
-      ScanLineSize := ((Header.Width * Header.BitCount) + 31) div 32 * 4;
+      ScanLineSize := Int64((Header.Width * Header.BitCount) + 31) div 32 * 4;
       Buffer := GetMem(ScanLineSize);
       Index := 0;
 

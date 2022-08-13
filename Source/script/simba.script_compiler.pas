@@ -72,7 +72,7 @@ implementation
 uses
   simba.import_system,
   simba.import_matrix,
-  simba.import_box, simba.import_point,
+  simba.import_box, simba.import_boxarray, simba.import_point,
 
   // LCL
   simba.import_lcl_system, simba.import_lcl_graphics, simba.import_lcl_controls,

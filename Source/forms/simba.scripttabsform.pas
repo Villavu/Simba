@@ -95,7 +95,7 @@ type
     function Open(FileName: String; CheckOtherTabs: Boolean = True): Boolean; overload;
     procedure Open; overload;
 
-    procedure OpenDeclaration(Header: String; StartPos, EndPos, Line: Integer; FileName: String); overload;
+    procedure OpenDeclaration(StartPos, EndPos, Line: Integer; FileName: String); overload;
     procedure OpenInternalDeclaration(Header: String; FileName: String);
     procedure OpenDeclaration(Declaration: TDeclaration); overload;
   end;
@@ -392,7 +392,7 @@ begin
   end;
 end;
 
-procedure TSimbaScriptTabsForm.OpenDeclaration(Header: String; StartPos, EndPos, Line: Integer; FileName: String);
+procedure TSimbaScriptTabsForm.OpenDeclaration(StartPos, EndPos, Line: Integer; FileName: String);
 begin
   if FileExists(FileName) then
     Open(FileName);
