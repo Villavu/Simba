@@ -136,7 +136,7 @@ implementation
 
 uses
   math,
-  simba.client, simba.tpa, simba.helpers_matrix;
+  simba.client, simba.tpa;
 
 var
   Percentage: array[0..255] of Extended;

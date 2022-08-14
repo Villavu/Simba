@@ -46,6 +46,7 @@ begin
     begin
       if (Text[I] <> #39) then
         Continue;
+
       InStr := False;
       Result := 'String' + Result;
     end;
@@ -54,6 +55,7 @@ begin
     begin
       if (Text[I] <> #34) then
         Continue;
+
       InMultiStr := False;
       Result := 'String' + Result;
     end;
@@ -61,7 +63,7 @@ begin
     case Text[i] of
       ')':
         begin
-          if InParams = 0 then
+          if (InParams = 0) and (InIndex = 0) then
             Result := Text[i] + Result;
 
           InParams += 1;
@@ -69,7 +71,7 @@ begin
 
       '(':
         begin
-          if InParams = 1 then
+          if (InParams = 1) and (InIndex = 0) then
             Result := Text[i] + Result;
           if InParams = 0 then
             Break;
@@ -79,29 +81,20 @@ begin
 
       ']':
         begin
-          if (InParams = 0) then
-          begin
+          InIndex += 1;
+          if (InParams = 0) and (InIndex = 1) then
             Result := Text[i] + Result;
-
-            InIndex += 1;
-          end;
         end;
 
       '[':
         begin
-          if InIndex <= 0 then
-            Break;
-
-          if (InParams = 0) then
-          begin
+          InIndex -= 1;
+          if (InParams = 0) and (InIndex = 0) then
             Result := Text[i] + Result;
-
-            InIndex -= 1;
-          end;
         end;
 
       ',':
-        if (InIndex > 0) and (InParams = 0) then
+        if (InIndex > 0) and (InParams = 0) and (InIndex = 1) then
         begin
           Result := Text[i] + Result;
         end;

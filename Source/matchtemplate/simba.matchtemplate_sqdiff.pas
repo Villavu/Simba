@@ -14,8 +14,7 @@ interface
 
 uses
   classes, sysutils, math,
-  simba.mufasatypes, simba.helpers_matrix,
-  simba.matchtemplate, simba.matchtemplate_matrix, simba.matchtemplate_helpers;
+  simba.mufasatypes, simba.matchtemplate, simba.matchtemplate_matrix, simba.matchtemplate_helpers;
 
 function MatchTemplateMask_SQDIFF_CreateCache(Image, Template: TIntegerMatrix): TMatchTemplateCacheBase;
 function MatchTemplateMask_SQDIFF_CreateCache_MT(Image, Template: TIntegerMatrix): TMatchTemplateCacheBase;

@@ -57,7 +57,6 @@ function MatchTemplate(Image, Template: TIntegerMatrix; Formula: ETMFormula): TS
 implementation
 
 uses
-  simba.helpers_matrix,
   simba.matchtemplate_ccorr, simba.matchtemplate_sqdiff, simba.matchtemplate_ccoeff;
 
 procedure Validate(ImageWidth, ImageHeight, TemplateWidth, TemplateHeight: Integer);

@@ -675,12 +675,6 @@ begin
   FFunctionList := TSimbaFunctionList.Create();
   FFunctionList.Parent := SimbaFunctionListForm;
   FFunctionList.Align := alClient;
-  //
-  //FFunctionListUpdater := TSimbaFunctionListUpdater.Create(FFunctionList);
-  //FFunctionListTimer := TTimer.Create(Self);
-  //FFunctionListTimer.Interval := 750;
-  //FFunctionListTimer.Enabled := False;
-  //FFunctionListTimer.OnTimer := @TimerExecute;
 
   Reset();
 end;

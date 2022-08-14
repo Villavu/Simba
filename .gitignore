@@ -15,3 +15,6 @@ build/
 /libcrypto*
 /DocGen/input
 /DocGen/output
+/Source/tests/*.exe
+/Source/tests/lib
+/Source/tests/backup

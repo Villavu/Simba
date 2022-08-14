@@ -94,7 +94,7 @@ implementation
 
 uses
   math,
-  simba.math, simba.slacktree, simba.overallocatearray, simba.geometry, simba.helpers_matrix;
+  simba.math, simba.slacktree, simba.overallocatearray, simba.geometry;
 
 procedure SortTPA(var Arr: TPointArray; var Weights: TDoubleArray; SortUp: Boolean);
 begin

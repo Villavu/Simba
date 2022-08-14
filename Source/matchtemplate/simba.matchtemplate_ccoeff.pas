@@ -14,8 +14,7 @@ interface
 
 uses
   classes, sysutils, math,
-  simba.mufasatypes, simba.helpers_matrix,
-  simba.matchtemplate, simba.matchtemplate_matrix, simba.matchtemplate_helpers;
+  simba.mufasatypes, simba.matchtemplate, simba.matchtemplate_matrix, simba.matchtemplate_helpers;
 
 function MatchTemplate_CCOEFF(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
 function MatchTemplate_CCOEFF_MT(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;

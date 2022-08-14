@@ -16,12 +16,12 @@ uses
   Classes, SysUtils;
 
 type
-  generic TSimbaHeapArray<_T> = class
+  generic TSimbaHeapArray<_T> = record
   public
   type
     TElement = record Value: _T; Index: Int32; end;
     THeap = array of TElement;
-  protected
+  private
     FHeap: THeap;
 
     procedure _MoveDownHI(startPos, Pos: Int32);
@@ -29,12 +29,14 @@ type
     procedure _MoveUpHI(Pos: Int32);
     procedure _MoveUpLO(Pos: Int32);
   public
-    property Data: THeap read FHeap;
+    class operator Initialize(var Self: TSimbaHeapArray);
 
     function Peek: TElement;
 
     procedure Push(Item: _T; idx: Int32; HiLo: Boolean);
     procedure Pop(HiLo: Boolean);
+
+    property Data: THeap read FHeap;
   end;
 
   TSimbaHeapArrayF = specialize TSimbaHeapArray<Single>;
@@ -133,6 +135,11 @@ begin
   FHeap[Pos] := newItem;
 
   _MoveDownLO(startPos, Pos);
+end;
+
+class operator TSimbaHeapArray.Initialize(var Self: TSimbaHeapArray);
+begin
+  Self := Default(TSimbaHeapArray);
 end;
 
 function TSimbaHeapArray.Peek: TElement; inline;
