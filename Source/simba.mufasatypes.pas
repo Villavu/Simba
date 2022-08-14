@@ -137,6 +137,9 @@ type
     {$i boxarray.inc}
     {$i point.inc}
     {$i rgb32.inc}
+    {$i integermatrix.inc}
+    {$i singlematrix.inc}
+    {$i matrix.inc}
   {$UNDEF HEADER}
 
 function Min(const A, B: Integer): Integer; inline; overload;
@@ -175,7 +178,7 @@ implementation
 
 uses
   math,
-  simba.math, simba.overallocatearray, simba.geometry;
+  simba.math, simba.overallocatearray, simba.geometry, simba.heaparray;
 
 {$DEFINE BODY}
   {$i generics.inc}
@@ -183,6 +186,9 @@ uses
   {$i boxarray.inc}
   {$i point.inc}
   {$i rgb32.inc}
+  {$i integermatrix.inc}
+  {$i singlematrix.inc}
+  {$i matrix.inc}
 {$UNDEF BODY}
 
 function Min(const A, B: Integer): Integer;

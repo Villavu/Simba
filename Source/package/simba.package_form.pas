@@ -15,7 +15,7 @@ type
     ImageList: TImageList;
     InstallingButton: TButton;
     ImageList36: TImageList;
-    Label1: TLabel;
+    LoadingLabel: TLabel;
     Notebook1: TNotebook;
     BottomNotebook: TNotebook;
     Page1: TPage;
@@ -49,7 +49,7 @@ type
     procedure DoInstallClick(Sender: TObject);
     procedure DoAdvancedClick(Sender: TObject);
   public
-    constructor Create(TheOwner: TComponent); override;
+    constructor Create(AOwner: TComponent); override;
   end;
 
 var
@@ -60,7 +60,8 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.mufasatypes, simba.package_installform, simba.helpers_string, simba.package_installer, simba.files;
+  simba.mufasatypes, simba.package_installform, simba.helpers_string, simba.package_installer, simba.files,
+  simba.fonthelpers;
 
 procedure TSimbaPackageForm.FormShow(Sender: TObject);
 begin
@@ -253,9 +254,12 @@ begin
   end;
 end;
 
-constructor TSimbaPackageForm.Create(TheOwner: TComponent);
+constructor TSimbaPackageForm.Create(AOwner: TComponent);
 begin
-  inherited Create(TheOwner);
+  inherited Create(AOwner);
+
+  Width := Scale96ToScreen(650);
+  Height := Scale96ToScreen(550);
 
   FInfoBox := TPackageInfoGrid.Create(Self);
   FInfoBox.Parent := ScrollBox1;
@@ -274,7 +278,6 @@ begin
   FVersionBox.AnchorSideTop.Side := asrBottom;
 
   FListBox := TPackageListBox.Create(Self);
-  FListBox.Font.Size := 11;
   FListBox.Parent := ListPanel;
   FListBox.Align := alClient;
   FListBox.BorderSpacing.Around := 8;
@@ -282,10 +285,10 @@ begin
   FListBox.OnInstallClick := @DoInstallClick;
   FListBox.OnAdvancedClick := @DoAdvancedClick;
   FListBox.ImageList := ImageList36;
+  FListBox.Font.Size := SimbaFontHelpers.DefaultFontSize + 1;
 
   ListPanel.Height := Scale96ToScreen(250);
-  Width := Scale96ToScreen(650);
-  Height := Scale96ToScreen(550);
+  LoadingLabel.Font.Size := SimbaFontHelpers.DefaultFontSize + 3;
 
   {$IFDEF WINDOWS}
   OutputSynEdit.Font.Name := 'Consolas';

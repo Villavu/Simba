@@ -14,7 +14,7 @@ interface
 
 uses
   classes, sysutils, math,
-  simba.baseclass, simba.mufasatypes, simba.helpers_matrix, simba.matchtemplate_matrix;
+  simba.baseclass, simba.mufasatypes, simba.matchtemplate_matrix;
 
 type
   TImageSlices = array of TIntegerMatrix;

@@ -263,7 +263,7 @@ end;
 
 class function TSimbaGeometry.PointInTriangle(const P, P1, P2, P3: TPoint): Boolean;
 
-  function Orientation(const P1, P2, P: TPoint): Integer; inline;
+  function Orientation(const P1, P2, P: TPoint): Integer;
   var
     Orin: Double;
   begin

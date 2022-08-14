@@ -14,7 +14,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.mufasatypes, simba.helpers_matrix, simba.matchtemplate,
+  simba.mufasatypes, simba.matchtemplate,
   simba.matchtemplate_matrix, simba.matchtemplate_helpers;
 
 function MatchTemplateMask_CCORR_CreateCache(Image, Template: TIntegerMatrix): TMatchTemplateCacheBase;

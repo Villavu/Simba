@@ -23,7 +23,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.mufasatypes, simba.helpers_matrix;
+  simba.mufasatypes;
 
 type
   TComplex = record
@@ -54,7 +54,6 @@ type
 
     class function Create(const Image: TIntegerMatrix): TRGBMatrix; static;
   end;
-
 
 operator *(const Left: Double; const Mat: TSingleMatrix): TSingleMatrix;
 operator *(const Left: TRGBMatrix; const Right: TRGBMatrix): TRGBMatrix;

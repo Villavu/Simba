@@ -136,8 +136,16 @@ begin
     addGlobalFunc('procedure PauseScript', @_LapePauseScript);
 
     addGlobalFunc(
-      'procedure TerminateScript;', [
+      'procedure TerminateScript; overload;', [
       'begin',
+      '  Halt();',
+      'end;'
+    ]);
+
+    addGlobalFunc(
+      'procedure TerminateScript(Reason: String); overload;', [
+      'begin',
+      '  WriteLn(Reason);',
       '  Halt();',
       'end;'
     ]);

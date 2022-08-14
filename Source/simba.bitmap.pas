@@ -239,7 +239,7 @@ implementation
 uses
   math, intfgraphics, lazloggerbase, simba.overallocatearray, simba.geometry,
   simba.tpa, simba.stringutil, simba.colormath, simba.client, simba.iomanager,
-  simba.helpers_matrix, simba.helpers_string, simba.bitmap_misc, simba.math;
+  simba.helpers_string, simba.bitmap_misc, simba.math;
 
 function GetDrawColor(Color, Index: Integer): Integer; inline;
 const

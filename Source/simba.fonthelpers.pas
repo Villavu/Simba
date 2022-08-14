@@ -14,6 +14,10 @@ uses
 
 type
   TSimbaFontHelpers = record
+  private
+    FDefaultFontSize: Integer;
+  public
+    function DefaultFontSize: Integer;
     function IsFontFixed(Name: String): Boolean;
     function GetFixedFonts: TStringArray;
   end;
@@ -24,7 +28,20 @@ var
 implementation
 
 uses
-  LCLIntf, LCLType;
+  Graphics, LCLIntf, LCLType;
+
+function TSimbaFontHelpers.DefaultFontSize: Integer;
+begin
+  if (FDefaultFontSize = 0) then
+    with TBitmap.Create() do
+    try
+      FDefaultFontSize := Round(-GetFontData(Canvas.Font.Reference.Handle).Height * 72 / Canvas.Font.PixelsPerInch);
+    finally
+      Free();
+    end;
+
+  Result := FDefaultFontSize;
+end;
 
 function FontIsPitched(var Font: TEnumLogFontEx; var Metric: TNewTextMetricEx; FontType: LongInt; Data: LParam): LongInt; stdcall;
 begin
@@ -98,6 +115,8 @@ begin
   end;
 end;
 
+initialization
+  SimbaFontHelpers := Default(TSimbaFontHelpers);
 
 end.
 

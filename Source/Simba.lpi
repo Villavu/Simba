@@ -267,7 +267,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="108">
+    <Units Count="111">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -760,6 +760,18 @@
         <Filename Value="functionlist/simba.functionlist_nodes.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit107>
+      <Unit108>
+        <Filename Value="singlematrix.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit108>
+      <Unit109>
+        <Filename Value="integermatrix.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit109>
+      <Unit110>
+        <Filename Value="matrix.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit110>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
