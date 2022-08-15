@@ -695,6 +695,11 @@ begin
   PSingle(Result)^ := PMufasaBitmap(Params^[0])^.Compare(PMufasaBitmap(Params^[1])^);
 end;
 
+procedure _LapeMufasaBitmap_SaveUnfreedBitmaps(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  TMufasaBitmap.SaveUnfreedBitmaps := PString(Params^[0])^;
+end;
+
 procedure ImportBitmap(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -864,6 +869,8 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.DrawToCanvas(x, y: Integer; Canvas: TCanvas);', @_LapeMufasaBitmap_DrawToCanvas);
     addGlobalFunc('procedure TMufasaBitmap.LoadFromTBitmap(bmp: TBitmap);', @_LapeMufasaBitmap_LoadFromTBitmap);
     addGlobalFunc('function TMufasaBitmap.Compare(Other: TMufasaBitmap): Single;', @_LapeMufasaBitmap_Compare);
+
+    addGlobalFunc('procedure TMufasaBitmap.SaveUnfreedBitmaps(Path: String); static;', @_LapeMufasaBitmap_SaveUnfreedBitmaps);
 
     //addGlobalFunc('procedure TMufasaBitmap.Free;', @_LapeMufasaBitmap_Free);
 

@@ -115,6 +115,7 @@ procedure TIntegerMatrixHelper.Fill(Box: TBox; Value: Integer);
 var
   X, Y: Integer;
 begin
+  Box.Clip(TBox.Create(0, 0, Width - 1, Height - 1));
   for Y := Box.Y1 to Box.Y2 do
     for X := Box.X1 to Box.X2 do
       Self[Y, X] := Value;

@@ -17,6 +17,8 @@ type
   protected
     FName: String;
 
+    procedure NotifyUnfreed; virtual;
+
     function GetName: String;
     procedure SetName(Value: String);
   public
@@ -44,6 +46,14 @@ implementation
 
 uses
   simba.outputform;
+
+procedure TSimbaBaseClass.NotifyUnfreed;
+begin
+  if (Name <> '') then
+    DebugLnHint('%s (%s) "%s"', [ClassName, HexStr(Self), Name])
+  else
+    DebugLnHint('%s (%s)', [ClassName, HexStr(Self)]);
+end;
 
 function TSimbaBaseClass.GetName: String;
 begin
@@ -99,11 +109,7 @@ begin
       DebugLnHint('The following %d objects were not freed:', [FList.Count]);
 
       for I := 0 to FList.Count - 1 do
-        with TSimbaBaseClass(FList[I]) do
-          if (Name <> '') then
-            DebugLnHint('%s (%s) "%s"', [ClassName, HexStr(FList[I]), Name])
-          else
-            DebugLnHint('%s (%s)', [ClassName, HexStr(FList[I])]);
+        TSimbaBaseClass(FList[I]).NotifyUnfreed();
     end;
 
     FList.Free();

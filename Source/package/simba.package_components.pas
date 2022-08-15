@@ -180,7 +180,7 @@ begin
   try
     Canvas.Font := Self.Font;
 
-    ItemHeight := Round(Canvas.TextHeight('Fj') * 3.2);
+    ItemHeight := Round(Canvas.TextHeight('Fj') * 3.5);
 
     FButtonWidth := Round(Canvas.TextWidth('Install') * 3);
     FButtonHeight := Round(Canvas.TextHeight('Fj') * 1.35);

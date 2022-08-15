@@ -60,8 +60,8 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.mufasatypes, simba.package_installform, simba.helpers_string, simba.package_installer, simba.files,
-  simba.fonthelpers;
+  simba.mufasatypes, simba.package_installform, simba.helpers_string,
+  simba.package_installer, simba.files, simba.fonthelpers;
 
 procedure TSimbaPackageForm.FormShow(Sender: TObject);
 begin

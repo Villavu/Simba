@@ -17,7 +17,7 @@ object SimbaPackageForm: TSimbaPackageForm
     Height = 620
     Top = 0
     Width = 978
-    PageIndex = 1
+    PageIndex = 0
     Align = alClient
     TabOrder = 0
     object Page1: TPage
@@ -43,7 +43,7 @@ object SimbaPackageForm: TSimbaPackageForm
         Height = 225
         Top = 395
         Width = 978
-        PageIndex = 1
+        PageIndex = 0
         Align = alClient
         TabOrder = 1
         object PageVersions: TPage
@@ -216,20 +216,20 @@ object SimbaPackageForm: TSimbaPackageForm
       AnchorSideLeft.Side = asrCenter
       AnchorSideTop.Control = Bevel3
       AnchorSideTop.Side = asrBottom
-      Left = 402
+      Left = 401
       Height = 66
       Top = 2
-      Width = 175
+      Width = 176
       AutoSize = True
       BevelOuter = bvNone
       ClientHeight = 66
-      ClientWidth = 175
+      ClientWidth = 176
       TabOrder = 0
       object ToolBar: TToolBar
         Left = 0
         Height = 62
         Top = 2
-        Width = 175
+        Width = 176
         Align = alBottom
         AutoSize = True
         BorderSpacing.Top = 2
@@ -254,7 +254,7 @@ object SimbaPackageForm: TSimbaPackageForm
           OnClick = ButtonRefreshClick
         end
         object ButtonAddRepository: TToolButton
-          Left = 64
+          Left = 65
           Top = 0
           AutoSize = True
           Caption = 'Add Repository'
