@@ -37,6 +37,8 @@ type
     FTextDrawer: TSimbaTextDrawer;
     FClient: TObject;
 
+    procedure NotifyUnfreed; override;
+
     function GetPixel(X, Y: Integer): Integer;
     function GetCenter: TPoint;
     function GetFontAntialiasing: Boolean;
@@ -49,6 +51,8 @@ type
     procedure SetFontAntialiasing(Value: Boolean);
     procedure SetFontName(Value: String);
     procedure SetFontSize(Value: Single);
+  public
+    class var SaveUnfreedBitmaps: ShortString;
   public
     constructor Create; overload;
     constructor Create(AWidth, AHeight: Integer); overload;
@@ -255,6 +259,9 @@ function TMufasaBitmap.SaveToFile(FileName: String): Boolean;
 var
   Image: TLazIntfImage;
 begin
+  if (ExtractFileExt(FileName) = '') then
+    FileName := FileName + '.bmp';
+
   Image := TLazIntfImage.Create(Self.ToRawImage(), False);
   try
     Result := Image.SaveToFile(FileName);
@@ -2433,6 +2440,19 @@ begin
     FData := nil;
 
     SetSize(0, 0);
+  end;
+end;
+
+procedure TMufasaBitmap.NotifyUnfreed;
+begin
+  inherited NotifyUnfreed();
+
+  if (SaveUnfreedBitmaps <> '') then
+  try
+    SaveToFile(IncludeTrailingPathDelimiter(SetDirSeparators(SaveUnfreedBitmaps)) + IntToStr(PtrUInt(Self)) + '.bmp');
+  except
+    on E: Exception do
+      DebugLn(E.ToString);
   end;
 end;
 

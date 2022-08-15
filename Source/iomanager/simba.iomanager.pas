@@ -289,8 +289,8 @@ begin
 
   FFrozen := FImage;
   FFrozen.GetTargetDimensions(Width, Height);
-  with FFrozen.ReturnData(0, 0, Width - 1, Height - 1) do
-    FImage := TRawTarget.Create(Ptr, Width - 1, Height - 1, True); // New image
+  with FFrozen.ReturnData(0, 0, Width, Height) do
+    FImage := TRawTarget.Create(Ptr, Width, Height, True); // New image
 end;
 
 procedure TIOManager.UnFreeze;

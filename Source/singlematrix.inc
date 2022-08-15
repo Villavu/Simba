@@ -8,12 +8,13 @@ type
     function Height: Integer;
     function Area: Integer;
     function GetSize(out AWidth, AHeight: Integer): Boolean;
+    function GetSizeMinusOne(out AWidth, AHeight: Integer): Boolean;
     procedure SetSize(AWidth, AHeight: Integer);
     function Copy: TSingleMatrix;
     function GetValues(Indices: TPointArray): TSingleArray;
     procedure SetValues(Indices: TPointArray;  Values: TSingleArray);
     procedure SetValue(Indices: TPointArray;  Value: Single);
-    procedure Fill(Box: TBox;  Value: Single); overload;
+    procedure Fill(Box: TBox; Value: Single); overload;
     procedure Fill(Value: Single); overload;
     function Flatten: TSingleArray;
     function ToIntegerMatrix: TIntegerMatrix;
@@ -59,6 +60,17 @@ begin
   Result := (AWidth > 0) and (AHeight > 0);
 end;
 
+function TSingleMatrixHelper.GetSizeMinusOne(out AWidth, AHeight: Integer): Boolean;
+begin
+  Result := GetSize(AWidth, AHeight);
+
+  if Result then
+  begin
+    Dec(AWidth);
+    Dec(AHeight);
+  end;
+end;
+
 procedure TSingleMatrixHelper.SetSize(AWidth, AHeight: Integer);
 begin
   SetLength(Self, AHeight, AWidth);
@@ -99,8 +111,7 @@ end;
 
 procedure TSingleMatrixHelper.SetValues(Indices: TPointArray; Values: TSingleArray);
 var
-  Count, I: Integer;
-  W, H: Integer;
+  I, W, H: Integer;
 begin
   if (Length(Values) <> Length(Indices)) then
     raise Exception.Create('SetValues: Length(Indices) <> Length(Values)');
@@ -113,12 +124,11 @@ end;
 
 procedure TSingleMatrixHelper.SetValue(Indices: TPointArray; Value: Single);
 var
-  Count, I: Integer;
-  W, H: Integer;
+  I, W, H: Integer;
 begin
   if Self.GetSize(W, H) then
     for I := 0 to High(Indices) do
-      if (Indices[I].X >= 0) and (Indices[I].Y >= 0) and (Indices[I].X < W)  and (Indices[I].Y < H) then
+      if (Indices[I].X >= 0) and (Indices[I].Y >= 0) and (Indices[I].X < W) and (Indices[I].Y < H) then
         Self[Indices[I].Y, Indices[I].X] := Value;
 end;
 
@@ -126,6 +136,7 @@ procedure TSingleMatrixHelper.Fill(Box: TBox; Value: Single);
 var
   X, Y: Integer;
 begin
+  Box.Clip(TBox.Create(0, 0, Width - 1, Height - 1));
   for Y := Box.Y1 to Box.Y2 do
     for X := Box.X1 to Box.X2 do
       Self[Y, X] := Value;
@@ -177,12 +188,10 @@ begin
   MeanValue := 0;
   Stdev := 0;
 
-  if Self.GetSize(W, H) then
+  if Self.GetSizeMinusOne(W, H) then
   begin
     MeanValue := Self.Mean();
 
-    Dec(W);
-    Dec(H);
     for Y := 0 to H do
       for X := 0 to W do
       begin
@@ -199,30 +208,32 @@ procedure TSingleMatrixHelper.MinMax(out MinValue, MaxValue: Single);
 var
   X, Y, W, H: Integer;
   Value: Single;
+  HasValue: Boolean;
 begin
   MinValue := 0;
   MaxValue := 0;
 
-  if Self.GetSize(W, H) then
+  if Self.GetSizeMinusOne(W, H) then
   begin
-    MinValue := Single.MinValue;
-    MaxValue := Single.MaxValue;
-
-    Dec(W);
-    Dec(H);
+    HasValue := False;
 
     for Y := 0 to H do
       for X := 0 to W do
       begin
         Value := Self[Y, X];
+        if (not IsNumber(Value)) then
+          Continue;
 
-        if IsNumber(Value) then
+        if (not HasValue) then
         begin
-          if (Value > MaxValue) then
-            MaxValue := Value;
-          if (Value < MinValue) then
-            MinValue := Value;
+          MinValue := Value;
+          MaxValue := Value;
+
+          HasValue := True;
         end;
+
+        if (Value < MinValue) then MinValue := Value;
+        if (Value > MaxValue) then MaxValue := Value;
       end;
   end;
 end;
@@ -245,28 +256,25 @@ function TSingleMatrixHelper.ArgMax: TPoint;
 var
   X, Y, W, H: Integer;
   Value, Best: Single;
+  HasValue: Boolean;
 begin
   Result := TPoint.Create(0, 0);
 
-  if Self.GetSize(W, H) then
+  if Self.GetSizeMinusOne(W, H) then
   begin
-    Best := Self[Result.Y, Result.X];
-
-    Dec(W);
-    Dec(H);
+    HasValue := False;
 
     for Y := 0 to H do
       for X := 0 to W do
       begin
         Value := Self[Y, X];
+        if (not IsNumber(Value)) or (HasValue and (Value <= Best)) then
+          Continue;
 
-        if IsNumber(Value) and (Value > Best) then
-        begin
-          Result.X := X;
-          Result.Y := Y;
-
-          Best := Self[Result.Y, Result.X];
-        end;
+        HasValue := True;
+        Best := Value;
+        Result.X := X;
+        Result.Y := Y;
       end;
   end;
 end;
@@ -275,28 +283,25 @@ function TSingleMatrixHelper.ArgMin: TPoint;
 var
   X, Y, W, H: Integer;
   Value, Best: Single;
+  HasValue: Boolean;
 begin
   Result := TPoint.Create(0, 0);
 
-  if Self.GetSize(W, H) then
+  if Self.GetSizeMinusOne(W, H) then
   begin
-    Best := Self[Result.Y, Result.X];
-
-    Dec(W);
-    Dec(H);
+    HasValue := False;
 
     for Y := 0 to H do
       for X := 0 to W do
       begin
         Value := Self[Y, X];
+        if (not IsNumber(Value)) or (HasValue and (Value >= Best)) then
+          Continue;
 
-        if IsNumber(Value) and (Value < Best) then
-        begin
-          Result.X := X;
-          Result.Y := Y;
-
-          Best := Self[Result.Y, Result.X];
-        end;
+        HasValue := True;
+        Best := Value;
+        Result.X := X;
+        Result.Y := Y;
       end;
   end;
 end;
@@ -306,12 +311,10 @@ var
   Lo, Hi, OldRange, NewRange: Single;
   X, Y, W, H: Integer;
 begin
-  Result := Default(TSingleMatrix);
+  Result.SetSize(Self.Width, Self.Height);
 
-  if Self.GetSize(W, H) then
+  if Self.GetSizeMinusOne(W, H) then
   begin
-    Result.SetSize(W, H);
-
     Self.MinMax(Lo, Hi);
 
     OldRange := Hi - Lo;
@@ -319,8 +322,8 @@ begin
     if IsZero(OldRange) then
       Exit;
 
-    for Y := 0 to Height do
-      for X := 0 to Width do
+    for Y := 0 to H do
+      for X := 0 to W do
         if IsNumber(Self[Y, X]) then
           Result[Y, X] := (Self[Y, X] - Lo) / OldRange * NewRange + Alpha;
   end;
@@ -356,11 +359,8 @@ var
 begin
   Result := Default(TPointArray);
 
-  if Self.GetSize(W, H) then
+  if Self.GetSizeMinusOne(W, H) then
   begin
-    W := W - 1;
-    H := H - 1;
-
     case HiLo of
       True:
         for Y := 0 to H do
@@ -404,31 +404,32 @@ begin
   if (Block * Block <= 1) or (Block mod 2 = 0) then
     Exit;
 
-  Data := Self.Copy();
-  W := Self.Width - 1;
-  H := Self.Height - 1;
-  Radius := (block div 2);
-
-  for Y := 0 to H do
+  if Self.GetSizeMinusOne(W, H) then
   begin
-    ly := Math.Max(0, Y-Radius);
-    hy := Math.Min(H, Y+Radius);
+    Data := Self.Copy();
+    Radius := (Block div 2);
 
-    for X := 0 to W do
+    for Y := 0 to H do
     begin
-      lx    := Math.Max(0, X-Radius);
-      hx    := Math.Min(W, X+Radius);
-      Count := 0;
-      Heat  := 0;
+      ly := Math.Max(0, Y-Radius);
+      hy := Math.Min(H, Y+Radius);
 
-      for fy := ly to hy do
-        for fx := lx to hx do
-        begin
-          Heat += data[fy, fx];
-          Count += 1;
-        end;
+      for X := 0 to W do
+      begin
+        lx    := Math.Max(0, X-Radius);
+        hx    := Math.Min(W, X+Radius);
+        Count := 0;
+        Heat  := 0;
 
-      Self[Y, X] := Heat / Count;
+        for fy := ly to hy do
+          for fx := lx to hx do
+          begin
+            Heat += data[fy, fx];
+            Count += 1;
+          end;
+
+        Self[Y, X] := Heat / Count;
+      end;
     end;
   end;
 end;
@@ -440,11 +441,7 @@ var
 begin
   Result := 0;
 
-  if Self.GetSize(W, H) then
-  begin
-    Dec(W);
-    Dec(H);
-
+  if Self.GetSizeMinusOne(W, H) then
     for Y := 0 to H do
       for X := 0 to W do
       begin
@@ -452,6 +449,5 @@ begin
         if IsNumber(Value) then
           Result := Result + Value;
       end;
-  end;
 end;
 {$ENDIF}
