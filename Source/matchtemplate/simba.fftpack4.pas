@@ -14,6 +14,7 @@ unit simba.fftpack4;
   See the License for the specific language governing permissions and
   limitations under the License.
 [==============================================================================}
+{$DEFINE SIMBA_O4}
 {$i simba.inc}
 
 {$MODESWITCH ARRAYOPERATORS OFF}

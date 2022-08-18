@@ -13,7 +13,7 @@ unit simba.matchtemplate_helpers;
 interface
 
 uses
-  classes, sysutils, math,
+  classes, sysutils,
   simba.baseclass, simba.mufasatypes, simba.matchtemplate_matrix;
 
 type
@@ -29,45 +29,12 @@ function FFT2_RGB(Mat: TRGBMatrix): TRGBComplexMatrix;
 
 function CrossCorr(Image, Templ: TSingleMatrix): TSingleMatrix;
 function CrossCorrRGB(Image, Templ: TRGBMatrix): TRGBMatrix; overload;
-function CrossCorrRGB(Mat: TRGBComplexMatrix; Templ: TRGBMatrix): TRGBMatrix; overload;
+function CrossCorrRGB(Image: TRGBComplexMatrix; Templ: TRGBMatrix): TRGBMatrix; overload;
 
 implementation
 
 uses
   simba.FFTPACK4, simba.threadpool;
-
-function FFT2_RGB(Mat: TRGBMatrix): TRGBComplexMatrix;
-var
-  Spec: TComplexMatrix;
-  Width, Height: Integer;
-
-  function GetSpec(Mat: TSingleMatrix): TComplexMatrix;
-  var
-    X, Y: Integer;
-  begin
-    for Y := 0 to Height do
-      for X := 0 to Width do
-      begin
-        Spec[Y, X].Im := 0;
-        Spec[Y, X].Re := Mat[Y, X];
-      end;
-
-    Result := Spec;
-  end;
-
-begin
-  Result.Width  := Mat.Width;
-  Result.Height := Mat.Height;
-
-  Spec.SetSize(FFTPACK.OptimalDFTSize(Result.Width), FFTPACK.OptimalDFTSize(Result.Height));
-
-  Width  := Result.Width - 1;
-  Height := Result.Height - 1;
-
-  Result.R := FFTPACK.FFT2(GetSpec(Mat.R));
-  Result.G := FFTPACK.FFT2(GetSpec(Mat.G));
-  Result.B := FFTPACK.FFT2(GetSpec(Mat.B));
-end;
 
 function DoFFT2(const Matrix: TSingleMatrix; const outW, outH: Integer): TComplexMatrix;
 var
@@ -98,6 +65,16 @@ begin
   for Y := 0 to H do
     for X := 0 to W do
       Result[Y, X] := Spec[Y, X].Re;
+end;
+
+function FFT2_RGB(Mat: TRGBMatrix): TRGBComplexMatrix;
+begin
+  Result.Width  := Mat.Width;
+  Result.Height := Mat.Height;
+
+  Result.R := DoFFT2(Mat.R, Result.Width, Result.Height);
+  Result.G := DoFFT2(Mat.G, Result.Width, Result.Height);
+  Result.B := DoFFT2(Mat.B, Result.Width, Result.Height);
 end;
 
 // -----------------------------------------------------------------------------
@@ -241,23 +218,23 @@ begin
     Result := MatchTemplate(Image, Templ, Normed);
 end;
 
-function CrossCorrRGB(Mat: TRGBComplexMatrix; Templ: TRGBMatrix): TRGBMatrix;
+function CrossCorrRGB(Image: TRGBComplexMatrix; Templ: TRGBMatrix): TRGBMatrix;
 
   function CrossCorr(Channel: TComplexMatrix; Templ: TSingleMatrix): TSingleMatrix;
   begin
     Result := DoIFFT2(
       MulSpectrumConj(
         Channel,
-        DoFFT2(Templ, Mat.Width, Mat.Height)
+        DoFFT2(Templ, Image.Width, Image.Height)
       ),
-      Mat.Width - Templ.Width + 1, Mat.Height - Templ.Height + 1
+      Image.Width - Templ.Width + 1, Image.Height - Templ.Height + 1
     );
   end;
 
 begin
-  Result.R := CrossCorr(Mat.R, Templ.R);
-  Result.G := CrossCorr(Mat.G, Templ.G);
-  Result.B := CrossCorr(Mat.B, Templ.B);
+  Result.R := CrossCorr(Image.R, Templ.R);
+  Result.G := CrossCorr(Image.G, Templ.G);
+  Result.B := CrossCorr(Image.B, Templ.B);
 end;
 
 end.

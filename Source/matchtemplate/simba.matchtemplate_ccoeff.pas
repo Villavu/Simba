@@ -13,7 +13,7 @@ unit simba.matchtemplate_ccoeff;
 interface
 
 uses
-  classes, sysutils, math,
+  classes, sysutils,
   simba.mufasatypes, simba.matchtemplate, simba.matchtemplate_matrix, simba.matchtemplate_helpers;
 
 function MatchTemplate_CCOEFF(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
@@ -38,7 +38,6 @@ type
       ImgFFT: TRGBComplexMatrix;
       MaskChannels: TRGBMatrix;
       MaskSum, MaskSquaredSum: Single;
-      ImgChannels: TRGBMatrix;
       ImgMaskCorr: TSingleMatrix;
       ImgNormCorr: TSingleMatrix;
     end;
@@ -73,15 +72,14 @@ begin
       ImageChannels  := TRGBMatrix.Create(ImageSlices[I]);
       ImageMaskCorr  := CrossCorrRGB(ImageChannels, MaskChannels);
 
-      ImgFFT := FFT2_RGB(ImageChannels);
-
-      ImgChannels := ImageChannels;
       ImgMaskCorr := ImageChannels.Merge();
       ImgNormCorr := Sqrt(
         CrossCorrRGB(ImageChannels * ImageChannels, MaskChannels * MaskChannels) +
                     (ImageMaskCorr * (1 / MaskSum)) *
                     (ImageMaskCorr * (MaskSquaredSum / MaskSum) - CrossCorrRGB(ImageChannels, MaskChannels * MaskChannels) * 2)
         );
+
+      ImgFFT := FFT2_RGB(ImageChannels);
     end;
 end;
 
@@ -109,8 +107,8 @@ begin
   ImgMaskCorr := ImageChannels.Merge();
   ImgNormCorr := Sqrt(
     CrossCorrRGB(ImageChannels * ImageChannels, MaskChannels * MaskChannels) +
-              (ImageMaskCorr * (1 / MaskSum)) *
-              (ImageMaskCorr * (MaskSumSquared / MaskSum) - CrossCorrRGB(ImageChannels, MaskChannels * MaskChannels) * 2)
+                (ImageMaskCorr * (1 / MaskSum)) *
+                (ImageMaskCorr * (MaskSumSquared / MaskSum) - CrossCorrRGB(ImageChannels, MaskChannels * MaskChannels) * 2)
   );
 
   TemplChannels := TRGBMatrix.Create(Template);
