@@ -25,6 +25,11 @@ begin
   PMatchTemplateCacheBase(Result)^ := MatchTemplateCache(PMufasaBitmap(Params^[0])^, PMufasaBitmap(Params^[1])^, PTMFormula(Params^[2])^);
 end;
 
+procedure _LapeMatchTemplateCache_FreeOnTerminate(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PMatchTemplateCacheBase(Params^[0])^.FreeOnTerminate := PBoolean(Params^[1])^;
+end;
+
 procedure _LapeMatchTemplateMaskCache(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PSingleMatrix(Result)^ := MatchTemplateMask(PMatchTemplateCacheBase(Params^[0])^, PIntegerMatrix(Params^[1])^, PTMFormula(Params^[2])^);
@@ -66,6 +71,7 @@ begin
 
     addGlobalFunc('function TMatchTemplateCache.Create(Image, Template: TIntegerMatrix; Formula: ETMFormula): TMatchTemplateCache; static; overload', @_LapeMatchTemplateCache_Create);
     addGlobalFunc('function TMatchTemplateCache.Create(Image, Template: TMufasaBitmap; Formula: ETMFormula): TMatchTemplateCache; static; overload', @_LapeMatchTemplateCache_CreateEx);
+    addGlobalFunc('procedure TMatchTemplateCache.FreeOnTerminate(Enable: Boolean);', @_LapeMatchTemplateCache_FreeOnTerminate);
 
     addGlobalFunc('function MatchTemplateMask(Cache: TMatchTemplateCache; Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix; overload', @_LapeMatchTemplateMaskCache);
     addGlobalFunc('function MatchTemplateMask(Cache: TMatchTemplateCache; Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix; overload', @_LapeMatchTemplateMaskCacheEx);

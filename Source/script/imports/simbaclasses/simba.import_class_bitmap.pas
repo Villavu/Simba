@@ -700,6 +700,11 @@ begin
   TMufasaBitmap.SaveUnfreedBitmaps := PString(Params^[0])^;
 end;
 
+procedure _LapeMufasaBitmap_FreeOnTerminate(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PMufasaBitmap(Params^[0])^.FreeOnTerminate := PBoolean(Params^[1])^;
+end;
+
 procedure ImportBitmap(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -871,6 +876,7 @@ begin
     addGlobalFunc('function TMufasaBitmap.Compare(Other: TMufasaBitmap): Single;', @_LapeMufasaBitmap_Compare);
 
     addGlobalFunc('procedure TMufasaBitmap.SaveUnfreedBitmaps(Path: String); static;', @_LapeMufasaBitmap_SaveUnfreedBitmaps);
+    addGlobalFunc('procedure TMufasaBitmap.FreeOnTerminate(Value: Boolean);', @_LapeMufasaBitmap_FreeOnTerminate);
 
     //addGlobalFunc('procedure TMufasaBitmap.Free;', @_LapeMufasaBitmap_Free);
 

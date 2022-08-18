@@ -16,6 +16,7 @@ type
   TSimbaBaseClass = class
   protected
     FName: String;
+    FFreeOnTerminate: Boolean;
 
     procedure NotifyUnfreed; virtual;
 
@@ -26,6 +27,7 @@ type
     destructor Destroy; override;
 
     property Name: String read GetName write SetName;
+    property FreeOnTerminate: Boolean read FFreeOnTerminate write FFreeOnTerminate;
   end;
 
   TSimbaObjectTracker = class
@@ -106,10 +108,17 @@ begin
   begin
     if (FList.Count > 0) then
     begin
-      DebugLnHint('The following %d objects were not freed:', [FList.Count]);
+      for I := FList.Count - 1 downto 0 do
+        if TSimbaBaseClass(FList[I]).FreeOnTerminate then
+          TSimbaBaseClass(FList[I]).Free();
 
-      for I := 0 to FList.Count - 1 do
-        TSimbaBaseClass(FList[I]).NotifyUnfreed();
+      if (FList.Count > 0) then
+      begin
+        DebugLnHint('The following %d objects were not freed:', [FList.Count]);
+
+        for I := 0 to FList.Count - 1 do
+          TSimbaBaseClass(FList[I]).NotifyUnfreed();
+      end;
     end;
 
     FList.Free();
