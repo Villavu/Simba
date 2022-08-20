@@ -42,7 +42,6 @@ implementation
 {$R *.lfm}
 
 uses
-  openssl,
   simba.settings, simba.fonthelpers;
 
 procedure TSimbaSettingsForm.TreeViewClick(Sender: TObject);
@@ -55,7 +54,7 @@ procedure TSimbaSettingsForm.FormShow(Sender: TObject);
 begin
   if (EditorFontFrame.FontsNameComboBox.Items.Count = 0) then
   begin
-    EditorFontFrame.FontsNameComboBox.Items.AddStrings(SimbaFontHelpers.GetFixedFonts());
+    EditorFontFrame.FontsNameComboBox.Items.AddStrings(GetFixedFonts());
     EditorFontFrame.FontsNameComboBox.ItemIndex := EditorFontFrame.FontsNameComboBox.Items.IndexOf(SimbaSettings.Editor.FontName.Value);
     if (EditorFontFrame.FontsNameComboBox.ItemIndex < 0) then
       EditorFontFrame.FontsNameComboBox.ItemIndex := 0;

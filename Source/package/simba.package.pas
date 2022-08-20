@@ -48,6 +48,7 @@ type
     FVersions: TSimbaPackageVersionArray;
     FVersionsNoBranch: TSimbaPackageVersionArray;
 
+    procedure ClearConfig;
     procedure WriteConfig(Key: String; Value: String);
     function ReadConfig(Key: String): String;
 
@@ -81,6 +82,7 @@ type
     property LatestVersionTime: TDateTime read GetLatestVersionTime;
 
     function IsInstalled: Boolean;
+    function UnInstall: Boolean;
 
     function HasUpdate: Boolean;
     function HasVersions: Boolean;
@@ -274,6 +276,30 @@ begin
     Result := '';
 end;
 
+procedure TSimbaPackage.ClearConfig;
+var
+  Keys: TStringList;
+  Key: String;
+begin
+  Keys := TStringList.Create();
+
+  try
+    with TIniFile.Create(GetPackagePath() + 'packages.ini') do
+    try
+      ReadSection(FURL, Keys);
+      for Key in Keys do
+        DeleteKey(FURL, Key);
+    finally
+      Free();
+    end;
+  except
+    on E: Exception do
+      DebugLn('[TSimbaPackage.ClearConfig]: %s', [E.ToString()]);
+  end;
+
+  Keys.Free();
+end;
+
 procedure TSimbaPackage.WriteConfig(Key: String; Value: String);
 begin
   try
@@ -307,7 +333,7 @@ end;
 
 function TSimbaPackage.GetInstalledPath: String;
 begin
-  Result := ReadConfig('InstalledPath');
+  Result := CleanAndExpandDirectory(ReadConfig('InstalledPath'));
 end;
 
 procedure TSimbaPackage.SetInstalledPath(Value: String);
@@ -367,6 +393,13 @@ end;
 function TSimbaPackage.IsInstalled: Boolean;
 begin
   Result := (InstalledVersion <> '') and DirectoryExists(InstalledPath);
+end;
+
+function TSimbaPackage.UnInstall: Boolean;
+begin
+  Result := (not IsInstalled()) or DeleteDirectory(InstalledPath, False);
+  if Result then
+    ClearConfig();
 end;
 
 function TSimbaPackage.HasUpdate: Boolean;

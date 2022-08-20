@@ -1,7 +1,7 @@
 object SimbaPackageForm: TSimbaPackageForm
-  Left = 1012
+  Left = 1486
   Height = 688
-  Top = 379
+  Top = 323
   Width = 978
   Caption = 'Simba Packages'
   ClientHeight = 688
@@ -11,6 +11,7 @@ object SimbaPackageForm: TSimbaPackageForm
   DesignTimePPI = 120
   OnShow = FormShow
   Position = poMainFormCenter
+  ShowInTaskBar = stAlways
   LCLVersion = '2.2.2.0'
   object Notebook1: TNotebook
     Left = 0
@@ -71,7 +72,7 @@ object SimbaPackageForm: TSimbaPackageForm
             Width = 954
             Align = alClient
             BorderSpacing.Around = 12
-            Font.Height = -17
+            Font.Height = -13
             Font.Name = 'Courier New'
             Font.Pitch = fpFixed
             Font.Quality = fqCleartypeNatural
@@ -79,7 +80,7 @@ object SimbaPackageForm: TSimbaPackageForm
             ParentFont = False
             TabOrder = 0
             Gutter.Visible = False
-            Gutter.Width = 72
+            Gutter.Width = 68
             Gutter.MouseActions = <>
             RightGutter.Width = 0
             RightGutter.MouseActions = <>
@@ -126,7 +127,7 @@ object SimbaPackageForm: TSimbaPackageForm
                 MouseActions = <>
               end
               object SynGutterLineNumber1: TSynGutterLineNumber
-                Width = 21
+                Width = 17
                 MouseActions = <>
                 MarkupInfo.Background = clBtnFace
                 MarkupInfo.Foreground = clNone

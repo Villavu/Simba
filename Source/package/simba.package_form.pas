@@ -61,7 +61,7 @@ implementation
 
 uses
   simba.mufasatypes, simba.package_installform, simba.helpers_string,
-  simba.package_installer, simba.files, simba.fonthelpers;
+  simba.package_installer, simba.files, simba.fonthelpers, simba.dialog;
 
 procedure TSimbaPackageForm.FormShow(Sender: TObject);
 begin
@@ -240,18 +240,32 @@ begin
 end;
 
 procedure TSimbaPackageForm.DoAdvancedClick(Sender: TObject);
+var
+  Package: TSimbaPackage;
 begin
-  if (FListBox.Selected <> nil) and FListBox.Selected.HasVersions() then
-  begin
-    with TSimbaPackageInstallForm.Create(Self, FListBox.Selected) do
-    try
-      ShowModal();
-    finally
-      Free();
-    end;
+  Package := FListBox.Selected;
+  if (Package = nil) then
+    Exit;
 
-    DoPackageSelectionChanged(Self, True); // update new visible info
+  case Package.IsInstalled() of
+    True:
+      if SimbaQuestionDlg(
+        'Uninstall Package',
+        'Are you sure you want to uninstall "' + Package.Info.FullName + '" ?' + LineEnding +
+        'This will remove the entire directory "' + Package.InstalledPath + '"')
+      then
+        Package.UnInstall();
+
+    False:
+      with TSimbaPackageInstallForm.Create(Self, Package) do
+      try
+        ShowModal();
+      finally
+        Free();
+      end;
   end;
+
+  DoPackageSelectionChanged(Self, True); // update new visible info
 end;
 
 constructor TSimbaPackageForm.Create(AOwner: TComponent);
@@ -259,7 +273,7 @@ begin
   inherited Create(AOwner);
 
   Width := Scale96ToScreen(650);
-  Height := Scale96ToScreen(550);
+  Height := Scale96ToScreen(600);
 
   FInfoBox := TPackageInfoGrid.Create(Self);
   FInfoBox.Parent := ScrollBox1;
@@ -285,11 +299,12 @@ begin
   FListBox.OnInstallClick := @DoInstallClick;
   FListBox.OnAdvancedClick := @DoAdvancedClick;
   FListBox.ImageList := ImageList36;
-  FListBox.Font.Size := SimbaFontHelpers.DefaultFontSize + 1;
+  FListBox.Font.Size := GetDefaultFontSize() + 1;
 
-  ListPanel.Height := Scale96ToScreen(250);
-  LoadingLabel.Font.Size := SimbaFontHelpers.DefaultFontSize + 3;
+  ListPanel.Height := Scale96ToScreen(260);
+  LoadingLabel.Font.Size := GetDefaultFontSize() + 3;
 
+  OutputSynEdit.Font.Size := GetDefaultFontSize() + 1;
   {$IFDEF WINDOWS}
   OutputSynEdit.Font.Name := 'Consolas';
   {$ENDIF}

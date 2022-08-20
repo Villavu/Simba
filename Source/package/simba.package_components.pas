@@ -112,8 +112,8 @@ uses
 
 const
   pkgGridLineColor = $CCCCCC;
-  pkgHeader = $CCCCCC;
-  pkgSubHeader = $DEDEDE;
+  pkgHeader        = $CCCCCC;
+  pkgSubHeader     = $DEDEDE;
 
 function TPackageListBox.GetSelected: TSimbaPackage;
 begin
@@ -180,10 +180,10 @@ begin
   try
     Canvas.Font := Self.Font;
 
-    ItemHeight := Round(Canvas.TextHeight('Fj') * 3.5);
+    ItemHeight := Round(Canvas.TextHeight('Fj') * 3.6);
 
-    FButtonWidth := Round(Canvas.TextWidth('Install') * 3);
-    FButtonHeight := Round(Canvas.TextHeight('Fj') * 1.35);
+    FButtonWidth := Round(Canvas.TextWidth('Custom Install') * 1.3);
+    FButtonHeight := Round(Canvas.TextHeight('Fj') * 1.4);
   finally
     Free();
   end;
@@ -191,7 +191,7 @@ end;
 
 procedure TPackageListBox.DoDrawItem(Control: TWinControl; Index: Integer; ARect: TRect; State: TOwnerDrawState);
 
-  procedure PaintButton(ButtonRect: TRect; ButtonText: String; ButtonType: TThemedButton);
+  procedure PaintButton(ButtonRect: TRect; ButtonText: String; ButtonType: TThemedButton; FontColor: TColor; FontStyles: TFontStyles);
   var
     TextStyle: TTextStyle;
   begin
@@ -205,6 +205,8 @@ procedure TPackageListBox.DoDrawItem(Control: TWinControl; Index: Integer; ARect
     TextStyle.Layout := tlCenter;
     TextStyle.Opaque := False;
 
+    FBuffer.Canvas.Font.Color := FontColor;
+    FBuffer.Canvas.Font.Style := FontStyles;
     FBuffer.Canvas.TextRect(ButtonRect, ButtonRect.Left, ButtonRect.Top, ButtonText, TextStyle);
   end;
 
@@ -250,36 +252,37 @@ begin
 
   if Package.HasUpdate() then
   begin
-    FBuffer.Canvas.Font.Bold := True;
-
     if (FHotInstallButtonIndex = Index) then
-      PaintButton(GetInstallButtonRect(ARect), 'Update', tbPushButtonHot)
+      PaintButton(GetInstallButtonRect(ARect), 'Update', tbPushButtonHot, clBlack, [fsBold])
     else
-      PaintButton(GetInstallButtonRect(ARect), 'Update', tbPushButtonNormal);
+      PaintButton(GetInstallButtonRect(ARect), 'Update', tbPushButtonNormal, clBlack, [fsBold]);
+
+    if (FHotAdvancedButtonIndex = Index) then
+      PaintButton(GetAdvancedButtonRect(ARect), 'Uninstall', tbPushButtonHot, clBlack, [])
+    else
+      PaintButton(GetAdvancedButtonRect(ARect), 'Uninstall', tbPushButtonNormal, clBlack, []);
   end
   else if Package.IsInstalled() then
   begin
-    FBuffer.Canvas.Font.Color := clGray;
-    FBuffer.Canvas.Font.Bold := False;
+    PaintButton(GetInstallButtonRect(ARect), 'Up to date', tbPushButtonDisabled, clGray, []);
 
-    PaintButton(GetInstallButtonRect(ARect), 'Installed', tbPushButtonDisabled);
-  end
-  else begin
-    FBuffer.Canvas.Font.Bold := False;
-
-    if (FHotInstallButtonIndex = Index) then
-      PaintButton(GetInstallButtonRect(ARect), 'Install', tbPushButtonHot)
+    if (FHotAdvancedButtonIndex = Index) then
+      PaintButton(GetAdvancedButtonRect(ARect), 'Uninstall', tbPushButtonHot, clBlack, [])
     else
-      PaintButton(GetInstallButtonRect(ARect), 'Install', tbPushButtonNormal);
-  end;
-
-  FBuffer.Canvas.Font.Color := clBlack;
-  FBuffer.Canvas.Font.Bold := False;
-
-  if (FHotAdvancedButtonIndex = Index) then
-    PaintButton(GetAdvancedButtonRect(ARect), 'Advanced', tbPushButtonHot)
+      PaintButton(GetAdvancedButtonRect(ARect), 'Uninstall', tbPushButtonNormal, clBlack, []);
+  end
   else
-    PaintButton(GetAdvancedButtonRect(ARect), 'Advanced', tbPushButtonNormal);
+  begin
+    if (FHotInstallButtonIndex = Index) then
+      PaintButton(GetInstallButtonRect(ARect), 'Install', tbPushButtonHot, clBlack, [])
+    else
+      PaintButton(GetInstallButtonRect(ARect), 'Install', tbPushButtonNormal, clBlack, []);
+
+    if (FHotAdvancedButtonIndex = Index) then
+      PaintButton(GetAdvancedButtonRect(ARect), 'Custom Install', tbPushButtonHot, clBlack, [])
+    else
+      PaintButton(GetAdvancedButtonRect(ARect), 'Custom Install', tbPushButtonNormal, clBlack, []);
+  end;
 
   DescRect.Top    := 10 + Canvas.TextHeight(Package.Info.Name);
   DescRect.Left   := 55+1;

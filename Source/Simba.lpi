@@ -267,7 +267,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="111">
+    <Units Count="112">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -772,6 +772,13 @@
         <Filename Value="matrix.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit110>
+      <Unit111>
+        <Filename Value="forms/simba.dialog.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SimbaDialogForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit111>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
