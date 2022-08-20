@@ -12,35 +12,23 @@ interface
 uses
   Classes, SysUtils;
 
-type
-  TSimbaFontHelpers = record
-  private
-    FDefaultFontSize: Integer;
-  public
-    function DefaultFontSize: Integer;
-    function IsFontFixed(Name: String): Boolean;
-    function GetFixedFonts: TStringArray;
-  end;
-
-var
-  SimbaFontHelpers: TSimbaFontHelpers;
+function GetDefaultFontSize: Integer;
+function IsFontFixed(FontName: String): Boolean;
+function GetFixedFonts: TStringArray;
 
 implementation
 
 uses
   Graphics, LCLIntf, LCLType;
 
-function TSimbaFontHelpers.DefaultFontSize: Integer;
+function GetDefaultFontSize: Integer;
 begin
-  if (FDefaultFontSize = 0) then
-    with TBitmap.Create() do
-    try
-      FDefaultFontSize := Round(-GetFontData(Canvas.Font.Reference.Handle).Height * 72 / Canvas.Font.PixelsPerInch);
-    finally
-      Free();
-    end;
-
-  Result := FDefaultFontSize;
+  with TBitmap.Create() do
+  try
+    Result := Round((GetFontData(Canvas.Font.Reference.Handle).Height * 72 / Canvas.Font.PixelsPerInch) * -1);
+  finally
+    Free();
+  end;
 end;
 
 function FontIsPitched(var Font: TEnumLogFontEx; var Metric: TNewTextMetricEx; FontType: LongInt; Data: LParam): LongInt; stdcall;
@@ -61,18 +49,18 @@ begin
       TStringList(PtrUInt(Data)).Add(lfFaceName);
 end;
 
-function TSimbaFontHelpers.IsFontFixed(Name: String): Boolean;
+function IsFontFixed(FontName: String): Boolean;
 var
   DC: HDC;
   Font: TLogFont;
 begin
   Result := False;
-  if (Name = '') then
+  if (FontName = '') then
     Exit;
 
   Font := Default(TLogFont);
   Font.lfCharSet := DEFAULT_CHARSET;
-  Font.lfFaceName := PChar(Name);
+  Font.lfFaceName := PChar(FontName);
   Font.lfPitchAndFamily := {$IFDEF LINUX}FIXED_PITCH{$ELSE}0{$ENDIF};
 
   DC := GetDC(0);
@@ -84,7 +72,7 @@ begin
   end;
 end;
 
-function TSimbaFontHelpers.GetFixedFonts: TStringArray;
+function GetFixedFonts: TStringArray;
 var
   DC: HDC;
   Font: TLogFont;
@@ -114,9 +102,6 @@ begin
     Strings.Free();
   end;
 end;
-
-initialization
-  SimbaFontHelpers := Default(TSimbaFontHelpers);
 
 end.
 

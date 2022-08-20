@@ -52,6 +52,7 @@ const
   IMAGE_GITHUB              = 34;
   IMAGE_CONSTANT            = 35;
   IMAGE_VARIABLE            = 36;
+  IMAGE_OPERATOR            = 39;
 
 type
   TSimbaForm = class(TForm)

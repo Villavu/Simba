@@ -418,7 +418,7 @@ begin
 
     'General.OutputFontName':
       begin
-        if SimbaFontHelpers.IsFontFixed(Setting.Value) then
+        if IsFontFixed(Setting.Value) then
           FOutputBox.Font.Name := Setting.Value;
       end;
 

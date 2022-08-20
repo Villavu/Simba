@@ -208,7 +208,7 @@ begin
 
   if (Setting = SimbaSettings.Editor.FontName) then
   begin
-    if SimbaFontHelpers.IsFontFixed(Setting.Value) then
+    if IsFontFixed(Setting.Value) then
       Font.Name := Setting.Value;
   end;
 

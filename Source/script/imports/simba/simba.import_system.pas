@@ -125,6 +125,7 @@ begin
     addGlobalVar(GetFontPath(), 'FontPath').isConstant := True;
     addGlobalVar(GetSimbaPath(), 'AppPath').isConstant := True;
     addGlobalVar(GetScriptPath(), 'ScriptPath').isConstant := True;
+    addGlobalVar(GetDataPath(), 'DataPath').isConstant := True;
 
     addGlobalFunc('function GetProcessorCount: Integer', @_LapeGetProcessorCount);
     addGlobalFunc('function GetMainThreadID: PtrUInt', @_LapeGetMainThreadID);
@@ -151,7 +152,7 @@ begin
     ]);
 
     addGlobalFunc(
-      'procedure MemMove(constref Src; var Dst; Size: SizeInt);', [
+      'procedure MemMove(constref Src; var Dst; Size: SizeInt); deprecated;', [
       'begin',
       '  Move(Src, Dst, Size);',
       'end;'

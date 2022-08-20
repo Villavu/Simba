@@ -39,7 +39,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.files, simba.helpers_string;
+  simba.files, simba.helpers_string, simba.fonthelpers;
 
 constructor TSimbaPackageInstallForm.Create(AOwner: TComponent; APackage: TSimbaPackage);
 var
@@ -47,6 +47,7 @@ var
 begin
   inherited Create(AOwner);
 
+  Output.Font.Size := GetDefaultFontSize() + 1;
   {$IFDEF WINDOWS}
   Output.Font.Name := 'Consolas';
   {$ENDIF}

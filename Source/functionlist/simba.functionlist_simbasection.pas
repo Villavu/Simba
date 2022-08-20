@@ -30,15 +30,19 @@ begin
   Result := CompareStr(A.Text, B.Text);
 
   case A.ImageIndex of
-    IMAGE_TYPE:     Dec(Result, 2000);
-    IMAGE_CONSTANT: Dec(Result, 1500);
-    IMAGE_VARIABLE: Dec(Result, 1000);
+    IMAGE_TYPE:      Dec(Result, 2000);
+    IMAGE_CONSTANT:  Dec(Result, 1500);
+    IMAGE_VARIABLE:  Dec(Result, 1000);
+    IMAGE_PROCEDURE: Dec(Result, 500);
+    IMAGE_FUNCTION:  Dec(Result, 500);
   end;
 
   case B.ImageIndex of
-    IMAGE_TYPE:     Inc(Result, 2000);
-    IMAGE_CONSTANT: Inc(Result, 1500);
-    IMAGE_VARIABLE: Inc(Result, 1000);
+    IMAGE_TYPE:      Inc(Result, 2000);
+    IMAGE_CONSTANT:  Inc(Result, 1500);
+    IMAGE_VARIABLE:  Inc(Result, 1000);
+    IMAGE_PROCEDURE: Inc(Result, 500);
+    IMAGE_FUNCTION:  Inc(Result, 500);
   end;
 end;
 

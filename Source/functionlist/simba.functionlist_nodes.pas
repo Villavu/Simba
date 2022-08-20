@@ -134,18 +134,25 @@ begin
           Text := TciProcedureDeclaration(ADecl).ObjectName + '.' + Text;
         Hint := TciProcedureDeclaration(ADecl).Header;
 
-        case TciProcedureDeclaration(ADecl).IsFunction of
-          True:
-            begin
-              ImageIndex    := IMAGE_FUNCTION;
-              SelectedIndex := IMAGE_FUNCTION;
-            end;
+        if TciProcedureDeclaration(ADecl).IsOperator then
+        begin
+          ImageIndex    := IMAGE_OPERATOR;
+          SelectedIndex := IMAGE_OPERATOR;
+        end else
+        begin
+          case TciProcedureDeclaration(ADecl).IsFunction of
+            True:
+              begin
+                ImageIndex    := IMAGE_FUNCTION;
+                SelectedIndex := IMAGE_FUNCTION;
+              end;
 
-          False:
-            begin
-              ImageIndex    := IMAGE_PROCEDURE;
-              SelectedIndex := IMAGE_PROCEDURE;
-            end;
+            False:
+              begin
+                ImageIndex    := IMAGE_PROCEDURE;
+                SelectedIndex := IMAGE_PROCEDURE;
+              end;
+          end;
         end;
       end;
 
