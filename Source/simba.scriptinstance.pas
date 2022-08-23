@@ -141,8 +141,6 @@ begin
     end;
   end;
 
-  SimbaOutputForm.ScrollToBottom();
-
   Self.Free();
 end;
 

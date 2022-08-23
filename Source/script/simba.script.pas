@@ -77,7 +77,7 @@ uses
 
 procedure TSimbaScript.DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
-  DebugLnHint(Hint);
+  SimbaDebugLn(ESimbaDebugLn.YELLOW, Hint);
 end;
 
 function TSimbaScript.DoCompilerFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;

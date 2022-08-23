@@ -47,14 +47,14 @@ var
 implementation
 
 uses
-  simba.outputform;
+  simba.mufasatypes;
 
 procedure TSimbaBaseClass.NotifyUnfreed;
 begin
   if (Name <> '') then
-    DebugLnHint('%s (%s) "%s"', [ClassName, HexStr(Self), Name])
+    SimbaDebugLn(ESimbaDebugLn.YELLOW, '%s (%s) "%s"', [ClassName, HexStr(Self), Name])
   else
-    DebugLnHint('%s (%s)', [ClassName, HexStr(Self)]);
+    SimbaDebugLn(ESimbaDebugLn.YELLOW, '%s (%s)', [ClassName, HexStr(Self)]);
 end;
 
 function TSimbaBaseClass.GetName: String;
@@ -114,7 +114,7 @@ begin
 
       if (FList.Count > 0) then
       begin
-        DebugLnHint('The following %d objects were not freed:', [FList.Count]);
+        SimbaDebugLn(ESimbaDebugLn.YELLOW, 'The following %d objects were not freed:', [FList.Count]);
 
         for I := 0 to FList.Count - 1 do
           TSimbaBaseClass(FList[I]).NotifyUnfreed();
@@ -131,7 +131,8 @@ initialization
   SimbaObjectTracker := TSimbaObjectTracker.Create();
 
 finalization
-  SimbaObjectTracker.Free();
+  if Assigned(SimbaObjectTracker) then
+    FreeAndNil(SimbaObjectTracker);
 
 end.
 
