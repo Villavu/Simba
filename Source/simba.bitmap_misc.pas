@@ -59,7 +59,7 @@ type
 
   PRGB24 = ^TRGB24;
   TRGB24 = packed record
-    B, G, R : byte;
+    B, G, R : Byte;
   end;
 
 procedure LoadBitmapAreaFromFile(Bitmap: TMufasaBitmap; FileName: String; Area: TBox);

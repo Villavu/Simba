@@ -20,6 +20,10 @@ type
 
     procedure SetAlign(Value: TAlign); override;
   public
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+    procedure MouseMove(Shift: TShiftState; X,Y: Integer); override;
+    procedure MouseLeave;  override;
+
     constructor Create(AOwner: TComponent); override;
   end;
 
@@ -27,11 +31,11 @@ type
   protected
     FMenuItem: TMenuItem;
     FNeedDefaultPosition: Boolean;
-    FMaxWidth, FMaxHeight: Integer;
 
-    procedure DoWindowStateChanged(Sender: TObject);
     procedure DoMenuItemDestroyed(Sender: TObject);
     procedure DoMenuItemClicked(Sender: TObject);
+
+    function GetHeader: TSimbaAnchorDockHeader;
 
     procedure SetMenuItem(Value: TMenuItem);
     procedure SetVisible(Value: Boolean); override;
@@ -43,12 +47,13 @@ type
 
     property MenuItem: TMenuItem read FMenuItem write SetMenuItem;
     property NeedDefaultPosition: Boolean read FNeedDefaultPosition write FNeedDefaultPosition;
+    property Header: TSimbaAnchorDockHeader read GetHeader;
   end;
 
   TSimbaAnchorDockSplitter = class(TAnchorDockSplitter)
   protected
   const
-    GRIPPER_SIZE = 100;
+    GRIPPER_SIZE = 75;
   protected
     procedure Paint; override;
   end;
@@ -57,7 +62,7 @@ type
   private
     procedure OnFormClose(Sender: TObject; var CloseAction: TCloseAction);
   public
-    procedure MakeDockable(Form: TCustomForm; MenuItem: TMenuItem);
+    procedure MakeDockable(Form: TCustomForm; MenuItem: TMenuItem; AddDockHeader: Boolean = True);
     procedure ManualDockPanel(SrcSite: TAnchorDockHostSite; TargetPanel: TAnchorDockPanel; Align: TAlign; TargetControl: TControl = nil);
 
     function SaveLayout: String;
@@ -85,6 +90,21 @@ begin
   inherited SetAlign(alTop);
 end;
 
+procedure TSimbaAnchorDockHeader.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  inherited MouseDown(Button, Shift, X, Y);
+end;
+
+procedure TSimbaAnchorDockHeader.MouseMove(Shift: TShiftState; X, Y: Integer);
+begin
+  inherited MouseMove(Shift, X, Y);
+end;
+
+procedure TSimbaAnchorDockHeader.MouseLeave;
+begin
+  inherited MouseLeave();
+end;
+
 constructor TSimbaAnchorDockHeader.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -98,32 +118,9 @@ begin
   BorderSpacing.Bottom := 2;
 end;
 
-procedure TSimbaAnchorDockHostSite.DoWindowStateChanged(Sender: TObject);
+function TSimbaAnchorDockHostSite.GetHeader: TSimbaAnchorDockHeader;
 begin
-  if (WindowState = wsMaximized) and (Constraints.MaxWidth > 0) and (Constraints.MaxHeight > 0) then
-  begin
-    BeginFormUpdate();
-
-    WindowState := wsNormal;
-
-    FMaxWidth  := Constraints.MaxWidth;
-    FMaxHeight := Constraints.MaxHeight;
-
-    Constraints.MaxWidth := 0;
-    Constraints.MaxHeight := 0;
-
-    WindowState := wsMaximized;
-
-    EndFormUpdate();
-  end else
-  if (WindowState <> wsMaximized) and (FMaxWidth > 0) and (FMaxHeight > 0) then
-  begin
-    Constraints.MaxWidth := FMaxWidth;
-    Constraints.MaxHeight := FMaxHeight;
-
-    FMaxWidth := 0;
-    FMaxHeight := 0;
-  end;
+  Result := inherited Header as TSimbaAnchorDockHeader;
 end;
 
 procedure TSimbaAnchorDockHostSite.DoMenuItemDestroyed(Sender: TObject);
@@ -185,8 +182,6 @@ begin
   inherited CreateNew(AOwner, Num);
 
   FNeedDefaultPosition := True;
-
-  OnWindowStateChange := @DoWindowStateChanged;
 end;
 
 function TSimbaAnchorDockHostSite.ExecuteDock(NewControl, DropOnControl: TControl; DockAlign: TAlign): Boolean;
@@ -210,26 +205,27 @@ begin
     akLeft, akRight:
       Canvas.FillRect(
         CenterW - 1, CenterH - GRIPPER_SIZE,
-        CenterW + 1, CenterH + GRIPPER_SIZE
+        CenterW + 2, CenterH + GRIPPER_SIZE
       );
 
     // horz
     akTop, akBottom:
       Canvas.FillRect(
         CenterW - GRIPPER_SIZE, CenterH - 1,
-        CenterW + GRIPPER_SIZE, CenterH + 1
+        CenterW + GRIPPER_SIZE, CenterH + 2
       );
   end;
 end;
 
-procedure TAnchorDockMasterHelper.MakeDockable(Form: TCustomForm; MenuItem: TMenuItem);
+procedure TAnchorDockMasterHelper.MakeDockable(Form: TCustomForm; MenuItem: TMenuItem; AddDockHeader: Boolean);
 begin
   inherited MakeDockable(Form, False);
 
-  if Form.HostDockSite is TSimbaAnchorDockHostSite then
+  if (Form.HostDockSite is TSimbaAnchorDockHostSite) then
   begin
     Form.AddHandlerClose(@OnFormClose, True);
 
+    TSimbaAnchorDockHostSite(Form.HostDockSite).Header.Visible := AddDockHeader;
     TSimbaAnchorDockHostSite(Form.HostDockSite).MenuItem := MenuItem;
   end;
 end;

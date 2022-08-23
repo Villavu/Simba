@@ -48,6 +48,9 @@ type
     procedure DoTabPopupOpen(Sender: TObject);
     // Open new tab if empty tab area on the right is clicked
     procedure DoDoubleClick(Sender: TObject);
+    procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure FormMouseLeave(Sender: TObject);
+    procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
   protected
     FEditorReplace: TSimbaEditorReplace;
     FEditorFind: TSimbaEditorFind;
@@ -108,7 +111,8 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.outputform, simba.scripttabhistory, simba.files, simba.editor_docgenerator;
+  simba.outputform, simba.scripttabhistory, simba.files, simba.editor_docgenerator,
+  simba.dockinghelpers;
 
 procedure TSimbaScriptTabsForm.DoEditorPopupShow(Sender: TObject);
 var
@@ -199,6 +203,24 @@ procedure TSimbaScriptTabsForm.DoDoubleClick(Sender: TObject);
 begin
   if (ScreenToClient(Mouse.CursorPos).Y < NoteBook.TabRect(0).Height) then
     AddTab();
+end;
+
+procedure TSimbaScriptTabsForm.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  if (HostDockSite is TSimbaAnchorDockHostSite) then
+    TSimbaAnchorDockHostSite(HostDockSite).Header.MouseDown(Button, Shift, X, Y);
+end;
+
+procedure TSimbaScriptTabsForm.FormMouseLeave(Sender: TObject);
+begin
+  if (HostDockSite is TSimbaAnchorDockHostSite) then
+    TSimbaAnchorDockHostSite(HostDockSite).Header.MouseLeave();
+end;
+
+procedure TSimbaScriptTabsForm.FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+begin
+  if (HostDockSite is TSimbaAnchorDockHostSite) then
+    TSimbaAnchorDockHostSite(HostDockSite).Header.MouseMove(Shift, X, Y);
 end;
 
 procedure TSimbaScriptTabsForm.CaretMoved(Sender: TObject; Changes: TSynStatusChanges);

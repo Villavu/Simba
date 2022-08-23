@@ -142,6 +142,27 @@ type
     {$i matrix.inc}
   {$UNDEF HEADER}
 
+var
+  DebugLnFunc: procedure(const Msg: String);
+
+{$PUSH}
+{$SCOPEDENUMS ON}
+type
+  ESimbaDebugLn = (
+    NONE,
+    CLEAR,
+    YELLOW,
+    RED,
+    GREEN
+  );
+{$POP}
+
+procedure SimbaDebugLn(const Msg: String); overload;
+procedure SimbaDebugLn(const Msg: String; Args: array of const); overload;
+
+procedure SimbaDebugLn(const Typ: ESimbaDebugLn; const Msg: String); overload;
+procedure SimbaDebugLn(const Typ: ESimbaDebugLn; const Msg: String; Args: array of const); overload;
+
 function Min(const A, B: Integer): Integer; inline; overload;
 function Max(const A, B: Integer): Integer; inline; overload;
 function Min(const A, B: Int64): Int64; inline; overload;
@@ -177,8 +198,11 @@ procedure Threaded(Methods: TProcArray; Interval: Integer = 0); overload;
 implementation
 
 uses
-  math,
+  math, forms, lazloggerbase,
   simba.math, simba.overallocatearray, simba.geometry, simba.heaparray;
+
+const
+  IsScriptProcessWithCommunication: Boolean = False;
 
 {$DEFINE BODY}
   {$i generics.inc}
@@ -190,6 +214,29 @@ uses
   {$i singlematrix.inc}
   {$i matrix.inc}
 {$UNDEF BODY}
+
+procedure SimbaDebugLn(const Msg: String);
+begin
+  DebugLnFunc(Msg);
+end;
+
+procedure SimbaDebugLn(const Msg: String; Args: array of const);
+begin
+  SimbaDebugLn(Msg.Format(Args));
+end;
+
+procedure SimbaDebugLn(const Typ: ESimbaDebugLn; const Msg: String);
+begin
+  if IsScriptProcessWithCommunication then
+    SimbaDebugLn(#0#0 + IntToStr(Integer(Typ)) + Msg)
+  else
+    SimbaDebugLn(Msg);
+end;
+
+procedure SimbaDebugLn(const Typ: ESimbaDebugLn; const Msg: String; Args: array of const);
+begin
+  SimbaDebugLn(Typ, Msg.Format(Args));
+end;
 
 function Min(const A, B: Integer): Integer;
 begin
@@ -457,6 +504,11 @@ begin
     Threads[I].Free();
   end;
 end;
+
+initialization
+  DebugLnFunc := @DebugLn;
+
+  IsScriptProcessWithCommunication := Application.HasOption('simbacommunication');
 
 end.
 

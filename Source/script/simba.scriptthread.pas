@@ -56,7 +56,7 @@ uses
 procedure TSimbaScriptThread.HandleTerminate(Sender: TObject);
 begin
   if (FatalException is Exception) then
-    DebugLnError('Note: Script thread did not exit cleanly: ' + Exception(FatalException).Message);
+    SimbaDebugLn(ESimbaDebugLn.RED, 'Note: Script thread did not exit cleanly: ' + Exception(FatalException).Message);
 
   {$IFDEF WINDOWS}
   if (StartupConsoleMode <> 0) then
@@ -96,7 +96,7 @@ end;
 
 procedure TSimbaScriptThread.HandleException(E: Exception);
 begin
-  DebugLnError(E.Message);
+  SimbaDebugLn(ESimbaDebugLn.RED, E.Message);
 
   if (FScript.SimbaCommunication <> nil) then
   begin
@@ -117,16 +117,16 @@ begin
 
     if FScript.Compile() then
     begin
-      DebugLnSuccess('Succesfully compiled in %.2f milliseconds.', [FScript.CompileTime]);
+      SimbaDebugLn(ESimbaDebugLn.GREEN, 'Succesfully compiled in %.2f milliseconds.', [FScript.CompileTime]);
       if FCompileOnly then
         Exit;
 
       FScript.Run();
 
       if (Script.RunningTime < 10000) then
-        DebugLnSuccess('Succesfully executed in %.2f milliseconds.', [Script.RunningTime])
+        SimbaDebugLn(ESimbaDebugLn.GREEN, 'Succesfully executed in %.2f milliseconds.', [Script.RunningTime])
       else
-        DebugLnSuccess('Succesfully executed in %s.', [FormatMilliseconds(Script.RunningTime, '\[hh:mm:ss\]')]);
+        SimbaDebugLn(ESimbaDebugLn.GREEN, 'Succesfully executed in %s.', [FormatMilliseconds(Script.RunningTime, '\[hh:mm:ss\]')]);
     end;
   except
     on E: Exception do

@@ -992,7 +992,7 @@ end;
 
 procedure TSimbaForm.HandlePrintDTM(DTM: String);
 begin
-  SimbaOutputForm.Add('DTM := DTMFromString(' + #39 + DTM + #39 + ');');
+  SimbaDebugLn('DTM := DTMFromString(' + #39 + DTM + #39 + ');');
 end;
 
 procedure TSimbaForm.MenuItemDTMEditorClick(Sender: TObject);
@@ -1270,7 +1270,7 @@ begin
         Exit;
 
       SimbaColorPickerHistoryForm.Add(Point, Color);
-      SimbaOutputForm.Add('Color picked: ' + IntToStr(Color) + ' at (' + IntToStr(Point.X) + ', ' + IntToStr(Point.Y) + ')');
+      SimbaDebugLn('Color picked: %d at (%d, %d)', [Color, Point.X, Point.Y]);
 
       Application.QueueAsyncCall(@DoColorPicked, 0);
     finally
@@ -1283,22 +1283,18 @@ begin
 end;
 
 procedure TSimbaForm.ToolbarButtonSelectTargetClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-var
-  Lines: TStringList;
 begin
   if (Button = mbLeft) then
   begin
-    Lines := TStringList.Create();
-
     try
       with TSimbaWindowSelector.Create() do
       try
-        Lines.Add('Window Selected: %d', [Selected]);
-        Lines.Add(' - Dimensions: %dx%d', [Selected.GetBounds().Width - 1, Selected.GetBounds().Height - 1]);
-        Lines.Add(' - Title: "%s"', [Selected.GetTitle()]);
-        Lines.Add(' - Class: "%s"', [Selected.GetClassName()]);
-        Lines.Add(' - PID: %d (%s bit)', [Selected.GetPID(), BoolToStr(SimbaProcess.IsProcess64Bit(Selected.GetPID()), '64', '32')]);
-        Lines.Add(' - Executable: "%s"', [SimbaProcess.GetProcessPath(Selected.GetPID())]);
+        SimbaDebugLn('Window Selected: %d', [Selected]);
+        SimbaDebugLn(' - Dimensions: %dx%d', [Selected.GetBounds().Width - 1, Selected.GetBounds().Height - 1]);
+        SimbaDebugLn(' - Title: "%s"', [Selected.GetTitle()]);
+        SimbaDebugLn(' - Class: "%s"', [Selected.GetClassName()]);
+        SimbaDebugLn(' - PID: %d (%s bit)', [Selected.GetPID(), BoolToStr(SimbaProcess.IsProcess64Bit(Selected.GetPID()), '64', '32')]);
+        SimbaDebugLn(' - Executable: "%s"', [SimbaProcess.GetProcessPath(Selected.GetPID())]);
 
         FWindowSelection := Selected;
         FProcessSelection := Selected.GetPID();
@@ -1311,10 +1307,6 @@ begin
       on E: Exception do
         ShowMessage('Exception while selecting window: ' + E.Message + ' (' + E.ClassName + ')');
     end;
-
-    SimbaOutputForm.Add(Lines);
-
-    Lines.Free();
   end;
 end;
 
@@ -1326,7 +1318,7 @@ begin
 
     FAreaSelection := FAreaSelector.Pick(FWindowSelection);
     with FAreaSelection do
-      SimbaOutputForm.Add('Area picked: [%d, %d, %d, %d]'.Format([X1, Y1, X2, Y2]));
+      SimbaDebugLn('Area picked: [%d, %d, %d, %d]'.Format([X1, Y1, X2, Y2]));
   except
     on E: Exception do
       ShowMessage('Exception while selecting area: ' + E.ToString());
@@ -1339,6 +1331,7 @@ begin
 
   try
     DockMaster.BeginUpdate();
+    DockMaster.SplitterWidth := 5;
     DockMaster.HeaderClass := TSimbaAnchorDockHeader;
     DockMaster.SplitterClass := TSimbaAnchorDockSplitter;
     DockMaster.SiteClass := TSimbaAnchorDockHostSite;
@@ -1348,8 +1341,8 @@ begin
     DockMaster.HeaderHint := 'Use the mouse to drag and dock this window';
     DockMaster.MakeDockPanel(DockPanel, admrpChild);
 
-    DockMaster.MakeDockable(SimbaScriptTabsForm, MenuItemEditor);
-    DockMaster.MakeDockable(SimbaOutputForm, MenuItemOutput);
+    DockMaster.MakeDockable(SimbaScriptTabsForm, MenuItemEditor, False);
+    DockMaster.MakeDockable(SimbaOutputForm, MenuItemOutput, False);
     DockMaster.MakeDockable(SimbaFileBrowserForm, MenuItemFileBrowser);
     DockMaster.MakeDockable(SimbaFunctionListForm, MenuItemFunctionList);
     DockMaster.MakeDockable(SimbaNotesForm, MenuItemNotes);
@@ -1423,7 +1416,7 @@ procedure TSimbaForm.DoMouseLoggerChange(Sender: TObject; X, Y: Integer; HotkeyP
 begin
   StatusPanelCursor.Caption := '(' + IntToStr(X) + ', ' + IntToStr(Y) + ')';
   if HotkeyPressed then
-    SimbaOutputForm.Add(StatusPanelCursor.Caption);
+    SimbaDebugLn(StatusPanelCursor.Caption);
 end;
 
 end.

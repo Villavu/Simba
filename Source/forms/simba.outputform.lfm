@@ -1,29 +1,49 @@
 object SimbaOutputForm: TSimbaOutputForm
-  Left = 4199
-  Height = 557
-  Top = 64
-  Width = 811
+  Left = 2579
+  Height = 274
+  Top = 376
+  Width = 676
   Caption = 'Output'
-  DesignTimePPI = 144
+  ClientHeight = 274
+  ClientWidth = 676
+  DesignTimePPI = 120
+  OnMouseDown = FormMouseDown
+  OnMouseLeave = FormMouseLeave
+  OnMouseMove = FormMouseMove
   LCLVersion = '2.2.2.0'
+  object PageControl: TPageControl
+    Left = 0
+    Height = 274
+    Top = 0
+    Width = 676
+    ActivePage = TabScript
+    Align = alClient
+    Images = SimbaForm.Images
+    TabIndex = 1
+    TabOrder = 0
+    object TabSimba: TTabSheet
+      Caption = 'Simba Messages'
+      ImageIndex = 28
+    end
+    object TabScript: TTabSheet
+      Caption = 'Script Output'
+      ImageIndex = 14
+    end
+  end
   object ContextMenu: TPopupMenu
-    Left = 84
-    Top = 36
-    object MenuItemCut: TMenuItem
-      Caption = 'Cut'
-      OnClick = MenuItemCutClick
+    Left = 40
+    Top = 56
+    object MenuItemCopyLine: TMenuItem
+      Caption = 'Copy Line'
+      OnClick = MenuItemCopyLineClick
     end
     object MenuItemCopy: TMenuItem
-      Caption = 'Copy'
+      Caption = 'Copy Selection'
       OnClick = MenuItemCopyClick
     end
-    object MenuItemPaste: TMenuItem
-      Caption = 'Paste'
-      OnClick = MenuItemPasteClick
-    end
-    object MenuItemDelete: TMenuItem
-      Caption = 'Delete'
-      OnClick = MenuItemDeleteClick
+    object MenuItemCopyAll: TMenuItem
+      Caption = 'Copy All'
+      OnClick = MenuItemCopyAllClick
     end
     object MenuItemSeperator: TMenuItem
       Caption = '-'
@@ -36,7 +56,7 @@ object SimbaOutputForm: TSimbaOutputForm
   object Timer: TTimer
     Interval = 400
     OnTimer = TimerExecute
-    Left = 216
-    Top = 36
+    Left = 128
+    Top = 56
   end
 end

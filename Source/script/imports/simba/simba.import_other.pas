@@ -9,7 +9,7 @@ implementation
 uses
   classes, sysutils, clipbrd, extctrls, lptypes,
   simba.script_compiler, simba.nativeinterface, simba.scriptthread, simba.stringutil, simba.outputform,
-  simba.settings;
+  simba.settings, simba.mufasatypes;
 
 procedure _LapePlaySound(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -72,7 +72,7 @@ end;
 
 procedure _LapeClearDebug(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  DebugLnClear();
+  SimbaDebugLn(ESimbaDebugLn.CLEAR, '');
 end;
 
 procedure _LapeDisguise(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
