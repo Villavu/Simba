@@ -743,7 +743,7 @@ begin
     //addGlobalFunc('function TMufasaBitmap.CreateFromClient(Client: TObject; Area: TBox): TMufasaBitmap; static; overload', @_LapeMufasaBitmap_CreateFromClientEx);
 
     addGlobalFunc('function TMufasaBitmap.CreateFromFile(FileName: String): TMufasaBitmap; static; overload', @_LapeMufasaBitmap_CreateFromFile);
-    addGlobalFunc('function TMufasaBitmap.CreateFromString(Width, Height: Integer; Str: String): TMufasaBitmap; static; overload', @_LapeMufasaBitmap_CreateFromString);
+    addGlobalFunc('function TMufasaBitmap.CreateFromString(Wicdth, Height: Integer; Str: String): TMufasaBitmap; static; overload', @_LapeMufasaBitmap_CreateFromString);
 
     addGlobalFunc('function TMufasaBitmap.Equals(Other: TMufasaBitmap): Boolean;', @_LapeMufasaBitmap_Equals);
 

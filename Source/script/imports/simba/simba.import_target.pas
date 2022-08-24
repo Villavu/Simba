@@ -121,21 +121,6 @@ begin
   PBoolean(Result)^ := SimbaScriptThread.Script.Client.IOManager.TargetValid();
 end;
 
-procedure _LapeSaveScreenshot(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-var
-  BMP: TMufasaBitmap;
-begin
-  with SimbaScriptThread.Script.Client do
-  begin
-    BMP := TMufasaBitmap.CreateFromClient(SimbaScriptThread.Script.Client);
-    try
-      BMP.SaveToFile(PString(Params^[0])^);
-    finally
-      BMP.Free();
-    end;
-  end;
-end;
-
 procedure _LapeGetTargetWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   if SimbaScriptThread.Script.Client.IOManager.GetImageTarget() is TWindowTarget then
@@ -196,13 +181,56 @@ begin
     addGlobalFunc('procedure Unfreeze', @_LapeUnfreeze);
     addGlobalFunc('procedure ActivateClient', @_LapeActivateClient);
     addGlobalFunc('function IsTargetValid: Boolean', @_LapeIsTargetValid);
-    addGlobalFunc('procedure SaveScreenshot(FileName: string)', @_LapeSaveScreenshot);
     addGlobalFunc('function GetTargetWindow: TWindowHandle', @_LapeGetTargetWindow);
     addGlobalFunc('function GetTargetPID: Integer', @_LapeGetTargetPID);
     addGlobalFunc('function AddHandlerInvalidTarget(Handler: TNotifyEvent): TNotifyEvent;', @_LapeAddHandlerInvalidTarget);
     addGlobalFunc('procedure RemoveHandlerInvalidTarget(Handler: TNotifyEvent);', @_LapeRemoveHandlerInvalidTarget);
     addGlobalFunc('procedure SetAutoActivateClient(Value: Boolean);', @_LapeSetAutoActivateClient);
     addGlobalFunc('function GetAutoActivateClient: Boolean;', @_LapeGetAutoActivateClient);
+
+    addGlobalFunc(
+      'function SaveScreenshot: String; overload;', [
+      'var',
+      '  FileName: String;',
+      '  T: UInt64;',
+      'begin',
+      '  with TMufasaBitmap.CreateFromClient() do',
+      '  try',
+      '    FileName := ScreenshotPath + ExtractFileName(ScriptFile) + #32 + FormatDateTime("dd-mm hh-mm-ss", Now()) + ".png";',
+      '    if SaveToFile(FileName) then',
+      '      Exit(FileName);',
+      '',
+      '    // File not available! Try for a little with milliseconds (zzz)',
+      '    T := GetTickCount() + 1000;',
+      '    while (GetTickCount() < T) do',
+      '    begin',
+      '      FileName := ScreenshotPath + ExtractFileName(ScriptFile) + #32 + FormatDateTime("dd-mm hh-mm-ss-zzz", Now()) + ".png";',
+      '      if SaveToFile(FileName) then',
+      '        Exit(FileName);',
+      '',
+      '      Sleep(50);',
+      '    end;',
+      '  finally',
+      '    Free();',
+      '  end;',
+      'end;'
+    ]);
+
+    addGlobalFunc(
+      'function SaveScreenshot(FileName: String): String; overload;', [
+      'begin',
+      '  if (ExtractFileExt(FileName) = "") then',
+      '    FileName := FileName + ".png";',
+      '',
+      '  with TMufasaBitmap.CreateFromClient() do',
+      '  try',
+      '    if SaveToFile(FileName) then',
+      '      Result := FileName;',
+      '  finally',
+      '    Free();',
+      '  end;',
+      'end;'
+    ]);
 
     popSection();
   end;

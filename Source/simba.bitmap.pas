@@ -241,9 +241,9 @@ const
 implementation
 
 uses
-  math, intfgraphics, lazloggerbase, simba.overallocatearray, simba.geometry,
+  FPImage, math, intfgraphics, lazloggerbase, simba.overallocatearray, simba.geometry,
   simba.tpa, simba.stringutil, simba.colormath, simba.client, simba.iomanager,
-  simba.helpers_string, simba.bitmap_misc, simba.math;
+  simba.helpers_string, simba.bitmap_misc, simba.math, FPWriteBMP;
 
 function GetDrawColor(Color, Index: Integer): Integer; inline;
 const
@@ -258,19 +258,40 @@ end;
 function TMufasaBitmap.SaveToFile(FileName: String): Boolean;
 var
   Image: TLazIntfImage;
+  Stream: TFileStream;
+  WriterClass: TFPCustomImageWriterClass;
+  Writer: TFPCustomImageWriter;
 begin
-  if (ExtractFileExt(FileName) = '') then
-    FileName := FileName + '.bmp';
+  Result := False;
 
-  Image := TLazIntfImage.Create(Self.ToRawImage(), False);
-  try
-    Result := Image.SaveToFile(FileName);
-  finally
-    Image.Free();
+  if not FileExists(FileName) then
+  begin
+    Writer := nil;
+    Stream := nil;
+    Image  := nil;
+
+    WriterClass := TFPCustomImage.FindWriterFromFileName(FileName);
+    if (WriterClass = nil) then
+      raise Exception.Create('Unknown image format: ' + FileName);
+    Writer := WriterClass.Create();
+
+    try
+      Stream := TFileStream.Create(FileName, fmCreate or fmShareExclusive);
+
+      Image := TLazIntfImage.Create(Self.ToRawImage(), False);
+      Image.SaveToStream(Stream, Writer);
+
+      Result := True;
+    except
+    end;
+
+    if (Writer <> nil) then
+      FreeAndNil(Writer);
+    if (Stream <> nil) then
+      FreeAndNil(Stream);
+    if (Image <> nil) then
+      FreeAndNil(Image);
   end;
-
-  if not Result then
-    raise ESimbaBitmapException.CreateFmt(sbeImageFormatNotSupported, [FileName]);
 end;
 
 procedure TMufasaBitmap.LoadFromFile(FileName: String);

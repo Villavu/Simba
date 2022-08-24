@@ -126,6 +126,7 @@ begin
     addGlobalVar(GetSimbaPath(), 'AppPath').isConstant := True;
     addGlobalVar(GetScriptPath(), 'ScriptPath').isConstant := True;
     addGlobalVar(GetDataPath(), 'DataPath').isConstant := True;
+    addGlobalVar(GetScreenshotPath(), 'ScreenshotPath').isConstant := True;
 
     addGlobalFunc('function GetProcessorCount: Integer', @_LapeGetProcessorCount);
     addGlobalFunc('function GetMainThreadID: PtrUInt', @_LapeGetMainThreadID);
