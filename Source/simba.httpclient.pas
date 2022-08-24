@@ -91,6 +91,9 @@ type
     FOnHeaders: THTTPClientHeadersEvent;
     FOnCopyingProgress: THTTPClientExtractEvent;
     FOnResponseCode: THTTPClientResponseCodeEvent;
+    FDownloadingFinished: TNotifyEvent;
+    FExtractingFinished: TNotifyEvent;
+    FCopyingFinished: TNotifyEvent;
 
     procedure DoExtractProgress(Sender: TObject; FileName: String; Percent: Double);
     procedure DoCopyingProgress(Sender: TObject; FileName: String; Percent: Double);
@@ -119,6 +122,10 @@ type
     property OnHeadersReceived: THTTPClientHeadersEvent read FOnHeaders write FOnHeaders;
     property OnCopyingProgress: THTTPClientExtractEvent read FOnCopyingProgress write FOnCopyingProgress;
     property OnResponseCode: THTTPClientResponseCodeEvent read FOnResponseCode write FOnResponseCode;
+
+    property OnDownloadingFinished: TNotifyEvent read FDownloadingFinished write FDownloadingFinished;
+    property OnExtractingFinished: TNotifyEvent read FExtractingFinished write FExtractingFinished;
+    property OnCopyingFinished: TNotifyEvent read FCopyingFinished write FCopyingFinished;
 
     property ResponseCode: Int32 read GetResponseCode;
     property ResponseHeader[Name: String]: String read GetResponseHeader;
@@ -335,6 +342,8 @@ begin
       Extractor := TSimbaZipExtractor.Create();
       Extractor.OnProgress := @DoExtractProgress;
       Extractor.OnCopying := @DoCopyingProgress;
+      Extractor.OnCopyingFinished := FCopyingFinished;
+      Extractor.OnExtractingFinished := FExtractingFinished;
       Extractor.InputStream := Stream;
       Extractor.OutputPath := OutputPath;
       Extractor.Flat := Flat;
@@ -457,6 +466,7 @@ begin
   FHTTPClient.OnConnecting := @DoConnecting;
   FHTTPClient.OnHeaders := @DoHeaders;
   FHTTPClient.OnResponseCode := @DoResponseCode;
+  FHTTPClient.OnComplete := FCopyingFinished;
   FHTTPClient.AddHeader('User-Agent', Format('Mozilla/5.0 (compatible; Simba/%d; Target/%s)', [SIMBA_VERSION, {$I %FPCTARGETOS%} + '-' + {$I %FPCTARGETCPU%}]));
 end;
 

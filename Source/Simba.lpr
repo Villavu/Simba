@@ -16,7 +16,7 @@ uses
   simba.outputform, simba.colorpickerhistoryform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.associate,
   simba.script_dump, simba.openexampleform, simba.scriptthread,
-  simba.package_form;
+  simba.package_form, simba.mufasatypes;
 
 type
   TApplicationHelper = class helper for TApplication
@@ -95,6 +95,9 @@ begin
 
       Halt();
     end;
+
+    IsScriptProcess := True;
+    IsScriptProcessWithCommunication := Application.HasOption('simbacommunication');
 
     SimbaScriptThread := TSimbaScriptThread.Create(
       Application.Params[Application.ParamCount],

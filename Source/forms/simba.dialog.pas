@@ -10,31 +10,40 @@ unit simba.dialog;
 interface
 
 uses
-  Classes, SysUtils;
-
-function SimbaQuestionDlg(Title, Question: String): Boolean;
-
-implementation
-
-uses
-  Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls, LCLType;
+  Classes, SysUtils, StdCtrls, Forms, Controls, Graphics, Dialogs, ExtCtrls, LCLType;
 
 type
+  {$PUSH}
+  {$SCOPEDENUMS ON}
+  ESimbaDialogResult = (
+    CANCEL,
+    YES,
+    NO
+  );
+  {$POP}
+
   TSimbaDialogForm = class(TForm)
+    ButtonCancel: TButton;
     ButtonNo: TButton;
     ButtonYes: TButton;
     Image1: TImage;
     QuestionLabel: TLabel;
     MessagePanel: TPanel;
     ButtonPanel: TPanel;
+    procedure ButtonCancelClick(Sender: TObject);
     procedure ButtonNoClick(Sender: TObject);
     procedure ButtonYesClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
   public
-    YesButtonClicked: Boolean;
+    DialogResult: ESimbaDialogResult;
   end;
 
-function SimbaQuestionDlg(Title, Question: String): Boolean;
+function SimbaQuestionDlg(Title, Question: String): ESimbaDialogResult; overload;
+function SimbaQuestionDlg(Title: String; Question: TStringArray): ESimbaDialogResult; overload;
+
+implementation
+
+function SimbaQuestionDlg(Title, Question: String): ESimbaDialogResult;
 begin
   with TSimbaDialogForm.Create(nil) do
   try
@@ -43,26 +52,39 @@ begin
 
     ShowModal();
 
-    Result := YesButtonClicked;
+    Result := DialogResult;
   finally
     Free();
   end;
 end;
 
+function SimbaQuestionDlg(Title: String; Question: TStringArray): ESimbaDialogResult;
+begin
+  Result := SimbaQuestionDlg(Title, ''.Join(LineEnding, Question));
+end;
+
 procedure TSimbaDialogForm.FormCreate(Sender: TObject);
 begin
+  DialogResult := ESimbaDialogResult.CANCEL; // default, if close button was clicked.
+
   Image1.Picture.Bitmap := TBitmap(GetDialogIcon(idDialogConfirm));
 end;
 
 procedure TSimbaDialogForm.ButtonNoClick(Sender: TObject);
 begin
+  DialogResult := ESimbaDialogResult.NO;
+  Close();
+end;
+
+procedure TSimbaDialogForm.ButtonCancelClick(Sender: TObject);
+begin
+  DialogResult := ESimbaDialogResult.CANCEL;
   Close();
 end;
 
 procedure TSimbaDialogForm.ButtonYesClick(Sender: TObject);
 begin
-  YesButtonClicked := True;
-
+  DialogResult := ESimbaDialogResult.YES;
   Close();
 end;
 

@@ -4,7 +4,7 @@ object SimbaForm: TSimbaForm
   Top = 396
   Width = 1220
   Caption = 'Simba'
-  ClientHeight = 695
+  ClientHeight = 670
   ClientWidth = 1220
   DesignTimePPI = 120
   KeyPreview = True
@@ -55,13 +55,13 @@ object SimbaForm: TSimbaForm
     end
     object ToolbarDivider1: TToolButton
       Left = 261
-      Height = 5
+      Height = 28
       Top = 2
       Style = tbsDivider
     end
     object ToolbarButtonClearOutput: TToolButton
       Left = 241
-      Hint = 'Clear Output'
+      Hint = 'Clear Script Output'
       Top = 2
       Caption = 'Clear'
       ImageIndex = 7
@@ -85,7 +85,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolbarDivider2: TToolButton
       Left = 171
-      Height = 5
+      Height = 28
       Top = 2
       Style = tbsDivider
     end
@@ -101,7 +101,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolbarDivider3: TToolButton
       Left = 81
-      Height = 5
+      Height = 28
       Top = 2
       Style = tbsDivider
     end
@@ -133,7 +133,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolbarDivider4: TToolButton
       Left = 106
-      Height = 5
+      Height = 28
       Top = 2
       Style = tbsDivider
     end
@@ -146,7 +146,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolbarDivider5: TToolButton
       Left = 236
-      Height = 5
+      Height = 28
       Top = 2
       Style = tbsDivider
     end

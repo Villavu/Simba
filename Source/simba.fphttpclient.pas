@@ -41,6 +41,7 @@ type
   public
     OnConnecting: TConnectingEvent;
     OnResponseCode: TResponseCodeEvent;
+    OnComplete: TNotifyEvent;
 
     property ResponseStatusCode read FResponseCode;
   end;
@@ -53,6 +54,7 @@ type
   public
     OnConnecting: TConnectingEvent;
     OnResponseCode: TResponseCodeEvent;
+    OnComplete: TNotifyEvent;
   end;
   {$ENDIF}
 
@@ -120,6 +122,9 @@ begin
   finally
     LocalPool.release;
   end;
+
+  if Assigned(OnComplete) then
+    OnComplete(Self);
 end;
 {$ELSE}
 function TSimbaFPHTTPClient.GetSocketHandler(const UseSSL: Boolean): TSocketHandler;
@@ -136,6 +141,9 @@ begin
     OnConnecting(Self, AURL);
 
   inherited;
+
+  if Assigned(OnComplete) then
+    OnComplete(Self);
 end;
 
 function TSimbaFPHTTPClient.ReadResponseHeaders: integer;

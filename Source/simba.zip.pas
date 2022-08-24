@@ -22,6 +22,8 @@ type
     FFlat: Boolean;
     FOnProgress: TZipProgressEvent;
     FOnCopying: TZipProgressEvent;
+    FExtractingFinished: TNotifyEvent;
+    FCopyingFinished: TNotifyEvent;
     FIgnoreList: TStringList;
     FCurrentFile: String;
 
@@ -34,6 +36,8 @@ type
     property Flat: Boolean read FFlat write FFlat;
     property OnProgress: TZipProgressEvent read FOnProgress write FOnProgress;
     property OnCopying: TZipProgressEvent read FOnCopying write FOnCopying;
+    property OnCopyingFinished: TNotifyEvent read FCopyingFinished write FCopyingFinished;
+    property OnExtractingFinished: TNotifyEvent read FExtractingFinished write FExtractingFinished;
     property IgnoreList: TStringList read FIgnoreList;
 
     procedure Extract;
@@ -141,6 +145,7 @@ procedure TCopyDirectory.Execute(SourceDir, TargetDir: String);
 var
   I: Integer;
 begin
+  FFileIndex := 0;
   FSourceDir := CleanAndExpandFilename(SetDirSeparators(SourceDir));
   FTargetDir := CleanAndExpandFilename(SetDirSeparators(TargetDir));
 
@@ -155,8 +160,6 @@ begin
   ForceDirectories(FTargetDir);
   for I := 0 to FIgnoreList.Count - 1 do
     FIgnoreList[I] := IncludeLeadingPathDelimiter(SetDirSeparators(FIgnoreList[I]));
-
-  FFileIndex := 0;
 
   FSearcher.Search(FSourceDir);
 end;
@@ -213,12 +216,13 @@ begin
 
   try
     UnZipper.UnZipAllFiles();
-    if (FOnProgress <> nil) then
-      FOnProgress(Self, '', 100);
+    if Assigned(FOnProgress)         then FOnProgress(Self, '', 100);
+    if Assigned(FExtractingFinished) then FExtractingFinished(Self);
 
     with TCopyDirectory.Create() do
     try
       OnProgress := FOnCopying;
+
       TotalFileCount := Unzipper.Entries.Count - 1;
       IgnoreList.AddStrings(Self.IgnoreList, True);
 
@@ -228,6 +232,8 @@ begin
     finally
       Free();
     end;
+
+    if Assigned(FCopyingFinished) then FCopyingFinished(Self);
   finally
     UnZipper.Free();
   end;

@@ -88,8 +88,12 @@ type
 
   TPackageInfoGrid = class(TStringGrid)
   protected
+    FCheckBox: TCheckBox;
     FHomepageHovered: Boolean;
+    FOnAutoUpdateChange: TNotifyEvent;
 
+    procedure SetAutoUpdateChecked(AValue: Boolean);
+    procedure DoAutoUpdateChanged(Sender: TObject);
     procedure GetAutoFillColumnInfo(const Index: Integer; var aMin, aMax, aPriority: Integer); override;
     procedure PrepareCanvas(aCol, aRow: Integer; aState: TGridDrawState); override;
 
@@ -102,6 +106,9 @@ type
     constructor Create(AOwner: TComponent); override;
 
     procedure SetInfo(HomepageURL, InstalledVer, LatestVer: String);
+
+    property OnAutoUpdateChange: TNotifyEvent read FOnAutoUpdateChange write FOnAutoUpdateChange;
+    property AutoUpdateChecked: Boolean Write SetAutoUpdateChecked;
   end;
 
 implementation
@@ -386,6 +393,19 @@ begin
   Result := Items.AddObject('', Package);
 end;
 
+procedure TPackageInfoGrid.SetAutoUpdateChecked(AValue: Boolean);
+begin
+  FCheckBox.OnChange := nil;
+  FCheckBox.Checked  := AValue;
+  FCheckBox.OnChange := @DoAutoUpdateChanged;
+end;
+
+procedure TPackageInfoGrid.DoAutoUpdateChanged(Sender: TObject);
+begin
+  if Assigned(FOnAutoUpdateChange) then
+    FOnAutoUpdateChange(Sender);
+end;
+
 procedure TPackageInfoGrid.GetAutoFillColumnInfo(const Index: Integer; var aMin, aMax, aPriority: Integer);
 begin
   inherited GetAutoFillColumnInfo(Index, aMin, aMax, aPriority);
@@ -463,17 +483,27 @@ begin
     Canvas.Font := Self.Font;
     Canvas.Font.Bold := True;
 
-    ColWidths[0] := Canvas.TextWidth('Package Information :: ');
+    ColWidths[0] := Canvas.TextWidth('Package Information :::: ');
   finally
     Free();
   end;
 
   Height := CellRect(ColCount - 1, RowCount - 1).Bottom;
+
+  with CellRect(1, 4) do
+  begin
+    FCheckBox.Top  := CenterPoint.Y - (FCheckBox.Height div 2);
+    FCheckBox.Left := Left + 5;
+  end;
 end;
 
 constructor TPackageInfoGrid.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+
+  FCheckBox := TCheckBox.Create(Self);
+  FCheckBox.Parent := Self;
+  FCheckBox.OnChange := @DoAutoUpdateChanged;
 
   FocusRectVisible := False;
   BorderStyle := bsNone;
@@ -488,13 +518,14 @@ begin
   FixedCols := 0;
   FixedRows := 0;
 
-  RowCount := 4;
+  RowCount := 5;
   ColCount := 2;
 
   Cells[0, 0] := 'Package Information';
   Cells[0, 1] := 'Homepage';
   Cells[0, 2] := 'Installed Version';
   Cells[0, 3] := 'Latest Version';
+  Cells[0, 4] := 'Automatically Update';
 
   EndUpdate();
 

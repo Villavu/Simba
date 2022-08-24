@@ -44,6 +44,7 @@ type
     procedure BeginLoading;
     procedure EndLoading;
 
+    procedure DoAutoUpdateClicked(Sender: TObject);
     procedure DoRefresh(Data: PtrInt);
     procedure DoPackageSelectionChanged(Sender: TObject; User: Boolean);
     procedure DoInstallClick(Sender: TObject);
@@ -78,6 +79,12 @@ procedure TSimbaPackageForm.EndLoading;
 begin
   Notebook1.ShowControl(Page1);
   Application.ProcessMessages();
+end;
+
+procedure TSimbaPackageForm.DoAutoUpdateClicked(Sender: TObject);
+begin
+  if (FListBox.Selected <> nil) then
+    FListBox.Selected.AutoUpdateEnabled := TCheckBox(Sender).Checked;
 end;
 
 procedure TSimbaPackageForm.DoRefresh(Data: PtrInt);
@@ -182,6 +189,7 @@ begin
   PageVersions.Show();
 
   FInfoBox.SetInfo(Package.Info.HomepageURL, Package.InstalledVersion, Package.LatestVersion);
+  FInfoBox.AutoUpdateChecked := Package.AutoUpdateEnabled;
 
   FVersionBox.BeginUpdate();
   FVersionBox.Fill(Package);
@@ -201,12 +209,13 @@ begin
 
     if (Package <> nil) and Package.HasVersions() then
     begin
-      Installer := TSimbaPackageInstaller.Create(Package, OutputSynEdit);
+      OutputSynEdit.Clear();
 
+      Installer := TSimbaPackageInstaller.Create(Package, OutputSynEdit);
       try
         if Installer.GetOptions(Package.Versions[0], Options) then
         begin
-          if QuestionDlg('Install Package', 'Install "%s" to "%s" ?'.Format([Package.Info.FullName, ExtractRelativePath(GetSimbaPath(), Options.Path)]), mtConfirmation, [mrYes, mrNo], 0) = mrYes then
+          if SimbaQuestionDlg('Install Package', ['Install package "' + Package.Info.FullName + '" to', '"' + Options.Path + '" ?']) = ESimbaDialogResult.YES then
           begin
             InstallingButton.Caption := 'Installing...';
             InstallingButton.Enabled := False;
@@ -249,12 +258,10 @@ begin
 
   case Package.IsInstalled() of
     True:
-      if SimbaQuestionDlg(
-        'Uninstall Package',
-        'Are you sure you want to uninstall "' + Package.Info.FullName + '" ?' + LineEnding +
-        'This will remove the entire directory "' + Package.InstalledPath + '"')
-      then
-        Package.UnInstall();
+      case SimbaQuestionDlg('Uninstall Package', ['Uninstalling "' + Package.Info.FullName + '"', 'Do you also want to delete the files?',  '*All* files in "' + Package.InstalledPath + '" will be deleted!']) of
+        ESimbaDialogResult.YES: Package.UnInstall(True);
+        ESimbaDialogResult.NO:  Package.UnInstall(False);
+      end;
 
     False:
       with TSimbaPackageInstallForm.Create(Self, Package) do
@@ -279,6 +286,7 @@ begin
   FInfoBox.Parent := ScrollBox1;
   FInfoBox.Align := alTop;
   FInfoBox.BorderSpacing.Around := 8;
+  FInfoBox.OnAutoUpdateChange := @DoAutoUpdateClicked;
 
   FVersionBox := TPackageVersionGrid.Create(Self);
   FVersionBox.Parent := ScrollBox1;
