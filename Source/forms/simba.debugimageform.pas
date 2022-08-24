@@ -41,8 +41,7 @@ implementation
 {$R *.lfm}
 
 uses
-  lcltype, math,
-  simba.dockinghelpers, simba.outputform;
+  simba.mufasatypes, simba.dockinghelpers;
 
 procedure TSimbaDebugImageForm.Close;
 var
@@ -63,7 +62,7 @@ end;
 
 procedure TSimbaDebugImageForm.ImageDoubleClick(Sender: TObject);
 begin
-  SimbaOutputForm.Add('Debug Image Click: ' + IntToStr(FMouseX) + ', ' + IntToStr(FMouseY));
+  SimbaDebugLn('Debug Image Click: (%d, %d)', [FMouseX, FMouseY]);
 end;
 
 procedure TSimbaDebugImageForm.SetSize(AWidth, AHeight: Integer; AEnsureVisible: Boolean);

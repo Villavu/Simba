@@ -1,7 +1,7 @@
 object SimbaDialogForm: TSimbaDialogForm
-  Left = 2735
+  Left = 2758
   Height = 134
-  Top = 946
+  Top = 865
   Width = 350
   AutoSize = True
   BorderIcons = [biSystemMenu]
@@ -72,7 +72,7 @@ object SimbaDialogForm: TSimbaDialogForm
     ClientWidth = 350
     TabOrder = 1
     object ButtonNo: TButton
-      Left = 257
+      Left = 164
       Height = 30
       Top = 8
       Width = 85
@@ -82,10 +82,10 @@ object SimbaDialogForm: TSimbaDialogForm
       Caption = 'No'
       Constraints.MinWidth = 85
       OnClick = ButtonNoClick
-      TabOrder = 0
+      TabOrder = 1
     end
     object ButtonYes: TButton
-      Left = 164
+      Left = 71
       Height = 30
       Top = 8
       Width = 85
@@ -95,7 +95,20 @@ object SimbaDialogForm: TSimbaDialogForm
       Caption = 'Yes'
       Constraints.MinWidth = 85
       OnClick = ButtonYesClick
-      TabOrder = 1
+      TabOrder = 0
+    end
+    object ButtonCancel: TButton
+      Left = 257
+      Height = 30
+      Top = 8
+      Width = 85
+      Align = alRight
+      AutoSize = True
+      BorderSpacing.Around = 8
+      Caption = 'Cancel'
+      Constraints.MinWidth = 85
+      OnClick = ButtonCancelClick
+      TabOrder = 2
     end
   end
 end

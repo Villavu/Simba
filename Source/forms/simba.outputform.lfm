@@ -1,7 +1,7 @@
 object SimbaOutputForm: TSimbaOutputForm
-  Left = 2579
+  Left = 2631
   Height = 274
-  Top = 376
+  Top = 375
   Width = 676
   Caption = 'Output'
   ClientHeight = 274

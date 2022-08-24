@@ -17,6 +17,9 @@ uses
 type
   TSimbaOutputBox = class(TSynEdit)
   protected
+    FLock: TCriticalSection;
+    FBuffer: TStringList;
+
     FMouseLink: record
       Quote: record
         URL: String;
@@ -38,9 +41,13 @@ type
     procedure SetAntialiasing(Value: Boolean);
   public
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
 
-    procedure ScrollToBottom;
     procedure GetWordBoundsAtRowCol(const XY: TPoint; out StartX, EndX: integer); override;
+
+    function Add(const S: String): String;
+    procedure AddClear;
+    procedure Flush;
 
     property Antialiasing: Boolean read GetAntialiasing write SetAntialiasing;
   end;
@@ -68,17 +75,11 @@ type
   protected
     FSimbaOutputBox: TSimbaOutputBox;
     FScriptOutputBox: TSimbaOutputBox;
-    FLock: TCriticalSection;
-    FStrings: TStringList;
-    FClear: Boolean;
 
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
   public
-    procedure Clear;
-
-    procedure Add(const S: String); overload;
-    procedure Add(const Strings: TStrings); overload;
-    function AddRaw(const Data: String): String;
+    property ScriptOutputBox: TSimbaOutputBox read FScriptOutputBox;
+    property SimbaOutputBox: TSimbaOutputBox read FSimbaOutputBox;
 
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -93,32 +94,12 @@ implementation
 
 uses
   SynEditMarkupBracket, SynEditMarkupWordGroup,
-  lazloggerbase, lclintf,
+  lazloggerbase, lclintf, math,
   simba.dockinghelpers, simba.fonthelpers, simba.scripttabsform, simba.nativeinterface, simba.helpers_string, simba.mufasatypes;
 
-function GetDebugLnType(var S: String): ESimbaDebugLn;
-var
-  I, NewLength: Integer;
+procedure SimbaDebugLn(const S: String);
 begin
-  Result := ESimbaDebugLn.NONE;
-
-  if (Length(S) > 2) and (S[1] = #0) and (S[2] = #0) and TryStrToInt(S[3], I) then
-  begin
-    Result := ESimbaDebugLn(I);
-
-    // Remove magic header without memory allocations.
-    NewLength := Length(S) - 3;
-    if (NewLength > 0) then
-      Move(S[4], S[1], NewLength * SizeOf(Char));
-    SetLength(S, NewLength);
-  end;
-end;
-
-procedure SimbaDebugLn(const Msg: String);
-begin
-  SimbaOutputForm.FSimbaOutputBox.Lines.Add(Msg);
-  SimbaOutputForm.FSimbaOutputBox.ScrollToBottom();
-  SimbaOutputForm.PageControl.ActivePage := SimbaOutputForm.TabSimba;
+  SimbaOutputForm.SimbaOutputBox.Add(S + LineEnding + ToStr(ESimbaDebugLn.SHOW) + LineEnding);
 end;
 
 function TSimbaOutputBox.GetAntialiasing: Boolean;
@@ -207,6 +188,9 @@ constructor TSimbaOutputBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
+  FBuffer := TStringList.Create();
+  FLock := TCriticalSection.Create();
+
   OnMouseLeave        := @DoMouseLeave;
   OnMouseLink         := @DoAllowMouseLink;
   OnClickLink         := @DoMouseLinkClick;
@@ -227,9 +211,14 @@ begin
     Command := emcMouseLink;
 end;
 
-procedure TSimbaOutputBox.ScrollToBottom;
+destructor TSimbaOutputBox.Destroy;
 begin
-  TopLine := Lines.Count;
+  if (FLock <> nil) then
+    FreeAndNil(FLock);
+  if (FBuffer <> nil) then
+    FreeAndNil(FBuffer);
+
+  inherited Destroy();
 end;
 
 procedure TSimbaOutputBox.GetWordBoundsAtRowCol(const XY: TPoint; out StartX, EndX: integer);
@@ -238,7 +227,7 @@ procedure TSimbaOutputBox.GetWordBoundsAtRowCol(const XY: TPoint; out StartX, En
   function FindDocPos(Line: String; var StartPos, EndPos: Integer): Boolean;
   begin
     StartPos := 1;
-    EndPos := Length(Line);
+    EndPos := Length(Line) + 1;
 
     Result := Line.Contains('at line') and Line.Contains('column') and Line.Contains('in file');
     if Result then
@@ -285,143 +274,130 @@ begin
   end;
 end;
 
-procedure TSimbaOutputForm.Add(const S: String);
-var
-  Line: String;
-begin
-  DebugLn(S);
+function TSimbaOutputBox.Add(const S: String): String;
 
-  FLock.Enter();
-  try
-    for Line in S.Split([LineEnding]) do
-      FStrings.Add(Line);
-  finally
-    FLock.Leave();
-  end;
-end;
-
-procedure TSimbaOutputForm.Add(const Strings: TStrings);
-var
-  I: Integer;
-begin
-  FLock.Enter();
-  try
-    for I := 0 to Strings.Count - 1 do
-      FStrings.Add(Strings[I]);
-  finally
-    FLock.Leave();
-  end;
-end;
-
-function TSimbaOutputForm.AddRaw(const Data: String): String;
-var
-  I: Integer;
-  Lines: TStringArray;
-begin
-  Lines := Data.Split(LineEnding);
-
-  with SimbaOutputForm do
+  function ParseDebugLn(var S: String): ESimbaDebugLn;
+  var
+    IntVal, NewLen: Integer;
   begin
-    FLock.Enter();
+    Result := ESimbaDebugLn.NONE;
 
-    try
-      if Data.EndsWith(LineEnding) then
+    if (Length(S) >= 5) and (S[1] = #0) and (S[2] = #0) and (S[3] = '$') then
+    begin
+      IntVal := S.CopyRange(3, 5).ToInteger(0);
+
+      if InRange(IntVal, Integer(Low(ESimbaDebugLn)) + 1, Integer(High(ESimbaDebugLn))) then
       begin
-        for I := 0 to High(Lines) do
-          FStrings.Add(Lines[I]);
+        Result := ESimbaDebugLn(IntVal);
 
-        Result := '';
-      end else
-      begin
-        // Pipe buffer is full! Carry over last line.
-        for I := 0 to High(Lines) - 1 do
-          FStrings.Add(Lines[I]);
-
-        Result := Lines[High(Lines)];
+        NewLen := Length(S) - 5;
+        if (NewLen > 0) then
+          Move(S[6], S[1], NewLen * SizeOf(Char));
+        SetLength(S, NewLen);
       end;
-    finally
-      FLock.Leave();
     end;
+  end;
+
+var
+  Arr: TStringArray;
+  I, H: Integer;
+begin
+  Arr := S.Split(LineEnding);
+
+  FLock.Enter();
+  try
+    H := High(Arr);
+    for I := 0 to H - 1 do
+      FBuffer.AddObject(Arr[I], TObject(PtrUInt(ParseDebugLn(Arr[I]))));
+
+    if S.EndsWith(LineEnding) then
+    begin
+      FBuffer.AddObject(Arr[H], TObject(PtrUInt(ParseDebugLn(Arr[H]))));
+
+      Result := '';
+    end else
+      Result := Arr[H];
+  finally
+    FLock.Leave();
+  end;
+end;
+
+procedure TSimbaOutputBox.AddClear;
+begin
+  Add(ToStr(ESimbaDebugLn.CLEAR) + LineEnding);
+end;
+
+procedure TSimbaOutputBox.Flush;
+var
+  I, StartIndex: Integer;
+  LineType: ESimbaDebugLn;
+  NeedVisible, NeedScroll: Boolean;
+begin
+  FLock.Enter();
+
+  try
+    if (FBuffer.Count > 0) then
+    begin
+      NeedVisible := False;
+
+      StartIndex := 0;
+      for I := 0 to FBuffer.Count - 1 do
+      begin
+        LineType := ESimbaDebugLn(PtrUInt(FBuffer.Objects[I]));
+        if (LineType = ESimbaDebugLn.CLEAR) then
+          StartIndex := I+1;
+
+        NeedVisible := NeedVisible or (LineType in [ESimbaDebugLn.YELLOW, ESimbaDebugLn.RED, ESimbaDebugLn.GREEN, ESimbaDebugLn.SHOW]);
+      end;
+
+      BeginUpdate(False);
+      if (StartIndex > 0) then
+        Clear();
+
+      // auto scroll if already scrolled to bottom.
+      NeedScroll := (Lines.Count < LinesInWindow) or ((Lines.Count + 1) = (TopLine + LinesInWindow));
+      for I := StartIndex to FBuffer.Count - 1 do
+      begin
+        LineType := ESimbaDebugLn(PtrUInt(FBuffer.Objects[I]));
+
+        case LineType of
+          ESimbaDebugLn.NONE:   Lines.Add(FBuffer[I]);
+          ESimbaDebugLn.YELLOW: Lines.AddObject(FBuffer[I], TObject(PtrUInt($00BFFF)));
+          ESimbaDebugLn.RED:    Lines.AddObject(FBuffer[I], TObject(PtrUInt($0000A5)));
+          ESimbaDebugLn.GREEN:  Lines.AddObject(FBuffer[I], TObject(PtrUInt($228B22)));
+        end;
+      end;
+
+      if NeedVisible then
+      begin
+        if (Parent is TTabSheet) then
+          TTabSheet(Parent).PageControl.ActivePage := TTabSheet(Parent);
+        TopLine := Lines.Count;
+      end else
+      if NeedScroll then
+        TopLine := Lines.Count;
+
+      EndUpdate();
+      Invalidate();
+
+      FBuffer.Clear();
+    end;
+  finally
+    FLock.Leave();
   end;
 end;
 
 procedure TSimbaOutputForm.MenuItemSelectAllClick(Sender: TObject);
 begin
-  FScriptOutputBox.SelectAll();
+  if (ContextMenu.PopupComponent is TSynEdit) then
+    with TSynEdit(ContextMenu.PopupComponent) do
+      SelectAll();
 end;
 
 procedure TSimbaOutputForm.TimerExecute(Sender: TObject);
-
-  function GetStartIndex: Integer;
-  var
-    I: Integer;
-    Line: String;
-  begin
-    Result := -1;
-
-    for I := FStrings.Count - 1 downto 0 do
-    begin
-      Line := FStrings[I];
-
-      if (GetDebugLnType(Line) = ESimbaDebugLn.CLEAR) then
-      begin
-        FScriptOutputBox.Clear();
-
-        Exit(I);
-      end;
-    end;
-  end;
-
-var
-  I: Integer;
-  Line: String;
-  LineType: ESimbaDebugLn;
-  NeedScroll, NeedShow: Boolean;
 begin
-  NeedShow := False;
-
-  FLock.Enter();
-  try
-    if FClear then
-    begin
-      FScriptOutputBox.Clear();
-      FStrings.Clear();
-
-      FClear := False;
-    end;
-
-    if (FStrings.Count = 0) then
-      Exit;
-
-    FScriptOutputBox.BeginUpdate(False);
-
-    // auto scroll if already scrolled to bottom.
-    NeedScroll := (FScriptOutputBox.Lines.Count < FScriptOutputBox.LinesInWindow) or ((FScriptOutputBox.Lines.Count + 1) = (FScriptOutputBox.TopLine + FScriptOutputBox.LinesInWindow));
-    for I := GetStartIndex() + 1 to FStrings.Count - 1 do
-    begin
-      Line := FStrings[I];
-      LineType := GetDebugLnType(Line);
-
-      case LineType of
-        ESimbaDebugLn.NONE:   FScriptOutputBox.Lines.Add(Line);
-        ESimbaDebugLn.YELLOW: FScriptOutputBox.Lines.AddObject(Line, TObject(PtrUInt($00BFFF)));
-        ESimbaDebugLn.RED:    FScriptOutputBox.Lines.AddObject(Line, TObject(PtrUInt($0000A5)));
-        ESimbaDebugLn.GREEN:  FScriptOutputBox.Lines.AddObject(Line, TObject(PtrUInt($228B22)));
-      end;
-
-      NeedShow := NeedShow or (LineType in [ESimbaDebugLn.YELLOW, ESimbaDebugLn.RED, ESimbaDebugLn.GREEN]);
-    end;
-
-    if NeedScroll or NeedShow then
-      FScriptOutputBox.TopLine := FScriptOutputBox.Lines.Count;
-    if NeedShow then
-      PageControl.ActivePage := TabScript;
-
-    FScriptOutputBox.EndUpdate();
-    FStrings.Clear();
-  finally
-    FLock.Leave();
-  end;
+  FScriptOutputBox.Flush();
+  FSimbaOutputBox.Flush();
 end;
 
 procedure TSimbaOutputForm.SimbaSettingChanged(Setting: TSimbaSetting);
@@ -448,14 +424,11 @@ begin
   end;
 end;
 
-procedure TSimbaOutputForm.Clear;
-begin
-  FClear := True;
-end;
-
 procedure TSimbaOutputForm.MenuItemCopyClick(Sender: TObject);
 begin
-  FScriptOutputBox.CopyToClipboard();
+  if (ContextMenu.PopupComponent is TSynEdit) then
+    with TSynEdit(ContextMenu.PopupComponent) do
+      CopyToClipboard();
 end;
 
 procedure TSimbaOutputForm.MenuItemCopyLineClick(Sender: TObject);
@@ -500,11 +473,7 @@ constructor TSimbaOutputForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  DebugLnFunc := @SimbaDebugLn;
   PageControl.ActivePage := TabScript;
-
-  FStrings := TStringList.Create();
-  FLock := TCriticalSection.Create();
 
   FSimbaOutputBox := TSimbaOutputBox.Create(Self);
   FSimbaOutputBox.Parent := TabSimba;
@@ -521,15 +490,12 @@ begin
   SimbaSettingChanged(SimbaSettings.General.OutputFontAntiAliased);
 
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
+
+  DebugLnFunc := @SimbaDebugLn;
 end;
 
 destructor TSimbaOutputForm.Destroy;
 begin
-  if (FLock <> nil) then
-    FreeAndNil(FLock);
-  if (FStrings <> nil) then
-    FreeAndNil(FStrings);
-
   if (SimbaSettings <> nil) then
     SimbaSettings.UnRegisterChangeHandler(@SimbaSettingChanged);
 

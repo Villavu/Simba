@@ -40,6 +40,9 @@ type
   end;
 
   TSimbaPackage = class
+  private
+    function GetAutoUpdateEnabled: Boolean;
+    procedure SetAutoUpdateEnabled(AValue: Boolean);
   protected
     FEndpoint: TSimbaPackageEndpoint;
     FURL: String;
@@ -80,9 +83,10 @@ type
     property InstalledVersionTime: TDateTime read GetInstalledVersionTime write SetInstalledVersionTime;
     property LatestVersion: String read GetLatestVersion;
     property LatestVersionTime: TDateTime read GetLatestVersionTime;
+    property AutoUpdateEnabled: Boolean read GetAutoUpdateEnabled write SetAutoUpdateEnabled;
 
     function IsInstalled: Boolean;
-    function UnInstall: Boolean;
+    function UnInstall(RemoveFiles: Boolean): Boolean;
 
     function HasUpdate: Boolean;
     function HasVersions: Boolean;
@@ -255,8 +259,8 @@ end;
 function TSimbaPackage.GetLatestVersionTime: TDateTime;
 begin
   Result := 0;
-  if (Length(Versions) > 0) then
-    Result := Versions[0].Time;
+  if (Length(VersionsNoBranch) > 0) then
+    Result := VersionsNoBranch[0].Time;
 end;
 
 function TSimbaPackage.GetInstalledVersionTime: TDateTime;
@@ -274,6 +278,16 @@ begin
   Result := ReadConfig('InstalledVersion');
   if (Result <> '') and (not DirectoryExists(InstalledPath)) then
     Result := '';
+end;
+
+function TSimbaPackage.GetAutoUpdateEnabled: Boolean;
+begin
+  Result := (Self.InstalledVersion <> '') and (Self.ReadConfig('AutoUpdate') <> '');
+end;
+
+procedure TSimbaPackage.SetAutoUpdateEnabled(AValue: Boolean);
+begin
+  Self.WriteConfig('AutoUpdate', 'True')
 end;
 
 procedure TSimbaPackage.ClearConfig;
@@ -333,7 +347,9 @@ end;
 
 function TSimbaPackage.GetInstalledPath: String;
 begin
-  Result := CleanAndExpandDirectory(ReadConfig('InstalledPath'));
+  Result := ReadConfig('InstalledPath');
+  if (Result <> '') then
+    Result := CleanAndExpandDirectory(Result);
 end;
 
 procedure TSimbaPackage.SetInstalledPath(Value: String);
@@ -395,11 +411,17 @@ begin
   Result := (InstalledVersion <> '') and DirectoryExists(InstalledPath);
 end;
 
-function TSimbaPackage.UnInstall: Boolean;
+function TSimbaPackage.UnInstall(RemoveFiles: Boolean): Boolean;
 begin
-  Result := (not IsInstalled()) or DeleteDirectory(InstalledPath, False);
+  Result := IsInstalled();
+
   if Result then
+  begin
+    if RemoveFiles and PathIsInPath(InstalledPath, GetSimbaPath()) then
+      DeleteDirectory(InstalledPath, False);
+
     ClearConfig();
+  end;
 end;
 
 function TSimbaPackage.HasUpdate: Boolean;

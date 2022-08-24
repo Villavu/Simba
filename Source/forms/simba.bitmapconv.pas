@@ -38,7 +38,7 @@ implementation
 
 uses
   clipbrd, lclintf, lcltype,
-  simba.outputform;
+  simba.mufasatypes;
 
 const
   BmpSizeTxt = '(%dx%d)';
@@ -117,7 +117,7 @@ begin
     end else
       Builder.Add(Format('  BMP := TMufasaBitmap.CreateFromString(%d, %d, %s);', [dispPic.Width, dispPic.Height, QuotedStr(Str)]));
 
-    SimbaOutputForm.Add(Builder);
+    SimbaDebugLn(Builder.Text);
 
     try
       Clipboard.AsText := Builder.Text;

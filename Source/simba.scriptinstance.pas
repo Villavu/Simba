@@ -87,7 +87,6 @@ uses
   forms, lazloggerbase,
   simba.outputform, simba.scripttabsform, simba.scripttab;
 
-// todo ensure finished
 procedure TSimbaScriptInstance.DoOutputThread;
 var
   Buffer: array[1..4096] of Char;
@@ -102,7 +101,7 @@ begin
 
       if (Count > 0) then
       begin
-        Remaining := SimbaOutputForm.AddRaw(Remaining + Copy(Buffer, 1, Count));
+        Remaining := SimbaOutputForm.ScriptOutputBox.Add(Remaining + Copy(Buffer, 1, Count));
         if (Count < Length(Buffer)) then
           Sleep(500);
       end;

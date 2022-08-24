@@ -12,6 +12,10 @@ interface
 uses
   Classes, SysUtils, Graphics;
 
+const
+  IsScriptProcess: Boolean = False;
+  IsScriptProcessWithCommunication: Boolean = False;
+
 type
   {$SCOPEDENUMS ON}
   ESimbaScriptState = (STATE_PAUSED, STATE_STOP, STATE_RUNNING, STATE_NONE);
@@ -153,9 +157,12 @@ type
     CLEAR,
     YELLOW,
     RED,
-    GREEN
+    GREEN,
+    SHOW
   );
 {$POP}
+
+function ToStr(Typ: ESimbaDebugLn): String; overload;
 
 procedure SimbaDebugLn(const Msg: String); overload;
 procedure SimbaDebugLn(const Msg: String; Args: array of const); overload;
@@ -201,9 +208,6 @@ uses
   math, forms, lazloggerbase,
   simba.math, simba.overallocatearray, simba.geometry, simba.heaparray;
 
-const
-  IsScriptProcessWithCommunication: Boolean = False;
-
 {$DEFINE BODY}
   {$i generics.inc}
   {$i box.inc}
@@ -214,6 +218,11 @@ const
   {$i singlematrix.inc}
   {$i matrix.inc}
 {$UNDEF BODY}
+
+function ToStr(Typ: ESimbaDebugLn): String;
+begin
+  Result := #0+#0+'$'+IntToHex(Ord(Typ), 2);
+end;
 
 procedure SimbaDebugLn(const Msg: String);
 begin
@@ -227,8 +236,8 @@ end;
 
 procedure SimbaDebugLn(const Typ: ESimbaDebugLn; const Msg: String);
 begin
-  if IsScriptProcessWithCommunication then
-    SimbaDebugLn(#0#0 + IntToStr(Integer(Typ)) + Msg)
+  if (not IsScriptProcess) or IsScriptProcessWithCommunication then
+    SimbaDebugLn(ToStr(Typ) + Msg)
   else
     SimbaDebugLn(Msg);
 end;
@@ -426,26 +435,36 @@ type
 
 procedure TSyncObject.Execute;
 begin
-  if Assigned(Proc) then Proc();
+  if Assigned(Proc)       then Proc();
   if Assigned(NestedProc) then NestedProc();
 end;
 
 procedure Sync(Method: TProc);
 var
-  SyncObject{%H-}: TSyncObject;
+  SyncObject: TSyncObject;
 begin
-  SyncObject.Proc := Method;
+  if (GetCurrentThreadID() <> MainThreadID) then
+  begin
+    SyncObject.Proc       := Method;
+    SyncObject.NestedProc := nil;
 
-  TThread.Synchronize(nil, @SyncObject.Execute);
+    TThread.Synchronize(nil, @SyncObject.Execute);
+  end else
+    Method();
 end;
 
 procedure Sync(Method: TNestedProc);
 var
-  SyncObject{%H-}: TSyncObject;
+  SyncObject: TSyncObject;
 begin
-  SyncObject.NestedProc := Method;
+  if (GetCurrentThreadID() <> MainThreadID) then
+  begin
+    SyncObject.Proc       := nil;
+    SyncObject.NestedProc := Method;
 
-  TThread.Synchronize(nil, @SyncObject.Execute);
+    TThread.Synchronize(nil, @SyncObject.Execute);
+  end else
+    Method();
 end;
 
 type
@@ -507,8 +526,6 @@ end;
 
 initialization
   DebugLnFunc := @DebugLn;
-
-  IsScriptProcessWithCommunication := Application.HasOption('simbacommunication');
 
 end.
 

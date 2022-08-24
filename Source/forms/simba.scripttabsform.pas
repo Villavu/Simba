@@ -111,7 +111,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.outputform, simba.scripttabhistory, simba.files, simba.editor_docgenerator,
+  simba.mufasatypes, simba.scripttabhistory, simba.files, simba.editor_docgenerator,
   simba.dockinghelpers;
 
 procedure TSimbaScriptTabsForm.DoEditorPopupShow(Sender: TObject);
@@ -436,9 +436,9 @@ begin
   if (Header = '') then
     Exit;
 
-  SimbaOutputForm.Add('Declared internally in Simba: ' + FileName);
-  SimbaOutputForm.Add('Declaration:');
-  SimbaOutputForm.Add(Header);
+  SimbaDebugLn('Declared internally in Simba: ' + FileName);
+  SimbaDebugLn('Declaration:');
+  SimbaDebugLn(Header);
 end;
 
 procedure TSimbaScriptTabsForm.OpenDeclaration(Declaration: TDeclaration);
@@ -464,16 +464,16 @@ begin
   end else
   begin
     if IsLibrary then
-      SimbaOutputForm.Add('Declared internally in plugin: ' + FileName)
+      SimbaDebugLn('Declared internally in plugin: ' + FileName)
     else
-      SimbaOutputForm.Add('Declared internally in Simba: ' + FileName);
+      SimbaDebugLn('Declared internally in Simba: ' + FileName);
 
-    SimbaOutputForm.Add('Declaration:');
+    SimbaDebugLn('Declaration:');
 
     if Declaration is TciProcedureDeclaration then
-      SimbaOutputForm.Add(TciProcedureDeclaration(Declaration).Header)
+      SimbaDebugLn(TciProcedureDeclaration(Declaration).Header)
     else
-      SimbaOutputForm.Add(Declaration.RawText);
+      SimbaDebugLn(Declaration.RawText);
   end;
 end;
 

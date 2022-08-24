@@ -13,6 +13,7 @@ type
     Path: String;
     IgnoreList: TStringArray;
     Flat: Boolean;
+    AutoUpdate: Boolean;
   end;
 
   TSimbaPackageInstaller = class
@@ -24,15 +25,23 @@ type
     FProgressBuffer: TStringList;
     FProgressLast: String;
 
-    procedure FlushProgress;
-    procedure Progress(S: String);
-    procedure Log(S: String);
+    FDownloadProgress, FExtractProgress, FCopyProgress: record
+      Time: UInt64;
+      Progress: String;
+    end;
+
+    procedure FlushLog;
+    procedure Log(S: String; Flush: Boolean = False);
 
     procedure DoConnectingProgress(Sender: TObject; URL: String);
     procedure DoDownloadingProgress(Sender: TObject; URL, ContentType: String; Pos, Size: Int64);
     procedure DoExtractingProgress(Sender: TObject; FileName: String; Percent: Double);
     procedure DoCopyingProgress(Sender: TObject; FileName: String; Percent: Double);
     procedure DoResponseCode(Sender: TObject; Code: Integer);
+
+    procedure DoDownloadingFinished(Sender: TObject);
+    procedure DoExtractingFinished(Sender: TObject);
+    procedure DoCopyingFinished(Sender: TObject);
   public
     constructor Create(Package: TSimbaPackage; Output: TSynEdit);
     destructor Destroy; override;
@@ -47,28 +56,34 @@ uses
   forms,
   simba.mufasatypes, simba.httpclient, simba.helpers_string, simba.files;
 
-procedure TSimbaPackageInstaller.FlushProgress;
-var
-  I: Integer;
-begin
-  FProgressBufferLock.Enter();
+procedure TSimbaPackageInstaller.FlushLog;
 
-  try
-    FOutput.BeginUpdate(False);
-    for I := 0 to FProgressBuffer.Count - 1 do
-      FOutput.Append(FProgressBuffer[I]);
-    FOutput.CaretXY := TPoint.Create(0, FOutput.Lines.Count);
-    FOutput.EndUpdate();
+  procedure Execute;
+  var
+    I: Integer;
+  begin
+    FProgressBufferLock.Enter();
 
-    FProgressBuffer.Clear();
-  finally
-    FProgressBufferLock.Leave();
+    try
+      FOutput.BeginUpdate(False);
+      for I := 0 to FProgressBuffer.Count - 1 do
+        FOutput.Append(FProgressBuffer[I]);
+      FOutput.CaretXY := TPoint.Create(0, FOutput.Lines.Count);
+      FOutput.EndUpdate();
+
+      FProgressBuffer.Clear();
+    finally
+      FProgressBufferLock.Leave();
+    end;
+
+    Application.ProcessMessages();
   end;
 
-  Application.ProcessMessages();
+begin
+  Sync(@Execute);
 end;
 
-procedure TSimbaPackageInstaller.Progress(S: String);
+procedure TSimbaPackageInstaller.Log(S: String; Flush: Boolean);
 begin
   FProgressBufferLock.Enter();
   try
@@ -79,17 +94,14 @@ begin
   finally
     FProgressBufferLock.Leave();
   end;
-end;
 
-procedure TSimbaPackageInstaller.Log(S: String);
-begin
-  FOutput.Append(S);
-  FOutput.CaretXY := TPoint.Create(0, FOutput.Lines.Count);
+  if Flush then
+    FlushLog();
 end;
 
 procedure TSimbaPackageInstaller.DoConnectingProgress(Sender: TObject; URL: String);
 begin
-  Progress('Connecting to %s'.Format([URL]));
+  Log('Connecting to %s'.Format([URL]));
 end;
 
 procedure TSimbaPackageInstaller.DoDownloadingProgress(Sender: TObject; URL, ContentType: String; Pos, Size: Int64);
@@ -98,24 +110,55 @@ begin
     Exit;
 
   if (Size > 0) then
-    Progress('Downloading: %f / %f MB'.Format([Pos / (1024 * 1024), Size / (1024 * 1024)]))
+    FDownloadProgress.Progress := 'Downloading: %f / %f MB'.Format([Pos / (1024 * 1024), Size / (1024 * 1024)])
   else
-    Progress('Downloading: %f MB'.Format([Pos / (1024 * 1024)]));
+    FDownloadProgress.Progress := 'Downloading: %f MB'.Format([Pos / (1024 * 1024)]);
+
+  if (GetTickCount64() - FDownloadProgress.Time) < 500 then
+    Exit;
+  FDownloadProgress.Time := GetTickCount64();
+
+  Log(FDownloadProgress.Progress);
 end;
 
 procedure TSimbaPackageInstaller.DoExtractingProgress(Sender: TObject; FileName: String; Percent: Double);
 begin
-  Progress('Extracting: %d%%'.Format([Round(Percent)]));
+  FExtractProgress.Progress := 'Extracting: %d%%'.Format([Round(Percent)]);
+  if (GetTickCount64() - FExtractProgress.Time) < 500 then
+    Exit;
+  FExtractProgress.Time := GetTickCount64();
+
+  Log(FExtractProgress.Progress);
 end;
 
 procedure TSimbaPackageInstaller.DoCopyingProgress(Sender: TObject; FileName: String; Percent: Double);
 begin
-  Progress('Copying: %d%%'.Format([Round(Percent)]));
+  FCopyProgress.Progress := 'Copying: %d%%'.Format([Round(Percent)]);
+  if (GetTickCount64() - FCopyProgress.Time) < 500 then
+    Exit;
+  FCopyProgress.Time := GetTickCount64();
+
+  Log(FCopyProgress.Progress);
 end;
 
 procedure TSimbaPackageInstaller.DoResponseCode(Sender: TObject; Code: Integer);
 begin
-  Progress('HTTP response: %d'.Format([Code]));
+  Log('HTTP response: %d'.Format([Code]));
+end;
+
+procedure TSimbaPackageInstaller.DoDownloadingFinished(Sender: TObject);
+begin
+  Log(FDownloadProgress.Progress);
+end;
+
+procedure TSimbaPackageInstaller.DoExtractingFinished(Sender: TObject);
+begin
+  Log(FExtractProgress.Progress);
+end;
+
+procedure TSimbaPackageInstaller.DoCopyingFinished(Sender: TObject);
+begin
+  Log(FCopyProgress.Progress);
 end;
 
 constructor TSimbaPackageInstaller.Create(Package: TSimbaPackage; Output: TSynEdit);
@@ -165,16 +208,18 @@ begin
   Thread := Threaded(@Run);
   while (not Thread.Finished) do
   begin
-    Application.ProcessMessages();
+    if (GetCurrentThreadID() = MainThreadID) then
+      Application.ProcessMessages();
 
-    Sleep(50);
+    Sleep(500);
   end;
 
   Result := Strings.Count > 0;
   if Result then
   begin
-    Options.Path       := Strings.Values['path'];
-    Options.Flat       := Strings.Values['flat'] = 'true';
+    Options.Path := Strings.Values['path'];
+    Options.Flat := Strings.Values['flat'] = 'true';
+    Options.AutoUpdate := Strings.Values['autoupdate'] = 'true';
     for I := 0 to Strings.Count - 1 do
       if (Strings.Names[I] = 'ignore') then
         Options.IgnoreList += [Strings.ValueFromIndex[I]];
@@ -201,6 +246,10 @@ function TSimbaPackageInstaller.Install(Version: TSimbaPackageVersion; Options: 
       OnCopyingProgress  := @DoCopyingProgress;
       OnResponseCode     := @DoResponseCode;
 
+      OnDownloadingFinished := @DoDownloadingFinished;
+      OnExtractingFinished  := @DoExtractingFinished;
+      OnCopyingFinished     := @DoCopyingFinished;
+
       GetZIP(Version.DownloadURL, Options.Path, Options.Flat, Options.IgnoreList);
     finally
       Free();
@@ -210,35 +259,32 @@ function TSimbaPackageInstaller.Install(Version: TSimbaPackageVersion; Options: 
 var
   Thread: TThread;
 begin
-  FOutput.Clear();
-
   Log('Installing: %s'.Format([FPackage.Info.FullName]));
   Log('Version: %s'.Format([Version.Name]));
   Log('Path: %s'.Format([Options.Path]));
-  Log('');
+  Log('', True);
 
   Thread := Threaded(@Run);
   while (not Thread.Finished) do
   begin
-    FlushProgress();
+    FlushLog();
 
-    Sleep(50);
+    Sleep(500);
   end;
 
-  FlushProgress();
-  Log('');
+  Log('', True);
 
   Result := Thread.FatalException = nil;
-
   if Result then
   begin
-    Log('Succesfully installed!');
+    Log('Succesfully installed!', True);
 
     FPackage.InstalledVersion     := Version.Name;
     FPackage.InstalledVersionTime := Version.Time;
     FPackage.InstalledPath        := Options.Path;
+    FPackage.AutoUpdateEnabled    := Options.AutoUpdate;
   end else
-    Log('Installing failed: %s'.Format([Thread.FatalException.ToString()]));
+    Log('Installing failed: %s'.Format([Thread.FatalException.ToString()]), True);
 
   Thread.Free();
 end;

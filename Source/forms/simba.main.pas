@@ -288,7 +288,8 @@ uses
   simba.filebrowserform, simba.notesform, simba.settingsform, simba.colorpicker,
   simba.ci_includecache, simba.scriptformatter,  simba.editor,
   simba.dockinghelpers, simba.datetime, simba.nativeinterface, simba.httpclient,
-  simba.functionlist_simbasection, simba.package, simba.helpers_windowhandle, simba.functionlist_updater;
+  simba.functionlist_simbasection, simba.package, simba.helpers_windowhandle,
+  simba.functionlist_updater, simba.package_installer;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 
@@ -644,12 +645,38 @@ var
   Files, Updates: TStringList;
   Packages: TSimbaPackageArray;
   I: Integer;
+  Options: TSimbaPackageInstallOptions;
 begin
   Updates := TStringList.Create();
   Packages := LoadPackages();
+
   for I := 0 to High(Packages) do
+  begin
     if Packages[I].HasUpdate then
-      Updates.Add('%s can be updated to version %s', [Packages[I].Info.FullName, Packages[I].LatestVersion]);
+    begin
+      if Packages[I].AutoUpdateEnabled then
+      begin
+        SimbaDebugLn('Auto updating ' + Packages[I].Info.FullName);
+
+        with TSimbaPackageInstaller.Create(Packages[I], SimbaOutputForm.SimbaOutputBox) do
+        try
+          if GetOptions(Packages[I].Versions[0], Options) and Install(Packages[I].Versions[0], Options) then
+          begin
+            SimbaDebugLn('');
+            SimbaDebugLn(ESimbaDebugLn.GREEN, 'Succesfully auto updated package "%s"', [Packages[I].Info.FullName]);
+            SimbaDebugLn(ESimbaDebugLn.GREEN, '"%s" is now at version "%s"', [Packages[I].Info.FullName, Packages[I].InstalledVersion]);
+            SimbaDebugLn(ESimbaDebugLn.GREEN, 'Scripts will need to be restarted for changes to take effect.');
+          end else
+            SimbaDebugLn(ESimbaDebugLn.RED, 'Auto updating %s failed.', [Packages[I].Info.FullName]);
+        finally
+          Free();
+        end;
+      end else
+        Updates.Add('%s can be updated to version %s', [Packages[I].Info.FullName, Packages[I].LatestVersion]);
+    end;
+
+    Packages[I].Free();
+  end;
 
   if (not Updates.Equals(FPackageUpdates)) then
   begin
@@ -837,7 +864,7 @@ begin
   if (CurrentTab <> nil) then
   try
     if (GetAction() in [Compile, Run, Debug]) and SimbaSettings.General.OutputClearOnCompile.Value then
-      SimbaOutputForm.Clear();
+      SimbaOutputForm.ScriptOutputBox.AddClear();
 
     case GetAction() of
       Compile: CurrentTab.Compile();
@@ -942,7 +969,7 @@ end;
 
 procedure TSimbaForm.MenuClearOutputClick(Sender: TObject);
 begin
-  SimbaOutputForm.Clear();
+  SimbaOutputForm.ScriptOutputBox.AddClear();
 end;
 
 procedure TSimbaForm.MenuFileClick(Sender: TObject);
