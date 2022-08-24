@@ -79,6 +79,7 @@ type
   function GetScriptPath: String;
   function GetPackagePath: String;
   function GetDumpPath: String;
+  function GetScreenshotPath: String;
 
   procedure CreateBaseDirectories;
 
@@ -390,11 +391,16 @@ begin
   Result := GetDataPath() + 'dumps' + DirectorySeparator;
 end;
 
+function GetScreenshotPath: String;
+begin
+  Result := GetSimbaPath() + 'Screenshots' + DirectorySeparator;
+end;
+
 procedure CreateBaseDirectories;
 var
   Directory: String;
 begin
-  for Directory in [GetDumpPath(), GetPackagePath(), GetIncludePath(), GetFontPath(), GetScriptPath(), GetPluginPath(), GetPluginCopyPath()] do
+  for Directory in [GetScreenshotPath(), GetDumpPath(), GetPackagePath(), GetIncludePath(), GetFontPath(), GetScriptPath(), GetPluginPath(), GetPluginCopyPath()] do
   begin
     if DirectoryExists(Directory) then
       Continue;
