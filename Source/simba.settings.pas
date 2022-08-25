@@ -6,6 +6,7 @@
 unit simba.settings;
 
 {$i simba.inc}
+{$WARN 6058 off : Call to subroutine "$1" marked as inline is not inlined}
 
 interface
 
@@ -62,6 +63,7 @@ type
       RecentFiles: TSimbaSetting;
       CustomFontSize: TSimbaSetting;
       ToolbarSize: TSimbaSetting;
+      ToolbarPosition: TSimbaSetting;
       ColorPickerHistory: TSimbaSetting;
       MacOSKeystrokes: TSimbaSetting;
 
@@ -310,6 +312,7 @@ begin
   General.RecentFiles := TSimbaSetting_BinaryString.Create(Self, 'General', 'RecentFiles', '');
   General.CustomFontSize := TSimbaSetting_Integer.Create(Self, 'General', 'CustomFontSize', 0);
   General.ToolbarSize := TSimbaSetting_Integer.Create(Self, 'General', 'ToolbarSize', 24);
+  General.ToolbarPosition := TSimbaSetting_String.Create(Self, 'General', 'ToolbarPosition', 'Top');
   General.ColorPickerHistory := TSimbaSetting_BinaryString.Create(Self, 'General', 'ColorPickerHistory', '');
   General.MacOSKeystrokes := TSimbaSetting_Boolean.Create(Self, 'General', 'MacOSKeystrokes', {$IFDEF DARWIN}True{$ELSE}False{$ENDIF});
 

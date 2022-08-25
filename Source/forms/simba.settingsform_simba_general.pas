@@ -22,6 +22,7 @@ type
     Label2: TLabel;
     OutputDivider: TDividerBevel;
     OutputFontSize: TSpinEdit;
+    ToolbarPositionRadioGroup: TRadioGroup;
     ToolbarSizeCaption: TLabel;
     FontSizeLabel: TLabel;
     ToolbarSizeTrackBar: TTrackBar;
@@ -29,7 +30,12 @@ type
 
     procedure FontSizeTrackBarChange(Sender: TObject);
     procedure ToolbarSizeTrackBarChange(Sender: TObject);
+  private
+    function GetToolbarPosition: String;
+    procedure SetToolbarPosition(AValue: String);
   public
+    property ToolbarPosition: String read GetToolbarPosition write SetToolbarPosition;
+
     constructor Create(AOwner: TComponent); override;
   end;
 
@@ -51,6 +57,26 @@ begin
     ToolbarSizeCaption.Caption := 'Toolbar Size (Default)'
   else
     ToolbarSizeCaption.Caption := 'Toolbar Size (' + IntToStr(ToolbarSizeTrackBar.Position) + ')';
+end;
+
+function TSimbaGeneralFrame.GetToolbarPosition: String;
+begin
+  case ToolbarPositionRadioGroup.ItemIndex of
+    0: Result := 'Top';
+    1: Result := 'Left';
+    2: Result := 'Right';
+  end;
+end;
+
+procedure TSimbaGeneralFrame.SetToolbarPosition(AValue: String);
+begin
+  case AValue of
+    'Top':   ToolbarPositionRadioGroup.ItemIndex := 0;
+    'Left':  ToolbarPositionRadioGroup.ItemIndex := 1;
+    'Right': ToolbarPositionRadioGroup.ItemIndex := 2;
+    else
+      ToolbarPositionRadioGroup.ItemIndex := 0;
+  end;
 end;
 
 constructor TSimbaGeneralFrame.Create(AOwner: TComponent);

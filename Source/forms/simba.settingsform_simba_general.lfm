@@ -1,15 +1,15 @@
 object SimbaGeneralFrame: TSimbaGeneralFrame
   Left = 0
-  Height = 380
+  Height = 545
   Top = 0
   Width = 571
-  ClientHeight = 380
+  ClientHeight = 545
   ClientWidth = 571
   DesignTimePPI = 120
   ParentFont = False
   TabOrder = 0
   DesignLeft = 2862
-  DesignTop = 803
+  DesignTop = 638
   object ToolbarSizeTrackBar: TTrackBar
     AnchorSideLeft.Control = ToolbarSizeCaption
     AnchorSideLeft.Side = asrBottom
@@ -67,6 +67,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Font Size (Default)'
     Layout = tlCenter
+    ParentColor = False
   end
   object ToolbarSizeCaption: TLabel
     AnchorSideLeft.Control = Owner
@@ -80,6 +81,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Toolbar Size (Default)'
     Layout = tlCenter
+    ParentColor = False
   end
   object OutputDivider: TDividerBevel
     AnchorSideLeft.Control = Owner
@@ -89,7 +91,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Side = asrBottom
     Left = 0
     Height = 20
-    Top = 209
+    Top = 321
     Width = 571
     Caption = 'Output'
     Align = alCustom
@@ -105,11 +107,12 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Side = asrBottom
     Left = 0
     Height = 28
-    Top = 235
+    Top = 347
     Width = 73
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Font Name'
     Layout = tlCenter
+    ParentColor = False
   end
   object OutputFontName: TComboBox
     AnchorSideLeft.Control = Label1
@@ -120,7 +123,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Side = asrBottom
     Left = 83
     Height = 28
-    Top = 235
+    Top = 347
     Width = 488
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 10
@@ -137,7 +140,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Side = asrBottom
     Left = 83
     Height = 28
-    Top = 269
+    Top = 381
     Width = 488
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 10
@@ -150,7 +153,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideTop.Side = asrBottom
     Left = 0
     Height = 24
-    Top = 303
+    Top = 415
     Width = 106
     BorderSpacing.Top = 6
     Caption = 'Anti-Aliased'
@@ -163,27 +166,28 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Side = asrBottom
     Left = 0
     Height = 28
-    Top = 269
+    Top = 381
     Width = 60
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Font Size'
     Layout = tlCenter
+    ParentColor = False
   end
   object CheckGroup1: TCheckGroup
     AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = ToolbarSizeTrackBar
+    AnchorSideTop.Control = ToolbarPositionRadioGroup
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 5
     Height = 119
-    Top = 84
+    Top = 196
     Width = 561
     Anchors = [akTop, akLeft, akRight]
     AutoFill = True
     AutoSize = True
     BorderSpacing.Left = 5
-    BorderSpacing.Top = 10
+    BorderSpacing.Top = 5
     BorderSpacing.Right = 5
     BorderSpacing.InnerBorder = 5
     Caption = 'General'
@@ -198,7 +202,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     ClientHeight = 94
     ClientWidth = 557
     Items.Strings = (
-      'Clear Output On Compile'
+      'Clear Script Output On Compile'
       'Extract OpenSSL On Launch (Windows)'
       'Use Command Key (MacOS)'
     )
@@ -206,5 +210,39 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Data = {
       03000000030303
     }
+  end
+  object ToolbarPositionRadioGroup: TRadioGroup
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = ToolbarSizeTrackBar
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 5
+    Height = 107
+    Top = 84
+    Width = 561
+    Anchors = [akTop, akLeft, akRight]
+    AutoFill = True
+    AutoSize = True
+    BorderSpacing.Left = 5
+    BorderSpacing.Top = 10
+    BorderSpacing.Right = 5
+    BorderSpacing.InnerBorder = 5
+    Caption = 'Toolbar Position'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    ClientHeight = 82
+    ClientWidth = 557
+    Items.Strings = (
+      'Top (Default)'
+      'Left'
+      'Right'
+    )
+    TabOrder = 6
   end
 end

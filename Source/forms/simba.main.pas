@@ -57,6 +57,8 @@ const
 type
   TSimbaForm = class(TForm)
     DockPanel: TAnchorDockPanel;
+    MenuItemDocumentation: TMenuItem;
+    MenuItemGithub: TMenuItem;
     PackageImageList: TImageList;
     Images: TImageList;
     MainMenu: TMainMenu;
@@ -180,10 +182,12 @@ type
     procedure MenuItemCloseTabsClick(Sender: TObject);
     procedure MenuItemConsoleClick(Sender: TObject);
     procedure MenuItemDebuggerClick(Sender: TObject);
+    procedure MenuItemDocumentationClick(Sender: TObject);
     procedure MenuItemDTMEditorClick(Sender: TObject);
     procedure MenuItemFindNextClick(Sender: TObject);
     procedure MenuItemFindPrevClick(Sender: TObject);
     procedure MenuItemFormatScriptClick(Sender: TObject);
+    procedure MenuItemGithubClick(Sender: TObject);
     procedure MenuItemLockLayoutClick(Sender: TObject);
     procedure MenuItemReportBugClick(Sender: TObject);
     procedure MenuItemResetLayoutClick(Sender: TObject);
@@ -255,6 +259,7 @@ type
     procedure HandleEditorCaretChange(Sender: TObject);
 
     procedure SetToolbarSize(Value: Integer);
+    procedure SetToolbarPosition(Value: String);
     procedure SetCustomFontSize(Value: Integer);
     procedure SetConsoleVisible(Value: Boolean);
     procedure SetLayoutLocked(Value: Boolean);
@@ -279,7 +284,7 @@ implementation
 {$R *.lfm}
 
 uses
-  lcltype, lclintf, lazloggerbase, lazfileutils, anchordocking, math,
+  lcltype, lclintf, lazloggerbase, lazfileutils, anchordocking, math, toolwin,
   simba.openssl, simba.files, simba.process, simba.package_form,
   simba.openexampleform, simba.colorpickerhistoryform, simba.codeparser,
   simba.codeinsight, simba.associate, simba.scripttab, simba.debugimageform,
@@ -360,6 +365,26 @@ begin
 
   ToolBar.ButtonWidth  := Value + Scale96ToScreen(8);
   ToolBar.ButtonHeight := Value + Scale96ToScreen(8);
+end;
+
+procedure TSimbaForm.SetToolbarPosition(Value: String);
+var
+  I: Integer;
+begin
+  case Value of
+    'Top':   ToolBar.Align := alTop;
+    'Left':  ToolBar.Align := alLeft;
+    'Right': ToolBar.Align := alRight;
+  end;
+
+  if (Value = 'Top') then
+    ToolBar.EdgeBorders := [ebTop, ebBottom]
+  else
+    ToolBar.EdgeBorders := [];
+
+  for I := 0 to Toolbar.ButtonCount-1 do
+    if (ToolBar.Buttons[I].Style = tbsDivider) then
+      ToolBar.Buttons[I].Visible := Value = 'Top';
 end;
 
 procedure TSimbaForm.SetCustomFontSize(Value: Integer);
@@ -536,6 +561,11 @@ begin
   end;
 end;
 
+procedure TSimbaForm.MenuItemGithubClick(Sender: TObject);
+begin
+  OpenURL(SIMBA_GITHUB_URL);
+end;
+
 procedure TSimbaForm.MenuItemAboutClick(Sender: TObject);
 begin
   SimbaAboutForm.ShowModal();
@@ -620,6 +650,7 @@ begin
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
 
   SimbaSettingChanged(SimbaSettings.General.ToolbarSize);
+  SimbaSettingChanged(SimbaSettings.General.ToolbarPosition);
   SimbaSettingChanged(SimbaSettings.General.CustomFontSize);
   SimbaSettingChanged(SimbaSettings.General.LockLayout);
   SimbaSettingChanged(SimbaSettings.General.TrayIconVisible);
@@ -837,6 +868,11 @@ begin
     SimbaScriptTabsForm.CurrentTab.DebuggingForm.ShowOnTop();
 end;
 
+procedure TSimbaForm.MenuItemDocumentationClick(Sender: TObject);
+begin
+  OpenURL(SIMBA_DOCS_URL);
+end;
+
 procedure TSimbaForm.MenuItemACAClick(Sender: TObject);
 begin
   TSimbaACAForm.Create(WindowSelection).ShowOnTop();
@@ -920,6 +956,8 @@ end;
 
 procedure TSimbaForm.SimbaSettingChanged(Setting: TSimbaSetting);
 begin
+  if (Setting = SimbaSettings.General.ToolbarPosition) then
+    SetToolbarPosition(Setting.Value);
   if (Setting = SimbaSettings.General.ToolbarSize) then
     SetToolbarSize(Setting.Value);
   if (Setting = SimbaSettings.General.CustomFontSize) then
@@ -1290,6 +1328,8 @@ begin
 end;
 
 procedure TSimbaForm.ToolbarButtonColorPickerClick(Sender: TObject);
+var
+  I: Integer;
 begin
   try
     with TSimbaColorPicker.Create(FWindowSelection) do
@@ -1411,12 +1451,6 @@ end;
 
 procedure TSimbaForm.SetupCompleted;
 begin
-  {
-  ToolBar.EdgeBorders:=[];
-  for I := 0 to Toolbar.ButtonCount-1 do
-    if (ToolBar.Buttons[I].Style=tbsDivider) then
-      ToolBar.Buttons[I].Visible:=False;
-  }
   ScriptStateTimer.Enabled := True;
   PackageMenuTimer.Enabled := True;
 
