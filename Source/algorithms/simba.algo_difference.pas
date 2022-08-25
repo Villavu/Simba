@@ -23,7 +23,7 @@ function Algo_Int64_Difference(x,y: TInt64Array): TInt64Array;
 implementation
 
 uses
-  simba.generics_dict;
+  simba.dictionary;
 
 {$DEFINE MACRO_SET_DIFF :=
   for i:=0 to High(x) do dict[x[i]] := True;

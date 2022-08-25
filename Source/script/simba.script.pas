@@ -72,8 +72,7 @@ type
 implementation
 
 uses
-  lazloggerbase,
-  simba.outputform, simba.files, simba.datetime, simba.helpers_string, simba.httpclient;
+  simba.files, simba.datetime, simba.httpclient;
 
 procedure TSimbaScript.DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
@@ -93,11 +92,11 @@ function TSimbaScript.DoCompilerHandleDirective(Sender: TLapeCompiler; Directive
   var
     URL, Source: String;
   begin
-    Result := ((Directive = 'I') or (Directive = 'INCLUDE')) and (Argument.Between('URL(', ')') <> '');
+    Result := ((Directive = 'I') or (Directive = 'INCLUDE')) and (Argument.ToUpper().Between('URL(', ')') <> '');
 
     if Result then
     begin
-      URL    := Argument.Between('URL(', ')');
+      URL    := Argument.ToUpper().Between('URL(', ')');
       Source := TSimbaHTTPClient.SimpleGet(URL, [HTTP_OK]);
 
       FCompiler.pushTokenizer(TLapeTokenizerString.Create(Source, '!' + URL));
@@ -179,7 +178,7 @@ function TSimbaScript.DoFindMacro(Sender: TLapeCompiler; Name: lpString; var Val
   var
     EnvVar: String;
   begin
-    EnvVar := Name.Between('ENV(', ')');
+    EnvVar := Name.ToUpper().Between('ENV(', ')');
 
     Result := EnvVar <> '';
     if Result then
@@ -191,7 +190,7 @@ function TSimbaScript.DoFindMacro(Sender: TLapeCompiler; Name: lpString; var Val
   var
     Lib: String;
   begin
-    Lib := Name.Between('LIBPATH(', ')');
+    Lib :=  Name.ToUpper().Between('LIBPATH(', ')');
 
     Result := Lib <> '';
     if Result then

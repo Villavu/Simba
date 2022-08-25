@@ -45,8 +45,7 @@ implementation
 
 uses
   lazloggerbase, lazfileutils, lcltype,
-  simba.main, simba.package, simba.fonthelpers, simba.scripttabsform,
-  simba.helpers_string;
+  simba.main, simba.package, simba.fonthelpers, simba.scripttabsform;
 
 procedure TSimbaOpenExampleForm.LoadPackageExamples;
 var

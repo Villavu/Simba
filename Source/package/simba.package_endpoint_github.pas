@@ -30,7 +30,7 @@ implementation
 
 uses
   forms, fpjson, jsonparser, jsonscanner, lazloggerbase, dateutils,
-  simba.helpers_string, simba.httpclient, simba.files;
+  simba.httpclient, simba.files, simba.mufasatypes;
 
 const
   URL_REPOS            = 'https://api.github.com/repos/%s/%s';                       // {Owner} {Name}

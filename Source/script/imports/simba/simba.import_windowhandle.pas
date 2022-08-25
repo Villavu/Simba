@@ -8,7 +8,7 @@ implementation
 
 uses
   classes, sysutils, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.helpers_windowhandle;
+  simba.script_compiler, simba.mufasatypes, simba.windowhandle;
 
 procedure _LapeWindowHandle_Activate(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin

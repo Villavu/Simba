@@ -89,7 +89,7 @@ implementation
 
 uses
   baseunix, unix, lcltype, cocoaall, cocoautils, cocoawscommon, cocoagdiobjects,
-  simba.process, simba.helpers_string;
+  simba.process;
 
 type
   NSEventFix = objccategory external(NSEvent)

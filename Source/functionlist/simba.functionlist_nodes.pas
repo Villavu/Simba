@@ -56,7 +56,7 @@ implementation
 
 uses
   lazfileutils, lclintf,
-  simba.main, simba.scripttabsform, simba.helpers_string;
+  simba.mufasatypes, simba.main, simba.scripttabsform;
 
 procedure TFunctionList_InternalDeclNode.Open;
 begin

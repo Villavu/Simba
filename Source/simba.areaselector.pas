@@ -48,7 +48,7 @@ implementation
 
 uses
   math, lcltype,
-  simba.helpers_windowhandle;
+  simba.windowhandle;
 
 function TSimbaAreaSelector.GetDragEdge(X, Y: Integer): EDragEdge;
 

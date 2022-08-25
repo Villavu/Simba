@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.helpers_windowhandle;
+unit simba.windowhandle;
 
 {$i simba.inc}
 
@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.mufasatypes, simba.helpers_string;
+  simba.mufasatypes;
 
 type
   TWindowHandleHelper = type Helper for TWindowHandle

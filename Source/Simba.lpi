@@ -267,7 +267,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="112">
+    <Units Count="113">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -779,6 +779,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit111>
+      <Unit112>
+        <Filename Value="string.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit112>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

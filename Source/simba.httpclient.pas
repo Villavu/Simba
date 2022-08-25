@@ -178,7 +178,7 @@ type
 implementation
 
 uses
-  simba.zip, simba.helpers_string;
+  simba.zip;
 
 function TSimbaHTTPClient.GetResponseHeaders: TStringList;
 begin

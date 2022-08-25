@@ -49,7 +49,7 @@ type
     Index : integer;
     function ToString : string;
     function SaveToFile(const FileName : string) : boolean;
-    function LoadFromString(const s : string) : boolean;
+    function LoadFromString(S: string) : boolean;
     procedure Normalize;
     function Valid : boolean;
     procedure DeletePoint(Point : integer);
@@ -167,7 +167,7 @@ begin
     result := @FPoints[0];
 end;
 
-procedure TMDTM.SetPointCount(const AValue: Integer);
+procedure TMDTM.SetPointCount(const AValue: integer);
 begin
   SetLength(FPoints,AValue);
   FLen := AValue;
@@ -226,7 +226,7 @@ begin
   Result := False;
 end;
 
-function TMDTM.LoadFromString(const s: string): boolean;
+function TMDTM.LoadFromString(S: string): boolean;
 var
   Source : String;
   i: Integer;
@@ -250,7 +250,8 @@ begin
 
   if S[1] = 'm' then
   begin
-    Source := DecompressString(Base64Decode(s.Remove(0, 1)), True);
+    Delete(S, 1, 1);
+    Source := DecompressString(Base64Decode(S), True);
     if (Source <> '') then
     begin
       ptr := @Source[1];
@@ -300,13 +301,13 @@ begin
     Normalize();
 end;
 
-procedure TMDTM.DeletePoint(Point: Integer);
+procedure TMDTM.DeletePoint(Point: integer);
 begin
   MovePoint(Point, FLen - 1);
   Count := Count - 1;
 end;
 
-procedure TMDTM.SwapPoint(p1, p2: Integer);
+procedure TMDTM.SwapPoint(p1, p2: integer);
 var
   tempP: TMDTMPoint;
 begin
@@ -316,7 +317,7 @@ begin
   FPoints[p2] := tempP;
 end;
 
-procedure TMDTM.MovePoint(fromIndex, toIndex: Integer);
+procedure TMDTM.MovePoint(fromIndex, toIndex: integer);
 var
   i: Integer;
 begin
@@ -329,7 +330,7 @@ begin
       SwapPoint(i, i + 1);
 end;
 
-function TMDTM.AddPoint(Point: TMDTMPoint): Integer;
+function TMDTM.AddPoint(Point: TMDTMPoint): integer;
 begin
   Count := Count + 1;
   Result := FLen - 1;

@@ -95,7 +95,8 @@ implementation
 uses
   SynEditMarkupBracket, SynEditMarkupWordGroup,
   lazloggerbase, lclintf, math,
-  simba.dockinghelpers, simba.fonthelpers, simba.scripttabsform, simba.nativeinterface, simba.helpers_string, simba.mufasatypes;
+  simba.dockinghelpers, simba.fonthelpers, simba.scripttabsform,
+  simba.nativeinterface, simba.mufasatypes;
 
 procedure SimbaDebugLn(const S: String);
 begin

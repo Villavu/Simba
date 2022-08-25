@@ -208,7 +208,7 @@ type
   end;
   TPointFArray = array of TPointF;
 
-  function PointF(const X, Y: Double): TPointF; inline;
+  function PointF(const X, Y: Double): TPointF;
   begin
     Result.X := X;
     Result.Y := Y;

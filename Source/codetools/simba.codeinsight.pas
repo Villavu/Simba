@@ -80,7 +80,7 @@ type
 implementation
 
 uses
-  simba.settings, simba.codetools_arrayhelpers, simba.helpers_string;
+  simba.settings, simba.codetools_arrayhelpers;
 
 class constructor TCodeInsight.Create;
 begin

@@ -23,7 +23,7 @@ function Algo_Int64_Intersection(x,y: TInt64Array): TInt64Array;
 implementation
 
 uses
-  math, simba.generics_dict;
+  math, simba.dictionary;
 
 {$DEFINE MACRO_SET_INTERSECTION :=
   for i:=0 to High(x) do dict[x[i]] := 1;
@@ -75,7 +75,7 @@ type
   TDict = specialize TDictionary<TPoint, Int32>;
 var
   dict, dupes: TDict;
-  i,c, tmp: Int32;
+  i,c: Int32;
 begin
   Result := nil;
   dict := TDict.Create(@HashPoint);
@@ -90,7 +90,7 @@ type
   TDict = specialize TDictionary<UInt8, Int32>;
 var
   dict, dupes: TDict;
-  i,c, tmp: Int32;
+  i,c: Int32;
 begin
   Result := nil;
   dict := TDict.Create(@HashUInt8);
@@ -105,7 +105,7 @@ type
   TDict = specialize TDictionary<Int32, Int32>;
 var
   dict, dupes: TDict;
-  i,c, tmp: Int32;
+  i,c: Int32;
 begin
   Result := nil;
   dict := TDict.Create(@HashInt32);
@@ -120,7 +120,7 @@ type
   TDict = specialize TDictionary<Int64, Int32>;
 var
   dict, dupes: TDict;
-  i,c, tmp: Int32;
+  i,c: Int32;
 begin
   Result := nil;
   dict  := TDict.Create(@HashInt64);

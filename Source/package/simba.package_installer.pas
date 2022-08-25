@@ -54,7 +54,7 @@ implementation
 
 uses
   forms,
-  simba.mufasatypes, simba.httpclient, simba.helpers_string, simba.files;
+  simba.mufasatypes, simba.httpclient, simba.files;
 
 procedure TSimbaPackageInstaller.FlushLog;
 

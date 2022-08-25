@@ -75,7 +75,7 @@ implementation
 
 uses
   x, xatom, keysym, baseunix, unix, linux, lcltype, lazloggerbase, ctypes,
-  simba.process, simba.xlib, simba.helpers_string;
+  simba.process, simba.xlib;
 
 const
    _SC_PAGESIZE = 30;

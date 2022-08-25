@@ -93,8 +93,8 @@ implementation
 
 uses
   interfacebase, forms, lazfileutils, lazloggerbase, synedit, syneditmousecmds,
-  simba.scripttabsform, simba.autocomplete, simba.settings,
-  simba.scripttabhistory, simba.main, simba.parser_misc, simba.files, simba.helpers_string, simba.functionlist_updater;
+  simba.scripttabsform, simba.autocomplete, simba.settings, simba.scripttabhistory,
+  simba.main, simba.parser_misc, simba.files, simba.functionlist_updater;
 
 procedure TSimbaScriptTab.HandleAutoComplete;
 var
