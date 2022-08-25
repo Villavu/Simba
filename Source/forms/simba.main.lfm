@@ -551,6 +551,15 @@ object SimbaForm: TSimbaForm
         ImageIndex = 24
         OnClick = MenuItemReportBugClick
       end
+      object MenuItemGithub: TMenuItem
+        Caption = 'Simba Github'
+        ImageIndex = 34
+        OnClick = MenuItemGithubClick
+      end
+      object MenuItemDocumentation: TMenuItem
+        Caption = 'Online Documentation'
+        OnClick = MenuItemDocumentationClick
+      end
     end
   end
   object TrayIcon: TTrayIcon

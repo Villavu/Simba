@@ -79,6 +79,8 @@ begin
   SimbaGeneralFrame.FontSizeTrackBar.Position := SimbaSettings.General.CustomFontSize.Value;
   SimbaGeneralFrame.FontSizeTrackBar.OnChange(nil);
 
+  SimbaGeneralFrame.ToolbarPosition := SimbaSettings.General.ToolbarPosition.Value;
+
   SimbaGeneralFrame.CheckGroup1.Checked[0] := SimbaSettings.General.OutputClearOnCompile.Value;
   SimbaGeneralFrame.CheckGroup1.Checked[1] := SimbaSettings.General.OpenSSLExtractOnLaunch.Value;
   SimbaGeneralFrame.CheckGroup1.Checked[2] := SimbaSettings.General.MacOSKeystrokes.Value;
@@ -121,6 +123,8 @@ begin
     SimbaSettings.General.CustomFontSize.Value := SimbaSettings.General.CustomFontSize.DefaultValue
   else
     SimbaSettings.General.CustomFontSize.Value := SimbaGeneralFrame.FontSizeTrackBar.Position;
+
+  SimbaSettings.General.ToolbarPosition.Value := SimbaGeneralFrame.ToolbarPosition;
 
   SimbaSettings.General.OutputClearOnCompile.Value := SimbaGeneralFrame.CheckGroup1.Checked[0];
   SimbaSettings.General.OpenSSLExtractOnLaunch.Value := SimbaGeneralFrame.CheckGroup1.Checked[1];
