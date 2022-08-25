@@ -63,7 +63,7 @@ implementation
 
 uses
   jsonparser, jsonscanner, fpjson, dateutils, lazloggerbase,
-  simba.httpclient, simba.helpers_string;
+  simba.httpclient, simba.mufasatypes;
 
 function ParseJSON(const S: String): TJSONData;
 var

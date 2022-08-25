@@ -13,7 +13,7 @@ uses
   classes, sysutils, graphics, controls, lcltype,
   synedit, synedittypes, syngutterlineoverview, lazsyneditmousecmdstypes,
   syneditmousecmds, syneditkeycmds, synpluginmulticaret, synedithighlighter, syneditmarkuphighall,
-  simba.autocomplete, simba.parameterhint, simba.settings,
+  simba.mufasatypes, simba.autocomplete, simba.parameterhint, simba.settings,
   simba.editor_attributes, simba.editor_modifiedlinegutter;
 
 const
@@ -64,7 +64,7 @@ type
 implementation
 
 uses
-  simba.parser_misc, simba.fonthelpers, simba.helpers_string, simba.highlighter,
+  simba.parser_misc, simba.fonthelpers, simba.highlighter,
   simba.editor_blockcompletion, simba.editor_docgenerator, simba.editor_commentblock,
   simba.editor_mousewheelzoom, simba.editor_history;
 

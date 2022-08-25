@@ -8,7 +8,7 @@ implementation
 
 uses
   classes, sysutils, lptypes, ffi,
-  simba.script_compiler, simba.mufasatypes, simba.scriptthread, simba.nativeinterface, simba.math, simba.files;
+  simba.script_compiler, simba.mufasatypes, simba.scriptthread, simba.nativeinterface, simba.files;
 
 procedure _LapeGetEnvironmentVariable(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin

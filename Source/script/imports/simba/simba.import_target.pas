@@ -9,7 +9,7 @@ implementation
 uses
   classes, sysutils, lptypes,
   simba.script_compiler, simba.mufasatypes, simba.scriptthread, simba.bitmap,
-  simba.helpers_windowhandle,  simba.target_exported, simba.target_window;
+  simba.windowhandle, simba.target_exported, simba.target_window;
 
 procedure _LapeSetDesktopAsClient(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin

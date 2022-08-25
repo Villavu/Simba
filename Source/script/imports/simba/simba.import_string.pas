@@ -8,8 +8,7 @@ implementation
 
 uses
   classes, sysutils, lptypes,  uregexpr, strutils,
-  simba.script_compiler, simba.mufasatypes, simba.stringutil,
-  simba.helpers_string;
+  simba.script_compiler, simba.mufasatypes, simba.stringutil;
 
 procedure _LapeExtractFromStr(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -108,6 +107,26 @@ end;
 procedure _LapeString_StartsWith(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PBoolean(Result)^ := PString(Params^[0])^.StartsWith(PString(Params^[1])^, PBoolean(Params^[2])^);
+end;
+
+procedure _LapeString_Equals(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PString(Params^[0])^.Equals(PString(Params^[1])^);
+end;
+
+procedure _LapeString_EqualsIgnoreCase(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PString(Params^[0])^.EqualsIgnoreCase(PString(Params^[1])^);
+end;
+
+procedure _LapeString_Compare(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PInteger(Result)^ := PString(Params^[0])^.Compare(PString(Params^[1])^);
+end;
+
+procedure _LapeString_Hash(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PUInt32(Result)^ := PString(Params^[0])^.Hash(PUInt32(Params^[1])^);
 end;
 
 procedure _LapeString_EndsWith(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -598,6 +617,11 @@ begin
     addGlobalFunc('function String.LowerChars: String; static;', @_LapeString_LowerChars);
     addGlobalFunc('function String.UpperChars: String; static;', @_LapeString_UpperChars);
     addGlobalFunc('function String.AlphaNumChars: String; static;', @_LapeString_AlphaNumChars);
+
+    addGlobalFunc('function String.Equals(Other: String): Boolean;', @_LapeString_Equals);
+    addGlobalFunc('function String.EqualsIgnoreCase(Other: String): Boolean;', @_LapeString_EqualsIgnoreCase);
+    addGlobalFunc('function String.Compare(Other: String): Integer;', @_LapeString_Compare);
+    addGlobalFunc('function String.Hash(Seed: UInt32 = 0): UInt32;', @_LapeString_Hash);
 
     addGlobalFunc('function String.IsUpper(): Boolean;', @_LapeString_IsUpper);
     addGlobalFunc('function String.IsLower(): Boolean;', @_LapeString_IsLower);

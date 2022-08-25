@@ -39,7 +39,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.files, simba.helpers_string, simba.fonthelpers;
+  simba.files,  simba.fonthelpers;
 
 constructor TSimbaPackageInstallForm.Create(AOwner: TComponent; APackage: TSimbaPackage);
 var

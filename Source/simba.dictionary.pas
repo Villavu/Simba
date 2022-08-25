@@ -1,4 +1,4 @@
-unit simba.generics_dict;
+unit simba.dictionary;
 {
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
@@ -52,8 +52,8 @@ type
     HashFunc: THashFunc;
 
     procedure _growRebuild();
-    function _addItem(h:UInt32; key:K; value:V; checkResize:Boolean=True): Boolean; inline;
-    function _delItem(pos:THashIndex; key:K): Boolean; inline;
+    function _addItem(h:UInt32; key:K; value:V; checkResize:Boolean=True): Boolean;
+    function _delItem(pos:THashIndex; key:K): Boolean;
   public
     // create
     constructor Create(AHashFunc:THashFunc);
@@ -99,7 +99,7 @@ type
     function AddOrModify(key:K; value:V): Boolean; inline;
 
     // Look up a key. Returns False if it's not found.
-    function Get(key:K; var value:V): Boolean; inline;
+    function Get(key:K; out value:V): Boolean; inline;
 
     // Look up a key. Returns the given default value if not found.
     function GetDef(key:K; default:V): V; inline;
@@ -124,8 +124,6 @@ type
     property Size:UInt32 read FSize;
     property Data:TMap read FData;
   end;
-
-
 
 // hash-functions to go with the hashtable.
 function HashBool(constref k: Boolean): UInt32; inline;
@@ -259,8 +257,8 @@ end;
 
 procedure TDictionary<K,V>._growRebuild();
 var
-  i,j,k,hi:Int32;
-  temp:Array of THashElement;
+  i,j,k,hi: Int32;
+  temp: array of THashElement;
   hval,strategy: UInt32;
 begin
   SetLength(temp, FHigh);
@@ -377,7 +375,7 @@ begin
 end;
 
 
-function TDictionary<K,V>.Get(key: K; var value: V): Boolean;
+function TDictionary<K,V>.Get(key: K; out value: V): Boolean;
 var pos: THashIndex;
 begin
   if not Find(key, pos) then Exit(False);

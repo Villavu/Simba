@@ -1,18 +1,6 @@
-{
-  Author: Raymond van Venetië and Merlijn Wajer
-  Project: Simba (https://github.com/MerlijnWajer/Simba)
-  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
-}
-unit simba.helpers_string;
+{%MAINUNIT simba.mufasatypes}
 
-{$i simba.inc}
-
-interface
-
-uses
-  classes, sysutils,
-  simba.mufasatypes;
-
+{$IFDEF HEADER}
 type
   PRegExprGroup = ^TRegExprGroup;
   TRegExprGroup = record
@@ -44,7 +32,7 @@ type
     function ToUpper(): Char;
     function ToLower(): Char;
     function Capitalize(): Char;
-    
+
     function Join(const Values: TStringArray): String;
   end;
 
@@ -56,6 +44,11 @@ type
     AlphaChars    = LowerChars + UpperChars;
     AlphaNumChars = AlphaChars + NumberChars;
   public
+    function Equals(Other: String): Boolean;
+    function EqualsIgnoreCase(Other: String): Boolean;
+    function Compare(Other: String): Integer;
+    function Hash(Seed: UInt32 = 0): UInt32;
+
     function IsUpper(): Boolean;
     function IsLower(): Boolean;
     function IsAlphaNum(): Boolean;
@@ -114,7 +107,7 @@ type
 
     function Count(const Value: String): Integer;
     function CountAll(const Values: TStringArray): TIntegerArray;
-    
+
     function Join(const Values: TStringArray): String;
     function Split(const Seperators: TStringArray): TStringArray; overload;
     function Split(const Seperator: String): TStringArray; overload;
@@ -147,22 +140,14 @@ type
     function ToDouble(Default: Double): Double; overload;
     function ToExtended: Extended; overload;
     function ToExtended(Default: Extended): Extended; overload;
-
-    function ToSHA1: String;
-    function ToMD5: String;
   end;
 
   operator * (const Left: String; Right: Int32): String;
   operator in(const Left: String; const Right: String): Boolean;
   operator in(const Left: String; const Right: TStringArray): Boolean;
+{$ENDIF}
 
-implementation
-
-uses
-  strutils, uregexpr, sha1, md5,
-  simba.overallocatearray;
-
-(* Char helpers in the same file since there are so few and it's strongly related *)
+{$IFDEF BODY}
 function TSimbaCharHelper.IsUpper(): Boolean;
 begin
   Result := (Byte(Self) >= Byte('A')) and (Byte(Self) <= Byte('Z'));
@@ -174,7 +159,7 @@ begin
 end;
 
 function TSimbaCharHelper.IsAlphaNum(): Boolean;
-begin               
+begin
   Result := Self in ['0'..'9', 'a'..'z', 'A'..'Z'];
 end;
 
@@ -191,17 +176,17 @@ end;
 
 function TSimbaCharHelper.ToUpper(): Char;
 begin
-  Result := Upcase(Self);
+  Result := UpCase(Self);
 end;
 
 function TSimbaCharHelper.ToLower(): Char;
 begin
-  Result := Lowercase(Self);
+  Result := LowerCase(Self);
 end;
 
 function TSimbaCharHelper.Capitalize(): Char;
 begin
-  Result := Upcase(Self);
+  Result := UpCase(Self);
 end;
 
 function TSimbaCharHelper.Join(const Values: TStringArray): String;
@@ -214,7 +199,7 @@ begin
     if i <> High(values) then
       Result += Self;
   end;
-end; 
+end;
 
 
 (* ---- String helpers ---- *)
@@ -491,6 +476,64 @@ begin
     for I := 0 to High(Matches) do
       Result[I] := Matches[I];
   end;
+end;
+
+function TSimbaStringHelper.Equals(Other: String): Boolean;
+begin
+  Result := Self = Other;
+end;
+
+function TSimbaStringHelper.EqualsIgnoreCase(Other: String): Boolean;
+begin
+  Result := SameText(Self, Other);
+end;
+
+function TSimbaStringHelper.Compare(Other: String): Integer;
+begin
+  Result := CompareText(Self, Other);
+end;
+
+//MurMurHas2 by Tommi Prami & optimizations by Patrick van Logchem
+function TSimbaStringHelper.Hash(Seed: UInt32 = 0): UInt32;
+const
+  cM: UInt32 = $5BD1E995;
+  cR: UInt32 = 24;
+var
+  Data: Pointer;
+  Len: Integer;
+  i, k: UInt32;
+begin
+  Data := PChar(Self);
+  Len := Length(Self);
+
+  {$UNDEF REDO_Q}{$IFOPT Q+}{$Q-}{$DEFINE REDO_Q}{$ENDIF}
+  {$UNDEF REDO_R}{$IFOPT R+}{$R-}{$DEFINE REDO_R}{$ENDIF}
+  Result := Seed xor Len;
+  for i := 1 to Len div SizeOf(UInt32) do
+  begin
+    k := PUInt32(Data)^ * cM;
+    Result := (Result * cM) xor ((k xor (k shr cR)) * cM);
+    Inc(PtrUInt(Data), SizeOf(UInt32));
+  end;
+
+  Len := Len and 3;
+  if (Len > 0) then
+  begin
+    if (Len >= SizeOf(UInt16)) then
+    begin
+      k := PUInt16(Data)^;
+      if (Len > SizeOf(UInt16)) then
+        k := k + (UInt32(PUInt8(PtrUInt(Data) + SizeOf(UInt16))^) shl 16);
+    end
+    else
+      k := PUInt8(Data)^;
+    Result := (Result xor k) * cM;
+  end;
+
+  Result := (Result xor (Result shr 13)) * cM;
+  Result := (Result xor (Result shr 15));
+  {$IFDEF REDO_Q}{$Q+}{$ENDIF}
+  {$IFDEF REDO_R}{$R+}{$ENDIF}
 end;
 
 function TSimbaStringHelper.IsUpper(): Boolean;
@@ -810,7 +853,7 @@ begin
     if i <> High(values) then
       Result += Self;
   end;
-end;  
+end;
 
 function TSimbaStringHelper.Split(const Seperators: TStringArray): TStringArray;
 var
@@ -997,22 +1040,6 @@ begin
   Result := StrToFloatDef(Self, Default);
 end;
 
-function TSimbaStringHelper.ToSHA1: String;
-begin
-  if (Self = '') then
-    Result := ''
-  else
-    Result := SHA1Print(SHA1String(Self));
-end;
-
-function TSimbaStringHelper.ToMD5: String;
-begin
-  if (Self = '') then
-    Result := ''
-  else
-    Result := MD5Print(MD5String(Self));
-end;
-
 operator *(const Left: String; Right: Int32): String;
 var
   I, Len: Integer;
@@ -1075,6 +1102,5 @@ begin
 
   Result := False;
 end;
-
-end.
+{$ENDIF}
 

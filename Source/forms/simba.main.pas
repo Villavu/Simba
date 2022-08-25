@@ -288,7 +288,7 @@ uses
   simba.filebrowserform, simba.notesform, simba.settingsform, simba.colorpicker,
   simba.ci_includecache, simba.scriptformatter,  simba.editor,
   simba.dockinghelpers, simba.datetime, simba.nativeinterface, simba.httpclient,
-  simba.functionlist_simbasection, simba.package, simba.helpers_windowhandle,
+  simba.functionlist_simbasection, simba.package, simba.windowhandle,
   simba.functionlist_updater, simba.package_installer;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
@@ -366,6 +366,7 @@ procedure TSimbaForm.SetCustomFontSize(Value: Integer);
 var
   I: Integer;
 begin
+  CreateHandle;
   for I := 0 to Screen.CustomFormCount - 1 do
     Screen.CustomForms[I].Font.Size := Value;
 end;

@@ -52,7 +52,7 @@ type
     procedure SetFontName(Value: String);
     procedure SetFontSize(Value: Single);
   public
-    class var SaveUnfreedBitmaps: ShortString;
+    class var DebugUnfreedBitmaps: ShortString;
   public
     constructor Create; overload;
     constructor Create(AWidth, AHeight: Integer); overload;
@@ -241,9 +241,9 @@ const
 implementation
 
 uses
-  FPImage, math, intfgraphics, lazloggerbase, simba.overallocatearray, simba.geometry,
+  fpimage, math, intfgraphics, simba.overallocatearray, simba.geometry,
   simba.tpa, simba.stringutil, simba.colormath, simba.client, simba.iomanager,
-  simba.helpers_string, simba.bitmap_misc, simba.math, FPWriteBMP;
+  simba.bitmap_misc, simba.math;
 
 function GetDrawColor(Color, Index: Integer): Integer; inline;
 const
@@ -2468,12 +2468,12 @@ procedure TMufasaBitmap.NotifyUnfreed;
 begin
   inherited NotifyUnfreed();
 
-  if (SaveUnfreedBitmaps <> '') then
+  if (DebugUnfreedBitmaps <> '') then
   try
-    SaveToFile(IncludeTrailingPathDelimiter(SetDirSeparators(SaveUnfreedBitmaps)) + IntToStr(PtrUInt(Self)) + '.bmp');
+    SaveToFile(IncludeTrailingPathDelimiter(SetDirSeparators(DebugUnfreedBitmaps)) + IntToStr(PtrUInt(Self)) + '.bmp');
   except
     on E: Exception do
-      DebugLn(E.ToString);
+      SimbaDebugLn(E.ToString);
   end;
 end;
 

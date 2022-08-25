@@ -144,6 +144,7 @@ type
     {$i integermatrix.inc}
     {$i singlematrix.inc}
     {$i matrix.inc}
+    {$i string.inc}
   {$UNDEF HEADER}
 
 var
@@ -205,7 +206,7 @@ procedure Threaded(Methods: TProcArray; Interval: Integer = 0); overload;
 implementation
 
 uses
-  math, forms, lazloggerbase,
+  math, forms, lazloggerbase, uregexpr, strutils,
   simba.math, simba.overallocatearray, simba.geometry, simba.heaparray;
 
 {$DEFINE BODY}
@@ -217,6 +218,7 @@ uses
   {$i integermatrix.inc}
   {$i singlematrix.inc}
   {$i matrix.inc}
+  {$i string.inc}
 {$UNDEF BODY}
 
 function ToStr(Typ: ESimbaDebugLn): String;

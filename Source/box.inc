@@ -167,6 +167,7 @@ function TBoxHelper.Invert(Area: TBox): TBoxArray;
 var
   B: TBox;
   Boxes: TBoxArray;
+  I, Count: Integer;
 begin
   Result := System.Default(TBoxArray);
 
@@ -186,27 +187,35 @@ begin
     TBox.Create(B.X2,    B.Y1,    Area.X2, Area.Y2)
   ];
 
-  for B in Boxes do
-    if (B.X2 > B.X1) and (B.Y2 > B.Y1) then
-      Result += [B];
+  Count := 0;
+  SetLength(Result, Length(Boxes));
+  for I := 0 to High(Boxes) do
+    with Boxes[I] do
+      if (X2 > X1) and (Y2 > Y1) then
+      begin
+        Result[Count] := Boxes[I];
+        Inc(Count);
+      end;
+
+  SetLength(Result, Count);
 end;
 
 function TBoxHelper.Partition(Rows, Cols: Integer): TBoxArray;
 var
-  idx,x,y: Int32;
+  idx,x,y: Integer;
   BoxW, BoxH: Single;
 begin
   SetLength(Result, Cols * Rows);
-  BoxW := (Self.x2 - Self.x1 + 1) / Cols;
-  BoxH := (Self.y2 - Self.y1 + 1) / Rows;
+  BoxW := (Self.X2 - Self.X1 + 1) / Cols;
+  BoxH := (Self.Y2 - Self.Y1 + 1) / Rows;
   for y:=0 to Rows-1 do
     for x:=0 to Cols-1 do
     begin
       idx := (Y * Cols) + X;
-      Result[idx].x1 := Ceil(Self.x1 + (BoxW * x));
-      Result[idx].y1 := Ceil(Self.y1 + (BoxH * y));
-      Result[idx].x2 := Trunc(Self.x1 + (BoxW * x) + BoxW-1);
-      Result[idx].y2 := Trunc(Self.y1 + (BoxH * y) + BoxH-1);
+      Result[idx].X1 := Ceil(Self.X1 + (BoxW * x));
+      Result[idx].Y1 := Ceil(Self.Y1 + (BoxH * y));
+      Result[idx].X2 := Trunc(Self.X1 + (BoxW * x) + BoxW-1);
+      Result[idx].Y2 := Trunc(Self.Y1 + (BoxH * y) + BoxH-1);
     end;
 end;
 

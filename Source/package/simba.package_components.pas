@@ -115,7 +115,7 @@ implementation
 
 uses
   lcltype, lclintf, themes, lazutf8, synedit,
-  simba.helpers_string;
+  simba.mufasatypes;
 
 const
   pkgGridLineColor = $CCCCCC;

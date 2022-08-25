@@ -104,7 +104,7 @@ implementation
 
 uses
   clipbrd,
-  simba.colormath, simba.helpers_windowhandle;
+  simba.colormath, simba.windowhandle;
 
 procedure TSimbaACAForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
@@ -186,7 +186,18 @@ begin
 end;
 
 procedure TSimbaACAForm.CopyBestColorClick(Sender: TObject);
+
+  function CopyEdit(Edit: TEdit): Boolean;
+  begin
+    Result := Edit.Focused and (Edit.SelLength > 0);
+    if Result then
+      Edit.CopyToClipboard();
+  end;
+
 begin
+  if CopyEdit(EditColor) or CopyEdit(EditTolerance) or CopyEdit(EditHue) or CopyEdit(EditSat) then
+    Exit;
+
   if ButtonCTS0.Checked then Clipboard.AsText := Format('CTS0(%s, %s)', [EditColor.Text, EditTolerance.Text]);
   if ButtonCTS1.Checked then Clipboard.AsText := Format('CTS1(%s, %s)', [EditColor.Text, EditTolerance.Text]);
   if ButtonCTS2.Checked then Clipboard.AsText := Format('CTS2(%s, %s, %s, %s)', [EditColor.Text, EditTolerance.Text, EditHue.Text, EditSat.Text]);

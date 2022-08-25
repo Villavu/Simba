@@ -23,7 +23,7 @@ function Algo_Int64_SymmetricDifference(x,y: TInt64Array): TInt64Array;
 implementation
 
 uses
-  math, simba.generics_dict;
+  math, simba.dictionary;
 
 {$DEFINE MACRO_SET_SYMDIFF :=
   for i:=0 to High(x) do dict[x[i]] := 1;
