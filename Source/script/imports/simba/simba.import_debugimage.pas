@@ -163,7 +163,7 @@ procedure ImportDebugImage(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Debug Image');
+    pushSection('https://villavu.github.io/Simba/debug image.html');
 
     addGlobalFunc('procedure ShowBitmap(Bitmap: TMufasaBitmap; EnsureVisible: Boolean = True); override', @_LapeShowBitmap);
     addGlobalFunc('procedure DrawBitmapDebugImg(Bitmap: TMufasaBitmap); overload', @_LapeDrawBitmapDebugImg);
