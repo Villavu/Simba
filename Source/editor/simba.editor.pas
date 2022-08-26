@@ -10,9 +10,10 @@ unit simba.editor;
 interface
 
 uses
-  classes, sysutils, graphics, controls, lcltype,
-  synedit, synedittypes, syngutterlineoverview, lazsyneditmousecmdstypes,
-  syneditmousecmds, syneditkeycmds, synpluginmulticaret, synedithighlighter, syneditmarkuphighall,
+  Classes, SysUtils, Graphics, Controls, LCLType,
+  SynEdit, SynEditTypes, SynGutterLineOverview, SynEditMouseCmds,
+  SynEditKeyCmds, SynPluginMultiCaret, SynEditHighlighter,
+  SynHighlighterPas_Simba, SynEditMarkupHighAll, LazSynEditMouseCmdsTypes,
   simba.mufasatypes, simba.autocomplete, simba.parameterhint, simba.settings,
   simba.editor_attributes, simba.editor_modifiedlinegutter;
 
@@ -64,8 +65,8 @@ type
 implementation
 
 uses
-  simba.parser_misc, simba.fonthelpers, simba.highlighter,
-  simba.editor_blockcompletion, simba.editor_docgenerator, simba.editor_commentblock,
+  simba.parser_misc, simba.fonthelpers, simba.editor_blockcompletion,
+  simba.editor_docgenerator, simba.editor_commentblock,
   simba.editor_mousewheelzoom, simba.editor_history;
 
 function TSimbaEditor.IsHighlighterAttribute(Values: TStringArray): Boolean;
@@ -258,6 +259,7 @@ begin
     NestedComments := True;
     StringKeywordMode := spsmNone;
     TypeHelpers := True;
+    StringMultilineMode := [spmsmDoubleQuote];
   end;
 
   FParameterHint := TSimbaParameterHint.Create(nil);
