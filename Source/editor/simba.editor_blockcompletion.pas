@@ -10,8 +10,8 @@ unit simba.editor_blockcompletion;
 interface
 
 uses
-  Classes, SysUtils, lcltype,
-  SynEdit, SynEditTypes, SynEditKeyCmds;
+  Classes, SysUtils, LCLType,
+  SynEdit, SynEditTypes, SynEditKeyCmds, SynEditHighlighterFoldBase, SynHighlighterPas_Simba;
 
 type
   TSimbaEditorPlugin_BlockCompletion = class(TLazSynEditPlugin)
@@ -25,8 +25,7 @@ type
 implementation
 
 uses
-  SynEditHighlighterFoldBase,
-  simba.editor, simba.settings, simba.highlighter;
+  simba.editor, simba.settings;
 
 procedure TSimbaEditorPlugin_BlockCompletion.DoEditorAdded(Value: TCustomSynEdit);
 begin
