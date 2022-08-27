@@ -1,12 +1,33 @@
 var
-  Contents, NewContents, Import, WrapperName, Header, HeaderName, DocComment, Line: String;
+  Contents, NewContents, Import, WrapperName, Header, DocComment, Line: String;
   I: Integer;
   Map: array of record
     WrapperName: String;
     DocComment: String;
   end;
+
+  Params: TStringArray;
+  ReadWrapperName, WriteWrapperName: String;
+
+  procedure Add(Header, WrapperName: String);
+  var
+    HeaderName, Doc: String;
+  begin
+    // Strip overload
+    if Header.EndsWith('overload') or Header.EndsWith('overload;') then
+      Header := Header.Before('overload');
+    Header := Header.Trim();
+    if not Header.EndsWith(';') then
+      Header += ';';
+    HeaderName := Header.After(' ');
+    HeaderName := HeaderName.CopyRange(1, HeaderName.IndexOfAny(['(',':',';']) - 1);
+
+    Doc := '(*%s%s%s%s%s%s%s*)'.format([LineEnding, HeaderName, LineEnding, '~' * Length(HeaderName), LineEnding, Header, LineEnding]);
+    Map += [WrapperName, Doc];
+  end;
+
 begin
-  Contents := ReadFileContents('Source/script/imports/simba/simba.import_windowhandle.pas');
+  Contents := ReadFileContents('Source/script/imports/simbaclasses/simba.import_class_bitmap.pas');
 
   for DocComment in Contents.BetweenAll('(*','*)') do
   begin
@@ -15,26 +36,26 @@ begin
     Contents := Contents.Replace('(*' + DocComment + '*)' + LineEnding, '');
   end;
 
+  for Import in Contents.BetweenAll("addClassVar(", ");" + LineEnding) do
+  begin
+    ReadWrapperName := Import.Between('@', '_Read');
+    WriteWrapperName := Import.Between('_Read, @', '_Write');
+
+    Params := Import.BetweenAll(#39, #39);
+    Params.RemoveAll(', ');
+
+    if (ReadWrapperName <> '') then
+      Add('function ' + Params[0] + '.Get' + Params[1] + ': ' + Params[2], ReadWrapperName + '_Read');
+     if (WriteWrapperName <> '') then
+      Add('procedure ' + Params[0] + '.Set' + Params[1] + '(Value: ' + Params[2] + ')', WriteWrapperName + '_Write');
+  end;
+
   for Import in Contents.BetweenAll("addGlobalFunc(", ");" + LineEnding) do
   begin
     WrapperName := Import.After('@');
     Header := Import.Between(#39, #39);
-
-    // Strip overload
-    if Header.EndsWith('overload') or Header.EndsWith('overload;') then
-      Header := Header.Before('overload');
-
-    Header := Header.Trim();
-    if not Header.EndsWith(';') then
-      Header += ';';
-
-    // extract "Foo.Box" from full header
-    HeaderName := Header.After(' ');
-    HeaderName := HeaderName.CopyRange(1, HeaderName.IndexOfAny(['(',':',';']) - 1);
-
-    DocComment := '(*%s%s%s%s%s%s%s*)'.format([LineEnding, HeaderName, LineEnding, '~' * Length(HeaderName), LineEnding, Header, LineEnding]);
-
-    Map += [WrapperName, DocComment];
+    if (WrapperName <> '') then
+      Add(Header, WrapperName);
   end;
 
   for Line in Contents.Split(LineEnding) do

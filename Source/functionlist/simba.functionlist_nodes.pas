@@ -104,7 +104,7 @@ begin
   inherited Create(FunctionList.TreeView.Items);
 
   URL  := AURL;
-  Text := ExtractFileNameOnly(AURL).Capitalize();
+  Text := ExtractFileNameOnly(AURL);
   Hint := Text + ' (double click to open online documentation)';
 
   ImageIndex    := IMAGE_FILE;

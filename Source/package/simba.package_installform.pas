@@ -109,9 +109,11 @@ begin
   if (FVersion = nil) then
     Exit;
 
+  Options := Default(TSimbaPackageInstallOptions);
   Options.Path := PathEdit.Text;
   Options.Flat := FlatCheckbox.Checked;
   Options.IgnoreList := IgnoreListMemo.Lines.ToStringArray();
+  Options.AutoUpdate := False;
 
   if QuestionDlg('Install Package', 'Install "%s" to "%s" ?'.Format([FPackage.Info.FullName, ExtractRelativePath(GetSimbaPath(), Options.Path)]), mtConfirmation, [mrYes, mrNo], 0) = mrYes then
   begin

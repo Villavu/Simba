@@ -692,7 +692,7 @@ begin
 
         with TSimbaPackageInstaller.Create(Packages[I], SimbaOutputForm.SimbaOutputBox) do
         try
-          if GetOptions(Packages[I].Versions[0], Options) and Install(Packages[I].Versions[0], Options) then
+          if GetOptions(Packages[I].VersionsNoBranch[0], Options) and Install(Packages[I].VersionsNoBranch[0], Options) then
           begin
             SimbaDebugLn('');
             SimbaDebugLn(ESimbaDebugLn.GREEN, 'Succesfully auto updated package "%s"', [Packages[I].Info.FullName]);
