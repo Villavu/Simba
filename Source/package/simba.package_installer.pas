@@ -65,13 +65,16 @@ procedure TSimbaPackageInstaller.FlushLog;
     FProgressBufferLock.Enter();
 
     try
-      FOutput.BeginUpdate(False);
-      for I := 0 to FProgressBuffer.Count - 1 do
-        FOutput.Append(FProgressBuffer[I]);
-      FOutput.CaretXY := TPoint.Create(0, FOutput.Lines.Count);
-      FOutput.EndUpdate();
+      if (FProgressBuffer.Count > 0) then
+      begin
+        FOutput.BeginUpdate(False);
+        for I := 0 to FProgressBuffer.Count - 1 do
+          FOutput.Append(FProgressBuffer[I]);
+        FOutput.CaretXY := TPoint.Create(0, FOutput.Lines.Count);
+        FOutput.EndUpdate();
 
-      FProgressBuffer.Clear();
+        FProgressBuffer.Clear();
+      end;
     finally
       FProgressBufferLock.Leave();
     end;
@@ -269,7 +272,7 @@ begin
   begin
     FlushLog();
 
-    Sleep(500);
+    Sleep(100);
   end;
 
   Log('', True);

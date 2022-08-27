@@ -78,9 +78,9 @@ procedure ShowOnClient(ATPA: T2DPointArray; Color: Integer = $0000FF);
 *)
 
 (*
-ShowBitmap
-~~~~~~~~~~
-procedure ShowBitmap(Bitmap: TMufasaBitmap; EnsureVisible: Boolean = True); override;
+Show
+~~~~
+procedure Show(Bitmap: TMufasaBitmap; EnsureVisible: Boolean = True);
 *)
 procedure _LapeShowBitmap(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -163,14 +163,15 @@ procedure ImportDebugImage(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('https://villavu.github.io/Simba/debug image.html');
+    pushSection('https://villavu.github.io/Simba/Debug Image.html');
 
-    addGlobalFunc('procedure ShowBitmap(Bitmap: TMufasaBitmap; EnsureVisible: Boolean = True); override', @_LapeShowBitmap);
     addGlobalFunc('procedure DrawBitmapDebugImg(Bitmap: TMufasaBitmap); overload', @_LapeDrawBitmapDebugImg);
     addGlobalFunc('procedure DisplayDebugImgWindow(Width, Height: Integer)', @_LapeDisplayDebugImgWindow);
     addGlobalFunc('procedure SetDebugImgMaxSize(MaxWidth, MaxHeight: Integer)', @_LapeSetDebugImgMaxSize);
     addGlobalFunc('procedure HideDebugImg', @_LapeHideDebugImg);
     addGlobalFunc('procedure ClearDebugImg', @_LapeClearDebugImg);
+
+    addGlobalFunc('procedure Show(Bitmap: TMufasaBitmap; EnsureVisible: Boolean = True); override', @_LapeShowBitmap);
 
     addGlobalFunc(
       'procedure Show(Matrix: TIntegerMatrix); overload;', [

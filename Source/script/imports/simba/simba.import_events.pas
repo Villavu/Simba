@@ -10,14 +10,55 @@ uses
   classes, sysutils, lpeval,
   simba.script_compiler;
 
+(*
+Events
+======
+Add methods to be called when a script is stopped/paused/resumed.
+*)
+
+(*
+AddOnTerminate
+~~~~~~~~~~~~~~
+procedure AddOnTerminate(Proc: procedure);
+procedure AddOnTerminate(Proc: procedure of object);
+
+Adds a procedure to be called when the script is terminated.
+*)
+
+(*
+AddOnUserTerminate
+~~~~~~~~~~~~~~~~~~
+procedure AddOnUserTerminate(Proc: procedure);
+procedure AddOnUserTerminate(Proc: procedure of object);
+
+Adds a procedure to be called when the script is terminated with the stop button being clicked.
+*)
+
+(*
+AddOnPause
+~~~~~~~~~~
+procedure AddOnPause(Proc: procedure);
+procedure AddOnPause(Proc: procedure of object);
+
+Adds a procedure to be called when the script is paused.
+*)
+
+(*
+AddOnResume
+~~~~~~~~~~~
+procedure AddOnResume(Proc: procedure);
+procedure AddOnResume(Proc: procedure of object);
+
+Adds a procedure to be called when the script is resumed from pause.
+*)
+
 procedure ImportEvents(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Events');
+    pushSection('https://villavu.github.io/Simba/Events.html');
 
     addDelayedCode([
-      LapeDelayedFlags,
       'var',
       '  _TerminateEvents, _UserTerminateEvents, _PauseEvents, _ResumeEvents: array of record',
       '    Proc: procedure;',
@@ -66,7 +107,6 @@ begin
     ], '!Events');
 
     addDelayedCode([
-      LapeDelayedFlags,
       'procedure AddOnTerminate(Proc: procedure); overload;',
       'begin',
       '  _TerminateEvents += [Proc];',

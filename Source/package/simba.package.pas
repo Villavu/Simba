@@ -40,9 +40,6 @@ type
   end;
 
   TSimbaPackage = class
-  private
-    function GetAutoUpdateEnabled: Boolean;
-    procedure SetAutoUpdateEnabled(AValue: Boolean);
   protected
     FEndpoint: TSimbaPackageEndpoint;
     FURL: String;
@@ -55,10 +52,12 @@ type
     procedure WriteConfig(Key: String; Value: String);
     function ReadConfig(Key: String): String;
 
+    procedure SetAutoUpdateEnabled(AValue: Boolean);
     procedure SetInstalledVersion(Value: String);
     procedure SetInstalledVersionTime(Value: TDateTime);
     procedure SetInstalledPath(Value: String);
 
+    function GetAutoUpdateEnabled: Boolean;
     function GetInstalledPath: String;
     function GetInstalledVersion: String;
     function GetInstalledVersionTime: TDateTime;
@@ -214,7 +213,7 @@ var
   URLs: TStringArray;
   Procs: TProcArray;
   Weights: TIntegerArray;
-  I, J: Integer;
+  I: Integer;
 begin
   URLs := LoadPackageURLs();
 
@@ -228,32 +227,21 @@ begin
 
   Threaded(Procs, 100);
 
-  // sort so updates first, installed second
   SetLength(Weights, Length(Result));
   for I := 0 to High(Result) do
   begin
-    if Result[I].IsInstalled() then
-      Inc(Weights[I]);
-    if Result[I].HasUpdate() then
-      Inc(Weights[I]);
+    if Result[I].IsInstalled() then Inc(Weights[I]);
+    if Result[I].HasUpdate()   then Inc(Weights[I]);
   end;
 
-  for I := 0 to High(Result) do
-    for J := 0 to High(Result) do
-    begin
-      if (Weights[I] > Weights[J]) then
-      begin
-        Swap(Pointer(Result[I]), Pointer(Result[J]));
-        Swap(Weights[I], Weights[J]);
-      end;
-    end;
+  specialize QuickSortWeighted<TSimbaPackage, Integer>(Result, Weights, Low(Result), High(Result), False);
 end;
 
 function TSimbaPackage.GetLatestVersion: String;
 begin
   Result := '';
-  if (Length(Versions) > 0) then
-    Result := Versions[0].Name;
+  if (Length(VersionsNoBranch) > 0) then
+    Result := VersionsNoBranch[0].Name;
 end;
 
 function TSimbaPackage.GetLatestVersionTime: TDateTime;
@@ -282,12 +270,15 @@ end;
 
 function TSimbaPackage.GetAutoUpdateEnabled: Boolean;
 begin
-  Result := (Self.InstalledVersion <> '') and (Self.ReadConfig('AutoUpdate') <> '');
+  Result := (Self.InstalledVersion <> '') and (Self.ReadConfig('AutoUpdate') = 'True');
 end;
 
 procedure TSimbaPackage.SetAutoUpdateEnabled(AValue: Boolean);
 begin
-  Self.WriteConfig('AutoUpdate', 'True')
+  case AValue of
+    True:  Self.WriteConfig('AutoUpdate', 'True');
+    False: Self.WriteConfig('AutoUpdate', 'False');
+  end;
 end;
 
 procedure TSimbaPackage.ClearConfig;
@@ -431,7 +422,7 @@ end;
 
 function TSimbaPackage.HasVersions: Boolean;
 begin
-  Result := Length(Self.Versions) > 0;
+  Result := Length(Self.VersionsNoBranch) > 0;
 end;
 
 end.

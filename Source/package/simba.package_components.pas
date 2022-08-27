@@ -108,7 +108,7 @@ type
     procedure SetInfo(HomepageURL, InstalledVer, LatestVer: String);
 
     property OnAutoUpdateChange: TNotifyEvent read FOnAutoUpdateChange write FOnAutoUpdateChange;
-    property AutoUpdateChecked: Boolean Write SetAutoUpdateChecked;
+    property AutoUpdateChecked: Boolean write SetAutoUpdateChecked;
   end;
 
 implementation

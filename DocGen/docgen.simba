@@ -5,11 +5,13 @@ var
   end;
 
 begin
-  SourceFiles += ['simba.import_point.pas',        'tpoint'       ];
-  SourceFiles += ['simba.import_box.pas',          'tbox'         ];
-  SourceFiles += ['simba.import_boxarray.pas',     'tboxarray'    ];
-  SourceFiles += ['simba.import_windowhandle.pas', 'window handle'];
-  SourceFiles += ['simba.import_debugimage.pas',   'debug image'  ];
+  SourceFiles += ['simba.import_point.pas',        'Point'        ];
+  SourceFiles += ['simba.import_box.pas',          'Box'          ];
+  SourceFiles += ['simba.import_boxarray.pas',     'Box Array'    ];
+  SourceFiles += ['simba.import_windowhandle.pas', 'Window Handle'];
+  SourceFiles += ['simba.import_debugimage.pas',   'Debug Image'  ];
+  SourceFiles += ['simba.import_events.pas',       'Events'       ];
+  SourceFiles += ['simba.import_class_bitmap.pas', 'Bitmap'       ];
 end;
 
 const
