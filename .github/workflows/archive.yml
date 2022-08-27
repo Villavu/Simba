@@ -17,7 +17,6 @@ jobs:
         with:
           script: |
             var fs = require('fs');
-            fs.mkdirSync('binaries');
             var artifacts = await github.actions.listWorkflowRunArtifacts({
                owner: context.repo.owner,
                repo: context.repo.repo,
@@ -30,10 +29,16 @@ jobs:
                  artifact_id: artifact.id,
                  archive_format: 'zip',
               });
-              fs.writeFileSync('binaries/' + artifact.name, Buffer.from(download.data));
+              fs.writeFileSync(artifact.name + '.zip', Buffer.from(download.data));
 
               console.log('Downloaded: ' + artifact.name);
             }
+
+      - name: Unzip
+        shell: bash
+        run: |
+          mkdir binaries
+          unzip '*.zip' -d binaries  
 
       - name: Get current date
         id: date
