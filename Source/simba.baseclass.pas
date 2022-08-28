@@ -102,26 +102,32 @@ end;
 
 destructor TSimbaObjectTracker.Destroy;
 var
-  I: Integer;
+  I, UnfreedCount: Integer;
 begin
   if (FList <> nil) then
   begin
     if (FList.Count > 0) then
     begin
-      for I := FList.Count - 1 downto 0 do
-        if TSimbaBaseClass(FList[I]).FreeOnTerminate then
-          TSimbaBaseClass(FList[I]).Free();
+      UnfreedCount := 0;
+      for I := 0 to FList.Count - 1 do
+        if not TSimbaBaseClass(FList[I]).FreeOnTerminate then
+          Inc(UnfreedCount);
 
-      if (FList.Count > 0) then
+      if (UnfreedCount > 0) then
       begin
-        SimbaDebugLn(ESimbaDebugLn.YELLOW, 'The following %d objects were not freed:', [FList.Count]);
+        SimbaDebugLn(ESimbaDebugLn.YELLOW, 'The following %d objects were not freed:', [UnfreedCount]);
 
         for I := 0 to FList.Count - 1 do
-          TSimbaBaseClass(FList[I]).NotifyUnfreed();
+          with TSimbaBaseClass(FList[I]) do
+          begin
+            if not FreeOnTerminate then
+              NotifyUnfreed();
+            Free();
+          end;
       end;
     end;
 
-    FList.Free();
+    FreeAndNil(FList);
   end;
 
   inherited Destroy();
