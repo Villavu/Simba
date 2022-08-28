@@ -10,15 +10,17 @@ unit simba.scriptinstance_communication;
 interface
 
 uses
-  classes, sysutils, forms, extctrls,
+  classes, sysutils, forms, extctrls, typinfo, lazloggerbase,
   simba.ipc, simba.mufasatypes;
 
 type
   TSimbaScriptInstanceCommunication = class(TSimbaIPCServer)
   protected
     FScriptInstance: TObject;
-    FMethods: array[ESimbaCommunicationMessage] of TThreadMethod;
-    FThreadSafe: array[ESimbaCommunicationMessage] of Boolean;
+    FMethods: array[ESimbaCommunicationMessage] of record
+      Method: TProc;
+      ThreadSafe: Boolean;
+    end;
     FParams: TMemoryStream;
     FResult: TMemoryStream;
 
@@ -59,16 +61,26 @@ uses
 
 procedure TSimbaScriptInstanceCommunication.OnMessage(MessageID: Integer; Params, Result: TMemoryStream);
 var
-  Message: ESimbaCommunicationMessage;
+  Message: ESimbaCommunicationMessage absolute MessageID;
+
+  procedure DoMethod;
+  begin
+    try
+      FMethods[Message].Method();
+    except
+      on E: Exception do
+        DebugLn('%s :: %s', [GetEnumName(TypeInfo(ESimbaCommunicationMessage), MessageID), E.ToString()]);
+    end;
+  end;
+
 begin
   FParams := Params;
   FResult := Result;
 
-  Message := ESimbaCommunicationMessage(MessageID);
-  if FThreadSafe[Message] then
-    FMethods[Message]()
+  if FMethods[Message].ThreadSafe then
+    DoMethod()
   else
-    TThread.Synchronize(TThread.CurrentThread, FMethods[Message]);
+    Sync(@DoMethod);
 end;
 
 procedure TSimbaScriptInstanceCommunication.Disguise;
@@ -186,7 +198,6 @@ begin
   FParams.Read(Height, SizeOf(Integer));
 
   SimbaDebugImageForm.ImageBox.SetBackground(FParams.Memory + FParams.Position, Width, Height);
-
   SimbaDebugImageForm.SetSize(Width, Height, EnsureVisible);
 end;
 
@@ -226,33 +237,36 @@ begin
 end;
 
 constructor TSimbaScriptInstanceCommunication.Create(ScriptInstance: TObject);
+
+  procedure SetMethod(Message: ESimbaCommunicationMessage; Proc: TProc; ThreadSafe: Boolean = False);
+  begin
+    FMethods[Message].Method     := Proc;
+    FMethods[Message].ThreadSafe := Threadsafe;
+  end;
+
 begin
   inherited Create();
 
   FScriptInstance := ScriptInstance;
 
-  FMethods[ESimbaCommunicationMessage.STATUS]              := @Status;
-  FMethods[ESimbaCommunicationMessage.DISGUSE]             := @Disguise;
-  FMethods[ESimbaCommunicationMessage.SIMBA_PID]           := @GetSimbaPID;
-  FMethods[ESimbaCommunicationMessage.SIMBA_TARGET_PID]    := @GetSimbaTargetPID;
-  FMethods[ESimbaCommunicationMessage.SIMBA_TARGET_WINDOW] := @GetSimbaTargetWindow;
-  FMethods[ESimbaCommunicationMessage.SCRIPT_ERROR]        := @ScriptError;
-  FMethods[ESimbaCommunicationMessage.SCRIPT_STATE_CHANGE] := @ScriptStateChanged;
-  FMethods[ESimbaCommunicationMessage.BALLOON_HINT]        := @ShowBalloonHint;
-  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_MAXSIZE]  := @DebugImage_SetMaxSize;
-  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_DRAW]     := @DebugImage_Draw;
-  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_SHOW]     := @DebugImage_Show;
-  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_HIDE]     := @DebugImage_Hide;
-  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_ZOOM]     := @DebugImage_SetZoom;
-  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_MOVETO]   := @DebugImage_MoveTo;
-  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY]  := @DebugImage_Display;
-  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_CLEAR]    := @DebugImage_Clear;
-
-  FMethods[ESimbaCommunicationMessage.DEBUG_METHOD_NAME]   := @DebugMethodName;
-  FMethods[ESimbaCommunicationMessage.DEBUG_EVENTS]        := @DebugEvents;
-
-  FThreadSafe[ESimbaCommunicationMessage.DEBUG_METHOD_NAME] := True;
-  FThreadSafe[ESimbaCommunicationMessage.DEBUG_EVENTS]      := True;
+  SetMethod(ESimbaCommunicationMessage.STATUS,              @Status);
+  SetMethod(ESimbaCommunicationMessage.DISGUSE,             @Disguise);
+  SetMethod(ESimbaCommunicationMessage.SIMBA_PID,           @GetSimbaPID);
+  SetMethod(ESimbaCommunicationMessage.SIMBA_TARGET_PID,    @GetSimbaTargetPID);
+  SetMethod(ESimbaCommunicationMessage.SIMBA_TARGET_WINDOW, @GetSimbaTargetWindow);
+  SetMethod(ESimbaCommunicationMessage.SCRIPT_ERROR,        @ScriptError);
+  SetMethod(ESimbaCommunicationMessage.SCRIPT_STATE_CHANGE, @ScriptStateChanged);
+  SetMethod(ESimbaCommunicationMessage.BALLOON_HINT,        @ShowBalloonHint);
+  SetMethod(ESimbaCommunicationMessage.DEBUGIMAGE_MAXSIZE,  @DebugImage_SetMaxSize);
+  SetMethod(ESimbaCommunicationMessage.DEBUGIMAGE_DRAW,     @DebugImage_Draw);
+  SetMethod(ESimbaCommunicationMessage.DEBUGIMAGE_SHOW,     @DebugImage_Show);
+  SetMethod(ESimbaCommunicationMessage.DEBUGIMAGE_HIDE,     @DebugImage_Hide);
+  SetMethod(ESimbaCommunicationMessage.DEBUGIMAGE_ZOOM,     @DebugImage_SetZoom);
+  SetMethod(ESimbaCommunicationMessage.DEBUGIMAGE_MOVETO,   @DebugImage_MoveTo);
+  SetMethod(ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY,  @DebugImage_Display);
+  SetMethod(ESimbaCommunicationMessage.DEBUGIMAGE_CLEAR,    @DebugImage_Clear);
+  SetMethod(ESimbaCommunicationMessage.DEBUG_METHOD_NAME,   @DebugMethodName, True);
+  SetMethod(ESimbaCommunicationMessage.DEBUG_EVENTS,        @DebugEvents,     True);
 end;
 
 end.
