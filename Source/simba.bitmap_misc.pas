@@ -108,7 +108,6 @@ begin
     end;
 
     Area.Clip(TBox.Create(0, 0, Header.Width, Header.Height));
-
     if (Area.Width > 1) and (Area.Height > 1) then
     begin
       Bitmap.SetSize(Area.Width, Area.Height);
@@ -118,9 +117,9 @@ begin
       Buffer := GetMem(ScanLineSize);
       Index := 0;
 
-      for Row := Area.Y1 to Area.Y2 - 1 do
+      for Row := Area.Y1 to Area.Y2 do
       begin
-        Stream.Position := PixelOffset + ((Header.Height - Row) * ScanLineSize) + (Area.X1 * BytesPerPixel);
+        Stream.Position := PixelOffset + ((Header.Height - (Row + 1)) * ScanLineSize) + (Area.X1 * BytesPerPixel);
         Stream.Read(Buffer^, ScanLineSize);
 
         for Column := 0 to Area.Width - 1 do
