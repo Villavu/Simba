@@ -25,8 +25,9 @@ type
     SIMBA_PID, SIMBA_TARGET_PID, SIMBA_TARGET_WINDOW,
     SCRIPT_ERROR, SCRIPT_STATE_CHANGE,
     BALLOON_HINT,
-    DEBUGIMAGE_ZOOM, DEBUGIMAGE_MOVETO, DEBUGIMAGE_MAXSIZE, DEBUGIMAGE_DRAW, DEBUGIMAGE_SHOW, DEBUGIMAGE_HIDE,
-    DEBUGIMAGE_DISPLAY, DEBUGIMAGE_CLEAR,
+    DEBUGIMAGE_UPDATE,
+    DEBUGIMAGE_MOVETO, DEBUGIMAGE_MAXSIZE, DEBUGIMAGE_SHOW, DEBUGIMAGE_HIDE,
+    DEBUGIMAGE_DISPLAY, DEBUGIMAGE_DISPLAY_XY,
     DEBUG_METHOD_NAME, DEBUG_EVENTS
   );
 
@@ -201,6 +202,7 @@ procedure Sync(Method: TProc); overload;
 procedure Sync(Method: TNestedProc); overload;
 
 function Threaded(Method: TNestedProc): TThread; overload;
+function Threaded(Method: TProc): TThread; overload;
 procedure Threaded(Methods: TProcArray; Interval: Integer = 0); overload;
 
 implementation
@@ -437,8 +439,13 @@ type
 
 procedure TSyncObject.Execute;
 begin
-  if Assigned(Proc)       then Proc();
-  if Assigned(NestedProc) then NestedProc();
+  try
+    if Assigned(Proc)       then Proc();
+    if Assigned(NestedProc) then NestedProc();
+  except
+    on E: Exception do
+      DebugLn('Sync :: ' + E.Message);
+  end;
 end;
 
 procedure Sync(Method: TProc);
@@ -504,6 +511,11 @@ end;
 function Threaded(Method: TNestedProc): TThread;
 begin
   Result := TThreaded.Create(Method);
+end;
+
+function Threaded(Method: TProc): TThread;
+begin
+  Result := TThreaded.Create(Method)
 end;
 
 procedure Threaded(Methods: TProcArray; Interval: Integer);

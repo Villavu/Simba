@@ -45,6 +45,7 @@ type
     FZoomPanel: TStatusPanel;
     FStatusPanel: TStatusPanel;
     FZoom: Single;
+    FZoomPixels: Integer;
     FWidth: Int32;
     FHeight: Int32;
     FOnPaintArea: TSimbaImageBox_PaintArea;
@@ -89,6 +90,7 @@ type
     property StatusBar: TStatusBar read FStatusBar;
     property StatusPanel: TStatusPanel read FStatusPanel;
     property Background: TCanvas read FBackgroundCanvas;
+    property BackgroundBitmap: TBitmap read FBackground;
 
     procedure MoveTo(X, Y: Integer);
     function IsVisible(X, Y: Integer): Boolean; overload;
@@ -196,6 +198,7 @@ begin
 
   if (Value = 0.50) or (Value = 1.00) or (Value = 2.00) or (Value = 4.00) or (Value = 8.00) or (Value = 16.00) then
   begin
+    FZoomPixels := Ceil(1 * Value);
     FZoom := Value;
     FZoomPanel.Text := IntToStr(Round(Value * 100)) + '%';
 
@@ -218,22 +221,17 @@ var
 begin
   SimbaNativeInterface.ClearInterpolation(FScrollBox.Canvas);
 
-  W := FScrollBox.ClientWidth;
-  while W mod Ceil(1 * FZoom) <> 0 do
-    W += 1;
+  W := FScrollBox.ClientWidth  + (FZoomPixels - FScrollBox.ClientWidth  mod FZoomPixels);
+  H := FScrollBox.ClientHeight + (FZoomPixels - FScrollBox.ClientHeight mod FZoomPixels);
 
-  H := FScrollBox.ClientHeight;
-  while H mod Ceil(1 * FZoom) <> 0 do
-    H += 1;
-
-  ScreenRect.Left := FScrollBox.HorzScrollBar.Position;
-  ScreenRect.Top := FScrollBox.VertScrollBar.Position;
-  ScreenRect.Width := W;
+  ScreenRect.Left   := FScrollBox.HorzScrollBar.Position;
+  ScreenRect.Top    := FScrollBox.VertScrollBar.Position;
+  ScreenRect.Width  := W;
   ScreenRect.Height := H;
 
-  LocalRect.Left := Trunc(FScrollBox.HorzScrollBar.Position / FZoom);
-  LocalRect.Top := Trunc(FScrollBox.VertScrollBar.Position / FZoom);
-  LocalRect.Width := Trunc(W / FZoom);
+  LocalRect.Left   := Trunc(FScrollBox.HorzScrollBar.Position / FZoom);
+  LocalRect.Top    := Trunc(FScrollBox.VertScrollBar.Position / FZoom);
+  LocalRect.Width  := Trunc(W / FZoom);
   LocalRect.Height := Trunc(H / FZoom);
 
   FScrollBox.Canvas.Brush.Color := clBlack;
@@ -303,6 +301,7 @@ begin
     FDimensionsPanel.Text := Format('%dx%d', [FWidth, FHeight]);
 
     FZoom := 1;
+    FZoomPixels := 1;
     FZoomPanel.Text := '100%';
 
     FScrollBox.SetSize(FBackground.Width, FBackground.Height);
@@ -651,6 +650,7 @@ begin
   FWidth := 0;
   FHeight := 0;
   FZoom := 1;
+  FZoomPixels := 1;
 
   Canvas.Free();
   Canvas := FOverlay.Canvas;

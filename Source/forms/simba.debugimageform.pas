@@ -28,7 +28,7 @@ type
     procedure Close;
 
     procedure SetMaxSize(AWidth, AHeight: Integer);
-    procedure SetSize(AWidth, AHeight: Integer; AEnsureVisible: Boolean = True);
+    procedure SetSize(AWidth, AHeight: Integer; AForce: Boolean; AEnsureVisible: Boolean = True);
 
     property ImageBox: TSimbaImageBox read FImageBox;
   end;
@@ -65,7 +65,7 @@ begin
   SimbaDebugLn('Debug Image Click: (%d, %d)', [FMouseX, FMouseY]);
 end;
 
-procedure TSimbaDebugImageForm.SetSize(AWidth, AHeight: Integer; AEnsureVisible: Boolean);
+procedure TSimbaDebugImageForm.SetSize(AWidth, AHeight: Integer; AForce: Boolean; AEnsureVisible: Boolean);
 var
   Form: TCustomForm;
 begin
@@ -82,9 +82,9 @@ begin
 
   AHeight := AHeight + FImageBox.StatusBar.Height;
 
-  if (AWidth > Form.Width) then
+  if AForce or (AWidth > Form.Width) then
     Form.Width := Min(AWidth, FMaxWidth);
-  if (AHeight > Form.Height) then
+  if AForce or (AHeight > Form.Height) then
     Form.Height := Min(AHeight, FMaxHeight);
 
   if AEnsureVisible then
@@ -98,7 +98,7 @@ begin
   FMaxWidth := 1500;
   FMaxHeight := 1000;
 
-  FImageBox := TSimbaImageBox.Create(Self);
+  FImageBox := TSimbaImageBox.CreateNoOverlay(Self);
   FImageBox.Parent := Self;
   FImageBox.Align := alClient;
   FImageBox.OnMouseMove := @ImageMouseMove;

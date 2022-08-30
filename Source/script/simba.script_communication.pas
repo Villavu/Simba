@@ -30,14 +30,13 @@ type
     procedure Status(S: String);
     procedure Disguse(S: String);
 
-    procedure DebugImage_SetZoom(Level: Single);
     procedure DebugImage_SetMaxSize(Width, Height: Integer);
     procedure DebugImage_MoveTo(X, Y: Integer);
-    procedure DebugImage_Draw(Bitmap: TMufasaBitmap);
     procedure DebugImage_Show(Bitmap: TMufasaBitmap; EnsureVisible: Boolean);
+    procedure DebugImage_Update(Bitmap: TMufasaBitmap);
     procedure DebugImage_Hide;
-    procedure DebugImage_Display(Width, Height: Integer);
-    procedure DebugImage_Clear;
+    procedure DebugImage_Display(Width, Height: Integer); overload;
+    procedure DebugImage_Display(X, Y, Width, Height: Integer); overload;
 
     procedure DebugMethodName(Name: String);
     procedure DebugEvents(Events: TMemoryStream);
@@ -160,19 +159,6 @@ begin
   end;
 end;
 
-procedure TSimbaScriptCommunication.DebugImage_SetZoom(Level: Single);
-begin
-  BeginInvoke(ESimbaCommunicationMessage.DEBUGIMAGE_ZOOM);
-
-  try
-    FParams.Write(Level, SizeOf(Single));
-
-    Invoke();
-  finally
-    EndInvoke();
-  end;
-end;
-
 procedure TSimbaScriptCommunication.DebugImage_SetMaxSize(Width, Height: Integer);
 begin
   BeginInvoke(ESimbaCommunicationMessage.DEBUGIMAGE_MAXSIZE);
@@ -201,33 +187,65 @@ begin
   end;
 end;
 
-procedure TSimbaScriptCommunication.DebugImage_Draw(Bitmap: TMufasaBitmap);
+// Send chunked ... faster & less memory needed.
+procedure TSimbaScriptCommunication.DebugImage_Show(Bitmap: TMufasaBitmap; EnsureVisible: Boolean);
+var
+  Header: TSimbaIPCHeader;
+  Y: Integer;
 begin
-  BeginInvoke(ESimbaCommunicationMessage.DEBUGIMAGE_DRAW);
+  BeginInvoke(ESimbaCommunicationMessage.DEBUGIMAGE_SHOW);
 
   try
-    FParams.Write(Bitmap.Width, SizeOf(Integer));
-    FParams.Write(Bitmap.Height, SizeOf(Integer));
-    FParams.Write(Bitmap.Data^, Bitmap.Width * Bitmap.Height * SizeOf(TRGB32));
+    Header.Size      := 0;
+    Header.MessageID := FMessageID;
 
-    Invoke();
+    FOutputStream.Write(Header, SizeOf(TSimbaIPCHeader));
+    FOutputStream.Write(EnsureVisible, SizeOf(Boolean));
+    FOutputStream.Write(Bitmap.Width, SizeOf(Integer));
+    FOutputStream.Write(Bitmap.Height, SizeOf(Integer));
+
+    for Y := 0 to Bitmap.Height - 1 do
+      FOutputStream.Write(Bitmap.Data[Y * Bitmap.Width], Bitmap.Width * SizeOf(TRGB32));
+
+    // Read result
+    FInputStream.Read(Header, SizeOf(TSimbaIPCHeader));
+    if (Header.Size > 0) then
+    begin
+      FResult.CopyFrom(FInputStream, Header.Size);
+      FResult.Position := 0;
+    end;
   finally
     EndInvoke();
   end;
 end;
 
-procedure TSimbaScriptCommunication.DebugImage_Show(Bitmap: TMufasaBitmap; EnsureVisible: Boolean);
+// Send chunked ... faster & less memory needed.
+// Data is sent row by row
+procedure TSimbaScriptCommunication.DebugImage_Update(Bitmap: TMufasaBitmap);
+var
+  Header: TSimbaIPCHeader;
+  Y: Integer;
 begin
-  BeginInvoke(ESimbaCommunicationMessage.DEBUGIMAGE_SHOW);
+  BeginInvoke(ESimbaCommunicationMessage.DEBUGIMAGE_UPDATE);
 
   try
-    FParams.Write(EnsureVisible, SizeOf(Boolean));
+    Header.Size      := 0;
+    Header.MessageID := FMessageID;
 
-    FParams.Write(Bitmap.Width, SizeOf(Integer));
-    FParams.Write(Bitmap.Height, SizeOf(Integer));
-    FParams.Write(Bitmap.Data^, Bitmap.Width * Bitmap.Height * SizeOf(TRGB32));
+    FOutputStream.Write(Header, SizeOf(TSimbaIPCHeader));
+    FOutputStream.Write(Bitmap.Width, SizeOf(Integer));
+    FOutputStream.Write(Bitmap.Height, SizeOf(Integer));
 
-    Invoke();
+    for Y := 0 to Bitmap.Height - 1 do
+      FOutputStream.Write(Bitmap.Data[Y * Bitmap.Width], Bitmap.Width * SizeOf(TRGB32));
+
+    // Read result
+    FInputStream.Read(Header, SizeOf(TSimbaIPCHeader));
+    if (Header.Size > 0) then
+    begin
+      FResult.CopyFrom(FInputStream, Header.Size);
+      FResult.Position := 0;
+    end;
   finally
     EndInvoke();
   end;
@@ -258,11 +276,16 @@ begin
   end;
 end;
 
-procedure TSimbaScriptCommunication.DebugImage_Clear;
+procedure TSimbaScriptCommunication.DebugImage_Display(X, Y, Width, Height: Integer);
 begin
-   BeginInvoke(ESimbaCommunicationMessage.DEBUGIMAGE_CLEAR);
+  BeginInvoke(ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY_XY);
 
   try
+    FParams.Write(X, SizeOf(Integer));
+    FParams.Write(Y, SizeOf(Integer));
+    FParams.Write(Width, SizeOf(Integer));
+    FParams.Write(Height, SizeOf(Integer));
+
     Invoke();
   finally
     EndInvoke();
