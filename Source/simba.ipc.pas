@@ -59,14 +59,14 @@ type
 
     procedure BeginInvoke(MethodID: Integer);
     procedure EndInvoke;
-
     procedure Invoke;
   end;
 
 implementation
 
 uses
-  lazloggerbase;
+  lazloggerbase,
+  simba.mufasatypes;
 
 procedure TSimbaIPCServer.Execute;
 var
@@ -92,7 +92,6 @@ begin
       // Copy parameters
       if (Header.Size > 0) then
         Params.CopyFrom(FInputStream, Header.Size);
-
       Params.Position := 0;
 
       OnMessage(Header.MessageID, Params, Result);
@@ -141,28 +140,26 @@ begin
   inherited Create();
 
   // Input
-  if (not CreatePipeHandles(InputHandle, OutputHandle, 65536)) then
+  if (not CreatePipeHandles(InputHandle, OutputHandle, 4096)) then
     raise Exception.Create('Unable to create input pipe');
 
   FInputStream := TInputPipeStream.Create(InputHandle);
   FInputClient := TOutputPipeStream.Create(DuplicateHandle(OutputHandle));
 
   // Output
-  if (not CreatePipeHandles(InputHandle, OutputHandle, 65536)) then
+  if (not CreatePipeHandles(InputHandle, OutputHandle, 4096)) then
     raise Exception.Create('Unable to create output pipe');
 
   FOutputStream := TOutputPipeStream.Create(OutputHandle);
   FOutputClient := TInputPipeStream.Create(DuplicateHandle(InputHandle));
 
   FClientID := IntToHex(FInputClient.Handle, 16) + IntToHex(FOutputClient.Handle, 16);
-  FThread := TThread.ExecuteInThread(@Execute);
+  FThread := Threaded(@Execute);
 end;
 
 destructor TSimbaIPCServer.Destroy;
 begin
-  FThread.FreeOnTerminate := False;
   FThread.Terminate();
-
   while not FThread.Finished do
   begin
     try

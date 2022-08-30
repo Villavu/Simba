@@ -10,17 +10,14 @@ unit simba.scriptinstance_communication;
 interface
 
 uses
-  classes, sysutils, forms, extctrls, typinfo, lazloggerbase,
+  classes, sysutils, forms, extctrls, graphics,
   simba.ipc, simba.mufasatypes;
 
 type
   TSimbaScriptInstanceCommunication = class(TSimbaIPCServer)
   protected
     FScriptInstance: TObject;
-    FMethods: array[ESimbaCommunicationMessage] of record
-      Method: TProc;
-      ThreadSafe: Boolean;
-    end;
+    FMethods: array[ESimbaCommunicationMessage] of TProc;
     FParams: TMemoryStream;
     FResult: TMemoryStream;
 
@@ -38,14 +35,13 @@ type
     procedure ScriptStateChanged;
     procedure ScriptError;
 
-    procedure DebugImage_SetZoom;
     procedure DebugImage_SetMaxSize;
     procedure DebugImage_MoveTo;
-    procedure DebugImage_Draw;
     procedure DebugImage_Show;
+    procedure DebugImage_Update;
     procedure DebugImage_Hide;
     procedure DebugImage_Display;
-    procedure DebugImage_Clear;
+    procedure DebugImage_DisplayXY;
 
     procedure DebugMethodName;
     procedure DebugEvents;
@@ -56,41 +52,38 @@ type
 implementation
 
 uses
-  simba.scriptinstance,
-  simba.main, simba.debugimageform;
+  simba.scriptinstance, simba.bitmap_misc, simba.main, simba.debugimageform;
 
 procedure TSimbaScriptInstanceCommunication.OnMessage(MessageID: Integer; Params, Result: TMemoryStream);
 var
   Message: ESimbaCommunicationMessage absolute MessageID;
-
-  procedure DoMethod;
-  begin
-    try
-      FMethods[Message].Method();
-    except
-      on E: Exception do
-        DebugLn('%s :: %s', [GetEnumName(TypeInfo(ESimbaCommunicationMessage), MessageID), E.ToString()]);
-    end;
-  end;
-
 begin
   FParams := Params;
   FResult := Result;
 
-  if FMethods[Message].ThreadSafe then
-    DoMethod()
-  else
-    Sync(@DoMethod);
+  FMethods[Message]();
 end;
 
 procedure TSimbaScriptInstanceCommunication.Disguise;
+
+  procedure Execute;
+  begin
+    SimbaForm.Caption := FParams.ReadAnsiString();
+  end;
+
 begin
-  SimbaForm.Caption := FParams.ReadAnsiString();
+  Sync(@Execute);
 end;
 
 procedure TSimbaScriptInstanceCommunication.Status;
+
+  procedure Execute;
+  begin
+    SimbaForm.StatusPanelFileName.Caption := FParams.ReadAnsiString();
+  end;
+
 begin
-  SimbaForm.StatusPanelFileName.Caption := FParams.ReadAnsiString();
+  Sync(@Execute);
 end;
 
 procedure TSimbaScriptInstanceCommunication.ShowBalloonHint;
@@ -98,30 +91,37 @@ var
   Title, Hint: String;
   Timeout: Integer;
   Flags: TBalloonFlags;
+
+  procedure Execute;
+  begin
+    SimbaForm.TrayIcon.BalloonTitle   := Title;
+    SimbaForm.TrayIcon.BalloonHint    := Hint;
+    SimbaForm.TrayIcon.BalloonTimeout := Timeout;
+    SimbaForm.TrayIcon.BalloonFlags   := Flags;
+    SimbaForm.TrayIcon.ShowBalloonHint();
+  end;
+
 begin
   Title := FParams.ReadAnsiString;
   Hint := FParams.ReadAnsiString;
 
   FParams.Read(Timeout, SizeOf(Integer));
   FParams.Read(Flags, SizeOf(TBalloonFlags));
-
-  SimbaForm.TrayIcon.BalloonTitle := Title;
-  SimbaForm.TrayIcon.BalloonHint := Hint;
-  SimbaForm.TrayIcon.BalloonTimeout := Timeout;
-  SimbaForm.TrayIcon.BalloonFlags := Flags;
-  SimbaForm.TrayIcon.ShowBalloonHint();
 end;
 
+// Threadsafe
 procedure TSimbaScriptInstanceCommunication.GetSimbaPID;
 begin
   FResult.Write(GetProcessID(), SizeOf(PtrUInt));
 end;
 
+// Threadsafe
 procedure TSimbaScriptInstanceCommunication.GetSimbaTargetWindow;
 begin
   FResult.Write(SimbaForm.WindowSelection, SizeOf(PtrUInt));
 end;
 
+// Threadsafe
 procedure TSimbaScriptInstanceCommunication.GetSimbaTargetPID;
 begin
   FResult.Write(SimbaForm.ProcessSelection, SizeOf(PtrUInt));
@@ -130,15 +130,27 @@ end;
 procedure TSimbaScriptInstanceCommunication.ScriptStateChanged;
 var
   State: ESimbaScriptState;
+
+  procedure Execute;
+  begin
+    TSimbaScriptInstance(FScriptInstance).State := State;
+  end;
+
 begin
   FParams.Read(State, SizeOf(ESimbaScriptState));
 
-  TSimbaScriptInstance(FScriptInstance).State := State;
+  Sync(@Execute);
 end;
 
 procedure TSimbaScriptInstanceCommunication.ScriptError;
 var
   Error: TSimbaScriptError;
+
+  procedure Execute;
+  begin
+    TSimbaScriptInstance(FScriptInstance).Error := Error;
+  end;
+
 begin
   Error.Message  := FParams.ReadAnsiString();
   Error.FileName := FParams.ReadAnsiString();
@@ -146,87 +158,228 @@ begin
   FParams.Read(Error.Line, SizeOf(Integer));
   FParams.Read(Error.Column, SizeOf(Integer));
 
-  TSimbaScriptInstance(FScriptInstance).Error := Error;
-end;
-
-procedure TSimbaScriptInstanceCommunication.DebugImage_SetZoom;
-var
-  Level: Single;
-begin
-  FParams.Read(Level, SizeOf(Single));
-
-  SimbaDebugImageForm.ImageBox.Zoom := Level;
+  Sync(@Execute);
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_SetMaxSize;
 var
   Width, Height: Integer;
+
+  procedure Execute;
+  begin
+    SimbaDebugImageForm.SetMaxSize(Width, Height);
+  end;
+
 begin
   FParams.Read(Width, SizeOf(Integer));
   FParams.Read(Height, SizeOf(Integer));
 
-  SimbaDebugImageForm.SetMaxSize(Width, Height);
+  Sync(@Execute);
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_MoveTo;
 var
   X, Y: Integer;
+
+  procedure Execute;
+  begin
+    SimbaDebugImageForm.ImageBox.MoveTo(X, Y);
+  end;
+
 begin
   FParams.Read(X, SizeOf(Integer));
   FParams.Read(Y, SizeOf(Integer));
 
-  SimbaDebugImageForm.ImageBox.MoveTo(X, Y);
-end;
-
-procedure TSimbaScriptInstanceCommunication.DebugImage_Draw;
-var
-  Width, Height: Integer;
-begin
-  FParams.Read(Width, SizeOf(Integer));
-  FParams.Read(Height, SizeOf(Integer));
-
-  SimbaDebugImageForm.ImageBox.SetBackground(FParams.Memory + FParams.Position, Width, Height);
+  Sync(@Execute);
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_Show;
 var
   EnsureVisible: Boolean;
-  Width, Height: Integer;
-begin
-  FParams.Read(EnsureVisible, SizeOf(Boolean));
-  FParams.Read(Width, SizeOf(Integer));
-  FParams.Read(Height, SizeOf(Integer));
 
-  SimbaDebugImageForm.ImageBox.SetBackground(FParams.Memory + FParams.Position, Width, Height);
-  SimbaDebugImageForm.SetSize(Width, Height, EnsureVisible);
+  procedure Execute;
+  begin
+    DebugImage_Update();
+
+    with SimbaDebugImageForm.ImageBox do
+      SimbaDebugImageForm.SetSize(BackgroundBitmap.Width, BackgroundBitmap.Height, False, EnsureVisible);
+  end;
+
+begin
+  FInputStream.Read(EnsureVisible, SizeOf(Boolean));
+
+  Sync(@Execute);
+end;
+
+// Chunked data is sent. Row by row.
+procedure TSimbaScriptInstanceCommunication.DebugImage_Update;
+
+  // Modified from TBitmapHelper.FromData in simba.bitmap_misc
+  procedure Execute;
+  var
+    Width, Height: Integer;
+    Source, Dest: PByte;
+    SourceUpper: PtrUInt;
+    DestBytesPerLine, SourceBytesPerLine: Integer;
+    SourcePtr, DestPtr: PByte;
+
+    procedure BGR;
+    type
+      PRGB24 = ^TRGB24;
+      TRGB24 = packed record
+        B, G, R : Byte;
+      end;
+    var
+      Y: Integer;
+    begin
+      for Y := 0 to Height - 1 do
+      begin
+        FInputStream.Read(Source^, SourceBytesPerLine);
+
+        SourcePtr := Source;
+        DestPtr   := Dest;
+
+        while (PtrUInt(SourcePtr) < SourceUpper) do
+        begin
+          PRGB24(DestPtr)^ := PRGB24(SourcePtr)^; // Can just use first three bytes
+
+          Inc(SourcePtr, SizeOf(TRGB32));
+          Inc(DestPtr, SizeOf(TRGB24));
+        end;
+
+        Inc(Dest, DestBytesPerLine);
+      end;
+    end;
+
+    procedure BGRA;
+    var
+      Y: Integer;
+    begin
+      for Y := 0 to Height - 1 do
+      begin
+        FInputStream.Read(Source^, SourceBytesPerLine);
+
+        Move(Source^, Dest^, DestBytesPerLine);
+        Inc(Dest, DestBytesPerLine);
+      end;
+    end;
+
+    procedure ARGB;
+    type
+      PARGB = ^TARGB;
+      TARGB = packed record
+        A, R, G, B: Byte;
+      end;
+    var
+      Y: Integer;
+    begin
+      for Y := 0 to Height - 1 do
+      begin
+        FInputStream.Read(Source^, SourceBytesPerLine);
+
+        SourcePtr := Source;
+        DestPtr   := Dest;
+
+        while (PtrUInt(SourcePtr) < SourceUpper) do
+        begin
+          PARGB(DestPtr)^.R := PRGB32(SourcePtr)^.R;
+          PARGB(DestPtr)^.G := PRGB32(SourcePtr)^.G;
+          PARGB(DestPtr)^.B := PRGB32(SourcePtr)^.B;
+          PARGB(DestPtr)^.A := PRGB32(SourcePtr)^.A;
+
+          Inc(SourcePtr, SizeOf(TRGB32));
+          Inc(DestPtr, SizeOf(TARGB));
+        end;
+
+        Inc(Dest, DestBytesPerLine);
+      end;
+    end;
+  var
+    Bitmap: TBitmap;
+  begin
+    FInputStream.Read(Width, SizeOf(Integer));
+    FInputStream.Read(Height, SizeOf(Integer));
+
+    Bitmap := SimbaDebugImageForm.ImageBox.BackgroundBitmap;
+    Bitmap.BeginUpdate();
+    Bitmap.SetSize(Width, Height);
+
+    DestBytesPerLine := Bitmap.RawImage.Description.BytesPerLine;
+    Dest             := Bitmap.RawImage.Data;
+
+    SourceBytesPerLine := Width * SizeOf(TRGB32);
+    Source             := GetMem(SourceBytesPerLine);
+    SourceUpper        := PtrUInt(Source + SourceBytesPerLine);
+
+    case GetBitmapPixelFormat(Bitmap) of
+      'BGR':  BGR();
+      'BGRA': BGRA();
+      'ARGB': ARGB();
+    end;
+
+    FreeMem(Source);
+
+    Bitmap.EndUpdate();
+  end;
+
+begin
+  Sync(@Execute);
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_Hide;
+
+  procedure Execute;
+  begin
+    SimbaDebugImageForm.Close();
+  end;
+
 begin
-  SimbaDebugImageForm.Close();
+  Sync(@Execute);
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_Display;
 var
   Width, Height: Integer;
+
+  procedure Execute;
+  begin
+    SimbaDebugImageForm.SetSize(Width, Height, True);
+  end;
+
 begin
   FParams.Read(Width, SizeOf(Integer));
   FParams.Read(Height, SizeOf(Integer));
 
-  SimbaDebugImageForm.SetSize(Width, Height);
+  Sync(@Execute);
 end;
 
-procedure TSimbaScriptInstanceCommunication.DebugImage_Clear;
+procedure TSimbaScriptInstanceCommunication.DebugImage_DisplayXY;
+var
+  X, Y, Width, Height: Integer;
+
+  procedure Execute;
+  begin
+    SimbaDebugImageForm.Left := X;
+    SimbaDebugImageForm.Top  := Y;
+    SimbaDebugImageForm.SetSize(Width, Height, True);
+  end;
+
 begin
-  SimbaDebugImageForm.ImageBox.Background.Brush.Color := 0;
-  SimbaDebugImageForm.ImageBox.Background.Clear();
+  FParams.Read(X, SizeOf(Integer));
+  FParams.Read(Y, SizeOf(Integer));
+  FParams.Read(Width, SizeOf(Integer));
+  FParams.Read(Height, SizeOf(Integer));
+
+  Sync(@Execute);
 end;
 
+// threadsafe
 procedure TSimbaScriptInstanceCommunication.DebugMethodName;
 begin
   TSimbaScriptInstance(FScriptInstance).DebuggerForm.AddMethod(FParams.ReadAnsiString());
 end;
 
+// threadsafe
 procedure TSimbaScriptInstanceCommunication.DebugEvents;
 var
   Count: Integer;
@@ -237,36 +390,28 @@ begin
 end;
 
 constructor TSimbaScriptInstanceCommunication.Create(ScriptInstance: TObject);
-
-  procedure SetMethod(Message: ESimbaCommunicationMessage; Proc: TProc; ThreadSafe: Boolean = False);
-  begin
-    FMethods[Message].Method     := Proc;
-    FMethods[Message].ThreadSafe := Threadsafe;
-  end;
-
 begin
   inherited Create();
 
   FScriptInstance := ScriptInstance;
 
-  SetMethod(ESimbaCommunicationMessage.STATUS,              @Status);
-  SetMethod(ESimbaCommunicationMessage.DISGUSE,             @Disguise);
-  SetMethod(ESimbaCommunicationMessage.SIMBA_PID,           @GetSimbaPID);
-  SetMethod(ESimbaCommunicationMessage.SIMBA_TARGET_PID,    @GetSimbaTargetPID);
-  SetMethod(ESimbaCommunicationMessage.SIMBA_TARGET_WINDOW, @GetSimbaTargetWindow);
-  SetMethod(ESimbaCommunicationMessage.SCRIPT_ERROR,        @ScriptError);
-  SetMethod(ESimbaCommunicationMessage.SCRIPT_STATE_CHANGE, @ScriptStateChanged);
-  SetMethod(ESimbaCommunicationMessage.BALLOON_HINT,        @ShowBalloonHint);
-  SetMethod(ESimbaCommunicationMessage.DEBUGIMAGE_MAXSIZE,  @DebugImage_SetMaxSize);
-  SetMethod(ESimbaCommunicationMessage.DEBUGIMAGE_DRAW,     @DebugImage_Draw);
-  SetMethod(ESimbaCommunicationMessage.DEBUGIMAGE_SHOW,     @DebugImage_Show);
-  SetMethod(ESimbaCommunicationMessage.DEBUGIMAGE_HIDE,     @DebugImage_Hide);
-  SetMethod(ESimbaCommunicationMessage.DEBUGIMAGE_ZOOM,     @DebugImage_SetZoom);
-  SetMethod(ESimbaCommunicationMessage.DEBUGIMAGE_MOVETO,   @DebugImage_MoveTo);
-  SetMethod(ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY,  @DebugImage_Display);
-  SetMethod(ESimbaCommunicationMessage.DEBUGIMAGE_CLEAR,    @DebugImage_Clear);
-  SetMethod(ESimbaCommunicationMessage.DEBUG_METHOD_NAME,   @DebugMethodName, True);
-  SetMethod(ESimbaCommunicationMessage.DEBUG_EVENTS,        @DebugEvents,     True);
+  FMethods[ESimbaCommunicationMessage.STATUS]                := @Status;
+  FMethods[ESimbaCommunicationMessage.DISGUSE]               := @Disguise;
+  FMethods[ESimbaCommunicationMessage.SIMBA_PID]             := @GetSimbaPID;
+  FMethods[ESimbaCommunicationMessage.SIMBA_TARGET_PID]      := @GetSimbaTargetPID;
+  FMethods[ESimbaCommunicationMessage.SIMBA_TARGET_WINDOW]   := @GetSimbaTargetWindow;
+  FMethods[ESimbaCommunicationMessage.SCRIPT_ERROR]          := @ScriptError;
+  FMethods[ESimbaCommunicationMessage.SCRIPT_STATE_CHANGE]   := @ScriptStateChanged;
+  FMethods[ESimbaCommunicationMessage.BALLOON_HINT]          := @ShowBalloonHint;
+  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_MAXSIZE]    := @DebugImage_SetMaxSize;
+  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_SHOW]       := @DebugImage_Show;
+  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_UPDATE]     := @DebugImage_Update;
+  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_HIDE]       := @DebugImage_Hide;
+  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_MOVETO]     := @DebugImage_MoveTo;
+  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY]    := @DebugImage_Display;
+  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY_XY] := @DebugImage_DisplayXY;
+  FMethods[ESimbaCommunicationMessage.DEBUG_METHOD_NAME]     := @DebugMethodName;
+  FMethods[ESimbaCommunicationMessage.DEBUG_EVENTS]          := @DebugEvents;
 end;
 
 end.

@@ -91,52 +91,52 @@ begin
 end;
 
 (*
-DrawBitmapDebugImg
-~~~~~~~~~~~~~~~~~~
-procedure DrawBitmapDebugImg(Bitmap: TMufasaBitmap);
+UpdateDebugImage
+~~~~~~~~~~~~~~~~
+procedure UpdateDebugImage(Bitmap: TMufasaBitmap);
 *)
-procedure _LapeDrawBitmapDebugImg(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeUpdateDebugImage(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('DrawBitmapDebugImg requires Simba communication');
 
-  SimbaScriptThread.Script.SimbaCommunication.DebugImage_Draw(PMufasaBitmap(Params^[0])^);
+  SimbaScriptThread.Script.SimbaCommunication.DebugImage_Update(PMufasaBitmap(Params^[0])^);
 end;
 
 (*
-DisplayDebugImgWindow
-~~~~~~~~~~~~~~~~~~~~~
-procedure DisplayDebugImgWindow(Width, Height: Integer);
+ShowDebugImage
+~~~~~~~~~~~~~~
+procedure ShowDebugImage(Width, Height: Integer);
 *)
-procedure _LapeDisplayDebugImgWindow(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeShowDebugImage1(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('DisplayDebugImgWindow requires Simba communication');
+    raise Exception.Create('ShowDebugImage requires Simba communication');
 
   with SimbaScriptThread.Script.Client do
     SimbaScriptThread.Script.SimbaCommunication.DebugImage_Display(PInteger(Params^[0])^, PInteger(Params^[1])^);
 end;
 
 (*
-ClearDebugImg
-~~~~~~~~~~~~~
-procedure ClearDebugImg;
+ShowDebugImage
+~~~~~~~~~~~~~~
+procedure ShowDebugImage(X, Y,Width, Height: Integer);
 *)
-procedure _LapeClearDebugImg(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeShowDebugImage2(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('ClearDebugImage requires Simba communication');
+    raise Exception.Create('ShowDebugImage requires Simba communication');
 
   with SimbaScriptThread.Script.Client do
-    SimbaScriptThread.Script.SimbaCommunication.DebugImage_Clear();
+    SimbaScriptThread.Script.SimbaCommunication.DebugImage_Display(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 (*
-SetDebugImgMaxSize
-~~~~~~~~~~~~~~~~~~
-procedure SetDebugImgMaxSize(MaxWidth, MaxHeight: Integer);
+SetDebugImageMaxSize
+~~~~~~~~~~~~~~~~~~~~
+procedure SetDebugImageMaxSize(MaxWidth, MaxHeight: Integer);
 *)
-procedure _LapeSetDebugImgMaxSize(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSetDebugImageMaxSize(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('SetDebugImgMaxSize requires Simba communication');
@@ -146,14 +146,14 @@ begin
 end;
 
 (*
-HideDebugImg
-~~~~~~~~~~~~
-procedure HideDebugImg;
+HideDebugImage
+~~~~~~~~~~~~~~
+procedure HideDebugImage;
 *)
-procedure _LapeHideDebugImg(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeHideDebugImage(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('HideDebugImg requires Simba communication');
+    raise Exception.Create('HideDebugImage requires Simba communication');
 
   with SimbaScriptThread.Script.Client do
     SimbaScriptThread.Script.SimbaCommunication.DebugImage_Hide();
@@ -165,11 +165,11 @@ begin
   begin
     pushSection('https://villavu.github.io/Simba/Debug Image.html');
 
-    addGlobalFunc('procedure DrawBitmapDebugImg(Bitmap: TMufasaBitmap); overload', @_LapeDrawBitmapDebugImg);
-    addGlobalFunc('procedure DisplayDebugImgWindow(Width, Height: Integer)', @_LapeDisplayDebugImgWindow);
-    addGlobalFunc('procedure SetDebugImgMaxSize(MaxWidth, MaxHeight: Integer)', @_LapeSetDebugImgMaxSize);
-    addGlobalFunc('procedure HideDebugImg', @_LapeHideDebugImg);
-    addGlobalFunc('procedure ClearDebugImg', @_LapeClearDebugImg);
+    addGlobalFunc('procedure SetDebugImageMaxSize(MaxWidth, MaxHeight: Integer)', @_LapeSetDebugImageMaxSize);
+    addGlobalFunc('procedure ShowDebugImage(Width, Height: Integer); overload;', @_LapeShowDebugImage1);
+    addGlobalFunc('procedure ShowDebugImage(X, Y, Width, Height: Integer); overload;', @_LapeShowDebugImage2);
+    addGlobalFunc('procedure HideDebugImage;', @_LapeHideDebugImage);
+    addGlobalFunc('procedure UpdateDebugImage(Bitmap: TMufasaBitmap);', @_LapeUpdateDebugImage);
 
     addGlobalFunc('procedure Show(Bitmap: TMufasaBitmap; EnsureVisible: Boolean = True); override', @_LapeShowBitmap);
 
