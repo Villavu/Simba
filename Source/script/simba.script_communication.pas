@@ -15,8 +15,6 @@ uses
 
 type
   TSimbaScriptCommunication = class(TSimbaIPCClient)
-  protected
-    procedure BeginInvoke(Message: ESimbaCommunicationMessage); overload;
   public
     function GetSimbaTargetWindow: PtrUInt;
     function GetSimbaTargetPID: PtrUInt;
@@ -31,7 +29,6 @@ type
     procedure Disguse(S: String);
 
     procedure DebugImage_SetMaxSize(Width, Height: Integer);
-    procedure DebugImage_MoveTo(X, Y: Integer);
     procedure DebugImage_Show(Bitmap: TMufasaBitmap; EnsureVisible: Boolean);
     procedure DebugImage_Update(Bitmap: TMufasaBitmap);
     procedure DebugImage_Hide;
@@ -44,14 +41,9 @@ type
 
 implementation
 
-procedure TSimbaScriptCommunication.BeginInvoke(Message: ESimbaCommunicationMessage);
-begin
-  BeginInvoke(Ord(Message));
-end;
-
 function TSimbaScriptCommunication.GetSimbaTargetWindow: PtrUInt;
 begin
-  BeginInvoke(ESimbaCommunicationMessage.SIMBA_TARGET_WINDOW);
+  BeginInvoke(Integer(ESimbaCommunicationMessage.SIMBA_TARGET_WINDOW));
 
   try
     Invoke();
@@ -64,7 +56,7 @@ end;
 
 function TSimbaScriptCommunication.GetSimbaTargetPID: PtrUInt;
 begin
-  BeginInvoke(ESimbaCommunicationMessage.SIMBA_TARGET_PID);
+  BeginInvoke(Integer(ESimbaCommunicationMessage.SIMBA_TARGET_PID));
 
   try
     Invoke();
@@ -77,7 +69,7 @@ end;
 
 function TSimbaScriptCommunication.GetSimbaPID: PtrUInt;
 begin
-  BeginInvoke(ESimbaCommunicationMessage.SIMBA_PID);
+  BeginInvoke(Integer(ESimbaCommunicationMessage.SIMBA_PID));
 
   try
     Invoke();
@@ -90,7 +82,7 @@ end;
 
 procedure TSimbaScriptCommunication.ScriptError(Message: String; Line, Column: Integer; FileName: String);
 begin
-  BeginInvoke(ESimbaCommunicationMessage.SCRIPT_ERROR);
+  BeginInvoke(Integer(ESimbaCommunicationMessage.SCRIPT_ERROR));
 
   try
     FParams.WriteAnsiString(Message);
@@ -106,7 +98,7 @@ end;
 
 procedure TSimbaScriptCommunication.ScriptStateChanged(State: ESimbaScriptState);
 begin
-  BeginInvoke(ESimbaCommunicationMessage.SCRIPT_STATE_CHANGE);
+  BeginInvoke(Integer(ESimbaCommunicationMessage.SCRIPT_STATE_CHANGE));
 
   try
     FParams.Write(State, SizeOf(ESimbaScriptState));
@@ -119,7 +111,7 @@ end;
 
 procedure TSimbaScriptCommunication.ShowBalloonHint(Title, Hint: String; Timeout: Integer; Flags: TBalloonFlags);
 begin
-  BeginInvoke(ESimbaCommunicationMessage.BALLOON_HINT);
+  BeginInvoke(Integer(ESimbaCommunicationMessage.BALLOON_HINT));
 
   try
     FParams.WriteAnsiString(Title);
@@ -135,7 +127,7 @@ end;
 
 procedure TSimbaScriptCommunication.Status(S: String);
 begin
-  BeginInvoke(ESimbaCommunicationMessage.STATUS);
+  BeginInvoke(Integer(ESimbaCommunicationMessage.STATUS));
 
   try
     FParams.WriteAnsiString(S);
@@ -148,7 +140,7 @@ end;
 
 procedure TSimbaScriptCommunication.Disguse(S: String);
 begin
-  BeginInvoke(ESimbaCommunicationMessage.DISGUSE);
+  BeginInvoke(Integer(ESimbaCommunicationMessage.DISGUSE));
 
   try
     FParams.WriteAnsiString(S);
@@ -161,25 +153,11 @@ end;
 
 procedure TSimbaScriptCommunication.DebugImage_SetMaxSize(Width, Height: Integer);
 begin
-  BeginInvoke(ESimbaCommunicationMessage.DEBUGIMAGE_MAXSIZE);
+  BeginInvoke(Integer(ESimbaCommunicationMessage.DEBUGIMAGE_MAXSIZE));
 
   try
     FParams.Write(Width, SizeOf(Integer));
     FParams.Write(Height, SizeOf(Integer));
-
-    Invoke();
-  finally
-    EndInvoke();
-  end;
-end;
-
-procedure TSimbaScriptCommunication.DebugImage_MoveTo(X, Y: Integer);
-begin
-  BeginInvoke(ESimbaCommunicationMessage.DEBUGIMAGE_MOVETO);
-
-  try
-    FParams.Write(X, SizeOf(Integer));
-    FParams.Write(Y, SizeOf(Integer));
 
     Invoke();
   finally
@@ -193,7 +171,10 @@ var
   Header: TSimbaIPCHeader;
   Y: Integer;
 begin
-  BeginInvoke(ESimbaCommunicationMessage.DEBUGIMAGE_SHOW);
+  if (Bitmap = nil) or (Bitmap.Width = 0) or (Bitmap.Height = 0) then
+    Exit;
+
+  BeginInvoke(Integer(ESimbaCommunicationMessage.DEBUGIMAGE_SHOW));
 
   try
     Header.Size      := 0;
@@ -226,7 +207,10 @@ var
   Header: TSimbaIPCHeader;
   Y: Integer;
 begin
-  BeginInvoke(ESimbaCommunicationMessage.DEBUGIMAGE_UPDATE);
+  if (Bitmap = nil) or (Bitmap.Width = 0) or (Bitmap.Height = 0) then
+    Exit;
+
+  BeginInvoke(Integer(ESimbaCommunicationMessage.DEBUGIMAGE_UPDATE));
 
   try
     Header.Size      := 0;
@@ -253,7 +237,7 @@ end;
 
 procedure TSimbaScriptCommunication.DebugImage_Hide;
 begin
-  BeginInvoke(ESimbaCommunicationMessage.DEBUGIMAGE_HIDE);
+  BeginInvoke(Integer(ESimbaCommunicationMessage.DEBUGIMAGE_HIDE));
 
   try
     Invoke();
@@ -264,7 +248,7 @@ end;
 
 procedure TSimbaScriptCommunication.DebugImage_Display(Width, Height: Integer);
 begin
-  BeginInvoke(ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY);
+  BeginInvoke(Integer(ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY));
 
   try
     FParams.Write(Width, SizeOf(Integer));
@@ -278,7 +262,7 @@ end;
 
 procedure TSimbaScriptCommunication.DebugImage_Display(X, Y, Width, Height: Integer);
 begin
-  BeginInvoke(ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY_XY);
+  BeginInvoke(Integer(ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY_XY));
 
   try
     FParams.Write(X, SizeOf(Integer));
@@ -294,7 +278,7 @@ end;
 
 procedure TSimbaScriptCommunication.DebugMethodName(Name: String);
 begin
-  BeginInvoke(ESimbaCommunicationMessage.DEBUG_METHOD_NAME);
+  BeginInvoke(Integer(ESimbaCommunicationMessage.DEBUG_METHOD_NAME));
 
   try
     FParams.WriteAnsiString(Name);
@@ -309,7 +293,7 @@ procedure TSimbaScriptCommunication.DebugEvents(Events: TMemoryStream);
 var
   Count: Integer;
 begin
-  BeginInvoke(ESimbaCommunicationMessage.DEBUG_EVENTS);
+  BeginInvoke(Integer(ESimbaCommunicationMessage.DEBUG_EVENTS));
 
   try
     Count := Events.Position div SizeOf(TSimbaScriptDebuggerEvent);
