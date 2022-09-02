@@ -34,7 +34,6 @@ type
 
     procedure InitBaseDefinitions; override;
     procedure InitBaseDateTime; override;
-    procedure InitBaseString; override;
     procedure InitBaseVariant; override;
   public
     function getIntegerArray: TLapeType; override;
@@ -338,57 +337,6 @@ begin
   addGlobalFunc('function IncMinute(const Value: TDateTime; const NumberOfMinutes: Int64 = 1): TDateTime;', @_LapeIncMinute);
   addGlobalFunc('function IncSecond(const Value: TDateTime; const NumberOfSeconds: Int64 = 1): TDateTime;', @_LapeIncSecond);
   addGlobalFunc('function IncMilliSecond(const Value: TDateTime; const NumberOfMilliSeconds: Int64 = 1): TDateTime;', @_LapeIncMilliSecond);
-end;
-
-procedure TSimbaScript_Compiler.InitBaseString;
-begin
-  addGlobalType('set of (rfReplaceAll, rfIgnoreCase)', 'TReplaceFlags');
-
-  addGlobalFunc('function Pos(Needle, Haystack: String): SizeInt;', @_LapePos);
-  addGlobalFunc('function UpperCase(S: String): String;', @_LapeUpperCase);
-  addGlobalFunc('function LowerCase(S: String): String;', @_LapeLowerCase);
-  addGlobalFunc('function UpCase(c: AnsiChar): AnsiChar; overload;', @_LapeUpCaseA);
-  addGlobalFunc('function UpCase(c: WideChar): WideChar; overload;', @_LapeUpCaseW);
-  addGlobalFunc('function CompareStr(s1, s2: String): Integer;', @_LapeCompareStr);
-  addGlobalFunc('function CompareText(s1, s2: String): Integer;', @_LapeCompareText);
-  addGlobalFunc('function SameText(s1, s2: String): EvalBool;', @_LapeSameText);
-  addGlobalFunc('function Trim(S: String): String;', @_LapeTrim);
-  addGlobalFunc('function TrimLeft(S: String): String;', @_LapeTrimLeft);
-  addGlobalFunc('function TrimRight(S: String): String;', @_LapeTrimRight);
-  addGlobalFunc('function PadL(S: String; Len: SizeInt; c: Char = " "): String;', @_LapePadL);
-  addGlobalFunc('function PadR(S: String; Len: SizeInt; c: Char = " "): String;', @_LapePadR);
-  addGlobalFunc('function QuotedStr(S: String): String;', @_LapeQuotedStr);
-  addGlobalFunc('function IntToHex(Value: Int64; Digits: Integer = 1): String; overload;', @_LapeIntToHex);
-  addGlobalFunc('function IntToHex(Value: UInt64; Digits: Integer = 1): String; overload;', @_LapeUIntToHex);
-  addGlobalFunc('function IntToStr(i: Int64): String; overload;', @_LapeToString_Int64);
-  addGlobalFunc('function IntToStr(i: UInt64): String; overload;', @_LapeToString_UInt64);
-  addGlobalFunc('function StrToInt(S: String): Integer;', @_LapeStrToInt);
-  addGlobalFunc('function StrToIntDef(S: String; Def: Integer): Integer;', @_LapeStrToIntDef);
-  addGlobalFunc('function StrToInt64(S: String): Int64;', @_LapeStrToInt64);
-  addGlobalFunc('function StrToInt64Def(S: String; Def: Int64): Int64;', @_LapeStrToInt64Def);
-  addGlobalFunc('function StrToUInt64(S: String): UInt64;', @_LapeStrToUInt64);
-  addGlobalFunc('function StrToUInt64Def(S: String; Def: UInt64): UInt64;', @_LapeStrToUInt64Def);
-  addGlobalFunc('function FloatToStr(f: Extended): String;', @_LapeToString_Extended);
-  addGlobalFunc('function StrToFloat(S: String): Extended;', @_LapeStrToFloat);
-  addGlobalFunc('function StrToFloatDef(S: String; Def: Extended): Extended;', @_LapeStrToFloatDef);
-  addGlobalFunc('function CurrToStr(Value: Currency): String;', @_LapeToString_Currency);
-  addGlobalFunc('function StrToCurr(S: String): Currency;', @_LapeStrToCurr);
-  addGlobalFunc('function StrToCurrDef(S: String; Def: Currency): Currency;', @_LapeStrToCurrDef);
-  addGlobalFunc('function StrToBool(S: String): EvalBool;', @_LapeStrToBool);
-  addGlobalFunc('function BoolToStr(B: EvalBool; TrueS: String = "True"; FalseS: String = "False"): String;', @_LapeBoolToStr);
-  addGlobalFunc('function StrToBoolDef(S: String; Default: EvalBool): EvalBool;', @_LapeStrToBoolDef);
-  addGlobalFunc('function Format(Fmt: String; Args: array of Variant): String;', @_LapeFormat);
-  addGlobalFunc('function FormatFloat(Format: String; Value: Extended): String;', @_LapeFormatFloat);
-  addGlobalFunc('function FormatCurr(Format: String; Value: Currency): String;', @_LapeFormatCurr);
-  addGlobalFunc('function LastDelimiter(Delimiters, S: String): SizeInt;', @_LapeLastDelimiter);
-  addGlobalFunc('function StringReplace(S, OldPattern, NewPattern: String; Flags: TReplaceFlags): String;', @_LapeStringReplace);
-  addGlobalFunc('Function IsDelimiter(Delimiters, S: String; Index: SizeInt): EvalBool;', @_LapeIsDelimiter);
-  addGlobalFunc('function StringOfChar(c: Char; l: SizeInt): String;', @_LapeStringOfChar);
-
-  addDelayedCode(LapeDelayedFlags +
-    'function Chr(IntValue: UInt8):  AnsiChar; overload; begin Result := AnsiChar(IntValue); end;' + LineEnding +
-    'function Chr(IntValue: UInt16): WideChar; overload; begin Result := WideChar(IntValue); end;',
-    '!addDelayedString');
 end;
 
 procedure TSimbaScript_Compiler.InitBaseVariant;

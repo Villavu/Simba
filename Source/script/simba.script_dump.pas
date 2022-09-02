@@ -29,7 +29,6 @@ type
 
     procedure InitBaseDefinitions; override;
     procedure InitBaseMath; override;
-    procedure InitBaseString; override;
     procedure InitBaseDateTime; override;
     procedure InitBaseVariant; override;
     procedure InitBaseFile; override;
@@ -117,15 +116,6 @@ begin
   pushSection('Math');
 
   inherited InitBaseMath();
-
-  popSection();
-end;
-
-procedure TCompilerDump.InitBaseString;
-begin
-  pushSection('String');
-
-  inherited InitBaseString();
 
   popSection();
 end;
