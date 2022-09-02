@@ -10,7 +10,7 @@ unit simba.script_communication;
 interface
 
 uses
-  classes, sysutils, extctrls,
+  classes, sysutils,
   simba.ipc, simba.mufasatypes, simba.bitmap;
 
 type
@@ -23,7 +23,7 @@ type
     procedure ScriptError(Message: String; Line, Column: Integer; FileName: String);
     procedure ScriptStateChanged(State: ESimbaScriptState);
 
-    procedure ShowBalloonHint(Title, Hint: String; Timeout: Integer; Flags: TBalloonFlags);
+    procedure ShowTrayNotification(Title, Message: String; Timeout: Integer);
 
     procedure Status(S: String);
     procedure Disguse(S: String);
@@ -109,15 +109,14 @@ begin
   end;
 end;
 
-procedure TSimbaScriptCommunication.ShowBalloonHint(Title, Hint: String; Timeout: Integer; Flags: TBalloonFlags);
+procedure TSimbaScriptCommunication.ShowTrayNotification(Title, Message: String; Timeout: Integer);
 begin
-  BeginInvoke(Integer(ESimbaCommunicationMessage.BALLOON_HINT));
+  BeginInvoke(Integer(ESimbaCommunicationMessage.TRAY_NOTIFICATION));
 
   try
     FParams.WriteAnsiString(Title);
-    FParams.WriteAnsiString(Hint);
+    FParams.WriteAnsiString(Message);
     FParams.Write(Timeout, SizeOf(Integer));
-    FParams.Write(Flags, SizeOf(Flags));
 
     Invoke();
   finally

@@ -25,11 +25,6 @@ begin
   PPtrUInt(Result)^ := PtrUInt(MainThreadID);
 end;
 
-procedure _LapeGetProcessorCount(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PPtrUInt(Result)^ := TThread.ProcessorCount;
-end;
-
 procedure _LapeWait(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   Sleep(PUInt32(Params^[0])^);
@@ -64,9 +59,9 @@ begin
   TThread.Synchronize(nil, @Sync.Execute);
 end;
 
-procedure _LapePauseScript(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetThreadCount(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  SimbaScriptThread.Script.State := ESimbaScriptState.STATE_PAUSED;
+  PPtrUInt(Result)^ := TThread.ProcessorCount;
 end;
 
 procedure ImportSystem(Compiler: TSimbaScript_Compiler);
@@ -119,38 +114,13 @@ begin
 
     addGlobalType('(__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__)', 'EComparator');
 
-    addGlobalVar('', 'ScriptFile').isConstant := True;
-    addGlobalVar(GetIncludePath(), 'IncludePath').isConstant := True;
-    addGlobalVar(GetPluginPath(), 'PluginPath').isConstant := True;
-    addGlobalVar(GetFontPath(), 'FontPath').isConstant := True;
-    addGlobalVar(GetSimbaPath(), 'AppPath').isConstant := True;
-    addGlobalVar(GetScriptPath(), 'ScriptPath').isConstant := True;
-    addGlobalVar(GetDataPath(), 'DataPath').isConstant := True;
-    addGlobalVar(GetScreenshotPath(), 'ScreenshotPath').isConstant := True;
-
-    addGlobalFunc('function GetProcessorCount: Integer', @_LapeGetProcessorCount);
+    addGlobalFunc('function GetThreadCount: Integer', @_LapeGetThreadCount);
     addGlobalFunc('function GetMainThreadID: PtrUInt', @_LapeGetMainThreadID);
     addGlobalFunc('function GetCurrentThreadID: PtrUInt', @_LapeGetCurrentThreadID);
     addGlobalFunc('function GetEnvironmentVariable(const Name: String): String', @_LapeGetEnvironmentVariable);
 
     addGlobalType('procedure() of object', 'TSyncMethod', {$IF DEFINED(CPU32) and DEFINED(LAPE_CDECL)}FFI_CDECL{$ELSE}FFI_DEFAULT_ABI{$ENDIF});
     addGlobalFunc('procedure Sync(Method: TSyncMethod)', @_LapeSync);
-    addGlobalFunc('procedure PauseScript', @_LapePauseScript);
-
-    addGlobalFunc(
-      'procedure TerminateScript; overload;', [
-      'begin',
-      '  Halt();',
-      'end;'
-    ]);
-
-    addGlobalFunc(
-      'procedure TerminateScript(Reason: String); overload;', [
-      'begin',
-      '  WriteLn(Reason);',
-      '  Halt();',
-      'end;'
-    ]);
 
     addGlobalFunc(
       'procedure MemMove(constref Src; var Dst; Size: SizeInt); deprecated;', [

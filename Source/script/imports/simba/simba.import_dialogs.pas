@@ -8,7 +8,8 @@ implementation
 
 uses
   classes, sysutils, dialogs, controls, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.scriptthread, simba.aca, simba.dtmeditor;
+  simba.script_compiler, simba.mufasatypes, simba.scriptthread, simba.aca, simba.dtmeditor,
+  simba.dialog;
 
 procedure _LapeInputCombo(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 
@@ -26,17 +27,6 @@ procedure _LapeInputQuery(const Params: PParamArray; const Result: Pointer); {$I
   procedure Execute;
   begin
     PBoolean(Result)^ := InputQuery(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
-  end;
-
-begin
-  Sync(@Execute);
-end;
-
-procedure _LapeShowDialog(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-
-  procedure Execute;
-  begin
-    PInteger(Result)^ := MessageDlg(PString(Params^[0])^, PString(Params^[1])^, TMsgDlgType(Params^[2]^), TMsgDlgButtons(Params^[3]^), '');
   end;
 
 begin
@@ -116,33 +106,41 @@ begin
   Sync(@Execute);
 end;
 
+procedure _LapeShowQuestionDialog(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+
+  procedure Execute;
+  begin
+    PSimbaDialogResult(Result)^ := SimbaQuestionDlg(PString(Params^[0])^, PString(Params^[1])^);
+  end;
+
+begin
+  Sync(@Execute);
+end;
+
+procedure _LapeShowTrayNotification(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
+    raise Exception.Create('ShowTrayNotification requires Simba communication');
+
+  SimbaScriptThread.Script.SimbaCommunication.ShowTrayNotification(PString(Params^[0])^, PString(Params^[1])^, PInteger(Params^[2])^);
+end;
+
 procedure ImportDialogs(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
     pushSection('Dialogs');
 
-    addGlobalVar(mrNone, 'mrNone').isConstant := True;
-    addGlobalVar(mrOK, 'mrOK').isConstant := True;
-    addGlobalVar(mrCancel, 'mrCancel').isConstant := True;
-    addGlobalVar(mrAbort, 'mrAbort').isConstant := True;
-    addGlobalVar(mrRetry, 'mrRetry').isConstant := True;
-    addGlobalVar(mrIgnore,'mrIgnore').isConstant := True;
-    addGlobalVar(mrYes, 'mrYes').isConstant := True;
-    addGlobalVar(mrNo, 'mrNo').isConstant := True;
-    addGlobalVar(mrAll,'mrAll').isConstant := True;
-    addGlobalVar(mrNoToAll, 'mrNoToAll').isConstant := True;
-    addGlobalVar(mrYesToAll, 'mrYesToAll').isConstant := True;
-    addGlobalVar(mrClose, 'mrClose').isConstant := True;
-    addGlobalType('set of (mbYes, mbNo, mbOK, mbCancel, mbAbort, mbRetry, mbIgnore, mbAll, mbNoToAll, mbYesToAll, mbHelp, mbClose)', 'TMsgDlgButtons');
-    addGlobalType('(mtWarning, mtError, mtInformation, mtConfirmation, mtCustom)', 'TMsgDlgType');
-    addGlobalFunc('function SelectDirectory(Caption, InitialDirectory: String; out Directory: String): Boolean;', @_LapeSelectDirectory);
-    addGlobalFunc('function InputQuery(Caption, Prompt: String; var Value: String): Boolean', @_LapeInputQuery);
-    addGlobalFunc('function InputCombo(Caption, Prompt: string; List: TStringArray): Integer', @_LapeInputCombo);
-    addGlobalFunc('function ShowDialog(Caption, Message: string; DialogType: TMsgDlgType; Buttons: TMsgDlgButtons): Integer', @_LapeShowDialog);
+    addGlobalType('enum(CANCEL, YES, NO)', 'ESimbaDialogResult');
+
+    addGlobalFunc('function ShowDirectoryDialog(Title, InitialDirectory: String; out Directory: String): Boolean;', @_LapeSelectDirectory);
+    addGlobalFunc('function ShowQueryDialog(Caption, Prompt: String; var Value: String): Boolean', @_LapeInputQuery);
+    addGlobalFunc('function ShowComboDialog(Caption, Prompt: string; List: TStringArray): Integer', @_LapeInputCombo);
     addGlobalFunc('procedure ShowMessage(Message: String)', @_LapeShowMessage);
     addGlobalFunc('procedure ShowDTMEditor(Title: String; out DTM: String)', @_LapeShowDTMEditor);
     addGlobalFunc('procedure ShowACA(Title: String; out CTS, Color, Tolerance: Integer; out Hue, Sat: Extended)', @_LapeShowACA);
+    addGlobalFunc('procedure ShowTrayNotification(Title, Message: String; Timeout: Integer = 3000)', @_LapeShowTrayNotification);
+    addGlobalFunc('function ShowQuestionDialog(Title, Question: String): ESimbaDialogResult', @_LapeShowQuestionDialog);
 
     popSection();
   end;

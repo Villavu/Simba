@@ -30,7 +30,6 @@ type
     procedure InitBaseDefinitions; override;
     procedure InitBaseMath; override;
     procedure InitBaseDateTime; override;
-    procedure InitBaseVariant; override;
     procedure InitBaseFile; override;
 
     procedure WriteMethod(Header, Name: String);
@@ -125,15 +124,6 @@ begin
   pushSection('DateTime');
 
   inherited InitBaseDateTime();
-
-  popSection();
-end;
-
-procedure TCompilerDump.InitBaseVariant;
-begin
-  pushSection('Variant');
-
-  inherited InitBaseVariant();
 
   popSection();
 end;

@@ -26,7 +26,7 @@ type
     procedure Disguise;
     procedure Status;
 
-    procedure ShowBalloonHint;
+    procedure ShowTrayNotification;
 
     procedure GetSimbaPID;
     procedure GetSimbaTargetWindow;
@@ -86,27 +86,26 @@ begin
   Sync(@Execute);
 end;
 
-procedure TSimbaScriptInstanceCommunication.ShowBalloonHint;
+procedure TSimbaScriptInstanceCommunication.ShowTrayNotification;
 var
   Title, Hint: String;
   Timeout: Integer;
-  Flags: TBalloonFlags;
 
   procedure Execute;
   begin
     SimbaForm.TrayIcon.BalloonTitle   := Title;
     SimbaForm.TrayIcon.BalloonHint    := Hint;
     SimbaForm.TrayIcon.BalloonTimeout := Timeout;
-    SimbaForm.TrayIcon.BalloonFlags   := Flags;
     SimbaForm.TrayIcon.ShowBalloonHint();
   end;
 
 begin
   Title := FParams.ReadAnsiString;
-  Hint := FParams.ReadAnsiString;
+  Hint  := FParams.ReadAnsiString;
 
   FParams.Read(Timeout, SizeOf(Integer));
-  FParams.Read(Flags, SizeOf(TBalloonFlags));
+
+  Sync(@Execute);
 end;
 
 // Threadsafe
@@ -402,7 +401,7 @@ begin
   FMethods[ESimbaCommunicationMessage.SIMBA_TARGET_WINDOW]   := @GetSimbaTargetWindow;
   FMethods[ESimbaCommunicationMessage.SCRIPT_ERROR]          := @ScriptError;
   FMethods[ESimbaCommunicationMessage.SCRIPT_STATE_CHANGE]   := @ScriptStateChanged;
-  FMethods[ESimbaCommunicationMessage.BALLOON_HINT]          := @ShowBalloonHint;
+  FMethods[ESimbaCommunicationMessage.TRAY_NOTIFICATION]     := @ShowTrayNotification;
   FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_MAXSIZE]    := @DebugImage_SetMaxSize;
   FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_SHOW]       := @DebugImage_Show;
   FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_UPDATE]     := @DebugImage_Update;

@@ -13,8 +13,6 @@ uses
   classes, sysutils,
   simba.mufasatypes;
 
-  function GetFiles(Path, Ext: string): TStringArray;
-  function GetDirectories(Path: string): TStringArray;
   function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
   function FindFiles(Directories: TStringArray; WildCard: String; Recursive: Boolean = False): TStringArray;
   function FindPlugin(var FileName: String; const Directories: array of String): Boolean;
@@ -116,47 +114,6 @@ begin
             {$ENDIF}
             FindFile(FileName, '.' + SharedSuffix, Directories) or
             FindFile(FileName, {$IFDEF CPU32}'32'{$ELSE}'64'{$ENDIF} + '.' + SharedSuffix, Directories);
-end;
-
-function GetFiles(Path, Ext: string): TStringArray;
-var
-  SearchRec : TSearchRec;
-  c : integer;
-begin
-  c := 0;
-  Path := IncludeTrailingPathDelimiter(Path);
-  Ext := Ext.TrimLeft(['.']);
-
-  if FindFirst(Path + '*.' + ext, faAnyFile, SearchRec) = 0 then
-  begin
-    repeat
-      if (SearchRec.Attr and faDirectory) = faDirectory then
-        Continue;
-      inc(c);
-      SetLength(Result,c);
-      Result[c-1] := SearchRec.Name;
-    until FindNext(SearchRec) <> 0;
-    SysUtils.FindClose(SearchRec);
-  end;
-end;
-
-function GetDirectories(Path: string): TStringArray;
-var
-  SearchRec : TSearchRec;
-  c : integer;
-begin
-  c := 0;
-  if FindFirst(Path + '*', faDirectory, SearchRec) = 0 then
-  begin
-    repeat
-      if (SearchRec.Name[1] = '.') or ((SearchRec.Attr and faDirectory) <> faDirectory) then
-        continue;
-      inc(c);
-      SetLength(Result,c);
-       Result[c-1] := SearchRec.Name;
-    until FindNext(SearchRec) <> 0;
-    SysUtils.FindClose(SearchRec);
-  end;
 end;
 
 procedure UnZipFile(const ArchiveFileName, OutputDirectory: String);

@@ -267,7 +267,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="113">
+    <Units Count="116">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -783,6 +783,18 @@
         <Filename Value="string.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit112>
+      <Unit113>
+        <Filename Value="script/imports/simba/simba.import_variant.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit113>
+      <Unit114>
+        <Filename Value="script/imports/simba/simba.import_script.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit114>
+      <Unit115>
+        <Filename Value="script/imports/simba/simba.import_simba.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit115>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

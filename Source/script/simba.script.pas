@@ -263,6 +263,7 @@ begin
   // Only available at runtime
   PClient(FCompiler['Client'].Ptr)^ := FClient;
   PString(FCompiler['ScriptFile'].Ptr)^ := FScriptFileName;
+  PString(FCompiler['ScriptName'].Ptr)^ := ExtractFileName(FScriptFileName);
 
   FRunningTime := HighResolutionTime();
   try

@@ -15,6 +15,7 @@ uses
 type
   {$PUSH}
   {$SCOPEDENUMS ON}
+  PSimbaDialogResult = ^ESimbaDialogResult;
   ESimbaDialogResult = (
     CANCEL,
     YES,

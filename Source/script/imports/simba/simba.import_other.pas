@@ -62,61 +62,6 @@ begin
   SimbaScriptThread.Script.SimbaCommunication.Status(PString(Params^[0])^);
 end;
 
-procedure _LapeShowBalloonHint(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('ShowBalloonHint requires Simba communication');
-
-  SimbaScriptThread.Script.SimbaCommunication.ShowBalloonHint(PString(Params^[0])^, PString(Params^[1])^, PInteger(Params^[2])^, TBalloonFlags(Params^[3]^));
-end;
-
-procedure _LapeClearDebug(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  SimbaDebugLn(ESimbaDebugLn.CLEAR, '');
-end;
-
-procedure _LapeDisguise(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('Disguise requires Simba communication');
-
-  SimbaScriptThread.Script.SimbaCommunication.Disguse(PString(Params^[0])^);
-end;
-
-procedure _LapeGetSimbaPID(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('GetSimbaPID requires Simba communication');
-
-  PPtrUInt(Result)^ := SimbaScriptThread.Script.SimbaCommunication.GetSimbaPID();
-end;
-
-procedure _LapeGetSimbaTargetPID(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('GetSimbaTargetPID requires Simba communication');
-
-  PPtrUInt(Result)^ := SimbaScriptThread.Script.SimbaCommunication.GetSimbaTargetPID();
-end;
-
-procedure _LapeGetSimbaTargetWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('GetSimbaTargetWindow requires Simba communication');
-
-  PPtrUInt(Result)^ := SimbaScriptThread.Script.SimbaCommunication.GetSimbaTargetWindow();
-end;
-
-procedure _LapeGetSimpleSetting(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PString(Result)^ := SimbaSettings.GetSimpleSetting(PString(Params^[0])^, PString(Params^[1])^);
-end;
-
-procedure _LapeSetSimpleSetting(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  SimbaSettings.SetSimpleSetting(PString(Params^[0])^, PString(Params^[1])^);
-end;
-
 procedure ImportOther(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -129,18 +74,6 @@ begin
     addGlobalFunc('procedure Simba', @_LapeSimba);
     addGlobalFunc('procedure SetClipBoard(Data: string)', @_LapeSetClipBoard);
     addGlobalFunc('function GetClipBoard: String', @_LapeGetClipBoard);
-
-    addGlobalType('(bfNone, bfInfo, bfWarning, bfError)', 'TBalloonFlags');
-    addGlobalFunc('procedure Status(const Status: String)', @_LapeStatus);
-    addGlobalFunc('procedure ShowBalloonHint(const Title, Hint: String; const Timeout: Integer; const Flags: TBalloonFlags)', @_LapeShowBalloonHint);
-    addGlobalFunc('procedure ClearDebug', @_LapeClearDebug);
-    addGlobalFunc('procedure Disguise(const Caption: String)', @_LapeDisguise);
-    addGlobalFunc('function GetSimbaPID: PtrUInt', @_LapeGetSimbaPID);
-    addGlobalFunc('function GetSimbaTargetPID: PtrUInt', @_LapeGetSimbaTargetPID);
-    addGlobalFunc('function GetSimbaTargetWindow: TWindowHandle', @_LapeGetSimbaTargetWindow);
-
-    addGlobalFunc('function GetSimpleSetting(Name: String; DefValue: String = ""): String', @_LapeGetSimpleSetting);
-    addGlobalFunc('procedure SetSimpleSetting(Name, Value: String);', @_LapeSetSimpleSetting);
 
     popSection();
   end;
