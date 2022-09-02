@@ -54,8 +54,8 @@ implementation
 {$R *.lfm}
 
 uses
-  lcltype, types, LazLoggerBase,
-  simba.main, simba.colormath, simba.settings, simba.stringutil;
+  lcltype, types,
+  simba.mufasatypes, simba.main, simba.colormath, simba.settings, simba.stringutil;
 
 type
   TColorHistoryValue = packed record
@@ -171,7 +171,7 @@ begin
   Result.X := -1;
   Result.Y := -1;
 
-  Arr := Between('(', ')', ColorListBox.Items[Index]).Split([', ']);
+  Arr := ColorListBox.Items[Index].Between('(', ')').Split([', ']);
   if (Length(Arr) = 2) then
   begin
     Result.X := StrToIntDef(Arr[0], -1);
