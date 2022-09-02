@@ -46,6 +46,14 @@ begin
   begin
     pushSection('File');
 
+    addGlobalVar(GetIncludePath(), 'IncludePath').isConstant := True;
+    addGlobalVar(GetPluginPath(), 'PluginPath').isConstant := True;
+    addGlobalVar(GetFontPath(), 'FontPath').isConstant := True;
+    addGlobalVar(GetSimbaPath(), 'SimbaPath').isConstant := True;
+    addGlobalVar(GetScriptPath(), 'ScriptPath').isConstant := True;
+    addGlobalVar(GetDataPath(), 'DataPath').isConstant := True;
+    addGlobalVar(GetScreenshotPath(), 'ScreenshotPath').isConstant := True;
+
     addGlobalFunc('procedure WriteINI(Section, KeyName, NewString, FileName: String)', @_LapeWriteINI);
     addGlobalFunc('function ReadINI(Section, KeyName, FileName: String): String', @_LapeReadINI);
     addGlobalFunc('procedure DeleteINI(Section, KeyName, FileName: String)', @_LapeDeleteINI);
