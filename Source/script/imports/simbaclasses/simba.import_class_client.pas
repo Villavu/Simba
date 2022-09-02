@@ -8,7 +8,7 @@ implementation
 
 uses
   classes, sysutils, lptypes,
-  simba.script_compiler, simba.client, simba.files, simba.ocr, simba.finder,
+  simba.script_compiler, simba.client, simba.ocr, simba.finder,
   simba.dtm, simba.iomanager;
 
 procedure _LapeClient_IOManager_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -19,16 +19,6 @@ end;
 procedure _LapeClient_IOManager_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PClient(Params^[0])^.IOManager := PIOManager(Params^[1])^;
-end;
-
-procedure _LapeClient_MFiles_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PMFiles(Result)^ := PClient(Params^[0])^.MFiles;
-end;
-
-procedure _LapeClient_MFiles_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PClient(Params^[0])^.MFiles := PMFiles(Params^[1])^;
 end;
 
 procedure _LapeClient_MFinder_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -76,7 +66,6 @@ begin
   with Compiler do
   begin
     addClassVar('TClient', 'IOManager', 'TIOManager', @_LapeClient_IOManager_Read, @_LapeClient_IOManager_Write);
-    addClassVar('TClient', 'MFiles', 'TMFiles', @_LapeClient_MFiles_Read, @_LapeClient_MFiles_Write);
     addClassVar('TClient', 'MFinder', 'TMFinder', @_LapeClient_MFinder_Read, @_LapeClient_MFinder_Write);
     addClassVar('TClient', 'MDTMs', 'TMDTMS', @_LapeClient_MDTMs_Read, @_LapeClient_MDTMs_Write);
     addClassVar('TClient', 'MOCR', 'TMOCR', @_LapeClient_MOCR_Read, @_LapeClient_MOCR_Write);

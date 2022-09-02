@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.iomanager, simba.files, simba.finder, simba.dtm, simba.ocr, simba.internet;
+  simba.iomanager, simba.finder, simba.dtm, simba.ocr, simba.internet;
 
 (*
 
@@ -46,7 +46,6 @@ type
     FOwnIOManager: Boolean;
   public
     IOManager: TIOManager;
-    MFiles: TMFiles;
     MFinder: TMFinder;
     MDTMs: TMDTMS;
     MOCR: TMOCR;
@@ -92,7 +91,6 @@ begin
 
   FOwnIOManager := (UseIOManager = nil);
 
-  MFiles := TMFiles.Create(self);
   MFinder := TMFinder.Create(Self);
   MDTMs := TMDTMS.Create(Self);
   MOCR := TMOCR.Create(Self);
@@ -114,7 +112,6 @@ begin
   MOCR.Free;
   MDTMs.Free;
   MFinder.Free;
-  MFiles.Free;
   MInternets.Free;
   MSockets.Free;
   if FOwnIOManager then

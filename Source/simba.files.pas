@@ -13,48 +13,6 @@ uses
   classes, sysutils,
   simba.mufasatypes;
 
-const
-  File_AccesError = -1;
-  File_EventError = -2;
-
-type
-  TMufasaFile = record
-    Path: String;
-    FS: TFileStream;
-    BytesRead, Mode: Integer;
-  end;
-  TMufasaFilesArray = array of TMufasaFile;
-
-  PMFiles = ^TMFiles;
-  TMFiles = class(TObject)
-  public
-    function CreateFile(Path: string): Integer;
-    function OpenFile(Path: string; Shared: Boolean): Integer;
-    function RewriteFile(Path: string; Shared: Boolean): Integer;
-    function AppendFile(Path: string): Integer;
-    function DeleteFile(Filename: string): Boolean;
-    function RenameFile(OldName, NewName: string): Boolean;
-    procedure CloseFile(FileNum: Integer);
-    procedure WriteINI(const Section, KeyName, NewString : string; FileName : string);
-    function ReadINI(const Section, KeyName : string; FileName : string) : string;
-    procedure DeleteINI(const Section, KeyName : string; FileName : string);
-    function EndOfFile(FileNum: Integer): Boolean;
-    function FileSizeMuf(FileNum: Integer): LongInt;
-    function ReadFileString(FileNum: Integer; out s: string; x: Integer): Boolean;
-    function WriteFileString(FileNum: Integer;const s: string): Boolean;
-    function SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer;
-    function FilePointerPos(FileNum: Integer): Integer;
-    constructor Create(Owner : TObject);
-    destructor Destroy; override;
-  private
-    MFiles: TMufasaFilesArray;
-    FreeSpots: Array Of Integer;
-    Client : TObject;
-    procedure CheckFileNum(FileNum : integer);
-    procedure FreeFileList;
-    function AddFileToManagedList(Path: string; FS: TFileStream; Mode: Integer): Integer;
-  end;
-
   function GetFiles(Path, Ext: string): TStringArray;
   function GetDirectories(Path: string): TStringArray;
   function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
@@ -83,10 +41,14 @@ type
 
   procedure CreateBaseDirectories;
 
+  function ReadINI(const Section, KeyName: string; FileName: string): string;
+  procedure DeleteINI(const Section, KeyName : string; FileName : string);
+  procedure WriteINI(const Section, KeyName, NewString : string; FileName : string);
+
 implementation
 
 uses
-  forms, lazloggerbase, inifiles, fileutil, lazfileutils, zipper, dynlibs, sha1;
+  forms, inifiles, fileutil, zipper, sha1;
 
 function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
 var
@@ -201,7 +163,7 @@ procedure UnZipFile(const ArchiveFileName, OutputDirectory: String);
 var
   UnZipper: TUnZipper;
 begin
-  if (not FileExistsUTF8(ArchiveFileName)) then
+  if (not FileExists(ArchiveFileName)) then
     raise Exception.CreateFmt('UnZipFile: Archive "%s" does not exist', [ArchiveFileName]);
 
   UnZipper := TUnZipper.Create();
@@ -409,344 +371,36 @@ begin
   end;
 end;
 
-constructor TMFiles.Create(Owner : TObject);
+function ReadINI(const Section, KeyName: string; FileName: string): string;
 begin
-  inherited Create;
-  self.Client := Owner;
-  SetLength(Self.MFiles, 0);
-  SetLength(Self.FreeSpots, 0);
-end;
-
-procedure TMFiles.FreeFileList;
-var
-  I : integer;
-begin
-  For I := 0 To High(MFiles) Do
-    if MFiles[i].FS <> nil then
-    begin
-      Writeln(Format('File[%s] has not been freed in the script, freeing it now.',[MFiles[i].Path]));
-      try
-        MFiles[I].FS.Free;
-      except
-        Writeln('FreeFileList - Exception when freeing FileStream');
-      end;
-    end;
-  SetLength(MFiles, 0);
-  SetLength(FreeSpots, 0);
-end;
-
-destructor TMFiles.Destroy;
-begin
-  FreeFileList;
-  inherited;
-end;
-
-procedure TMFiles.CheckFileNum(FileNum: integer);
-begin
-  if(FileNum < 0) or (FileNum >= Length(MFiles)) then
-    raise Exception.CreateFmt('Invalid FileNum passed: %d',[FileNum]);
-end;
-
-function TMFiles.AddFileToManagedList(Path: String; FS: TFileStream; Mode: Integer): Integer;
-var
-  tFile: TMufasaFile;
-begin
-  tFile.Path := Path;
-  tFile.FS := FS;
-  tFile.Mode := Mode;
-  tFile.BytesRead := 0;
-  if Length(FreeSpots) > 0 then
-  begin
-    MFiles[FreeSpots[High(FreeSpots)]] := tFile;
-    Result := FreeSpots[High(FreeSpots)];
-    SetLength(FreeSpots, High(FreeSpots));
-  end else
-  begin
-    SetLength(MFiles, Length(MFiles) + 1);
-    MFiles[High(MFiles)] := tFile;
-    Result := High(MFiles);
-  end;
-end;
-
-function TMFiles.SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer;
-begin
-  CheckFileNum(FileNum);
-  case Origin of
-    fsFromBeginning:
-                      if(cChars < 0) then
-                        raise Exception.CreateFmt('fsFromBeginning takes no negative cChars. (%d)',[cChars]);
-    fsFromCurrent:
-                  ;
-    fsFromEnd:
-                  if(cChars > 0) then
-                    raise Exception.CreateFmt('fsFromEnd takes no positive cChars. (%d)',[cChars]);
-    else
-      raise Exception.CreateFmt('Invalid Origin: %d',[Origin]);
-  end;
-
+  with TINIFile.Create(ExpandFileName(FileName)) do
   try
-    Result := MFiles[FileNum].FS.Seek(cChars, Origin);
-  except
-    Writeln('SetFileCharPointer - Exception Occured.');
-    Result := File_AccesError;
+    Result := ReadString(Section, KeyName, '');
+  finally
+    Free();
   end;
-  //Result := FileSeek(Files[FileNum].Handle, cChars, Origin);
 end;
 
-{/\
-  Creates a file for reading/writing.
-  Returns the handle (index) to the File Array.
-  Returns File_AccesError if unsuccesfull.
-/\}
-
-function TMFiles.CreateFile(Path: string): Integer;
-var
-  FS: TFileStream;
+procedure DeleteINI(const Section, KeyName : string; FileName : string);
 begin
+  with TIniFile.Create(ExpandFileName(FileName)) do
   try
-    FS := TFileStream.Create(Path, fmCreate);
-    Result := AddFileToManagedList(Path, FS, fmCreate);
-  except
-    Result := File_AccesError;
-    Writeln(Format('CreateFile - Exception. Could not create file: %s',[path]));
-  end;
-end;
-
-{/\
-  Opens a file for reading.
-  Returns the handle (index) to the File Array.
-  Returns File_AccesError if unsuccesfull.
-/\}
-
-function TMFiles.OpenFile(Path: string; Shared: Boolean): Integer;
-var
-  FS: TFileStream;
-  fMode: Integer;
-begin
-  if Shared then
-    fMode := fmOpenRead or fmShareDenyNone
-  else
-    fMode := fmOpenRead or fmShareExclusive;
-  try
-      FS := TFileStream.Create(Path, fMode)
-  except
-    Result := File_AccesError;
-    Writeln(Format('OpenFile - Exception. Could not open file: %s',[path]));
-    Exit;
-  end;
-  Result := AddFileToManagedList(Path, FS, fMode);
-end;
-
-function TMFiles.AppendFile(Path: string): Integer;
-var
-  FS: TFileStream;
-  fMode: Integer;
-begin
-  fMode := fmOpenReadWrite;
-  if not FileExists(Path) then
-    fMode := fMode or fmCreate;
-  try
-    FS := TFileStream.Create(Path, fMode);
-    FS.Seek(0, fsFromEnd);
-    Result := AddFileToManagedList(Path, FS, fMode);
-  except
-    Result := File_AccesError;
-    Writeln(Format('AppendFile - Exception. Could not create file: %s',[path]));
-  end;
-end;
-
-{/\
-  Reads key from INI file
-/\}
-
-function TMFiles.ReadINI(const Section, KeyName: string; FileName: string): string;
-begin
-  FileName := ExpandFileNameUTF8(FileName);
-
-  with TINIFile.Create(FileName, True) do
-    try
-      Result := ReadString(Section, KeyName, '');
-    finally
-      Free;
-  end;
-end;
-
-{/\
-  Deletes a key from INI file
-/\}
-
-procedure TMFiles.DeleteINI(const Section, KeyName : string; FileName : string);
-begin 
-  FileName := ExpandFileNameUTF8(FileName);
-
-  with TIniFile.Create(FileName, True) do
-    try
-      if KeyName = '' then
+    if (KeyName = '') then
 	    EraseSection(Section)
 	  else
-		DeleteKey(Section, KeyName);
-    finally
-      Free;
+	    DeleteKey(Section, KeyName);
+  finally
+    Free();
   end;
 end;
 
-{/\
-  Writes a key to INI file
-/\}
-
-procedure TMFiles.WriteINI(const Section, KeyName, NewString : string; FileName : string);
+procedure WriteINI(const Section, KeyName, NewString : string; FileName : string);
 begin
-  FileName := ExpandFileNameUTF8(FileName);
-
-  with TINIFile.Create(FileName, True) do
-    try
+  with TINIFile.Create(ExpandFileName(FileName)) do
+  try
 	  WriteString(Section, KeyName, NewString);
-    finally
-	  Free;
-  end;
-end;
-
-{/\
-  Opens a file for writing. And deletes the contents.
-  Returns the handle (index) to the File Array.
-  Returns File_AccesError if unsuccesfull.
-/\}
-
-function TMFiles.RewriteFile(Path: string; Shared: Boolean): Integer;
-var
-  FS: TFileStream;
-  fMode: Integer;
-begin
-  if Shared then
-    fMode := fmOpenReadWrite or fmShareDenyNone  or fmCreate
-  else
-    fMode := fmOpenReadWrite or fmShareDenyWrite or fmShareDenyRead or fmCreate;
-  try
-    FS := TFileStream.Create(Path, fMode);
-    FS.Size:=0;
-    Result := AddFileToManagedList(Path, FS, fMode);
-  except
-    Result := File_AccesError;
-    WriteLn(Format('ReWriteFile - Exception. Could not create file: %s',[path]));
-  end;
-end;
-
-function TMFiles.DeleteFile(Filename: string): Boolean;
-begin
-  Result := DeleteFileUTF8(Filename);
-end;
-
-function TMFiles.RenameFile(OldName, NewName: string): Boolean;
-begin
-  Result := RenameFileUTF8(OldName, NewName);
-end;
-
-{/\
-  Free's the given File at the given index.
-/\}
-procedure TMFiles.CloseFile(FileNum: Integer);
-begin
-  CheckFileNum(filenum);
-  try
-    MFiles[FileNum].FS.Free;
-    MFiles[FileNum].FS := nil;
-    SetLength(FreeSpots, Length(FreeSpots) + 1);
-    FreeSpots[High(FreeSpots)] := FileNum;
-  except
-    WriteLn(Format('CloseFile, exception when freeing the file: %d',[filenum]));
-  end;
-end;
-
-{/\
-  Returns true if the BytesRead of the given FileNum (Index) has been reached.
-  Also returns true if the FileNum is not valid.
-/\}
-
-function TMFiles.EndOfFile(FileNum: Integer): Boolean;
-begin
-  CheckFileNum(filenum);
-  if MFiles[FileNum].FS = nil then
-  begin
-    WriteLn(format('EndOfFile: Invalid Internal Handle of File: %d',[filenum]));
-    Result := True;
-    Exit;
-  end;
-  Result := FilePointerPos(FileNum) >= FileSizeMuf(FileNum);
-end;
-
-{/\
-  Returns the FileSize of the given index (FileNum)
-/\}
-
-function TMFiles.FileSizeMuf(FileNum: Integer): LongInt;
-begin
-  CheckFileNum(filenum);
-  if MFiles[FileNum].FS = nil then
-  begin
-    WriteLn(format('FileSize: Invalid Internal Handle of File: %d',[filenum]));
-    Result := File_AccesError;
-    Exit;
-  end;
-
-  Result := MFiles[FileNum].FS.Size;
-end;
-
-function TMFiles.FilePointerPos(FileNum: Integer): Integer;
-begin
-  CheckFileNum(filenum);
-  if MFiles[FileNum].FS = nil then
-  begin
-    WriteLn(format('FilePointerPos: Invalid Internal Handle of File: %d',[filenum]));
-    Result := File_AccesError;
-    Exit;
-  end;
-  try
-    Result := MFiles[FileNum].FS.Seek(0, fsFromCurrent);
-  except
-    WriteLn('Exception in FilePointerPos');
-  end;
-end;
-
-{/\
-  Reads x numbers of characters from a file, and stores it into s.
-/\}
-
-function TMFiles.ReadFileString(FileNum: Integer; out s: string; x: Integer): Boolean;
-begin
-  CheckFileNum(filenum);
-  if MFiles[FileNum].FS = nil then
-  begin
-    WriteLn(format('ReadFileString: Invalid Internal Handle of File: %d',[filenum]));
-    Exit;
-  end;
-
-  SetLength(S, X);
-  Result := MFiles[FileNum].FS.Read(S[1], x) = x;
-  {Files[FileNum].BytesRead := Files[FileNum].BytesRead + X;
-  FileRead(Files[FileNum].Handle, S[1], X);
-  SetLength(S, X); }
-end;
-
-{/\
-  Writes s in the given File.
-/\}
-
-function TMFiles.WriteFileString(FileNum: Integer;const  s: string): Boolean;
-begin
-  result := false;
-  CheckFileNum(filenum);
-  if(MFiles[FileNum].FS = nil) then
-  begin
-    WriteLn(format('WriteFileString: Invalid Internal Handle of File: %d',[filenum]));
-    Exit;
-  end;
-  if (MFiles[FileNum].Mode and (fmOpenWrite or fmOpenReadWrite)) = 0 then //Checks if we have write rights..
-    exit;
-  try
-    Result := MFiles[FileNum].FS.Write(S[1], Length(S)) <> 1;
-  except
-    WriteLn('Exception - WriteFileString.');
-    Result := False;
+  finally
+	  Free();
   end;
 end;
 
