@@ -10,7 +10,8 @@ begin
   SourceFiles += ['simba.import_boxarray.pas',     'Box Array'    ];
   SourceFiles += ['simba.import_windowhandle.pas', 'Window Handle'];
   SourceFiles += ['simba.import_debugimage.pas',   'Debug Image'  ];
-  SourceFiles += ['simba.import_events.pas',       'Events'       ];
+  SourceFiles += ['simba.import_variant.pas',      'Variant'      ];
+  SourceFiles += ['simba.import_script.pas',       'Script'       ];
   SourceFiles += ['simba.import_class_bitmap.pas', 'Bitmap'       ];
 end;
 
@@ -77,8 +78,8 @@ begin
     Comments := Comments.Replace('Note::', '.. note::');
     Comments := Comments.Replace('Warning::', '.. warning::');
 
-    WriteFileContents(INPUT_DIR + Name + '.rst', Comments, False);
-    WriteFileContents(INPUT_DIR + 'index.rst', '   ' + Name + LineEnding, True);
+    WriteFileContents(INPUT_DIR + Name + '.rst', Comments);
+    AppendFileContents(INPUT_DIR + 'index.rst', '   ' + Name + LineEnding);
   end;
 end;
 
@@ -87,14 +88,15 @@ var
   I: Integer;
   FileName: String;
 begin
-  for I := 0 to High(SourceFiles) do
-    for FileName in FindFile(SOURCE_ROOT_DIR, SourceFiles[I].FileName, True) do
-    begin
-      if ExtractFileName(ExtractFileDir(FileName)) in SOURCE_IGNORE_DIRS then
-        Continue;
+  for FileName in FindFiles(SOURCE_ROOT_DIR, True) do
+  begin
+    if ExtractFileName(ExtractFileDir(FileName)) in SOURCE_IGNORE_DIRS then
+      Continue;
 
-      ParseComments(FileName, SourceFiles[I].Title);
-    end;
+    for I := 0 to High(SourceFiles) do
+      if (SourceFiles[I].FileName = ExtractFileName(FileName)) then
+        ParseComments(FileName, SourceFiles[I].Title);
+  end;
 end;
 
 var
@@ -104,13 +106,15 @@ begin
   CreateDirectory(OUTPUT_DIR);
   DeleteDirectory(INPUT_DIR, True);
 
-  WriteFileContents(INPUT_DIR + 'index.rst', TOC_FILE, False);
-  WriteFileContents(INPUT_DIR + 'conf.py', CONFIG_FILE, False);
-  WriteFileContents(INPUT_DIR + 'layout.html', TEMPLATE_FILE, False);
+  WriteFileContents(INPUT_DIR + 'index.rst', TOC_FILE);
+  WriteFileContents(INPUT_DIR + 'conf.py', CONFIG_FILE);
+  WriteFileContents(INPUT_DIR + 'layout.html', TEMPLATE_FILE);
 
   Build();
 
   WriteLn('Sphinx exit code: ', RunCommand('sphinx-build', ['-q', '-E', INPUT_DIR, OUTPUT_DIR], Str));
   if (Str <> '') then
     WriteLn(Str);
+
+  WriteLn('Link: "' + ExpandFileName(OUTPUT_DIR) + 'index.html"');
 end.
