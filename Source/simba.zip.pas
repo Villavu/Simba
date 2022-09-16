@@ -107,7 +107,7 @@ begin
   if (not isIgnore(RelativePath)) then
   begin
     DestPath := StringReplace(Sender.FileName, FSourceDir, FTargetDir, []);
-    if not CopyFile(Sender.FileName, DestPath, [cffCreateDestDirectory]) then
+    if not CopyFile(Sender.FileName, DestPath, [cffCreateDestDirectory, cffOverwriteFile]) then
       Inc(FCopyFailedCount);
   end;
 
