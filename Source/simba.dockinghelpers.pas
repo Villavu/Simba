@@ -266,7 +266,7 @@ begin
     finally
       EndUpdate;
     end;
-    exit;
+    Exit;
   end;
 
   if AutoFreedIfControlIsRemoved(Site,SrcSite) then
@@ -320,8 +320,6 @@ begin
 
     if (Form.HostDockSite is TSimbaAnchorDockHostSite) then
     begin
-      DebugLn('simba.dockinghelpers :: OnFormClose : ', TAnchorDockHostSite(Form.HostDockSite).Header.Caption);
-
       with TSimbaAnchorDockHostSite(Form.HostDockSite) do
         CloseSite();
 

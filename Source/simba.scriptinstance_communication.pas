@@ -201,7 +201,7 @@ var
     DebugImage_Update();
 
     with SimbaDebugImageForm.ImageBox do
-      SimbaDebugImageForm.SetSize(BackgroundBitmap.Width, BackgroundBitmap.Height, False, EnsureVisible);
+      SimbaDebugImageForm.SetSize(Background.Width, Background.Height, False, EnsureVisible);
   end;
 
 begin
@@ -299,7 +299,7 @@ procedure TSimbaScriptInstanceCommunication.DebugImage_Update;
     FInputStream.Read(Width, SizeOf(Integer));
     FInputStream.Read(Height, SizeOf(Integer));
 
-    Bitmap := SimbaDebugImageForm.ImageBox.BackgroundBitmap;
+    Bitmap := SimbaDebugImageForm.ImageBox.Background;
     Bitmap.BeginUpdate();
     Bitmap.SetSize(Width, Height);
 

@@ -12,11 +12,11 @@ interface
 uses
   classes, sysutils, fileutil, dividerbevel, forms, controls,
   graphics, dialogs, extctrls, comctrls, stdctrls, menus, colorbox, lcltype,
-  simba.client, simba.imagebox, simba.mufasatypes, simba.imageboxzoom;
+  simba.client, simba.mufasatypes, simba.imagebox, simba.imagebox_zoom, simba.imagebox_bitmap;
 
 type
-  TACABestColorEvent = procedure(CTS: Int32; Color, Tolerance: Int32; Hue, Sat: Extended) of object;
-  TACABestColorEventEx = procedure(CTS: Int32; Color, Tolerance: Int32; Hue, Sat: Extended) is nested;
+  TACABestColorEvent = procedure(CTS: Integer; Color, Tolerance: Integer; Hue, Sat: Extended) of object;
+  TACABestColorEventEx = procedure(CTS: Integer; Color, Tolerance: Integer; Hue, Sat: Extended) is nested;
 
   TSimbaACAForm = class(TForm)
     ButtonDebugColor: TButton;
@@ -85,7 +85,10 @@ type
     FImageBox: TSimbaImageBox;
     FImageZoom: TSimbaImageBoxZoom;
     FZoomInfo: TLabel;
+    FDebugTPA: TPointArray;
+    FDrawColor: TColor;
 
+    procedure DoPaintArea(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; R: TRect);
     procedure CalculateBestColor;
 
     function GetColors: TIntegerArray;
@@ -113,21 +116,21 @@ var
 begin
   FImageZoom.MoveTest(FImageBox, X, Y);
 
-  ColorToRGB(FImageBox.Background.Pixels[X, Y], R, G, B);
-  ColorToHSL(FImageBox.Background.Pixels[X, Y], H, S, L);
+  ColorToRGB(FImageBox.Background.Canvas.Pixels[X, Y], R, G, B);
+  ColorToHSL(FImageBox.Background.Canvas.Pixels[X, Y], H, S, L);
 
-  FZoomInfo.Caption := Format('Color: %d', [FImageBox.Background.Pixels[X, Y]]) + LineEnding +
+  FZoomInfo.Caption := Format('Color: %d', [FImageBox.Background.Canvas.Pixels[X, Y]]) + LineEnding +
                        Format('RGB: %d, %d, %d', [R, G, B])                     + LineEnding +
                        Format('HSL: %.2f, %.2f, %.2f', [H, S, L])               + LineEnding;
 end;
 
 procedure TSimbaACAForm.ClientImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
-  Pixel: Int32;
+  Pixel: Integer;
 begin
   if (Button = mbLeft) then
   begin
-    Pixel := FImageBox.Background.Pixels[X, Y];
+    Pixel := FImageBox.Background.Canvas.Pixels[X, Y];
 
     if ColorListBox.Items.IndexOf(Pixel.ToString()) = -1 then
       ColorListBox.ItemIndex := ColorListBox.Items.AddObject(Pixel.ToString(), TObject(PtrUInt(Pixel)));
@@ -139,9 +142,15 @@ begin
   PanelRight.Constraints.MinWidth := PanelRight.Width;
 end;
 
+procedure TSimbaACAForm.DoPaintArea(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; R: TRect);
+begin
+  if (Length(FDebugTPA) > 0) then
+    Bitmap.DrawPoints(FDebugTPA, FDrawColor);
+end;
+
 procedure TSimbaACAForm.ChangeDrawColor(Sender: TObject);
 var
-  i: Int32;
+  i: Integer;
 begin
   with Sender as TMenuItem do
   begin
@@ -150,17 +159,17 @@ begin
         Parent[i].Checked := False;
 
     case Caption of
-      'Red': FImageBox.Canvas.Pen.Color := clRed;
-      'Green': FImageBox.Canvas.Pen.Color := clGreen;
-      'Blue': FImageBox.Canvas.Pen.Color := clBlue;
-      'Yellow': FImageBox.Canvas.Pen.Color := clYellow;
+      'Red':    FDrawColor := clRed;
+      'Green':  FDrawColor := clGreen;
+      'Blue':   FDrawColor := clBlue;
+      'Yellow': FDrawColor := clYellow;
     end;
   end;
 end;
 
 function TSimbaACAForm.GetColors: TIntegerArray;
 var
-  i: Int32;
+  i: Integer;
 begin
   SetLength(Result, ColorListBox.Count);
   for i := 0 to ColorListBox.Count - 1 do
@@ -205,7 +214,7 @@ end;
 
 procedure TSimbaACAForm.ColorSelectionChanged(Sender: TObject; User: Boolean);
 var
-  R, G, B: Int32;
+  R, G, B: Integer;
   H, S, L: Extended;
 begin
   if User and (ColorListBox.ItemIndex >= 0) then
@@ -225,8 +234,8 @@ end;
 
 procedure TSimbaACAForm.ButtonDebugColorClick(Sender: TObject);
 var
-  CTS: Int32;
-  Col, Tol: Int32;
+  CTS: Integer;
+  Col, Tol: Integer;
   HueMod, SatMod: Extended;
 begin
   if ButtonCTS0.Checked then CTS := 0;
@@ -238,8 +247,8 @@ begin
   HueMod := StrToFloatDef(EditHue.Text, -1);
   SatMod := StrToFloatDef(EditSat.Text, -1);
 
-  FImageBox.Clear();
-  FImageBox.DebugColor(CTS, Col, Tol, HueMod, SatMod);
+  FDebugTPA := FImageBox.FindColors(CTS, Col, Tol, HueMod, SatMod);
+
   FImageBox.Paint();
 end;
 
@@ -256,7 +265,7 @@ end;
 
 procedure TSimbaACAForm.ButtonLoadColorsClick(Sender: TObject);
 var
-  i: Int32;
+  i: Integer;
 begin
   try
     with TOpenDialog.Create(Self) do
@@ -285,8 +294,8 @@ end;
 
 procedure TSimbaACAForm.CalculateBestColor;
 var
-  CTS: Int32;
-  Col, Tol: Int32;
+  CTS: Integer;
+  Col, Tol: Integer;
   Hue, Sat: Extended;
 begin
   if Length(GetColors()) = 0 then
@@ -338,7 +347,9 @@ end;
 
 procedure TSimbaACAForm.ButtonClearImageClick(Sender: TObject);
 begin
-  FImageBox.Clear();
+  FDebugTPA := [];
+
+  Paint();
 end;
 
 procedure TSimbaACAForm.ButtonDeleteSelectedColorClick(Sender: TObject);
@@ -395,7 +406,7 @@ begin
   FImageBox.Align := alClient;
   FImageBox.OnMouseDown := @ClientImageMouseDown;
   FImageBox.OnMouseMove := @ClientImageMouseMove;
-  FImageBox.Canvas.Pen.Color := clRed;
+  FImageBox.OnPaintArea := @DoPaintArea;
 
   FImageZoom := TSimbaImageBoxZoom.Create(Self);
   FImageZoom.Parent := PanelTop;
@@ -407,6 +418,7 @@ begin
   FZoomInfo.BorderSpacing.Right := 10;
   FZoomInfo.AnchorToNeighbour(akLeft, 10, FImageZoom);
 
+  FDrawColor := clRed;
   FManageClient := ManageClient;
   FClient := Client;
 

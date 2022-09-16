@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.imageboxzoom;
+unit simba.imagebox_zoom;
 
 {$i simba.inc}
 
@@ -135,7 +135,7 @@ begin
 
   for LoopX := 0 to FBitmap.Width - 1 do
     for LoopY := 0 to FBitmap.Height - 1 do
-      FBitmap.Canvas.Pixels[LoopX, LoopY] := ImageBox.Background.Pixels[X + LoopX, Y + LoopY];
+      FBitmap.Canvas.Pixels[LoopX, LoopY] := ImageBox.Background.Canvas.Pixels[X + LoopX, Y + LoopY];
 
   Invalidate();
 end;

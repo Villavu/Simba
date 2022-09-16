@@ -35,7 +35,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
             <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win32"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;helpers;generics;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist"/>
+            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -78,7 +78,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
             <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win64"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;helpers;generics;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist"/>
+            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -120,7 +120,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;helpers;generics;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist"/>
+            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -164,7 +164,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;helpers;generics;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist"/>
+            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -210,7 +210,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;helpers;generics;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist"/>
+            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -267,7 +267,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="116">
+    <Units Count="120">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -795,6 +795,25 @@
         <Filename Value="script/imports/simba/simba.import_simba.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit115>
+      <Unit116>
+        <Filename Value="simba.shapebox.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit116>
+      <Unit117>
+        <Filename Value="algorithms/simba.algo_sort.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit117>
+      <Unit118>
+        <Filename Value="forms/simba.shapeboxform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SimbaShapeBoxForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit118>
+      <Unit119>
+        <Filename Value="simba.imagebox_bitmap.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit119>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -805,7 +824,7 @@
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
       <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win64"/>
-      <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;helpers;generics;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist"/>
+      <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox"/>
       <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

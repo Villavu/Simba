@@ -75,7 +75,7 @@ function ExcludePointsBox(const Points: TPointArray; Box: TBox): TPointArray;
 function TPAReduceByDistance(const Points: TPointArray; Dist: Integer): TPointArray;
 function TPAFloodFill(const TPA: TPointArray; StartPoint: TPoint): TPointArray;
 function TPADensity(const TPA: TPointArray): Double;
-function TPAConnect(const TPA: TPointArray): TPointArray;
+function TPAConnect(const TPA: TPointArray; Thickness: Integer = 1): TPointArray;
 
 // Author: Jarl Holta
 // https://github.com/slackydev/SimbaExt
@@ -240,7 +240,7 @@ begin
   Result := Arr.Trim();
 end;
 
-function TPAConnect(const TPA: TPointArray): TPointArray;
+function TPAConnect(const TPA: TPointArray; Thickness: Integer): TPointArray;
 var
   I: Integer;
 begin
@@ -249,8 +249,8 @@ begin
   if (Length(TPA) > 1) then
   begin
     for I := 0 to High(TPA) - 1 do
-      Result += TPAFromLine(TPA[I].X, TPA[I].Y, TPA[I+1].X, TPA[I+1].Y);
-    Result += TPAFromLine(TPA[High(TPA)].X, TPA[High(TPA)].Y, TPA[0].X, TPA[0].Y);
+      Result += TPAFromLine(TPA[I].X, TPA[I].Y, TPA[I+1].X, TPA[I+1].Y, Thickness);
+    Result += TPAFromLine(TPA[High(TPA)].X, TPA[High(TPA)].Y, TPA[0].X, TPA[0].Y, Thickness);
   end;
 end;
 
@@ -1569,7 +1569,7 @@ end;
 {/\
   Removes the points that are not within the box
 /\}
-procedure FilterPointsBox(var points: TPointArray; X1,Y1, X2, Y2: integer);
+procedure FilterPointsBox(var Points: TPointArray; X1, Y1, X2, Y2: integer);
 var
   h, c, i, tmp: integer;
 begin
@@ -1731,8 +1731,15 @@ begin
 
   SetLength(Result, step + 1);
 
-  rx := dx / step;
-  ry := dy / step;
+  if (step = 0) then
+  begin
+    rx := dx;
+    ry := dy;
+  end else
+  begin
+    rx := dx / step;
+    ry := dy / step;
+  end;
   x := x1;
   y := y1;
 
@@ -1745,7 +1752,7 @@ begin
     Result[i] := Point(Round(x), Round(y));
   end;
 
-  if (Thickness - 1 > 0) then
+  if (Thickness > 1) then
     Result := TPAGrow(Result, Thickness - 1);
 end;
 
