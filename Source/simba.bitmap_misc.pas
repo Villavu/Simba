@@ -20,10 +20,9 @@ type
   TBitmapHelper = type helper for TBitmap
     // Draw TRGB32 data without changing bitmap format
     procedure FromData(AData: PRGB32; AWidth, AHeight: Integer);
-    // Draws a lot of pixels. Else use TCanvas.Pixels
-    procedure DrawPoints(TPA: TPointArray);
 
     function ToMufasaBitmap: TMufasaBitmap;
+    procedure LoadFromFile(FileName: String);
   end;
 
   TRGBSum = record
@@ -49,7 +48,7 @@ type
 implementation
 
 uses
-  BMPcomn, GraphType;
+  BMPcomn, GraphType, IntfGraphics;
 
 type
   PARGB = ^TARGB;
@@ -327,80 +326,6 @@ begin
   EndUpdate();
 end;
 
-procedure TBitmapHelper.DrawPoints(TPA: TPointArray);
-var
-  Data: PByte;
-  BytesPerLine, BytesPerPixel: Integer;
-  Count: Integer;
-
-  procedure BGR;
-  var
-    Pixel: TRGB24;
-    I: Integer;
-  begin
-    Pixel := Default(TRGB24);
-
-    ColorToRGB(Canvas.Pen.Color, Pixel.R, Pixel.G, Pixel.B);
-    for I := 0 to Count - 1 do
-      PRGB24(Data + (TPA[I].Y * BytesPerLine + TPA[I].X * BytesPerPixel))^ := Pixel;
-  end;
-
-  procedure BGRA;
-  var
-    Pixel: TRGB32;
-    I: Integer;
-  begin
-    Pixel := Default(TRGB32);
-
-    ColorToRGB(Canvas.Pen.Color, Pixel.R, Pixel.G, Pixel.B);
-    for I := 0 to Count - 1 do
-      PRGB32(Data + (TPA[I].Y * BytesPerLine + TPA[I].X * BytesPerPixel))^ := Pixel;
-  end;
-
-  procedure ARGB;
-  var
-    Pixel: TARGB;
-    I: Integer;
-  begin
-    Pixel := Default(TARGB);
-
-    ColorToRGB(Canvas.Pen.Color, Pixel.R, Pixel.G, Pixel.B);
-    for I := 0 to Count - 1 do
-      PARGB(Data + (TPA[I].Y * BytesPerLine + TPA[I].X * BytesPerPixel))^ := Pixel;
-  end;
-
-var
-  W, H, I: Integer;
-begin
-  // remove points outside bounds
-  W := Width;
-  H := Height;
-  Count := 0;
-  for I := 0 to High(TPA) do
-    if (TPA[I].X >= 0) and (TPA[I].Y >= 0) and (TPA[I].X < W) and (TPA[I].Y < H) then
-    begin
-      TPA[Count] := TPA[I];
-      Inc(Count);
-    end;
-
-  if (Count > 0) then
-  begin
-    BeginUpdate();
-
-    Data := RawImage.Data;
-    BytesPerLine := RawImage.Description.BytesPerLine;
-    BytesPerPixel := RawImage.Description.BitsPerPixel div 8;
-
-    case GetBitmapPixelFormat(Self) of
-      'BGR':  BGR();
-      'BGRA': BGRA();
-      'ARGB': ARGB();
-    end;
-
-    EndUpdate();
-  end;
-end;
-
 function TBitmapHelper.ToMufasaBitmap: TMufasaBitmap;
 var
   Source, Dest: PByte;
@@ -501,6 +426,22 @@ begin
     'BGR':  BGR();
     'BGRA': BGRA();
     'ARGB': ARGB();
+  end;
+end;
+
+procedure TBitmapHelper.LoadFromFile(FileName: String);
+var
+  LazImg: TLazIntfImage;
+  RawImageDesc: TRawImageDescription;
+begin
+  try
+    LazImg := TLazIntfImage.Create(0, 0);
+    LazImg.DataDescription := Self.RawImage.Description;
+    LazImg.LoadFromFile(FileName);
+
+    Self.LoadFromIntfImage(LazImg);
+  finally
+    LazImg.Free();
   end;
 end;
 

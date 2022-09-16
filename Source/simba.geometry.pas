@@ -215,12 +215,15 @@ type
   end;
 
 var
-  i,k,Len:Integer;
+  i,k,Len: Integer;
   theta,det: Double;
-  c1,c2:array [0..2] of Double;
+  c1,c2: array[0..2] of Double;
   p1,q1,p2,q2: TPointF;
   tmp: TPointFArray;
 begin
+  if (Length(Polygon) <= 1) then
+    Exit(Polygon);
+
   SetLength(Result, Length(Polygon));
   SetLength(tmp, Length(Polygon) * 2);
 
@@ -250,7 +253,7 @@ begin
     c2[2] := -(q1.x*q2.y-q2.x*q1.y);
 
     det := c1[0] * c2[1] - c1[1] * c2[0];
-    if (det <> 0) then
+    if (Abs(0 - det) > 0.001) then
     begin
       Result[i div 2].X := Round((c1[2] * c2[1] - c1[1] * c2[2]) / det);
       Result[i div 2].Y := Round((c1[0] * c2[2] - c1[2] * c2[0]) / det);

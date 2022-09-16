@@ -8,7 +8,7 @@ implementation
 
 uses
   classes, sysutils, controls, extctrls, comctrls, graphics, lptypes, ffi,
-  simba.script_compiler, simba.mufasatypes, simba.imagebox, simba.bitmap, simba.dtm, simba.iomanager;
+  simba.script_compiler, simba.mufasatypes, simba.imagebox, simba.imagebox_bitmap, simba.bitmap, simba.dtm, simba.iomanager;
 
 type
   PComponent = ^TComponent;
@@ -18,6 +18,62 @@ type
   PMouseEvent = ^TMouseEvent;
   PStatusBar = ^TStatusBar;
   PStatusPanel = ^TStatusPanel;
+  PBitmap = ^TBitmap;
+
+procedure _LapeSimbaImageBoxBitmap_DrawLine(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBoxBitmap(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^);
+end;
+
+procedure _LapeSimbaImageBoxBitmap_DrawCross(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBoxBitmap(Params^[0])^.DrawCross(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
+end;
+
+procedure _LapeSimbaImageBoxBitmap_DrawCrossArray(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBoxBitmap(Params^[0])^.DrawCrossArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
+end;
+
+procedure _LapeSimbaImageBoxBitmap_DrawCrossHair(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBoxBitmap(Params^[0])^.DrawCrosshair(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
+end;
+
+procedure _LapeSimbaImageBoxBitmap_DrawBox(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBoxBitmap(Params^[0])^.DrawBox(PBox(Params^[1])^, PColor(Params^[2])^);
+end;
+
+procedure _LapeSimbaImageBoxBitmap_DrawBoxFilled(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBoxBitmap(Params^[0])^.DrawBoxFilled(PBox(Params^[1])^, PColor(Params^[2])^);
+end;
+
+procedure _LapeSimbaImageBoxBitmap_DrawPoly(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBoxBitmap(Params^[0])^.DrawPoly(PPointArray(Params^[1])^, PBoolean(Params^[2])^, PColor(Params^[3])^);
+end;
+
+procedure _LapeSimbaImageBoxBitmap_DrawPoint(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBoxBitmap(Params^[0])^.DrawPoint(PPoint(Params^[1])^, PColor(Params^[2])^);
+end;
+
+procedure _LapeSimbaImageBoxBitmap_DrawPoints(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBoxBitmap(Params^[0])^.DrawPoints(PPointArray(Params^[1])^, PColor(Params^[2])^);
+end;
+
+procedure _LapeSimbaImageBoxBitmap_DrawCircle(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBoxBitmap(Params^[0])^.DrawCircle(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
+end;
+
+procedure _LapeSimbaImageBoxBitmap_DrawCircleFilled(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBoxBitmap(Params^[0])^.DrawCircleFilled(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
+end;
 
 procedure _LapeSimbaImageBox_Zoom_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
@@ -41,42 +97,22 @@ end;
 
 procedure _LapeSimbaImageBox_OnPaintArea_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PSimbaImageBox_PaintArea(Result)^ := PSimbaImageBox(Params^[0])^.OnPaintArea;
+  PSimbaImageBoxPaintAreaEvent(Result)^ := PSimbaImageBox(Params^[0])^.OnPaintArea;
 end;
 
 procedure _LapeSimbaImageBox_OnPaintArea_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PSimbaImageBox(Params^[0])^.OnPaintArea := PSimbaImageBox_PaintArea(Params^[1])^;
+  PSimbaImageBox(Params^[0])^.OnPaintArea := PSimbaImageBoxPaintAreaEvent(Params^[1])^;
 end;
 
 procedure _LapeSimbaImageBox_MoveTo(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PSimbaImageBox(Params^[0])^.MoveTo(PInt32(Params^[1])^, PInt32(Params^[2])^);
+  PSimbaImageBox(Params^[0])^.MoveTo(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeSimbaImageBox_IsVisible(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := PSimbaImageBox(Params^[0])^.IsVisible(PInt32(Params^[1])^, PInt32(Params^[2])^);
-end;
-
-procedure _LapeSimbaImageBox_DebugColor(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PSimbaImageBox(Params^[0])^.DebugColor(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
-end;
-
-procedure _LapeSimbaImageBox_DebugDTM(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PSimbaImageBox(Params^[0])^.DebugDTM(PMDTM(Params^[1])^);
-end;
-
-procedure _LapeSimbaImageBox_DebugTPA(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PSimbaImageBox(Params^[0])^.DebugTPA(PPointArray(Params^[1])^);
-end;
-
-procedure _LapeSimbaImageBox_Clear(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PSimbaImageBox(Params^[0])^.Clear();
+  PBoolean(Result)^ := PSimbaImageBox(Params^[0])^.IsVisible(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeSimbaImageBox_Paint(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -112,11 +148,6 @@ end;
 procedure _LapeSimbaImageBox_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PSimbaImageBox(Params^[0])^ := TSimbaImageBox.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeSimbaImageBox_InitNoOverlay(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PSimbaImageBox(Params^[0])^ := TSimbaImageBox.CreateNoOverlay(PComponent(Params^[1])^);
 end;
 
 procedure _LapeSimbaImageBox_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -194,13 +225,50 @@ begin
   PSimbaImageBox(Params^[0])^.OnDblClick := PNotifyEvent(Params^[1])^;
 end;
 
+procedure _LapeSimbaImageBox_MousePoint_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPoint(Result)^ := PSimbaImageBox(Params^[0])^.MousePoint;
+end;
+
+procedure _LapeSimbaImageBox_Background_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBitmap(Result)^ := PSimbaImageBox(Params^[0])^.Background;
+end;
+
+procedure _LapeSimbaImageBox_FindDTMs(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := PSimbaImageBox(Params^[0])^.FindDTMs(PMDTM(Params^[1])^);
+end;
+
+procedure _LapeSimbaImageBox_FindColors(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := PSimbaImageBox(Params^[0])^.FindColors(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+end;
+
 procedure ImportSimbaImageBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    addClass('TSimbaImageBox', 'TCustomControl');
-    addGlobalType('procedure(Sender: TObject; ACanvas: TCanvas; R: TRect) of object', 'TSimbaImageBox_PaintArea', FFI_DEFAULT_ABI);
-    addClassVar('TSimbaImageBox', 'OnPaintArea', 'TSimbaImageBox_PaintArea', @_LapeSimbaImageBox_OnPaintArea_Read, @_LapeSimbaImageBox_OnPaintArea_Write);
+    addClass('TSimbaImageBoxBitmap');
+
+    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawLine(Start, Stop: TPoint; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawLine);
+    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawCross(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawCross);
+    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawCrossArray(Centers: TPointArray; Radius: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawCrossArray);
+    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawCrossHair(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawCrossHair);
+    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawBox(Box: TBox; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawBox);
+    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawBoxFilled(Box: TBox; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawBoxFilled);
+    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawPoly(Poly: TPointArray; Connect: Boolean; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawPoly);
+    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawPoint(P: TPoint; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawPoint);
+    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawPoints(TPA: TPointArray; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawPoints);
+    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawCircle(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawCircle);
+    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawCircleFilled(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawCircleFilled);
+
+    addGlobalType('procedure(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; Rect: TRect) of object', 'TSimbaImageBoxPaintAreaEvent', FFI_DEFAULT_ABI);
+
+    addClass('TSimbaImageBox', 'TWinControl');
+
+    addClassVar('TSimbaImageBox', 'MousePoint', 'TPoint', @_LapeSimbaImageBox_MousePoint_Read);
+    addClassVar('TSimbaImageBox', 'Background', 'TBitmap', @_LapeSimbaImageBox_Background_Read);
     addClassVar('TSimbaImageBox', 'Zoom', 'Single', @_LapeSimbaImageBox_Zoom_Read, @_LapeSimbaImageBox_Zoom_Write);
     addClassVar('TSimbaImageBox', 'StatusBar', 'TStatusBar', @_LapeSimbaImageBox_StatusBar_Read);
     addClassVar('TSimbaImageBox', 'StatusPanel', 'TStatusPanel', @_LapeSimbaImageBox_StatusPanel_Read);
@@ -210,25 +278,19 @@ begin
     addClassVar('TSimbaImageBox', 'OnMouseLeave', 'TNotifyEvent', @_LapeSimbaImageBox_OnMouseLeave_Read, @_LapeSimbaImageBox_OnMouseLeave_Write);
     addClassVar('TSimbaImageBox', 'OnMouseEnter', 'TNotifyEvent', @_LapeSimbaImageBox_OnMouseEnter_Read, @_LapeSimbaImageBox_OnMouseEnter_Write);
     addClassVar('TSimbaImageBox', 'OnDblClick', 'TNotifyEvent', @_LapeSimbaImageBox_OnDblClick_Read, @_LapeSimbaImageBox_OnDblClick_Write);
-    //addClassVar('TSimbaImageBox', 'Cursor', 'TCursor', @_LapeSimbaImageBox_Cursor_Read, @_LapeSimbaImageBox_Cursor_Write);
-    addGlobalFunc('procedure TSimbaImageBox.MoveTo(X, Y: Int32);', @_LapeSimbaImageBox_MoveTo);
-    addGlobalFunc('function TSimbaImageBox.IsVisible(X, Y: Int32): Boolean; overload;', @_LapeSimbaImageBox_IsVisible);
+    addClassVar('TSimbaImageBox', 'OnPaintArea', 'TSimbaImageBoxPaintAreaEvent', @_LapeSimbaImageBox_OnPaintArea_Read, @_LapeSimbaImageBox_OnPaintArea_Write);
 
-    addGlobalFunc('procedure TSimbaImageBox.DebugColor(CTS: Integer; Col, Tol: Integer; HueMod: Extended = 0.2; SatMod: Extended = 0.2);', @_LapeSimbaImageBox_DebugColor);
-    addGlobalFunc('procedure TSimbaImageBox.DebugDTM(DTM: TMDTM);', @_LapeSimbaImageBox_DebugDTM);
-    addGlobalFunc('procedure TSimbaImageBox.DebugTPA(TPA: TPointArray);', @_LapeSimbaImageBox_DebugTPA);
-    addGlobalFunc('procedure TSimbaImageBox.Clear; overload;', @_LapeSimbaImageBox_Clear);
-    addGlobalFunc('procedure TSimbaImageBox.Paint; overload;', @_LapeSimbaImageBox_Paint);
-
+    addGlobalFunc('procedure TSimbaImageBox.MoveTo(X, Y: Integer);', @_LapeSimbaImageBox_MoveTo);
+    addGlobalFunc('function TSimbaImageBox.IsVisible(X, Y: Integer): Boolean; overload;', @_LapeSimbaImageBox_IsVisible);
+    addGlobalFunc('procedure TSimbaImageBox.Paint;', @_LapeSimbaImageBox_Paint);
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(Data: PRGB32; AWidth, AHeight: Integer); overload;', @_LapeSimbaImageBox_SetBackground_Data);
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(FileName: String); overload;', @_LapeSimbaImageBox_SetBackground_FileName);
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(Bitmap: TMufasaBitmap); overload;', @_LapeSimbaImageBox_SetBackground_Bitmap);
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(IOManager: TIOManager; X1, Y1, X2, Y2: Integer); overload;', @_LapeSimbaImageBox_SetBackground_IOManagerArea);
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(IOManager: TIOManager); overload;', @_LapeSimbaImageBox_SetBackground_IOManager);
-
+    addGlobalFunc('function TSimbaImageBox.FindColors(CTS: Integer; Col, Tol: Integer; HueMod: Extended = 0.2; SatMod: Extended = 0.2): TPointArray;', @_LapeSimbaImageBox_FindColors);
+    addGlobalFunc('function TSimbaImageBox.FindDTM(DTM: TMDTM): TPointArray;', @_LapeSimbaImageBox_FindDTMs);
     addGlobalFunc('procedure TSimbaImageBox.Init(Owner: TComponent); override', @_LapeSimbaImageBox_Init);
-    addGlobalFunc('procedure TSimbaImageBox.InitNoOverlay(Owner: TComponent); overload; override', @_LapeSimbaImageBox_InitNoOverlay);
-    //addGlobalFunc('procedure TSimbaImageBox.Free;', @_LapeSimbaImageBox_Free);
   end;
 end;
 

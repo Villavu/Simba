@@ -12,7 +12,7 @@ interface
 uses
   classes, sysutils, fileutil, dividerbevel, forms, controls,
   graphics, dialogs, extctrls, comctrls, stdctrls, menus, lcltype,
-  simba.client, simba.dtm, simba.imagebox, simba.imageboxzoom, simba.mufasatypes;
+  simba.client, simba.dtm, simba.mufasatypes, simba.imagebox, simba.imagebox_bitmap, simba.imagebox_zoom;
 
 type
   TDTMPrintEvent   = procedure(DTM: String) of object;
@@ -91,18 +91,26 @@ type
     FZoomInfo: TLabel;
     FManageClient: Boolean;
     FClient: TClient;
-    FDragging: Int32;
+    FDragging: Integer;
+    FDebugDTM: TPointArray;
+    FDebugColor: TPointArray;
 
     FOnPrintDTM: TDTMPrintEvent;
     FOnPrintDTMEx: TDTMPrintEventEx;
 
-    procedure AddPoint(X, Y, Col, Tol, Size: Int32); overload;
-    procedure AddPoint(X, Y, Col: Int32); overload;
-    procedure EditPoint(Index: Int32; X, Y, Col, Tol, Size: Int32);
-    procedure OffsetPoint(Index: Int32; X, Y: Int32);
+    FDrawColor: TColor;
+    FFlashing: Boolean;
+    FLastFlash: UInt64;
 
-    function GetPointAt(X, Y: Int32): Int32;
-    function GetPoint(Index: Int32): TMDTMPoint;
+    procedure DoPaintArea(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; R: TRect);
+
+    procedure AddPoint(X, Y, Col, Tol, Size: Integer); overload;
+    procedure AddPoint(X, Y, Col: Integer); overload;
+    procedure EditPoint(Index: Integer; X, Y, Col, Tol, Size: Integer);
+    procedure OffsetPoint(Index: Integer; X, Y: Integer);
+
+    function GetPointAt(X, Y: Integer): Integer;
+    function GetPoint(Index: Integer): TMDTMPoint;
     function GetPoints: TMDTMPointArray;
     function GetDTM: TMDTM;
 
@@ -132,18 +140,18 @@ var
 begin
   FImageZoom.MoveTest(FImageBox, X, Y);
 
-  ColorToRGB(FImageBox.Background.Pixels[X, Y], R, G, B);
-  ColorToHSL(FImageBox.Background.Pixels[X, Y], H, S, L);
+  ColorToRGB(FImageBox.Background.Canvas.Pixels[X, Y], R, G, B);
+  ColorToHSL(FImageBox.Background.Canvas.Pixels[X, Y], H, S, L);
 
-  FZoomInfo.Caption := Format('Color: %d', [FImageBox.Background.Pixels[X, Y]]) + LineEnding +
-                       Format('RGB: %d, %d, %d', [R, G, B])                     + LineEnding +
-                       Format('HSL: %.2f, %.2f, %.2f', [H, S, L])               + LineEnding;
+  FZoomInfo.Caption := Format('Color: %d', [FImageBox.Background.Canvas.Pixels[X, Y]]) + LineEnding +
+                       Format('RGB: %d, %d, %d', [R, G, B])                            + LineEnding +
+                       Format('HSL: %.2f, %.2f, %.2f', [H, S, L])                      + LineEnding;
 
   if (FDragging > -1) then
   begin
     Point := GetPoint(FDragging);
 
-    EditPoint(FDragging, X, Y, FImageBox.Background.Pixels[X, Y], Point.T, Point.ASZ);
+    EditPoint(FDragging, X, Y, FImageBox.Background.Canvas.Pixels[X, Y], Point.T, Point.ASZ);
   end;
 
   if (GetPointAt(X, Y) > -1) then
@@ -162,7 +170,7 @@ begin
         case FImageBox.Cursor of
           crDefault:
             begin
-              AddPoint(X, Y, FImageBox.Background.Pixels[X, Y]);
+              AddPoint(X, Y, FImageBox.Background.Canvas.Pixels[X, Y]);
 
               FImageBox.Cursor := crHandPoint;
             end;
@@ -182,7 +190,7 @@ end;
 
 procedure TSimbaDTMEditorForm.ChangeDrawColor(Sender: TObject);
 var
-  i: Int32;
+  i: Integer;
 begin
   with Sender as TMenuItem do
   begin
@@ -191,51 +199,26 @@ begin
         Parent[i].Checked := False;
 
     case Caption of
-      'Red': FImageBox.Canvas.Pen.Color := clRed;
-      'Green': FImageBox.Canvas.Pen.Color := clGreen;
-      'Blue': FImageBox.Canvas.Pen.Color := clBlue;
-      'Yellow': FImageBox.Canvas.Pen.Color := clYellow;
+      'Red':    FDrawColor := clRed;
+      'Green':  FDrawColor := clGreen;
+      'Blue':   FDrawColor := clBlue;
+      'Yellow': FDrawColor := clYellow;
     end;
   end;
 end;
 
 procedure TSimbaDTMEditorForm.DrawDTM;
-var
-  Points: TMDTMPointArray;
-  Point: TMDTMPoint;
-  i: Int32;
 begin
-  PointFlashTimer.Enabled := True;
-
-  FImageBox.Clear();
-
-  Points := GetPoints();
-
-  if (Length(Points) > 0) then
-  begin
-    for i := 0 to High(Points) do
-    begin
-      Point := Points[i];
-
-      if (Length(Points) > 1) then // Connect to main point
-      begin
-        FImageBox.Canvas.Line(Points[0].X, Points[0].Y, Point.X, Point.Y);
-        FImageBox.Canvas.FillRect(Points[0].X - Max(1, Points[0].ASZ), Points[0].Y - Max(1, Points[0].ASZ),
-                                  Points[0].X + Max(1, Points[0].ASZ), Points[0].Y + Max(1, Points[0].ASZ));
-      end;
-
-      FImageBox.Canvas.FillRect(Point.X - Max(1, Point.ASZ), Point.Y - Max(1, Point.ASZ),
-                                Point.X + Max(1, Point.ASZ), Point.Y + Max(1, Point.ASZ));
-    end;
-  end;
+  FDebugColor := [];
+  FDebugDTM   := [];
 
   FImageBox.Paint();
 end;
 
-function TSimbaDTMEditorForm.GetPointAt(X, Y: Int32): Int32;
+function TSimbaDTMEditorForm.GetPointAt(X, Y: Integer): Integer;
 var
   Points: TMDTMPointArray;
-  i: Int32;
+  i: Integer;
 begin
   Result := -1;
 
@@ -261,19 +244,71 @@ begin
   DrawDTM();
 end;
 
-procedure TSimbaDTMEditorForm.AddPoint(X, Y, Col, Tol, Size: Int32);
+procedure TSimbaDTMEditorForm.DoPaintArea(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; R: TRect);
+var
+  Points: TMDTMPointArray;
+  I: Integer;
+  FlashColor: TColor;
+begin
+  if Length(FDebugDTM) > 0 then
+    Bitmap.DrawCrossArray(FDebugDTM, 10, FDrawColor)
+  else
+  if Length(FDebugColor) > 0 then
+    Bitmap.DrawPoints(FDebugColor, FDrawColor)
+  else
+  begin
+    Points := GetPoints();
+    for I := 0 to High(Points) do
+    begin
+      if (Length(Points) > 1) then // Connect to main point
+        Bitmap.DrawLine(TPoint.Create(Points[0].X, Points[0].Y),
+                        TPoint.Create(Points[I].X, Points[I].Y), clRed);
+
+      with Points[I] do
+        Bitmap.DrawBoxFilled(
+          TBox.Create(X - Max(1, ASZ), Y - Max(1, ASZ), X + Max(1, ASZ), Y + Max(1, ASZ)), clYellow
+        );
+    end;
+
+    if Length(Points) > 0 then
+      with Points[0] do
+        Bitmap.DrawBoxFilled(
+          TBox.Create(X - Max(1, ASZ), Y - Max(1, ASZ), X + Max(1, ASZ), Y + Max(1, ASZ)), clYellow
+        );
+
+    if FFlashing and (GetTickCount64() - FLastFlash > 400) then
+    begin
+      FLastFlash := GetTickCount64();
+
+      if Odd(PointFlashTimer.Tag) then
+        FlashColor := clRed
+      else
+        FlashColor := clYellow;
+
+      if ListBox.ItemIndex > -1 then
+        with GetPoint(ListBox.ItemIndex) do
+          Bitmap.DrawBoxFilled(
+            TBox.Create(X - Max(1, ASZ), Y - Max(1, ASZ), X + Max(1, ASZ), Y + Max(1, ASZ)), FlashColor
+          );
+
+      PointFlashTimer.Tag := PointFlashTimer.Tag + 1;
+    end;
+  end;
+end;
+
+procedure TSimbaDTMEditorForm.AddPoint(X, Y, Col, Tol, Size: Integer);
 begin
   ListBox.ItemIndex := ListBox.Items.Add('%d, %d, %d, %d, %d', [X, Y, Col, Tol, Size]);
   DrawDTM();
 end;
 
-procedure TSimbaDTMEditorForm.AddPoint(X, Y, Col: Int32);
+procedure TSimbaDTMEditorForm.AddPoint(X, Y, Col: Integer);
 begin
   ListBox.ItemIndex := ListBox.Items.Add('%d, %d, %d, 0, 1', [X, Y, Col]);
   DrawDTM();
 end;
 
-procedure TSimbaDTMEditorForm.EditPoint(Index: Int32; X, Y, Col, Tol, Size: Int32);
+procedure TSimbaDTMEditorForm.EditPoint(Index: Integer; X, Y, Col, Tol, Size: Integer);
 begin
   ListBox.Items[Index] := Format('%d, %d, %d, %d, %d', [X, Y, Col, Tol, Size]);
 
@@ -289,7 +324,7 @@ begin
   DrawDTM();
 end;
 
-procedure TSimbaDTMEditorForm.OffsetPoint(Index: Int32; X, Y: Int32);
+procedure TSimbaDTMEditorForm.OffsetPoint(Index: Integer; X, Y: Integer);
 var
   Point: TMDTMPoint;
 begin
@@ -297,7 +332,7 @@ begin
   Point := GetPoint(Index); EditPoint(Index, Point.X + X, Point.Y + Y, Point.C, Point.T, Point.ASZ);
 end;
 
-function TSimbaDTMEditorForm.GetPoint(Index: Int32): TMDTMPoint;
+function TSimbaDTMEditorForm.GetPoint(Index: Integer): TMDTMPoint;
 var
   Items: TStringArray;
 begin
@@ -313,7 +348,7 @@ end;
 
 function TSimbaDTMEditorForm.GetPoints: TMDTMPointArray;
 var
-  i: Int32;
+  i: Integer;
 begin
   SetLength(Result, ListBox.Items.Count);
   for i := 0 to High(Result) do
@@ -323,7 +358,7 @@ end;
 function TSimbaDTMEditorForm.GetDTM: TMDTM;
 var
   Points: TMDTMPointArray;
-  i: Int32;
+  i: Integer;
 begin
   Points := GetPoints();
 
@@ -370,23 +405,9 @@ begin
 end;
 
 procedure TSimbaDTMEditorForm.PointFlash(Sender: TObject);
-var
-  Point: TMDTMPoint;
 begin
-  if ListBox.ItemIndex > -1 then
-  begin
-    Point := GetPoint(ListBox.ItemIndex);
-
-    if Odd(PointFlashTimer.Tag) then
-      FImageBox.Canvas.Brush.Color := clYellow
-    else
-      FImageBox.Canvas.Brush.Color := FImageBox.Canvas.Pen.Color;
-
-    FImageBox.Canvas.FillRect(Point.X - Max(1, Point.ASZ), Point.Y - Max(1, Point.ASZ), Point.X + Max(1, Point.ASZ), Point.Y + Max(1, Point.ASZ));
+  if FFlashing then
     FImageBox.Paint();
-
-    PointFlashTimer.Tag := PointFlashTimer.Tag + 1;
-  end;
 end;
 
 procedure TSimbaDTMEditorForm.FindDTMClick(Sender: TObject);
@@ -396,10 +417,10 @@ begin
   ListBox.ClearSelection();
 
   DTM := GetDTM();
-
   try
-    FImageBox.Clear();
-    FImageBox.DebugDTM(DTM);
+    FDebugColor := [];
+    FDebugDTM   := FImageBox.FindDTMs(DTM);
+
     FImageBox.Paint();
   finally
     DTM.Free();
@@ -424,9 +445,10 @@ end;
 
 procedure TSimbaDTMEditorForm.ListBoxSelectionChange(Sender: TObject; User: boolean);
 begin
-  if ListBox.ItemIndex > -1 then
+  if (ListBox.ItemIndex > -1) then
   begin
-    PointFlashTimer.Enabled := True;
+    FFlashing := True;
+
     PanelSelectedPoint.Enabled := True;
 
     with GetPoint(ListBox.ItemIndex) do
@@ -456,10 +478,11 @@ begin
   if ListBox.ItemIndex > -1 then
     with GetPoint(ListBox.ItemIndex) do
     begin
-      PointFlashTimer.Enabled := False;
+      FFlashing := False;
 
-      FImageBox.Clear();
-      FImageBox.DebugColor(1, C, T);
+      FDebugDTM   := [];
+      FDebugColor := FImageBox.FindColors(1, C, T);
+
       FImageBox.Paint();
     end;
 end;
@@ -493,7 +516,7 @@ end;
 procedure TSimbaDTMEditorForm.MenuItemOffsetDTMClick(Sender: TObject);
 var
   Values: array[0..1] of String;
-  X, Y, I: Int32;
+  X, Y, I: Integer;
 begin
   Values[0] := '0';
   Values[1] := '0';
@@ -537,7 +560,7 @@ end;
 
 procedure TSimbaDTMEditorForm.PointEditChanged(Sender: TObject);
 var
-  X, Y, Col, Tol, Size: Int32;
+  X, Y, Col, Tol, Size: Integer;
   Point: TMDTMPoint;
 begin
   if (ListBox.ItemIndex > -1) and (TEdit(Sender).Text <> '') then
@@ -571,15 +594,16 @@ constructor TSimbaDTMEditorForm.Create(Client: TClient; ManageClient: Boolean);
 begin
   inherited Create(Application.MainForm);
 
+  FDrawColor := clRed;
   FDragging := -1;
 
   FImageBox := TSimbaImageBox.Create(Self);
   FImageBox.Parent := PanelMain;
   FImageBox.Align := alClient;
+  FImageBox.OnPaintArea := @DoPaintArea;
   FImageBox.OnMouseDown := @ClientImageMouseDown;
   FImageBox.OnMouseMove := @ClientImageMouseMove;
   FImageBox.OnMouseUp := @ClientImageMouseUp;
-  FImageBox.Canvas.Pen.Color := clRed;
 
   FImageZoom := TSimbaImageBoxZoom.Create(Self);
   FImageZoom.Parent := PanelTop;
