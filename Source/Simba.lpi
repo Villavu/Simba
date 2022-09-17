@@ -267,7 +267,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="120">
+    <Units Count="122">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -814,6 +814,14 @@
         <Filename Value="simba.imagebox_bitmap.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit119>
+      <Unit120>
+        <Filename Value="algorithms/simba.algo_unique.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit120>
+      <Unit121>
+        <Filename Value="script/imports/simbaclasses/simba.import_class_shapebox.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit121>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -1,0 +1,40 @@
+object SimbaShapeBoxForm: TSimbaShapeBoxForm
+  Left = 2592
+  Height = 240
+  Top = 1075
+  Width = 320
+  Caption = 'Shape Box '
+  DesignTimePPI = 120
+  Menu = MainMenu1
+  OnCreate = FormCreate
+  OnHide = FormHide
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '2.2.2.0'
+  object MainMenu1: TMainMenu
+    Left = 70
+    Top = 63
+    object MenuItem1: TMenuItem
+      Caption = 'File'
+      object MenuItem3: TMenuItem
+        Caption = 'Load Shapes'
+        OnClick = MenuItem3Click
+      end
+      object MenuItem4: TMenuItem
+        Caption = 'Save Shapes'
+        OnClick = MenuItem4Click
+      end
+    end
+    object MenuItem2: TMenuItem
+      Caption = 'Image'
+      object MenuItemLoadImage: TMenuItem
+        Caption = 'Load Image'
+        OnClick = MenuItemLoadImageClick
+      end
+    end
+  end
+  object OpenDialog: TOpenDialog
+    Left = 184
+    Top = 67
+  end
+end

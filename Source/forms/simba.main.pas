@@ -57,6 +57,7 @@ const
 type
   TSimbaForm = class(TForm)
     DockPanel: TAnchorDockPanel;
+    MenuItemShapeBox: TMenuItem;
     MenuItemDocumentation: TMenuItem;
     MenuItemGithub: TMenuItem;
     PackageImageList: TImageList;
@@ -175,6 +176,7 @@ type
     procedure MenuFileClick(Sender: TObject);
     procedure MenuFindClick(Sender: TObject);
     procedure MenuGotoClick(Sender: TObject);
+    procedure MenuItemShapeBoxClick(Sender: TObject);
     procedure MenuItemAboutClick(Sender: TObject);
     procedure MenuItemACAClick(Sender: TObject);
     procedure MenuItemAssociateScriptsClick(Sender: TObject);
@@ -294,7 +296,7 @@ uses
   simba.ci_includecache, simba.scriptformatter,  simba.editor,
   simba.dockinghelpers, simba.datetime, simba.nativeinterface, simba.httpclient,
   simba.functionlist_simbasection, simba.package, simba.windowhandle,
-  simba.functionlist_updater, simba.package_installer;
+  simba.functionlist_updater, simba.package_installer, simba.shapeboxform;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 
@@ -1006,6 +1008,11 @@ begin
   end;
 end;
 
+procedure TSimbaForm.MenuItemShapeBoxClick(Sender: TObject);
+begin
+  SimbaShapeBoxForm.Show();
+end;
+
 procedure TSimbaForm.MenuClearOutputClick(Sender: TObject);
 begin
   SimbaOutputForm.ScriptOutputBox.AddClear();
@@ -1328,8 +1335,6 @@ begin
 end;
 
 procedure TSimbaForm.ToolbarButtonColorPickerClick(Sender: TObject);
-var
-  I: Integer;
 begin
   try
     with TSimbaColorPicker.Create(FWindowSelection) do

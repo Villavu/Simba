@@ -15,16 +15,13 @@ uses
 
 type
   TSimbaDebugImageForm = class(TForm)
+    procedure FormCreate(Sender: TObject);
   protected
-    FMouseX, FMouseY: Integer;
     FImageBox: TSimbaImageBox;
     FMaxWidth, FMaxHeight: Integer;
 
-    procedure ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure ImageDoubleClick(Sender: TObject);
   public
-    constructor Create(AOwner: TComponent); override;
-
     procedure Close;
 
     procedure SetMaxSize(AWidth, AHeight: Integer);
@@ -54,15 +51,20 @@ begin
   Form.Close();
 end;
 
-procedure TSimbaDebugImageForm.ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaDebugImageForm.FormCreate(Sender: TObject);
 begin
-  FMouseX := X;
-  FMouseY := Y;
+  FMaxWidth := 1500;
+  FMaxHeight := 1000;
+
+  FImageBox := TSimbaImageBox.Create(Self);
+  FImageBox.Parent := Self;
+  FImageBox.Align := alClient;
+  FImageBox.OnDblClick := @ImageDoubleClick;
 end;
 
 procedure TSimbaDebugImageForm.ImageDoubleClick(Sender: TObject);
 begin
-  SimbaDebugLn('Debug Image Click: (%d, %d)', [FMouseX, FMouseY]);
+  SimbaDebugLn('Debug Image Click: (%d, %d)', [ImageBox.MousePoint.X, ImageBox.MousePoint.Y]);
 end;
 
 procedure TSimbaDebugImageForm.SetSize(AWidth, AHeight: Integer; AForce: Boolean; AEnsureVisible: Boolean);
@@ -89,20 +91,6 @@ begin
 
   if AEnsureVisible then
     Form.EnsureVisible(True);
-end;
-
-constructor TSimbaDebugImageForm.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-
-  FMaxWidth := 1500;
-  FMaxHeight := 1000;
-
-  FImageBox := TSimbaImageBox.CreateNoOverlay(Self);
-  FImageBox.Parent := Self;
-  FImageBox.Align := alClient;
-  FImageBox.OnMouseMove := @ImageMouseMove;
-  FImageBox.OnDblClick := @ImageDoubleClick;
 end;
 
 procedure TSimbaDebugImageForm.SetMaxSize(AWidth, AHeight: Integer);

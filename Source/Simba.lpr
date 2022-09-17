@@ -16,7 +16,7 @@ uses
   simba.outputform, simba.colorpickerhistoryform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.associate,
   simba.script_dump, simba.openexampleform, simba.scriptthread,
-  simba.package_form, simba.mufasatypes{, simba.windowsdarktheme};
+  simba.package_form, simba.mufasatypes, simba.shapeboxform{, simba.windowsdarktheme};
 
 type
   TApplicationHelper = class helper for TApplication
@@ -39,7 +39,7 @@ begin
   if Application.HasOption('help') then
   begin
     DebugLn('Usage:');
-    DebugLn('  simba.exe [options] "path/to/script.simba"');
+    DebugLn('  Simba.exe [options] "path/to/script.simba"');
     DebugLn('');
     DebugLn('Options:');
     DebugLn('  --run       Run a script');
@@ -48,13 +48,13 @@ begin
     DebugLn('');
     DebugLn('Examples:');
     DebugLn('  Run a script without opening Simba:');
-    DebugLn('    simba.exe --run "script.simba"');
+    DebugLn('    Simba.exe --run "script.simba"');
     DebugLn('');
     DebugLn('  Open a script in Simba');
-    DebugLn('    simba.exe --open "script.simba"');
+    DebugLn('    Simba.exe --open "script.simba"');
     DebugLn('');
     DebugLn('  Open a script in Simba and run');
-    DebugLn('    simba.exe --open --run "script.simba"');
+    DebugLn('    Simba.exe --open --run "script.simba"');
     DebugLn('');
 
     Halt();
@@ -123,6 +123,7 @@ begin
     Application.CreateForm(TSimbaOpenExampleForm, SimbaOpenExampleForm);
     Application.CreateForm(TSimbaColorPickerHistoryForm, SimbaColorPickerHistoryForm);
     Application.CreateForm(TSimbaPackageForm, SimbaPackageForm);
+    Application.CreateForm(TSimbaShapeBoxForm, SimbaShapeBoxForm);
 
     Application.QueueAsyncCall(@SimbaForm.Setup, 0);
   end;

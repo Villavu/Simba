@@ -100,7 +100,7 @@ implementation
 uses
   inifiles, lazloggerbase, forms, dateutils, fileutil, lazfileutils,
   simba.files, simba.mufasatypes, simba.httpclient,
-  simba.package_endpoint_github, simba.package_endpoint_custom;
+  simba.package_endpoint_github, simba.package_endpoint_custom, simba.algo_sort;
 
 function GetPackageFiles(Name: String): TStringList;
 var
