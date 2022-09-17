@@ -209,7 +209,8 @@ implementation
 
 uses
   math, forms, lazloggerbase, uregexpr, strutils,
-  simba.math, simba.overallocatearray, simba.geometry, simba.heaparray;
+  simba.math, simba.overallocatearray, simba.geometry, simba.heaparray,
+  simba.algo_sort;
 
 {$DEFINE BODY}
   {$i generics.inc}

@@ -83,7 +83,7 @@ uses
   simba.import_class_finder, simba.import_class_font, simba.import_class_fonts,
   simba.import_class_ocr, simba.import_class_target, simba.import_class_iomanager,
   simba.import_class_client, simba.import_class_xml, simba.import_class_json,
-  simba.import_class_imagebox,
+  simba.import_class_imagebox, simba.import_class_shapebox,
 
   // Simba
   simba.import_timing, simba.import_algorithms, simba.import_colormath,

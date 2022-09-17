@@ -51,6 +51,8 @@ type
     FMousePoint: TPoint;
     FBitmap: TSimbaImageBoxBitmap;
 
+    procedure DoPaintArea(Bitmap: TSimbaImageBoxBitmap; R: TRect); virtual;
+
     function GetScrolledRect: TRect; virtual;
 
     procedure ScrollBoxPaint(Sender: TObject); virtual;
@@ -279,6 +281,12 @@ begin
   end;
 end;
 
+procedure TSimbaImageBox.DoPaintArea(Bitmap: TSimbaImageBoxBitmap; R: TRect);
+begin
+  if Assigned(FOnPaintArea) then
+    FOnPaintArea(Self, Bitmap, R);
+end;
+
 function TSimbaImageBox.GetScrolledRect: TRect;
 begin
   Result := FScrollBox.GetScrolledClientRect();
@@ -387,8 +395,7 @@ begin
   else
     RenderZoomOut(FZoomPixels, FBackground, LocalRect.Left, LocalRect.Top, LocalRect.Width, LocalRect.Height, FBitmap.Bitmap);
 
-  if Assigned(FOnPaintArea) then
-    FOnPaintArea(Self, FBitmap, LocalRect);
+  DoPaintArea(FBitmap, LocalRect);
 
   FBitmap.EndUpdate();
 
