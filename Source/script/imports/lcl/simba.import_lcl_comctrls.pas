@@ -13,7 +13,6 @@ uses
 type
   PRect = ^TRect;
   PCollection = ^TCollection;
-  PPersistent = ^TPersistent;
   PStrings = ^TStrings;
   PAlignment = ^TAlignment;
   PCanvas = ^TCanvas;
@@ -507,11 +506,6 @@ begin
   PInteger(Result)^ := PCustomTabControl(Params^[0])^.GetImageIndex(PInteger(Params^[1])^);
 end;
 
-procedure _LapeCustomTabControl_IndexOf(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PInteger(Result)^ := PCustomTabControl(Params^[0])^.IndexOf(PPersistent(Params^[1])^);
-end;
-
 procedure _LapeCustomTabControl_CustomPage(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PCustomPage(Result)^ := PCustomTabControl(Params^[0])^.CustomPage(PInteger(Params^[1])^);
@@ -792,24 +786,9 @@ begin
   PStatusPanels(Params^[0])^.Free();
 end;
 
-procedure _LapeStatusBar_BeginUpdate(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PStatusBar(Params^[0])^.BeginUpdate();
-end;
-
-procedure _LapeStatusBar_EndUpdate(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PStatusBar(Params^[0])^.EndUpdate();
-end;
-
 procedure _LapeStatusBar_GetPanelIndexAt(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PInteger(Result)^ := PStatusBar(Params^[0])^.GetPanelIndexAt(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-procedure _LapeStatusBar_SizeGripEnabled(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PStatusBar(Params^[0])^.SizeGripEnabled();
 end;
 
 procedure _LapeStatusBar_Canvas_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -972,7 +951,6 @@ begin
     addClass('TCustomTabControl', 'TWinControl');
     addGlobalFunc('function TCustomTabControl.TabRect(AIndex: Integer): TRect;', @_LapeCustomTabControl_TabRect);
     addGlobalFunc('function TCustomTabControl.GetImageIndex(ThePageIndex: Integer): Integer;', @_LapeCustomTabControl_GetImageIndex);
-    addGlobalFunc('function TCustomTabControl.IndexOf(APage: TPersistent): integer;', @_LapeCustomTabControl_IndexOf);
     addGlobalFunc('function TCustomTabControl.CustomPage(Index: integer): TCustomPage;', @_LapeCustomTabControl_CustomPage);
     addGlobalFunc('function TCustomTabControl.TabToPageIndex(AIndex: integer): integer;', @_LapeCustomTabControl_TabToPageIndex);
     addGlobalFunc('function TCustomTabControl.PageToTabIndex(AIndex: integer): integer;', @_LapeCustomTabControl_PageToTabIndex);;
@@ -1001,25 +979,21 @@ begin
     addGlobalFunc('procedure TPageControl.Init(TheOwner: TComponent); override', @_LapePageControl_Init);
 
     addClass('TStatusBar', 'TWinControl');
-    addClass('TStatusPanel', 'TCollectionItem');
+    addClass('TStatusPanel');
     addGlobalFunc('function TStatusPanel.StatusBar: TStatusBar;', @_LapeStatusPanel_StatusBar);
     addClassVar('TStatusPanel', 'Alignment', 'TAlignment', @_LapeStatusPanel_Alignment_Read, @_LapeStatusPanel_Alignment_Write);
     addClassVar('TStatusPanel', 'Bevel', 'TStatusPanelBevel', @_LapeStatusPanel_Bevel_Read, @_LapeStatusPanel_Bevel_Write);
     addClassVar('TStatusPanel', 'Style', 'TStatusPanelStyle', @_LapeStatusPanel_Style_Read, @_LapeStatusPanel_Style_Write);
     addClassVar('TStatusPanel', 'Text', 'TCaption', @_LapeStatusPanel_Text_Read, @_LapeStatusPanel_Text_Write);
     addClassVar('TStatusPanel', 'Width', 'Integer', @_LapeStatusPanel_Width_Read, @_LapeStatusPanel_Width_Write);
-    addGlobalFunc('procedure TStatusPanel.Init(ACollection: TCollection); override', @_LapeStatusPanel_Init);
 
-    addClass('TStatusPanels', 'TCollection');
+    addClass('TStatusPanels');
     addGlobalFunc('procedure TStatusPanels.Init(AStatusBar: TStatusBar)', @_LapeStatusPanels_Init);
     addGlobalFunc('function TStatusPanels.Add: TStatusPanel;', @_LapeStatusPanels_Add);
     addClassVar('TStatusPanels', 'Items', 'TStatusPanel', @_LapeStatusPanels_Items_Index_Read, @_LapeStatusPanels_Items_Index_Write, True);
     addClassVar('TStatusPanels', 'StatusBar', 'TStatusBar', @_LapeStatusPanels_StatusBar_Read);
 
-    addGlobalFunc('procedure TStatusBar.BeginUpdate;', @_LapeStatusBar_BeginUpdate);
-    addGlobalFunc('procedure TStatusBar.EndUpdate;', @_LapeStatusBar_EndUpdate);
     addGlobalFunc('function TStatusBar.GetPanelIndexAt(X, Y: Integer): Integer;', @_LapeStatusBar_GetPanelIndexAt);
-    addGlobalFunc('function TStatusBar.SizeGripEnabled: Boolean;', @_LapeStatusBar_SizeGripEnabled);
     addClassVar('TStatusBar', 'Canvas', 'TCanvas', @_LapeStatusBar_Canvas_Read);
     addClassVar('TStatusBar', 'AutoHint', 'Boolean', @_LapeStatusBar_AutoHint_Read, @_LapeStatusBar_AutoHint_Write);
     addClassVar('TStatusBar', 'Panels', 'TStatusPanels', @_LapeStatusBar_Panels_Read, @_LapeStatusBar_Panels_Write);

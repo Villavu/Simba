@@ -11,7 +11,8 @@ interface
 
 uses
   classes, sysutils, typinfo, variants,
-  ffi, lpffi, lpcompiler, lptypes, lpvartypes, lpparser, lptree, lpffiwrappers, lpinterpreter, lpeval;
+  ffi, lpffi, lpcompiler, lptypes, lpvartypes, lpparser, lptree, lpffiwrappers, lpinterpreter, lpeval,
+  simba.mufasatypes;
 
 type
   TSimbaScript_Compiler = class;
@@ -47,11 +48,13 @@ type
     procedure pushTokenizer(ATokenizer: TLapeTokenizerBase); reintroduce;
     procedure pushConditional(AEval: Boolean; ADocPos: TDocPos); reintroduce;
 
-    procedure addDelayedCode(Code: array of lpString; AFileName: lpString = ''); virtual; overload;
+    procedure addDelayedCode(Code: TStringArray; AFileName: lpString = ''); virtual; overload;
 
-    function addGlobalFunc(Header: lpString; Body: array of lpString): TLapeTree_Method; virtual; overload;
+    function addGlobalFunc(Header: lpString; Body: TStringArray): TLapeTree_Method; virtual; overload;
     function addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar; virtual; overload;
     function addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType; virtual; overload;
+
+    function addCallbackType(Str: String): TLapeType;
 
     procedure addClass(Name: lpString; Parent: lpString = 'TObject'); virtual;
     procedure addClassVar(Obj, Item, Typ: lpString; ARead: Pointer; AWrite: Pointer = nil; Arr: Boolean = False; ArrType: lpString = 'Integer'); virtual;
@@ -97,13 +100,13 @@ uses
 
   simba.script_compiler_waituntil;
 
-function TSimbaScript_Compiler.addGlobalFunc(Header: lpString; Body: array of lpString): TLapeTree_Method;
+function TSimbaScript_Compiler.addGlobalFunc(Header: lpString; Body: TStringArray): TLapeTree_Method;
 var
   OldState: Pointer;
 begin
   Result := nil;
 
-  OldState := getTempTokenizerState(LapeDelayedFlags + Header + ''.Join(LineEnding, Body), '!' + Header);
+  OldState := getTempTokenizerState(LapeDelayedFlags + Header + LineEnding.Join(Body), '!' + Header);
   try
     Expect([tk_kw_Function, tk_kw_Procedure, tk_kw_Operator]);
     Result := ParseMethod(nil, False);
@@ -128,6 +131,11 @@ end;
 function TSimbaScript_Compiler.addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType;
 begin
   Result := addGlobalType(Format('native(type %s, %s)', [Str, GetEnumName(TypeInfo(TFFIABI), Ord(ABI))]), AName);
+end;
+
+function TSimbaScript_Compiler.addCallbackType(Str: String): TLapeType;
+begin
+  Result := addGlobalType(Str.After('='), Str.Before('='), FFI_DEFAULT_ABI);
 end;
 
 procedure TSimbaScript_Compiler.addClass(Name: lpString; Parent: lpString);
@@ -368,9 +376,9 @@ begin
   inherited pushConditional(AEval, ADocPos);
 end;
 
-procedure TSimbaScript_Compiler.addDelayedCode(Code: array of lpString; AFileName: lpString);
+procedure TSimbaScript_Compiler.addDelayedCode(Code: TStringArray; AFileName: lpString);
 begin
-  addDelayedCode(LapeDelayedFlags + ''.Join(LineEnding, Code), AFileName);
+  addDelayedCode(LapeDelayedFlags + LineEnding.Join(Code), AFileName);
 end;
 
 end.

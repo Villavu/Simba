@@ -55,7 +55,7 @@ begin
     addGlobalType('array of TOCRData', 'TOCRDataArray');
     addClassVar('TMFont', 'Name', 'String', @_LapeMFont_Name_Read, @_LapeMFont_Name_Write);
     addClassVar('TMFont', 'Data', 'TOcrData', @_LapeMFont_Data_Read, @_LapeMFont_Data_Write);
-    addGlobalFunc('procedure TMFont.Init; override', @_LapeMFont_Init);
+    addGlobalFunc('procedure TMFont.Init', @_LapeMFont_Init);
     addGlobalFunc('function TMFont.Copy: TMFont', @_LapeMFont_Copy);
   end;
 end;

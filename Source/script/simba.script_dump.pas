@@ -20,7 +20,7 @@ implementation
 uses
   lazloggerbase,
   lpparser, lptypes, lpvartypes, lptree, Contnrs,
-  simba.script_compiler, simba.script_plugin;
+  simba.mufasatypes, simba.script_compiler, simba.script_plugin;
 
 type
   TCompilerDump = class(TSimbaScript_Compiler)
@@ -39,7 +39,7 @@ type
     procedure addBaseDefine(Define: lpString; Value: lpString = ''); override;
 
     function addDelayedCode(Code: lpString; AFileName: lpString = ''; AfterCompilation: Boolean = True; IsGlobal: Boolean = True): TLapeTree_Base; override;
-    function addGlobalFunc(Header: lpString; Body: array of lpString): TLapeTree_Method; override;
+    function addGlobalFunc(Header: lpString; Body: TStringArray): TLapeTree_Method; override;
     function addGlobalFunc(Header: lpString; Value: Pointer): TLapeGlobalVar; override;
     function addGlobalType(Str: lpString; AName: lpString): TLapeType; override;
     function addGlobalType(Typ: TLapeType; AName: lpString = ''; ACopy: Boolean = True): TLapeType; override;
@@ -171,7 +171,7 @@ begin
     Write(Code);
 end;
 
-function TCompilerDump.addGlobalFunc(Header: lpString; Body: array of lpString): TLapeTree_Method;
+function TCompilerDump.addGlobalFunc(Header: lpString; Body: TStringArray): TLapeTree_Method;
 begin
   Result := inherited addGlobalFunc(Header, Body);
 

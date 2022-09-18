@@ -11,7 +11,6 @@ uses
   simba.script_compiler;
 
 type
-  PObject = ^TObject;
   PBrush = ^TBrush;
   PPen = ^TPen;
   PAlignment = ^TAlignment;
@@ -324,11 +323,6 @@ begin
   PPanel(Params^[0])^.Free();
 end;
 
-procedure _LapeShape_StyleChanged(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PShape(Params^[0])^.StyleChanged(PObject(Params^[1])^);
-end;
-
 procedure _LapeShape_Brush_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PBrush(Result)^ := PShape(Params^[0])^.Brush;
@@ -392,6 +386,7 @@ begin
     addGlobalFunc('procedure TTimer.Init(AOwner: TComponent); override', @_LapeTimer_Init);
     //addGlobalFunc('procedure TTimer.Free;', @_LapeTimer_Free);
 
+
     addClass('TCustomImage', 'TGraphicControl');
     addGlobalFunc('procedure TCustomImage.Init(AOwner: TComponent); override', @_LapeCustomImage_Init);
     //addClassVar('TCustomImage', 'Canvas', 'TCanvas', @_LapeCustomImage_Canvas_Read);
@@ -429,7 +424,6 @@ begin
     //addGlobalFunc('procedure TPanel.Free;', @_LapePanel_Free);
 
     addClass('TShape', 'TGraphicControl');
-    addGlobalFunc('procedure TShape.StyleChanged(Sender: TObject);', @_LapeShape_StyleChanged);
     addClassVar('TShape', 'Brush', 'TBrush', @_LapeShape_Brush_Read, @_LapeShape_Brush_Write);
     addClassVar('TShape', 'Pen', 'TPen', @_LapeShape_Pen_Read, @_LapeShape_Pen_Write);
     addClassVar('TShape', 'Shape', 'TShapeType', @_LapeShape_Shape_Read, @_LapeShape_Shape_Write);

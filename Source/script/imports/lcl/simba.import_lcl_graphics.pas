@@ -87,7 +87,7 @@ end;
 
 procedure _LapeFont_HandleAllocated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  Pboolean(Result)^ := PFont(Params^[0])^.HandleAllocated();
+  PBoolean(Result)^ := PFont(Params^[0])^.HandleAllocated();
 end;
 
 procedure _LapeFont_Handle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -102,17 +102,17 @@ end;
 
 procedure _LapeFont_IsDefault(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  Pboolean(Result)^ := PFont(Params^[0])^.IsDefault();
+  PBoolean(Result)^ := PFont(Params^[0])^.IsDefault();
 end;
 
 procedure _LapeFont_IsEqual(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  Pboolean(Result)^ := PFont(Params^[0])^.IsEqual(PFont(Params^[1])^);
+  PBoolean(Result)^ := PFont(Params^[0])^.IsEqual(PFont(Params^[1])^);
 end;
 
 procedure _LapeFont_IsMonoSpace_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  Pboolean(Result)^ := PFont(Params^[0])^.IsMonoSpace;
+  PBoolean(Result)^ := PFont(Params^[0])^.IsMonoSpace;
 end;
 
 procedure _LapeFont_SetDefault(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -218,21 +218,6 @@ end;
 procedure _LapePen_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PPen(Params^[0])^ := TPen.Create();
-end;
-
-procedure _LapePen_Assign(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PPen(Params^[0])^.Assign(PPersistent(Params^[1])^);
-end;
-
-procedure _LapePen_Handle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PHandle(Result)^ := PPen(Params^[0])^.Handle;
-end;
-
-procedure _LapePen_Handle_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PPen(Params^[0])^.Handle := PHandle(Params^[1])^;
 end;
 
 procedure _LapePen_Color_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -412,7 +397,7 @@ end;
 
 procedure _LapeCanvas_PolyBezierEx(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PCanvas(Params^[0])^.PolyBezier(PPointArray(Params^[1])^, Pboolean(Params^[2])^, Pboolean(Params^[3])^);
+  PCanvas(Params^[0])^.PolyBezier(PPointArray(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
 end;
 
 procedure _LapeCanvas_Polygon(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -477,7 +462,7 @@ end;
 
 procedure _LapeCanvas_HandleAllocated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  Pboolean(Result)^ := PCanvas(Params^[0])^.HandleAllocated();
+  PBoolean(Result)^ := PCanvas(Params^[0])^.HandleAllocated();
 end;
 
 procedure _LapeCanvas_AutoRedraw_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -660,16 +645,6 @@ begin
   PAntialiasingMode(Result)^ := PCanvas(Params^[0])^.AntialiasingMode;
 end;
 
-procedure _LapeGraphic_Assign(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PGraphic(Params^[0])^.Assign(PPersistent(Params^[1])^);
-end;
-
-procedure _LapeGraphic_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PGraphic(Params^[0])^ := TGraphic.Create();
-end;
-
 procedure _LapeGraphic_Clear(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PGraphic(Params^[0])^.Clear();
@@ -792,17 +767,17 @@ end;
 
 procedure _LapeBitmap_BitmapHandleAllocated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  Pboolean(Result)^ := PBitmap(Params^[0])^.BitmapHandleAllocated();
+  PBoolean(Result)^ := PBitmap(Params^[0])^.BitmapHandleAllocated();
 end;
 
 procedure _LapeBitmap_MaskHandleAllocated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  Pboolean(Result)^ := PBitmap(Params^[0])^.MaskHandleAllocated();
+  PBoolean(Result)^ := PBitmap(Params^[0])^.MaskHandleAllocated();
 end;
 
 procedure _LapeBitmap_PaletteAllocated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  Pboolean(Result)^ := PBitmap(Params^[0])^.PaletteAllocated();
+  PBoolean(Result)^ := PBitmap(Params^[0])^.PaletteAllocated();
 end;
 
 procedure _LapeBitmap_LoadFromStream(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -852,7 +827,7 @@ end;
 
 procedure _LapeBitmap_HandleAllocated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  Pboolean(Result)^ := PBitmap(Params^[0])^.HandleAllocated();
+  PBoolean(Result)^ := PBitmap(Params^[0])^.HandleAllocated();
 end;
 
 procedure _LapeBitmap_BitmapHandle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -1058,20 +1033,20 @@ begin
     addGlobalType('(amDontCare, amOn, amOff)', 'TAntialiasingMode');
     addGlobalType('(tlTop, tlCenter, tlBottom)', 'TTextLayout');
 
-    addClass('TGraphicsObject', 'TPersistent');
+    addClass('TGraphicsObject');
     addClassVar('TGraphicsObject', 'OnChanging', 'TNotifyEvent', @_LapeGraphicsObject_OnChanging_Read, @_LapeGraphicsObject_OnChanging_Write);
     addClassVar('TGraphicsObject', 'OnChange', 'TNotifyEvent', @_LapeGraphicsObject_OnChange_Read, @_LapeGraphicsObject_OnChange_Write);
-    addGlobalFunc('procedure TGraphicsObject.Init; override', @_LapeGraphicsObject_Init);
+    addGlobalFunc('procedure TGraphicsObject.Init', @_LapeGraphicsObject_Init);
 
     addClass('TFont', 'TGraphicsObject');
     addGlobalFunc('procedure TFont.Init; override', @_LapeFont_Init);
     addGlobalFunc('procedure TFont.BeginUpdate;', @_LapeFont_BeginUpdate);
     addGlobalFunc('procedure TFont.EndUpdate;', @_LapeFont_EndUpdate);
-    addGlobalFunc('function TFont.HandleAllocated: boolean;', @_LapeFont_HandleAllocated);
+    addGlobalFunc('function TFont.HandleAllocated: Boolean;', @_LapeFont_HandleAllocated);
     addClassVar('TFont', 'Handle', 'THandle', @_LapeFont_Handle_Read, @_LapeFont_Handle_Write);
-    addGlobalFunc('function TFont.IsDefault: boolean;', @_LapeFont_IsDefault);
-    addGlobalFunc('function TFont.IsEqual(AFont: TFont): boolean;', @_LapeFont_IsEqual);
-    addClassVar('TFont', 'IsMonoSpace', 'boolean', @_LapeFont_IsMonoSpace_Read);
+    addGlobalFunc('function TFont.IsDefault: Boolean;', @_LapeFont_IsDefault);
+    addGlobalFunc('function TFont.IsEqual(AFont: TFont): Boolean;', @_LapeFont_IsEqual);
+    addClassVar('TFont', 'IsMonoSpace', 'Boolean', @_LapeFont_IsMonoSpace_Read);
     addGlobalFunc('procedure TFont.SetDefault;', @_LapeFont_SetDefault);
     addClassVar('TFont', 'PixelsPerInch', 'Integer', @_LapeFont_PixelsPerInch_Read, @_LapeFont_PixelsPerInch_Write);
     addClassVar('TFont', 'Color', 'TColor', @_LapeFont_Color_Read, @_LapeFont_Color_Write);
@@ -1085,7 +1060,6 @@ begin
 
     addClass('TPen', 'TGraphicsObject');
     addGlobalFunc('procedure TPen.Init; override', @_LapePen_Init);
-    addClassVar('TPen', 'Handle', 'THandle', @_LapePen_Handle_Read, @_LapePen_Handle_Write);
     addClassVar('TPen', 'Color', 'Integer', @_LapePen_Color_Read, @_LapePen_Color_Write);
     addClassVar('TPen', 'Cosmetic', 'Boolean', @_LapePen_Cosmetic_Read, @_LapePen_Cosmetic_Write);
     addClassVar('TPen', 'Mode', 'TPenMode', @_LapePen_Mode_Read, @_LapePen_Mode_Write);
@@ -1097,8 +1071,7 @@ begin
     addClassVar('TBrush', 'Color', 'Integer', @_LapeBrush_Color_Read, @_LapeBrush_Color_Write);
     addClassVar('TBrush', 'Style', 'TBrushStyle', @_LapeBrush_Style_Read, @_LapeBrush_Style_Write);
 
-    addClass('TGraphic', 'TPersistent');
-    addGlobalFunc('procedure TGraphic.Init; override', @_LapeGraphic_Init);
+    addClass('TGraphic');
     addGlobalFunc('procedure TGraphic.Clear;', @_LapeGraphic_Clear);
     addGlobalFunc('procedure TGraphic.LoadFromFile(const Filename: String);', @_LapeGraphic_LoadFromFile);
     addGlobalFunc('procedure TGraphic.SaveToFile(const Filename: String);', @_LapeGraphic_SaveToFile);
@@ -1112,7 +1085,7 @@ begin
     addClassVar('TGraphic', 'Transparent', 'Boolean', @_LapeGraphic_Transparent_Read, @_LapeGraphic_Transparent_Write);
     addClassVar('TGraphic', 'Width', 'Integer', @_LapeGraphic_Width_Read, @_LapeGraphic_Width_Write);
 
-    addClass('TCanvas', 'TPersistent');
+    addClass('TCanvas');
     addGlobalFunc('procedure TCanvas.Lock;', @_LapeCanvas_Lock);
     addGlobalFunc('function TCanvas.TryLock: Boolean;', @_LapeCanvas_TryLock);
     addGlobalFunc('procedure TCanvas.Unlock;', @_LapeCanvas_Unlock);
@@ -1131,7 +1104,7 @@ begin
     addGlobalFunc('procedure TCanvas.FloodFill(X, Y: Integer; FillColor: TColor;FillStyle: TFillStyle);', @_LapeCanvas_FloodFill);
     addGlobalFunc('procedure TCanvas.RadialPie(x1, y1, x2, y2, StartAngle16Deg, Angle16DegLength: Integer);', @_LapeCanvas_RadialPie);
     addGlobalFunc('procedure TCanvas.Pie(EllipseX1,EllipseY1,EllipseX2,EllipseY2, StartX,StartY,EndX,EndY: Integer);', @_LapeCanvas_Pie);
-    addGlobalFunc('procedure TCanvas.PolyBezier(Points: TPointArray;Filled: boolean; Continuous: boolean); overload', @_LapeCanvas_PolyBezierEx);
+    addGlobalFunc('procedure TCanvas.PolyBezier(Points: TPointArray;Filled: Boolean; Continuous: Boolean); overload', @_LapeCanvas_PolyBezierEx);
     addGlobalFunc('procedure TCanvas.Polygon(Points: TPointArray;Winding: Boolean;StartIndex: Integer; NumPts: Integer);', @_LapeCanvas_Polygon);
     addGlobalFunc('procedure TCanvas.Polygon(Points: TPointArray); overload', @_LapeCanvas_PolygonExEx);
     addGlobalFunc('procedure TCanvas.Polyline(Points: TPointArray;StartIndex: Integer;NumPts: Integer);', @_LapeCanvas_Polyline);
@@ -1165,16 +1138,16 @@ begin
     addClassVar('TCanvas', 'OnChange', 'TNotifyEvent', @_LapeCanvas_OnChange_Read, @_LapeCanvas_OnChange_Write);
     addClassVar('TCanvas', 'OnChanging', 'TNotifyEvent', @_LapeCanvas_OnChanging_Read, @_LapeCanvas_OnChanging_Write);
     addClassVar('TCanvas', 'AntialiasingMode', 'TAntialiasingMode', @_LapeCanvas_AntialiasingMode_Get, @_LapeCanvas_AntialiasingMode_Set);
-    addGlobalFunc('procedure TCanvas.Init; override', @_LapeCanvas_Init);
+    addGlobalFunc('procedure TCanvas.Init', @_LapeCanvas_Init);
 
     addClass('TBitmap', 'TGraphic');
-    addGlobalFunc('procedure TBitmap.Init; override', @_LapeBitmap_Init);
+    addGlobalFunc('procedure TBitmap.Init', @_LapeBitmap_Init);
     addGlobalFunc('procedure TBitmap.BeginUpdate(ACanvasOnly: Boolean);', @_LapeBitmap_BeginUpdate);
     addGlobalFunc('procedure TBitmap.EndUpdate(AStreamIsValid: Boolean);', @_LapeBitmap_EndUpdate);
     addGlobalFunc('procedure TBitmap.FreeImage;', @_LapeBitmap_FreeImage);
-    addGlobalFunc('function TBitmap.BitmapHandleAllocated: boolean;', @_LapeBitmap_BitmapHandleAllocated);
-    addGlobalFunc('function TBitmap.MaskHandleAllocated: boolean;', @_LapeBitmap_MaskHandleAllocated);
-    addGlobalFunc('function TBitmap.PaletteAllocated: boolean;', @_LapeBitmap_PaletteAllocated);
+    addGlobalFunc('function TBitmap.BitmapHandleAllocated: Boolean;', @_LapeBitmap_BitmapHandleAllocated);
+    addGlobalFunc('function TBitmap.MaskHandleAllocated: Boolean;', @_LapeBitmap_MaskHandleAllocated);
+    addGlobalFunc('function TBitmap.PaletteAllocated: Boolean;', @_LapeBitmap_PaletteAllocated);
     addGlobalFunc('procedure TBitmap.LoadFromStream(AStream: TStream);', @_LapeBitmap_LoadFromStream);
     addGlobalFunc('procedure TBitmap.LoadFromStream(AStream: TStream; ASize: UInt32); overload', @_LapeBitmap_LoadFromStreamEx);
     addGlobalFunc('procedure TBitmap.SaveToStream(AStream: TStream);', @_LapeBitmap_SaveToStream);
@@ -1185,16 +1158,16 @@ begin
     addGlobalFunc('function TBitmap.ReleasePalette: THandle;', @_LapeBitmap_ReleasePalette);
     addGlobalFunc('function TBitmap.ToString: String;', @_LapeBitmap_ToString);
     addGlobalFunc('procedure TBitmap.LoadFromString(w, h, TransparentColor: Integer; data: String);', @_LapeBitmap_LoadFromString);
+    addGlobalFunc('function TBitmap.HandleAllocated: Boolean;', @_LapeBitmap_HandleAllocated);
     addClassVar('TBitmap', 'Canvas', 'TCanvas', @_LapeBitmap_Canvas_Read);
-    addGlobalFunc('function TBitmap.HandleAllocated: boolean;', @_LapeBitmap_HandleAllocated);
     addClassVar('TBitmap', 'BitmapHandle', 'THandle', @_LapeBitmap_BitmapHandle_Read, @_LapeBitmap_BitmapHandle_Write);
     addClassVar('TBitmap', 'Masked', 'Boolean', @_LapeBitmap_Masked_Read, @_LapeBitmap_Masked_Write);
     addClassVar('TBitmap', 'MaskHandle', 'THandle', @_LapeBitmap_MaskHandle_Read, @_LapeBitmap_MaskHandle_Write);
     addClassVar('TBitmap', 'TransparentColor', 'TColor', @_LapeBitmap_TransparentColor_Read, @_LapeBitmap_TransparentColor_Write);
     addClassVar('TBitmap', 'TransparentMode', 'TTransparentMode', @_LapeBitmap_TransparentMode_Read, @_LapeBitmap_TransparentMode_Write);
 
-    addClass('TPicture', 'TPersistent');
-    addGlobalFunc('procedure TPicture.Init; override', @_LapePicture_Init);
+    addClass('TPicture');
+    addGlobalFunc('procedure TPicture.Init;', @_LapePicture_Init);
     addGlobalFunc('procedure TPicture.Clear;', @_LapePicture_Clear);
     addGlobalFunc('procedure TPicture.LoadFromFile(const Filename: String);', @_LapePicture_LoadFromFile);
     addGlobalFunc('procedure TPicture.LoadFromStream(Stream: TStream);', @_LapePicture_LoadFromStream);

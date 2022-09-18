@@ -11,8 +11,6 @@ uses
   simba.script_compiler;
 
 type
-  PObject = ^TObject;
-  PHandle = ^THandle;
   PStrings = ^TStrings;
   PBorderIcons = ^TBorderIcons;
   PCloseEvent = ^TCloseEvent;
@@ -28,6 +26,10 @@ type
   PSizeConstraints = ^TSizeConstraints;
   PControl = ^TControl;
   PNotifyEvent = ^TNotifyEvent;
+  PDropFilesEvent = ^TDropFilesEvent;
+  PMouseWheelEvent = ^TMouseWheelEvent;
+  PMouseWheelUpDownEvent = ^TMouseWheelUpDownEvent;
+
   PComponent = ^TComponent;
   PWinControl = ^TWinControl;
   PFormBorderStyle = ^TFormBorderStyle;
@@ -43,11 +45,6 @@ type
   POpenDialog = ^TOpenDialog;
   POpenOption = ^TOpenOption;
   POpenOptions = ^TOpenOptions;
-
-procedure _LapeSizeConstraints_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PSizeConstraints(Params^[0])^ := TSizeConstraints.Create(PControl(Params^[1])^);
-end;
 
 procedure _LapeSizeConstraints_Control_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
@@ -199,41 +196,6 @@ begin
   PCustomForm(Params^[0])^.ShowOnTop();
 end;
 
-procedure _LapeCustomForm_RemoveAllHandlersOfObject(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomForm(Params^[0])^.RemoveAllHandlersOfObject(PObject(Params^[1])^);
-end;
-
-procedure _LapeCustomForm_AddHandlerFirstShow(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomForm(Params^[0])^.AddHandlerFirstShow(PNotifyEvent(Params^[1])^, PBoolean(Params^[2])^);
-end;
-
-procedure _LapeCustomForm_RemoveHandlerFirstShow(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomForm(Params^[0])^.RemoveHandlerFirstShow(PNotifyEvent(Params^[1])^);
-end;
-
-procedure _LapeCustomForm_AddHandlerClose(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomForm(Params^[0])^.AddHandlerClose(PCloseEvent(Params^[1])^, PBoolean(Params^[2])^);
-end;
-
-procedure _LapeCustomForm_RemoveHandlerClose(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomForm(Params^[0])^.RemoveHandlerClose(PCloseEvent(Params^[1])^);
-end;
-
-procedure _LapeCustomForm_AddHandlerCreate(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomForm(Params^[0])^.AddHandlerCreate(PNotifyEvent(Params^[1])^, PBoolean(Params^[2])^);
-end;
-
-procedure _LapeCustomForm_RemoveHandlerCreate(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomForm(Params^[0])^.RemoveHandlerCreate(PNotifyEvent(Params^[1])^);
-end;
-
 procedure _LapeCustomForm_Active_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PBoolean(Result)^ := PCustomForm(Params^[0])^.Active;
@@ -289,16 +251,6 @@ begin
   PCustomForm(Params^[0])^.AlphaBlendValue := pbyte(Params^[1])^;
 end;
 
-procedure _LapeCustomForm_CancelControl_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PControl(Result)^ := PCustomForm(Params^[0])^.CancelControl;
-end;
-
-procedure _LapeCustomForm_CancelControl_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomForm(Params^[0])^.CancelControl := PControl(Params^[1])^;
-end;
-
 procedure _LapeCustomForm_DefaultControl_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PControl(Result)^ := PCustomForm(Params^[0])^.DefaultControl;
@@ -327,96 +279,6 @@ end;
 procedure _LapeCustomForm_PopupParent_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PCustomForm(Params^[0])^.PopupParent := PCustomForm(Params^[1])^;
-end;
-
-procedure _LapeCustomForm_OnActivate_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PNotifyEvent(Result)^ := PCustomForm(Params^[0])^.OnActivate;
-end;
-
-procedure _LapeCustomForm_OnActivate_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomForm(Params^[0])^.OnActivate := PNotifyEvent(Params^[1])^;
-end;
-
-procedure _LapeCustomForm_OnClose_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCloseEvent(Result)^ := PCustomForm(Params^[0])^.OnClose;
-end;
-
-procedure _LapeCustomForm_OnClose_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomForm(Params^[0])^.OnClose := PCloseEvent(Params^[1])^;
-end;
-
-procedure _LapeCustomForm_OnCloseQuery_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCloseQueryEvent(Result)^ := PCustomForm(Params^[0])^.OnCloseQuery;
-end;
-
-procedure _LapeCustomForm_OnCloseQuery_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomForm(Params^[0])^.OnCloseQuery := PCloseQueryEvent(Params^[1])^;
-end;
-
-procedure _LapeCustomForm_OnCreate_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PNotifyEvent(Result)^ := PCustomForm(Params^[0])^.OnCreate;
-end;
-
-procedure _LapeCustomForm_OnCreate_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomForm(Params^[0])^.OnCreate := PNotifyEvent(Params^[1])^;
-end;
-
-procedure _LapeCustomForm_OnDeactivate_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PNotifyEvent(Result)^ := PCustomForm(Params^[0])^.OnDeactivate;
-end;
-
-procedure _LapeCustomForm_OnDeactivate_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomForm(Params^[0])^.OnDeactivate := PNotifyEvent(Params^[1])^;
-end;
-
-procedure _LapeCustomForm_OnDestroy_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PNotifyEvent(Result)^ := PCustomForm(Params^[0])^.OnDestroy;
-end;
-
-procedure _LapeCustomForm_OnDestroy_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomForm(Params^[0])^.OnDestroy := PNotifyEvent(Params^[1])^;
-end;
-
-procedure _LapeCustomForm_OnHide_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PNotifyEvent(Result)^ := PCustomForm(Params^[0])^.OnHide;
-end;
-
-procedure _LapeCustomForm_OnHide_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomForm(Params^[0])^.OnHide := PNotifyEvent(Params^[1])^;
-end;
-
-procedure _LapeCustomForm_OnShow_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PNotifyEvent(Result)^ := PCustomForm(Params^[0])^.OnShow;
-end;
-
-procedure _LapeCustomForm_OnShow_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomForm(Params^[0])^.OnShow := PNotifyEvent(Params^[1])^;
-end;
-
-procedure _LapeCustomForm_OnWindowStateChange_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PNotifyEvent(Result)^ := PCustomForm(Params^[0])^.OnWindowStateChange;
-end;
-
-procedure _LapeCustomForm_OnWindowStateChange_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomForm(Params^[0])^.OnWindowStateChange := PNotifyEvent(Params^[1])^;
 end;
 
 procedure _LapeCustomForm_PixelsPerInch_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -500,26 +362,6 @@ begin
   PForm(Params^[0])^.ShowInTaskBar := stAlways;
 end;
 
-procedure _LapeForm_Cascade(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PForm(Params^[0])^.Cascade();
-end;
-
-procedure _LapeForm_Next(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PForm(Params^[0])^.Next();
-end;
-
-procedure _LapeForm_Previous(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PForm(Params^[0])^.Previous();
-end;
-
-procedure _LapeForm_Tile(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PForm(Params^[0])^.Tile();
-end;
-
 procedure _LapeForm_Show(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PForm(Params^[0])^.Show();
@@ -555,6 +397,16 @@ begin
   PForm(Params^[0])^.ClientHeight := PInteger(Params^[1])^;
 end;
 
+procedure _LapeForm_OnActivate_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PNotifyEvent(Result)^ := PForm(Params^[0])^.OnActivate;
+end;
+
+procedure _LapeForm_OnActivate_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PForm(Params^[0])^.OnActivate := PNotifyEvent(Params^[1])^;
+end;
+
 procedure _LapeForm_OnClose_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PCloseEvent(Result)^ := PForm(Params^[0])^.OnClose;
@@ -563,6 +415,16 @@ end;
 procedure _LapeForm_OnClose_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PForm(Params^[0])^.OnClose := PCloseEvent(Params^[1])^;
+end;
+
+procedure _LapeForm_OnCloseQuery_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PCloseQueryEvent(Result)^ := PForm(Params^[0])^.OnCloseQuery;
+end;
+
+procedure _LapeForm_OnCloseQuery_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PForm(Params^[0])^.OnCloseQuery := PCloseQueryEvent(Params^[1])^;
 end;
 
 procedure _LapeForm_OnCreate_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -575,6 +437,16 @@ begin
   PForm(Params^[0])^.OnCreate := PNotifyEvent(Params^[1])^;
 end;
 
+procedure _LapeForm_OnDeactivate_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PNotifyEvent(Result)^ := PForm(Params^[0])^.OnDeactivate;
+end;
+
+procedure _LapeForm_OnDeactivate_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PForm(Params^[0])^.OnDeactivate := PNotifyEvent(Params^[1])^;
+end;
+
 procedure _LapeForm_OnDestroy_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PNotifyEvent(Result)^ := PForm(Params^[0])^.OnDestroy;
@@ -583,6 +455,76 @@ end;
 procedure _LapeForm_OnDestroy_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PForm(Params^[0])^.OnDestroy := PNotifyEvent(Params^[1])^;
+end;
+
+procedure _LapeForm_OnDropFiles_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PDropFilesEvent(Result)^ := PForm(Params^[0])^.OnDropFiles;
+end;
+
+procedure _LapeForm_OnDropFiles_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PForm(Params^[0])^.OnDropFiles := PDropFilesEvent(Params^[1])^;
+end;
+
+procedure _LapeForm_OnMouseLeave_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PNotifyEvent(Result)^ := PForm(Params^[0])^.OnMouseLeave;
+end;
+
+procedure _LapeForm_OnMouseLeave_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PForm(Params^[0])^.OnMouseLeave := PNotifyEvent(Params^[1])^;
+end;
+
+procedure _LapeForm_OnMouseEnter_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PNotifyEvent(Result)^ := PForm(Params^[0])^.OnMouseEnter;
+end;
+
+procedure _LapeForm_OnMouseEnter_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PForm(Params^[0])^.OnMouseEnter := PNotifyEvent(Params^[1])^;
+end;
+
+procedure _LapeForm_OnMouseWheel_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PMouseWheelEvent(Result)^ := PForm(Params^[0])^.OnMouseWheel;
+end;
+
+procedure _LapeForm_OnMouseWheel_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PForm(Params^[0])^.OnMouseWheel := PMouseWheelEvent(Params^[1])^;
+end;
+
+procedure _LapeForm_OnMouseWheelUp_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PMouseWheelUpDownEvent(Result)^ := PForm(Params^[0])^.OnMouseWheelUp;
+end;
+
+procedure _LapeForm_OnMouseWheelUp_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PForm(Params^[0])^.OnMouseWheelUp := PMouseWheelUpDownEvent(Params^[1])^;
+end;
+
+procedure _LapeForm_OnMouseWheelDown_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PMouseWheelUpDownEvent(Result)^ := PForm(Params^[0])^.OnMouseWheelDown;
+end;
+
+procedure _LapeForm_OnMouseWheelDown_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PForm(Params^[0])^.OnMouseWheelDown := PMouseWheelUpDownEvent(Params^[1])^;
+end;
+
+procedure _LapeForm_OnWindowStateChange_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PNotifyEvent(Result)^ := PForm(Params^[0])^.OnWindowStateChange;
+end;
+
+procedure _LapeForm_OnWindowStateChange_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PForm(Params^[0])^.OnWindowStateChange := PNotifyEvent(Params^[1])^;
 end;
 
 procedure _LapeForm_OnHide_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -755,14 +697,24 @@ begin
   PForm(Params^[0])^.Caption := PString(Params^[1])^;
 end;
 
-procedure _LapeForm_Position_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomForm_Position_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PPosition(Result)^ := PForm(Params^[0])^.Position;
+  PPosition(Result)^ := PCustomForm(Params^[0])^.Position;
 end;
 
-procedure _LapeForm_Position_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomForm_Position_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
-  PForm(Params^[0])^.Position := PPosition(Params^[1])^;
+  PCustomForm(Params^[0])^.Position := PPosition(Params^[1])^;
+end;
+
+procedure _LapeCustomForm_AutoScroll_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PCustomForm(Params^[0])^.AutoScroll;
+end;
+
+procedure _LapeCustomForm_AutoScroll_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+begin
+  PCustomForm(Params^[0])^.AutoScroll := PBoolean(Params^[1])^;
 end;
 
 procedure _LapeForm_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -845,16 +797,6 @@ begin
   Pboolean(Result)^ := PCommonDialog(Params^[0])^.Execute();
 end;
 
-procedure _LapeCommonDialog_Handle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PHandle(Result)^ := PCommonDialog(Params^[0])^.Handle;
-end;
-
-procedure _LapeCommonDialog_Handle_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCommonDialog(Params^[0])^.Handle := PHandle(Params^[1])^;
-end;
-
 procedure _LapeCommonDialog_UserChoice_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   Pinteger(Result)^ := PCommonDialog(Params^[0])^.UserChoice;
@@ -868,11 +810,6 @@ end;
 procedure _LapeCommonDialog_Close(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PCommonDialog(Params^[0])^.Close();
-end;
-
-procedure _LapeCommonDialog_HandleAllocated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  Pboolean(Result)^ := PCommonDialog(Params^[0])^.HandleAllocated();
 end;
 
 procedure _LapeCommonDialog_OnClose_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -923,21 +860,6 @@ end;
 procedure _LapeCommonDialog_Height_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PCommonDialog(Params^[0])^.Height := Pinteger(Params^[1])^;
-end;
-
-procedure _LapeCommonDialog_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCommonDialog(Params^[0])^ := TCommonDialog.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeCommonDialog_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCommonDialog(Params^[0])^.Free();
-end;
-
-procedure _LapeFileDialog_DoTypeChange(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PFileDialog(Params^[0])^.DoTypeChange();
 end;
 
 procedure _LapeFileDialog_Execute(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -1122,14 +1044,15 @@ begin
     addGlobalType('(stDefault, stAlways, stNever)', 'TShowInTaskbar');
     addGlobalType('(bsNone, bsSingle, bsSizeable, bsDialog, bsToolWindow, bsSizeToolWin)', 'TFormBorderStyle');
     addGlobalType('(caNone, caHide, caFree, caMinimize)', 'TCloseAction');
-    addGlobalType('procedure(Sender: TObject; var CloseAction: TCloseAction) of object', 'TCloseEvent', FFI_DEFAULT_ABI);
-    addGlobalType('procedure(Sender: TObject; var CanClose: Boolean) of object', 'TCloseQueryEvent', FFI_DEFAULT_ABI);
-    addGlobalType('(poDesigned, poDefault, poDefaultPosOnly, poDefaultSizeOnly, poScreenCenter, poMainFormCenter, poOwnerFormCenter)', 'TPosition');
+    addGlobalType('(poDesigned, poDefault, poDefaultPosOnly, poDefaultSizeOnly, poScreenCenter, poDesktopCenter, poMainFormCenter, poOwnerFormCenter, poWorkAreaCenter)', 'TPosition');
     addGlobalType('(biSystemMenu, biMinimize, biMaximize, biHelp)', 'TBorderIcon');
     addGlobalType('set of TBorderIcon', 'TBorderIcons');
 
-    addClass('TSizeConstraints', 'TPersistent');
-    addGlobalFunc('procedure TSizeConstraints.Init(AControl: TControl)', @_LapeSizeConstraints_Init);
+    addCallbackType('TDropFilesEvent = procedure(Sender: TObject; const FileNames: TStringArray) of object');
+    addCallbackType('TCloseEvent = procedure(Sender: TObject; var CloseAction: TCloseAction) of object');
+    addCallbackType('TCloseQueryEvent = procedure(Sender: TObject; var CanClose: Boolean) of object');
+
+    addClass('TSizeConstraints');
     addClassVar('TSizeConstraints', 'Control', 'TControl', @_LapeSizeConstraints_Control_Read);
     addClassVar('TSizeConstraints', 'OnChange', 'TNotifyEvent', @_LapeSizeConstraints_OnChange_Read, @_LapeSizeConstraints_OnChange_Write);
     addClassVar('TSizeConstraints', 'MaxHeight', 'Integer', @_LapeSizeConstraints_MaxHeight_Read, @_LapeSizeConstraints_MaxHeight_Write);
@@ -1141,23 +1064,15 @@ begin
     addGlobalFunc('procedure TCustomForm.Init(AOwner: TComponent); override', @_LapeCustomForm_Init);
     addGlobalFunc('procedure TCustomForm.InitNew(AOwner: TComponent; Num: Integer)', @_LapeCustomForm_CreateNew);
     addGlobalFunc('procedure TCustomForm.Close;', @_LapeCustomForm_Close);
-    addGlobalFunc('function TCustomForm.CloseQuery: boolean;', @_LapeCustomForm_CloseQuery);
+    addGlobalFunc('function TCustomForm.CloseQuery: Boolean;', @_LapeCustomForm_CloseQuery);
     addGlobalFunc('procedure TCustomForm.DefocusControl(Control: TWinControl; Removing: Boolean);', @_LapeCustomForm_DefocusControl);
     addGlobalFunc('procedure TCustomForm.EnsureVisible(AMoveToTop: Boolean);', @_LapeCustomForm_EnsureVisible);
     addGlobalFunc('procedure TCustomForm.FocusControl(WinControl: TWinControl);', @_LapeCustomForm_FocusControl);
-
     addGlobalFunc('function TCustomForm.GetFormImage: TBitmap;', @_LapeCustomForm_GetFormImage);
     addGlobalFunc('function TCustomForm.SetFocusedControl(Control: TWinControl): Boolean;', @_LapeCustomForm_SetFocusedControl);
     addGlobalFunc('procedure TCustomForm.SetRestoredBounds(ALeft, ATop, AWidth, AHeight: Integer);', @_LapeCustomForm_SetRestoredBounds);
     addGlobalFunc('function TCustomForm.ShowModal: Integer;', @_LapeCustomForm_ShowModal);
     addGlobalFunc('procedure TCustomForm.ShowOnTop;', @_LapeCustomForm_ShowOnTop);
-    addGlobalFunc('procedure TCustomForm.RemoveAllHandlersOfObject(AnObject: TObject);', @_LapeCustomForm_RemoveAllHandlersOfObject);
-    addGlobalFunc('procedure TCustomForm.AddHandlerFirstShow(OnFirstShowHandler: TNotifyEvent;AsFirst: Boolean);', @_LapeCustomForm_AddHandlerFirstShow);
-    addGlobalFunc('procedure TCustomForm.RemoveHandlerFirstShow(OnFirstShowHandler: TNotifyEvent);', @_LapeCustomForm_RemoveHandlerFirstShow);
-    addGlobalFunc('procedure TCustomForm.AddHandlerClose(OnCloseHandler: TCloseEvent; AsFirst: Boolean);', @_LapeCustomForm_AddHandlerClose);
-    addGlobalFunc('procedure TCustomForm.RemoveHandlerClose(OnCloseHandler: TCloseEvent);', @_LapeCustomForm_RemoveHandlerClose);
-    addGlobalFunc('procedure TCustomForm.AddHandlerCreate(OnCreateHandler: TNotifyEvent; AsFirst: Boolean);', @_LapeCustomForm_AddHandlerCreate);
-    addGlobalFunc('procedure TCustomForm.RemoveHandlerCreate(OnCreateHandler: TNotifyEvent);', @_LapeCustomForm_RemoveHandlerCreate);
     addClassVar('TCustomForm', 'BorderStyle', 'TFormBorderStyle', @_LapeCustomForm_Read_BorderStyle, @_LapeCustomForm_Write_BorderStyle);
     addClassVar('TCustomForm', 'BorderIcons', 'TBorderIcons', @_LapeCustomForm_Read_BorderIcons, @_LapeCustomForm_Write_BorderIcons);
     addClassVar('TCustomForm', 'Active', 'Boolean', @_LapeCustomForm_Active_Read);
@@ -1166,19 +1081,9 @@ begin
     addClassVar('TCustomForm', 'AllowDropFiles', 'Boolean', @_LapeCustomForm_AllowDropFiles_Read, @_LapeCustomForm_AllowDropFiles_Write);
     addClassVar('TCustomForm', 'AlphaBlend', 'Boolean', @_LapeCustomForm_AlphaBlend_Read, @_LapeCustomForm_AlphaBlend_Write);
     addClassVar('TCustomForm', 'AlphaBlendValue', 'Byte', @_LapeCustomForm_AlphaBlendValue_Read, @_LapeCustomForm_AlphaBlendValue_Write);
-    addClassVar('TCustomForm', 'CancelControl', 'TControl', @_LapeCustomForm_CancelControl_Read, @_LapeCustomForm_CancelControl_Write);
     addClassVar('TCustomForm', 'DefaultControl', 'TControl', @_LapeCustomForm_DefaultControl_Read, @_LapeCustomForm_DefaultControl_Write);
     addClassVar('TCustomForm', 'KeyPreview', 'Boolean', @_LapeCustomForm_KeyPreview_Read, @_LapeCustomForm_KeyPreview_Write);
     addClassVar('TCustomForm', 'PopupParent', 'TCustomForm', @_LapeCustomForm_PopupParent_Read, @_LapeCustomForm_PopupParent_Write);
-    addClassVar('TCustomForm', 'OnActivate', 'TNotifyEvent', @_LapeCustomForm_OnActivate_Read, @_LapeCustomForm_OnActivate_Write);
-    addClassVar('TCustomForm', 'OnClose', 'TCloseEvent', @_LapeCustomForm_OnClose_Read, @_LapeCustomForm_OnClose_Write);
-    addClassVar('TCustomForm', 'OnCloseQuery', 'TCloseQueryEvent', @_LapeCustomForm_OnCloseQuery_Read, @_LapeCustomForm_OnCloseQuery_Write);
-    addClassVar('TCustomForm', 'OnCreate', 'TNotifyEvent', @_LapeCustomForm_OnCreate_Read, @_LapeCustomForm_OnCreate_Write);
-    addClassVar('TCustomForm', 'OnDeactivate', 'TNotifyEvent', @_LapeCustomForm_OnDeactivate_Read, @_LapeCustomForm_OnDeactivate_Write);
-    addClassVar('TCustomForm', 'OnDestroy', 'TNotifyEvent', @_LapeCustomForm_OnDestroy_Read, @_LapeCustomForm_OnDestroy_Write);
-    addClassVar('TCustomForm', 'OnHide', 'TNotifyEvent', @_LapeCustomForm_OnHide_Read, @_LapeCustomForm_OnHide_Write);
-    addClassVar('TCustomForm', 'OnShow', 'TNotifyEvent', @_LapeCustomForm_OnShow_Read, @_LapeCustomForm_OnShow_Write);
-    addClassVar('TCustomForm', 'OnWindowStateChange', 'TNotifyEvent', @_LapeCustomForm_OnWindowStateChange_Read, @_LapeCustomForm_OnWindowStateChange_Write);
     addClassVar('TCustomForm', 'PixelsPerInch', 'Integer', @_LapeCustomForm_PixelsPerInch_Read, @_LapeCustomForm_PixelsPerInch_Write);
     addClassVar('TCustomForm', 'RestoredLeft', 'Integer', @_LapeCustomForm_RestoredLeft_Read);
     addClassVar('TCustomForm', 'RestoredTop', 'Integer', @_LapeCustomForm_RestoredTop_Read);
@@ -1186,43 +1091,49 @@ begin
     addClassVar('TCustomForm', 'RestoredHeight', 'Integer', @_LapeCustomForm_RestoredHeight_Read);
     addClassVar('TCustomForm', 'Constraints', 'TSizeConstraints', @_LapeCustomForm_Constraints_Read, @_LapeCustomForm_Constraints_Write);
     addClassVar('TCustomForm', 'ShowInTaskBar', 'TShowInTaskBar', @_LapeCustomForm_ShowInTaskBar_Read, @_LapeCustomForm_ShowInTaskBar_Write);
+    addClassVar('TCustomForm', 'Position', 'TPosition', @_LapeCustomForm_Position_Read, @_LapeCustomForm_Position_Write);
+    addClassVar('TCustomForm', 'AutoScroll', 'Boolean', @_LapeCustomForm_AutoScroll_Read, @_LapeCustomForm_AutoScroll_Write);
 
     addClass('TForm', 'TCustomForm');
     addGlobalFunc('procedure TForm.Init(TheOwner: TComponent); override', @_LapeForm_Init);
-    addGlobalFunc('procedure TForm.Cascade;', @_LapeForm_Cascade);
-    addGlobalFunc('procedure TForm.Next;', @_LapeForm_Next);
-    addGlobalFunc('procedure TForm.Previous;', @_LapeForm_Previous);
-    addGlobalFunc('procedure TForm.Tile;', @_LapeForm_Tile);
+
+    addClassVar('TForm', 'OnActivate', 'TNotifyEvent', @_LapeForm_OnActivate_Read, @_LapeForm_OnActivate_Write);
+    addClassVar('TForm', 'OnClose', 'TCloseEvent', @_LapeForm_OnClose_Read, @_LapeForm_OnClose_Write);
+    addClassVar('TForm', 'OnCloseQuery', 'TCloseQueryEvent', @_LapeForm_OnCloseQuery_Read, @_LapeForm_OnCloseQuery_Write);
+    addClassVar('TForm', 'OnCreate', 'TNotifyEvent', @_LapeForm_OnCreate_Read, @_LapeForm_OnCreate_Write);
     addClassVar('TForm', 'OnDblClick', 'TNotifyEvent', @_LapeForm_OnDblClick_Read, @_LapeForm_OnDblClick_Write);
-    addClassVar('TForm', 'OnMouseMove', 'TMouseMoveEvent', @_LapeForm_OnMouseMove_Read, @_LapeForm_OnMouseMove_Write);
+    addClassVar('TForm', 'OnDeactivate', 'TNotifyEvent', @_LapeForm_OnDeactivate_Read, @_LapeForm_OnDeactivate_Write);
+    addClassVar('TForm', 'OnDestroy', 'TNotifyEvent', @_LapeForm_OnDestroy_Read, @_LapeForm_OnDestroy_Write);
+    addClassVar('TForm', 'OnDropFiles', 'TDropFilesEvent', @_LapeForm_OnDropFiles_Read, @_LapeForm_OnDropFiles_Write);
+    addClassVar('TForm', 'OnHide', 'TNotifyEvent', @_LapeForm_OnHide_Read, @_LapeForm_OnHide_Write);
     addClassVar('TForm', 'OnMouseDown', 'TMouseEvent', @_LapeForm_OnMouseDown_Read, @_LapeForm_OnMouseDown_Write);
+    addClassVar('TForm', 'OnMouseEnter', 'TNotifyEvent', @_LapeForm_OnMouseEnter_Read, @_LapeForm_OnMouseEnter_Write);
+    addClassVar('TForm', 'OnMouseLeave', 'TNotifyEvent', @_LapeForm_OnMouseLeave_Read, @_LapeForm_OnMouseLeave_Write);
+    addClassVar('TForm', 'OnMouseMove', 'TMouseMoveEvent', @_LapeForm_OnMouseMove_Read, @_LapeForm_OnMouseMove_Write);
     addClassVar('TForm', 'OnMouseUp', 'TMouseEvent', @_LapeForm_OnMouseUp_Read, @_LapeForm_OnMouseUp_Write);
-    addClassVar('TForm', 'OnKeyDown', 'TKeyEvent', @_LapeForm_OnKeyDown_Read, @_LapeForm_OnKeyDown_Write);
-    addClassVar('TForm', 'OnKeyUp', 'TKeyEvent', @_LapeForm_OnKeyUp_Read, @_LapeForm_OnKeyUp_Write);
-    addClassVar('TForm', 'OnKeyPress', 'TKeyPressEvent', @_LapeForm_OnKeyPress_Read, @_LapeForm_OnKeyPress_Write);
-    addClassVar('TForm', 'Position', 'TPosition', @_LapeForm_Position_Read, @_LapeForm_Position_Write);
+    addClassVar('TForm', 'OnMouseWheel', 'TMouseWheelEvent', @_LapeForm_OnMouseWheel_Read, @_LapeForm_OnMouseWheel_Write);
+    addClassVar('TForm', 'OnMouseWheelDown', 'TMouseWheelUpDownEvent', @_LapeForm_OnMouseWheelDown_Read, @_LapeForm_OnMouseWheelDown_Write);
+    addClassVar('TForm', 'OnMouseWheelUp', 'TMouseWheelUpDownEvent', @_LapeForm_OnMouseWheelUp_Read, @_LapeForm_OnMouseWheelUp_Write);
+    addClassVar('TForm', 'OnShow', 'TNotifyEvent', @_LapeForm_OnShow_Read, @_LapeForm_OnShow_Write);
+    addClassVar('TForm', 'OnWindowStateChange', 'TNotifyEvent', @_LapeForm_OnWindowStateChange_Read, @_LapeForm_OnWindowStateChange_Write);
 
     addClass('TScrollBox', 'TScrollingWinControl');
     addGlobalFunc('procedure TScrollBox.Init(AOwner: TComponent); override', @_LapeScrollBox_Init);
 
-    addGlobalType('(ofReadOnly, ofOverwritePrompt,ofHideReadOnly,ofNoChangeDir,ofShowHelp,ofNoValidate,ofAllowMultiSelect,ofExtensionDifferent,ofPathMustExist,ofFileMustExist,ofCreatePrompt,ofShareAware,ofNoReadOnlyReturn,ofNoTestFileCreate,ofNoNetworkButton,ofNoLongNames,ofOldStyleDialog,ofNoDereferenceLinks,ofEnableIncludeNotify,ofEnableSizing,ofDontAddToRecent,ofForceShowHidden,ofViewDetail,ofAutoPreview)', 'TOpenOption');
+    addGlobalType('(ofReadOnly, ofOverwritePrompt, ofHideReadOnly, ofNoChangeDir, ofShowHelp, ofNoValidate, ofAllowMultiSelect, ofExtensionDifferent, ofPathMustExist, ofFileMustExist, ofCreatePrompt, ofShareAware, ofNoReadOnlyReturn, ofNoTestFileCreate, ofNoNetworkButton, ofNoLongNames, ofOldStyleDialog, ofNoDereferenceLinks, ofEnableIncludeNotify, ofEnableSizing, ofDontAddToRecent, ofForceShowHidden, ofViewDetail, ofAutoPreview)', 'TOpenOption');
     addGlobalType('set of TOpenOption', 'TOpenOptions');
 
     addClass('TCommonDialog', 'TComponent');
-    addGlobalFunc('function TCommonDialog.Execute: boolean;', @_LapeCommonDialog_Execute);
-    addClassVar('TCommonDialog', 'Handle', 'THandle', @_LapeCommonDialog_Handle_Read, @_LapeCommonDialog_Handle_Write);
+    addGlobalFunc('function TCommonDialog.Execute: Boolean;', @_LapeCommonDialog_Execute);
     addClassVar('TCommonDialog', 'UserChoice', 'Integer', @_LapeCommonDialog_UserChoice_Read, @_LapeCommonDialog_UserChoice_Write);
     addGlobalFunc('procedure TCommonDialog.Close;', @_LapeCommonDialog_Close);
-    addGlobalFunc('function TCommonDialog.HandleAllocated: boolean;', @_LapeCommonDialog_HandleAllocated);
     addClassVar('TCommonDialog', 'OnClose', 'TNotifyEvent', @_LapeCommonDialog_OnClose_Read, @_LapeCommonDialog_OnClose_Write);
     addClassVar('TCommonDialog', 'OnCanClose', 'TCloseQueryEvent', @_LapeCommonDialog_OnCanClose_Read, @_LapeCommonDialog_OnCanClose_Write);
     addClassVar('TCommonDialog', 'OnShow', 'TNotifyEvent', @_LapeCommonDialog_OnShow_Read, @_LapeCommonDialog_OnShow_Write);
     addClassVar('TCommonDialog', 'Width', 'Integer', @_LapeCommonDialog_Width_Read, @_LapeCommonDialog_Width_Write);
     addClassVar('TCommonDialog', 'Height', 'Integer', @_LapeCommonDialog_Height_Read, @_LapeCommonDialog_Height_Write);
-    addGlobalFunc('procedure TCommonDialog.Init(AOwner: TComponent)', @_LapeCommonDialog_Init);
 
     AddClass('TFileDialog', 'TCommonDialog');
-    addGlobalFunc('procedure TFileDialog.DoTypeChange;', @_LapeFileDialog_DoTypeChange);
     addClassVar('TFileDialog', 'Files', 'TStrings', @_LapeFileDialog_Files_Read, nil);
     addClassVar('TFileDialog', 'HistoryList', 'TStrings', @_LapeFileDialog_HistoryList_Read, @_LapeFileDialog_HistoryList_Write);
     addClassVar('TFileDialog', 'DefaultExt', 'String', @_LapeFileDialog_DefaultExt_Read, @_LapeFileDialog_DefaultExt_Write);

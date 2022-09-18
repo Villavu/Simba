@@ -8,7 +8,7 @@ implementation
 
 uses
   classes, sysutils, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.tpa, simba.math,
+  simba.script_compiler, simba.mufasatypes, simba.tpa,
   simba.algo_difference, simba.algo_intersection, simba.algo_symmetricDifference,
   simba.geometry;
 
