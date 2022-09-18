@@ -300,96 +300,6 @@ begin
   PBoolean(Result)^ := PProcess(Params^[0])^.Running;
 end;
 
-procedure _LapeProcess_ShowWindow_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PShowWindowOptions(Result)^ := PProcess(Params^[0])^.ShowWindow;
-end;
-
-procedure _LapeProcess_ShowWindow_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PProcess(Params^[0])^.ShowWindow := PShowWindowOptions(Params^[1])^;
-end;
-
-procedure _LapeProcess_WindowColumns_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCardinal(Result)^ := PProcess(Params^[0])^.WindowColumns;
-end;
-
-procedure _LapeProcess_WindowColumns_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PProcess(Params^[0])^.WindowColumns := PCardinal(Params^[1])^;
-end;
-
-procedure _LapeProcess_WindowHeight_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCardinal(Result)^ := PProcess(Params^[0])^.WindowHeight;
-end;
-
-procedure _LapeProcess_WindowHeight_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PProcess(Params^[0])^.WindowHeight := PCardinal(Params^[1])^;
-end;
-
-procedure _LapeProcess_WindowLeft_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCardinal(Result)^ := PProcess(Params^[0])^.WindowLeft;
-end;
-
-procedure _LapeProcess_WindowLeft_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PProcess(Params^[0])^.WindowLeft := PCardinal(Params^[1])^;
-end;
-
-procedure _LapeProcess_WindowRows_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCardinal(Result)^ := PProcess(Params^[0])^.WindowRows;
-end;
-
-procedure _LapeProcess_WindowRows_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PProcess(Params^[0])^.WindowRows := PCardinal(Params^[1])^;
-end;
-
-procedure _LapeProcess_WindowTop_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCardinal(Result)^ := PProcess(Params^[0])^.WindowTop;
-end;
-
-procedure _LapeProcess_WindowTop_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PProcess(Params^[0])^.WindowTop := PCardinal(Params^[1])^;
-end;
-
-procedure _LapeProcess_WindowWidth_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCardinal(Result)^ := PProcess(Params^[0])^.WindowWidth;
-end;
-
-procedure _LapeProcess_WindowWidth_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PProcess(Params^[0])^.WindowWidth := PCardinal(Params^[1])^;
-end;
-
-procedure _LapeProcess_FillAttribute_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCardinal(Result)^ := PProcess(Params^[0])^.FillAttribute;
-end;
-
-procedure _LapeProcess_FillAttribute_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PProcess(Params^[0])^.FillAttribute := PCardinal(Params^[1])^;
-end;
-
-procedure _LapeProcess_XTermProgram_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PString(Result)^ := PProcess(Params^[0])^.XTermProgram;
-end;
-
-procedure _LapeProcess_XTermProgram_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PProcess(Params^[0])^.XTermProgram := PString(Params^[1])^;
-end;
-
 procedure _LapeProcess_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PProcess(Params^[0])^ := TProcess.Create(PComponent(Params^[1])^);
@@ -585,21 +495,6 @@ begin
   PMenu(Result)^ := PMenuItem(Params^[0])^.GetParentMenu();
 end;
 
-procedure _LapeMenuItem_GetIsRightToLeft(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PMenuItem(Params^[0])^.GetIsRightToLeft();
-end;
-
-procedure _LapeMenuItem_HandleAllocated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PMenuItem(Params^[0])^.HandleAllocated();
-end;
-
-procedure _LapeMenuItem_HasIcon(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  Pboolean(Result)^ := PMenuItem(Params^[0])^.HasIcon();
-end;
-
 procedure _LapeMenuItem_IndexOf(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PInteger(Result)^ := PMenuItem(Params^[0])^.IndexOf(PMenuItem(Params^[1])^);
@@ -633,11 +528,6 @@ end;
 procedure _LapeMenuItem_Delete(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PMenuItem(Params^[0])^.Delete(PInteger(Params^[1])^);
-end;
-
-procedure _LapeMenuItem_HandleNeeded(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PMenuItem(Params^[0])^.HandleNeeded();
 end;
 
 procedure _LapeMenuItem_Insert(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -780,16 +670,6 @@ begin
   PMenuItem(Params^[0])^.RadioItem := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeMenuItem_RightJustify_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  Pboolean(Result)^ := PMenuItem(Params^[0])^.RightJustify;
-end;
-
-procedure _LapeMenuItem_RightJustify_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PMenuItem(Params^[0])^.RightJustify := Pboolean(Params^[1])^;
-end;
-
 procedure _LapeMenuItem_OnClick_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PNotifyEvent(Result)^ := PMenuItem(Params^[0])^.OnClick;
@@ -844,31 +724,6 @@ begin
   PMenuItem(Params^[0])^.Add(PMenuItem(Result)^);
 end;
 
-procedure _LapeMenu_HandleAllocated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PMenu(Params^[0])^.HandleAllocated();
-end;
-
-procedure _LapeMenu_IsRightToLeft(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PMenu(Params^[0])^.IsRightToLeft();
-end;
-
-procedure _LapeMenu_UseRightToLeftAlignment(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PMenu(Params^[0])^.UseRightToLeftAlignment();
-end;
-
-procedure _LapeMenu_UseRightToLeftReading(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PMenu(Params^[0])^.UseRightToLeftReading();
-end;
-
-procedure _LapeMenu_HandleNeeded(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PMenu(Params^[0])^.HandleNeeded();
-end;
-
 procedure _LapeMenu_DispatchCommand(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PBoolean(Result)^ := PMenu(Params^[0])^.DispatchCommand(PWord(Params^[1])^);
@@ -882,16 +737,6 @@ end;
 procedure _LapeMenu_Parent_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PMenu(Params^[0])^.Parent := PComponent(Params^[1])^;
-end;
-
-procedure _LapeMenu_ShortcutHandled_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  Pboolean(Result)^ := PMenu(Params^[0])^.ShortcutHandled;
-end;
-
-procedure _LapeMenu_ShortcutHandled_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PMenu(Params^[0])^.ShortcutHandled := Pboolean(Params^[1])^;
 end;
 
 procedure _LapeMenu_ParentBidiMode_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -956,21 +801,18 @@ begin
     addGlobalFunc('procedure TFloatSpinEdit.Init(TheOwner: TComponent); override', @_LapeFloatSpinEdit_Init);
 
     addClass('TCustomSpinEdit', 'TCustomFloatSpinEdit');
-    addClassVar('TCustomSpinEdit', 'Value', 'integer', @_LapeCustomSpinEdit_Value_Read, @_LapeCustomSpinEdit_Value_Write);
-    addClassVar('TCustomSpinEdit', 'MinValue', 'integer', @_LapeCustomSpinEdit_MinValue_Read, @_LapeCustomSpinEdit_MinValue_Write);
-    addClassVar('TCustomSpinEdit', 'MaxValue', 'integer', @_LapeCustomSpinEdit_MaxValue_Read, @_LapeCustomSpinEdit_MaxValue_Write);
-    addClassVar('TCustomSpinEdit', 'Increment', 'integer', @_LapeCustomSpinEdit_Increment_Read, @_LapeCustomSpinEdit_Increment_Write);
+    addClassVar('TCustomSpinEdit', 'Value', 'Integer', @_LapeCustomSpinEdit_Value_Read, @_LapeCustomSpinEdit_Value_Write);
+    addClassVar('TCustomSpinEdit', 'MinValue', 'Integer', @_LapeCustomSpinEdit_MinValue_Read, @_LapeCustomSpinEdit_MinValue_Write);
+    addClassVar('TCustomSpinEdit', 'MaxValue', 'Integer', @_LapeCustomSpinEdit_MaxValue_Read, @_LapeCustomSpinEdit_MaxValue_Write);
+    addClassVar('TCustomSpinEdit', 'Increment', 'Integer', @_LapeCustomSpinEdit_Increment_Read, @_LapeCustomSpinEdit_Increment_Write);
     addGlobalFunc('procedure TCustomSpinEdit.Init(TheOwner: TComponent); override', @_LapeCustomSpinEdit_Init);
 
     addClass('TSpinEdit', 'TCustomSpinEdit');
     addGlobalFunc('procedure TSpinEdit.Init(TheOwner: TComponent); override', @_LapeSpinEdit_Init);
 
-    addGlobalType('(oRunSuspended,poWaitOnExit,poUsePipes,poStderrToOutPut,poNoConsole,poNewConsole,poDefaultErrorMode,poNewProcessGroup,poDebugProcess,poDebugOnlyThisProcess,poDetached,poPassInput,poRunIdle)', 'TProcessOption');
-    addGlobalType('(swoNone,swoHIDE,swoMaximize,swoMinimize,swoRestore,swoShow, swoShowDefault,swoShowMaximized,swoShowMinimized, swoshowMinNOActive,swoShowNA,swoShowNoActivate,swoShowNormal)', 'TShowWindowOptions');
-    addGlobalType('(suoUseShowWindow,suoUseSize,suoUsePosition, suoUseCountChars,suoUseFillAttribute)', 'TStartupOption');
+    addGlobalType('(poRunSuspended,poWaitOnExit,poUsePipes,poStderrToOutPut,poNoConsole,poNewConsole,poDefaultErrorMode,poNewProcessGroup,poDebugProcess,poDebugOnlyThisProcess,poDetached,poPassInput,poRunIdle)', 'TProcessOption');
     addGlobalType('(ppHigh,ppIdle,ppNormal,ppRealTime)', 'TProcessPriority');
     addGlobalType('set of TProcessOption', 'TProcessOptions');
-    addGlobalType('set of TStartupOption', 'TStartupOptions');
 
     addClass('TOutputPipeStream', 'THandleStream');
     addGlobalFunc('procedure TOutputPipeStream.Init(AHandle: THandle); override', @_LapeOutputPipeStream_Init);
@@ -1011,17 +853,7 @@ begin
     addClassVar('TProcess', 'Environment', 'TStrings', @_LapeProcess_Environment_Read, @_LapeProcess_Environment_Write);
     addClassVar('TProcess', 'Options', 'TProcessOptions', @_LapeProcess_Options_Read, @_LapeProcess_Options_Write);
     addClassVar('TProcess', 'Priority', 'TProcessPriority', @_LapeProcess_Priority_Read, @_LapeProcess_Priority_Write);
-    addClassVar('TProcess', 'StartupOptions', 'TStartupOptions', @_LapeProcess_StartupOptions_Read, @_LapeProcess_StartupOptions_Write);
     addClassVar('TProcess', 'Running', 'Boolean', @_LapeProcess_Running_Read);
-    addClassVar('TProcess', 'ShowWindow', 'TShowWindowOptions', @_LapeProcess_ShowWindow_Read, @_LapeProcess_ShowWindow_Write);
-    addClassVar('TProcess', 'WindowColumns', 'UInt32', @_LapeProcess_WindowColumns_Read, @_LapeProcess_WindowColumns_Write);
-    addClassVar('TProcess', 'WindowHeight', 'UInt32', @_LapeProcess_WindowHeight_Read, @_LapeProcess_WindowHeight_Write);
-    addClassVar('TProcess', 'WindowLeft', 'UInt32', @_LapeProcess_WindowLeft_Read, @_LapeProcess_WindowLeft_Write);
-    addClassVar('TProcess', 'WindowRows', 'UInt32', @_LapeProcess_WindowRows_Read, @_LapeProcess_WindowRows_Write);
-    addClassVar('TProcess', 'WindowTop', 'UInt32', @_LapeProcess_WindowTop_Read, @_LapeProcess_WindowTop_Write);
-    addClassVar('TProcess', 'WindowWidth', 'UInt32', @_LapeProcess_WindowWidth_Read, @_LapeProcess_WindowWidth_Write);
-    addClassVar('TProcess', 'FillAttribute', 'UInt32', @_LapeProcess_FillAttribute_Read, @_LapeProcess_FillAttribute_Write);
-    addClassVar('TProcess', 'XTermProgram', 'String', @_LapeProcess_XTermProgram_Read, @_LapeProcess_XTermProgram_Write);
     addGlobalFunc('procedure TProcess.Init(AOwner : TComponent); override', @_LapeProcess_Init);
     //addGlobalFunc('procedure TProcess.Free;', @_LapeProcess_Free);
 
@@ -1029,9 +861,6 @@ begin
     addClass('TMenuItem', 'TComponent');
     addGlobalFunc('function TMenuItem.Find(const ACaption: string): TMenuItem;', @_LapeMenuItem_Find);
     addGlobalFunc('function TMenuItem.GetParentMenu: TMenu;', @_LapeMenuItem_GetParentMenu);
-    addGlobalFunc('function TMenuItem.GetIsRightToLeft: Boolean;', @_LapeMenuItem_GetIsRightToLeft);
-    addGlobalFunc('function TMenuItem.HandleAllocated: Boolean;', @_LapeMenuItem_HandleAllocated);
-    addGlobalFunc('function TMenuItem.HasIcon: boolean;', @_LapeMenuItem_HasIcon);
     addGlobalFunc('function TMenuItem.IndexOf(Item: TMenuItem): Integer;', @_LapeMenuItem_IndexOf);
     addGlobalFunc('function TMenuItem.IndexOfCaption(const ACaption: string): Integer;', @_LapeMenuItem_IndexOfCaption);
     addGlobalFunc('function TMenuItem.VisibleIndexOf(Item: TMenuItem): Integer;', @_LapeMenuItem_VisibleIndexOf);
@@ -1040,7 +869,6 @@ begin
     addGlobalFunc('procedure TMenuItem.AddSeparator;', @_LapeMenuItem_AddSeparator);
     addGlobalFunc('procedure TMenuItem.Click;', @_LapeMenuItem_Click);
     addGlobalFunc('procedure TMenuItem.Delete(Index: Integer);', @_LapeMenuItem_Delete);
-    addGlobalFunc('procedure TMenuItem.HandleNeeded;', @_LapeMenuItem_HandleNeeded);
     addGlobalFunc('procedure TMenuItem.Insert(Index: Integer; Item: TMenuItem);', @_LapeMenuItem_Insert);
     addGlobalFunc('procedure TMenuItem.RecreateHandle;', @_LapeMenuItem_RecreateHandle);
     addGlobalFunc('procedure TMenuItem.Remove(Item: TMenuItem);', @_LapeMenuItem_Remove);
@@ -1063,21 +891,14 @@ begin
     addClassVar('TMenuItem', 'Bitmap', 'TBitmap', @_LapeMenuItem_Bitmap_Read, @_LapeMenuItem_Bitmap_Write);
     addClassVar('TMenuItem', 'GroupIndex', 'Byte', @_LapeMenuItem_GroupIndex_Read, @_LapeMenuItem_GroupIndex_Write);
     addClassVar('TMenuItem', 'RadioItem', 'Boolean', @_LapeMenuItem_RadioItem_Read, @_LapeMenuItem_RadioItem_Write);
-    addClassVar('TMenuItem', 'RightJustify', 'boolean', @_LapeMenuItem_RightJustify_Read, @_LapeMenuItem_RightJustify_Write);
     addClassVar('TMenuItem', 'OnClick', 'TNotifyEvent', @_LapeMenuItem_OnClick_Read, @_LapeMenuItem_OnClick_Write);
     addClassVar('TMenuItem', 'Caption', 'String', @_LapeMenuItem_Caption_Read, @_LapeMenuItem_Caption_Write);
     addGlobalFunc('procedure TMenuItem.Init(AOwner: TComponent); override', @_LapeMenuItem_Init);
     // addGlobalFunc('procedure TMenuItem.Free;', @_LapeMenuItem_Free);
 
-    addGlobalFunc('function TMenu.HandleAllocated: Boolean;', @_LapeMenu_HandleAllocated);
-    addGlobalFunc('function TMenu.IsRightToLeft: Boolean;', @_LapeMenu_IsRightToLeft);
-    addGlobalFunc('function TMenu.UseRightToLeftAlignment: Boolean;', @_LapeMenu_UseRightToLeftAlignment);
-    addGlobalFunc('function TMenu.UseRightToLeftReading: Boolean;', @_LapeMenu_UseRightToLeftReading);
-    addGlobalFunc('procedure TMenu.HandleNeeded;', @_LapeMenu_HandleNeeded);
     addGlobalFunc('function TMenu.DispatchCommand(ACommand: Int16): Boolean;', @_LapeMenu_DispatchCommand);
-    addGlobalFunc('function TMenu.AddMenu(name: string): TMenuItem;', @_LapeMenu_AddMenu);
+    addGlobalFunc('function TMenu.AddMenu(Name: string): TMenuItem;', @_LapeMenu_AddMenu);
     addClassVar('TMenu', 'Parent', 'TComponent', @_LapeMenu_Parent_Read, @_LapeMenu_Parent_Write);
-    addClassVar('TMenu', 'ShortcutHandled', 'boolean', @_LapeMenu_ShortcutHandled_Read, @_LapeMenu_ShortcutHandled_Write);
     addClassVar('TMenu', 'Items', 'TMenuItem', @_LapeMenu_Items_Read, nil);
     addGlobalFunc('procedure TMenu.Init(AOwner: TComponent); override', @_LapeMenu_Init);
     //addGlobalFunc('procedure TMenu.Free;', @_LapeMenu_Free);

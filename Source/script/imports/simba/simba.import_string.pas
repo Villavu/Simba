@@ -8,7 +8,7 @@ implementation
 
 uses
   classes, sysutils, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.stringutil;
+  simba.script_compiler, simba.mufasatypes;
 
 procedure _LapeString_Before(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin

@@ -12,11 +12,8 @@ uses
 
 type
   PObject = ^TObject;
-  PCollection = ^TCollection;
-  PCollectionItem = ^TCollectionItem;
   PComponent = ^TComponent;
   PComponentName = ^TComponentName;
-  PComponentState = ^TComponentState;
   PCustomMemoryStream = ^TCustomMemoryStream;
   PFileStream = ^TFileStream;
   PHandle = ^THandle;
@@ -31,11 +28,6 @@ type
   PStrings = ^TStrings;
   PStringStream = ^TStringStream;
 
-procedure _LapeObject_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PObject(Params^[0])^ := TObject.Create();
-end;
-
 procedure _LapeObject_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PObject(Params^[0])^.Free();
@@ -44,26 +36,6 @@ end;
 procedure _LapeObject_ClassName(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PString(Result)^ := PObject(Params^[0])^.ClassName;
-end;
-
-procedure _LapePersistent_Assign(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PPersistent(Params^[0])^.Assign(PPersistent(Params^[1])^);
-end;
-
-procedure _LapePersistent_GetNamePath(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PString(Result)^ := PPersistent(Params^[0])^.GetNamePath();
-end;
-
-procedure _LapePersistent_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PPersistent(Params^[0])^ := TPersistent.Create();
-end;
-
-procedure _LapePersistent_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PPersistent(Params^[0])^.Free();
 end;
 
 procedure _LapeStream_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -94,51 +66,6 @@ end;
 procedure _LapeStream_CopyFrom(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PInt64(Result)^ := PStream(Params^[0])^.CopyFrom(PStream(Params^[1])^, PInt64(Params^[2])^);
-end;
-
-procedure _LapeStream_ReadComponent(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PComponent(Result)^ := PStream(Params^[0])^.ReadComponent(PComponent(Params^[1])^);
-end;
-
-procedure _LapeStream_ReadComponentRes(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PComponent(Result)^ := PStream(Params^[0])^.ReadComponentRes(PComponent(Params^[1])^);
-end;
-
-procedure _LapeStream_WriteComponent(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PStream(Params^[0])^.WriteComponent(PComponent(Params^[1])^);
-end;
-
-procedure _LapeStream_WriteComponentRes(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PStream(Params^[0])^.WriteComponentRes(PString(Params^[1])^, PComponent(Params^[2])^);
-end;
-
-procedure _LapeStream_WriteDescendent(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PStream(Params^[0])^.WriteDescendent(PComponent(Params^[1])^, PComponent(Params^[2])^);
-end;
-
-procedure _LapeStream_WriteDescendentRes(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PStream(Params^[0])^.WriteDescendentRes(PString(Params^[1])^, PComponent(Params^[2])^, PComponent(Params^[3])^);
-end;
-
-procedure _LapeStream_WriteResourceHeader(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PStream(Params^[0])^.WriteResourceHeader(PString(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-procedure _LapeStream_FixupResourceHeader(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PStream(Params^[0])^.FixupResourceHeader(PInteger(Params^[1])^);
-end;
-
-procedure _LapeStream_ReadResHeader(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PStream(Params^[0])^.ReadResHeader();
 end;
 
 procedure _LapeStream_ReadByte(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -661,16 +588,6 @@ begin
   PComponent(Params^[0])^ := TComponent.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeComponent_DestroyComponents(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PComponent(Params^[0])^.DestroyComponents();
-end;
-
-procedure _LapeComponent_Destroying(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PComponent(Params^[0])^.Destroying();
-end;
-
 procedure _LapeComponent_FindComponent(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PComponent(Result)^ := PComponent(Params^[0])^.FindComponent(PString(Params^[1])^);
@@ -706,11 +623,6 @@ begin
   PComponent(Params^[0])^.ComponentIndex := PInteger(Params^[1])^;
 end;
 
-procedure _LapeComponent_ComponentState_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PComponentState(Result)^ := PComponent(Params^[0])^.ComponentState;
-end;
-
 procedure _LapeComponent_Owner_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PComponent(Result)^ := PComponent(Params^[0])^.Owner;
@@ -741,138 +653,12 @@ begin
   PComponent(Params^[0])^.Free();
 end;
 
-procedure _LapeCollectionItem_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCollectionItem(Params^[0])^ := TCollectionItem.Create(PCollection(Params^[1])^);
-end;
-
-procedure _LapeCollectionItem_GetNamePath(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PString(Result)^ := PCollectionItem(Params^[0])^.GetNamePath();
-end;
-
-procedure _LapeCollectionItem_Collection_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCollection(Result)^ := PCollectionItem(Params^[0])^.Collection;
-end;
-
-procedure _LapeCollectionItem_Collection_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCollectionItem(Params^[0])^.Collection := PCollection(Params^[1])^;
-end;
-
-procedure _LapeCollectionItem_ID_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PInteger(Result)^ := PCollectionItem(Params^[0])^.ID;
-end;
-
-procedure _LapeCollectionItem_Index_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PInteger(Result)^ := PCollectionItem(Params^[0])^.Index;
-end;
-
-procedure _LapeCollectionItem_Index_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCollectionItem(Params^[0])^.Index := PInteger(Params^[1])^;
-end;
-
-procedure _LapeCollectionItem_DisplayName_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PString(Result)^ := PCollectionItem(Params^[0])^.DisplayName;
-end;
-
-procedure _LapeCollectionItem_DisplayName_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCollectionItem(Params^[0])^.DisplayName := PString(Params^[1])^;
-end;
-
-procedure _LapeCollectionItem_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCollectionItem(Params^[0])^.Free();
-end;
-
-procedure _LapeCollection_Owner(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PPersistent(Result)^ := PCollection(Params^[0])^.Owner();
-end;
-
-procedure _LapeCollection_Add(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCollectionItem(Result)^ := PCollection(Params^[0])^.Add();
-end;
-
-procedure _LapeCollection_Assign(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCollection(Params^[0])^.Assign(PPersistent(Params^[1])^);
-end;
-
-procedure _LapeCollection_BeginUpdate(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCollection(Params^[0])^.BeginUpdate();
-end;
-
-procedure _LapeCollection_Clear(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCollection(Params^[0])^.Clear();
-end;
-
-procedure _LapeCollection_EndUpdate(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCollection(Params^[0])^.EndUpdate();
-end;
-
-procedure _LapeCollection_Delete(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCollection(Params^[0])^.Delete(PInteger(Params^[1])^);
-end;
-
-procedure _LapeCollection_GetNamePath(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PString(Result)^ := PCollection(Params^[0])^.GetNamePath();
-end;
-
-procedure _LapeCollection_Insert(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCollectionItem(Result)^ := PCollection(Params^[0])^.Insert(PInteger(Params^[1])^);
-end;
-
-procedure _LapeCollection_FindItemID(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCollectionItem(Result)^ := PCollection(Params^[0])^.FindItemID(PInteger(Params^[1])^);
-end;
-
-procedure _LapeCollection_Exchange(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCollection(Params^[0])^.Exchange(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-procedure _LapeCollection_Count_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PInteger(Result)^ := PCollection(Params^[0])^.Count;
-end;
-
-procedure _LapeCollection_Items_Index_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCollectionItem(Result)^ := PCollection(Params^[0])^.Items[PInteger(Params^[1])^];
-end;
-
-procedure _LapeCollection_Items_Index_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCollection(Params^[0])^.Items[PInteger(Params^[1])^] := PCollectionItem(Params^[2])^;
-end;
-
-procedure _LapeCollection_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCollection(Params^[0])^.Free();
-end;
-
 procedure ImportLCLSystem(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
     addClass('TObject', 'Pointer');
 
-    addGlobalFunc('procedure TObject.Init;', @_LapeObject_Init);
     addGlobalFunc('procedure TObject.Free;', @_LapeObject_Free);
     addGlobalFunc('function TObject.ClassName: String;', @_LapeObject_ClassName);
 
@@ -882,44 +668,14 @@ begin
     addGlobalType('String', 'TCaption');
     addGlobalType('(soBeginning, soCurrent, soEnd)', 'TSeekOrigin');
 
-    addClass('TPersistent');
-    addGlobalFunc('procedure TPersistent.Assign(Source: TPersistent);', @_LapePersistent_Assign);
-    addGlobalFunc('function TPersistent.GetNamePath: String;', @_LapePersistent_GetNamePath);
-    addGlobalFunc('procedure TPersistent.Init; override', @_LapePersistent_Init);
-    addGlobalFunc('procedure TPersistent.Free;', @_LapePersistent_Free);
-
-    addClass('TCollection');
-    addClass('TCollectionItem', 'TPersistent');
-    addClassVar('TCollectionItem', 'Collection', 'TCollection', @_LapeCollectionItem_Collection_Read, @_LapeCollectionItem_Collection_Write);
-    addClassVar('TCollectionItem', 'ID', 'Integer', @_LapeCollectionItem_ID_Read, nil);
-    addClassVar('TCollectionItem', 'Index', 'Integer', @_LapeCollectionItem_Index_Read, @_LapeCollectionItem_Index_Write);
-    addClassVar('TCollectionItem', 'DisplayName', 'String', @_LapeCollectionItem_DisplayName_Read, @_LapeCollectionItem_DisplayName_Write);
-    addGlobalFunc('procedure TCollectionItem.Init(ACollection: TCollection)', @_LapeCollectionItem_Init);
-
-    addGlobalFunc('function TCollection.Owner: TPersistent;', @_LapeCollection_Owner);
-    addGlobalFunc('function TCollection.Add: TCollectionItem;', @_LapeCollection_Add);
-    addGlobalFunc('procedure TCollection.BeginUpdate;', @_LapeCollection_BeginUpdate);
-    addGlobalFunc('procedure TCollection.Clear;', @_LapeCollection_Clear);
-    addGlobalFunc('procedure TCollection.EndUpdate;', @_LapeCollection_EndUpdate);
-    addGlobalFunc('procedure TCollection.Delete(Index: Integer);', @_LapeCollection_Delete);
-    addGlobalFunc('function TCollection.Insert(Index: Integer): TCollectionItem;', @_LapeCollection_Insert);
-    addGlobalFunc('function TCollection.FindItemID(ID: Integer): TCollectionItem;', @_LapeCollection_FindItemID);
-    addGlobalFunc('procedure TCollection.Exchange(Const Index1, index2: Integer);', @_LapeCollection_Exchange);
-    addClassVar('TCollection', 'Count', 'Integer', @_LapeCollection_Count_Read, nil);
-    addClassVar('TCollection', 'Items', 'TCollectionItem', @_LapeCollection_Items_Index_Read, @_LapeCollection_Items_Index_Write, True);
-
-    addClass('TComponent', 'TPersistent');
-    addGlobalType('(csLoading, csReading, csWriting, csDestroying,csDesigning, csAncestor, csUpdating, csFixups, csFreeNotification,csInline, csDesignInstance)', 'TComponentState');
-    addGlobalFunc('procedure TComponent.Init(AOwner: TComponent); overload', @_LapeComponent_Init);
-    addGlobalFunc('procedure TComponent.DestroyComponents;', @_LapeComponent_DestroyComponents);
-    addGlobalFunc('procedure TComponent.Destroying;', @_LapeComponent_Destroying);
+    addClass('TComponent');
+    addGlobalFunc('procedure TComponent.Init(AOwner: TComponent)', @_LapeComponent_Init);
     addGlobalFunc('function TComponent.FindComponent(const AName: String): TComponent;', @_LapeComponent_FindComponent);
     addGlobalFunc('procedure TComponent.InsertComponent(AComponent: TComponent);', @_LapeComponent_InsertComponent);
     addGlobalFunc('procedure TComponent.RemoveComponent(AComponent: TComponent);', @_LapeComponent_RemoveComponent);
     addGlobalFunc('function TComponent.GetComponent(index: Integer): TComponent;', @_LapeComponent_Components);
     addClassVar('TComponent', 'ComponentCount', 'Integer', @_LapeComponent_ComponentCount_Read);
     addClassVar('TComponent', 'ComponentIndex', 'Integer', @_LapeComponent_ComponentIndex_Read, @_LapeComponent_ComponentIndex_Write);
-    addClassVar('TComponent', 'ComponentState', 'TComponentState', @_LapeComponent_ComponentState_Read);
     addClassVar('TComponent', 'Owner', 'TComponent', @_LapeComponent_Owner_Read);
     addClassVar('TComponent', 'Name', 'TComponentName', @_LapeComponent_Name_Read, @_LapeComponent_Name_Write);
     addClassVar('TComponent', 'Tag', 'PtrInt', @_LapeComponent_Tag_Read, @_LapeComponent_Tag_Write);
@@ -931,15 +687,6 @@ begin
     addGlobalFunc('procedure TStream.ReadBuffer(var Buffer; Count: Integer);', @_LapeStream_ReadBuffer);
     addGlobalFunc('procedure TStream.WriteBuffer(constref Buffer; Count: Integer);', @_LapeStream_WriteBuffer);
     addGlobalFunc('function TStream.CopyFrom(Source: TStream; Count: Int64): Int64;', @_LapeStream_CopyFrom);
-    addGlobalFunc('function TStream.ReadComponent(Instance: TComponent): TComponent;', @_LapeStream_ReadComponent);
-    addGlobalFunc('function TStream.ReadComponentRes(Instance: TComponent): TComponent;', @_LapeStream_ReadComponentRes);
-    addGlobalFunc('procedure TStream.WriteComponent(Instance: TComponent);', @_LapeStream_WriteComponent);
-    addGlobalFunc('procedure TStream.WriteComponentRes(const ResName: String; Instance: TComponent);', @_LapeStream_WriteComponentRes);
-    addGlobalFunc('procedure TStream.WriteDescendent(Instance, Ancestor: TComponent);', @_LapeStream_WriteDescendent);
-    addGlobalFunc('procedure TStream.WriteDescendentRes(const ResName: String; Instance, Ancestor: TComponent);', @_LapeStream_WriteDescendentRes);
-    addGlobalFunc('procedure TStream.WriteResourceHeader(const ResName: String; var FixupInfo: Integer);', @_LapeStream_WriteResourceHeader);
-    addGlobalFunc('procedure TStream.FixupResourceHeader(FixupInfo: Integer);', @_LapeStream_FixupResourceHeader);
-    addGlobalFunc('procedure TStream.ReadResHeader;', @_LapeStream_ReadResHeader);
     addGlobalFunc('function TStream.ReadByte: Byte;', @_LapeStream_ReadByte);
     addGlobalFunc('function TStream.ReadDWord: UInt32;', @_LapeStream_ReadDWord);
     addGlobalFunc('function TStream.ReadAnsiString: String;', @_LapeStream_ReadAnsiString);
@@ -980,7 +727,7 @@ begin
     addGlobalFunc('function TStringStream.ReadString(Count: Integer): String;', @_LapeStringStream_ReadString);
     addGlobalFunc('procedure TStringStream.WriteString(const AString: String);', @_LapeStringStream_WriteString);
 
-    addClass('TStrings', 'TPersistent');
+    addClass('TStrings');
     addGlobalFunc('function TStrings.Add(const S: String): Integer;', @_LapeStrings_Add);
     addGlobalFunc('function TStrings.AddObject(const S: String; AObject: TObject): Integer;', @_LapeStrings_AddObject);
     addGlobalFunc('procedure TStrings.Append(const S: String);', @_LapeStrings_Append);
@@ -1010,7 +757,7 @@ begin
     addClassVar('TStrings', 'Names', 'String', @_LapeStrings_Names_Read, nil, True);
     addClassVar('TStrings', 'ValueFromIndex', 'String', @_LapeStrings_ValueFromIndex_Read, @_LapeStrings_ValueFromIndex_Write, True);
     addClassVar('TStrings', 'Text', 'String', @_LapeStrings_Text_Read, @_LapeStrings_Text_Write);
-    addGlobalFunc('procedure TStrings.Init; override', @_LapeStrings_Init);
+    addGlobalFunc('procedure TStrings.Init', @_LapeStrings_Init);
 
     addClass('TStringList', 'TStrings');
 

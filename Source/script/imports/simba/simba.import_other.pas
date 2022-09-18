@@ -8,7 +8,7 @@ implementation
 
 uses
   classes, sysutils, clipbrd, extctrls, lptypes,
-  simba.script_compiler, simba.nativeinterface, simba.scriptthread, simba.stringutil, simba.outputform,
+  simba.script_compiler, simba.nativeinterface, simba.scriptthread, simba.stringutil,
   simba.settings, simba.mufasatypes;
 
 procedure _LapePlaySound(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

@@ -33,49 +33,9 @@ type
   PFont = ^TFont;
   PPersistent = ^TPersistent;
 
-procedure _LapeControl_AdjustSize(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PControl(Params^[0])^.AdjustSize();
-end;
-
 procedure _LapeControl_SetBounds(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PControl(Params^[0])^.SetBounds(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
-end;
-
-procedure _LapeControl_SetInitialBounds(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PControl(Params^[0])^.SetInitialBounds(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
-end;
-
-procedure _LapeControl_SetBoundsKeepBase(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PControl(Params^[0])^.SetBoundsKeepBase(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
-end;
-
-procedure _LapeControl_GetPreferredSize(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PControl(Params^[0])^.GetPreferredSize(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pboolean(Params^[3])^, Pboolean(Params^[4])^);
-end;
-
-procedure _LapeControl_GetDefaultWidth(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  Pinteger(Result)^ := PControl(Params^[0])^.GetDefaultWidth();
-end;
-
-procedure _LapeControl_GetDefaultHeight(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  Pinteger(Result)^ := PControl(Params^[0])^.GetDefaultHeight();
-end;
-
-procedure _LapeControl_BaseBounds_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PRect(Result)^ := PControl(Params^[0])^.BaseBounds;
-end;
-
-procedure _LapeControl_ReadBounds_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PRect(Result)^ := PControl(Params^[0])^.ReadBounds;
 end;
 
 procedure _LapeControl_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -83,79 +43,9 @@ begin
   PControl(Params^[0])^ := TControl.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeControl_EditingDone(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PControl(Params^[0])^.EditingDone();
-end;
-
-procedure _LapeControl_ExecuteDefaultAction(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PControl(Params^[0])^.ExecuteDefaultAction();
-end;
-
-procedure _LapeControl_ExecuteCancelAction(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PControl(Params^[0])^.ExecuteCancelAction();
-end;
-
 procedure _LapeControl_BringToFront(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PControl(Params^[0])^.BringToFront();
-end;
-
-procedure _LapeControl_HasParent(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PControl(Params^[0])^.HasParent();
-end;
-
-procedure _LapeControl_GetParentComponent(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PComponent(Result)^ := PControl(Params^[0])^.GetParentComponent();
-end;
-
-procedure _LapeControl_IsParentOf(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  Pboolean(Result)^ := PControl(Params^[0])^.IsParentOf(PControl(Params^[1])^);
-end;
-
-procedure _LapeControl_GetTopParent(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PControl(Result)^ := PControl(Params^[0])^.GetTopParent();
-end;
-
-procedure _LapeControl_IsVisible(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PControl(Params^[0])^.IsVisible();
-end;
-
-procedure _LapeControl_IsControlVisible(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PControl(Params^[0])^.IsControlVisible();
-end;
-
-procedure _LapeControl_IsEnabled(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PControl(Params^[0])^.IsEnabled();
-end;
-
-procedure _LapeControl_IsParentColor(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PControl(Params^[0])^.IsParentColor();
-end;
-
-procedure _LapeControl_IsParentFont(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PControl(Params^[0])^.IsParentFont();
-end;
-
-procedure _LapeControl_FormIsUpdating(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  Pboolean(Result)^ := PControl(Params^[0])^.FormIsUpdating();
-end;
-
-procedure _LapeControl_IsProcessingPaintMsg(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  Pboolean(Result)^ := PControl(Params^[0])^.IsProcessingPaintMsg();
 end;
 
 procedure _LapeControl_Hide(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -203,11 +93,6 @@ begin
   PPoint(Result)^ := PControl(Params^[0])^.ControlToScreen(PPoint(Params^[1])^);
 end;
 
-procedure _LapeControl_GetChildsRect(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PRect(Result)^ := PControl(Params^[0])^.GetChildrenRect(Pboolean(Params^[1])^);
-end;
-
 procedure _LapeControl_Show(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PControl(Params^[0])^.Show();
@@ -238,16 +123,6 @@ begin
   PControl(Params^[0])^.BoundsRect := PRect(Params^[1])^;
 end;
 
-procedure _LapeControl_BoundsRectForNewParent_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PRect(Result)^ := PControl(Params^[0])^.BoundsRectForNewParent;
-end;
-
-procedure _LapeControl_BoundsRectForNewParent_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PControl(Params^[0])^.BoundsRectForNewParent := PRect(Params^[1])^;
-end;
-
 procedure _LapeControl_Caption_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PString(Result)^ := PControl(Params^[0])^.Caption;
@@ -266,11 +141,6 @@ end;
 procedure _LapeControl_ClientHeight_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PControl(Params^[0])^.ClientHeight := PInteger(Params^[1])^;
-end;
-
-procedure _LapeControl_ClientOrigin_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PPoint(Result)^ := PControl(Params^[0])^.ClientOrigin;
 end;
 
 procedure _LapeControl_ClientRect_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -298,11 +168,6 @@ begin
   PControl(Params^[0])^.Color := PInteger(Params^[1])^;
 end;
 
-procedure _LapeControl_ControlOrigin_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PPoint(Result)^ := PControl(Params^[0])^.ControlOrigin;
-end;
-
 procedure _LapeControl_Enabled_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PBoolean(Result)^ := PControl(Params^[0])^.Enabled;
@@ -323,17 +188,7 @@ begin
   PControl(Params^[0])^.Font := PFont(Params^[1])^;
 end;
 
-procedure _LapeControl_IsControl_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PControl(Params^[0])^.IsControl;
-end;
-
-procedure _LapeControl_IsControl_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PControl(Params^[0])^.IsControl := PBoolean(Params^[1])^;
-end;
-
-procedure _LapeControl_MouseEntered_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeControl_MouseInClient_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PBoolean(Result)^ := PControl(Params^[0])^.MouseInClient;
 end;
@@ -386,11 +241,6 @@ end;
 procedure _LapeControl_Visible_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PControl(Params^[0])^.Visible := PBoolean(Params^[1])^;
-end;
-
-procedure _LapeControl_IsRightToLeft(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PControl(Params^[0])^.IsRightToLeft();
 end;
 
 procedure _LapeControl_Left_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -493,24 +343,9 @@ begin
   PWinControl(Params^[0])^.BorderWidth := Pinteger(Params^[1])^;
 end;
 
-procedure _LapeWinControl_BoundsLockCount_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  Pinteger(Result)^ := PWinControl(Params^[0])^.BoundsLockCount;
-end;
-
 procedure _LapeWinControl_Brush_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PBrush(Result)^ := PWinControl(Params^[0])^.Brush;
-end;
-
-procedure _LapeWinControl_CachedClientHeight_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  Pinteger(Result)^ := PWinControl(Params^[0])^.CachedClientHeight;
-end;
-
-procedure _LapeWinControl_CachedClientWidth_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  Pinteger(Result)^ := PWinControl(Params^[0])^.CachedClientWidth;
 end;
 
 procedure _LapeWinControl_ControlCount_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -536,11 +371,6 @@ end;
 procedure _LapeWinControl_Handle_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PWinControl(Params^[0])^.Handle := PHandle(Params^[1])^;
-end;
-
-procedure _LapeWinControl_IsResizing_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PWinControl(Params^[0])^.IsResizing;
 end;
 
 procedure _LapeWinControl_TabOrder_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -613,41 +443,6 @@ begin
   PBoolean(Result)^ := PWinControl(Params^[0])^.Showing;
 end;
 
-procedure _LapeWinControl_AutoSizeDelayed(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  Pboolean(Result)^ := PWinControl(Params^[0])^.AutoSizeDelayed();
-end;
-
-procedure _LapeWinControl_AutoSizeDelayedReport(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PString(Result)^ := PWinControl(Params^[0])^.AutoSizeDelayedReport();
-end;
-
-procedure _LapeWinControl_AutoSizeDelayedHandle(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PWinControl(Params^[0])^.AutoSizeDelayedHandle();
-end;
-
-procedure _LapeWinControl_BeginUpdateBounds(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PWinControl(Params^[0])^.BeginUpdateBounds();
-end;
-
-procedure _LapeWinControl_EndUpdateBounds(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PWinControl(Params^[0])^.EndUpdateBounds();
-end;
-
-procedure _LapeWinControl_LockRealizeBounds(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PWinControl(Params^[0])^.LockRealizeBounds();
-end;
-
-procedure _LapeWinControl_UnlockRealizeBounds(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PWinControl(Params^[0])^.UnlockRealizeBounds();
-end;
-
 procedure _LapeWinControl_ControlAtPos(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PControl(Result)^ := PWinControl(Params^[0])^.ControlAtPos(PPoint(Params^[1])^, PBoolean(Params^[2])^);
@@ -668,34 +463,9 @@ begin
   PWinControl(Params^[0])^.SetBounds(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
 end;
 
-procedure _LapeWinControl_GetChildsRect(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PRect(Result)^ := PWinControl(Params^[0])^.GetChildrenRect(Pboolean(Params^[1])^);
-end;
-
-procedure _LapeWinControl_DisableAlign(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PWinControl(Params^[0])^.DisableAlign();
-end;
-
-procedure _LapeWinControl_EnableAlign(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PWinControl(Params^[0])^.EnableAlign();
-end;
-
-procedure _LapeWinControl_ReAlign(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PWinControl(Params^[0])^.ReAlign();
-end;
-
 procedure _LapeWinControl_ScrollBy(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PWinControl(Params^[0])^.ScrollBy(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-procedure _LapeWinControl_WriteLayoutDebugReport(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PWinControl(Params^[0])^.WriteLayoutDebugReport(PString(Params^[1])^);
 end;
 
 procedure _LapeWinControl_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -743,19 +513,9 @@ begin
   PWinControl(Params^[0])^.SelectNext(PWinControl(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
 end;
 
-procedure _LapeWinControl_GetTextLen(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PInteger(Result)^ := PWinControl(Params^[0])^.GetTextLen();
-end;
-
 procedure _LapeWinControl_Invalidate(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PWinControl(Params^[0])^.Invalidate();
-end;
-
-procedure _LapeWinControl_AddControl(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PWinControl(Params^[0])^.AddControl();
 end;
 
 procedure _LapeWinControl_InsertControl(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -788,11 +548,6 @@ begin
   PWinControl(Params^[0])^.SetFocus();
 end;
 
-procedure _LapeWinControl_FlipChildren(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PWinControl(Params^[0])^.FlipChildren(PBoolean(Params^[1])^);
-end;
-
 procedure _LapeWinControl_ScaleBy(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PWinControl(Params^[0])^.ScaleBy(PInteger(Params^[1])^, PInteger(Params^[2])^);
@@ -803,19 +558,9 @@ begin
   PBoolean(Result)^ := PWinControl(Params^[0])^.HandleAllocated();
 end;
 
-procedure _LapeWinControl_ParentHandlesAllocated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  Pboolean(Result)^ := PWinControl(Params^[0])^.ParentHandlesAllocated();
-end;
-
 procedure _LapeWinControl_HandleNeeded(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PWinControl(Params^[0])^.HandleNeeded();
-end;
-
-procedure _LapeWinControl_BrushCreated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PBoolean(Result)^ := PWinControl(Params^[0])^.BrushCreated();
 end;
 
 procedure _LapeWinControl_PaintTo(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -1039,11 +784,17 @@ begin
   begin
     addGlobalType('(ssShift, ssAlt, ssCtrl, ssLeft, ssRight, ssMiddle, ssDouble, ssMeta, ssSuper, ssHyper, ssAltGr, ssCaps, ssNum, ssScroll, ssTriple, ssQuad, ssExtra1, ssExtra2)', 'TShiftStateEnum');
     addGlobalType('set of TShiftStateEnum', 'TShiftState');
-    addGlobalType('procedure(Sender: TObject; var Key: Int16; Shift: TShiftState) of object', 'TKeyEvent', FFI_DEFAULT_ABI);
-    addGlobalType('procedure(Sender: TObject; var Key: Char) of object', 'TKeyPressEvent', FFI_DEFAULT_ABI);
+
+    addCallbackType('TKeyEvent = procedure(Sender: TObject; var Key: Int16; Shift: TShiftState) of object');
+    addCallbackType('TKeyPressEvent = procedure(Sender: TObject; var Key: Char) of object');
+
     addGlobalType('(mbLeft, mbRight, mbMiddle, mbExtra1, mbExtra2)', 'TMouseButton');
-    addGlobalType('procedure(Sender: TObject; Button: TMouseButton;Shift: TShiftState; X, Y: Integer) of object', 'TMouseEvent', FFI_DEFAULT_ABI);
-    addGlobalType('procedure(Sender: TObject; Shift: TShiftState; X, Y: Integer) of object', 'TMouseMoveEvent', FFI_DEFAULT_ABI);
+
+    addCallbackType('TMouseEvent = procedure(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer) of object');
+    addCallbackType('TMouseMoveEvent = procedure(Sender: TObject; Shift: TShiftState; X, Y: Integer) of object');
+    addCallbackType('TMouseWheelEvent = procedure(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean) of object');
+    addCallbackType('TMouseWheelUpDownEvent = procedure(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean) of object');
+
     addGlobalType('(sbHorizontal, sbVertical)', 'TScrollBarKind');
     addGlobalType('(alNone, alTop, alBottom, alLeft, alRight, alClient, alCustom)', 'TAlign');
     addGlobalType('Integer', 'TCursor');
@@ -1056,31 +807,9 @@ begin
 
     addClass('TControl', 'TComponent');
     addClass('TWinControl', 'TControl');
-    addGlobalFunc('procedure TControl.AdjustSize;', @_LapeControl_AdjustSize);
-    addGlobalFunc('procedure TControl.SetBounds(aLeft, aTop, aWidth, aHeight: integer);', @_LapeControl_SetBounds);
-    addGlobalFunc('procedure TControl.SetInitialBounds(aLeft, aTop, aWidth, aHeight: integer);', @_LapeControl_SetInitialBounds);
-    addGlobalFunc('procedure TControl.SetBoundsKeepBase(aLeft, aTop, aWidth, aHeight: integer);', @_LapeControl_SetBoundsKeepBase);
-    addGlobalFunc('procedure TControl.GetPreferredSize(var PreferredWidth, PreferredHeight: integer;Raw: boolean;WithThemeSpace: boolean);', @_LapeControl_GetPreferredSize);
-    addGlobalFunc('function TControl.GetDefaultWidth: integer;', @_LapeControl_GetDefaultWidth);
-    addGlobalFunc('function TControl.GetDefaultHeight: integer;', @_LapeControl_GetDefaultHeight);
-    addClassVar('TControl', 'BaseBounds', 'TRect', @_LapeControl_BaseBounds_Read);
-    addClassVar('TControl', 'ReadBounds', 'TRect', @_LapeControl_ReadBounds_Read);
+    addGlobalFunc('procedure TControl.SetBounds(aLeft, aTop, aWidth, aHeight: Integer);', @_LapeControl_SetBounds);
     addGlobalFunc('procedure TControl.Init(TheOwner: TComponent); override', @_LapeControl_Init);
-    addGlobalFunc('procedure TControl.EditingDone;', @_LapeControl_EditingDone);
-    addGlobalFunc('procedure TControl.ExecuteDefaultAction;', @_LapeControl_ExecuteDefaultAction);
-    addGlobalFunc('procedure TControl.ExecuteCancelAction;', @_LapeControl_ExecuteCancelAction);
     addGlobalFunc('procedure TControl.BringToFront;', @_LapeControl_BringToFront);
-    addGlobalFunc('function TControl.HasParent: Boolean;', @_LapeControl_HasParent);
-    addGlobalFunc('function TControl.GetParentComponent: TComponent;', @_LapeControl_GetParentComponent);
-    addGlobalFunc('function TControl.IsParentOf(AControl: TControl): boolean;', @_LapeControl_IsParentOf);
-    addGlobalFunc('function TControl.GetTopParent: TControl;', @_LapeControl_GetTopParent);
-    addGlobalFunc('function TControl.IsVisible: Boolean;', @_LapeControl_IsVisible);
-    addGlobalFunc('function TControl.IsControlVisible: Boolean;', @_LapeControl_IsControlVisible);
-    addGlobalFunc('function TControl.IsEnabled: Boolean;', @_LapeControl_IsEnabled);
-    addGlobalFunc('function TControl.IsParentColor: Boolean;', @_LapeControl_IsParentColor);
-    addGlobalFunc('function TControl.IsParentFont: Boolean;', @_LapeControl_IsParentFont);
-    addGlobalFunc('function TControl.FormIsUpdating: boolean;', @_LapeControl_FormIsUpdating);
-    addGlobalFunc('function TControl.IsProcessingPaintMsg: boolean;', @_LapeControl_IsProcessingPaintMsg);
     addGlobalFunc('procedure TControl.Hide;', @_LapeControl_Hide);
     addGlobalFunc('procedure TControl.Refresh;', @_LapeControl_Refresh);
     addGlobalFunc('procedure TControl.Repaint;', @_LapeControl_Repaint);
@@ -1090,27 +819,20 @@ begin
     addGlobalFunc('function TControl.ClientToScreen(const APoint: TPoint): TPoint;', @_LapeControl_ClientToScreen);
     addGlobalFunc('function TControl.ScreenToControl(const APoint: TPoint): TPoint;', @_LapeControl_ScreenToControl);
     addGlobalFunc('function TControl.ControlToScreen(const APoint: TPoint): TPoint;', @_LapeControl_ControlToScreen);
-    addGlobalFunc('function TControl.GetChildsRect(Scrolled: boolean): TRect;', @_LapeControl_GetChildsRect);
     addGlobalFunc('procedure TControl.ShowHint;', @_LapeControl_ShowHint);
-    addGlobalFunc('function TControl.IsRightToLeft: Boolean;', @_LapeControl_IsRightToLeft);
     addGlobalFunc('procedure TControl.Show;', @_LapeControl_Show);
     addGlobalFunc('procedure TControl.Update;', @_LapeControl_Update);
     addClassVar('TControl', 'Cursor', 'TCursor', @_LapeControl_Cursor_Read, @_LapeControl_Cursor_Write);
     addClassVar('TControl', 'Align', 'TAlign', @_LapeControl_Align_Read, @_LapeControl_Align_Write);
     addClassVar('TControl', 'AutoSize', 'Boolean', @_LapeControl_AutoSize_Read, @_LapeControl_AutoSize_Write);
     addClassVar('TControl', 'BoundsRect', 'TRect', @_LapeControl_BoundsRect_Read, @_LapeControl_BoundsRect_Write);
-    addClassVar('TControl', 'BoundsRectForNewParent', 'TRect', @_LapeControl_BoundsRectForNewParent_Read, @_LapeControl_BoundsRectForNewParent_Write);
     addClassVar('TControl', 'Caption', 'String', @_LapeControl_Caption_Read, @_LapeControl_Caption_Write);
     addClassVar('TControl', 'ClientHeight', 'Integer', @_LapeControl_ClientHeight_Read, @_LapeControl_ClientHeight_Write);
-    addClassVar('TControl', 'ClientOrigin', 'TPoint', @_LapeControl_ClientOrigin_Read);
     addClassVar('TControl', 'ClientRect', 'TRect', @_LapeControl_ClientRect_Read);
     addClassVar('TControl', 'ClientWidth', 'Integer', @_LapeControl_ClientWidth_Read, @_LapeControl_ClientWidth_Write);
     addClassVar('TControl', 'Color', 'Integer', @_LapeControl_Color_Read, @_LapeControl_Color_Write);
-    addClassVar('TControl', 'ControlOrigin', 'TPoint', @_LapeControl_ControlOrigin_Read);
     addClassVar('TControl', 'Enabled', 'Boolean', @_LapeControl_Enabled_Read, @_LapeControl_Enabled_Write);
     addClassVar('TControl', 'Font', 'TFont', @_LapeControl_Font_Read, @_LapeControl_Font_Write);
-    addClassVar('TControl', 'IsControl', 'Boolean', @_LapeControl_IsControl_Read, @_LapeControl_IsControl_Write);
-    addClassVar('TControl', 'MouseEntered', 'Boolean', @_LapeControl_MouseEntered_Read);
     addClassVar('TControl', 'OnChangeBounds', 'TNotifyEvent', @_LapeControl_OnChangeBounds_Read, @_LapeControl_OnChangeBounds_Write);
     addClassVar('TControl', 'OnClick', 'TNotifyEvent', @_LapeControl_OnClick_Read, @_LapeControl_OnClick_Write);
     addClassVar('TControl', 'OnResize', 'TNotifyEvent', @_LapeControl_OnResize_Read, @_LapeControl_OnResize_Write);
@@ -1123,15 +845,11 @@ begin
     addClassVar('TControl', 'Hint', 'String', @_LapeControl_Hint_Read, @_LapeControl_Hint_Write);
     addClassVar('TControl', 'Parent', 'TWinControl', @_LapeControl_Parent_Read, @_LapeControl_Parent_Write);
 
-    addClassVar('TWinControl', 'BorderWidth', 'integer', @_LapeWinControl_BorderWidth_Read, @_LapeWinControl_BorderWidth_Write);
-    addClassVar('TWinControl', 'BoundsLockCount', 'integer', @_LapeWinControl_BoundsLockCount_Read);
+    addClassVar('TWinControl', 'BorderWidth', 'Integer', @_LapeWinControl_BorderWidth_Read, @_LapeWinControl_BorderWidth_Write);
     addClassVar('TWinControl', 'Brush', 'TBrush', @_LapeWinControl_Brush_Read);
-    addClassVar('TWinControl', 'CachedClientHeight', 'integer', @_LapeWinControl_CachedClientHeight_Read);
-    addClassVar('TWinControl', 'CachedClientWidth', 'integer', @_LapeWinControl_CachedClientWidth_Read);
     addClassVar('TWinControl', 'ControlCount', 'Integer', @_LapeWinControl_ControlCount_Read);
     addClassVar('TWinControl', 'DoubleBuffered', 'Boolean', @_LapeWinControl_DoubleBuffered_Read, @_LapeWinControl_DoubleBuffered_Write);
     addClassVar('TWinControl', 'Handle', 'THandle', @_LapeWinControl_Handle_Read, @_LapeWinControl_Handle_Write);
-    addClassVar('TWinControl', 'IsResizing', 'Boolean', @_LapeWinControl_IsResizing_Read);
     addClassVar('TWinControl', 'TabOrder', 'Integer', @_LapeWinControl_TabOrder_Read, @_LapeWinControl_TabOrder_Write);
     addClassVar('TWinControl', 'TabStop', 'Boolean', @_LapeWinControl_TabStop_Read, @_LapeWinControl_TabStop_Write);
     addClassVar('TWinControl', 'OnEnter', 'TNotifyEvent', @_LapeWinControl_OnEnter_Read, @_LapeWinControl_OnEnter_Write);
@@ -1141,36 +859,26 @@ begin
     addClassVar('TWinControl', 'OnKeyUp', 'TKeyEvent', nil, @_LapeWinControl_OnKeyUp_Write);
     addClassVar('TWinControl', 'ParentWindow', 'THandle', @_LapeWinControl_ParentWindow_Read, @_LapeWinControl_ParentWindow_Write);
     addClassVar('TWinControl', 'Showing', 'Boolean', @_LapeWinControl_Showing_Read);
-    addGlobalFunc('procedure TWinControl.BeginUpdateBounds;', @_LapeWinControl_BeginUpdateBounds);
-    addGlobalFunc('procedure TWinControl.EndUpdateBounds;', @_LapeWinControl_EndUpdateBounds);
-    addGlobalFunc('procedure TWinControl.LockRealizeBounds;', @_LapeWinControl_LockRealizeBounds);
-    addGlobalFunc('procedure TWinControl.UnlockRealizeBounds;', @_LapeWinControl_UnlockRealizeBounds);
     addGlobalFunc('function TWinControl.ControlAtPos(const Pos: TPoint; AllowDisabled: Boolean): TControl;', @_LapeWinControl_ControlAtPos);
     addGlobalFunc('function TWinControl.ControlAtPos(const Pos: TPoint;AllowDisabled, AllowWinControls: Boolean): TControl; overload', @_LapeWinControl_ControlAtPosEx);
     addGlobalFunc('function TWinControl.ContainsControl(Control: TControl): Boolean;', @_LapeWinControl_ContainsControl);
-    addGlobalFunc('procedure TWinControl.DisableAlign;', @_LapeWinControl_DisableAlign);
-    addGlobalFunc('procedure TWinControl.EnableAlign;', @_LapeWinControl_EnableAlign);
-    addGlobalFunc('procedure TWinControl.ReAlign;', @_LapeWinControl_ReAlign);
     addGlobalFunc('procedure TWinControl.ScrollBy(DeltaX, DeltaY: Integer);', @_LapeWinControl_ScrollBy);
     addGlobalFunc('procedure TWinControl.Init(TheOwner: TComponent); override', @_LapeWinControl_Init);
     addGlobalFunc('procedure TWinControl.CreateParented(AParentWindow: Thandle);', @_LapeWinControl_CreateParented);
     addGlobalFunc('function TWinControl.CanFocus: Boolean;', @_LapeWinControl_CanFocus);
-    addGlobalFunc('function TWinControl.GetControlIndex(AControl: TControl): integer;', @_LapeWinControl_GetControlIndex);
-    addGlobalFunc('procedure TWinControl.SetControlIndex(AControl: TControl; NewIndex: integer);', @_LapeWinControl_SetControlIndex);
+    addGlobalFunc('function TWinControl.GetControlIndex(AControl: TControl): Integer;', @_LapeWinControl_GetControlIndex);
+    addGlobalFunc('procedure TWinControl.SetControlIndex(AControl: TControl; NewIndex: Integer);', @_LapeWinControl_SetControlIndex);
     addGlobalFunc('function TWinControl.Focused: Boolean;', @_LapeWinControl_Focused);
     addGlobalFunc('function TWinControl.PerformTab(ForwardTab: boolean): boolean;', @_LapeWinControl_PerformTab);
     addGlobalFunc('function TWinControl.FindChildControl(const ControlName: String): TControl;', @_LapeWinControl_FindChildControl);
     addGlobalFunc('procedure TWinControl.SelectNext(CurControl: TWinControl;GoForward, CheckTabStop: Boolean);', @_LapeWinControl_SelectNext);
-    addGlobalFunc('procedure TWinControl.AddControl;', @_LapeWinControl_AddControl);
     addGlobalFunc('procedure TWinControl.InsertControl(AControl: TControl);', @_LapeWinControl_InsertControl);
-    addGlobalFunc('procedure TWinControl.InsertControl(AControl: TControl; Index: integer); overload', @_LapeWinControl_InsertControlEx);
+    addGlobalFunc('procedure TWinControl.InsertControl(AControl: TControl; Index: Integer); overload', @_LapeWinControl_InsertControlEx);
     addGlobalFunc('procedure TWinControl.RemoveControl(AControl: TControl);', @_LapeWinControl_RemoveControl);
     addGlobalFunc('procedure TWinControl.SetFocus;', @_LapeWinControl_SetFocus);
-    addGlobalFunc('procedure TWinControl.FlipChildren(AllLevels: Boolean);', @_LapeWinControl_FlipChildren);
     addGlobalFunc('procedure TWinControl.ScaleBy(Multiplier, Divider: Integer);', @_LapeWinControl_ScaleBy);
     addGlobalFunc('function TWinControl.HandleAllocated: Boolean;', @_LapeWinControl_HandleAllocated);
     addGlobalFunc('procedure TWinControl.HandleNeeded;', @_LapeWinControl_HandleNeeded);
-    addGlobalFunc('function TWinControl.BrushCreated: Boolean;', @_LapeWinControl_BrushCreated);
     addGlobalFunc('procedure TWinControl.PaintTo(ACanvas: TCanvas; X, Y: Integer);', @_LapeWinControl_PaintTo);
     addGlobalFunc('procedure TWinControl.SetShape(AShape: TBitmap);', @_LapeWinControl_SetShape);
 
@@ -1179,15 +887,15 @@ begin
     addClassVar('TCustomControl', 'Canvas', 'TCanvas', @_LapeCustomControl_Canvas_Read, @_LapeCustomControl_Canvas_Write);
     addClassVar('TCustomControl', 'OnPaint', 'TNotifyEvent', @_LapeCustomControl_OnPaint_Read, @_LapeCustomControl_OnPaint_Write);
 
-    addClass('TControlScrollBar', 'TPersistent');
+    addClass('TControlScrollBar');
     addGlobalFunc('procedure TControlScrollBar.Init(AControl: TWinControl; AKind: TScrollBarKind)', @_LapeControlScrollBar_Init);
     addGlobalFunc('function TControlScrollBar.IsScrollBarVisible: Boolean;', @_LapeControlScrollBar_IsScrollBarVisible);
     addGlobalFunc('function TControlScrollBar.ScrollPos: Integer;', @_LapeControlScrollBar_ScrollPos);
     addGlobalFunc('function TControlScrollBar.GetOtherScrollBar: TControlScrollBar;', @_LapeControlScrollBar_GetOtherScrollBar);
-    addClassVar('TControlScrollBar', 'Size', 'integer', @_LapeControlScrollBar_Size_Read);
-    addGlobalFunc('function TControlScrollBar.ClientSize: integer;', @_LapeControlScrollBar_ClientSize);
-    addGlobalFunc('function TControlScrollBar.ClientSizeWithBar: integer;', @_LapeControlScrollBar_ClientSizeWithBar);
-    addGlobalFunc('function TControlScrollBar.ClientSizeWithoutBar: integer;', @_LapeControlScrollBar_ClientSizeWithoutBar);
+    addClassVar('TControlScrollBar', 'Size', 'Integer', @_LapeControlScrollBar_Size_Read);
+    addGlobalFunc('function TControlScrollBar.ClientSize: Integer;', @_LapeControlScrollBar_ClientSize);
+    addGlobalFunc('function TControlScrollBar.ClientSizeWithBar: Integer;', @_LapeControlScrollBar_ClientSizeWithBar);
+    addGlobalFunc('function TControlScrollBar.ClientSizeWithoutBar: Integer;', @_LapeControlScrollBar_ClientSizeWithoutBar);
     addClassVar('TControlScrollBar', 'Increment', 'Integer', @_LapeControlScrollBar_Increment_Read, @_LapeControlScrollBar_Increment_Write);
     addClassVar('TControlScrollBar', 'Page', 'Integer', @_LapeControlScrollBar_Page_Read, @_LapeControlScrollBar_Page_Write);
     addClassVar('TControlScrollBar', 'Smooth', 'Boolean', @_LapeControlScrollBar_Smooth_Read, @_LapeControlScrollBar_Smooth_Write);

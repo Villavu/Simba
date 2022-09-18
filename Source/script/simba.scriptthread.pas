@@ -51,7 +51,7 @@ uses
   cocoaall, cocoaint, cocoautils,
   {$ENDIF}
   forms, fileutil, lazloggerbase, lpmessages,
-  simba.outputform, simba.files, simba.datetime, simba.script_communication, simba.script_debugger;
+  simba.files, simba.datetime, simba.script_communication, simba.script_debugger;
 
 procedure TSimbaScriptThread.HandleTerminate(Sender: TObject);
 begin

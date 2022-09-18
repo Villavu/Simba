@@ -74,14 +74,13 @@ type
 
     procedure SetParent(Value: TWinControl); override;
     procedure SetZoom(Value: Single); virtual;
-  published
+  public
     property OnMouseDown;
     property OnMouseMove;
     property OnMouseUp;
     property OnMouseEnter;
     property OnMouseLeave;
     property OnDblClick;
-  public
     property OnPaintArea: TSimbaImageBoxPaintAreaEvent read FOnPaintArea write FOnPaintArea;
 
     property MousePoint: TPoint read FMousePoint;
@@ -451,6 +450,8 @@ begin
 
     Zoom := 1;
   end;
+
+  Paint();
 end;
 
 procedure TSimbaImageBox.ImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);

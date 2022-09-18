@@ -15,7 +15,6 @@ type
   PComponent = ^TComponent;
   PAlignment = ^TAlignment;
   PTextLayout = ^TTextLayout;
-  PWinControl = ^TWinControl;
   PButton = ^TButton;
   PButtonControl = ^TButtonControl;
   PButtonLayout = ^TButtonLayout;
@@ -31,7 +30,6 @@ type
   PCustomLabel = ^TCustomLabel;
   PCustomListBox = ^TCustomListBox;
   PCustomMemo = ^TCustomMemo;
-  PCustomScrollBar = ^TCustomScrollBar;
   PCustomSpeedButton = ^TCustomSpeedButton;
   PDrawItemEvent = ^TDrawItemEvent;
   PSelectionChangeEvent = ^TSelectionChangeEvent;
@@ -43,10 +41,7 @@ type
   PMemo = ^TMemo;
   PMemoScrollbar = ^TMemoScrollbar;
   PRadioButton = ^TRadioButton;
-  PScrollBar = ^TScrollBar;
-  PScrollEvent = ^TScrollEvent;
   PScrollStyle = ^TScrollStyle;
-  PScrollBarKind = ^TScrollBarKind;
   PSpeedButton = ^TSpeedButton;
   PBitmap = ^TBitmap;
   PNotifyEvent = ^TNotifyEvent;
@@ -55,134 +50,9 @@ type
   PRect = ^TRect;
   PCanvas = ^TCanvas;
 
-procedure _LapeCustomScrollBar_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomScrollBar(Params^[0])^ := TCustomScrollBar.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeCustomScrollBar_SetParams(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomScrollBar(Params^[0])^.SetParams(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
-end;
-
-procedure _LapeCustomScrollBar_SetParamsEx(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomScrollBar(Params^[0])^.SetParams(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
-end;
-
-procedure _LapeCustomScrollBar_Kind_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PScrollBarKind(Result)^ := PCustomScrollBar(Params^[0])^.Kind;
-end;
-
-procedure _LapeCustomScrollBar_Kind_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomScrollBar(Params^[0])^.Kind := PScrollBarKind(Params^[1])^;
-end;
-
-procedure _LapeCustomScrollBar_LargeChange_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  Pinteger(Result)^ := PCustomScrollBar(Params^[0])^.LargeChange;
-end;
-
-procedure _LapeCustomScrollBar_LargeChange_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomScrollBar(Params^[0])^.LargeChange := Pinteger(Params^[1])^;
-end;
-
-procedure _LapeCustomScrollBar_Max_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PInteger(Result)^ := PCustomScrollBar(Params^[0])^.Max;
-end;
-
-procedure _LapeCustomScrollBar_Max_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomScrollBar(Params^[0])^.Max := PInteger(Params^[1])^;
-end;
-
-procedure _LapeCustomScrollBar_Min_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PInteger(Result)^ := PCustomScrollBar(Params^[0])^.Min;
-end;
-
-procedure _LapeCustomScrollBar_Min_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomScrollBar(Params^[0])^.Min := PInteger(Params^[1])^;
-end;
-
-procedure _LapeCustomScrollBar_PageSize_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PInteger(Result)^ := PCustomScrollBar(Params^[0])^.PageSize;
-end;
-
-procedure _LapeCustomScrollBar_PageSize_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomScrollBar(Params^[0])^.PageSize := PInteger(Params^[1])^;
-end;
-
-procedure _LapeCustomScrollBar_Position_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PInteger(Result)^ := PCustomScrollBar(Params^[0])^.Position;
-end;
-
-procedure _LapeCustomScrollBar_Position_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomScrollBar(Params^[0])^.Position := PInteger(Params^[1])^;
-end;
-
-procedure _LapeCustomScrollBar_SmallChange_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  Pinteger(Result)^ := PCustomScrollBar(Params^[0])^.SmallChange;
-end;
-
-procedure _LapeCustomScrollBar_SmallChange_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomScrollBar(Params^[0])^.SmallChange := Pinteger(Params^[1])^;
-end;
-
-procedure _LapeCustomScrollBar_OnChange_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PNotifyEvent(Result)^ := PCustomScrollBar(Params^[0])^.OnChange;
-end;
-
-procedure _LapeCustomScrollBar_OnChange_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomScrollBar(Params^[0])^.OnChange := PNotifyEvent(Params^[1])^;
-end;
-
-procedure _LapeCustomScrollBar_OnScroll_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PScrollEvent(Result)^ := PCustomScrollBar(Params^[0])^.OnScroll;
-end;
-
-procedure _LapeCustomScrollBar_OnScroll_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomScrollBar(Params^[0])^.OnScroll := PScrollEvent(Params^[1])^;
-end;
-
-procedure _LapeCustomScrollBar_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomScrollBar(Params^[0])^.Free();
-end;
-
-procedure _LapeScrollBar_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PScrollBar(Params^[0])^ := TScrollBar.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeScrollBar_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PScrollBar(Params^[0])^.Free();
-end;
-
 procedure _LapeCustomComboBox_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PCustomComboBox(Params^[0])^ := TCustomComboBox.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeCustomComboBox_IntfGetItems(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PCustomComboBox(Params^[0])^.IntfGetItems();
 end;
 
 procedure _LapeCustomComboBox_AddItem(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
@@ -850,16 +720,6 @@ begin
   PGroupBox(Params^[0])^.Free();
 end;
 
-procedure _LapeMemoScrollbar_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PMemoScrollbar(Params^[0])^ := TMemoScrollbar.Create(PWinControl(Params^[1])^, PScrollBarKind(Params^[2])^);
-end;
-
-procedure _LapeMemoScrollbar_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
-begin
-  PMemoScrollbar(Params^[0])^.Free();
-end;
-
 procedure _LapeCustomMemo_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
 begin
   PCustomMemo(Params^[0])^ := TCustomMemo.Create(PComponent(Params^[1])^);
@@ -1305,35 +1165,15 @@ begin
   with Compiler do
   begin
     addGlobalType('(ssNone, ssHorizontal, ssVertical, ssBoth,ssAutoHorizontal, ssAutoVertical, ssAutoBoth)', 'TScrollStyle');
-    addGlobalType('(scLineUp, scLineDown, scPageUp, scPageDown, scPosition, scTrack, scTop, scBottom, scEndScroll)', 'TScrollCode');
-    addGlobalType('procedure(Sender: TObject; ScrollCode: TScrollCode; var ScrollPos: Integer) of object', 'TScrollEvent', FFI_DEFAULT_ABI);
     addGlobalType('(odSelected, odGrayed, odDisabled, odChecked, odFocused, odDefault, odHotLight, odInactive, odNoAccel, odNoFocusRect, odReserved1, odReserved2, odComboBoxEdit, odPainted)', 'TOwnerDrawStateType');
     addGlobalType('set of TOwnerDrawStateType', 'TOwnerDrawState');
     addGlobalType('procedure(Control: TWinControl; Index: Integer; ARect: TRect; State: TOwnerDrawState) of object', 'TDrawItemEvent', FFI_DEFAULT_ABI);
     addGlobalType('(csDropDown,csSimple,csDropDownList,csOwnerDrawFixed,csOwnerDrawVariable)', 'TComboBoxStyle');
     addGlobalType('(lbStandard, lbOwnerDrawFixed, lbOwnerDrawVariable, lbVirtual)', 'TListBoxStyle');
-    addGlobalType('(sbsNone, sbsSingle, sbsSunken)', 'TStaticBorderStyle');
     addGlobalType('(taLeftJustify, taRightJustify, taCenter)', 'TAlignment');
     addGlobalType('(cbUnchecked, cbChecked, cbGrayed)', 'TCheckBoxState');
     addGlobalType('(blGlyphLeft, blGlyphRight, blGlyphTop, blGlyphBottom)', 'TButtonLayout');
     addGlobalType('procedure(Sender: TObject; User: Boolean) of object', 'TSelectionChangeEvent', FFI_DEFAULT_ABI);
-
-    addClass('TCustomScrollBar', 'TWinControl');
-    addGlobalFunc('procedure TCustomScrollBar.Init(AOwner: TComponent); override', @_LapeCustomScrollBar_Init);
-    addGlobalFunc('procedure TCustomScrollBar.SetParams(APosition, AMin, AMax, APageSize: Integer);', @_LapeCustomScrollBar_SetParams);
-    addGlobalFunc('procedure TCustomScrollBar.SetParams(APosition, AMin, AMax: Integer); overload', @_LapeCustomScrollBar_SetParamsEx);
-    addClassVar('TCustomScrollBar', 'Kind', 'TScrollBarKind', @_LapeCustomScrollBar_Kind_Read, @_LapeCustomScrollBar_Kind_Write);
-    addClassVar('TCustomScrollBar', 'LargeChange', 'Integer', @_LapeCustomScrollBar_LargeChange_Read, @_LapeCustomScrollBar_LargeChange_Write);
-    addClassVar('TCustomScrollBar', 'Max', 'Integer', @_LapeCustomScrollBar_Max_Read, @_LapeCustomScrollBar_Max_Write);
-    addClassVar('TCustomScrollBar', 'Min', 'Integer', @_LapeCustomScrollBar_Min_Read, @_LapeCustomScrollBar_Min_Write);
-    addClassVar('TCustomScrollBar', 'PageSize', 'Integer', @_LapeCustomScrollBar_PageSize_Read, @_LapeCustomScrollBar_PageSize_Write);
-    addClassVar('TCustomScrollBar', 'Position', 'Integer', @_LapeCustomScrollBar_Position_Read, @_LapeCustomScrollBar_Position_Write);
-    addClassVar('TCustomScrollBar', 'SmallChange', 'Integer', @_LapeCustomScrollBar_SmallChange_Read, @_LapeCustomScrollBar_SmallChange_Write);
-    addClassVar('TCustomScrollBar', 'OnChange', 'TNotifyEvent', @_LapeCustomScrollBar_OnChange_Read, @_LapeCustomScrollBar_OnChange_Write);
-    addClassVar('TCustomScrollBar', 'OnScroll', 'TScrollEvent', @_LapeCustomScrollBar_OnScroll_Read, @_LapeCustomScrollBar_OnScroll_Write);
-
-    addClass('TScrollBar', 'TCustomScrollBar');
-    addGlobalFunc('procedure TScrollBar.Init(AOwner: TComponent); override', @_LapeScrollBar_Init);
 
     addClass('TCustomComboBox', 'TWinControl');
     addGlobalFunc('procedure TCustomComboBox.Init(TheOwner: TComponent); override', @_LapeCustomComboBox_Init);
@@ -1436,8 +1276,6 @@ begin
     addGlobalFunc('procedure TGroupBox.Init(AOwner: TComponent); override', @_LapeGroupBox_Init);
 
     addClass('TMemoScrollbar', 'TControlScrollBar');
-    addGlobalFunc('procedure TMemoScrollbar.Init(AControl: TWinControl; AKind: TScrollBarKind)', @_LapeMemoScrollbar_Init);
-
     addClass('TCustomMemo', 'TCustomEdit');
     addGlobalFunc('procedure TCustomMemo.Init(AOwner: TComponent); override', @_LapeCustomMemo_Init);
     addGlobalFunc('procedure TCustomMemo.Append(const Value: String);', @_LapeCustomMemo_Append);
