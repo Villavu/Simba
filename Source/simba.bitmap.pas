@@ -127,6 +127,10 @@ type
     procedure DrawBoxFilled(B: TBox; Color: Integer);
     procedure DrawBoxInverted(B: TBox; Color: Integer);
 
+    procedure DrawQuad(Quad: TQuad; Color: Integer);
+    procedure DrawQuadFilled(Quad: TQuad; Color: Integer);
+    procedure DrawQuadInverted(Quad: TQuad; Color: Integer);
+
     procedure DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: Integer = -1);
     procedure DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: Integer = -1);
     procedure DrawCircleArray(Points: TPointArray; Radius: Integer; Filled: Boolean; Color: Integer = -1);
@@ -243,7 +247,7 @@ implementation
 uses
   fpimage, math, intfgraphics, simba.overallocatearray, simba.geometry,
   simba.tpa, simba.stringutil, simba.colormath, simba.client, simba.iomanager,
-  simba.bitmap_misc, simba.math;
+  simba.bitmap_misc;
 
 function GetDrawColor(Color, Index: Integer): Integer; inline;
 const
@@ -990,8 +994,52 @@ begin
 end;
 
 procedure TMufasaBitmap.DrawLine(Start, Stop: TPoint; Color: Integer);
+var
+  BGR: TRGB32;
+
+  procedure PutPixel(const X, Y: Single); inline;
+  var
+    XX, YY: Integer;
+  begin
+    XX := Round(X);
+    YY := Round(Y);
+    if (XX >= 0) and (YY >= 0) and (XX < FWidth) and (YY < FHeight) then
+      FData[YY * FWidth + XX] := BGR;
+  end;
+
+var
+  DX, DY, Step, I: Integer;
+  RX, RY, X, Y: Single;
 begin
-  Self.DrawTPA(TPAFromLine(Start, Stop), Color);
+  BGR := RGBToBGR(Color);
+
+  DX := (Stop.X - Start.X);
+  DY := (Stop.Y - Start.Y);
+  if (Abs(DX) > Abs(DY)) then
+    Step := Abs(DX)
+  else
+    Step := Abs(DY);
+
+  if (Step = 0) then
+  begin
+    RX := DX;
+    RY := DY;
+  end else
+  begin
+    RX := DX / Step;
+    RY := DY / Step;
+  end;
+  X := Start.X;
+  Y := Start.Y;
+
+  PutPixel(X, Y);
+  for I := 1 to Step do
+  begin
+    X := X + RX;
+    Y := Y + RY;
+
+    PutPixel(X, Y);
+  end;
 end;
 
 procedure TMufasaBitmap.DrawLine(Start, Stop: TPoint; Thickness: Integer; Color: Integer);
@@ -1115,6 +1163,50 @@ begin
   Self.DrawBoxFilled(Box(B.X2, 0,    FWidth-1, B.Y1),      Color); //Top Right
   Self.DrawBoxFilled(Box(B.X2, B.Y1, FWidth-1, B.Y2),      Color); //Mid Right
   Self.DrawBoxFilled(Box(B.X2, B.Y1, FWidth-1, FHeight-1), Color); //Btm Right
+end;
+
+procedure TMufasaBitmap.DrawQuad(Quad: TQuad; Color: Integer);
+begin
+  DrawLine(Quad.Top, Quad.Right, Color);
+  DrawLine(Quad.Right, Quad.Bottom, Color);
+  DrawLine(Quad.Bottom, Quad.Left, Color);
+  DrawLine(Quad.Left, Quad.Top, Color);
+end;
+
+procedure TMufasaBitmap.DrawQuadFilled(Quad: TQuad; Color: Integer);
+var
+  X, Y: Integer;
+  Bounds: TBox;
+  RGB: TRGB32;
+begin
+  RGB := RGBToBGR(Color);
+
+  Bounds := Quad.Bounds;
+  Bounds.Clip(Box(0, 0, FWidth-1, FHeight-1));
+
+  for X := Bounds.X1 to Bounds.X2 do
+    for Y := Bounds.Y1 to Bounds.Y2 do
+      if TSimbaGeometry.PointInQuad(TPoint.Create(X, Y), Quad.Top, Quad.Right, Quad.Bottom, Quad.Left) then
+        FData[Y*FWidth+X] := RGB;
+end;
+
+procedure TMufasaBitmap.DrawQuadInverted(Quad: TQuad; Color: Integer);
+var
+  X, Y: Integer;
+  Bounds: TBox;
+  RGB: TRGB32;
+begin
+  RGB := RGBToBGR(Color);
+
+  Bounds := Quad.Bounds;
+  Bounds.Clip(Box(0, 0, FWidth-1, FHeight-1));
+
+  Self.DrawBoxInverted(Bounds, Color);
+
+  for X := Bounds.X1 to Bounds.X2 do
+    for Y := Bounds.Y1 to Bounds.Y2 do
+      if not TSimbaGeometry.PointInQuad(TPoint.Create(X, Y), Quad.Top, Quad.Right, Quad.Bottom, Quad.Left) then
+        FData[Y*FWidth+X] := RGB;
 end;
 
 procedure TMufasaBitmap.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: Integer);

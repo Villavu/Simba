@@ -267,7 +267,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="122">
+    <Units Count="124">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -822,6 +822,14 @@
         <Filename Value="script/imports/simbaclasses/simba.import_class_shapebox.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit121>
+      <Unit122>
+        <Filename Value="script/imports/simba/simba.import_quad.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit122>
+      <Unit123>
+        <Filename Value="quad.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit123>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

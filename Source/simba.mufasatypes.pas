@@ -138,6 +138,7 @@ type
 
   {$DEFINE HEADER}
     {$i generics.inc}
+    {$i quad.inc}
     {$i box.inc}
     {$i boxarray.inc}
     {$i point.inc}
@@ -210,10 +211,11 @@ implementation
 uses
   math, forms, lazloggerbase, uregexpr, strutils,
   simba.math, simba.overallocatearray, simba.geometry, simba.heaparray,
-  simba.algo_sort;
+  simba.algo_sort, simba.tpa;
 
 {$DEFINE BODY}
   {$i generics.inc}
+  {$i quad.inc}
   {$i box.inc}
   {$i boxarray.inc}
   {$i point.inc}

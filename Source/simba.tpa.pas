@@ -13,6 +13,8 @@ uses
   classes, sysutils,
   simba.mufasatypes;
 
+function MinAreaRect(const Points: TPointArray): TPointArray;
+
 function NearbyPointInArrayEx(P: TPoint; W, H: Integer; a: TPointArray): Boolean;
 function NearbyPointInArray(P: TPoint; Dist: Integer; a: TPointArray): Boolean;
 function TPAtoATPAEx(const TPA: TPointArray; W, H: Integer): T2DPointArray;
@@ -94,7 +96,82 @@ implementation
 
 uses
   math,
-  simba.math, simba.slacktree, simba.overallocatearray, simba.geometry, simba.algo_sort;
+  simba.math, simba.slacktree, simba.overallocatearray, simba.geometry,
+  simba.algo_sort, simba.algo_unique;
+
+function MinAreaRect(const Points: TPointArray): TPointArray;
+type
+  TBoundingBox = record
+    CosA: Double;
+    CosAP: Double;
+    CosAM: Double;
+    Area: Double;
+    X: Double;
+    XH: Double;
+    Y: Double;
+    YH: Double;
+  end;
+var
+  I, J: Integer;
+  X, Y: Double;
+  TPA: TPointArray;
+  Angles: TDoubleArray;
+  Box, BestBox: TBoundingBox;
+begin
+  Result := [TPoint.Create(0, 0), TPoint.Create(0, 0), TPoint.Create(0, 0), TPoint.Create(0, 0)];
+
+  if (Length(Points) > 1) then
+  begin
+    TPA := ConvexHull(Points);
+
+    SetLength(Angles, Length(TPA));
+    for I := 0 to High(TPA) - 1 do
+      Angles[I] := TSimbaGeometry.AngleBetween(TPA[I], TPA[I+1]);
+    Angles := Algo_Unique_Double(Angles);
+
+    BestBox.Area := Double.MaxValue;
+
+    for I := 0 to High(Angles) do
+    begin
+      Box.CosA  := Cos(Angles[I]);
+      Box.CosAP := Cos(Angles[I] + HALF_PI);
+      Box.CosAM := Cos(Angles[I] - HALF_PI);
+      Box.X := (Box.CosA  * TPA[0].x) + (Box.CosAM * TPA[0].y);
+      Box.Y := (Box.CosAP * TPA[0].x) + (Box.CosA  * TPA[0].y);
+      Box.XH := Box.X;
+      Box.YH := Box.Y;
+
+      for J := 0 to High(TPA) do
+      begin
+        X := (Box.CosA  * TPA[J].X) + (Box.CosAM * TPA[J].Y);
+        Y := (Box.CosAP * TPA[J].X) + (Box.CosA  * TPA[J].Y);
+        if (X > Box.XH) then
+          Box.XH := X
+        else
+        if (X < Box.X) then
+          Box.X := X;
+
+        if (Y > Box.YH) then
+          Box.YH := Y
+        else
+        if (Y < Box.Y) then
+          Box.Y := Y;
+      end;
+
+      Box.Area := (Box.XH - Box.X) * (Box.YH - Box.Y);
+      if (Box.Area < BestBox.Area) then
+        BestBox := Box;
+    end;
+
+    with BestBox do
+    begin
+      Result[0] := Point(Round((CosAP * Y)  + (CosA * X)),  Round((CosA * Y)  + (CosAM * X)));
+      Result[1] := Point(Round((CosAP * Y)  + (CosA * XH)), Round((CosA * Y)  + (CosAM * XH)));
+      Result[2] := Point(Round((CosAP * YH) + (CosA * XH)), Round((CosA * YH) + (CosAM * XH)));
+      Result[3] := Point(Round((CosAP * YH) + (CosA * X)),  Round((CosA * YH) + (CosAM * X)));
+    end;
+  end;
+end;
 
 procedure SortTPA(var Arr: TPointArray; var Weights: TDoubleArray; SortUp: Boolean);
 begin

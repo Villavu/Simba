@@ -51,7 +51,7 @@ type
     class function LinesIntersect(const P1, P2, Q1, Q2: TPoint; out Where: TPoint): Boolean; static; overload; inline;
     class function PointInTriangle(const P, P1, P2, P3: TPoint): Boolean; static; inline;
     class function PointInBox(const P: TPoint; const Box: TBox): Boolean; static; inline;
-    class function PointInRect(const P: TPoint; const A,B,C,D: TPoint): Boolean; static; overload; inline;
+    class function PointInQuad(const P: TPoint; const A,B,C,D: TPoint): Boolean; static; inline;
     class function PointInPolygon(const P: TPoint; const Polygon: TPointArray): Boolean; static; inline;
     class function PointInCircle(const P, Center: TPoint; Radius: Double): Boolean; static; inline;
     class function PointInEllipse(const P, Center: TPoint; const YRadius, XRadius: Double): Boolean; static;
@@ -307,7 +307,7 @@ begin
   Result := InRange(P.X, Box.X1, Box.X2) and InRange(P.Y, Box.Y1, Box.Y2);
 end;
 
-class function TSimbaGeometry.PointInRect(const P: TPoint; const A, B, C, D: TPoint): Boolean;
+class function TSimbaGeometry.PointInQuad(const P: TPoint; const A, B, C, D: TPoint): Boolean;
 begin
   Result := PointInTriangle(P, A,C,B) or PointInTriangle(P, A,D,C);
 end;
