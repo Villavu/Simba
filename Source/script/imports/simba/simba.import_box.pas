@@ -147,6 +147,16 @@ begin
 end;
 
 (*
+TBox.Contains
+~~~~~~~~~~~~~
+function TBox.Contains(Other: TQuad): Boolean;
+*)
+procedure _LapeBox_Contains4(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PBox(Params^[0])^.Contains(PQuad(Params^[1])^);
+end;
+
+(*
 TBox.Partition
 ~~~~~~~~~~~~~~
 function TBox.Partition(Rows, Cols: Integer): TBoxArray;

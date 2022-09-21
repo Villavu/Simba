@@ -249,6 +249,33 @@ begin
     ]);
 
     addGlobalFunc(
+      'procedure Show(Quad: TQuad; Color: Integer = $0000FF); overload;', [
+      'begin',
+      '  with Quad.Bounds() do',
+      '    with TMufasaBitmap.Create(X1+X2+1, Y1+Y2+1) do',
+      '    try',
+      '      DrawQuad(Quad, Color);',
+      '      Show();',
+      '    finally',
+      '      Free();',
+      '    end;',
+      'end;'
+    ]);
+
+    addGlobalFunc(
+      'procedure ShowOnClient(Quad: TQuad; Color: Integer = $0000FF); overload;', [
+      'begin',
+      '  with TMufasaBitmap.CreateFromClient() do',
+      '  try',
+      '    DrawQuad(Quad, Color);',
+      '    Show();',
+      '  finally',
+      '    Free();',
+      '  end;',
+      'end;'
+    ]);
+
+    addGlobalFunc(
       'procedure ShowOnClient(Boxes: TBoxArray; Filled: Boolean = False); overload;', [
       'begin',
       '  with TMufasaBitmap.CreateFromClient() do',

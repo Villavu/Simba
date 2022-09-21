@@ -5,10 +5,13 @@ unit simba.algo_unique;
 interface
 
 uses
-  Classes, SysUtils, Math;
+  Classes, SysUtils, Math,
+  simba.mufasatypes;
 
 generic function Unique<T>(const Arr: specialize TArray<T>): specialize TArray<T>;
 generic function Unique_SameValue<T>(const Arr: specialize TArray<T>): specialize TArray<T>;
+
+function Algo_Unique_Double(Arr: TDoubleArray): TDoubleArray;
 
 implementation
 
@@ -68,6 +71,11 @@ begin
   end;
 
   SetLength(Result, Last);
+end;
+
+function Algo_Unique_Double(Arr: TDoubleArray): TDoubleArray;
+begin
+  Result := specialize Unique_SameValue<Double>(Arr);
 end;
 
 end.

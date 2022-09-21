@@ -12,21 +12,24 @@ type
     class function Create(Center: TPoint; XRad, YRad: Integer): TBox; static; overload;
     class function Default: TBox; static;
 
+    function ToQuad: TQuad;
     function EqualDimensions(Other: TBox): Boolean;
     function Area: Integer;
     function Expand(SizeMod: Integer): TBox; overload;
     function Expand(SizeMod: Integer; MaxBounds: TBox): TBox; overload;
     function Expand(WidMod, HeiMod: Integer): TBox; overload;
     function Expand(WidMod, HeiMod: Integer; MaxBounds: TBox): TBox; overload;
-    function Contains(Other: TBox): Boolean; overload;
-    function Contains(Other: TPoint): Boolean; overload;
-    function Contains(X, Y: Integer): Boolean; overload;
+    function Contains(Other: TBox): Boolean; overload; inline;
+    function Contains(Other: TPoint): Boolean; overload; inline;
+    function Contains(X, Y: Integer): Boolean; overload; inline;
+    function Contains(Other: TQuad): Boolean; overload; inline;
 
     function Offset(X, Y: Integer): TBox; overload;
     function Offset(P: TPoint): TBox; overload;
     function Combine(Other: TBox): TBox;
     function Invert(Area: TBox): TBoxArray;
     function Partition(Rows, Cols: Integer): TBoxArray;
+    function Filter(Points: TPointArray): TPointArray;
 
     function NearestEdge(P: TPoint): TPoint;
     function Intersect(P: TPoint): TPoint;
@@ -86,6 +89,14 @@ begin
   Result := System.Default(TBox);
 end;
 
+function TBoxHelper.ToQuad: TQuad;
+begin
+  Result.Top    := TPoint.Create(Self.X1, Self.Y1);
+  Result.Right  := TPoint.Create(Self.X2, Self.Y1);
+  Result.Bottom := TPoint.Create(Self.X2, Self.Y2);
+  Result.Left   := TPoint.Create(Self.X1, Self.Y2);
+end;
+
 function TBoxHelper.EqualDimensions(Other: TBox): Boolean;
 begin
   Result := (Self.Width = Other.Width) and (Self.Height = Other.Height);
@@ -137,6 +148,11 @@ end;
 function TBoxHelper.Contains(X, Y: Integer): Boolean;
 begin
   Result := (X >= Self.X1) and (Y >= Self.Y1) and (X <= Self.X2) and (Y <= Self.Y2);
+end;
+
+function TBoxHelper.Contains(Other: TQuad): Boolean;
+begin
+  Result := Contains(Other.Left) and Contains(Other.Right) and Contains(Other.Top) and Contains(Other.Bottom);
 end;
 
 function TBoxHelper.Offset(X, Y: Integer): TBox;
@@ -217,6 +233,21 @@ begin
       Result[idx].X2 := Trunc(Self.X1 + (BoxW * x) + BoxW-1);
       Result[idx].Y2 := Trunc(Self.Y1 + (BoxH * y) + BoxH-1);
     end;
+end;
+
+function TBoxHelper.Filter(Points: TPointArray): TPointArray;
+var
+  I, Count: Integer;
+begin
+  SetLength(Result, Length(Points));
+  Count := 0;
+  for I := 0 to High(Points) do
+    if Contains(Points[I]) then
+    begin
+      Result[Count] := Points[I];
+      Inc(Count);
+    end;
+  SetLength(Result, Count);
 end;
 
 function TBoxHelper.NearestEdge(P: TPoint): TPoint;

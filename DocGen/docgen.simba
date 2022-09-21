@@ -8,6 +8,7 @@ begin
   SourceFiles += ['simba.import_point.pas',        'Point'        ];
   SourceFiles += ['simba.import_box.pas',          'Box'          ];
   SourceFiles += ['simba.import_boxarray.pas',     'Box Array'    ];
+  SourceFiles += ['simba.import_quad.pas',         'Quad'         ];
   SourceFiles += ['simba.import_windowhandle.pas', 'Window Handle'];
   SourceFiles += ['simba.import_debugimage.pas',   'Debug Image'  ];
   SourceFiles += ['simba.import_variant.pas',      'Variant'      ];

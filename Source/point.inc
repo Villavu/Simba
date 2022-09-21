@@ -4,7 +4,7 @@
 type
   TPointHelper = record Helper for TPoint
   public
-    class function Create(X, Y: Integer): TPoint; static;
+    class function Create(X, Y: Integer): TPoint; static; inline;
 
     function InTriangle(A, B, C: TPoint): Boolean;
     function InPolygon(Poly: TPointArray): Boolean;

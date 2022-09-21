@@ -856,6 +856,35 @@ begin
 end;
 
 (*
+TMufasaBitmap.DrawQuad
+~~~~~~~~~~~~~~~~~~~~~
+procedure TMufasaBitmap.DrawQuad(B: TBox; Color: Integer);
+*)
+procedure _LapeMufasaBitmap_DrawQuad(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PMufasaBitmap(Params^[0])^.DrawQuad(PQuad(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+(*
+TMufasaBitmap.DrawQuadFilled
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure TMufasaBitmap.DrawQuadFilled(B: TBox; Color: Integer);
+*)
+procedure _LapeMufasaBitmap_DrawQuadFilled(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PMufasaBitmap(Params^[0])^.DrawQuadFilled(PQuad(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+(*
+TMufasaBitmap.DrawQuadInverted
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure TMufasaBitmap.DrawQuadInverted(B: TBox; Color: Integer);
+*)
+procedure _LapeMufasaBitmap_DrawQuadInverted(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PMufasaBitmap(Params^[0])^.DrawQuadInverted(PQuad(Params^[1])^, PInteger(Params^[2])^);
+end;
+(*
 TMufasaBitmap.DrawBoxArray
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 procedure TMufasaBitmap.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: Integer = -1);
@@ -1475,6 +1504,11 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.DrawBox(B: TBox; Color: Integer);', @_LapeMufasaBitmap_DrawBox);
     addGlobalFunc('procedure TMufasaBitmap.DrawBoxFilled(B: TBox; Color: Integer);', @_LapeMufasaBitmap_DrawBoxFilled);
     addGlobalFunc('procedure TMufasaBitmap.DrawBoxInverted(B: TBox; Color: Integer);', @_LapeMufasaBitmap_DrawBoxInverted);
+
+    addGlobalFunc('procedure TMufasaBitmap.DrawQuad(Quad: TQuad; Color: Integer);', @_LapeMufasaBitmap_DrawQuad);
+    addGlobalFunc('procedure TMufasaBitmap.DrawQuadFilled(Quad: TQuad; Color: Integer);', @_LapeMufasaBitmap_DrawQuadFilled);
+    addGlobalFunc('procedure TMufasaBitmap.DrawQuadInverted(Quad: TQuad; Color: Integer);', @_LapeMufasaBitmap_DrawQuadInverted);
+
     addGlobalFunc('procedure TMufasaBitmap.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: Integer = -1);', @_LapeMufasaBitmap_DrawBoxArray);
     addGlobalFunc('procedure TMufasaBitmap.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: Integer = -1);', @_LapeMufasaBitmap_DrawPolygonArray);
     addGlobalFunc('procedure TMufasaBitmap.DrawCircleArray(Points: TPointArray; Radius: Integer; Filled: Boolean; Color: Integer = -1);', @_LapeMufasaBitmap_DrawCircleArray);

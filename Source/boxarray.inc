@@ -15,6 +15,9 @@ type
     procedure SortByHeight(LowToHigh: Boolean);
     procedure SortByArea(LowToHigh: Boolean);
 
+    function ContainsPoint(P: TPoint; out Index: Integer): Boolean; overload;
+    function ContainsPoint(P: TPoint): Boolean; overload;
+
     function Merge: TBox;
     function Centers: TPointArray;
     function Offset(P: TPoint): TBoxArray; overload;
@@ -117,6 +120,28 @@ begin
     Weights[I] := Self[I].Area;
 
   specialize QuickSortWeighted<TBox, Integer>(Self, Weights, Low(Self), High(Self), LowToHigh);
+end;
+
+function TBoxArrayHelper.ContainsPoint(P: TPoint; out Index: Integer): Boolean;
+var
+  I: Integer;
+begin
+  for I := 0 to High(Self) do
+    if Self[I].Contains(P) then
+    begin
+      Index := I;
+
+      Exit(True);
+    end;
+
+  Result := False;
+end;
+
+function TBoxArrayHelper.ContainsPoint(P: TPoint): Boolean;
+var
+  Index: Integer;
+begin
+  Result := ContainsPoint(P, Index);
 end;
 
 function TBoxArrayHelper.Merge: TBox;
