@@ -60,7 +60,8 @@ var
   RecordType: TLapeType_Record;
   RecordVar, FieldVar: TResVar;
 begin
-  Result := _ResVar.New(FCompiler.getTempVar(resType(), 2));
+  Dest := NullResVar;
+  Result := _ResVar.New(FCompiler.getTempVar(resType()));
 
   if (FParams.Count <> 1) or isEmpty(FParams[0]) then
     LapeExceptionFmt(lpeWrongNumberParams, [1]);
@@ -81,20 +82,22 @@ begin
     end;
 
     // field name
-    with TLapeTree_Operator.Create(op_AssignPlus, Self) do
+    with TLapeTree_Operator.Create(op_Plus, Self) do
     try
+      Dest := Result;
       Left := TLapeTree_ResVar.Create(Result.IncLock(), Self);
       Right := TLapeTree_String.Create(FCompiler.getConstant(RecordType.FieldMap.Key[I]), Self);
-      Compile(Offset);
+
+      Result := Compile(Offset);
     finally
       Free();
     end;
 
     // field type
-    with TLapeTree_Operator.Create(op_AssignPlus, Self) do
+    with TLapeTree_Operator.Create(op_Plus, Self) do
     try
+      Dest := Result;
       Left := TLapeTree_ResVar.Create(Result.IncLock(), Self);
-
       if FieldVar.HasType() then
         if (FieldVar.VarType.Name <> '') then
           Right := TLapeTree_String.Create(FieldVar.VarType.Name, Self)
@@ -103,20 +106,22 @@ begin
       else
         Right := TLapeTree_String.Create('', Self);
 
-      Compile(Offset);
+      Result := Compile(Offset);
     finally
       Free();
     end;
 
     // field value
-    with TLapeTree_Operator.Create(op_AssignPlus, Self) do
+    with TLapeTree_Operator.Create(op_Plus, Self) do
     try
+      Dest := Result;
+
       Left := TLapeTree_ResVar.Create(Result.IncLock(), Self);
       Right := TLapeTree_InternalMethod_ToStr.Create(Self);
       with TLapeTree_InternalMethod_ToStr(Right) do
         addParam(TLapeTree_ResVar.Create(FieldVar.IncLock(), Self));
 
-      Compile(Offset);
+      Result := Compile(Offset);
     finally
       Free();
     end;
@@ -222,7 +227,8 @@ var
   FieldVar: TLapeGlobalVar;
   Decls: TLapeDeclArray;
 begin
-  Result := _ResVar.New(FCompiler.getTempVar(resType(), 2));
+  Dest := NullResVar;
+  Result := _ResVar.New(FCompiler.getTempVar(resType()));
 
   if (FParams.Count <> 1) or isEmpty(FParams[0]) then
     LapeExceptionFmt(lpeWrongNumberParams, [1]);
@@ -238,20 +244,22 @@ begin
       Continue;
 
     // field name
-    with TLapeTree_Operator.Create(op_AssignPlus, Self) do
+    with TLapeTree_Operator.Create(op_Plus, Self) do
     try
+      Dest := Result;
       Left := TLapeTree_ResVar.Create(Result.IncLock(), Self);
       Right := TLapeTree_String.Create(FieldVar.Name, Self);
-      Compile(Offset);
+
+      Result := Compile(Offset);
     finally
       Free();
     end;
 
     // field type
-    with TLapeTree_Operator.Create(op_AssignPlus, Self) do
+    with TLapeTree_Operator.Create(op_Plus, Self) do
     try
+      Dest := Result;
       Left := TLapeTree_ResVar.Create(Result.IncLock(), Self);
-
       if FieldVar.HasType() then
         if (FieldVar.VarType.Name <> '') then
           Right := TLapeTree_String.Create(FieldVar.VarType.Name, Self)
@@ -260,20 +268,22 @@ begin
       else
         Right := TLapeTree_String.Create('', Self);
 
-      Compile(Offset);
+      Result := Compile(Offset);
     finally
       Free();
     end;
 
     // field value
-    with TLapeTree_Operator.Create(op_AssignPlus, Self) do
+    with TLapeTree_Operator.Create(op_Plus, Self) do
     try
+      Dest := Result;
+
       Left := TLapeTree_ResVar.Create(Result.IncLock(), Self);
       Right := TLapeTree_InternalMethod_ToStr.Create(Self);
       with TLapeTree_InternalMethod_ToStr(Right) do
         addParam(TLapeTree_GlobalVar.Create(FieldVar, Self));
 
-      Compile(Offset);
+      Result := Compile(Offset);
     finally
       Free();
     end;
