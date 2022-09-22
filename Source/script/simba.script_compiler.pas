@@ -98,7 +98,7 @@ uses
   simba.import_string, simba.import_internet, simba.import_target, simba.import_variant,
   simba.import_simba,
 
-  simba.script_compiler_waituntil;
+  simba.script_compiler_waituntil, simba.script_compiler_rtti;
 
 function TSimbaScript_Compiler.addGlobalFunc(Header: lpString; Body: TStringArray): TLapeTree_Method;
 var
@@ -171,6 +171,7 @@ begin
 
     InitializeWaitUntil(Self);
     InitializeFFI(Self);
+    InitializeRTTI(Self);
 
     addGlobalType('type Pointer', 'TClient');
     addGlobalVar('TClient', nil, 'Client'); // Will be assigned later

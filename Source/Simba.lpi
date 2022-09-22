@@ -267,7 +267,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="124">
+    <Units Count="125">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -830,6 +830,10 @@
         <Filename Value="quad.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit123>
+      <Unit124>
+        <Filename Value="script/simba.script_compiler_rtti.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit124>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
