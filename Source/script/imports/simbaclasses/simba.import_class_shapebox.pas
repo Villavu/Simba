@@ -135,6 +135,26 @@ begin
   PSimbaShapeBox(Params^[0])^.DeletePoly(PInteger(Params^[1])^);
 end;
 
+procedure _LapeSimbaShapeBox_AddPoint(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaShapeBox(Params^[0])^.AddPoint(PPoint(Params^[1])^, PString(Params^[2])^);
+end;
+
+procedure _LapeSimbaShapeBox_AddBox(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaShapeBox(Params^[0])^.AddBox(PBox(Params^[1])^, PString(Params^[2])^);
+end;
+
+procedure _LapeSimbaShapeBox_AddPoly(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaShapeBox(Params^[0])^.AddPoly(PPointArray(Params^[1])^, PString(Params^[2])^);
+end;
+
+procedure _LapeSimbaShapeBox_AddPath(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaShapeBox(Params^[0])^.AddPath(PPointArray(Params^[1])^, PString(Params^[2])^);
+end;
+
 procedure ImportSimbaShapeBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -171,6 +191,11 @@ begin
     addGlobalFunc('procedure TSimbaShapeBox.DeleteBox(Index: Integer);', @_LapeSimbaShapeBox_DeleteBox);
     addGlobalFunc('procedure TSimbaShapeBox.DeletePoly(Index: Integer);', @_LapeSimbaShapeBox_DeletePoly);
     addGlobalFunc('procedure TSimbaShapeBox.DeletePath(Index: Integer);', @_LapeSimbaShapeBox_DeletePath);
+
+    addGlobalFunc('procedure TSimbaShapeBox.AddPoint(Point: TPoint; AName: String = "");', @_LapeSimbaShapeBox_AddPoint);
+    addGlobalFunc('procedure TSimbaShapeBox.AddBox(Box: TBox; AName: String = "");', @_LapeSimbaShapeBox_AddBox);
+    addGlobalFunc('procedure TSimbaShapeBox.AddPoly(Poly: TPointArray; AName: String = "");', @_LapeSimbaShapeBox_AddPoly);
+    addGlobalFunc('procedure TSimbaShapeBox.AddPath(Path: TPointArray; AName: String = "");', @_LapeSimbaShapeBox_AddPath);
 
     addGlobalFunc('function TSimbaShapeBox.LeftPanel: TPanel;', @_LapeSimbaShapeBox_LeftPanel);
   end;

@@ -188,6 +188,11 @@ type
     procedure DeletePoly(Index: Integer);
     procedure DeletePath(Index: Integer);
 
+    procedure AddPoint(Point: TPoint; AName: String = '');
+    procedure AddBox(Box: TBox; AName: String = '');
+    procedure AddPoly(Poly: TPointArray; AName: String = '');
+    procedure AddPath(Path: TPointArray; AName: String = '');
+
     procedure SaveToFile(FileName: String);
     procedure LoadFromFile(FileName: String);
 
@@ -566,6 +571,8 @@ function TSimbaShapeBoxShape_Box.Contains(P: TPoint; ExpandMod: Integer): Boolea
 var
   R: TRect;
 begin
+  FRect.NormalizeRect();
+
   R := FRect;
   if (ExpandMod > 0) then
     R.Inflate(ExpandMod, ExpandMod);
@@ -767,7 +774,11 @@ begin
     Exit(TBox.Default());
 
   with TSimbaShapeBoxShape_Box(Shape) do
+  begin
+    FRect.NormalizeRect();
+
     Result := TBox.Create(FRect.Left, FRect.Top, FRect.Right, FRect.Bottom);
+  end;
 end;
 
 function TSimbaShapeBox.GetBoxCount: Integer;
@@ -1091,6 +1102,46 @@ end;
 procedure TSimbaShapeBox.DeletePath(Index: Integer);
 begin
   DeleteShapeIndex(TSimbaShapeBoxShape_Path, Index);
+end;
+
+procedure TSimbaShapeBox.AddPoint(Point: TPoint; AName: String);
+var
+  Shape: TSimbaShapeBoxShape_Point;
+begin
+  Shape := TSimbaShapeBoxShape_Point.Create(AName);
+  Shape.FPoint := Point;
+
+  FList.Items.AddObject(Shape.FName, Shape);
+end;
+
+procedure TSimbaShapeBox.AddBox(Box: TBox; AName: String);
+var
+  Shape: TSimbaShapeBoxShape_Box;
+begin
+  Shape := TSimbaShapeBoxShape_Box.Create(AName);
+  Shape.FRect := TRect.Create(Box.X1, Box.Y1, Box.X2, Box.Y2);
+
+  FList.Items.AddObject(Shape.FName, Shape);
+end;
+
+procedure TSimbaShapeBox.AddPoly(Poly: TPointArray; AName: String);
+var
+  Shape: TSimbaShapeBoxShape_Poly;
+begin
+  Shape := TSimbaShapeBoxShape_Poly.Create(AName);
+  Shape.FPoly := Poly;
+
+  FList.Items.AddObject(Shape.FName, Shape);
+end;
+
+procedure TSimbaShapeBox.AddPath(Path: TPointArray; AName: String);
+var
+  Shape: TSimbaShapeBoxShape_Path;
+begin
+  Shape := TSimbaShapeBoxShape_Path.Create(AName);
+  Shape.FPoly := Path;
+
+  FList.Items.AddObject(Shape.FName, Shape);
 end;
 
 procedure TSimbaShapeBox.SaveToFile(FileName: String);
