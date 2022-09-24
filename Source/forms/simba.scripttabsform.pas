@@ -17,6 +17,8 @@ uses
 type
   TSimbaScriptTabsForm = class(TForm)
     MenuItem1: TMenuItem;
+    MenuItemOpenFileDir: TMenuItem;
+    MenuItemCopyFileName: TMenuItem;
     MenuItemDocumentation: TMenuItem;
     MenuItemUndo: TMenuItem;
     MenuItemCopy: TMenuItem;
@@ -112,7 +114,7 @@ implementation
 
 uses
   simba.mufasatypes, simba.scripttabhistory, simba.files, simba.editor_docgenerator,
-  simba.dockinghelpers;
+  simba.dockinghelpers, simba.nativeinterface;
 
 procedure TSimbaScriptTabsForm.DoEditorPopupShow(Sender: TObject);
 var
@@ -145,7 +147,7 @@ end;
 
 procedure TSimbaScriptTabsForm.DoEditorPopupClick(Sender: TObject);
 begin
-  if (CurrentEditor = nil) then
+  if (CurrentTab = nil) or (CurrentEditor = nil) then
     Exit;
 
   if (Sender = MenuItemFindDeclaration) then CurrentEditor.OnClickLink(Self, mbLeft, [], CurrentEditor.CaretX, CurrentEditor.CaretY);
@@ -157,8 +159,12 @@ begin
   if (Sender = MenuItemDelete)          then CurrentEditor.ClearSelection();
   if (Sender = MenuItemSelectAll)       then CurrentEditor.SelectAll();
   if (Sender = MenuItemDocumentation)   then CurrentEditor.ExecuteSimpleCommand(TSimbaEditorPlugin_DocGenerator.EditorCommand);
+  if (Sender = MenuItemCopyFileName)    then CurrentEditor.DoCopyToClipboard(CurrentTab.ScriptFileName);
+
   if (Sender = MenuItemFind)            then Self.Find();
   if (Sender = MenuItemReplace)         then Self.Replace();
+
+  if (Sender = MenuItemOpenFileDir)     then SimbaNativeInterface.OpenDirectory(ExtractFileDir(CurrentTab.ScriptFileName));
 end;
 
 procedure TSimbaScriptTabsForm.DoOnDropFiles(Sender: TObject; const FileNames: array of String);

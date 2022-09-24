@@ -23,7 +23,6 @@ type
     FScriptFileName: String;
     FScriptTitle: String;
     FScriptInstance: TSimbaScriptInstance;
-    FScriptErrorLine: Int32;
     FFunctionList: TSimbaFunctionList;
     FDebuggingForm: TSimbaDebuggerForm;
 
@@ -35,7 +34,6 @@ type
     procedure HandleEditorClick(Sender: TObject);
     procedure HandleEditorChange(Sender: TObject);
     procedure HandleEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure HandleEditorSpecialLine(Sender: TObject; Line: Integer; var Special: Boolean; AMarkup: TSynSelectedColor);
     procedure HandleEditorUserCommand(Sender: TObject; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer);
 
     procedure HandleAutoComplete;
@@ -66,8 +64,6 @@ type
 
     function GetParser: TCodeInsight;
     function ParseScript: TCodeInsight;
-
-    procedure SetError(Line, Col: Int32);
 
     procedure Undo;
     procedure Redo;
@@ -287,13 +283,6 @@ procedure TSimbaScriptTab.HandleEditorClick(Sender: TObject);
 begin
   if (SimbaScriptTabHistory <> nil) then
     SimbaScriptTabHistory.Add(Self);
-
-  if (FScriptErrorLine > -1) then
-  begin
-    FScriptErrorLine := -1;
-
-    FEditor.Invalidate();
-  end;
 end;
 
 procedure TSimbaScriptTab.HandleEditorChange(Sender: TObject);
@@ -311,13 +300,6 @@ begin
     SimbaForm.MenuItemSave.Enabled := False;
     SimbaForm.ToolbarButtonSave.Enabled := False;
   end;
-
-  if (FScriptErrorLine > -1) then
-  begin
-    FScriptErrorLine := -1;
-
-    FEditor.Invalidate();
-  end;
 end;
 
 procedure TSimbaScriptTab.HandleEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -334,18 +316,6 @@ begin
   end;
 
   Application.QueueASyncCall(@HandleFindDeclaration, PtrInt(CaretPos)); // SynEdit is paint locked!
-end;
-
-procedure TSimbaScriptTab.HandleEditorSpecialLine(Sender: TObject; Line: Integer; var Special: Boolean; AMarkup: TSynSelectedColor);
-begin
-  Special := Line = FScriptErrorLine;
-
-  if Special then
-  begin
-    AMarkup.BackAlpha  := 128;
-    AMarkup.Background := $0000A5;
-    AMarkup.Foreground := clNone;
-  end;
 end;
 
 procedure TSimbaScriptTab.HandleEditorUserCommand(Sender: TObject; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer);
@@ -485,16 +455,6 @@ begin
   end;
 end;
 
-procedure TSimbaScriptTab.SetError(Line, Col: Int32);
-begin
-  FScriptErrorLine := Line;
-
-  FEditor.CaretX := Col;
-  FEditor.CaretY := Line;
-  FEditor.TopLine := Line - (FEditor.LinesInWindow div 2);
-  FEditor.Invalidate();
-end;
-
 procedure TSimbaScriptTab.Undo;
 begin
   FEditor.Undo();
@@ -547,7 +507,6 @@ begin
 
   FScriptTitle := 'Untitled';
   FScriptFileName := '';
-  FScriptErrorLine := -1;
 
   FEditor.Text := SimbaSettings.Editor.DefaultScript.Value;
   FEditor.ClearUndo();
@@ -669,7 +628,6 @@ begin
   FEditor.OnClick := @HandleEditorClick;
   FEditor.OnChange := @HandleEditorChange;
   FEditor.OnClickLink := @HandleEditorLinkClick;
-  FEditor.OnSpecialLineMarkup := @HandleEditorSpecialLine;
   FEditor.OnProcessUserCommand := @HandleEditorUserCommand;
 
   FFunctionList := TSimbaFunctionList.Create();

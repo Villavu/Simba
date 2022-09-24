@@ -155,6 +155,46 @@ begin
   PSimbaShapeBox(Params^[0])^.AddPath(PPointArray(Params^[1])^, PString(Params^[2])^);
 end;
 
+procedure _LapeSimbaShapeBox_PointUserData_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointer(Result)^ := PSimbaShapeBox(Params^[0])^.PointUserData[PInteger(Params^[1])^];
+end;
+
+procedure _LapeSimbaShapeBox_BoxUserData_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointer(Result)^ := PSimbaShapeBox(Params^[0])^.BoxUserData[PInteger(Params^[1])^];
+end;
+
+procedure _LapeSimbaShapeBox_PathUserData_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointer(Result)^ := PSimbaShapeBox(Params^[0])^.PathUserData[PInteger(Params^[1])^];
+end;
+
+procedure _LapeSimbaShapeBox_PolyUserData_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointer(Result)^ := PSimbaShapeBox(Params^[0])^.PolyUserData[PInteger(Params^[1])^];
+end;
+
+procedure _LapeSimbaShapeBox_PointUserData_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaShapeBox(Params^[0])^.PointUserData[PInteger(Params^[1])^] := PPointer(Params^[2])^;
+end;
+
+procedure _LapeSimbaShapeBox_BoxUserData_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaShapeBox(Params^[0])^.BoxUserData[PInteger(Params^[1])^] := PPointer(Params^[2])^;
+end;
+
+procedure _LapeSimbaShapeBox_PathUserData_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaShapeBox(Params^[0])^.PathUserData[PInteger(Params^[1])^] := PPointer(Params^[2])^;
+end;
+
+procedure _LapeSimbaShapeBox_PolyUserData_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaShapeBox(Params^[0])^.PolyUserData[PInteger(Params^[1])^] := PPointer(Params^[2])^;
+end;
+
 procedure ImportSimbaShapeBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -164,18 +204,22 @@ begin
     addClassVar('TSimbaShapeBox', 'PointCount', 'Integer', @_LapeSimbaShapeBox_PointCount_Read);
     addClassVar('TSimbaShapeBox', 'PointName', 'String', @_LapeSimbaShapeBox_PointName_Read, nil, True);
     addClassVar('TSimbaShapeBox', 'Point', 'TPoint', @_LapeSimbaShapeBox_Point_Read, nil, True);
+    addClassVar('TSimbaShapeBox', 'PointUserData', 'Pointer', @_LapeSimbaShapeBox_PointUserData_Read, @_LapeSimbaShapeBox_PointUserData_Write, True);
 
     addClassVar('TSimbaShapeBox', 'PathCount', 'Integer', @_LapeSimbaShapeBox_PathCount_Read);
     addClassVar('TSimbaShapeBox', 'PathName', 'String', @_LapeSimbaShapeBox_PathName_Read, nil, True);
     addClassVar('TSimbaShapeBox', 'Path', 'TPointArray', @_LapeSimbaShapeBox_Path_Read, nil, True);
+    addClassVar('TSimbaShapeBox', 'PathUserData', 'Pointer', @_LapeSimbaShapeBox_PathUserData_Read, @_LapeSimbaShapeBox_PathUserData_Write, True);
 
     addClassVar('TSimbaShapeBox', 'PolyCount', 'Integer', @_LapeSimbaShapeBox_PolyCount_Read);
     addClassVar('TSimbaShapeBox', 'PolyName', 'String', @_LapeSimbaShapeBox_PolyName_Read, nil, True);
     addClassVar('TSimbaShapeBox', 'Poly', 'TPointArray', @_LapeSimbaShapeBox_Poly_Read, nil, True);
+    addClassVar('TSimbaShapeBox', 'PolyUserData', 'Pointer', @_LapeSimbaShapeBox_PolyUserData_Read, @_LapeSimbaShapeBox_PolyUserData_Write, True);
 
     addClassVar('TSimbaShapeBox', 'BoxCount', 'Integer', @_LapeSimbaShapeBox_BoxCount_Read);
     addClassVar('TSimbaShapeBox', 'BoxName', 'String', @_LapeSimbaShapeBox_BoxName_Read, nil, True);
     addClassVar('TSimbaShapeBox', 'Box', 'TBox', @_LapeSimbaShapeBox_Box_Read, nil, True);
+    addClassVar('TSimbaShapeBox', 'BoxUserData', 'Pointer', @_LapeSimbaShapeBox_BoxUserData_Read, @_LapeSimbaShapeBox_BoxUserData_Write, True);
 
     addGlobalFunc('procedure TSimbaShapeBox.Init(Owner: TComponent); override', @_LapeSimbaShapeBox_Init);
 

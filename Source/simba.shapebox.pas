@@ -23,6 +23,9 @@ type
     FDragStart: TPoint;
     FName: String;
     FShapeType: String;
+    FUserData: Pointer;
+
+    destructor Destroy; override;
 
     function GetLineColor(const Flags: EPaintShapeFlags): TColor; inline;
     function GetConnectorColor(const Flags: EPaintShapeFlags): TColor; inline;
@@ -152,6 +155,9 @@ type
 
     procedure DeleteShapeIndex(ShapeClass: TSimbaShapeBoxShapeClass; Index: Integer);
 
+    function GetShapeUserData(ShapeClass: TSimbaShapeBoxShapeClass; Index: Integer): Pointer;
+    procedure SetShapeUserData(ShapeClass: TSimbaShapeBoxShapeClass; Index: Integer; Data: Pointer);
+
     function GetShapeCount(ShapeClass: TSimbaShapeBoxShapeClass): Integer;
     function GetShapeFromIndex(ShapeClass: TSimbaShapeBoxShapeClass; Index: Integer): TSimbaShapeBoxShape;
     function GetShapeNameIndex(ShapeClass: TSimbaShapeBoxShapeClass; Index: Integer): String;
@@ -173,6 +179,16 @@ type
     function GetPoly(Index: Integer): TPointArray;
     function GetPolyCount: Integer;
     function GetPolyName(Index: Integer): String;
+
+    function GetBoxUserData(Index: Integer): Pointer;
+    function GetPathUserData(Index: Integer): Pointer;
+    function GetPointUserData(Index: Integer): Pointer;
+    function GetPolyUserData(Index: Integer): Pointer;
+
+    procedure SetBoxUserData(Index: Integer; Value: Pointer);
+    procedure SetPathUserData(Index: Integer; Value: Pointer);
+    procedure SetPointUserData(Index: Integer; Value: Pointer);
+    procedure SetPolyUserData(Index: Integer; Value: Pointer);
 
     procedure SetSelecting(AValue: TSimbaShapeBoxShape);
   public
@@ -202,18 +218,22 @@ type
     property PointCount: Integer read GetPointCount;
     property Point[Index: Integer]: TPoint read GetPoint;
     property PointName[Index: Integer]: String read GetPointName;
+    property PointUserData[Index: Integer]: Pointer read GetPointUserData write SetPointUserData;
 
     property PathCount: Integer read GetPathCount;
     property Path[Index: Integer]: TPointArray read GetPath;
     property PathName[Index: Integer]: String read GetPathName;
+    property PathUserData[Index: Integer]: Pointer read GetPathUserData write SetPathUserData;
 
     property PolyCount: Integer read GetPolyCount;
     property Poly[Index: Integer]: TPointArray read GetPoly;
     property PolyName[Index: Integer]: String read GetPolyName;
+    property PolyUserData[Index: Integer]: Pointer read GetPolyUserData write SetPolyUserData;
 
     property BoxCount: Integer read GetBoxCount;
     property Box[Index: Integer]: TBox read GetBox;
     property BoxName[Index: Integer]: String read GetBoxName;
+    property BoxUserData[Index: Integer]: Pointer read GetBoxUserData write SetBoxUserData;
   end;
 
 implementation
@@ -223,6 +243,14 @@ uses
 
 const
   CLOSE_DISTANCE = 8;
+
+destructor TSimbaShapeBoxShape.Destroy;
+begin
+  if (FUserData <> nil) then
+    FreeMemAndNil(FUserData);
+
+  inherited Destroy();
+end;
 
 function TSimbaShapeBoxShape.GetLineColor(const Flags: EPaintShapeFlags): TColor;
 begin
@@ -349,7 +377,7 @@ begin
     ACanvas.DrawPoly(FPoly, False, GetLineColor(Flags));
 
   for P in FPoly do
-    ACanvas.DrawCircleFilled(P, 4, GetConnectorColor(Flags));
+    ACanvas.DrawCircleFilled(P, 3, GetConnectorColor(Flags));
 end;
 
 procedure TSimbaShapeBoxShape_Poly.BuildContainsCache;
@@ -460,7 +488,7 @@ begin
     ACanvas.DrawPoly(FPoly + [FPoly[0]], True, GetLineColor(Flags));
 
   for P in FPoly do
-    ACanvas.DrawBoxFilled(TBox.Create(P, 4, 4), GetConnectorColor(Flags));
+    ACanvas.DrawBoxFilled(TBox.Create(P, 3, 3), GetConnectorColor(Flags));
 end;
 
 function TSimbaShapeBoxShape_Poly.CanDrag(MousePoint: TPoint; out ACursor: TCursor): Boolean;
@@ -620,11 +648,11 @@ begin
   ACanvas.DrawBox(TBox.Create(FRect.Left, FRect.Top, FRect.Right, FRect.Bottom), GetLineColor(Flags));
   with FRect do
   begin
-    ACanvas.DrawBoxFilled(TBox.Create(Left-4, Top-4, Left+4, Top+4), GetConnectorColor(Flags));
-    ACanvas.DrawBoxFilled(TBox.Create(Right-4, Bottom-4, Right+4, Bottom+4), GetConnectorColor(Flags));
+    ACanvas.DrawBoxFilled(TBox.Create(Left-3, Top-3, Left+3, Top+3), GetConnectorColor(Flags));
+    ACanvas.DrawBoxFilled(TBox.Create(Right-3, Bottom-3, Right+3, Bottom+3), GetConnectorColor(Flags));
 
-    ACanvas.DrawBoxFilled(TBox.Create(Right-4, Top-4, Right+4, Top+4), GetConnectorColor(Flags));
-    ACanvas.DrawBoxFilled(TBox.Create(Left-4, Bottom-4, Left+4, Bottom+4), GetConnectorColor(Flags));
+    ACanvas.DrawBoxFilled(TBox.Create(Right-3, Top-3, Right+3, Top+3), GetConnectorColor(Flags));
+    ACanvas.DrawBoxFilled(TBox.Create(Left-3, Bottom-3, Left+3, Bottom+3), GetConnectorColor(Flags));
   end;
 end;
 
@@ -763,6 +791,33 @@ begin
       end;
       Inc(Curr);
     end;
+end;
+
+function TSimbaShapeBox.GetShapeUserData(ShapeClass: TSimbaShapeBoxShapeClass; Index: Integer): Pointer;
+var
+  Shape: TSimbaShapeBoxShape;
+begin
+  Shape := GetShapeFromIndex(ShapeClass, Index);
+
+  if (Shape = nil) then
+    Result := nil
+  else
+    Result := Shape.FUserData;
+end;
+
+procedure TSimbaShapeBox.SetShapeUserData(ShapeClass: TSimbaShapeBoxShapeClass; Index: Integer; Data: Pointer);
+var
+  Shape: TSimbaShapeBoxShape;
+begin
+  Shape := GetShapeFromIndex(ShapeClass, Index);
+
+  if (Shape <> nil) then
+  begin
+    if (Shape.FUserData <> nil) then
+      FreeMem(Shape.FUserData);
+
+    Shape.FUserData := Data;
+  end;
 end;
 
 function TSimbaShapeBox.GetBox(Index: Integer): TBox;
@@ -950,6 +1005,46 @@ begin
       Result := Shape;
     end;
   end;
+end;
+
+function TSimbaShapeBox.GetBoxUserData(Index: Integer): Pointer;
+begin
+  Result := GetShapeUserData(TSimbaShapeBoxShape_Box, Index);
+end;
+
+function TSimbaShapeBox.GetPathUserData(Index: Integer): Pointer;
+begin
+  Result := GetShapeUserData(TSimbaShapeBoxShape_Path, Index);
+end;
+
+function TSimbaShapeBox.GetPointUserData(Index: Integer): Pointer;
+begin
+  Result := GetShapeUserData(TSimbaShapeBoxShape_Point, Index);
+end;
+
+function TSimbaShapeBox.GetPolyUserData(Index: Integer): Pointer;
+begin
+  Result := GetShapeUserData(TSimbaShapeBoxShape_Poly, Index);
+end;
+
+procedure TSimbaShapeBox.SetBoxUserData(Index: Integer; Value: Pointer);
+begin
+  SetShapeUserData(TSimbaShapeBoxShape_Box, Index, Value);
+end;
+
+procedure TSimbaShapeBox.SetPathUserData(Index: Integer; Value: Pointer);
+begin
+  SetShapeUserData(TSimbaShapeBoxShape_Path, Index, Value);
+end;
+
+procedure TSimbaShapeBox.SetPointUserData(Index: Integer; Value: Pointer);
+begin
+  SetShapeUserData(TSimbaShapeBoxShape_Point, Index, Value);
+end;
+
+procedure TSimbaShapeBox.SetPolyUserData(Index: Integer; Value: Pointer);
+begin
+  SetShapeUserData(TSimbaShapeBoxShape_Poly, Index, Value);
 end;
 
 procedure TSimbaShapeBox.ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);

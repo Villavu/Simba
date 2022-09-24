@@ -123,14 +123,8 @@ begin
     if FileExists(FMouseLink.DocPos.FileName) then
       SimbaScriptTabsForm.Open(FMouseLink.DocPos.FileName);
 
-    with SimbaScriptTabsForm.CurrentEditor, FMouseLink.DocPos do
-    begin
-      CaretX := Col;
-      CaretY := Line;
-      TopLine := TopLine - (LinesInWindow div 2);
-      if CanSetFocus() then
-        SetFocus();
-    end;
+    with FMouseLink.DocPos do
+      SimbaScriptTabsForm.CurrentEditor.FocusLine(Line, Col);
 
     Exit;
   end;

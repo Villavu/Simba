@@ -100,12 +100,20 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
       Caption = 'Delete'
       OnClick = DoEditorPopupClick
     end
-    object MenuItemSeperator3: TMenuItem
-      Caption = '-'
-    end
     object MenuItemSelectAll: TMenuItem
       Caption = 'Select All'
       ShortCut = 16449
+      OnClick = DoEditorPopupClick
+    end
+    object MenuItemSeperator3: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemCopyFileName: TMenuItem
+      Caption = 'Copy Filename'
+      OnClick = DoEditorPopupClick
+    end
+    object MenuItemOpenFileDir: TMenuItem
+      Caption = 'Open File Directory'
       OnClick = DoEditorPopupClick
     end
     object MenuItemSeperator4: TMenuItem
