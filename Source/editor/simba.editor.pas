@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics, Controls, LCLType,
-  SynEdit, SynEditTypes, SynGutterLineOverview, SynEditMouseCmds,
+  SynEdit, SynEditTypes, SynGutterLineOverview, SynEditMouseCmds, SynEditMiscClasses,
   SynEditKeyCmds, SynPluginMultiCaret, SynEditHighlighter,
   SynHighlighterPas_Simba, SynEditMarkupHighAll, LazSynEditMouseCmdsTypes,
   simba.mufasatypes, simba.autocomplete, simba.parameterhint, simba.settings,
@@ -31,8 +31,17 @@ type
     FAutoComplete: TSimbaAutoComplete;
     FModifiedLinesGutter: TSimbaEditorModifiedLinesGutter;
 
+    FFocusedLinesUpdating: Boolean;
+    FFocusedLinesCount: Integer;
+    FFocusedLinesColors: array of record
+      Line: Integer;
+      Color: TColor;
+    end;
+
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
 
+    // Temp line coloring
+    procedure DoSpecialLineColor(Sender: TObject; Line: Integer; var Special: Boolean; AMarkup: TSynSelectedColor);
     // Enable/Disable TSynEditMarkupHighlightAllCaret depending on has selection
     procedure DoStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
     // Handle ecAutoCompleteChar & ecParameterHintChar
@@ -57,6 +66,9 @@ type
     procedure ExecuteSimpleCommand(Command: TSynEditorCommand);
     // Repaint some extra things when saved
     procedure MarkTextAsSaved; reintroduce;
+
+    procedure ClearFocusedLines;
+    procedure FocusLine(Line, Col: Integer);
 
     constructor Create(AOwner: TComponent; LoadColors: Boolean = True); reintroduce;
     destructor Destroy; override;
@@ -120,8 +132,58 @@ begin
   ModifiedLinesGutter.ReCalc();
 end;
 
+procedure TSimbaEditor.ClearFocusedLines;
+var
+  I: Integer;
+begin
+  if (not FFocusedLinesUpdating) and (FFocusedLinesCount > 0) then
+  begin
+    FFocusedLinesCount := 0;
+    for I := 0 to High(FFocusedLinesColors) do
+      FFocusedLinesColors[I].Line := -1;
+
+    Invalidate();
+  end;
+end;
+
+procedure TSimbaEditor.FocusLine(Line, Col: Integer);
+var
+  I: Integer;
+begin
+  FFocusedLinesUpdating := True;
+  try
+    CaretX := Col;
+    CaretY := Line;
+    TopLine := Line - (LinesInWindow div 2);
+    if CanSetFocus() then
+      SetFocus();
+
+    for I := 0 to High(FFocusedLinesColors) do
+      if (FFocusedLinesColors[I].Line = -1) then
+      begin
+        FFocusedLinesColors[I].Line  := Line;
+        FFocusedLinesColors[I].Color := $008CFF;
+
+        Invalidate();
+        Exit;
+      end;
+
+    SetLength(FFocusedLinesColors, Length(FFocusedLinesColors) + 1);
+
+    FFocusedLinesColors[High(FFocusedLinesColors)].Line  := Line;
+    FFocusedLinesColors[High(FFocusedLinesColors)].Color := $008CFF;
+  finally
+    FFocusedLinesCount    := FFocusedLinesCount + 1;
+    FFocusedLinesUpdating := False;
+
+    Invalidate();
+  end;
+end;
+
 procedure TSimbaEditor.DoStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
 begin
+  ClearFocusedLines();
+
   if (scSelection in Changes) then
     MarkupByClass[TSynEditMarkupHighlightAllCaret].Enabled := SelAvail;
 end;
@@ -214,6 +276,26 @@ begin
   end;
 end;
 
+procedure TSimbaEditor.DoSpecialLineColor(Sender: TObject; Line: Integer; var Special: Boolean; AMarkup: TSynSelectedColor);
+var
+  I: Integer;
+begin
+  Special := False;
+  if (FFocusedLinesCount = 0) then
+    Exit;
+
+  for I := 0 to High(FFocusedLinesColors) do
+    if (FFocusedLinesColors[I].Line = Line) then
+    begin
+      AMarkup.BackAlpha  := 180;
+      AMarkup.Background := FFocusedLinesColors[I].Color;
+      AMarkup.Foreground := clNone;
+
+      Special := True;
+      Exit;
+    end;
+end;
+
 function TSimbaEditor.GetExpression(X, Y: Integer): String;
 var
   StartX, EndX: Integer;
@@ -236,9 +318,11 @@ begin
   TabWidth := 2;
   BlockIndent := 2;
 
+  OnSpecialLineMarkup := @DoSpecialLineColor;
+
   MouseActions.AddCommand(emcOverViewGutterScrollTo, False, LazSynEditMouseCmdsTypes.mbLeft, ccSingle, cdDown, [], []);
 
-  RegisterStatusChangedHandler(@DoStatusChanged, [scSelection]);
+  RegisterStatusChangedHandler(@DoStatusChanged, [scCaretX, scCaretY, scModified, scSelection]);
   RegisterCommandHandler(@DoAfterCommand, nil, [hcfPostExec]);
 
   Highlighter := TSynFreePascalSyn.Create(Self);

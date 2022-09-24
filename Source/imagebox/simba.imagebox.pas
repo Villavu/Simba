@@ -396,6 +396,8 @@ begin
 
   DoPaintArea(FBitmap, LocalRect);
 
+  // FBitmap.DrawBoxTransparent(TBox.Create(FMousePoint.X - 15, FMousePoint.Y - 15, FMousePoint.X + 15, FMousePoint.Y + 15), clRed, 0.25);
+
   FBitmap.EndUpdate();
 
   BitBlt(

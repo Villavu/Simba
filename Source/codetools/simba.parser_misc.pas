@@ -94,9 +94,12 @@ begin
         end;
 
       ',':
-        if (InIndex > 0) and (InParams = 0) and (InIndex = 1) then
         begin
-          Result := Text[i] + Result;
+          if (InIndex > 0) and (InParams = 0) and (InIndex = 1) then
+            Result := Text[i] + Result
+          else
+          if (InIndex = 0) and (InParams = 0) then
+            Break;
         end;
 
       else

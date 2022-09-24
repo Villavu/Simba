@@ -43,6 +43,11 @@ begin
   Test_GetExpression('"hello world".', 'String.');
   Test_GetExpression(#39 + 'Test""' + #39 + '.', 'String.');
 
+  Test_GetExpression('Foo([],m.', 'm.');
+  Test_GetExpression('Foo([], m.', 'm.');
+  Test_GetExpression('Foo([[1,1]],m.', 'm.');
+  Test_GetExpression('Foo([[1,1]], m.', 'm.');
+
   WriteLn(IntToStr(Passed), ' tests passed');
   WriteLn(IntToStr(Failed), ' tests failed');
 

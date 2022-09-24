@@ -5,12 +5,26 @@ unit simba.imagebox_bitmap;
 interface
 
 uses
-  Classes, SysUtils, graphics, lcltype,
-  simba.mufasatypes;
+  Classes, SysUtils, Graphics, LCLType,
+  simba.mufasatypes, simba.bitmap_misc;
 
 type
   PSimbaImageBoxBitmap = ^TSimbaImageBoxBitmap;
   TSimbaImageBoxBitmap = class(TObject)
+  protected
+  type
+    PBGR = ^TBGR;
+    TBGR = packed record
+      B,G,R: Byte;
+    end;
+    PBGRA = ^TBGRA;
+    TBGRA = packed record
+      B,G,R,A: Byte;
+    end;
+    PARGB = ^TARGB;
+    TARGB = packed record
+      A,R,G,B: Byte;
+    end;
   protected
     FBitmap: TBitmap;
     FPixelFormat: String;
@@ -30,6 +44,18 @@ type
     FWidthMinus1: Integer;
     FHeightMinus1: Integer;
 
+    function BGR(Color: TColor): TBGR;
+    function BGRA(Color: TColor): TBGRA;
+    function ARGB(Color: TColor): TARGB;
+
+    procedure PixelBGR(X, Y: Integer; const Pixel: TBGR); inline;
+    procedure PixelBGRA(X, Y: Integer; const Pixel: TBGRA); inline;
+    procedure PixelARGB(X, Y: Integer; const Pixel: TARGB); inline;
+
+    procedure PixelBGRTransparency(X, Y: Integer; const T, RMod, GMod, BMod: Single); inline;
+    procedure PixelBGRATransparency(X, Y: Integer; const T, RMod, GMod, BMod: Single); inline;
+    procedure PixelARGBTransparency(X, Y: Integer; const T, RMod, GMod, BMod: Single); inline;
+
     function GetHandle: HDC;
   public
     constructor Create;
@@ -43,10 +69,12 @@ type
     procedure DrawCrossArray(Centers: TPointArray; Radius: Integer; Color: TColor);
     procedure DrawCrossHair(Center: TPoint; Radius: Integer; Color: TColor);
     procedure DrawBox(Box: TBox; Color: TColor);
+    procedure DrawBoxTransparent(Box: TBox; Color: TColor; Transparency: Single);
     procedure DrawBoxFilled(Box: TBox; Color: TColor);
     procedure DrawPoly(Poly: TPointArray; Connect: Boolean; Color: TColor);
     procedure DrawPoint(P: TPoint; Color: TColor);
     procedure DrawPoints(TPA: TPointArray; Color: TColor);
+    procedure DrawEllipse(Center: TPoint; RadiusX, RadiusY: Integer; Color: TColor);
     procedure DrawCircle(Center: TPoint; Radius: Integer; Color: TColor);
     procedure DrawCircleFilled(Center: TPoint; Radius: Integer; Color: TColor);
 
@@ -58,19 +86,100 @@ type
 
 implementation
 
-uses
-  simba.bitmap_misc, simba.colormath, simba.tpa, simba.overallocatearray;
+{$DEFINE MACRO_PIXEL :=
+  var
+    StartX, StartY, EndX, EndY: Integer;
+  begin
+    X := Trunc((X + FOffset.X) * FZoom);
+    Y := Trunc((Y + FOffset.Y) * FZoom);
 
-type
-  PARGB = ^TARGB;
-  TARGB = packed record
-    A, R, G, B: Byte;
-  end;
+    if (FZoom > 1) then
+    begin
+      StartX := X;
+      StartY := Y;
+      EndX := Min(FWidthMinus1,  X + FPixelSizeMinus1);
+      EndY := Min(FHeightMinus1, Y + FPixelSizeMinus1);
 
-  PRGB24 = ^TRGB24;
-  TRGB24 = packed record
-    B, G, R : Byte;
+      for Y := StartY to EndY do
+        for X := StartX to EndX do
+          if (X >= 0) and (Y >= 0) and (X < FWidth) and (Y < FHeight) then
+            PixelType(FData + (Y * FBytesPerLine + X * FBytesPerPixel))^ := Pixel;
+    end else
+      if (X >= 0) and (Y >= 0) and (X < FWidth) and (Y < FHeight) then
+        PixelType(FData + (Y * FBytesPerLine + X * FBytesPerPixel))^ := Pixel;
   end;
+}
+
+{$DEFINE MACRO_PIXEL_TRANSPARENCY :=
+  var
+    StartX, StartY, EndX, EndY: Integer;
+  begin
+    X := Trunc((X + FOffset.X) * FZoom);
+    Y := Trunc((Y + FOffset.Y) * FZoom);
+
+    if (FZoom > 1) then
+    begin
+      StartX := X;
+      StartY := Y;
+      EndX := Min(FWidthMinus1,  X + FPixelSizeMinus1);
+      EndY := Min(FHeightMinus1, Y + FPixelSizeMinus1);
+
+      for Y := StartY to EndY do
+        for X := StartX to EndX do
+          if (X >= 0) and (Y >= 0) and (X < FWidth) and (Y < FHeight) then
+            with PixelType(FData + (Y * FBytesPerLine + X * FBytesPerPixel))^ do
+            begin
+              R := Byte(Round((R * T) + RMod));
+              G := Byte(Round((G * T) + GMod));
+              B := Byte(Round((B * T) + BMod));
+            end;
+    end else
+      if (X >= 0) and (Y >= 0) and (X < FWidth) and (Y < FHeight) then
+        with PixelType(FData + (Y * FBytesPerLine + X * FBytesPerPixel))^ do
+        begin
+          R := Byte(Round((R * T) + RMod));
+          G := Byte(Round((G * T) + GMod));
+          B := Byte(Round((B * T) + BMod));
+        end;
+  end;
+}
+
+{$DEFINE PixelType := PBGR}
+procedure TSimbaImageBoxBitmap.PixelBGR(X, Y: Integer; const Pixel: TBGR);   MACRO_PIXEL
+{$DEFINE PixelType := PBGRA}
+procedure TSimbaImageBoxBitmap.PixelBGRA(X, Y: Integer; const Pixel: TBGRA); MACRO_PIXEL
+{$DEFINE PixelType := PARGB}
+procedure TSimbaImageBoxBitmap.PixelARGB(X, Y: Integer; const Pixel: TARGB); MACRO_PIXEL
+
+{$DEFINE PixelType := PBGR}
+procedure TSimbaImageBoxBitmap.PixelBGRTransparency(X, Y: Integer; const T, RMod, GMod, BMod: Single);  MACRO_PIXEL_TRANSPARENCY
+{$DEFINE PixelType := PBGRA}
+procedure TSimbaImageBoxBitmap.PixelBGRATransparency(X, Y: Integer; const T, RMod, GMod, BMod: Single); MACRO_PIXEL_TRANSPARENCY
+{$DEFINE PixelType := PARGB}
+procedure TSimbaImageBoxBitmap.PixelARGBTransparency(X, Y: Integer; const T, RMod, GMod, BMod: Single); MACRO_PIXEL_TRANSPARENCY
+
+function TSimbaImageBoxBitmap.BGR(Color: TColor): TBGR;
+begin
+  Result.R := Color and $FF;
+  Result.G := Color shr 8 and $FF;
+  Result.B := Color shr 16 and $FF;
+end;
+
+function TSimbaImageBoxBitmap.BGRA(Color: TColor): TBGRA;
+begin
+  Result.R := Color and $FF;
+  Result.G := Color shr 8 and $FF;
+  Result.B := Color shr 16 and $FF;
+  Result.A := 0;
+end;
+
+function TSimbaImageBoxBitmap.ARGB(Color: TColor): TARGB;
+begin
+  Result.A := 0;
+  Result.R := Color and $FF;
+  Result.G := Color shr 8 and $FF;
+  Result.B := Color shr 16 and $FF;
+end;
 
 function TSimbaImageBoxBitmap.GetHandle: HDC;
 begin
@@ -103,7 +212,7 @@ begin
 
   FZoom := Zoom;
   FRect := Rect;
-  FWidth  := Width;
+  FWidth := Width;
   FHeight := Height;
   FPixelSize := PixelSize;
 
@@ -126,98 +235,184 @@ begin
 end;
 
 procedure TSimbaImageBoxBitmap.DrawLine(Start, Stop: TPoint; Color: TColor);
+
+  {$DEFINE MACRO_LINE :=
+  var
+    DX, DY, Step, I: Integer;
+    RX, RY, X, Y: Single;
+  begin
+    DX := (Stop.X - Start.X);
+    DY := (Stop.Y - Start.Y);
+    if (Abs(DX) > Abs(DY)) then
+      Step := Abs(DX)
+    else
+      Step := Abs(DY);
+
+    if (Step = 0) then
+    begin
+      RX := DX;
+      RY := DY;
+    end else
+    begin
+      RX := DX / Step;
+      RY := DY / Step;
+    end;
+    X := Start.X;
+    Y := Start.Y;
+
+    PixelProc(Round(X), Round(Y), Color);
+    for I := 1 to Step do
+    begin
+      X := X + RX;
+      Y := Y + RY;
+
+      PixelProc(Round(X), Round(Y), Color);
+    end;
+  end;
+  }
+
+  {$DEFINE PixelProc := PixelBGR}
+  procedure DrawBGR(Color: TBGR);   MACRO_LINE
+  {$DEFINE PixelProc := PixelBGRA}
+  procedure DrawBGRA(Color: TBGRA); MACRO_LINE
+  {$DEFINE PixelProc := PixelARGB}
+  procedure DrawARGB(Color: TARGB); MACRO_LINE
+
 begin
-  DrawPoints(TPAFromLine(Start, Stop), Color);
+  case FPixelFormat of
+    'BGR':  DrawBGR(BGR(Color));
+    'BGRA': DrawBGRA(BGRA(Color));
+    'ARGB': DrawARGB(ARGB(Color));
+  end;
 end;
 
 procedure TSimbaImageBoxBitmap.DrawCross(Center: TPoint; Radius: Integer; Color: TColor);
 begin
   Radius := Radius div 2;
 
-  DrawPoints(
-    TPAFromLine(Center.X - Radius, Center.Y - Radius, Center.X + Radius, Center.Y + Radius) +
-    TPAFromLine(Center.X + Radius, Center.Y - Radius, Center.X - Radius, Center.Y + Radius),
-    Color
-  );
+  DrawLine(TPoint.Create(Center.X - Radius, Center.Y - Radius), TPoint.Create(Center.X + Radius, Center.Y + Radius), Color);
+  DrawLine(TPoint.Create(Center.X + Radius, Center.Y - Radius), TPoint.Create(Center.X - Radius, Center.Y + Radius), Color);
 end;
 
 procedure TSimbaImageBoxBitmap.DrawCrossArray(Centers: TPointArray; Radius: Integer; Color: TColor);
 var
-  Template, Points: TPointArray;
-  P: TPoint;
-  I, J, Count: Integer;
+  I: Integer;
   Center: TPoint;
   R: TRect;
 begin
-  Radius := Radius div 2;
-
-  Template := TPAFromLine(-Radius, -Radius, +Radius, + Radius) +
-              TPAFromLine(-Radius, +Radius, +Radius, - Radius);
-
-  SetLength(Points, Length(Centers) * Length(Template));
-  Count := 0;
-
   R := FRect;
   R.Inflate(Radius, Radius);
 
+  Radius := Radius div 2;
   for I := 0 to High(Centers) do
   begin
     Center := Centers[I];
     if (Center.X < R.Left) or (Center.Y < R.Top) or (Center.X > R.Right) or (Center.Y > FRect.Bottom) then
       Continue;
 
-    P := Centers[I];
-    for J := 0 to High(Template) do
-    begin
-      Points[Count].X := P.X + Template[J].X;
-      Points[Count].Y := P.Y + Template[J].Y;
-
-      Inc(Count);
-    end;
+    DrawLine(TPoint.Create(Center.X - Radius, Center.Y - Radius), TPoint.Create(Center.X + Radius, Center.Y + Radius), Color);
+    DrawLine(TPoint.Create(Center.X + Radius, Center.Y - Radius), TPoint.Create(Center.X - Radius, Center.Y + Radius), Color);
   end;
-  SetLength(Points, Count);
-
-  DrawPoints(Points, Color);
 end;
 
 procedure TSimbaImageBoxBitmap.DrawCrossHair(Center: TPoint; Radius: Integer; Color: TColor);
 begin
   Radius := Radius div 2;
 
-  DrawPoints(
-    TPAFromLine(Center.X - Radius, Center.Y, Center.X + Radius, Center.Y) +
-    TPAFromLine(Center.X, Center.Y - Radius, Center.X, Center.Y + Radius),
-    Color
-  );
+  DrawLine(TPoint.Create(Center.X - Radius, Center.Y), TPoint.Create(Center.X + Radius, Center.Y), Color);
+  DrawLine(TPoint.Create(Center.X, Center.Y - Radius), TPoint.Create(Center.X, Center.Y + Radius), Color);
 end;
 
 procedure TSimbaImageBoxBitmap.DrawBox(Box: TBox; Color: TColor);
 begin
   Box.Normalize();
 
-  DrawPoints(EdgeFromBox(Box), Color);
+  DrawLine(TPoint.Create(Box.X1, Box.Y1), TPoint.Create(Box.X2, Box.Y1), Color);
+  DrawLine(TPoint.Create(Box.X2, Box.Y1), TPoint.Create(Box.X2, Box.Y2), Color);
+  DrawLine(TPoint.Create(Box.X2, Box.Y2), TPoint.Create(Box.X1, Box.Y2), Color);
+  DrawLine(TPoint.Create(Box.X1, Box.Y2), TPoint.Create(Box.X1, Box.Y1), Color);
+end;
+
+procedure TSimbaImageBoxBitmap.DrawBoxTransparent(Box: TBox; Color: TColor; Transparency: Single);
+var
+  RMod, GMod, BMod: Single;
+
+  {$DEFINE MACRO_PIXELS :=
+    var
+      X, Y: Integer;
+    begin
+      for Y := Box.Y1 to Box.Y2 - 1 do
+        for X := Box.X1 to Box.X2 - 1 do
+        begin
+          if ((FZoom >= 1) or ((Y mod FPixelSize = 0) and (X mod FPixelSize = 0))) then
+            PixelProc(X, Y, Transparency, RMod, GMod, BMod);
+        end;
+    end;
+  }
+
+  {$DEFINE PixelProc := PixelBGRTransparency}
+  procedure DrawBGR;  MACRO_PIXELS
+  {$DEFINE PixelProc := PixelBGRATransparency}
+  procedure DrawBGRA; MACRO_PIXELS
+  {$DEFINE PixelProc := PixelARGBTransparency}
+  procedure DrawARGB; MACRO_PIXELS
+
+begin
+  Box.Normalize();
+
+  RMod := ((Color and $FF)        * Transparency);
+  GMod := ((Color shr 8 and $FF)  * Transparency);
+  BMod := ((Color shr 16 and $FF) * Transparency);
+
+  Transparency := 1.0 - Transparency;
+
+  case FPixelFormat of
+    'BGR':  DrawBGR();
+    'BGRA': DrawBGRA();
+    'ARGB': DrawARGB();
+  end;
 end;
 
 procedure TSimbaImageBoxBitmap.DrawBoxFilled(Box: TBox; Color: TColor);
+
+  {$DEFINE MACRO_PIXELS :=
+    var
+      X, Y: Integer;
+    begin
+      for Y := Box.Y1 to Box.Y2 do
+        for X := Box.X1 to Box.X2 do
+          PixelProc(X, Y, Color);
+    end;
+  }
+
+  {$DEFINE PixelProc := PixelBGR}
+  procedure DrawBGR(Color: TBGR);   MACRO_PIXELS
+  {$DEFINE PixelProc := PixelBGRA}
+  procedure DrawBGRA(Color: TBGRA); MACRO_PIXELS
+  {$DEFINE PixelProc := PixelARGB}
+  procedure DrawARGB(Color: TARGB); MACRO_PIXELS
+
 begin
-  DrawPoints(TPAFromBox(Box), Color);
+  Box.Normalize();
+
+  case FPixelFormat of
+    'BGR':  DrawBGR(BGR(Color));
+    'BGRA': DrawBGRA(BGRA(Color));
+    'ARGB': DrawARGB(ARGB(Color));
+  end;
 end;
 
 procedure TSimbaImageBoxBitmap.DrawPoly(Poly: TPointArray; Connect: Boolean; Color: TColor);
 var
-  TPA: TPointArray;
   I: Integer;
 begin
-  if (Length(Poly) > 1) then
-  begin
-    TPA := [];
-    for I := 0 to High(Poly) - 1 do
-      TPA += TPAFromLine(Poly[I].X, Poly[I].Y, Poly[I+1].X, Poly[I+1].Y);
-    if Connect then
-      TPA += TPAFromLine(Poly[High(Poly)].X, Poly[High(Poly)].Y, Poly[0].X, Poly[0].Y);
+  if (Length(Poly) <= 1) then
+    Exit;
 
-    DrawPoints(TPA, Color);
-  end;
+  for I := 0 to High(Poly) - 1 do
+    DrawLine(Poly[I], Poly[I+1], Color);
+  if Connect then
+    DrawLine(Poly[High(Poly)], Poly[0], Color);
 end;
 
 procedure TSimbaImageBoxBitmap.DrawPoint(P: TPoint; Color: TColor);
@@ -227,136 +422,165 @@ end;
 
 procedure TSimbaImageBoxBitmap.DrawPoints(TPA: TPointArray; Color: TColor);
 
-  procedure PixelBGR(const X, Y: Integer; const Pixel: TRGB24); inline;
+  procedure DrawBGR(const Color: TBGR);
   var
-    LoopX, LoopY, EndX, EndY: Integer;
-  begin
-    if (FZoom > 1) then
-    begin
-      EndX := Min(FWidthMinus1,  X + FPixelSizeMinus1);
-      EndY := Min(FHeightMinus1, Y + FPixelSizeMinus1);
-
-      for LoopY := Y to EndY do
-        for LoopX := X to EndX do
-          PRGB24(FData + (LoopY * FBytesPerLine + LoopX * FBytesPerPixel))^ := Pixel;
-    end else
-      PRGB24(FData + (Y * FBytesPerLine + X * FBytesPerPixel))^ := Pixel;
-  end;
-
-  procedure PixelBGRA(const X, Y: Integer; const Pixel: TRGB32); inline;
-  var
-    LoopX, LoopY, EndX, EndY: Integer;
-  begin
-    if (FZoom > 1) then
-    begin
-      EndX := Min(FWidthMinus1,  X + FPixelSizeMinus1);
-      EndY := Min(FHeightMinus1, Y + FPixelSizeMinus1);
-
-      for LoopY := Y to EndY do
-        for LoopX := X to EndX do
-          PRGB32(FData + (LoopY * FBytesPerLine + LoopX * FBytesPerPixel))^ := Pixel;
-    end else
-      PRGB32(FData + (Y * FBytesPerLine + X * FBytesPerPixel))^ := Pixel;
-  end;
-
-  procedure PixelARGB(const X, Y: Integer; const Pixel: TARGB); inline;
-  var
-    LoopX, LoopY, EndX, EndY: Integer;
-  begin
-    if (FZoom > 1) then
-    begin
-      EndX := Min(FWidthMinus1,  X + FPixelSizeMinus1);
-      EndY := Min(FHeightMinus1, Y + FPixelSizeMinus1);
-
-      for LoopY := Y to EndY do
-        for LoopX := X to EndX do
-          PARGB(FData + (LoopY * FBytesPerLine + LoopX * FBytesPerPixel))^ := Pixel;
-    end else
-      PARGB(FData + (Y * FBytesPerLine + X * FBytesPerPixel))^ := Pixel;
-  end;
-
-  procedure BGR;
-  var
-    Pixel: TRGB24;
     I: Integer;
-    X, Y: Integer;
   begin
-    Pixel := Default(TRGB24);
-
-    ColorToRGB(Color, Pixel.R, Pixel.G, Pixel.B);
-
     for I := 0 to High(TPA) do
-    begin
-      X := TPA[I].X;
-      Y := TPA[I].Y;
-      if (X < FRect.Left) or (Y < FRect.Top) or (X > FRect.Right) or (Y > FRect.Bottom) then
-        Continue;
-
-      PixelBGR(Trunc((X + FOffset.X) * FZoom), Trunc((Y + FOffset.Y) * FZoom), Pixel);
-    end;
+      PixelBGR(TPA[I].X, TPA[I].Y, Color);
   end;
 
-  procedure BGRA;
+  procedure DrawBGRA(const Color: TBGRA);
   var
-    Pixel: TRGB32;
     I: Integer;
-    X, Y: Integer;
   begin
-    Pixel := Default(TRGB32);
-
-    ColorToRGB(Color, Pixel.R, Pixel.G, Pixel.B);
-
     for I := 0 to High(TPA) do
-    begin
-      X := TPA[I].X;
-      Y := TPA[I].Y;
-      if (X < FRect.Left) or (Y < FRect.Top) or (X > FRect.Right) or (Y > FRect.Bottom) then
-        Continue;
-
-      PixelBGRA(Trunc((X + FOffset.X) * FZoom), Trunc((Y + FOffset.Y) * FZoom), Pixel);
-    end;
+      PixelBGRA(TPA[I].X, TPA[I].Y, Color);
   end;
 
-  procedure ARGB;
+  procedure DrawARGB(const Color: TARGB);
   var
-    Pixel: TARGB;
     I: Integer;
-    X, Y: Integer;
   begin
-    Pixel := Default(TARGB);
-
-    ColorToRGB(Color, Pixel.R, Pixel.G, Pixel.B);
-
     for I := 0 to High(TPA) do
-    begin
-      X := TPA[I].X;
-      Y := TPA[I].Y;
-      if (X < FRect.Left) or (Y < FRect.Top) or (X > FRect.Right) or (Y > FRect.Bottom) then
-        Continue;
-
-      PixelARGB(Trunc((X + FOffset.X) * FZoom), Trunc((Y + FOffset.Y) * FZoom), Pixel);
-    end;
+      PixelARGB(TPA[I].X, TPA[I].Y, Color);
   end;
 
 begin
-  if Length(TPA) = 0 then
+  if (Length(TPA) = 0) then
     Exit;
 
   case FPixelFormat of
-    'BGR':  BGR();
-    'BGRA': BGRA();
-    'ARGB': ARGB();
+    'BGR':  DrawBGR(BGR(Color));
+    'BGRA': DrawBGRA(BGRA(Color));
+    'ARGB': DrawARGB(ARGB(Color));
+  end;
+end;
+
+ procedure TSimbaImageBoxBitmap.DrawEllipse(Center: TPoint; RadiusX, RadiusY: Integer; Color: TColor);
+
+  {$DEFINE MACRO_ELLIPSE :=
+    var
+      RadXSq, RadYSq: Integer;
+      TwoSqX, TwoSqY: Integer;
+      X, Y, P, PX, PY: Integer;
+    begin
+      RadXSq := RadiusX * RadiusX;
+      RadYSq := RadiusY * RadiusY;
+      TwoSqX := 2 * RadXSq;
+      TwoSqY := 2 * RadYSq;
+      X  := 0;
+      Y  := RadiusY;
+      PX := 0;
+      PY := TwoSqX * Y;
+
+      PixelProc(Center.Y+Y, Center.X+X, Color);
+      PixelProc(Center.Y+Y, Center.X-X, Color);
+      PixelProc(Center.Y-Y, Center.X+X, Color);
+      PixelProc(Center.Y-Y, Center.X-X, Color);
+
+      P := Round(RadYSQ - (RadXSQ * RadiusY) + (0.25 * RadXSQ));
+      while PX<PY do
+      begin
+        Inc(X);
+        Inc(PX, TwoSqY);
+
+        if (P < 0) then
+          Inc(P, RadYSq + PX)
+        else begin
+          Dec(Y);
+          Dec(PY, TwoSqX);
+          Inc(P, RadYSq + PX - PY);
+        end;
+
+        // Filled
+        //DrawLine(TPoint.Create(Center.Y+Y,Center.X+X), TPoint.Create(Center.Y+Y,Center.X-X), Color);
+        //DrawLine(TPoint.Create(Center.Y-Y,Center.X+X), TPoint.Create(Center.Y-Y,Center.X-X), Color);
+
+        PixelProc(Center.Y+Y, Center.X+X, Color);
+        PixelProc(Center.Y+Y, Center.X-X, Color);
+        PixelProc(Center.Y-Y, Center.X+X, Color);
+        PixelProc(Center.Y-Y, Center.X-X, Color);
+      end;
+
+      P := Round(RadYSQ * Sqr(X + 0.5) + RadXSQ * Sqr(Y - 1) - RadXSQ * RadYSQ);
+      while (Y>0) do
+      begin
+        Dec(Y);
+        Dec(PY, TwoSqX);
+        if (P > 0) then
+          Inc(P, RadXSq - PY)
+        else begin
+          Inc(X);
+          Inc(PX, TwoSqY);
+          Inc(P, RadXSq - PY + PX);
+        end;
+
+        // Filled
+        //DrawLine(TPoint.Create(Center.Y+Y,Center.X+X), TPoint.Create(Center.Y+Y,Center.X-X), Color);
+        //DrawLine(TPoint.Create(Center.Y-Y,Center.X+X), TPoint.Create(Center.Y-Y,Center.X-X), Color);
+
+        PixelProc(Center.Y+Y,Center.X+X, Color);
+        PixelProc(Center.Y+Y,Center.X-X, Color);
+        PixelProc(Center.Y-Y,Center.X+X, Color);
+        PixelProc(Center.Y-Y,Center.X-X, Color);
+      end;
+    end;
+  }
+
+  {$DEFINE PixelProc := PixelBGR}
+  procedure DrawBGR(Color: TBGR);   MACRO_ELLIPSE
+  {$DEFINE PixelProc := PixelBGRA}
+  procedure DrawBGRA(Color: TBGRA); MACRO_ELLIPSE
+  {$DEFINE PixelProc := PixelARGB}
+  procedure DrawARGB(Color: TARGB); MACRO_ELLIPSE
+
+begin
+  case FPixelFormat of
+    'BGR':  DrawBGR(BGR(Color));
+    'BGRA': DrawBGRA(BGRA(Color));
+    'ARGB': DrawARGB(ARGB(Color));
   end;
 end;
 
 procedure TSimbaImageBoxBitmap.DrawCircle(Center: TPoint; Radius: Integer; Color: TColor);
 begin
-  DrawPoints(TPAFromCircle(Center, Radius, False), Color);
+  case FPixelFormat of
+    'BGR':  DrawEllipse(Center, Radius, Radius, Color);
+    'BGRA': DrawEllipse(Center, Radius, Radius, Color);
+    'ARGB': DrawEllipse(Center, Radius, Radius, Color);
+  end;
 end;
 
 procedure TSimbaImageBoxBitmap.DrawCircleFilled(Center: TPoint; Radius: Integer; Color: TColor);
+
+  {$DEFINE MACRO_CIRCLE_FILLED :=
+    var
+      X, Y: Integer;
+      SqRad: Single;
+    begin
+      SqRad := Trunc(Sqr(Radius + 0.5));
+      with TBox.Create(Center, Radius, Radius) do
+        for Y := Y1 to Y2 do
+          for X := X1 to X2 do
+            if Sqr(X - Center.X) + Sqr(Y - Center.Y) < SqRad then
+              PixelProc(X, Y, Color);
+    end;
+  }
+
+  {$DEFINE PixelProc := PixelBGR}
+  procedure DrawBGR(Color: TBGR);   MACRO_CIRCLE_FILLED
+  {$DEFINE PixelProc := PixelBGRA}
+  procedure DrawBGRA(Color: TBGRA); MACRO_CIRCLE_FILLED
+  {$DEFINE PixelProc := PixelARGB}
+  procedure DrawARGB(Color: TARGB); MACRO_CIRCLE_FILLED
+
 begin
-  DrawPoints(TPAFromCircle(Center, Radius, True), Color);
+  case FPixelFormat of
+    'BGR':  DrawBGR(BGR(Color));
+    'BGRA': DrawBGRA(BGRA(Color));
+    'ARGB': DrawARGB(ARGB(Color));
+  end;
 end;
 
 end.

@@ -117,6 +117,18 @@ begin
 end;
 
 (*
+TBox.Filter
+~~~~~~~~~~~
+function TBox.Filter(Points: TPointArray): TPointArray;
+
+Returns all points that are in the box.
+*)
+procedure _LapeBox_Filter(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PPointArray(Result)^ := PBox(Params^[0])^.Filter(PPointArray(Params^[1])^);
+end;
+
+(*
 TBox.Contains
 ~~~~~~~~~~~~~
 function TBox.Contains(Other: TBox): Boolean;
@@ -304,7 +316,7 @@ begin
     addGlobalFunc('function TBox.Expand(SizeMod: Integer; MaxBounds: TBox): TBox; overload;', @_LapeBox_Expand3);
     addGlobalFunc('function TBox.Expand(WidMod, HeiMod: Integer): TBox; overload;', @_LapeBox_Expand2);
     addGlobalFunc('function TBox.Expand(WidMod, HeiMod: Integer; MaxBounds: TBox): TBox; overload;', @_LapeBox_Expand4);
-
+    addGlobalFunc('function TBox.Filter(Points: TPointArray): TPointArray', @_LapeBox_Filter);
     addGlobalFunc('function TBox.Contains(Other: TBox): Boolean; overload;', @_LapeBox_Contains1);
     addGlobalFunc('function TBox.Contains(Other: TPoint): Boolean; overload;', @_LapeBox_Contains2);
     addGlobalFunc('function TBox.Contains(X, Y: Integer): Boolean; overload;', @_LapeBox_Contains3);

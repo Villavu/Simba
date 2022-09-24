@@ -75,6 +75,16 @@ begin
   PSimbaImageBoxBitmap(Params^[0])^.DrawCircleFilled(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
 end;
 
+procedure _LapeSimbaImageBoxBitmap_DrawBoxTransparent(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBoxBitmap(Params^[0])^.DrawBoxTransparent(PBox(Params^[1])^, PColor(Params^[2])^, PSingle(Params^[3])^);
+end;
+
+procedure _LapeSimbaImageBoxBitmap_DrawEllipse(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaImageBoxBitmap(Params^[0])^.DrawEllipse(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PColor(Params^[4])^);
+end;
+
 procedure _LapeSimbaImageBox_Zoom_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PSingle(Result)^ := PSimbaImageBox(Params^[0])^.Zoom;
@@ -262,6 +272,8 @@ begin
     addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawPoints(TPA: TPointArray; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawPoints);
     addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawCircle(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawCircle);
     addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawCircleFilled(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawCircleFilled);
+    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawBoxTransparent(Box: TBox; Color: TColor; Transparency: Single);', @_LapeSimbaImageBoxBitmap_DrawBoxTransparent);
+    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawEllipse(Center: TPoint; RadiusX, RadiusY: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawEllipse);
 
     addGlobalType('procedure(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; Rect: TRect) of object', 'TSimbaImageBoxPaintAreaEvent', FFI_DEFAULT_ABI);
 

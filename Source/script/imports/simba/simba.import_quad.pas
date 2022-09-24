@@ -11,8 +11,8 @@ uses
   simba.mufasatypes, simba.script_compiler;
 
 (*
-Quad
-======
+TQuad
+=====
 The TQuad type is a record which stores four TPoints (Top, Right, Bottom, Left)
 
 See: <https://en.wikipedia.org/wiki/Quadrilateral>
