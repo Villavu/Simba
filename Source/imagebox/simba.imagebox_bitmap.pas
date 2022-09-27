@@ -65,6 +65,7 @@ type
     procedure EndUpdate;
 
     procedure DrawLine(Start, Stop: TPoint; Color: TColor);
+    procedure DrawLineGap(Start, Stop: TPoint; Gap: Integer; Color: TColor);
     procedure DrawCross(Center: TPoint; Radius: Integer; Color: TColor);
     procedure DrawCrossArray(Centers: TPointArray; Radius: Integer; Color: TColor);
     procedure DrawCrossHair(Center: TPoint; Radius: Integer; Color: TColor);
@@ -268,6 +269,67 @@ procedure TSimbaImageBoxBitmap.DrawLine(Start, Stop: TPoint; Color: TColor);
 
       PixelProc(Round(X), Round(Y), Color);
     end;
+  end;
+  }
+
+  {$DEFINE PixelProc := PixelBGR}
+  procedure DrawBGR(Color: TBGR);   MACRO_LINE
+  {$DEFINE PixelProc := PixelBGRA}
+  procedure DrawBGRA(Color: TBGRA); MACRO_LINE
+  {$DEFINE PixelProc := PixelARGB}
+  procedure DrawARGB(Color: TARGB); MACRO_LINE
+
+begin
+  case FPixelFormat of
+    'BGR':  DrawBGR(BGR(Color));
+    'BGRA': DrawBGRA(BGRA(Color));
+    'ARGB': DrawARGB(ARGB(Color));
+  end;
+end;
+
+procedure TSimbaImageBoxBitmap.DrawLineGap(Start, Stop: TPoint; Gap: Integer; Color: TColor);
+
+  {$DEFINE MACRO_LINE :=
+  var
+    DX, DY, Step, I, G: Integer;
+    RX, RY, X, Y: Single;
+  begin
+    DX := (Stop.X - Start.X);
+    DY := (Stop.Y - Start.Y);
+    if (Abs(DX) > Abs(DY)) then
+      Step := Abs(DX)
+    else
+      Step := Abs(DY);
+
+    if (Step = 0) then
+    begin
+      RX := DX;
+      RY := DY;
+    end else
+    begin
+      RX := DX / Step;
+      RY := DY / Step;
+    end;
+    X := Start.X;
+    Y := Start.Y;
+    G := 0;
+
+    PixelProc(Round(X), Round(Y), Color);
+    for I := 1 to Step do
+    begin
+      X := X + RX;
+      Y := Y + RY;
+
+      Inc(G);
+      if (G > 0) then
+      begin
+        PixelProc(Round(X), Round(Y), Color);
+        if (G > Gap) then
+          G := -Gap;
+      end;
+    end;
+
+    PixelProc(Round(X), Round(Y), Color);
   end;
   }
 

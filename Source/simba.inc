@@ -17,7 +17,7 @@
 {$DEFINE SIMBA_BUGS_URL      := 'https://github.com/Villavu/Simba/issues'}
 {$DEFINE SIMBA_DOCS_URL      := 'https://villavu.github.io/Simba/'}
 {$DEFINE SIMBA_PACKAGES_URL  := 'https://raw.githubusercontent.com/Villavu/Simba-Package-List/main/list'}
-{$DEFINE SIMBA_ANALYTICS_URL := 'https://olly.best/simba.php'}
+{$DEFINE SIMBA_ANALYTICS_URL := 'http://olly.best/simba.php'}
 
 // GITHUB_XXX env variables are available when building in github actions
 {$DEFINE SIMBA_COMMIT     := {$include %GITHUB_SHORT_SHA%}}
