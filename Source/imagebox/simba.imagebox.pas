@@ -10,7 +10,7 @@ unit simba.imagebox;
 interface
 
 uses
-  classes, sysutils, forms, controls, graphics, dialogs, extctrls, comctrls, StdCtrls,
+  classes, sysutils, forms, controls, graphics, dialogs, extctrls, comctrls,
   lclintf, lcltype, IntfGraphics,
   simba.mufasatypes, simba.bitmap, simba.dtm, simba.iomanager, simba.imagebox_bitmap;
 
@@ -51,6 +51,7 @@ type
     FMousePoint: TPoint;
     FBitmap: TSimbaImageBoxBitmap;
 
+    procedure KeyDown(var Key: Word; Shift: TShiftState); override;
     procedure DoPaintArea(Bitmap: TSimbaImageBoxBitmap; R: TRect); virtual;
 
     function GetScrolledRect: TRect; virtual;
@@ -58,7 +59,7 @@ type
     procedure ScrollBoxPaint(Sender: TObject); virtual;
 
     procedure FontChanged(Sender: TObject); override;
-    procedure BackgroundChanged(Sender: TObject);  virtual;
+    procedure BackgroundChanged(Sender: TObject); virtual;
 
     procedure ImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); virtual;
     procedure ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); virtual;
@@ -68,6 +69,7 @@ type
     procedure ImageMouseEnter(Sender: TObject); virtual;
     procedure ImageMouseLeave(Sender: TObject); virtual;
     procedure ImageDoubleClick(Sender: TObject); virtual;
+    procedure ImageKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState); virtual;
 
     function GetCursor: TCursor; override;
     procedure SetCursor(Value: TCursor); override;
@@ -107,11 +109,12 @@ type
     destructor Destroy; override;
   end;
 
+
 implementation
 
 uses
   math, fpimage, graphtype,
-  simba.nativeinterface, simba.bitmap_misc, simba.finder_dtm, simba.finder_color, simba.datetime;
+  simba.nativeinterface, simba.bitmap_misc, simba.finder_dtm, simba.finder_color;
 
 procedure TSimbaImageBox_ScrollBox.GetPreferredSize(var PreferredWidth, PreferredHeight: integer; Raw: boolean; WithThemeSpace: boolean);
 begin
@@ -280,6 +283,11 @@ begin
   end;
 end;
 
+procedure TSimbaImageBox.KeyDown(var Key: Word; Shift: TShiftState);
+begin
+  ImageKeyDown(Self, Key, Shift);
+end;
+
 procedure TSimbaImageBox.DoPaintArea(Bitmap: TSimbaImageBoxBitmap; R: TRect);
 begin
   if Assigned(FOnPaintArea) then
@@ -301,42 +309,27 @@ type
   PixelRGB  = packed record R,G,B: Byte; end;
   PixelRGBA = Integer;
 
-  procedure RenderZoomOut(ratio: Integer; src: TBitmap; srcX, srcY, srcW, srcH: Integer; dest: TBitmap);
-  var
-    LoopEndX, LoopEndY: Integer;
+  procedure RenderZoomOut(Ratio: Integer; src: TBitmap; srcX, srcY, srcW, srcH: Integer; dest: TBitmap);
   begin
-    LoopEndX := FBitmap.Width - 1;
-    LoopEndY := FBitmap.Height - 1;
-
     case (Src.RawImage.Description.BitsPerPixel shr 3) of
-      3: specialize ZoomOut<PixelRGB>(Ratio, SrcX, SrcY, LoopEndX, LoopEndY, Src.RawImage, Dest.RawImage);
-      4: specialize ZoomOut<PixelRGBA>(Ratio, SrcX, SrcY, LoopEndX, LoopEndY, Src.RawImage, Dest.RawImage);
+      3: specialize ZoomOut<PixelRGB>(Ratio, SrcX, SrcY, FBitmap.Width - 1, FBitmap.Height - 1, Src.RawImage, Dest.RawImage);
+      4: specialize ZoomOut<PixelRGBA>(Ratio, SrcX, SrcY, FBitmap.Width - 1, FBitmap.Height - 1, Src.RawImage, Dest.RawImage);
     end;
   end;
 
-  procedure RenderZoomIn(ratio: Integer; src: TBitmap; srcX, srcY, srcW, srcH: Integer; dest: TBitmap);
-  var
-    LoopEndX, LoopEndY: Integer;
+  procedure RenderZoomIn(Ratio: Integer; src: TBitmap; srcX, srcY, srcW, srcH: Integer; dest: TBitmap);
   begin
-    LoopEndX := FBitmap.Width - 1;
-    LoopEndY := FBitmap.Height - 1;
-
     case (Src.RawImage.Description.BitsPerPixel shr 3) of
-      3: specialize ZoomIn<PixelRGB>(Ratio, SrcX, SrcY, LoopEndX, LoopEndY, Src.RawImage, Dest.RawImage);
-      4: specialize ZoomIn<PixelRGBA>(Ratio, SrcX, SrcY, LoopEndX, LoopEndY, Src.RawImage, Dest.RawImage);
+      3: specialize ZoomIn<PixelRGB>(Ratio, SrcX, SrcY, FBitmap.Width - 1, FBitmap.Height - 1, Src.RawImage, Dest.RawImage);
+      4: specialize ZoomIn<PixelRGBA>(Ratio, SrcX, SrcY, FBitmap.Width - 1, FBitmap.Height - 1, Src.RawImage, Dest.RawImage);
     end;
   end;
 
   procedure RenderNoZoom(src: TBitmap; srcX, srcY, srcW, srcH: Integer; dest: TBitmap);
-  var
-    LoopEndX, LoopEndY: Integer;
   begin
-    LoopEndX := FBitmap.Width - 1;
-    LoopEndY := FBitmap.Height - 1;
-
     case (Src.RawImage.Description.BitsPerPixel shr 3) of
-      3: specialize NoZoom<PixelRGB>(SrcX, SrcY, LoopEndX, LoopEndY, Src.RawImage, Dest.RawImage);
-      4: specialize NoZoom<PixelRGBA>(SrcX, SrcY, LoopEndX, LoopEndY, Src.RawImage, Dest.RawImage);
+      3: specialize NoZoom<PixelRGB>(SrcX, SrcY, FBitmap.Width, FBitmap.Height, Src.RawImage, Dest.RawImage);
+      4: specialize NoZoom<PixelRGBA>(SrcX, SrcY, FBitmap.Width, FBitmap.Height, Src.RawImage, Dest.RawImage);
     end;
   end;
 
@@ -566,6 +559,12 @@ begin
     OnDblClick(Self);
 end;
 
+procedure TSimbaImageBox.ImageKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if (OnKeyDown <> nil) then
+    OnKeyDown(Self, Key, Shift);
+end;
+
 procedure TSimbaImageBox.ImageMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
   Handled := True;
@@ -726,6 +725,7 @@ begin
   FScrollBox.OnMouseLeave := @ImageMouseLeave;
   FScrollBox.OnMouseEnter := @ImageMouseEnter;
   FScrollBox.OnDblClick := @ImageDoubleClick;
+  FScrollBox.OnKeyDown := @ImageKeyDown;
 
   FStatusBar := TStatusBar.Create(Self);
   FStatusBar.Parent := Self;

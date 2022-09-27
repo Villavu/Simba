@@ -54,6 +54,8 @@ type
     function addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar; virtual; overload;
     function addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType; virtual; overload;
 
+    function addGlobalType(Str: TStringArray; Name: String): TLapeType; virtual; overload;
+
     function addCallbackType(Str: String): TLapeType;
 
     procedure addClass(Name: lpString; Parent: lpString = 'TObject'); virtual;
@@ -131,6 +133,11 @@ end;
 function TSimbaScript_Compiler.addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType;
 begin
   Result := addGlobalType(Format('native(type %s, %s)', [Str, GetEnumName(TypeInfo(TFFIABI), Ord(ABI))]), AName);
+end;
+
+function TSimbaScript_Compiler.addGlobalType(Str: TStringArray; Name: String): TLapeType;
+begin
+  Result := addGlobalType(LineEnding.Join(Str), Name);
 end;
 
 function TSimbaScript_Compiler.addCallbackType(Str: String): TLapeType;
