@@ -68,7 +68,7 @@ type
     procedure MarkTextAsSaved; reintroduce;
 
     procedure ClearFocusedLines;
-    procedure FocusLine(Line, Col: Integer);
+    procedure FocusLine(Line, Column: Integer; AColor: TColor);
 
     constructor Create(AOwner: TComponent; LoadColors: Boolean = True); reintroduce;
     destructor Destroy; override;
@@ -146,13 +146,13 @@ begin
   end;
 end;
 
-procedure TSimbaEditor.FocusLine(Line, Col: Integer);
+procedure TSimbaEditor.FocusLine(Line, Column: Integer; AColor: TColor);
 var
   I: Integer;
 begin
   FFocusedLinesUpdating := True;
   try
-    CaretX := Col;
+    CaretX := Column;
     CaretY := Line;
     TopLine := Line - (LinesInWindow div 2);
     if CanSetFocus() then
@@ -162,7 +162,7 @@ begin
       if (FFocusedLinesColors[I].Line = -1) then
       begin
         FFocusedLinesColors[I].Line  := Line;
-        FFocusedLinesColors[I].Color := $008CFF;
+        FFocusedLinesColors[I].Color := AColor;
 
         Invalidate();
         Exit;
@@ -171,7 +171,7 @@ begin
     SetLength(FFocusedLinesColors, Length(FFocusedLinesColors) + 1);
 
     FFocusedLinesColors[High(FFocusedLinesColors)].Line  := Line;
-    FFocusedLinesColors[High(FFocusedLinesColors)].Color := $008CFF;
+    FFocusedLinesColors[High(FFocusedLinesColors)].Color := AColor;
   finally
     FFocusedLinesCount    := FFocusedLinesCount + 1;
     FFocusedLinesUpdating := False;
@@ -287,7 +287,7 @@ begin
   for I := 0 to High(FFocusedLinesColors) do
     if (FFocusedLinesColors[I].Line = Line) then
     begin
-      AMarkup.BackAlpha  := 180;
+      AMarkup.BackAlpha  := 128;
       AMarkup.Background := FFocusedLinesColors[I].Color;
       AMarkup.Foreground := clNone;
 

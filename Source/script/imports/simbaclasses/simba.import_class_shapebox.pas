@@ -136,6 +136,16 @@ begin
   PSimbaShapeBox(Params^[0])^.UserDataSize := PInteger(Params^[1])^;
 end;
 
+procedure _LapeSimbaShapeBox_QueryNameOnNew_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoolean(Result)^ := PSimbaShapeBox(Params^[0])^.QueryNameOnNew;
+end;
+
+procedure _LapeSimbaShapeBox_QueryNameOnNew_WRite(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PSimbaShapeBox(Params^[0])^.QueryNameOnNew := PBoolean(Params^[1])^;
+end;
+
 procedure _LapeSimbaShapeBox_DeleteShape(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PSimbaShapeBox(Params^[0])^.DeleteShape(PInteger(Params^[1])^);
@@ -177,6 +187,7 @@ begin
     addGlobalFunc('function TSimbaShapeBox.ShapeIndex: Integer', @_LapeSimbaShapeBox_GetShapeIndex);
 
     addClassVar('TSimbaShapeBox', 'UserDataSize', 'Integer', @_LapeSimbaShapeBox_UserDataSize_Read, @_LapeSimbaShapeBox_UserDataSize_Write);
+    addClassVar('TSimbaShapeBox', 'QueryNameOnNew', 'Boolean', @_LapeSimbaShapeBox_QueryNameOnNew_Read, @_LapeSimbaShapeBox_QueryNameOnNew_Write);
 
     addGlobalFunc('procedure TSimbaShapeBox.DeleteShape(Index: Integer);', @_LapeSimbaShapeBox_DeleteShape);
     addGlobalFunc('procedure TSimbaShapeBox.DeleteAllShapes;', @_LapeSimbaShapeBox_DeleteAllShapes);

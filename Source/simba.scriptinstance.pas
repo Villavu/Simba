@@ -133,10 +133,10 @@ begin
       if (SameFileName(ScriptTab.ScriptFileName, Error.FileName)) or ((ScriptTab.ScriptFileName = '') and (ScriptTab.ScriptTitle = Error.FileName)) then
       begin
         ScriptTab.Show();
-        ScriptTab.Editor.FocusLine(Error.Line, Error.Column);
+        ScriptTab.Editor.FocusLine(Error.Line, Error.Column, $0000A5);
       end else
       if SimbaScriptTabsForm.Open(Error.FileName) then
-        ScriptTab.Editor.FocusLine(Error.Line, Error.Column);
+        ScriptTab.Editor.FocusLine(Error.Line, Error.Column, $0000A5);
     end;
   end;
 
