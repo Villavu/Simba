@@ -185,6 +185,7 @@ type
     FDeleteAllButton: TButton;
 
     FUserDataSize: Integer;
+    FQueryNameOnNew: Boolean;
 
     function CheckIndex(Index: Integer): Boolean;
 
@@ -233,6 +234,7 @@ type
     procedure ManualAddPath(Path: TPointArray; AName: String = '');
     procedure ManualAddPath(Path: TPointArray; AName: String; constref UserData); overload;
 
+    property QueryNameOnNew: Boolean read FQueryNameOnNew write FQueryNameOnNew;
     property UserDataSize: Integer read FUserDataSize write SetUserDataSize;
     property Panel: TPanel read FPanel;
 
@@ -255,7 +257,7 @@ uses
   LCLType, simba.geometry, simba.tpa, math;
 
 const
-  CLOSE_DISTANCE = 8;
+  CLOSE_DISTANCE = 7;
 
 constructor TSimbaShapeBoxShape.Create(ShapeBox: TSimbaShapeBox);
 begin
@@ -263,7 +265,7 @@ begin
 
   FShapeType := String(ClassName).After('_');
   FName := FShapeType;
-  FUserData := GetMem(ShapeBox.UserDataSize);
+  FUserData := AllocMem(ShapeBox.UserDataSize);
 end;
 
 destructor TSimbaShapeBoxShape.Destroy;
@@ -772,37 +774,43 @@ end;
 procedure TSimbaShapeBox.DoShapeAddButtonClick(Sender: TObject);
 var
   NewShape: TSimbaShapeBoxShape;
+  NewName: String;
 begin
   NewShape := nil;
+  if FQueryNameOnNew and (not InputQuery('Simba', 'Enter name', NewName)) then
+    Exit;
 
-  case TButton(Sender).Caption of
-    'New Point':
-       begin
-         NewShape := TSimbaShapeBoxShape_Point.Create(Self);
-         StatusPanel.Text := 'Selecting point: Click to set';
-       end;
-
-    'New Box':
-       begin
-         NewShape := TSimbaShapeBoxShape_Box.Create(Self);
-         StatusPanel.Text := 'Selecting box: Click to set top left then again for bottom left';
-       end;
-
-    'New Poly':
-       begin
-        NewShape := TSimbaShapeBoxShape_Poly.Create(Self);
-        StatusPanel.Text := 'Selecting polygon: Click to set points and press ENTER to finish';
-       end;
-
-    'New Path':
-       begin
-         NewShape := TSimbaShapeBoxShape_Path.Create(Self);
-         StatusPanel.Text := 'Selecting path: Click to set points and press ENTER to finish';
-       end;
+  if (Sender = FPathButton) then
+  begin
+    NewShape := TSimbaShapeBoxShape_Path.Create(Self);
+    StatusPanel.Text := 'Selecting path: Click to set points and press ENTER to finish';
   end;
 
-  if (NewShape <> nil) Then
+  if (Sender = FPolyButton) then
+  begin
+    NewShape := TSimbaShapeBoxShape_Poly.Create(Self);
+    StatusPanel.Text := 'Selecting polygon: Click to set points and press ENTER to finish';
+  end;
+
+  if (Sender = FPointButton) then
+  begin
+    NewShape := TSimbaShapeBoxShape_Point.Create(Self);
+    StatusPanel.Text := 'Selecting point: Click to set';
+  end;
+
+  if (Sender = FBoxButton) then
+  begin
+    NewShape := TSimbaShapeBoxShape_Box.Create(Self);
+    StatusPanel.Text := 'Selecting box: Click to set top left then again for bottom left';
+  end;
+
+  if (NewShape <> nil) then
+  begin
+    if FQueryNameOnNew then
+      NewShape.FName := NewName;
+
     InternalAddShape(NewShape, True);
+  end;
 end;
 
 procedure TSimbaShapeBox.DoShapeDeleteClick(Sender: TObject);
