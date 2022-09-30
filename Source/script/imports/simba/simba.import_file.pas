@@ -48,7 +48,6 @@ begin
 
     addGlobalVar(GetIncludePath(), 'IncludePath').isConstant := True;
     addGlobalVar(GetPluginPath(), 'PluginPath').isConstant := True;
-    addGlobalVar(GetFontPath(), 'FontPath').isConstant := True;
     addGlobalVar(GetSimbaPath(), 'SimbaPath').isConstant := True;
     addGlobalVar(GetScriptPath(), 'ScriptPath').isConstant := True;
     addGlobalVar(GetDataPath(), 'DataPath').isConstant := True;

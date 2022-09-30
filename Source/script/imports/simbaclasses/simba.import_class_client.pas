@@ -8,7 +8,7 @@ implementation
 
 uses
   classes, sysutils, lptypes,
-  simba.script_compiler, simba.client, simba.ocr, simba.finder,
+  simba.script_compiler, simba.client, simba.finder,
   simba.dtm, simba.iomanager;
 
 procedure _LapeClient_IOManager_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -41,16 +41,6 @@ begin
   PClient(Params^[0])^.MDTMs := PMDTMS(Params^[1])^;
 end;
 
-procedure _LapeClient_MOCR_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PMOCR(Result)^ := PClient(Params^[0])^.MOCR;
-end;
-
-procedure _LapeClient_MOCR_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PClient(Params^[0])^.MOCR := PMOCR(Params^[1])^;
-end;
-
 procedure _LapeClient_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PClient(Params^[0])^ := TClient.Create(PString(Params^[1])^, PIOManager(Params^[2])^);
@@ -68,7 +58,6 @@ begin
     addClassVar('TClient', 'IOManager', 'TIOManager', @_LapeClient_IOManager_Read, @_LapeClient_IOManager_Write);
     addClassVar('TClient', 'MFinder', 'TMFinder', @_LapeClient_MFinder_Read, @_LapeClient_MFinder_Write);
     addClassVar('TClient', 'MDTMs', 'TMDTMS', @_LapeClient_MDTMs_Read, @_LapeClient_MDTMs_Write);
-    addClassVar('TClient', 'MOCR', 'TMOCR', @_LapeClient_MOCR_Read, @_LapeClient_MOCR_Write);
     addGlobalFunc('procedure TClient.Init(const plugin_dir: string = ""; const UseIOManager: TIOManager = nil)', @_LapeClient_Init);
     //addGlobalFunc('procedure TClient.Free;', @_LapeClient_Free);
   end;
