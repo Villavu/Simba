@@ -256,7 +256,6 @@ end;
 function TSimbaScript.Run: Boolean;
 begin
   FClient := TClient.Create();
-  FClient.MOCR.FontPath := GetFontPath();
   if (FTargetWindow > 0) then
     FClient.IOManager.SetTarget(FTargetWindow);
 

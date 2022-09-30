@@ -31,7 +31,6 @@ uses
   function GetIncludePath: String;
   function GetPluginPath: String;
   function GetPluginCopyPath: String;
-  function GetFontPath: String;
   function GetScriptPath: String;
   function GetPackagePath: String;
   function GetDumpPath: String;
@@ -290,11 +289,6 @@ begin
   Result := GetDataPath() + 'plugins' + DirectorySeparator;
 end;
 
-function GetFontPath: String;
-begin
-  Result := GetSimbaPath() + 'Fonts' + DirectorySeparator;
-end;
-
 function GetScriptPath: String;
 begin
   Result := GetSimbaPath() + 'Scripts' + DirectorySeparator;
@@ -319,7 +313,7 @@ procedure CreateBaseDirectories;
 var
   Directory: String;
 begin
-  for Directory in [GetScreenshotPath(), GetDumpPath(), GetPackagePath(), GetIncludePath(), GetFontPath(), GetScriptPath(), GetPluginPath(), GetPluginCopyPath()] do
+  for Directory in [GetScreenshotPath(), GetDumpPath(), GetPackagePath(), GetIncludePath(), GetScriptPath(), GetPluginPath(), GetPluginCopyPath()] do
   begin
     if DirectoryExists(Directory) then
       Continue;

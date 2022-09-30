@@ -220,36 +220,6 @@ begin
     PBoolean(Result)^ := MFinder.FindTemplate(TMufasaBitmap(Params^[0]^), Int32(Params^[1]^), Int32(Params^[2]^), ETMFormula(Params^[3]^), Int32(Params^[4]^), Int32(Params^[5]^), Int32(Params^[6]^), Int32(Params^[7]^), Extended(Params^[8]^), Boolean(Params^[9]^));
 end;
 
-procedure _LapeFindTextMatrix(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  with SimbaScriptThread.Script.Client do
-    PSingle(Result)^ := MFinder.FindTextMatrix(PString(Params^[0])^, PString(Params^[1])^, PIntegerMatrix(Params^[2])^, PBox(Params^[3])^);
-end;
-
-procedure _LapeFindTextColor(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  with SimbaScriptThread.Script.Client do
-    PSingle(Result)^ := MFinder.FindTextColor(PString(Params^[0])^, PString(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PBox(Params^[8])^);
-end;
-
-procedure _LapeFindTextColorEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindTextColor(PString(Params^[0])^, PString(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PSingle(Params^[8])^);
-end;
-
-procedure _LapeFindText(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  with SimbaScriptThread.Script.Client do
-    PSingle(Result)^ := MFinder.FindText(PString(Params^[0])^, PString(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PBox(Params^[6])^);
-end;
-
-procedure _LapeFindTextEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindText(PString(Params^[0])^, PString(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PSingle(Params^[6])^);
-end;
-
 procedure _LapeGetColorsMatrix(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   with SimbaScriptThread.Script.Client do
@@ -298,11 +268,6 @@ begin
     addGlobalFunc('function FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean', @_LapeFindDeformedBitmapToleranceIn);
     addGlobalFunc('function FindTemplate(Templ: TMufasaBitmap; out x, y: Integer; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @_LapeFindTemplate);
     addGlobalFunc('function FindTemplateEx(Templ: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @_LapeFindTemplateEx);
-    addGlobalFunc('function FindTextMatrix(Text, Font: String; const Matrix: T2DIntegerArray; out Bounds: TBox): Single', @_LapeFindTextMatrix);
-    addGlobalFunc('function FindTextColor(Text, Font: String; Color, Tolerance: Integer; X1, Y1, X2, Y2: Integer; out Bounds: TBox): Single; overload', @_LapeFindTextColor);
-    addGlobalFunc('function FindTextColor(Text, Font: String; Color, Tolerance: Integer; X1, Y1, X2, Y2: Integer; MinMatch: Single = 1): Boolean; overload', @_LapeFindTextColorEx);
-    addGlobalFunc('function FindText(Text, Font: String; X1, Y1, X2, Y2: Integer; out Bounds: TBox): Single; overload', @_LapeFindText);
-    addGlobalFunc('function FindText(Text, Font: String; X1, Y1, X2, Y2: Integer; MinMatch: Single = 1): Boolean; overload', @_LapeFindTextEx);
 
     popSection();
   end;
