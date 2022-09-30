@@ -136,7 +136,7 @@ begin
         ScriptTab.Editor.FocusLine(Error.Line, Error.Column, $0000A5);
       end else
       if SimbaScriptTabsForm.Open(Error.FileName) then
-        ScriptTab.Editor.FocusLine(Error.Line, Error.Column, $0000A5);
+        SimbaScriptTabsForm.CurrentEditor.FocusLine(Error.Line, Error.Column, $0000A5);
     end;
   end;
 

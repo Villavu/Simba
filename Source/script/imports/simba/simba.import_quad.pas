@@ -28,7 +28,7 @@ TQuad.Create
 ~~~~~~~~~~~~
 function TQuad.Create(ATop, ARight, ABottom, ALeft: TPoint): TQuad; static;
 *)
-procedure _LapeQuad_Create1(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_Create(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   PQuad(Result)^ := TQuad.Create(PPoint(Params^[0])^, PPoint(Params^[1])^, PPoint(Params^[2])^, PPoint(Params^[3])^);
 end;
@@ -36,11 +36,21 @@ end;
 (*
 TQuad.Create
 ~~~~~~~~~~~~
+function TQuad.Create(Box: TBox): TQuad; static;
+*)
+procedure _LapeQuad_CreateFromBox(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PQuad(Result)^ := TQuad.CreateFromBox(PBox(Params^[0])^);
+end;
+
+(*
+TQuad.Create
+~~~~~~~~~~~~
 function TQuad.Create(Points: TPointArray): TQuad; static;
 *)
-procedure _LapeQuad_Create2(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_CreateFromPoints(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PQuad(Result)^ := TQuad.Create(PPointArray(Params^[0])^);
+  PQuad(Result)^ := TQuad.CreateFromPoints(PPointArray(Params^[0])^);
 end;
 
 (*
@@ -209,16 +219,9 @@ begin
   begin
     pushSection('https://villavu.github.io/Simba/Quad.html');
 
-    addGlobalType(
-      'record            ' + LineEnding +
-      '  Top: TPoint;    ' + LineEnding +
-      '  Right: TPoint;  ' + LineEnding +
-      '  Bottom: TPoint; ' + LineEnding +
-      '  Left: TPoint;   ' + LineEnding +
-      'end;', 'TQuad');
-
-    addGlobalFunc('function TQuad.Create(ATop, ARight, ABottom, ALeft: TPoint): TQuad; static; overload', @_LapeQuad_Create1);
-    addGlobalFunc('function TQuad.Create(Points: TPointArray): TQuad; static; overload', @_LapeQuad_Create2);
+    addGlobalFunc('function TQuad.Create(ATop, ARight, ABottom, ALeft: TPoint): TQuad; static; overload', @_LapeQuad_Create);
+    addGlobalFunc('function TQuad.CreateFromBox(Box: TBox): TQuad; static; overload', @_LapeQuad_CreateFromBox);
+    addGlobalFunc('function TQuad.CreateFromPoints(Points: TPointArray): TQuad; static; overload', @_LapeQuad_CreateFromPoints);
     addGlobalFunc('function TQuad.ToTPA: TPointArray', @_LapeQuad_ToTPA);
     addGlobalFunc('function TQuad.Bounds: TBox', @_LapeQuad_Bounds);
     addGlobalFunc('function TQuad.ShortSideLen: Integer', @_LapeQuad_ShortSideLen);
@@ -234,7 +237,6 @@ begin
     addGlobalFunc('function TQuad.NearestEdge(P: TPoint): TPoint', @_LapeQuad_NearestEdge);
     addGlobalFunc('function TQuad.Area: Integer', @_LapeQuad_Area);
     addGlobalFunc('function TQuad.Normalize: TQuad', @_LapeQuad_Normalize);
-
     addGlobalFunc('operator in(Left: TPoint; Right: TQuad): Boolean;', @_LapeQuad_IN_Quad);
 
     popSection();

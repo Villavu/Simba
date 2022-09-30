@@ -257,7 +257,7 @@ uses
   LCLType, simba.geometry, simba.tpa, math;
 
 const
-  CLOSE_DISTANCE = 7;
+  CLOSE_DISTANCE = 4;
 
 constructor TSimbaShapeBoxShape.Create(ShapeBox: TSimbaShapeBox);
 begin
