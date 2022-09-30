@@ -298,6 +298,11 @@ begin
   PPointArray(Result)^ := PBox(Params^[0])^.Corners();
 end;
 
+procedure _LapeBox_ToQuad(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PQuad(Result)^ := PBox(Params^[0])^.ToQuad();
+end;
+
 procedure ImportBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -320,11 +325,13 @@ begin
     addGlobalFunc('function TBox.Contains(Other: TBox): Boolean; overload;', @_LapeBox_Contains1);
     addGlobalFunc('function TBox.Contains(Other: TPoint): Boolean; overload;', @_LapeBox_Contains2);
     addGlobalFunc('function TBox.Contains(X, Y: Integer): Boolean; overload;', @_LapeBox_Contains3);
+    addGlobalFunc('function TBox.Contains(Other: TQuad): Boolean; overload;', @_LapeBox_Contains4);
     addGlobalFunc('function TBox.Partition(Rows, Cols: Integer): TBoxArray;', @_LapeBox_Partition);
     addGlobalFunc('function TBox.Offset(X, Y: Integer): TBox; overload;', @_LapeBox_Offset1);
     addGlobalFunc('function TBox.Offset(P: TPoint): TBox; overload;', @_LapeBox_Offset2);
     addGlobalFunc('function TBox.Combine(Other: TBox): TBox;', @_LapeBox_Combine);
     addGlobalFunc('function TBox.Invert(Area: TBox): TBoxArray;', @_LapeBox_Invert);
+    addGlobalFunc('function TBox.ToQuad: TQuad;', @_LapeBox_ToQuad);
 
     addGlobalFunc('function TBox.NearestEdge(P: TPoint): TPoint;', @_LapeBox_NearestEdge);
     addGlobalFunc('function TBox.Intersect(P: TPoint): TPoint;', @_LapeBox_Intersect);

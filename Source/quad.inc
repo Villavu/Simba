@@ -9,8 +9,9 @@
     Bottom: TPoint;
     Left: TPoint;
 
-    class function Create(ATop, ARight, ABottom, ALeft: TPoint): TQuad; static;
-    class function Create(Points: TPointArray): TQuad; static;
+    class function Create(ATop, ARight, ABottom, ALeft: TPoint): TQuad; static; overload;
+    class function CreateFromBox(Box: TBox): TQuad; static; overload;
+    class function CreateFromPoints(Points: TPointArray): TQuad; static; overload;
     class operator in(const P: TPoint; const Quad: TQuad): Boolean;
 
     function ToTPA: TPointArray;
@@ -40,7 +41,15 @@ begin
   Result.Left   := ALeft;
 end;
 
-class function TQuad.Create(Points: TPointArray): TQuad;
+class function TQuad.CreateFromBox(Box: TBox): TQuad;
+begin
+  Result.Top    := TPoint.Create(Box.X1, Box.Y1);
+  Result.Right  := TPoint.Create(Box.X2, Box.Y1);
+  Result.Bottom := TPoint.Create(Box.X2, Box.Y2);
+  Result.Left   := TPoint.Create(Box.X1, Box.Y2);
+end;
+
+class function TQuad.CreateFromPoints(Points: TPointArray): TQuad;
 var
   Rect: TPointArray;
 begin
@@ -167,10 +176,10 @@ var
   I: Integer;
   Best: Double;
 begin
-  Dists[0] := TSimbaGeometry.DistToLine(P, Self.Top,   Self.Left,  Points[0]);
-  Dists[1] := TSimbaGeometry.DistToLine(P, Self.Left,  Self.Bottom,   Points[1]);
-  Dists[2] := TSimbaGeometry.DistToLine(P, Self.Bottom,   Self.Right, Points[2]);
-  Dists[3] := TSimbaGeometry.DistToLine(P, Self.Right, Self.Top,   Points[3]);
+  Dists[0] := TSimbaGeometry.DistToLine(P, Self.Top,    Self.Left,   Points[0]);
+  Dists[1] := TSimbaGeometry.DistToLine(P, Self.Left,   Self.Bottom, Points[1]);
+  Dists[2] := TSimbaGeometry.DistToLine(P, Self.Bottom, Self.Right,  Points[2]);
+  Dists[3] := TSimbaGeometry.DistToLine(P, Self.Right,  Self.Top,    Points[3]);
 
   Best   := Dists[0];
   Result := Points[0];

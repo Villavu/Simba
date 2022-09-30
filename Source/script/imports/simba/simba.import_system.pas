@@ -102,12 +102,15 @@ begin
     addGlobalType('array of Boolean', 'TBooleanArray');
     addGlobalType('array of Variant', 'TVariantArray');
 
-    addGlobalType('record X1, Y1, X2, Y2: Integer; end', 'TBox');
-    addGlobalType('array of TBox', 'TBoxArray');
-
     addGlobalType('record X, Y: Integer; end', 'TPoint');
     addGlobalType('array of TPoint', 'TPointArray');
     addGlobalType('array of TPointArray', 'T2DPointArray');
+
+    addGlobalType('record Top: TPoint; Right: TPoint; Bottom: TPoint; Left: TPoint; end;', 'TQuad');
+    addGlobalType('array of TQuad', 'TQuadArray');
+
+    addGlobalType('record X1, Y1, X2, Y2: Integer; end', 'TBox');
+    addGlobalType('array of TBox', 'TBoxArray');
 
     addGlobalType('record X, Y: Single; end', 'TPointF');
     addGlobalType('Integer', 'TColor');
