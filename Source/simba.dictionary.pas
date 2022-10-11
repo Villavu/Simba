@@ -134,24 +134,11 @@ function HashNative(constref k: NativeInt): UInt32; inline;
 function HashPoint(constref k: TPoint): UInt32; inline;
 function HashBox(constref k: TBox): UInt32; inline;
 function HashAStr(constref k: AnsiString): UInt32; inline;
-function NextPow2m1(n: Int32): Int32; inline;
 
-//------------------------------------------------------------------------------
 implementation
 
-uses Math;
-
-function NextPow2m1(n: Int32): Int32; inline;
-begin
-  n := n - 1;
-  n := n or (n shr 1);
-  n := n or (n shr 2);
-  n := n or (n shr 4);
-  n := n or (n shr 8);
-  n := n or (n shr 16);
-  n := n or (n shr 32);
-  Result := n;
-end;
+uses
+  simba.math;
 
 (******************************* Hash Functions *******************************)
 function HashBool(constref k: Boolean): UInt32;
@@ -203,11 +190,6 @@ begin
   end;
 end;
 
-
-
-
-
-
 (******************************************************************************)
 {
   TDictionary<K,V>
@@ -235,7 +217,7 @@ procedure TDictionary<K,V>.SetSize(k:SizeInt);
 begin
   if FHigh <> 0 then
     raise Exception.Create('Can''t set size after dictionary has been filled. Call `clear` first');
-  FSize := Max(DICT_MIN_SIZE-1, NextPow2m1(k));
+  FSize := Max(DICT_MIN_SIZE-1, NextPower2(k-1));
   SetLength(FData, FSize+1);
 end;
 

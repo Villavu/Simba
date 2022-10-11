@@ -189,9 +189,6 @@ procedure Swap(var A, B: TPoint); overload;
 procedure Swap(var A, B: Pointer); overload;
 procedure Swap(var A, B: TRGB32); overload;
 
-function Unique(const Arr: TIntegerArray): TIntegerArray; overload;
-function Unique(const Arr: TStringArray): TStringArray; overload;
-
 type
   TProc       = procedure of object;
   TProcArray  = array of TProc;
@@ -346,90 +343,6 @@ end;
 procedure Swap(var A, B: TRGB32);
 begin
   specialize Swap<TRGB32>(A, B);
-end;
-
-function Unique(const Arr: TIntegerArray): TIntegerArray;
-var
-  I, J, Size: Integer;
-  Value: Integer;
-  Table: array of record
-    Bucket: TIntegerArray;
-    Count: Integer;
-  end;
-  Buffer: specialize TSimbaOverAllocateArray<Integer>;
-label
-  Next;
-begin
-  Buffer.Init();
-
-  SetLength(Table, NextPower2(Length(Arr)));
-  Size := High(Table);
-
-  for i := 0 to High(Arr) do
-  begin
-    Value := Arr[i];
-
-    with Table[Value and Size] do
-    begin
-      for J := 0 to Count - 1 do
-        if (Value = Bucket[J]) then
-          goto Next;
-
-      if (Count >= Length(Bucket)) then
-        SetLength(Bucket, 4 + (Length(Bucket) * 2));
-
-      Bucket[Count] := Value;
-      Inc(Count);
-
-      Buffer.Add(Value);
-    end;
-
-    Next:
-  end;
-
-  Result := Buffer.Trim();
-end;
-
-function Unique(const Arr: TStringArray): TStringArray;
-var
-  I, J, Size: Integer;
-  Value: String;
-  Table: array of record
-    Bucket: TStringArray;
-    Count: Integer;
-  end;
-  Buffer: specialize TSimbaOverAllocateArray<String>;
-label
-  Next;
-begin
-  Buffer.Init();
-
-  SetLength(Table, NextPower2(Length(Arr)));
-  Size := High(Table);
-
-  for i := 0 to High(Arr) do
-  begin
-    Value := Arr[i];
-
-    with Table[Hash(Value) and Size] do
-    begin
-      for J := 0 to Count - 1 do
-        if (Value = Bucket[J]) then
-          goto Next;
-
-      if (Count >= Length(Bucket)) then
-        SetLength(Bucket, 4 + (Length(Bucket) * 2));
-
-      Bucket[Count] := Value;
-      Inc(Count);
-
-      Buffer.Add(Value);
-    end;
-
-    Next:
-  end;
-
-  Result := Buffer.Trim();
 end;
 
 type

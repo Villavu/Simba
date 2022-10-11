@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, graphics,
-  simba.mufasatypes, simba.bitmap, simba.colormath;
+  simba.mufasatypes, simba.bitmap;
 
 procedure LoadBitmapAreaFromFile(Bitmap: TMufasaBitmap; FileName: String; Area: TBox);
 function GetBitmapPixelFormat(Bitmap: TBitmap): String;
@@ -432,7 +432,6 @@ end;
 procedure TBitmapHelper.LoadFromFile(FileName: String);
 var
   LazImg: TLazIntfImage;
-  RawImageDesc: TRawImageDescription;
 begin
   try
     LazImg := TLazIntfImage.Create(0, 0);

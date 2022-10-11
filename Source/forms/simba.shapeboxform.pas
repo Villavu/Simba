@@ -33,6 +33,9 @@ var
 
 implementation
 
+uses
+  simba.mufasatypes;
+
 procedure TSimbaShapeBoxForm.FormCreate(Sender: TObject);
 begin
   ShapeBox := TSimbaShapeBox.Create(Self);
@@ -45,6 +48,7 @@ end;
 
 procedure TSimbaShapeBoxForm.FormHide(Sender: TObject);
 begin
+  ShapeBox.PrintShapes();
   ShapeBox.SaveToFile(GetDataPath() + 'shapes');
   if (not HasBackground) then
     ShapeBox.Background.SetSize(0, 0);

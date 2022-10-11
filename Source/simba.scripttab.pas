@@ -89,7 +89,7 @@ implementation
 
 uses
   interfacebase, forms, lazfileutils, lazloggerbase, synedit, syneditmousecmds,
-  simba.scripttabsform, simba.autocomplete, simba.settings, simba.scripttabhistory,
+  simba.scripttabsform, simba.autocomplete, simba.settings,
   simba.main, simba.parser_misc, simba.files, simba.functionlist_updater;
 
 procedure TSimbaScriptTab.HandleAutoComplete;
@@ -272,17 +272,12 @@ begin
   if (FFunctionList <> nil) then
     FFunctionList.Show();
 
-  if (SimbaScriptTabHistory <> nil) then
-    SimbaScriptTabHistory.Add(Self);
-
   if (FEditor <> nil) and FEditor.CanSetFocus then
     FEditor.SetFocus();
 end;
 
 procedure TSimbaScriptTab.HandleEditorClick(Sender: TObject);
 begin
-  if (SimbaScriptTabHistory <> nil) then
-    SimbaScriptTabHistory.Add(Self);
 end;
 
 procedure TSimbaScriptTab.HandleEditorChange(Sender: TObject);
@@ -502,9 +497,6 @@ end;
 
 procedure TSimbaScriptTab.Reset;
 begin
-  if (SimbaScriptTabHistory <> nil) then
-    SimbaScriptTabHistory.Clear(Self);
-
   FScriptTitle := 'Untitled';
   FScriptFileName := '';
 
@@ -641,9 +633,6 @@ destructor TSimbaScriptTab.Destroy;
 begin
   FFunctionList.DecRef();
   FFunctionList := nil;
-
-  if (SimbaScriptTabHistory <> nil) then
-    SimbaScriptTabHistory.Clear(Self);
 
   inherited Destroy();
 end;

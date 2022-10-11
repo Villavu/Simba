@@ -219,6 +219,8 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
+    procedure PrintShapes;
+
     procedure SaveToFile(FileName: String);
     procedure LoadFromFile(FileName: String);
 
@@ -1126,6 +1128,14 @@ begin
   ManualAddPath(Path, AName);
   if (FUserDataSize > 0) then
     Move(UserData, FShapes.Last.FUserData^, FUserDataSize);
+end;
+
+procedure TSimbaShapeBox.PrintShapes;
+var
+  I: Integer;
+begin
+  for I := 0 to FShapes.Count - 1 do
+    SimbaDebugLn(FShapes[I].FName  + ' := [' + FShapes[I].ToStr() + '];');
 end;
 
 procedure TSimbaShapeBox.SaveToFile(FileName: String);
