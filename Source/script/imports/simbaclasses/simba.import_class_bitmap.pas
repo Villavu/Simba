@@ -857,7 +857,7 @@ end;
 
 (*
 TMufasaBitmap.DrawQuad
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 procedure TMufasaBitmap.DrawQuad(B: TBox; Color: Integer);
 *)
 procedure _LapeMufasaBitmap_DrawQuad(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -867,7 +867,7 @@ end;
 
 (*
 TMufasaBitmap.DrawQuadFilled
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 procedure TMufasaBitmap.DrawQuadFilled(B: TBox; Color: Integer);
 *)
 procedure _LapeMufasaBitmap_DrawQuadFilled(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -877,7 +877,7 @@ end;
 
 (*
 TMufasaBitmap.DrawQuadInverted
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 procedure TMufasaBitmap.DrawQuadInverted(B: TBox; Color: Integer);
 *)
 procedure _LapeMufasaBitmap_DrawQuadInverted(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
