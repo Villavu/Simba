@@ -39,61 +39,61 @@ end;
 (*
 TBoxArray.SortFrom
 ~~~~~~~~~~~~~~~~~~
-procedure TBoxArray.SortFrom(From: TPoint);
+function TBoxArray.SortFrom(From: TPoint): TBoxArray;
 *)
-procedure _LapeBoxArray_SortFrom(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeBoxArray_SortFrom(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoxArray(Params^[0])^.SortFrom(PPoint(Params^[1])^);
+  PBoxArray(Result)^ := PBoxArray(Params^[0])^.SortFrom(PPoint(Params^[1])^);
 end;
 
 (*
 TBoxArray.SortByX
 ~~~~~~~~~~~~~~~~~
-procedure TBoxArray.SortByX(LowToHigh: Boolean);
+function TBoxArray.SortByX(LowToHigh: Boolean): TBoxArray;
 *)
-procedure _LapeBoxArray_SortByX(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeBoxArray_SortByX(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoxArray(Params^[0])^.SortByX(PBoolean(Params^[1])^);
+  PBoxArray(Result)^ := PBoxArray(Params^[0])^.SortByX(PBoolean(Params^[1])^);
 end;
 
 (*
 TBoxArray.SortByY
 ~~~~~~~~~~~~~~~~~
-procedure TBoxArray.SortByY(LowToHigh: Boolean);
+function TBoxArray.SortByY(LowToHigh: Boolean; const Result: Pointer): TBoxArray;
 *)
-procedure _LapeBoxArray_SortByY(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeBoxArray_SortByY(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoxArray(Params^[0])^.SortByY(PBoolean(Params^[1])^);
+  PBoxArray(Result)^ := PBoxArray(Params^[0])^.SortByY(PBoolean(Params^[1])^);
 end;
 
 (*
 TBoxArray.SortByWidth
 ~~~~~~~~~~~~~~~~~~~~~
-procedure TBoxArray.SortByWidth(LowToHigh: Boolean);
+function TBoxArray.SortByWidth(LowToHigh: Boolean; const Result: Pointer): TBoxArray;
 *)
-procedure _LapeBoxArray_SortByWidth(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeBoxArray_SortByWidth(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoxArray(Params^[0])^.SortByWidth(PBoolean(Params^[1])^);
+  PBoxArray(Result)^ := PBoxArray(Params^[0])^.SortByWidth(PBoolean(Params^[1])^);
 end;
 
 (*
 TBoxArray.SortByHeight
 ~~~~~~~~~~~~~~~~~~~~~~
-procedure TBoxArray.SortByHeight(LowToHigh: Boolean);
+function TBoxArray.SortByHeight(LowToHigh: Boolean; const Result: Pointer): TBoxArray;
 *)
-procedure _LapeBoxArray_SortByHeight(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeBoxArray_SortByHeight(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoxArray(Params^[0])^.SortByHeight(PBoolean(Params^[1])^);
+  PBoxArray(Result)^ := PBoxArray(Params^[0])^.SortByHeight(PBoolean(Params^[1])^);
 end;
 
 (*
 TBoxArray.SortByArea
 ~~~~~~~~~~~~~~~~~~~~
-procedure TBoxArray.SortByArea(LowToHigh: Boolean);
+function TBoxArray.SortByArea(LowToHigh: Boolean; const Result: Pointer): TBoxArray;
 *)
-procedure _LapeBoxArray_SortByArea(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeBoxArray_SortByArea(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoxArray(Params^[0])^.SortByArea(PBoolean(Params^[1])^);
+  PBoxArray(Result)^ := PBoxArray(Params^[0])^.SortByArea(PBoolean(Params^[1])^);
 end;
 
 (*
@@ -176,6 +176,26 @@ begin
   PBoolean(Result)^ := PBoxArray(Params^[0])^.ContainsPoint(PPoint(Params^[1])^);
 end;
 
+(*
+TBoxArray.Sort
+~~~~~~~~~~~~~~
+function TBoxArray.Sort(Weights: TIntegerArray; LowToHigh: Boolean = True): TBoxArray
+*)
+procedure _LapeBoxArray_Sort1(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoxArray(Result)^ := PBoxArray(Params^[0])^.Sort(PDoubleArray(Params^[1])^, PBoolean(Params^[2])^);
+end;
+
+(*
+TBoxArray.Sort
+~~~~~~~~~~~~~~
+function TBoxArray.Sort(Weights: TDoubleArray; LowToHigh: Boolean = True): TBoxArray
+*)
+procedure _LapeBoxArray_Sort2(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+begin
+  PBoxArray(Result)^ := PBoxArray(Params^[0])^.Sort(PDoubleArray(Params^[1])^, PBoolean(Params^[2])^);
+end;
+
 procedure ImportBoxArray(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -185,12 +205,15 @@ begin
     addGlobalFunc('function TBoxArray.Create(Start: TPoint; Columns, Rows, Width, Height: Integer; Spacing: TPoint): TBoxArray; static;', @_LapeBoxArray_Create);
     addGlobalFunc('function TBoxArray.Pack: TBoxArray;', @_LapeBoxArray_Pack);
 
-    addGlobalFunc('procedure TBoxArray.SortFrom(From: TPoint);', @_LapeBoxArray_SortFrom);
-    addGlobalFunc('procedure TBoxArray.SortByX(LowToHigh: Boolean = True);', @_LapeBoxArray_SortByX);
-    addGlobalFunc('procedure TBoxArray.SortByY(LowToHigh: Boolean = True);', @_LapeBoxArray_SortByY);
-    addGlobalFunc('procedure TBoxArray.SortByWidth(LowToHigh: Boolean = True);', @_LapeBoxArray_SortByWidth);
-    addGlobalFunc('procedure TBoxArray.SortByHeight(LowToHigh: Boolean = True);', @_LapeBoxArray_SortByHeight);
-    addGlobalFunc('procedure TBoxArray.SortByArea(LowToHigh: Boolean = True);', @_LapeBoxArray_SortByArea);
+    addGlobalFunc('function TBoxArray.Sort(Weights: TIntegerArray; LowToHigh: Boolean = True): TBoxArray; overload', @_LapeBoxArray_Sort1);
+    addGlobalFunc('function TBoxArray.Sort(Weights: TDoubleArray; LowToHigh: Boolean = True): TBoxArray; overload', @_LapeBoxArray_Sort2);
+
+    addGlobalFunc('function TBoxArray.SortFrom(From: TPoint): TBoxArray', @_LapeBoxArray_SortFrom);
+    addGlobalFunc('function TBoxArray.SortByX(LowToHigh: Boolean = True): TBoxArray', @_LapeBoxArray_SortByX);
+    addGlobalFunc('function TBoxArray.SortByY(LowToHigh: Boolean = True): TBoxArray', @_LapeBoxArray_SortByY);
+    addGlobalFunc('function TBoxArray.SortByWidth(LowToHigh: Boolean = True): TBoxArray', @_LapeBoxArray_SortByWidth);
+    addGlobalFunc('function TBoxArray.SortByHeight(LowToHigh: Boolean = True): TBoxArray', @_LapeBoxArray_SortByHeight);
+    addGlobalFunc('function TBoxArray.SortByArea(LowToHigh: Boolean = True): TBoxArray;', @_LapeBoxArray_SortByArea);
 
     addGlobalFunc('function TBoxArray.Merge: TBox;', @_LapeBoxArray_Merge);
     addGlobalFunc('function TBoxArray.Centers: TPointArray;', @_LapeBoxArray_Centers);

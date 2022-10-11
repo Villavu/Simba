@@ -8,12 +8,14 @@ type
 
     function Pack: TBoxArray;
 
-    procedure SortFrom(From: TPoint);
-    procedure SortByX(LowToHigh: Boolean);
-    procedure SortByY(LowToHigh: Boolean);
-    procedure SortByWidth(LowToHigh: Boolean);
-    procedure SortByHeight(LowToHigh: Boolean);
-    procedure SortByArea(LowToHigh: Boolean);
+    function Sort(Weights: TIntegerArray; LowToHigh: Boolean = True): TBoxArray; overload;
+    function Sort(Weights: TDoubleArray; LowToHigh: Boolean = True): TBoxArray; overload;
+    function SortFrom(From: TPoint): TBoxArray;
+    function SortByX(LowToHigh: Boolean): TBoxArray;
+    function SortByY(LowToHigh: Boolean): TBoxArray;
+    function SortByWidth(LowToHigh: Boolean): TBoxArray;
+    function SortByHeight(LowToHigh: Boolean): TBoxArray;
+    function SortByArea(LowToHigh: Boolean): TBoxArray;
 
     function ContainsPoint(P: TPoint; out Index: Integer): Boolean; overload;
     function ContainsPoint(P: TPoint): Boolean; overload;
@@ -50,7 +52,7 @@ begin
   end;
 end;
 
-procedure TBoxArrayHelper.SortFrom(From: TPoint);
+function TBoxArrayHelper.SortFrom(From: TPoint): TBoxArray;
 var
   Weights: TIntegerArray;
   I: Integer;
@@ -59,10 +61,10 @@ begin
   for I := 0 to High(Weights) do
     Weights[I] := Distance(From, Self[I].Center);
 
-  specialize QuickSortWeighted<TBox, Integer>(Self, Weights, Low(Self), High(Self), True);
+  Result := Self.Sort(Weights);
 end;
 
-procedure TBoxArrayHelper.SortByX(LowToHigh: Boolean);
+function TBoxArrayHelper.SortByX(LowToHigh: Boolean): TBoxArray;
 var
   Weights: TIntegerArray;
   I: Integer;
@@ -71,10 +73,10 @@ begin
   for I := 0 to High(Weights) do
     Weights[I] := Self[I].Center.X;
 
-  specialize QuickSortWeighted<TBox, Integer>(Self, Weights, Low(Self), High(Self), LowToHigh);
+  Result := Self.Sort(Weights, LowToHigh);
 end;
 
-procedure TBoxArrayHelper.SortByY(LowToHigh: Boolean);
+function TBoxArrayHelper.SortByY(LowToHigh: Boolean): TBoxArray;
 var
   Weights: TIntegerArray;
   I: Integer;
@@ -83,10 +85,10 @@ begin
   for I := 0 to High(Weights) do
     Weights[I] := Self[I].Center.Y;
 
-  specialize QuickSortWeighted<TBox, Integer>(Self, Weights, Low(Self), High(Self), LowToHigh);
+  Result := Self.Sort(Weights, LowToHigh);
 end;
 
-procedure TBoxArrayHelper.SortByWidth(LowToHigh: Boolean);
+function TBoxArrayHelper.SortByWidth(LowToHigh: Boolean): TBoxArray;
 var
   Weights: TIntegerArray;
   I: Integer;
@@ -95,10 +97,10 @@ begin
   for I := 0 to High(Weights) do
     Weights[I] := Self[I].Width;
 
-  specialize QuickSortWeighted<TBox, Integer>(Self, Weights, Low(Self), High(Self), LowToHigh);
+  Result := Self.Sort(Weights, LowToHigh);
 end;
 
-procedure TBoxArrayHelper.SortByHeight(LowToHigh: Boolean);
+function TBoxArrayHelper.SortByHeight(LowToHigh: Boolean): TBoxArray;
 var
   Weights: TIntegerArray;
   I: Integer;
@@ -107,10 +109,10 @@ begin
   for I := 0 to High(Weights) do
     Weights[I] := Self[I].Height;
 
-  specialize QuickSortWeighted<TBox, Integer>(Self, Weights, Low(Self), High(Self), LowToHigh);
+  Result := Self.Sort(Weights, LowToHigh);
 end;
 
-procedure TBoxArrayHelper.SortByArea(LowToHigh: Boolean);
+function TBoxArrayHelper.SortByArea(LowToHigh: Boolean): TBoxArray;
 var
   Weights: TIntegerArray;
   I: Integer;
@@ -119,7 +121,7 @@ begin
   for I := 0 to High(Weights) do
     Weights[I] := Self[I].Area;
 
-  specialize QuickSortWeighted<TBox, Integer>(Self, Weights, Low(Self), High(Self), LowToHigh);
+  Result := Self.Sort(Weights, LowToHigh);
 end;
 
 function TBoxArrayHelper.ContainsPoint(P: TPoint; out Index: Integer): Boolean;
@@ -293,6 +295,16 @@ begin
 
   for I := 0 to Len - 1 do
     Result[Blocks[I].Index] := TBox.Create(Blocks[I].X, Blocks[I].Y, Blocks[I].X + Blocks[I].W, Blocks[I].Y + Blocks[I].H);
+end;
+
+function TBoxArrayHelper.Sort(Weights: TIntegerArray; LowToHigh: Boolean): TBoxArray;
+begin
+  Result := specialize Sorted<TBox>(Self, Weights, LowToHigh);
+end;
+
+function TBoxArrayHelper.Sort(Weights: TDoubleArray; LowToHigh: Boolean): TBoxArray;
+begin
+  Result := specialize Sorted<TBox>(Self, Weights, LowToHigh);
 end;
 {$ENDIF}
 
