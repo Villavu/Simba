@@ -243,7 +243,7 @@ procedure ImportPoint(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('https://villavu.github.io/Simba/Point.html');
+    pushSection('https://villavu.github.io/Simba/TPoint.html');
 
     addGlobalFunc('function Point(X, Y: Integer): TPoint', @_LapePoint);
 

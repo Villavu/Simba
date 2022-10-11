@@ -60,7 +60,7 @@ type
   TDict = specialize TDictionary<TBox, Int32>;
 var
   dict, dupes: TDict;
-  i,c, tmp: Int32;
+  i,c: Int32;
 begin
   Result := nil;
   dict := TDict.Create(@HashBox);

@@ -42,6 +42,8 @@ type
   private
     function GetItem(i:Int32): PNode; inline;
   public
+    hidden: Integer;
+
     property items[i:Int32]: PNode read GetItem; default;
 
     function InitBranch: Int32; inline; //dummy
@@ -377,7 +379,11 @@ begin
   for i:=0 to High(nodes) do
   begin
     Result[i] := Nodes[i]^.split;
-    if hide then Nodes[i]^.hidden := True;
+    if hide then
+    begin
+      Nodes[i]^.hidden := True;
+      inc(hidden);
+    end;
   end;
 end;
 

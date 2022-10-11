@@ -5,10 +5,12 @@ var
   end;
 
 begin
-  SourceFiles += ['simba.import_point.pas',        'Point'        ];
-  SourceFiles += ['simba.import_box.pas',          'Box'          ];
-  SourceFiles += ['simba.import_boxarray.pas',     'Box Array'    ];
-  SourceFiles += ['simba.import_quad.pas',         'Quad'         ];
+  SourceFiles += ['simba.import_point.pas',        'TPoint'       ];
+  SourceFiles += ['simba.import_tpa.pas',          'TPointArray'  ];
+  SourceFiles += ['simba.import_atpa.pas',         'T2DPointArray'];
+  SourceFiles += ['simba.import_box.pas',          'TBox'         ];
+  SourceFiles += ['simba.import_boxarray.pas',     'TBoxArray'    ];
+  SourceFiles += ['simba.import_quad.pas',         'TQuad'        ];
   SourceFiles += ['simba.import_windowhandle.pas', 'Window Handle'];
   SourceFiles += ['simba.import_debugimage.pas',   'Debug Image'  ];
   SourceFiles += ['simba.import_variant.pas',      'Variant'      ];

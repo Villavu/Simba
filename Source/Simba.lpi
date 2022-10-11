@@ -267,7 +267,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="125">
+    <Units Count="127">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -503,7 +503,7 @@
         <IsPartOfProject Value="True"/>
       </Unit44>
       <Unit45>
-        <Filename Value="script/imports/simba/simba.import_algorithms.pas"/>
+        <Filename Value="script/imports/simba/simba.import_tpa.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit45>
       <Unit46>
@@ -834,6 +834,14 @@
         <Filename Value="script/simba.script_compiler_rtti.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit124>
+      <Unit125>
+        <Filename Value="simba.atpa.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit125>
+      <Unit126>
+        <Filename Value="script/imports/simba/simba.import_atpa.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit126>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -406,7 +406,7 @@ end;
 
 procedure TSimbaShapeBoxShape_Poly.BuildContainsCache;
 begin
-  FContainsCache := TSimbaGeometry.ExpandPolygon(ConvexHull(FPoly), CLOSE_DISTANCE);
+  FContainsCache := TSimbaGeometry.ExpandPolygon(FPoly.ConvexHull(), CLOSE_DISTANCE);
 end;
 
 procedure TSimbaShapeBoxShape_Poly.SelectingMouseDown(Sender: TSimbaShapeBox; Button: TMouseButton; Shift: TShiftState; MousePoint: TPoint);
@@ -445,7 +445,7 @@ end;
 
 function TSimbaShapeBoxShape_Poly.Center: TPoint;
 begin
-  Result := MiddleTPA(FPoly);
+  Result := FPoly.Mean();
 end;
 
 function TSimbaShapeBoxShape_Poly.GetDragIndex(MousePoint: TPoint): Integer;

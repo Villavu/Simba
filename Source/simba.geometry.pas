@@ -38,8 +38,8 @@ type
   TSimbaGeometry = class
   public
   class var
-    CosTable: array[0..359] of Extended;
-    SinTable: array[0..359] of Extended;
+    CosTable: array[0..359] of Double;
+    SinTable: array[0..359] of Double;
   public
     class constructor Create;
 
@@ -56,11 +56,11 @@ type
     class function PointInCircle(const P, Center: TPoint; Radius: Double): Boolean; static; inline;
     class function PointInEllipse(const P, Center: TPoint; const YRadius, XRadius: Double): Boolean; static;
 
-    class function RotatePointFast(const P: TPoint; Degrees: Integer; X, Y: Extended): TPoint; static;
-    class function RotatePointsFast(const Points: TPointArray; Degrees: Integer; X, Y: Extended): TPointArray; static;
+    class function RotatePointFast(const P: TPoint; Degrees: Integer; X, Y: Double): TPoint; static;
+    class function RotatePointsFast(const Points: TPointArray; Degrees: Integer; X, Y: Double): TPointArray; static;
 
-    class function RotatePoint(const P: TPoint; Radians, X, Y: Extended): TPoint; static;
-    class function RotatePoints(const Points: TPointArray; Radians, X, Y: Extended): TPointArray; static;
+    class function RotatePoint(const P: TPoint; Radians, X, Y: Double): TPoint; static;
+    class function RotatePoints(const Points: TPointArray; Radians, X, Y: Double): TPointArray; static;
 
     class function AngleBetween(const P1, P2: TPoint): Double; static; inline;
     class function DeltaAngle(const DegreesA, DegreesB: Double; R: Double = 360): Double; static;
@@ -85,9 +85,9 @@ begin
   end;
 end;
 
-class function TSimbaGeometry.RotatePointFast(const P: TPoint; Degrees: Integer; X, Y: Extended): TPoint;
+class function TSimbaGeometry.RotatePointFast(const P: TPoint; Degrees: Integer; X, Y: Double): TPoint;
 var
-  SinValue, CosValue: Extended;
+  SinValue, CosValue: Double;
 begin
   Degrees := Degrees mod 360;
   if (Degrees < 0) then
@@ -100,10 +100,10 @@ begin
   Result.Y := Trunc(Y + SinValue * (P.X - X) + CosValue * (P.Y - Y));
 end;
 
-class function TSimbaGeometry.RotatePointsFast(const Points: TPointArray; Degrees: Integer; X, Y: Extended): TPointArray;
+class function TSimbaGeometry.RotatePointsFast(const Points: TPointArray; Degrees: Integer; X, Y: Double): TPointArray;
 var
   I: Integer;
-  CosValue, SinValue: Extended;
+  CosValue, SinValue: Double;
 begin
   SetLength(Result, Length(Points));
 
@@ -121,9 +121,9 @@ begin
   end;
 end;
 
-class function TSimbaGeometry.RotatePoint(const P: TPoint; Radians, X, Y: Extended): TPoint;
+class function TSimbaGeometry.RotatePoint(const P: TPoint; Radians, X, Y: Double): TPoint;
 var
-  CosValue, SinValue: Extended;
+  CosValue, SinValue: Double;
 begin
   CosValue := Cos(Radians);
   SinValue := Sin(Radians);
@@ -132,10 +132,10 @@ begin
   Result.Y := Trunc(Y + SinValue * (P.X - X) + CosValue * (P.Y - Y));
 end;
 
-class function TSimbaGeometry.RotatePoints(const Points: TPointArray; Radians, X, Y: Extended): TPointArray;
+class function TSimbaGeometry.RotatePoints(const Points: TPointArray; Radians, X, Y: Double): TPointArray;
 var
   I: Integer;
-  CosValue, SinValue: Extended;
+  CosValue, SinValue: Double;
 begin
   SetLength(Result, Length(Points));
 

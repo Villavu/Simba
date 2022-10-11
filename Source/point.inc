@@ -4,19 +4,19 @@
 type
   TPointHelper = record Helper for TPoint
   public
-    class function Create(X, Y: Integer): TPoint; static; inline;
+    class function Create(const X, Y: Integer): TPoint; static; inline;
 
     function InTriangle(A, B, C: TPoint): Boolean;
-    function InPolygon(Poly: TPointArray): Boolean;
+    function InPolygon(Poly: TPointArray): Boolean; inline;
     function InCircle(Center: TPoint; Radius: Double): Boolean;
-    function InBox(Box: TBox): Boolean;
+    function InBox(Box: TBox): Boolean; inline;
     function DistanceTo(Other: TPoint): Double;
     function RotateFast(Degrees: Integer; Center: TPoint): TPoint;
     function Rotate(Radians: Double; Center: TPoint): TPoint;
     function Magnitude: Double;
     function AngleBetween(Other: TPoint): Double;
-    function Offset(X, Y: Integer): TPoint; overload;
-    function Offset(P: TPoint): TPoint; overload;
+    function Offset(X, Y: Integer): TPoint; inline; overload;
+    function Offset(P: TPoint): TPoint; inline; overload;
     function Random(Min, Max: Integer): TPoint; overload;
     function Random(Value: Integer): TPoint; overload;
   end;
@@ -27,11 +27,12 @@ type
   operator + (const Left, Right: TPoint): TPoint;
   operator - (const Left, Right: TPoint): TPoint;
   operator * (const Left: TPoint; const Right: Double): TPoint;
+  operator div (const Left: TPoint; const Right: Integer): TPoint;
   operator in (const Left: TPoint; const Right: TBox): Boolean;
 {$ENDIF}
 
 {$IFDEF BODY}
-class function TPointHelper.Create(X, Y: Integer): TPoint;
+class function TPointHelper.Create(const X, Y: Integer): TPoint;
 begin
   Result.X := X;
   Result.Y := Y;
@@ -127,6 +128,12 @@ operator *(const Left: TPoint; const Right: Double): TPoint;
 begin
   Result.X := Round(Left.X * Right);
   Result.Y := Round(Left.Y * Right);
+end;
+
+operator div(const Left: TPoint; const Right: Integer): TPoint;
+begin
+  Result.X := Left.X div Right;
+  Result.Y := Left.Y div Right;
 end;
 
 operator in(const Left: TPoint; const Right: TBox): Boolean;

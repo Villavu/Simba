@@ -1445,7 +1445,8 @@ begin
   end;
 
   Result := Length(TPA) > 0;
-  OffsetTPA(TPA, Point(xs,ys));
+  if Result then
+    TPA := TPA.Offset(xs, ys);
 end;
 
 function TMFinder.FindTemplate(TemplImage: TMufasaBitmap; out X,Y: Integer; Formula: ETMFormula;
@@ -1487,7 +1488,8 @@ function ValidMainPointBox(const TPA: TPointArray; const X1, Y1, X2, Y2: Integer
 var
   B: TBox;
 begin
-  B := GetTPABounds(TPA);
+  B := TPA.Bounds();
+
   Result.X1 := X1 - B.X1;
   Result.Y1 := Y1 - B.Y1;
   Result.X2 := X2 - B.X2;
@@ -1895,7 +1897,7 @@ var
 begin
   len := High(Coords);
   SetLength(Result,len+1);
-  Box := GetTPABounds(coords);
+  Box := coords.Bounds();
   if (not GetData(PtrData, box.x1, box.y1, box.x2, box.y2)) then
     Exit;
 

@@ -50,15 +50,8 @@ begin
 end;
 
 class function TQuad.CreateFromPoints(Points: TPointArray): TQuad;
-var
-  Rect: TPointArray;
 begin
-  Rect := MinAreaRect(Points);
-
-  Result.Top    := Rect[0];
-  Result.Right  := Rect[1];
-  Result.Bottom := Rect[2];
-  Result.Left   := Rect[3];
+  Result := Points.MinAreaRect();
 end;
 
 class operator TQuad.in(const P: TPoint; const Quad: TQuad): Boolean;
@@ -73,7 +66,7 @@ end;
 
 function TQuad.Bounds: TBox;
 begin
-  Result := GetTPABounds(ToTPA());
+  Result := ToTPA().Bounds();
 end;
 
 function TQuad.ShortSideLen: Integer;

@@ -140,7 +140,7 @@ function ValidMainPointBox(const TPA: TPointArray; const x1, y1, x2, y2: Integer
 var
   b: TBox;
 begin
-  b := GetTPABounds(TPA);
+  b := TPA.Bounds();
   Result.x1 := x1 - b.x1;
   Result.y1 := y1 - b.y1;
   Result.x2 := x2 - b.x2;
