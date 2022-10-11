@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.windowsdarktheme;
 
 {$I simba.inc}
@@ -11,6 +16,7 @@ const
 
 implementation
 
+{$IF DEFINED(SIMBA_WINDOWS_DARKTHEME) and DEFINED(WINDOWS)}
 uses
   Controls, Forms, UxTheme, Windows;
 
@@ -28,7 +34,7 @@ begin
   if Assigned(Control) then
   begin
     Control := FindControl(Data);
-    if not Control.IsParentColor then
+    if (not Control.IsParentColor) then
       Control.Color := InputBackColor;
     Control.Font.Color := TextColor;
 
@@ -36,16 +42,17 @@ begin
   end;
 end;
 
-function HookProc(code: LongInt; win: WPARAM; data: LPARAM): LRESULT; stdcall;
+function HookProc(Code: LongInt; Win: WPARAM; Data: LPARAM): LRESULT; stdcall;
 begin
-  if (code = HCBT_CREATEWND) then
-    Application.QueueAsyncCall(@Application.SetDarkTheme, PtrInt(win));
+  if (Code = HCBT_CREATEWND) then
+    Application.QueueAsyncCall(@Application.SetDarkTheme, PtrInt(Win));
 
-  Result := CallNextHookEx(0, code, win, data);
+  Result := CallNextHookEx(0, Code, Win, Data);
 end;
 
 initialization
-  SetWindowsHookEx(WH_CBT, @proc, GetModuleHandle(nil), GetCurrentThreadID());
+  SetWindowsHookEx(WH_CBT, @HookProc, GetModuleHandle(nil), GetCurrentThreadID());
+{$ENDIF}
 
 end.
 

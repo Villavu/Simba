@@ -1,9 +1,4 @@
 unit simba.dictionary;
-{
-  Author: Raymond van Venetië and Merlijn Wajer
-  Project: Simba (https://github.com/MerlijnWajer/Simba)
-  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
-}
 {==============================================================================]
   Hashmap copyright (c) 2022, Jarl `slacky` Holta
 [==============================================================================}

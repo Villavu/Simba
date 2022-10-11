@@ -1,3 +1,31 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
+
+{
+ Jarl Holta - https://github.com/slackydev/SimbaExt
+
+  - CreateFromSimplePolygon
+  - CreateFromEllipse
+  - CreateFromCircle
+  - ConvexHull
+  - Border
+  - Skeleton
+  - MinAreaRect
+  - Erode
+  - Grow
+  - RotateEx
+  - PartitionEx
+}
+
+{
+  Jani Lähdesmäki - Janilabo
+
+  - Cluster
+}
+
 unit simba.tpa;
 
 {$i simba.inc}

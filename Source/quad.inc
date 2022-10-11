@@ -1,3 +1,8 @@
+{
+  TQuad is TRectangle from SRL.
+  Author: Jarl Holta - https://github.com/slackydev
+}
+
 {%MAINUNIT simba.mufasatypes}
 
 {$IFDEF HEADER}
