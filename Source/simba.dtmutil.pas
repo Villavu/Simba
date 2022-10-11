@@ -12,31 +12,24 @@ interface
 uses
   Classes, SysUtils, simba.dtm, simba.tpa, simba.mufasatypes;
 
-
 function MDTMToSDTM(Const DTM: TMDTM): TSDTM;
 function SDTMToMDTM(Const DTM: TSDTM): TMDTM;
 function CreateDTMPoint(x,y,c,t,asz : integer; bp : boolean) : TMDTMPoint;
 
-{procedure iniTSDTM(out d: TMDTM; len: integer);}
 function ValidMainPointBox(var dtm: TMDTM; const x1, y1, x2, y2: Integer): TBox;
 function ValidMainPointBox(const TPA: TPointArray; const x1, y1, x2, y2: Integer): TBox;
-function ValidMainPointBoxRotated(var dtm: TMDTM; const x1, y1, x2, y2: Integer;const
-                                  sAngle, eAngle, aStep: Extended): TBox;
-{function RotateDTM(const dtm: TMDTM; angle: extended) : TMDTM;
-function copydtm(const dtm: TMDTM): TMDTM;                     }
 
 const
-    dtm_Rectangle = 0;
-    dtm_Cross = 1;
-    dtm_DiagonalCross = 2;
-    dtm_Circle = 3;
-    dtm_Triangle = 4;
+  dtm_Rectangle = 0;
+  dtm_Cross = 1;
+  dtm_DiagonalCross = 2;
+  dtm_Circle = 3;
+  dtm_Triangle = 4;
 
 implementation
 
 uses
   math;
-
 
 function CreateDTMPoint(x,y,c,t,asz : integer; bp : boolean) : TMDTMPoint;
 begin
@@ -80,10 +73,6 @@ begin
   end;
 end;
 
-{/\
-  Converts a TSDTM to a TMDTM.
-/\}
-
 function SDTMToMDTM(Const DTM: TSDTM): TMDTM;
 var
    I: Integer;
@@ -111,11 +100,9 @@ begin
 end;
 
 function ValidMainPointBox(var dtm: TMDTM; const x1, y1, x2, y2: Integer): TBox;
-
 var
    i: Integer;
    b: TBox;
-
 begin
   dtm.Normalize;
 
@@ -136,6 +123,7 @@ begin
   Result.x2 := x2 - b.x2;
   Result.y2 := y2 - b.y2;
 end;
+
 function ValidMainPointBox(const TPA: TPointArray; const x1, y1, x2, y2: Integer): TBox;
 var
   b: TBox;
@@ -146,50 +134,6 @@ begin
   Result.x2 := x2 - b.x2;
   Result.y2 := y2 - b.y2;
 end;
-
-function ValidMainPointBoxRotated(var dtm: TMDTM; const x1, y1, x2, y2: Integer;
-                                  const sAngle, eAngle, aStep: Extended): TBox;
-
-var
-   d:extended;
-
-begin
-  dtm.normalize;
-
-{ Delete the ASZ
-  for i := 0 to high(dtm.c) do
-  begin
-    d := max(d, sqrt(sqr(dtm.p[i].x - dtm.asz[i]) + sqr(dtm.p[i].x - dtm.asz[i])));
-    d := max(d, sqrt(sqr(dtm.p[i].y - dtm.asz[i]) + sqr(dtm.p[i].y - dtm.asz[i])));
-    d := max(d, sqrt(sqr(dtm.p[i].x + dtm.asz[i]) + sqr(dtm.p[i].x + dtm.asz[i])));
-    d := max(d, sqrt(sqr(dtm.p[i].y + dtm.asz[i]) + sqr(dtm.p[i].y + dtm.asz[i])));
-  end;   }
-
-  Result.x1 := x1 + ceil(d);
-  Result.y1 := y1 + ceil(d);
-  Result.x2 := x2 - ceil(d);
-  Result.y2 := y2 - ceil(d);
-end;
-
-{function RotateDTM(const dtm: TMDTM; angle: extended) : TMDTM;
-begin
-  if DTM.c then
-    raise Exception.Create('RotateDTM, no points in DTM.');
-  result := copydtm(dtm);
-  RotatePoints_(result.p, angle, result.p[0].x, result.p[0].y);
-end;    }
-
-{function copydtm(const dtm: TMDTM): TMDTM;
-begin
-  iniTSDTM(result,dtm.l);
-  Move(dtm.p[0], result.p[0], length(dtm.p) * sizeof(Tpoint));
-  Move(dtm.c[0], result.c[0], length(dtm.c) * sizeof(Integer));
-  Move(dtm.t[0], result.t[0], length(dtm.t) * sizeof(Integer));
-  Move(dtm.asz[0], result.asz[0], length(dtm.asz) * sizeof(Integer));
-  Move(dtm.ash[0], result.ash[0], length(dtm.ash) * sizeof(Integer));
-  Move(dtm.bp[0], result.bp[0], length(dtm.bp) * sizeof(Boolean));
-  result.n := 'Copy of ' + dtm.n;
-end;  }
 
 end.
 

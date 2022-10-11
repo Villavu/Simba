@@ -44,22 +44,22 @@ end;
 
 procedure _LapeUnique_IntegerArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PIntegerArray(Result)^ := Unique(PIntegerArray(Params^[0])^);
+  PIntegerArray(Result)^ := Algo_Unique_Integer(PIntegerArray(Params^[0])^);
 end;
 
 procedure _LapeUnique_StringArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PStringArray(Result)^ := Unique(PStringArray(Params^[0])^);
+  PStringArray(Result)^ := Algo_Unique_String(PStringArray(Params^[0])^);
 end;
 
 procedure _LapeUnique_SingleArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PSingleArray(Result)^ := specialize Unique_SameValue<Single>(PSingleArray(Params^[0])^);
+  PSingleArray(Result)^ := Algo_Unique_Single(PSingleArray(Params^[0])^);
 end;
 
 procedure _LapeUnique_DoubleArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PDoubleArray(Result)^ := specialize Unique_SameValue<Double>(PDoubleArray(Params^[0])^);
+  PDoubleArray(Result)^ := Algo_Unique_Double(PDoubleArray(Params^[0])^);
 end;
 
 // IndicesOf

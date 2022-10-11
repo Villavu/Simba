@@ -11,13 +11,16 @@ uses
 generic function Unique<T>(const Arr: specialize TArray<T>): specialize TArray<T>;
 generic function Unique_SameValue<T>(const Arr: specialize TArray<T>): specialize TArray<T>;
 
-function Algo_Unique_Double(Arr: TDoubleArray): TDoubleArray;
-function Algo_Unique_Points(Arr: TPointArray): TPointArray;
+function Algo_Unique_Single(const Arr: TSingleArray): TSingleArray;
+function Algo_Unique_Double(const Arr: TDoubleArray): TDoubleArray;
+function Algo_Unique_Points(const Arr: TPointArray): TPointArray;
+function Algo_Unique_Integer(const Arr: TIntegerArray): TIntegerArray;
+function Algo_Unique_String(const Arr: TStringArray): TStringArray;
 
 implementation
 
 uses
-  simba.tpa;
+  simba.tpa, simba.overallocatearray, simba.math;
 
 generic function Unique<T>(const Arr: specialize TArray<T>): specialize TArray<T>;
 var
@@ -77,12 +80,17 @@ begin
   SetLength(Result, Last);
 end;
 
-function Algo_Unique_Double(Arr: TDoubleArray): TDoubleArray;
+function Algo_Unique_Single(const Arr: TSingleArray): TSingleArray;
+begin
+  Result := specialize Unique_SameValue<Single>(Arr);
+end;
+
+function Algo_Unique_Double(const Arr: TDoubleArray): TDoubleArray;
 begin
   Result := specialize Unique_SameValue<Double>(Arr);
 end;
 
-function Algo_Unique_Points(Arr: TPointArray): TPointArray;
+function Algo_Unique_Points(const Arr: TPointArray): TPointArray;
 var
   Matrix: TBooleanMatrix;
   I, Count: Integer;
@@ -109,6 +117,90 @@ begin
 
     SetLength(Result, Count);
   end;
+end;
+
+function Algo_Unique_Integer(const Arr: TIntegerArray): TIntegerArray;
+var
+  I, J, Size: Integer;
+  Value: Integer;
+  Table: array of record
+    Bucket: TIntegerArray;
+    Count: Integer;
+  end;
+  Buffer: specialize TSimbaOverAllocateArray<Integer>;
+label
+  Next;
+begin
+  Buffer.Init();
+
+  SetLength(Table, NextPower2(Length(Arr)));
+  Size := High(Table);
+
+  for i := 0 to High(Arr) do
+  begin
+    Value := Arr[i];
+
+    with Table[Value and Size] do
+    begin
+      for J := 0 to Count - 1 do
+        if (Value = Bucket[J]) then
+          goto Next;
+
+      if (Count >= Length(Bucket)) then
+        SetLength(Bucket, 4 + (Length(Bucket) * 2));
+
+      Bucket[Count] := Value;
+      Inc(Count);
+
+      Buffer.Add(Value);
+    end;
+
+    Next:
+  end;
+
+  Result := Buffer.Trim();
+end;
+
+function Algo_Unique_String(const Arr: TStringArray): TStringArray;
+var
+  I, J, Size: Integer;
+  Value: String;
+  Table: array of record
+    Bucket: TStringArray;
+    Count: Integer;
+  end;
+  Buffer: specialize TSimbaOverAllocateArray<String>;
+label
+  Next;
+begin
+  Buffer.Init();
+
+  SetLength(Table, NextPower2(Length(Arr)));
+  Size := High(Table);
+
+  for i := 0 to High(Arr) do
+  begin
+    Value := Arr[i];
+
+    with Table[Hash(Value) and Size] do
+    begin
+      for J := 0 to Count - 1 do
+        if (Value = Bucket[J]) then
+          goto Next;
+
+      if (Count >= Length(Bucket)) then
+        SetLength(Bucket, 4 + (Length(Bucket) * 2));
+
+      Bucket[Count] := Value;
+      Inc(Count);
+
+      Buffer.Add(Value);
+    end;
+
+    Next:
+  end;
+
+  Result := Buffer.Trim();
 end;
 
 end.

@@ -193,7 +193,7 @@ begin
   CWpoint := pointer(dst);
   PCardinal(dst)^ := 0;
   inc(dst,sizeof(CWpoint^));
-  fillchar(offset,sizeof(offset),0); // fast 16KB reset to 0
+  fillchar(offset{%H-},sizeof(offset),0); // fast 16KB reset to 0
   // 1. main loop to search using hash[]
   if src<=src_endmatch then
   repeat
@@ -201,7 +201,7 @@ begin
     h := ((v shr 12) xor v) and 4095;
     o := offset[h];
     offset[h] := src;
-    cached := v xor cache[h]; // o=nil if cache[h] is uninitialized
+    cached := v xor {%H-}cache[h]; // o=nil if cache[h] is uninitialized
     cache[h] := v;
     if (cached and $00ffffff=0) and (o<>nil) and (src-o>2) then begin
       CWpoint^ := CWpoint^ or (cardinal(1) shl CWbit);
@@ -347,7 +347,7 @@ nextCW:
         t := ord(src^)+(16+2);
         inc(src);
       end;
-      if dst-offset[h]<t then
+      if dst-{%H-}offset[h]<t then
         movechars(offset[h],dst,t) else
         move(offset[h]^,dst^,t);
       if last_hashed<dst then
@@ -452,7 +452,7 @@ begin
     result := (result and $7fff) or (integer(PWord(src)^) shl 15);
     inc(src,2);
   end;
-  SynLZdecompress1passub(src, src_end, dst, offset);
+  SynLZdecompress1passub(src, src_end, dst, offset{%H-});
 end;
 
 procedure SynLZdecompress1partialsub(src, dst, src_end, dst_end: PAnsiChar; var offset: TOffsets);
@@ -542,7 +542,7 @@ begin
   if maxDst<result then
     result := maxDst;
   if result>0 then
-    SynLZdecompress1partialsub(src, dst, src_end, dst+result, offset);
+    SynLZdecompress1partialsub(src, dst, src_end, dst+result, offset{%H-});
 end;
 
 end.

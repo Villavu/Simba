@@ -2,6 +2,8 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+
+  Currently unused.
 }
 unit simba.editor_history;
 
@@ -27,32 +29,38 @@ type
 implementation
 
 uses
-  simba.settings, simba.scripttabhistory;
+  simba.settings;
 
 procedure TSimbaEditorPlugin_History.DoEditorAdded(Value: TCustomSynEdit);
 begin
   inherited DoEditorAdded(Value);
 
+  {
   Value.RegisterMouseActionExecHandler(@DoMouseAction);
   Value.MouseActions.AddCommand(EditorCommandForward, False, LazSynEditMouseCmdsTypes.mbExtra2, ccSingle, cdDown, [], []);
   Value.MouseActions.AddCommand(EditorCommandBack, False, LazSynEditMouseCmdsTypes.mbExtra1, ccSingle, cdDown, [], []);
+  }
 end;
 
 function TSimbaEditorPlugin_History.DoMouseAction(AnAction: TSynEditMouseAction; var AnInfo: TSynEditMouseActionInfo): Boolean;
 begin
   Result := False;
 
+  {
   if (AnAction.Command = EditorCommandForward) then
     SimbaScriptTabHistory.GoForward()
   else
   if (AnAction.Command = EditorCommandBack) then
     SimbaScriptTabHistory.GoBack();
+   }
 end;
 
 class constructor TSimbaEditorPlugin_History.Create;
 begin
+  {
   EditorCommandForward := AllocatePluginKeyRange(1);
   EditorCommandBack := AllocatePluginKeyRange(1);
+  }
 end;
 
 end.

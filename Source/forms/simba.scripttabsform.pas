@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, forms, controls, graphics, dialogs,
-  stdctrls, extctrls, comctrls, extendednotebook, menus, synedit, synedittypes,
+  extctrls, comctrls, extendednotebook, menus, synedit, synedittypes,
   simba.scripttab, simba.editor, simba.codeparser, simba.editor_findreplace;
 
 type
@@ -113,7 +113,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.mufasatypes, simba.scripttabhistory, simba.files, simba.editor_docgenerator,
+  simba.mufasatypes, simba.files, simba.editor_docgenerator,
   simba.dockinghelpers, simba.nativeinterface;
 
 procedure TSimbaScriptTabsForm.DoEditorPopupShow(Sender: TObject);
@@ -432,8 +432,6 @@ begin
     TopLine := (Line + 1) - (LinesInWindow div 2);
     if CanSetFocus() then
       SetFocus();
-
-    SimbaScriptTabHistory.Add(CurrentTab);
   end;
 end;
 
@@ -465,8 +463,6 @@ begin
     CurrentEditor.TopLine := (Declaration.Line + 1) - (CurrentEditor.LinesInWindow div 2);
     if CurrentEditor.CanSetFocus() then
       CurrentEditor.SetFocus();
-
-    SimbaScriptTabHistory.Add(CurrentTab);
   end else
   begin
     if IsLibrary then
