@@ -728,21 +728,21 @@ end;
 (*
 TMufasaBitmap.DrawCross
 ~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawCross(ACenter: TPoint; Radius: Integer; Thickness: Integer; Color: Integer);
+procedure TMufasaBitmap.DrawCross(ACenter: TPoint; Radius: Integer; Color: Integer);
 *)
 procedure _LapeMufasaBitmap_DrawCross(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PMufasaBitmap(Params^[0])^.DrawCross(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+  PMufasaBitmap(Params^[0])^.DrawCross(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 (*
 TMufasaBitmap.DrawCrosshairs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawCrosshairs(ACenter: TPoint; Size: Integer; Thickness: Integer; Color: Integer);
+procedure TMufasaBitmap.DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: Integer);
 *)
 procedure _LapeMufasaBitmap_DrawCrosshairs(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PMufasaBitmap(Params^[0])^.DrawCrosshairs(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+  PMufasaBitmap(Params^[0])^.DrawCrosshairs(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 (*
@@ -758,11 +758,11 @@ end;
 (*
 TMufasaBitmap.DrawLine
 ~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawLine(Start, Stop: TPoint; Thickness: Integer; Color: Integer);
+procedure TMufasaBitmap.DrawLine(Start, Stop: TPoint; Color: Integer);
 *)
 procedure _LapeMufasaBitmap_DrawLineEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PMufasaBitmap(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+  PMufasaBitmap(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 (*
@@ -917,11 +917,11 @@ end;
 (*
 TMufasaBitmap.DrawCrossArray
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawCrossArray(Points: TPointArray; Radius: Integer; Thickness: Integer; Color: Integer = -1);
+procedure TMufasaBitmap.DrawCrossArray(Points: TPointArray; Radius: Integer; Color: Integer = -1);
 *)
 procedure _LapeMufasaBitmap_DrawCrossArray(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PMufasaBitmap(Params^[0])^.DrawCrossArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+  PMufasaBitmap(Params^[0])^.DrawCrossArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 (*

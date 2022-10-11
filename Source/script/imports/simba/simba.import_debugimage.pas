@@ -223,7 +223,7 @@ begin
     addGlobalFunc(
       'procedure Show(TPA: TPointArray; Color: Integer = $0000FF); overload;', [
       'begin',
-      '  with GetTPABounds(TPA) do',
+      '  with TPA.Bounds() do',
       '    with TMufasaBitmap.Create(X1+X2+1, Y1+Y2+1) do',
       '    try',
       '      DrawTPA(TPA, Color);',
@@ -237,7 +237,7 @@ begin
     addGlobalFunc(
       'procedure Show(ATPA: T2DPointArray; Color: Integer = $0000FF); overload;', [
       'begin',
-      '  with GetATPABounds(ATPA) do',
+      '  with ATPA.Bounds() do',
       '    with TMufasaBitmap.Create(X1+X2+1, Y1+Y2+1) do',
       '    try',
       '      DrawATPA(ATPA);',

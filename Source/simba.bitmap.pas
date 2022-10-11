@@ -109,11 +109,10 @@ type
     procedure DrawATPA(ATPA: T2DPointArray; Color: Integer); overload;
     procedure DrawTPA(Points: TPointArray; Color: Integer);
 
-    procedure DrawCrosshairs(ACenter: TPoint; Size: Integer; Thickness: Integer; Color: Integer);
-    procedure DrawCross(ACenter: TPoint; Radius: Integer; Thickness: Integer; Color: Integer);
+    procedure DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: Integer);
+    procedure DrawCross(ACenter: TPoint; Radius: Integer; Color: Integer);
 
-    procedure DrawLine(Start, Stop: TPoint; Color: Integer); overload;
-    procedure DrawLine(Start, Stop: TPoint; Thickness: Integer; Color: Integer); overload;
+    procedure DrawLine(Start, Stop: TPoint; Color: Integer);
 
     procedure DrawPolygon(Points: TPointArray; Color: Integer);
     procedure DrawPolygonFilled(Points: TPointArray; Color: Integer);
@@ -134,7 +133,7 @@ type
     procedure DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: Integer = -1);
     procedure DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: Integer = -1);
     procedure DrawCircleArray(Points: TPointArray; Radius: Integer; Filled: Boolean; Color: Integer = -1);
-    procedure DrawCrossArray(Points: TPointArray; Radius: Integer; Thickness: Integer; Color: Integer = -1);
+    procedure DrawCrossArray(Points: TPointArray; Radius: Integer; Color: Integer = -1);
 
     function AverageBrightness: Integer;
     function PeakBrightness: Integer;
@@ -971,25 +970,25 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.DrawCrosshairs(ACenter: TPoint; Size: Integer; Thickness: Integer; Color: Integer);
+procedure TMufasaBitmap.DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: Integer);
 begin
   Size := Max(1, Size);
 
   with ACenter do
   begin
-    Self.DrawLine(Point(X - Size, Y), Point(X + Size, Y), Thickness, Color);
-    Self.DrawLine(Point(X, Y - Size), Point(X, Y + Size), Thickness, Color);
+    Self.DrawLine(Point(X - Size, Y), Point(X + Size, Y), Color);
+    Self.DrawLine(Point(X, Y - Size), Point(X, Y + Size), Color);
   end;
 end;
 
-procedure TMufasaBitmap.DrawCross(ACenter: TPoint; Radius: Integer; Thickness: Integer; Color: Integer);
+procedure TMufasaBitmap.DrawCross(ACenter: TPoint; Radius: Integer; Color: Integer);
 begin
   Radius := Max(1, Round(Radius/2*Sqrt(2)));
 
   with ACenter do
   begin
-    Self.DrawLine(Point(X - Radius, Y - Radius), Point(X + Radius, Y + Radius), Thickness, Color);
-    Self.DrawLine(Point(X + Radius, Y - Radius), Point(X - Radius, Y + Radius), Thickness, Color);
+    Self.DrawLine(Point(X - Radius, Y - Radius), Point(X + Radius, Y + Radius), Color);
+    Self.DrawLine(Point(X + Radius, Y - Radius), Point(X - Radius, Y + Radius), Color);
   end;
 end;
 
@@ -1042,14 +1041,9 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.DrawLine(Start, Stop: TPoint; Thickness: Integer; Color: Integer);
-begin
-  Self.DrawTPA(TPAFromLine(Start, Stop, Thickness), Color);
-end;
-
 procedure TMufasaBitmap.DrawPolygon(Points: TPointArray; Color: Integer);
 begin
-  Self.DrawTPA(TPAConnect(Points), Color);
+  Self.DrawTPA(Points.Connect(), Color);
 end;
 
 procedure TMufasaBitmap.DrawPolygonFilled(Points: TPointArray; Color: Integer);
@@ -1064,7 +1058,7 @@ begin
 
   RGB := RGBToBGR(Color);
 
-  Bounds := GetTPABounds(Points);
+  Bounds := Points.Bounds();
   Bounds.Clip(Box(0, 0, FWidth-1, FHeight-1));
 
   for X := Bounds.X1 to Bounds.X2 do
@@ -1085,7 +1079,7 @@ begin
 
   RGB := RGBToBGR(Color);
 
-  Bounds := GetTPABounds(Points);
+  Bounds := Points.Bounds();
   Bounds.Clip(Box(0, 0, FWidth-1, FHeight-1));
 
   Self.DrawBoxInverted(Bounds, Color);
@@ -1101,7 +1095,7 @@ begin
   if (Radius < 1) then
     Exit;
 
-  DrawTPA(TPAFromCircle(ACenter, Radius, False), Color);
+  DrawTPA(TPointArray.CreateFromCircle(ACenter, Radius, False), Color);
 end;
 
 procedure TMufasaBitmap.DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: Integer);
@@ -1109,7 +1103,7 @@ begin
   if (Radius < 1) then
     Exit;
 
-  DrawTPA(TPAFromCircle(ACenter, Radius, True), Color);
+  DrawTPA(TPointArray.CreateFromCircle(ACenter, Radius, True), Color);
 end;
 
 procedure TMufasaBitmap.DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: Integer);
@@ -1135,7 +1129,7 @@ end;
 
 procedure TMufasaBitmap.DrawBox(B: TBox; Color: Integer);
 begin
-  Self.DrawTPA(EdgeFromBox(B), Color);
+  Self.DrawTPA(TPointArray.CreateFromBox(B, False), Color);
 end;
 
 procedure TMufasaBitmap.DrawBoxFilled(B: TBox; Color: Integer);
@@ -1242,12 +1236,12 @@ begin
       DrawCircle(Points[I], Radius, GetDrawColor(Color, I));
 end;
 
-procedure TMufasaBitmap.DrawCrossArray(Points: TPointArray; Radius: Integer; Thickness: Integer; Color: Integer);
+procedure TMufasaBitmap.DrawCrossArray(Points: TPointArray; Radius: Integer; Color: Integer);
 var
   I: Integer;
 begin
   for I := 0 to High(Points) do
-    DrawCross(Points[I], Radius, Thickness, GetDrawColor(Color, I));
+    DrawCross(Points[I], Radius, GetDrawColor(Color, I));
 end;
 
 procedure TMufasaBitmap.DrawToCanvas(x,y: Integer; Canvas: TCanvas);
@@ -1469,7 +1463,7 @@ begin
     TSimbaGeometry.RotatePoint(Point(0, 0), Angle, W div 2, H div 2)
   ];
 
-  Result := GetTPABounds(B);
+  Result := B.Bounds();
 end;
 
 procedure TMufasaBitmap.Rotate(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap);

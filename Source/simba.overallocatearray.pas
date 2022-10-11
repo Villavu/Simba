@@ -10,18 +10,21 @@ unit simba.overallocatearray;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils,
+  simba.mufasatypes;
 
 type
   generic TSimbaOverAllocateArray<_T> = record
   private
   type
+    TSelf = specialize TSimbaOverAllocateArray<_T>;
     TArr = specialize TArray<_T>;
   private
     FLength: Integer;
     FCount: Integer;
     FArr: TArr;
 
+    procedure EnsureGrowth(const Len: Integer = 1); inline;
     function GetItem(const Index: Integer): _T; inline;
   public
     property Count: Integer read FCount;
@@ -29,6 +32,8 @@ type
 
     procedure Clear;
     procedure Init(const InitialSize: Integer = 1024);
+    procedure InitWith(const Values: TArr);
+
     procedure Add(const Value: _T); overload; inline;
     procedure Add(const Values: TArr); overload; inline;
 
@@ -37,9 +42,44 @@ type
     function Pop: _T; inline;
 
     function Trim: TArr;
+    function Copy: TArr;
+
+    class operator Initialize(var Self: TSelf);
+  end;
+
+  TSimbaPointBuffer = specialize TSimbaOverAllocateArray<TPoint>;
+  TSimbaPointArrayBuffer = specialize TSimbaOverAllocateArray<TPointArray>;
+
+type
+  TSimbaPointBufferHelper = record helper for TSimbaPointBuffer
+  public
+    procedure Add(const X, Y: Integer); overload; inline;
   end;
 
 implementation
+
+procedure TSimbaOverAllocateArray.EnsureGrowth(const Len: Integer);
+begin
+  if (FCount + Len >= FLength) then
+  begin
+    FLength := FLength + Len;
+    if (FLength < 32) then
+      FLength := 32;
+    FLength := FLength * 2;
+
+    SetLength(FArr, FLength);
+  end;
+end;
+
+procedure TSimbaPointBufferHelper.Add(const X, Y: Integer);
+begin
+  EnsureGrowth();
+
+  FArr[FCount].X := X;
+  FArr[FCount].Y := Y;
+
+  Inc(FCount);
+end;
 
 function TSimbaOverAllocateArray.GetItem(const Index: Integer): _T;
 begin
@@ -56,35 +96,37 @@ begin
   FLength := InitialSize;
   FCount := 0;
 
-  SetLength(FArr, FLength);
+  if (FLength > 0) then
+    SetLength(FArr, FLength);
+end;
+
+procedure TSimbaOverAllocateArray.InitWith(const Values: TArr);
+begin
+  FArr := Values;
+  FLength := Length(FArr);
+  FCount := FLength;
 end;
 
 procedure TSimbaOverAllocateArray.Add(const Value: _T);
 begin
+  EnsureGrowth();
+
   FArr[FCount] := Value;
   Inc(FCount);
-
-  if (FCount = FLength) then
-  begin
-    FLength := FLength + (FLength div 2);
-    SetLength(FArr, FLength);
-  end;
 end;
 
 procedure TSimbaOverAllocateArray.Add(const Values: TArr);
+var
+  Len: Integer;
 begin
-  if (Length(Values) = 0) then
-    Exit;
+  Len := Length(Values);
 
-  if (FCount + Length(Values) >= FLength) then
+  if (Len > 0) then
   begin
-    FLength := Length(Values) + FLength + (FLength div 2);
-
-    SetLength(FArr, FLength);
+    EnsureGrowth(Len);
+    Move(Values[0], FArr[FCount], Len * SizeOf(_T));
+    Inc(FCount, Len);
   end;
-
-  Move(Values[0], FArr[FCount], Length(Values) * SizeOf(_T));
-  Inc(FCount, Length(Values));
 end;
 
 function TSimbaOverAllocateArray.First: _T;
@@ -111,5 +153,14 @@ begin
   Result := FArr;
 end;
 
-end.
+function TSimbaOverAllocateArray.Copy: TArr;
+begin
+  Result := System.Copy(FArr, 0, FCount);
+end;
 
+class operator TSimbaOverAllocateArray.Initialize(var Self: TSelf);
+begin
+  Self := Default(TSelf);
+end;
+
+end.

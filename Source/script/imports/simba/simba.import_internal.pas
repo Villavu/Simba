@@ -39,7 +39,7 @@ end;
 // Unique
 procedure _LapeUnique_PointArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PPointArray(Result)^ := UniqueTPA(PPointArray(Params^[0])^);
+  PPointArray(Result)^ := PPointArray(Params^[0])^.Unique();
 end;
 
 procedure _LapeUnique_IntegerArray(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}

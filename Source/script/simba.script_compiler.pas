@@ -90,7 +90,7 @@ uses
   simba.import_class_imagebox, simba.import_class_shapebox,
 
   // Simba
-  simba.import_timing, simba.import_algorithms, simba.import_colormath,
+  simba.import_timing, simba.import_tpa, simba.import_atpa, simba.import_colormath,
   simba.import_crypto, simba.import_windowhandle, simba.import_debugimage,
   simba.import_dialogs, simba.import_dtm, simba.import_file, simba.import_internal,
   simba.import_keyboard, simba.import_matchtemplate, simba.import_finder,
