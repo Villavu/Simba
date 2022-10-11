@@ -16,7 +16,7 @@ uses
   simba.outputform, simba.colorpickerhistoryform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.associate,
   simba.script_dump, simba.openexampleform, simba.scriptthread,
-  simba.package_form, simba.mufasatypes, simba.shapeboxform{, simba.windowsdarktheme};
+  simba.package_form, simba.mufasatypes, simba.shapeboxform, simba.windowsdarktheme;
 
 type
   TApplicationHelper = class helper for TApplication
