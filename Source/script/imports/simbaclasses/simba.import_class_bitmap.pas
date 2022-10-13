@@ -1424,7 +1424,7 @@ procedure ImportBitmap(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('https://villavu.github.io/Simba/Bitmap.html');
+    ImportingSection := 'TMufasaBitmap';
 
     addClass('TMufasaBitmap');
 
@@ -1643,7 +1643,7 @@ begin
       'end;'
     ]);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

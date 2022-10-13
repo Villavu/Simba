@@ -69,7 +69,7 @@ procedure ImportSimba(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Simba');
+    ImportingSection := 'Simba';
 
     addGlobalFunc('procedure ClearDebug', @_LapeClearDebug);
 
@@ -82,7 +82,7 @@ begin
     addGlobalFunc('function SetSimbaSetting(Name: String; DefValue: String = ""): String', @_LapeGetSimpleSetting);
     addGlobalFunc('procedure GetSimbaSetting(Name, Value: String);', @_LapeSetSimpleSetting);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

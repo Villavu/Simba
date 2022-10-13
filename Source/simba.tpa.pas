@@ -117,8 +117,6 @@ type
     function PartitionEx(BoxWidth, BoxHeight: Integer): T2DPointArray;
   end;
 
-  function RandomCenterTPA(Amount:Integer; CX,CY,RadX,RadY:Integer): TPointArray;
-
 implementation
 
 uses
@@ -158,25 +156,6 @@ begin
     y := ((dy * 0.7070) - (dx * 0.7070)) + Curr.y;
     Adj[i].X := Round(x);
     Adj[i].Y := Round(y);
-  end;
-end;
-
-function RandomCenterTPA(Amount:Integer; CX,CY,RadX,RadY:Integer): TPointArray;
-var
-  i:Integer;
-  x,y,xstep,ystep: Single;
-begin
-  SetLength(Result, Amount);
-  xstep := RadX / Amount;
-  ystep := RadY / Amount;
-  x:=0;
-  y:=0;
-  for i:=0 to Amount-1 do
-  begin
-    x := x + xstep;
-    y := y + ystep;
-    Result[i].x := RandomRange(Round(CX-x), Round(CX+x));
-    Result[i].y := RandomRange(Round(CY-y), Round(CY+y));
   end;
 end;
 

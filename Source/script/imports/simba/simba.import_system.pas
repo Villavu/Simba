@@ -68,7 +68,7 @@ procedure ImportSystem(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('System');
+    ImportingSection := 'System';
 
     addBaseDefine('SIMBA' + Format('%d', [SIMBA_VERSION]));
     addBaseDefine('SIMBAMAJOR' + Format('%d', [SIMBA_MAJOR]));
@@ -132,7 +132,7 @@ begin
       'end;'
     ]);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

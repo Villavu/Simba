@@ -64,7 +64,7 @@ procedure ImportProcess(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Process');
+    ImportingSection := 'Process';
 
     addGlobalType('type SizeUInt', 'TProcessID');
     addGlobalType('type Integer', 'TProcessExitStatus');
@@ -79,7 +79,7 @@ begin
     addGlobalFunc('function RunCommand(Executable: String; Commands: TStringArray): TProcessID; overload', @_LapeRunCommand);
     addGlobalFunc('function RunCommandTimeout(Executable: String; Commands: TStringArray; out Output: String; Timeout: Integer): Boolean', @_LapeRunCommandTimeout);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

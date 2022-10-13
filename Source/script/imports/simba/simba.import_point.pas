@@ -243,7 +243,7 @@ procedure ImportPoint(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('https://villavu.github.io/Simba/TPoint.html');
+    ImportingSection := 'TPoint';
 
     addGlobalFunc('function Point(X, Y: Integer): TPoint', @_LapePoint);
 
@@ -270,7 +270,7 @@ begin
     addGlobalFunc('operator *= (var L: TPoint; R: Double): TPoint;', @_LapePoint_MultiplyAssign_Double);
     addGlobalFunc('operator in(Left: TPoint; Right: TBox): Boolean;', @_LapePoint_IN_Box);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

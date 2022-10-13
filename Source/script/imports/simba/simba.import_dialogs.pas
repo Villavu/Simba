@@ -129,7 +129,7 @@ procedure ImportDialogs(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Dialogs');
+    ImportingSection := 'Dialogs';
 
     addGlobalType('enum(CANCEL, YES, NO)', 'ESimbaDialogResult');
 
@@ -142,7 +142,7 @@ begin
     addGlobalFunc('procedure ShowTrayNotification(Title, Message: String; Timeout: Integer = 3000)', @_LapeShowTrayNotification);
     addGlobalFunc('function ShowQuestionDialog(Title, Question: String): ESimbaDialogResult', @_LapeShowQuestionDialog);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

@@ -384,7 +384,7 @@ begin
   else
     ToolBar.EdgeBorders := [];
 
-  for I := 0 to Toolbar.ButtonCount-1 do
+  for I := 0 to Toolbar.ButtonCount - 1 do
     if (ToolBar.Buttons[I].Style = tbsDivider) then
       ToolBar.Buttons[I].Visible := Value = 'Top';
 end;
@@ -620,7 +620,12 @@ begin
     for I := 0 to List.Count - 1 do
     begin
       if (List.Names[I] = '') then
+      begin
+        Writeln('NIL NAMES ##########');
+        Writeln(List.ValueFromIndex[I]);
+        Writeln('##############');
         Continue;
+      end;
 
       Parser := TCodeInsight_Include.Create();
       Parser.Run(List.ValueFromIndex[I], List.Names[I]);

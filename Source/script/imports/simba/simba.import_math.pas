@@ -99,7 +99,7 @@ procedure ImportMath(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Math');
+    ImportingSection := 'Math';
 
     addGlobalFunc('function Distance(const X1, Y1, X2, Y2: Integer): Integer; overload', @_LapeDistance);
     addGlobalFunc('function Distance(const P1, P2: TPoint): Integer; overload', @_LapeDistanceEx);
@@ -121,7 +121,7 @@ begin
     addGlobalFunc('function Modulo(const X, Y: Integer): Integer; overload', @_LapeModulo);
     addGlobalFunc('function Modulo(const X, Y: Extended): Extended; overload', @_LapeModuloF);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

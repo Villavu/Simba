@@ -213,11 +213,10 @@ begin
   FTreeView.Align := alClient;
   FTreeView.BorderStyle := bsNone;
   FTreeView.Images := SimbaForm.Images;
-  FTreeView.ReadOnly := True;
-  FTreeView.ToolTips := False;
   FTreeView.OnDblClick := @DoTreeViewDoubleClick;
   FTreeView.OnSelectionChanged := @DoTreeViewSelectionChanged;
   FTreeView.OnMouseMove := @DoTreeViewMouseMove;
+  FTreeView.Options := FTreeView.Options + [tvoRightClickSelect, tvoReadOnly, tvoAutoItemHeight] - [tvoToolTips, tvoThemedDraw];
 
   ExpandedState := TTreeNodeExpandedState.Create(FTreeView);
 

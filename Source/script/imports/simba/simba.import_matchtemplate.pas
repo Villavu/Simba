@@ -64,7 +64,7 @@ procedure ImportMatchTemplate(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Match Template');
+    ImportingSection := 'Match Template';
 
     addClass('TMatchTemplateCache');
     addGlobalType('(TM_CCORR, TM_CCORR_NORMED, TM_CCOEFF, TM_CCOEFF_NORMED, TM_SQDIFF, TM_SQDIFF_NORMED)', 'ETMFormula');
@@ -82,7 +82,7 @@ begin
     addGlobalFunc('function TMufasaBitmap.MatchTemplate(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;', @_LapeMufasaBitmap_MatchTemplate);
     addGlobalFunc('function TMufasaBitmap.MatchTemplateMask(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;', @_LapeMufasaBitmap_MatchTemplateMask);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

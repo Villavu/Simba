@@ -66,7 +66,7 @@ procedure ImportOther(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Other');
+    ImportingSection := 'Other';
 
     addGlobalFunc('procedure PlaySound(Sound: String)', @_LapePlaySound);
     addGlobalFunc('procedure StopSound', @_LapeStopSound);
@@ -75,7 +75,7 @@ begin
     addGlobalFunc('procedure SetClipBoard(Data: string)', @_LapeSetClipBoard);
     addGlobalFunc('function GetClipBoard: String', @_LapeGetClipBoard);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

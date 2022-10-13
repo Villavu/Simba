@@ -44,7 +44,7 @@ procedure ImportFile(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('File');
+    ImportingSection := 'File';
 
     addGlobalVar(GetIncludePath(), 'IncludePath').isConstant := True;
     addGlobalVar(GetPluginPath(), 'PluginPath').isConstant := True;
@@ -60,7 +60,7 @@ begin
     addGlobalFunc('procedure UnZipFile(ArchiveFileName, OutputDirectory: String)', @_LapeUnZipFile);
     addGlobalFunc('function UnZipOneFile(ArchiveFileName, FileName, OutputDirectory: String): Boolean', @_LapeUnZipOneFile);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

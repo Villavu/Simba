@@ -15,19 +15,9 @@ begin
   SimbaNativeInterface.PreciseSleep(PUInt32(Params^[0])^);
 end;
 
-procedure _LapeSleep(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  Sleep(PUInt32(Params^[0])^);
-end;
-
 procedure _LapeWait(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
   Sleep(PUInt32(Params^[0])^);
-end;
-
-procedure _LapeGetTickCount(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PUInt64(Result)^ := GetTickCount64();
 end;
 
 procedure _LapeConvertTime(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -64,10 +54,8 @@ procedure ImportTiming(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Timing');
+    ImportingSection := 'Timing';
 
-    addGlobalFunc('function GetTickCount: UInt64;', @_LapeGetTickCount);
-    addGlobalFunc('procedure Sleep(MilliSeconds: UInt32);', @_LapeSleep);
     addGlobalFunc('procedure PreciseSleep(MilliSeconds: UInt32);', @_LapePreciseSleep);
     addGlobalFunc('procedure Wait(Milliseconds: UInt32)', @_LapeWait);
 
@@ -154,7 +142,7 @@ begin
       'end;'
     ],'Timers');
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

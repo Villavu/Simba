@@ -163,7 +163,7 @@ procedure ImportDebugImage(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('https://villavu.github.io/Simba/Debug Image.html');
+    ImportingSection := 'Debug Image';
 
     addGlobalFunc('procedure SetDebugImageMaxSize(MaxWidth, MaxHeight: Integer)', @_LapeSetDebugImageMaxSize);
     addGlobalFunc('procedure ShowDebugImage(Width, Height: Integer); overload;', @_LapeShowDebugImage1);
@@ -321,7 +321,7 @@ begin
       'end;'
     ]);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

@@ -49,7 +49,7 @@ procedure ImportKeyboard(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Keyboard');
+    ImportingSection := 'Keyboard';
 
     addGlobalFunc('procedure KeyDown(Key: Integer)', @_LapeKeyDown);
     addGlobalFunc('procedure KeyUp(Key: Integer)', @_LapeKeyUp);
@@ -59,7 +59,8 @@ begin
     addGlobalFunc('function IsKeyDown(Key: Integer): Boolean', @_LapeIsKeyDown);
     addGlobalFunc('function GetKeyCode(C: Char): Integer', @_LapeGetKeyCode);
 
-    pushSection('Virtual Keys');
+    ImportingSection := 'Virtual Keys';
+
     addGlobalVar(Integer(0), 'VK_UNKNOWN').isConstant := True;
     addGlobalVar(Integer(1), 'VK_LBUTTON').isConstant := True;
     addGlobalVar(Integer(2), 'VK_RBUTTON').isConstant := True;
@@ -198,9 +199,7 @@ begin
     addGlobalVar(Integer(250), 'VK_PLAY').isConstant := True;
     addGlobalVar(Integer(251), 'VK_ZOOM').isConstant := True;
 
-    popSection();
-
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

@@ -301,7 +301,7 @@ begin
   FFileBrowser.BorderSpacing.Left := 3;
   FFileBrowser.BorderSpacing.Right := 3;
   FFileBrowser.Images := SimbaForm.Images;
-  FFileBrowser.Options := FFileBrowser.Options + [tvoRightClickSelect, tvoReadOnly, tvoAutoItemHeight] - [tvoToolTips];
+  FFileBrowser.Options := FFileBrowser.Options + [tvoRightClickSelect, tvoReadOnly, tvoAutoItemHeight] - [tvoToolTips, tvoThemedDraw];
   FFileBrowser.PopupMenu := Popup;
   FFileBrowser.OnDblClick := @DoFileBrowserDoubleClick;
   FFileBrowser.BorderStyle := bsNone;

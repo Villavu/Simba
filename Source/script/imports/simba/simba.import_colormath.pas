@@ -128,7 +128,7 @@ procedure ImportColorMath(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Color Math');
+    ImportingSection := 'Color Math';
 
     addGlobalFunc('procedure ColorToRGB(Color: Int32; var r, g, b: Int32)', @_LapeColorToRGB);
     addGlobalFunc('function RGBtoColor(r, g, b: Int32): TColor', @_LapeRGBtoColor);
@@ -153,7 +153,7 @@ begin
     addGlobalFunc('function ColorToGray(const Color: Int32): TColor', @_LapeColorToGray);
     addGlobalFunc('procedure CalculateBestColor(Colors: TIntegerArray; CTS: Integer; out Color, Tolerance: Integer; out Hue, Sat: Extended)', @_LapeCalculateBestColor);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

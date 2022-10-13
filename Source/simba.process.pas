@@ -10,7 +10,8 @@ unit simba.process;
 interface
 
 uses
-  classes, sysutils;
+  classes, sysutils,
+  simba.mufasatypes;
 
 type
   PProcessID = ^TProcessID;
@@ -292,10 +293,10 @@ begin
     end;
 
   {$IFDEF UNIX}
-  Result := Self.RunCommandInDir(Application.Location, GetEnvironmentVariable('SHELL'), ['-c', Application.ExeName + ' ' + String.Join(' ', Parameters) + ' --run ' + Script + ' > ' + OutputFileName]);
+  Result := Self.RunCommandInDir(Application.Location, GetEnvironmentVariable('SHELL'), ['-c', Application.ExeName + ' ' + ' '.Join(Parameters) + ' --run ' + Script + ' > ' + OutputFileName]);
   {$ENDIF}
   {$IFDEF WINDOWS}
-  Result := Self.RunCommandInDir(Application.Location, GetEnvironmentVariable('COMSPEC'), ['/c', Application.ExeName + ' ' + String.Join(' ', Parameters) + ' --run ' + Script + ' > ' + OutputFileName]);
+  Result := Self.RunCommandInDir(Application.Location, GetEnvironmentVariable('COMSPEC'), ['/c', Application.ExeName + ' ' + ' '.Join(Parameters) + ' --run ' + Script + ' > ' + OutputFileName]);
   {$ENDIF}
 end;
 

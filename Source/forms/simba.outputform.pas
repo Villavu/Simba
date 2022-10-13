@@ -298,6 +298,8 @@ var
   I, H: Integer;
 begin
   Arr := S.Split(LineEnding);
+  if (Length(Arr) = 0) then
+    Exit('');
 
   FLock.Enter();
   try

@@ -560,18 +560,17 @@ end;
 
 function TmwBasePasLex.KeyHash: Integer;
 //var
-//  s: String = '';
+//  DebugKeyHash: String = '';
 begin
   Result := 0;
   while IsIdentifiers(fOrigin[Run]) do
   begin
-    //s += fOrigin[Run];
+    // DebugKeyHash += fOrigin[Run];
     Inc(Result, HashValue(fOrigin[Run]));
-    //inc(Result, mHashTable[fOrigin[Run]]);
-    inc(Run);
+    Inc(Run);
   end;
 
-  //WRiteLN('KeyHash for ', S, ' = ', Result);
+  // WriteLn('KeyHash for ', DebugKeyHash, ' = ', Result);
 end;
 
 function TmwBasePasLex.KeyComp(const aKey: string): Boolean;
@@ -1028,7 +1027,7 @@ end;
 function TmwBasePasLex.Func108: TptTokenKind;
 begin
   Result := tokIdentifier;
-  if KeyComp('Operator') then fExID := tokOperator;
+  if KeyComp('Operator') then Result := tokOperator;
 end;
 
 function TmwBasePasLex.Func112: TptTokenKind;

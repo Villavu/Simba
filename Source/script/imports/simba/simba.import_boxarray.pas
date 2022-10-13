@@ -200,7 +200,7 @@ procedure ImportBoxArray(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('https://villavu.github.io/Simba/TBoxArray.html');
+    ImportingSection := 'TBoxArray';
 
     addGlobalFunc('function TBoxArray.Create(Start: TPoint; Columns, Rows, Width, Height: Integer; Spacing: TPoint): TBoxArray; static;', @_LapeBoxArray_Create);
     addGlobalFunc('function TBoxArray.Pack: TBoxArray;', @_LapeBoxArray_Pack);
@@ -226,7 +226,7 @@ begin
     addGlobalFunc('function TBoxArray.ContainsPoint(P: TPoint; out Index: Integer): Boolean; overload;', @_LapeBoxArray_ContainsPoint1);
     addGlobalFunc('function TBoxArray.ContainsPoint(P: TPoint): Boolean; overload;', @_LapeBoxArray_ContainsPoint2);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

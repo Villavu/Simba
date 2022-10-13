@@ -168,7 +168,7 @@ procedure ImportCrypto(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Crypto');
+    ImportingSection := 'Crypto';
 
     addGlobalFunc('function BlowFish_Encrypt(const Data, Password: String): String', @_LapeBlowFish_Encrypt);
     addGlobalFunc('function BlowFish_Decrypt(const Data, Password: String): String', @_LapeBlowFish_Decrypt);
@@ -200,7 +200,7 @@ begin
     addGlobalFunc('function TLZCompressionThread.GetOnCompressed: TLZCompressedEvent', @_LapeLZCompressionThreadOnCompressed_Read);
     addGlobalFunc('function TLZCompressionThread.IsCompressing: Boolean', @_LapeLZCompressionThread_IsCompressing);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

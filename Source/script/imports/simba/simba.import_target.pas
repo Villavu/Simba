@@ -157,7 +157,7 @@ procedure ImportTarget(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Target');
+    ImportingSection := 'Target';
 
     addGlobalFunc('function SetDesktopAsClient: Integer', @_LapeSetDesktopAsClient);
     addGlobalFunc('function SetTargetWindow(Window: TWindowHandle): Integer', @_LapeSetTargetWindow);
@@ -232,7 +232,7 @@ begin
       'end;'
     ]);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

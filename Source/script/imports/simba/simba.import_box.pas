@@ -307,7 +307,7 @@ procedure ImportBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('https://villavu.github.io/Simba/TBox.html');
+    ImportingSection := 'TBox';
 
     addGlobalFunc('function Box(X1, Y1, X2, Y2: Integer): TBox; overload', @_LapeBox);
     addGlobalFunc('function Box(Mid: TPoint; XRad, YRad: Integer): TBox; overload', @_LapeBoxEx);
@@ -344,7 +344,7 @@ begin
     addGlobalFunc('function TBox.Height: Integer;', @_LapeBox_Height);
     addGlobalFunc('function TBox.Center: TPoint;', @_LapeBox_Center);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

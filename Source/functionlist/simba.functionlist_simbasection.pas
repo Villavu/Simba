@@ -6,7 +6,26 @@ interface
 
 uses
   classes, sysutils, comctrls,
-  simba.codeparser, simba.ci_includecache, simba.functionlistform;
+  simba.mufasatypes, simba.codeparser, simba.ci_includecache, simba.functionlistform;
+
+const
+  SimbaSectionDocLinks: TStringArray = (
+    'TPoint        -> https://villavu.github.io/Simba/TPoint.html',
+    'TPointArray   -> https://villavu.github.io/Simba/TPointArray.html',
+    'TBox          -> https://villavu.github.io/Simba/TBox.html',
+    'TBoxArray     -> https://villavu.github.io/Simba/TBoxArray.html',
+    'TQuad         -> https://villavu.github.io/Simba/TQuad.html',
+    'Random        -> https://villavu.github.io/Simba/Random.html',
+    'TWindowHandle -> https://villavu.github.io/Simba/Window Handle.html',
+    'T2DPointArray -> https://villavu.github.io/Simba/T2DPointArray.html',
+    'Debug Image   -> https://villavu.github.io/Simba/Debug Image.html',
+    'Script        -> https://villavu.github.io/Simba/Script.html',
+    'Variant       -> https://villavu.github.io/Simba/Variant.html',
+    'TWindowHandle -> https://villavu.github.io/Simba/TWindowHandle.html',
+    'TMufasaBitmap -> https://villavu.github.io/Simba/TMufasaBitmap.html'
+  );
+
+function GetSectionDocLink(Section: String): String;
 
 type
   TSimbaFunctionList_SimbaSection = class(TSimbaFunctionListStaticSection)
@@ -23,11 +42,26 @@ type
 implementation
 
 uses
+  strutils,
   simba.main, simba.functionlist_nodes;
+
+function GetSectionDocLink(Section: String): String;
+var
+  I: Integer;
+begin
+  Result := '';
+
+  for I := 0 to High(SimbaSectionDocLinks) do
+    if (SimbaSectionDocLinks[I].Before('->').Trim() = Section) then
+    begin
+      Result := SimbaSectionDocLinks[I].After('->').Trim();
+      Exit;
+    end;
+end;
 
 function TSimbaFunctionList_SimbaSection.Sort(A, B: TTreeNode): Integer;
 begin
-  Result := CompareStr(A.Text, B.Text);
+  Result := NaturalCompareText(A.Text, B.Text);
 
   case A.ImageIndex of
     IMAGE_TYPE:      Dec(Result, 2000);
@@ -65,10 +99,10 @@ procedure TSimbaFunctionList_SimbaSection.Add(FunctionList: TSimbaFunctionList);
 var
   Section: TCodeParser;
   SimbaNode, SectionNode: TTreeNode;
-  FileName: String;
+  FileName, URL: String;
 begin
   SimbaNode := FunctionList.TreeView.Items.Add(nil, 'Simba');
-  SimbaNode.ImageIndex := IMAGE_DIRECTORY;
+  SimbaNode.ImageIndex    := IMAGE_DIRECTORY;
   SimbaNode.SelectedIndex := IMAGE_DIRECTORY;
 
   for Section in FSections do
@@ -77,8 +111,9 @@ begin
       Continue;
 
     FileName := Section.Lexer.FileName;
-    if FileName.StartsWith('https://') or FileName.StartsWith('http://') then
-      SectionNode := FunctionList.AddNode(SimbaNode, TFunctionList_URLNode.Create(FunctionList, FileName))
+    URL := GetSectionDocLink(FileName);
+    if (URL <> '') then
+      SectionNode := FunctionList.AddNode(SimbaNode, TFunctionList_URLNode.Create(FunctionList, URL))
     else
       SectionNode := FunctionList.AddNode(SimbaNode, TFunctionList_InternalFileNode.Create(FunctionList, FileName));
 

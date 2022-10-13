@@ -163,7 +163,7 @@ procedure ImportVariant(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Variant');
+    ImportingSection := 'Variant';
 
     addGlobalType('enum(Unknown, Unassigned, Null, Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64, Single, Double, DateTime, Currency, Boolean, Variant, AString, UString, WString)', 'EVariantVarType');
 
@@ -177,7 +177,7 @@ begin
     addGlobalFunc('function Variant.Null: Variant; static;', @_LapeVariantNull);
     addGlobalFunc('function Variant.Unassigned: Variant; static;', @_LapeVariantUnassigned);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

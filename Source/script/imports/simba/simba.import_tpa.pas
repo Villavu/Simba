@@ -649,16 +649,6 @@ begin
 end;
 
 (*
-RandomCenterTPA
-~~~~~~~~~~~~~~~
-function RandomCenterTPA(Amount:Integer; CX,CY,RadX,RadY:Integer): TPointArray;
-*)
-procedure _LapeRandomCenterTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
-begin
-  PPointArray(Result)^ := RandomCenterTPA(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
-end;
-
-(*
 TPointArray.MinAreaRect
 ~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.MinAreaRect: TQuad;
@@ -722,9 +712,7 @@ procedure ImportTPA(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('https://villavu.github.io/Simba/TPointArray.html');
-
-    addGlobalFunc('function RandomCenterTPA(Amount:Integer; CX,CY,RadX,RadY:Integer): TPointArray;', @_LapeRandomCenterTPA);
+    ImportingSection := 'TPointArray';
 
     addGlobalFunc('function TPointArray.CreateFromBox(Box: TBox; Filled: Boolean): TPointArray; static;', @_LapeTPACreateFromBox);
     addGlobalFunc('function TPointArray.CreateFromEllipse(Center: TPoint; RadiusX, RadiusY: Integer; Filled: Boolean): TPointArray; static;', @_LapeTPACreateFromEllipse);
@@ -818,7 +806,7 @@ begin
     addGlobalFunc('function TPointArray.Intersection(Other: TPointArray): TPointArray', @_Lape_Point_Intersection);
     addGlobalFunc('function TBoxArray.Intersection(Other: TBoxArray): TBoxArray', @_Lape_Box_Intersection);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

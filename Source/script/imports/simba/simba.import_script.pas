@@ -180,7 +180,7 @@ procedure ImportScript(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Script');
+    ImportingSection := 'Script';
 
     addGlobalVar('', 'ScriptFile').isConstant := True;
     addGlobalVar('', 'ScriptName').isConstant := True;
@@ -300,7 +300,7 @@ begin
       'end;'
     ]);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 
