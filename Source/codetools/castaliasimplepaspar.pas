@@ -1036,19 +1036,13 @@ begin
       begin
         ExportsClause;
       end;
-    tokFunction, tokIdentifier:
+    tokFunction, tokProcedure, tokOperator:
       begin
-        if (TokenID = tokIdentifier) and (Lexer.ExId <> tokOperator) then
-          SynError(InvalidDeclarationSection);
         ProcedureDeclarationSection;
       end;
     tokLabel:
       begin
         LabelDeclarationSection;
-      end;
-    tokProcedure:
-      begin
-        ProcedureDeclarationSection;
       end;
     tokResourceString:
       begin
@@ -1306,11 +1300,8 @@ begin
       begin
         DestructorHeading;
       end;
-    tokFunction, tokIdentifier:
+    tokFunction:
       begin
-        if (TokenID = tokIdentifier) and (Lexer.ExID <> tokOperator) then
-          Expected(tokOperator);
-
         Lexer.InitAhead;
         Lexer.AheadNext;
         case Lexer.AheadTokenID of
@@ -1346,9 +1337,6 @@ end;
 
 procedure TmwSimplePasPar.ClassFunctionHeading;
 begin
-  if (TokenID = tokIdentifier) and (Lexer.ExID = tokOperator) then
-    Expected(tokIdentifier) else
-
   Expected(tokFunction);
   FunctionMethodName;
   if TokenID = tokRoundOpen then
@@ -1399,11 +1387,6 @@ begin
     tokProcedure:
       begin
         NextToken;
-      end;
-    tokIdentifier:
-      begin
-        if Lexer.ExID = tokOperator then
-          NextToken;
       end;
   end;
   ResolutionInterfaceName;
@@ -1785,8 +1768,8 @@ end;
 
 procedure TmwSimplePasPar.FunctionMethodDeclaration;
 begin
-  if (TokenID = tokIdentifier) and (Lexer.ExID = tokOperator) then
-    NextToken
+  if (TokenID = tokOperator) then
+    NextToken()
   else
     Expected(tokFunction);
 
@@ -4296,35 +4279,17 @@ end;
 
 procedure TmwSimplePasPar.ProcedureDeclarationSection;
 begin
-  if TokenID = tokClass then
-  begin
-    NextToken;
-  end;
+  if (TokenID = tokClass) then
+    NextToken();
+
   case TokenID of
-    tokConstructor:
+    tokConstructor, tokDestructor, tokProcedure:
       begin
-        ProcedureMethodDeclaration;
+        ProcedureMethodDeclaration();
       end;
-    tokDestructor:
+    tokFunction, tokOperator:
       begin
-        ProcedureMethodDeclaration;
-      end;
-    tokProcedure:
-      begin
-        ProcedureMethodDeclaration;
-      end;
-    tokFunction:
-      begin
-        FunctionMethodDeclaration;
-      end;
-    tokIdentifier:
-      begin
-        if Lexer.ExID = tokOperator then
-        begin
-          FunctionMethodDeclaration;
-        end
-        else
-          SynError(InvalidProcedureDeclarationSection);
+        FunctionMethodDeclaration();
       end;
   else
     begin
@@ -4909,6 +4874,10 @@ begin
       tokLabel:
         begin
           LabelDeclarationSection;
+        end;
+      tokOperator:
+        begin
+          ProcedureDeclarationSection();
         end;
       tokProcedure:
         begin

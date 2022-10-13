@@ -465,15 +465,11 @@ begin
   PBoolean(Result)^ := PChar(Params^[0])^ in PStringArray(Params^[1])^;
 end;
 
-
-//------------------
-//lape exports
-
 procedure ImportString(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('String');
+    ImportingSection := 'String';
 
     addGlobalType(
       'record'               + LineEnding +
@@ -594,10 +590,10 @@ begin
     addGlobalFunc('function String.ToExtended: Extended; overload;', @_LapeString_ToExtended);
     addGlobalFunc('function String.ToExtended(Default: Extended): Extended; overload;', @_LapeString_ToExtendedDef);
 
-    addGlobalFunc('operator * (Left: String; Right: Integer): String', @_LapeString_MUL_Integer);
+    addGlobalFunc('operator *(Left: String; Right: Integer): String', @_LapeString_MUL_Integer);
     addGlobalFunc('operator in(Left: String; Right: String): Boolean', @_LapeString_IN_String);
     addGlobalFunc('operator in(Left: String; Right: TStringArray): Boolean', @_LapeString_IN_StringArray);
-    
+
     addGlobalFunc('function Char.IsUpper(): Boolean;',    @_LapeChar_IsUpper);
     addGlobalFunc('function Char.IsLower(): Boolean;',    @_LapeChar_IsLower);
     addGlobalFunc('function Char.ToUpper(): String;',     @_LapeChar_ToUpper);
@@ -607,12 +603,12 @@ begin
     addGlobalFunc('function Char.IsInteger(): Boolean;',  @_LapeChar_IsInteger);
     addGlobalFunc('function Char.IsFloat(): Boolean;',    @_LapeChar_IsFloat);
     addGlobalFunc('function Char.Join(Values: TStringArray): String;', @_LapeChar_Join);
-    
-    addGlobalFunc('operator * (Left: Char; Right: Integer): String', @_LapeChar_MUL_Integer);
+
+    addGlobalFunc('operator *(Left: Char; Right: Integer): String', @_LapeChar_MUL_Integer);
     addGlobalFunc('operator in(Left: Char; Right: String): Boolean', @_LapeChar_IN_String);
     addGlobalFunc('operator in(Left: Char; Right: TStringArray): Boolean', @_LapeChar_IN_StringArray);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

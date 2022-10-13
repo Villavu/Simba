@@ -31,7 +31,7 @@ var
   I, J: SizeInt;
   Q, P: _T;
 begin
-  if (Length(AValues) = 0) then
+  if (Length(AValues) <= 1) then
     Exit;
 
   repeat
@@ -79,10 +79,9 @@ var
   Mid, T: _W;
   TP: _T;
 begin
-  if (Length(Arr) = 0) then
+  if (Length(Arr) <= 1) or (Length(Weights) <> Length(Arr)) then
     Exit;
 
-  if (Length(Weights) = Length(Arr)) then
   repeat
     Lo := iLo;
     Hi := iHi;

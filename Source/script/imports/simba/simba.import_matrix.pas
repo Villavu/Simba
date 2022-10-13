@@ -264,7 +264,7 @@ procedure ImportMatrix(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Matrix');
+    ImportingSection := 'Matrix';
 
     addGlobalType('array of TSingleArray', 'TSingleMatrix');
     addGlobalType('array of TIntegerArray', 'TIntegerMatrix');
@@ -331,7 +331,7 @@ begin
     addGlobalFunc('function TDoubleMatrix.Area: Integer;', @_LapeDoubleMatrix_Area);
     addGlobalFunc('function TDoubleMatrix.GetSize(out Width, Height: Integer): Boolean;', @_LapeDoubleMatrix_GetSize);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

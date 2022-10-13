@@ -27,7 +27,7 @@ type
   public
     function GetItemsOfClass(AClass: TDeclarationClass; SubSearch: Boolean = False): TDeclarationArray;
     function GetFirstItemOfClass(AClass: TDeclarationClass; SubSearch: Boolean = False): TDeclaration;
-    function GetItemInPosition(Position: Int32): TDeclaration;
+    function GetItemInPosition(Position: Integer): TDeclaration;
 
     function GetRawText(AClass: TDeclarationClass): String;
     function GetCleanText(AClass: TDeclarationClass): String;
@@ -70,7 +70,7 @@ type
     FName: String;
     FNameUpper: String;
     FNameCached: Boolean;
-    FLine: Int32;
+    FLine: Integer;
     FLexer: TmwPasLex;
 
     function GetRawText: string; virtual;
@@ -99,7 +99,7 @@ type
     property Items: TDeclarationList read FItems;
     property Name: String read GetNameProp;
     property NameUpper: String read GetNameUpperProp;
-    property Line: Int32 read FLine;
+    property Line: Integer read FLine;
 
     constructor Create(ALexer: TmwPasLex; AOwner: TDeclaration; AOrigin: PAnsiChar; AStart: Integer; AEnd: Integer = -1); overload; virtual;
     constructor Create(From: TDeclaration); overload; virtual;
@@ -162,7 +162,7 @@ type
 
   TciArrayType = class(TDeclaration)
   public
-    function GetDimensionCount: Int32;
+    function GetDimensionCount: Integer;
     function GetType: TciTypeKind;
     function IsStatic: Boolean;
   end;
@@ -264,9 +264,9 @@ type
   public
     // For parameter hints so we can restructure.
     // var
-    //   a, b, c: Int32; (group 0)
+    //   a, b, c: Integer; (group 0)
     //   d: Extended;    (group 1)
-    Group: Int32;
+    Group: Integer;
 
     property VarType: TciTypeKind read GetVarType;
     property Value: TDeclaration read GetValue;
@@ -312,7 +312,7 @@ type
   protected
     FStack: TDeclarationStack;
     FItems: TDeclarationList;
-    FTokenPos: Int32;
+    FTokenPos: Integer;
     FLexers: array of TmwPasLex;
     FLexerStack: array of TmwPasLex;
     FOnFindInclude: TOnFindInclude;
@@ -544,7 +544,7 @@ begin
   Result := 'Result';
 end;
 
-function TciArrayType.GetDimensionCount: Int32;
+function TciArrayType.GetDimensionCount: Integer;
 var
   Declaration: TDeclaration;
 begin
@@ -565,7 +565,7 @@ end;
 function TciArrayType.GetType: TciTypeKind;
 var
   Declarations: TDeclarationArray;
-  Index: Int32;
+  Index: Integer;
 begin
   Result := nil;
 
@@ -772,11 +772,11 @@ begin
       Exit;
 end;
 
-function TDeclarationList.GetItemInPosition(Position: Int32): TDeclaration;
+function TDeclarationList.GetItemInPosition(Position: Integer): TDeclaration;
 
   procedure Search(Declaration: TDeclaration; var Result: TDeclaration);
   var
-    I: Int32;
+    I: Integer;
   begin
     if (Position >= Declaration.StartPos) and (Position <= Declaration.EndPos) then
     begin
@@ -788,7 +788,7 @@ function TDeclarationList.GetItemInPosition(Position: Int32): TDeclaration;
   end;
 
 var
-  I: Int32;
+  I: Integer;
 begin
   Result := nil;
 
@@ -972,7 +972,7 @@ end;
 
 function TDeclaration.Clone(AOwner: TDeclaration): TDeclaration;
 var
-  i: Int32;
+  i: Integer;
 begin
   Result := TDeclarationClass(Self.ClassType).Create(Self);
   Result.Owner := AOwner;
@@ -1165,8 +1165,8 @@ end;
 
 procedure TCodeParser.SeperateVariables(Variables: TciVarDeclaration);
 var
-  i: Int32;
-  Index: Int32;
+  i: Integer;
+  Index: Integer;
   Names: TDeclarationArray;
   Declaration: TciVarDeclaration;
   Kind: TDeclaration;
@@ -1228,7 +1228,7 @@ end;
 
 destructor TCodeParser.Destroy;
 var
-  I: Int32;
+  I: Integer;
 begin
   FStack.Free();
   FItems.Free();
@@ -1245,53 +1245,27 @@ end;
 
 procedure TCodeParser.ParseFile;
 begin
-  Lexer.Next;
+  Lexer.Next();
 
-  SkipJunk;
-  case GenID of
-    tokLibrary:
-      begin
-        LibraryFile;
-      end;
-    tokPackage:
-      begin
-        PackageFile;
-      end;
-    tokUnit:
-      begin
-        UnitFile;
-      end;
-    else
+  SkipJunk();
+  if (TokenID = tokProgram) then
+  begin
+    NextToken();
+    SemiColon();
+  end;
+
+  while (TokenID in [tokBegin, tokConst, tokFunction, tokOperator, tokLabel, tokProcedure, tokType, tokVar]) do
+  begin
+    if (TokenID = tokBegin) then
     begin
-      if (Lexer.GenID = TokProgram) then
-      begin
-        Expected(TokProgram);
-        QualifiedIdentifier;
-        if TokenID = TokRoundOpen then
-        begin
-          NextToken;
-          IdentifierList;
-          Expected(TokRoundClose);
-        end;
-        SemiColon;
-      end;
-      if (TokenID = TokUses) then
-        MainUsesClause;
+      CompoundStatement();
+      if (TokenID = tokSemiColon) then
+        Expected(tokSemiColon);
+    end else
+      DeclarationSection();
 
-      while (TokenID in [tokBegin, TokClass, TokConst, TokConstructor, TokDestructor, TokExports, TokFunction, TokLabel, TokProcedure, TokResourceString, TokThreadVar, TokType, TokVar]) or (Lexer.ExID = tokOperator) do
-      begin
-        if TokenID = tokBegin then
-        begin
-          CompoundStatement;
-          if (TokenID = tokSemiColon) then
-            Expected(tokSemiColon);
-        end else
-          DeclarationSection;
-
-        if (TokenID = tok_DONE) then
-          Break;
-      end;
-    end;
+    if (TokenID = tok_DONE) then
+      Break;
   end;
 end;
 
@@ -1648,11 +1622,10 @@ var
   Declaration: TciProcedureDeclaration;
 begin
   Declaration := PushStack(TciProcedureDeclaration) as TciProcedureDeclaration;
-  if Lexer.ExID = tokOperator then
-    Declaration.IsOperator := True
-  else
-  if Lexer.TokenID = tokFunction then
-    Declaration.IsFunction := True;
+  case Lexer.TokenID of
+    tokOperator: Declaration.IsOperator := True;
+    tokFunction: Declaration.IsFunction := True;
+  end;
 
   inherited;
   PopStack;
@@ -2003,7 +1976,7 @@ end;
 procedure TCodeParser.Run;
 var
   Declaration: TDeclaration;
-  I: Int32;
+  I: Integer;
 begin
   FFiles.Clear();
   if FileExists(FLexer.FileName) then

@@ -15,8 +15,9 @@ uses
   simba.bitmapconv, simba.functionlistform, simba.scripttabsform,
   simba.outputform, simba.colorpickerhistoryform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.associate,
-  simba.script_dump, simba.openexampleform, simba.scriptthread,
-  simba.package_form, simba.mufasatypes, simba.shapeboxform, simba.windowsdarktheme;
+  simba.openexampleform, simba.scriptthread,
+  simba.package_form, simba.mufasatypes, simba.shapeboxform, simba.windowsdarktheme,
+  simba.compiler_dump, simba.plugin_dump;
 
 type
   TApplicationHelper = class helper for TApplication
@@ -62,8 +63,7 @@ begin
 
   if Application.HasOption('dumpcompiler') then
   begin
-    with DumpCompiler() do
-      SaveToFile(Application.Params[Application.ParamCount]);
+    DumpCompiler(Application.Params[Application.ParamCount]);
 
     Halt();
   end;

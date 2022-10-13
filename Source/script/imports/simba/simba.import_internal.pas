@@ -171,8 +171,6 @@ procedure ImportInternal(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection(''); // Hidden
-
     addGlobalFunc('procedure _Write(S: String); override', @_LapeWrite);
     addGlobalFunc('procedure _WriteLn; override', @_LapeWriteLn);
 
@@ -210,8 +208,6 @@ begin
     addGlobalFunc('function _ArrayMax(const a: TIntegerArray): Int64; overload', @_LapeArrayMax_IntegerArray);
     addGlobalFunc('function _ArrayMax(const a: TSingleArray): Single; overload', @_LapeArrayMax_SingleArray);
     addGlobalFunc('function _ArrayMax(const a: TDoubleArray): Double; overload', @_LapeArrayMax_DoubleArray);
-
-    popSection();
   end;
 end;
 

@@ -178,7 +178,7 @@ procedure ImportInternet(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Internet');
+    ImportingSection := 'Internet';
 
     addGlobalFunc('procedure OpenWebPage(URL: String)', @_LapeOpenWebPage);
     addGlobalFunc('function GetPage(URL: String): String', @_LapeGetPage);
@@ -213,7 +213,7 @@ begin
     addGlobalFunc('function CreateSocket: Int32', @_LapeCreateSocket);
     addGlobalFunc('procedure FreeSocket(Client: Int32)', @_LapeFreeSocket);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

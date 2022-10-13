@@ -10,8 +10,8 @@ unit simba.script_compiler;
 interface
 
 uses
-  classes, sysutils, typinfo, variants,
-  ffi, lpffi, lpcompiler, lptypes, lpvartypes, lpparser, lptree, lpffiwrappers, lpinterpreter, lpeval,
+  classes, sysutils, typinfo, contnrs,
+  ffi, lpffi, lpcompiler, lptypes, lpvartypes, lpparser, lptree, lpffiwrappers, lpinterpreter,
   simba.mufasatypes;
 
 type
@@ -20,40 +20,39 @@ type
   TSimbaImportArray = array of TSimbaImport;
 
   TSimbaScript_Compiler = class(TLapeCompiler)
-  public class var
+  protected class var
     Imports: TSimbaImportArray;
-
+  public
     class procedure RegisterImport(Proc: TSimbaImport);
   public type
     TManagedImportClosure = class(TLapeDeclaration)
       Closure: TImportClosure;
     end;
   protected
-    FSectionStack: TStringArray;
+    FImportingSection: String;
+    FDump: TFPStringHashTable;
 
-    function Section: String;
+    function GetImportingSection: String;
 
     procedure InitBaseDefinitions; override;
-    procedure InitBaseDateTime; override;
-    procedure InitBaseVariant; override;
   public
+    property ImportingSection: String read GetImportingSection write FImportingSection;
+
     function getIntegerArray: TLapeType; override;
     function getFloatArray: TLapeType; override;
 
     function CurrentDir: String;
-
-    procedure pushSection(Name: String);
-    procedure popSection;
 
     procedure pushTokenizer(ATokenizer: TLapeTokenizerBase); reintroduce;
     procedure pushConditional(AEval: Boolean; ADocPos: TDocPos); reintroduce;
 
     procedure addDelayedCode(Code: TStringArray; AFileName: lpString = ''); virtual; overload;
 
+    function addGlobalVar(AVar: TLapeGlobalVar; AName: lpString = ''): TLapeGlobalVar; override;
+
     function addGlobalFunc(Header: lpString; Body: TStringArray): TLapeTree_Method; virtual; overload;
     function addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar; virtual; overload;
     function addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType; virtual; overload;
-
     function addGlobalType(Str: TStringArray; Name: String): TLapeType; virtual; overload;
 
     function addCallbackType(Str: String): TLapeType;
@@ -74,6 +73,8 @@ type
 implementation
 
 uses
+  lpeval,
+
   simba.import_system,
   simba.import_matrix,
   simba.import_quad, simba.import_box, simba.import_boxarray, simba.import_point,
@@ -97,7 +98,7 @@ uses
   simba.import_math, simba.import_mouse, simba.import_other,
   simba.import_process, simba.import_script, simba.import_slacktree,
   simba.import_string, simba.import_internet, simba.import_target, simba.import_variant,
-  simba.import_simba,
+  simba.import_simba, simba.import_random,
 
   simba.script_compiler_waituntil, simba.script_compiler_rtti;
 
@@ -105,8 +106,6 @@ function TSimbaScript_Compiler.addGlobalFunc(Header: lpString; Body: TStringArra
 var
   OldState: Pointer;
 begin
-  Result := nil;
-
   OldState := getTempTokenizerState(LapeDelayedFlags + Header + LineEnding.Join(Body), '!' + Header);
   try
     Expect([tk_kw_Function, tk_kw_Procedure, tk_kw_Operator]);
@@ -126,7 +125,7 @@ begin
   Closure.Closure := LapeImportWrapper(Value, Self, Header, ABI);
 
   with TManagedImportClosure(addManagedDecl(Closure)) do
-    Result := inherited addGlobalFunc(Header, Closure.Func);
+    Result := addGlobalFunc(Header, Closure.Func);
 end;
 
 function TSimbaScript_Compiler.addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType;
@@ -230,16 +229,25 @@ end;
 
 constructor TSimbaScript_Compiler.Create(ATokenizer: TLapeTokenizerBase; ManageTokenizer: Boolean; AEmitter: TLapeCodeEmitter; ManageEmitter: Boolean);
 begin
-  inherited Create(ATokenizer, ManageTokenizer, AEmitter, ManageEmitter);
+  FDump := TFPStringHashTable.Create();
 
-  pushSection('!Simba');
+  inherited Create(ATokenizer, ManageTokenizer, AEmitter, ManageEmitter);
 end;
 
 destructor TSimbaScript_Compiler.Destroy;
 begin
-  popSection();
+  if (FDump <> nil) then
+    FreeAndNil(FDump);
 
   inherited Destroy();
+end;
+
+function TSimbaScript_Compiler.GetImportingSection: String;
+begin
+  if (FImportingSection = '') then
+    FImportingSection := '!Simba';
+
+  Result := FImportingSection;
 end;
 
 class procedure TSimbaScript_Compiler.RegisterImport(Proc: TSimbaImport);
@@ -254,24 +262,6 @@ begin
     Result := ExtractFileDir(Tokenizer.FileName);
 end;
 
-function TSimbaScript_Compiler.Section: String;
-begin
-  if Length(FSectionStack) > 0 then
-    Result := FSectionStack[High(FSectionStack)]
-  else
-    Result := '';
-end;
-
-procedure TSimbaScript_Compiler.pushSection(Name: String);
-begin
-  FSectionStack := FSectionStack + [Name];
-end;
-
-procedure TSimbaScript_Compiler.popSection;
-begin
-  SetLength(FSectionStack, Length(FSectionStack) - 1);
-end;
-
 procedure TSimbaScript_Compiler.InitBaseDefinitions;
 begin
   addGlobalType(getBaseType(DetermineIntType(SizeOf(Byte), False)).createCopy(), 'Byte');
@@ -279,84 +269,6 @@ begin
   addGlobalType(getPointerType(ltChar, False).createCopy(), 'PChar');
 
   inherited InitBaseDefinitions();
-end;
-
-procedure TSimbaScript_Compiler.InitBaseDateTime;
-begin
-  addGlobalVar(HoursPerDay, 'HoursPerDay').isConstant := True;
-  addGlobalVar(MinsPerHour, 'MinsPerHour').isConstant := True;
-  addGlobalVar(SecsPerMin, 'SecsPerMin').isConstant := True;
-  addGlobalVar(MSecsPerSec, 'MSecsPerSec').isConstant := True;
-  addGlobalVar(MinsPerDay, 'MinsPerDay').isConstant := True;
-  addGlobalVar(SecsPerDay, 'SecsPerDay').isConstant := True;
-  addGlobalVar(MSecsPerDay, 'MSecsPerDay').isConstant := True;
-  addGlobalVar(DateDelta, 'DateDelta').isConstant := True;
-
-  addGlobalType(getBaseType(ltDouble).createCopy(True), 'TDateTime', False);
-
-  addGlobalFunc('function EncodeDate(Year, Month, Day: UInt16): TDateTime;', @_LapeEncodeDate);
-  addGlobalFunc('function EncodeTime(Hour, Min, Sec, MSec: UInt16): TDateTime;', @_LapeEncodeTime);
-  addGlobalFunc('procedure DecodeDate(DateTime: TDateTime; var Year, Month, Day: UInt16);', @_LapeDecodeDate);
-  addGlobalFunc('function DecodeDateFully(DateTime: TDateTime; var Year, Month, Day, DOW: UInt16): Boolean;', @_LapeDecodeDateFully);
-  addGlobalFunc('procedure DecodeTime(DateTime: TDateTime; var Hour, Min, Sec, MSec: UInt16);', @_LapeDecodeTime);
-
-  addGlobalFunc('function DateTimeToStr(const DateTime: TDateTime): string;', @_LapeDateTimeToStr);
-  addGlobalFunc('function DateToStr(const DateTime: TDateTime): string;', @_LapeDateToStr);
-  addGlobalFunc('function TimeToStr(const DateTime: TDateTime): string;', @_LapeTimeToStr);
-
-  TLapeType_OverloadedMethod(Globals['ToString'].VarType).addMethod(
-    TLapeType_Method(addManagedType(
-      TLapeType_Method.Create(
-        Self,
-        [getGlobalType('TDateTime')],
-        [lptConstRef],
-        [TLapeGlobalVar(nil)],
-        getBaseType(ltString)
-      )
-    )).NewGlobalVar(@_LapeDateTimeToStr)
-  );
-
-  addGlobalFunc('function Date: TDateTime;', @_LapeDate);
-  addGlobalFunc('function Time: TDateTime;', @_LapeTime);
-  addGlobalFunc('function Now: TDateTime;', @_LapeNow);
-  addGlobalFunc('function NowUTC: TDateTime;', @_LapeNowUTC);
-
-  addGlobalFunc('procedure ReplaceTime(var DateTime: TDateTime; NewTime: TDateTime);', @_LapeReplaceTime);
-  addGlobalFunc('procedure ReplaceDate(var DateTime: TDateTime; NewDate: TDateTime);', @_LapeReplaceDate);
-
-  addGlobalFunc('function FormatDateTime(Format: string; DateTime: TDateTime): string;', @_LapeFormatDateTime);
-  addGlobalFunc('function StrToDate(s: string): TDateTime;', @_LapeStrToDate);
-  addGlobalFunc('function StrToDateDef(s: string; Default: TDateTime): TDateTime;', @_LapeStrToDateDef);
-  addGlobalFunc('function StrToTime(s: string): TDateTime;', @_LapeStrToTime);
-  addGlobalFunc('function StrToTimeDef(s: string; Default: TDateTime): TDateTime;', @_LapeStrToTimeDef);
-  addGlobalFunc('function StrToDateTime(s: string): TDateTime;', @_LapeStrToDateTime);
-  addGlobalFunc('function StrToDateTimeDef(s: string; Default: TDateTime): TDateTime;', @_LapeStrToDateTimeDef);
-
-  addGlobalFunc('function DateTimeToUnix(const Value: TDateTime; InputIsUTC: Boolean = True): Int64;', @_LapeDateTimeToUnix);
-  addGlobalFunc('function UnixToDateTime(const Value: Int64; ReturnUTC: Boolean = True): TDateTime;', @_LapeUnixToDateTime);
-  addGlobalFunc('function UnixTime: Int64;', @_LapeUnixTime);
-
-  addGlobalFunc('function YearsBetween(const ANow, AThen: TDateTime): Int32;', @_LapeYearsBetween);
-  addGlobalFunc('function MonthsBetween(const ANow, AThen: TDateTime): Int32;', @_LapeMonthsBetween);
-  addGlobalFunc('function WeeksBetween(const ANow, AThen: TDateTime): Int32;', @_LapeWeeksBetween);
-  addGlobalFunc('function DaysBetween(const ANow, AThen: TDateTime): Int32;', @_LapeDaysBetween);
-  addGlobalFunc('function HoursBetween(const ANow, AThen: TDateTime): Int64;', @_LapeHoursBetween);
-  addGlobalFunc('function MinutesBetween(const ANow, AThen: TDateTime): Int64;', @_LapeMinutesBetween);
-  addGlobalFunc('function SecondsBetween(const ANow, AThen: TDateTime): Int64;', @_LapeSecondsBetween);
-  addGlobalFunc('function MilliSecondsBetween(const ANow, AThen: TDateTime): Int64;', @_LapeMilliSecondsBetween);
-
-  addGlobalFunc('function IncYear(const Value: TDateTime; const NumberOfYears: Int32 = 1): TDateTime;', @_LapeIncYear);
-  addGlobalFunc('function IncWeek(const Value: TDateTime; const NumberOfWeeks: Int32 = 1): TDateTime;', @_LapeIncWeek);
-  addGlobalFunc('function IncDay(const Value: TDateTime; const NumberOfDays: Int32 = 1): TDateTime;', @_LapeIncDay);
-  addGlobalFunc('function IncHour(const Value: TDateTime; const NumberOfHours: Int64 = 1): TDateTime;', @_LapeIncHour);
-  addGlobalFunc('function IncMinute(const Value: TDateTime; const NumberOfMinutes: Int64 = 1): TDateTime;', @_LapeIncMinute);
-  addGlobalFunc('function IncSecond(const Value: TDateTime; const NumberOfSeconds: Int64 = 1): TDateTime;', @_LapeIncSecond);
-  addGlobalFunc('function IncMilliSecond(const Value: TDateTime; const NumberOfMilliSeconds: Int64 = 1): TDateTime;', @_LapeIncMilliSecond);
-end;
-
-procedure TSimbaScript_Compiler.InitBaseVariant;
-begin
-  { nothing }
 end;
 
 function TSimbaScript_Compiler.getIntegerArray: TLapeType;
@@ -386,6 +298,12 @@ end;
 procedure TSimbaScript_Compiler.addDelayedCode(Code: TStringArray; AFileName: lpString);
 begin
   addDelayedCode(LapeDelayedFlags + LineEnding.Join(Code), AFileName);
+end;
+
+function TSimbaScript_Compiler.addGlobalVar(AVar: TLapeGlobalVar; AName: lpString): TLapeGlobalVar;
+begin
+  Result := inherited;
+  Result._DocPos.FileName := ImportingSection;
 end;
 
 end.

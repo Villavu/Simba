@@ -64,7 +64,7 @@ procedure ImportDTM(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('DTM');
+    ImportingSection := 'DTM';
 
     addGlobalFunc('procedure SetDTMName(DTM: Int32; Name: String)', @_LapeSetDTMName);
     addGlobalFunc('function DTMFromString(S: String): Int32', @_LapeDTMFromString);
@@ -77,7 +77,7 @@ begin
     addGlobalFunc('function SDTMToMDTM(DTM: TSDTM): TMDTM', @_LapeSDTMToMDTM);
     addGlobalFunc('function CreateDTMPoint(x,y,c,t,asz: Int32; bp: Boolean): TMDTMPoint', @_LapeCreateDTMPoint);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

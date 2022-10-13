@@ -217,7 +217,7 @@ procedure ImportQuad(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('https://villavu.github.io/Simba/TQuad.html');
+    ImportingSection := 'TQuad';
 
     addGlobalFunc('function TQuad.Create(ATop, ARight, ABottom, ALeft: TPoint): TQuad; static; overload', @_LapeQuad_Create);
     addGlobalFunc('function TQuad.CreateFromBox(Box: TBox): TQuad; static; overload', @_LapeQuad_CreateFromBox);
@@ -239,7 +239,7 @@ begin
     addGlobalFunc('function TQuad.Normalize: TQuad', @_LapeQuad_Normalize);
     addGlobalFunc('operator in(Left: TPoint; Right: TQuad): Boolean;', @_LapeQuad_IN_Quad);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

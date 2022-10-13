@@ -271,7 +271,7 @@ procedure ImportWindowHandle(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('https://villavu.github.io/Simba/Window Handle.html');
+    ImportingSection := 'TWindowHandle';
 
     addGlobalType('type PtrUInt', 'TWindowHandle');
     addGlobalType('array of TWindowHandle', 'TWindowHandleArray');
@@ -301,7 +301,7 @@ begin
     addGlobalFunc('function FindChildWindow(Title: String; ClassName: String; out Child: TWindowHandle): Boolean; overload', @_LapeFindChildWindow);
     addGlobalFunc('function FindChildWindows(Title: String; ClassName: String): TWindowHandleArray; overload', @_LapeFindChildWindows);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

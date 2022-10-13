@@ -322,7 +322,7 @@ procedure ImportATPA(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('https://villavu.github.io/Simba/T2DPointArray.html');
+    ImportingSection := 'T2DPointArray';
 
     addGlobalFunc('function T2DPointArray.Offset(P: TPoint): T2DPointArray; overload', @_LapeATPA_Offset1);
     addGlobalFunc('function T2DPointArray.Offset(X, Y: Integer): T2DPointArray; overload', @_LapeATPA_Offset2);
@@ -364,7 +364,7 @@ begin
     addGlobalFunc('function T2DPointArray.Merge: TPointArray;', @_LapeATPA_Merge);
     addGlobalFunc('function T2DPointArray.Intersection: TPointArray', @_LapeATPA_Intersection);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

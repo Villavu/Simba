@@ -230,7 +230,7 @@ procedure ImportFinder(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Finder');
+    ImportingSection := 'Finder';
 
     addGlobalFunc('function FindDTM(DTM: Integer; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean', @_LapeFindDTM);
     addGlobalFunc('function FindDTMs(DTM: Integer; var p: TPointArray; xs, ys, xe, ye: Integer): Boolean', @_LapeFindDTMs);
@@ -269,7 +269,7 @@ begin
     addGlobalFunc('function FindTemplate(Templ: TMufasaBitmap; out x, y: Integer; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @_LapeFindTemplate);
     addGlobalFunc('function FindTemplateEx(Templ: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @_LapeFindTemplateEx);
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 

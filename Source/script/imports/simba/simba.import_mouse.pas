@@ -53,7 +53,7 @@ procedure ImportMouse(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    pushSection('Mouse');
+    ImportingSection := 'Mouse';
 
     addGlobalFunc('procedure MoveMouse(X, Y: Integer)', @_LapeMoveMouse);
     addGlobalFunc('procedure ScrollMouse(X, Y: Integer; Clicks: Integer)', @_LapeScrollMouse);
@@ -69,7 +69,7 @@ begin
     addGlobalVar(Integer(MOUSE_EXTRA_1), 'MOUSE_EXTRA_1').isConstant := True;
     addGlobalVar(Integer(MOUSE_EXTRA_2), 'MOUSE_EXTRA_2').isConstant := True;
 
-    popSection();
+    ImportingSection := '';
   end;
 end;
 
