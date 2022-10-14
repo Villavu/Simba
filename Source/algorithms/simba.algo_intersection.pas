@@ -23,7 +23,7 @@ function Algo_Int64_Intersection(x,y: TInt64Array): TInt64Array;
 implementation
 
 uses
-  math, simba.dictionary;
+  simba.dictionary;
 
 {$DEFINE MACRO_SET_INTERSECTION :=
   for i:=0 to High(x) do dict[x[i]] := 1;
