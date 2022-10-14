@@ -15,6 +15,7 @@ begin
   SourceFiles += ['simba.import_debugimage.pas',   'Debug Image'   ];
   SourceFiles += ['simba.import_variant.pas',      'Variant'       ];
   SourceFiles += ['simba.import_script.pas',       'Script'        ];
+  SourceFiles += ['simba.import_random.pas',       'Random'        ];
   SourceFiles += ['simba.import_class_bitmap.pas', 'TMufasaBitmap' ];
 end;
 
