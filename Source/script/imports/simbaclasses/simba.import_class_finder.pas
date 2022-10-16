@@ -125,22 +125,22 @@ end;
 
 procedure _LapeMFinder_FindDTM(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := PMFinder(Params^[0])^.FindDTM(PMDTM(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^);
+  PBoolean(Result)^ := PMFinder(Params^[0])^.FindDTM(PDTM(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^);
 end;
 
 procedure _LapeMFinder_FindDTMs(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := PMFinder(Params^[0])^.FindDTMs(PMDTM(Params^[1])^, PPointArray(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^, Pinteger(Params^[5])^, Pinteger(Params^[6])^, PInteger(Params^[7])^);
+  PBoolean(Result)^ := PMFinder(Params^[0])^.FindDTMs(PDTM(Params^[1])^, PPointArray(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^, Pinteger(Params^[5])^, Pinteger(Params^[6])^, PInteger(Params^[7])^);
 end;
 
 procedure _LapeMFinder_FindDTMRotated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := PMFinder(Params^[0])^.FindDTMRotated(PMDTM(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PExtended(Params^[8])^, PExtended(Params^[9])^, PExtended(Params^[10])^, PExtended(Params^[11])^, Pboolean(Params^[12])^);
+  PBoolean(Result)^ := PMFinder(Params^[0])^.FindDTMRotated(PDTM(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PDouble(Params^[8])^, PDouble(Params^[9])^, PDouble(Params^[10])^, PDouble(Params^[11])^);
 end;
 
 procedure _LapeMFinder_FindDTMsRotated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PBoolean(Result)^ := PMFinder(Params^[0])^.FindDTMsRotated(PMDTM(Params^[1])^, PPointArray(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PExtended(Params^[7])^, PExtended(Params^[8])^, PExtended(Params^[9])^, PDoubleArray(Params^[10])^, Pboolean(Params^[11])^, PInteger(Params^[12])^);
+  PBoolean(Result)^ := PMFinder(Params^[0])^.FindDTMsRotated(PDTM(Params^[1])^, PPointArray(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PDouble(Params^[7])^, PDouble(Params^[8])^, PDouble(Params^[9])^, PDoubleArray(Params^[10])^, PInteger(Params^[11])^);
 end;
 
 procedure _LapeMFinder_GetColors(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -214,10 +214,12 @@ begin
     addGlobalFunc('function TMFinder.FindBitmapSpiralTolerance(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye,tolerance : integer): Boolean;', @_LapeMFinder_FindBitmapSpiralTolerance);
     addGlobalFunc('function TMFinder.FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x, y: Integer; out Points : TPointArray; xs, ys, xe, ye,tolerance: Integer; maxToFind: Integer = 0): Boolean;', @_LapeMFinder_FindBitmapsSpiralTolerance);
     addGlobalFunc('function TMFinder.FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; out accuracy: Extended): Boolean;', @_LapeMFinder_FindDeformedBitmapToleranceIn);
-    addGlobalFunc('function TMFinder.FindDTM(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;', @_LapeMFinder_FindDTM);
-    addGlobalFunc('function TMFinder.FindDTMs(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2 : integer; maxToFind: Integer = 0): Boolean;', @_LapeMFinder_FindDTMs);
-    addGlobalFunc('function TMFinder.FindDTMRotated(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating: Boolean): Boolean;', @_LapeMFinder_FindDTMRotated);
-    addGlobalFunc('function TMFinder.FindDTMsRotated(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: TDoubleArray; Alternating : Boolean; maxToFind: Integer = 0): Boolean;', @_LapeMFinder_FindDTMsRotated);
+
+    addGlobalFunc('function TMFinder.FindDTM(DTM: TDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;', @_LapeMFinder_FindDTM);
+    addGlobalFunc('function TMFinder.FindDTMs(DTM: TDTM; out Points: TPointArray; x1, y1, x2, y2 : integer; maxToFind: Integer = 0): Boolean;', @_LapeMFinder_FindDTMs);
+    addGlobalFunc('function TMFinder.FindDTMRotated(DTM: TDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating: Boolean): Boolean;', @_LapeMFinder_FindDTMRotated);
+    addGlobalFunc('function TMFinder.FindDTMsRotated(DTM: TDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: TDoubleArray; Alternating : Boolean; maxToFind: Integer = 0): Boolean;', @_LapeMFinder_FindDTMsRotated);
+
     addGlobalFunc('function TMFinder.GetColors(const Coords: TPointArray): TIntegerArray;', @_LapeMFinder_GetColors);
     addGlobalFunc('procedure TMFinder.SetToleranceSpeed(nCTS: Integer);', @_LapeMFinder_SetToleranceSpeed);
     addGlobalFunc('function TMFinder.GetToleranceSpeed: Integer;', @_LapeMFinder_GetToleranceSpeed);

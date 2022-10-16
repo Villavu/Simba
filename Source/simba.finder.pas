@@ -101,10 +101,10 @@ type
     function FindTemplateEx(TemplImage: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
     function FindTemplate(TemplImage: TMufasaBitmap; out X,Y: Integer; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
 
-    function FindDTM(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
-    function FindDTMs(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2 : Integer; maxToFind: Integer = 0): Boolean;
-    function FindDTMRotated(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating: Boolean): Boolean;
-    function FindDTMsRotated(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: TDoubleArray; Alternating : Boolean; maxToFind: Integer = 0): Boolean;
+    function FindDTM(DTM: TDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
+    function FindDTMs(DTM: TDTM; out Points: TPointArray; x1, y1, x2, y2 : Integer; maxToFind: Integer = 0): Boolean;
+    function FindDTMRotated(DTM: TDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Double; out aFound: Double): Boolean;
+    function FindDTMsRotated(DTM: TDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Double; out aFound: TDoubleArray; maxToFind: Integer = 0): Boolean;
 
     //Donno
     function GetColors(const Coords: TPointArray): TIntegerArray;
@@ -130,7 +130,7 @@ implementation
 
 uses
   math,
-  simba.client, simba.tpa;
+  simba.client, simba.tpa, simba.finder_dtm;
 
 var
   Percentage: array[0..255] of Extended;
@@ -1472,7 +1472,7 @@ end;
   been found at in x, y and Result to true.
 }
 
-function TMFinder.FindDTM(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
+function TMFinder.FindDTM(DTM: TDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
 var
    P: TPointArray;
 begin
@@ -1484,192 +1484,34 @@ begin
   end;
 end;
 
-function ValidMainPointBox(const TPA: TPointArray; const X1, Y1, X2, Y2: Integer): TBox;
-var
-  B: TBox;
-begin
-  B := TPA.Bounds();
-
-  Result.X1 := X1 - B.X1;
-  Result.Y1 := Y1 - B.Y1;
-  Result.X2 := X2 - B.X2;
-  Result.Y2 := Y2 - B.Y2;
-end;
-
-function ValidMainPointBox(var DTM: TMDTM; const X1, Y1, X2, Y2: Integer): TBox;
-var
-  TPA: TPointArray;
-  I: Integer;
-begin
-  SetLength(TPA, DTM.Count);
-  for I := 0 to High(TPA) do
-    TPA[I] := Point(DTM.Points[I].X, DTM.Points[I].Y);
-
-  Result := ValidMainPointBox(TPA, X1, Y1, X2, Y2);
-end;
-
 //MaxToFind, if it's < 1 it won't stop looking
-function TMFinder.FindDTMs(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; maxToFind: Integer): Boolean;
+function TMFinder.FindDTMs(DTM: TDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; maxToFind: Integer): Boolean;
 var
-  //Cache DTM stuff
-  Len : Integer;       //Len of the points
-  DPoints : TMDTMPointArray; //DTM Points
-
-  // Bitwise
-  b: Array of Array of Integer;
-  ch: array of array of Integer;
-
-  // bounds
-  W, H: Integer;
-  MA: TBox;
-  MaxX,MaxY : Integer; //The maximum value X/Y can take (for subpoints)
-
-  // for loops, etc
-  xx, yy: Integer;
-  i, xxx,yyy: Integer;
-
-  StartX,StartY,EndX,EndY : Integer;
-
-  //clientdata
-  cd: TPRGB32Array;
-
   PtrData: TRetData;
-
-  // point count
-  pc: Integer = 0;
-  Found : Boolean;
-
-  goodPoints: Array of Boolean;
-
-  col_arr, tol_arr: Array of Integer;
-  ctsinfoarray: TCTSInfoArray;
-  compare: TCTSCompareFunction;
-
-  label theEnd;
-  label AnotherLoopEnd;
-
+  Buffer: TFindDTMBuffer;
 begin
   Result := False;
   if (not GetData(PtrData, x1, y1, x2, y2)) then
     Exit;
 
-  DTM.Normalize();
+  Buffer.Data := PtrData.Ptr;
+  Buffer.LineWidth := PtrData.RowLen;
+  Buffer.X1 := x1;
+  Buffer.Y1 := y1;
+  Buffer.X2 := x2;
+  Buffer.Y2 := y2;
 
-  // Get the area we should search in for the Main Point.
-  MA := ValidMainPointBox(DTM, x1, y1, x2, y2);
-  //Load the DTM-cache variables
-  DPoints:= dtm.Points;
-  Len := Length(DPoints);
-  if (Len = 0) then
-    Exit;
+  Points := Buffer.FindDTMs(DTM);
 
-  // Turn the bp into a more usable array.
-  setlength(goodPoints, Len);
-  for i := 0 to Len - 1 do
-    goodPoints[i] := not DPoints[i].bp;
-
-  // Init data structure b and ch.
-  W := x2 - x1;
-  H := y2 - y1;
-
-  setlength(b, (W + 1));
-  setlength(ch, (W + 1));
-  for i := 0 to W do
-  begin
-    setlength(ch[i], (H + 1));
-    FillChar(ch[i][0], SizeOf(Integer) * (H+1), 0);
-    setlength(b[i], (H + 1));
-    FillChar(b[i][0], SizeOf(Integer) * (H+1), 0);
-  end;
-
-  SetLength(col_arr, Len);
-  SetLength(tol_arr, Len);
-  // C = DTM.C
-  for i := 0 to Len - 1 do
-  begin
-    col_arr[i] := DPoints[i].c;
-    tol_arr[i] := DPoints[i].t;
-  end;
-
-  ctsinfoarray := Create_CTSInfoArray(col_arr, tol_arr);
-  compare := Get_CTSCompare(Self.CTS);
-
-  cd := CalculateRowPtrs(PtrData, h + 1);
-  //CD starts at 0,0.. We must adjust the MA, since this is still based on the xs,ys,xe,ye box.
-  MA.x1 := MA.x1 - x1;
-  MA.y1 := MA.y1 - y1;
-  MA.x2 := MA.x2 - x1;
-  MA.y2 := MA.y2 - y1;
-
-  MaxX := x2-x1;
-  MaxY := y2-y1;
-  //MA is now fixed to the new (0,0) box...
-
-  for yy := MA.y1 to MA.y2  do //Coord of the mainpoint in the search area
-    for xx := MA.x1 to MA.x2 do
-    begin
-      //Mainpoint can have area size as well, so we must check that just like any subpoint.
-      for i := 0 to Len - 1 do
-      begin //change to use other areashapes too.
-        Found := False;
-        //With area it can go out of bounds, therefore this max/min check
-        StartX := Max(0,xx - DPoints[i].asz + DPoints[i].x);
-        StartY := Max(0,yy - DPoints[i].asz + DPoints[i].y);
-        EndX := Min(MaxX,xx + DPoints[i].asz + DPoints[i].x);
-        EndY := Min(MaxY,yy + DPoints[i].asz + DPoints[i].y);
-        for xxx := StartX to EndX do //The search area for the subpoint
-        begin
-          for yyy := StartY to EndY do
-          begin
-            // If we have not checked this point, check it now.
-            if ch[xxx][yyy] and (1 shl i) = 0 then
-            begin
-              // Checking point i now. (Store that we matched it)
-              ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
-              if compare(ctsinfoarray[i], @cd[yyy][xxx]) then
-                b[xxx][yyy] := b[xxx][yyy] or (1 shl i);
-            end;
-
-            //Check if the point matches the subpoint
-            if (b[xxx][yyy] and (1 shl i) <> 0) then
-            begin
-              //Check if it was supposed to be a goodpoint..
-              if GoodPoints[i] then
-              begin
-                Found := true;
-                break;
-              end else //It was not supposed to match!!
-                goto AnotherLoopEnd;
-            end;
-          end;
-          if Found then Break; //Optimalisation, we must break out of this second for loop, since we already found the subpoint
-        end;
-        if (not found) and (GoodPoints[i]) then      //This sub-point wasn't found, while it should.. Exit this mainpoint search
-          goto AnotherLoopEnd;
-      end;
-      //We survived the sub-point search, add this mainpoint to the results.
-      ClientTPA[pc] := Point(xx + x1, yy + y1);
-      Inc(pc);
-      if(pc = maxToFind) then
-        goto theEnd;
-      AnotherLoopEnd:
-    end;
-  TheEnd:
-
-  Free_CTSInfoArray(ctsinfoarray);
-
-  SetLength(Points, pc);
-  if pc > 0 then
-    Move(ClientTPA[0], Points[0], pc * SizeOf(TPoint));
-  Result := (pc > 0);
+  Result := Length(Points) > 0;
 end;
 
-function TMFinder.FindDTMRotated(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating: Boolean): Boolean;
+function TMFinder.FindDTMRotated(DTM: TDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Double; out aFound: Double): Boolean;
 var
   P: TPointArray;
   F: TDoubleArray;
 begin
-  Result := FindDTMsRotated(dtm, P, x1, y1, x2, y2, sAngle, eAngle, aStep, F, Alternating, 1);
+  Result := FindDTMsRotated(dtm, P, x1, y1, x2, y2, sAngle, eAngle, aStep, F, 1);
   if not Result then
     Exit;
 
@@ -1679,213 +1521,25 @@ begin
   Exit(True);
 end;
 
-procedure RotPoints_DTM(const P: TPointArray;var RotTPA : TPointArray; const A: Extended); inline;
+function TMFinder.FindDTMsRotated(DTM: TDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Double; out aFound: TDoubleArray; maxToFind: Integer): Boolean;
 var
-   I, L: Integer;
-begin
-  L := High(P);
-  for I := 0 to L do
-  begin
-    RotTPA[I].X := Round(cos(A) * p[i].x  - sin(A) * p[i].y);
-    RotTPA[I].Y := Round(sin(A) * p[i].x  + cos(A) * p[i].y);
-  end;
-end;
-
-function TMFinder.FindDTMsRotated(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: TDoubleArray; Alternating: Boolean; maxToFind: Integer): Boolean;
-var
-   //Cached variables
-   Len : Integer;
-   DPoints : TMDTMPointArray;
-   DTPA : TPointArray;
-   RotTPA: TPointArray;
-
-   // Bitwise
-   b: Array of Array of Integer;
-   ch: Array of Array of Integer;
-
-   // bounds
-   W, H: Integer;
-   MA: TBox;
-   MaxX,MaxY : Integer;//The maximum value a (subpoint) can have!
-
-   // for loops, etc
-   xx, yy: Integer;
-   i, xxx,yyy: Integer;
-   StartX,StartY,EndX,EndY : Integer;
-
-   Found : Boolean;
-   //clientdata
-   cd: TPRGB32Array;
-
-   PtrData: TRetData;
-
-   //If we search alternating, we start in the middle and then +,-,+,- the angle step outwars
-   MiddleAngle : Extended;
-   //Count the amount of anglesteps, mod 2 determines whether it's a + or a - search, and div 2 determines the amount of steps
-   //you have to take.
-   AngleSteps : Integer;
-
-   // point count
-   pc: Integer = 0;
-
-   goodPoints: Array of Boolean;
-   s: Extended;
-
-   col_arr, tol_arr: Array of Integer;
-   ctsinfoarray: TCTSInfoArray;
-   compare: TCTSCompareFunction;
-
-   label theEnd;
-   label AnotherLoopEnd;
-
-
+  PtrData: TRetData;
+  Buffer: TFindDTMBuffer;
 begin
   Result := False;
   if (not GetData(PtrData, x1, y1, x2, y2)) then
     Exit;
 
-  DTM.Normalize();
+  Buffer.Data := PtrData.Ptr;
+  Buffer.LineWidth := PtrData.RowLen;
+  Buffer.X1 := x1;
+  Buffer.Y1 := y1;
+  Buffer.X2 := x2;
+  Buffer.Y2 := y2;
 
-  DPoints:= dtm.Points;
-  Len := Length(DPoints);
-  if (Len = 0) then
-    Exit;
+  Points := Buffer.FindDTMsRotated(DTM, sAngle, eAngle, aStep, aFound);
 
-  setlength(goodPoints, Len);
-  for i := 0 to Len - 1 do
-    goodPoints[i] := not DPoints[i].bp;
-
-  MaxX := x2 - x1;
-  MaxY := y2 - y1;
-
-  // Init data structure B.
-  W := x2 - x1;
-  H := y2 - y1;
-  setlength(b, (W + 1));
-  setlength(ch, (W + 1));
-  for i := 0 to W do
-  begin
-    setlength(b[i], (H + 1));
-    FillChar(b[i][0], SizeOf(Integer) * (H+1), 0);
-    setlength(ch[i], (H + 1));
-    FillChar(ch[i][0], SizeOf(Integer) * (H+1), 0);
-  end;
-
-  {
-  When we search for a rotated DTM, everything is the same, except the coordinates..
-  Therefore we create a TPA of the 'original' DTM, containing all the Points.
-  This then will be used to rotate the points}
-  SetLength(DTPA,len);
-  SetLength(RotTPA,len);
-  for i := 0 to len-1 do
-    DTPA[i] := Point(DPoints[i].x,DPoints[i].y);
-
-  SetLength(col_arr, Len);
-  SetLength(tol_arr, Len);
-  // C = DTM.C
-  for i := 0 to Len - 1 do
-  begin
-    col_arr[i] := DPoints[i].c;
-    tol_arr[i] := DPoints[i].t;
-  end;
-
-  ctsinfoarray := Create_CTSInfoArray(col_arr, tol_arr);
-  compare := Get_CTSCompare(Self.CTS);
-
-  cd := CalculateRowPtrs(PtrData, h + 1);
-  SetLength(aFound, 0);
-  SetLength(Points, 0);
-  if Alternating then
-  begin
-    MiddleAngle := (sAngle + eAngle) / 2.0;
-    s := MiddleAngle;  //Start in the middle!
-    AngleSteps := 0;
-  end else
-    s := sAngle;
-  while s < eAngle do
-  begin
-    RotPoints_DTM(DTPA,RotTPA,s);
-    //DTMRot now has the same points as the original DTM, just rotated!
-    //The other stuff in the structure doesn't matter, as it's the same as the original DTM..
-    //So from now on if we want to see what 'point' we're at, use RotTPA, for the rest just use the original DTM
-    MA := ValidMainPointBox(RotTPA, x1, y1, x2, y2);
-    //CD(ClientData) starts at 0,0.. We must adjust the MA, since this is still based on the xs,ys,xe,ye box.
-    MA.x1 := MA.x1 - x1;
-    MA.y1 := MA.y1 - y1;
-    MA.x2 := MA.x2 - x1;
-    MA.y2 := MA.y2 - y1;
-    //MA is now fixed to the new (0,0) box...
-    for yy := MA.y1  to MA.y2  do //(xx,yy) is now the coord of the mainpoint in the search area
-      for xx := MA.x1  to MA.x2 do
-      begin
-        //Mainpoint can have area size as well, so we must check that just like any subpoint.
-        for i := 0 to Len - 1 do
-        begin //change to use other areashapes too.
-          Found := False;
-          //With area it can go out of bounds, therefore this max/min check
-          StartX := Max(0,xx - DPoints[i].asz + RotTPA[i].x);
-          StartY := Max(0,yy - DPoints[i].asz + RotTPA[i].y);
-          EndX := Min(MaxX,xx + DPoints[i].asz + RotTPA[i].x);
-          EndY := Min(MaxY,yy + DPoints[i].asz + RotTPA[i].y);
-          for xxx := StartX to EndX do //The search area for the subpoint
-          begin
-            for yyy := StartY to EndY do
-            begin
-              // If we have not checked this point, check it now.
-              if ch[xxx][yyy] and (1 shl i) = 0 then
-              begin
-                // Checking point i now. (Store that we matched it)
-                ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
-
-                if compare(ctsinfoarray[i], @cd[yyy][xxx]) then
-                  b[xxx][yyy] := b[xxx][yyy] or (1 shl i);
-              end;
-
-              //Check if the point matches the subpoint
-              if (b[xxx][yyy] and (1 shl i) <> 0) then
-              begin
-                //Check if it was supposed to be a goodpoint..
-                if GoodPoints[i] then
-                begin
-                  Found := True;
-                  Break;
-                end else //It was not supposed to match!!
-                  goto AnotherLoopEnd;
-              end;
-            end;
-            if Found then Break; //Optimalisation, we must Break out of this second for loop, since we already found the subpoint
-          end;
-          if (not found) and (GoodPoints[i]) then      //This sub-point wasn't found, while it should.. Exit this mainpoint search
-            goto AnotherLoopEnd;
-        end;
-        //We survived the sub-point search, add this mainpoint to the results.
-        Inc(pc);
-        SetLength(Points, pc);
-        Points[pc-1] := Point(xx + x1, yy + y1);
-        SetLength(aFound, pc);
-        AFound[pc-1] := s;
-        if(pc = maxToFind) then
-          goto theEnd;
-        AnotherLoopEnd:
-      end;
-    if Alternating then
-    begin
-      if AngleSteps mod 2 = 0 then   //This means it's an even number, thus we must add a positive step
-        s := MiddleAngle + (aStep * (anglesteps div 2 + 1))  //Angle steps starts at 0, so we must add 1.
-      else
-        s := MiddleAngle - (aStep * (anglesteps div 2 + 1)); //We must search in the negative direction
-      Inc(AngleSteps);
-    end else
-      s := s + aStep;
-  end;
-  TheEnd:
-
-  Free_CTSInfoArray(ctsinfoarray);
-
-  Result := (pc > 0);
-  { Don't forget to pre calculate the rotated points at the start.
-   Saves a lot of rotatepoint() calls. }
-//  raise Exception.CreateFmt('Not done yet!', []);
+  Result := Length(Points) > 0;
 end;
 
 function TMFinder.GetColors(const Coords: TPointArray): TIntegerArray;

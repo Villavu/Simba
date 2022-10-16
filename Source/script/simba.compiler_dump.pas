@@ -130,8 +130,7 @@ function TSimbaCompilerDump.addDelayedCode(ACode: lpString; AFileName: lpString;
 begin
   Result := inherited addDelayedCode(ACode, AFileName, AfterCompilation, IsGlobal);
 
-  if (AFileName <> '') and (AFileName[1] <> '!') then
-    addCodeDump(ACode);
+  addCodeDump(ACode);
 end;
 
 function TSimbaCompilerDump.addGlobalFunc(Header: lpString; Value: Pointer): TLapeGlobalVar;

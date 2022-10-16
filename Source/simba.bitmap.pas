@@ -1494,7 +1494,7 @@ begin
     begin
       OldX := Round(MidX + CosAngle * (X + MinX - MidX) - SinAngle * (Y + MinY - MidY));
       OldY := Round(MidY + SinAngle * (X + MinX - MidX) + CosAngle * (Y + MinY - MidY));
-      if not ((OldX < 0) or (OldX >= FWidth) or (OldY < 0) or (OldY >= FHeight)) then
+      if (OldX >= 0) and (OldY >= 0) and (OldX < FWidth) and (OldY < FHeight) then
         TargetBitmap.FData[Y * TargetBitmap.FWidth + X] := Self.FData[OldY * FWidth + OldX];
     end;
 end;

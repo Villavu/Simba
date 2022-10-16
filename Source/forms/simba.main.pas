@@ -1070,7 +1070,7 @@ end;
 
 procedure TSimbaForm.HandlePrintDTM(DTM: String);
 begin
-  SimbaDebugLn('DTM := DTMFromString(' + #39 + DTM + #39 + ');');
+  SimbaDebugLn('DTM := TDTM.CreateFromString(' + #39 + DTM + #39 + ');');
 end;
 
 procedure TSimbaForm.MenuItemDTMEditorClick(Sender: TObject);

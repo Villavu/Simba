@@ -302,7 +302,7 @@ procedure TMufasaBitmap.Rotate(Radians: Single; Expand: Boolean; TargetBitmap: T
 *)
 procedure _LapeMufasaBitmap_Rotate(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PMufasaBitmap(Params^[0])^.Rotate(PExtended(Params^[1])^, PBoolean(Params^[2])^, PMufasaBitmap(Params^[3])^);
+  PMufasaBitmap(Params^[0])^.Rotate(PSingle(Params^[1])^, PBoolean(Params^[2])^, PMufasaBitmap(Params^[3])^);
 end;
 
 (*

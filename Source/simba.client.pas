@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.iomanager, simba.finder, simba.dtm,simba.internet;
+  simba.iomanager, simba.finder, simba.internet;
 
 (*
 
@@ -47,7 +47,6 @@ type
   public
     IOManager: TIOManager;
     MFinder: TMFinder;
-    MDTMs: TMDTMS;
     MInternets: TMInternet;
     MSockets: TMSocks;
 
@@ -91,7 +90,6 @@ begin
   FOwnIOManager := (UseIOManager = nil);
 
   MFinder := TMFinder.Create(Self);
-  MDTMs := TMDTMS.Create(Self);
   MInternets := TMInternet.Create(Self);
   MSockets := TMSocks.Create(Self);
 end;
@@ -107,7 +105,6 @@ TClient.Destroy
 *)
 destructor TClient.Destroy;
 begin
-  MDTMs.Free;
   MFinder.Free;
   MInternets.Free;
   MSockets.Free;

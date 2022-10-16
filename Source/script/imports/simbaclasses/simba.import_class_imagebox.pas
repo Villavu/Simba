@@ -252,7 +252,7 @@ end;
 
 procedure _LapeSimbaImageBox_FindDTMs(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
 begin
-  PPointArray(Result)^ := PSimbaImageBox(Params^[0])^.FindDTMs(PMDTM(Params^[1])^);
+  PPointArray(Result)^ := PSimbaImageBox(Params^[0])^.FindDTMs(PDTM(Params^[1])^);
 end;
 
 procedure _LapeSimbaImageBox_FindColors(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
@@ -307,7 +307,7 @@ begin
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(IOManager: TIOManager; X1, Y1, X2, Y2: Integer); overload;', @_LapeSimbaImageBox_SetBackground_IOManagerArea);
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(IOManager: TIOManager); overload;', @_LapeSimbaImageBox_SetBackground_IOManager);
     addGlobalFunc('function TSimbaImageBox.FindColors(CTS: Integer; Col, Tol: Integer; HueMod: Extended = 0.2; SatMod: Extended = 0.2): TPointArray;', @_LapeSimbaImageBox_FindColors);
-    addGlobalFunc('function TSimbaImageBox.FindDTM(DTM: TMDTM): TPointArray;', @_LapeSimbaImageBox_FindDTMs);
+    addGlobalFunc('function TSimbaImageBox.FindDTM(DTM: TDTM): TPointArray;', @_LapeSimbaImageBox_FindDTMs);
     addGlobalFunc('procedure TSimbaImageBox.Init(Owner: TComponent); override', @_LapeSimbaImageBox_Init);
   end;
 end;
