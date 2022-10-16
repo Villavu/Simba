@@ -93,7 +93,7 @@ begin
   GUI.CustomFontSize.DefaultValue := 0;
 
   GUI.CustomToolbarSize := TSimbaSetting_Int64.Create(FManager, 'GUI', 'CustomToolbarSize');
-  GUI.CustomToolbarSize.DefaultValue := 0;
+  GUI.CustomToolbarSize.DefaultValue := 24;
 
   // Editor
   Editor.ColorsPath := TSimbaSetting_String.Create(FManager, 'Editor', 'ColorsPath');

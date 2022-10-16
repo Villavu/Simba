@@ -86,18 +86,38 @@ implementation
 uses
   simba.settings, simba.stringutil;
 
+const
+  SETTINGS_VERSION = 1402;
+
 constructor TSimbaSettingManager.Create(FileName: String);
+var
+  BackupFilename: String;
 begin
   inherited Create();
 
-  FIniFile := TIniFile.Create(FileName);
+  FIniFile := TIniFile.Create(FileName, [ifoWriteStringBoolean]);
+
+  if FileExists(FileName) and (FIniFile.ReadInteger('Settings', 'Version', 0) <> SETTINGS_VERSION) then
+  begin
+    BackupFilename := FileName + '.old';
+    if FileExists(BackupFilename) then
+      DeleteFile(BackupFilename);
+    RenameFile(FileName, BackupFilename);
+
+    FIniFile.Free();
+    FIniFile := TIniFile.Create(FileName, [ifoWriteStringBoolean]);
+  end;
+
   FIniFile.CacheUpdates := True;
+  FIniFile.SetBoolStringValues(True, ['True']);
+  FIniFile.SetBoolStringValues(False, ['False']);
+  FIniFile.WriteInteger('Settings', 'Version', SETTINGS_VERSION);
 
   FSettings := TSimbaSettingList.Create();
 end;
 
 destructor TSimbaSettingManager.Destroy;
-begin;
+begin
   FIniFile.Free();
   FSettings.Free();
 

@@ -54,6 +54,7 @@
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
+              <DebugInfoType Value="dsDwarf2Set"/>
               <StripSymbols Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
@@ -259,6 +260,9 @@
             <TargetOS Value="win32"/>
           </CodeGeneration>
           <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+            </Debugging>
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
@@ -729,6 +733,7 @@
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
+        <DebugInfoType Value="dsDwarf2Set"/>
         <StripSymbols Value="True"/>
       </Debugging>
       <LinkSmart Value="True"/>

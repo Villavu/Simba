@@ -40,7 +40,7 @@ type
   public
     ImageBox: TSimbaImageBox;
 
-    procedure Resize(AWidth, AHeight: Int32; AShowOnTop: Boolean);
+    procedure SetSize(AWidth, AHeight: Integer; AEnsureVisible: Boolean = True);
 
     constructor Create(AOwner: TComponent); override;
   end;
@@ -64,12 +64,28 @@ begin
   SimbaDebugForm.Add('Debug Image Click: ' + IntToStr(FMouseX) + ', ' + IntToStr(FMouseY));
 end;
 
-procedure TSimbaDebugImageForm.Resize(AWidth, AHeight: Int32; AShowOnTop: Boolean);
+procedure TSimbaDebugImageForm.SetSize(AWidth, AHeight: Integer; AEnsureVisible: Boolean);
+var
+  Form: TCustomForm;
 begin
-  SimbaDockingHelper.Resize(Self, Max(200, AWidth), Max(200, AHeight + ImageBox.StatusBar.Height));
-  SimbaDockingHelper.EnsureVisible(Self);
-  if AShowOnTop then
-    SimbaDockingHelper.ShowOnTop(Self);
+  Form := TCustomForm(Self);
+  if (HostDockSite is TSimbaAnchorDockHostSite) then
+    Form := TSimbaAnchorDockHostSite(HostDockSite);
+
+  if (Form is TSimbaAnchorDockHostSite) and (TSimbaAnchorDockHostSite(Form).Header <> nil) then
+  begin
+    AHeight := AHeight + TSimbaAnchorDockHostSite(Form).Header.Height +
+                         TSimbaAnchorDockHostSite(Form).Header.BorderSpacing.Top +
+                         TSimbaAnchorDockHostSite(Form).Header.BorderSpacing.Bottom;
+  end;
+
+  if (AWidth > Form.Width) then
+    Form.Width := AWidth;
+  if (AHeight > Form.Height) then
+    Form.Height := AHeight;
+
+  if AEnsureVisible then
+    Form.EnsureVisible(True);
 end;
 
 constructor TSimbaDebugImageForm.Create(AOwner: TComponent);

@@ -28,7 +28,7 @@ unit simba.main;
 interface
 
 uses
-  classes, sysutils, fileutil, lresources, forms, controls, graphics, dialogs,
+  classes, sysutils, fileutil, AnchorDockPanel, lresources, forms, controls, graphics, dialogs,
   stdctrls, menus, comctrls, extctrls, buttons, imglist,
   simba.windowselector, simba.scripttab, simba.oswindow, castaliapaslextypes;
 
@@ -73,6 +73,7 @@ const
 
 type
   TSimbaForm = class(TForm)
+    DockPanel: TAnchorDockPanel;
     Images: TImageList;
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
@@ -196,7 +197,6 @@ type
     procedure MenuReplaceClick(Sender: TObject);
     procedure MenuSelectAllClick(Sender: TObject);
     procedure MenuUndoClick(Sender: TObject);
-    procedure DoToolbarResize(Sender: TObject);
     procedure DoResetLayoutClick(Sender: TObject);
     procedure MenuItemConsoleClick(Sender: TObject);
     procedure MenuItemLockLayoutClick(Sender: TObject);
@@ -222,6 +222,7 @@ type
     FWindowSelection: TOSWindow;
     FProcessSelection: UInt32;
     FExceptionMessage: TStringList;
+    FDockingReset: Boolean;
 
     procedure DoPrintDTM(constref DTM: String);
     procedure DoExceptionHandler(Sender: TObject; E: Exception);
@@ -239,9 +240,7 @@ type
 
     procedure AddRecentFile(FileName: String);
 
-    procedure Docking_Setup;
-    procedure Docking_AdjustForToolBar;
-    procedure Docking_SetDefault;
+    procedure SetupDocking;
 
     procedure CodeTools_Setup;
     procedure CodeTools_OnMessage(Sender: TObject; const Typ: TMessageEventType; const Message: String; X, Y: Integer);
@@ -277,156 +276,6 @@ uses
   {$IFDEF WINDOWS},
   windows, shellapi
   {$ENDIF};
-
-type
-  TSimbaAnchorDockHeader = class(TAnchorDockHeader)
-  protected
-    procedure Paint; override;
-
-    procedure SetAlign(Value: TAlign); override;
-  public
-    constructor Create(AOwner: TComponent); override;
-  end;
-
-  TSimbaAnchorDockHostSite = class(TAnchorDockHostSite)
-  protected
-    FMenuItem: TMenuItem;
-
-    procedure DoMenuItemDestroyed(Sender: TObject);
-    procedure DoMenuItemClicked(Sender: TObject);
-
-    procedure SetMenuItem(Value: TMenuItem);
-    procedure SetVisible(Value: Boolean); override;
-    procedure SetParent(Value: TWinControl); override;
-  public
-    property MenuItem: TMenuItem read FMenuItem write SetMenuItem;
-
-    procedure UpdateDockCaption(Exclude: TControl = nil); override;
-
-    constructor CreateNew(AOwner: TComponent; Num: Integer = 0); override;
-  end;
-
-  TSimbaAnchorDockSplitter = class(TAnchorDockSplitter)
-  protected
-    procedure SetParent(Value: TWinControl); override;
-    procedure Paint; override;
-  end;
-
-procedure TSimbaAnchorDockHeader.Paint;
-var
-  Style: TTextStyle;
-begin
-  Style := Canvas.TextStyle;
-  Style.Layout := tlCenter;
-  Style.Alignment := taCenter;
-
-  Font := SimbaForm.Font;
-
-  Canvas.TextRect(ClientRect, 0, 0, Self.Caption, Style);
-end;
-
-procedure TSimbaAnchorDockHeader.SetAlign(Value: TAlign);
-begin
-  inherited SetAlign(alTop);
-end;
-
-constructor TSimbaAnchorDockHeader.Create(AOwner: TComponent);
-var
-  I: Int32;
-begin
-  inherited Create(AOwner);
-
-  BevelWidth := 3;
-  PopupMenu := nil;
-  Color := clForm;
-
-  for I := ControlCount - 1 downto 0 do
-    Controls[I].Parent := nil;
-end;
-
-procedure TSimbaAnchorDockHostSite.DoMenuItemDestroyed(Sender: TObject);
-begin
-  FMenuItem := nil;
-end;
-
-procedure TSimbaAnchorDockHostSite.DoMenuItemClicked(Sender: TObject);
-begin
-  case TMenuItem(Sender).Checked of
-    True: SimbaDockingHelper.Center(Self);
-    False: SimbaDockingHelper.Hide(Self);
-  end;
-end;
-
-procedure TSimbaAnchorDockHostSite.SetMenuItem(Value: TMenuItem);
-begin
-  FMenuItem := Value;
-  FMenuItem.AddHandlerOnDestroy(@DoMenuItemDestroyed);
-  FMenuItem.OnClick := @DoMenuItemClicked;
-end;
-
-procedure TSimbaAnchorDockHostSite.SetVisible(Value: Boolean);
-begin
-  inherited SetVisible(Value and SimbaForm.Visible);
-
-  if (MenuItem <> nil) then
-    MenuItem.Checked := Value;
-
-  if (Parent <> nil) then
-    ShowInTaskBar := stNever
-  else
-    ShowInTaskBar := stAlways;
-end;
-
-procedure TSimbaAnchorDockHostSite.SetParent(Value: TWinControl);
-begin
-  if (Value <> nil) then
-    ShowInTaskBar := stNever
-  else
-    ShowInTaskBar := stAlways;
-
-  inherited SetParent(Value);
-end;
-
-procedure TSimbaAnchorDockHostSite.UpdateDockCaption(Exclude: TControl);
-begin
-  inherited UpdateDockCaption(Exclude);
-
-  Caption := Application.Title;
-end;
-
-constructor TSimbaAnchorDockHostSite.CreateNew(AOwner: TComponent; Num: Integer);
-begin
-  inherited CreateNew(AOwner, Num);
-
-  DefaultMonitor := dmMainForm;
-end;
-
-procedure TSimbaAnchorDockSplitter.SetParent(Value: TWinControl);
-begin
-  if (Value = SimbaForm) then
-    inherited SetParent(nil)
-  else
-    inherited SetParent(Value);
-end;
-
-procedure TSimbaAnchorDockSplitter.Paint;
-var
-  Center: Int32;
-begin
-  Canvas.Brush.Color := Self.Color;
-  Canvas.FillRect(ClientRect);
-  Canvas.Brush.Color := cl3DShadow;
-
-  if ResizeAnchor in [akLeft, akRight] then // vertical
-  begin
-    Center := Width div 2;
-    Canvas.FillRect(Center - 2, Height div 2 - 50, Center + 1, Height div 2 + 50);
-  end else
-  begin
-    Center := Height div 2;
-    Canvas.FillRect(Width div 2 - 50, Center - 2, Width div 2 + 50, Center + 1);
-  end;
-end;
 
 procedure TSimbaForm.DoExceptionHandler(Sender: TObject; E: Exception);
 var
@@ -539,100 +388,6 @@ begin
   end;
 
   Halt(1); // Calls finalization sections
-end;
-
-procedure TSimbaForm.Docking_Setup;
-
-  procedure MakeDockable(Form: TForm; Item: TMenuItem);
-  begin
-    DockMaster.MakeDockable(Form, False);
-    with DockMaster.GetAnchorSite(Form) as TSimbaAnchorDockHostSite do
-      MenuItem := Item;
-  end;
-
-  procedure RemoveDocking(Form: TCustomForm);
-  var
-    I: Int32;
-  begin
-    SimbaDockingHelper.Hide(Form);
-
-    if DockMaster.GetAnchorSite(Form) <> nil then
-      Form := DockMaster.GetAnchorSite(Form);
-
-    for I := Form.ControlCount - 1 downto 0 do
-      if (Form.Controls[I] is TAnchorDockHostSite) then
-        Form.Controls[I].Free();
-  end;
-
-var
-  I: Int32;
-  Site: TSimbaAnchorDockHostSite;
-begin
-  DockMaster.HeaderClass := TSimbaAnchorDockHeader;
-  DockMaster.SplitterClass := TSimbaAnchorDockSplitter;
-  DockMaster.SiteClass := TSimbaAnchorDockHostSite;
-  DockMaster.HideHeaderCaptionFloatingControl := False;
-  DockMaster.HeaderAlignTop := $FFFFFF;
-  DockMaster.PageAreaInPercent := 0;
-  DockMaster.SplitterWidth := 8;
-  DockMaster.HeaderHint := 'Use the mouse to drag and dock this window';
-  DockMaster.MakeDockSite(Self, [akBottom], admrpChild);
-
-  MakeDockable(SimbaScriptTabsForm, MenuItemEditor);
-  MakeDockable(SimbaDebugForm, MenuItemOutput);
-  MakeDockable(SimbaFileBrowserForm, MenuItemFileBrowser);
-  MakeDockable(SimbaFunctionListForm, MenuItemFunctionList);
-  MakeDockable(SimbaNotesForm, MenuItemNotes);
-  MakeDockable(SimbaDebugImageForm, MenuItemDebugImage);
-  MakeDockable(SimbaColorHistoryForm, MenuItemColourHistory);
-
-  if SimbaSettings.GUI.Layout.Value <> '' then
-  try
-    SimbaDockingHelper.LoadLayoutFromString(SimbaSettings.GUI.Layout.Value);
-  except
-    SimbaSettings.GUI.Layout.Value := '';
-    SimbaSettings.Save();
-
-    for I := 0 to DockMaster.ControlCount - 1 do
-      if DockMaster.Controls[I] is TCustomForm then
-        RemoveDocking(DockMaster.Controls[I] as TCustomForm);
-
-    if MessageDlg('Simba', 'Docking somehow got corrupted. Simba must restart.', mtError, mbYesNo, 0) = mrYes then
-      SimbaProcess.RunCommand(Application.ExeName, []);
-
-    Halt;
-  end else
-    Docking_SetDefault();
-
-  // Show everything at once if menu item is checked
-  Self.BeginFormUpdate();
-  Self.Visible := True;
-
-  for I := 0 to Screen.CustomFormCount - 1 do
-    if (Screen.CustomForms[I] is TSimbaAnchorDockHostSite) then
-    begin
-      Site := Screen.CustomForms[I] as TSimbaAnchorDockHostSite;
-      if (Site.ControlCount = 1) then // only header
-        Continue;
-      if (Site.MenuItem <> nil) and (not Site.MenuItem.Checked) then
-        Continue;
-
-      Screen.CustomForms[i].Visible := True;
-    end;
-
-  Self.Enabled := True;
-  Self.EndFormUpdate();
-end;
-
-// Adjust for toolbar wrapping
-procedure TSimbaForm.Docking_AdjustForToolBar;
-var
-  I: Int32;
-begin
-  for I := 0 to ControlCount - 1 do
-    if Controls[I] is TAnchorDockHostSite then
-      with Controls[I].BoundsRect do
-        Controls[I].BoundsRect := TRect.Create(Left, ToolBar.Height, Right, Bottom);
 end;
 
 procedure TSimbaForm.CodeTools_OnMessage(Sender: TObject; const Typ: TMessageEventType; const Message: String; X, Y: Integer);
@@ -1021,7 +776,10 @@ end;
 
 procedure TSimbaForm.DoResetLayoutClick(Sender: TObject);
 begin
-  Docking_SetDefault();
+  if MessageDlg('Reset to default layout? This will happen when Simba is next restarted.', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+    FDockingReset := True
+  else
+    FDockingReset := False;
 end;
 
 procedure TSimbaForm.MenuItemConsoleClick(Sender: TObject);
@@ -1152,21 +910,16 @@ begin
   begin
     CloseAction := caFree;
 
+    if FDockingReset then
+    begin
+      SimbaSettings.GUI.Layout.Value := '';
+      SimbaSettings.GUI.LayoutLocked.Value := False;
+    end else
     if (WindowState <> wsMinimized) then
-      SimbaSettings.GUI.Layout.Value := SimbaDockingHelper.SaveLayoutToString();
-
-    SimbaSettings.GUI.RecentFiles.Value := '';
-    for i := MenuItemOpenRecent.Count - 1 downto 0 do
-      SimbaSettings.GUI.RecentFiles.Value := SimbaSettings.GUI.RecentFiles.Value + ',' + MenuItemOpenRecent[i].Caption;
+      SimbaSettings.GUI.Layout.Value := DockMaster.SaveLayout();
 
     Visible := False;
-    Application.ProcessMessages();
   end;
-end;
-
-procedure TSimbaForm.DoToolbarResize(Sender: TObject);
-begin
-  Docking_AdjustForToolBar();
 end;
 
 procedure TSimbaForm.Settings_Setup;
@@ -1192,32 +945,21 @@ end;
 
 procedure TSimbaForm.Settings_CustomToolbarSize_Changed(Value: Int64);
 begin
-  if Value = 0 then
-  begin
-    Value := Images.WidthForPPI[Images.Width, ToolBar.Font.PixelsPerInch];
-    if Screen.PixelsPerInch = 96 then
-      Value := 24;
-  end;
+  ToolBar.ImagesWidth := Value;
 
-  Self.ToolBar.ImagesWidth := Value;
-  Self.Toolbar.ButtonWidth := Value + 8;
-  Self.Toolbar.ButtonHeight := Value + 8;
+  ToolBar.ButtonWidth  := Value + Scale96ToScreen(8);
+  ToolBar.ButtonHeight := Value + Scale96ToScreen(8);
 end;
 
 procedure TSimbaForm.Settings_CustomFontSize_Changed(Value: Int64);
 var
   i: Int32;
 begin
-  if Value = 0 then
-  begin
-    Font.SetDefault();
-
-    Value := Round((-Graphics.GetFontData(Font.Reference.Handle).Height * 72 / Font.PixelsPerInch)) + 1;
-  end;
+  if (Value = 0) then
+    Exit;
 
   for i := 0 to Screen.CustomFormCount - 1 do
     Screen.CustomForms[i].Font.Size := Value;
-
   Screen.HintFont.Size := Value;
 end;
 
@@ -1308,7 +1050,7 @@ begin
   end;
 
   CodeTools_Setup();
-  Docking_Setup();
+  SetupDocking();
   Settings_Setup();
 
   // First launch
@@ -1318,6 +1060,8 @@ begin
 
     SimbaSettings.Environment.FirstLaunch.Value := False;
   end;
+
+  Self.Enabled := True;
 end;
 
 procedure TSimbaForm.SetEnabled(Value: Boolean);
@@ -1420,7 +1164,8 @@ begin
       Free();
     end;
 
-    SimbaDockingHelper.ShowOnTop(SimbaColorHistoryForm);
+    MenuItemColourHistory.Checked := True;
+    MenuItemColourHistory.OnClick(MenuItemColourHistory);
   except
     on E: Exception do
       ShowMessage('Exception while picking color: ' + E.Message + '(' + E.ClassName + ')');
@@ -1452,47 +1197,60 @@ begin
   end;
 end;
 
-procedure TSimbaForm.Docking_SetDefault;
-var
-  I: Int32;
+procedure TSimbaForm.SetupDocking;
 begin
   BeginFormUpdate();
 
-  // Undock & hide everything
-  for I := 0 to Screen.CustomFormCount - 1 do
-  begin
-    if DockMaster.GetAnchorSite(Screen.CustomForms[I]) = nil then
-      Continue;
+  try
+    DockMaster.BeginUpdate();
+    DockMaster.SplitterWidth := 5;
+    DockMaster.HeaderClass := TSimbaAnchorDockHeader;
+    DockMaster.SplitterClass := TSimbaAnchorDockSplitter;
+    DockMaster.SiteClass := TSimbaAnchorDockHostSite;
+    DockMaster.HideHeaderCaptionFloatingControl := False;
+    DockMaster.HeaderAlignTop := $FFFFFF;
+    DockMaster.PageAreaInPercent := 0;
+    DockMaster.HeaderHint := 'Use the mouse to drag and dock this window';
+    DockMaster.MakeDockPanel(DockPanel, admrpChild);
 
-    DockMaster.GetAnchorSite(Screen.CustomForms[I]).Hide();
-    DockMaster.ManualFloat(Screen.CustomForms[I]);
+    DockMaster.MakeDockable(SimbaScriptTabsForm, MenuItemEditor);
+    DockMaster.MakeDockable(SimbaDebugForm, MenuItemOutput);
+    DockMaster.MakeDockable(SimbaFileBrowserForm, MenuItemFileBrowser);
+    DockMaster.MakeDockable(SimbaFunctionListForm, MenuItemFunctionList);
+    DockMaster.MakeDockable(SimbaNotesForm, MenuItemNotes);
+    DockMaster.MakeDockable(SimbaDebugImageForm, MenuItemDebugImage);
+    DockMaster.MakeDockable(SimbaColorHistoryForm, MenuItemColourHistory);
+
+    if (SimbaSettings.GUI.Layout.Value = '') then
+    begin
+      DockMaster.GetAnchorSite(SimbaFileBrowserForm).Width := 140;
+      DockMaster.GetAnchorSite(SimbaFunctionListForm).Width := 140;
+      DockMaster.GetAnchorSite(SimbaDebugForm).Height := 120;
+
+      DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaScriptTabsForm), DockPanel, alClient);
+      DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaDebugForm), DockPanel, alBottom);
+      DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaFunctionListForm), DockPanel, alLeft);
+      DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaFileBrowserForm), DockPanel, alRight);
+
+      DockMaster.MakeVisible(SimbaScriptTabsForm, False);
+      DockMaster.MakeVisible(SimbaDebugForm, False);
+      DockMaster.MakeVisible(SimbaFunctionListForm, False);
+      DockMaster.MakeVisible(SimbaFileBrowserForm, False);
+
+      Width := 1250;
+      Height := 850;
+    end else
+      DockMaster.LoadLayout(SimbaSettings.GUI.Layout.Value);
+  finally
+    DockMaster.EndUpdate();
+
+    EndFormUpdate();
   end;
 
-  Position := poDesigned;
+  if (SimbaSettings.GUI.Layout.Value = '') then
+    Position := poScreenCenter;
 
-  Width := 1000;
-  Height := 0;
-
-  DockMaster.GetAnchorSite(SimbaScriptTabsForm).Height := 600;
-  DockMaster.GetAnchorSite(SimbaFileBrowserForm).Width := 250;
-  DockMaster.GetAnchorSite(SimbaFunctionListForm).Width := 165;
-  DockMaster.GetAnchorSite(SimbaDebugForm).Height := 200;
-
-  DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaScriptTabsForm), DockMaster.GetSite(Self), alBottom);
-  DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaDebugForm), DockMaster.GetSite(SimbaScriptTabsForm), alBottom);
-  DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaFunctionListForm), DockMaster.GetSite(SimbaScriptTabsForm), alLeft);
-  DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaFileBrowserForm), DockMaster.GetSite(SimbaScriptTabsForm), alRight);
-
-  DockMaster.MakeVisible(SimbaScriptTabsForm, False);
-  DockMaster.MakeVisible(SimbaDebugForm, False);
-  DockMaster.MakeVisible(SimbaFunctionListForm, False);
-  DockMaster.MakeVisible(SimbaFileBrowserForm, False);
-
-  Docking_AdjustForToolBar();
-
-  Position := poScreenCenter;
-
-  EndFormUpdate();
+  EnsureVisible();
 end;
 
 {$R *.lfm}

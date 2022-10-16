@@ -273,7 +273,7 @@ begin
   Params.Read(Width, SizeOf(Int32));
   Params.Read(Height, SizeOf(Int32));
 
-  SimbaDebugImageForm.Resize(Width, Height, True);
+  SimbaDebugImageForm.SetSize(Width, Height, True);
 end;
 
 constructor TSimbaMethod_DisplayDebugImage.Create(Width, Height: Int32);
@@ -303,9 +303,9 @@ begin
   Params.Read(Width, SizeOf(Int32));
   Params.Read(Height, SizeOf(Int32));
 
-  SimbaDebugImageForm.Resize(
+  SimbaDebugImageForm.SetSize(
     Max(Width, SimbaDebugImageForm.ImageBox.Width),
-    Max(Height, SimbaDebugImageForm.ImageBox.Height - SimbaDebugImageForm.ImageBox.StatusBar.Height),
+    Max(Height, SimbaDebugImageForm.ImageBox.Height),
     True
   );
 

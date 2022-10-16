@@ -15,7 +15,6 @@ type
     procedure ApplyDPI(Window: HWND; var X1, Y1, X2, Y2: Int32);
     procedure RemoveDPI(Window: HWND; var X1, Y1, X2, Y2: Int32);
   public
-    function IsScaledAndDPIAware(Window: HWND): Boolean;
     function GetWindowImage(Window: HWND; WindowDC, BufferDC: HDC; X, Y, Width, Height: Int32): Boolean;
     function GetWindowBounds(Window: HWND; out Bounds: TBox): Boolean;
     function GetMousePosition(Window: HWND): TPoint;
@@ -82,14 +81,6 @@ begin
     X2 := Round(X2 / (DPI.X / 96));
     Y2 := Round(Y2 / (DPI.Y / 96));
   end;
-end;
-
-function TSimbaWindowsHelpers.IsScaledAndDPIAware(Window: HWND): Boolean;
-var
-  DPI: record X, Y: UINT; end;
-begin
-  Result := DPIEnabled and (not AreDpiAwarenessContextsEqual(GetWindowDpiAwarenessContext(Window), DPI_AWARENESS_CONTEXT_UNAWARE)) and
-                           (GetDpiForMonitor(MonitorFromWindow(Window, MONITOR_DEFAULTTONEAREST), MDT_EFFECTIVE_DPI, DPI.X, DPI.Y) = S_OK) and ((DPI.X <> 96) or (DPI.Y <> 96));
 end;
 
 function TSimbaWindowsHelpers.GetWindowBounds(Window: HWND; out Bounds: TBox): Boolean;

@@ -59,6 +59,7 @@ type
     procedure DoEditorMouseEnter(Sender: TObject);
     procedure DoEditorMouseLeave(Sender: TObject);
 
+    procedure SizeComponents;
     procedure CaretChanged(Sender: TObject);
     procedure FontChanged(Sender: TObject); override;
 
@@ -321,30 +322,37 @@ begin
   FEditing := False;
 end;
 
+procedure TSimbaScriptTabsForm.SizeComponents;
+begin
+  if (ControlCount = 0) then
+    Exit;
+
+  with TBitmap.Create() do
+  try
+    // Measure on slightly bigger font size
+    // Font size can be 0 so use GetFontData
+    Canvas.Font := Self.Font;
+    Canvas.Font.Size := Round(-GetFontData(Canvas.Font.Reference.Handle).Height * 72 / Canvas.Font.PixelsPerInch) + 2;
+
+    StatusBar.Height := Canvas.TextHeight('Taylor Swift');
+    StatusPanelCaret.Width  := Canvas.TextWidth('Line 10000, Col 10000');
+    StatusPanelState.Width  := Canvas.TextWidth('[000:000:000]');
+  finally
+    Free();
+  end;
+end;
+
 procedure TSimbaScriptTabsForm.CaretChanged(Sender: TObject);
 begin
   with TSynEditCaret(Sender) do
-    StatusPanelCaret.Caption := IntToStr(LinePos) + ': ' + IntToStr(CharPos);
+    StatusPanelCaret.Caption := 'Line ' + IntToStr(LinePos) + ', Col ' + IntToStr(CharPos);
 end;
 
 procedure TSimbaScriptTabsForm.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
 
-  if (StatusBar <> nil) and (StatusPanelCaret <> nil) and (StatusPanelState <> nil) then
-    with TBitmap.Create() do
-    try
-      Canvas.Font := Self.Font;
-
-      with Canvas.TextExtent('0') do
-      begin
-        StatusBar.Height := Round(CY * 1.35);
-        StatusPanelCaret.Width := Round(CX * 12.5);
-        StatusPanelState.Width := Round(CX * 15);
-      end;
-    finally
-      Free();
-    end;
+  SizeComponents();
 end;
 
 procedure TSimbaScriptTabsForm.SetCurrentTab(Value: TSimbaScriptTab);
@@ -671,6 +679,7 @@ constructor TSimbaScriptTabsForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
+  SizeComponents();
   AddTab();
 end;
 
