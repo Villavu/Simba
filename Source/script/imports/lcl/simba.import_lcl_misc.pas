@@ -35,748 +35,748 @@ type
   PMainMenu = ^TMainMenu;
   PMenuItem = ^TMenuItem;
 
-procedure _LapeOutputPipeStream_Seek(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeOutputPipeStream_Seek(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pint64(Result)^ := POutputPipeStream(Params^[0])^.Seek(Pint64(Params^[1])^, PSeekOrigin(Params^[2])^);
 end;
 
-procedure _LapeOutputPipeStream_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeOutputPipeStream_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := POutputPipeStream(Params^[0])^.Read(PPointer(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-procedure _LapeOutputPipeStream_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeOutputPipeStream_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   POutputPipeStream(Params^[0])^ := TOutputPipeStream.Create(PHandle(Params^[1])^);
 end;
 
-procedure _LapeOutputPipeStream_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeOutputPipeStream_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   POutputPipeStream(Params^[0])^.Free();
 end;
 
-procedure _LapeInputPipeStream_Write(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeInputPipeStream_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PInputPipeStream(Params^[0])^.Write(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-procedure _LapeInputPipeStream_Seek(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeInputPipeStream_Seek(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pint64(Result)^ := PInputPipeStream(Params^[0])^.Seek(Pint64(Params^[1])^, PSeekOrigin(Params^[2])^);
 end;
 
-procedure _LapeInputPipeStream_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeInputPipeStream_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PInputPipeStream(Params^[0])^.Read(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-procedure _LapeInputPipeStream_NumBytesAvailable_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeInputPipeStream_NumBytesAvailable_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PUInt32(Result)^ := PInputPipeStream(Params^[0])^.NumBytesAvailable;
 end;
 
-procedure _LapeInputPipeStream_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeInputPipeStream_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PInputPipeStream(Params^[0])^ := TInputPipeStream.Create(PHandle(Params^[1])^);
 end;
 
-procedure _LapeInputPipeStream_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeInputPipeStream_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PInputPipeStream(Params^[0])^.Free();
 end;
 
-procedure _LapeProcess_Execute(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Execute(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.Execute();
 end;
 
-procedure _LapeProcess_CloseInput(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_CloseInput(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.CloseInput();
 end;
 
-procedure _LapeProcess_CloseOutput(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_CloseOutput(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.CloseOutput();
 end;
 
-procedure _LapeProcess_CloseStderr(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_CloseStderr(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.CloseStderr();
 end;
 
-procedure _LapeProcess_Resume(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Resume(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PProcess(Params^[0])^.Resume();
 end;
 
-procedure _LapeProcess_Suspend(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Suspend(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PProcess(Params^[0])^.Suspend();
 end;
 
-procedure _LapeProcess_Terminate(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Terminate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PProcess(Params^[0])^.Terminate(PInteger(Params^[1])^);
 end;
 
-procedure _LapeProcess_WaitOnExit(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_WaitOnExit(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PProcess(Params^[0])^.WaitOnExit();
 end;
 
-procedure _LapeProcess_WindowRect_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_WindowRect_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PRect(Result)^ := PProcess(Params^[0])^.WindowRect;
 end;
 
-procedure _LapeProcess_WindowRect_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_WindowRect_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.WindowRect := PRect(Params^[1])^;
 end;
 
-procedure _LapeProcess_Handle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Handle_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PHandle(Result)^ := PProcess(Params^[0])^.Handle;
 end;
 
-procedure _LapeProcess_ProcessHandle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_ProcessHandle_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PHandle(Result)^ := PProcess(Params^[0])^.ProcessHandle;
 end;
 
-procedure _LapeProcess_ThreadHandle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_ThreadHandle_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PHandle(Result)^ := PProcess(Params^[0])^.ThreadHandle;
 end;
 
-procedure _LapeProcess_ProcessID_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_ProcessID_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PProcess(Params^[0])^.ProcessID;
 end;
 
-procedure _LapeProcess_ThreadID_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_ThreadID_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PProcess(Params^[0])^.ThreadID;
 end;
 
-procedure _LapeProcess_ExitStatus_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_ExitStatus_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PProcess(Params^[0])^.ExitStatus;
 end;
 
-procedure _LapeProcess_InheritHandles_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_InheritHandles_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PProcess(Params^[0])^.InheritHandles;
 end;
 
-procedure _LapeProcess_InheritHandles_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_InheritHandles_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.InheritHandles := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeProcess_PipeBufferSize_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_PipeBufferSize_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pcardinal(Result)^ := PProcess(Params^[0])^.PipeBufferSize;
 end;
 
-procedure _LapeProcess_PipeBufferSize_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_PipeBufferSize_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.PipeBufferSize := Pcardinal(Params^[1])^;
 end;
 
-procedure _LapeProcess_Active_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Active_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PProcess(Params^[0])^.Active;
 end;
 
-procedure _LapeProcess_Active_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Active_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.Active := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeProcess_CommandLine_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_CommandLine_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PProcess(Params^[0])^.CommandLine;
 end;
 
-procedure _LapeProcess_CommandLine_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_CommandLine_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.CommandLine := PString(Params^[1])^;
 end;
 
-procedure _LapeProcess_Executable_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Executable_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PProcess(Params^[0])^.Executable;
 end;
 
-procedure _LapeProcess_Executable_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Executable_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.Executable := PString(Params^[1])^;
 end;
 
-procedure _LapeProcess_Parameters_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Parameters_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PStrings(Result)^ := PProcess(Params^[0])^.Parameters;
 end;
 
-procedure _LapeProcess_Parameters_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Parameters_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.Parameters := PStrings(Params^[1])^;
 end;
 
-procedure _LapeProcess_ConsoleTitle_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_ConsoleTitle_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PProcess(Params^[0])^.ConsoleTitle;
 end;
 
-procedure _LapeProcess_ConsoleTitle_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_ConsoleTitle_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.ConsoleTitle := PString(Params^[1])^;
 end;
 
-procedure _LapeProcess_CurrentDirectory_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_CurrentDirectory_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PProcess(Params^[0])^.CurrentDirectory;
 end;
 
-procedure _LapeProcess_CurrentDirectory_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_CurrentDirectory_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.CurrentDirectory := PString(Params^[1])^;
 end;
 
-procedure _LapeProcess_Desktop_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Desktop_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PProcess(Params^[0])^.Desktop;
 end;
 
-procedure _LapeProcess_Desktop_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Desktop_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.Desktop := PString(Params^[1])^;
 end;
 
-procedure _LapeProcess_Environment_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Environment_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PStrings(Result)^ := PProcess(Params^[0])^.Environment;
 end;
 
-procedure _LapeProcess_Environment_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Environment_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.Environment := PStrings(Params^[1])^;
 end;
 
-procedure _LapeProcess_Options_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Options_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcessOptions(Result)^ := PProcess(Params^[0])^.Options;
 end;
 
-procedure _LapeProcess_Options_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Options_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.Options := PProcessOptions(Params^[1])^;
 end;
 
-procedure _LapeProcess_Priority_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Priority_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcessPriority(Result)^ := PProcess(Params^[0])^.Priority;
 end;
 
-procedure _LapeProcess_Priority_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Priority_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.Priority := PProcessPriority(Params^[1])^;
 end;
 
-procedure _LapeProcess_StartupOptions_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_StartupOptions_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PStartupOptions(Result)^ := PProcess(Params^[0])^.StartupOptions;
 end;
 
-procedure _LapeProcess_StartupOptions_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_StartupOptions_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.StartupOptions := PStartupOptions(Params^[1])^;
 end;
 
-procedure _LapeProcess_Running_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Running_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PProcess(Params^[0])^.Running;
 end;
 
-procedure _LapeProcess_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^ := TProcess.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeProcess_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.Free();
 end;
 
-procedure _LapeProcess_Input_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Input_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   POutputPipeStream(Result)^ := PProcess(Params^[0])^.Input;
 end;
 
-procedure _LapeProcess_Output_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Output_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInputPipeStream(Result)^ := PProcess(Params^[0])^.Output;
 end;
 
-procedure _LapeProcess_Stderr_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_Stderr_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInputPipeStream(Result)^ := PProcess(Params^[0])^.Stderr;
 end;
 
-procedure _LapeProcess_ExitCode_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeProcess_ExitCode_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PProcess(Params^[0])^.ExitCode;
 end;
 
-procedure _LapeCustomFloatSpinEdit_GetLimitedValue(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomFloatSpinEdit_GetLimitedValue(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDouble(Result)^ := PCustomFloatSpinEdit(Params^[0])^.GetLimitedValue(PDouble(Params^[1])^);
 end;
 
-procedure _LapeCustomFloatSpinEdit_ValueToStr(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomFloatSpinEdit_ValueToStr(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PCustomFloatSpinEdit(Params^[0])^.ValueToStr(PDouble(Params^[1])^);
 end;
 
-procedure _LapeCustomFloatSpinEdit_StrToValue(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomFloatSpinEdit_StrToValue(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDouble(Result)^ := PCustomFloatSpinEdit(Params^[0])^.StrToValue(PString(Params^[1])^);
 end;
 
-procedure _LapeCustomFloatSpinEdit_DecimalPlaces_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomFloatSpinEdit_DecimalPlaces_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PCustomFloatSpinEdit(Params^[0])^.DecimalPlaces;
 end;
 
-procedure _LapeCustomFloatSpinEdit_DecimalPlaces_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomFloatSpinEdit_DecimalPlaces_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomFloatSpinEdit(Params^[0])^.DecimalPlaces := PInteger(Params^[1])^;
 end;
 
-procedure _LapeCustomFloatSpinEdit_Increment_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomFloatSpinEdit_Increment_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDouble(Result)^ := PCustomFloatSpinEdit(Params^[0])^.Increment;
 end;
 
-procedure _LapeCustomFloatSpinEdit_Increment_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomFloatSpinEdit_Increment_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomFloatSpinEdit(Params^[0])^.Increment := PDouble(Params^[1])^;
 end;
 
-procedure _LapeCustomFloatSpinEdit_MinValue_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomFloatSpinEdit_MinValue_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDouble(Result)^ := PCustomFloatSpinEdit(Params^[0])^.MinValue;
 end;
 
-procedure _LapeCustomFloatSpinEdit_MinValue_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomFloatSpinEdit_MinValue_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomFloatSpinEdit(Params^[0])^.MinValue := PDouble(Params^[1])^;
 end;
 
-procedure _LapeCustomFloatSpinEdit_MaxValue_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomFloatSpinEdit_MaxValue_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDouble(Result)^ := PCustomFloatSpinEdit(Params^[0])^.MaxValue;
 end;
 
-procedure _LapeCustomFloatSpinEdit_MaxValue_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomFloatSpinEdit_MaxValue_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomFloatSpinEdit(Params^[0])^.MaxValue := PDouble(Params^[1])^;
 end;
 
-procedure _LapeCustomFloatSpinEdit_Value_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomFloatSpinEdit_Value_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDouble(Result)^ := PCustomFloatSpinEdit(Params^[0])^.Value;
 end;
 
-procedure _LapeCustomFloatSpinEdit_Value_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomFloatSpinEdit_Value_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomFloatSpinEdit(Params^[0])^.Value := PDouble(Params^[1])^;
 end;
 
-procedure _LapeCustomFloatSpinEdit_ValueEmpty_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomFloatSpinEdit_ValueEmpty_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomFloatSpinEdit(Params^[0])^.ValueEmpty;
 end;
 
-procedure _LapeCustomFloatSpinEdit_ValueEmpty_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomFloatSpinEdit_ValueEmpty_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomFloatSpinEdit(Params^[0])^.ValueEmpty := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomFloatSpinEdit_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomFloatSpinEdit_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomFloatSpinEdit(Params^[0])^ := TCustomFloatSpinEdit.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeCustomFloatSpinEdit_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomFloatSpinEdit_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomFloatSpinEdit(Params^[0])^.Free();
 end;
 
-procedure _LapeFloatSpinEdit_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeFloatSpinEdit_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PFloatSpinEdit(Params^[0])^ := TFloatSpinEdit.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeFloatSpinEdit_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeFloatSpinEdit_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PFloatSpinEdit(Params^[0])^.Free();
 end;
 
-procedure _LapeCustomSpinEdit_Value_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpinEdit_Value_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pinteger(Result)^ := PCustomSpinEdit(Params^[0])^.Value;
 end;
 
-procedure _LapeCustomSpinEdit_Value_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpinEdit_Value_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpinEdit(Params^[0])^.Value := Pinteger(Params^[1])^;
 end;
 
-procedure _LapeCustomSpinEdit_MinValue_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpinEdit_MinValue_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pinteger(Result)^ := PCustomSpinEdit(Params^[0])^.MinValue;
 end;
 
-procedure _LapeCustomSpinEdit_MinValue_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpinEdit_MinValue_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpinEdit(Params^[0])^.MinValue := Pinteger(Params^[1])^;
 end;
 
-procedure _LapeCustomSpinEdit_MaxValue_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpinEdit_MaxValue_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pinteger(Result)^ := PCustomSpinEdit(Params^[0])^.MaxValue;
 end;
 
-procedure _LapeCustomSpinEdit_MaxValue_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpinEdit_MaxValue_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpinEdit(Params^[0])^.MaxValue := Pinteger(Params^[1])^;
 end;
 
-procedure _LapeCustomSpinEdit_Increment_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpinEdit_Increment_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pinteger(Result)^ := PCustomSpinEdit(Params^[0])^.Increment;
 end;
 
-procedure _LapeCustomSpinEdit_Increment_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpinEdit_Increment_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpinEdit(Params^[0])^.Increment := Pinteger(Params^[1])^;
 end;
 
-procedure _LapeCustomSpinEdit_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpinEdit_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpinEdit(Params^[0])^ := TCustomSpinEdit.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeCustomSpinEdit_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpinEdit_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpinEdit(Params^[0])^.Free();
 end;
 
-procedure _LapeSpinEdit_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeSpinEdit_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSpinEdit(Params^[0])^ := TSpinEdit.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeSpinEdit_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeSpinEdit_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSpinEdit(Params^[0])^.Free();
 end;
 
-procedure _LapeMenuItem_Find(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Find(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Result)^ := PMenuItem(Params^[0])^.Find(PString(Params^[1])^);
 end;
 
-procedure _LapeMenuItem_GetParentMenu(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_GetParentMenu(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenu(Result)^ := PMenuItem(Params^[0])^.GetParentMenu();
 end;
 
-procedure _LapeMenuItem_IndexOf(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_IndexOf(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PMenuItem(Params^[0])^.IndexOf(PMenuItem(Params^[1])^);
 end;
 
-procedure _LapeMenuItem_IndexOfCaption(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_IndexOfCaption(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PMenuItem(Params^[0])^.IndexOfCaption(PString(Params^[1])^);
 end;
 
-procedure _LapeMenuItem_VisibleIndexOf(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_VisibleIndexOf(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PMenuItem(Params^[0])^.VisibleIndexOf(PMenuItem(Params^[1])^);
 end;
 
-procedure _LapeMenuItem_Add(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Add(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.Add(PMenuItem(Params^[1])^);
 end;
 
-procedure _LapeMenuItem_AddSeparator(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_AddSeparator(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.AddSeparator();
 end;
 
-procedure _LapeMenuItem_Click(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Click(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.Click();
 end;
 
-procedure _LapeMenuItem_Delete(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Delete(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.Delete(PInteger(Params^[1])^);
 end;
 
-procedure _LapeMenuItem_Insert(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Insert(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.Insert(PInteger(Params^[1])^, PMenuItem(Params^[2])^);
 end;
 
-procedure _LapeMenuItem_RecreateHandle(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_RecreateHandle(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.RecreateHandle();
 end;
 
-procedure _LapeMenuItem_Remove(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Remove(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.Remove(PMenuItem(Params^[1])^);
 end;
 
-procedure _LapeMenuItem_IsCheckItem(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_IsCheckItem(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pboolean(Result)^ := PMenuItem(Params^[0])^.IsCheckItem();
 end;
 
-procedure _LapeMenuItem_IsLine(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_IsLine(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PMenuItem(Params^[0])^.IsLine();
 end;
 
-procedure _LapeMenuItem_IsInMenuBar(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_IsInMenuBar(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pboolean(Result)^ := PMenuItem(Params^[0])^.IsInMenuBar();
 end;
 
-procedure _LapeMenuItem_Clear(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Clear(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.Clear();
 end;
 
-procedure _LapeMenuItem_HasBitmap(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_HasBitmap(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pboolean(Result)^ := PMenuItem(Params^[0])^.HasBitmap();
 end;
 
-procedure _LapeMenuItem_Count_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Count_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PMenuItem(Params^[0])^.Count;
 end;
 
-procedure _LapeMenuItem_Items_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Items_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Result)^ := PMenuItem(Params^[0])^.Items[PInteger(Params^[1])^];
 end;
 
-procedure _LapeMenuItem_MenuIndex_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_MenuIndex_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PMenuItem(Params^[0])^.MenuIndex;
 end;
 
-procedure _LapeMenuItem_MenuIndex_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_MenuIndex_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.MenuIndex := PInteger(Params^[1])^;
 end;
 
-procedure _LapeMenuItem_Menu_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Menu_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenu(Result)^ := PMenuItem(Params^[0])^.Menu;
 end;
 
-procedure _LapeMenuItem_Parent_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Parent_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Result)^ := PMenuItem(Params^[0])^.Parent;
 end;
 
-procedure _LapeMenuItem_Command_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Command_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PWord(Result)^ := PMenuItem(Params^[0])^.Command;
 end;
 
-procedure _LapeMenuItem_MenuVisibleIndex(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_MenuVisibleIndex(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pinteger(Result)^ := PMenuItem(Params^[0])^.MenuVisibleIndex();
 end;
 
-procedure _LapeMenuItem_AutoCheck_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_AutoCheck_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pboolean(Result)^ := PMenuItem(Params^[0])^.AutoCheck;
 end;
 
-procedure _LapeMenuItem_AutoCheck_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_AutoCheck_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.AutoCheck := Pboolean(Params^[1])^;
 end;
 
-procedure _LapeMenuItem_Default_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Default_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PMenuItem(Params^[0])^.Default;
 end;
 
-procedure _LapeMenuItem_Default_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Default_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.Default := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeMenuItem_Bitmap_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Bitmap_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBitmap(Result)^ := PMenuItem(Params^[0])^.Bitmap;
 end;
 
-procedure _LapeMenuItem_Bitmap_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Bitmap_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.Bitmap := PBitmap(Params^[1])^;
 end;
 
-procedure _LapeMenuItem_GroupIndex_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_GroupIndex_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   pbyte(Result)^ := PMenuItem(Params^[0])^.GroupIndex;
 end;
 
-procedure _LapeMenuItem_GroupIndex_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_GroupIndex_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.GroupIndex := pbyte(Params^[1])^;
 end;
 
-procedure _LapeMenuItem_Hint_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Hint_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PMenuItem(Params^[0])^.Hint;
 end;
 
-procedure _LapeMenuItem_Hint_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Hint_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.Hint := PString(Params^[1])^;
 end;
 
-procedure _LapeMenuItem_RadioItem_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_RadioItem_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PMenuItem(Params^[0])^.RadioItem;
 end;
 
-procedure _LapeMenuItem_RadioItem_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_RadioItem_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.RadioItem := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeMenuItem_OnClick_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_OnClick_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PNotifyEvent(Result)^ := PMenuItem(Params^[0])^.OnClick;
 end;
 
-procedure _LapeMenuItem_OnClick_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_OnClick_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.OnClick := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeMenuItem_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^ := TMenuItem.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeMenuItem_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.Free();
 end;
 
-procedure _LapeMenuItem_Caption_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Caption_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PMenuItem(Params^[0])^.Caption;
 end;
 
-procedure _LapeMenuItem_Caption_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Caption_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.Caption := PString(Params^[1])^;
 end;
 
-procedure _LapeMenuItem_Checked_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Checked_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PMenuItem(Params^[0])^.Checked;
 end;
 
-procedure _LapeMenuItem_Checked_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_Checked_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.Checked := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeMenuItem_AddEx(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_AddEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 type
   TMenuItemArray = array of TMenuItem;
 begin
   PMenuItem(Params^[0])^.Add(TMenuItemArray(Params^[1]^));
 end;
 
-procedure _LapeMenuItem_AddMenu(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenuItem_AddMenu(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Result)^ := TMenuItem.Create(PMenu(Params^[0])^);
   PMenuItem(Result)^.Caption := PString(Params^[1])^;
   PMenuItem(Params^[0])^.Add(PMenuItem(Result)^);
 end;
 
-procedure _LapeMenu_DispatchCommand(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenu_DispatchCommand(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PMenu(Params^[0])^.DispatchCommand(PWord(Params^[1])^);
 end;
 
-procedure _LapeMenu_Parent_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenu_Parent_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PComponent(Result)^ := PMenu(Params^[0])^.Parent;
 end;
 
-procedure _LapeMenu_Parent_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenu_Parent_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenu(Params^[0])^.Parent := PComponent(Params^[1])^;
 end;
 
-procedure _LapeMenu_ParentBidiMode_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenu_ParentBidiMode_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PMenu(Params^[0])^.ParentBidiMode;
 end;
 
-procedure _LapeMenu_ParentBidiMode_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenu_ParentBidiMode_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenu(Params^[0])^.ParentBidiMode := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeMenu_Items_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenu_Items_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Result)^ := PMenu(Params^[0])^.Items;
 end;
 
-procedure _LapeMenu_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenu_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenu(Params^[0])^ := TMenu.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeMenu_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenu_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenu(Params^[0])^.Free();
 end;
 
-procedure _LapeMenu_AddMenu(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMenu_AddMenu(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Result)^ := TMenuItem.Create(PMenu(Params^[0])^);
   PMenuItem(Result)^.Caption := PString(Params^[1])^;
   PMenu(Params^[0])^.Items.Add(PMenuItem(Result)^);
 end;
 
-procedure _LapeMainMenu_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMainMenu_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMainMenu(Params^[0])^ := TMainMenu.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeMainMenu_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMainMenu_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMainMenu(Params^[0])^.Free();
 end;

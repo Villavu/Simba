@@ -23,6 +23,10 @@
 {$DEFINE SIMBA_COMMIT     := {$include %GITHUB_SHORT_SHA%}}
 {$DEFINE SIMBA_COMMIT_URL := {$include %GITHUB_SERVER_URL%} + '/' + {$include %GITHUB_REPOSITORY%} + '/commit/' + {$include %GITHUB_SHORT_SHA%}}
 
+{$IFDEF Lape_CDECL}
+  {$DEFINE LAPE_WRAPPER_CALLING_CONV := cdecl; }
+{$ENDIF}
+
 {.$DEFINE SIMBA_WINDOWS_DARKTHEME} // incomplete
 
 {$IFOPT D-}

@@ -10,12 +10,12 @@ uses
   classes, sysutils, lptypes,
   simba.script_compiler, simba.scriptthread, simba.mufasatypes, simba.settings;
 
-procedure _LapeClearDebug(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeClearDebug(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaDebugLn(ESimbaDebugLn.CLEAR, '');
 end;
 
-procedure _LapeDisguise(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeDisguise(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('Disguise requires Simba communication');
@@ -23,7 +23,7 @@ begin
   SimbaScriptThread.Script.SimbaCommunication.Disguse(PString(Params^[0])^);
 end;
 
-procedure _LapeStatus(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeStatus(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('Status requires Simba communication');
@@ -31,7 +31,7 @@ begin
   SimbaScriptThread.Script.SimbaCommunication.Status(PString(Params^[0])^);
 end;
 
-procedure _LapeGetSimbaPID(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetSimbaPID(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('GetSimbaPID requires Simba communication');
@@ -39,7 +39,7 @@ begin
   PPtrUInt(Result)^ := SimbaScriptThread.Script.SimbaCommunication.GetSimbaPID();
 end;
 
-procedure _LapeGetSimbaTargetPID(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetSimbaTargetPID(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('GetSimbaTargetPID requires Simba communication');
@@ -47,7 +47,7 @@ begin
   PPtrUInt(Result)^ := SimbaScriptThread.Script.SimbaCommunication.GetSimbaTargetPID();
 end;
 
-procedure _LapeGetSimbaTargetWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetSimbaTargetWindow(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('GetSimbaTargetWindow requires Simba communication');
@@ -55,12 +55,12 @@ begin
   PPtrUInt(Result)^ := SimbaScriptThread.Script.SimbaCommunication.GetSimbaTargetWindow();
 end;
 
-procedure _LapeGetSimpleSetting(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetSimpleSetting(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := SimbaSettings.GetSimpleSetting(PString(Params^[0])^, PString(Params^[1])^);
 end;
 
-procedure _LapeSetSimpleSetting(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSetSimpleSetting(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaSettings.SetSimpleSetting(PString(Params^[0])^, PString(Params^[1])^);
 end;

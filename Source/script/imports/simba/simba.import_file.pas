@@ -10,32 +10,32 @@ uses
   classes, sysutils, lptypes,
   simba.script_compiler, simba.files;
 
-procedure _LapeWriteINI(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeWriteINI(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   WriteINI(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^, PString(Params^[3])^);
 end;
 
-procedure _LapeReadINI(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeReadINI(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := ReadINI(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
 end;
 
-procedure _LapeDeleteINI(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeDeleteINI(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   DeleteINI(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[1])^);
 end;
 
-procedure _LapeUnZipFile(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeUnZipFile(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   UnZipFile(PString(Params^[0])^, PString(Params^[1])^);
 end;
 
-procedure _LapeUnZipOneFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeUnZipOneFile(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := UnZipOneFile(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
 end;
 
-procedure _LapeZipFiles(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeZipFiles(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   ZipFiles(PString(Params^[0])^, PStringArray(Params^[1])^);
 end;

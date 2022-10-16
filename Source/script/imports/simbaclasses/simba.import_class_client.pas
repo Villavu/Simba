@@ -11,32 +11,32 @@ uses
   simba.script_compiler, simba.client, simba.finder,
   simba.iomanager;
 
-procedure _LapeClient_IOManager_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeClient_IOManager_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PIOManager(Result)^ := PClient(Params^[0])^.IOManager;
 end;
 
-procedure _LapeClient_IOManager_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeClient_IOManager_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PClient(Params^[0])^.IOManager := PIOManager(Params^[1])^;
 end;
 
-procedure _LapeClient_MFinder_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeClient_MFinder_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PMFinder(Result)^ := PClient(Params^[0])^.MFinder;
 end;
 
-procedure _LapeClient_MFinder_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeClient_MFinder_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PClient(Params^[0])^.MFinder := PMFinder(Params^[1])^;
 end;
 
-procedure _LapeClient_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeClient_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PClient(Params^[0])^ := TClient.Create(PString(Params^[1])^, PIOManager(Params^[2])^);
 end;
 
-procedure _LapeClient_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeClient_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PClient(Params^[0])^.Free();
 end;

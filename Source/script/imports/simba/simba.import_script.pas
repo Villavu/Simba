@@ -77,7 +77,7 @@ procedure PauseScript;
 
 Programmatically pauses the script. The only way for the script to resumed is by the user clicking the play button.
 *)
-procedure _LapePauseScript(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapePauseScript(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaScriptThread.Script.State := ESimbaScriptState.STATE_PAUSED;
 end;
@@ -89,7 +89,7 @@ function GetScriptPID: TProcessID;
 
 Returns the process ID of the running script.
 *)
-procedure _LapeGetScriptPID(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetScriptPID(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcessID(Result)^ := GetProcessID();
 end;
@@ -101,7 +101,7 @@ function GetScriptParameters: TStringArray;
 
 Returns all command line parameters passed to the script.
 *)
-procedure _LapeGetScriptParameters(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetScriptParameters(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PStringArray(Result)^ := SimbaProcess.GetScriptParameters();
 end;
@@ -114,7 +114,7 @@ function GetScriptParameter(Name: String): String;
 Returns a command line parameter value passed to the script.
 Parameters should be passed as a key-pair value: `Name=Value`
 *)
-procedure _LapeGetScriptParameter(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetScriptParameter(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := SimbaProcess.GetScriptParameter(PString(Params^[0])^);
 end;
@@ -129,7 +129,7 @@ Runs a simba script and **will wait** until the script has finished.
  - The script output will be returned in the `Output` parameter.
  - Returns the exit status of the scripts process.
 *)
-procedure _LapeRunScript(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeRunScript(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcessExitStatus(Result)^ := SimbaProcess.RunScript(PString(Params^[0])^, PStringArray(Params^[1])^, PString(Params^[2])^);
 end;
@@ -151,7 +151,7 @@ Example::
     Sleep(100);
   WriteLn('Script finished!');
 *)
-procedure _LapeRunScriptEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeRunScriptEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcessID(Result)^ := SimbaProcess.RunScript(PString(Params^[0])^, PStringArray(Params^[1])^);
 end;
@@ -171,7 +171,7 @@ Example::
     Sleep(100);
   WriteLn('Script finished!');
 *)
-procedure _LapeRunScriptOutputToFile(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeRunScriptOutputToFile(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcessID(Result)^ := SimbaProcess.RunScriptOutputToFile(PString(Params^[0])^, PStringArray(Params^[1])^, PString(Params^[2])^);
 end;

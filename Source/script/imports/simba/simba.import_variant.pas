@@ -42,7 +42,7 @@ Example::
   if (v.VarType = EVariantVarType.Int32) then
     WriteLn('Variant contains a Int32');
 *)
-procedure _LapeVariantVarType(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVariantVarType(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 
   function GetVarType(const v: Variant): EVariantType;
   begin
@@ -81,7 +81,7 @@ Variant.IsNumeric
 ~~~~~~~~~~~~~~~~~
 function Variant.IsNumeric: Boolean;
 *)
-procedure _LapeVariantIsNumeric(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVariantIsNumeric(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PEvalBool(Result)^ := VarIsNumeric(PVariant(Params^[0])^);
 end;
@@ -91,7 +91,7 @@ Variant.IsString
 ~~~~~~~~~~~~~~~~
 function Variant.IsString: Boolean;
 *)
-procedure _LapeVariantIsString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVariantIsString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PEvalBool(Result)^ := VarIsStr(PVariant(Params^[0])^);
 end;
@@ -101,7 +101,7 @@ Variant.IsOrdinal
 ~~~~~~~~~~~~~~~~~
 function Variant.IsOrdinal: Boolean;
 *)
-procedure _LapeVariantIsOrdinal(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVariantIsOrdinal(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PEvalBool(Result)^ := VarIsOrdinal(PVariant(Params^[0])^);
 end;
@@ -111,7 +111,7 @@ Variant.IsFloat
 ~~~~~~~~~~~~~~~
 function Variant.IsFloat: Boolean;
 *)
-procedure _LapeVariantIsFloat(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVariantIsFloat(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PEvalBool(Result)^ := VarIsFloat(PVariant(Params^[0])^);
 end;
@@ -121,7 +121,7 @@ Variant.IsBoolean
 ~~~~~~~~~~~~~~~~~
 function Variant.IsBoolean: Boolean;
 *)
-procedure _LapeVariantIsBoolean(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVariantIsBoolean(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PEvalBool(Result)^ := VarIsBool(PVariant(Params^[0])^);
 end;
@@ -137,7 +137,7 @@ Example::
 
   v := Variant.Null;
 *)
-procedure _LapeVariantNull(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVariantNull(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PVariant(Result)^ := Null;
 end;
@@ -154,7 +154,7 @@ Example::
   if (v = Variant.Unassigned) then
     WriteLn('The variant has not been assigned to!');
 *)
-procedure _LapeVariantUnassigned(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVariantUnassigned(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PVariant(Result)^ := Unassigned;
 end;

@@ -32,7 +32,7 @@ TWindowHandle.Activate
 ~~~~~~~~~~~~~~~~~~~~~~
 function TWindowHandle.Activate: Boolean;
 *)
-procedure _LapeWindowHandle_Activate(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeWindowHandle_Activate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PWindowHandle(Params^[0])^.Activate();
 end;
@@ -42,7 +42,7 @@ TWindowHandle.IsVaild
 ~~~~~~~~~~~~~~~~~~~~~
 function TWindowHandle.IsVaild: Boolean;
 *)
-procedure _LapeWindowHandle_IsVaild(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeWindowHandle_IsVaild(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PWindowHandle(Params^[0])^.IsValid();
 end;
@@ -52,7 +52,7 @@ TWindowHandle.IsActive
 ~~~~~~~~~~~~~~~~~~~~~~
 function TWindowHandle.IsActive: Boolean;
 *)
-procedure _LapeWindowHandle_IsActive(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeWindowHandle_IsActive(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PWindowHandle(Params^[0])^.IsActive();
 end;
@@ -62,7 +62,7 @@ TWindowHandle.IsVisible
 ~~~~~~~~~~~~~~~~~~~~~~~
 function TWindowHandle.IsVisible: Boolean;
 *)
-procedure _LapeWindowHandle_IsVisible(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeWindowHandle_IsVisible(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PWindowHandle(Params^[0])^.IsVisible();
 end;
@@ -72,7 +72,7 @@ TWindowHandle.GetPID
 ~~~~~~~~~~~~~~~~~~~~
 function TWindowHandle.GetPID: UInt32;
 *)
-procedure _LapeWindowHandle_GetPID(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeWindowHandle_GetPID(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PUInt32(Result)^ := PWindowHandle(Params^[0])^.GetPID();
 end;
@@ -82,7 +82,7 @@ TWindowHandle.GetRootWindow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TWindowHandle.GetRootWindow: TWindowHandle;
 *)
-procedure _LapeWindowHandle_GetRootWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeWindowHandle_GetRootWindow(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PWindowHandle(Result)^ := PWindowHandle(Params^[0])^.GetRootWindow();
 end;
@@ -92,7 +92,7 @@ TWindowHandle.GetTitle
 ~~~~~~~~~~~~~~~~~~~~~~
 function TWindowHandle.GetTitle: String;
 *)
-procedure _LapeWindowHandle_GetTitle(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeWindowHandle_GetTitle(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PWindowHandle(Params^[0])^.GetTitle();
 end;
@@ -102,7 +102,7 @@ TWindowHandle.GetClassName
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TWindowHandle.GetClassName: String;
 *)
-procedure _LapeWindowHandle_GetClassName(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeWindowHandle_GetClassName(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PWindowHandle(Params^[0])^.GetClassName();
 end;
@@ -112,7 +112,7 @@ TWindowHandle.GetTitleW
 ~~~~~~~~~~~~~~~~~~~~~~~
 function TWindowHandle.GetTitleW: WideString;
 *)
-procedure _LapeWindowHandle_GetTitleW(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeWindowHandle_GetTitleW(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PWideString(Result)^ := PWindowHandle(Params^[0])^.GetTitleW();
 end;
@@ -122,7 +122,7 @@ TWindowHandle.GetClassNameW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TWindowHandle.GetClassNameW: WideString;
 *)
-procedure _LapeWindowHandle_GetClassNameW(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeWindowHandle_GetClassNameW(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PWideString(Result)^ := PWindowHandle(Params^[0])^.GetClassNameW();
 end;
@@ -132,7 +132,7 @@ TWindowHandle.GetBounds
 ~~~~~~~~~~~~~~~~~~~~~~~
 function TWindowHandle.GetBounds: TBox;
 *)
-procedure _LapeWindowHandle_GetBounds(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeWindowHandle_GetBounds(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBox(Result)^ := PWindowHandle(Params^[0])^.GetBounds();
 end;
@@ -142,7 +142,7 @@ TWindowHandle.GetChildren
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 function TWindowHandle.GetChildren(Recursive: Boolean = True): TWindowHandleArray;
 *)
-procedure _LapeWindowHandle_GetChildren(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeWindowHandle_GetChildren(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PWindowHandleArray(Result)^ := PWindowHandle(Params^[0])^.GetChildren(PBoolean(Params^[1])^);
 end;
@@ -152,7 +152,7 @@ TWindowHandle.SetBounds
 ~~~~~~~~~~~~~~~~~~~~~~~
 procedure TWindowHandle.SetBounds(Bounds: TBox);
 *)
-procedure _LapeWindowHandle_SetBounds(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeWindowHandle_SetBounds(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PWindowHandle(Params^[0])^.SetBounds(PBox(Params^[1])^);
 end;
@@ -162,7 +162,7 @@ TWindowHandle.Kill
 ~~~~~~~~~~~~~~~~~~
 procedure TWindowHandle.Kill;
 *)
-procedure _LapeWindowHandle_Kill(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeWindowHandle_Kill(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PWindowHandle(Params^[0])^.Kill();
 end;
@@ -172,7 +172,7 @@ GetTopWindows
 ~~~~~~~~~~~~~
 function GetTopWindows: TWindowHandleArray;
 *)
-procedure _LapeGetTopWindows(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetTopWindows(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PWindowHandleArray(Result)^ := GetTopWindows();
 end;
@@ -182,7 +182,7 @@ GetVisibleWindows
 ~~~~~~~~~~~~~~~~~
 function GetVisibleWindows: TWindowHandleArray;
 *)
-procedure _LapeGetVisibleWindows(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetVisibleWindows(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PWindowHandleArray(Result)^ := GetVisibleWindows();
 end;
@@ -192,7 +192,7 @@ GetWindows
 ~~~~~~~~~~
 function GetWindows: TWindowHandleArray;
 *)
-procedure _LapeGetWindows(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetWindows(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PWindowHandleArray(Result)^ := GetWindows();
 end;
@@ -202,7 +202,7 @@ GetActiveWindow
 ~~~~~~~~~~~~~~~
 function GetActiveWindow: TWindowHandle;
 *)
-procedure _LapeGetActiveWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetActiveWindow(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PWindowHandle(Result)^ := GetActiveWindow();
 end;
@@ -212,7 +212,7 @@ GetDesktopWindow
 ~~~~~~~~~~~~~~~~
 function GetDesktopWindow: TWindowHandle;
 *)
-procedure _LapeGetDesktopWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetDesktopWindow(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PWindowHandle(Result)^ := GetDesktopWindow();
 end;
@@ -222,7 +222,7 @@ GetWindowAtCursor
 ~~~~~~~~~~~~~~~~~
 function GetWindowAtCursor: TWindowHandle;
 *)
-procedure _LapeGetWindowAtCursor(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetWindowAtCursor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PWindowHandle(Result)^ := GetWindowAtCursor();
 end;
@@ -232,7 +232,7 @@ FindWindow
 ~~~~~~~~~~
 function FindWindow(Title: String; out Window: TWindowHandle): Boolean;
 *)
-procedure _LapeFindWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindWindow(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := FindWindow(PString(Params^[0])^, PWindowHandle(Params^[1])^);
 end;
@@ -242,7 +242,7 @@ FindWindows
 ~~~~~~~~~~~
 function FindWindows(Title: String): TWindowHandleArray;
 *)
-procedure _LapeFindWindows(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindWindows(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PWindowHandleArray(Result)^ := FindWindows(PString(Params^[0])^);
 end;
@@ -252,7 +252,7 @@ FindChildWindow
 ~~~~~~~~~~~~~~~
 function FindChildWindow(Title: String; ClassName: String; out Child: TWindowHandle): Boolean;
 *)
-procedure _LapeFindChildWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindChildWindow(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := FindChildWindow(PString(Params^[0])^, PString(Params^[1])^, PWindowHandle(Params^[2])^);
 end;
@@ -262,7 +262,7 @@ FindChildWindows
 ~~~~~~~~~~~~~~~~
 function FindChildWindows(Title: String; ClassName: String): TWindowHandleArray;
 *)
-procedure _LapeFindChildWindows(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindChildWindows(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PWindowHandleArray(Result)^ := FindChildWindows(PString(Params^[0])^, PString(Params^[1])^);
 end;

@@ -23,7 +23,7 @@ TByteArray.Difference
 ~~~~~~~~~~~~~~~~~~~~~
 function TByteArray.Difference(Other: TByteArray): TByteArray;
 *)
-procedure _Lape_UInt8_Difference(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _Lape_UInt8_Difference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PByteArray(Result)^ := Algo_UInt8_Difference(PByteArray(Params^[0])^, PByteArray(Params^[1])^)
 end;
@@ -33,7 +33,7 @@ TIntegerArray.Difference
 ~~~~~~~~~~~~~~~~~~~~~~~~
 function TIntegerArray.Difference(Other: TIntegerArray): TIntegerArray;
 *)
-procedure _Lape_Int32_Difference(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _Lape_Int32_Difference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PIntegerArray(Result)^ := Algo_Int32_Difference(PIntegerArray(Params^[0])^, PIntegerArray(Params^[1])^)
 end;
@@ -43,7 +43,7 @@ TInt64Array.Difference
 ~~~~~~~~~~~~~~~~~~~~~~
 function TInt64Array.Difference(Other: TInt64Array): TInt64Array;
 *)
-procedure _Lape_Int64_Difference(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _Lape_Int64_Difference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInt64Array(Result)^ := Algo_Int64_Difference(PInt64Array(Params^[0])^, PInt64Array(Params^[1])^)
 end;
@@ -53,7 +53,7 @@ TPointArray.Difference
 ~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.Difference(Other: TPointArray): TPointArray;
 *)
-procedure _Lape_Point_Difference(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _Lape_Point_Difference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := Algo_Point_Difference(PPointArray(Params^[0])^, PPointArray(Params^[1])^)
 end;
@@ -63,7 +63,7 @@ TBoxArray.Difference
 ~~~~~~~~~~~~~~~~~~~~
 function TBoxArray.Difference(Other: TBoxArray): TBoxArray;
 *)
-procedure _Lape_Box_Difference(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _Lape_Box_Difference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoxArray(Result)^ := Algo_Box_Difference(PBoxArray(Params^[0])^, PBoxArray(Params^[1])^)
 end;
@@ -73,7 +73,7 @@ TByteArray.SymmetricDifference
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TByteArray.SymmetricDifference(Other: TByteArray): TByteArray;
 *)
-procedure _Lape_UInt8_SymmetricDifference(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _Lape_UInt8_SymmetricDifference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PByteArray(Result)^ := Algo_UInt8_SymmetricDifference(PByteArray(Params^[0])^, PByteArray(Params^[1])^)
 end;
@@ -83,7 +83,7 @@ TIntegerArray.SymmetricDifference
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TIntegerArray.SymmetricDifference(Other: TIntegerArray): TIntegerArray;
 *)
-procedure _Lape_Int32_SymmetricDifference(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _Lape_Int32_SymmetricDifference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PIntegerArray(Result)^ := Algo_Int32_SymmetricDifference(PIntegerArray(Params^[0])^, PIntegerArray(Params^[1])^)
 end;
@@ -93,7 +93,7 @@ TInt64Array.SymmetricDifference
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TInt64Array.SymmetricDifference(Other: TInt64Array): TInt64Array;
 *)
-procedure _Lape_Int64_SymmetricDifference(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _Lape_Int64_SymmetricDifference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInt64Array(Result)^ := Algo_Int64_SymmetricDifference(PInt64Array(Params^[0])^, PInt64Array(Params^[1])^)
 end;
@@ -103,7 +103,7 @@ TPointArray.SymmetricDifference
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.SymmetricDifference(Other: TPointArray): TPointArray;
 *)
-procedure _Lape_Point_SymmetricDifference(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _Lape_Point_SymmetricDifference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := Algo_Point_SymmetricDifference(PPointArray(Params^[0])^, PPointArray(Params^[1])^)
 end;
@@ -113,7 +113,7 @@ TBoxArray.SymmetricDifference
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TBoxArray.SymmetricDifference(Other: TBoxArray): TBoxArray;
 *)
-procedure _Lape_Box_SymmetricDifference(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _Lape_Box_SymmetricDifference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoxArray(Result)^ := Algo_Box_SymmetricDifference(PBoxArray(Params^[0])^, PBoxArray(Params^[1])^)
 end;
@@ -123,7 +123,7 @@ TByteArray.Intersection
 ~~~~~~~~~~~~~~~~~~~~~~~
 function TByteArray.Intersection(Other: TByteArray): TByteArray;
 *)
-procedure _Lape_UInt8_Intersection(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _Lape_UInt8_Intersection(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PByteArray(Result)^ := Algo_UInt8_Intersection(PByteArray(Params^[0])^, PByteArray(Params^[1])^)
 end;
@@ -133,7 +133,7 @@ TIntegerArray.Intersection
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TIntegerArray.Intersection(Other: TIntegerArray): TIntegerArray;
 *)
-procedure _Lape_Int32_Intersection(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _Lape_Int32_Intersection(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PIntegerArray(Result)^ := Algo_Int32_Intersection(PIntegerArray(Params^[0])^, PIntegerArray(Params^[1])^)
 end;
@@ -143,7 +143,7 @@ TInt64Array.Intersection
 ~~~~~~~~~~~~~~~~~~~~~~~~
 function TInt64Array.Intersection(Other: TInt64Array): TInt64Array;
 *)
-procedure _Lape_Int64_Intersection(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _Lape_Int64_Intersection(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInt64Array(Result)^ := Algo_Int64_Intersection(PInt64Array(Params^[0])^, PInt64Array(Params^[1])^)
 end;
@@ -153,7 +153,7 @@ TPointArray.Intersection
 ~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.Intersection(Other: TPointArray): TPointArray;
 *)
-procedure _Lape_Point_Intersection(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _Lape_Point_Intersection(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := Algo_Point_Intersection(PPointArray(Params^[0])^, PPointArray(Params^[1])^)
 end;
@@ -163,7 +163,7 @@ TBoxArray.Intersection
 ~~~~~~~~~~~~~~~~~~~~~~
 function TBoxArray.Intersection(Other: TBoxArray): TBoxArray;
 *)
-procedure _Lape_Box_Intersection(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _Lape_Box_Intersection(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoxArray(Result)^ := Algo_Box_Intersection(PBoxArray(Params^[0])^, PBoxArray(Params^[1])^)
 end;
@@ -173,7 +173,7 @@ TPointArray.CreateFromBox
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.CreateFromBox(Box: TBox; Filled: Boolean): TPointArray; static;
 *)
-procedure _LapeTPACreateFromBox(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPACreateFromBox(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := TPointArray.CreateFromBox(PBox(Params^[0])^, PBoolean(Params^[1])^);
 end;
@@ -183,7 +183,7 @@ TPointArray.CreateFromEllipse
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.CreateFromEllipse(Center: TPoint; RadiusX, RadiusY: Integer; Filled: Boolean): TPointArray; static;
 *)
-procedure _LapeTPACreateFromEllipse(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPACreateFromEllipse(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := TPointArray.CreateFromEllipse(PPoint(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^);
 end;
@@ -193,7 +193,7 @@ TPointArray.CreateFromCircle
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.CreateFromCircle(Center: TPoint; Radius: Integer; Filled: Boolean): TPointArray; static;
 *)
-procedure _LapeTPACreateFromCircle(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPACreateFromCircle(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := TPointArray.CreateFromCircle(PPoint(Params^[0])^, PInteger(Params^[1])^, PBoolean(Params^[2])^);
 end;
@@ -203,7 +203,7 @@ TPointArray.CreateFromLine
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.CreateFromLine(Start, Stop: TPoint): TPointArray; static;
 *)
-procedure _LapeTPACreateFromLine(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPACreateFromLine(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := TPointArray.CreateFromLine(PPoint(Params^[0])^, PPoint(Params^[1])^);
 end;
@@ -213,7 +213,7 @@ TPointArray.CreateFromPolygon
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.CreateFromPolygon(Poly: TPointArray; Filled: Boolean): TPointArray; static;
 *)
-procedure _LapeTPACreateFromPolygon(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPACreateFromPolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := TPointArray.CreateFromPolygon(PPointArray(Params^[0])^, PBoolean(Params^[1])^);
 end;
@@ -223,7 +223,7 @@ TPointArray.CreateFromSimplePolygon
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.CreateFromSimplePolygon(Center: TPoint; Sides: Integer; Size: Integer; Filled: Boolean): TPointArray; static;
 *)
-procedure _LapeTPACreateFromSimplePolygon(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPACreateFromSimplePolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := TPointArray.CreateFromSimplePolygon(PPoint(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^);
 end;
@@ -233,7 +233,7 @@ TPointArray.Rows
 ~~~~~~~~~~~~~~~~
 function TPointArray.Rows: T2DPointArray;
 *)
-procedure _LapeTPARows(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPARows(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   P2DPointArray(Result)^ := PPointArray(Params^[0])^.Rows();
 end;
@@ -243,7 +243,7 @@ TPointArray.Columns
 ~~~~~~~~~~~~~~~~~~~
 function TPointArray.Columns: T2DPointArray;
 *)
-procedure _LapeTPAColumns(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAColumns(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   P2DPointArray(Result)^ := PPointArray(Params^[0])^.Columns();
 end;
@@ -253,7 +253,7 @@ TPointArray.Offset
 ~~~~~~~~~~~~~~~~~~
 function TPointArray.Offset(P: TPoint): TPointArray;
 *)
-procedure _LapeTPAOffset1(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAOffset1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.Offset(PPoint(Params^[1])^);
 end;
@@ -263,7 +263,7 @@ TPointArray.Offset
 ~~~~~~~~~~~~~~~~~~
 function TPointArray.Offset(X, Y: Integer): TPointArray;
 *)
-procedure _LapeTPAOffset2(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAOffset2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.Offset(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
@@ -273,7 +273,7 @@ TPointArray.FloodFill
 ~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.FloodFill(StartPoint: TPoint): TPointArray;
 *)
-procedure _LapeTPAFloodFill(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAFloodFill(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.FloodFill(PPoint(Params^[1])^);
 end;
@@ -283,7 +283,7 @@ TPointArray.Invert
 ~~~~~~~~~~~~~~~~~~
 function TPointArray.Invert(Bounds: TBox): TPointArray;
 *)
-procedure _LapeTPAInvert1(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAInvert1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.Invert(PBox(Params^[1])^);
 end;
@@ -293,7 +293,7 @@ TPointArray.Invert
 ~~~~~~~~~~~~~~~~~~
 function TPointArray.Invert: TPointArray;
 *)
-procedure _LapeTPAInvert2(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAInvert2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.Invert();
 end;
@@ -303,7 +303,7 @@ TPointArray.Bounds
 ~~~~~~~~~~~~~~~~~~
 function TPointArray.Bounds: TBox;
 *)
-procedure _LapeTPABounds(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPABounds(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBox(Result)^ := PPointArray(Params^[0])^.Bounds();
 end;
@@ -313,7 +313,7 @@ TPointArray.Mean
 ~~~~~~~~~~~~~~~~
 function TPointArray.Mean: TPoint;
 *)
-procedure _LapeTPAMean(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAMean(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPoint(Result)^ := PPointArray(Params^[0])^.Mean();
 end;
@@ -323,7 +323,7 @@ TPointArray.ReduceByDistance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ReduceByDistance(Dist: Integer): TPointArray;
 *)
-procedure _LapeTPAReduceByDistance(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAReduceByDistance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.ReduceByDistance(PInteger(Params^[1])^);
 end;
@@ -333,7 +333,7 @@ TPointArray.PointsNearby
 ~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.PointsNearby(Other: TPointArray; MinDist, MaxDist: Double): TPointArray;
 *)
-procedure _LapeTPAPointsNearby1(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAPointsNearby1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.PointsNearby(PPointArray(Params^[1])^, PDouble(Params^[2])^, PDouble(Params^[3])^);
 end;
@@ -343,7 +343,7 @@ TPointArray.PointsNearby
 ~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.PointsNearby(Other: TPointArray; MinDistX, MinDistY, MaxDistX, MaxDistY: Double): TPointArray;
 *)
-procedure _LapeTPAPointsNearby2(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAPointsNearby2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.PointsNearby(PPointArray(Params^[1])^, PDouble(Params^[2])^, PDouble(Params^[3])^, PDouble(Params^[4])^, PDouble(Params^[5])^);
 end;
@@ -353,7 +353,7 @@ TPointArray.IsPointNearby
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.IsPointNearby(Other: TPoint; MinDist, MaxDist: Double): Boolean;
 *)
-procedure _LapeTPAIsPointNearby1(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAIsPointNearby1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PPointArray(Params^[0])^.IsPointNearby(PPoint(Params^[1])^, PDouble(Params^[2])^, PDouble(Params^[3])^);
 end;
@@ -363,7 +363,7 @@ TPointArray.IsPointNearby
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.IsPointNearby(Other: TPoint; MinDistX, MinDistY, MaxDistX, MaxDistY: Double): Boolean;
 *)
-procedure _LapeTPAIsPointNearby2(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAIsPointNearby2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PPointArray(Params^[0])^.IsPointNearby(PPoint(Params^[1])^, PDouble(Params^[2])^, PDouble(Params^[3])^, PDouble(Params^[4])^, PDouble(Params^[5])^);
 end;
@@ -373,7 +373,7 @@ TPointArray.NearestPoint
 ~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.NearestPoint(Other: TPoint): TPoint;
 *)
-procedure _LapeTPANearestPoint(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPANearestPoint(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPoint(Result)^ := PPointArray(Params^[0])^.NearestPoint(PPoint(Params^[1])^);
 end;
@@ -383,7 +383,7 @@ TPointArray.Density
 ~~~~~~~~~~~~~~~~~~~
 function TPointArray.Density: Double;
 *)
-procedure _LapeTPADensity(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPADensity(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDouble(Result)^ := PPointArray(Params^[0])^.Density();
 end;
@@ -393,7 +393,7 @@ TPointArray.Connect
 ~~~~~~~~~~~~~~~~~~~
 function TPointArray.Connect: TPointArray;
 *)
-procedure _LapeTPAConnect(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAConnect(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.Connect();
 end;
@@ -403,7 +403,7 @@ TPointArray.Extremes
 ~~~~~~~~~~~~~~~~~~~~
 function TPointArray.Extremes: TPointArray;
 *)
-procedure _LapeTPAExtremes(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAExtremes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.Extremes();
 end;
@@ -413,7 +413,7 @@ TPointArray.Rotate
 ~~~~~~~~~~~~~~~~~~
 function TPointArray.Rotate(Radians: Double; Center: TPoint): TPointArray;
 *)
-procedure _LapeTPARotate(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPARotate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.Rotate(PDouble(Params^[1])^, PPoint(Params^[2])^);
 end;
@@ -423,7 +423,7 @@ TPointArray.RotateEx
 ~~~~~~~~~~~~~~~~~~~~
 function TPointArray.RotateEx(Radians: Double): TPointArray;
 *)
-procedure _LapeTPARotateEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPARotateEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.RotateEx(PDouble(Params^[1])^);
 end;
@@ -433,7 +433,7 @@ TPointArray.Sort
 ~~~~~~~~~~~~~~~~
 function TPointArray.Sort(Weights: TIntegerArray; LowToHigh: Boolean = True): TPointArray;
 *)
-procedure _LapeTPASort1(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPASort1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.Sort(PIntegerArray(Params^[1])^, PBoolean(Params^[2])^);
 end;
@@ -443,7 +443,7 @@ TPointArray.Sort
 ~~~~~~~~~~~~~~~~
 function TPointArray.Sort(Weights: TDoubleArray; LowToHigh: Boolean = True): TPointArray;
 *)
-procedure _LapeTPASort2(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPASort2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.Sort(PDoubleArray(Params^[1])^, PBoolean(Params^[2])^);
 end;
@@ -453,7 +453,7 @@ TPointArray.SortByX
 ~~~~~~~~~~~~~~~~~~~
 function TPointArray.SortByX(LowToHigh: Boolean = True): TPointArray;
 *)
-procedure _LapeTPASortByX(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPASortByX(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.SortByX(PBoolean(Params^[1])^);
 end;
@@ -463,7 +463,7 @@ TPointArray.SortByY
 ~~~~~~~~~~~~~~~~~~~
 function TPointArray.SortByY(LowToHigh: Boolean = True): TPointArray;
 *)
-procedure _LapeTPASortByY(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPASortByY(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.SortByY(PBoolean(Params^[1])^);
 end;
@@ -473,7 +473,7 @@ TPointArray.SortFrom
 ~~~~~~~~~~~~~~~~~~~~
 function TPointArray.SortFrom(From: TPoint): TPointArray;
 *)
-procedure _LapeTPASortFrom(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPASortFrom(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.SortFrom(PPoint(Params^[1])^);
 end;
@@ -483,7 +483,7 @@ TPointArray.SortByRow
 ~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.SortByRow(Reverse: Boolean = False): TPointArray;
 *)
-procedure _LapeTPASortByRow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPASortByRow(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.SortByRow(PBoolean(Params^[1])^);
 end;
@@ -493,7 +493,7 @@ TPointArray.SortByColumn
 ~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.SortByColumn(Reverse: Boolean = False): TPointArray;
 *)
-procedure _LapeTPASortByColumn(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPASortByColumn(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.SortByColumn(PBoolean(Params^[1])^);
 end;
@@ -503,7 +503,7 @@ TPointArray.ExcludePie
 ~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ExcludePie(SD, ED, MinR, MaxR: Double; Center: TPoint): TPointArray;
 *)
-procedure _LapeTPAExcludePie(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAExcludePie(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.ExcludePie(PDouble(Params^[1])^, PDouble(Params^[2])^, PDouble(Params^[3])^, PDouble(Params^[4])^, PPoint(Params^[5])^);
 end;
@@ -513,7 +513,7 @@ TPointArray.ExcludeDist
 ~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ExcludeDist(Center: TPoint; MinDist, MaxDist: Double): TPointArray;
 *)
-procedure _LapeTPAExcludeDist(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAExcludeDist(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.ExcludeDist(PPoint(Params^[1])^, PDouble(Params^[2])^, PDouble(Params^[3])^);
 end;
@@ -523,7 +523,7 @@ TPointArray.ExcludePoints
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ExcludePoints(Points: TPointArray): TPointArray;
 *)
-procedure _LapeTPAExcludePoints(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAExcludePoints(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.ExcludePoints(PPointArray(Params^[1])^);
 end;
@@ -533,7 +533,7 @@ TPointArray.ExcludePolygon
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ExcludePolygon(Polygon: TPointArray): TPointArray;
 *)
-procedure _LapeTPAExcludePolygon(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAExcludePolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.ExcludePolygon(PPointArray(Params^[1])^);
 end;
@@ -543,7 +543,7 @@ TPointArray.ExcludeBox
 ~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ExcludeBox(Box: TBox): TPointArray;
 *)
-procedure _LapeTPAExcludeBox(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAExcludeBox(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.ExcludeBox(PBox(Params^[1])^);
 end;
@@ -553,7 +553,7 @@ TPointArray.Skeleton
 ~~~~~~~~~~~~~~~~~~~~
 function TPointArray.Skeleton(FMin: Integer = 2; FMax: Integer = 6): TPointArray;
 *)
-procedure _LapeTPASkeleton(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPASkeleton(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.Skeleton(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
@@ -563,7 +563,7 @@ TPointArray.Border
 ~~~~~~~~~~~~~~~~~~
 function TPointArray.Border: TPointArray;
 *)
-procedure _LapeTPABorder(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPABorder(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.Border();
 end;
@@ -573,7 +573,7 @@ TPointArray.Edges
 ~~~~~~~~~~~~~~~~~
 function TPointArray.Edges: TPointArray;
 *)
-procedure _LapeTPAEdges(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAEdges(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.Edges();
 end;
@@ -583,7 +583,7 @@ TPointArray.ConvexHull
 ~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ConvexHull: TPointArray;
 *)
-procedure _LapeTPAConvexHull(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAConvexHull(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.ConvexHull();
 end;
@@ -593,7 +593,7 @@ TPointArray.ShapeFill
 ~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ShapeFill: TPointArray;
 *)
-procedure _LapeTPAShapeFill(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAShapeFill(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.ShapeFill();
 end;
@@ -603,7 +603,7 @@ TPointArray.Unique
 ~~~~~~~~~~~~~~~~~~
 function TPointArray.Unique: TPointArray; override;
 *)
-procedure _LapeTPAUnique(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAUnique(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.Unique();
 end;
@@ -613,7 +613,7 @@ TPointArray.Split
 ~~~~~~~~~~~~~~~~~
 function TPointArray.Split(Dist: Integer): T2DPointArray;
 *)
-procedure _LapeTPASplit1(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPASplit1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   P2DPointArray(Result)^ := PPointArray(Params^[0])^.Split(PInteger(Params^[1])^);
 end;
@@ -623,7 +623,7 @@ TPointArray.Split
 ~~~~~~~~~~~~~~~~~
 function TPointArray.Split(DistX, DistY: Integer): T2DPointArray;
 *)
-procedure _LapeTPASplit2(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPASplit2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   P2DPointArray(Result)^ := PPointArray(Params^[0])^.Split(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
@@ -633,7 +633,7 @@ TPointArray.Cluster
 ~~~~~~~~~~~~~~~~~~~
 function TPointArray.Cluster(Dist: Integer): T2DPointArray;
 *)
-procedure _LapeTPACluster1(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPACluster1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   P2DPointArray(Result)^ := PPointArray(Params^[0])^.Cluster(PInteger(Params^[1])^);
 end;
@@ -643,7 +643,7 @@ TPointArray.Cluster
 ~~~~~~~~~~~~~~~~~~~
 function TPointArray.Cluster(DistX, DistY: Integer): T2DPointArray;
 *)
-procedure _LapeTPACluster2(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPACluster2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   P2DPointArray(Result)^ := PPointArray(Params^[0])^.Cluster(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
@@ -653,7 +653,7 @@ TPointArray.MinAreaRect
 ~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.MinAreaRect: TQuad;
 *)
-procedure _LapeTPAMinAreaRect(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAMinAreaRect(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PQuad(Result)^ := PPointArray(Params^[0])^.MinAreaRect();
 end;
@@ -663,7 +663,7 @@ TPointArray.Erode
 ~~~~~~~~~~~~~~~~~
 function TPointArray.Erode(Iterations: Integer): TPointArray;
 *)
-procedure _LapeTPAErode(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAErode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.Erode(PInteger(Params^[1])^);
 end;
@@ -673,7 +673,7 @@ TPointArray.Grow
 ~~~~~~~~~~~~~~~~
 function TPointArray.Grow(Iterations: Integer): TPointArray;
 *)
-procedure _LapeTPAGrow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAGrow(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.Grow(PInteger(Params^[1])^);
 end;
@@ -683,7 +683,7 @@ TPointArray.Partition
 ~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.Partition(Dist: Integer): T2DPointArray;
 *)
-procedure _LapeTPAPartition1(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAPartition1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   P2DPointArray(Result)^ := PPointArray(Params^[0])^.Partition(PInteger(Params^[1])^);
 end;
@@ -693,7 +693,7 @@ TPointArray.Partition
 ~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.Partition(Width, Height: Integer): T2DPointArray;
 *)
-procedure _LapeTPAPartition2(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAPartition2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   P2DPointArray(Result)^ := PPointArray(Params^[0])^.Partition(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
@@ -703,7 +703,7 @@ TPointArray.PartitionEx
 ~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.PartitionEx(BoxWidth, BoxHeight: Integer): T2DPointArray;
 *)
-procedure _LapeTPAPartitionEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeTPAPartitionEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   P2DPointArray(Result)^ := PPointArray(Params^[0])^.PartitionEx(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;

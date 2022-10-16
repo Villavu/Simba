@@ -50,1112 +50,1112 @@ type
   PRect = ^TRect;
   PCanvas = ^TCanvas;
 
-procedure _LapeCustomComboBox_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^ := TCustomComboBox.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeCustomComboBox_AddItem(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_AddItem(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.AddItem(PString(Params^[1])^, PObject(Params^[2])^);
 end;
 
-procedure _LapeCustomComboBox_AddHistoryItem(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_AddHistoryItem(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.AddHistoryItem(PString(Params^[1])^, Pinteger(Params^[2])^, PBoolean(Params^[3])^, PBoolean(Params^[4])^);
 end;
 
-procedure _LapeCustomComboBox_AddHistoryItemEx(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_AddHistoryItemEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.AddHistoryItem(PString(Params^[1])^, PObject(Params^[2])^, Pinteger(Params^[3])^, PBoolean(Params^[4])^, PBoolean(Params^[5])^);
 end;
 
-procedure _LapeCustomComboBox_Clear(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_Clear(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.Clear();
 end;
 
-procedure _LapeCustomComboBox_ClearSelection(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_ClearSelection(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.ClearSelection();
 end;
 
-procedure _LapeCustomComboBox_DroppedDown_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_DroppedDown_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomComboBox(Params^[0])^.DroppedDown;
 end;
 
-procedure _LapeCustomComboBox_DroppedDown_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_DroppedDown_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.DroppedDown := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomComboBox_SelectAll(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_SelectAll(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.SelectAll();
 end;
 
-procedure _LapeCustomComboBox_AutoComplete_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_AutoComplete_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomComboBox(Params^[0])^.AutoComplete;
 end;
 
-procedure _LapeCustomComboBox_AutoComplete_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_AutoComplete_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.AutoComplete := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomComboBox_AutoDropDown_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_AutoDropDown_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomComboBox(Params^[0])^.AutoDropDown;
 end;
 
-procedure _LapeCustomComboBox_AutoDropDown_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_AutoDropDown_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.AutoDropDown := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomComboBox_AutoSelect_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_AutoSelect_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomComboBox(Params^[0])^.AutoSelect;
 end;
 
-procedure _LapeCustomComboBox_AutoSelect_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_AutoSelect_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.AutoSelect := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomComboBox_AutoSelected_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_AutoSelected_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomComboBox(Params^[0])^.AutoSelected;
 end;
 
-procedure _LapeCustomComboBox_AutoSelected_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_AutoSelected_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.AutoSelected := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomComboBox_ArrowKeysTraverseList_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_ArrowKeysTraverseList_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomComboBox(Params^[0])^.ArrowKeysTraverseList;
 end;
 
-procedure _LapeCustomComboBox_ArrowKeysTraverseList_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_ArrowKeysTraverseList_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.ArrowKeysTraverseList := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomComboBox_Canvas_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_Canvas_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PCanvas(Result)^ := PCustomComboBox(Params^[0])^.Canvas;
 end;
 
-procedure _LapeCustomComboBox_DropDownCount_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_DropDownCount_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PCustomComboBox(Params^[0])^.DropDownCount;
 end;
 
-procedure _LapeCustomComboBox_DropDownCount_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_DropDownCount_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.DropDownCount := PInteger(Params^[1])^;
 end;
 
-procedure _LapeCustomComboBox_Items_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_Items_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PStrings(Result)^ := PCustomComboBox(Params^[0])^.Items;
 end;
 
-procedure _LapeCustomComboBox_Items_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_Items_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.Items := PStrings(Params^[1])^;
 end;
 
-procedure _LapeCustomComboBox_ItemIndex_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_ItemIndex_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pinteger(Result)^ := PCustomComboBox(Params^[0])^.ItemIndex;
 end;
 
-procedure _LapeCustomComboBox_ItemIndex_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_ItemIndex_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.ItemIndex := Pinteger(Params^[1])^;
 end;
 
-procedure _LapeCustomComboBox_ReadOnly_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_ReadOnly_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomComboBox(Params^[0])^.ReadOnly;
 end;
 
-procedure _LapeCustomComboBox_ReadOnly_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_ReadOnly_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.ReadOnly := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomComboBox_SelLength_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_SelLength_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pinteger(Result)^ := PCustomComboBox(Params^[0])^.SelLength;
 end;
 
-procedure _LapeCustomComboBox_SelLength_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_SelLength_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.SelLength := Pinteger(Params^[1])^;
 end;
 
-procedure _LapeCustomComboBox_SelStart_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_SelStart_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pinteger(Result)^ := PCustomComboBox(Params^[0])^.SelStart;
 end;
 
-procedure _LapeCustomComboBox_SelStart_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_SelStart_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.SelStart := Pinteger(Params^[1])^;
 end;
 
-procedure _LapeCustomComboBox_SelText_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_SelText_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PCustomComboBox(Params^[0])^.SelText;
 end;
 
-procedure _LapeCustomComboBox_SelText_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_SelText_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.SelText := PString(Params^[1])^;
 end;
 
-procedure _LapeCustomComboBox_Style_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_Style_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PComboBoxStyle(Result)^ := PCustomComboBox(Params^[0])^.Style;
 end;
 
-procedure _LapeCustomComboBox_Style_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_Style_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.Style := PComboBoxStyle(Params^[1])^;
 end;
 
-procedure _LapeCustomComboBox_Text_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_Text_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PCustomComboBox(Params^[0])^.Text;
 end;
 
-procedure _LapeCustomComboBox_Text_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_Text_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.Text := PString(Params^[1])^;
 end;
 
-procedure _LapeCustomComboBox_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomComboBox(Params^[0])^.Free();
 end;
 
-procedure _LapeComboBox_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeComboBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PComboBox(Params^[0])^ := TComboBox.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeCustomComboBox_OnChange_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_OnChange_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PNotifyEvent(Result)^ := PComboBox(Params^[0])^.OnChange;
 end;
 
-procedure _LapeCustomComboBox_OnChange_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomComboBox_OnChange_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PComboBox(Params^[0])^.OnChange := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeComboBox_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeComboBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PComboBox(Params^[0])^.Free();
 end;
 
-procedure _LapeCustomListBox_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^ := TCustomListBox.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeCustomListBox_AddItem(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_AddItem(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.AddItem(PString(Params^[1])^, PObject(Params^[2])^);
 end;
 
-procedure _LapeCustomListBox_Click(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_Click(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.Click();
 end;
 
-procedure _LapeCustomListBox_Clear(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_Clear(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.Clear();
 end;
 
-procedure _LapeCustomListBox_ClearSelection(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_ClearSelection(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.ClearSelection();
 end;
 
-procedure _LapeCustomListBox_GetIndexAtXY(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_GetIndexAtXY(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pinteger(Result)^ := PCustomListBox(Params^[0])^.GetIndexAtXY(Pinteger(Params^[1])^, Pinteger(Params^[2])^);
 end;
 
-procedure _LapeCustomListBox_GetIndexAtY(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_GetIndexAtY(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pinteger(Result)^ := PCustomListBox(Params^[0])^.GetIndexAtY(Pinteger(Params^[1])^);
 end;
 
-procedure _LapeCustomListBox_GetSelectedText(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_GetSelectedText(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PCustomListBox(Params^[0])^.GetSelectedText();
 end;
 
-procedure _LapeCustomListBox_ItemAtPos(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_ItemAtPos(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PCustomListBox(Params^[0])^.ItemAtPos(PPoint(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
-procedure _LapeCustomListBox_ItemRect(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_ItemRect(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PRect(Result)^ := PCustomListBox(Params^[0])^.ItemRect(PInteger(Params^[1])^);
 end;
 
-procedure _LapeCustomListBox_ItemVisible(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_ItemVisible(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomListBox(Params^[0])^.ItemVisible(PInteger(Params^[1])^);
 end;
 
-procedure _LapeCustomListBox_ItemFullyVisible(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_ItemFullyVisible(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomListBox(Params^[0])^.ItemFullyVisible(PInteger(Params^[1])^);
 end;
 
-procedure _LapeCustomListBox_LockSelectionChange(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_LockSelectionChange(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.LockSelectionChange();
 end;
 
-procedure _LapeCustomListBox_MakeCurrentVisible(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_MakeCurrentVisible(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.MakeCurrentVisible();
 end;
 
-procedure _LapeCustomListBox_MeasureItem(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_MeasureItem(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.MeasureItem(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-procedure _LapeCustomListBox_SelectAll(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_SelectAll(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.SelectAll();
 end;
 
-procedure _LapeCustomListBox_UnlockSelectionChange(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_UnlockSelectionChange(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.UnlockSelectionChange();
 end;
 
-procedure _LapeCustomListBox_DrawFocusRect_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_DrawFocusRect_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := lboDrawFocusRect in PCustomListBox(Params^[0])^.Options;
 end;
 
-procedure _LapeCustomListBox_DrawFocusRect_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_DrawFocusRect_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.Options := PCustomListBox(Params^[0])^.Options + [lboDrawFocusRect];
 end;
 
-procedure _LapeCustomListBox_Canvas_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_Canvas_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PCanvas(Result)^ := PCustomListBox(Params^[0])^.Canvas;
 end;
 
-procedure _LapeCustomListBox_ClickOnSelChange_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_ClickOnSelChange_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomListBox(Params^[0])^.ClickOnSelChange;
 end;
 
-procedure _LapeCustomListBox_ClickOnSelChange_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_ClickOnSelChange_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.ClickOnSelChange := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomListBox_Columns_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_Columns_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PCustomListBox(Params^[0])^.Columns;
 end;
 
-procedure _LapeCustomListBox_Columns_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_Columns_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.Columns := PInteger(Params^[1])^;
 end;
 
-procedure _LapeCustomListBox_Count_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_Count_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PCustomListBox(Params^[0])^.Count;
 end;
 
-procedure _LapeCustomListBox_ExtendedSelect_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_ExtendedSelect_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomListBox(Params^[0])^.ExtendedSelect;
 end;
 
-procedure _LapeCustomListBox_ExtendedSelect_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_ExtendedSelect_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.ExtendedSelect := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomListBox_ItemHeight_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_ItemHeight_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PCustomListBox(Params^[0])^.ItemHeight;
 end;
 
-procedure _LapeCustomListBox_ItemHeight_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_ItemHeight_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.ItemHeight := PInteger(Params^[1])^;
 end;
 
-procedure _LapeCustomListBox_ItemIndex_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_ItemIndex_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pinteger(Result)^ := PCustomListBox(Params^[0])^.ItemIndex;
 end;
 
-procedure _LapeCustomListBox_ItemIndex_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_ItemIndex_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.ItemIndex := Pinteger(Params^[1])^;
 end;
 
-procedure _LapeCustomListBox_Items_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_Items_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PStrings(Result)^ := PCustomListBox(Params^[0])^.Items;
 end;
 
-procedure _LapeCustomListBox_Items_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_Items_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.Items := PStrings(Params^[1])^;
 end;
 
-procedure _LapeCustomListBox_MultiSelect_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_MultiSelect_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomListBox(Params^[0])^.MultiSelect;
 end;
 
-procedure _LapeCustomListBox_MultiSelect_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_MultiSelect_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.MultiSelect := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomListBox_ScrollWidth_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_ScrollWidth_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PCustomListBox(Params^[0])^.ScrollWidth;
 end;
 
-procedure _LapeCustomListBox_ScrollWidth_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_ScrollWidth_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.ScrollWidth := PInteger(Params^[1])^;
 end;
 
-procedure _LapeCustomListBox_SelCount_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_SelCount_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pinteger(Result)^ := PCustomListBox(Params^[0])^.SelCount;
 end;
 
-procedure _LapeCustomListBox_Sorted_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_Sorted_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomListBox(Params^[0])^.Sorted;
 end;
 
-procedure _LapeCustomListBox_Sorted_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_Sorted_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.Sorted := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomListBox_TopIndex_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_TopIndex_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PCustomListBox(Params^[0])^.TopIndex;
 end;
 
-procedure _LapeCustomListBox_TopIndex_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_TopIndex_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.TopIndex := PInteger(Params^[1])^;
 end;
 
-procedure _LapeCustomListBox_Style_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_Style_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PListBoxStyle(Result)^ := PCustomListBox(Params^[0])^.Style;
 end;
 
-procedure _LapeCustomListBox_Style_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_Style_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.Style := PListBoxStyle(Params^[1])^;
 end;
 
-procedure _LapeCustomListBox_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.Free();
 end;
 
-procedure _LapeCustomListBox_OnSelectionChange_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_OnSelectionChange_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSelectionChangeEvent(Result)^ := PCustomListBox(Params^[0])^.OnSelectionChange;
 end;
 
-procedure _LapeCustomListBox_OnSelectionChange_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_OnSelectionChange_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.OnSelectionChange := PSelectionChangeEvent(Params^[1])^;
 end;
 
-procedure _LapeCustomListBox_OnDrawItem_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_OnDrawItem_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDrawItemEvent(Result)^ := PCustomListBox(Params^[0])^.OnDrawItem;
 end;
 
-procedure _LapeCustomListBox_OnDrawItem_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomListBox_OnDrawItem_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.OnDrawItem := PDrawItemEvent(Params^[1])^;
 end;
 
-procedure _LapeListBox_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeListBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PListBox(Params^[0])^ := TListBox.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeListBox_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeListBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PListBox(Params^[0])^.Free();
 end;
 
-procedure _LapeCustomEdit_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^ := TCustomEdit.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeCustomEdit_Clear(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_Clear(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^.Clear();
 end;
 
-procedure _LapeCustomEdit_SelectAll(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_SelectAll(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^.SelectAll();
 end;
 
-procedure _LapeCustomEdit_ClearSelection(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_ClearSelection(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^.ClearSelection();
 end;
 
-procedure _LapeCustomEdit_CopyToClipboard(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_CopyToClipboard(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^.CopyToClipboard();
 end;
 
-procedure _LapeCustomEdit_CutToClipboard(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_CutToClipboard(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^.CutToClipboard();
 end;
 
-procedure _LapeCustomEdit_PasteFromClipboard(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_PasteFromClipboard(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^.PasteFromClipboard();
 end;
 
-procedure _LapeCustomEdit_Undo(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_Undo(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^.Undo();
 end;
 
-procedure _LapeCustomEdit_CanUndo_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_CanUndo_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomEdit(Params^[0])^.CanUndo;
 end;
 
-procedure _LapeCustomEdit_CaretPos_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_CaretPos_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPoint(Result)^ := PCustomEdit(Params^[0])^.CaretPos;
 end;
 
-procedure _LapeCustomEdit_CaretPos_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_CaretPos_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^.CaretPos := PPoint(Params^[1])^;
 end;
 
-procedure _LapeCustomEdit_HideSelection_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_HideSelection_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomEdit(Params^[0])^.HideSelection;
 end;
 
-procedure _LapeCustomEdit_HideSelection_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_HideSelection_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^.HideSelection := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomEdit_MaxLength_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_MaxLength_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PCustomEdit(Params^[0])^.MaxLength;
 end;
 
-procedure _LapeCustomEdit_MaxLength_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_MaxLength_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^.MaxLength := PInteger(Params^[1])^;
 end;
 
-procedure _LapeCustomEdit_Modified_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_Modified_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomEdit(Params^[0])^.Modified;
 end;
 
-procedure _LapeCustomEdit_Modified_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_Modified_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^.Modified := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomEdit_OnChange_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_OnChange_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PNotifyEvent(Result)^ := PCustomEdit(Params^[0])^.OnChange;
 end;
 
-procedure _LapeCustomEdit_OnChange_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_OnChange_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^.OnChange := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeCustomEdit_PasswordChar_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_PasswordChar_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PChar(Result)^ := PCustomEdit(Params^[0])^.PasswordChar;
 end;
 
-procedure _LapeCustomEdit_PasswordChar_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_PasswordChar_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^.PasswordChar := PChar(Params^[1])^;
 end;
 
-procedure _LapeCustomEdit_ReadOnly_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_ReadOnly_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomEdit(Params^[0])^.ReadOnly;
 end;
 
-procedure _LapeCustomEdit_ReadOnly_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_ReadOnly_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^.ReadOnly := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomEdit_SelLength_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_SelLength_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pinteger(Result)^ := PCustomEdit(Params^[0])^.SelLength;
 end;
 
-procedure _LapeCustomEdit_SelLength_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_SelLength_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^.SelLength := Pinteger(Params^[1])^;
 end;
 
-procedure _LapeCustomEdit_SelStart_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_SelStart_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pinteger(Result)^ := PCustomEdit(Params^[0])^.SelStart;
 end;
 
-procedure _LapeCustomEdit_SelStart_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_SelStart_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^.SelStart := Pinteger(Params^[1])^;
 end;
 
-procedure _LapeCustomEdit_SelText_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_SelText_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PCustomEdit(Params^[0])^.SelText;
 end;
 
-procedure _LapeCustomEdit_SelText_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_SelText_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^.SelText := PString(Params^[1])^;
 end;
 
-procedure _LapeCustomEdit_Text_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_Text_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PCustomEdit(Params^[0])^.Text;
 end;
 
-procedure _LapeCustomEdit_Text_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_Text_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^.Text := PString(Params^[1])^;
 end;
 
-procedure _LapeCustomEdit_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomEdit_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomEdit(Params^[0])^.Free();
 end;
 
-procedure _LapeEdit_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeEdit_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PEdit(Params^[0])^ := TEdit.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeEdit_OnEditingDone_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeEdit_OnEditingDone_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PNotifyEvent(Result)^ := PEdit(Params^[0])^.OnEditingDone;
 end;
 
-procedure _LapeEdit_OnEditingDone_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeEdit_OnEditingDone_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PEdit(Params^[0])^.OnEditingDone := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeEdit_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeEdit_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PEdit(Params^[0])^.Free();
 end;
 
-procedure _LapeCustomGroupBox_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomGroupBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomGroupBox(Params^[0])^ := TCustomGroupBox.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeCustomGroupBox_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomGroupBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomGroupBox(Params^[0])^.Free();
 end;
 
-procedure _LapeGroupBox_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeGroupBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PGroupBox(Params^[0])^ := TGroupBox.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeGroupBox_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeGroupBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PGroupBox(Params^[0])^.Free();
 end;
 
-procedure _LapeCustomMemo_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomMemo_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomMemo(Params^[0])^ := TCustomMemo.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeCustomMemo_Append(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomMemo_Append(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomMemo(Params^[0])^.Append(PString(Params^[1])^);
 end;
 
-procedure _LapeCustomMemo_Lines_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomMemo_Lines_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PStrings(Result)^ := PCustomMemo(Params^[0])^.Lines;
 end;
 
-procedure _LapeCustomMemo_Lines_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomMemo_Lines_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomMemo(Params^[0])^.Lines := PStrings(Params^[1])^;
 end;
 
-procedure _LapeCustomMemo_HorzScrollBar_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomMemo_HorzScrollBar_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PMemoScrollBar(Result)^ := PCustomMemo(Params^[0])^.HorzScrollBar;
 end;
 
-procedure _LapeCustomMemo_HorzScrollBar_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomMemo_HorzScrollBar_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomMemo(Params^[0])^.HorzScrollBar := PMemoScrollBar(Params^[1])^;
 end;
 
-procedure _LapeCustomMemo_VertScrollBar_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomMemo_VertScrollBar_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PMemoScrollBar(Result)^ := PCustomMemo(Params^[0])^.VertScrollBar;
 end;
 
-procedure _LapeCustomMemo_VertScrollBar_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomMemo_VertScrollBar_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomMemo(Params^[0])^.VertScrollBar := PMemoScrollBar(Params^[1])^;
 end;
 
-procedure _LapeCustomMemo_ScrollBars_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomMemo_ScrollBars_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PScrollStyle(Result)^ := PCustomMemo(Params^[0])^.ScrollBars;
 end;
 
-procedure _LapeCustomMemo_ScrollBars_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomMemo_ScrollBars_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomMemo(Params^[0])^.ScrollBars := PScrollStyle(Params^[1])^;
 end;
 
-procedure _LapeCustomMemo_WantReturns_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomMemo_WantReturns_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomMemo(Params^[0])^.WantReturns;
 end;
 
-procedure _LapeCustomMemo_WantReturns_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomMemo_WantReturns_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomMemo(Params^[0])^.WantReturns := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomMemo_WantTabs_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomMemo_WantTabs_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomMemo(Params^[0])^.WantTabs;
 end;
 
-procedure _LapeCustomMemo_WantTabs_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomMemo_WantTabs_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomMemo(Params^[0])^.WantTabs := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomMemo_WordWrap_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomMemo_WordWrap_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomMemo(Params^[0])^.WordWrap;
 end;
 
-procedure _LapeCustomMemo_WordWrap_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomMemo_WordWrap_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomMemo(Params^[0])^.WordWrap := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomMemo_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomMemo_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomMemo(Params^[0])^.Free();
 end;
 
-procedure _LapeMemo_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMemo_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMemo(Params^[0])^ := TMemo.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeMemo_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeMemo_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMemo(Params^[0])^.Free();
 end;
 
-procedure _LapeButtonControl_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeButtonControl_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PButtonControl(Params^[0])^ := TButtonControl.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeButtonControl_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeButtonControl_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PButtonControl(Params^[0])^.Free();
 end;
 
-procedure _LapeCustomButton_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomButton_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomButton(Params^[0])^ := TCustomButton.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeCustomButton_Active_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomButton_Active_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomButton(Params^[0])^.Active;
 end;
 
-procedure _LapeCustomButton_Default_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomButton_Default_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomButton(Params^[0])^.Default;
 end;
 
-procedure _LapeCustomButton_Default_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomButton_Default_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomButton(Params^[0])^.Default := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomButton_Cancel_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomButton_Cancel_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomButton(Params^[0])^.Cancel;
 end;
 
-procedure _LapeCustomButton_Cancel_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomButton_Cancel_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomButton(Params^[0])^.Cancel := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomButton_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomButton_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomButton(Params^[0])^.Free();
 end;
 
-procedure _LapeButton_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeButton_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PButton(Params^[0])^ := TButton.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeButton_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeButton_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PButton(Params^[0])^.Free();
 end;
 
-procedure _LapeCustomCheckBox_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomCheckBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomCheckBox(Params^[0])^ := TCustomCheckBox.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeCustomCheckBox_AllowGrayed_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomCheckBox_AllowGrayed_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomCheckBox(Params^[0])^.AllowGrayed;
 end;
 
-procedure _LapeCustomCheckBox_AllowGrayed_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomCheckBox_AllowGrayed_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomCheckBox(Params^[0])^.AllowGrayed := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomCheckBox_State_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomCheckBox_State_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PCheckBoxState(Result)^ := PCustomCheckBox(Params^[0])^.State;
 end;
 
-procedure _LapeCustomCheckBox_State_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomCheckBox_State_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomCheckBox(Params^[0])^.State := PCheckBoxState(Params^[1])^;
 end;
 
-procedure _LapeCustomCheckBox_OnChange_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomCheckBox_OnChange_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PNotifyEvent(Result)^ := PCustomCheckBox(Params^[0])^.OnChange;
 end;
 
-procedure _LapeCustomCheckBox_OnChange_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomCheckBox_OnChange_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomCheckBox(Params^[0])^.OnChange := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeCustomCheckBox_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomCheckBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomCheckBox(Params^[0])^.Free();
 end;
 
-procedure _LapeCheckBox_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCheckBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCheckBox(Params^[0])^ := TCheckBox.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeCheckBox_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCheckBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCheckBox(Params^[0])^.Free();
 end;
 
-procedure _LapeCustomLabel_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomLabel_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomLabel(Params^[0])^ := TCustomLabel.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeCustomLabel_AdjustFontForOptimalFill(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomLabel_AdjustFontForOptimalFill(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomLabel(Params^[0])^.AdjustFontForOptimalFill();
 end;
 
-procedure _LapeCustomLabel_Paint(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomLabel_Paint(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomLabel(Params^[0])^.Paint();
 end;
 
-procedure _LapeCustomLabel_SetBounds(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomLabel_SetBounds(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomLabel(Params^[0])^.SetBounds(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
 end;
 
-procedure _LapeCustomLabel_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomLabel_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomLabel(Params^[0])^.Free();
 end;
 
-procedure _LapeLabel_Alignment_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeLabel_Alignment_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PAlignment(Result)^ := PLabel(Params^[0])^.Alignment;
 end;
 
-procedure _LapeLabel_Alignment_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeLabel_Alignment_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PLabel(Params^[0])^.Alignment := PAlignment(Params^[1])^;
 end;
 
-procedure _LapeLabel_Layout_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeLabel_Layout_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PTextLayout(Result)^ := PLabel(Params^[0])^.Layout;
 end;
 
-procedure _LapeLabel_Layout_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeLabel_Layout_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PLabel(Params^[0])^.Layout := PTextLayout(Params^[1])^;
 end;
 
-procedure _LapeLabel_Transparent_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeLabel_Transparent_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PLabel(Params^[0])^.Transparent;
 end;
 
-procedure _LapeLabel_Transparent_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeLabel_Transparent_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PLabel(Params^[0])^.Transparent := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeLabel_WordWrap_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeLabel_WordWrap_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PLabel(Params^[0])^.WordWrap;
 end;
 
-procedure _LapeLabel_WordWrap_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeLabel_WordWrap_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PLabel(Params^[0])^.WordWrap := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeLabel_OptimalFill_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeLabel_OptimalFill_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PLabel(Params^[0])^.OptimalFill;
 end;
 
-procedure _LapeLabel_OptimalFill_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeLabel_OptimalFill_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PLabel(Params^[0])^.OptimalFill := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeLabel_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeLabel_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PLabel(Params^[0])^ := TLabel.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeLabel_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeLabel_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PLabel(Params^[0])^.Free();
 end;
 
-procedure _LapeCustomSpeedButton_FindDownButton(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_FindDownButton(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpeedButton(Result)^ := PCustomSpeedButton(Params^[0])^.FindDownButton();
 end;
 
-procedure _LapeCustomSpeedButton_AllowAllUp_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_AllowAllUp_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomSpeedButton(Params^[0])^.AllowAllUp;
 end;
 
-procedure _LapeCustomSpeedButton_AllowAllUp_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_AllowAllUp_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpeedButton(Params^[0])^.AllowAllUp := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomSpeedButton_Down_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_Down_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomSpeedButton(Params^[0])^.Down;
 end;
 
-procedure _LapeCustomSpeedButton_Down_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_Down_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpeedButton(Params^[0])^.Down := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomSpeedButton_Flat_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_Flat_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomSpeedButton(Params^[0])^.Flat;
 end;
 
-procedure _LapeCustomSpeedButton_Flat_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_Flat_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpeedButton(Params^[0])^.Flat := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomSpeedButton_Glyph_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_Glyph_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBitmap(Result)^ := PCustomSpeedButton(Params^[0])^.Glyph;
 end;
 
-procedure _LapeCustomSpeedButton_Glyph_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_Glyph_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpeedButton(Params^[0])^.Glyph := PBitmap(Params^[1])^;
 end;
 
-procedure _LapeCustomSpeedButton_GroupIndex_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_GroupIndex_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PCustomSpeedButton(Params^[0])^.GroupIndex;
 end;
 
-procedure _LapeCustomSpeedButton_GroupIndex_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_GroupIndex_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpeedButton(Params^[0])^.GroupIndex := PInteger(Params^[1])^;
 end;
 
-procedure _LapeCustomSpeedButton_Layout_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_Layout_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PButtonLayout(Result)^ := PCustomSpeedButton(Params^[0])^.Layout;
 end;
 
-procedure _LapeCustomSpeedButton_Layout_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_Layout_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpeedButton(Params^[0])^.Layout := PButtonLayout(Params^[1])^;
 end;
 
-procedure _LapeCustomSpeedButton_Margin_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_Margin_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pinteger(Result)^ := PCustomSpeedButton(Params^[0])^.Margin;
 end;
 
-procedure _LapeCustomSpeedButton_Margin_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_Margin_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpeedButton(Params^[0])^.Margin := Pinteger(Params^[1])^;
 end;
 
-procedure _LapeCustomSpeedButton_NumGlyphs_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_NumGlyphs_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PCustomSpeedButton(Params^[0])^.NumGlyphs;
 end;
 
-procedure _LapeCustomSpeedButton_NumGlyphs_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_NumGlyphs_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpeedButton(Params^[0])^.NumGlyphs := PInteger(Params^[1])^;
 end;
 
-procedure _LapeCustomSpeedButton_ShowAccelChar_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_ShowAccelChar_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomSpeedButton(Params^[0])^.ShowAccelChar;
 end;
 
-procedure _LapeCustomSpeedButton_ShowAccelChar_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_ShowAccelChar_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpeedButton(Params^[0])^.ShowAccelChar := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomSpeedButton_ShowCaption_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_ShowCaption_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomSpeedButton(Params^[0])^.ShowCaption;
 end;
 
-procedure _LapeCustomSpeedButton_ShowCaption_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_ShowCaption_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpeedButton(Params^[0])^.ShowCaption := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomSpeedButton_Spacing_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_Spacing_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pinteger(Result)^ := PCustomSpeedButton(Params^[0])^.Spacing;
 end;
 
-procedure _LapeCustomSpeedButton_Spacing_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_Spacing_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpeedButton(Params^[0])^.Spacing := Pinteger(Params^[1])^;
 end;
 
-procedure _LapeCustomSpeedButton_Transparent_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_Transparent_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomSpeedButton(Params^[0])^.Transparent;
 end;
 
-procedure _LapeCustomSpeedButton_Transparent_Write(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_Transparent_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpeedButton(Params^[0])^.Transparent := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomSpeedButton_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpeedButton(Params^[0])^ := TCustomSpeedButton.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeCustomSpeedButton_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeCustomSpeedButton_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpeedButton(Params^[0])^.Free();
 end;
 
-procedure _LapeSpeedButton_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeSpeedButton_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSpeedButton(Params^[0])^ := TSpeedButton.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeSpeedButton_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeSpeedButton_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSpeedButton(Params^[0])^.Free();
 end;
 
-procedure _LapeRadioButton_Init(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeRadioButton_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PRadioButton(Params^[0])^ := TRadioButton.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeRadioButton_Free(const Params: PParamArray); {$IFDEF Lape_CDECL} cdecl;{$ENDIF}
+procedure _LapeRadioButton_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PRadioButton(Params^[0])^.Free();
 end;

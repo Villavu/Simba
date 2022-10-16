@@ -37,7 +37,7 @@ function RandomCenterTPA(Amount: Integer; Box: TBox): TPointArray;
 
 Generates random points in `Box` weighted towards the center.
 *)
-procedure _LapeRandomCenterTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeRandomCenterTPA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := RandomCenterTPA(PInteger(Params^[0])^, PBox(Params^[1])^);
 end;
@@ -49,7 +49,7 @@ function RandomTPA(Amount: Integer; Box: TBox): TPointArray;
 
 Generates random points in `Box`.
 *)
-procedure _LapeRandomTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeRandomTPA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := RandomTPA(PInteger(Params^[0])^, PBox(Params^[1])^);
 end;
@@ -62,12 +62,12 @@ function RandomLeft(Lo, Hi: Int64): Int64;
 
 Generates a random number between `Lo` and `Hi` weighted towards `Lo`
 *)
-procedure _LapeRandomLeft(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeRandomLeft(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDouble(Result)^ := RandomLeft(PDouble(Params^[0])^, PDouble(Params^[1])^);
 end;
 
-procedure _LapeRandomLeftI(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeRandomLeftI(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInt64(Result)^ := RandomLeft(PInt64(Params^[0])^, PInt64(Params^[1])^);
 end;
@@ -80,12 +80,12 @@ function RandomRight(Lo, Hi: Int64): Int64;
 
 Generates a random number between `Lo` and `Hi` weighted towards `Hi`
 *)
-procedure _LapeRandomRight(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeRandomRight(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDouble(Result)^ := RandomRight(PDouble(Params^[0])^, PDouble(Params^[1])^);
 end;
 
-procedure _LapeRandomRightI(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeRandomRightI(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInt64(Result)^ := RandomRight(PInt64(Params^[0])^, PInt64(Params^[1])^);
 end;
@@ -98,12 +98,12 @@ function RandomMean(Lo, Hi: Int64): Int64;
 
 Generates a random number between `Lo` and `Hi` weighted towards the mean of Lo,Hi
 *)
-procedure _LapeRandomMean(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeRandomMean(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDouble(Result)^ := RandomMean(PDouble(Params^[0])^, PDouble(Params^[1])^);
 end;
 
-procedure _LapeRandomMeanI(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeRandomMeanI(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInt64(Result)^ := RandomMean(PInt64(Params^[0])^, PInt64(Params^[1])^);
 end;
@@ -116,12 +116,12 @@ function RandomMode(Mode, Lo, Hi: Int64): Int64;
 
 Generates a random number between `Lo` and `Hi` weighted torwards `Mode`
 *)
-procedure _LapeRandomMode(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeRandomMode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDouble(Result)^ := RandomMode(PDouble(Params^[0])^, PDouble(Params^[1])^, PDouble(Params^[2])^);
 end;
 
-procedure _LapeRandomModeI(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeRandomModeI(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInt64(Result)^ := RandomMode(PInt64(Params^[0])^, PInt64(Params^[1])^, PInt64(Params^[2])^);
 end;

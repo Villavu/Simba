@@ -11,7 +11,7 @@ uses
   synlz, blowfish, md5, sha1, hmac,
   simba.script_compiler, simba.stringutil, simba.compressionthread;
 
-procedure _LapeBlowFish_Encrypt(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeBlowFish_Encrypt(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 var
   Data: String;
   Output: TStringStream;
@@ -35,7 +35,7 @@ begin
   end;
 end;
 
-procedure _LapeBlowFish_Decrypt(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeBlowFish_Decrypt(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 var
   Input: TStringStream;
   Decrypt: TBlowFishDeCryptStream;
@@ -57,109 +57,109 @@ begin
   end;
 end;
 
-procedure _LapeMD5String(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeMD5String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := MD5Print(MD5String(PString(Params^[0])^));
 end;
 
-procedure _LapeMD5File(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeMD5File(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   if FileExists(PString(Params^[0])^) then
     PString(Result)^ := MD5Print(MD5File(PString(Params^[0])^));
 end;
 
-procedure _LapeSHA1String(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSHA1String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := SHA1Print(SHA1String(PString(Params^[0])^));
 end;
 
-procedure _LapeSHA1File(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSHA1File(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   if FileExists(PString(Params^[0])^) then
     PString(Result)^ := SHA1Print(SHA1File(PString(Params^[0])^));
 end;
 
-procedure _LapeHMACMD5(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeHMACMD5(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := HMACMD5(PString(Params^[0])^, PString(Params^[1])^);
 end;
 
-procedure _LapeHMACSHA1(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeHMACSHA1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := HMACSHA1(PString(Params^[0])^, PString(Params^[1])^);
 end;
 
-procedure _LapeCompressString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeCompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pstring(Result)^ := CompressString(PString(Params^[0])^);
 end;
 
-procedure _LapeDecompressString(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeDecompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pstring(Result)^ := DecompressString(PString(Params^[0])^);
 end;
 
-procedure _LapeBase64Encode(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeBase64Encode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pstring(Result)^ := Base64Encode(PString(Params^[0])^);
 end;
 
-procedure _LapeBase64Decode(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeBase64Decode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pstring(Result)^ := Base64Decode(PString(Params^[0])^);
 end;
 
-procedure _LapeSynLZCompress(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSynLZCompress(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := SynLZcompress1pas(PPAnsiChar(Params^[0])^, PInteger(Params^[1])^, PPAnsiChar(Params^[2])^);
 end;
 
-procedure _LapeSynLZDecompress(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSynLZDecompress(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := SynLZdecompress1pas(PPAnsiChar(Params^[0])^, PInteger(Params^[1])^, PPAnsiChar(Params^[2])^);
 end;
 
-procedure _LapeSynLZCompressDestLen(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSynLZCompressDestLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := SynLZcompressdestlen(PInteger(Params^[0])^);
 end;
 
-procedure _LapeSynLZDecompressDestLen(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSynLZDecompressDestLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := SynLZdecompressdestlen(PPAnsiChar(Params^[0])^);
 end;
 
-procedure _LapeLZCompressionThread_Create(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeLZCompressionThread_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PLZCompressionThread(Result)^ := TLZCompressionThread.Create();
 end;
 
-procedure _LapeLZCompressionThread_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeLZCompressionThread_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PLZCompressionThread(Params^[0])^.Free();
 end;
 
-procedure _LapeLZCompressionThread_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeLZCompressionThread_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PLZCompressionThread(Params^[0])^.Write(PPointer(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-procedure _LapeLZCompressionThread_WaitCompressing(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeLZCompressionThread_WaitCompressing(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PLZCompressionThread(Params^[0])^.WaitCompressing();
 end;
 
-procedure _LapeLZCompressionThread_IsCompressing(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeLZCompressionThread_IsCompressing(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PLZCompressionThread(Params^[0])^.IsCompressing;
 end;
 
-procedure _LapeLZCompressionThreadOnCompressed_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeLZCompressionThreadOnCompressed_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PLZCompressedEvent(Result)^ := PLZCompressionThread(Params^[0])^.OnCompressed;
 end;
 
-procedure _LapeLZCompressionThreadOnCompressed_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeLZCompressionThreadOnCompressed_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PLZCompressionThread(Params^[0])^.OnCompressed := PLZCompressedEvent(Params^[1])^;
 end;

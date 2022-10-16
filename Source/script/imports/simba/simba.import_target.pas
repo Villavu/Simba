@@ -11,144 +11,144 @@ uses
   simba.script_compiler, simba.mufasatypes, simba.scriptthread, simba.bitmap,
   simba.windowhandle, simba.target_exported, simba.target_window;
 
-procedure _LapeSetDesktopAsClient(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSetDesktopAsClient(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := SimbaScriptThread.Script.Client.IOManager.SetDesktop();
 end;
 
-procedure _LapeSetTargetWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSetTargetWindow(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := SimbaScriptThread.Script.Client.IOManager.SetTarget(PWindowHandle(Params^[0])^);
 end;
 
-procedure _LapeSetTargetData(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSetTargetData(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := SimbaScriptThread.Script.Client.IOManager.SetTarget(PPRGB32(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-procedure _LapeSetTargetBitmap(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSetTargetBitmap(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := SimbaScriptThread.Script.Client.IOManager.SetTarget(PMufasaBitmap(Params^[0])^);
 end;
 
-procedure _LapeSetEIOSTarget(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSetEIOSTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := SimbaScriptThread.Script.Client.IOManager.SetTarget(Pstring(Params^[0])^, Pstring(Params^[1])^);
 end;
 
-procedure _LapeMouseSetClientArea(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeMouseSetClientArea(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := SimbaScriptThread.Script.Client.IOManager.MouseSetClientArea(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
-procedure _LapeMouseResetClientArea(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeMouseResetClientArea(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaScriptThread.Script.Client.IOManager.MouseResetClientArea();
 end;
 
-procedure _LapeImageSetClientArea(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeImageSetClientArea(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := SimbaScriptThread.Script.Client.IOManager.ImageSetClientArea(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
-procedure _LapeImageResetClientArea(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeImageResetClientArea(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaScriptThread.Script.Client.IOManager.ImageResetClientArea();
 end;
 
-procedure _LapeSetImageTarget(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSetImageTarget(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
    SimbaScriptThread.Script.Client.IOManager.SetImageTarget(PInteger(Params^[0])^);
 end;
 
-procedure _LapeSetKeyMouseTarget(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSetKeyMouseTarget(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaScriptThread.Script.Client.IOManager.SetKeyMouseTarget(PInteger(Params^[0])^);
 end;
 
-procedure _LapeGetImageTarget(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetImageTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaScriptThread.Script.Client.IOManager.GetImageTarget(PInteger(Result)^);
 end;
 
-procedure _LapeGetKeyMouseTarget(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetKeyMouseTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaScriptThread.Script.Client.IOManager.GetKeyMouseTarget(PInteger(Result)^);
 end;
 
-procedure _LapeExportImageTarget(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeExportImageTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PTarget_Exported(Result)^ := SimbaScriptThread.Script.Client.IOManager.ExportImageTarget();
 end;
 
-procedure _LapeExportKeyMouseTarget(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeExportKeyMouseTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PTarget_Exported(Result)^ := SimbaScriptThread.Script.Client.IOManager.ExportKeyMouseTarget();
 end;
 
-procedure _LapeFreeTarget(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFreeTarget(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaScriptThread.Script.Client.IOManager.FreeTarget(PInteger(Params^[0])^);
 end;
 
-procedure _LapeGetClientDimensions(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetClientDimensions(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaScriptThread.Script.Client.IOManager.GetDimensions(PInteger(Params^[0])^, PInteger(Params^[1])^);
 end;
 
-procedure _LapeGetClientPosition(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetClientPosition(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaScriptThread.Script.Client.IOManager.GetPosition(PInteger(Params^[0])^, PInteger(Params^[1])^);
 end;
 
-procedure _LapeFreeze(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFreeze(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaScriptThread.Script.Client.IOManager.Freeze();
 end;
 
-procedure _LapeUnFreeze(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeUnFreeze(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaScriptThread.Script.Client.IOManager.UnFreeze();
 end;
 
-procedure _LapeActivateClient(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeActivateClient(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaScriptThread.Script.Client.IOManager.ActivateClient();
 end;
 
-procedure _LapeIsTargetValid(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeIsTargetValid(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := SimbaScriptThread.Script.Client.IOManager.TargetValid();
 end;
 
-procedure _LapeGetTargetWindow(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetTargetWindow(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   if SimbaScriptThread.Script.Client.IOManager.GetImageTarget() is TWindowTarget then
     PWindowHandle(Result)^ := TWindowTarget(SimbaScriptThread.Script.Client.IOManager.GetImageTarget()).WindowHandle;
 end;
 
-procedure _LapeGetTargetPID(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetTargetPID(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   if SimbaScriptThread.Script.Client.IOManager.GetImageTarget() is TWindowTarget then
     PInteger(Result)^ := TWindowTarget(SimbaScriptThread.Script.Client.IOManager.GetImageTarget()).WindowHandle.GetPID();
 end;
 
-procedure _LapeAddHandlerInvalidTarget(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeAddHandlerInvalidTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   TNotifyEvent(Result^) := SimbaScriptThread.Script.Client.IOManager.AddHandlerInvalidTarget(TNotifyEvent(Params^[0]^));
 end;
 
-procedure _LapeRemoveHandlerInvalidTarget(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeRemoveHandlerInvalidTarget(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaScriptThread.Script.Client.IOManager.RemoveHandlerInvalidTarget(TNotifyEvent(Params^[0]^));
 end;
 
-procedure _LapeSetAutoActivateClient(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSetAutoActivateClient(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaScriptThread.Script.Client.IOManager.AutoActivate := PBoolean(Params^[0])^;
 end;
 
-procedure _LapeGetAutoActivateClient(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetAutoActivateClient(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := SimbaScriptThread.Script.Client.IOManager.AutoActivate;
 end;
