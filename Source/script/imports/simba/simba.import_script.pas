@@ -210,6 +210,8 @@ begin
       'end;'
     ]);
 
+    ImportingSection := '';
+
     addDelayedCode([
       'var',
       '  _TerminateEvents, _UserTerminateEvents, _PauseEvents, _ResumeEvents: array of record',
@@ -299,8 +301,6 @@ begin
       '  _ResumeEvents += [,Proc];',
       'end;'
     ]);
-
-    ImportingSection := '';
   end;
 end;
 

@@ -22,36 +22,16 @@ type
     // Area to search
     X1, Y1, X2, Y2: Integer;
 
-    function FindDTMs(DTM: TMDTM; MaxToFind: Integer = 0): TPointArray;
+    function FindDTMs(DTM: TDTM; MaxToFind: Integer = 0): TPointArray;
+    function FindDTMsRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = 0): TPointArray;
   end;
 
 implementation
 
 uses
-  simba.colormath, simba.overallocatearray;
+  simba.colormath, simba.overallocatearray, simba.math;
 
-function DTMBounds(DTM: TMDTM): TBox;
-var
-  I: Integer;
-begin
-  with DTM.Points[0] do
-    Result := TBox.Create(X, Y, X, Y);
-
-  for I := 1 to DTM.Count - 1 do
-  begin
-    if (DTM.Points[I].X < Result.X1) then Result.X1 := DTM.Points[I].X;
-    if (DTM.Points[I].Y < Result.Y1) then Result.Y1 := DTM.Points[I].Y;
-    if (DTM.Points[I].X > Result.X2) then Result.X2 := DTM.Points[I].X;
-    if (DTM.Points[I].Y > Result.Y2) then Result.Y2 := DTM.Points[I].Y;
-  end;
-
-  Result.X1 := Result.X1 - DTM.Points[0].X;
-  Result.Y1 := Result.Y1 - DTM.Points[0].Y;
-  Result.X2 := Result.X2 - DTM.Points[0].X;
-  Result.Y2 := Result.Y2 - DTM.Points[0].Y;
-end;
-
-function TFindDTMBuffer.FindDTMs(DTM: TMDTM; MaxToFind: Integer): TPointArray;
+function TFindDTMBuffer.FindDTMs(DTM: TDTM; MaxToFind: Integer): TPointArray;
 var
   PointColors: TRGB32Array;
   PointTolerances: TIntegerArray;
@@ -86,7 +66,7 @@ var
               begin
                 Checked.SetBit(Index);
 
-                if RGBDistance(Data[Y * LineWidth +X], PointColors[Index]) <= PointTolerances[Index] then
+                if RGBDistance(Data[Y * LineWidth + X], PointColors[Index]) <= PointTolerances[Index] then
                 begin
                   Checked.SetBit(Index);
                   Hit.SetBit(Index);
@@ -99,6 +79,21 @@ var
       end;
 
     Result := False;
+  end;
+
+  function DTMBounds(DTM: TDTM): TBox;
+  var
+    I: Integer;
+  begin
+    Result := TBox.Create(0, 0, 0, 0);
+
+    for I := 1 to DTM.PointCount - 1 do
+    begin
+      if (DTM.Points[I].X < Result.X1) then Result.X1 := DTM.Points[I].X;
+      if (DTM.Points[I].X > Result.X2) then Result.X2 := DTM.Points[I].X;
+      if (DTM.Points[I].Y < Result.Y1) then Result.Y1 := DTM.Points[I].Y;
+      if (DTM.Points[I].Y > Result.Y2) then Result.Y2 := DTM.Points[I].Y;
+    end;
   end;
 
 var
@@ -121,27 +116,27 @@ begin
   if (MainPointArea.X1 >= MainPointArea.X2) or (MainPointArea.Y1 >= MainPointArea.Y2) then
     Exit(nil);
 
-  SetLength(PointColors, DTM.Count);
-  SetLength(PointTolerances, DTM.Count);
-  for I := 0 to DTM.Count - 1 do
+  SetLength(PointColors, DTM.PointCount);
+  SetLength(PointTolerances, DTM.PointCount);
+  for I := 0 to DTM.PointCount - 1 do
   begin
-    PointColors[I] := RGBToBGR(DTM.Points[I].C);
+    PointColors[I] := RGBToBGR(DTM.Points[I].Color);
 
-    if (DTM.Points[I].T = 0) then
+    if (DTM.Points[I].Tolerance = 0) then
       PointTolerances[I] := Sqr(1)
     else
-      PointTolerances[I] := Sqr(DTM.Points[I].T);
+      PointTolerances[I] := Sqr(DTM.Points[I].Tolerance);
   end;
 
   PointBuffer.Init(256);
   SetLength(Table, Y2-Y1+1, X2-X1+1);
-  H := DTM.Count - 1;
+  H := DTM.PointCount - 1;
 
   for Y := MainPointArea.Y1 to MainPointArea.Y2 do
     for X := MainPointArea.X1 to MainPointArea.X2 do
     begin
       for I := 0 to H do
-        if not FindPoint(I, DTM.Points[I].ASZ, X + DTM.Points[I].X, Y + DTM.Points[I].Y) then
+        if not FindPoint(I, DTM.Points[I].AreaSize, X + DTM.Points[I].X, Y + DTM.Points[I].Y) then
           goto Next;
 
       PointBuffer.Add(TPoint.Create(X, Y));
@@ -155,6 +150,169 @@ begin
     end;
 
   Result := PointBuffer.Trim();
+end;
+
+function TFindDTMBuffer.FindDTMsRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer): TPointArray;
+var
+  PointColors: TRGB32Array;
+  PointTolerances: TIntegerArray;
+  Table: array of array of record
+    Checked: Int64;
+    Hit: Int64;
+  end;
+
+  function FindPoint(const Index, Size: Integer; X, Y: Integer): Boolean;
+  var
+    StartX, StopX, StartY, StopY: Integer;
+  begin
+    StartX := X - Size;
+    StartY := Y - Size;
+    StopX  := X + Size;
+    StopY  := Y + Size;
+
+    for Y := StartY to StopY do
+      for X := StartX to StopX do
+      begin
+        if (X < X1) or (Y < Y1) or (X > X2) or (Y > Y2) then
+          Continue;
+
+        with Table[Y, X] do
+        begin
+          case Checked.TestBit(Index) of
+            True:
+              if Hit.TestBit(Index) then
+                Exit(True);
+
+            False:
+              begin
+                Checked.SetBit(Index);
+
+                if RGBDistance(Data[Y * LineWidth + X], PointColors[Index]) <= PointTolerances[Index] then
+                begin
+                  Checked.SetBit(Index);
+                  Hit.SetBit(Index);
+
+                  Exit(True);
+                end;
+              end;
+          end;
+        end;
+      end;
+
+    Result := False;
+  end;
+
+  procedure RotateDTMPoints(const Points: TPointArray; var RotatedPoints : TPointArray; const A: Double; out Bounds: TBox); inline;
+  var
+    I: Integer;
+  begin
+    Bounds := TBox.Create(0, 0, 0, 0);
+
+    for I := 1 to High(Points) do
+    begin
+      RotatedPoints[I].X := Round(Cos(A) * Points[I].X - Sin(A) * Points[I].Y);
+      RotatedPoints[I].Y := Round(Sin(A) * Points[I].X + Cos(A) * Points[I].Y);
+
+      if (RotatedPoints[I].X < Bounds.X1) then Bounds.X1 := RotatedPoints[I].X;
+      if (RotatedPoints[I].X > Bounds.X2) then Bounds.X2 := RotatedPoints[I].X;
+      if (RotatedPoints[I].Y < Bounds.Y1) then Bounds.Y1 := RotatedPoints[I].Y;
+      if (RotatedPoints[I].Y > Bounds.Y2) then Bounds.Y2 := RotatedPoints[I].Y;
+    end;
+  end;
+
+type
+  TMatch = record X,Y: Integer; Deg: Double; end;
+  TMatchBuffer = specialize TSimbaOverAllocateArray<TMatch>;
+var
+  I, X, Y: Integer;
+  MainPointArea: TBox;
+  Match: TMatch;
+  MatchBuffer: TMatchBuffer;
+  Points, RotatedPoints: TPointArray;
+  MiddleAngle, SearchDegree: Double;
+  AngleSteps: Integer = 0;
+  test: TBox;
+label
+  Next, Finished;
+begin
+  if (not DTM.Valid()) then
+    Exit(nil);
+
+  SetLength(Points, DTM.PointCount);
+  SetLength(RotatedPoints, DTM.PointCount);
+  SetLength(PointColors, DTM.PointCount);
+  SetLength(PointTolerances, DTM.PointCount);
+  for I := 0 to DTM.PointCount - 1 do
+  begin
+    Points[I] := TPoint.Create(DTM.Points[I].X, DTM.Points[I].Y);
+    PointColors[I] := RGBToBGR(DTM.Points[I].Color);
+
+    if (DTM.Points[I].Tolerance = 0) then
+      PointTolerances[I] := Sqr(1)
+    else
+      PointTolerances[I] := Sqr(DTM.Points[I].Tolerance);
+  end;
+
+  SetLength(Table, Y2-Y1+1, X2-X1+1);
+
+  StartDegrees := FixD(StartDegrees);
+  if (EndDegrees <> 360) then
+    EndDegrees := FixD(EndDegrees);
+  if (StartDegrees > EndDegrees) then
+    EndDegrees := EndDegrees + 360;
+
+  MiddleAngle  := (StartDegrees + EndDegrees) / 2.0;
+  SearchDegree := MiddleAngle;
+  AngleSteps   := 0;
+
+  while (SearchDegree <= EndDegrees) do
+  begin
+    if (AngleSteps mod 2 = 0) then
+      SearchDegree := MiddleAngle + (Step * (AngleSteps div 2 + 1))
+    else
+      SearchDegree := MiddleAngle - (Step * (AngleSteps div 2 + 1));
+
+    Inc(AngleSteps);
+
+    RotateDTMPoints(Points, RotatedPoints, Radians(SearchDegree), Test);
+
+    MainPointArea.X1 := X1 + Abs(Test.X1);
+    MainPointArea.Y1 := Y1 + Abs(Test.Y1);
+    MainPointArea.X2 := X2 - Test.X2;
+    MainPointArea.Y2 := Y2 - Test.Y2;
+    if (MainPointArea.X1 >= MainPointArea.X2) or (MainPointArea.Y1 >= MainPointArea.Y2) then
+      Continue;
+
+    for Y := MainPointArea.Y1 to MainPointArea.Y2 do
+      for X := MainPointArea.X1 to MainPointArea.X2 do
+      begin
+        for I := 0 to High(RotatedPoints) do
+          if not FindPoint(I, DTM.Points[I].AreaSize, X + RotatedPoints[I].X, Y + RotatedPoints[I].Y) then
+            goto Next;
+
+        Match.X := X;
+        Match.Y := Y;
+        Match.Deg := SearchDegree;
+        MatchBuffer.Add(Match);
+
+        if (MatchBuffer.Count = MaxToFind) then
+          goto Finished;
+
+        Next:
+      end;
+  end;
+
+  Finished:
+
+  SetLength(Result,       MatchBuffer.Count);
+  SetLength(FoundDegrees, MatchBuffer.Count);
+  for I := 0 to MatchBuffer.Count - 1 do
+    with MatchBuffer[I] do
+    begin
+      Result[I].X := X;
+      Result[I].Y := Y;
+      FoundDegrees[I] := Deg;
+    end;
 end;
 
 end.

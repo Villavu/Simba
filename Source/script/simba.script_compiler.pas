@@ -85,7 +85,7 @@ uses
   simba.import_lcl_comctrls, simba.import_lcl_misc,
 
   // Simba classes
-  simba.import_class_bitmap, simba.import_class_dtm, simba.import_class_dtms,
+  simba.import_class_bitmap, simba.import_class_dtm,
   simba.import_class_finder, simba.import_class_target, simba.import_class_iomanager,
   simba.import_class_client, simba.import_class_xml, simba.import_class_json,
   simba.import_class_imagebox, simba.import_class_shapebox,
@@ -93,7 +93,7 @@ uses
   // Simba
   simba.import_timing, simba.import_tpa, simba.import_atpa, simba.import_colormath,
   simba.import_crypto, simba.import_windowhandle, simba.import_debugimage,
-  simba.import_dialogs, simba.import_dtm, simba.import_file, simba.import_internal,
+  simba.import_dialogs, simba.import_file, simba.import_internal,
   simba.import_keyboard, simba.import_matchtemplate, simba.import_finder,
   simba.import_math, simba.import_mouse, simba.import_other,
   simba.import_process, simba.import_script, simba.import_slacktree,

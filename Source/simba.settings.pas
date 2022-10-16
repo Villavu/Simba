@@ -192,6 +192,7 @@ procedure TSimbaSettings.Load;
 var
   INI: TIniFile;
   Setting: TSimbaSetting;
+  BackupFilename: String;
 begin
   if FFirstLaunch then
     Exit;
@@ -203,7 +204,11 @@ begin
 
     if (INI.ReadInteger('Settings', 'Version', 0) <> SETTINGS_VERSION) then
     begin
-      RenameFile(FFileName, FFileName + '.old');
+      BackupFilename := FFileName + '.old';
+      if FileExists(BackupFilename) then
+        DeleteFile(BackupFilename);
+      RenameFile(FFileName, BackupFilename);
+
       Exit;
     end;
 

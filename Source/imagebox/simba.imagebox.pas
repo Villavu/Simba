@@ -95,7 +95,7 @@ type
     function IsVisible(X, Y: Integer): Boolean; overload;
 
     function FindColors(CTS: Integer; Col, Tol: Integer; HueMod: Extended = 0.2; SatMod: Extended = 0.2): TPointArray;
-    function FindDTMs(DTM: TMDTM): TPointArray;
+    function FindDTMs(DTM: TDTM): TPointArray;
 
     procedure SetBackground(Data: PRGB32; AWidth, AHeight: Integer); overload;
     procedure SetBackground(FileName: String); overload;
@@ -640,7 +640,7 @@ begin
   Bitmap.Free();
 end;
 
-function TSimbaImageBox.FindDTMs(DTM: TMDTM): TPointArray;
+function TSimbaImageBox.FindDTMs(DTM: TDTM): TPointArray;
 var
   Bitmap: TMufasaBitmap;
   Buffer: TFindDTMBuffer;
