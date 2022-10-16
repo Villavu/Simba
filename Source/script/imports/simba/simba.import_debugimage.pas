@@ -82,7 +82,7 @@ Show
 ~~~~
 procedure Show(Bitmap: TMufasaBitmap; EnsureVisible: Boolean = True);
 *)
-procedure _LapeShowBitmap(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeShowBitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('ShowBitmap requires Simba communication');
@@ -95,7 +95,7 @@ UpdateDebugImage
 ~~~~~~~~~~~~~~~~
 procedure UpdateDebugImage(Bitmap: TMufasaBitmap);
 *)
-procedure _LapeUpdateDebugImage(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeUpdateDebugImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('DrawBitmapDebugImg requires Simba communication');
@@ -108,7 +108,7 @@ ShowDebugImage
 ~~~~~~~~~~~~~~
 procedure ShowDebugImage(Width, Height: Integer);
 *)
-procedure _LapeShowDebugImage1(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeShowDebugImage1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('ShowDebugImage requires Simba communication');
@@ -122,7 +122,7 @@ ShowDebugImage
 ~~~~~~~~~~~~~~
 procedure ShowDebugImage(X, Y,Width, Height: Integer);
 *)
-procedure _LapeShowDebugImage2(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeShowDebugImage2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('ShowDebugImage requires Simba communication');
@@ -136,7 +136,7 @@ SetDebugImageMaxSize
 ~~~~~~~~~~~~~~~~~~~~
 procedure SetDebugImageMaxSize(MaxWidth, MaxHeight: Integer);
 *)
-procedure _LapeSetDebugImageMaxSize(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSetDebugImageMaxSize(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('SetDebugImgMaxSize requires Simba communication');
@@ -150,7 +150,7 @@ HideDebugImage
 ~~~~~~~~~~~~~~
 procedure HideDebugImage;
 *)
-procedure _LapeHideDebugImage(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeHideDebugImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('HideDebugImage requires Simba communication');

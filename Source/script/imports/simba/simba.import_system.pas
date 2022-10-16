@@ -10,27 +10,27 @@ uses
   classes, sysutils, lptypes, ffi,
   simba.script_compiler, simba.mufasatypes, simba.nativeinterface;
 
-procedure _LapeGetEnvironmentVariable(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetEnvironmentVariable(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := GetEnvironmentVariable(PString(Params^[0])^);
 end;
 
-procedure _LapeGetCurrentThreadID(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetCurrentThreadID(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPtrUInt(Result)^ := PtrUInt(GetCurrentThreadID());
 end;
 
-procedure _LapeGetMainThreadID(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetMainThreadID(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPtrUInt(Result)^ := PtrUInt(MainThreadID);
 end;
 
-procedure _LapeWait(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeWait(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   Sleep(PUInt32(Params^[0])^);
 end;
 
-procedure _LapePreciseSleep(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapePreciseSleep(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaNativeInterface.PreciseSleep(PUInt32(Params^[0])^);
 end;
@@ -49,7 +49,7 @@ begin
   TSyncProcedure(Params^[0]^)();
 end;
 
-procedure _LapeSync(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSync(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 var
   Sync: TSync;
 begin
@@ -59,7 +59,7 @@ begin
   TThread.Synchronize(nil, @Sync.Execute);
 end;
 
-procedure _LapeGetThreadCount(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetThreadCount(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPtrUInt(Result)^ := TThread.ProcessorCount;
 end;

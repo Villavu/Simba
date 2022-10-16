@@ -11,7 +11,7 @@ uses
   simba.script_compiler, simba.mufasatypes, simba.scriptthread, simba.aca, simba.dtmeditor,
   simba.dialog;
 
-procedure _LapeInputCombo(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeInputCombo(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 
   procedure Execute;
   begin
@@ -22,7 +22,7 @@ begin
   Sync(@Execute);
 end;
 
-procedure _LapeInputQuery(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeInputQuery(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 
   procedure Execute;
   begin
@@ -33,7 +33,7 @@ begin
   Sync(@Execute);
 end;
 
-procedure _LapeShowMessage(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeShowMessage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 
   procedure Execute;
   begin
@@ -44,7 +44,7 @@ begin
   Sync(@Execute);
 end;
 
-procedure _LapeShowDTMEditor(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeShowDTMEditor(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 
   procedure PrintDTM(DTM: String);
   begin
@@ -67,7 +67,7 @@ begin
   Sync(@Execute);
 end;
 
-procedure _LapeShowACA(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeShowACA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 
   procedure CalculateBestColor(CTS, Color, Tolerance: Int32; Hue, Sat: Extended);
   begin
@@ -95,7 +95,7 @@ begin
   Sync(@Execute);
 end;
 
-procedure _LapeSelectDirectory(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSelectDirectory(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 
   procedure Execute;
   begin
@@ -106,7 +106,7 @@ begin
   Sync(@Execute);
 end;
 
-procedure _LapeShowQuestionDialog(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeShowQuestionDialog(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 
   procedure Execute;
   begin
@@ -117,7 +117,7 @@ begin
   Sync(@Execute);
 end;
 
-procedure _LapeShowTrayNotification(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeShowTrayNotification(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('ShowTrayNotification requires Simba communication');

@@ -28,7 +28,7 @@ TQuad.Create
 ~~~~~~~~~~~~
 function TQuad.Create(ATop, ARight, ABottom, ALeft: TPoint): TQuad; static;
 *)
-procedure _LapeQuad_Create(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PQuad(Result)^ := TQuad.Create(PPoint(Params^[0])^, PPoint(Params^[1])^, PPoint(Params^[2])^, PPoint(Params^[3])^);
 end;
@@ -38,7 +38,7 @@ TQuad.Create
 ~~~~~~~~~~~~
 function TQuad.Create(Box: TBox): TQuad; static;
 *)
-procedure _LapeQuad_CreateFromBox(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_CreateFromBox(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PQuad(Result)^ := TQuad.CreateFromBox(PBox(Params^[0])^);
 end;
@@ -48,7 +48,7 @@ TQuad.Create
 ~~~~~~~~~~~~
 function TQuad.Create(Points: TPointArray): TQuad; static;
 *)
-procedure _LapeQuad_CreateFromPoints(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_CreateFromPoints(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PQuad(Result)^ := TQuad.CreateFromPoints(PPointArray(Params^[0])^);
 end;
@@ -58,7 +58,7 @@ TQuad.ToTPA
 ~~~~~~~~~~~
 function TQuad.ToTPA: TPointArray;
 *)
-procedure _LapeQuad_ToTPA(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_ToTPA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PQuad(Params^[0])^.ToTPA();
 end;
@@ -68,7 +68,7 @@ TQuad.Bounds
 ~~~~~~~~~~~~
 function TQuad.Bounds: TBox;
 *)
-procedure _LapeQuad_Bounds(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_Bounds(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBox(Result)^ := PQuad(Params^[0])^.Bounds();
 end;
@@ -78,7 +78,7 @@ TQuad.ShortSideLen
 ~~~~~~~~~~~~~~~~~~
 function TQuad.ShortSideLen: Integer;
 *)
-procedure _LapeQuad_ShortSideLen(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_ShortSideLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PQuad(Params^[0])^.ShortSideLen();
 end;
@@ -88,7 +88,7 @@ TQuad.LongSideLen
 ~~~~~~~~~~~~~~~~~
 function TQuad.LongSideLen: Integer;
 *)
-procedure _LapeQuad_LongSideLen(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_LongSideLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PQuad(Params^[0])^.LongSideLen();
 end;
@@ -98,7 +98,7 @@ TQuad.Mean
 ~~~~~~~~~~
 function TQuad.Mean: TPoint;
 *)
-procedure _LapeQuad_Mean(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_Mean(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPoint(Result)^ := PQuad(Params^[0])^.Mean();
 end;
@@ -108,7 +108,7 @@ TQuad.Rotate
 ~~~~~~~~~~~~
 function TQuad.Rotate(Angle: Double): TQuad;
 *)
-procedure _LapeQuad_Rotate(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_Rotate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PQuad(Result)^ := PQuad(Params^[0])^.Rotate(PDouble(Params^[1])^);
 end;
@@ -118,7 +118,7 @@ TQuad.Contains
 ~~~~~~~~~~~~~~
 function TQuad.Contains(P: TPoint): Boolean;
 *)
-procedure _LapeQuad_Contains1(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_Contains1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PQuad(Params^[0])^.Contains(PPoint(Params^[1])^);
 end;
@@ -128,7 +128,7 @@ TQuad.Contains
 ~~~~~~~~~~~~~~
 function TQuad.Contains(X, Y: Integer): Boolean;
 *)
-procedure _LapeQuad_Contains2(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_Contains2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PQuad(Params^[0])^.Contains(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
@@ -138,7 +138,7 @@ TQuad.Offset
 ~~~~~~~~~~~~
 function TQuad.Offset(P: TPoint): TQuad;
 *)
-procedure _LapeQuad_Offset1(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_Offset1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PQuad(Result)^ := PQuad(Params^[0])^.Offset(PPoint(Params^[1])^);
 end;
@@ -148,7 +148,7 @@ TQuad.Offset
 ~~~~~~~~~~~~
 function TQuad.Offset(X, Y: Integer): TQuad;
 *)
-procedure _LapeQuad_Offset2(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_Offset2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PQuad(Result)^ := PQuad(Params^[0])^.Offset(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
@@ -158,7 +158,7 @@ TQuad.Filter
 ~~~~~~~~~~~~
 function TQuad.Filter(Points: TPointArray): TPointArray;
 *)
-procedure _LapeQuad_Filter(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_Filter(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PQuad(Params^[0])^.Filter(PPointArray(Params^[1])^);
 end;
@@ -168,7 +168,7 @@ TQuad.Expand
 ~~~~~~~~~~~~
 function TQuad.Expand(Amount: Double): TQuad;
 *)
-procedure _LapeQuad_Expand(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_Expand(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PQuad(Result)^ := PQuad(Params^[0])^.Expand(PDouble(Params^[1])^);
 end;
@@ -178,7 +178,7 @@ TQuad.NearestEdge
 ~~~~~~~~~~~~~~~~~
 function TQuad.NearestEdge(P: TPoint): TPoint;
 *)
-procedure _LapeQuad_NearestEdge(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_NearestEdge(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPoint(Result)^ := PQuad(Params^[0])^.NearestEdge(PPoint(Params^[1])^);
 end;
@@ -188,7 +188,7 @@ TQuad.Area
 ~~~~~~~~~~
 function TQuad.Area: Integer;
 *)
-procedure _LapeQuad_Area(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_Area(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PQuad(Params^[0])^.Area();
 end;
@@ -198,7 +198,7 @@ TQuad.Normalize
 ~~~~~~~~~~~~~~~
 function TQuad.Normalize: TQuad;
 *)
-procedure _LapeQuad_Normalize(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_Normalize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PQuad(Result)^ := PQuad(Params^[0])^.Normalize();
 end;
@@ -208,7 +208,7 @@ in
 ~~
 operator in(Left: TPoint; Right: TQuad): Boolean;
 *)
-procedure _LapeQuad_IN_Quad(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeQuad_IN_Quad(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PPoint(Params^[0])^ in PQuad(Params^[1])^;
 end;

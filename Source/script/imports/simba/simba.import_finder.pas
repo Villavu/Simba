@@ -11,205 +11,205 @@ uses
   simba.script_compiler, simba.mufasatypes, simba.scriptthread, simba.finder, simba.bitmap, simba.matchtemplate,
   simba.dtm;
 
-procedure _LapeFindDTM(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindDTM(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFinder.FindDTM(PDTM(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^);
 end;
 
-procedure _LapeFindDTMs(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindDTMs(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFinder.FindDTMs(PDTM(Params^[0])^, PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
 end;
 
-procedure _LapeFindDTMRotated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindDTMRotated(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFinder.FindDTMRotated(PDTM(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PDouble(Params^[7])^, PDouble(Params^[8])^, PDouble(Params^[9])^, PDouble(Params^[10])^);
 end;
 
-procedure _LapeFindDTMsRotated(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindDTMsRotated(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFinder.FindDTMsRotated(PDTM(Params^[0])^, PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PDouble(Params^[6])^, PDouble(Params^[7])^, PDouble(Params^[8])^, PDoubleArray(Params^[9])^);
 end;
 
-procedure _LapeFindBitmap(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindBitmap(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFinder.FindBitmap(PMufasaBitmap(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-procedure _LapeFindBitmapIn(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindBitmapIn(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFinder.FindBitmapIn(PMufasaBitmap(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^);
 end;
 
-procedure _LapeFindBitmapToleranceIn(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindBitmapToleranceIn(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFinder.FindBitmapToleranceIn(PMufasaBitmap(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^);
 end;
 
-procedure _LapeFindBitmapSpiral(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindBitmapSpiral(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFinder.FindBitmapSpiral(PMufasaBitmap(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^);
 end;
 
-procedure _LapeFindBitmapsSpiralTolerance(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindBitmapsSpiralTolerance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFinder.FindBitmapsSpiralTolerance(PMufasaBitmap(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PPointArray(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PInteger(Params^[8])^);
 end;
 
-procedure _LapeFindBitmapSpiralTolerance(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindBitmapSpiralTolerance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFinder.FindBitmapSpiralTolerance(PMufasaBitmap(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^);
 end;
 
-procedure _LapeGetColor(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PInteger(Result)^ := MFinder.GetColor(PInteger(Params^[0])^, PInteger(Params^[1])^);
 end;
 
-procedure _LapeGetColors(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PIntegerArray(Result)^ := MFinder.GetColors(PPointArray(Params^[0])^);
 end;
 
-procedure _LapeFindColor(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     Pboolean(Result)^ := MFinder.FindColor(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^);
 end;
 
-procedure _Lapefindcolortolerance(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _Lapefindcolortolerance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     Pboolean(Result)^ := MFinder.FindColorTolerance(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^);
 end;
 
-procedure _LapeFindColors(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFinder.FindColors(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
 end;
 
-procedure _LapeSetColorToleranceSpeed(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSetColorToleranceSpeed(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     MFinder.SetToleranceSpeed(PInteger(Params^[0])^);
 end;
 
-procedure _LapeGetToleranceSpeed(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetToleranceSpeed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PInteger(Result)^ := MFinder.GetToleranceSpeed();
 end;
 
-procedure _LapeSetToleranceSpeed2Modifiers(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSetToleranceSpeed2Modifiers(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     MFinder.SetToleranceSpeed2Modifiers(PExtended(Params^[0])^, PExtended(Params^[1])^);
 end;
 
-procedure _LapeGetToleranceSpeed2Modifiers(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetToleranceSpeed2Modifiers(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     MFinder.GetToleranceSpeed2Modifiers(PExtended(Params^[0])^, PExtended(Params^[1])^);
 end;
 
-procedure _LapeSetToleranceSpeed3Modifier(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSetToleranceSpeed3Modifier(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     MFinder.SetToleranceSpeed3Modifier(PExtended(Params^[0])^);
 end;
 
-procedure _LapeGetToleranceSpeed3Modifier(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetToleranceSpeed3Modifier(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PExtended(Result)^ := MFinder.GetToleranceSpeed3Modifier();
 end;
 
-procedure _LapeSimilarColors(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimilarColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
   Pboolean(Result)^ := MFinder.SimilarColors(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-procedure _LapeCountColor(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeCountColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PInteger(Result)^ := MFinder.CountColor(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
 end;
 
-procedure _LapeCountColorTolerance(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeCountColorTolerance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PInteger(Result)^ := MFinder.CountColorTolerance(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
 end;
 
-procedure _LapeFindColorsTolerance(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindColorsTolerance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFinder.FindColorsTolerance(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^);
 end;
 
-procedure _LapeFindColorSpiral(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindColorSpiral(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFinder.FindColorSpiral(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^);
 end;
 
-procedure _LapeFindColorSpiralTolerance(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindColorSpiralTolerance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFinder.FindColorSpiralTolerance(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^);
 end;
 
-procedure _LapeFindColorsSpiralTolerance(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindColorsSpiralTolerance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFinder.FindColorsSpiralTolerance(PInteger(Params^[0])^, PInteger(Params^[1])^, PPointArray(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PInteger(Params^[8])^);
 end;
 
-procedure _LapeFindColoredArea(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindColoredArea(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFinder.FindColoredArea(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^);
 end;
 
-procedure _LapeFindColoredAreaTolerance(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindColoredAreaTolerance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFinder.FindColoredAreaTolerance(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PInteger(Params^[8])^);
 end;
 
-procedure _LapeFindDeformedBitmapToleranceIn(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindDeformedBitmapToleranceIn(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PBoolean(Result)^ := MFinder.FindDeformedBitmapToleranceIn(PMufasaBitmap(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PInteger(Params^[8])^, PBoolean(Params^[9])^, PExtended(Params^[10])^);
 end;
 
-procedure _LapeFindTemplateEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindTemplateEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do // bitmap                     out TPA                   formula                  xs                  ys                  xe                  ye                  min match              dynamic adjust
     PBoolean(Result)^ := MFinder.FindTemplateEx(TMufasaBitmap(Params^[0]^), TPointArray(Params^[1]^), ETMFormula(Params^[2]^), Int32(Params^[3]^), Int32(Params^[4]^), Int32(Params^[5]^), Int32(Params^[6]^), Extended(Params^[7]^), Boolean(Params^[8]^));
 end;
 
-procedure _LapeFindTemplate(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeFindTemplate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do // bitmap                   out X               out Y               formula                  xs                  ys,                 xe                  ye                  min match              dynamic adjust
     PBoolean(Result)^ := MFinder.FindTemplate(TMufasaBitmap(Params^[0]^), Int32(Params^[1]^), Int32(Params^[2]^), ETMFormula(Params^[3]^), Int32(Params^[4]^), Int32(Params^[5]^), Int32(Params^[6]^), Int32(Params^[7]^), Extended(Params^[8]^), Boolean(Params^[9]^));
 end;
 
-procedure _LapeGetColorsMatrix(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetColorsMatrix(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   with SimbaScriptThread.Script.Client do
     PIntegerMatrix(Result)^ := IOManager.ReturnMatrix(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^ - PInteger(Params^[0])^ + 1, PInteger(Params^[3])^ - PInteger(Params^[1])^ + 1);

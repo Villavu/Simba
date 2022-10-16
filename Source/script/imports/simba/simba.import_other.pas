@@ -11,22 +11,22 @@ uses
   simba.script_compiler, simba.nativeinterface, simba.scriptthread, simba.stringutil,
   simba.settings, simba.mufasatypes;
 
-procedure _LapePlaySound(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapePlaySound(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaNativeInterface.PlaySound(PString(Params^[0])^);
 end;
 
-procedure _LapeStopSound(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeStopSound(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaNativeInterface.StopSound();
 end;
 
-procedure _LapeSetSupressExceptions(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSetSupressExceptions(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaScriptThread.Script.Client.MFinder.WarnOnly := PBoolean(Params^[0])^;
 end;
 
-procedure _LapeSimba(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimba(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   WriteLn(DecompressString(Base64Decode(
     '9AoAAHicldU7b+0gDADgvdL9D+AisSDOTrpUvWvGuzNVOkMn9v72a942j6T1dJrEX7AxqRAXYaS9up3iz8suVxoMKe+' +
@@ -38,7 +38,7 @@ begin
     '+//1sR/NLyhCQ==')));
 end;
 
-procedure _LapeSetClipBoard(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSetClipBoard(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   try
     Clipboard.AsText := PString(Params^[0])^;
@@ -46,7 +46,7 @@ begin
   end;
 end;
 
-procedure _LapeGetClipBoard(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeGetClipBoard(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   try
     PString(Result)^ := Clipboard.AsText;
@@ -54,7 +54,7 @@ begin
   end;
 end;
 
-procedure _LapeStatus(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeStatus(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('Status requires Simba communication');

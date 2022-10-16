@@ -13,222 +13,222 @@ uses
 type
   PStream = ^TStream;
 
-procedure _LapeXmlNode_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXmlNode_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PXmlNode(Params^[0])^ := TXmlNode.Create();
 end;
 
-procedure _LapeXmlNode_Find(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXmlNode_Find(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PXmlNode(Result)^ := PXmlNode(Params^[0])^.Find(PString(Params^[1])^);
 end;
 
-procedure _LapeXmlNode_GetParent(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXmlNode_GetParent(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PXmlNode(Result)^ := PXmlNode(Params^[0])^.Parent;
 end;
 
-procedure _LapeXmlNode_GetNodeName(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXmlNode_GetNodeName(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PXmlNode(Params^[0])^.NodeName;
 end;
 
-procedure _LapeXmlNode_GetText(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXmlNode_GetText(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PXmlNode(Params^[0])^.Text;
 end;
 
-procedure _LapeXmlNode_SetNodeName(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXmlNode_SetNodeName(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PXmlNode(Params^[0])^.NodeName := PString(Params^[1])^;
 end;
 
-procedure _LapeXmlNode_SetParent(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXmlNode_SetParent(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PXmlNode(Params^[0])^.Parent := PXMLNode(Params^[1])^;
 end;
 
-procedure _LapeXmlNode_GetChildNodes(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXmlNode_GetChildNodes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PXMLNodeList(Result)^ := PXmlNode(Params^[0])^.ChildNodes;
 end;
 
-procedure _LapeXmlNode_FindEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXmlNode_FindEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PXmlNode(Result)^ := PXmlNode(Params^[0])^.Find(PString(Params^[1])^, PString(Params^[2])^);
 end;
 
-procedure _LapeXmlNode_FindExEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXmlNode_FindExEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PXmlNode(Result)^ := PXmlNode(Params^[0])^.Find(PString(Params^[1])^, PString(Params^[2])^, PString(Params^[3])^);
 end;
 
-procedure _LapeXmlNode_FindNodes(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXmlNode_FindNodes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PXmlNodeList(Result)^ := PXmlNode(Params^[0])^.FindNodes(PString(Params^[1])^);
 end;
 
-procedure _LapeXmlNode_HasAttribute(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXmlNode_HasAttribute(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PXmlNode(Params^[0])^.HasAttribute(PString(Params^[1])^);
 end;
 
-procedure _LapeXmlNode_AddChild(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXmlNode_AddChild(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PXmlNode(Result)^ := PXmlNode(Params^[0])^.AddChild(PString(Params^[1])^);
 end;
 
-procedure _LapeXmlNode_SetText(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXmlNode_SetText(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PXmlNode(Result)^ := PXmlNode(Params^[0])^.SetText(PString(Params^[1])^);
 end;
 
-procedure _LapeXmlNode_SetAttribute(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXmlNode_SetAttribute(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PXmlNode(Result)^ := PXmlNode(Params^[0])^.SetAttribute(PString(Params^[1])^, PString(Params^[2])^);
 end;
 
-procedure _LapeXmlNode_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXmlNode_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PXmlNode(Params^[0])^.Free();
 end;
 
-procedure _LapeXmlNode_GetAttribute(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXmlNode_GetAttribute(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PXmlNode(Params^[0])^[PString(Params^[1])^];
 end;
 
-procedure _LapeXMLNodeList_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXMLNodeList_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PXMLNodeList(Params^[0])^ := TXMLNodeList.Create();
 end;
 
-procedure _LapeXMLNodeList_Clear(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXMLNodeList_Clear(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PXMLNodeList(Params^[0])^.Clear();
 end;
 
-procedure _LapeXMLNodeList_Assign(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXMLNodeList_Assign(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PXMLNodeList(Params^[0])^.Assign(PXMLNodeList(Params^[1])^);
 end;
 
-procedure _LapeXMLNodeList_Add(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXMLNodeList_Add(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PXMLNodeList(Params^[0])^.Add(PXMLNode(Params^[1])^);
 end;
 
-procedure _LapeXMLNodeList_AddEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXMLNodeList_AddEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PXMLNodeList(Params^[0])^.Add(PXMLNodeList(Params^[1])^);
 end;
 
-procedure _LapeXMLNodeList_IndexOf(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXMLNodeList_IndexOf(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PXMLNodeList(Params^[0])^.IndexOf(PXMLNode(Params^[1])^);
 end;
 
-procedure _LapeXMLNodeList_IndexOfEx(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXMLNodeList_IndexOfEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PXMLNodeList(Params^[0])^.IndexOf(PString(Params^[1])^);
 end;
 
-procedure _LapeXMLNodeList_Delete(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXMLNodeList_Delete(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PXMLNodeList(Params^[0])^.Delete(PXMLNode(Params^[1])^);
 end;
 
-procedure _LapeXMLNodeList_DeleteEx(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXMLNodeList_DeleteEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PXMLNodeList(Params^[0])^.Delete(PInteger(Params^[1])^);
 end;
 
-procedure _LapeXMLNodeList_Count_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXMLNodeList_Count_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PXMLNodeList(Params^[0])^.Count;
 end;
 
-procedure _LapeXMLNodeList_Item(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXMLNodeList_Item(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PXMLNode(Result)^ := PXMLNodeList(Params^[0])^.Item[PInteger(Params^[1])^];
 end;
 
-procedure _LapeXMLNodeList_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeXMLNodeList_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PXMLNodeList(Params^[0])^.Free();
 end;
 
-procedure _LapeVerySimpleXml_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVerySimpleXml_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PVerySimpleXml(Params^[0])^ := TVerySimpleXml.Create();
 end;
 
-procedure _LapeVerySimpleXml_Clear(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVerySimpleXml_Clear(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PVerySimpleXml(Params^[0])^.Clear();
 end;
 
-procedure _LapeVerySimpleXml_LoadFromFile(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVerySimpleXml_LoadFromFile(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PVerySimpleXml(Params^[0])^.LoadFromFile(PString(Params^[1])^);
 end;
 
-procedure _LapeVerySimpleXml_LoadFromStream(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVerySimpleXml_LoadFromStream(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PVerySimpleXml(Params^[0])^.LoadFromStream(PStream(Params^[1])^);
 end;
 
-procedure _LapeVerySimpleXml_LoadFromString(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVerySimpleXml_LoadFromString(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PVerySimpleXml(Params^[0])^.LoadFromString(PString(Params^[1])^);
 end;
 
-procedure _LapeVerySimpleXml_SaveToStream(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVerySimpleXml_SaveToStream(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PVerySimpleXml(Params^[0])^.SaveToStream(PStream(Params^[1])^);
 end;
 
-procedure _LapeVerySimpleXml_SaveToFile(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVerySimpleXml_SaveToFile(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PVerySimpleXml(Params^[0])^.SaveToFile(PString(Params^[1])^);
 end;
 
-procedure _LapeVerySimpleXml_SaveToString(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVerySimpleXml_SaveToString(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PVerySimpleXml(Params^[0])^.SaveToString(PString(Params^[1])^);
 end;
 
-procedure _LapeVerySimpleXml_Root_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVerySimpleXml_Root_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PXMLNode(Result)^ := PVerySimpleXml(Params^[0])^.Root;
 end;
 
-procedure _LapeVerySimpleXml_Root_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVerySimpleXml_Root_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PVerySimpleXml(Params^[0])^.Root := PXMLNode(Params^[1])^;
 end;
 
-procedure _LapeVerySimpleXml_Header_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVerySimpleXml_Header_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PXMLNode(Result)^ := PVerySimpleXml(Params^[0])^.Header;
 end;
 
-procedure _LapeVerySimpleXml_Header_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVerySimpleXml_Header_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PVerySimpleXml(Params^[0])^.Header := PXMLNode(Params^[1])^;
 end;
 
-procedure _LapeVerySimpleXml_Ident_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVerySimpleXml_Ident_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PVerySimpleXml(Params^[0])^.Ident;
 end;
 
-procedure _LapeVerySimpleXml_Ident_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVerySimpleXml_Ident_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PVerySimpleXml(Params^[0])^.Ident := PString(Params^[1])^;
 end;
 
-procedure _LapeVerySimpleXml_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeVerySimpleXml_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PVerySimpleXml(Params^[0])^.Free();
 end;

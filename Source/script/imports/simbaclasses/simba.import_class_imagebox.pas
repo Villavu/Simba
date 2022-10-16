@@ -20,242 +20,242 @@ type
   PStatusPanel = ^TStatusPanel;
   PBitmap = ^TBitmap;
 
-procedure _LapeSimbaImageBoxBitmap_DrawLineGap(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBoxBitmap_DrawLineGap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBoxBitmap(Params^[0])^.DrawLineGap(PPoint(Params^[1])^, PPoint(Params^[2])^, PInteger(Params^[3])^, PColor(Params^[4])^);
 end;
 
-procedure _LapeSimbaImageBoxBitmap_DrawLine(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBoxBitmap_DrawLine(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBoxBitmap(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^);
 end;
 
-procedure _LapeSimbaImageBoxBitmap_DrawCross(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBoxBitmap_DrawCross(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBoxBitmap(Params^[0])^.DrawCross(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
 end;
 
-procedure _LapeSimbaImageBoxBitmap_DrawCrossArray(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBoxBitmap_DrawCrossArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBoxBitmap(Params^[0])^.DrawCrossArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
 end;
 
-procedure _LapeSimbaImageBoxBitmap_DrawCrossHair(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBoxBitmap_DrawCrossHair(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBoxBitmap(Params^[0])^.DrawCrosshair(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
 end;
 
-procedure _LapeSimbaImageBoxBitmap_DrawBox(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBoxBitmap_DrawBox(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBoxBitmap(Params^[0])^.DrawBox(PBox(Params^[1])^, PColor(Params^[2])^);
 end;
 
-procedure _LapeSimbaImageBoxBitmap_DrawBoxFilled(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBoxBitmap_DrawBoxFilled(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBoxBitmap(Params^[0])^.DrawBoxFilled(PBox(Params^[1])^, PColor(Params^[2])^);
 end;
 
-procedure _LapeSimbaImageBoxBitmap_DrawPoly(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBoxBitmap_DrawPoly(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBoxBitmap(Params^[0])^.DrawPoly(PPointArray(Params^[1])^, PBoolean(Params^[2])^, PColor(Params^[3])^);
 end;
 
-procedure _LapeSimbaImageBoxBitmap_DrawPoint(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBoxBitmap_DrawPoint(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBoxBitmap(Params^[0])^.DrawPoint(PPoint(Params^[1])^, PColor(Params^[2])^);
 end;
 
-procedure _LapeSimbaImageBoxBitmap_DrawPoints(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBoxBitmap_DrawPoints(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBoxBitmap(Params^[0])^.DrawPoints(PPointArray(Params^[1])^, PColor(Params^[2])^);
 end;
 
-procedure _LapeSimbaImageBoxBitmap_DrawCircle(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBoxBitmap_DrawCircle(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBoxBitmap(Params^[0])^.DrawCircle(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
 end;
 
-procedure _LapeSimbaImageBoxBitmap_DrawCircleFilled(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBoxBitmap_DrawCircleFilled(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBoxBitmap(Params^[0])^.DrawCircleFilled(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
 end;
 
-procedure _LapeSimbaImageBoxBitmap_DrawBoxTransparent(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBoxBitmap_DrawBoxTransparent(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBoxBitmap(Params^[0])^.DrawBoxTransparent(PBox(Params^[1])^, PColor(Params^[2])^, PSingle(Params^[3])^);
 end;
 
-procedure _LapeSimbaImageBoxBitmap_DrawEllipse(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBoxBitmap_DrawEllipse(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBoxBitmap(Params^[0])^.DrawEllipse(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PColor(Params^[4])^);
 end;
 
-procedure _LapeSimbaImageBox_Zoom_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_Zoom_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSingle(Result)^ := PSimbaImageBox(Params^[0])^.Zoom;
 end;
 
-procedure _LapeSimbaImageBox_Zoom_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_Zoom_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^.Zoom := PSingle(Params^[1])^;
 end;
 
-procedure _LapeSimbaImageBox_StatusBar_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_StatusBar_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PStatusBar(Result)^ := PSimbaImageBox(Params^[0])^.StatusBar;
 end;
 
-procedure _LapeSimbaImageBox_StatusPanel_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_StatusPanel_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PStatusPanel(Result)^ := PSimbaImageBox(Params^[0])^.StatusPanel;
 end;
 
-procedure _LapeSimbaImageBox_OnPaintArea_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_OnPaintArea_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBoxPaintAreaEvent(Result)^ := PSimbaImageBox(Params^[0])^.OnPaintArea;
 end;
 
-procedure _LapeSimbaImageBox_OnPaintArea_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_OnPaintArea_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^.OnPaintArea := PSimbaImageBoxPaintAreaEvent(Params^[1])^;
 end;
 
-procedure _LapeSimbaImageBox_MoveTo(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_MoveTo(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^.MoveTo(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-procedure _LapeSimbaImageBox_IsVisible(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_IsVisible(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaImageBox(Params^[0])^.IsVisible(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-procedure _LapeSimbaImageBox_Paint(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_Paint(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^.Paint();
 end;
 
-procedure _LapeSimbaImageBox_SetBackground_Data(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_SetBackground_Data(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^.SetBackground(PPRGB32(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
-procedure _LapeSimbaImageBox_SetBackground_FileName(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_SetBackground_FileName(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^.SetBackground(PString(Params^[1])^);
 end;
 
-procedure _LapeSimbaImageBox_SetBackground_Bitmap(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_SetBackground_Bitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^.SetBackground(PMufasaBitmap(Params^[1])^);
 end;
 
-procedure _LapeSimbaImageBox_SetBackground_IOManagerArea(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_SetBackground_IOManagerArea(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^.SetBackground(PIOManager(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
 end;
 
-procedure _LapeSimbaImageBox_SetBackground_IOManager(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_SetBackground_IOManager(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^.SetBackground(PIOManager(Params^[1])^);
 end;
 
-procedure _LapeSimbaImageBox_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^ := TSimbaImageBox.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeSimbaImageBox_Free(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^.Free();
 end;
 
-procedure _LapeSimbaImageBox_Cursor_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_Cursor_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PCursor(Result)^ := PSimbaImageBox(Params^[0])^.Cursor;
 end;
 
-procedure _LapeSimbaImageBox_Cursor_Write(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_Cursor_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^.Cursor := PCursor(Params^[1])^;
 end;
 
-procedure _LapeSimbaImageBox_OnMouseMove_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_OnMouseMove_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PMouseMoveEvent(Result)^ := PSimbaImageBox(Params^[0])^.OnMouseMove;
 end;
 
-procedure _LapeSimbaImageBox_OnMouseMove_Write(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_OnMouseMove_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^.OnMouseMove := PMouseMoveEvent(Params^[1])^;
 end;
 
-procedure _LapeSimbaImageBox_OnMouseDown_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_OnMouseDown_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PMouseEvent(Result)^ := PSimbaImageBox(Params^[0])^.OnMouseDown;
 end;
 
-procedure _LapeSimbaImageBox_OnMouseDown_Write(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_OnMouseDown_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^.OnMouseDown := PMouseEvent(Params^[1])^;
 end;
 
-procedure _LapeSimbaImageBox_OnMouseUp_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_OnMouseUp_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PMouseEvent(Result)^ := PSimbaImageBox(Params^[0])^.OnMouseUp;
 end;
 
-procedure _LapeSimbaImageBox_OnMouseUp_Write(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_OnMouseUp_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^.OnMouseUp := PMouseEvent(Params^[1])^;
 end;
 
-procedure _LapeSimbaImageBox_OnMouseEnter_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_OnMouseEnter_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PNotifyEvent(Result)^ := PSimbaImageBox(Params^[0])^.OnMouseEnter;
 end;
 
-procedure _LapeSimbaImageBox_OnMouseEnter_Write(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_OnMouseEnter_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^.OnMouseEnter := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeSimbaImageBox_OnMouseLeave_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_OnMouseLeave_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PNotifyEvent(Result)^ := PSimbaImageBox(Params^[0])^.OnMouseLeave;
 end;
 
-procedure _LapeSimbaImageBox_OnMouseLeave_Write(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_OnMouseLeave_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^.OnMouseLeave := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeSimbaImageBox_OnDblClick_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_OnDblClick_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PNotifyEvent(Result)^ := PSimbaImageBox(Params^[0])^.OnDblClick;
 end;
 
-procedure _LapeSimbaImageBox_OnDblClick_Write(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_OnDblClick_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^.OnDblClick := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeSimbaImageBox_MousePoint_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_MousePoint_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPoint(Result)^ := PSimbaImageBox(Params^[0])^.MousePoint;
 end;
 
-procedure _LapeSimbaImageBox_Background_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_Background_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBitmap(Result)^ := PSimbaImageBox(Params^[0])^.Background;
 end;
 
-procedure _LapeSimbaImageBox_FindDTMs(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_FindDTMs(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PSimbaImageBox(Params^[0])^.FindDTMs(PDTM(Params^[1])^);
 end;
 
-procedure _LapeSimbaImageBox_FindColors(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaImageBox_FindColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PSimbaImageBox(Params^[0])^.FindColors(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
 end;

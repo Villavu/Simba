@@ -16,142 +16,142 @@ type
   PPanel = ^TPanel;
   PButton = ^TButton;
 
-procedure _LapeSimbaShapeBox_Init(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^ := TSimbaShapeBox.Create(PComponent(Params^[1])^);
 end;
 
-procedure _LapeSimbaShapeBox_SaveToFile(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_SaveToFile(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaShapeBox(Params^[0])^.SaveToFile(PString(Params^[1])^);
 end;
 
-procedure _LapeSimbaShapeBox_LoadFromFile(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_LoadFromFile(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaShapeBox(Params^[0])^.LoadFromFile(PString(Params^[1])^);
 end;
 
-procedure _LapeSimbaShapeBox_PointButton(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_PointButton(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PButton(Result)^ := PSimbaShapeBox(Params^[0])^.PointButton;
 end;
 
-procedure _LapeSimbaShapeBox_BoxButton(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_BoxButton(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PButton(Result)^ := PSimbaShapeBox(Params^[0])^.BoxButton;
 end;
 
-procedure _LapeSimbaShapeBox_PathButton(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_PathButton(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PButton(Result)^ := PSimbaShapeBox(Params^[0])^.PathButton;
 end;
 
-procedure _LapeSimbaShapeBox_PolyButton(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_PolyButton(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PButton(Result)^ := PSimbaShapeBox(Params^[0])^.PolyButton;
 end;
 
-procedure _LapeSimbaShapeBox_NameButton(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_NameButton(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PButton(Result)^ := PSimbaShapeBox(Params^[0])^.NameButton;
 end;
 
-procedure _LapeSimbaShapeBox_DeleteButton(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_DeleteButton(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PButton(Result)^ := PSimbaShapeBox(Params^[0])^.DeleteButton;
 end;
 
-procedure _LapeSimbaShapeBox_DeleteAllButton(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_DeleteAllButton(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PButton(Result)^ := PSimbaShapeBox(Params^[0])^.DeleteAllButton;
 end;
 
-procedure _LapeSimbaShapeBox_Panel(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_Panel(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPanel(Result)^ := PSimbaShapeBox(Params^[0])^.Panel;
 end;
 
-procedure _LapeSimbaShapeBox_ManualAddPoint1(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_ManualAddPoint1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaShapeBox(Params^[0])^.ManualAddPoint(PPoint(Params^[1])^, PString(Params^[2])^);
 end;
 
-procedure _LapeSimbaShapeBox_ManualAddPoint2(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_ManualAddPoint2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaShapeBox(Params^[0])^.ManualAddPoint(PPoint(Params^[1])^, PString(Params^[2])^, Params^[3]^);
 end;
 
-procedure _LapeSimbaShapeBox_ManualAddBox1(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_ManualAddBox1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaShapeBox(Params^[0])^.ManualAddBox(PBox(Params^[1])^, PString(Params^[2])^);
 end;
 
-procedure _LapeSimbaShapeBox_ManualAddBox2(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_ManualAddBox2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaShapeBox(Params^[0])^.ManualAddBox(PBox(Params^[1])^, PString(Params^[2])^, Params^[3]^);
 end;
 
-procedure _LapeSimbaShapeBox_ManualAddPoly1(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_ManualAddPoly1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaShapeBox(Params^[0])^.ManualAddPoly(PPointArray(Params^[1])^, PString(Params^[2])^);
 end;
 
-procedure _LapeSimbaShapeBox_ManualAddPoly2(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_ManualAddPoly2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaShapeBox(Params^[0])^.ManualAddPoly(PPointArray(Params^[1])^, PString(Params^[2])^, Params^[3]^);
 end;
 
-procedure _LapeSimbaShapeBox_ManualAddPath1(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_ManualAddPath1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaShapeBox(Params^[0])^.ManualAddPath(PPointArray(Params^[1])^, PString(Params^[2])^);
 end;
 
-procedure _LapeSimbaShapeBox_ManualAddPath2(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_ManualAddPath2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaShapeBox(Params^[0])^.ManualAddPath(PPointArray(Params^[1])^, PString(Params^[2])^, Params^[3]^);
 end;
 
-procedure _LapeSimbaShapeBox_GetShape(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_GetShape(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PShapeBoxShape(Result)^ := PSimbaShapeBox(Params^[0])^.Shape[PInteger(Params^[1])^];
 end;
 
-procedure _LapeSimbaShapeBox_GetShapeIndex(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_GetShapeIndex(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PSimbaShapeBox(Params^[0])^.ShapeIndex;
 end;
 
-procedure _LapeSimbaShapeBox_GetShapeCount(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_GetShapeCount(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PSimbaShapeBox(Params^[0])^.ShapeCount;
 end;
 
-procedure _LapeSimbaShapeBox_UserDataSize_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_UserDataSize_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PSimbaShapeBox(Params^[0])^.UserDataSize;
 end;
 
-procedure _LapeSimbaShapeBox_UserDataSize_Write(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_UserDataSize_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaShapeBox(Params^[0])^.UserDataSize := PInteger(Params^[1])^;
 end;
 
-procedure _LapeSimbaShapeBox_QueryNameOnNew_Read(const Params: PParamArray; const Result: Pointer); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_QueryNameOnNew_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaShapeBox(Params^[0])^.QueryNameOnNew;
 end;
 
-procedure _LapeSimbaShapeBox_QueryNameOnNew_WRite(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_QueryNameOnNew_WRite(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaShapeBox(Params^[0])^.QueryNameOnNew := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeSimbaShapeBox_DeleteShape(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_DeleteShape(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaShapeBox(Params^[0])^.DeleteShape(PInteger(Params^[1])^);
 end;
 
-procedure _LapeSimbaShapeBox_DeleteAllShapes(const Params: PParamArray); {$IFDEF Lape_CDECL}cdecl;{$ENDIF}
+procedure _LapeSimbaShapeBox_DeleteAllShapes(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaShapeBox(Params^[0])^.DeleteAllShapes();
 end;
