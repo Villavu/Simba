@@ -60,7 +60,6 @@ begin
   Stream := nil;
   try
     Output := TMemoryStream.Create();
-    Output.Write(Len, SizeOf(Integer)); // preappends the uncompressed string length for backwards compatibility (streams are now used - not needed)
 
     Stream := TCompressionStream.Create(clDefault, Output);
     Stream.Write(Str[1], Len);
@@ -87,7 +86,6 @@ var
   Count: Integer;
 begin
   Result := '';
-
   if (Str = '') then
     Exit;
 
@@ -95,10 +93,20 @@ begin
   Stream := nil;
   try
     Input := TStringStream.Create(Str);
-    Input.Position := 4; // skip preappended uncompressed string length. (not used anymore)
+
+    // Old simba had the uncompressed string in header. Skip this if zlib magic header.
+    if (Input.ReadByte() = $78) and (Input.ReadByte() = $9C) then
+      Input.Position := 0
+    else
+    begin
+      Input.Position := SizeOf(Integer);
+      if (Input.ReadByte() <> $78) or (Input.ReadByte() <> $9C) then
+        Input.Position := 0
+      else
+        Input.Position := SizeOf(Integer);
+    end;
 
     Stream := TDeCompressionStream.Create(Input);
-
     repeat
       Count := Stream.Read(Buffer[1], Length(Buffer));
       if Count > 0 then
