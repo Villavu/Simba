@@ -7,9 +7,9 @@ interface
 implementation
 
 uses
-  classes, sysutils, clipbrd, extctrls, lptypes,
-  simba.script_compiler, simba.nativeinterface, simba.scriptthread, simba.stringutil,
-  simba.settings, simba.mufasatypes;
+  classes, sysutils, clipbrd, lptypes,
+  simba.script_compiler, simba.nativeinterface, simba.scriptthread,
+  simba.settings, simba.mufasatypes, simba.compress, simba.encoding;
 
 procedure _LapePlaySound(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin

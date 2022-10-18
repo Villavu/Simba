@@ -118,7 +118,7 @@ implementation
 
 uses
   lazloggerbase, synedit,
-  simba.stringutil, simba.files;
+  simba.encoding, simba.files;
 
 function TSimbaSetting.GetName: String;
 begin

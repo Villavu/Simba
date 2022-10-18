@@ -245,8 +245,8 @@ implementation
 
 uses
   fpimage, math, intfgraphics, simba.overallocatearray, simba.geometry,
-  simba.tpa, simba.stringutil, simba.colormath, simba.client, simba.iomanager,
-  simba.bitmap_misc;
+  simba.tpa, simba.colormath, simba.client, simba.iomanager,
+  simba.bitmap_misc, simba.encoding, simba.compress;
 
 function GetDrawColor(Color, Index: Integer): Integer; inline;
 const
@@ -398,7 +398,7 @@ begin
     DataPtr[i].B := FData[i].B;
   end;
 
-  Result := 'm' + Base64Encode(CompressString(DataStr, False));
+  Result := 'm' + Base64Encode(CompressString(DataStr));
 end;
 
 function TMufasaBitmap.ToMatrixBGR: TIntegerMatrix;
@@ -602,7 +602,7 @@ begin
   if (Str <> '') and (Str[1] = 'm') then
     Delete(Str, 1, 1);
 
-  Source := DecompressString(Base64Decode(Str), False);
+  Source := DecompressString(Base64Decode(Str));
   if (Source = '') then
     raise ESimbaBitmapException.Create(sbeInvalidBitmapString);
 

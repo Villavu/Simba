@@ -68,7 +68,7 @@ type
 implementation
 
 uses
-  simba.stringutil;
+  simba.compress, simba.encoding;
 
 procedure TDTM.CheckIndex(Index: Integer);
 begin

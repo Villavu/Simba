@@ -1,4 +1,4 @@
-unit simba.compressionthread;
+unit simba.compress;
 
 {$i simba.inc}
 
@@ -35,10 +35,83 @@ type
     property IsCompressing: Boolean read GetIsCompressing;
   end;
 
+function CompressString(const Str: String): String;
+function DecompressString(const Str: String) : String;
+
 implementation
 
 uses
+  zstream,
   simba.datetime;
+
+function CompressString(const Str: String): String;
+var
+  Len: Integer;
+  Output: TMemoryStream;
+  Stream: TCompressionStream;
+begin
+  Result := '';
+
+  Len := Length(Str);
+  if (Len = 0) then
+    Exit;
+
+  Output := nil;
+  Stream := nil;
+  try
+    Output := TMemoryStream.Create();
+    Output.Write(Len, SizeOf(Integer)); // preappends the uncompressed string length for backwards compatibility (streams are now used - not needed)
+
+    Stream := TCompressionStream.Create(clDefault, Output);
+    Stream.Write(Str[1], Len);
+    Stream.Flush();
+
+    SetLength(Result, Output.Size);
+
+    Output.Position := 0;
+    Output.Read(Result[1], Output.Size);
+  except
+  end;
+
+  if (Stream <> nil) then
+    Stream.Free();
+  if (Output <> nil) then
+    Output.Free();
+end;
+
+function DecompressString(const Str: String): String;
+var
+  Input: TStringStream;
+  Stream: TDeCompressionStream;
+  Buffer: array[1..4096] of Char;
+  Count: Integer;
+begin
+  Result := '';
+
+  if (Str = '') then
+    Exit;
+
+  Input := nil;
+  Stream := nil;
+  try
+    Input := TStringStream.Create(Str);
+    Input.Position := 4; // skip preappended uncompressed string length. (not used anymore)
+
+    Stream := TDeCompressionStream.Create(Input);
+
+    repeat
+      Count := Stream.Read(Buffer[1], Length(Buffer));
+      if Count > 0 then
+        Result := Result + System.Copy(Buffer, 1, Count);
+    until (Count = 0);
+  except
+  end;
+
+  if (Stream <> nil) then
+    Stream.Free();
+  if (Input <> nil) then
+    Input.Free();
+end;
 
 type
   TCompressingStream = class(TMemoryStream)

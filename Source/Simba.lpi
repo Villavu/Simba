@@ -267,7 +267,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="131">
+    <Units Count="133">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -511,7 +511,7 @@
         <IsPartOfProject Value="True"/>
       </Unit46>
       <Unit47>
-        <Filename Value="script/imports/simba/simba.import_crypto.pas"/>
+        <Filename Value="script/imports/simba/simba.import_hash.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit47>
       <Unit48>
@@ -559,7 +559,7 @@
         <IsPartOfProject Value="True"/>
       </Unit58>
       <Unit59>
-        <Filename Value="script/imports/simba/simba.import_mouse.pas"/>
+        <Filename Value="script/imports/simba/simba.import_input.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit59>
       <Unit60>
@@ -858,6 +858,14 @@
         <Filename Value="script/simba.plugin_dump.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit130>
+      <Unit131>
+        <Filename Value="simba.encoding.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit131>
+      <Unit132>
+        <Filename Value="script/imports/simba/simba.import_compress.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit132>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

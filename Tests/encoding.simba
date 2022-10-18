@@ -1,0 +1,11 @@
+{$assertions on}
+begin
+  Assert(Base64Encode('HelloWorld123!@') = 'SGVsbG9Xb3JsZDEyMyFA');
+  Assert(Base64Decode('SGVsbG9Xb3JsZDEyMyFA') = 'HelloWorld123!@');
+
+  Assert(Base32Encode('HelloWorld123!@') = 'JBSWY3DPK5XXE3DEGEZDGIKA');
+  Assert(Base32Decode('JBSWY3DPK5XXE3DEGEZDGIKA') = 'HelloWorld123!@');
+
+  Assert(HexEncode('HelloWorld123!@') = '48656c6c6f576f726c643132332140');
+  Assert(HexDecode('48656c6c6f576f726c643132332140') = 'HelloWorld123!@');
+end;
