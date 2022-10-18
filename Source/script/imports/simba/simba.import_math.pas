@@ -60,6 +60,11 @@ begin
   PExtended(Result)^ := Degrees(PExtended(Params^[0])^);
 end;
 
+procedure _LapeLog2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PExtended(Result)^ := Log2(PExtended(Params^[0])^);
+end;
+
 procedure _LapeLog10(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PExtended(Result)^ := Log10(PExtended(Params^[0])^);
@@ -101,17 +106,20 @@ begin
   begin
     ImportingSection := 'Math';
 
+    addGlobalVar(ltDouble, @HALF_PI, 'HALF_PI').isConstant := True;
+
     addGlobalFunc('function Distance(const X1, Y1, X2, Y2: Integer): Integer; overload', @_LapeDistance);
     addGlobalFunc('function Distance(const P1, P2: TPoint): Integer; overload', @_LapeDistanceEx);
     addGlobalFunc('function RandomRange(const Min, Max: Integer): Integer', @_LapeRandomRange);
     addGlobalFunc('function FixD(Degrees: Extended): Extended', @_LapeFixD);
-    addGlobalFunc('function LogN(base, x: Extended): Extended', @_LapeLogn);
     addGlobalFunc('function Sar(num: Integer; shift: byte): Integer', @_LapeSar);
     addGlobalFunc('function Ror(num: UInt32; shift: byte): UInt32', @_LapeRor);
     addGlobalFunc('function Rol(num: UInt32; shift: byte): UInt32', @_LapeRol);
     addGlobalFunc('function Radians(e: Extended): Extended', @_LapeRadians);
     addGlobalFunc('function Degrees(e: Extended): Extended', @_LapeDegrees);
-    addGlobalFunc('function Log10(f: Extended): Extended', @_LapeLog10);
+    addGlobalFunc('function LogN(base, x: Extended): Extended', @_LapeLogn);
+    addGlobalFunc('function Log2(x: Extended): Extended', @_LapeLog2);
+    addGlobalFunc('function Log10(x: Extended): Extended', @_LapeLog10);
     addGlobalFunc('function FixRad(rad: Extended): Extended', @_LapeFixRad);
     addGlobalFunc('function NextPower2(const n: Integer): Integer', @_LapeNextPower2);
 
