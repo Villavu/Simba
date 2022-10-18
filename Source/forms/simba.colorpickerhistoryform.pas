@@ -55,7 +55,7 @@ implementation
 
 uses
   lcltype, types,
-  simba.mufasatypes, simba.main, simba.colormath, simba.settings, simba.stringutil;
+  simba.mufasatypes, simba.main, simba.colormath, simba.settings;
 
 type
   TColorHistoryValue = packed record

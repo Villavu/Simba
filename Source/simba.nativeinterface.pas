@@ -100,7 +100,7 @@ implementation
 
 uses
   lcltype, lclintf,
-  simba.math,
+  simba.random,
   {$IF DEFINED(WINDOWS)}
   simba.nativeinterface_windows;
   {$ELSEIF DEFINED(LINUX)}
@@ -143,7 +143,7 @@ procedure TSimbaNativeInterface.SendStringEx(Text: String; MinKeyWait, MaxMaxWai
 
   function GetRandomWait: Integer;
   begin
-    Result := Trunc(TruncatedGauss(MinKeyWait, MaxMaxWait));
+    Result := RandomLeft(MinKeyWait, MaxMaxWait);
   end;
 
 var

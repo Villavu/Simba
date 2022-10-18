@@ -1251,6 +1251,7 @@ begin
   if (TokenID = tokProgram) then
   begin
     NextToken();
+    Expected(tokIdentifier);
     SemiColon();
   end;
 

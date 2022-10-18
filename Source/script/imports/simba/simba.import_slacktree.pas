@@ -84,8 +84,6 @@ procedure ImportSlackTree(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    ImportingSection := 'SlackTree';
-
     addGlobalType('record Split: TPoint; L, R: Integer; hidden: Boolean; end;', 'TSlackNode');
     addGlobalType('^TSlackNode', 'PSlackNode');
     addGlobalType('array of TSlackNode;', 'TSlackArray');
@@ -106,8 +104,6 @@ begin
     addGlobalFunc('function TSlackTree.RangeQueryEx(query:TPoint; xRad,yRad:Double; hide: Boolean = False): TPointArray; overload;', @_LapeSlackTreeRangeQueryEx);
     addGlobalFunc('function TSlackTree.RangeQueryEx(query:TPoint; xmin,ymin,xmax,ymax:double; hide: Boolean = False): TPointArray; overload;', @_LapeSlackTreeRangeQueryEx2);
     addGlobalFunc('function TSlackTree.RefArray: TSlackRefArray;', @_LapeSlackTreeRefArray);
-
-    ImportingSection := '';
   end;
 end;
 

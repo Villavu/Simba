@@ -183,7 +183,7 @@ begin
         Continue;
 
       if isConstant then
-        FDump['const %s = %s;'.Format([Name, VarType.Name])] := DocPos.FileName
+        FDump['const %s = %s;'.Format([Name.ToUpper(), VarType.Name])] := DocPos.FileName
       else
         FDump['var %s: %s;'.Format([Name, VarType.Name])] := DocPos.FileName;
     end;

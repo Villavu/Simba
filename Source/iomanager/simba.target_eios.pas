@@ -108,7 +108,7 @@ type
 implementation
 
 uses
-  simba.math;
+  simba.random;
 
 procedure TEIOS_Target.GetTargetBounds(out Bounds: TBox);
 begin
@@ -329,7 +329,7 @@ procedure TEIOS_Target.SendStringEx(Text: String; MinKeyWait, MaxKeyWait: Intege
 
   function GetRandomWait: Integer;
   begin
-    Result := Trunc(TruncatedGauss(MinKeyWait, MaxKeyWait));
+    Result := RandomLeft(MinKeyWait, MaxKeyWait);
   end;
 
 var

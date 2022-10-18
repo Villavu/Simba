@@ -19,36 +19,6 @@ Methods relating to point arrays.
 *)
 
 (*
-TByteArray.Difference
-~~~~~~~~~~~~~~~~~~~~~
-function TByteArray.Difference(Other: TByteArray): TByteArray;
-*)
-procedure _Lape_UInt8_Difference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PByteArray(Result)^ := Algo_UInt8_Difference(PByteArray(Params^[0])^, PByteArray(Params^[1])^)
-end;
-
-(*
-TIntegerArray.Difference
-~~~~~~~~~~~~~~~~~~~~~~~~
-function TIntegerArray.Difference(Other: TIntegerArray): TIntegerArray;
-*)
-procedure _Lape_Int32_Difference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PIntegerArray(Result)^ := Algo_Int32_Difference(PIntegerArray(Params^[0])^, PIntegerArray(Params^[1])^)
-end;
-
-(*
-TInt64Array.Difference
-~~~~~~~~~~~~~~~~~~~~~~
-function TInt64Array.Difference(Other: TInt64Array): TInt64Array;
-*)
-procedure _Lape_Int64_Difference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInt64Array(Result)^ := Algo_Int64_Difference(PInt64Array(Params^[0])^, PInt64Array(Params^[1])^)
-end;
-
-(*
 TPointArray.Difference
 ~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.Difference(Other: TPointArray): TPointArray;
@@ -56,46 +26,6 @@ function TPointArray.Difference(Other: TPointArray): TPointArray;
 procedure _Lape_Point_Difference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := Algo_Point_Difference(PPointArray(Params^[0])^, PPointArray(Params^[1])^)
-end;
-
-(*
-TBoxArray.Difference
-~~~~~~~~~~~~~~~~~~~~
-function TBoxArray.Difference(Other: TBoxArray): TBoxArray;
-*)
-procedure _Lape_Box_Difference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoxArray(Result)^ := Algo_Box_Difference(PBoxArray(Params^[0])^, PBoxArray(Params^[1])^)
-end;
-
-(*
-TByteArray.SymmetricDifference
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TByteArray.SymmetricDifference(Other: TByteArray): TByteArray;
-*)
-procedure _Lape_UInt8_SymmetricDifference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PByteArray(Result)^ := Algo_UInt8_SymmetricDifference(PByteArray(Params^[0])^, PByteArray(Params^[1])^)
-end;
-
-(*
-TIntegerArray.SymmetricDifference
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TIntegerArray.SymmetricDifference(Other: TIntegerArray): TIntegerArray;
-*)
-procedure _Lape_Int32_SymmetricDifference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PIntegerArray(Result)^ := Algo_Int32_SymmetricDifference(PIntegerArray(Params^[0])^, PIntegerArray(Params^[1])^)
-end;
-
-(*
-TInt64Array.SymmetricDifference
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TInt64Array.SymmetricDifference(Other: TInt64Array): TInt64Array;
-*)
-procedure _Lape_Int64_SymmetricDifference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInt64Array(Result)^ := Algo_Int64_SymmetricDifference(PInt64Array(Params^[0])^, PInt64Array(Params^[1])^)
 end;
 
 (*
@@ -109,46 +39,6 @@ begin
 end;
 
 (*
-TBoxArray.SymmetricDifference
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TBoxArray.SymmetricDifference(Other: TBoxArray): TBoxArray;
-*)
-procedure _Lape_Box_SymmetricDifference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoxArray(Result)^ := Algo_Box_SymmetricDifference(PBoxArray(Params^[0])^, PBoxArray(Params^[1])^)
-end;
-
-(*
-TByteArray.Intersection
-~~~~~~~~~~~~~~~~~~~~~~~
-function TByteArray.Intersection(Other: TByteArray): TByteArray;
-*)
-procedure _Lape_UInt8_Intersection(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PByteArray(Result)^ := Algo_UInt8_Intersection(PByteArray(Params^[0])^, PByteArray(Params^[1])^)
-end;
-
-(*
-TIntegerArray.Intersection
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TIntegerArray.Intersection(Other: TIntegerArray): TIntegerArray;
-*)
-procedure _Lape_Int32_Intersection(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PIntegerArray(Result)^ := Algo_Int32_Intersection(PIntegerArray(Params^[0])^, PIntegerArray(Params^[1])^)
-end;
-
-(*
-TInt64Array.Intersection
-~~~~~~~~~~~~~~~~~~~~~~~~
-function TInt64Array.Intersection(Other: TInt64Array): TInt64Array;
-*)
-procedure _Lape_Int64_Intersection(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInt64Array(Result)^ := Algo_Int64_Intersection(PInt64Array(Params^[0])^, PInt64Array(Params^[1])^)
-end;
-
-(*
 TPointArray.Intersection
 ~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.Intersection(Other: TPointArray): TPointArray;
@@ -156,16 +46,6 @@ function TPointArray.Intersection(Other: TPointArray): TPointArray;
 procedure _Lape_Point_Intersection(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := Algo_Point_Intersection(PPointArray(Params^[0])^, PPointArray(Params^[1])^)
-end;
-
-(*
-TBoxArray.Intersection
-~~~~~~~~~~~~~~~~~~~~~~
-function TBoxArray.Intersection(Other: TBoxArray): TBoxArray;
-*)
-procedure _Lape_Box_Intersection(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoxArray(Result)^ := Algo_Box_Intersection(PBoxArray(Params^[0])^, PBoxArray(Params^[1])^)
 end;
 
 (*
@@ -784,27 +664,9 @@ begin
     addGlobalFunc('function TPointArray.Partition(Dist: Integer): T2DPointArray; overload', @_LapeTPAPartition1);
     addGlobalFunc('function TPointArray.Partition(Width, Height: Integer): T2DPointArray; overload', @_LapeTPAPartition2);
     addGlobalFunc('function TPointArray.PartitionEx(BoxWidth, BoxHeight: Integer): T2DPointArray', @_LapeTPAPartitionEx);
-
-    //------- array.Difference(array)
-    addGlobalFunc('function TByteArray.Difference(Other: TByteArray): TByteArray', @_Lape_UInt8_Difference);
-    addGlobalFunc('function TIntegerArray.Difference(Other: TIntegerArray): TIntegerArray', @_Lape_Int32_Difference);
-    addGlobalFunc('function TInt64Array.Difference(Other: TInt64Array): TInt64Array', @_Lape_Int64_Difference);
-    addGlobalFunc('function TPointArray.Difference(Other: TPointArray): TPointArray', @_Lape_Point_Difference);
-    addGlobalFunc('function TBoxArray.Difference(Other: TBoxArray): TBoxArray', @_Lape_Box_Difference);
-
-    //------- array.SymmetricDifference(array)
-    addGlobalFunc('function TByteArray.SymmetricDifference(Other: TByteArray): TByteArray', @_Lape_UInt8_SymmetricDifference);
-    addGlobalFunc('function TIntegerArray.SymmetricDifference(Other: TIntegerArray): TIntegerArray', @_Lape_Int32_SymmetricDifference);
-    addGlobalFunc('function TInt64Array.SymmetricDifference(Other: TInt64Array): TInt64Array', @_Lape_Int64_SymmetricDifference);
-    addGlobalFunc('function TPointArray.SymmetricDifference(Other: TPointArray): TPointArray', @_Lape_Point_SymmetricDifference);
-    addGlobalFunc('function TBoxArray.SymmetricDifference(Other: TBoxArray): TBoxArray', @_Lape_Box_SymmetricDifference);
-
-    //------- array.Intersection(array)
-    addGlobalFunc('function TByteArray.Intersection(Other: TByteArray): TByteArray', @_Lape_UInt8_Intersection);
-    addGlobalFunc('function TIntegerArray.Intersection(Other: TIntegerArray): TIntegerArray', @_Lape_Int32_Intersection);
-    addGlobalFunc('function TInt64Array.Intersection(Other: TInt64Array): TInt64Array', @_Lape_Int64_Intersection);
     addGlobalFunc('function TPointArray.Intersection(Other: TPointArray): TPointArray', @_Lape_Point_Intersection);
-    addGlobalFunc('function TBoxArray.Intersection(Other: TBoxArray): TBoxArray', @_Lape_Box_Intersection);
+    addGlobalFunc('function TPointArray.Difference(Other: TPointArray): TPointArray', @_Lape_Point_Difference);
+    addGlobalFunc('function TPointArray.SymmetricDifference(Other: TPointArray): TPointArray', @_Lape_Point_SymmetricDifference);
 
     ImportingSection := '';
   end;

@@ -14,7 +14,7 @@ uses
   simba.mufasatypes;
 
 const
-  HALF_PI = PI / 2;
+  HALF_PI: Double = PI / 2;
 
 function FixRad(const Rad: Extended): Extended;
 function FixD(const Degrees: Extended): Extended;
@@ -30,8 +30,6 @@ function IsNumber(const n: Single): Boolean; inline; overload;
 function Modulo(const X, Y: Double): Double; inline; overload;
 function Modulo(const X, Y: Single): Single; inline; overload;
 function Modulo(const X, Y: Integer): Integer; inline; overload;
-
-function TruncatedGauss(Left:Double=0; Right:Double=1; CUTOFF:Single=4): Double;
 
 implementation
 
@@ -103,24 +101,6 @@ end;
 function Degrees(const e: Extended): Extended;
 begin
   Result := RadToDeg(e);
-end;
-
-function TruncatedGauss(Left:Double=0; Right:Double=1; CUTOFF:Single=4): Double;
-
-  function nzRandom: Extended;
-  begin
-    {$IFDEF FPC_HAS_TYPE_EXTENDED}
-    Result := Max(Random(), 1.0e-4900); //10^-4900 seems to be our safe limit
-    {$ELSE}
-    Result := Max(Random(), 1.0e-320);
-    {$ENDIF}
-  end;
-
-begin
-  Result := CUTOFF+1;
-  while Result >= CUTOFF do
-    Result := Abs(Sqrt(-2 * Ln(nzRandom())) * Cos(2 * PI * Random()));
-  Result := Result / CUTOFF * (Right-Left) + Left;
 end;
 
 end.
