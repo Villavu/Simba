@@ -167,6 +167,9 @@ type
 
 function ToStr(Typ: ESimbaDebugLn): String; overload;
 
+procedure DebugLn(const Msg: String); overload;
+procedure DebugLn(const Msg: String; Args: array of const); overload;
+
 procedure SimbaDebugLn(const Msg: String); overload;
 procedure SimbaDebugLn(const Msg: String; Args: array of const); overload;
 
@@ -226,6 +229,16 @@ uses
 function ToStr(Typ: ESimbaDebugLn): String;
 begin
   Result := #0+#0+'$'+IntToHex(Ord(Typ), 2);
+end;
+
+procedure DebugLn(const Msg: String);
+begin
+  {%H-}lazloggerbase.DebugLn(Msg);
+end;
+
+procedure DebugLn(const Msg: String; Args: array of const);
+begin
+  {%H-}lazloggerbase.DebugLn(Msg, Args);
 end;
 
 procedure SimbaDebugLn(const Msg: String);

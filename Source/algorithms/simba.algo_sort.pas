@@ -79,7 +79,7 @@ var
   Mid, T: _W;
   TP: _T;
 begin
-  if (Length(Arr) <= 1) or (Length(Weights) <> Length(Arr)) then
+  if (Length(Arr) <= 1) or (Length(Weights) <> Length(Arr)) or (iHi-iLo < 1) then
     Exit;
 
   repeat

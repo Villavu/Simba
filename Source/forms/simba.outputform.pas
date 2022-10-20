@@ -94,7 +94,7 @@ implementation
 
 uses
   SynEditMarkupBracket, SynEditMarkupWordGroup,
-  lazloggerbase, lclintf, math,
+  lclintf, math,
   simba.dockinghelpers, simba.fonthelpers, simba.scripttabsform,
   simba.nativeinterface, simba.mufasatypes;
 
@@ -493,6 +493,8 @@ end;
 
 destructor TSimbaOutputForm.Destroy;
 begin
+  DebugLnFunc := @DebugLn;
+
   if (SimbaSettings <> nil) then
     SimbaSettings.UnRegisterChangeHandler(@SimbaSettingChanged);
 
