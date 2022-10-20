@@ -867,6 +867,8 @@ begin
 
     FreeAndNil(FRecentFiles);
   end;
+
+  SimbaSettings.Save();
 end;
 
 procedure TSimbaForm.MenuItemDebuggerClick(Sender: TObject);

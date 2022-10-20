@@ -11,7 +11,7 @@ unit simba.settings;
 interface
 
 uses
-  classes, sysutils, inifiles, lazmethodlist, variants, fgl;
+  classes, sysutils, inifiles, lazmethodlist, variants, fgl, controls, graphics;
 
 const
   SETTINGS_VERSION = 1; // Increase if settings become incompatible
@@ -26,33 +26,60 @@ type
     FValue: Variant;
     FDefaultValue: Variant;
 
+    procedure CheckValue(AValue: Variant); virtual; abstract;
+    procedure ReadValue(INI: TINIFile); virtual; abstract;
+    procedure WriteValue(INI: TINIFile); virtual; abstract;
+
     function GetName: String;
+    function GetValue: Variant;
     procedure SetValue(AValue: Variant);
   public
     constructor Create(ASettings: TSimbaSettings; ASection, AName: String; DefaultValue: Variant);
 
     property DefaultValue: Variant read FDefaultValue;
-    property Value: Variant read FValue write SetValue;
+    property Value: Variant read GetValue write SetValue;
     property Name: String read GetName;
   end;
 
-  TSimbaSetting_Boolean      = class(TSimbaSetting);
-  TSimbaSetting_String       = class(TSimbaSetting);
-  TSimbaSetting_BinaryString = class(TSimbaSetting);
-  TSimbaSetting_Integer      = class(TSimbaSetting);
+  TSimbaSetting_Boolean = class(TSimbaSetting)
+  protected
+    procedure CheckValue(AValue: Variant); override;
+    procedure ReadValue(INI: TINIFile); override;
+    procedure WriteValue(INI: TINIFile); override;
+  end;
 
-  TSimbaSettingList = specialize TFPGObjectList<TSimbaSetting>;
+  TSimbaSetting_String = class(TSimbaSetting)
+  protected
+    procedure CheckValue(AValue: Variant); override;
+    procedure ReadValue(INI: TINIFile); override;
+    procedure WriteValue(INI: TINIFile); override;
+  end;
+
+  TSimbaSetting_BinaryString = class(TSimbaSetting)
+  protected
+    procedure CheckValue(AValue: Variant); override;
+    procedure ReadValue(INI: TINIFile); override;
+    procedure WriteValue(INI: TINIFile); override;
+  end;
+
+  TSimbaSetting_Integer = class(TSimbaSetting)
+  protected
+    procedure CheckValue(AValue: Variant); override;
+    procedure ReadValue(INI: TINIFile); override;
+    procedure WriteValue(INI: TINIFile); override;
+  end;
+
   TSimbaSettingChangedEvent = procedure(Setting: TSimbaSetting) of object;
 
   TSimbaSettings = class
   protected
-    FFileName: String;
+  type
+    TSettingList = specialize TFPGObjectList<TSimbaSetting>;
+  protected
     FChangeEventList: TMethodList;
-    FList: TSimbaSettingList;
+    FList: TSettingList;
     FFirstLaunch: Boolean;
-
-    procedure Load;
-    procedure Save;
+    FLoaded: Boolean;
   public
     General: record
       ConsoleVisible: TSimbaSetting;
@@ -99,15 +126,21 @@ type
 
     property FirstLaunch: Boolean read FFirstLaunch;
 
+    class var FileName: String;
+    class constructor Create;
+    class function GetINIFile: TINIFile;
     class procedure SetSimpleSetting(Name, Value: String);
     class function GetSimpleSetting(Name: String; DefValue: String = ''): String;
+
+    procedure Load;
+    procedure Save;
 
     procedure RegisterChangeHandler(Event: TSimbaSettingChangedEvent);
     procedure UnRegisterChangeHandler(Event: TSimbaSettingChangedEvent);
 
     procedure Changed(Setting: TSimbaSetting);
 
-    constructor Create(FileName: String);
+    constructor Create;
     destructor Destroy; override;
   end;
 
@@ -117,32 +150,88 @@ var
 implementation
 
 uses
-  lazloggerbase, synedit,
-  simba.encoding, simba.files;
+  synedit,
+  simba.mufasatypes, simba.encoding, simba.files;
+
+procedure TSimbaSetting_Integer.CheckValue(AValue: Variant);
+begin
+  if not VarIsOrdinal(AValue) then
+    raise Exception.Create('TSimbaSetting_BinaryString: Value is not a String')
+end;
+
+procedure TSimbaSetting_Integer.ReadValue(INI: TINIFile);
+begin
+  Value := INI.ReadInt64(FSection, FName, Value);
+end;
+
+procedure TSimbaSetting_Integer.WriteValue(INI: TINIFile);
+begin
+  INI.WriteInt64(FSection, FName, Value);
+end;
+
+procedure TSimbaSetting_BinaryString.CheckValue(AValue: Variant);
+begin
+  if not VarIsStr(AValue) then
+    raise Exception.Create('TSimbaSetting_BinaryString: Value is not a String')
+end;
+
+procedure TSimbaSetting_BinaryString.ReadValue(INI: TINIFile);
+begin
+  Value := Base64Decode(INI.ReadString(FSection, FName, Value));
+end;
+
+procedure TSimbaSetting_BinaryString.WriteValue(INI: TINIFile);
+begin
+  INI.WriteString(FSection, FName, Base64Encode(Value));
+end;
+
+procedure TSimbaSetting_String.CheckValue(AValue: Variant);
+begin
+  if not VarIsStr(AValue) then
+    raise Exception.Create('TSimbaSetting_String: Value is not a String');
+end;
+
+procedure TSimbaSetting_String.ReadValue(INI: TINIFile);
+begin
+  Value := INI.ReadString(FSection, FName, Value);
+end;
+
+procedure TSimbaSetting_String.WriteValue(INI: TINIFile);
+begin
+  INI.WriteString(FSection, FName, Value);
+end;
+
+procedure TSimbaSetting_Boolean.CheckValue(AValue: Variant);
+begin
+  if not VarIsBool(AValue) then
+    raise Exception.Create('TSimbaSetting_Boolean: Value is not a Boolean');
+end;
+
+procedure TSimbaSetting_Boolean.ReadValue(INI: TINIFile);
+begin
+  Value := INI.ReadBool(FSection, FName, Value);
+end;
+
+procedure TSimbaSetting_Boolean.WriteValue(INI: TINIFile);
+begin
+  INI.WriteBool(FSection, FName, Value);
+end;
 
 function TSimbaSetting.GetName: String;
 begin
   Result := FSection + '.' + FName;
 end;
 
-procedure TSimbaSetting.SetValue(AValue: Variant);
-type
-  TVarIsFunction = function(const V: Variant): Boolean;
-
-  procedure AssertType(CheckType: TVarIsFunction);
-  begin
-    if not CheckType(AValue) then
-      raise Exception.Create('Invalid setting value for ' + FName + ' Expected ' + ClassName);
-  end;
-
+function TSimbaSetting.GetValue: Variant;
 begin
-  if (Self is TSimbaSetting_String) or (Self is TSimbaSetting_BinaryString) then
-    AssertType(@VarIsStr);
-  if (Self is TSimbaSetting_Boolean) then
-    AssertType(@VarIsBool);
-  if (Self is TSimbaSetting_Integer) then
-    AssertType(@VarIsOrdinal);
+  FSettings.Load();
 
+  Result := FValue;
+end;
+
+procedure TSimbaSetting.SetValue(AValue: Variant);
+begin
+  CheckValue(AValue);
   if (AValue = FValue) then
     Exit;
 
@@ -171,7 +260,7 @@ begin
   if (FChangeEventList = nil) or (FChangeEventList.Count = 0) then
     Exit;
 
-  DebugLn('Setting changed: ', Setting.Name);
+  DebugLn('[TSimbaSettings.Changed] Setting changed: ' + Setting.Name);
 
   i := FChangeEventList.Count;
   while FChangeEventList.NextDownIndex(i) do
@@ -192,45 +281,33 @@ procedure TSimbaSettings.Load;
 var
   INI: TIniFile;
   Setting: TSimbaSetting;
-  BackupFilename: String;
 begin
-  if FFirstLaunch then
+  if FLoaded then
     Exit;
+  FLoaded := True;
 
-  INI := TIniFile.Create(FFileName, [ifoWriteStringBoolean]);
+  DebugLn('[TSimbaSettings.Load]');
+
+  INI := GetINIFile();
   try
-    INI.SetBoolStringValues(True, ['True']);
-    INI.SetBoolStringValues(False, ['False']);
-
     if (INI.ReadInteger('Settings', 'Version', 0) <> SETTINGS_VERSION) then
     begin
-      BackupFilename := FFileName + '.old';
-      if FileExists(BackupFilename) then
-        DeleteFile(BackupFilename);
-      RenameFile(FFileName, BackupFilename);
+      DeleteFile(INI.FileName + '.old');
+      RenameFile(INI.FileName, INI.FileName + '.old');
 
       Exit;
     end;
 
-    for Setting in FList do
+    if FileExists(FileName) then
     begin
-      if not INI.ValueExists(Setting.FSection, Setting.FName) then
-        Continue;
+      FFirstLaunch := False;
 
-      if (Setting is TSimbaSetting_Boolean) then
-        Setting.Value := INI.ReadBool(Setting.FSection, Setting.FName, Setting.Value);
-
-      if (Setting is TSimbaSetting_Integer) then
-        Setting.Value := INI.ReadInteger(Setting.FSection, Setting.FName, Setting.Value);
-
-      if (Setting is TSimbaSetting_String) then
-        Setting.Value := INI.ReadString(Setting.FSection, Setting.FName, Setting.Value);
-
-      if (Setting is TSimbaSetting_BinaryString) then
+      for Setting in FList do
       begin
-        Setting.FValue := INI.ReadString(Setting.FSection, Setting.FName, Setting.Value);
-        if (Setting.FValue <> '') then
-          Setting.FValue := Base64Decode(Setting.Value);
+        if not INI.ValueExists(Setting.FSection, Setting.FName) then
+          Continue;
+
+        Setting.ReadValue(INI);
       end;
     end;
   finally
@@ -243,26 +320,16 @@ var
   INI: TIniFile;
   Setting: TSimbaSetting;
 begin
-  INI := TIniFile.Create(FFileName, [ifoWriteStringBoolean]);
-  INI.CacheUpdates := True;
-  INI.SetBoolStringValues(True, ['True']);
-  INI.SetBoolStringValues(False, ['False']);
+  if (not FLoaded) then
+    Exit;
+
+  DebugLn('[TSimbaSettings.Save]');
+
+  INI := GetINIFile();
   INI.WriteInteger('Settings', 'Version', SETTINGS_VERSION);
 
   for Setting in FList do
-  begin
-    if (Setting is TSimbaSetting_Boolean) then
-      INI.WriteBool(Setting.FSection, Setting.FName, Setting.Value);
-
-    if (Setting is TSimbaSetting_Integer) then
-      INI.WriteInteger(Setting.FSection, Setting.FName, Setting.Value);
-
-    if (Setting is TSimbaSetting_String) then
-      INI.WriteString(Setting.FSection, Setting.FName, Setting.Value);
-
-    if (Setting is TSimbaSetting_BinaryString) then
-      INI.WriteString(Setting.FSection, Setting.FName, Base64Encode(Setting.Value));
-  end;
+    Setting.WriteValue(INI);
 
   try
     INI.UpdateFile();
@@ -272,12 +339,25 @@ begin
   INI.Free();
 end;
 
+class constructor TSimbaSettings.Create;
+begin
+  FileName := GetDataPath() + 'settings.ini';
+end;
+
+class function TSimbaSettings.GetINIFile: TINIFile;
+begin
+  Result := TIniFile.Create(FileName, [ifoWriteStringBoolean]);
+  Result.CacheUpdates := True;
+  Result.SetBoolStringValues(True, ['True']);
+  Result.SetBoolStringValues(False, ['False']);
+end;
+
 class procedure TSimbaSettings.SetSimpleSetting(Name, Value: String);
 begin
   try
-    with TIniFile.Create(SimbaSettings.FFileName) do
+    with GetINIFile() do
     try
-      WriteString('Temp', Name, Value);
+      WriteString('Other', Name, Value);
     finally
       Free();
     end;
@@ -287,76 +367,72 @@ end;
 
 class function TSimbaSettings.GetSimpleSetting(Name: String; DefValue: String): String;
 begin
+  Result := '';
+
   try
-    with TIniFile.Create(SimbaSettings.FFileName) do
+    with GetINIFile() do
     try
-      Result := ReadString('Temp', Name, DefValue);
+      Result := ReadString('Other', Name, DefValue);
     finally
       Free();
     end;
   except
-    Result := '';
   end;
 end;
 
-constructor TSimbaSettings.Create(FileName: String);
+constructor TSimbaSettings.Create;
 begin
   inherited Create();
 
-  FFileName := ExpandFileName(FileName);
-  FFirstLaunch := not FileExists(FFileName);
-  FList := TSimbaSettingList.Create();
+  FFirstLaunch := True;
+  FList := TSettingList.Create();
   FChangeEventList := TMethodList.Create();
 
   // General
-  General.ConsoleVisible := TSimbaSetting_Boolean.Create(Self, 'General', 'ConsoleVisible', True);
-  General.TrayIconVisible := TSimbaSetting_Boolean.Create(Self, 'General', 'TrayIconVisible', True);
-  General.LockLayout := TSimbaSetting_Boolean.Create(Self, 'General', 'LockLayout', False);
-  General.Layout := TSimbaSetting_BinaryString.Create(Self, 'General', 'Layout', '');
-  General.Notes := TSimbaSetting_BinaryString.Create(Self, 'General', 'Notes', '');
-  General.RecentFiles := TSimbaSetting_BinaryString.Create(Self, 'General', 'RecentFiles', '');
-  General.CustomFontSize := TSimbaSetting_Integer.Create(Self, 'General', 'CustomFontSize', 0);
-  General.ToolbarSize := TSimbaSetting_Integer.Create(Self, 'General', 'ToolbarSize', 24);
-  General.ToolbarPosition := TSimbaSetting_String.Create(Self, 'General', 'ToolbarPosition', 'Top');
+  General.ConsoleVisible     := TSimbaSetting_Boolean.Create(Self, 'General', 'ConsoleVisible', True);
+  General.TrayIconVisible    := TSimbaSetting_Boolean.Create(Self, 'General', 'TrayIconVisible', True);
+  General.LockLayout         := TSimbaSetting_Boolean.Create(Self, 'General', 'LockLayout', False);
+  General.Layout             := TSimbaSetting_BinaryString.Create(Self, 'General', 'Layout', '');
+  General.Notes              := TSimbaSetting_BinaryString.Create(Self, 'General', 'Notes', '');
+  General.RecentFiles        := TSimbaSetting_BinaryString.Create(Self, 'General', 'RecentFiles', '');
+  General.CustomFontSize     := TSimbaSetting_Integer.Create(Self, 'General', 'CustomFontSize', 0);
+  General.ToolbarSize        := TSimbaSetting_Integer.Create(Self, 'General', 'ToolbarSize', 24);
+  General.ToolbarPosition    := TSimbaSetting_String.Create(Self, 'General', 'ToolbarPosition', 'Top');
   General.ColorPickerHistory := TSimbaSetting_BinaryString.Create(Self, 'General', 'ColorPickerHistory', '');
-  General.MacOSKeystrokes := TSimbaSetting_Boolean.Create(Self, 'General', 'MacOSKeystrokes', {$IFDEF DARWIN}True{$ELSE}False{$ENDIF});
+  General.MacOSKeystrokes    := TSimbaSetting_Boolean.Create(Self, 'General', 'MacOSKeystrokes', {$IFDEF DARWIN}True{$ELSE}False{$ENDIF});
 
-  General.OutputFontSize := TSimbaSetting_Integer.Create(Self, 'General', 'OutputFontSize', SynDefaultFontSize + 1);
-  General.OutputFontName := TSimbaSetting_String.Create(Self, 'General', 'OutputFontName', {$IFDEF WINDOWS}'Consolas'{$ELSE}''{$ENDIF});
+  General.OutputFontSize        := TSimbaSetting_Integer.Create(Self, 'General', 'OutputFontSize', SynDefaultFontSize + 1);
+  General.OutputFontName        := TSimbaSetting_String.Create(Self, 'General', 'OutputFontName', {$IFDEF WINDOWS}'Consolas'{$ELSE}''{$ENDIF});
   General.OutputFontAntiAliased := TSimbaSetting_Boolean.Create(Self, 'General', 'OutputFontAntiAliased', True);
-  General.OutputClearOnCompile := TSimbaSetting_Boolean.Create(Self, 'General', 'OutputClearOnCompile', False);
+  General.OutputClearOnCompile  := TSimbaSetting_Boolean.Create(Self, 'General', 'OutputClearOnCompile', False);
 
   General.OpenSSLExtractOnLaunch := TSimbaSetting_Boolean.Create(Self, 'General', 'OpenSSLExtractOnLaunch', True);
-  General.OpenSSLCryptoHash := TSimbaSetting_String.Create(Self, 'General', 'OpenSSLCryptoHash', '');
-  General.OpenSSLHash := TSimbaSetting_String.Create(Self, 'General', 'OpenSSLHash', '');
+  General.OpenSSLCryptoHash      := TSimbaSetting_String.Create(Self, 'General', 'OpenSSLCryptoHash', '');
+  General.OpenSSLHash            := TSimbaSetting_String.Create(Self, 'General', 'OpenSSLHash', '');
 
   // Editor
-  Editor.DefaultScript := TSimbaSetting_BinaryString.Create(Self, 'Editor', 'DefaultScript', 'program new;' + LineEnding + 'begin' + LineEnding + 'end.');
-  Editor.CustomColors := TSimbaSetting_String.Create(Self, 'Editor', 'CustomColors', '');
-  Editor.FontSize := TSimbaSetting_Integer.Create(Self, 'Editor', 'FontSize', SynDefaultFontSize + 1);
-  Editor.FontName := TSimbaSetting_String.Create(Self, 'Editor', 'FontName', {$IFDEF WINDOWS}'Consolas'{$ELSE}''{$ENDIF});
-  Editor.AntiAliased := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AntiAliased', True);
-  Editor.IgnoreCodeToolsIDEDirective := TSimbaSetting_Boolean.Create(Self, 'Editor', 'IgnoreCodeToolsIDEDirective', False);
-  Editor.AllowCaretPastEOL := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AllowCaretPastEOL', True);
+  Editor.DefaultScript                   := TSimbaSetting_BinaryString.Create(Self, 'Editor', 'DefaultScript', 'program new;' + LineEnding + 'begin' + LineEnding + 'end.');
+  Editor.CustomColors                    := TSimbaSetting_String.Create(Self, 'Editor', 'CustomColors', '');
+  Editor.FontSize                        := TSimbaSetting_Integer.Create(Self, 'Editor', 'FontSize', SynDefaultFontSize + 1);
+  Editor.FontName                        := TSimbaSetting_String.Create(Self, 'Editor', 'FontName', {$IFDEF WINDOWS}'Consolas'{$ELSE}''{$ENDIF});
+  Editor.AntiAliased                     := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AntiAliased', True);
+  Editor.IgnoreCodeToolsIDEDirective     := TSimbaSetting_Boolean.Create(Self, 'Editor', 'IgnoreCodeToolsIDEDirective', False);
+  Editor.AllowCaretPastEOL               := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AllowCaretPastEOL', True);
   Editor.AutomaticallyOpenAutoCompletion := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyOpenAutoCompletion', True);
   Editor.AutomaticallyShowParameterHints := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyShowParameterHints', True);
-  Editor.RightMargin := TSimbaSetting_Integer.Create(Self, 'Editor', 'RightMargin', 80);
-  Editor.RightMarginVisible := TSimbaSetting_Boolean.Create(Self, 'Editor', 'RightMarginVisible', False);
+  Editor.RightMargin                     := TSimbaSetting_Integer.Create(Self, 'Editor', 'RightMargin', 80);
+  Editor.RightMarginVisible              := TSimbaSetting_Boolean.Create(Self, 'Editor', 'RightMarginVisible', False);
 
-  Editor.AutomaticallyCompleteBegin := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteBegin', True);
+  Editor.AutomaticallyCompleteBegin       := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteBegin', True);
   Editor.AutomaticallyCompleteParentheses := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteParentheses', False);
-  Editor.AutomaticallyCompleteIndex := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteIndex', False);
+  Editor.AutomaticallyCompleteIndex       := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteIndex', False);
 
   Editor.AutoCompleteWidth := TSimbaSetting_Integer.Create(Self, 'Editor', 'AutoCompleteWidth', 400);
   Editor.AutoCompleteLines := TSimbaSetting_Integer.Create(Self, 'Editor', 'AutoCompleteLines', 8);
-
-  Load();
 end;
 
 destructor TSimbaSettings.Destroy;
 begin
-  Save();
-
   if (FChangeEventList <> nil) then
     FreeAndNil(FChangeEventList);
   if (FList <> nil) then
@@ -366,7 +442,7 @@ begin
 end;
 
 initialization
-  SimbaSettings := TSimbaSettings.Create(GetDataPath() + 'settings.ini');
+  SimbaSettings := TSimbaSettings.Create();
 
 finalization
   if (SimbaSettings <> nil) then

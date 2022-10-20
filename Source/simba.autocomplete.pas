@@ -12,22 +12,17 @@ interface
 uses
   classes, sysutils, graphics, controls, lcltype,
   synedit, syncompletion, syneditkeycmds,
-  simba.codeparser, simba.codeinsight, simba.settings;
+  simba.mufasatypes, simba.codeparser, simba.codeinsight;
 
 type
+  TSimbaAutoComplete = class;
   TSimbaAutoComplete_Form = class;
-
-  TSimbaAutoComplete_ItemList = class(TStringList)
-  public
-    CurrentString: String;
-
-    constructor Create;
-  end;
 
   TSimbaAutoComplete_Hint = class(TSynBaseCompletionHint)
   protected
     FCompletionForm: TSimbaAutoComplete_Form;
     FText: String;
+    FTextWidth: Integer;
   public
     constructor Create(AOwner: TComponent); override;
 
@@ -41,21 +36,18 @@ type
   protected
     FColumnWidth: Integer;
 
-    procedure SimbaSettingChanged(Setting: TSimbaSetting);
-
+    procedure DoShow; override;
     procedure DoHide; override;
     procedure FontChanged(Sender: TObject); override;
   public
     constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
-
-    property ColumnWidth: Integer read FColumnWidth;
   end;
 
   TSimbaAutoComplete = class(TSynCompletion)
   protected
     FParser: TCodeInsight;
-    FDeclarations: TDeclarationList;
+    FGlobals: TDeclarationArray;
+    FLocals: TDeclarationArray;
 
     function HandlePaintList(const Key: String; Canvas: TCanvas; X, Y: Integer; Selected: Boolean; Index: Integer): Boolean;
 
@@ -64,7 +56,6 @@ type
     procedure HandleTab(Sender: TObject);
 
     function GetCompletionFormClass: TSynBaseCompletionFormClass; override;
-    function GetColumnWidth: Integer;
 
     procedure SetParser(Value: TCodeInsight);
   public
@@ -74,27 +65,24 @@ type
     procedure FillGlobals;
     procedure FillMembers(TypeDeclaration: TDeclaration; IsStatic: Boolean);
 
-    property ColumnWidth: Integer read GetColumnWidth;
     property Parser: TCodeInsight read FParser write SetParser;
   end;
 
 implementation
 
 uses
-  castaliapaslextypes, simba.fonthelpers;
+  castaliapaslextypes,
+  simba.settings, simba.algo_sort;
 
 procedure TSimbaAutoComplete_Hint.SetBounds(ALeft, ATop, AWidth, AHeight: Integer);
 begin
   if (FCompletionForm <> nil) then
     with FCompletionForm do
     begin
-      if (FText <> '') then
-      begin
-        ALeft := HintRect.Left + DrawBorderWidth + ColumnWidth - 2;
-        ATop := HintRect.Top + DrawBorderWidth;
-        AWidth := Self.Canvas.TextWidth(FText) + 4;
-        AHeight := FontHeight - 3;
-      end;
+      ALeft   := HintRect.Left + FCompletionForm.FColumnWidth;
+      ATop    := HintRect.Top + DrawBorderWidth;
+      AWidth  := FTextWidth + (DrawBorderWidth * 2) + 4;
+      AHeight := FontHeight - 3;
     end;
 
   inherited SetBounds(ALeft, ATop, AWidth, AHeight);
@@ -136,8 +124,6 @@ function TSimbaAutoComplete_Hint.CalcHintRect(MaxWidth: Integer; const AHint: St
 var
   Decl: TDeclaration;
 begin
-  Result := TRect.Empty;
-
   Decl := FCompletionForm.ItemList.Objects[Index] as TDeclaration;
   if Decl is TciProcedureDeclaration then
     FText := GetProcedureText(Decl as TciProcedureDeclaration)
@@ -153,22 +139,26 @@ begin
   else
     FText := '';
 
-  if (FText <> '') then
-    Result.Right := 100000; // Always show
+  FTextWidth := Canvas.TextWidth(FText);
+  if (FTextWidth > 0) then
+    Result := TRect.Create(0,0,100000,0) // Always show
+  else
+    Result := TRect.Create(0,0,0,0);
 end;
 
 procedure TSimbaAutoComplete_Hint.Paint;
 begin
-  Canvas.Brush.Color := FCompletionForm.ClSelect;
-  Canvas.FillRect(ClientRect);
+  if (FCompletionForm = nil) then
+    Exit;
 
   Canvas.Font.Color := FCompletionForm.TextColor;
-  Canvas.Brush.Style := bsClear;
-  Canvas.TextOut(2, 0, FText);
+  Canvas.Brush.Color := FCompletionForm.ClSelect;
+  Canvas.FillRect(ClientRect);
+  Canvas.TextOut(FCompletionForm.DrawBorderWidth + 2, 0, FText);
 end;
 
 {$IFDEF WINDOWS}
-function SetClassLong(hWnd:HWND; nIndex:longint=-26; dwNewLong:Integer=0):DWORD; stdcall; external 'user32' name 'SetClassLongA';
+function SetClassLong(Handle: HWND; Index: Integer = -26; Value: Integer = 0): UInt32; stdcall; external 'user32' name 'SetClassLongA';
 {$ENDIF}
 
 constructor TSimbaAutoComplete_Hint.Create(AOwner: TComponent);
@@ -184,45 +174,21 @@ begin
   {$ENDIF}
 end;
 
-constructor TSimbaAutoComplete_ItemList.Create;
+procedure TSimbaAutoComplete_Form.DoShow;
 begin
-  inherited Create();
+  Font := CurrentEditor.Font;
 
-  OwnsObjects := False;
-  UseLocale := False;
-  CaseSensitive := False;
-  Duplicates := dupAccept;
-end;
+  Width           := SimbaSettings.Editor.AutoCompleteWidth.Value;
+  NbLinesInWindow := SimbaSettings.Editor.AutoCompleteLines.Value;
 
-destructor TSimbaAutoComplete_Form.Destroy;
-begin
-  SimbaSettings.UnRegisterChangeHandler(@SimbaSettingChanged);
-
-  inherited Destroy();
-end;
-
-procedure TSimbaAutoComplete_Form.SimbaSettingChanged(Setting: TSimbaSetting);
-begin
-  if (Setting = SimbaSettings.Editor.FontSize) then
-    Font.Size := Setting.Value;
-
-  if (Setting = SimbaSettings.Editor.FontName) then
-  begin
-    if IsFontFixed(Setting.Value) then
-      Font.Name := Setting.Value;
-  end;
-
-  if SimbaSettings.Editor.AntiAliased.Value then
-    Font.Quality := fqCleartypeNatural
-  else
-    Font.Quality := fqNonAntialiased;
+  inherited DoShow();
 end;
 
 procedure TSimbaAutoComplete_Form.DoHide;
 begin
   inherited DoHide();
 
-  SimbaSettings.Editor.AutoCompleteWidth.Value := Scale96ToScreen(500);
+  SimbaSettings.Editor.AutoCompleteWidth.Value := Width;
   SimbaSettings.Editor.AutoCompleteLines.Value := NbLinesInWindow;
 end;
 
@@ -230,9 +196,8 @@ procedure TSimbaAutoComplete_Form.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
 
-  FFontHeight := FFontHeight + 2;
-  if (FHint <> nil) then
-    FHint.Font := Font;
+  FHint.Hide();
+  FHint.Font := Self.Font;
 
   with TBitmap.Create() do
   try
@@ -242,33 +207,26 @@ begin
   finally
     Free();
   end;
+
+  FFontHeight := FFontHeight + 2;
 end;
 
 constructor TSimbaAutoComplete_Form.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  if (FItemList <> nil) then
-    FreeAndNil(FItemList);
-  FItemList := TSimbaAutoComplete_ItemList.Create();
-
   if (FHint <> nil) then
     FreeAndNil(FHint);
+
   FHint := TSimbaAutoComplete_Hint.Create(Self);
 
   DrawBorderWidth := 4;
   DrawBorderColor := RGBToColor(240, 240, 240);
   BackgroundColor := RGBToColor(240, 240, 240);
-  ClSelect := RGBToColor(159, 180, 208);
+  ClSelect        := RGBToColor(159, 180, 208);
 
-  TextColor := clBlack;
+  TextColor         := clBlack;
   TextSelectedColor := clBlack;
-
-  SimbaSettingChanged(SimbaSettings.Editor.FontSize);
-  SimbaSettingChanged(SimbaSettings.Editor.FontName);
-  SimbaSettingChanged(SimbaSettings.Editor.AntiAliased);
-
-  SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
 end;
 
 procedure TSimbaAutoComplete.HandleCompletion(var Value: String; SourceValue: String; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
@@ -286,57 +244,74 @@ begin
   Value := '';
 end;
 
-function CustomSortCallback(List: TSimbaAutoComplete_ItemList; Left, Right: Integer): Integer;
-var
-  LeftName, RightName: String;
-  LeftDeclaration, RightDeclaration, Declaration: TDeclaration;
-  LeftWeight, RightWeight: Integer;
-begin
-  Result := 0;
-
-  LeftDeclaration := TDeclaration(List.Objects[Left]);
-  LeftName := LeftDeclaration.NameUpper;
-  LeftWeight := ((100 - Round(Length(List.CurrentString) / Length(LeftName) * 100)) + (Pos(List.CurrentString, LeftName) * 100));
-
-  RightDeclaration := TDeclaration(List.Objects[Right]);
-  RightName := RightDeclaration.NameUpper;
-  RightWeight := ((100 - Round(Length(List.CurrentString) / Length(RightName) * 100)) + (Pos(List.CurrentString, RightName) * 100));
-
-  // Locals always first
-  if LeftDeclaration.HasOwnerClass(TciProcedureDeclaration, Declaration) then
-    LeftWeight -= $FFFF;
-  if RightDeclaration.HasOwnerClass(TciProcedureDeclaration, Declaration) then
-    RightWeight -= $FFFF;
-
-  Result := LeftWeight - RightWeight;
-end;
-
 procedure TSimbaAutoComplete.HandleFiltering(var NewPosition: Integer);
-var
-  I: Integer;
-begin
-  with ItemList as TSimbaAutoComplete_ItemList do
+
+  procedure AddSorted(Decls: TDeclarationArray);
+  var
+    I: Integer;
+    List: TStringList;
   begin
-    CurrentString := UpperCase(Self.CurrentString);
+    List := TStringList.Create();
+    List.UseLocale := False;
 
-    BeginUpdate();
-    Clear();
+    for I := 0 to High(Decls) do
+      List.AddObject(Decls[I].Name, Decls[I]);
+    List.Sort();
+    for I := 0 to List.Count - 1 do
+      ItemList.AddObject(List[I], List.Objects[I]);
 
-    for I := 0 to FDeclarations.Count - 1 do
-      if (CurrentString = '') or FDeclarations[I].NameUpper.Contains(CurrentString) then
-        AddObject(FDeclarations[i].Name, FDeclarations[i]);
+    List.Free();
+  end;
+
+  procedure AddFiltered(Filter: String; Decls: TDeclarationArray; DefaultWeight: Integer = 0);
+  var
+    I, Count: Integer;
+    FilteredDecls: TDeclarationArray;
+    Weights: TIntegerArray;
+  begin
+    SetLength(FilteredDecls, Length(Decls));
+    SetLength(Weights, Length(Decls));
+
+    Count := 0;
+    for I := 0 to High(Decls) do
+      if Decls[I].NameUpper.Contains(Filter) then
+      begin
+        FilteredDecls[Count] := Decls[i];
+        Weights[Count] := DefaultWeight + (100 - Round(Length(Filter) / Length(Decls[I].Name) * 100)) + (Pos(Filter, Decls[I].NameUpper) * 100);
+
+        Inc(Count);
+      end;
 
     if (Count > 0) then
     begin
-      if (CurrentString <> '') then
-        CustomSort(TStringListSortCompare(@CustomSortCallback))
-      else
-        Sort();
+      if (Count > 1) then
+        specialize QuickSortWeighted<TDeclaration, Integer>(FilteredDecls, Weights, 0, Count - 1, True);
 
-      NewPosition := 0
-    end else
-      NewPosition := -1;
+      for I := 0 to Count - 1 do
+        ItemList.AddObject(FilteredDecls[I].Name, FilteredDecls[I]);
+    end;
   end;
+
+begin
+  ItemList.BeginUpdate();
+  ItemList.Clear();
+
+  if (Self.CurrentString = '') then
+  begin
+    AddSorted(FLocals);
+    AddSorted(FGlobals);
+  end else
+  begin
+    AddFiltered(Self.CurrentString.ToUpper(), FLocals, -$FFFF);
+    AddFiltered(Self.CurrentString.ToUpper(), FGlobals);
+  end;
+
+  ItemList.EndUpdate();
+
+  if (ItemList.Count > 0) then
+    NewPosition := 0
+  else
+    NewPosition := -1;
 end;
 
 procedure TSimbaAutoComplete.HandleTab(Sender: TObject);
@@ -347,47 +322,53 @@ end;
 
 procedure TSimbaAutoComplete.FillGlobals;
 var
-  Declaration: TDeclaration;
+  I, Count: Integer;
   Method: TciProcedureDeclaration;
 begin
-  FDeclarations.Clear();
+  Count := 0;
 
-  for Declaration in FParser.Globals do
+  FLocals := FParser.Locals;
+  FGlobals := FParser.Globals;
+  for I := 0 to High(FGlobals) do
   begin
-    if Declaration.ClassType = TciProcedureDeclaration then
+    if FGlobals[i].ClassType = TciProcedureDeclaration then
     begin
-      Method := Declaration as TciProcedureDeclaration;
+      Method := FGlobals[i] as TciProcedureDeclaration;
       if Method.IsOperator or Method.IsMethodOfType or (tokOverride in Method.Directives) then
         Continue;
     end;
 
-    FDeclarations.Add(Declaration);
+    FGlobals[Count] := FGlobals[I];
+    Inc(Count);
   end;
-
-  FDeclarations.AddRange(FParser.Locals);
+  SetLength(FGlobals, Count);
 end;
 
 procedure TSimbaAutoComplete.FillMembers(TypeDeclaration: TDeclaration; IsStatic: Boolean);
 var
-  Declaration: TDeclaration;
+  I, Count: Integer;
 begin
-  FDeclarations.Clear();
+  Count := 0;
 
-  for Declaration in FParser.GetMembersOfType(TypeDeclaration) do
+  FLocals := nil;
+  FGlobals := FParser.GetMembersOfType(TypeDeclaration);
+  for I := 0 to High(FGlobals) do
   begin
-    if (Declaration.ClassType = TciProcedureDeclaration) and (tokOverride in TciProcedureDeclaration(Declaration).Directives) then
+    if (FGlobals[I].ClassType = TciProcedureDeclaration) and (tokOverride in TciProcedureDeclaration(FGlobals[I]).Directives) then
       Continue;
 
     if IsStatic then
     begin
-      if (Declaration.Owner is TciRecordType) and (Declaration.ClassType = TciClassField) then
+      if (FGlobals[I].Owner is TciRecordType) and (FGlobals[I].ClassType = TciClassField) then
         Continue;
-      if (Declaration.ClassType = TciProcedureDeclaration) and (not (tokStatic in TciProcedureDeclaration(Declaration).Directives)) then
+      if (FGlobals[I].ClassType = TciProcedureDeclaration) and (not (tokStatic in TciProcedureDeclaration(FGlobals[I]).Directives)) then
         Continue;
     end;
 
-    FDeclarations.Add(Declaration);
+    FGlobals[Count] := FGlobals[I];
+    Inc(Count);
   end;
+  SetLength(FGlobals, Count);
 end;
 
 function TSimbaAutoComplete.GetCompletionFormClass: TSynBaseCompletionFormClass;
@@ -395,14 +376,10 @@ begin
   Result := TSimbaAutoComplete_Form;
 end;
 
-function TSimbaAutoComplete.GetColumnWidth: Integer;
-begin
-  Result := TSimbaAutoComplete_Form(TheForm).ColumnWidth;
-end;
-
 procedure TSimbaAutoComplete.SetParser(Value: TCodeInsight);
 begin
-  FDeclarations.Clear();
+  FGlobals := nil;
+  FLocals := nil;
 
   if (FParser <> nil) then
     FParser.Free();
@@ -413,23 +390,15 @@ constructor TSimbaAutoComplete.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  FDeclarations := TDeclarationList.Create(False);
-
   OnPaintItem := @HandlePaintList;
   OnCodeCompletion := @HandleCompletion;
   OnSearchPosition := @HandleFiltering;
   OnKeyCompletePrefix := @HandleTab;
-
-  LinesInWindow := SimbaSettings.Editor.AutoCompleteLines.Value;
-  Width := TheForm.Scale96ToScreen(SimbaSettings.Editor.AutoCompleteWidth.Value);
 end;
 
 destructor TSimbaAutoComplete.Destroy;
 begin
   SetParser(nil);
-
-  if (FDeclarations <> nil) then
-    FreeAndNil(FDeclarations);
 
   inherited Destroy();
 end;
@@ -495,10 +464,10 @@ begin
   Canvas.Brush.Style := bsClear;
 
   Canvas.Font.Color := Column.Color;
-  Canvas.TextOut(X, Y, Column.Text);
+  Canvas.TextOut(X + 2, Y, Column.Text);
 
   Canvas.Font.Color := TheForm.TextColor;
-  Canvas.TextOut(X + ColumnWidth, Y, Key);
+  Canvas.TextOut(X + 2 + TSimbaAutoComplete_Form(TheForm).FColumnWidth, Y, Key);
 
   Result := True;
 end;

@@ -21,7 +21,7 @@ function GetOTPToken(Secret: String): Integer;
 implementation
 
 uses
-  HMAC, sha1, DateUtils;
+  HMAC, DateUtils, sha1;
 
 {$R-}
 {$Q-}
@@ -77,14 +77,14 @@ begin
   if (Data = '') then
     Exit('');
 
-  l:=Length(Data);
-  i:=(l div 5);
+  l := Length(Data);
+  i := (l div 5);
   if (l mod 5) <> 0 then
     Inc(i);
   SetLength(Result, i*8);
 
-  i:=1;
-  j:=0;
+  i := 1;
+  j := 0;
   while (i+4 <= l) do
   begin
     Result[j+1] := Base32Table[  Byte(Data[i])   shr 3];
@@ -202,15 +202,15 @@ begin
   if (Data = '') then
     Exit('');
 
-  l:=Length(Data);
-  i:=(l div 3);
+  l := Length(Data);
+  i := (l div 3);
   if (l mod 3) <> 0 then
     Inc(i);
   SetLength(Result, i*4);
 
-  i:=1;
-  j:=0;
-  while (i+2<=l) do
+  i := 1;
+  j := 0;
+  while (i+2 <= l) do
   begin
     Result[j+1] := Base64Table[  Byte(Data[i])   shr 2];
     Result[j+2] := Base64Table[((Byte(Data[i])   and $03) shl 4) or (Byte(Data[i+1]) shr 4)];
@@ -221,7 +221,7 @@ begin
     Inc(i, 3);
   end;
 
-  if (i=l) then
+  if (i = l) then
   begin
     Result[j+1] := Base64Table[  Byte(Data[i]) shr 2];
     Result[j+2] := Base64Table[((Byte(Data[i]) and $03) shl 4)];
