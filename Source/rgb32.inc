@@ -4,8 +4,8 @@
 type
   TRGB32Helper = record Helper for TRGB32
   public
-    class function Create(const Red, Green, Blue: Byte): TRGB32; static; overload;
-    class function Create(const Red, Green, Blue, Alpha: Byte): TRGB32; static; overload;
+    class function Create(const Red, Green, Blue: Byte): TRGB32; static; overload; inline;
+    class function Create(const Red, Green, Blue, Alpha: Byte): TRGB32; static; overload; inline;
 
     function ToString: String;
     function Equals(const Other: TRGB32): Boolean; inline;

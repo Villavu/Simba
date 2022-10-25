@@ -300,7 +300,7 @@ TMufasaBitmap.Rotate
 ~~~~~~~~~~~~~~~~~~~~
 procedure TMufasaBitmap.Rotate(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap);
 *)
-procedure _LapeMufasaBitmap_Rotate(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_Rotate1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMufasaBitmap(Params^[0])^.Rotate(PSingle(Params^[1])^, PBoolean(Params^[2])^, PMufasaBitmap(Params^[3])^);
 end;
@@ -310,9 +310,29 @@ TMufasaBitmap.RotateBilinear
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 procedure TMufasaBitmap.RotateBilinear(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap);
 *)
-procedure _LapeMufasaBitmap_RotateBilinear(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_RotateBilinear1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMufasaBitmap(Params^[0])^.RotateBilinear(PSingle(Params^[1])^, PBoolean(Params^[2])^, PMufasaBitmap(Params^[3])^);
+end;
+
+(*
+TMufasaBitmap.Rotate
+~~~~~~~~~~~~~~~~~~~~
+function TMufasaBitmap.Rotate(Radians: Single; Expand: Boolean): TMufasaBitmap;
+*)
+procedure _LapeMufasaBitmap_Rotate2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMufasaBitmap(Result)^ := PMufasaBitmap(Params^[0])^.Rotate(PSingle(Params^[1])^, PBoolean(Params^[2])^);
+end;
+
+(*
+TMufasaBitmap.RotateBilinear
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function TMufasaBitmap.RotateBilinear(Radians: Single; Expand: Boolean): TMufasaBitmap;
+*)
+procedure _LapeMufasaBitmap_RotateBilinear2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMufasaBitmap(Result)^ := PMufasaBitmap(Params^[0])^.RotateBilinear(PSingle(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 (*
@@ -1545,8 +1565,12 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.Fill(Color: Integer);', @_LapeMufasaBitmap_Fill);
     addGlobalFunc('procedure TMufasaBitmap.ReplaceColor(OldColor, NewColor: Integer);', @_LapeMufasaBitmap_ReplaceColor);
     addGlobalFunc('procedure TMufasaBitmap.ReplaceColors(OldColors, NewColors: TIntegerArray);', @_LapeMufasaBitmap_ReplaceColors);
-    addGlobalFunc('procedure TMufasaBitmap.Rotate(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap);', @_LapeMufasaBitmap_Rotate);
-    addGlobalFunc('procedure TMufasaBitmap.RotateBilinear(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap);', @_LapeMufasaBitmap_RotateBilinear);
+    addGlobalFunc('procedure TMufasaBitmap.Rotate(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap); overload', @_LapeMufasaBitmap_Rotate1);
+    addGlobalFunc('procedure TMufasaBitmap.RotateBilinear(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap); overload', @_LapeMufasaBitmap_RotateBilinear1);
+
+    addGlobalFunc('function TMufasaBitmap.Rotate(Radians: Single; Expand: Boolean): TMufasaBitmap; overload', @_LapeMufasaBitmap_Rotate2);
+    addGlobalFunc('function TMufasaBitmap.RotateBilinear(Radians: Single; Expand: Boolean): TMufasaBitmap; overload', @_LapeMufasaBitmap_RotateBilinear2);
+
     addGlobalFunc('procedure TMufasaBitmap.Desaturate(TargetBitmap: TMufasaBitmap); overload', @_LapeMufasaBitmap_Desaturate);
     addGlobalFunc('procedure TMufasaBitmap.Desaturate; overload', @_LapeMufasaBitmap_DesaturateEx);
     addGlobalFunc('procedure TMufasaBitmap.GreyScale(TargetBitmap: TMufasaBitmap); overload', @_LapeMufasaBitmap_GreyScale);

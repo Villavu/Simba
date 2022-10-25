@@ -15,23 +15,6 @@ uses
   simba.mufasatypes, simba.codeparser, simba.codeinsight;
 
 type
-  TSimbaAutoComplete = class;
-  TSimbaAutoComplete_Form = class;
-
-  TSimbaAutoComplete_Hint = class(TSynBaseCompletionHint)
-  protected
-    FCompletionForm: TSimbaAutoComplete_Form;
-    FText: String;
-    FTextWidth: Integer;
-  public
-    constructor Create(AOwner: TComponent); override;
-
-    function CalcHintRect(MaxWidth: Integer; const AHint: String; AData: Pointer): TRect; override;
-
-    procedure Paint; override;
-    procedure SetBounds(ALeft, ATop, AWidth, AHeight: Integer); override;
-  end;
-
   TSimbaAutoComplete_Form = class(TSynCompletionForm)
   protected
     FColumnWidth: Integer;
@@ -41,6 +24,20 @@ type
     procedure FontChanged(Sender: TObject); override;
   public
     constructor Create(AOwner: TComponent); override;
+  end;
+
+  TSimbaAutoComplete_Hint = class(TSynBaseCompletionHint)
+  protected
+    FForm: TSimbaAutoComplete_Form;
+    FText: String;
+    FTextWidth: Integer;
+  public
+    constructor Create(AOwner: TComponent); override;
+
+    function CalcHintRect(MaxWidth: Integer; const AHint: String; AData: Pointer): TRect; override;
+
+    procedure Paint; override;
+    procedure SetBounds(ALeft, ATop, AWidth, AHeight: Integer); override;
   end;
 
   TSimbaAutoComplete = class(TSynCompletion)
@@ -76,14 +73,13 @@ uses
 
 procedure TSimbaAutoComplete_Hint.SetBounds(ALeft, ATop, AWidth, AHeight: Integer);
 begin
-  if (FCompletionForm <> nil) then
-    with FCompletionForm do
-    begin
-      ALeft   := HintRect.Left + FCompletionForm.FColumnWidth;
-      ATop    := HintRect.Top + DrawBorderWidth;
-      AWidth  := FTextWidth + (DrawBorderWidth * 2) + 4;
-      AHeight := FontHeight - 3;
-    end;
+  if (FForm <> nil) then
+  begin
+    ALeft   := HintRect.Left + FForm.FColumnWidth;
+    ATop    := HintRect.Top + FForm.DrawBorderWidth;
+    AWidth  := FTextWidth + (FForm.DrawBorderWidth * 2) + 4;
+    AHeight := FForm.FontHeight - 3;
+  end;
 
   inherited SetBounds(ALeft, ATop, AWidth, AHeight);
 end;
@@ -124,7 +120,7 @@ function TSimbaAutoComplete_Hint.CalcHintRect(MaxWidth: Integer; const AHint: St
 var
   Decl: TDeclaration;
 begin
-  Decl := FCompletionForm.ItemList.Objects[Index] as TDeclaration;
+  Decl := FForm.ItemList.Objects[Index] as TDeclaration;
   if Decl is TciProcedureDeclaration then
     FText := GetProcedureText(Decl as TciProcedureDeclaration)
   else
@@ -148,13 +144,10 @@ end;
 
 procedure TSimbaAutoComplete_Hint.Paint;
 begin
-  if (FCompletionForm = nil) then
-    Exit;
-
-  Canvas.Font.Color := FCompletionForm.TextColor;
-  Canvas.Brush.Color := FCompletionForm.ClSelect;
+  Canvas.Font.Color := FForm.TextColor;
+  Canvas.Brush.Color := FForm.ClSelect;
   Canvas.FillRect(ClientRect);
-  Canvas.TextOut(FCompletionForm.DrawBorderWidth + 2, 0, FText);
+  Canvas.TextOut(FForm.DrawBorderWidth + 2, 0, FText);
 end;
 
 {$IFDEF WINDOWS}
@@ -165,9 +158,7 @@ constructor TSimbaAutoComplete_Hint.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  FCompletionForm := AOwner as TSimbaAutoComplete_Form;
-
-  Color := clForm;
+  FForm := AOwner as TSimbaAutoComplete_Form;
 
   {$IFDEF WINDOWS}
   SetClassLong(Handle); // Clear CS_DROPSHADOW
