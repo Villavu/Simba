@@ -266,14 +266,14 @@ begin
 
       with Points[I] do
         Bitmap.DrawBoxFilled(
-          TBox.Create(X - Max(1, AreaSize), Y - Max(1, AreaSize), X + Max(1, AreaSize), Y + Max(1, AreaSize)), clYellow
+          TBox.Create(X - AreaSize, Y - AreaSize, X + AreaSize, Y + AreaSize), clYellow
         );
     end;
 
     if Length(Points) > 0 then
       with Points[0] do
         Bitmap.DrawBoxFilled(
-          TBox.Create(X - Max(1, AreaSize), Y - Max(1, AreaSize), X + Max(1, AreaSize), Y + Max(1, AreaSize)), clYellow
+          TBox.Create(X - AreaSize, Y - AreaSize, X + AreaSize, Y + AreaSize), clYellow
         );
 
     if FFlashing and (GetTickCount64() - FLastFlash > 400) then
@@ -288,7 +288,7 @@ begin
       if ListBox.ItemIndex > -1 then
         with GetPoint(ListBox.ItemIndex) do
           Bitmap.DrawBoxFilled(
-            TBox.Create(X - Max(1, AreaSize), Y - Max(1, AreaSize), X + Max(1, AreaSize), Y + Max(1, AreaSize)), FlashColor
+            TBox.Create(X - AreaSize, Y - AreaSize, X + AreaSize, Y + AreaSize), FlashColor
           );
 
       PointFlashTimer.Tag := PointFlashTimer.Tag + 1;
