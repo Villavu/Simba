@@ -152,8 +152,11 @@ type
     function GetColors: TIntegerArray;
     procedure ReplaceColor(OldColor, NewColor: Integer);
     procedure ReplaceColors(OldColors, NewColors: TIntegerArray);
-    procedure Rotate(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap);
-    procedure RotateBilinear(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap);
+    procedure Rotate(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap); overload;
+    procedure RotateBilinear(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap); overload;
+    function Rotate(Radians: Single; Expand: Boolean): TMufasaBitmap; overload;
+    function RotateBilinear(Radians: Single; Expand: Boolean): TMufasaBitmap; overload;
+
     procedure Desaturate(TargetBitmap: TMufasaBitmap); overload;
     procedure Desaturate; overload;
     procedure GreyScale(TargetBitmap: TMufasaBitmap); overload;
@@ -1469,105 +1472,215 @@ end;
 procedure TMufasaBitmap.Rotate(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap);
 var
   CosAngle, SinAngle: Single;
-  MinX, MinY, MidX, MidY: Integer;
-  OldX, OldY, X, Y: Integer;
-  B: TBox;
+
+  procedure RotateNoExpand;
+  var
+    X, Y, OldX, OldY, W, H: Integer;
+    MidX, MidY: Single;
+  begin
+    TargetBitmap.SetSize(FWidth, FHeight);
+
+    MidX := (FWidth - 1) / 2;
+    MidY := (FHeight - 1) / 2;
+
+    W := FWidth - 1;
+    H := FHeight - 1;
+    for Y := 0 to H do
+      for X := 0 to W do
+      begin
+        OldX := Round(MidX + CosAngle * (X - MidX) - SinAngle * (Y - MidY));
+        OldY := Round(MidY + SinAngle * (X - MidX) + CosAngle * (Y - MidY));
+        if (OldX >= 0) and (OldX < FWidth) and (OldY >= 0) and (OldY < FHeight) then
+          TargetBitmap.FData[Y * FWidth + X] := FData[OldY * FWidth + OldX];
+      end;
+  end;
+
+  procedure RotateExpand;
+  var
+    X, Y, OldX, OldY, NewWidth, NewHeight: Integer;
+    MidX, MidY: Single;
+    NewBounds: TBox;
+  begin
+    MidX := (FWidth - 1) / 2;
+    MidY := (FHeight - 1) / 2;
+
+    NewBounds := GetRotatedSize(FWidth, FHeight, Radians);
+
+    NewWidth := NewBounds.Width-1;
+    NewHeight := NewBounds.Height-1;
+
+    TargetBitmap.SetSize(NewWidth, NewHeight);
+
+    Dec(NewWidth);
+    Dec(NewHeight);
+    for Y := 0 to NewHeight do
+      for X := 0 to NewWidth do
+      begin
+        OldX := Round(MidX + CosAngle * (NewBounds.X1+X - MidX) - SinAngle * (NewBounds.Y1+Y - MidY));
+        OldY := Round(MidY + SinAngle * (NewBounds.X1+X - MidX) + CosAngle * (NewBounds.Y1+Y - MidY));
+        if (OldX >= 0) and (OldX < FWidth) and (OldY >= 0) and (OldY < FHeight) then
+          TargetBitmap.FData[Y * TargetBitmap.FWidth + X] := FData[OldY * FWidth + OldX];
+      end;
+  end;
+
 begin
   CosAngle := Cos(Radians);
   SinAngle := Sin(Radians);
 
-  if Expand then
-    B := GetRotatedSize(FWidth, FHeight, Radians)
-  else
-    B := Box(0, 0, FWidth, FHeight);
-
-  MidX := Center.X;
-  MidY := Center.Y;
-
-  MinX := B.X1;
-  MinY := B.Y1;
-
-  TargetBitmap.SetSize(B.Width, B.Height);
-
-  for Y := TargetBitmap.FHeight - 1 downto 0 do
-    for X := TargetBitmap.FWidth - 1 downto 0 do
-    begin
-      OldX := Round(MidX + CosAngle * (X + MinX - MidX) - SinAngle * (Y + MinY - MidY));
-      OldY := Round(MidY + SinAngle * (X + MinX - MidX) + CosAngle * (Y + MinY - MidY));
-      if (OldX >= 0) and (OldY >= 0) and (OldX < FWidth) and (OldY < FHeight) then
-        TargetBitmap.FData[Y * TargetBitmap.FWidth + X] := Self.FData[OldY * FWidth + OldX];
-    end;
+  case Expand of
+    True:  RotateExpand();
+    False: RotateNoExpand();
+  end;
 end;
 
 procedure TMufasaBitmap.RotateBilinear(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap);
 var
   CosAngle, SinAngle: Single;
-  MinX,MinY,MidX,MidY: Integer;
-  X,Y: Integer;
-  OldX,OldY: Single;
-  B: TBox;
-  RR,GG,BB: Integer;
-  dX,dY:Single;
-  p0,p1,p2,p3,Color: TRGB32;
-  topR,topG,topB,BtmR,btmG,btmB: Single;
-  fX,fY,cX,cY: Integer;
+
+  procedure RotateNoExpand;
+  var
+    x, y, w, h: Integer;
+    OldX, OldY: Single;
+    dX, dY, dxMinus1, dyMinus1: Single;
+    p0, p1, p2, p3: TRGB32;
+    topR, topG, topB, BtmR, btmG, btmB: Single;
+    fX, fY, cX, cY: Integer;
+    MidX, MidY: Single;
+  begin
+    TargetBitmap.SetSize(FWidth, FHeight);
+
+    MidX := (FWidth - 1) / 2;
+    MidY := (FHeight - 1) / 2;
+
+    W := FWidth - 1;
+    H := FHeight - 1;
+    for Y := 0 to H do
+      for X := 0 to W do
+      begin
+        OldX := (MidX + CosAngle * (X - MidX) - SinAngle * (Y - MidY));
+        OldY := (MidY + SinAngle * (X - MidX) + CosAngle * (Y - MidY));
+
+        fX := Trunc(OldX);
+        fY := Trunc(OldY);
+        cX := Ceil(OldX);
+        cY := Ceil(OldY);
+
+        if (fX >= 0) and (cX >= 0) and (fX < FWidth) and (cX < FWidth) and
+           (fY >= 0) and (cY >= 0) and (fY < FHeight) and (cY < FHeight) then
+        begin
+          dx := OldX - fX;
+          dy := OldY - fY;
+          dxMinus1 := 1 - dx;
+          dyMinus1 := 1 - dy;
+
+          p0 := FData[fY * FWidth + fX];
+          p1 := FData[fY * FWidth + cX];
+          p2 := FData[cY * FWidth + fX];
+          p3 := FData[cY * FWidth + cX];
+
+          TopR := dxMinus1 * p0.R + dx * p1.R;
+          TopG := dxMinus1 * p0.G + dx * p1.G;
+          TopB := dxMinus1 * p0.B + dx * p1.B;
+          BtmR := dxMinus1 * p2.R + dx * p3.R;
+          BtmG := dxMinus1 * p2.G + dx * p3.G;
+          BtmB := dxMinus1 * p2.B + dx * p3.B;
+
+          with TargetBitmap.FData[Y * TargetBitmap.FWidth + X] do
+          begin
+            R := EnsureRange(Round(dyMinus1 * TopR + dy * BtmR), 0, 255);
+            G := EnsureRange(Round(dyMinus1 * TopG + dy * BtmG), 0, 255);
+            B := EnsureRange(Round(dyMinus1 * TopB + dy * BtmB), 0, 255);
+            A := 0;
+          end;
+        end;
+      end;
+  end;
+
+  procedure RotateExpand;
+  var
+    NewWidth, NewHeight, X, Y: Integer;
+    NewBounds: TBox;
+    OldX, OldY: Single;
+    dX, dY, dxMinus1, dyMinus1: Single;
+    p0, p1, p2, p3: TRGB32;
+    topR, topG, topB, BtmR, btmG, btmB: Single;
+    fX, fY, cX, cY: Integer;
+    MidX, MidY: Single;
+  begin
+    NewBounds := GetRotatedSize(FWidth, FHeight, Radians);
+    NewWidth := NewBounds.Width - 1;
+    NewHeight := NewBounds.Height - 1;
+    MidX := (NewWidth - 1) / 2;
+    MidY := (NewHeight - 1) / 2;
+
+    TargetBitmap.SetSize(NewWidth, NewHeight);
+
+    Dec(NewWidth);
+    Dec(NewHeight);
+    for Y := 0 to NewHeight do
+      for X := 0 to NewWidth do
+      begin
+        OldX := (MidX + CosAngle * (X - MidX) - SinAngle * (Y - MidY));
+        OldY := (MidY + SinAngle * (X - MidX) + CosAngle * (Y - MidY));
+
+        fX := Trunc(OldX) + NewBounds.X1;
+        fY := Trunc(OldY) + NewBounds.Y1;
+        cX := Ceil(OldX)  + NewBounds.X1;
+        cY := Ceil(OldY)  + NewBounds.Y1;
+
+        if (fX >= 0) and (cX >= 0) and (fX < FWidth) and (cX < FWidth) and
+           (fY >= 0) and (cY >= 0) and (fY < FHeight) and (cY < FHeight) then
+        begin
+          dx := OldX - (fX - NewBounds.X1);
+          dy := OldY - (fY - NewBounds.Y1);
+          dxMinus1 := 1 - dx;
+          dyMinus1 := 1 - dy;
+
+          p0 := FData[fY * FWidth + fX];
+          p1 := FData[fY * FWidth + cX];
+          p2 := FData[cY * FWidth + fX];
+          p3 := FData[cY * FWidth + cX];
+
+          TopR := dxMinus1 * p0.R + dx * p1.R;
+          TopG := dxMinus1 * p0.G + dx * p1.G;
+          TopB := dxMinus1 * p0.B + dx * p1.B;
+          BtmR := dxMinus1 * p2.R + dx * p3.R;
+          BtmG := dxMinus1 * p2.G + dx * p3.G;
+          BtmB := dxMinus1 * p2.B + dx * p3.B;
+
+          with TargetBitmap.FData[Y * TargetBitmap.FWidth + X] do
+          begin
+            R := EnsureRange(Round(dyMinus1 * TopR + dy * BtmR), 0, 255);
+            G := EnsureRange(Round(dyMinus1 * TopG + dy * BtmG), 0, 255);
+            B := EnsureRange(Round(dyMinus1 * TopB + dy * BtmB), 0, 255);
+            A := 0;
+          end;
+        end;
+      end;
+  end;
+
 begin
   CosAngle := Cos(Radians);
   SinAngle := Sin(Radians);
 
-  if Expand then
-    B := GetRotatedSize(FWidth, FHeight, Radians)
-  else
-    B := Box(0, 0, FWidth, FHeight);
+  case Expand of
+    True:  RotateExpand();
+    False: RotateNoExpand();
+  end;
+end;
 
-  MidX := Center.X;
-  MidY := Center.Y;
+function TMufasaBitmap.Rotate(Radians: Single; Expand: Boolean): TMufasaBitmap;
+begin
+  Result := TMufasaBitmap.Create();
 
-  MinX := B.X1;
-  MinY := B.Y1;
+  Self.Rotate(Radians, Expand, Result);
+end;
 
-  TargetBitmap.SetSize(B.Width, B.Height);
+function TMufasaBitmap.RotateBilinear(Radians: Single; Expand: Boolean): TMufasaBitmap;
+begin
+  Result := TMufasaBitmap.Create();
 
-  for Y := TargetBitmap.FHeight - 1 downto 0 do
-    for X := TargetBitmap.FWidth - 1 downto 0 do
-    begin
-      OldX := MidX + CosAngle * (X + MinX - MidX) - SinAngle * (Y + MinY - MidY);
-      OldY := MidY + SinAngle * (X + MinX - MidX) + CosAngle * (Y + MinY - MidY);
-
-      fX := Trunc(OldX);
-      fY := Trunc(OldY);
-      cX := Ceil(OldX);
-      cY := Ceil(OldY);
-
-      if not ((fX < 0) or (cX < 0) or (fX >= FWidth) or (cX >= FWidth) or
-              (fY < 0) or (cY < 0) or (fY >= FHeight) or (cY >= FHeight)) then
-      begin
-        dx := OldX - fX;
-        dy := OldY - fY;
-
-        p0 := FData[fY * FWidth + fX];
-        p1 := FData[fY * FWidth + cX];
-        p2 := FData[cY * FWidth + fX];
-        p3 := FData[cY * FWidth + cX];
-
-        TopR := (1 - dx) * p0.R + dx * p1.R;
-        TopG := (1 - dx) * p0.G + dx * p1.G;
-        TopB := (1 - dx) * p0.B + dx * p1.B;
-        BtmR := (1 - dx) * p2.R + dx * p3.R;
-        BtmG := (1 - dx) * p2.G + dx * p3.G;
-        BtmB := (1 - dx) * p2.B + dx * p3.B;
-
-        RR := Round((1 - dy) * TopR + dy * BtmR);
-        GG := Round((1 - dy) * TopG + dy * BtmG);
-        BB := Round((1 - dy) * TopB + dy * BtmB);
-
-        Color.R := EnsureRange(RR, 0, 255);
-        Color.G := EnsureRange(GG, 0, 255);
-        Color.B := EnsureRange(BB, 0, 255);
-
-        TargetBitmap.FData[Y * TargetBitmap.FWidth + X] := Color;
-      end;
-    end;
+  Self.RotateBilinear(Radians, Expand, Result);
 end;
 
 procedure TMufasaBitmap.Desaturate;

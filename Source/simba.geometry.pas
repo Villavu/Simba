@@ -97,7 +97,7 @@ begin
   CosValue := CosTable[Degrees];
 
   Result.X := Trunc(X + CosValue * (P.X - X) - SinValue * (P.Y - Y));
-  Result.Y := Trunc(Y + SinValue * (P.X - X) + CosValue * (P.Y - Y));
+  Result.Y := Round(Y + SinValue * (P.X - X) + CosValue * (P.Y - Y));
 end;
 
 class function TSimbaGeometry.RotatePointsFast(const Points: TPointArray; Degrees: Integer; X, Y: Double): TPointArray;
@@ -116,8 +116,8 @@ begin
 
   for I := 0 to High(Result) do
   begin
-    Result[I].X := Trunc(X + CosValue * (Points[I].X - X) - SinValue * (Points[I].Y - Y));
-    Result[I].Y := Trunc(Y + SinValue * (Points[I].X - X) + CosValue * (Points[I].Y - Y));
+    Result[I].X := Round(X + CosValue * (Points[I].X - X) - SinValue * (Points[I].Y - Y));
+    Result[I].Y := Round(Y + SinValue * (Points[I].X - X) + CosValue * (Points[I].Y - Y));
   end;
 end;
 
@@ -128,8 +128,8 @@ begin
   CosValue := Cos(Radians);
   SinValue := Sin(Radians);
 
-  Result.X := Trunc(X + CosValue * (P.X - X) - SinValue * (P.Y - Y));
-  Result.Y := Trunc(Y + SinValue * (P.X - X) + CosValue * (P.Y - Y));
+  Result.X := Round(X + CosValue * (P.X - X) - SinValue * (P.Y - Y));
+  Result.Y := Round(Y + SinValue * (P.X - X) + CosValue * (P.Y - Y));
 end;
 
 class function TSimbaGeometry.RotatePoints(const Points: TPointArray; Radians, X, Y: Double): TPointArray;
@@ -144,8 +144,8 @@ begin
 
   for I := 0 to High(Result) do
   begin
-    Result[I].X := Trunc(X + CosValue * (Points[I].X - X) - SinValue * (Points[I].Y - Y));
-    Result[I].Y := Trunc(Y + SinValue * (Points[I].X - X) + CosValue * (Points[I].Y - Y));
+    Result[I].X := Round(X + CosValue * (Points[I].X - X) - SinValue * (Points[I].Y - Y));
+    Result[I].Y := Round(Y + SinValue * (Points[I].X - X) + CosValue * (Points[I].Y - Y));
   end;
 end;
 

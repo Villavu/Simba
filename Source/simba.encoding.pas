@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.encoding;
 
 {$i simba.Inc}
@@ -160,10 +165,10 @@ begin
   k := (Length(Data) div 8) * 5;
   SetLength(Result, k);
 
-  if Data[l  ]='=' then Dec(k);
-  if Data[l-2]='=' then Dec(k);
-  if Data[l-3]='=' then Dec(k);
-  if Data[l-5]='=' then Dec(k);
+  if Data[l  ] = '=' then Dec(k);
+  if Data[l-2] = '=' then Dec(k);
+  if Data[l-3] = '=' then Dec(k);
+  if Data[l-5] = '=' then Dec(k);
 
   i := 0;
   j := 0;
@@ -173,7 +178,7 @@ begin
     begin
       Inc(i);
 
-      a[n]:=0;
+      a[n] := 0;
       while (a[n] < 32) and (Data[i] <> Base32Table[a[n]]) do
         Inc(a[n]);
     end;
@@ -183,11 +188,11 @@ begin
         if a[n] = 32 then
           a[n] := 0;
 
-    Result[j+1]:=Char((a[0] shl 3) or (a[1] shr 2));
-    Result[j+2]:=Char((a[1] shl 6) or (a[2] shl 1) or (a[3] shr 4));
-    Result[j+3]:=Char((a[3] shl 4) or (a[4] shr 1));
-    Result[j+4]:=Char((a[4] shl 7) or (a[5] shl 2) or (a[6] shr 3));
-    Result[j+5]:=Char((a[6] shl 5) or (a[7]      ));
+    Result[j+1] := Char((a[0] shl 3) or (a[1] shr 2));
+    Result[j+2] := Char((a[1] shl 6) or (a[2] shl 1) or (a[3] shr 4));
+    Result[j+3] := Char((a[3] shl 4) or (a[4] shr 1));
+    Result[j+4] := Char((a[4] shl 7) or (a[5] shl 2) or (a[6] shr 3));
+    Result[j+5] := Char((a[6] shl 5) or (a[7]      ));
 
     Inc(j, 5);
   end;
