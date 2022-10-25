@@ -1,7 +1,7 @@
 object SimbaDTMEditorForm: TSimbaDTMEditorForm
-  Left = 35
+  Left = 888
   Height = 1146
-  Top = 79
+  Top = 135
   Width = 1346
   Caption = 'DTM Editor'
   ClientHeight = 1121
@@ -14,7 +14,7 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
   Position = poScreenCenter
   ShowHint = True
   ShowInTaskBar = stAlways
-  LCLVersion = '2.2.2.0'
+  LCLVersion = '2.2.4.0'
   object PanelMain: TPanel
     Left = 0
     Height = 1121

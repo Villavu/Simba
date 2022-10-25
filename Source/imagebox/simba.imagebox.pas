@@ -650,12 +650,9 @@ begin
   with Buffer do
   begin
     Buffer.Data := Bitmap.Data;
-    Buffer.LineWidth := Bitmap.Width;
-
-    X1 := 0;
-    Y1 := 0;
-    X2 := Bitmap.Width - 1;
-    Y2 := Bitmap.Height - 1;
+    Buffer.Width := Bitmap.Width;
+    Buffer.SearchWidth := Bitmap.Width;
+    Buffer.SearchHeight := Bitmap.Height;
 
     Result := FindDTMs(DTM);
   end;

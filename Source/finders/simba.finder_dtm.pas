@@ -17,10 +17,10 @@ uses
 type
   TFindDTMBuffer = record
     Data: PRGB32;
-    LineWidth: PtrUInt;
+    Width: Integer;
 
-    // Area to search
-    X1, Y1, X2, Y2: Integer;
+    SearchWidth: Integer;
+    SearchHeight: Integer;
 
     function FindDTMs(DTM: TDTM; MaxToFind: Integer = 0): TPointArray;
     function FindDTMsRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = 0): TPointArray;
@@ -29,7 +29,7 @@ type
 implementation
 
 uses
-  simba.colormath, simba.overallocatearray, simba.math;
+  simba.colormath, simba.math, simba.overallocatearray;
 
 function TFindDTMBuffer.FindDTMs(DTM: TDTM; MaxToFind: Integer): TPointArray;
 var
@@ -52,7 +52,7 @@ var
     for Y := StartY to StopY do
       for X := StartX to StopX do
       begin
-        if (X < X1) or (Y < Y1) or (X > X2) or (Y > Y2) then
+        if (X < 0) or (Y < 0) or (X >= SearchWidth) or (Y >= SearchHeight) then
           Continue;
 
         with Table[Y, X] do
@@ -66,7 +66,7 @@ var
               begin
                 Checked.SetBit(Index);
 
-                if RGBDistance(Data[Y * LineWidth + X], PointColors[Index]) <= PointTolerances[Index] then
+                if RGBDistance(Data[Y * Width + X], PointColors[Index]) <= PointTolerances[Index] then
                 begin
                   Checked.SetBit(Index);
                   Hit.SetBit(Index);
@@ -107,10 +107,10 @@ begin
     Exit(nil);
 
   MainPointArea := DTMBounds(DTM);
-  MainPointArea.X1 := X1 + Abs(MainPointArea.X1);
-  MainPointArea.Y1 := Y1 + Abs(MainPointArea.Y1);
-  MainPointArea.X2 := X2 - MainPointArea.X2;
-  MainPointArea.Y2 := Y2 - MainPointArea.Y2;
+  MainPointArea.X1 := Abs(MainPointArea.X1);
+  MainPointArea.Y1 := Abs(MainPointArea.Y1);
+  MainPointArea.X2 := SearchWidth - MainPointArea.X2;
+  MainPointArea.Y2 := SearchHeight - MainPointArea.Y2;
 
   // DTM can't fit in search area
   if (MainPointArea.X1 >= MainPointArea.X2) or (MainPointArea.Y1 >= MainPointArea.Y2) then
@@ -129,7 +129,7 @@ begin
   end;
 
   PointBuffer.Init(256);
-  SetLength(Table, Y2-Y1+1, X2-X1+1);
+  SetLength(Table, SearchHeight, SearchWidth);
   H := DTM.PointCount - 1;
 
   for Y := MainPointArea.Y1 to MainPointArea.Y2 do
@@ -173,7 +173,7 @@ var
     for Y := StartY to StopY do
       for X := StartX to StopX do
       begin
-        if (X < X1) or (Y < Y1) or (X > X2) or (Y > Y2) then
+        if (X < 0) or (Y < 0) or (X >= SearchWidth) or (Y >= SearchHeight) then
           Continue;
 
         with Table[Y, X] do
@@ -187,7 +187,7 @@ var
               begin
                 Checked.SetBit(Index);
 
-                if RGBDistance(Data[Y * LineWidth + X], PointColors[Index]) <= PointTolerances[Index] then
+                if RGBDistance(Data[Y * Width + X], PointColors[Index]) <= PointTolerances[Index] then
                 begin
                   Checked.SetBit(Index);
                   Hit.SetBit(Index);
@@ -230,8 +230,8 @@ var
   MatchBuffer: TMatchBuffer;
   Points, RotatedPoints: TPointArray;
   MiddleAngle, SearchDegree: Double;
-  AngleSteps: Integer = 0;
-  test: TBox;
+  AngleSteps: Integer;
+  DTMBounds: TBox;
 label
   Next, Finished;
 begin
@@ -253,7 +253,7 @@ begin
       PointTolerances[I] := Sqr(DTM.Points[I].Tolerance);
   end;
 
-  SetLength(Table, Y2-Y1+1, X2-X1+1);
+  SetLength(Table, SearchHeight, SearchWidth);
 
   StartDegrees := FixD(StartDegrees);
   if (EndDegrees <> 360) then
@@ -274,12 +274,12 @@ begin
 
     Inc(AngleSteps);
 
-    RotateDTMPoints(Points, RotatedPoints, Radians(SearchDegree), Test);
+    RotateDTMPoints(Points, RotatedPoints, Radians(SearchDegree), DTMBounds);
 
-    MainPointArea.X1 := X1 + Abs(Test.X1);
-    MainPointArea.Y1 := Y1 + Abs(Test.Y1);
-    MainPointArea.X2 := X2 - Test.X2;
-    MainPointArea.Y2 := Y2 - Test.Y2;
+    MainPointArea.X1 := Abs(DTMBounds.X1);
+    MainPointArea.Y1 := Abs(DTMBounds.Y1);
+    MainPointArea.X2 := SearchWidth - DTMBounds.X2;
+    MainPointArea.Y2 := SearchHeight - DTMBounds.Y2;
     if (MainPointArea.X1 >= MainPointArea.X2) or (MainPointArea.Y1 >= MainPointArea.Y2) then
       Continue;
 
