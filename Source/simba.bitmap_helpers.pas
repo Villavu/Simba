@@ -89,29 +89,31 @@ end;
 function TMufasaBitmapHelpers.FindBitmap(Bitmap: TMufasaBitmap; out X, Y: Integer; Tolerance: Integer): Boolean;
 var
   Buffer: TFindBitmapBuffer;
+  Points: TPointArray;
 begin
-  Buffer.Ptr := FData;
-  Buffer.PtrInc := 0;
-  Buffer.X1 := 0;
-  Buffer.Y1 := 0;
-  Buffer.X2 := FWidth - 1;
-  Buffer.Y2 := FHeight - 1;
+  Buffer.Data := FData;
+  Buffer.Width := FWidth;
+  Buffer.SearchWidth := FWidth;
+  Buffer.SearchHeight := FHeight;
 
-  Result := Buffer.Find(Bitmap, X, Y, Tolerance);
+  Result := Buffer.Find(Bitmap, Points, Tolerance);
+  if Result then
+  begin
+    X := Points[0].X;
+    Y := Points[0].Y;
+  end;
 end;
 
 function TMufasaBitmapHelpers.FindBitmaps(Bitmap: TMufasaBitmap; out Points: TPointArray; Tolerance: Integer): Boolean;
 var
   Buffer: TFindBitmapBuffer;
 begin
-  Buffer.Ptr := FData;
-  Buffer.PtrInc := 0;
-  Buffer.X1 := 0;
-  Buffer.Y1 := 0;
-  Buffer.X2 := FWidth - 1;
-  Buffer.Y2 := FHeight - 1;
+  Buffer.Data := FData;
+  Buffer.Width := FWidth;
+  Buffer.SearchWidth := FWidth;
+  Buffer.SearchHeight := FHeight;
 
-  Result := Buffer.FindAll(Bitmap, Points, Tolerance);
+  Result := Buffer.Find(Bitmap, Points, Tolerance);
 end;
 
 end.
