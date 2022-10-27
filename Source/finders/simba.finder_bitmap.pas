@@ -24,6 +24,8 @@ type
 
     function Find(Bitmap: TMufasaBitmap; out Points: TPointArray; MaxToFind: Integer): Boolean; overload;
     function Find(Bitmap: TMufasaBitmap; out Points: TPointArray; Tolerance: Integer; MaxToFind: Integer): Boolean; overload;
+
+    class operator Initialize(var Self: TFindBitmapBuffer);
   end;
 
 implementation
@@ -170,6 +172,11 @@ begin
   Points := Buffer.Trim();
 
   Result := Length(Points) > 0;
+end;
+
+class operator TFindBitmapBuffer.Initialize(var Self: TFindBitmapBuffer);
+begin
+  Self := Default(TFindBitmapBuffer);
 end;
 
 end.

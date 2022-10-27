@@ -1,0 +1,65 @@
+{$assertions on}
+
+var img: TMufasaBitmap;
+var x, y: Integer;
+var tpa: TPointArray;
+begin
+  img := TMufasaBitmap.Create(127, 127);
+  for y:=0 to img.GetHeight()-1 do
+    for x:=0 to img.GetWidth()-1 do
+      img.SetPixel(x,y, RGBToColor(255, y+x, y+x));
+
+  SetTargetBitmap(img);
+
+  Assert(FindColor(X, Y, $7E7EFF));
+  Assert(X=126);
+  Assert(Y=0);
+
+  Assert(FindColor(X, Y, $7E7EFF, 25, 25, 100, 100));
+  Assert(X=100);
+  Assert(Y=26);
+
+  Assert(FindColor(X, Y, $7E7EFF, TBox.Create(25, 25, 100, 100)));
+  Assert(X=100);
+  Assert(Y=26);
+
+  Assert(FindColorTolerance(X, Y, $7E7EFF, 5));
+  Assert(X=123);
+  Assert(Y=0);
+
+  Assert(FindColorTolerance(X, Y, $7E7EFF, 25, 25, 100, 100, 5));
+  Assert(X=98);
+  Assert(Y=25);
+
+  Assert(FindColorTolerance(X, Y, $7E7EFF, TBox.Create(25, 25, 100, 100), 5));
+  Assert(X=98);
+  Assert(Y=25);
+
+  Assert(FindColorsTolerance(TPA, $7E7EFF, 5));
+  Assert(TPA.Length() = 877);
+
+  Assert(FindColorsTolerance(TPA, $7E7EFF, 25, 25, 100, 100, 5));
+  Assert(TPA.Length() = 519);
+
+  Assert(FindColorsTolerance(TPA, $7E7EFF, TBox.Create(25, 25, 100, 100), 5));
+  Assert(TPA.Length() = 519);
+
+  Assert(FindColors(TPA, $7E7EFF));
+  Assert(TPA.Length() = 127);
+
+  Assert(FindColors(TPA, $7E7EFF, 25, 25, 100, 100));
+  Assert(TPA.Length() = 75);
+
+  Assert(FindColors(TPA, $7E7EFF, TBox.Create(25, 25, 100, 100)));
+  Assert(TPA.Length() = 75);
+
+  Assert(CountColorTolerance($7E7EFF, 5) = 877);
+  Assert(CountColorTolerance($7E7EFF, 25, 25, 100, 100, 5) = 519);
+  Assert(CountColorTolerance($7E7EFF, TBox.Create(25, 25, 100, 100), 5) = 519);
+
+  Assert(CountColor($7E7EFF) = 127);
+  Assert(CountColor($7E7EFF, 25, 25, 100, 100) = 75);
+  Assert(CountColor($7E7EFF, TBox.Create(25, 25, 100, 100)) = 75);
+
+  img.Free();
+end.

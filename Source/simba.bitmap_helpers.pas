@@ -48,12 +48,10 @@ function TMufasaBitmapHelpers.FindColors(out Points: TPointArray; Color: Integer
 var
   Buffer: TFindColorBuffer;
 begin
-  Buffer.Ptr := FData;
-  Buffer.PtrInc := 0;
-  Buffer.X1 := 0;
-  Buffer.Y1 := 0;
-  Buffer.X2 := FWidth - 1;
-  Buffer.Y2 := FHeight - 1;
+  Buffer.Data := FData;
+  Buffer.Width := FWidth;
+  Buffer.SearchWidth := FWidth;
+  Buffer.SearchHeight := FHeight;
 
   Result := Buffer.Find(Points, Color);
 end;
@@ -62,12 +60,10 @@ function TMufasaBitmapHelpers.FindColorsTolerance(out Points: TPointArray; Color
 var
   Buffer: TFindColorBuffer;
 begin
-  Buffer.Ptr := FData;
-  Buffer.PtrInc := 0;
-  Buffer.X1 := 0;
-  Buffer.Y1 := 0;
-  Buffer.X2 := FWidth - 1;
-  Buffer.Y2 := FHeight - 1;
+  Buffer.Data := FData;
+  Buffer.Width := FWidth;
+  Buffer.SearchWidth := FWidth;
+  Buffer.SearchHeight := FHeight;
 
   Result := Buffer.FindCTS1(Points, Color, Tolerance);
 end;
@@ -76,12 +72,10 @@ function TMufasaBitmapHelpers.FindColorsTolerance(out Points: TPointArray; Color
 var
   Buffer: TFindColorBuffer;
 begin
-  Buffer.Ptr := FData;
-  Buffer.PtrInc := 0;
-  Buffer.X1 := 0;
-  Buffer.Y1 := 0;
-  Buffer.X2 := FWidth - 1;
-  Buffer.Y2 := FHeight - 1;
+  Buffer.Data := FData;
+  Buffer.Width := FWidth;
+  Buffer.SearchWidth := FWidth;
+  Buffer.SearchHeight := FHeight;
 
   Result := Buffer.FindCTS2(Points, Color, Tolerance, HueMod, SatMod);
 end;

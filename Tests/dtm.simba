@@ -34,9 +34,8 @@ begin
     dtm.SetPointColor(i, $00FF00);
 
   Assert(FindDTMsRotated(dtm, tpa, 0,0,img.GetWidth()-1,img.GetHeight()-1,40,50,1,FoundDegrees));
-
-  Assert(ToString(TPA) = '[{X = 100, Y = 100}, {X = 99, Y = 99}, {X = 100, Y = 99}, {X = 99, Y = 100}, {X = 100, Y = 100}]');
-  Assert(ToString(FoundDegrees) = '[46, 44, 44, 44, 44]');
+  Assert(ToString(TPA) = '[{X = 100, Y = 100}, {X = 100, Y = 101}, {X = 99, Y = 100}, {X = 100, Y = 100}]');
+  Assert(ToString(FoundDegrees) = '[46, 46, 44, 44]');
 
   img.Clear();
   img.SetPixel(100,100, $0000FF);
