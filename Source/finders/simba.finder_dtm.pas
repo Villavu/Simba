@@ -24,6 +24,8 @@ type
 
     function FindDTMs(DTM: TDTM; MaxToFind: Integer = 0): TPointArray;
     function FindDTMsRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = 0): TPointArray;
+
+    class operator Initialize(var Self: TFindDTMBuffer);
   end;
 
 implementation
@@ -313,6 +315,11 @@ begin
       Result[I].Y := Y;
       FoundDegrees[I] := Deg;
     end;
+end;
+
+class operator TFindDTMBuffer.Initialize(var Self: TFindDTMBuffer);
+begin
+  Self := Default(TFindDTMBuffer);
 end;
 
 end.

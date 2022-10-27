@@ -12,263 +12,167 @@ interface
 
 uses
   classes, sysutils,
-  simba.mufasatypes;
-
-{
-function TMFinder.FindColorsTolerance(out Points: TPointArray; Color, xs, ys, xe, ye, Tol: Integer): Boolean;
-var
-  Data: TRetData;
-  Buffer: TFindColorBuffer;
-begin
-  if GetData(Data, xs, ys, xe, ye) then
-  begin
-    Ptr := Data.Ptr;
-    PtrInc := Data.IncPtrWith;
-    X1 := xs;
-    Y1 := ys;
-    X2 := xe;
-    Y2 := ye;
-
-    Result := FindCTS2(Points, Color, Tol, Self.hueMod, Self.satMod);
-  end else
-    Result := False;
-end;
-}
+  simba.mufasatypes, simba.overallocatearray, simba.colormath_same;
 
 type
   TFindColorBuffer = record
-    Ptr: PRGB32;
-    PtrInc: Integer;
+    Data: PRGB32;
+    Width: Integer;
 
-    X1, Y1, X2, Y2: Integer;
+    SearchWidth: Integer;
+    SearchHeight: Integer;
 
-    function Find(out Points: TPointArray; const Color: Integer): Boolean;
-    function FindCTS0(out Points: TPointArray; const Color, Tolerance: Integer): Boolean;
-    function FindCTS1(out Points: TPointArray; const Color, Tolerance: Integer): Boolean;
-    function FindCTS2(out Points: TPointArray; const Color, Tolerance: Integer; const HueMod, SatMod: Extended): Boolean;
+    Offset: TPoint;
+
+    function Find(out Points: TPointArray; Color: Integer; MaxToFind: Integer = 0): Boolean;
+    function FindCTS0(out Points: TPointArray; Color, Tolerance: Integer; MaxToFind: Integer = 0): Boolean;
+    function FindCTS1(out Points: TPointArray; Color, Tolerance: Integer; MaxToFind: Integer = 0): Boolean;
+    function FindCTS2(out Points: TPointArray; Color, Tolerance: Integer; HueMod, SatMod: Extended; MaxToFind: Integer = 0): Boolean;
+    function FindCTS3(out Points: TPointArray; Color, Tolerance: Integer; Modifier: Extended; MaxToFind: Integer = 0): Boolean;
+
+    function Count(Color: Integer; MaxToFind: Integer = 0): Integer;
+    function CountCTS0(Color, Tolerance: Integer; MaxToFind: Integer = 0): Integer;
+    function CountCTS1(Color, Tolerance: Integer; MaxToFind: Integer = 0): Integer;
+    function CountCTS2(Color, Tolerance: Integer; HueMod, SatMod: Extended; MaxToFind: Integer = 0): Integer;
+    function CountCTS3(Color, Tolerance: Integer; Modifier: Extended; MaxToFind: Integer = 0): Integer;
+
+    class operator Initialize(var Self: TFindColorBuffer);
   end;
 
 implementation
 
-uses
-  math,
-  simba.colormath, simba.overallocatearray;
-
+generic function Finder<TSameColor>(const SameColor: TSameColor; const Offset: TPoint; out Points: TPointArray; Data: PRGB32; DataWidth: Integer; SearchWidth, SearchHeight: Integer; MaxToFind: Integer = 0): Boolean;
 var
-  Percentage: array[0..255] of Single;
-
-function TFindColorBuffer.Find(out Points: TPointArray; const Color: Integer): Boolean;
-var
-  GoalR, GoalG, GoalB: Integer;
-
-  function Match(const Color: TRGB32): Boolean; inline;
-  begin
-    Result := (GoalR = Color.R) and (GoalG = Color.G) and (GoalB = Color.B);
-  end;
-
-var
-  X, Y: Integer;
-  PointBuffer: specialize TSimbaOverAllocateArray<TPoint>;
+  X, Y, RowSize: Integer;
+  RowPtr, Ptr: PByte;
+  PointBuffer: TSimbaPointBuffer;
+label
+  Finished;
 begin
-  PointBuffer.Init(4096);
+  if (SearchWidth = 0) or (SearchHeight = 0) or (Data = nil) or (DataWidth = 0) then
+    Exit(False);
 
-  ColorToRGB(Color, GoalR, GoalG, GoalB);
+  RowSize := DataWidth * SizeOf(TRGB32);
+  RowPtr := PByte(Data);
 
-  for Y := Y1 to Y2 do
+  Dec(SearchHeight);
+  Dec(SearchWidth);
+  for Y := 0 to SearchHeight do
   begin
-    for X := X1 to X2 do
+    Ptr := RowPtr;
+    for X := 0 to SearchWidth do
     begin
-      if Match(Ptr^) then
-        PointBuffer.Add(Point(X, Y));
+      if SameColor.IsSame(PRGB32(Ptr)^) then
+      begin
+        PointBuffer.Add(X + Offset.X, Y + Offset.Y);
 
-      Inc(Ptr);
+        if (PointBuffer.Count = MaxToFind) then
+        begin
+          Points := PointBuffer.Trim();
+
+          goto Finished;
+        end;
+      end;
+
+      Inc(Ptr, SizeOf(TRGB32));
     end;
 
-    Inc(Ptr, PtrInc);
+    Inc(RowPtr, RowSize);
   end;
+  Finished:
 
   Points := PointBuffer.Trim();
 
   Result := Length(Points) > 0;
 end;
 
-// Future note: Having CTS0 & CTS1 seems pretty pointless.
-function TFindColorBuffer.FindCTS0(out Points: TPointArray; const Color, Tolerance: Integer): Boolean;
+generic function Counter<TSameColor>(const SameColor: TSameColor; Data: PRGB32; DataWidth: Integer; SearchWidth, SearchHeight: Integer; MaxToFind: Integer = 0): Integer;
 var
-  GoalR, GoalG, GoalB: Integer;
-
-  function Match(const Color: TRGB32): Boolean; inline;
-  begin
-    Result := (Abs(GoalR - Color.R) <= Tolerance) and
-              (Abs(GoalG - Color.G) <= Tolerance) and
-              (Abs(GoalB - Color.B) <= Tolerance);
-  end;
-
-var
-  X, Y: Integer;
-  PointBuffer: specialize TSimbaOverAllocateArray<TPoint>;
+  X, Y, RowSize: Integer;
+  RowPtr, Ptr: PByte;
 begin
-  PointBuffer.Init(4096);
+  Result := 0;
+  if (SearchWidth = 0) or (SearchHeight = 0) or (Data = nil) or (DataWidth = 0) then
+    Exit;
 
-  ColorToRGB(Color, GoalR, GoalG, GoalB);
+  RowSize := DataWidth * SizeOf(TRGB32);
+  RowPtr := PByte(Data);
 
-  for Y := Y1 to Y2 do
+  Dec(SearchHeight);
+  Dec(SearchWidth);
+  for Y := 0 to SearchHeight do
   begin
-    for X := X1 to X2 do
+    Ptr := RowPtr;
+    for X := 0 to SearchWidth do
     begin
-      if Match(Ptr^) then
-        PointBuffer.Add(Point(X, Y));
+      if SameColor.IsSame(PRGB32(Ptr)^) then
+      begin
+        Inc(Result);
+        if (Result = MaxToFind) then
+          Exit;
+      end;
 
-      Inc(Ptr);
+      Inc(Ptr, SizeOf(TRGB32));
     end;
 
-    Inc(Ptr, PtrInc);
+    Inc(RowPtr, RowSize);
   end;
-
-  Points := PointBuffer.Trim();
-
-  Result := Length(Points) > 0;
 end;
 
-function TFindColorBuffer.FindCTS1(out Points: TPointArray; const Color, Tolerance: Integer): Boolean;
-var
-  GoalR, GoalG, GoalB: Integer;
-  GoalTolerance: Integer;
-
-  function Match(const Color: TRGB32): Boolean; inline;
-  begin
-    Result := Sqr(GoalR - Color.R) + Sqr(GoalG - Color.G) + Sqr(GoalB - Color.B) <= GoalTolerance;
-  end;
-
-var
-  X, Y: Integer;
-  PointBuffer: specialize TSimbaOverAllocateArray<TPoint>;
+function TFindColorBuffer.Find(out Points: TPointArray; Color: Integer; MaxToFind: Integer): Boolean;
 begin
-  PointBuffer.Init(4096);
-
-  ColorToRGB(Color, GoalR, GoalG, GoalB);
-
-  GoalTolerance := Sqr(Tolerance);
-
-  for Y := Y1 to Y2 do
-  begin
-    for X := X1 to X2 do
-    begin
-      if Match(Ptr^) then
-        PointBuffer.Add(Point(X, Y));
-
-      Inc(Ptr);
-    end;
-
-    Inc(Ptr, PtrInc);
-  end;
-
-  Points := PointBuffer.Trim();
-
-  Result := Length(Points) > 0;
+  Result := specialize Finder<TSameColor>(TSameColor.Create(Color), Offset, Points, Self.Data, Self.Width, Self.SearchWidth, Self.SearchHeight, MaxToFind);
 end;
 
-function TFindColorBuffer.FindCTS2(out Points: TPointArray; const Color, Tolerance: Integer; const HueMod, SatMod: Extended): Boolean;
-var
-  GoalH, GoalS, GoalL: Single;
-  GoalHueMod, GoalSatMod: Single;
-  GoalTolerance: Single;
-
-  function Match(const Color: TRGB32): Boolean; inline;
-  var
-    R, G, B: Single;
-    H, S, L: Single;
-    CMin, CMax, D: Single;
-  begin
-    R := Percentage[Color.R];
-    G := Percentage[Color.G];
-    B := Percentage[Color.B];
-
-    CMin := R;
-    CMax := R;
-    if G < CMin then CMin := G;
-    if B < CMin then CMin := B;
-    if G > CMax then CMax := G;
-    if B > CMax then CMax := B;
-
-    L := 0.5 * (CMax + CMin);
-
-    if Abs(L-GoalL) > GoalTolerance then
-      Exit(False);
-    if (CMax = CMin) then
-      Exit(GoalS <= GoalSatMod);
-
-    D := CMax - CMin;
-    if (L < 0.5) then
-      S := D / (CMax + CMin)
-    else
-      S := D / (2 - CMax - CMin);
-
-    if Abs(S - GoalS) > GoalSatMod then
-      Exit(False);
-
-    if (R = CMax) then
-      H := (G - B) / D
-    else
-    if (G = CMax) then
-      H  := 2 + (B - R) / D
-    else
-      H := 4 + (R - G) / D;
-
-    H := H / 6;
-    if (H < 0) then
-      H := H + 1;
-    H := H * 100;
-
-    if (H > GoalH) then
-      Result := Min(H - GoalH, Abs(H - (GoalH + 100))) <= GoalHueMod
-    else
-      Result := Min(GoalH - H, Abs(GoalH - (H + 100))) <= GoalHueMod;
-  end;
-
-var
-  X, Y: Integer;
-  PointBuffer: specialize TSimbaOverAllocateArray<TPoint>;
+function TFindColorBuffer.FindCTS0(out Points: TPointArray; Color, Tolerance: Integer; MaxToFind: Integer): Boolean;
 begin
-  PointBuffer.Init(4096);
-  with RGBToBGR(Color) do
-    RGBToHSL(R, G, B, GoalH, GoalS, GoalL);
-
-  GoalHueMod    := (Tolerance * HueMod);
-  GoalSatMod    := (Tolerance * SatMod) / 100;
-  GoalTolerance := (Tolerance / 100);
-
-  GoalL := GoalL / 100;
-  GoalS := GoalS / 100;
-
-  for Y := Y1 to Y2 do
-  begin
-    for X := X1 to X2 do
-    begin
-      if Match(Ptr^) then
-        PointBuffer.Add(Point(X, Y));
-
-      Inc(Ptr);
-    end;
-
-    Inc(Ptr, PtrInc);
-  end;
-
-  Points := PointBuffer.Trim();
-
-  Result := Length(Points) > 0;
+  Result := specialize Finder<TSameColorCTS0>(TSameColorCTS0.Create(Color, Tolerance), Offset, Points, Self.Data, Self.Width, Self.SearchWidth, Self.SearchHeight, MaxToFind);
 end;
 
-procedure LoadPercentages;
-var
-  I: Integer;
+function TFindColorBuffer.FindCTS1(out Points: TPointArray; Color, Tolerance: Integer; MaxToFind: Integer): Boolean;
 begin
-  for I := 0 to 255 do
-    Percentage[I] := I / 255;
+  Result := specialize Finder<TSameColorCTS1>(TSameColorCTS1.Create(Color, Tolerance), Offset, Points, Self.Data, Self.Width, Self.SearchWidth, Self.SearchHeight, MaxToFind);
 end;
 
-initialization
-  LoadPercentages();
+function TFindColorBuffer.FindCTS2(out Points: TPointArray; Color, Tolerance: Integer; HueMod, SatMod: Extended; MaxToFind: Integer): Boolean;
+begin
+  Result := specialize Finder<TSameColorCTS2>(TSameColorCTS2.Create(Color, Tolerance, HueMod, SatMod), Offset, Points, Self.Data, Self.Width, Self.SearchWidth, Self.SearchHeight, MaxToFind);
+end;
+
+function TFindColorBuffer.FindCTS3(out Points: TPointArray; Color, Tolerance: Integer; Modifier: Extended; MaxToFind: Integer): Boolean;
+begin
+  Result := specialize Finder<TSameColorCTS3>(TSameColorCTS3.Create(Color, Tolerance, Modifier), Offset, Points, Self.Data, Self.Width, Self.SearchWidth, Self.SearchHeight, MaxToFind);
+end;
+
+function TFindColorBuffer.Count(Color: Integer; MaxToFind: Integer): Integer;
+begin
+  Result := specialize Counter<TSameColor>(TSameColor.Create(Color), Self.Data, Self.Width, Self.SearchWidth, Self.SearchHeight, MaxToFind);
+end;
+
+function TFindColorBuffer.CountCTS0(Color, Tolerance: Integer; MaxToFind: Integer): Integer;
+begin
+  Result := specialize Counter<TSameColorCTS0>(TSameColorCTS0.Create(Color, Tolerance), Self.Data, Self.Width, Self.SearchWidth, Self.SearchHeight, MaxToFind);
+end;
+
+function TFindColorBuffer.CountCTS1(Color, Tolerance: Integer; MaxToFind: Integer): Integer;
+begin
+  Result := specialize Counter<TSameColorCTS1>(TSameColorCTS1.Create(Color, Tolerance), Self.Data, Self.Width, Self.SearchWidth, Self.SearchHeight, MaxToFind);
+end;
+
+function TFindColorBuffer.CountCTS2(Color, Tolerance: Integer; HueMod, SatMod: Extended; MaxToFind: Integer): Integer;
+begin
+  Result := specialize Counter<TSameColorCTS2>(TSameColorCTS2.Create(Color, Tolerance, HueMod, SatMod), Self.Data, Self.Width, Self.SearchWidth, Self.SearchHeight, MaxToFind);
+end;
+
+function TFindColorBuffer.CountCTS3(Color, Tolerance: Integer; Modifier: Extended; MaxToFind: Integer): Integer;
+begin
+  Result := specialize Counter<TSameColorCTS3>(TSameColorCTS3.Create(Color, Tolerance, Modifier), Self.Data, Self.Width, Self.SearchWidth, Self.SearchHeight, MaxToFind);
+end;
+
+class operator TFindColorBuffer.Initialize(var Self: TFindColorBuffer);
+begin
+  Self := Default(TFindColorBuffer);
+end;
 
 end.
 

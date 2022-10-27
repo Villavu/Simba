@@ -622,13 +622,10 @@ begin
 
   with Buffer do
   begin
-    Buffer.Ptr := Bitmap.Data;
-    Buffer.PtrInc := 0;
-
-    X1 := 0;
-    Y1 := 0;
-    X2 := Bitmap.Width - 1;
-    Y2 := Bitmap.Height - 1;
+    Buffer.Data := Bitmap.Data;
+    Buffer.Width := Bitmap.Width;
+    Buffer.SearchWidth := Bitmap.Width;
+    Buffer.SearchHeight := Bitmap.Height;
 
     case CTS of
       0: FindCTS0(Result, Col, Tol);
