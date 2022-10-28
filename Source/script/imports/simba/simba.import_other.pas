@@ -21,11 +21,6 @@ begin
   SimbaNativeInterface.StopSound();
 end;
 
-procedure _LapeSetSupressExceptions(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  SimbaScriptThread.Script.Client.MFinder.WarnOnly := PBoolean(Params^[0])^;
-end;
-
 procedure _LapeSimba(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   WriteLn(DecompressString(Base64Decode(
@@ -70,7 +65,6 @@ begin
 
     addGlobalFunc('procedure PlaySound(Sound: String)', @_LapePlaySound);
     addGlobalFunc('procedure StopSound', @_LapeStopSound);
-    addGlobalFunc('procedure SetSupressExceptions(Supress: Boolean)', @_LapeSetSupressExceptions);
     addGlobalFunc('procedure Simba', @_LapeSimba);
     addGlobalFunc('procedure SetClipBoard(Data: string)', @_LapeSetClipBoard);
     addGlobalFunc('function GetClipBoard: String', @_LapeGetClipBoard);

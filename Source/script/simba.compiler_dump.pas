@@ -27,6 +27,7 @@ type
   protected
     FList: TStringList;
 
+    procedure InitBaseVariant; override;
     procedure InitBaseMath; override;
     procedure InitBaseDefinitions; override;
     procedure InitBaseDateTime; override;
@@ -57,6 +58,11 @@ begin
   finally
     Free();
   end;
+end;
+
+procedure TSimbaCompilerDump.InitBaseVariant;
+begin
+  { nothing, we import our own variant }
 end;
 
 procedure TSimbaCompilerDump.InitBaseMath;

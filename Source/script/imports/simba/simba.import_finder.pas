@@ -8,212 +8,8 @@ implementation
 
 uses
   classes, sysutils, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.scriptthread, simba.finder, simba.bitmap, simba.matchtemplate,
-  simba.dtm;
+  simba.script_compiler, simba.mufasatypes;
 
-procedure _LapeFindDTM(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindDTM(PDTM(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^);
-end;
-
-procedure _LapeFindDTMs(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindDTMs(PDTM(Params^[0])^, PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
-end;
-
-procedure _LapeFindDTMRotated(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindDTMRotated(PDTM(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PDouble(Params^[7])^, PDouble(Params^[8])^, PDouble(Params^[9])^, PDouble(Params^[10])^);
-end;
-
-procedure _LapeFindDTMsRotated(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindDTMsRotated(PDTM(Params^[0])^, PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PDouble(Params^[6])^, PDouble(Params^[7])^, PDouble(Params^[8])^, PDoubleArray(Params^[9])^);
-end;
-
-procedure _LapeFindBitmap(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindBitmap(PMufasaBitmap(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-procedure _LapeFindBitmapIn(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindBitmapIn(PMufasaBitmap(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^);
-end;
-
-procedure _LapeFindBitmapToleranceIn(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindBitmapToleranceIn(PMufasaBitmap(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^);
-end;
-
-procedure _LapeFindBitmapSpiral(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindBitmapSpiral(PMufasaBitmap(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^);
-end;
-
-procedure _LapeFindBitmapsSpiralTolerance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindBitmapsSpiralTolerance(PMufasaBitmap(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PPointArray(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PInteger(Params^[8])^);
-end;
-
-procedure _LapeFindBitmapSpiralTolerance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindBitmapSpiralTolerance(PMufasaBitmap(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^);
-end;
-
-procedure _LapeGetColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PInteger(Result)^ := MFinder.GetColor(PInteger(Params^[0])^, PInteger(Params^[1])^);
-end;
-
-procedure _LapeGetColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PIntegerArray(Result)^ := MFinder.GetColors(PPointArray(Params^[0])^);
-end;
-
-procedure _LapeFindColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    Pboolean(Result)^ := MFinder.FindColor(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^);
-end;
-
-procedure _Lapefindcolortolerance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    Pboolean(Result)^ := MFinder.FindColorTolerance(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^);
-end;
-
-procedure _LapeFindColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindColors(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
-end;
-
-procedure _LapeSetColorToleranceSpeed(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    MFinder.SetToleranceSpeed(PInteger(Params^[0])^);
-end;
-
-procedure _LapeGetToleranceSpeed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PInteger(Result)^ := MFinder.GetToleranceSpeed();
-end;
-
-procedure _LapeSetToleranceSpeed2Modifiers(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    MFinder.SetToleranceSpeed2Modifiers(PExtended(Params^[0])^, PExtended(Params^[1])^);
-end;
-
-procedure _LapeGetToleranceSpeed2Modifiers(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    MFinder.GetToleranceSpeed2Modifiers(PExtended(Params^[0])^, PExtended(Params^[1])^);
-end;
-
-procedure _LapeSetToleranceSpeed3Modifier(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    MFinder.SetToleranceSpeed3Modifier(PExtended(Params^[0])^);
-end;
-
-procedure _LapeGetToleranceSpeed3Modifier(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PExtended(Result)^ := MFinder.GetToleranceSpeed3Modifier();
-end;
-
-procedure _LapeSimilarColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-  Pboolean(Result)^ := MFinder.SimilarColors(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-procedure _LapeCountColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PInteger(Result)^ := MFinder.CountColor(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
-end;
-
-procedure _LapeCountColorTolerance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PInteger(Result)^ := MFinder.CountColorTolerance(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
-end;
-
-procedure _LapeFindColorsTolerance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindColorsTolerance(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^);
-end;
-
-procedure _LapeFindColorSpiral(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindColorSpiral(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^);
-end;
-
-procedure _LapeFindColorSpiralTolerance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindColorSpiralTolerance(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^);
-end;
-
-procedure _LapeFindColorsSpiralTolerance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindColorsSpiralTolerance(PInteger(Params^[0])^, PInteger(Params^[1])^, PPointArray(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PInteger(Params^[8])^);
-end;
-
-procedure _LapeFindColoredArea(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindColoredArea(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^);
-end;
-
-procedure _LapeFindColoredAreaTolerance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindColoredAreaTolerance(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PInteger(Params^[8])^);
-end;
-
-procedure _LapeFindDeformedBitmapToleranceIn(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PBoolean(Result)^ := MFinder.FindDeformedBitmapToleranceIn(PMufasaBitmap(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PInteger(Params^[8])^, PBoolean(Params^[9])^, PExtended(Params^[10])^);
-end;
-
-procedure _LapeFindTemplateEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do // bitmap                     out TPA                   formula                  xs                  ys                  xe                  ye                  min match              dynamic adjust
-    PBoolean(Result)^ := MFinder.FindTemplateEx(TMufasaBitmap(Params^[0]^), TPointArray(Params^[1]^), ETMFormula(Params^[2]^), Int32(Params^[3]^), Int32(Params^[4]^), Int32(Params^[5]^), Int32(Params^[6]^), Extended(Params^[7]^), Boolean(Params^[8]^));
-end;
-
-procedure _LapeFindTemplate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do // bitmap                   out X               out Y               formula                  xs                  ys,                 xe                  ye                  min match              dynamic adjust
-    PBoolean(Result)^ := MFinder.FindTemplate(TMufasaBitmap(Params^[0]^), Int32(Params^[1]^), Int32(Params^[2]^), ETMFormula(Params^[3]^), Int32(Params^[4]^), Int32(Params^[5]^), Int32(Params^[6]^), Int32(Params^[7]^), Extended(Params^[8]^), Boolean(Params^[9]^));
-end;
-
-procedure _LapeGetColorsMatrix(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  with SimbaScriptThread.Script.Client do
-    PIntegerMatrix(Result)^ := IOManager.ReturnMatrix(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^ - PInteger(Params^[0])^ + 1, PInteger(Params^[3])^ - PInteger(Params^[1])^ + 1);
-end;
 
 procedure ImportFinder(Compiler: TSimbaScript_Compiler);
 begin
@@ -221,43 +17,453 @@ begin
   begin
     ImportingSection := 'Finder';
 
-    addGlobalFunc('function FindDTM(DTM: TDTM; out X, Y: Integer; xs, ys, xe, ye: Integer): Boolean', @_LapeFindDTM);
-    addGlobalFunc('function FindDTMs(DTM: TDTM; out FoundPoints: TPointArray; xs, ys, xe, ye: Integer): Boolean', @_LapeFindDTMs);
+    addGlobalFunc(
+      'procedure SetColorToleranceSpeed(CTS: Integer);', [
+      'begin',
+      '  Client.GetMFinder().SetToleranceSpeed(CTS);',
+      'end;'
+      ]
+    );
 
-    addGlobalFunc('function FindDTMRotated(DTM: TDTM; out X, Y: Integer; xs, ys, xe, ye: Integer; StartDegree, EndDegree, Step: Double; out FoundDegree: Double): Boolean', @_LapeFindDTMRotated);
-    addGlobalFunc('function FindDTMsRotated(DTM: TDTM; out FoundPoints: TPointArray; xs, ys, xe, ye: Integer; StartDergee, EndDegree, Step: Double; out FoundDegrees: TDoubleArray): Boolean', @_LapeFindDTMsRotated);
+    addGlobalFunc(
+      'function GetToleranceSpeed: Integer;', [
+      'begin',
+      '  Result := Client.GetMFinder().GetToleranceSpeed();',
+      'end;'
+      ]
+    );
 
-    addGlobalFunc('function FindBitmap(Bitmap: TMufasaBitmap; var x, y: Integer): Boolean', @_LapeFindBitmap);
-    addGlobalFunc('function FindBitmapIn(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean', @_LapeFindBitmapIn);
-    addGlobalFunc('function FindBitmapToleranceIn(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean', @_LapeFindBitmapToleranceIn);
-    addGlobalFunc('function FindBitmapSpiral(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean', @_LapeFindBitmapSpiral);
-    addGlobalFunc('function FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x, y: Integer; var Points: TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean', @_LapeFindBitmapsSpiralTolerance);
-    addGlobalFunc('function FindBitmapSpiralTolerance(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye,tolerance: Integer): Boolean', @_LapeFindBitmapSpiralTolerance);
-    addGlobalFunc('function GetColor(x, y: Integer): Integer', @_LapeGetColor);
+    addGlobalFunc(
+      'procedure SetToleranceSpeed2Modifiers(HueMod, SatMod: Extended);', [
+      'begin',
+      '  Client.GetMFinder().SetToleranceSpeed2Modifiers(HueMod, SatMod);',
+      'end;'
+      ]
+    );
+
+    addGlobalFunc(
+      'procedure GetToleranceSpeed2Modifiers(out HueMod, SatMod: Extended);', [
+      'begin',
+      '  Client.GetMFinder().GetToleranceSpeed2Modifiers(HueMod, SatMod);',
+      'end;'
+      ]
+    );
+
+    addGlobalFunc(
+      'procedure SetToleranceSpeed3Modifier(Modifier: Extended);', [
+      'begin',
+      '  Client.GetMFinder().SetToleranceSpeed3Modifier(Modifier);',
+      'end;'
+      ]
+    );
+
+    addGlobalFunc(
+      'function GetToleranceSpeed3Modifier: Extended;', [
+      'begin',
+      '  Result := Client.GetMFinder().GetToleranceSpeed3Modifier();',
+      'end;'
+      ]
+    );
+
+    // FindColor
+    addGlobalFunc(
+      'function FindColor(out X, Y: Integer; Color, X1, Y1, X2, Y2: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindColor(X, Y, Color, TBox([X1, Y1, X2, Y2]));',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindColor(out X, Y: Integer; Color: Integer; Area: TBox): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindColor(X, Y, Color, Area);',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindColor(out X, Y: Integer; Color: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindColor(X, Y, Color, TBox([-1, -1, -1, -1]));',
+      'end;'
+      ]
+    );
+
+    // FindColorTolerance
+    addGlobalFunc(
+      'function FindColorTolerance(out X, Y: Integer; Color, X1, Y1, X2, Y2, Tolerance: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindColorTolerance(X, Y, Color, Tolerance, TBox([X1, Y1, X2, Y2]));',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindColorTolerance(out X, Y: Integer; Color, Tolerance: Integer; Area: TBox): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindColorTolerance(X, Y, Color, Tolerance, Area);',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindColorTolerance(out X, Y: Integer; Color, Tolerance: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindColorTolerance(X, Y, Color, Tolerance, TBox([-1, -1, -1, -1]));',
+      'end;'
+      ]
+    );
+
+    // FindColorsTolerance
+    addGlobalFunc(
+      'function FindColorsTolerance(out Points: TPointArray; Color, X1, Y1, X2, Y2, Tolerance: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindColorsTolerance(Points, Color, Tolerance, TBox([X1, Y1, X2, Y2]));',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindColorsTolerance(out Points: TPointArray; Color, Tolerance: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindColorsTolerance(Points, Color, Tolerance, TBox([-1, -1, -1, -1]));',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindColorsTolerance(out Points: TPointArray; Color, Tolerance: Integer; Area: TBox): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindColorsTolerance(Points, Color, Tolerance, Area);',
+      'end;'
+      ]
+    );
+
+    // FindColors
+    addGlobalFunc(
+      'function FindColors(out Points: TPointArray; Color, X1, Y1, X2, Y2: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindColors(Points, Color, TBox([X1, Y1, X2, Y2]));',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindColors(out Points: TPointArray; Color: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindColors(Points, Color, TBox([-1, -1, -1, -1]));',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindColors(out Points: TPointArray; Color: Integer; Area: TBox): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindColors(Points, Color, Area);',
+      'end;'
+      ]
+    );
+
+    // CountColorsTolerance
+    addGlobalFunc(
+      'function CountColorTolerance(Color, X1, Y1, X2, Y2, Tolerance: Integer): Integer; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().CountColorTolerance(Color, Tolerance, TBox([X1, Y1, X2, Y2]));',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function CountColorTolerance(Color, Tolerance: Integer): Integer; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().CountColorTolerance(Color, Tolerance, TBox([-1, -1, -1, -1]));',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function CountColorTolerance(Color, Tolerance: Integer; Area: TBox): Integer; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().CountColorTolerance(Color, Tolerance, Area);',
+      'end;'
+      ]
+    );
+
+    // CountColors
+    addGlobalFunc(
+      'function CountColor(Color, X1, Y1, X2, Y2: Integer): Integer; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().CountColor(Color, TBox([X1, Y1, X2, Y2]));',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function CountColor(Color: Integer): Integer; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().CountColor(Color, TBox([-1, -1, -1, -1]));',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function CountColor(Color: Integer; Area: TBox): Integer; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().CountColor(Color, Area);',
+      'end;'
+      ]
+    );
+
+    // FindDTMs
+    addGlobalFunc(
+      'function FindDTMs(DTM: TDTM; out FoundPoints: TPointArray; X1, Y1, X2, Y2: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindDTMs(DTM, FoundPoints, TBox([X1, Y1, X2, Y2]));',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindDTMs(DTM: TDTM; out FoundPoints: TPointArray; Area: TBox): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindDTMs(DTM, FoundPoints, Area);',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindDTMs(DTM: TDTM; out FoundPoints: TPointArray): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindDTMs(DTM, FoundPoints, TBox([-1, -1, -1, -1]));',
+      'end;'
+      ]
+    );
+
+    // FindDTM
+    addGlobalFunc(
+      'function FindDTM(DTM: TDTM; out X, Y: Integer; X1, Y1, X2, Y2: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindDTM(DTM, X, Y, TBox([X1, Y1, X2, Y2]));',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindDTM(DTM: TDTM; out X, Y: Integer; Area: TBox): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindDTM(DTM, X, Y, Area);',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindDTM(DTM: TDTM; out X, Y: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindDTM(DTM, X, Y, TBox([-1, -1, -1, -1]));',
+      'end;'
+      ]
+    );
+
+    // FindDTMsRotated
+    addGlobalFunc(
+      'function FindDTMsRotated(DTM: TDTM; out FoundPoints: TPointArray; X1, Y1, X2, Y2: Integer; StartDegree, EndDegree, Step: Double; out FoundDegrees: TDoubleArray): Boolean;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindDTMsRotated(DTM, FoundPoints, TBox([X1, Y1, X2, Y2]), StartDegree, EndDegree, Step, FoundDegrees);',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindDTMsRotated(DTM: TDTM; out FoundPoints: TPointArray; Area: TBox; StartDegree, EndDegree, Step: Double; out FoundDegrees: TDoubleArray): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindDTMsRotated(DTM, FoundPoints, Area, StartDegree, EndDegree, Step, FoundDegrees);',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindDTMsRotated(DTM: TDTM; out FoundPoints: TPointArray; StartDegree, EndDegree, Step: Double; out FoundDegrees: TDoubleArray): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindDTMsRotated(DTM, FoundPoints, TBox([-1, -1, -1, -1]), StartDegree, EndDegree, Step, FoundDegrees);',
+      'end;'
+      ]
+    );
+
+    // FindDTMRotated
+    addGlobalFunc(
+      'function FindDTMRotated(DTM: TDTM; out X, Y: Integer; X1, Y1, X2, Y2: Integer; StartDegree, EndDegree, Step: Double; out FoundDegree: Double): Boolean;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindDTMRotated(DTM, X, Y, TBox([X1, Y1, X2, Y2]), StartDegree, EndDegree, Step, FoundDegree);',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindDTMRotated(DTM: TDTM; out X, Y: Integer; Area: TBox; StartDegree, EndDegree, Step: Double; out FoundDegree: Double): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindDTMRotated(DTM, X, Y, Area, StartDegree, EndDegree, Step, FoundDegree);',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindDTMRotated(DTM: TDTM; out X, Y: Integer; StartDegree, EndDegree, Step: Double; out FoundDegree: Double): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindDTMRotated(DTM, X, Y, TBox([-1, -1, -1, -1]), StartDegree, EndDegree, Step, FoundDegree);',
+      'end;'
+      ]
+    );
+
+    // FindBitmaps
+    addGlobalFunc(
+      'function FindBitmaps(Bitmap: TMufasaBitmap; out Points: TPointArray; X1, Y1, X2, Y2: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindBitmaps(Bitmap, Points, TBox([X1, Y1, X2, Y2]));',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindBitmaps(Bitmap: TMufasaBitmap; out Points: TPointArray; Area: TBox): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindBitmaps(Bitmap, Points, Area);',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindBitmaps(Bitmap: TMufasaBitmap; out Points: TPointArray): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindBitmaps(Bitmap, Points, TBox([-1, -1, -1, -1]));',
+      'end;'
+      ]
+    );
+
+    // FindBitmap
+    addGlobalFunc(
+      'function FindBitmap(Bitmap: TMufasaBitmap; out X, Y: Integer; X1, Y1, X2, Y2: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindBitmap(Bitmap, X, Y, TBox([X1, Y1, X2, Y2]));',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindBitmap(Bitmap: TMufasaBitmap; out X, Y: Integer; Area: TBox): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindBitmap(Bitmap, X, Y, Area);',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindBitmap(Bitmap: TMufasaBitmap; out X, Y: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindBitmap(Bitmap, X, Y, TBox([-1, -1, -1, -1]));',
+      'end;'
+      ]
+    );
+
+    // FindBitmapsTolerance
+    addGlobalFunc(
+      'function FindBitmapsTolerance(Bitmap: TMufasaBitmap; out Points: TPointArray; X1, Y1, X2, Y2: Integer; Tolerance: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindBitmapsTolerance(Bitmap, Points, TBox([X1, Y1, X2, Y2]), Tolerance);',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindBitmapsTolerance(Bitmap: TMufasaBitmap; out Points: TPointArray; Area: TBox; Tolerance: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindBitmapsTolerance(Bitmap, Points, Area, Tolerance);',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindBitmapsTolerance(Bitmap: TMufasaBitmap; out Points: TPointArray; Tolerance: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindBitmapsTolerance(Bitmap, Points, TBox([-1, -1, -1, -1]), Tolerance);',
+      'end;'
+      ]
+    );
+
+    // FindBitmapTolerance
+    addGlobalFunc(
+      'function FindBitmapTolerance(Bitmap: TMufasaBitmap; out X, Y: Integer; X1, Y1, X2, Y2: Integer; Tolerance: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindBitmapTolerance(Bitmap, X, Y, TBox([X1, Y1, X2, Y2]), Tolerance);',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindBitmapTolerance(Bitmap: TMufasaBitmap; out X, Y: Integer; Area: TBox; Tolerance: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindBitmapTolerance(Bitmap, X, Y, Area, Tolerance);',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindBitmapTolerance(Bitmap: TMufasaBitmap; out X, Y: Integer; Tolerance: Integer): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindBitmapTolerance(Bitmap, X, Y, TBox([-1, -1, -1, -1]), Tolerance);',
+      'end;'
+      ]
+    );
+
+    // FindTemplate
+    addGlobalFunc(
+      'function FindTemplate(Bitmap: TMufasaBitmap; out X, Y: Integer; Formula: ETMFormula; Area: TBox; MinMatch: Extended): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindTemplate(Bitmap, X, Y, Formula, Area, MinMatch);',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindTemplate(Bitmap: TMufasaBitmap; out X,Y: Integer; Formula: ETMFormula; MinMatch: Extended): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindTemplate(Bitmap, X, Y, Formula, TBox([-1, -1, -1, -1]), MinMatch);',
+      'end;'
+      ]
+    );
+
+    // FindTemplateEx
+    addGlobalFunc(
+      'function FindTemplateEx(Bitmap: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; Area: TBox; MinMatch: Extended): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindTemplateEx(Bitmap, TPA, Formula, Area, MinMatch);',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function FindTemplateEx(Bitmap: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; MinMatch: Extended): Boolean; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().FindTemplateEx(Bitmap, TPA, Formula, TBox([-1, -1, -1, -1]), MinMatch);',
+      'end;'
+      ]
+    );
+
+    addGlobalFunc(
+      'function GetColor(X, Y: Integer): Integer;', [
+      'begin',
+      '  Result := Client.GetMFinder().GetColor(X, Y);',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function GetColors(Points: TPointArray): TIntegerArray;', [
+      'begin',
+      '  Result := Client.GetMFinder().GetColors(Points);',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function GetColorsMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix;', [
+      'begin',
+      '  Result := Client.GetMFinder().GetColorsMatrix(X1, Y1, X2, Y2);',
+      'end;'
+      ]
+    );
+
+    addGlobalFunc(
+      'function SimilarColors(Color1, Color2, Tolerance: Integer): Boolean;', [
+      'begin',
+      '  Result := Client.GetMFinder().SimilarColors(Color1, Color2, Tolerance);',
+      'end;'
+      ]
+    );
+
+    {
+    addGlobalFunc('function GetColor(X, Y: Integer): Integer', @_LapeGetColor);
     addGlobalFunc('function GetColors(const Coords: TPointArray): TIntegerArray', @_LapeGetColors);
     addGlobalFunc('function GetColorsMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix', @_LapeGetColorsMatrix);
-    addGlobalFunc('function FindColor(var x, y: Integer; color, x1, y1, x2, y2: Integer): boolean', @_LapeFindColor);
-    addGlobalFunc('function FindColorTolerance(var x, y: Integer; color, x1, y1, x2, y2, tol: Integer): boolean', @_LapeFindColorTolerance);
-    addGlobalFunc('function FindColors(var TPA: TPointArray; Color, x1, y1, x2, y2: Integer): Boolean', @_LapeFindColors);
     addGlobalFunc('procedure SetColorToleranceSpeed(CTS: Integer)', @_LapeSetColorToleranceSpeed);
     addGlobalFunc('function GetToleranceSpeed: Integer', @_LapeGetToleranceSpeed);
     addGlobalFunc('procedure SetToleranceSpeed2Modifiers(Hue, Sat: Extended)', @_LapeSetToleranceSpeed2Modifiers);
     addGlobalFunc('procedure GetToleranceSpeed2Modifiers(var Hue, Sat: Extended)', @_LapeGetToleranceSpeed2Modifiers);
     addGlobalFunc('procedure SetToleranceSpeed3Modifier(Modifier: Extended)', @_LapeSetToleranceSpeed3Modifier);
     addGlobalFunc('function GetToleranceSpeed3Modifier: Extended', @_LapeGetToleranceSpeed3Modifier);
-    addGlobalFunc('function SimilarColors(Color1, Color2, Tol: Integer): boolean', @_LapeSimilarColors);
-    addGlobalFunc('function CountColor(Color, xs, ys, xe, ye: Integer): Integer', @_LapeCountColor);
-    addGlobalFunc('function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer', @_LapeCountColorTolerance);
-    addGlobalFunc('function FindColorsTolerance(var Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean', @_LapeFindColorsTolerance);
-    addGlobalFunc('function FindColorSpiral(var x, y: Integer; color, xs, ys, xe, ye: Integer): Boolean', @_LapeFindColorSpiral);
-    addGlobalFunc('function FindColorSpiralTolerance(var x, y: Integer; color, xs, ys, xe, ye, Tol: Integer): Boolean', @_LapeFindColorSpiralTolerance);
-    addGlobalFunc('function FindColorsSpiralTolerance(x, y: Integer; var Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer): Boolean', @_LapeFindColorsSpiralTolerance);
-    addGlobalFunc('function FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea: Integer): Boolean', @_LapeFindColoredArea);
-    addGlobalFunc('function FindColoredAreaTolerance(var x, y: Integer; Color, xs, ys, xe, ye, MinArea, Tol: Integer): Boolean', @_LapeFindColoredAreaTolerance);
-    addGlobalFunc('function FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean', @_LapeFindDeformedBitmapToleranceIn);
-    addGlobalFunc('function FindTemplate(Templ: TMufasaBitmap; out x, y: Integer; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @_LapeFindTemplate);
-    addGlobalFunc('function FindTemplateEx(Templ: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @_LapeFindTemplateEx);
+    addGlobalFunc('function SimilarColors(Color1, Color2, Tol: Integer): Boolean', @_LapeSimilarColors);
 
+    addGlobalFunc('function FindTemplate(Templ: TMufasaBitmap; out X, Y: Integer; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @_LapeFindTemplate);
+    addGlobalFunc('function FindTemplateEx(Templ: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @_LapeFindTemplateEx);
+}
     ImportingSection := '';
   end;
 end;

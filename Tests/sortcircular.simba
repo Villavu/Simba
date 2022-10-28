@@ -1,0 +1,13 @@
+{$assertions on}
+
+var
+  TPA: TPointArray;
+begin
+  TPA := TPointArray.CreateFromCircle(TPoint.Create(100, 100), 5, False);
+  TPA := TPA.SortCircular(TPA.Mean(), 90, True);
+
+  Assert(TPA[0] = [105, 100]);
+  Assert(TPA[9] = [100, 105]);
+  Assert(TPA[16] = [95, 100]);
+  Assert(TPA[24] = [100, 95]);
+end.

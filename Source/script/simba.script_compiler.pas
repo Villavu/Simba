@@ -34,6 +34,7 @@ type
 
     function GetImportingSection: String;
 
+    procedure InitBaseVariant; override;
     procedure InitBaseDefinitions; override;
   public
     property ImportingSection: String read GetImportingSection write FImportingSection;
@@ -85,7 +86,7 @@ uses
   simba.import_lcl_comctrls, simba.import_lcl_misc,
 
   // Simba classes
-  simba.import_class_bitmap, simba.import_class_dtm,
+  simba.import_class_bitmap, simba.import_class_dtm, simba.import_matchtemplate,
   simba.import_class_finder, simba.import_class_target, simba.import_class_iomanager,
   simba.import_class_client, simba.import_class_xml, simba.import_class_json,
   simba.import_class_imagebox, simba.import_class_shapebox,
@@ -94,8 +95,8 @@ uses
   simba.import_timing, simba.import_tpa, simba.import_atpa, simba.import_colormath,
   simba.import_hash, simba.import_compress, simba.import_windowhandle,
   simba.import_debugimage, simba.import_dialogs, simba.import_file,
-  simba.import_internal, simba.import_matchtemplate, simba.import_finder,
-  simba.import_math,  simba.import_other, simba.import_input,
+  simba.import_internal, simba.import_finder,
+  simba.import_math, simba.import_other, simba.import_input,
   simba.import_process, simba.import_script,  simba.import_slacktree,
   simba.import_string, simba.import_internet, simba.import_target,
   simba.import_variant, simba.import_simba, simba.import_random,
@@ -174,12 +175,16 @@ begin
   try
     Options := Options + [lcoLooseSemicolon, lcoAutoInvoke, lcoExplicitSelf, lcoAutoObjectify];
 
+    ImportingSection := 'System';
+
     InitializeWaitUntil(Self);
     InitializeFFI(Self);
     InitializeRTTI(Self);
 
     addGlobalType('type Pointer', 'TClient');
     addGlobalVar('TClient', nil, 'Client'); // Will be assigned later
+
+    ImportingSection := '';
 
     for Proc in Imports do
       Proc(Self);
@@ -248,6 +253,11 @@ begin
     FImportingSection := '!Simba';
 
   Result := FImportingSection;
+end;
+
+procedure TSimbaScript_Compiler.InitBaseVariant;
+begin
+    { nothing, we import our own variant }
 end;
 
 class procedure TSimbaScript_Compiler.RegisterImport(Proc: TSimbaImport);

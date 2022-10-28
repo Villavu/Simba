@@ -588,6 +588,16 @@ begin
   P2DPointArray(Result)^ := PPointArray(Params^[0])^.PartitionEx(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
+(*
+TPointArray.SortCircular
+~~~~~~~~~~~~~~~~~~~~~~~~
+function TPointArray.SortCircular(Center: TPoint; StartDegrees: Integer; Clockwise: Boolean): TPointArray;
+*)
+procedure _LapeTPASortCircular(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PPointArray(Params^[0])^.SortCircular(PPoint(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^);
+end;
+
 procedure ImportTPA(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -652,6 +662,7 @@ begin
     addGlobalFunc('function TPointArray.SortByX(LowToHigh: Boolean = True): TPointArray;', @_LapeTPASortByX);
     addGlobalFunc('function TPointArray.SortByY(LowToHigh: Boolean = True): TPointArray;', @_LapeTPASortByY);
     addGlobalFunc('function TPointArray.SortFrom(From: TPoint): TPointArray;', @_LapeTPASortFrom);
+    addGlobalFunc('function TPointArray.SortCircular(Center: TPoint; StartDegrees: Integer; Clockwise: Boolean): TPointArray', @_LapeTPASortCircular);
 
     addGlobalFunc('function TPointArray.SortByRow(Reverse: Boolean = False): TPointArray', @_LapeTPASortByRow);
     addGlobalFunc('function TPointArray.SortByColumn(Reverse: Boolean = False): TPointArray', @_LapeTPASortByColumn);

@@ -22,6 +22,8 @@ type
     SearchWidth: Integer;
     SearchHeight: Integer;
 
+    Offset: TPoint;
+
     function FindDTMs(DTM: TDTM; MaxToFind: Integer = 0): TPointArray;
     function FindDTMsRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = 0): TPointArray;
 
@@ -141,7 +143,7 @@ begin
         if not FindPoint(I, DTM.Points[I].AreaSize, X + DTM.Points[I].X, Y + DTM.Points[I].Y) then
           goto Next;
 
-      PointBuffer.Add(TPoint.Create(X, Y));
+      PointBuffer.Add(TPoint.Create(X + Offset.X, Y + Offset.Y));
       if (PointBuffer.Count = MaxToFind) then
       begin
         Result := PointBuffer.Trim();
@@ -311,8 +313,8 @@ begin
   for I := 0 to MatchBuffer.Count - 1 do
     with MatchBuffer[I] do
     begin
-      Result[I].X := X;
-      Result[I].Y := Y;
+      Result[I].X := X + Offset.X;
+      Result[I].Y := Y + Offset.Y;
       FoundDegrees[I] := Deg;
     end;
 end;
