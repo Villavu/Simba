@@ -257,7 +257,7 @@ end;
 
 procedure TSimbaScript_Compiler.InitBaseVariant;
 begin
-    { nothing, we import our own variant }
+  { nothing, we import our own variant }
 end;
 
 class procedure TSimbaScript_Compiler.RegisterImport(Proc: TSimbaImport);

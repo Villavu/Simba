@@ -33,6 +33,7 @@ uses
   function GetPluginCopyPath: String;
   function GetScriptPath: String;
   function GetPackagePath: String;
+  function GetOldPackagePath: String;
   function GetDumpPath: String;
   function GetScreenshotPath: String;
 
@@ -299,6 +300,11 @@ begin
   Result := GetDataPath() + 'packages' + DirectorySeparator;
 end;
 
+function GetOldPackagePath: String;
+begin
+  Result := GetDataPath() + 'oldpackages' + DirectorySeparator;
+end;
+
 function GetDumpPath: String;
 begin
   Result := GetDataPath() + 'dumps' + DirectorySeparator;
@@ -313,7 +319,7 @@ procedure CreateBaseDirectories;
 var
   Directory: String;
 begin
-  for Directory in [GetScreenshotPath(), GetDumpPath(), GetPackagePath(), GetIncludePath(), GetScriptPath(), GetPluginPath(), GetPluginCopyPath()] do
+  for Directory in [GetScreenshotPath(), GetDumpPath(), GetPackagePath(), GetIncludePath(), GetScriptPath(), GetPluginPath(), GetPluginCopyPath(), GetOldPackagePath()] do
   begin
     if DirectoryExists(Directory) then
       Continue;

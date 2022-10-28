@@ -53,7 +53,7 @@ type
 implementation
 
 uses
-  forms,
+  Forms, FileUtil,
   simba.mufasatypes, simba.httpclient, simba.files;
 
 procedure TSimbaPackageInstaller.FlushLog;
@@ -246,12 +246,10 @@ function TSimbaPackageInstaller.Install(Version: TSimbaPackageVersion; Options: 
       OnConnecting       := @DoConnectingProgress;
       OnDownloadProgress := @DoDownloadingProgress;
       OnExtractProgress  := @DoExtractingProgress;
-      OnCopyingProgress  := @DoCopyingProgress;
       OnResponseCode     := @DoResponseCode;
 
       OnDownloadingFinished := @DoDownloadingFinished;
       OnExtractingFinished  := @DoExtractingFinished;
-      OnCopyingFinished     := @DoCopyingFinished;
 
       GetZIP(Version.DownloadURL, Options.Path, Options.Flat, Options.IgnoreList);
     finally
@@ -261,11 +259,31 @@ function TSimbaPackageInstaller.Install(Version: TSimbaPackageVersion; Options: 
 
 var
   Thread: TThread;
+  FileName: String;
 begin
+  Result := False;
+
   Log('Installing: %s'.Format([FPackage.Info.FullName]));
   Log('Version: %s'.Format([Version.Name]));
   Log('Path: %s'.Format([Options.Path]));
   Log('', True);
+
+  if DirectoryExists(Options.Path) then
+  begin
+    FileName := GetOldPackagePath() + ExtractFileName(Options.Path);
+    if DirectoryExists(FileName) then
+      DeleteDirectory(FileName, False);
+
+    Log('Moving old files to %s'.Format([FileName]), True);
+    if (not RenameFile(Options.Path, FileName)) then
+    begin
+      Log('Unable to move old files %s'.Format([Options.Path]), True);
+      Log('Please delete the files manually', True);
+
+      Exit;
+    end;
+    Log('', True);
+  end;
 
   Thread := Threaded(@Run);
   while (not Thread.Finished) do
