@@ -17,7 +17,6 @@ var
   templ: TMufasaBitmap := TMufasaBitmap.CreateFromString(10, 10, 'meJxjYCAA2A30IQxuvQA0BlwWKAIRBHLh6oFARFIeWQtECq4AKAtEQC5QFq4RWTuagWiGI9uIJgV3EsRwPF6Du5wYAAAGDQ9J');
   X, Y: Integer;
   TPA: TPointArray;
-  I: Integer;
 begin
   SetTargetBitmap(img);
 

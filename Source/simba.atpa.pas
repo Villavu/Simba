@@ -43,7 +43,7 @@ type
     function ExcludeSize(MinLen, MaxLen: Integer): T2DPointArray; overload;
     function ExcludeSizeEx(MaxLen: Integer): T2DPointArray;
     function ExcludeDimensions(MinShortSide, MinLongSide, MaxShortSide, MaxLongSide: Integer): T2DPointArray;
-    function ExcludeDimensionsEx(MaxShortSide, MaxLongSide: Integer): T2DPointArray;
+    function ExcludeDimensionsEx(MinShortSide, MinLongSide: Integer): T2DPointArray;
 
     function Bounds: TBox;
     function BoundsArray: TBoxArray;
@@ -321,9 +321,9 @@ begin
   Result := Buffer.Trim();
 end;
 
-function T2DPointArrayHelper.ExcludeDimensionsEx(MaxShortSide, MaxLongSide: Integer): T2DPointArray;
+function T2DPointArrayHelper.ExcludeDimensionsEx(MinShortSide, MinLongSide: Integer): T2DPointArray;
 begin
-  Result := Self.ExcludeDimensions(0, 0, MaxShortSide, MaxLongSide);
+  Result := Self.ExcludeDimensions(MinShortSide, MinLongSide, Integer.MaxValue, Integer.MaxValue);
 end;
 
 function T2DPointArrayHelper.Bounds: TBox;

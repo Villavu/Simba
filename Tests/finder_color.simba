@@ -31,7 +31,7 @@ begin
   Assert(X=98);
   Assert(Y=25);
 
-  Assert(FindColorTolerance(X, Y, $7E7EFF, TBox.Create(25, 25, 100, 100), 5));
+  Assert(FindColorTolerance(X, Y, $7E7EFF, 5, TBox.Create(25, 25, 100, 100)));
   Assert(X=98);
   Assert(Y=25);
 
@@ -41,7 +41,7 @@ begin
   Assert(FindColorsTolerance(TPA, $7E7EFF, 25, 25, 100, 100, 5));
   Assert(TPA.Length() = 519);
 
-  Assert(FindColorsTolerance(TPA, $7E7EFF, TBox.Create(25, 25, 100, 100), 5));
+  Assert(FindColorsTolerance(TPA, $7E7EFF, 5, TBox.Create(25, 25, 100, 100)));
   Assert(TPA.Length() = 519);
 
   Assert(FindColors(TPA, $7E7EFF));
@@ -55,7 +55,7 @@ begin
 
   Assert(CountColorTolerance($7E7EFF, 5) = 877);
   Assert(CountColorTolerance($7E7EFF, 25, 25, 100, 100, 5) = 519);
-  Assert(CountColorTolerance($7E7EFF, TBox.Create(25, 25, 100, 100), 5) = 519);
+  Assert(CountColorTolerance($7E7EFF, 5, TBox.Create(25, 25, 100, 100)) = 519);
 
   Assert(CountColor($7E7EFF) = 127);
   Assert(CountColor($7E7EFF, 25, 25, 100, 100) = 75);

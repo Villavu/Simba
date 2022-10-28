@@ -351,7 +351,7 @@ begin
     addGlobalFunc('function T2DPointArray.ExcludeSize(MinLen, MaxLen: Integer): T2DPointArray; overload', @_LapeATPA_ExcludeSize2);
     addGlobalFunc('function T2DPointArray.ExcludeSizeEx(MaxLen: Integer): T2DPointArray', @_LapeATPA_ExcludeSizeEx);
     addGlobalFunc('function T2DPointArray.ExcludeDimensions(MinShortSide, MinLongSide, MaxShortSide, MaxLongSide: Integer): T2DPointArray', @_LapeATPA_ExcludeDimensions);
-    addGlobalFunc('function T2DPointArray.ExcludeDimensionsEx(MaxShortSide, MaxLongSide: Integer): T2DPointArray', @_LapeATPA_ExcludeDimensionsEx);
+    addGlobalFunc('function T2DPointArray.ExcludeDimensionsEx(MinShortSide, MinLongSide: Integer): T2DPointArray', @_LapeATPA_ExcludeDimensionsEx);
 
     addGlobalFunc('function T2DPointArray.Smallest: TPointArray', @_LapeATPA_Smallest);
     addGlobalFunc('function T2DPointArray.Largest: TPointArray', @_LapeATPA_Largest);

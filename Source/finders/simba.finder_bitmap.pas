@@ -22,6 +22,8 @@ type
     SearchWidth: Integer;
     SearchHeight: Integer;
 
+    Offset: TPoint;
+
     function Find(Bitmap: TMufasaBitmap; out Points: TPointArray; MaxToFind: Integer): Boolean; overload;
     function Find(Bitmap: TMufasaBitmap; out Points: TPointArray; Tolerance: Integer; MaxToFind: Integer): Boolean; overload;
 
@@ -37,7 +39,7 @@ function TFindBitmapBuffer.Find(Bitmap: TMufasaBitmap; out Points: TPointArray; 
 
   function Match(const BufferPtr, BitmapPtr: TRGB32): Boolean; inline;
   begin
-    Result := (Bitmap.TransparentColorActive and BitmapPtr.EqualsIgnoreAlpha(Bitmap.TransparentRGB)) or (BufferPtr.EqualsIgnoreAlpha(BitmapPtr));
+    Result := (Bitmap.TransparentColorActive and BitmapPtr.EqualsIgnoreAlpha(Bitmap.TransparentRGB)) or BufferPtr.EqualsIgnoreAlpha(BitmapPtr);
   end;
 
   function Hit(BufferPtr: PRGB32): Boolean;
@@ -86,7 +88,7 @@ begin
     begin
       if Hit(RowPtr) then
       begin
-        Buffer.Add(X, Y);
+        Buffer.Add(X + Offset.X, Y + Offset.Y);
         if (Buffer.Count = MaxToFind) then
           goto Finished;
       end;
@@ -158,7 +160,7 @@ begin
     begin
       if Hit(RowPtr) then
       begin
-        Buffer.Add(X, Y);
+        Buffer.Add(X + Offset.X, Y + Offset.Y);
         if (Buffer.Count = MaxToFind) then
           goto Finished;
       end;
