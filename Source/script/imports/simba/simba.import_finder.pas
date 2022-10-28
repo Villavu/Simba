@@ -10,7 +10,6 @@ uses
   classes, sysutils, lptypes,
   simba.script_compiler, simba.mufasatypes;
 
-
 procedure ImportFinder(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -449,21 +448,6 @@ begin
       ]
     );
 
-    {
-    addGlobalFunc('function GetColor(X, Y: Integer): Integer', @_LapeGetColor);
-    addGlobalFunc('function GetColors(const Coords: TPointArray): TIntegerArray', @_LapeGetColors);
-    addGlobalFunc('function GetColorsMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix', @_LapeGetColorsMatrix);
-    addGlobalFunc('procedure SetColorToleranceSpeed(CTS: Integer)', @_LapeSetColorToleranceSpeed);
-    addGlobalFunc('function GetToleranceSpeed: Integer', @_LapeGetToleranceSpeed);
-    addGlobalFunc('procedure SetToleranceSpeed2Modifiers(Hue, Sat: Extended)', @_LapeSetToleranceSpeed2Modifiers);
-    addGlobalFunc('procedure GetToleranceSpeed2Modifiers(var Hue, Sat: Extended)', @_LapeGetToleranceSpeed2Modifiers);
-    addGlobalFunc('procedure SetToleranceSpeed3Modifier(Modifier: Extended)', @_LapeSetToleranceSpeed3Modifier);
-    addGlobalFunc('function GetToleranceSpeed3Modifier: Extended', @_LapeGetToleranceSpeed3Modifier);
-    addGlobalFunc('function SimilarColors(Color1, Color2, Tol: Integer): Boolean', @_LapeSimilarColors);
-
-    addGlobalFunc('function FindTemplate(Templ: TMufasaBitmap; out X, Y: Integer; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @_LapeFindTemplate);
-    addGlobalFunc('function FindTemplateEx(Templ: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; xs,ys,xe,ye: Integer; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @_LapeFindTemplateEx);
-}
     ImportingSection := '';
   end;
 end;
