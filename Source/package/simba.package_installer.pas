@@ -25,7 +25,7 @@ type
     FProgressBuffer: TStringList;
     FProgressLast: String;
 
-    FDownloadProgress, FExtractProgress, FCopyProgress: record
+    FDownloadProgress, FExtractProgress: record
       Time: UInt64;
       Progress: String;
     end;
@@ -36,12 +36,10 @@ type
     procedure DoConnectingProgress(Sender: TObject; URL: String);
     procedure DoDownloadingProgress(Sender: TObject; URL, ContentType: String; Pos, Size: Int64);
     procedure DoExtractingProgress(Sender: TObject; FileName: String; Percent: Double);
-    procedure DoCopyingProgress(Sender: TObject; FileName: String; Percent: Double);
     procedure DoResponseCode(Sender: TObject; Code: Integer);
 
     procedure DoDownloadingFinished(Sender: TObject);
     procedure DoExtractingFinished(Sender: TObject);
-    procedure DoCopyingFinished(Sender: TObject);
   public
     constructor Create(Package: TSimbaPackage; Output: TSynEdit);
     destructor Destroy; override;
@@ -134,16 +132,6 @@ begin
   Log(FExtractProgress.Progress);
 end;
 
-procedure TSimbaPackageInstaller.DoCopyingProgress(Sender: TObject; FileName: String; Percent: Double);
-begin
-  FCopyProgress.Progress := 'Copying: %d%%'.Format([Round(Percent)]);
-  if (GetTickCount64() - FCopyProgress.Time) < 500 then
-    Exit;
-  FCopyProgress.Time := GetTickCount64();
-
-  Log(FCopyProgress.Progress);
-end;
-
 procedure TSimbaPackageInstaller.DoResponseCode(Sender: TObject; Code: Integer);
 begin
   Log('HTTP response: %d'.Format([Code]));
@@ -157,11 +145,6 @@ end;
 procedure TSimbaPackageInstaller.DoExtractingFinished(Sender: TObject);
 begin
   Log(FExtractProgress.Progress);
-end;
-
-procedure TSimbaPackageInstaller.DoCopyingFinished(Sender: TObject);
-begin
-  Log(FCopyProgress.Progress);
 end;
 
 constructor TSimbaPackageInstaller.Create(Package: TSimbaPackage; Output: TSynEdit);
