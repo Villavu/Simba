@@ -234,6 +234,11 @@ begin
   PPointArray(Result)^ := PSingleMatrix(Params^[0])^.ArgMulti(PInteger(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
+procedure _LapeSingleMatrix_Smoothen(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSingleMatrix(Params^[0])^.Smoothen(PInteger(Params^[1])^);
+end;
+
 // Double
 procedure _LapeDoubleMatrix_Width(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -295,6 +300,7 @@ begin
     addGlobalFunc('function TSingleMatrix.NormMinMax(Alpha, Beta: Single): TSingleMatrix;', @_LapeSingleMatrix_NormMinMax);
     addGlobalFunc('function TSingleMatrix.Indices(Value: Single; Comparator: EComparator): TPointArray;', @_LapeSingleMatrix_Indices);
     addGlobalFunc('function TSingleMatrix.ArgMulti(Count: Integer; HiLo: Boolean): TPointArray;', @_LapeSingleMatrix_ArgMulti);
+    addGlobalFunc('procedure TSingleMatrix.Smoothen(Block: Integer);', @_LapeSingleMatrix_Smoothen);
 
     // integer
     addGlobalFunc('function TIntegerMatrix.Width: Integer;', @_LapeIntegerMatrix_Width);
