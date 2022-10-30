@@ -28,6 +28,8 @@ function RandomMean(Lo, Hi: Int64): Int64; overload;
 function RandomMode(Mode, Lo, Hi: Double): Double; overload;
 function RandomMode(Mode, Lo, Hi: Int64): Int64; overload;
 
+function GaussRand(Mean, Dev: Double): Double;
+
 var
   RandCutoff: Double = 5;
 
@@ -35,6 +37,11 @@ implementation
 
 uses
   math;
+
+function nzRandom: Double;
+begin
+  Result := Max(Double(Random()), 1.0e-320);
+end;
 
 function RandomCenterTPA(Amount: Integer; Box: TBox): TPointArray;
 var
@@ -70,12 +77,6 @@ begin
 end;
 
 function RandomLeft(Lo, Hi: Double): Double;
-
-  function nzRandom: Double;
-  begin
-    Result := Max(Double(Random()), 1.0e-320);
-  end;
-
 begin
   Result := RandCutoff + 1;
   while Result >= RandCutoff do
@@ -112,12 +113,6 @@ begin
 end;
 
 function RandomMode(Mode, Lo, Hi: Double): Double;
-
-  function nzRandom: Double;
-  begin
-    Result := Max(Double(Random()), 1.0e-320);
-  end;
-
 var
   Top: Double;
 begin
@@ -134,6 +129,14 @@ end;
 function RandomMode(Mode, Lo, Hi: Int64): Int64;
 begin
   Result := Round(RandomMode(Mode * 1.00, Lo * 1.00, Hi * 1.00));
+end;
+
+function GaussRand(Mean, Dev: Double): Double;
+var
+  Len: Double;
+begin
+  Len := Dev * Sqrt(-2 * Ln(nzRandom()));
+  Result := Mean + Len * Cos(2 * PI * Random());
 end;
 
 end.

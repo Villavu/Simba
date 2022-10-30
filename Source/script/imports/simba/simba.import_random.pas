@@ -126,6 +126,18 @@ begin
   PInt64(Result)^ := RandomMode(PInt64(Params^[0])^, PInt64(Params^[1])^, PInt64(Params^[2])^);
 end;
 
+(*
+GaussRand
+~~~~~~~~~
+function GaussRand(Mean, Dev: Double): Double
+
+Generates a random gaussian/normal number.
+*)
+procedure _LapeGaussRand(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDouble(Result)^ := GaussRand(PDouble(Params^[0])^, PDouble(Params^[1])^);
+end;
+
 procedure ImportRandom(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -148,6 +160,8 @@ begin
 
     addGlobalFunc('function RandomMode(Mode, Lo, Hi: Double): Double; overload', @_LapeRandomMode);
     addGlobalFunc('function RandomMode(Mode, Lo, Hi: Int64): Int64; overload', @_LapeRandomModeI);
+
+    addGlobalFunc('function GaussRand(Mean, Dev: Double): Double;', @_LapeGaussRand);
 
     ImportingSection := '';
   end;
