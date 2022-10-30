@@ -12,6 +12,9 @@ type
     class function Create(Center: TPoint; XRad, YRad: Integer): TBox; static; overload;
     class function Default: TBox; static;
 
+    function RandomPoint: TPoint;
+    function RandomPointCenter: TPoint;
+
     function ToQuad: TQuad;
     function EqualDimensions(Other: TBox): Boolean;
     function Area: Integer;
@@ -87,6 +90,18 @@ end;
 class function TBoxHelper.Default: TBox;
 begin
   Result := System.Default(TBox);
+end;
+
+function TBoxHelper.RandomPoint: TPoint;
+begin
+  Result.X := RandomRange(Self.X1, Self.X2);
+  Result.Y := RandomRange(Self.Y1, Self.Y2);
+end;
+
+function TBoxHelper.RandomPointCenter: TPoint;
+begin
+  Result.X := RandomMean(Self.X1, Self.X2);
+  Result.Y := RandomMean(Self.Y1, Self.Y2);
 end;
 
 function TBoxHelper.ToQuad: TQuad;

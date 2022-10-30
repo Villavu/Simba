@@ -204,6 +204,30 @@ begin
 end;
 
 (*
+TQuad.RandomPoint
+~~~~~~~~~~~~~~~~~
+function TQuad.RandomPoint: TPoint;
+
+Returns a completely random point in the quad.
+*)
+procedure _LapeQuad_RandomPoint(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPoint(Result)^ := PQuad(Params^[0])^.RandomPoint();
+end;
+
+(*
+TQuad.RandomPointCenter
+~~~~~~~~~~~~~~~~~~~~~~~
+function TQuad.RandomPointCenter: TPoint;
+
+Returns a random point in the quad which is weighted torwards the quad's center.
+*)
+procedure _LapeQuad_RandomPointCenter(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPoint(Result)^ := PQuad(Params^[0])^.RandomPointCenter();
+end;
+
+(*
 in
 ~~
 operator in(Left: TPoint; Right: TQuad): Boolean;
@@ -237,6 +261,10 @@ begin
     addGlobalFunc('function TQuad.NearestEdge(P: TPoint): TPoint', @_LapeQuad_NearestEdge);
     addGlobalFunc('function TQuad.Area: Integer', @_LapeQuad_Area);
     addGlobalFunc('function TQuad.Normalize: TQuad', @_LapeQuad_Normalize);
+
+    addGlobalFunc('function TQuad.RandomPoint: TPoint', @_LapeQuad_RandomPoint);
+    addGlobalFunc('function TQuad.RandomPointCenter: TPoint', @_LapeQuad_RandomPointCenter);
+
     addGlobalFunc('operator in(Left: TPoint; Right: TQuad): Boolean;', @_LapeQuad_IN_Quad);
 
     ImportingSection := '';

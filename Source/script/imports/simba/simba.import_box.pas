@@ -298,9 +298,40 @@ begin
   PPointArray(Result)^ := PBox(Params^[0])^.Corners();
 end;
 
+(*
+TBox.ToQuad
+~~~~~~~~~~~
+function TBox.ToQuad: TQuad;
+
+Converts the TBox to a TQuad type.
+*)
 procedure _LapeBox_ToQuad(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PQuad(Result)^ := PBox(Params^[0])^.ToQuad();
+end;
+
+(*
+TBox.RandomPoint
+~~~~~~~~~~~~~~~~
+function TBox.RandomPoint: TPoint;
+
+Returns a completely random point in the box.
+*)
+procedure _LapeBox_RandomPoint(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPoint(Result)^ := PBox(Params^[0])^.RandomPoint();
+end;
+
+(*
+TBox.RandomPointCenter
+~~~~~~~~~~~~~~~~~~~~~~
+function TBox.RandomPointCenter: TPoint;
+
+Returns a random point in the box which is weighted torwards the box center.
+*)
+procedure _LapeBox_RandomPointCenter(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPoint(Result)^ := PBox(Params^[0])^.RandomPointCenter();
 end;
 
 procedure ImportBox(Compiler: TSimbaScript_Compiler);
@@ -343,6 +374,9 @@ begin
     addGlobalFunc('function TBox.Width: Integer;', @_LapeBox_Width);
     addGlobalFunc('function TBox.Height: Integer;', @_LapeBox_Height);
     addGlobalFunc('function TBox.Center: TPoint;', @_LapeBox_Center);
+
+    addGlobalFunc('function TBox.RandomPoint: TPoint', @_LapeBox_RandomPoint);
+    addGlobalFunc('function TBox.RandomPointCenter: TPoint', @_LapeBox_RandomPointCenter);
 
     ImportingSection := '';
   end;

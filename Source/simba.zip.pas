@@ -22,7 +22,6 @@ type
     FFlat: Boolean;
     FOnProgress: TZipProgressEvent;
     FExtractingFinished: TNotifyEvent;
-    FCopyingFinished: TNotifyEvent;
     FIgnoreList: TStringList;
     FCurrentFile: String;
 

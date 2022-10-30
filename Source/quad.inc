@@ -19,6 +19,9 @@
     class function CreateFromPoints(Points: TPointArray): TQuad; static; overload;
     class operator in(const P: TPoint; const Quad: TQuad): Boolean;
 
+    function RandomPoint: TPoint;
+    function RandomPointCenter: TPoint;
+
     function ToTPA: TPointArray;
     function Bounds: TBox;
     function ShortSideLen: Integer;
@@ -62,6 +65,46 @@ end;
 class operator TQuad.in(const P: TPoint; const Quad: TQuad): Boolean;
 begin
   Result := Quad.Contains(P);
+end;
+
+function TQuad.RandomPoint: TPoint;
+var
+  a,x,y,x1,y1,x2,y2: Double;
+begin
+  a := ArcTan2(Left.Y-Top.Y, Left.X-Top.X);
+  X := (Top.X + Right.X + Bottom.X + Left.X) / 4;
+  Y := (Top.Y + Right.Y + Bottom.Y + Left.Y) / 4;
+  x1 := x-Hypot(Left.y-Top.y, Left.x-Top.x) / 2;
+  y1 := y-Hypot(Left.y-Bottom.y, Left.x-Bottom.x) / 2;
+  x2 := x+Hypot(Left.y-Top.y, Left.x-Top.x) / 2;
+  y2 := y+Hypot(Left.y-Bottom.y, Left.x-Bottom.x) / 2;
+
+  X := (X2 + X1) / 2 + (Random()*2 - 1);
+  Y := (Y2 + Y1) / 2 + (Random()*2 - 1);
+
+  Result.X := RandomRange(Round(x1)+2, Round(x2)-2);
+  Result.Y := RandomRange(Round(y1)+2, Round(y2)-2);
+  Result := Result.Rotate(a, TPoint.Create(Round(X), Round(Y)));
+end;
+
+function TQuad.RandomPointCenter: TPoint;
+var
+  a,x,y,x1,y1,x2,y2: Double;
+begin
+  a := ArcTan2(Left.Y-Top.Y, Left.X-Top.X);
+  X := (Top.X + Right.X + Bottom.X + Left.X) / 4;
+  Y := (Top.Y + Right.Y + Bottom.Y + Left.Y) / 4;
+  x1 := x-Hypot(Left.y-Top.y, Left.x-Top.x) / 2;
+  y1 := y-Hypot(Left.y-Bottom.y, Left.x-Bottom.x) / 2;
+  x2 := x+Hypot(Left.y-Top.y, Left.x-Top.x) / 2;
+  y2 := y+Hypot(Left.y-Bottom.y, Left.x-Bottom.x) / 2;
+
+  X := (X2 + X1) / 2 + (Random()*2 - 1);
+  Y := (Y2 + Y1) / 2 + (Random()*2 - 1);
+
+  Result.X := Round(RandomMean(x1+1, x2-1));
+  Result.Y := Round(RandomMean(y1+1, y2-1));
+  Result := Result.Rotate(a, TPoint.Create(Round(X), Round(Y)));
 end;
 
 function TQuad.ToTPA: TPointArray;
