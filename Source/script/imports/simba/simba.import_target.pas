@@ -153,6 +153,16 @@ begin
   PBoolean(Result)^ := SimbaScriptThread.Script.Client.IOManager.AutoActivate;
 end;
 
+procedure _LapeGetClientWidth(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := SimbaScriptThread.Script.Client.IOManager.GetWidth();
+end;
+
+procedure _LapeGetClientHeight(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := SimbaScriptThread.Script.Client.IOManager.GetHeight();
+end;
+
 procedure ImportTarget(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -187,6 +197,9 @@ begin
     addGlobalFunc('procedure RemoveHandlerInvalidTarget(Handler: TNotifyEvent);', @_LapeRemoveHandlerInvalidTarget);
     addGlobalFunc('procedure SetAutoActivateClient(Value: Boolean);', @_LapeSetAutoActivateClient);
     addGlobalFunc('function GetAutoActivateClient: Boolean;', @_LapeGetAutoActivateClient);
+
+    addGlobalFunc('function GetClientWidth: Integer', @_LapeGetClientWidth);
+    addGlobalFunc('function GetClientHeight: Integer', @_LapeGetClientHeight);
 
     addGlobalFunc(
       'function SaveScreenshot: String; overload;', [

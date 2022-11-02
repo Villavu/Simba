@@ -53,6 +53,9 @@ type
     function ReturnData(X, Y, Width, Height: Integer): TRetData;
     function ReturnMatrix(X, Y, Width, Height: Integer): TIntegerMatrix;
 
+    function GetWidth: Integer;
+    function GetHeight: Integer;
+
     procedure GetDimensions(out Width, Height: Integer);
     procedure GetPosition(out Left, Top: Integer);
     procedure ActivateClient;
@@ -333,6 +336,24 @@ end;
 function TIOManager.ReturnMatrix(X, Y, Width, Height: Integer): TIntegerMatrix;
 begin
   Result := FImage.ReturnMatrix(X, Y, Width, Height);
+end;
+
+function TIOManager.GetWidth: Integer;
+var
+  P: TPoint;
+begin
+  GetDimensions(P.X, P.Y);
+
+  Result := P.X;
+end;
+
+function TIOManager.GetHeight: Integer;
+var
+  P: TPoint;
+begin
+  GetDimensions(P.X, P.Y);
+
+  Result := P.Y;
 end;
 
 function TIOManager.SetTarget(Data: PRGB32; Width, Height: Integer): Integer;

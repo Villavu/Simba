@@ -50,7 +50,7 @@ jobs:
             
     steps:
       - name: Install Lazarus
-        uses: ollydev/setup-lazarus-fpcup@master
+        uses: ollydev/setup-lazarus-fpcup@v3
         with:
           laz: lazarus_2_2_4
           fpc: release_3_2_2
