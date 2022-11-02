@@ -1,23 +1,24 @@
 object SimbaScriptTabsForm: TSimbaScriptTabsForm
-  Left = 1085
-  Height = 315
-  Top = 319
-  Width = 705
+  Left = 1131
+  Height = 262
+  Top = 372
+  Width = 659
   AllowDropFiles = True
   Caption = 'Editor'
-  ClientHeight = 315
-  ClientWidth = 705
+  ClientHeight = 262
+  ClientWidth = 659
   DesignTimePPI = 120
+  OnDestroy = FormDestroy
   OnDropFiles = DoOnDropFiles
   OnMouseDown = FormMouseDown
   OnMouseLeave = FormMouseLeave
   OnMouseMove = FormMouseMove
-  LCLVersion = '2.2.2.0'
+  LCLVersion = '2.2.4.0'
   object Notebook: TExtendedNotebook
     Left = 4
-    Height = 311
+    Height = 258
     Top = 0
-    Width = 697
+    Width = 651
     Align = alClient
     BorderSpacing.Left = 4
     BorderSpacing.Right = 4
@@ -135,6 +136,7 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
     end
     object MenuItemDocumentation: TMenuItem
       Caption = 'Insert Documentation'
+      ImageIndex = 42
       ShortCut = 16452
       OnClick = DoEditorPopupClick
     end

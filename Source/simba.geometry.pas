@@ -125,8 +125,7 @@ class function TSimbaGeometry.RotatePoint(const P: TPoint; Radians, X, Y: Double
 var
   CosValue, SinValue: Double;
 begin
-  CosValue := Cos(Radians);
-  SinValue := Sin(Radians);
+  SinCos(Radians, SinValue, CosValue);
 
   Result.X := Round(X + CosValue * (P.X - X) - SinValue * (P.Y - Y));
   Result.Y := Round(Y + SinValue * (P.X - X) + CosValue * (P.Y - Y));
@@ -137,11 +136,9 @@ var
   I: Integer;
   CosValue, SinValue: Double;
 begin
+  SinCos(Radians, SinValue, CosValue);
+
   SetLength(Result, Length(Points));
-
-  CosValue := Cos(Radians);
-  SinValue := Sin(Radians);
-
   for I := 0 to High(Result) do
   begin
     Result[I].X := Round(X + CosValue * (Points[I].X - X) - SinValue * (Points[I].Y - Y));

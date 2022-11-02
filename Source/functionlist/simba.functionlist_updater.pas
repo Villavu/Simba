@@ -55,9 +55,12 @@ procedure TSimbaFunctionListUpdater.BeginUpdate;
 var
   Tab: TSimbaScriptTab;
 begin
+  if (SimbaScriptTabsForm = nil) then
+    Exit;
   Tab := SimbaScriptTabsForm.CurrentTab;
   if (Tab = nil) then
     Exit;
+
   // No changes
   if (Tab.FunctionList = FFunctionList) and (Tab.Editor.ChangeStamp = FChangeStamp) then
     Exit;

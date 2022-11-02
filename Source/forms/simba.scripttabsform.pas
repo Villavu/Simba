@@ -50,6 +50,7 @@ type
     procedure DoTabPopupOpen(Sender: TObject);
     // Open new tab if empty tab area on the right is clicked
     procedure DoDoubleClick(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
     procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FormMouseLeave(Sender: TObject);
     procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -211,6 +212,11 @@ begin
     AddTab();
 end;
 
+procedure TSimbaScriptTabsForm.FormDestroy(Sender: TObject);
+begin
+  SimbaScriptTabsForm := nil;
+end;
+
 procedure TSimbaScriptTabsForm.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   if (HostDockSite is TSimbaAnchorDockHostSite) then
@@ -262,10 +268,15 @@ end;
 
 function TSimbaScriptTabsForm.GetCurrentTab: TSimbaScriptTab;
 begin
-  if (Notebook.TabIndex > -1) then
-    Result := Notebook.Pages[Notebook.TabIndex] as TSimbaScriptTab
-  else
+  if (Notebook.TabIndex = -1) then
+  begin
+    DebugLn('[TSimbaScriptTabsForm.GetCurrentTab]: TabIndex = -1');
+
     Result := nil;
+    Exit;
+  end;
+
+  Result := Notebook.Pages[Notebook.TabIndex] as TSimbaScriptTab;
 end;
 
 function TSimbaScriptTabsForm.GetCurrentEditor: TSimbaEditor;
