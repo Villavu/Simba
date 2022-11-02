@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  ComCtrls, StdCtrls, Menus, syncobjs,
+  ComCtrls, Menus, syncobjs,
   simba.mufasatypes;
 
 type

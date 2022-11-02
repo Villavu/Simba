@@ -88,7 +88,7 @@ type
 implementation
 
 uses
-  interfacebase, forms, lazfileutils, lazloggerbase, synedit, syneditmousecmds,
+  interfacebase, forms, lazfileutils, synedit, syneditmousecmds,
   simba.scripttabsform, simba.autocomplete, simba.settings,
   simba.main, simba.parser_misc, simba.files, simba.functionlist_updater;
 
@@ -522,7 +522,7 @@ end;
 
 procedure TSimbaScriptTab.Run(Target: THandle);
 begin
-  DebugLn('TSimbaScriptTab.Run :: ', ScriptTitle, ' ', ScriptFileName);
+  DebugLn('TSimbaScriptTab.Run :: ' + ScriptTitle + ' ' + ScriptFileName);
 
   if (FScriptInstance <> nil) then
     FScriptInstance.Resume()
@@ -544,7 +544,7 @@ end;
 
 procedure TSimbaScriptTab.RunWithDebugging(Target: THandle);
 begin
-  DebugLn('TSimbaScriptTab.RunWithDebugging :: ', ScriptTitle, ' ', ScriptFileName);
+  DebugLn('TSimbaScriptTab.RunWithDebugging :: ' + ScriptTitle + ' ' + ScriptFileName);
 
   if (FScriptInstance <> nil) then // Already running
     Exit;
@@ -571,7 +571,7 @@ end;
 
 procedure TSimbaScriptTab.Compile;
 begin
-  DebugLn('TSimbaScriptTab.Compile :: ', ScriptTitle, ' ', ScriptFileName);
+  DebugLn('TSimbaScriptTab.Compile :: ' + ScriptTitle + ' ' + ScriptFileName);
 
   if (FScriptInstance = nil) then
   begin
@@ -591,7 +591,7 @@ end;
 
 procedure TSimbaScriptTab.Pause;
 begin
-  DebugLn('TSimbaScriptTab.Pause :: ', ScriptTitle, ' ', ScriptFileName);
+  DebugLn('TSimbaScriptTab.Pause :: ' + ScriptTitle + ' ' + ScriptFileName);
 
   if (FScriptInstance <> nil) then
     FScriptInstance.Pause();
@@ -599,7 +599,7 @@ end;
 
 procedure TSimbaScriptTab.Stop;
 begin
-  DebugLn('TSimbaScriptTab.Stop :: ', ScriptTitle, ' ', ScriptFileName);
+  DebugLn('TSimbaScriptTab.Stop :: ' + ScriptTitle + ' ' + ScriptFileName);
 
   if (FScriptInstance <> nil) then
     FScriptInstance.Stop();

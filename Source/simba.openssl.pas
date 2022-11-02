@@ -23,8 +23,8 @@ procedure ExtractOpenSSL;
 implementation
 
 uses
-  lazloggerbase, lcltype,
-  simba.gz, simba.settings, simba.files;
+  lcltype,
+  simba.mufasatypes, simba.gz, simba.settings, simba.files;
 
 function IsFileHash(FileName: String; Hash: String): Boolean;
 begin

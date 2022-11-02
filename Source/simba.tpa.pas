@@ -30,6 +30,10 @@ unit simba.tpa;
 
 {$i simba.inc}
 
+{$IFOPT D-}
+  {$OPTIMIZATION LEVEL4}
+{$ENDIF}
+
 interface
 
 uses
@@ -398,7 +402,7 @@ end;
 
 class function TPointArrayHelper.CreateFromSimplePolygon(Center: TPoint; Sides: Integer; Size: Integer; Filled: Boolean): TPointArray;
 var
-  i,j: Integer;
+  i: Integer;
   dx,dy,ptx,pty,SinR,CosR: Double;
   pt : TPoint;
 begin
@@ -406,7 +410,7 @@ begin
   pty := Center.Y + Size;
   SinR := Sin(Radians(360.0 / Sides));
   CosR := Cos(Radians(360.0 / Sides));
-  j := 1;
+
   Result := [Point(Round(ptx),Round(pty))];
   for i:=1 to Sides-1 do
   begin
@@ -1589,7 +1593,7 @@ end;
 
 function TPointArrayHelper.Split(Dist: Integer): T2DPointArray;
 var
-  t1, t2, c, ec, tc, Hi, DistSqr: Integer;
+  t1, t2, ec, tc, Hi, DistSqr: Integer;
   TPA: TPointArray;
   Buffer: TSimbaPointBuffer;
   ResultBuffer: TSimbaPointArrayBuffer;
@@ -1636,7 +1640,6 @@ begin
         end;
         Inc(t1);
       end;
-      Inc(c);
     end;
 
     if (Buffer.Count > 0) then
@@ -1648,7 +1651,7 @@ end;
 
 function TPointArrayHelper.Split(DistX, DistY: Integer): T2DPointArray;
 var
-  t1, t2, c, ec, tc, Hi: Integer;
+  t1, t2, ec, tc, Hi: Integer;
   TPA: TPointArray;
   Buffer: TSimbaPointBuffer;
   ResultBuffer: TSimbaPointArrayBuffer;
@@ -1694,7 +1697,6 @@ begin
         end;
         Inc(t1);
       end;
-      Inc(c);
     end;
 
     if (Buffer.Count > 0) then

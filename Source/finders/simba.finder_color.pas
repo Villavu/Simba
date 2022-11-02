@@ -5,8 +5,11 @@
 }
 unit simba.finder_color;
 
-{$DEFINE SIMBA_O4}
 {$i simba.inc}
+
+{$IFOPT D-}
+  {$OPTIMIZATION LEVEL4}
+{$ENDIF}
 
 interface
 

@@ -5,8 +5,11 @@
 }
 unit simba.colormath;
 
-{$DEFINE SIMBA_O4}
 {$i simba.inc}
+
+{$IFOPT D-}
+  {$OPTIMIZATION LEVEL4}
+{$ENDIF}
 
 interface
 

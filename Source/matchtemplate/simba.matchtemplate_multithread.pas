@@ -7,6 +7,10 @@ unit simba.matchtemplate_multithread;
 
 {$i simba.inc}
 
+{$IFOPT D-}
+  {$OPTIMIZATION LEVEL4}
+{$ENDIF}
+
 interface
 
 uses

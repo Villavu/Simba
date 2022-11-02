@@ -1,3 +1,4 @@
 *.lrs binary
 *.res binary
 *.simba linguist-language=Pascal
+*.inc linguist-language=Pascal

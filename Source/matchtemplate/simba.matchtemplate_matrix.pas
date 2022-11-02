@@ -14,8 +14,11 @@ unit simba.matchtemplate_matrix;
   See the License for the specific language governing permissions and
   limitations under the License.
 [==============================================================================}
-{$DEFINE SIMBA_O4}
 {$i simba.inc}
+
+{$IFOPT D-}
+  {$OPTIMIZATION LEVEL4}
+{$ENDIF}
 
 {$MODESWITCH ARRAYOPERATORS OFF}
 
