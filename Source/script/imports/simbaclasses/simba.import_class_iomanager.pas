@@ -63,6 +63,16 @@ begin
   //PIOManager(Params^[0])^.FreeReturnData();
 end;
 
+procedure _LapeIOManager_GetWidth(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PIOManager(Params^[0])^.GetWidth();
+end;
+
+procedure _LapeIOManager_GetHeight(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PIOManager(Params^[0])^.GetHeight();
+end;
+
 procedure _LapeIOManager_GetDimensions(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PIOManager(Params^[0])^.GetDimensions(PInteger(Params^[1])^, PInteger(Params^[2])^);
@@ -275,6 +285,8 @@ begin
     addGlobalFunc('function TIOManager.ReturnMatrix(X, Y, Width, Height: Integer): TIntegerMatrix;', @_LapeIOManager_ReturnMatrix);
     addGlobalFunc('function TIOManager.ReturnData(X, Y, Width, Height: Integer): TRetData;', @_LapeIOManager_ReturnData);
     addGlobalFunc('procedure TIOManager.FreeReturnData;', @_LapeIOManager_FreeReturnData);
+    addGlobalFunc('function TIOManager.GetWidth: Boolean;', @_LapeIOManager_GetWidth);
+    addGlobalFunc('function TIOManager.GetHeight: Boolean;', @_LapeIOManager_GetHeight);
     addGlobalFunc('procedure TIOManager.GetDimensions(out W, H: Integer);', @_LapeIOManager_GetDimensions);
     addGlobalFunc('procedure TIOManager.GetPosition(var Left, Top: Integer);', @_LapeIOManager_GetPosition);
     addGlobalFunc('procedure TIOManager.ActivateClient;', @_LapeIOManager_ActivateClient);
