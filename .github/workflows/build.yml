@@ -49,16 +49,15 @@ jobs:
             test: Simba-Darwin64
             
     steps:
-      - uses: actions/checkout@v2.5.0
+      - name: Install Lazarus
+        uses: ollydev/setup-lazarus-fpcup@master
+        with:
+          laz: lazarus_2_2_4
+          fpc: release_3_2_2
+
+      - uses: actions/checkout@v3.1.0 
         with: 
           submodules: true
-      
-      - name: Install Lazarus
-        uses: ollydev/setup-lazarus-fpcup@v2.5
-        with:
-          laz-branch: lazarus_2_2_4
-          fpc-branch: fixes_3_2
-          fpcup-release: v2.2.0h
     
       - name: Build Simba
         run: |

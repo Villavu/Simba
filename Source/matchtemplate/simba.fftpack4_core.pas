@@ -1009,8 +1009,7 @@ var
   ar1,ai1,ar2,ai2: Single;
 begin
   arg := TWOPI / ip;
-  dcp := Cos(arg);
-  dsp := Sin(arg);
+  SinCos(arg, dsp, dcp);
   ipph := (ip+1) div 2;
   nbd := (ido-1) div 2;
   if ido<>1 then
@@ -1225,8 +1224,7 @@ var
   ai1,ai2,ar1,ar2: Single;
 begin          
   arg := TWOPI / ip;
-  dcp := Cos(arg);
-  dsp := Sin(arg);
+  SinCos(arg, dsp, dcp);
   nbd := (ido-1) div 2;
   ipph := (ip+1) div 2;
   if ido>=l1 then begin
