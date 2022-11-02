@@ -2,6 +2,10 @@ unit simba.imagebox_bitmap;
 
 {$i simba.inc}
 
+{$IFOPT D-}
+  {$OPTIMIZATION LEVEL4}
+{$ENDIF}
+
 interface
 
 uses

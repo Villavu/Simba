@@ -41,7 +41,6 @@ type
 implementation
 
 uses
-  lazloggerbase,
   simba.script, simba.script_compiler_debugger;
 
 procedure TSimbaScript_Debugger.EnterMethod(const Index: Integer);

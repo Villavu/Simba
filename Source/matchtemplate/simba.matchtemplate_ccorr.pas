@@ -5,8 +5,11 @@
 }
 unit simba.matchtemplate_ccorr;
 
-{$DEFINE SIMBA_O4}
 {$i simba.inc}
+
+{$IFOPT D-}
+  {$OPTIMIZATION LEVEL4}
+{$ENDIF}
 
 {$MODESWITCH ARRAYOPERATORS OFF}
 

@@ -7,6 +7,10 @@ unit simba.atpa;
 
 {$i simba.inc}
 
+{$IFOPT D-}
+  {$OPTIMIZATION LEVEL4}
+{$ENDIF}
+
 interface
 
 uses

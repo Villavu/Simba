@@ -7,11 +7,14 @@ unit simba.math;
 
 {$i simba.inc}
 
+{$IFOPT D-}
+  {$OPTIMIZATION LEVEL4}
+{$ENDIF}
+
 interface
 
 uses
-  Classes, SysUtils,
-  simba.mufasatypes;
+  Classes, SysUtils;
 
 const
   HALF_PI: Double = PI / 2;

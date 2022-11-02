@@ -84,7 +84,7 @@ type
 implementation
 
 uses
-  forms, lazloggerbase,
+  forms,
   simba.outputform, simba.scripttabsform, simba.scripttab;
 
 procedure TSimbaScriptInstance.DoOutputThread;
@@ -108,7 +108,7 @@ begin
     until (Count = 0);
   except
     on E: Exception do
-      DebugLn('Listener thread exception: ', E.Message);
+      DebugLn('Listener thread exception: ' + E.Message);
   end;
 end;
 

@@ -213,6 +213,10 @@ uses
   simba.math, simba.overallocatearray, simba.geometry, simba.heaparray,
   simba.algo_sort, simba.tpa, simba.random;
 
+{$IFOPT D-}
+  {$OPTIMIZATION LEVEL4}
+{$ENDIF}
+
 {$DEFINE BODY}
   {$i generics.inc}
   {$i quad.inc}

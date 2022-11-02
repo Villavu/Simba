@@ -17,8 +17,11 @@ unit simba.matchtemplate;
   Mask template matching implemented from OpenCV's templmatch.cpp
 
 [==============================================================================}
-{$DEFINE SIMBA_O4}
 {$i simba.inc}
+
+{$IFOPT D-}
+  {$OPTIMIZATION LEVEL4}
+{$ENDIF}
 
 {$MODESWITCH ARRAYOPERATORS OFF}
 

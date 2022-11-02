@@ -7,6 +7,10 @@ unit simba.slacktree;
 
 {$i simba.inc}
 
+{$IFOPT D-}
+  {$OPTIMIZATION LEVEL4}
+{$ENDIF}
+
 interface
 
 uses

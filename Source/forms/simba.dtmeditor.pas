@@ -376,7 +376,6 @@ procedure TSimbaDTMEditorForm.LoadDTMClick(Sender: TObject);
 var
   Value: String;
   DTM: TDTM;
-  Point: TDTMPoint;
   I: Integer;
 begin
   Value := '';

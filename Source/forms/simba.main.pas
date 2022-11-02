@@ -286,7 +286,7 @@ implementation
 {$R *.lfm}
 
 uses
-  lcltype, lclintf, lazloggerbase, lazfileutils, anchordocking, math, toolwin,
+  lcltype, lclintf, lazfileutils, anchordocking, math, toolwin,
   simba.openssl, simba.files, simba.process, simba.package_form,
   simba.openexampleform, simba.colorpickerhistoryform, simba.codeparser,
   simba.codeinsight, simba.associate, simba.scripttab, simba.debugimageform,
@@ -585,11 +585,11 @@ begin
       ExtractOpenSSL();
   except
     on E: Exception do
-      DebugLn('[TSimbaForm.SetupAnalyticsAndOpenSSL]: ', E.ToString());
+      DebugLn('[TSimbaForm.SetupAnalyticsAndOpenSSL]: ' + E.ToString());
   end;
 
   try
-    if Application.HasOption('noanalytics') then
+    if Application.HasOption('noanalytics') or (SIMBA_COMMIT = '') then // SIMBA_COMMIT = '' is a local build. Don't log.
       Exit;
 
     with TSimbaHTTPClient.Create() do
@@ -602,7 +602,7 @@ begin
     end;
   except
     on E: Exception do
-      DebugLn('[TSimbaForm.SetupAnalyticsAndOpenSSL]: ', E.ToString());
+      DebugLn('[TSimbaForm.SetupAnalyticsAndOpenSSL]: ' + E.ToString());
   end;
 end;
 
@@ -620,12 +620,7 @@ begin
     for I := 0 to List.Count - 1 do
     begin
       if (List.Names[I] = '') then
-      begin
-        Writeln('NIL NAMES ##########');
-        Writeln(List.ValueFromIndex[I]);
-        Writeln('##############');
         Continue;
-      end;
 
       Parser := TCodeInsight_Include.Create();
       Parser.Run(List.ValueFromIndex[I], List.Names[I]);
@@ -638,7 +633,7 @@ begin
     );
   except
     on E: Exception do
-      DebugLn('[TSimbaForm.SetupCodeTools]: ', E.ToString());
+      DebugLn('[TSimbaForm.SetupCodeTools]: ' + E.ToString());
   end;
 
   if (List <> nil) then

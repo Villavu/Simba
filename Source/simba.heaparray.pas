@@ -10,6 +10,10 @@ unit simba.heaparray;
 
 {$i simba.inc}
 
+{$IFOPT D-}
+  {$OPTIMIZATION LEVEL4}
+{$ENDIF}
+
 interface
 
 uses

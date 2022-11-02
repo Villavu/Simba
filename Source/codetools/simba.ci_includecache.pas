@@ -10,9 +10,9 @@ unit simba.ci_includecache;
 interface
 
 uses
-  Classes, SysUtils, syncobjs, castaliapaslex, castaliapaslextypes,
+  Classes, SysUtils, syncobjs, castaliapaslex,
   generics.collections,
-  simba.codeparser;
+  simba.mufasatypes, simba.codeparser;
 
 type
   TCodeInsight_Include = class(TCodeParser)
@@ -63,8 +63,7 @@ type
 implementation
 
 uses
-  lazloggerbase,
-  simba.settings, simba.outputform;
+  simba.settings;
 
 procedure TCodeInsight_Include.Assign(From: TObject);
 begin
@@ -159,7 +158,7 @@ begin
     if (Include.LastUsed < 25) and (not Include.Outdated) then
       Continue;
 
-    DebugLn('Purge include: ', Include.Lexer.FileName);
+    DebugLn('Purge include: ' + Include.Lexer.FileName);
 
     FCachedIncludes.Delete(I);
   end;
@@ -204,7 +203,7 @@ begin
 
     if (Result = nil) then
     begin
-      DebugLn('Caching Include: ', FileName);
+      DebugLn('Caching Include: ' + FileName);
 
       Result := TCodeInsight_Include.Create();
       Result.Assign(Sender);
@@ -237,7 +236,7 @@ end;
 
 function TCodeInsight_IncludeCache.GetLibrary(Sender: TCodeParser; FileName: String): TCodeInsight_Include;
 var
-  Contents: String;
+  Contents: String = '';
 begin
   Result := nil;
 
@@ -250,7 +249,7 @@ begin
 
     if (Result = nil) then
     begin
-      DebugLn('Caching Library: ', FileName);
+      DebugLn('Caching Library: ' + FileName);
 
       if (Sender.OnLoadLibrary <> nil) then
       begin

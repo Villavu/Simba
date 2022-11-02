@@ -62,7 +62,7 @@ implementation
 
 uses
   simba.mufasatypes, simba.package_installform,
-  simba.package_installer, simba.files, simba.fonthelpers, simba.dialog;
+  simba.package_installer, simba.fonthelpers, simba.dialog;
 
 procedure TSimbaPackageForm.FormShow(Sender: TObject);
 begin

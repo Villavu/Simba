@@ -88,8 +88,7 @@ end;
 
 procedure TIntegerMatrixHelper.SetValues(Indices: TPointArray; Values: TIntegerArray);
 var
-  Count, I: Integer;
-  W, H: Integer;
+  I, W, H: Integer;
 begin
   if (Length(Values) <> Length(Indices)) then
     raise Exception.Create('SetValues: Length(Indices) <> Length(Values)');
@@ -102,8 +101,7 @@ end;
 
 procedure TIntegerMatrixHelper.SetValue(Indices: TPointArray; Value: Integer);
 var
-  Count, I: Integer;
-  W, H: Integer;
+  I, W, H: Integer;
 begin
   if Self.GetSize(W, H) then
     for I := 0 to High(Indices) do
