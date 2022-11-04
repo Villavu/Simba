@@ -138,6 +138,8 @@ type
     procedure DrawCircleArray(Points: TPointArray; Radius: Integer; Filled: Boolean; Color: Integer = -1);
     procedure DrawCrossArray(Points: TPointArray; Radius: Integer; Color: Integer = -1);
 
+    procedure DrawHSLCircle(ACenter: TPoint; Radius: Integer);
+
     function AverageBrightness: Integer;
     function PeakBrightness: Integer;
 
@@ -252,7 +254,7 @@ implementation
 uses
   fpimage, math, intfgraphics, simba.overallocatearray, simba.geometry,
   simba.tpa, simba.colormath, simba.client, simba.iomanager,
-  simba.bitmap_misc, simba.encoding, simba.compress;
+  simba.bitmap_misc, simba.encoding, simba.compress, simba.math;
 
 function GetDrawColor(Color, Index: Integer): Integer; inline;
 const
@@ -1248,6 +1250,28 @@ var
 begin
   for I := 0 to High(Points) do
     DrawCross(Points[I], Radius, GetDrawColor(Color, I));
+end;
+
+procedure TMufasaBitmap.DrawHSLCircle(ACenter: TPoint; Radius: Integer);
+var
+  H, S, L: Single;
+  X, Y: Integer;
+  Bounds: TBox;
+begin
+  Bounds.X1 := Max(ACenter.X - Radius, 0);
+  Bounds.Y1 := Max(ACenter.Y - Radius, 0);
+  Bounds.X2 := Min(ACenter.X + Radius, FWidth - 1);
+  Bounds.Y2 := Min(ACenter.Y + Radius, FHeight - 1);
+
+  for Y := Bounds.Y1 to Bounds.Y2 do
+    for X := Bounds.X1 to Bounds.X2 do
+    begin
+      H := Degrees(ArcTan2(Y - ACenter.Y, X - ACenter.X)) / 3.6;
+      S := Hypot(ACenter.X - X, ACenter.Y - Y);
+      L := 50;
+      if S / Radius * 100 < 100 then
+        SetPixel(X, Y, HSLToColor(H, S / Radius * 100, L));
+    end;
 end;
 
 procedure TMufasaBitmap.DrawToCanvas(x,y: Integer; Canvas: TCanvas);
