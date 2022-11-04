@@ -1,0 +1,21 @@
+program ProcedureExample;
+
+procedure HelloWorld;
+begin
+  WriteLn('Hello world!'); 
+end;
+
+procedure MultiplyNumber(var Number: Integer; MultiplyBy: Integer);
+begin
+  Number := Number * MultiplyBy;
+end;
+
+var
+  Number: Integer;
+begin
+  HelloWorld(); 
+  
+  Number := 10;
+  MultiplyNumber(Number, 10);
+  WriteLn('10x10 = ', Number);
+end.

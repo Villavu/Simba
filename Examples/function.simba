@@ -1,0 +1,23 @@
+program FunctionExample;
+
+function GetNumber: Integer;
+begin
+  Result := 10; 
+end;
+
+function GetText: String;
+begin
+  Result := 'Hello World'; 
+end;
+
+function MultiplyNumber(Number: Integer; MultiplyBy: Integer): Integer;
+begin
+  Result := Number * MultiplyBy;
+end;
+
+begin
+  WriteLn(GetNumber());
+  WriteLn(GetText());
+
+  Writeln('10x10 = ', MultiplyNumber(10, 10));
+end;

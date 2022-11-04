@@ -1,0 +1,47 @@
+program LoopsExample;
+
+procedure ForLoop;
+var
+  Counter: Integer;
+begin
+  WriteLn('ForLoop:');
+  for Counter := 0 to 4 do
+    WriteLn(Counter);
+  WriteLn('ForLoop finished');
+end;
+
+procedure ForLoop_Break;
+var
+  Counter: Integer;
+begin
+  WriteLn('ForLoop_Break:');
+  for Counter := 0 to 4 do
+    if (Counter = 3) then // Exit the loop if counter is 3
+      Break;
+  WriteLn('ForLoop_Break finished: ', Counter);
+end;
+
+procedure ForLoop_Continue;
+var
+  Counter: Integer;
+begin
+  WriteLn('ForLoop_Continue:');
+  for Counter := 0 to 4 do
+  begin
+    if (Counter = 2) or (Counter = 3) or (Counter = 4) then // Skip the loop if Counter is 2,3,4
+      Continue;
+
+    WriteLn(Counter);
+  end;
+  WriteLn('ForLoop_Continue finished');
+end;
+
+begin
+  WriteLn('-------------------------------');
+  ForLoop();
+  WriteLn('-------------------------------');
+  ForLoop_Break();
+  WriteLn('-------------------------------');
+  ForLoop_Continue();
+  WriteLn('-------------------------------');
+end.
