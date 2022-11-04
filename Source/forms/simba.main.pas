@@ -286,17 +286,25 @@ implementation
 {$R *.lfm}
 
 uses
-  lcltype, lclintf, lazfileutils, anchordocking, math, toolwin,
-  simba.openssl, simba.files, simba.process, simba.package_form,
-  simba.openexampleform, simba.colorpickerhistoryform, simba.codeparser,
-  simba.codeinsight, simba.associate, simba.scripttab, simba.debugimageform,
-  simba.bitmapconv, simba.aca, simba.windowselector, simba.dtmeditor,
-  simba.aboutform, simba.functionlistform, simba.scripttabsform, simba.outputform,
-  simba.filebrowserform, simba.notesform, simba.settingsform, simba.colorpicker,
-  simba.ci_includecache, simba.scriptformatter,  simba.editor,
-  simba.dockinghelpers, simba.datetime, simba.nativeinterface, simba.httpclient,
-  simba.functionlist_simbasection, simba.package, simba.windowhandle,
-  simba.functionlist_updater, simba.package_installer, simba.shapeboxform;
+  LCLType, LCLIntf, AnchorDocking, Math, Toolwin, LazFileUtils,
+
+  simba.shapeboxform, simba.openexampleform, simba.colorpickerhistoryform,
+  simba.package_form, simba.debugimageform, simba.bitmaptostringform, simba.aboutform,
+  simba.outputform, simba.filebrowserform, simba.notesform, simba.settingsform,
+  simba.functionlistform, simba.scripttabsform,
+
+  simba.package, simba.package_installer, simba.associate,
+  simba.functionlist_simbasection, simba.functionlist_updater,
+
+  simba.codeparser, simba.codeinsight, simba.ci_includecache,
+  simba.scripttab, simba.editor,
+  simba.aca, simba.dtmeditor,
+
+  simba.windowselector, simba.colorpicker,
+
+  simba.openssl, simba.files, simba.process, simba.httpclient,
+  simba.dockinghelpers, simba.datetime, simba.nativeinterface,
+  simba.scriptformatter, simba.windowhandle;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 

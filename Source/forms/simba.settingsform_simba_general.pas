@@ -10,18 +10,11 @@ unit simba.settingsform_simba_general;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, StdCtrls, ComCtrls, ExtCtrls, Spin,
-  DividerBevel;
+  Classes, SysUtils, Forms, Controls, StdCtrls, ComCtrls, ExtCtrls;
 
 type
   TSimbaGeneralFrame = class(TFrame)
     CheckGroup1: TCheckGroup;
-    OutputFontAntiAliased: TCheckBox;
-    OutputFontName: TComboBox;
-    Label1: TLabel;
-    Label2: TLabel;
-    OutputDivider: TDividerBevel;
-    OutputFontSize: TSpinEdit;
     ToolbarPositionRadioGroup: TRadioGroup;
     ToolbarSizeCaption: TLabel;
     FontSizeLabel: TLabel;
