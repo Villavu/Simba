@@ -12,7 +12,7 @@ uses
   simba.init,
   classes, sysutils, interfaces, forms, lazlogger,
   simba.settings, simba.main, simba.aboutform, simba.debugimageform,
-  simba.bitmapconv, simba.functionlistform, simba.scripttabsform,
+  simba.bitmaptostringform, simba.functionlistform, simba.scripttabsform,
   simba.outputform, simba.colorpickerhistoryform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.associate,
   simba.openexampleform, simba.scriptthread,

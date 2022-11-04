@@ -36,6 +36,8 @@ type
   public
     constructor Create(ASettings: TSimbaSettings; ASection, AName: String; DefaultValue: Variant);
 
+    procedure SetDefault;
+
     property DefaultValue: Variant read FDefaultValue;
     property Value: Variant read GetValue write SetValue;
     property Name: String read GetName;
@@ -95,9 +97,6 @@ type
       MacOSKeystrokes: TSimbaSetting;
 
       OutputClearOnCompile: TSimbaSetting;
-      OutputFontName: TSimbaSetting;
-      OutputFontSize: TSimbaSetting;
-      OutputFontAntiAliased: TSimbaSetting;
 
       OpenSSLExtractOnLaunch: TSimbaSetting;
       OpenSSLCryptoHash: TSimbaSetting;
@@ -122,6 +121,14 @@ type
 
       AutoCompleteWidth: TSimbaSetting;
       AutoCompleteLines: TSimbaSetting;
+    end;
+
+    OutputBox: record
+      FontName: TSimbaSetting;
+      FontSize: TSimbaSetting;
+      FontColor: TSimbaSetting;
+      FontAntiAliased: TSimbaSetting;
+      Color: TSimbaSetting;
     end;
 
     property FirstLaunch: Boolean read FFirstLaunch;
@@ -251,6 +258,11 @@ begin
   FName := AName;
   FDefaultValue := DefaultValue;
   FValue := FDefaultValue;
+end;
+
+procedure TSimbaSetting.SetDefault;
+begin
+  Value := FDefaultValue;
 end;
 
 procedure TSimbaSettings.Changed(Setting: TSimbaSetting);
@@ -384,6 +396,9 @@ constructor TSimbaSettings.Create;
 begin
   inherited Create();
 
+  SynDefaultFontSize := SynDefaultFontSize + 1;
+  SynDefaultFontName := {$IFDEF WINDOWS}'Consolas'{$ELSE}SynDefaultFontName{$ENDIF};
+
   FFirstLaunch := True;
   FList := TSettingList.Create();
   FChangeEventList := TMethodList.Create();
@@ -401,9 +416,6 @@ begin
   General.ColorPickerHistory := TSimbaSetting_BinaryString.Create(Self, 'General', 'ColorPickerHistory', '');
   General.MacOSKeystrokes    := TSimbaSetting_Boolean.Create(Self, 'General', 'MacOSKeystrokes', {$IFDEF DARWIN}True{$ELSE}False{$ENDIF});
 
-  General.OutputFontSize        := TSimbaSetting_Integer.Create(Self, 'General', 'OutputFontSize', SynDefaultFontSize + 1);
-  General.OutputFontName        := TSimbaSetting_String.Create(Self, 'General', 'OutputFontName', {$IFDEF WINDOWS}'Consolas'{$ELSE}''{$ENDIF});
-  General.OutputFontAntiAliased := TSimbaSetting_Boolean.Create(Self, 'General', 'OutputFontAntiAliased', True);
   General.OutputClearOnCompile  := TSimbaSetting_Boolean.Create(Self, 'General', 'OutputClearOnCompile', False);
 
   General.OpenSSLExtractOnLaunch := TSimbaSetting_Boolean.Create(Self, 'General', 'OpenSSLExtractOnLaunch', True);
@@ -413,8 +425,8 @@ begin
   // Editor
   Editor.DefaultScript                   := TSimbaSetting_BinaryString.Create(Self, 'Editor', 'DefaultScript', 'program new;' + LineEnding + 'begin' + LineEnding + 'end.');
   Editor.CustomColors                    := TSimbaSetting_String.Create(Self, 'Editor', 'CustomColors', '');
-  Editor.FontSize                        := TSimbaSetting_Integer.Create(Self, 'Editor', 'FontSize', SynDefaultFontSize + 1);
-  Editor.FontName                        := TSimbaSetting_String.Create(Self, 'Editor', 'FontName', {$IFDEF WINDOWS}'Consolas'{$ELSE}''{$ENDIF});
+  Editor.FontSize                        := TSimbaSetting_Integer.Create(Self, 'Editor', 'FontSize', SynDefaultFontSize);
+  Editor.FontName                        := TSimbaSetting_String.Create(Self, 'Editor', 'FontName', SynDefaultFontName);
   Editor.AntiAliased                     := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AntiAliased', True);
   Editor.IgnoreCodeToolsIDEDirective     := TSimbaSetting_Boolean.Create(Self, 'Editor', 'IgnoreCodeToolsIDEDirective', False);
   Editor.AllowCaretPastEOL               := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AllowCaretPastEOL', True);
@@ -429,6 +441,12 @@ begin
 
   Editor.AutoCompleteWidth := TSimbaSetting_Integer.Create(Self, 'Editor', 'AutoCompleteWidth', 400);
   Editor.AutoCompleteLines := TSimbaSetting_Integer.Create(Self, 'Editor', 'AutoCompleteLines', 8);
+
+  OutputBox.FontColor       := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'FontColor', clWhite);
+  OutputBox.Color           := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'Color', clWhite);
+  OutputBox.FontSize        := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'FontSize', SynDefaultFontHeight);
+  OutputBox.FontName        := TSimbaSetting_String.Create(Self, 'OutputBox', 'FontName', SynDefaultFontName);
+  OutputBox.FontAntiAliased := TSimbaSetting_Boolean.Create(Self, 'OutputBox', 'FontAntiAliased', True);
 end;
 
 destructor TSimbaSettings.Destroy;

@@ -45,13 +45,10 @@ type
     0: (B, G, R, A: Byte);
     1: (AsInteger: Integer);
   end;
-
-  PRGB32 = ^TRGB32;
-  PRGB32Array = ^TRGB32Array;
   TRGB32Array = array of TRGB32;
 
-  PPRGB32 = ^PRGB32;
-  PPRGB32Array = ^TPRGB32Array;
+  PPRGB32 = ^PRGB32; // Pointer to PRGB32
+  PRGB32 = ^TRGB32;
   TPRGB32Array = array of PRGB32;
 
   TRetData = record
@@ -80,10 +77,8 @@ type
   );
 
   PStringArray = ^TStringArray;
-  TStringArray = array of String;
 
   PPoint = ^TPoint;
-
   PPointArray = ^TPointArray;
   TPointArray = array of TPoint;
   P2DPointArray = ^T2DPointArray;

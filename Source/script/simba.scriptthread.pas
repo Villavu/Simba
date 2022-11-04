@@ -50,7 +50,7 @@ uses
   {$IFDEF COCOA_TERMINATE_FIX}
   cocoaall, cocoaint, cocoautils,
   {$ENDIF}
-  forms, fileutil, lazloggerbase, lpmessages,
+  forms, fileutil, lpmessages,
   simba.files, simba.datetime, simba.script_communication, simba.script_debugger;
 
 procedure TSimbaScriptThread.HandleTerminate(Sender: TObject);

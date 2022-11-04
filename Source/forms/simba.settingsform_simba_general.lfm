@@ -1,10 +1,10 @@
 object SimbaGeneralFrame: TSimbaGeneralFrame
   Left = 0
-  Height = 545
+  Height = 336
   Top = 0
-  Width = 571
-  ClientHeight = 545
-  ClientWidth = 571
+  Width = 770
+  ClientHeight = 336
+  ClientWidth = 770
   DesignTimePPI = 120
   ParentFont = False
   TabOrder = 0
@@ -21,7 +21,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Left = 164
     Height = 31
     Top = 43
-    Width = 407
+    Width = 606
     Max = 32
     Min = 12
     OnChange = ToolbarSizeTrackBarChange
@@ -43,7 +43,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Left = 164
     Height = 31
     Top = 6
-    Width = 407
+    Width = 606
     Max = 25
     Min = 5
     OnChange = FontSizeTrackBarChange
@@ -83,96 +83,6 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Layout = tlCenter
     ParentColor = False
   end
-  object OutputDivider: TDividerBevel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = CheckGroup1
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    Left = 0
-    Height = 20
-    Top = 321
-    Width = 571
-    Caption = 'Output'
-    Align = alCustom
-    Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 6
-    BorderSpacing.Bottom = 6
-    Style = gsHorLines
-  end
-  object Label1: TLabel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = OutputFontName
-    AnchorSideBottom.Control = OutputFontName
-    AnchorSideBottom.Side = asrBottom
-    Left = 0
-    Height = 28
-    Top = 347
-    Width = 73
-    Anchors = [akTop, akLeft, akBottom]
-    Caption = 'Font Name'
-    Layout = tlCenter
-    ParentColor = False
-  end
-  object OutputFontName: TComboBox
-    AnchorSideLeft.Control = Label1
-    AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = OutputDivider
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    Left = 83
-    Height = 28
-    Top = 347
-    Width = 488
-    Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Left = 10
-    ItemHeight = 20
-    TabOrder = 2
-    Text = 'OutputFontName'
-  end
-  object OutputFontSize: TSpinEdit
-    AnchorSideLeft.Control = Label1
-    AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = OutputFontName
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    Left = 83
-    Height = 28
-    Top = 381
-    Width = 488
-    Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Left = 10
-    BorderSpacing.Top = 6
-    TabOrder = 3
-  end
-  object OutputFontAntiAliased: TCheckBox
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = OutputFontSize
-    AnchorSideTop.Side = asrBottom
-    Left = 0
-    Height = 24
-    Top = 415
-    Width = 106
-    BorderSpacing.Top = 6
-    Caption = 'Anti-Aliased'
-    TabOrder = 4
-  end
-  object Label2: TLabel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = OutputFontSize
-    AnchorSideBottom.Control = OutputFontSize
-    AnchorSideBottom.Side = asrBottom
-    Left = 0
-    Height = 28
-    Top = 381
-    Width = 60
-    Anchors = [akTop, akLeft, akBottom]
-    Caption = 'Font Size'
-    Layout = tlCenter
-    ParentColor = False
-  end
   object CheckGroup1: TCheckGroup
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = ToolbarPositionRadioGroup
@@ -182,7 +92,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Left = 5
     Height = 119
     Top = 196
-    Width = 561
+    Width = 760
     Anchors = [akTop, akLeft, akRight]
     AutoFill = True
     AutoSize = True
@@ -200,13 +110,13 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
     ClientHeight = 94
-    ClientWidth = 557
+    ClientWidth = 756
     Items.Strings = (
       'Clear Script Output On Compile'
       'Extract OpenSSL On Launch (Windows)'
       'Use Command Key (MacOS)'
     )
-    TabOrder = 5
+    TabOrder = 2
     Data = {
       03000000030303
     }
@@ -220,7 +130,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Left = 5
     Height = 107
     Top = 84
-    Width = 561
+    Width = 760
     Anchors = [akTop, akLeft, akRight]
     AutoFill = True
     AutoSize = True
@@ -237,12 +147,12 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
     ClientHeight = 82
-    ClientWidth = 557
+    ClientWidth = 756
     Items.Strings = (
       'Top (Default)'
       'Left'
       'Right'
     )
-    TabOrder = 6
+    TabOrder = 3
   end
 end

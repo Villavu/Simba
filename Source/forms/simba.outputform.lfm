@@ -1,7 +1,7 @@
 object SimbaOutputForm: TSimbaOutputForm
-  Left = 2631
+  Left = 3288
   Height = 274
-  Top = 375
+  Top = 1011
   Width = 676
   Caption = 'Output'
   ClientHeight = 274
@@ -10,7 +10,7 @@ object SimbaOutputForm: TSimbaOutputForm
   OnMouseDown = FormMouseDown
   OnMouseLeave = FormMouseLeave
   OnMouseMove = FormMouseMove
-  LCLVersion = '2.2.2.0'
+  LCLVersion = '2.2.4.0'
   object PageControl: TPageControl
     Left = 0
     Height = 274
@@ -51,6 +51,13 @@ object SimbaOutputForm: TSimbaOutputForm
     object MenuItemSelectAll: TMenuItem
       Caption = 'Select All'
       OnClick = MenuItemSelectAllClick
+    end
+    object Separator1: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemCustomize: TMenuItem
+      Caption = 'Customize'
+      OnClick = MenuItemCustomizeClick
     end
   end
   object Timer: TTimer

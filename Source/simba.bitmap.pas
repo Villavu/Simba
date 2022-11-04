@@ -2022,9 +2022,9 @@ begin
           valG := valG + (Matrix[yy][xx] * Row[cy][cx].G);
           valB := valB + (Matrix[yy][xx] * Row[cy][cx].B);
         end;
-      RowT[y][x].R := round(valR);
-      RowT[y][x].G := round(valG);
-      RowT[y][x].B := round(valB);;
+      RowT[y][x].R := Round(valR);
+      RowT[y][x].G := Round(valG);
+      RowT[y][x].B := Round(valB);
     end;
 end;
 

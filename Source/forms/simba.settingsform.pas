@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, ExtCtrls, ButtonPanel, Spin,
   simba.settingsform_editor_font, simba.settingsform_editor_colors, simba.settingsform_editor_general,
-  simba.settingsform_simba_general;
+  simba.settingsform_simba_general, simba.settingsform_outputbox;
 
 type
   TSimbaSettingsForm = class(TForm)
@@ -23,13 +23,16 @@ type
 
     procedure FormShow(Sender: TObject);
     procedure OKButtonClick(Sender: TObject);
-    procedure TreeViewClick(Sender: TObject);
+    procedure TreeViewSelectionChanged(Sender: TObject);
   public
     SimbaGeneralFrame: TSimbaGeneralFrame;
+    SimbaOutputBoxFrame: TSimbaOutputBoxFrame;
 
     EditorGeneralFrame: TEditorGeneralFrame;
     EditorFontFrame: TEditorFontFrame;
     EditorColorsFrame: TEditorColorsFrame;
+
+    procedure ShowPage(Title: String);
 
     constructor Create(AOwner: TComponent); override;
   end;
@@ -44,10 +47,15 @@ implementation
 uses
   simba.settings, simba.fonthelpers;
 
-procedure TSimbaSettingsForm.TreeViewClick(Sender: TObject);
+procedure TSimbaSettingsForm.TreeViewSelectionChanged(Sender: TObject);
 begin
   if (TreeView.Selected <> nil) and (TreeView.Selected.Data <> nil) then
     Notebook.ShowControl(TPage(TreeView.Selected.Data));
+end;
+
+procedure TSimbaSettingsForm.ShowPage(Title: String);
+begin
+  TreeView.Selected := TreeView.Items.FindNodeWithText(Title);
 end;
 
 procedure TSimbaSettingsForm.FormShow(Sender: TObject);
@@ -85,16 +93,7 @@ begin
   SimbaGeneralFrame.CheckGroup1.Checked[1] := SimbaSettings.General.OpenSSLExtractOnLaunch.Value;
   SimbaGeneralFrame.CheckGroup1.Checked[2] := SimbaSettings.General.MacOSKeystrokes.Value;
 
-  if (SimbaGeneralFrame.OutputFontName.Items.Count = 0) then
-  begin
-    SimbaGeneralFrame.OutputFontName.Items.AddStrings(EditorFontFrame.FontsNameComboBox.Items);
-    SimbaGeneralFrame.OutputFontName.ItemIndex := SimbaGeneralFrame.OutputFontName.Items.IndexOf(SimbaSettings.General.OutputFontName.Value);
-    if (SimbaGeneralFrame.OutputFontName.ItemIndex < 0) then
-      SimbaGeneralFrame.OutputFontName.ItemIndex := 0;
-  end;
-
-  SimbaGeneralFrame.OutputFontSize.Value := SimbaSettings.General.OutputFontSize.Value;
-  SimbaGeneralFrame.OutputFontAntiAliased.Checked := SimbaSettings.General.OutputFontAntiAliased.Value;
+  SimbaOutputBoxFrame.Load();
 end;
 
 procedure TSimbaSettingsForm.OKButtonClick(Sender: TObject);
@@ -130,9 +129,7 @@ begin
   SimbaSettings.General.OpenSSLExtractOnLaunch.Value := SimbaGeneralFrame.CheckGroup1.Checked[1];
   SimbaSettings.General.MacOSKeystrokes.Value := SimbaGeneralFrame.CheckGroup1.Checked[2];
 
-  SimbaSettings.General.OutputFontName.Value := SimbaGeneralFrame.OutputFontName.Text;
-  SimbaSettings.General.OutputFontSize.Value := SimbaGeneralFrame.OutputFontSize.Value;
-  SimbaSettings.General.OutputFontAntiAliased.Value := SimbaGeneralFrame.OutputFontAntiAliased.Checked;
+  SimbaOutputBoxFrame.Save();
 end;
 
 constructor TSimbaSettingsForm.Create(AOwner: TComponent);
@@ -164,6 +161,10 @@ begin
   SimbaGeneralFrame := TSimbaGeneralFrame.Create(Self);
   SimbaGeneralFrame.Parent := AddPage('General', Node);
   SimbaGeneralFrame.Align := alClient;
+
+  SimbaOutputBoxFrame := TSimbaOutputBoxFrame.Create(Self);
+  SimbaOutputBoxFrame.Parent := AddPage('Output Box', Node);
+  SimbaOutputBoxFrame.Align := alClient;
 
   Node := TreeView.Items.Add(nil, 'Editor');
 

@@ -54,12 +54,14 @@ type
 
   TSimbaOutputForm = class(TForm)
     ContextMenu: TPopupMenu;
+    MenuItemCustomize: TMenuItem;
     MenuItemCopyAll: TMenuItem;
     MenuItemCopyLine: TMenuItem;
     MenuItemSeperator: TMenuItem;
     MenuItemCopy: TMenuItem;
     MenuItemSelectAll: TMenuItem;
     PageControl: TPageControl;
+    Separator1: TMenuItem;
     TabSimba: TTabSheet;
     TabScript: TTabSheet;
     Timer: TTimer;
@@ -70,6 +72,7 @@ type
     procedure MenuItemCopyAllClick(Sender: TObject);
     procedure MenuItemCopyClick(Sender: TObject);
     procedure MenuItemCopyLineClick(Sender: TObject);
+    procedure MenuItemCustomizeClick(Sender: TObject);
     procedure MenuItemSelectAllClick(Sender: TObject);
     procedure TimerExecute(Sender: TObject);
   protected
@@ -96,7 +99,7 @@ uses
   SynEditMarkupBracket, SynEditMarkupWordGroup,
   lclintf, math,
   simba.dockinghelpers, simba.fonthelpers, simba.scripttabsform,
-  simba.nativeinterface, simba.mufasatypes;
+  simba.nativeinterface, simba.mufasatypes, simba.settingsform;
 
 procedure SimbaDebugLn(const S: String);
 begin
@@ -400,20 +403,32 @@ end;
 procedure TSimbaOutputForm.SimbaSettingChanged(Setting: TSimbaSetting);
 begin
   case Setting.Name of
-    'General.OutputFontSize':
+    'OutputBox.Color':
+      begin
+        FScriptOutputBox.Color := Setting.Value;
+        FSimbaOutputBox.Color  := Setting.Value;
+      end;
+
+    'OutputBox.FontColor':
+      begin
+        FScriptOutputBox.Font.Color := Setting.Value;
+        FSimbaOutputBox.Font.Color  := Setting.Value;
+      end;
+
+    'OutputBox.FontSize':
       begin
         FScriptOutputBox.Font.Size := Setting.Value;
         FSimbaOutputBox.Font.Size  := Setting.Value;
       end;
 
-    'General.OutputFontName':
+    'OutputBox.FontName':
       if IsFontFixed(Setting.Value) then
       begin
         FScriptOutputBox.Font.Name := Setting.Value;
         FSimbaOutputBox.Font.Name  := Setting.Value;
       end;
 
-    'General.OutputFontAntiAliased':
+    'OutputBox.FontAntiAliased':
       begin
         FScriptOutputBox.Antialiasing := Setting.Value;
         FSimbaOutputBox.Antialiasing  := Setting.Value;
@@ -439,6 +454,12 @@ begin
       if (Line > 0) and (Line <= Lines.Count) then
         DoCopyToClipboard(Lines[Line - 1]);
     end;
+end;
+
+procedure TSimbaOutputForm.MenuItemCustomizeClick(Sender: TObject);
+begin
+  SimbaSettingsForm.TreeView.Selected := SimbaSettingsForm.TreeView.Items.FindNodeWithText('Output Box');
+  SimbaSettingsForm.ShowModal();
 end;
 
 procedure TSimbaOutputForm.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -482,9 +503,11 @@ begin
   FScriptOutputBox.Align := alClient;
   FScriptOutputBox.PopupMenu := ContextMenu;
 
-  SimbaSettingChanged(SimbaSettings.General.OutputFontName);
-  SimbaSettingChanged(SimbaSettings.General.OutputFontSize);
-  SimbaSettingChanged(SimbaSettings.General.OutputFontAntiAliased);
+  SimbaSettingChanged(SimbaSettings.OutputBox.Color);
+  SimbaSettingChanged(SimbaSettings.OutputBox.FontColor);
+  SimbaSettingChanged(SimbaSettings.OutputBox.FontSize);
+  SimbaSettingChanged(SimbaSettings.OutputBox.FontName);
+  SimbaSettingChanged(SimbaSettings.OutputBox.FontAntiAliased);
 
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
 

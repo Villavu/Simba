@@ -1,7 +1,7 @@
 object SimbaSettingsForm: TSimbaSettingsForm
-  Left = 848
+  Left = 3380
   Height = 625
-  Top = 210
+  Top = 478
   Width = 750
   Caption = 'Settings'
   ClientHeight = 625
@@ -9,7 +9,7 @@ object SimbaSettingsForm: TSimbaSettingsForm
   DesignTimePPI = 120
   OnShow = FormShow
   Position = poScreenCenter
-  LCLVersion = '2.2.2.0'
+  LCLVersion = '2.2.4.0'
   object TreeView: TTreeView
     Left = 0
     Height = 571
@@ -22,7 +22,7 @@ object SimbaSettingsForm: TSimbaSettingsForm
     ReadOnly = True
     ScrollBars = ssAutoBoth
     TabOrder = 0
-    OnClick = TreeViewClick
+    OnSelectionChanged = TreeViewSelectionChanged
     Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
   end
   object Notebook: TNotebook
