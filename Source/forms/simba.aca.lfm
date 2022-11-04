@@ -14,7 +14,7 @@ object SimbaACAForm: TSimbaACAForm
   Position = poScreenCenter
   ShowHint = True
   ShowInTaskBar = stAlways
-  LCLVersion = '2.2.2.0'
+  LCLVersion = '2.2.4.0'
   object PanelMain: TPanel
     Left = 0
     Height = 924
@@ -412,6 +412,10 @@ object SimbaACAForm: TSimbaACAForm
     end
     object MenuImage: TMenuItem
       Caption = 'Image'
+      object MenuItemLoadHSLCircle: TMenuItem
+        Caption = 'Load HSL Circle'
+        OnClick = MenuItemLoadHSLCircleClick
+      end
       object MenuItemLoadImage: TMenuItem
         Caption = 'Load Image'
         OnClick = ButtonLoadImageClick

@@ -38,6 +38,7 @@ type
     MainMenu: TMainMenu;
     MenuImage: TMenuItem;
     MenuColors: TMenuItem;
+    MenuItemLoadHSLCircle: TMenuItem;
     MenuItemUpdateImage: TMenuItem;
     MenuItemLoadColors: TMenuItem;
     MenuItemSaveColors: TMenuItem;
@@ -75,6 +76,7 @@ type
     procedure ButtonUpdateImageClick(Sender: TObject);
     procedure ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure ClientImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure MenuItemLoadHSLCircleClick(Sender: TObject);
     procedure PanelRightResize(Sender: TObject);
   protected
     FOnCalculateBestColor: TACABestColorEvent;
@@ -107,7 +109,7 @@ implementation
 
 uses
   clipbrd,
-  simba.colormath, simba.windowhandle;
+  simba.colormath, simba.windowhandle, simba.bitmap;
 
 procedure TSimbaACAForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
@@ -120,8 +122,8 @@ begin
   ColorToHSL(FImageBox.Background.Canvas.Pixels[X, Y], H, S, L);
 
   FZoomInfo.Caption := Format('Color: %d', [FImageBox.Background.Canvas.Pixels[X, Y]]) + LineEnding +
-                       Format('RGB: %d, %d, %d', [R, G, B])                     + LineEnding +
-                       Format('HSL: %.2f, %.2f, %.2f', [H, S, L])               + LineEnding;
+                       Format('RGB: %d, %d, %d', [R, G, B])                            + LineEnding +
+                       Format('HSL: %.2f, %.2f, %.2f', [H, S, L])                      + LineEnding;
 end;
 
 procedure TSimbaACAForm.ClientImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -135,6 +137,18 @@ begin
     if ColorListBox.Items.IndexOf(Pixel.ToString()) = -1 then
       ColorListBox.ItemIndex := ColorListBox.Items.AddObject(Pixel.ToString(), TObject(PtrUInt(Pixel)));
   end;
+end;
+
+procedure TSimbaACAForm.MenuItemLoadHSLCircleClick(Sender: TObject);
+var
+  Bitmap: TMufasaBitmap;
+begin
+  Bitmap := TMufasaBitmap.Create(800, 800);
+  Bitmap.DrawHSLCircle(Bitmap.Center, 350);
+
+  FImageBox.SetBackground(Bitmap);
+
+  Bitmap.Free();
 end;
 
 procedure TSimbaACAForm.PanelRightResize(Sender: TObject);
@@ -349,7 +363,7 @@ procedure TSimbaACAForm.ButtonClearImageClick(Sender: TObject);
 begin
   FDebugTPA := [];
 
-  Paint();
+  FImageBox.Paint();
 end;
 
 procedure TSimbaACAForm.ButtonDeleteSelectedColorClick(Sender: TObject);
