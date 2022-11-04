@@ -126,7 +126,7 @@ function ExtractExamples(ResourceHandle: TFPResourceHMODULE; ResourceType, Resou
 var
   Name, Value: String;
 begin
-  Result := False;
+  Result := True;
 
   Name := ResourceName;
   if Name.EndsWith('.SIMBA') then

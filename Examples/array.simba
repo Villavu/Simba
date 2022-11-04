@@ -1,21 +1,22 @@
 var
-  Arr: array of TPoint;
-  P: TPoint;
-  I: Integer;
+  Arr: array of Integer;
+  Index, Value: Integer;
 begin
-  Arr.SetLength(2);
-  Arr[0] := [100, 100];
-  Arr[1] := [200, 200];
-  Arr.Append([400, 400]);
+  Arr.SetLength(3);
+  Arr[0] := 200;
+  Arr[1] := 400;
+  Arr[2] := 600;
+  
+  WriteLn('Index of 400 is ', Arr.IndexOf(400));
 
-  I := Arr.IndexOf([200, 200]);
-  WriteLn('Index of [200, 200] = ', I);
+  Arr := [5,6,7,8];
+  Arr.Append(100);
 
-  WriteLn('For loop');
-  for I := 0 to Arr.Length() - 1 do
-    WriteLN(Arr[I]);
+  WriteLn('For loop:');
+  for Index := 0 to Arr.Length() - 1 do
+    WriteLn('Arr[', Index, '] is ', Arr[Index]);
 
-  WriteLn('For in loop');
-  for P in Arr.Reversed() do
-    WriteLn(P);
+  WriteLn('For in loop')
+  for Value in Arr.Reversed() do
+    WriteLn(Value);
 end.

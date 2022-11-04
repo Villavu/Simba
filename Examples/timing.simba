@@ -1,0 +1,28 @@
+program TimingExample;
+
+procedure SomethingToTime;
+var
+  Counter: Integer;
+begin
+  while (Counter < 100) do
+  begin
+    Sleep(Random(30));
+    Inc(Counter);
+  end;
+end;
+
+var
+  Timer: TSimbaTimer;
+  Milliseconds: Integer;
+  Formatted: String;
+begin
+  Timer.Start();
+  SomethingToTime();
+  Timer.Stop();
+
+  Milliseconds := Timer.Elapsed();
+  Formatted := Timer.ElapsedFmt('s');
+
+  WriteLn('Milliseconds: ', Milliseconds);
+  WriteLN('Seconds: ', Formatted);
+end. 
