@@ -129,6 +129,11 @@ type
       Color: TSimbaSetting;
     end;
 
+    ScriptBackup: record
+      Enabled: TSimbaSetting;
+      Interval: TSimbaSetting;
+    end;
+
     property FirstLaunch: Boolean read FFirstLaunch;
 
     class function GetINIFile: TINIFile;
@@ -440,6 +445,9 @@ begin
   OutputBox.FontSize        := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'FontSize', SynDefaultFontHeight);
   OutputBox.FontName        := TSimbaSetting_String.Create(Self, 'OutputBox', 'FontName', SynDefaultFontName);
   OutputBox.FontAntiAliased := TSimbaSetting_Boolean.Create(Self, 'OutputBox', 'FontAntiAliased', True);
+
+  ScriptBackup.Enabled  := TSimbaSetting_Boolean.Create(Self, 'ScriptBackup', 'Enabled', True);
+  ScriptBackup.Interval := TSimbaSetting_Integer.Create(Self, 'ScriptBackup', 'Interval', 5);
 end;
 
 destructor TSimbaSettings.Destroy;

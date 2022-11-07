@@ -45,6 +45,24 @@ type
     destructor Destroy; override;
   end;
 
+  TSimbaZipUpdater = class
+  protected
+    FUnZipper: TUnZipper;
+    FZipper: TZipper;
+
+    procedure BeginUpdate(ZipFile: String);
+    procedure EndUpdate;
+
+    procedure CreateStream(Sender: TObject; var AStream : TStream; AItem: TFullZipFileEntry);
+    procedure DoneStream(Sender: TObject; var AStream : TStream; AItem: TFullZipFileEntry);
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    procedure AddFileContents(ZipFile, Contents, FileName: String);
+    procedure AddFile(ZipFile, FileName: String);
+  end;
+
 implementation
 
 uses
@@ -148,6 +166,77 @@ begin
   end;
 
   AStream := TFileStream.Create(FileName, fmCreate or fmShareDenyWrite);
+end;
+
+constructor TSimbaZipUpdater.Create;
+begin
+  inherited Create();
+
+  FUnZipper := TUnZipper.Create();
+  FUnZipper.OnCreateStream := @CreateStream;
+  FUnZipper.OnDoneStream := @DoneStream;
+
+  FZipper := TZipper.Create();
+end;
+
+destructor TSimbaZipUpdater.Destroy;
+begin
+  if (FUnZipper <> nil) then
+    FreeAndNil(FUnZipper);
+  if (FZipper <> nil) then
+    FreeAndNil(FZipper);
+
+  inherited Destroy();
+end;
+
+procedure TSimbaZipUpdater.AddFileContents(ZipFile, Contents, FileName: String);
+begin
+  BeginUpdate(ZipFile);
+  FZipper.Entries.AddFileEntry(TStringStream.Create(Contents), ExtractFileName(FileName));
+  EndUpdate();
+end;
+
+procedure TSimbaZipUpdater.AddFile(ZipFile, FileName: String);
+begin
+  BeginUpdate(ZipFile);
+  FZipper.Entries.AddFileEntry(FileName, ExtractFileName(FileName));
+  EndUpdate();
+end;
+
+procedure TSimbaZipUpdater.BeginUpdate(ZipFile: String);
+begin
+  if FileExists(ZipFile) then
+    FUnZipper.UnZipAllFiles(ZipFile);
+  FZipper.FileName := ZipFile;
+end;
+
+procedure TSimbaZipUpdater.EndUpdate;
+var
+  I: Integer;
+  Stream: TStream;
+begin
+  FZipper.ZipAllFiles();
+
+  for I := 0 to FZipper.Entries.Count - 1 do
+  begin
+    Stream := FZipper.Entries[I].Stream;
+    if (Stream <> nil) then
+      FreeAndNil(Stream);
+
+    FZipper.Entries[I].Stream := nil;
+  end;
+end;
+
+procedure TSimbaZipUpdater.CreateStream(Sender: TObject; var AStream: TStream; AItem: TFullZipFileEntry);
+begin
+  AStream := TMemoryStream.Create();
+end;
+
+procedure TSimbaZipUpdater.DoneStream(Sender: TObject; var AStream: TStream; AItem: TFullZipFileEntry);
+begin
+  AStream.Position := 0;
+
+  FZipper.Entries.AddFileEntry(AStream, AItem.ArchiveFileName);
 end;
 
 end.

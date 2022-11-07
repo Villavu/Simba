@@ -1,7 +1,7 @@
 object SimbaSettingsForm: TSimbaSettingsForm
-  Left = 3380
+  Left = 3840
   Height = 625
-  Top = 478
+  Top = 617
   Width = 750
   Caption = 'Settings'
   ClientHeight = 625
@@ -14,11 +14,10 @@ object SimbaSettingsForm: TSimbaSettingsForm
     Left = 0
     Height = 571
     Top = 0
-    Width = 188
+    Width = 200
     Align = alLeft
     AutoExpand = True
     BorderSpacing.Right = 1
-    ParentFont = False
     ReadOnly = True
     ScrollBars = ssAutoBoth
     TabOrder = 0
@@ -26,10 +25,10 @@ object SimbaSettingsForm: TSimbaSettingsForm
     Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
   end
   object Notebook: TNotebook
-    Left = 199
+    Left = 211
     Height = 571
     Top = 0
-    Width = 545
+    Width = 533
     Align = alClient
     BorderSpacing.Left = 4
     BorderSpacing.Right = 6
@@ -54,7 +53,7 @@ object SimbaSettingsForm: TSimbaSettingsForm
     ShowButtons = [pbOK, pbCancel]
   end
   object Splitter: TSplitter
-    Left = 189
+    Left = 201
     Height = 571
     Top = 0
     Width = 6

@@ -6,21 +6,23 @@ object SimbaOutputBoxFrame: TSimbaOutputBoxFrame
   ClientHeight = 300
   ClientWidth = 600
   DesignTimePPI = 120
-  ParentFont = False
   TabOrder = 0
-  DesignLeft = 2595
-  DesignTop = 47
+  DesignLeft = 2729
+  DesignTop = 857
   object ColorBoxBackground: TColorBox
+    AnchorSideLeft.Control = Label1
+    AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = Owner
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 136
+    Left = 124
     Height = 26
     Top = 5
-    Width = 464
+    Width = 476
     ColorRectWidth = 40
     Style = [cbCustomColor, cbCustomColors]
     Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 5
     BorderSpacing.Top = 5
     ItemHeight = 20
     OnChange = ColorBoxBackgroundChange
@@ -55,14 +57,15 @@ object SimbaOutputBoxFrame: TSimbaOutputBoxFrame
     ParentColor = False
   end
   object ColorBoxFontColor: TColorBox
+    AnchorSideLeft.Control = ColorBoxBackground
     AnchorSideTop.Control = ColorBoxBackground
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 136
+    Left = 124
     Height = 26
     Top = 36
-    Width = 464
+    Width = 476
     ColorRectWidth = 40
     Style = [cbCustomColor, cbCustomColors]
     Anchors = [akTop, akLeft, akRight]
@@ -72,14 +75,15 @@ object SimbaOutputBoxFrame: TSimbaOutputBoxFrame
     TabOrder = 1
   end
   object FontNameComboBox: TComboBox
+    AnchorSideLeft.Control = ColorBoxBackground
     AnchorSideTop.Control = ColorBoxFontColor
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 136
+    Left = 124
     Height = 28
     Top = 67
-    Width = 464
+    Width = 476
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 5
     ItemHeight = 20
@@ -115,9 +119,10 @@ object SimbaOutputBoxFrame: TSimbaOutputBoxFrame
     ParentColor = False
   end
   object FontSizeSpinEdit: TSpinEdit
+    AnchorSideLeft.Control = ColorBoxBackground
     AnchorSideTop.Control = FontNameComboBox
     AnchorSideTop.Side = asrBottom
-    Left = 136
+    Left = 124
     Height = 28
     Top = 100
     Width = 142
@@ -142,7 +147,7 @@ object SimbaOutputBoxFrame: TSimbaOutputBoxFrame
     AnchorSideTop.Control = Label5
     AnchorSideBottom.Control = Label5
     AnchorSideBottom.Side = asrBottom
-    Left = 136
+    Left = 124
     Height = 20
     Top = 133
     Width = 24

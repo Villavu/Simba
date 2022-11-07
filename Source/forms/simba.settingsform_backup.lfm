@@ -1,0 +1,121 @@
+object SimbaBackupFrame: TSimbaBackupFrame
+  Left = 0
+  Height = 305
+  Top = 0
+  Width = 668
+  ClientHeight = 305
+  ClientWidth = 668
+  DesignTimePPI = 120
+  TabOrder = 0
+  DesignLeft = 1157
+  DesignTop = 569
+  object BackupIntervalEdit: TSpinEdit
+    AnchorSideLeft.Control = BackupIntervalLabel
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Label1
+    AnchorSideTop.Side = asrBottom
+    Left = 106
+    Height = 28
+    Top = 86
+    Width = 144
+    BorderSpacing.Left = 5
+    BorderSpacing.Top = 10
+    TabOrder = 0
+  end
+  object BackupIntervalLabel: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = BackupIntervalEdit
+    AnchorSideBottom.Control = BackupIntervalEdit
+    AnchorSideBottom.Side = asrBottom
+    Left = 0
+    Height = 28
+    Top = 86
+    Width = 101
+    Anchors = [akTop, akLeft, akBottom]
+    Caption = 'Backup Interval'
+    Layout = tlCenter
+    ParentColor = False
+  end
+  object LabelBackup: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    Left = 0
+    Height = 20
+    Top = 5
+    Width = 195
+    BorderSpacing.Top = 5
+    Caption = 'Script backups are located at:'
+    Layout = tlCenter
+    ParentColor = False
+  end
+  object LabelBackupDirectory: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = LabelBackup
+    AnchorSideTop.Side = asrBottom
+    AnchorSideBottom.Side = asrBottom
+    Left = 0
+    Height = 1
+    Top = 30
+    Width = 1
+    BorderSpacing.Top = 5
+    Layout = tlCenter
+    ParentColor = False
+  end
+  object Label2: TLabel
+    AnchorSideLeft.Control = BackupIntervalEdit
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = BackupIntervalLabel
+    AnchorSideBottom.Control = BackupIntervalLabel
+    AnchorSideBottom.Side = asrBottom
+    Left = 255
+    Height = 28
+    Top = 86
+    Width = 52
+    Anchors = [akTop, akLeft, akBottom]
+    BorderSpacing.Left = 5
+    Caption = 'Minutes'
+    Layout = tlCenter
+    ParentColor = False
+  end
+  object Label1: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = DividerBevel1
+    AnchorSideTop.Side = asrBottom
+    AnchorSideBottom.Side = asrBottom
+    Left = 0
+    Height = 20
+    Top = 56
+    Width = 192
+    Caption = 'Automatically Backup Scripts'
+    Layout = tlCenter
+    ParentColor = False
+  end
+  object BackupEnabledCheckbox: TCheckBox
+    AnchorSideLeft.Control = Label1
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Label1
+    AnchorSideBottom.Control = Label1
+    AnchorSideBottom.Side = asrBottom
+    Left = 202
+    Height = 20
+    Top = 56
+    Width = 24
+    Anchors = [akTop, akLeft, akBottom]
+    BorderSpacing.Left = 10
+    TabOrder = 1
+  end
+  object DividerBevel1: TDividerBevel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = LabelBackupDirectory
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 0
+    Height = 20
+    Top = 36
+    Width = 668
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Top = 5
+    Style = gsHorLines
+  end
+end
