@@ -187,8 +187,11 @@ procedure TSimbaAutoComplete_Form.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
 
-  FHint.Hide();
-  FHint.Font := Self.Font;
+  if (FHint <> nil) then
+  begin
+    FHint.Hide();
+    FHint.Font := Self.Font;
+  end;
 
   with TBitmap.Create() do
   try

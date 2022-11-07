@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, ExtCtrls, ButtonPanel, Spin,
   simba.settingsform_editor_font, simba.settingsform_editor_colors, simba.settingsform_editor_general,
-  simba.settingsform_simba_general, simba.settingsform_outputbox;
+  simba.settingsform_simba_general, simba.settingsform_outputbox, simba.settingsform_backup;
 
 type
   TSimbaSettingsForm = class(TForm)
@@ -27,6 +27,7 @@ type
   public
     SimbaGeneralFrame: TSimbaGeneralFrame;
     SimbaOutputBoxFrame: TSimbaOutputBoxFrame;
+    SimbaBackupFrame: TSimbaBackupFrame;
 
     EditorGeneralFrame: TEditorGeneralFrame;
     EditorFontFrame: TEditorFontFrame;
@@ -94,6 +95,7 @@ begin
   SimbaGeneralFrame.CheckGroup1.Checked[2] := SimbaSettings.General.MacOSKeystrokes.Value;
 
   SimbaOutputBoxFrame.Load();
+  SimbaBackupFrame.Load();
 end;
 
 procedure TSimbaSettingsForm.OKButtonClick(Sender: TObject);
@@ -130,6 +132,7 @@ begin
   SimbaSettings.General.MacOSKeystrokes.Value := SimbaGeneralFrame.CheckGroup1.Checked[2];
 
   SimbaOutputBoxFrame.Save();
+  SimbaBackupFrame.Save();
 end;
 
 constructor TSimbaSettingsForm.Create(AOwner: TComponent);
@@ -165,6 +168,10 @@ begin
   SimbaOutputBoxFrame := TSimbaOutputBoxFrame.Create(Self);
   SimbaOutputBoxFrame.Parent := AddPage('Output Box', Node);
   SimbaOutputBoxFrame.Align := alClient;
+
+  SimbaBackupFrame := TSimbaBackupFrame.Create(Self);
+  SimbaBackupFrame.Parent := AddPage('Script Backup', Node);
+  SimbaBackupFrame.Align := alClient;
 
   Node := TreeView.Items.Add(nil, 'Editor');
 

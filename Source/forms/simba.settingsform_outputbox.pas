@@ -31,6 +31,9 @@ type
     procedure ColorBoxFontColorChange(Sender: TObject);
     procedure FontNameComboBoxChange(Sender: TObject);
     procedure FontSizeSpinEditChange(Sender: TObject);
+  protected
+    procedure SizeComponents;
+    procedure FontChanged(Sender: TObject); override;
   public
     constructor Create(TheOwner: TComponent); override;
 
@@ -77,6 +80,33 @@ const
 procedure TSimbaOutputBoxFrame.FontSizeSpinEditChange(Sender: TObject);
 begin
   SimbaSettings.OutputBox.FontSize.Value := TSpinEdit(Sender).Value;
+end;
+
+procedure TSimbaOutputBoxFrame.SizeComponents;
+begin
+  if (ControlCount = 0) then
+    Exit;
+
+  with TBitmap.Create() do
+  try
+    Canvas.Font := Self.Font;
+    if (Canvas.Font.Size = 0) then
+      Canvas.Font.Size := GetDefaultFontSize() + 1
+    else
+      Canvas.Font.Size := Canvas.Font.Size + 1;
+
+    ColorBoxBackground.ItemHeight := Canvas.TextHeight('Fj');
+    ColorBoxFontColor.ItemHeight := Canvas.TextHeight('Fj');
+  finally
+    Free();
+  end;
+end;
+
+procedure TSimbaOutputBoxFrame.FontChanged(Sender: TObject);
+begin
+  inherited FontChanged(Sender);
+
+  SizeComponents();
 end;
 
 procedure TSimbaOutputBoxFrame.FontNameComboBoxChange(Sender: TObject);

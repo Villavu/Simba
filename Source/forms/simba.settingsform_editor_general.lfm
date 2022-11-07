@@ -1,21 +1,23 @@
 object EditorGeneralFrame: TEditorGeneralFrame
   Left = 0
-  Height = 373
+  Height = 466
   Top = 0
-  Width = 513
-  ClientHeight = 373
-  ClientWidth = 513
+  Width = 641
+  ClientHeight = 466
+  ClientWidth = 641
+  DesignTimePPI = 120
+  ParentFont = False
   TabOrder = 0
-  DesignLeft = 1717
-  DesignTop = 244
+  DesignLeft = 401
+  DesignTop = 504
   object CaretPastEOLCheckBox: TCheckBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
     Left = 0
-    Height = 19
-    Top = 5
-    Width = 130
-    BorderSpacing.Top = 5
+    Height = 24
+    Top = 6
+    Width = 162
+    BorderSpacing.Top = 6
     Caption = 'Allow Caret Past EOL'
     TabOrder = 0
   end
@@ -26,12 +28,12 @@ object EditorGeneralFrame: TEditorGeneralFrame
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 0
-    Height = 15
-    Top = 114
-    Width = 513
+    Height = 20
+    Top = 142
+    Width = 641
     Caption = 'Code Tools'
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 10
+    BorderSpacing.Top = 12
     Style = gsHorLines
   end
   object ShowParameterHintsCheckbox: TCheckBox
@@ -39,10 +41,10 @@ object EditorGeneralFrame: TEditorGeneralFrame
     AnchorSideTop.Control = DividerBevel1
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 19
-    Top = 137
-    Width = 211
-    BorderSpacing.Top = 8
+    Height = 24
+    Top = 172
+    Width = 262
+    BorderSpacing.Top = 10
     Caption = 'Automatically show parameter hints'
     TabOrder = 1
   end
@@ -51,10 +53,10 @@ object EditorGeneralFrame: TEditorGeneralFrame
     AnchorSideTop.Control = ShowParameterHintsCheckbox
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 19
-    Top = 161
-    Width = 204
-    BorderSpacing.Top = 5
+    Height = 24
+    Top = 202
+    Width = 255
+    BorderSpacing.Top = 6
     Caption = 'Automatically open auto complete'
     TabOrder = 2
   end
@@ -63,10 +65,10 @@ object EditorGeneralFrame: TEditorGeneralFrame
     AnchorSideTop.Control = DividerBevel4
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 19
-    Top = 57
-    Width = 54
-    BorderSpacing.Top = 8
+    Height = 24
+    Top = 72
+    Width = 68
+    BorderSpacing.Top = 10
     Caption = 'Visible'
     TabOrder = 3
   end
@@ -75,12 +77,12 @@ object EditorGeneralFrame: TEditorGeneralFrame
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = VisibleRightMarginCheckbox
     AnchorSideTop.Side = asrBottom
-    Left = 39
-    Height = 23
-    Top = 81
-    Width = 100
-    BorderSpacing.Left = 10
-    BorderSpacing.Top = 5
+    Left = 48
+    Height = 28
+    Top = 102
+    Width = 125
+    BorderSpacing.Left = 12
+    BorderSpacing.Top = 6
     MaxValue = 1000
     TabOrder = 4
   end
@@ -90,12 +92,13 @@ object EditorGeneralFrame: TEditorGeneralFrame
     AnchorSideBottom.Control = RightMarginEdit
     AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 23
-    Top = 81
-    Width = 29
+    Height = 28
+    Top = 102
+    Width = 36
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Value'
     Layout = tlCenter
+    ParentColor = False
   end
   object DividerBevel4: TDividerBevel
     AnchorSideLeft.Control = Owner
@@ -104,12 +107,12 @@ object EditorGeneralFrame: TEditorGeneralFrame
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 0
-    Height = 15
-    Top = 34
-    Width = 513
+    Height = 20
+    Top = 42
+    Width = 641
     Caption = 'Right Margin'
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 10
+    BorderSpacing.Top = 12
     Style = gsHorLines
   end
   object IgnoreCodetoolsDirectiveCheckbox: TCheckBox
@@ -117,10 +120,10 @@ object EditorGeneralFrame: TEditorGeneralFrame
     AnchorSideTop.Control = OpenAutoCompletionCheckbox
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 19
-    Top = 185
-    Width = 215
-    BorderSpacing.Top = 5
+    Height = 24
+    Top = 232
+    Width = 267
+    BorderSpacing.Top = 6
     Caption = 'Ignore {%CODETOOLS OFF} directive'
     TabOrder = 5
   end
@@ -131,23 +134,23 @@ object EditorGeneralFrame: TEditorGeneralFrame
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 0
-    Height = 15
-    Top = 214
-    Width = 513
+    Height = 20
+    Top = 268
+    Width = 641
     Caption = 'Block Completion'
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 10
+    BorderSpacing.Top = 12
+    Style = gsHorLines
   end
   object CompleteBeginCheckbox: TCheckBox
     AnchorSideLeft.Control = CompleteLabel
     AnchorSideTop.Control = CompleteLabel
     AnchorSideTop.Side = asrBottom
-    Left = 10
-    Height = 19
-    Top = 257
-    Width = 116
-    BorderSpacing.Left = 10
-    BorderSpacing.Top = 5
+    Left = 0
+    Height = 24
+    Top = 324
+    Width = 145
+    BorderSpacing.Top = 6
     Caption = '"begin" add "end"'
     TabOrder = 6
   end
@@ -155,11 +158,11 @@ object EditorGeneralFrame: TEditorGeneralFrame
     AnchorSideLeft.Control = CompleteBeginCheckbox
     AnchorSideTop.Control = CompleteBeginCheckbox
     AnchorSideTop.Side = asrBottom
-    Left = 10
-    Height = 19
-    Top = 281
-    Width = 74
-    BorderSpacing.Top = 5
+    Left = 0
+    Height = 24
+    Top = 354
+    Width = 92
+    BorderSpacing.Top = 6
     Caption = '"(" add ")"'
     TabOrder = 7
   end
@@ -167,11 +170,11 @@ object EditorGeneralFrame: TEditorGeneralFrame
     AnchorSideLeft.Control = CompleteParenthesesCheckbox
     AnchorSideTop.Control = CompleteParenthesesCheckbox
     AnchorSideTop.Side = asrBottom
-    Left = 10
-    Height = 19
-    Top = 307
-    Width = 74
-    BorderSpacing.Top = 7
+    Left = 0
+    Height = 24
+    Top = 387
+    Width = 92
+    BorderSpacing.Top = 9
     Caption = '"[" add "]"'
     TabOrder = 8
   end
@@ -180,10 +183,11 @@ object EditorGeneralFrame: TEditorGeneralFrame
     AnchorSideTop.Control = CompleteDivider
     AnchorSideTop.Side = asrBottom
     Left = 0
-    Height = 15
-    Top = 237
-    Width = 199
-    BorderSpacing.Top = 8
+    Height = 20
+    Top = 298
+    Width = 248
+    BorderSpacing.Top = 10
     Caption = 'Automatically complete the block on:'
+    ParentColor = False
   end
 end

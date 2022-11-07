@@ -267,7 +267,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="139">
+    <Units Count="140">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -893,6 +893,12 @@
         <Filename Value="codetools/simba.ide_codetools_setup.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit138>
+      <Unit139>
+        <Filename Value="forms/simba.settingsform_backup.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SimbaBackupFrame"/>
+        <ResourceBaseClass Value="Frame"/>
+      </Unit139>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
