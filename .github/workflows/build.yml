@@ -37,16 +37,21 @@ jobs:
             binary: Simba-Linux64
             test: Simba-Linux64
           
-          - name: AArch64  
+          - name: Linux AArch64  
             runs-on: ubuntu-latest
-            build-mode: AARCH64
-            binary: Simba-AArch64
+            build-mode: LINUX-AARCH64
+            binary: Simba-Linux-AArch64
             
           - name: MacOS 64
             runs-on: macos-latest
-            build-mode: DARWIN64
-            binary: Simba-Darwin64.zip
-            test: Simba-Darwin64
+            build-mode: MACOS64
+            binary: Simba-MacOS.zip
+            test: Simba
+
+          - name: MacOS AArch64
+            runs-on: macos-latest
+            build-mode: MACOS-AARCH64
+            binary: Simba-MacOS-AArch64.zip
             
     steps:
       - name: Install Lazarus
@@ -58,12 +63,31 @@ jobs:
       - uses: actions/checkout@v3.1.0 
         with: 
           submodules: true
-    
+
       - name: Build Simba
         run: |
           export GITHUB_SHORT_SHA=$(git rev-parse --short HEAD)
           
           lazbuild --build-mode=${{ matrix.config.build-mode }} "Source/Simba.lpi"
+
+      - name: Sign MacOS App Bundle
+        if: matrix.config.runs-on == 'macos-latest'
+        env: 
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output certificate.p12
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security import certificate.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+
+          codesign --sign "7ACAD7EE0AA3A0783CE9592567098A3F08FC0B0B" Simba.app  
+          codesign -v Simba.app
+
+          ditto -c -k --sequesterRsrc --keepParent Simba.app ${{ matrix.config.binary }}
 
       - name: Test Simba
         if: matrix.config.test != ''
@@ -77,7 +101,7 @@ jobs:
           fi
           
           ./${{ matrix.config.test }} --run "Tests/tester.simba"
-
+          
       - name: Upload Binary 
         uses: actions/upload-artifact@v3.0.0
         with:
