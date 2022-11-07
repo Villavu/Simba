@@ -5,11 +5,11 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>Simba-Darwin64</string>
+	<string>Simba</string>
 	<key>CFBundleName</key>
 	<string>Simba</string>
 	<key>CFBundleIdentifier</key>
-	<string>Simba-Darwin64</string>
+	<string>com.villavu.simba</string>
 	<key>CFBundleIconFile</key>
 	<string>Simba.icns</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -17,11 +17,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>
-	<string>Simba</string>
+	<string>????</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.4</string>
+	<string>1.5</string>
 	<key>CFBundleVersion</key>
-	<string>1400</string>
+	<string>1500</string>
 	<key>CSResourcesFileMapped</key>
 	<false/>
 	<key>CFBundleDocumentTypes</key>

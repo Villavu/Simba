@@ -2,11 +2,10 @@
  
 echo "Creating macOS application bundle"
  
-rm -r ../Simba-Darwin64.zip
-rm -r ../Simba-Darwin64.app
+rm -r ../Simba.zip
+rm -r ../Simba.app
 cp -R macosbundle/Simba.app ../
  
 cd ..
-cp Simba-Darwin64 Simba.app
- 
-zip -r Simba-Darwin64.zip Simba.app
+cp Simba Simba.app/Contents/MacOS/
+rm Simba.app/Contents/MacOS/.gitkeep

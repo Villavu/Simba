@@ -24,7 +24,7 @@
       <CharSet Value="04B0"/>
       <StringTable CompanyName="villavu.com" FileDescription="Simba: http://wizzup.org/simba/" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="1.5"/>
     </VersionInfo>
-    <BuildModes Count="6">
+    <BuildModes Count="7">
       <Item1 Name="DEBUG" Default="True"/>
       <Item2 Name="WIN32">
         <CompilerOptions>
@@ -153,14 +153,52 @@
           </Other>
         </CompilerOptions>
       </Item4>
-      <Item5 Name="DARWIN64">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="cocoa"/>
-        </MacroValues>
+      <Item5 Name="LINUX-AARCH64">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="../Simba-Darwin64"/>
+            <Filename Value="../Simba-Linux-AArch64"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
+            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox"/>
+            <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <CStyleMacros Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="aarch64"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="3"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True"/>
+            </CompilerMessages>
+            <CustomOptions Value="-dLape_CDECL"/>
+            <CreateMakefileOnBuild Value="True"/>
+          </Other>
+        </CompilerOptions>
+      </Item5>
+      <Item6 Name="MACOS64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../Simba"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
@@ -201,12 +239,12 @@
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
-      </Item5>
-      <Item6 Name="AARCH64">
+      </Item6>
+      <Item7 Name="MACOS-AARCH64">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="../Simba-AArch64"/>
+            <Filename Value="../Simba"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
@@ -221,7 +259,7 @@
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <TargetCPU Value="aarch64"/>
-            <TargetOS Value="linux"/>
+            <TargetOS Value="darwin"/>
             <Optimizations>
               <OptimizationLevel Value="3"/>
             </Optimizations>
@@ -239,12 +277,17 @@
               <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dLape_CDECL"/>
+            <ExecuteAfter>
+              <Command Value="macosbundle/make.sh"/>
+              <ShowAllMessages Value="True"/>
+              <CompileReasons Run="False"/>
+            </ExecuteAfter>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
-      </Item6>
+      </Item7>
       <SharedMatrixOptions Count="1">
-        <Item1 ID="760724751738" Modes="DARWIN64" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
+        <Item1 ID="760724751738" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>
@@ -897,6 +940,7 @@
         <Filename Value="forms/simba.settingsform_backup.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaBackupFrame"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
       </Unit139>
     </Units>

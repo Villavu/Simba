@@ -40,20 +40,20 @@ jobs:
           mkdir binaries
           unzip '*.zip' -d binaries  
 
-      - name: Get current date
-        id: date
-        run: echo "::set-output name=date::$(date +'%d-%m-%Y')"
-
       - name: Push
-        uses: cpina/github-action-push-to-another-repository@v1.5
-        env:
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-        with:
-          source-directory: 'binaries'
-          target-directory: ${{ steps.date.outputs.date }} ${{ github.event.workflow_run.head_sha }}
-          destination-github-username: 'villavu'
-          destination-repository-name: 'simba-build-archive'
-          commit-message: ${{ github.event.workflow_run.head_sha }}
-          user-email: 'villavu-bot'
-          user-name: 'villavu-bot'
-          target-branch: main
+        shell: bash     
+        run: |
+          date_formatted=$(date +'%d-%m-%Y')
+
+          git config --global http.postBuffer 500M
+          git config --global user.email "villavu-bot"
+          git config --global user.name "villavu-bot"
+
+          git clone https://${{ secrets.API_TOKEN_GITHUB }}@github.com/villavu/simba-build-archive
+
+          cd simba-build-archive
+          mv ../binaries "$date_formatted ${{ github.event.workflow_run.head_sha }}"
+
+          git add .
+          git commit --message "${{ github.event.workflow_run.head_sha }}"
+          git push https://${{ secrets.API_TOKEN_GITHUB }}@github.com/villavu/simba-build-archive
