@@ -575,7 +575,7 @@ end;
 
 procedure TSimbaShapeBoxShape_Poly.FromStr(Str: String);
 var
-  Elements, Element: TStringArray;
+  Elements: TStringArray;
   I: Integer;
 begin
   Elements := Str.BetweenAll('[', ']');

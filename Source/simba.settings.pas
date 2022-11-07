@@ -31,7 +31,6 @@ type
     procedure WriteValue(INI: TINIFile); virtual; abstract;
 
     function GetName: String;
-    function GetValue: Variant;
     procedure SetValue(AValue: Variant);
   public
     constructor Create(ASettings: TSimbaSettings; ASection, AName: String; DefaultValue: Variant);
@@ -39,7 +38,7 @@ type
     procedure SetDefault;
 
     property DefaultValue: Variant read FDefaultValue;
-    property Value: Variant read GetValue write SetValue;
+    property Value: Variant read FValue write SetValue;
     property Name: String read GetName;
   end;
 
@@ -81,7 +80,6 @@ type
     FChangeEventList: TMethodList;
     FList: TSettingList;
     FFirstLaunch: Boolean;
-    FLoaded: Boolean;
   public
     General: record
       ConsoleVisible: TSimbaSetting;
@@ -133,11 +131,9 @@ type
 
     property FirstLaunch: Boolean read FFirstLaunch;
 
-    class var FileName: String;
-    class constructor Create;
     class function GetINIFile: TINIFile;
-    class procedure SetSimpleSetting(Name, Value: String);
-    class function GetSimpleSetting(Name: String; DefValue: String = ''): String;
+    class procedure SetSimpleSetting(AName, Value: String);
+    class function GetSimpleSetting(AName: String; DefValue: String = ''): String;
 
     procedure Load;
     procedure Save;
@@ -151,14 +147,34 @@ type
     destructor Destroy; override;
   end;
 
-var
-  SimbaSettings: TSimbaSettings;
+function GetSimbaSettings: TSimbaSettings;
+function GetSimbaSettingsFileName: String;
+
+property SimbaSettings: TSimbaSettings read GetSimbaSettings;
+property SimbaSettingFileName: String read GetSimbaSettingsFileName;
 
 implementation
 
 uses
-  synedit,
-  simba.mufasatypes, simba.encoding, simba.files;
+  Forms, SynEdit,
+  simba.mufasatypes, simba.encoding, simba.files,
+  simba.ide_initialization;
+
+var
+  SimbaSettingsInstance: TSimbaSettings = nil;
+
+function GetSimbaSettings: TSimbaSettings;
+begin
+  if (SimbaSettingsInstance = nil) then
+    raise Exception.Create('Simba settings have not been created');
+
+  Result := SimbaSettingsInstance;
+end;
+
+function GetSimbaSettingsFileName: String;
+begin
+  Result := GetDataPath() + 'settings.ini';
+end;
 
 procedure TSimbaSetting_Integer.CheckValue(AValue: Variant);
 begin
@@ -229,13 +245,6 @@ begin
   Result := FSection + '.' + FName;
 end;
 
-function TSimbaSetting.GetValue: Variant;
-begin
-  FSettings.Load();
-
-  Result := FValue;
-end;
-
 procedure TSimbaSetting.SetValue(AValue: Variant);
 begin
   CheckValue(AValue);
@@ -294,12 +303,6 @@ var
   INI: TIniFile;
   Setting: TSimbaSetting;
 begin
-  if FLoaded then
-    Exit;
-  FLoaded := True;
-
-  DebugLn('[TSimbaSettings.Load]');
-
   INI := GetINIFile();
   try
     if (INI.ReadInteger('Settings', 'Version', 0) <> SETTINGS_VERSION) then
@@ -310,7 +313,7 @@ begin
       Exit;
     end;
 
-    if FileExists(FileName) then
+    if FileExists(SimbaSettingFileName) then
     begin
       FFirstLaunch := False;
 
@@ -332,11 +335,6 @@ var
   INI: TIniFile;
   Setting: TSimbaSetting;
 begin
-  if (not FLoaded) then
-    Exit;
-
-  DebugLn('[TSimbaSettings.Save]');
-
   INI := GetINIFile();
   INI.WriteInteger('Settings', 'Version', SETTINGS_VERSION);
 
@@ -351,25 +349,20 @@ begin
   INI.Free();
 end;
 
-class constructor TSimbaSettings.Create;
-begin
-  FileName := GetDataPath() + 'settings.ini';
-end;
-
 class function TSimbaSettings.GetINIFile: TINIFile;
 begin
-  Result := TIniFile.Create(FileName, [ifoWriteStringBoolean]);
+  Result := TIniFile.Create(SimbaSettingFileName, [ifoWriteStringBoolean]);
   Result.CacheUpdates := True;
   Result.SetBoolStringValues(True, ['True']);
   Result.SetBoolStringValues(False, ['False']);
 end;
 
-class procedure TSimbaSettings.SetSimpleSetting(Name, Value: String);
+class procedure TSimbaSettings.SetSimpleSetting(AName, Value: String);
 begin
   try
     with GetINIFile() do
     try
-      WriteString('Other', Name, Value);
+      WriteString('Other', AName, Value);
     finally
       Free();
     end;
@@ -377,14 +370,14 @@ begin
   end;
 end;
 
-class function TSimbaSettings.GetSimpleSetting(Name: String; DefValue: String): String;
+class function TSimbaSettings.GetSimpleSetting(AName: String; DefValue: String): String;
 begin
   Result := '';
 
   try
     with GetINIFile() do
     try
-      Result := ReadString('Other', Name, DefValue);
+      Result := ReadString('Other', AName, DefValue);
     finally
       Free();
     end;
@@ -459,12 +452,18 @@ begin
   inherited Destroy();
 end;
 
+procedure CreateSimbaSettings;
+begin
+  SimbaSettingsInstance := TSimbaSettings.Create();
+  SimbaSettingsInstance.Load();
+end;
+
 initialization
-  SimbaSettings := TSimbaSettings.Create();
+  SimbaIDEInitialization.RegisterMethodOnCreate(@CreateSimbaSettings, 'SimbaSettings');
 
 finalization
-  if (SimbaSettings <> nil) then
-    FreeAndNil(SimbaSettings);
+  if (SimbaSettingsInstance <> nil) then
+    FreeAndNil(SimbaSettingsInstance);
 
 end.
 

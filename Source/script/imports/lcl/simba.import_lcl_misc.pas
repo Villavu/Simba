@@ -23,7 +23,6 @@ type
   PProcess = ^TProcess;
   PProcessOptions = ^TProcessOptions;
   PProcessPriority = ^TProcessPriority;
-  PShowWindowOptions = ^TShowWindowOptions;
   PStartupOptions = ^TStartupOptions;
 
   PCustomFloatSpinEdit = ^TCustomFloatSpinEdit;

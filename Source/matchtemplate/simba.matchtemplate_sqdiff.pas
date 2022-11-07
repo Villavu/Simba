@@ -16,7 +16,7 @@ unit simba.matchtemplate_sqdiff;
 interface
 
 uses
-  classes, sysutils, math,
+  classes, sysutils,
   simba.mufasatypes, simba.matchtemplate, simba.matchtemplate_matrix, simba.matchtemplate_helpers;
 
 function MatchTemplateMask_SQDIFF_CreateCache(Image, Template: TIntegerMatrix): TMatchTemplateCacheBase;

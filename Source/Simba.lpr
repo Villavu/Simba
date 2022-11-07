@@ -14,10 +14,10 @@ uses
   simba.settings, simba.main, simba.aboutform, simba.debugimageform,
   simba.bitmaptostringform, simba.functionlistform, simba.scripttabsform,
   simba.outputform, simba.colorpickerhistoryform, simba.filebrowserform,
-  simba.notesform, simba.settingsform, simba.associate,
-  simba.openexampleform, simba.scriptthread,
-  simba.package_form, simba.mufasatypes, simba.shapeboxform, simba.windowsdarktheme,
-  simba.compiler_dump, simba.plugin_dump;
+  simba.notesform, simba.settingsform, simba.associate, simba.openexampleform,
+  simba.scriptthread, simba.package_form, simba.mufasatypes, simba.shapeboxform,
+  simba.windowsdarktheme, simba.compiler_dump, simba.plugin_dump,
+  simba.ide_analytics, simba.ide_codetools_setup;
 
 type
   TApplicationHelper = class helper for TApplication

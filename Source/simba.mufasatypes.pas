@@ -201,6 +201,8 @@ function Threaded(Method: TNestedProc): TThread; overload;
 function Threaded(Method: TProc): TThread; overload;
 procedure Threaded(Methods: TProcArray; Interval: Integer = 0); overload;
 
+procedure ThreadedAndForget(Method: TNestedProc);
+
 implementation
 
 uses
@@ -410,11 +412,17 @@ type
     FProc: TProc;
     FNestedProc: TNestedProc;
 
+    procedure DoTerminated(Sender: TObject);
     procedure Execute; override;
   public
-    constructor Create(Proc: TNestedProc); reintroduce;
-    constructor Create(Proc: TProc); reintroduce;
+    constructor Create(Proc: TNestedProc; Forget: Boolean); reintroduce;
+    constructor Create(Proc: TProc; Forget: Boolean); reintroduce;
   end;
+
+procedure TThreaded.DoTerminated(Sender: TObject);
+begin
+  Flush(Output);
+end;
 
 procedure TThreaded.Execute;
 begin
@@ -422,28 +430,40 @@ begin
   if Assigned(FProc)       then FProc();
 end;
 
-constructor TThreaded.Create(Proc: TNestedProc);
+constructor TThreaded.Create(Proc: TNestedProc; Forget: Boolean);
 begin
   inherited Create(False, 512*512);
+
+  if Forget then
+  begin
+    FreeOnTerminate := True;
+    OnTerminate := @DoTerminated;
+  end;
 
   FNestedProc := Proc;
 end;
 
-constructor TThreaded.Create(Proc: TProc);
+constructor TThreaded.Create(Proc: TProc; Forget: Boolean);
 begin
   inherited Create(False, 512*512);
+
+  if Forget then
+  begin
+    FreeOnTerminate := True;
+    OnTerminate := @DoTerminated;
+  end;
 
   FProc := Proc;
 end;
 
 function Threaded(Method: TNestedProc): TThread;
 begin
-  Result := TThreaded.Create(Method);
+  Result := TThreaded.Create(Method, False);
 end;
 
 function Threaded(Method: TProc): TThread;
 begin
-  Result := TThreaded.Create(Method)
+  Result := TThreaded.Create(Method, False);
 end;
 
 procedure Threaded(Methods: TProcArray; Interval: Integer);
@@ -454,7 +474,7 @@ begin
   SetLength(Threads, Length(Methods));
   for I := 0 to High(Threads) do
   begin
-    Threads[I] := TThreaded.Create(Methods[I]);
+    Threads[I] := TThreaded.Create(Methods[I], False);
     if (Interval > 0) then
       Sleep(Interval);
   end;
@@ -464,6 +484,11 @@ begin
     Threads[I].WaitFor();
     Threads[I].Free();
   end;
+end;
+
+procedure ThreadedAndForget(Method: TNestedProc);
+begin
+  TThreaded.Create(Method, True);
 end;
 
 initialization

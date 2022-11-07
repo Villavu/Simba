@@ -18,7 +18,15 @@ type
   TSimbaFunctionListForm = class(TForm);
 
   TSimbaFunctionListStaticSection = class(TObject)
+  protected
+    FLoaded: TSimpleLock;
+
+    function GetLoaded: Boolean;
+    procedure SetLoaded(Value: Boolean);
   public
+    property Loaded: Boolean read GetLoaded write SetLoaded;
+
+    function Added(FunctionList: TSimbaFunctionList): Boolean; virtual; abstract;
     procedure Add(FunctionList: TSimbaFunctionList); virtual; abstract;
   end;
 
@@ -37,12 +45,6 @@ type
     procedure DoTreeViewDoubleClick(Sender: TObject);
     procedure DoTreeViewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure DoAfterFilter(Sender: TObject);
-  public
-  class var
-    StaticSections: TList;
-
-    class constructor Create;
-    class destructor Destroy;
   public
     IncludesHash: String;
     ExpandedState: TTreeNodeExpandedState;
@@ -72,8 +74,20 @@ implementation
 {$R *.lfm}
 
 uses
-  lazfileutils, LCLIntf,
   simba.main, simba.functionlist_nodes;
+
+procedure TSimbaFunctionListStaticSection.SetLoaded(Value: Boolean);
+begin
+  if Value then
+    FLoaded.IncLock()
+  else
+    FLoaded.DecLock();
+end;
+
+function TSimbaFunctionListStaticSection.GetLoaded: Boolean;
+begin
+  Result := FLoaded.IsLocked();
+end;
 
 procedure TSimbaFunctionList.DoTreeViewSelectionChanged(Sender: TObject);
 var
@@ -124,24 +138,6 @@ begin
   for I := 0 to TreeView.Items.TopLvlCount - 1 do
     if (FTreeView.Items.TopLvlItems[I] <> FIncludesNode) and (FTreeView.Items.TopLvlItems[I] <> FPluginsNode) then
       FTreeView.Items.TopLvlItems[I].Expanded := True;
-end;
-
-class constructor TSimbaFunctionList.Create;
-begin
-  StaticSections := TList.Create();
-end;
-
-class destructor TSimbaFunctionList.Destroy;
-var
-  I: Integer;
-begin
-  if (StaticSections <> nil) then
-  begin
-    for I := 0 to StaticSections.Count - 1 do
-      TSimbaFunctionListStaticSection(StaticSections[I]).Free();
-
-    FreeAndNil(StaticSections);
-  end;
 end;
 
 function TSimbaFunctionList.AddNode(ParentNode: TTreeNode; Node: TTreeNode): TTreeNode;
@@ -201,8 +197,6 @@ begin
 end;
 
 constructor TSimbaFunctionList.Create;
-var
-  I: Integer;
 begin
   inherited Create(nil);
 
@@ -244,9 +238,6 @@ begin
   FIncludesNode := FTreeView.Items.Add(nil, 'Includes');
   FIncludesNode.ImageIndex := IMAGE_DIRECTORY;
   FIncludesNode.SelectedIndex := IMAGE_DIRECTORY;
-
-  for I := 0 to StaticSections.Count - 1 do
-    TSimbaFunctionListStaticSection(StaticSections[I]).Add(Self);
 
   IncRef();
 end;
