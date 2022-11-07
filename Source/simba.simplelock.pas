@@ -51,7 +51,7 @@ end;
 
 procedure TSimpleLock.DecLock;
 begin
- InterlockedDecrement(FLock);
+  InterlockedDecrement(FLock);
 end;
 
 function TSimpleLock.IsLocked: Boolean;

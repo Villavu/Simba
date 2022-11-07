@@ -34,10 +34,13 @@ type
 
     function Sort(A, B: TTreeNode): Integer;
   public
-    constructor Create(Includes: TCodeInsight_IncludeArray);
-
+    function Added(FunctionList: TSimbaFunctionList): Boolean; override;
+    procedure Load(Includes: TCodeInsight_IncludeArray);
     procedure Add(FunctionList: TSimbaFunctionList); override;
   end;
+
+var
+  SimbaFunctionList_SimbaSection: TSimbaFunctionList_SimbaSection;
 
 implementation
 
@@ -80,12 +83,15 @@ begin
   end;
 end;
 
-constructor TSimbaFunctionList_SimbaSection.Create(Includes: TCodeInsight_IncludeArray);
+function TSimbaFunctionList_SimbaSection.Added(FunctionList: TSimbaFunctionList): Boolean;
+begin
+  Result := FunctionList.TreeView.Items.FindTopLvlNode('Simba') <> nil;
+end;
+
+procedure TSimbaFunctionList_SimbaSection.Load(Includes: TCodeInsight_IncludeArray);
 var
   Include: TCodeInsight_Include;
 begin
-  inherited Create();
-
   for Include in Includes do
   begin
     if (Include.Lexer = nil) or (Include.Lexer.FileName.StartsWith('!')) then
@@ -93,6 +99,8 @@ begin
 
     FSections := FSections + [Include];
   end;
+
+  Loaded := True;
 end;
 
 procedure TSimbaFunctionList_SimbaSection.Add(FunctionList: TSimbaFunctionList);
@@ -125,6 +133,13 @@ begin
   SimbaNode.AlphaSort();
   SimbaNode.Expanded := True;
 end;
+
+initialization
+  SimbaFunctionList_SimbaSection := TSimbaFunctionList_SimbaSection.Create();
+
+finalization
+  if (SimbaFunctionList_SimbaSection <> nil) then
+    FreeAndNil(SimbaFunctionList_SimbaSection);
 
 end.
 

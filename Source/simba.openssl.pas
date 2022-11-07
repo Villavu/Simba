@@ -24,7 +24,7 @@ implementation
 
 uses
   lcltype,
-  simba.mufasatypes, simba.gz, simba.settings, simba.files;
+  simba.mufasatypes, simba.gz, simba.settings, simba.files, simba.ide_initialization;
 
 function IsFileHash(FileName: String; Hash: String): Boolean;
 begin
@@ -88,6 +88,7 @@ end;
 
 procedure ExtractOpenSSL;
 begin
+  if SimbaSettings.General.OpenSSLExtractOnLaunch.Value then
   try
     EnumResourceNames(HINSTANCE, RT_RCDATA, @ExtractLibCrypto, 0);
     EnumResourceNames(HINSTANCE, RT_RCDATA, @ExtractLibSSL, 0);
@@ -96,6 +97,9 @@ begin
       DebugLn('Exception while extracting OpenSSL: ' + E.Message);
   end;
 end;
+
+initialization
+  SimbaIDEInitialization.RegisterMethodOnAfterCreate(@ExtractOpenSSL, 'OpenSSL');
 
 end.
 

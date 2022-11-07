@@ -12,7 +12,7 @@ interface
 uses
   classes, sysutils, fileutil, anchordockpanel, forms, controls, graphics, dialogs,
   stdctrls, menus, comctrls, extctrls, buttons, imglist,
-  simba.settings, simba.mufasatypes, simba.mouselogger, simba.areaselector;
+  simba.settings, simba.mufasatypes, simba.mouselogger, simba.areaselector, simba.scriptbackup;
 
 const
   IMAGE_COMPILE             = 0;
@@ -234,8 +234,6 @@ type
     FAreaSelector: TSimbaAreaSelector;
     FAreaSelection: TBox;
 
-    procedure SetupAnalyticsAndOpenSSL;
-    procedure SetupCodeTools;
     procedure SetupDocking;
     procedure SetupCompleted;
 
@@ -293,16 +291,16 @@ uses
   simba.outputform, simba.filebrowserform, simba.notesform, simba.settingsform,
   simba.functionlistform, simba.scripttabsform,
 
-  simba.package, simba.package_installer, simba.associate,
+  simba.package, simba.package_installer, simba.associate, simba.ide_initialization,
   simba.functionlist_simbasection, simba.functionlist_updater,
 
-  simba.codeparser, simba.codeinsight, simba.ci_includecache,
+  simba.codeparser, simba.codeinsight,
   simba.scripttab, simba.editor,
   simba.aca, simba.dtmeditor,
 
   simba.windowselector, simba.colorpicker,
 
-  simba.openssl, simba.files, simba.process, simba.httpclient,
+  simba.openssl, simba.files, simba.process,
   simba.dockinghelpers, simba.datetime, simba.nativeinterface,
   simba.scriptformatter, simba.windowhandle;
 
@@ -586,68 +584,6 @@ begin
   Close();
 end;
 
-procedure TSimbaForm.SetupAnalyticsAndOpenSSL;
-begin
-  try
-    if SimbaSettings.General.OpenSSLExtractOnLaunch.Value then
-      ExtractOpenSSL();
-  except
-    on E: Exception do
-      DebugLn('[TSimbaForm.SetupAnalyticsAndOpenSSL]: ' + E.ToString());
-  end;
-
-  try
-    if Application.HasOption('noanalytics') or (SIMBA_COMMIT = '') then // SIMBA_COMMIT = '' is a local build. Don't log.
-      Exit;
-
-    with TSimbaHTTPClient.Create() do
-    try
-      // Simple HTTP request - nothing extra is sent.
-      // Only used for logging very basic (ide) launch count.
-      Get(SIMBA_ANALYTICS_URL, []);
-    finally
-      Free();
-    end;
-  except
-    on E: Exception do
-      DebugLn('[TSimbaForm.SetupAnalyticsAndOpenSSL]: ' + E.ToString());
-  end;
-end;
-
-procedure TSimbaForm.SetupCodeTools;
-var
-  List: TStringList;
-  I: Integer;
-  Parser: TCodeInsight_Include;
-begin
-  List := nil;
-
-  try
-    List := SimbaProcess.RunDump(HashFile(Application.ExeName), ['--dumpcompiler']);
-
-    for I := 0 to List.Count - 1 do
-    begin
-      if (List.Names[I] = '') then
-        Continue;
-
-      Parser := TCodeInsight_Include.Create();
-      Parser.Run(List.ValueFromIndex[I], List.Names[I]);
-
-      TCodeInsight.AddBaseInclude(Parser);
-    end;
-
-    TSimbaFunctionList.StaticSections.Add(
-      TSimbaFunctionList_SimbaSection.Create(TCodeInsight.BaseIncludes)
-    );
-  except
-    on E: Exception do
-      DebugLn('[TSimbaForm.SetupCodeTools]: ' + E.ToString());
-  end;
-
-  if (List <> nil) then
-    List.Free();
-end;
-
 procedure TSimbaForm.Setup(Data: PtrInt);
 begin
   SimbaScriptTabsForm.OnEditorLoaded := @HandleEditorLoaded;
@@ -674,6 +610,8 @@ begin
   FMouseLogger := TSimbaMouseLogger.Create();
   FMouseLogger.OnChange := @DoMouseLoggerChange;
   FMouseLogger.Hotkey := VK_F1;
+
+  SimbaIDEInitialization.CallOnAfterCreateMethods();
 end;
 
 procedure TSimbaForm.DoPackageMenuClick(Sender: TObject);
@@ -832,7 +770,7 @@ end;
 
 procedure TSimbaForm.FormCreate(Sender: TObject);
 begin
-  CreateBaseDirectories();
+  SimbaIDEInitialization.CallOnCreateMethods();
 
   Application.CaptureExceptions := True;
   Application.OnException := @SimbaForm.HandleException;
@@ -844,8 +782,6 @@ begin
 
   FRecentFiles := TStringList.Create();
   FRecentFiles.Text := SimbaSettings.General.RecentFiles.Value;
-
-  Threaded([@SetupAnalyticsAndOpenSSL, @SetupCodeTools]);
 end;
 
 procedure TSimbaForm.FormDestroy(Sender: TObject);

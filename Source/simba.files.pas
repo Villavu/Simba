@@ -34,10 +34,9 @@ uses
   function GetScriptPath: String;
   function GetPackagePath: String;
   function GetOldPackagePath: String;
+  function GetBackupsPath: String;
   function GetDumpPath: String;
   function GetScreenshotPath: String;
-
-  procedure CreateBaseDirectories;
 
   function ReadINI(const Section, KeyName: string; FileName: string): string;
   procedure DeleteINI(const Section, KeyName : string; FileName : string);
@@ -46,7 +45,8 @@ uses
 implementation
 
 uses
-  forms, inifiles, fileutil, zipper, sha1;
+  forms, inifiles, fileutil, zipper, sha1,
+  simba.ide_initialization;
 
 function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
 var
@@ -305,6 +305,11 @@ begin
   Result := GetDataPath() + 'oldpackages' + DirectorySeparator;
 end;
 
+function GetBackupsPath: String;
+begin
+  Result := GetDataPath() + 'backups' + DirectorySeparator;
+end;
+
 function GetDumpPath: String;
 begin
   Result := GetDataPath() + 'dumps' + DirectorySeparator;
@@ -319,7 +324,7 @@ procedure CreateBaseDirectories;
 var
   Directory: String;
 begin
-  for Directory in [GetScreenshotPath(), GetDumpPath(), GetPackagePath(), GetIncludePath(), GetScriptPath(), GetPluginPath(), GetPluginCopyPath(), GetOldPackagePath()] do
+  for Directory in [GetScreenshotPath(), GetDumpPath(), GetPackagePath(), GetIncludePath(), GetScriptPath(), GetPluginPath(), GetPluginCopyPath(), GetOldPackagePath(), GetBackupsPath()] do
   begin
     if DirectoryExists(Directory) then
       Continue;
@@ -360,6 +365,9 @@ begin
 	  Free();
   end;
 end;
+
+initialization
+  SimbaIDEInitialization.RegisterMethodOnCreate(@CreateBaseDirectories, 'Base Directories');
 
 end.
 

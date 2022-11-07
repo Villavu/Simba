@@ -36,7 +36,7 @@ var
 implementation
 
 uses
-  simba.scripttabsform, simba.scripttab;
+  simba.scripttabsform, simba.scripttab, simba.functionlist_simbasection;
 
 constructor TSimbaFunctionListUpdater.Create;
 begin
@@ -55,23 +55,23 @@ procedure TSimbaFunctionListUpdater.BeginUpdate;
 var
   Tab: TSimbaScriptTab;
 begin
-  if (SimbaScriptTabsForm = nil) then
+  if (SimbaScriptTabsForm = nil) or (SimbaScriptTabsForm.CurrentTab = nil) then
     Exit;
+
   Tab := SimbaScriptTabsForm.CurrentTab;
-  if (Tab = nil) then
-    Exit;
+  if (not SimbaFunctionList_SimbaSection.Added(Tab.FunctionList)) and SimbaFunctionList_SimbaSection.Loaded then
+    SimbaFunctionList_SimbaSection.Add(Tab.FunctionList);
 
-  // No changes
-  if (Tab.FunctionList = FFunctionList) and (Tab.Editor.ChangeStamp = FChangeStamp) then
-    Exit;
+  if (Tab.FunctionList <> FFunctionList) or (Tab.Editor.ChangeStamp <> FChangeStamp) then // Changes happened: Tab changed or editor modified
+  begin
+    FFunctionList := Tab.FunctionList;
+    FFunctionList.IncRef();
+    FFunctionList.TreeView.BeginUpdate();
+    FFunctionList.ExpandedState.CreateChildNodes(FFunctionList.ScriptNode);
 
-  FFunctionList := Tab.FunctionList;
-  FFunctionList.IncRef();
-  FFunctionList.TreeView.BeginUpdate();
-  FFunctionList.ExpandedState.CreateChildNodes(FFunctionList.ScriptNode);
-
-  FChangeStamp := Tab.Editor.ChangeStamp;
-  FParser      := Tab.GetParser();
+    FChangeStamp := Tab.Editor.ChangeStamp;
+    FParser      := Tab.GetParser();
+  end;
 end;
 
 procedure TSimbaFunctionListUpdater.EndUpdate;

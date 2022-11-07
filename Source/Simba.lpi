@@ -267,7 +267,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="135">
+    <Units Count="139">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -877,6 +877,22 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
       </Unit134>
+      <Unit135>
+        <Filename Value="simba.scriptbackup.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit135>
+      <Unit136>
+        <Filename Value="simba.ide_initialization.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit136>
+      <Unit137>
+        <Filename Value="simba.ide_analytics.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit137>
+      <Unit138>
+        <Filename Value="codetools/simba.ide_codetools_setup.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit138>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
