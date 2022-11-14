@@ -1,7 +1,7 @@
 object SimbaScriptTabsForm: TSimbaScriptTabsForm
-  Left = 1131
+  Left = 1694
   Height = 262
-  Top = 372
+  Top = 519
   Width = 659
   AllowDropFiles = True
   Caption = 'Editor'
@@ -24,7 +24,6 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
     BorderSpacing.Right = 4
     BorderSpacing.Bottom = 4
     Images = SimbaForm.Images
-    ParentFont = False
     PopupMenu = TabPopupMenu
     TabOrder = 0
     OnChange = DoOnTabChange

@@ -6,10 +6,9 @@ object EditorGeneralFrame: TEditorGeneralFrame
   ClientHeight = 466
   ClientWidth = 641
   DesignTimePPI = 120
-  ParentFont = False
   TabOrder = 0
-  DesignLeft = 401
-  DesignTop = 504
+  DesignLeft = 1081
+  DesignTop = 508
   object CaretPastEOLCheckBox: TCheckBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner

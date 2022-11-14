@@ -478,6 +478,7 @@ end;
 
 procedure TPackageInfoGrid.Measure;
 begin
+  BeginUpdate();
   with TBitmap.Create() do
   try
     Canvas.Font := Self.Font;
@@ -487,6 +488,7 @@ begin
   finally
     Free();
   end;
+  EndUpdate();
 
   Height := CellRect(ColCount - 1, RowCount - 1).Bottom;
 
@@ -779,6 +781,7 @@ begin
     {$ELSE}
     Canvas.Font.Name := SynDefaultFontName;
     {$ENDIF}
+    Canvas.Font.Size := Self.Font.Size;
 
     FFixedCharWidth := Canvas.TextWidth('i');
     FFixedCharHeight := Canvas.TextHeight('i');

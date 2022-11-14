@@ -440,7 +440,7 @@ begin
   Editor.AutoCompleteWidth := TSimbaSetting_Integer.Create(Self, 'Editor', 'AutoCompleteWidth', 400);
   Editor.AutoCompleteLines := TSimbaSetting_Integer.Create(Self, 'Editor', 'AutoCompleteLines', 8);
 
-  OutputBox.FontColor       := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'FontColor', clWhite);
+  OutputBox.FontColor       := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'FontColor', clBlack);
   OutputBox.Color           := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'Color', clWhite);
   OutputBox.FontSize        := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'FontSize', SynDefaultFontHeight);
   OutputBox.FontName        := TSimbaSetting_String.Create(Self, 'OutputBox', 'FontName', SynDefaultFontName);
