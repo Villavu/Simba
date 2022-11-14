@@ -8,7 +8,7 @@ object SimbaSettingsForm: TSimbaSettingsForm
   ClientWidth = 750
   DesignTimePPI = 120
   OnShow = FormShow
-  Position = poScreenCenter
+  Position = poMainFormCenter
   LCLVersion = '2.2.4.0'
   object TreeView: TTreeView
     Left = 0

@@ -94,6 +94,7 @@ begin
   SimbaGeneralFrame.CheckGroup1.Checked[1] := SimbaSettings.General.OpenSSLExtractOnLaunch.Value;
   SimbaGeneralFrame.CheckGroup1.Checked[2] := SimbaSettings.General.MacOSKeystrokes.Value;
 
+  EditorColorsFrame.Load();
   SimbaOutputBoxFrame.Load();
   SimbaBackupFrame.Load();
 end;
@@ -131,6 +132,7 @@ begin
   SimbaSettings.General.OpenSSLExtractOnLaunch.Value := SimbaGeneralFrame.CheckGroup1.Checked[1];
   SimbaSettings.General.MacOSKeystrokes.Value := SimbaGeneralFrame.CheckGroup1.Checked[2];
 
+  EditorColorsFrame.Save();
   SimbaOutputBoxFrame.Save();
   SimbaBackupFrame.Save();
 end;
@@ -156,8 +158,11 @@ var
 begin
   inherited Create(AOwner);
 
-  Width := Scale96ToScreen(800);
+  Width  := Scale96ToScreen(800);
   Height := Scale96ToScreen(600);
+
+  Constraints.MinWidth  := Round(Width * 0.75);
+  Constraints.MinHeight := Round(Height * 0.75);
 
   Node := TreeView.Items.Add(nil, 'Simba');
 

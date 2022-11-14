@@ -1,288 +1,339 @@
 object EditorColorsFrame: TEditorColorsFrame
   Left = 0
-  Height = 475
+  Height = 877
   Top = 0
-  Width = 634
-  ClientHeight = 475
-  ClientWidth = 634
+  Width = 1111
+  ClientHeight = 877
+  ClientWidth = 1111
+  DesignTimePPI = 120
+  ParentFont = False
   TabOrder = 0
-  DesignLeft = -1536
-  DesignTop = 456
+  DesignLeft = 2767
+  DesignTop = 287
   object Panel1: TPanel
     Left = 0
-    Height = 364
+    Height = 877
     Top = 0
-    Width = 634
-    Align = alTop
-    AutoSize = True
+    Width = 1111
+    Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 364
-    ClientWidth = 634
+    ClientHeight = 877
+    ClientWidth = 1111
     TabOrder = 0
-    object Panel3: TPanel
-      AnchorSideLeft.Control = BackgroundColorBox
-      AnchorSideTop.Control = Label2
-      AnchorSideRight.Control = ItalicCheckBox
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = BoldCheckBox
-      AnchorSideBottom.Side = asrBottom
-      Left = 210
-      Height = 249
-      Top = 105
-      Width = 290
-      Anchors = [akTop, akLeft, akRight, akBottom]
-      BevelOuter = bvNone
-      TabOrder = 8
-      Visible = False
+    object GroupBox1: TGroupBox
+      AnchorSideLeft.Control = Panel1
+      AnchorSideTop.Control = Panel1
+      Left = 0
+      Height = 227
+      Top = 5
+      Width = 192
+      BorderSpacing.Top = 5
+      Caption = 'Presets'
+      ClientHeight = 202
+      ClientWidth = 188
+      TabOrder = 0
+      object PresetListBox: TListBox
+        Left = 10
+        Height = 187
+        Top = 5
+        Width = 168
+        Align = alClient
+        BorderSpacing.Left = 10
+        BorderSpacing.Top = 5
+        BorderSpacing.Right = 10
+        BorderSpacing.Bottom = 10
+        Items.Strings = (
+          'Light'
+          'Dark'
+        )
+        ItemHeight = 20
+        OnSelectionChange = DoPresetChanged
+        Options = []
+        TabOrder = 0
+      end
     end
-    object Label1: TLabel
-      AnchorSideLeft.Control = TreeView
+    object GroupBox2: TGroupBox
+      AnchorSideLeft.Control = GroupBox1
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
+      AnchorSideRight.Control = Panel1
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = GroupBox1
       AnchorSideBottom.Side = asrBottom
-      Left = 210
-      Height = 20
+      Left = 202
+      Height = 227
       Top = 5
-      Width = 77
+      Width = 899
+      Anchors = [akTop, akLeft, akRight, akBottom]
       BorderSpacing.Left = 10
       BorderSpacing.Top = 5
-      Caption = 'Foreground'
-      Layout = tlCenter
-    end
-    object BackgroundColorBox: TColorListBox
-      AnchorSideLeft.Control = Label1
-      AnchorSideTop.Control = Label2
-      AnchorSideTop.Side = asrBottom
-      AnchorSideRight.Control = ItalicCheckBox
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Side = asrBottom
-      Left = 210
-      Height = 70
-      Top = 130
-      Width = 290
-      ColorRectWidth = 25
-      Style = [cbStandardColors, cbCustomColor, cbPrettyNames]
-      Anchors = [akTop, akLeft, akRight]
-      BorderSpacing.Top = 5
-      BorderSpacing.Bottom = 5
-      ItemHeight = 0
-      OnSelectionChange = BackgroundColorBoxSelectionChange
-      TabOrder = 0
-    end
-    object ForegoundColorBox: TColorListBox
-      AnchorSideLeft.Control = Label1
-      AnchorSideTop.Control = Label1
-      AnchorSideTop.Side = asrBottom
-      AnchorSideRight.Control = ItalicCheckBox
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = BackgroundColorBox
-      AnchorSideBottom.Side = asrBottom
-      Left = 210
-      Height = 70
-      Top = 30
-      Width = 290
-      ColorRectWidth = 25
-      Style = [cbStandardColors, cbCustomColor, cbPrettyNames]
-      Anchors = [akTop, akLeft, akRight]
-      BorderSpacing.Top = 5
-      ItemHeight = 0
-      OnSelectionChange = ForegoundColorBoxSelectionChange
+      BorderSpacing.Right = 10
+      Caption = 'Preview'
       TabOrder = 1
     end
-    object BoldCheckBox: TCheckBox
-      AnchorSideLeft.Control = Label1
-      AnchorSideTop.Control = Label3
+    object GroupBox3: TGroupBox
+      AnchorSideLeft.Control = Panel1
+      AnchorSideTop.Control = GroupBox1
       AnchorSideTop.Side = asrBottom
-      Left = 210
-      Height = 24
-      Top = 330
-      Width = 55
-      BorderSpacing.Top = 5
-      BorderSpacing.Bottom = 10
-      Caption = 'Bold'
-      OnMouseUp = FontStyleChangeHandler
-      TabOrder = 2
-    end
-    object ItalicCheckBox: TCheckBox
-      AnchorSideLeft.Control = UnderlineCheckBox
-      AnchorSideLeft.Side = asrBottom
-      AnchorSideTop.Control = BoldCheckBox
-      Left = 444
-      Height = 24
-      Top = 330
-      Width = 56
-      BorderSpacing.Left = 10
-      Caption = 'Italic'
-      OnMouseUp = FontStyleChangeHandler
-      TabOrder = 3
-    end
-    object UnderlineCheckBox: TCheckBox
-      AnchorSideLeft.Control = StrikeCheckBox
-      AnchorSideLeft.Side = asrBottom
-      AnchorSideTop.Control = BoldCheckBox
-      Left = 346
-      Height = 24
-      Top = 330
-      Width = 88
-      BorderSpacing.Left = 10
-      Caption = 'Underline'
-      OnMouseUp = FontStyleChangeHandler
-      TabOrder = 4
-    end
-    object StrikeCheckBox: TCheckBox
-      AnchorSideLeft.Control = BoldCheckBox
-      AnchorSideLeft.Side = asrBottom
-      AnchorSideTop.Control = BoldCheckBox
-      Left = 275
-      Height = 24
-      Top = 330
-      Width = 61
-      BorderSpacing.Left = 10
-      Caption = 'Strike'
-      OnMouseUp = FontStyleChangeHandler
-      TabOrder = 5
-    end
-    object Label3: TLabel
-      AnchorSideLeft.Control = Label1
-      AnchorSideTop.Control = FrameColorBox
-      AnchorSideTop.Side = asrBottom
-      Left = 210
-      Height = 20
-      Top = 305
-      Width = 71
-      Caption = 'Font Styles'
-    end
-    object TreeView: TTreeView
-      Left = 0
-      Height = 359
-      Top = 0
-      Width = 200
-      Align = alLeft
-      AutoExpand = True
-      BorderSpacing.Bottom = 5
-      ReadOnly = True
-      ScrollBars = ssAutoBoth
-      TabOrder = 6
-      OnSelectionChanged = TreeViewSelectionChanged
-      Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
-    end
-    object SaveAsButton: TButton
       AnchorSideRight.Control = Panel1
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = Panel1
       AnchorSideBottom.Side = asrBottom
-      Left = 503
-      Height = 30
-      Top = 329
-      Width = 131
-      Anchors = [akRight, akBottom]
+      Left = 0
+      Height = 635
+      Top = 242
+      Width = 1106
+      Anchors = [akTop, akLeft, akRight, akBottom]
       AutoSize = True
-      BorderSpacing.Top = 5
-      BorderSpacing.Bottom = 5
-      Caption = 'Save And Apply'
-      OnClick = SaveAsButtonClick
-      TabOrder = 7
+      BorderSpacing.Top = 10
+      BorderSpacing.Right = 5
+      Caption = 'Customize'
+      ClientHeight = 610
+      ClientWidth = 1102
+      TabOrder = 2
+      object TreeView: TTreeView
+        AnchorSideLeft.Control = GroupBox3
+        AnchorSideTop.Control = GroupBox3
+        AnchorSideBottom.Control = GroupBox3
+        AnchorSideBottom.Side = asrBottom
+        Left = 10
+        Height = 595
+        Top = 5
+        Width = 300
+        Align = alCustom
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        AutoExpand = True
+        BorderSpacing.Left = 10
+        BorderSpacing.Top = 5
+        BorderSpacing.Bottom = 10
+        Constraints.MaxWidth = 315
+        Constraints.MinWidth = 200
+        ReadOnly = True
+        ScrollBars = ssAutoBoth
+        TabOrder = 0
+        OnSelectionChanged = TreeViewSelectionChanged
+        Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
+      end
+      object BoldCheckBox: TCheckBox
+        AnchorSideLeft.Control = LabelFontStyles
+        AnchorSideTop.Control = LabelFontStyles
+        AnchorSideTop.Side = asrBottom
+        AnchorSideBottom.Control = LoadButton
+        Left = 320
+        Height = 24
+        Top = 481
+        Width = 55
+        Anchors = [akLeft, akBottom]
+        BorderSpacing.Top = 5
+        BorderSpacing.Bottom = 30
+        Caption = 'Bold'
+        OnMouseUp = FontStyleChangeHandler
+        TabOrder = 1
+      end
+      object StrikeCheckBox: TCheckBox
+        AnchorSideLeft.Control = BoldCheckBox
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = BoldCheckBox
+        Left = 387
+        Height = 24
+        Top = 481
+        Width = 61
+        BorderSpacing.Left = 12
+        Caption = 'Strike'
+        OnMouseUp = FontStyleChangeHandler
+        TabOrder = 2
+      end
+      object UnderlineCheckBox: TCheckBox
+        AnchorSideLeft.Control = StrikeCheckBox
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = BoldCheckBox
+        Left = 460
+        Height = 24
+        Top = 481
+        Width = 88
+        BorderSpacing.Left = 12
+        Caption = 'Underline'
+        OnMouseUp = FontStyleChangeHandler
+        TabOrder = 3
+      end
+      object ItalicCheckBox: TCheckBox
+        AnchorSideLeft.Control = UnderlineCheckBox
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = BoldCheckBox
+        Left = 560
+        Height = 24
+        Top = 481
+        Width = 56
+        BorderSpacing.Left = 12
+        Caption = 'Italic'
+        OnMouseUp = FontStyleChangeHandler
+        TabOrder = 4
+      end
+      object LabelFontStyles: TLabel
+        AnchorSideLeft.Control = TreeView
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Side = asrBottom
+        AnchorSideBottom.Control = BoldCheckBox
+        Left = 320
+        Height = 20
+        Top = 456
+        Width = 71
+        Anchors = [akLeft, akBottom]
+        BorderSpacing.Left = 10
+        BorderSpacing.Top = 5
+        Caption = 'Font Styles'
+        ParentColor = False
+      end
+      object SaveAsButton: TButton
+        AnchorSideLeft.Control = LoadButton
+        AnchorSideTop.Control = GroupBox3
+        AnchorSideRight.Control = LoadButton
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = TreeView
+        AnchorSideBottom.Side = asrBottom
+        Left = 320
+        Height = 30
+        Top = 570
+        Width = 124
+        Anchors = [akLeft, akRight, akBottom]
+        AutoSize = True
+        Caption = 'Save To File'
+        OnClick = SaveAsButtonClick
+        TabOrder = 5
+      end
+      object LoadButton: TButton
+        AnchorSideLeft.Control = TreeView
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = SaveAsButton
+        Left = 320
+        Height = 30
+        Top = 535
+        Width = 124
+        Anchors = [akLeft, akBottom]
+        AutoSize = True
+        BorderSpacing.Left = 10
+        BorderSpacing.Bottom = 5
+        Caption = 'Load From File'
+        OnClick = LoadButtonClick
+        TabOrder = 6
+      end
+      object Panel2: TPanel
+        AnchorSideLeft.Control = TreeView
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = GroupBox3
+        AnchorSideRight.Control = GroupBox3
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = LabelFontStyles
+        Left = 315
+        Height = 446
+        Top = 5
+        Width = 777
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        BorderSpacing.Left = 5
+        BorderSpacing.Top = 5
+        BorderSpacing.Right = 10
+        BorderSpacing.Bottom = 5
+        BevelOuter = bvNone
+        ClientHeight = 446
+        ClientWidth = 777
+        TabOrder = 7
+        OnResize = Panel2Resize
+        object ForegoundColorBox: TColorListBox
+          AnchorSideLeft.Control = LabelForeground
+          AnchorSideTop.Control = LabelForeground
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = LabelBackground
+          AnchorSideBottom.Control = Panel2
+          AnchorSideBottom.Side = asrBottom
+          Left = 5
+          Height = 424
+          Top = 22
+          Width = 202
+          ColorRectWidth = 31
+          Style = [cbStandardColors, cbCustomColor, cbPrettyNames]
+          Anchors = [akTop, akLeft, akBottom]
+          BorderSpacing.Top = 2
+          BorderSpacing.Right = 10
+          ItemHeight = 0
+          OnSelectionChange = ForegoundColorBoxSelectionChange
+          TabOrder = 0
+        end
+        object LabelForeground: TLabel
+          AnchorSideLeft.Control = Panel2
+          AnchorSideTop.Control = Panel2
+          Left = 5
+          Height = 20
+          Top = 0
+          Width = 77
+          BorderSpacing.Left = 5
+          Caption = 'Foreground'
+          Layout = tlCenter
+          ParentColor = False
+        end
+        object LabelBackground: TLabel
+          AnchorSideLeft.Control = BackgroundColorBox
+          AnchorSideTop.Control = Panel2
+          Left = 217
+          Height = 20
+          Top = 0
+          Width = 79
+          Caption = 'Background'
+          ParentColor = False
+        end
+        object BackgroundColorBox: TColorListBox
+          AnchorSideLeft.Control = ForegoundColorBox
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Control = LabelBackground
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = FrameColorBox
+          AnchorSideBottom.Control = Panel2
+          AnchorSideBottom.Side = asrBottom
+          Left = 217
+          Height = 424
+          Top = 22
+          Width = 177
+          ColorRectWidth = 31
+          Style = [cbStandardColors, cbCustomColor, cbPrettyNames]
+          Anchors = [akTop, akLeft, akBottom]
+          BorderSpacing.Left = 5
+          BorderSpacing.Top = 2
+          ItemHeight = 0
+          OnSelectionChange = BackgroundColorBoxSelectionChange
+          TabOrder = 1
+        end
+        object FrameColorBox: TColorListBox
+          AnchorSideLeft.Control = BackgroundColorBox
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Control = LabelFrame
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Side = asrBottom
+          AnchorSideBottom.Control = Panel2
+          AnchorSideBottom.Side = asrBottom
+          Left = 399
+          Height = 424
+          Top = 22
+          Width = 200
+          ColorRectWidth = 31
+          Style = [cbStandardColors, cbCustomColor, cbPrettyNames]
+          Anchors = [akTop, akLeft, akBottom]
+          BorderSpacing.Left = 5
+          BorderSpacing.Top = 2
+          ItemHeight = 0
+          OnSelectionChange = FrameColorBoxSelectionChange
+          TabOrder = 2
+        end
+        object LabelFrame: TLabel
+          AnchorSideLeft.Control = FrameColorBox
+          AnchorSideTop.Control = Panel2
+          Left = 399
+          Height = 20
+          Top = 0
+          Width = 41
+          Caption = 'Frame'
+          ParentColor = False
+        end
+      end
     end
-    object Label2: TLabel
-      AnchorSideLeft.Control = Label1
-      AnchorSideTop.Control = ForegoundColorBox
-      AnchorSideTop.Side = asrBottom
-      AnchorSideBottom.Side = asrBottom
-      Left = 210
-      Height = 20
-      Top = 105
-      Width = 79
-      BorderSpacing.Top = 5
-      Caption = 'Background'
-      Layout = tlCenter
-    end
-    object LoadButton: TButton
-      AnchorSideLeft.Control = SaveAsButton
-      AnchorSideRight.Control = SaveAsButton
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = SaveAsButton
-      Left = 503
-      Height = 30
-      Top = 294
-      Width = 131
-      Anchors = [akLeft, akRight, akBottom]
-      AutoSize = True
-      Caption = 'Load'
-      OnClick = LoadButtonClick
-      TabOrder = 9
-    end
-    object ResetButton: TButton
-      AnchorSideLeft.Control = SaveAsButton
-      AnchorSideTop.Control = Panel1
-      AnchorSideRight.Control = SaveAsButton
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = LoadButton
-      Left = 503
-      Height = 30
-      Top = 5
-      Width = 131
-      Anchors = [akTop, akLeft, akRight]
-      AutoSize = True
-      BorderSpacing.Top = 5
-      BorderSpacing.Bottom = 5
-      Caption = 'Reset'
-      OnClick = ResetButtonClick
-      TabOrder = 10
-    end
-    object Label4: TLabel
-      AnchorSideLeft.Control = BackgroundColorBox
-      AnchorSideTop.Control = BackgroundColorBox
-      AnchorSideTop.Side = asrBottom
-      Left = 210
-      Height = 20
-      Top = 205
-      Width = 41
-      Caption = 'Frame'
-    end
-    object FrameColorBox: TColorListBox
-      AnchorSideLeft.Control = Label1
-      AnchorSideTop.Control = Label4
-      AnchorSideTop.Side = asrBottom
-      AnchorSideRight.Control = ItalicCheckBox
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Side = asrBottom
-      Left = 210
-      Height = 70
-      Top = 230
-      Width = 290
-      ColorRectWidth = 25
-      Style = [cbStandardColors, cbCustomColor, cbPrettyNames]
-      Anchors = [akTop, akLeft, akRight]
-      BorderSpacing.Top = 5
-      BorderSpacing.Bottom = 5
-      ItemHeight = 0
-      OnSelectionChange = FrameColorBoxSelectionChange
-      TabOrder = 11
-    end
-    object ResetDarkButton: TButton
-      AnchorSideLeft.Control = ResetButton
-      AnchorSideTop.Control = ResetButton
-      AnchorSideTop.Side = asrBottom
-      AnchorSideRight.Control = SaveAsButton
-      AnchorSideRight.Side = asrBottom
-      Left = 503
-      Height = 30
-      Top = 40
-      Width = 131
-      Anchors = [akTop, akLeft, akRight]
-      AutoSize = True
-      Caption = 'Reset (Dark)'
-      OnClick = ResetDarkButtonClick
-      TabOrder = 12
-    end
-  end
-  object EditorPanel: TPanel
-    Left = 0
-    Height = 111
-    Top = 364
-    Width = 634
-    Align = alClient
-    BevelOuter = bvNone
-    TabOrder = 1
   end
 end

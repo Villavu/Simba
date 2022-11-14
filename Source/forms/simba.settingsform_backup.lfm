@@ -6,10 +6,9 @@ object SimbaBackupFrame: TSimbaBackupFrame
   ClientHeight = 305
   ClientWidth = 668
   DesignTimePPI = 120
-  ParentFont = False
   TabOrder = 0
-  DesignLeft = 3592
-  DesignTop = 836
+  DesignLeft = 4331
+  DesignTop = 1010
   object BackupIntervalEdit: TSpinEdit
     AnchorSideLeft.Control = BackupIntervalLabel
     AnchorSideLeft.Side = asrBottom

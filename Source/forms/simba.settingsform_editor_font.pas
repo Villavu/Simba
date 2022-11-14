@@ -64,7 +64,6 @@ begin
   begin
     Parent := EditorPanel;
     Align := alClient;
-    BorderStyle := bsNone;
     ReadOnly := True;
     Text := 'program Font;                                           ' + LineEnding +
             '{  brace }                                              ' + LineEnding +

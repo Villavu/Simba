@@ -16,10 +16,14 @@ uses
 
 type
   TEditorColorsFrame = class(TFrame)
-    ResetDarkButton: TButton;
+    GroupBox1: TGroupBox;
+    GroupBox2: TGroupBox;
+    GroupBox3: TGroupBox;
+    LabelBackground: TLabel;
+    Panel2: TPanel;
+    PresetListBox: TListBox;
     FrameColorBox: TColorListBox;
-    Label4: TLabel;
-    ResetButton: TButton;
+    LabelFrame: TLabel;
     SaveAsButton: TButton;
     BoldCheckBox: TCheckBox;
     LoadButton: TButton;
@@ -28,17 +32,14 @@ type
     StrikeCheckBox: TCheckBox;
     BackgroundColorBox: TColorListBox;
     ForegoundColorBox: TColorListBox;
-    Label1: TLabel;
-    Label2: TLabel;
-    Label3: TLabel;
+    LabelForeground: TLabel;
+    LabelFontStyles: TLabel;
     Panel1: TPanel;
-    EditorPanel: TPanel;
-    Panel3: TPanel;
     TreeView: TTreeView;
 
-    procedure ResetDarkButtonClick(Sender: TObject);
+    procedure DoPresetChanged(Sender: TObject; User: boolean);
     procedure FrameColorBoxSelectionChange(Sender: TObject; User: Boolean);
-    procedure ResetButtonClick(Sender: TObject);
+    procedure Panel2Resize(Sender: TObject);
     procedure SaveAsButtonClick(Sender: TObject);
     procedure LoadButtonClick(Sender: TObject);
     procedure ForegoundColorBoxSelectionChange(Sender: TObject; User: Boolean);
@@ -48,12 +49,14 @@ type
   protected
     FEditor: TSimbaEditor;
 
-    procedure Reset;
-
     procedure AddCustomColor(CustomColor: TColor; ColorListBox: TColorListBox);
     function SelectedAttr: TSynHighlighterAttributes;
   public
     property Editor: TSimbaEditor read FEditor;
+
+    procedure Reset;
+    procedure Load;
+    procedure Save;
 
     constructor Create(AOwner: TComponent); override;
   end;
@@ -63,7 +66,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.settings, simba.editor_attributes, simba.files;
+  simba.settings, simba.editor_attributes, simba.files, simba.mufasatypes;
 
 {$i simba.editor_colorpresets.inc}
 
@@ -92,16 +95,25 @@ begin
       FrameColorBox.ItemIndex := 0;
     end;
 
-    Panel3.Visible := SelectedAttr is TSimbaEditor_Attribute;
-    if Panel3.Visible then
-      Panel3.BringToFront()
-    else
-      Panel3.SendToBack();
-
     if SelectedAttr is TSimbaEditor_Attribute then
-      Label1.Caption := 'Color:'
-    else
-      Label1.Caption := 'Foreground:';
+    begin
+      LabelForeground.Caption := 'Color';
+
+      BackgroundColorBox.Hide();
+      LabelBackground.Hide();
+
+      FrameColorBox.Hide();
+      LabelFrame.Hide();
+    end else
+    begin
+      LabelForeground.Caption := 'Foreground';
+
+      BackgroundColorBox.Show();
+      LabelBackground.Show();
+
+      FrameColorBox.Show();
+      LabelFrame.Show();
+    end;
 
     BoldCheckBox.Checked := fsBold in SelectedAttr.Style;
     ItalicCheckBox.Checked := fsItalic in SelectedAttr.Style;
@@ -139,7 +151,12 @@ begin
 
   with FEditor do
   begin
-    Parent := EditorPanel;
+    Font.Size := 8;
+    BorderSpacing.Top := 5;
+    BorderSpacing.Left := 10;
+    BorderSpacing.Right := 10;
+    BorderSpacing.Bottom := 10;
+    Parent := GroupBox2;
     Align := alClient;
     ReadOnly := True;
     Text := 'program Highlight;                                      ' + LineEnding +
@@ -149,7 +166,7 @@ begin
             '                                                        ' + LineEnding +
             '{$I SRL/osr.simba}                                      ' + LineEnding +
             '                                                        ' + LineEnding +
-            'procedure Test(var i: Int32);                           ' + LineEnding +
+            'procedure Test(var i: Integer);                         ' + LineEnding +
             'var                                                     ' + LineEnding +
             '  s: String;                                            ' + LineEnding +
             'begin                                                   ' + LineEnding +
@@ -178,6 +195,11 @@ begin
   TreeView.EndUpdate();
 end;
 
+procedure TEditorColorsFrame.Load;
+begin
+  { nothing }
+end;
+
 procedure TEditorColorsFrame.AddCustomColor(CustomColor: TColor; ColorListBox: TColorListBox);
 var
   I: Int32;
@@ -192,7 +214,7 @@ begin
     end;
   end;
 
-  ColorListBox.Items.AddObject('Custom Color (%d, %d, %d)', [Red(UInt32(CustomColor)), Green(UInt32(CustomColor)), Blue(UInt32(CustomColor))], TObject(PtrUInt(CustomColor)));
+  ColorListBox.Items.AddObject('Custom (%d, %d, %d)', [Red(UInt32(CustomColor)), Green(UInt32(CustomColor)), Blue(UInt32(CustomColor))], TObject(PtrUInt(CustomColor)));
 end;
 
 function TEditorColorsFrame.SelectedAttr: TSynHighlighterAttributes;
@@ -200,6 +222,18 @@ begin
   Result := nil;
   if (TreeView.Selected <> nil) and (TreeView.Selected.Data <> nil) then
     Result := TSynHighlighterAttributes(TreeView.Selected.Data);
+end;
+
+procedure TEditorColorsFrame.Save;
+var
+  FileName: String;
+begin
+  FileName := GetDataPath() + 'colors_editor.ini';
+
+  FEditor.Attributes.SaveToFile(FileName);
+
+  SimbaSettings.Editor.CustomColors.Value := FileName;
+  SimbaSettings.Changed(SimbaSettings.Editor.CustomColors);
 end;
 
 procedure TEditorColorsFrame.SaveAsButtonClick(Sender: TObject);
@@ -288,14 +322,19 @@ begin
     AddCustomColor(FrameColorBox.Selected, FrameColorBox);
 end;
 
-procedure TEditorColorsFrame.ResetDarkButtonClick(Sender: TObject);
+procedure TEditorColorsFrame.Panel2Resize(Sender: TObject);
 begin
-  FEditor.Attributes.LoadFromStream(TStringStream.Create(EDITOR_PRESET_DARK), True);
+  ForegoundColorBox.Width  := (TPanel(Sender).Width - 20) div 3;
+  BackgroundColorBox.Width := (TPanel(Sender).Width - 20) div 3;
+  FrameColorBox.Width      := (TPanel(Sender).Width - 20) div 3;
 end;
 
-procedure TEditorColorsFrame.ResetButtonClick(Sender: TObject);
+procedure TEditorColorsFrame.DoPresetChanged(Sender: TObject; User: boolean);
 begin
-  Reset();
+  case PresetListBox.GetSelectedText() of
+    'Light': FEditor.Attributes.LoadFromStream(TStringStream.Create(LineEnding.Join(EDITOR_PRESET_LIGHT)), True);
+    'Dark':  FEditor.Attributes.LoadFromStream(TStringStream.Create(LineEnding.Join(EDITOR_PRESET_DARK)), True);
+  end;
 end;
 
 constructor TEditorColorsFrame.Create(AOwner: TComponent);
