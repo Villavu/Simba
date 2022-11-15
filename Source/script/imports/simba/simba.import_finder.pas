@@ -418,10 +418,18 @@ begin
       ]
     );
 
+    // GetColor
     addGlobalFunc(
-      'function GetColor(X, Y: Integer): Integer;', [
+      'function GetColor(X, Y: Integer): Integer; overload;', [
       'begin',
       '  Result := Client.GetMFinder().GetColor(X, Y);',
+      'end;'
+      ]
+    );
+    addGlobalFunc(
+      'function GetColor(Point: TPoint): Integer; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().GetColor(Point.X, Point.Y);',
       'end;'
       ]
     );
@@ -440,10 +448,62 @@ begin
       ]
     );
 
+    // SimilarColors
     addGlobalFunc(
       'function SimilarColors(Color1, Color2, Tolerance: Integer): Boolean;', [
       'begin',
       '  Result := Client.GetMFinder().SimilarColors(Color1, Color2, Tolerance);',
+      'end;'
+      ]
+    );
+
+    // AverageBrightness
+    addGlobalFunc(
+      'function AverageBrightness(Area: TBox): Integer;', [
+      'begin',
+      '  Result := Client.GetMFinder().AverageBrightness(Area);',
+      'end;'
+      ]
+    );
+    // PeakBrightness
+    addGlobalFunc(
+      'function PeakBrightness(Area: TBox): Integer;', [
+      'begin',
+      '  Result := Client.GetMFinder().PeakBrightness(Area);',
+      'end;'
+      ]
+    );
+
+    // GetPixelDifference
+    addGlobalFunc(
+      'function GetPixelDifference(Area: TBox; WaitTime: Integer): Integer; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().GetPixelDifference(Area, WaitTime);',
+      'end;'
+      ]
+    );
+    // GetPixelDifference
+    addGlobalFunc(
+      'function GetPixelDifference(Area: TBox; Tolerance, WaitTime: Integer): Integer; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().GetPixelDifference(Area, Tolerance, WaitTime);',
+      'end;'
+      ]
+    );
+
+    // GetPixelDifference
+    addGlobalFunc(
+      'function GetPixelDifferenceTPA(Area: TBox; WaitTime: Integer): TPointArray; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().GetPixelDifferenceTPA(Area, WaitTime);',
+      'end;'
+      ]
+    );
+    // GetPixelDifference
+    addGlobalFunc(
+      'function GetPixelDifferenceTPA(Area: TBox; Tolerance, WaitTime: Integer): TPointArray; overload;', [
+      'begin',
+      '  Result := Client.GetMFinder().GetPixelDifferenceTPA(Area, Tolerance, WaitTime);',
       'end;'
       ]
     );

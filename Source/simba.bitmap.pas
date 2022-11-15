@@ -63,6 +63,7 @@ type
     constructor CreateFromClient(Client: TObject; Area: TBox); overload;
     constructor CreateFromFile(FileName: String);
     constructor CreateFromString(AWidth, AHeight: Integer; Str: String);
+    constructor CreateFromData(AWidth, AHeight: Integer; AData: PRGB32; CopyData: Boolean = True);
 
     destructor Destroy; override;
 
@@ -220,7 +221,7 @@ type
     procedure LoadFromClient; overload;
     procedure LoadFromClient(Area: TBox); overload;
     procedure LoadFromString(AWidth, AHeight: Integer; Str: String);
-    procedure LoadFromMemory(AWidth, AHeight: Integer; Memory: PRGB32);
+    procedure LoadFromData(AWidth, AHeight: Integer; AData: PRGB32; CopyData: Boolean = True);
     procedure LoadFromTBitmap(bmp: TBitmap);
     procedure LoadFromBitmap(Bitmap: TMufasaBitmap);
     procedure LoadFromRawImage(RawImage: TRawImage);
@@ -316,7 +317,7 @@ begin
     LazIntf.DataDescription := RawImageDesc;
     LazIntf.LoadFromFile(FileName);
 
-    LoadFromMemory(LazIntf.Width, LazIntf.Height, PRGB32(LazIntf.PixelData));
+    LoadFromData(LazIntf.Width, LazIntf.Height, PRGB32(LazIntf.PixelData));
   finally
     LazIntf.Free;
   end;
@@ -625,11 +626,15 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.LoadFromMemory(AWidth, AHeight: Integer; Memory: PRGB32);
+procedure TMufasaBitmap.LoadFromData(AWidth, AHeight: Integer; AData: PRGB32; CopyData: Boolean);
 begin
-  SetSize(AWidth, AHeight);
-  if (Memory <> nil) then
-    Move(Memory^, FData^, AWidth * AHeight * SizeOf(TRGB32));
+  if CopyData then
+  begin
+    SetSize(AWidth, AHeight);
+    if (AData <> nil) then
+      Move(AData^, FData^, AWidth * AHeight * SizeOf(TRGB32));
+  end else
+    SetPersistentMemory(PtrUInt(AData), AWidth, AHeight);
 end;
 
 procedure TMufasaBitmap.LoadFromRawImage(RawImage: TRawImage);
@@ -2782,6 +2787,13 @@ begin
   Create();
 
   LoadFromString(AWidth, AHeight, Str);
+end;
+
+constructor TMufasaBitmap.CreateFromData(AWidth, AHeight: Integer; AData: PRGB32; CopyData: Boolean);
+begin
+  Create();
+
+  LoadFromData(AWidth, AHeight, AData, CopyData);
 end;
 
 destructor TMufasaBitmap.Destroy;

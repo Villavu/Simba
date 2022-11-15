@@ -1275,13 +1275,13 @@ begin
 end;
 
 (*
-TMufasaBitmap.LoadFromMemory
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.LoadFromMemory(AWidth, AHeight: Integer; Memory: PRGB32);
+TMufasaBitmap.LoadFromData
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure TMufasaBitmap.LoadFromData(AWidth, AHeight: Integer; Memory: PRGB32; CopyData: Boolean = True);
 *)
-procedure _LapeMufasaBitmap_LoadFromMemory(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_LoadFromData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.LoadFromMemory(PInteger(Params^[1])^, PInteger(Params^[2])^, PPRGB32(Params^[3])^);
+  PMufasaBitmap(Params^[0])^.LoadFromData(PInteger(Params^[1])^, PInteger(Params^[2])^, PPRGB32(Params^[3])^, PBoolean(Params^[4])^);
 end;
 
 (*
@@ -1608,7 +1608,7 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.LoadFromFile(FileName: String); overload', @_LapeMufasaBitmap_LoadFromFile);
     addGlobalFunc('procedure TMufasaBitmap.LoadFromFile(FileName: String; Area: TBox); overload', @_LapeMufasaBitmap_LoadFromFileEx);
     addGlobalFunc('procedure TMufasaBitmap.LoadFromString(AWidth, AHeight: Integer; Str: String)', @_LapeMufasaBitmap_LoadFromString);
-    addGlobalFunc('procedure TMufasaBitmap.LoadFromMemory(AWidth, AHeight: Integer; Memory: PRGB32)', @_LapeMufasaBitmap_LoadFromMemory);
+    addGlobalFunc('procedure TMufasaBitmap.LoadFromData(AWidth, AHeight: Integer; AData: PRGB32; CopyData: Boolean = True)', @_LapeMufasaBitmap_LoadFromData);
     addGlobalFunc('procedure TMufasaBitmap.LoadFromBitmap(Bitmap: TMufasaBitmap);', @_LapeMufasaBitmap_LoadFromBitmap);
 
     addGlobalFunc('function TMufasaBitmap.SaveToFile(FileName: String): Boolean;', @_LapeMufasaBitmap_SaveToFile);

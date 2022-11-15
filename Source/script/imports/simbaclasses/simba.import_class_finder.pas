@@ -148,6 +148,36 @@ begin
   PMFinder(Params^[0])^ := TMFinder.Create(PObject(Params^[1])^);
 end;
 
+procedure _LapeMFinder_AverageBrightness(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PMFinder(Params^[0])^.AverageBrightness(PBox(Params^[1])^);
+end;
+
+procedure _LapeMFinder_PeakBrightness(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PMFinder(Params^[0])^.PeakBrightness(PBox(Params^[1])^);
+end;
+
+procedure _LapeMFinder_GetPixelDifference1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PMFinder(Params^[0])^.GetPixelDifference(PBox(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure _LapeMFinder_GetPixelDifference2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PMFinder(Params^[0])^.GetPixelDifference(PBox(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+end;
+
+procedure _LapeMFinder_GetPixelDifferenceTPA1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PMFinder(Params^[0])^.GetPixelDifferenceTPA(PBox(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure _LapeMFinder_GetPixelDifferenceTPA2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PMFinder(Params^[0])^.GetPixelDifferenceTPA(PBox(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+end;
+
 procedure ImportFinder(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -180,6 +210,14 @@ begin
 
     addGlobalFunc('function TMFinder.FindTemplate(TemplImage: TMufasaBitmap; out X, Y: Integer; Formula: ETMFormula; Area: TBox; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @_LapeMFinder_FindTemplate);
     addGlobalFunc('function TMFinder.FindTemplateEx(TemplImage: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; Area: TBox; MinMatch: Extended; DynamicAdjust: Boolean = True): Boolean', @_LapeMFinder_FindTemplateEx);
+
+    addGlobalFunc('function TMFinder.AverageBrightness(Area: TBox): Integer', @_LapeMFinder_AverageBrightness);
+    addGlobalFunc('function TMFinder.PeakBrightness(Area: TBox): Integer', @_LapeMFinder_PeakBrightness);
+
+    addGlobalFunc('function TMFinder.GetPixelDifference(Area: TBox; WaitTime: Integer): Integer; overload', @_LapeMFinder_GetPixelDifference1);
+    addGlobalFunc('function TMFinder.GetPixelDifference(Area: TBox; Tolerance: Integer; WaitTime: Integer): Integer; overload', @_LapeMFinder_GetPixelDifference2);
+    addGlobalFunc('function TMFinder.GetPixelDifferenceTPA(Area: TBox; WaitTime: Integer): TPointArray; overload', @_LapeMFinder_GetPixelDifferenceTPA1);
+    addGlobalFunc('function TMFinder.GetPixelDifferenceTPA(Area: TBox; Tolerance: Integer; WaitTime: Integer): TPointArray; overload', @_LapeMFinder_GetPixelDifferenceTPA2);
 
     addGlobalFunc('procedure TMFinder.SetToleranceSpeed(CTS: Integer);', @_LapeMFinder_SetToleranceSpeed);
     addGlobalFunc('function TMFinder.GetToleranceSpeed: Integer;', @_LapeMFinder_GetToleranceSpeed);

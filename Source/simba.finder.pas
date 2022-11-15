@@ -23,6 +23,7 @@ type
     CTS: Integer;
   public
     function GetData(out Data: TRetData; var X1, Y1, X2, Y2: Integer): Boolean;
+    function GetBitmap(out Bitmap: TMufasaBitmap; X1, Y1, X2, Y2: Integer; CopyData: Boolean = True): Boolean;
 
     function SimilarColors(Color1, Color2, Tolerance: Integer): Boolean;
 
@@ -49,6 +50,14 @@ type
     function GetColors(TPA: TPointArray): TIntegerArray;
     function GetColorsMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix;
     function GetColor(X, Y: Integer): Integer;
+
+    function AverageBrightness(Area: TBox): Integer;
+    function PeakBrightness(Area: TBox): Integer;
+
+    function GetPixelDifference(Area: TBox; WaitTime: Integer): Integer; overload;
+    function GetPixelDifference(Area: TBox; Tolerance: Integer; WaitTime: Integer): Integer; overload;
+    function GetPixelDifferenceTPA(Area: TBox; WaitTime: Integer): TPointArray; overload;
+    function GetPixelDifferenceTPA(Area: TBox; Tolerance: Integer; WaitTime: Integer): TPointArray; overload;
 
     // tol speeds
     procedure SetToleranceSpeed(nCTS: Integer);
@@ -137,6 +146,16 @@ begin
     SimbaDebugLn(ESimbaDebugLn.YELLOW, 'No image data returned. Is the target resizing?');
 
   Result := Data.Ptr <> nil;
+end;
+
+function TMFinder.GetBitmap(out Bitmap: TMufasaBitmap; X1, Y1, X2, Y2: Integer; CopyData: Boolean): Boolean;
+var
+  ImageData: TRetData;
+begin
+  if GetData(ImageData, X1, Y1, X2, Y2) then
+    Bitmap := TMufasaBitmap.CreateFromData(X2-X1+1, Y2-Y1+1, ImageData.Ptr, CopyData)
+  else
+    Bitmap := nil;
 end;
 
 function TMFinder.GetColorsMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix;
@@ -471,6 +490,106 @@ end;
 function TMFinder.GetColor(X, Y: Integer): Integer;
 begin
   Result := TClient(Client).IOManager.GetColor(X, Y);
+end;
+
+function TMFinder.AverageBrightness(Area: TBox): Integer;
+var
+  Bitmap: TMufasaBitmap;
+begin
+  if GetBitmap(Bitmap, Area.X1, Area.Y1, Area.X2, Area.Y2, False) then
+  begin
+    Result := Bitmap.AverageBrightness();
+
+    Bitmap.Free();
+  end;
+end;
+
+function TMFinder.PeakBrightness(Area: TBox): Integer;
+var
+  Bitmap: TMufasaBitmap;
+begin
+  if GetBitmap(Bitmap, Area.X1, Area.Y1, Area.X2, Area.Y2, False) then
+  begin
+    Result := Bitmap.PeakBrightness();
+
+    Bitmap.Free();
+  end;
+end;
+
+function TMFinder.GetPixelDifference(Area: TBox; WaitTime: Integer): Integer;
+var
+  BitmapBefore, BitmapAfter: TMufasaBitmap;
+begin
+  Result := 0;
+
+  if GetBitmap(BitmapBefore, Area.X1, Area.Y1, Area.X2, Area.Y2) then
+  begin
+    Sleep(WaitTime);
+    if GetBitmap(BitmapAfter, Area.X1, Area.Y1, Area.X2, Area.Y2) and (BitmapBefore.Width = BitmapAfter.Width) and (BitmapBefore.Height = BitmapAfter.Height) then
+      Result := BitmapBefore.PixelDifference(BitmapAfter);
+  end;
+
+  if (BitmapBefore <> nil) then
+    BitmapBefore.Free();
+  if (BitmapAfter <> nil) then
+    BitmapAfter.Free();
+end;
+
+function TMFinder.GetPixelDifference(Area: TBox; Tolerance: Integer; WaitTime: Integer): Integer;
+var
+  BitmapBefore, BitmapAfter: TMufasaBitmap;
+begin
+  Result := 0;
+
+  if GetBitmap(BitmapBefore, Area.X1, Area.Y1, Area.X2, Area.Y2) then
+  begin
+    Sleep(WaitTime);
+    if GetBitmap(BitmapAfter, Area.X1, Area.Y1, Area.X2, Area.Y2) and (BitmapBefore.Width = BitmapAfter.Width) and (BitmapBefore.Height = BitmapAfter.Height) then
+      Result := BitmapBefore.PixelDifference(BitmapAfter, Tolerance);
+  end;
+
+  if (BitmapBefore <> nil) then
+    BitmapBefore.Free();
+  if (BitmapAfter <> nil) then
+    BitmapAfter.Free();
+end;
+
+function TMFinder.GetPixelDifferenceTPA(Area: TBox; WaitTime: Integer): TPointArray;
+var
+  BitmapBefore, BitmapAfter: TMufasaBitmap;
+begin
+  Result := nil;
+
+  if GetBitmap(BitmapBefore, Area.X1, Area.Y1, Area.X2, Area.Y2) then
+  begin
+    Sleep(WaitTime);
+    if GetBitmap(BitmapAfter, Area.X1, Area.Y1, Area.X2, Area.Y2) and (BitmapBefore.Width = BitmapAfter.Width) and (BitmapBefore.Height = BitmapAfter.Height) then
+      Result := BitmapBefore.PixelDifferenceTPA(BitmapAfter);
+  end;
+
+  if (BitmapBefore <> nil) then
+    BitmapBefore.Free();
+  if (BitmapAfter <> nil) then
+    BitmapAfter.Free();
+end;
+
+function TMFinder.GetPixelDifferenceTPA(Area: TBox; Tolerance: Integer; WaitTime: Integer): TPointArray;
+var
+  BitmapBefore, BitmapAfter: TMufasaBitmap;
+begin
+  Result := nil;
+
+  if GetBitmap(BitmapBefore, Area.X1, Area.Y1, Area.X2, Area.Y2) then
+  begin
+    Sleep(WaitTime);
+    if GetBitmap(BitmapAfter, Area.X1, Area.Y1, Area.X2, Area.Y2) and (BitmapBefore.Width = BitmapAfter.Width) and (BitmapBefore.Height = BitmapAfter.Height) then
+      Result := BitmapBefore.PixelDifferenceTPA(BitmapAfter, Tolerance);
+  end;
+
+  if (BitmapBefore <> nil) then
+    BitmapBefore.Free();
+  if (BitmapAfter <> nil) then
+    BitmapAfter.Free();
 end;
 
 end.
