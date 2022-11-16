@@ -13,6 +13,20 @@ uses
   Classes, SysUtils, lcltype,
   SynEdit, SynEditTypes, SynEditKeyCmds;
 
+const
+  DEFAULT_DOCUMENTATION_COMMENT =
+    '(*'          + LineEnding +
+    '%s'          + LineEnding +
+    '%s'          + LineEnding +
+    '%s'          + LineEnding +
+    ''            + LineEnding +
+    'DESCRIPTION' + LineEnding +
+    ''            + LineEnding +
+    'Example::'   + LineEnding +
+    ''            + LineEnding +
+    '  EXAMPLE'   + LineEnding +
+    '*)'          + LineEnding;
+
 type
   TSimbaEditorPlugin_DocGenerator = class(TLazSynEditPlugin)
   protected
@@ -28,22 +42,7 @@ type
 implementation
 
 uses
-  simba.editor, simba.codeparser;
-
-const
-  DOCUMENTATION_COMMENT =
-    '(*'             + LineEnding +
-    '%s'             + LineEnding +
-    '%s'             + LineEnding +
-    '.. pascal:: %s' + LineEnding +
-    ''               + LineEnding +
-    'DESC'           + LineEnding +
-    ''               + LineEnding +
-    'Example'        + LineEnding +
-    '-------'        + LineEnding +
-    ''               + LineEnding +
-    '  EXAMPLE'      + LineEnding +
-    '*)'             + LineEnding;
+  simba.editor, simba.codeparser, simba.settings;
 
 procedure TSimbaEditorPlugin_DocGenerator.DoEditorAdded(Value: TCustomSynEdit);
 begin
@@ -97,7 +96,7 @@ begin
             FullName := Name;
 
           InsertTextAtCaret(
-            Format(DOCUMENTATION_COMMENT, [FullName, StringOfChar('~', Length(FullName)), Header])
+            Format(SimbaSettings.Editor.DocumentationComment.Value, [FullName, StringOfChar('~', Length(FullName)), Header])
           );
         end;
     except

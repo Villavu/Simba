@@ -1,14 +1,15 @@
 object EditorGeneralFrame: TEditorGeneralFrame
   Left = 0
-  Height = 466
+  Height = 672
   Top = 0
-  Width = 641
-  ClientHeight = 466
-  ClientWidth = 641
+  Width = 946
+  ClientHeight = 672
+  ClientWidth = 946
   DesignTimePPI = 120
+  ParentFont = False
   TabOrder = 0
-  DesignLeft = 1081
-  DesignTop = 508
+  DesignLeft = 2564
+  DesignTop = 377
   object CaretPastEOLCheckBox: TCheckBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
@@ -29,7 +30,7 @@ object EditorGeneralFrame: TEditorGeneralFrame
     Left = 0
     Height = 20
     Top = 142
-    Width = 641
+    Width = 946
     Caption = 'Code Tools'
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 12
@@ -108,7 +109,7 @@ object EditorGeneralFrame: TEditorGeneralFrame
     Left = 0
     Height = 20
     Top = 42
-    Width = 641
+    Width = 946
     Caption = 'Right Margin'
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 12
@@ -135,7 +136,7 @@ object EditorGeneralFrame: TEditorGeneralFrame
     Left = 0
     Height = 20
     Top = 268
-    Width = 641
+    Width = 946
     Caption = 'Block Completion'
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 12
@@ -188,5 +189,36 @@ object EditorGeneralFrame: TEditorGeneralFrame
     BorderSpacing.Top = 10
     Caption = 'Automatically complete the block on:'
     ParentColor = False
+  end
+  object CompleteDivider1: TDividerBevel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = CompleteIndexCheckbox
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 0
+    Height = 20
+    Top = 423
+    Width = 946
+    Caption = 'Documentation Comment'
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Top = 12
+    Style = gsHorLines
+  end
+  object DocCommentMemo: TMemo
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = CompleteDivider1
+    AnchorSideTop.Side = asrBottom
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 0
+    Height = 209
+    Top = 453
+    Width = 408
+    Anchors = [akTop, akLeft, akBottom]
+    BorderSpacing.Top = 10
+    BorderSpacing.Bottom = 10
+    ScrollBars = ssAutoBoth
+    TabOrder = 9
   end
 end
