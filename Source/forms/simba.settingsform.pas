@@ -94,6 +94,7 @@ begin
   SimbaGeneralFrame.CheckGroup1.Checked[1] := SimbaSettings.General.OpenSSLExtractOnLaunch.Value;
   SimbaGeneralFrame.CheckGroup1.Checked[2] := SimbaSettings.General.MacOSKeystrokes.Value;
 
+  EditorGeneralFrame.Load();
   EditorColorsFrame.Load();
   SimbaOutputBoxFrame.Load();
   SimbaBackupFrame.Load();
@@ -132,6 +133,7 @@ begin
   SimbaSettings.General.OpenSSLExtractOnLaunch.Value := SimbaGeneralFrame.CheckGroup1.Checked[1];
   SimbaSettings.General.MacOSKeystrokes.Value := SimbaGeneralFrame.CheckGroup1.Checked[2];
 
+  EditorGeneralFrame.Save();
   EditorColorsFrame.Save();
   SimbaOutputBoxFrame.Save();
   SimbaBackupFrame.Save();
@@ -169,28 +171,34 @@ begin
   SimbaGeneralFrame := TSimbaGeneralFrame.Create(Self);
   SimbaGeneralFrame.Parent := AddPage('General', Node);
   SimbaGeneralFrame.Align := alClient;
+  SimbaGeneralFrame.ParentFont := True;
 
   SimbaOutputBoxFrame := TSimbaOutputBoxFrame.Create(Self);
   SimbaOutputBoxFrame.Parent := AddPage('Output Box', Node);
   SimbaOutputBoxFrame.Align := alClient;
+  SimbaOutputBoxFrame.ParentFont := True;
 
   SimbaBackupFrame := TSimbaBackupFrame.Create(Self);
   SimbaBackupFrame.Parent := AddPage('Script Backup', Node);
   SimbaBackupFrame.Align := alClient;
+  SimbaBackupFrame.ParentFont := True;
 
   Node := TreeView.Items.Add(nil, 'Editor');
 
   EditorGeneralFrame := TEditorGeneralFrame.Create(Self);
   EditorGeneralFrame.Parent := AddPage('General', Node);
   EditorGeneralFrame.Align := alClient;
+  EditorGeneralFrame.ParentFont := True;
 
   EditorFontFrame := TEditorFontFrame.Create(Self);
   EditorFontFrame.Parent := AddPage('Font', Node);
   EditorFontFrame.Align := alClient;
+  EditorFontFrame.ParentFont := True;
 
   EditorColorsFrame := TEditorColorsFrame.Create(Self);
   EditorColorsFrame.Parent := AddPage('Colors', Node);
   EditorColorsFrame.Align := alClient;
+  EditorColorsFrame.ParentFont := True;
 
   TreeView.Selected := TreeView.Items.GetFirstNode();
 end;

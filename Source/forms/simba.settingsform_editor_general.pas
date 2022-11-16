@@ -15,6 +15,7 @@ uses
 type
   TEditorGeneralFrame = class(TFrame)
     CompleteBeginCheckbox: TCheckBox;
+    CompleteDivider1: TDividerBevel;
     CompleteParenthesesCheckbox: TCheckBox;
     CompleteIndexCheckbox: TCheckBox;
     CompleteDivider: TDividerBevel;
@@ -22,21 +23,34 @@ type
     CaretPastEOLCheckBox: TCheckBox;
     DividerBevel4: TDividerBevel;
     CompleteLabel: TLabel;
+    DocCommentMemo: TMemo;
     VisibleRightMarginCheckbox: TCheckBox;
     MarginValueLabel: TLabel;
     ShowParameterHintsCheckbox: TCheckBox;
     OpenAutoCompletionCheckbox: TCheckBox;
     DividerBevel1: TDividerBevel;
     RightMarginEdit: TSpinEdit;
-  private
-
   public
-
+    procedure Load;
+    procedure Save;
   end;
 
 implementation
 
 {$R *.lfm}
+
+uses
+  simba.settings;
+
+procedure TEditorGeneralFrame.Load;
+begin
+  DocCommentMemo.Lines.Text := SimbaSettings.Editor.DocumentationComment.Value;
+end;
+
+procedure TEditorGeneralFrame.Save;
+begin
+  SimbaSettings.Editor.DocumentationComment.Value := DocCommentMemo.Lines.Text;
+end;
 
 end.
 

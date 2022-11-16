@@ -119,6 +119,8 @@ type
 
       AutoCompleteWidth: TSimbaSetting;
       AutoCompleteLines: TSimbaSetting;
+
+      DocumentationComment: TSimbaSetting;
     end;
 
     OutputBox: record
@@ -162,7 +164,7 @@ implementation
 
 uses
   Forms, SynEdit,
-  simba.mufasatypes, simba.encoding, simba.files,
+  simba.mufasatypes, simba.encoding, simba.files, simba.editor_docgenerator,
   simba.ide_initialization;
 
 var
@@ -432,6 +434,7 @@ begin
   Editor.AutomaticallyShowParameterHints := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyShowParameterHints', True);
   Editor.RightMargin                     := TSimbaSetting_Integer.Create(Self, 'Editor', 'RightMargin', 80);
   Editor.RightMarginVisible              := TSimbaSetting_Boolean.Create(Self, 'Editor', 'RightMarginVisible', False);
+  Editor.DocumentationComment            := TSimbaSetting_BinaryString.Create(Self, 'Editor', 'DocumentationComment', DEFAULT_DOCUMENTATION_COMMENT);
 
   Editor.AutomaticallyCompleteBegin       := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteBegin', True);
   Editor.AutomaticallyCompleteParentheses := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteParentheses', False);
