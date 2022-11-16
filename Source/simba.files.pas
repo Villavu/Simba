@@ -45,8 +45,7 @@ uses
 implementation
 
 uses
-  forms, inifiles, fileutil, zipper, sha1,
-  simba.ide_initialization;
+  forms, inifiles, fileutil, zipper, sha1;
 
 function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
 var
@@ -165,13 +164,11 @@ end;
 // Make a copy of the plugin to data/plugins/ so we can delete/update if it's loaded
 procedure CopyPlugin(var FileName: String);
 var
-  Hash: String;
+  NewFileName: String;
 begin
-  Hash := ConcatPaths([GetPluginCopyPath(), HashFile(FileName) + ExtractFileExt(FileName)]);
-  if not FileExists(Hash) then
-    CopyFile(FileName, Hash);
-
-  FileName := Hash;
+  NewFileName := GetPluginCopyPath() + HashFile(FileName) + ExtractFileExt(FileName);
+  if CopyFile(FileName, NewFileName, [], True) then
+    FileName := NewFileName;
 end;
 
 procedure ZipFiles(const ArchiveFileName: String; const Files: TStringArray);
@@ -287,7 +284,7 @@ end;
 
 function GetPluginCopyPath: String;
 begin
-  Result := GetDataPath() + 'plugins' + DirectorySeparator;
+  Result := GetDataPath() + 'plugincopies' + DirectorySeparator;
 end;
 
 function GetScriptPath: String;
@@ -324,12 +321,28 @@ procedure CreateBaseDirectories;
 var
   Directory: String;
 begin
-  for Directory in [GetScreenshotPath(), GetDumpPath(), GetPackagePath(), GetIncludePath(), GetScriptPath(), GetPluginPath(), GetPluginCopyPath(), GetOldPackagePath(), GetBackupsPath()] do
+  // Root directories
+  for Directory in [GetIncludePath(), GetScriptPath(), GetPluginPath(), GetDataPath(), GetScreenshotPath()] do
+  begin
+     if DirectoryExists(Directory) then
+       Continue;
+
+    if CreateDir(Directory) then
+      DebugLn('[CreateBaseDirectories]: ' + Directory)
+    else
+      DebugLn('[CreateBaseDirectories]: Failed ' + Directory);
+  end;
+
+  // Data directories
+  for Directory in [GetPackagePath(), GetPluginCopyPath(), GetOldPackagePath(), GetBackupsPath(), GetDumpPath()] do
   begin
     if DirectoryExists(Directory) then
       Continue;
 
-    ForceDirectories(Directory);
+    if CreateDir(Directory) then
+      DebugLn('[CreateBaseDirectories]: ' + Directory)
+    else
+      DebugLn('[CreateBaseDirectories]: Failed ' + Directory);
   end;
 end;
 
@@ -367,7 +380,7 @@ begin
 end;
 
 initialization
-  SimbaIDEInitialization.RegisterMethodOnCreate(@CreateBaseDirectories, 'Base Directories');
+  CreateBaseDirectories();
 
 end.
 
