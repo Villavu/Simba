@@ -72,7 +72,7 @@ interface
 
 uses
   classes, sysutils, dynlibs, lpcompiler,
-  simba.script_compiler;
+  simba.mufasatypes, simba.script_compiler;
 
 type
   TSimbaSynchronizeMethod = procedure(Data: Pointer); cdecl;
@@ -483,10 +483,18 @@ begin
   end;
 
   FFileName := FileName;
+  if (not FileExists(FFileName)) then
+    raise Exception.CreateFmt('Loading plugin: File "%s" does not exist', [FFileName]);
+
   FHandle := LoadLibrary(FFileName);
 
   if (FHandle = 0) then
+  begin
+    DebugLn('Plugin filename: ' + FFileName);
+    DebugLn('Plugin load error: ' + GetLoadErrorStr());
+
     raise Exception.Create('Loading plugin failed. Architecture mismatch? (expected a ' + {$IFDEF CPU32}'32'{$ELSE}'64'{$ENDIF} + ' bit plugin)');
+  end;
 
   FSimbaMethods.Synchronize := @_Synchronize;
   FSimbaMethods.GetMem := @_GetMem;
