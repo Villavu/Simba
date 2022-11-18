@@ -352,7 +352,7 @@ begin
   CGPostKeyboardEvent(0, VirtualKeyToNativeKeyCode(Key), 1);
 
   if (WaitTime > 0) then
-    Sleep(WaitTime);
+    PreciseSleep(WaitTime);
 end;
 
 procedure TSimbaNativeInterface_Darwin.ReleaseKey(Key: Integer; WaitTime: Integer);
@@ -360,7 +360,7 @@ begin
   CGPostKeyboardEvent(0, VirtualKeyToNativeKeyCode(Key), 0);
 
   if (WaitTime > 0) then
-    Sleep(WaitTime);
+    PreciseSleep(WaitTime);
 end;
 
 procedure TSimbaNativeInterface_Darwin.HoldKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer);
@@ -368,7 +368,7 @@ begin
   CGPostKeyboardEvent(0, KeyCode, 1);
 
   if (WaitTime > 0) then
-    Sleep(WaitTime);
+    PreciseSleep(WaitTime);
 end;
 
 procedure TSimbaNativeInterface_Darwin.ReleaseKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer);
@@ -376,7 +376,7 @@ begin
   CGPostKeyboardEvent(0, KeyCode, 0);
 
   if (WaitTime > 0) then
-    Sleep(WaitTime);
+    PreciseSleep(WaitTime);
 end;
 
 function TSimbaNativeInterface_Darwin.VirtualKeyToNativeKeyCode(VirtualKey: Integer): Integer;

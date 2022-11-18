@@ -231,7 +231,7 @@ begin
   SimbaXLib.XSync(False);
 
   if (WaitTime > 0) then
-    Sleep(WaitTime);
+    PreciseSleep(WaitTime);
 end;
 
 procedure TSimbaNativeInterface_Linux.ReleaseKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer);
@@ -240,7 +240,7 @@ begin
   SimbaXLib.XSync(False);
 
   if (WaitTime > 0) then
-    Sleep(WaitTime);
+    PreciseSleep(WaitTime);
 end;
 
 function TSimbaNativeInterface_Linux.GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean;
@@ -496,7 +496,7 @@ begin
   SimbaXLib.XSync(False);
 
   if (WaitTime > 0) then
-    Sleep(WaitTime);
+    PreciseSleep(WaitTime);
 end;
 
 procedure TSimbaNativeInterface_Linux.ReleaseKey(VirtualKey: Integer; WaitTime: Integer);
@@ -505,7 +505,7 @@ begin
   SimbaXLib.XSync(False);
 
   if (WaitTime > 0) then
-    Sleep(WaitTime);
+    PreciseSleep(WaitTime);
 end;
 
 function TSimbaNativeInterface_Linux.GetProcessMemUsage(PID: SizeUInt): Int64;
