@@ -480,7 +480,7 @@ begin
   SendInput(1, @Input, SizeOf(Input));
 
   if (WaitTime > 0) then
-    Sleep(WaitTime);
+    PreciseSleep(WaitTime);
 end;
 
 procedure TSimbaNativeInterface_Windows.ReleaseKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer = 0);
@@ -495,7 +495,7 @@ begin
   SendInput(1, @Input, SizeOf(Input));
 
   if (WaitTime > 0) then
-    Sleep(WaitTime);
+    PreciseSleep(WaitTime);
 end;
 
 function TSimbaNativeInterface_Windows.VirtualKeyToNativeKeyCode(VirtualKey: Integer): Integer;
@@ -523,7 +523,7 @@ begin
   SendInput(1, @Input, SizeOf(Input));
 
   if (WaitTime > 0) then
-    Sleep(WaitTime);
+    PreciseSleep(WaitTime);
 end;
 
 procedure TSimbaNativeInterface_Windows.ReleaseKey(VirtualKey: Integer; WaitTime: Integer);
@@ -538,7 +538,7 @@ begin
   SendInput(1, @Input, SizeOf(Input));
 
   if (WaitTime > 0) then
-    Sleep(WaitTime);
+    PreciseSleep(WaitTime);
 end;
 
 function TSimbaNativeInterface_Windows.GetProcessMemUsage(PID: SizeUInt): Int64;
