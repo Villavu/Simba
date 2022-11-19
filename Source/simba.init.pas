@@ -17,7 +17,7 @@ interface
 
 uses
   {$IFDEF UNIX}
-  cthreads, cmem,
+  cthreads,
   {$ENDIF}
   classes, sysutils, lazlogger;
 

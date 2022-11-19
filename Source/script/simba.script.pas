@@ -297,7 +297,13 @@ begin
 end;
 
 destructor TSimbaScript.Destroy;
+var
+  Plugin: TSimbaScriptPlugin;
 begin
+  for Plugin in FPlugins do
+    Plugin.Free();
+  FPlugins := nil;
+
   if (FClient <> nil) then
     FreeAndNil(FClient);
   if (FCompiler <> nil) then

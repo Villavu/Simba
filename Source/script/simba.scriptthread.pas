@@ -118,15 +118,16 @@ begin
     if FScript.Compile() then
     begin
       SimbaDebugLn(ESimbaDebugLn.GREEN, 'Succesfully compiled in %.2f milliseconds.', [FScript.CompileTime]);
-      if FCompileOnly then
-        Exit;
 
-      FScript.Run();
+      if (not FCompileOnly) then
+      begin
+        FScript.Run();
 
-      if (Script.RunningTime < 10000) then
-        SimbaDebugLn(ESimbaDebugLn.GREEN, 'Succesfully executed in %.2f milliseconds.', [Script.RunningTime])
-      else
-        SimbaDebugLn(ESimbaDebugLn.GREEN, 'Succesfully executed in %s.', [FormatMilliseconds(Script.RunningTime, '\[hh:mm:ss\]')]);
+        if (Script.RunningTime < 10000) then
+          SimbaDebugLn(ESimbaDebugLn.GREEN, 'Succesfully executed in %.2f milliseconds.', [Script.RunningTime])
+        else
+          SimbaDebugLn(ESimbaDebugLn.GREEN, 'Succesfully executed in %s.', [FormatMilliseconds(Script.RunningTime, '\[hh:mm:ss\]')]);
+      end;
     end;
   except
     on E: Exception do
