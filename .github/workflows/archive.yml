@@ -43,7 +43,8 @@ jobs:
       - name: Push
         shell: bash     
         run: |
-          date_formatted=$(date +'%d-%m-%Y')
+          date_year=$(date +"%Y")
+          date_month_day=$(date +"%m-%d")
 
           git config --global http.postBuffer 500M
           git config --global user.email "villavu-bot"
@@ -52,7 +53,8 @@ jobs:
           git clone https://${{ secrets.API_TOKEN_GITHUB }}@github.com/villavu/simba-build-archive
 
           cd simba-build-archive
-          mv ../binaries "$date_formatted ${{ github.event.workflow_run.head_sha }}"
+          mkdir -p $date_year
+          mv ../binaries "$date_year/$date_month_day | ${{ github.event.workflow_run.head_sha }}"
 
           git add .
           git commit --message "${{ github.event.workflow_run.head_sha }}"
