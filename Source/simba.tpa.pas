@@ -128,20 +128,19 @@ uses
   simba.overallocatearray, simba.geometry, simba.math,
   simba.algo_sort, simba.slacktree, simba.algo_unique;
 
-procedure GetAdjacent(var Adj: TPointArray; n:TPoint; EightWay: Boolean); inline;
+procedure GetAdjacent4(var Adj: TPointArray; const P: TPoint); inline;
 begin
-  Adj[0] := Point(n.x-1,n.y);
-  Adj[1] := Point(n.x,n.y-1);
-  Adj[2] := Point(n.x+1,n.y);
-  Adj[3] := Point(n.x,n.y+1);
+  Adj[0].X := P.X - 1;
+  Adj[0].Y := P.Y;
 
-  if EightWay then
-  begin
-    Adj[4] := Point(n.x-1,n.y-1);
-    Adj[5] := Point(n.x+1,n.y+1);
-    Adj[6] := Point(n.x-1,n.y+1);
-    Adj[7] := Point(n.x+1,n.y-1);
-  end;
+  Adj[1].X := P.X;
+  Adj[1].Y := P.Y - 1;
+
+  Adj[2].X := P.X + 1;
+  Adj[2].Y := P.Y;
+
+  Adj[3].X := P.X;
+  Adj[3].Y := P.Y + 1;
 end;
 
 procedure RotatingAdjecent(var Adj: TPointArray; const Curr:TPoint; const Prev: TPoint); inline;
@@ -982,28 +981,31 @@ end;
 
 function TPointArrayHelper.Erode(Iterations: Integer): TPointArray;
 var
-  H,i,j: Int32;
+  I, J, X, Y: Integer;
   Matrix: TBooleanMatrix;
   QueueA, QueueB: TSimbaPointBuffer;
-  face:TPointArray;
-  pt:TPoint;
+  face: TPointArray;
+  pt: TPoint;
   B: TBox;
 begin
-  H := High(Self);
-  if (H = -1) or (Iterations=0) then Exit;
-  B := Self.Bounds;
-  B.x1 := B.x1 - Iterations - 1;
-  B.y1 := B.y1 - Iterations - 1;
-  B.x2 := (B.x2 - B.x1) + Iterations + 1;
-  B.y2 := (B.y2 - B.y1) + Iterations + 1;
-  SetLength(Matrix, B.y2, B.x2);
-  for i:=0 to H do
-    Matrix[Self[i].Y - B.Y1][Self[i].X - B.X1] := True;
+  Result := Default(TPointArray);
+  if (Length(Self) = 0) or (Iterations = 0) then
+    Exit;
 
-  SetLength(face,4);
+  B := Self.Bounds();
+  B.X1 := B.x1 - Iterations - 1;
+  B.Y1 := B.y1 - Iterations - 1;
+  B.X2 := (B.X2 - B.X1) + Iterations + 1;
+  B.Y2 := (B.Y2 - B.Y1) + Iterations + 1;
+
+  Matrix.SetSize(B.X2, B.Y2);
+  for I:=0 to High(Self) do
+    Matrix[Self[I].Y - B.Y1][Self[I].X - B.X1] := True;
+
+  SetLength(face, 4);
   QueueA.InitWith(Self.Edges().Offset(-B.X1, -B.Y1));
   QueueB.Init();
-  j := 0;
+  J := 0;
   repeat
     case (J mod 2) = 0 of
       True:
@@ -1011,15 +1013,14 @@ begin
         begin
           pt := QueueA.Pop;
           Matrix[pt.y][pt.x] := False;
-          GetAdjacent(face, pt, False);
-          for i:=0 to 3 do
+          GetAdjacent4(face, pt);
+          for I:=0 to 3 do
           begin
-            pt := face[i];
+            pt := face[I];
             if Matrix[pt.y][pt.x] then
             begin
               Matrix[pt.y][pt.x] := False;
               QueueB.Add(pt);
-              Inc(H);
             end;
           end;
         end;
@@ -1029,72 +1030,69 @@ begin
         begin
           pt := QueueB.Pop;
           Matrix[pt.y][pt.x] := False;
-          GetAdjacent(face, pt, False);
-          for i:=0 to 3 do
+          GetAdjacent4(face, pt);
+          for I:=0 to 3 do
           begin
-            pt := face[i];
+            pt := face[I];
             if Matrix[pt.y][pt.x] then
             begin
               Matrix[pt.y][pt.x] := False;
               QueueA.Add(pt);
-              Inc(H);
             end;
           end;
         end;
     end;
-    Inc(j);
-  until (j >= Iterations);
+    Inc(J);
+  until (J >= Iterations);
 
-  SetLength(Result, H+1);
-  for I:=0 to B.y2-1 do
-    for j:=0 to B.x2-1 do
-    begin
-      if H<0 then Break;
-      if Matrix[i][j] then begin
-        Result[H] := Point(j+B.x1,i+B.y1);
-        Dec(H);
-      end;
-    end;
+  QueueA.Clear();
+  for Y := 0 to B.Y2-1 do
+    for X := 0 to B.X2-1 do
+      if Matrix[Y, X] then
+        QueueA.Add(X + B.X1, Y + B.Y1);
+  Result := QueueA.Trim();
 end;
 
 function TPointArrayHelper.Grow(Iterations: Integer): TPointArray;
 var
-  H,i,j: Integer;
+  I,J,X,Y: Integer;
   Matrix: TBooleanMatrix;
   QueueA, QueueB: TSimbaPointBuffer;
   face:TPointArray;
   pt:TPoint;
   B: TBox;
 begin
-  H := High(Self);
-  if (H = -1) or (Iterations=0) then Exit;
+  Result := Default(TPointArray);
+  if (Length(Self) = 0) or (Iterations = 0) then
+    Exit;
+
   B := Self.Bounds();
   B.x1 := B.x1 - Iterations - 1;
   B.y1 := B.y1 - Iterations - 1;
   B.x2 := (B.x2 - B.x1) + Iterations + 1;
   B.y2 := (B.y2 - B.y1) + Iterations + 1;
-  SetLength(Matrix, B.y2, B.x2);
-  for i:=0 to H do
-    Matrix[Self[i].Y - B.Y1][Self[i].X - B.X1] := True;
+
+  Matrix.SetSize(B.X2, B.Y2);
+  for I:=0 to High(Self) do
+    Matrix[Self[I].Y - B.Y1][Self[I].X - B.X1] := True;
 
   SetLength(face,4);
   QueueA.InitWith(Self.Edges().Offset(-B.X1,-B.Y1));
   QueueB.Init();
-  j := 0;
+  J := 0;
   repeat
     case (J mod 2) = 0 of
     True:
       while (QueueA.Count > 0) do
       begin
-        GetAdjacent(face, QueueA.Pop(), False);
-        for i:=0 to 3 do
+        GetAdjacent4(face, QueueA.Pop());
+        for I:=0 to 3 do
         begin
-          pt := face[i];
+          pt := face[I];
           if not(Matrix[pt.y][pt.x]) then
           begin
             Matrix[pt.y][pt.x] := True;
             QueueB.Add(pt);
-            Inc(H);
           end;
         end;
       end;
@@ -1102,33 +1100,27 @@ begin
     False:
       while (QueueB.Count > 0) do
       begin
-        GetAdjacent(face, QueueB.Pop(), False);
-        for i:=0 to 3 do
+        GetAdjacent4(face, QueueB.Pop());
+        for I:=0 to 3 do
         begin
-          pt := face[i];
+          pt := face[I];
           if not(Matrix[pt.y][pt.x]) then
           begin
             Matrix[pt.y][pt.x] := True;
             QueueA.Add(pt);
-            Inc(H);
           end;
         end;
       end;
     end;
-    Inc(j);
-  until (j >= Iterations);
+    Inc(J);
+  until (J >= Iterations);
 
-  SetLength(Result, H+1);
-  for I:=0 to B.y2-1 do
-    for j:=0 to B.x2-1 do
-    begin
-      if H<0 then Break;
-      if Matrix[i][j] then
-      begin
-        Result[H] := Point(j+B.x1,i+B.y1);
-        Dec(H);
-      end;
-    end;
+  QueueA.Clear();
+  for Y := 0 to B.Y2-1 do
+    for X := 0 to B.X2-1 do
+      if Matrix[Y, X] then
+        QueueA.Add(X + B.X1, Y + B.Y1);
+  Result := QueueA.Trim();
 end;
 
 function TPointArrayHelper.Unique: TPointArray;
