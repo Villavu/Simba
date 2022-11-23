@@ -111,7 +111,7 @@ begin
   SetLength(Weights, Length(Self));
   for I := 0 to High(Self) do
   begin
-    if Length(Self[I]) >= Index then
+    if (Index >= Length(Self[I])) then
       raise Exception.CreateFmt('T2DPointArray.SortFromIndex: Index %d out of range', [Index]);
 
     Weights[I] := Sqr(From.X - Self[I][Index].X) + Sqr(From.Y - Self[I][Index].Y);
@@ -282,14 +282,16 @@ var
   I: Integer;
   Buffer: TSimbaPointArrayBuffer;
 begin
+  Buffer.Init(Length(Self));
+
   for I := 0 to High(Self) do
     case KeepIf of
-      __LT__: if (Length(Self[I]) <  Len) then Buffer.Add(Copy(Self));
-      __GT__: if (Length(Self[I]) >  Len) then Buffer.Add(Copy(Self));
-      __EQ__: if (Length(Self[I]) =  Len) then Buffer.Add(Copy(Self));
-      __LE__: if (Length(Self[I]) <= Len) then Buffer.Add(Copy(Self));
-      __GE__: if (Length(Self[I]) >= Len) then Buffer.Add(Copy(Self));
-      __NE__: if (Length(Self[I]) <> Len) then Buffer.Add(Copy(Self));
+      __LT__: if (Length(Self[I]) <  Len) then Buffer.Add(Copy(Self[I]));
+      __GT__: if (Length(Self[I]) >  Len) then Buffer.Add(Copy(Self[I]));
+      __EQ__: if (Length(Self[I]) =  Len) then Buffer.Add(Copy(Self[I]));
+      __LE__: if (Length(Self[I]) <= Len) then Buffer.Add(Copy(Self[I]));
+      __GE__: if (Length(Self[I]) >= Len) then Buffer.Add(Copy(Self[I]));
+      __NE__: if (Length(Self[I]) <> Len) then Buffer.Add(Copy(Self[I]));
     end;
 
   Result := Buffer.Trim();
@@ -300,6 +302,8 @@ var
   I: Integer;
   Buffer: TSimbaPointArrayBuffer;
 begin
+  Buffer.Init(Length(Self));
+
   for I := 0 to High(Self) do
     if InRange(Length(Self[I]), MinLen, MaxLen) then
       Buffer.Add(Copy(Self[I]));
@@ -317,6 +321,8 @@ var
   I: Integer;
   Buffer: TSimbaPointArrayBuffer;
 begin
+  Buffer.Init(Length(Self));
+
   for I := 0 to High(Self) do
     with Self[I].MinAreaRect() do
       if InRange(ShortSideLen, MinShortSide, MaxShortSide) and InRange(LongSideLen, MinLongSide, MaxLongSide) then
