@@ -10,7 +10,7 @@ unit simba.editor_docgenerator;
 interface
 
 uses
-  Classes, SysUtils, lcltype,
+  Classes, SysUtils, LCLType,
   SynEdit, SynEditTypes, SynEditKeyCmds;
 
 const
@@ -80,12 +80,11 @@ begin
       Exit;
 
     Parser := TCodeParser.Create();
-
     try
       Parser.Run(Text, '');
 
       Decl := Parser.Items.GetItemInPosition(SelStart - 1);
-      if (Decl <> nil) and Decl.HasOwnerClass(TciProcedureDeclaration, Decl, True) then
+      if (Decl <> nil) and ((Decl is TciProcedureDeclaration) or Decl.HasOwnerClass(TciProcedureDeclaration, Decl, True)) then
         with Decl as TciProcedureDeclaration do
         begin
           CaretXY := CharIndexToRowCol(StartPos);
@@ -101,7 +100,6 @@ begin
         end;
     except
     end;
-
     if (Parser <> nil) then
       Parser.Free();
   end;
