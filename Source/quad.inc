@@ -38,6 +38,8 @@
     function Area: Integer;
     function Normalize: TQuad;
   end;
+  PQuadArray = ^TQuadArray;
+  TQuadArray = array of TQuad;
 {$ENDIF}
 
 {$IFDEF BODY}

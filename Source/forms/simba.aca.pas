@@ -38,6 +38,7 @@ type
     MainMenu: TMainMenu;
     MenuImage: TMenuItem;
     MenuColors: TMenuItem;
+    MenuItemLoadHSLCircleEx: TMenuItem;
     MenuItemLoadHSLCircle: TMenuItem;
     MenuItemUpdateImage: TMenuItem;
     MenuItemLoadColors: TMenuItem;
@@ -58,6 +59,7 @@ type
     ButtonCTS0: TRadioButton;
     ButtonCTS1: TRadioButton;
     ButtonCTS2: TRadioButton;
+    Separator1: TMenuItem;
 
     procedure ButtonClearImageClick(Sender: TObject);
     procedure ButtonDeleteColorsClick(Sender: TObject);
@@ -77,6 +79,7 @@ type
     procedure ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure ClientImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure MenuItemLoadHSLCircleClick(Sender: TObject);
+    procedure MenuItemLoadHSLCircleExClick(Sender: TObject);
     procedure PanelRightResize(Sender: TObject);
   protected
     FOnCalculateBestColor: TACABestColorEvent;
@@ -90,6 +93,7 @@ type
     FDebugTPA: TPointArray;
     FDrawColor: TColor;
 
+    procedure LoadHSLCircle(Radius: Integer);
     procedure DoPaintArea(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; R: TRect);
     procedure CalculateBestColor;
 
@@ -140,20 +144,33 @@ begin
 end;
 
 procedure TSimbaACAForm.MenuItemLoadHSLCircleClick(Sender: TObject);
-var
-  Bitmap: TMufasaBitmap;
 begin
-  Bitmap := TMufasaBitmap.Create(800, 800);
-  Bitmap.DrawHSLCircle(Bitmap.Center, 350);
+  LoadHSLCircle(350);
+end;
 
-  FImageBox.SetBackground(Bitmap);
-
-  Bitmap.Free();
+procedure TSimbaACAForm.MenuItemLoadHSLCircleExClick(Sender: TObject);
+var
+  Value: String;
+begin
+  if InputQuery('ACA', 'HSL Circle Radius (Max 2000)', Value) and Value.IsInteger() then
+    LoadHSLCircle(Min(Value.ToInteger(), 2000));
 end;
 
 procedure TSimbaACAForm.PanelRightResize(Sender: TObject);
 begin
   PanelRight.Constraints.MinWidth := PanelRight.Width;
+end;
+
+procedure TSimbaACAForm.LoadHSLCircle(Radius: Integer);
+var
+  Bitmap: TMufasaBitmap;
+begin
+  Bitmap := TMufasaBitmap.Create(Radius*2, Radius*2);
+  Bitmap.DrawHSLCircle(Bitmap.Center, Radius);
+
+  FImageBox.SetBackground(Bitmap);
+
+  Bitmap.Free();
 end;
 
 procedure TSimbaACAForm.DoPaintArea(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; R: TRect);
