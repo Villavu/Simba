@@ -6,6 +6,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
   ClientHeight = 456
   ClientWidth = 773
   DesignTimePPI = 120
+  ParentFont = False
   TabOrder = 0
   DesignLeft = 2605
   DesignTop = 43
@@ -43,11 +44,11 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Height = 31
     Top = 6
     Width = 609
-    Max = 25
-    Min = 5
+    Max = 20
+    Min = 8
     OnChange = FontSizeTrackBarChange
     PageSize = 1
-    Position = 5
+    Position = 8
     Align = alCustom
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 6

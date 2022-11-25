@@ -416,6 +416,13 @@ object SimbaACAForm: TSimbaACAForm
         Caption = 'Load HSL Circle'
         OnClick = MenuItemLoadHSLCircleClick
       end
+      object MenuItemLoadHSLCircleEx: TMenuItem
+        Caption = 'Load HSL Circle ...'
+        OnClick = MenuItemLoadHSLCircleExClick
+      end
+      object Separator1: TMenuItem
+        Caption = '-'
+      end
       object MenuItemLoadImage: TMenuItem
         Caption = 'Load Image'
         OnClick = ButtonLoadImageClick

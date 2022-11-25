@@ -134,6 +134,7 @@ type
     procedure DrawQuadFilled(Quad: TQuad; Color: Integer);
     procedure DrawQuadInverted(Quad: TQuad; Color: Integer);
 
+    procedure DrawQuadArray(Quads: TQuadArray; Filled: Boolean; Color: Integer = -1);
     procedure DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: Integer = -1);
     procedure DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: Integer = -1);
     procedure DrawCircleArray(Points: TPointArray; Radius: Integer; Filled: Boolean; Color: Integer = -1);
@@ -257,14 +258,15 @@ uses
   simba.tpa, simba.colormath, simba.client, simba.iomanager,
   simba.bitmap_misc, simba.encoding, simba.compress, simba.math;
 
-function GetDrawColor(Color, Index: Integer): Integer; inline;
+function GetDistinctColor(const Color, Index: Integer): Integer; inline;
 const
-  BRIGHT_COLORS: TIntegerArray = (clRed, clBlue, clGreen, clLime, clMaroon, clYellow, clAqua, clWhite, clPurple, $0099FF, $B3A2EA); // Orange, Pink
+  // Distinct colors - https://sashamaps.net/docs/resources/20-colors/
+  DISTINCT_COLORS: TIntegerArray = ($4B19E6, $4BB43C, $19E1FF, $D86343, $3182F5, $B41E91, $F4D442, $E632F0, $45EFBF, $D4BEFA, $909946, $FFBEDC, $24639A, $C8FAFF, $000080, $C3FFAA, $008080, $B1D8FF, $750000, $A9A9A9);
 begin
   if (Color > -1) then
     Result := Color
   else
-    Result := BRIGHT_COLORS[Index mod Length(BRIGHT_COLORS)];
+    Result := DISTINCT_COLORS[Index mod Length(DISTINCT_COLORS)];
 end;
 
 function TMufasaBitmap.SaveToFile(FileName: String): Boolean;
@@ -953,7 +955,7 @@ var
   I: Integer;
 begin
   for I := 0 to High(ATPA) do
-    DrawTPA(ATPA[I], GetDrawColor(-1, I));
+    DrawTPA(ATPA[I], GetDistinctColor(-1, I));
 end;
 
 procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray; Color: Integer);
@@ -1216,15 +1218,26 @@ begin
         FData[Y*FWidth+X] := RGB;
 end;
 
+procedure TMufasaBitmap.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; Color: Integer);
+var
+  I: Integer;
+begin
+  for I := 0 to High(Quads) do
+    if Filled then
+      DrawQuadFilled(Quads[I], GetDistinctColor(Color, I))
+    else
+      DrawQuad(Quads[I], GetDistinctColor(Color, I));
+end;
+
 procedure TMufasaBitmap.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: Integer);
 var
   I: Integer;
 begin
   for I := 0 to High(Boxes) do
     if Filled then
-      DrawBoxFilled(Boxes[I], GetDrawColor(Color, I))
+      DrawBoxFilled(Boxes[I], GetDistinctColor(Color, I))
     else
-      DrawBox(Boxes[I], GetDrawColor(Color, I));
+      DrawBox(Boxes[I], GetDistinctColor(Color, I));
 end;
 
 procedure TMufasaBitmap.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: Integer);
@@ -1233,9 +1246,9 @@ var
 begin
   for I := 0 to High(Polygons) do
     if Filled then
-      DrawPolygonFilled(Polygons[I], GetDrawColor(Color, I))
+      DrawPolygonFilled(Polygons[I], GetDistinctColor(Color, I))
     else
-      DrawPolygon(Polygons[I], GetDrawColor(Color, I));
+      DrawPolygon(Polygons[I], GetDistinctColor(Color, I));
 end;
 
 procedure TMufasaBitmap.DrawCircleArray(Points: TPointArray; Radius: Integer; Filled: Boolean; Color: Integer);
@@ -1244,9 +1257,9 @@ var
 begin
   for I := 0 to High(Points) do
     if Filled then
-      DrawCircleFilled(Points[I], Radius, GetDrawColor(Color, I))
+      DrawCircleFilled(Points[I], Radius, GetDistinctColor(Color, I))
     else
-      DrawCircle(Points[I], Radius, GetDrawColor(Color, I));
+      DrawCircle(Points[I], Radius, GetDistinctColor(Color, I));
 end;
 
 procedure TMufasaBitmap.DrawCrossArray(Points: TPointArray; Radius: Integer; Color: Integer);
@@ -1254,7 +1267,7 @@ var
   I: Integer;
 begin
   for I := 0 to High(Points) do
-    DrawCross(Points[I], Radius, GetDrawColor(Color, I));
+    DrawCross(Points[I], Radius, GetDistinctColor(Color, I));
 end;
 
 procedure TMufasaBitmap.DrawHSLCircle(ACenter: TPoint; Radius: Integer);

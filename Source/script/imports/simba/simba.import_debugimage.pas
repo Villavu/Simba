@@ -44,6 +44,18 @@ procedure Show(Box: TBox; Filled: Boolean = False);
 (*
 Show
 ~~~~
+procedure Show(Quads: TQuadArray; Filled: Boolean = False);
+*)
+
+(*
+Show
+~~~~
+procedure Show(Quad: TQuad; Filled: Boolean = False);
+*)
+
+(*
+Show
+~~~~
 procedure Show(TPA: TPointArray; Color: Integer = $0000FF);
 *)
 
@@ -63,6 +75,18 @@ procedure ShowOnClient(Boxes: TBoxArray; Filled: Boolean = False);
 ShowOnClient
 ~~~~~~~~~~~~
 procedure ShowOnClient(Box: TBox; Filled: Boolean = False);
+*)
+
+(*
+ShowOnClient
+~~~~~~~~~~~~
+procedure ShowOnClient(Quads: TQuadArray; Filled: Boolean = False);
+*)
+
+(*
+ShowOnClient
+~~~~~~~~~~~~
+procedure ShowOnClient(Quad: TQuad; Filled: Boolean = False);
 *)
 
 (*
@@ -249,12 +273,18 @@ begin
     ]);
 
     addGlobalFunc(
-      'procedure Show(Quad: TQuad; Color: Integer = $0000FF); overload;', [
+      'procedure Show(Quads: TQuadArray; Filled: Boolean = False); overload;', [
+      'var',
+      '  Boxes: TBoxArray;',
+      '  Quad: TQuad;',
       'begin',
-      '  with Quad.Bounds() do',
+      '  for Quad in Quads do',
+      '    Boxes += Quad.Bounds();',
+      '',
+      '  with Boxes.Merge() do',
       '    with TMufasaBitmap.Create(X1+X2+1, Y1+Y2+1) do',
       '    try',
-      '      DrawQuad(Quad, Color);',
+      '      DrawQuadArray(Quads, Filled);',
       '      Show();',
       '    finally',
       '      Free();',
@@ -263,15 +293,29 @@ begin
     ]);
 
     addGlobalFunc(
-      'procedure ShowOnClient(Quad: TQuad; Color: Integer = $0000FF); overload;', [
+      'procedure Show(Quad: TQuad; Filled: Boolean = False); overload;', [
+      'begin',
+      '  Show(TQuadArray([Quad]), Filled);',
+      'end;'
+    ]);
+
+    addGlobalFunc(
+      'procedure ShowOnClient(Quads: TQuadArray; Filled: Boolean = False); overload;', [
       'begin',
       '  with TMufasaBitmap.CreateFromClient() do',
       '  try',
-      '    DrawQuad(Quad, Color);',
+      '    DrawQuadArray(Quads, Filled);',
       '    Show();',
       '  finally',
       '    Free();',
       '  end;',
+      'end;'
+    ]);
+
+    addGlobalFunc(
+      'procedure ShowOnClient(Quad: TQuad; Filled: Boolean = False); overload;', [
+      'begin',
+      '  ShowOnClient(TQuadArray([Quad]), Filled);',
       'end;'
     ]);
 
