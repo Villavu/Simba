@@ -236,6 +236,9 @@ begin
   FDump['function IndicesOf(const Item: T; const A: array): TIntegerArray; external;'] := 'System';
   FDump['function Contains(const Item: T; const A: array): Boolean; external;'] := 'System';
 
+  FDump['function RTTIFields(constref AnyRecord): TRTTIFields; external;']      := 'System';
+  FDump['function RTTIClassFields(constref AnyRecord): TRTTIFields; external;'] := 'System';
+
   // Move lape stuff to better sections
   FDump['function Random(min, max: Int64): Int64; overload; external;']       := 'Random';
   FDump['function Random(min, max: Extended): Extended; overload; external;'] := 'Random';
