@@ -8,8 +8,8 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
   DesignTimePPI = 120
   ParentFont = False
   TabOrder = 0
-  DesignLeft = 2605
-  DesignTop = 43
+  DesignLeft = 2613
+  DesignTop = 830
   object ToolbarSizeTrackBar: TTrackBar
     AnchorSideLeft.Control = ToolbarSizeCaption
     AnchorSideLeft.Side = asrBottom
