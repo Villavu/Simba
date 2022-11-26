@@ -156,6 +156,8 @@ begin
     Bitmap := TMufasaBitmap.CreateFromData(X2-X1+1, Y2-Y1+1, ImageData.Ptr, CopyData)
   else
     Bitmap := nil;
+
+  Result := Bitmap <> nil;
 end;
 
 function TMFinder.GetColorsMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix;

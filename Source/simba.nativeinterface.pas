@@ -69,8 +69,6 @@ type
     procedure OpenDirectory(Path: String); virtual; abstract;
 
     // Not abstract
-    procedure ClearInterpolation(Canvas: TCanvas); virtual;
-
     procedure PreciseSleep(Milliseconds: UInt32); virtual;
 
     procedure PlaySound(Path: String); virtual;
@@ -140,12 +138,6 @@ begin
 end;
 
 procedure TSimbaNativeInterface.SendStringEx(Text: String; MinKeyWait, MaxMaxWait: Integer);
-
-  function GetRandomWait: Integer;
-  begin
-    Result := RandomLeft(MinKeyWait, MaxMaxWait);
-  end;
-
 var
   Character: Char;
   KeyCode: Integer;
@@ -158,26 +150,21 @@ begin
 
     if (KeyModifiers <> []) then
     begin
-      if (ssShift in KeyModifiers) then HoldKey(VK_SHIFT,   GetRandomWait());
-      if (ssCtrl  in KeyModifiers) then HoldKey(VK_CONTROL, GetRandomWait());
-      if (ssAlt   in KeyModifiers) then HoldKey(VK_MENU,    GetRandomWait());
+      if (ssShift in KeyModifiers) then HoldKey(VK_SHIFT,   RandomLeft(MinKeyWait, MaxMaxWait));
+      if (ssCtrl  in KeyModifiers) then HoldKey(VK_CONTROL, RandomLeft(MinKeyWait, MaxMaxWait));
+      if (ssAlt   in KeyModifiers) then HoldKey(VK_MENU,    RandomLeft(MinKeyWait, MaxMaxWait));
     end;
 
-    HoldKeyNativeKeyCode(KeyCode,    GetRandomWait());
-    ReleaseKeyNativeKeyCode(KeyCode, GetRandomWait());
+    HoldKeyNativeKeyCode(KeyCode,    RandomLeft(MinKeyWait, MaxMaxWait));
+    ReleaseKeyNativeKeyCode(KeyCode, RandomLeft(MinKeyWait, MaxMaxWait));
 
     if (KeyModifiers <> []) then
     begin
-      if (ssShift in KeyModifiers) then ReleaseKey(VK_SHIFT,   GetRandomWait());
-      if (ssCtrl  in KeyModifiers) then ReleaseKey(VK_CONTROL, GetRandomWait());
-      if (ssAlt   in KeyModifiers) then ReleaseKey(VK_MENU,    GetRandomWait());
+      if (ssShift in KeyModifiers) then ReleaseKey(VK_SHIFT,   RandomLeft(MinKeyWait, MaxMaxWait));
+      if (ssCtrl  in KeyModifiers) then ReleaseKey(VK_CONTROL, RandomLeft(MinKeyWait, MaxMaxWait));
+      if (ssAlt   in KeyModifiers) then ReleaseKey(VK_MENU,    RandomLeft(MinKeyWait, MaxMaxWait));
     end;
   end;
-end;
-
-procedure TSimbaNativeInterface.ClearInterpolation(Canvas: TCanvas);
-begin
-  { not critical }
 end;
 
 procedure TSimbaNativeInterface.PreciseSleep(Milliseconds: UInt32);

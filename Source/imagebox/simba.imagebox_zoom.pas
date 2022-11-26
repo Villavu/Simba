@@ -84,8 +84,6 @@ procedure TSimbaImageBoxZoom.Paint;
 var
   R: TRect;
 begin
-  SimbaNativeInterface.ClearInterpolation(Canvas);
-
   if (FTempColor > -1) then
   begin
     Canvas.Pen.Color := clBlack;
