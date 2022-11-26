@@ -55,9 +55,6 @@ uses
 
 procedure TSimbaScriptThread.HandleTerminate(Sender: TObject);
 begin
-  if (FatalException is Exception) then
-    SimbaDebugLn(ESimbaDebugLn.RED, 'Note: Script thread did not exit cleanly: ' + Exception(FatalException).Message);
-
   {$IFDEF WINDOWS}
   if (StartupConsoleMode <> 0) then
   begin
@@ -68,7 +65,7 @@ begin
   {$ENDIF}
 
   Application.Terminate();
-  while not Application.Terminated do
+  while (not Application.Terminated) do
     Application.ProcessMessages();
 
   {$IFDEF COCOA_TERMINATE_FIX}
@@ -111,6 +108,10 @@ begin
 end;
 
 procedure TSimbaScriptThread.Execute;
+{$IFDEF SIMBA_HAS_DEBUGINFO}
+var
+  I: Integer;
+{$ENDIF}
 begin
   try
     ExecuteInThread(@HandleInput);
@@ -134,8 +135,22 @@ begin
       HandleException(E);
   end;
 
-  if (FScript <> nil) then
-    FreeAndNil(FScript);
+  // Free the script in the thread so it (hopefully) doesn't mess up the rest of the process if something goes wrong.
+  try
+    FScript.Free();
+  except
+    on E: Exception do
+    begin
+      SimbaDebugLn(ESimbaDebugLn.YELLOW, 'Note: An exception occurred while cleaning up the script: ' + E.Message);
+
+      {$IFDEF SIMBA_HAS_DEBUGINFO}
+      SimbaDebugLn(ESimbaDebugLn.YELLOW, 'Stack trace:');
+      SimbaDebugLn(ESimbaDebugLn.YELLOW, BackTraceStrFunc(ExceptAddr));
+      for I := 0 to ExceptFrameCount - 1 do
+        SimbaDebugLn(ESimbaDebugLn.YELLOW, BackTraceStrFunc(ExceptFrames[I]));
+      {$ENDIF}
+    end;
+  end;
 end;
 
 constructor TSimbaScriptThread.Create(FileName: String; SimbaCommunication, TargetWindow: String; CompileOnly, Debugging: Boolean);

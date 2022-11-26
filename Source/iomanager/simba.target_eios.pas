@@ -180,11 +180,10 @@ end;
 
 destructor TEIOS_Target.Destroy;
 begin
-  if (FLib <> NilHandle) then
-    FreeLibrary(FLib);
-
   if (FClient.ReleaseTarget <> nil) and (FTarget <> nil) then
     FClient.ReleaseTarget(FTarget);
+  if (FLib <> NilHandle) then
+    FreeLibrary(FLib);
 
   inherited Destroy();
 end;
@@ -326,17 +325,11 @@ begin
 end;
 
 procedure TEIOS_Target.SendStringEx(Text: String; MinKeyWait, MaxKeyWait: Integer);
-
-  function GetRandomWait: Integer;
-  begin
-    Result := RandomLeft(MinKeyWait, MaxKeyWait);
-  end;
-
 var
   Character: Char;
 begin
   for Character in Text do
-    SendString(Character, GetRandomWait(), GetRandomWait());
+    SendString(Character, RandomLeft(MinKeyWait, MaxKeyWait), RandomLeft(MinKeyWait, MaxKeyWait));
 end;
 
 procedure TEIOS_Target.HoldKey(Key: Integer);
