@@ -583,9 +583,21 @@ TPointArray.PartitionEx
 ~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.PartitionEx(BoxWidth, BoxHeight: Integer): T2DPointArray;
 *)
-procedure _LapeTPAPartitionEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTPAPartitionEx1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   P2DPointArray(Result)^ := PPointArray(Params^[0])^.PartitionEx(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+(*
+TPointArray.PartitionEx
+~~~~~~~~~~~~~~~~~~~~~~~
+function TPointArray.PartitionEx(BoxWidth, BoxHeight: Integer): T2DPointArray;
+
+PartitionEx with StartPoint.
+*)
+procedure _LapeTPAPartitionEx2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  P2DPointArray(Result)^ := PPointArray(Params^[0])^.PartitionEx(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 (*
@@ -674,7 +686,8 @@ begin
 
     addGlobalFunc('function TPointArray.Partition(Dist: Integer): T2DPointArray; overload', @_LapeTPAPartition1);
     addGlobalFunc('function TPointArray.Partition(Width, Height: Integer): T2DPointArray; overload', @_LapeTPAPartition2);
-    addGlobalFunc('function TPointArray.PartitionEx(BoxWidth, BoxHeight: Integer): T2DPointArray', @_LapeTPAPartitionEx);
+    addGlobalFunc('function TPointArray.PartitionEx(BoxWidth, BoxHeight: Integer): T2DPointArray; overload', @_LapeTPAPartitionEx1);
+    addGlobalFunc('function TPointArray.PartitionEx(StartPoint: TPoint; BoxWidth, BoxHeight: Integer): T2DPointArray; overload', @_LapeTPAPartitionEx2);
     addGlobalFunc('function TPointArray.Intersection(Other: TPointArray): TPointArray', @_Lape_Point_Intersection);
     addGlobalFunc('function TPointArray.Difference(Other: TPointArray): TPointArray', @_Lape_Point_Difference);
     addGlobalFunc('function TPointArray.SymmetricDifference(Other: TPointArray): TPointArray', @_Lape_Point_SymmetricDifference);
