@@ -118,7 +118,8 @@ type
 
     function Partition(Width, Height: Integer): T2DPointArray; overload;
     function Partition(Dist: Integer): T2DPointArray; overload;
-    function PartitionEx(BoxWidth, BoxHeight: Integer): T2DPointArray;
+    function PartitionEx(StartPoint: TPoint; BoxWidth, BoxHeight: Integer): T2DPointArray; overload;
+    function PartitionEx(BoxWidth, BoxHeight: Integer): T2DPointArray; overload;
   end;
 
 implementation
@@ -2012,36 +2013,52 @@ begin
   end;
 end;
 
-function TPointArrayHelper.PartitionEx(BoxWidth, BoxHeight: Integer): T2DPointArray;
+function TPointArrayHelper.PartitionEx(StartPoint: TPoint; BoxWidth, BoxHeight: Integer): T2DPointArray;
 var
-  I, X, Y, ColCount, RowCount: Integer;
-  Area: TBox;
+  I, X, Y, ColCount, RowCount, ResultCount: Integer;
+  B: TBox;
   Buffers: array of TSimbaPointBuffer;
 begin
   Result := Default(T2DPointArray);
 
   if (Length(Self) > 0) then
   begin
-    Area    := Self.Bounds;
-    Area.X2 := Area.Width;
-    Area.Y2 := Area.Height;
+    with Self.Bounds() do
+    begin
+      B.X1 := Min(StartPoint.X, X1);
+      B.Y1 := Min(StartPoint.Y, Y1);
+      B.X2 := X2;
+      B.Y2 := Y2;
+    end;
 
-    ColCount := Ceil(Area.X2 / BoxWidth);
-    RowCount := Ceil(Area.Y2 / BoxHeight);
+    ColCount := Ceil(B.Width / BoxWidth);
+    RowCount := Ceil(B.Height / BoxHeight);
 
     SetLength(Buffers, (ColCount + 1) * (RowCount + 1));
     for I := 0 to High(Self) do
     begin
-      X := (Self[I].X - Area.X1) div BoxWidth;
-      Y := (Self[I].Y - Area.Y1) div BoxHeight;
+      X := (Self[I].X - B.X1) div BoxWidth;
+      Y := (Self[I].Y - B.Y1) div BoxHeight;
 
       Buffers[(Y * ColCount) + X].Add(Self[I]);
     end;
 
+    ResultCount := 0;
+
     SetLength(Result, Length(Buffers));
     for I := 0 to High(Result) do
-      Result[I] := Buffers[I].Trim();
-  end
+      if (Buffers[I].Count > 0) then
+      begin
+        Result[ResultCount] := Buffers[I].Trim();
+        Inc(ResultCount);
+      end;
+    SetLength(Result, ResultCount);
+  end;
+end;
+
+function TPointArrayHelper.PartitionEx(BoxWidth, BoxHeight: Integer): T2DPointArray;
+begin
+  Result := PartitionEx(TPoint.Create(Integer.MaxValue, Integer.MaxValue), BoxWidth, BoxHeight);
 end;
 
 end.
