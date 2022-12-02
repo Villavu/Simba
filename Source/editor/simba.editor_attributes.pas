@@ -189,24 +189,10 @@ end;
 
 procedure TSimbaEditor_CaretColorAttribute.DoChange;
 begin
-  if (Editor = nil) then
-    Exit;
-
-  with TSynEditProtectedAccess(Editor) do
+  if (Editor <> nil) then
   begin
-    if (Foreground = clDefault) or (Foreground = clNone) then
-    begin
-      FScreenCaretPainterClass := TSynEditScreenCaretPainterSystem;
-      if FScreenCaret.Painter.ClassType <> TSynEditScreenCaretPainterSystem then
-        FScreenCaret.ChangePainter(TSynEditScreenCaretPainterSystem);
-    end else
-    begin
-      FScreenCaretPainterClass := TSynEditScreenCaretPainterInternal;
-      if FScreenCaret.Painter.ClassType <> TSynEditScreenCaretPainterInternal then
-        FScreenCaret.ChangePainter(TSynEditScreenCaretPainterInternal);
-
+    with TSynEditProtectedAccess(Editor) do
       TSynEditScreenCaretPainterInternal(FScreenCaret.Painter).Color := Foreground;
-    end;
 
     Editor.Invalidate();
   end;

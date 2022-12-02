@@ -77,6 +77,7 @@ type
 implementation
 
 uses
+  SynEditPointClasses,
   simba.parser_misc, simba.fonthelpers, simba.editor_blockcompletion,
   simba.editor_docgenerator, simba.editor_commentblock,
   simba.editor_mousewheelzoom, simba.editor_history;
@@ -345,6 +346,10 @@ begin
     TypeHelpers := True;
     StringMultilineMode := [spmsmDoubleQuote];
   end;
+
+  FScreenCaretPainterClass := TSynEditScreenCaretPainterInternal;
+  if FScreenCaret.Painter.ClassType <> TSynEditScreenCaretPainterInternal then
+    FScreenCaret.ChangePainter(TSynEditScreenCaretPainterInternal);
 
   FParameterHint := TSimbaParameterHint.Create(nil);
   FParameterHint.Editor := Self;
