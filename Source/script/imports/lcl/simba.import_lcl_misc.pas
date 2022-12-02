@@ -7,7 +7,8 @@ interface
 implementation
 
 uses
-  classes, sysutils, process, spin, pipes, menus, graphics, lptypes, ffi,
+  classes, sysutils, process, spin, pipes, menus, graphics, ListFilterEdit, StdCtrls, Buttons,
+  lptypes, ffi,
   simba.script_compiler;
 
 type
@@ -33,6 +34,10 @@ type
   PMenu = ^TMenu;
   PMainMenu = ^TMainMenu;
   PMenuItem = ^TMenuItem;
+
+  PListFilterEdit = ^TListFilterEdit;
+  PListBox = ^TListBox;
+  PSpeedButton = ^TSpeedButton;
 
 procedure _LapeOutputPipeStream_Seek(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -89,21 +94,6 @@ begin
   PProcess(Params^[0])^.Execute();
 end;
 
-procedure _LapeProcess_CloseInput(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Params^[0])^.CloseInput();
-end;
-
-procedure _LapeProcess_CloseOutput(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Params^[0])^.CloseOutput();
-end;
-
-procedure _LapeProcess_CloseStderr(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Params^[0])^.CloseStderr();
-end;
-
 procedure _LapeProcess_Resume(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PProcess(Params^[0])^.Resume();
@@ -132,11 +122,6 @@ end;
 procedure _LapeProcess_WindowRect_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.WindowRect := PRect(Params^[1])^;
-end;
-
-procedure _LapeProcess_Handle_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PHandle(Result)^ := PProcess(Params^[0])^.Handle;
 end;
 
 procedure _LapeProcess_ProcessHandle_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -224,16 +209,6 @@ begin
   PProcess(Params^[0])^.Parameters := PStrings(Params^[1])^;
 end;
 
-procedure _LapeProcess_ConsoleTitle_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := PProcess(Params^[0])^.ConsoleTitle;
-end;
-
-procedure _LapeProcess_ConsoleTitle_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Params^[0])^.ConsoleTitle := PString(Params^[1])^;
-end;
-
 procedure _LapeProcess_CurrentDirectory_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PProcess(Params^[0])^.CurrentDirectory;
@@ -242,16 +217,6 @@ end;
 procedure _LapeProcess_CurrentDirectory_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PProcess(Params^[0])^.CurrentDirectory := PString(Params^[1])^;
-end;
-
-procedure _LapeProcess_Desktop_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := PProcess(Params^[0])^.Desktop;
-end;
-
-procedure _LapeProcess_Desktop_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Params^[0])^.Desktop := PString(Params^[1])^;
 end;
 
 procedure _LapeProcess_Environment_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -534,11 +499,6 @@ begin
   PMenuItem(Params^[0])^.Insert(PInteger(Params^[1])^, PMenuItem(Params^[2])^);
 end;
 
-procedure _LapeMenuItem_RecreateHandle(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PMenuItem(Params^[0])^.RecreateHandle();
-end;
-
 procedure _LapeMenuItem_Remove(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMenuItem(Params^[0])^.Remove(PMenuItem(Params^[1])^);
@@ -780,6 +740,91 @@ begin
   PMainMenu(Params^[0])^.Free();
 end;
 
+procedure _LapeListFilterEdit_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PListFilterEdit(Params^[0])^ := TListFilterEdit.Create(PComponent(Params^[1])^);
+end;
+
+procedure _LapeListFilterEdit_FilteredListBox_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PListBox(Result)^ := TListBox(PListFilterEdit(Params^[0])^.FilteredListbox);
+end;
+
+procedure _LapeListFilterEdit_FilteredListBox_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PListFilterEdit(Params^[0])^.FilteredListbox := PListBox(Params^[1])^;
+end;
+
+procedure _LapeListFilterEdit_Filter_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PListFilterEdit(Params^[0])^.Filter;
+end;
+
+procedure _LapeListFilterEdit_Filter_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PListFilterEdit(Params^[0])^.Filter := PString(Params^[1])^;
+end;
+
+procedure _LapeListFilterEdit_Flat_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PListFilterEdit(Params^[0])^.Flat;
+end;
+
+procedure _LapeListFilterEdit_Flat_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PListFilterEdit(Params^[0])^.Flat := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeListFilterEdit_ButtonCaption_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PListFilterEdit(Params^[0])^.ButtonCaption;
+end;
+
+procedure _LapeListFilterEdit_ButtonCaption_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PListFilterEdit(Params^[0])^.ButtonCaption := PString(Params^[1])^;
+end;
+
+procedure _LapeListFilterEdit_ButtonWidth_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PListFilterEdit(Params^[0])^.ButtonWidth;
+end;
+
+procedure _LapeListFilterEdit_ButtonWidth_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PListFilterEdit(Params^[0])^.ButtonWidth := PInteger(Params^[1])^;
+end;
+
+procedure _LapeListFilterEdit_TextHint_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PListFilterEdit(Params^[0])^.TextHint;
+end;
+
+procedure _LapeListFilterEdit_TextHint_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PListFilterEdit(Params^[0])^.TextHint := PString(Params^[1])^;
+end;
+
+procedure _LapeListFilterEdit_OnAfterFilter_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PNotifyEvent(Result)^ := PListFilterEdit(Params^[0])^.OnAfterFilter;
+end;
+
+procedure _LapeListFilterEdit_OnAfterFilter_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PListFilterEdit(Params^[0])^.OnAfterFilter := PNotifyEvent(Params^[1])^;
+end;
+
+procedure _LapeListFilterEdit_OnChange_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PNotifyEvent(Result)^ := PListFilterEdit(Params^[0])^.OnChange;
+end;
+
+procedure _LapeListFilterEdit_OnChange_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PListFilterEdit(Params^[0])^.OnChange := PNotifyEvent(Params^[1])^;
+end;
+
 procedure ImportLCLMisc(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -822,15 +867,11 @@ begin
 
     addClass('TProcess', 'TComponent');
     addGlobalFunc('procedure TProcess.Execute;', @_LapeProcess_Execute);
-    addGlobalFunc('procedure TProcess.CloseInput;', @_LapeProcess_CloseInput);
-    addGlobalFunc('procedure TProcess.CloseOutput;', @_LapeProcess_CloseOutput);
-    addGlobalFunc('procedure TProcess.CloseStderr;', @_LapeProcess_CloseStderr);
     addGlobalFunc('function TProcess.Resume: Integer;', @_LapeProcess_Resume);
     addGlobalFunc('function TProcess.Suspend: Integer;', @_LapeProcess_Suspend);
     addGlobalFunc('function TProcess.Terminate(AExitCode : Integer): Boolean;', @_LapeProcess_Terminate);
     addGlobalFunc('function TProcess.WaitOnExit: Boolean;', @_LapeProcess_WaitOnExit);
     addClassVar('TProcess', 'WindowRect', 'TRect', @_LapeProcess_WindowRect_Read, @_LapeProcess_WindowRect_Write);
-    addClassVar('TProcess', 'Handle', 'THandle', @_LapeProcess_Handle_Read);
     addClassVar('TProcess', 'ProcessHandle', 'THandle', @_LapeProcess_ProcessHandle_Read);
     addClassVar('TProcess', 'ThreadHandle', 'THandle', @_LapeProcess_ThreadHandle_Read);
     addClassVar('TProcess', 'ProcessID', 'Integer', @_LapeProcess_ProcessID_Read);
@@ -846,9 +887,7 @@ begin
     addClassVar('TProcess', 'CommandLine', 'String', @_LapeProcess_CommandLine_Read, @_LapeProcess_CommandLine_Write);
     addClassVar('TProcess', 'Executable', 'String', @_LapeProcess_Executable_Read, @_LapeProcess_Executable_Write);
     addClassVar('TProcess', 'Parameters', 'TStrings', @_LapeProcess_Parameters_Read, @_LapeProcess_Parameters_Write);
-    addClassVar('TProcess', 'ConsoleTitle', 'String', @_LapeProcess_ConsoleTitle_Read, @_LapeProcess_ConsoleTitle_Write);
     addClassVar('TProcess', 'CurrentDirectory', 'String', @_LapeProcess_CurrentDirectory_Read, @_LapeProcess_CurrentDirectory_Write);
-    addClassVar('TProcess', 'Desktop', 'String', @_LapeProcess_Desktop_Read, @_LapeProcess_Desktop_Write);
     addClassVar('TProcess', 'Environment', 'TStrings', @_LapeProcess_Environment_Read, @_LapeProcess_Environment_Write);
     addClassVar('TProcess', 'Options', 'TProcessOptions', @_LapeProcess_Options_Read, @_LapeProcess_Options_Write);
     addClassVar('TProcess', 'Priority', 'TProcessPriority', @_LapeProcess_Priority_Read, @_LapeProcess_Priority_Write);
@@ -869,7 +908,6 @@ begin
     addGlobalFunc('procedure TMenuItem.Click;', @_LapeMenuItem_Click);
     addGlobalFunc('procedure TMenuItem.Delete(Index: Integer);', @_LapeMenuItem_Delete);
     addGlobalFunc('procedure TMenuItem.Insert(Index: Integer; Item: TMenuItem);', @_LapeMenuItem_Insert);
-    addGlobalFunc('procedure TMenuItem.RecreateHandle;', @_LapeMenuItem_RecreateHandle);
     addGlobalFunc('procedure TMenuItem.Remove(Item: TMenuItem);', @_LapeMenuItem_Remove);
     addGlobalFunc('function TMenuItem.IsCheckItem: boolean;', @_LapeMenuItem_IsCheckItem);
     addGlobalFunc('function TMenuItem.IsLine: Boolean;', @_LapeMenuItem_IsLine);
@@ -898,13 +936,24 @@ begin
     addGlobalFunc('function TMenu.DispatchCommand(ACommand: Int16): Boolean;', @_LapeMenu_DispatchCommand);
     addGlobalFunc('function TMenu.AddMenu(Name: string): TMenuItem;', @_LapeMenu_AddMenu);
     addClassVar('TMenu', 'Parent', 'TComponent', @_LapeMenu_Parent_Read, @_LapeMenu_Parent_Write);
-    addClassVar('TMenu', 'Items', 'TMenuItem', @_LapeMenu_Items_Read, nil);
+    addClassVar('TMenu', 'Items', 'TMenuItem', @_LapeMenu_Items_Read);
     addGlobalFunc('procedure TMenu.Init(AOwner: TComponent); override', @_LapeMenu_Init);
     //addGlobalFunc('procedure TMenu.Free;', @_LapeMenu_Free);
 
     addClass('TMainMenu', 'TMenu');
     addGlobalFunc('procedure TMainMenu.Init(AOwner: TComponent); override', @_LapeMainMenu_Init);
     //addGlobalFunc('procedure TMainMenu.Free;', @_LapeMainMenu_Free);
+
+    addClass('TListFilterEdit', 'TCustomControl');
+    addGlobalFunc('procedure TListFilterEdit.Init(AOwner: TComponent); override', @_LapeListFilterEdit_Init);
+    addClassVar('TListFilterEdit', 'FilteredListBox', 'TListBox', @_LapeListFilterEdit_FilteredListBox_Read, @_LapeListFilterEdit_FilteredListBox_Write);
+    addClassVar('TListFilterEdit', 'Filter', 'String', @_LapeListFilterEdit_Filter_Read, @_LapeListFilterEdit_Filter_Write);
+    addClassVar('TListFilterEdit', 'Flat', 'Boolean', @_LapeListFilterEdit_Flat_Read, @_LapeListFilterEdit_Flat_Write);
+    addClassVar('TListFilterEdit', 'ButtonCaption', 'String', @_LapeListFilterEdit_ButtonCaption_Read, @_LapeListFilterEdit_ButtonCaption_Write);
+    addClassVar('TListFilterEdit', 'ButtonWidth', 'Integer', @_LapeListFilterEdit_ButtonWidth_Read, @_LapeListFilterEdit_ButtonWidth_Write);
+    addClassVar('TListFilterEdit', 'TextHint', 'String', @_LapeListFilterEdit_TextHint_Read, @_LapeListFilterEdit_TextHint_Write);
+    addClassVar('TListFilterEdit', 'OnAfterFilter', 'TNotifyEvent', @_LapeListFilterEdit_OnAfterFilter_Read, @_LapeListFilterEdit_OnAfterFilter_Write);
+    addClassVar('TListFilterEdit', 'OnChange', 'TNotifyEvent', @_LapeListFilterEdit_OnChange_Read, @_LapeListFilterEdit_OnChange_Write);
   end;
 end;
 
