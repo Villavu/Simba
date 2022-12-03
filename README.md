@@ -8,7 +8,7 @@ The scripting language used is [Lape](https://github.com/nielsAD/lape) which use
 Simba is available for:
  - Windows (32 & 64 bit)
  - Linux (64 bit & AArch64)
- - MacOS (64 bit)
+ - MacOS (64 bit & AArch64)
 
 ![Simba on Windows 11](Images/docs/simba_windows.png)
 
@@ -23,13 +23,16 @@ Linux:
 MacOS:
   - `libffi` `brew install libffi`
 
-
 ------
-# Building Simba
+## Building Simba
 
-Simba is a [Lazarus](https://www.lazarus-ide.org/) project. Version 2.2 is available here: https://sourceforge.net/projects/lazarus/files/
+Simba is a [Lazarus](https://www.lazarus-ide.org/) project. Lazarus is available here: https://sourceforge.net/projects/lazarus/files/ the latest version should work.
 
 Steps:
 1) Clone the Simba repository & install submodules `git clone --recurse-submodules https://github.com/Villavu/Simba`. 
-2) Open `Source/Simba.lpi` in Lazarus
-3) When built the Simba executable will be located in the root directory of the repository.
+2) Open `Source/Simba.lpi` in Lazarus.
+3) Select the build mode required.
+
+![Build Mode](Images/docs/buildmode.png)
+
+4) Build Simba (Run > Build) and when completed the Simba executable will be located in the root directory of the repository.
