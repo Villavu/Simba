@@ -365,7 +365,9 @@
       <Unit8>
         <Filename Value="forms/simba.filebrowserform.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="SimbaFileBrowserForm"/>
         <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
       </Unit8>
       <Unit9>
         <Filename Value="forms/simba.functionlistform.pas"/>

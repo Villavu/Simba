@@ -1,10 +1,10 @@
 object SimbaOutputForm: TSimbaOutputForm
   Left = 3288
-  Height = 274
+  Height = 140
   Top = 1011
   Width = 676
   Caption = 'Output'
-  ClientHeight = 274
+  ClientHeight = 140
   ClientWidth = 676
   DesignTimePPI = 120
   OnMouseDown = FormMouseDown
@@ -13,7 +13,7 @@ object SimbaOutputForm: TSimbaOutputForm
   LCLVersion = '2.2.4.0'
   object PageControl: TPageControl
     Left = 0
-    Height = 274
+    Height = 140
     Top = 0
     Width = 676
     ActivePage = TabScript

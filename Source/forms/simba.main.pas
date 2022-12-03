@@ -221,7 +221,6 @@ type
   protected
     FWindowSelection: TWindowHandle;
     FProcessSelection: Integer;
-    FDockingReset: Boolean;
     FRecentFiles: TStringList;
 
     FPackageMenu: TStringList;
@@ -234,6 +233,7 @@ type
     FAreaSelector: TSimbaAreaSelector;
     FAreaSelection: TBox;
 
+    procedure SetDefaultDocking(IsResetting: Boolean = False);
     procedure SetupDocking;
     procedure SetupCompleted;
 
@@ -582,6 +582,60 @@ end;
 procedure TSimbaForm.TrayPopupExitClick(Sender: TObject);
 begin
   Close();
+end;
+
+procedure TSimbaForm.SetDefaultDocking(IsResetting: Boolean);
+var
+  I: Integer;
+  Splitter: TAnchorDockSplitter;
+begin
+  if IsResetting then
+  begin
+    if (MessageDlg('Reset to default layout?', mtConfirmation, [mbYes, mbNo], 0) <> mrYes) then
+      Exit;
+
+    SimbaSettings.General.Layout.Value := '';
+    SimbaSettings.General.LockLayout.Value := False;
+
+    Hide();
+    WindowState := wsNormal;
+    for I := 0 to Screen.CustomFormCount - 1 do
+      if (Screen.CustomForms[I].HostDockSite is TCustomForm) then
+      begin
+        Screen.CustomForms[I].Hide();
+
+        DockMaster.ManualFloat(Screen.CustomForms[I]);
+        if (DockMaster.GetAnchorSite(Screen.CustomForms[I]) <> nil) then
+          DockMaster.GetAnchorSite(Screen.CustomForms[I]).Header.Visible := True;
+      end;
+  end;
+
+  DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaScriptTabsForm), DockPanel, alClient);
+  DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaOutputForm), DockPanel, alBottom);
+  DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaFunctionListForm), DockPanel, alLeft);
+  DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaFileBrowserForm), DockPanel, alRight);
+
+  DockMaster.MakeVisible(SimbaScriptTabsForm, False);
+  DockMaster.MakeVisible(SimbaOutputForm, False);
+  DockMaster.MakeVisible(SimbaFunctionListForm, False);
+  DockMaster.MakeVisible(SimbaFileBrowserForm, False);
+
+  // Default size
+  Width := 1250;
+  Height := 850;
+
+  if GetDockSplitter(DockMaster.GetAnchorSite(SimbaScriptTabsForm), akLeft, Splitter) then
+    Splitter.SetSplitterPosition(250);
+  if GetDockSplitter(DockMaster.GetAnchorSite(SimbaScriptTabsForm), akRight, Splitter) then
+    Splitter.SetSplitterPosition(1000);
+  if GetDockSplitter(DockMaster.GetAnchorSite(SimbaScriptTabsForm), akBottom, Splitter) then
+    Splitter.SetSplitterPosition(450);
+
+  DockMaster.GetAnchorSite(SimbaScriptTabsForm).Header.Visible := False;
+  DockMaster.GetAnchorSite(SimbaOutputForm).Header.Visible := False;
+
+  MoveToDefaultPosition();
+  EnsureVisible();
 end;
 
 procedure TSimbaForm.Setup(Data: PtrInt);
@@ -1080,10 +1134,7 @@ end;
 
 procedure TSimbaForm.MenuItemResetLayoutClick(Sender: TObject);
 begin
-  if MessageDlg('Reset to default layout? This will happen when Simba is next restarted.', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
-    FDockingReset := True
-  else
-    FDockingReset := False;
+  SetDefaultDocking(True);
 end;
 
 procedure TSimbaForm.MenuItemConsoleClick(Sender: TObject);
@@ -1198,12 +1249,6 @@ begin
   else
   begin
     CloseAction := caFree;
-
-    if FDockingReset then
-    begin
-      SimbaSettings.General.Layout.Value := '';
-      SimbaSettings.General.LockLayout.Value := False;
-    end else
     if (WindowState <> wsMinimized) then
       SimbaSettings.General.Layout.Value := DockMaster.SaveLayout();
 
@@ -1359,45 +1404,33 @@ begin
     DockMaster.PageAreaInPercent := 0;
     DockMaster.HeaderHint := 'Use the mouse to drag and dock this window';
     DockMaster.MakeDockPanel(DockPanel, admrpChild);
+    DockMaster.DragTreshold := 40;
 
-    DockMaster.MakeDockable(SimbaScriptTabsForm, MenuItemEditor, False);
-    DockMaster.MakeDockable(SimbaOutputForm, MenuItemOutput, False);
+    DockMaster.MakeDockable(SimbaScriptTabsForm, MenuItemEditor);
+    DockMaster.MakeDockable(SimbaOutputForm, MenuItemOutput);
     DockMaster.MakeDockable(SimbaFileBrowserForm, MenuItemFileBrowser);
     DockMaster.MakeDockable(SimbaFunctionListForm, MenuItemFunctionList);
     DockMaster.MakeDockable(SimbaNotesForm, MenuItemNotes);
     DockMaster.MakeDockable(SimbaDebugImageForm, MenuItemDebugImage);
     DockMaster.MakeDockable(SimbaColorPickerHistoryForm, MenuItemColourHistory);
 
-    if (SimbaSettings.General.Layout.Value = '') then
+    if (SimbaSettings.General.Layout.Value <> '') then
     begin
-      DockMaster.GetAnchorSite(SimbaFileBrowserForm).Width := 175;
-      DockMaster.GetAnchorSite(SimbaFunctionListForm).Width := 175;
-      DockMaster.GetAnchorSite(SimbaOutputForm).Height := 80;
-
-      DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaScriptTabsForm), DockPanel, alClient);
-      DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaOutputForm), DockPanel, alBottom);
-      DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaFunctionListForm), DockPanel, alLeft);
-      DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaFileBrowserForm), DockPanel, alRight);
-
-      DockMaster.MakeVisible(SimbaScriptTabsForm, False);
-      DockMaster.MakeVisible(SimbaOutputForm, False);
-      DockMaster.MakeVisible(SimbaFunctionListForm, False);
-      DockMaster.MakeVisible(SimbaFileBrowserForm, False);
-
-      Width := 1250;
-      Height := 850;
-    end else
       DockMaster.LoadLayout(SimbaSettings.General.Layout.Value);
+
+      if (DockMaster.GetAnchorSite(SimbaScriptTabsForm) <> nil) then
+        DockMaster.GetAnchorSite(SimbaScriptTabsForm).Header.Visible := False;
+      if (DockMaster.GetAnchorSite(SimbaOutputForm) <> nil) then
+        DockMaster.GetAnchorSite(SimbaOutputForm).Header.Visible := False;
+
+      EnsureVisible();
+    end else
+      SetDefaultDocking();
   finally
     DockMaster.EndUpdate();
 
     EndFormUpdate();
   end;
-
-  if (SimbaSettings.General.Layout.Value = '') then
-    Position := poScreenCenter;
-
-  EnsureVisible();
 end;
 
 procedure TSimbaForm.SetupCompleted;

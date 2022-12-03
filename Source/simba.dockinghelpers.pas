@@ -62,7 +62,7 @@ type
   private
     procedure OnFormClose(Sender: TObject; var CloseAction: TCloseAction);
   public
-    procedure MakeDockable(Form: TCustomForm; MenuItem: TMenuItem; AddDockHeader: Boolean = True);
+    procedure MakeDockable(Form: TCustomForm; MenuItem: TMenuItem);
     procedure ManualDockPanel(SrcSite: TAnchorDockHostSite; TargetPanel: TAnchorDockPanel; Align: TAlign; TargetControl: TControl = nil);
 
     function SaveLayout: String;
@@ -217,15 +217,14 @@ begin
   end;
 end;
 
-procedure TAnchorDockMasterHelper.MakeDockable(Form: TCustomForm; MenuItem: TMenuItem; AddDockHeader: Boolean);
+procedure TAnchorDockMasterHelper.MakeDockable(Form: TCustomForm; MenuItem: TMenuItem);
 begin
-  inherited MakeDockable(Form, False);
+  inherited MakeDockable(Form, False, False, True);
 
   if (Form.HostDockSite is TSimbaAnchorDockHostSite) then
   begin
     Form.AddHandlerClose(@OnFormClose, True);
 
-    TSimbaAnchorDockHostSite(Form.HostDockSite).Header.Visible := AddDockHeader;
     TSimbaAnchorDockHostSite(Form.HostDockSite).MenuItem := MenuItem;
   end;
 end;

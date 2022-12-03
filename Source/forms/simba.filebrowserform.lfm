@@ -2,10 +2,10 @@ object SimbaFileBrowserForm: TSimbaFileBrowserForm
   Left = -799
   Height = 309
   Top = 571
-  Width = 401
+  Width = 175
   Caption = 'File Browser'
   DesignTimePPI = 120
-  LCLVersion = '2.2.0.2'
+  LCLVersion = '2.2.4.0'
   object Popup: TPopupMenu
     OnPopup = PopupPopup
     Left = 110

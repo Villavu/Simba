@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 2864
+  Left = 849
   Height = 695
-  Top = 630
+  Top = 596
   Width = 1220
   Caption = 'Simba'
   ClientHeight = 670
@@ -12,6 +12,7 @@ object SimbaForm: TSimbaForm
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  Position = poScreenCenter
   LCLVersion = '2.2.4.0'
   object ToolBar: TToolBar
     Left = 0
