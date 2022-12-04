@@ -25,20 +25,20 @@ jobs:
             binary: Simba-Win64.exe
             test: Simba-Win64.exe
             
-          - name: Windows 32  
+          - name: Windows 32
             runs-on: windows-latest
             build-mode: WIN32
             binary: Simba-Win32.exe
             test: Simba-Win32.exe
 
           - name: Linux 64
-            runs-on: ubuntu-latest
+            runs-on: ubuntu-20.04
             build-mode: LINUX64
             binary: Simba-Linux64
             test: Simba-Linux64
           
           - name: Linux AArch64  
-            runs-on: ubuntu-latest
+            runs-on: ubuntu-20.04
             build-mode: LINUX-AARCH64
             binary: Simba-Linux-AArch64
             
@@ -55,10 +55,10 @@ jobs:
             
     steps:
       - name: Install Lazarus
-        uses: ollydev/setup-lazarus-fpcup@v3
+        uses: ollydev/setup-lazarus-fpcup@master
         with:
           laz: lazarus_2_2_4
-          fpc: release_3_2_2
+          fpc: fixes_3_2
 
       - uses: actions/checkout@v3.1.0 
         with: 
@@ -92,7 +92,7 @@ jobs:
       - name: Test Simba
         if: matrix.config.test != ''
         run: |
-          if [ "${{ matrix.config.runs-on }}" = "ubuntu-latest" ]; then
+          if [ "${{ matrix.config.runs-on }}" = "ubuntu-20.04" ]; then
               export DISPLAY=:1
               Xvfb :1 & sleep 2
           fi

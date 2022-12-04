@@ -126,7 +126,7 @@ begin
     addGlobalFunc('procedure Sync(Method: TSyncMethod)', @_LapeSync);
 
     addGlobalFunc(
-      'procedure MemMove(constref Src; var Dst; Size: SizeInt); deprecated;', [
+      'procedure MemMove(constref Src; var Dst; Size: SizeInt); deprecated "Use Move";', [
       'begin',
       '  Move(Src, Dst, Size);',
       'end;'
