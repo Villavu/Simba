@@ -181,6 +181,22 @@ begin
   PCustomForm(Params^[0])^.SetRestoredBounds(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
 end;
 
+procedure _LapeCustomForm_StayOnTop_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  if (PCustomForm(Params^[0])^.FormStyle = fsSystemStayOnTop) then
+    PBoolean(Result)^ := True
+  else
+    PBoolean(Result)^ := False;
+end;
+
+procedure _LapeCustomForm_StayOnTop_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  if PBoolean(Params^[1])^ then
+    PCustomForm(Params^[0])^.FormStyle := fsSystemStayOnTop
+  else
+    PCustomForm(Params^[0])^.FormStyle := fsNormal;
+end;
+
 procedure _LapeCustomForm_Show(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomForm(Params^[0])^.Show();
@@ -1093,6 +1109,7 @@ begin
     addClassVar('TCustomForm', 'ShowInTaskBar', 'TShowInTaskBar', @_LapeCustomForm_ShowInTaskBar_Read, @_LapeCustomForm_ShowInTaskBar_Write);
     addClassVar('TCustomForm', 'Position', 'TPosition', @_LapeCustomForm_Position_Read, @_LapeCustomForm_Position_Write);
     addClassVar('TCustomForm', 'AutoScroll', 'Boolean', @_LapeCustomForm_AutoScroll_Read, @_LapeCustomForm_AutoScroll_Write);
+    addClassVar('TCustomForm', 'StayOnTop', 'Boolean', @_LapeCustomForm_StayOnTop_Read, @_LapeCustomForm_StayOnTop_Write);
 
     addClass('TForm', 'TCustomForm');
     addGlobalFunc('procedure TForm.Init(TheOwner: TComponent); override', @_LapeForm_Init);

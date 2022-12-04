@@ -12,7 +12,7 @@ interface
 uses
   sysutils, classes,
   castaliapaslex, castaliapaslextypes,
-  simba.codeparser, simba.parser_misc,
+  simba.mufasatypes, simba.codeparser, simba.parser_misc,
   simba.ci_includecache;
 
 type
@@ -370,7 +370,7 @@ function TCodeInsight.GetMembersOfType(Declaration: TDeclaration): TDeclarationA
     end;
 
     if Depth >= 20 then
-      WriteLn('Recursive type detected');
+      DebugLn('Recursive type detected');
   end;
 
 begin
@@ -380,7 +380,9 @@ begin
 
   if Declaration is TciProcedureClassName then
   begin
-    Declaration := GlobalByName[Declaration.RawText];
+    Declaration := LocalByName[Declaration.RawText];
+    if (Declaration = nil) then
+      Declaration := GlobalByName[Declaration.RawText];
     if Declaration is TciTypeDeclaration then
       GetMethods(Declaration as TciTypeDeclaration);
   end else
@@ -410,7 +412,7 @@ begin
   if Declaration is TciArrayType then
     Result := Result + ManageParser(ParseArrayHelpers(Declaration as TciArrayType)).Items.ToArray
   else
-    WriteLn('GetMembersOfType: Unexpected type "', Declaration.ClassName, '"');
+    DebugLn('GetMembersOfType: Unexpected type "' + Declaration.ClassName + '"');
 end;
 
 function TCodeInsight.GetMembersOfType(Declaration: TDeclaration; Name: String): TDeclarationArray;
@@ -521,7 +523,9 @@ begin
 
   if Declaration is TciProcedureClassName then
   begin
-    Result := GlobalByName[Declaration.RawText];
+    Result := LocalByName[Declaration.RawText];
+    if (Result = nil) then
+      Result := GlobalByName[Declaration.RawText];
     Exit;
   end;
   if Declaration is TciTypeDeclaration then
@@ -538,16 +542,19 @@ begin
     with Declaration as TciTypeKind do
     begin
       if IdentifierType <> nil then
-        Result := GlobalByName[IdentifierType.Name]
-      else
+      begin
+        Result := LocalByName[IdentifierType.Name];
+        if (Result = nil) then
+          Result := GlobalByName[IdentifierType.Name]
+      end else
         Result := GetType;
     end;
   end else
   begin
     if Declaration = nil then
-      WriteLN('ResolveType: Nil')
+      DebugLn('ResolveType: Nil')
     else
-      WriteLn('ResolveType: Unexpected type "', Declaration.ClassName, '"');
+      DebugLn('ResolveType: Unexpected type "' + Declaration.ClassName + '"');
   end;
 end;
 
