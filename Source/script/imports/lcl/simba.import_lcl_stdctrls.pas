@@ -32,6 +32,7 @@ type
   PCustomMemo = ^TCustomMemo;
   PCustomSpeedButton = ^TCustomSpeedButton;
   PDrawItemEvent = ^TDrawItemEvent;
+  PMeasureItemEvent = ^TMeasureItemEvent;
   PSelectionChangeEvent = ^TSelectionChangeEvent;
   PEdit = ^TEdit;
   PGroupBox = ^TGroupBox;
@@ -475,6 +476,16 @@ begin
   PCustomListBox(Params^[0])^.TopIndex := PInteger(Params^[1])^;
 end;
 
+procedure _LapeCustomListBox_OnDblClick_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PNotifyEvent(Result)^ := PCustomListBox(Params^[0])^.OnDblClick;
+end;
+
+procedure _LapeCustomListBox_OnDblClick_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PCustomListBox(Params^[0])^.OnDblClick := PNotifyEvent(Params^[1])^;
+end;
+
 procedure _LapeCustomListBox_Style_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PListBoxStyle(Result)^ := PCustomListBox(Params^[0])^.Style;
@@ -498,6 +509,16 @@ end;
 procedure _LapeCustomListBox_OnSelectionChange_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomListBox(Params^[0])^.OnSelectionChange := PSelectionChangeEvent(Params^[1])^;
+end;
+
+procedure _LapeCustomListBox_OnMeasureItem_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMeasureItemEvent(Result)^ := PCustomListBox(Params^[0])^.OnMeasureItem;
+end;
+
+procedure _LapeCustomListBox_OnMeasureItem_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PCustomListBox(Params^[0])^.OnMeasureItem := PMeasureItemEvent(Params^[1])^;
 end;
 
 procedure _LapeCustomListBox_OnDrawItem_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -1164,7 +1185,7 @@ procedure ImportLCLStdCtrls(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    addGlobalType('(ssNone, ssHorizontal, ssVertical, ssBoth,ssAutoHorizontal, ssAutoVertical, ssAutoBoth)', 'TScrollStyle');
+    addGlobalType('(ssNone, ssHorizontal, ssVertical, ssBoth, ssAutoHorizontal, ssAutoVertical, ssAutoBoth)', 'TScrollStyle');
     addGlobalType('(odSelected, odGrayed, odDisabled, odChecked, odFocused, odDefault, odHotLight, odInactive, odNoAccel, odNoFocusRect, odReserved1, odReserved2, odComboBoxEdit, odPainted)', 'TOwnerDrawStateType');
     addGlobalType('set of TOwnerDrawStateType', 'TOwnerDrawState');
     addGlobalType('procedure(Control: TWinControl; Index: Integer; ARect: TRect; State: TOwnerDrawState) of object', 'TDrawItemEvent', FFI_DEFAULT_ABI);
@@ -1174,6 +1195,7 @@ begin
     addGlobalType('(cbUnchecked, cbChecked, cbGrayed)', 'TCheckBoxState');
     addGlobalType('(blGlyphLeft, blGlyphRight, blGlyphTop, blGlyphBottom)', 'TButtonLayout');
     addGlobalType('procedure(Sender: TObject; User: Boolean) of object', 'TSelectionChangeEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Control: TWinControl; Index: Integer; var AHeight: Integer) of object', 'TMeasureItemEvent', FFI_DEFAULT_ABI);
 
     addClass('TCustomComboBox', 'TWinControl');
     addGlobalFunc('procedure TCustomComboBox.Init(TheOwner: TComponent); override', @_LapeCustomComboBox_Init);
@@ -1237,7 +1259,9 @@ begin
     addClassVar('TCustomListBox', 'Sorted', 'Boolean', @_LapeCustomListBox_Sorted_Read, @_LapeCustomListBox_Sorted_Write);
     addClassVar('TCustomListBox', 'TopIndex', 'Integer', @_LapeCustomListBox_TopIndex_Read, @_LapeCustomListBox_TopIndex_Write);
     addClassVar('TCustomListBox', 'Style', 'TListBoxStyle', @_LapeCustomListBox_Style_Read, @_LapeCustomListBox_Style_Write);
+    addClassVar('TCustomListBox', 'OnDblClick', 'TNotifyEvent', @_LapeCustomListBox_OnDblClick_Read, @_LapeCustomListBox_OnDblClick_Write);
     addClassVar('TCustomListBox', 'OnDrawItem', 'TDrawItemEvent', @_LapeCustomListBox_OnDrawItem_Read, @_LapeCustomListBox_OnDrawItem_Write);
+    addClassVar('TCustomListBox', 'OnMeasureItemEvent', 'TMeasureItemEvent', @_LapeCustomListBox_OnMeasureItem_Read, @_LapeCustomListBox_OnMeasureItem_Write);
     addClassVar('TCustomListBox', 'OnSelectionChange', 'TSelectionChangeEvent', @_LapeCustomListBox_OnSelectionChange_Read, @_LapeCustomListBox_OnSelectionChange_Write);
 
     addClass('TListBox', 'TCustomListBox');
