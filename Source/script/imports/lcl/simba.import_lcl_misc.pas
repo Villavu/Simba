@@ -7,7 +7,7 @@ interface
 implementation
 
 uses
-  classes, sysutils, process, spin, pipes, menus, graphics, ListFilterEdit, StdCtrls, Buttons,
+  classes, sysutils, process, spin, pipes, menus, graphics, ListFilterEdit, StdCtrls, Buttons, ButtonPanel,
   lptypes, ffi,
   simba.script_compiler;
 
@@ -38,6 +38,8 @@ type
   PListFilterEdit = ^TListFilterEdit;
   PListBox = ^TListBox;
   PSpeedButton = ^TSpeedButton;
+  PButtonPanel = ^TButtonPanel;
+  PPanelButtons = ^TPanelButtons;
 
 procedure _LapeOutputPipeStream_Seek(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -825,6 +827,31 @@ begin
   PListFilterEdit(Params^[0])^.OnChange := PNotifyEvent(Params^[1])^;
 end;
 
+procedure _LapeButtonPanel_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PButtonPanel(Params^[0])^ := TButtonPanel.Create(PComponent(Params^[1])^);
+end;
+
+procedure _LapeButtonPanel_ShowButtons_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPanelButtons(Result)^ := PButtonPanel(Params^[0])^.ShowButtons;
+end;
+
+procedure _LapeButtonPanel_ShowButtons_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PButtonPanel(Params^[0])^.ShowButtons := PPanelButtons(Params^[1])^;
+end;
+
+procedure _LapeButtonPanel_ShowGlyphs_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPanelButtons(Result)^ := PButtonPanel(Params^[0])^.ShowGlyphs;
+end;
+
+procedure _LapeButtonPanel_ShowGlyphs_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PButtonPanel(Params^[0])^.ShowGlyphs := PPanelButtons(Params^[1])^;
+end;
+
 procedure ImportLCLMisc(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -954,6 +981,12 @@ begin
     addClassVar('TListFilterEdit', 'TextHint', 'String', @_LapeListFilterEdit_TextHint_Read, @_LapeListFilterEdit_TextHint_Write);
     addClassVar('TListFilterEdit', 'OnAfterFilter', 'TNotifyEvent', @_LapeListFilterEdit_OnAfterFilter_Read, @_LapeListFilterEdit_OnAfterFilter_Write);
     addClassVar('TListFilterEdit', 'OnChange', 'TNotifyEvent', @_LapeListFilterEdit_OnChange_Read, @_LapeListFilterEdit_OnChange_Write);
+
+    addClass('TButtonPanel', 'TCustomPanel');
+    addGlobalType('set of (pbOK, pbCancel, pbClose, pbHelp)', 'TButtonPanelButtons');
+    addGlobalFunc('procedure TButtonPanel.Init(AOwner: TComponent); override', @_LapeButtonPanel_Init);
+    addClassVar('TButtonPanel', 'ShowButtons', 'TButtonPanelButtons', @_LapeButtonPanel_ShowButtons_Read, @_LapeButtonPanel_ShowButtons_Write);
+    addClassVar('TButtonPanel', 'ShowGlyphs', 'TButtonPanelButtons', @_LapeButtonPanel_ShowGlyphs_Read, @_LapeButtonPanel_ShowGlyphs_Write);
   end;
 end;
 
