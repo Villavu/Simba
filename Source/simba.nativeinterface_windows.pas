@@ -766,7 +766,7 @@ end;
 
 function TSimbaNativeInterface_Windows.IsWindowVisible(Window: TWindowHandle): Boolean;
 begin
-  Result := IsWindowVisible(Window) and (not IsIconic(Window))
+  Result := Windows.IsWindowVisible(Window) and (not IsIconic(Window))
 end;
 
 function TSimbaNativeInterface_Windows.GetWindowPID(Window: TWindowHandle): Integer;
@@ -797,8 +797,11 @@ var
   RootWindow: TWindowHandle;
   I: Integer;
 begin
-  if GetActiveWindow() = Window then
+  if (GetActiveWindow() = Window) then
     Exit(True);
+
+  if IsIconic(Window) then
+    PostMessage(Window, WM_SYSCOMMAND, SC_RESTORE, 0);
 
   RootWindow := GetRootWindow(Window);
   CurrentThread := GetWindowThreadProcessID(GetForegroundWindow(), PID);

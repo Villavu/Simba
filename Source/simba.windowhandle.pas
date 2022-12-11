@@ -92,7 +92,7 @@ end;
 
 function TWindowHandleHelper.GetTitleW: WideString;
 begin
-   Result := SimbaNativeInterface.GetWindowTitle(Self);
+  Result := SimbaNativeInterface.GetWindowTitle(Self);
 end;
 
 function TWindowHandleHelper.GetBounds: TBox;
@@ -160,7 +160,7 @@ var
   Windows: TWindowHandleArray;
   I: Integer;
 begin
-  Windows := GetTopWindows();
+  Windows := GetWindows();
   for I := 0 to High(Windows) do
     if Windows[I].GetTitle().RegExprExists(Title) then
     begin
@@ -180,7 +180,7 @@ var
 begin
   Result := Default(TWindowHandleArray);
 
-  Windows := GetTopWindows();
+  Windows := GetWindows();
   for I := 0 to High(Windows) do
     if Windows[I].GetTitle().RegExprExists(Title) then
       Result := Result + [Windows[I]];
