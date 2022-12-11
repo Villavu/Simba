@@ -38,11 +38,11 @@ begin
 end;
 
 (*
-TWindowHandle.IsVaild
+TWindowHandle.IsValid
 ~~~~~~~~~~~~~~~~~~~~~
-function TWindowHandle.IsVaild: Boolean;
+function TWindowHandle.IsValid: Boolean;
 *)
-procedure _LapeWindowHandle_IsVaild(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeWindowHandle_IsValid(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PWindowHandle(Params^[0])^.IsValid();
 end;
@@ -277,7 +277,7 @@ begin
     addGlobalType('array of TWindowHandle', 'TWindowHandleArray');
 
     addGlobalFunc('function TWindowHandle.Activate: Boolean;', @_LapeWindowHandle_Activate);
-    addGlobalFunc('function TWindowHandle.IsVaild: Boolean;', @_LapeWindowHandle_IsVaild);
+    addGlobalFunc('function TWindowHandle.IsValid: Boolean;', @_LapeWindowHandle_IsValid);
     addGlobalFunc('function TWindowHandle.IsActive: Boolean;', @_LapeWindowHandle_IsActive);
     addGlobalFunc('function TWindowHandle.IsVisible: Boolean;', @_LapeWindowHandle_IsVisible);
     addGlobalFunc('function TWindowHandle.GetPID: UInt32;', @_LapeWindowHandle_GetPID);
