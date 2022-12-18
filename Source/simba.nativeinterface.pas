@@ -69,6 +69,9 @@ type
     procedure OpenDirectory(Path: String); virtual; abstract;
 
     // Not abstract
+
+    function WindowHandleToStr(WindowHandle: TWindowHandle): String; virtual;
+    function WindowHandleFromStr(Str: String): TWindowHandle; virtual;
     procedure PreciseSleep(Milliseconds: UInt32); virtual;
 
     procedure PlaySound(Path: String); virtual;
@@ -165,6 +168,16 @@ begin
       if (ssAlt   in KeyModifiers) then ReleaseKey(VK_MENU,    RandomLeft(MinKeyWait, MaxMaxWait));
     end;
   end;
+end;
+
+function TSimbaNativeInterface.WindowHandleToStr(WindowHandle: TWindowHandle): String;
+begin
+  Result := IntToStr(WindowHandle);
+end;
+
+function TSimbaNativeInterface.WindowHandleFromStr(Str: String): TWindowHandle;
+begin
+  Result := Str.ToInt64(0);
 end;
 
 procedure TSimbaNativeInterface.PreciseSleep(Milliseconds: UInt32);

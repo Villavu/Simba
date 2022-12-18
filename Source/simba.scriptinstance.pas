@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, process,
-  simba.mufasatypes, simba.scriptinstance_communication, simba.debuggerform;
+  simba.mufasatypes, simba.scriptinstance_communication, simba.debuggerform, simba.windowhandle;
 
 type
   TSimbaScriptError = record
@@ -27,7 +27,7 @@ type
 
     FSimbaCommunication: TSimbaScriptInstanceCommunication;
 
-    FTarget: THandle;
+    FTarget: TWindowHandle;
 
     FStartTime: UInt64;
     FScriptFile: String;
@@ -59,7 +59,7 @@ type
 
     // Parameters to pass to script
     property ScriptFile: String write FScriptFile;
-    property Target: THandle write FTarget;
+    property Target: TWindowHandle write FTarget;
 
     // Stats
     property TimeRunning: UInt64 read GetTimeRunning;
@@ -167,7 +167,7 @@ end;
 procedure TSimbaScriptInstance.Start(Args: array of String);
 begin
   FProcess.Parameters.Add('--simbacommunication=%s', [FSimbaCommunication.ClientID]);
-  FProcess.Parameters.Add('--target=' + IntToStr(FTarget));
+  FProcess.Parameters.Add('--target=' + FTarget.AsString());
   FProcess.Parameters.AddStrings(Args);
   FProcess.Parameters.Add(FScriptFile);
   FProcess.Execute();
