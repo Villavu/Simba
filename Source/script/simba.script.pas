@@ -13,7 +13,7 @@ uses
   classes, sysutils,
   lptypes, lpvartypes, lpcompiler, lpparser, lpinterpreter, lpmessages,
   simba.script_compiler, simba.script_communication, simba.script_debugger,
-  simba.client, simba.script_plugin, simba.mufasatypes;
+  simba.client, simba.script_plugin, simba.mufasatypes, simba.windowhandle;
 
 type
   TSimbaScript = class
@@ -228,7 +228,7 @@ begin
   if (Value = '') then
     Exit;
 
-  FTargetWindow := Value.ToInt64(0);
+  FTargetWindow.FromString(Value);
 end;
 
 function TSimbaScript.Compile: Boolean;

@@ -310,7 +310,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="140">
+    <Units Count="141">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -945,6 +945,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
       </Unit139>
+      <Unit140>
+        <Filename Value="simba.darwin_axui.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit140>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

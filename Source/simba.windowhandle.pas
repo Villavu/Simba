@@ -31,6 +31,9 @@ type
     procedure SetBounds(Bounds: TBox);
     function Activate: Boolean;
     procedure Kill;
+
+    function AsString: String;
+    procedure FromString(Str: String);
   end;
 
   function GetVisibleWindows: TWindowHandleArray;
@@ -118,6 +121,16 @@ end;
 procedure TWindowHandleHelper.Kill;
 begin
   SimbaNativeInterface.TerminateProcess(Self.GetPID());
+end;
+
+function TWindowHandleHelper.AsString: String;
+begin
+  Result := SimbaNativeInterface.WindowHandleToStr(Self);
+end;
+
+procedure TWindowHandleHelper.FromString(Str: String);
+begin
+  Self := SimbaNativeInterface.WindowHandleFromStr(Str);
 end;
 
 function TWindowHandleHelper.GetRelativeCursorPos: TPoint;

@@ -10,7 +10,7 @@ object SimbaAboutForm: TSimbaAboutForm
   ClientWidth = 630
   OnCreate = FormCreate
   Position = poScreenCenter
-  LCLVersion = '2.0.12.0'
+  LCLVersion = '2.2.4.0'
   object AboutMemo: TMemo
     AnchorSideTop.Control = VersionLabel
     AnchorSideTop.Side = asrBottom
@@ -18,8 +18,8 @@ object SimbaAboutForm: TSimbaAboutForm
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = ImageSimba
     Left = 8
-    Height = 385
-    Top = 48
+    Height = 389
+    Top = 44
     Width = 612
     Align = alCustom
     Anchors = [akTop, akLeft, akRight, akBottom]
@@ -40,8 +40,8 @@ object SimbaAboutForm: TSimbaAboutForm
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
     Left = 186
-    Height = 30
-    Top = 477
+    Height = 20
+    Top = 487
     Width = 434
     Anchors = [akLeft, akRight, akBottom]
     AutoSize = True
@@ -58,9 +58,9 @@ object SimbaAboutForm: TSimbaAboutForm
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
     Left = 10
-    Height = 32
+    Height = 28
     Top = 5
-    Width = 66
+    Width = 65
     BorderSpacing.Left = 10
     BorderSpacing.Top = 5
     Caption = 'Simba'
@@ -451,7 +451,7 @@ object SimbaAboutForm: TSimbaAboutForm
     AnchorSideTop.Side = asrBottom
     Left = 10
     Height = 1
-    Top = 37
+    Top = 33
     Width = 1
     Font.Color = clNavy
     Font.Height = -11
