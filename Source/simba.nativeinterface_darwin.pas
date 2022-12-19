@@ -79,7 +79,7 @@ type
     function GetVisibleWindows: TWindowHandleArray; override;
     function GetTopWindows: TWindowHandleArray; override;
 
-    function GetWindowAtCursor: TWindowHandle; override;
+    function GetWindowAtCursor(Exclude: TWindowHandleArray): TWindowHandle; override;
     function GetDesktopWindow: TWindowHandle; override;
     function GetActiveWindow: TWindowHandle; override;
     function IsWindowActive(Window: TWindowHandle): Boolean; override;
@@ -106,7 +106,7 @@ implementation
 
 uses
   baseunix, unix, lcltype, cocoaall, cocoautils,
-  simba.process, simba.darwin_axui, simba.files;
+  simba.process, simba.darwin_axui, simba.windowhandle;
 
 type
   NSEventFix = objccategory external(NSEvent)
@@ -647,7 +647,7 @@ begin
   Result := GetWindows();
 end;
 
-function TSimbaNativeInterface_Darwin.GetWindowAtCursor: TWindowHandle;
+function TSimbaNativeInterface_Darwin.GetWindowAtCursor(Exclude: TWindowHandleArray): TWindowHandle;
 var
   Windows, Childs: TWindowHandleArray;
   MousePos: TPoint;
@@ -661,6 +661,10 @@ begin
   Windows := GetTopWindows();
 
   for I := 0 to High(Windows) do
+  begin
+    if (Windows[I] in Exclude) then
+      Continue;
+
     if GetWindowBounds(Windows[I]).Contains(MousePos.X, MousePos.Y) then
     begin
       Result := Windows[I];
@@ -692,6 +696,7 @@ begin
 
       Break;
     end;
+  end;
 end;
 
 function TSimbaNativeInterface_Darwin.GetDesktopWindow: TWindowHandle;
