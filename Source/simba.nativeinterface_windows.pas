@@ -62,7 +62,7 @@ type
     function GetVisibleWindows: TWindowHandleArray; override;
     function GetTopWindows: TWindowHandleArray; override;
 
-    function GetWindowAtCursor: TWindowHandle; override;
+    function GetWindowAtCursor(Exclude: TWindowHandleArray): TWindowHandle; override;
     function GetDesktopWindow: TWindowHandle; override;
     function GetActiveWindow: TWindowHandle; override;
     function IsWindowActive(Window: TWindowHandle): Boolean; override;
@@ -93,7 +93,7 @@ implementation
 
 uses
   windows, jwapsapi, dwmapi, multimon, mmsystem,
-  simba.process;
+  simba.process, simba.windowhandle;
 
 type
   MONITOR_DPI_TYPE = (
@@ -105,7 +105,7 @@ type
   DPI_AWARENESS_CONTEXT = type TWindowHandle;
 
 const
-  DPI_AWARENESS_CONTEXT_UNAWARE                   = DPI_AWARENESS_CONTEXT(-1);
+  {%H-}DPI_AWARENESS_CONTEXT_UNAWARE              = DPI_AWARENESS_CONTEXT(-1);
   {%H-}DPI_AWARENESS_CONTEXT_SYSTEM_AWARE         = DPI_AWARENESS_CONTEXT(-2);
   {%H-}DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE    = DPI_AWARENESS_CONTEXT(-3);
   {%H-}DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = DPI_AWARENESS_CONTEXT(-4);
@@ -113,7 +113,7 @@ const
 
   {%H-}MONITOR_DEFAULTTONULL    = $00000000;
   {%H-}MONITOR_DEFAULTTOPRIMARY = $00000001;
-  MONITOR_DEFAULTTONEAREST = $00000002;
+  {%H-}MONITOR_DEFAULTTONEAREST = $00000002;
 
 var
   GetWindowDpiAwarenessContext: function(Window: TWindowHandle): DPI_AWARENESS_CONTEXT; stdcall;
@@ -735,13 +735,17 @@ begin
   Result := Data.Windows;
 end;
 
-function TSimbaNativeInterface_Windows.GetWindowAtCursor: TWindowHandle;
+function TSimbaNativeInterface_Windows.GetWindowAtCursor(Exclude: TWindowHandleArray): TWindowHandle;
 var
   Cursor: TPoint;
 begin
-  Result := 0;
   if GetCursorPos(Cursor) then
+  begin
     Result := WindowFromPoint(Cursor);
+    if Result in Exclude then
+      Result := 0;
+  end else
+    Result := 0;
 end;
 
 function TSimbaNativeInterface_Windows.GetDesktopWindow: TWindowHandle;

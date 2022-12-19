@@ -51,7 +51,7 @@ type
     function GetVisibleWindows: TWindowHandleArray; override;
     function GetTopWindows: TWindowHandleArray; override;
 
-    function GetWindowAtCursor: TWindowHandle; override;
+    function GetWindowAtCursor(Exclude: TWindowHandleArray): TWindowHandle; override;
     function GetDesktopWindow: TWindowHandle; override;
     function GetActiveWindow: TWindowHandle; override;
     function IsWindowActive(Window: TWindowHandle): Boolean; override;
@@ -75,7 +75,7 @@ implementation
 
 uses
   x, xatom, keysym, baseunix, unix, linux, lcltype, lazloggerbase, ctypes,
-  simba.process, simba.xlib;
+  simba.process, simba.xlib, simba.windowhandle;
 
 const
    _SC_PAGESIZE = 30;
@@ -626,7 +626,7 @@ begin
   end;
 end;
 
-function TSimbaNativeInterface_Linux.GetWindowAtCursor: TWindowHandle;
+function TSimbaNativeInterface_Linux.GetWindowAtCursor(Exclude: TWindowHandleArray): TWindowHandle;
 var
   Root, Child: TWindow;
   x_root, y_root, x, y: Integer;
@@ -635,7 +635,6 @@ begin
   SimbaXLib.XQueryPointer(GetDesktopWindow(), @Root, @Child, @x_root, @y_root, @x, @y, @mask);
 
   Result := Child;
-
   while (Child <> 0) do
   begin
     Result := Child;
@@ -649,7 +648,13 @@ begin
   if (GetWindowPID(Result) = 0) then
     for Child in GetWindowChildren(Result, False) do
       if HasWindowProperty(Child, 'WM_STATE') then
-        Exit(Child);
+      begin
+        Result := Child;
+        Break;
+      end;
+
+  if (Result in Exclude) then
+    Result := 0;
 end;
 
 function TSimbaNativeInterface_Linux.GetDesktopWindow: TWindowHandle;
@@ -711,16 +716,10 @@ begin
   if (Window = 0) then
     Exit;
 
-  if (SimbaXLib.XGetWMName(Window, @Struct) <> 0) and (Struct.NItems > 0) and (Struct.Value <> nil) then
-  try
-    if (Struct.Encoding <> XA_STRING) then
-    begin
-      DebugLn('GetWindowTitle: Unexpected encoding "%d"', [Struct.Encoding]);
-      Exit;
-    end;
-
+  if (SimbaXLib.XGetWMName(Window, @Struct) <> 0) and (Struct.Value <> nil) then
+  begin
     Result := StrPas(PChar(Struct.Value));
-  finally
+
     SimbaXLib.XFree(Struct.Value);
   end;
 end;

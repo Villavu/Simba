@@ -57,7 +57,7 @@ type
     function GetWindows: TWindowHandleArray; virtual; abstract;
     function GetTopWindows: TWindowHandleArray; virtual; abstract;
 
-    function GetWindowAtCursor: TWindowHandle; virtual; abstract;
+    function GetWindowAtCursor(Exclude: TWindowHandleArray): TWindowHandle; virtual; abstract;
     function GetDesktopWindow: TWindowHandle; virtual; abstract;
     function GetActiveWindow: TWindowHandle; virtual; abstract;
 
