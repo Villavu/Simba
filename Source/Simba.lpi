@@ -35,7 +35,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
             <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win32"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox"/>
+            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox;../Third-Party/neural-api"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -78,7 +78,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
             <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win64"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox"/>
+            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox;../Third-Party/neural-api"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -120,7 +120,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox"/>
+            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox;../Third-Party/neural-api"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -161,7 +161,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox"/>
+            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox;../Third-Party/neural-api"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -202,7 +202,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox"/>
+            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox;../Third-Party/neural-api"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -248,7 +248,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox"/>
+            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox;../Third-Party/neural-api"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -310,7 +310,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="140">
+    <Units Count="143">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -945,6 +945,18 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
       </Unit139>
+      <Unit140>
+        <Filename Value="../Third-Party/neural-api/neuraldatasets.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit140>
+      <Unit141>
+        <Filename Value="../Third-Party/neural-api/neuralnetwork.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit141>
+      <Unit142>
+        <Filename Value="../Third-Party/neural-api/neuralvolume.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit142>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -955,7 +967,7 @@
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
       <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win64"/>
-      <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox"/>
+      <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;iomanager;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;../Third-Party/Synapse;functionlist;imagebox;../Third-Party/neural-api"/>
       <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

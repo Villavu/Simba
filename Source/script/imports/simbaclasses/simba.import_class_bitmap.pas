@@ -276,6 +276,16 @@ begin
 end;
 
 (*
+TMufasaBitmap.ClassifyBitmap
+~~~~~~~~~~~~~~~~~~~~~~~~
+function TMufasaBitmap.ClassifyBitmap(out labels: TStringArray; out scores: TSingleArray; out Best: String): Boolean;
+*)
+procedure _LapeMufasaBitmap_ClassifyBitmap(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PMufasaBitmap(Params^[0])^.ClassifyBitmap(PStringArray(Params^[1])^, PSingleArray(Params^[2])^, PString(Params^[3])^);
+end;
+
+(*
 TMufasaBitmap.ReplaceColor
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 procedure TMufasaBitmap.ReplaceColor(OldColor, NewColor: Integer);
@@ -1552,6 +1562,7 @@ begin
 
     addGlobalFunc('function TMufasaBitmap.FindBitmap(Bitmap: TMufasaBitmap; out X, Y: Integer; Tolerance: Integer): Boolean;', @_LapeMufasaBitmap_FindBitmap);
     addGlobalFunc('function TMufasaBitmap.FindBitmaps(Bitmap: TMufasaBitmap; out Points: TPointArray; Tolerance: Integer): Boolean;', @_LapeMufasaBitmap_FindBitmaps);
+    addGlobalFunc('function TMufasaBitmap.ClassifyBitmap(out Labels: TStringArray; out Scores: TSingleArray; out Best: String): Boolean;', @_LapeMufasaBitmap_ClassifyBitmap);
 
     addGlobalFunc('procedure TMufasaBitmap.Clear; overload', @_LapeMufasaBitmap_Clear);
     addGlobalFunc('procedure TMufasaBitmap.Clear(Area: TBox); overload', @_LapeMufasaBitmap_ClearEx);
