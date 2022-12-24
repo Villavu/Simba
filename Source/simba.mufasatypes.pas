@@ -61,7 +61,7 @@ type
   PWindowHandle = ^TWindowHandle;
   PWindowHandleArray = ^TWindowHandleArray;
 
-  TWindowHandle = type PtrUInt;
+  TWindowHandle = type UInt64;
   TWindowHandleArray = array of TWindowHandle;
 
 type

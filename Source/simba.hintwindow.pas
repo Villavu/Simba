@@ -49,8 +49,8 @@ begin
   TextStyle.Layout := tlCenter;
 
   Canvas.Font := TSimbaHintWindow(Owner).FTreeView.Font;
-  Canvas.Font.Color := clBlack;
-  Canvas.Pen.Color := clBlack;
+  Canvas.Font.Color := clWindowText;
+  Canvas.Pen.Color := clWindowText;
   Canvas.Brush.Color := clWindow;
   Canvas.Rectangle(ClientRect);
   Canvas.TextRect(ClientRect, 3, 0, Caption, TextStyle);

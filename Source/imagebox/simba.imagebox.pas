@@ -109,7 +109,6 @@ type
     destructor Destroy; override;
   end;
 
-
 implementation
 
 uses
@@ -298,8 +297,8 @@ function TSimbaImageBox.GetScrolledRect: TRect;
 begin
   Result := FScrollBox.GetScrolledClientRect();
 
-  Result.Left   := Result.Left   + ((FZoomPixels - Result.Left) mod FZoomPixels);
-  Result.Top    := Result.Top    + ((FZoomPixels - Result.Top)  mod FZoomPixels);
+  Result.Left   := Max(0, Result.Left   + ((FZoomPixels - Result.Left) mod FZoomPixels));
+  Result.Top    := Max(0, Result.Top    + ((FZoomPixels - Result.Top)  mod FZoomPixels));
   Result.Right  := Result.Right  + FZoomPixels;
   Result.Bottom := Result.Bottom + FZoomPixels;
 end;
@@ -444,6 +443,7 @@ begin
     FHeight := FBackground.Height;
 
     Zoom := 1;
+    MoveTo(0, 0);
   end;
 
   Paint();

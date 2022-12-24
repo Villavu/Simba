@@ -273,7 +273,7 @@ begin
   begin
     ImportingSection := 'TWindowHandle';
 
-    addGlobalType('type PtrUInt', 'TWindowHandle');
+    addGlobalType('type UInt64', 'TWindowHandle');
     addGlobalType('array of TWindowHandle', 'TWindowHandleArray');
 
     addGlobalFunc('function TWindowHandle.Activate: Boolean;', @_LapeWindowHandle_Activate);

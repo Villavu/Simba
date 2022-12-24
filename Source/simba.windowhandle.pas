@@ -31,6 +31,9 @@ type
     procedure SetBounds(Bounds: TBox);
     function Activate: Boolean;
     procedure Kill;
+
+    function AsString: String;
+    procedure FromString(Str: String);
   end;
 
   function GetVisibleWindows: TWindowHandleArray;
@@ -38,12 +41,14 @@ type
   function GetTopWindows: TWindowHandleArray;
   function GetActiveWindow: TWindowHandle;
   function GetDesktopWindow: TWindowHandle;
-  function GetWindowAtCursor: TWindowHandle;
+  function GetWindowAtCursor(Exclude: TWindowHandleArray = nil): TWindowHandle;
 
   function FindWindow(Title: String; out Window: TWindowHandle): Boolean;
   function FindWindows(Title: String): TWindowHandleArray;
   function FindChildWindow(Title: String; ClassName: String; out Child: TWindowHandle): Boolean;
   function FindChildWindows(Title: String; ClassName: String): TWindowHandleArray;
+
+  operator in(const Left: TWindowHandle; const Right: TWindowHandleArray): Boolean;
 
 implementation
 
@@ -120,6 +125,16 @@ begin
   SimbaNativeInterface.TerminateProcess(Self.GetPID());
 end;
 
+function TWindowHandleHelper.AsString: String;
+begin
+  Result := SimbaNativeInterface.WindowHandleToStr(Self);
+end;
+
+procedure TWindowHandleHelper.FromString(Str: String);
+begin
+  Self := SimbaNativeInterface.WindowHandleFromStr(Str);
+end;
+
 function TWindowHandleHelper.GetRelativeCursorPos: TPoint;
 begin
   Result := SimbaNativeInterface.GetMousePosition(Self);
@@ -145,9 +160,9 @@ begin
   Result := SimbaNativeInterface.GetDesktopWindow();
 end;
 
-function GetWindowAtCursor: TWindowHandle;
+function GetWindowAtCursor(Exclude: TWindowHandleArray): TWindowHandle;
 begin
-  Result := SimbaNativeInterface.GetWindowAtCursor();
+  Result := SimbaNativeInterface.GetWindowAtCursor(Exclude);
 end;
 
 function GetTopWindows: TWindowHandleArray;
@@ -224,6 +239,11 @@ begin
       if ChildWindows[J].GetClassName().RegExprExists(ClassName) then
         Result := Result + [ChildWindows[J]];
   end;
+end;
+
+operator in(const Left: TWindowHandle; const Right: TWindowHandleArray): Boolean;
+begin
+  Result := (Length(Right) > 0) and (IndexQWord(Right[0], Length(Right), Left) > -1);
 end;
 
 end.

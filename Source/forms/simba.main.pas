@@ -1351,25 +1351,19 @@ begin
   if (Button = mbLeft) then
   begin
     try
-      with TSimbaWindowSelector.Create() do
-      try
-        SimbaDebugLn('Window Selected: %d', [Selected]);
-        SimbaDebugLn(' - Dimensions: %dx%d', [Selected.GetBounds().Width - 1, Selected.GetBounds().Height - 1]);
-        SimbaDebugLn(' - Title: "%s"', [Selected.GetTitle()]);
-        SimbaDebugLn(' - Class: "%s"', [Selected.GetClassName()]);
-        SimbaDebugLn(' - PID: %d (%s bit)', [Selected.GetPID(), BoolToStr(SimbaProcess.IsProcess64Bit(Selected.GetPID()), '64', '32')]);
-        SimbaDebugLn(' - Executable: "%s"', [SimbaProcess.GetProcessPath(Selected.GetPID())]);
-
-        FWindowSelection := Selected;
-        FProcessSelection := Selected.GetPID();
-      finally
-        Free();
-      end;
-
+      FWindowSelection := ShowWindowSelector();
+      FProcessSelection := FWindowSelection.GetPID();
       FMouseLogger.WindowHandle := FWindowSelection;
+
+      SimbaDebugLn('Window Selected: %d', [FWindowSelection]);
+      SimbaDebugLn(' - Dimensions: %dx%d', [FWindowSelection.GetBounds().Width - 1, FWindowSelection.GetBounds().Height - 1]);
+      SimbaDebugLn(' - Title: "%s"', [FWindowSelection.GetTitle()]);
+      SimbaDebugLn(' - Class: "%s"', [FWindowSelection.GetClassName()]);
+      SimbaDebugLn(' - PID: %d (%s bit)', [FWindowSelection.GetPID(), BoolToStr(SimbaProcess.IsProcess64Bit(FWindowSelection.GetPID()), '64', '32')]);
+      SimbaDebugLn(' - Executable: "%s"', [SimbaProcess.GetProcessPath(FWindowSelection.GetPID())]);
     except
       on E: Exception do
-        ShowMessage('Exception while selecting window: ' + E.Message + ' (' + E.ClassName + ')');
+        ShowMessage('Exception while selecting window: ' + E.ToString());
     end;
   end;
 end;

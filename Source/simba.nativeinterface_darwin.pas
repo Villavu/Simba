@@ -15,6 +15,14 @@ uses
   simba.mufasatypes, simba.nativeinterface;
 
 type
+  TVirtualWindow = packed record
+    Handle: CGWindowID;
+    InfoIndex: Integer;
+  end;
+  {$IF SizeOf(TVirtualWindow) <> SizeOf(TWindowHandle)}
+    {$FATAL SizeOf(TVirtualWindow) <> SizeOf(TWindowHandle)}
+  {$ENDIF}
+
   TSimbaNativeInterface_Darwin = class(TSimbaNativeInterface)
   protected
   type
@@ -26,6 +34,13 @@ type
     TKeyMap = array[#0..#255] of TKeyMapItem;
   protected
     FKeyMap: TKeyMap;
+    FVirtualWindowInfo: array of record
+      ClientRect: TBox;
+      ClassStr: ShortString;
+    end;
+
+    function IsVirtualWindow(Window: TWindowHandle; out VirtualWindow: TVirtualWindow): Boolean;
+    function GetVirtualWindowInfoIndex(ClientRect: TBox; ClassStr: ShortString): Integer;
   public
     constructor Create;
 
@@ -64,7 +79,7 @@ type
     function GetVisibleWindows: TWindowHandleArray; override;
     function GetTopWindows: TWindowHandleArray; override;
 
-    function GetWindowAtCursor: TWindowHandle; override;
+    function GetWindowAtCursor(Exclude: TWindowHandleArray): TWindowHandle; override;
     function GetDesktopWindow: TWindowHandle; override;
     function GetActiveWindow: TWindowHandle; override;
     function IsWindowActive(Window: TWindowHandle): Boolean; override;
@@ -82,13 +97,16 @@ type
     function HighResolutionTime: Double; override;
 
     procedure OpenDirectory(Path: String); override;
+
+    function WindowHandleToStr(Window: TWindowHandle): String; override;
+    function WindowHandleFromStr(Str: String): TWindowHandle; override;
   end;
 
 implementation
 
 uses
-  baseunix, unix, lcltype, cocoaall, cocoautils, cocoawscommon, cocoagdiobjects,
-  simba.process;
+  baseunix, unix, lcltype, cocoaall, cocoautils,
+  simba.process, simba.darwin_axui, simba.windowhandle;
 
 type
   NSEventFix = objccategory external(NSEvent)
@@ -138,15 +156,25 @@ function proc_pidinfo(pid: longint; flavor: longint; arg: UInt64; buffer: pointe
 function TSimbaNativeInterface_Darwin.GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean;
 var
   windowIds, windows: CFArrayRef;
-  LocalPool: NSAutoReleasePool;
   Rect: CGRect;
+  VirtualWindow: TVirtualWindow;
+  B: TBox;
 begin
-  LocalPool := NSAutoReleasePool.alloc.init;
+  if Self.IsVirtualWindow(Window, VirtualWindow) then
+  begin
+    Result := GetWindowBounds(VirtualWindow.Handle, B);
+    if Result then
+    begin
+      Bounds := Self.FVirtualWindowInfo[VirtualWindow.InfoIndex].ClientRect;
+      Bounds := Bounds.Offset(B.X1, B.Y1);
+    end;
+
+    Exit;
+  end;
 
   windowIds := CFArrayCreateMutable(nil, 1, nil);
   CFArrayAppendValue(windowIds, Pointer(Window));
   windows := CGWindowListCreateDescriptionFromArray(windowIds);
-  CFRelease(windowIds);
 
   Result := CFArrayGetCount(windows) <> 0;
   if Result then
@@ -162,14 +190,14 @@ begin
     end;
   end;
 
+  CFRelease(windowIds);
   CFRelease(windows);
-  LocalPool.release;
 end;
 
 function TSimbaNativeInterface_Darwin.GetWindowBounds(Window: TWindowHandle): TBox;
 begin
   if not GetWindowBounds(Window, Result) then
-    Result := Box(0, 0, 0, 0);
+    Result := TBox.Default();
 end;
 
 procedure TSimbaNativeInterface_Darwin.SetWindowBounds(Window: TWindowHandle; Bounds: TBox);
@@ -184,8 +212,11 @@ var
   Context: CGContextRef;
   WindowBounds: TBox;
   R: TRect;
+  VirtualWindow: TVirtualWindow;
 begin
   WindowBounds := GetWindowBounds(Window);
+  if IsVirtualWindow(Window, VirtualWindow) then
+    Window := VirtualWindow.Handle;
 
   R.Left   := WindowBounds.X1 + X;
   R.Top    := WindowBounds.Y1 + Y;
@@ -203,13 +234,14 @@ begin
   begin
     if Result then
     begin
-      ColorSpace := CGColorSpaceCreateDeviceRGB();
-
       ReAllocMem(ImageData, Width * Height * SizeOf(TRGB32));
-      Context := CGBitmapContextCreate(ImageData, Width, Height, 8, Width * SizeOf(TRGB32), ColorSpace, kCGImageAlphaPremultipliedFirst or kCGBitmapByteOrder32Little);
 
-      CGColorSpaceRelease(ColorSpace);
+      ColorSpace := CGColorSpaceCreateDeviceRGB();
+      Context := CGBitmapContextCreate(ImageData, Width, Height, 8, Width * SizeOf(TRGB32), ColorSpace, kCGImageAlphaNoneSkipFirst or kCGBitmapByteOrder32Little);
+
       CGContextDrawImage(Context, CGRectMake(0, 0, Width, Height), Image);
+      CGContextRelease(Context);
+      CGColorSpaceRelease(ColorSpace);
     end;
 
     CGImageRelease(Image);
@@ -236,13 +268,14 @@ var
 begin
   event := CGEventCreate(nil);
   point := CGEventGetLocation(event);
-  CFRelease(event);
 
   with GetWindowBounds(Window) do
   begin
     Result.X := Round(Point.X) - X1;
     Result.Y := Round(Point.Y) - Y1;
   end;
+
+  CFRelease(event);
 end;
 
 procedure TSimbaNativeInterface_Darwin.SetMousePosition(Window: TWindowHandle; Position: TPoint);
@@ -333,12 +366,8 @@ begin
 end;
 
 function TSimbaNativeInterface_Darwin.IsMouseButtonHeld(Button: TClickType): Boolean;
-var
-  mouseButton: Integer;
 begin
-  mouseButton := ClickTypeToMouseButton[Button];
-
-  Result := CGEventSourceButtonState(kCGEventSourceStateCombinedSessionState, mouseButton) > 0;
+  Result := CGEventSourceButtonState(kCGEventSourceStateCombinedSessionState, ClickTypeToMouseButton[Button]) > 0;
 end;
 
 function TSimbaNativeInterface_Darwin.IsKeyHeld(Key: Integer): Boolean;
@@ -491,16 +520,16 @@ begin
     VK_OEM_COMMA:           Result := $2B;
     VK_OEM_MINUS:           Result := $1B;
     VK_OEM_PERIOD:          Result := $2F;
-    VK_OEM_2:               Result := $2C;  // /?
-    VK_OEM_3:               Result := $32;  // `~
-    VK_OEM_4:               Result := $21;  // [{
-    VK_OEM_5:               Result := $2A;  // \|
-    VK_OEM_6:               Result := $1E;  // ]}
-    VK_OEM_7:               Result := $27;  // '"
-    $E1:                    Result := $18;  //VK_EQUAL
-    VK_OEM_102:             Result := $2A;  // backslash RT-102
-    $E3:                    Result := $51;  //VK_KEYPAD_EQUALS
-    $E4:                    Result := $3F;  //VK_FUNCTION
+    VK_OEM_2:               Result := $2C; // /?
+    VK_OEM_3:               Result := $32; // `~
+    VK_OEM_4:               Result := $21; // [{
+    VK_OEM_5:               Result := $2A; // \|
+    VK_OEM_6:               Result := $1E; // ]}
+    VK_OEM_7:               Result := $27; // '"
+    $E1:                    Result := $18; //VK_EQUAL
+    VK_OEM_102:             Result := $2A; // backslash RT-102
+    $E3:                    Result := $51; //VK_KEYPAD_EQUALS
+    $E4:                    Result := $3F; //VK_FUNCTION
     VK_OEM_CLEAR:           Result := $47;
   else
     Result := $FFFF;
@@ -559,58 +588,47 @@ end;
 
 function TSimbaNativeInterface_Darwin.HighResolutionTime: Double;
 begin
-  Result := Double((mach_absolute_time * timeInfo.numer) / ((1000*1000) * timeInfo.denom));
+  Result := Double((mach_absolute_time * timeInfo.numer) / ((1000 * 1000) * timeInfo.denom));
 end;
 
 function TSimbaNativeInterface_Darwin.GetWindows: TWindowHandleArray;
 var
   Windows: CFArrayRef;
   I: Integer;
-  LocalPool: NSAutoReleasePool;
   NormalWindowLevel: Integer;
 begin
   Result := Default(TWindowHandleArray);
 
-  LocalPool := NSAutoReleasePool.alloc.init;
   Windows := CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly or kCGWindowListExcludeDesktopElements, kCGNullWindowID);
   NormalWindowLevel := CGWindowLevelForKey(kCGNormalWindowLevelKey);
 
   for I := 0 to CFArrayGetCount(Windows) - 1 do
-  begin
-    if NSNumber(CFDictionaryGetValue(CFArrayGetValueAtIndex(Windows, I), kCGWindowLayer)).IntValue <> NormalWindowLevel then
-      Continue;
-
-    Result += [NSNumber(CFDictionaryGetValue(CFArrayGetValueAtIndex(Windows, I), kCGWindowNumber)).unsignedIntValue];
-  end;
+    if NSNumber(CFDictionaryGetValue(CFArrayGetValueAtIndex(Windows, I), kCGWindowLayer)).IntValue = NormalWindowLevel then
+      Result += [NSNumber(CFDictionaryGetValue(CFArrayGetValueAtIndex(Windows, I), kCGWindowNumber)).unsignedIntValue];
 
   CFRelease(Windows);
-  LocalPool.release;
 end;
 
 function TSimbaNativeInterface_Darwin.GetWindowChildren(Window: TWindowHandle; Recursive: Boolean): TWindowHandleArray;
 var
-  ParentPid: Integer;
-  Windows: CFArrayRef;
-  WindowInfo: CFDictionaryRef;
-  i: Integer;
-  LocalPool: NSAutoReleasePool;
+  I: Integer;
+  VirtualWindow: ^TVirtualWindow;
+  B: TBox;
+  Info: TAXUIWindowInfo;
 begin
-  // TODO: Requires usage of AX API. Currently gets all windows that belong to parentPID
-  ParentPid := GetWindowPID(Window);
+  Info := AXUI_GetWindowInfo(GetWindowPID(Window));
 
-  LocalPool := NSAutoReleasePool.alloc.init;
-  SetLength(Result, 0);
-  Windows := CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly or kCGWindowListExcludeDesktopElements, Window);
-
-  for i := 0 to CFArrayGetCount(Windows) - 1 do
+  if (Length(Info.Children) > 0) and GetWindowBounds(Window, B) then
   begin
-    WindowInfo := CFArrayGetValueAtIndex(Windows, i);
-    if (ParentPid = NSNumber(CFDictionaryGetValue(WindowInfo, kCGWindowOwnerPID)).intValue) then
-      Result += [NSNumber(CFDictionaryGetValue(WindowInfo, kCGWindowNumber)).unsignedIntValue];
-  end;
-
-  CFRelease(Windows);
-  LocalPool.release;
+    SetLength(Result, Length(Info.Children));
+    for I := 0 to High(Info.Children) do
+    begin
+      VirtualWindow := @Result[I];
+      VirtualWindow^.Handle := Window;
+      VirtualWindow^.InfoIndex := GetVirtualWindowInfoIndex(Info.Children[I].Bounds.Offset(-B.X1, -B.Y1), Info.Children[I].ClassName);
+    end;
+  end else
+    SetLength(Result, 0);
 end;
 
 function TSimbaNativeInterface_Darwin.GetVisibleWindows: TWindowHandleArray;
@@ -629,11 +647,13 @@ begin
   Result := GetWindows();
 end;
 
-function TSimbaNativeInterface_Darwin.GetWindowAtCursor: TWindowHandle;
+function TSimbaNativeInterface_Darwin.GetWindowAtCursor(Exclude: TWindowHandleArray): TWindowHandle;
 var
-  Windows: TWindowHandleArray;
+  Windows, Childs: TWindowHandleArray;
   MousePos: TPoint;
-  I: Integer;
+  I, J, BestIndex: Integer;
+  Sum, BestSum: Single;
+  B: TBox;
 begin
   Result := 0;
 
@@ -641,11 +661,42 @@ begin
   Windows := GetTopWindows();
 
   for I := 0 to High(Windows) do
+  begin
+    if (Windows[I] in Exclude) then
+      Continue;
+
     if GetWindowBounds(Windows[I]).Contains(MousePos.X, MousePos.Y) then
     begin
       Result := Windows[I];
-      Exit;
+
+      BestSum   := Single.MaxValue;
+      BestIndex := -1;
+
+      Childs := Self.GetWindowChildren(Result, True);
+      for J := 0 to High(Childs) do
+      begin
+        B := GetWindowBounds(Childs[J]);
+        if not B.Contains(MousePos) then
+          Continue;
+
+        Sum := MousePos.DistanceTo(TPoint.Create(B.X1, B.Y1)) +
+               MousePos.DistanceTo(TPoint.Create(B.X2, B.Y1)) +
+               MousePos.DistanceTo(TPoint.Create(B.X1, B.Y2)) +
+               MousePos.DistanceTo(TPoint.Create(B.X2, B.Y2));
+
+        if (Sum < BestSum) then
+        begin
+          BestSum   := Sum;
+          BestIndex := J;
+        end;
+      end;
+
+      if (BestIndex > -1) then
+        Result := Childs[BestIndex];
+
+      Break;
     end;
+  end;
 end;
 
 function TSimbaNativeInterface_Darwin.GetDesktopWindow: TWindowHandle;
@@ -655,49 +706,46 @@ end;
 
 function TSimbaNativeInterface_Darwin.GetActiveWindow: TWindowHandle;
 begin
-  // TODO: Requires usage of AX API
+  // TODO: Requires usage of AX API, kAXFocusedApplicationAttribute
   Result := 0;
 end;
 
 function TSimbaNativeInterface_Darwin.IsWindowActive(Window: TWindowHandle): Boolean;
-var
-  LocalPool: NSAutoReleasePool;
 begin
-  LocalPool := NSAutoReleasePool.alloc.init;
   Result := NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier = GetWindowPID(Window);
-  LocalPool.release;
 end;
 
 function TSimbaNativeInterface_Darwin.IsWindowValid(Window: TWindowHandle): Boolean;
 var
   windowIds, windows: CFArrayRef;
+  VirtualWindow: TVirtualWindow;
 begin
+  if IsVirtualWindow(Window, VirtualWindow) then
+    Window := VirtualWindow.Handle;
+
   windowIds := CFArrayCreateMutable(nil, 1, nil);
   CFArrayAppendValue(windowIds, Pointer(Window));
   windows := CGWindowListCreateDescriptionFromArray(windowIds);
-  CFRelease(windowIds);
+
   Result := CFArrayGetCount(windows) <> 0;
+
+  CFRelease(windowIds);
   CFRelease(windows);
 end;
 
 function TSimbaNativeInterface_Darwin.IsWindowVisible(Window: TWindowHandle): Boolean;
 var
   windowIds, windows: CFArrayRef;
-  LocalPool: NSAutoReleasePool;
 begin
-  Result := False;
-
-  LocalPool := NSAutoReleasePool.alloc.init;
   windowIds := CFArrayCreateMutable(nil, 1, nil);
   CFArrayAppendValue(windowIds, Pointer(Window));
-  windows := CGWindowListCreateDescriptionFromArray(windowIds);
-  CFRelease(windowIds);
 
+  windows := CGWindowListCreateDescriptionFromArray(windowIds);
   if CFArrayGetCount(windows) <> 0 then
     Result := NSNumber(CFDictionaryGetValue(CFArrayGetValueAtIndex(windows, 0), kCGWindowIsOnScreen)).boolValue;
 
+  CFRelease(windowIds);
   CFRelease(windows);
-  LocalPool.release;
 end;
 
 function GetWindowDictionaryValueInt(Window: TWindowHandle; Key: CFStringRef): Integer;
@@ -741,40 +789,96 @@ begin
 end;
 
 function TSimbaNativeInterface_Darwin.GetWindowPID(Window: TWindowHandle): Integer;
+var
+  VirtualWindow: TVirtualWindow;
 begin
+  if IsVirtualWindow(Window, VirtualWindow) then
+    Window := VirtualWindow.Handle;
+
   Result := GetWindowDictionaryValueInt(Window, kCGWindowOwnerPID);
 end;
 
 function TSimbaNativeInterface_Darwin.GetWindowClass(Window: TWindowHandle): WideString;
+var
+  VirtualWindow: TVirtualWindow;
 begin
-  Result := GetWindowDictionaryValueStr(Window, kCGWindowOwnerName); // Classname doesn''t exists macOS. This could help though.
+  if IsVirtualWindow(Window, VirtualWindow) then
+    Result := FVirtualWindowInfo[VirtualWindow.InfoIndex].ClassStr
+  else
+    Result := AXUI_GetWindowClass(GetWindowPID(Window));
 end;
 
 function TSimbaNativeInterface_Darwin.GetWindowTitle(Window: TWindowHandle): WideString;
 begin
-  Result := GetWindowDictionaryValueStr(Window, kCGWindowName);
+  Result := AXUI_GetWindowTitle(GetWindowPID(Window));
 end;
 
 function TSimbaNativeInterface_Darwin.GetRootWindow(Window: TWindowHandle): TWindowHandle;
+var
+  VirtualWindow: TVirtualWindow;
 begin
-  // TODO: Requires usage of AX API.
-  Result := Window;
+  if IsVirtualWindow(Window, VirtualWindow) then
+    Result := VirtualWindow.Handle
+  else
+    Result := Window;
 end;
 
 function TSimbaNativeInterface_Darwin.ActivateWindow(Window: TWindowHandle): Boolean;
-var
-  app: NSRunningApplication;
-  LocalPool: NSAutoReleasePool;
 begin
-  LocalPool := NSAutoReleasePool.alloc.init;
-  app := NSRunningApplication.runningApplicationWithProcessIdentifier(GetWindowPID(Window));
-  Result := app.activateWithOptions(NSApplicationActivateIgnoringOtherApps);
-  LocalPool.release;
+  Result := NSRunningApplication.runningApplicationWithProcessIdentifier(GetWindowPID(Window)).activateWithOptions(NSApplicationActivateIgnoringOtherApps);
 end;
 
 procedure TSimbaNativeInterface_Darwin.OpenDirectory(Path: String);
 begin
   SimbaProcess.RunCommand('open', [Path]);
+end;
+
+function TSimbaNativeInterface_Darwin.WindowHandleToStr(Window: TWindowHandle): String;
+var
+  VirtualWindow: TVirtualWindow;
+begin
+  if Self.IsVirtualWindow(Window, VirtualWindow) then
+  begin
+    with Self.FVirtualWindowInfo[VirtualWindow.InfoIndex] do
+      Result := 'VirtualWindow[%d, %d,%d,%d,%d, %s]'.Format([VirtualWindow.Handle, ClientRect.X1, ClientRect.Y1, ClientRect.X2, ClientRect.Y2, ClassStr]);
+  end else
+    Result := inherited;
+end;
+
+function TSimbaNativeInterface_Darwin.WindowHandleFromStr(Str: String): TWindowHandle;
+var
+  VirtualWindow: TVirtualWindow absolute Result;
+  Box: TBox;
+  ClassStr: String;
+begin
+  if Str.StartsWith('VirtualWindow') then
+  begin
+    SScanf(Str, 'VirtualWindow[%d, %d,%d,%d,%d, %s]', [@VirtualWindow.Handle, @Box.X1, @Box.Y1, @Box.X2, @Box.Y2, @ClassStr]);
+
+    VirtualWindow.InfoIndex := Self.GetVirtualWindowInfoIndex(Box, ClassStr);
+  end else
+    Result := inherited WindowHandleFromStr(Str);
+end;
+
+function TSimbaNativeInterface_Darwin.IsVirtualWindow(Window: TWindowHandle; out VirtualWindow: TVirtualWindow): Boolean;
+begin
+  VirtualWindow := TVirtualWindow(Window);
+
+  Result := VirtualWindow.InfoIndex > 0;
+end;
+
+function TSimbaNativeInterface_Darwin.GetVirtualWindowInfoIndex(ClientRect: TBox; ClassStr: ShortString): Integer;
+var
+  I: Integer;
+begin
+  Result := Length(Self.FVirtualWindowInfo);
+  for I := 0 to Result - 1 do
+    if (Self.FVirtualWindowInfo[I].ClientRect = ClientRect) and (Self.FVirtualWindowInfo[I].ClassStr = ClassStr) then
+      Exit(I);
+
+  SetLength(FVirtualWindowInfo, Result + 1);
+  FVirtualWindowInfo[Result].ClientRect := ClientRect;
+  FVirtualWindowInfo[Result].ClassStr := ClassStr;
 end;
 
 constructor TSimbaNativeInterface_Darwin.Create;
@@ -796,27 +900,30 @@ constructor TSimbaNativeInterface_Darwin.Create;
   end;
 
 var
-  LocalPool: NSAutoReleasePool;
   Event: NSEvent;
   KeyCode: Integer;
 begin
   inherited Create();
 
-  LocalPool := NSAutoReleasePool.alloc.init;
+  SetLength(FVirtualWindowInfo, 1);
 
   for KeyCode := 0 to 255 do
   begin
     Event := NSEvent.eventWithCGEvent(CGEventCreateKeyboardEvent(nil, KeyCode, 1));
-    if (Event.Type_ <> NSKeyDown) then
-      Continue;
 
-    MapKey(KeyCode, Event.characters, []);
-    MapKey(KeyCode, NSEventFix(Event).charactersByApplyingModifiers(NSShiftKeyMask), [ssShift]);
-    MapKey(KeyCode, NSEventFix(Event).charactersByApplyingModifiers(NSAlternateKeyMask), [ssAlt]);
-    MapKey(KeyCode, NSEventFix(Event).charactersByApplyingModifiers(NSControlKeyMask), [ssCtrl]);
+    if (Event <> nil) then
+    begin
+      if (Event.Type_ = NSKeyDown) then
+      begin
+        MapKey(KeyCode, Event.characters, []);
+        MapKey(KeyCode, NSEventFix(Event).charactersByApplyingModifiers(NSShiftKeyMask), [ssShift]);
+        MapKey(KeyCode, NSEventFix(Event).charactersByApplyingModifiers(NSAlternateKeyMask), [ssAlt]);
+        MapKey(KeyCode, NSEventFix(Event).charactersByApplyingModifiers(NSControlKeyMask), [ssCtrl]);
+      end;
+
+      CFRelease(Event);
+    end;
   end;
-
-  LocalPool.release;
 end;
 
 initialization
