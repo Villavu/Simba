@@ -150,51 +150,28 @@ var
   end;
 
   procedure LoadBitmapIntoTinyImage(const Bitmap: TMufasaBitmap; out TI: TTinyImage);
-  const
-    useStretchDraw: Boolean = True;
   var
     I, J: integer;
     r,g,b: byte;
-    Bmp: TBitmap;
-    Tmp: TBitmap;
     Copy: TMufasaBitmap;
   begin
 
-    if useStretchDraw then
-    begin
-        Tmp := Bitmap.ToTBitmap;
-        Bmp := TBitmap.Create;
-        Bmp.SetSize(32,32);
-        Bmp.Canvas.StretchDraw(TRect.Create(0,0,32,32), Tmp);
-    end
-    else
-    begin
-      Copy := Self.Copy;
-      Copy.ResizeBilinear(32,32);
-      Bmp := Copy.ToTBitmap;
-    end;
+    Copy := Self.Copy;
 
     try
+      Copy.Resize(32,32);
       for I := 0 to 31 do
       begin
         for J := 0 to 31 do
         begin
-          {TI.R[I, J] := Bitmap.FData[J * 32 + I].r;
-          TI.G[I, J] := Bitmap.FData[J * 32 + I].g;
-          TI.B[I, J] := Bitmap.FData[J * 32 + I].b; }
-          {RedGreenBlue(Bitmap.Pixel[J, I], r,g,b);}
-          RedGreenBlue(Bmp.Canvas.Pixels[J, I], r,g,b);
+          RedGreenBlue(Copy.Pixel[J, I], r,g,b);
           TI.R[I, J] := r;
           TI.G[I, J] := g;
           TI.B[I, J] := b;
         end;
       end;
     finally
-      bmp.Free;
-      if useStretchDraw then
-          Tmp.Free
-      else
-          Copy.Free;
+      Copy.Free;
     end;
   end;
 begin
@@ -206,6 +183,7 @@ begin
   LoadTinyImageIntoNNetVolume(TI, InputV);
   InputV.RgbImgToNeuronalInput(csEncodeRGB);
 
+  NN.EnableDropouts(False);
   NN.Compute(InputV);
   NN.GetOutput(OutputV);
 
