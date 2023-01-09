@@ -92,18 +92,27 @@ begin
 end;
 
 procedure TSimbaScriptThread.HandleException(E: Exception);
+var
+  Line: String;
 begin
   SimbaDebugLn(ESimbaDebugLn.RED, E.Message);
 
-  if (FScript.SimbaCommunication <> nil) then
+  if (E is lpException) then
   begin
-    if (E is lpException) then
+    with lpException(E) do
     begin
-      with E as lpException do
+      for Line in lpException(E).StackTrace.Split(LineEnding) do
+        if (Line <> '') then
+          SimbaDebugLn(ESimbaDebugLn.RED, Line);
+
+      if (FScript.SimbaCommunication <> nil) then
         FScript.SimbaCommunication.ScriptError(E.Message, DocPos.Line, DocPos.Col, DocPos.FileName)
-    end else
-      FScript.SimbaCommunication.ScriptError(E.Message, 0, 0, '');
-  end else
+      else
+        FScript.SimbaCommunication.ScriptError(E.Message, 0, 0, '');
+    end;
+  end;
+
+  if (FScript.SimbaCommunication = nil) then
     ExitCode := 1;
 end;
 

@@ -18,7 +18,7 @@ procedure InitializeWaitUntil(Compiler: TLapeCompiler);
 implementation
 
 uses
-  lptypes, lptree, lpvartypes, lpmessages;
+  lptypes, lptree, lpvartypes, lpmessages, lpinternalmethods;
 
 type
   TLapeTree_WaitUntil_Operator = class(TLapeTree_Operator) // Dont take ownership of FLeft

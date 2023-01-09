@@ -212,7 +212,7 @@ var
 begin
   Method := Globals[Name];
   if (Method <> nil) then
-    RunCode(FEmitter.Code, FEmitter.CodeLen, [], PCodePos(Method.Ptr)^);
+    RunCode(FEmitter, [], PCodePos(Method.Ptr)^);
 end;
 
 procedure TSimbaScript_Compiler.InvokeProcFFI(Name: String);
