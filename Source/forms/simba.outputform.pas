@@ -222,6 +222,21 @@ end;
 
 procedure TSimbaOutputBox.GetWordBoundsAtRowCol(const XY: TPoint; out StartX, EndX: integer);
 
+  // Line 3 in function "cpuuu" in file "Untitled"
+  function FindStackTrace(Line: String; var StartPos, EndPos: Integer): Boolean;
+  begin
+    StartPos := 1;
+    EndPos := Length(Line) + 1;
+
+    Result := Line.Contains('Line') and Line.Contains('in') and Line.Contains('in file');
+    if Result then
+    begin
+      FMouseLink.DocPos.FileName := Line.After('file').Between('"', '"');
+      FMouseLink.DocPos.Line     := Line.Between('Line', 'in').ExtractInteger();
+      FMouseLink.DocPos.Col      := 0;
+    end;
+  end;
+
   // at line 3, column 3 in file "C:\Users\OllyC\Desktop\Code\Simba\Scripts\testing.simba"
   function FindDocPos(Line: String; var StartPos, EndPos: Integer): Boolean;
   begin
@@ -266,7 +281,7 @@ begin
   FMouseLink.DocPos.FileName := '';
 
   Line := TextView[XY.Y - 1];
-  if FindDocPos(Line, StartPos, EndPos) or FindURLOrFile(Line, StartPos, EndPos) then
+  if FindStackTrace(Line, StartPos, EndPos) or FindDocPos(Line, StartPos, EndPos) or FindURLOrFile(Line, StartPos, EndPos) then
   begin
     StartX := StartPos;
     EndX   := EndPos;

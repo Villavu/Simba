@@ -310,7 +310,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="141">
+    <Units Count="142">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -949,6 +949,10 @@
         <Filename Value="simba.darwin_axui.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit140>
+      <Unit141>
+        <Filename Value="forms/simba.scripttabs_findpanel.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit141>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

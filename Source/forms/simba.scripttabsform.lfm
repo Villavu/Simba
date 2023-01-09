@@ -139,8 +139,8 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
       Left = 5
       Height = 24
       Top = 35
-      Width = 108
-      Caption = 'Whole Word'
+      Width = 148
+      Caption = 'Whole Words Only'
       OnChange = FindEditChange
       TabOrder = 4
     end

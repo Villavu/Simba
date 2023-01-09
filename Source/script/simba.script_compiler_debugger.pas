@@ -24,7 +24,7 @@ procedure InitializeDebugger(Compiler: TLapeCompiler; Methods: PStringArray; OnE
 implementation
 
 uses
-  lptree, lpvartypes;
+  lptree, lpvartypes, lpinternalmethods;
 
 procedure AddDebuggingMethods(Compiler: TLapeCompiler);
 var

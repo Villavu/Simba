@@ -269,7 +269,7 @@ begin
     if (FDebugger <> nil) then
       FDebugger.Run();
 
-    RunCode(FCompiler.Emitter.Code, FCompiler.Emitter.CodeLen, FState);
+    RunCode(FCompiler.Emitter, FState);
   finally
     FRunningTime := HighResolutionTime() - FRunningTime;
 

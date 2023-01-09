@@ -18,7 +18,7 @@ procedure InitializeRTTI(Compiler: TLapeCompiler);
 implementation
 
 uses
-  lptypes, lptree, lpvartypes, lpmessages, lpvartypes_record;
+  lptypes, lptree, lpvartypes, lpmessages, lpvartypes_record, lpinternalmethods;
 
 type
   TLapeTree_InternalMethod_RTTIFields = class(TLapeTree_InternalMethod)
