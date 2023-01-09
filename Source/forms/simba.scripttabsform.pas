@@ -11,11 +11,18 @@ interface
 
 uses
   classes, sysutils, forms, controls, graphics, dialogs,
-  extctrls, comctrls, extendednotebook, menus, synedit, synedittypes,
+  extctrls, comctrls, extendednotebook, menus, StdCtrls, Buttons, synedit, synedittypes,
   simba.scripttab, simba.editor, simba.codeparser, simba.editor_findreplace;
 
 type
+  TEditorSearchEvent = procedure(MatchCount: Integer) of object;
+
   TSimbaScriptTabsForm = class(TForm)
+    FindCheckBoxCaseSens: TCheckBox;
+    FindCheckboxWholeWord: TCheckBox;
+    FindButtonDown: TBitBtn;
+    FindButtonUp: TBitBtn;
+    FindEdit: TEdit;
     MenuItem1: TMenuItem;
     MenuItemOpenFileDir: TMenuItem;
     MenuItemCopyFileName: TMenuItem;
@@ -38,6 +45,8 @@ type
     MenuItemNewTab: TMenuItem;
     MenuItemCloseTab: TMenuItem;
     MenuItemCloseOtherTabs: TMenuItem;
+    FindPanel: TPanel;
+    FindButtonClose: TSpeedButton;
     TabPopupMenu: TPopupMenu;
     Notebook: TExtendedNotebook;
     EditorPopupMenu: TPopupMenu;
@@ -50,6 +59,11 @@ type
     procedure DoTabPopupOpen(Sender: TObject);
     // Open new tab if empty tab area on the right is clicked
     procedure DoDoubleClick(Sender: TObject);
+    procedure FindButtonClick(Sender: TObject);
+    procedure FindButtonResize(Sender: TObject);
+    procedure FindButtonKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FindEditChange(Sender: TObject);
+    procedure FindPanelResize(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FormMouseLeave(Sender: TObject);
@@ -62,6 +76,7 @@ type
     FOnEditorChanged: TNotifyEvent;
     FOnEditorLoaded: TNotifyEvent;
     FOnEditorCaretChanged: TNotifyEvent;
+    FOnSearch: TEditorSearchEvent;
 
     procedure CaretMoved(Sender: TObject; Changes: TSynStatusChanges);
 
@@ -78,6 +93,7 @@ type
     property OnEditorLoaded: TNotifyEvent read FOnEditorLoaded write FOnEditorLoaded;
     property OnEditorChanged: TNotifyEvent read FOnEditorChanged write FOnEditorChanged;
     property OnEditorCaretChanged: TNotifyEvent read FOnEditorCaretChanged write FOnEditorCaretChanged;
+    property OnSearch: TEditorSearchEvent read FOnSearch write FOnSearch;
 
     property TabCount: Integer read GetTabCount;
     property Tabs[Index: Integer]: TSimbaScriptTab read GetTab;
@@ -114,6 +130,7 @@ implementation
 {$R *.lfm}
 
 uses
+  lcltype,
   simba.mufasatypes, simba.files, simba.editor_docgenerator,
   simba.dockinghelpers, simba.nativeinterface;
 
@@ -212,6 +229,73 @@ begin
     AddTab();
 end;
 
+procedure TSimbaScriptTabsForm.FindButtonClick(Sender: TObject);
+begin
+  if Sender.Equals(FindButtonUp) then
+    FindPrevious()
+  else
+  if Sender.Equals(FindButtonDown) then
+    FindNext()
+  else
+  if Sender.Equals(FindButtonClose) then
+    FindPanel.Hide();
+end;
+
+procedure TSimbaScriptTabsForm.FindButtonResize(Sender: TObject);
+var
+  Button: TBitBtn absolute Sender;
+begin
+  Button.Width := Button.Height;
+
+  if (Button.Width >= 45) then
+    TBitBtn(Sender).ImageWidth := 32
+  else
+  if (Button.Width >= 35) then
+    TBitBtn(Sender).ImageWidth := 24
+  else
+    TBitBtn(Sender).ImageWidth := 16;
+end;
+
+procedure TSimbaScriptTabsForm.FindButtonKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  case Key of
+    VK_ESCAPE:
+      begin
+        FindPanel.Hide();
+        if (CurrentEditor <> nil) and CurrentEditor.CanSetFocus() then
+          CurrentEditor.SetFocus();
+        Key := 0;
+      end;
+
+    VK_UP:
+      begin
+        FindButtonUp.Click();
+        Key := 0;
+      end;
+
+    VK_RETURN, VK_DOWN:
+      begin
+        FindButtonDown.Click();
+        Key := 0;
+      end;
+  end;
+end;
+
+procedure TSimbaScriptTabsForm.FindEditChange(Sender: TObject);
+begin
+  if (CurrentEditor <> nil) then
+  begin
+    FEditorFind.ExecuteNoDialog(CurrentEditor, FindEdit.Text, FindCheckBoxCaseSens.Checked, FindCheckboxWholeWord.Checked);
+    if Assigned(FOnSearch) then
+      FOnSearch(FEditorFind.Matches);
+  end;
+end;
+
+procedure TSimbaScriptTabsForm.FindPanelResize(Sender: TObject);
+begin
+  FindEdit.Width := FindPanel.Width div 3;
+end;
+
 procedure TSimbaScriptTabsForm.FormDestroy(Sender: TObject);
 begin
   SimbaScriptTabsForm := nil;
@@ -295,8 +379,9 @@ end;
 
 procedure TSimbaScriptTabsForm.Find;
 begin
-  if (CurrentEditor <> nil) then
-    FEditorFind.Execute(CurrentEditor);
+  FindPanel.Show();
+  if FindEdit.CanSetFocus() then
+    FindEdit.SetFocus();
 end;
 
 procedure TSimbaScriptTabsForm.FindNext;

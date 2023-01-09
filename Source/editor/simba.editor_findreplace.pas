@@ -17,15 +17,19 @@ type
   protected
     FDialog: TFindDialog;
     FEditor: TSynEdit;
+    FMatches: Integer;
 
     procedure DoFind(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
 
     procedure Execute(Editor: TSynEdit);
+    procedure ExecuteNoDialog(Editor: TSynEdit; FindText: String; CaseSens, WholeWord: Boolean);
 
     procedure FindPrev(Editor: TSynEdit);
     procedure FindNext(Editor: TSynEdit);
+
+    property Matches: Integer read FMatches;
   end;
 
   TSimbaEditorReplace = class(TComponent)
@@ -50,7 +54,7 @@ uses
 type
   TSimbaEditorHelper = class helper for TSimbaEditor
   public
-    procedure AddMarks(CaseSensitive, WholeWorld: Boolean; Pattern: String);
+    function AddMarks(ForceEntireScope, CaseSensitive, WholeWorld: Boolean; Pattern: String): Integer;
     procedure ShowMarks;
     procedure HideMarks(Sender: TObject); overload;
     procedure HideMarks; overload;
@@ -80,18 +84,24 @@ begin
   if (Timer = nil) then
   begin
     Timer := TTimer.Create(Self);
+    Timer.Interval := 5000;
     Timer.Name := 'MarksChangedTimer';
+    Timer.OnTimer := @HideMarks;
+  end else
+  begin
+    // restart
+    Timer.Enabled := False;
+    Timer.Enabled := True;
   end;
-
-  Timer.Interval := 5000;
-  Timer.OnTimer := @HideMarks;
 end;
 
-procedure TSimbaEditorHelper.AddMarks(CaseSensitive, WholeWorld: Boolean; Pattern: String);
+function TSimbaEditorHelper.AddMarks(ForceEntireScope, CaseSensitive, WholeWorld: Boolean; Pattern: String): Integer;
 var
   Search: TSynEditSearch;
   SearchStart, SearchEnd, FoundStart, FoundEnd: TPoint;
 begin
+  Result := 0;
+
   ModifiedLinesGutter.ClearMarks();
 
   Search := TSynEditSearch.Create();
@@ -101,7 +111,7 @@ begin
     Search.Pattern := Pattern;
     Search.IdentChars := IdentChars;
 
-    if SelAvail then
+    if SelAvail and (not ForceEntireScope) then
     begin
       SearchStart := BlockBegin;
       SearchEnd := BlockEnd;
@@ -116,9 +126,9 @@ begin
 
     while Search.FindNextOne(Lines, SearchStart, SearchEnd, FoundStart, FoundEnd, True) do
     begin
-      ModifiedLinesGutter.AddMark(FoundStart.Y + (FoundEnd.Y - FoundStart.Y), RGBToColor(219, 112, 147));
-
+      ModifiedLinesGutter.AddMark(FoundStart.Y + (FoundEnd.Y - FoundStart.Y), clPurple);
       SearchStart := FoundEnd;
+      Inc(Result);
     end;
   finally
     Search.Free();
@@ -207,7 +217,7 @@ var
 begin
   with TSimbaEditor(FEditor) do
   begin
-    AddMarks(frMatchCase in FDialog.Options, frWholeWord in FDialog.Options, FDialog.FindText);
+    FMatches := AddMarks(False, frMatchCase in FDialog.Options, frWholeWord in FDialog.Options, FDialog.FindText);
 
     SearchOptions := [];
     if (frMatchCase in FDialog.Options) then
@@ -258,6 +268,39 @@ begin
     FDialog.Options := FDialog.Options + [frEntireScope, frHideEntireScope];
 
   FDialog.Execute();
+end;
+
+procedure TSimbaEditorFind.ExecuteNoDialog(Editor: TSynEdit; FindText: String; CaseSens, WholeWord: Boolean);
+var
+  SearchOptions: TSynSearchOptions;
+begin
+  FEditor := Editor;
+  with TSimbaEditor(FEditor) do
+    HideMarks();
+
+  FDialog.FindText := FindText;
+  if CaseSens then
+    FDialog.Options := FDialog.Options + [frMatchCase]
+  else
+    FDialog.Options := FDialog.Options - [frMatchCase];
+
+  if WholeWord then
+    FDialog.Options := FDialog.Options + [frWholeWord]
+  else
+    FDialog.Options := FDialog.Options - [frWholeWord];
+
+  with TSimbaEditor(FEditor) do
+  begin
+    SearchOptions := [ssoEntireScope];
+    if (frMatchCase in FDialog.Options) then
+      SearchOptions := SearchOptions + [ssoMatchCase];
+    if (frWholeWord in FDialog.Options) then
+      SearchOptions := SearchOptions + [ssoWholeWord];
+
+    FMatches := AddMarks(True, frMatchCase in FDialog.Options, frWholeWord in FDialog.Options, FDialog.FindText);
+
+    SearchReplaceEx(FDialog.FindText, '', SearchOptions, Point(1, 1));
+  end;
 end;
 
 procedure TSimbaEditorFind.FindPrev(Editor: TSynEdit);

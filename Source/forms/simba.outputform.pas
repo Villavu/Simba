@@ -194,6 +194,7 @@ begin
   OnClickLink         := @DoMouseLinkClick;
   OnSpecialLineMarkup := @DoSpecialLineMarkup;
 
+  TabStop := False;
   BorderStyle := bsNone;
   Options := Options + [eoHideRightMargin];
 

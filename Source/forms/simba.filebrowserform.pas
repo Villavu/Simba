@@ -306,6 +306,7 @@ begin
   FFileBrowser.OnDblClick := @DoFileBrowserDoubleClick;
   FFileBrowser.BorderStyle := bsNone;
   FFileBrowser.Fill();
+  FFileBrowser.TabStop := False;
 
   FFilter := TTreeFilterEdit.Create(Self);
   FFilter.FilteredTreeview := FFileBrowser;
@@ -316,6 +317,7 @@ begin
   FFilter.TextHint := '(search)';
   FFilter.Spacing := 2;
   FFilter.Flat := True;
+  FFilter.TabStop := False;
 end;
 
 end.

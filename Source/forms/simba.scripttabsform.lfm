@@ -1,12 +1,12 @@
 object SimbaScriptTabsForm: TSimbaScriptTabsForm
-  Left = 1694
+  Left = 3908
   Height = 262
-  Top = 519
-  Width = 659
+  Top = 1042
+  Width = 1079
   AllowDropFiles = True
   Caption = 'Editor'
   ClientHeight = 262
-  ClientWidth = 659
+  ClientWidth = 1079
   DesignTimePPI = 120
   OnDestroy = FormDestroy
   OnDropFiles = DoOnDropFiles
@@ -15,14 +15,12 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
   OnMouseMove = FormMouseMove
   LCLVersion = '2.2.4.0'
   object Notebook: TExtendedNotebook
-    Left = 4
-    Height = 258
+    Left = 0
+    Height = 177
     Top = 0
-    Width = 651
+    Width = 1079
+    TabStop = False
     Align = alClient
-    BorderSpacing.Left = 4
-    BorderSpacing.Right = 4
-    BorderSpacing.Bottom = 4
     Images = SimbaForm.Images
     PopupMenu = TabPopupMenu
     TabOrder = 0
@@ -30,6 +28,122 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
     Options = [nboDoChangeOnSetIndex]
     TabDragMode = dmAutomatic
     TabDragAcceptMode = dmAutomatic
+  end
+  object FindPanel: TPanel
+    Left = 0
+    Height = 85
+    Top = 177
+    Width = 1079
+    Align = alBottom
+    AutoSize = True
+    BevelOuter = bvNone
+    ClientHeight = 85
+    ClientWidth = 1079
+    TabOrder = 1
+    Visible = False
+    OnResize = FindPanelResize
+    object FindEdit: TEdit
+      AnchorSideLeft.Control = FindPanel
+      AnchorSideTop.Control = FindPanel
+      AnchorSideBottom.Control = FindPanel
+      AnchorSideBottom.Side = asrBottom
+      Left = 5
+      Height = 28
+      Top = 5
+      Width = 209
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 5
+      BorderSpacing.Bottom = 2
+      OnChange = FindEditChange
+      OnKeyDown = FindButtonKeyDown
+      TabOrder = 0
+    end
+    object FindButtonClose: TSpeedButton
+      AnchorSideTop.Control = FindPanel
+      AnchorSideRight.Control = FindPanel
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = FindPanel
+      AnchorSideBottom.Side = asrBottom
+      Left = 1042
+      Height = 75
+      Top = 5
+      Width = 27
+      Anchors = [akTop, akRight, akBottom]
+      BorderSpacing.Top = 5
+      BorderSpacing.Right = 10
+      BorderSpacing.Bottom = 5
+      Caption = '🗙'
+      Flat = True
+      Spacing = 0
+      OnClick = FindButtonClick
+    end
+    object FindButtonUp: TBitBtn
+      AnchorSideLeft.Control = FindButtonDown
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = FindEdit
+      AnchorSideBottom.Control = FindEdit
+      AnchorSideBottom.Side = asrBottom
+      Left = 266
+      Height = 28
+      Top = 5
+      Width = 42
+      Anchors = [akTop, akLeft, akBottom]
+      AutoSize = True
+      BorderSpacing.Left = 5
+      Images = SimbaForm.Images
+      ImageIndex = 43
+      OnClick = FindButtonClick
+      OnKeyDown = FindButtonKeyDown
+      OnResize = FindButtonResize
+      Spacing = 0
+      TabOrder = 2
+    end
+    object FindButtonDown: TBitBtn
+      AnchorSideLeft.Control = FindEdit
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = FindEdit
+      AnchorSideBottom.Control = FindEdit
+      AnchorSideBottom.Side = asrBottom
+      Left = 219
+      Height = 28
+      Top = 5
+      Width = 42
+      Anchors = [akTop, akLeft, akBottom]
+      AutoSize = True
+      BorderSpacing.Left = 5
+      Images = SimbaForm.Images
+      ImageIndex = 44
+      OnClick = FindButtonClick
+      OnKeyDown = FindButtonKeyDown
+      OnResize = FindButtonResize
+      Spacing = 0
+      TabOrder = 1
+    end
+    object FindCheckBoxCaseSens: TCheckBox
+      AnchorSideLeft.Control = FindEdit
+      AnchorSideTop.Control = FindCheckboxWholeWord
+      AnchorSideTop.Side = asrBottom
+      Left = 5
+      Height = 24
+      Top = 59
+      Width = 117
+      BorderSpacing.Bottom = 2
+      Caption = 'Case Sensitive'
+      OnChange = FindEditChange
+      TabOrder = 3
+    end
+    object FindCheckboxWholeWord: TCheckBox
+      AnchorSideLeft.Control = FindEdit
+      AnchorSideTop.Control = FindEdit
+      AnchorSideTop.Side = asrBottom
+      Left = 5
+      Height = 24
+      Top = 35
+      Width = 108
+      Caption = 'Whole Word'
+      OnChange = FindEditChange
+      TabOrder = 4
+    end
   end
   object TabPopupMenu: TPopupMenu
     Images = SimbaForm.Images
