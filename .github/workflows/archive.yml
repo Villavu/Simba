@@ -53,8 +53,11 @@ jobs:
           git clone https://${{ secrets.API_TOKEN_GITHUB }}@github.com/villavu/simba-build-archive
 
           cd simba-build-archive
-          mkdir -p $date_year
-          mv ../binaries "$date_year/$date_month_day | ${{ github.event.workflow_run.head_sha }}"
+
+          dir="$date_year/$date_month_day | ${{ github.event.workflow_run.head_sha }}"  
+          
+          mkdir -p $dir
+          mv ../binaries/* $dir
 
           git add .
           git commit --message "${{ github.event.workflow_run.head_sha }}"
