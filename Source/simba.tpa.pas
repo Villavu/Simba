@@ -1139,7 +1139,7 @@ var
 begin
   Buffer.Init();
 
-  if (Length(Result) > 1) then
+  if (Length(Self) > 1) then
   begin
     Tree.Init(Self.Unique());
 

@@ -257,6 +257,7 @@ type
     procedure HandleEditorChanged(Sender: TObject);
     procedure HandleEditorLoaded(Sender: TObject);
     procedure HandleEditorCaretChange(Sender: TObject);
+    procedure HandleEditorSearch(Count: Integer);
 
     procedure SetToolbarSize(Value: Integer);
     procedure SetToolbarPosition(Value: String);
@@ -643,6 +644,7 @@ begin
   SimbaScriptTabsForm.OnEditorLoaded := @HandleEditorLoaded;
   SimbaScriptTabsForm.OnEditorChanged := @HandleEditorChanged;
   SimbaScriptTabsForm.OnEditorCaretChanged := @HandleEditorCaretChange;
+  SimbaScriptTabsForm.OnSearch := @HandleEditorSearch;
   SimbaScriptTabsForm.AddTab();
 
   SimbaFunctionListUpdater := TSimbaFunctionListUpdater.Create();
@@ -1290,6 +1292,11 @@ procedure TSimbaForm.HandleEditorCaretChange(Sender: TObject);
 begin
   with Sender as TSimbaEditor do
     StatusPanelCaret.Caption := 'Line ' + IntToStr(CaretY) + ', Col ' + IntToStr(CaretX);
+end;
+
+procedure TSimbaForm.HandleEditorSearch(Count: Integer);
+begin
+  StatusPanelFileName.Caption := 'Find matches: ' + IntToStr(Count);
 end;
 
 procedure TSimbaForm.MenuEditClick(Sender: TObject);

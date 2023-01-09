@@ -1,7 +1,7 @@
 object SimbaOutputForm: TSimbaOutputForm
-  Left = 3288
+  Left = 4281
   Height = 140
-  Top = 1011
+  Top = 819
   Width = 676
   Caption = 'Output'
   ClientHeight = 140
@@ -16,10 +16,11 @@ object SimbaOutputForm: TSimbaOutputForm
     Height = 140
     Top = 0
     Width = 676
-    ActivePage = TabScript
+    TabStop = False
+    ActivePage = TabSimba
     Align = alClient
     Images = SimbaForm.Images
-    TabIndex = 1
+    TabIndex = 0
     TabOrder = 0
     object TabSimba: TTabSheet
       Caption = 'Simba Messages'

@@ -211,6 +211,7 @@ begin
   FTreeView.OnSelectionChanged := @DoTreeViewSelectionChanged;
   FTreeView.OnMouseMove := @DoTreeViewMouseMove;
   FTreeView.Options := FTreeView.Options + [tvoRightClickSelect, tvoReadOnly, tvoAutoItemHeight] - [tvoToolTips, tvoThemedDraw];
+  FTreeView.TabStop := False;
 
   ExpandedState := TTreeNodeExpandedState.Create(FTreeView);
 
@@ -224,6 +225,7 @@ begin
   FFilter.TextHint := '(search)';
   FFilter.Flat := True;
   FFilter.ExpandAllInitially := True;
+  FFilter.TabStop := False;
 
   FHint := TSimbaHintWindow.Create(FTreeView);
 

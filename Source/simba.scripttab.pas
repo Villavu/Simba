@@ -611,11 +611,13 @@ begin
 
   Caption := FScriptTitle;
   ImageIndex := IMAGE_SIMBA;
+  TabStop := False;
 
   FEditor := TSimbaEditor.Create(Self);
   FEditor.Parent := Self;
   FEditor.Align := alClient;
   FEditor.BorderStyle := bsNone;
+  FEditor.TabStop := False;
 
   FEditor.OnClick := @HandleEditorClick;
   FEditor.OnChange := @HandleEditorChange;
