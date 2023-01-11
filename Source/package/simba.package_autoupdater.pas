@@ -143,7 +143,7 @@ begin
         if InstallLatestVersion() then
         begin
           SimbaDebugLn('');
-          SimbaDebugLn(ESimbaDebugLn.GREEN, 'Succesfully auto updated FPackages[I] "%s"', [FPackages[I].Info.FullName]);
+          SimbaDebugLn(ESimbaDebugLn.GREEN, 'Succesfully auto updated "%s"', [FPackages[I].Info.FullName]);
           SimbaDebugLn(ESimbaDebugLn.GREEN, '"%s" is now at version "%s"', [FPackages[I].Info.FullName, FPackages[I].InstalledVersion]);
           SimbaDebugLn(ESimbaDebugLn.GREEN, 'Scripts will need to be restarted for changes to take effect.');
         end else
