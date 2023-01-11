@@ -57,6 +57,7 @@ type
     procedure SetInstalledVersionTime(Value: TDateTime);
     procedure SetInstalledPath(Value: String);
 
+    function GetConfigPath: String;
     function GetAutoUpdateEnabled: Boolean;
     function GetInstalledPath: String;
     function GetInstalledVersion: String;
@@ -77,6 +78,7 @@ type
     property Versions: TSimbaPackageVersionArray read FVersions;
     property Info: TSimbaPackageInfo read FInfo;
 
+    property ConfigPath: String read GetConfigPath;
     property InstalledPath: String read GetInstalledPath write SetInstalledPath;
     property InstalledVersion: String read GetInstalledVersion write SetInstalledVersion;
     property InstalledVersionTime: TDateTime read GetInstalledVersionTime write SetInstalledVersionTime;
@@ -93,7 +95,6 @@ type
   TSimbaPackageArray = array of TSimbaPackage;
 
   function LoadPackages: TSimbaPackageArray;
-  function GetPackageFiles(Name: String): TStringList;
 
 implementation
 
@@ -101,32 +102,6 @@ uses
   inifiles, lazloggerbase, forms, dateutils, fileutil, lazfileutils,
   simba.files, simba.mufasatypes, simba.httpclient,
   simba.package_endpoint_github, simba.package_endpoint_custom, simba.algo_sort;
-
-function GetPackageFiles(Name: String): TStringList;
-var
-  Files: TStringList;
-  I, J: Integer;
-  FileName: String;
-begin
-  Result := TStringList.Create();
-
-  Files := FindAllFiles(GetIncludePath(), '.simbapackage');
-  for I := 0 to Files.Count - 1 do
-    with TStringList.Create() do
-    try
-      LoadFromFile(Files[I]);
-
-      for J := 0 to Count - 1 do
-        if (Names[J] = Name) then
-        begin
-          FileName := ConcatPaths([ExtractFileDir(Files[I]), SetDirSeparators(ValueFromIndex[J])]);
-          if FileExists(FileName) then
-            Result.AddPair(ExtractFileName(ExcludeTrailingPathDelimiter(ExtractFileDir(Files[I]))), FileName);
-        end;
-    finally
-      Free();
-    end;
-end;
 
 constructor TSimbaPackageVersion.Create(AName, ANotes, ADownloadURL, AOptionsURL, ATime: String);
 begin
@@ -281,6 +256,13 @@ begin
   end;
 end;
 
+function TSimbaPackage.GetConfigPath: String;
+begin
+  Result := '';
+  if IsInstalled and FileExists(InstalledPath + '.simbapackage') then
+    Result := InstalledPath + '.simbapackage';
+end;
+
 procedure TSimbaPackage.ClearConfig;
 var
   Keys: TStringList;
@@ -417,7 +399,7 @@ end;
 
 function TSimbaPackage.HasUpdate: Boolean;
 begin
-  Result := IsInstalled() and (LatestVersionTime > InstalledVersionTime);
+  Result := IsInstalled() and HasVersions() and (LatestVersionTime > InstalledVersionTime);
 end;
 
 function TSimbaPackage.HasVersions: Boolean;

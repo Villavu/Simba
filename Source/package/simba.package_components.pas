@@ -255,7 +255,7 @@ begin
 
   FBuffer.Canvas.Font.Color := clBlack;
   FBuffer.Canvas.Font.Bold := True;
-  FBuffer.Canvas.TextOut(ImageList.Width + 20, 10, Package.Info.Name);
+  FBuffer.Canvas.TextOut(ImageList.Width + 20, 10, Package.Info.FullName);
 
   if Package.HasUpdate() then
   begin

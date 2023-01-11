@@ -45,37 +45,42 @@ implementation
 
 uses
   lazloggerbase, lazfileutils, lcltype,
-  simba.main, simba.package, simba.fonthelpers, simba.scripttabsform;
+  simba.main, simba.package, simba.package_configfile, simba.fonthelpers, simba.scripttabsform;
 
 procedure TSimbaOpenExampleForm.LoadPackageExamples;
 var
   I: Integer;
   ParentNode, Node: TTreeNode;
-  Files: TStringList;
+  Package: TSimbaPackage;
+  FileName: String;
+  Config: TSimbaPackageConfigFile;
 begin
   TreeView.BeginUpdate();
   for I := 1 to TreeView.Items.TopLvlCount - 1 do
     TreeView.Items.TopLvlItems[I].Free();
 
-  Files := GetPackageFiles('example');
-  for I := 0 to Files.Count - 1 do
+  for Package in LoadPackages() do
   begin
-    ParentNode := TreeView.Items.FindTopLvlNode(Files.Names[I]);
-    if (ParentNode = nil) then
+    Config := ParsePackageConfigFile(Package.ConfigPath);
+    if (Length(Config.Examples) = 0) then
+      Continue;
+
+    ParentNode := TreeView.Items.Add(nil, Package.Info.FullName);
+    ParentNode.ImageIndex := IMAGE_PACKAGE;
+    ParentNode.SelectedIndex := IMAGE_PACKAGE;
+
+    for FileName in Config.Examples do
     begin
-      ParentNode := TreeView.Items.Add(nil, Files.Names[I]);
-      ParentNode.ImageIndex := IMAGE_PACKAGE;
-      ParentNode.SelectedIndex := IMAGE_PACKAGE;
+      Node := TreeView.Items.AddChild(ParentNode, ExtractFileNameOnly(FileName));
+      Node.ImageIndex := IMAGE_SIMBA;
+      Node.SelectedIndex := IMAGE_SIMBA;
+      Node.Data := NewStr(FileName);
     end;
 
-    Node := TreeView.Items.AddChild(ParentNode, ExtractFileNameOnly(Files.ValueFromIndex[I]));
-    Node.ImageIndex := IMAGE_SIMBA;
-    Node.SelectedIndex := IMAGE_SIMBA;
-    Node.Data := NewStr(Files.ValueFromIndex[I]);
+    Package.Free();
   end;
-  Files.Free();
 
-  TreeView.Width := TreeView.Canvas.TextWidth('SomePackageName - Example');
+  TreeView.Width := TreeView.Indent + TreeView.Items[0].DisplayTextLeft + TreeView.Canvas.TextWidth('ollydev/SRL-Development');
   TreeView.EndUpdate();
 
   Editor.Visible := False;

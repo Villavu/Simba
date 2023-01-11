@@ -46,6 +46,7 @@ type
 
     function GetOptions(Version: TSimbaPackageVersion; out Options: TSimbaPackageInstallOptions): Boolean;
     function Install(Version: TSimbaPackageVersion; Options: TSimbaPackageInstallOptions): Boolean;
+    function InstallLatestVersion: Boolean;
   end;
 
 implementation
@@ -291,6 +292,19 @@ begin
     Log('Installing failed: %s'.Format([Thread.FatalException.ToString()]), True);
 
   Thread.Free();
+end;
+
+function TSimbaPackageInstaller.InstallLatestVersion: Boolean;
+var
+  Version: TSimbaPackageVersion;
+  Options: TSimbaPackageInstallOptions;
+begin
+  if FPackage.HasVersions() then
+  begin
+    Version := FPackage.Versions[0];
+
+    Result := GetOptions(Version, Options) and Install(Version, Options);
+  end;
 end;
 
 end.

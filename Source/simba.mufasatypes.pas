@@ -165,6 +165,8 @@ function ToStr(Typ: ESimbaDebugLn): String; overload;
 procedure DebugLn(const Msg: String); overload;
 procedure DebugLn(const Msg: String; Args: array of const); overload;
 
+procedure AssertMainThread(const Method: String);
+
 procedure SimbaDebugLn(const Msg: String); overload;
 procedure SimbaDebugLn(const Msg: String; Args: array of const); overload;
 
@@ -240,6 +242,12 @@ end;
 procedure DebugLn(const Msg: String; Args: array of const);
 begin
   {%H-}lazloggerbase.DebugLn(Msg, Args);
+end;
+
+procedure AssertMainThread(const Method: String);
+begin
+  if (GetCurrentThreadID() <> MainThreadID) then
+    raise Exception('Not called on main thread: ' + Method);
 end;
 
 procedure SimbaDebugLn(const Msg: String);
