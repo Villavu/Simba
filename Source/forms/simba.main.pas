@@ -53,6 +53,7 @@ const
   IMAGE_CONSTANT            = 35;
   IMAGE_VARIABLE            = 36;
   IMAGE_OPERATOR            = 39;
+  IMAGE_PACKAGE_UPDATE      = 45;
 
 type
   TSimbaForm = class(TForm)
@@ -60,7 +61,6 @@ type
     MenuItemShapeBox: TMenuItem;
     MenuItemDocumentation: TMenuItem;
     MenuItemGithub: TMenuItem;
-    PackageImageList: TImageList;
     Images: TImageList;
     MainMenu: TMainMenu;
     MenuEdit: TMenuItem;
@@ -223,11 +223,6 @@ type
     FProcessSelection: Integer;
     FRecentFiles: TStringList;
 
-    FPackageMenu: TStringList;
-    FPackageMenuChanged: Boolean;
-    FPackageUpdates: TStringList;
-    FPackageUpdatesChanged: Boolean;
-
     FMouseLogger: TSimbaMouseLogger;
 
     FAreaSelector: TSimbaAreaSelector;
@@ -239,10 +234,6 @@ type
 
     procedure DoColorPicked(Data: PtrInt);
     procedure DoMouseLoggerChange(Sender: TObject; X, Y: Integer; HotkeyPressed: Boolean);
-
-    procedure DoPackageMenuClick(Sender: TObject);
-    procedure DoPackageMenuBuilding;
-    procedure DoPackageMenuBuildingFinished(Sender: TObject);
 
     procedure FontChanged(Sender: TObject); override;
 
@@ -285,14 +276,16 @@ implementation
 {$R *.lfm}
 
 uses
-  LCLType, LCLIntf, AnchorDocking, Math, Toolwin, LazFileUtils,
+  LCLType, LCLIntf, AnchorDocking, Toolwin, LazFileUtils,
 
   simba.shapeboxform, simba.openexampleform, simba.colorpickerhistoryform,
-  simba.package_form, simba.debugimageform, simba.bitmaptostringform, simba.aboutform,
+  simba.debugimageform, simba.bitmaptostringform, simba.aboutform,
   simba.outputform, simba.filebrowserform, simba.notesform, simba.settingsform,
   simba.functionlistform, simba.scripttabsform,
 
-  simba.package, simba.package_installer, simba.associate, simba.ide_initialization,
+  simba.package_form, simba.package_autoupdater,
+
+  simba.associate, simba.ide_initialization,
   simba.functionlist_simbasection, simba.functionlist_updater,
 
   simba.codeparser, simba.codeinsight,
@@ -521,7 +514,7 @@ end;
 
 procedure TSimbaForm.DoPackageMenuTimer(Sender: TObject);
 begin
-  TThread.ExecuteInThread(@DoPackageMenuBuilding, @DoPackageMenuBuildingFinished);
+  UpdatePackages();
 end;
 
 procedure TSimbaForm.StatusPanelPaint(Sender: TObject);
@@ -670,160 +663,6 @@ begin
   SimbaIDEInitialization.CallOnAfterCreateMethods();
 end;
 
-procedure TSimbaForm.DoPackageMenuClick(Sender: TObject);
-begin
-  if SimbaScriptTabsForm.Open(TMenuItem(Sender).Hint, True) and (ssCtrl in GetKeyShiftState()) then
-    MenuItemRun.Click();
-end;
-
-procedure TSimbaForm.DoPackageMenuBuilding;
-var
-  Files, Updates: TStringList;
-  Packages: TSimbaPackageArray;
-  I: Integer;
-  Options: TSimbaPackageInstallOptions;
-begin
-  Updates := TStringList.Create();
-  Packages := LoadPackages();
-
-  for I := 0 to High(Packages) do
-  begin
-    if Packages[I].HasUpdate then
-    begin
-      if Packages[I].AutoUpdateEnabled then
-      begin
-        SimbaDebugLn('Auto updating ' + Packages[I].Info.FullName);
-
-        with TSimbaPackageInstaller.Create(Packages[I], SimbaOutputForm.SimbaOutputBox) do
-        try
-          if GetOptions(Packages[I].VersionsNoBranch[0], Options) and Install(Packages[I].VersionsNoBranch[0], Options) then
-          begin
-            SimbaDebugLn('');
-            SimbaDebugLn(ESimbaDebugLn.GREEN, 'Succesfully auto updated package "%s"', [Packages[I].Info.FullName]);
-            SimbaDebugLn(ESimbaDebugLn.GREEN, '"%s" is now at version "%s"', [Packages[I].Info.FullName, Packages[I].InstalledVersion]);
-            SimbaDebugLn(ESimbaDebugLn.GREEN, 'Scripts will need to be restarted for changes to take effect.');
-          end else
-            SimbaDebugLn(ESimbaDebugLn.RED, 'Auto updating %s failed.', [Packages[I].Info.FullName]);
-        finally
-          Free();
-        end;
-      end else
-        Updates.Add('%s can be updated to version %s', [Packages[I].Info.FullName, Packages[I].LatestVersion]);
-    end;
-
-    Packages[I].Free();
-  end;
-
-  if (not Updates.Equals(FPackageUpdates)) then
-  begin
-    FPackageUpdates.AddStrings(Updates, True);
-    FPackageUpdatesChanged := True;
-  end;
-  Updates.Free();
-
-  Files := GetPackageFiles('script');
-  if (not Files.Equals(FPackageMenu)) then
-  begin
-    FPackageMenu.AddStrings(Files, True);
-    FPackageMenuChanged := True;
-  end;
-  Files.Free();
-end;
-
-procedure TSimbaForm.DoPackageMenuBuildingFinished(Sender: TObject);
-
-  function CreatePackageMenu(PackageName: String): TMenuItem;
-  var
-    I: Integer;
-  begin
-    for I := 0 to MainMenu.Items.Count - 1 do
-      if (MainMenu.Items[I].Tag = 1) and (MainMenu.Items[I].Caption = PackageName) then
-      begin
-        Result := MainMenu.Items[I];
-        Exit;
-      end;
-
-    Result := TMenuItem.Create(MainMenu);
-    Result.Tag := 1;
-    Result.Caption := PackageName;
-
-    MainMenu.Items.Add(Result);
-  end;
-
-  function CreateIcon(Num: Integer): Integer;
-  var
-    bmp16, bmp24, bmp32: TBitmap;
-  begin
-    bmp16 := TBitmap.Create();
-    bmp24 := TBitmap.Create();
-    bmp32 := TBitmap.Create();
-
-    Images.Resolution[16].GetBitmap(IMAGE_PACKAGE, bmp16);
-    Images.Resolution[24].GetBitmap(IMAGE_PACKAGE, bmp24);
-    Images.Resolution[32].GetBitmap(IMAGE_PACKAGE, bmp32);
-
-    with PackageImageList.ResolutionByIndex[0] do
-      Draw(bmp16.Canvas, bmp16.Width - Width, bmp16.Height - Height, Min(Count - 1, Num));
-    with PackageImageList.ResolutionByIndex[0] do
-      Draw(bmp24.Canvas, bmp24.Width - Width, bmp24.Height - Height, Min(Count - 1, Num));
-    with PackageImageList.ResolutionByIndex[1] do
-      Draw(bmp32.Canvas, bmp32.Width - Width, bmp32.Height - Height, Min(Count - 1, Num));
-
-    Result := Images.AddMultipleResolutions([bmp16, bmp24, bmp32]);
-
-    bmp16.Free();
-    bmp24.Free();
-    bmp32.Free();
-  end;
-
-var
-  I: Integer;
-  ParentItem, Item: TMenuItem;
-  PackageName: String;
-begin
-  if FPackageUpdatesChanged then
-  begin
-    if (ToolbarButtonPackages.ImageIndex <> IMAGE_PACKAGE) then
-      Images.Delete(ToolbarButtonPackages.ImageIndex);
-
-    if (FPackageUpdates.Count > 0) then
-    begin
-      ToolbarButtonPackages.Hint := 'Open packages' + LineEnding + FPackageUpdates.Text.Trim();
-      ToolbarButtonPackages.ImageIndex := CreateIcon(FPackageUpdates.Count);
-    end else
-    begin
-      ToolbarButtonPackages.Hint := 'Open packages';
-      ToolbarButtonPackages.ImageIndex := IMAGE_PACKAGE;
-    end;
-  end;
-
-  FPackageUpdatesChanged := False;
-
-  if FPackageMenuChanged then
-  begin
-    for I := 0 to MainMenu.Items.Count - 1 do
-      if MainMenu.Items[I].Tag = 1 then
-        MainMenu.Items.Delete(I);
-
-    ParentItem := nil;
-    for I := 0 to FPackageMenu.Count - 1 do
-    begin
-      PackageName := FPackageMenu.Names[I];
-      if (ParentItem = nil) or (ParentItem.Caption <> PackageName) then
-        ParentItem := CreatePackageMenu(PackageName);
-
-      Item := TMenuItem.Create(MainMenu);
-      Item.Caption := ExtractFileNameOnly(FPackageMenu.ValueFromIndex[I]);
-      Item.Hint := FPackageMenu.ValueFromIndex[I];
-      Item.OnClick := @DoPackageMenuClick;
-
-      ParentItem.Add(Item);
-    end;
-  end;
-
-  FPackageMenuChanged := False;
-end;
-
 procedure TSimbaForm.FormCreate(Sender: TObject);
 begin
   SimbaIDEInitialization.CallOnCreateMethods();
@@ -832,9 +671,6 @@ begin
   Application.OnException := @SimbaForm.HandleException;
 
   Screen.AddHandlerFormAdded(@SimbaForm.HandleFormCreated, True);
-
-  FPackageMenu := TStringList.Create();
-  FPackageUpdates := TStringList.Create();
 
   FRecentFiles := TStringList.Create();
   FRecentFiles.Text := SimbaSettings.General.RecentFiles.Value;

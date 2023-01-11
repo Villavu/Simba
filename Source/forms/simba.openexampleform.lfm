@@ -1,22 +1,22 @@
 object SimbaOpenExampleForm: TSimbaOpenExampleForm
   Left = 1139
-  Height = 900
+  Height = 750
   Top = 19
-  Width = 1350
+  Width = 1125
   Caption = 'Open Example'
-  ClientHeight = 900
-  ClientWidth = 1350
-  DesignTimePPI = 144
+  ClientHeight = 750
+  ClientWidth = 1125
+  DesignTimePPI = 120
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '2.2.2.0'
+  LCLVersion = '2.2.4.0'
   object TreeView: TTreeView
     Left = 0
-    Height = 839
+    Height = 696
     Top = 0
-    Width = 270
+    Width = 225
     Align = alLeft
     AutoExpand = True
     Images = SimbaForm.Images
@@ -32,11 +32,11 @@ object SimbaOpenExampleForm: TSimbaOpenExampleForm
     Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowLines, tvoToolTips, tvoNoDoubleClickExpand, tvoThemedDraw]
   end
   object ButtonPanel: TButtonPanel
-    Left = 9
-    Height = 43
-    Top = 848
-    Width = 1332
-    BorderSpacing.Around = 9
+    Left = 8
+    Height = 38
+    Top = 704
+    Width = 1109
+    BorderSpacing.Around = 8
     OKButton.Name = 'OKButton'
     OKButton.DefaultCaption = True
     OKButton.OnClick = ButtonOkClick
@@ -50,37 +50,37 @@ object SimbaOpenExampleForm: TSimbaOpenExampleForm
     ShowButtons = [pbOK, pbCancel]
   end
   object Splitter: TSplitter
-    Left = 270
-    Height = 839
+    Left = 225
+    Height = 696
     Top = 0
-    Width = 8
+    Width = 7
   end
   object EditorPanel: TPanel
-    Left = 278
-    Height = 839
+    Left = 232
+    Height = 696
     Top = 0
-    Width = 1072
+    Width = 893
     Align = alClient
     BevelOuter = bvNone
     Caption = '(no file selected)'
-    ClientHeight = 839
-    ClientWidth = 1072
+    ClientHeight = 696
+    ClientWidth = 893
     ParentFont = False
     TabOrder = 3
     inline Editor: TSynEdit
       Left = 0
-      Height = 839
+      Height = 696
       Top = 0
-      Width = 1072
+      Width = 893
       Align = alClient
-      Font.Height = -20
+      Font.Height = -17
       Font.Name = 'Courier New'
       Font.Pitch = fpFixed
       Font.Quality = fqNonAntialiased
       ParentColor = False
       ParentFont = False
       TabOrder = 0
-      Gutter.Width = 85
+      Gutter.Width = 72
       Gutter.MouseActions = <>
       RightGutter.Visible = False
       RightGutter.Width = 0
@@ -122,11 +122,11 @@ object SimbaOpenExampleForm: TSimbaOpenExampleForm
       LineHighlightColor.Foreground = clNone
       inline SynLeftGutterPartList1: TSynGutterPartList
         object SynGutterMarks1: TSynGutterMarks
-          Width = 36
+          Width = 30
           MouseActions = <>
         end
         object SynGutterLineNumber1: TSynGutterLineNumber
-          Width = 25
+          Width = 21
           MouseActions = <>
           MarkupInfo.Background = clBtnFace
           MarkupInfo.Foreground = clNone
@@ -136,7 +136,7 @@ object SimbaOpenExampleForm: TSimbaOpenExampleForm
           LeadingZeros = False
         end
         object SynGutterChanges1: TSynGutterChanges
-          Width = 6
+          Width = 5
           MouseActions = <>
           ModifiedColor = 59900
           SavedColor = clGreen
@@ -148,7 +148,7 @@ object SimbaOpenExampleForm: TSimbaOpenExampleForm
           MarkupInfo.Foreground = clGray
         end
         object SynGutterCodeFolding1: TSynGutterCodeFolding
-          Width = 15
+          Width = 13
           MouseActions = <>
           MarkupInfo.Background = clNone
           MarkupInfo.Foreground = clGray
@@ -163,7 +163,7 @@ object SimbaOpenExampleForm: TSimbaOpenExampleForm
     CompilerMode = pcmObjFPC
     NestedComments = True
     TypeHelpers = False
-    Left = 1020
-    Top = 36
+    Left = 850
+    Top = 30
   end
 end
