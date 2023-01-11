@@ -59,7 +59,6 @@ type
     FTokenID: TptTokenKind;
     fLinePos: Integer;
     fExID: TptTokenKind;
-    FOnMessage: TMessageEvent;
     fOnCompDirect: TDirectiveEvent;
     fOnElseDirect: TDirectiveEvent;
     fOnEndIfDirect: TDirectiveEvent;
@@ -233,6 +232,8 @@ type
     function IsIdentifiers(AChar: AnsiChar): Boolean;
     function HashValue(AChar: AnsiChar): Integer;
   protected
+    procedure ErrorMessage(const Message: String); virtual;
+
     procedure SetOrigin(NewValue: PAnsiChar); virtual;
     procedure SetOnCompDirect(const Value: TDirectiveEvent); virtual;
     procedure SetOnDefineDirect(const Value: TDirectiveEvent); virtual;
@@ -286,7 +287,6 @@ type
     property ExID: TptTokenKind read fExID;
     property GenID: TptTokenKind read GetGenID;
     property IsCompilerDirective: Boolean read GetIsCompilerDirective;
-    property OnMessage: TMessageEvent read FOnMessage write FOnMessage;
     property OnCompDirect: TDirectiveEvent read fOnCompDirect write SetOnCompDirect;
     property OnDefineDirect: TDirectiveEvent read fOnDefineDirect write SetOnDefineDirect;
     property OnElseDirect: TDirectiveEvent read fOnElseDirect write SetOnElseDirect;
@@ -323,6 +323,8 @@ type
     function GetStatus: TmwPasLexStatus;
     procedure SetStatus(const Value: TmwPasLexStatus);
   protected
+    procedure ErrorMessage(const Message: String); override;
+
     procedure SetOrigin(NewValue: PAnsiChar); override;
     procedure SetOnCompDirect(const Value: TDirectiveEvent); override;
     procedure SetOnDefineDirect(const Value: TDirectiveEvent); override;
@@ -350,6 +352,9 @@ type
   end;
 
 implementation
+
+uses
+  lazloggerbase;
 
 procedure MakeIdentTable;
 var
@@ -1252,8 +1257,8 @@ procedure TmwBasePasLex.BraceCloseProc;
 begin
   inc(Run);
   fTokenId := tokError;
-  if Assigned(FOnMessage) then
-	  FOnMessage(Self, meError, 'Illegal character', PosXY.X, PosXY.Y);
+
+  ErrorMessage('Illegal character');
 end;
 
 procedure TmwBasePasLex.BorProc;
@@ -1263,8 +1268,7 @@ begin
     #0:
       begin
 		    NullProc;
-        if Assigned(FOnMessage) then
-          FOnMessage(Self, meError, 'Unexpected file end', PosXY.X, PosXY.Y);
+        ErrorMessage('Unexpected file end');
         exit;
       end;
   end;
@@ -1612,6 +1616,11 @@ begin
     Result := Ord(AChar);
 end;
 
+procedure TmwBasePasLex.ErrorMessage(const Message: String);
+begin
+  DebugLn('"%s" at line %d, column %d', [Message, PosXY.Y + 1, PosXY.X]);
+end;
+
 procedure TmwBasePasLex.IdentProc; inline;
 begin
   fTokenID := IdentKind;
@@ -1764,8 +1773,7 @@ begin
     #0:
       begin
         NullProc;
-        if Assigned(FOnMessage) then
-          FOnMessage(Self, meError, 'Unexpected file end', PosXY.X, PosXY.Y);
+        ErrorMessage('Unexpected file end');
         exit;
       end;
   end;
@@ -1997,8 +2005,7 @@ begin
     case FOrigin[Run] of
       #0, #10, #13:
         begin
-          if Assigned(FOnMessage) then
-            FOnMessage(Self, meError, 'Unterminated string', PosXY.X, PosXY.Y);
+          ErrorMessage('Unterminated string');
           Break;
         end;
       #39:
@@ -2025,8 +2032,7 @@ procedure TmwBasePasLex.UnknownProc;
 begin
   inc(Run);
   fTokenID := tokUnknown;
-  if Assigned(FOnMessage) then
-   FOnMessage(Self, meError, 'Unknown Character', PosXY.X, PosXY.Y);
+  ErrorMessage('Unknown Character');
 end;
 
 procedure TmwBasePasLex.Next; inline;
@@ -2377,6 +2383,14 @@ begin
   fAheadLex.Origin := Value.Origin;
 end;
 
+procedure TmwPasLex.ErrorMessage(const Message: String);
+begin
+  if (FileName <> '') then
+    DebugLn('[Codetools]: "%s" at line %d, column %d in file "%s"', [Message, PosXY.Y + 1, PosXY.X, FileName])
+  else
+    DebugLn('[Codetools]: "%s" at line %d, column %d', [Message, PosXY.Y + 1, PosXY.X]);
+end;
+
 procedure TmwBasePasLex.SetOnCompDirect(const Value: TDirectiveEvent);
 begin
   fOnCompDirect := Value;
@@ -2515,8 +2529,7 @@ begin
     case FOrigin[Run] of
       #0{, #10, #13}:
         begin
-          if Assigned(FOnMessage) then
-          FOnMessage(Self, meError, 'Unterminated string', PosXY.X, PosXY.Y);
+          ErrorMessage('Unterminated string');
           break;
         end;
       #34:

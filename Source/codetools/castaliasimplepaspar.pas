@@ -46,7 +46,6 @@ type
 type
   TmwSimplePasPar = class(TObject)
   protected
-    fOnMessage: TMessageEvent;
     fLexer: TmwPasLex;
 
     fInterfaceOnly: Boolean;
@@ -56,7 +55,7 @@ type
     AheadParse: TmwSimplePasPar;
 
     fInRound: Boolean;
-    procedure setOnMessage(Value: TMessageEvent);
+
     procedure InitAhead;
 
     procedure Expected(Sym: TptTokenKind); virtual;
@@ -354,7 +353,7 @@ type
 
     procedure Assign(From: TObject); virtual;
     procedure SynError(Error: TmwParseError); virtual;
-    procedure DefaultOnMessage(Sender: TObject; const Typ: TMessageEventType; const Msg: String; X, Y: Integer);
+    procedure ErrorMessage(const Message: String); virtual;
 
     procedure Run; virtual; overload;
     procedure Run(Script: String; FileName: String); virtual; overload;
@@ -362,7 +361,6 @@ type
 
     property InterfaceOnly: Boolean read fInterfaceOnly write fInterfaceOnly;
     property Lexer: TmwPasLex read fLexer;
-    property OnMessage: TMessageEvent read FOnMessage write setOnMessage;
     property LastNoJunkPos: Integer read fLastNoJunkPos;
     property LastNoJunkLen: Integer read fLastNoJunkLen;
   end;
@@ -463,10 +461,7 @@ begin
     ParseFile();
   except
     on E: Exception do
-    begin
-      if Assigned(fOnMessage) then
-        fOnMessage(Self, meError, E.Message, Lexer.PosXY.X, LExer.PosXY.Y);
-    end;
+      ErrorMessage(E.Message);
   end;
 end;
 
@@ -503,7 +498,6 @@ constructor TmwSimplePasPar.Create;
 begin
   inherited Create;
   fLexer := TmwPasLex.Create;
-  fOnMessage := DefaultOnMessage;
 end;
 
 destructor TmwSimplePasPar.Destroy;
@@ -518,10 +512,7 @@ procedure TmwSimplePasPar.Assign(From: TObject);
 begin
   if (From is TmwSimplePasPar) then
     with From as TmwSimplePasPar do
-    begin
       Self.Lexer.CloneDefinesFrom(Lexer);
-      Self.OnMessage := OnMessage;
-    end;
 end;
 
 procedure TmwSimplePasPar.Expected(Sym: TptTokenKind);
@@ -531,11 +522,7 @@ begin
     if TokenID = tokNull then
       ExpectedFatal(Sym)
     else
-    begin
-      if Assigned(FOnMessage) then
-        FOnMessage(Self, meError, Format(rsExpected, [TokenName(Sym), fLexer.Token]),
-          fLexer.PosXY.X, fLexer.PosXY.Y);
-    end;
+      ErrorMessage(Format('"%s" expected but found "%s"', [TokenName(Sym), FLexer.Token]));
   end
   else
     NextToken;
@@ -546,10 +533,9 @@ begin
   if Sym <> Lexer.ExID then
   begin
     if Lexer.TokenID = tokNull then
-      ExpectedFatal(Sym) {jdj 7/22/1999}
-    else if Assigned(FOnMessage) then
-      FOnMessage(Self, meError, Format(rsExpected, ['EX:' + TokenName(Sym), fLexer.Token]),
-        fLexer.PosXY.X, fLexer.PosXY.Y);
+      ExpectedFatal(Sym)
+    else
+      ErrorMessage(Format('"%s" expected but found "%s"', [TokenName(Sym), FLexer.Token]))
   end
   else
     NextToken;
@@ -577,9 +563,6 @@ end;
 
 procedure TmwSimplePasPar.HandlePtCompDirect(Sender: TmwBasePasLex);
 begin
-  if Assigned(FOnMessage) then
-    FOnMessage(Self, meNotSupported, 'Currently not supported ' + fLexer.Token, fLexer.PosXY.X, fLexer.PosXY.Y);
-
   Sender.Next; //XM Jul-2000
   { ToDo }
 end;
@@ -654,9 +637,6 @@ end;
 
 procedure TmwSimplePasPar.HandlePtIfOptDirect(Sender: TmwBasePasLex);
 begin
-  if Assigned(FOnMessage) then
-    FOnMessage(Self, meNotSupported, 'Currently not supported ' + fLexer.Token, fLexer.PosXY.X, fLexer.PosXY.Y);
-
   Sender.Next; //XM Jul-2000
 
   { ToDo }
@@ -664,9 +644,6 @@ end;
 
 procedure TmwSimplePasPar.HandlePtIncludeDirect(Sender: TmwBasePasLex);
 begin
-  if Assigned(FOnMessage) then
-    FOnMessage(Self, meNotSupported, 'Currently not supported ' + fLexer.Token, fLexer.PosXY.X, fLexer.PosXY.Y);
-
   Sender.Next; //XM Jul-2000
 
   { ToDo }
@@ -674,9 +651,6 @@ end;
 
 procedure TmwSimplePasPar.HandlePtResourceDirect(Sender: TmwBasePasLex);
 begin
-  if Assigned(FOnMessage) then
-    FOnMessage(Self, meNotSupported, 'Currently not supported ' + fLexer.Token, fLexer.PosXY.X, fLexer.PosXY.Y);
-
   Sender.Next; //XM Jul-2000
 
   { ToDo }
@@ -802,23 +776,22 @@ end;
 
 procedure TmwSimplePasPar.SynError(Error: TmwParseError);
 begin
-  if Assigned(FOnMessage) then
-    FOnMessage(Self, meError, ParserErrorName(Error) + ' found ' + fLexer.Token, fLexer.PosXY.X, fLexer.PosXY.Y);
+  ErrorMessage(ParserErrorName(Error) + ' found ' + fLexer.Token);
 end;
 
-procedure TmwSimplePasPar.DefaultOnMessage(Sender: TObject; const Typ: TMessageEventType; const Msg: String; X, Y: Integer);
+procedure TmwSimplePasPar.ErrorMessage(const Message: String);
 begin
-  if Assigned(fLexer) then
+  if (FLexer <> nil) then
   begin
-    if (fLexer.MaxPos > -1) and (fLexer.TokenPos > fLexer.MaxPos) then
-      Exit;
-
-    if (fLexer.FileName <> '') then
-      DebugLn('"%s" at line %d, column %d in file "%s"', [Msg, Y + 1, X, fLexer.FileName])
-    else
-      DebugLn('"%s" at line %d, column %d', [Msg, Y + 1, X]);
+    if (fLexer.MaxPos = -1) or (fLexer.TokenPos <= fLexer.MaxPos) then
+    begin
+      if (fLexer.FileName <> '') then
+        DebugLn('[Codetools]: "%s" at line %d, column %d in file "%s"', [Message, FLexer.PosXY.Y + 1, FLexer.PosXY.X, FLexer.FileName])
+      else
+        DebugLn('[Codetools]: "%s" at line %d, column %d', [Message, FLexer.PosXY.Y + 1, FLexer.PosXY.X]);
+    end;
   end else
-    DebugLn('"%s" at line %d, column %d', [Msg, Y + 1, X]);
+    DebugLn('[Codetools]: ' + Message);
 end;
 
 procedure TmwSimplePasPar.ParseFile;
@@ -1846,9 +1819,7 @@ begin
       ExpectedFatal(tokIdentifier) {jdj 7/22/1999}
     else
     begin
-      if Assigned(FOnMessage) then
-        FOnMessage(Self, meError, Format(rsExpected, [TokenName(tokIdentifier), fLexer.Token]),
-          fLexer.PosXY.X, fLexer.PosXY.Y);
+      ErrorMessage(Format('"%s" expected but found "%s"', [TokenName(tokIdentifier), FLexer.Token]));
     end;
   end
   else
@@ -2080,24 +2051,18 @@ end;
 procedure TmwSimplePasPar.IfStatement;
 begin
   Expected(tokIf);
-  Expression;
+  Expression();
+  while (TokenID = tokAssign) do
+  begin
+    NextToken();
+    Expression();
+  end;
   Expected(tokThen);
-  Statement;
-  //This breaks if you have an if statement immediately preceding the else 
-  //clause of a case statement
-{  Lexer.InitAhead;
-  if (TokenID = tokSemicolon) and (Lexer.AheadTokenID = tokElse) then
+  Statement();
+  if (TokenID = tokElse) then
   begin
-    if Assigned(FOnMessage) then
-    begin
-      FOnMessage(Self, meError, ''';'' not allowed before ''ELSE''',
-        FLexer.PosXY.X, FLexer.PosXY.Y);
-    end;
-  end;}
-  if TokenID = tokElse then
-  begin
-    NextToken;
-    Statement;
+    NextToken();
+    Statement();
   end;
 end;
 
@@ -2771,11 +2736,11 @@ begin
           end;
       end;
     end;
-  tokAssign:
-    begin
-      StatementList;
-      Expression;
-    end;
+  //tokAssign:
+  //  begin
+  //    StatementList;
+  //    Expression;
+  //  end;
   end;
 end;
 
@@ -4999,13 +4964,6 @@ begin
       NextToken;
       AncestorId;
     end;
-end;
-
-procedure TmwSimplePasPar.setOnMessage(Value: TMessageEvent);
-begin
-  fOnMessage := Value;
-  if Assigned(fLexer) then
-    fLexer.OnMessage := Value;
 end;
 
 procedure TmwSimplePasPar.InitAhead;

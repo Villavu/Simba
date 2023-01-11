@@ -24,9 +24,6 @@ var
   CompTable: array[#0..#255] of byte;
 
 type
-  TMessageEventType = (meError, meNotSupported);
-  TMessageEvent = procedure(Sender: TObject; const Typ: TMessageEventType; const Msg: string; X, Y: integer) of object; //jdj 7/16/1999; DR 2001-11-06
-
   TCommentState = (csAnsi, csBor, csNo);
 
   TTokenPoint = packed record

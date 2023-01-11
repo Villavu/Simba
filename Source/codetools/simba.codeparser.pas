@@ -419,6 +419,9 @@ type
 
 implementation
 
+uses
+  lazloggerbase;
+
 procedure TDeclarationMap.Clear;
 begin
   FDictionary.Clear();
@@ -1152,7 +1155,6 @@ begin
   FLexer := ALexer;
   FLexer.OnIncludeDirect := @OnIncludeDirect;
   FLexer.OnLibraryDirect := @OnLibraryDirect;
-  FLexer.OnMessage := OnMessage;
 end;
 
 procedure TCodeParser.PopLexer;
@@ -1307,14 +1309,11 @@ begin
           end;
         end;
       end else
-        WriteLn('Library "', FileName, '" not found');
+        DebugLn('Library "', FileName, '" not found');
     end;
   except
     on E: Exception do
-    begin
-      if (FOnMessage <> nil) then
-        FOnMessage(Self, meError, E.Message, Sender.PosXY.X, Sender.PosXY.Y);
-    end;
+      ErrorMessage(E.Message);
   end;
 end;
 
@@ -1356,14 +1355,11 @@ begin
           end;
         end;
       end else
-        WriteLn('Include "', FileName, '" not found');
+        DebugLn('Include "', FileName, '" not found');
     end;
   except
     on E: Exception do
-    begin
-      if (FOnMessage <> nil) then
-        FOnMessage(Self, meError, E.Message, Sender.PosXY.X, Sender.PosXY.Y);
-    end;
+      ErrorMessage(E.Message);
   end;
 end;
 
@@ -2018,7 +2014,6 @@ begin
     FOnFindInclude := TCodeParser(From).OnFindInclude;
     FOnFindLibrary := TCodeParser(From).OnFindLibrary;
     FOnLoadLibrary := TCodeParser(From).OnLoadLibrary;
-    FOnMessage := TCodeParser(From).OnMessage;
   end;
 end;
 
