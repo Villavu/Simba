@@ -198,6 +198,8 @@ begin
     addGlobalFunc(
       'procedure TerminateScript; overload;', [
       'begin',
+      '  WriteLn("Script Terminated");',
+      '  WriteLn(DumpCallStack());',
       '  Halt();',
       'end;'
     ]);
@@ -206,6 +208,7 @@ begin
       'procedure TerminateScript(Reason: String); overload;', [
       'begin',
       '  WriteLn("Script Terminated: " + Reason);',
+      '  WriteLn(DumpCallStack());',
       '  Halt();',
       'end;'
     ]);
