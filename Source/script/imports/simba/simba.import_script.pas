@@ -196,19 +196,21 @@ begin
     addGlobalFunc('procedure PauseScript', @_LapePauseScript);
 
     addGlobalFunc(
-      'procedure TerminateScript; overload;', [
+      'procedure TerminateScript(WriteCallStack: Boolean = True); overload;', [
       'begin',
       '  WriteLn("Script Terminated");',
-      '  WriteLn(DumpCallStack(1));',
+      '  if WriteCallStack then',
+      '    WriteLn(DumpCallStack(1));',
       '  Halt();',
       'end;'
     ]);
 
     addGlobalFunc(
-      'procedure TerminateScript(Reason: String); overload;', [
+      'procedure TerminateScript(Reason: String; WriteCallStack: Boolean = True); overload;', [
       'begin',
       '  WriteLn("Script Terminated: " + Reason);',
-      '  WriteLn(DumpCallStack(1));',
+      '  if WriteCallStack then',
+      '    WriteLn(DumpCallStack(1));',
       '  Halt();',
       'end;'
     ]);
