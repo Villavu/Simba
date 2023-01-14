@@ -199,7 +199,7 @@ begin
       'procedure TerminateScript; overload;', [
       'begin',
       '  WriteLn("Script Terminated");',
-      '  WriteLn(DumpCallStack());',
+      '  WriteLn(DumpCallStack(1));',
       '  Halt();',
       'end;'
     ]);
@@ -208,7 +208,7 @@ begin
       'procedure TerminateScript(Reason: String); overload;', [
       'begin',
       '  WriteLn("Script Terminated: " + Reason);',
-      '  WriteLn(DumpCallStack());',
+      '  WriteLn(DumpCallStack(1));',
       '  Halt();',
       'end;'
     ]);

@@ -43,21 +43,18 @@ jobs:
       - name: Push
         shell: bash     
         run: |
-          date_year=$(date +"%Y")
-          date_month_day=$(date +"%m-%d")
-
           git config --global http.postBuffer 500M
           git config --global user.email "villavu-bot"
           git config --global user.name "villavu-bot"
+          git clone https://${{ secrets.API_TOKEN_GITHUB }}@github.com/Villavu/Simba-Build-Archive
 
-          git clone https://${{ secrets.API_TOKEN_GITHUB }}@github.com/villavu/simba-build-archive
+          date_year=$(date +"%Y")
+          date_month_day=$(date +"%m-%d")
 
-          cd simba-build-archive
+          mkdir -p "Simba-Build-Archive/$date_year/$date_month_day | ${{ github.event.workflow_run.head_sha }}"
+          mv binaries/* "Simba-Build-Archive/$date_year/$date_month_day | ${{ github.event.workflow_run.head_sha }}/"
 
-          dir="$date_year/$date_month_day | ${{ github.event.workflow_run.head_sha }}"  
-          
-          mkdir -p $dir
-          mv ../binaries/* $dir
+          cd Simba-Build-Archive
 
           git add .
           git commit --message "${{ github.event.workflow_run.head_sha }}"
