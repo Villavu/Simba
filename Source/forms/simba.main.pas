@@ -619,11 +619,11 @@ begin
   Height := 850;
 
   if GetDockSplitter(DockMaster.GetAnchorSite(SimbaScriptTabsForm), akLeft, Splitter) then
-    Splitter.SetSplitterPosition(250);
+    Splitter.SetSplitterPosition(180);
   if GetDockSplitter(DockMaster.GetAnchorSite(SimbaScriptTabsForm), akRight, Splitter) then
-    Splitter.SetSplitterPosition(1000);
+    Splitter.SetSplitterPosition(720);
   if GetDockSplitter(DockMaster.GetAnchorSite(SimbaScriptTabsForm), akBottom, Splitter) then
-    Splitter.SetSplitterPosition(450);
+    Splitter.SetSplitterPosition(350);
 
   DockMaster.GetAnchorSite(SimbaScriptTabsForm).Header.Visible := False;
   DockMaster.GetAnchorSite(SimbaOutputForm).Header.Visible := False;
