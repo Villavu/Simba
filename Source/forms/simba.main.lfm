@@ -1,11 +1,11 @@
 object SimbaForm: TSimbaForm
-  Left = 4161
-  Height = 574
-  Top = 81
+  Left = 2545
+  Height = 565
+  Top = 65
   Width = 910
   Caption = 'Simba'
-  ClientHeight = 549
-  ClientWidth = 910
+  ClientHeight = 0
+  ClientWidth = 0
   DesignTimePPI = 120
   KeyPreview = True
   Menu = MainMenu
@@ -169,7 +169,7 @@ object SimbaForm: TSimbaForm
   object StatusBar: TPanel
     Left = 0
     Height = 35
-    Top = 514
+    Top = 505
     Width = 910
     Align = alBottom
     BevelOuter = bvNone
@@ -230,7 +230,7 @@ object SimbaForm: TSimbaForm
   end
   object DockPanel: TAnchorDockPanel
     Left = 0
-    Height = 482
+    Height = 473
     Top = 32
     Width = 910
     Align = alClient

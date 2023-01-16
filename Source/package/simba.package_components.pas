@@ -694,20 +694,18 @@ procedure TPackageVersionGrid.Fill(Package: TSimbaPackage);
 var
   Header: TVersionHeader;
   Info: TVersionInfo;
-  Version: TSimbaPackageVersion;
-  Versions: TSimbaPackageVersionArray;
+  Version: TSimbaPackageRelease;
   I: Integer;
 begin
   Clear();
 
-  Versions := Package.VersionsNoBranch;
-  if Length(Versions) > 0 then
+  if Package.HasReleases() then
   begin
-    RowCount := RowCount + Length(Versions) * 2;
+    RowCount := RowCount + Length(Package.Releases) * 2;
 
     for I := FixedRows to RowCount - 1 do
     begin
-      Version := Versions[(I - FixedRows) div 2];
+      Version := Package.Releases[(I - FixedRows) div 2];
 
       case Odd(I - FixedRows) of
         True:

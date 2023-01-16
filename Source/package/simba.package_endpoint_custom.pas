@@ -56,28 +56,15 @@ type
     constructor Create(URL: String); override;
 
     function GetInfo: TSimbaPackageInfo; override;
-    function GetVersions: TSimbaPackageVersionArray; override;
+    function GetReleases: TSimbaPackageReleaseArray; override;
+    function GetBranches: TSimbaPackageBranchArray; override;
   end;
 
 implementation
 
 uses
-  jsonparser, jsonscanner, fpjson, dateutils, lazloggerbase,
+  dateutils, fpjson,
   simba.httpclient, simba.mufasatypes;
-
-function ParseJSON(const S: String): TJSONData;
-var
-  Parser: TJSONParser;
-begin
-  Parser := TJSONParser.Create(S, [joComments]);
-  try
-    Result := Parser.Parse();
-  except
-    Result := nil;
-  end;
-
-  Parser.Free();
-end;
 
 function TSimbaPackageEndpoint_Custom.GetPage(URL: String): String;
 begin
@@ -92,7 +79,7 @@ begin
     end;
   except
     on E: Exception do
-      DebugLn(URL, ' :: ', E.ToString());
+      DebugLn(URL + ' :: ' + E.ToString());
   end;
 end;
 
@@ -109,7 +96,7 @@ var
 begin
   Result := Default(TSimbaPackageInfo);
 
-  Json := ParseJSON(GetPage(FURL));
+  Json := GetPage(FURL).ParseJSON();
   if (Json = nil) then
     Exit;
 
@@ -124,36 +111,75 @@ begin
   JSON.Free();
 end;
 
-function TSimbaPackageEndpoint_Custom.GetVersions: TSimbaPackageVersionArray;
+function TSimbaPackageEndpoint_Custom.GetReleases: TSimbaPackageReleaseArray;
 var
-  Json: TJsonData;
+  JSON: TJSONData;
   I: Integer;
-  Version: TSimbaPackageVersion;
+  Release: TSimbaPackageRelease;
 begin
   Result := [];
 
-  Json := ParseJSON(GetPage(FURL + 'versions'));
-  if (Json = nil) then
+  JSON := GetPage(FURL + 'versions').ParseJSON();
+  if (JSON = nil) then
     Exit;
 
   for I := 0 to JSON.Count - 1 do
     if (JSON.Items[I] is TJSONObject) then
-    begin
       with TJSONObject(JSON.Items[I]) do
-      try
-        Version := TSimbaPackageVersion.Create(
-          Strings['name'],
-          Strings['notes'],
-          Strings['download_url'],
-          Strings['options_url'],
-          Strings['time']
-        );
+      begin
+        Release := Default(TSimbaPackageRelease);
+        Release.Name := Strings['name'];
+        Release.Notes := Strings['notes'];
+        Release.DownloadURL := Strings['download_url'];
+        Release.OptionsURL := Strings['options_url'];
+        Release.Age := Strings['time'];
 
-        Result := Result + [Version];
-      except
-        FreeAndNil(Version);
+        if (Release.Notes = '') then
+          Release.Notes := '(no release notes)';
+
+        if (Release.Age <> '') then
+        begin
+          if Release.Age.IsInteger() then
+            Release.Time := UnixToDateTime(Release.Age.ToInt64())
+          else
+            Release.Time := ISO8601ToDate(Release.Age);
+
+          case DaysBetween(Now(), Time) of
+            0: Release.Age := '(today)';
+            1: Release.Age := '(yesterday)';
+            else
+              Release.Age := '(' + IntToStr(DaysBetween(Now(), Release.Time)) + ' days ago)';
+          end;
+        end;
+
+        Result := Result + [Release];
       end;
-    end;
+
+  JSON.Free();
+end;
+
+function TSimbaPackageEndpoint_Custom.GetBranches: TSimbaPackageBranchArray;
+var
+  JSON: TJSONData;
+  I: Integer;
+  Branch: TSimbaPackageBranch;
+begin
+  Result := [];
+
+  JSON := GetPage(FURL + 'branches').ParseJSON();
+  if (JSON = nil) then
+    Exit;
+
+  for I := 0 to JSON.Count - 1 do
+    if (JSON.Items[I] is TJSONObject) then
+      with TJSONObject(JSON.Items[I]) do
+      begin
+        Branch := Default(TSimbaPackageBranch);
+        Branch.Name := Strings['name'];
+        Branch.DownloadURL := Strings['download_url'];
+
+        Result := Result + [Branch];
+      end;
 
   JSON.Free();
 end;

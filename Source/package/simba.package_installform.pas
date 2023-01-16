@@ -22,13 +22,19 @@ type
     Output: TSynEdit;
 
     procedure DoInstallButtonClick(Sender: TObject);
+    // Update the install option components
     procedure DoVersionChange(Sender: TObject);
   private
     FPackage: TSimbaPackage;
-    FVersion: TSimbaPackageVersion;
     FInstaller: TSimbaPackageInstaller;
 
+    function GetSelectedRelease(out ARelease: TSimbaPackageRelease): Boolean;
+    function GetSelectedBranch(out ABranch: TSimbaPackageBranch): Boolean;
+
     procedure Log(S: String);
+
+    procedure DoStartInstall(Sender: TObject);
+    procedure DoEndInstall(Sender: TObject);
   public
     constructor Create(AOwner: TComponent; APackage: TSimbaPackage); reintroduce;
     destructor Destroy; override;
@@ -39,7 +45,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.files,  simba.fonthelpers;
+  simba.mufasatypes, simba.files, simba.fonthelpers, simba.dialog;
 
 constructor TSimbaPackageInstallForm.Create(AOwner: TComponent; APackage: TSimbaPackage);
 var
@@ -57,15 +63,15 @@ begin
 
   FPackage := APackage;
   FInstaller := TSimbaPackageInstaller.Create(FPackage, Output);
+  FInstaller.OnStartInstall := @DoStartInstall;
+  FInstaller.OnEndInstall := @DoEndInstall;
 
   VersionsList.Items.Clear();
-  for I := 0 to High(FPackage.Versions) do
-  begin
-    if FPackage.Versions[I] is TSimbaPackageBranch then
-      VersionsList.Items.AddObject(FPackage.Versions[I].Name + ' (branch)', FPackage.Versions[I])
-    else
-      VersionsList.Items.AddObject(FPackage.Versions[I].Name + ' ' + FPackage.Versions[I].Age, FPackage.Versions[I]);
-  end;
+  for I := 0 to High(FPackage.Releases) do
+    VersionsList.Items.AddObject(FPackage.Releases[I].Name + ' ' + FPackage.Releases[I].Age, TObject(@FPackage.Releases[I]));
+  for I := 0 to High(FPackage.Branches) do
+    VersionsList.Items.AddObject(FPackage.Branches[I].Name + ' (branch)', TObject(@FPackage.Branches[I]));
+
   if (VersionsList.Items.Count > 0) then
     VersionsList.ItemIndex := 0;
   VersionsList.OnChange(VersionsList);
@@ -81,19 +87,37 @@ end;
 
 procedure TSimbaPackageInstallForm.DoVersionChange(Sender: TObject);
 var
+  Rel: TSimbaPackageRelease;
   Options: TSimbaPackageInstallOptions;
 begin
-  if (VersionsList.ItemIndex > -1) then
-  begin
-    FVersion := VersionsList.Items.Objects[VersionsList.ItemIndex] as TSimbaPackageVersion;
-    if not FInstaller.GetOptions(FVersion, Options) then
-      Log('Version "%s" has no install options'.Format([FVersion.Name]));
+  if GetSelectedRelease(Rel) then
+    if FInstaller.GetOptions(Rel, Options) then
+    begin
+      PathEdit.Text        := Options.Path;
+      FlatCheckbox.Checked := Options.Flat;
+      IgnoreListMemo.Lines.AddStrings(Options.IgnoreList, True);
 
-    PathEdit.Text        := Options.Path;
-    FlatCheckbox.Checked := Options.Flat;
-    IgnoreListMemo.Lines.AddStrings(Options.IgnoreList, True);
-  end else
-    FVersion := nil;
+      Exit;
+    end else
+      Log('Release "%s" has no install options'.Format([Rel.Name]));
+
+  PathEdit.Text        := GetIncludePath() + FPackage.Info.Name;
+  FlatCheckbox.Checked := False;
+  IgnoreListMemo.Clear();
+end;
+
+function TSimbaPackageInstallForm.GetSelectedRelease(out ARelease: TSimbaPackageRelease): Boolean;
+begin
+  Result := (VersionsList.ItemIndex > -1) and (not VersionsList.Items[VersionsList.ItemIndex].Contains('branch'));
+  if Result then
+    ARelease := TSimbaPackageRelease(Pointer(VersionsList.Items.Objects[VersionsList.ItemIndex])^);
+end;
+
+function TSimbaPackageInstallForm.GetSelectedBranch(out ABranch: TSimbaPackageBranch): Boolean;
+begin
+  Result := (VersionsList.ItemIndex > -1) and VersionsList.Items[VersionsList.ItemIndex].Contains('branch');
+  if Result then
+    ABranch := TSimbaPackageBranch(Pointer(VersionsList.Items.Objects[VersionsList.ItemIndex])^);
 end;
 
 procedure TSimbaPackageInstallForm.Log(S: String);
@@ -102,29 +126,35 @@ begin
   Output.CaretXY := TPoint.Create(0, Output.Lines.Count);
 end;
 
+procedure TSimbaPackageInstallForm.DoStartInstall(Sender: TObject);
+begin
+  InstallButton.Caption := 'Installing...';
+  InstallButton.Enabled := False;
+end;
+
+procedure TSimbaPackageInstallForm.DoEndInstall(Sender: TObject);
+begin
+  InstallButton.Caption := 'Install';
+  InstallButton.Enabled := True;
+end;
+
 procedure TSimbaPackageInstallForm.DoInstallButtonClick(Sender: TObject);
 var
   Options: TSimbaPackageInstallOptions;
+  Rel: TSimbaPackageRelease;
+  Branch: TSimbaPackageBranch;
 begin
-  if (FVersion = nil) then
-    Exit;
-
   Options := Default(TSimbaPackageInstallOptions);
   Options.Path := PathEdit.Text;
   Options.Flat := FlatCheckbox.Checked;
   Options.IgnoreList := IgnoreListMemo.Lines.ToStringArray();
   Options.AutoUpdate := False;
 
-  if QuestionDlg('Install Package', 'Install "%s" to "%s" ?'.Format([FPackage.Info.FullName, ExtractRelativePath(GetSimbaPath(), Options.Path)]), mtConfirmation, [mrYes, mrNo], 0) = mrYes then
-  begin
-    InstallButton.Caption := 'Installing...';
-    InstallButton.Enabled := False;
-
-    FInstaller.Install(FVersion, Options);
-
-    InstallButton.Caption := 'Install';
-    InstallButton.Enabled := True;
-  end;
+  if GetSelectedRelease(Rel) and (SimbaQuestionDlg('Install Package', 'Install "%s" to "%s" ?'.Format([FPackage.Info.FullName, ExtractRelativePath(GetSimbaPath(), Options.Path)])) = ESimbaDialogResult.YES) then
+    FInstaller.Install(Rel, Options)
+  else
+  if GetSelectedBranch(Branch) and (SimbaQuestionDlg('Install Package', 'Install "%s" to "%s" ?'.Format([FPackage.Info.FullName, ExtractRelativePath(GetSimbaPath(), Options.Path)])) = ESimbaDialogResult.YES) then
+    FInstaller.InstallBranch(Branch, Options.Path);
 end;
 
 end.

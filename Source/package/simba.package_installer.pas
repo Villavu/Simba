@@ -30,6 +30,7 @@ type
       Progress: String;
     end;
 
+    function InternalInstall(URL: String; Path: String; IgnoreList: TStringArray; Flat: Boolean): Boolean;
     procedure FlushLog;
     procedure Log(S: String; Flush: Boolean = False);
 
@@ -41,11 +42,15 @@ type
     procedure DoDownloadingFinished(Sender: TObject);
     procedure DoExtractingFinished(Sender: TObject);
   public
+    OnStartInstall: TNotifyEvent;
+    OnEndInstall: TNotifyEvent;
+
     constructor Create(Package: TSimbaPackage; Output: TSynEdit);
     destructor Destroy; override;
 
-    function GetOptions(Version: TSimbaPackageVersion; out Options: TSimbaPackageInstallOptions): Boolean;
-    function Install(Version: TSimbaPackageVersion; Options: TSimbaPackageInstallOptions): Boolean;
+    function GetOptions(Version: TSimbaPackageRelease; out Options: TSimbaPackageInstallOptions): Boolean;
+    function Install(Version: TSimbaPackageRelease; Options: TSimbaPackageInstallOptions): Boolean;
+    function InstallBranch(Branch: TSimbaPackageBranch; Path: String): Boolean;
     function InstallLatestVersion: Boolean;
   end;
 
@@ -54,6 +59,72 @@ implementation
 uses
   Forms, FileUtil,
   simba.mufasatypes, simba.httpclient, simba.files;
+
+function TSimbaPackageInstaller.InternalInstall(URL: String; Path: String; IgnoreList: TStringArray; Flat: Boolean): Boolean;
+
+  procedure Run;
+  begin
+    with TSimbaHTTPClient.Create() do
+    try
+      OnConnecting       := @DoConnectingProgress;
+      OnDownloadProgress := @DoDownloadingProgress;
+      OnExtractProgress  := @DoExtractingProgress;
+      OnResponseCode     := @DoResponseCode;
+
+      OnDownloadingFinished := @DoDownloadingFinished;
+      OnExtractingFinished  := @DoExtractingFinished;
+
+      GetZIP(URL, Path, Flat, IgnoreList);
+    finally
+      Free();
+    end;
+  end;
+
+var
+  FileName: String;
+  Thread: TThread;
+begin
+  Result := False;
+  if Assigned(OnStartInstall) then
+    OnStartInstall(Self);
+
+  // Move old files to Data/OldPackages/
+  if DirectoryExists(Path) then
+  begin
+    FileName := GetOldPackagePath() + ExtractFileName(Path);
+    if DirectoryExists(FileName) then
+      DeleteDirectory(FileName, False);
+
+    Log('Moving old files to %s'.Format([FileName]), True);
+    if (not RenameFile(Path, FileName)) then
+    begin
+      Log('Unable to move old files %s'.Format([Path]), True);
+      Log('Please delete the files manually', True);
+
+      Exit;
+    end;
+    Log('', True);
+  end;
+
+  Thread := Threaded(@Run);
+  while (not Thread.Finished) do
+  begin
+    FlushLog();
+
+    Sleep(100);
+  end;
+
+  Result := Thread.FatalException = nil;
+  if Result then
+    Log('Succesfully installed!', True)
+  else
+    Log('Installing failed: %s'.Format([Thread.FatalException.ToString()]), True);
+
+  Thread.Free();
+
+  if Assigned(OnEndInstall) then
+    OnEndInstall(Self);
+end;
 
 procedure TSimbaPackageInstaller.FlushLog;
 
@@ -169,7 +240,7 @@ begin
   inherited Destroy();
 end;
 
-function TSimbaPackageInstaller.GetOptions(Version: TSimbaPackageVersion; out Options: TSimbaPackageInstallOptions): Boolean;
+function TSimbaPackageInstaller.GetOptions(Version: TSimbaPackageRelease; out Options: TSimbaPackageInstallOptions): Boolean;
 var
   Strings: TStringList;
 
@@ -189,6 +260,10 @@ var
   Thread: TThread;
   I: Integer;
 begin
+  Result := False;
+  if (Version.OptionsURL = '') then
+    Exit;
+
   Options := Default(TSimbaPackageInstallOptions);
 
   Strings := TStringList.Create();
@@ -221,90 +296,49 @@ begin
   Strings.Free();
 end;
 
-function TSimbaPackageInstaller.Install(Version: TSimbaPackageVersion; Options: TSimbaPackageInstallOptions): Boolean;
-
-  procedure Run;
-  begin
-    with TSimbaHTTPClient.Create() do
-    try
-      OnConnecting       := @DoConnectingProgress;
-      OnDownloadProgress := @DoDownloadingProgress;
-      OnExtractProgress  := @DoExtractingProgress;
-      OnResponseCode     := @DoResponseCode;
-
-      OnDownloadingFinished := @DoDownloadingFinished;
-      OnExtractingFinished  := @DoExtractingFinished;
-
-      GetZIP(Version.DownloadURL, Options.Path, Options.Flat, Options.IgnoreList);
-    finally
-      Free();
-    end;
-  end;
-
-var
-  Thread: TThread;
-  FileName: String;
+function TSimbaPackageInstaller.Install(Version: TSimbaPackageRelease; Options: TSimbaPackageInstallOptions): Boolean;
 begin
-  Result := False;
-
   Log('Installing: %s'.Format([FPackage.Info.FullName]));
-  Log('Version: %s'.Format([Version.Name]));
+  Log('Release: %s'.Format([Version.Name]));
   Log('Path: %s'.Format([Options.Path]));
   Log('', True);
 
-  if DirectoryExists(Options.Path) then
-  begin
-    FileName := GetOldPackagePath() + ExtractFileName(Options.Path);
-    if DirectoryExists(FileName) then
-      DeleteDirectory(FileName, False);
-
-    Log('Moving old files to %s'.Format([FileName]), True);
-    if (not RenameFile(Options.Path, FileName)) then
-    begin
-      Log('Unable to move old files %s'.Format([Options.Path]), True);
-      Log('Please delete the files manually', True);
-
-      Exit;
-    end;
-    Log('', True);
-  end;
-
-  Thread := Threaded(@Run);
-  while (not Thread.Finished) do
-  begin
-    FlushLog();
-
-    Sleep(100);
-  end;
-
-  Log('', True);
-
-  Result := Thread.FatalException = nil;
+  Result := InternalInstall(Version.DownloadURL, Options.Path, Options.IgnoreList, Options.Flat);
   if Result then
   begin
-    Log('Succesfully installed!', True);
-
     FPackage.InstalledVersion     := Version.Name;
     FPackage.InstalledVersionTime := Version.Time;
     FPackage.InstalledPath        := Options.Path;
     FPackage.AutoUpdateEnabled    := Options.AutoUpdate;
-  end else
-    Log('Installing failed: %s'.Format([Thread.FatalException.ToString()]), True);
+  end;
 
-  Thread.Free();
+  Log('', True);
+end;
+
+function TSimbaPackageInstaller.InstallBranch(Branch: TSimbaPackageBranch; Path: String): Boolean;
+begin
+  Log('Installing: %s'.Format([FPackage.Info.FullName]));
+  Log('Branch: %s'.Format([Branch.Name]));
+  Log('Path: %s'.Format([Path]));
+  Log('', True);
+
+  Result := InternalInstall(Branch.DownloadURL, Path, [], False);
+  if Result then
+  begin
+    FPackage.InstalledVersion     := Branch.Name;
+    FPackage.InstalledVersionTime := 0;
+    FPackage.InstalledPath        := Path;
+    FPackage.AutoUpdateEnabled    := False;
+  end;
+
+  Log('', True);
 end;
 
 function TSimbaPackageInstaller.InstallLatestVersion: Boolean;
 var
-  Version: TSimbaPackageVersion;
   Options: TSimbaPackageInstallOptions;
 begin
-  if FPackage.HasVersions() then
-  begin
-    Version := FPackage.Versions[0];
-
-    Result := GetOptions(Version, Options) and Install(Version, Options);
-  end;
+  Result := FPackage.HasReleases() and GetOptions(FPackage.Releases[0], Options) and Install(FPackage.Releases[0], Options);
 end;
 
 end.

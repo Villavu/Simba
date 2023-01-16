@@ -159,13 +159,9 @@ begin
   else
     FileName := CleanAndExpandFilename(FOutputPath + FileName);
 
-  if AItem.IsDirectory then
-  begin
-    ForceDirectories(FileName);
-    Exit;
-  end;
-
-  AStream := TFileStream.Create(FileName, fmCreate or fmShareDenyWrite);
+  ForceDirectories(ExtractFileDir(FileName));
+  if (not AItem.IsDirectory) then
+    AStream := TFileStream.Create(FileName, fmCreate or fmShareDenyWrite);
 end;
 
 constructor TSimbaZipUpdater.Create;

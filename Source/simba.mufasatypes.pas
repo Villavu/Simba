@@ -10,7 +10,7 @@ unit simba.mufasatypes;
 interface
 
 uses
-  Classes, SysUtils, Graphics;
+  Classes, SysUtils, Graphics, fpjson;
 
 const
   IsScriptProcess: Boolean = False;
@@ -208,7 +208,7 @@ procedure ThreadedAndForget(Method: TNestedProc);
 implementation
 
 uses
-  math, forms, lazloggerbase, uregexpr, strutils,
+  math, forms, lazloggerbase, uregexpr, strutils, jsonparser, jsonscanner,
   simba.math, simba.overallocatearray, simba.geometry, simba.heaparray,
   simba.algo_sort, simba.tpa, simba.random;
 

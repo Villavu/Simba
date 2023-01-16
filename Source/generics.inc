@@ -1,5 +1,6 @@
 {$IFDEF HEADER}
 generic procedure Swap<T>(var A, B: T);
+generic procedure MoveElement<T>(var Arr: array of T; AFrom, ATo: Integer);
 generic function MinA<T>(const Arr: array of T): T;
 generic function MaxA<T>(const Arr: array of T): T;
 generic function Sum<T, R>(var AValues: array of T): R;
@@ -21,6 +22,18 @@ begin
 
   A := B;
   B := C;
+end;
+
+generic procedure MoveElement<T>(var Arr: array of T; AFrom, ATo: Integer);
+var
+  Item: T;
+begin
+  Item := Arr[AFrom];
+  if (ATo > AFrom) then
+    Move(Arr[AFrom + 1], Arr[AFrom], (ATo - AFrom) * SizeOf(T))
+  else
+    Move(Arr[ATo], Arr[ATo + 1], (AFrom - ATo) * SizeOf(T));
+  Move(Item, Arr[ATo], SizeOf(T));
 end;
 
 generic function Sum<T, R>(var AValues: array of T): R;
