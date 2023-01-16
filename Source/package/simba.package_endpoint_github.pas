@@ -23,13 +23,14 @@ type
     constructor Create(URL: String); override;
 
     function GetInfo: TSimbaPackageInfo; override;
-    function GetVersions: TSimbaPackageVersionArray; override;
+    function GetReleases: TSimbaPackageReleaseArray; override;
+    function GetBranches: TSimbaPackageBranchArray; override;
   end;
 
 implementation
 
 uses
-  forms, fpjson, jsonparser, jsonscanner, lazloggerbase, dateutils,
+  forms, fpjson, dateutils,
   simba.httpclient, simba.files, simba.mufasatypes;
 
 const
@@ -39,20 +40,6 @@ const
   URL_DOWNLOAD_BRANCH  = 'https://github.com/%s/%s/archive/refs/heads/%s.zip';       // {Owner} {Name} {Version}
   URL_DOWNLOAD_RELEASE = 'https://github.com/%s/%s/archive/refs/tags/%s.zip';        // {Owner} {Name} {Version}
   URL_OPTIONS          = 'https://raw.githubusercontent.com/%s/%s/%s/.simbapackage'; // {Owner} {Name} {Version}
-
-function ParseJSON(const S: String): TJSONData;
-var
-  Parser: TJSONParser;
-begin
-  Parser := TJSONParser.Create(S, [joComments]);
-  try
-    Result := Parser.Parse();
-  except
-    Result := nil;
-  end;
-
-  Parser.Free();
-end;
 
 constructor TSimbaPackageEndpoint_Github.Create(URL: String);
 var
@@ -76,7 +63,7 @@ var
 begin
   Result := Default(TSimbaPackageInfo);
 
-  Json := ParseJSON(GetPageCache('info', FInfoAPI));
+  Json := GetPageCache('info', FInfoAPI).ParseJSON();
   if (Json = nil) then
     Exit;
 
@@ -91,70 +78,77 @@ begin
   JSON.Free();
 end;
 
-function TSimbaPackageEndpoint_Github.GetVersions: TSimbaPackageVersionArray;
+function TSimbaPackageEndpoint_Github.GetReleases: TSimbaPackageReleaseArray;
 var
-  Json: TJsonData;
+  JSON: TJSONData;
   I: Integer;
-  Version: TSimbaPackageVersion;
-  DownloadURL, OptionsURL: String;
+  Release: TSimbaPackageRelease;
 begin
   Result := [];
 
-  Json := ParseJSON(GetPageCache('releases', FReleasesAPI));
-  if (Json <> nil) then
-  begin
-    for I := 0 to JSON.Count - 1 do
-      if (JSON.Items[I] is TJSONObject) then
+  JSON := GetPageCache('releases', FReleasesAPI).ParseJSON();
+  if (JSON = nil) then
+    Exit;
+
+  for I := 0 to JSON.Count - 1 do
+    if (JSON.Items[I] is TJSONObject) then
+      with TJSONObject(JSON.Items[I]) do
       begin
-        with TJSONObject(JSON.Items[I]) do
-        try
-          DownloadURL := URL_DOWNLOAD_RELEASE.Format([FOwner, FName, Strings['tag_name']]);
-          OptionsURL  := URL_OPTIONS.Format([FOwner, FName, Strings['tag_name']]);
+        Release := Default(TSimbaPackageRelease);
+        Release.Age := Strings['published_at'];
+        Release.Name := Strings['tag_name'];
+        Release.Notes := Strings['body'];
+        Release.DownloadURL := URL_DOWNLOAD_RELEASE.Format([FOwner, FName, Strings['tag_name']]);
+        Release.OptionsURL := URL_OPTIONS.Format([FOwner, FName, Strings['tag_name']]);
 
-          Version := TSimbaPackageVersion.Create(
-            Strings['tag_name'] ,
-            Strings['body'],
-            DownloadURL,
-            OptionsURL,
-            Strings['published_at']
-          );
+        if (Release.Notes = '') then
+          Release.Notes := '(no release notes)';
 
-          Result := Result + [Version];
-        except
-          FreeAndNil(Version);
+        if (Release.Age <> '') then
+        begin
+          if Release.Age.IsInteger() then
+            Release.Time := UnixToDateTime(Release.Age.ToInt64())
+          else
+            Release.Time := ISO8601ToDate(Release.Age);
+
+          case DaysBetween(Now(), Time) of
+            0: Release.Age := '(today)';
+            1: Release.Age := '(yesterday)';
+            else
+              Release.Age := '(' + IntToStr(DaysBetween(Now(), Release.Time)) + ' days ago)';
+          end;
         end;
+
+        Result := Result + [Release];
       end;
 
-    JSON.Free();
-  end;
+  JSON.Free();
+end;
 
-  Json := ParseJSON(GetPageCache('branches', FBranchesAPI));
-  if (Json <> nil) then
-  begin
-    for I := 0 to JSON.Count - 1 do
-      if (JSON.Items[I] is TJSONObject) then
+function TSimbaPackageEndpoint_Github.GetBranches: TSimbaPackageBranchArray;
+var
+  JSON: TJSONData;
+  I: Integer;
+  Branch: TSimbaPackageBranch;
+begin
+  Result := [];
+
+  JSON := GetPageCache('branches', FBranchesAPI).ParseJSON();
+  if (JSON = nil) then
+    Exit;
+
+  for I := 0 to JSON.Count - 1 do
+    if (JSON.Items[I] is TJSONObject) then
+      with TJSONObject(JSON.Items[I]) do
       begin
-        with TJSONObject(JSON.Items[I]) do
-        try
-          DownloadURL := URL_DOWNLOAD_BRANCH.Format([FOwner, FName, Strings['name']]);
-          OptionsURL  := URL_OPTIONS.Format([FOwner, FName, Strings['name']]);
+        Branch := Default(TSimbaPackageBranch);
+        Branch.Name := Strings['name'];
+        Branch.DownloadURL := URL_DOWNLOAD_BRANCH.Format([FOwner, FName, Strings['name']]);
 
-          Version := TSimbaPackageBranch.Create(
-            Strings['name'],
-            '',
-            DownloadURL,
-            OptionsURL,
-            ''
-          );
-
-          Result := Result + [Version];
-        except
-          FreeAndNil(Version);
-        end;
+        Result := Result + [Branch];
       end;
 
-    JSON.Free();
-  end;
+  JSON.Free();
 end;
 
 function TSimbaPackageEndpoint_Github.GetPageCache(Key: String; URL: String): String;
@@ -190,7 +184,6 @@ var
 
   procedure Download;
   var
-    JsonParser: TJSONParser;
     JsonData: TJSONData;
   begin
     with TSimbaHTTPClient.Create() do
@@ -202,22 +195,15 @@ var
       Free();
     end;
 
-    JsonParser := TJSONParser.Create(Cache.Text, [joComments]);
-    try
-      JsonData := JsonParser.Parse();
-
-      if (JsonData <> nil) then
-      begin
-        Cache.Text := JsonData.FormatJSON();
-        Cache.Insert(0, '//' + ETag);
-        Cache.SaveToFile(CacheFileName);
-      end;
-    except
-    end;
-
+    JsonData := Cache.Text.ParseJSON();
     if (JsonData <> nil) then
+    try
+      Cache.Text := JsonData.FormatJSON();
+      Cache.Insert(0, '//' + ETag);
+      Cache.SaveToFile(CacheFileName);
+    finally
       JsonData.Free();
-    JsonParser.Free();
+    end;
   end;
 
 begin
@@ -233,7 +219,7 @@ begin
     Result := Cache.Text;
   except
     on E: Exception do
-      DebugLn(URL, ' :: ', E.ToString());
+      DebugLn(URL + ' :: ' + E.ToString());
   end;
 
   Cache.Free();

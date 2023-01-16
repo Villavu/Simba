@@ -49,6 +49,9 @@ type
     procedure DoPackageSelectionChanged(Sender: TObject; User: Boolean);
     procedure DoInstallClick(Sender: TObject);
     procedure DoAdvancedClick(Sender: TObject);
+
+    // Returns false if need advanced install
+    function SimpleInstall(Package: TSimbaPackage): Boolean;
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -196,56 +199,57 @@ begin
   FVersionBox.EndUpdate();
 end;
 
-procedure TSimbaPackageForm.DoInstallClick(Sender: TObject);
+function TSimbaPackageForm.SimpleInstall(Package: TSimbaPackage): Boolean;
 var
-  Package: TSimbaPackage;
   Installer: TSimbaPackageInstaller;
   Options: TSimbaPackageInstallOptions;
 begin
-  FListBox.Enabled := False;
+  Result := False;
 
-  try
-    Package := FListBox.Selected;
+  Installer := TSimbaPackageInstaller.Create(Package, OutputSynEdit);
+  if Package.HasReleases() and Installer.GetOptions(Package.Releases[0], Options) then
+  begin
+    OutputSynEdit.Clear();
 
-    if (Package <> nil) and Package.HasVersions() then
+    if SimbaQuestionDlg('Install Package', ['Install package "' + Package.Info.FullName + '" to', '"' + Options.Path + '" ?']) = ESimbaDialogResult.YES then
     begin
-      OutputSynEdit.Clear();
+      InstallingButton.Caption := 'Installing...';
+      InstallingButton.Enabled := False;
 
-      Installer := TSimbaPackageInstaller.Create(Package, OutputSynEdit);
-      try
-        if Installer.GetOptions(Package.Versions[0], Options) then
-        begin
-          if SimbaQuestionDlg('Install Package', ['Install package "' + Package.Info.FullName + '" to', '"' + Options.Path + '" ?']) = ESimbaDialogResult.YES then
-          begin
-            InstallingButton.Caption := 'Installing...';
-            InstallingButton.Enabled := False;
+      PageInstalling.Show();
 
-            PageInstalling.Show();
+      Installer.Install(Package.Releases[0], Options);
 
-            Installer.Install(Package.Versions[0], Options);
-
-            InstallingButton.Caption := 'Close';
-            InstallingButton.Enabled := True;
-          end;
-        end else
-        begin
-          // no install options, advanced install
-          with TSimbaPackageInstallForm.Create(Self, Package) do
-          try
-            ShowModal();
-          finally
-            Free();
-          end;
-        end;
-      finally
-        Installer.Free();
-      end;
+      InstallingButton.Caption := 'Close';
+      InstallingButton.Enabled := True;
     end;
 
-    FInfoBox.SetInfo(Package.Info.HomepageURL, Package.InstalledVersion, Package.LatestVersion);
-  finally
-    FListBox.Enabled := True;
+    Result := True;
   end;
+  Installer.Free();
+end;
+
+procedure TSimbaPackageForm.DoInstallClick(Sender: TObject);
+var
+  Package: TSimbaPackage;
+begin
+  Package := FListBox.Selected;
+  if (Package = nil) then
+    Exit;
+
+  FListBox.Enabled := False;
+
+  if not SimpleInstall(Package) then
+    with TSimbaPackageInstallForm.Create(Self, Package) do
+    try
+      ShowModal();
+    finally
+      Free();
+    end;
+
+  FListBox.Enabled := True;
+
+  DoPackageSelectionChanged(Self, True); // update new visible info
 end;
 
 procedure TSimbaPackageForm.DoAdvancedClick(Sender: TObject);
@@ -258,7 +262,7 @@ begin
 
   case Package.IsInstalled() of
     True:
-      case SimbaQuestionDlg('Uninstall Package', ['Uninstalling "' + Package.Info.FullName + '"', 'Do you also want to delete the files?',  '*All* files in "' + Package.InstalledPath + '" will be deleted!']) of
+      case SimbaQuestionDlg('Uninstall Package', ['Uninstall "' + Package.Info.FullName + '"', 'Do you also want to delete the files?',  '*All* files in "' + Package.InstalledPath + '" will be deleted!']) of
         ESimbaDialogResult.YES: Package.UnInstall(True);
         ESimbaDialogResult.NO:  Package.UnInstall(False);
       end;

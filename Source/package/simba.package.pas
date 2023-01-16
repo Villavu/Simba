@@ -11,18 +11,21 @@ const
   PACKAGE_SETTINGS_VERSION = 1;
 
 type
-  TSimbaPackageVersion = class(TInterfacedObject)
+  TSimbaPackageBranch = record
+    Name: String;
+    DownloadURL: String;
+  end;
+  TSimbaPackageBranchArray = array of TSimbaPackageBranch;
+
+  TSimbaPackageRelease = record
     Name: String;
     Notes: String;
     Age: String;
     Time: TDateTime;
     DownloadURL: String;
     OptionsURL: String;
-
-    constructor Create(AName, ANotes, ADownloadURL, AOptionsURL, ATime: String);
   end;
-  TSimbaPackageBranch = class(TSimbaPackageVersion);
-  TSimbaPackageVersionArray = array of TSimbaPackageVersion;
+  TSimbaPackageReleaseArray = array of TSimbaPackageRelease;
 
   TSimbaPackageInfo = record
     Description: String;
@@ -36,7 +39,8 @@ type
     constructor Create(URL: String); virtual; abstract;
 
     function GetInfo: TSimbaPackageInfo; virtual; abstract;
-    function GetVersions: TSimbaPackageVersionArray; virtual; abstract;
+    function GetReleases: TSimbaPackageReleaseArray; virtual; abstract;
+    function GetBranches: TSimbaPackageBranchArray; virtual; abstract;
   end;
 
   TSimbaPackage = class
@@ -45,8 +49,8 @@ type
     FURL: String;
     FLoaded: Boolean;
     FInfo: TSimbaPackageInfo;
-    FVersions: TSimbaPackageVersionArray;
-    FVersionsNoBranch: TSimbaPackageVersionArray;
+    FReleases: TSimbaPackageReleaseArray;
+    FBranches: TSimbaPackageBranchArray;
 
     procedure ClearConfig;
     procedure WriteConfig(Key: String; Value: String);
@@ -74,8 +78,8 @@ type
     property URL: String read FURL;
     property EndPoint: TSimbaPackageEndpoint read FEndpoint;
 
-    property VersionsNoBranch: TSimbaPackageVersionArray read FVersionsNoBranch;
-    property Versions: TSimbaPackageVersionArray read FVersions;
+    property Branches: TSimbaPackageBranchArray read FBranches;
+    property Releases: TSimbaPackageReleaseArray read FReleases;
     property Info: TSimbaPackageInfo read FInfo;
 
     property ConfigPath: String read GetConfigPath;
@@ -86,11 +90,12 @@ type
     property LatestVersionTime: TDateTime read GetLatestVersionTime;
     property AutoUpdateEnabled: Boolean read GetAutoUpdateEnabled write SetAutoUpdateEnabled;
 
+    function IsBranchInstalled: Boolean;
     function IsInstalled: Boolean;
     function UnInstall(RemoveFiles: Boolean): Boolean;
 
     function HasUpdate: Boolean;
-    function HasVersions: Boolean;
+    function HasReleases: Boolean;
   end;
   TSimbaPackageArray = array of TSimbaPackage;
 
@@ -99,36 +104,9 @@ type
 implementation
 
 uses
-  inifiles, lazloggerbase, forms, dateutils, fileutil, lazfileutils,
+  inifiles, dateutils, fileutil, lazfileutils,
   simba.files, simba.mufasatypes, simba.httpclient,
-  simba.package_endpoint_github, simba.package_endpoint_custom, simba.algo_sort;
-
-constructor TSimbaPackageVersion.Create(AName, ANotes, ADownloadURL, AOptionsURL, ATime: String);
-begin
-  inherited Create();
-
-  Name := AName;
-  DownloadURL := ADownloadURL;
-  OptionsURL := AOptionsURL;
-  Notes := ANotes.Trim();
-  if (Notes = '') then
-    Notes := '(no release notes)';
-
-  if (ATime <> '') then
-  begin
-    if ATime.IsInteger() then
-      Time := UnixToDateTime(ATime.ToInt64())
-    else
-      Time := ISO8601ToDate(ATime);
-
-    case DaysBetween(Now(), Time) of
-      0: Age := '(today)';
-      1: Age := '(yesterday)';
-      else
-        Age := '(' + IntToStr(DaysBetween(Now(), Time)) + ' days ago)';
-    end;
-  end;
-end;
+  simba.package_endpoint_github, simba.package_endpoint_custom;
 
 function LoadPackageURLs: TStringArray;
 var
@@ -187,7 +165,6 @@ function LoadPackages: TSimbaPackageArray;
 var
   URLs: TStringArray;
   Procs: TProcArray;
-  Weights: TIntegerArray;
   I: Integer;
 begin
   URLs := LoadPackageURLs();
@@ -202,28 +179,27 @@ begin
 
   Threaded(Procs, 100);
 
-  SetLength(Weights, Length(Result));
+  // reorder so updates are first, then installed, then uninstalled
   for I := 0 to High(Result) do
-  begin
-    if Result[I].IsInstalled() then Inc(Weights[I]);
-    if Result[I].HasUpdate()   then Inc(Weights[I]);
-  end;
-
-  specialize QuickSortWeighted<TSimbaPackage, Integer>(Result, Weights, Low(Result), High(Result), False);
+    if Result[I].IsInstalled() then
+      specialize MoveElement<TSimbaPackage>(Result, I, 0);
+  for I := 0 to High(Result) do
+    if Result[I].HasUpdate() then
+      specialize MoveElement<TSimbaPackage>(Result, I, 0);
 end;
 
 function TSimbaPackage.GetLatestVersion: String;
 begin
   Result := '';
-  if (Length(VersionsNoBranch) > 0) then
-    Result := VersionsNoBranch[0].Name;
+  if HasReleases() then
+    Result := FReleases[0].Name;
 end;
 
 function TSimbaPackage.GetLatestVersionTime: TDateTime;
 begin
   Result := 0;
-  if (Length(VersionsNoBranch) > 0) then
-    Result := VersionsNoBranch[0].Time;
+  if HasReleases() then
+    Result := FReleases[0].Time;
 end;
 
 function TSimbaPackage.GetInstalledVersionTime: TDateTime;
@@ -340,7 +316,6 @@ begin
   inherited Create();
 
   FURL := AURL;
-
   if ('github.com' in FURL) then
     FEndpoint := TSimbaPackageEndpoint_Github.Create(FURL)
   else
@@ -356,27 +331,22 @@ begin
 end;
 
 procedure TSimbaPackage.Load;
-var
-  I: Integer;
 begin
   FLoaded := True;
 
   FInfo := FEndpoint.GetInfo();
-  FVersions := FEndpoint.GetVersions();
-  FVersionsNoBranch := [];
-
-  for I := 0 to High(FVersions) do
-  begin
-    if (FVersions[I] is TSimbaPackageBranch) then
-      Continue;
-
-    FVersionsNoBranch += [FVersions[I]];
-  end;
+  FBranches := FEndpoint.GetBranches();
+  FReleases := FEndpoint.GetReleases();
 end;
 
 function TSimbaPackage.Exists: Boolean;
 begin
   Result := Self.Info.Name <> '';
+end;
+
+function TSimbaPackage.IsBranchInstalled: Boolean;
+begin
+  Result := (InstalledVersion <> '') and (InstalledVersionTime = 0);
 end;
 
 function TSimbaPackage.IsInstalled: Boolean;
@@ -399,12 +369,12 @@ end;
 
 function TSimbaPackage.HasUpdate: Boolean;
 begin
-  Result := IsInstalled() and HasVersions() and (LatestVersionTime > InstalledVersionTime);
+  Result := IsInstalled() and (not IsBranchInstalled()) and (LatestVersionTime > InstalledVersionTime);
 end;
 
-function TSimbaPackage.HasVersions: Boolean;
+function TSimbaPackage.HasReleases: Boolean;
 begin
-  Result := Length(Self.VersionsNoBranch) > 0;
+  Result := Length(FReleases) > 0;
 end;
 
 end.

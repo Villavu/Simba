@@ -140,6 +140,8 @@ type
     function ToDouble(Default: Double): Double; overload;
     function ToExtended: Extended; overload;
     function ToExtended(Default: Extended): Extended; overload;
+
+    function ParseJSON: TJSONData;
   end;
 
   operator * (const Left: String; Right: Int32): String;
@@ -1038,6 +1040,23 @@ end;
 function TSimbaStringHelper.ToExtended(Default: Extended): Extended;
 begin
   Result := StrToFloatDef(Self, Default);
+end;
+
+function TSimbaStringHelper.ParseJSON: TJSONData;
+var
+  Parser: TJSONParser;
+begin
+  Result := nil;
+
+  if (Self <> '') then
+  begin
+    Parser := TJSONParser.Create(Self, [joComments, joIgnoreTrailingComma]);
+    try
+      Result := Parser.Parse();
+    except
+    end;
+    Parser.Free();
+  end;
 end;
 
 operator *(const Left: String; Right: Int32): String;

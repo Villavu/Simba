@@ -1,14 +1,14 @@
 object SimbaPackageInstallForm: TSimbaPackageInstallForm
-  Left = 4437
+  Left = 4482
   Height = 488
-  Top = 393
+  Top = 41
   Width = 606
   Caption = 'Package - Advanced Install'
   ClientHeight = 488
   ClientWidth = 606
   DesignTimePPI = 120
   Position = poOwnerFormCenter
-  LCLVersion = '2.2.2.0'
+  LCLVersion = '2.2.4.0'
   object OptionsPanel: TPanel
     Left = 0
     Height = 246
