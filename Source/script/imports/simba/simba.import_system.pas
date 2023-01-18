@@ -113,7 +113,6 @@ begin
     addGlobalType('array of TBox', 'TBoxArray');
 
     addGlobalType('record X, Y: Single; end', 'TPointF');
-    addGlobalType('Integer', 'TColor');
 
     addGlobalType('(__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__)', 'EComparator');
 

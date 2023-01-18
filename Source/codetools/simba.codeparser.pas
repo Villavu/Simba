@@ -1461,11 +1461,20 @@ begin
 end;
 
 procedure TCodeParser.Expression;
+var
+  Decl: TDeclaration;
 begin
   if (not InDeclarations([TciVarDeclaration, TciConstantDeclaration, TciOrdinalType])) then
   begin
     inherited;
     Exit;
+  end;
+
+  if InDeclarations([TciConstantDeclaration, TciVarDeclaration]) and (Lexer.TokenID = tokIdentifier) then
+  begin
+    Decl := PushStack(TciTypeKind);
+    Decl.Items.Add(TciTypeIdentifer.Create(Lexer, Decl, Lexer.Origin, Lexer.TokenPos, Lexer.TokenPos+Lexer.TokenLen));
+    PopStack();
   end;
 
   PushStack(TciExpression);
