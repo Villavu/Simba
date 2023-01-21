@@ -348,6 +348,8 @@ type
     property GenID: TptTokenKind read GetGenID;
     property TokenID: TptTokenKind read GetTokenID;
   public
+    NoErrorMessages: Boolean;
+
     constructor Create;
     destructor Destroy; override;
 
@@ -781,9 +783,12 @@ end;
 
 procedure TmwSimplePasPar.ErrorMessage(const Message: String);
 begin
+  if NoErrorMessages then
+    Exit;
+
   if (FLexer <> nil) then
   begin
-    if (fLexer.MaxPos = -1) or (fLexer.TokenPos <= fLexer.MaxPos) then
+    if (fLexer.MaxPos = -1) or (fLexer.TokenPos < fLexer.MaxPos) then
     begin
       if (fLexer.FileName <> '') then
         DebugLn('[Codetools]: "%s" at line %d, column %d in file "%s"', [Message, FLexer.PosXY.Y + 1, FLexer.PosXY.X, FLexer.FileName])

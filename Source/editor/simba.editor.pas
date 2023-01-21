@@ -80,7 +80,7 @@ uses
   SynEditPointClasses,
   simba.parser_misc, simba.fonthelpers, simba.editor_blockcompletion,
   simba.editor_docgenerator, simba.editor_commentblock,
-  simba.editor_mousewheelzoom, simba.editor_history;
+  simba.editor_mousewheelzoom, simba.editor_history, simba.editor_multicaret;
 
 function TSimbaEditor.IsHighlighterAttribute(Values: TStringArray): Boolean;
 var
@@ -385,8 +385,7 @@ begin
     TSynGutterLOvProviderCurrentPage.Create(Providers);
   end;
 
-  TSynPluginMultiCaret.Create(Self);
-
+  TSimbaEditorPlugin_MultiCaret.Create(Self);
   TSimbaEditorPlugin_BlockCompletion.Create(Self);
   TSimbaEditorPlugin_DocGenerator.Create(Self);
   TSimbaEditorPlugin_CommentBlock.Create(Self);
