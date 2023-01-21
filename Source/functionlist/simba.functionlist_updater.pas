@@ -92,6 +92,7 @@ begin
 
     if Assigned(FParser) then
     try
+      FParser.NoErrorMessages := True;
       FParser.Run();
 
       FFunctionList.ScriptNode.DeleteChildren();
