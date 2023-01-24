@@ -10,11 +10,15 @@ unit simba.mufasatypes;
 interface
 
 uses
-  Classes, SysUtils, Graphics, fpjson;
+  Classes, SysUtils, fpjson;
+
+{$SCOPEDENUMS ON}
+type
+  ESimbaProcessType = (UNKNOWN, IDE, SCRIPT, SCRIPT_WITH_COMMUNICATION);
 
 const
-  IsScriptProcess: Boolean = False;
-  IsScriptProcessWithCommunication: Boolean = False;
+  SimbaProcessType: ESimbaProcessType = ESimbaProcessType.UNKNOWN;
+{$SCOPEDENUMS OFF}
 
 type
   {$SCOPEDENUMS ON}
@@ -144,34 +148,32 @@ type
     {$i string.inc}
   {$UNDEF HEADER}
 
-var
-  DebugLnFunc: procedure(const Msg: String);
-
 {$PUSH}
 {$SCOPEDENUMS ON}
 type
-  ESimbaDebugLn = (
-    NONE,
+  EDebugLn = (
     CLEAR,
     YELLOW,
     RED,
     GREEN,
-    SHOW
+    FOCUS
   );
+  EDebugLnFlags = set of EDebugLn;
 {$POP}
 
-function ToStr(Typ: ESimbaDebugLn): String; overload;
+var
+  DoSimbaDebugLn: procedure(const S: String) of object;
 
 procedure DebugLn(const Msg: String); overload;
 procedure DebugLn(const Msg: String; Args: array of const); overload;
 
+procedure SimbaDebugLn(const Flags: EDebugLnFlags; const Msg: String); overload;
+procedure SimbaDebugLn(const Flags: EDebugLnFlags; const Msg: TStringArray); overload;
+
+function FlagsToString(const Flags: EDebugLnFlags): String; inline;
+function FlagsFromString(var Str: String): EDebugLnFlags; inline;
+
 procedure AssertMainThread(const Method: String);
-
-procedure SimbaDebugLn(const Msg: String); overload;
-procedure SimbaDebugLn(const Msg: String; Args: array of const); overload;
-
-procedure SimbaDebugLn(const Typ: ESimbaDebugLn; const Msg: String); overload;
-procedure SimbaDebugLn(const Typ: ESimbaDebugLn; const Msg: String; Args: array of const); overload;
 
 function Min(const A, B: Integer): Integer; inline; overload;
 function Max(const A, B: Integer): Integer; inline; overload;
@@ -229,19 +231,14 @@ uses
   {$i string.inc}
 {$UNDEF BODY}
 
-function ToStr(Typ: ESimbaDebugLn): String;
-begin
-  Result := #0+#0+'$'+IntToHex(Ord(Typ), 2);
-end;
-
 procedure DebugLn(const Msg: String);
 begin
-  {%H-}lazloggerbase.DebugLn(Msg);
+  DebugLogger.DebugLn(Msg);
 end;
 
 procedure DebugLn(const Msg: String; Args: array of const);
 begin
-  {%H-}lazloggerbase.DebugLn(Msg, Args);
+  DebugLogger.DebugLn(Msg, Args);
 end;
 
 procedure AssertMainThread(const Method: String);
@@ -252,25 +249,66 @@ end;
 
 procedure SimbaDebugLn(const Msg: String);
 begin
-  DebugLnFunc(Msg);
+  DebugLn(Msg);
 end;
 
 procedure SimbaDebugLn(const Msg: String; Args: array of const);
 begin
-  SimbaDebugLn(Msg.Format(Args));
+  DebugLn(Msg.Format(Args));
 end;
 
-procedure SimbaDebugLn(const Typ: ESimbaDebugLn; const Msg: String);
+const
+  DebugLnFlagsHeader       = String(#0#0);
+  DebugLnFlagsHeaderLength = Length(DebugLnFlagsHeader) + 6;
+
+function FlagsToString(const Flags: EDebugLnFlags): String;
 begin
-  if (not IsScriptProcess) or IsScriptProcessWithCommunication then
-    SimbaDebugLn(ToStr(Typ) + Msg)
-  else
-    SimbaDebugLn(Msg);
+  Result := DebugLnFlagsHeader + IntToHex(Integer(Flags), 6);
 end;
 
-procedure SimbaDebugLn(const Typ: ESimbaDebugLn; const Msg: String; Args: array of const);
+function FlagsFromString(var Str: String): EDebugLnFlags;
+
+  function HexToInt(P: PChar): Integer; inline;
+  var
+    N, I: Integer;
+    Val: Char;
+  begin
+    Result := 0;
+
+    for I := 1 to 6 do
+    begin
+      Val := P^;
+      case Val of
+        '0'..'9': N := Ord(Val) - (Ord('0'));
+        'a'..'f': N := Ord(Val) - (Ord('a') - 10);
+        'A'..'F': N := Ord(Val) - (Ord('A') - 10);
+        else
+          Exit(0);
+      end;
+      Inc(P);
+
+      Result := Result*16+N;
+    end;
+  end;
+
 begin
-  SimbaDebugLn(Typ, Msg.Format(Args));
+  if (Length(Str) >= DebugLnFlagsHeaderLength) and (Str[1] = DebugLnFlagsHeader[1]) and (Str[2] = DebugLnFlagsHeader[2]) then
+  begin
+    Result := EDebugLnFlags(HexToInt(@Str[3]));
+
+    Delete(Str, 1, DebugLnFlagsHeaderLength);
+  end else
+    Result := [];
+end;
+
+procedure SimbaDebugLn(const Flags: EDebugLnFlags; const Msg: String);
+begin
+  DoSimbaDebugLn(FlagsToString(Flags) + Msg);
+end;
+
+procedure SimbaDebugLn(const Flags: EDebugLnFlags; const Msg: TStringArray);
+begin
+  DoSimbaDebugLn(FlagsToString(Flags) + LineEnding.Join(Msg));
 end;
 
 function Min(const A, B: Integer): Integer;
@@ -500,7 +538,7 @@ begin
 end;
 
 initialization
-  DebugLnFunc := @DebugLn;
+  DoSimbaDebugLn := @DebugLogger.DebugLn;
 
 end.
 

@@ -143,7 +143,7 @@ begin
 
   Data := TClient(Self.Client).IOManager.ReturnData(X1, Y1, X2 - X1 + 1, Y2 - Y1 + 1);
   if (Data.Ptr = nil) then
-    SimbaDebugLn(ESimbaDebugLn.YELLOW, 'No image data returned. Is the target resizing?');
+    SimbaDebugLn([EDebugLn.YELLOW], 'No image data returned. Is the target resizing?');
 
   Result := Data.Ptr <> nil;
 end;
@@ -182,7 +182,7 @@ begin
 
   Result := TClient(Self.Client).IOManager.ReturnMatrix(X1, Y1, X2 - X1 + 1, Y2 - Y1 + 1);
   if (Result.Area = 0) then
-    SimbaDebugLn(ESimbaDebugLn.YELLOW, 'No image data returned. Is the target resizing?');
+    SimbaDebugLn([EDebugLn.YELLOW], 'No image data returned. Is the target resizing?');
 end;
 
 function TMFinder.SimilarColors(Color1, Color2, Tolerance: Integer) : Boolean;

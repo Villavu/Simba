@@ -5,8 +5,8 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
   Width = 1079
   AllowDropFiles = True
   Caption = 'Editor'
-  ClientHeight = 262
-  ClientWidth = 1079
+  ClientHeight = 0
+  ClientWidth = 0
   DesignTimePPI = 120
   OnDestroy = FormDestroy
   OnDropFiles = DoOnDropFiles
@@ -26,6 +26,9 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
     TabOrder = 0
     OnChange = DoOnTabChange
     Options = [nboDoChangeOnSetIndex]
+    OnTabDragOverEx = NotebookTabDragOverEx
+    OnTabEndDrag = NotebookTabEndDrag
+    OnTabStartDrag = NotebookTabStartDrag
     TabDragMode = dmAutomatic
     TabDragAcceptMode = dmAutomatic
   end

@@ -1140,7 +1140,7 @@ var
   I: Integer;
 begin
   for I := 0 to FShapes.Count - 1 do
-    SimbaDebugLn(FShapes[I].FName  + ' := [' + FShapes[I].ToStr() + '];');
+    SimbaDebugLn([EDebugLn.FOCUS], FShapes[I].FName  + ' := [' + FShapes[I].ToStr() + '];');
 end;
 
 procedure TSimbaShapeBox.SaveToFile(FileName: String);

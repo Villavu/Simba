@@ -13,7 +13,7 @@ uses
   classes, sysutils, comctrls, controls, dialogs, lcltype, extctrls, graphics,
   syneditmiscclasses, syneditkeycmds,
   simba.mufasatypes, simba.editor, simba.scriptinstance, simba.codeinsight, simba.codeparser, simba.parameterhint,
-  simba.debuggerform, simba.functionlistform;
+  simba.debuggerform, simba.functionlistform, simba.outputform;
 
 type
   TSimbaScriptTab = class(TTabSheet)
@@ -25,13 +25,15 @@ type
     FScriptInstance: TSimbaScriptInstance;
     FFunctionList: TSimbaFunctionList;
     FDebuggingForm: TSimbaDebuggerForm;
+    FOutputBox: TSimbaOutputBox;
 
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
     procedure DoHide; override;
     procedure DoShow; override;
 
-    procedure HandleEditorClick(Sender: TObject);
+    procedure ScriptStateChanged(Sender: TObject);
+
     procedure HandleEditorChange(Sender: TObject);
     procedure HandleEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure HandleEditorUserCommand(Sender: TObject; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer);
@@ -47,6 +49,7 @@ type
   public
     property DebuggingForm: TSimbaDebuggerForm read FDebuggingForm;
     property FunctionList: TSimbaFunctionList read FFunctionList;
+    property OutputBox: TSimbaOutputBox read FOutputBox;
 
     property ScriptInstance: TSimbaScriptInstance read FScriptInstance;
     property ScriptTitle: String read FScriptTitle;
@@ -238,6 +241,7 @@ end;
 
 procedure TSimbaScriptTab.UpdateSavedText;
 begin
+  FOutputBox.Tab.Caption := FScriptTitle;
   FSavedText := FEditor.Text;
 
   FEditor.MarkTextAsSaved();
@@ -269,15 +273,22 @@ procedure TSimbaScriptTab.DoShow;
 begin
   inherited DoShow();
 
+  if (FOutputBox <> nil) then
+    FOutputBox.Show();
   if (FFunctionList <> nil) then
     FFunctionList.Show();
-
   if (FEditor <> nil) and FEditor.CanSetFocus then
     FEditor.SetFocus();
 end;
 
-procedure TSimbaScriptTab.HandleEditorClick(Sender: TObject);
+procedure TSimbaScriptTab.ScriptStateChanged(Sender: TObject);
 begin
+  case TSimbaScriptInstance(Sender).State of
+    ESimbaScriptState.STATE_RUNNING: FOutputBox.Tab.ImageIndex := IMAGE_PLAY;
+    ESimbaScriptState.STATE_PAUSED:  FOutputBox.Tab.ImageIndex := IMAGE_PAUSE;
+    else
+      FOutputBox.Tab.ImageIndex := IMAGE_STOP;
+  end;
 end;
 
 procedure TSimbaScriptTab.HandleEditorChange(Sender: TObject);
@@ -531,7 +542,8 @@ begin
     if (FScriptFileName <> '') then
       Save(FScriptFileName);
 
-    FScriptInstance := TSimbaScriptInstance.Create(Self);
+    FScriptInstance := TSimbaScriptInstance.Create(Self, FOutputBox);
+    FScriptInstance.RegisterStateChangeHandler(@ScriptStateChanged);
     FScriptInstance.Target := Target;
     if (FScriptFileName = '') then
       FScriptInstance.ScriptFile := CreateTempFile(Script, ScriptTitle)
@@ -558,7 +570,7 @@ begin
   if (FScriptFileName <> '') then
     Save(FScriptFileName);
 
-  FScriptInstance := TSimbaScriptInstance.Create(Self);
+  FScriptInstance := TSimbaScriptInstance.Create(Self, FOutputBox);
   FScriptInstance.Target := Target;
 
   if (FScriptFileName = '') then
@@ -578,7 +590,7 @@ begin
     if (FScriptFileName <> '') then
       Save(FScriptFileName);
 
-    FScriptInstance := TSimbaScriptInstance.Create(Self);
+    FScriptInstance := TSimbaScriptInstance.Create(Self, FOutputBox);
 
     if (FScriptFileName = '') then
       FScriptInstance.ScriptFile := CreateTempFile(Script, ScriptTitle)
@@ -619,7 +631,6 @@ begin
   FEditor.BorderStyle := bsNone;
   FEditor.TabStop := False;
 
-  FEditor.OnClick := @HandleEditorClick;
   FEditor.OnChange := @HandleEditorChange;
   FEditor.OnClickLink := @HandleEditorLinkClick;
   FEditor.OnProcessUserCommand := @HandleEditorUserCommand;
@@ -627,6 +638,9 @@ begin
   FFunctionList := TSimbaFunctionList.Create();
   FFunctionList.Parent := SimbaFunctionListForm;
   FFunctionList.Align := alClient;
+
+  FOutputBox := SimbaOutputForm.AddScriptOutput(Self, 'Untitled');
+  FOutputBox.Tab.ImageIndex := IMAGE_STOP;
 
   Reset();
 end;

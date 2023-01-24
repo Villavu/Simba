@@ -96,10 +96,12 @@ begin
       Halt();
     end;
 
-    IsScriptProcess := True;
-    IsScriptProcessWithCommunication := Application.HasOption('simbacommunication');
+    if Application.HasOption('simbacommunication') then
+      SimbaProcessType := ESimbaProcessType.SCRIPT_WITH_COMMUNICATION
+    else
+      SimbaProcessType := ESimbaProcessType.SCRIPT;
 
-    SimbaScriptThread := TSimbaScriptThread.Create(
+    SimbaScriptThread := TSimbaScriptRunner.Create(
       Application.Params[Application.ParamCount],
       Application.GetOptionValue('simbacommunication'),
       Application.GetOptionValue('target'),
@@ -108,6 +110,8 @@ begin
     );
   end else
   begin
+    SimbaProcessType := ESimbaProcessType.IDE;
+
     Application.ShowMainForm := False;
 
     Application.CreateForm(TSimbaForm, SimbaForm);

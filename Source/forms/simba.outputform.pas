@@ -12,7 +12,7 @@ interface
 uses
   classes, sysutils, forms, controls, comctrls, graphics, menus, extctrls, syncobjs,
   synedit, synedittypes, syneditmiscclasses, syneditmousecmds,
-  simba.settings;
+  simba.settings, simba.mufasatypes;
 
 type
   TSimbaOutputBox = class(TSynEdit)
@@ -31,12 +31,15 @@ type
       end;
     end;
 
+    procedure SimbaSettingChanged(Setting: TSimbaSetting);
+
     procedure DoOpenLink(Data: PtrInt);
-    procedure DoSpecialLineMarkup(Sender: TObject; Line: integer; var Special: Boolean; AMarkup: TSynSelectedColor);
+    procedure DoSpecialLineMarkup(Sender: TObject; Line: Integer; var Special: Boolean; AMarkup: TSynSelectedColor);
     procedure DoMouseLeave(Sender: TObject);
     procedure DoAllowMouseLink(Sender: TObject; X, Y: Integer; var AllowMouseLink: Boolean);
     procedure DoMouseLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 
+    function GetTab: TTabSheet;
     function GetAntialiasing: Boolean;
     procedure SetAntialiasing(Value: Boolean);
   public
@@ -46,10 +49,20 @@ type
     procedure GetWordBoundsAtRowCol(const XY: TPoint; out StartX, EndX: integer); override;
 
     function Add(const S: String): String;
-    procedure AddClear;
+    procedure Empty;
     procedure Flush;
 
+    property Tab: TTabSheet read GetTab;
     property Antialiasing: Boolean read GetAntialiasing write SetAntialiasing;
+  end;
+
+  TSimbaOutputTab = class(TTabSheet)
+  protected
+    FOutputBox: TSimbaOutputBox;
+  public
+    constructor Create(AOwner: TComponent); override;
+
+    property OutputBox: TSimbaOutputBox read FOutputBox;
   end;
 
   TSimbaOutputForm = class(TForm)
@@ -62,9 +75,7 @@ type
     MenuItemSelectAll: TMenuItem;
     PageControl: TPageControl;
     Separator1: TMenuItem;
-    TabSimba: TTabSheet;
-    TabScript: TTabSheet;
-    Timer: TTimer;
+    FlushTimer: TTimer;
 
     procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FormMouseLeave(Sender: TObject);
@@ -74,18 +85,18 @@ type
     procedure MenuItemCopyLineClick(Sender: TObject);
     procedure MenuItemCustomizeClick(Sender: TObject);
     procedure MenuItemSelectAllClick(Sender: TObject);
-    procedure TimerExecute(Sender: TObject);
+    procedure DoFlushTimerExecute(Sender: TObject);
   protected
     FSimbaOutputBox: TSimbaOutputBox;
-    FScriptOutputBox: TSimbaOutputBox;
 
-    procedure SimbaSettingChanged(Setting: TSimbaSetting);
+    procedure DebugLn(const S: String);
   public
-    property ScriptOutputBox: TSimbaOutputBox read FScriptOutputBox;
     property SimbaOutputBox: TSimbaOutputBox read FSimbaOutputBox;
 
+    function AddSimbaOutput: TSimbaOutputBox;
+    function AddScriptOutput(AOwner: TComponent; TabTitle: String): TSimbaOutputBox;
+
     constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
   end;
 
 var
@@ -97,13 +108,16 @@ implementation
 
 uses
   SynEditMarkupBracket, SynEditMarkupWordGroup,
-  lclintf, math,
   simba.dockinghelpers, simba.fonthelpers, simba.scripttabsform,
-  simba.nativeinterface, simba.mufasatypes, simba.settingsform;
+  simba.nativeinterface, simba.settingsform, simba.main;
 
-procedure SimbaDebugLn(const S: String);
+constructor TSimbaOutputTab.Create(AOwner: TComponent);
 begin
-  SimbaOutputForm.SimbaOutputBox.Add(S + LineEnding + ToStr(ESimbaDebugLn.SHOW) + LineEnding);
+  inherited Create(AOwner);
+
+  FOutputBox := TSimbaOutputBox.Create(Self);
+  FOutputBox.Parent := Self;
+  FOutputBox.Align := alClient;
 end;
 
 function TSimbaOutputBox.GetAntialiasing: Boolean;
@@ -117,6 +131,32 @@ begin
     True:  Font.Quality := fqCleartypeNatural;
     False: Font.Quality := fqNonAntialiased;
   end;
+end;
+
+function TSimbaOutputBox.GetTab: TTabSheet;
+begin
+  if (not (Parent is TTabSheet)) then
+    raise Exception.Create('TSimbaOutputBox.GetTab: Parent is not a TTabSheet!');
+
+  Result := TTabSheet(Parent);
+end;
+
+procedure TSimbaOutputBox.SimbaSettingChanged(Setting: TSimbaSetting);
+begin
+  if Setting.Equals(SimbaSettings.OutputBox.FontAntiAliased) then
+    Antialiasing := Setting.Value
+  else
+  if Setting.Equals(SimbaSettings.OutputBox.Color) then
+    Color := Setting.Value
+  else
+  if Setting.Equals(SimbaSettings.OutputBox.FontColor) then
+    Font.Color := Setting.Value
+  else
+  if Setting.Equals(SimbaSettings.OutputBox.FontSize) then
+    Font.Size := Setting.Value
+  else
+  if Setting.Equals(SimbaSettings.OutputBox.FontName) and IsFontFixed(Setting.Value) then
+    Font.Name := Setting.Value;
 end;
 
 procedure TSimbaOutputBox.DoOpenLink(Data: PtrInt);
@@ -148,22 +188,30 @@ begin
 
   if (FMouseLink.Quote.URL <> '') then
   begin
-    OpenURL(FMouseLink.Quote.URL);
+    SimbaNativeInterface.OpenURL(FMouseLink.Quote.URL);
 
     Exit;
   end;
 end;
 
-procedure TSimbaOutputBox.DoSpecialLineMarkup(Sender: TObject; Line: integer; var Special: Boolean; AMarkup: TSynSelectedColor);
+procedure TSimbaOutputBox.DoSpecialLineMarkup(Sender: TObject; Line: Integer; var Special: Boolean; AMarkup: TSynSelectedColor);
+var
+  Flags: EDebugLnFlags;
 begin
-  Special := Lines.Objects[Line - 1] <> nil;
+  Flags := EDebugLnFlags(Integer(PtrUInt(Lines.Objects[Line - 1])));
 
-  if Special then
+  if (([EDebugLn.YELLOW, EDebugLn.RED, EDebugLn.GREEN] * Flags) <> []) then
   begin
+    if (EDebugLn.YELLOW in Flags) then AMarkup.Background := $00BFFF else
+    if (EDebugLn.RED    in Flags) then AMarkup.Background := $0000A5 else
+    if (EDebugLn.GREEN  in Flags) then AMarkup.Background := $228B22;
+
     AMarkup.BackAlpha  := 115;
-    AMarkup.Background := PtrUInt(Lines.Objects[Line - 1]);
     AMarkup.Foreground := clNone;
-  end;
+
+    Special := True;
+  end else
+    Special := False;
 end;
 
 procedure TSimbaOutputBox.DoMouseLeave(Sender: TObject);
@@ -183,6 +231,8 @@ begin
 end;
 
 constructor TSimbaOutputBox.Create(AOwner: TComponent);
+var
+  Setting: TSimbaSetting;
 begin
   inherited Create(AOwner);
 
@@ -208,10 +258,16 @@ begin
   ResetMouseActions();
   with MouseTextActions.Add() do
     Command := emcMouseLink;
+
+  SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
+  for Setting in [SimbaSettings.OutputBox.Color, SimbaSettings.OutputBox.FontColor, SimbaSettings.OutputBox.FontSize, SimbaSettings.OutputBox.FontName, SimbaSettings.OutputBox.FontAntiAliased] do
+    SimbaSettingChanged(Setting);
 end;
 
 destructor TSimbaOutputBox.Destroy;
 begin
+  SimbaSettings.UnRegisterChangeHandler(@SimbaSettingChanged);
+
   if (FLock <> nil) then
     FreeAndNil(FLock);
   if (FBuffer <> nil) then
@@ -289,81 +345,73 @@ begin
 end;
 
 function TSimbaOutputBox.Add(const S: String): String;
-
-  function ParseDebugLn(var S: String): ESimbaDebugLn;
-  var
-    IntVal, NewLen: Integer;
-  begin
-    Result := ESimbaDebugLn.NONE;
-
-    if (Length(S) >= 5) and (S[1] = #0) and (S[2] = #0) and (S[3] = '$') then
-    begin
-      IntVal := S.CopyRange(3, 5).ToInteger(0);
-
-      if InRange(IntVal, Integer(Low(ESimbaDebugLn)) + 1, Integer(High(ESimbaDebugLn))) then
-      begin
-        Result := ESimbaDebugLn(IntVal);
-
-        NewLen := Length(S) - 5;
-        if (NewLen > 0) then
-          Move(S[6], S[1], NewLen * SizeOf(Char));
-        SetLength(S, NewLen);
-      end;
-    end;
-  end;
-
 var
   Arr: TStringArray;
-  I, H: Integer;
+  I: Integer;
+  Line: String;
+  Flags: EDebugLnFlags;
 begin
   Arr := S.Split(LineEnding);
   if (Length(Arr) = 0) then
-    Exit('');
-
-  FLock.Enter();
-  try
-    H := High(Arr);
-    for I := 0 to H - 1 do
-      FBuffer.AddObject(Arr[I], TObject(PtrUInt(ParseDebugLn(Arr[I]))));
+    Result := ''
+  else
+  begin
+    FLock.Enter();
 
     if S.EndsWith(LineEnding) then
     begin
-      FBuffer.AddObject(Arr[H], TObject(PtrUInt(ParseDebugLn(Arr[H]))));
-
       Result := '';
+
+      for I := 0 to High(Arr) do
+      begin
+        Line  := Arr[I];
+        Flags := FlagsFromString(Line);
+
+        FBuffer.AddObject(Line, TObject(PtrUInt(Integer(Flags))));
+      end;
     end else
-      Result := Arr[H];
-  finally
+    begin
+      Result := Arr[High(Arr)];
+
+      for I := 0 to High(Arr) - 1 do
+      begin
+        Line  := Arr[I];
+        Flags := FlagsFromString(Line);
+
+        FBuffer.AddObject(Line, TObject(PtrUInt(Integer(Flags))));
+      end;
+    end;
+
     FLock.Leave();
   end;
 end;
 
-procedure TSimbaOutputBox.AddClear;
+procedure TSimbaOutputBox.Empty;
 begin
-  Add(ToStr(ESimbaDebugLn.CLEAR) + LineEnding);
+  Add(FlagsToString([EDebugLn.CLEAR]) + LineEnding);
 end;
 
 procedure TSimbaOutputBox.Flush;
 var
   I, StartIndex: Integer;
-  LineType: ESimbaDebugLn;
-  NeedVisible, NeedScroll: Boolean;
+  NeedFocus, NeedScroll: Boolean;
+  Flags: EDebugLnFlags;
 begin
   FLock.Enter();
 
   try
     if (FBuffer.Count > 0) then
     begin
-      NeedVisible := False;
+      NeedFocus := False;
 
       StartIndex := 0;
       for I := 0 to FBuffer.Count - 1 do
       begin
-        LineType := ESimbaDebugLn(PtrUInt(FBuffer.Objects[I]));
-        if (LineType = ESimbaDebugLn.CLEAR) then
+        Flags := EDebugLnFlags(Integer(PtrUInt(FBuffer.Objects[I])));
+        if (EDebugLn.CLEAR in Flags) then
           StartIndex := I+1;
-
-        NeedVisible := NeedVisible or (LineType in [ESimbaDebugLn.YELLOW, ESimbaDebugLn.RED, ESimbaDebugLn.GREEN, ESimbaDebugLn.SHOW]);
+        if (EDebugLn.FOCUS in Flags) then
+          NeedFocus := True;
       end;
 
       BeginUpdate(False);
@@ -373,28 +421,15 @@ begin
       // auto scroll if already scrolled to bottom.
       NeedScroll := (Lines.Count < LinesInWindow) or ((Lines.Count + 1) = (TopLine + LinesInWindow));
       for I := StartIndex to FBuffer.Count - 1 do
-      begin
-        LineType := ESimbaDebugLn(PtrUInt(FBuffer.Objects[I]));
+        Lines.AddObject(FBuffer[I], FBuffer.Objects[I]);
 
-        case LineType of
-          ESimbaDebugLn.NONE:   Lines.Add(FBuffer[I]);
-          ESimbaDebugLn.YELLOW: Lines.AddObject(FBuffer[I], TObject(PtrUInt($00BFFF)));
-          ESimbaDebugLn.RED:    Lines.AddObject(FBuffer[I], TObject(PtrUInt($0000A5)));
-          ESimbaDebugLn.GREEN:  Lines.AddObject(FBuffer[I], TObject(PtrUInt($228B22)));
-        end;
-      end;
-
-      if NeedVisible then
+      if NeedFocus or NeedScroll then
       begin
-        if (Parent is TTabSheet) then
+        if NeedFocus and (Parent is TTabSheet) then
           TTabSheet(Parent).PageControl.ActivePage := TTabSheet(Parent);
         TopLine := Lines.Count;
-      end else
-      if NeedScroll then
-        TopLine := Lines.Count;
-
+      end;
       EndUpdate();
-      Invalidate();
 
       FBuffer.Clear();
     end;
@@ -410,46 +445,42 @@ begin
       SelectAll();
 end;
 
-procedure TSimbaOutputForm.TimerExecute(Sender: TObject);
+procedure TSimbaOutputForm.DoFlushTimerExecute(Sender: TObject);
+var
+  I: Integer;
 begin
-  FScriptOutputBox.Flush();
-  FSimbaOutputBox.Flush();
+  for I := 0 to PageControl.PageCount - 1 do
+    TSimbaOutputTab(PageControl.Pages[I]).OutputBox.Flush();
 end;
 
-procedure TSimbaOutputForm.SimbaSettingChanged(Setting: TSimbaSetting);
+procedure TSimbaOutputForm.DebugLn(const S: String);
 begin
-  case Setting.Name of
-    'OutputBox.Color':
-      begin
-        FScriptOutputBox.Color := Setting.Value;
-        FSimbaOutputBox.Color  := Setting.Value;
-      end;
+  SimbaOutputBox.Add(S + LineEnding);
+end;
 
-    'OutputBox.FontColor':
-      begin
-        FScriptOutputBox.Font.Color := Setting.Value;
-        FSimbaOutputBox.Font.Color  := Setting.Value;
-      end;
+function TSimbaOutputForm.AddSimbaOutput: TSimbaOutputBox;
+var
+  Tab: TSimbaOutputTab;
+begin
+  Tab := TSimbaOutputTab.Create(PageControl);
+  Tab.PageControl := PageControl;
+  Tab.Caption := 'Simba';
+  Tab.ImageIndex := IMAGE_SIMBA;
 
-    'OutputBox.FontSize':
-      begin
-        FScriptOutputBox.Font.Size := Setting.Value;
-        FSimbaOutputBox.Font.Size  := Setting.Value;
-      end;
+  Result := Tab.OutputBox;
+  Result.PopupMenu := ContextMenu;
+end;
 
-    'OutputBox.FontName':
-      if IsFontFixed(Setting.Value) then
-      begin
-        FScriptOutputBox.Font.Name := Setting.Value;
-        FSimbaOutputBox.Font.Name  := Setting.Value;
-      end;
+function TSimbaOutputForm.AddScriptOutput(AOwner: TComponent; TabTitle: String): TSimbaOutputBox;
+var
+  Tab: TSimbaOutputTab;
+begin
+  Tab := TSimbaOutputTab.Create(AOwner);
+  Tab.PageControl := PageControl;
+  Tab.Caption := TabTitle;
 
-    'OutputBox.FontAntiAliased':
-      begin
-        FScriptOutputBox.Antialiasing := Setting.Value;
-        FSimbaOutputBox.Antialiasing  := Setting.Value;
-      end;
-  end;
+  Result := Tab.OutputBox;
+  Result.PopupMenu := ContextMenu;
 end;
 
 procedure TSimbaOutputForm.MenuItemCopyClick(Sender: TObject);
@@ -466,10 +497,17 @@ begin
   if (ContextMenu.PopupComponent is TSynEdit) then
     with TSynEdit(ContextMenu.PopupComponent) do
     begin
-      Line := FScriptOutputBox.PixelsToRowColumn(ScreenToClient(ContextMenu.PopupPoint), []).Y;
+      Line := PixelsToRowColumn(ScreenToClient(ContextMenu.PopupPoint), []).Y;
       if (Line > 0) and (Line <= Lines.Count) then
         DoCopyToClipboard(Lines[Line - 1]);
     end;
+end;
+
+procedure TSimbaOutputForm.MenuItemCopyAllClick(Sender: TObject);
+begin
+  if (ContextMenu.PopupComponent is TSynEdit) then
+    with TSynEdit(ContextMenu.PopupComponent) do
+      DoCopyToClipboard(Lines.Text);
 end;
 
 procedure TSimbaOutputForm.MenuItemCustomizeClick(Sender: TObject);
@@ -496,49 +534,15 @@ begin
     TSimbaAnchorDockHostSite(HostDockSite).Header.MouseMove(Shift, X, Y);
 end;
 
-procedure TSimbaOutputForm.MenuItemCopyAllClick(Sender: TObject);
-begin
-  if (ContextMenu.PopupComponent is TSynEdit) then
-    with TSynEdit(ContextMenu.PopupComponent) do
-      DoCopyToClipboard(Lines.Text);
-end;
-
 constructor TSimbaOutputForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  PageControl.ActivePage := TabScript;
+  FSimbaOutputBox := AddSimbaOutput();
 
-  FSimbaOutputBox := TSimbaOutputBox.Create(Self);
-  FSimbaOutputBox.Parent := TabSimba;
-  FSimbaOutputBox.Align := alClient;
-  FSimbaOutputBox.PopupMenu := ContextMenu;
-
-  FScriptOutputBox := TSimbaOutputBox.Create(Self);
-  FScriptOutputBox.Parent := TabScript;
-  FScriptOutputBox.Align := alClient;
-  FScriptOutputBox.PopupMenu := ContextMenu;
-
-  SimbaSettingChanged(SimbaSettings.OutputBox.Color);
-  SimbaSettingChanged(SimbaSettings.OutputBox.FontColor);
-  SimbaSettingChanged(SimbaSettings.OutputBox.FontSize);
-  SimbaSettingChanged(SimbaSettings.OutputBox.FontName);
-  SimbaSettingChanged(SimbaSettings.OutputBox.FontAntiAliased);
-
-  SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
-
-  DebugLnFunc := @SimbaDebugLn;
+  DoSimbaDebugLn := @DebugLn;
 end;
 
-destructor TSimbaOutputForm.Destroy;
-begin
-  DebugLnFunc := @DebugLn;
-
-  if (SimbaSettings <> nil) then
-    SimbaSettings.UnRegisterChangeHandler(@SimbaSettingChanged);
-
-  inherited Destroy();
-end;
 
 end.
 

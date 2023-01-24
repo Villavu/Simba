@@ -68,7 +68,16 @@ type
     procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FormMouseLeave(Sender: TObject);
     procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    // Keep output tabs in same order
+    procedure NotebookTabDragOverEx(Sender, Source: TObject; OldIndex, NewIndex: Integer; CopyDrag: Boolean; var Accept: Boolean);
+    procedure NotebookTabEndDrag(Sender, Target: TObject; X, Y: Integer);
+    procedure NotebookTabStartDrag(Sender: TObject; var DragObject: TDragObject);
   protected
+    FDraggingTab: record
+      StartIndex: Integer;
+      EndIndex: Integer;
+    end;
+
     FEditorReplace: TSimbaEditorReplace;
     FEditorFind: TSimbaEditorFind;
 
@@ -132,7 +141,7 @@ implementation
 uses
   lcltype,
   simba.mufasatypes, simba.files, simba.editor_docgenerator,
-  simba.dockinghelpers, simba.nativeinterface;
+  simba.dockinghelpers, simba.nativeinterface, simba.outputform;
 
 procedure TSimbaScriptTabsForm.DoEditorPopupShow(Sender: TObject);
 var
@@ -317,6 +326,22 @@ procedure TSimbaScriptTabsForm.FormMouseMove(Sender: TObject; Shift: TShiftState
 begin
   if (HostDockSite is TSimbaAnchorDockHostSite) then
     TSimbaAnchorDockHostSite(HostDockSite).Header.MouseMove(Shift, X, Y);
+end;
+
+procedure TSimbaScriptTabsForm.NotebookTabDragOverEx(Sender, Source: TObject; OldIndex, NewIndex: Integer; CopyDrag: Boolean; var Accept: Boolean);
+begin
+  FDraggingTab.EndIndex := NewIndex;
+end;
+
+procedure TSimbaScriptTabsForm.NotebookTabEndDrag(Sender, Target: TObject; X, Y: Integer);
+begin
+ if (FDraggingTab.StartIndex <> FDraggingTab.EndIndex) then
+   TCustomTabControl(SimbaOutputForm.PageControl).Pages.Move(FDraggingTab.StartIndex + 1, FDraggingTab.EndIndex + 1);
+end;
+
+procedure TSimbaScriptTabsForm.NotebookTabStartDrag(Sender: TObject; var DragObject: TDragObject);
+begin
+  FDraggingTab.StartIndex := Notebook.DraggingTabIndex;
 end;
 
 procedure TSimbaScriptTabsForm.CaretMoved(Sender: TObject; Changes: TSynStatusChanges);
@@ -536,42 +561,36 @@ begin
   if (Header = '') then
     Exit;
 
-  SimbaDebugLn('Declared internally in Simba: ' + FileName);
-  SimbaDebugLn('Declaration:');
-  SimbaDebugLn(Header);
+  SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in Simba: ' + FileName, 'Declaration:', Header]);
 end;
 
 procedure TSimbaScriptTabsForm.OpenDeclaration(Declaration: TDeclaration);
-var
-  FileName: String;
-  IsLibrary: Boolean;
 begin
-  FileName := Declaration.Lexer.FileName;
-  IsLibrary := Declaration.Lexer.IsLibrary;
-
-  if (FileName = '') or FileExists(FileName) and (not IsLibrary) then
+  if Declaration.Lexer.IsLibrary then
   begin
-    if FileExists(FileName) then
-      Open(FileName);
+    if (Declaration is TciProcedureDeclaration) then
+      SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in plugin: ' + Declaration.Lexer.FileName, TciProcedureDeclaration(Declaration).Header])
+    else
+      SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in plugin: ' + Declaration.Lexer.FileName, Declaration.RawText])
+  end
+  else
+  if (Declaration.Lexer.FileName = '') or FileExists(Declaration.Lexer.FileName) then
+  begin
+    if FileExists(Declaration.Lexer.FileName) then
+      Open(Declaration.Lexer.FileName);
 
     CurrentEditor.SelStart := Declaration.StartPos + 1;
     CurrentEditor.SelEnd := Declaration.EndPos + 1;
     CurrentEditor.TopLine := (Declaration.Line + 1) - (CurrentEditor.LinesInWindow div 2);
     if CurrentEditor.CanSetFocus() then
       CurrentEditor.SetFocus();
-  end else
+  end
+  else
   begin
-    if IsLibrary then
-      SimbaDebugLn('Declared internally in plugin: ' + FileName)
+    if (Declaration is TciProcedureDeclaration) then
+      SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in Simba: ' + Declaration.Lexer.FileName, TciProcedureDeclaration(Declaration).Header])
     else
-      SimbaDebugLn('Declared internally in Simba: ' + FileName);
-
-    SimbaDebugLn('Declaration:');
-
-    if Declaration is TciProcedureDeclaration then
-      SimbaDebugLn(TciProcedureDeclaration(Declaration).Header)
-    else
-      SimbaDebugLn(Declaration.RawText);
+      SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in Simba: ' + Declaration.Lexer.FileName, Declaration.RawText])
   end;
 end;
 

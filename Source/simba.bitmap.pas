@@ -2717,7 +2717,7 @@ begin
     SaveToFile(IncludeTrailingPathDelimiter(SetDirSeparators(DebugUnfreedBitmaps)) + IntToStr(PtrUInt(Self)) + '.bmp');
   except
     on E: Exception do
-      SimbaDebugLn(E.ToString);
+      DebugLn(E.ToString);
   end;
 end;
 

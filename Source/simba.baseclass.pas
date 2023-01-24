@@ -52,9 +52,9 @@ uses
 procedure TSimbaBaseClass.NotifyUnfreed;
 begin
   if (Name <> '') then
-    SimbaDebugLn(ESimbaDebugLn.YELLOW, '%s (%s) "%s"', [ClassName, HexStr(Self), Name])
+    SimbaDebugLn([EDebugLn.YELLOW], '%s (%s) "%s"'.Format([ClassName, HexStr(Self), Name]))
   else
-    SimbaDebugLn(ESimbaDebugLn.YELLOW, '%s (%s)', [ClassName, HexStr(Self)]);
+    SimbaDebugLn([EDebugLn.YELLOW], '%s (%s)'.Format([ClassName, HexStr(Self)]));
 end;
 
 function TSimbaBaseClass.GetName: String;
@@ -115,7 +115,7 @@ begin
 
       if (UnfreedCount > 0) then
       begin
-        SimbaDebugLn(ESimbaDebugLn.YELLOW, 'The following %d objects were not freed:', [UnfreedCount]);
+        SimbaDebugLn([EDebugLn.YELLOW], 'The following %d objects were not freed:'.Format([UnfreedCount]));
 
         for I := 0 to FList.Count - 1 do
           with TSimbaBaseClass(FList[I]) do

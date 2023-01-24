@@ -741,7 +741,7 @@ begin
   if (CurrentTab <> nil) then
   try
     if (GetAction() in [Compile, Run, Debug]) and SimbaSettings.General.OutputClearOnCompile.Value then
-      SimbaOutputForm.ScriptOutputBox.AddClear();
+      CurrentTab.OutputBox.Empty();
 
     case GetAction() of
       Compile: CurrentTab.Compile();
@@ -853,7 +853,7 @@ end;
 
 procedure TSimbaForm.MenuClearOutputClick(Sender: TObject);
 begin
-  SimbaOutputForm.ScriptOutputBox.AddClear();
+  SimbaScriptTabsForm.CurrentTab.OutputBox.Empty();
 end;
 
 procedure TSimbaForm.MenuFileClick(Sender: TObject);
@@ -903,7 +903,7 @@ end;
 
 procedure TSimbaForm.HandlePrintDTM(DTM: String);
 begin
-  SimbaDebugLn('DTM := TDTM.CreateFromString(' + #39 + DTM + #39 + ');');
+  SimbaDebugLn([EDebugLn.FOCUS], 'DTM := TDTM.CreateFromString(' + #39 + DTM + #39 + ');');
 end;
 
 procedure TSimbaForm.MenuItemDTMEditorClick(Sender: TObject);
@@ -1177,7 +1177,7 @@ begin
         Exit;
 
       SimbaColorPickerHistoryForm.Add(Point, Color);
-      SimbaDebugLn('Color picked: %d at (%d, %d)', [Color, Point.X, Point.Y]);
+      SimbaDebugLn([EDebugLn.FOCUS], 'Color picked: %d at (%d, %d)'.Format([Color, Point.X, Point.Y]));
 
       Application.QueueAsyncCall(@DoColorPicked, 0);
     finally
@@ -1185,7 +1185,7 @@ begin
     end;
   except
     on E: Exception do
-      ShowMessage('Exception while picking color: ' + E.Message + '(' + E.ClassName + ')');
+      ShowMessage('Exception while picking color: ' + E.ToString());
   end;
 end;
 
@@ -1198,12 +1198,14 @@ begin
       FProcessSelection := FWindowSelection.GetPID();
       FMouseLogger.WindowHandle := FWindowSelection;
 
-      SimbaDebugLn('Window Selected: %d', [FWindowSelection]);
-      SimbaDebugLn(' - Dimensions: %dx%d', [FWindowSelection.GetBounds().Width - 1, FWindowSelection.GetBounds().Height - 1]);
-      SimbaDebugLn(' - Title: "%s"', [FWindowSelection.GetTitle()]);
-      SimbaDebugLn(' - Class: "%s"', [FWindowSelection.GetClassName()]);
-      SimbaDebugLn(' - PID: %d (%s bit)', [FWindowSelection.GetPID(), BoolToStr(SimbaProcess.IsProcess64Bit(FWindowSelection.GetPID()), '64', '32')]);
-      SimbaDebugLn(' - Executable: "%s"', [SimbaProcess.GetProcessPath(FWindowSelection.GetPID())]);
+      SimbaDebugLn([EDebugLn.FOCUS], [
+         'Window Selected: %d'.Format([FWindowSelection]),
+         ' - Dimensions: %dx%d'.Format([FWindowSelection.GetBounds().Width - 1, FWindowSelection.GetBounds().Height - 1]),
+         ' - Title: "%s"'.Format([FWindowSelection.GetTitle()]),
+         ' - Class: "%s"'.Format([FWindowSelection.GetClassName()]),
+         ' - PID: %d (%s bit)'.Format([FWindowSelection.GetPID(), BoolToStr(SimbaProcess.IsProcess64Bit(FWindowSelection.GetPID()), '64', '32')]),
+         ' - Executable: "%s"'.Format([SimbaProcess.GetProcessPath(FWindowSelection.GetPID())])
+      ]);
     except
       on E: Exception do
         ShowMessage('Exception while selecting window: ' + E.ToString());
@@ -1219,7 +1221,7 @@ begin
 
     FAreaSelection := FAreaSelector.Pick(FWindowSelection);
     with FAreaSelection do
-      SimbaDebugLn('Area picked: [%d, %d, %d, %d]'.Format([X1, Y1, X2, Y2]));
+      SimbaDebugLn([EDebugLn.FOCUS], 'Area picked: [%d, %d, %d, %d]'.Format([X1, Y1, X2, Y2]));
   except
     on E: Exception do
       ShowMessage('Exception while selecting area: ' + E.ToString());
@@ -1299,7 +1301,7 @@ procedure TSimbaForm.DoMouseLoggerChange(Sender: TObject; X, Y: Integer; HotkeyP
 begin
   StatusPanelCursor.Caption := '(' + IntToStr(X) + ', ' + IntToStr(Y) + ')';
   if HotkeyPressed then
-    SimbaDebugLn(StatusPanelCursor.Caption);
+    SimbaDebugLn([EDebugLn.FOCUS], StatusPanelCursor.Caption);
 end;
 
 end.
