@@ -12,7 +12,7 @@ uses
 
 procedure _LapeClearDebug(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  SimbaDebugLn(ESimbaDebugLn.CLEAR, '');
+  SimbaDebugLn([EDebugLn.CLEAR], '');
 end;
 
 procedure _LapeDisguise(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV

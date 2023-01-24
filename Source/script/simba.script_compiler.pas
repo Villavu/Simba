@@ -147,7 +147,7 @@ begin
   StartImporting();
 
   try
-    Options := Options + [lcoLooseSemicolon, lcoAutoInvoke, lcoExplicitSelf, lcoAutoObjectify];
+    Options := Options + [lcoLooseSemicolon, lcoAutoInvoke, lcoExplicitSelf, lcoAutoObjectify, lcoRelativeFileNames];
 
     ImportingSection := 'System';
 

@@ -64,7 +64,7 @@ end;
 
 procedure TSimbaDebugImageForm.ImageDoubleClick(Sender: TObject);
 begin
-  SimbaDebugLn('Debug Image Click: (%d, %d)', [ImageBox.MousePoint.X, ImageBox.MousePoint.Y]);
+  SimbaDebugLn([EDebugLn.FOCUS], 'Debug Image Click: (%d, %d)'.Format([ImageBox.MousePoint.X, ImageBox.MousePoint.Y]));
 end;
 
 procedure TSimbaDebugImageForm.SetSize(AWidth, AHeight: Integer; AForce: Boolean; AEnsureVisible: Boolean);

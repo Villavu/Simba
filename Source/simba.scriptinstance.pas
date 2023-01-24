@@ -10,8 +10,8 @@ unit simba.scriptinstance;
 interface
 
 uses
-  classes, sysutils, process,
-  simba.mufasatypes, simba.scriptinstance_communication, simba.debuggerform, simba.windowhandle;
+  classes, sysutils, process, LazMethodList,
+  simba.mufasatypes, simba.scriptinstance_communication, simba.debuggerform, simba.windowhandle, simba.outputform;
 
 type
   TSimbaScriptError = record
@@ -23,6 +23,7 @@ type
 
   TSimbaScriptInstance = class(TComponent)
   protected
+    FStateChangeHandlerList: TMethodList;
     FProcess: TProcess;
 
     FSimbaCommunication: TSimbaScriptInstanceCommunication;
@@ -33,6 +34,7 @@ type
     FScriptFile: String;
     //FScriptName: String;
 
+    FOutputBox: TSimbaOutputBox;
     FOutputThread: TThread;
 
     FState: ESimbaScriptState;
@@ -51,11 +53,12 @@ type
     function GetExitCode: Int32;
     function GetPID: UInt32;
 
+    procedure SetState(Value: ESimbaScriptState);
     procedure SetError(Value: TSimbaScriptError);
   public
     property DebuggerForm: TSimbaDebuggerForm read FDebuggingForm;
     property Process: TProcess read FProcess;
-    property State: ESimbaScriptState read FState write FState;
+    property State: ESimbaScriptState read FState write SetState;
 
     // Parameters to pass to script
     property ScriptFile: String write FScriptFile;
@@ -77,15 +80,17 @@ type
     procedure Stop;
     procedure Kill;
 
-    constructor Create(AOwner: TComponent); override;
+    procedure RegisterStateChangeHandler(Event: TNotifyEvent);
+    procedure UnRegisterStateChangeHandler(Event: TNotifyEvent);
+
+    constructor Create(AOwner: TComponent; OutputBox: TSimbaOutputBox); reintroduce;
     destructor Destroy; override;
   end;
 
 implementation
 
 uses
-  forms,
-  simba.outputform, simba.scripttabsform, simba.scripttab;
+  forms, simba.scripttabsform, simba.scripttab;
 
 procedure TSimbaScriptInstance.DoOutputThread;
 var
@@ -101,7 +106,7 @@ begin
 
       if (Count > 0) then
       begin
-        Remaining := SimbaOutputForm.ScriptOutputBox.Add(Remaining + Copy(Buffer, 1, Count));
+        Remaining := FOutputBox.Add(Remaining + Copy(Buffer, 1, Count));
         if (Count < Length(Buffer)) then
           Sleep(500);
       end;
@@ -140,6 +145,8 @@ begin
     end;
   end;
 
+  State := ESimbaScriptState.STATE_STOP;
+
   Self.Free();
 end;
 
@@ -158,6 +165,12 @@ begin
   Result := FProcess.ProcessID;
 end;
 
+procedure TSimbaScriptInstance.SetState(Value: ESimbaScriptState);
+begin
+  FState := Value;
+  FStateChangeHandlerList.CallNotifyEvents(Self);
+end;
+
 procedure TSimbaScriptInstance.SetError(Value: TSimbaScriptError);
 begin
   FErrorSet := True;
@@ -166,6 +179,8 @@ end;
 
 procedure TSimbaScriptInstance.Start(Args: array of String);
 begin
+  State := ESimbaScriptState.STATE_RUNNING;
+
   FProcess.Parameters.Add('--simbacommunication=%s', [FSimbaCommunication.ClientID]);
   FProcess.Parameters.Add('--target=' + FTarget.AsString());
   FProcess.Parameters.AddStrings(Args);
@@ -217,10 +232,12 @@ begin
   end;
 end;
 
-constructor TSimbaScriptInstance.Create(AOwner: TComponent);
+constructor TSimbaScriptInstance.Create(AOwner: TComponent; OutputBox: TSimbaOutputBox);
 begin
   inherited Create(AOwner);
 
+  FOutputBox := OutputBox;
+  FStateChangeHandlerList := TMethodList.Create();
   FState := ESimbaScriptState.STATE_RUNNING;
   FSimbaCommunication := TSimbaScriptInstanceCommunication.Create(Self);
 
@@ -238,10 +255,24 @@ begin
   FProcess.Terminate(0);
 end;
 
+procedure TSimbaScriptInstance.RegisterStateChangeHandler(Event: TNotifyEvent);
+begin
+  FStateChangeHandlerList.Add(TMethod(Event));
+
+  Event(Self);
+end;
+
+procedure TSimbaScriptInstance.UnRegisterStateChangeHandler(Event: TNotifyEvent);
+begin
+  FStateChangeHandlerList.Remove(TMethod(Event));
+end;
+
 destructor TSimbaScriptInstance.Destroy;
 begin
   DebugLn('TSimbaScriptInstance.Destroy');
 
+  if (FStateChangeHandlerList <> nil) then
+    FreeAndNil(FStateChangeHandlerList);
   if (FProcess <> nil) then
     FreeAndNil(FProcess);
   if (FSimbaCommunication <> nil) then

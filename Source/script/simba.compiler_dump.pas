@@ -198,26 +198,18 @@ begin
   FDump['procedure Delete(A: array; Index: Int32; Count: Int32 = Length(A)); external;'] := 'System';
   FDump['procedure Insert(Item: Anything; A: array; Index: Int32); external;'] := 'System';
   FDump['procedure Copy(A: array; Index: Int32 = 0; Count: Int32 = Length(A)); overload; external;'] := 'System';
-  FDump['procedure Copy(S: String; Index: Int32 = 1; Count: Int32 = Length(S)); overload; external;'] := 'System';
   FDump['procedure SetLength(A: array; Length: Int32); overload; external;'] := 'System';
-  FDump['procedure SetLength(S: String; Length: Int32); overload; external;'] := 'System';
   FDump['function Low(A: array): Int32; external;'] := 'System';
-  FDump['function Low(A: String): Int32; external;'] := 'System';
   FDump['function High(A: array): Int32; external;'] := 'System';
-  FDump['function High(A: String): Int32; external;'] := 'System';
   FDump['function Length(A: array): Int32; overload; external;'] := 'System';
-  FDump['function Length(S: String): Int32; overload; external;'] := 'System';
   FDump['procedure WriteLn(Args: Anything); external;'] := 'System';
   FDump['procedure Write(Args: Anything); external;'] := 'System';
   FDump['procedure Swap(var A, B: Anything); external;'] := 'System';
   FDump['function SizeOf(A: Anything): Int32; external;'] := 'System';
   FDump['function ToString(A: Anything): String; external;'] := 'System';
   FDump['function ToStr(A: Anything): String; external;'] := 'System';
-  FDump['function GetExceptionMessage: ShortString; external;'] := 'System';
-  FDump['function Inc(var X: Ordinal): Ordinal; overload; external;'] := 'System';
-  FDump['function Dec(var X: Ordinal): Ordinal; overload; external;'] := 'System';
-  FDump['function Inc(var X: Ordinal; Amount: SizeInt): Ordinal; overload; external;'] := 'System';
-  FDump['function Dec(var X: Ordinal; Amount: SizeInt): Ordinal; overload; external;'] := 'System';
+  FDump['function Inc(var X: Ordinal; Amount: SizeInt = 1): Ordinal; overload; external;'] := 'System';
+  FDump['function Dec(var X: Ordinal; Amount: SizeInt = 1): Ordinal; overload; external;'] := 'System';
   FDump['function Ord(X: Ordinal): Int32; external;'] := 'System';
   FDump['function WaitUntil(Condition: Expression; Interval, Timeout: Int32): Boolean; external;'] := 'System';
   FDump['function Default(T: AnyType): AnyType; external;'] := 'System';
@@ -238,6 +230,18 @@ begin
 
   FDump['function RTTIFields(constref AnyRecord): TRTTIFields; external;']      := 'System';
   FDump['function RTTIClassFields(constref AnyRecord): TRTTIFields; external;'] := 'System';
+
+  FDump['function GetCallerAddress: Pointer; external;']    := 'System';
+  FDump['function GetCallerName: String; external;']        := 'System';
+  FDump['function GetCallerLocation: Pointer; external;']   := 'System';
+  FDump['function GetCallerLocationStr: String; external;'] := 'System';
+
+  FDump['function GetExceptionLocation: Pointer; external;']   := 'System';
+  FDump['function GetExceptionLocationStr: String; external;'] := 'System';
+  FDump['function GetExceptionMessage: String; external;']     := 'System';
+
+  FDump['function GetScriptMethodName(Address: Pointer): String; external;'] := 'System';
+  FDump['function DumpCallStack(Start: Integer = 0): String; external;']     := 'System';
 
   // Move lape stuff to better sections
   FDump['function Random(min, max: Int64): Int64; overload; external;']       := 'Random';

@@ -19,13 +19,20 @@ interface
 
 uses
   Classes, SysUtils,
+  lptypes, lpvartypes,
   simba.script, simba.mufasatypes;
 
 type
-  TSimbaScriptThread = class(TThread)
+  TSimbaScriptRunner = class(TThread)
   protected
     FScript: TSimbaScript;
     FCompileOnly: Boolean;
+
+    procedure DebugLnGreen(S: String);
+    procedure DebugLnRed(S: String);
+    procedure DebugLnYellow(S: String);
+
+    procedure DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 
     procedure HandleTerminate(Sender: TObject);
     procedure HandleInput;
@@ -42,7 +49,7 @@ type
   end;
 
 var
-  SimbaScriptThread: TSimbaScriptThread;
+  SimbaScriptThread: TSimbaScriptRunner;
 
 implementation
 
@@ -53,7 +60,36 @@ uses
   forms, fileutil, lpmessages,
   simba.files, simba.datetime, simba.script_communication, simba.script_debugger;
 
-procedure TSimbaScriptThread.HandleTerminate(Sender: TObject);
+procedure TSimbaScriptRunner.DebugLnGreen(S: String);
+begin
+  if (SimbaProcessType = ESimbaProcessType.SCRIPT_WITH_COMMUNICATION) then
+    SimbaDebugLn([EDebugLn.GREEN], S)
+  else
+    DebugLn(S);
+end;
+
+procedure TSimbaScriptRunner.DebugLnRed(S: String);
+begin
+  if (SimbaProcessType = ESimbaProcessType.SCRIPT_WITH_COMMUNICATION) then
+    SimbaDebugLn([EDebugLn.RED], S)
+  else
+    DebugLn(S);
+end;
+
+procedure TSimbaScriptRunner.DebugLnYellow(S: String);
+begin
+  if (SimbaProcessType = ESimbaProcessType.SCRIPT_WITH_COMMUNICATION) then
+    SimbaDebugLn([EDebugLn.YELLOW], S)
+  else
+    DebugLn(S);
+end;
+
+procedure TSimbaScriptRunner.DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
+begin
+  DebugLnYellow(Hint);
+end;
+
+procedure TSimbaScriptRunner.HandleTerminate(Sender: TObject);
 begin
   {$IFDEF WINDOWS}
   if (StartupConsoleMode <> 0) then
@@ -79,7 +115,7 @@ begin
   {$ENDIF}
 end;
 
-procedure TSimbaScriptThread.HandleInput;
+procedure TSimbaScriptRunner.HandleInput;
 var
   Stream: THandleStream;
   State: ESimbaScriptState;
@@ -91,11 +127,11 @@ begin
   Stream.Free();
 end;
 
-procedure TSimbaScriptThread.HandleException(E: Exception);
+procedure TSimbaScriptRunner.HandleException(E: Exception);
 var
   Line: String;
 begin
-  SimbaDebugLn(ESimbaDebugLn.RED, E.Message);
+  DebugLnRed(E.Message);
 
   if (E is lpException) then
   begin
@@ -103,7 +139,7 @@ begin
     begin
       for Line in lpException(E).StackTrace.Split(LineEnding) do
         if (Line <> '') then
-          SimbaDebugLn(ESimbaDebugLn.RED, Line);
+          DebugLnRed(Line);
 
       if (FScript.SimbaCommunication <> nil) then
         FScript.SimbaCommunication.ScriptError(E.Message, DocPos.Line, DocPos.Col, DocPos.FileName)
@@ -116,7 +152,7 @@ begin
     ExitCode := 1;
 end;
 
-procedure TSimbaScriptThread.Execute;
+procedure TSimbaScriptRunner.Execute;
 {$IFDEF SIMBA_HAS_DEBUGINFO}
 var
   I: Integer;
@@ -127,16 +163,16 @@ begin
 
     if FScript.Compile() then
     begin
-      SimbaDebugLn(ESimbaDebugLn.GREEN, 'Succesfully compiled in %.2f milliseconds.', [FScript.CompileTime]);
+      DebugLnGreen('Succesfully compiled in %.2f milliseconds.'.Format([FScript.CompileTime]));
 
       if (not FCompileOnly) then
       begin
         FScript.Run();
 
         if (Script.RunningTime < 10000) then
-          SimbaDebugLn(ESimbaDebugLn.GREEN, 'Succesfully executed in %.2f milliseconds.', [Script.RunningTime])
+          DebugLnGreen('Succesfully executed in %.2f milliseconds.'.Format([Script.RunningTime]))
         else
-          SimbaDebugLn(ESimbaDebugLn.GREEN, 'Succesfully executed in %s.', [FormatMilliseconds(Script.RunningTime, '\[hh:mm:ss\]')]);
+          DebugLnGreen('Succesfully executed in %s.'.Format([FormatMilliseconds(Script.RunningTime, '\[hh:mm:ss\]')]));
       end;
     end;
   except
@@ -150,19 +186,19 @@ begin
   except
     on E: Exception do
     begin
-      SimbaDebugLn(ESimbaDebugLn.YELLOW, 'Note: An exception occurred while cleaning up the script: ' + E.Message);
+      DebugLn('Exception occurred while cleaning up the script: ' + E.Message);
 
       {$IFDEF SIMBA_HAS_DEBUGINFO}
-      SimbaDebugLn(ESimbaDebugLn.YELLOW, 'Stack trace:');
-      SimbaDebugLn(ESimbaDebugLn.YELLOW, BackTraceStrFunc(ExceptAddr));
+      DebugLn('Stack trace:');
+      DebugLn(BackTraceStrFunc(ExceptAddr));
       for I := 0 to ExceptFrameCount - 1 do
-        SimbaDebugLn(ESimbaDebugLn.YELLOW, BackTraceStrFunc(ExceptFrames[I]));
+        DebugLn(BackTraceStrFunc(ExceptFrames[I]));
       {$ENDIF}
     end;
   end;
 end;
 
-constructor TSimbaScriptThread.Create(FileName: String; SimbaCommunication, TargetWindow: String; CompileOnly, Debugging: Boolean);
+constructor TSimbaScriptRunner.Create(FileName: String; SimbaCommunication, TargetWindow: String; CompileOnly, Debugging: Boolean);
 begin
   inherited Create(False);
 

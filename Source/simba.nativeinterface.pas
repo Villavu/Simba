@@ -81,6 +81,7 @@ type
     procedure HideTerminal; virtual;
 
     procedure OpenFile(Path: String); virtual;
+    procedure OpenURL(URL: String); virtual;
 
     function GetVirtualKeyCode(Character: Char): Integer; virtual;
 
@@ -100,7 +101,7 @@ implementation
 {$ENDIF}
 
 uses
-  lcltype, lclintf,
+  LCLType, LCLIntf,
   simba.random,
   {$IF DEFINED(WINDOWS)}
   simba.nativeinterface_windows;
@@ -207,7 +208,12 @@ end;
 
 procedure TSimbaNativeInterface.OpenFile(Path: String);
 begin
-  OpenDocument(Path);
+  LCLIntf.OpenDocument(Path);
+end;
+
+procedure TSimbaNativeInterface.OpenURL(URL: String);
+begin
+  LCLIntf.OpenURL(URL);
 end;
 
 function TSimbaNativeInterface.GetVirtualKeyCode(Character: Char): Integer;

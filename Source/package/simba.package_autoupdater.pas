@@ -130,35 +130,43 @@ end;
 procedure TPackageUpdater.Execute;
 var
   I: Integer;
+  Package: TSimbaPackage;
 begin
   FPackages := LoadPackages();
 
   for I := 0 to High(FPackages) do
-    if FPackages[I].HasUpdate and FPackages[I].AutoUpdateEnabled then
-    begin
-      SimbaDebugLn('Auto updating ' + FPackages[I].Info.FullName);
+  begin
+    Package := FPackages[I];
 
-      with TSimbaPackageInstaller.Create(FPackages[I], SimbaOutputForm.SimbaOutputBox) do
+    if Package.HasUpdate() and Package.AutoUpdateEnabled then
+    begin
+      SimbaDebugLn([EDebugLn.FOCUS], 'Automatically updating ' + Package.Info.FullName);
+
+      with TSimbaPackageInstaller.Create(Package, SimbaOutputForm.SimbaOutputBox) do
       try
         if InstallLatestVersion() then
         begin
-          SimbaDebugLn('');
-          SimbaDebugLn(ESimbaDebugLn.GREEN, 'Succesfully auto updated "%s"', [FPackages[I].Info.FullName]);
-          SimbaDebugLn(ESimbaDebugLn.GREEN, '"%s" is now at version "%s"', [FPackages[I].Info.FullName, FPackages[I].InstalledVersion]);
-          SimbaDebugLn(ESimbaDebugLn.GREEN, 'Scripts will need to be restarted for changes to take effect.');
+          SimbaDebugLn([EDebugLn.FOCUS, EDebugLn.GREEN], [
+            'Succesfully updated "' + Package.Info.FullName + '"',
+            'Now at version: ' + Package.InstalledVersion,
+            'Scripts will need to be restarted for changes to take effect.'
+          ]);
         end else
-          SimbaDebugLn(ESimbaDebugLn.RED, 'Auto updating %s failed.', [FPackages[I].Info.FullName]);
+          SimbaDebugLn([EDebugLn.FOCUS, EDebugLn.RED], [
+            'Failed to update "' + Package.Info.FullName + '"'
+          ]);
       finally
         Free();
       end;
     end;
+  end;
 
   SetLength(FConfigFiles, Length(FPackages));
   for I := 0 to High(FPackages) do
   begin
-    FConfigFiles[I] := ParsePackageConfigFile(FPackages[I].ConfigPath);
-    if FPackages[I].HasUpdate() then
-      FUpdates.Add('%s can be updated to version %s', [FPackages[I].Info.FullName, FPackages[I].LatestVersion]);
+    FConfigFiles[I] := ParsePackageConfigFile(Package.ConfigPath);
+    if Package.HasUpdate() then
+      FUpdates.Add('%s can be updated to version %s', [Package.Info.FullName, Package.LatestVersion]);
   end;
 end;
 

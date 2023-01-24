@@ -1,7 +1,7 @@
 object SimbaOutputForm: TSimbaOutputForm
-  Left = 4281
+  Left = 4075
   Height = 140
-  Top = 819
+  Top = 1203
   Width = 676
   Caption = 'Output'
   ClientHeight = 140
@@ -17,19 +17,9 @@ object SimbaOutputForm: TSimbaOutputForm
     Top = 0
     Width = 676
     TabStop = False
-    ActivePage = TabSimba
     Align = alClient
     Images = SimbaForm.Images
-    TabIndex = 0
     TabOrder = 0
-    object TabSimba: TTabSheet
-      Caption = 'Simba Messages'
-      ImageIndex = 28
-    end
-    object TabScript: TTabSheet
-      Caption = 'Script Output'
-      ImageIndex = 14
-    end
   end
   object ContextMenu: TPopupMenu
     Left = 40
@@ -61,9 +51,9 @@ object SimbaOutputForm: TSimbaOutputForm
       OnClick = MenuItemCustomizeClick
     end
   end
-  object Timer: TTimer
-    Interval = 400
-    OnTimer = TimerExecute
+  object FlushTimer: TTimer
+    Interval = 500
+    OnTimer = DoFlushTimerExecute
     Left = 128
     Top = 56
   end

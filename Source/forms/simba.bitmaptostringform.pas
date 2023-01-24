@@ -117,7 +117,7 @@ begin
     end else
       Builder.Add(Format('  BMP := TMufasaBitmap.CreateFromString(%d, %d, %s);', [dispPic.Width, dispPic.Height, QuotedStr(Str)]));
 
-    SimbaDebugLn(Builder.Text);
+    SimbaDebugLn([EDebugLn.FOCUS], Builder.Text);
 
     try
       Clipboard.AsText := Builder.Text;
