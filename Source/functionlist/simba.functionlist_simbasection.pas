@@ -5,8 +5,8 @@ unit simba.functionlist_simbasection;
 interface
 
 uses
-  classes, sysutils, comctrls,
-  simba.mufasatypes, simba.codeparser, simba.ci_includecache, simba.functionlistform;
+  Classes, SysUtils, ComCtrls,
+  simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_cache, simba.functionlistform;
 
 const
   SimbaSectionDocLinks: TStringArray = (

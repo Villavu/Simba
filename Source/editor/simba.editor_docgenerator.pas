@@ -42,7 +42,7 @@ type
 implementation
 
 uses
-  simba.editor, simba.codeparser, simba.settings;
+  simba.editor, simba.ide_codetools_parser, simba.settings;
 
 procedure TSimbaEditorPlugin_DocGenerator.DoEditorAdded(Value: TCustomSynEdit);
 begin

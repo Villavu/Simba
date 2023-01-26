@@ -5,9 +5,8 @@ unit simba.functionlist_nodes;
 interface
 
 uses
-  classes, sysutils, comctrls,
-  simba.codeparser,
-  simba.functionlistform;
+  Classes, SysUtils, ComCtrls,
+  simba.ide_codetools_parser, simba.functionlistform;
 
 type
   TFunctionListNode = class(TTreeNode)

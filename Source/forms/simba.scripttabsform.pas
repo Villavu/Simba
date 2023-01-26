@@ -12,7 +12,7 @@ interface
 uses
   classes, sysutils, forms, controls, graphics, dialogs,
   extctrls, comctrls, extendednotebook, menus, StdCtrls, Buttons, synedit, synedittypes,
-  simba.scripttab, simba.editor, simba.codeparser, simba.editor_findreplace;
+  simba.scripttab, simba.editor, simba.ide_codetools_parser, simba.editor_findreplace;
 
 type
   TEditorSearchEvent = procedure(MatchCount: Integer) of object;

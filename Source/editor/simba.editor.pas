@@ -78,7 +78,7 @@ implementation
 
 uses
   SynEditPointClasses,
-  simba.parser_misc, simba.fonthelpers, simba.editor_blockcompletion,
+  simba.ide_codetools_utils, simba.fonthelpers, simba.editor_blockcompletion,
   simba.editor_docgenerator, simba.editor_commentblock,
   simba.editor_mousewheelzoom, simba.editor_history, simba.editor_multicaret;
 
@@ -303,7 +303,7 @@ var
 begin
   GetWordBoundsAtRowCol(TPoint.Create(X, Y), StartX, EndX);
 
-  Result := simba.parser_misc.GetExpression(Text, RowColToCharIndex(TPoint.Create(EndX - 1, Y)));
+  Result := simba.ide_codetools_utils.GetExpression(Text, RowColToCharIndex(TPoint.Create(EndX - 1, Y)));
 end;
 
 constructor TSimbaEditor.Create(AOwner: TComponent; LoadColors: Boolean);

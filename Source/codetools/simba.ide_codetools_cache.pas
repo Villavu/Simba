@@ -2,17 +2,20 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+
+  Caches an entire include, its not per file.
+  So cache for `{$i SomeInclude}` will include all the files `SomeInclude` also includes.
 }
-unit simba.ci_includecache;
+unit simba.ide_codetools_cache;
 
 {$i simba.inc}
 
 interface
 
 uses
-  Classes, SysUtils, syncobjs, castaliapaslex,
-  generics.collections,
-  simba.mufasatypes, simba.codeparser;
+  Classes, SysUtils, Generics.Collections, syncobjs,
+  mPasLexTypes, mPasLex,
+  simba.mufasatypes, simba.ide_codetools_parser;
 
 type
   TCodeInsight_Include = class(TCodeParser)
@@ -28,7 +31,6 @@ type
     LastUsed: Int32;
 
     procedure Assign(From: TObject); override;
-    function Equals(Obj: TObject): Boolean; override;
 
     property Outdated: Boolean read GetOutdated;
     property InDefines: TSaveDefinesRec read FInDefines write FInDefines;
@@ -112,32 +114,6 @@ begin
     end;
 end;
 
-function TCodeInsight_Include.Equals(Obj: TObject): Boolean;
-var
-  I: Int32;
-begin
-  Result := True;
-
-  if TCodeInsight_Include(Obj).Lexer.UseCodeToolsIDEDirective <> Lexer.UseCodeToolsIDEDirective then
-    Exit(False);
-
-  if (TCodeInsight_Include(Obj).InDefines.Defines <> InDefines.Defines) or
-     (TCodeInsight_Include(Obj).InDefines.Stack <> InDefines.Stack) then
-    Exit(False);
-
-  if (TCodeInsight_Include(Obj).OutDefines.Defines <> OutDefines.Defines) or
-     (TCodeInsight_Include(Obj).OutDefines.Defines <> OutDefines.Defines) then
-    Exit(False);
-
-  if TCodeInsight_Include(Obj).Files.Count <> FFiles.Count then
-    Exit(False);
-
-  for I := 0 to FFiles.Count - 1 do
-    if (FFiles[I] <> TCodeInsight_Include(Obj).Files[I]) or
-       (FFiles.Objects[I] <> TCodeInsight_Include(Obj).Files.Objects[I]) then
-      Exit(False);
-end;
-
 constructor TCodeInsight_Include.Create;
 begin
   inherited Create();
@@ -177,7 +153,7 @@ begin
          (Include.InDefines.Stack <> Sender.Lexer.SaveDefines.Stack) or
          (Include.Lexer.UseCodeToolsIDEDirective <> Sender.Lexer.UseCodeToolsIDEDirective) then
       begin
-        Include.LastUsed := Include.LastUsed + 1; // When this reaches 10 the include will be destroyed.
+        Include.LastUsed := Include.LastUsed + 1; // When this reaches 25 the include will be destroyed.
 
         Continue;
       end;

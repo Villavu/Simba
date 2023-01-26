@@ -3,14 +3,14 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.parser_misc;
+unit simba.ide_codetools_utils;
 
 {$i simba.inc}
 
 interface
 
 uses
-  sysutils;
+  Classes, SysUtils;
 
 type
   TExpressionItem = record Identifier: String; Dimensions: Int32; Deref: Boolean; DerefArray: Boolean; end;

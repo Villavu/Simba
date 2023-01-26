@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.codeparser;
+unit simba.ide_codetools_parser;
 
 {$DEFINE PARSER_SEPERATE_VARIABLES}
 
@@ -13,8 +13,8 @@ interface
 
 uses
   SysUtils, Classes,
-  CastaliaPasLex, CastaliaSimplePasPar, CastaliaPasLexTypes,
-  generics.collections, generics.defaults;
+  mPasLexTypes, mPasLex, mSimplePasPar,
+  Generics.Collections, Generics.Defaults;
 
 type
   TDeclaration = class;

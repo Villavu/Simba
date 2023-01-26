@@ -12,7 +12,7 @@ interface
 uses
   classes, sysutils, comctrls, controls, dialogs, lcltype, extctrls, graphics,
   syneditmiscclasses, syneditkeycmds,
-  simba.mufasatypes, simba.editor, simba.scriptinstance, simba.codeinsight, simba.codeparser, simba.parameterhint,
+  simba.mufasatypes, simba.editor, simba.scriptinstance, simba.ide_codetools_insight, simba.ide_codetools_parser, simba.parameterhint,
   simba.debuggerform, simba.functionlistform, simba.outputform;
 
 type
@@ -91,9 +91,9 @@ type
 implementation
 
 uses
-  interfacebase, forms, lazfileutils, synedit, syneditmousecmds,
+  InterfaceBase, Forms, SynEdit, LazFileUtils,
   simba.scripttabsform, simba.autocomplete, simba.settings,
-  simba.main, simba.parser_misc, simba.files, simba.functionlist_updater;
+  simba.main, simba.ide_codetools_utils, simba.files, simba.functionlist_updater;
 
 procedure TSimbaScriptTab.HandleAutoComplete;
 var

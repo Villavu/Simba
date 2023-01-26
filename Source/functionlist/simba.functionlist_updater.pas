@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, comctrls,
-  simba.codeparser, simba.codeinsight, simba.functionlistform;
+  simba.ide_codetools_parser, simba.ide_codetools_insight, simba.functionlistform;
 
 type
   TSimbaFunctionListUpdater = class(TThread)
@@ -36,7 +36,7 @@ var
 implementation
 
 uses
-  simba.scripttabsform, simba.scripttab, simba.functionlist_simbasection;
+  simba.scripttabsform, simba.scripttab, simba.functionlist_simbasection, simba.ide_codetools_setup;
 
 constructor TSimbaFunctionListUpdater.Create;
 begin
@@ -55,7 +55,7 @@ procedure TSimbaFunctionListUpdater.BeginUpdate;
 var
   Tab: TSimbaScriptTab;
 begin
-  if (SimbaScriptTabsForm = nil) or (SimbaScriptTabsForm.CurrentTab = nil) then
+  if (SimbaScriptTabsForm = nil) or (SimbaScriptTabsForm.CurrentTab = nil) or (not CodetoolsSetup) then
     Exit;
 
   Tab := SimbaScriptTabsForm.CurrentTab;

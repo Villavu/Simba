@@ -3,15 +3,15 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.codetools_arrayhelpers;
+unit simba.ide_codetools_helpers;
 
 {$i simba.inc}
 
 interface
 
 uses
-  classes, sysutils,
-  simba.codeparser;
+  Classes, SysUtils,
+  simba.ide_codetools_parser;
 
 function ParseArrayHelpers(Arr: TciArrayType): TCodeParser;
 function ParseStringHelpers(StrType, CharType: String): TCodeParser;

@@ -10,8 +10,8 @@ unit simba.parameterhint;
 interface
 
 uses
-  classes, sysutils, forms, controls, graphics, extctrls, synedit,
-  simba.codeinsight, simba.codeparser;
+  Classes, SysUtils, Forms, Controls, Graphics, ExtCtrls, SynEdit,
+  simba.ide_codetools_insight, simba.ide_codetools_parser;
 
 type
   TSimbaParameterHint = class(THintWindow)
@@ -51,7 +51,8 @@ type
 implementation
 
 uses
-  lclintf, lcltype, castaliapaslex, castaliapaslextypes, types;
+  LCLIntf, LCLType, Types,
+  mPasLexTypes, mPasLex;
 
 type
   TSynEdit_Helper = class helper for TSynEdit

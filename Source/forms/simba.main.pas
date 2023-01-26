@@ -286,9 +286,8 @@ uses
   simba.package_form, simba.package_autoupdater,
 
   simba.associate, simba.ide_initialization,
+  simba.ide_codetools_parser,
   simba.functionlist_simbasection, simba.functionlist_updater,
-
-  simba.codeparser, simba.codeinsight,
   simba.scripttab, simba.editor,
   simba.aca, simba.dtmeditor,
 

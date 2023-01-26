@@ -1,0 +1,1561 @@
+{ + --------------------------------------------------------------------------+
+  | Class:       TmwPasLex
+  | Created:     07.98 - 10.98
+  | Author:      Martin Waldenburg
+  | Description: A very fast Pascal tokenizer.
+  | Version:     1.32
+  | Copyright (c) 1998, 1999 Martin Waldenburg
+  | All rights reserved.
+  |
+  | DISCLAIMER:
+  |
+  | THIS SOFTWARE IS PROVIDED BY THE AUTHOR 'AS IS'.
+  |
+  | ALL EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+  | THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+  | PARTICULAR PURPOSE ARE DISCLAIMED.
+  |
+  | IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+  | INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  | (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+  | OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  | INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+  | WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+  | NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  | THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  |
+  |  Martin.Waldenburg@T-Online.de
+  +--------------------------------------------------------------------------+ }
+
+// Heavily modified over the years for Simba
+
+unit mPasLex;
+
+{$i simba.Inc}
+
+interface
+
+uses
+  SysUtils, Classes,
+  mPasLexTypes;
+
+type
+  TmwBasePasLex = class;
+  TDirectiveEvent = procedure(Sender: TmwBasePasLex) of object;
+
+  PDefineRec = ^TDefineRec;
+  TDefineRec = record
+    Defined: Boolean;
+    StartCount: Integer;
+    Next: PDefineRec;
+  end;
+  TDefineRecArray = array of TDefineRec;
+
+  PSaveDefinesRec = ^TSaveDefinesRec;
+  TSaveDefinesRec = record
+    RecArray: TDefineRecArray;
+    Stack: Integer;
+    Defines: string;
+  end;
+
+  TmwBasePasLex = class(TObject)
+  protected
+    fCommentState: TCommentState;
+    fOrigin: PAnsiChar;
+    fScript: String;
+    fRun: Integer;
+    TempRun: Integer;
+    fTokenPos: Integer;
+    fLineNumber: Integer;
+    FTokenID: TptTokenKind;
+    fLinePos: Integer;
+    fExID: TptTokenKind;
+    fOnCompDirect: TDirectiveEvent;
+    fOnElseDirect: TDirectiveEvent;
+    fOnEndIfDirect: TDirectiveEvent;
+    fOnIfDefDirect: TDirectiveEvent;
+    fOnIfNDefDirect: TDirectiveEvent;
+    fOnResourceDirect: TDirectiveEvent;
+    fOnIncludeDirect: TDirectiveEvent;
+    fOnLibraryDirect: TDirectiveEvent;
+    fOnDefineDirect: TDirectiveEvent;
+    fOnIfOptDirect: TDirectiveEvent;
+    fOnIfDirect: TDirectiveEvent;
+    fOnElseIfDirect: TDirectiveEvent;
+	  fOnUnDefDirect: TDirectiveEvent;
+    FDirectiveParamOrigin: PAnsiChar;
+
+    FDefines: TStringList;
+    FDefineStack: Integer;
+    FTopDefineRec: PDefineRec;
+    FUseDefines: Boolean;
+    FUseCodeToolsIDEDirective: Boolean;
+
+    FIdentBuffer: PChar;
+    FIdentBufferUpper: PtrUInt;
+
+    function GetPosXY: TTokenPoint;
+    procedure SetRunPos(Value: Integer);
+    procedure AddressOpProc;
+    procedure AmpersandOpProc;
+    procedure AsciiCharProc;
+    procedure AnsiProc;
+    procedure BorProc;
+    procedure BraceCloseProc;
+    procedure BraceOpenProc;
+    procedure ColonProc;
+    procedure CommaProc;
+    procedure CRProc;
+    procedure EqualProc;
+    procedure GreaterProc;
+    procedure IdentProc;
+    procedure IntegerProc;
+    procedure LFProc;
+    procedure LowerProc;
+    procedure MinusProc;
+    procedure NullProc;
+    procedure NumberProc;
+    procedure PlusProc;
+    procedure PointerSymbolProc;
+    procedure PointProc;
+    procedure RoundCloseProc;
+    procedure RoundOpenProc;
+    procedure SemiColonProc;
+    procedure SetScript(Value: String);
+    procedure SlashProc;
+    procedure SpaceProc;
+    procedure SquareCloseProc;
+    procedure SquareOpenProc;
+    procedure StarProc;
+    procedure StringProc;
+    procedure StringDQProc;
+    procedure SymbolProc;
+    procedure UnknownProc;
+    function GetToken: string;
+    function GetTokenLen: Integer;
+    function GetCompilerDirective: string;
+    function GetDirectiveKind: TptTokenKind;
+    function GetIDEDirectiveKind: TptTokenKind;
+    function GetDirectiveParam: string;
+    function GetDirectiveParamOriginal : string;
+    function GetIsJunk: Boolean;
+    function GetIsSpace: Boolean;
+    function GetIsCompilerDirective: Boolean;
+
+    function IsDefined(const ADefine: string): Boolean;
+    procedure EnterDefineBlock(ADefined: Boolean);
+    procedure ExitDefineBlock;
+  protected
+    procedure ErrorMessage(const Message: String); virtual;
+
+    procedure SetOrigin(NewValue: PAnsiChar); virtual;
+    procedure SetOnCompDirect(const Value: TDirectiveEvent); virtual;
+    procedure SetOnDefineDirect(const Value: TDirectiveEvent); virtual;
+    procedure SetOnElseDirect(const Value: TDirectiveEvent); virtual;
+    procedure SetOnEndIfDirect(const Value: TDirectiveEvent); virtual;
+    procedure SetOnIfDefDirect(const Value: TDirectiveEvent); virtual;
+    procedure SetOnIfNDefDirect(const Value: TDirectiveEvent); virtual;
+    procedure SetOnIfOptDirect(const Value: TDirectiveEvent); virtual;
+    procedure SetOnIncludeDirect(const Value: TDirectiveEvent); virtual;
+    procedure SetOnLibraryDirect(const Value: TDirectiveEvent); virtual;
+    procedure SetOnResourceDirect(const Value: TDirectiveEvent); virtual;
+    procedure SetOnUnDefDirect(const Value: TDirectiveEvent); virtual;
+    procedure SetOnIfDirect(const Value: TDirectiveEvent); virtual;
+    procedure SetOnElseIfDirect(const Value: TDirectiveEvent); virtual;
+  public
+    CaretPos: Integer;
+    MaxPos: Integer;
+
+    constructor Create; virtual;
+    destructor Destroy; override;
+    procedure Next; inline;
+    procedure NextID(ID: TptTokenKind);
+    procedure NextNoJunk;
+    procedure NextNoSpace;
+    procedure Init;
+    procedure InitFrom(ALexer: TmwBasePasLex);
+
+    procedure AddDefine(const ADefine: string);
+    procedure RemoveDefine(const ADefine: string);
+    procedure ClearDefines;
+    procedure InitDefines;
+    procedure CloneDefinesFrom(ALexer: TmwBasePasLex);
+    function SaveDefines: TSaveDefinesRec;
+    procedure LoadDefines(From: TSaveDefinesRec);
+
+    property CompilerDirective: string read GetCompilerDirective;
+    property DirectiveParam: string read GetDirectiveParam;
+    property DirectiveParamOriginal : string read GetDirectiveParamOriginal;
+	  property IsJunk: Boolean read GetIsJunk;
+    property IsSpace: Boolean read GetIsSpace;
+    property LineNumber: Integer read fLineNumber write fLineNumber;
+    property LinePos: Integer read fLinePos write fLinePos;
+    property Origin: PAnsiChar read fOrigin write SetOrigin;
+    property Script: String read FScript write SetScript;
+    property PosXY: TTokenPoint read GetPosXY;
+    property RunPos: Integer read fRun write SetRunPos;
+    property Token: string read GetToken;
+    property TokenLen: Integer read GetTokenLen;
+    property TokenPos: Integer read fTokenPos;
+    property TokenID: TptTokenKind read FTokenID;
+    property ExID: TptTokenKind read fExID;
+    property IsCompilerDirective: Boolean read GetIsCompilerDirective;
+    property OnCompDirect: TDirectiveEvent read fOnCompDirect write SetOnCompDirect;
+    property OnDefineDirect: TDirectiveEvent read fOnDefineDirect write SetOnDefineDirect;
+    property OnElseDirect: TDirectiveEvent read fOnElseDirect write SetOnElseDirect;
+    property OnEndIfDirect: TDirectiveEvent read fOnEndIfDirect write SetOnEndIfDirect;
+    property OnIfDefDirect: TDirectiveEvent read fOnIfDefDirect write SetOnIfDefDirect;
+    property OnIfNDefDirect: TDirectiveEvent read fOnIfNDefDirect write SetOnIfNDefDirect;
+    property OnIfOptDirect: TDirectiveEvent read fOnIfOptDirect write SetOnIfOptDirect;
+    property OnIncludeDirect: TDirectiveEvent read fOnIncludeDirect write SetOnIncludeDirect;
+    property OnLibraryDirect: TDirectiveEvent read fOnLibraryDirect write SetOnLibraryDirect;
+    property OnIfDirect: TDirectiveEvent read fOnIfDirect write SetOnIfDirect;
+    property OnElseIfDirect: TDirectiveEvent read fOnElseIfDirect write SetOnElseIfDirect;
+	  property OnResourceDirect: TDirectiveEvent read fOnResourceDirect write SetOnResourceDirect;
+	  property OnUnDefDirect: TDirectiveEvent read fOnUnDefDirect write SetOnUnDefDirect;
+
+    property DirectiveParamOrigin: PAnsiChar read FDirectiveParamOrigin;
+
+    property UseCodeToolsIDEDirective: Boolean read FUseCodeToolsIDEDirective write FUseCodeToolsIDEDirective;
+    property UseDefines: Boolean read FUseDefines write FUseDefines;
+
+    property Defines: TStringList read FDefines;
+  end;
+
+  TmwPasLex = class(TmwBasePasLex)
+  private
+    fAheadLex: TmwBasePasLex;
+    fFileName: String;
+    fIsLibrary: Boolean;
+    function GetAheadExID: TptTokenKind;
+    function GetAheadToken: string;
+    function GetAheadTokenID: TptTokenKind;
+  protected
+    procedure SetOrigin(NewValue: PAnsiChar); override;
+    procedure ErrorMessage(const Message: String); override;
+  public
+    constructor Create; override;
+    destructor Destroy; override;
+    procedure InitAhead;
+    procedure AheadNext;
+    property AheadLex: TmwBasePasLex read fAheadLex;
+    property AheadToken: string read GetAheadToken;
+    property AheadTokenID: TptTokenKind read GetAheadTokenID;
+    property AheadExID: TptTokenKind read GetAheadExID;
+    property FileName: String read fFileName write fFileName;
+    property IsLibrary: Boolean read fIsLibrary write fIsLibrary;
+  end;
+
+implementation
+
+uses
+  lazloggerbase;
+
+procedure TmwBasePasLex.ClearDefines;
+var
+  Frame: PDefineRec;
+begin
+  while FTopDefineRec <> nil do
+  begin
+    Frame := FTopDefineRec;
+    FTopDefineRec := Frame^.Next;
+    Dispose(Frame);
+  end;
+  FDefines.Clear;
+  FDefineStack := 0;
+  FTopDefineRec := nil;
+end;
+
+procedure TmwBasePasLex.CloneDefinesFrom(ALexer: TmwBasePasLex);
+var
+  Frame, LastFrame, SourceFrame: PDefineRec;
+begin
+  ClearDefines;
+  FDefines.Assign(ALexer.FDefines);
+  FDefineStack := ALexer.FDefineStack;
+
+  Frame := nil;
+  LastFrame := nil;
+  SourceFrame := ALexer.FTopDefineRec;
+  while SourceFrame <> nil do
+  begin
+    New(Frame);
+    if FTopDefineRec = nil then
+      FTopDefineRec := Frame
+    else
+      LastFrame^.Next := Frame;
+    Frame^.Defined := SourceFrame^.Defined;
+    Frame^.StartCount := SourceFrame^.StartCount;
+    LastFrame := Frame;
+
+    SourceFrame := SourceFrame^.Next;
+  end;
+  if Frame <> nil then
+    Frame^.Next := nil;
+end;
+
+function TmwBasePasLex.SaveDefines: TSaveDefinesRec;
+var
+  Frame: PDefineRec;
+begin
+  Result.Defines := FDefines.CommaText;
+  Result.Stack := FDefineStack;
+
+  Frame := FTopDefineRec;
+  while (Frame <> nil) do
+  begin
+    SetLength(Result.RecArray, Length(Result.RecArray) + 1);
+    Result.RecArray[High(Result.RecArray)] := Frame^;
+    Result.RecArray[High(Result.RecArray)].Next := nil;
+    Frame := Frame^.Next;
+  end;
+end;
+
+procedure TmwBasePasLex.LoadDefines(From: TSaveDefinesRec);
+var
+  Frame, LastFrame: PDefineRec;
+  i: Integer;
+begin
+  ClearDefines;
+  FDefines.CommaText := From.Defines;
+  FDefineStack := From.Stack;
+
+  Frame := nil;
+  LastFrame := nil;
+  for i := 0 to High(From.RecArray) do
+  begin
+    New(Frame);
+    if (i = 0) then
+      FTopDefineRec := Frame
+    else
+      LastFrame^.Next := Frame;
+
+    Frame^ := From.RecArray[i];
+    LastFrame := Frame;
+  end;
+
+  if (Frame <> nil) then
+    Frame^.Next := nil;
+end;
+
+function TmwBasePasLex.GetPosXY: TTokenPoint;
+begin
+  Result.X := FTokenPos - FLinePos;
+  Result.Y := FLineNumber;
+end;
+
+constructor TmwBasePasLex.Create;
+begin
+  inherited Create();
+
+  FIdentBuffer := GetMem(MaxTokenNameLength + 1);
+  FIdentBufferUpper := PtrUInt(@FIdentBuffer[MaxTokenNameLength + 1]);
+
+  fOrigin := nil;
+  fExID := tokUnKnown;
+
+  FUseDefines := True;
+  FDefines := TStringList.Create;
+  FDefines.Duplicates := dupIgnore;
+  FTopDefineRec := nil;
+  InitDefines;
+
+  MaxPos := -1;
+  CaretPos := -1;
+end;
+
+destructor TmwBasePasLex.Destroy;
+begin
+  ClearDefines;
+  FDefines.Free;
+  fOrigin := nil;
+
+  inherited Destroy();
+end;
+
+procedure TmwBasePasLex.SetOrigin(NewValue: PAnsiChar);
+begin
+  fOrigin := NewValue;
+  Init;
+  //Next();
+end;
+
+procedure TmwBasePasLex.SetRunPos(Value: Integer);
+begin
+  fRun := Value;
+  Next;
+end;
+
+procedure TmwBasePasLex.AddDefine(const ADefine: string);
+begin
+  FDefines.Add(ADefine);
+end;
+
+procedure TmwBasePasLex.AddressOpProc;
+begin
+  case FOrigin[fRun + 1] of
+    '@':
+      begin
+        fTokenID := tokDoubleAddressOp;
+        Inc(fRun, 2);
+      end;
+  else
+    begin
+      fTokenID := tokAddressOp;
+      Inc(fRun);
+    end;
+  end;
+end;
+
+procedure TmwBasePasLex.AsciiCharProc;
+begin
+  fTokenID := tokAsciiChar;
+  Inc(fRun);
+  if FOrigin[fRun] = '$' then
+  begin
+    Inc(fRun);
+    while FOrigin[fRun] in ['0'..'9', 'A'..'F', 'a'..'f'] do Inc(fRun);
+  end else
+  begin
+    while FOrigin[fRun] in ['0'..'9'] do
+      Inc(fRun);
+  end;
+end;
+
+procedure TmwBasePasLex.BraceCloseProc;
+begin
+  Inc(fRun);
+  fTokenId := tokError;
+
+  ErrorMessage('Illegal character');
+end;
+
+procedure TmwBasePasLex.BorProc;
+begin
+  fTokenID := tokBorComment;
+  case FOrigin[fRun] of
+    #0:
+      begin
+		    NullProc;
+        ErrorMessage('Unexpected file end');
+        exit;
+      end;
+  end;
+
+  while FOrigin[fRun] <> #0 do
+	  case FOrigin[fRun] of
+	    '}':
+		  begin
+		    fCommentState := csNo;
+		    Inc(fRun);
+		    break;
+		  end;
+
+	    #10:
+		  begin
+			  Inc(fRun);
+			  Inc(fLineNumber);
+			  fLinePos := fRun;
+		  end;
+	    #13:
+		  begin
+			  Inc(fRun);
+			  if FOrigin[fRun] = #10 then Inc( fRun );
+			  Inc(fLineNumber);
+			  fLinePos := fRun;
+		  end;
+	    else
+        Inc(fRun);
+	  end;
+end;
+
+procedure TmwBasePasLex.BraceOpenProc;
+var
+  Param, Def: string;
+  tmpRun: Integer;
+begin
+  case FOrigin[fRun + 1] of
+    '$': fTokenID := GetDirectiveKind;
+    '%': fTokenID := GetIDEDirectiveKind;
+    else
+      fTokenID := tokBorComment;
+  end;
+  if (fTokenID = tokBorComment) then
+    fCommentState := csBor;
+  Inc(fRun);
+  while FOrigin[fRun] <> #0 do
+    case FOrigin[fRun] of
+      '}':
+        begin
+          fCommentState := csNo;
+          Inc(fRun);
+          break;
+		    end;
+	    #10:
+		  begin
+			  Inc(fRun);
+			  Inc(fLineNumber);
+			  fLinePos := fRun;
+		  end;
+	    #13:
+		  begin
+			  Inc(fRun);
+			  if FOrigin[fRun] = #10 then Inc(fRun);
+			  Inc(fLineNumber);
+			  fLinePos := fRun;
+		  end;
+    else Inc(fRun);
+    end;
+
+  case fTokenID of
+    tokIDECodeTools:
+      begin
+        if FUseCodeToolsIDEDirective then
+        begin
+          if DirectiveParamOriginal = 'off' then
+            EnterDefineBlock(False)
+          else
+          if DirectiveParamOriginal = 'on' then
+            ExitDefineBlock();
+        end;
+
+        Next();
+      end;
+
+    tokCompDirect:
+      begin
+        if FUseDefines and (FDefineStack = 0) then
+        begin
+          Def := CompilerDirective;
+          if (Def = '$S+') or (Def = '$SCOPEDENUMS ON') then
+            AddDefine('!SCOPEDENUMS')
+          else
+          if (Def = '$S-') or (Def = '$SCOPEDENUMS OFF') then
+            RemoveDefine('!SCOPEDENUMS')
+          else
+          if (Def = '$EXPLICTSELF ON') then
+            AddDefine('!EXPLICTSELF')
+          else
+          if (Def = '$EXPLICTSELF OFF') then
+            RemoveDefine('!EXPLICTSELF');
+        end;
+
+        if Assigned(fOnCompDirect) and (FDefineStack = 0) then
+          fOnCompDirect(Self);
+      end;
+    tokDefineDirect:
+      begin
+        if FUseDefines and (FDefineStack = 0) then
+          AddDefine(DirectiveParam);
+        if Assigned(fOnDefineDirect) then
+          fOnDefineDirect(Self);
+      end;
+    tokElseDirect:
+      begin
+        if FUseDefines then
+        begin
+          if FTopDefineRec <> nil then
+          begin
+            if FTopDefineRec^.Defined then
+              Inc(FDefineStack)
+            else
+              if FDefineStack > 0 then
+                Dec(FDefineStack);
+          end;
+        end;
+        if Assigned(fOnElseDirect) then
+          fOnElseDirect(Self);
+      end;
+    tokEndIfDirect:
+      begin
+        if FUseDefines then
+          ExitDefineBlock;
+        if Assigned(fOnEndIfDirect) then
+          fOnEndIfDirect(Self);
+      end;
+    tokIfDefDirect:
+      begin
+        if FUseDefines then
+          EnterDefineBlock(IsDefined(DirectiveParam));
+        if Assigned(fOnIfDefDirect) then
+          fOnIfDefDirect(Self);
+      end;
+    tokIfNDefDirect:
+      begin
+        if FUseDefines then
+          EnterDefineBlock(not IsDefined(DirectiveParam));
+    		if Assigned(fOnIfNDefDirect) then
+          fOnIfNDefDirect(Self);
+      end;
+    tokIfOptDirect:
+      begin
+        if Assigned(fOnIfOptDirect) then
+          fOnIfOptDirect(Self);
+      end;
+    tokIfDirect:
+      begin
+        if FUseDefines then
+        begin
+          Param := DirectiveParam;
+          if Pos('DEFINED', Param) = 1 then
+          begin
+            Def := Copy(Param, 9, Length(Param) - 9);
+            EnterDefineBlock(IsDefined(Def));
+          end;
+        end;
+        if Assigned(fOnIfDirect) then
+          fOnIfDirect(Self);
+      end;
+    tokElseIfDirect:
+      begin
+        if FUseDefines then
+        begin
+          if FTopDefineRec <> nil then
+          begin
+            if FTopDefineRec^.Defined then
+              Inc(FDefineStack)
+            else
+            begin
+              if FDefineStack > 0 then
+                Dec(FDefineStack);
+              Param := DirectiveParam;
+              if Pos('DEFINED', Param) = 1 then
+              begin
+                Def := Copy(Param, 9, Length(Param) - 9);
+                EnterDefineBlock(IsDefined(Def));
+              end;
+            end;
+          end;
+        end;
+        if Assigned(fOnElseIfDirect) then
+          fOnElseIfDirect(Self);
+      end;
+    tokIncludeDirect, tokIncludeOnceDirect:
+      begin
+        if Assigned(fOnIncludeDirect) and (FDefineStack = 0) then
+          fOnIncludeDirect(Self);
+      end;
+    tokLibraryDirect:
+      begin
+        if Assigned(fOnLibraryDirect) and (FDefineStack = 0) then
+          fOnLibraryDirect(Self);
+      end;
+    tokResourceDirect:
+      begin
+        if Assigned(fOnResourceDirect) and (FDefineStack = 0) then
+          fOnResourceDirect(Self);
+      end;
+    tokUndefDirect:
+      begin
+        if FUseDefines and (FDefineStack = 0) then
+          RemoveDefine(DirectiveParam);
+        if Assigned(fOnUndefDirect) then
+          fOnUndefDirect(Self);
+      end;
+  end;
+  Next();
+end;
+
+procedure TmwBasePasLex.ColonProc;
+begin
+  if (FOrigin[fRun + 1] = '=') then
+  begin
+    Inc(fRun, 2);
+    fTokenID := tokAssign;
+	end else
+  begin
+    Inc(fRun);
+    fTokenID := tokColon;
+  end;
+end;
+
+procedure TmwBasePasLex.CommaProc;
+begin
+  Inc(fRun);
+  fTokenID := tokComma;
+end;
+
+procedure TmwBasePasLex.CRProc;
+begin
+  case fCommentState of
+    csBor: fTokenID := tokCRLFCo;
+    csAnsi: fTokenID := tokCRLFCo;
+    else
+      fTokenID := tokCRLF;
+  end;
+
+  case FOrigin[fRun + 1] of
+    #10: Inc(fRun, 2);
+    else
+      Inc(fRun);
+  end;
+
+  Inc(fLineNumber);
+  fLinePos := fRun;
+end;
+
+procedure TmwBasePasLex.EnterDefineBlock(ADefined: Boolean);
+var
+  StackFrame: PDefineRec;
+begin
+  New(StackFrame);
+  StackFrame^.Next := FTopDefineRec;
+  StackFrame^.Defined := ADefined;
+  StackFrame^.StartCount := FDefineStack;
+  FTopDefineRec := StackFrame;
+  if not ADefined then
+    Inc(FDefineStack);
+end;
+
+procedure TmwBasePasLex.EqualProc;
+begin
+  Inc(fRun);
+  fTokenID := tokEqual;
+end;
+
+procedure TmwBasePasLex.ExitDefineBlock;
+var
+  StackFrame: PDefineRec;
+begin
+  StackFrame := FTopDefineRec;
+  if StackFrame <> nil then
+  begin
+    FDefineStack := StackFrame^.StartCount;
+    FTopDefineRec := StackFrame^.Next;
+    Dispose(StackFrame);
+  end;
+end;
+
+procedure TmwBasePasLex.GreaterProc;
+begin
+  case FOrigin[fRun + 1] of
+    '=':
+      begin
+        Inc(fRun, 2);
+        fTokenID := tokGreaterEqual;
+      end;
+  else
+    begin
+      Inc(fRun);
+      fTokenID := tokGreater;
+	end;
+  end;
+end;
+
+procedure TmwBasePasLex.ErrorMessage(const Message: String);
+begin
+  DebugLn('"%s" at line %d, column %d', [Message, PosXY.Y + 1, PosXY.X]);
+end;
+
+procedure TmwBasePasLex.IdentProc;
+var
+  Ptr: PChar;
+begin
+  Ptr := FIdentBuffer;
+  while (FOrigin[fRun] in ['0'..'9', 'A'..'Z', '_', 'a'..'z']) do
+  begin
+    if (PtrUInt(Ptr) < FIdentBufferUpper) then
+    begin
+      Ptr^ := FOrigin[fRun];
+      if (Ptr^ in [#65..#90]) then // change to lowercase
+        Ptr^ := Char(Ord(Ptr^) + 32);
+      Inc(Ptr);
+    end;
+
+    Inc(fRun);
+  end;
+  Ptr^ := #0;
+
+  fTokenID := KeywordDictionary[FIdentBuffer];
+  if (fTokenID in ExTokens) then
+  begin
+    fExID := fTokenID;
+    fTokenID := tokIdentifier;
+  end;
+end;
+
+procedure TmwBasePasLex.IntegerProc;
+begin
+  Inc(fRun);
+  fTokenID := tokIntegerConst;
+  while FOrigin[fRun] in ['0'..'9', 'A'..'F', 'a'..'f'] do
+    Inc(fRun);
+end;
+
+function TmwBasePasLex.IsDefined(const ADefine: string): Boolean;
+begin
+  Result := FDefines.IndexOf(ADefine) > -1;
+end;
+
+procedure TmwBasePasLex.LFProc;
+begin
+  case fCommentState of
+	  csBor: fTokenID := tokCRLFCo;
+	  csAnsi: fTokenID := tokCRLFCo;
+    else
+      fTokenID := tokCRLF;
+  end;
+  Inc(fRun);
+  Inc(fLineNumber);
+  fLinePos := fRun;
+end;
+
+procedure TmwBasePasLex.LowerProc;
+begin
+  case FOrigin[fRun + 1] of
+    '=':
+      begin
+        Inc(fRun, 2);
+        fTokenID := tokLowerEqual;
+      end;
+    '>':
+      begin
+        Inc(fRun, 2);
+        fTokenID := tokNotEqual;
+      end
+  else
+    begin
+      Inc(fRun);
+      fTokenID := tokLower;
+    end;
+  end;
+end;
+
+procedure TmwBasePasLex.MinusProc;
+begin
+  Inc(fRun);
+  if FOrigin[fRun] = '=' then
+  begin
+    Inc(fRun);
+    fTokenID := tokMinusAsgn;
+  end else
+    fTokenID := tokMinus;
+end;
+
+procedure TmwBasePasLex.NullProc;
+begin
+  fTokenID := tokNull;
+end;
+
+procedure TmwBasePasLex.NumberProc;
+begin
+  Inc(fRun);
+  fTokenID := tokIntegerConst;
+  while FOrigin[fRun] in ['0'..'9', '.', 'e', 'E'] do
+  begin
+    case FOrigin[fRun] of
+      '.':
+        if FOrigin[fRun + 1] = '.' then
+          break
+        else fTokenID := tokFloat
+    end;
+    Inc(fRun);
+  end;
+end;
+
+procedure TmwBasePasLex.PlusProc;
+begin
+  Inc(fRun);
+  if FOrigin[fRun] = '=' then
+  begin
+    Inc(fRun);
+    fTokenID := tokPlusAsgn;
+  end else
+    fTokenID := tokPlus;
+end;
+
+procedure TmwBasePasLex.PointerSymbolProc;
+begin
+  Inc(fRun);
+  fTokenID := tokPointerSymbol;
+end;
+
+procedure TmwBasePasLex.PointProc;
+begin
+  case FOrigin[fRun + 1] of
+    '.':
+      begin
+        Inc(fRun, 2);
+        fTokenID := tokDotDot;
+      end;
+    ')':
+      begin
+        Inc(fRun, 2);
+        fTokenID := tokSquareClose;
+      end;
+  else
+    begin
+      Inc(fRun);
+      fTokenID := tokPoint;
+    end;
+  end;
+end;
+
+procedure TmwBasePasLex.RemoveDefine(const ADefine: string);
+var
+  I: Integer;
+begin
+  I := FDefines.IndexOf(ADefine);
+  if (I > -1) then
+    FDefines.Delete(I);
+end;
+
+procedure TmwBasePasLex.RoundCloseProc;
+begin
+  Inc(fRun);
+  fTokenID := tokRoundClose;
+end;
+
+procedure TmwBasePasLex.AnsiProc;
+begin
+  fTokenID := tokAnsiComment;
+  case FOrigin[fRun] of
+    #0:
+      begin
+        NullProc;
+        ErrorMessage('Unexpected file end');
+        exit;
+      end;
+  end;
+
+  while fOrigin[fRun] <> #0 do
+    case fOrigin[fRun] of
+      '*':
+        if fOrigin[fRun + 1] = ')' then
+        begin
+          fCommentState := csNo;
+          Inc(fRun, 2);
+          break;
+        end
+        else Inc(fRun);
+
+	  #10:
+		begin
+			Inc(fRun);
+			Inc(fLineNumber);
+			fLinePos := fRun;
+		end;
+	  #13:
+		begin
+			Inc(fRun);
+			if FOrigin[fRun] = #10 then
+        Inc(fRun);
+			Inc(fLineNumber);
+			fLinePos := fRun;
+		end;
+
+	  else
+      Inc(fRun);
+  end;
+end;
+
+procedure TmwBasePasLex.RoundOpenProc;
+begin
+  Inc(fRun);
+  case fOrigin[fRun] of
+    '*':
+      begin
+        fTokenID := tokAnsiComment;
+        if FOrigin[fRun + 1] = '$' then
+          fTokenID := GetDirectiveKind
+        else fCommentState := csAnsi;
+        Inc(fRun);
+        while fOrigin[fRun] <> #0 do
+          case fOrigin[fRun] of
+            '*':
+			  if fOrigin[fRun + 1] = ')' then
+			  begin
+				fCommentState := csNo;
+				Inc(fRun, 2);
+				break;
+			  end
+			  else Inc(fRun);
+
+			  #10:
+				begin
+					Inc(fRun);
+					Inc(fLineNumber);
+					fLinePos := fRun;
+				end;
+			  #13:
+				begin
+					Inc(fRun);
+					if FOrigin[fRun] = #10 then Inc(fRun);
+					Inc(fLineNumber);
+					fLinePos := fRun;
+				end;
+			else Inc(fRun);
+          end;
+      end;
+    '.':
+      begin
+        Inc(fRun);
+        fTokenID := tokSquareOpen;
+      end;
+  else fTokenID := tokRoundOpen;
+  end;
+  case fTokenID of
+    tokCompDirect:
+      begin
+        if Assigned(fOnCompDirect) then
+          fOnCompDirect(Self);
+      end;
+    tokDefineDirect:
+      begin
+        if Assigned(fOnDefineDirect) then
+          fOnDefineDirect(Self);
+      end;
+    tokElseDirect:
+      begin
+        if Assigned(fOnElseDirect) then
+          fOnElseDirect(Self);
+      end;
+    tokEndIfDirect:
+      begin
+        if Assigned(fOnEndIfDirect) then
+          fOnEndIfDirect(Self);
+      end;
+    tokIfDefDirect:
+      begin
+        if Assigned(fOnIfDefDirect) then
+          fOnIfDefDirect(Self);
+      end;
+    tokIfNDefDirect:
+      begin
+        if Assigned(fOnIfNDefDirect) then
+          fOnIfNDefDirect(Self);
+      end;
+    tokIfOptDirect:
+      begin
+        if Assigned(fOnIfOptDirect) then
+          fOnIfOptDirect(Self);
+      end;
+    tokLibraryDirect:
+       begin
+        if Assigned(fOnLibraryDirect) then
+          fOnLibraryDirect(Self);
+      end;
+    tokIncludeDirect, tokIncludeOnceDirect:
+      begin
+        if Assigned(fOnIncludeDirect) then
+          fOnIncludeDirect(Self);
+      end;
+    tokResourceDirect:
+      begin
+        if Assigned(fOnResourceDirect) then
+          fOnResourceDirect(Self);
+      end;
+    tokUndefDirect:
+      begin
+        if Assigned(fOnUndefDirect) then
+          fOnUndefDirect(Self);
+      end;
+  end;
+end;
+
+procedure TmwBasePasLex.SemiColonProc;
+begin
+  Inc(fRun);
+  fTokenID := tokSemiColon;
+end;
+
+procedure TmwBasePasLex.SetScript(Value: String);
+begin
+  fScript := Value;
+  Origin := PChar(fScript);
+end;
+
+procedure TmwBasePasLex.SlashProc;
+begin
+  case FOrigin[fRun + 1] of
+    '/':
+      begin
+        Inc(fRun, 2);
+        fTokenID := tokSlashesComment;
+        while FOrigin[fRun] <> #0 do
+        begin
+          case FOrigin[fRun] of
+            #10, #13: break;
+          end;
+          Inc(fRun);
+        end;
+      end;
+    '=': 
+      begin
+        Inc(fRun,2);
+        fTokenID := tokDivAsgn;
+      end;
+  else
+    begin
+      Inc(fRun);
+      fTokenID := tokSlash;
+    end;
+  end;
+end;
+
+procedure TmwBasePasLex.SpaceProc;
+begin
+  Inc(fRun);
+  fTokenID := tokSpace;
+  while FOrigin[fRun] in [#1..#9, #11, #12, #14..#32] do
+    Inc(fRun);
+end;
+
+procedure TmwBasePasLex.SquareCloseProc;
+begin
+  Inc(fRun);
+  fTokenID := tokSquareClose;
+end;
+
+procedure TmwBasePasLex.SquareOpenProc;
+begin
+  Inc(fRun);
+  fTokenID := tokSquareOpen;
+end;
+
+procedure TmwBasePasLex.StarProc;
+begin
+  Inc(fRun);
+  case FOrigin[fRun]  of
+    '=':
+      begin
+        Inc(fRun);
+        fTokenID := tokMulAsgn;
+      end;
+    '*':
+      begin
+        Inc(fRun);
+        if FOrigin[fRun] = '=' then
+        begin
+          Inc(fRun);
+          fTokenID := tokPowAsgn;
+        end else
+          fTokenID := tokStarStar;
+      end;
+    else
+      fTokenID := tokStar;
+  end;
+end;
+
+procedure TmwBasePasLex.StringProc;
+begin
+  fTokenID := tokStringConst;
+  repeat
+    Inc(fRun);
+    case FOrigin[fRun] of
+      #0, #10, #13:
+        begin
+          ErrorMessage('Unterminated string');
+          Break;
+        end;
+      #39:
+        while (FOrigin[fRun] = #39) and (FOrigin[fRun + 1] = #39) do
+          Inc(fRun, 2);
+    end;
+  until FOrigin[fRun] = #39;
+
+  if FOrigin[fRun] = #39 then
+  begin
+    Inc(fRun);
+    if TokenLen = 3 then
+      fTokenID := tokAsciiChar;
+  end;
+end;
+
+procedure TmwBasePasLex.SymbolProc;
+begin
+  Inc(fRun);
+  fTokenID := tokSymbol;
+end;
+
+procedure TmwBasePasLex.UnknownProc;
+begin
+  Inc(fRun);
+  fTokenID := tokUnknown;
+  ErrorMessage('Unknown Character');
+end;
+
+procedure TmwBasePasLex.Next;
+begin
+  fExID := tokUnknown;
+  fTokenPos := fRun;
+
+  case fCommentState of
+    csAnsi: AnsiProc;
+    csBor: BorProc;
+    csNo:
+      begin
+        case fOrigin[fRun] of
+          #0: NullProc();
+          #10: LFProc();
+          #13: CRProc();
+          #1..#9, #11, #12, #14..#32: SpaceProc();
+          #34: StringDQProc();
+          #39: StringProc();
+          '0'..'9': NumberProc();
+          'A'..'Z', 'a'..'z', '_': IdentProc();
+          '{': BraceOpenProc();
+          '}': BraceCloseProc();
+          '(': RoundOpenProc();
+          ')': RoundCloseProc();
+          '*': StarProc();
+          '+': PlusProc();
+          ',': CommaProc();
+          '-': MinusProc();
+          '.': PointProc();
+          '/': SlashProc();
+          ':': ColonProc();
+          ';': SemiColonProc();
+          '<': LowerProc();
+          '=': EqualProc();
+          '>': GreaterProc();
+          '@': AddressOpProc();
+          '[': SquareOpenProc();
+          ']': SquareCloseProc();
+          '^': PointerSymbolProc();
+          '#': AsciiCharProc();
+          '$': IntegerProc();
+          '?', '`', '!', '%', '&', '\': SymbolProc();
+          else
+            UnknownProc();
+        end;
+    end;
+  end;
+
+  if (MaxPos > -1) and (fTokenPos > MaxPos) and (not IsJunk) then
+    fTokenID := tok_DONE;
+end;
+
+function TmwBasePasLex.GetIsJunk: Boolean;
+begin
+  result := (fTokenID in JunkTokens) or (FUseDefines and (FDefineStack > 0) and (TokenID <> tokNull) and (TokenID <> tok_DONE));
+end;
+
+function TmwBasePasLex.GetIsSpace: Boolean;
+begin
+  Result := fTokenID in [tokCRLF, tokSpace];
+end;
+
+function TmwBasePasLex.GetToken: string;
+begin
+  SetString(Result, (FOrigin + fTokenPos), GetTokenLen);
+end;
+
+function TmwBasePasLex.GetTokenLen: Integer;
+begin
+  Result := fRun - fTokenPos;
+end;
+
+procedure TmwBasePasLex.NextID(ID: TptTokenKind);
+begin
+  repeat
+    case fTokenID of
+      tokNull, tok_DONE: break;
+    else Next;
+    end;
+  until fTokenID = ID;
+end;
+
+procedure TmwBasePasLex.NextNoJunk;
+begin
+  repeat
+    Next;
+  until not IsJunk;
+end;
+
+procedure TmwBasePasLex.NextNoSpace;
+begin
+  repeat
+    Next;
+  until not IsSpace;
+end;
+
+function TmwBasePasLex.GetCompilerDirective: string;
+var
+  DirectLen: Integer;
+begin
+  if TokenID <> tokCompDirect then
+    Result := ''
+  else
+    case fOrigin[fTokenPos] of
+      '(':
+        begin
+          DirectLen := fRun - fTokenPos - 4;
+          SetString(Result, (FOrigin + fTokenPos + 2), DirectLen);
+          Result := UpperCase(Result);
+        end;
+      '{':
+        begin
+          DirectLen := fRun - fTokenPos - 2;
+          SetString(Result, (FOrigin + fTokenPos + 1), DirectLen);
+          Result := UpperCase(Result);
+        end;
+    end;
+end;
+
+function TmwBasePasLex.GetDirectiveKind: TptTokenKind;
+var
+  StartPos, EndPos: Integer;
+  Directive: String;
+begin
+  Result := tokCompDirect;
+
+  StartPos := fTokenPos;
+  while (fOrigin[StartPos] <> #0) and (fOrigin[StartPos] <> '$') do
+    Inc(StartPos);
+  StartPos := StartPos + 1;
+  EndPos := StartPos;
+  while (fOrigin[EndPos] <> #0) and (not (fOrigin[EndPos] in [' ', '}'])) do
+    Inc(EndPos);
+
+  SetLength(Directive, EndPos-StartPos);
+  Move(fOrigin[StartPos], Directive[1], Length(Directive));
+
+  if (Directive = 'I')            then Result := tokIncludeDirect     else
+  if (Directive = 'IF')           then Result := tokIfDirect          else
+  if (Directive = 'IFDEF')        then Result := tokIfDefDirect       else
+  if (Directive = 'ENDIF')        then Result := tokEndIfDirect       else
+  if (Directive = 'ELSE')         then Result := tokElseDirect        else
+  if (Directive = 'DEFINE')       then Result := tokDefineDirect      else
+  if (Directive = 'IFNDEF')       then Result := tokIfNDefDirect      else
+  if (Directive = 'UNDEF')        then Result := tokUndefDirect       else
+  if (Directive = 'LOADLIB')      then Result := tokLibraryDirect     else
+  if (Directive = 'ELSEIF')       then Result := tokElseIfDirect      else
+  if (Directive = 'IFOPT')        then Result := tokIfOptDirect       else
+  if (Directive = 'INCLUDE')      then Result := tokIncludeDirect     else
+  if (Directive = 'INCLUDE_ONCE') then Result := tokIncludeOnceDirect;
+end;
+
+function TmwBasePasLex.GetIDEDirectiveKind: TptTokenKind;
+var
+  StartPos, EndPos: Integer;
+  Directive: String;
+begin
+  Result := tokCompDirect;
+
+  StartPos := fTokenPos;
+  while (fOrigin[StartPos] <> #0) and (fOrigin[StartPos] <> '%') do
+    Inc(StartPos);
+  StartPos := StartPos + 1;
+  EndPos := StartPos;
+  while (fOrigin[EndPos] <> #0) and (not (fOrigin[EndPos] in [' ', '}'])) do
+    Inc(EndPos);
+
+  SetLength(Directive, EndPos-StartPos);
+  Move(fOrigin[StartPos], Directive[1], Length(Directive));
+
+  if (Directive = 'CODETOOLS') then
+    Result := tokIDECodeTools;
+end;
+
+function TmwBasePasLex.GetDirectiveParamOriginal: string;
+var
+  StartPos, EndPos: Integer;
+begin
+  StartPos := fTokenPos;
+  while (fOrigin[StartPos] <> #0) and (fOrigin[StartPos] <> ' ') do
+    Inc(StartPos);
+
+  EndPos := StartPos+1;
+  while (fOrigin[EndPos] <> #0) and (fOrigin[EndPos] <> '}') do
+    Inc(EndPos);
+
+  SetLength(Result, (EndPos - StartPos) - 1);
+  Move(fOrigin[StartPos + 1], Result[1], Length(Result));
+end;
+
+function TmwBasePasLex.GetDirectiveParam: string;
+begin
+  result := uppercase(GetDirectiveParamOriginal);
+end;
+
+procedure TmwBasePasLex.Init;
+begin
+  fCommentState := csNo;
+  fLineNumber := 0;
+  fLinePos := 0;
+  fRun := 0;
+  //InitDefines;
+end;
+
+procedure TmwBasePasLex.InitFrom(ALexer: TmwBasePasLex);
+begin
+  Origin := ALexer.Origin;
+  fCommentState := ALexer.fCommentState;
+  fLineNumber := ALexer.fLineNumber;
+  fLinePos := ALexer.fLinePos;
+  fRun := ALexer.fRun;
+  CloneDefinesFrom(ALexer);
+end;
+
+procedure TmwBasePasLex.InitDefines;
+begin
+  ClearDefines;
+end;
+
+function TmwBasePasLex.GetIsCompilerDirective: Boolean;
+begin
+  Result := fTokenID in [tokCompDirect, tokDefineDirect, tokElseDirect,
+    tokEndIfDirect, tokIfDefDirect, tokIfNDefDirect, tokIfOptDirect,
+    tokIncludeDirect, tokIncludeOnceDirect, tokResourceDirect, tokUndefDirect, tokLibraryDirect];
+end;
+
+constructor TmwPasLex.Create;
+begin
+  inherited Create;
+  fAheadLex := TmwBasePasLex.Create;
+end;
+
+destructor TmwPasLex.Destroy;
+begin
+  fAheadLex.Free;
+  inherited Destroy;
+end;
+
+procedure TmwPasLex.SetOrigin(NewValue: PAnsiChar);
+begin
+  inherited SetOrigin(NewValue);
+  fAheadLex.SetOrigin(NewValue);
+end;
+
+procedure TmwPasLex.AheadNext;
+begin
+  fAheadLex.NextNoJunk;
+end;
+
+function TmwPasLex.GetAheadExID: TptTokenKind;
+begin
+  Result := fAheadLex.ExID;
+end;
+
+function TmwPasLex.GetAheadToken: string;
+begin
+  Result := fAheadLex.Token;
+end;
+
+function TmwPasLex.GetAheadTokenID: TptTokenKind;
+begin
+  Result := fAheadLex.TokenID;
+end;
+
+procedure TmwPasLex.InitAhead;
+begin
+  fAheadLex.RunPos := RunPos;
+  FAheadLex.fLineNumber := FLineNumber;
+  FAheadLex.FLinePos := FLinePos;
+
+  FAheadLex.CloneDefinesFrom(Self);
+
+  //FAheadLex.FTokenPos := FTokenPos;
+  while fAheadLex.IsJunk do
+    fAheadLex.Next;
+end;
+
+procedure TmwPasLex.ErrorMessage(const Message: String);
+begin
+  if (FileName <> '') then
+    DebugLn('[Codetools]: "%s" at line %d, column %d in file "%s"', [Message, PosXY.Y + 1, PosXY.X, FileName])
+  else
+    DebugLn('[Codetools]: "%s" at line %d, column %d', [Message, PosXY.Y + 1, PosXY.X]);
+end;
+
+procedure TmwBasePasLex.SetOnCompDirect(const Value: TDirectiveEvent);
+begin
+  fOnCompDirect := Value;
+end;
+
+procedure TmwBasePasLex.SetOnDefineDirect(const Value: TDirectiveEvent);
+begin
+  fOnDefineDirect := Value;
+end;
+
+procedure TmwBasePasLex.SetOnElseDirect(const Value: TDirectiveEvent);
+begin
+  fOnElseDirect := Value;
+end;
+
+procedure TmwBasePasLex.SetOnElseIfDirect(const Value: TDirectiveEvent);
+begin
+  fOnElseIfDirect := Value;
+end;
+
+procedure TmwBasePasLex.SetOnEndIfDirect(const Value: TDirectiveEvent);
+begin
+  fOnEndIfDirect := Value;
+end;
+
+procedure TmwBasePasLex.SetOnIfDefDirect(const Value: TDirectiveEvent);
+begin
+  fOnIfDefDirect := Value;
+end;
+
+procedure TmwBasePasLex.SetOnIfDirect(const Value: TDirectiveEvent);
+begin
+  FOnIfDirect := Value;
+end;
+
+procedure TmwBasePasLex.SetOnIfNDefDirect(const Value: TDirectiveEvent);
+begin
+  fOnIfNDefDirect := Value;
+end;
+
+procedure TmwBasePasLex.SetOnIfOptDirect(const Value: TDirectiveEvent);
+begin
+  fOnIfOptDirect := Value;
+end;
+
+procedure TmwBasePasLex.SetOnIncludeDirect(const Value: TDirectiveEvent);
+begin
+  fOnIncludeDirect := Value;
+end;
+
+procedure TmwBasePasLex.SetOnLibraryDirect(const Value: TDirectiveEvent);
+begin
+  fOnLibraryDirect := Value;
+end;
+
+procedure TmwBasePasLex.SetOnResourceDirect(const Value: TDirectiveEvent);
+begin
+  fOnResourceDirect := Value;
+end;
+
+procedure TmwBasePasLex.SetOnUnDefDirect(const Value: TDirectiveEvent);
+begin
+  fOnUnDefDirect := Value;
+end;
+
+procedure TmwBasePasLex.StringDQProc;
+begin
+  fTokenID := tokStringConst;
+  repeat
+    Inc(fRun);
+    case FOrigin[fRun] of
+      #0{, #10, #13}:
+        begin
+          ErrorMessage('Unterminated string');
+          break;
+        end;
+      #34:
+        while (FOrigin[fRun] = #34) and (FOrigin[fRun + 1] = #34) do
+          Inc(fRun, 2);
+    end;
+  until FOrigin[fRun] = #34;
+  if FOrigin[fRun] = #34 then
+  begin
+    Inc(fRun);
+    if TokenLen = 3 then
+      fTokenID := tokAsciiChar;
+  end;
+end;
+
+procedure TmwBasePasLex.AmpersandOpProc;
+begin
+  FTokenID := tokAmpersand;
+  Inc(fRun);
+  while FOrigin[fRun] in ['a'..'z', 'A'..'Z','0'..'9'] do
+    Inc(fRun);
+  FTokenID := tokIdentifier;
+end;
+
+end.
+

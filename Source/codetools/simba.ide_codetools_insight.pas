@@ -3,21 +3,22 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.codeinsight;
+unit simba.ide_codetools_insight;
 
 {$i simba.inc}
 
 interface
 
 uses
-  sysutils, classes,
-  castaliapaslex, castaliapaslextypes,
-  simba.mufasatypes, simba.codeparser, simba.parser_misc,
-  simba.ci_includecache;
+  Sysutils, Classes,
+  mPasLexTypes, mPasLex,
+  simba.mufasatypes,
+  simba.ide_codetools_parser, simba.ide_codetools_utils, simba.ide_codetools_cache;
 
 type
   TCodeInsight = class(TCodeParser)
-  protected class var
+  protected
+  class var
     FIncludeCache: TCodeInsight_IncludeCache;
     FBaseIncludes: TCodeInsight_IncludeArray;
     FBaseDefines: TStringList;
@@ -80,7 +81,7 @@ type
 implementation
 
 uses
-  simba.settings, simba.codetools_arrayhelpers;
+  simba.settings, simba.ide_codetools_helpers;
 
 class constructor TCodeInsight.Create;
 begin

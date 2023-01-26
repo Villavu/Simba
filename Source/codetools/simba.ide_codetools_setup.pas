@@ -7,11 +7,14 @@ interface
 uses
   Classes, SysUtils, Forms;
 
+var
+  CodetoolsSetup: Boolean = False;
+
 implementation
 
 uses
-  simba.mufasatypes, simba.codeinsight,
-  simba.ide_initialization, simba.ci_includecache, simba.process, simba.files, simba.functionlist_simbasection, simba.functionlistform;
+  simba.mufasatypes, simba.ide_codetools_insight, simba.ide_codetools_cache,
+  simba.ide_initialization, simba.process, simba.files, simba.functionlist_simbasection, simba.functionlistform;
 
 procedure SetupCodeTools;
 var
@@ -44,6 +47,8 @@ begin
 
   if (List <> nil) then
     List.Free();
+
+  CodetoolsSetup := True;
 end;
 
 initialization

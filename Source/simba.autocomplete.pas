@@ -12,7 +12,7 @@ interface
 uses
   classes, sysutils, graphics, controls, lcltype,
   synedit, syncompletion, syneditkeycmds,
-  simba.mufasatypes, simba.codeparser, simba.codeinsight;
+  simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_insight;
 
 type
   TSimbaAutoComplete_Form = class(TSynCompletionForm)
@@ -68,7 +68,7 @@ type
 implementation
 
 uses
-  castaliapaslextypes,
+  mPasLexTypes,
   simba.settings, simba.algo_sort;
 
 procedure TSimbaAutoComplete_Hint.SetBounds(ALeft, ATop, AWidth, AHeight: Integer);
