@@ -29,9 +29,9 @@ type
     function GetFirstItemOfClass(AClass: TDeclarationClass; SubSearch: Boolean = False): TDeclaration;
     function GetItemInPosition(Position: Integer): TDeclaration;
 
-    function GetRawText(AClass: TDeclarationClass): String;
-    function GetCleanText(AClass: TDeclarationClass): String;
-    function GetShortText(AClass: TDeclarationClass): String;
+    function GetTextOfClass(AClass: TDeclarationClass): String;
+    function GetTextOfClassNoComments(AClass: TDeclarationClass): String;
+    function GetTextOfClassNoCommentsSingleLine(AClass: TDeclarationClass): String;
   end;
 
   TDeclarationMap = class
@@ -60,26 +60,24 @@ type
   TDeclaration = class
   private
     FOwner: TDeclaration;
-    FOrigin: PAnsiChar;
-    FRawText: String;
-    FCleanText: String;
-    FShortText: String;
     FStartPos: Integer;
     FEndPos: Integer;
     FItems: TDeclarationList;
     FName: String;
-    FNameUpper: String;
-    FNameCached: Boolean;
     FLine: Integer;
     FLexer: TmwPasLex;
 
-    function GetRawText: string; virtual;
-    function GetCleanText: string; virtual;
-    function GetShortText: string; virtual;
-    function GetName: string; virtual;
+    FText: String;
+    FTextNoComments: String;
+    FTextNoCommentsSingleLine: String;
 
-    function GetNameProp: string;
-    function GetNameUpperProp: string;
+    function DoGetName: string; virtual;
+
+    function GetText: String;
+    function GetTextNoComments: String;
+    function GetTextNoCommentsSingleLine: String;
+
+    function GetName: string;
   public
     function HasOwnerClass(AClass: TDeclarationClass; out Declaration: TDeclaration; Recursive: Boolean = False): Boolean;
     function GetOwnersOfClass(AClass: TDeclarationClass): TDeclarationArray;
@@ -89,19 +87,18 @@ type
 
     property Lexer: TmwPasLex read FLexer;
     property Owner: TDeclaration read FOwner write FOwner;
-    property Origin: PAnsiChar read FOrigin;
 
-    property RawText: string read GetRawText write FRawText;
-    property CleanText: string read GetCleanText;
-    property ShortText: string read GetShortText;
     property StartPos: Integer read FStartPos write FStartPos;
     property EndPos: Integer read FEndPos write FEndPos;
     property Items: TDeclarationList read FItems;
-    property Name: String read GetNameProp;
-    property NameUpper: String read GetNameUpperProp;
+    property Name: String read GetName;
     property Line: Integer read FLine;
 
-    constructor Create(ALexer: TmwPasLex; AOwner: TDeclaration; AOrigin: PAnsiChar; AStart: Integer; AEnd: Integer = -1); overload; virtual;
+    property Text: String read GetText;
+    property TextNoComments: String read GetTextNoComments;
+    property TextNoCommentsSingleLine: String read GetTextNoCommentsSingleLine;
+
+    constructor Create(ALexer: TmwPasLex; AOwner: TDeclaration; AStart: Integer; AEnd: Integer = -1); overload; virtual;
     constructor Create(From: TDeclaration); overload; virtual;
     destructor Destroy; override;
   end;
@@ -130,7 +127,7 @@ type
   TciTypeName = class(TDeclaration);
   TciTypeIdentifer = class(TDeclaration)
   protected
-    function GetName: string; override;
+    function DoGetName: string; override;
   end;
 
   TciPointerType = class(TDeclaration)
@@ -149,7 +146,7 @@ type
 
   TciEnumElement = class(TDeclaration)
   protected
-    function GetName: string; override;
+    function DoGetName: string; override;
   end;
 
   TciSetType = class(TDeclaration);
@@ -180,12 +177,12 @@ type
   TciProcedureName = class(TDeclaration);
   TciProcedureClassName = class(TciTypeKind)
   protected
-    function GetName: string; override;
+    function DoGetName: string; override;
   end;
 
   TciReturnType = class(TciTypeKind)
   protected
-    function GetName: string; override;
+    function DoGetName: string; override;
   end;
 
   EProcedureDirectives = set of TptTokenKind;
@@ -201,7 +198,7 @@ type
 
     function GetHeader: String;
 
-    function GetName: String; override;
+    function DoGetName: String; override;
     function GetObjectName: String;
     function GetReturnType: TciReturnType;
   public
@@ -219,7 +216,7 @@ type
   TciProceduralType = class(TciProcedureDeclaration);
 
   TciInclude = class(TDeclaration);
-  TciJunk = class(TDeclaration);
+
 
   TciCompoundStatement = class(TDeclaration);
   TciWithStatement = class(TDeclaration);
@@ -239,7 +236,7 @@ type
     function GetCopyType: TciTypeCopy;
     function GetArrayType: TciArrayType;
     function GetPointerType: TciPointerType;
-    function GetName: String; override;
+    function DoGetName: String; override;
   public
     function GetType: TDeclaration;
 
@@ -260,7 +257,7 @@ type
 
     function GetValue: TDeclaration;
     function GetVarType: TciTypeKind;
-    function GetName: String; override;
+    function DoGetName: String; override;
   public
     // For parameter hints so we can restructure.
     // var
@@ -312,19 +309,17 @@ type
   protected
     FStack: TDeclarationStack;
     FItems: TDeclarationList;
-    FTokenPos: Integer;
-    FLexers: array of TmwPasLex;
-    FLexerStack: array of TmwPasLex;
     FOnFindInclude: TOnFindInclude;
     FOnInclude: TOnInclude;
     FOnFindLibrary: TOnFindInclude;
     FOnLoadLibrary: TOnLoadLibrary;
     FOnLibrary: TOnLibrary;
     FGlobals: TDeclarationMap;
-    FFiles: TStringList;
 
-    procedure PushLexer(ALexer: TmwPasLex);
-    procedure PopLexer;
+    function GetCaretPos: Integer;
+    function GetMaxPos: Integer;
+    procedure SetCaretPos(Value: Integer);
+    procedure SetMaxPos(Value: Integer);
 
     procedure SeperateVariables(Variables: TciVarDeclaration);
 
@@ -334,9 +329,8 @@ type
     procedure PopStack(AEnd: Integer = -1);
 
     procedure ParseFile; override;
-    procedure OnLibraryDirect(Sender: TmwBasePasLex); virtual;
-    procedure OnIncludeDirect(Sender: TmwBasePasLex); virtual;                  //Includes
-    procedure NextToken; override;                                              //Junk
+    procedure OnLibraryDirect(Sender: TmwBasePasLex); override;
+    procedure OnIncludeDirect(Sender: TmwBasePasLex); override;                  //Includes
 
     procedure CompoundStatement; override;                                      //Begin-End
     procedure WithStatement; override;                                          //With
@@ -400,7 +394,6 @@ type
   public
     property Items: TDeclarationList read FItems;
     property Globals: TDeclarationMap read FGlobals;
-    property Files: TStringList read FFiles;
 
     property OnFindInclude: TOnFindInclude read FOnFindInclude write FOnFindInclude;
     property OnInclude: TOnInclude read FOnInclude write FOnInclude;
@@ -409,18 +402,21 @@ type
     property OnLoadLibrary: TOnLoadLibrary read FOnLoadLibrary write FOnLoadLibrary;
     property OnLibrary: TOnLibrary read FOnLibrary write FOnLibrary;
 
-    procedure Run; overload; override;
+    property CaretPos: Integer read GetCaretPos write SetCaretPos;
+    property MaxPos: Integer read GetMaxPos write SetMaxPos;
+
+    procedure Run; override;
 
     procedure Assign(From: TObject); override;
 
-    constructor Create;
+    constructor Create; override;
     destructor Destroy; override;
   end;
 
 implementation
 
 uses
-  lazloggerbase;
+  simba.mufasatypes;
 
 procedure TDeclarationMap.Clear;
 begin
@@ -487,22 +483,22 @@ end;
 
 function TciTypeCopy.GetParent: String;
 begin
-  Result := FItems.GetRawText(TciTypeIdentifer);
+  Result := FItems.GetTextOfClass(TciTypeIdentifer);
 end;
 
 function TciTypeAlias.GetParent: String;
 begin
-  Result := FItems.GetRawText(TciTypeIdentifer);
+  Result := FItems.GetTextOfClass(TciTypeIdentifer);
 end;
 
 function TciRecordType.GetParent: String;
 begin
-  Result := FItems.GetRawText(TciAncestorId);
+  Result := FItems.GetTextOfClass(TciAncestorId);
 end;
 
 function TciNativeType.GetParent: String;
 begin
-  Result := FItems.GetRawText(TciAncestorId);
+  Result := FItems.GetTextOfClass(TciAncestorId);
 end;
 
 function TciEnumType.GetElements: TDeclarationArray;
@@ -510,9 +506,9 @@ begin
   Result := FItems.GetItemsOfClass(TciEnumElement);
 end;
 
-function TciTypeIdentifer.GetName: string;
+function TciTypeIdentifer.DoGetName: string;
 begin
-  Result := RawText;
+  Result := GetText();
 end;
 
 function TciTypeKind.GetRecordType: TciRecordType;
@@ -532,17 +528,17 @@ begin
     Result := Items[0];
 end;
 
-function TciEnumElement.GetName: string;
+function TciEnumElement.DoGetName: string;
 begin
-  Result := RawText;
+  Result := GetText();
 end;
 
-function TciProcedureClassName.GetName: string;
+function TciProcedureClassName.DoGetName: string;
 begin
   Result := 'Self';
 end;
 
-function TciReturnType.GetName: string;
+function TciReturnType.DoGetName: string;
 begin
   Result := 'Result';
 end;
@@ -593,13 +589,15 @@ begin
   Result := FItems.GetFirstItemOfClass(TciTypeKind) as TciTypeKind;
 end;
 
-function TciVarDeclaration.GetName: string;
+function TciVarDeclaration.DoGetName: string;
 var
   Declaration: TDeclaration;
 begin
   Declaration := FItems.GetFirstItemOfClass(TciVarName);
   if (Declaration <> nil) then
-    Result := Declaration.CleanText;
+    Result := Declaration.GetText()
+  else
+    Result := '';
 end;
 
 function TciTypeDeclaration.GetAliasType: TciTypeAlias;
@@ -690,13 +688,15 @@ begin
     Result := TciPointerType(Declaration);
 end;
 
-function TciTypeDeclaration.GetName: String;
+function TciTypeDeclaration.DoGetName: String;
 var
   Declaration: TDeclaration;
 begin
   Declaration := FItems.GetFirstItemOfClass(TciTypeName);
   if (Declaration <> nil) then
-    Result := Declaration.CleanText;
+    Result := Declaration.GetText()
+  else
+    Result := '';
 end;
 
 function TciTypeDeclaration.GetType: TDeclaration;
@@ -800,7 +800,7 @@ begin
       Search(FItems[I], Result);
 end;
 
-function TDeclarationList.GetRawText(AClass: TDeclarationClass): String;
+function TDeclarationList.GetTextOfClass(AClass: TDeclarationClass): String;
 var
   Declaration: TDeclaration;
 begin
@@ -808,10 +808,10 @@ begin
 
   Declaration := GetFirstItemOfClass(AClass);
   if Declaration <> nil then
-    Result := Declaration.RawText;
+    Result := Declaration.GetText();
 end;
 
-function TDeclarationList.GetCleanText(AClass: TDeclarationClass): String;
+function TDeclarationList.GetTextOfClassNoComments(AClass: TDeclarationClass): String;
 var
   Declaration: TDeclaration;
 begin
@@ -819,10 +819,10 @@ begin
 
   Declaration := GetFirstItemOfClass(AClass);
   if Declaration <> nil then
-    Result := Declaration.CleanText;
+    Result := Declaration.GetTextNoComments();
 end;
 
-function TDeclarationList.GetShortText(AClass: TDeclarationClass): String;
+function TDeclarationList.GetTextOfClassNoCommentsSingleLine(AClass: TDeclarationClass): String;
 var
   Declaration: TDeclaration;
 begin
@@ -830,94 +830,106 @@ begin
 
   Declaration := GetFirstItemOfClass(AClass);
   if Declaration <> nil then
-    Result := Declaration.ShortText;
+    Result := Declaration.GetTextNoCommentsSingleLine();
 end;
 
-function TDeclaration.GetNameProp: string;
+function TDeclaration.GetName: string;
 begin
-  if not FNameCached then
-  begin
-    FName := GetName;
-    FNameUpper := UpperCase(FName);
-    FNameCached := True;
-  end;
+  if (FName = #0) then
+    FName := DoGetName();
 
   Result := FName;
 end;
 
-function TDeclaration.GetNameUpperProp: string;
+function TDeclaration.GetText: String;
 begin
-  if not FNameCached then
-  begin
-    FName := GetName;
-    FNameUpper := UpperCase(FName);
-    FNameCached := True;
-  end;
+  if (FText = #0) then
+    FText := FLexer.CopyDoc(FStartPos, FEndPos);
 
-  Result := FNameUpper;
+  Result := FText;
 end;
 
-function TDeclaration.GetRawText: string;
-begin
-  if FRawText = '' then
-  begin
-    SetLength(FRawText, FEndPos - FStartPos);
-    if Length(FRawText) > 0 then
-      Move(FOrigin[FStartPos], FRawText[1], Length(FRawText));
-  end;
+function TDeclaration.GetTextNoComments: String;
 
-  Result := FRawText;
-end;
-
-function TDeclaration.GetCleanText: string;
-var
-  i: Integer;
-  a: TDeclarationArray;
-  s: string;
-begin
-  if (FCleanText = '') and (FStartPos <> FEndPos) and (FOrigin <> nil) then
+  function Filter(const Text: String): String;
+  var
+    Builder: TStringBuilder;
+    Lexer: TmwPasLex;
   begin
-    s := RawText;
-    a := Items.GetItemsOfClass(TciJunk, True);
-    for i := High(a) downto 0 do
+    Builder := nil;
+
+    Lexer := TmwPasLex.Create(Text);
+    Lexer.Next();
+    while (Lexer.TokenID <> tokNull) do
     begin
-      Delete(s, a[i].StartPos - FStartPos + 1, a[i].EndPos - a[i].StartPos);
-      if (Pos(LineEnding, a[i].GetRawText) > 0) then
-        Insert(LineEnding, s, a[i].StartPos - FStartPos + 1)
-      else
-        Insert(' ', s, a[i].StartPos - FStartPos + 1);
+      if (not (Lexer.TokenID in [tokSlashesComment, tokAnsiComment, tokBorComment])) then
+      begin
+        if (Builder = nil) then
+          Builder := TStringBuilder.Create(Length(Text));
+
+        Builder.Append(Lexer.Token);
+      end;
+      Lexer.Next();
     end;
-    FCleanText := s;
-  end;
+    Lexer.Free();
 
-  Result := FCleanText;
-end;
+    if (Builder <> nil) then
+    begin
+      Result := Builder.ToString();
 
-function TDeclaration.GetShortText: string;
-
-  function SingleLine(const S: String): String;
-  begin
-    Result := S;
-
-    while (Pos(LineEnding, Result) > 0) do
-      Result := StringReplace(Result, LineEnding, #32, [rfReplaceAll]);
-    while (Pos(#9, Result) > 0) do
-      Result := StringReplace(Result, #9, #32, [rfReplaceAll]);
-    while (Pos(#32#32, Result) > 0) do
-      Result := StringReplace(Result, #32#32, #32, [rfReplaceAll]);
-
-    Result := StringReplace(Result, '( ', '(', [rfReplaceAll]);
-    Result := StringReplace(Result, ' )', ')', [rfReplaceAll]);
+      Builder.Free();
+    end else
+      Result := Text;
   end;
 
 begin
-  if (FShortText = '') then
-    FShortText := SingleLine(CleanText);
+  if (FTextNoComments = #0) then
+    FTextNoComments := Filter(FLexer.CopyDoc(FStartPos, FEndPos));
 
-  Result := FShortText;
+  Result := FTextNoComments;
 end;
 
-function TDeclaration.GetName: string;
+function TDeclaration.GetTextNoCommentsSingleLine: String;
+
+  function Filter(const Text: String): String;
+  var
+    Builder: TStringBuilder;
+    Lexer: TmwPasLex;
+  begin
+    Builder := nil;
+
+    Lexer := TmwPasLex.Create(Text);
+    Lexer.Next();
+    while (Lexer.TokenID <> tokNull) do
+    begin
+      if (not (Lexer.TokenID in [tokSlashesComment, tokAnsiComment, tokBorComment, tokCRLF, tokCRLFCo])) then
+      begin
+        if (Builder = nil) then
+          Builder := TStringBuilder.Create(Length(Text));
+
+        Builder.Append(Lexer.Token);
+      end;
+      Lexer.Next();
+    end;
+    Lexer.Free();
+
+    if (Builder <> nil) then
+    begin
+      Result := Builder.ToString();
+
+      Builder.Free();
+    end else
+      Result := Text;
+  end;
+
+begin
+  if (FTextNoCommentsSingleLine = #0) then
+    FTextNoCommentsSingleLine := Filter(FLexer.CopyDoc(FStartPos, FEndPos));
+
+  Result := FTextNoCommentsSingleLine;
+end;
+
+function TDeclaration.DoGetName: string;
 begin
   Result := '';
 end;
@@ -985,19 +997,22 @@ end;
 
 function TDeclaration.IsName(const Value: String): Boolean;
 begin
-  Result := UpperCase(Value) = GetNameUpperProp;
+  Result := SameText(Name, Value);
 end;
 
-constructor TDeclaration.Create(ALexer: TmwPasLex; AOwner: TDeclaration; AOrigin: PAnsiChar; AStart: Integer; AEnd: Integer);
+constructor TDeclaration.Create(ALexer: TmwPasLex; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
 begin
-  inherited Create;
+  inherited Create();
+
+  FText := #0;
+  FTextNoComments := #0;
+  FTextNoCommentsSingleLine := #0;
+
+  FName := #0;
 
   FLexer := ALexer;
   FLine := FLexer.LineNumber;
   FOwner := AOwner;
-  FOrigin := AOrigin;
-  FRawText := '';
-  FCleanText := '';
   FStartPos := AStart;
   if (AEnd > -1) then
     FEndPos := AEnd
@@ -1009,7 +1024,7 @@ end;
 
 constructor TDeclaration.Create(From: TDeclaration);
 begin
-  Create(From.Lexer, From.Owner, From.Origin, From.StartPos, From.EndPos);
+  Create(From.Lexer, From.Owner, From.StartPos, From.EndPos);
 end;
 
 destructor TDeclaration.Destroy;
@@ -1038,9 +1053,9 @@ begin
 
     FHeader := FHeader + Name;
 
-    FHeader := FHeader + Items.GetCleanText(TciParameterList);
+    FHeader := FHeader + Items.GetTextOfClassNoCommentsSingleLine(TciParameterList);
     if ReturnType <> nil then
-      FHeader := FHeader + ': ' + ReturnType.CleanText;
+      FHeader := FHeader + ': ' + ReturnType.GetText();
 
     FHeader := FHeader + ';';
 
@@ -1052,13 +1067,15 @@ begin
   Result := FHeader;
 end;
 
-function TciProcedureDeclaration.GetName: String;
+function TciProcedureDeclaration.DoGetName: String;
 var
   Declaration: TDeclaration;
 begin
   Declaration := FItems.GetFirstItemOfClass(TciProcedureName);
   if (Declaration <> nil) then
-    Result := Declaration.CleanText;
+    Result := Declaration.GetText()
+  else
+    Result := '';
 end;
 
 function TciProcedureDeclaration.GetObjectName: String;
@@ -1069,7 +1086,7 @@ begin
   begin
     Declaration := FItems.GetFirstItemOfClass(TciProcedureClassName);
     if Declaration <> nil then
-      FObjectName := Declaration.CleanText;
+      FObjectName := Declaration.GetText();
   end;
 
   Result := FObjectName;
@@ -1125,12 +1142,12 @@ begin
 
   if (FStack.Count > 0) then
   begin
-    Result := AClass.Create(FLexer, FStack.Peek(), Lexer.Origin, AStart);
+    Result := AClass.Create(FLexer, FStack.Peek(), AStart);
 
     FStack.Peek().Items.Add(Result);
   end else
   begin
-    Result := AClass.Create(FLexer, nil, Lexer.Origin, AStart);
+    Result := AClass.Create(FLexer, nil, AStart);
 
     FItems.Add(Result);
   end;
@@ -1138,31 +1155,32 @@ begin
   FStack.Push(Result);
 end;
 
-procedure TCodeParser.PushLexer(ALexer: TmwPasLex);
+function TCodeParser.GetCaretPos: Integer;
 begin
-  if Length(FLexerStack) > 100 then
-    raise Exception.Create('Recursive include detected');
-
-  ALexer.CloneDefinesFrom(FLexer);
-  ALexer.UseCodeToolsIDEDirective := FLexer.UseCodeToolsIDEDirective;
-
-  SetLength(FLexers, Length(FLexers) + 1);
-  FLexers[High(FLexers)] := ALexer;
-
-  SetLength(FLexerStack, Length(FLexerStack) + 1);
-  FLexerStack[High(FLexerStack)] := ALexer;
-
-  FLexer := ALexer;
-  FLexer.OnIncludeDirect := @OnIncludeDirect;
-  FLexer.OnLibraryDirect := @OnLibraryDirect;
+  if (fLexer = nil) then
+    Result := -1
+  else
+    Result := fLexer.CaretPos;
 end;
 
-procedure TCodeParser.PopLexer;
+function TCodeParser.GetMaxPos: Integer;
 begin
-  FLexerStack[High(FLexerStack) - 1].CloneDefinesFrom(FLexerStack[High(FLexerStack)]);
-  SetLength(FLexerStack, Length(FLexerStack) - 1);
+  if (fLexer = nil) then
+    Result := -1
+  else
+    Result := fLexer.MaxPos;
+end;
 
-  FLexer := FLexerStack[High(FLexerStack)];
+procedure TCodeParser.SetCaretPos(Value: Integer);
+begin
+  if (fLexer <> nil) then
+    fLexer.CaretPos := Value;
+end;
+
+procedure TCodeParser.SetMaxPos(Value: Integer);
+begin
+  if (fLexer <> nil) then
+    fLexer.MaxPos := Value;
 end;
 
 procedure TCodeParser.SeperateVariables(Variables: TciVarDeclaration);
@@ -1210,7 +1228,7 @@ end;
 procedure TCodeParser.PopStack(AEnd: Integer = -1);
 begin
   if (AEnd = -1) then
-    AEnd := FTokenPos;
+    AEnd := fLastNoJunkPos;
 
   if (FStack.Count > 0) then
     FStack.Pop().EndPos := AEnd;
@@ -1220,29 +1238,18 @@ constructor TCodeParser.Create;
 begin
   inherited Create();
 
-  FStack := TDeclarationStack.Create;
+  FStack := TDeclarationStack.Create();
   FItems := TDeclarationList.Create(True);
   FGlobals := TDeclarationMap.Create();
-  FFiles := TStringList.Create();
-
-  PushLexer(FLexer);
 end;
 
 destructor TCodeParser.Destroy;
-var
-  I: Integer;
 begin
   FStack.Free();
   FItems.Free();
   FGlobals.Free();
-  FFiles.Free();
 
-  for I := 1 to High(FLexers) do
-    FLexers[I].Free();
-
-  FLexer := FLexers[0];
-
-  inherited;
+  inherited Destroy();
 end;
 
 procedure TCodeParser.ParseFile;
@@ -1250,24 +1257,24 @@ begin
   Lexer.Next();
 
   SkipJunk();
-  if (TokenID = tokProgram) then
+  if (Lexer.TokenID = tokProgram) then
   begin
     NextToken();
     Expected(tokIdentifier);
     SemiColon();
   end;
 
-  while (TokenID in [tokBegin, tokConst, tokFunction, tokOperator, tokLabel, tokProcedure, tokType, tokVar]) do
+  while (Lexer.TokenID in [tokBegin, tokConst, tokFunction, tokOperator, tokLabel, tokProcedure, tokType, tokVar]) do
   begin
-    if (TokenID = tokBegin) then
+    if (Lexer.TokenID = tokBegin) then
     begin
       CompoundStatement();
-      if (TokenID = tokSemiColon) then
+      if (Lexer.TokenID = tokSemiColon) then
         Expected(tokSemiColon);
     end else
       DeclarationSection();
 
-    if (TokenID = tok_DONE) then
+    if (Lexer.TokenID = tok_DONE) then
       Break;
   end;
 end;
@@ -1298,22 +1305,20 @@ begin
           begin
             FOnLoadLibrary(Self, FileName, Contents);
 
-            PushLexer(TmwPasLex.Create());
+            PushLexer(TmwPasLex.Create(Contents, FileName));
 
             FLexer.IsLibrary := True;
-            FLexer.FileName := FileName;
-            FLexer.Script := Contents;
-            FLexer.Next();
-
-            FFiles.AddObject(FileName, TObject(PtrInt(FileAge(FileName))));
+            //FLexer.FileName := FileName;
+            //FLexer.Script := Contents;
+            //FLexer.Next();
           end;
         end;
       end else
-        DebugLn('Library "', FileName, '" not found');
+        DebugLn('Library "' + FileName + '" not found');
     end;
   except
     on E: Exception do
-      ErrorMessage(E.Message);
+      OnErrorMessage(fLexer, E.Message);
   end;
 end;
 
@@ -1330,56 +1335,35 @@ begin
     begin
       if FOnFindInclude(Self, FileName) then
       begin
-        Handled := (Sender.TokenID = tokIncludeOnceDirect) and (FFiles.IndexOf(FileName) > -1);
-
+        Handled := (Sender.TokenID = tokIncludeOnceDirect) and HasFile(FileName);
         if not Handled then
         begin
-          FFiles.AddObject(FileName, TObject(PtrInt(FileAge(FileName))));
           if (FOnInclude <> nil) then
             FOnInclude(Self, FileName, Handled);
 
           if not Handled then
           begin
-            PushLexer(TmwPasLex.Create());
+            PushLexer(TmwPasLex.CreateFromFile(FileName));
 
-            with TStringList.Create() do
-            try
-              LoadFromFile(FileName);
-
-              FLexer.FileName := FileName;
-              FLexer.Script := Text;
-              FLexer.Next();
-            finally
-              Free();
-            end;
+            //with TStringList.Create() do
+            //try
+            //  LoadFromFile(FileName);
+            //
+            //  FLexer.FileName := FileName;
+            //  FLexer.Script := Text;
+            //  FLexer.Next();
+            //finally
+            //  Free();
+            //end;
           end;
         end;
       end else
-        DebugLn('Include "', FileName, '" not found');
+        DebugLn('Include "' + FileName + '" not found');
     end;
   except
     on E: Exception do
-      ErrorMessage(E.Message);
+      OnErrorMessage(fLexer, E.Message);
   end;
-end;
-
-procedure TCodeParser.NextToken;
-begin
-  FTokenPos := -1;
-
-  repeat
-    FLexer.Next;
-
-    if (FTokenPos = -1) then
-      FTokenPos := Lexer.TokenPos;
-
-    if (Lexer.TokenID = tokNull) and (Length(FLexerStack) > 1) then
-    begin
-      PopLexer();
-
-      Continue;
-    end;
-  until not Lexer.IsJunk;
 end;
 
 procedure TCodeParser.CompoundStatement;
@@ -1473,7 +1457,7 @@ begin
   if InDeclarations([TciConstantDeclaration, TciVarDeclaration]) and (Lexer.TokenID = tokIdentifier) then
   begin
     Decl := PushStack(TciTypeKind);
-    Decl.Items.Add(TciTypeIdentifer.Create(Lexer, Decl, Lexer.Origin, Lexer.TokenPos, Lexer.TokenPos+Lexer.TokenLen));
+    Decl.Items.Add(TciTypeIdentifer.Create(Lexer, Decl, Lexer.TokenPos, Lexer.TokenPos+Lexer.TokenLen));
     PopStack();
   end;
 
@@ -1499,7 +1483,7 @@ procedure TCodeParser.ProceduralDirective;
 begin
   if InDeclaration(TciProcedureDeclaration) then
     with FStack.Peek as TciProcedureDeclaration do
-      Directives := Directives + [ExID];
+      Directives := Directives + [Lexer.ExID];
 
   inherited ProceduralDirective;
 end;
@@ -1950,6 +1934,7 @@ var
   Declaration: TDeclaration;
 begin
   Declaration := PushStack(TciEnumType);
+
   if Lexer.Defines.IndexOf('!SCOPEDENUMS') > -1 then
     TciEnumType(Declaration).Scoped := True;
   inherited;
@@ -1984,10 +1969,6 @@ var
   Declaration: TDeclaration;
   I: Integer;
 begin
-  FFiles.Clear();
-  if FileExists(FLexer.FileName) then
-    FFiles.AddObject(FLexer.FileName, TObject(PtrInt(FileAge(FLexer.FileName))));
-
   inherited Run();
 
   for I := 0 to FItems.Count - 1 do

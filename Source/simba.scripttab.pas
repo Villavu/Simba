@@ -415,29 +415,23 @@ end;
 function TSimbaScriptTab.GetParser: TCodeInsight;
 begin
   Result := TCodeInsight.Create();
-  if (Result.Lexer.FileName = '') then
-    Result.Lexer.FileName := FScriptFileName;
-
   Result.OnFindInclude := @SimbaForm.CodeTools_OnFindInclude;
   Result.OnFindLibrary := @SimbaForm.CodeTools_OnFindLibrary;
   Result.OnLoadLibrary := @SimbaForm.CodeTools_OnLoadLibrary;
-  Result.Lexer.CaretPos := FEditor.SelStart - 1;
- // Result.Lexer.MaxPos := FEditor.SelStart - 1;
-  Result.Lexer.Script := FEditor.Text;
+  Result.SetScript(Script, FScriptFileName);
+  Result.CaretPos := FEditor.SelStart - 1;
 end;
 
 function TSimbaScriptTab.ParseScript: TCodeInsight;
 begin
   Result := TCodeInsight.Create();
-  if (Result.Lexer.FileName = '') then
-    Result.Lexer.FileName := FScriptFileName;
-
   Result.OnFindInclude := @SimbaForm.CodeTools_OnFindInclude;
   Result.OnFindLibrary := @SimbaForm.CodeTools_OnFindLibrary;
   Result.OnLoadLibrary := @SimbaForm.CodeTools_OnLoadLibrary;
-  Result.Lexer.CaretPos := FEditor.SelStart - 1;
-  Result.Lexer.MaxPos := FEditor.SelStart - 1;
-  Result.Run(Script, Result.Lexer.FileName);
+  Result.SetScript(Script, FScriptFileName);
+  Result.CaretPos := FEditor.SelStart - 1;
+  Result.MaxPos := FEditor.SelStart - 1;
+  Result.Run();
 end;
 
 function TSimbaScriptTab.Load(FileName: String; AScriptFileName, AScriptTitle: String): Boolean;

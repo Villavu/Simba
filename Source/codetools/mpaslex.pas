@@ -36,12 +36,13 @@ unit mPasLex;
 interface
 
 uses
-  SysUtils, Classes,
+  SysUtils, Classes, Generics.Collections, LazUTF8,
   mPasLexTypes;
 
 type
   TmwBasePasLex = class;
   TDirectiveEvent = procedure(Sender: TmwBasePasLex) of object;
+  TErrorMessageEvent = procedure(Sender: TmwBasePasLex; Message: String) of object;
 
   PDefineRec = ^TDefineRec;
   TDefineRec = record
@@ -61,10 +62,10 @@ type
   TmwBasePasLex = class(TObject)
   protected
     fCommentState: TCommentState;
-    fOrigin: PAnsiChar;
-    fScript: String;
+    fDoc: String;
+    fFileName: String;
+    fFileAge: Integer;
     fRun: Integer;
-    TempRun: Integer;
     fTokenPos: Integer;
     fLineNumber: Integer;
     FTokenID: TptTokenKind;
@@ -83,13 +84,14 @@ type
     fOnIfDirect: TDirectiveEvent;
     fOnElseIfDirect: TDirectiveEvent;
 	  fOnUnDefDirect: TDirectiveEvent;
+    fOnErrorMessage: TErrorMessageEvent;
+
     FDirectiveParamOrigin: PAnsiChar;
 
-    FDefines: TStringList;
+    FDefines: TStringListUTF8Fast;
     FDefineStack: Integer;
     FTopDefineRec: PDefineRec;
     FUseDefines: Boolean;
-    FUseCodeToolsIDEDirective: Boolean;
 
     FIdentBuffer: PChar;
     FIdentBufferUpper: PtrUInt;
@@ -121,7 +123,6 @@ type
     procedure RoundCloseProc;
     procedure RoundOpenProc;
     procedure SemiColonProc;
-    procedure SetScript(Value: String);
     procedure SlashProc;
     procedure SpaceProc;
     procedure SquareCloseProc;
@@ -146,9 +147,8 @@ type
     procedure EnterDefineBlock(ADefined: Boolean);
     procedure ExitDefineBlock;
   protected
-    procedure ErrorMessage(const Message: String); virtual;
+    procedure Error(Message: String); virtual;
 
-    procedure SetOrigin(NewValue: PAnsiChar); virtual;
     procedure SetOnCompDirect(const Value: TDirectiveEvent); virtual;
     procedure SetOnDefineDirect(const Value: TDirectiveEvent); virtual;
     procedure SetOnElseDirect(const Value: TDirectiveEvent); virtual;
@@ -163,35 +163,35 @@ type
     procedure SetOnIfDirect(const Value: TDirectiveEvent); virtual;
     procedure SetOnElseIfDirect(const Value: TDirectiveEvent); virtual;
   public
+    OnErrorMessage: TErrorMessageEvent;
+
     CaretPos: Integer;
     MaxPos: Integer;
 
-    constructor Create; virtual;
+    constructor Create(Doc: String; AFileName: String = ''); virtual;
+    constructor CreateFromFile(AFileName: String); virtual;
     destructor Destroy; override;
     procedure Next; inline;
-    procedure NextID(ID: TptTokenKind);
-    procedure NextNoJunk;
-    procedure NextNoSpace;
-    procedure Init;
-    procedure InitFrom(ALexer: TmwBasePasLex);
+    procedure NextNoJunk; inline;
+
+    function CopyDoc(const StartPos, EndPos: Integer): String;
 
     procedure AddDefine(const ADefine: string);
     procedure RemoveDefine(const ADefine: string);
     procedure ClearDefines;
-    procedure InitDefines;
     procedure CloneDefinesFrom(ALexer: TmwBasePasLex);
     function SaveDefines: TSaveDefinesRec;
     procedure LoadDefines(From: TSaveDefinesRec);
 
+    property FileName: String read fFileName;
+    property FileAge: Integer read fFileAge;
     property CompilerDirective: string read GetCompilerDirective;
     property DirectiveParam: string read GetDirectiveParam;
-    property DirectiveParamOriginal : string read GetDirectiveParamOriginal;
+    property DirectiveParamOriginal: string read GetDirectiveParamOriginal;
 	  property IsJunk: Boolean read GetIsJunk;
     property IsSpace: Boolean read GetIsSpace;
     property LineNumber: Integer read fLineNumber write fLineNumber;
     property LinePos: Integer read fLinePos write fLinePos;
-    property Origin: PAnsiChar read fOrigin write SetOrigin;
-    property Script: String read FScript write SetScript;
     property PosXY: TTokenPoint read GetPosXY;
     property RunPos: Integer read fRun write SetRunPos;
     property Token: string read GetToken;
@@ -216,25 +216,20 @@ type
 
     property DirectiveParamOrigin: PAnsiChar read FDirectiveParamOrigin;
 
-    property UseCodeToolsIDEDirective: Boolean read FUseCodeToolsIDEDirective write FUseCodeToolsIDEDirective;
     property UseDefines: Boolean read FUseDefines write FUseDefines;
 
-    property Defines: TStringList read FDefines;
+    property Defines: TStringListUTF8Fast read FDefines;
   end;
 
   TmwPasLex = class(TmwBasePasLex)
   private
     fAheadLex: TmwBasePasLex;
-    fFileName: String;
     fIsLibrary: Boolean;
     function GetAheadExID: TptTokenKind;
     function GetAheadToken: string;
     function GetAheadTokenID: TptTokenKind;
-  protected
-    procedure SetOrigin(NewValue: PAnsiChar); override;
-    procedure ErrorMessage(const Message: String); override;
   public
-    constructor Create; override;
+    constructor Create(Doc: String; AFileName: String = ''); override;
     destructor Destroy; override;
     procedure InitAhead;
     procedure AheadNext;
@@ -242,9 +237,12 @@ type
     property AheadToken: string read GetAheadToken;
     property AheadTokenID: TptTokenKind read GetAheadTokenID;
     property AheadExID: TptTokenKind read GetAheadExID;
-    property FileName: String read fFileName write fFileName;
+
     property IsLibrary: Boolean read fIsLibrary write fIsLibrary;
   end;
+
+  TLexerStack = specialize TStack<TmwPasLex>;
+  TLexerList = specialize TObjectList<TmwPasLex>;
 
 implementation
 
@@ -344,40 +342,54 @@ begin
   Result.Y := FLineNumber;
 end;
 
-constructor TmwBasePasLex.Create;
+constructor TmwBasePasLex.Create(Doc: String; AFileName: String = '');
 begin
   inherited Create();
+
+  fDoc := Doc + #0;
+  fCommentState := csNo;
+  fRun := 1;
+  fFileName := AFileName;
+  if (fFileName <> '') and FileExists(fFileName) then
+    fFileAge := SysUtils.FileAge(fFileName);
+
+  fExID := tokUnKnown;
 
   FIdentBuffer := GetMem(MaxTokenNameLength + 1);
   FIdentBufferUpper := PtrUInt(@FIdentBuffer[MaxTokenNameLength + 1]);
 
-  fOrigin := nil;
-  fExID := tokUnKnown;
-
   FUseDefines := True;
-  FDefines := TStringList.Create;
+  FDefines := TStringListUTF8Fast.Create();
   FDefines.Duplicates := dupIgnore;
-  FTopDefineRec := nil;
-  InitDefines;
 
   MaxPos := -1;
   CaretPos := -1;
+end;
+
+constructor TmwBasePasLex.CreateFromFile(AFileName: String);
+var
+  Contents: String;
+begin
+  Contents := '';
+  if FileExists(AFileName) then
+    with TStringList.Create() do
+    try
+      LoadFromFile(AFileName);
+
+      Contents := Text;
+    finally
+      Free();
+    end;
+
+  Create(Contents, AFileName);
 end;
 
 destructor TmwBasePasLex.Destroy;
 begin
   ClearDefines;
   FDefines.Free;
-  fOrigin := nil;
 
   inherited Destroy();
-end;
-
-procedure TmwBasePasLex.SetOrigin(NewValue: PAnsiChar);
-begin
-  fOrigin := NewValue;
-  Init;
-  //Next();
 end;
 
 procedure TmwBasePasLex.SetRunPos(Value: Integer);
@@ -393,7 +405,7 @@ end;
 
 procedure TmwBasePasLex.AddressOpProc;
 begin
-  case FOrigin[fRun + 1] of
+  case fDoc[fRun + 1] of
     '@':
       begin
         fTokenID := tokDoubleAddressOp;
@@ -411,13 +423,13 @@ procedure TmwBasePasLex.AsciiCharProc;
 begin
   fTokenID := tokAsciiChar;
   Inc(fRun);
-  if FOrigin[fRun] = '$' then
+  if fDoc[fRun] = '$' then
   begin
     Inc(fRun);
-    while FOrigin[fRun] in ['0'..'9', 'A'..'F', 'a'..'f'] do Inc(fRun);
+    while fDoc[fRun] in ['0'..'9', 'A'..'F', 'a'..'f'] do Inc(fRun);
   end else
   begin
-    while FOrigin[fRun] in ['0'..'9'] do
+    while fDoc[fRun] in ['0'..'9'] do
       Inc(fRun);
   end;
 end;
@@ -427,23 +439,23 @@ begin
   Inc(fRun);
   fTokenId := tokError;
 
-  ErrorMessage('Illegal character');
+  Error('Illegal character');
 end;
 
 procedure TmwBasePasLex.BorProc;
 begin
   fTokenID := tokBorComment;
-  case FOrigin[fRun] of
+  case fDoc[fRun] of
     #0:
       begin
 		    NullProc;
-        ErrorMessage('Unexpected file end');
+        Error('Unexpected file end');
         exit;
       end;
   end;
 
-  while FOrigin[fRun] <> #0 do
-	  case FOrigin[fRun] of
+  while fDoc[fRun] <> #0 do
+	  case fDoc[fRun] of
 	    '}':
 		  begin
 		    fCommentState := csNo;
@@ -460,7 +472,7 @@ begin
 	    #13:
 		  begin
 			  Inc(fRun);
-			  if FOrigin[fRun] = #10 then Inc( fRun );
+			  if fDoc[fRun] = #10 then Inc( fRun );
 			  Inc(fLineNumber);
 			  fLinePos := fRun;
 		  end;
@@ -472,9 +484,8 @@ end;
 procedure TmwBasePasLex.BraceOpenProc;
 var
   Param, Def: string;
-  tmpRun: Integer;
 begin
-  case FOrigin[fRun + 1] of
+  case fDoc[fRun + 1] of
     '$': fTokenID := GetDirectiveKind;
     '%': fTokenID := GetIDEDirectiveKind;
     else
@@ -483,8 +494,8 @@ begin
   if (fTokenID = tokBorComment) then
     fCommentState := csBor;
   Inc(fRun);
-  while FOrigin[fRun] <> #0 do
-    case FOrigin[fRun] of
+  while fDoc[fRun] <> #0 do
+    case fDoc[fRun] of
       '}':
         begin
           fCommentState := csNo;
@@ -500,7 +511,7 @@ begin
 	    #13:
 		  begin
 			  Inc(fRun);
-			  if FOrigin[fRun] = #10 then Inc(fRun);
+			  if fDoc[fRun] = #10 then Inc(fRun);
 			  Inc(fLineNumber);
 			  fLinePos := fRun;
 		  end;
@@ -510,12 +521,12 @@ begin
   case fTokenID of
     tokIDECodeTools:
       begin
-        if FUseCodeToolsIDEDirective then
+        if (not IsDefined('!IGNORECODETOOLS')) then
         begin
-          if DirectiveParamOriginal = 'off' then
+          if (DirectiveParam = 'OFF') then
             EnterDefineBlock(False)
           else
-          if DirectiveParamOriginal = 'on' then
+          if (DirectiveParam = 'ON') then
             ExitDefineBlock();
         end;
 
@@ -527,17 +538,18 @@ begin
         if FUseDefines and (FDefineStack = 0) then
         begin
           Def := CompilerDirective;
-          if (Def = '$S+') or (Def = '$SCOPEDENUMS ON') then
-            AddDefine('!SCOPEDENUMS')
-          else
-          if (Def = '$S-') or (Def = '$SCOPEDENUMS OFF') then
-            RemoveDefine('!SCOPEDENUMS')
-          else
-          if (Def = '$EXPLICTSELF ON') then
-            AddDefine('!EXPLICTSELF')
-          else
-          if (Def = '$EXPLICTSELF OFF') then
-            RemoveDefine('!EXPLICTSELF');
+          Param := DirectiveParam;
+
+          if (Def = 'SCOPEDENUMS') or (Def = 'S') then
+          begin
+            if (Param = 'ON')  or (Param = '+') then AddDefine('!SCOPEDENUMS') else
+            if (Param = 'OFF') or (Param = '-') then RemoveDefine('!SCOPEDENUMS');
+          end else
+          if (Def = 'EXPLICTSELF') then
+          begin
+            if (Param = 'ON')  then AddDefine('!EXPLICTSELF') else
+            if (Param = 'OFF') then RemoveDefine('!EXPLICTSELF');
+          end;
         end;
 
         if Assigned(fOnCompDirect) and (FDefineStack = 0) then
@@ -658,7 +670,7 @@ end;
 
 procedure TmwBasePasLex.ColonProc;
 begin
-  if (FOrigin[fRun + 1] = '=') then
+  if (fDoc[fRun + 1] = '=') then
   begin
     Inc(fRun, 2);
     fTokenID := tokAssign;
@@ -684,7 +696,7 @@ begin
       fTokenID := tokCRLF;
   end;
 
-  case FOrigin[fRun + 1] of
+  case fDoc[fRun + 1] of
     #10: Inc(fRun, 2);
     else
       Inc(fRun);
@@ -728,7 +740,7 @@ end;
 
 procedure TmwBasePasLex.GreaterProc;
 begin
-  case FOrigin[fRun + 1] of
+  case fDoc[fRun + 1] of
     '=':
       begin
         Inc(fRun, 2);
@@ -742,9 +754,15 @@ begin
   end;
 end;
 
-procedure TmwBasePasLex.ErrorMessage(const Message: String);
+procedure TmwBasePasLex.Error(Message: String);
 begin
-  DebugLn('"%s" at line %d, column %d', [Message, PosXY.Y + 1, PosXY.X]);
+  if Assigned(OnErrorMessage) then
+    OnErrorMessage(Self, Message)
+  else
+  if (FileName <> '') then
+    DebugLn('[Codetools]: "%s" at line %d, column %d in file "%s"', [Message, PosXY.Y + 1, PosXY.X, FileName])
+  else
+    DebugLn('[Codetools]: "%s" at line %d, column %d', [Message, PosXY.Y + 1, PosXY.X]);
 end;
 
 procedure TmwBasePasLex.IdentProc;
@@ -752,11 +770,11 @@ var
   Ptr: PChar;
 begin
   Ptr := FIdentBuffer;
-  while (FOrigin[fRun] in ['0'..'9', 'A'..'Z', '_', 'a'..'z']) do
+  while (fDoc[fRun] in ['0'..'9', 'A'..'Z', '_', 'a'..'z']) do
   begin
     if (PtrUInt(Ptr) < FIdentBufferUpper) then
     begin
-      Ptr^ := FOrigin[fRun];
+      Ptr^ := fDoc[fRun];
       if (Ptr^ in [#65..#90]) then // change to lowercase
         Ptr^ := Char(Ord(Ptr^) + 32);
       Inc(Ptr);
@@ -778,7 +796,7 @@ procedure TmwBasePasLex.IntegerProc;
 begin
   Inc(fRun);
   fTokenID := tokIntegerConst;
-  while FOrigin[fRun] in ['0'..'9', 'A'..'F', 'a'..'f'] do
+  while fDoc[fRun] in ['0'..'9', 'A'..'F', 'a'..'f'] do
     Inc(fRun);
 end;
 
@@ -802,7 +820,7 @@ end;
 
 procedure TmwBasePasLex.LowerProc;
 begin
-  case FOrigin[fRun + 1] of
+  case fDoc[fRun + 1] of
     '=':
       begin
         Inc(fRun, 2);
@@ -824,7 +842,7 @@ end;
 procedure TmwBasePasLex.MinusProc;
 begin
   Inc(fRun);
-  if FOrigin[fRun] = '=' then
+  if fDoc[fRun] = '=' then
   begin
     Inc(fRun);
     fTokenID := tokMinusAsgn;
@@ -841,11 +859,11 @@ procedure TmwBasePasLex.NumberProc;
 begin
   Inc(fRun);
   fTokenID := tokIntegerConst;
-  while FOrigin[fRun] in ['0'..'9', '.', 'e', 'E'] do
+  while fDoc[fRun] in ['0'..'9', '.', 'e', 'E'] do
   begin
-    case FOrigin[fRun] of
+    case fDoc[fRun] of
       '.':
-        if FOrigin[fRun + 1] = '.' then
+        if fDoc[fRun + 1] = '.' then
           break
         else fTokenID := tokFloat
     end;
@@ -856,7 +874,7 @@ end;
 procedure TmwBasePasLex.PlusProc;
 begin
   Inc(fRun);
-  if FOrigin[fRun] = '=' then
+  if fDoc[fRun] = '=' then
   begin
     Inc(fRun);
     fTokenID := tokPlusAsgn;
@@ -872,7 +890,7 @@ end;
 
 procedure TmwBasePasLex.PointProc;
 begin
-  case FOrigin[fRun + 1] of
+  case fDoc[fRun + 1] of
     '.':
       begin
         Inc(fRun, 2);
@@ -909,19 +927,19 @@ end;
 procedure TmwBasePasLex.AnsiProc;
 begin
   fTokenID := tokAnsiComment;
-  case FOrigin[fRun] of
+  case fDoc[fRun] of
     #0:
       begin
         NullProc;
-        ErrorMessage('Unexpected file end');
+        Error('Unexpected file end');
         exit;
       end;
   end;
 
-  while fOrigin[fRun] <> #0 do
-    case fOrigin[fRun] of
+  while fDoc[fRun] <> #0 do
+    case fDoc[fRun] of
       '*':
-        if fOrigin[fRun + 1] = ')' then
+        if fDoc[fRun + 1] = ')' then
         begin
           fCommentState := csNo;
           Inc(fRun, 2);
@@ -938,7 +956,7 @@ begin
 	  #13:
 		begin
 			Inc(fRun);
-			if FOrigin[fRun] = #10 then
+			if fDoc[fRun] = #10 then
         Inc(fRun);
 			Inc(fLineNumber);
 			fLinePos := fRun;
@@ -952,18 +970,18 @@ end;
 procedure TmwBasePasLex.RoundOpenProc;
 begin
   Inc(fRun);
-  case fOrigin[fRun] of
+  case fDoc[fRun] of
     '*':
       begin
         fTokenID := tokAnsiComment;
-        if FOrigin[fRun + 1] = '$' then
+        if fDoc[fRun + 1] = '$' then
           fTokenID := GetDirectiveKind
         else fCommentState := csAnsi;
         Inc(fRun);
-        while fOrigin[fRun] <> #0 do
-          case fOrigin[fRun] of
+        while fDoc[fRun] <> #0 do
+          case fDoc[fRun] of
             '*':
-			  if fOrigin[fRun + 1] = ')' then
+			  if fDoc[fRun + 1] = ')' then
 			  begin
 				fCommentState := csNo;
 				Inc(fRun, 2);
@@ -980,7 +998,7 @@ begin
 			  #13:
 				begin
 					Inc(fRun);
-					if FOrigin[fRun] = #10 then Inc(fRun);
+					if fDoc[fRun] = #10 then Inc(fRun);
 					Inc(fLineNumber);
 					fLinePos := fRun;
 				end;
@@ -1059,22 +1077,16 @@ begin
   fTokenID := tokSemiColon;
 end;
 
-procedure TmwBasePasLex.SetScript(Value: String);
-begin
-  fScript := Value;
-  Origin := PChar(fScript);
-end;
-
 procedure TmwBasePasLex.SlashProc;
 begin
-  case FOrigin[fRun + 1] of
+  case fDoc[fRun + 1] of
     '/':
       begin
         Inc(fRun, 2);
         fTokenID := tokSlashesComment;
-        while FOrigin[fRun] <> #0 do
+        while fDoc[fRun] <> #0 do
         begin
-          case FOrigin[fRun] of
+          case fDoc[fRun] of
             #10, #13: break;
           end;
           Inc(fRun);
@@ -1097,7 +1109,7 @@ procedure TmwBasePasLex.SpaceProc;
 begin
   Inc(fRun);
   fTokenID := tokSpace;
-  while FOrigin[fRun] in [#1..#9, #11, #12, #14..#32] do
+  while fDoc[fRun] in [#1..#9, #11, #12, #14..#32] do
     Inc(fRun);
 end;
 
@@ -1116,7 +1128,7 @@ end;
 procedure TmwBasePasLex.StarProc;
 begin
   Inc(fRun);
-  case FOrigin[fRun]  of
+  case fDoc[fRun]  of
     '=':
       begin
         Inc(fRun);
@@ -1125,7 +1137,7 @@ begin
     '*':
       begin
         Inc(fRun);
-        if FOrigin[fRun] = '=' then
+        if fDoc[fRun] = '=' then
         begin
           Inc(fRun);
           fTokenID := tokPowAsgn;
@@ -1142,19 +1154,19 @@ begin
   fTokenID := tokStringConst;
   repeat
     Inc(fRun);
-    case FOrigin[fRun] of
+    case fDoc[fRun] of
       #0, #10, #13:
         begin
-          ErrorMessage('Unterminated string');
+          Error('Unterminated string');
           Break;
         end;
       #39:
-        while (FOrigin[fRun] = #39) and (FOrigin[fRun + 1] = #39) do
+        while (fDoc[fRun] = #39) and (fDoc[fRun + 1] = #39) do
           Inc(fRun, 2);
     end;
-  until FOrigin[fRun] = #39;
+  until fDoc[fRun] = #39;
 
-  if FOrigin[fRun] = #39 then
+  if fDoc[fRun] = #39 then
   begin
     Inc(fRun);
     if TokenLen = 3 then
@@ -1172,7 +1184,7 @@ procedure TmwBasePasLex.UnknownProc;
 begin
   Inc(fRun);
   fTokenID := tokUnknown;
-  ErrorMessage('Unknown Character');
+  Error('Unknown Character');
 end;
 
 procedure TmwBasePasLex.Next;
@@ -1185,7 +1197,7 @@ begin
     csBor: BorProc;
     csNo:
       begin
-        case fOrigin[fRun] of
+        case fDoc[fRun] of
           #0: NullProc();
           #10: LFProc();
           #13: CRProc();
@@ -1238,22 +1250,12 @@ end;
 
 function TmwBasePasLex.GetToken: string;
 begin
-  SetString(Result, (FOrigin + fTokenPos), GetTokenLen);
+  Result := Copy(FDoc, FTokenPos, GetTokenLen);
 end;
 
 function TmwBasePasLex.GetTokenLen: Integer;
 begin
   Result := fRun - fTokenPos;
-end;
-
-procedure TmwBasePasLex.NextID(ID: TptTokenKind);
-begin
-  repeat
-    case fTokenID of
-      tokNull, tok_DONE: break;
-    else Next;
-    end;
-  until fTokenID = ID;
 end;
 
 procedure TmwBasePasLex.NextNoJunk;
@@ -1263,34 +1265,29 @@ begin
   until not IsJunk;
 end;
 
-procedure TmwBasePasLex.NextNoSpace;
+function TmwBasePasLex.CopyDoc(const StartPos, EndPos: Integer): String;
 begin
-  repeat
-    Next;
-  until not IsSpace;
+  Result := Copy(FDoc, StartPos, EndPos - StartPos);
 end;
 
 function TmwBasePasLex.GetCompilerDirective: string;
 var
-  DirectLen: Integer;
+  StartPos, EndPos: Integer;
 begin
-  if TokenID <> tokCompDirect then
+  if (TokenID <> tokCompDirect) then
     Result := ''
   else
-    case fOrigin[fTokenPos] of
-      '(':
-        begin
-          DirectLen := fRun - fTokenPos - 4;
-          SetString(Result, (FOrigin + fTokenPos + 2), DirectLen);
-          Result := UpperCase(Result);
-        end;
-      '{':
-        begin
-          DirectLen := fRun - fTokenPos - 2;
-          SetString(Result, (FOrigin + fTokenPos + 1), DirectLen);
-          Result := UpperCase(Result);
-        end;
-    end;
+  begin
+    StartPos := fTokenPos;
+    while (fDoc[StartPos] <> #0) and (fDoc[StartPos] <> '$') do
+      Inc(StartPos);
+    StartPos := StartPos + 1;
+    EndPos := StartPos;
+    while (fDoc[EndPos] <> #0) and (not (fDoc[EndPos] in [' ', '}'])) do
+      Inc(EndPos);
+
+    Result := UpperCase(Copy(fDoc, StartPos, EndPos-StartPos));
+  end;
 end;
 
 function TmwBasePasLex.GetDirectiveKind: TptTokenKind;
@@ -1301,29 +1298,34 @@ begin
   Result := tokCompDirect;
 
   StartPos := fTokenPos;
-  while (fOrigin[StartPos] <> #0) and (fOrigin[StartPos] <> '$') do
+  while (fDoc[StartPos] <> #0) and (fDoc[StartPos] <> '$') do
     Inc(StartPos);
   StartPos := StartPos + 1;
   EndPos := StartPos;
-  while (fOrigin[EndPos] <> #0) and (not (fOrigin[EndPos] in [' ', '}'])) do
+  while (fDoc[EndPos] <> #0) and (not (fDoc[EndPos] in [' ', '}'])) do
     Inc(EndPos);
 
-  SetLength(Directive, EndPos-StartPos);
-  Move(fOrigin[StartPos], Directive[1], Length(Directive));
+  SetLength(Directive, EndPos - StartPos);
+  if (Length(Directive) > 0) then
+  begin
+    Move(fDoc[StartPos], Directive[1], Length(Directive));
 
-  if (Directive = 'I')            then Result := tokIncludeDirect     else
-  if (Directive = 'IF')           then Result := tokIfDirect          else
-  if (Directive = 'IFDEF')        then Result := tokIfDefDirect       else
-  if (Directive = 'ENDIF')        then Result := tokEndIfDirect       else
-  if (Directive = 'ELSE')         then Result := tokElseDirect        else
-  if (Directive = 'DEFINE')       then Result := tokDefineDirect      else
-  if (Directive = 'IFNDEF')       then Result := tokIfNDefDirect      else
-  if (Directive = 'UNDEF')        then Result := tokUndefDirect       else
-  if (Directive = 'LOADLIB')      then Result := tokLibraryDirect     else
-  if (Directive = 'ELSEIF')       then Result := tokElseIfDirect      else
-  if (Directive = 'IFOPT')        then Result := tokIfOptDirect       else
-  if (Directive = 'INCLUDE')      then Result := tokIncludeDirect     else
-  if (Directive = 'INCLUDE_ONCE') then Result := tokIncludeOnceDirect;
+    Directive := UpperCase(Directive);
+
+    if (Directive = 'I')            then Result := tokIncludeDirect     else
+    if (Directive = 'IF')           then Result := tokIfDirect          else
+    if (Directive = 'IFDEF')        then Result := tokIfDefDirect       else
+    if (Directive = 'ENDIF')        then Result := tokEndIfDirect       else
+    if (Directive = 'ELSE')         then Result := tokElseDirect        else
+    if (Directive = 'DEFINE')       then Result := tokDefineDirect      else
+    if (Directive = 'IFNDEF')       then Result := tokIfNDefDirect      else
+    if (Directive = 'UNDEF')        then Result := tokUndefDirect       else
+    if (Directive = 'LOADLIB')      then Result := tokLibraryDirect     else
+    if (Directive = 'ELSEIF')       then Result := tokElseIfDirect      else
+    if (Directive = 'IFOPT')        then Result := tokIfOptDirect       else
+    if (Directive = 'INCLUDE')      then Result := tokIncludeDirect     else
+    if (Directive = 'INCLUDE_ONCE') then Result := tokIncludeOnceDirect;
+  end;
 end;
 
 function TmwBasePasLex.GetIDEDirectiveKind: TptTokenKind;
@@ -1334,18 +1336,22 @@ begin
   Result := tokCompDirect;
 
   StartPos := fTokenPos;
-  while (fOrigin[StartPos] <> #0) and (fOrigin[StartPos] <> '%') do
+  while (fDoc[StartPos] <> #0) and (fDoc[StartPos] <> '%') do
     Inc(StartPos);
   StartPos := StartPos + 1;
   EndPos := StartPos;
-  while (fOrigin[EndPos] <> #0) and (not (fOrigin[EndPos] in [' ', '}'])) do
+  while (fDoc[EndPos] <> #0) and (not (fDoc[EndPos] in [' ', '}'])) do
     Inc(EndPos);
 
-  SetLength(Directive, EndPos-StartPos);
-  Move(fOrigin[StartPos], Directive[1], Length(Directive));
+  SetLength(Directive, EndPos - StartPos);
+  if (Length(Directive) > 0) then
+  begin
+    Move(fDoc[StartPos], Directive[1], Length(Directive));
 
-  if (Directive = 'CODETOOLS') then
-    Result := tokIDECodeTools;
+    Directive := UpperCase(Directive);
+    if (Directive = 'CODETOOLS') then
+      Result := tokIDECodeTools;
+  end;
 end;
 
 function TmwBasePasLex.GetDirectiveParamOriginal: string;
@@ -1353,44 +1359,21 @@ var
   StartPos, EndPos: Integer;
 begin
   StartPos := fTokenPos;
-  while (fOrigin[StartPos] <> #0) and (fOrigin[StartPos] <> ' ') do
+  while (fDoc[StartPos] <> #0) and (fDoc[StartPos] <> ' ') do
     Inc(StartPos);
 
-  EndPos := StartPos+1;
-  while (fOrigin[EndPos] <> #0) and (fOrigin[EndPos] <> '}') do
+  EndPos := StartPos + 1;
+  while (fDoc[EndPos] <> #0) and (fDoc[EndPos] <> '}') do
     Inc(EndPos);
 
   SetLength(Result, (EndPos - StartPos) - 1);
-  Move(fOrigin[StartPos + 1], Result[1], Length(Result));
+  if (Length(Result) > 0) then
+    Move(fDoc[StartPos + 1], Result[1], Length(Result));
 end;
 
 function TmwBasePasLex.GetDirectiveParam: string;
 begin
-  result := uppercase(GetDirectiveParamOriginal);
-end;
-
-procedure TmwBasePasLex.Init;
-begin
-  fCommentState := csNo;
-  fLineNumber := 0;
-  fLinePos := 0;
-  fRun := 0;
-  //InitDefines;
-end;
-
-procedure TmwBasePasLex.InitFrom(ALexer: TmwBasePasLex);
-begin
-  Origin := ALexer.Origin;
-  fCommentState := ALexer.fCommentState;
-  fLineNumber := ALexer.fLineNumber;
-  fLinePos := ALexer.fLinePos;
-  fRun := ALexer.fRun;
-  CloneDefinesFrom(ALexer);
-end;
-
-procedure TmwBasePasLex.InitDefines;
-begin
-  ClearDefines;
+  Result := UpperCase(GetDirectiveParamOriginal);
 end;
 
 function TmwBasePasLex.GetIsCompilerDirective: Boolean;
@@ -1400,22 +1383,16 @@ begin
     tokIncludeDirect, tokIncludeOnceDirect, tokResourceDirect, tokUndefDirect, tokLibraryDirect];
 end;
 
-constructor TmwPasLex.Create;
+constructor TmwPasLex.Create(Doc: String; AFileName: String = '');
 begin
-  inherited Create;
-  fAheadLex := TmwBasePasLex.Create;
+  inherited;
+  fAheadLex := TmwBasePasLex.Create(Doc, AFileName);
 end;
 
 destructor TmwPasLex.Destroy;
 begin
   fAheadLex.Free;
   inherited Destroy;
-end;
-
-procedure TmwPasLex.SetOrigin(NewValue: PAnsiChar);
-begin
-  inherited SetOrigin(NewValue);
-  fAheadLex.SetOrigin(NewValue);
 end;
 
 procedure TmwPasLex.AheadNext;
@@ -1443,20 +1420,9 @@ begin
   fAheadLex.RunPos := RunPos;
   FAheadLex.fLineNumber := FLineNumber;
   FAheadLex.FLinePos := FLinePos;
-
   FAheadLex.CloneDefinesFrom(Self);
-
-  //FAheadLex.FTokenPos := FTokenPos;
   while fAheadLex.IsJunk do
     fAheadLex.Next;
-end;
-
-procedure TmwPasLex.ErrorMessage(const Message: String);
-begin
-  if (FileName <> '') then
-    DebugLn('[Codetools]: "%s" at line %d, column %d in file "%s"', [Message, PosXY.Y + 1, PosXY.X, FileName])
-  else
-    DebugLn('[Codetools]: "%s" at line %d, column %d', [Message, PosXY.Y + 1, PosXY.X]);
 end;
 
 procedure TmwBasePasLex.SetOnCompDirect(const Value: TDirectiveEvent);
@@ -1529,18 +1495,19 @@ begin
   fTokenID := tokStringConst;
   repeat
     Inc(fRun);
-    case FOrigin[fRun] of
+    case fDoc[fRun] of
       #0{, #10, #13}:
         begin
-          ErrorMessage('Unterminated string');
+          Error('Unterminated string');
           break;
         end;
       #34:
-        while (FOrigin[fRun] = #34) and (FOrigin[fRun + 1] = #34) do
+        while (fDoc[fRun] = #34) and (fDoc[fRun + 1] = #34) do
           Inc(fRun, 2);
     end;
-  until FOrigin[fRun] = #34;
-  if FOrigin[fRun] = #34 then
+  until fDoc[fRun] = #34;
+
+  if fDoc[fRun] = #34 then
   begin
     Inc(fRun);
     if TokenLen = 3 then
@@ -1552,7 +1519,7 @@ procedure TmwBasePasLex.AmpersandOpProc;
 begin
   FTokenID := tokAmpersand;
   Inc(fRun);
-  while FOrigin[fRun] in ['a'..'z', 'A'..'Z','0'..'9'] do
+  while fDoc[fRun] in ['a'..'z', 'A'..'Z','0'..'9'] do
     Inc(fRun);
   FTokenID := tokIdentifier;
 end;

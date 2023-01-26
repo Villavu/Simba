@@ -33,7 +33,8 @@ begin
         Continue;
 
       Parser := TCodeInsight_Include.Create();
-      Parser.Run(List.ValueFromIndex[I], List.Names[I]);
+      Parser.SetScript(List.ValueFromIndex[I], List.Names[I]);
+      Parser.Run();
 
       TCodeInsight.AddBaseInclude(Parser);
     end;

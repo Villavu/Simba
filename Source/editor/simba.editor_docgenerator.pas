@@ -81,7 +81,8 @@ begin
 
     Parser := TCodeParser.Create();
     try
-      Parser.Run(Text, '');
+      Parser.SetScript(Text);
+      Parser.Run();
 
       Decl := Parser.Items.GetItemInPosition(SelStart - 1);
       if (Decl <> nil) and ((Decl is TciProcedureDeclaration) or Decl.HasOwnerClass(TciProcedureDeclaration, Decl, True)) then

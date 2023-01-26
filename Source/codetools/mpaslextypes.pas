@@ -301,6 +301,8 @@ end;
 // Fowler–Noll–Vo
 function TKeywordDictionary.Hash(Key: PChar): UInt32; inline;
 begin
+  {$UNDEF REDO_Q}{$IFOPT Q+}{$Q-}{$DEFINE REDO_Q}{$ENDIF}
+  {$UNDEF REDO_R}{$IFOPT R+}{$R-}{$DEFINE REDO_R}{$ENDIF}
   Result := SEED;
   while (Key^ <> #0) do
   begin
@@ -309,6 +311,8 @@ begin
     Inc(Key);
   end;
   Result := Result and FSize;
+  {$IFDEF REDO_Q}{$Q+}{$ENDIF}
+  {$IFDEF REDO_R}{$R+}{$ENDIF}
 end;
 
 procedure TKeywordDictionary.setValue(const Key: PChar; const Value: TptTokenKind);

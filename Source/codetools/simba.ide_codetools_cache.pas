@@ -4,7 +4,7 @@
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 
   Caches an entire include, its not per file.
-  So cache for `{$i SomeInclude}` will include all the files `SomeInclude` also includes.
+  So cache for `$i SomeInclude`" will include all the files `SomeInclude` also includes.
 }
 unit simba.ide_codetools_cache;
 
@@ -37,8 +37,6 @@ type
     property OutDefines: TSaveDefinesRec read FOutDefines write FOutDefines;
 
     property Hash: String read GetHash;
-
-    constructor Create;
   end;
 
   TCodeInsight_IncludeArray = array of TCodeInsight_Include;
@@ -78,23 +76,19 @@ end;
 function TCodeInsight_Include.GetHash: String;
 var
   I: Int32;
-  List: TStringList;
+  Builder: TStringBuilder;
 begin
   if (FHash = '') then
   begin
-    List := TStringList.Create();
-    List.LineBreak := '';
-    List.Add(Lexer.UseCodeToolsIDEDirective.ToString());
-    List.Add(InDefines.Defines  + InDefines.Stack.ToString());
-    List.Add(OutDefines.Defines + OutDefines.Stack.ToString());
+    Builder := TStringBuilder.Create(512);
+    Builder.Append(InDefines.Defines + InDefines.Stack.ToString());
+    Builder.Append(OutDefines.Defines + OutDefines.Stack.ToString());
+    for I := 0 to fLexers.Count - 1 do
+      Builder.Append(fLexers[i].FileName + IntToStr(fLexers[i].FileAge));
 
-    List.AddStrings(FFiles);
-    for I := 0 to FFiles.Count - 1 do
-      List.Add(IntToStr(PtrUInt(FFiles.Objects[I])));
+    FHash := Builder.ToString();
 
-    FHash := List.Text;
-
-    List.Free();
+    Builder.Free();
   end;
 
   Result := FHash;
@@ -104,21 +98,11 @@ function TCodeInsight_Include.GetOutdated: Boolean;
 var
   i: Int32;
 begin
+  for i := 0 to fLexers.Count - 1 do
+    if (fLexers[i].FileName <> '') and (FileAge(fLexers[i].FileName) <> fLexers[i].FileAge) then
+      Exit(True);
+
   Result := False;
-
-  for i := 0 to FFiles.Count - 1 do
-    if FileAge(FFiles[i]) <> PtrInt(FFiles.Objects[i]) then
-    begin
-      Result := True;
-      Exit;
-    end;
-end;
-
-constructor TCodeInsight_Include.Create;
-begin
-  inherited Create();
-
-  FLexer.UseCodeToolsIDEDirective := not SimbaSettings.Editor.IgnoreCodeToolsIDEDirective.Value;
 end;
 
 procedure TCodeInsight_IncludeCache.Purge;
@@ -150,8 +134,7 @@ begin
     if Include.Lexer.FileName = FileName then
     begin
       if (Include.InDefines.Defines <> Sender.Lexer.SaveDefines.Defines) or
-         (Include.InDefines.Stack <> Sender.Lexer.SaveDefines.Stack) or
-         (Include.Lexer.UseCodeToolsIDEDirective <> Sender.Lexer.UseCodeToolsIDEDirective) then
+         (Include.InDefines.Stack <> Sender.Lexer.SaveDefines.Stack) then
       begin
         Include.LastUsed := Include.LastUsed + 1; // When this reaches 25 the include will be destroyed.
 
@@ -182,8 +165,9 @@ begin
       DebugLn('Caching Include: ' + FileName);
 
       Result := TCodeInsight_Include.Create();
+      Result.SetFile(FileName);
       Result.Assign(Sender);
-      Result.Run(FileName);
+      Result.Run();
       Result.OutDefines := Result.Lexer.SaveDefines;
       Result.InDefines := Sender.Lexer.SaveDefines;
 
@@ -232,8 +216,9 @@ begin
         Sender.OnLoadLibrary(Self, FileName, Contents);
 
         Result := TCodeInsight_Include.Create();
+        Result.SetScript(Contents, FileName);
         Result.Assign(Sender);
-        Result.Run(Contents, FileName);
+        Result.Run();
         Result.OutDefines := Result.Lexer.SaveDefines;
         Result.InDefines := Sender.Lexer.SaveDefines;
         Result.Lexer.IsLibrary := True;

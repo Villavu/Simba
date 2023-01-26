@@ -129,9 +129,10 @@ begin
     else
       Script := Script.Replace('<Array>', 'Array');
 
-    Script := Script.Replace('<ArrayType>', Arr.GetType().CleanText);
+    Script := Script.Replace('<ArrayType>', Arr.GetType().Text);
 
-    Result.Run(Script, '!ArrayHelper');
+    Result.SetScript(Script, '!ArrayHelper');
+    Result.Run();
   end;
 end;
 
@@ -144,7 +145,8 @@ begin
   Script := Script.Replace('<ArrayType>', CharType);
 
   Result := TCodeParser.Create();
-  Result.Run(Script, '!StringHelper');
+  Result.SetScript(Script, '!StringHelper');
+  Result.Run();
 end;
 
 end.

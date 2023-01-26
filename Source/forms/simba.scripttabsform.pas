@@ -571,7 +571,7 @@ begin
     if (Declaration is TciProcedureDeclaration) then
       SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in plugin: ' + Declaration.Lexer.FileName, TciProcedureDeclaration(Declaration).Header])
     else
-      SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in plugin: ' + Declaration.Lexer.FileName, Declaration.RawText])
+      SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in plugin: ' + Declaration.Lexer.FileName, Declaration.Text])
   end
   else
   if (Declaration.Lexer.FileName = '') or FileExists(Declaration.Lexer.FileName) then
@@ -590,7 +590,7 @@ begin
     if (Declaration is TciProcedureDeclaration) then
       SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in Simba: ' + Declaration.Lexer.FileName, TciProcedureDeclaration(Declaration).Header])
     else
-      SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in Simba: ' + Declaration.Lexer.FileName, Declaration.RawText])
+      SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in Simba: ' + Declaration.Lexer.FileName, Declaration.Text])
   end;
 end;
 

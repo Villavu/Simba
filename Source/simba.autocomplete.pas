@@ -88,24 +88,24 @@ function TSimbaAutoComplete_Hint.CalcHintRect(MaxWidth: Integer; const AHint: St
 
   function GetProcedureText(Decl: TciProcedureDeclaration): String;
   begin
-    Result := Decl.Name + Decl.Items.GetShortText(TciParameterList);
+    Result := Decl.Name + Decl.Items.GetTextOfClassNoCommentsSingleLine(TciParameterList);
     Result := Result.Replace('constref ', '', [rfReplaceAll]);
     Result := Result.Replace('const ', '', [rfReplaceAll]);
 
     if (Decl.ReturnType <> nil) then
-      Result := Result + ': ' + Decl.Items.GetShortText(TciReturnType);
+      Result := Result + ': ' + Decl.Items.GetTextOfClassNoCommentsSingleLine(TciReturnType);
   end;
 
   function GetVariableText(Decl: TciVarDeclaration): String;
   begin
     Result := Decl.Name;
     if (Decl.VarType <> nil) then
-      Result := Result + ': ' + Decl.VarType.ShortText;
+      Result := Result + ': ' + Decl.VarType.Text;
   end;
 
   function GetTypeText(Decl: TciTypeDeclaration): String;
   begin
-    Result := Decl.Name + ' = ' + Decl.Items.GetShortText(TciTypeKind);
+    Result := Decl.Name + ' = ' + Decl.Items.GetTextOfClassNoCommentsSingleLine(TciTypeKind);
   end;
 
   function GetEnumText(Decl: TciEnumElement): String;
@@ -268,10 +268,10 @@ procedure TSimbaAutoComplete.HandleFiltering(var NewPosition: Integer);
 
     Count := 0;
     for I := 0 to High(Decls) do
-      if Decls[I].NameUpper.Contains(Filter) then
+      if Decls[I].Name.Contains(Filter, False) then
       begin
         FilteredDecls[Count] := Decls[i];
-        Weights[Count] := DefaultWeight + (100 - Round(Length(Filter) / Length(Decls[I].Name) * 100)) + (Pos(Filter, Decls[I].NameUpper) * 100);
+        Weights[Count] := DefaultWeight + (100 - Round(Length(Filter) / Length(Decls[I].Name.ToUpper()) * 100)) + (Pos(Filter, Decls[I].Name.ToUpper()) * 100);
 
         Inc(Count);
       end;

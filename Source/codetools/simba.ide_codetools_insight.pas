@@ -31,7 +31,6 @@ type
     procedure DoLibrary(Sender: TObject; FileName: String; var Handled: Boolean);
 
     function ManageParser(Parser: TCodeParser): TCodeParser;
-    procedure Reset;
 
     function GetIncludesHash: String;
 
@@ -61,7 +60,8 @@ type
     function ResolveArrayType(Declaration: TDeclaration; Dimensions: Int32): TDeclaration;
     function ResolvePointer(Declaration: TDeclaration): TDeclaration;
 
-    procedure Run; overload; override;
+    procedure Reset; override;
+    procedure Run; override;
 
     property Includes: TCodeInsight_IncludeArray read FIncludes;
     property IncludesHash: String read GetIncludesHash;
@@ -74,14 +74,14 @@ type
     property LocalsByName[Name: String]: TDeclarationArray read GetLocalsByName;
     property LocalByName[Name: String]: TDeclaration read GetLocalByName;
 
-    constructor Create;
+    constructor Create; override;
     destructor Destroy; override;
   end;
 
 implementation
 
 uses
-  simba.settings, simba.ide_codetools_helpers;
+  simba.ide_codetools_helpers, simba.settings;
 
 class constructor TCodeInsight.Create;
 begin
@@ -195,7 +195,7 @@ procedure TCodeInsight.Reset;
 var
   i: Int32;
 begin
-  Lexer.Init();
+  inherited Reset();
 
   for I := 0 to High(FManagedParsers) do
     FManagedParsers[I].Free();
@@ -330,10 +330,9 @@ function TCodeInsight.GetMembersOfType(Declaration: TDeclaration): TDeclarationA
   begin
     Depth := 0;
 
-
     while (Declaration <> nil) and (Depth < 20) do
     begin
-      case Declaration.NameUpper of
+      case Declaration.Name.ToUpper() of
         'STRING', 'ANSISTRING':
           Result := Result + ManageParser(ParseStringHelpers(Declaration.Name, 'Char')).Items.ToArray;
         'WIDESTRING', 'UNICODESTRING':
@@ -381,9 +380,9 @@ begin
 
   if Declaration is TciProcedureClassName then
   begin
-    Declaration := LocalByName[Declaration.RawText];
+    Declaration := LocalByName[Declaration.Text];
     if (Declaration = nil) then
-      Declaration := GlobalByName[Declaration.RawText];
+      Declaration := GlobalByName[Declaration.Text];
     if Declaration is TciTypeDeclaration then
       GetMethods(Declaration as TciTypeDeclaration);
   end else
@@ -396,7 +395,7 @@ begin
 
       if IdentifierType <> nil then
       begin
-        Declaration := GlobalByName[IdentifierType.RawText];
+        Declaration := GlobalByName[IdentifierType.Text];
         if Declaration is TciTypeDeclaration then
           GetMethods(Declaration as TciTypeDeclaration);
       end;
@@ -518,15 +517,15 @@ begin
 
   if Declaration is TciTypeIdentifer then
   begin
-    Result := GlobalByName[Declaration.RawText];
+    Result := GlobalByName[Declaration.Text];
     Exit;
   end;
 
   if Declaration is TciProcedureClassName then
   begin
-    Result := LocalByName[Declaration.RawText];
+    Result := LocalByName[Declaration.Text];
     if (Result = nil) then
-      Result := GlobalByName[Declaration.RawText];
+      Result := GlobalByName[Declaration.Text];
     Exit;
   end;
   if Declaration is TciTypeDeclaration then
@@ -636,7 +635,7 @@ procedure TCodeInsight.Run;
   begin
     for i := 0 to High(Declarations) do
     begin
-      Declaration := ParseExpression(Declarations[i].RawText);
+      Declaration := ParseExpression(Declarations[i].Text);
       if Declaration <> nil then
         for Declaration in GetMembersOfType(Declaration) do
           FLocals.Add(Declaration.Name, Declaration);
@@ -659,6 +658,8 @@ var
 begin
   Lexer.ClearDefines();
   Lexer.Defines.AddStrings(FBaseDefines);
+  if SimbaSettings.Editor.IgnoreCodeToolsIDEDirective.Value then
+    Lexer.Defines.Add('!IGNORECODETOOLS');
 
   inherited Run();
 
@@ -693,8 +694,6 @@ end;
 constructor TCodeInsight.Create;
 begin
   inherited Create();
-
-  FLexer.UseCodeToolsIDEDirective := not SimbaSettings.Editor.IgnoreCodeToolsIDEDirective.Value;
 
   FLocals := TDeclarationMap.Create();
 

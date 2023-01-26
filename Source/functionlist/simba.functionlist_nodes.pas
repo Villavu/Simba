@@ -157,7 +157,7 @@ begin
 
     'TciTypeDeclaration':
       begin
-        Hint := ADecl.ShortText;
+        Hint := ADecl.Text;
 
         ImageIndex    := IMAGE_TYPE;
         SelectedIndex := IMAGE_TYPE;
@@ -165,7 +165,7 @@ begin
 
     'TciConstantDeclaration':
       begin
-        Hint := ADecl.ShortText;
+        Hint := ADecl.Text;
 
         ImageIndex    := IMAGE_CONSTANT;
         SelectedIndex := IMAGE_CONSTANT;
@@ -173,7 +173,7 @@ begin
 
     'TciVarDeclaration':
       begin
-        Hint := ADecl.ShortText;
+        Hint := ADecl.Text;
 
         ImageIndex    := IMAGE_VARIABLE;
         SelectedIndex := IMAGE_VARIABLE;

@@ -81,11 +81,9 @@ begin
   if (Index < 0) or (Index >= Length(FParameters)) then
     Exit;
 
-  Lexer := TmwPasLex.Create();
-
+  Lexer := TmwPasLex.Create(FSynEdit.TextBetweenPoints[FBracketPoint, FSynEdit.CaretXY]);
+  Lexer.Next();
   try
-    Lexer.Origin := PChar(FSynEdit.TextBetweenPoints[FBracketPoint, FSynEdit.CaretXY]);
-
     BracketCount := 0;
     ParameterIndex := -1;
 
@@ -161,7 +159,7 @@ begin
     end;
 
     if TypeDecl <> nil then
-      TypeStr := ': ' + TypeDecl.ShortText
+      TypeStr := ': ' + TypeDecl.Text
     else
       TypeStr := '';
 
@@ -200,7 +198,7 @@ begin
     TypeDecl := nil;
 
   if TypeDecl <> nil then
-    TypeStr := ': ' + TypeDecl.ShortText
+    TypeStr := ': ' + TypeDecl.Text
   else
     TypeStr := '';
 
