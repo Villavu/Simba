@@ -39,27 +39,12 @@ uses
   SysUtils, Classes,
   mPasLexTypes, mPasLex;
 
-resourcestring
-  rsExpected = '''%s'' expected found ''%s''';
-  rsEndOfFile = 'end of file';
-
 const
- ClassMethodDirectiveEnum = [
+  ClassMethodDirectiveEnum = [
     tokAbstract, tokCdecl, tokMessage, tokOverride,  tokOverload, tokRegister,
     tokReintroduce, tokSafeCall, tokStdCall, tokVirtual, tokDeprecated,
     tokLibrary, tokPlatform, tokStatic, tokInline
- ];
-
-type
-  ESyntaxError = class(Exception)
-  private
-    FPosXY: TTokenPoint;
-  public
-    constructor Create(const Msg: string);
-    constructor CreateFmt(const Msg: string; const Args: array of const);
-    constructor CreatePos(const Msg: string; aPosXY: TTokenPoint);
-    property PosXY: TTokenPoint read FPosXY write FPosXY;
-  end;
+  ];
 
 type
   TmwSimplePasPar = class(TObject)
@@ -83,7 +68,6 @@ type
 
     procedure Expected(Sym: TptTokenKind); virtual;
     procedure ExpectedEx(Sym: TptTokenKind); virtual;
-    procedure ExpectedFatal(Sym: TptTokenKind); virtual;
     procedure HandlePtCompDirect(Sender: TmwBasePasLex); virtual;
     procedure HandlePtDefineDirect(Sender: TmwBasePasLex); virtual;
     procedure HandlePtElseDirect(Sender: TmwBasePasLex); virtual;
@@ -196,7 +180,6 @@ type
     procedure IndexSpecifier; virtual;
     procedure InitializationSection; virtual;
     procedure InlineStatement; virtual;
-    procedure InParameter; virtual;
     procedure InterfaceDeclaration; virtual;
     procedure InterfaceForward; virtual;
     procedure InterfaceGUID; virtual;
@@ -231,11 +214,11 @@ type
     procedure ObjectType; virtual;
     procedure ObjectTypeEnd; virtual;
     procedure ObjectVisibility; virtual;
-    procedure OldFormalParameterType; virtual;
+    procedure ParameterVarType; virtual;
     procedure OrdinalType; virtual;
     procedure OutParameter; virtual;
     procedure PackageFile; virtual;
-    procedure ParameterFormal; virtual;
+    procedure NormalParameter; virtual;
     procedure ParameterName; virtual;
     procedure ParameterNameList; virtual;
     procedure ParseFile; virtual;
@@ -390,28 +373,6 @@ uses
   simba.datetime
   {$ENDIF};
 
-constructor ESyntaxError.Create(const Msg: string);
-begin
-  // !! changed initialization for TTokenPoint
-  FPosXY.X:= -1;
-  FPosXY.Y:= -1;
-  inherited Create(Msg);
-end;
-
-constructor ESyntaxError.CreateFmt(const Msg: string; const Args: array of const);
-begin
-  // !! changed initialization for TTokenPoint
-  FPosXY.X:= -1;
-  FPosXY.Y:= -1;
-  inherited CreateFmt(Msg, Args);
-end;
-
-constructor ESyntaxError.CreatePos(const Msg: string; aPosXY: TTokenPoint);
-begin
-  Message := Msg;
-  FPosXY := aPosXY;
-end;
-
 procedure TmwSimplePasPar.ForwardDeclaration;
 begin
   NextToken;
@@ -501,44 +462,25 @@ end;
 
 procedure TmwSimplePasPar.Expected(Sym: TptTokenKind);
 begin
-  if Sym <> Lexer.TokenID then
+  if (Sym <> Lexer.TokenID) then
   begin
-    if Lexer.TokenID = tokNull then
-      ExpectedFatal(Sym)
+    if (Lexer.TokenID = tokNull) then
+      OnErrorMessage(fLexer, Format('"%s" expected but end of file reached', [TokenName(Sym)]))
     else
-      OnErrorMessage(fLexer, Format('"%s" expected but found "%s"', [TokenName(Sym), FLexer.Token]));
-  end
-  else
+      OnErrorMessage(fLexer, Format('"%s" expected but found "%s"', [TokenName(Sym), FLexer.Token]))
+  end else
     NextToken;
 end;
 
 procedure TmwSimplePasPar.ExpectedEx(Sym: TptTokenKind);
 begin
-  if Sym <> Lexer.ExID then
+  if (Sym <> Lexer.ExID) then
   begin
-    if Lexer.TokenID = tokNull then
-      ExpectedFatal(Sym)
+    if (Lexer.TokenID = tokNull) then
+      OnErrorMessage(fLexer, Format('"%s" expected but end of file reached', [TokenName(Sym)]))
     else
       OnErrorMessage(fLexer, Format('"%s" expected but found "%s"', [TokenName(Sym), FLexer.Token]))
-  end
-  else
-    NextToken;
-end;
-
-procedure TmwSimplePasPar.ExpectedFatal(Sym: TptTokenKind);
-var
-  tS: string;
-begin
-  if Sym <> Lexer.TokenID then
-  begin
-    if Lexer.TokenID = tokNull then
-      tS := rsEndOfFile
-    else
-      tS := fLexer.Token;
-
-    raise ESyntaxError.CreatePos(Format(rsExpected, [TokenName(Sym), tS]), fLexer.PosXY);
-  end
-  else
+  end else
     NextToken;
 end;
 
@@ -1509,11 +1451,7 @@ begin
       case Lexer.ExID of
         tokOut: OutParameter;
       else
-        ParameterFormal;
-      end;
-    tokIn:
-      begin
-        InParameter;
+        NormalParameter;
       end;
     tokVar:
       begin
@@ -1530,7 +1468,7 @@ begin
     tokColon:
       begin
         NextToken;
-        OldFormalParameterType;
+        ParameterVarType;
         if Lexer.TokenID = tokEqual then
         begin
           NextToken;
@@ -1548,7 +1486,7 @@ begin
     tokColon:
       begin
         NextToken;
-        OldFormalParameterType;
+        ParameterVarType;
         if Lexer.TokenID = tokEqual then
         begin
           NextToken;
@@ -1566,7 +1504,7 @@ begin
     tokColon:
       begin
         NextToken;
-        OldFormalParameterType;
+        ParameterVarType;
       end
   end;
 end;
@@ -1579,12 +1517,12 @@ begin
     tokColon:
       begin
         NextToken;
-        OldFormalParameterType;
+        ParameterVarType;
       end
   end;
 end;
 
-procedure TmwSimplePasPar.ParameterFormal;
+procedure TmwSimplePasPar.NormalParameter;
 begin
   case Lexer.TokenID of
     tokIdentifier:
@@ -1595,7 +1533,7 @@ begin
           tokColon:
             begin
               NextToken;
-              OldFormalParameterType;
+              ParameterVarType;
               if Lexer.TokenID = tokEqual then
               begin
                 NextToken;
@@ -1605,7 +1543,7 @@ begin
         end;
 
         {Expected(tokColon);
-        OldFormalParameterType;
+        ParameterVarType;
         if Lexer.TokenID = tokEqual then
         begin
           NextToken;
@@ -1630,7 +1568,7 @@ begin
   Expected(tokIdentifier);
 end;
 
-procedure TmwSimplePasPar.OldFormalParameterType;
+procedure TmwSimplePasPar.ParameterVarType;
 begin
   TypeIdentifer;
 end;
@@ -1704,14 +1642,7 @@ begin
     tokPlusAsgn,
     tokMinusAsgn,
     tokPowAsgn]) then
-  begin
-    if Lexer.TokenID = tokNull then
-      ExpectedFatal(tokIdentifier)
-    else
-    begin
-      OnErrorMessage(fLexer, Format('"%s" expected but found "%s"', [TokenName(tokIdentifier), FLexer.Token]));
-    end;
-  end
+    OnErrorMessage(fLexer, Format('"%s" expected but found "%s"', [TokenName(tokIdentifier), FLexer.Token]))
   else
     NextToken;
 end;
@@ -1833,7 +1764,7 @@ begin
   begin
     QualifiedIdentifier;
     typ := Lexer.TokenID;
-    writeln(typ);
+    //writeln(typ);
     Expected(typ);
   end;
 
@@ -2032,24 +1963,6 @@ begin
     Expected(tokIntegerConst);
   end;
   Expected(tokRoundClose);
-end;
-
-procedure TmwSimplePasPar.InParameter;
-begin
-  Expected(tokIn);
-  ParameterNameList;
-  case Lexer.TokenID of
-    tokColon:
-      begin
-        NextToken;
-        OldFormalParameterType;
-        if Lexer.TokenID = tokEqual then
-        begin
-          NextToken;
-          TypedConstant;
-        end;
-      end
-  end;
 end;
 
 procedure TmwSimplePasPar.RaiseStatement;
@@ -2347,18 +2260,14 @@ end;
 procedure TmwSimplePasPar.NativeType;
 begin
   NextToken;
-
-  if Lexer.TokenID = tokIdentifier then
-  begin
-    AncestorId;
-  end else
+  if (Lexer.TokenID = tokIdentifier) then
+    AncestorId
+  else
   begin
     Expected(tokRoundOpen);
-
     AncestorId;
     while (not (Lexer.TokenID in [tokRoundClose, tokNull, tok_DONE])) do
       NextToken;
-
     Expected(tokRoundClose);
   end;
 end;
@@ -3640,6 +3549,11 @@ begin
     ExplicitType;
     Exit;
   end;
+  if Lexer.TokenID = tokIdentifier then
+  begin
+    TypeAlias;
+    Exit;
+  end;
 
   case Lexer.TokenID of
     tokClass:
@@ -3712,7 +3626,7 @@ end;
 
 procedure TmwSimplePasPar.TypeKind;
 begin
-  if Lexer.ExID = tokNative then
+  if (Lexer.TokenID = tokNative) then
   begin
     NativeType;
     Exit;

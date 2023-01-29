@@ -368,7 +368,6 @@ type
     procedure ConstParameter; override;                                         //Procedure/Function Parameters
     procedure OutParameter; override;                                           //Procedure/Function Parameters
     procedure ParameterFormal; override;                                        //Procedure/Function Parameters
-    procedure InParameter; override;                                            //Procedure/Function Parameters
     procedure VarParameter; override;                                           //Procedure/Function Parameters
     procedure ParameterName; override;                                          //Procedure/Function Parameters
     procedure OldFormalParameterType; override;                                 //Procedure/Function Parameters
@@ -1743,25 +1742,6 @@ begin
   end;
 
   Declaration := PushStack(TciFormalParameter);
-  inherited;
-  PopStack;
-
-  {$IFDEF PARSER_SEPERATE_VARIABLES}
-  SeperateVariables(Declaration as TciVarDeclaration);
-  {$ENDIF}
-end;
-
-procedure TCodeParser.InParameter;
-var
-  Declaration: TDeclaration;
-begin
-  if (not InDeclaration(TciParameterList)) then
-  begin
-    inherited;
-    Exit;
-  end;
-
-  Declaration := PushStack(TciInParameter);
   inherited;
   PopStack;
 

@@ -143,7 +143,6 @@ type
     function GetIsSpace: Boolean;
     function GetIsCompilerDirective: Boolean;
 
-    function IsDefined(const ADefine: string): Boolean;
     procedure EnterDefineBlock(ADefined: Boolean);
     procedure ExitDefineBlock;
   protected
@@ -182,6 +181,7 @@ type
     procedure CloneDefinesFrom(ALexer: TmwBasePasLex);
     function SaveDefines: TSaveDefinesRec;
     procedure LoadDefines(From: TSaveDefinesRec);
+    function IsDefined(const ADefine: string): Boolean;
 
     property FileName: String read fFileName;
     property FileAge: Integer read fFileAge;
@@ -437,7 +437,7 @@ end;
 procedure TmwBasePasLex.BraceCloseProc;
 begin
   Inc(fRun);
-  fTokenId := tokError;
+  fTokenId := tokNull;
 
   Error('Illegal character');
 end;

@@ -47,6 +47,8 @@ type
   end;
 
   TptTokenKind = (
+    tokUnknown,
+
     tokAbsolute,
     tokAbstract,
     tokAdd,
@@ -94,7 +96,6 @@ type
     tokEndIfDirect,
     tokEnum,
     tokEqual,
-    tokError,
     tokExcept,
     tokExit,
     tokExport,
@@ -140,8 +141,7 @@ type
     tokMinus,
     tokMod,
     tokName,
-    tokNodefault,
-    tokNone,
+    tokNoDefault,
     tokNot,
     tokNotEqual,
     tokNull,
@@ -174,8 +174,8 @@ type
     tokReintroduce,
     tokRepeat,
     tokRequires,
-    tokResourceDirect,
     tokResourcestring,
+    tokResourceDirect,
     tokRoundClose,
     tokRoundOpen,
     tokRunError,
@@ -197,7 +197,6 @@ type
     tokStored,
     tokStrict,
     tokStringConst,
-    tokStringresource,
     tokSymbol,
     tokThen,
     tokThreadvar,
@@ -206,7 +205,6 @@ type
     tokType,
     tokUndefDirect,
     tokUnit,
-    tokUnknown,
     tokUnsafe,
     tokUntil,
     tokUses,
@@ -224,6 +222,8 @@ type
     tokPowAsgn,
     tok_DONE
   );
+
+  TptTokenSet = set of TptTokenKind;
 
 type
   // "Perfect Hashing"
@@ -264,28 +264,45 @@ const
   ];
 
   ExTokens = [
-    tokAdd, tokAt, tokCdecl, tokRead, tokOn, tokBreak, tokFinal, tokIndex, tokOut, tokExit, tokSafecall, tokPublic, tokHelper, tokDefault, tokMessage, tokStdcall, tokNative, tokStatic, tokWrite, tokStored, tokDeprecated, tokAbstract, tokForward, tokPrivate, tokOverload, tokAbsolute, tokOverride, tokPublished, tokExport, tokExternal, tokRegister, tokPlatform, tokContinue, tokVirtual, tokProtected, tokImplements, tokReintroduce
+    tokAdd, tokAt, tokCdecl, tokRead, tokOn, tokBreak, tokFinal, tokIndex, tokOut, tokExit, tokSafecall, tokPublic, tokHelper, tokDefault, tokMessage, tokStdcall, tokStatic, tokWrite, tokStored, tokDeprecated, tokAbstract, tokForward, tokPrivate, tokOverload, tokAbsolute, tokOverride, tokPublished, tokExport, tokExternal, tokRegister, tokPlatform, tokContinue, tokVirtual, tokProtected, tokImplements, tokReintroduce
   ];
 
   JunkTokens = [
     tokAnsiComment, tokBorComment, tokSlashesComment,
     tokCRLF, tokCRLFCo, tokSpace,
-    tokIfDirect,  tokElseIfDirect, tokIfDefDirect, tokIfNDefDirect, tokEndIfDirect, tokIfOptDirect, tokDefineDirect, tokUndefDirect
+    tokIfDirect, tokElseIfDirect, tokIfDefDirect, tokIfNDefDirect, tokEndIfDirect, tokIfOptDirect, tokUndefDirect
   ];
 
 const
   MaxTokenNameLength: Integer = 0;
 
-function TokenName(const Value: TptTokenKind): string;
+function TokenName(const Value: TptTokenKind): String;
+function TokenNames(const Value: TptTokenSet): String;
+
+procedure SetupKeywordDictionary;
 
 implementation
 
 uses
   simba.ide_initialization;
 
-function TokenName(const Value: TptTokenKind): string;
+function TokenName(const Value: TptTokenKind): String;
 begin
   Result := Copy(GetEnumName(TypeInfo(TptTokenKind), Ord(Value)), 4);
+end;
+
+function TokenNames(const Value: TptTokenSet): String;
+var
+  Tok: TptTokenKind;
+begin
+  Result := '[';
+  for Tok in Value do
+  begin
+    if (Result <> '[') then
+      Result := Result + ', ';
+    Result := Result + TokenName(Tok);
+  end;
+  Result := Result + ']';
 end;
 
 constructor TKeywordDictionary.Create(InvalidValue: TptTokenKind; Size: Integer);

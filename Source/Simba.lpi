@@ -310,7 +310,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="142">
+    <Units Count="144">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -953,6 +953,14 @@
         <Filename Value="forms/simba.scripttabs_findpanel.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit141>
+      <Unit142>
+        <Filename Value="codetools/simba.ide_codetools_insight_new.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit142>
+      <Unit143>
+        <Filename Value="codetools/simba.ide_codetools_parser_new.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit143>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

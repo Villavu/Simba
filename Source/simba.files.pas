@@ -379,8 +379,8 @@ begin
   end;
 end;
 
-initialization
-  CreateBaseDirectories();
+//initialization
+//  CreateBaseDirectories();
 
 end.
 
