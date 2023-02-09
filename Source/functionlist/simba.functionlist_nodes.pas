@@ -59,7 +59,7 @@ uses
 
 procedure TFunctionList_InternalDeclNode.Open;
 begin
-  SimbaScriptTabsForm.OpenInternalDeclaration(Hint, FFileName);
+//  SimbaScriptTabsForm.OpenInternalDeclaration(Hint, FFileName);
 end;
 
 constructor TFunctionList_InternalFileNode.Create(FunctionList: TSimbaFunctionList; AFileName: String);
@@ -112,7 +112,7 @@ end;
 
 procedure TFunctionList_DeclNode.Open;
 begin
-  SimbaScriptTabsForm.OpenDeclaration(FStartPos, FEndPos, FLine, FFileName);
+//  SimbaScriptTabsForm.OpenDeclaration(FStartPos, FEndPos, FLine, FFileName);
 end;
 
 constructor TFunctionList_DeclNode.Create(FunctionList: TSimbaFunctionList; ADecl: TDeclaration);
@@ -126,6 +126,7 @@ begin
 
   Text := ADecl.Name;
 
+  {
   case ADecl.ClassName of
     'TciProcedureDeclaration':
       begin
@@ -179,6 +180,7 @@ begin
         SelectedIndex := IMAGE_VARIABLE;
       end;
   end;
+  }
 end;
 
 end.

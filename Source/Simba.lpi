@@ -954,11 +954,11 @@
         <IsPartOfProject Value="True"/>
       </Unit141>
       <Unit142>
-        <Filename Value="codetools/simba.ide_codetools_insight_new.pas"/>
+        <Filename Value="codetools/simba.ide_codetools_insight.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit142>
       <Unit143>
-        <Filename Value="codetools/simba.ide_codetools_parser_new.pas"/>
+        <Filename Value="codetools/simba.ide_codetools_parser.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit143>
     </Units>
@@ -1000,7 +1000,7 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="5">
+    <Exceptions Count="6">
       <Item1>
         <Name Value="ESyntaxError"/>
       </Item1>
@@ -1016,6 +1016,9 @@
       <Item5>
         <Name Value="EScannerError"/>
       </Item5>
+      <Item6>
+        <Name Value="EFOpenError"/>
+      </Item6>
     </Exceptions>
   </Debugging>
 </CONFIG>

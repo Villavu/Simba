@@ -12,7 +12,7 @@ interface
 uses
   classes, sysutils, forms, controls, graphics, dialogs,
   extctrls, comctrls, extendednotebook, menus, StdCtrls, Buttons, synedit, synedittypes,
-  simba.scripttab, simba.editor, simba.ide_codetools_parser, simba.editor_findreplace;
+  simba.scripttab, simba.editor, simba.editor_findreplace;
 
 type
   TEditorSearchEvent = procedure(MatchCount: Integer) of object;
@@ -126,9 +126,9 @@ type
     function Open(FileName: String; CheckOtherTabs: Boolean = True): Boolean; overload;
     procedure Open; overload;
 
-    procedure OpenDeclaration(StartPos, EndPos, Line: Integer; FileName: String); overload;
-    procedure OpenInternalDeclaration(Header: String; FileName: String);
-    procedure OpenDeclaration(Declaration: TDeclaration); overload;
+    //procedure OpenDeclaration(StartPos, EndPos, Line: Integer; FileName: String); overload;
+    //procedure OpenInternalDeclaration(Header: String; FileName: String);
+    //procedure OpenDeclaration(Declaration: TDeclaration); overload;
   end;
 
 var
@@ -139,7 +139,7 @@ implementation
 {$R *.lfm}
 
 uses
-  lcltype,
+  LCLType,
   simba.mufasatypes, simba.files, simba.editor_docgenerator,
   simba.dockinghelpers, simba.nativeinterface, simba.outputform;
 
@@ -541,6 +541,7 @@ begin
   end;
 end;
 
+{
 procedure TSimbaScriptTabsForm.OpenDeclaration(StartPos, EndPos, Line: Integer; FileName: String);
 begin
   if FileExists(FileName) then
@@ -593,6 +594,7 @@ begin
       SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in Simba: ' + Declaration.Lexer.FileName, Declaration.Text])
   end;
 end;
+}
 
 end.
 

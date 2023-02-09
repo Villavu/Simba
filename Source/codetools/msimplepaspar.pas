@@ -351,8 +351,8 @@ type
 
     procedure Assign(From: TObject); virtual;
 
-    procedure SetScript(Script: String; FileName: String = ''); virtual;
-    procedure SetFile(FileName: String); virtual;
+    procedure SetScript(Script: String; FileName: String = ''; Defines: TStringArray = nil); virtual;
+    procedure SetFile(FileName: String; Defines: TStringArray = nil); virtual;
 
     function HasFile(FileName: String): Boolean;
 
@@ -429,7 +429,7 @@ begin
     ParseFile();
 
     {$IFDEF PARSER_BENCHMARK}
-    Writeln(Lexer.FileName, ' -> ', FormatFloat('0.00', HighResolutionTime()-T));
+    Writeln('Parsing took: ', FormatFloat('0.00', HighResolutionTime()-T));
     {$ENDIF}
   except
     on E: Exception do
@@ -682,16 +682,18 @@ begin
   fLexerStack.Clear();
 end;
 
-procedure TmwSimplePasPar.SetScript(Script: String; FileName: String);
+procedure TmwSimplePasPar.SetScript(Script: String; FileName: String; Defines: TStringArray);
 begin
   Reset();
   PushLexer(TmwPasLex.Create(Script, FileName));
+  fLexer.Defines.AddStrings(Defines);
 end;
 
-procedure TmwSimplePasPar.SetFile(FileName: String);
+procedure TmwSimplePasPar.SetFile(FileName: String; Defines: TStringArray);
 begin
   Reset();
   PushLexer(TmwPasLex.CreateFromFile(FileName));
+  fLexer.Defines.AddStrings(Defines);
 end;
 
 function TmwSimplePasPar.HasFile(FileName: String): Boolean;
@@ -1570,7 +1572,7 @@ end;
 
 procedure TmwSimplePasPar.ParameterVarType;
 begin
-  TypeIdentifer;
+  TypeKind();
 end;
 
 procedure TmwSimplePasPar.FunctionMethodDeclaration;
@@ -3544,12 +3546,12 @@ begin
   end else
     NextToken();
 
-  if Lexer.TokenID = tokType then
+  if (Lexer.TokenID = tokType) then
   begin
     ExplicitType;
     Exit;
   end;
-  if Lexer.TokenID = tokIdentifier then
+  if (Lexer.TokenID = tokIdentifier) and (Lexer.ExID <> tokPrivate) then
   begin
     TypeAlias;
     Exit;
@@ -3749,12 +3751,24 @@ end;
 procedure TmwSimplePasPar.ConstantAssign;
 begin
   Expected(tokAssign);
+  if (Lexer.TokenID = tokIdentifier) then
+  begin
+    Lexer.InitAhead;
+    if (Lexer.AheadTokenID = tokRoundOpen) then
+      ConstantType();
+  end;
   ConstantValueTyped;
 end;
 
 procedure TmwSimplePasPar.ConstantEqual;
 begin
   Expected(tokEqual);
+  if (Lexer.TokenID = tokIdentifier) then
+  begin
+    Lexer.InitAhead;
+    if (Lexer.AheadTokenID = tokRoundOpen) then
+      ConstantType();
+  end;
   ConstantValue;
 end;
 

@@ -13,14 +13,14 @@ var
 implementation
 
 uses
-  simba.mufasatypes, simba.ide_codetools_insight, simba.ide_codetools_cache,
+  simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_insight,
   simba.ide_initialization, simba.process, simba.files, simba.functionlist_simbasection, simba.functionlistform;
 
 procedure SetupCodeTools;
 var
   List: TStringList;
   I: Integer;
-  Parser: TCodeInsight_Include;
+  Parser: TCodeParser;
 begin
   List := nil;
 
@@ -32,15 +32,15 @@ begin
       if (List.Names[I] = '') then
         Continue;
 
-      Parser := TCodeInsight_Include.Create();
+      Parser := TCodeParser.Create();
       Parser.SetScript(List.ValueFromIndex[I], List.Names[I]);
       Parser.Run();
 
-      TCodeInsight.AddBaseInclude(Parser);
+      TCodeinsight.AddBaseInclude(Parser);
     end;
 
-    SimbaFunctionList_SimbaSection.Load(TCodeInsight.BaseIncludes);
-    SimbaFunctionList_SimbaSection.Loaded := True;
+    //SimbaFunctionList_SimbaSection.Load(TCodeinsight.BaseIncludes);
+    //SimbaFunctionList_SimbaSection.Loaded := True;
   except
     on E: Exception do
       DebugLn('[TSimbaForm.SetupCodeTools]: ' + E.ToString());

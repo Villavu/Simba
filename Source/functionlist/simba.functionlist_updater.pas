@@ -16,7 +16,7 @@ uses
 type
   TSimbaFunctionListUpdater = class(TThread)
   protected
-    FParser: TCodeInsight;
+    FParser: TCodeinsight;
     FChangeStamp: Int64;
 
     FFunctionList: TSimbaFunctionList;
@@ -70,7 +70,7 @@ begin
     FFunctionList.ExpandedState.CreateChildNodes(FFunctionList.ScriptNode);
 
     FChangeStamp := Tab.Editor.ChangeStamp;
-    FParser      := Tab.GetParser();
+    //FParser      := Tab.GetParser();
   end;
 end;
 
@@ -88,16 +88,18 @@ var
 begin
   while (not Terminated) do
   begin
+    {
     Synchronize(@BeginUpdate);
 
     if Assigned(FParser) then
     try
-      FParser.NoErrorMessages := True;
+      //FParser.NoErrorMessages := True;
       FParser.Run();
 
-      FFunctionList.ScriptNode.DeleteChildren();
-      FFunctionList.AddDecls(FFunctionList.ScriptNode, FParser.Items);
+      //FFunctionList.ScriptNode.DeleteChildren();
+      //FFunctionList.AddDecls(FFunctionList.ScriptNode, FParser.Items);
 
+      {
       if (FParser.IncludesHash <> FFunctionList.IncludesHash) then
       begin
         FFunctionList.IncludesNode.DeleteChildren();
@@ -107,6 +109,7 @@ begin
 
         FFunctionList.IncludesHash := FParser.IncludesHash;
       end;
+      }
     finally
       FParser.Free();
       FParser := nil;
@@ -114,6 +117,7 @@ begin
       Synchronize(@EndUpdate);
     end;
 
+    }
     Sleep(850);
   end;
 end;

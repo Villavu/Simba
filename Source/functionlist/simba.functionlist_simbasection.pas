@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, ComCtrls,
-  simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_cache, simba.functionlistform;
+  simba.mufasatypes, simba.ide_codetools_parser, simba.functionlistform;
 
 const
   SimbaSectionDocLinks: TStringArray = (
@@ -35,7 +35,7 @@ type
     function Sort(A, B: TTreeNode): Integer;
   public
     function Added(FunctionList: TSimbaFunctionList): Boolean; override;
-    procedure Load(Includes: TCodeInsight_IncludeArray);
+    procedure Load(Includes: array of TCodeParser);
     procedure Add(FunctionList: TSimbaFunctionList); override;
   end;
 
@@ -88,16 +88,16 @@ begin
   Result := FunctionList.TreeView.Items.FindTopLvlNode('Simba') <> nil;
 end;
 
-procedure TSimbaFunctionList_SimbaSection.Load(Includes: TCodeInsight_IncludeArray);
+procedure TSimbaFunctionList_SimbaSection.Load(Includes: array of TCodeParser);
 var
-  Include: TCodeInsight_Include;
+  Parser: TCodeParser;
 begin
-  for Include in Includes do
+  for Parser in Includes do
   begin
-    if (Include.Lexer = nil) or (Include.Lexer.FileName.StartsWith('!')) then
+    if (Parser.Lexer = nil) or (Parser.Lexer.FileName.StartsWith('!')) then
       Continue;
 
-    FSections := FSections + [Include];
+    FSections := FSections + [Parser];
   end;
 
   Loaded := True;

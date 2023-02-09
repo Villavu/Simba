@@ -13,23 +13,19 @@ uses
   Classes, SysUtils, Graphics, Controls, LCLType,
   SynEdit, SynEditTypes, SynGutterLineOverview, SynEditMouseCmds, SynEditMiscClasses,
   SynEditKeyCmds, SynPluginMultiCaret, SynEditHighlighter,
-  SynHighlighterPas_Simba, SynEditMarkupHighAll, LazSynEditMouseCmdsTypes,
+  SynHighlighterPas_Simba, SynEditMarkupHighAll, LazSynEditMouseCmdsTypes, LazMethodList,
   simba.mufasatypes, simba.autocomplete, simba.parameterhint, simba.settings,
   simba.editor_attributes, simba.editor_modifiedlinegutter;
-
-const
-  ecAutoComplete      = ecUserFirst + 1;
-  ecAutoCompleteChar  = ecUserFirst + 2;
-  ecParameterHint     = ecUserFirst + 3;
-  ecParameterHintChar = ecUserFirst + 4;
 
 type
   TSimbaEditor = class(TSynEdit)
   protected
-    FAttributes: TSimbaEditor_Attributes;
-    FParameterHint: TSimbaParameterHint;
     FAutoComplete: TSimbaAutoComplete;
+    FParamHint: TSimbaParamHint;
+
+    FAttributes: TSimbaEditor_Attributes;
     FModifiedLinesGutter: TSimbaEditorModifiedLinesGutter;
+    FFontChangedHandlerList: TMethodList;
 
     FFocusedLinesUpdating: Boolean;
     FFocusedLinesCount: Integer;
@@ -38,19 +34,18 @@ type
       Color: TColor;
     end;
 
+    procedure FontChanged(Sender: TObject); override;
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
 
     // Temp line coloring
     procedure DoSpecialLineColor(Sender: TObject; Line: Integer; var Special: Boolean; AMarkup: TSynSelectedColor);
     // Enable/Disable TSynEditMarkupHighlightAllCaret depending on has selection
     procedure DoStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
-    // Handle ecAutoCompleteChar & ecParameterHintChar
-    procedure DoAfterCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
   public
+    property AutoComplete: TSimbaAutoComplete read FAutoComplete;
+    property ParamHint: TSimbaParamHint read FParamHint;
     property TextView;
     property ModifiedLinesGutter: TSimbaEditorModifiedLinesGutter read FModifiedLinesGutter;
-    property AutoComplete: TSimbaAutoComplete read FAutoComplete;
-    property ParameterHint: TSimbaParameterHint read FParameterHint;
     property Attributes: TSimbaEditor_Attributes read FAttributes;
 
     // Is highlighter attribute at caret
@@ -67,6 +62,11 @@ type
     // Repaint some extra things when saved
     procedure MarkTextAsSaved; reintroduce;
 
+    procedure RegisterFontChangedHandler(Handler: TNotifyEvent);
+    procedure UnRegisterFontChangedHandler(Handler: TNotifyEvent);
+    procedure RegisterCaretMoveHandler(Handler: TNotifyEvent);
+    procedure UnRegisterCaretMoveHandler(Handler: TNotifyEvent);
+
     procedure ClearFocusedLines;
     procedure FocusLine(Line, Column: Integer; AColor: TColor);
 
@@ -80,7 +80,7 @@ uses
   SynEditPointClasses,
   simba.ide_codetools_utils, simba.fonthelpers, simba.editor_blockcompletion,
   simba.editor_docgenerator, simba.editor_commentblock,
-  simba.editor_mousewheelzoom, simba.editor_history, simba.editor_multicaret;
+  simba.editor_mousewheelzoom, simba.editor_multicaret;
 
 function TSimbaEditor.IsHighlighterAttribute(Values: TStringArray): Boolean;
 var
@@ -131,6 +131,26 @@ begin
 
   InvalidateGutter();
   ModifiedLinesGutter.ReCalc();
+end;
+
+procedure TSimbaEditor.RegisterFontChangedHandler(Handler: TNotifyEvent);
+begin
+  FFontChangedHandlerList.Add(TMethod(Handler));
+end;
+
+procedure TSimbaEditor.UnRegisterFontChangedHandler(Handler: TNotifyEvent);
+begin
+  FFontChangedHandlerList.Remove(TMethod(Handler));
+end;
+
+procedure TSimbaEditor.RegisterCaretMoveHandler(Handler: TNotifyEvent);
+begin
+  GetCaretObj().AddChangeHandler(Handler);
+end;
+
+procedure TSimbaEditor.UnRegisterCaretMoveHandler(Handler: TNotifyEvent);
+begin
+  GetCaretObj().RemoveChangeHandler(Handler);
 end;
 
 procedure TSimbaEditor.ClearFocusedLines;
@@ -189,17 +209,11 @@ begin
     MarkupByClass[TSynEditMarkupHighlightAllCaret].Enabled := SelAvail;
 end;
 
-procedure TSimbaEditor.DoAfterCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
+procedure TSimbaEditor.FontChanged(Sender: TObject);
 begin
-  case Command of
-    ecChar:
-      case AChar of
-        '(': if SimbaSettings.Editor.AutomaticallyShowParameterHints.Value then
-               CommandProcessor(ecParameterHintChar, AChar, Data);
-        '.': if SimbaSettings.Editor.AutomaticallyOpenAutoCompletion.Value then
-               CommandProcessor(ecAutoCompleteChar, AChar, Data);
-      end;
-  end;
+  inherited FontChanged(Sender);
+
+  FFontChangedHandlerList.CallNotifyEvents(Self);
 end;
 
 procedure TSimbaEditor.SimbaSettingChanged(Setting: TSimbaSetting);
@@ -299,16 +313,47 @@ end;
 
 function TSimbaEditor.GetExpression(X, Y: Integer): String;
 var
-  StartX, EndX: Integer;
+  StartIndex, EndIndex, InRound, InSquare: Integer;
+  TheText: String;
 begin
-  GetWordBoundsAtRowCol(TPoint.Create(X, Y), StartX, EndX);
+  if (X > Length(LineText)) then
+    Exit('');
+  TheText := Text;
 
-  Result := simba.ide_codetools_utils.GetExpression(Text, RowColToCharIndex(TPoint.Create(EndX - 1, Y)));
+  StartIndex := RowColToCharIndex(TPoint.Create(X, Y));
+  EndIndex := StartIndex;
+  if (StartIndex < 1) or (StartIndex > Length(TheText)) then
+    Exit;
+
+  InRound := 0;
+  InSquare := 0;
+
+  while (EndIndex > 0) do
+  begin
+    case TheText[EndIndex] of
+      ')': Inc(InRound);
+      '(': Dec(InRound);
+      ']': Inc(InSquare);
+      '[': Dec(InSquare);
+      #0..#32:
+        if (InRound <= 0) and (InSquare <= 0) then
+          Break;
+    end;
+
+    Dec(EndIndex);
+  end;
+
+  if (EndIndex = 0) then
+    Result := ''
+  else
+    Result := Copy(TheText, EndIndex + 1, StartIndex - EndIndex);
 end;
 
 constructor TSimbaEditor.Create(AOwner: TComponent; LoadColors: Boolean);
 begin
   inherited Create(AOwner);
+
+  FFontChangedHandlerList := TMethodList.Create();
 
   Options := Options + [eoTabIndent, eoKeepCaretX, eoDragDropEditing, eoScrollPastEof] - [eoSmartTabs];
   Options2 := Options2 + [eoCaretSkipsSelection];
@@ -324,17 +369,16 @@ begin
   MouseActions.AddCommand(emcOverViewGutterScrollTo, False, LazSynEditMouseCmdsTypes.mbLeft, ccSingle, cdDown, [], []);
 
   RegisterStatusChangedHandler(@DoStatusChanged, [scCaretX, scCaretY, scModified, scSelection]);
-  RegisterCommandHandler(@DoAfterCommand, nil, [hcfPostExec]);
 
   Highlighter := TSynFreePascalSyn.Create(Self);
   with TSynFreePascalSyn(Highlighter) do
   begin
-    CommentAttri.Foreground := clBlue;
-    CommentAttri.Style := [fsBold];
     IdentifierAttri.Foreground := clDefault;
     NumberAttri.Foreground := clNavy;
     StringAttri.Foreground := clBlue;
     SymbolAttri.Foreground := clRed;
+    CommentAttri.Foreground := clBlue;
+    CommentAttri.Style := [fsBold];
     DirectiveAttri.Foreground := clRed;
     DirectiveAttri.Style := [fsBold];
     BracketMatchColor.Background := clGray;
@@ -348,11 +392,11 @@ begin
   end;
 
   FScreenCaretPainterClass := TSynEditScreenCaretPainterInternal;
-  if FScreenCaret.Painter.ClassType <> TSynEditScreenCaretPainterInternal then
+  if (FScreenCaret.Painter.ClassType <> TSynEditScreenCaretPainterInternal) then
     FScreenCaret.ChangePainter(TSynEditScreenCaretPainterInternal);
 
-  FParameterHint := TSimbaParameterHint.Create(nil);
-  FParameterHint.Editor := Self;
+  FParamHint := TSimbaParamHint.Create(nil);
+  FParamHint.Editor := Self;
 
   FAutoComplete := TSimbaAutoComplete.Create(nil);
   FAutoComplete.Editor := Self;
@@ -360,7 +404,7 @@ begin
   FAutoComplete.ExecCommandID := ecNone;
   FAutoComplete.ShowSizeDrag := True;
 
-  with MarkupByClass[TSynEditMarkupHighlightAllCaret] as TSynEditMarkupHighlightAllCaret do
+  with TSynEditMarkupHighlightAllCaret(MarkupByClass[TSynEditMarkupHighlightAllCaret]) do
   begin
     Enabled := False;
     WaitTime := 1;
@@ -390,25 +434,10 @@ begin
   TSimbaEditorPlugin_DocGenerator.Create(Self);
   TSimbaEditorPlugin_CommentBlock.Create(Self);
   TSimbaEditorPlugin_MouseWheelZoom.Create(Self);
-  TSimbaEditorPlugin_History.Create(Self);
 
   Keystrokes.Delete(KeyStrokes.FindCommand(ecInsertLine));
   Keystrokes.Delete(KeyStrokes.FindCommand(ecNormalSelect));
   Keystrokes.Delete(KeyStrokes.FindCommand(ecColumnSelect));
-
-  with KeyStrokes.Add() do
-  begin
-    Key := VK_SPACE;
-    Shift := [ssCtrl];
-    Command := ecAutoComplete;
-  end;
-
-  with KeyStrokes.Add() do
-  begin
-    Key := VK_SPACE;
-    Shift := [ssCtrl, ssShift];
-    Command := ecParameterHint;
-  end;
 
   if LoadColors then
     SimbaSettingChanged(SimbaSettings.Editor.CustomColors);
@@ -428,12 +457,10 @@ begin
   if (SimbaSettings <> nil) then
     SimbaSettings.UnRegisterChangeHandler(@SimbaSettingChanged);
 
-  if (FAutoComplete <> nil) then
-    FreeAndNil(FAutoComplete);
-  if (FParameterHint <> nil) then
-    FreeAndNil(FParameterHint);
   if (FAttributes <> nil) then
     FreeAndNil(FAttributes);
+  if (FFontChangedHandlerList <> nil) then
+    FreeAndNil(FFontChangedHandlerList);
 
   inherited Destroy();
 end;

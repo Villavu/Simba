@@ -1,8 +1,3 @@
-{
-  Author: Raymond van Venetië and Merlijn Wajer
-  Project: Simba (https://github.com/MerlijnWajer/Simba)
-  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
-}
 unit simba.ide_codetools_insight;
 
 {$i simba.inc}
@@ -10,706 +5,374 @@ unit simba.ide_codetools_insight;
 interface
 
 uses
-  Sysutils, Classes,
-  mPasLexTypes, mPasLex,
-  simba.mufasatypes,
-  simba.ide_codetools_parser, simba.ide_codetools_utils, simba.ide_codetools_cache;
+  Classes, SysUtils,
+  mPasLex,
+  simba.ide_codetools_parser, simba.ide_codetools_utils;
 
 type
-  TCodeInsight = class(TCodeParser)
+  TCodeinsight = class(TObject)
+  protected class var
+    FBaseIncludes: array of TCodeParser;
+    FBaseDefines: array of String;
   protected
-  class var
-    FIncludeCache: TCodeInsight_IncludeCache;
-    FBaseIncludes: TCodeInsight_IncludeArray;
-    FBaseDefines: TStringList;
-  protected
-    FIncludes: TCodeInsight_IncludeArray;
-    FLocals: TDeclarationMap;
-    FManagedParsers: array of TCodeParser;
+    FIncludes: array of TCodeParser;
+    FScriptParser: TCodeParser;
 
-    procedure DoInclude(Sender: TObject; FileName: String; var Handled: Boolean);
-    procedure DoLibrary(Sender: TObject; FileName: String; var Handled: Boolean);
+    function DoFindInclude(Sender: TmwBasePasLex; var FileName: string): Boolean;
 
-    function ManageParser(Parser: TCodeParser): TCodeParser;
-
-    function GetIncludesHash: String;
-
-    function GetGlobals: TDeclarationArray;
-    function GetGlobalByName(Name: String): TDeclaration;
-    function GetGlobalsByName(Name: String): TDeclarationArray;
-
-    function GetLocals: TDeclarationArray;
-    function GetLocalByName(Name: String): TDeclaration;
-    function GetLocalsByName(Name: String): TDeclarationArray;
+    procedure Reset;
   public
-    class constructor Create;
+    class procedure AddBaseInclude(Include: TCodeParser);
+    class procedure AddBaseDefine(Def: String);
     class destructor Destroy;
-    class procedure AddBaseInclude(Include: TCodeInsight_Include);
-    class property BaseIncludes: TCodeInsight_IncludeArray read FBaseIncludes;
 
-    function GetMembersOfType(Declaration: TDeclaration): TDeclarationArray; overload;
-    function GetMembersOfType(Declaration: TDeclaration; Name: String): TDeclarationArray; overload;
+    procedure SetScript(Script: String; FileName: String; CaretPos, MaxPos: Integer);
+    procedure Run;
 
-    function ParseExpression(Expressions: TExpressionArray): TDeclaration;
-    function ParseExpression(Expr: String): TDeclaration;
+    function FindDecl(S: String): TDeclaration;
 
-    function FindDeclarations(Expr: String): TDeclarationArray;
-    function FindMethods(Expr: String): TDeclarationArray;
+    function GetOverloads(Decl: TDeclaration): TDeclarationArray;
+    function GetGlobals: TDeclarationArray;
+    function GetMethodsOfType(Typ: String): TDeclarationArray;
+    function GetMembersOfType(Decl: TDeclaration): TDeclarationArray;
 
-    function ResolveType(Declaration: TDeclaration): TDeclaration;
-    function ResolveArrayType(Declaration: TDeclaration; Dimensions: Int32): TDeclaration;
-    function ResolvePointer(Declaration: TDeclaration): TDeclaration;
+    // if `TDeclaration_VarType` resolve to type.
+    // if `TDeclaration_Identifier` resolve to type "TPoint" > "record X,Y: Integer; end"
+    function EnsureTypeDeclaration(Decl: TDeclaration): TDeclaration;
 
-    procedure Reset; override;
-    procedure Run; override;
+    function DoArrayIndex(Decl: TDeclaration; Dimensions: Integer): TDeclaration;
+    function DoPointerDeref(Decl: TDeclaration): TDeclaration;
 
-    property Includes: TCodeInsight_IncludeArray read FIncludes;
-    property IncludesHash: String read GetIncludesHash;
+    function ParseExpression(Expr: TExpressionItems; WantMethodResult: Boolean): TDeclaration; overload;
+    function ParseExpression(Expr: String; WantMethodResult: Boolean): TDeclaration; overload;
 
-    property Globals: TDeclarationArray read GetGlobals;
-    property GlobalsByName[Name: String]: TDeclarationArray read GetGlobalsByName;
-    property GlobalByName[Name: String]: TDeclaration read GetGlobalByName;
-
-    property Locals: TDeclarationArray read GetLocals;
-    property LocalsByName[Name: String]: TDeclarationArray read GetLocalsByName;
-    property LocalByName[Name: String]: TDeclaration read GetLocalByName;
-
-    constructor Create; override;
+    constructor Create;
     destructor Destroy; override;
   end;
 
 implementation
 
 uses
-  simba.ide_codetools_helpers, simba.settings;
+  simba.mufasatypes, simba.files;
 
-class constructor TCodeInsight.Create;
+function TCodeinsight.DoFindInclude(Sender: TmwBasePasLex; var FileName: string): Boolean;
 begin
-  FIncludeCache := TCodeInsight_IncludeCache.Create();
-  FBaseDefines := TStringList.Create();
-  FBaseDefines.Duplicates := dupIgnore;
-  FBaseDefines.Add('!EXPLICTSELF');
+  Result := FindFile(FileName, '', [ExtractFileDir(Sender.FileName), GetIncludePath(), GetSimbaPath()]);
 end;
 
-class destructor TCodeInsight.Destroy;
-var
-  I: Int32;
+procedure TCodeinsight.Reset;
 begin
-  for I := 0 to High(FBaseIncludes) do
-    FBaseIncludes[I].Free();
-
-  FIncludeCache.Free();
-  FIncludeCache := nil;
-
-  FBaseDefines.Free();
-  FBaseDefines := nil;
+  FScriptParser.Reset();
 end;
 
-class procedure TCodeInsight.AddBaseInclude(Include: TCodeInsight_Include);
+class procedure TCodeinsight.AddBaseInclude(Include: TCodeParser);
 begin
   FBaseIncludes := FBaseIncludes + [Include];
-  FBaseDefines.AddStrings(Include.Lexer.Defines);
 end;
 
-function TCodeInsight.GetGlobalsByName(Name: String): TDeclarationArray;
-var
-  Include: TCodeInsight_Include;
+class procedure TCodeinsight.AddBaseDefine(Def: String);
 begin
-  Result := nil;
-
-  for Include in FBaseIncludes + FIncludes do
-    Result := Result + Include.Globals.GetAll(Name);
-
-  Result := Result + FGlobals.GetAll(Name);
+  FBaseDefines := FBaseDefines + [Def];
 end;
 
-function TCodeInsight.GetGlobalByName(Name: String): TDeclaration;
+class destructor TCodeinsight.Destroy;
 var
-  Include: TCodeInsight_Include;
+  Include: TCodeParser;
 begin
-  Result := nil;
+  for Include in FBaseIncludes do
+    Include.Free();
+  {$IFDEF PARSER_LEAK_CHECKS}
+  if (SimbaProcessType = ESimbaProcessType.IDE) then
+    TDeclaration.PrintLeaks();
+  {$ENDIF}
+  inherited;
+end;
 
-  for Include in FBaseIncludes + FIncludes do
+procedure TCodeinsight.SetScript(Script: String; FileName: String; CaretPos, MaxPos: Integer);
+begin
+  Reset();
+  FScriptParser.SetScript(Script, FileName, FBaseDefines);
+  FScriptParser.Lexer.CaretPos := CaretPos;
+  FScriptParser.Lexer.MaxPos := MaxPos;
+end;
+
+procedure TCodeinsight.Run;
+begin
+  FScriptParser.Run();
+end;
+
+function TCodeinsight.FindDecl(S: String): TDeclaration;
+var
+  I: Integer;
+begin
+  for I := 0 to High(FBaseIncludes) do
   begin
-    Result := Include.Globals.Get(Name);
-    if Result <> nil then
+    Result := FBaseIncludes[I].GetGlobal(S);
+    if (Result <> nil) then
       Exit;
   end;
-
-  Result := FGlobals.Get(Name);
+  Result := FScriptParser.GetGlobal(S);
 end;
 
-function TCodeInsight.GetLocalsByName(Name: String): TDeclarationArray;
-begin
-  Result := FLocals.GetAll(Name);
-end;
-
-function TCodeInsight.GetLocalByName(Name: String): TDeclaration;
-begin
-  Result := FLocals.Get(Name);
-end;
-
-function TCodeInsight.GetGlobals: TDeclarationArray;
+function TCodeinsight.GetOverloads(Decl: TDeclaration): TDeclarationArray;
 var
-  Include: TCodeInsight_Include;
+  n: String;
 begin
+  n := Decl.Name;
+
   Result := nil;
-
-  for Include in FBaseIncludes + FIncludes do
-    Result += Include.Globals.GetAll();
-
-  Result += FGlobals.GetAll();
-end;
-
-function TCodeInsight.GetLocals: TDeclarationArray;
-begin
-  Result := FLocals.GetAll();
-end;
-
-procedure TCodeInsight.DoInclude(Sender: TObject; FileName: String; var Handled: Boolean);
-var
-  Include: TCodeInsight_Include;
-begin
-  Include := FIncludeCache.GetInclude(Self, FileName);
-  if (Include <> nil) then
-    FIncludes := FIncludes + [Include];
-
-  Handled := True;
-end;
-
-procedure TCodeInsight.DoLibrary(Sender: TObject; FileName: String; var Handled: Boolean);
-var
-  Include: TCodeInsight_Include;
-begin
-  if (OnLoadLibrary <> nil) then
-  begin
-    Include := FIncludeCache.GetLibrary(Self, FileName);
-    if (Include <> nil) then
-      FIncludes := FIncludes + [Include];
-  end;
-
-  Handled := True;
-end;
-
-procedure TCodeInsight.Reset;
-var
-  i: Int32;
-begin
-  inherited Reset();
-
-  for I := 0 to High(FManagedParsers) do
-    FManagedParsers[I].Free();
-  FManagedParsers := nil;
-
-  for i := 0 to High(FIncludes) do
-    FIncludeCache.Release(FIncludes[i]);
-
-  FGlobals.Clear();
-  FLocals.Clear();
-end;
-
-function TCodeInsight.ManageParser(Parser: TCodeParser): TCodeParser;
-begin
-  FManagedParsers := FManagedParsers + [Parser];
-
-  Result := Parser;
-end;
-
-function TCodeInsight.GetIncludesHash: String;
-var
-  I: Int32;
-begin
-  Result := '';
-  for I := 0 to High(FIncludes) do
-    Result := Result + FIncludes[I].Hash;
-end;
-
-function TCodeInsight.ParseExpression(Expressions: TExpressionArray): TDeclaration;
-var
-  i: Int32;
-  Base: TExpressionItem;
-  Members: TDeclarationArray;
-  Declaration: TDeclaration;
-begin
-  Result := nil;
-
-  Base := Expressions.PopLeft();
-
-  Declaration := LocalByName[Base.Identifier];
-  if Declaration = nil then
-    Declaration := GlobalByName[Base.Identifier];
-
-  if (Declaration <> nil) then
-  begin
-    Declaration := ResolveType(Declaration);
-    if Declaration = nil then
-      Exit;
-
-    if Base.Deref then
-    begin
-      Declaration := ResolvePointer(Declaration);
-      if Declaration = nil then
-        Exit;
-    end;
-
-    if Base.Dimensions > 0 then
-    begin
-      Declaration := ResolveArrayType(Declaration, Base.Dimensions);
-      if Declaration = nil then
-        Exit;
-
-      if Base.DerefArray then
-      begin
-        Declaration := ResolvePointer(Declaration);
-        if Declaration = nil then
-          Exit;
-      end;
-    end;
-
-    for i := 0 to High(Expressions) do
-    begin
-      Members := GetMembersOfType(Declaration, Expressions[i].Identifier);
-      if Length(Members) = 0 then
-        Exit;
-
-      Declaration := Members[0];
-      Declaration := ResolveType(Declaration);
-      if Declaration = nil then
-        Exit;
-
-      if Expressions[i].Deref then
-      begin
-        Declaration := ResolvePointer(Declaration);
-        if Declaration = nil then
-          Exit;
-      end;
-
-      if Expressions[i].Dimensions > 0 then
-      begin
-        Declaration := ResolveArrayType(Declaration, Expressions[i].Dimensions);
-        if Declaration = nil then
-          Exit;
-
-        if Expressions[i].DerefArray then
-        begin
-          Declaration := ResolvePointer(Declaration);
-          if Declaration = nil then
-            Exit;
-        end;
-      end;
-    end;
-
-    Result := Declaration;
-  end;
-end;
-
-function TCodeInsight.ParseExpression(Expr: String): TDeclaration;
-begin
-  Result := ParseExpression(GetExpressionArray(Expr));
-end;
-
-function TCodeInsight.GetMembersOfType(Declaration: TDeclaration): TDeclarationArray;
-
-  procedure GetFields(Declaration: TciRecordType);
-  begin
-    if (Declaration <> nil) then
-      Result := Result + Declaration.Items.GetItemsOfClass(TciVarDeclaration);
-  end;
-
-  procedure GetEnumElements(Declaration: TciTypeDeclaration);
-  begin
-    if (Declaration.EnumType <> nil) then
-      Result := Result + Declaration.EnumType.Elements;
-  end;
-
-  procedure GetMethods(Declaration: TciTypeDeclaration);
-  var
-    Parent: TDeclaration;
-    Declarations: TDeclarationArray;
-    I, Depth: Int32;
-  begin
-    Depth := 0;
-
-    while (Declaration <> nil) and (Depth < 20) do
-    begin
-      case Declaration.Name.ToUpper() of
-        'STRING', 'ANSISTRING':
-          Result := Result + ManageParser(ParseStringHelpers(Declaration.Name, 'Char')).Items.ToArray;
-        'WIDESTRING', 'UNICODESTRING':
-          Result := Result + ManageParser(ParseStringHelpers(Declaration.Name, 'WideChar')).Items.ToArray;
-      end;
-
-      Declarations := GlobalsByName['!' + Declaration.Name];
-      for I := 0 to High(Declarations) do
-        if Declarations[I] is TciProcedureDeclaration then
-          Result := Result + [Declarations[I]];
-
-      if (Declaration.ArrayType <> nil) then
-        Result := Result + ManageParser(ParseArrayHelpers(Declaration.ArrayType)).Items.ToArray;
-
-      if Declaration.RecordType <> nil then
-        GetFields(Declaration.RecordType);
-
-      Parent := nil;
-
-      if Declaration.RecordType <> nil then
-        Parent := GlobalByName[Declaration.RecordType.Parent]
-      else
-      if Declaration.CopyType <> nil then
-        Parent := GlobalByName[Declaration.CopyType.Parent]
-      else
-      if Declaration.AliasType <> nil then
-        Parent := GlobalByName[Declaration.AliasType.Parent];
-
-      if (Parent <> nil) and (Parent <> Declaration) and (Parent is TciTypeDeclaration) then
-        Declaration := Parent as TciTypeDeclaration
-      else
-        Declaration := nil;
-
-      Inc(Depth);
-    end;
-
-    if Depth >= 20 then
-      DebugLn('Recursive type detected');
-  end;
-
-begin
-  Result := nil;
-  if Declaration = nil then
-    Exit;
-
-  if Declaration is TciProcedureClassName then
-  begin
-    Declaration := LocalByName[Declaration.Text];
-    if (Declaration = nil) then
-      Declaration := GlobalByName[Declaration.Text];
-    if Declaration is TciTypeDeclaration then
-      GetMethods(Declaration as TciTypeDeclaration);
-  end else
-  if Declaration is TciTypeKind then
-  begin
-    with Declaration as TciTypeKind do
-    begin
-      if RecordType <> nil then
-        GetFields(RecordType);
-
-      if IdentifierType <> nil then
-      begin
-        Declaration := GlobalByName[IdentifierType.Text];
-        if Declaration is TciTypeDeclaration then
-          GetMethods(Declaration as TciTypeDeclaration);
-      end;
-    end;
-  end else
-  if Declaration is TciTypeDeclaration then
-  begin
-    GetMethods(Declaration as TciTypeDeclaration);
-    GetEnumElements(Declaration as TciTypeDeclaration);
-  end else
-  if Declaration is TciRecordType then
-    GetFields(Declaration as TciRecordType)
+  if (Decl is TDeclaration_TypeMethod) then
+    Result := [Decl]
   else
-  if Declaration is TciArrayType then
-    Result := Result + ManageParser(ParseArrayHelpers(Declaration as TciArrayType)).Items.ToArray
-  else
-    DebugLn('GetMembersOfType: Unexpected type "' + Declaration.ClassName + '"');
-end;
-
-function TCodeInsight.GetMembersOfType(Declaration: TDeclaration; Name: String): TDeclarationArray;
-var
-  Declarations: TDeclarationArray;
-  i: Int32;
-begin
-  Result := nil;
-
-  Declarations := GetMembersOfType(Declaration);
-  for i := 0 to High(Declarations) do
-    if Declarations[i].IsName(Name) then
-      Result := Result + [Declarations[i]];
-end;
-
-function TCodeInsight.FindDeclarations(Expr: String): TDeclarationArray;
-var
-  Expressions: TExpressionArray;
-  Name: String;
-  Declaration: TDeclaration;
-begin
-  Result := nil;
-
-  Expressions := GetExpressionArray(Expr);
-  Name := Expressions.Pop.Identifier;
-
-  if Length(Expressions) > 0 then
+  if (Decl is TDeclaration_Method) then
   begin
-    Declaration := ParseExpression(Expressions);
-    if Declaration <> nil then
-      Result := GetMembersOfType(Declaration, Name);
-  end else
-    Result := LocalsByName[Name] + GlobalsByName[Name];
+    if (TDeclaration_Method(Decl).MethodType in [mtObjectFunction, mtObjectProcedure]) then
+    begin
+      for Decl in GetMethodsOfType(TDeclaration_Method(Decl).ObjectName) do
+        if Decl.IsName(n) then
+          Result := Result + [Decl];
+    end else
+      for Decl in GetGlobals() do
+        if Decl.IsName(n) and (Decl is TDeclaration_Method) then
+          Result := Result + [Decl];
+  end;
 end;
 
-function TCodeInsight.FindMethods(Expr: String): TDeclarationArray;
+function TCodeinsight.GetGlobals: TDeclarationArray;
+var
+  I: Integer;
+begin
+  Result := FScriptParser.Globals.ToArray;
+  for I := 0 to High(FBaseIncludes) do
+    Result := Result + FBaseIncludes[I].Globals.ToArray;
+end;
 
-  function Resolve(Declaration: TDeclaration): TciProcedureDeclaration;
+function TCodeinsight.GetMethodsOfType(Typ: String): TDeclarationArray;
+var
+  I, Count: Integer;
+begin
+  Result := GetMembersOfType(EnsureTypeDeclaration(FindDecl(Typ)));
+
+  Count := 0;
+  for I := 0 to High(Result) do
+    if (Result[I] is TDeclaration_Method) then
+    begin
+      Result[Count] := Result[I];
+      Inc(Count);
+    end;
+  SetLength(Result, Count);
+end;
+
+function TCodeinsight.GetMembersOfType(Decl: TDeclaration): TDeclarationArray;
+
+  procedure CheckRecord(Decl: TDeclaration);
+  begin
+    Result := Result + Decl.Items.GetItemsOfClass(TDeclaration_Var);
+  end;
+
+  procedure CheckMethods(Decl: TDeclaration);
   var
-    NativeMethod: TciNativeType;
-    Parent: TDeclaration;
+    I: Integer;
+  begin
+    for I := 0 to High(FBaseIncludes) do
+      Result := Result + FBaseIncludes[I].GetMethodsOfType(Decl.Name);
+    Result := Result + FScriptParser.GetMethodsOfType(Decl.Name);
+  end;
+
+  function GetParent(Decl: TDeclaration): TDeclaration;
+  begin
+    if (Decl is TDeclaration_TypeRecord) then
+      Result := EnsureTypeDeclaration(TDeclaration_TypeRecord(Decl).Parent)
+    else
+    if (Decl is TDeclaration_TypeCopy) then
+      Result := EnsureTypeDeclaration(TDeclaration_TypeCopy(Decl).VarType)
+    else
+    if (Decl is TDeclaration_TypeAlias) then
+      Result := EnsureTypeDeclaration(TDeclaration_TypeAlias(Decl).VarType)
+    else
+      Result := nil;
+  end;
+
+var
+  ParentDecl: TDeclaration;
+  Depth: Integer;
+begin
+  Result := nil;
+
+  Depth := 0;
+  while (Decl <> nil) and (Depth < 20) do
+  begin
+    if (Decl is TDeclaration_TypeRecord) then
+      CheckRecord(Decl);
+    CheckMethods(Decl);
+
+    ParentDecl := GetParent(Decl);
+    if (ParentDecl <> Decl) then
+      Decl := ParentDecl
+    else
+      Decl := nil;
+
+    Inc(Depth);
+  end;
+
+  if (Depth > 20) then
+    DebugLn('TCodeinsight.GetMembersOfType: Recursive type');
+end;
+
+function TCodeinsight.EnsureTypeDeclaration(Decl: TDeclaration): TDeclaration;
+begin
+  Result := Decl;
+  if (Result is TDeclaration_VarType) and (Result.Items.Count > 0) then
+    Result := Result.Items.First();
+  if (Result is TDeclaration_Identifier) then
+    Result := FindDecl(Result.Text);
+end;
+
+function TCodeinsight.DoArrayIndex(Decl: TDeclaration; Dimensions: Integer): TDeclaration;
+begin
+  Result := Decl;
+  if (Result is TDeclaration_TypeArray) then
+  begin
+    Dec(Dimensions, TDeclaration_TypeArray(Result).DimCount);
+
+    Result := EnsureTypeDeclaration(TDeclaration_TypeArray(Result).VarType);
+    if (Dimensions > 0) then
+      Result := DoArrayIndex(Result, Dimensions);
+  end;
+end;
+
+function TCodeinsight.DoPointerDeref(Decl: TDeclaration): TDeclaration;
+begin
+  Result := Decl;
+  if (Result is TDeclaration_TypePointer) then
+    Result := EnsureTypeDeclaration(TDeclaration_TypePointer(Result).VarType);
+end;
+
+function TCodeinsight.ParseExpression(Expr: TExpressionItems; WantMethodResult: Boolean): TDeclaration;
+
+  function FindMember(Decl: TDeclaration; Expr: TExpressionItem): TDeclaration;
   begin
     Result := nil;
 
-    if (Declaration <> nil) and not (Declaration is TciProcedureDeclaration) then
-    begin
-      Declaration := ResolveType(Declaration);
-
-      if Declaration is TciTypeDeclaration then
+    for Decl in GetMembersOfType(Decl) do
+      if Decl.IsName(Expr.Text) then
       begin
-        NativeMethod := TciTypeDeclaration(Declaration).NativeMethodType;
-
-        if NativeMethod <> nil then
+        if (Decl is TDeclaration_Var) and (TDeclaration_Var(Decl).VarType <> nil) then
         begin
-          Parent := GlobalByName[NativeMethod.Parent];
-          if Parent is TciTypeDeclaration then
-            Declaration := Parent as TciTypeDeclaration;
+          Result := EnsureTypeDeclaration(TDeclaration_Var(Decl).VarType);
+          Exit;
         end;
 
-        if Declaration is TciTypeDeclaration then
-          Declaration := TciTypeDeclaration(Declaration).MethodType;
-      end;
-    end;
+        if (Decl is TDeclaration_Method) then
+        begin
+          if Expr.IsLastItem then
+          begin
+            case WantMethodResult of
+              True:
+                if (TDeclaration_Method(Decl).ResultType <> nil) then
+                begin
+                  Result := EnsureTypeDeclaration(TDeclaration_Method(Decl).ResultType);
+                  Exit;
+                end;
+              False:
+                begin
+                  Result := Decl;
+                  Exit;
+                end;
+            end;
+          end;
 
-    if Declaration is TciProcedureDeclaration then
-      Result := Declaration as TciProcedureDeclaration;
+          if (TDeclaration_Method(Decl).ResultType <> nil) then
+          begin
+            Result := EnsureTypeDeclaration(TDeclaration_Method(Decl).ResultType);
+            Exit;
+          end;
+        end;
+      end;
+  end;
+
+  function DoSymbols(Decl: TDeclaration; Expr: TExpressionItem): TDeclaration;
+  begin
+    Result := Decl;
+    if Expr.DerefText then
+      Result := DoPointerDeref(Result);
+
+    if (Expr.Dimensions > 0) then
+    begin
+      Result := DoArrayIndex(Result, Expr.Dimensions);
+      if Expr.DerefDimension then
+        Result := DoPointerDeref(Result);
+    end;
   end;
 
 var
-  Declaration: TciProcedureDeclaration;
-  Declarations: TDeclarationArray;
-  i: Int32;
-  Invoke: Boolean;
+  Decl: TDeclaration;
+  I: Integer;
 begin
   Result := nil;
-
-  Invoke := Expr.EndsWith('()');
-  Declarations := FindDeclarations(Expr);
-
-  for i := 0 to High(Declarations) do
-  begin
-    Declaration := Resolve(Declarations[i]);
-
-    if (Declaration <> nil) then
-    begin
-      if Invoke then
-      begin
-        if (Declaration.ReturnType <> nil) then
-          Declaration := Resolve(Declaration.ReturnType)
-        else
-          Declaration := nil;
-      end;
-      if (Declaration <> nil) then
-        Result := Result + [Declaration];
-    end;
-  end;
-end;
-
-function TCodeInsight.ResolveType(Declaration: TDeclaration): TDeclaration;
-begin
-  Result := nil;
-
-  if Declaration is TciTypeIdentifer then
-  begin
-    Result := GlobalByName[Declaration.Text];
+  if (Length(Expr) = 0) then
     Exit;
-  end;
 
-  if Declaration is TciProcedureClassName then
-  begin
-    Result := LocalByName[Declaration.Text];
-    if (Result = nil) then
-      Result := GlobalByName[Declaration.Text];
-    Exit;
-  end;
-  if Declaration is TciTypeDeclaration then
-    Exit(Declaration);
+  Decl := FindDecl(Expr[0].Text);
 
-  if Declaration is TciProcedureDeclaration then
-    Declaration := TciProcedureDeclaration(Declaration).ReturnType
+  if (Decl is TDeclaration_Method) and (not Expr[0].IsLastItem) then
+   Decl := EnsureTypeDeclaration(TDeclaration_Method(Decl).ResultType)
   else
-  if Declaration is TciVarDeclaration then
-    Declaration := TciVarDeclaration(Declaration).VarType;
+  if (Decl is TDeclaration_Var) then
+    Decl := EnsureTypeDeclaration(TDeclaration_Var(Decl).VarType);
 
-  if Declaration is TciTypeKind then
+  if (Decl = nil) then
   begin
-    with Declaration as TciTypeKind do
-    begin
-      if IdentifierType <> nil then
-      begin
-        Result := LocalByName[IdentifierType.Name];
-        if (Result = nil) then
-          Result := GlobalByName[IdentifierType.Name]
-      end else
-        Result := GetType;
-    end;
-  end else
-  begin
-    if Declaration = nil then
-      DebugLn('ResolveType: Nil')
-    else
-      DebugLn('ResolveType: Unexpected type "' + Declaration.ClassName + '"');
+    DebugLn('TCodeinsight.ParseExpression: Unknown starting type "' + Expr[0].Text + '"');
+    Exit;
   end;
+
+  Decl := DoSymbols(Decl, Expr[0]);
+  if (Decl = nil) then
+  begin
+    DebugLn('TCodeinsight.ParseExpression: Failed on starting symbols "' + Expr[0].Text + '"');
+    Exit;
+  end;
+
+  for I := 1 to High(Expr) do
+  begin
+    Decl := FindMember(Decl, Expr[I]);
+    if (Decl = nil) then
+    begin
+      DebugLn('TCodeinsight.ParseExpression: Failed on member "' + Expr[I].Text + '"');
+      Exit;
+    end;
+    Decl := DoSymbols(Decl, Expr[I]);
+    if (Decl = nil) then
+    begin
+      DebugLn('TCodeinsight.ParseExpression: Failed on symbols "' + Expr[I].Text + '"');
+      Exit;
+    end;
+  end;
+
+  Result := Decl;
 end;
 
-function TCodeInsight.ResolveArrayType(Declaration: TDeclaration; Dimensions: Int32): TDeclaration;
+function TCodeinsight.ParseExpression(Expr: String; WantMethodResult: Boolean): TDeclaration;
 begin
-  Result := nil;
-
-  while (Declaration <> nil) and (Dimensions > 0) do
-  begin
-    if Declaration is TciTypeDeclaration then
-      Declaration := TciTypeDeclaration(Declaration).ArrayType;
-
-    if (Declaration is TciArrayType) then
-    begin
-      with Declaration as TciArrayType do
-      begin
-        Dec(Dimensions, GetDimensionCount());
-        Declaration := ResolveType(GetType());
-      end;
-    end else
-      Declaration := nil;
-  end;
-
-  Result := Declaration;
+  Result := ParseExpression(StringToExpression(Expr), WantMethodResult);
 end;
 
-function TCodeInsight.ResolvePointer(Declaration: TDeclaration): TDeclaration;
-begin
-  Result := nil;
-
-  if Declaration is TciTypeDeclaration then
-    Declaration := TciTypeDeclaration(Declaration).PointerType;
-
-  if (Declaration <> nil) and (Declaration.ClassType = TciPointerType) then
-    Result := ResolveType(TciPointerType(Declaration).GetType());
-end;
-
-procedure TCodeInsight.Run;
-
-  procedure GetMethodLocals(Method: TciProcedureDeclaration);
-  var
-    Declaration: TDeclaration;
-    Declarations: TDeclarationArray;
-    i: Int32;
-  begin
-    Declarations := nil;
-
-    while (Method <> nil) do
-    begin
-      Declarations := Declarations + Method.Items.GetItemsOfClass(TciVarDeclaration);
-      Declarations := Declarations + Method.Items.GetItemsOfClass(TciTypeDeclaration);
-      Declarations := Declarations + Method.Items.GetItemsOfClass(TciProcedureDeclaration);
-      Declarations := Declarations + Method.Items.GetItemsOfClass(TciReturnType);
-      Declarations := Declarations + Method.GetParamDeclarations();
-
-      if (tokStatic in Method.Directives) then
-        Break;
-
-      Declaration := Method.Items.GetFirstItemOfClass(TciProcedureClassName);
-      if (Declaration <> nil) then
-      begin
-        Declarations := Declarations + [Declaration];
-        if (Lexer.Defines.IndexOf('!EXPLICTSELF') = -1) then
-          Declarations := Declarations + GetMembersOfType(Declaration);
-      end;
-
-      Method.HasOwnerClass(TciProcedureDeclaration, TDeclaration(Method));
-    end;
-
-    for i := 0 to High(Declarations) do
-      FLocals.Add(Declarations[i].Name, Declarations[i]);
-  end;
-
-  procedure GetWithVariables(Declarations: TDeclarationArray);
-  var
-    Declaration: TDeclaration;
-    i: Int32;
-  begin
-    for i := 0 to High(Declarations) do
-    begin
-      Declaration := ParseExpression(Declarations[i].Text);
-      if Declaration <> nil then
-        for Declaration in GetMembersOfType(Declaration) do
-          FLocals.Add(Declaration.Name, Declaration);
-    end;
-  end;
-
-  function GetLastDeclaration(Declaration: TDeclaration): TDeclaration;
-  begin
-    while Declaration.Items.Count > 0 do
-      Declaration := Declaration.Items[Declaration.Items.Count - 1];
-
-    Result := Declaration;
-  end;
-
-var
-  Declaration: TDeclaration;
-  Declarations: TDeclarationArray;
-  Method: TDeclaration;
-  I: Int32;
-begin
-  Lexer.ClearDefines();
-  Lexer.Defines.AddStrings(FBaseDefines);
-  if SimbaSettings.Editor.IgnoreCodeToolsIDEDirective.Value then
-    Lexer.Defines.Add('!IGNORECODETOOLS');
-
-  inherited Run();
-
-  FLocals.Clear();
-
-  // Find Locals
-  if (FItems.Count > 0) and (FLexer.CaretPos > -1) then
-  begin
-    Declaration := FItems.GetItemInPosition(FLexer.CaretPos);
-    if (Declaration = nil) and (FLexer.CaretPos >= FItems[FItems.Count - 1].StartPos) then // Assume declaration isn't fully declared
-      Declaration := GetLastDeclaration(FItems[FItems.Count - 1]);
-
-    if (Declaration <> nil) then
-    begin
-      Method := Declaration;
-
-      if (Method is TciProcedureDeclaration) then
-        GetMethodLocals(Method as TciProcedureDeclaration);
-      if Method.HasOwnerClass(TciProcedureDeclaration, Method, True) then
-        GetMethodLocals(Method as TciProcedureDeclaration);
-
-      Declarations := Declaration.GetOwnersOfClass(TciWithStatement);
-      if Declaration is TciWithStatement then
-        Declarations := Declarations + [Declaration];
-
-      for I := 0 to High(Declarations) do
-        GetWithVariables(Declarations[I].Items.GetItemsOfClass(TciVariable));
-    end;
-  end;
-end;
-
-constructor TCodeInsight.Create;
+constructor TCodeinsight.Create;
 begin
   inherited Create();
 
-  FLocals := TDeclarationMap.Create();
-
-  OnInclude := @DoInclude;
-  OnLibrary := @DoLibrary;
-
-  Reset();
+  FScriptParser := TCodeParser.Create();
+  FScriptParser.OnFindInclude := @DoFindInclude;
 end;
 
-destructor TCodeInsight.Destroy;
+destructor TCodeinsight.Destroy;
 begin
-  Reset();
-
-  FLocals.Free();
+  if (FScriptParser <> nil) then
+    FreeAndNil(FScriptParser);
 
   inherited Destroy();
 end;
 
 end.
+

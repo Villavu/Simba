@@ -84,6 +84,7 @@ begin
       Parser.SetScript(Text);
       Parser.Run();
 
+      {
       Decl := Parser.Items.GetItemInPosition(SelStart - 1);
       if (Decl <> nil) and ((Decl is TciProcedureDeclaration) or Decl.HasOwnerClass(TciProcedureDeclaration, Decl, True)) then
         with Decl as TciProcedureDeclaration do
@@ -99,6 +100,7 @@ begin
             Format(SimbaSettings.Editor.DocumentationComment.Value, [FullName, StringOfChar('~', Length(FullName)), Header])
           );
         end;
+      }
     except
     end;
     if (Parser <> nil) then

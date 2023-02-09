@@ -98,7 +98,7 @@ type
     function StartsWith(const Value: String; CaseSenstive: Boolean = True): Boolean;
     function EndsWith(const Value: String; CaseSenstive: Boolean = True): Boolean;
 
-    function Partition(const Value: String): TStringArray;
+    function Partition(const Value: String; CaseSenstive: Boolean = True): TStringArray;
     function Replace(const OldValue: String; const NewValue: String): String; overload;
     function Replace(const OldValue: String; const NewValue: String; ReplaceFlags: TReplaceFlags): String; overload;
 
@@ -782,13 +782,17 @@ begin
   end;
 end;
 
-function TSimbaStringHelper.Partition(const Value: String): TStringArray;
+function TSimbaStringHelper.Partition(const Value: String; CaseSenstive: Boolean): TStringArray;
 var
   I: Integer;
 begin
   Result := ['', '', ''];
 
-  I := Self.IndexOf(Value);
+  if CaseSenstive then
+    I := Self.IndexOf(Value)
+  else
+    I := Self.ToUpper().IndexOf(Value.ToUpper());
+
   if (I > 0) then
   begin
     Result[0] := System.Copy(Self, 1, I-1);

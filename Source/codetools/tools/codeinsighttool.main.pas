@@ -43,10 +43,10 @@ begin
     Run();
 
     Decl := ParseExpression(Edit1.Text);
-    //if (Decl = nil) then
-    //  Memo1.Text := 'Base var type not found'
-    //else
-    //  Memo1.Text := 'Base var type: ' + Decl.Dump + ' :: ' + Decl.Text;
+    if (Decl = nil) then
+      Memo1.Text := 'Failed'
+    else
+      Memo1.Text := 'Found: ' + Decl.Dump() + ' "' + Decl.Text + '"';
   finally
     Free();
   end;

@@ -10,82 +10,259 @@ unit simba.parameterhint;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, ExtCtrls, SynEdit,
+  Classes, SysUtils, Forms, Controls, Graphics, ExtCtrls, LCLType,
+  SynEdit, SynEditTypes, SynEditKeyCmds,
   simba.ide_codetools_insight, simba.ide_codetools_parser;
 
 type
-  TSimbaParameterHint = class(THintWindow)
-  protected const
-    FBorderX = 4;
-    FBorderY = 2;
+  TSimbaParamHintForm = class(THintWindow)
   protected
-    LastParameterIndex: Int32;
-    FSynEdit: TSynEdit;
-    FStartPoint: TPoint;
-    FBracketPoint: TPoint;
-    FParser: TCodeInsight;
-    FDeclarations: array of TciProcedureDeclaration;
-    FParameters: array of TDeclarationArray;
+    FMethods: array of TDeclaration_Method;
+    FBoldIndex: Integer;
+    FNeededWidth: Integer;
+    FNeededHeight: Integer;
+    FMeasuring: Boolean;
+
+    procedure DoHide; override;
 
     procedure Paint; override;
-
-    procedure HandleEditorKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure HandleEditorCaretChange(Sender: TObject);
-
-    procedure DrawHints(var Bounds: TRect; Measure: Boolean);
-    function PrepareParamString(Index: Int32; out Str: String): Integer;
-
-    procedure SetEditor(Value: TSynEdit);
-    procedure SetParser(Value: TCodeInsight);
+    procedure DrawMethod(var X, Y: Integer; Method: TDeclaration);
+    procedure SetBoldIndex(AValue: Integer);
   public
-    property Editor: TSynEdit read FSynEdit write SetEditor;
-    property Parser: TCodeInsight read FParser write SetParser;
+    procedure Show(ScreenPoint: TPoint; Decls: TDeclarationArray);
 
-    procedure CalculateBounds;
-    procedure Execute(BracketPoint: TPoint; Methods: TDeclarationArray);
+    property BoldIndex: Integer read FBoldIndex write SetBoldIndex;
+  end;
 
+  TSimbaParamHint = class(TLazSynEditPlugin)
+  protected
+    FHintForm: TSimbaParamHintForm;
+    FParenthesesPoint: TPoint;
+    FDisplayPoint: TPoint;
+    FCodeinsight: TCodeinsight;
+
+    function IsShowing: Boolean;
+    function GetParameterIndexAtCaret: Integer;
+
+    procedure DoEditorTopLineChanged(Sender: TObject; Changes: TSynStatusChanges);
+    procedure DoEditorCaretMove(Sender: TObject);
+    procedure DoEditorCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
+    procedure DoEditorKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure DoEditorAdded(Value: TCustomSynEdit); override;
+    procedure DoEditorRemoving(Value: TCustomSynEdit); override;
+  public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+  public
+    class var ParamHintCommand: TSynEditorCommand;
+    class function IsParamHintCommand(Command: TSynEditorCommand; AChar: TUTF8Char): Boolean;
+    class constructor Create;
   end;
 
 implementation
 
 uses
-  LCLIntf, LCLType, Types,
-  mPasLexTypes, mPasLex;
+  mPasLexTypes, mPasLex,
+  simba.editor, simba.mufasatypes, simba.ide_codetools_setup;
 
-type
-  TSynEdit_Helper = class helper for TSynEdit
-  public
-    procedure AddHandlerOnCaretChange(Handler: TNotifyEvent);
-  end;
-
-procedure TSynEdit_Helper.AddHandlerOnCaretChange(Handler: TNotifyEvent);
+procedure TSimbaParamHintForm.SetBoldIndex(AValue: Integer);
 begin
-  GetCaretObj().AddChangeHandler(Handler);
+  FBoldIndex := AValue;
+  if (FBoldIndex = -1) then
+    Hide();
 end;
 
-function TSimbaParameterHint.PrepareParamString(Index: Int32; out Str: String): Integer;
+procedure TSimbaParamHintForm.DoHide;
+begin
+  FMethods := nil;
+
+  inherited DoHide();
+end;
+
+procedure TSimbaParamHintForm.Paint;
+var
+  I: Integer;
+  X, Y: Integer;
+begin
+  if (not FMeasuring) then
+  begin
+    Canvas.Brush.Color := cl3DLight;
+    Canvas.Pen.Color := clBlack;
+    Canvas.Rectangle(ClientRect);
+  end;
+
+  Y := 2;
+  X := 0;
+
+  for I := 0 to High(FMethods) do
+  begin
+    X := 4;
+    DrawMethod(X, Y, FMethods[I]);
+    if (X > FNeededWidth) then
+      FNeededWidth := X;
+  end;
+
+  FNeededWidth := FNeededWidth + 4;
+  FNeededHeight := Y + 2;
+end;
+
+procedure TSimbaParamHintForm.DrawMethod(var X, Y: Integer; Method: TDeclaration);
+var
+  ParamIndex: Integer;
+
+  procedure DrawText(Str: String; Bold: Boolean = False);
+  begin
+    if not FMeasuring then
+    begin
+      Canvas.Font.Bold := Bold;
+      Canvas.TextOut(X, Y, Str);
+    end;
+
+    Inc(X, Canvas.TextWidth(Str));
+  end;
+
+  procedure DrawGroup(Group: TDeclaration);
+  var
+    Decls: TDeclarationArray;
+    I: Integer;
+    NeedBold: Boolean;
+  begin
+    Decls := Group.Items.GetItemsOfClass(TDeclaration_Parameter);
+    if (Length(Decls) = 0) then
+      Exit;
+
+    NeedBold := (FBoldIndex >= ParamIndex) and (FBoldIndex < ParamIndex + Length(Decls));
+    with TDeclaration_Parameter(Decls[0]) do
+    begin
+      case ParamType of
+        tokVar: DrawText('var ', NeedBold);
+        tokOut: DrawText('out ', NeedBold);
+        tokConst: if (VarTypeString = '') then DrawText('const ', NeedBold);
+        tokConstRef: if (VarTypeString = '') then DrawText('constref ', NeedBold);
+      end;
+    end;
+
+    for I := 0 to High(Decls) do
+      with TDeclaration_Parameter(Decls[I]) do
+      begin
+        if (I > 0) then
+          DrawText(', ');
+        DrawText(Name, ParamIndex=FBoldIndex);
+
+        Inc(ParamIndex);
+      end;
+
+    with TDeclaration_Parameter(Decls[0]) do
+    begin
+      if (VarTypeString <> '') then
+        DrawText(': ' + VarTypeString, NeedBold);
+      if (DefaultValueString <> '') then
+        DrawText(' = ' + DefaultValueString, NeedBold);
+    end;
+  end;
+
+var
+  Decl: TDeclaration;
+  Decls: TDeclarationArray;
+  I: Integer;
+begin
+  Decl := Method.Items.GetFirstItemOfClass(TDeclaration_ParamList);
+  if (Decl = nil) then
+  begin
+    if (Method is TDeclaration_TypeMethod) then
+      DrawText('();')
+    else
+      DrawText(Method.Name + '();');
+    Y := Y + Canvas.TextHeight('Lol');
+    Exit;
+  end;
+
+  ParamIndex := 0;
+
+  Decls := Decl.Items.GetItemsOfClass(TDeclaration_ParamGroup);
+  for I := 0 to High(Decls) do
+  begin
+    if (I = 0) then
+    begin
+      if (Method is TDeclaration_TypeMethod) then
+        DrawText('(')
+      else
+        DrawText(Method.Name + '(');
+    end;
+
+    DrawGroup(Decls[I]);
+
+    if (I < High(Decls)) then
+      DrawText('; ')
+    else
+      DrawText(')');
+  end;
+
+  Y := Y + Canvas.TextHeight('Lol');
+end;
+
+procedure TSimbaParamHintForm.Show(ScreenPoint: TPoint; Decls: TDeclarationArray);
+var
+  ScreenRect: TRect;
+  MaxRight: Integer;
+  I, Count: Integer;
+begin
+  Count := 0;
+  SetLength(FMethods, Length(Decls));
+  for I := 0 to High(Decls) do
+    if (Decls[I] is TDeclaration_Method) then
+    begin
+      if TDeclaration_Method(Decls[I]).IsOverride then
+        Continue;
+
+      FMethods[I] := TDeclaration_Method(Decls[I]);
+      Inc(Count);
+    end;
+  SetLength(FMethods, Count);
+
+  FNeededHeight := 0;
+  FNeededWidth := 0;
+  FMeasuring := True;
+  Paint();
+  FMeasuring := False;
+
+  ScreenRect.Top := ScreenPoint.Y;
+  ScreenRect.Left := ScreenPoint.X;
+  ScreenRect.Width := FNeededWidth;
+  ScreenRect.Height := FNeededHeight;
+  ScreenRect.Offset(-4, -ScreenRect.Height);
+
+  // Either clip to screen right or main form right, whatever is more right.
+  MaxRight := Max(Application.MainForm.BoundsRect.Right, Monitor.BoundsRect.Right);
+  if (ScreenRect.Right > MaxRight) then
+    ScreenRect.Right := MaxRight;
+
+  ActivateWithBounds(ScreenRect, '');
+end;
+
+function TSimbaParamHint.IsShowing: Boolean;
+begin
+  Result := FHintForm.Visible;
+end;
+
+function TSimbaParamHint.GetParameterIndexAtCaret: Integer;
 var
   Lexer: TmwPasLex;
-  BracketCount, ParameterIndex, ParamC: Int32;
-  ParamNames: TStringArray;
-  TypeDecl: TDeclaration;
-  s, TypeStr, Params: string;
-  i, ii, Group: Int32;
+  BracketCount: Integer;
 begin
   Result := -1;
-
-  if (FSynEdit = nil) then
-    Exit;
-  if (Index < 0) or (Index >= Length(FParameters)) then
+  if ((Editor.CaretX < FParenthesesPoint.X) and (Editor.CaretY < FParenthesesPoint.Y)) or
+     ((Editor.CaretX < FParenthesesPoint.X) and (Editor.CaretY = FParenthesesPoint.Y)) then
     Exit;
 
-  Lexer := TmwPasLex.Create(FSynEdit.TextBetweenPoints[FBracketPoint, FSynEdit.CaretXY]);
-  Lexer.Next();
+  Lexer := TmwPasLex.Create(Editor.TextBetweenPoints[FParenthesesPoint, TPoint.Create(Editor.CaretX, Editor.CaretY)]);
+  Lexer.NextNoJunk();
   try
+    if (Lexer.TokenID <> tokRoundOpen) then
+      Exit;
+
+    Result := 0;
     BracketCount := 0;
-    ParameterIndex := -1;
 
     while (Lexer.TokenID <> tokNull) do
     begin
@@ -93,21 +270,24 @@ begin
         tokRoundOpen, tokSquareOpen:
           begin
             Inc(BracketCount);
-            if BracketCount = 1 then
-              ParameterIndex := 0;
+            if (BracketCount = 1) then
+              Result := 0;
           end;
 
         tokRoundClose, tokSquareClose:
           begin
             Dec(BracketCount);
-            if BracketCount =0 then
+            if (BracketCount = 0) then
+            begin
+              Result := -1;
               Exit;
+            end;
           end;
 
         tokComma:
           begin
-            if BracketCount = 1 then
-              Inc(ParameterIndex);
+            if (BracketCount = 1) then
+              Inc(Result);
           end;
         end;
 
@@ -116,356 +296,162 @@ begin
   finally
     Lexer.Free();
   end;
+end;
 
-  if ParameterIndex = -1 then
-    Exit;
-
-  if ParameterIndex = LastParameterIndex then
+procedure TSimbaParamHint.DoEditorTopLineChanged(Sender: TObject; Changes: TSynStatusChanges);
+begin
+  if IsShowing then
   begin
-    Result := ParameterIndex;
-    Exit;
+    if (Editor.CaretY < Editor.TopLine) or (Editor.CaretY > Editor.ScreenRowToRow(Max(0, Editor.LinesInWindow - 1))) then
+      FHintForm.Visible := False
+    else
+      FHintForm.Show(Editor.ClientToScreen(Editor.RowColumnToPixels(Editor.LogicalToPhysicalPos(FDisplayPoint))), TDeclarationArray(FHintForm.FMethods));
   end;
+end;
 
-  str := '';
-  ParamC := 0;
-
-  group := 0;
-  i := 0;
-  while (i < Length(FParameters[Index])) do
+procedure TSimbaParamHint.DoEditorCaretMove(Sender: TObject);
+begin
+  if IsShowing then
   begin
-    // Seems pointless to show these. Just clutter.
-    //if (FParameters[Index][i] is TciConstRefParameter) then
-    //  s := 'constref '
-    //else if (FParameters[Index][i] is TciConstParameter) then
-    //  s := 'const '
-    if (FParameters[Index][i] is TciOutParameter) then
-      s := 'out '
-    //else if (FParameters[Index][i] is TciInParameter) then
-    //  s := 'in '
-    else if (FParameters[Index][i] is TciVarParameter) then
-      s := 'var '
-    else
-      s := '';
+    FHintForm.BoldIndex := GetParameterIndexAtCaret();
+    FHintForm.Invalidate();
+  end;
+end;
 
-    group := TciParameter(FParameters[Index][i]).Group;
-    SetLength(ParamNames, 0);
+procedure TSimbaParamHint.DoEditorCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
 
-    TypeDecl := FParameters[Index][i].Items.GetFirstItemOfClass(TciTypeKind);
-    while (i < Length(FParameters[Index])) and (TciParameter(FParameters[Index][i]).Group = group) do
-    begin
-      SetLength(ParamNames, Length(ParamNames) + 1);
-      ParamNames[High(ParamNames)] := TciParameter(FParameters[Index][i]).Name;
-      Inc(i);
-    end;
+  // Go back until we find an unclosed (
+  function FindParenthesesPoint: TPoint;
+  var
+    Text: String;
+    I, InRound: Integer;
+  begin
+    Result.X := -1;
+    Result.Y := -1;
 
-    if TypeDecl <> nil then
-      TypeStr := ': ' + TypeDecl.Text
-    else
-      TypeStr := '';
+    Text := Editor.Text;
+    if (Editor.SelStart > Length(Text)) then
+      Exit;
 
-    Params := '';
-    for ii := 0 to high(ParamNames) do
-    begin
-      if ParameterIndex = ParamC then //Found the current parameter index in the parameterdecl!
-      begin
-        if s <> '' then
-          s := '\' + s + '\'; //If it has a const/var/in/out thingy, bold this as well
-        if TypeStr <> '' then        //If has a type then bold the type
-          TypeStr := '\' + TypeStr + '\';
-        if Params <> '' then
-          Params := Params +', \' + ParamNames[ii] + '\'
-        else
-          Params := '\' + ParamNames[ii] + '\';
-      end else
-      begin
-        if Params <> '' then
-          Params := Params +', ' +  ParamNames[ii]
-        else
-          Params := ParamNames[ii]
+    InRound := 1;
+    for I := Editor.SelStart - 1 downto 1 do
+      case Text[I] of
+        ')': Inc(InRound);
+        '(':
+          begin
+            Dec(InRound);
+            if (InRound = 0) then
+            begin
+              Result := Editor.CharIndexToRowCol(I-1);
+              Exit;
+            end;
+          end;
       end;
-      inc(ParamC);
-    end;
-
-    if str <> '' then
-      str := str + '; ' + s + Params + TypeStr
-    else
-      str := s + params + TypeStr;
   end;
 
-  if (FDeclarations[Index] <> nil) then
-    TypeDecl := FDeclarations[Index].ReturnType
-  else
-    TypeDecl := nil;
+var
+  Text: String;
+  I: Integer;
+  Decl: TDeclaration;
+begin
+  if IsParamHintCommand(Command, AChar) and CodetoolsSetup then
+  begin
+    Handled := True;
 
-  if TypeDecl <> nil then
-    TypeStr := ': ' + TypeDecl.Text
-  else
-    TypeStr := '';
+    Text := Editor.Text;
+    if (Editor.SelStart > Length(Text)) then
+      Exit;
 
-  str :=  '(' +  str + ')' + TypeStr + ';';
+    for I := Editor.SelStart - 1 downto 1 do
+      if (Text[I] = '(') then
+        Break;
 
-  if (FDeclarations[Index] <> nil) and (FDeclarations[Index].Name <> '') then
-    str := FDeclarations[Index].Name + str;
-  str := StringReplace(str, '\\', '', [rfReplaceAll]); //Delete all the \\, something like \const \\x\ is the same as \const x\
+    FCodeinsight.SetScript(Editor.Text, '', Editor.SelStart, Editor.SelStart);
+    FCodeinsight.Run();
+    FParenthesesPoint := FindParenthesesPoint();
 
-  Result := parameterindex;
+    Decl := FCodeinsight.ParseExpression(TSimbaEditor(Editor).GetExpression(FParenthesesPoint.X, FParenthesesPoint.Y), False);
+    if (Decl is TDeclaration_Method) then
+    begin
+      if (Decl is TDeclaration_TypeMethod) then
+        FDisplayPoint := FParenthesesPoint
+      else
+        FDisplayPoint := FParenthesesPoint.Offset(-Length(Decl.Name), 0);
+
+      FHintForm.Font := Editor.Font;
+      FHintForm.BoldIndex := GetParameterIndexAtCaret();
+      FHintForm.Show(Editor.ClientToScreen(Editor.RowColumnToPixels(Editor.LogicalToPhysicalPos(FDisplayPoint))), FCodeinsight.GetOverloads(Decl));
+    end;
+  end;
 end;
 
-procedure TSimbaParameterHint.SetEditor(Value: TSynEdit);
+procedure TSimbaParamHint.DoEditorKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if FSynEdit = Value then
-    Exit;
-
-  FSynEdit := Value;
-  FSynEdit.AddHandlerOnCaretChange(@HandleEditorCaretChange);
-  FSynEdit.AddHandlerOnKeyDown(@HandleEditorKeyDown);
+  if IsShowing() and (Key = VK_ESCAPE) then
+    Self.FHintForm.Hide();
 end;
 
-procedure TSimbaParameterHint.SetParser(Value: TCodeInsight);
+procedure TSimbaParamHint.DoEditorAdded(Value: TCustomSynEdit);
 begin
-  if (FParser <> nil) then
-    FParser.Free();
+  inherited DoEditorAdded(Value);
 
-  SetLength(FParameters, 0);
-  SetLength(FDeclarations, 0);
+  if (Value is TSimbaEditor) then
+    with TSimbaEditor(Value) do
+    begin
+      RegisterCaretMoveHandler(@DoEditorCaretMove);
+      RegisterBeforeKeyDownHandler(@DoEditorKeyDown);
+      RegisterCommandHandler(@DoEditorCommand, nil, [hcfPostExec]);
+      RegisterStatusChangedHandler(@DoEditorTopLineChanged, [scTopLine]);
 
-  FParser := Value;
+      with KeyStrokes.Add() do
+      begin
+        Key := VK_SPACE;
+        Shift := [ssCtrl, ssShift];
+        Command := ParamHintCommand;
+      end;
+    end;
 end;
 
-destructor TSimbaParameterHint.Destroy;
+procedure TSimbaParamHint.DoEditorRemoving(Value: TCustomSynEdit);
 begin
-  SetParser(nil);
+  if (Value is TSimbaEditor) then
+    with TSimbaEditor(Value) do
+    begin
+      UnRegisterCaretMoveHandler(@DoEditorCaretMove);
+      UnRegisterBeforeKeyDownHandler(@DoEditorKeyDown);
+      UnRegisterCommandHandler(@DoEditorCommand);
+      UnRegisterStatusChangedHandler(@DoEditorTopLineChanged);
+    end;
+
+  inherited DoEditorRemoving(Value);
+end;
+
+destructor TSimbaParamHint.Destroy;
+begin
+  if (FHintForm <> nil) then
+    FreeAndNil(FHintForm);
+  if (FCodeinsight <> nil) then
+    FreeAndNil(FCodeinsight);
 
   inherited Destroy();
 end;
 
-constructor TSimbaParameterHint.Create(AOwner: TComponent);
+class function TSimbaParamHint.IsParamHintCommand(Command: TSynEditorCommand; AChar: TUTF8Char): Boolean;
+begin
+  Result := ((Command = ecChar) and (AChar = '(')) or (Command = ParamHintCommand);
+end;
+
+class constructor TSimbaParamHint.Create;
+begin
+  ParamHintCommand := AllocatePluginKeyRange(1);
+end;
+
+constructor TSimbaParamHint.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  AutoHide := False;
-  LastParameterIndex := -1;
-end;
-
-procedure TSimbaParameterHint.CalculateBounds;
-var
-  MonitorRect: TRect;
-  ScreenPoint: TPoint;
-  R: TRect;
-begin
-  Font := FSynEdit.Font;
-
-  ScreenPoint := FSynEdit.ClientToScreen(FSynEdit.RowColumnToPixels(FSynEdit.LogicalToPhysicalPos(FStartPoint)));
-  MonitorRect := Screen.MonitorFromPoint(ScreenPoint).BoundsRect;
-
-  R := MonitorRect;
-  R.Left := ScreenPoint.X - FBorderX;
-  R.Top := ScreenPoint.Y;
-
-  DrawHints(R, True);
-
-  if R.Left < MonitorRect.Left then
-    R.Left := MonitorRect.Left;
-  if R.Top < MonitorRect.Top then
-    R.Top := MonitorRect.Top;
-  if R.Right > MonitorRect.Right then
-    R.Right := MonitorRect.Right;
-  if R.Bottom > MonitorRect.Bottom then
-    R.Bottom := MonitorRect.Bottom;
-
-  BoundsRect := Rect(R.Left, R.Top - R.Height, R.Right, R.Bottom - R.Height);
-end;
-
-procedure TSimbaParameterHint.HandleEditorCaretChange(Sender: TObject);
-var
-  MustHide: Boolean;
-  CursorXY: TPoint;
-  Line: string;
-  i: Int32;
-begin
-  if not self.Visible then
-    Exit;
-
-  try
-    MustHide := True;
-
-    if not Assigned(FSynEdit) then
-      Exit;
-    if FSynEdit.Focused = False then
-      Exit;
-    CursorXY := FSynEdit.CaretXY;
-    if (CursorXY.y < FBracketPoint.y) or ((CursorXY.x <= FBracketPoint.x) and (CursorXY.y <= FBracketPoint.y)) then //Cursor moved in front of the bracket
-      Exit;
-    if (FBracketPoint.Y <= 0) or (FBracketPoint.Y > FSynEdit.Lines.Count) then
-      Line := ''
-    else
-      Line:= FSynEdit.Lines[FBracketPoint.Y - 1];
-    if (FBracketPoint.X > Length(Line)) or (not (Line[FBracketPoint.X] in ['(','['])) then
-      Exit;
-
-    for i := 0 to High(FDeclarations) do
-    begin
-      if PrepareParamString(i, Line) <> LastParameterIndex then
-      begin
-        MustHide := False;
-        Exit;
-      end;
-    end;
-  finally
-    if MustHide then
-      Self.Hide()
-    else
-      Self.Invalidate();
-  end;
-end;
-
-procedure TSimbaParameterHint.HandleEditorKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-  if Self.Visible and (Key = VK_ESCAPE) then
-    Self.Hide();
-end;
-
-procedure TSimbaParameterHint.DrawHints(var Bounds: TRect; Measure: Boolean);
-var
-  CharacterSize: TSize;
-
-  function MeasureWord(constref Text: String): Int32;
-  var
-    i: Int32;
-  begin
-    Result := 0;
-    for i := 1 to Length(Text) do
-      if (Text[i] <> '\') then
-        Inc(Result);
-
-    Result *= CharacterSize.CX;
-  end;
-
-  procedure DrawWord(constref Text: String; X, Y: Int32);
-  var
-    i: Int32;
-  begin
-    Canvas.Brush.Style := bsClear;
-    Canvas.Font.Color := clBlack;
-
-    for i := 1 to Length(Text) do
-    begin
-      if Text[i] = '\' then
-        Canvas.Font.Bold := not Canvas.Font.Bold
-      else
-      begin
-        Canvas.TextOut(X, Y, Text[i]);
-
-        X := X + CharacterSize.CX;
-      end;
-    end;
-  end;
-
-  procedure DrawHint(Index: Int32; Offset: Int32; out Size: TSize);
-  var
-    i, X, Y: Int32;
-    Str: String;
-    Words: TStringArray;
-  begin
-    PrepareParamString(Index, Str);
-
-    X := FBorderX;
-    Y := FBorderY;
-
-    Size.CX := 0;
-    Size.CY := CharacterSize.CY;
-
-    Words := Str.Split(' ');
-    for i := 0 to High(Words) - 1 do
-      Words[i] := Words[i] + ' ';
-
-    for i := 0 to High(Words) do
-    begin
-      if (Bounds.Left + X + MeasureWord(Words[i]) > Bounds.Right) then
-      begin
-        if (X > Size.CX) then
-          Size.CX := X;
-        Size.CY := Size.CY + CharacterSize.CY;
-
-        X := FBorderX;
-        Y := Y + CharacterSize.CY;
-      end;
-
-      if not Measure then
-        DrawWord(Words[i], X, Offset + Y);
-
-      X := X + MeasureWord(Words[i]);
-    end;
-
-    if (X > Size.CX) then
-      Size.CX := X;
-  end;
-
-var
-  i, W, H: Int32;
-  Size: TSize;
-begin
-  CharacterSize := Canvas.TextExtent(' ');
-
-  W := 0;
-  H := 0;
-
-  for i := 0 to High(FParameters) do
-  begin
-    DrawHint(i, H, Size);
-
-    if (Size.CX > W) then
-      W := Size.CX;
-    H := H + Size.CY;
-  end;
-
-  Bounds.Right := Bounds.Left + W + (FBorderX * 2);
-  Bounds.Bottom := Bounds.Top + H + (FBorderY * 2);
-end;
-
-procedure TSimbaParameterHint.Paint;
-var
-  R: TRect;
-begin
-  R := ClientRect;
-
-  Canvas.Brush.Color := $F0F0F0;
-  Canvas.Pen.Color := clBlack;
-  Canvas.Rectangle(R);
-
-  DrawHints(R, False);
-end;
-
-procedure TSimbaParameterHint.Execute(BracketPoint: TPoint; Methods: TDeclarationArray);
-var
-  I: Int32;
-begin
-  LastParameterIndex := -1;
-
-  SetLength(FDeclarations, 0);
-  SetLength(FParameters, 0);
-
-  for I := 0 to High(Methods) do
-  begin
-    if (tokOverride in TciProcedureDeclaration(Methods[I]).Directives) then
-      Continue;
-
-    FDeclarations += [TciProcedureDeclaration(Methods[I])];
-    FParameters += [TciProcedureDeclaration(Methods[I]).GetParamDeclarations()];
-  end;
-
-  if (Length(FDeclarations) > 0) and (Length(FParameters) > 0) then
-  begin
-    FStartPoint := Point(BracketPoint.X - Length(Methods[0].Name), BracketPoint.Y);
-    FBracketPoint := BracketPoint;
-
-    CalculateBounds();
-  end;
-
-  Self.Visible := (Length(FDeclarations) > 0) and (Length(FParameters) > 0);
-
-  if FSynEdit.CanFocus then
-    FSynEdit.SetFocus();
+  FCodeinsight := TCodeinsight.Create();
+  FHintForm := TSimbaParamHintForm.Create(Self);
 end;
 
 end.

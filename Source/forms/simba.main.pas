@@ -261,10 +261,6 @@ type
     property WindowSelection: TWindowHandle read FWindowSelection;
     property ProcessSelection: Integer read FProcessSelection;
 
-    procedure CodeTools_OnLoadLibrary(Sender: TObject; FileName: String; var Contents: String);
-    function CodeTools_OnFindInclude(Sender: TObject; var FileName: String): Boolean;
-    function CodeTools_OnFindLibrary(Sender: TObject; var FileName: String): Boolean;
-
     procedure Setup(Data: PtrInt);
   end;
 
@@ -286,7 +282,6 @@ uses
   simba.package_form, simba.package_autoupdater,
 
   simba.associate, simba.ide_initialization,
-  simba.ide_codetools_parser,
   simba.functionlist_simbasection, simba.functionlist_updater,
   simba.scripttab, simba.editor,
   simba.aca, simba.dtmeditor,
@@ -451,38 +446,10 @@ begin
   SetMacOSKeystroke(MainMenu.Items);
 end;
 
-function TSimbaForm.CodeTools_OnFindInclude(Sender: TObject; var FileName: String): Boolean;
-begin
-  Result := FindFile(FileName, '', [ExtractFileDir(TCodeParser(Sender).Lexer.FileName), GetIncludePath(), GetSimbaPath()]);
-end;
-
-function TSimbaForm.CodeTools_OnFindLibrary(Sender: TObject; var FileName: String): Boolean;
-begin
-  Result := FindPlugin(FileName, [ExtractFileDir(TCodeParser(Sender).Lexer.FileName), GetPluginPath(), GetSimbaPath()]);
-end;
-
 procedure TSimbaForm.HandleFormCreated(Sender: TObject; Form: TCustomForm);
 begin
   if (SimbaSettings.General.CustomFontSize.Value > 0) then
     Form.Font.Size := SimbaSettings.General.CustomFontSize.Value;
-end;
-
-procedure TSimbaForm.CodeTools_OnLoadLibrary(Sender: TObject; FileName: String; var Contents: String);
-var
-  List: TStringList;
-begin
-  List := nil;
-  try
-    List := SimbaProcess.RunDump(HashFile(FileName), ['--dumpplugin=' + FileName]);
-
-    Contents := List.Text;
-  except
-    on E: Exception do
-      DebugLn(E.Message);
-  end;
-
-  if (List <> nil) then
-    List.Free();
 end;
 
 procedure TSimbaForm.HandleRecentFileClick(Sender: TObject);
