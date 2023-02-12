@@ -54,8 +54,8 @@ type
     fLexerStack: TLexerStack;
 
     fInterfaceOnly: Boolean;
+    fLastNoJunkTok: TptTokenKind;
     fLastNoJunkPos: Integer;
-    fLastNoJunkLen: Integer;
 
     fInRound: Boolean;
 
@@ -362,7 +362,6 @@ type
     property InterfaceOnly: Boolean read fInterfaceOnly write fInterfaceOnly;
     property Lexer: TmwPasLex read fLexer;
     property LastNoJunkPos: Integer read fLastNoJunkPos;
-    property LastNoJunkLen: Integer read fLastNoJunkLen;
   end;
 
 implementation
@@ -573,6 +572,7 @@ end;
 procedure TmwSimplePasPar.NextToken;
 begin
   fLastNoJunkPos := -1;
+  fLastNoJunkTok := Lexer.TokenID;
 
   repeat
     Lexer.Next();
@@ -629,7 +629,6 @@ begin
     end;
   end;
   fLastNoJunkPos := Lexer.TokenPos;
-  fLastNoJunkLen := Lexer.TokenLen;
 end;
 
 procedure TmwSimplePasPar.SkipAnsiComment;

@@ -55,7 +55,7 @@ implementation
 
 uses
   lazfileutils, lclintf,
-  simba.mufasatypes, simba.main, simba.scripttabsform;
+  simba.mufasatypes, simba.main, simba.scripttabsform, simba.functionlist_formatter;
 
 procedure TFunctionList_InternalDeclNode.Open;
 begin
@@ -124,63 +124,11 @@ begin
   FEndPos   := ADecl.EndPos;
   FLine     := ADecl.Line;
 
-  Text := ADecl.Name;
+  Text := FunctionListFormatter.GetName(ADecl);
+  Hint := FunctionListFormatter.GetHint(ADecl);
 
-  {
-  case ADecl.ClassName of
-    'TciProcedureDeclaration':
-      begin
-        if TciProcedureDeclaration(ADecl).IsMethodOfType then
-          Text := TciProcedureDeclaration(ADecl).ObjectName + '.' + Text;
-        Hint := TciProcedureDeclaration(ADecl).Header;
-
-        if TciProcedureDeclaration(ADecl).IsOperator then
-        begin
-          ImageIndex    := IMAGE_OPERATOR;
-          SelectedIndex := IMAGE_OPERATOR;
-        end else
-        begin
-          case TciProcedureDeclaration(ADecl).IsFunction of
-            True:
-              begin
-                ImageIndex    := IMAGE_FUNCTION;
-                SelectedIndex := IMAGE_FUNCTION;
-              end;
-
-            False:
-              begin
-                ImageIndex    := IMAGE_PROCEDURE;
-                SelectedIndex := IMAGE_PROCEDURE;
-              end;
-          end;
-        end;
-      end;
-
-    'TciTypeDeclaration':
-      begin
-        Hint := ADecl.Text;
-
-        ImageIndex    := IMAGE_TYPE;
-        SelectedIndex := IMAGE_TYPE;
-      end;
-
-    'TciConstantDeclaration':
-      begin
-        Hint := ADecl.Text;
-
-        ImageIndex    := IMAGE_CONSTANT;
-        SelectedIndex := IMAGE_CONSTANT;
-      end;
-
-    'TciVarDeclaration':
-      begin
-        Hint := ADecl.Text;
-
-        ImageIndex    := IMAGE_VARIABLE;
-        SelectedIndex := IMAGE_VARIABLE;
-      end;
-  end;
-  }
+  ImageIndex    := FunctionListFormatter.GetImage(ADecl);
+  SelectedIndex := ImageIndex;
 end;
 
 end.

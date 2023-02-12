@@ -35,7 +35,7 @@ type
     function Sort(A, B: TTreeNode): Integer;
   public
     function Added(FunctionList: TSimbaFunctionList): Boolean; override;
-    procedure Load(Includes: array of TCodeParser);
+    procedure Load(Includes: TCodeParserList);
     procedure Add(FunctionList: TSimbaFunctionList); override;
   end;
 
@@ -88,7 +88,7 @@ begin
   Result := FunctionList.TreeView.Items.FindTopLvlNode('Simba') <> nil;
 end;
 
-procedure TSimbaFunctionList_SimbaSection.Load(Includes: array of TCodeParser);
+procedure TSimbaFunctionList_SimbaSection.Load(Includes: TCodeParserList);
 var
   Parser: TCodeParser;
 begin

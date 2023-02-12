@@ -10,13 +10,15 @@ unit simba.functionlist_updater;
 interface
 
 uses
-  classes, sysutils, comctrls,
-  simba.ide_codetools_parser, simba.ide_codetools_insight, simba.functionlistform;
+  Classes, SysUtils,
+  simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_insight, simba.functionlistform;
 
 type
   TSimbaFunctionListUpdater = class(TThread)
   protected
-    FParser: TCodeinsight;
+    FNeedUpdate: Boolean;
+
+    FCodeinsight: TCodeinsight;
     FChangeStamp: Int64;
 
     FFunctionList: TSimbaFunctionList;
@@ -31,7 +33,7 @@ type
   end;
 
 var
-  SimbaFunctionListUpdater: TSimbaFunctionListUpdater;
+  SimbaFunctionListUpdater: TSimbaFunctionListUpdater = nil;
 
 implementation
 
@@ -41,12 +43,18 @@ uses
 constructor TSimbaFunctionListUpdater.Create;
 begin
   inherited Create(False, 512*512);
+
+  FCodeinsight := TCodeinsight.Create();
+  FCodeinsight.ScriptParser.NoErrorMessages := True;
 end;
 
 destructor TSimbaFunctionListUpdater.Destroy;
 begin
   Terminate();
   WaitFor();
+
+  if (FCodeinsight <> nil) then
+    FreeAndNil(FCodeinsight);
 
   inherited Destroy();
 end;
@@ -55,75 +63,76 @@ procedure TSimbaFunctionListUpdater.BeginUpdate;
 var
   Tab: TSimbaScriptTab;
 begin
-  if (SimbaScriptTabsForm = nil) or (SimbaScriptTabsForm.CurrentTab = nil) or (not CodetoolsSetup) then
-    Exit;
+  AssertMainThread('TSimbaFunctionListUpdater.BeginUpdate');
 
-  Tab := SimbaScriptTabsForm.CurrentTab;
-  if (not SimbaFunctionList_SimbaSection.Added(Tab.FunctionList)) and SimbaFunctionList_SimbaSection.Loaded then
-    SimbaFunctionList_SimbaSection.Add(Tab.FunctionList);
-
-  if (Tab.FunctionList <> FFunctionList) or (Tab.Editor.ChangeStamp <> FChangeStamp) then // Changes happened: Tab changed or editor modified
+  if (SimbaScriptTabsForm <> nil) and (SimbaScriptTabsForm.CurrentTab <> nil) then
   begin
-    FFunctionList := Tab.FunctionList;
-    FFunctionList.IncRef();
-    FFunctionList.TreeView.BeginUpdate();
-    FFunctionList.ExpandedState.CreateChildNodes(FFunctionList.ScriptNode);
+    Tab := SimbaScriptTabsForm.CurrentTab;
 
-    FChangeStamp := Tab.Editor.ChangeStamp;
-    //FParser      := Tab.GetParser();
+    FNeedUpdate := (Tab.FunctionList <> FFunctionList) or (Tab.Editor.ChangeStamp <> FChangeStamp); // Changes happened: Tab changed or editor modified
+    if FNeedUpdate then
+    begin
+      FChangeStamp := Tab.Editor.ChangeStamp;
+
+      FFunctionList := Tab.FunctionList;
+      FFunctionList.IncRef();
+      FFunctionList.TreeView.BeginUpdate();
+      FFunctionList.ExpandedState.CreateChildNodes(FFunctionList.ScriptNode);
+
+      FCodeinsight.SetScript(Tab.Script, Tab.ScriptFileName, -1, -1);
+    end;
   end;
 end;
 
 procedure TSimbaFunctionListUpdater.EndUpdate;
 begin
+  AssertMainThread('TSimbaFunctionListUpdater.EndUpdate');
+
   FFunctionList.ExpandedState.Apply(FFunctionList.TreeView);
   FFunctionList.ScriptNode.Expanded := True;
   FFunctionList.TreeView.EndUpdate();
   FFunctionList.DecRef();
+
+  FNeedUpdate := False;
 end;
 
 procedure TSimbaFunctionListUpdater.Execute;
 var
   I: Integer;
 begin
+  while (not Terminated) and (not CodetoolsSetup) do
+    Sleep(500);
+
   while (not Terminated) do
   begin
-    {
     Synchronize(@BeginUpdate);
 
-    if Assigned(FParser) then
-    try
-      //FParser.NoErrorMessages := True;
-      FParser.Run();
+    if FNeedUpdate then
+    begin
+      FCodeinsight.Run();
 
-      //FFunctionList.ScriptNode.DeleteChildren();
-      //FFunctionList.AddDecls(FFunctionList.ScriptNode, FParser.Items);
+      FFunctionList.ScriptNode.DeleteChildren();
+      FFunctionList.AddDecls(FFunctionList.ScriptNode, FCodeinsight.ScriptParser.Items);
 
-      {
-      if (FParser.IncludesHash <> FFunctionList.IncludesHash) then
+      if (FCodeinsight.IncludesHash <> FFunctionList.IncludesHash) then
       begin
         FFunctionList.IncludesNode.DeleteChildren();
         FFunctionList.PluginsNode.DeleteChildren();
-        for I := 0 to High(FParser.Includes) do
-          FFunctionList.AddInclude(FParser.Includes[I]);
+        for I := 0 to FCodeinsight.Includes.Count - 1 do
+          FFunctionList.AddInclude(FCodeinsight.Includes[I]);
 
-        FFunctionList.IncludesHash := FParser.IncludesHash;
+        FFunctionList.IncludesHash := FCodeinsight.IncludesHash;
       end;
-      }
-    finally
-      FParser.Free();
-      FParser := nil;
+
+      if (not SimbaFunctionList_SimbaSection.Added(FFunctionList)) and SimbaFunctionList_SimbaSection.Loaded then
+        SimbaFunctionList_SimbaSection.Add(FFunctionList);
 
       Synchronize(@EndUpdate);
     end;
 
-    }
     Sleep(850);
   end;
 end;
-
-initialization
-  SimbaFunctionListUpdater := nil;
 
 finalization
   if Assigned(SimbaFunctionListUpdater) then

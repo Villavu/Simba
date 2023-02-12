@@ -11,7 +11,8 @@ uses
 
 type
   TCodeinsight = class(TObject)
-  protected class var
+  public
+  class var
     FBaseIncludes: TCodeParserList;
     FBaseDefines: TStringList;
   protected
@@ -20,6 +21,7 @@ type
 
     function DoHandleInclude(Sender: TmwBasePasLex): Boolean;
     function GetIncludes: TCodeParserArray;
+    function GetIncludesHash: String;
 
     procedure Reset;
   public
@@ -27,6 +29,11 @@ type
     class procedure AddBaseDefine(Def: String);
     class constructor Create;
     class destructor Destroy;
+
+    property Includes: TCodeParserList read FIncludes;
+    property IncludesHash: String read GetIncludesHash;
+
+    property ScriptParser: TCodeParser read FScriptParser;
 
     procedure SetScript(Script: String; FileName: String; CaretPos, MaxPos: Integer);
     procedure Run;
@@ -56,6 +63,15 @@ implementation
 
 uses
   simba.mufasatypes, simba.ide_codetools_cache;
+
+function TCodeinsight.GetIncludesHash: String;
+var
+  I: Integer;
+begin
+  Result := '';
+  for I := 0 to FIncludes.Count - 1 do
+    Result := Result + FIncludes[I].Hash;
+end;
 
 function TCodeinsight.DoHandleInclude(Sender: TmwBasePasLex): Boolean;
 var

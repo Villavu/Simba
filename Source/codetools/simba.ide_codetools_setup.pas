@@ -41,8 +41,8 @@ begin
 
     TCodeinsight.AddBaseDefine('!EXPLICTSELF');
 
-    //SimbaFunctionList_SimbaSection.Load(TCodeinsight.BaseIncludes);
-    //SimbaFunctionList_SimbaSection.Loaded := True;
+    SimbaFunctionList_SimbaSection.Load(TCodeinsight.FBaseIncludes);
+    SimbaFunctionList_SimbaSection.Loaded := True;
   except
     on E: Exception do
       DebugLn('[TSimbaForm.SetupCodeTools]: ' + E.ToString());

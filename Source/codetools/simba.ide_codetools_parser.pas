@@ -104,6 +104,7 @@ type
   TDeclaration_VarStub = class(TDeclaration_Stub)
   public
     TempNames: TStringArray;
+    DefToken: TptTokenKind;
   end;
   TDeclaration_ParamStub = class(TDeclaration_VarStub)
   public
@@ -175,6 +176,8 @@ type
     FVarTypeString: String;
     FVarDefaultString: String;
   public
+    DefToken: TptTokenKind;
+
     function VarType: TDeclaration;
     function VarTypeString: String;
     function VarDefault: TDeclaration;
@@ -193,6 +196,7 @@ type
   protected
     FParamString: String;
     FResultString: String;
+    FHeaderString: String;
   public
     ObjectName: String;
     MethodType: EMethodType;
@@ -205,6 +209,7 @@ type
 
     function ParamString: String;
     function ResultString: String;
+    function HeaderString: String;
 
     constructor Create; override;
   end;
@@ -215,6 +220,7 @@ type
   TDeclaration_Parameter = class(TDeclaration)
   public
     ParamType: TptTokenKind;
+    DefToken: TptTokenKind;
 
     function VarTypeString: String;
     function DefaultValueString: String;
@@ -246,10 +252,15 @@ type
     FGlobalMap: TDeclarationMap;
     FTypeMethodMap: TDeclarationMap;
 
+    FHash: String;
+
     procedure AddToMap(Map: TDeclarationMap; Name: String; Decl: TDeclaration);
 
     procedure AddGlobal(Decl: TDeclaration);
     procedure AddTypeMethod(Decl: TDeclaration_Method);
+
+    // Hashes lexers filenames, fileage and defines.
+    function GetHash: String; virtual;
 
     function GetCaretPos: Integer;
     function GetMaxPos: Integer;
@@ -335,6 +346,8 @@ type
 
     property CaretPos: Integer read GetCaretPos write SetCaretPos;
     property MaxPos: Integer read GetMaxPos write SetMaxPos;
+
+    property Hash: String read GetHash;
 
     procedure Reset; override;
     procedure Run; override;
@@ -444,7 +457,10 @@ begin
   begin
     FVarDefaultString := Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarDefault);
     if (FVarDefaultString <> '') then
-      FVarDefaultString := ' = ' + FVarDefaultString;
+      case DefToken of
+        tokAssign: FVarDefaultString := ' := ' + FVarDefaultString;
+        tokEqual:  FVarDefaultString := ' = ' + FVarDefaultString;
+      end;
   end;
 
   Result := FVarDefaultString;
@@ -523,12 +539,31 @@ begin
   Result := FResultString;
 end;
 
+function TDeclaration_Method.HeaderString: String;
+begin
+  if (FHeaderString = #0) then
+  begin
+    case MethodType of
+      mtFunction: FHeaderString := 'function ' + Name;
+      mtProcedure: FHeaderString := 'procedure ' + Name;
+      mtObjectFunction: FHeaderString := 'function ' + ObjectName + '.' + Name;
+      mtObjectProcedure: FHeaderString := 'procedure ' + ObjectName + '.' + Name;
+      mtOperator: FHeaderString := 'operator ' + Name;
+    end;
+
+    FHeaderString := FHeaderString + ParamString + ResultString;
+  end;
+
+  Result := FHeaderString;
+end;
+
 constructor TDeclaration_Method.Create;
 begin
   inherited;
 
   FResultString := #0;
   FParamString := #0;
+  FHeaderString := #0;
 end;
 
 function TDeclaration_Parameter.VarTypeString: String;
@@ -961,6 +996,27 @@ begin
   AddToMap(FTypeMethodMap, Decl.ObjectName, Decl);
 end;
 
+function TCodeParser.GetHash: String;
+var
+  Builder: TStringBuilder;
+  I: Integer;
+begin
+  if (FHash = '') then
+  begin
+    Builder := TStringBuilder.Create(1024);
+    with Lexer.SaveDefines() do
+      Builder.Append(Defines + IntToStr(Stack));
+    for I := 0 to fLexers.Count - 1 do
+      Builder.Append(fLexers[i].FileName + IntToStr(fLexers[i].FileAge));
+
+    FHash := Builder.ToString();
+
+    Builder.Free();
+  end;
+
+  Result := FHash;
+end;
+
 function TCodeParser.GetCaretPos: Integer;
 begin
   if (fLexer = nil) then
@@ -1176,6 +1232,8 @@ begin
     Exit;
   end;
 
+  TDeclaration_VarStub(FStack.Peek).DefToken := fLastNoJunkTok;
+
   PushStack(TDeclaration_VarDefault);
   inherited;
   PopStack();
@@ -1309,6 +1367,8 @@ begin
     if (VarDefault <> nil) then
       VarDecl.Items.Add(VarDefault);
 
+    TDeclaration_Var(VarDecl).DefToken := TDeclaration_VarStub(Decl).DefToken;
+
     PopStack();
   end;
 end;
@@ -1342,6 +1402,8 @@ begin
       VarDecl.Items.Add(VarType);
     if (VarDefault <> nil) then
       VarDecl.Items.Add(VarDefault);
+
+    TDeclaration_Var(VarDecl).DefToken := TDeclaration_VarStub(Decl).DefToken;
 
     PopStack();
   end;
@@ -1640,6 +1702,8 @@ var
   List: TDeclarationList;
 begin
   inherited Reset();
+
+  FHash := '';
 
   for List in FGlobalMap.Values do
     List.Free();

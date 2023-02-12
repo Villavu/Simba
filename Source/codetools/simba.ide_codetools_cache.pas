@@ -33,7 +33,9 @@ type
   TCachedInclude = class(TCodeParser)
   protected
     FInDefines: TSaveDefinesRec;
-    // FHash: String;
+
+    // Add InDefines to hash
+    function GetHash: String; override;
 
     function DoFindInclude(Sender: TmwBasePasLex; var FileName: String): Boolean;
   public
@@ -41,7 +43,6 @@ type
     LastUsed: Integer;
 
     constructor Create(FileName: String; InDefines: TSaveDefinesRec); reintroduce;
-    procedure Run; override;
 
     function IsOutdated: Boolean;
     function IncRef: TCachedInclude;
@@ -79,7 +80,7 @@ begin
     if (FIncludes[I].RefCount > 0) or (FIncludes[I].LastUsed < PurgeThreshold) then
       Continue;
 
-    DebugLn('Purge include: ' + FIncludes[I].Lexer.FileName);
+    DebugLn('Purge include: %s [%d]', [FIncludes[I].Lexer.FileName, FIncludes[I].LastUsed]);
 
     FIncludes.Delete(I);
   end;
@@ -172,28 +173,17 @@ begin
   end;
 end;
 
-function TCachedInclude.DoFindInclude(Sender: TmwBasePasLex; var FileName: string): Boolean;
+function TCachedInclude.GetHash: String;
 begin
-  Result := FindFile(FileName, '', [ExtractFileDir(Sender.FileName), GetIncludePath(), GetSimbaPath()]);
+  if (FHash = '') then
+    FHash := inherited + InDefines.Defines + IntToStr(InDefines.Stack);
+
+  Result := FHash;
 end;
 
-procedure TCachedInclude.Run;
-//var
-//  Builder: TStringBuilder;
-//  I: Integer;
+function TCachedInclude.DoFindInclude(Sender: TmwBasePasLex; var FileName: String): Boolean;
 begin
-  inherited Run();
-
-  //Builder := TStringBuilder.Create(512);
-  //Builder.Append(FInDefines.Defines + IntToStr(FInDefines.Stack));
-  //with Lexer.SaveDefines() do
-  //  Builder.Append(Defines + IntToStr(Stack));
-  //for I := 0 to fLexers.Count - 1 do
-  //  Builder.Append(fLexers[i].FileName + IntToStr(fLexers[i].FileAge));
-  //
-  //FHash := Builder.ToString();
-  //
-  //Builder.Free();
+  Result := FindFile(FileName, '', [ExtractFileDir(Sender.FileName), GetIncludePath(), GetSimbaPath()]);
 end;
 
 function TCachedInclude.IsOutdated: Boolean;
