@@ -39,6 +39,8 @@ begin
       TCodeinsight.AddBaseInclude(Parser);
     end;
 
+    TCodeinsight.AddBaseDefine('!EXPLICTSELF');
+
     //SimbaFunctionList_SimbaSection.Load(TCodeinsight.BaseIncludes);
     //SimbaFunctionList_SimbaSection.Loaded := True;
   except

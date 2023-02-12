@@ -138,7 +138,8 @@ type
     function GetDirectiveKind: TptTokenKind;
     function GetIDEDirectiveKind: TptTokenKind;
     function GetDirectiveParam: string;
-    function GetDirectiveParamOriginal : string;
+    function GetDirectiveParamOriginal: string;
+    function GetDirectiveParamAsFileName: string;
     function GetIsJunk: Boolean;
     function GetIsSpace: Boolean;
     function GetIsCompilerDirective: Boolean;
@@ -188,6 +189,7 @@ type
     property CompilerDirective: string read GetCompilerDirective;
     property DirectiveParam: string read GetDirectiveParam;
     property DirectiveParamOriginal: string read GetDirectiveParamOriginal;
+    property DirectiveParamAsFileName: string read GetDirectiveParamAsFileName;
 	  property IsJunk: Boolean read GetIsJunk;
     property IsSpace: Boolean read GetIsSpace;
     property LineNumber: Integer read fLineNumber write fLineNumber;
@@ -1373,7 +1375,22 @@ end;
 
 function TmwBasePasLex.GetDirectiveParam: string;
 begin
-  Result := UpperCase(GetDirectiveParamOriginal);
+  Result := UpperCase(GetDirectiveParamOriginal());
+end;
+
+function TmwBasePasLex.GetDirectiveParamAsFileName: string;
+var
+  i: Integer;
+begin
+  Result := GetDirectiveParamOriginal;
+  for i:=1 to Length(Result) do
+    {$IFDEF Windows}
+    if Result[i]='/' then
+      Result[i]:='\';
+    {$ELSE}
+    if Result[i]='\' then
+      Result[i]:='/';
+    {$ENDIF}
 end;
 
 function TmwBasePasLex.GetIsCompilerDirective: Boolean;

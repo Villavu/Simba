@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 
-  Caches an entire include, its not per file.
+  Caches an entire "top level" include, its not per file.
   So cache for `$i SomeInclude`" will include all the files `SomeInclude` also includes.
 }
 unit simba.ide_codetools_cache;
@@ -13,244 +13,252 @@ unit simba.ide_codetools_cache;
 interface
 
 uses
-  Classes, SysUtils, Generics.Collections, syncobjs,
+  Classes, SysUtils,
   mPasLexTypes, mPasLex,
   simba.mufasatypes, simba.ide_codetools_parser;
 
-type
-  TCodeInsight_Include = class(TCodeParser)
-  protected
-    FInDefines: TSaveDefinesRec;
-    FOutDefines: TSaveDefinesRec;
-    FHash: String;
+function GetCachedInclude(Sender: TmwBasePasLex): TCodeParser;
+procedure ReleaseCachedIncludes(Includes: TCodeParserList);
 
-    function GetHash: String;
-    function GetOutdated: Boolean;
-  public
-    RefCount: Int32;
-    LastUsed: Int32;
-
-    procedure Assign(From: TObject); override;
-
-    property Outdated: Boolean read GetOutdated;
-    property InDefines: TSaveDefinesRec read FInDefines write FInDefines;
-    property OutDefines: TSaveDefinesRec read FOutDefines write FOutDefines;
-
-    property Hash: String read GetHash;
-  end;
-
-  TCodeInsight_IncludeArray = array of TCodeInsight_Include;
-  TCodeInsight_IncludeList = specialize TObjectList<TCodeInsight_Include>;
-
-  TCodeInsight_IncludeCache = class
-  protected
-    FLock: TCriticalSection;
-    FCachedIncludes: TCodeInsight_IncludeList;
-
-    procedure Purge;
-
-    function Find(Sender: TCodeParser; FileName: String): TCodeInsight_Include;
-  public
-    function GetInclude(Sender: TCodeParser; FileName: String): TCodeInsight_Include;
-    function GetLibrary(Sender: TCodeParser; FileName: String): TCodeInsight_Include;
-
-    procedure Release(Include: TCodeInsight_Include);
-
-    constructor Create;
-    destructor Destroy; override;
-  end;
+const
+  PurgeThreshold = 20; // If cache miss reaches of a include reaches this, remove the cache
 
 implementation
 
 uses
-  simba.settings;
+  Generics.Collections,
+  simba.simplelock, simba.files;
 
-procedure TCodeInsight_Include.Assign(From: TObject);
-begin
-  inherited Assign(From);
+type
+  TCachedInclude = class(TCodeParser)
+  protected
+    FInDefines: TSaveDefinesRec;
+    // FHash: String;
 
-  FOnInclude := nil; // No include cache
-  FOnLibrary := nil; // No library cache
-end;
+    function DoFindInclude(Sender: TmwBasePasLex; var FileName: String): Boolean;
+  public
+    RefCount: Integer;
+    LastUsed: Integer;
 
-function TCodeInsight_Include.GetHash: String;
-var
-  I: Int32;
-  Builder: TStringBuilder;
-begin
-  if (FHash = '') then
-  begin
-    Builder := TStringBuilder.Create(512);
-    Builder.Append(InDefines.Defines + InDefines.Stack.ToString());
-    Builder.Append(OutDefines.Defines + OutDefines.Stack.ToString());
-    for I := 0 to fLexers.Count - 1 do
-      Builder.Append(fLexers[i].FileName + IntToStr(fLexers[i].FileAge));
+    constructor Create(FileName: String; InDefines: TSaveDefinesRec); reintroduce;
+    procedure Run; override;
 
-    FHash := Builder.ToString();
+    function IsOutdated: Boolean;
+    function IncRef: TCachedInclude;
+    function DecRef: TCachedInclude;
 
-    Builder.Free();
+    property InDefines: TSaveDefinesRec read FInDefines;
   end;
 
-  Result := FHash;
+  TIncludeCache = class(TObject)
+  protected
+  type
+    TList = specialize TObjectList<TCachedInclude>;
+  protected
+    FLock: TSimpleEnterableLock;
+    FIncludes: TList;
+
+    procedure Purge;
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    function Get(Sender: TmwBasePasLex): TCodeParser;
+    procedure Release(Includes: TCodeParserList);
+  end;
+
+var
+  IncludeCache: TIncludeCache;
+
+procedure TIncludeCache.Purge;
+var
+  I: Integer;
+begin
+  for I := FIncludes.Count - 1 downto 0 do
+  begin
+    if (FIncludes[I].RefCount > 0) or (FIncludes[I].LastUsed < PurgeThreshold) then
+      Continue;
+
+    DebugLn('Purge include: ' + FIncludes[I].Lexer.FileName);
+
+    FIncludes.Delete(I);
+  end;
 end;
 
-function TCodeInsight_Include.GetOutdated: Boolean;
+constructor TIncludeCache.Create;
+begin
+  inherited Create();
+
+  FIncludes := TList.Create();
+end;
+
+destructor TIncludeCache.Destroy;
+begin
+  if (FIncludes <> nil) then
+    FreeAndNil(FIncludes);
+
+  inherited Destroy();
+end;
+
+function TIncludeCache.Get(Sender: TmwBasePasLex): TCodeParser;
 var
-  i: Int32;
+  Include: TCachedInclude;
+  InDefines: TSaveDefinesRec;
+  FileName: String;
+begin
+  Result := nil;
+
+  FileName := Sender.DirectiveParamAsFileName;
+  if (not FindFile(FileName, '', [ExtractFileDir(Sender.FileName), GetIncludePath(), GetSimbaPath()])) then
+    Exit;
+
+  InDefines := Sender.SaveDefines();
+
+  FLock.Enter();
+  try
+    for Include in FIncludes do
+      if (Include.Lexer.FileName = FileName) then
+      begin
+        if (Include.InDefines.Stack <> InDefines.Stack) or (Include.InDefines.Defines <> InDefines.Defines) then
+        begin
+          {$IFDEF PARSER_CACHE_DEBUG}
+          DebugLn('Cache hit "%s" but not used %d, %d', [Include.Lexer.FileName, Include.RefCount, Include.LastUsed + 1]);
+          {$ENDIF}
+
+          Include.LastUsed := Include.LastUsed + 1;
+          Continue;
+        end;
+
+        if Include.IsOutdated() then
+        begin
+          {$IFDEF PARSER_CACHE_DEBUG}
+          DebugLn('Cache hit "%s" but is outdated %d', [Include.Lexer.FileName, Include.RefCount]);
+          {$ENDIF}
+
+          Include.LastUsed := 1000;
+          Continue;
+        end;
+
+        if (Result = nil) then // Already found, but we're checking above checks
+          Result := Include.IncRef();
+      end;
+
+    if (Result = nil) then
+    begin
+      Include := TCachedInclude.Create(FileName, InDefines);
+      Include.Run();
+
+      Result := FIncludes[FIncludes.Add(Include)];
+    end;
+
+    Purge();
+  finally
+    FLock.Leave();
+  end;
+end;
+
+procedure TIncludeCache.Release(Includes: TCodeParserList);
+var
+  Include: TCodeParser;
+begin
+  FLock.Enter();
+
+  try
+    for Include in Includes do
+      if (Include is TCachedInclude) then
+        TCachedInclude(Include).DecRef();
+  finally
+    FLock.Leave();
+  end;
+end;
+
+function TCachedInclude.DoFindInclude(Sender: TmwBasePasLex; var FileName: string): Boolean;
+begin
+  Result := FindFile(FileName, '', [ExtractFileDir(Sender.FileName), GetIncludePath(), GetSimbaPath()]);
+end;
+
+procedure TCachedInclude.Run;
+//var
+//  Builder: TStringBuilder;
+//  I: Integer;
+begin
+  inherited Run();
+
+  //Builder := TStringBuilder.Create(512);
+  //Builder.Append(FInDefines.Defines + IntToStr(FInDefines.Stack));
+  //with Lexer.SaveDefines() do
+  //  Builder.Append(Defines + IntToStr(Stack));
+  //for I := 0 to fLexers.Count - 1 do
+  //  Builder.Append(fLexers[i].FileName + IntToStr(fLexers[i].FileAge));
+  //
+  //FHash := Builder.ToString();
+  //
+  //Builder.Free();
+end;
+
+function TCachedInclude.IsOutdated: Boolean;
+var
+  i: Integer;
 begin
   for i := 0 to fLexers.Count - 1 do
     if (fLexers[i].FileName <> '') and (FileAge(fLexers[i].FileName) <> fLexers[i].FileAge) then
-      Exit(True);
+    begin
+      Result := True;
+      Exit;
+    end;
 
   Result := False;
 end;
 
-procedure TCodeInsight_IncludeCache.Purge;
-var
-  i: Int32;
-  Include: TCodeInsight_Include;
+function TCachedInclude.IncRef: TCachedInclude;
 begin
-  for i := FCachedIncludes.Count - 1 downto 0 do
-  begin
-    Include := FCachedIncludes.Items[i];
-    if (Include.RefCount > 0) then
-      Continue;
-    if (Include.LastUsed < 25) and (not Include.Outdated) then
-      Continue;
+  Inc(RefCount);
+  Result := Self;
 
-    DebugLn('Purge include: ' + Include.Lexer.FileName);
-
-    FCachedIncludes.Delete(I);
-  end;
+  {$IFDEF PARSER_CACHE_DEBUG}
+  DebugLn('IncRef: %s -> %d', [Lexer.FileName, RefCount]);
+  {$ENDIF}
 end;
 
-function TCodeInsight_IncludeCache.Find(Sender: TCodeParser; FileName: String): TCodeInsight_Include;
-var
-  Include: TCodeInsight_Include;
+function TCachedInclude.DecRef: TCachedInclude;
 begin
-  Result := nil;
+  Dec(RefCount);
+  Result := Self;
 
-  for Include in FCachedIncludes do
-    if Include.Lexer.FileName = FileName then
-    begin
-      if (Include.InDefines.Defines <> Sender.Lexer.SaveDefines.Defines) or
-         (Include.InDefines.Stack <> Sender.Lexer.SaveDefines.Stack) then
-      begin
-        Include.LastUsed := Include.LastUsed + 1; // When this reaches 25 the include will be destroyed.
-
-        Continue;
-      end;
-
-      if Include.Outdated then
-        Continue;
-
-      Result := Include;
-      Break;
-    end;
+  {$IFDEF PARSER_CACHE_DEBUG}
+  DebugLn('DecRef: %s -> %d', [Lexer.FileName, RefCount]);
+  {$ENDIF}
 end;
 
-function TCodeInsight_IncludeCache.GetInclude(Sender: TCodeParser; FileName: String): TCodeInsight_Include;
-begin
-  Result := nil;
-
-  FLock.Enter();
-
-  try
-    Purge();
-
-    Result := Find(Sender, FileName);
-
-    if (Result = nil) then
-    begin
-      DebugLn('Caching Include: ' + FileName);
-
-      Result := TCodeInsight_Include.Create();
-      Result.SetFile(FileName);
-      Result.Assign(Sender);
-      Result.Run();
-      Result.OutDefines := Result.Lexer.SaveDefines;
-      Result.InDefines := Sender.Lexer.SaveDefines;
-
-      FCachedIncludes.Add(Result);
-    end;
-
-    Sender.Lexer.CloneDefinesFrom(Result.Lexer);
-
-    Result.RefCount := Result.RefCount + 1;
-    Result.LastUsed := 0;
-  finally
-    FLock.Leave();
-  end;
-end;
-
-procedure TCodeInsight_IncludeCache.Release(Include: TCodeInsight_Include);
-begin
-  FLock.Enter();
-
-  try
-    Include.RefCount := Include.RefCount - 1;
-  finally
-    FLock.Leave();
-  end;
-end;
-
-function TCodeInsight_IncludeCache.GetLibrary(Sender: TCodeParser; FileName: String): TCodeInsight_Include;
-var
-  Contents: String = '';
-begin
-  Result := nil;
-
-  FLock.Enter();
-
-  try
-    Purge();
-
-    Result := Find(Sender, FileName);
-
-    if (Result = nil) then
-    begin
-      DebugLn('Caching Library: ' + FileName);
-
-      if (Sender.OnLoadLibrary <> nil) then
-      begin
-        Sender.OnLoadLibrary(Self, FileName, Contents);
-
-        Result := TCodeInsight_Include.Create();
-        Result.SetScript(Contents, FileName);
-        Result.Assign(Sender);
-        Result.Run();
-        Result.OutDefines := Result.Lexer.SaveDefines;
-        Result.InDefines := Sender.Lexer.SaveDefines;
-        Result.Lexer.IsLibrary := True;
-
-        FCachedIncludes.Add(Result);
-      end;
-    end;
-
-    Sender.Lexer.CloneDefinesFrom(Result.Lexer);
-
-    Result.RefCount := Result.RefCount + 1;
-    Result.LastUsed := 0;
-  finally
-    FLock.Leave();
-  end;
-end;
-
-constructor TCodeInsight_IncludeCache.Create;
+constructor TCachedInclude.Create(FileName: String; InDefines: TSaveDefinesRec);
 begin
   inherited Create();
 
-  FLock := TCriticalSection.Create();
-  FCachedIncludes := TCodeInsight_IncludeList.Create();
+  LastUsed := 0;
+  RefCount := 1;
+  FInDefines := InDefines;
+
+  OnFindInclude := @DoFindInclude;
+
+  SetFile(FileName);
+  Lexer.LoadDefines(FInDefines);
 end;
 
-destructor TCodeInsight_IncludeCache.Destroy;
+function GetCachedInclude(Sender: TmwBasePasLex): TCodeParser;
 begin
-  FLock.Free();
-  FCachedIncludes.Free();
-
-  inherited Destroy();
+  Result := IncludeCache.Get(Sender);
 end;
+
+procedure ReleaseCachedIncludes(Includes: TCodeParserList);
+begin
+  IncludeCache.Release(Includes);
+end;
+
+initialization
+  IncludeCache := TIncludeCache.Create();
+
+finalization
+  IncludeCache.Free();
 
 end.
 

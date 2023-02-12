@@ -223,7 +223,7 @@ type
 
 
   TOnFindInclude = function(Sender: TmwBasePasLex; var FileName: string): Boolean of object;
-  TOnInclude = procedure(Sender: TmwBasePasLex; FileName: String; var Handled: Boolean) of object;
+  TOnHandleInclude = function(Sender: TmwBasePasLex): Boolean of object;
 
   TOnFindLibrary = function(Sender: TmwBasePasLex; var FileName: String): Boolean of object;
   TOnLoadLibrary = procedure(Sender: TmwBasePasLex; FileName: String; var Contents: String) of object;
@@ -237,7 +237,7 @@ type
     FItems: TDeclarationList;
     FStack: TDeclarationStack;
     FOnFindInclude: TOnFindInclude;
-    FOnInclude: TOnInclude;
+    FOnHandleInclude: TOnHandleInclude;
     FOnFindLibrary: TOnFindInclude;
     FOnLoadLibrary: TOnLoadLibrary;
     FOnLibrary: TOnLibrary;
@@ -327,7 +327,7 @@ type
     property Globals: TDeclarationList read FGlobals;
 
     property OnFindInclude: TOnFindInclude read FOnFindInclude write FOnFindInclude;
-    property OnInclude: TOnInclude read FOnInclude write FOnInclude;
+    property OnHandleInclude: TOnHandleInclude read FOnHandleInclude write FOnHandleInclude;
 
     property OnFindLibrary: TOnFindInclude read FOnFindLibrary write FOnFindLibrary;
     property OnLoadLibrary: TOnLoadLibrary read FOnLoadLibrary write FOnLoadLibrary;
@@ -348,11 +348,12 @@ type
     constructor Create; override;
     destructor Destroy; override;
   end;
+  TCodeParserArray = array of TCodeParser;
+  TCodeParserList = specialize TList<TCodeParser>;
 
 implementation
 
 uses
-  LazFileUtils,
   simba.mufasatypes;
 
 function TDeclaration_EnumElement.GetName: string;
@@ -1088,21 +1089,18 @@ procedure TCodeParser.OnIncludeDirect(Sender: TmwBasePasLex);
 var
   FileName: String;
 begin
-  if Sender.IsJunk or (FOnFindInclude = nil) then
+  if Sender.IsJunk or (Assigned(FOnHandleInclude) and FOnHandleInclude(Sender)) then
     Exit;
 
-  FileName := GetForcedPathDelims(Sender.DirectiveParamOriginal);
-  if (Sender.TokenID = tokIncludeOnceDirect) and HasFile(FileName) then
-    Exit;
-
-  if FOnFindInclude(Sender, FileName) then
+  FileName := Sender.DirectiveParamAsFileName;
+  if Assigned(FOnFindInclude) and FOnFindInclude(Sender, FileName) then
   begin
+    if (Sender.TokenID = tokIncludeOnceDirect) and HasFile(FileName) then
+      Exit;
+
     PushLexer(TmwPasLex.CreateFromFile(FileName));
-
-    Exit;
-  end;
-
-  DebugLn('Include "' + Sender.DirectiveParamOriginal + '" not found');
+  end else
+    DebugLn('Include "' + Sender.DirectiveParamOriginal + '" not handled');
 end;
 
 procedure TCodeParser.CompoundStatement;

@@ -6,24 +6,26 @@ interface
 
 uses
   Classes, SysUtils,
-  mPasLex,
+  mPasLexTypes, mPasLex,
   simba.ide_codetools_parser, simba.ide_codetools_utils;
 
 type
   TCodeinsight = class(TObject)
   protected class var
-    FBaseIncludes: array of TCodeParser;
-    FBaseDefines: array of String;
+    FBaseIncludes: TCodeParserList;
+    FBaseDefines: TStringList;
   protected
-    FIncludes: array of TCodeParser;
+    FIncludes: TCodeParserList;
     FScriptParser: TCodeParser;
 
-    function DoFindInclude(Sender: TmwBasePasLex; var FileName: string): Boolean;
+    function DoHandleInclude(Sender: TmwBasePasLex): Boolean;
+    function GetIncludes: TCodeParserArray;
 
     procedure Reset;
   public
     class procedure AddBaseInclude(Include: TCodeParser);
     class procedure AddBaseDefine(Def: String);
+    class constructor Create;
     class destructor Destroy;
 
     procedure SetScript(Script: String; FileName: String; CaretPos, MaxPos: Integer);
@@ -53,26 +55,53 @@ type
 implementation
 
 uses
-  simba.mufasatypes, simba.files;
+  simba.mufasatypes, simba.ide_codetools_cache;
 
-function TCodeinsight.DoFindInclude(Sender: TmwBasePasLex; var FileName: string): Boolean;
+function TCodeinsight.DoHandleInclude(Sender: TmwBasePasLex): Boolean;
+var
+  I: Integer;
+  FileName: String;
 begin
-  Result := FindFile(FileName, '', [ExtractFileDir(Sender.FileName), GetIncludePath(), GetSimbaPath()]);
+  Result := True;
+
+  if (Sender.TokenID = tokIncludeOnceDirect) then
+  begin
+    FileName := Sender.DirectiveParamAsFileName;
+    for I := 0 to FIncludes.Count - 1 do
+      if (FIncludes[I].Lexer.FileName = FileName) then
+        Exit;
+  end;
+
+  FIncludes.Add(GetCachedInclude(Sender));
+end;
+
+function TCodeinsight.GetIncludes: TCodeParserArray;
+begin
+  Result := FBaseIncludes.ToArray() + FIncludes.ToArray();
 end;
 
 procedure TCodeinsight.Reset;
 begin
+  ReleaseCachedIncludes(FIncludes);
+
+  FIncludes.Clear();
   FScriptParser.Reset();
 end;
 
 class procedure TCodeinsight.AddBaseInclude(Include: TCodeParser);
 begin
-  FBaseIncludes := FBaseIncludes + [Include];
+  FBaseIncludes.Add(Include);
 end;
 
 class procedure TCodeinsight.AddBaseDefine(Def: String);
 begin
-  FBaseDefines := FBaseDefines + [Def];
+  FBaseDefines.Add(Def);
+end;
+
+class constructor TCodeinsight.Create;
+begin
+  FBaseIncludes := TCodeParserList.Create();
+  FBaseDefines := TStringList.Create();
 end;
 
 class destructor TCodeinsight.Destroy;
@@ -81,6 +110,8 @@ var
 begin
   for Include in FBaseIncludes do
     Include.Free();
+  FBaseIncludes.Free();
+  FBaseDefines.Free();
   {$IFDEF PARSER_LEAK_CHECKS}
   if (SimbaProcessType = ESimbaProcessType.IDE) then
     TDeclaration.PrintLeaks();
@@ -91,7 +122,8 @@ end;
 procedure TCodeinsight.SetScript(Script: String; FileName: String; CaretPos, MaxPos: Integer);
 begin
   Reset();
-  FScriptParser.SetScript(Script, FileName, FBaseDefines);
+
+  FScriptParser.SetScript(Script, FileName, FBaseDefines.ToStringArray());
   FScriptParser.Lexer.CaretPos := CaretPos;
   FScriptParser.Lexer.MaxPos := MaxPos;
 end;
@@ -103,14 +135,15 @@ end;
 
 function TCodeinsight.FindDecl(S: String): TDeclaration;
 var
-  I: Integer;
+  Include: TCodeParser;
 begin
-  for I := 0 to High(FBaseIncludes) do
+  for Include in GetIncludes() do
   begin
-    Result := FBaseIncludes[I].GetGlobal(S);
+    Result := Include.GetGlobal(S);
     if (Result <> nil) then
       Exit;
   end;
+
   Result := FScriptParser.GetGlobal(S);
 end;
 
@@ -140,11 +173,12 @@ end;
 
 function TCodeinsight.GetGlobals: TDeclarationArray;
 var
-  I: Integer;
+  Include: TCodeParser;
 begin
   Result := FScriptParser.Globals.ToArray;
-  for I := 0 to High(FBaseIncludes) do
-    Result := Result + FBaseIncludes[I].Globals.ToArray;
+
+  for Include in GetIncludes() do
+    Result := Result + Include.Globals.ToArray;
 end;
 
 function TCodeinsight.GetMethodsOfType(Typ: String): TDeclarationArray;
@@ -172,10 +206,10 @@ function TCodeinsight.GetMembersOfType(Decl: TDeclaration): TDeclarationArray;
 
   procedure CheckMethods(Decl: TDeclaration);
   var
-    I: Integer;
+    Include: TCodeParser;
   begin
-    for I := 0 to High(FBaseIncludes) do
-      Result := Result + FBaseIncludes[I].GetMethodsOfType(Decl.Name);
+    for Include in GetIncludes() do
+      Result := Result + Include.GetMethodsOfType(Decl.Name);
     Result := Result + FScriptParser.GetMethodsOfType(Decl.Name);
   end;
 
@@ -355,7 +389,7 @@ end;
 
 function TCodeinsight.ParseExpression(Expr: String; WantMethodResult: Boolean): TDeclaration;
 begin
-  Result := ParseExpression(StringToExpression(Expr), WantMethodResult);
+ Result := ParseExpression(StringToExpression(Expr), WantMethodResult);
 end;
 
 constructor TCodeinsight.Create;
@@ -363,13 +397,19 @@ begin
   inherited Create();
 
   FScriptParser := TCodeParser.Create();
-  FScriptParser.OnFindInclude := @DoFindInclude;
+  FScriptParser.OnHandleInclude := @DoHandleInclude;
+
+  FIncludes := TCodeParserList.Create();
 end;
 
 destructor TCodeinsight.Destroy;
 begin
+  Reset();
+
   if (FScriptParser <> nil) then
     FreeAndNil(FScriptParser);
+  if (FIncludes <> nil) then
+    FreeAndNil(FIncludes);
 
   inherited Destroy();
 end;

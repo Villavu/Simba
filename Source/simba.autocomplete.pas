@@ -351,6 +351,7 @@ procedure TSimbaAutoComplete.ShowHint(Index: Integer);
 var
   Decl: TDeclaration;
   R: TRect;
+  MaxRight: Integer;
 begin
   Decl := GetDecl(Index);
   if (Decl = nil) or (not FForm.Showing) then
@@ -358,6 +359,7 @@ begin
     FHintForm.Visible := False;
     Exit;
   end;
+
   if FHintForm.Visible and (FHintForm.FItemIndex = Index) then
     Exit;
 
@@ -373,13 +375,17 @@ begin
     if (Decl is TDeclaration_Type)        then FText := GetTypeText(Decl)                          else
                                                FText := '';
 
-    R := TRect.Create(
-      Form.ClientToScreen(TPoint.Create(FColumnWidth, Form.DrawBorderWidth + (Index - Form.Scroll.Position) * FontHeight)),
-      Canvas.TextWidth(FName + FText),
-      FontHeight - 3
-    );
+    R := TRect.Create(Form.ClientToScreen(TPoint.Create(FColumnWidth, Form.DrawBorderWidth + (Index - Form.Scroll.Position) * FontHeight)));
+    R.Width := Canvas.TextWidth(FName + FText);
+    R.Height := FontHeight - 3;
+    R.Inflate(Form.DrawBorderWidth, 0);
 
-    HintRect := TRect.Create(R.Left - Form.DrawBorderWidth, R.Top, R.Right + Form.DrawBorderWidth, R.Bottom);
+    // Either clip to screen right or main form right, whatever is more right.
+    MaxRight := Max(Application.MainForm.BoundsRect.Right, Monitor.BoundsRect.Right);
+    if (R.Right > MaxRight) then
+      R.Right := MaxRight;
+
+    HintRect := R;
 
     Application.QueueAsyncCall(@ShowHintForm, 0);
   end;
