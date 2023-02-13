@@ -75,7 +75,7 @@ end;
 
 function GetHint_Type(Decl: TDeclaration): String;
 begin
-  Result := Decl.TextNoCommentsSingleLine;
+  Result := 'type ' + Decl.Name + ' = ' + Decl.TextNoCommentsSingleLine;
 end;
 
 function GetHint_Const(Decl: TDeclaration): String;

@@ -10,7 +10,8 @@ unit simba.ide_codetools_utils;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils,
+  mPasLexTypes, mPasLex;
 
 type
   TExpressionItem = record
@@ -26,10 +27,13 @@ type
 
 function StringToExpression(const Str: String): TExpressionItems;
 
+function FindInclude(Sender: TmwBasePasLex): String;
+function FindPluginExports(FileName: String): String;
+
 implementation
 
 uses
-  mPasLexTypes, mPasLex;
+  simba.mufasatypes, simba.files, simba.process;
 
 function StringToExpression(const Str: String): TExpressionItems;
 var
@@ -105,6 +109,49 @@ begin
 
   if (Length(Result) > 0) then
     Result[High(Result)].IsLastItem := True;
+end;
+
+function FindInclude(Sender: TmwBasePasLex): String;
+var
+  FileName: String;
+begin
+  Result := '';
+
+  FileName := Sender.DirectiveParamAsFileName;
+
+  case Sender.TokenID of
+    tokLibraryDirect:
+      begin
+        if FindPlugin(FileName, [ExtractFileDir(Sender.FileName), GetPluginPath(), GetSimbaPath()]) then
+          Result := FileName;
+      end;
+
+    tokIncludeDirect, tokIncludeOnceDirect:
+      begin
+        if FindFile(FileName, '', [ExtractFileDir(Sender.FileName), GetIncludePath(), GetSimbaPath()]) then
+          Result := FileName;
+      end;
+  end;
+end;
+
+function FindPluginExports(FileName: String): String;
+var
+  List: TStringList;
+begin
+  Result := '';
+
+  List := nil;
+  try
+    List := SimbaProcess.RunDump(HashFile(FileName), ['--dumpplugin=' + FileName]);
+
+    Result := List.Text;
+  except
+    on E: Exception do
+      DebugLn(E.Message);
+  end;
+
+  if (List <> nil) then
+    List.Free();
 end;
 
 end.

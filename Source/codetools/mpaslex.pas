@@ -165,6 +165,7 @@ type
   public
     OnErrorMessage: TErrorMessageEvent;
 
+    IsLibrary: Boolean;
     CaretPos: Integer;
     MaxPos: Integer;
 
@@ -226,7 +227,7 @@ type
   TmwPasLex = class(TmwBasePasLex)
   private
     fAheadLex: TmwBasePasLex;
-    fIsLibrary: Boolean;
+
     function GetAheadExID: TptTokenKind;
     function GetAheadToken: string;
     function GetAheadTokenID: TptTokenKind;
@@ -239,8 +240,6 @@ type
     property AheadToken: string read GetAheadToken;
     property AheadTokenID: TptTokenKind read GetAheadTokenID;
     property AheadExID: TptTokenKind read GetAheadExID;
-
-    property IsLibrary: Boolean read fIsLibrary write fIsLibrary;
   end;
 
   TLexerStack = specialize TStack<TmwPasLex>;
@@ -495,6 +494,7 @@ begin
   end;
   if (fTokenID = tokBorComment) then
     fCommentState := csBor;
+
   Inc(fRun);
   while fDoc[fRun] <> #0 do
     case fDoc[fRun] of
@@ -502,14 +502,23 @@ begin
         begin
           fCommentState := csNo;
           Inc(fRun);
-          break;
+          Break;
 		    end;
-	    #10:
+
+      '{':
+        if (fDoc[fRun+1] = '$') then
+        begin
+          Dec(fRun);
+          Break;
+        end;
+
+      #10:
 		  begin
 			  Inc(fRun);
 			  Inc(fLineNumber);
 			  fLinePos := fRun;
 		  end;
+
 	    #13:
 		  begin
 			  Inc(fRun);
@@ -517,8 +526,12 @@ begin
 			  Inc(fLineNumber);
 			  fLinePos := fRun;
 		  end;
-    else Inc(fRun);
+
+      else
+        Inc(fRun);
     end;
+
+  if (fDoc[fRun-1] = '}') then
 
   case fTokenID of
     tokIDECodeTools:

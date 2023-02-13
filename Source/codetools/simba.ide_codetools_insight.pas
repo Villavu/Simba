@@ -20,6 +20,8 @@ type
     FScriptParser: TCodeParser;
 
     function DoHandleInclude(Sender: TmwBasePasLex): Boolean;
+    function DoHandleLibrary(Sender: TmwBasePasLex): Boolean;
+
     function GetIncludes: TCodeParserArray;
     function GetIncludesHash: String;
 
@@ -77,6 +79,7 @@ function TCodeinsight.DoHandleInclude(Sender: TmwBasePasLex): Boolean;
 var
   I: Integer;
   FileName: String;
+  Include: TCodeParser;
 begin
   Result := True;
 
@@ -88,7 +91,20 @@ begin
         Exit;
   end;
 
-  FIncludes.Add(GetCachedInclude(Sender));
+  Include := GetCachedInclude(Sender);
+  if (Include <> nil) then
+    FIncludes.Add(Include);
+end;
+
+function TCodeinsight.DoHandleLibrary(Sender: TmwBasePasLex): Boolean;
+var
+  Include: TCodeParser;
+begin
+  Result := True;
+
+  Include := GetCachedInclude(Sender);
+  if (Include <> nil) then
+    FIncludes.Add(Include);
 end;
 
 function TCodeinsight.GetIncludes: TCodeParserArray;
@@ -414,6 +430,7 @@ begin
 
   FScriptParser := TCodeParser.Create();
   FScriptParser.OnHandleInclude := @DoHandleInclude;
+  FScriptParser.OnHandleLibrary := @DoHandleLibrary;
 
   FIncludes := TCodeParserList.Create();
 end;

@@ -15,7 +15,7 @@ interface
 uses
   Classes, SysUtils,
   mPasLexTypes, mPasLex,
-  simba.mufasatypes, simba.ide_codetools_parser;
+  simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_utils;
 
 function GetCachedInclude(Sender: TmwBasePasLex): TCodeParser;
 procedure ReleaseCachedIncludes(Includes: TCodeParserList);
@@ -27,7 +27,7 @@ implementation
 
 uses
   Generics.Collections,
-  simba.simplelock, simba.files;
+  simba.simplelock;
 
 type
   TCachedInclude = class(TCodeParser)
@@ -37,12 +37,13 @@ type
     // Add InDefines to hash
     function GetHash: String; override;
 
+    function DoHandleLibrary(Sender: TmwBasePasLex): Boolean;
     function DoFindInclude(Sender: TmwBasePasLex; var FileName: String): Boolean;
   public
     RefCount: Integer;
     LastUsed: Integer;
 
-    constructor Create(FileName: String; InDefines: TSaveDefinesRec); reintroduce;
+    constructor Create(Sender: TmwBasePasLex; FileName: String); reintroduce;
 
     function IsOutdated: Boolean;
     function IncRef: TCachedInclude;
@@ -109,52 +110,54 @@ var
 begin
   Result := nil;
 
-  FileName := Sender.DirectiveParamAsFileName;
-  if (not FindFile(FileName, '', [ExtractFileDir(Sender.FileName), GetIncludePath(), GetSimbaPath()])) then
-    Exit;
+  FileName := FindInclude(Sender);
+  if (FileName <> '') then
+  begin
+    InDefines := Sender.SaveDefines();
 
-  InDefines := Sender.SaveDefines();
+    FLock.Enter();
+    try
+      for Include in FIncludes do
+        if (Include.Lexer.FileName = FileName) then
+        begin
+          if (Include.InDefines.Stack <> InDefines.Stack) or (Include.InDefines.Defines <> InDefines.Defines) then
+          begin
+            {$IFDEF PARSER_CACHE_DEBUG}
+            DebugLn('Cache hit "%s" but not used %d, %d', [Include.Lexer.FileName, Include.RefCount, Include.LastUsed + 1]);
+            {$ENDIF}
 
-  FLock.Enter();
-  try
-    for Include in FIncludes do
-      if (Include.Lexer.FileName = FileName) then
+            Include.LastUsed := Include.LastUsed + 1;
+            Continue;
+          end;
+
+          if Include.IsOutdated() then
+          begin
+            {$IFDEF PARSER_CACHE_DEBUG}
+            DebugLn('Cache hit "%s" but is outdated %d', [Include.Lexer.FileName, Include.RefCount]);
+            {$ENDIF}
+
+            Include.LastUsed := 1000;
+            Continue;
+          end;
+
+          if (Result = nil) then // Already found, but we're checking above checks
+            Result := Include.IncRef();
+        end;
+
+      Purge();
+
+      if (Result = nil) then
       begin
-        if (Include.InDefines.Stack <> InDefines.Stack) or (Include.InDefines.Defines <> InDefines.Defines) then
-        begin
-          {$IFDEF PARSER_CACHE_DEBUG}
-          DebugLn('Cache hit "%s" but not used %d, %d', [Include.Lexer.FileName, Include.RefCount, Include.LastUsed + 1]);
-          {$ENDIF}
+        DebugLn('Caching %s', [FileName]);
 
-          Include.LastUsed := Include.LastUsed + 1;
-          Continue;
-        end;
+        Include := TCachedInclude.Create(Sender, FileName);
+        Include.Run();
 
-        if Include.IsOutdated() then
-        begin
-          {$IFDEF PARSER_CACHE_DEBUG}
-          DebugLn('Cache hit "%s" but is outdated %d', [Include.Lexer.FileName, Include.RefCount]);
-          {$ENDIF}
-
-          Include.LastUsed := 1000;
-          Continue;
-        end;
-
-        if (Result = nil) then // Already found, but we're checking above checks
-          Result := Include.IncRef();
+        Result := FIncludes[FIncludes.Add(Include)];
       end;
-
-    if (Result = nil) then
-    begin
-      Include := TCachedInclude.Create(FileName, InDefines);
-      Include.Run();
-
-      Result := FIncludes[FIncludes.Add(Include)];
+    finally
+      FLock.Leave();
     end;
-
-    Purge();
-  finally
-    FLock.Leave();
   end;
 end;
 
@@ -181,9 +184,26 @@ begin
   Result := FHash;
 end;
 
+function TCachedInclude.DoHandleLibrary(Sender: TmwBasePasLex): Boolean;
+var
+  FileName: String;
+begin
+  Result := True;
+
+  FileName := FindInclude(Sender);
+  if (FileName <> '') then
+  begin
+    PushLexer(TmwPasLex.Create(FindPluginExports(FileName), FileName));
+
+    Lexer.IsLibrary := True
+  end;
+end;
+
 function TCachedInclude.DoFindInclude(Sender: TmwBasePasLex; var FileName: String): Boolean;
 begin
-  Result := FindFile(FileName, '', [ExtractFileDir(Sender.FileName), GetIncludePath(), GetSimbaPath()]);
+  FileName := FindInclude(Sender);
+
+  Result := FileName <> '';
 end;
 
 function TCachedInclude.IsOutdated: Boolean;
@@ -220,18 +240,24 @@ begin
   {$ENDIF}
 end;
 
-constructor TCachedInclude.Create(FileName: String; InDefines: TSaveDefinesRec);
+constructor TCachedInclude.Create(Sender: TmwBasePasLex; FileName: String);
 begin
   inherited Create();
 
   LastUsed := 0;
   RefCount := 1;
-  FInDefines := InDefines;
+  FInDefines := Sender.SaveDefines();
 
   OnFindInclude := @DoFindInclude;
+  OnHandleLibrary := @DoHandleLibrary;
 
-  SetFile(FileName);
+  if (Sender.TokenID = tokLibraryDirect) then
+    SetScript(FindPluginExports(FileName), FileName)
+  else
+    SetFile(FileName);
+
   Lexer.LoadDefines(FInDefines);
+  Lexer.IsLibrary := (Sender.TokenID = tokLibraryDirect);
 end;
 
 function GetCachedInclude(Sender: TmwBasePasLex): TCodeParser;

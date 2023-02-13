@@ -227,13 +227,9 @@ type
     function Dump: String; override;
   end;
 
-
   TOnFindInclude = function(Sender: TmwBasePasLex; var FileName: string): Boolean of object;
   TOnHandleInclude = function(Sender: TmwBasePasLex): Boolean of object;
-
-  TOnFindLibrary = function(Sender: TmwBasePasLex; var FileName: String): Boolean of object;
-  TOnLoadLibrary = procedure(Sender: TmwBasePasLex; FileName: String; var Contents: String) of object;
-  TOnLibrary = procedure(Sender: TmwBasePasLex; FileName: String; var Handled: Boolean) of object;
+  TOnHandleLibrary = function(Sender: TmwBasePasLex): Boolean of object;
 
   TDeclarationMap = specialize TDictionary<String, TDeclarationList>;
 
@@ -244,9 +240,7 @@ type
     FStack: TDeclarationStack;
     FOnFindInclude: TOnFindInclude;
     FOnHandleInclude: TOnHandleInclude;
-    FOnFindLibrary: TOnFindInclude;
-    FOnLoadLibrary: TOnLoadLibrary;
-    FOnLibrary: TOnLibrary;
+    FOnHandleLibrary: TOnHandleLibrary;
 
     FGlobals: TDeclarationList;
     FGlobalMap: TDeclarationMap;
@@ -339,10 +333,7 @@ type
 
     property OnFindInclude: TOnFindInclude read FOnFindInclude write FOnFindInclude;
     property OnHandleInclude: TOnHandleInclude read FOnHandleInclude write FOnHandleInclude;
-
-    property OnFindLibrary: TOnFindInclude read FOnFindLibrary write FOnFindLibrary;
-    property OnLoadLibrary: TOnLoadLibrary read FOnLoadLibrary write FOnLoadLibrary;
-    property OnLibrary: TOnLibrary read FOnLibrary write FOnLibrary;
+    property OnHandleLibrary: TOnHandleLibrary read FOnHandleLibrary write FOnHandleLibrary;
 
     property CaretPos: Integer read GetCaretPos write SetCaretPos;
     property MaxPos: Integer read GetMaxPos write SetMaxPos;
@@ -873,7 +864,8 @@ function TDeclaration.GetTextNoCommentsSingleLine: String;
     end else
       Result := Text;
 
-    Result := Result.Replace('  ', '');
+    while Result.Contains('  ') do
+      Result := Result.Replace('  ', ' ');
   end;
 
 begin
@@ -1099,46 +1091,11 @@ begin
 end;
 
 procedure TCodeParser.OnLibraryDirect(Sender: TmwBasePasLex);
-var
-  FileName, Contents: String;
-  Handled: Boolean;
 begin
-  Contents := '';
+  if Sender.IsJunk or (Assigned(FOnHandleLibrary) and FOnHandleLibrary(Sender)) then
+    Exit;
 
-  //if (not Sender.IsJunk) then
-  //try
-  //  FileName := SetDirSeparators(Sender.DirectiveParamOriginal);
-  //
-  //  if (FOnFindLibrary <> nil) then
-  //  begin
-  //    if FOnFindLibrary(Self, FileName) then
-  //    begin
-  //      Handled := False;
-  //
-  //      if (FOnLibrary <> nil) then
-  //        FOnLibrary(Self, FileName, Handled);
-  //
-  //      if not Handled then
-  //      begin
-  //        if (FOnLoadLibrary <> nil) then
-  //        begin
-  //          FOnLoadLibrary(Self, FileName, Contents);
-  //
-  //          PushLexer(TmwPasLex.Create(Contents, FileName));
-  //
-  //          FLexer.IsLibrary := True;
-  //          //FLexer.FileName := FileName;
-  //          //FLexer.Script := Contents;
-  //          //FLexer.Next();
-  //        end;
-  //      end;
-  //    end else
-  //      DebugLn('Library "' + FileName + '" not found');
-  //  end;
-  //except
-  //  on E: Exception do
-  //    OnErrorMessage(fLexer, E.Message);
-  //end;
+  DebugLn('Library "' + Sender.DirectiveParamAsFileName + '" not handled');
 end;
 
 procedure TCodeParser.OnIncludeDirect(Sender: TmwBasePasLex);
@@ -1156,7 +1113,7 @@ begin
 
     PushLexer(TmwPasLex.CreateFromFile(FileName));
   end else
-    DebugLn('Include "' + Sender.DirectiveParamOriginal + '" not handled');
+    DebugLn('Include "' + Sender.DirectiveParamAsFileName + '" not handled');
 end;
 
 procedure TCodeParser.CompoundStatement;

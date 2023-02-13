@@ -241,7 +241,7 @@ var
   begin
     for Item in FDecls do
     begin
-      if (Item is TDeclaration_Method) and (TDeclaration_Method(Item).MethodType = mtOperator) then
+      if (Item is TDeclaration_Method) and ((TDeclaration_Method(Item).MethodType = mtOperator) or TDeclaration_Method(Item).IsOverride()) then
         Continue;
 
       FFilteredDecls[Count] := Item;
