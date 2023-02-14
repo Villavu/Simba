@@ -55,11 +55,12 @@ implementation
 
 uses
   lazfileutils, lclintf,
-  simba.mufasatypes, simba.main, simba.scripttabsform, simba.functionlist_formatter;
+  simba.mufasatypes, simba.main, simba.scripttabsform, simba.functionlist_formatter,
+  simba.ide_showdeclaration;
 
 procedure TFunctionList_InternalDeclNode.Open;
 begin
-//  SimbaScriptTabsForm.OpenInternalDeclaration(Hint, FFileName);
+  ShowInternalDeclaration(Hint, FFileName);
 end;
 
 constructor TFunctionList_InternalFileNode.Create(FunctionList: TSimbaFunctionList; AFileName: String);
@@ -112,7 +113,7 @@ end;
 
 procedure TFunctionList_DeclNode.Open;
 begin
-//  SimbaScriptTabsForm.OpenDeclaration(FStartPos, FEndPos, FLine, FFileName);
+  ShowDeclaration(FStartPos, FEndPos, FLine, FFileName);
 end;
 
 constructor TFunctionList_DeclNode.Create(FunctionList: TSimbaFunctionList; ADecl: TDeclaration);

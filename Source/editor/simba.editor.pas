@@ -57,6 +57,8 @@ type
     function IsTextAhead(Values: TStringArray): Boolean;
     // Get Expression string at X,Y
     function GetExpression(X, Y: Integer): String;
+    // Get word bounds at X,Y
+    function GetExpressionEx(X, Y: Integer): String;
     // Execute a command that needs no extra data
     procedure ExecuteSimpleCommand(Command: TSynEditorCommand);
     // Repaint some extra things when saved
@@ -347,6 +349,15 @@ begin
     Result := ''
   else
     Result := Copy(TheText, EndIndex + 1, StartIndex - EndIndex);
+end;
+
+function TSimbaEditor.GetExpressionEx(X, Y: Integer): String;
+var
+  StartX, EndX: Integer;
+begin
+  GetWordBoundsAtRowCol(TPoint.Create(X, Y), StartX, EndX);
+
+  Result := GetExpression(EndX - 1, Y);
 end;
 
 constructor TSimbaEditor.Create(AOwner: TComponent; LoadColors: Boolean);

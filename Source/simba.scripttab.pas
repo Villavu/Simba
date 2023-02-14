@@ -26,18 +26,18 @@ type
     FFunctionList: TSimbaFunctionList;
     FDebuggingForm: TSimbaDebuggerForm;
     FOutputBox: TSimbaOutputBox;
+    FLinkExpression: String;
 
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
     procedure DoHide; override;
     procedure DoShow; override;
+    procedure DoShowDeclaration(Data: PtrInt);
 
     procedure ScriptStateChanged(Sender: TObject);
 
     procedure HandleEditorChange(Sender: TObject);
     procedure HandleEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-
-    procedure HandleFindDeclaration(Data: PtrInt);
 
     procedure UpdateSavedText;
 
@@ -85,13 +85,9 @@ type
 implementation
 
 uses
-  InterfaceBase, Forms, SynEdit, LazFileUtils,
-  simba.scripttabsform, simba.settings,
-  simba.main, simba.files, simba.functionlist_updater;
-
-procedure TSimbaScriptTab.HandleFindDeclaration(Data: PtrInt);
-begin
-end;
+  Forms, SynEdit, LazFileUtils,
+  simba.settings, simba.ide_codetools_parser, simba.ide_codetools_insight,
+  simba.main, simba.files, simba.functionlist_updater, simba.ide_showdeclaration;
 
 function TSimbaScriptTab.GetScript: String;
 begin
@@ -145,6 +141,36 @@ begin
     FEditor.SetFocus();
 end;
 
+procedure TSimbaScriptTab.DoShowDeclaration(Data: PtrInt);
+var
+  Decl: TDeclaration;
+  Decls: TDeclarationArray;
+  Codeinsight: TCodeinsight;
+begin
+  Codeinsight := TCodeinsight.Create();
+  try
+    Codeinsight.SetScript(Script, ScriptFileName, -1, -1);
+    Codeinsight.Run();
+
+    Decl := Codeinsight.ParseExpression(FLinkExpression, False);
+    if (Decl <> nil) then
+    begin
+      if (Decl.ClassType = TDeclaration_Method) then
+      begin
+        Decls := Codeinsight.GetOverloads(Decl);
+        if (Length(Decls) > 1) then
+          ShowDeclarationDialog(Decls);
+      end;
+
+      ShowDeclaration(Decl);
+    end;
+  except
+    on E: Exception do
+      DebugLn('TSimbaScriptTab.HandleEditorLinkClick: ' + E.ToString());
+  end;
+  Codeinsight.Free();
+end;
+
 procedure TSimbaScriptTab.ScriptStateChanged(Sender: TObject);
 begin
   case TSimbaScriptInstance(Sender).State of
@@ -173,19 +199,16 @@ begin
 end;
 
 procedure TSimbaScriptTab.HandleEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-var
-  CaretPos: PPoint;
 begin
-  CaretPos := GetMem(SizeOf(TPoint));
-  if (Sender = FEditor) then
-    CaretPos^ := FEditor.PixelsToRowColumn(ScreenToControl(Mouse.CursorPos), [])
-  else
+  if (Sender is TSynEdit) then
   begin
-    CaretPos^.X := X;
-    CaretPos^.Y := Y;
+    X := TSynEdit(Sender).PixelsToRowColumn(ScreenToControl(Mouse.CursorPos), []).X;
+    Y := TSynEdit(Sender).PixelsToRowColumn(ScreenToControl(Mouse.CursorPos), []).Y;
   end;
 
-  Application.QueueASyncCall(@HandleFindDeclaration, PtrInt(CaretPos)); // SynEdit is paint locked!
+  FLinkExpression := Editor.GetExpressionEx(X, Y);
+
+  Application.QueueAsyncCall(@DoShowDeclaration, 0);
 end;
 
 function TSimbaScriptTab.SaveAsDialog: String;

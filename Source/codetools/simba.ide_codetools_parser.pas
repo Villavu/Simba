@@ -15,6 +15,8 @@ uses
   Generics.Collections, Generics.Defaults;
 
 type
+  TCodeParser = class;
+
   TDeclaration = class;
   TDeclarationArray = array of TDeclaration;
   TDeclarationClass = class of TDeclaration;
@@ -36,12 +38,12 @@ type
 
   {$IFDEF PARSER_LEAK_CHECKS}
   TLeakChecker = class(TObject)
-  public
+  protected
   class var
-    Creates: Integer;
-    Destroys: Integer;
+    FList: TList;
   public
-    class procedure PrintLeaks;
+    class constructor Create;
+    class destructor Destroy;
 
     constructor Create; virtual;
     destructor Destroy; override;
@@ -50,6 +52,7 @@ type
 
   TDeclaration = class({$IFDEF PARSER_LEAK_CHECKS}TLeakChecker{$ELSE}TObject{$ENDIF})
   protected
+    FParser: TCodeParser;
     FOwner: TDeclaration;
     FStartPos: Integer;
     FEndPos: Integer;
@@ -73,10 +76,10 @@ type
     function IsName(const Value: String): Boolean; inline;
 
     property Lexer: TmwPasLex read FLexer;
-    property Owner: TDeclaration read FOwner write FOwner;
+    property Owner: TDeclaration read FOwner;
 
-    property StartPos: Integer read FStartPos write FStartPos;
-    property EndPos: Integer read FEndPos write FEndPos;
+    property StartPos: Integer read FStartPos;
+    property EndPos: Integer read FEndPos;
     property Items: TDeclarationList read FItems;
     property Name: String read GetName write FName;
     property Line: Integer read FLine;
@@ -85,8 +88,8 @@ type
     property TextNoComments: String read GetTextNoComments;
     property TextNoCommentsSingleLine: String read GetTextNoCommentsSingleLine;
 
-    constructor Create; {$IFDEF PARSER_LEAK_CHECKS}override{$ELSE}virtual; overload{$ENDIF};
-    constructor Create(ALexer: TmwPasLex; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); virtual; overload;
+    constructor Create(AParser: TCodeParser); reintroduce; virtual;
+    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); reintroduce; virtual;
     destructor Destroy; override;
   end;
 
@@ -103,7 +106,13 @@ type
   end;
   TDeclaration_VarStub = class(TDeclaration_Stub)
   public
-    TempNames: TStringArray;
+    NameCount: Integer;
+    Names: array of record
+      Name: String;
+      StartPos: Integer;
+      EndPos: Integer;
+    end;
+
     DefToken: TptTokenKind;
   end;
   TDeclaration_ParamStub = class(TDeclaration_VarStub)
@@ -183,7 +192,7 @@ type
     function VarDefault: TDeclaration;
     function VarDefaultString: String;
 
-    constructor Create; override;
+    constructor Create(AParser: TCodeParser); override;
   end;
 
   TDeclaration_Const = class(TDeclaration_Var);
@@ -211,7 +220,7 @@ type
     function ResultString: String;
     function HeaderString: String;
 
-    constructor Create; override;
+    constructor Create(AParser: TCodeParser); override;
   end;
 
   TDeclaration_TypeMethod = class(TDeclaration_Method);
@@ -235,6 +244,8 @@ type
 
   TCodeParser = class(TmwSimplePasPar)
   protected
+    FManagedItems: TDeclarationList;
+
     FRoot: TDeclaration;
     FItems: TDeclarationList;
     FStack: TDeclarationStack;
@@ -290,7 +301,6 @@ type
 
     procedure VarDeclaration; override;                                         //Var
     procedure VarName; override;                                                //Var
-
 
     procedure ConstantDeclaration; override;                                    //Const
     procedure ConstantName; override;                                           //Const
@@ -457,9 +467,9 @@ begin
   Result := FVarDefaultString;
 end;
 
-constructor TDeclaration_Var.Create;
+constructor TDeclaration_Var.Create(AParser: TCodeParser);
 begin
-  inherited Create();
+  inherited Create(AParser);
 
   FVarDefaultString := #0;
   FVarTypeString := #0;
@@ -548,9 +558,9 @@ begin
   Result := FHeaderString;
 end;
 
-constructor TDeclaration_Method.Create;
+constructor TDeclaration_Method.Create(AParser: TCodeParser);
 begin
-  inherited;
+  inherited Create(AParser);
 
   FResultString := #0;
   FParamString := #0;
@@ -581,23 +591,34 @@ begin
 end;
 
 {$IFDEF PARSER_LEAK_CHECKS}
-class procedure TLeakChecker.PrintLeaks;
+class constructor TLeakChecker.Create;
 begin
-  DebugLn('TLeakChecker.PrintLeaks: ' + IntToStr(TLeakChecker.Creates - TLeakChecker.Destroys) + ' (should be zero)');
-  DebugLn('Press enter to close...');
-  ReadLn();
+  FList := TList.Create();
+end;
+
+class destructor TLeakChecker.Destroy;
+begin
+  if (SimbaProcessType = ESimbaProcessType.IDE) then
+  begin
+    DebugLn('TLeakChecker.PrintLeaks: ' + IntToStr(FList.Count) + ' (should be zero)');
+    DebugLn('Press enter to close...');
+
+    ReadLn;
+  end;
+
+  FList.Free();
 end;
 
 constructor TLeakChecker.Create;
 begin
   inherited Create();
 
-  Inc(Creates);
+  FList.Add(Self);
 end;
 
 destructor TLeakChecker.Destroy;
 begin
-  Inc(Destroys);
+  FList.Remove(Self);
 
   inherited Destroy();
 end;
@@ -880,10 +901,13 @@ begin
   Result := SameText(Name, Value);
 end;
 
-constructor TDeclaration.Create;
+constructor TDeclaration.Create(AParser: TCodeParser);
 begin
   inherited Create();
 
+  FParser := AParser;
+  FParser.FManagedItems.Add(Self);
+  FLexer := AParser.Lexer;
   FItems := TDeclarationList.Create();
 
   FText := #0;
@@ -893,11 +917,10 @@ begin
   FName := #0;
 end;
 
-constructor TDeclaration.Create(ALexer: TmwPasLex; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
+constructor TDeclaration.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
 begin
-  Create();
+  Create(AParser);
 
-  FLexer := ALexer;
   FLine := FLexer.LineNumber;
   FOwner := AOwner;
   FStartPos := AStart;
@@ -905,13 +928,9 @@ begin
 end;
 
 destructor TDeclaration.Destroy;
-var
-  I: Integer;
 begin
-  for I := 0 to FItems.Count - 1 do
-    if (FItems[I].Owner = Self) then
-      FItems[I].Free();
-  FItems.Free();
+  if (FItems <> nil) then
+    FreeAndNil(FItems);
 
   inherited Destroy();
 end;
@@ -941,7 +960,7 @@ end;
 
 function TCodeParser.PushStack(AClass: TDeclarationClass): TDeclaration;
 begin
-  Result := AClass.Create(FLexer, FStack.Peek(), FLexer.TokenPos, FLexer.TokenPos);
+  Result := AClass.Create(Self, FStack.Peek(), FLexer.TokenPos, FLexer.TokenPos);
 
   FStack.Peek().Items.Add(Result);
   FStack.Push(Result);
@@ -949,7 +968,7 @@ end;
 
 procedure TCodeParser.PopStack();
 begin
-  FStack.Pop().EndPos := fLastNoJunkPos;
+  FStack.Pop().fEndPos := fLastNoJunkPos;
 end;
 
 procedure TCodeParser.AddToMap(Map: TDeclarationMap; Name: String; Decl: TDeclaration);
@@ -1041,24 +1060,29 @@ constructor TCodeParser.Create;
 begin
   inherited Create();
 
-  FRoot := TDeclaration.Create();
-  FItems := FRoot.Items;
-  FStack := TDeclarationStack.Create();
-  FStack.Push(FRoot);
+  FManagedItems := TDeclarationList.Create();
+
   FGlobalMap := TDeclarationMap.Create();
   FTypeMethodMap := TDeclarationMap.Create();
   FGlobals := TDeclarationList.Create();
+
+  FRoot := TDeclaration.Create(Self);
+  FStack := TDeclarationStack.Create();
+  FStack.Push(FRoot);
+
+  FItems := FRoot.Items;
 end;
 
 destructor TCodeParser.Destroy;
 begin
   Reset();
 
-  FRoot.Free();
+  FManagedItems.Free();
   FStack.Free();
   FGlobalMap.Free();
   FTypeMethodMap.Free();
   FGlobals.Free();
+  FRoot.Free();
 
   inherited Destroy();
 end;
@@ -1305,8 +1329,8 @@ end;
 procedure TCodeParser.VarDeclaration;
 var
   Decl: TDeclaration;
-  TempName: String;
   VarDecl, VarType, VarDefault: TDeclaration;
+  I: Integer;
 begin
   Decl := PushStack(TDeclaration_VarStub);
   inherited;
@@ -1315,25 +1339,38 @@ begin
   VarType := Decl.Items.GetFirstItemOfClass(TDeclaration_VarType);
   VarDefault := Decl.Items.GetFirstItemOfClass(TDeclaration_VarDefault);
 
-  for TempName in TDeclaration_VarStub(Decl).TempNames do
-  begin
-    VarDecl := PushStack(TDeclaration_Var);
-    VarDecl.Name := TempName;
-    if (VarType <> nil) then
-      VarDecl.Items.Add(VarType);
-    if (VarDefault <> nil) then
-      VarDecl.Items.Add(VarDefault);
+  with TDeclaration_VarStub(Decl) do
+    for I := 0 to NameCount - 1 do
+    begin
+      VarDecl := PushStack(TDeclaration_Var);
+      VarDecl.Name := Names[I].Name;
+      if (VarType <> nil) then
+        VarDecl.Items.Add(VarType);
+      if (VarDefault <> nil) then
+        VarDecl.Items.Add(VarDefault);
 
-    TDeclaration_Var(VarDecl).DefToken := TDeclaration_VarStub(Decl).DefToken;
+      TDeclaration_Var(VarDecl).DefToken := TDeclaration_VarStub(Decl).DefToken;
+      TDeclaration_Var(VarDecl).FStartPos := Names[I].StartPos;
+      TDeclaration_Var(VarDecl).FEndPos := Names[I].EndPos;
 
-    PopStack();
-  end;
+      FStack.Pop();
+    end;
 end;
 
 procedure TCodeParser.VarName;
 begin
   if InDeclaration(TDeclaration_VarStub) then
-    TDeclaration_VarStub(FStack.Peek).TempNames += [Lexer.Token];
+    with TDeclaration_VarStub(FStack.Peek) do
+    begin
+      if (NameCount >= Length(Names)) then
+        SetLength(Names, 4+Length(Names)*2);
+
+      Names[NameCount].Name := Lexer.Token;
+      Names[NameCount].StartPos := Lexer.TokenPos;
+      Names[NameCount].EndPos := Lexer.TokenPos+Lexer.TokenLen;
+
+      Inc(NameCount);
+    end;
 
   inherited;
 end;
@@ -1341,8 +1378,8 @@ end;
 procedure TCodeParser.ConstantDeclaration;
 var
   Decl: TDeclaration;
-  TempName: String;
   VarDecl, VarType, VarDefault: TDeclaration;
+  I: Integer;
 begin
   Decl := PushStack(TDeclaration_VarStub);
   inherited;
@@ -1351,6 +1388,24 @@ begin
   VarType := Decl.Items.GetFirstItemOfClass(TDeclaration_VarType);
   VarDefault := Decl.Items.GetFirstItemOfClass(TDeclaration_VarDefault);
 
+  with TDeclaration_VarStub(Decl) do
+    for I := 0 to NameCount - 1 do
+    begin
+      VarDecl := PushStack(TDeclaration_Const);
+      VarDecl.Name := Names[I].Name;
+      if (VarType <> nil) then
+        VarDecl.Items.Add(VarType);
+      if (VarDefault <> nil) then
+        VarDecl.Items.Add(VarDefault);
+
+      TDeclaration_Var(VarDecl).DefToken := TDeclaration_VarStub(Decl).DefToken;
+      TDeclaration_Var(VarDecl).FStartPos := Names[I].StartPos;
+      TDeclaration_Var(VarDecl).FEndPos := Names[I].EndPos;
+      FStack.Pop();
+      //PopStack();
+    end;
+
+  {
   for TempName in TDeclaration_VarStub(Decl).TempNames do
   begin
     VarDecl := PushStack(TDeclaration_Const);
@@ -1364,6 +1419,7 @@ begin
 
     PopStack();
   end;
+  }
 end;
 
 procedure TCodeParser.ConstantName;
@@ -1478,26 +1534,35 @@ end;
 procedure TCodeParser.FormalParameterSection;
 var
   Decl, ParamDecl, VarType, VarDef: TDeclaration;
-  TempName: String;
+  I: Integer;
 begin
   Decl := PushStack(TDeclaration_ParamStub);
   inherited;
   PopStack();
 
   PushStack(TDeclaration_ParamGroup);
+
   VarType := Decl.Items.GetFirstItemOfClass(TDeclaration_VarType);
   VarDef := Decl.Items.GetFirstItemOfClass(TDeclaration_VarDefault);
-  for TempName in TDeclaration_VarStub(Decl).TempNames do
-  begin
-    ParamDecl := PushStack(TDeclaration_Parameter);
-    ParamDecl.Name := TempName;
-    TDeclaration_Parameter(ParamDecl).ParamType := TDeclaration_ParamStub(Decl).ParamType;
-    if (VarType <> nil) then
-      ParamDecl.Items.Add(VarType);
-    if (VarDef <> nil) then
-      ParamDecl.Items.Add(VarDef);
-    PopStack();
-  end;
+
+  with TDeclaration_VarStub(Decl) do
+    for I := 0 to NameCount - 1 do
+    begin
+      ParamDecl := PushStack(TDeclaration_Parameter);
+      ParamDecl.Name := Names[I].Name;
+      TDeclaration_Parameter(ParamDecl).ParamType := TDeclaration_ParamStub(Decl).ParamType;
+      if (VarType <> nil) then
+        ParamDecl.Items.Add(VarType);
+      if (VarDef <> nil) then
+        ParamDecl.Items.Add(VarDef);
+
+      TDeclaration_Var(ParamDecl).DefToken := TDeclaration_VarStub(Decl).DefToken;
+      TDeclaration_Var(ParamDecl).FStartPos := Names[I].StartPos;
+      TDeclaration_Var(ParamDecl).FEndPos := Names[I].EndPos;
+
+      PopStack();
+    end;
+
   PopStack();
 end;
 
@@ -1539,7 +1604,7 @@ end;
 procedure TCodeParser.ClassField;
 var
   Decl, FieldDecl, VarType: TDeclaration;
-  TempName: String;
+  I: Integer;
 begin
   if (not InDeclarations([TDeclaration_TypeRecord, TDeclaration_TypeUnion])) then
   begin
@@ -1552,15 +1617,17 @@ begin
   PopStack();
 
   VarType := Decl.Items.GetFirstItemOfClass(TDeclaration_VarType);
-  for TempName in TDeclaration_VarStub(Decl).TempNames do
-  begin
-    FieldDecl := PushStack(TDeclaration_Field);
-    FieldDecl.Name := TempName;
-    if (VarType <> nil) then
-      FieldDecl.Items.Add(VarType);
 
-    PopStack();
-  end;
+  with TDeclaration_VarStub(Decl) do
+    for I := 0 to NameCount - 1 do
+    begin
+      FieldDecl := PushStack(TDeclaration_Field);
+      FieldDecl.Name := Names[I].Name;
+      if (VarType <> nil) then
+        FieldDecl.Items.Add(VarType);
+
+      PopStack();
+    end;
 end;
 
 procedure TCodeParser.FieldName;
@@ -1657,6 +1724,7 @@ end;
 procedure TCodeParser.Reset;
 var
   List: TDeclarationList;
+  I: Integer;
 begin
   inherited Reset();
 
@@ -1671,10 +1739,15 @@ begin
   FGlobalMap.Clear();
   FTypeMethodMap.Clear();
 
-  FRoot.Free();
-  FRoot := TDeclaration.Create();
+  for I := 0 to FManagedItems.Count - 1 do
+    FManagedItems[I].Free();
+  FManagedItems.Clear();
+
+  FRoot := TDeclaration.Create(Self);
   FStack.Clear();
   FStack.Push(FRoot);
+
+  FItems := FRoot.Items;
 end;
 
 procedure TCodeParser.Run;

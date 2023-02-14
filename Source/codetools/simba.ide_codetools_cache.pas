@@ -274,7 +274,8 @@ initialization
   IncludeCache := TIncludeCache.Create();
 
 finalization
-  IncludeCache.Free();
+  if (IncludeCache <> nil) then
+    FreeAndNil(IncludeCache);
 
 end.
 

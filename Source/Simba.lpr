@@ -113,7 +113,6 @@ begin
     SimbaProcessType := ESimbaProcessType.IDE;
 
     Application.ShowMainForm := False;
-
     Application.CreateForm(TSimbaForm, SimbaForm);
     Application.CreateForm(TSimbaFunctionListForm, SimbaFunctionListForm);
     Application.CreateForm(TSimbaDebugImageForm, SimbaDebugImageForm);
@@ -131,6 +130,5 @@ begin
 
     Application.QueueAsyncCall(@SimbaForm.Setup, 0);
   end;
-
   Application.Run();
 end.

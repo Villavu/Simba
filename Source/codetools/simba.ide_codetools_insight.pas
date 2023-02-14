@@ -144,11 +144,6 @@ begin
     Include.Free();
   FBaseIncludes.Free();
   FBaseDefines.Free();
-  {$IFDEF PARSER_LEAK_CHECKS}
-  if (SimbaProcessType = ESimbaProcessType.IDE) then
-    TDeclaration.PrintLeaks();
-  {$ENDIF}
-  inherited;
 end;
 
 procedure TCodeinsight.SetScript(Script: String; FileName: String; CaretPos, MaxPos: Integer);
@@ -169,6 +164,8 @@ function TCodeinsight.FindDecl(S: String): TDeclaration;
 var
   Include: TCodeParser;
 begin
+  Result := nil;
+
   for Include in GetIncludes() do
   begin
     Result := Include.GetGlobal(S);
@@ -183,6 +180,8 @@ function TCodeinsight.GetOverloads(Decl: TDeclaration): TDeclarationArray;
 var
   n: String;
 begin
+  if (Decl = nil) then
+    Exit(nil);
   n := Decl.Name;
 
   Result := nil;
@@ -208,7 +207,6 @@ var
   Include: TCodeParser;
 begin
   Result := FScriptParser.Globals.ToArray;
-
   for Include in GetIncludes() do
     Result := Result + Include.Globals.ToArray;
 end;
@@ -380,6 +378,8 @@ begin
     Exit;
 
   Decl := FindDecl(Expr[0].Text);
+  if Length(Expr) = 1 then
+    Exit(Decl);
 
   if (Decl is TDeclaration_Method) and (not Expr[0].IsLastItem) then
    Decl := EnsureTypeDeclaration(TDeclaration_Method(Decl).ResultType)
