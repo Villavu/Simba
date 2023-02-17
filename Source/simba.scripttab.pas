@@ -10,8 +10,7 @@ unit simba.scripttab;
 interface
 
 uses
-  Classes, SysUtils, ComCtrls, Controls, Dialogs, ExtCtrls, Graphics,
-  SynEditMiscClasses, SynEditKeyCmds,
+  Classes, SysUtils, ComCtrls, Controls, Dialogs,
   simba.mufasatypes, simba.editor, simba.scriptinstance,
   simba.debuggerform, simba.functionlistform, simba.outputform;
 
@@ -137,7 +136,7 @@ begin
     FOutputBox.Show();
   if (FFunctionList <> nil) then
     FFunctionList.Show();
-  if (FEditor <> nil) and FEditor.CanSetFocus then
+  if (FEditor <> nil) and FEditor.CanSetFocus() then
     FEditor.SetFocus();
 end;
 
@@ -148,11 +147,12 @@ var
   Codeinsight: TCodeinsight;
 begin
   Codeinsight := TCodeinsight.Create();
+
   try
     Codeinsight.SetScript(Script, ScriptFileName, -1, -1);
     Codeinsight.Run();
 
-    Decl := Codeinsight.ParseExpression(FLinkExpression, False);
+    Decl := Codeinsight.ParseExpression(FLinkExpression, []);
     if (Decl <> nil) then
     begin
       if (Decl.ClassType = TDeclaration_Method) then
@@ -168,6 +168,7 @@ begin
     on E: Exception do
       DebugLn('TSimbaScriptTab.HandleEditorLinkClick: ' + E.ToString());
   end;
+
   Codeinsight.Free();
 end;
 

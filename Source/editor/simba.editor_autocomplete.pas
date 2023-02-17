@@ -5,7 +5,7 @@
 
   Auto complete form (Ctrl + Space)
 }
-unit simba.autocomplete;
+unit simba.editor_autocomplete;
 
 {$i simba.inc}
 
@@ -433,7 +433,7 @@ begin
       end else
         Filter := '';
 
-      FDecls := FCodeinsight.GetMembersOfType(FCodeinsight.ParseExpression(Expression, True));
+      FDecls := FCodeinsight.GetMembersOfType(FCodeinsight.ParseExpression(Expression, [EParseExpressionFlag.WantMethodResult]));
     end else
     begin
       Filter := Expression;

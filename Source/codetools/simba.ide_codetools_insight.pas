@@ -10,6 +10,11 @@ uses
   simba.ide_codetools_parser, simba.ide_codetools_utils;
 
 type
+  {$SCOPEDENUMS ON}
+  EParseExpressionFlag = (WantVarType, WantMethodResult);
+  EParseExpressionFlags = set of EParseExpressionFlag;
+  {$SCOPEDENUMS OFF}
+
   TCodeinsight = class(TObject)
   public
   class var
@@ -54,8 +59,8 @@ type
     function DoArrayIndex(Decl: TDeclaration; Dimensions: Integer): TDeclaration;
     function DoPointerDeref(Decl: TDeclaration): TDeclaration;
 
-    function ParseExpression(Expr: TExpressionItems; WantMethodResult: Boolean): TDeclaration; overload;
-    function ParseExpression(Expr: String; WantMethodResult: Boolean): TDeclaration; overload;
+    function ParseExpression(Expr: TExpressionItems; Flags: EParseExpressionFlags): TDeclaration; overload;
+    function ParseExpression(Expr: String; Flags: EParseExpressionFlags): TDeclaration; overload;
 
     constructor Create;
     destructor Destroy; override;
@@ -312,7 +317,7 @@ begin
     Result := EnsureTypeDeclaration(TDeclaration_TypePointer(Result).VarType);
 end;
 
-function TCodeinsight.ParseExpression(Expr: TExpressionItems; WantMethodResult: Boolean): TDeclaration;
+function TCodeinsight.ParseExpression(Expr: TExpressionItems; Flags: EParseExpressionFlags): TDeclaration;
 
   function FindMember(Decl: TDeclaration; Expr: TExpressionItem): TDeclaration;
   begin
@@ -331,7 +336,7 @@ function TCodeinsight.ParseExpression(Expr: TExpressionItems; WantMethodResult: 
         begin
           if Expr.IsLastItem then
           begin
-            case WantMethodResult of
+            case (EParseExpressionFlag.WantMethodResult in Flags) of
               True:
                 if (TDeclaration_Method(Decl).ResultType <> nil) then
                 begin
@@ -378,8 +383,11 @@ begin
     Exit;
 
   Decl := FindDecl(Expr[0].Text);
-  if Length(Expr) = 1 then
-    Exit(Decl);
+  if (Length(Expr) = 1) and (Flags * [EParseExpressionFlag.WantMethodResult, EParseExpressionFlag.WantVarType] = []) then
+  begin
+    Result := Decl;
+    Exit;
+  end;
 
   if (Decl is TDeclaration_Method) and (not Expr[0].IsLastItem) then
    Decl := EnsureTypeDeclaration(TDeclaration_Method(Decl).ResultType)
@@ -419,9 +427,9 @@ begin
   Result := Decl;
 end;
 
-function TCodeinsight.ParseExpression(Expr: String; WantMethodResult: Boolean): TDeclaration;
+function TCodeinsight.ParseExpression(Expr: String; Flags: EParseExpressionFlags): TDeclaration;
 begin
- Result := ParseExpression(StringToExpression(Expr), WantMethodResult);
+ Result := ParseExpression(StringToExpression(Expr), Flags);
 end;
 
 constructor TCodeinsight.Create;

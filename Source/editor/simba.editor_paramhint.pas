@@ -3,14 +3,14 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.parameterhint;
+unit simba.editor_paramhint;
 
 {$i simba.inc}
 
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, ExtCtrls, LCLType,
+  Classes, SysUtils, Forms, Controls, Graphics, LCLType,
   SynEdit, SynEditTypes, SynEditKeyCmds,
   simba.ide_codetools_insight, simba.ide_codetools_parser;
 
@@ -22,11 +22,12 @@ type
     FNeededWidth: Integer;
     FNeededHeight: Integer;
     FMeasuring: Boolean;
+    FLineHeight: Integer;
 
     procedure DoHide; override;
-
+    procedure FontChanged(Sender: TObject); override;
     procedure Paint; override;
-    procedure DrawMethod(var X, Y: Integer; Method: TDeclaration);
+    procedure DrawMethod(var X, Y: Integer; Method: TDeclaration_Method);
     procedure SetBoldIndex(AValue: Integer);
   public
     procedure Show(ScreenPoint: TPoint; Decls: TDeclarationArray);
@@ -45,6 +46,7 @@ type
     function GetParameterIndexAtCaret: Integer;
 
     procedure DoEditorTopLineChanged(Sender: TObject; Changes: TSynStatusChanges);
+    procedure DoEditorFontChanged(Sender: TObject);
     procedure DoEditorCaretMove(Sender: TObject);
     procedure DoEditorCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
     procedure DoEditorKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -79,6 +81,20 @@ begin
   inherited DoHide();
 end;
 
+procedure TSimbaParamHintForm.FontChanged(Sender: TObject);
+begin
+  inherited FontChanged(Sender);
+
+  with TBitmap.Create() do
+  try
+    Canvas.Font := Self.Font;
+
+    FLineHeight := Canvas.TextHeight('TaylorSwift');
+  finally
+    Free();
+  end;
+end;
+
 procedure TSimbaParamHintForm.Paint;
 var
   I: Integer;
@@ -106,7 +122,7 @@ begin
   FNeededHeight := Y + 2;
 end;
 
-procedure TSimbaParamHintForm.DrawMethod(var X, Y: Integer; Method: TDeclaration);
+procedure TSimbaParamHintForm.DrawMethod(var X, Y: Integer; Method: TDeclaration_Method);
 var
   ParamIndex: Integer;
 
@@ -172,33 +188,32 @@ begin
     if (Method is TDeclaration_TypeMethod) then
       DrawText('();')
     else
-      DrawText(Method.Name + '();');
-    Y := Y + Canvas.TextHeight('Lol');
-    Exit;
-  end;
-
-  ParamIndex := 0;
-
-  Decls := Decl.Items.GetItemsOfClass(TDeclaration_ParamGroup);
-  for I := 0 to High(Decls) do
+      DrawText(Method.Name + '()' + Method.ResultString() + ';');
+  end else
   begin
-    if (I = 0) then
+    ParamIndex := 0;
+
+    Decls := Decl.Items.GetItemsOfClass(TDeclaration_ParamGroup);
+    for I := 0 to High(Decls) do
     begin
-      if (Method is TDeclaration_TypeMethod) then
-        DrawText('(')
+      if (I = 0) then
+      begin
+        if (Method is TDeclaration_TypeMethod) then
+          DrawText('(')
+        else
+          DrawText(Method.Name + '(');
+      end;
+
+      DrawGroup(Decls[I]);
+
+      if (I < High(Decls)) then
+        DrawText('; ')
       else
-        DrawText(Method.Name + '(');
+        DrawText(')' + Method.ResultString() + ';');
     end;
-
-    DrawGroup(Decls[I]);
-
-    if (I < High(Decls)) then
-      DrawText('; ')
-    else
-      DrawText(')');
   end;
 
-  Y := Y + Canvas.TextHeight('Lol');
+  Y := Y + FLineHeight;
 end;
 
 procedure TSimbaParamHintForm.Show(ScreenPoint: TPoint; Decls: TDeclarationArray);
@@ -309,6 +324,12 @@ begin
   end;
 end;
 
+procedure TSimbaParamHint.DoEditorFontChanged(Sender: TObject);
+begin
+  if IsShowing then
+    FHintForm.Hide();
+end;
+
 procedure TSimbaParamHint.DoEditorCaretMove(Sender: TObject);
 begin
   if IsShowing then
@@ -366,11 +387,12 @@ begin
       if (Text[I] = '(') then
         Break;
 
-    FCodeinsight.SetScript(Editor.Text, '', Editor.SelStart, Editor.SelStart);
-    FCodeinsight.Run();
     FParenthesesPoint := FindParenthesesPoint();
 
-    Decl := FCodeinsight.ParseExpression(TSimbaEditor(Editor).GetExpression(FParenthesesPoint.X, FParenthesesPoint.Y), False);
+    FCodeinsight.SetScript(Editor.Text, '', Editor.SelStart, Editor.SelStart);
+    FCodeinsight.Run();
+
+    Decl := FCodeinsight.ParseExpression(TSimbaEditor(Editor).GetExpression(FParenthesesPoint.X, FParenthesesPoint.Y), [EParseExpressionFlag.WantVarType]);
     if (Decl is TDeclaration_Method) then
     begin
       if (Decl is TDeclaration_TypeMethod) then
@@ -398,6 +420,7 @@ begin
   if (Value is TSimbaEditor) then
     with TSimbaEditor(Value) do
     begin
+      RegisterFontChangedHandler(@DoEditorFontChanged);
       RegisterCaretMoveHandler(@DoEditorCaretMove);
       RegisterBeforeKeyDownHandler(@DoEditorKeyDown);
       RegisterCommandHandler(@DoEditorCommand, nil, [hcfPostExec]);
@@ -417,6 +440,7 @@ begin
   if (Value is TSimbaEditor) then
     with TSimbaEditor(Value) do
     begin
+      UnRegisterFontChangedHandler(@DoEditorFontChanged);
       UnRegisterCaretMoveHandler(@DoEditorCaretMove);
       UnRegisterBeforeKeyDownHandler(@DoEditorKeyDown);
       UnRegisterCommandHandler(@DoEditorCommand);

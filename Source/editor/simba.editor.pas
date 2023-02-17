@@ -12,9 +12,9 @@ interface
 uses
   Classes, SysUtils, Graphics, Controls, LCLType,
   SynEdit, SynEditTypes, SynGutterLineOverview, SynEditMouseCmds, SynEditMiscClasses,
-  SynEditKeyCmds, SynPluginMultiCaret, SynEditHighlighter,
-  SynHighlighterPas_Simba, SynEditMarkupHighAll, LazSynEditMouseCmdsTypes, LazMethodList,
-  simba.mufasatypes, simba.autocomplete, simba.parameterhint, simba.settings,
+  SynEditKeyCmds, SynEditHighlighter, SynHighlighterPas_Simba, SynEditMarkupHighAll,
+  LazSynEditMouseCmdsTypes, LazMethodList,
+  simba.mufasatypes, simba.settings, simba.editor_autocomplete, simba.editor_paramhint,
   simba.editor_attributes, simba.editor_modifiedlinegutter;
 
 type
@@ -80,7 +80,7 @@ implementation
 
 uses
   SynEditPointClasses,
-  simba.ide_codetools_utils, simba.fonthelpers, simba.editor_blockcompletion,
+  simba.fonthelpers, simba.editor_blockcompletion,
   simba.editor_docgenerator, simba.editor_commentblock,
   simba.editor_mousewheelzoom, simba.editor_multicaret;
 
