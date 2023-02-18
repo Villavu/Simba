@@ -29,7 +29,7 @@ type
 
     function GetItemsOfClass(AClass: TDeclarationClass; SubSearch: Boolean = False): TDeclarationArray;
     function GetFirstItemOfClass(AClass: TDeclarationClass; SubSearch: Boolean = False): TDeclaration;
-    function GetItemInPosition(Position: Integer): TDeclaration;
+    function GetItemInPosition(Position: Integer; CheckEnd: Boolean = True): TDeclaration;
 
     function GetTextOfClass(AClass: TDeclarationClass): String;
     function GetTextOfClassNoComments(AClass: TDeclarationClass): String;
@@ -88,16 +88,16 @@ type
     property TextNoComments: String read GetTextNoComments;
     property TextNoCommentsSingleLine: String read GetTextNoCommentsSingleLine;
 
+    function GetOwnerByClass(AClass: TDeclarationClass): TDeclaration;
+
     constructor Create(AParser: TCodeParser); reintroduce; virtual;
     constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); reintroduce; virtual;
     destructor Destroy; override;
   end;
 
-  TciCompoundStatement = class(TDeclaration);
-  TciWithStatement = class(TDeclaration);
-  TciSimpleStatement = class(TDeclaration);
-  TciVariable = class(TDeclaration);
-  TciExpression = class(TDeclaration);
+  TDeclaration_CompoundStatement = class(TDeclaration);
+  TDeclaration_WithStatement = class(TDeclaration);
+  TDeclaration_WithVariable = class(TDeclaration);
 
   TDeclaration_Stub = class(TDeclaration);
   TDeclaration_TypeStub = class(TDeclaration_Stub)
@@ -212,6 +212,7 @@ type
     Directives: EMethodDirectives;
 
     function IsOverride: Boolean;
+    function ParamDecls: TDeclarationArray;
 
     function ResultType: TDeclaration;
     function Dump: String; override;
@@ -248,16 +249,20 @@ type
 
     FRoot: TDeclaration;
     FItems: TDeclarationList;
+    FLastItem: TDeclaration;
     FStack: TDeclarationStack;
     FOnFindInclude: TOnFindInclude;
     FOnHandleInclude: TOnHandleInclude;
     FOnHandleLibrary: TOnHandleLibrary;
 
+    FLocals: TDeclarationList;
     FGlobals: TDeclarationList;
     FGlobalMap: TDeclarationMap;
     FTypeMethodMap: TDeclarationMap;
 
     FHash: String;
+
+    procedure FindLocals;
 
     procedure AddToMap(Map: TDeclarationMap; Name: String; Decl: TDeclaration);
 
@@ -283,7 +288,6 @@ type
 
     procedure CompoundStatement; override;                                      //Begin-End
     procedure WithStatement; override;                                          //With
-    procedure SimpleStatement; override;                                        //Begin-End + With
     procedure Variable; override;                                               //With
 
     procedure ConstantType; override;
@@ -339,6 +343,7 @@ type
     procedure QualifiedIdentifier; override;                                    //Enum Element Name
   public
     property Items: TDeclarationList read FItems;
+    property Locals: TDeclarationList read FLocals;
     property Globals: TDeclarationList read FGlobals;
 
     property OnFindInclude: TOnFindInclude read FOnFindInclude write FOnFindInclude;
@@ -491,6 +496,17 @@ end;
 function TDeclaration_Method.IsOverride: Boolean;
 begin
   Result := tokOverride in Directives;
+end;
+
+function TDeclaration_Method.ParamDecls: TDeclarationArray;
+var
+  Decl: TDeclaration;
+begin
+  Result := nil;
+
+  Decl := FItems.GetFirstItemOfClass(TDeclaration_ParamList);
+  if (Decl <> nil) then
+    Result := Decl.Items.GetItemsOfClass(TDeclaration_Parameter, True);
 end;
 
 function TDeclaration_Method.ResultType: TDeclaration;
@@ -723,13 +739,13 @@ begin
       Exit;
 end;
 
-function TDeclarationList.GetItemInPosition(Position: Integer): TDeclaration;
+function TDeclarationList.GetItemInPosition(Position: Integer; CheckEnd: Boolean): TDeclaration;
 
   procedure Search(Declaration: TDeclaration; var Result: TDeclaration);
   var
     I: Integer;
   begin
-    if (Position >= Declaration.StartPos) and (Position <= Declaration.EndPos) then
+    if (Position >= Declaration.StartPos) and ((not CheckEnd) or (Position <= Declaration.EndPos)) then
     begin
       Result := Declaration;
 
@@ -744,7 +760,7 @@ begin
   Result := nil;
 
   for I := 0 to FLength - 1 do
-    if (Position >= FItems[I].StartPos) and (Position <= FItems[I].EndPos) then
+    if (Position >= FItems[I].StartPos) and ((not CheckEnd) or (Position <= FItems[I].EndPos)) then
       Search(FItems[I], Result);
 end;
 
@@ -901,6 +917,26 @@ begin
   Result := SameText(Name, Value);
 end;
 
+function TDeclaration.GetOwnerByClass(AClass: TDeclarationClass): TDeclaration;
+var
+  Decl: TDeclaration;
+begin
+  Decl := FOwner;
+
+  while (Decl <> nil) do
+  begin
+    if (Decl is AClass) then
+    begin
+      Result := Decl;
+      Exit;
+    end;
+
+    Decl := Decl.Owner;
+  end;
+
+  Result := nil;
+end;
+
 constructor TDeclaration.Create(AParser: TCodeParser);
 begin
   inherited Create();
@@ -960,15 +996,70 @@ end;
 
 function TCodeParser.PushStack(AClass: TDeclarationClass): TDeclaration;
 begin
-  Result := AClass.Create(Self, FStack.Peek(), FLexer.TokenPos, FLexer.TokenPos);
+  FLastItem := AClass.Create(Self, FStack.Peek(), FLexer.TokenPos, FLexer.TokenPos);
 
-  FStack.Peek().Items.Add(Result);
-  FStack.Push(Result);
+  FStack.Peek().Items.Add(FLastItem);
+  FStack.Push(FLastItem);
+
+  Result := FLastItem;
 end;
 
 procedure TCodeParser.PopStack();
 begin
-  FStack.Pop().fEndPos := fLastNoJunkPos;
+  if (Lexer.TokenID = tok_DONE) then
+    FStack.Pop()
+  else
+    FStack.Pop().fEndPos := fLastNoJunkPos;
+end;
+
+procedure TCodeParser.FindLocals;
+
+  procedure CheckMethod(Decl: TDeclaration);
+  begin
+    FLocals.AddRange(Decl.Items.GetItemsOfClass(TDeclaration_Method));
+
+    while (Decl is TDeclaration_Method) do
+    begin
+      FLocals.AddRange(Decl.Items.GetItemsOfClass(TDeclaration_Var));
+      FLocals.AddRange(Decl.Items.GetItemsOfClass(TDeclaration_Type));
+      if (FItems.GetFirstItemOfClass(TDeclaration_ParamList) <> nil) then
+        FLocals.AddRange(FItems.GetFirstItemOfClass(TDeclaration_ParamList).Items.GetItemsOfClass(TDeclaration_Parameter, True));
+
+      Decl := Decl.GetOwnerByClass(TDeclaration_Method);
+    end;
+  end;
+
+  procedure CheckWith(Decl: TDeclaration);
+  begin
+    while (Decl is TDeclaration_WithStatement) do
+    begin
+      FLocals.AddRange(Decl.Items.GetItemsOfClass(TDeclaration_WithVariable));
+
+      Decl := Decl.GetOwnerByClass(TDeclaration_WithStatement);
+    end;
+  end;
+
+var
+  Decl: TDeclaration;
+begin
+  FLocals.Clear();
+
+  if (CaretPos > -1) then
+  begin
+    Decl := FItems.GetItemInPosition(CaretPos);
+    if (Decl = nil) then
+      Decl := FItems.GetItemInPosition(CaretPos, False);
+
+    if (Decl is TDeclaration_Method) then
+      CheckMethod(Decl)
+    else
+      CheckMethod(Decl.GetOwnerByClass(TDeclaration_Method));
+
+    if (Decl is TDeclaration_WithStatement) then
+      CheckWith(Decl)
+    else
+      CheckWith(Decl.GetOwnerByClass(TDeclaration_WithStatement));
+  end;
 end;
 
 procedure TCodeParser.AddToMap(Map: TDeclarationMap; Name: String; Decl: TDeclaration);
@@ -1061,6 +1152,7 @@ begin
   inherited Create();
 
   FManagedItems := TDeclarationList.Create();
+  FLocals := TDeclarationList.Create();
 
   FGlobalMap := TDeclarationMap.Create();
   FTypeMethodMap := TDeclarationMap.Create();
@@ -1077,6 +1169,7 @@ destructor TCodeParser.Destroy;
 begin
   Reset();
 
+  FLocals.Free();
   FManagedItems.Free();
   FStack.Free();
   FGlobalMap.Free();
@@ -1142,52 +1235,39 @@ end;
 
 procedure TCodeParser.CompoundStatement;
 begin
-  if (not InDeclarations([nil, TDeclaration_Method, TciWithStatement])) then
+  if (not InDeclarations([nil, TDeclaration_Method, TDeclaration_WithStatement])) then
   begin
     inherited;
     Exit;
   end;
 
-  PushStack(TciCompoundStatement);
+  PushStack(TDeclaration_CompoundStatement);
   inherited;
   PopStack();
 end;
 
 procedure TCodeParser.WithStatement;
 begin
-  if (not InDeclarations([TDeclaration_Method, TciCompoundStatement])) then
+  if (not InDeclarations([TDeclaration_Method, TDeclaration_CompoundStatement])) then
   begin
     inherited;
     Exit;
   end;
 
-  PushStack(TciWithStatement);
-  inherited;
-  PopStack();
-end;
-
-procedure TCodeParser.SimpleStatement;
-begin
-  if (not InDeclaration(TciWithStatement)) then
-  begin
-    inherited;
-    Exit;
-  end;
-
-  PushStack(TciSimpleStatement);
+  PushStack(TDeclaration_WithStatement);
   inherited;
   PopStack();
 end;
 
 procedure TCodeParser.Variable;
 begin
-  if (not InDeclaration(TciWithStatement)) then
+  if (not InDeclaration(TDeclaration_WithStatement)) then
   begin
     inherited;
     Exit;
   end;
 
-  PushStack(TciVariable);
+  PushStack(TDeclaration_WithVariable);
   inherited;
   PopStack();
 end;
@@ -1768,6 +1848,8 @@ begin
     else
       AddGlobal(Decl);
   end;
+
+  FindLocals();
 end;
 
 function TCodeParser.GetGlobal(AName: String): TDeclaration;

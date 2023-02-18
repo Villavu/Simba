@@ -27,7 +27,7 @@ var
 implementation
 
 uses
-  simba.ide_codetools_parser_new, simba.ide_codetools_insight_new, mPasLexTypes;
+  simba.ide_codetools_parser, simba.ide_codetools_insight, mPasLexTypes;
 
 {$R *.lfm}
 
@@ -37,16 +37,21 @@ var
 begin
   SetupKeywordDictionary();
 
-  with TNewCodeinsight.Create() do
+  with TCodeinsight.Create() do
   try
-    SetScript(SynEdit1.Text, '');
+    SetScript(SynEdit1.Text, '', SynEdit1.SelStart, SynEdit1.SelStart);
     Run();
 
-    Decl := ParseExpression(Edit1.Text);
+    Decl := ParseExpression(Edit1.Text, [EParseExpressionFlag.WantMethodResult]);
     if (Decl = nil) then
       Memo1.Text := 'Failed'
     else
       Memo1.Text := 'Found: ' + Decl.Dump() + ' "' + Decl.Text + '"';
+
+    Memo1.Lines.Add('');
+    Memo1.Lines.Add('Locals: %d', [ScriptParser.Locals.Count]);
+    for Decl in ScriptParser.Locals.ToArray() do
+      Memo1.Lines.Add(Decl.ClassName + ' "' + Decl.Name + '"');
   finally
     Free();
   end;

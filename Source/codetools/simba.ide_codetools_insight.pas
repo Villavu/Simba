@@ -429,7 +429,7 @@ end;
 
 function TCodeinsight.ParseExpression(Expr: String; Flags: EParseExpressionFlags): TDeclaration;
 begin
- Result := ParseExpression(StringToExpression(Expr), Flags);
+  Result := ParseExpression(StringToExpression(Expr), Flags);
 end;
 
 constructor TCodeinsight.Create;
