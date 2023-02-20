@@ -134,6 +134,8 @@ type
     property isVar: Boolean index 6 read GetFlags write SetFlags;
     property isConst: Boolean index 7 read GetFlags write SetFlags;
     property isType: Boolean index 8 read GetFlags write SetFlags;
+    property isEnum: Boolean index 9 read GetFlags write SetFlags;
+    property isScopedEnum: Boolean index 10 read GetFlags write SetFlags;
 
     constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); reintroduce;
     destructor Destroy; override;
@@ -914,7 +916,10 @@ end;
 
 function TDeclaration.GetName: string;
 begin
-  Result := FName.Value;
+  if FName.IsNull then
+    Result := ''
+  else
+    Result := FName.Value;
 end;
 
 procedure TDeclaration.SetName(Value: String);
@@ -1180,7 +1185,9 @@ begin
       FTypeMethods.Add(TDeclaration_Method(Decl).ObjectName, Decl);
 
       Continue;
-    end;
+    end else
+    if (Decl is TDeclaration_TypeEnum) then
+      FGlobals.Extend(TDeclaration_TypeEnum(Decl).Elements);
 
     FGlobals.Add(Decl);
   end;
@@ -1460,9 +1467,6 @@ begin
     NewDecl.Name := TDeclaration_TypeStub(Decl).TempName;
 
     FStack.Top.Items.Add(NewDecl);
-    if (NewDecl is TDeclaration_TypeEnum) then
-      for NewDecl in TDeclaration_TypeEnum(NewDecl).Elements do
-        FStack.Top.Items.Add(NewDecl);
   end else
     OnErrorMessage(Lexer, 'Invalid type declaration');
 end;
@@ -1846,18 +1850,27 @@ begin
 end;
 
 procedure TCodeParser.EnumeratedType;
+var
+  Decl: TDeclaration;
 begin
   if Lexer.IsDefined('!SCOPEDENUMS') then
-    PushStack(TDeclaration_TypeEnumScoped)
-  else
-    PushStack(TDeclaration_TypeEnum);
+  begin
+    EnumeratedScopedType();
+    Exit;
+  end;
+
+  Decl := PushStack(TDeclaration_TypeEnum);
+  Decl.isEnum := True;
   inherited;
   PopStack();
 end;
 
 procedure TCodeParser.EnumeratedScopedType;
+var
+  Decl: TDeclaration;
 begin
-  PushStack(TDeclaration_TypeEnumScoped);
+  Decl := PushStack(TDeclaration_TypeEnumScoped);
+  Decl.isScopedEnum := True;
   inherited;
   PopStack();
 end;

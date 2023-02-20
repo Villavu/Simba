@@ -2692,7 +2692,8 @@ end;
 
 procedure TmwSimplePasPar.EnumeratedScopedType;
 begin
-  NextToken();
+  if (Lexer.TokenID = tokEnum) then // Could be {$scopedenums}
+    NextToken();
 
   Expected(tokRoundOpen);
   EnumeratedTypeItem;

@@ -212,6 +212,7 @@ begin
   FTreeView.OnMouseMove := @DoTreeViewMouseMove;
   FTreeView.Options := FTreeView.Options + [tvoRightClickSelect, tvoReadOnly, tvoAutoItemHeight] - [tvoToolTips, tvoThemedDraw];
   FTreeView.TabStop := False;
+  FTreeView.DragMode := dmAutomatic;
 
   ExpandedState := TTreeNodeExpandedState.Create(FTreeView);
 

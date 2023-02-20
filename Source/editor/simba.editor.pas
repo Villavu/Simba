@@ -10,7 +10,7 @@ unit simba.editor;
 interface
 
 uses
-  Classes, SysUtils, Graphics, Controls, LCLType,
+  Classes, SysUtils, Graphics, Controls, ComCtrls, LCLType,
   SynEdit, SynEditTypes, SynGutterLineOverview, SynEditMouseCmds, SynEditMiscClasses,
   SynEditKeyCmds, SynEditHighlighter, SynHighlighterPas_Simba, SynEditMarkupHighAll,
   LazSynEditMouseCmdsTypes, LazMethodList,
@@ -36,6 +36,9 @@ type
 
     procedure FontChanged(Sender: TObject); override;
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
+
+    procedure DoDragDrop(Sender, Source: TObject; X,Y: Integer);
+    procedure DoDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
 
     // Temp line coloring
     procedure DoSpecialLineColor(Sender: TObject; Line: Integer; var Special: Boolean; AMarkup: TSynSelectedColor);
@@ -203,6 +206,20 @@ begin
   end;
 end;
 
+procedure TSimbaEditor.DoDragDrop(Sender, Source: TObject; X, Y: Integer);
+begin
+  if (Source is TTreeView) and (TTreeView(Source).Selected <> nil) then
+  begin
+    TextBetweenPoints[PixelsToRowColumn(TPoint.Create(X, Y)),
+                      PixelsToRowColumn(TPoint.Create(X, Y))] := TTreeView(Source).Selected.Text;
+  end;
+end;
+
+procedure TSimbaEditor.DoDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
+begin
+  Accept := Source is TTreeView;
+end;
+
 procedure TSimbaEditor.DoStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
 begin
   ClearFocusedLines();
@@ -318,10 +335,11 @@ var
   StartIndex, EndIndex, InRound, InSquare: Integer;
   TheText: String;
 begin
+  Result := '';
   if (X > Length(LineText)) then
-    Exit('');
-  TheText := Text;
+    Exit;
 
+  TheText := Text;
   StartIndex := RowColToCharIndex(TPoint.Create(X, Y));
   EndIndex := StartIndex;
   if (StartIndex < 1) or (StartIndex > Length(TheText)) then
@@ -340,6 +358,11 @@ begin
       #0..#32:
         if (InRound <= 0) and (InSquare <= 0) then
           Break;
+    end;
+
+    case TheText[EndIndex] of
+      '(': if (InRound < 0) then Break;
+      '[': if (InSquare < 0) then Break;
     end;
 
     Dec(EndIndex);
@@ -363,6 +386,9 @@ end;
 constructor TSimbaEditor.Create(AOwner: TComponent; LoadColors: Boolean);
 begin
   inherited Create(AOwner);
+
+  OnDragDrop := @DoDragDrop;
+  OnDragOver := @DoDragOver;
 
   FFontChangedHandlerList := TMethodList.Create();
 
@@ -461,6 +487,8 @@ begin
   SimbaSettingChanged(SimbaSettings.General.MacOSKeystrokes);
 
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
+
+
 end;
 
 destructor TSimbaEditor.Destroy;

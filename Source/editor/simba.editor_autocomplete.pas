@@ -25,6 +25,7 @@ type
     procedure DoShow; override;
     procedure DoHide; override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
+    procedure KeyDown(var Key: Word; Shift: TShiftState); override;
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -191,6 +192,17 @@ begin
   FAutoComplete.ShowHint(Scroll.Position + (Y - DrawBorderWidth) div FFontHeight, False);
 end;
 
+procedure TSimbaAutoComplete_Form.KeyDown(var Key: Word; Shift: TShiftState);
+begin
+  if (Key = VK_OEM_COMMA) then
+  begin
+    OnValidate(Self, ',', Shift);
+    Key := 0;
+  end;
+
+  inherited KeyDown(Key, Shift);
+end;
+
 constructor TSimbaAutoComplete_Form.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -210,7 +222,7 @@ end;
 
 procedure TSimbaAutoComplete.ContinueCompletion(Data: PtrInt);
 begin
-  Editor.CommandProcessor(ecChar, '.', nil);
+  Editor.CommandProcessor(ecChar, Char(Byte(Data)), nil);
 end;
 
 procedure TSimbaAutoComplete.DoCodeCompletion(var Value: String; SourceValue: String; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
@@ -223,8 +235,10 @@ begin
   else
     Value := Decl.Name;
 
-  if (KeyChar = '.') then
-    Application.QueueAsyncCall(@ContinueCompletion, 0);
+  case KeyChar of
+    '.': Application.QueueAsyncCall(@ContinueCompletion, Ord('.'));
+    ',': Application.QueueAsyncCall(@ContinueCompletion, Ord(','));
+  end;
 end;
 
 function CompareDeclarations(A, B: TDeclaration): Integer;

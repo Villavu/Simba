@@ -392,7 +392,7 @@ begin
     FCodeinsight.SetScript(Editor.Text, '', Editor.SelStart, Editor.SelStart);
     FCodeinsight.Run();
 
-    Decl := FCodeinsight.ParseExpression(TSimbaEditor(Editor).GetExpression(FParenthesesPoint.X, FParenthesesPoint.Y), [EParseExpressionFlag.WantVarType]);
+    Decl := FCodeinsight.ParseExpression(TSimbaEditor(Editor).GetExpression(FParenthesesPoint.X -1, FParenthesesPoint.Y), [EParseExpressionFlag.WantVarType]);
     if (Decl is TDeclaration_Method) then
     begin
       if (Decl is TDeclaration_TypeMethod) then
