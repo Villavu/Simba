@@ -168,7 +168,7 @@ begin
   FLock.Enter();
 
   try
-    for Include in Includes do
+    for Include in Includes.ToArray() do
       if (Include is TCachedInclude) then
         TCachedInclude(Include).DecRef();
   finally

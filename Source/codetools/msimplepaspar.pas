@@ -4423,8 +4423,8 @@ end;
 procedure TmwSimplePasPar.PopLexer;
 begin
   fLexerStack.Pop();
-  fLexerStack.Peek().CloneDefinesFrom(fLexer);
-  fLexer := fLexerStack.Peek();
+  fLexerStack.Top.CloneDefinesFrom(fLexer);
+  fLexer := fLexerStack.Top;
 end;
 
 procedure TmwSimplePasPar.OnLibraryDirect(Sender: TmwBasePasLex);

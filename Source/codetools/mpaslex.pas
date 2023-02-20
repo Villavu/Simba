@@ -36,7 +36,8 @@ unit mPasLex;
 interface
 
 uses
-  SysUtils, Classes, Generics.Collections, LazUTF8,
+  SysUtils, Classes,
+  simba.list, simba.stack,
   mPasLexTypes;
 
 type
@@ -88,7 +89,7 @@ type
 
     FDirectiveParamOrigin: PAnsiChar;
 
-    FDefines: TStringListUTF8Fast;
+    FDefines: TStringList;
     FDefineStack: Integer;
     FTopDefineRec: PDefineRec;
     FUseDefines: Boolean;
@@ -221,7 +222,7 @@ type
 
     property UseDefines: Boolean read FUseDefines write FUseDefines;
 
-    property Defines: TStringListUTF8Fast read FDefines;
+    property Defines: TStringList read FDefines;
   end;
 
   TmwPasLex = class(TmwBasePasLex)
@@ -242,8 +243,8 @@ type
     property AheadExID: TptTokenKind read GetAheadExID;
   end;
 
-  TLexerStack = specialize TStack<TmwPasLex>;
-  TLexerList = specialize TObjectList<TmwPasLex>;
+  TLexerStack = specialize TSimbaStack<TmwPasLex>;
+  TLexerList = specialize TSimbaList<TmwPasLex>;
 
 implementation
 
@@ -360,7 +361,8 @@ begin
   FIdentBufferUpper := PtrUInt(@FIdentBuffer[MaxTokenNameLength + 1]);
 
   FUseDefines := True;
-  FDefines := TStringListUTF8Fast.Create();
+  FDefines := TStringList.Create();
+  FDefines.UseLocale := False;
   FDefines.Duplicates := dupIgnore;
 
   MaxPos := -1;

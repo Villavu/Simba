@@ -66,14 +66,12 @@ begin
   begin
     ImageList := SimbaForm.Images;
 
-    if (Grid.Objects[aCol,aRow] is TDeclaration_Method) then
+    if (Grid.Objects[aCol, aRow] is TDeclaration_Method) then
     begin
-      case TDeclaration_Method(Grid.Objects[aCol,aRow]).MethodType of
-        mtFunction, mtObjectFunction:
-          ImageIndex := IMAGE_FUNCTION;
-        else
-          ImageIndex := IMAGE_PROCEDURE;
-      end;
+      if TDeclaration(Grid.Objects[aCol,aRow]).isFunction then
+        ImageIndex := IMAGE_FUNCTION
+      else
+        ImageIndex := IMAGE_PROCEDURE;
     end;
   end;
 end;

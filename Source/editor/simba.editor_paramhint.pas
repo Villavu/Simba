@@ -188,7 +188,7 @@ begin
     if (Method is TDeclaration_TypeMethod) then
       DrawText('();')
     else
-      DrawText(Method.Name + '()' + Method.ResultString() + ';');
+      DrawText(Method.Name + '()' + Method.ResultString + ';');
   end else
   begin
     ParamIndex := 0;
@@ -209,7 +209,7 @@ begin
       if (I < High(Decls)) then
         DrawText('; ')
       else
-        DrawText(')' + Method.ResultString() + ';');
+        DrawText(')' + Method.ResultString + ';');
     end;
   end;
 
@@ -227,7 +227,7 @@ begin
   for I := 0 to High(Decls) do
     if (Decls[I] is TDeclaration_Method) then
     begin
-      if TDeclaration_Method(Decls[I]).IsOverride then
+      if Decls[i].isOverrideMethod then
         Continue;
 
       FMethods[I] := TDeclaration_Method(Decls[I]);

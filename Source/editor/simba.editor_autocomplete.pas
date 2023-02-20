@@ -50,6 +50,7 @@ type
     FHintForm: TSimbaAutoComplete_Hint;
     FCodeinsight: TCodeinsight;
     FDecls: TDeclarationArray;
+    FLocalDecls: TDeclarationArray;
 
     FFilteredDecls: TDeclarationArray;
     FFilteredWeights: TIntegerArray; // cache
@@ -59,7 +60,7 @@ type
     function GetDecl(Index: Integer): TDeclaration;
     function GetCompletionFormClass: TSynBaseCompletionFormClass; override;
 
-    procedure ShowHint(Index: Integer);
+    procedure ShowHint(Index: Integer; Force: Boolean);
     procedure ShowHintForm(Data: PtrInt);
     procedure ContinueCompletion(Data: PtrInt);
 
@@ -187,7 +188,7 @@ begin
   if ((Scroll.Visible) and (X > Scroll.Left)) or (Y < DrawBorderWidth) or (Y >= ClientHeight - DrawBorderWidth) then
     Exit;
 
-  FAutoComplete.ShowHint(Scroll.Position + (Y - DrawBorderWidth) div FFontHeight);
+  FAutoComplete.ShowHint(Scroll.Position + (Y - DrawBorderWidth) div FFontHeight, False);
 end;
 
 constructor TSimbaAutoComplete_Form.Create(AOwner: TComponent);
@@ -233,61 +234,73 @@ end;
 
 procedure TSimbaAutoComplete.DoFiltering(var NewPosition: Integer);
 var
+  Filter: String;
   Count: Integer;
 
-  procedure AddSorted;
-  var
-    Item: TDeclaration;
+  function IgnoreDeclaration(const Decl: TDeclaration): Boolean; inline;
   begin
-    for Item in FDecls do
+    Result := (Decl.Name = '') or Decl.isOverrideMethod or Decl.isOperatorMethod;
+  end;
+
+  procedure AddSorted(Decls: TDeclarationArray; StartIndex: Integer);
+  var
+    I: Integer;
+  begin
+    for I := 0 to High(Decls) do
     begin
-      if (Item is TDeclaration_Method) and ((TDeclaration_Method(Item).MethodType = mtOperator) or TDeclaration_Method(Item).IsOverride()) then
+      if IgnoreDeclaration(Decls[I]) then
         Continue;
 
-      FFilteredDecls[Count] := Item;
-
+      FFilteredDecls[Count] := Decls[I];
       Inc(Count);
     end;
 
-    if (Count > 1) then
-      specialize QuickSortFunc<TDeclaration>(FFilteredDecls, 0, Count - 1, @CompareDeclarations);
+    specialize QuickSortFunc<TDeclaration>(FFilteredDecls, StartIndex, Count - 1, @CompareDeclarations);
   end;
 
-  procedure AddFiltered(Filter: String; DefaultWeight: Integer = 0);
+  procedure AddFiltered(Decls: TDeclarationArray; StartIndex: Integer);
   var
-    Decl: TDeclaration;
+    I: Integer;
     DeclName: String;
   begin
-    Filter := Filter.ToUpper();
-
-    for Decl in FDecls do
+    for I := 0 to High(Decls) do
     begin
-      DeclName := Decl.Name.ToUpper();
+      if IgnoreDeclaration(Decls[I]) then
+        Continue;
+
+      DeclName := Decls[I].Name.ToUpper();
       if (DeclName.IndexOf(Filter) > 0) then
       begin
-        FFilteredDecls[Count] := Decl;
-        FFilteredWeights[Count] := DefaultWeight + (100 - Round(Length(Filter) / Length(DeclName) * 100)) + (DeclName.IndexOf(Filter) * 100);
+        FFilteredDecls[Count] := Decls[I];
+        FFilteredWeights[Count] := (100 - Round(Length(Filter) / Length(DeclName) * 100)) + (DeclName.IndexOf(Filter) * 100);
 
         Inc(Count);
       end;
     end;
 
-    if (Count > 1) then
-      specialize QuickSortWeighted<TDeclaration, Integer>(FFilteredDecls, FFilteredWeights, 0, Count - 1, True);
+    specialize QuickSortWeighted<TDeclaration, Integer>(FFilteredDecls, FFilteredWeights, StartIndex, Count - 1, True);
   end;
 
+var
+  NeededLength: Integer;
 begin
-  if (Length(FFilteredDecls) < Length(FDecls)) then
-    SetLength(FFilteredDecls, Length(FDecls));
-  if (Length(FFilteredWeights) < Length(FDecls)) then
-    SetLength(FFilteredWeights, Length(FDecls));
+  NeededLength := Length(FDecls) + Length(FLocalDecls);
+  if (Length(FFilteredDecls) < NeededLength) then
+    SetLength(FFilteredDecls, NeededLength);
+  if (Length(FFilteredWeights) < NeededLength) then
+    SetLength(FFilteredWeights, NeededLength);
 
   Count := 0;
-
-  if (CurrentString = '') then
-    AddSorted()
-  else
-    AddFiltered(CurrentString);
+  Filter := CurrentString.ToUpper();
+  if (Filter = '') then
+  begin
+    AddSorted(FLocalDecls, 0);
+    AddSorted(FDecls, Count);
+  end else
+  begin
+    AddFiltered(FLocalDecls, 0);
+    AddFiltered(FDecls, Count);
+  end;
 
   if (Count > 0) then
     NewPosition := 0
@@ -295,6 +308,8 @@ begin
     NewPosition := -1;
 
   TVirtualStringList(ItemList).Count := Count;
+
+  Application.QueueAsyncCall(@ShowHintForm, 0);
 end;
 
 procedure TSimbaAutoComplete.DoTabPressed(Sender: TObject);
@@ -318,7 +333,7 @@ begin
   end;
 end;
 
-procedure TSimbaAutoComplete.ShowHint(Index: Integer);
+procedure TSimbaAutoComplete.ShowHint(Index: Integer; Force: Boolean);
 
   function GetMethodText(Decl: TDeclaration_Method): String;
   begin
@@ -360,7 +375,7 @@ begin
     Exit;
   end;
 
-  if FHintForm.Visible and (FHintForm.FItemIndex = Index) then
+  if FHintForm.Visible and (FHintForm.FItemIndex = Index) and (not Force) then
     Exit;
 
   with FHintForm do
@@ -387,7 +402,9 @@ begin
 
     HintRect := R;
 
-    Application.QueueAsyncCall(@ShowHintForm, 0);
+    FHintForm.ActivateHint('');
+
+    //Application.QueueAsyncCall(@4, 0);
   end;
 end;
 
@@ -418,6 +435,7 @@ begin
     FHintForm.Font := TSynEdit(Sender).Font;
 
     FDecls := [];
+    FLocalDecls := [];
     FCodeinsight.SetScript(Editor.Text, '', Editor.SelStart, Editor.SelStart);
     FCodeinsight.Run();
 
@@ -439,6 +457,7 @@ begin
       Filter := Expression;
 
       FDecls := FCodeinsight.GetGlobals();
+      FLocalDecls := FCodeinsight.ScriptParser.Locals.ToArray();
     end;
 
     StartPoint := Editor.CaretXY;
@@ -500,7 +519,7 @@ var
 begin
   if (Decl is TDeclaration_Method) then
   begin
-    if TDeclaration_Method(Decl).MethodType in [mtFunction, mtObjectFunction] then
+    if Decl.isFunction  then
       Column := COLUMN_FUNC
     else
       Column := COLUMN_PROC;
@@ -578,13 +597,15 @@ end;
 
 procedure TSimbaAutoComplete.DoPositionChanged(Sender: TObject);
 begin
-  ShowHint(Position);
+  ShowHint(Position, True);
 end;
 
 procedure TSimbaAutoComplete.ShowHintForm(Data: PtrInt);
 begin
-  FHintForm.Paint();
-  FHintForm.ActivateHint('');
+  ShowHint(Position, True);
+  //ShowItemHint();
+  //FHintForm.Paint();
+  //FHintForm.ActivateHint('');
 end;
 
 constructor TSimbaAutoComplete.Create(AOwner: TComponent);

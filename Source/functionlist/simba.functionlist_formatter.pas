@@ -43,14 +43,14 @@ uses
 
 function GetImage_Method(Decl: TDeclaration): Integer;
 begin
-  case TDeclaration_Method(Decl).MethodType of
-     mtFunction, mtObjectFunction:
-       Result := IMAGE_FUNCTION;
-     mtProcedure, mtObjectProcedure:
-       Result := IMAGE_PROCEDURE;
-     mtOperator:
-       Result := IMAGE_OPERATOR;
-   end;
+  if Decl.isFunction then
+    Result := IMAGE_FUNCTION
+  else
+  if Decl.isProcedure then
+    Result := IMAGE_PROCEDURE
+  else
+  if Decl.isOperatorMethod then
+    Result := IMAGE_OPEN;
 end;
 
 function GetImage_Type(Decl: TDeclaration): Integer;
@@ -90,7 +90,7 @@ end;
 
 function GetName_Method(Decl: TDeclaration): String;
 begin
-  if TDeclaration_Method(Decl).MethodType in [mtObjectFunction, mtObjectProcedure] then
+  if Decl.isObjectMethod then
     Result := TDeclaration_Method(Decl).ObjectName + '.' + TDeclaration_Method(Decl).Name
   else
     Result := Decl.Name;

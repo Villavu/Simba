@@ -40,7 +40,7 @@ var
   I, J: SizeInt;
   Q, P: _T;
 begin
-  if (Length(AValues) <= 1) then
+  if (Length(AValues) <= 1) or (ARight-ALeft < 1) then
     Exit;
 
   repeat

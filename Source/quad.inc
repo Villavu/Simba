@@ -27,7 +27,7 @@
     function ShortSideLen: Integer;
     function LongSideLen: Integer;
     function Mean: TPoint;
-    function Rotate(Angle: Double): TQuad;
+    function Rotate(Radians: Double): TQuad;
     function Contains(P: TPoint): Boolean; overload; inline;
     function Contains(X, Y: Integer): Boolean; overload; inline;
     function Offset(P: TPoint): TQuad; overload;
@@ -141,14 +141,14 @@ begin
   Result.Y := (Self.Top.Y + Self.Right.Y + Self.Bottom.Y + Self.Left.Y) div 4;
 end;
 
-function TQuad.Rotate(Angle: Double): TQuad;
+function TQuad.Rotate(Radians: Double): TQuad;
 begin
   with Self.Mean() do
   begin
-    Result.Top    := TSimbaGeometry.RotatePoint(Self.Top,    Angle, X, Y);
-    Result.Right  := TSimbaGeometry.RotatePoint(Self.Right,  Angle, X, Y);
-    Result.Bottom := TSimbaGeometry.RotatePoint(Self.Bottom, Angle, X, Y);
-    Result.Left   := TSimbaGeometry.RotatePoint(Self.Left,   Angle, X, Y);
+    Result.Top    := TSimbaGeometry.RotatePoint(Self.Top,    Radians, X, Y);
+    Result.Right  := TSimbaGeometry.RotatePoint(Self.Right,  Radians, X, Y);
+    Result.Bottom := TSimbaGeometry.RotatePoint(Self.Bottom, Radians, X, Y);
+    Result.Left   := TSimbaGeometry.RotatePoint(Self.Left,   Radians, X, Y);
   end;
 
   Result := Result.Normalize();

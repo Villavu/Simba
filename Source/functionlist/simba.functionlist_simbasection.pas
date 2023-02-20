@@ -92,7 +92,7 @@ procedure TSimbaFunctionList_SimbaSection.Load(Includes: TCodeParserList);
 var
   Parser: TCodeParser;
 begin
-  for Parser in Includes do
+  for Parser in Includes.ToArray() do
   begin
     if (Parser.Lexer = nil) or (Parser.Lexer.FileName.StartsWith('!')) then
       Continue;

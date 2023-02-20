@@ -8,6 +8,7 @@ object ShowDeclarationForm: TShowDeclarationForm
   ClientWidth = 700
   DesignTimePPI = 120
   Position = poMainFormCenter
+  LCLVersion = '2.2.4.0'
   object Grid: TStringGrid
     Left = 0
     Height = 396
@@ -23,7 +24,6 @@ object ShowDeclarationForm: TShowDeclarationForm
         Width = 290
       end    
       item
-        SizePriority = 1
         Title.Caption = 'Function'
         Width = 415
       end    

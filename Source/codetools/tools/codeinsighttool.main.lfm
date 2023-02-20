@@ -453,6 +453,7 @@ object Form1: TForm1
       '  Integer = Integer;'
       '  Boolean = Boolean;'
       ''
+      ''
       'type'
       '  TPoint = record'
       '  class var'
@@ -474,6 +475,8 @@ object Form1: TForm1
       '  xyz=0;'
       ''
       '  procedure hello;'
+      '  type'
+      '    EFoo = (hello, worldhello);'
       ''
       '    procedure nested;'
       '    begin'
@@ -576,7 +579,7 @@ object Form1: TForm1
   end
   object Memo1: TMemo
     Left = 776
-    Height = 113
+    Height = 584
     Top = 104
     Width = 440
     Lines.Strings = (

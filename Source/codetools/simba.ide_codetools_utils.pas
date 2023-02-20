@@ -14,6 +14,19 @@ uses
   mPasLexTypes, mPasLex;
 
 type
+  TNullableString = object
+  private
+    FValue: String;
+    FHasValue: Boolean;
+
+    function GetIsNull: Boolean;
+    procedure SetValue(const AValue: String);
+  public
+    property IsNull: Boolean read GetIsNull;
+    property Value: String read FValue write SetValue;
+  end;
+
+type
   TExpressionItem = record
     IsLastItem: Boolean;
 
@@ -34,6 +47,17 @@ implementation
 
 uses
   simba.mufasatypes, simba.files, simba.process;
+
+procedure TNullableString.SetValue(const AValue: String);
+begin
+  FValue := AValue;
+  FHasValue := True;
+end;
+
+function TNullableString.GetIsNull: Boolean;
+begin
+  Result := not FHasValue;
+end;
 
 function StringToExpression(const Str: String): TExpressionItems;
 var

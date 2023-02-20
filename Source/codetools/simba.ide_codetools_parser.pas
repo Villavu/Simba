@@ -12,7 +12,8 @@ interface
 uses
   SysUtils, Classes,
   mPasLexTypes, mPasLex, mSimplePasPar,
-  Generics.Collections, Generics.Defaults;
+  simba.mufasatypes, simba.ide_codetools_utils,
+  simba.stack, simba.list, simba.stringbuilder;
 
 type
   TCodeParser = class;
@@ -21,11 +22,16 @@ type
   TDeclarationArray = array of TDeclaration;
   TDeclarationClass = class of TDeclaration;
 
-  TDeclarationStack = specialize TStack<TDeclaration>;
+  TDeclarationList = class(TObject)
+  protected
+    FItems: TDeclarationArray;
+    FCount: Integer;
 
-  TDeclarationList = class(specialize TList<TDeclaration>)
+    function GetItem(Index: Integer): TDeclaration;
   public
+    function ToArray: TDeclarationArray;
     function GetByClassAndName(AClass: TDeclarationClass; AName: String; SubSearch: Boolean = False): TDeclarationArray;
+    function GetByName(AName: String; SubSearch: Boolean = False): TDeclarationArray;
 
     function GetItemsOfClass(AClass: TDeclarationClass; SubSearch: Boolean = False): TDeclarationArray;
     function GetFirstItemOfClass(AClass: TDeclarationClass; SubSearch: Boolean = False): TDeclaration;
@@ -33,8 +39,30 @@ type
 
     function GetTextOfClass(AClass: TDeclarationClass): String;
     function GetTextOfClassNoComments(AClass: TDeclarationClass): String;
-    function GetTextOfClassNoCommentsSingleLine(AClass: TDeclarationClass): String;
+    function GetTextOfClassNoCommentsSingleLine(AClass: TDeclarationClass; Prefix: String = ''): String;
+
+    procedure Add(Decl: TDeclaration);
+    procedure Extend(Decls: TDeclarationArray);
+    procedure Clear(FreeDecls: Boolean = False);
+
+    property Count: Integer read FCount;
+    property Items[Index: Integer]: TDeclaration read GetItem; default;
   end;
+
+  TDeclarationMap = class(TObject)
+  protected
+    FList: TStringList;
+  public
+    procedure Add(Name: String; Decl: TDeclaration);
+    function Get(Name: String): TDeclarationArray;
+
+    procedure Clear;
+
+    constructor Create;
+    destructor Destroy; override;
+  end;
+
+  TDeclarationStack = specialize TSimbaStack<TDeclaration>;
 
   {$IFDEF PARSER_LEAK_CHECKS}
   TLeakChecker = class(TObject)
@@ -57,19 +85,25 @@ type
     FStartPos: Integer;
     FEndPos: Integer;
     FItems: TDeclarationList;
-    FName: String;
     FLine: Integer;
     FLexer: TmwPasLex;
 
-    FText: String;
-    FTextNoComments: String;
-    FTextNoCommentsSingleLine: String;
+    FName: TNullableString;
+    FText: TNullableString;
+    FTextNoComments: TNullableString;
+    FTextNoCommentsSingleLine: TNullableString;
+
+    FFlags: UInt16;
+
+    procedure SetFlags(const Index: Integer; const AValue: Boolean);
+    function GetFlags(const Index: Integer): Boolean;
 
     function GetText: String;
     function GetTextNoComments: String;
     function GetTextNoCommentsSingleLine: String;
 
     function GetName: string; virtual;
+    procedure SetName(Value: String); virtual;
   public
     function Dump: String; virtual;
 
@@ -81,7 +115,7 @@ type
     property StartPos: Integer read FStartPos;
     property EndPos: Integer read FEndPos;
     property Items: TDeclarationList read FItems;
-    property Name: String read GetName write FName;
+    property Name: String read GetName write SetName;
     property Line: Integer read FLine;
 
     property Text: String read GetText;
@@ -90,9 +124,24 @@ type
 
     function GetOwnerByClass(AClass: TDeclarationClass): TDeclaration;
 
-    constructor Create(AParser: TCodeParser); reintroduce; virtual;
-    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); reintroduce; virtual;
+    // Simple helper flags
+    property isProcedure: Boolean index 1 read GetFlags write SetFlags;
+    property isFunction: Boolean index 2 read GetFlags write SetFlags;
+    property isObjectMethod: Boolean index 3 read GetFlags write SetFlags;
+    property isOperatorMethod: Boolean index 4 read GetFlags write SetFlags;
+    property isOverrideMethod: Boolean index 5 read GetFlags write SetFlags;
+
+    property isVar: Boolean index 6 read GetFlags write SetFlags;
+    property isConst: Boolean index 7 read GetFlags write SetFlags;
+    property isType: Boolean index 8 read GetFlags write SetFlags;
+
+    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); reintroduce;
     destructor Destroy; override;
+  end;
+
+  TDeclaration_Root = class(TDeclaration)
+  public
+    constructor Create; reintroduce;
   end;
 
   TDeclaration_CompoundStatement = class(TDeclaration);
@@ -182,46 +231,44 @@ type
   TDeclaration_VarDefault = class(TDeclaration);
   TDeclaration_Var = class(TDeclaration)
   protected
-    FVarTypeString: String;
-    FVarDefaultString: String;
+    FVarTypeString: TNullableString;
+    FVarDefaultString: TNullableString;
+
+    function GetVarType: TDeclaration;
+    function GetVarTypeString: String;
+    function GetVarDefaultString: String;
   public
     DefToken: TptTokenKind;
 
-    function VarType: TDeclaration;
-    function VarTypeString: String;
-    function VarDefault: TDeclaration;
-    function VarDefaultString: String;
-
-    constructor Create(AParser: TCodeParser); override;
+    property VarType: TDeclaration read GetVarType;
+    property VarTypeString: String read GetVarTypeString;
+    property VarDefaultString: String read GetVarDefaultString;
   end;
 
   TDeclaration_Const = class(TDeclaration_Var);
   TDeclaration_Field = class(TDeclaration_Var);
 
-  EMethodType = (mtProcedure, mtFunction, mtObjectProcedure, mtObjectFunction, mtOperator);
   EMethodDirectives = TptTokenSet;
 
   TDeclaration_Method = class(TDeclaration)
   protected
-    FParamString: String;
-    FResultString: String;
-    FHeaderString: String;
+    FParamString: TNullableString;
+    FResultString: TNullableString;
+    FHeaderString: TNullableString;
+
+    function GetParamString: String;
+    function GetResultString: String;
+    function GetHeaderString: String;
   public
     ObjectName: String;
-    MethodType: EMethodType;
     Directives: EMethodDirectives;
-
-    function IsOverride: Boolean;
-    function ParamDecls: TDeclarationArray;
 
     function ResultType: TDeclaration;
     function Dump: String; override;
 
-    function ParamString: String;
-    function ResultString: String;
-    function HeaderString: String;
-
-    constructor Create(AParser: TCodeParser); override;
+    property ParamString: String read GetParamString;
+    property ResultString: String read GetResultString;
+    property HeaderString: String read GetHeaderString;
   end;
 
   TDeclaration_TypeMethod = class(TDeclaration_Method);
@@ -241,15 +288,12 @@ type
   TOnHandleInclude = function(Sender: TmwBasePasLex): Boolean of object;
   TOnHandleLibrary = function(Sender: TmwBasePasLex): Boolean of object;
 
-  TDeclarationMap = specialize TDictionary<String, TDeclarationList>;
-
   TCodeParser = class(TmwSimplePasPar)
   protected
     FManagedItems: TDeclarationList;
 
     FRoot: TDeclaration;
     FItems: TDeclarationList;
-    FLastItem: TDeclaration;
     FStack: TDeclarationStack;
     FOnFindInclude: TOnFindInclude;
     FOnHandleInclude: TOnHandleInclude;
@@ -257,17 +301,12 @@ type
 
     FLocals: TDeclarationList;
     FGlobals: TDeclarationList;
-    FGlobalMap: TDeclarationMap;
-    FTypeMethodMap: TDeclarationMap;
+    FTypeMethods: TDeclarationMap;
 
     FHash: String;
 
     procedure FindLocals;
-
-    procedure AddToMap(Map: TDeclarationMap; Name: String; Decl: TDeclaration);
-
-    procedure AddGlobal(Decl: TDeclaration);
-    procedure AddTypeMethod(Decl: TDeclaration_Method);
+    procedure FindGlobals;
 
     // Hashes lexers filenames, fileage and defines.
     function GetHash: String; virtual;
@@ -345,6 +384,7 @@ type
     property Items: TDeclarationList read FItems;
     property Locals: TDeclarationList read FLocals;
     property Globals: TDeclarationList read FGlobals;
+    property TypeMethods: TDeclarationMap read FTypeMethods;
 
     property OnFindInclude: TOnFindInclude read FOnFindInclude write FOnFindInclude;
     property OnHandleInclude: TOnHandleInclude read FOnHandleInclude write FOnHandleInclude;
@@ -358,9 +398,6 @@ type
     procedure Reset; override;
     procedure Run; override;
 
-    function GetGlobal(AName: String): TDeclaration;
-    function GetMethodsOfType(ATypeName: String): TDeclarationArray;
-
     function DebugTree: String;
     function DebugGlobals: String;
 
@@ -368,17 +405,65 @@ type
     destructor Destroy; override;
   end;
   TCodeParserArray = array of TCodeParser;
-  TCodeParserList = specialize TList<TCodeParser>;
+  TCodeParserList = specialize TSimbaList<TCodeParser>;
 
 implementation
 
-uses
-  simba.mufasatypes;
+procedure TDeclarationMap.Add(Name: String; Decl: TDeclaration);
+var
+  Index: Integer;
+  Decls: TDeclarationList;
+begin
+  if FList.Find(Name, Index) then
+    Decls := TDeclarationList(FList.Objects[Index])
+  else
+    Decls := TDeclarationList(FList.Objects[FList.AddObject(Name, TDeclarationList.Create())]);
+
+  Decls.Add(Decl);
+end;
+
+function TDeclarationMap.Get(Name: String): TDeclarationArray;
+var
+  Index: Integer;
+begin
+  if FList.Find(Name, Index) then
+    Result := TDeclarationList(FList.Objects[Index]).ToArray()
+  else
+    Result := nil;
+end;
+
+procedure TDeclarationMap.Clear;
+begin
+  FList.Clear();
+end;
+
+constructor TDeclarationMap.Create;
+begin
+  inherited Create();
+
+  FList := TStringList.Create();
+  FList.Sorted := True;
+  FList.OwnsObjects := True;
+  FList.UseLocale := False;
+end;
+
+destructor TDeclarationMap.Destroy;
+begin
+  if (FList <> nil) then
+    FreeAndNil(FList);
+
+  inherited Destroy();
+end;
+
+constructor TDeclaration_Root.Create;
+begin
+  inherited Create(nil, nil, 0, 0);
+end;
 
 function TDeclaration_EnumElement.GetName: string;
 begin
-  if (FName = #0) then
-    FName := Items.GetTextOfClass(TDeclaration_EnumElementName);
+  if FName.IsNull then
+    FName.Value := Items.GetTextOfClass(TDeclaration_EnumElementName);
 
   Result := inherited;
 end;
@@ -435,57 +520,36 @@ begin
   Result := Items.GetItemsOfClass(TDeclaration_Field);
 end;
 
-function TDeclaration_Var.VarType: TDeclaration;
+function TDeclaration_Var.GetVarType: TDeclaration;
 begin
   Result := Items.GetFirstItemOfClass(TDeclaration_VarType);
 end;
 
-function TDeclaration_Var.VarTypeString: String;
+function TDeclaration_Var.GetVarTypeString: String;
 begin
-  if (FVarTypeString = #0) then
-  begin
-    FVarTypeString := Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarType);
-    if (FVarTypeString <> '') then
-      FVarTypeString := ': ' + FVarTypeString;
-  end;
+  if FVarTypeString.IsNull then
+    FVarTypeString.Value := Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarType, ': ');
 
-  Result := FVarTypeString;
+  Result := FVarTypeString.Value;
 end;
 
-function TDeclaration_Var.VarDefault: TDeclaration;
+function TDeclaration_Var.GetVarDefaultString: String;
 begin
-  Result := Items.GetFirstItemOfClass(TDeclaration_VarDefault);
-end;
+  if FVarDefaultString.IsNull then
+    case DefToken of
+      tokAssign: FVarDefaultString.Value := Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarDefault, ' := ');
+      tokEqual:  FVarDefaultString.Value := Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarDefault, ' = ');
+    end;
 
-function TDeclaration_Var.VarDefaultString: String;
-begin
-  if (FVarDefaultString = #0) then
-  begin
-    FVarDefaultString := Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarDefault);
-    if (FVarDefaultString <> '') then
-      case DefToken of
-        tokAssign: FVarDefaultString := ' := ' + FVarDefaultString;
-        tokEqual:  FVarDefaultString := ' = ' + FVarDefaultString;
-      end;
-  end;
-
-  Result := FVarDefaultString;
-end;
-
-constructor TDeclaration_Var.Create(AParser: TCodeParser);
-begin
-  inherited Create(AParser);
-
-  FVarDefaultString := #0;
-  FVarTypeString := #0;
+  Result := FVarDefaultString.Value;
 end;
 
 function TDeclaration_EnumElementName.GetName: string;
 begin
-  if (FName = #0) then
-    FName := Text;
+  if FName.IsNull then
+    FName.Value := Text;
 
-  Result := FName;
+  Result := FName.Value;
 end;
 
 function TDeclaration_TypeEnum.Elements: TDeclarationArray;
@@ -493,30 +557,14 @@ begin
   Result := Items.GetItemsOfClass(TDeclaration_EnumElement);
 end;
 
-function TDeclaration_Method.IsOverride: Boolean;
-begin
-  Result := tokOverride in Directives;
-end;
-
-function TDeclaration_Method.ParamDecls: TDeclarationArray;
+function TDeclaration_Method.ResultType: TDeclaration;
 var
   Decl: TDeclaration;
 begin
-  Result := nil;
-
-  Decl := FItems.GetFirstItemOfClass(TDeclaration_ParamList);
+  Decl := Items.GetFirstItemOfClass(TDeclaration_MethodResult);
   if (Decl <> nil) then
-    Result := Decl.Items.GetItemsOfClass(TDeclaration_Parameter, True);
-end;
-
-function TDeclaration_Method.ResultType: TDeclaration;
-begin
-  if (MethodType in [mtFunction, mtObjectFunction]) then
-  begin
-    Result := Items.GetFirstItemOfClass(TDeclaration_MethodResult);
-    if (Result <> nil) then
-      Result := Result.Items.GetFirstItemOfClass(TDeclaration_VarType);
-  end else
+    Result := Decl.Items.GetFirstItemOfClass(TDeclaration_VarType)
+  else
     Result := nil;
 end;
 
@@ -524,63 +572,56 @@ function TDeclaration_Method.Dump: String;
 begin
   Result := inherited;
 
-  case MethodType of
-    mtProcedure:       Result := Result + ' [procedure]';
-    mtFunction:        Result := Result + ' [function]';
-    mtObjectProcedure: Result := Result + ' [procedure of object]';
-    mtObjectFunction:  Result := Result + ' [function of object]';
-    mtOperator:        Result := Result + ' [operator]';
-  end;
+  //case MethodType of
+  //  mtProcedure:       Result := Result + ' [procedure]';
+  //  mtFunction:        Result := Result + ' [function]';
+  //  mtObjectProcedure: Result := Result + ' [procedure of object]';
+  //  mtObjectFunction:  Result := Result + ' [function of object]';
+  //  mtOperator:        Result := Result + ' [operator]';
+  //end;
 
   if (Directives <> []) then
     Result := Result + ' ' + TokenNames(Directives);
 end;
 
-function TDeclaration_Method.ParamString: String;
+function TDeclaration_Method.GetParamString: String;
 begin
-  if (FParamString = #0) then
-    FParamString := FItems.GetTextOfClassNoCommentsSingleLine(TDeclaration_ParamList);
+  if FParamString.IsNull then
+    FParamString.Value := FItems.GetTextOfClassNoCommentsSingleLine(TDeclaration_ParamList);
 
-  Result := FParamString;
+  Result := FParamString.Value;
 end;
 
-function TDeclaration_Method.ResultString: String;
+function TDeclaration_Method.GetResultString: String;
 begin
-  if (FResultString = #0) then
+  if FResultString.IsNull then
+    FResultString.Value := FItems.GetTextOfClassNoCommentsSingleLine(TDeclaration_MethodResult, ': ');
+
+  Result := FResultString.Value;
+end;
+
+function TDeclaration_Method.GetHeaderString: String;
+var
+  Builder: TSimbaStringBuilder;
+begin
+  if FHeaderString.IsNull then
   begin
-    FResultString := FItems.GetTextOfClassNoCommentsSingleLine(TDeclaration_MethodResult);
-    if (FResultString <> '') then
-      FResultString := ': ' + FResultString;
+    if isFunction       then Builder.Append('function')  else
+    if isProcedure      then Builder.Append('procedure') else
+    if isOperatorMethod then Builder.Append('operator');
+
+    Builder.Append(' ');
+    if isObjectMethod then
+      Builder.Append(ObjectName + '.' + Name)
+    else
+      Builder.Append(Name);
+    Builder.Append(ParamString);
+    Builder.Append(ResultString);
+
+    FHeaderString.Value := Builder.Str;
   end;
 
-  Result := FResultString;
-end;
-
-function TDeclaration_Method.HeaderString: String;
-begin
-  if (FHeaderString = #0) then
-  begin
-    case MethodType of
-      mtFunction: FHeaderString := 'function ' + Name;
-      mtProcedure: FHeaderString := 'procedure ' + Name;
-      mtObjectFunction: FHeaderString := 'function ' + ObjectName + '.' + Name;
-      mtObjectProcedure: FHeaderString := 'procedure ' + ObjectName + '.' + Name;
-      mtOperator: FHeaderString := 'operator ' + Name;
-    end;
-
-    FHeaderString := FHeaderString + ParamString + ResultString;
-  end;
-
-  Result := FHeaderString;
-end;
-
-constructor TDeclaration_Method.Create(AParser: TCodeParser);
-begin
-  inherited Create(AParser);
-
-  FResultString := #0;
-  FParamString := #0;
-  FHeaderString := #0;
+  Result := FHeaderString.Value;
 end;
 
 function TDeclaration_Parameter.VarTypeString: String;
@@ -651,7 +692,7 @@ var
     if (Item is AClass) and (Item.IsName(AName)) then
     begin
       if (Size = Length(Result)) then
-        SetLength(Result, Length(Result) * 2);
+        SetLength(Result, 4 + Length(Result) * 2);
       Result[Size] := Item;
       Inc(Size);
     end;
@@ -664,10 +705,39 @@ var
 var
   I: Integer;
 begin
-  SetLength(Result, 16);
-
   Size := 0;
-  for I := 0 to FLength - 1 do
+  for I := 0 to Count - 1 do
+    DoSearch(FItems[I]);
+
+  SetLength(Result, Size);
+end;
+
+function TDeclarationList.GetByName(AName: String; SubSearch: Boolean): TDeclarationArray;
+var
+  Size: Integer;
+
+  procedure DoSearch(const Item: TDeclaration);
+  var
+    I: Integer;
+  begin
+    if Item.IsName(AName) then
+    begin
+      if (Size = Length(Result)) then
+        SetLength(Result, 4 + Length(Result) * 2);
+      Result[Size] := Item;
+      Inc(Size);
+    end;
+
+    if SubSearch then
+      for I := 0 to Item.Items.Count - 1 do
+        DoSearch(Item.Items[I]);
+  end;
+
+var
+  I: Integer;
+begin
+  Size := 0;
+  for I := 0 to Count - 1 do
     DoSearch(FItems[I]);
 
   SetLength(Result, Size);
@@ -684,7 +754,7 @@ var
     if (Item is AClass) then
     begin
       if (Size = Length(Result)) then
-        SetLength(Result, Length(Result) * 2);
+        SetLength(Result, 8 + Length(Result) * 2);
       Result[Size] := Item;
       Inc(Size);
     end;
@@ -697,10 +767,8 @@ var
 var
   I: Integer;
 begin
-  SetLength(Result, 16);
-
   Size := 0;
-  for I := 0 to FLength - 1 do
+  for I := 0 to Count - 1 do
     DoSearch(FItems[I]);
 
   SetLength(Result, Size);
@@ -734,7 +802,7 @@ var
 begin
   Result := nil;
 
-  for i := 0 to FLength - 1 do
+  for i := 0 to Count - 1 do
     if SearchItem(AClass, SubSearch, FItems[i], Result) then
       Exit;
 end;
@@ -759,7 +827,7 @@ var
 begin
   Result := nil;
 
-  for I := 0 to FLength - 1 do
+  for I := 0 to Count - 1 do
     if (Position >= FItems[I].StartPos) and ((not CheckEnd) or (Position <= FItems[I].EndPos)) then
       Search(FItems[I], Result);
 end;
@@ -786,23 +854,72 @@ begin
     Result := Declaration.GetTextNoComments();
 end;
 
-function TDeclarationList.GetTextOfClassNoCommentsSingleLine(AClass: TDeclarationClass): String;
+function TDeclarationList.GetTextOfClassNoCommentsSingleLine(AClass: TDeclarationClass; Prefix: String): String;
 var
-  Declaration: TDeclaration;
+  Decl: TDeclaration;
 begin
-  Result := '';
+  Decl := GetFirstItemOfClass(AClass);
 
-  Declaration := GetFirstItemOfClass(AClass);
-  if Declaration <> nil then
-    Result := Declaration.GetTextNoCommentsSingleLine();
+  if (Decl <> nil) then
+  begin
+    Result := Decl.GetTextNoCommentsSingleLine();
+    if (Result <> '') then
+      Result := Prefix + Result;
+  end else
+    Result := '';
+end;
+
+function TDeclarationList.GetItem(Index: Integer): TDeclaration;
+begin
+  Result := FItems[Index];
+end;
+
+function TDeclarationList.ToArray: TDeclarationArray;
+begin
+  SetLength(Result, FCount);
+  if (FCount > 0) then
+    Move(FItems[0], Result[0], FCount * SizeOf(TDeclaration));
+end;
+
+procedure TDeclarationList.Add(Decl: TDeclaration);
+begin
+  if (FCount >= Length(FItems)) then
+    SetLength(FItems, 4 + (Length(FItems) * 2));
+
+  FItems[FCount] := Decl;
+  Inc(FCount);
+end;
+
+procedure TDeclarationList.Extend(Decls: TDeclarationArray);
+begin
+  if (Length(Decls) = 0) then
+    Exit;
+
+  if (FCount + Length(Decls) >= Length(FItems)) then
+    SetLength(FItems, 4 + Length(Decls) + (Length(FItems) * 2));
+  Move(Decls[0], FItems[FCount], Length(Decls) * SizeOf(TDeclaration));
+  Inc(FCount, Length(Decls));
+end;
+
+procedure TDeclarationList.Clear(FreeDecls: Boolean);
+var
+  I: Integer;
+begin
+  if FreeDecls then
+    for I := 0 to FCount - 1 do
+      FItems[I].Free();
+
+  FCount := 0;
 end;
 
 function TDeclaration.GetName: string;
 begin
-  if (FName = #0) then
-    Result := ''
-  else
-    Result := FName;
+  Result := FName.Value;
+end;
+
+procedure TDeclaration.SetName(Value: String);
+begin
+  FName.Value := Value;
 end;
 
 function TDeclaration.Dump: String;
@@ -813,103 +930,88 @@ begin
     Result := ClassName + ' (' + Name + ')';
 end;
 
+procedure TDeclaration.SetFlags(const Index: Integer; const AValue: Boolean);
+begin
+  if AValue then
+    FFlags := FFlags or (1 shl Index)
+  else
+    FFlags := FFlags and not (1 shl Index);
+end;
+
+function TDeclaration.GetFlags(const Index: Integer): Boolean;
+begin
+  Result := (FFlags and (1 shl Index)) <> 0;
+end;
+
 function TDeclaration.GetText: String;
 begin
-  if (FText = #0) then
-    FText := FLexer.CopyDoc(FStartPos, FEndPos);
+  if FText.IsNull then
+    FText.Value := FLexer.CopyDoc(FStartPos, FEndPos);
 
-  Result := FText;
+  Result := FText.Value;
 end;
 
 function TDeclaration.GetTextNoComments: String;
 
   function Filter(const Text: String): String;
   var
-    Builder: TStringBuilder;
+    Builder: TSimbaStringBuilder;
     Lexer: TmwPasLex;
   begin
-    Builder := nil;
-
     Lexer := TmwPasLex.Create(Text);
     Lexer.Next();
     while (Lexer.TokenID <> tokNull) do
     begin
       if (not (Lexer.TokenID in [tokSlashesComment, tokAnsiComment, tokBorComment])) then
-      begin
-        if (Builder = nil) then
-          Builder := TStringBuilder.Create(Length(Text));
-
         Builder.Append(Lexer.Token);
-      end;
+
       Lexer.Next();
     end;
     Lexer.Free();
 
-    if (Builder <> nil) then
-    begin
-      Result := Builder.ToString();
-
-      Builder.Free();
-    end else
-      Result := Text;
+    Result := Builder.Str;
   end;
 
 begin
-  if (FTextNoComments = #0) then
-    FTextNoComments := Filter(FLexer.CopyDoc(FStartPos, FEndPos));
+  if FTextNoComments.IsNull then
+    FTextNoComments.Value := Filter(FLexer.CopyDoc(FStartPos, FEndPos));
 
-  Result := FTextNoComments;
+  Result := FTextNoComments.Value;
 end;
 
 function TDeclaration.GetTextNoCommentsSingleLine: String;
 
   function Filter(const Text: String): String;
   var
-    Builder: TStringBuilder;
+    Builder: TSimbaStringBuilder;
     Lexer: TmwPasLex;
   begin
-    Builder := nil;
-
     Lexer := TmwPasLex.Create(Text);
     Lexer.Next();
     while (Lexer.TokenID <> tokNull) do
     begin
-      if (Lexer.TokenID in [tokCRLF, tokCRLFCo]) then
-      begin
-        if (Builder = nil) then
-          Builder := TStringBuilder.Create(Length(Text));
-
-        Builder.Append(' ');
+      case Lexer.TokenID of
+        tokCRLF, tokCRLFCo: Builder.Append(' ');
+        tokSlashesComment, tokAnsiComment, tokBorComment: { nothing };
+        else
+          Builder.Append(Lexer.Token);
       end;
 
-      if (not (Lexer.TokenID in [tokSlashesComment, tokAnsiComment, tokBorComment, tokCRLF, tokCRLFCo])) then
-      begin
-        if (Builder = nil) then
-          Builder := TStringBuilder.Create(Length(Text));
-
-        Builder.Append(Lexer.Token);
-      end;
       Lexer.Next();
     end;
     Lexer.Free();
 
-    if (Builder <> nil) then
-    begin
-      Result := Builder.ToString();
-
-      Builder.Free();
-    end else
-      Result := Text;
+    Result := Builder.Str;
 
     while Result.Contains('  ') do
       Result := Result.Replace('  ', ' ');
   end;
 
 begin
-  if (FTextNoCommentsSingleLine = #0) then
-    FTextNoCommentsSingleLine := Filter(FLexer.CopyDoc(FStartPos, FEndPos));
+  if FTextNoCommentsSingleLine.IsNull then
+    FTextNoCommentsSingleLine.Value := Filter(FLexer.CopyDoc(FStartPos, FEndPos));
 
-  Result := FTextNoCommentsSingleLine;
+  Result := FTextNoCommentsSingleLine.Value;
 end;
 
 function TDeclaration.IsName(const Value: String): Boolean;
@@ -937,30 +1039,23 @@ begin
   Result := nil;
 end;
 
-constructor TDeclaration.Create(AParser: TCodeParser);
+constructor TDeclaration.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
 begin
   inherited Create();
 
   FParser := AParser;
-  FParser.FManagedItems.Add(Self);
-  FLexer := AParser.Lexer;
-  FItems := TDeclarationList.Create();
+  if (FParser <> nil) then
+  begin
+    FLexer := FParser.Lexer;
+    FLine := FLexer.LineNumber;
+    FParser.FManagedItems.Add(Self);
+  end;
 
-  FText := #0;
-  FTextNoComments := #0;
-  FTextNoCommentsSingleLine := #0;
-
-  FName := #0;
-end;
-
-constructor TDeclaration.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
-begin
-  Create(AParser);
-
-  FLine := FLexer.LineNumber;
   FOwner := AOwner;
   FStartPos := AStart;
   FEndPos := AEnd;
+
+  FItems := TDeclarationList.Create();
 end;
 
 destructor TDeclaration.Destroy;
@@ -976,7 +1071,7 @@ begin
   if (AClass = nil) then
     Result := (FStack.Count = 1)
   else
-    Result := (FStack.Count > 0) and (FStack.Peek() is AClass);
+    Result := (FStack.Count > 1) and (FStack.Top is AClass);
 end;
 
 function TCodeParser.InDeclarations(AClassArray: array of TDeclarationClass): Boolean;
@@ -996,12 +1091,10 @@ end;
 
 function TCodeParser.PushStack(AClass: TDeclarationClass): TDeclaration;
 begin
-  FLastItem := AClass.Create(Self, FStack.Peek(), FLexer.TokenPos, FLexer.TokenPos);
+  Result := AClass.Create(Self, FStack.Top, FLexer.TokenPos, FLexer.TokenPos);
 
-  FStack.Peek().Items.Add(FLastItem);
-  FStack.Push(FLastItem);
-
-  Result := FLastItem;
+  FStack.Top.Items.Add(Result);
+  FStack.Push(Result);
 end;
 
 procedure TCodeParser.PopStack();
@@ -1016,14 +1109,18 @@ procedure TCodeParser.FindLocals;
 
   procedure CheckMethod(Decl: TDeclaration);
   begin
-    FLocals.AddRange(Decl.Items.GetItemsOfClass(TDeclaration_Method));
+    if (Decl = nil) then
+      Exit;
+
+    FLocals.Extend(Decl.Items.GetItemsOfClass(TDeclaration_Method));
 
     while (Decl is TDeclaration_Method) do
     begin
-      FLocals.AddRange(Decl.Items.GetItemsOfClass(TDeclaration_Var));
-      FLocals.AddRange(Decl.Items.GetItemsOfClass(TDeclaration_Type));
+      FLocals.Extend(Decl.Items.GetItemsOfClass(TDeclaration_Var));
+      FLocals.Extend(Decl.Items.GetItemsOfClass(TDeclaration_Type));
+      FLocals.Extend(Decl.Items.GetItemsOfClass(TDeclaration_EnumElement));
       if (FItems.GetFirstItemOfClass(TDeclaration_ParamList) <> nil) then
-        FLocals.AddRange(FItems.GetFirstItemOfClass(TDeclaration_ParamList).Items.GetItemsOfClass(TDeclaration_Parameter, True));
+        FLocals.Extend(FItems.GetFirstItemOfClass(TDeclaration_ParamList).Items.GetItemsOfClass(TDeclaration_Parameter, True));
 
       Decl := Decl.GetOwnerByClass(TDeclaration_Method);
     end;
@@ -1031,9 +1128,12 @@ procedure TCodeParser.FindLocals;
 
   procedure CheckWith(Decl: TDeclaration);
   begin
+    if (Decl = nil) then
+      Exit;
+
     while (Decl is TDeclaration_WithStatement) do
     begin
-      FLocals.AddRange(Decl.Items.GetItemsOfClass(TDeclaration_WithVariable));
+      FLocals.Extend(Decl.Items.GetItemsOfClass(TDeclaration_WithVariable));
 
       Decl := Decl.GetOwnerByClass(TDeclaration_WithStatement);
     end;
@@ -1049,6 +1149,8 @@ begin
     Decl := FItems.GetItemInPosition(CaretPos);
     if (Decl = nil) then
       Decl := FItems.GetItemInPosition(CaretPos, False);
+    if (Decl = nil) then
+      Exit;
 
     if (Decl is TDeclaration_Method) then
       CheckMethod(Decl)
@@ -1062,58 +1164,41 @@ begin
   end;
 end;
 
-procedure TCodeParser.AddToMap(Map: TDeclarationMap; Name: String; Decl: TDeclaration);
+procedure TCodeParser.FindGlobals;
 var
-  List: TDeclarationList;
+  I: Integer;
+  Decl: TDeclaration;
 begin
-  Name := Name.ToUpper();
-
-  if Map.TryGetValue(Name, List) then
-    List.Add(Decl)
-  else
+  for I := 0 to FItems.Count - 1 do
   begin
-    List := TDeclarationList.Create();
-    List.Add(Decl);
+    Decl := FItems[I];
+    if (Decl.Name = '') then
+      Continue;
 
-    Map.Add(Name, List);
-  end;
-end;
-
-procedure TCodeParser.AddGlobal(Decl: TDeclaration);
-begin
-  FGlobals.Add(Decl);
-
-  AddToMap(FGlobalMap, Decl.Name, Decl);
-
-  if (Decl is TDeclaration_TypeEnum) then
-    for Decl in TDeclaration_TypeEnum(Decl).Elements do
+    if (Decl is TDeclaration_Method) and Decl.isObjectMethod then
     begin
-      FGlobals.Add(Decl);
-      AddToMap(FGlobalMap, Decl.Name, Decl);
-    end;
-end;
+      FTypeMethods.Add(TDeclaration_Method(Decl).ObjectName, Decl);
 
-procedure TCodeParser.AddTypeMethod(Decl: TDeclaration_Method);
-begin
-  AddToMap(FTypeMethodMap, Decl.ObjectName, Decl);
+      Continue;
+    end;
+
+    FGlobals.Add(Decl);
+  end;
 end;
 
 function TCodeParser.GetHash: String;
 var
-  Builder: TStringBuilder;
+  Builder: TSimbaStringBuilder;
   I: Integer;
 begin
   if (FHash = '') then
   begin
-    Builder := TStringBuilder.Create(1024);
     with Lexer.SaveDefines() do
       Builder.Append(Defines + IntToStr(Stack));
     for I := 0 to fLexers.Count - 1 do
       Builder.Append(fLexers[i].FileName + IntToStr(fLexers[i].FileAge));
 
-    FHash := Builder.ToString();
-
-    Builder.Free();
+    FHash := Builder.Str;
   end;
 
   Result := FHash;
@@ -1153,12 +1238,10 @@ begin
 
   FManagedItems := TDeclarationList.Create();
   FLocals := TDeclarationList.Create();
-
-  FGlobalMap := TDeclarationMap.Create();
-  FTypeMethodMap := TDeclarationMap.Create();
   FGlobals := TDeclarationList.Create();
+  FTypeMethods := TDeclarationMap.Create();
 
-  FRoot := TDeclaration.Create(Self);
+  FRoot := TDeclaration_Root.Create();
   FStack := TDeclarationStack.Create();
   FStack.Push(FRoot);
 
@@ -1170,11 +1253,11 @@ begin
   Reset();
 
   FLocals.Free();
+  FGlobals.Free();
+  FTypeMethods.Free();
+
   FManagedItems.Free();
   FStack.Free();
-  FGlobalMap.Free();
-  FTypeMethodMap.Free();
-  FGlobals.Free();
   FRoot.Free();
 
   inherited Destroy();
@@ -1293,7 +1376,7 @@ begin
     Exit;
   end;
 
-  TDeclaration_VarStub(FStack.Peek).DefToken := fLastNoJunkTok;
+  TDeclaration_VarStub(FStack.Top).DefToken := fLastNoJunkTok;
 
   PushStack(TDeclaration_VarDefault);
   inherited;
@@ -1342,7 +1425,7 @@ end;
 procedure TCodeParser.ProceduralDirective;
 begin
   if InDeclaration(TDeclaration_Method) then
-    Include(TDeclaration_Method(FStack.Peek).Directives, Lexer.ExID);
+    Include(TDeclaration_Method(FStack.Top).Directives, Lexer.ExID);
   inherited;
 end;
 
@@ -1372,10 +1455,14 @@ begin
 
   if (Decl.Items.Count > 0) then
   begin
-    NewDecl := Decl.Items.First;
+    NewDecl := Decl.Items[0];
+    NewDecl.isType := True;
     NewDecl.Name := TDeclaration_TypeStub(Decl).TempName;
 
-    FStack.Peek.Items.Add(NewDecl);
+    FStack.Top.Items.Add(NewDecl);
+    if (NewDecl is TDeclaration_TypeEnum) then
+      for NewDecl in TDeclaration_TypeEnum(NewDecl).Elements do
+        FStack.Top.Items.Add(NewDecl);
   end else
     OnErrorMessage(Lexer, 'Invalid type declaration');
 end;
@@ -1383,7 +1470,7 @@ end;
 procedure TCodeParser.TypeName;
 begin
   if InDeclaration(TDeclaration_TypeStub) then
-    TDeclaration_TypeStub(FStack.Peek()).TempName := Lexer.Token;
+    TDeclaration_TypeStub(FStack.Top).TempName := Lexer.Token;
 
   inherited;
 end;
@@ -1423,6 +1510,7 @@ begin
     for I := 0 to NameCount - 1 do
     begin
       VarDecl := PushStack(TDeclaration_Var);
+      VarDecl.isVar := True;
       VarDecl.Name := Names[I].Name;
       if (VarType <> nil) then
         VarDecl.Items.Add(VarType);
@@ -1440,7 +1528,7 @@ end;
 procedure TCodeParser.VarName;
 begin
   if InDeclaration(TDeclaration_VarStub) then
-    with TDeclaration_VarStub(FStack.Peek) do
+    with TDeclaration_VarStub(FStack.Top) do
     begin
       if (NameCount >= Length(Names)) then
         SetLength(Names, 4+Length(Names)*2);
@@ -1472,6 +1560,7 @@ begin
     for I := 0 to NameCount - 1 do
     begin
       VarDecl := PushStack(TDeclaration_Const);
+      VarDecl.isConst := True;
       VarDecl.Name := Names[I].Name;
       if (VarType <> nil) then
         VarDecl.Items.Add(VarType);
@@ -1509,13 +1598,13 @@ end;
 
 procedure TCodeParser.ProcedureDeclarationSection;
 var
-  Decl: TDeclaration_Method;
+  Decl: TDeclaration;
 begin
-  Decl := TDeclaration_Method(PushStack(TDeclaration_Method));
+  Decl := PushStack(TDeclaration_Method);
   case Lexer.TokenID of
-    tokFunction:  Decl.MethodType := mtFunction;
-    tokProcedure: Decl.MethodType := mtProcedure;
-    tokOperator:  Decl.MethodType := mtOperator;
+    tokFunction:  Decl.isFunction := True;
+    tokProcedure: Decl.isProcedure := True;
+    tokOperator:  Decl.isOperatorMethod := True;
   end;
 
   inherited;
@@ -1525,7 +1614,8 @@ end;
 procedure TCodeParser.FunctionProcedureName;
 begin
   if InDeclaration(TDeclaration_Method) then
-    TDeclaration_Method(FStack.Peek).Name := Lexer.Token;
+    TDeclaration_Method(FStack.Top).Name := Lexer.Token;
+
   inherited;
 end;
 
@@ -1535,14 +1625,11 @@ var
 begin
   if InDeclaration(TDeclaration_Method) then
   begin
-    Decl := TDeclaration_Method(FStack.Peek);
+    Decl := TDeclaration_Method(FStack.Top);
     Decl.ObjectName := Lexer.Token;
-
-    case Decl.MethodType of
-      mtFunction:  Decl.MethodType := mtObjectFunction;
-      mtProcedure: Decl.MethodType := mtObjectProcedure;
-    end;
+    Decl.isObjectMethod := True;
   end;
+
   inherited;
 end;
 
@@ -1562,7 +1649,7 @@ end;
 procedure TCodeParser.ConstRefParameter;
 begin
   if InDeclaration(TDeclaration_ParamStub) then
-   TDeclaration_ParamStub(FStack.Peek).ParamType := tokConstRef;
+   TDeclaration_ParamStub(FStack.Top).ParamType := tokConstRef;
 
   inherited;
 end;
@@ -1570,7 +1657,7 @@ end;
 procedure TCodeParser.ConstParameter;
 begin
   if InDeclaration(TDeclaration_ParamStub) then
-   TDeclaration_ParamStub(FStack.Peek).ParamType := tokConst;
+   TDeclaration_ParamStub(FStack.Top).ParamType := tokConst;
 
   inherited;
 end;
@@ -1578,7 +1665,7 @@ end;
 procedure TCodeParser.OutParameter;
 begin
   if InDeclaration(TDeclaration_ParamStub) then
-    TDeclaration_ParamStub(FStack.Peek).ParamType := tokOut;
+    TDeclaration_ParamStub(FStack.Top).ParamType := tokOut;
 
   inherited;
 end;
@@ -1586,7 +1673,7 @@ end;
 procedure TCodeParser.NormalParameter;
 begin
   if InDeclaration(TDeclaration_ParamStub) then
-    TDeclaration_ParamStub(FStack.Peek).ParamType := tokUnknown;
+    TDeclaration_ParamStub(FStack.Top).ParamType := tokUnknown;
 
   inherited;
 end;
@@ -1594,7 +1681,7 @@ end;
 procedure TCodeParser.VarParameter;
 begin
   if InDeclaration(TDeclaration_ParamStub) then
-    TDeclaration_ParamStub(FStack.Peek).ParamType := tokVar;
+    TDeclaration_ParamStub(FStack.Top).ParamType := tokVar;
 
   inherited;
 end;
@@ -1636,9 +1723,9 @@ begin
       if (VarDef <> nil) then
         ParamDecl.Items.Add(VarDef);
 
-      TDeclaration_Var(ParamDecl).DefToken := TDeclaration_VarStub(Decl).DefToken;
-      TDeclaration_Var(ParamDecl).FStartPos := Names[I].StartPos;
-      TDeclaration_Var(ParamDecl).FEndPos := Names[I].EndPos;
+      TDeclaration_Parameter(ParamDecl).DefToken := TDeclaration_VarStub(Decl).DefToken;
+      TDeclaration_Parameter(ParamDecl).FStartPos := Names[I].StartPos;
+      TDeclaration_Parameter(ParamDecl).FEndPos := Names[I].EndPos;
 
       PopStack();
     end;
@@ -1776,6 +1863,8 @@ begin
 end;
 
 procedure TCodeParser.EnumeratedTypeItem;
+var
+  Decl: TDeclaration;
 begin
   if (not InDeclarations([TDeclaration_TypeEnum, TDeclaration_TypeEnumScoped])) then
   begin
@@ -1783,7 +1872,7 @@ begin
     Exit;
   end;
 
-  PushStack(TDeclaration_EnumElement);
+  Decl := PushStack(TDeclaration_EnumElement);
   inherited;
   PopStack();
 end;
@@ -1802,76 +1891,28 @@ begin
 end;
 
 procedure TCodeParser.Reset;
-var
-  List: TDeclarationList;
-  I: Integer;
 begin
   inherited Reset();
 
   FHash := '';
 
-  for List in FGlobalMap.Values do
-    List.Free();
-  for List in FTypeMethodMap.Values do
-    List.Free();
+  FManagedItems.Clear(True);
 
   FGlobals.Clear();
-  FGlobalMap.Clear();
-  FTypeMethodMap.Clear();
+  FLocals.Clear();
+  FTypeMethods.Clear();
 
-  for I := 0 to FManagedItems.Count - 1 do
-    FManagedItems[I].Free();
-  FManagedItems.Clear();
-
-  FRoot := TDeclaration.Create(Self);
+  FRoot.Items.Clear();
   FStack.Clear();
   FStack.Push(FRoot);
-
-  FItems := FRoot.Items;
 end;
 
 procedure TCodeParser.Run;
-var
-  Decl: TDeclaration;
-  I: Integer;
 begin
   inherited Run();
 
-  for I := 0 to FItems.Count - 1 do
-  begin
-    Decl := FItems[I];
-    if (Decl.Name = '') then
-      Continue;
-
-    if (Decl is TDeclaration_Method) and (TDeclaration_Method(Decl).MethodType in [mtObjectFunction, mtObjectProcedure]) then
-      AddTypeMethod(Decl as TDeclaration_Method)
-    else
-      AddGlobal(Decl);
-  end;
-
+  FindGlobals();
   FindLocals();
-end;
-
-function TCodeParser.GetGlobal(AName: String): TDeclaration;
-var
-  List: TDeclarationList;
-begin
-  AName := AName.ToUpper();
-  if FGlobalMap.TryGetValue(AName, List) then
-    Result := List.First()
-  else
-    Result := nil;
-end;
-
-function TCodeParser.GetMethodsOfType(ATypeName: String): TDeclarationArray;
-var
-  List: TDeclarationList;
-begin
-  ATypeName := ATypeName.ToUpper();
-  if (ATypeName <> '') and FTypeMethodMap.TryGetValue(ATypeName, List) then
-    Result := List.ToArray
-  else
-    Result := nil;
 end;
 
 function TCodeParser.DebugTree: String;
@@ -1925,9 +1966,9 @@ var
 begin
   Builder := TAnsiStringBuilder.Create();
 
-  for List in FGlobalMap.Values do
-    for Decl in List do
-      Builder.AppendLine(Decl.ClassName + ' -> ' + Decl.Name);
+  //for List in FGlobalMap.Values do
+  //  for Decl in List do
+  //    Builder.AppendLine(Decl.ClassName + ' -> ' + Decl.Name);
   Result := Builder.ToString().Trim();
 
   Builder.Free();

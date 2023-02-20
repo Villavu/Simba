@@ -145,7 +145,7 @@ class destructor TCodeinsight.Destroy;
 var
   Include: TCodeParser;
 begin
-  for Include in FBaseIncludes do
+  for Include in FBaseIncludes.ToArray() do
     Include.Free();
   FBaseIncludes.Free();
   FBaseDefines.Free();
@@ -168,17 +168,23 @@ end;
 function TCodeinsight.FindDecl(S: String): TDeclaration;
 var
   Include: TCodeParser;
+  Decls: TDeclarationArray;
 begin
-  Result := nil;
-
   for Include in GetIncludes() do
   begin
-    Result := Include.GetGlobal(S);
-    if (Result <> nil) then
+    Decls := Include.Globals.GetByName(S);
+    if (Length(Decls) > 0) then
+    begin
+      Result := Decls[0];
       Exit;
+    end;
   end;
 
-  Result := FScriptParser.GetGlobal(S);
+  Decls := FScriptParser.Globals.GetByName(S);
+  if (Length(Decls) > 0) then
+    Result := Decls[0]
+  else
+    Result := nil;
 end;
 
 function TCodeinsight.GetOverloads(Decl: TDeclaration): TDeclarationArray;
@@ -195,7 +201,7 @@ begin
   else
   if (Decl is TDeclaration_Method) then
   begin
-    if (TDeclaration_Method(Decl).MethodType in [mtObjectFunction, mtObjectProcedure]) then
+    if Decl.isObjectMethod then
     begin
       for Decl in GetMethodsOfType(TDeclaration_Method(Decl).ObjectName) do
         if Decl.IsName(n) then
@@ -244,8 +250,8 @@ function TCodeinsight.GetMembersOfType(Decl: TDeclaration): TDeclarationArray;
     Include: TCodeParser;
   begin
     for Include in GetIncludes() do
-      Result := Result + Include.GetMethodsOfType(Decl.Name);
-    Result := Result + FScriptParser.GetMethodsOfType(Decl.Name);
+      Result := Result + Include.TypeMethods.Get(Decl.Name);
+    Result := Result + FScriptParser.TypeMethods.Get(Decl.Name);
   end;
 
   function GetParent(Decl: TDeclaration): TDeclaration;
@@ -292,7 +298,7 @@ function TCodeinsight.EnsureTypeDeclaration(Decl: TDeclaration): TDeclaration;
 begin
   Result := Decl;
   if (Result is TDeclaration_VarType) and (Result.Items.Count > 0) then
-    Result := Result.Items.First();
+    Result := Result.Items[0];
   if (Result is TDeclaration_Identifier) then
     Result := FindDecl(Result.Text);
 end;
