@@ -137,16 +137,12 @@ end;
 
 class constructor TCodeinsight.Create;
 begin
-  FBaseIncludes := TCodeParserList.Create();
+  FBaseIncludes := TCodeParserList.Create(True);
   FBaseDefines := TStringList.Create();
 end;
 
 class destructor TCodeinsight.Destroy;
-var
-  Include: TCodeParser;
 begin
-  for Include in FBaseIncludes.ToArray() do
-    Include.Free();
   FBaseIncludes.Free();
   FBaseDefines.Free();
 end;

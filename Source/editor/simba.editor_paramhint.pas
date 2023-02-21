@@ -185,9 +185,9 @@ begin
   Decl := Method.Items.GetFirstItemOfClass(TDeclaration_ParamList);
   if (Decl = nil) then
   begin
-    if (Method is TDeclaration_TypeMethod) then
-      DrawText('();')
-    else
+    //if (Method is TDeclaration_TypeMethod) then
+    //  DrawText('();')
+    //else
       DrawText(Method.Name + '()' + Method.ResultString + ';');
   end else
   begin
@@ -198,9 +198,9 @@ begin
     begin
       if (I = 0) then
       begin
-        if (Method is TDeclaration_TypeMethod) then
-          DrawText('(')
-        else
+        //if (Method is TDeclaration_TypeMethod) then
+        //  DrawText('(')
+        //else
           DrawText(Method.Name + '(');
       end;
 

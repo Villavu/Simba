@@ -37,7 +37,6 @@ type
 
   PListFilterEdit = ^TListFilterEdit;
   PListBox = ^TListBox;
-  PSpeedButton = ^TSpeedButton;
   PButtonPanel = ^TButtonPanel;
   PPanelButtons = ^TPanelButtons;
 

@@ -487,8 +487,6 @@ begin
   SimbaSettingChanged(SimbaSettings.General.MacOSKeystrokes);
 
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
-
-
 end;
 
 destructor TSimbaEditor.Destroy;

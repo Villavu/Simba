@@ -428,7 +428,7 @@ begin
     ParseFile();
 
     {$IFDEF PARSER_BENCHMARK}
-    Writeln('Parsing took: ', FormatFloat('0.00', HighResolutionTime()-T));
+    Writeln('Parsing took: ', FormatFloat('0.00', HighResolutionTime() - T));
     {$ENDIF}
   except
     on E: Exception do
@@ -440,7 +440,7 @@ constructor TmwSimplePasPar.Create;
 begin
   inherited Create();
 
-  fLexers := TLexerList.Create();
+  fLexers := TLexerList.Create(True);
   fLexerStack := TLexerStack.Create();
 end;
 
@@ -478,7 +478,7 @@ begin
     if (Lexer.TokenID = tokNull) then
       OnErrorMessage(fLexer, Format('"%s" expected but end of file reached', [TokenName(Sym)]))
     else
-      OnErrorMessage(fLexer, Format('"%s" expected but found "%s"', [TokenName(Sym), FLexer.Token]))
+      OnErrorMessage(fLexer, Format('"%s" expected but found "%s"', [TokenName(Sym), FLexer.Token]));
   end else
     NextToken;
 end;

@@ -244,7 +244,7 @@ type
   end;
 
   TLexerStack = specialize TSimbaStack<TmwPasLex>;
-  TLexerList = specialize TSimbaList<TmwPasLex>;
+  TLexerList = specialize TSimbaObjectList<TmwPasLex>;
 
 implementation
 

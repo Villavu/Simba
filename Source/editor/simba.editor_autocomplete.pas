@@ -13,36 +13,36 @@ interface
 
 uses
   Classes, SysUtils, Graphics, Controls, Forms, LCLType,
-  SynEdit, SynEditTypes, SynCompletion, SynEditKeyCmds,
+  SynEdit, SynEditTypes, SynCompletion, SynEditKeyCmds, SynEditHighlighter,
   simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_insight;
 
 type
   TSimbaAutoComplete = class;
   TSimbaAutoComplete_Form = class(TSynCompletionForm)
   protected
-    FAutoComplete: TSimbaAutoComplete;
+    procedure FontChanged(Sender: TObject); override;
 
     procedure DoShow; override;
     procedure DoHide; override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
   public
+    AutoComplete: TSimbaAutoComplete;
+
     constructor Create(AOwner: TComponent); override;
   end;
 
-  TSimbaAutoComplete_Hint = class(THintWindow)
-  protected
-    FAutoComplete: TSimbaAutoComplete;
-    FName: String;
-    FText: String;
-    FItemIndex: Integer;
-
-    procedure DoHide; override;
+  TSimbaAutoComplete_Hint = class(TSynBaseCompletionHint)
   public
-    constructor Create(AOwner: TComponent); override;
-
+    procedure SetBounds(ALeft, ATop, AWidth, AHeight: integer); override;
     procedure EraseBackground(DC: HDC); override;
     procedure Paint; override;
+    procedure RealSetText(const AValue: TCaption); override;
+  public
+    AutoComplete: TSimbaAutoComplete;
+    TextWidth: Integer;
+
+    constructor Create(AOwner: TComponent); override;
   end;
 
   TSimbaAutoComplete = class(TSynCompletion)
@@ -58,23 +58,24 @@ type
 
     FColumnWidth: Integer;
 
+    function GetHintText(Decl: TDeclaration; IsHint: Boolean): String;
+
     function GetDecl(Index: Integer): TDeclaration;
     function GetCompletionFormClass: TSynBaseCompletionFormClass; override;
 
-    procedure ShowHint(Index: Integer; Force: Boolean);
-    procedure ShowHintForm(Data: PtrInt);
     procedure ContinueCompletion(Data: PtrInt);
 
-    procedure PaintColumn(Canvas: TCanvas; X, Y: Integer; Decl: TDeclaration);
-    procedure PaintName(Canvas: TCanvas; X, Y: Integer; AName: String);
+    procedure PaintColumn(Canvas: TCanvas; var X, Y: Integer; Decl: TDeclaration);
+    procedure PaintName(Canvas: TCanvas; var X, Y: Integer; AName: String);
+    procedure PaintText(Canvas: TCanvas; X, Y: Integer; AText: String);
 
     function DoPaintItem(const Key: String; Canvas: TCanvas; X, Y: Integer; Selected: Boolean; Index: Integer): Boolean;
-    procedure DoPositionChanged(Sender: TObject);
+    function DoMeasureItem(const AKey: string; ACanvas: TCanvas; Selected: boolean; Index: integer): TPoint;
     procedure DoCodeCompletion(var Value: String; SourceValue: String; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
     procedure DoFiltering(var NewPosition: Integer);
     procedure DoTabPressed(Sender: TObject);
+    procedure DoExecute(Sender: TObject);
 
-    procedure DoEditorFontChanged(Sender: TObject);
     procedure DoEditorCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
     procedure DoEditorAdded(Value: TCustomSynEdit); override;
     procedure DoEditorRemoving(Value: TCustomSynEdit); override;
@@ -133,35 +134,57 @@ end;
 
 procedure TSimbaAutoComplete_Hint.Paint;
 begin
-  Canvas.Brush.Color := FAutoComplete.SelectedColor;
-  Canvas.Font.Color := FAutoComplete.Form.TextColor;
-  Canvas.FillRect(ClientRect);
-  Canvas.TextOut(FAutoComplete.Form.DrawBorderWidth + Canvas.TextWidth(FName), 0, FText);
+  if (AutoComplete.Position = Index) then
+    Canvas.Brush.Color := AutoComplete.SelectedColor
+  else
+    Canvas.Brush.Color := Color;
+  with ClientRect do
+    Canvas.FillRect(AutoComplete.Form.DrawBorderWidth, Top, Right, Bottom);
 
-  FAutoComplete.PaintName(Canvas, FAutoComplete.Form.DrawBorderWidth, 0, FName);
+  AutoComplete.OnPaintItem('', Canvas, AutoComplete.Form.DrawBorderWidth, 0, AutoComplete.Position = Index, Index);
 end;
 
-procedure TSimbaAutoComplete_Hint.DoHide;
+procedure TSimbaAutoComplete_Hint.RealSetText(const AValue: TCaption);
 begin
-  FItemIndex := -1;
-
-  inherited DoHide();
+  if (AValue <> '') then
+    inherited;
 end;
 
 constructor TSimbaAutoComplete_Hint.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  FItemIndex := -1;
-
   {$IFDEF WINDOWS}
   SetClassLong(Handle); // Clear CS_DROPSHADOW
   {$ENDIF}
 end;
 
+procedure TSimbaAutoComplete_Hint.SetBounds(ALeft, ATop, AWidth, AHeight: integer);
+begin
+  if (AutoComplete <> nil) then
+  begin
+    ATop    := HintRect.Top + AutoComplete.Form.DrawBorderWidth;
+    AWidth  := TextWidth;
+    AHeight := AutoComplete.FontHeight - 3;
+  end;
+
+  inherited SetBounds(ALeft, ATop, AWidth, AHeight);
+end;
+
 procedure TSimbaAutoComplete_Hint.EraseBackground(DC: HDC);
 begin
   { nothing }
+end;
+
+procedure TSimbaAutoComplete_Form.FontChanged(Sender: TObject);
+begin
+  inherited FontChanged(Sender);
+
+  FHint.Font := Self.Font;
+  if (AutoComplete <> nil) then
+    AutoComplete.FColumnWidth := Canvas.TextWidth('class const ');
+
+  FFontHeight := FFontHeight + 2;
 end;
 
 procedure TSimbaAutoComplete_Form.DoShow;
@@ -176,20 +199,18 @@ procedure TSimbaAutoComplete_Form.DoHide;
 begin
   inherited DoHide();
 
-  FAutoComplete.FHintForm.Hide();
-
   SimbaSettings.Editor.AutoCompleteWidth.Value := Width;
   SimbaSettings.Editor.AutoCompleteLines.Value := NbLinesInWindow;
 end;
 
 procedure TSimbaAutoComplete_Form.MouseMove(Shift: TShiftState; X, Y: Integer);
 begin
-  inherited MouseMove(Shift, X, Y);
-
   if ((Scroll.Visible) and (X > Scroll.Left)) or (Y < DrawBorderWidth) or (Y >= ClientHeight - DrawBorderWidth) then
     Exit;
+  if (Scroll.Position + (Y - DrawBorderWidth) div FFontHeight) = FHint.Index then
+    Exit;
 
-  FAutoComplete.ShowHint(Scroll.Position + (Y - DrawBorderWidth) div FFontHeight, False);
+  inherited MouseMove(Shift, X, Y);
 end;
 
 procedure TSimbaAutoComplete_Form.KeyDown(var Key: Word; Shift: TShiftState);
@@ -218,6 +239,10 @@ begin
 
   TextColor         := clBlack;
   TextSelectedColor := clBlack;
+
+  {$IFDEF WINDOWS}
+  SetClassLong(FHint.Handle); // Clear CS_DROPSHADOW
+  {$ENDIF}
 end;
 
 procedure TSimbaAutoComplete.ContinueCompletion(Data: PtrInt);
@@ -322,8 +347,6 @@ begin
     NewPosition := -1;
 
   TVirtualStringList(ItemList).Count := Count;
-
-  Application.QueueAsyncCall(@ShowHintForm, 0);
 end;
 
 procedure TSimbaAutoComplete.DoTabPressed(Sender: TObject);
@@ -332,22 +355,13 @@ begin
     OnValidate(TheForm, '', []);
 end;
 
-procedure TSimbaAutoComplete.DoEditorFontChanged(Sender: TObject);
+procedure TSimbaAutoComplete.DoExecute(Sender: TObject);
 begin
-  FForm.Font := TSynEdit(Sender).Font;
-  FHintForm.Font := TSynEdit(Sender).Font;
-
-  with TBitmap.Create() do
-  try
-    Canvas.Font := TSynEdit(Sender).Font;
-
-    FColumnWidth := Canvas.TextWidth('class const ');
-  finally
-    Free();
-  end;
+  if (Editor <> nil) then
+    FForm.Font := Editor.Font;
 end;
 
-procedure TSimbaAutoComplete.ShowHint(Index: Integer; Force: Boolean);
+function TSimbaAutoComplete.GetHintText(Decl: TDeclaration; IsHint: Boolean): String;
 
   function GetMethodText(Decl: TDeclaration_Method): String;
   begin
@@ -356,10 +370,13 @@ procedure TSimbaAutoComplete.ShowHint(Index: Integer; Force: Boolean);
 
   function GetVarText(Decl: TDeclaration_Var): String;
   begin
-    Result := Decl.VarTypeString + Decl.VarDefaultString;
+    if IsHint then
+      Result := Decl.VarTypeString + Decl.VarDefaultString
+    else
+      Result := Decl.VarTypeString;
   end;
 
-  function GetEnumElementText(Decl: TDeclaration): String;
+  function GetEnumElementText(Decl: TDeclaration_EnumElement): String;
   begin
     if (Decl.Owner <> nil) then
       Result := ': ' + Decl.Owner.Name
@@ -367,59 +384,39 @@ procedure TSimbaAutoComplete.ShowHint(Index: Integer; Force: Boolean);
       Result := '';
   end;
 
-  function GetRecordText(Decl: TDeclaration): String;
+  function GetRecordText(Decl: TDeclaration_TypeRecord): String;
   begin
-    Result := ' = record';
+    if IsHint then
+      Result := ' = record'
+    else
+      Result := '';
   end;
 
-  function GetTypeText(Decl: TDeclaration): String;
+  function GetTypeText(Decl: TDeclaration_Type): String;
   begin
-    Result := ' = ' + Decl.TextNoCommentsSingleLine;
+    if IsHint then
+      Result := ' = ' + Decl.TextNoCommentsSingleLine
+    else
+      Result := '';
   end;
 
-var
-  Decl: TDeclaration;
-  R: TRect;
-  MaxRight: Integer;
 begin
-  Decl := GetDecl(Index);
-  if (Decl = nil) or (not FForm.Showing) then
-  begin
-    FHintForm.Visible := False;
-    Exit;
-  end;
+  Result := '';
 
-  if FHintForm.Visible and (FHintForm.FItemIndex = Index) and (not Force) then
-    Exit;
-
-  with FHintForm do
-  begin
-    FItemIndex := Index;
-    FName := Decl.Name;
-
-    if (Decl is TDeclaration_Method)      then FText := GetMethodText(Decl as TDeclaration_Method) else
-    if (Decl is TDeclaration_Var)         then FText := GetVarText(Decl as TDeclaration_Var)       else
-    if (Decl is TDeclaration_EnumElement) then FText := GetEnumElementText(Decl)                   else
-    if (Decl is TDeclaration_TypeRecord)  then FText := GetRecordText(Decl)                        else
-    if (Decl is TDeclaration_Type)        then FText := GetTypeText(Decl)                          else
-                                               FText := '';
-
-    R := TRect.Create(Form.ClientToScreen(TPoint.Create(FColumnWidth, Form.DrawBorderWidth + (Index - Form.Scroll.Position) * FontHeight)));
-    R.Width := Canvas.TextWidth(FName + FText);
-    R.Height := FontHeight - 3;
-    R.Inflate(Form.DrawBorderWidth, 0);
-
-    // Either clip to screen right or main form right, whatever is more right.
-    MaxRight := Max(Application.MainForm.BoundsRect.Right, Monitor.BoundsRect.Right);
-    if (R.Right > MaxRight) then
-      R.Right := MaxRight;
-
-    HintRect := R;
-
-    FHintForm.ActivateHint('');
-
-    //Application.QueueAsyncCall(@4, 0);
-  end;
+  if Decl.isMethod then
+    Result := GetMethodText(Decl as TDeclaration_Method)
+  else
+  if Decl.isEnumElement then
+    Result := GetEnumElementText(Decl as TDeclaration_EnumElement)
+  else
+  if Decl.isVar or Decl.isConst or Decl.isParam then
+    Result := GetVarText(Decl as TDeclaration_Var)
+  else
+  if Decl.isRecord then
+    Result := GetRecordText(Decl as TDeclaration_TypeRecord)
+  else
+  if Decl.isType then
+    Result := GetTypeText(Decl as TDeclaration_Type);
 end;
 
 function TSimbaAutoComplete.GetDecl(Index: Integer): TDeclaration;
@@ -444,9 +441,6 @@ begin
   if IsAutoCompleteCommand(Command, AChar) and CodetoolsSetup then
   begin
     Handled := True;
-
-    FForm.Font := TSynEdit(Sender).Font;
-    FHintForm.Font := TSynEdit(Sender).Font;
 
     FDecls := [];
     FLocalDecls := [];
@@ -489,7 +483,6 @@ begin
   if (Value is TSimbaEditor) then
     with TSimbaEditor(Value) do
     begin
-      RegisterFontChangedHandler(@DoEditorFontChanged);
       RegisterCommandHandler(@DoEditorCommand, nil, [hcfPostExec]);
 
       with KeyStrokes.Add() do
@@ -505,15 +498,12 @@ procedure TSimbaAutoComplete.DoEditorRemoving(Value: TCustomSynEdit);
 begin
   if (Value is TSimbaEditor) then
     with TSimbaEditor(Value) do
-    begin
-      UnRegisterFontChangedHandler(@DoEditorFontChanged);
       UnRegisterCommandHandler(@DoEditorCommand);
-    end;
 
   inherited DoEditorRemoving(Value);
 end;
 
-procedure TSimbaAutoComplete.PaintColumn(Canvas: TCanvas; X, Y: Integer; Decl: TDeclaration);
+procedure TSimbaAutoComplete.PaintColumn(Canvas: TCanvas; var X, Y: Integer; Decl: TDeclaration);
 type
   TColumnFormat = record
     Text: String;
@@ -563,14 +553,13 @@ begin
       Column := COLUMN_TYPE;
   end;
 
-  Canvas.Font.Bold := True;
   Canvas.Font.Color := Column.Color;
-  Canvas.Brush.Style := bsClear;
   Canvas.TextOut(X + 2, Y, Column.Text);
-  Canvas.Font.Bold := False;
+
+  X := FColumnWidth;
 end;
 
-procedure TSimbaAutoComplete.PaintName(Canvas: TCanvas; X, Y: Integer; AName: String);
+procedure TSimbaAutoComplete.PaintName(Canvas: TCanvas; var X, Y: Integer; AName: String);
 
   procedure DrawText(Str: String; Color: TColor);
   begin
@@ -583,6 +572,8 @@ procedure TSimbaAutoComplete.PaintName(Canvas: TCanvas; X, Y: Integer; AName: St
 var
   Strings: TStringArray;
 begin
+  Canvas.Font.Bold := True;
+
   if (CurrentString = '') then
     DrawText(AName, Form.TextColor)
   else
@@ -593,33 +584,102 @@ begin
     DrawText(Strings[1], $00008B);
     DrawText(Strings[2], Form.TextColor);
   end;
+
+  Canvas.Font.Bold := False;
+end;
+
+procedure TSimbaAutoComplete.PaintText(Canvas: TCanvas; X, Y: Integer; AText: String);
+var
+  Highlighter: TSynCustomHighlighter;
+  TokStart: PChar;
+  TokLen: Integer;
+  TokString: String;
+begin
+  SetLength(TokString, 64);
+
+  Highlighter := Editor.Highlighter;
+  Highlighter.ResetRange();
+  Highlighter.SetLine(AText, 0);
+
+  while (not Highlighter.GetEol()) do
+  begin
+    Highlighter.GetTokenEx(TokStart, TokLen);
+
+    if (TokLen > 0) then
+    begin
+      if (TokLen > Length(TokString)) then
+        SetLength(TokString, (Length(TokString) * 2) + TokLen);
+      Move(TokStart^, TokString[1], TokLen);
+
+      with Highlighter.GetTokenAttribute() do
+      begin
+        if (Foreground = clNone) then
+          Canvas.Font.Color := clBlack
+        else
+          Canvas.Font.Color := ColorToRGB(Foreground);
+
+        Canvas.Font.Style := [];
+        Canvas.TextOut(X, Y, TokString.CopyRange(1, TokLen));
+
+        X := X + Canvas.TextWidth(TokString.CopyRange(1, TokLen));
+      end;
+    end;
+
+    Highlighter.Next();
+  end;
 end;
 
 function TSimbaAutoComplete.DoPaintItem(const Key: String; Canvas: TCanvas; X, Y: Integer; Selected: Boolean; Index: Integer): Boolean;
 var
   Decl: TDeclaration;
+  Text: String;
 begin
   Result := True;
 
   Decl := GetDecl(Index);
-  if (Decl = nil) then
-    Exit;
+  if (Decl <> nil) then
+  begin
+    Canvas.Brush.Style := bsClear;
 
-  PaintColumn(Canvas, X, Y, Decl);
-  PaintName(Canvas, FColumnWidth, Y, Decl.Name);
+    if (Canvas = FHintForm.Canvas) then
+      Text := FHintForm.Caption
+    else
+      Text := GetHintText(Decl, False);
+
+    PaintColumn(Canvas, X, Y, Decl);
+    PaintName(Canvas, X, Y, Decl.Name);
+    PaintText(Canvas, X, Y, Text);
+  end;
 end;
 
-procedure TSimbaAutoComplete.DoPositionChanged(Sender: TObject);
-begin
-  ShowHint(Position, True);
-end;
+function TSimbaAutoComplete.DoMeasureItem(const AKey: string; ACanvas: TCanvas; Selected: boolean; Index: integer): TPoint;
 
-procedure TSimbaAutoComplete.ShowHintForm(Data: PtrInt);
+  function Measure(const Text: String; Bold: Boolean): Integer;
+  begin
+    ACanvas.Font.Bold := Bold;
+    Result := ACanvas.TextWidth(Text);
+    ACanvas.Font.Bold := False;
+  end;
+
+var
+  Decl: TDeclaration;
+  MaxRight: Integer;
 begin
-  ShowHint(Position, True);
-  //ShowItemHint();
-  //FHintForm.Paint();
-  //FHintForm.ActivateHint('');
+  Decl := GetDecl(Index);
+
+  if (Decl <> nil) then
+  begin
+    FHintForm.Caption := GetHintText(Decl, True);
+    FHintForm.TextWidth := FColumnWidth + Measure(Decl.Name, True) + Measure(FHintForm.Caption, False) + FForm.DrawBorderWidth;
+
+    // Either clip to screen right or main form right, whatever is more right.
+    MaxRight := Max(Application.MainForm.BoundsRect.Right, FForm.Monitor.BoundsRect.Right);
+    if (FForm.Left + FHintForm.TextWidth > MaxRight) then
+      FHintForm.TextWidth := MaxRight - FForm.Left;
+
+    Result := TPoint.Create(10000, FForm.FontHeight); // width=10000, so always show
+  end else
+    Result := TPoint.Create(0, 0);
 end;
 
 constructor TSimbaAutoComplete.Create(AOwner: TComponent);
@@ -628,17 +688,21 @@ begin
 
   FCodeinsight := TCodeinsight.Create();
   FForm := TSimbaAutoComplete_Form(TheForm);
-  FForm.FAutoComplete := Self;
+  FForm.AutoComplete := Self;
+
   FHintForm := TSimbaAutoComplete_Hint.Create(TheForm);
-  FHintForm.FAutoComplete := Self;
+  FHintForm.AutoComplete := Self;
+
+  FForm.FHint := FHintForm;
 
   OnPaintItem := @DoPaintItem;
   OnCodeCompletion := @DoCodeCompletion;
   OnSearchPosition := @DoFiltering;
   OnKeyCompletePrefix := @DoTabPressed;
-  OnPositionChanged := @DoPositionChanged;
+  OnMeasureItem := @DoMeasureItem;
+  OnExecute := @DoExecute;
 
-  LongLineHintType := sclpNone;
+  LongLineHintType := sclpExtendRightOnly;
 end;
 
 destructor TSimbaAutoComplete.Destroy;

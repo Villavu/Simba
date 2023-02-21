@@ -93,7 +93,7 @@ type
     FTextNoComments: TNullableString;
     FTextNoCommentsSingleLine: TNullableString;
 
-    FFlags: UInt16;
+    FFlags: UInt32;
 
     procedure SetFlags(const Index: Integer; const AValue: Boolean);
     function GetFlags(const Index: Integer): Boolean;
@@ -125,17 +125,21 @@ type
     function GetOwnerByClass(AClass: TDeclarationClass): TDeclaration;
 
     // Simple helper flags
-    property isProcedure: Boolean index 1 read GetFlags write SetFlags;
-    property isFunction: Boolean index 2 read GetFlags write SetFlags;
-    property isObjectMethod: Boolean index 3 read GetFlags write SetFlags;
-    property isOperatorMethod: Boolean index 4 read GetFlags write SetFlags;
-    property isOverrideMethod: Boolean index 5 read GetFlags write SetFlags;
+    property isMethod: Boolean index 1 read GetFlags write SetFlags;
+    property isProcedure: Boolean index 2 read GetFlags write SetFlags;
+    property isFunction: Boolean index 3 read GetFlags write SetFlags;
+    property isObjectMethod: Boolean index 4 read GetFlags write SetFlags;
+    property isOperatorMethod: Boolean index 5 read GetFlags write SetFlags;
+    property isOverrideMethod: Boolean index 6 read GetFlags write SetFlags;
 
-    property isVar: Boolean index 6 read GetFlags write SetFlags;
-    property isConst: Boolean index 7 read GetFlags write SetFlags;
-    property isType: Boolean index 8 read GetFlags write SetFlags;
-    property isEnum: Boolean index 9 read GetFlags write SetFlags;
-    property isScopedEnum: Boolean index 10 read GetFlags write SetFlags;
+    property isVar: Boolean index 7 read GetFlags write SetFlags;
+    property isConst: Boolean index 8 read GetFlags write SetFlags;
+    property isType: Boolean index 9 read GetFlags write SetFlags;
+    property isEnum: Boolean index 10 read GetFlags write SetFlags;
+    property isScopedEnum: Boolean index 11 read GetFlags write SetFlags;
+    property isEnumElement: Boolean index 12 read GetFlags write SetFlags;
+    property isRecord: Boolean index 13 read GetFlags write SetFlags;
+    property isParam: Boolean index 14 read GetFlags write SetFlags;
 
     constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); reintroduce;
     destructor Destroy; override;
@@ -177,6 +181,7 @@ type
   TDeclaration_Identifier = class(TDeclaration);
   TDeclaration_OrdinalType = class(TDeclaration);
 
+  // Types
   TDeclaration_Type = class(TDeclaration);
 
   TDeclaration_TypeRecord = class(TDeclaration_Type)
@@ -208,10 +213,6 @@ type
     function VarType: TDeclaration;
   end;
 
-  TDeclaration_TypeSet = class(TDeclaration_Type);
-  TDeclaration_TypeRange = class(TDeclaration_Type);
-  TDeclaration_TypeNativeMethod = class(TDeclaration_Type);
-
   TDeclaration_EnumElement = class(TDeclaration)
   public
     function GetName: string; override;
@@ -227,6 +228,10 @@ type
     function Elements: TDeclarationArray;
   end;
 
+  TDeclaration_TypeSet = class(TDeclaration_Type);
+  TDeclaration_TypeRange = class(TDeclaration_Type);
+  TDeclaration_TypeNativeMethod = class(TDeclaration_Type);
+  TDeclaration_TypeMethod = class(TDeclaration_Type);
   TDeclaration_TypeEnumScoped = class(TDeclaration_Type);
 
   TDeclaration_VarType = class(TDeclaration);
@@ -272,8 +277,6 @@ type
     property ResultString: String read GetResultString;
     property HeaderString: String read GetHeaderString;
   end;
-
-  TDeclaration_TypeMethod = class(TDeclaration_Method);
 
   TDeclaration_MethodResult = class(TDeclaration);
   TDeclaration_Parameter = class(TDeclaration)
@@ -407,7 +410,7 @@ type
     destructor Destroy; override;
   end;
   TCodeParserArray = array of TCodeParser;
-  TCodeParserList = specialize TSimbaList<TCodeParser>;
+  TCodeParserList = specialize TSimbaObjectList<TCodeParser>;
 
 implementation
 
@@ -1605,6 +1608,7 @@ var
   Decl: TDeclaration;
 begin
   Decl := PushStack(TDeclaration_Method);
+  Decl.isMethod := True;
   case Lexer.TokenID of
     tokFunction:  Decl.isFunction := True;
     tokProcedure: Decl.isProcedure := True;
@@ -1720,6 +1724,7 @@ begin
     for I := 0 to NameCount - 1 do
     begin
       ParamDecl := PushStack(TDeclaration_Parameter);
+      ParamDecl.isParam := True;
       ParamDecl.Name := Names[I].Name;
       TDeclaration_Parameter(ParamDecl).ParamType := TDeclaration_ParamStub(Decl).ParamType;
       if (VarType <> nil) then
@@ -1759,8 +1764,11 @@ begin
 end;
 
 procedure TCodeParser.RecordType;
+var
+  Decl: TDeclaration;
 begin
-  PushStack(TDeclaration_TypeRecord);
+  Decl := PushStack(TDeclaration_TypeRecord);
+  Decl.isRecord := True;
   inherited;
   PopStack();
 end;
@@ -1886,6 +1894,7 @@ begin
   end;
 
   Decl := PushStack(TDeclaration_EnumElement);
+  Decl.isEnumElement := True;
   inherited;
   PopStack();
 end;
