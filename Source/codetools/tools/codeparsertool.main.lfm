@@ -7,7 +7,6 @@ object Form1: TForm1
   ClientHeight = 654
   ClientWidth = 1412
   DesignTimePPI = 120
-  LCLVersion = '2.2.4.0'
   inline SynEdit1: TSynEdit
     Left = 16
     Height = 536
@@ -451,7 +450,9 @@ object Form1: TForm1
     MouseTextActions = <>
     MouseSelActions = <>
     Lines.Strings = (
-      'var foo: procedure(a,b,c: Integer; s: String);'
+      'type'
+      '  TFoo = native(type procedure(abc: Integer))'
+      ''
       ''
       'begin'
       ''

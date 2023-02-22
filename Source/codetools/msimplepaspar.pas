@@ -2262,11 +2262,16 @@ procedure TmwSimplePasPar.NativeType;
 begin
   NextToken;
   if (Lexer.TokenID = tokIdentifier) then
-    AncestorId
+    TypeIdentifer
   else
   begin
     Expected(tokRoundOpen);
-    AncestorId;
+
+    if (Lexer.TokenID = tokType) then
+      TypeDeclaration
+    else
+      TypeIdentifer;
+
     while (not (Lexer.TokenID in [tokRoundClose, tokNull, tok_DONE])) do
       NextToken;
     Expected(tokRoundClose);

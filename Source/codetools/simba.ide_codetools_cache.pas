@@ -21,13 +21,12 @@ function GetCachedInclude(Sender: TmwBasePasLex): TCodeParser;
 procedure ReleaseCachedIncludes(Includes: TCodeParserList);
 
 const
-  PurgeThreshold = 20; // If cache miss reaches of a include reaches this, remove the cache
+  PurgeThreshold = 25; // If cache miss reaches of a include reaches this, remove the cache
 
 implementation
 
 uses
-  Generics.Collections,
-  simba.simplelock;
+  simba.simplelock, simba.list;
 
 type
   TCachedInclude = class(TCodeParser)
@@ -55,7 +54,7 @@ type
   TIncludeCache = class(TObject)
   protected
   type
-    TList = specialize TObjectList<TCachedInclude>;
+    TList = specialize TSimbaObjectList<TCachedInclude>;
   protected
     FLock: TSimpleEnterableLock;
     FIncludes: TList;
@@ -91,7 +90,7 @@ constructor TIncludeCache.Create;
 begin
   inherited Create();
 
-  FIncludes := TList.Create();
+  FIncludes := TList.Create(True);
 end;
 
 destructor TIncludeCache.Destroy;
@@ -117,7 +116,7 @@ begin
 
     FLock.Enter();
     try
-      for Include in FIncludes do
+      for Include in FIncludes.ToArray() do
         if (Include.Lexer.FileName = FileName) then
         begin
           if (Include.InDefines.Stack <> InDefines.Stack) or (Include.InDefines.Defines <> InDefines.Defines) then
@@ -150,10 +149,10 @@ begin
       begin
         DebugLn('Caching %s', [FileName]);
 
-        Include := TCachedInclude.Create(Sender, FileName);
-        Include.Run();
+        Result := TCachedInclude.Create(Sender, FileName);
+        Result.Run();
 
-        Result := FIncludes[FIncludes.Add(Include)];
+        FIncludes.Add(Result as TCachedInclude);
       end;
     finally
       FLock.Leave();
@@ -179,7 +178,7 @@ end;
 function TCachedInclude.GetHash: String;
 begin
   if FHash.IsNull then
-    FHash.Value := inherited + InDefines.Defines + IntToStr(InDefines.Stack);
+    FHash.Value := inherited + FInDefines.Defines + IntToStr(FInDefines.Stack);
 
   Result := FHash.Value;
 end;

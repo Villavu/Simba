@@ -27,7 +27,8 @@ type
     FItems: TDeclarationArray;
     FCount: Integer;
 
-    function GetItem(Index: Integer): TDeclaration;
+    function GetItem(const Index: Integer): TDeclaration;
+    procedure SetItem(const Index: Integer; const Value: TDeclaration);
   public
     function ToArray: TDeclarationArray;
     function GetByClassAndName(AClass: TDeclarationClass; AName: String; SubSearch: Boolean = False): TDeclarationArray;
@@ -46,7 +47,7 @@ type
     procedure Clear(FreeDecls: Boolean = False);
 
     property Count: Integer read FCount;
-    property Items[Index: Integer]: TDeclaration read GetItem; default;
+    property Items[Index: Integer]: TDeclaration read GetItem write SetItem; default;
   end;
 
   TDeclarationMap = class(TObject)
@@ -95,12 +96,15 @@ type
 
     FFlags: UInt32;
 
+    procedure ClearFlags;
     procedure SetFlags(const Index: Integer; const AValue: Boolean);
     function GetFlags(const Index: Integer): Boolean;
 
     function GetText: String;
     function GetTextNoComments: String;
     function GetTextNoCommentsSingleLine: String;
+
+    function GetHasItems: Boolean;
 
     function GetName: string; virtual;
     procedure SetName(Value: String); virtual;
@@ -118,13 +122,15 @@ type
     property Name: String read GetName write SetName;
     property Line: Integer read FLine;
 
+    property HasItems: Boolean read GetHasItems;
+
     property Text: String read GetText;
     property TextNoComments: String read GetTextNoComments;
     property TextNoCommentsSingleLine: String read GetTextNoCommentsSingleLine;
 
     function GetOwnerByClass(AClass: TDeclarationClass): TDeclaration;
 
-    // Simple helper flags
+    // Simple, easily extendable helper "flags"
     property isMethod: Boolean index 1 read GetFlags write SetFlags;
     property isProcedure: Boolean index 2 read GetFlags write SetFlags;
     property isFunction: Boolean index 3 read GetFlags write SetFlags;
@@ -140,8 +146,9 @@ type
     property isEnumElement: Boolean index 12 read GetFlags write SetFlags;
     property isRecord: Boolean index 13 read GetFlags write SetFlags;
     property isParam: Boolean index 14 read GetFlags write SetFlags;
+    property isField: Boolean index 15 read GetFlags write SetFlags;
 
-    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); reintroduce;
+    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); virtual; reintroduce;
     destructor Destroy; override;
   end;
 
@@ -177,12 +184,15 @@ type
   TDeclaration_ParamList = class(TDeclaration);
   TDeclaration_ParamGroup = class(TDeclaration);
 
-  TDeclaration_ParentType = class(TDeclaration);
   TDeclaration_Identifier = class(TDeclaration);
+  TDeclaration_ParentType = class(TDeclaration_Identifier);
   TDeclaration_OrdinalType = class(TDeclaration);
 
   // Types
-  TDeclaration_Type = class(TDeclaration);
+  TDeclaration_Type = class(TDeclaration)
+  public
+    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); override;
+  end;
 
   TDeclaration_TypeRecord = class(TDeclaration_Type)
   public
@@ -230,9 +240,20 @@ type
 
   TDeclaration_TypeSet = class(TDeclaration_Type);
   TDeclaration_TypeRange = class(TDeclaration_Type);
-  TDeclaration_TypeNativeMethod = class(TDeclaration_Type);
-  TDeclaration_TypeMethod = class(TDeclaration_Type);
   TDeclaration_TypeEnumScoped = class(TDeclaration_Type);
+
+  TDeclaration_TypeMethod = class(TDeclaration_Type)
+  protected
+    FResultString: TNullableString;
+
+    function GetResultString: String;
+  public
+    property ResultString: String read GetResultString;
+  end;
+  TDeclaration_TypeNativeMethod = class(TDeclaration_Type)
+  public
+    function GetMethod: TDeclaration;
+  end;
 
   TDeclaration_VarType = class(TDeclaration);
   TDeclaration_VarDefault = class(TDeclaration);
@@ -247,13 +268,24 @@ type
   public
     DefToken: TptTokenKind;
 
+    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); override;
+
     property VarType: TDeclaration read GetVarType;
     property VarTypeString: String read GetVarTypeString;
     property VarDefaultString: String read GetVarDefaultString;
   end;
 
-  TDeclaration_Const = class(TDeclaration_Var);
-  TDeclaration_Field = class(TDeclaration_Var);
+  TDeclaration_VarClass = class of TDeclaration_Var;
+
+  TDeclaration_Const = class(TDeclaration_Var)
+  public
+    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); override;
+  end;
+
+  TDeclaration_Field = class(TDeclaration_Var)
+  public
+    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); override;
+  end;
 
   EMethodDirectives = TptTokenSet;
 
@@ -288,13 +320,11 @@ type
     function GetName: string; override;
   end;
 
-  TDeclaration_Parameter = class(TDeclaration)
+  TDeclaration_Parameter = class(TDeclaration_Var)
   public
     ParamType: TptTokenKind;
-    DefToken: TptTokenKind;
 
-    function VarTypeString: String;
-    function DefaultValueString: String;
+    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); override;
     function Dump: String; override;
   end;
 
@@ -330,9 +360,13 @@ type
     procedure SetCaretPos(const Value: Integer);
     procedure SetMaxPos(const Value: Integer);
 
+    procedure EmptyVarStub(VarStub: TDeclaration_VarStub; VarClass: TDeclaration_VarClass);
+    procedure EmptyParamStub(ParamStub: TDeclaration_ParamStub);
+
     function InDeclaration(AClass: TDeclarationClass): Boolean;
     function InDeclarations(AClassArray: array of TDeclarationClass): Boolean;
     function PushStack(AClass: TDeclarationClass): TDeclaration;
+    function PushStub(AClass: TDeclarationClass): TDeclaration;
     procedure PopStack;
 
     procedure ParseFile; override;
@@ -422,6 +456,43 @@ type
   TCodeParserList = specialize TSimbaObjectList<TCodeParser>;
 
 implementation
+
+constructor TDeclaration_Type.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
+begin
+  inherited Create(AParser, AOwner, AStart, AEnd);
+
+  ClearFlags();
+  isType := True;
+end;
+
+constructor TDeclaration_Field.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
+begin
+  inherited;
+
+  ClearFlags();
+  isField := True;
+end;
+
+constructor TDeclaration_Const.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
+begin
+  inherited;
+
+  ClearFlags();
+  isConst := True;
+end;
+
+function TDeclaration_TypeNativeMethod.GetMethod: TDeclaration;
+begin
+  Result := FItems.GetFirstItemOfClass(TDeclaration_ParentType);
+end;
+
+function TDeclaration_TypeMethod.GetResultString: String;
+begin
+  if FResultString.IsNull then
+    FResultString.Value := FItems.GetTextOfClassNoCommentsSingleLine(TDeclaration_MethodResult, ': ');
+
+  Result := FResultString.Value;
+end;
 
 function TDeclaration_MethodResult.GetName: string;
 begin
@@ -535,8 +606,6 @@ end;
 function TDeclaration_TypeRecord.Parent: TDeclaration;
 begin
   Result := Items.GetFirstItemOfClass(TDeclaration_ParentType);
-  if (Result <> nil) then
-    Result := Result.Items.GetFirstItemOfClass(TDeclaration_VarType);
 end;
 
 function TDeclaration_TypeRecord.Fields: TDeclarationArray;
@@ -566,6 +635,14 @@ begin
     end;
 
   Result := FVarDefaultString.Value;
+end;
+
+constructor TDeclaration_Var.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
+begin
+  inherited;
+
+  ClearFlags();
+  isVar := True;
 end;
 
 function TDeclaration_EnumElementName.GetName: string;
@@ -644,14 +721,12 @@ begin
   Result := FHeaderString.Value;
 end;
 
-function TDeclaration_Parameter.VarTypeString: String;
+constructor TDeclaration_Parameter.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
 begin
-  Result := FItems.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarType);
-end;
+  inherited;
 
-function TDeclaration_Parameter.DefaultValueString: String;
-begin
-  Result := FItems.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarDefault);
+  ClearFlags();
+  isParam := True;
 end;
 
 function TDeclaration_Parameter.Dump: String;
@@ -887,9 +962,20 @@ begin
     Result := '';
 end;
 
-function TDeclarationList.GetItem(Index: Integer): TDeclaration;
+function TDeclarationList.GetItem(const Index: Integer): TDeclaration;
 begin
+  if (Index < 0) or (Index >= FCount) then
+    raise Exception.CreateFmt('TDeclarationList.GetItem: Index %d out of bounds', [Index]);
+
   Result := FItems[Index];
+end;
+
+procedure TDeclarationList.SetItem(const Index: Integer; const Value: TDeclaration);
+begin
+  if (Index < 0) or (Index >= FCount) then
+    raise Exception.CreateFmt('TDeclarationList.SetItem: Index %d out of bounds', [Index]);
+
+  FItems[Index] := Value;
 end;
 
 function TDeclarationList.ToArray: TDeclarationArray;
@@ -949,6 +1035,11 @@ begin
     Result := ClassName
   else
     Result := ClassName + ' (' + Name + ')';
+end;
+
+procedure TDeclaration.ClearFlags;
+begin
+  FFlags := 0;
 end;
 
 procedure TDeclaration.SetFlags(const Index: Integer; const AValue: Boolean);
@@ -1035,6 +1126,11 @@ begin
   Result := FTextNoCommentsSingleLine.Value;
 end;
 
+function TDeclaration.GetHasItems: Boolean;
+begin
+  Result := FItems.Count > 0;
+end;
+
 function TDeclaration.IsName(const Value: String): Boolean;
 begin
   Result := SameText(Name, Value);
@@ -1115,6 +1211,13 @@ begin
   Result := AClass.Create(Self, FStack.Top, FLexer.TokenPos, FLexer.TokenPos);
 
   FStack.Top.Items.Add(Result);
+  FStack.Push(Result);
+end;
+
+function TCodeParser.PushStub(AClass: TDeclarationClass): TDeclaration;
+begin
+  Result := AClass.Create(Self, FStack.Top, FLexer.TokenPos, FLexer.TokenPos);
+
   FStack.Push(Result);
 end;
 
@@ -1271,6 +1374,59 @@ procedure TCodeParser.SetMaxPos(const Value: Integer);
 begin
   if (fLexer <> nil) then
     fLexer.MaxPos := Value;
+end;
+
+procedure TCodeParser.EmptyVarStub(VarStub: TDeclaration_VarStub; VarClass: TDeclaration_VarClass);
+var
+  VarType, VarDefault: TDeclaration;
+  NewDecl: TDeclaration_Var;
+  I: Integer;
+begin
+  VarType := VarStub.Items.GetFirstItemOfClass(TDeclaration_VarType);
+  VarDefault := VarStub.Items.GetFirstItemOfClass(TDeclaration_VarDefault);
+
+  for I := 0 to VarStub.NameCount - 1 do
+  begin
+    NewDecl := VarClass.Create(Self, FStack.Top, FLexer.TokenPos, FLexer.TokenPos);
+    NewDecl.Name := VarStub.Names[I].Name;
+    if (VarType <> nil) then
+      NewDecl.Items.Add(VarType);
+    if (VarDefault <> nil) then
+      NewDecl.Items.Add(VarDefault);
+
+    NewDecl.DefToken  := VarStub.DefToken;
+    NewDecl.FStartPos := VarStub.Names[I].StartPos;
+    NewDecl.FEndPos   := VarStub.Names[I].EndPos;
+
+    FStack.Top.Items.Add(NewDecl);
+  end;
+end;
+
+procedure TCodeParser.EmptyParamStub(ParamStub: TDeclaration_ParamStub);
+var
+  VarType, VarDefault: TDeclaration;
+  NewDecl: TDeclaration_Parameter;
+  I: Integer;
+begin
+  VarType := ParamStub.Items.GetFirstItemOfClass(TDeclaration_VarType);
+  VarDefault := ParamStub.Items.GetFirstItemOfClass(TDeclaration_VarDefault);
+
+  for I := 0 to ParamStub.NameCount - 1 do
+  begin
+    NewDecl := TDeclaration_Parameter.Create(Self, FStack.Top, FLexer.TokenPos, FLexer.TokenPos);
+    NewDecl.Name := ParamStub.Names[I].Name;
+    if (VarType <> nil) then
+      NewDecl.Items.Add(VarType);
+    if (VarDefault <> nil) then
+      NewDecl.Items.Add(VarDefault);
+
+    NewDecl.DefToken  := ParamStub.DefToken;
+    NewDecl.ParamType := ParamStub.ParamType;
+    NewDecl.FStartPos := ParamStub.Names[I].StartPos;
+    NewDecl.FEndPos   := ParamStub.Names[I].EndPos;
+
+    FStack.Top.Items.Add(NewDecl);
+  end;
 end;
 
 constructor TCodeParser.Create;
@@ -1490,19 +1646,17 @@ procedure TCodeParser.TypeDeclaration;
 var
   Decl, NewDecl: TDeclaration;
 begin
-  Decl := PushStack(TDeclaration_TypeStub);
+  Decl := PushStub(TDeclaration_TypeStub);
   inherited;
   PopStack();
 
-  if (Decl.Items.Count > 0) then
+  if Decl.HasItems then
   begin
     NewDecl := Decl.Items[0];
-    NewDecl.isType := True;
     NewDecl.Name := TDeclaration_TypeStub(Decl).TempName;
 
     FStack.Top.Items.Add(NewDecl);
-  end else
-    OnErrorMessage(Lexer, 'Invalid type declaration');
+  end;
 end;
 
 procedure TCodeParser.TypeName;
@@ -1534,33 +1688,12 @@ end;
 procedure TCodeParser.VarDeclaration;
 var
   Decl: TDeclaration;
-  VarDecl, VarType, VarDefault: TDeclaration;
-  I: Integer;
 begin
-  Decl := PushStack(TDeclaration_VarStub);
+  Decl := PushStub(TDeclaration_VarStub);
   inherited;
   PopStack();
 
-  VarType := Decl.Items.GetFirstItemOfClass(TDeclaration_VarType);
-  VarDefault := Decl.Items.GetFirstItemOfClass(TDeclaration_VarDefault);
-
-  with TDeclaration_VarStub(Decl) do
-    for I := 0 to NameCount - 1 do
-    begin
-      VarDecl := PushStack(TDeclaration_Var);
-      VarDecl.isVar := True;
-      VarDecl.Name := Names[I].Name;
-      if (VarType <> nil) then
-        VarDecl.Items.Add(VarType);
-      if (VarDefault <> nil) then
-        VarDecl.Items.Add(VarDefault);
-
-      TDeclaration_Var(VarDecl).DefToken := TDeclaration_VarStub(Decl).DefToken;
-      TDeclaration_Var(VarDecl).FStartPos := Names[I].StartPos;
-      TDeclaration_Var(VarDecl).FEndPos := Names[I].EndPos;
-
-      FStack.Pop();
-    end;
+  EmptyVarStub(TDeclaration_VarStub(Decl), TDeclaration_Var);
 end;
 
 procedure TCodeParser.VarName;
@@ -1584,49 +1717,12 @@ end;
 procedure TCodeParser.ConstantDeclaration;
 var
   Decl: TDeclaration;
-  VarDecl, VarType, VarDefault: TDeclaration;
-  I: Integer;
 begin
-  Decl := PushStack(TDeclaration_VarStub);
+  Decl := PushStub(TDeclaration_VarStub);
   inherited;
   PopStack();
 
-  VarType := Decl.Items.GetFirstItemOfClass(TDeclaration_VarType);
-  VarDefault := Decl.Items.GetFirstItemOfClass(TDeclaration_VarDefault);
-
-  with TDeclaration_VarStub(Decl) do
-    for I := 0 to NameCount - 1 do
-    begin
-      VarDecl := PushStack(TDeclaration_Const);
-      VarDecl.isConst := True;
-      VarDecl.Name := Names[I].Name;
-      if (VarType <> nil) then
-        VarDecl.Items.Add(VarType);
-      if (VarDefault <> nil) then
-        VarDecl.Items.Add(VarDefault);
-
-      TDeclaration_Var(VarDecl).DefToken := TDeclaration_VarStub(Decl).DefToken;
-      TDeclaration_Var(VarDecl).FStartPos := Names[I].StartPos;
-      TDeclaration_Var(VarDecl).FEndPos := Names[I].EndPos;
-      FStack.Pop();
-      //PopStack();
-    end;
-
-  {
-  for TempName in TDeclaration_VarStub(Decl).TempNames do
-  begin
-    VarDecl := PushStack(TDeclaration_Const);
-    VarDecl.Name := TempName;
-    if (VarType <> nil) then
-      VarDecl.Items.Add(VarType);
-    if (VarDefault <> nil) then
-      VarDecl.Items.Add(VarDefault);
-
-    TDeclaration_Var(VarDecl).DefToken := TDeclaration_VarStub(Decl).DefToken;
-
-    PopStack();
-  end;
-  }
+  EmptyVarStub(TDeclaration_VarStub(Decl), TDeclaration_Const);
 end;
 
 procedure TCodeParser.ConstantName;
@@ -1669,7 +1765,6 @@ begin
   end;
 
   Decl := PushStack(TDeclaration_MethodObjectName);
-  Decl.isVar := True;
   TypeKind();
   PopStack();
 end;
@@ -1678,14 +1773,13 @@ procedure TCodeParser.ReturnType;
 var
   Decl: TDeclaration;
 begin
-  if (not InDeclaration(TDeclaration_Method)) then
+  if (not InDeclarations([TDeclaration_Method, TDeclaration_TypeMethod])) then
   begin
     inherited;
     Exit;
   end;
 
   Decl := PushStack(TDeclaration_MethodResult);
-  Decl.isVar := True;
   TypeKind();
   PopStack();
 end;
@@ -1693,7 +1787,7 @@ end;
 procedure TCodeParser.ConstRefParameter;
 begin
   if InDeclaration(TDeclaration_ParamStub) then
-   TDeclaration_ParamStub(FStack.Top).ParamType := tokConstRef;
+    TDeclaration_ParamStub(FStack.Top).ParamType := tokConstRef;
 
   inherited;
 end;
@@ -1701,7 +1795,7 @@ end;
 procedure TCodeParser.ConstParameter;
 begin
   if InDeclaration(TDeclaration_ParamStub) then
-   TDeclaration_ParamStub(FStack.Top).ParamType := tokConst;
+    TDeclaration_ParamStub(FStack.Top).ParamType := tokConst;
 
   inherited;
 end;
@@ -1744,37 +1838,14 @@ end;
 
 procedure TCodeParser.FormalParameterSection;
 var
-  Decl, ParamDecl, VarType, VarDef: TDeclaration;
-  I: Integer;
+  Decl: TDeclaration;
 begin
-  Decl := PushStack(TDeclaration_ParamStub);
+  Decl := PushStub(TDeclaration_ParamStub);
   inherited;
   PopStack();
 
   PushStack(TDeclaration_ParamGroup);
-
-  VarType := Decl.Items.GetFirstItemOfClass(TDeclaration_VarType);
-  VarDef := Decl.Items.GetFirstItemOfClass(TDeclaration_VarDefault);
-
-  with TDeclaration_VarStub(Decl) do
-    for I := 0 to NameCount - 1 do
-    begin
-      ParamDecl := PushStack(TDeclaration_Parameter);
-      ParamDecl.isParam := True;
-      ParamDecl.Name := Names[I].Name;
-      TDeclaration_Parameter(ParamDecl).ParamType := TDeclaration_ParamStub(Decl).ParamType;
-      if (VarType <> nil) then
-        ParamDecl.Items.Add(VarType);
-      if (VarDef <> nil) then
-        ParamDecl.Items.Add(VarDef);
-
-      TDeclaration_Parameter(ParamDecl).DefToken := TDeclaration_VarStub(Decl).DefToken;
-      TDeclaration_Parameter(ParamDecl).FStartPos := Names[I].StartPos;
-      TDeclaration_Parameter(ParamDecl).FEndPos := Names[I].EndPos;
-
-      PopStack();
-    end;
-
+  EmptyParamStub(TDeclaration_ParamStub(Decl));
   PopStack();
 end;
 
@@ -1818,8 +1889,7 @@ end;
 
 procedure TCodeParser.ClassField;
 var
-  Decl, FieldDecl, VarType: TDeclaration;
-  I: Integer;
+  Decl: TDeclaration;
 begin
   if (not InDeclarations([TDeclaration_TypeRecord, TDeclaration_TypeUnion])) then
   begin
@@ -1827,23 +1897,11 @@ begin
     Exit;
   end;
 
-  Decl := PushStack(TDeclaration_VarStub);
+  Decl := PushStub(TDeclaration_VarStub);
   inherited;
   PopStack();
 
-  VarType := Decl.Items.GetFirstItemOfClass(TDeclaration_VarType);
-
-  with TDeclaration_VarStub(Decl) do
-    for I := 0 to NameCount - 1 do
-    begin
-      FieldDecl := PushStack(TDeclaration_Field);
-      FieldDecl.isVar := True;
-      FieldDecl.Name := Names[I].Name;
-      if (VarType <> nil) then
-        FieldDecl.Items.Add(VarType);
-
-      PopStack();
-    end;
+  EmptyVarStub(TDeclaration_VarStub(Decl), TDeclaration_Field);
 end;
 
 procedure TCodeParser.FieldName;
@@ -1860,11 +1918,7 @@ begin
   end;
 
   PushStack(TDeclaration_ParentType);
-  PushStack(TDeclaration_VarType);
-  PushStack(TDeclaration_Identifier);
   inherited;
-  PopStack();
-  PopStack();
   PopStack();
 end;
 
@@ -1975,15 +2029,13 @@ end;
 
 function TCodeParser.DebugTree: String;
 var
-  Builder: TAnsiStringBuilder;
+  Builder: TSimbaStringBuilder;
   Depth: Integer = 1;
 
   procedure Dump(Decl: TDeclaration);
   var
     I: Integer;
   begin
-    if (Decl is TDeclaration_Stub) then
-      Exit;
     Builder.AppendLine(StringOfChar('-', Depth*2) + ' ' + Decl.Dump());
 
     Inc(Depth);
@@ -1998,38 +2050,26 @@ var
 var
   I, Count: Integer;
 begin
-  Builder := TAnsiStringBuilder.Create();
-
   Count := 0;
   for I := 0 to Items.Count - 1 do
   begin
-    if (Items[I] is TDeclaration_Stub) then
-      Continue;
-
     Builder.AppendLine(IntToStr(Count) + ')');
     Dump(Items[I]);
     Inc(Count);
   end;
 
-  Result := Builder.ToString().Trim();
-
-  Builder.Free();
+  Result := Builder.Str.Trim();
 end;
 
 function TCodeParser.DebugGlobals: String;
 var
-  Builder: TAnsiStringBuilder;
-  List: TDeclarationList;
+  Builder: TSimbaStringBuilder;
   Decl: TDeclaration;
 begin
-  Builder := TAnsiStringBuilder.Create();
+  for Decl in FGlobals.ToArray() do
+    Builder.AppendLine(Decl.ClassName + ' -> ' + Decl.Name);
 
-  //for List in FGlobalMap.Values do
-  //  for Decl in List do
-  //    Builder.AppendLine(Decl.ClassName + ' -> ' + Decl.Name);
-  Result := Builder.ToString().Trim();
-
-  Builder.Free();
+  Result := Builder.Str.Trim();
 end;
 
 end.

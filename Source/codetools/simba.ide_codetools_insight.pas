@@ -49,6 +49,7 @@ type
 
     function GetOverloads(Decl: TDeclaration): TDeclarationArray;
     function GetGlobals: TDeclarationArray;
+    function GetLocals: TDeclarationArray;
     function GetMethodsOfType(Typ: String): TDeclarationArray;
     function GetMembersOfType(Decl: TDeclaration): TDeclarationArray;
 
@@ -210,7 +211,7 @@ begin
         if Decl.IsName(n) then
           Result := Result + [Decl];
     end else
-      for Decl in GetGlobals() do
+      for Decl in GetGlobals() + GetLocals() do
         if Decl.IsName(n) and (Decl is TDeclaration_Method) then
           Result := Result + [Decl];
   end;
@@ -223,6 +224,11 @@ begin
   Result := FScriptParser.Globals.ToArray;
   for Include in GetIncludes() do
     Result := Result + Include.Globals.ToArray;
+end;
+
+function TCodeinsight.GetLocals: TDeclarationArray;
+begin
+  Result := FScriptParser.Locals.ToArray();
 end;
 
 function TCodeinsight.GetMethodsOfType(Typ: String): TDeclarationArray;
@@ -304,6 +310,8 @@ begin
     Result := Result.Items[0];
   if (Result is TDeclaration_Identifier) then
     Result := FindDecl(Result.Text);
+  if (Result is TDeclaration_TypeNativeMethod) and (Result.Items.Count > 0) then
+    Result := Result.Items[0];
 end;
 
 function TCodeinsight.DoArrayIndex(Decl: TDeclaration; Dimensions: Integer): TDeclaration;

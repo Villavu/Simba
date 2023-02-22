@@ -26,6 +26,7 @@ type
   public
     procedure Add(Item: _T); virtual;
     procedure Clear; virtual;
+    procedure Delete(Index: Integer); virtual;
     function ToArray: TArr; virtual;
 
     property Count: Integer read FCount;
@@ -37,6 +38,7 @@ type
     FFreeObjects: Boolean;
   public
     procedure Clear; override;
+    procedure Delete(Index: Integer); override;
 
     constructor Create(FreeObjects: Boolean = False); reintroduce;
     destructor Destroy; override;
@@ -67,6 +69,15 @@ begin
   FCount := 0;
 end;
 
+procedure TSimbaList.Delete(Index: Integer);
+begin
+  if (Index < 0) or (Index >= FCount) then
+    raise Exception.CreateFmt('%s.Delete: Index %d out of bounds', [ClassName, Index]);
+
+  FCount := FCount - 1;
+  Move(FArr[Index + 1], FArr[Index], (FCount - Index) * SizeOf(_T));
+end;
+
 function TSimbaList.ToArray: TArr;
 begin
   SetLength(Result, FCount);
@@ -84,6 +95,15 @@ begin
       FArr[I].Free();
 
   inherited Clear();
+end;
+
+procedure TSimbaObjectList.Delete(Index: Integer);
+begin
+  if (Index < 0) or (Index >= FCount) then
+    raise Exception.CreateFmt('%s.Delete: Index %d out of bounds', [ClassName, Index]);
+  FArr[Index].Free();
+
+  inherited Delete(Index);
 end;
 
 constructor TSimbaObjectList.Create(FreeObjects: Boolean);

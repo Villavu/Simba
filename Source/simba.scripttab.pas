@@ -146,30 +146,35 @@ var
   Decls: TDeclarationArray;
   Codeinsight: TCodeinsight;
 begin
-  Codeinsight := TCodeinsight.Create();
-
   try
-    Codeinsight.SetScript(Script, ScriptFileName, -1, -1);
-    Codeinsight.Run();
+    Codeinsight := TCodeinsight.Create();
 
-    Decl := Codeinsight.ParseExpression(FLinkExpression, []);
-    if (Decl <> nil) then
-    begin
-      if (Decl.ClassType = TDeclaration_Method) then
+    try
+      Codeinsight.SetScript(Script, ScriptFileName, Editor.SelStart, Editor.SelStart);
+      Codeinsight.Run();
+
+      Decl := Codeinsight.ParseExpression(FLinkExpression, []);
+      if (Decl <> nil) then
       begin
-        Decls := Codeinsight.GetOverloads(Decl);
-        if (Length(Decls) > 1) then
-          ShowDeclarationDialog(Decls);
-      end;
+        if (Decl.ClassType = TDeclaration_Method) then
+        begin
+          Decls := Codeinsight.GetOverloads(Decl);
+          if (Length(Decls) > 1) then
+          begin
+            ShowDeclarationDialog(Decls);
+            Exit;
+          end;
+        end;
 
-      ShowDeclaration(Decl);
+        ShowDeclaration(Decl);
+      end;
+    finally
+      Codeinsight.Free();
     end;
   except
     on E: Exception do
-      DebugLn('TSimbaScriptTab.HandleEditorLinkClick: ' + E.ToString());
+      DebugLn('TSimbaScriptTab.DoShowDeclaration: ' + E.ToString());
   end;
-
-  Codeinsight.Free();
 end;
 
 procedure TSimbaScriptTab.ScriptStateChanged(Sender: TObject);

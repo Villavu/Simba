@@ -358,7 +358,7 @@ begin
   fExID := tokUnKnown;
 
   FIdentBuffer := GetMem(MaxTokenNameLength + 1);
-  FIdentBufferUpper := PtrUInt(@FIdentBuffer[MaxTokenNameLength + 1]);
+  FIdentBufferUpper := PtrUInt(@FIdentBuffer[MaxTokenNameLength]);
 
   FUseDefines := True;
   FDefines := TStringList.Create();
@@ -389,8 +389,10 @@ end;
 
 destructor TmwBasePasLex.Destroy;
 begin
-  ClearDefines;
-  FDefines.Free;
+  ClearDefines();
+  FDefines.Free();
+
+  FreeMem(FIdentBuffer);
 
   inherited Destroy();
 end;

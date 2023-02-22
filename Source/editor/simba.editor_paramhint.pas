@@ -17,7 +17,7 @@ uses
 type
   TSimbaParamHintForm = class(THintWindow)
   protected
-    FMethods: array of TDeclaration_Method;
+    FMethods: TDeclarationArray;
     FBoldIndex: Integer;
     FNeededWidth: Integer;
     FNeededHeight: Integer;
@@ -27,7 +27,7 @@ type
     procedure DoHide; override;
     procedure FontChanged(Sender: TObject); override;
     procedure Paint; override;
-    procedure DrawMethod(var X, Y: Integer; Method: TDeclaration_Method);
+    procedure DrawMethod(var X, Y: Integer; Method: TDeclaration);
     procedure SetBoldIndex(AValue: Integer);
   public
     procedure Show(ScreenPoint: TPoint; Decls: TDeclarationArray);
@@ -122,18 +122,15 @@ begin
   FNeededHeight := Y + 2;
 end;
 
-procedure TSimbaParamHintForm.DrawMethod(var X, Y: Integer; Method: TDeclaration_Method);
+procedure TSimbaParamHintForm.DrawMethod(var X, Y: Integer; Method: TDeclaration);
 var
   ParamIndex: Integer;
 
   procedure DrawText(Str: String; Bold: Boolean = False);
   begin
+    Canvas.Font.Bold := Bold;
     if not FMeasuring then
-    begin
-      Canvas.Font.Bold := Bold;
       Canvas.TextOut(X, Y, Str);
-    end;
-
     Inc(X, Canvas.TextWidth(Str));
   end;
 
@@ -147,7 +144,11 @@ var
     if (Length(Decls) = 0) then
       Exit;
 
-    NeedBold := (FBoldIndex >= ParamIndex) and (FBoldIndex < ParamIndex + Length(Decls));
+    if FMeasuring then
+      NeedBold := True
+    else
+      NeedBold := (FBoldIndex >= ParamIndex) and (FBoldIndex < ParamIndex + Length(Decls));
+
     with TDeclaration_Parameter(Decls[0]) do
     begin
       case ParamType of
@@ -171,25 +172,33 @@ var
     with TDeclaration_Parameter(Decls[0]) do
     begin
       if (VarTypeString <> '') then
-        DrawText(': ' + VarTypeString, NeedBold);
-      if (DefaultValueString <> '') then
-        DrawText(' = ' + DefaultValueString, NeedBold);
+        DrawText(VarTypeString, NeedBold);
+      if (VarDefaultString <> '') then
+        DrawText(VarDefaultString, NeedBold);
     end;
   end;
 
 var
+  NameString, ResultString: String;
   Decl: TDeclaration;
   Decls: TDeclarationArray;
   I: Integer;
 begin
+  NameString := '';
+  ResultString := '';
+
+  if (Method is TDeclaration_Method) then
+  begin
+    NameString := TDeclaration_Method(Method).Name;
+    ResultString := TDeclaration_Method(Method).ResultString;
+  end;
+  if (Method is TDeclaration_TypeMethod) then
+    ResultString := TDeclaration_TypeMethod(Method).ResultString;
+
   Decl := Method.Items.GetFirstItemOfClass(TDeclaration_ParamList);
   if (Decl = nil) then
-  begin
-    //if (Method is TDeclaration_TypeMethod) then
-    //  DrawText('();')
-    //else
-      DrawText(Method.Name + '()' + Method.ResultString + ';');
-  end else
+    DrawText(NameString + '()' + ResultString + ';')
+  else
   begin
     ParamIndex := 0;
 
@@ -197,19 +206,14 @@ begin
     for I := 0 to High(Decls) do
     begin
       if (I = 0) then
-      begin
-        //if (Method is TDeclaration_TypeMethod) then
-        //  DrawText('(')
-        //else
-          DrawText(Method.Name + '(');
-      end;
+        DrawText(NameString + '(');
 
       DrawGroup(Decls[I]);
 
       if (I < High(Decls)) then
         DrawText('; ')
       else
-        DrawText(')' + Method.ResultString + ';');
+        DrawText(')' + ResultString + ';');
     end;
   end;
 
@@ -220,20 +224,22 @@ procedure TSimbaParamHintForm.Show(ScreenPoint: TPoint; Decls: TDeclarationArray
 var
   ScreenRect: TRect;
   MaxRight: Integer;
-  I, Count: Integer;
+  I: Integer;
 begin
-  Count := 0;
-  SetLength(FMethods, Length(Decls));
+  FMethods := [];
   for I := 0 to High(Decls) do
-    if (Decls[I] is TDeclaration_Method) then
-    begin
-      if Decls[i].isOverrideMethod then
-        Continue;
+  begin
+    if Decls[I].isOverrideMethod then
+      Continue;
 
-      FMethods[I] := TDeclaration_Method(Decls[I]);
-      Inc(Count);
-    end;
-  SetLength(FMethods, Count);
+    FMethods := FMethods + [Decls[I]];
+  end;
+
+  if (Length(FMethods) = 0) then
+  begin
+    Hide();
+    Exit;
+  end;
 
   FNeededHeight := 0;
   FNeededWidth := 0;
@@ -374,6 +380,8 @@ var
   Text: String;
   I: Integer;
   Decl: TDeclaration;
+  Decls: TDeclarationArray;
+  ScreenPoint: TPoint;
 begin
   if IsParamHintCommand(Command, AChar) and CodetoolsSetup then
   begin
@@ -393,17 +401,26 @@ begin
     FCodeinsight.Run();
 
     Decl := FCodeinsight.ParseExpression(TSimbaEditor(Editor).GetExpression(FParenthesesPoint.X -1, FParenthesesPoint.Y), [EParseExpressionFlag.WantVarType]);
+    Decls := [];
+
+    if (Decl is TDeclaration_TypeMethod) then
+    begin
+      FDisplayPoint := FParenthesesPoint;
+      Decls := [Decl];
+    end;
     if (Decl is TDeclaration_Method) then
     begin
-      if (Decl is TDeclaration_TypeMethod) then
-        FDisplayPoint := FParenthesesPoint
-      else
-        FDisplayPoint := FParenthesesPoint.Offset(-Length(Decl.Name), 0);
+      FDisplayPoint := FParenthesesPoint.Offset(-Length(Decl.Name), 0);
+      Decls := FCodeinsight.GetOverloads(Decl);
+    end;
 
+    if (Length(Decls) > 0) then
+    begin
       FHintForm.Font := Editor.Font;
       FHintForm.BoldIndex := GetParameterIndexAtCaret();
-      FHintForm.Show(Editor.ClientToScreen(Editor.RowColumnToPixels(Editor.LogicalToPhysicalPos(FDisplayPoint))), FCodeinsight.GetOverloads(Decl));
-    end;
+      FHintForm.Show(Editor.ClientToScreen(Editor.RowColumnToPixels(Editor.LogicalToPhysicalPos(FDisplayPoint))), Decls);
+    end else
+      FHintForm.Hide();
   end;
 end;
 
@@ -452,8 +469,6 @@ end;
 
 destructor TSimbaParamHint.Destroy;
 begin
-  if (FHintForm <> nil) then
-    FreeAndNil(FHintForm);
   if (FCodeinsight <> nil) then
     FreeAndNil(FCodeinsight);
 

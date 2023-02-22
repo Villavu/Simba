@@ -25,6 +25,7 @@ type
     class operator Initialize(var Self: TSimbaStringBuilder);
 
     procedure Append(const Str: String);
+    procedure AppendLine(const Str: String);
     property Str: String read GetString;
   end;
 
@@ -54,6 +55,11 @@ begin
 
     Inc(FCount, Len);
   end;
+end;
+
+procedure TSimbaStringBuilder.AppendLine(const Str: String);
+begin
+  Append(Str + LineEnding);
 end;
 
 end.
