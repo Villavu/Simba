@@ -166,6 +166,13 @@ var
   Include: TCodeParser;
   Decls: TDeclarationArray;
 begin
+  Decls := FScriptParser.Locals.GetByName(S);
+  if (Length(Decls) > 0) then
+  begin
+    Result := Decls[0];
+    Exit;
+  end;
+
   for Include in GetIncludes() do
   begin
     Decls := Include.Globals.GetByName(S);
@@ -395,7 +402,9 @@ begin
    Decl := EnsureTypeDeclaration(TDeclaration_Method(Decl).ResultType)
   else
   if (Decl is TDeclaration_Var) then
-    Decl := EnsureTypeDeclaration(TDeclaration_Var(Decl).VarType);
+    Decl := EnsureTypeDeclaration(TDeclaration_Var(Decl).VarType)
+  else
+    Decl := EnsureTypeDeclaration(Decl);
 
   if (Decl = nil) then
   begin

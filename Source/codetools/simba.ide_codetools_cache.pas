@@ -178,10 +178,10 @@ end;
 
 function TCachedInclude.GetHash: String;
 begin
-  if (FHash = '') then
-    FHash := inherited + InDefines.Defines + IntToStr(InDefines.Stack);
+  if FHash.IsNull then
+    FHash.Value := inherited + InDefines.Defines + IntToStr(InDefines.Stack);
 
-  Result := FHash;
+  Result := FHash.Value;
 end;
 
 function TCachedInclude.DoHandleLibrary(Sender: TmwBasePasLex): Boolean;

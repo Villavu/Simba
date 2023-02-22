@@ -71,6 +71,7 @@ type
 
     function DoPaintItem(const Key: String; Canvas: TCanvas; X, Y: Integer; Selected: Boolean; Index: Integer): Boolean;
     function DoMeasureItem(const AKey: string; ACanvas: TCanvas; Selected: boolean; Index: integer): TPoint;
+
     procedure DoCodeCompletion(var Value: String; SourceValue: String; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
     procedure DoFiltering(var NewPosition: Integer);
     procedure DoTabPressed(Sender: TObject);
@@ -182,7 +183,7 @@ begin
 
   FHint.Font := Self.Font;
   if (AutoComplete <> nil) then
-    AutoComplete.FColumnWidth := Canvas.TextWidth('class const ');
+    AutoComplete.FColumnWidth := Canvas.TextWidth('class const  ');
 
   FFontHeight := FFontHeight + 2;
 end;
@@ -417,6 +418,9 @@ begin
   else
   if Decl.isType then
     Result := GetTypeText(Decl as TDeclaration_Type);
+
+  if (Result = '') then
+    Result := #0;
 end;
 
 function TSimbaAutoComplete.GetDecl(Index: Integer): TDeclaration;
@@ -517,7 +521,7 @@ const
   COLUMN_ENUM:        TColumnFormat = (Text: 'enum';        Color: $9314FF);
   COLUMN_CONST:       TColumnFormat = (Text: 'const';       Color: $8B8B00);
   COLUMN_CLASS_VAR:   TColumnFormat = (Text: 'class var';   Color: clPurple);
-  COLUMN_CLASS_CONST: TColumnFormat = (Text: 'class const'; Color: clOlive);
+  COLUMN_CLASS_CONST: TColumnFormat = (Text: 'class const'; Color: $8B8B00);
 var
   Column: TColumnFormat;
 begin

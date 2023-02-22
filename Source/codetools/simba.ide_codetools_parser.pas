@@ -33,8 +33,8 @@ type
     function GetByClassAndName(AClass: TDeclarationClass; AName: String; SubSearch: Boolean = False): TDeclarationArray;
     function GetByName(AName: String; SubSearch: Boolean = False): TDeclarationArray;
 
-    function GetItemsOfClass(AClass: TDeclarationClass; SubSearch: Boolean = False): TDeclarationArray;
-    function GetFirstItemOfClass(AClass: TDeclarationClass; SubSearch: Boolean = False): TDeclaration;
+    function GetItemsOfClass(AClass: TDeclarationClass; ExactClass: Boolean = False; SubSearch: Boolean = False): TDeclarationArray;
+    function GetFirstItemOfClass(AClass: TDeclarationClass; ExactClass: Boolean = False; SubSearch: Boolean = False): TDeclaration;
     function GetItemInPosition(Position: Integer; CheckEnd: Boolean = True): TDeclaration;
 
     function GetTextOfClass(AClass: TDeclarationClass): String;
@@ -278,7 +278,16 @@ type
     property HeaderString: String read GetHeaderString;
   end;
 
-  TDeclaration_MethodResult = class(TDeclaration);
+  TDeclaration_MethodResult = class(TDeclaration_Var)
+  protected
+    function GetName: string; override;
+  end;
+
+  TDeclaration_MethodObjectName = class(TDeclaration_Var)
+  public
+    function GetName: string; override;
+  end;
+
   TDeclaration_Parameter = class(TDeclaration)
   public
     ParamType: TptTokenKind;
@@ -308,7 +317,7 @@ type
     FGlobals: TDeclarationList;
     FTypeMethods: TDeclarationMap;
 
-    FHash: String;
+    FHash: TNullableString;
 
     procedure FindLocals;
     procedure FindGlobals;
@@ -413,6 +422,16 @@ type
   TCodeParserList = specialize TSimbaObjectList<TCodeParser>;
 
 implementation
+
+function TDeclaration_MethodResult.GetName: string;
+begin
+  Result := 'Result';
+end;
+
+function TDeclaration_MethodObjectName.GetName: string;
+begin
+  Result := 'Self';
+end;
 
 procedure TDeclarationMap.Add(Name: String; Decl: TDeclaration);
 var
@@ -563,14 +582,10 @@ begin
 end;
 
 function TDeclaration_Method.ResultType: TDeclaration;
-var
-  Decl: TDeclaration;
 begin
-  Decl := Items.GetFirstItemOfClass(TDeclaration_MethodResult);
-  if (Decl <> nil) then
-    Result := Decl.Items.GetFirstItemOfClass(TDeclaration_VarType)
-  else
-    Result := nil;
+  Result := Items.GetFirstItemOfClass(TDeclaration_MethodResult);
+  if (Result <> nil) then
+    Result := Result.Items.GetFirstItemOfClass(TDeclaration_VarType);
 end;
 
 function TDeclaration_Method.Dump: String;
@@ -748,7 +763,7 @@ begin
   SetLength(Result, Size);
 end;
 
-function TDeclarationList.GetItemsOfClass(AClass: TDeclarationClass; SubSearch: Boolean = False): TDeclarationArray;
+function TDeclarationList.GetItemsOfClass(AClass: TDeclarationClass; ExactClass: Boolean; SubSearch: Boolean): TDeclarationArray;
 var
   Size: Integer;
 
@@ -756,7 +771,7 @@ var
   var
     I: Integer;
   begin
-    if (Item is AClass) then
+    if (Item.ClassType = AClass) or ((not ExactClass) and (Item is AClass)) then
     begin
       if (Size = Length(Result)) then
         SetLength(Result, 8 + Length(Result) * 2);
@@ -779,37 +794,35 @@ begin
   SetLength(Result, Size);
 end;
 
-function TDeclarationList.GetFirstItemOfClass(AClass: TDeclarationClass; SubSearch: Boolean = False): TDeclaration;
+function TDeclarationList.GetFirstItemOfClass(AClass: TDeclarationClass; ExactClass: Boolean; SubSearch: Boolean): TDeclaration;
 
-  function SearchItem(AClass: TDeclarationClass; SubSearch: Boolean; Item: TDeclaration; out Res: TDeclaration): Boolean;
+  procedure DoSearch(const Item: TDeclaration);
   var
-    i: Integer;
+    I: Integer;
   begin
-    Res := nil;
-    Result := False;
-    if ((Item = nil) and (AClass = nil)) or (Item is AClass) then
-    begin
-      Res := Item;
-      Result := True;
-      Exit;
-    end;
+    if (Item.ClassType = AClass) or ((not ExactClass) and (Item is AClass)) then
+      Result := Item
+    else
     if SubSearch then
-      for i := 0 to Item.Items.Count - 1 do
-        if SearchItem(AClass, SubSearch, Item.Items[i], Res) then
-        begin
-          Result := True;
-          Break;
-        end;
+      for I := 0 to Item.Items.Count - 1 do
+      begin
+        DoSearch(Item.Items[I]);
+        if (Result <> nil) then
+          Exit;
+      end;
   end;
 
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := nil;
 
-  for i := 0 to Count - 1 do
-    if SearchItem(AClass, SubSearch, FItems[i], Result) then
+  for I := 0 to Count - 1 do
+  begin
+    DoSearch(FItems[I]);
+    if (Result <> nil) then
       Exit;
+  end;
 end;
 
 function TDeclarationList.GetItemInPosition(Position: Integer; CheckEnd: Boolean): TDeclaration;
@@ -1116,19 +1129,37 @@ end;
 procedure TCodeParser.FindLocals;
 
   procedure CheckMethod(Decl: TDeclaration);
+  var
+    SelfDecl, ResultDecl: TDeclaration;
   begin
     if (Decl = nil) then
       Exit;
+    SelfDecl := nil;
+    ResultDecl := nil;
 
     FLocals.Extend(Decl.Items.GetItemsOfClass(TDeclaration_Method));
 
     while (Decl is TDeclaration_Method) do
     begin
-      FLocals.Extend(Decl.Items.GetItemsOfClass(TDeclaration_Var));
+      if (SelfDecl = nil) then
+      begin
+        SelfDecl := Decl.Items.GetFirstItemOfClass(TDeclaration_MethodObjectName, True);
+        if (SelfDecl <> nil) then
+          FLocals.Add(SelfDecl);
+      end;
+      if (ResultDecl = nil) then
+      begin
+        ResultDecl := Decl.Items.GetFirstItemOfClass(TDeclaration_MethodResult, True);
+        if (ResultDecl <> nil) then
+          FLocals.Add(ResultDecl);
+      end;
+
+      FLocals.Extend(Decl.Items.GetItemsOfClass(TDeclaration_Var, True));
+      FLocals.Extend(Decl.Items.GetItemsOfClass(TDeclaration_Const, True));
       FLocals.Extend(Decl.Items.GetItemsOfClass(TDeclaration_Type));
       FLocals.Extend(Decl.Items.GetItemsOfClass(TDeclaration_EnumElement));
       if (FItems.GetFirstItemOfClass(TDeclaration_ParamList) <> nil) then
-        FLocals.Extend(FItems.GetFirstItemOfClass(TDeclaration_ParamList).Items.GetItemsOfClass(TDeclaration_Parameter, True));
+        FLocals.Extend(FItems.GetFirstItemOfClass(TDeclaration_ParamList).Items.GetItemsOfClass(TDeclaration_Parameter, False, True));
 
       Decl := Decl.GetOwnerByClass(TDeclaration_Method);
     end;
@@ -1201,17 +1232,17 @@ var
   Builder: TSimbaStringBuilder;
   I: Integer;
 begin
-  if (FHash = '') then
+  if FHash.IsNull then
   begin
     with Lexer.SaveDefines() do
       Builder.Append(Defines + IntToStr(Stack));
     for I := 0 to fLexers.Count - 1 do
       Builder.Append(fLexers[i].FileName + IntToStr(fLexers[i].FileAge));
 
-    FHash := Builder.Str;
+    FHash.Value := Builder.Str;
   end;
 
-  Result := FHash;
+  Result := FHash.Value;
 end;
 
 function TCodeParser.GetCaretPos: Integer;
@@ -1408,7 +1439,7 @@ end;
 
 procedure TCodeParser.TypeKind;
 begin
-  if (not InDeclarations([TDeclaration_VarStub, TDeclaration_TypeArray, TDeclaration_MethodResult])) then
+  if (not InDeclarations([TDeclaration_VarStub, TDeclaration_TypeArray, TDeclaration_MethodResult, TDeclaration_MethodObjectName])) then
   begin
     inherited;
     Exit;
@@ -1629,19 +1660,23 @@ end;
 
 procedure TCodeParser.ObjectNameOfMethod;
 var
-  Decl: TDeclaration_Method;
+  Decl: TDeclaration;
 begin
   if InDeclaration(TDeclaration_Method) then
   begin
-    Decl := TDeclaration_Method(FStack.Top);
-    Decl.ObjectName := Lexer.Token;
-    Decl.isObjectMethod := True;
+    TDeclaration_Method(FStack.Top).ObjectName := Lexer.Token;
+    TDeclaration_Method(FStack.Top).isObjectMethod := True;
   end;
 
-  inherited;
+  Decl := PushStack(TDeclaration_MethodObjectName);
+  Decl.isVar := True;
+  TypeKind();
+  PopStack();
 end;
 
 procedure TCodeParser.ReturnType;
+var
+  Decl: TDeclaration;
 begin
   if (not InDeclaration(TDeclaration_Method)) then
   begin
@@ -1649,7 +1684,8 @@ begin
     Exit;
   end;
 
-  PushStack(TDeclaration_MethodResult);
+  Decl := PushStack(TDeclaration_MethodResult);
+  Decl.isVar := True;
   TypeKind();
   PopStack();
 end;
@@ -1801,6 +1837,7 @@ begin
     for I := 0 to NameCount - 1 do
     begin
       FieldDecl := PushStack(TDeclaration_Field);
+      FieldDecl.isVar := True;
       FieldDecl.Name := Names[I].Name;
       if (VarType <> nil) then
         FieldDecl.Items.Add(VarType);
@@ -1916,8 +1953,7 @@ procedure TCodeParser.Reset;
 begin
   inherited Reset();
 
-  FHash := '';
-
+  FHash.IsNull := True;
   FManagedItems.Clear(True);
 
   FGlobals.Clear();

@@ -20,9 +20,10 @@ type
     FHasValue: Boolean;
 
     function GetIsNull: Boolean;
+    procedure SetIsNull(const AValue: Boolean);
     procedure SetValue(const AValue: String);
   public
-    property IsNull: Boolean read GetIsNull;
+    property IsNull: Boolean read GetIsNull write SetIsNull;
     property Value: String read FValue write SetValue;
   end;
 
@@ -52,6 +53,11 @@ procedure TNullableString.SetValue(const AValue: String);
 begin
   FValue := AValue;
   FHasValue := True;
+end;
+
+procedure TNullableString.SetIsNull(const AValue: Boolean);
+begin
+  FHasValue := not AValue;
 end;
 
 function TNullableString.GetIsNull: Boolean;
