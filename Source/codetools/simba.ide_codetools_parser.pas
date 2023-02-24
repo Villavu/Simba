@@ -363,8 +363,11 @@ type
     procedure EmptyVarStub(VarStub: TDeclaration_VarStub; VarClass: TDeclaration_VarClass);
     procedure EmptyParamStub(ParamStub: TDeclaration_ParamStub);
 
-    function InDeclaration(AClass: TDeclarationClass): Boolean;
-    function InDeclarations(AClassArray: array of TDeclarationClass): Boolean;
+    function InDeclaration(const AClassType: TDeclarationClass): Boolean; inline;
+    function InDeclaration(const AClassType1, AClassType2: TDeclarationClass): Boolean; overload;
+    function InDeclaration(const AClassType1, AClassType2, AClassType3: TDeclarationClass): Boolean; overload;
+    function InDeclaration(const AClassType1, AClassType2, AClassType3, AClassType4: TDeclarationClass): Boolean; overload;
+
     function PushStack(AClass: TDeclarationClass): TDeclaration;
     function PushStub(AClass: TDeclarationClass): TDeclaration;
     procedure PopStack;
@@ -909,7 +912,6 @@ function TDeclarationList.GetItemInPosition(Position: Integer; CheckEnd: Boolean
     if (Position >= Declaration.StartPos) and ((not CheckEnd) or (Position <= Declaration.EndPos)) then
     begin
       Result := Declaration;
-
       for I := 0 to Declaration.Items.Count - 1 do
         Search(Declaration.Items[I], Result);
     end;
@@ -1183,27 +1185,24 @@ begin
   inherited Destroy();
 end;
 
-function TCodeParser.InDeclaration(AClass: TDeclarationClass): Boolean;
+function TCodeParser.InDeclaration(const AClassType: TDeclarationClass): Boolean;
 begin
-  if (AClass = nil) then
-    Result := (FStack.Count = 1)
-  else
-    Result := (FStack.Count > 1) and (FStack.Top is AClass);
+  Result := (FStack.Top is AClassType);
 end;
 
-function TCodeParser.InDeclarations(AClassArray: array of TDeclarationClass): Boolean;
-var
-  AClass: TDeclarationClass;
+function TCodeParser.InDeclaration(const AClassType1, AClassType2: TDeclarationClass): Boolean;
 begin
-  Result := False;
+  Result := InDeclaration(AClassType1) or InDeclaration(AClassType2);
+end;
 
-  for AClass in AClassArray do
-    if InDeclaration(AClass) then
-    begin
-      Result := True;
+function TCodeParser.InDeclaration(const AClassType1, AClassType2, AClassType3: TDeclarationClass): Boolean;
+begin
+  Result := InDeclaration(AClassType1) or InDeclaration(AClassType2) or InDeclaration(AClassType3);
+end;
 
-      Exit;
-    end;
+function TCodeParser.InDeclaration(const AClassType1, AClassType2, AClassType3, AClassType4: TDeclarationClass): Boolean;
+begin
+  Result := InDeclaration(AClassType1) or InDeclaration(AClassType2) or InDeclaration(AClassType3) or InDeclaration(AClassType4);
 end;
 
 function TCodeParser.PushStack(AClass: TDeclarationClass): TDeclaration;
@@ -1515,7 +1514,7 @@ end;
 
 procedure TCodeParser.CompoundStatement;
 begin
-  if (not InDeclarations([nil, TDeclaration_Method, TDeclaration_WithStatement])) then
+  if (not InDeclaration(TDeclaration_Root, TDeclaration_Method, TDeclaration_WithStatement)) then
   begin
     inherited;
     Exit;
@@ -1528,7 +1527,7 @@ end;
 
 procedure TCodeParser.WithStatement;
 begin
-  if (not InDeclarations([TDeclaration_Method, TDeclaration_CompoundStatement])) then
+  if (not InDeclaration(TDeclaration_Method, TDeclaration_CompoundStatement)) then
   begin
     inherited;
     Exit;
@@ -1595,7 +1594,7 @@ end;
 
 procedure TCodeParser.TypeKind;
 begin
-  if (not InDeclarations([TDeclaration_VarStub, TDeclaration_TypeArray, TDeclaration_MethodResult, TDeclaration_MethodObjectName])) then
+  if (not InDeclaration(TDeclaration_VarStub, TDeclaration_TypeArray, TDeclaration_MethodResult, TDeclaration_MethodObjectName)) then
   begin
     inherited;
     Exit;
@@ -1608,7 +1607,7 @@ end;
 
 procedure TCodeParser.ProceduralType;
 begin
-  if (not InDeclarations([TDeclaration_TypeStub, TDeclaration_VarType])) then
+  if (not InDeclaration(TDeclaration_TypeStub, TDeclaration_VarType)) then
   begin
     inherited;
     Exit;
@@ -1773,7 +1772,7 @@ procedure TCodeParser.ReturnType;
 var
   Decl: TDeclaration;
 begin
-  if (not InDeclarations([TDeclaration_Method, TDeclaration_TypeMethod])) then
+  if (not InDeclaration(TDeclaration_Method, TDeclaration_TypeMethod)) then
   begin
     inherited;
     Exit;
@@ -1891,7 +1890,7 @@ procedure TCodeParser.ClassField;
 var
   Decl: TDeclaration;
 begin
-  if (not InDeclarations([TDeclaration_TypeRecord, TDeclaration_TypeUnion])) then
+  if (not InDeclaration(TDeclaration_TypeRecord, TDeclaration_TypeUnion)) then
   begin
     inherited;
     Exit;
@@ -1911,7 +1910,7 @@ end;
 
 procedure TCodeParser.AncestorId;
 begin
-  if (not InDeclarations([TDeclaration_TypeRecord, TDeclaration_TypeNativeMethod])) then
+  if (not InDeclaration(TDeclaration_TypeRecord, TDeclaration_TypeNativeMethod)) then
   begin
     inherited;
     Exit;
@@ -1931,7 +1930,7 @@ end;
 
 procedure TCodeParser.OrdinalType;
 begin
-  if (not InDeclarations([TDeclaration_TypeSet, TDeclaration_TypeArray, TDeclaration_TypeStub])) then
+  if (not InDeclaration(TDeclaration_TypeSet, TDeclaration_TypeArray, TDeclaration_TypeStub)) then
   begin
     inherited;
     Exit;
@@ -1978,7 +1977,7 @@ procedure TCodeParser.EnumeratedTypeItem;
 var
   Decl: TDeclaration;
 begin
-  if (not InDeclarations([TDeclaration_TypeEnum, TDeclaration_TypeEnumScoped])) then
+  if (not InDeclaration(TDeclaration_TypeEnum, TDeclaration_TypeEnumScoped)) then
   begin
     inherited;
     Exit;
