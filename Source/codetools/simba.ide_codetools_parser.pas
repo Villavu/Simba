@@ -206,6 +206,7 @@ type
     function Dump: String; override;
     function DimCount: Integer;
     function VarType: TDeclaration;
+    function IsStatic: Boolean;
   end;
 
   TDeclaration_TypePointer = class(TDeclaration_Type)
@@ -604,6 +605,11 @@ end;
 function TDeclaration_TypeArray.VarType: TDeclaration;
 begin
   Result := Items.GetFirstItemOfClass(TDeclaration_VarType);
+end;
+
+function TDeclaration_TypeArray.IsStatic: Boolean;
+begin
+  Result := Items.GetFirstItemOfClass(TDeclaration_OrdinalType) <> nil;
 end;
 
 function TDeclaration_TypeRecord.Parent: TDeclaration;

@@ -70,7 +70,7 @@ type
 implementation
 
 uses
-  simba.mufasatypes, simba.ide_codetools_cache;
+  simba.mufasatypes, simba.ide_codetools_cache, simba.ide_codetools_arrayhelpers;
 
 function TCodeinsight.GetIncludesHash: String;
 var
@@ -261,6 +261,10 @@ function TCodeinsight.GetMembersOfType(Decl: TDeclaration): TDeclarationArray;
     for Include in GetIncludes() do
       Result := Result + Include.TypeMethods.Get(Decl.Name);
     Result := Result + FScriptParser.TypeMethods.Get(Decl.Name);
+
+    Include := GetArrayHelpers(Decl);
+    if (Include <> nil) then
+      Result := Result + Include.Items.ToArray;
   end;
 
   function GetParent(Decl: TDeclaration): TDeclaration;
