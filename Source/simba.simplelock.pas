@@ -42,7 +42,39 @@ type
     class operator Finalize(var Self: TSimpleWaitableLock);
   end;
 
+  TSimpleEnterableLock = record
+  private
+    FLock: TCriticalSection;
+  public
+    procedure Enter;
+    procedure Leave;
+
+    class operator Initialize(var Self: TSimpleEnterableLock);
+    class operator Finalize(var Self: TSimpleEnterableLock);
+  end;
+
 implementation
+
+procedure TSimpleEnterableLock.Enter;
+begin
+  FLock.Enter();
+end;
+
+procedure TSimpleEnterableLock.Leave;
+begin
+  FLock.Leave();
+end;
+
+class operator TSimpleEnterableLock.Initialize(var Self: TSimpleEnterableLock);
+begin
+  Self.FLock := TCriticalSection.Create();
+end;
+
+class operator TSimpleEnterableLock.Finalize(var Self: TSimpleEnterableLock);
+begin
+  if (Self.FLock <> nil) then
+    FreeAndNil(Self.FLock);
+end;
 
 procedure TSimpleLock.IncLock;
 begin

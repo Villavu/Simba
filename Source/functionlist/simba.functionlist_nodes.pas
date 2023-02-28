@@ -5,9 +5,8 @@ unit simba.functionlist_nodes;
 interface
 
 uses
-  classes, sysutils, comctrls,
-  simba.codeparser,
-  simba.functionlistform;
+  Classes, SysUtils, ComCtrls,
+  simba.ide_codetools_parser, simba.functionlistform;
 
 type
   TFunctionListNode = class(TTreeNode)
@@ -56,11 +55,12 @@ implementation
 
 uses
   lazfileutils, lclintf,
-  simba.mufasatypes, simba.main, simba.scripttabsform;
+  simba.mufasatypes, simba.main, simba.scripttabsform, simba.functionlist_formatter,
+  simba.ide_showdeclaration;
 
 procedure TFunctionList_InternalDeclNode.Open;
 begin
-  SimbaScriptTabsForm.OpenInternalDeclaration(Hint, FFileName);
+  ShowInternalDeclaration(Hint, FFileName);
 end;
 
 constructor TFunctionList_InternalFileNode.Create(FunctionList: TSimbaFunctionList; AFileName: String);
@@ -113,7 +113,7 @@ end;
 
 procedure TFunctionList_DeclNode.Open;
 begin
-  SimbaScriptTabsForm.OpenDeclaration(FStartPos, FEndPos, FLine, FFileName);
+  ShowDeclaration(FStartPos, FEndPos, FLine, FFileName);
 end;
 
 constructor TFunctionList_DeclNode.Create(FunctionList: TSimbaFunctionList; ADecl: TDeclaration);
@@ -125,61 +125,11 @@ begin
   FEndPos   := ADecl.EndPos;
   FLine     := ADecl.Line;
 
-  Text := ADecl.Name;
+  Text := FunctionListFormatter.GetName(ADecl);
+  Hint := FunctionListFormatter.GetHint(ADecl);
 
-  case ADecl.ClassName of
-    'TciProcedureDeclaration':
-      begin
-        if TciProcedureDeclaration(ADecl).IsMethodOfType then
-          Text := TciProcedureDeclaration(ADecl).ObjectName + '.' + Text;
-        Hint := TciProcedureDeclaration(ADecl).Header;
-
-        if TciProcedureDeclaration(ADecl).IsOperator then
-        begin
-          ImageIndex    := IMAGE_OPERATOR;
-          SelectedIndex := IMAGE_OPERATOR;
-        end else
-        begin
-          case TciProcedureDeclaration(ADecl).IsFunction of
-            True:
-              begin
-                ImageIndex    := IMAGE_FUNCTION;
-                SelectedIndex := IMAGE_FUNCTION;
-              end;
-
-            False:
-              begin
-                ImageIndex    := IMAGE_PROCEDURE;
-                SelectedIndex := IMAGE_PROCEDURE;
-              end;
-          end;
-        end;
-      end;
-
-    'TciTypeDeclaration':
-      begin
-        Hint := ADecl.ShortText;
-
-        ImageIndex    := IMAGE_TYPE;
-        SelectedIndex := IMAGE_TYPE;
-      end;
-
-    'TciConstantDeclaration':
-      begin
-        Hint := ADecl.ShortText;
-
-        ImageIndex    := IMAGE_CONSTANT;
-        SelectedIndex := IMAGE_CONSTANT;
-      end;
-
-    'TciVarDeclaration':
-      begin
-        Hint := ADecl.ShortText;
-
-        ImageIndex    := IMAGE_VARIABLE;
-        SelectedIndex := IMAGE_VARIABLE;
-      end;
-  end;
+  ImageIndex    := FunctionListFormatter.GetImage(ADecl);
+  SelectedIndex := ImageIndex;
 end;
 
 end.

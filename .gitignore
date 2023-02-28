@@ -19,3 +19,5 @@ build/
 /Source/tests/lib
 /Source/tests/backup
 /Screenshots
+/Source/codetools/tools/lib
+*.exe

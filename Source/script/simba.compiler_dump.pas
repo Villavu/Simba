@@ -168,6 +168,25 @@ begin
 end;
 
 procedure TSimbaCompilerDump.DumpToFile(FileName: String);
+
+  function DoDump(Decl: TLapeGlobalVar): String;
+  begin
+    if Decl.isConstant then
+      Result := 'const ' + UpperCase(Decl.Name) + ': ' + Decl.VarType.Name
+    else
+      Result := 'var ' + Decl.Name + ': ' + Decl.VarType.Name;
+
+    if Decl.isConstant or (not Decl.isNull) then
+    begin
+      if (Decl.VarType.BaseType in LapeCharTypes) then
+        Result := Result + ' = "' + Decl.AsString + '"'
+      else
+        Result := Result + ' = ' + Decl.AsString
+    end;
+
+    Result := Result + ';';
+  end;
+
 var
   BaseType: ELapeBaseType;
   Decl: TLapeDeclaration;
@@ -185,13 +204,10 @@ begin
     begin
       if (DocPos.FileName = '') or (DocPos.FileName[1] = '!') then
         Continue;
-      if (Name = '') or (Name = 'nil') or (VarType.Name = '') or (BaseType in [ltUnknown, ltScriptMethod, ltImportedMethod]) then
+      if (Name = '') or (Name = 'nil') or (VarType = nil) or (VarType.Name = '') or (BaseType in [ltUnknown, ltScriptMethod, ltImportedMethod]) then
         Continue;
 
-      if isConstant then
-        FDump['const %s = %s;'.Format([Name.ToUpper(), VarType.Name])] := DocPos.FileName
-      else
-        FDump['var %s: %s;'.Format([Name, VarType.Name])] := DocPos.FileName;
+      FDump[DoDump(Decl as TLapeGlobalVar)] := DocPos.FileName;
     end;
 
   // add internals
@@ -249,7 +265,7 @@ begin
   FDump['function Random(l: Int64): Int64; overload; external;']              := 'Random';
   FDump['function Random: Extended; overload; external;']                     := 'Random';
   FDump['procedure Randomize; external;']                                     := 'Random';
-  FDump['var RandSeed: UInt32;']                                              := 'Random';
+  FDump['var RandSeed: UInt32 = ' + IntToStr(RandSeed) + ';']                 := 'Random';
 
   FDump['function GetTickCount: UInt64; external;']                           := 'Timing';
   FDump['procedure Sleep(MilliSeconds: UInt32); external;']                   := 'Timing';

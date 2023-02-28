@@ -7,17 +7,20 @@ interface
 uses
   Classes, SysUtils, Forms;
 
+var
+  CodetoolsSetup: Boolean = False;
+
 implementation
 
 uses
-  simba.mufasatypes, simba.codeinsight,
-  simba.ide_initialization, simba.ci_includecache, simba.process, simba.files, simba.functionlist_simbasection, simba.functionlistform;
+  simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_insight,
+  simba.ide_initialization, simba.process, simba.files, simba.functionlist_simbasection, simba.functionlistform;
 
 procedure SetupCodeTools;
 var
   List: TStringList;
   I: Integer;
-  Parser: TCodeInsight_Include;
+  Parser: TCodeParser;
 begin
   List := nil;
 
@@ -29,13 +32,16 @@ begin
       if (List.Names[I] = '') then
         Continue;
 
-      Parser := TCodeInsight_Include.Create();
-      Parser.Run(List.ValueFromIndex[I], List.Names[I]);
+      Parser := TCodeParser.Create();
+      Parser.SetScript(List.ValueFromIndex[I], List.Names[I]);
+      Parser.Run();
 
-      TCodeInsight.AddBaseInclude(Parser);
+      TCodeinsight.AddBaseInclude(Parser);
     end;
 
-    SimbaFunctionList_SimbaSection.Load(TCodeInsight.BaseIncludes);
+    TCodeinsight.AddBaseDefine('!EXPLICTSELF');
+
+    SimbaFunctionList_SimbaSection.Load(TCodeinsight.FBaseIncludes);
     SimbaFunctionList_SimbaSection.Loaded := True;
   except
     on E: Exception do
@@ -44,6 +50,8 @@ begin
 
   if (List <> nil) then
     List.Free();
+
+  CodetoolsSetup := True;
 end;
 
 initialization

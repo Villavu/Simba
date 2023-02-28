@@ -42,7 +42,7 @@ type
 implementation
 
 uses
-  simba.editor, simba.codeparser, simba.settings;
+  simba.ide_codetools_parser, simba.settings;
 
 procedure TSimbaEditorPlugin_DocGenerator.DoEditorAdded(Value: TCustomSynEdit);
 begin
@@ -69,40 +69,51 @@ begin
 end;
 
 procedure TSimbaEditorPlugin_DocGenerator.InsertDocumentation;
+
+  procedure InsertDocAtMethod(Decl: TDeclaration);
+  var
+    FullName: String;
+  begin
+    if (Decl is TDeclaration_Method) then
+      with TDeclaration_Method(Decl) do
+      begin
+        Editor.CaretXY := Editor.CharIndexToRowCol(StartPos - 1);
+
+        if isObjectMethod then
+          FullName := ObjectName + '.' + Name
+        else
+          FullName := Name;
+
+        Editor.InsertTextAtCaret(
+          Format(SimbaSettings.Editor.DocumentationComment.Value, [FullName, StringOfChar('~', Length(FullName)), HeaderString])
+        );
+      end;
+  end;
+
 var
   Parser: TCodeParser;
   Decl: TDeclaration;
-  FullName: String;
 begin
-  with Editor as TSimbaEditor do
-  begin
-    if ReadOnly then
-      Exit;
+  if Editor.ReadOnly then
+    Exit;
 
-    Parser := TCodeParser.Create();
-    try
-      Parser.Run(Text, '');
+  Parser := TCodeParser.Create();
+  try
+    Parser.SetScript(Editor.Text);
+    Parser.Run();
 
-      Decl := Parser.Items.GetItemInPosition(SelStart - 1);
-      if (Decl <> nil) and ((Decl is TciProcedureDeclaration) or Decl.HasOwnerClass(TciProcedureDeclaration, Decl, True)) then
-        with Decl as TciProcedureDeclaration do
-        begin
-          CaretXY := CharIndexToRowCol(StartPos);
-
-          if IsMethodOfType then
-            FullName := ObjectName + '.' + Name
-          else
-            FullName := Name;
-
-          InsertTextAtCaret(
-            Format(SimbaSettings.Editor.DocumentationComment.Value, [FullName, StringOfChar('~', Length(FullName)), Header])
-          );
-        end;
-    except
+    Decl := Parser.Items.GetByPosition(Editor.SelStart - 1);
+    if (Decl <> nil) then
+    begin
+      if (Decl is TDeclaration_Method) then
+        InsertDocAtMethod(Decl)
+      else
+        InsertDocAtMethod(Decl.GetOwnerByClass(TDeclaration_Method));
     end;
-    if (Parser <> nil) then
-      Parser.Free();
+  except
   end;
+  if (Parser <> nil) then
+    Parser.Free();
 end;
 
 class constructor TSimbaEditorPlugin_DocGenerator.Create;
