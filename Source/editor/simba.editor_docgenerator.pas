@@ -102,7 +102,7 @@ begin
     Parser.SetScript(Editor.Text);
     Parser.Run();
 
-    Decl := Parser.Items.GetItemInPosition(Editor.SelStart - 1);
+    Decl := Parser.Items.GetByPosition(Editor.SelStart - 1);
     if (Decl <> nil) then
     begin
       if (Decl is TDeclaration_Method) then

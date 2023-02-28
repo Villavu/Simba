@@ -233,7 +233,7 @@ end;
 
 function TCodeinsight.GetLocals: TDeclarationArray;
 begin
-  Result := FScriptParser.Locals.ToArray();
+  Result := FScriptParser.Locals.ToArray;
 end;
 
 function TCodeinsight.GetMethodsOfType(Typ: String): TDeclarationArray;
@@ -256,7 +256,7 @@ function TCodeinsight.GetMembersOfType(Decl: TDeclaration): TDeclarationArray;
 
   procedure CheckRecord(Decl: TDeclaration);
   begin
-    Result := Result + Decl.Items.GetItemsOfClass(TDeclaration_Var);
+    Result := Result + Decl.Items.GetByClass(TDeclaration_Var);
   end;
 
   procedure CheckMethods(Decl: TDeclaration);
@@ -326,6 +326,16 @@ end;
 function TCodeinsight.DoArrayIndex(Decl: TDeclaration; Dimensions: Integer): TDeclaration;
 begin
   Result := Decl;
+
+  if (Result is TDeclaration_TypeAlias) then
+  begin
+    if Result.IsName('String') then
+      Result := EnsureTypeDeclaration(FindDecl('Char'))
+    else
+    if Result.IsName('UnicodeString') or Result.IsName('WideString') then
+      Result := EnsureTypeDeclaration(FindDecl('WideChar'));
+  end
+  else
   if (Result is TDeclaration_TypeArray) then
   begin
     Dec(Dimensions, TDeclaration_TypeArray(Result).DimCount);

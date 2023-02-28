@@ -140,7 +140,7 @@ var
     I: Integer;
     NeedBold: Boolean;
   begin
-    Decls := Group.Items.GetItemsOfClass(TDeclaration_Parameter);
+    Decls := Group.Items.GetByClass(TDeclaration_Parameter);
     if (Length(Decls) = 0) then
       Exit;
 
@@ -195,14 +195,14 @@ begin
   if (Method is TDeclaration_TypeMethod) then
     ResultString := TDeclaration_TypeMethod(Method).ResultString;
 
-  Decl := Method.Items.GetFirstItemOfClass(TDeclaration_ParamList);
+  Decl := Method.Items.GetByClassEx(TDeclaration_ParamList);
   if (Decl = nil) then
     DrawText(NameString + '()' + ResultString + ';')
   else
   begin
     ParamIndex := 0;
 
-    Decls := Decl.Items.GetItemsOfClass(TDeclaration_ParamGroup);
+    Decls := Decl.Items.GetByClass(TDeclaration_ParamGroup);
     for I := 0 to High(Decls) do
     begin
       if (I = 0) then

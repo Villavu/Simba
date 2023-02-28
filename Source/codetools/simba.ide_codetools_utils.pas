@@ -79,7 +79,7 @@ begin
   Lex := TmwPasLex.Create(Str);
   try
     Lex.NextNoJunk();
-    if (Lex.TokenID <> tokIdentifier) then
+    if (not (Lex.TokenID in [tokIdentifier, tokStringConst])) then
       Exit;
 
     LastToken := Lex.TokenID;
@@ -126,6 +126,14 @@ begin
                 Result[High(Result)].DerefDimension := True
               else
                 Result[High(Result)].DerefText := True;
+            end;
+          end;
+        tokStringConst:
+          begin
+            if (InRound = 0) and (InSquare = 0) then
+            begin
+              SetLength(Result, Length(Result) + 1);
+              Result[High(Result)].Text := 'String';
             end;
           end;
       end;
