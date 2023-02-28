@@ -10,9 +10,8 @@ unit simba.scripttab;
 interface
 
 uses
-  classes, sysutils, comctrls, controls, dialogs, lcltype, extctrls, graphics,
-  syneditmiscclasses, syneditkeycmds,
-  simba.mufasatypes, simba.editor, simba.scriptinstance, simba.codeinsight, simba.codeparser, simba.parameterhint,
+  Classes, SysUtils, ComCtrls, Controls, Dialogs,
+  simba.mufasatypes, simba.editor, simba.scriptinstance,
   simba.debuggerform, simba.functionlistform, simba.outputform;
 
 type
@@ -26,21 +25,18 @@ type
     FFunctionList: TSimbaFunctionList;
     FDebuggingForm: TSimbaDebuggerForm;
     FOutputBox: TSimbaOutputBox;
+    FLinkExpression: String;
 
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
     procedure DoHide; override;
     procedure DoShow; override;
+    procedure DoShowDeclaration(Data: PtrInt);
 
     procedure ScriptStateChanged(Sender: TObject);
 
     procedure HandleEditorChange(Sender: TObject);
     procedure HandleEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure HandleEditorUserCommand(Sender: TObject; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer);
-
-    procedure HandleAutoComplete;
-    procedure HandleParameterHints;
-    procedure HandleFindDeclaration(Data: PtrInt);
 
     procedure UpdateSavedText;
 
@@ -65,9 +61,6 @@ type
     function Load(FileName: String): Boolean; overload;
     function Load(FileName: String; AScriptFileName, AScriptTitle: String): Boolean; overload;
 
-    function GetParser: TCodeInsight;
-    function ParseScript: TCodeInsight;
-
     procedure Undo;
     procedure Redo;
 
@@ -91,143 +84,9 @@ type
 implementation
 
 uses
-  interfacebase, forms, lazfileutils, synedit, syneditmousecmds,
-  simba.scripttabsform, simba.autocomplete, simba.settings,
-  simba.main, simba.parser_misc, simba.files, simba.functionlist_updater;
-
-procedure TSimbaScriptTab.HandleAutoComplete;
-var
-  Expression, Filter: String;
-  IsStatic: Boolean;
-  Declaration: TDeclaration;
-  P: TPoint;
-begin
-  Filter := '';
-  Expression := '';
-
-  if FEditor.CaretX <= Length(FEditor.LineText) + 1 then
-    Expression := GetExpression(FEditor.Text, FEditor.SelStart - 1);
-
-  FEditor.AutoComplete.Parser := Self.ParseScript();
-
-  if Expression.Contains('.') then
-  begin
-    if not Expression.EndsWith('.') then
-    begin
-      Filter := Copy(Expression, LastDelimiter('.', Expression) + 1, $FFFFFF);
-      Expression := Copy(Expression, 1, LastDelimiter('.', Expression) - 1);
-    end;
-
-    Declaration := FEditor.AutoComplete.Parser.ParseExpression(Expression);
-    if (Declaration <> nil) then
-    begin
-      IsStatic := (Expression.Count('.') = 1) and
-                  (not FEditor.IsHighlighterAttributeEx(['String', 'Number'], TPoint.Create(-2, 0))) and
-                  (FEditor.AutoComplete.Parser.GlobalByName[Expression.Before('.')] is TciTypeDeclaration);
-
-      FEditor.AutoComplete.FillMembers(
-        Declaration, IsStatic
-      );
-    end;
-  end else
-  begin
-    Filter := Expression;
-
-    FEditor.AutoComplete.FillGlobals();
-  end;
-
-  if (Filter = '') then
-    P := FEditor.CaretXY
-  else
-    P := FEditor.CharIndexToRowCol(FEditor.SelStart - Length(Filter) - 1);
-
-  P := FEditor.RowColumnToPixels(P);
-  P := FEditor.ClientToScreen(P);
-
-  FEditor.AutoComplete.Execute(Filter, P.X, P.Y + FEditor.LineHeight);
-end;
-
-procedure TSimbaScriptTab.HandleParameterHints;
-var
-  BracketPos, InParameters: Int32;
-  Expression, ScriptText: String;
-  Methods: TDeclarationArray;
-begin
-  ScriptText := Script;
-
-  if (FEditor.SelStart <= Length(ScriptText)) then
-  begin
-    InParameters := 0;
-
-    for BracketPos := FEditor.SelStart - 1 downto 1 do
-    begin
-      if (ScriptText[BracketPos] = ')') then
-        Inc(InParameters);
-
-      if (ScriptText[BracketPos] = '(') then
-      begin
-        if (InParameters = 0) then
-          Break;
-
-        Dec(InParameters);
-      end;
-    end;
-
-    Expression := GetExpression(ScriptText, BracketPos - 1);
-  end else
-    Exit;
-
-  FEditor.ParameterHint.Parser := Self.ParseScript();
-  with FEditor.ParameterHint.Parser do
-    Methods := FindMethods(Expression);
-
-  FEditor.ParameterHint.Execute(FEditor.CharIndexToRowCol(BracketPos - 1), Methods);
-end;
-
-procedure TSimbaScriptTab.HandleFindDeclaration(Data: PtrInt);
-var
-  Expression: String;
-  Parser: TCodeInsight;
-  Declarations: TDeclarationArray;
-  Buttons: TDialogButtons;
-  i: Int32;
-begin
-  try
-    Expression := FEditor.GetExpression(PPoint(Data)^.X, PPoint(Data)^.Y);
-    if (Expression = '') then
-      Exit;
-
-    Parser := Self.ParseScript();
-    Declarations := Parser.FindDeclarations(Expression);
-
-    if Length(Declarations) = 1 then
-      SimbaScriptTabsForm.OpenDeclaration(Declarations[0])
-    else
-    if Length(Declarations) > 1 then
-    begin
-      Buttons := TDialogButtons.Create(TDialogButton);
-
-      for i := 0 to High(Declarations) do
-      begin
-        with Buttons.Add() do
-        begin
-          Caption := ExtractFileName(Declarations[i].Lexer.FileName) + ' (Line ' + IntToStr(Declarations[i].Line + 1) + ')';
-          ModalResult := 1000 + i;
-        end;
-      end;
-
-      i := DefaultQuestionDialog('Multiple declarations found', 'Choose the declaration to show', Ord(mtInformation), Buttons , 0);
-      if (i >= 1000) then
-        SimbaScriptTabsForm.OpenDeclaration(Declarations[i - 1000]);
-
-      Buttons.Free();
-    end;
-
-    Parser.Free();
-  finally
-    FreeMem(Pointer(Data));
-  end;
-end;
+  Forms, SynEdit, LazFileUtils,
+  simba.settings, simba.ide_codetools_parser, simba.ide_codetools_insight,
+  simba.main, simba.files, simba.functionlist_updater, simba.ide_showdeclaration;
 
 function TSimbaScriptTab.GetScript: String;
 begin
@@ -277,8 +136,45 @@ begin
     FOutputBox.Show();
   if (FFunctionList <> nil) then
     FFunctionList.Show();
-  if (FEditor <> nil) and FEditor.CanSetFocus then
+  if (FEditor <> nil) and FEditor.CanSetFocus() then
     FEditor.SetFocus();
+end;
+
+procedure TSimbaScriptTab.DoShowDeclaration(Data: PtrInt);
+var
+  Decl: TDeclaration;
+  Decls: TDeclarationArray;
+  Codeinsight: TCodeinsight;
+begin
+  try
+    Codeinsight := TCodeinsight.Create();
+
+    try
+      Codeinsight.SetScript(Script, ScriptFileName, Editor.GetCaretPos(True));
+      Codeinsight.Run();
+
+      Decl := Codeinsight.ParseExpression(FLinkExpression, []);
+      if (Decl <> nil) then
+      begin
+        if (Decl.ClassType = TDeclaration_Method) then
+        begin
+          Decls := Codeinsight.GetOverloads(Decl);
+          if (Length(Decls) > 1) then
+          begin
+            ShowDeclarationDialog(Decls);
+            Exit;
+          end;
+        end;
+
+        ShowDeclaration(Decl);
+      end;
+    finally
+      Codeinsight.Free();
+    end;
+  except
+    on E: Exception do
+      DebugLn('TSimbaScriptTab.DoShowDeclaration: ' + E.ToString());
+  end;
 end;
 
 procedure TSimbaScriptTab.ScriptStateChanged(Sender: TObject);
@@ -309,29 +205,16 @@ begin
 end;
 
 procedure TSimbaScriptTab.HandleEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-var
-  CaretPos: PPoint;
 begin
-  CaretPos := GetMem(SizeOf(TPoint));
-  if (Sender = FEditor) then
-    CaretPos^ := FEditor.PixelsToRowColumn(ScreenToControl(Mouse.CursorPos), [])
-  else
+  if (Sender is TSynEdit) then
   begin
-    CaretPos^.X := X;
-    CaretPos^.Y := Y;
+    X := TSynEdit(Sender).PixelsToRowColumn(ScreenToControl(Mouse.CursorPos), []).X;
+    Y := TSynEdit(Sender).PixelsToRowColumn(ScreenToControl(Mouse.CursorPos), []).Y;
   end;
 
-  Application.QueueASyncCall(@HandleFindDeclaration, PtrInt(CaretPos)); // SynEdit is paint locked!
-end;
+  FLinkExpression := Editor.GetExpressionEx(X, Y);
 
-procedure TSimbaScriptTab.HandleEditorUserCommand(Sender: TObject; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer);
-begin
-  case Command of
-    ecParameterHint, ecParameterHintChar:
-      HandleParameterHints();
-    ecAutoComplete, ecAutoCompleteChar:
-      HandleAutoComplete();
-  end;
+  Application.QueueAsyncCall(@DoShowDeclaration, 0);
 end;
 
 function TSimbaScriptTab.SaveAsDialog: String;
@@ -410,34 +293,6 @@ begin
   FScriptFileName := FileName;
 
   UpdateSavedText();
-end;
-
-function TSimbaScriptTab.GetParser: TCodeInsight;
-begin
-  Result := TCodeInsight.Create();
-  if (Result.Lexer.FileName = '') then
-    Result.Lexer.FileName := FScriptFileName;
-
-  Result.OnFindInclude := @SimbaForm.CodeTools_OnFindInclude;
-  Result.OnFindLibrary := @SimbaForm.CodeTools_OnFindLibrary;
-  Result.OnLoadLibrary := @SimbaForm.CodeTools_OnLoadLibrary;
-  Result.Lexer.CaretPos := FEditor.SelStart - 1;
- // Result.Lexer.MaxPos := FEditor.SelStart - 1;
-  Result.Lexer.Script := FEditor.Text;
-end;
-
-function TSimbaScriptTab.ParseScript: TCodeInsight;
-begin
-  Result := TCodeInsight.Create();
-  if (Result.Lexer.FileName = '') then
-    Result.Lexer.FileName := FScriptFileName;
-
-  Result.OnFindInclude := @SimbaForm.CodeTools_OnFindInclude;
-  Result.OnFindLibrary := @SimbaForm.CodeTools_OnFindLibrary;
-  Result.OnLoadLibrary := @SimbaForm.CodeTools_OnLoadLibrary;
-  Result.Lexer.CaretPos := FEditor.SelStart - 1;
-  Result.Lexer.MaxPos := FEditor.SelStart - 1;
-  Result.Run(Script, Result.Lexer.FileName);
 end;
 
 function TSimbaScriptTab.Load(FileName: String; AScriptFileName, AScriptTitle: String): Boolean;
@@ -633,7 +488,6 @@ begin
 
   FEditor.OnChange := @HandleEditorChange;
   FEditor.OnClickLink := @HandleEditorLinkClick;
-  FEditor.OnProcessUserCommand := @HandleEditorUserCommand;
 
   FFunctionList := TSimbaFunctionList.Create();
   FFunctionList.Parent := SimbaFunctionListForm;

@@ -5,8 +5,8 @@ unit simba.functionlist_simbasection;
 interface
 
 uses
-  classes, sysutils, comctrls,
-  simba.mufasatypes, simba.codeparser, simba.ci_includecache, simba.functionlistform;
+  Classes, SysUtils, ComCtrls,
+  simba.mufasatypes, simba.ide_codetools_parser, simba.functionlistform;
 
 const
   SimbaSectionDocLinks: TStringArray = (
@@ -35,7 +35,7 @@ type
     function Sort(A, B: TTreeNode): Integer;
   public
     function Added(FunctionList: TSimbaFunctionList): Boolean; override;
-    procedure Load(Includes: TCodeInsight_IncludeArray);
+    procedure Load(Includes: TCodeParserList);
     procedure Add(FunctionList: TSimbaFunctionList); override;
   end;
 
@@ -88,16 +88,16 @@ begin
   Result := FunctionList.TreeView.Items.FindTopLvlNode('Simba') <> nil;
 end;
 
-procedure TSimbaFunctionList_SimbaSection.Load(Includes: TCodeInsight_IncludeArray);
+procedure TSimbaFunctionList_SimbaSection.Load(Includes: TCodeParserList);
 var
-  Include: TCodeInsight_Include;
+  Parser: TCodeParser;
 begin
-  for Include in Includes do
+  for Parser in Includes.ToArray() do
   begin
-    if (Include.Lexer = nil) or (Include.Lexer.FileName.StartsWith('!')) then
+    if (Parser.Lexer = nil) or (Parser.Lexer.FileName.StartsWith('!')) then
       Continue;
 
-    FSections := FSections + [Include];
+    FSections := FSections + [Parser];
   end;
 
   Loaded := True;

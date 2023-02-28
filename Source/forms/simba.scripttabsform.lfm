@@ -5,8 +5,8 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
   Width = 1079
   AllowDropFiles = True
   Caption = 'Editor'
-  ClientHeight = 0
-  ClientWidth = 0
+  ClientHeight = 262
+  ClientWidth = 1079
   DesignTimePPI = 120
   OnDestroy = FormDestroy
   OnDropFiles = DoOnDropFiles

@@ -17,7 +17,7 @@ uses
   simba.notesform, simba.settingsform, simba.associate, simba.openexampleform,
   simba.scriptthread, simba.package_form, simba.mufasatypes, simba.shapeboxform,
   simba.windowsdarktheme, simba.compiler_dump, simba.plugin_dump,
-  simba.ide_analytics, simba.ide_codetools_setup;
+  simba.ide_analytics, simba.ide_codetools_setup, simba.ide_codetools_insight;
 
 type
   TApplicationHelper = class helper for TApplication
@@ -113,7 +113,6 @@ begin
     SimbaProcessType := ESimbaProcessType.IDE;
 
     Application.ShowMainForm := False;
-
     Application.CreateForm(TSimbaForm, SimbaForm);
     Application.CreateForm(TSimbaFunctionListForm, SimbaFunctionListForm);
     Application.CreateForm(TSimbaDebugImageForm, SimbaDebugImageForm);
@@ -131,6 +130,5 @@ begin
 
     Application.QueueAsyncCall(@SimbaForm.Setup, 0);
   end;
-
   Application.Run();
 end.

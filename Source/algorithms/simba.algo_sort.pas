@@ -17,6 +17,11 @@ uses
   Classes, SysUtils,
   simba.mufasatypes;
 
+type
+  generic TCompareFunc<_T> = function(A, B: _T): Integer;
+
+generic procedure QuickSortFunc<_T>(var AValues: array of _T; ALeft, ARight: SizeInt; CompareFunc: specialize TCompareFunc<_T>);
+
 generic procedure QuickSort<_T>(var AValues: array of _T; ALeft, ARight: SizeInt);
 generic procedure QuickSortWeighted<_T, _W>(var Arr: array of _T; var Weights: array of _W; iLo, iHi: SizeInt; SortUp: Boolean);
 
@@ -29,6 +34,53 @@ generic function Sorted<_T>(const Arr: specialize TArray<_T>; Weights: TIntegerA
 generic function Sorted<_T>(const Arr: specialize TArray<_T>; Weights: TDoubleArray; SortUp: Boolean): specialize TArray<_T>; overload;
 
 implementation
+
+generic procedure QuickSortFunc<_T>(var AValues: array of _T; ALeft, ARight: SizeInt; CompareFunc: specialize TCompareFunc<_T>);
+var
+  I, J: SizeInt;
+  Q, P: _T;
+begin
+  if (Length(AValues) <= 1) or (ARight-ALeft < 1) then
+    Exit;
+
+  repeat
+    I := ALeft;
+    J := ARight;
+    P := AValues[ALeft + (ARight - ALeft) shr 1];
+    repeat
+      while CompareFunc(AValues[I], P) < 0 do Inc(I);
+      while CompareFunc(AValues[J], P) > 0 do Dec(J);
+
+      if I <= J then
+      begin
+        if I <> J then
+        begin
+          Q := AValues[I];
+          AValues[I] := AValues[J];
+          AValues[J] := Q;
+        end;
+        Inc(I);
+        Dec(J);
+      end;
+    until I > J;
+
+    // sort the smaller range recursively
+    // sort the bigger range via the loop
+    // Reasons: memory usage is O(log(n)) instead of O(n) and loop is faster than recursion
+    if J - ALeft < ARight - I then
+    begin
+      if ALeft < J then
+        specialize QuickSortFunc<_T>(AValues, ALeft, J, CompareFunc);
+      ALeft := I;
+    end
+    else
+    begin
+      if I < ARight then
+        specialize QuickSortFunc<_T>(AValues, I, ARight, CompareFunc);
+      ARight := J;
+    end;
+  until ALeft >= ARight;
+end;
 
 generic procedure QuickSort<_T>(var AValues: array of _T; ALeft, ARight: SizeInt);
 var

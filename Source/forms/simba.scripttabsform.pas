@@ -12,7 +12,7 @@ interface
 uses
   classes, sysutils, forms, controls, graphics, dialogs,
   extctrls, comctrls, extendednotebook, menus, StdCtrls, Buttons, synedit, synedittypes,
-  simba.scripttab, simba.editor, simba.codeparser, simba.editor_findreplace;
+  simba.scripttab, simba.editor, simba.editor_findreplace;
 
 type
   TEditorSearchEvent = procedure(MatchCount: Integer) of object;
@@ -125,10 +125,6 @@ type
 
     function Open(FileName: String; CheckOtherTabs: Boolean = True): Boolean; overload;
     procedure Open; overload;
-
-    procedure OpenDeclaration(StartPos, EndPos, Line: Integer; FileName: String); overload;
-    procedure OpenInternalDeclaration(Header: String; FileName: String);
-    procedure OpenDeclaration(Declaration: TDeclaration); overload;
   end;
 
 var
@@ -139,7 +135,7 @@ implementation
 {$R *.lfm}
 
 uses
-  lcltype,
+  LCLType,
   simba.mufasatypes, simba.files, simba.editor_docgenerator,
   simba.dockinghelpers, simba.nativeinterface, simba.outputform;
 
@@ -538,59 +534,6 @@ begin
   except
     on E: Exception do
       ShowMessage('Exception while opening file: ' + E.Message);
-  end;
-end;
-
-procedure TSimbaScriptTabsForm.OpenDeclaration(StartPos, EndPos, Line: Integer; FileName: String);
-begin
-  if FileExists(FileName) then
-    Open(FileName);
-
-  with CurrentEditor do
-  begin
-    SelStart := StartPos + 1;
-    SelEnd := EndPos + 1;
-    TopLine := (Line + 1) - (LinesInWindow div 2);
-    if CanSetFocus() then
-      SetFocus();
-  end;
-end;
-
-procedure TSimbaScriptTabsForm.OpenInternalDeclaration(Header: String; FileName: String);
-begin
-  if (Header = '') then
-    Exit;
-
-  SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in Simba: ' + FileName, 'Declaration:', Header]);
-end;
-
-procedure TSimbaScriptTabsForm.OpenDeclaration(Declaration: TDeclaration);
-begin
-  if Declaration.Lexer.IsLibrary then
-  begin
-    if (Declaration is TciProcedureDeclaration) then
-      SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in plugin: ' + Declaration.Lexer.FileName, TciProcedureDeclaration(Declaration).Header])
-    else
-      SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in plugin: ' + Declaration.Lexer.FileName, Declaration.RawText])
-  end
-  else
-  if (Declaration.Lexer.FileName = '') or FileExists(Declaration.Lexer.FileName) then
-  begin
-    if FileExists(Declaration.Lexer.FileName) then
-      Open(Declaration.Lexer.FileName);
-
-    CurrentEditor.SelStart := Declaration.StartPos + 1;
-    CurrentEditor.SelEnd := Declaration.EndPos + 1;
-    CurrentEditor.TopLine := (Declaration.Line + 1) - (CurrentEditor.LinesInWindow div 2);
-    if CurrentEditor.CanSetFocus() then
-      CurrentEditor.SetFocus();
-  end
-  else
-  begin
-    if (Declaration is TciProcedureDeclaration) then
-      SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in Simba: ' + Declaration.Lexer.FileName, TciProcedureDeclaration(Declaration).Header])
-    else
-      SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in Simba: ' + Declaration.Lexer.FileName, Declaration.RawText])
   end;
 end;
 

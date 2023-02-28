@@ -10,8 +10,8 @@ unit simba.functionlistform;
 interface
 
 uses
-  classes, sysutils, forms, controls, comctrls, extctrls, treefilteredit,
-  simba.codeparser, simba.codeinsight, simba.hintwindow, simba.simplelock;
+  Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, TreeFilterEdit,
+  simba.ide_codetools_parser, simba.ide_codetools_insight, simba.hintwindow, simba.simplelock;
 
 type
   TSimbaFunctionList = class;
@@ -212,6 +212,7 @@ begin
   FTreeView.OnMouseMove := @DoTreeViewMouseMove;
   FTreeView.Options := FTreeView.Options + [tvoRightClickSelect, tvoReadOnly, tvoAutoItemHeight] - [tvoToolTips, tvoThemedDraw];
   FTreeView.TabStop := False;
+  FTreeView.DragMode := dmAutomatic;
 
   ExpandedState := TTreeNodeExpandedState.Create(FTreeView);
 

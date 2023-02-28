@@ -1,66 +1,73 @@
-{
-  The contents of this file are subject to the Mozilla Public License Version
-  1.1 (the "License"); you may not use this file except in compliance with the
-  License. You may obtain a copy of the License at
-  http://www.mozilla.org/NPL/NPL-1_1Final.html
+{ + --------------------------------------------------------------------------+
+  | Class:       TmwPasLex
+  | Created:     07.98 - 10.98
+  | Author:      Martin Waldenburg
+  | Description: A very fast Pascal tokenizer.
+  | Version:     1.32
+  | Copyright (c) 1998, 1999 Martin Waldenburg
+  | All rights reserved.
+  |
+  | DISCLAIMER:
+  |
+  | THIS SOFTWARE IS PROVIDED BY THE AUTHOR 'AS IS'.
+  |
+  | ALL EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+  | THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+  | PARTICULAR PURPOSE ARE DISCLAIMED.
+  |
+  | IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+  | INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  | (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+  | OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  | INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+  | WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+  | NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  | THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  |
+  |  Martin.Waldenburg@T-Online.de
+  +--------------------------------------------------------------------------+ }
 
-  Software distributed under the License is distributed on an "AS IS" basis,
-  WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
-  the specific language governing rights and limitations under the License.
-}
-unit castaliasimplepaspar;
+// Heavily modified over the years for Simba
 
-{$MODE DELPHI}
+unit mSimplePasPar;
+
+{$i simba.inc}
 
 interface
 
 uses
-  sysutils,
-  classes,
-  castaliapaslextypes,
-  castaliapaslex,
-  castaliasimplepaspartypes;
-
-resourcestring
-  rsExpected = '''%s'' expected found ''%s''';
-  rsEndOfFile = 'end of file';
+  SysUtils, Classes,
+  mPasLexTypes, mPasLex;
 
 const
- ClassMethodDirectiveEnum = [
+  ClassMethodDirectiveEnum = [
     tokAbstract, tokCdecl, tokMessage, tokOverride,  tokOverload, tokRegister,
     tokReintroduce, tokSafeCall, tokStdCall, tokVirtual, tokDeprecated,
     tokLibrary, tokPlatform, tokStatic, tokInline
- ];
-
-type
-  ESyntaxError = class(Exception)
-  private
-    FPosXY: TTokenPoint;
-  public
-    constructor Create(const Msg: string);
-    constructor CreateFmt(const Msg: string; const Args: array of const);
-    constructor CreatePos(const Msg: string; aPosXY: TTokenPoint);
-    property PosXY: TTokenPoint read FPosXY write FPosXY;
-  end;
+  ];
 
 type
   TmwSimplePasPar = class(TObject)
   protected
     fLexer: TmwPasLex;
+    fLexers: TLexerList;
+    fLexerStack: TLexerStack;
 
     fInterfaceOnly: Boolean;
+    fLastNoJunkTok: TptTokenKind;
     fLastNoJunkPos: Integer;
-    fLastNoJunkLen: Integer;
-
-    AheadParse: TmwSimplePasPar;
 
     fInRound: Boolean;
 
-    procedure InitAhead;
+    procedure PushLexer(ALexer: TmwPasLex); virtual;
+    procedure PopLexer; virtual;
+
+    procedure OnErrorMessage(Sender: TmwBasePasLex; Message: String); virtual;
+    procedure OnLibraryDirect(Sender: TmwBasePasLex); virtual;
+    procedure OnIncludeDirect(Sender: TmwBasePasLex); virtual;
 
     procedure Expected(Sym: TptTokenKind); virtual;
     procedure ExpectedEx(Sym: TptTokenKind); virtual;
-    procedure ExpectedFatal(Sym: TptTokenKind); virtual;
     procedure HandlePtCompDirect(Sender: TmwBasePasLex); virtual;
     procedure HandlePtDefineDirect(Sender: TmwBasePasLex); virtual;
     procedure HandlePtElseDirect(Sender: TmwBasePasLex); virtual;
@@ -76,18 +83,13 @@ type
     procedure HandlePtElseIfDirect(Sender: TmwBasePasLex); virtual;
     procedure NextToken; virtual;
     procedure SkipJunk; virtual;
-    procedure TerminateStream(Stream: TCustomMemoryStream); virtual;
     procedure SemiColon; virtual;
-    function GetExID: TptTokenKind; virtual;
-    function GetTokenID: TptTokenKind; virtual;
-    function GetGenID: TptTokenKind; virtual;
     procedure AccessSpecifier; virtual;
     procedure AdditiveOperator; virtual;
-    procedure AncestorIdList; virtual; // !! Added ancestorIdList back in...
-    procedure AncestorId; virtual; // !! Added ancestorId back in...
+    procedure AncestorIdList; virtual;
+    procedure AncestorId; virtual;
     procedure ArrayConstant; virtual;
     procedure ArrayType; virtual;
-    procedure AsmStatement; virtual;
     procedure Block; virtual;
     procedure CaseLabel; virtual;
     procedure CaseSelector; virtual;
@@ -107,7 +109,7 @@ type
     procedure ClassProperty; virtual;
     procedure ClassReferenceType; virtual;
     procedure ClassType; virtual;
-    procedure ClassTypeEnd; virtual; // DR 2001-07-31
+    procedure ClassTypeEnd; virtual;
     procedure ClassVisibility; virtual;
     procedure CompoundStatement; virtual;
     procedure ConstantColon; virtual;
@@ -132,13 +134,13 @@ type
     procedure Directive16Bit; virtual;
     procedure DirectiveBinding; virtual;
     procedure DirectiveCalling; virtual;
-    procedure DirectiveDeprecated; virtual; // DR 2001-10-20
-    procedure DirectiveLibrary; virtual; // DR 2001-10-20
-    procedure DirectivePlatform; virtual; // DR 2001-10-20
+    procedure DirectiveDeprecated; virtual;
+    procedure DirectiveLibrary; virtual;
+    procedure DirectivePlatform; virtual;
     procedure EmptyStatement; virtual;
     procedure EnumeratedType; virtual;
     procedure EnumeratedScopedType; virtual;
-    procedure EnumeratedTypeItem; virtual; // DR 2001-10-29
+    procedure EnumeratedTypeItem; virtual;
     procedure ExceptBlock; virtual;
     procedure ExceptionBlockElseBranch; virtual;
     procedure ExceptionClassTypeIdentifier; virtual;
@@ -146,7 +148,7 @@ type
     procedure ExceptionHandlerList; virtual;
     procedure ExceptionIdentifier; virtual;
     procedure ExceptionVariable; virtual;
-    procedure ExplicitType; virtual; // !! changed spelling to "Explicit"
+    procedure ExplicitType; virtual;
     procedure ExportedHeading; virtual;
     procedure ExportsClause; virtual;
     procedure ExportsElement; virtual;
@@ -163,7 +165,8 @@ type
     procedure FormalParameterList; virtual;
     procedure FormalParameterSection; virtual;
     procedure ForStatement; virtual;
-    procedure ForwardDeclaration; virtual; {GLC: corrected spelling}
+    procedure ForInStatement; virtual;
+    procedure ForwardDeclaration; virtual;
     procedure FunctionHeading; virtual;
     procedure FunctionMethodDeclaration; virtual;
     procedure FunctionMethodName; virtual;
@@ -174,10 +177,9 @@ type
     procedure IfStatement; virtual;
     procedure ImplementationSection; virtual;
     procedure IncludeFile; virtual;
-    procedure IndexSpecifier; virtual; // DR 2001-07-26
+    procedure IndexSpecifier; virtual;
     procedure InitializationSection; virtual;
     procedure InlineStatement; virtual;
-    procedure InParameter; virtual;
     procedure InterfaceDeclaration; virtual;
     procedure InterfaceForward; virtual;
     procedure InterfaceGUID; virtual;
@@ -210,13 +212,13 @@ type
     procedure ObjectPropertySpecifiers; virtual;
     procedure ObjectProcedureHeading; virtual;
     procedure ObjectType; virtual;
-    procedure ObjectTypeEnd; virtual; // DR 2001-08-07
+    procedure ObjectTypeEnd; virtual;
     procedure ObjectVisibility; virtual;
-    procedure OldFormalParameterType; virtual;
+    procedure ParameterVarType; virtual;
     procedure OrdinalType; virtual;
     procedure OutParameter; virtual;
     procedure PackageFile; virtual;
-    procedure ParameterFormal; virtual;
+    procedure NormalParameter; virtual;
     procedure ParameterName; virtual;
     procedure ParameterNameList; virtual;
     procedure ParseFile; virtual;
@@ -261,9 +263,9 @@ type
     procedure SkipAnsiComment; virtual;
     procedure SkipBorComment; virtual;
     procedure SkipSlashesComment; virtual;
-    procedure SkipSpace; virtual; //XM Jul-2000
-    procedure SkipCRLFco; virtual; //XM Jul-2000
-    procedure SkipCRLF; virtual; //XM Jul-2000
+    procedure SkipSpace; virtual;
+    procedure SkipCRLFco; virtual;
+    procedure SkipCRLF; virtual;
     procedure Statement; virtual;
     procedure StatementList; virtual;
     procedure StorageExpression; virtual;
@@ -287,7 +289,6 @@ type
     procedure TypeAlias; virtual;
     procedure TypeKind; virtual;
     procedure TypeName; virtual;
-    //generics
     procedure TypeArgs; virtual;
     procedure TypeParams; virtual;
     procedure TypeParamDecl; virtual;
@@ -295,7 +296,6 @@ type
     procedure TypeParamList; virtual;
     procedure ConstraintList; virtual;
     procedure Constraint; virtual;
-    //end generics
     procedure TypeSection; virtual;
     procedure UnitFile; virtual;
     procedure UnitId; virtual;
@@ -313,7 +313,7 @@ type
     procedure VariableTwo; virtual;
     procedure VariantSection; virtual;
     procedure VarParameter; virtual;
-    procedure VarName; virtual; //!! Added VarName and VarNameList back in...
+    procedure VarName; virtual;
     procedure VarNameList; virtual;
     procedure VarSection; virtual;
     procedure VisibilityPrivate; virtual;
@@ -343,171 +343,113 @@ type
     procedure NamedArgumentList;
     procedure NamedArgument;
     procedure AttributeArgumentExpression;
-
-    property ExID: TptTokenKind read GetExID;
-    property GenID: TptTokenKind read GetGenID;
-    property TokenID: TptTokenKind read GetTokenID;
   public
     NoErrorMessages: Boolean;
 
-    constructor Create;
+    constructor Create; virtual;
     destructor Destroy; override;
 
     procedure Assign(From: TObject); virtual;
-    procedure SynError(Error: TmwParseError); virtual;
-    procedure ErrorMessage(const Message: String); virtual;
 
-    procedure Run; virtual; overload;
-    procedure Run(Script: String; FileName: String); virtual; overload;
-    procedure Run(FileName: String); virtual; overload;
+    procedure SetScript(Script: String; FileName: String = ''; Defines: TStringArray = nil); virtual;
+    procedure SetFile(FileName: String; Defines: TStringArray = nil); virtual;
+
+    function HasFile(FileName: String): Boolean;
+
+    procedure Reset; virtual;
+    procedure Run; virtual;
 
     property InterfaceOnly: Boolean read fInterfaceOnly write fInterfaceOnly;
     property Lexer: TmwPasLex read fLexer;
     property LastNoJunkPos: Integer read fLastNoJunkPos;
-    property LastNoJunkLen: Integer read fLastNoJunkLen;
   end;
 
 implementation
 
 uses
-  LazLoggerBase;
-
-constructor ESyntaxError.Create(const Msg: string);
-begin
-  // !! changed initialization for TTokenPoint
-  FPosXY.X:= -1;
-  FPosXY.Y:= -1;
-  inherited Create(Msg);
-end;
-
-constructor ESyntaxError.CreateFmt(const Msg: string; const Args: array of const);
-begin
-  // !! changed initialization for TTokenPoint
-  FPosXY.X:= -1;
-  FPosXY.Y:= -1;
-  inherited CreateFmt(Msg, Args);
-end;
-
-constructor ESyntaxError.CreatePos(const Msg: string; aPosXY: TTokenPoint);
-begin
-  Message := Msg;
-  FPosXY := aPosXY;
-end;
-
-{ TmwSimplePasPar }
-(* DR 2002-01-16
-const
-  cnExpected = 'Expected ''%s'' found ''%s''';
-//  cnOrExpected = 'Expected ''%s'' or ''%s'' found ''%s''';
-  cnEndOfFile = 'end of file'; {jdj 7/22/1999}
-//  cnIntegerOverflow = 'Integer constant too large'; {jdj 7/22/1999}
-*)
-
- {range checks a tokIntegerConst-slightly faster than StrToInt}
-{function IsValidInteger(const S: string): Boolean; jdj 7/22/1999
-var jdj removed 02/07/2001
-  C: Integer;
-  N: Integer;
-begin
-  Val(S, N, C);
-  Result := (C = 0);
-end;}
+  LazLoggerBase
+  {$IFDEF PARSER_BENCHMARK},
+  simba.datetime
+  {$ENDIF};
 
 procedure TmwSimplePasPar.ForwardDeclaration;
-begin {jdj added method 02/07/2001}
+begin
   NextToken;
-  SEMICOLON;
+  SemiColon;
 end;
 
 procedure TmwSimplePasPar.ObjectProperty;
-begin {jdj added method 02/07/2001}
- // DR 2001-08-07 -> changed. for array-property override failure
+begin
   Expected(tokProperty);
   PropertyName;
-  case TokenID of
+  case Lexer.TokenID of
     tokColon, tokSquareOpen:
       begin
         PropertyInterface;
       end;
   end;
   ObjectPropertySpecifiers;
-  case ExID of
+  case Lexer.ExID of
     tokDefault:
       begin
-        PropertyDefault; //DR 2001-07-16
-        SEMICOLON;
+        PropertyDefault;
+        SemiColon;
       end;
   end;
 end;
 
 procedure TmwSimplePasPar.ObjectPropertySpecifiers;
-begin {jdj added method 02/07/2001}
-  if ExID = tokIndex then
+begin
+  if Lexer.ExID = tokIndex then
   begin
-    IndexSpecifier; // DR 2001-08-07
+    IndexSpecifier;
   end;
-  while ExID in [tokRead, tokWrite] do
+  while Lexer.ExID in [tokRead, tokWrite] do
   begin
     AccessSpecifier;
   end;
-  while ExID in [tokDefault, tokNoDefault, tokStored] do
+  while Lexer.ExID in [tokDefault, tokNoDefault, tokStored] do
   begin
     StorageSpecifier;
   end;
-  SEMICOLON;
+  SemiColon;
 end;
 
 procedure TmwSimplePasPar.Run;
+{$IFDEF PARSER_BENCHMARK}
+var T: Double;
+{$ENDIF}
 begin
   try
+    {$IFDEF PARSER_BENCHMARK}
+    T := HighResolutionTime();
+    {$ENDIF}
+
     ParseFile();
+
+    {$IFDEF PARSER_BENCHMARK}
+    Writeln('Parsing took: ', FormatFloat('0.00', HighResolutionTime() - T));
+    {$ENDIF}
   except
     on E: Exception do
-      ErrorMessage(E.Message);
+      OnErrorMessage(fLexer, E.Message);
   end;
-end;
-
-procedure TmwSimplePasPar.Run(Script: String; FileName: String);
-begin
-  fLexer.FileName := FileName;
-  fLexer.Script := Script;
-
-  Run();
-end;
-
-procedure TmwSimplePasPar.Run(FileName: String);
-var
-  Script: String;
-begin
-  Script := '';
-
-  try
-    with TStringList.Create() do
-    try
-      LoadFromFile(FileName);
-
-      Script := Text;
-    finally
-      Free();
-    end;
-  except
-  end;
-
-  Run(Script, FileName);
 end;
 
 constructor TmwSimplePasPar.Create;
 begin
-  inherited Create;
-  fLexer := TmwPasLex.Create;
+  inherited Create();
+
+  fLexers := TLexerList.Create(True);
+  fLexerStack := TLexerStack.Create();
 end;
 
 destructor TmwSimplePasPar.Destroy;
 begin
-  FreeAndNil(AheadParse);
-  FreeAndNil(fLexer);
+  FreeAndNil(fLexerStack);
+  FreeAndNil(fLexers);
 
-  inherited;
+  inherited Destroy();
 end;
 
 procedure TmwSimplePasPar.Assign(From: TObject);
@@ -519,59 +461,36 @@ end;
 
 procedure TmwSimplePasPar.Expected(Sym: TptTokenKind);
 begin
-  if Sym <> Lexer.TokenID then
+  if (Sym <> Lexer.TokenID) then
   begin
-    if TokenID = tokNull then
-      ExpectedFatal(Sym)
+    if (Lexer.TokenID = tokNull) then
+      OnErrorMessage(fLexer, Format('"%s" expected but end of file reached', [TokenName(Sym)]))
     else
-      ErrorMessage(Format('"%s" expected but found "%s"', [TokenName(Sym), FLexer.Token]));
-  end
-  else
+      OnErrorMessage(fLexer, Format('"%s" expected but found "%s"', [TokenName(Sym), FLexer.Token]))
+  end else
     NextToken;
 end;
 
 procedure TmwSimplePasPar.ExpectedEx(Sym: TptTokenKind);
 begin
-  if Sym <> Lexer.ExID then
+  if (Sym <> Lexer.ExID) then
   begin
-    if Lexer.TokenID = tokNull then
-      ExpectedFatal(Sym)
+    if (Lexer.TokenID = tokNull) then
+      OnErrorMessage(fLexer, Format('"%s" expected but end of file reached', [TokenName(Sym)]))
     else
-      ErrorMessage(Format('"%s" expected but found "%s"', [TokenName(Sym), FLexer.Token]))
-  end
-  else
-    NextToken;
-end;
-
-{Replace Token with cnEndOfFile if TokenId = toknull}
-
-procedure TmwSimplePasPar.ExpectedFatal(Sym: TptTokenKind);
-var
-  tS: string;
-begin
-  if Sym <> Lexer.TokenID then
-  begin
-    {--jdj 7/22/1999--}
-    if Lexer.TokenId = tokNull then
-      tS := rsEndOfFile
-    else
-      tS := fLexer.Token;
-    {--jdj 7/22/1999--}
-    raise ESyntaxError.CreatePos(Format(rsExpected, [TokenName(Sym), tS]), fLexer.PosXY);
-  end
-  else
+      OnErrorMessage(fLexer, Format('"%s" expected but found "%s"', [TokenName(Sym), FLexer.Token]));
+  end else
     NextToken;
 end;
 
 procedure TmwSimplePasPar.HandlePtCompDirect(Sender: TmwBasePasLex);
 begin
-  Sender.Next; //XM Jul-2000
-  { ToDo }
+  Sender.Next;
 end;
 
 procedure TmwSimplePasPar.HandlePtDefineDirect(Sender: TmwBasePasLex);
 begin
-  Sender.Next; //XM Jul-2000
+  Sender.Next;
 end;
 
 procedure TmwSimplePasPar.HandlePtElseDirect(Sender: TmwBasePasLex);
@@ -579,8 +498,7 @@ begin
   if Sender = Lexer then
     NextToken
   else
-    Sender.Next; //XM Jul-2000
-  { ToDo }
+    Sender.Next;
 end;
 
 procedure TmwSimplePasPar.HandlePtElseIfDirect(Sender: TmwBasePasLex);
@@ -596,9 +514,7 @@ begin
   if Sender = Lexer then
     NextToken
   else
-    Sender.Next; //XM Jul-2000
-
-  { ToDo }
+    Sender.Next;
 end;
 
 procedure TmwSimplePasPar.HandlePtIfDefDirect(Sender: TmwBasePasLex);
@@ -606,9 +522,7 @@ begin
   if Sender = Lexer then
     NextToken
   else
-    Sender.Next; //XM Jul-2000
-
-  { ToDo }
+    Sender.Next;
 end;
 
 procedure TmwSimplePasPar.HandlePtIfDirect(Sender: TmwBasePasLex);
@@ -632,49 +546,54 @@ begin
   if Sender = Lexer then
     NextToken
   else
-    Sender.Next; //XM Jul-2000
-
-  { ToDo }
+    Sender.Next;
 end;
 
 procedure TmwSimplePasPar.HandlePtIfOptDirect(Sender: TmwBasePasLex);
 begin
-  Sender.Next; //XM Jul-2000
-
-  { ToDo }
+  Sender.Next;
 end;
 
 procedure TmwSimplePasPar.HandlePtIncludeDirect(Sender: TmwBasePasLex);
 begin
-  Sender.Next; //XM Jul-2000
-
-  { ToDo }
+  Sender.Next;
 end;
 
 procedure TmwSimplePasPar.HandlePtResourceDirect(Sender: TmwBasePasLex);
 begin
-  Sender.Next; //XM Jul-2000
-
-  { ToDo }
+  Sender.Next;
 end;
 
 procedure TmwSimplePasPar.HandlePtUndefDirect(Sender: TmwBasePasLex);
 begin
-  Sender.Next; //XM Jul-2000
-
-  { ToDo }
+  Sender.Next;
 end;
 
 procedure TmwSimplePasPar.NextToken;
 begin
-  FLexer.NextNoJunk;
+  fLastNoJunkPos := -1;
+  fLastNoJunkTok := Lexer.TokenID;
+
+  repeat
+    Lexer.Next();
+
+    if (fLastNoJunkPos = -1) then
+      fLastNoJunkPos := Lexer.TokenPos;
+
+    if (Lexer.TokenID = tokNull) and (fLexerStack.Count > 1) then
+    begin
+      PopLexer();
+
+      Continue;
+    end;
+  until (not Lexer.IsJunk);
 end;
 
 procedure TmwSimplePasPar.SkipJunk;
 begin
   if Lexer.IsJunk then
   begin
-    case TokenID of
+    case Lexer.TokenID of
       tokAnsiComment:
         begin
           SkipAnsiComment;
@@ -689,7 +608,7 @@ begin
         end;
       tokSpace:
         begin
-          SkipSpace; //XM Jul-2000
+          SkipSpace;
         end;
       tokCRLFCo:
         begin
@@ -710,20 +629,19 @@ begin
     end;
   end;
   fLastNoJunkPos := Lexer.TokenPos;
-  fLastNoJunkLen := Lexer.TokenLen;
 end;
 
 procedure TmwSimplePasPar.SkipAnsiComment;
 begin
   Expected(tokAnsiComment);
-  while TokenID in [tokAnsiComment] do
+  while Lexer.TokenID in [tokAnsiComment] do
     Lexer.Next;
 end;
 
 procedure TmwSimplePasPar.SkipBorComment;
 begin
   Expected(tokBorComment);
-  while TokenID in [tokBorComment] do
+  while Lexer.TokenID in [tokBorComment] do
     Lexer.Next;
 end;
 
@@ -732,77 +650,66 @@ begin
   Expected(tokSlashesComment);
 end;
 
-procedure TmwSimplePasPar.TerminateStream(Stream: TCustomMemoryStream);
-var
-  aChar: Char;
-begin
-  Stream.Position := Stream.Size;
-  aChar := #0;
-  Stream.Write(aChar, SizeOf(char));
-end;
-
 procedure TmwSimplePasPar.SemiColon;
 begin
-  case Lexer.TokenID of
-    tokElse, tokEnd, tokExcept, tokfinally, tokFinalization, tokRoundClose, tokUntil: // jdj 2.23.20001 added tokFinalization
-      ;
-  else
+  if (not (Lexer.TokenID in [tokElse, tokEnd, tokExcept, tokFinally, tokFinalization, tokRoundClose, tokUntil])) then
     Expected(tokSemiColon);
-    //Check for semicolon before else - common syntax error - JT 11.10.2007
-    //Doesn't work here - it fails a CASE statement
-//    if Lexer.TokenID = tokElse then
-//    begin
-//      if Assigned(FOnMessage) then
-//      begin
-//        FOnMessage(Self, meError, ''';'' not allowed before ''ELSE''',
-//          FLexer.PosXY.X, FLexer.PosXY.Y);
-//      end;
-//    end;
-  end;
 end;
 
-function TmwSimplePasPar.GetExID: TptTokenKind;
-begin
-  Result := fLexer.ExID;
-end;
-
-function TmwSimplePasPar.GetTokenID: TptTokenKind;
-begin
-  Result := fLexer.TokenID;
-end;
-
-function TmwSimplePasPar.GetGenID: TptTokenKind;
-begin
-  Result := fLexer.GenID;
-end;
-
-procedure TmwSimplePasPar.SynError(Error: TmwParseError);
-begin
-  ErrorMessage(ParserErrorName(Error) + ' found ' + fLexer.Token);
-end;
-
-procedure TmwSimplePasPar.ErrorMessage(const Message: String);
+procedure TmwSimplePasPar.OnErrorMessage(Sender: TmwBasePasLex; Message: String);
 begin
   if NoErrorMessages then
     Exit;
 
-  if (FLexer <> nil) then
+  if (Sender <> nil) then
   begin
-    if (fLexer.MaxPos = -1) or (fLexer.TokenPos < fLexer.MaxPos) then
+    if (Sender.CaretPos = -1) or (Sender.TokenPos < Sender.CaretPos) then
     begin
-      if (fLexer.FileName <> '') then
-        DebugLn('[Codetools]: "%s" at line %d, column %d in file "%s"', [Message, FLexer.PosXY.Y + 1, FLexer.PosXY.X, FLexer.FileName])
+      if (Sender.FileName <> '') then
+        DebugLn('[Codetools]: "%s" at line %d, column %d in file "%s"', [Message, Sender.PosXY.Y + 1, Sender.PosXY.X, Sender.FileName])
       else
-        DebugLn('[Codetools]: "%s" at line %d, column %d', [Message, FLexer.PosXY.Y + 1, FLexer.PosXY.X]);
+        DebugLn('[Codetools]: "%s" at line %d, column %d', [Message, Sender.PosXY.Y + 1, Sender.PosXY.X]);
     end;
   end else
     DebugLn('[Codetools]: ' + Message);
 end;
 
+procedure TmwSimplePasPar.Reset;
+begin
+  fLexer := nil;
+  fLexers.Clear();
+  fLexerStack.Clear();
+end;
+
+procedure TmwSimplePasPar.SetScript(Script: String; FileName: String; Defines: TStringArray);
+begin
+  Reset();
+  PushLexer(TmwPasLex.Create(Script, FileName));
+  fLexer.Defines.AddStrings(Defines);
+end;
+
+procedure TmwSimplePasPar.SetFile(FileName: String; Defines: TStringArray);
+begin
+  Reset();
+  PushLexer(TmwPasLex.CreateFromFile(FileName));
+  fLexer.Defines.AddStrings(Defines);
+end;
+
+function TmwSimplePasPar.HasFile(FileName: String): Boolean;
+var
+  I: Integer;
+begin
+  for I := 0 to fLexers.Count - 1 do
+    if (fLexers[I].FileName = FileName) then
+      Exit(True);
+
+  Result := False;
+end;
+
 procedure TmwSimplePasPar.ParseFile;
 begin
   SkipJunk;
-  case GenID of
+  case Lexer.ExID of
     tokLibrary:
       begin
         LibraryFile;
@@ -830,7 +737,7 @@ procedure TmwSimplePasPar.LibraryFile;
 begin
   Expected(tokLibrary);
   Expected(tokIdentifier);
-  SEMICOLON;
+  SemiColon;
   ProgramBlock;
   Expected(tokPoint);
 end;
@@ -846,8 +753,8 @@ begin
     Expected(tokIdentifier);
   end;
 
-  SEMICOLON;
-  case ExID of
+  SemiColon;
+  case Lexer.ExID of
     tokRequires:
       begin
         RequiresClause;
@@ -867,7 +774,7 @@ procedure TmwSimplePasPar.ProgramFile;
 begin
   Expected(tokProgram);
   QualifiedIdentifier;
-  if TokenID = tokRoundOpen then
+  if Lexer.TokenID = tokRoundOpen then
   begin
     NextToken;
     IdentifierList;
@@ -875,7 +782,7 @@ begin
   end;
   if not InterfaceOnly then
   begin
-    SEMICOLON;
+    SemiColon;
     ProgramBlock;
     Expected(tokPoint);
   end;
@@ -886,14 +793,14 @@ begin
   Expected(tokUnit);
   UnitName;
 
-  while ExID in [tokDeprecated, tokLibrary, tokPlatform] do
-    case ExID of
+  while Lexer.ExID in [tokDeprecated, tokLibrary, tokPlatform] do
+    case Lexer.ExID of
       tokDeprecated: DirectiveDeprecated;
       tokLibrary: DirectiveLibrary;
       tokPlatform: DirectivePlatform;
     end;
 
-  SEMICOLON;
+  SemiColon;
   InterfaceSection;
   if not InterfaceOnly then
   begin
@@ -905,7 +812,7 @@ end;
 
 procedure TmwSimplePasPar.ProgramBlock;
 begin
-  if TokenID = tokUses then
+  if Lexer.TokenID = tokUses then
   begin
     MainUsesClause;
   end;
@@ -916,12 +823,12 @@ procedure TmwSimplePasPar.MainUsesClause;
 begin
   Expected(tokUses);
   MainUsedUnitStatement;
-  while TokenID = tokComma do
+  while Lexer.TokenID = tokComma do
   begin
     NextToken;
     MainUsedUnitStatement;
   end;
-  SEMICOLON;
+  SemiColon;
 end;
 
 procedure TmwSimplePasPar.MainUsedUnitStatement;
@@ -948,13 +855,13 @@ procedure TmwSimplePasPar.UsesClause;
 begin
   Expected(tokUses);
   UsedUnitsList;
-  SEMICOLON;
+  SemiColon;
 end;
 
 procedure TmwSimplePasPar.UsedUnitsList;
 begin
   UsedUnitName;
-  while TokenID = tokComma do
+  while Lexer.TokenID = tokComma do
   begin
     NextToken;
     UsedUnitName;
@@ -964,7 +871,7 @@ end;
 procedure TmwSimplePasPar.UsedUnitName;
 begin
   Expected(tokIdentifier);
-  while TokenID = tokPoint do
+  while Lexer.TokenID = tokPoint do
   begin
     NextToken;
     Expected(tokIdentifier);
@@ -973,27 +880,18 @@ end;
 
 procedure TmwSimplePasPar.Block;
 begin
-  while (TokenID in [tokClass, tokConst, tokConstructor, tokDestructor, tokExports,
+  while (Lexer.TokenID in [tokClass, tokConst, tokConstructor, tokDestructor, tokExports,
     tokFunction, tokLabel, tokProcedure, tokResourceString, tokThreadVar, tokType,
     tokVar, tokSquareOpen]) do
   begin
     DeclarationSection;
   end;
-  case TokenID of
-    tokAsm:
-      begin
-        AsmStatement;
-      end;
-  else
-    begin
-      CompoundStatement;
-    end;
-  end;
+  CompoundStatement;
 end;
 
 procedure TmwSimplePasPar.DeclarationSection;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokClass:
       begin
         ProcedureDeclarationSection;
@@ -1042,10 +940,6 @@ begin
       begin
         CustomAttribute;
       end;
-  else
-    begin
-      SynError(InvalidDeclarationSection);
-    end;
   end;
 end;
 
@@ -1067,7 +961,7 @@ end;
 procedure TmwSimplePasPar.InterfaceHeritage;
 begin
   Expected(tokRoundOpen);
-  AncestorIdList; // JR moved qualified check into ancestorIdList // DR 2001-11-01 can also be qualified!
+  AncestorIdList;
   Expected(tokRoundClose);
 end;
 
@@ -1080,7 +974,7 @@ end;
 
 procedure TmwSimplePasPar.AccessSpecifier;
 begin
-  case ExID of
+  case Lexer.ExID of
     tokRead:
       begin
         NextToken;
@@ -1094,42 +988,24 @@ begin
     tokAdd:
       begin
         NextToken;
-        QualifiedIdentifier; //TODO: AddAccessIdentifier
+        QualifiedIdentifier;
       end;
-  else
-    begin
-      SynError(InvalidAccessSpecifier);
-    end;
   end;
 end;
 
 procedure TmwSimplePasPar.ReadAccessIdentifier;
 begin
   QualifiedIdentifier;
-  (* XM removed at Martin suggestion. Martin send a more general fix in QualifiedIdentifier
-    //jdj 12/05/2000
-    if (TokenID =  tokSquareOpen) then
-      begin
-        ConstantExpression;
-      end;
-    //jdj 12/05/2000*)
 end;
 
 procedure TmwSimplePasPar.WriteAccessIdentifier;
 begin
   QualifiedIdentifier;
-  (* XM removed at Martin suggestion. Martin send a more general fix in QualifiedIdentifier
-   //jdj 12/05/2000
-    if (TokenID =  tokSquareOpen) then
-      begin
-        ConstantExpression;
-      end;
-    //jdj 12/05/2000*)
 end;
 
 procedure TmwSimplePasPar.StorageSpecifier;
 begin
-  case ExID of
+  case Lexer.ExID of
     tokStored:
       begin
         StorageStored;
@@ -1142,10 +1018,6 @@ begin
       begin
         StorageNoDefault;
       end
-  else
-    begin
-      SynError(InvalidStorageSpecifier);
-    end;
   end;
 end;
 
@@ -1163,13 +1035,13 @@ end;
 procedure TmwSimplePasPar.StorageStored;
 begin
   ExpectedEx(tokStored);
-  case TokenID of
+  case Lexer.TokenID of
     tokIdentifier:
       begin
         StorageIdentifier;
       end;
   else
-    if TokenID <> tokSemiColon then
+    if Lexer.TokenID <> tokSemiColon then
     begin
       StorageExpression;
     end;
@@ -1187,21 +1059,20 @@ begin
 end;
 
 procedure TmwSimplePasPar.PropertyParameterList;
-//changed James Jacobson on 20001221
 begin
   Expected(tokSquareOpen);
-  if TokenID = tokConst then
+  if Lexer.TokenID = tokConst then
   begin
     PropertyParameterConst;
   end;
   IdentifierList;
   Expected(tokColon);
   TypeIdentifer;
-  while TokenID = tokSemiColon do
+  while Lexer.TokenID = tokSemiColon do
   begin
-    SEMICOLON;
-    if TokenID = tokConst then
-    begin //jdj 12-21-2000
+    SemiColon;
+    if Lexer.TokenID = tokConst then
+    begin
       PropertyParameterConst;
     end;
     IdentifierList;
@@ -1211,25 +1082,6 @@ begin
   Expected(tokSquareClose);
 end;
 
-(*begin
-  Expected(tokSquareOpen);
-  if TokenID = tokConst then
-  begin
-    PropertyParameterConst;
-  end;
-  IdentifierList;
-  Expected(tokColon);
-  TypeIdentifer;
-  while TokenID = tokSemiColon do
-  begin
-    SEMICOLON;
-    IdentifierList;
-    Expected(tokColon);
-    TypeIdentifer;
-  end;
-  Expected(tokSquareClose);
-end;*)
-
 procedure TmwSimplePasPar.PropertyParameterConst;
 begin
   Expected(tokConst);
@@ -1237,29 +1089,29 @@ end;
 
 procedure TmwSimplePasPar.PropertySpecifiers;
 begin
-  if ExID = tokIndex then
+  if Lexer.ExID = tokIndex then
   begin
-    IndexSpecifier; // DR 2001-07-26
+    IndexSpecifier;
   end;
-  while ExID in [tokRead, tokWrite, tokAdd] do
+  while Lexer.ExID in [tokRead, tokWrite, tokAdd] do
   begin
     AccessSpecifier;
   end;
-  while ExID in [tokDefault, tokNoDefault, tokStored] do
+  while Lexer.ExID in [tokDefault, tokNoDefault, tokStored] do
   begin
     StorageSpecifier;
   end;
-  if ExID = tokImplements then
+  if Lexer.ExID = tokImplements then
   begin
     NextToken;
     QualifiedIdentifierList;
   end;
-  SEMICOLON;
+  SemiColon;
 end;
 
 procedure TmwSimplePasPar.PropertyInterface;
 begin
-  if TokenID = tokSquareOpen then
+  if Lexer.TokenID = tokSquareOpen then
   begin
     PropertyParameterList;
   end;
@@ -1269,7 +1121,7 @@ end;
 
 procedure TmwSimplePasPar.ClassMethodHeading;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokConstructor:
       begin
         ConstructorHeading;
@@ -1308,8 +1160,6 @@ begin
           end;
         end;
       end;
-  else
-    SynError(InvalidClassMethodHeading);
   end;
 end;
 
@@ -1317,16 +1167,16 @@ procedure TmwSimplePasPar.ClassFunctionHeading;
 begin
   Expected(tokFunction);
   FunctionMethodName;
-  if TokenID = tokRoundOpen then
+  if Lexer.TokenID = tokRoundOpen then
   begin
     FormalParameterList;
   end;
   Expected(tokColon);
   ReturnType;
-  if TokenId = tokSemicolon then // DR 2002-01-14
-    SEMICOLON;
-  if ExID in ClassMethodDirectiveEnum then
-    ClassMethodDirective; //XM 2002-01-26
+  if Lexer.TokenID = tokSemicolon then
+    SemiColon;
+  if Lexer.ExID in ClassMethodDirectiveEnum then
+    ClassMethodDirective;
 end;
 
 procedure TmwSimplePasPar.FunctionMethodName;
@@ -1338,15 +1188,15 @@ procedure TmwSimplePasPar.ClassProcedureHeading;
 begin
   Expected(tokProcedure);
   ProcedureMethodName;
-  if TokenID = tokRoundOpen then
+  if Lexer.TokenID = tokRoundOpen then
   begin
     FormalParameterList;
   end;
 
-  if TokenId = tokSemicolon then // DR 2002-01-14
-    SEMICOLON;
+  if Lexer.TokenID = tokSemicolon then
+    SemiColon;
 
-  if exID in ClassMethodDirectiveEnum then // XM 2002-01-29
+  if Lexer.ExID in ClassMethodDirectiveEnum then
   ClassMethodDirective;
 end;
 
@@ -1357,7 +1207,7 @@ end;
 
 procedure TmwSimplePasPar.ClassMethodResolution;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokFunction:
       begin
         NextToken;
@@ -1372,7 +1222,7 @@ begin
   Expected(tokIdentifier);
   Expected(tokEqual);
   Expected(tokIdentifier);
-  SEMICOLON;
+  SemiColon;
 end;
 
 procedure TmwSimplePasPar.ResolutionInterfaceName;
@@ -1382,13 +1232,13 @@ end;
 
 procedure TmwSimplePasPar.Constraint;
 begin
-  while TokenId in [tokConstructor, tokRecord, tokUnion, tokClass, tokIdentifier] do
+  while Lexer.TokenID in [tokConstructor, tokRecord, tokUnion, tokClass, tokIdentifier] do
   begin
-    case TokenId of
+    case Lexer.TokenID of
       tokConstructor, tokRecord, tokUnion, tokClass: NextToken;
       tokIdentifier: TypeIdentifer;
     end;
-    if TokenId = tokComma then
+    if Lexer.TokenID = tokComma then
       NextToken;
   end;
 end;
@@ -1396,7 +1246,7 @@ end;
 procedure TmwSimplePasPar.ConstraintList;
 begin
   Constraint;
-  while TokenId = tokComma do
+  while Lexer.TokenID = tokComma do
   begin
     Constraint;
   end;
@@ -1406,11 +1256,11 @@ procedure TmwSimplePasPar.ConstructorHeading;
 begin
   Expected(tokConstructor);
   ConstructorName;
-  if TokenID = tokRoundOpen then
+  if Lexer.TokenID = tokRoundOpen then
   begin
     FormalParameterList;
   end;
-  SEMICOLON;
+  SemiColon;
   ClassMethodDirective;
 end;
 
@@ -1423,11 +1273,11 @@ procedure TmwSimplePasPar.DestructorHeading;
 begin
   Expected(tokDestructor);
   DestructorName;
-  if TokenID = tokRoundOpen then
+  if Lexer.TokenID = tokRoundOpen then
   begin
     FormalParameterList;
   end;
-  SEMICOLON;
+  SemiColon;
   ClassMethodDirective;
 end;
 
@@ -1438,17 +1288,17 @@ end;
 
 procedure TmwSimplePasPar.ClassMethodDirective;
 begin
-  while ExId in ClassMethodDirectiveEnum do
+  while Lexer.ExID in ClassMethodDirectiveEnum do
   begin
     ProceduralDirective;
-    if TokenId = tokSemicolon then // DR 2002-01-14
-      SEMICOLON;
+    if Lexer.TokenID = tokSemicolon then
+      SemiColon;
   end;
 end;
 
 procedure TmwSimplePasPar.ObjectMethodHeading;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokConstructor:
       begin
         ObjectConstructorHeading;
@@ -1465,10 +1315,6 @@ begin
       begin
         ObjectProcedureHeading;
       end;
-  else
-    begin
-      SynError(InvalidMethodHeading);
-    end;
   end;
 end;
 
@@ -1476,13 +1322,13 @@ procedure TmwSimplePasPar.ObjectFunctionHeading;
 begin
   Expected(tokFunction);
   FunctionMethodName;
-  if TokenID = tokRoundOpen then
+  if Lexer.TokenID = tokRoundOpen then
   begin
     FormalParameterList;
   end;
   Expected(tokColon);
   ReturnType;
-  if TokenID = tokSemiColon then  SEMICOLON;
+  if Lexer.TokenID = tokSemiColon then  SemiColon;
   ObjectMethodDirective;
 end;
 
@@ -1490,11 +1336,11 @@ procedure TmwSimplePasPar.ObjectProcedureHeading;
 begin
   Expected(tokProcedure);
   ProcedureMethodName;
-  if TokenID = tokRoundOpen then
+  if Lexer.TokenID = tokRoundOpen then
   begin
     FormalParameterList;
   end;
-  if TokenID = tokSemiColon then SEMICOLON;
+  if Lexer.TokenID = tokSemiColon then SemiColon;
   ObjectMethodDirective;
 end;
 
@@ -1502,11 +1348,11 @@ procedure TmwSimplePasPar.ObjectConstructorHeading;
 begin
   Expected(tokConstructor);
   ConstructorName;
-  if TokenID = tokRoundOpen then
+  if Lexer.TokenID = tokRoundOpen then
   begin
     FormalParameterList;
   end;
-  if TokenID = tokSemiColon then SEMICOLON;
+  if Lexer.TokenID = tokSemiColon then SemiColon;
   ObjectMethodDirective;
 end;
 
@@ -1514,44 +1360,40 @@ procedure TmwSimplePasPar.ObjectDestructorHeading;
 begin
   Expected(tokDestructor);
   DestructorName;
-  if TokenID = tokRoundOpen then
+  if Lexer.TokenID = tokRoundOpen then
   begin
     FormalParameterList;
   end;
-  if TokenID = tokSemiColon then SEMICOLON;
+  if Lexer.TokenID = tokSemiColon then SemiColon;
   ObjectMethodDirective;
 end;
 
 procedure TmwSimplePasPar.ObjectMethodDirective;
 begin
-  while ExID in [tokAbstract, tokCdecl, tokExport, tokExternal,
+  while Lexer.ExID in [tokAbstract, tokCdecl, tokExport, tokExternal,
     tokMessage,
-    tokOverload, // DR 2001-08-07
+    tokOverload,
     tokRegister, tokSafeCall, tokStdCall, tokVirtual,
     tokDeprecated, tokLibrary, tokPlatform, tokStatic, tokInline] do
   begin
     ProceduralDirective;
-    if TokenID = tokSemiColon then SEMICOLON;
+    if Lexer.TokenID = tokSemiColon then SemiColon;
   end;
 end;
 
 procedure TmwSimplePasPar.Directive16Bit;
 begin
-  case ExID of
+  case Lexer.ExID of
     tokExport:
       begin
         NextToken;
       end;
-  else
-    begin
-      SynError(InvalidDirective16Bit);
-    end;
   end;
 end;
 
 procedure TmwSimplePasPar.DirectiveBinding;
 begin
-  case ExID of
+  case Lexer.ExID of
     tokVirtual:
       begin
         NextToken;
@@ -1573,10 +1415,6 @@ begin
       begin
         NextToken;
       end;
-  else
-    begin
-      SynError(InvalidDirectiveBinding);
-    end;
   end;
 end;
 
@@ -1589,9 +1427,9 @@ procedure TmwSimplePasPar.FormalParameterList;
 begin
   Expected(tokRoundOpen);
   FormalParameterSection;
-  while TokenID = tokSemiColon do
+  while Lexer.TokenID = tokSemiColon do
   begin
-    SEMICOLON;
+    SemiColon;
     FormalParameterSection;
   end;
   Expected(tokRoundClose);
@@ -1599,9 +1437,9 @@ end;
 
 procedure TmwSimplePasPar.FormalParameterSection;
 begin
-  while TokenID = tokSquareOpen do
+  while Lexer.TokenID = tokSquareOpen do
     CustomAttribute;
-  case TokenID of
+  case Lexer.TokenID of
     tokConstRef:
       begin
         ConstRefParameter;
@@ -1611,14 +1449,10 @@ begin
         ConstParameter;
       end;
     tokIdentifier:
-      case ExID of
+      case Lexer.ExID of
         tokOut: OutParameter;
       else
-        ParameterFormal;
-      end;
-    tokIn:
-      begin
-        InParameter;
+        NormalParameter;
       end;
     tokVar:
       begin
@@ -1631,12 +1465,12 @@ procedure TmwSimplePasPar.ConstRefParameter;
 begin
   Expected(tokConstRef);
   ParameterNameList;
-  case TokenID of
+  case Lexer.TokenID of
     tokColon:
       begin
         NextToken;
-        OldFormalParameterType;
-        if TokenID = tokEqual then
+        ParameterVarType;
+        if Lexer.TokenID = tokEqual then
         begin
           NextToken;
           TypedConstant;
@@ -1649,12 +1483,12 @@ procedure TmwSimplePasPar.ConstParameter;
 begin
   Expected(tokConst);
   ParameterNameList;
-  case TokenID of
+  case Lexer.TokenID of
     tokColon:
       begin
         NextToken;
-        OldFormalParameterType;
-        if TokenID = tokEqual then
+        ParameterVarType;
+        if Lexer.TokenID = tokEqual then
         begin
           NextToken;
           TypedConstant;
@@ -1667,11 +1501,11 @@ procedure TmwSimplePasPar.VarParameter;
 begin
   Expected(tokVar);
   ParameterNameList;
-  case TokenID of
+  case Lexer.TokenID of
     tokColon:
       begin
         NextToken;
-        OldFormalParameterType;
+        ParameterVarType;
       end
   end;
 end;
@@ -1680,28 +1514,28 @@ procedure TmwSimplePasPar.OutParameter;
 begin
   ExpectedEx(tokOut);
   ParameterNameList;
-  case TokenID of
+  case Lexer.TokenID of
     tokColon:
       begin
         NextToken;
-        OldFormalParameterType;
+        ParameterVarType;
       end
   end;
 end;
 
-procedure TmwSimplePasPar.ParameterFormal;
+procedure TmwSimplePasPar.NormalParameter;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokIdentifier:
       begin
         ParameterNameList;
 
-        case TokenID of
+        case Lexer.TokenID of
           tokColon:
             begin
               NextToken;
-              OldFormalParameterType;
-              if TokenID = tokEqual then
+              ParameterVarType;
+              if Lexer.TokenID = tokEqual then
               begin
                 NextToken;
                 TypedConstant;
@@ -1710,24 +1544,20 @@ begin
         end;
 
         {Expected(tokColon);
-        OldFormalParameterType;
-        if TokenID = tokEqual then
+        ParameterVarType;
+        if Lexer.TokenID = tokEqual then
         begin
           NextToken;
           TypedConstant;
         end;}
       end;
-  else
-    begin
-      SynError(InvalidParameter);
-    end;
   end;
 end;
 
 procedure TmwSimplePasPar.ParameterNameList;
 begin
   ParameterName;
-  while TokenID = tokComma do
+  while Lexer.TokenID = tokComma do
   begin
     NextToken;
     ParameterName;
@@ -1739,14 +1569,14 @@ begin
   Expected(tokIdentifier);
 end;
 
-procedure TmwSimplePasPar.OldFormalParameterType;
+procedure TmwSimplePasPar.ParameterVarType;
 begin
-  TypeIdentifer;
+  TypeKind();
 end;
 
 procedure TmwSimplePasPar.FunctionMethodDeclaration;
 begin
-  if (TokenID = tokOperator) then
+  if (Lexer.TokenID = tokOperator) then
     NextToken()
   else
     Expected(tokFunction);
@@ -1758,7 +1588,7 @@ begin
     Expected(tokPoint);
   end;
   FunctionProcedureName;
-  if TokenID = tokRoundOpen then
+  if Lexer.TokenID = tokRoundOpen then
   begin
     FormalParameterList;
   end;
@@ -1771,7 +1601,7 @@ end;
 
 procedure TmwSimplePasPar.ProcedureMethodDeclaration;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokConstructor:
       begin
         NextToken;
@@ -1784,10 +1614,6 @@ begin
       begin
         NextToken;
       end;
-  else
-    begin
-      SynError(InvalidProcedureMethodDeclaration);
-    end;
   end;
   Lexer.InitAhead;
   if Lexer.AheadTokenID in [tokPoint, tokLower] then
@@ -1796,7 +1622,7 @@ begin
     Expected(tokPoint);
   end;
   FunctionProcedureName;
-  if TokenID = tokRoundOpen then
+  if Lexer.TokenID = tokRoundOpen then
   begin
     FormalParameterList;
   end;
@@ -1807,8 +1633,6 @@ end;
 procedure TmwSimplePasPar.FunctionProcedureName;
 begin
   if not (Lexer.TokenID in [tokIdentifier,
-
-    //Operators =)
     tokMinus, tokOr, tokPlus, tokXor,
     tokAnd, tokAs, tokDiv, tokMod, tokShl, tokShr, tokSlash, tokStar, tokStarStar,
     tokEqual, tokGreater, tokGreaterEqual, tokLower, tokLowerEqual,
@@ -1819,14 +1643,7 @@ begin
     tokPlusAsgn,
     tokMinusAsgn,
     tokPowAsgn]) then
-  begin
-    if TokenID = tokNull then
-      ExpectedFatal(tokIdentifier) {jdj 7/22/1999}
-    else
-    begin
-      ErrorMessage(Format('"%s" expected but found "%s"', [TokenName(tokIdentifier), FLexer.Token]));
-    end;
-  end
+    OnErrorMessage(fLexer, Format('"%s" expected but found "%s"', [TokenName(tokIdentifier), FLexer.Token]))
   else
     NextToken;
 end;
@@ -1841,61 +1658,47 @@ var
   NoExternal: Boolean;
 begin
   NoExternal := True;
-  if TokenID = tokSemiColon then SEMICOLON;
-  case ExID of
+  if Lexer.TokenID = tokSemiColon then SemiColon;
+  case Lexer.ExID of
     tokForward:
       ForwardDeclaration;
   else
-    while (ExID in [tokAbstract, tokCdecl, tokExport, tokExternal,
+    while (Lexer.ExID in [tokAbstract, tokCdecl, tokExport, tokExternal,
       tokMessage, tokOverload, tokOverride, tokRegister,
       tokReintroduce, tokSafeCall, tokStdCall, tokVirtual,
       tokDeprecated, tokLibrary, tokPlatform,
-      tokAssembler, tokNative, tokStatic, tokInline, tokConst
-       ]) or (TokenID = tokConstRef)
+      tokNative, tokStatic, tokInline, tokConst
+       ]) or (Lexer.TokenID = tokConstRef)
     do
       begin
-        case TokenID of
+        case Lexer.TokenID of
           tokConstRef:
             begin
               NextToken;
-              if (TokenID = tokSemiColon) then SEMICOLON;
+              if (Lexer.TokenID = tokSemiColon) then SemiColon;
             end
         else
-          case ExId of
+          case Lexer.ExID of
             tokExternal:
               begin
                 ProceduralDirective;
-                if TokenID = tokSemiColon then SEMICOLON;
+                if Lexer.TokenID = tokSemiColon then SemiColon;
                 NoExternal := False;
               end;
           else
             begin
               ProceduralDirective;
-              if TokenID = tokSemiColon then SEMICOLON;
+              if Lexer.TokenID = tokSemiColon then SemiColon;
             end;
           end;
         end;
       end;
-    if ExID = tokForward then
-      ForwardDeclaration // DR 2001-07-23
+    if Lexer.ExID = tokForward then
+      ForwardDeclaration
     else if NoExternal then
     begin
-      if ExId = tokAssembler then
-      begin
-        NextToken;
-        SEMICOLON;
-      end;
-      case TokenID of
-        tokAsm:
-          begin
-            AsmStatement;
-          end;
-      else
-        begin
-          Block;
-        end;
-      end;
-      SEMICOLON;
+      Block;
+      SemiColon;
     end;
   end;
 end;
@@ -1903,10 +1706,10 @@ end;
 procedure TmwSimplePasPar.ExternalDirective;
 begin
   ExpectedEx(tokExternal);
-  case TokenID of
+  case Lexer.TokenID of
     tokSemiColon:
       begin
-        SEMICOLON;
+        SemiColon;
       end;
   else
     begin
@@ -1930,7 +1733,7 @@ begin
       end;
     tokSemiColon:
       begin
-        SEMICOLON;
+        SemiColon;
         ExternalDirectiveThree;
       end;
   end
@@ -1938,13 +1741,13 @@ end;
 
 procedure TmwSimplePasPar.ExternalDirectiveThree;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokMinus:
       begin
         NextToken;
       end;
   end;
-  case TokenID of
+  case Lexer.TokenID of
     tokIdentifier, tokIntegerConst:
       begin
         NextToken;
@@ -1961,7 +1764,8 @@ begin
   if (Lexer.TokenID = tokIdentifier) then
   begin
     QualifiedIdentifier;
-    typ := Lexer.TokenID;  //Should be tokIn or tokAssign =)
+    typ := Lexer.TokenID;
+    //writeln(typ);
     Expected(typ);
   end;
 
@@ -1969,14 +1773,12 @@ begin
 
   if (typ <> tokIn) then
   begin
-    case TokenID of
+    case Lexer.TokenID of
       tokTo, tokDownTo: NextToken;
-      else
-        SynError(InvalidForStatement);
     end;
     Expression;
 
-    if (TokenID = tokWith) then
+    if (Lexer.TokenID = tokWith) then
     begin
       NextToken;
       Expression;
@@ -1985,6 +1787,11 @@ begin
 
   Expected(tokDo);
   Statement;
+end;
+
+procedure TmwSimplePasPar.ForInStatement;
+begin
+
 end;
 
 procedure TmwSimplePasPar.WhileStatement;
@@ -2009,20 +1816,20 @@ begin
   Expression;
   Expected(tokOf);
   CaseSelector;
-  while TokenID = tokSemiColon do
+  while Lexer.TokenID = tokSemiColon do
   begin
-    SEMICOLON;
-    case TokenID of
+    SemiColon;
+    case Lexer.TokenID of
       tokElse, tokEnd: ;
     else
       CaseSelector;
     end;
   end;
-  if TokenID = tokElse then
+  if Lexer.TokenID = tokElse then
   begin
     NextToken;
     StatementList;
-    SEMICOLON;
+    SemiColon;
   end;
   Expected(tokEnd);
 end;
@@ -2030,13 +1837,13 @@ end;
 procedure TmwSimplePasPar.CaseSelector;
 begin
   CaseLabel;
-  while TokenID = tokComma do
+  while Lexer.TokenID = tokComma do
   begin
     NextToken;
     CaseLabel;
   end;
   Expected(tokColon);
-  case TokenID of
+  case Lexer.TokenID of
     tokSemiColon: ;
   else
     Statement;
@@ -2046,7 +1853,7 @@ end;
 procedure TmwSimplePasPar.CaseLabel;
 begin
   ConstantExpression;
-  if TokenID = tokDotDot then
+  if Lexer.TokenID = tokDotDot then
   begin
     NextToken;
     ConstantExpression;
@@ -2057,14 +1864,14 @@ procedure TmwSimplePasPar.IfStatement;
 begin
   Expected(tokIf);
   Expression();
-  while (TokenID = tokAssign) do
+  while (Lexer.TokenID = tokAssign) do
   begin
     NextToken();
     Expression();
   end;
   Expected(tokThen);
   Statement();
-  if (TokenID = tokElse) then
+  if (Lexer.TokenID = tokElse) then
   begin
     NextToken();
     Statement();
@@ -2073,7 +1880,7 @@ end;
 
 procedure TmwSimplePasPar.ExceptBlock;
 begin
-  case ExID of
+  case Lexer.ExID of
     tokOn:
       begin
         ExceptionHandlerList;
@@ -2091,7 +1898,7 @@ begin
   while fLexer.ExID = tokOn do
   begin
     ExceptionHandler;
-    SEMICOLON;
+    SemiColon;
   end;
 end;
 
@@ -2105,7 +1912,7 @@ end;
 
 procedure TmwSimplePasPar.ExceptionBlockElseBranch;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokElse:
       begin
         NextToken;
@@ -2151,7 +1958,7 @@ begin
   Expected(tokInline);
   Expected(tokRoundOpen);
   Expected(tokIntegerConst);
-  while (TokenID = tokSlash) do
+  while (Lexer.TokenID = tokSlash) do
   begin
     NextToken;
     Expected(tokIntegerConst);
@@ -2159,58 +1966,10 @@ begin
   Expected(tokRoundClose);
 end;
 
-procedure TmwSimplePasPar.InParameter;
-begin
-  Expected(tokIn);
-  ParameterNameList;
-  case TokenID of
-    tokColon:
-      begin
-        NextToken;
-        OldFormalParameterType;
-        if TokenID = tokEqual then
-        begin
-          NextToken;
-          TypedConstant;
-        end;
-      end
-  end;
-end;
-
-procedure TmwSimplePasPar.AsmStatement;
-begin
-  Lexer.AsmCode := True;
-  Expected(tokAsm);
-  { should be replaced with a Assembler lexer }
-  while (not (TokenID in [tokEnd, tok_Done])) do
-    case fLexer.TokenID of
-      tokBegin, tokCase, tokEnd, tokIf, tokFunction, tokProcedure, tokRepeat, tokwhile: break;
-      tokAddressOp:
-        begin
-          NextToken;
-          NextToken;
-        end;
-      tokDoubleAddressOp:
-        begin
-          NextToken;
-          NextToken;
-        end;
-      tokNull: //JThurman 10-26-2004.  Need another way out of this.
-        begin
-          Expected(tokEnd);
-          Exit;
-        end;
-    else
-      NextToken;
-    end;
-  Lexer.AsmCode := False;
-  Expected(tokEnd);
-end;
-
 procedure TmwSimplePasPar.RaiseStatement;
 begin
   Expected(tokRaise);
-  while (not (TokenID in [tokSemiColon, tokNull, tok_DONE])) do
+  while (not (Lexer.TokenID in [tokSemiColon, tokNull{, tok_DONE}])) do
     NextToken();
 end;
 
@@ -2218,13 +1977,13 @@ procedure TmwSimplePasPar.TryStatement;
 begin
   Expected(tokTry);
   StatementList;
-  case TokenID of
+  case Lexer.TokenID of
     tokExcept:
       begin
         NextToken;
         ExceptBlock;
 
-        if (TokenID = tokFinally) then
+        if (Lexer.TokenID = tokFinally) then
         begin
           NextToken;
           StateMentList;
@@ -2237,7 +1996,7 @@ begin
         NextToken;
         StatementList;
 
-        if (TokenID = tokExcept) then
+        if (Lexer.TokenID = tokExcept) then
         begin
           NextToken;
           StateMentList;
@@ -2245,10 +2004,6 @@ begin
 
         Expected(tokEnd);
       end;
-  else
-    begin
-      SynError(InvalidTryStatement);
-    end;
   end;
 end;
 
@@ -2272,14 +2027,14 @@ end;
 
 procedure TmwSimplePasPar.StatementList;
 begin
-  while TokenID in [tokAddressOp, tokAsm, tokBegin, tokCase, tokDoubleAddressOp,
+  while Lexer.TokenID in [tokAddressOp, tokBegin, tokCase, tokDoubleAddressOp,
     tokFor, tokGoTo, tokIdentifier, tokIf, tokInline, tokIntegerConst, tokStringConst,
     tokPointerSymbol, tokRaise, tokRoundOpen, tokRepeat, tokSemiColon,
     tokTry, tokWhile, tokWith, tokAssign] do
   begin
     Statement();
 
-    if (TokenID = tokAssign) then
+    if (Lexer.TokenID = tokAssign) then
     begin
       NextToken();
       Statement();
@@ -2290,11 +2045,11 @@ end;
 
 procedure TmwSimplePasPar.SimpleStatement;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokAddressOp, tokDoubleAddressOp, tokIdentifier, tokPointerSymbol, tokRoundOpen, tokStringConst:
       begin
         Designator;
-        if TokenID in [tokAssign, tokMulAsgn, tokDivAsgn, tokPlusAsgn, tokMinusAsgn, tokPowAsgn] then
+        if Lexer.TokenID in [tokAssign, tokMulAsgn, tokDivAsgn, tokPlusAsgn, tokMinusAsgn, tokPowAsgn] then
         begin
           NextToken;
           Expression;
@@ -2310,11 +2065,7 @@ end;
 
 procedure TmwSimplePasPar.Statement;
 begin
-  case TokenID of
-    tokAsm:
-      begin
-        AsmStatement;
-      end;
+  case Lexer.TokenID of
     tokBegin:
       begin
         CompoundStatement;
@@ -2402,7 +2153,7 @@ end;
 
 procedure TmwSimplePasPar.LabeledStatement;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokIdentifier:
       begin
         NextToken;
@@ -2415,10 +2166,6 @@ begin
         Expected(tokColon);
         Statement;
       end;
-  else
-    begin
-      SynError(InvalidLabeledStatement);
-    end;
   end;
 end;
 
@@ -2430,7 +2177,7 @@ end;
 procedure TmwSimplePasPar.SetElement;
 begin
   Expression;
-  if TokenID = tokDotDot then
+  if Lexer.TokenID = tokDotDot then
   begin
     NextToken;
     Expression;
@@ -2438,21 +2185,21 @@ begin
 end;
 
 procedure TmwSimplePasPar.QualifiedIdentifier;
-begin //mw 12/7/2000
-  if (TokenID = tokType) then
+begin
+  if (Lexer.TokenID = tokType) then
   begin
     TypeDeclaration;
     Exit;
   end;
 
   Expected(tokIdentifier);
-  case TokenID of
+  case Lexer.TokenID of
     tokPoint:
       begin
-        while TokenID = tokPoint do
+        while Lexer.TokenID = tokPoint do
         begin
           NextToken;
-          if TokenID in [tokAnd, tokArray, tokAs, tokASM, tokBegin, tokCase, tokClass,
+          if Lexer.TokenID in [tokAnd, tokArray, tokAs, tokBegin, tokCase, tokClass,
             tokConst, tokConstRef, tokConstructor, tokDestructor, tokDiv, tokDo,
             tokDOwnto, tokElse, tokEnd, tokExcept, tokExports, tokFinal,
             tokFinalization, tokFinally, tokFor, tokFunction, tokGoto, tokIf,
@@ -2466,7 +2213,7 @@ begin //mw 12/7/2000
               NextToken
           else
           Expected(tokIdentifier);
-          if (TokenID = tokSquareOpen) then
+          if (Lexer.TokenID = tokSquareOpen) then
           begin
             ConstantExpression;
           end;
@@ -2479,30 +2226,13 @@ begin //mw 12/7/2000
     tokStringConst, tokIntegerConst, tokFloat, tokIdentifier:
       ConstantExpression;
   end;
-(*  Expected(tokIdentifier); // old code for information removed in next versions
-  case TokenID of
-    tokPoint:
-      begin
-        NextToken;
-        Expected(tokIdentifier);
-        if (TokenID = tokSquareOpen) then
-        begin
-          ConstantExpression;
-        end;
-      end;
-    tokSquareOpen: {MW 20001207}
-      begin
-        ConstantExpression;
-      end;
-  end;*)
-
 end;
 
 procedure TmwSimplePasPar.SetConstructor;
 begin
   Expected(tokSquareOpen);
   SetElement;
-  while TokenID = tokComma do
+  while Lexer.TokenID = tokComma do
   begin
     NextToken;
     SetElement;
@@ -2512,7 +2242,7 @@ end;
 
 procedure TmwSimplePasPar.Number;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokFloat:
       begin
         NextToken;
@@ -2525,28 +2255,25 @@ begin
       begin
         NextToken;
       end;
-  else
-    begin
-      SynError(InvalidNumber);
-    end;
   end;
 end;
 
 procedure TmwSimplePasPar.NativeType;
 begin
   NextToken;
-
-  if TokenID = tokIdentifier then
-  begin
-    AncestorId;
-  end else
+  if (Lexer.TokenID = tokIdentifier) then
+    TypeIdentifer
+  else
   begin
     Expected(tokRoundOpen);
 
-    AncestorId;
-    while (not (TokenID in [tokRoundClose, tokNull, tok_DONE])) do
-      NextToken;
+    if (Lexer.TokenID = tokType) then
+      TypeDeclaration
+    else
+      TypeIdentifer;
 
+    while (not (Lexer.TokenID in [tokRoundClose, tokNull{, tok_DONE}])) do
+      NextToken;
     Expected(tokRoundClose);
   end;
 end;
@@ -2554,16 +2281,16 @@ end;
 procedure TmwSimplePasPar.ExpressionList;
 begin
   Expression;
-  if TokenID = tokAssign then //JT Nov 26, 2004 - supporting ole automation syntax
+  if Lexer.TokenID = tokAssign then
     begin
       Expected(tokAssign);
       Expression;
     end;
-  while TokenID = tokComma do
+  while Lexer.TokenID = tokComma do
   begin
     NextToken;
     Expression;
-    if TokenID = tokAssign then //JT Nov 26, 2004 - supporting ole automation syntax
+    if Lexer.TokenID = tokAssign then
     begin
       Expected(tokAssign);
       Expression;
@@ -2578,7 +2305,7 @@ end;
 
 procedure TmwSimplePasPar.MultiplicativeOperator;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokAnd: NextToken;
     tokDiv: NextToken;
     tokMod: NextToken;
@@ -2587,15 +2314,12 @@ begin
     tokSlash: NextToken;
     tokStar:  NextToken;
     tokStarStar: NextToken;
-  else
-    begin SynError(InvalidMultiplicativeOperator);
-    end;
   end;
 end;
 
 procedure TmwSimplePasPar.Factor;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokAsciiChar, tokStringConst:
       begin
         CharString;
@@ -2633,16 +2357,14 @@ end;
 
 procedure TmwSimplePasPar.AdditiveOperator;
 begin
-  if TokenID in [tokMinus, tokOr, tokPlus, tokXor] then
-    NextToken
-  else
-    SynError(InvalidAdditiveOperator);
+  if Lexer.TokenID in [tokMinus, tokOr, tokPlus, tokXor] then
+    NextToken;
 end;
 
 procedure TmwSimplePasPar.Term;
 begin
   Factor;
-  while TokenID in [tokAnd, tokDiv, tokMod, tokShl, tokShr, tokSlash, tokStar, tokStarStar] do
+  while Lexer.TokenID in [tokAnd, tokDiv, tokMod, tokShl, tokShr, tokSlash, tokStar, tokStarStar] do
   begin
     MultiplicativeOperator;
     Factor;
@@ -2651,7 +2373,7 @@ end;
 
 procedure TmwSimplePasPar.RelativeOperator;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokAs:
       begin
         NextToken;
@@ -2688,17 +2410,13 @@ begin
       begin
         NextToken;
       end;
-  else
-    begin
-      SynError(InvalidRelativeOperator);
-    end;
   end;
 end;
 
 procedure TmwSimplePasPar.SimpleExpression;
 begin
   Term;
-  while TokenID in [tokMinus, tokOr, tokPlus, tokXor] do
+  while Lexer.TokenID in [tokMinus, tokOr, tokPlus, tokXor] do
   begin
     AdditiveOperator;
     Term;
@@ -2707,7 +2425,7 @@ end;
 
 procedure TmwSimplePasPar.Expression;
 begin
-  if (TokenID = tokType) then
+  if (Lexer.TokenID = tokType) then
   begin
     TypeDeclaration;
     Exit;
@@ -2715,14 +2433,11 @@ begin
 
   SimpleExpression;
 
-  //JT 2006-07-17 The Delphi language guide has this as
-  //Expression -> SimpleExpression [RelOp SimpleExpression]...
-  //So this needs to be able to repeat itself.
-  case TokenID of
+  case Lexer.TokenID of
   tokEqual, tokGreater, tokGreaterEqual, tokLower, tokLowerEqual, tokIn, tokIs,
     tokNotEqual:
     begin
-      while TokenID in [tokEqual, tokGreater, tokGreaterEqual, tokLower, tokLowerEqual,
+      while Lexer.TokenID in [tokEqual, tokGreater, tokGreaterEqual, tokLower, tokLowerEqual,
         tokIn, tokIs, tokNotEqual{, tokColon}] do
       begin
         RelativeOperator;
@@ -2734,48 +2449,30 @@ begin
       case fInRound of
         False: ;
         True:
-          while TokenID = tokColon do
+          while Lexer.TokenID = tokColon do
           begin
             NextToken;
             SimpleExpression;
           end;
       end;
     end;
-  //tokAssign:
-  //  begin
-  //    StatementList;
-  //    Expression;
-  //  end;
   end;
 end;
 
 procedure TmwSimplePasPar.VarDeclaration;
 begin
-  // !! Changed back to var name list from IdentifierList
   VarNameList;
-  if (TokenID = tokColon) then
+  if (Lexer.TokenID = tokColon) then
   begin
     Expected(tokColon);
     TypeKind;
   end;
 
-  while ExID in [tokDeprecated, tokLibrary, tokPlatform] do // DR 2001-10-20
-    case ExID of
-      tokDeprecated: DirectiveDeprecated;
-      tokLibrary: DirectiveLibrary;
-      tokPlatform: DirectivePlatform;
-    end;
-  case GenID of
+  case Lexer.TokenID of
     tokAbsolute: VarAbsolute;
     tokEqual: VarEqual;
     tokAssign: VarAssign;
   end;
-  while ExID in [tokDeprecated, tokLibrary, tokPlatform] do // DR 2001-10-20
-    case ExID of
-      tokDeprecated: DirectiveDeprecated;
-      tokLibrary: DirectiveLibrary;
-      tokPlatform: DirectivePlatform;
-    end;
 end;
 
 procedure TmwSimplePasPar.VarAbsolute;
@@ -2799,7 +2496,7 @@ end;
 procedure TmwSimplePasPar.VarNameList;
 begin
   VarName;
-  while TokenID = tokComma do
+  while Lexer.TokenID = tokComma do
     begin
       NextToken;
       VarName;
@@ -2813,7 +2510,7 @@ end;
 
 procedure TmwSimplePasPar.DirectiveCalling;
 begin
-  case ExID of
+  case Lexer.ExID of
     tokCdecl:
       begin
         NextToken;
@@ -2830,24 +2527,20 @@ begin
       begin
         NextToken;
       end;
-  else
-    begin
-      SynError(InvalidDirectiveCalling);
-    end;
   end;
 end;
 
 procedure TmwSimplePasPar.RecordVariant;
 begin
   ConstantExpression;
-  while (TokenID = tokComma) do
+  while (Lexer.TokenID = tokComma) do
   begin
     NextToken;
     ConstantExpression;
   end;
   Expected(tokColon);
   Expected(tokRoundOpen);
-  if TokenID <> tokRoundClose then
+  if Lexer.TokenID <> tokRoundClose then
   begin
     FieldList;
   end;
@@ -2860,10 +2553,10 @@ begin
   TagField;
   Expected(tokOf);
   RecordVariant;
-  while TokenID = tokSemiColon do
+  while Lexer.TokenID = tokSemiColon do
   begin
-    SEMICOLON;
-    case TokenID of //DR 2001-12-11
+    SemiColon;
+    case Lexer.TokenID of
       tokEnd, tokRoundClose: Break;
     else
       RecordVariant;
@@ -2895,12 +2588,11 @@ end;
 
 procedure TmwSimplePasPar.FieldDeclaration;
 begin
-  //IdentifierList;
   FieldNameList;
   Expected(tokColon);
   TypeKind;
-  while ExID in [tokDeprecated, tokLibrary, tokPlatform] do // DR 2002-01-09
-    case ExID of
+  while Lexer.ExID in [tokDeprecated, tokLibrary, tokPlatform] do
+    case Lexer.ExID of
       tokDeprecated: DirectiveDeprecated;
       tokLibrary: DirectiveLibrary;
       tokPlatform: DirectivePlatform;
@@ -2909,12 +2601,12 @@ end;
 
 procedure TmwSimplePasPar.FieldList;
 begin
-  while TokenID = tokIdentifier do
+  while Lexer.TokenID = tokIdentifier do
   begin
     FieldDeclaration;
-    SEMICOLON;
+    SemiColon;
   end;
-  if TokenID = tokCase then
+  if Lexer.TokenID = tokCase then
   begin
     VariantSection;
   end;
@@ -2928,7 +2620,7 @@ end;
 procedure TmwSimplePasPar.FieldNameList;
 begin
   FieldName;
-  while TokenID = tokComma do
+  while Lexer.TokenID = tokComma do
   begin
     NextToken;
     FieldName;
@@ -2939,13 +2631,13 @@ procedure TmwSimplePasPar.RecordType;
 begin
   Expected(tokRecord);
 
-  if TokenID = tokSemicolon then
+  if Lexer.TokenID = tokSemicolon then
     Exit;
 
-  if TokenID = tokRoundOpen then
+  if Lexer.TokenID = tokRoundOpen then
   begin
     ClassHeritage;
-    if TokenID = tokSemicolon then
+    if Lexer.TokenID = tokSemicolon then
       Exit;
   end;
   ClassMemberList;
@@ -2956,7 +2648,7 @@ end;
 procedure TmwSimplePasPar.UnionType;
 begin
   Expected(tokUnion);
-  if TokenID = tokSemicolon then
+  if Lexer.TokenID = tokSemicolon then
     Exit;
   FieldList;
   Expected(tokEnd);
@@ -2972,11 +2664,11 @@ end;
 procedure TmwSimplePasPar.ArrayType;
 begin
   Expected(tokArray);
-  if TokenID = tokSquareOpen then
+  if Lexer.TokenID = tokSquareOpen then
   begin
     NextToken;
     OrdinalType;
-    while TokenID = tokComma do
+    while Lexer.TokenID = tokComma do
     begin
       NextToken;
       OrdinalType;
@@ -2984,7 +2676,7 @@ begin
     Expected(tokSquareClose);
   end;
 
-  if (TokenID = tokOf) then
+  if (Lexer.TokenID = tokOf) then
   begin
     Expected(tokOf);
     TypeKind;
@@ -2995,7 +2687,7 @@ procedure TmwSimplePasPar.EnumeratedType;
 begin
   Expected(tokRoundOpen);
   EnumeratedTypeItem;
-  while TokenID = tokComma do
+  while Lexer.TokenID = tokComma do
   begin
     NextToken;
     EnumeratedTypeItem;
@@ -3005,11 +2697,12 @@ end;
 
 procedure TmwSimplePasPar.EnumeratedScopedType;
 begin
-  NextToken();
+  if (Lexer.TokenID = tokEnum) then // Could be {$scopedenums}
+    NextToken();
 
   Expected(tokRoundOpen);
   EnumeratedTypeItem;
-  while TokenID = tokComma do
+  while Lexer.TokenID = tokComma do
   begin
     NextToken;
     EnumeratedTypeItem;
@@ -3020,7 +2713,7 @@ end;
 procedure TmwSimplePasPar.SubrangeType;
 begin
   ConstantExpression;
-  if TokenID = tokDotDot then
+  if Lexer.TokenID = tokDotDot then
   begin
     NextToken;
     ConstantExpression;
@@ -3029,7 +2722,7 @@ end;
 
 procedure TmwSimplePasPar.RealType;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokMinus:
       begin
         NextToken;
@@ -3039,7 +2732,7 @@ begin
         NextToken;
       end;
   end;
-  case TokenId of
+  case Lexer.TokenID of
     tokFloat:
       begin
         NextToken;
@@ -3053,7 +2746,7 @@ end;
 
 procedure TmwSimplePasPar.OrdinalType;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokIdentifier:
       begin
         Lexer.InitAhead;
@@ -3063,7 +2756,7 @@ begin
               Expression;
             end;
           tokRoundOpen:
-            begin //jdj
+            begin
               ConstantExpression;
             end;
         else
@@ -3087,7 +2780,7 @@ begin
       Expression;
     end;
   end;
-  if TokenID = tokDotDot then
+  if Lexer.TokenID = tokDotDot then
   begin
     NextToken;
     ConstantExpression;
@@ -3096,7 +2789,7 @@ end;
 
 procedure TmwSimplePasPar.VariableReference;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokStringConst, tokIntegerConst:
       begin
         NextToken;
@@ -3115,7 +2808,7 @@ begin
     tokPointerSymbol:
       begin
         NextToken;
-        case TokenID of
+        case Lexer.TokenID of
           tokRoundClose, tokSquareClose: ;
         else
           begin
@@ -3128,9 +2821,9 @@ begin
   end;
 end;
 
-procedure TmwSimplePasPar.Variable; (* Attention: could also came from proc_call ! ! *)
+procedure TmwSimplePasPar.Variable;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokPoint:
       begin
         VariableTwo;
@@ -3151,7 +2844,7 @@ begin
     QualifiedIdentifier;
   end;
   VariableTwo;
-  case TokenID of
+  case Lexer.TokenID of
     tokAs:
       begin
         NextToken;
@@ -3162,11 +2855,11 @@ end;
 
 procedure TmwSimplePasPar.VariableTwo;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokPoint:
       begin
         NextToken;
-        case TokenID of
+        case Lexer.TokenID of
           tokAddressOp, tokDoubleAddressOp, tokIdentifier:
             begin
               VariableReference;
@@ -3180,7 +2873,7 @@ begin
     tokPointerSymbol:
       begin
         NextToken;
-        case TokenID of
+        case Lexer.TokenID of
           tokAddressOp, tokDoubleAddressOp, tokIdentifier:
             begin
               VariableReference;
@@ -3195,16 +2888,15 @@ begin
       begin
         NextToken;
         fInRound := True;
-        case TokenID of
+        case Lexer.TokenID of
           tokRoundClose:
             begin
               NextToken;
-              //Expected(tokRoundClose);
               fInRound := False;
             end;
         else
           begin
-            case TokenID of
+            case Lexer.TokenID of
               tokAddressOp, tokDoubleAddressOp:
                 begin
                   VariableReference;
@@ -3221,7 +2913,7 @@ begin
             fInRound := False;
           end;
         end;
-        case TokenID of
+        case Lexer.TokenID of
           tokAddressOp, tokDoubleAddressOp:
             begin
               VariableReference;
@@ -3234,46 +2926,15 @@ begin
       end;
     tokSquareOpen:
       begin
-        Lexer.InitAhead;
-        while Lexer.AheadTokenID <> tokSemiColon do
-        begin
-          case Lexer.AheadTokenID of
-            tokBegin, tokClass, tokConst, tokEnd, tokDotDot, tokIn, tokNull, tok_Done, tokThreadVar, tokType,
-              tokVar: break;
-          else
-            Lexer.AheadNext;
-          end;
-        end;
-        case Lexer.AheadTokenID of
-          tokDotDot:
+        NextToken;
+        case Lexer.TokenID of
+          tokSquareClose:
             begin
-              SubrangeType;
+              NextToken;
             end;
         else
           begin
-            NextToken;
-            case TokenID of
-              tokSquareClose:
-                begin
-                  NextToken;
-                end;
-            else
-              begin
-                case TokenID of
-                  tokAddressOp, tokDoubleAddressOp:
-                    begin
-                      VariableReference;
-                    end;
-                  tokPoint, tokPointerSymbol, tokRoundOpen, tokSquareOpen:
-                    begin
-                      VariableTwo;
-                    end;
-                end;
-                ExpressionList;
-                Expected(tokSquareClose);
-              end;
-            end;
-            case TokenID of
+            case Lexer.TokenID of
               tokAddressOp, tokDoubleAddressOp:
                 begin
                   VariableReference;
@@ -3283,8 +2944,19 @@ begin
                   VariableTwo;
                 end;
             end;
-
+            ExpressionList;
+            Expected(tokSquareClose);
           end;
+        end;
+        case Lexer.TokenID of
+          tokAddressOp, tokDoubleAddressOp:
+            begin
+              VariableReference;
+            end;
+          tokPoint, tokPointerSymbol, tokRoundOpen, tokSquareOpen:
+            begin
+              VariableTwo;
+            end;
         end;
       end;
   end;
@@ -3292,17 +2964,13 @@ end;
 
 procedure TmwSimplePasPar.InterfaceType;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokInterface:
       begin
         NextToken;
       end;
-  else
-    begin
-      SynError(InvalidInterfaceType);
-    end;
   end;
-  case TokenID of
+  case Lexer.TokenID of
     tokEnd:
       begin
         NextToken; { Direct descendant without new members }
@@ -3310,7 +2978,7 @@ begin
     tokRoundOpen:
       begin
         InterfaceHeritage;
-        case TokenID of
+        case Lexer.TokenID of
           tokEnd:
             begin
               NextToken; { No new members }
@@ -3318,7 +2986,7 @@ begin
           tokSemiColon: ; { No new members }
         else
           begin
-            if TokenID = tokSquareOpen then
+            if Lexer.TokenID = tokSquareOpen then
             begin
               InterfaceGUID;
             end;
@@ -3329,7 +2997,7 @@ begin
       end;
   else
     begin
-      if TokenID = tokSquareOpen then
+      if Lexer.TokenID = tokSquareOpen then
       begin
         InterfaceGUID;
       end;
@@ -3341,7 +3009,7 @@ end;
 
 procedure TmwSimplePasPar.InterfaceMemberList;
 begin
-  while TokenID in [tokFunction, tokProcedure, tokProperty] do
+  while Lexer.TokenID in [tokFunction, tokProcedure, tokProperty] do
   begin
     ClassMethodOrProperty;
   end;
@@ -3351,7 +3019,7 @@ procedure TmwSimplePasPar.ClassType;
 begin
   Expected(tokClass);
 
-  case TokenID of
+  case Lexer.TokenID of
     tokIdentifier:
       case Lexer.ExID of
         tokAbstract: ExpectedEx(tokAbstract);
@@ -3366,35 +3034,35 @@ begin
       Expected(tokSealed);
   end;
 
-  case TokenID of
+  case Lexer.TokenID of
     tokEnd:
       begin
-        ClassTypeEnd; // DR 2001-07-31
+        ClassTypeEnd;
         NextToken; { Direct descendant of TObject without new members }
       end;
     tokRoundOpen:
       begin
         ClassHeritage;
-        case TokenID of
+        case Lexer.TokenID of
           tokEnd:
             begin
-              Expected(tokEnd); // DR 2001-07-31
-              ClassTypeEnd; // DR 2001-07-31
+              Expected(tokEnd);
+              ClassTypeEnd;
             end;
-          tokSemiColon: ClassTypeEnd; // DR 2001-07-31
+          tokSemiColon: ClassTypeEnd;
         else
           begin
             ClassMemberList; { Direct descendant of TObject }
-            Expected(tokEnd); // DR 2001-07-31
-            ClassTypeEnd; // DR 2001-07-31
+            Expected(tokEnd);
+            ClassTypeEnd;
           end;
         end;
       end;
   else
     begin
       ClassMemberList; { Direct descendant of TObject }
-      Expected(tokEnd); // DR 2001-07-31
-      ClassTypeEnd; // DR 2001-07-31
+      Expected(tokEnd);
+      ClassTypeEnd;
     end;
   end;
 end;
@@ -3408,16 +3076,16 @@ end;
 
 procedure TmwSimplePasPar.ClassVisibility;
 begin
-  if TokenID = tokStrict then
+  if Lexer.TokenID = tokStrict then
     Expected(tokStrict);
 
-  while ExID in [tokPrivate, tokProtected, tokPublic, tokPublished] do
+  while Lexer.ExID in [tokPrivate, tokProtected, tokPublic, tokPublished] do
   begin
     Lexer.InitAhead;
     case Lexer.AheadExID of
       tokColon, tokComma: ;
     else
-      case ExID of
+      case Lexer.ExID of
         tokPrivate:
           begin
             VisibilityPrivate;
@@ -3467,33 +3135,33 @@ end;
 procedure TmwSimplePasPar.ClassMemberList;
 begin
   ClassVisibility;
-  while TokenID in [tokClass, tokConstructor, tokDestructor, tokFunction,
+  while Lexer.TokenID in [tokClass, tokConstructor, tokDestructor, tokFunction,
     tokIdentifier, tokProcedure, tokProperty, tokType, tokSquareOpen, tokVar, tokConst, tokStrict,
      tokCase] do
   begin
-    while (TokenID = tokIdentifier) and
-      not (ExID in [tokPrivate, tokProtected, tokPublished, tokPublic]) do
+    while (Lexer.TokenID = tokIdentifier) and
+      not (Lexer.ExID in [tokPrivate, tokProtected, tokPublished, tokPublic]) do
     begin
       ClassField;
-      SEMICOLON;
+      SemiColon;
       ClassVisibility;
     end;
-    while TokenID in [tokClass, tokConstructor, tokDestructor, tokFunction,
+    while Lexer.TokenID in [tokClass, tokConstructor, tokDestructor, tokFunction,
       tokProcedure, tokProperty, tokSquareOpen, tokVar, tokConst] do
     begin
-      if (TokenID = tokVar) then
+      if (Lexer.TokenID = tokVar) then
       begin
         NextToken;
         ClassField;
-        SEMICOLON;
+        SemiColon;
       end
       else
         ClassMethodOrProperty;
     end;
 
-    while TokenID = tokType do
+    while Lexer.TokenID = tokType do
       TypeSection;
-    while TokenID = tokCase do
+    while Lexer.TokenID = tokCase do
     begin
       VariantSection;
     end;
@@ -3504,12 +3172,12 @@ end;
 
 procedure TmwSimplePasPar.ClassMethodOrProperty;
 begin
-  if TokenID = tokSquareOpen then
+  if Lexer.TokenID = tokSquareOpen then
     CustomAttribute;
 
-  if TokenID = tokClass
-    then ClassClass; //DR 2001-07-16
-  case TokenID of
+  if Lexer.TokenID = tokClass
+    then ClassClass;
+  case Lexer.TokenID of
     tokProperty:
       begin
         ClassProperty;
@@ -3518,7 +3186,7 @@ begin
     tokVar:
       begin
         NextToken;
-        while (TokenID = tokIdentifier) and (ExID = tokUnknown) do
+        while (Lexer.TokenID = tokIdentifier) and (Lexer.ExID = tokUnknown) do
         begin
           VarDeclaration;
           NextToken;
@@ -3527,7 +3195,7 @@ begin
     tokConst:
       begin
         NextToken;
-        while (TokenID = tokIdentifier) and (ExID = tokUnknown) do
+        while (Lexer.TokenID = tokIdentifier) and (Lexer.ExID = tokUnknown) do
         begin
           ConstantDeclaration;
           NextToken;
@@ -3542,21 +3210,20 @@ end;
 
 procedure TmwSimplePasPar.ClassProperty;
 begin
- // DR 2001-07-19 -> changed. for array-property override failure
   Expected(tokProperty);
   PropertyName;
-  case TokenID of
+  case Lexer.TokenID of
     tokColon, tokSquareOpen:
       begin
         PropertyInterface;
       end;
   end;
   PropertySpecifiers;
-  case ExID of
+  case Lexer.ExID of
     tokDefault:
       begin
-        PropertyDefault; //DR 2001-07-16
-        SEMICOLON;
+        PropertyDefault;
+        SemiColon;
       end;
   end;
 end;
@@ -3568,12 +3235,11 @@ end;
 
 procedure TmwSimplePasPar.ClassField;
 begin
-  //IdentifierList;
   FieldNameList;
   Expected(tokColon);
   TypeKind;
-  while ExID in [tokDeprecated, tokLibrary, tokPlatform] do // DR 2001-10-20
-    case ExID of
+  while Lexer.ExID in [tokDeprecated, tokLibrary, tokPlatform] do
+    case Lexer.ExID of
       tokDeprecated: DirectiveDeprecated;
       tokLibrary: DirectiveLibrary;
       tokPlatform: DirectivePlatform;
@@ -3583,35 +3249,35 @@ end;
 procedure TmwSimplePasPar.ObjectType;
 begin
   Expected(tokObject);
-  case TokenID of
+  case Lexer.TokenID of
     tokEnd:
       begin
-        ObjectTypeEnd; // DR 2001-07-31
+        ObjectTypeEnd;
         NextToken; { Direct descendant without new members }
       end;
     tokRoundOpen:
       begin
         ObjectHeritage;
-        case TokenID of
+        case Lexer.TokenID of
           tokEnd:
             begin
-              Expected(tokEnd); // DR 2001-07-31
-              ObjectTypeEnd; // DR 2001-07-31
+              Expected(tokEnd);
+              ObjectTypeEnd;
             end;
-          tokSemiColon: ObjectTypeEnd; // DR 2001-07-31
+          tokSemiColon: ObjectTypeEnd;
         else
           begin
             ObjectMemberList; { Direct descendant }
-            Expected(tokEnd); // DR 2001-07-31
-            ObjectTypeEnd; // DR 2001-07-31
+            Expected(tokEnd);
+            ObjectTypeEnd;
           end;
         end;
       end;
   else
     begin
       ObjectMemberList; { Direct descendant }
-      Expected(tokEnd); // DR 2001-07-31
-      ObjectTypeEnd; // DR 2001-07-31
+      Expected(tokEnd);
+      ObjectTypeEnd;
     end;
   end;
 end;
@@ -3624,20 +3290,20 @@ begin
 end;
 
 procedure TmwSimplePasPar.ObjectMemberList;
-begin {jdj added tokProperty-call to ObjectProperty 02/07/2001}
+begin
   ObjectVisibility;
-  while TokenID in [tokConstructor, tokDestructor, tokFunction, tokIdentifier,
+  while Lexer.TokenID in [tokConstructor, tokDestructor, tokFunction, tokIdentifier,
     tokProcedure, tokProperty] do
   begin
-    while TokenID = tokIdentifier do
+    while Lexer.TokenID = tokIdentifier do
     begin
       ObjectField;
-      SEMICOLON;
+      SemiColon;
       ObjectVisibility;
     end;
-    while TokenID in [tokConstructor, tokDestructor, tokFunction, tokProcedure, tokProperty] do
+    while Lexer.TokenID in [tokConstructor, tokDestructor, tokFunction, tokProcedure, tokProperty] do
     begin
-      case TokenID of
+      case Lexer.TokenID of
         tokConstructor, tokDestructor, tokFunction, tokProcedure:
           ObjectMethodHeading;
         tokProperty:
@@ -3650,13 +3316,13 @@ end;
 
 procedure TmwSimplePasPar.ObjectVisibility;
 begin
-  while ExID in [tokPrivate, tokProtected, tokPublic] do
+  while Lexer.ExID in [tokPrivate, tokProtected, tokPublic] do
   begin
     Lexer.InitAhead;
     case Lexer.AheadExID of
       tokColon, tokComma: ;
     else
-      case ExID of
+      case Lexer.ExID of
         tokPrivate:
           begin
             VisibilityPrivate;
@@ -3679,8 +3345,8 @@ begin
   IdentifierList;
   Expected(tokColon);
   TypeKind;
-  while ExID in [tokDeprecated, tokLibrary, tokPlatform] do // DR 2001-10-20
-    case ExID of
+  while Lexer.ExID in [tokDeprecated, tokLibrary, tokPlatform] do
+    case Lexer.ExID of
       tokDeprecated: DirectiveDeprecated;
       tokLibrary: DirectiveLibrary;
       tokPlatform: DirectivePlatform;
@@ -3698,11 +3364,11 @@ procedure TmwSimplePasPar.ProceduralType;
 var
   TheTokenID: TptTokenKind;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokFunction:
       begin
         NextToken;
-        if TokenID = tokRoundOpen then
+        if Lexer.TokenID = tokRoundOpen then
         begin
           FormalParameterList;
         end;
@@ -3712,41 +3378,36 @@ begin
     tokProcedure:
       begin
         NextToken;
-        if TokenID = tokRoundOpen then
+        if Lexer.TokenID = tokRoundOpen then
         begin
           FormalParameterList;
         end;
       end;
-  else
-    begin
-      SynError(InvalidProceduralType);
-    end;
   end;
-  if TokenID = tokOf then
+  if Lexer.TokenID = tokOf then
   begin
     NextToken;
     Expected(tokObject);
   end;
   Lexer.InitAhead;
-  case TokenID of
+  case Lexer.TokenID of
     tokSemiColon: TheTokenID := Lexer.AheadExID;
   else
-    TheTokenID := ExID;
+    TheTokenID := Lexer.ExID;
   end;
   while TheTokenID in [tokAbstract, tokCdecl, tokExport, tokExternal,
     tokMessage, tokOverload, tokOverride, tokRegister,
     tokReintroduce, tokSafeCall, tokStdCall, tokVirtual,
     tokStatic, tokInline
     ] do
- // DR 2001-11-14 no checking for deprecated etc. since it's captured by the typedecl
   begin
-    if TokenID = tokSemiColon then SEMICOLON;
+    if Lexer.TokenID = tokSemiColon then SemiColon;
     ProceduralDirective;
     Lexer.InitAhead;
-    case TokenID of
+    case Lexer.TokenID of
       tokSemiColon: TheTokenID := Lexer.AheadExID;
     else
-      TheTokenID := ExID;
+      TheTokenID := Lexer.ExID;
     end;
   end;
 end;
@@ -3764,22 +3425,20 @@ end;
 
 procedure TmwSimplePasPar.StructuredType;
 begin
-  if TokenID = tokPacked then
+  if Lexer.TokenID = tokPacked then
     NextToken;
 
-  case TokenID of
+  case Lexer.TokenID of
     tokArray: ArrayType;
     tokRecord: RecordType;
     tokUnion: UnionType;
     tokSet: SetType;
-  else
-    SynError(InvalidStructuredType);
   end;
 end;
 
 procedure TmwSimplePasPar.SimpleType;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokMinus:
       begin
         NextToken;
@@ -3847,10 +3506,10 @@ procedure TmwSimplePasPar.RecordConstant;
 begin
   Expected(tokRoundOpen);
   RecordFieldConstant;
-  while (TokenID = tokSemiColon) do
+  while (Lexer.TokenID = tokSemiColon) do
   begin
-    SEMICOLON;
-    if TokenId <> tokRoundClose then //jdj 2.23.2001
+    SemiColon;
+    if Lexer.TokenID <> tokRoundClose then
       RecordFieldConstant;
   end;
   Expected(tokRoundClose);
@@ -3859,8 +3518,8 @@ end;
 procedure TmwSimplePasPar.ArrayConstant;
 begin
   Expected(tokRoundOpen);
-  TypedConstant;
-  while (TokenID = tokComma) do
+
+  while (Lexer.TokenID = tokComma) do
   begin
     NextToken;
     TypedConstant;
@@ -3885,28 +3544,25 @@ end;
 
 procedure TmwSimplePasPar.TypeDeclaration;
 begin
-  if (TokenID <> tokType) then
+  if (Lexer.TokenID <> tokType) then
   begin
     TypeName;
     Expected(tokEqual);
   end else
     NextToken();
 
-  Lexer.InitAhead;
-
-  // Some types have their own tokens which messes when declarating base types: `type Currency = Currency`
-  if (TokenID = tokIdentifier) and (Lexer.AheadTokenID = tokSemiColon) then
-  begin
-    TypeAlias;
-    Exit;
-  end;
-  if TokenID = tokType then
+  if (Lexer.TokenID = tokType) then
   begin
     ExplicitType;
     Exit;
   end;
+  if (Lexer.TokenID = tokIdentifier) and (Lexer.ExID <> tokPrivate) then
+  begin
+    TypeAlias;
+    Exit;
+  end;
 
-  case TokenID of
+  case Lexer.TokenID of
     tokClass:
       begin
         case Lexer.AheadTokenID of
@@ -3954,8 +3610,8 @@ begin
     TypeKind;
   end;
 
-  while ExID in [tokDeprecated, tokLibrary, tokPlatform] do // DR 2001-10-20
-    case ExID of
+  while Lexer.ExID in [tokDeprecated, tokLibrary, tokPlatform] do
+    case Lexer.ExID of
       tokDeprecated: DirectiveDeprecated;
       tokLibrary: DirectiveLibrary;
       tokPlatform: DirectivePlatform;
@@ -3965,7 +3621,7 @@ end;
 procedure TmwSimplePasPar.TypeName;
 begin
   Expected(tokIdentifier);
-  if TokenId = tokLower then
+  if Lexer.TokenID = tokLower then
     TypeParams;
 end;
 
@@ -3977,16 +3633,16 @@ end;
 
 procedure TmwSimplePasPar.TypeKind;
 begin
-  if ExID = tokNative then
+  if (Lexer.TokenID = tokNative) then
   begin
     NativeType;
     Exit;
   end;
 
-  if (TokenID = tokIdentifier) and (GenID = tokPrivate) then
+  if (Lexer.TokenID = tokIdentifier) and (Lexer.ExID = tokPrivate) then
     NextToken;
 
-  case TokenID of
+  case Lexer.TokenID of
     tokAsciiChar, tokFloat, tokIntegerConst, tokMinus, tokPlus, tokSquareOpen, tokStringConst, tokRoundOpen, tokEnum:
       begin
         SimpleType;
@@ -4014,10 +3670,6 @@ begin
         end else
           PointerType;
       end;
-  else
-    begin
-      SynError(InvalidTypeKind);
-    end;
   end;
 end;
 
@@ -4025,7 +3677,7 @@ procedure TmwSimplePasPar.TypeArgs;
 begin
   Expected(tokLower);
   TypeIdentifer;
-  while TokenId = tokComma do
+  while Lexer.TokenID = tokComma do
   begin
     NextToken;
     TypeIdentifer;
@@ -4035,99 +3687,7 @@ end;
 
 procedure TmwSimplePasPar.TypedConstant;
 begin
-  case TokenID of
-    tokRoundOpen:
-      begin
-        Lexer.InitAhead;
-        while Lexer.AheadTokenID <> tokSemiColon do
-          case Lexer.AheadTokenID of
-            tokAnd, tokBegin, tokCase, tokColon, tokEnd, tokElse, tokIf, tokMinus, tokNull, tok_Done,
-              tokOr, tokPlus, tokShl, tokShr, tokSlash, tokStar, tokStarStar, tokWhile, tokWith,
-              tokXor: break;
-            tokRoundOpen:
-              begin
-                repeat
-                  case Lexer.AheadTokenID of
-                    tokBegin, tokCase, tokEnd, tokElse, tokIf, tokNull, tok_Done, tokWhile, tokWith: break;
-                  else
-                    begin
-                      case Lexer.AheadTokenID of
-                        tokRoundClose:
-                          begin
-                            NextToken;
-                            break;
-                          end;
-                      else
-                        Lexer.AheadNext;
-                      end;
-                    end;
-                  end;
-                until Lexer.AheadTokenID = tokRoundClose;
-              end;
-          else
-            Lexer.AheadNext;
-          end;
-        case Lexer.AheadTokenID of
-          tokColon: RecordConstant;
-          tokNull, tok_Done: ;
-          tokAnd, tokMinus, tokOr, tokPlus, tokShl, tokShr, tokSlash, tokStar, tokStarStar, tokXor:
-            begin
-              ConstantExpression;
-            end;
-        else
-          begin
-            ArrayConstant;
-          end;
-        end;
-      end;
-    tokSquareOpen:
-      ConstantExpression; // DR 2002-01-11
-
- { DR: fails with constructed set constants like
-    WordDelimiters: set of Char = [#0..#255] - ['a'..'z','A'..'Z','1'..'9','0'];
-
- (*empty; there mustn't be all fields of a record mentioned*)
-   begin
-  NextToken;
-  if TokenID <> tokSquareClose then
-    begin
-   case TokenID of
-     tokDotDot:
-    begin
-      NextToken;
-      NextToken;
-    end;
-     else
-    NextToken;
-    case TokenID of
-      tokDotDot:
-     begin
-       NextToken;
-       NextToken;
-     end;
-    end;
-   end;
-   while TokenID = tokComma do
-     begin
-    NextToken;
-    NextToken;
-    case TokenID of
-      tokDotDot:
-     begin
-       NextToken;
-       NextToken;
-     end;
-    end;
-     end;
-   Expected(tokSquareClose);
-    end
-  else NextToken;
-   end;}
-  else
-    begin
-      ConstantExpression;
-    end;
-  end;
+  ConstantExpression;
 end;
 
 procedure TmwSimplePasPar.TypeIdentifer;
@@ -4150,8 +3710,8 @@ begin
   Identifier;
   Expected(tokEqual);
   CharString;
-  while ExID in [tokDeprecated, tokLibrary, tokPlatform] do // DR 2002-01-10
-    case ExID of
+  while Lexer.ExID in [tokDeprecated, tokLibrary, tokPlatform] do
+    case Lexer.ExID of
       tokDeprecated: DirectiveDeprecated;
       tokLibrary: DirectiveLibrary;
       tokPlatform: DirectivePlatform;
@@ -4161,7 +3721,7 @@ end;
 procedure TmwSimplePasPar.ConstantDeclaration;
 begin
   ConstantName;
-  case TokenID of
+  case Lexer.TokenID of
     tokAssign:
       begin
         ConstantAssign;
@@ -4174,13 +3734,9 @@ begin
       begin
         ConstantColon;
       end;
-  else
-    begin
-      SynError(InvalidConstantDeclaration);
-    end;
   end;
-  while ExID in [tokDeprecated, tokLibrary, tokPlatform] do // DR 2001-10-20
-    case ExID of
+  while Lexer.ExID in [tokDeprecated, tokLibrary, tokPlatform] do
+    case Lexer.ExID of
       tokDeprecated: DirectiveDeprecated;
       tokLibrary: DirectiveLibrary;
       tokPlatform: DirectivePlatform;
@@ -4190,7 +3746,6 @@ end;
 procedure TmwSimplePasPar.ConstantColon;
 begin
   Expected(tokColon);
-//JR changed to constant Type
   ConstantType;
   if (not (Lexer.TokenID in [tokAssign, tokEqual])) then
     Expected(tokEqual);
@@ -4201,12 +3756,24 @@ end;
 procedure TmwSimplePasPar.ConstantAssign;
 begin
   Expected(tokAssign);
+  if (Lexer.TokenID = tokIdentifier) then
+  begin
+    Lexer.InitAhead;
+    if (Lexer.AheadTokenID = tokRoundOpen) then
+      ConstantType();
+  end;
   ConstantValueTyped;
 end;
 
 procedure TmwSimplePasPar.ConstantEqual;
 begin
   Expected(tokEqual);
+  if (Lexer.TokenID = tokIdentifier) then
+  begin
+    Lexer.InitAhead;
+    if (Lexer.AheadTokenID = tokRoundOpen) then
+      ConstantType();
+  end;
   ConstantValue;
 end;
 
@@ -4231,7 +3798,7 @@ begin
 end;
 procedure TmwSimplePasPar.LabelId;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokIntegerConst:
       begin
         NextToken;
@@ -4240,19 +3807,15 @@ begin
       begin
         NextToken;
       end;
-  else
-    begin
-      SynError(InvalidLabelId);
-    end;
   end;
 end;
 
 procedure TmwSimplePasPar.ProcedureDeclarationSection;
 begin
-  if (TokenID = tokClass) then
+  if (Lexer.TokenID = tokClass) then
     NextToken();
 
-  case TokenID of
+  case Lexer.TokenID of
     tokConstructor, tokDestructor, tokProcedure:
       begin
         ProcedureMethodDeclaration();
@@ -4261,10 +3824,6 @@ begin
       begin
         FunctionMethodDeclaration();
       end;
-  else
-    begin
-      SynError(InvalidProcedureDeclarationSection);
-    end;
   end;
 end;
 
@@ -4272,17 +3831,17 @@ procedure TmwSimplePasPar.LabelDeclarationSection;
 begin
   Expected(tokLabel);
   LabelId;
-  while (TokenID = tokComma) do
+  while (Lexer.TokenID = tokComma) do
   begin
     NextToken;
     LabelId;
   end;
-  SEMICOLON;
+  SemiColon;
 end;
 
-procedure TmwSimplePasPar.ProceduralDirective; //TODO: Add STATIC and FINAL
+procedure TmwSimplePasPar.ProceduralDirective;
 begin
-  case ExID of
+  case Lexer.ExID of
     tokAbstract:
       begin
         NextToken;
@@ -4303,10 +3862,6 @@ begin
       begin
         DirectiveBinding;
       end;
-    tokAssembler:
-      begin
-        NextToken;
-      end;
     tokStatic:
       begin
         NextToken;
@@ -4323,16 +3878,12 @@ begin
       DirectivePlatform;
     tokNative:
       NextToken;
-  else
-    begin
-      SynError(InvalidProceduralDirective);
-    end;
   end;
 end;
 
 procedure TmwSimplePasPar.ExportedHeading;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokFunction:
       begin
         FunctionHeading;
@@ -4341,38 +3892,25 @@ begin
       begin
         ProcedureHeading;
       end;
-  else
-    begin
-      SynError(InvalidExportedHeading);
-    end;
   end;
-  if TokenID = tokSemiColon then SEMICOLON;
-  case ExID of
+  if Lexer.TokenID = tokSemiColon then SemiColon;
+  case Lexer.ExID of
     tokForward:
       begin
-        ForwardDeclaration; //jdj added 02/07/2001
-//        NextToken;
-//        SEMICOLON;
+        ForwardDeclaration;
       end;
-    tokAssembler:
-      begin
-        NextToken;
-        SEMICOLON;
-        if Exid = tokForward then
-          ForwardDeclaration; //jdj added 02/07/2001
-      end;
-  else  //TODO: Add STATIC and FINAL
-    while ExID in [tokAbstract, tokCdecl, tokExport, tokExternal,
+  else
+    while Lexer.ExID in [tokAbstract, tokCdecl, tokExport, tokExternal,
       tokMessage, tokOverload, tokOverride, tokRegister,
       tokReintroduce, tokSafeCall, tokStdCall, tokVirtual,
-      tokDeprecated, tokLibrary, tokPlatform, // DR 2001-10-20
+      tokDeprecated, tokLibrary, tokPlatform,
       tokStatic, tokInline, tokConst] do
     begin
       ProceduralDirective;
-      if TokenID = tokSemiColon then SEMICOLON;
+      if Lexer.TokenID = tokSemiColon then SemiColon;
     end;
-    if ExId = tokForward then
-      ForwardDeclaration; //jdj added 02/07/2001
+    if Lexer.ExID = tokForward then
+      ForwardDeclaration;
   end;
 end;
 
@@ -4380,7 +3918,7 @@ procedure TmwSimplePasPar.FunctionHeading;
 begin
   Expected(tokFunction);
   FunctionProcedureName;
-  if TokenID = tokRoundOpen then
+  if Lexer.TokenID = tokRoundOpen then
   begin
     FormalParameterList;
   end;
@@ -4392,7 +3930,7 @@ procedure TmwSimplePasPar.ProcedureHeading;
 begin
   Expected(tokProcedure);
   FunctionProcedureName;
-  if TokenID = tokRoundOpen then
+  if Lexer.TokenID = tokRoundOpen then
   begin
     FormalParameterList;
   end;
@@ -4401,7 +3939,7 @@ end;
 
 procedure TmwSimplePasPar.VarSection;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokThreadVar:
       begin
         NextToken;
@@ -4410,19 +3948,15 @@ begin
       begin
         NextToken;
       end;
-  else
-    begin
-      SynError(InvalidVarSection);
-    end;
   end;
-  while TokenID in [tokIdentifier, tokSquareOpen] do
+  while Lexer.TokenID in [tokIdentifier, tokSquareOpen] do
   begin
-    if TokenID = tokSquareOpen then
+    if Lexer.TokenID = tokSquareOpen then
       CustomAttribute
     else
     begin
       VarDeclaration;
-      SEMICOLON;
+      SemiColon;
     end;
   end;
 end;
@@ -4431,19 +3965,19 @@ procedure TmwSimplePasPar.TypeSection;
 begin
   Expected(tokType);
 
-  while (TokenID = tokIdentifier) do
+  while (Lexer.TokenID = tokIdentifier) do
   begin
     TypeDeclaration;
-    if TokenID = tokEqual then
+    if Lexer.TokenID = tokEqual then
       TypedConstant;
-    SEMICOLON;
+    SemiColon;
   end;
 end;
 
 procedure TmwSimplePasPar.TypeParamDecl;
 begin
   TypeParamList;
-  if TokenId = tokColon then
+  if Lexer.TokenID = tokColon then
   begin
     NextToken;
     ConstraintList;
@@ -4453,7 +3987,7 @@ end;
 procedure TmwSimplePasPar.TypeParamDeclList;
 begin
   TypeParamDecl;
-  while TokenId = tokSemicolon do
+  while Lexer.TokenID = tokSemicolon do
   begin
     NextToken;
     TypeParamDecl;
@@ -4462,13 +3996,13 @@ end;
 
 procedure TmwSimplePasPar.TypeParamList;
 begin
-  if TokenId = tokSquareOpen then
+  if Lexer.TokenID = tokSquareOpen then
     AttributeSection;
   Identifier;
-  while TokenId = tokComma do
+  while Lexer.TokenID = tokComma do
   begin
     NextToken;
-    if TokenId = tokSquareOpen then
+    if Lexer.TokenID = tokSquareOpen then
       AttributeSection;
     Identifier;
   end;
@@ -4483,40 +4017,36 @@ end;
 
 procedure TmwSimplePasPar.ConstSection;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokConst:
       begin
         NextToken;
-        while TokenID in [tokIdentifier, tokSquareOpen] do
+        while Lexer.TokenID in [tokIdentifier, tokSquareOpen] do
         begin
-          if TokenID = tokSquareOpen then
+          if Lexer.TokenID = tokSquareOpen then
             CustomAttribute
           else
           begin
             ConstantDeclaration;
-            SEMICOLON;
+            SemiColon;
           end;
         end;
       end;
     tokResourceString:
       begin
         NextToken;
-        while (TokenID = tokIdentifier) do
+        while (Lexer.TokenID = tokIdentifier) do
         begin
           ResourceDeclaration;
-          SEMICOLON;
+          SemiColon;
         end;
       end
-  else
-    begin
-      SynError(InvalidConstSection);
-    end;
   end;
 end;
 
 procedure TmwSimplePasPar.InterfaceDeclaration;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokConst:
       begin
         ConstSection;
@@ -4553,24 +4083,18 @@ begin
       begin
         CustomAttribute;
       end;
-  else
-    begin
-      SynError(InvalidInterfaceDeclaration);
-    end;
   end;
 end;
 
 procedure TmwSimplePasPar.ExportsElement;
 begin
   Expected(tokIdentifier);
-  //  if TokenID = tokIndex then
-  if FLexer.ExID = tokIndex then //jdj 20001207
+  if FLexer.ExID = tokIndex then
   begin
     NextToken;
     Expected(tokIntegerConst);
   end;
-  //  if TokenID = tokName then
-  if FLexer.ExID = tokName then //jdj 20001207
+  if FLexer.ExID = tokName then
   begin
     NextToken;
     CharString;
@@ -4588,24 +4112,24 @@ procedure TmwSimplePasPar.ExportsClause;
 begin
   Expected(tokExports);
   ExportsElement;
-  while TokenID = tokComma do
+  while Lexer.TokenID = tokComma do
   begin
     NextToken;
     ExportsElement;
   end;
-  SEMICOLON;
+  SemiColon;
 end;
 
 procedure TmwSimplePasPar.RequiresClause;
 begin
   ExpectedEx(tokRequires);
   RequiresIdentifier;
-  while TokenID = tokComma do
+  while Lexer.TokenID = tokComma do
   begin
     NextToken;
     RequiresIdentifier;
   end;
-  SEMICOLON;
+  SemiColon;
 end;
 
 procedure TmwSimplePasPar.RequiresIdentifier;
@@ -4620,12 +4144,12 @@ end;
 
 procedure TmwSimplePasPar.InitializationSection;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokInitialization:
       begin
         NextToken;
         StatementList;
-        if TokenID = tokFinalization then
+        if Lexer.TokenID = tokFinalization then
         begin
           NextToken;
           StatementList;
@@ -4640,21 +4164,17 @@ begin
       begin
         NextToken;
       end;
-  else
-    begin
-      SynError(InvalidInitializationSection);
-    end;
   end;
 end;
 
 procedure TmwSimplePasPar.ImplementationSection;
 begin
   Expected(tokImplementation);
-  if TokenID = tokUses then
+  if Lexer.TokenID = tokUses then
   begin
     UsesClause;
   end;
-  while TokenID in [tokClass, tokConst, tokConstructor, tokDestructor, tokFunction,
+  while Lexer.TokenID in [tokClass, tokConst, tokConstructor, tokDestructor, tokFunction,
     tokLabel, tokProcedure, tokResourceString, tokThreadVar, tokType, tokVar,
     tokExports, tokSquareOpen] do
   begin
@@ -4665,11 +4185,11 @@ end;
 procedure TmwSimplePasPar.InterfaceSection;
 begin
   Expected(tokInterface);
-  if TokenID = tokUses then
+  if Lexer.TokenID = tokUses then
   begin
     UsesClause;
   end;
-  while TokenID in [tokConst, tokFunction, tokResourceString, tokProcedure,
+  while Lexer.TokenID in [tokConst, tokFunction, tokResourceString, tokProcedure,
     tokThreadVar, tokType, tokVar, tokExports, tokSquareOpen] do
   begin
     InterfaceDeclaration;
@@ -4678,8 +4198,8 @@ end;
 
 procedure TmwSimplePasPar.IdentifierList;
 begin
-  Identifier; // DR 2001-10-20
-  while TokenID = tokComma do
+  Identifier;
+  while Lexer.TokenID = tokComma do
   begin
     NextToken;
     Identifier;
@@ -4689,7 +4209,7 @@ end;
 procedure TmwSimplePasPar.QualifiedIdentifierList;
 begin
   QualifiedIdentifier;
-  while (TokenID = tokComma) do
+  while (Lexer.TokenID = tokComma) do
   begin
     NextToken;
     QualifiedIdentifier;
@@ -4697,13 +4217,13 @@ begin
 end;
 
 procedure TmwSimplePasPar.CharString;
-begin //updated mw 2/22/00, JThurman 6/24/2004
-  case TokenID of
+begin
+  case Lexer.TokenID of
     tokAsciiChar, tokIdentifier, tokRoundOpen, tokStringConst:
-      while TokenID in
+      while Lexer.TokenID in
         [tokAsciiChar, tokIdentifier, tokPlus, tokRoundOpen, tokStringConst] do
       begin
-        case TokenID of
+        case Lexer.TokenID of
           tokIdentifier, tokRoundOpen:
             begin
               VariableReference;
@@ -4717,95 +4237,13 @@ begin //updated mw 2/22/00, JThurman 6/24/2004
           VariableReference;
         end;
       end;
-  else
-    begin
-      SynError(InvalidCharString);
-    end;
   end;
 end;
 
-(*procedure TmwSimplePasPar.CharString;
-begin //updated mw 2/22/00
-  case TokenID of
-    tokAsciiChar, tokIdentifier, tokRoundOpen, tokStringConst:
-      while TokenID in
-        [tokAsciiChar, tokIdentifier, tokPlus, tokRoundOpen, tokStringConst] do
-      begin
-        case TokenID of
-          tokIdentifier, tokRoundOpen:
-            begin
-              VariableReference;
-            end;
-        else
-          NextToken;
-        end;
-      end;
-  else
-    begin
-      SynError(InvalidCharString);
-    end;
-  end;
-end;*)
-
-(*procedure TmwSimplePasPar.CharString;
-begin
-  case TokenID of
-    tokAsciiChar, tokStringConst:
-      while TokenID in [tokAsciiChar, tokPlus, tokStringConst] do
-      begin
-        case TokenID of
-          tokPlus:
-            begin
-              NextToken;
-              if TokenID = tokIdentifier then
-              begin
-                VariableReference;
-              end;
-            end;
-        else
-          begin
-            NextToken;
-          end;
-        end;
-      end;
-    tokIdentifier:
-      begin
-        VariableReference;
-        case TokenID of
-          tokPlus:
-            begin
-              NextToken;
-              while TokenID in [tokAsciiChar, tokPlus, tokStringConst] do
-              begin
-                case TokenID of
-                  tokPlus:
-                    begin
-                      NextToken;
-                      if TokenID = tokIdentifier then
-                      begin
-                        VariableReference;
-                      end;
-                    end;
-                else
-                  begin
-                    NextToken;
-                  end;
-                end;
-              end;
-   end;
-        end;
-      end
-  else
-    begin
-      SynError(InvalidCharString);
-    end;
-  end;
-end;*)
-
 procedure TmwSimplePasPar.IncludeFile;
 begin
-  while (not (TokenID in [tokNull, tok_DONE])) do
-    case TokenID of
+  while (not (Lexer.TokenID in [tokNull{, tok_DONE}])) do
+    case Lexer.TokenID of
       tokClass:
         begin
           ProcedureDeclarationSection;
@@ -4836,7 +4274,7 @@ begin
           if Lexer.AheadTokenID in [tokColon, tokEqual] then
           begin
             ConstantDeclaration;
-            if TokenID = tokSemiColon then SEMICOLON;
+            if Lexer.TokenID = tokSemiColon then SemiColon;
           end
           else
             NextToken;
@@ -4876,24 +4314,24 @@ begin
     end;
 end;
 
-procedure TmwSimplePasPar.SkipSpace; //XM Jul-2000
+procedure TmwSimplePasPar.SkipSpace;
 begin
   Expected(tokSpace);
-  while TokenID in [tokSpace] do
+  while Lexer.TokenID in [tokSpace] do
     Lexer.Next;
 end;
 
-procedure TmwSimplePasPar.SkipCRLFco; //XM Jul-2000
+procedure TmwSimplePasPar.SkipCRLFco;
 begin
   Expected(tokCRLFCo);
-  while TokenID in [tokCRLFCo] do
+  while Lexer.TokenID in [tokCRLFCo] do
     Lexer.Next;
 end;
 
-procedure TmwSimplePasPar.SkipCRLF; //XM Jul-2000
+procedure TmwSimplePasPar.SkipCRLF;
 begin
   Expected(tokCRLF);
-  while TokenID in [tokCRLF] do
+  while Lexer.TokenID in [tokCRLF] do
     Lexer.Next;
 end;
 
@@ -4924,7 +4362,7 @@ end;
 procedure TmwSimplePasPar.DirectiveDeprecated;
 begin
   ExpectedEx(tokDeprecated);
-  if TokenID = tokStringConst then
+  if Lexer.TokenID = tokStringConst then
     NextToken;
 end;
 
@@ -4941,7 +4379,7 @@ end;
 procedure TmwSimplePasPar.EnumeratedTypeItem;
 begin
   QualifiedIdentifier;
-  if TokenID = tokEqual then
+  if Lexer.TokenID = tokEqual then
   begin
     Expected(tokEqual);
     ConstantExpression;
@@ -4955,27 +4393,52 @@ end;
 
 procedure TmwSimplePasPar.AncestorId;
 begin
-  // !! Although I re-added this function I modified it
-  // so that it now calls QualifiedIdentifier, per DR's change
   QualifiedIdentifier;
 end;
 
 procedure TmwSimplePasPar.AncestorIdList;
 begin
-  // !! Added this function back in
   AncestorId;
-  while(TokenID = tokComma) do
-    begin
-      NextToken;
-      AncestorId;
-    end;
+  while (Lexer.TokenID = tokComma) do
+  begin
+    NextToken;
+    AncestorId;
+  end;
 end;
 
-procedure TmwSimplePasPar.InitAhead;
+procedure TmwSimplePasPar.PushLexer(ALexer: TmwPasLex);
 begin
-  if AheadParse = nil then
-    AheadParse := TmwSimplePasPar.Create;
-  AheadParse.Lexer.InitFrom(Lexer);
+  if (fLexer <> nil) then
+    ALexer.CloneDefinesFrom(fLexer);
+
+  fLexer := ALexer;
+  fLexers.Add(fLexer);
+  fLexerStack.Push(fLexer);
+
+  if (fLexerStack.Count > 100) then
+    raise Exception.Create('Recursive include');
+
+  fLexer.OnIncludeDirect := @OnIncludeDirect;
+  fLexer.OnLibraryDirect := @OnLibraryDirect;
+  fLexer.OnErrorMessage := @OnErrorMessage;
+
+  if (fLexerStack.Count > 1) then
+    fLexer.Next();
+end;
+
+procedure TmwSimplePasPar.PopLexer;
+begin
+  fLexerStack.Pop();
+  fLexerStack.Top.CloneDefinesFrom(fLexer);
+  fLexer := fLexerStack.Top;
+end;
+
+procedure TmwSimplePasPar.OnLibraryDirect(Sender: TmwBasePasLex);
+begin
+end;
+
+procedure TmwSimplePasPar.OnIncludeDirect(Sender: TmwBasePasLex);
+begin
 end;
 
 procedure TmwSimplePasPar.GlobalAttributes;
@@ -4985,7 +4448,7 @@ end;
 
 procedure TmwSimplePasPar.GlobalAttributeSections;
 begin
-  while TokenID = tokSquareOpen do
+  while Lexer.TokenID = tokSquareOpen do
     GlobalAttributeSection;
 end;
 
@@ -4994,7 +4457,7 @@ begin
   Expected(tokSquareOpen);
   GlobalAttributeTargetSpecifier;
   AttributeList;
-  while TokenID = tokComma do
+  while Lexer.TokenID = tokComma do
   begin
     Expected(tokComma);
     GlobalAttributeTargetSpecifier;
@@ -5021,7 +4484,7 @@ end;
 
 procedure TmwSimplePasPar.AttributeSections;
 begin
-  while TokenID = tokSquareOpen do
+  while Lexer.TokenID = tokSquareOpen do
     AttributeSection;
 end;
 
@@ -5032,7 +4495,7 @@ begin
   if Lexer.AheadTokenID = tokColon then
     AttributeTargetSpecifier;
   AttributeList;
-  while TokenID = tokComma do
+  while Lexer.TokenID = tokComma do
   begin
     Lexer.InitAhead;
     if Lexer.AheadTokenID = tokColon then
@@ -5050,7 +4513,7 @@ end;
 
 procedure TmwSimplePasPar.AttributeTarget;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokProperty:
       Expected(tokProperty);
     tokType:
@@ -5063,7 +4526,7 @@ end;
 procedure TmwSimplePasPar.AttributeList;
 begin
   Attribute;
-  while TokenID = tokComma do
+  while Lexer.TokenID = tokComma do
   begin
     Expected(tokComma);
     AttributeList;
@@ -5073,13 +4536,13 @@ end;
 procedure TmwSimplePasPar.Attribute;
 begin
   AttributeName;
-  if TokenID = tokRoundOpen then
+  if Lexer.TokenID = tokRoundOpen then
     AttributeArguments;
 end;
 
 procedure TmwSimplePasPar.AttributeName;
 begin
-  case TokenID of
+  case Lexer.TokenID of
     tokIn, tokOut, tokConst, tokConstRef, tokVar:
       NextToken;
   else
@@ -5090,7 +4553,7 @@ end;
 procedure TmwSimplePasPar.AttributeArguments;
 begin
   Expected(tokRoundOpen);
-  if TokenID <> tokRoundClose then
+  if Lexer.TokenID <> tokRoundClose then
   begin
     Lexer.InitAhead;
     if Lexer.AheadTokenID = tokEqual then
@@ -5106,7 +4569,7 @@ end;
 procedure TmwSimplePasPar.PositionalArgumentList;
 begin
   PositionalArgument;
-  while TokenID = tokComma do
+  while Lexer.TokenID = tokComma do
   begin
     Expected(tokComma);
     PositionalArgument;
@@ -5121,7 +4584,7 @@ end;
 procedure TmwSimplePasPar.NamedArgumentList;
 begin
   NamedArgument;
-  while TokenID = tokComma do
+  while Lexer.TokenID = tokComma do
   begin
     Expected(tokComma);
     NamedArgument;

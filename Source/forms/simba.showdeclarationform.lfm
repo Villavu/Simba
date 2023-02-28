@@ -1,0 +1,74 @@
+object ShowDeclarationForm: TShowDeclarationForm
+  Left = 285
+  Height = 450
+  Top = 250
+  Width = 700
+  Caption = 'Select Declaration'
+  ClientHeight = 450
+  ClientWidth = 700
+  DesignTimePPI = 120
+  Position = poMainFormCenter
+  LCLVersion = '2.2.4.0'
+  object Grid: TStringGrid
+    Left = 0
+    Height = 396
+    Top = 0
+    Width = 700
+    Align = alClient
+    ColCount = 4
+    Columns = <    
+      item
+        ButtonStyle = cbsCheckboxColumn
+        SizePriority = 0
+        Title.Caption = ''
+        Width = 290
+      end    
+      item
+        Title.Caption = 'Function'
+        Width = 415
+      end    
+      item
+        SizePriority = 0
+        Title.Caption = 'Line'
+        Width = 290
+      end    
+      item
+        Title.Caption = 'File'
+        Width = 416
+      end>
+    DefaultColWidth = 200
+    FixedCols = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing, goDblClickAutoSize, goSmoothScroll, goRowHighlight]
+    RowCount = 1
+    TabOrder = 0
+    OnDblClick = GridDblClick
+    OnDrawCell = GridDrawCell
+    OnGetCheckboxState = GridGetCheckboxState
+    OnPrepareCanvas = GridPrepareCanvas
+    OnUserCheckboxImage = GridUserCheckboxImage
+    ColWidths = (
+      290
+      415
+      290
+      416
+    )
+  end
+  object ButtonPanel: TButtonPanel
+    Left = 8
+    Height = 38
+    Top = 404
+    Width = 684
+    BorderSpacing.Around = 8
+    OKButton.Name = 'OKButton'
+    OKButton.Caption = 'Open Declaration'
+    OKButton.OnClick = OKButtonClick
+    HelpButton.Name = 'HelpButton'
+    HelpButton.DefaultCaption = True
+    CloseButton.Name = 'CloseButton'
+    CloseButton.DefaultCaption = True
+    CancelButton.Name = 'CancelButton'
+    CancelButton.DefaultCaption = True
+    TabOrder = 1
+    ShowButtons = [pbOK, pbCancel]
+  end
+end
