@@ -381,7 +381,6 @@ var
   I: Integer;
   Decl: TDeclaration;
   Decls: TDeclarationArray;
-  ScreenPoint: TPoint;
 begin
   if IsParamHintCommand(Command, AChar) and CodetoolsSetup then
   begin
@@ -397,7 +396,7 @@ begin
 
     FParenthesesPoint := FindParenthesesPoint();
 
-    FCodeinsight.SetScript(Editor.Text, '', Editor.SelStart, Editor.SelStart);
+    FCodeinsight.SetScript(Editor.Text, '', TSimbaEditor(Editor).GetCaretPos(True));
     FCodeinsight.Run();
 
     Decl := FCodeinsight.ParseExpression(TSimbaEditor(Editor).GetExpression(FParenthesesPoint.X -1, FParenthesesPoint.Y), [EParseExpressionFlag.WantVarType]);
@@ -407,7 +406,8 @@ begin
     begin
       FDisplayPoint := FParenthesesPoint;
       Decls := [Decl];
-    end;
+    end
+    else
     if (Decl is TDeclaration_Method) then
     begin
       FDisplayPoint := FParenthesesPoint.Offset(-Length(Decl.Name), 0);

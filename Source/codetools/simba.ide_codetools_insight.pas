@@ -42,7 +42,7 @@ type
 
     property ScriptParser: TCodeParser read FScriptParser;
 
-    procedure SetScript(Script: String; FileName: String; CaretPos, MaxPos: Integer);
+    procedure SetScript(Script: String; FileName: String; CaretPos: Integer = -1);
     procedure Run;
 
     function FindDecl(S: String): TDeclaration;
@@ -148,18 +148,23 @@ begin
   FBaseDefines.Free();
 end;
 
-procedure TCodeinsight.SetScript(Script: String; FileName: String; CaretPos, MaxPos: Integer);
+procedure TCodeinsight.SetScript(Script: String; FileName: String; CaretPos: Integer);
 begin
   Reset();
 
   FScriptParser.SetScript(Script, FileName, FBaseDefines.ToStringArray());
   FScriptParser.Lexer.CaretPos := CaretPos;
-  FScriptParser.Lexer.MaxPos := MaxPos;
 end;
 
 procedure TCodeinsight.Run;
+var
+  I: Integer;
 begin
   FScriptParser.Run();
+
+  for I := 0 to FScriptParser.Locals.Count - 1 do
+    if (FScriptParser.Locals[I] is TDeclaration_WithVariable) then
+      FScriptParser.Locals.Extend(GetMembersOfType(ParseExpression(FScriptParser.Locals[I].Text, [EParseExpressionFlag.WantMethodResult])));
 end;
 
 function TCodeinsight.FindDecl(S: String): TDeclaration;

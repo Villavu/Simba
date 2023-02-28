@@ -448,7 +448,7 @@ begin
 
     FDecls := [];
     FLocalDecls := [];
-    FCodeinsight.SetScript(Editor.Text, '', Editor.SelStart, Editor.SelStart);
+    FCodeinsight.SetScript(Editor.Text, '', TSimbaEditor(Editor).GetCaretPos(True));
     FCodeinsight.Run();
 
     Expression := TSimbaEditor(Editor).GetExpression(Editor.CaretX - 1, Editor.CaretY);
@@ -469,7 +469,7 @@ begin
       Filter := Expression;
 
       FDecls := FCodeinsight.GetGlobals();
-      FLocalDecls := FCodeinsight.ScriptParser.Locals.ToArray();
+      FLocalDecls := FCodeinsight.GetLocals();
     end;
 
     StartPoint := Editor.CaretXY;

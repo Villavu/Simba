@@ -195,7 +195,8 @@ begin
       'WIDESTRING':    Result := Run(FStringHelpers, 'WideString', 'WideChar');
       'UNICODESTRING': Result := Run(FStringHelpers, 'UnicodeString', 'UnicodeChar');
     end;
-  end else
+  end
+  else
   if (Decl is TDeclaration_TypeArray) then
   begin
     ArrName := Decl.Name;

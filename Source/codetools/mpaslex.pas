@@ -168,7 +168,6 @@ type
 
     IsLibrary: Boolean;
     CaretPos: Integer;
-    MaxPos: Integer;
 
     constructor Create(Doc: String; AFileName: String = ''); virtual;
     constructor CreateFromFile(AFileName: String); virtual;
@@ -365,7 +364,6 @@ begin
   FDefines.UseLocale := False;
   FDefines.Duplicates := dupIgnore;
 
-  MaxPos := -1;
   CaretPos := -1;
 end;
 
@@ -1253,13 +1251,13 @@ begin
     end;
   end;
 
-  if (MaxPos > -1) and (fTokenPos > MaxPos) and (not IsJunk) then
-    fTokenID := tok_DONE;
+  //if (MaxPos > -1) and (fTokenPos > MaxPos) and (not IsJunk) then
+  // fTokenID := tok_DONE;
 end;
 
 function TmwBasePasLex.GetIsJunk: Boolean;
 begin
-  result := (fTokenID in JunkTokens) or (FUseDefines and (FDefineStack > 0) and (TokenID <> tokNull) and (TokenID <> tok_DONE));
+  result := (fTokenID in JunkTokens) or (FUseDefines and (FDefineStack > 0) and (TokenID <> tokNull){ and (TokenID <> tok_DONE)});
 end;
 
 function TmwBasePasLex.GetIsSpace: Boolean;

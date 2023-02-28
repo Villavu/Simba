@@ -27,7 +27,6 @@ implementation
 {$R *.lfm}
 
 uses
-  mPasLexTypes,
   simba.mufasatypes, simba.ide_codetools_parser;
 
 procedure TForm1.Timer1Timer(Sender: TObject);
@@ -35,11 +34,9 @@ begin
   if (ChangeStamp = SynEdit1.ChangeStamp) then
     Exit;
 
-  SetupKeywordDictionary();
   with TCodeParser.Create() do
   try
     SetScript(SynEdit1.Text);
-    MaxPos := SynEdit1.SelStart;
     Run();
 
     Memo1.Text := DebugTree();

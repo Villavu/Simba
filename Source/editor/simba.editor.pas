@@ -51,6 +51,8 @@ type
     property ModifiedLinesGutter: TSimbaEditorModifiedLinesGutter read FModifiedLinesGutter;
     property Attributes: TSimbaEditor_Attributes read FAttributes;
 
+    function GetCaretPos(GoBackToWord: Boolean): Integer;
+
     // Is highlighter attribute at caret
     function IsHighlighterAttribute(Values: TStringArray): Boolean;
     // Is highlighter attribute at caret + offset
@@ -228,6 +230,18 @@ begin
     MarkupByClass[TSynEditMarkupHighlightAllCaret].Enabled := SelAvail;
 end;
 
+function TSimbaEditor.GetCaretPos(GoBackToWord: Boolean): Integer;
+var
+  TheText: String;
+begin
+  TheText := TextBetweenPoints[TPoint.Create(1, 1), LogicalCaretXY];
+
+  Result := Length(TheText);
+  if GoBackToWord then
+    while (Result > 1) and (Result <= Length(TheText)) and (TheText[Result] <= #32) do
+      Dec(Result);
+end;
+
 procedure TSimbaEditor.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
@@ -332,46 +346,54 @@ end;
 
 function TSimbaEditor.GetExpression(X, Y: Integer): String;
 var
-  StartIndex, EndIndex, InRound, InSquare: Integer;
-  TheText: String;
+  Line: String;
+  InRound, InSquare: Integer;
 begin
   Result := '';
-  if (X > Length(LineText)) then
-    Exit;
 
-  TheText := Text;
-  StartIndex := RowColToCharIndex(TPoint.Create(X, Y));
-  EndIndex := StartIndex;
-  if (StartIndex < 1) or (StartIndex > Length(TheText)) then
+  Y := Y - 1;
+  if (Y < 0) or (Y >= TextView.Count) then
+    Exit;
+  Line := TextView[Y];
+  if (X > Length(Line)) then
     Exit;
 
   InRound := 0;
   InSquare := 0;
 
-  while (EndIndex > 0) do
+  while (Y >= 0) do
   begin
-    case TheText[EndIndex] of
+    case Line[X] of
       ')': Inc(InRound);
-      '(': Dec(InRound);
       ']': Inc(InSquare);
-      '[': Dec(InSquare);
+      '(':
+        begin
+          Dec(InRound);
+          if (InRound < 0) then
+            Break;
+        end;
+      '[':
+        begin
+          Dec(InSquare);
+          if (InSquare < 0) then
+            Break;
+        end;
       #0..#32:
         if (InRound <= 0) and (InSquare <= 0) then
           Break;
     end;
 
-    case TheText[EndIndex] of
-      '(': if (InRound < 0) then Break;
-      '[': if (InSquare < 0) then Break;
+    Result := Line[X] + Result;
+
+    X := X - 1;
+    if (X < 1) then // go back (up) a line
+    begin
+      Y := Y - 1;
+      X := 1;
+      if (Y >= 0) then
+        Line := TextView[Y];
     end;
-
-    Dec(EndIndex);
   end;
-
-  if (EndIndex = 0) then
-    Result := ''
-  else
-    Result := Copy(TheText, EndIndex + 1, StartIndex - EndIndex);
 end;
 
 function TSimbaEditor.GetExpressionEx(X, Y: Integer): String;

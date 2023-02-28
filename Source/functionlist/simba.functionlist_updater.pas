@@ -79,7 +79,7 @@ begin
       FFunctionList.TreeView.BeginUpdate();
       FFunctionList.ExpandedState.CreateChildNodes(FFunctionList.ScriptNode);
 
-      FCodeinsight.SetScript(Tab.Script, Tab.ScriptFileName, -1, -1);
+      FCodeinsight.SetScript(Tab.Script, Tab.ScriptFileName);
     end;
   end;
 end;

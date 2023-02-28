@@ -36,7 +36,7 @@ type
 
     function GetItemsOfClass(AClass: TDeclarationClass; ExactClass: Boolean = False; SubSearch: Boolean = False): TDeclarationArray;
     function GetFirstItemOfClass(AClass: TDeclarationClass; ExactClass: Boolean = False; SubSearch: Boolean = False): TDeclaration;
-    function GetItemInPosition(Position: Integer; CheckEnd: Boolean = True): TDeclaration;
+    function GetItemInPosition(Position: Integer): TDeclaration;
 
     function GetTextOfClass(AClass: TDeclarationClass): String;
     function GetTextOfClassNoComments(AClass: TDeclarationClass): String;
@@ -157,8 +157,8 @@ type
     constructor Create; reintroduce;
   end;
 
-  TDeclaration_CompoundStatement = class(TDeclaration);
   TDeclaration_WithStatement = class(TDeclaration);
+  TDeclaration_WithVariableList = class(TDeclaration);
   TDeclaration_WithVariable = class(TDeclaration);
 
   TDeclaration_Stub = class(TDeclaration);
@@ -357,9 +357,7 @@ type
     function GetHash: String; virtual;
 
     function GetCaretPos: Integer;
-    function GetMaxPos: Integer;
     procedure SetCaretPos(const Value: Integer);
-    procedure SetMaxPos(const Value: Integer);
 
     procedure EmptyVarStub(VarStub: TDeclaration_VarStub; VarClass: TDeclaration_VarClass);
     procedure EmptyParamStub(ParamStub: TDeclaration_ParamStub);
@@ -377,9 +375,9 @@ type
     procedure OnLibraryDirect(Sender: TmwBasePasLex); override;
     procedure OnIncludeDirect(Sender: TmwBasePasLex); override;                 //Includes
 
-    procedure CompoundStatement; override;                                      //Begin-End
     procedure WithStatement; override;                                          //With
-    procedure Variable; override;                                               //With
+    procedure VariableList; override;                                           //With
+    procedure Variable; override;
 
     procedure ConstantType; override;
     procedure ConstantValue; override;
@@ -443,7 +441,6 @@ type
     property OnHandleLibrary: TOnHandleLibrary read FOnHandleLibrary write FOnHandleLibrary;
 
     property CaretPos: Integer read GetCaretPos write SetCaretPos;
-    property MaxPos: Integer read GetMaxPos write SetMaxPos;
 
     property Hash: String read GetHash;
 
@@ -909,13 +906,13 @@ begin
   end;
 end;
 
-function TDeclarationList.GetItemInPosition(Position: Integer; CheckEnd: Boolean): TDeclaration;
+function TDeclarationList.GetItemInPosition(Position: Integer): TDeclaration;
 
   procedure Search(Declaration: TDeclaration; var Result: TDeclaration);
   var
     I: Integer;
   begin
-    if (Position >= Declaration.StartPos) and ((not CheckEnd) or (Position <= Declaration.EndPos)) then
+    if (Position >= Declaration.StartPos) and (Position <= Declaration.EndPos) then
     begin
       Result := Declaration;
       for I := 0 to Declaration.Items.Count - 1 do
@@ -929,7 +926,7 @@ begin
   Result := nil;
 
   for I := 0 to Count - 1 do
-    if (Position >= FItems[I].StartPos) and ((not CheckEnd) or (Position <= FItems[I].EndPos)) then
+    if (Position >= FItems[I].StartPos) and (Position <= FItems[I].EndPos) then
       Search(FItems[I], Result);
 end;
 
@@ -1228,10 +1225,7 @@ end;
 
 procedure TCodeParser.PopStack();
 begin
-  if (Lexer.TokenID = tok_DONE) then
-    FStack.Pop()
-  else
-    FStack.Pop().fEndPos := fLastNoJunkPos;
+  FStack.Pop().fEndPos := fLastNoJunkPos;
 end;
 
 procedure TCodeParser.FindLocals;
@@ -1280,7 +1274,8 @@ procedure TCodeParser.FindLocals;
 
     while (Decl is TDeclaration_WithStatement) do
     begin
-      FLocals.Extend(Decl.Items.GetItemsOfClass(TDeclaration_WithVariable));
+      if (Decl.Items.GetFirstItemOfClass(TDeclaration_WithVariableList) <> nil) then
+        FLocals.Extend(Decl.Items.GetFirstItemOfClass(TDeclaration_WithVariableList).Items.GetItemsOfClass(TDeclaration_WithVariable));
 
       Decl := Decl.GetOwnerByClass(TDeclaration_WithStatement);
     end;
@@ -1294,8 +1289,6 @@ begin
   if (CaretPos > -1) then
   begin
     Decl := FItems.GetItemInPosition(CaretPos);
-    if (Decl = nil) then
-      Decl := FItems.GetItemInPosition(CaretPos, False);
     if (Decl = nil) then
       Exit;
 
@@ -1361,24 +1354,10 @@ begin
     Result := fLexer.CaretPos;
 end;
 
-function TCodeParser.GetMaxPos: Integer;
-begin
-  if (fLexer = nil) then
-    Result := -1
-  else
-    Result := fLexer.MaxPos;
-end;
-
 procedure TCodeParser.SetCaretPos(const Value: Integer);
 begin
   if (fLexer <> nil) then
     fLexer.CaretPos := Value;
-end;
-
-procedure TCodeParser.SetMaxPos(const Value: Integer);
-begin
-  if (fLexer <> nil) then
-    fLexer.MaxPos := Value;
 end;
 
 procedure TCodeParser.EmptyVarStub(VarStub: TDeclaration_VarStub; VarClass: TDeclaration_VarClass);
@@ -1487,8 +1466,8 @@ begin
     end else
       DeclarationSection();
 
-    if (Lexer.TokenID = tok_DONE) then
-      Break;
+    //if (Lexer.TokenID = tok_DONE) then
+    //  Break;
   end;
 end;
 
@@ -1518,35 +1497,23 @@ begin
     DebugLn('Include "' + Sender.DirectiveParamAsFileName + '" not handled');
 end;
 
-procedure TCodeParser.CompoundStatement;
+procedure TCodeParser.WithStatement;
 begin
-  if (not InDeclaration(TDeclaration_Root, TDeclaration_Method, TDeclaration_WithStatement)) then
-  begin
-    inherited;
-    Exit;
-  end;
-
-  PushStack(TDeclaration_CompoundStatement);
+  PushStack(TDeclaration_WithStatement);
   inherited;
   PopStack();
 end;
 
-procedure TCodeParser.WithStatement;
+procedure TCodeParser.VariableList;
 begin
-  if (not InDeclaration(TDeclaration_Method, TDeclaration_CompoundStatement)) then
-  begin
-    inherited;
-    Exit;
-  end;
-
-  PushStack(TDeclaration_WithStatement);
+  PushStack(TDeclaration_WithVariableList);
   inherited;
   PopStack();
 end;
 
 procedure TCodeParser.Variable;
 begin
-  if (not InDeclaration(TDeclaration_WithStatement)) then
+  if (not InDeclaration(TDeclaration_WithVariableList)) then
   begin
     inherited;
     Exit;
@@ -1760,8 +1727,6 @@ begin
 end;
 
 procedure TCodeParser.ObjectNameOfMethod;
-var
-  Decl: TDeclaration;
 begin
   if InDeclaration(TDeclaration_Method) then
   begin
@@ -1769,14 +1734,12 @@ begin
     TDeclaration_Method(FStack.Top).isObjectMethod := True;
   end;
 
-  Decl := PushStack(TDeclaration_MethodObjectName);
+  PushStack(TDeclaration_MethodObjectName);
   TypeKind();
   PopStack();
 end;
 
 procedure TCodeParser.ReturnType;
-var
-  Decl: TDeclaration;
 begin
   if (not InDeclaration(TDeclaration_Method, TDeclaration_TypeMethod)) then
   begin
@@ -1784,7 +1747,7 @@ begin
     Exit;
   end;
 
-  Decl := PushStack(TDeclaration_MethodResult);
+  PushStack(TDeclaration_MethodResult);
   TypeKind();
   PopStack();
 end;

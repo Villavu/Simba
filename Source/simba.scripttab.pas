@@ -150,7 +150,7 @@ begin
     Codeinsight := TCodeinsight.Create();
 
     try
-      Codeinsight.SetScript(Script, ScriptFileName, Editor.SelStart, Editor.SelStart);
+      Codeinsight.SetScript(Script, ScriptFileName, Editor.GetCaretPos(True));
       Codeinsight.Run();
 
       Decl := Codeinsight.ParseExpression(FLinkExpression, []);

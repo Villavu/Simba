@@ -219,8 +219,8 @@ type
     tokMulAsgn,
     tokPlusAsgn,
     tokMinusAsgn,
-    tokPowAsgn,
-    tok_DONE
+    tokPowAsgn
+    //tok_DONE
   );
 
   TptTokenSet = set of TptTokenKind;
@@ -228,7 +228,7 @@ type
 type
   // "Perfect Hashing"
   // A hashtable with no collisions.
-  TKeywordDictionary = class
+  TKeywordDictionary = class(TObject)
   protected
   const
     SEED = 123;

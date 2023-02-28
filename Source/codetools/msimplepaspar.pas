@@ -663,7 +663,7 @@ begin
 
   if (Sender <> nil) then
   begin
-    if (Sender.MaxPos = -1) or (Sender.TokenPos < Sender.MaxPos) then
+    if (Sender.CaretPos = -1) or (Sender.TokenPos < Sender.CaretPos) then
     begin
       if (Sender.FileName <> '') then
         DebugLn('[Codetools]: "%s" at line %d, column %d in file "%s"', [Message, Sender.PosXY.Y + 1, Sender.PosXY.X, Sender.FileName])
@@ -1969,7 +1969,7 @@ end;
 procedure TmwSimplePasPar.RaiseStatement;
 begin
   Expected(tokRaise);
-  while (not (Lexer.TokenID in [tokSemiColon, tokNull, tok_DONE])) do
+  while (not (Lexer.TokenID in [tokSemiColon, tokNull{, tok_DONE}])) do
     NextToken();
 end;
 
@@ -2272,7 +2272,7 @@ begin
     else
       TypeIdentifer;
 
-    while (not (Lexer.TokenID in [tokRoundClose, tokNull, tok_DONE])) do
+    while (not (Lexer.TokenID in [tokRoundClose, tokNull{, tok_DONE}])) do
       NextToken;
     Expected(tokRoundClose);
   end;
@@ -4242,7 +4242,7 @@ end;
 
 procedure TmwSimplePasPar.IncludeFile;
 begin
-  while (not (Lexer.TokenID in [tokNull, tok_DONE])) do
+  while (not (Lexer.TokenID in [tokNull{, tok_DONE}])) do
     case Lexer.TokenID of
       tokClass:
         begin
