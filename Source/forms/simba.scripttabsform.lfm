@@ -24,7 +24,8 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
     Images = SimbaForm.Images
     PopupMenu = TabPopupMenu
     TabOrder = 0
-    OnChange = DoOnTabChange
+    OnChange = DoTabChange
+    OnChanging = DoTabChanging
     Options = [nboDoChangeOnSetIndex]
     OnTabDragOverEx = NotebookTabDragOverEx
     OnTabEndDrag = NotebookTabEndDrag

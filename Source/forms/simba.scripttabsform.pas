@@ -54,7 +54,6 @@ type
     procedure DoEditorPopupClick(Sender: TObject);
     procedure DoEditorPopupShow(Sender: TObject);
     procedure DoOnDropFiles(Sender: TObject; const FileNames: array of String);
-    procedure DoOnTabChange(Sender: TObject);
     procedure DoTabPopupClick(Sender: TObject);
     procedure DoTabPopupOpen(Sender: TObject);
     // Open new tab if empty tab area on the right is clicked
@@ -68,6 +67,8 @@ type
     procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FormMouseLeave(Sender: TObject);
     procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    procedure DoTabChanging(Sender: TObject; var AllowChange: Boolean);
+    procedure DoTabChange(Sender: TObject);
     // Keep output tabs in same order
     procedure NotebookTabDragOverEx(Sender, Source: TObject; OldIndex, NewIndex: Integer; CopyDrag: Boolean; var Accept: Boolean);
     procedure NotebookTabEndDrag(Sender, Target: TObject; X, Y: Integer);
@@ -77,6 +78,7 @@ type
       StartIndex: Integer;
       EndIndex: Integer;
     end;
+    FOutputChangingLock: Integer;
 
     FEditorReplace: TSimbaEditorReplace;
     FEditorFind: TSimbaEditorFind;
@@ -125,6 +127,9 @@ type
 
     function Open(FileName: String; CheckOtherTabs: Boolean = True): Boolean; overload;
     procedure Open; overload;
+
+    procedure LockOutputChanging;
+    procedure UnlockOutputChanging;
   end;
 
 var
@@ -196,12 +201,6 @@ var
 begin
   for I := 0 to High(FileNames) do
     Self.Open(FileNames[I], True);
-end;
-
-procedure TSimbaScriptTabsForm.DoOnTabChange(Sender: TObject);
-begin
-  if (FOnEditorChanged <> nil) then
-    FOnEditorChanged(CurrentTab);
 end;
 
 procedure TSimbaScriptTabsForm.DoTabPopupClick(Sender: TObject);
@@ -322,6 +321,41 @@ procedure TSimbaScriptTabsForm.FormMouseMove(Sender: TObject; Shift: TShiftState
 begin
   if (HostDockSite is TSimbaAnchorDockHostSite) then
     TSimbaAnchorDockHostSite(HostDockSite).Header.MouseMove(Shift, X, Y);
+end;
+
+procedure TSimbaScriptTabsForm.DoTabChanging(Sender: TObject; var AllowChange: Boolean);
+var
+  Tab: TSimbaScriptTab;
+begin
+  Tab := CurrentTab;
+  if (Tab <> nil) then
+  begin
+    if (Tab.FunctionList <> nil) then
+      Tab.FunctionList.Hide();
+    if (Tab.OutputBox <> nil) and (FOutputChangingLock = 0) then
+      CurrentTab.OutputBox.Hide();
+  end;
+
+  AllowChange := True;
+end;
+
+procedure TSimbaScriptTabsForm.DoTabChange(Sender: TObject);
+var
+  Tab: TSimbaScriptTab;
+begin
+  Tab := CurrentTab;
+  if (Tab <> nil) then
+  begin
+    if (Tab.FunctionList <> nil) then
+      Tab.FunctionList.Show();
+    if (Tab.OutputBox <> nil) and (FOutputChangingLock = 0) then
+      Tab.OutputBox.Show();
+    if (Tab.Editor <> nil) and Tab.Editor.CanSetFocus() then
+      Tab.Editor.SetFocus();
+  end;
+
+  if (FOnEditorChanged <> nil) then
+    FOnEditorChanged(CurrentTab);
 end;
 
 procedure TSimbaScriptTabsForm.NotebookTabDragOverEx(Sender, Source: TObject; OldIndex, NewIndex: Integer; CopyDrag: Boolean; var Accept: Boolean);
@@ -535,6 +569,16 @@ begin
     on E: Exception do
       ShowMessage('Exception while opening file: ' + E.Message);
   end;
+end;
+
+procedure TSimbaScriptTabsForm.LockOutputChanging;
+begin
+  Inc(FOutputChangingLock);
+end;
+
+procedure TSimbaScriptTabsForm.UnlockOutputChanging;
+begin
+  Dec(FOutputChangingLock);
 end;
 
 end.

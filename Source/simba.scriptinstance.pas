@@ -129,9 +129,10 @@ begin
     FProcess.Terminate(100);
 
   if FErrorSet then
-  begin
-    ScriptTab := SimbaScriptTabsForm.FindTab(Self);
+  try
+    SimbaScriptTabsForm.LockOutputChanging();
 
+    ScriptTab := SimbaScriptTabsForm.FindTab(Self);
     if (ScriptTab <> nil) then
     begin
       // Check error is not in a include
@@ -143,6 +144,8 @@ begin
       if SimbaScriptTabsForm.Open(Error.FileName) then
         SimbaScriptTabsForm.CurrentEditor.FocusLine(Error.Line, Error.Column, $0000A5);
     end;
+  finally
+    SimbaScriptTabsForm.UnlockOutputChanging();
   end;
 
   State := ESimbaScriptState.STATE_STOP;
