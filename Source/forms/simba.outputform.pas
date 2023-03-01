@@ -430,6 +430,7 @@ begin
         TopLine := Lines.Count;
       end;
       EndUpdate();
+      Invalidate();
 
       FBuffer.Clear();
     end;

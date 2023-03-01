@@ -396,8 +396,8 @@ constructor TSimbaSettings.Create;
 begin
   inherited Create();
 
-  if Screen.Fonts.IndexOf('Cascadia Mono Light') > -1 then
-    SynDefaultFontName := 'Cascadia Mono Light';
+  if Screen.Fonts.IndexOf('Consolas') > -1 then
+    SynDefaultFontName := 'Consolas';
 
   FFirstLaunch := True;
   FList := TSettingList.Create();

@@ -29,8 +29,6 @@ type
 
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
-    procedure DoHide; override;
-    procedure DoShow; override;
     procedure DoShowDeclaration(Data: PtrInt);
 
     procedure ScriptStateChanged(Sender: TObject);
@@ -118,26 +116,6 @@ begin
   end;
 
   inherited Notification(AComponent, Operation);
-end;
-
-procedure TSimbaScriptTab.DoHide;
-begin
-  inherited DoHide();
-
-  if (FFunctionList <> nil) then
-    FFunctionList.Hide();
-end;
-
-procedure TSimbaScriptTab.DoShow;
-begin
-  inherited DoShow();
-
-  if (FOutputBox <> nil) then
-    FOutputBox.Show();
-  if (FFunctionList <> nil) then
-    FFunctionList.Show();
-  if (FEditor <> nil) and FEditor.CanSetFocus() then
-    FEditor.SetFocus();
 end;
 
 procedure TSimbaScriptTab.DoShowDeclaration(Data: PtrInt);
