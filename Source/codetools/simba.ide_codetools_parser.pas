@@ -141,16 +141,6 @@ type
     property isOverloadMethod: Boolean index 7 read GetFlags write SetFlags;
     property isStaticMethod: Boolean index 8 read GetFlags write SetFlags;
 
-    property isVar: Boolean index 9 read GetFlags write SetFlags;
-    property isConst: Boolean index 10 read GetFlags write SetFlags;
-    property isType: Boolean index 11 read GetFlags write SetFlags;
-    property isEnum: Boolean index 12 read GetFlags write SetFlags;
-    property isScopedEnum: Boolean index 13 read GetFlags write SetFlags;
-    property isEnumElement: Boolean index 14 read GetFlags write SetFlags;
-    property isRecord: Boolean index 15 read GetFlags write SetFlags;
-    property isParam: Boolean index 16 read GetFlags write SetFlags;
-    property isField: Boolean index 17 read GetFlags write SetFlags;
-
     constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); virtual; reintroduce;
     destructor Destroy; override;
   end;
@@ -191,19 +181,13 @@ type
   TDeclaration_ParentType = class(TDeclaration_Identifier);
   TDeclaration_OrdinalType = class(TDeclaration);
 
-  // Types
-  TDeclaration_Type = class(TDeclaration)
-  public
-    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); override;
-  end;
-
+  TDeclaration_Type = class(TDeclaration);
   TDeclaration_TypeRecord = class(TDeclaration_Type)
   public
     function Parent: TDeclaration;
     function Fields: TDeclarationArray;
   end;
 
-  TDeclaration_TypeUnion = class(TDeclaration_Type);
   TDeclaration_TypeArray = class(TDeclaration_Type)
   public
     function Dump: String; override;
@@ -242,10 +226,6 @@ type
     function Elements: TDeclarationArray;
   end;
 
-  TDeclaration_TypeSet = class(TDeclaration_Type);
-  TDeclaration_TypeRange = class(TDeclaration_Type);
-  TDeclaration_TypeEnumScoped = class(TDeclaration_Type);
-
   TDeclaration_TypeMethod = class(TDeclaration_Type)
   protected
     FResultString: TNullableString;
@@ -254,10 +234,16 @@ type
   public
     property ResultString: String read GetResultString;
   end;
+
   TDeclaration_TypeNativeMethod = class(TDeclaration_Type)
   public
     function GetMethod: TDeclaration;
   end;
+
+  TDeclaration_TypeSet = class(TDeclaration_Type);
+  TDeclaration_TypeRange = class(TDeclaration_Type);
+  TDeclaration_TypeEnumScoped = class(TDeclaration_Type);
+  TDeclaration_TypeUnion = class(TDeclaration_Type);
 
   TDeclaration_VarType = class(TDeclaration);
   TDeclaration_VarDefault = class(TDeclaration);
@@ -272,24 +258,14 @@ type
   public
     DefToken: TptTokenKind;
 
-    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); override;
-
     property VarType: TDeclaration read GetVarType;
     property VarTypeString: String read GetVarTypeString;
     property VarDefaultString: String read GetVarDefaultString;
   end;
 
   TDeclaration_VarClass = class of TDeclaration_Var;
-
-  TDeclaration_Const = class(TDeclaration_Var)
-  public
-    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); override;
-  end;
-
-  TDeclaration_Field = class(TDeclaration_Var)
-  public
-    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); override;
-  end;
+  TDeclaration_Const = class(TDeclaration_Var);
+  TDeclaration_Field = class(TDeclaration_Var);
 
   TDeclaration_Method = class(TDeclaration)
   protected
@@ -325,7 +301,6 @@ type
   public
     ParamType: TptTokenKind;
 
-    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); override;
     function Dump: String; override;
   end;
 
@@ -372,16 +347,16 @@ type
     procedure PopStack; inline;
 
     procedure ParseFile; override;
-    procedure OnLibraryDirect(Sender: TmwBasePasLex); override;
+    procedure OnLibraryDirect(Sender: TmwBasePasLex); override;                 //Plugins
     procedure OnIncludeDirect(Sender: TmwBasePasLex); override;                 //Includes
 
     procedure WithStatement; override;                                          //With
     procedure VariableList; override;                                           //With
-    procedure Variable; override;
+    procedure Variable; override;                                               //With
 
-    procedure ConstantType; override;
-    procedure ConstantValue; override;
-    procedure ConstantExpression; override;
+    procedure ConstantType; override;                                           //Var + Const
+    procedure ConstantValue; override;                                          //Var + Const
+    procedure ConstantExpression; override;                                     //Var + Const
     procedure TypeKind; override;                                               //Var + Const + Array + Record
     procedure ProceduralType; override;                                         //Var + Procedure/Function Parameters
 
@@ -390,7 +365,7 @@ type
     procedure TypeDeclaration; override;                                        //Type
     procedure TypeName; override;                                               //Type
     procedure ExplicitType; override;                                           //Type
-    procedure PointerType; override;
+    procedure PointerType; override;                                            //Type
 
     procedure VarDeclaration; override;                                         //Var
     procedure VarName; override;                                                //Var
@@ -457,30 +432,6 @@ type
   TCodeParserList = specialize TSimbaObjectList<TCodeParser>;
 
 implementation
-
-constructor TDeclaration_Type.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
-begin
-  inherited Create(AParser, AOwner, AStart, AEnd);
-
-  ClearFlags();
-  isType := True;
-end;
-
-constructor TDeclaration_Field.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
-begin
-  inherited;
-
-  ClearFlags();
-  isField := True;
-end;
-
-constructor TDeclaration_Const.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
-begin
-  inherited;
-
-  ClearFlags();
-  isConst := True;
-end;
 
 function TDeclaration_TypeNativeMethod.GetMethod: TDeclaration;
 begin
@@ -643,14 +594,6 @@ begin
   Result := FVarDefaultString.Value;
 end;
 
-constructor TDeclaration_Var.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
-begin
-  inherited;
-
-  ClearFlags();
-  isVar := True;
-end;
-
 function TDeclaration_EnumElementName.GetName: string;
 begin
   if FName.IsNull then
@@ -729,14 +672,6 @@ begin
   end;
 
   Result := FHeaderString.Value;
-end;
-
-constructor TDeclaration_Parameter.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
-begin
-  inherited;
-
-  ClearFlags();
-  isParam := True;
 end;
 
 function TDeclaration_Parameter.Dump: String;
@@ -1848,11 +1783,8 @@ begin
 end;
 
 procedure TCodeParser.RecordType;
-var
-  Decl: TDeclaration;
 begin
-  Decl := PushStack(TDeclaration_TypeRecord);
-  Decl.isRecord := True;
+  PushStack(TDeclaration_TypeRecord);
   inherited;
   PopStack();
 end;
@@ -1926,8 +1858,6 @@ begin
 end;
 
 procedure TCodeParser.EnumeratedType;
-var
-  Decl: TDeclaration;
 begin
   if Lexer.IsDefined('!SCOPEDENUMS') then
   begin
@@ -1935,25 +1865,19 @@ begin
     Exit;
   end;
 
-  Decl := PushStack(TDeclaration_TypeEnum);
-  Decl.isEnum := True;
+  PushStack(TDeclaration_TypeEnum);
   inherited;
   PopStack();
 end;
 
 procedure TCodeParser.EnumeratedScopedType;
-var
-  Decl: TDeclaration;
 begin
-  Decl := PushStack(TDeclaration_TypeEnumScoped);
-  Decl.isScopedEnum := True;
+  PushStack(TDeclaration_TypeEnumScoped);
   inherited;
   PopStack();
 end;
 
 procedure TCodeParser.EnumeratedTypeItem;
-var
-  Decl: TDeclaration;
 begin
   if (not InDeclaration(TDeclaration_TypeEnum, TDeclaration_TypeEnumScoped)) then
   begin
@@ -1961,8 +1885,7 @@ begin
     Exit;
   end;
 
-  Decl := PushStack(TDeclaration_EnumElement);
-  Decl.isEnumElement := True;
+  PushStack(TDeclaration_EnumElement);
   inherited;
   PopStack();
 end;

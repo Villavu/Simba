@@ -445,243 +445,176 @@ begin
   Error('Illegal character');
 end;
 
-procedure TmwBasePasLex.BorProc;
-begin
-  fTokenID := tokBorComment;
-  case fDoc[fRun] of
-    #0:
-      begin
-		    NullProc;
-        Error('Unexpected file end');
-        exit;
-      end;
-  end;
-
-  while fDoc[fRun] <> #0 do
-	  case fDoc[fRun] of
-	    '}':
-		  begin
-		    fCommentState := csNo;
-		    Inc(fRun);
-		    break;
-		  end;
-
-	    #10:
-		  begin
-			  Inc(fRun);
-			  Inc(fLineNumber);
-			  fLinePos := fRun;
-		  end;
-	    #13:
-		  begin
-			  Inc(fRun);
-			  if fDoc[fRun] = #10 then Inc( fRun );
-			  Inc(fLineNumber);
-			  fLinePos := fRun;
-		  end;
-	    else
-        Inc(fRun);
-	  end;
-end;
-
 procedure TmwBasePasLex.BraceOpenProc;
 var
   Param, Def: string;
 begin
   case fDoc[fRun + 1] of
-    '$': fTokenID := GetDirectiveKind;
-    '%': fTokenID := GetIDEDirectiveKind;
+    '$':
+      begin
+        BorProc(); // Skip comment
+        fTokenID := GetDirectiveKind;
+      end;
+    '%':
+      begin
+        BorProc();
+        fTokenID := GetIDEDirectiveKind;
+      end;
     else
-      fTokenID := tokBorComment;
+      FCommentState := csBor;
   end;
-  if (fTokenID = tokBorComment) then
-    fCommentState := csBor;
 
-  Inc(fRun);
-  while fDoc[fRun] <> #0 do
-    case fDoc[fRun] of
-      '}':
+  if (fCommentState = csNo) then
+  begin
+    case fTokenID of
+      tokIDECodeTools:
         begin
-          fCommentState := csNo;
-          Inc(fRun);
-          Break;
-		    end;
-
-      '{':
-        if (fDoc[fRun+1] = '$') then
-        begin
-          Dec(fRun);
-          Break;
-        end;
-
-      #10:
-		  begin
-			  Inc(fRun);
-			  Inc(fLineNumber);
-			  fLinePos := fRun;
-		  end;
-
-	    #13:
-		  begin
-			  Inc(fRun);
-			  if fDoc[fRun] = #10 then Inc(fRun);
-			  Inc(fLineNumber);
-			  fLinePos := fRun;
-		  end;
-
-      else
-        Inc(fRun);
-    end;
-
-  if (fDoc[fRun-1] = '}') then
-
-  case fTokenID of
-    tokIDECodeTools:
-      begin
-        if (not IsDefined('!IGNORECODETOOLS')) then
-        begin
-          if (DirectiveParam = 'OFF') then
-            EnterDefineBlock(False)
-          else
-          if (DirectiveParam = 'ON') then
-            ExitDefineBlock();
-        end;
-
-        Next();
-      end;
-
-    tokCompDirect:
-      begin
-        if FUseDefines and (FDefineStack = 0) then
-        begin
-          Def := CompilerDirective;
-          Param := DirectiveParam;
-
-          if (Def = 'SCOPEDENUMS') or (Def = 'S') then
+          if (not IsDefined('!IGNORECODETOOLS')) then
           begin
-            if (Param = 'ON')  or (Param = '+') then AddDefine('!SCOPEDENUMS') else
-            if (Param = 'OFF') or (Param = '-') then RemoveDefine('!SCOPEDENUMS');
-          end else
-          if (Def = 'EXPLICTSELF') then
-          begin
-            if (Param = 'ON')  then AddDefine('!EXPLICTSELF') else
-            if (Param = 'OFF') then RemoveDefine('!EXPLICTSELF');
-          end;
-        end;
-
-        if Assigned(fOnCompDirect) and (FDefineStack = 0) then
-          fOnCompDirect(Self);
-      end;
-    tokDefineDirect:
-      begin
-        if FUseDefines and (FDefineStack = 0) then
-          AddDefine(DirectiveParam);
-        if Assigned(fOnDefineDirect) then
-          fOnDefineDirect(Self);
-      end;
-    tokElseDirect:
-      begin
-        if FUseDefines then
-        begin
-          if FTopDefineRec <> nil then
-          begin
-            if FTopDefineRec^.Defined then
-              Inc(FDefineStack)
+            if (DirectiveParam = 'OFF') then
+              EnterDefineBlock(False)
             else
-              if FDefineStack > 0 then
-                Dec(FDefineStack);
+            if (DirectiveParam = 'ON') then
+              ExitDefineBlock();
           end;
+
+          Next();
         end;
-        if Assigned(fOnElseDirect) then
-          fOnElseDirect(Self);
-      end;
-    tokEndIfDirect:
-      begin
-        if FUseDefines then
-          ExitDefineBlock;
-        if Assigned(fOnEndIfDirect) then
-          fOnEndIfDirect(Self);
-      end;
-    tokIfDefDirect:
-      begin
-        if FUseDefines then
-          EnterDefineBlock(IsDefined(DirectiveParam));
-        if Assigned(fOnIfDefDirect) then
-          fOnIfDefDirect(Self);
-      end;
-    tokIfNDefDirect:
-      begin
-        if FUseDefines then
-          EnterDefineBlock(not IsDefined(DirectiveParam));
-    		if Assigned(fOnIfNDefDirect) then
-          fOnIfNDefDirect(Self);
-      end;
-    tokIfOptDirect:
-      begin
-        if Assigned(fOnIfOptDirect) then
-          fOnIfOptDirect(Self);
-      end;
-    tokIfDirect:
-      begin
-        if FUseDefines then
+
+      tokCompDirect:
         begin
-          Param := DirectiveParam;
-          if Pos('DEFINED', Param) = 1 then
+          if FUseDefines and (FDefineStack = 0) then
           begin
-            Def := Copy(Param, 9, Length(Param) - 9);
-            EnterDefineBlock(IsDefined(Def));
-          end;
-        end;
-        if Assigned(fOnIfDirect) then
-          fOnIfDirect(Self);
-      end;
-    tokElseIfDirect:
-      begin
-        if FUseDefines then
-        begin
-          if FTopDefineRec <> nil then
-          begin
-            if FTopDefineRec^.Defined then
-              Inc(FDefineStack)
-            else
+            Def := CompilerDirective;
+            Param := DirectiveParam;
+
+            if (Def = 'SCOPEDENUMS') or (Def = 'S') then
             begin
-              if FDefineStack > 0 then
-                Dec(FDefineStack);
-              Param := DirectiveParam;
-              if Pos('DEFINED', Param) = 1 then
+              if (Param = 'ON')  or (Param = '+') then AddDefine('!SCOPEDENUMS') else
+              if (Param = 'OFF') or (Param = '-') then RemoveDefine('!SCOPEDENUMS');
+            end else
+            if (Def = 'EXPLICTSELF') then
+            begin
+              if (Param = 'ON')  then AddDefine('!EXPLICTSELF') else
+              if (Param = 'OFF') then RemoveDefine('!EXPLICTSELF');
+            end;
+          end;
+
+          if Assigned(fOnCompDirect) and (FDefineStack = 0) then
+            fOnCompDirect(Self);
+        end;
+      tokDefineDirect:
+        begin
+          if FUseDefines and (FDefineStack = 0) then
+            AddDefine(DirectiveParam);
+          if Assigned(fOnDefineDirect) then
+            fOnDefineDirect(Self);
+        end;
+      tokElseDirect:
+        begin
+          if FUseDefines then
+          begin
+            if FTopDefineRec <> nil then
+            begin
+              if FTopDefineRec^.Defined then
+                Inc(FDefineStack)
+              else
+                if FDefineStack > 0 then
+                  Dec(FDefineStack);
+            end;
+          end;
+          if Assigned(fOnElseDirect) then
+            fOnElseDirect(Self);
+        end;
+      tokEndIfDirect:
+        begin
+          if FUseDefines then
+            ExitDefineBlock;
+          if Assigned(fOnEndIfDirect) then
+            fOnEndIfDirect(Self);
+        end;
+      tokIfDefDirect:
+        begin
+          if FUseDefines then
+            EnterDefineBlock(IsDefined(DirectiveParam));
+          if Assigned(fOnIfDefDirect) then
+            fOnIfDefDirect(Self);
+        end;
+      tokIfNDefDirect:
+        begin
+          if FUseDefines then
+            EnterDefineBlock(not IsDefined(DirectiveParam));
+    		  if Assigned(fOnIfNDefDirect) then
+            fOnIfNDefDirect(Self);
+        end;
+      tokIfOptDirect:
+        begin
+          if Assigned(fOnIfOptDirect) then
+            fOnIfOptDirect(Self);
+        end;
+      tokIfDirect:
+        begin
+          if FUseDefines then
+          begin
+            Param := DirectiveParam;
+            if Pos('DEFINED', Param) = 1 then
+            begin
+              Def := Copy(Param, 9, Length(Param) - 9);
+              EnterDefineBlock(IsDefined(Def));
+            end;
+          end;
+          if Assigned(fOnIfDirect) then
+            fOnIfDirect(Self);
+        end;
+      tokElseIfDirect:
+        begin
+          if FUseDefines then
+          begin
+            if FTopDefineRec <> nil then
+            begin
+              if FTopDefineRec^.Defined then
+                Inc(FDefineStack)
+              else
               begin
-                Def := Copy(Param, 9, Length(Param) - 9);
-                EnterDefineBlock(IsDefined(Def));
+                if FDefineStack > 0 then
+                  Dec(FDefineStack);
+                Param := DirectiveParam;
+                if Pos('DEFINED', Param) = 1 then
+                begin
+                  Def := Copy(Param, 9, Length(Param) - 9);
+                  EnterDefineBlock(IsDefined(Def));
+                end;
               end;
             end;
           end;
+          if Assigned(fOnElseIfDirect) then
+            fOnElseIfDirect(Self);
         end;
-        if Assigned(fOnElseIfDirect) then
-          fOnElseIfDirect(Self);
-      end;
-    tokIncludeDirect, tokIncludeOnceDirect:
-      begin
-        if Assigned(fOnIncludeDirect) and (FDefineStack = 0) then
-          fOnIncludeDirect(Self);
-      end;
-    tokLibraryDirect:
-      begin
-        if Assigned(fOnLibraryDirect) and (FDefineStack = 0) then
-          fOnLibraryDirect(Self);
-      end;
-    tokResourceDirect:
-      begin
-        if Assigned(fOnResourceDirect) and (FDefineStack = 0) then
-          fOnResourceDirect(Self);
-      end;
-    tokUndefDirect:
-      begin
-        if FUseDefines and (FDefineStack = 0) then
-          RemoveDefine(DirectiveParam);
-        if Assigned(fOnUndefDirect) then
-          fOnUndefDirect(Self);
-      end;
+      tokIncludeDirect, tokIncludeOnceDirect:
+        begin
+          if Assigned(fOnIncludeDirect) and (FDefineStack = 0) then
+            fOnIncludeDirect(Self);
+        end;
+      tokLibraryDirect:
+        begin
+          if Assigned(fOnLibraryDirect) and (FDefineStack = 0) then
+            fOnLibraryDirect(Self);
+        end;
+      tokResourceDirect:
+        begin
+          if Assigned(fOnResourceDirect) and (FDefineStack = 0) then
+            fOnResourceDirect(Self);
+        end;
+      tokUndefDirect:
+        begin
+          if FUseDefines and (FDefineStack = 0) then
+            RemoveDefine(DirectiveParam);
+          if Assigned(fOnUndefDirect) then
+            fOnUndefDirect(Self);
+        end;
+    end;
   end;
+
   Next();
 end;
 
@@ -942,149 +875,117 @@ begin
 end;
 
 procedure TmwBasePasLex.AnsiProc;
+var
+  Depth: Integer = 0;
 begin
   fTokenID := tokAnsiComment;
-  case fDoc[fRun] of
-    #0:
-      begin
-        NullProc;
-        Error('Unexpected file end');
-        exit;
-      end;
-  end;
 
   while fDoc[fRun] <> #0 do
+  begin
     case fDoc[fRun] of
-      '*':
-        if fDoc[fRun + 1] = ')' then
+      '(':
         begin
-          fCommentState := csNo;
-          Inc(fRun, 2);
-          break;
-        end
-        else Inc(fRun);
+          if (fDoc[fRun + 1] = '*') then
+          begin
+            Inc(fRun);
+            Inc(Depth);
+          end;
+          Inc(fRun);
+        end;
 
-	  #10:
-		begin
-			Inc(fRun);
-			Inc(fLineNumber);
-			fLinePos := fRun;
-		end;
-	  #13:
-		begin
-			Inc(fRun);
-			if fDoc[fRun] = #10 then
+      '*':
+        begin
+          if (fDoc[fRun + 1] = ')') then
+          begin
+            Inc(fRun);
+            Dec(Depth);
+          end;
+          Inc(fRun);
+          if (Depth <= 0) then
+          	Break;
+        end;
+
+	    #10:
+		    begin
+			    Inc(fRun);
+			    Inc(fLineNumber);
+			    fLinePos := fRun;
+		    end;
+
+	    #13:
+		    begin
+			    Inc(fRun);
+			    if fDoc[fRun] = #10 then
+            Inc(fRun);
+			    Inc(fLineNumber);
+			    fLinePos := fRun;
+        end;
+
+	    else
         Inc(fRun);
-			Inc(fLineNumber);
-			fLinePos := fRun;
-		end;
-
-	  else
-      Inc(fRun);
+    end;
   end;
+
+  fCommentState := csNo;
+end;
+
+procedure TmwBasePasLex.BorProc;
+var
+  Depth: Integer = 0;
+begin
+  fTokenID := tokBorComment;
+
+  while fDoc[fRun] <> #0 do
+	  case fDoc[fRun] of
+      '{':
+        begin
+          Inc(fRun);
+          Inc(Depth);
+        end;
+
+	    '}':
+		    begin
+          Inc(fRun);
+          Dec(Depth);
+          if (Depth <= 0) then
+		        Break;
+		    end;
+
+	    #10:
+		    begin
+			    Inc(fRun);
+			    Inc(fLineNumber);
+
+			    fLinePos := fRun;
+		    end;
+
+      #13:
+		    begin
+			    Inc(fRun);
+			    if fDoc[fRun] = #10 then
+            Inc(fRun);
+			    Inc(fLineNumber);
+
+			    fLinePos := fRun;
+		    end;
+
+	    else
+        Inc(fRun);
+	  end;
+
+  fCommentState := csNo;
 end;
 
 procedure TmwBasePasLex.RoundOpenProc;
 begin
-  Inc(fRun);
-  case fDoc[fRun] of
-    '*':
-      begin
-        fTokenID := tokAnsiComment;
-        if fDoc[fRun + 1] = '$' then
-          fTokenID := GetDirectiveKind
-        else fCommentState := csAnsi;
-        Inc(fRun);
-        while fDoc[fRun] <> #0 do
-          case fDoc[fRun] of
-            '*':
-			  if fDoc[fRun + 1] = ')' then
-			  begin
-				fCommentState := csNo;
-				Inc(fRun, 2);
-				break;
-			  end
-			  else Inc(fRun);
-
-			  #10:
-				begin
-					Inc(fRun);
-					Inc(fLineNumber);
-					fLinePos := fRun;
-				end;
-			  #13:
-				begin
-					Inc(fRun);
-					if fDoc[fRun] = #10 then Inc(fRun);
-					Inc(fLineNumber);
-					fLinePos := fRun;
-				end;
-			else Inc(fRun);
-          end;
-      end;
-    '.':
-      begin
-        Inc(fRun);
-        fTokenID := tokSquareOpen;
-      end;
-  else fTokenID := tokRoundOpen;
-  end;
-  case fTokenID of
-    tokCompDirect:
-      begin
-        if Assigned(fOnCompDirect) then
-          fOnCompDirect(Self);
-      end;
-    tokDefineDirect:
-      begin
-        if Assigned(fOnDefineDirect) then
-          fOnDefineDirect(Self);
-      end;
-    tokElseDirect:
-      begin
-        if Assigned(fOnElseDirect) then
-          fOnElseDirect(Self);
-      end;
-    tokEndIfDirect:
-      begin
-        if Assigned(fOnEndIfDirect) then
-          fOnEndIfDirect(Self);
-      end;
-    tokIfDefDirect:
-      begin
-        if Assigned(fOnIfDefDirect) then
-          fOnIfDefDirect(Self);
-      end;
-    tokIfNDefDirect:
-      begin
-        if Assigned(fOnIfNDefDirect) then
-          fOnIfNDefDirect(Self);
-      end;
-    tokIfOptDirect:
-      begin
-        if Assigned(fOnIfOptDirect) then
-          fOnIfOptDirect(Self);
-      end;
-    tokLibraryDirect:
-       begin
-        if Assigned(fOnLibraryDirect) then
-          fOnLibraryDirect(Self);
-      end;
-    tokIncludeDirect, tokIncludeOnceDirect:
-      begin
-        if Assigned(fOnIncludeDirect) then
-          fOnIncludeDirect(Self);
-      end;
-    tokResourceDirect:
-      begin
-        if Assigned(fOnResourceDirect) then
-          fOnResourceDirect(Self);
-      end;
-    tokUndefDirect:
-      begin
-        if Assigned(fOnUndefDirect) then
-          fOnUndefDirect(Self);
-      end;
+  if (fDoc[fRun + 1] = '*') then
+  begin
+    FCommentState := csAnsi;
+    Next();
+  end else
+  begin
+    Inc(fRun);
+    fTokenID := tokRoundOpen;
   end;
 end;
 
