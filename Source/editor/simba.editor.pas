@@ -352,7 +352,7 @@ begin
   Result := '';
 
   Y := Y - 1;
-  if (Y < 0) or (Y >= TextView.Count) then
+  if (Y < 0) or (X < 1) or (Y >= TextView.Count) then
     Exit;
   Line := TextView[Y];
   if (X > Length(Line)) then
@@ -363,27 +363,30 @@ begin
 
   while (Y >= 0) do
   begin
-    case Line[X] of
-      ')': Inc(InRound);
-      ']': Inc(InSquare);
-      '(':
-        begin
-          Dec(InRound);
-          if (InRound < 0) then
+    if (X >= 1) and (X <= Length(Line)) then
+    begin
+      case Line[X] of
+        ')': Inc(InRound);
+        ']': Inc(InSquare);
+        '(':
+          begin
+            Dec(InRound);
+            if (InRound < 0) then
+              Break;
+          end;
+        '[':
+          begin
+            Dec(InSquare);
+            if (InSquare < 0) then
+              Break;
+          end;
+        #0..#32:
+          if (InRound <= 0) and (InSquare <= 0) then
             Break;
-        end;
-      '[':
-        begin
-          Dec(InSquare);
-          if (InSquare < 0) then
-            Break;
-        end;
-      #0..#32:
-        if (InRound <= 0) and (InSquare <= 0) then
-          Break;
-    end;
+      end;
 
-    Result := Line[X] + Result;
+      Result := Line[X] + Result;
+    end;
 
     X := X - 1;
     if (X < 1) then // go back (up) a line

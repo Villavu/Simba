@@ -12,7 +12,7 @@ unit simba.editor_autocomplete;
 interface
 
 uses
-  Classes, SysUtils, Graphics, Controls, Forms, LCLType,
+  Classes, SysUtils, Graphics, Controls, Forms, LCLType, Types,
   SynEdit, SynEditTypes, SynCompletion, SynEditKeyCmds, SynEditHighlighter,
   simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_insight;
 
@@ -57,6 +57,7 @@ type
     FFilteredWeights: TIntegerArray; // cache
 
     FColumnWidth: Integer;
+    FDrawOffsetY: Integer;
 
     function GetHintText(Decl: TDeclaration; IsHint: Boolean): String;
 
@@ -178,14 +179,21 @@ begin
 end;
 
 procedure TSimbaAutoComplete_Form.FontChanged(Sender: TObject);
+var
+  Size: TSize;
 begin
   inherited FontChanged(Sender);
 
   FHint.Font := Self.Font;
-  if (AutoComplete <> nil) then
-    AutoComplete.FColumnWidth := Canvas.TextWidth('class const  ');
+  FFontHeight := FFontHeight + 6;
 
-  FFontHeight := FFontHeight + 2;
+  if (AutoComplete <> nil) then
+  begin
+    Size := Canvas.TextExtent('class const  ');
+
+    AutoComplete.FColumnWidth := Size.Width;
+    AutoComplete.FDrawOffsetY := (((FFontHeight - 2) - Size.Height) div 2) - 1;
+  end;
 end;
 
 procedure TSimbaAutoComplete_Form.DoShow;
@@ -385,38 +393,27 @@ function TSimbaAutoComplete.GetHintText(Decl: TDeclaration; IsHint: Boolean): St
       Result := '';
   end;
 
-  function GetRecordText(Decl: TDeclaration_TypeRecord): String;
-  begin
-    if IsHint then
-      Result := ' = record'
-    else
-      Result := '';
-  end;
-
   function GetTypeText(Decl: TDeclaration_Type): String;
   begin
-    if IsHint then
-      Result := ' = ' + Decl.TextNoCommentsSingleLine
+    if (Decl is TDeclaration_TypeAlias) and (TDeclaration_TypeAlias(Decl).VarType.Text = Decl.Name) then // BaseType (Integer = Integer)
+      Result := ''
     else
-      Result := '';
+      Result := ' = ' + Decl.TextNoCommentsSingleLine
   end;
 
 begin
   Result := '';
 
-  if Decl.isMethod then
+  if (Decl is TDeclaration_Method) then
     Result := GetMethodText(Decl as TDeclaration_Method)
   else
-  if Decl.isEnumElement then
+  if (Decl is TDeclaration_EnumElement) then
     Result := GetEnumElementText(Decl as TDeclaration_EnumElement)
   else
-  if Decl.isVar or Decl.isConst or Decl.isParam then
+  if (Decl is TDeclaration_Var) then
     Result := GetVarText(Decl as TDeclaration_Var)
   else
-  if Decl.isRecord then
-    Result := GetRecordText(Decl as TDeclaration_TypeRecord)
-  else
-  if Decl.isType then
+  if (Decl is TDeclaration_Type) then
     Result := GetTypeText(Decl as TDeclaration_Type);
 
   if (Result = '') then
@@ -649,6 +646,8 @@ begin
       Text := FHintForm.Caption
     else
       Text := GetHintText(Decl, False);
+
+    Y := Y + FDrawOffsetY;
 
     PaintColumn(Canvas, X, Y, Decl);
     PaintName(Canvas, X, Y, Decl.Name);
