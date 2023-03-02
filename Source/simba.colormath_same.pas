@@ -139,7 +139,7 @@ begin
 
   if Abs(L-Self.GoalL) > Self.GoalTolerance then
     Exit(False);
-  if (CMax = CMin) then
+  if (CMax = CMin) or (Self.GoalS = 0) then
     Exit(Self.GoalS <= Self.GoalSatMod);
 
   D := CMax - CMin;
