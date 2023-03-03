@@ -340,7 +340,7 @@ begin
     j := i;
   end;
 
-  Result := Result * 0.5;
+  Result := Abs(Result) * 0.5;
 end;
 
 class function TSimbaGeometry.CrossProduct(const r, p, q: TPoint): Int64;
