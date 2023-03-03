@@ -50,7 +50,7 @@ begin
     Result := IMAGE_PROCEDURE
   else
   if Decl.isOperatorMethod then
-    Result := IMAGE_OPEN;
+    Result := IMAGE_OPERATOR;
 end;
 
 function GetImage_Type(Decl: TDeclaration): Integer;
