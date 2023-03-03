@@ -377,51 +377,44 @@ procedure TSimbaParamHint.DoEditorCommand(Sender: TObject; AfterProcessing: Bool
   end;
 
 var
-  Text: String;
-  I: Integer;
   Decl: TDeclaration;
   Decls: TDeclarationArray;
 begin
   if IsParamHintCommand(Command, AChar) and CodetoolsSetup then
-  begin
-    Handled := True;
-
-    Text := Editor.Text;
-    if (Editor.SelStart > Length(Text)) then
-      Exit;
-
-    for I := Editor.SelStart - 1 downto 1 do
-      if (Text[I] = '(') then
-        Break;
-
-    FParenthesesPoint := FindParenthesesPoint();
-
-    FCodeinsight.SetScript(Editor.Text, '', TSimbaEditor(Editor).GetCaretPos(True));
-    FCodeinsight.Run();
-
-    Decl := FCodeinsight.ParseExpression(TSimbaEditor(Editor).GetExpression(FParenthesesPoint.X -1, FParenthesesPoint.Y), [EParseExpressionFlag.WantVarType]);
-    Decls := [];
-
-    if (Decl is TDeclaration_TypeMethod) then
+    with TSimbaEditor(Editor) do
     begin
-      FDisplayPoint := FParenthesesPoint;
-      Decls := [Decl];
-    end
-    else
-    if (Decl is TDeclaration_Method) then
-    begin
-      FDisplayPoint := FParenthesesPoint.Offset(-Length(Decl.Name), 0);
-      Decls := FCodeinsight.GetOverloads(Decl);
+      Handled := True;
+      if IsHighlighterAttribute(['Number', 'Comment']) then
+        Exit;
+
+      FParenthesesPoint := FindParenthesesPoint();
+
+      FCodeinsight.SetScript(Text, '', GetCaretPos(True));
+      FCodeinsight.Run();
+
+      Decl := FCodeinsight.ParseExpression(GetExpression(FParenthesesPoint.X -1, FParenthesesPoint.Y), [EParseExpressionFlag.WantVarType]);
+      Decls := [];
+
+      if (Decl is TDeclaration_TypeMethod) then
+      begin
+        FDisplayPoint := FParenthesesPoint;
+        Decls := [Decl];
+      end
+      else
+      if (Decl is TDeclaration_Method) then
+      begin
+        FDisplayPoint := FParenthesesPoint.Offset(-Length(Decl.Name), 0);
+        Decls := FCodeinsight.GetOverloads(Decl);
+      end;
+
+      if (Length(Decls) > 0) then
+      begin
+        FHintForm.Font := Font;
+        FHintForm.BoldIndex := GetParameterIndexAtCaret();
+        FHintForm.Show(ClientToScreen(RowColumnToPixels(LogicalToPhysicalPos(FDisplayPoint))), Decls);
+      end else
+        FHintForm.Hide();
     end;
-
-    if (Length(Decls) > 0) then
-    begin
-      FHintForm.Font := Editor.Font;
-      FHintForm.BoldIndex := GetParameterIndexAtCaret();
-      FHintForm.Show(Editor.ClientToScreen(Editor.RowColumnToPixels(Editor.LogicalToPhysicalPos(FDisplayPoint))), Decls);
-    end else
-      FHintForm.Hide();
-  end;
 end;
 
 procedure TSimbaParamHint.DoEditorKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
