@@ -1406,13 +1406,23 @@ begin
 end;
 
 (*
-TMufasaBitmap.PixelEdgesTPA
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TMufasaBitmap.PixelEdgesTPA(MinDiff: Integer): TPointArray;
+TMufasaBitmap.FindEdges
+~~~~~~~~~~~~~~~~~~~~~~~
+function TMufasaBitmap.FindEdges(MinDiff: Integer): TPointArray;
 *)
-procedure _LapeMufasaBitmap_PixelEdgesTPA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_FindEdges(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PMufasaBitmap(Params^[0])^.PixelEdgesTPA(PInteger(Params^[1])^);
+  PPointArray(Result)^ := PMufasaBitmap(Params^[0])^.FindEdges(PInteger(Params^[1])^);
+end;
+
+(*
+TMufasaBitmap.FindEdgesHSL
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+function TMufasaBitmap.FindEdgesHSL(MinDiff: Integer; HueMod: Single = 0.2; SatMod: Single = 0.2): TPointArray;
+*)
+procedure _LapeMufasaBitmap_FindEdgesHSL(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PMufasaBitmap(Params^[0])^.FindEdgesHSL(PInteger(Params^[1])^, PSingle(Params^[2])^, PSingle(Params^[3])^);
 end;
 
 (*
@@ -1505,7 +1515,8 @@ begin
     addGlobalFunc('function TMufasaBitmap.PixelDifferenceTPA(Other: TMufasaBitmap): TPointArray; overload', @_LapeMufasaBitmap_PixelDifferenceTPA);
     addGlobalFunc('function TMufasaBitmap.PixelDifferenceTPA(Other: TMufasaBitmap; Tolerance: Integer): TPointArray; overload', @_LapeMufasaBitmap_PixelDifferenceToleranceTPA);
 
-    addGlobalFunc('function TMufasaBitmap.PixelEdgesTPA(MinDiff: Integer): TPointArray;', @_LapeMufasaBitmap_PixelEdgesTPA);
+    addGlobalFunc('function TMufasaBitmap.FindEdges(MinDiff: Integer): TPointArray;', @_LapeMufasaBitmap_FindEdges);
+    addGlobalFunc('function TMufasaBitmap.FindEdgesHSL(MinDiff: Integer; HueMod: Single = 0.2; SatMod: Single = 0.2): TPointArray;', @_LapeMufasaBitmap_FindEdgesHSL);
 
     addGlobalFunc('function TMufasaBitmap.TextWidth(Text: String): Integer;', @_LapeMufasaBitmap_TextWidth);
     addGlobalFunc('function TMufasaBitmap.TextHeight(Text: String): Integer;', @_LapeMufasaBitmap_TextHeight);
