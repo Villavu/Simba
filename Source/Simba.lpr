@@ -130,5 +130,6 @@ begin
 
     Application.QueueAsyncCall(@SimbaForm.Setup, 0);
   end;
+
   Application.Run();
 end.

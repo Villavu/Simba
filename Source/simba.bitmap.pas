@@ -255,7 +255,7 @@ implementation
 
 uses
   fpimage, math, intfgraphics, simba.overallocatearray, simba.geometry,
-  simba.tpa, simba.colormath, simba.client, simba.iomanager,
+  simba.tpa, simba.colormath, simba.colormath_distance, simba.client, simba.iomanager,
   simba.bitmap_misc, simba.encoding, simba.compress, simba.math;
 
 function GetDistinctColor(const Color, Index: Integer): Integer; inline;
@@ -846,7 +846,7 @@ begin
 
   for I := 0 to FWidth * FHeight - 1 do
   begin
-    if (RGBDistance(Ptr^, OtherPtr^) > Tolerance) then
+    if (DistanceRGB(Ptr^, OtherPtr^) > Tolerance) then
       Inc(Result);
 
     Inc(Ptr);
@@ -900,7 +900,7 @@ begin
     for X := 0 to W do
     begin
       Index := Y * FWidth + X;
-      if (RGBDistance(FData[Index], Other.FData[Index]) > Tolerance) then
+      if (DistanceRGB(FData[Index], Other.FData[Index]) > Tolerance) then
         Buffer.Add(TPoint.Create(X, Y));
     end;
 
@@ -923,7 +923,7 @@ begin
     for X := 0 to W do
     begin
       if (X+1 < W) then
-        if RGBDistance(FData[Y*FWidth+X], FData[Y*FWidth+(X+1)]) > MinDiff then
+        if DistanceRGB(FData[Y*FWidth+X], FData[Y*FWidth+(X+1)]) > MinDiff then
         begin
           Buffer.Add(TPoint.Create(X, Y));
 
@@ -931,7 +931,7 @@ begin
         end;
 
       if (Y+1 < H) then
-        if RGBDistance(FData[Y*FWidth+X], FData[(Y+1)*FWidth+X]) > MinDiff then
+        if DistanceRGB(FData[Y*FWidth+X], FData[(Y+1)*FWidth+X]) > MinDiff then
           Buffer.Add(TPoint.Create(X, Y));
     end;
 
