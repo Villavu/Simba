@@ -185,7 +185,7 @@ begin
   inherited FontChanged(Sender);
 
   FHint.Font := Self.Font;
-  FFontHeight := FFontHeight + 6;
+  FFontHeight := FFontHeight + 4;
 
   if (AutoComplete <> nil) then
   begin
