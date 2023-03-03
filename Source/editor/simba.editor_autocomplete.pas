@@ -440,41 +440,44 @@ var
   StartPoint: TPoint;
 begin
   if IsAutoCompleteCommand(Command, AChar) and CodetoolsSetup then
-  begin
-    Handled := True;
-
-    FDecls := [];
-    FLocalDecls := [];
-    FCodeinsight.SetScript(Editor.Text, '', TSimbaEditor(Editor).GetCaretPos(True));
-    FCodeinsight.Run();
-
-    Expression := TSimbaEditor(Editor).GetExpression(Editor.CaretX - 1, Editor.CaretY);
-    if Expression.Contains('.') then
+    with TSimbaEditor(Editor) do
     begin
-      if (Expression[Length(Expression)] <> '.') then
+      Handled := True;
+      if IsHighlighterAttribute(['Number', 'Comment']) then
+        Exit;
+
+      FDecls := [];
+      FLocalDecls := [];
+      FCodeinsight.SetScript(Text, '', GetCaretPos(True));
+      FCodeinsight.Run();
+
+      Expression := GetExpression(CaretX - 1, CaretY);
+      if Expression.Contains('.') then
       begin
-        LastDot := Expression.LastIndexOf('.');
+        if (Expression[Length(Expression)] <> '.') then
+        begin
+          LastDot := Expression.LastIndexOf('.');
 
-        Filter     := Copy(Expression, LastDot + 1);
-        Expression := Copy(Expression, 1, LastDot - 1);
+          Filter     := Copy(Expression, LastDot + 1);
+          Expression := Copy(Expression, 1, LastDot - 1);
+        end else
+          Filter := '';
+
+        FDecls := FCodeinsight.GetMembersOfType(FCodeinsight.ParseExpression(Expression, [EParseExpressionFlag.WantMethodResult]));
       end else
-        Filter := '';
+      begin
+        Filter := Expression;
 
-      FDecls := FCodeinsight.GetMembersOfType(FCodeinsight.ParseExpression(Expression, [EParseExpressionFlag.WantMethodResult]));
-    end else
-    begin
-      Filter := Expression;
+        FDecls := FCodeinsight.GetGlobals();
+        FLocalDecls := FCodeinsight.GetLocals();
+      end;
 
-      FDecls := FCodeinsight.GetGlobals();
-      FLocalDecls := FCodeinsight.GetLocals();
+      StartPoint := CaretXY;
+      StartPoint.X := StartPoint.X - Length(Filter);
+
+      with ClientToScreen(RowColumnToPixels(StartPoint)) do
+        Execute(Filter, X, Y + LineHeight);
     end;
-
-    StartPoint := Editor.CaretXY;
-    StartPoint.X := StartPoint.X - Length(Filter);
-
-    with Editor.ClientToScreen(Editor.RowColumnToPixels(StartPoint)) do
-      Execute(Filter, X, Y + Editor.LineHeight);
-  end;
 end;
 
 procedure TSimbaAutoComplete.DoEditorAdded(Value: TCustomSynEdit);
