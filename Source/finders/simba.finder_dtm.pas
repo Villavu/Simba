@@ -36,7 +36,7 @@ type
 implementation
 
 uses
-  simba.colormath, simba.math, simba.overallocatearray;
+  simba.colormath, simba.colormath_distance, simba.math, simba.overallocatearray;
 
 function TFindDTMBuffer.FindDTMs(DTM: TDTM; MaxToFind: Integer): TPointArray;
 var
@@ -73,7 +73,7 @@ var
               begin
                 Checked.SetBit(Index);
 
-                if RGBDistance(Data[Y * Width + X], PointColors[Index]) <= PointTolerances[Index] then
+                if DistanceRGB(Data[Y * Width + X], PointColors[Index]) <= PointTolerances[Index] then
                 begin
                   Checked.SetBit(Index);
                   Hit.SetBit(Index);
@@ -194,7 +194,7 @@ var
               begin
                 Checked.SetBit(Index);
 
-                if RGBDistance(Data[Y * Width + X], PointColors[Index]) <= PointTolerances[Index] then
+                if DistanceRGB(Data[Y * Width + X], PointColors[Index]) <= PointTolerances[Index] then
                 begin
                   Checked.SetBit(Index);
                   Hit.SetBit(Index);

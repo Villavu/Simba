@@ -8,7 +8,7 @@ implementation
 
 uses
   classes, sysutils, graphics, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.colormath;
+  simba.script_compiler, simba.mufasatypes, simba.colormath, simba.colormath_distance;
 
 procedure _LapeColorToRGB(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -124,6 +124,16 @@ begin
   PColor(Result)^ := ColorToGray(PInt32(Params^[0])^);
 end;
 
+procedure _LapeDistanceRGB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := DistanceRGB(PInteger(Params^[0])^, PInteger(Params^[1])^);
+end;
+
+procedure _LapeDistanceHSL(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSingle(Result)^ := DistanceHSL(PInteger(Params^[0])^, PInteger(Params^[1])^, PSingle(Params^[2])^, PSingle(Params^[3])^);
+end;
+
 procedure ImportColorMath(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -152,6 +162,9 @@ begin
     addGlobalFunc('procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended)', @_LapeHSLToCIELab);
     addGlobalFunc('function ColorToGray(const Color: Int32): TColor', @_LapeColorToGray);
     addGlobalFunc('procedure CalculateBestColor(Colors: TIntegerArray; CTS: Integer; out Color, Tolerance: Integer; out Hue, Sat: Extended)', @_LapeCalculateBestColor);
+
+    addGlobalFunc('function DistanceHSL(const Color1, Color2: Integer; const HueMod: Single = 0.2; const SatMod: Single = 0.2): Single', @_LapeDistanceHSL);
+    addGlobalFunc('function DistanceRGB(const Color1, Color2: Integer): Integer', @_LapeDistanceRGB);
 
     ImportingSection := '';
   end;

@@ -36,7 +36,7 @@ type
 implementation
 
 uses
-  simba.colormath, simba.overallocatearray;
+  simba.colormath, simba.colormath_distance, simba.overallocatearray;
 
 function TFindBitmapBuffer.Find(Bitmap: TMufasaBitmap; out Points: TPointArray; MaxToFind: Integer): Boolean;
 
@@ -112,7 +112,7 @@ function TFindBitmapBuffer.Find(Bitmap: TMufasaBitmap; out Points: TPointArray; 
   function Match(const BufferPtr, BitmapPtr: TRGB32): Boolean; inline;
   begin
     Result := (Bitmap.TransparentColorActive and BitmapPtr.EqualsIgnoreAlpha(Bitmap.TransparentRGB)) or
-              (RGBDistance(BufferPtr, BitmapPtr) <= Tolerance);
+              (DistanceRGB(BufferPtr, BitmapPtr) <= Tolerance);
   end;
 
   function Hit(BufferPtr: PRGB32): Boolean;
