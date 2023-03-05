@@ -1,0 +1,30 @@
+{$assertions on}
+
+var
+  TestTPA, ExtractedTPA: TPointArray;
+
+begin
+  TestTPA := TPointArray.CreateFromBox([10,10,40,40],True);
+
+  // Box
+  ExtractedTPA := TestTPA.ExtractBox([20,20,30,30]);
+  Assert(ExtractedTPA.Bounds() = [20,20,30,30]);
+
+  // Dist
+  ExtractedTPA := TestTPA.ExtractDist([25,25], 6, 10);
+  Assert(ExtractedTPA.Bounds() = [15,15,35,35]);
+
+  // Quad
+  ExtractedTPA := TestTPA.ExtractQuad(TQuad.CreateFromBox([20,20,30,30]).Rotate(Radians(45)));
+  Assert(ExtractedTPA.Bounds() = [18,18,32,32]);
+
+  // Pie
+  ExtractedTPA := TestTPA.ExtractPie(120,160,0,15,[25,25]);
+  Assert(ExtractedTPA.Bounds() = [26,26,37,38]);
+
+  // Poly
+  ExtractedTPA := TestTPA.ExtractPolygon([TPoint.Create(15, 15), TPoint.Create(30, 25), TPoint.Create(15, 35)]);
+  Assert(ExtractedTPA.Bounds() = [15,16,29,34]);
+
+  // Show([TestTPA, ExtractedTPA]);
+end.

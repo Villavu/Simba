@@ -32,7 +32,8 @@ type
     function Combine(Other: TBox): TBox;
     function Invert(Area: TBox): TBoxArray;
     function Partition(Rows, Cols: Integer): TBoxArray;
-    function Filter(Points: TPointArray): TPointArray;
+    function Extract(Points: TPointArray): TPointArray;
+    function Exclude(Points: TPointArray): TPointArray;
 
     function NearestEdge(P: TPoint): TPoint;
     function Intersect(P: TPoint): TPoint;
@@ -250,19 +251,30 @@ begin
     end;
 end;
 
-function TBoxHelper.Filter(Points: TPointArray): TPointArray;
+function TBoxHelper.Extract(Points: TPointArray): TPointArray;
 var
-  I, Count: Integer;
+  I: Integer;
+  Buffer: TSimbaPointBuffer;
 begin
-  SetLength(Result, Length(Points));
-  Count := 0;
+  Buffer.Init(Length(Points));
   for I := 0 to High(Points) do
     if Contains(Points[I]) then
-    begin
-      Result[Count] := Points[I];
-      Inc(Count);
-    end;
-  SetLength(Result, Count);
+      Buffer.Add(Points[I]);
+
+  Result := Buffer.Trim();
+end;
+
+function TBoxHelper.Exclude(Points: TPointArray): TPointArray;
+var
+  I: Integer;
+  Buffer: TSimbaPointBuffer;
+begin
+  Buffer.Init(Length(Points));
+  for I := 0 to High(Points) do
+    if not Contains(Points[I]) then
+      Buffer.Add(Points[I]);
+
+  Result := Buffer.Trim();
 end;
 
 function TBoxHelper.NearestEdge(P: TPoint): TPoint;
