@@ -154,13 +154,27 @@ begin
 end;
 
 (*
-TQuad.Filter
-~~~~~~~~~~~~
-function TQuad.Filter(Points: TPointArray): TPointArray;
+TQuad.Extract
+~~~~~~~~~~~~~
+function TQuad.Extract(Points: TPointArray): TPointArray;
+
+Returns all points that are in the quad.
 *)
-procedure _LapeQuad_Filter(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeQuad_Extract(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PQuad(Params^[0])^.Filter(PPointArray(Params^[1])^);
+  PPointArray(Result)^ := PQuad(Params^[0])^.Extract(PPointArray(Params^[1])^);
+end;
+
+(*
+TQuad.Exclude
+~~~~~~~~~~~~~
+function TQuad.Exclude(Points: TPointArray): TPointArray;
+
+Returns all points that are *not inside* the quad.
+*)
+procedure _LapeQuad_Exclude(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PQuad(Params^[0])^.Exclude(PPointArray(Params^[1])^);
 end;
 
 (*
@@ -256,7 +270,8 @@ begin
     addGlobalFunc('function TQuad.Contains(X, Y: Integer): Boolean; overload', @_LapeQuad_Contains2);
     addGlobalFunc('function TQuad.Offset(P: TPoint): TQuad; overload', @_LapeQuad_Offset1);
     addGlobalFunc('function TQuad.Offset(X, Y: Integer): TQuad; overload', @_LapeQuad_Offset2);
-    addGlobalFunc('function TQuad.Filter(Points: TPointArray): TPointArray', @_LapeQuad_Filter);
+    addGlobalFunc('function TQuad.Extract(Points: TPointArray): TPointArray', @_LapeQuad_Extract);
+    addGlobalFunc('function TQuad.Exclude(Points: TPointArray): TPointArray', @_LapeQuad_Exclude);
     addGlobalFunc('function TQuad.Expand(Amount: Double): TQuad', @_LapeQuad_Expand);
     addGlobalFunc('function TQuad.NearestEdge(P: TPoint): TPoint', @_LapeQuad_NearestEdge);
     addGlobalFunc('function TQuad.Area: Integer', @_LapeQuad_Area);

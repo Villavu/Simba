@@ -78,12 +78,20 @@ type
     function Unique: TPointArray;
     function ReduceByDistance(Dist: Integer): TPointArray;
 
+    // Return points NOT in ...
     function ExcludeDist(Center: TPoint; MinDist, MaxDist: Double): TPointArray;
     function ExcludePolygon(Polygon: TPointArray): TPointArray;
     function ExcludeBox(Box: TBox): TPointArray;
     function ExcludeQuad(Quad: TQuad): TPointArray;
-    function ExcludePie(SD, ED, MinR, MaxR: Double; Center: TPoint): TPointArray;
+    function ExcludePie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray;
     function ExcludePoints(Points: TPointArray): TPointArray;
+
+    // return points WITHIN ...
+    function ExtractDist(Center: TPoint; MinDist, MaxDist: Single): TPointArray;
+    function ExtractPolygon(Polygon: TPointArray): TPointArray;
+    function ExtractBox(Box: TBox): TPointArray;
+    function ExtractQuad(Quad: TQuad): TPointArray;
+    function ExtractPie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray;
 
     function Extremes: TPointArray;
     function Rotate(Radians: Double; Center: TPoint): TPointArray;
@@ -462,15 +470,15 @@ begin
 
   Matrix.SetSize(ABounds.Width, ABounds.Height);
   for i := 0 to High(Self) do
-    if (Self[I].X >= Bounds.X1) and (Self[I].Y >= Bounds.Y1) and (Self[I].X <= Bounds.X2) and (Self[I].Y <= Bounds.Y2) then
-      Matrix[Self[I].Y - Bounds.Y1][Self[I].X - Bounds.X1] := True;
+    if (Self[I].X >= ABounds.X1) and (Self[I].Y >= ABounds.Y1) and (Self[I].X <= ABounds.X2) and (Self[I].Y <= ABounds.Y2) then
+      Matrix[Self[I].Y - ABounds.Y1][Self[I].X - ABounds.X1] := True;
 
   W := Matrix.Width - 1;
   H := Matrix.Height - 1;
   for Y := 0 to H do
     for X := 0 to W do
       if not Matrix[Y, X] then
-        Buffer.Add(Bounds.X1 + X, Bounds.Y1 + Y);
+        Buffer.Add(ABounds.X1 + X, ABounds.Y1 + Y);
 
   Result := Buffer.Trim();
 end;
@@ -1177,7 +1185,7 @@ begin
   for I := 0 to High(Self) do
   begin
     Dist := Sqr(Self[I].X - Center.X) + Sqr(Self[I].Y - Center.Y);
-    if (Dist >= MinDistSqr) and (Dist <= MaxDistSqr) then
+    if (Dist <= MinDistSqr) or (Dist >= MaxDistSqr) then
       Buffer.Add(Self[I]);
   end;
 
@@ -1191,7 +1199,7 @@ var
 begin
   Buffer.Init();
   for I := 0 to High(Self) do
-    if Self[I].InPolygon(Polygon) then
+    if not Self[I].InPolygon(Polygon) then
       Buffer.Add(Self[I]);
 
   Result := Buffer.Trim();
@@ -1199,60 +1207,17 @@ end;
 
 function TPointArrayHelper.ExcludeBox(Box: TBox): TPointArray;
 begin
-  Result := Box.Filter(Self);
+  Result := Box.Exclude(Self);
 end;
 
 function TPointArrayHelper.ExcludeQuad(Quad: TQuad): TPointArray;
 begin
-  Result := Quad.Filter(Self);
+  Result := Quad.Exclude(Self);
 end;
 
-function TPointArrayHelper.ExcludePie(SD, ED, MinR, MaxR: Double; Center: TPoint): TPointArray;
-var
-  BminusAx, BminusAy, CminusAx, CminusAy: Double; // don't let the type deceive you. They are vectors!
-  StartD, EndD: Double;
-  I: Integer;
-  Over180: Boolean;
-  Buffer: TSimbaPointBuffer;
+function TPointArrayHelper.ExcludePie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray;
 begin
-  StartD := FixD(SD);
-  EndD   := FixD(ED);
-  if SameValue(StartD, EndD) then
-  begin
-    Result := Self.ExcludeDist(Center, MinR, MaxR);
-    Exit;
-  end;
-
-  if (SD > ED) then
-    Swap(StartD, EndD);
-  if (StartD > EndD) then
-    EndD := EndD + 360;
-
-  Over180 := (Max(StartD, EndD) - Min(StartD, EndD)) > 180;
-  if Over180 then
-  begin
-    StartD := StartD + 180;
-    EndD   := EndD   + 180;
-  end;
-
-  // a is the midPoint, B is the left limit line, C is the right Limit Line, X the point we are checking
-  BminusAx := Cos(Radians(StartD - 90)); // creating the two unit vectors
-  BminusAy := Sin(Radians(StartD - 90)); // I use -90 or else it will start at the right side instead of top
-
-  CminusAx := Cos(Radians(EndD - 90));
-  CminusAy := Sin(Radians(EndD - 90));
-
-  Buffer.Init(Length(Self) div 2);
-  for I := 0 to High(Self) do
-  begin
-    if (not (((BminusAx * (Self[i].Y - Center.Y)) - (BminusAy * (Self[i].X - Center.X)) > 0) and
-             ((CminusAx * (Self[i].Y - Center.Y)) - (CminusAy * (Self[i].X - Center.X)) < 0)) xor Over180) then
-      Continue;
-
-    Buffer.Add(Self[I]);
-  end;
-
-  Result := TPointArray(Buffer.Trim()).ExcludeDist(Center, MinR, MaxR);
+  Result := Self.ExtractPie(StartDegree, EndDegree, MinRadius, MaxRadius, Center).Invert(Self.Bounds());
 end;
 
 function TPointArrayHelper.ExcludePoints(Points: TPointArray): TPointArray;
@@ -1280,6 +1245,97 @@ begin
       Buffer.Add(Self[I]);
 
   Result := Buffer.Trim();
+end;
+
+function TPointArrayHelper.ExtractDist(Center: TPoint; MinDist, MaxDist: Single): TPointArray;
+var
+  Buffer: TSimbaPointBuffer;
+  I: Integer;
+  Dist, MinDistSqr, MaxDistSqr: Double;
+begin
+  Buffer.Init();
+
+  MinDistSqr := Sqr(MinDist);
+  MaxDistSqr := Sqr(MaxDist);
+  for I := 0 to High(Self) do
+  begin
+    Dist := Sqr(Self[I].X - Center.X) + Sqr(Self[I].Y - Center.Y);
+    if (Dist >= MinDistSqr) and (Dist <= MaxDistSqr) then
+      Buffer.Add(Self[I]);
+  end;
+
+  Result := Buffer.Trim();
+end;
+
+function TPointArrayHelper.ExtractPolygon(Polygon: TPointArray): TPointArray;
+var
+  Buffer: TSimbaPointBuffer;
+  I: Integer;
+begin
+  Buffer.Init(Length(Polygon));
+  for I := 0 to High(Self) do
+    if Self[I].InPolygon(Polygon) then
+      Buffer.Add(Self[I]);
+
+  Result := Buffer.Trim();
+end;
+
+function TPointArrayHelper.ExtractBox(Box: TBox): TPointArray;
+begin
+  Result := Box.Extract(Self);
+end;
+
+function TPointArrayHelper.ExtractQuad(Quad: TQuad): TPointArray;
+begin
+  Result := Quad.Extract(Self);
+end;
+
+function TPointArrayHelper.ExtractPie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray;
+var
+  BminusAx, BminusAy, CminusAx, CminusAy: Double; // don't let the type deceive you. They are vectors!
+  StartD, EndD: Double;
+  I: Integer;
+  Over180: Boolean;
+  Buffer: TSimbaPointBuffer;
+begin
+  StartD := FixD(StartDegree);
+  EndD   := FixD(EndDegree);
+
+  if (not SameValue(StartD, EndD)) then // if StartD = EndD, then we have a circle...
+  begin
+    if (StartDegree > EndDegree) then
+      Swap(StartD, EndD);
+    if (StartD > EndD) then
+      EndD := EndD + 360;
+
+    Over180 := (Max(StartD, EndD) - Min(StartD, EndD)) > 180;
+    if Over180 then
+    begin
+      StartD := StartD + 180;
+      EndD   := EndD   + 180;
+    end;
+
+    // a is the midPoint, B is the left limit line, C is the right Limit Line, X the point we are checking
+    BminusAx := Cos(Radians(StartD - 90)); // creating the two unit vectors
+    BminusAy := Sin(Radians(StartD - 90)); // I use -90 or else it will start at the right side instead of top
+
+    CminusAx := Cos(Radians(EndD - 90));
+    CminusAy := Sin(Radians(EndD - 90));
+
+    Buffer.Init(Length(Self) div 2);
+    for I := 0 to High(Self) do
+    begin
+      if (not (((BminusAx * (Self[i].Y - Center.Y)) - (BminusAy * (Self[i].X - Center.X)) > 0) and
+               ((CminusAx * (Self[i].Y - Center.Y)) - (CminusAy * (Self[i].X - Center.X)) < 0)) xor Over180) then
+        Continue;
+
+      Buffer.Add(Self[I]);
+    end;
+
+    //Result := Buffer.Trim();
+    Result := TPointArray(Buffer.Trim()).ExtractDist(Center, MinRadius, MaxRadius);
+  end else
+    //Result := Self.ExcludeDist(Center, MinRadius, MaxRadius);
 end;
 
 function TPointArrayHelper.Extremes: TPointArray;

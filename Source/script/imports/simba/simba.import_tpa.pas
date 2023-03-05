@@ -381,11 +381,11 @@ end;
 (*
 TPointArray.ExcludePie
 ~~~~~~~~~~~~~~~~~~~~~~
-function TPointArray.ExcludePie(SD, ED, MinR, MaxR: Double; Center: TPoint): TPointArray;
+function TPointArray.ExcludePie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray;
 *)
 procedure _LapeTPAExcludePie(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PPointArray(Params^[0])^.ExcludePie(PDouble(Params^[1])^, PDouble(Params^[2])^, PDouble(Params^[3])^, PDouble(Params^[4])^, PPoint(Params^[5])^);
+  PPointArray(Result)^ := PPointArray(Params^[0])^.ExcludePie(PSingle(Params^[1])^, PSingle(Params^[2])^, PSingle(Params^[3])^, PSingle(Params^[4])^, PPoint(Params^[5])^);
 end;
 
 (*
@@ -412,6 +412,10 @@ end;
 TPointArray.ExcludePolygon
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ExcludePolygon(Polygon: TPointArray): TPointArray;
+
+Returns all points from `Self` that are *not* inside the polygon.
+
+Inverse of `ExtractPolygon`
 *)
 procedure _LapeTPAExcludePolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -422,10 +426,90 @@ end;
 TPointArray.ExcludeBox
 ~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ExcludeBox(Box: TBox): TPointArray;
+
+Returns all points from `Self` that *not* inside the box.
+
+Inverse of `ExtractBox`
 *)
 procedure _LapeTPAExcludeBox(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.ExcludeBox(PBox(Params^[1])^);
+end;
+
+(*
+TPointArray.ExcludeQuad
+~~~~~~~~~~~~~~~~~~~~~~~
+function TPointArray.ExcludeQuad(Quad: TQuad): TPointArray;
+
+Returns all points from `Self` that *not* inside the quad.
+
+Inverse of `ExtractQuad`
+*)
+procedure _LapeTPAExcludeQuad(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PPointArray(Params^[0])^.ExcludeQuad(PQuad(Params^[1])^);
+end;
+
+(*
+TPointArray.ExtractDist
+~~~~~~~~~~~~~~~~~~~~~~~
+function TPointArray.ExtractDist(Center: TPoint; MinDist, MaxDist: Double): TPointArray;
+
+Returns all points from `Self` that *not* within `MinDist` and `MaxDist` from `Center`
+
+Inverse of `ExtractDist`
+*)
+procedure _LapeTPAExtractDist(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PPointArray(Params^[0])^.ExtractDist(PPoint(Params^[1])^, PSingle(Params^[2])^, PSingle(Params^[3])^);
+end;
+
+(*
+TPointArray.ExtractPolygon
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+function TPointArray.ExtractPolygon(Polygon: TPointArray): TPointArray;
+
+Returns all points from `Self` that are inside the polygon.
+*)
+procedure _LapeTPAExtractPolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PPointArray(Params^[0])^.ExtractPolygon(PPointArray(Params^[1])^);
+end;
+
+(*
+TPointArray.ExtractBox
+~~~~~~~~~~~~~~~~~~~~~~
+function TPointArray.ExtractBox(Box: TBox): TPointArray;
+
+Returns all points from `Self` that inside the box.
+*)
+procedure _LapeTPAExtractBox(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PPointArray(Params^[0])^.ExtractBox(PBox(Params^[1])^);
+end;
+
+(*
+TPointArray.ExtractQuad
+~~~~~~~~~~~~~~~~~~~~~~~
+function TPointArray.ExtractQuad(Quad: TQuad): TPointArray;
+
+Returns all points from `Self` that inside the quad.
+*)
+procedure _LapeTPAExtractQuad(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PPointArray(Params^[0])^.ExtractQuad(PQuad(Params^[1])^);
+end;
+
+(*
+TPointArray.ExtractPie
+~~~~~~~~~~~~~~~~~~~~~~
+function TPointArray.ExtractPie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray;
+
+Returns all points from `Self` are inside the "pie slice" defined by StartDegree, EndDegree and MinRadius, MaxRadius and Center.
+*)
+procedure _LapeTPAExtractPie(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PPointArray(Params^[0])^.ExtractPie(PSingle(Params^[1])^, PSingle(Params^[2])^, PSingle(Params^[3])^, PSingle(Params^[4])^, PPoint(Params^[5])^);
 end;
 
 (*
@@ -623,11 +707,18 @@ begin
     addGlobalFunc('function TPointArray.CreateFromPolygon(Poly: TPointArray; Filled: Boolean): TPointArray; static', @_LapeTPACreateFromPolygon);
     addGlobalFunc('function TPointArray.CreateFromSimplePolygon(Center: TPoint; Sides: Integer; Size: Integer; Filled: Boolean): TPointArray; static', @_LapeTPACreateFromSimplePolygon);
 
-    addGlobalFunc('function TPointArray.ExcludePie(SD, ED, MinR, MaxR: Double; Center: TPoint): TPointArray;', @_LapeTPAExcludePie);
+    addGlobalFunc('function TPointArray.ExcludePie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray;', @_LapeTPAExcludePie);
     addGlobalFunc('function TPointArray.ExcludeDist(Center: TPoint; MinDist, MaxDist: Double): TPointArray', @_LapeTPAExcludeDist);
     addGlobalFunc('function TPointArray.ExcludePoints(Points: TPointArray): TPointArray', @_LapeTPAExcludePoints);
     addGlobalFunc('function TPointArray.ExcludePolygon(Polygon: TPointArray): TPointArray', @_LapeTPAExcludePolygon);
     addGlobalFunc('function TPointArray.ExcludeBox(Box: TBox): TPointArray', @_LapeTPAExcludeBox);
+    addGlobalFunc('function TPointArray.ExcludeQuad(Quad: TQuad): TPointArray', @_LapeTPAExcludeQuad);
+
+    addGlobalFunc('function TPointArray.ExtractDist(Center: TPoint; MinDist, MaxDist: Single): TPointArray', @_LapeTPAExtractDist);
+    addGlobalFunc('function TPointArray.ExtractPolygon(Polygon: TPointArray): TPointArray', @_LapeTPAExtractPolygon);
+    addGlobalFunc('function TPointArray.ExtractBox(Box: TBox): TPointArray', @_LapeTPAExtractBox);
+    addGlobalFunc('function TPointArray.ExtractQuad(Quad: TQuad): TPointArray', @_LapeTPAExtractQuad);
+    addGlobalFunc('function TPointArray.ExtractPie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray', @_LapeTPAExtractPie);
 
     addGlobalFunc('function TPointArray.Skeleton(FMin: Integer = 2; FMax: Integer = 6): TPointArray;', @_LapeTPASkeleton);
     addGlobalFunc('function TPointArray.Border: TPointArray;', @_LapeTPABorder);

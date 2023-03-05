@@ -1,0 +1,34 @@
+{$assertions on}
+
+var
+  TestTPA, ExcludedTPA: TPointArray;
+
+begin
+  TestTPA := TPointArray.CreateFromBox([10,10,40,40],True);
+
+  ExcludedTPA := TestTPA.ExcludeBox([20,20,30,30]);
+  Assert(ExcludedTPA.Bounds() = TestTPA.Bounds());
+  Assert(ExcludedTPA.Length() = 840);
+
+  // Dist
+  ExcludedTPA := TestTPA.ExcludeDist([25,25], 6, 10);
+  Assert(ExcludedTPA.Bounds() = TestTPA.Bounds());
+  Assert(ExcludedTPA.Length() = 769);
+
+  // Quad
+  ExcludedTPA := TestTPA.ExcludeQuad(TQuad.CreateFromBox([20,20,30,30]).Rotate(Radians(45)));
+  Assert(ExcludedTPA.Bounds() = TestTPA.Bounds());
+  Assert(ExcludedTPA.Length() = 848);
+
+  // Pie
+  ExcludedTPA := TestTPA.ExcludePie(120,160,0,15,[25,25]);
+  Assert(ExcludedTPA.Bounds() = TestTPA.Bounds());
+  Assert(ExcludedTPA.Length() = 882);
+
+  // Poly
+  ExcludedTPA := TestTPA.ExcludePolygon([TPoint.Create(15, 15), TPoint.Create(30, 25), TPoint.Create(15, 35)]);
+  Assert(ExcludedTPA.Bounds() = TestTPA.Bounds());
+  Assert(ExcludedTPA.Length() = 806);
+
+  // Show(ExcludedTPA);
+end.

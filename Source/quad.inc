@@ -32,7 +32,8 @@
     function Contains(X, Y: Integer): Boolean; overload; inline;
     function Offset(P: TPoint): TQuad; overload;
     function Offset(X, Y: Integer): TQuad; overload;
-    function Filter(Points: TPointArray): TPointArray;
+    function Extract(Points: TPointArray): TPointArray;
+    function Exclude(Points: TPointArray): TPointArray;
     function Expand(Amount: Double): TQuad;
     function NearestEdge(P: TPoint): TPoint;
     function Area: Integer;
@@ -174,19 +175,30 @@ begin
   Result := TQuad.Create(Top.Offset(X, Y), Right.Offset(X, Y), Bottom.Offset(X, Y), Left.Offset(X, Y));
 end;
 
-function TQuad.Filter(Points: TPointArray): TPointArray;
+function TQuad.Extract(Points: TPointArray): TPointArray;
 var
-  I, Count: Integer;
+  I: Integer;
+  Buffer: TSimbaPointBuffer;
 begin
-  SetLength(Result, Length(Points));
-  Count := 0;
+  Buffer.Init(Length(Points));
   for I := 0 to High(Points) do
     if Contains(Points[I]) then
-    begin
-      Result[Count] := Points[I];
-      Inc(Count);
-    end;
-  SetLength(Result, Count);
+      Buffer.Add(Points[I]);
+
+  Result := Buffer.Trim();
+end;
+
+function TQuad.Exclude(Points: TPointArray): TPointArray;
+var
+  I: Integer;
+  Buffer: TSimbaPointBuffer;
+begin
+  Buffer.Init(Length(Points));
+  for I := 0 to High(Points) do
+    if not Contains(Points[I]) then
+      Buffer.Add(Points[I]);
+
+  Result := Buffer.Trim();
 end;
 
 function TQuad.Expand(Amount: Double): TQuad;

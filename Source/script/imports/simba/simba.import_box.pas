@@ -117,15 +117,27 @@ begin
 end;
 
 (*
-TBox.Filter
-~~~~~~~~~~~
-function TBox.Filter(Points: TPointArray): TPointArray;
+TBox.Extract
+~~~~~~~~~~~~
+function TBox.Extract(Points: TPointArray): TPointArray;
 
-Returns all points that are in the box.
+Returns all points that *are inside* the box.
 *)
-procedure _LapeBox_Filter(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeBox_Extract(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PBox(Params^[0])^.Filter(PPointArray(Params^[1])^);
+  PPointArray(Result)^ := PBox(Params^[0])^.Extract(PPointArray(Params^[1])^);
+end;
+
+(*
+TBox.Exclude
+~~~~~~~~~~~~
+function TBox.Exclude(Points: TPointArray): TPointArray;
+
+Returns all points that are *not inside* the box.
+*)
+procedure _LapeBox_Exclude(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PBox(Params^[0])^.Exclude(PPointArray(Params^[1])^);
 end;
 
 (*
@@ -352,7 +364,8 @@ begin
     addGlobalFunc('function TBox.Expand(SizeMod: Integer; MaxBounds: TBox): TBox; overload;', @_LapeBox_Expand3);
     addGlobalFunc('function TBox.Expand(WidMod, HeiMod: Integer): TBox; overload;', @_LapeBox_Expand2);
     addGlobalFunc('function TBox.Expand(WidMod, HeiMod: Integer; MaxBounds: TBox): TBox; overload;', @_LapeBox_Expand4);
-    addGlobalFunc('function TBox.Filter(Points: TPointArray): TPointArray', @_LapeBox_Filter);
+    addGlobalFunc('function TBox.Extract(Points: TPointArray): TPointArray', @_LapeBox_Extract);
+    addGlobalFunc('function TBox.Exclude(Points: TPointArray): TPointArray', @_LapeBox_Exclude);
     addGlobalFunc('function TBox.Contains(Other: TBox): Boolean; overload;', @_LapeBox_Contains1);
     addGlobalFunc('function TBox.Contains(Other: TPoint): Boolean; overload;', @_LapeBox_Contains2);
     addGlobalFunc('function TBox.Contains(X, Y: Integer): Boolean; overload;', @_LapeBox_Contains3);
