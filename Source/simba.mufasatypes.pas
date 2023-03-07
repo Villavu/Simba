@@ -50,7 +50,6 @@ type
     1: (AsInteger: Integer);
   end;
   TRGB32Array = array of TRGB32;
-  TColorBGRA = TRGB32;
 
   PPRGB32 = ^PRGB32; // Pointer to PRGB32
   PRGB32 = ^TRGB32;

@@ -21,6 +21,7 @@ function RGBToColor(r,g,b: Byte): TColor; overload; inline;
 function RGBToColor(r,g,b: Integer): TColor; overload; inline;
 procedure ColorToRGB(Color: Integer;out r,g,b: Byte); overload; inline;
 procedure ColorToRGB(Color: Integer;out r,g,b: Integer); overload; inline;
+{
 procedure RGBToXYZ(R,G,B: Byte;out x,y,z: Extended); inline;
 procedure XYZToRGB(X,Y,Z: Extended;out R,G,B: Byte); overload; inline;
 procedure XYZToRGB(X,Y,Z: Extended;out R,G,B: Integer); overload;
@@ -45,7 +46,7 @@ procedure ColorToCIELab(Color: Integer; out L, a, b: Extended);
 procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended);
 procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended);
 function ColorToGray(const Color: Integer): Byte; inline;
-
+}
 procedure BestColor_CTS0(Colors: TIntegerArray; out Color, Tolerance: Int32);
 procedure BestColor_CTS1(Colors: TIntegerArray; out Color, Tolerance: Int32);
 procedure BestColor_CTS2(Colors: TIntegerArray; out Color, Tolerance: Int32; out Hue, Sat: Extended);

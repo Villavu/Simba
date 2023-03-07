@@ -111,8 +111,8 @@ function TFindBitmapBuffer.Find(Bitmap: TMufasaBitmap; out Points: TPointArray; 
 
   function Match(const BufferPtr, BitmapPtr: TRGB32): Boolean; inline;
   begin
-    Result := (Bitmap.TransparentColorActive and BitmapPtr.EqualsIgnoreAlpha(Bitmap.TransparentRGB)) or
-              (DistanceRGB(BufferPtr, BitmapPtr) <= Tolerance);
+    //Result := (Bitmap.TransparentColorActive and BitmapPtr.EqualsIgnoreAlpha(Bitmap.TransparentRGB)) or
+    //          (DistanceRGB(BufferPtr, BitmapPtr) <= Tolerance);
   end;
 
   function Hit(BufferPtr: PRGB32): Boolean;

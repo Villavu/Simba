@@ -255,7 +255,7 @@ implementation
 uses
   fpimage, math, intfgraphics, simba.overallocatearray, simba.geometry,
   simba.tpa, simba.colormath, simba.colormath_distance, simba.client, simba.iomanager,
-  simba.bitmap_misc, simba.encoding, simba.compress, simba.math;
+  simba.bitmap_misc, simba.encoding, simba.compress, simba.math, simba.colormath_conversion;
 
 function GetDistinctColor(const Color, Index: Integer): Integer; inline;
 const
@@ -531,32 +531,32 @@ begin
     begin
       case ColorMapID of
         0:begin //cold blue to red
-            _H := (1 - Normed[Y,X]) * 67;
+            _H := (1 - Normed[Y,X]) * 240;
             _S := 40 + Normed[Y,X] * 60;
-            Color := HSLToColor(_H,_S,50);
+            Color := HSLToColor(ColorHSL.Create(_H,_S,50));
           end;
         1:begin //black -> blue -> red
-            _H := (1 - Normed[Y,X]) * 67;
+            _H := (1 - Normed[Y,X]) * 240;
             _L := Normed[Y,X] * 50;
-            Color := HSLToColor(_H,100,_L);
+            Color := HSLToColor(ColorHSL.Create(_H,100,_L));
           end;
         2:begin //white -> blue -> red
-            _H := (1 - Normed[Y,X]) * 67;
+            _H := (1 - Normed[Y,X]) * 240;
             _L := 100 - Normed[Y,X] * 50;
-            Color := HSLToColor(_H,100,_L);
+            Color := HSLToColor(ColorHSL.Create(_H,100,_L));
           end;
         3:begin //Light (to white)
             _L := (1 - Normed[Y,X]) * 100;
-            Color := HSLToColor(0,0,_L);
+            Color := HSLToColor(ColorHSL.Create(0,0,_L));
           end;
         4:begin //Light (to black)
             _L := Normed[Y,X] * 100;
-            Color := HSLToColor(0,0,_L);
+            Color := HSLToColor(ColorHSL.Create(0,0,_L));
           end;
         else
           begin //Custom black to hue to white
             _L := Normed[Y,X] * 100;
-            Color := HSLToColor(ColorMapID/3.6,100,_L);
+            Color := HSLToColor(ColorHSL.Create(ColorMapID,100,_L));
           end;
       end;
 
@@ -845,8 +845,8 @@ begin
 
   for I := 0 to FWidth * FHeight - 1 do
   begin
-    if (DistanceRGB(Ptr^, OtherPtr^) > Tolerance) then
-      Inc(Result);
+    //if (DistanceRGB(Ptr^, OtherPtr^) > Tolerance) then
+    //  Inc(Result);
 
     Inc(Ptr);
     Inc(OtherPtr);
@@ -899,8 +899,8 @@ begin
     for X := 0 to W do
     begin
       Index := Y * FWidth + X;
-      if (DistanceRGB(FData[Index], Other.FData[Index]) > Tolerance) then
-        Buffer.Add(TPoint.Create(X, Y));
+      //if (DistanceRGB(FData[Index], Other.FData[Index]) > Tolerance) then
+      //  Buffer.Add(TPoint.Create(X, Y));
     end;
 
   Result := Buffer.Trim();
@@ -1255,8 +1255,8 @@ begin
       H := Degrees(ArcTan2(Y - ACenter.Y, X - ACenter.X)) / 3.6;
       S := Hypot(ACenter.X - X, ACenter.Y - Y);
       L := 50;
-      if S / Radius * 100 < 100 then
-        SetPixel(X, Y, HSLToColor(H, S / Radius * 100, L));
+      //if S / Radius * 100 < 100 then
+      //  SetPixel(X, Y, HSLToColor(H, S / Radius * 100, L));
     end;
 end;
 
@@ -1705,8 +1705,8 @@ begin
   Ptr := FData;
   for i := (FHeight*FWidth-1) downto 0 do
   begin
-    RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,He,Se,Le);
-    HSLtoRGB(He,0.0,Le,Ptr^.R,Ptr^.G,Ptr^.B);
+    //RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,He,Se,Le);
+    //HSLtoRGB(He,0.0,Le,Ptr^.R,Ptr^.G,Ptr^.B);
     inc(ptr);
   end;
 end;
@@ -1722,8 +1722,8 @@ begin
   PtrNew := TargetBitmap.FData;
   for i := (FHeight*FWidth-1) downto 0 do
   begin
-    RGBToHSL(PtrOld^.R,PtrOld^.G,PtrOld^.B,He,Se,Le);
-    HSLtoRGB(He,0.0,Le,PtrNew^.R,PtrNew^.G,PtrNew^.B);
+    //RGBToHSL(PtrOld^.R,PtrOld^.G,PtrOld^.B,He,Se,Le);
+    //HSLtoRGB(He,0.0,Le,PtrNew^.R,PtrNew^.G,PtrNew^.B);
     inc(ptrOld);
     inc(PtrNew);
   end;
