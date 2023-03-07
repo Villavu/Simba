@@ -101,6 +101,7 @@ end;
 
 class function TSameColorCTS2.Create(Color, Tolerance: Integer; HueMod, SatMod: Single): TSameColorCTS2;
 begin
+  {
   RGBToHSL(
     Color and $FF,
     Color shr 8 and $FF,
@@ -116,6 +117,7 @@ begin
 
   Result.GoalL := Result.GoalL / 100;
   Result.GoalS := Result.GoalS / 100;
+  }
 end;
 
 function TSameColorCTS2.IsSame(const Color: TRGB32): Boolean;
@@ -175,6 +177,7 @@ var
   X, Y, Z: Extended;
   L, A, B: Extended;
 begin
+  {
   RGBToXYZ(
     Color and $FF,
     Color shr 8 and $FF,
@@ -187,6 +190,7 @@ begin
   Result.GoalA := A;
   Result.GoalB := B;
   Result.GoalTolerance := Sqr(Tolerance * Modifier);
+  }
 end;
 
 function TSameColorCTS3.IsSame(const Color: TRGB32): Boolean;

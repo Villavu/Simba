@@ -74,7 +74,7 @@ begin
     Exit;
 
   ColorToRGB(Color[Selected], R, G, B);
-  ColorToHSL(Color[Selected], H, S, L);
+  //ColorToHSL(Color[Selected], H, S, L);
 
   StringGrid.Cells[1, 0] := Format('%d', [Color[Selected]]);
   StringGrid.Cells[1, 1] := Format('$%s', [HexStr(Color[Selected], 6)]);

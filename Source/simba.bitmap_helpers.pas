@@ -12,12 +12,15 @@ unit simba.bitmap_helpers;
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils, simba.colormath_conversion, simba.finder_color_new,
   simba.mufasatypes, simba.matchtemplate, simba.bitmap;
 
 type
   TMufasaBitmapHelpers = class helper for TMufasaBitmap
   public
+    function TestFindColors(ColorSpace: EColorSpace; Color: Integer; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
+    function TestMatchColors(ColorSpace: EColorSpace; Color: Integer; Multipliers: TChannelMultipliers): TSingleMatrix;
+
     function MatchTemplate(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
     function MatchTemplateMask(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
 
@@ -35,8 +38,28 @@ type
 implementation
 
 uses
-  simba.finder_color, simba.finder_bitmap, simba.colormath_distance, simba.colormath_conversion,
+  simba.finder_color, simba.finder_bitmap, simba.colormath_distance,
   simba.overallocatearray;
+
+function TMufasaBitmapHelpers.TestFindColors(ColorSpace: EColorSpace; Color: Integer; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
+var
+  Buffer: TColorFinder;
+begin
+  Buffer := Default(TColorFinder);
+  Buffer.Setup(ColorSpace, Color, Tolerance, Multipliers);
+
+  Result := Buffer.Find(FData, FWidth, FWidth, FHeight, TPoint.Create(0, 0));
+end;
+
+function TMufasaBitmapHelpers.TestMatchColors(ColorSpace: EColorSpace; Color: Integer; Multipliers: TChannelMultipliers): TSingleMatrix;
+var
+  Buffer: TColorFinder;
+begin
+  Buffer := Default(TColorFinder);
+  Buffer.Setup(ColorSpace, Color, 0, Multipliers);
+
+  Result := Buffer.Match(FData, FWidth, FWidth, FHeight);
+end;
 
 function TMufasaBitmapHelpers.MatchTemplate(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
 begin
@@ -130,16 +153,16 @@ begin
     for X := 0 to W do
     begin
       if (X+1 < W) then
-        if DistanceRGB(FData[Y*FWidth+X], FData[Y*FWidth+(X+1)]) > MinDiff then
+        //if DistanceRGB(FData[Y*FWidth+X], FData[Y*FWidth+(X+1)]) > MinDiff then
         begin
           Buffer.Add(TPoint.Create(X, Y));
 
           Continue;
         end;
 
-      if (Y+1 < H) then
-        if DistanceRGB(FData[Y*FWidth+X], FData[(Y+1)*FWidth+X]) > MinDiff then
-          Buffer.Add(TPoint.Create(X, Y));
+      //if (Y+1 < H) then
+        //if DistanceRGB(FData[Y*FWidth+X], FData[(Y+1)*FWidth+X]) > MinDiff then
+        //  Buffer.Add(TPoint.Create(X, Y));
     end;
 
   Result := Buffer.Trim();
@@ -149,7 +172,7 @@ function TMufasaBitmapHelpers.FindEdgesHSL(MinDiff: Integer; HueMod: Single; Sat
 var
   X, Y ,W, H: Integer;
   Buffer: TSimbaPointBuffer;
-  Color: TColorHSL;
+  //Color: TColorHSL;
 begin
   Buffer.Init();
 
@@ -159,18 +182,18 @@ begin
   for Y := 0 to H do
     for X := 0 to W do
     begin
-      Color := TColorHSL.Create(FData[Y*FWidth+X]);
+      //Color := TColorHSL.Create(FData[Y*FWidth+X]);
       if (X+1 < W) then
-        if DistanceHSL(Color, TColorHSL.Create(FData[Y*FWidth+(X+1)]), HueMod, SatMod) > MinDiff then
+        //if DistanceHSL(Color, TColorHSL.Create(FData[Y*FWidth+(X+1)]), HueMod, SatMod) > MinDiff then
         begin
           Buffer.Add(TPoint.Create(X, Y));
 
           Continue;
         end;
 
-      if (Y+1 < H) then
-        if DistanceHSL(Color, TColorHSL.Create(FData[(Y+1)*FWidth+X]), HueMod, SatMod) > MinDiff then
-          Buffer.Add(TPoint.Create(X, Y));
+      //if (Y+1 < H) then
+        //if DistanceHSL(Color, TColorHSL.Create(FData[(Y+1)*FWidth+X]), HueMod, SatMod) > MinDiff then
+        //  Buffer.Add(TPoint.Create(X, Y));
     end;
 
   Result := Buffer.Trim();

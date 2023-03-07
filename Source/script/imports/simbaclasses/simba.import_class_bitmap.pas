@@ -8,7 +8,7 @@ implementation
 
 uses
   classes, sysutils, graphics, lptypes, lpeval,
-  simba.script_compiler, simba.mufasatypes, simba.bitmap, simba.bitmap_helpers;
+  simba.script_compiler, simba.mufasatypes, simba.bitmap, simba.bitmap_helpers, simba.colormath_conversion;
 
 type
   PObject = ^TObject;
@@ -1461,6 +1461,16 @@ begin
   PMufasaBitmap(Params^[0])^.FreeOnTerminate := PBoolean(Params^[1])^;
 end;
 
+procedure _LapeMufasaBitmap_TestFindColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PMufasaBitmap(Params^[0])^.TestFindColors(PColorSpace(Params^[1])^, PInteger(Params^[2])^, PSingle(Params^[3])^, PChannelMultipliers(Params^[4])^);
+end;
+
+procedure _LapeMufasaBitmap_TestMatchColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSingleMatrix(Result)^ := PMufasaBitmap(Params^[0])^.TestMatchColors(PColorSpace(Params^[1])^, PInteger(Params^[2])^, PChannelMultipliers(Params^[3])^);
+end;
+
 procedure ImportBitmap(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -1468,6 +1478,8 @@ begin
     ImportingSection := 'TMufasaBitmap';
 
     addClass('TMufasaBitmap');
+
+    addGlobalType('(RGB, HSV, HSL, XYZ, LAB, LCH, DELTAE)', 'EColorSpace');
 
     addGlobalType('array of TMufasaBitmap', 'TMufasaBitmapArray');
     addGlobalType('packed record B, G, R, A: Byte; end', 'TRGB32');
@@ -1488,6 +1500,9 @@ begin
     addClassVar('TMufasaBitmap', 'FontName', 'String', @_LapeMufasaBitmap_FontName_Read, @_LapeMufasaBitmap_FontName_Write);
     addClassVar('TMufasaBitmap', 'FontSize', 'Single', @_LapeMufasaBitmap_FontSize_Read, @_LapeMufasaBitmap_FontSize_Write);
     addClassVar('TMufasaBitmap', 'FontAntialiasing', 'Boolean', @_LapeMufasaBitmap_FontAntialiasing_Read, @_LapeMufasaBitmap_FontAntialiasing_Write);
+
+    addGlobalFunc('function TMufasaBitmap.TestFindColors(ColorSpace: EColorSpace; Color: Integer; Tolerance: Single; Multipliers: array[0..2] of Single): TPointArray;', @_LapeMufasaBitmap_TestFindColors);
+    addGlobalFunc('function TMufasaBitmap.TestMatchColors(ColorSpace: EColorSpace; Color: Integer; Multipliers: array[0..2] of Single): TSingleMatrix;', @_LapeMufasaBitmap_TestMatchColors);
 
     addGlobalFunc('function TMufasaBitmap.PointInBitmap(P: TPoint): Boolean; overload', @_LapeMufasaBitmap_PointInBitmap);
     addGlobalFunc('function TMufasaBitmap.PointInBitmap(X, Y: Integer): Boolean; overload', @_LapeMufasaBitmap_PointInBitmapEx);

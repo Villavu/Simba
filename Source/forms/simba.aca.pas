@@ -123,7 +123,7 @@ begin
   FImageZoom.MoveTest(FImageBox, X, Y);
 
   ColorToRGB(FImageBox.Background.Canvas.Pixels[X, Y], R, G, B);
-  ColorToHSL(FImageBox.Background.Canvas.Pixels[X, Y], H, S, L);
+  //ColorToHSL(FImageBox.Background.Canvas.Pixels[X, Y], H, S, L);
 
   FZoomInfo.Caption := Format('Color: %d', [FImageBox.Background.Canvas.Pixels[X, Y]]) + LineEnding +
                        Format('RGB: %d, %d, %d', [R, G, B])                            + LineEnding +
@@ -253,7 +253,7 @@ begin
     FImageZoom.SetTempColor(ColorListBox.Selected);
 
     ColorToRGB(ColorListBox.Selected, R, G, B);
-    ColorToHSL(ColorListBox.Selected, H, S, L);
+    //ColorToHSL(ColorListBox.Selected, H, S, L);
 
     FZoomInfo.Caption := Format('Color: %d', [ColorListBox.Selected]) + LineEnding +
                          Format('RGB: %d, %d, %d', [R, G, B])         + LineEnding +

@@ -1,15 +1,16 @@
 object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
   Left = 80
-  Height = 344
+  Height = 430
   Top = 135
-  Width = 664
+  Width = 830
   ActiveControl = ColorListBox
   Caption = 'Color Picker History'
-  ClientHeight = 344
-  ClientWidth = 664
+  ClientHeight = 430
+  ClientWidth = 830
+  DesignTimePPI = 120
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '2.2.0.4'
+  LCLVersion = '2.2.4.0'
   object ColorListBox: TColorListBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
@@ -19,13 +20,13 @@ object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
     Height = 309
     Top = 0
     Width = 427
-    ColorRectWidth = 4
+    ColorRectWidth = 5
     ColorRectOffset = 2
     Style = []
     Align = alCustom
     Anchors = [akTop, akLeft, akRight, akBottom]
-    BorderSpacing.Left = 5
-    BorderSpacing.Bottom = 5
+    BorderSpacing.Left = 6
+    BorderSpacing.Bottom = 6
     ExtendedSelect = False
     ItemHeight = 0
     OnSelectionChange = ColorListBoxSelectionChange
@@ -35,14 +36,14 @@ object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
     AnchorSideLeft.Control = Owner
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 5
+    Left = 6
     Height = 25
     Top = 314
     Width = 59
     Anchors = [akLeft, akBottom]
     AutoSize = True
-    BorderSpacing.Left = 5
-    BorderSpacing.Bottom = 5
+    BorderSpacing.Left = 6
+    BorderSpacing.Bottom = 6
     Caption = 'Delete'
     OnClick = HandleButtonDeleteClick
     TabOrder = 1
@@ -59,21 +60,21 @@ object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
     Align = alCustom
     Anchors = [akLeft, akBottom]
     AutoSize = True
-    BorderSpacing.Left = 5
-    BorderSpacing.Bottom = 5
+    BorderSpacing.Left = 6
+    BorderSpacing.Bottom = 6
     Caption = 'Clear'
     OnClick = HandleButtonClearClick
     TabOrder = 2
   end
   object ColorPanel: TPanel
-    Left = 432
+    Left = 374
     Height = 344
     Top = 0
-    Width = 232
+    Width = 290
     Align = alRight
     BevelOuter = bvNone
     ClientHeight = 344
-    ClientWidth = 232
+    ClientWidth = 290
     TabOrder = 3
     object ButtonExit: TButton
       Left = 5
@@ -82,9 +83,9 @@ object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
       Width = 222
       Align = alBottom
       AutoSize = True
-      BorderSpacing.Left = 5
-      BorderSpacing.Right = 5
-      BorderSpacing.Bottom = 5
+      BorderSpacing.Left = 6
+      BorderSpacing.Right = 6
+      BorderSpacing.Bottom = 6
       Caption = 'Exit'
       OnClick = HandleButtonExitClick
       TabOrder = 0
@@ -96,9 +97,9 @@ object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
       Width = 222
       Align = alBottom
       AutoSize = True
-      BorderSpacing.Left = 5
-      BorderSpacing.Right = 5
-      BorderSpacing.Bottom = 5
+      BorderSpacing.Left = 6
+      BorderSpacing.Right = 6
+      BorderSpacing.Bottom = 6
       Caption = 'Pick Color'
       OnClick = HandleButtonPickColorClick
       TabOrder = 1
@@ -116,21 +117,25 @@ object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
       Align = alTop
       Anchors = [akTop, akLeft, akRight, akBottom]
       AutoFillColumns = True
-      BorderSpacing.Left = 5
-      BorderSpacing.Top = 5
-      BorderSpacing.Right = 5
+      BorderSpacing.Left = 6
+      BorderSpacing.Top = 6
+      BorderSpacing.Right = 6
       BorderStyle = bsNone
       Color = clForm
       ColCount = 2
       Columns = <      
         item
+          MinSize = 12
+          MaxSize = 250
           SizePriority = 0
           Title.Caption = 'Title'
-          Width = 111
+          Width = 139
         end      
         item
+          MinSize = 12
+          MaxSize = 250
           Title.Caption = 'Title'
-          Width = 111
+          Width = 83
         end>
       DefaultDrawing = False
       FixedColor = clForm
@@ -141,8 +146,8 @@ object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
       TabOrder = 2
       OnKeyDown = StringGridKeyDown
       ColWidths = (
-        111
-        111
+        139
+        83
       )
       Cells = (
         5

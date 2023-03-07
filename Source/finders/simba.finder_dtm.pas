@@ -73,7 +73,7 @@ var
               begin
                 Checked.SetBit(Index);
 
-                if DistanceRGB(Data[Y * Width + X], PointColors[Index]) <= PointTolerances[Index] then
+                //if DistanceRGB(Data[Y * Width + X], PointColors[Index]) <= PointTolerances[Index] then
                 begin
                   Checked.SetBit(Index);
                   Hit.SetBit(Index);
@@ -194,7 +194,7 @@ var
               begin
                 Checked.SetBit(Index);
 
-                if DistanceRGB(Data[Y * Width + X], PointColors[Index]) <= PointTolerances[Index] then
+                //if DistanceRGB(Data[Y * Width + X], PointColors[Index]) <= PointTolerances[Index] then
                 begin
                   Checked.SetBit(Index);
                   Hit.SetBit(Index);

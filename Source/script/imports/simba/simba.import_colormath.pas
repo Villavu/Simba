@@ -22,32 +22,32 @@ end;
 
 procedure _LapeColorToHSL(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  ColorToHSL(PInt32(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^);
+  //ColorToHSL(PInt32(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^);
 end;
 
 procedure _LapeHSLToColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PColor(Result)^ := HSLToColor(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^);
+  //PColor(Result)^ := HSLToColor(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^);
 end;
 
 procedure _LapeColorToXYZ(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  ColorToXYZ(PInt32(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^);
+ // ColorToXYZ(PInt32(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^);
 end;
 
 procedure _LapeXYZToColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PColor(Result)^ := XYZToColor(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^);
+  //PColor(Result)^ := XYZToColor(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^);
 end;
 
 procedure _LapeRGBToHSL(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  RGBToHSL(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+ // RGBToHSL(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
 end;
 
 procedure _LapeHSLtoRGB(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  HSLtoRGB(Pextended(Params^[0])^, Pextended(Params^[1])^, Pextended(Params^[2])^, PByte(Params^[3])^, PByte(Params^[4])^, PByte(Params^[5])^);
+  //HSLtoRGB(Pextended(Params^[0])^, Pextended(Params^[1])^, Pextended(Params^[2])^, PByte(Params^[3])^, PByte(Params^[4])^, PByte(Params^[5])^);
 end;
 
 procedure _LapeCalculateBestColor(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -61,77 +61,77 @@ end;
 
 procedure _LapeRGBToXYZ(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  RGBToXYZ(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+  //RGBToXYZ(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
 end;
 
 procedure _LapeXYZToRGB(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  XYZToRGB(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^);
+ // XYZToRGB(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^);
 end;
 
 procedure _LapeXYZToHSL(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  HSLToXYZ(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+ // HSLToXYZ(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
 end;
 
 procedure _LapeHSLToXYZ(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  HSLToXYZ(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+ // HSLToXYZ(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
 end;
 
 procedure _LapeXYZtoCIELab(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  XYZtoCIELab(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+ // XYZtoCIELab(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
 end;
 
 procedure _LapeCIELabtoXYZ(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  CIELabToXYZ(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+//  CIELabToXYZ(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
 end;
 
 procedure _LapeCIELabToRGB(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  CIELabToRGB(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^);
+//  CIELabToRGB(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^);
 end;
 
 procedure _LapeRGBToCIELab(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  RGBToCIELab(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+ // RGBToCIELab(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
 end;
 
 procedure _LapeCIELabToColor(const Params: PParamArray; const Result : Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PColor(Result)^ := CIELabToColor(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^);
+  //PColor(Result)^ := CIELabToColor(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^);
 end;
 
 procedure _LapeColorToCIELab(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  ColorToCIELab(PInt32(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^);
+  //ColorToCIELab(PInt32(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^);
 end;
 
 procedure _LapeCIELabToHSL(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  CIELabToHSL(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+  //CIELabToHSL(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
 end;
 
 procedure _LapeHSLToCIELab(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  HSLToCIELab(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+  //HSLToCIELab(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
 end;
 
 procedure _LapeColorToGray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PColor(Result)^ := ColorToGray(PInt32(Params^[0])^);
+  //PColor(Result)^ := ColorToGray(PInt32(Params^[0])^);
 end;
 
 procedure _LapeDistanceRGB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := DistanceRGB(PInteger(Params^[0])^, PInteger(Params^[1])^);
+  //PInteger(Result)^ := DistanceRGB(PInteger(Params^[0])^, PInteger(Params^[1])^);
 end;
 
 procedure _LapeDistanceHSL(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSingle(Result)^ := DistanceHSL(PInteger(Params^[0])^, PInteger(Params^[1])^, PSingle(Params^[2])^, PSingle(Params^[3])^);
+  //PSingle(Result)^ := DistanceHSL(PInteger(Params^[0])^, PInteger(Params^[1])^, PSingle(Params^[2])^, PSingle(Params^[3])^);
 end;
 
 procedure ImportColorMath(Compiler: TSimbaScript_Compiler);
