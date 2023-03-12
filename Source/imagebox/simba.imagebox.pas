@@ -12,7 +12,7 @@ interface
 uses
   classes, sysutils, forms, controls, graphics, dialogs, extctrls, comctrls,
   lclintf, lcltype, IntfGraphics,
-  simba.mufasatypes, simba.bitmap, simba.dtm, simba.iomanager, simba.imagebox_bitmap;
+  simba.mufasatypes, simba.bitmap, simba.dtm, simba.iomanager, simba.imagebox_bitmap, simba.colormath_conversion;
 
 type
   TSimbaImageBox_ScrollBox = class(TScrollBox)
@@ -50,6 +50,7 @@ type
     end;
     FMousePoint: TPoint;
     FBitmap: TSimbaImageBoxBitmap;
+    FTempBackground: TBitmap;
 
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
     procedure DoPaintArea(Bitmap: TSimbaImageBoxBitmap; R: TRect); virtual;
@@ -97,6 +98,11 @@ type
     function FindColors(CTS: Integer; Col, Tol: Integer; HueMod: Extended = 0.2; SatMod: Extended = 0.2): TPointArray;
     function FindDTMs(DTM: TDTM): TPointArray;
 
+    function Test(ColorSpace: EColorSpace; Col: Integer; Tol: Single; Mods: TChannelMultipliers): TPointArray;
+    function Match(ColorSpace: EColorSpace; Col: Integer; Mods: TChannelMultipliers): TSingleMatrix;
+
+    procedure SetTempBackground(Bitmap: TMufasaBitmap; DoFreeBitmap: Boolean = False);
+
     procedure SetBackground(Data: PRGB32; AWidth, AHeight: Integer); overload;
     procedure SetBackground(FileName: String); overload;
     procedure SetBackground(Bitmap: TMufasaBitmap); overload;
@@ -113,7 +119,7 @@ implementation
 
 uses
   math, fpimage, graphtype,
-  simba.nativeinterface, simba.bitmap_misc, simba.finder_dtm, simba.finder_color;
+  simba.nativeinterface, simba.bitmap_misc, simba.finder_dtm, simba.finder_color, simba.bitmap_helpers;
 
 procedure TSimbaImageBox_ScrollBox.GetPreferredSize(var PreferredWidth, PreferredHeight: integer; Raw: boolean; WithThemeSpace: boolean);
 begin
@@ -334,6 +340,7 @@ type
 
 var
   LocalRect, ScreenRect: TRect;
+  BackgroundBitmap: TBitmap;
 //  T: Double;
 begin
   if (FBackground.Width = 0) or (FBackground.Height = 0) or (FZoom = 0) then
@@ -362,8 +369,13 @@ begin
   end else
     LocalRect        := ScreenRect;
 
-  LocalRect.Right  := Min(LocalRect.Right,  FBackground.Width);
-  LocalRect.Bottom := Min(LocalRect.Bottom, FBackground.Height);
+  if (FTempBackground <> nil) then
+    BackgroundBitmap := FTempBackground
+  else
+    BackgroundBitmap := FBackground;
+
+  LocalRect.Right  := Min(LocalRect.Right,  BackgroundBitmap.Width);
+  LocalRect.Bottom := Min(LocalRect.Bottom, BackgroundBitmap.Height);
 
   if (LocalRect.Width < 1) or (LocalRect.Height < 1) then
     Exit;
@@ -379,12 +391,12 @@ begin
   );
 
   if (FZoom = 1.00) then
-    RenderNoZoom(FBackground, LocalRect.Left, LocalRect.Top, LocalRect.Width, LocalRect.Height, FBitmap.Bitmap)
+    RenderNoZoom(BackgroundBitmap, LocalRect.Left, LocalRect.Top, LocalRect.Width, LocalRect.Height, FBitmap.Bitmap)
   else
   if (FZoom > 1.00) then
-    RenderZoomIn(FZoomPixels, FBackground, LocalRect.Left, LocalRect.Top, LocalRect.Width, LocalRect.Height, FBitmap.Bitmap)
+    RenderZoomIn(FZoomPixels, BackgroundBitmap, LocalRect.Left, LocalRect.Top, LocalRect.Width, LocalRect.Height, FBitmap.Bitmap)
   else
-    RenderZoomOut(FZoomPixels, FBackground, LocalRect.Left, LocalRect.Top, LocalRect.Width, LocalRect.Height, FBitmap.Bitmap);
+    RenderZoomOut(FZoomPixels, BackgroundBitmap, LocalRect.Left, LocalRect.Top, LocalRect.Width, LocalRect.Height, FBitmap.Bitmap);
 
   DoPaintArea(FBitmap, LocalRect);
 
@@ -418,8 +430,8 @@ begin
 
   with TBitmap.Create() do
   try
-    // Measure on slightly bigger font Wid
-    // Font Wid can be 0 so use GetFontData
+    // Measure on slightly bigger font width
+    // Font width can be 0 so use GetFontData
     Canvas.Font := Self.Font;
     Canvas.Font.Size := Round(-GetFontData(Canvas.Font.Reference.Handle).Height * 72 / Canvas.Font.PixelsPerInch) + 3;
 
@@ -657,6 +669,43 @@ begin
   Bitmap.Free();
 end;
 
+function TSimbaImageBox.Test(ColorSpace: EColorSpace; Col: Integer; Tol: Single; Mods: TChannelMultipliers): TPointArray;
+begin
+  with FBackground.ToMufasaBitmap() do
+  try
+    Result := TestFindColors(ColorSpace, Col, Tol, Mods);
+  finally
+    Free();
+  end;
+end;
+
+function TSimbaImageBox.Match(ColorSpace: EColorSpace; Col: Integer; Mods: TChannelMultipliers): TSingleMatrix;
+begin
+  with FBackground.ToMufasaBitmap() do
+  try
+    Result := TestMatchColors(ColorSpace, Col, Mods);
+  finally
+    Free();
+  end;
+end;
+
+procedure TSimbaImageBox.SetTempBackground(Bitmap: TMufasaBitmap; DoFreeBitmap: Boolean);
+begin
+  if (Bitmap <> nil) and (FTempBackground <> nil) then
+    raise Exception.Create('TSimbaImageBox.SetTempBackground: Already have a temp background');
+
+  if (Bitmap <> nil) then
+  begin
+    FTempBackground := TBitmap.Create();
+    FTempBackground.FromData(Bitmap.Data, Bitmap.Width, Bitmap.Height);
+
+    if DoFreeBitmap then
+      Bitmap.Free();
+  end else
+  if (FTempBackground <> nil) then
+    FreeAndNil(FTempBackground);
+end;
+
 procedure TSimbaImageBox.SetBackground(Data: PRGB32; AWidth, AHeight: Integer);
 begin
   FBackground.FromData(Data, AWidth, AHeight);
@@ -743,6 +792,8 @@ end;
 
 destructor TSimbaImageBox.Destroy;
 begin
+  SetTempBackground(nil);
+
   if (FBitmap <> nil) then
     FreeAndNil(FBitmap);
   if (FBackground <> nil) then

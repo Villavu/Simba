@@ -25,14 +25,56 @@ uses
 type
   ColorBGRA = packed record B,G,R,A: Byte; end; // for bitmaps etc
 
-  ColorRGB = record R,G,B: Byte;   end;
-  ColorXYZ = record X,Y,Z: Single; end;
-  ColorLAB = record L,A,B: Single; end;
-  ColorLCH = record L,C,H: Single; end;
-  ColorHSV = record H,S,V: Single; end;
+  ColorRGB = record
+    R,G,B: Byte;
+
+    class function Create(const RComponent, GComponent, BComponent: Byte): ColorRGB; static; inline;
+    function ToColor: TColor; inline;
+  end;
+
+  ColorXYZ = record
+    X,Y,Z: Single;
+
+    class function Create(const XComponent, YComponent, ZComponent: Single): ColorXYZ; static; inline;
+    function ToColor: TColor; inline;
+  end;
+
+  ColorLAB = record
+    L,A,B: Single;
+
+    class function Create(const LComponent, AComponent, BComponent: Single): ColorLAB; static; inline;
+    function ToColor: TColor; inline;
+  end;
+
+  ColorLCH = record
+    L,C,H: Single;
+
+    class function Create(const LComponent, CComponent, HComponent: Single): ColorLCH; static; inline;
+    function ToColor: TColor; inline;
+  end;
+
+  ColorHSV = record
+    H,S,V: Single;
+
+    class function Create(const HComponent, SComponent, VComponent: Single): ColorHSV; static; inline;
+    function ToColor: TColor; inline;
+  end;
+
   ColorHSL = record
     H,S,L: Single;
+
     class function Create(const HComponent, SComponent, LComponent: Single): ColorHSL; static; inline;
+    function ToColor: TColor; inline;
+  end;
+
+  TColorHelper = type Helper for TColor
+  public
+    function ToRGB: ColorRGB;
+    function ToXYZ: ColorXYZ;
+    function ToLAB: ColorLAB;
+    function ToLCH: ColorLCH;
+    function ToHSV: ColorHSV;
+    function ToHSL: ColorHSL;
   end;
 
   PColorBGRA = ^ColorBGRA;
@@ -42,6 +84,8 @@ type
   PColorLCH = ^ColorLCH;
   PColorHSV = ^ColorHSV;
   PColorHSL = ^ColorHSL;
+
+  TColorArray = array of TColor;
 
   PChannelMultipliers = ^TChannelMultipliers;
   TChannelMultipliers = array [0..2] of Single;
@@ -60,14 +104,14 @@ function ColorToRGB(Color: TColor): ColorRGB;  inline;
 function RGBToColor(RGB: ColorRGB): TColor; inline;
 
 // XYZ
-function ColorToXYZ(Color: TColor): ColorXYZ;  inline;
+function ColorToXYZ(Color: TColor): ColorXYZ; inline;
 function RGBToXYZ(const Red, Green, Blue: Byte): ColorXYZ; inline;
 function XYZToRGB(XYZ: ColorXYZ): ColorRGB; inline;
 function XYZToColor(HSL: ColorXYZ): TColor; inline;
 
 // LAB
 function RGBToLAB(const Red, Green, Blue: Byte): ColorLAB; inline;
-function ColorToLAB(Color: TColor): ColorLAB;  inline;
+function ColorToLAB(Color: TColor): ColorLAB; inline;
 function XYZToLAB(XYZ: ColorXYZ): ColorLAB; inline;
 function LABToXYZ(LAB: ColorLAB): ColorXYZ; inline;
 function LABToRGB(LAB: ColorLAB): ColorRGB; inline;
@@ -83,12 +127,12 @@ function LCHToRGB(LCH: ColorLCH): ColorRGB; inline;
 function LCHToColor(LCH: ColorLCH): TColor; inline;
 
 function RGBToHSV(const Red, Green, Blue: Byte): ColorHSV; inline;
-function ColorToHSV(Color: TColor): ColorHSV;  inline;
+function ColorToHSV(Color: TColor): ColorHSV; inline;
 function HSVToRGB(HSV: ColorHSV): ColorRGB; inline;
 function HSVToColor(HSV: ColorHSV): TColor; inline;
 
 // HSL
-function ColorToHSL(Color: TColor): ColorHSL;  inline;
+function ColorToHSL(Color: TColor): ColorHSL; inline;
 function RGBToHSL(const Red, Green, Blue: Byte): ColorHSL; inline;
 
 function HSLToRGB(HSL: ColorHSL): ColorRGB; inline;
@@ -658,11 +702,106 @@ begin
   Result := RGBToColor(HSLToRGB(HSL));
 end;
 
+class function ColorHSV.Create(const HComponent, SComponent, VComponent: Single): ColorHSV;
+begin
+  Result.H := HComponent;
+  Result.S := SComponent;
+  Result.V := VComponent;
+end;
+
+function ColorHSV.ToColor: TColor;
+begin
+  Result := HSVToColor(Self);
+end;
+
+class function ColorLCH.Create(const LComponent, CComponent, HComponent: Single): ColorLCH;
+begin
+  Result.L := LComponent;
+  Result.C := CComponent;
+  Result.H := HComponent;
+end;
+
+function ColorLCH.ToColor: TColor;
+begin
+  Result := LCHToColor(Self);
+end;
+
+class function ColorLAB.Create(const LComponent, AComponent, BComponent: Single): ColorLAB;
+begin
+  Result.L := LComponent;
+  Result.A := AComponent;
+  Result.B := BComponent;
+end;
+
+function ColorLAB.ToColor: TColor;
+begin
+  Result := LABToColor(Self);
+end;
+
+class function ColorXYZ.Create(const XComponent, YComponent, ZComponent: Single): ColorXYZ;
+begin
+  Result.X := XComponent;
+  Result.Y := YComponent;
+  Result.Z := ZComponent;
+end;
+
+function ColorXYZ.ToColor: TColor;
+begin
+  Result := XYZToColor(Self);
+end;
+
+class function ColorRGB.Create(const RComponent, GComponent, BComponent: Byte): ColorRGB;
+begin
+  Result.R := RComponent;
+  Result.G := GComponent;
+  Result.B := BComponent;
+end;
+
+function ColorRGB.ToColor: TColor;
+begin
+  Result := RGBToColor(Self);
+end;
+
+function TColorHelper.ToRGB: ColorRGB;
+begin
+  Result := ColorToRGB(Self);
+end;
+
+function TColorHelper.ToXYZ: ColorXYZ;
+begin
+  Result := ColorToXYZ(Self);
+end;
+
+function TColorHelper.ToLAB: ColorLAB;
+begin
+  Result := ColorToLAB(Self);
+end;
+
+function TColorHelper.ToLCH: ColorLCH;
+begin
+  Result := ColorToLCH(Self);
+end;
+
+function TColorHelper.ToHSV: ColorHSV;
+begin
+  Result := ColorToHSV(Self);
+end;
+
+function TColorHelper.ToHSL: ColorHSL;
+begin
+  Result := ColorToHSL(Self);
+end;
+
 class function ColorHSL.Create(const HComponent, SComponent, LComponent: Single): ColorHSL;
 begin
   Result.H := HComponent;
   Result.S := SComponent;
   Result.L := LComponent;
+end;
+
+function ColorHSL.ToColor: TColor;
+begin
+  Result := HSLToColor(Self);
 end;
 
 end.

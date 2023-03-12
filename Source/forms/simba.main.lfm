@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 2545
+  Left = 1260
   Height = 565
-  Top = 65
+  Top = 569
   Width = 910
   Caption = 'Simba'
   ClientHeight = 540
@@ -56,7 +56,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolbarDivider1: TToolButton
       Left = 261
-      Height = 5
+      Height = 28
       Top = 2
       Style = tbsDivider
     end
@@ -86,7 +86,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolbarDivider2: TToolButton
       Left = 171
-      Height = 5
+      Height = 28
       Top = 2
       Style = tbsDivider
     end
@@ -100,7 +100,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolbarDivider3: TToolButton
       Left = 81
-      Height = 5
+      Height = 28
       Top = 2
       Style = tbsDivider
     end
@@ -132,7 +132,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolbarDivider4: TToolButton
       Left = 106
-      Height = 5
+      Height = 28
       Top = 2
       Style = tbsDivider
     end
@@ -145,7 +145,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolbarDivider5: TToolButton
       Left = 236
-      Height = 5
+      Height = 28
       Top = 2
       Style = tbsDivider
     end

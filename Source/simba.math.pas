@@ -34,6 +34,8 @@ function Modulo(const X, Y: Double): Double; inline; overload;
 function Modulo(const X, Y: Single): Single; inline; overload;
 function Modulo(const X, Y: Integer): Integer; inline; overload;
 
+function CeilEx(const a: Single; const Precision: Int8 = 0): Double;
+
 implementation
 
 uses
@@ -104,6 +106,14 @@ end;
 function Degrees(const e: Extended): Extended;
 begin
   Result := RadToDeg(e);
+end;
+
+function CeilEx(const a: Single; const Precision: Int8 = 0): Double;
+begin
+  if (Precision = 0) then
+    Result := Ceil(a)
+  else
+    Result := RoundTo(a + 0.5 * 10**(-Double(precision)), -precision);
 end;
 
 end.

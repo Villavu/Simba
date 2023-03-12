@@ -1,11 +1,13 @@
 object SimbaACAForm: TSimbaACAForm
-  Left = 830
-  Height = 949
-  Top = 271
-  Width = 1301
+  Left = 3885
+  Height = 886
+  Top = 323
+  Width = 1076
   Caption = 'Auto Color Aid'
-  ClientHeight = 924
-  ClientWidth = 1301
+  ClientHeight = 861
+  ClientWidth = 1076
+  Constraints.MinHeight = 400
+  Constraints.MinWidth = 500
   DesignTimePPI = 120
   KeyPreview = True
   Menu = MainMenu
@@ -17,22 +19,24 @@ object SimbaACAForm: TSimbaACAForm
   LCLVersion = '2.2.4.0'
   object PanelMain: TPanel
     Left = 0
-    Height = 924
+    Height = 861
     Top = 0
-    Width = 945
+    Width = 720
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
   end
   object PanelRight: TPanel
-    Left = 945
-    Height = 924
+    AnchorSideLeft.Control = LabelMulti1
+    AnchorSideLeft.Side = asrBottom
+    Left = 720
+    Height = 861
     Top = 0
     Width = 356
     Align = alRight
     Anchors = [akTop, akRight]
     AutoSize = True
-    ClientHeight = 924
+    ClientHeight = 861
     ClientWidth = 356
     Constraints.MinWidth = 356
     TabOrder = 1
@@ -43,9 +47,9 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideTop.Side = asrBottom
       AnchorSideRight.Control = PanelRight
       AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = ButtonDeleteColors
+      AnchorSideBottom.Control = ButtonRemoveColor
       Left = 7
-      Height = 508
+      Height = 487
       Top = 7
       Width = 342
       Style = []
@@ -59,176 +63,24 @@ object SimbaACAForm: TSimbaACAForm
       OnSelectionChange = ColorSelectionChanged
       TabOrder = 0
     end
-    object Divider1: TDividerBevel
-      AnchorSideLeft.Control = PanelRight
-      AnchorSideTop.Side = asrBottom
-      AnchorSideRight.Control = PanelRight
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = ButtonCTS0
-      Left = 7
-      Height = 20
-      Top = 593
-      Width = 342
-      Caption = 'Best Color'
-      Anchors = [akLeft, akRight, akBottom]
-      BorderSpacing.Left = 6
-      BorderSpacing.Top = 6
-      BorderSpacing.Right = 6
-      BorderSpacing.Bottom = 6
-      CaptionSpacing = 15
-      LeftIndent = 40
-      Style = gsHorLines
-      OnResize = CenterDivider
-    end
-    object LabelColor: TLabel
-      AnchorSideLeft.Control = PanelRight
-      AnchorSideTop.Control = EditColor
-      AnchorSideBottom.Control = EditColor
-      AnchorSideBottom.Side = asrBottom
-      Left = 7
-      Height = 28
-      Top = 701
-      Width = 36
-      Anchors = [akTop, akLeft, akBottom]
-      BorderSpacing.Left = 6
-      Caption = 'Color'
-      Layout = tlCenter
-      ParentColor = False
-    end
-    object LabelTolerance: TLabel
-      AnchorSideLeft.Control = PanelRight
-      AnchorSideTop.Control = EditTolerance
-      AnchorSideBottom.Control = EditTolerance
-      AnchorSideBottom.Side = asrBottom
-      Left = 7
-      Height = 28
-      Top = 735
-      Width = 64
-      Anchors = [akTop, akLeft, akBottom]
-      BorderSpacing.Left = 6
-      Caption = 'Tolerance'
-      Layout = tlCenter
-      ParentColor = False
-    end
-    object LabelHue: TLabel
-      AnchorSideLeft.Control = PanelRight
-      AnchorSideTop.Control = EditHue
-      AnchorSideRight.Control = EditHue
-      AnchorSideBottom.Control = EditHue
-      AnchorSideBottom.Side = asrBottom
-      Left = 7
-      Height = 28
-      Top = 769
-      Width = 64
-      Anchors = [akTop, akLeft, akRight, akBottom]
-      BorderSpacing.Left = 6
-      BorderSpacing.Right = 6
-      Caption = 'Hue'
-      Layout = tlCenter
-      ParentColor = False
-    end
-    object LabelSat: TLabel
-      AnchorSideLeft.Control = PanelRight
-      AnchorSideTop.Control = EditSat
-      AnchorSideRight.Control = EditSat
-      AnchorSideBottom.Control = EditSat
-      AnchorSideBottom.Side = asrBottom
-      Left = 7
-      Height = 28
-      Top = 803
-      Width = 64
-      Anchors = [akTop, akLeft, akRight, akBottom]
-      BorderSpacing.Left = 6
-      BorderSpacing.Right = 6
-      Caption = 'Sat'
-      Layout = tlCenter
-      ParentColor = False
-    end
-    object EditColor: TEdit
-      AnchorSideLeft.Control = EditTolerance
-      AnchorSideTop.Side = asrBottom
-      AnchorSideRight.Control = PanelRight
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = EditTolerance
-      Left = 77
-      Height = 28
-      Top = 701
-      Width = 272
-      Anchors = [akLeft, akRight, akBottom]
-      BorderSpacing.Top = 6
-      BorderSpacing.Right = 6
-      TabOrder = 1
-    end
-    object EditTolerance: TEdit
-      AnchorSideLeft.Control = LabelTolerance
-      AnchorSideLeft.Side = asrBottom
-      AnchorSideTop.Control = EditColor
-      AnchorSideTop.Side = asrBottom
-      AnchorSideRight.Control = PanelRight
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = EditHue
-      Left = 77
-      Height = 28
-      Top = 735
-      Width = 272
-      Anchors = [akLeft, akRight, akBottom]
-      BorderSpacing.Left = 6
-      BorderSpacing.Top = 6
-      BorderSpacing.Right = 6
-      BorderSpacing.Bottom = 6
-      TabOrder = 2
-    end
-    object EditHue: TEdit
-      AnchorSideLeft.Control = EditTolerance
-      AnchorSideTop.Control = EditTolerance
-      AnchorSideTop.Side = asrBottom
-      AnchorSideRight.Control = PanelRight
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = EditSat
-      Left = 77
-      Height = 28
-      Top = 769
-      Width = 272
-      Anchors = [akLeft, akRight, akBottom]
-      BorderSpacing.Right = 6
-      TabOrder = 3
-    end
-    object EditSat: TEdit
-      AnchorSideLeft.Control = EditHue
-      AnchorSideTop.Control = EditHue
-      AnchorSideTop.Side = asrBottom
-      AnchorSideRight.Control = PanelRight
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = ButtonDebugColor
-      Left = 77
-      Height = 28
-      Top = 803
-      Width = 272
-      Anchors = [akLeft, akRight, akBottom]
-      BorderSpacing.Top = 6
-      BorderSpacing.Right = 6
-      BorderSpacing.Bottom = 6
-      TabOrder = 4
-    end
     object Divider2: TDividerBevel
       AnchorSideLeft.Control = PanelRight
+      AnchorSideTop.Control = Panel1
       AnchorSideTop.Side = asrBottom
       AnchorSideRight.Control = PanelRight
       AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = ButtonUpdateImage
-      Left = 7
+      AnchorSideBottom.Control = ButtonFindColor
+      Left = 1
       Height = 20
-      Top = 867
-      Width = 342
+      Top = 804
+      Width = 354
       Anchors = [akLeft, akRight, akBottom]
       BevelStyle = bsRaised
-      BorderSpacing.Left = 6
-      BorderSpacing.Right = 6
       CaptionSpacing = 15
       LeftIndent = 80
       Style = gsHorLines
     end
-    object ButtonClearImage: TButton
+    object ButtonMatchColor: TButton
       AnchorSideLeft.Control = PanelAlignment
       AnchorSideTop.Control = Divider2
       AnchorSideTop.Side = asrBottom
@@ -236,149 +88,51 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = PanelRight
       AnchorSideBottom.Side = asrBottom
-      Left = 184
+      Left = 242
       Height = 30
-      Hint = 'Clear all drawing from the image'
-      Top = 887
-      Width = 165
-      Anchors = [akTop, akLeft, akRight]
+      Hint = 'Draws match color matrix'
+      Top = 824
+      Width = 107
+      Anchors = [akRight, akBottom]
       AutoSize = True
       BorderSpacing.Left = 6
       BorderSpacing.Right = 6
       BorderSpacing.Bottom = 6
-      Caption = ' Clear Image '
-      OnClick = ButtonClearImageClick
-      TabOrder = 5
+      Caption = 'Match Color'
+      OnClick = ButtonMatchColorClick
+      TabOrder = 1
     end
-    object ButtonUpdateImage: TButton
+    object ButtonFindColor: TButton
       AnchorSideLeft.Control = PanelRight
-      AnchorSideRight.Control = PanelAlignment
+      AnchorSideLeft.Side = asrCenter
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = PanelRight
       AnchorSideBottom.Side = asrBottom
-      Left = 7
+      Left = 127
       Height = 30
-      Hint = 'Updates the image from the client'
-      Top = 887
-      Width = 166
-      Anchors = [akLeft, akRight, akBottom]
+      Hint = 'Draws find color matches'
+      Top = 824
+      Width = 102
+      Anchors = [akLeft, akBottom]
       AutoSize = True
       BorderSpacing.Left = 6
       BorderSpacing.Right = 6
       BorderSpacing.Bottom = 6
-      Caption = 'Update Image'
-      OnClick = ButtonUpdateImageClick
-      TabOrder = 6
-    end
-    object ButtonDebugColor: TButton
-      AnchorSideLeft.Control = PanelRight
-      AnchorSideRight.Control = PanelRight
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = Divider2
-      Left = 7
-      Height = 30
-      Hint = 'Displays best color matches'
-      Top = 837
-      Width = 342
-      Anchors = [akLeft, akRight, akBottom]
-      AutoSize = True
-      BorderSpacing.Left = 6
-      BorderSpacing.Right = 6
-      Caption = 'Debug Color'
-      OnClick = ButtonDebugColorClick
-      TabOrder = 7
-    end
-    object ButtonCTS0: TRadioButton
-      AnchorSideLeft.Control = PanelRight
-      AnchorSideBottom.Control = ButtonCTS1
-      Left = 7
-      Height = 24
-      Top = 619
-      Width = 61
-      Anchors = [akLeft, akBottom]
-      BorderSpacing.Left = 6
-      Caption = 'CTS 0'
-      OnClick = ButtonCTSClick
-      TabOrder = 8
-    end
-    object ButtonCTS1: TRadioButton
-      AnchorSideLeft.Control = PanelRight
-      AnchorSideBottom.Control = ButtonCTS2
-      Left = 7
-      Height = 24
-      Top = 645
-      Width = 61
-      Anchors = [akLeft, akBottom]
-      BorderSpacing.Left = 6
-      BorderSpacing.Top = 2
-      Caption = 'CTS 1'
-      OnClick = ButtonCTSClick
-      TabOrder = 9
-    end
-    object ButtonCTS2: TRadioButton
-      AnchorSideLeft.Control = PanelRight
-      AnchorSideBottom.Control = EditColor
-      Left = 7
-      Height = 24
-      Top = 671
-      Width = 61
-      Anchors = [akLeft, akBottom]
-      BorderSpacing.Left = 6
-      BorderSpacing.Top = 2
-      Caption = 'CTS 2'
-      Checked = True
-      OnClick = ButtonCTSClick
-      TabOrder = 10
-      TabStop = True
-    end
-    object ButtonDeleteColors: TButton
-      AnchorSideLeft.Control = PanelRight
-      AnchorSideRight.Control = PanelRight
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = ButtonDeleteSelectedColor
-      Left = 7
-      Height = 30
-      Top = 521
-      Width = 342
-      Anchors = [akLeft, akRight, akBottom]
-      AutoSize = True
-      BorderSpacing.Left = 6
-      BorderSpacing.Right = 6
-      BorderSpacing.Bottom = 6
-      Caption = 'Delete Colors'
-      OnClick = ButtonDeleteColorsClick
-      TabOrder = 11
-    end
-    object ButtonDeleteSelectedColor: TButton
-      AnchorSideLeft.Control = PanelRight
-      AnchorSideRight.Control = PanelRight
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = Divider1
-      Left = 7
-      Height = 30
-      Top = 557
-      Width = 342
-      Anchors = [akLeft, akRight, akBottom]
-      AutoSize = True
-      BorderSpacing.Left = 6
-      BorderSpacing.Right = 6
-      Caption = 'Delete Selected Color'
-      OnClick = ButtonDeleteSelectedColorClick
-      TabOrder = 12
+      Caption = ' Find Color '
+      OnClick = ButtonFindColorClick
+      TabOrder = 2
     end
     object PanelAlignment: TPanel
       AnchorSideLeft.Control = PanelRight
       AnchorSideLeft.Side = asrCenter
-      AnchorSideTop.Control = ButtonUpdateImage
-      AnchorSideBottom.Control = ButtonUpdateImage
+      AnchorSideTop.Control = ButtonFindColor
       AnchorSideBottom.Side = asrBottom
       Left = 178
-      Height = 30
-      Top = 887
+      Height = 1
+      Top = 824
       Width = 1
-      Anchors = [akTop, akLeft, akBottom]
       BevelOuter = bvNone
-      TabOrder = 13
+      TabOrder = 3
     end
     object PanelTop: TPanel
       Left = 1
@@ -388,7 +142,382 @@ object SimbaACAForm: TSimbaACAForm
       Align = alTop
       AutoSize = True
       BevelOuter = bvNone
-      TabOrder = 14
+      TabOrder = 4
+    end
+    object Panel1: TPanel
+      AnchorSideLeft.Control = PanelRight
+      AnchorSideTop.Control = Divider1
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = PanelRight
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = Divider2
+      Left = 7
+      Height = 252
+      Top = 552
+      Width = 342
+      Anchors = [akLeft, akRight, akBottom]
+      AutoSize = True
+      BorderSpacing.Left = 6
+      BorderSpacing.Right = 6
+      BevelOuter = bvNone
+      ClientHeight = 252
+      ClientWidth = 342
+      TabOrder = 5
+      object BestColorEdit: TEdit
+        AnchorSideLeft.Control = LabelMulti1
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = GroupBoxColorSpace
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = Panel1
+        AnchorSideRight.Side = asrBottom
+        Left = 121
+        Height = 28
+        Top = 92
+        Width = 221
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Left = 6
+        BorderSpacing.Top = 6
+        TabOrder = 0
+      end
+      object BestToleranceEdit: TEdit
+        AnchorSideLeft.Control = LabelMulti1
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = BestColorEdit
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = Panel1
+        AnchorSideRight.Side = asrBottom
+        Left = 121
+        Height = 28
+        Top = 125
+        Width = 221
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Left = 6
+        BorderSpacing.Top = 5
+        TabOrder = 1
+      end
+      object BestMulti1Edit: TEdit
+        AnchorSideLeft.Control = LabelMulti1
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = BestToleranceEdit
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = Panel1
+        AnchorSideRight.Side = asrBottom
+        Left = 121
+        Height = 28
+        Top = 158
+        Width = 221
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Left = 6
+        BorderSpacing.Top = 5
+        TabOrder = 2
+      end
+      object BestMulti2Edit: TEdit
+        AnchorSideLeft.Control = LabelMulti1
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = BestMulti1Edit
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = Panel1
+        AnchorSideRight.Side = asrBottom
+        Left = 121
+        Height = 28
+        Top = 191
+        Width = 221
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Left = 6
+        BorderSpacing.Top = 5
+        TabOrder = 3
+      end
+      object BestMulti3Edit: TEdit
+        AnchorSideLeft.Control = LabelMulti1
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = BestMulti2Edit
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = Panel1
+        AnchorSideRight.Side = asrBottom
+        Left = 121
+        Height = 28
+        Top = 224
+        Width = 221
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Left = 6
+        BorderSpacing.Top = 5
+        TabOrder = 4
+      end
+      object LabelBestColor: TLabel
+        AnchorSideLeft.Control = Panel1
+        AnchorSideTop.Control = BestColorEdit
+        AnchorSideBottom.Control = BestColorEdit
+        AnchorSideBottom.Side = asrBottom
+        Left = 6
+        Height = 28
+        Top = 92
+        Width = 68
+        Anchors = [akTop, akLeft, akBottom]
+        BorderSpacing.Left = 6
+        Caption = 'Best Color'
+        Layout = tlCenter
+        ParentColor = False
+      end
+      object LabelBestTolerance: TLabel
+        AnchorSideLeft.Control = Panel1
+        AnchorSideTop.Control = BestToleranceEdit
+        AnchorSideBottom.Control = BestToleranceEdit
+        AnchorSideBottom.Side = asrBottom
+        Left = 6
+        Height = 28
+        Top = 125
+        Width = 96
+        Anchors = [akTop, akLeft, akBottom]
+        BorderSpacing.Left = 6
+        Caption = 'Best Tolerance'
+        Layout = tlCenter
+        ParentColor = False
+      end
+      object LabelMulti1: TLabel
+        AnchorSideLeft.Control = Panel1
+        AnchorSideTop.Control = BestMulti1Edit
+        AnchorSideBottom.Control = BestMulti1Edit
+        AnchorSideBottom.Side = asrBottom
+        Left = 6
+        Height = 28
+        Top = 158
+        Width = 109
+        Anchors = [akTop, akLeft, akBottom]
+        BorderSpacing.Left = 6
+        Caption = 'Best R Multiplier'
+        Layout = tlCenter
+        ParentColor = False
+      end
+      object LabelMulti2: TLabel
+        AnchorSideLeft.Control = Panel1
+        AnchorSideTop.Control = BestMulti2Edit
+        AnchorSideBottom.Control = BestMulti2Edit
+        AnchorSideBottom.Side = asrBottom
+        Left = 6
+        Height = 28
+        Top = 191
+        Width = 110
+        Anchors = [akTop, akLeft, akBottom]
+        BorderSpacing.Left = 6
+        Caption = 'Best G Multiplier'
+        Layout = tlCenter
+        ParentColor = False
+      end
+      object LabelMulti3: TLabel
+        AnchorSideLeft.Control = Panel1
+        AnchorSideTop.Control = BestMulti3Edit
+        AnchorSideBottom.Control = BestMulti3Edit
+        AnchorSideBottom.Side = asrBottom
+        Left = 6
+        Height = 28
+        Top = 224
+        Width = 109
+        Anchors = [akTop, akLeft, akBottom]
+        BorderSpacing.Left = 6
+        Caption = 'Best B Multiplier'
+        Layout = tlCenter
+        ParentColor = False
+      end
+      object GroupBoxColorSpace: TGroupBox
+        AnchorSideLeft.Control = Panel1
+        AnchorSideRight.Control = Panel1
+        AnchorSideRight.Side = asrBottom
+        Left = 0
+        Height = 86
+        Top = 0
+        Width = 342
+        Anchors = [akTop, akLeft, akRight]
+        AutoSize = True
+        Caption = 'Color Space'
+        ClientHeight = 61
+        ClientWidth = 338
+        TabOrder = 5
+        object ButtonRGB: TRadioButton
+          AnchorSideLeft.Control = GroupBoxColorSpace
+          AnchorSideTop.Control = GroupBoxColorSpace
+          Left = 10
+          Height = 24
+          Top = 3
+          Width = 52
+          BorderSpacing.Left = 10
+          BorderSpacing.Top = 3
+          Caption = 'RGB'
+          OnClick = DoColorSpaceChanged
+          TabOrder = 0
+        end
+        object ButtonHSL: TRadioButton
+          AnchorSideLeft.Control = ButtonRGB
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Control = GroupBoxColorSpace
+          Left = 72
+          Height = 24
+          Top = 3
+          Width = 50
+          BorderSpacing.Left = 10
+          BorderSpacing.Top = 3
+          Caption = 'HSL'
+          OnClick = DoColorSpaceChanged
+          TabOrder = 1
+        end
+        object ButtonHSV: TRadioButton
+          AnchorSideLeft.Control = ButtonHSL
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Control = GroupBoxColorSpace
+          Left = 132
+          Height = 24
+          Top = 3
+          Width = 52
+          BorderSpacing.Left = 10
+          BorderSpacing.Top = 3
+          Caption = 'HSV'
+          OnClick = DoColorSpaceChanged
+          TabOrder = 2
+        end
+        object ButtonXYZ: TRadioButton
+          AnchorSideLeft.Control = ButtonHSV
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Control = GroupBoxColorSpace
+          Left = 194
+          Height = 24
+          Top = 3
+          Width = 50
+          BorderSpacing.Left = 10
+          BorderSpacing.Top = 3
+          Caption = 'XYZ'
+          OnClick = DoColorSpaceChanged
+          TabOrder = 3
+        end
+        object ButtonLAB: TRadioButton
+          AnchorSideLeft.Control = GroupBoxColorSpace
+          AnchorSideTop.Control = ButtonXYZ
+          AnchorSideTop.Side = asrBottom
+          Left = 10
+          Height = 24
+          Top = 32
+          Width = 50
+          BorderSpacing.Left = 10
+          BorderSpacing.Top = 5
+          Caption = 'LAB'
+          OnClick = DoColorSpaceChanged
+          TabOrder = 4
+        end
+        object ButtonLCH: TRadioButton
+          AnchorSideLeft.Control = ButtonLAB
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Control = ButtonXYZ
+          AnchorSideTop.Side = asrBottom
+          Left = 70
+          Height = 24
+          Top = 32
+          Width = 51
+          BorderSpacing.Left = 10
+          BorderSpacing.Top = 5
+          Caption = 'LCH'
+          OnClick = DoColorSpaceChanged
+          TabOrder = 5
+        end
+        object ButtonDeltaE: TRadioButton
+          AnchorSideLeft.Control = ButtonLCH
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Control = ButtonXYZ
+          AnchorSideTop.Side = asrBottom
+          Left = 131
+          Height = 24
+          Top = 32
+          Width = 72
+          BorderSpacing.Left = 10
+          BorderSpacing.Top = 5
+          BorderSpacing.Bottom = 5
+          Caption = 'Delta E'
+          OnClick = DoColorSpaceChanged
+          TabOrder = 6
+        end
+      end
+    end
+    object ButtonRemoveColor: TButton
+      AnchorSideLeft.Control = ColorListBox
+      AnchorSideTop.Control = ColorListBox
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = AlignmentPanel
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = Divider1
+      Left = 7
+      Height = 30
+      Top = 500
+      Width = 169
+      Anchors = [akLeft, akRight, akBottom]
+      AutoSize = True
+      BorderSpacing.Right = 3
+      Caption = 'Remove Color'
+      OnClick = ButtonRemoveColorClick
+      TabOrder = 6
+    end
+    object ButtonRemoveAllColors: TButton
+      AnchorSideLeft.Control = AlignmentPanel
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = ColorListBox
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = ColorListBox
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = Divider1
+      Left = 182
+      Height = 30
+      Top = 500
+      Width = 167
+      Anchors = [akLeft, akRight, akBottom]
+      AutoSize = True
+      BorderSpacing.Left = 3
+      Caption = 'Remove All Colors'
+      OnClick = ButtonRemoveAllColorsClick
+      TabOrder = 7
+    end
+    object AlignmentPanel: TPanel
+      AnchorSideLeft.Control = ColorListBox
+      AnchorSideLeft.Side = asrCenter
+      AnchorSideTop.Control = ColorListBox
+      AnchorSideTop.Side = asrBottom
+      Left = 178
+      Height = 1
+      Top = 500
+      Width = 1
+      BevelOuter = bvNone
+      TabOrder = 8
+    end
+    object Divider1: TDividerBevel
+      AnchorSideLeft.Control = PanelRight
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = PanelRight
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = Panel1
+      Left = 1
+      Height = 20
+      Top = 532
+      Width = 354
+      Anchors = [akLeft, akRight, akBottom]
+      BorderSpacing.Top = 2
+      Font.Style = [fsBold]
+      ParentFont = False
+      Style = gsHorLines
+    end
+    object ButtonClearImage: TButton
+      AnchorSideLeft.Control = PanelRight
+      AnchorSideRight.Control = PanelAlignment
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = PanelRight
+      AnchorSideBottom.Side = asrBottom
+      Left = 7
+      Height = 30
+      Hint = 'Clear all drawing from image'
+      Top = 824
+      Width = 106
+      Anchors = [akLeft, akBottom]
+      AutoSize = True
+      BorderSpacing.Left = 6
+      BorderSpacing.Right = 6
+      BorderSpacing.Bottom = 6
+      Caption = 'Clear Image'
+      OnClick = DoButtonClearImageClick
+      TabOrder = 9
     end
   end
   object MainMenu: TMainMenu
@@ -407,7 +536,6 @@ object SimbaACAForm: TSimbaACAForm
       object MenuItemCopyBestColor: TMenuItem
         Caption = 'Copy Best Color to Clipboard'
         ShortCut = 16451
-        OnClick = CopyBestColorClick
       end
     end
     object MenuImage: TMenuItem
@@ -434,7 +562,7 @@ object SimbaACAForm: TSimbaACAForm
       end
       object MenuItemClearImage: TMenuItem
         Caption = 'Clear Image'
-        OnClick = ButtonClearImageClick
+        OnClick = ButtonMatchColorClick
       end
       object MenuItemSeperator: TMenuItem
         Caption = '-'

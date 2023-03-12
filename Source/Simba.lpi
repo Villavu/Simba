@@ -65,6 +65,10 @@
             </CompilerMessages>
             <CustomOptions Value="-dStaticFFI
 -dLape_CDECL"/>
+            <OtherDefines Count="2">
+              <Define0 Value="StaticFFI"/>
+              <Define1 Value="Lape_CDECL"/>
+            </OtherDefines>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
@@ -310,7 +314,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="149">
+    <Units Count="151">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -983,6 +987,14 @@
         <Filename Value="colormath/simba.colormath_conversion.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit148>
+      <Unit149>
+        <Filename Value="finders/simba.finder_color_new.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit149>
+      <Unit150>
+        <Filename Value="colormath/simba.colormath_aca.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit150>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

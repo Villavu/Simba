@@ -1,16 +1,13 @@
 unit simba.imagebox_bitmap;
 
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
-
-{$IFOPT D-}
-  {$OPTIMIZATION LEVEL4}
-{$ENDIF}
 
 interface
 
 uses
   Classes, SysUtils, Graphics, LCLType,
-  simba.mufasatypes, simba.bitmap_misc;
+  simba.mufasatypes, simba.bitmap_misc, simba.colormath_conversion;
 
 type
   PSimbaImageBoxBitmap = ^TSimbaImageBoxBitmap;
@@ -48,9 +45,9 @@ type
     FWidthMinus1: Integer;
     FHeightMinus1: Integer;
 
-    function BGR(Color: TColor): TBGR;
-    function BGRA(Color: TColor): TBGRA;
-    function ARGB(Color: TColor): TARGB;
+    function BGR(Color: TColor): TBGR; inline;
+    function BGRA(Color: TColor): TBGRA; inline;
+    function ARGB(Color: TColor): TARGB; inline;
 
     procedure PixelBGR(X, Y: Integer; const Pixel: TBGR); inline;
     procedure PixelBGRA(X, Y: Integer; const Pixel: TBGRA); inline;
