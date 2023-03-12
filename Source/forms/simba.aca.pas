@@ -12,29 +12,33 @@ interface
 uses
   classes, sysutils, fileutil, dividerbevel, forms, controls,
   graphics, dialogs, extctrls, comctrls, stdctrls, menus, colorbox, lcltype,
-  simba.client, simba.mufasatypes, simba.imagebox, simba.imagebox_zoom, simba.imagebox_bitmap;
+  simba.client, simba.mufasatypes, simba.imagebox, simba.imagebox_zoom, simba.imagebox_bitmap,
+  simba.colormath_conversion;
 
 type
   TACABestColorEvent = procedure(CTS: Integer; Color, Tolerance: Integer; Hue, Sat: Extended) of object;
   TACABestColorEventEx = procedure(CTS: Integer; Color, Tolerance: Integer; Hue, Sat: Extended) is nested;
 
   TSimbaACAForm = class(TForm)
-    ButtonDebugColor: TButton;
-    ButtonUpdateImage: TButton;
+    ButtonRemoveColor: TButton;
+    ButtonRemoveAllColors: TButton;
+    ButtonFindColor: TButton;
+    ButtonMatchColor: TButton;
     ButtonClearImage: TButton;
-    ButtonDeleteColors: TButton;
-    ButtonDeleteSelectedColor: TButton;
     ColorListBox: TColorListBox;
-    Divider1: TDividerBevel;
     Divider2: TDividerBevel;
-    EditColor: TEdit;
-    EditTolerance: TEdit;
-    EditHue: TEdit;
-    EditSat: TEdit;
-    LabelColor: TLabel;
-    LabelTolerance: TLabel;
-    LabelHue: TLabel;
-    LabelSat: TLabel;
+    BestColorEdit: TEdit;
+    BestToleranceEdit: TEdit;
+    BestMulti1Edit: TEdit;
+    BestMulti2Edit: TEdit;
+    BestMulti3Edit: TEdit;
+    Divider1: TDividerBevel;
+    GroupBoxColorSpace: TGroupBox;
+    LabelBestColor: TLabel;
+    LabelBestTolerance: TLabel;
+    LabelMulti1: TLabel;
+    LabelMulti2: TLabel;
+    LabelMulti3: TLabel;
     MainMenu: TMainMenu;
     MenuImage: TMenuItem;
     MenuColors: TMenuItem;
@@ -44,6 +48,8 @@ type
     MenuItemLoadColors: TMenuItem;
     MenuItemSaveColors: TMenuItem;
     MenuItemCopyBestColor: TMenuItem;
+    Panel1: TPanel;
+    AlignmentPanel: TPanel;
     PanelTop: TPanel;
     PanelAlignment: TPanel;
     MenuItemLoadImage: TMenuItem;
@@ -56,22 +62,26 @@ type
     MenuItemColorYellow: TMenuItem;
     PanelMain: TPanel;
     PanelRight: TPanel;
-    ButtonCTS0: TRadioButton;
-    ButtonCTS1: TRadioButton;
-    ButtonCTS2: TRadioButton;
+    ButtonRGB: TRadioButton;
+    ButtonHSL: TRadioButton;
+    ButtonHSV: TRadioButton;
+    ButtonXYZ: TRadioButton;
+    ButtonLAB: TRadioButton;
+    ButtonLCH: TRadioButton;
+    ButtonDeltaE: TRadioButton;
     Separator1: TMenuItem;
 
-    procedure ButtonClearImageClick(Sender: TObject);
-    procedure ButtonDeleteColorsClick(Sender: TObject);
-    procedure ButtonDeleteSelectedColorClick(Sender: TObject);
+    procedure ButtonRemoveAllColorsClick(Sender: TObject);
+    procedure ButtonRemoveColorClick(Sender: TObject);
+    procedure ButtonFindColorClick(Sender: TObject);
+    procedure ButtonMatchColorClick(Sender: TObject);
     procedure ButtonLoadImageClick(Sender: TObject);
     procedure ButtonSaveColorsClick(Sender: TObject);
-    procedure CenterDivider(Sender: TObject);
-    procedure ButtonDebugColorClick(Sender: TObject);
+    procedure DoButtonClearImageClick(Sender: TObject);
+    procedure DoColorSpaceChanged(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure ButtonLoadColorsClick(Sender: TObject);
     procedure ButtonCTSClick(Sender: TObject);
-    procedure CopyBestColorClick(Sender: TObject);
     procedure ColorSelectionChanged(Sender: TObject; User: Boolean);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure ChangeDrawColor(Sender: TObject);
@@ -91,13 +101,17 @@ type
     FImageZoom: TSimbaImageBoxZoom;
     FZoomInfo: TLabel;
     FDebugTPA: TPointArray;
+    FDebugMatrix: TSingleMatrix;
     FDrawColor: TColor;
 
     procedure LoadHSLCircle(Radius: Integer);
     procedure DoPaintArea(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; R: TRect);
     procedure CalculateBestColor;
 
-    function GetColors: TIntegerArray;
+    procedure GetColorStuff(out ColorSpace: EColorSpace; out Col: Integer; out Tol: Single; out Mods: TChannelMultipliers);
+
+    function GetColorSpace: EColorSpace;
+    function GetColors: TColorArray;
   public
     constructor Create(Client: TClient; ManageClient: Boolean); reintroduce;
     constructor Create(Window: TWindowHandle); reintroduce;
@@ -113,7 +127,7 @@ implementation
 
 uses
   clipbrd,
-  simba.colormath, simba.windowhandle, simba.bitmap;
+  simba.colormath, simba.windowhandle, simba.bitmap, simba.colormath_aca;
 
 procedure TSimbaACAForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
@@ -198,7 +212,7 @@ begin
   end;
 end;
 
-function TSimbaACAForm.GetColors: TIntegerArray;
+function TSimbaACAForm.GetColors: TColorArray;
 var
   i: Integer;
 begin
@@ -225,24 +239,6 @@ begin
   CalculateBestColor();
 end;
 
-procedure TSimbaACAForm.CopyBestColorClick(Sender: TObject);
-
-  function CopyEdit(Edit: TEdit): Boolean;
-  begin
-    Result := Edit.Focused and (Edit.SelLength > 0);
-    if Result then
-      Edit.CopyToClipboard();
-  end;
-
-begin
-  if CopyEdit(EditColor) or CopyEdit(EditTolerance) or CopyEdit(EditHue) or CopyEdit(EditSat) then
-    Exit;
-
-  if ButtonCTS0.Checked then Clipboard.AsText := Format('CTS0(%s, %s)', [EditColor.Text, EditTolerance.Text]);
-  if ButtonCTS1.Checked then Clipboard.AsText := Format('CTS1(%s, %s)', [EditColor.Text, EditTolerance.Text]);
-  if ButtonCTS2.Checked then Clipboard.AsText := Format('CTS2(%s, %s, %s, %s)', [EditColor.Text, EditTolerance.Text, EditHue.Text, EditSat.Text]);
-end;
-
 procedure TSimbaACAForm.ColorSelectionChanged(Sender: TObject; User: Boolean);
 var
   R, G, B: Integer;
@@ -263,24 +259,27 @@ begin
   CalculateBestColor();
 end;
 
-procedure TSimbaACAForm.ButtonDebugColorClick(Sender: TObject);
-var
-  CTS: Integer;
-  Col, Tol: Integer;
-  HueMod, SatMod: Extended;
+procedure TSimbaACAForm.DoColorSpaceChanged(Sender: TObject);
+
+  procedure SetChannelNames(const C1, C2, C3: Char);
+  begin
+    LabelMulti1.Caption := 'Best ' + C1 + ' Multiplier';
+    LabelMulti2.Caption := 'Best ' + C2 + ' Multiplier';
+    LabelMulti3.Caption := 'Best ' + C3 + ' Multiplier';
+  end;
+
 begin
-  if ButtonCTS0.Checked then CTS := 0;
-  if ButtonCTS1.Checked then CTS := 1;
-  if ButtonCTS2.Checked then CTS := 2;
+  case GetColorSpace() of
+    EColorSpace.RGB:    SetChannelNames('R', 'G', 'B');
+    EColorSpace.XYZ:    SetChannelNames('X', 'Y', 'Z');
+    EColorSpace.LAB:    SetChannelNames('L', 'A', 'B');
+    EColorSpace.HSV:    SetChannelNames('H', 'S', 'V');
+    EColorSpace.HSL:    SetChannelNames('H', 'S', 'L');
+    EColorSpace.LCH:    SetChannelNames('L', 'C', 'H');
+    EColorSpace.DeltaE: SetChannelNames('L', 'A', 'B');
+  end;
 
-  Col := StrToIntDef(EditColor.Text, -1);
-  Tol := StrToIntDef(EditTolerance.Text, -1);
-  HueMod := StrToFloatDef(EditHue.Text, -1);
-  SatMod := StrToFloatDef(EditSat.Text, -1);
-
-  FDebugTPA := FImageBox.FindColors(CTS, Col, Tol, HueMod, SatMod);
-
-  FImageBox.Paint();
+  CalculateBestColor();
 end;
 
 procedure TSimbaACAForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -325,83 +324,113 @@ end;
 
 procedure TSimbaACAForm.CalculateBestColor;
 var
-  CTS: Integer;
-  Col, Tol: Integer;
-  Hue, Sat: Extended;
+  Colors: TColorArray;
+  Best: TBestColor;
 begin
-  if Length(GetColors()) = 0 then
+  Colors := GetColors();
+
+  if (Length(GetColors) > 0) then
   begin
-    EditColor.Text := '';
-    EditTolerance.Text := '';
-    EditHue.Text := '';
-    EditSat.Text := '';
+    Best := GetBestColor(GetColorSpace(), Colors);
+
+    BestColorEdit.Text := IntToStr(Best.Color);
+    BestToleranceEdit.Text := Format('%.3f', [Best.Tolerance]);
+    BestMulti1Edit.Text := Format('%.3f', [Best.Mods[0]]);
+    BestMulti2Edit.Text := Format('%.3f', [Best.Mods[1]]);
+    BestMulti3Edit.Text := Format('%.3f', [Best.Mods[2]]);
   end else
   begin
-    if ButtonCTS0.Checked then CTS := 0;
-    if ButtonCTS1.Checked then CTS := 1;
-    if ButtonCTS2.Checked then CTS := 2;
-
-    case CTS of
-      0: BestColor_CTS0(GetColors(), Col, Tol);
-      1: BestColor_CTS1(GetColors(), Col, Tol);
-      2: BestColor_CTS2(GetColors(), Col, Tol, Hue, Sat);
-    end;
-
-    EditColor.Text := Format('%d', [Col]);
-    EditTolerance.Text := Format('%d', [Tol]);
-
-    if (CTS = 2) then
-    begin
-      EditHue.Text := Format('%.2f', [Hue + 0.5e-2]);
-      EditSat.Text := Format('%.2f', [Sat + 0.5e-2]);
-
-      Hue := StrToFloat(EditHue.Text);
-      Sat := StrToFloat(EditSat.Text);
-    end else
-    begin
-      EditHue.Text := '';
-      EditSat.Text := '';
-    end;
-
-    if Assigned(OnCalculateBestColor) then
-      OnCalculateBestColor(CTS, Col, Tol, Hue, Sat);
-    if Assigned(OnCalculateBestColorEx) then
-      OnCalculateBestColorEx(CTS, Col, Tol, Hue, Sat);
+    BestColorEdit.Clear();
+    BestToleranceEdit.Clear();
+    BestMulti1Edit.Clear();
+    BestMulti2Edit.Clear();
+    BestMulti3Edit.Clear();
   end;
+
+  //  if Assigned(OnCalculateBestColor) then
+  //    OnCalculateBestColor(CTS, Col, Tol, Hue, Sat);
+  //  if Assigned(OnCalculateBestColorEx) then
+  //    OnCalculateBestColorEx(CTS, Col, Tol, Hue, Sat);
 end;
 
-procedure TSimbaACAForm.ButtonDeleteColorsClick(Sender: TObject);
+procedure TSimbaACAForm.GetColorStuff(out ColorSpace: EColorSpace; out Col: Integer; out Tol: Single; out Mods: TChannelMultipliers);
 begin
-  ColorListBox.Clear();
-  ColorListBox.OnSelectionChange(Sender, False);
+  ColorSpace := GetColorSpace();
+  Col := String(BestColorEdit.Text).ToInteger(0);
+  Tol := String(BestToleranceEdit.Text).ToSingle(0);
+  Mods[0] := String(BestMulti1Edit.Text).ToSingle(0);
+  Mods[1] := String(BestMulti2Edit.Text).ToSingle(0);
+  Mods[2] := String(BestMulti3Edit.Text).ToSingle(0);
 end;
 
-procedure TSimbaACAForm.ButtonClearImageClick(Sender: TObject);
+function TSimbaACAForm.GetColorSpace: EColorSpace;
 begin
+  if ButtonRGB.Checked then Result := EColorSpace.RGB else
+  if ButtonHSL.Checked then Result := EColorSpace.HSL else
+  if ButtonHSV.Checked then Result := EColorSpace.HSV else
+  if ButtonXYZ.Checked then Result := EColorSpace.XYZ else
+  if ButtonLAB.Checked then Result := EColorSpace.LAB else
+  if ButtonLCH.Checked then Result := EColorSpace.LCH else
+  if ButtonDeltaE.Checked then Result := EColorSpace.DELTAE;
+end;
+
+procedure TSimbaACAForm.ButtonMatchColorClick(Sender: TObject);
+var
+  ColorSpace: EColorSpace;
+  Col: Integer;
+  Tol: Single;
+  Multi: TChannelMultipliers;
+  bmp: TMufasaBitmap;
+begin
+  GetColorStuff(ColorSpace, Col, Tol, Multi);
+
   FDebugTPA := [];
+  FDebugMatrix := FImageBox.Match(ColorSpace, Col, Multi);
 
+  bmp := TMufasaBitmap.Create(FDebugMatrix.Width, FDebugMatrix.Height);
+  bmp.DrawMatrix(FDebugMatrix);
+  FImageBox.SetTempBackground(bmp, True);
   FImageBox.Paint();
 end;
 
-procedure TSimbaACAForm.ButtonDeleteSelectedColorClick(Sender: TObject);
+procedure TSimbaACAForm.ButtonFindColorClick(Sender: TObject);
+var
+  ColorSpace: EColorSpace;
+  Col: Integer;
+  Tol: Single;
+  Multi: TChannelMultipliers;
+begin
+  GetColorStuff(ColorSpace, Col, Tol, Multi);
+
+  FDebugTPA := FImageBox.Test(ColorSpace, Col, Tol, Multi);
+  FImageBox.SetTempBackground(nil);
+  FImageBox.Paint();
+end;
+
+procedure TSimbaACAForm.ButtonRemoveColorClick(Sender: TObject);
 begin
   ColorListBox.DeleteSelected();
   ColorListBox.OnSelectionChange(Sender, False);
 end;
 
+procedure TSimbaACAForm.ButtonRemoveAllColorsClick(Sender: TObject);
+begin
+  ColorListBox.Clear();
+  ColorListBox.OnSelectionChange(Sender, False);
+end;
+
 procedure TSimbaACAForm.ButtonLoadImageClick(Sender: TObject);
 begin
-  with TOpenDialog.Create(Self) do
   try
-    InitialDir := Application.Location;
-
-    if Execute() then
+    with TOpenDialog.Create(Self) do
     try
-      FImageBox.SetBackground(FileName);
-    except
+      InitialDir := Application.Location;
+      if Execute() then
+        FImageBox.SetBackground(FileName);
+    finally
+      Free();
     end;
-  finally
-    Free();
+  except
   end;
 end;
 
@@ -410,6 +439,7 @@ begin
   try
     with TSaveDialog.Create(Self) do
     try
+      InitialDir := Application.Location;
       if Execute() then
         ColorListBox.Items.SaveToFile(FileName);
     finally
@@ -419,11 +449,12 @@ begin
   end;
 end;
 
-procedure TSimbaACAForm.CenterDivider(Sender: TObject);
-var
-  Divider: TDividerBevel absolute Sender;
+procedure TSimbaACAForm.DoButtonClearImageClick(Sender: TObject);
 begin
-  Divider.LeftIndent := (Divider.Width div 2) - (Divider.Canvas.TextWidth(Divider.Caption) div 2) - Divider.CaptionSpacing;
+  FImageBox.SetTempBackground(nil);
+  FDebugTPA := [];
+
+  FImageBox.Paint();
 end;
 
 constructor TSimbaACAForm.Create(Client: TClient; ManageClient: Boolean);
@@ -454,6 +485,17 @@ begin
   FClient := Client;
 
   FImageBox.SetBackground(FClient.IOManager);
+
+  ButtonRGB.Checked := True;
+
+  with TBitmap.Create() do
+  try
+    Canvas.Font := Self.Font;
+
+    ColorListBox.ItemHeight := Round(Canvas.TextHeight('123') * 1.5);
+  finally
+    Free();
+  end;
 end;
 
 constructor TSimbaACAForm.Create(Window: TWindowHandle);

@@ -47,10 +47,11 @@ procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended);
 procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended);
 function ColorToGray(const Color: Integer): Byte; inline;
 }
+{
 procedure BestColor_CTS0(Colors: TIntegerArray; out Color, Tolerance: Int32);
 procedure BestColor_CTS1(Colors: TIntegerArray; out Color, Tolerance: Int32);
 procedure BestColor_CTS2(Colors: TIntegerArray; out Color, Tolerance: Int32; out Hue, Sat: Extended);
-
+}
 implementation
 
 uses

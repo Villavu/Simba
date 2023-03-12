@@ -100,11 +100,6 @@ begin
   end;
 end;
 
-function BGRToRGB(BGR: TRGB32): TColor;
-begin
-  Result := BGR.R or BGR.g shl 8 or BGR.b shl 16;
-end;
-
 function TColorFinder.Find(Buffer: PRGB32; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; Offset: TPoint; MaxToFind: Integer): TPointArray;
 var
   X, Y, RowSize: Integer;
@@ -127,7 +122,7 @@ begin
     Ptr := RowPtr;
     for X := 0 to SearchWidth do
     begin
-      if (Self.FCompareFunc(FColor, PColorBGRA(Ptr)^, FMultipliers) / FMaxDistance * 100 < FTolerance) then
+      if (Self.FCompareFunc(FColor, PColorBGRA(Ptr)^, FMultipliers) / FMaxDistance * 100 <= FTolerance) then
       begin
         PointBuffer.Add(X + Offset.X, Y + Offset.Y);
         if (PointBuffer.Count = MaxToFind) then
@@ -165,7 +160,10 @@ begin
     Ptr := RowPtr;
     for X := 0 to SearchWidth do
     begin
-      Result[Y, X] := FCompareFunc(FColor, PColorBGRA(Ptr)^, FMultipliers) / FMaxDistance * 100;
+
+      // Diff(self.Color, TestColor, self.Mods) / self.MaxDiff * 100;
+      //Result[Y, X] := 1-Sqrt(FCompareFunc(FColor, PColorBGRA(Ptr)^, FMultipliers) / FMaxDistance);
+      Result[Y, X] := 1-(FCompareFunc(FColor, PColorBGRA(Ptr)^, FMultipliers) / FMaxDistance);
 
       Inc(Ptr, SizeOf(TRGB32));
     end;
