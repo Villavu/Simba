@@ -18,7 +18,7 @@ interface
 
 uses
   classes, sysutils, lazmethodlist,
-  simba.target, simba.target_exported, simba.bitmap, simba.mufasatypes;
+  simba.target, simba.target_exported, simba.bitmap, simba.mufasatypes, simba.colormath_conversion;
 
 type
   PIOManager = ^TIOManager;
@@ -41,7 +41,7 @@ type
     function GetTarget(Index: Integer): TTarget;
     function GetTargetIndex(Target: TTarget): Integer;
   public
-    function SetTarget(Data: PRGB32; Width, Height: Integer): Integer; overload;
+    function SetTarget(Data: PColorBGRA; Width, Height: Integer): Integer; overload;
     function SetTarget(Bitmap: TMufasaBitmap): Integer; overload;
     function SetTarget(Plugin, Data: String): Integer; overload;
     function SetTarget(Window: TWindowHandle): Integer; overload;
@@ -49,7 +49,7 @@ type
     function TargetValid: Boolean;
 
     function GetColor(X, Y: Integer): Integer;
-    function CopyData(X, Y, Width, Height: Integer): PRGB32;
+    function CopyData(X, Y, Width, Height: Integer): PColorBGRA;
     function ReturnData(X, Y, Width, Height: Integer): TRetData;
     function ReturnMatrix(X, Y, Width, Height: Integer): TIntegerMatrix;
 
@@ -293,7 +293,7 @@ begin
   FFrozen := FImage;
   FFrozen.GetTargetDimensions(Width, Height);
   with FFrozen.ReturnData(0, 0, Width, Height) do
-    FImage := TRawTarget.Create(Ptr, Width, Height, True); // New image
+    FImage := TRawTarget.Create(PColorBGRA(Ptr), Width, Height, True); // New image
 end;
 
 procedure TIOManager.UnFreeze;
@@ -319,7 +319,7 @@ begin
   Result := FImage.GetColor(X, Y);
 end;
 
-function TIOManager.CopyData(X, Y, Width, Height: Integer): PRGB32;
+function TIOManager.CopyData(X, Y, Width, Height: Integer): PColorBGRA;
 begin
   ValidateTarget();
 
@@ -356,7 +356,7 @@ begin
   Result := P.Y;
 end;
 
-function TIOManager.SetTarget(Data: PRGB32; Width, Height: Integer): Integer;
+function TIOManager.SetTarget(Data: PColorBGRA; Width, Height: Integer): Integer;
 var
   Bitmap: TMufasaBitmap;
 begin

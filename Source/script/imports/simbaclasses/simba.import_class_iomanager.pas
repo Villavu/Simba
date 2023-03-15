@@ -20,7 +20,7 @@ end;
 
 procedure _LapeIOManager_SetTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := PIOManager(Params^[0])^.SetTarget(PPRGB32(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+  PInteger(Result)^ := PIOManager(Params^[0])^.SetTarget(PPointer(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 procedure _LapeIOManager_SetTargetEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -55,7 +55,7 @@ end;
 
 procedure _LapeIOManager_CopyData(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPRGB32(Result)^ := PIOManager(Params^[0])^.CopyData(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+  PPointer(Result)^ := PIOManager(Params^[0])^.CopyData(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
 end;
 
 procedure _LapeIOManager_FreeReturnData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV

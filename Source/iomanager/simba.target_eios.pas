@@ -20,7 +20,7 @@ unit simba.target_eios;
   UpdateImageBuffer: procedure(FTarget: pointer)
 
   //Works similar to the UpdateImageBuffer procedure, but it is a function instead and uses the result as the new image buffer pointer of the FTarget.
-  UpdateImageBufferEx: function(FTarget: pointer): prgb32:
+  UpdateImageBufferEx: function(FTarget: pointer): PColorBGRA:
 
   // Does the same as UpdateImageBuffer but it specifies which region of the image buffer requires to be updated.
   UpdateImageBufferBounds: procedure(FTarget: pointer; sx,sy,ex,ey: integer):
@@ -45,7 +45,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.target, simba.mufasatypes, dynlibs;
+  simba.target, simba.mufasatypes, simba.colormath_conversion, dynlibs;
 
 type
   PEIOS_Client = ^TEIOS_Client;
@@ -55,9 +55,9 @@ type
 
     GetTargetDimensions: procedure(Target: Pointer; var Width, Height: Integer); stdcall;
     GetTargetPosition: procedure(Target: Pointer; var Left, Top: Integer); stdcall;
-    GetImageBuffer: function(Target: Pointer): PRGB32; stdcall;
+    GetImageBuffer: function(Target: Pointer): PColorBGRA; stdcall;
     UpdateImageBuffer: procedure(Target: Pointer); stdcall;
-    UpdateImageBufferEx: function(Target: Pointer): PRGB32; stdcall;
+    UpdateImageBufferEx: function(Target: Pointer): PColorBGRA; stdcall;
     UpdateImageBufferBounds: procedure(Target: Pointer; X1, Y1, X2, Y2: Integer); stdcall;
 
     GetMousePosition: procedure(Target: Pointer; var X, Y: Integer); stdcall;
@@ -80,7 +80,7 @@ type
     FLib: TLibHandle;
     FClient: TEIOS_Client;
     FTarget: Pointer;
-    FBuffer: PRGB32;
+    FBuffer: PColorBGRA;
 
     procedure GetTargetBounds(out Bounds: TBox); override;
   public
@@ -88,7 +88,7 @@ type
     destructor Destroy; override;
 
     function ReturnData(X, Y, Width, Height: Integer): TRetData; override;
-    function CopyData(X, Y, Width, Height: Integer): PRGB32; override;
+    function CopyData(X, Y, Width, Height: Integer): PColorBGRA; override;
 
     procedure GetMousePosition(out X, Y: Integer); override;
     procedure MoveMouse(X, Y: Integer); override;
@@ -214,7 +214,7 @@ begin
     Result := Default(TRetData);
 end;
 
-function TEIOS_Target.CopyData(X, Y, Width, Height: Integer): PRGB32;
+function TEIOS_Target.CopyData(X, Y, Width, Height: Integer): PColorBGRA;
 var
   Bounds: TBox;
   Loop: Integer;

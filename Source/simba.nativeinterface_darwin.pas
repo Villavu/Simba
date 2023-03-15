@@ -12,7 +12,7 @@ interface
 
 uses
   classes, sysutils, graphics, macosall,
-  simba.mufasatypes, simba.nativeinterface;
+  simba.mufasatypes, simba.nativeinterface, simba.colormath_conversion;
 
 type
   TVirtualWindow = packed record
@@ -54,7 +54,7 @@ type
     function GetWindowBounds(Window: TWindowHandle): TBox; override; overload;
     procedure SetWindowBounds(Window: TWindowHandle; Bounds: TBox); override;
 
-    function GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PRGB32): Boolean; override;
+    function GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PColorBGRA): Boolean; override;
 
     function GetMousePosition: TPoint; override;
     function GetMousePosition(Window: TWindowHandle): TPoint; override;
@@ -205,7 +205,7 @@ begin
   // TODO: Requires usages of AX API.
 end;
 
-function TSimbaNativeInterface_Darwin.GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PRGB32): Boolean;
+function TSimbaNativeInterface_Darwin.GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PColorBGRA): Boolean;
 var
   Image: CGImageRef;
   ColorSpace: CGColorSpaceRef;

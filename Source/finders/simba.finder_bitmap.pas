@@ -15,11 +15,11 @@ interface
 
 uses
   classes, sysutils,
-  simba.mufasatypes, simba.bitmap;
+  simba.mufasatypes, simba.bitmap, simba.colormath_conversion;
 
 type
   TFindBitmapBuffer = record
-    Data: PRGB32;
+    Data: PColorBGRA;
     Width: Integer;
 
     SearchWidth: Integer;
@@ -36,19 +36,19 @@ type
 implementation
 
 uses
-  simba.colormath, simba.colormath_distance, simba.overallocatearray;
+  simba.colormath_distance, simba.overallocatearray;
 
 function TFindBitmapBuffer.Find(Bitmap: TMufasaBitmap; out Points: TPointArray; MaxToFind: Integer): Boolean;
 
-  function Match(const BufferPtr, BitmapPtr: TRGB32): Boolean; inline;
+  function Match(const BufferPtr, BitmapPtr: TColorBGRA): Boolean; inline;
   begin
     Result := (Bitmap.TransparentColorActive and BitmapPtr.EqualsIgnoreAlpha(Bitmap.TransparentRGB)) or BufferPtr.EqualsIgnoreAlpha(BitmapPtr);
   end;
 
-  function Hit(BufferPtr: PRGB32): Boolean;
+  function Hit(BufferPtr: PColorBGRA): Boolean;
   var
     X, Y: Integer;
-    BitmapPtr: PRGB32;
+    BitmapPtr: PColorBGRA;
   begin
     BitmapPtr := Bitmap.Data;
 
@@ -71,7 +71,7 @@ function TFindBitmapBuffer.Find(Bitmap: TMufasaBitmap; out Points: TPointArray; 
 
 var
   X, Y: Integer;
-  RowPtr: PRGB32;
+  RowPtr: PColorBGRA;
   Buffer: TSimbaPointBuffer;
 label
   Finished;
@@ -109,16 +109,16 @@ end;
 
 function TFindBitmapBuffer.Find(Bitmap: TMufasaBitmap; out Points: TPointArray; Tolerance: Integer; MaxToFind: Integer): Boolean;
 
-  function Match(const BufferPtr, BitmapPtr: TRGB32): Boolean; inline;
+  function Match(const BufferPtr, BitmapPtr: TColorBGRA): Boolean; inline;
   begin
     //Result := (Bitmap.TransparentColorActive and BitmapPtr.EqualsIgnoreAlpha(Bitmap.TransparentRGB)) or
     //          (DistanceRGB(BufferPtr, BitmapPtr) <= Tolerance);
   end;
 
-  function Hit(BufferPtr: PRGB32): Boolean;
+  function Hit(BufferPtr: PColorBGRA): Boolean;
   var
     X, Y: Integer;
-    BitmapPtr: PRGB32;
+    BitmapPtr: PColorBGRA;
   begin
     BitmapPtr := Bitmap.Data;
 
@@ -141,7 +141,7 @@ function TFindBitmapBuffer.Find(Bitmap: TMufasaBitmap; out Points: TPointArray; 
 
 var
   X, Y: Integer;
-  RowPtr: PRGB32;
+  RowPtr: PColorBGRA;
   Buffer: TSimbaPointBuffer;
 label
   Finished;

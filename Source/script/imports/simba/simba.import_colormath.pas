@@ -8,16 +8,16 @@ implementation
 
 uses
   classes, sysutils, graphics, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.colormath, simba.colormath_distance;
+  simba.script_compiler, simba.mufasatypes, simba.colormath_distance;
 
 procedure _LapeColorToRGB(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  ColorToRGB(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^);
+  //ColorToRGB(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^);
 end;
 
 procedure _LapeRGBtoColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PColor(Result)^ := RGBtoColor(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^);
+  //PColor(Result)^ := RGBtoColor(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^);
 end;
 
 procedure _LapeColorToHSL(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV

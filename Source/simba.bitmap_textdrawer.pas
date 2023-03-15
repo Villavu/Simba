@@ -11,15 +11,15 @@ interface
 
 uses
   classes, sysutils, lazfreetypefpimagedrawer, easylazfreetype, fpimage, graphics,
-  simba.mufasatypes;
+  simba.mufasatypes, simba.colormath_conversion;
 
 type
   TSimbaTextDrawer = class(TFPImageFreeTypeDrawer)
   protected
     FWidth: Int32;
     FHeight: Int32;
-    FData: PRGB32;
-    FCurrentColor: PRGB32;
+    FData: PColorBGRA;
+    FCurrentColor: PColorBGRA;
     FBitmap: TObject;
     FFonts: TStringArray;
     FFont: TFreeTypeFont;
@@ -168,7 +168,7 @@ end;
 
 procedure TSimbaTextDrawer.SetCurrentColorAndMoveRight(const AColor: TFPColor);
 begin
-  FCurrentColor^ := TRGB32(((AColor.Blue shr 8) and $FF) or (AColor.Green and $FF00) or ((AColor.Red shl 8) and $FF0000) or (AColor.Alpha and $FF000000));
+  FCurrentColor^ := TColorBGRA(((AColor.Blue shr 8) and $FF) or (AColor.Green and $FF00) or ((AColor.Red shl 8) and $FF0000) or (AColor.Alpha and $FF000000));
 
   Inc(FCurrentColor);
 end;

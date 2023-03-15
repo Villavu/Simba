@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.mufasatypes, simba.target;
+  simba.mufasatypes, simba.target, simba.colormath_conversion;
 
 type
   PRawTarget = ^TRawTarget;
@@ -19,21 +19,21 @@ type
   protected
     FWidth: Int32;
     FHeight: Int32;
-    FData: PRGB32;
+    FData: PColorBGRA;
     FManageData: Boolean;
 
     procedure GetTargetBounds(out Bounds: TBox); override;
   public
     function ReturnData(X, Y, Width, Height: Int32): TRetData; override;
-    function CopyData(X, Y, Width, Height: Int32): PRGB32; override;
+    function CopyData(X, Y, Width, Height: Int32): PColorBGRA; override;
 
-    constructor Create(Source: PRGB32; Width, Height: Int32; Copy: Boolean = False);
+    constructor Create(Source: PColorBGRA; Width, Height: Int32; Copy: Boolean = False);
     destructor Destroy; override;
  end;
 
 implementation
 
-constructor TRawTarget.Create(Source: PRGB32; Width, Height: Int32; Copy: Boolean);
+constructor TRawTarget.Create(Source: PColorBGRA; Width, Height: Int32; Copy: Boolean);
 begin
   inherited Create();
 
@@ -79,7 +79,7 @@ begin
     Result := Default(TRetData);
 end;
 
-function TRawTarget.CopyData(X, Y, Width, Height: Int32): PRGB32;
+function TRawTarget.CopyData(X, Y, Width, Height: Int32): PColorBGRA;
 var
   Bounds: TBox;
   Loop: Int32;

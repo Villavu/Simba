@@ -88,6 +88,7 @@ type
     procedure ButtonUpdateImageClick(Sender: TObject);
     procedure ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure ClientImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure MenuItemCopyBestColorClick(Sender: TObject);
     procedure MenuItemLoadHSLCircleClick(Sender: TObject);
     procedure MenuItemLoadHSLCircleExClick(Sender: TObject);
     procedure PanelRightResize(Sender: TObject);
@@ -111,6 +112,7 @@ type
     procedure GetColorStuff(out ColorSpace: EColorSpace; out Col: Integer; out Tol: Single; out Mods: TChannelMultipliers);
 
     function GetColorSpace: EColorSpace;
+    function GetColorSpaceStr: String;
     function GetColors: TColorArray;
   public
     constructor Create(Client: TClient; ManageClient: Boolean); reintroduce;
@@ -126,22 +128,18 @@ implementation
 {$R *.lfm}
 
 uses
-  clipbrd,
-  simba.colormath, simba.windowhandle, simba.bitmap, simba.colormath_aca;
+  Clipbrd, TypInfo,
+  simba.windowhandle, simba.bitmap, simba.colormath_aca;
 
 procedure TSimbaACAForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-var
-  R, G, B: Byte;
-  H, S, L: Extended;
 begin
+  FImageZoom.SetTempColor(-1);
   FImageZoom.MoveTest(FImageBox, X, Y);
 
-  ColorToRGB(FImageBox.Background.Canvas.Pixels[X, Y], R, G, B);
-  //ColorToHSL(FImageBox.Background.Canvas.Pixels[X, Y], H, S, L);
-
-  FZoomInfo.Caption := Format('Color: %d', [FImageBox.Background.Canvas.Pixels[X, Y]]) + LineEnding +
-                       Format('RGB: %d, %d, %d', [R, G, B])                            + LineEnding +
-                       Format('HSL: %.2f, %.2f, %.2f', [H, S, L])                      + LineEnding;
+  with FImageBox.Background.Canvas.Pixels[X, Y].ToRGB(), FImageBox.Background.Canvas.Pixels[X, Y].ToHSL() do
+    FZoomInfo.Caption := Format('Color: %d', [FImageBox.Background.Canvas.Pixels[X, Y]]) + LineEnding +
+                         Format('RGB: %d, %d, %d', [R, G, B])                            + LineEnding +
+                         Format('HSL: %.2f, %.2f, %.2f', [H, S, L])                      + LineEnding;
 end;
 
 procedure TSimbaACAForm.ClientImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -155,6 +153,11 @@ begin
     if ColorListBox.Items.IndexOf(Pixel.ToString()) = -1 then
       ColorListBox.ItemIndex := ColorListBox.Items.AddObject(Pixel.ToString(), TObject(PtrUInt(Pixel)));
   end;
+end;
+
+procedure TSimbaACAForm.MenuItemCopyBestColorClick(Sender: TObject);
+begin
+  Clipboard.AsText := Format('ColorTolerance($%s, %s, %s, [%s, %s, %s])', [IntToHex(StrToIntDef(BestColorEdit.Text, 0), 6), BestToleranceEdit.Text, GetColorSpaceStr(), BestMulti1Edit.Text, BestMulti2Edit.Text, BestMulti3Edit.Text]);
 end;
 
 procedure TSimbaACAForm.MenuItemLoadHSLCircleClick(Sender: TObject);
@@ -240,20 +243,15 @@ begin
 end;
 
 procedure TSimbaACAForm.ColorSelectionChanged(Sender: TObject; User: Boolean);
-var
-  R, G, B: Integer;
-  H, S, L: Extended;
 begin
   if User and (ColorListBox.ItemIndex >= 0) then
   begin
     FImageZoom.SetTempColor(ColorListBox.Selected);
 
-    ColorToRGB(ColorListBox.Selected, R, G, B);
-    //ColorToHSL(ColorListBox.Selected, H, S, L);
-
-    FZoomInfo.Caption := Format('Color: %d', [ColorListBox.Selected]) + LineEnding +
-                         Format('RGB: %d, %d, %d', [R, G, B])         + LineEnding +
-                         Format('HSL: %.2f, %.2f, %.2f', [H, S, L])   + LineEnding;
+    with ColorListBox.Selected.ToRGB(), ColorListBox.Selected.ToHSL() do
+      FZoomInfo.Caption := Format('Color: %d', [ColorListBox.Selected]) + LineEnding +
+                           Format('RGB: %d, %d, %d', [R, G, B])         + LineEnding +
+                           Format('HSL: %.2f, %.2f, %.2f', [H, S, L])   + LineEnding;
   end;
 
   CalculateBestColor();
@@ -374,6 +372,11 @@ begin
   if ButtonDeltaE.Checked then Result := EColorSpace.DELTAE;
 end;
 
+function TSimbaACAForm.GetColorSpaceStr: String;
+begin
+  Result := 'EColorSpace.' + GetEnumName(TypeInfo(EColorSpace), Ord(GetColorSpace()));
+end;
+
 procedure TSimbaACAForm.ButtonMatchColorClick(Sender: TObject);
 var
   ColorSpace: EColorSpace;
@@ -492,7 +495,7 @@ begin
   try
     Canvas.Font := Self.Font;
 
-    ColorListBox.ItemHeight := Round(Canvas.TextHeight('123') * 1.5);
+    ColorListBox.ItemHeight := Round(Canvas.TextHeight('123') * 1.3);
   finally
     Free();
   end;

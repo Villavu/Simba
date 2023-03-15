@@ -27,7 +27,7 @@ end;
 
 procedure _LapeTarget_CopyData(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPRGB32(Result)^ := PTarget(Params^[0])^.CopyData(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+  PPointer(Result)^ := PTarget(Params^[0])^.CopyData(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
 end;
 
 procedure _LapeTarget_ReturnData(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV

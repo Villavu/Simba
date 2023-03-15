@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.mufasatypes;
+  simba.mufasatypes, simba.colormath_conversion;
 
 type
   PTarget = ^TTarget;
@@ -40,7 +40,7 @@ type
 
     // Colors
     function GetColor(X, Y: Integer): Integer; virtual;
-    function CopyData(X, Y, Width, Height: Integer): PRGB32; virtual;
+    function CopyData(X, Y, Width, Height: Integer): PColorBGRA; virtual;
     function ReturnData(X, Y, Width, Height: Integer): TRetData; virtual;
     function ReturnMatrix(X, Y, Width, Height: Integer): TIntegerMatrix; virtual;
 
@@ -70,9 +70,6 @@ type
   TTargetArray = array of TTarget;
 
 implementation
-
-uses
-  simba.colormath;
 
 procedure TTarget.GetTargetPosition(out Left, Top: Integer);
 var
@@ -127,12 +124,12 @@ var
 begin
   Data := ReturnData(X, Y, 1, 1);
   if (Data.Ptr <> nil) then
-    Result := RGBToColor(Data.Ptr^.R, Data.Ptr^.G, Data.Ptr^.B)
+    Result := PColorBGRA(Data.Ptr)^.ToColor()
   else
     Result := 0;
 end;
 
-function TTarget.CopyData(X, Y, Width, Height: Integer): PRGB32;
+function TTarget.CopyData(X, Y, Width, Height: Integer): PColorBGRA;
 begin
   raise Exception.Create('CopyData not availble for this target');
 end;
@@ -145,7 +142,7 @@ end;
 function TTarget.ReturnMatrix(X, Y, Width, Height: Integer): TIntegerMatrix;
 var
   Data: TRetData;
-  Source: PRGB32;
+  Source: PColorBGRA;
   SourceInc: Integer;
   LoopX, LoopY: Integer;
   W, H: Integer;
@@ -158,14 +155,14 @@ begin
     W := Width - 1;
     H := Height - 1;
 
-    Source := Data.Ptr;
+    Source := PColorBGRA(Data.Ptr);
     SourceInc := Data.IncPtrWith;
 
     for LoopY := 0 to H do
     begin
       for LoopX := 0 to W do
       begin
-        Result[LoopY][LoopX] := BGRToRGB(Source^);
+        Result[LoopY][LoopX] := PColorBGRA(Source)^.ToColor;
 
         Inc(Source);
       end;

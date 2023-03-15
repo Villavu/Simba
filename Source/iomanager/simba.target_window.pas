@@ -11,17 +11,17 @@ interface
 
 uses
   classes, sysutils,
-  simba.mufasatypes, simba.target;
+  simba.mufasatypes, simba.target, simba.colormath_conversion;
 
 type
   TWindowTarget = class(TTarget)
   protected
     FWindowHandle: TWindowHandle;
-    FBuffer: PRGB32;
+    FBuffer: PColorBGRA;
 
     procedure GetTargetBounds(out Bounds: TBox); override;
   public
-    function CopyData(X, Y, Width, Height: Integer): PRGB32; override;
+    function CopyData(X, Y, Width, Height: Integer): PColorBGRA; override;
     function ReturnData(X, Y, Width, Height: Integer): TRetData; override;
 
     function TargetValid: Boolean; override;
@@ -75,13 +75,13 @@ begin
 
   if ValidateImageCapture(X, Y, Width, Height, Bounds) and SimbaNativeInterface.GetWindowImage(FWindowHandle, X, Y, Width, Height, FBuffer) then
   begin
-    Result.Ptr := FBuffer;
+    Result.Ptr := PRGB32(FBuffer);
     Result.IncPtrWith := 0;
     Result.RowLen := Width;
   end;
 end;
 
-function TWindowTarget.CopyData(X, Y, Width, Height: Integer): PRGB32;
+function TWindowTarget.CopyData(X, Y, Width, Height: Integer): PColorBGRA;
 var
   Bounds: TBox;
 begin

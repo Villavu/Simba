@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.mufasatypes, simba.nativeinterface;
+  simba.mufasatypes, simba.nativeinterface, simba.colormath_conversion;
 
 type
   TSimbaNativeInterface_Windows = class(TSimbaNativeInterface)
@@ -37,7 +37,7 @@ type
     function GetWindowBounds(Window: TWindowHandle): TBox; override; overload;
     procedure SetWindowBounds(Window: TWindowHandle; Bounds: TBox); override;
 
-    function GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PRGB32): Boolean; override;
+    function GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PColorBGRA): Boolean; override;
 
     function GetMousePosition: TPoint; override;
     function GetMousePosition(Window: TWindowHandle): TPoint; override;
@@ -262,7 +262,7 @@ begin
   Result := True;
 end;
 
-function TSimbaNativeInterface_Windows.GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PRGB32): Boolean;
+function TSimbaNativeInterface_Windows.GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PColorBGRA): Boolean;
 
   // BitBlt uses GetWindowRect area so must offset to real bounds if DwmCompositionEnabled.
   procedure ApplyRootOffset(Window: TWindowHandle; var X, Y: Integer);

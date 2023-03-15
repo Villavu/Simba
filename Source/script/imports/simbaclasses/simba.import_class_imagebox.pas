@@ -137,7 +137,7 @@ end;
 
 procedure _LapeSimbaImageBox_SetBackground_Data(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImageBox(Params^[0])^.SetBackground(PPRGB32(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+  PSimbaImageBox(Params^[0])^.SetBackground(PPointer(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 procedure _LapeSimbaImageBox_SetBackground_FileName(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV

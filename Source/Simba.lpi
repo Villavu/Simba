@@ -314,7 +314,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="151">
+    <Units Count="152">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -995,6 +995,10 @@
         <Filename Value="colormath/simba.colormath_aca.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit150>
+      <Unit151>
+        <Filename Value="simba.finder_test.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit151>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

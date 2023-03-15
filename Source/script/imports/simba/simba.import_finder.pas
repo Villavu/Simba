@@ -7,8 +7,48 @@ interface
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.script_compiler, simba.mufasatypes;
+  classes, sysutils, Graphics, lptypes,
+  simba.script_compiler, simba.mufasatypes, simba.finder_test, simba.bitmap;
+
+procedure _LapeSimbaFinder_SetTarget_Bitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaFinder(Params^[0])^.SetTarget(PMufasaBitmap(Params^[1])^);
+end;
+
+procedure _LapeSimbaFinder_SetTarget_Window(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaFinder(Params^[0])^.SetTarget(PWindowHandle(Params^[1])^);
+end;
+
+procedure _LapeSimbaFinder_FindColors1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.FindColors(PColor(Params^[1])^, PBox(Params^[2])^);
+end;
+
+procedure _LapeSimbaFinder_FindColors2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.FindColors(PColor(Params^[1])^, PSingle(Params^[2])^, PBox(Params^[3])^);
+end;
+
+procedure _LapeSimbaFinder_FindColors3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.FindColors(PColor(Params^[1])^, PSingle(Params^[2])^, PColorSpace(Params^[3])^, PBox(Params^[4])^);
+end;
+
+procedure _LapeSimbaFinder_FindColorsEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.FindColorsEx(PColorTolerance(Params^[1])^, PBox(Params^[2])^);
+end;
+
+procedure _LapeSimbaFinder_GetColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PColor(Result)^ := PSimbaFinder(Params^[0])^.GetColor(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure _LapeSimbaFinder_GetColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PIntegerArray(Result)^ := PSimbaFinder(Params^[0])^.GetColors(PPointArray(Params^[1])^);
+end;
 
 procedure ImportFinder(Compiler: TSimbaScript_Compiler);
 begin
@@ -16,6 +56,61 @@ begin
   begin
     ImportingSection := 'Finder';
 
+    addGlobalType('array [0..2] of Single', 'TChannelMultipliers');
+
+    addGlobalType([
+      'record',
+      '  ColorSpace: EColorSpace;',
+      '  Multipliers: TChannelMultipliers;',
+      'end;'],
+      'TColorSpace'
+    );
+
+    addGlobalType([
+      'record',
+      '  Color: Integer;',
+      '  Tolerance: Single;',
+      '  ColorSpace: EColorSpace;',
+      '  Multipliers: TChannelMultipliers;',
+      'end;'],
+      'TColorTolerance'
+    );
+
+    addGlobalFunc(
+      'function ColorSpace(AColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TColorSpace;', [
+      'begin',
+      '  Result := [AColorSpace, Multipliers];',
+      'end;']
+    );
+
+    addGlobalFunc(
+      'function ColorTolerance(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TColorTolerance;', [
+      'begin',
+      '  Result := [Color, Tolerance, ColorSpace, Multipliers];',
+      'end;']
+    );
+
+    addGlobalType([
+      'record',
+      '  Data: array[0..' + IntToStr(SizeOf(TSimbaFinder))  + '] of Byte;',
+      'end;'],
+      'TSimbaFinder'
+    );
+
+    addGlobalVar(getGlobalType('TSimbaFinder').NewGlobalVarP(), 'Finder');
+
+    addGlobalFunc('procedure TSimbaFinder.SetTarget(Bitmap: TMufasaBitmap); overload', @_LapeSimbaFinder_SetTarget_Bitmap);
+    addGlobalFunc('procedure TSimbaFinder.SetTarget(Window: TWindowHandle); overload', @_LapeSimbaFinder_SetTarget_Window);
+
+    addGlobalFunc('function TSimbaFinder.FindColors(Color: TColor; Bounds: TBox): TPointArray; overload', @_LapeSimbaFinder_FindColors1);
+    addGlobalFunc('function TSimbaFinder.FindColors(Color: TColor; Tolerance: Single; Bounds: TBox): TPointArray; overload', @_LapeSimbaFinder_FindColors2);
+    addGlobalFunc('function TSimbaFinder.FindColors(Color: TColor; Tolerance: Single; ColorSpace: TColorSpace; Bounds: TBox): TPointArray; overload', @_LapeSimbaFinder_FindColors3);
+    addGlobalFunc('function TSimbaFinder.FindColorsEx(Color: TColorTolerance; Bounds: TBox): TPointArray', @_LapeSimbaFinder_FindColorsEx);
+
+    addGlobalFunc('function TSimbaFinder.GetColor(X, Y: Integer): TColor', @_LapeSimbaFinder_GetColor);
+    addGlobalFunc('function TSimbaFinder.GetColors(Points: TPointArray): TIntegerArray', @_LapeSimbaFinder_GetColors);
+
+    {
     addGlobalFunc(
       'procedure SetColorToleranceSpeed(CTS: Integer);', [
       'begin',
@@ -507,6 +602,7 @@ begin
       'end;'
       ]
     );
+    }
 
     ImportingSection := '';
   end;
