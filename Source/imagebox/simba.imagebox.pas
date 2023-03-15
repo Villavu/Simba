@@ -103,7 +103,7 @@ type
 
     procedure SetTempBackground(Bitmap: TMufasaBitmap; DoFreeBitmap: Boolean = False);
 
-    procedure SetBackground(Data: PRGB32; AWidth, AHeight: Integer); overload;
+    procedure SetBackground(Data: PColorBGRA; AWidth, AHeight: Integer); overload;
     procedure SetBackground(FileName: String); overload;
     procedure SetBackground(Bitmap: TMufasaBitmap); overload;
     procedure SetBackground(IOManager: TIOManager; X1, Y1, X2, Y2: Integer); overload;
@@ -119,7 +119,7 @@ implementation
 
 uses
   math, fpimage, graphtype,
-  simba.nativeinterface, simba.bitmap_misc, simba.finder_dtm, simba.finder_color, simba.bitmap_helpers;
+  simba.nativeinterface, simba.bitmap_misc, simba.finder_dtm, simba.bitmap_helpers;
 
 procedure TSimbaImageBox_ScrollBox.GetPreferredSize(var PreferredWidth, PreferredHeight: integer; Raw: boolean; WithThemeSpace: boolean);
 begin
@@ -626,27 +626,30 @@ begin
 end;
 
 function TSimbaImageBox.FindColors(CTS: Integer; Col, Tol: Integer; HueMod: Extended; SatMod: Extended): TPointArray;
-var
-  Bitmap: TMufasaBitmap;
-  Buffer: TFindColorBuffer;
+//var
+//  Bitmap: TMufasaBitmap;
+//  Buffer: TFindColorBuffer;
+//begin
+//  Bitmap := FBackground.ToMufasaBitmap();
+//
+//  with Buffer do
+//  begin
+//    Buffer.Data := Bitmap.Data;
+//    Buffer.Width := Bitmap.Width;
+//    Buffer.SearchWidth := Bitmap.Width;
+//    Buffer.SearchHeight := Bitmap.Height;
+//
+//    case CTS of
+//      0: FindCTS0(Result, Col, Tol);
+//      1: FindCTS1(Result, Col, Tol);
+//      2: FindCTS2(Result, Col, Tol, HueMod, SatMod);
+//    end;
+//  end;
+//
+//  Bitmap.Free();
+//end;
 begin
-  Bitmap := FBackground.ToMufasaBitmap();
 
-  with Buffer do
-  begin
-    Buffer.Data := Bitmap.Data;
-    Buffer.Width := Bitmap.Width;
-    Buffer.SearchWidth := Bitmap.Width;
-    Buffer.SearchHeight := Bitmap.Height;
-
-    case CTS of
-      0: FindCTS0(Result, Col, Tol);
-      1: FindCTS1(Result, Col, Tol);
-      2: FindCTS2(Result, Col, Tol, HueMod, SatMod);
-    end;
-  end;
-
-  Bitmap.Free();
 end;
 
 function TSimbaImageBox.FindDTMs(DTM: TDTM): TPointArray;
@@ -654,19 +657,19 @@ var
   Bitmap: TMufasaBitmap;
   Buffer: TFindDTMBuffer;
 begin
-  Bitmap := FBackground.ToMufasaBitmap();
-
-  with Buffer do
-  begin
-    Buffer.Data := Bitmap.Data;
-    Buffer.Width := Bitmap.Width;
-    Buffer.SearchWidth := Bitmap.Width;
-    Buffer.SearchHeight := Bitmap.Height;
-
-    Result := FindDTMs(DTM);
-  end;
-
-  Bitmap.Free();
+  //Bitmap := FBackground.ToMufasaBitmap();
+  //
+  //with Buffer do
+  //begin
+  //  Buffer.Data := Bitmap.Data;
+  //  Buffer.Width := Bitmap.Width;
+  //  Buffer.SearchWidth := Bitmap.Width;
+  //  Buffer.SearchHeight := Bitmap.Height;
+  //
+  //  Result := FindDTMs(DTM);
+  //end;
+  //
+  //Bitmap.Free();
 end;
 
 function TSimbaImageBox.Test(ColorSpace: EColorSpace; Col: Integer; Tol: Single; Mods: TChannelMultipliers): TPointArray;
@@ -706,7 +709,7 @@ begin
     FreeAndNil(FTempBackground);
 end;
 
-procedure TSimbaImageBox.SetBackground(Data: PRGB32; AWidth, AHeight: Integer);
+procedure TSimbaImageBox.SetBackground(Data: PColorBGRA; AWidth, AHeight: Integer);
 begin
   FBackground.FromData(Data, AWidth, AHeight);
 end;
@@ -723,7 +726,7 @@ end;
 
 procedure TSimbaImageBox.SetBackground(IOManager: TIOManager; X1, Y1, X2, Y2: Integer);
 var
-  Data: PRGB32;
+  Data: PColorBGRA;
 begin
   Data := IOManager.CopyData(X1, Y1, X2-X1+1, Y2-Y1+1);
   if (Data <> nil) then

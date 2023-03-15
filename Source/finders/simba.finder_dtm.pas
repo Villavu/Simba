@@ -36,7 +36,7 @@ type
 implementation
 
 uses
-  simba.colormath, simba.colormath_distance, simba.math, simba.overallocatearray;
+  simba.colormath_distance, simba.math, simba.overallocatearray;
 
 function TFindDTMBuffer.FindDTMs(DTM: TDTM; MaxToFind: Integer): TPointArray;
 var
@@ -127,7 +127,7 @@ begin
   SetLength(PointTolerances, DTM.PointCount);
   for I := 0 to DTM.PointCount - 1 do
   begin
-    PointColors[I] := RGBToBGR(DTM.Points[I].Color);
+    //PointColors[I] := RGBToBGR(DTM.Points[I].Color);
 
     if (DTM.Points[I].Tolerance = 0) then
       PointTolerances[I] := Sqr(1)
@@ -252,7 +252,7 @@ begin
   for I := 0 to DTM.PointCount - 1 do
   begin
     Points[I] := TPoint.Create(DTM.Points[I].X, DTM.Points[I].Y);
-    PointColors[I] := RGBToBGR(DTM.Points[I].Color);
+    //PointColors[I] := RGBToBGR(DTM.Points[I].Color);
 
     if (DTM.Points[I].Tolerance = 0) then
       PointTolerances[I] := Sqr(1)

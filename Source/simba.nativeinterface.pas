@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, graphics,
-  simba.mufasatypes;
+  simba.mufasatypes, simba.colormath_conversion;
 
 type
   TSimbaNativeInterface = class
@@ -22,7 +22,7 @@ type
     function VirtualKeyToNativeKeyCode(VirtualKey: Integer): Integer; virtual; abstract;
     function GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean; virtual; abstract;
 
-    function GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PRGB32): Boolean; virtual; abstract;
+    function GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PColorBGRA): Boolean; virtual; abstract;
     function GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean; virtual; abstract;
     function GetWindowBounds(Window: TWindowHandle): TBox; virtual; abstract;
 

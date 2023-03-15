@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, graphics,
-  simba.mufasatypes, simba.bitmap;
+  simba.mufasatypes, simba.bitmap, simba.colormath_conversion;
 
 procedure LoadBitmapAreaFromFile(Bitmap: TMufasaBitmap; FileName: String; Area: TBox);
 function GetBitmapPixelFormat(Bitmap: TBitmap): String;
@@ -19,7 +19,7 @@ function GetBitmapPixelFormat(Bitmap: TBitmap): String;
 type
   TBitmapHelper = type helper for TBitmap
     // Draw TRGB32 data without changing bitmap format
-    procedure FromData(AData: PRGB32; AWidth, AHeight: Integer);
+    procedure FromData(AData: PColorBGRA; AWidth, AHeight: Integer);
 
     function ToMufasaBitmap: TMufasaBitmap;
     procedure LoadFromFile(FileName: String);
@@ -28,10 +28,10 @@ type
   TRGBSum = record
     R, G, B: Int64;
 
-    class operator :=(const Right: TRGB32): TRGBSum;
+    class operator :=(const Right: TColorBGRA): TRGBSum;
 
-    class operator +(const Left: TRGBSum; const Right: TRGB32): TRGBSum;
-    class operator -(const Left: TRGBSum; const Right: TRGB32): TRGBSum;
+    class operator +(const Left: TRGBSum; const Right: TColorBGRA): TRGBSum;
+    class operator -(const Left: TRGBSum; const Right: TColorBGRA): TRGBSum;
 
     class operator +(const Left, Right: TRGBSum): TRGBSum;
     class operator -(const Left, Right: TRGBSum): TRGBSum;
@@ -63,7 +63,7 @@ type
 
 procedure LoadBitmapAreaFromFile(Bitmap: TMufasaBitmap; FileName: String; Area: TBox);
 
-  function ColorRGBToBGRA(const ColorRGB: TColorRGB): TRGB32; inline;
+  function ColorRGBToBGRA(const ColorRGB: TColorRGB): TColorBGRA; inline;
   begin
     Result.B := ColorRGB.B;
     Result.G := ColorRGB.G;
@@ -207,7 +207,7 @@ begin
   raise Exception.Create('Pixel format not supported: ' + Bitmap.RawImage.Description.AsString);
 end;
 
-procedure TBitmapHelper.FromData(AData: PRGB32; AWidth, AHeight: Integer);
+procedure TBitmapHelper.FromData(AData: PColorBGRA; AWidth, AHeight: Integer);
 var
   Source, Dest: PByte;
   SourceBytesPerLine, DestBytesPerLine: Integer;
@@ -251,7 +251,7 @@ var
       RowUpper := PtrUInt(Source + SourceBytesPerLine);
       while PtrUInt(RowSource) < RowUpper do
       begin
-        PRGB32(RowDest)^ := PRGB32(RowSource)^;
+        PColorBGRA(RowDest)^ := PColorBGRA(RowSource)^;
 
         Inc(RowSource, SizeOf(TRGB32));
         Inc(RowDest, SizeOf(TRGB32));
@@ -290,10 +290,10 @@ var
 
       while PtrUInt(RowSource) < RowUpper do
       begin
-        PARGB(RowDest)^.R := PRGB32(RowSource)^.R;
-        PARGB(RowDest)^.G := PRGB32(RowSource)^.G;
-        PARGB(RowDest)^.B := PRGB32(RowSource)^.B;
-        PARGB(RowDest)^.A := PRGB32(RowSource)^.A;
+        PARGB(RowDest)^.R := PColorBGRA(RowSource)^.R;
+        PARGB(RowDest)^.G := PColorBGRA(RowSource)^.G;
+        PARGB(RowDest)^.B := PColorBGRA(RowSource)^.B;
+        PARGB(RowDest)^.A := PColorBGRA(RowSource)^.A;
 
         Inc(RowSource, SizeOf(TRGB32));
         Inc(RowDest, SizeOf(TARGB));
@@ -371,7 +371,7 @@ var
       RowUpper := PtrUInt(Source + SourceBytesPerLine);
       while PtrUInt(RowSource) < RowUpper do
       begin
-        PRGB32(RowDest)^ := PRGB32(RowSource)^;
+        PColorBGRA(RowDest)^ := PColorBGRA(RowSource)^;
 
         Inc(RowSource, SizeOf(TRGB32));
         Inc(RowDest, SizeOf(TRGB32));
@@ -396,10 +396,10 @@ var
 
       while PtrUInt(RowSource) < RowUpper do
       begin
-        PARGB(RowDest)^.R := PRGB32(RowSource)^.R;
-        PARGB(RowDest)^.G := PRGB32(RowSource)^.G;
-        PARGB(RowDest)^.B := PRGB32(RowSource)^.B;
-        PARGB(RowDest)^.A := PRGB32(RowSource)^.A;
+        PARGB(RowDest)^.R := PColorBGRA(RowSource)^.R;
+        PARGB(RowDest)^.G := PColorBGRA(RowSource)^.G;
+        PARGB(RowDest)^.B := PColorBGRA(RowSource)^.B;
+        PARGB(RowDest)^.A := PColorBGRA(RowSource)^.A;
 
         Inc(RowSource, SizeOf(TARGB));
         Inc(RowDest, SizeOf(TRGB32));
@@ -444,21 +444,21 @@ begin
   end;
 end;
 
-class operator TRGBSum.:=(const Right: TRGB32): TRGBSum;
+class operator TRGBSum.:=(const Right: TColorBGRA): TRGBSum;
 begin
   Result.R := Right.R;
   Result.G := Right.G;
   Result.B := Right.B;
 end;
 
-class operator TRGBSum.+(const Left: TRGBSum; const Right: TRGB32): TRGBSum;
+class operator TRGBSum.+(const Left: TRGBSum; const Right: TColorBGRA): TRGBSum;
 begin
   Result.R := Left.R + Right.R;
   Result.G := Left.G + Right.G;
   Result.B := Left.B + Right.B;
 end;
 
-class operator TRGBSum.-(const Left: TRGBSum; const Right: TRGB32): TRGBSum;
+class operator TRGBSum.-(const Left: TRGBSum; const Right: TColorBGRA): TRGBSum;
 begin
   Result.R := Left.R - Right.R;
   Result.G := Left.G - Right.G;

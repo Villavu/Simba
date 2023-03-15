@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.target, simba.mufasatypes;
+  simba.target, simba.mufasatypes, simba.colormath_conversion;
 
 type
   PTarget_Exported = ^TTarget_Exported;
@@ -36,7 +36,7 @@ type
     ReleaseKey: procedure(Target: Pointer; key: Int32); stdcall;
     IsKeyHeld: function(Target: Pointer; key: Int32): Boolean; stdcall;
     GetKeyCode: function(target : pointer; Character: Char): Int32; stdcall;
-    CopyData: function(Target: Pointer; X, Y, Width, Height: Int32): PRGB32; stdcall;
+    CopyData: function(Target: Pointer; X, Y, Width, Height: Int32): PColorBGRA; stdcall;
   end;
 
   TTarget_Helper = class helper for TTarget
@@ -136,7 +136,7 @@ begin
   Result := TTarget(Target).GetKeyCode(Character);
 end;
 
-function TTarget_Exported_CopyData(Target: Pointer; X, Y, Width, Height: Int32): PRGB32; stdcall;
+function TTarget_Exported_CopyData(Target: Pointer; X, Y, Width, Height: Int32): PColorBGRA; stdcall;
 begin
   Result := TTarget(Target).CopyData(X, Y, Width, Height);
 end;

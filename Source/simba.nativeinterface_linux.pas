@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.mufasatypes, simba.nativeinterface;
+  simba.mufasatypes, simba.nativeinterface, simba.colormath_conversion;
 
 type
   TSimbaNativeInterface_Linux = class(TSimbaNativeInterface)
@@ -26,7 +26,7 @@ type
     function GetWindowBounds(Window: TWindowHandle): TBox; override; overload;
     procedure SetWindowBounds(Window: TWindowHandle; Bounds: TBox); override;
 
-    function GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PRGB32): Boolean; override;
+    function GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PColorBGRA): Boolean; override;
 
     function GetMousePosition: TPoint; override;
     function GetMousePosition(Window: TWindowHandle): TPoint; override;
@@ -352,7 +352,7 @@ begin
   SimbaXLib.XSync(False);
 end;
 
-function TSimbaNativeInterface_Linux.GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PRGB32): Boolean;
+function TSimbaNativeInterface_Linux.GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PColorBGRA): Boolean;
 var
   Image: PXImage;
 begin
@@ -362,7 +362,7 @@ begin
   if Result then
   begin
     ReAllocMem(ImageData, Width * Height * SizeOf(TRGB32));
-    Move(Image^.Data^, PRGB32(ImageData)^, MemSize(ImageData));
+    Move(Image^.Data^, PColorBGRA(ImageData)^, MemSize(ImageData));
 
     SimbaXLib.XDestroyImage(Image);
   end;

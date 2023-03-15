@@ -47,7 +47,7 @@ function TMufasaBitmap.GetData: PRGB32;
 *)
 procedure _LapeMufasaBitmap_Data_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPRGB32(Result)^ := PMufasaBitmap(Params^[0])^.Data;
+  PPointer(Result)^ := PMufasaBitmap(Params^[0])^.Data;
 end;
 
 (*
@@ -1292,7 +1292,7 @@ procedure TMufasaBitmap.LoadFromData(AWidth, AHeight: Integer; Memory: PRGB32; C
 *)
 procedure _LapeMufasaBitmap_LoadFromData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.LoadFromData(PInteger(Params^[1])^, PInteger(Params^[2])^, PPRGB32(Params^[3])^, PBoolean(Params^[4])^);
+  PMufasaBitmap(Params^[0])^.LoadFromData(PInteger(Params^[1])^, PInteger(Params^[2])^, PPointer(Params^[3])^, PBoolean(Params^[4])^);
 end;
 
 (*

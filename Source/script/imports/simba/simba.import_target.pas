@@ -23,7 +23,7 @@ end;
 
 procedure _LapeSetTargetData(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := SimbaScriptThread.Script.Client.IOManager.SetTarget(PPRGB32(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+  PInteger(Result)^ := SimbaScriptThread.Script.Client.IOManager.SetTarget(PPointer(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeSetTargetBitmap(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV

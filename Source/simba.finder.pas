@@ -10,8 +10,7 @@ unit simba.finder;
 interface
 
 uses
-  simba.colormath, classes, sysutils, simba.bitmap, simba.dtm, simba.mufasatypes, simba.matchtemplate,
-  simba.finder_color;
+  classes, sysutils, simba.bitmap, simba.dtm, simba.mufasatypes, simba.matchtemplate;
 
 type
   PMFinder = ^TMFinder;
@@ -74,7 +73,8 @@ implementation
 
 uses
   math,
-  simba.client, simba.tpa, simba.finder_dtm, simba.finder_bitmap, simba.colormath_same;
+  simba.client, simba.tpa, simba.finder_dtm, simba.finder_bitmap,
+  simba.colormath_conversion;
 
 constructor TMFinder.Create(aClient: TObject);
 begin
@@ -153,7 +153,7 @@ var
   ImageData: TRetData;
 begin
   if GetData(ImageData, X1, Y1, X2, Y2) then
-    Bitmap := TMufasaBitmap.CreateFromData(X2-X1+1, Y2-Y1+1, ImageData.Ptr, CopyData)
+    Bitmap := TMufasaBitmap.CreateFromData(X2-X1+1, Y2-Y1+1, PColorBGRA(ImageData.Ptr), CopyData)
   else
     Bitmap := nil;
 
@@ -187,37 +187,40 @@ end;
 
 function TMFinder.SimilarColors(Color1, Color2, Tolerance: Integer) : Boolean;
 begin
-  case Self.CTS of
-    0: Result := TSameColorCTS0.Create(Color1, Tolerance).IsSame(RGBToBGR(Color2));
-    1: Result := TSameColorCTS1.Create(Color1, Tolerance).IsSame(RGBToBGR(Color2));
-    2: Result := TSameColorCTS2.Create(Color1, Tolerance, HueMod, SatMod).IsSame(RGBToBGR(Color2));
-    3: Result := TSameColorCTS3.Create(Color1, Tolerance, CTS3Modifier).IsSame(RGBToBGR(Color2));
-  end;
+  //case Self.CTS of
+  //  0: Result := TSameColorCTS0.Create(Color1, Tolerance).IsSame(RGBToBGR(Color2));
+  //  1: Result := TSameColorCTS1.Create(Color1, Tolerance).IsSame(RGBToBGR(Color2));
+  //  2: Result := TSameColorCTS2.Create(Color1, Tolerance, HueMod, SatMod).IsSame(RGBToBGR(Color2));
+  //  3: Result := TSameColorCTS3.Create(Color1, Tolerance, CTS3Modifier).IsSame(RGBToBGR(Color2));
+  //end;
 end;
 
 function TMFinder.CountColorTolerance(Color: Integer; Tolerance: Integer; Area: TBox): Integer;
-var
-  ImageData: TRetData;
-  Buffer: TFindColorBuffer;
+//var
+//  ImageData: TRetData;
+//  Buffer: TFindColorBuffer;
+//begin
+//  if GetData(ImageData, Area.X1, Area.Y1, Area.X2, Area.Y2) then
+//  begin
+//    Buffer.Data := PColorBGRA(ImageData.Ptr);
+//    Buffer.Width := ImageData.RowLen;
+//    Buffer.SearchWidth := Area.Width;
+//    Buffer.SearchHeight := Area.Height;
+//
+//    if (Tolerance = 0) then
+//      Result := Buffer.Count(Color)
+//    else
+//    case Self.CTS of
+//      0: Result := Buffer.CountCTS0(Color, Tolerance);
+//      1: Result := Buffer.CountCTS1(Color, Tolerance);
+//      2: Result := Buffer.CountCTS2(Color, Tolerance, HueMod, SatMod);
+//      3: Result := Buffer.CountCTS3(Color, Tolerance, CTS3Modifier);
+//    end;
+//  end else
+//    Result := 0;
+//end;
 begin
-  if GetData(ImageData, Area.X1, Area.Y1, Area.X2, Area.Y2) then
-  begin
-    Buffer.Data := ImageData.Ptr;
-    Buffer.Width := ImageData.RowLen;
-    Buffer.SearchWidth := Area.Width;
-    Buffer.SearchHeight := Area.Height;
 
-    if (Tolerance = 0) then
-      Result := Buffer.Count(Color)
-    else
-    case Self.CTS of
-      0: Result := Buffer.CountCTS0(Color, Tolerance);
-      1: Result := Buffer.CountCTS1(Color, Tolerance);
-      2: Result := Buffer.CountCTS2(Color, Tolerance, HueMod, SatMod);
-      3: Result := Buffer.CountCTS3(Color, Tolerance, CTS3Modifier);
-    end;
-  end else
-    Result := 0;
 end;
 
 function TMFinder.CountColor(Color: Integer; Area: TBox): Integer;
@@ -244,31 +247,32 @@ begin
 end;
 
 function TMFinder.FindColorsTolerance(out Points: TPointArray; Color, Tolerance: Integer; Area: TBox; MaxToFind: Integer = 0): Boolean;
-var
-  ImageData: TRetData;
-  Buffer: TFindColorBuffer;
+//var
+//  ImageData: TRetData;
+//  Buffer: TFindColorBuffer;
+//begin
+//  if GetData(ImageData, Area.X1, Area.Y1, Area.X2, Area.Y2) then
+//  begin
+//    Buffer.Data := PColorBGRA(ImageData.Ptr);
+//    Buffer.Width := ImageData.RowLen;
+//    Buffer.SearchWidth := Area.Width;
+//    Buffer.SearchHeight := Area.Height;
+//    Buffer.Offset := Area.TopLeft;
+//
+//    if (Tolerance = 0) then
+//      Result := Buffer.Find(Points, Color, MaxToFind)
+//    else
+//    begin
+//      case Self.CTS of
+//        0: Result := Buffer.FindCTS0(Points, Color, Tolerance, MaxToFind);
+//        1: Result := Buffer.FindCTS1(Points, Color, Tolerance, MaxToFind);
+//        2: Result := Buffer.FindCTS2(Points, Color, Tolerance, HueMod, SatMod, MaxToFind);
+//        3: Result := Buffer.FindCTS2(Points, Color, Tolerance, CTS3Modifier, MaxToFind);
+//      end;
+//    end;
+//  end else
+//    Result := False;
 begin
-  if GetData(ImageData, Area.X1, Area.Y1, Area.X2, Area.Y2) then
-  begin
-    Buffer.Data := ImageData.Ptr;
-    Buffer.Width := ImageData.RowLen;
-    Buffer.SearchWidth := Area.Width;
-    Buffer.SearchHeight := Area.Height;
-    Buffer.Offset := Area.TopLeft;
-
-    if (Tolerance = 0) then
-      Result := Buffer.Find(Points, Color, MaxToFind)
-    else
-    begin
-      case Self.CTS of
-        0: Result := Buffer.FindCTS0(Points, Color, Tolerance, MaxToFind);
-        1: Result := Buffer.FindCTS1(Points, Color, Tolerance, MaxToFind);
-        2: Result := Buffer.FindCTS2(Points, Color, Tolerance, HueMod, SatMod, MaxToFind);
-        3: Result := Buffer.FindCTS2(Points, Color, Tolerance, CTS3Modifier, MaxToFind);
-      end;
-    end;
-  end else
-    Result := False;
 end;
 
 function TMFinder.FindColors(out TPA: TPointArray; Color: Integer; Area: TBox): Boolean;
@@ -283,7 +287,7 @@ var
 begin
   if GetData(ImageData, Area.X1, Area.Y1, Area.X2, Area.Y2) then
   begin
-    Buffer.Data := ImageData.Ptr;
+    Buffer.Data := PColorBGRA(ImageData.Ptr);
     Buffer.Width := ImageData.RowLen;
     Buffer.SearchWidth := Area.Width;
     Buffer.SearchHeight := Area.Height;
@@ -314,7 +318,7 @@ var
 begin
   if GetData(ImageData, Area.X1, Area.Y1, Area.X2, Area.Y2) then
   begin
-    Buffer.Data := ImageData.Ptr;
+    Buffer.Data := PColorBGRA(ImageData.Ptr);
     Buffer.Width := ImageData.RowLen;
     Buffer.SearchWidth := Area.Width;
     Buffer.SearchHeight := Area.Height;
@@ -468,25 +472,26 @@ begin
 end;
 
 function TMFinder.GetColors(TPA: TPointArray): TIntegerArray;
-var
-  Bounds: TBox;
-  I, X, Y: Integer;
-  ImageData: TRetData;
+//var
+//  Bounds: TBox;
+//  I, X, Y: Integer;
+//  ImageData: TRetData;
+//begin
+//  SetLength(Result, Length(TPA));
+//
+//  Bounds := TPA.Bounds();
+//  if GetData(ImageData, Bounds.X1, Bounds.Y1, Bounds.X2, Bounds.Y2) then
+//  begin
+//    for I := 0 to High(TPA) do
+//    begin
+//      X := TPA[I].X - Bounds.X1;
+//      Y := TPA[I].Y - Bounds.Y1;
+//
+//      //Result[I] := BGRToRGB(ImageData.Ptr[Y * ImageData.RowLen + X]);
+//    end;
+//  end else
+//    Result := nil;
 begin
-  SetLength(Result, Length(TPA));
-
-  Bounds := TPA.Bounds();
-  if GetData(ImageData, Bounds.X1, Bounds.Y1, Bounds.X2, Bounds.Y2) then
-  begin
-    for I := 0 to High(TPA) do
-    begin
-      X := TPA[I].X - Bounds.X1;
-      Y := TPA[I].Y - Bounds.Y1;
-
-      Result[I] := BGRToRGB(ImageData.Ptr[Y * ImageData.RowLen + X]);
-    end;
-  end else
-    Result := nil;
 end;
 
 function TMFinder.GetColor(X, Y: Integer): Integer;

@@ -55,7 +55,7 @@ implementation
 
 uses
   lcltype, types,
-  simba.mufasatypes, simba.main, simba.colormath, simba.settings;
+  simba.mufasatypes, simba.main, simba.settings;
 
 type
   TColorHistoryValue = packed record
@@ -73,7 +73,7 @@ begin
   if (Selected < 0) then
     Exit;
 
-  ColorToRGB(Color[Selected], R, G, B);
+  //ColorToRGB(Color[Selected], R, G, B);
   //ColorToHSL(Color[Selected], H, S, L);
 
   StringGrid.Cells[1, 0] := Format('%d', [Color[Selected]]);

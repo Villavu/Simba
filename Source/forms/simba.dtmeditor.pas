@@ -130,7 +130,7 @@ implementation
 
 uses
   math,
-  simba.colormath, simba.windowhandle;
+  simba.windowhandle;
 
 procedure TSimbaDTMEditorForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
@@ -140,7 +140,7 @@ var
 begin
   FImageZoom.MoveTest(FImageBox, X, Y);
 
-  ColorToRGB(FImageBox.Background.Canvas.Pixels[X, Y], R, G, B);
+  //ColorToRGB(FImageBox.Background.Canvas.Pixels[X, Y], R, G, B);
   //ColorToHSL(FImageBox.Background.Canvas.Pixels[X, Y], H, S, L);
 
   FZoomInfo.Caption := Format('Color: %d', [FImageBox.Background.Canvas.Pixels[X, Y]]) + LineEnding +

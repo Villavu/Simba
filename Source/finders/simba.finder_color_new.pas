@@ -15,11 +15,11 @@ unit simba.finder_color_new;
 interface
 
 uses
-  Classes, SysUtils, Graphics,
+  Classes, SysUtils, Math, Graphics,
   simba.mufasatypes, simba.colormath_conversion, simba.colormath_distance;
 
 type
-  TColorDistanceFunc = function(const Color1: Pointer; const Color2: ColorBGRA; const mul: TChannelMultipliers): Single;
+  TColorDistanceFunc = function(const Color1: Pointer; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
 
   TColorFinder = record
   private
@@ -32,8 +32,8 @@ type
   public
     procedure Setup(Formula: EColorSpace; Color: TColor; Tolerance: Single; Multiplier: TChannelMultipliers);
 
-    function Find(Buffer: PRGB32; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; Offset: TPoint; MaxToFind: Integer = -1): TPointArray;
-    function Match(Buffer: PRGB32; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TSingleMatrix;
+    function Find(Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; Offset: TPoint; MaxToFind: Integer = -1): TPointArray;
+    function Match(Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TSingleMatrix;
   end;
 
 implementation
@@ -53,54 +53,54 @@ begin
       begin
         FCompareFunc := TColorDistanceFunc(@_DistanceRGB);
         FMaxDistance := DistanceRGB_Max(Multiplier);
-        PColorRGB(FColor)^ := ColorToRGB(Color);
+        PColorRGB(FColor)^ := Color.ToRGB();
       end;
 
     EColorSpace.HSV:
       begin
         FCompareFunc := TColorDistanceFunc(@_DistanceHSV);
         FMaxDistance := DistanceHSV_Max(Multiplier);
-        PColorHSV(FColor)^ := ColorToHSV(Color);
+        PColorHSV(FColor)^ := Color.ToHSV();
       end;
 
     EColorSpace.HSL:
       begin
         FCompareFunc := TColorDistanceFunc(@_DistanceHSL);
         FMaxDistance := DistanceHSL_Max(Multiplier);
-        PColorHSL(FColor)^ := ColorToHSL(Color);
+        PColorHSL(FColor)^ := Color.ToHSL();
       end;
 
     EColorSpace.XYZ:
       begin
         FCompareFunc := TColorDistanceFunc(@_DistanceXYZ);
         FMaxDistance := DistanceXYZ_Max(Multiplier);
-        PColorXYZ(FColor)^ := ColorToXYZ(Color);
+        PColorXYZ(FColor)^ := Color.ToXYZ();
       end;
 
     EColorSpace.LAB:
       begin
         FCompareFunc := TColorDistanceFunc(@_DistanceLAB);
         FMaxDistance := DistanceLAB_Max(Multiplier);
-        PColorLAB(FColor)^ := ColorToLAB(Color);
+        PColorLAB(FColor)^ := Color.ToLAB();
       end;
 
     EColorSpace.LCH:
       begin
         FCompareFunc := TColorDistanceFunc(@_DistanceLCH);
         FMaxDistance := DistanceLCH_Max(Multiplier);
-        PColorLCH(FColor)^ := ColorToLCH(Color);
+        PColorLCH(FColor)^ := Color.ToLCH();
       end;
 
     EColorSpace.DeltaE:
       begin
         FCompareFunc := TColorDistanceFunc(@_DistanceDeltaE);
         FMaxDistance := DistanceDeltaE_Max(Multiplier);
-        PColorLAB(FColor)^ := ColorToLAB(Color);
+        PColorLAB(FColor)^ := Color.ToLAB();
       end;
   end;
 end;
 
-function TColorFinder.Find(Buffer: PRGB32; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; Offset: TPoint; MaxToFind: Integer): TPointArray;
+function TColorFinder.Find(Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; Offset: TPoint; MaxToFind: Integer): TPointArray;
 var
   X, Y, RowSize: Integer;
   RowPtr, Ptr: PByte;
@@ -109,6 +109,8 @@ label
   Finished;
 begin
   Result := nil;
+  if IsZero(FMaxDistance) then
+    Exit;
   if (SearchWidth <= 0) or (SearchHeight <= 0) or (Buffer = nil) or (BufferWidth <= 0) then
     Exit;
 
@@ -139,12 +141,14 @@ begin
   Result := PointBuffer.Trim();
 end;
 
-function TColorFinder.Match(Buffer: PRGB32; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TSingleMatrix;
+function TColorFinder.Match(Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TSingleMatrix;
 var
   X, Y, RowSize: Integer;
   RowPtr, Ptr: PByte;
 begin
   Result := nil;
+  if IsZero(FMaxDistance) then
+    Exit;
   if (SearchWidth <= 0) or (SearchHeight <= 0) or (Buffer = nil) or (BufferWidth <= 0) then
     Exit;
 
@@ -160,10 +164,7 @@ begin
     Ptr := RowPtr;
     for X := 0 to SearchWidth do
     begin
-
-      // Diff(self.Color, TestColor, self.Mods) / self.MaxDiff * 100;
-      //Result[Y, X] := 1-Sqrt(FCompareFunc(FColor, PColorBGRA(Ptr)^, FMultipliers) / FMaxDistance);
-      Result[Y, X] := 1-(FCompareFunc(FColor, PColorBGRA(Ptr)^, FMultipliers) / FMaxDistance);
+      Result[Y, X] := 1 - (FCompareFunc(FColor, PColorBGRA(Ptr)^, FMultipliers) / FMaxDistance);
 
       Inc(Ptr, SizeOf(TRGB32));
     end;

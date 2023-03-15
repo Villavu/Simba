@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.target, simba.bitmap, simba.mufasatypes;
+  simba.target, simba.bitmap, simba.mufasatypes, simba.colormath_conversion;
 
 type
   PBitmapTarget = ^TBitmapTarget;
@@ -23,7 +23,7 @@ type
     procedure GetTargetBounds(out Bounds: TBox); override;
   public
     function ReturnData(X, Y, Width, Height: Int32): TRetData; override;
-    function CopyData(X, Y, Width, Height: Int32): PRGB32; override;
+    function CopyData(X, Y, Width, Height: Int32): PColorBGRA; override;
 
     constructor Create(Bitmap: TMufasaBitmap; ManageBitmap: Boolean);
     destructor Destroy; override;
@@ -68,7 +68,7 @@ begin
     Result := Default(TRetData);
 end;
 
-function TBitmapTarget.CopyData(X, Y, Width, Height: Int32): PRGB32;
+function TBitmapTarget.CopyData(X, Y, Width, Height: Int32): PColorBGRA;
 var
   Bounds: TBox;
   Loop: Int32;

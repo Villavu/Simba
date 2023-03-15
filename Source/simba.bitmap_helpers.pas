@@ -38,7 +38,7 @@ type
 implementation
 
 uses
-  simba.finder_color, simba.finder_bitmap, simba.colormath_distance,
+  simba.finder_bitmap, simba.colormath_distance,
   simba.overallocatearray;
 
 function TMufasaBitmapHelpers.TestFindColors(ColorSpace: EColorSpace; Color: Integer; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
@@ -72,39 +72,48 @@ begin
 end;
 
 function TMufasaBitmapHelpers.FindColors(out Points: TPointArray; Color: Integer): Boolean;
-var
-  Buffer: TFindColorBuffer;
+//var
+//  Buffer: TFindColorBuffer;
+//begin
+//  Buffer.Data := FData;
+//  Buffer.Width := FWidth;
+//  Buffer.SearchWidth := FWidth;
+//  Buffer.SearchHeight := FHeight;
+//
+//  Result := Buffer.Find(Points, Color);
+//end;
 begin
-  Buffer.Data := FData;
-  Buffer.Width := FWidth;
-  Buffer.SearchWidth := FWidth;
-  Buffer.SearchHeight := FHeight;
 
-  Result := Buffer.Find(Points, Color);
 end;
 
 function TMufasaBitmapHelpers.FindColorsTolerance(out Points: TPointArray; Color, Tolerance: Integer): Boolean;
-var
-  Buffer: TFindColorBuffer;
+//var
+//  Buffer: TFindColorBuffer;
+//begin
+//  Buffer.Data := FData;
+//  Buffer.Width := FWidth;
+//  Buffer.SearchWidth := FWidth;
+//  Buffer.SearchHeight := FHeight;
+//
+//  Result := Buffer.FindCTS1(Points, Color, Tolerance);
+//end;
 begin
-  Buffer.Data := FData;
-  Buffer.Width := FWidth;
-  Buffer.SearchWidth := FWidth;
-  Buffer.SearchHeight := FHeight;
 
-  Result := Buffer.FindCTS1(Points, Color, Tolerance);
 end;
 
 function TMufasaBitmapHelpers.FindColorsTolerance(out Points: TPointArray; Color, Tolerance: Integer; HueMod, SatMod: Extended): Boolean;
-var
-  Buffer: TFindColorBuffer;
+//var
+//  Buffer: TFindColorBuffer;
+//begin
+//  Buffer.Data := FData;
+//  Buffer.Width := FWidth;
+//  Buffer.SearchWidth := FWidth;
+//  Buffer.SearchHeight := FHeight;
+//
+//  Result := Buffer.FindCTS2(Points, Color, Tolerance, HueMod, SatMod);
+//end;
 begin
-  Buffer.Data := FData;
-  Buffer.Width := FWidth;
-  Buffer.SearchWidth := FWidth;
-  Buffer.SearchHeight := FHeight;
 
-  Result := Buffer.FindCTS2(Points, Color, Tolerance, HueMod, SatMod);
 end;
 
 function TMufasaBitmapHelpers.FindBitmap(Bitmap: TMufasaBitmap; out X, Y: Integer; Tolerance: Integer): Boolean;

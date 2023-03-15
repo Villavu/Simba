@@ -38,50 +38,50 @@ type
   TSuperColor = record
     A,B,C: Single;
 
-    class operator := (aValue: ColorRGB): TSuperColor;
-    class operator := (aValue: ColorXYZ): TSuperColor;
-    class operator := (aValue: ColorLAB): TSuperColor;
-    class operator := (aValue: ColorLCH): TSuperColor;
-    class operator := (aValue: ColorHSV): TSuperColor;
-    class operator := (aValue: ColorHSL): TSuperColor;
+    class operator := (aValue: TColorRGB): TSuperColor;
+    class operator := (aValue: TColorXYZ): TSuperColor;
+    class operator := (aValue: TColorLAB): TSuperColor;
+    class operator := (aValue: TColorLCH): TSuperColor;
+    class operator := (aValue: TColorHSV): TSuperColor;
+    class operator := (aValue: TColorHSL): TSuperColor;
   end;
 
-class operator TSuperColor.:=(aValue: ColorRGB): TSuperColor;
+class operator TSuperColor.:=(aValue: TColorRGB): TSuperColor;
 begin
   Result.A := aValue.R;
   Result.B := aValue.B;
   Result.C := aValue.G;
 end;
 
-class operator TSuperColor.:=(aValue: ColorXYZ): TSuperColor;
+class operator TSuperColor.:=(aValue: TColorXYZ): TSuperColor;
 begin
   Result.A := aValue.X;
   Result.B := aValue.Y;
   Result.C := aValue.Z;
 end;
 
-class operator TSuperColor.:=(aValue: ColorLAB): TSuperColor;
+class operator TSuperColor.:=(aValue: TColorLAB): TSuperColor;
 begin
   Result.A := aValue.L;
   Result.B := aValue.A;
   Result.C := aValue.B;
 end;
 
-class operator TSuperColor.:=(aValue: ColorLCH): TSuperColor;
+class operator TSuperColor.:=(aValue: TColorLCH): TSuperColor;
 begin
   Result.A := aValue.L;
   Result.B := aValue.C;
   Result.C := aValue.H;
 end;
 
-class operator TSuperColor.:=(aValue: ColorHSV): TSuperColor;
+class operator TSuperColor.:=(aValue: TColorHSV): TSuperColor;
 begin
   Result.A := aValue.H;
   Result.B := aValue.S;
   Result.C := aValue.V;
 end;
 
-class operator TSuperColor.:=(aValue: ColorHSL): TSuperColor;
+class operator TSuperColor.:=(aValue: TColorHSL): TSuperColor;
 begin
   Result.A := aValue.H;
   Result.B := aValue.S;
@@ -283,13 +283,13 @@ function GetTolerance(Formula: EColorSpace; Color: TColor; Colors: TColorArray; 
   function GetDistance(Color1, Color2: TColor): Single;
   begin
     case Formula of
-      EColorSpace.RGB:    Result := DistanceRGB(ColorToRGB(Color1), ColorToRGB(Color2), Mods);
-      EColorSpace.XYZ:    Result := DistanceXYZ(ColorToXYZ(Color1), ColorToXYZ(Color2), Mods);
-      EColorSpace.LAB:    Result := DistanceLAB(ColorToLAB(Color1), ColorToLAB(Color2), Mods);
-      EColorSpace.HSV:    Result := DistanceHSV(ColorToHSV(Color1), ColorToHSV(Color2), Mods);
-      EColorSpace.HSL:    Result := DistanceHSL(ColorToHSL(Color1), ColorToHSL(Color2), Mods);
-      EColorSpace.LCH:    Result := DistanceLCH(ColorToLCH(Color1), ColorToLCH(Color2), Mods);
-      EColorSpace.DeltaE: Result := DistanceDeltaE(ColorToLAB(Color1), ColorToLAB(Color2), Mods);
+      EColorSpace.RGB:    Result := DistanceRGB(Color1, Color2, Mods);
+      EColorSpace.XYZ:    Result := DistanceXYZ(Color1, Color2, Mods);
+      EColorSpace.LAB:    Result := DistanceLAB(Color1, Color2, Mods);
+      EColorSpace.HSV:    Result := DistanceHSV(Color1, Color2, Mods);
+      EColorSpace.HSL:    Result := DistanceHSL(Color1, Color2, Mods);
+      EColorSpace.LCH:    Result := DistanceLCH(Color1, Color2, Mods);
+      EColorSpace.DeltaE: Result := DistanceDeltaE(Color1, Color2, Mods);
     end;
   end;
 
@@ -322,6 +322,7 @@ var
   ABC: TSuperColor;
   range: TColorRange;
   hue: THueRange;
+  RGB: TColorRGB;
 begin
   Result := Default(TBestColor);
   range := ColorRange(Formula, Colors);
@@ -331,7 +332,8 @@ begin
   begin
     ABC.A := GetHue(Formula, Colors, hue.Low, hue.High);
     delA  := Max(Abs(DeltaAngle(ABC.A, hue.Low)), Abs(DeltaAngle(ABC.A, Hue.High)));
-  end else begin
+  end else
+  begin
     ABC.A := (range.A1 + range.A2) / 2;
     delA  := Abs(range.A1 - range.A2) / 2;
   end;
@@ -358,13 +360,21 @@ begin
   Result.Mods[2] := CeilEx(Result.Mods[2], 3);
 
   case Formula of
-    EColorSpace.RGB:    Result.Color := ColorRGB.Create(Trunc(ABC.A), Trunc(ABC.B), Trunc(ABC.C)).ToColor;
-    EColorSpace.XYZ:    Result.Color := ColorXYZ.Create(ABC.A, ABC.B, ABC.C).ToColor;
-    EColorSpace.LAB:    Result.Color := ColorLAB.Create(ABC.A, ABC.B, ABC.C).ToColor;
-    EColorSpace.HSV:    Result.Color := ColorHSV.Create(ABC.A, ABC.B, ABC.C).ToColor;
-    EColorSpace.HSL:    Result.Color := ColorHSL.Create(ABC.A, ABC.B, ABC.C).ToColor;
-    EColorSpace.LCH:    Result.Color := ColorLCH.Create(ABC.A, ABC.B, ABC.C).ToColor;
-    EColorSpace.DeltaE: Result.Color := ColorLCH.Create(ABC.A, ABC.B, ABC.C).ToColor;
+    EColorSpace.RGB:
+      begin
+        RGB.R := Trunc(ABC.A);
+        RGB.G := Trunc(ABC.B);
+        RGB.B := Trunc(ABC.C);
+
+        Result.Color := RGB.ToColor;
+      end;
+
+    EColorSpace.XYZ:    Result.Color := TColorXYZ(ABC).ToColor;
+    EColorSpace.LAB:    Result.Color := TColorLAB(ABC).ToColor;
+    EColorSpace.HSV:    Result.Color := TColorHSV(ABC).ToColor;
+    EColorSpace.HSL:    Result.Color := TColorHSL(ABC).ToColor;
+    EColorSpace.LCH:    Result.Color := TColorLCH(ABC).ToColor;
+    EColorSpace.DeltaE: Result.Color := TColorLCH(ABC).ToColor;
   end;
 
   Result.Tolerance := GetTolerance(Formula, Result.Color, Colors, Result.Mods);

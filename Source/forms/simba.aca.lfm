@@ -1,11 +1,11 @@
 object SimbaACAForm: TSimbaACAForm
-  Left = 3885
+  Left = 1192
   Height = 886
-  Top = 323
+  Top = 252
   Width = 1076
   Caption = 'Auto Color Aid'
-  ClientHeight = 861
-  ClientWidth = 1076
+  ClientHeight = 0
+  ClientWidth = 0
   Constraints.MinHeight = 400
   Constraints.MinWidth = 500
   DesignTimePPI = 120
@@ -536,6 +536,7 @@ object SimbaACAForm: TSimbaACAForm
       object MenuItemCopyBestColor: TMenuItem
         Caption = 'Copy Best Color to Clipboard'
         ShortCut = 16451
+        OnClick = MenuItemCopyBestColorClick
       end
     end
     object MenuImage: TMenuItem
