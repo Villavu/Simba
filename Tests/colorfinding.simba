@@ -1,0 +1,39 @@
+{$assertions on}
+
+// Very simple CountColor "test"
+
+const
+  TESTS := [
+    ColorTolerance($906E80, 18.496, EColorSpace.RGB,    [1.386, 0.808, 0.808]),
+    ColorTolerance($9D9462, 1.059,  EColorSpace.HSL,    [0.021, 0.135, 2.846]),
+    ColorTolerance($9D9469, 14.535, EColorSpace.HSV,    [0.155, 0.766, 2.080]),
+    ColorTolerance($78987F, 7.284,  EColorSpace.XYZ,    [1.535, 0.670, 0.796]),
+    ColorTolerance($79937F, 13.444, EColorSpace.LAB,    [1.770, 0.714, 0.517]),
+    ColorTolerance($6D79C6, 14.885, EColorSpace.LCH,    [2.084, 0.783, 0.135]),
+    ColorTolerance($6D79C6, 11.472, EColorSpace.DELTAE, [2.084, 0.783, 0.135])
+  ];
+
+  TEST_RESULTS := [
+    23403,
+    24717,
+    24713,
+    22031,
+    23668,
+    39849,
+    53442
+  ];
+
+var
+  Bitmap: TMufasaBitmap;
+  I: Integer;
+begin
+  Bitmap := TMufasaBitmap.Create(500, 500);
+  Bitmap.DrawHSLCircle(Bitmap.GetCenter(), 200);
+
+  Finder.SetTarget(Bitmap);
+
+  for I := 0 to High(TESTS) do
+    Assert(Finder.CountColorEx(TESTS[I]) = TEST_RESULTS[I]);
+
+  Bitmap.Free();
+end.

@@ -1471,6 +1471,11 @@ begin
   PSingleMatrix(Result)^ := PMufasaBitmap(Params^[0])^.TestMatchColors(PColorSpace(Params^[1])^, PInteger(Params^[2])^, PChannelMultipliers(Params^[3])^);
 end;
 
+procedure _LapeMufasaBitmap_DrawHSLCircle(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMufasaBitmap(Params^[0])^.DrawHSLCircle(PPoint(Params^[1])^, PInteger(Params^[2])^);
+end;
+
 procedure ImportBitmap(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -1640,6 +1645,8 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.ThresholdAdaptive(Alpha, Beta: Byte; AInvert: Boolean; Method: TBmpThreshMethod; k: Integer);', @_LapeMufasaBitmap_ThresholdAdaptive);
     addGlobalFunc('procedure TMufasaBitmap.ThresholdSauvola(Radius: Integer; AInvert: Boolean; k: Single);', @_LapeMufasaBitmap_ThresholdSauvola);
     addGlobalFunc('procedure TMufasaBitmap.Pad(Amount: Integer)', @_LapeMufasaBitmap_Pad);
+
+    addGlobalFunc('procedure TMufasaBitmap.DrawHSLCircle(ACenter: TPoint; Radius: Integer)', @_LapeMufasaBitmap_DrawHSLCircle);
 
     addGlobalFunc('procedure TMufasaBitmap.LoadFromClient; overload', @_LapeMufasaBitmap_LoadFromClient);
     addGlobalFunc('procedure TMufasaBitmap.LoadFromClient(Area: TBox); overload', @_LapeMufasaBitmap_LoadFromClientEx);

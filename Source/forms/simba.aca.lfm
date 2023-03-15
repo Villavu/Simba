@@ -4,8 +4,8 @@ object SimbaACAForm: TSimbaACAForm
   Top = 252
   Width = 1076
   Caption = 'Auto Color Aid'
-  ClientHeight = 0
-  ClientWidth = 0
+  ClientHeight = 861
+  ClientWidth = 1076
   Constraints.MinHeight = 400
   Constraints.MinWidth = 500
   DesignTimePPI = 120

@@ -1,3 +1,10 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+
+  Wrappers & Imports to import into lape.
+}
 unit simba.import_finder;
 
 {$i simba.inc}
@@ -20,24 +27,44 @@ begin
   PSimbaFinder(Params^[0])^.SetTarget(PWindowHandle(Params^[1])^);
 end;
 
-procedure _LapeSimbaFinder_FindColors1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaFinder_FindColor1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.FindColors(PColor(Params^[1])^, PBox(Params^[2])^);
+  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.FindColor(PColor(Params^[1])^, PBox(Params^[2])^);
 end;
 
-procedure _LapeSimbaFinder_FindColors2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaFinder_FindColor2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.FindColors(PColor(Params^[1])^, PSingle(Params^[2])^, PBox(Params^[3])^);
+  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.FindColor(PColor(Params^[1])^, PSingle(Params^[2])^, PBox(Params^[3])^);
 end;
 
-procedure _LapeSimbaFinder_FindColors3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaFinder_FindColor3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.FindColors(PColor(Params^[1])^, PSingle(Params^[2])^, PColorSpace(Params^[3])^, PBox(Params^[4])^);
+  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.FindColor(PColor(Params^[1])^, PSingle(Params^[2])^, PColorSpace(Params^[3])^, PBox(Params^[4])^);
 end;
 
-procedure _LapeSimbaFinder_FindColorsEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaFinder_FindColorEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.FindColorsEx(PColorTolerance(Params^[1])^, PBox(Params^[2])^);
+  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.FindColorEx(PColorTolerance(Params^[1])^, PBox(Params^[2])^);
+end;
+
+procedure _LapeSimbaFinder_CountColor1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSimbaFinder(Params^[0])^.CountColor(PColor(Params^[1])^, PBox(Params^[2])^);
+end;
+
+procedure _LapeSimbaFinder_CountColor2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSimbaFinder(Params^[0])^.CountColor(PColor(Params^[1])^, PSingle(Params^[2])^, PBox(Params^[3])^);
+end;
+
+procedure _LapeSimbaFinder_CountColor3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSimbaFinder(Params^[0])^.CountColor(PColor(Params^[1])^, PSingle(Params^[2])^, PColorSpace(Params^[3])^, PBox(Params^[4])^);
+end;
+
+procedure _LapeSimbaFinder_CountColorEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSimbaFinder(Params^[0])^.CountColorEx(PColorTolerance(Params^[1])^, PBox(Params^[2])^);
 end;
 
 procedure _LapeSimbaFinder_GetColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -48,6 +75,11 @@ end;
 procedure _LapeSimbaFinder_GetColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PIntegerArray(Result)^ := PSimbaFinder(Params^[0])^.GetColors(PPointArray(Params^[1])^);
+end;
+
+procedure _LapeSimbaFinder_GetColorsMatrix(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PIntegerMatrix(Result)^ := PSimbaFinder(Params^[0])^.GetColorsMatrix(PBox(Params^[1])^);
 end;
 
 procedure ImportFinder(Compiler: TSimbaScript_Compiler);
@@ -102,200 +134,21 @@ begin
     addGlobalFunc('procedure TSimbaFinder.SetTarget(Bitmap: TMufasaBitmap); overload', @_LapeSimbaFinder_SetTarget_Bitmap);
     addGlobalFunc('procedure TSimbaFinder.SetTarget(Window: TWindowHandle); overload', @_LapeSimbaFinder_SetTarget_Window);
 
-    addGlobalFunc('function TSimbaFinder.FindColors(Color: TColor; Bounds: TBox): TPointArray; overload', @_LapeSimbaFinder_FindColors1);
-    addGlobalFunc('function TSimbaFinder.FindColors(Color: TColor; Tolerance: Single; Bounds: TBox): TPointArray; overload', @_LapeSimbaFinder_FindColors2);
-    addGlobalFunc('function TSimbaFinder.FindColors(Color: TColor; Tolerance: Single; ColorSpace: TColorSpace; Bounds: TBox): TPointArray; overload', @_LapeSimbaFinder_FindColors3);
-    addGlobalFunc('function TSimbaFinder.FindColorsEx(Color: TColorTolerance; Bounds: TBox): TPointArray', @_LapeSimbaFinder_FindColorsEx);
+    addGlobalFunc('function TSimbaFinder.FindColor(Color: TColor; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindColor1);
+    addGlobalFunc('function TSimbaFinder.FindColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindColor2);
+    addGlobalFunc('function TSimbaFinder.FindColor(Color: TColor; Tolerance: Single; ColorSpace: TColorSpace; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindColor3);
+    addGlobalFunc('function TSimbaFinder.FindColorEx(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): TPointArray', @_LapeSimbaFinder_FindColorEx);
+
+    addGlobalFunc('function TSimbaFinder.CountColor(Color: TColor; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload', @_LapeSimbaFinder_CountColor1);
+    addGlobalFunc('function TSimbaFinder.CountColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload;', @_LapeSimbaFinder_CountColor2);
+    addGlobalFunc('function TSimbaFinder.CountColor(Color: TColor; Tolerance: Single; ColorSpace: TColorSpace; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload', @_LapeSimbaFinder_CountColor3);
+    addGlobalFunc('function TSimbaFinder.CountColorEx(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): Integer;', @_LapeSimbaFinder_CountColorEx);
 
     addGlobalFunc('function TSimbaFinder.GetColor(X, Y: Integer): TColor', @_LapeSimbaFinder_GetColor);
     addGlobalFunc('function TSimbaFinder.GetColors(Points: TPointArray): TIntegerArray', @_LapeSimbaFinder_GetColors);
+    addGlobalFunc('function TSimbaFinder.GetColorsMatrix(Bounds: TBox): TIntegerMatrix', @_LapeSimbaFinder_GetColorsMatrix);
 
     {
-    addGlobalFunc(
-      'procedure SetColorToleranceSpeed(CTS: Integer);', [
-      'begin',
-      '  Client.GetMFinder().SetToleranceSpeed(CTS);',
-      'end;'
-      ]
-    );
-
-    addGlobalFunc(
-      'function GetToleranceSpeed: Integer;', [
-      'begin',
-      '  Result := Client.GetMFinder().GetToleranceSpeed();',
-      'end;'
-      ]
-    );
-
-    addGlobalFunc(
-      'procedure SetToleranceSpeed2Modifiers(HueMod, SatMod: Extended);', [
-      'begin',
-      '  Client.GetMFinder().SetToleranceSpeed2Modifiers(HueMod, SatMod);',
-      'end;'
-      ]
-    );
-
-    addGlobalFunc(
-      'procedure GetToleranceSpeed2Modifiers(out HueMod, SatMod: Extended);', [
-      'begin',
-      '  Client.GetMFinder().GetToleranceSpeed2Modifiers(HueMod, SatMod);',
-      'end;'
-      ]
-    );
-
-    addGlobalFunc(
-      'procedure SetToleranceSpeed3Modifier(Modifier: Extended);', [
-      'begin',
-      '  Client.GetMFinder().SetToleranceSpeed3Modifier(Modifier);',
-      'end;'
-      ]
-    );
-
-    addGlobalFunc(
-      'function GetToleranceSpeed3Modifier: Extended;', [
-      'begin',
-      '  Result := Client.GetMFinder().GetToleranceSpeed3Modifier();',
-      'end;'
-      ]
-    );
-
-    // FindColor
-    addGlobalFunc(
-      'function FindColor(out X, Y: Integer; Color, X1, Y1, X2, Y2: Integer): Boolean; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().FindColor(X, Y, Color, TBox([X1, Y1, X2, Y2]));',
-      'end;'
-      ]
-    );
-    addGlobalFunc(
-      'function FindColor(out X, Y: Integer; Color: Integer; Area: TBox): Boolean; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().FindColor(X, Y, Color, Area);',
-      'end;'
-      ]
-    );
-    addGlobalFunc(
-      'function FindColor(out X, Y: Integer; Color: Integer): Boolean; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().FindColor(X, Y, Color, TBox([-1, -1, -1, -1]));',
-      'end;'
-      ]
-    );
-
-    // FindColorTolerance
-    addGlobalFunc(
-      'function FindColorTolerance(out X, Y: Integer; Color, X1, Y1, X2, Y2, Tolerance: Integer): Boolean; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().FindColorTolerance(X, Y, Color, Tolerance, TBox([X1, Y1, X2, Y2]));',
-      'end;'
-      ]
-    );
-    addGlobalFunc(
-      'function FindColorTolerance(out X, Y: Integer; Color, Tolerance: Integer; Area: TBox): Boolean; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().FindColorTolerance(X, Y, Color, Tolerance, Area);',
-      'end;'
-      ]
-    );
-    addGlobalFunc(
-      'function FindColorTolerance(out X, Y: Integer; Color, Tolerance: Integer): Boolean; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().FindColorTolerance(X, Y, Color, Tolerance, TBox([-1, -1, -1, -1]));',
-      'end;'
-      ]
-    );
-
-    // FindColorsTolerance
-    addGlobalFunc(
-      'function FindColorsTolerance(out Points: TPointArray; Color, X1, Y1, X2, Y2, Tolerance: Integer): Boolean; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().FindColorsTolerance(Points, Color, Tolerance, TBox([X1, Y1, X2, Y2]));',
-      'end;'
-      ]
-    );
-    addGlobalFunc(
-      'function FindColorsTolerance(out Points: TPointArray; Color, Tolerance: Integer): Boolean; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().FindColorsTolerance(Points, Color, Tolerance, TBox([-1, -1, -1, -1]));',
-      'end;'
-      ]
-    );
-    addGlobalFunc(
-      'function FindColorsTolerance(out Points: TPointArray; Color, Tolerance: Integer; Area: TBox): Boolean; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().FindColorsTolerance(Points, Color, Tolerance, Area);',
-      'end;'
-      ]
-    );
-
-    // FindColors
-    addGlobalFunc(
-      'function FindColors(out Points: TPointArray; Color, X1, Y1, X2, Y2: Integer): Boolean; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().FindColors(Points, Color, TBox([X1, Y1, X2, Y2]));',
-      'end;'
-      ]
-    );
-    addGlobalFunc(
-      'function FindColors(out Points: TPointArray; Color: Integer): Boolean; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().FindColors(Points, Color, TBox([-1, -1, -1, -1]));',
-      'end;'
-      ]
-    );
-    addGlobalFunc(
-      'function FindColors(out Points: TPointArray; Color: Integer; Area: TBox): Boolean; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().FindColors(Points, Color, Area);',
-      'end;'
-      ]
-    );
-
-    // CountColorsTolerance
-    addGlobalFunc(
-      'function CountColorTolerance(Color, X1, Y1, X2, Y2, Tolerance: Integer): Integer; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().CountColorTolerance(Color, Tolerance, TBox([X1, Y1, X2, Y2]));',
-      'end;'
-      ]
-    );
-    addGlobalFunc(
-      'function CountColorTolerance(Color, Tolerance: Integer): Integer; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().CountColorTolerance(Color, Tolerance, TBox([-1, -1, -1, -1]));',
-      'end;'
-      ]
-    );
-    addGlobalFunc(
-      'function CountColorTolerance(Color, Tolerance: Integer; Area: TBox): Integer; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().CountColorTolerance(Color, Tolerance, Area);',
-      'end;'
-      ]
-    );
-
-    // CountColors
-    addGlobalFunc(
-      'function CountColor(Color, X1, Y1, X2, Y2: Integer): Integer; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().CountColor(Color, TBox([X1, Y1, X2, Y2]));',
-      'end;'
-      ]
-    );
-    addGlobalFunc(
-      'function CountColor(Color: Integer): Integer; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().CountColor(Color, TBox([-1, -1, -1, -1]));',
-      'end;'
-      ]
-    );
-    addGlobalFunc(
-      'function CountColor(Color: Integer; Area: TBox): Integer; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().CountColor(Color, Area);',
-      'end;'
-      ]
-    );
 
     // FindDTMs
     addGlobalFunc(

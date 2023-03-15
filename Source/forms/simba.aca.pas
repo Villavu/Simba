@@ -392,6 +392,7 @@ begin
 
   bmp := TMufasaBitmap.Create(FDebugMatrix.Width, FDebugMatrix.Height);
   bmp.DrawMatrix(FDebugMatrix);
+  FImageBox.SetTempBackground(nil);
   FImageBox.SetTempBackground(bmp, True);
   FImageBox.Paint();
 end;
@@ -406,6 +407,8 @@ begin
   GetColorStuff(ColorSpace, Col, Tol, Multi);
 
   FDebugTPA := FImageBox.Test(ColorSpace, Col, Tol, Multi);
+
+  FImageBox.StatusPanel.Text := Format('Found %.0n matches', [Double(Length(FDebugTPA))]);
   FImageBox.SetTempBackground(nil);
   FImageBox.Paint();
 end;
