@@ -18,6 +18,9 @@ uses
   Classes, SysUtils, Math, Graphics,
   simba.mufasatypes, simba.colormath_conversion, simba.colormath_distance;
 
+const
+  DefaultMultipliers: TChannelMultipliers = (1, 1, 1);
+
 type
   TColorDistanceFunc = function(const Color1: Pointer; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
 
@@ -30,8 +33,10 @@ type
     FMultipliers: TChannelMultipliers;
     FMaxDistance: Single;
   public
-    procedure Setup(Formula: EColorSpace; Color: TColor; Tolerance: Single; Multiplier: TChannelMultipliers);
+    procedure Setup(Formula: EColorSpace; Color: TColor; Tolerance: Single; Multiplier: TChannelMultipliers); overload;
+    procedure Setup(Formula: EColorSpace; Color: TColor; Tolerance: Single = 1); overload;
 
+    function Count(Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; MaxToFind: Integer = -1): Integer;
     function Find(Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; Offset: TPoint; MaxToFind: Integer = -1): TPointArray;
     function Match(Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TSingleMatrix;
   end;
@@ -100,6 +105,44 @@ begin
   end;
 end;
 
+procedure TColorFinder.Setup(Formula: EColorSpace; Color: TColor; Tolerance: Single);
+begin
+  Setup(Formula, Color, Tolerance, DefaultMultipliers);
+end;
+
+function TColorFinder.Count(Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; MaxToFind: Integer): Integer;
+var
+  X, Y, RowSize: Integer;
+  RowPtr, Ptr: PByte;
+begin
+  Result := 0;
+  if IsZero(FMaxDistance) or (SearchWidth <= 0) or (SearchHeight <= 0) or (Buffer = nil) or (BufferWidth <= 0) then
+    Exit;
+
+  RowSize := BufferWidth * SizeOf(TRGB32);
+  RowPtr := PByte(Buffer);
+
+  Dec(SearchHeight);
+  Dec(SearchWidth);
+  for Y := 0 to SearchHeight do
+  begin
+    Ptr := RowPtr;
+    for X := 0 to SearchWidth do
+    begin
+      if (Self.FCompareFunc(FColor, PColorBGRA(Ptr)^, FMultipliers) / FMaxDistance * 100 <= FTolerance) then
+      begin
+        Inc(Result);
+        if (Result = MaxToFind) then
+          Exit;
+      end;
+
+      Inc(Ptr, SizeOf(TRGB32));
+    end;
+
+    Inc(RowPtr, RowSize);
+  end;
+end;
+
 function TColorFinder.Find(Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; Offset: TPoint; MaxToFind: Integer): TPointArray;
 var
   X, Y, RowSize: Integer;
@@ -109,10 +152,10 @@ label
   Finished;
 begin
   Result := nil;
-  if IsZero(FMaxDistance) then
+  if IsZero(FMaxDistance) or (SearchWidth <= 0) or (SearchHeight <= 0) or (Buffer = nil) or (BufferWidth <= 0) then
     Exit;
-  if (SearchWidth <= 0) or (SearchHeight <= 0) or (Buffer = nil) or (BufferWidth <= 0) then
-    Exit;
+
+  PointBuffer.Init(65536);
 
   RowSize := BufferWidth * SizeOf(TRGB32);
   RowPtr := PByte(Buffer);

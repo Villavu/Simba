@@ -39,6 +39,7 @@ type
     FColorFinder: TColorFinder;
 
     function DoFindColor(Bounds: TBox): TPointArray;
+    function DoCountColor(Bounds: TBox): Integer;
 
     procedure FreeData(var Data: PColorBGRA);
     function ValidateTargetBounds(var Bounds: TBox): Boolean;
@@ -47,14 +48,21 @@ type
     procedure SetTarget(Bitmap: TMufasaBitmap);
     procedure SetTarget(Window: TWindowHandle);
 
-    function FindColors(Color: TColor; Bounds: TBox): TPointArray; // RGB colorspace
-    function FindColors(Color: TColor; Tolerance: Single; Bounds: TBox): TPointArray; // RGB colorspace
+    function FindColor(Color: TColor; Bounds: TBox): TPointArray; // RGB Colorpace
+    function FindColor(Color: TColor; Tolerance: Single; Bounds: TBox): TPointArray; // RGB Colorpace
 
-    function FindColors(Color: TColor; Tolerance: Single; ColorSpace: TColorSpace; Bounds: TBox): TPointArray;
-    function FindColorsEx(Color: TColorTolerance; Bounds: TBox): TPointArray;
+    function FindColor(Color: TColor; Tolerance: Single; ColorSpace: TColorSpace; Bounds: TBox): TPointArray;
+    function FindColorEx(Color: TColorTolerance; Bounds: TBox): TPointArray;
+
+    function CountColor(Color: TColor; Bounds: TBox): Integer; // RGB Colorpace
+    function CountColor(Color: TColor; Tolerance: Single; Bounds: TBox): Integer; // RGB Colorpace
+
+    function CountColor(Color: TColor; Tolerance: Single; ColorSpace: TColorSpace; Bounds: TBox): Integer;
+    function CountColorEx(Color: TColorTolerance; Bounds: TBox): Integer;
 
     function GetColor(X, Y: Integer): TColor;
     function GetColors(Points: TPointArray): TColorArray;
+    function GetColorsMatrix(Bounds: TBox): TIntegerMatrix;
   end;
 
 implementation
@@ -76,6 +84,20 @@ begin
     Result := nil;
 end;
 
+function TSimbaFinder.DoCountColor(Bounds: TBox): Integer;
+var
+  Data: PColorBGRA;
+  DataWidth: Integer;
+begin
+  if GetTargetData(Bounds, Data, DataWidth) then
+  begin
+    Result := FColorFinder.Count(Data, DataWidth, Bounds.Width, Bounds.Height);
+
+    FreeData(Data);
+  end else
+    Result := 0;
+end;
+
 procedure TSimbaFinder.FreeData(var Data: PColorBGRA);
 begin
   if (FTargetType in [ETargetType.WINDOW]) then
@@ -88,9 +110,6 @@ var
   B: TBox;
 begin
   Result := False;
-
-  if (Bounds.X1 < 0) then Bounds.X1 := 0;
-  if (Bounds.Y1 < 0) then Bounds.Y1 := 0;
 
   case FTargetType of
     ETargetType.BITMAP:
@@ -115,8 +134,19 @@ begin
 
   if Result then
   begin
-    if (Bounds.X2 >= Width)  then Bounds.X2 := Width - 1;
-    if (Bounds.Y2 >= Height) then Bounds.Y2 := Height - 1;
+    if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
+    begin
+      Bounds.X1 := 0;
+      Bounds.Y1 := 0;
+      Bounds.X2 := Width -1;
+      Bounds.Y2 := Height - 1;
+    end else
+    begin
+      if (Bounds.X1 < 0) then Bounds.X1 := 0;
+      if (Bounds.Y1 < 0) then Bounds.Y1 := 0;
+      if (Bounds.X2 >= Width)  then Bounds.X2 := Width - 1;
+      if (Bounds.Y2 >= Height) then Bounds.Y2 := Height - 1;
+    end;
   end;
 end;
 
@@ -160,36 +190,60 @@ begin
   FTarget.Window := Window;
 end;
 
-function TSimbaFinder.FindColors(Color: TColor; Bounds: TBox): TPointArray;
-const
-  DefaultMultipliers: TChannelMultipliers = (1,1,1);
+function TSimbaFinder.FindColor(Color: TColor; Bounds: TBox): TPointArray;
 begin
-  FColorFinder.Setup(EColorSpace.RGB, Color, 1, DefaultMultipliers);
+  FColorFinder.Setup(EColorSpace.RGB, Color);
 
   Result := DoFindColor(Bounds);
 end;
 
-function TSimbaFinder.FindColors(Color: TColor; Tolerance: Single; Bounds: TBox): TPointArray;
-const
-  DefaultMultipliers: TChannelMultipliers = (1,1,1);
+function TSimbaFinder.FindColor(Color: TColor; Tolerance: Single; Bounds: TBox): TPointArray;
 begin
-  FColorFinder.Setup(EColorSpace.RGB, Color, Tolerance, DefaultMultipliers);
+  FColorFinder.Setup(EColorSpace.RGB, Color, Tolerance);
 
   Result := DoFindColor(Bounds);
 end;
 
-function TSimbaFinder.FindColors(Color: TColor; Tolerance: Single; ColorSpace: TColorSpace; Bounds: TBox): TPointArray;
+function TSimbaFinder.FindColor(Color: TColor; Tolerance: Single; ColorSpace: TColorSpace; Bounds: TBox): TPointArray;
 begin
-  FColorFinder.Setup(ColorSpace.ColorSpace, Color, Tolerance, ColorSpace.Multipliers);
+  FColorFinder.Setup(ColorSpace.ColorSpace, Color, Tolerance);
 
   Result := DoFindColor(Bounds);
 end;
 
-function TSimbaFinder.FindColorsEx(Color: TColorTolerance; Bounds: TBox): TPointArray;
+function TSimbaFinder.FindColorEx(Color: TColorTolerance; Bounds: TBox): TPointArray;
 begin
   FColorFinder.Setup(Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
 
   Result := DoFindColor(Bounds);
+end;
+
+function TSimbaFinder.CountColor(Color: TColor; Bounds: TBox): Integer;
+begin
+  FColorFinder.Setup(EColorSpace.RGB, Color);
+
+  Result := DoCountColor(Bounds);
+end;
+
+function TSimbaFinder.CountColor(Color: TColor; Tolerance: Single; Bounds: TBox): Integer;
+begin
+  FColorFinder.Setup(EColorSpace.RGB, Color, Tolerance);
+
+  Result := DoCountColor(Bounds);
+end;
+
+function TSimbaFinder.CountColor(Color: TColor; Tolerance: Single; ColorSpace: TColorSpace; Bounds: TBox): Integer;
+begin
+  FColorFinder.Setup(ColorSpace.ColorSpace, Color, Tolerance);
+
+  Result := DoCountColor(Bounds);
+end;
+
+function TSimbaFinder.CountColorEx(Color: TColorTolerance; Bounds: TBox): Integer;
+begin
+  FColorFinder.Setup(Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
+
+  Result := DoCountColor(Bounds);
 end;
 
 function TSimbaFinder.GetColor(X, Y: Integer): TColor;
@@ -231,6 +285,27 @@ begin
       Inc(Count);
     end;
     SetLength(Result, Count);
+  end;
+end;
+
+function TSimbaFinder.GetColorsMatrix(Bounds: TBox): TIntegerMatrix;
+var
+  Data: PColorBGRA;
+  DataWidth: Integer;
+  Width, Height, X, Y: Integer;
+begin
+  Result := nil;
+
+  if GetTargetData(Bounds, Data, DataWidth) then
+  begin
+    Width := Bounds.Width - 1;
+    Height := Bounds.Height - 1;
+
+    Result.SetSize(Width + 1, Height + 1);
+
+    for Y := 0 to Height do
+      for X := 0 to Width do
+        Result[Y, X] := Data[Y * DataWidth + X].ToColor();
   end;
 end;
 
