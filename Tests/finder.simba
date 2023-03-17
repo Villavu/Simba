@@ -1,0 +1,22 @@
+{$assertions on}
+
+var
+  Bitmap: TMufasaBitmap;
+
+procedure Test(Color: TColor; ExpectedPeak, ExpectedAverage: Integer);
+begin
+  Bitmap.Fill(Color);
+
+  Assert(Finder.PeakBrightness() = ExpectedPeak);
+  Assert(Finder.AverageBrightness() = ExpectedAverage);
+end;
+
+begin
+  Finder.SetTarget(Bitmap := TMufasaBitmap.Create(100,100));
+
+  Test(Colors.DARK_RED, 55, 18);
+  Test(Colors.BLACK, 0, 0);
+  Test(Colors.WHITE, 100, 100);
+
+  Bitmap.Free();
+end.

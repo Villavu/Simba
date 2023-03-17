@@ -107,6 +107,36 @@ begin
   PIntegerMatrix(Result)^ := PSimbaFinder(Params^[0])^.GetColorsMatrix(PBox(Params^[1])^);
 end;
 
+procedure _LapeSimbaFinder_GetPixelDifference1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSimbaFinder(Params^[0])^.GetPixelDifference(PInteger(Params^[1])^, PBox(Params^[2])^);
+end;
+
+procedure _LapeSimbaFinder_GetPixelDifference2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSimbaFinder(Params^[0])^.GetPixelDifference(PInteger(Params^[1])^, PInteger(Params^[2])^, PBox(Params^[3])^);
+end;
+
+procedure _LapeSimbaFinder_GetPixelDifferenceTPA1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.GetPixelDifferenceTPA(PInteger(Params^[1])^, PBox(Params^[2])^);
+end;
+
+procedure _LapeSimbaFinder_GetPixelDifferenceTPA2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.GetPixelDifferenceTPA(PInteger(Params^[1])^, PInteger(Params^[2])^, PBox(Params^[3])^);
+end;
+
+procedure _LapeSimbaFinder_AverageBrightness(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSimbaFinder(Params^[0])^.AverageBrightness(PBox(Params^[1])^);
+end;
+
+procedure _LapeSimbaFinder_PeakBrightness(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSimbaFinder(Params^[0])^.PeakBrightness(PBox(Params^[1])^);
+end;
+
 procedure ImportFinder(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -154,13 +184,14 @@ begin
       'TSimbaFinder'
     );
 
-    addGlobalVar('TSimbaFinder', '[]', 'Finder');
+    with addGlobalVar('TSimbaFinder', '[]', 'Finder') do
+      Used := duTrue;
 
     addGlobalFunc('procedure TSimbaFinder.SetTarget(Bitmap: TMufasaBitmap); overload', @_LapeSimbaFinder_SetTarget_Bitmap);
     addGlobalFunc('procedure TSimbaFinder.SetTarget(Window: TWindowHandle); overload', @_LapeSimbaFinder_SetTarget_Window);
 
     addGlobalFunc('function TSimbaFinder.FindDTM(DTM: TDTM; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray', @_LapeSimbaFinder_FindDTM);
-    addGlobalFunc('function TSimbaFinder.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;', @_LapeSimbaFinder_FindDTMRotated);
+    addGlobalFunc('function TSimbaFinder.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray', @_LapeSimbaFinder_FindDTMRotated);
 
     addGlobalFunc('function TSimbaFinder.FindBitmap(Bitmap: TMufasaBitmap; Tolerance: Single; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray', @_LapeSimbaFinder_FindBitmap);
     addGlobalFunc('function TSimbaFinder.FindBitmapEx(Bitmap: TMufasaBitmap; Tolerance: Single; ColorSpace: TColorSpace; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray', @_LapeSimbaFinder_FindBitmapEx);
@@ -171,14 +202,22 @@ begin
     addGlobalFunc('function TSimbaFinder.FindColorEx(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): TPointArray', @_LapeSimbaFinder_FindColorEx);
 
     addGlobalFunc('function TSimbaFinder.CountColor(Color: TColor; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload', @_LapeSimbaFinder_CountColor1);
-    addGlobalFunc('function TSimbaFinder.CountColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload;', @_LapeSimbaFinder_CountColor2);
+    addGlobalFunc('function TSimbaFinder.CountColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload', @_LapeSimbaFinder_CountColor2);
     addGlobalFunc('function TSimbaFinder.CountColor(Color: TColor; Tolerance: Single; ColorSpace: TColorSpace; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload', @_LapeSimbaFinder_CountColor3);
-    addGlobalFunc('function TSimbaFinder.CountColorEx(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): Integer;', @_LapeSimbaFinder_CountColorEx);
+    addGlobalFunc('function TSimbaFinder.CountColorEx(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): Integer', @_LapeSimbaFinder_CountColorEx);
 
     addGlobalFunc('function TSimbaFinder.GetColor(X, Y: Integer): TColor; overload', @_LapeSimbaFinder_GetColor1);
     addGlobalFunc('function TSimbaFinder.GetColor(P: TPoint): TColor; overload', @_LapeSimbaFinder_GetColor2);
     addGlobalFunc('function TSimbaFinder.GetColors(Points: TPointArray): TIntegerArray', @_LapeSimbaFinder_GetColors);
     addGlobalFunc('function TSimbaFinder.GetColorsMatrix(Bounds: TBox): TIntegerMatrix', @_LapeSimbaFinder_GetColorsMatrix);
+
+    addGlobalFunc('function TSimbaFinder.GetPixelDifference(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): Integer; overload', @_LapeSimbaFinder_GetPixelDifference1);
+    addGlobalFunc('function TSimbaFinder.GetPixelDifference(WaitTime, Tolerance: Integer; Area: TBox = [-1,-1,-1,-1]): Integer; overload', @_LapeSimbaFinder_GetPixelDifference2);
+    addGlobalFunc('function TSimbaFinder.GetPixelDifferenceTPA(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_GetPixelDifferenceTPA1);
+    addGlobalFunc('function TSimbaFinder.GetPixelDifferenceTPA(WaitTime, Tolerance: Integer; Area: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_GetPixelDifferenceTPA2);
+
+    addGlobalFunc('function TSimbaFinder.AverageBrightness(Area: TBox = [-1,-1,-1,-1]): Integer', @_LapeSimbaFinder_AverageBrightness);
+    addGlobalFunc('function TSimbaFinder.PeakBrightness(Area: TBox = [-1,-1,-1,-1]): Integer', @_LapeSimbaFinder_PeakBrightness);
 
     {
     // FindTemplate
@@ -212,66 +251,6 @@ begin
       'end;'
       ]
     )
-
-    // SimilarColors
-    addGlobalFunc(
-      'function SimilarColors(Color1, Color2, Tolerance: Integer): Boolean;', [
-      'begin',
-      '  Result := Client.GetMFinder().SimilarColors(Color1, Color2, Tolerance);',
-      'end;'
-      ]
-    );
-
-    // AverageBrightness
-    addGlobalFunc(
-      'function AverageBrightness(Area: TBox): Integer;', [
-      'begin',
-      '  Result := Client.GetMFinder().AverageBrightness(Area);',
-      'end;'
-      ]
-    );
-    // PeakBrightness
-    addGlobalFunc(
-      'function PeakBrightness(Area: TBox): Integer;', [
-      'begin',
-      '  Result := Client.GetMFinder().PeakBrightness(Area);',
-      'end;'
-      ]
-    );
-
-    // GetPixelDifference
-    addGlobalFunc(
-      'function GetPixelDifference(Area: TBox; WaitTime: Integer): Integer; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().GetPixelDifference(Area, WaitTime);',
-      'end;'
-      ]
-    );
-    // GetPixelDifference
-    addGlobalFunc(
-      'function GetPixelDifference(Area: TBox; Tolerance, WaitTime: Integer): Integer; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().GetPixelDifference(Area, Tolerance, WaitTime);',
-      'end;'
-      ]
-    );
-
-    // GetPixelDifference
-    addGlobalFunc(
-      'function GetPixelDifferenceTPA(Area: TBox; WaitTime: Integer): TPointArray; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().GetPixelDifferenceTPA(Area, WaitTime);',
-      'end;'
-      ]
-    );
-    // GetPixelDifference
-    addGlobalFunc(
-      'function GetPixelDifferenceTPA(Area: TBox; Tolerance, WaitTime: Integer): TPointArray; overload;', [
-      'begin',
-      '  Result := Client.GetMFinder().GetPixelDifferenceTPA(Area, Tolerance, WaitTime);',
-      'end;'
-      ]
-    );
     }
 
     ImportingSection := '';
