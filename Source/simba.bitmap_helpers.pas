@@ -12,24 +12,16 @@ unit simba.bitmap_helpers;
 interface
 
 uses
-  Classes, SysUtils, simba.colormath_conversion, simba.finder_color_new,
-  simba.mufasatypes, simba.matchtemplate, simba.bitmap;
+  Classes, SysUtils, Graphics,
+  simba.mufasatypes, simba.matchtemplate, simba.bitmap, simba.finder, simba.colormath_conversion;
 
 type
   TMufasaBitmapHelpers = class helper for TMufasaBitmap
   public
-    function TestFindColors(ColorSpace: EColorSpace; Color: Integer; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
-    function TestMatchColors(ColorSpace: EColorSpace; Color: Integer; Multipliers: TChannelMultipliers): TSingleMatrix;
-
     function MatchTemplate(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
     function MatchTemplateMask(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
 
-    function FindColors(out Points: TPointArray; Color: Integer): Boolean; overload;
-    function FindColorsTolerance(out Points: TPointArray; Color, Tolerance: Integer): Boolean; overload;
-    function FindColorsTolerance(out Points: TPointArray; Color, Tolerance: Integer; HueMod, SatMod: Extended): Boolean; overload;
-
-    function FindBitmap(Bitmap: TMufasaBitmap; out X, Y: Integer; Tolerance: Integer): Boolean;
-    function FindBitmaps(Bitmap: TMufasaBitmap; out Points: TPointArray; Tolerance: Integer): Boolean;
+    function FindColor(ColorSpace: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
 
     function FindEdges(MinDiff: Integer): TPointArray;
     function FindEdgesHSL(MinDiff: Integer; HueMod: Single = 0.2; SatMod: Single = 0.2): TPointArray;
@@ -38,28 +30,7 @@ type
 implementation
 
 uses
-  simba.finder_bitmap, simba.colormath_distance,
-  simba.overallocatearray;
-
-function TMufasaBitmapHelpers.TestFindColors(ColorSpace: EColorSpace; Color: Integer; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
-var
-  Buffer: TColorFinder;
-begin
-  Buffer := Default(TColorFinder);
-  Buffer.Setup(ColorSpace, Color, Tolerance, Multipliers);
-
-  Result := Buffer.Find(FData, FWidth, FWidth, FHeight, TPoint.Create(0, 0));
-end;
-
-function TMufasaBitmapHelpers.TestMatchColors(ColorSpace: EColorSpace; Color: Integer; Multipliers: TChannelMultipliers): TSingleMatrix;
-var
-  Buffer: TColorFinder;
-begin
-  Buffer := Default(TColorFinder);
-  Buffer.Setup(ColorSpace, Color, 0, Multipliers);
-
-  Result := Buffer.Match(FData, FWidth, FWidth, FHeight);
-end;
+  simba.colormath_distance, simba.overallocatearray;
 
 function TMufasaBitmapHelpers.MatchTemplate(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
 begin
@@ -71,79 +42,17 @@ begin
   Result := simba.matchtemplate.MatchTemplateMask(Self.ToMatrixBGR(), Template.ToMatrixBGR(), Formula);
 end;
 
-function TMufasaBitmapHelpers.FindColors(out Points: TPointArray; Color: Integer): Boolean;
-//var
-//  Buffer: TFindColorBuffer;
-//begin
-//  Buffer.Data := FData;
-//  Buffer.Width := FWidth;
-//  Buffer.SearchWidth := FWidth;
-//  Buffer.SearchHeight := FHeight;
-//
-//  Result := Buffer.Find(Points, Color);
-//end;
-begin
-
-end;
-
-function TMufasaBitmapHelpers.FindColorsTolerance(out Points: TPointArray; Color, Tolerance: Integer): Boolean;
-//var
-//  Buffer: TFindColorBuffer;
-//begin
-//  Buffer.Data := FData;
-//  Buffer.Width := FWidth;
-//  Buffer.SearchWidth := FWidth;
-//  Buffer.SearchHeight := FHeight;
-//
-//  Result := Buffer.FindCTS1(Points, Color, Tolerance);
-//end;
-begin
-
-end;
-
-function TMufasaBitmapHelpers.FindColorsTolerance(out Points: TPointArray; Color, Tolerance: Integer; HueMod, SatMod: Extended): Boolean;
-//var
-//  Buffer: TFindColorBuffer;
-//begin
-//  Buffer.Data := FData;
-//  Buffer.Width := FWidth;
-//  Buffer.SearchWidth := FWidth;
-//  Buffer.SearchHeight := FHeight;
-//
-//  Result := Buffer.FindCTS2(Points, Color, Tolerance, HueMod, SatMod);
-//end;
-begin
-
-end;
-
-function TMufasaBitmapHelpers.FindBitmap(Bitmap: TMufasaBitmap; out X, Y: Integer; Tolerance: Integer): Boolean;
+function TMufasaBitmapHelpers.FindColor(ColorSpace: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
 var
-  Buffer: TFindBitmapBuffer;
-  Points: TPointArray;
+  Finder: TSimbaFinder;
+  Space: TColorSpace;
 begin
-  Buffer.Data := FData;
-  Buffer.Width := FWidth;
-  Buffer.SearchWidth := FWidth;
-  Buffer.SearchHeight := FHeight;
+  Finder.SetTarget(Self);
 
-  Result := Buffer.Find(Bitmap, Points, Tolerance);
-  if Result then
-  begin
-    X := Points[0].X;
-    Y := Points[0].Y;
-  end;
-end;
+  Space.ColorSpace := ColorSpace;
+  Space.Multipliers := Multipliers;
 
-function TMufasaBitmapHelpers.FindBitmaps(Bitmap: TMufasaBitmap; out Points: TPointArray; Tolerance: Integer): Boolean;
-var
-  Buffer: TFindBitmapBuffer;
-begin
-  Buffer.Data := FData;
-  Buffer.Width := FWidth;
-  Buffer.SearchWidth := FWidth;
-  Buffer.SearchHeight := FHeight;
-
-  Result := Buffer.Find(Bitmap, Points, Tolerance);
+  Result := Finder.FindColor(Color, Tolerance, Space, Box(0, 0, Width-1, Height-1));
 end;
 
 function TMufasaBitmapHelpers.FindEdges(MinDiff: Integer): TPointArray;

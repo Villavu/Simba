@@ -283,13 +283,13 @@ function GetTolerance(Formula: EColorSpace; Color: TColor; Colors: TColorArray; 
   function GetDistance(Color1, Color2: TColor): Single;
   begin
     case Formula of
-      EColorSpace.RGB:    Result := DistanceRGB(Color1, Color2, Mods);
-      EColorSpace.XYZ:    Result := DistanceXYZ(Color1, Color2, Mods);
-      EColorSpace.LAB:    Result := DistanceLAB(Color1, Color2, Mods);
-      EColorSpace.HSV:    Result := DistanceHSV(Color1, Color2, Mods);
-      EColorSpace.HSL:    Result := DistanceHSL(Color1, Color2, Mods);
-      EColorSpace.LCH:    Result := DistanceLCH(Color1, Color2, Mods);
-      EColorSpace.DeltaE: Result := DistanceDeltaE(Color1, Color2, Mods);
+      EColorSpace.RGB:    Result := DistanceRGB(Color1.ToRGB(), Color2.ToRGB(), Mods);
+      EColorSpace.XYZ:    Result := DistanceXYZ(Color1.ToXYZ(), Color2.ToXYZ(), Mods);
+      EColorSpace.LAB:    Result := DistanceLAB(Color1.ToLAB(), Color2.ToLAB(), Mods);
+      EColorSpace.HSV:    Result := DistanceHSV(Color1.ToHSV(), Color2.ToHSV(), Mods);
+      EColorSpace.HSL:    Result := DistanceHSL(Color1.ToHSL(), Color2.ToHSL(), Mods);
+      EColorSpace.LCH:    Result := DistanceLCH(Color1.ToLCH(), Color2.ToLCH(), Mods);
+      EColorSpace.DeltaE: Result := DistanceDeltaE(Color1.ToLAB(), Color2.ToLAB(), Mods);
     end;
   end;
 

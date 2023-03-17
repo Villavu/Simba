@@ -18,6 +18,9 @@ uses
   Classes, SysUtils, Graphics,
   simba.mufasatypes, simba.colormath_conversion;
 
+const
+  DefaultMultipliers: TChannelMultipliers = (1, 1, 1);
+
 function DistanceRGB(const Color1, Color2: TColorRGB; const mul: TChannelMultipliers): Single; inline;
 function DistanceHSV(const Color1, Color2: TColorHSV; const mul: TChannelMultipliers): Single; inline;
 function DistanceHSL(const Color1, Color2: TColorHSL; const mul: TChannelMultipliers): Single; inline;
@@ -26,14 +29,6 @@ function DistanceLAB(const Color1, Color2: TColorLAB; const mul: TChannelMultipl
 function DistanceLCH(const Color1, Color2: TColorLCH; const mul: TChannelMultipliers): Single; inline;
 function DistanceDeltaE(const Color1, Color2: TColorLAB; const  mul: TChannelMultipliers): Single; inline;
 
-function DistanceRGB(const Color1, Color2: TColor; const mul: TChannelMultipliers): Single; overload;
-function DistanceHSV(const Color1, Color2: TColor; const mul: TChannelMultipliers): Single; overload;
-function DistanceHSL(const Color1, Color2: TColor; const mul: TChannelMultipliers): Single; overload;
-function DistanceXYZ(const Color1, Color2: TColor; const mul: TChannelMultipliers): Single; overload;
-function DistanceLAB(const Color1, Color2: TColor; const mul: TChannelMultipliers): Single; overload;
-function DistanceLCH(const Color1, Color2: TColor; const mul: TChannelMultipliers): Single; overload;
-function DistanceDeltaE(const Color1, Color2: TColor; const  mul: TChannelMultipliers): Single; overload;
-
 function DistanceRGB_Max(mul: TChannelMultipliers): Single; inline;
 function DistanceHSV_Max(mul: TChannelMultipliers): Single; inline;
 function DistanceHSL_Max(mul: TChannelMultipliers): Single; inline;
@@ -41,15 +36,6 @@ function DistanceXYZ_Max(mul: TChannelMultipliers): Single; inline;
 function DistanceLAB_Max(mul: TChannelMultipliers): Single; inline;
 function DistanceLCH_Max(mul: TChannelMultipliers): Single; inline;
 function DistanceDeltaE_Max(mul: TChannelMultipliers): Single; inline;
-
-// For finder usage
-function _DistanceRGB(const Color1: PColorRGB; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single; inline;
-function _DistanceHSV(const Color1: PColorHSV; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single; inline;
-function _DistanceHSL(const Color1: PColorHSL; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single; inline;
-function _DistanceXYZ(const Color1: PColorXYZ; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single; inline;
-function _DistanceLAB(const Color1: PColorLAB; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single; inline;
-function _DistanceLCH(const Color1: PColorLCH; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single; inline;
-function _DistanceDeltaE(const Color1: PColorLAB;const Color2: TColorBGRA; const mul: TChannelMultipliers): Single; inline;
 
 implementation
 
@@ -253,41 +239,6 @@ begin
   xDC /= xSC;
   xDH /= xSH;
   Result := Sqrt(Sqr(xDL * mul[0]) + Sqr(xDC * mul[1]) + Sqr(xDH * mul[2]));
-end;
-
-function _DistanceRGB(const Color1: PColorRGB; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
-begin
-  Result := DistanceRGB(Color1^, Color2.ToRGB(), Mul);
-end;
-
-function _DistanceHSV(const Color1: PColorHSV; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
-begin
-  Result := DistanceHSV(Color1^, Color2.ToHSV(), Mul);
-end;
-
-function _DistanceHSL(const Color1: PColorHSL; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
-begin
-  Result := DistanceHSL(Color1^, Color2.ToHSL(), Mul);
-end;
-
-function _DistanceXYZ(const Color1: PColorXYZ; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
-begin
-  Result := DistanceXYZ(Color1^, Color2.ToXYZ(), Mul);
-end;
-
-function _DistanceLAB(const Color1: PColorLAB; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
-begin
-  Result := DistanceLAB(Color1^, Color2.ToLAB(), Mul);
-end;
-
-function _DistanceLCH(const Color1: PColorLCH; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
-begin
-  Result := DistanceLCH(Color1^, Color2.ToLCH(), Mul);
-end;
-
-function _DistanceDeltaE(const Color1: PColorLAB; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
-begin
-  Result := DistanceDeltaE(Color1^, Color2.ToLAB(), Mul);
 end;
 
 end.

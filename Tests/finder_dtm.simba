@@ -1,4 +1,5 @@
 {$assertions on}
+
 var
   TreePoints: TPointArray := [
     TPoint.Create(23, 8),
@@ -15,15 +16,14 @@ var
   dtm: TDTM;
   img: TMufasaBitmap;
   TPA: TPointArray;
-  X, Y: Integer;
 begin
   dtm := TDTM.CreateFromString('meJxjZWBgUAZiVSBWAGI1IFYEYgcgdgFiWyh2BuIAPW4w1jdgh7NJAgA09QSA');
   img := TMufasaBitmap.CreateFromString(100, 100, 'meJztnV1vFFUYxxO94MLEK70wmugHMNV4B4Fg1AtjjAGCkoDxExi1KkKbVmprBSlQqtWoRIMvSVFQQnlpCooiWrDEl4/kg3/8979zznP2bGdnurts8stks53dmfntOc8855kz06df2/d0Hlev34jy67Vlw/vU4uVfjXMXL5PTFy6SzE2n2Xnoi+0Ts2Trvmny7Oh+smlokqx/a3SFN4fJwNtjCUqKoqu0rupcmahecmVU5AqiOsoVbUS5fHWJeN+gfr6bv0C89Xd/foq8/MFxsuP9Y2TbOzPkueGD5JnhSdLgZ3B0hUY/6x595O6t9xt4ce+OxwqWHh7ZY5QUVXB18ZerRtiiWnI1emKxTlfmh64gCrTkqqkl2wRc3TWwBa7sBXQZXr9LuzJR7XIVtpaoq4KiB3Y+FXVVRhRdmR+4wg9UxhVEtcWV11oSrmx9rlZwle56aCc//3aNXFm6TvDXe+57EP0Ozcm2deHSz1ganp+PTl8iusW3jp8m6ocB3FA/z+7dTx7fN0XQ47zWgng+sHeMwCrhygNjwyBHVI4rw77fXGFDHeiq0FpCV2g5d9x5hxq7+WYzURqom7oC2vVobM1dea3Fc2Xc/Ok37TJuvdOKqBxX7H0EotbcFSi0FuZUOa7SXQ/jEQZnI7SnuQEiFTqgLe2z84s/Es/P9LdnQWHrr370DVE/mmc+s3uSqJONeybIhqExYlpoYP3QMHETzv9jVNMwBV0tuTLsI3Bl5LsKN911rkCrrkimq3CLQ1/PV+RqhWpcUVcVrqKb6wpXOC6vP/545XfiuWIwL8TzT+Z/IkdPngfRDb3+2QnjxemvSIMfGbOoE2/Mok5cP+JEwVjGy9LhCkfad5XvKtSVdoW0yj5lUR0ftxcJV15/7zRX3n6Wd4UzIDJ2o6tdpWM4jkvHuZ4udYVIbqdjxHNkCybKwjiWhXh+eG7e8PYhHBdvGT9Ecmp0piJSg5I+BcJ1CitU6qowHlwrV15VoSCq6TolXVFX6ApgH9CXaaxmV15VQT3krFPeFYi6Yu8j0ZyqNleFqkLUVWKdtKvvzy8amkOageiaGud5LtDxoDmfOz1PZk4tkNETi+ndeGl27vmpj4mOhRviuRPDvarCwyODJGed8q7UEsD7zKk4HlwrV9Ea1H9NZbBAsM5gSVeqKxRFV9Cl+afnKr0PoLwrrav8362KrgxZp/in1bmisb4rgjh8ZuESWfjpClE/Oq5JfOHHZy4B1qmihYWQbe/NkM0jB0gip1pxFRuneK4KPDS+m/Rddawr6uq7up1dIQ5rfNYaSzSwG+nctbyrzDFgW1zlx/byrk6dXTDaG6+6yxWuXpkWyzDhhy+YM6grQFFr5SpWSajJFbJxk4MsN8yvjM5x5VcS2uMKtThkpACuLGGzJefA2D5wqfOsrF3pZ7W+16qrre9OEzf/TLryKwmVuyrUprrIVVBJqNYVeyL96GuNVzmuhr52CzJtdJVTSajIlc6qUlGGngc7xxVIVxLKuEItTq97UoLWpgrzQHKucxVcNdXVLleWKiRGx8Srva/OlYF2BWm95CpRey/jKjq/KO3KdgOuzDBc2Yumutroqmkumq691+8KrdFE4UfsTFct1d5Ri2vVlY6vtU544sw5w7qALY+ePG+ubGn7M/zNraXhuSozdlYKl/yi+GfMNXBVyM06zRWI1edTl1arcAWwA7g6T2Md5arxLBBfoQZX7H0EorrOlerKj+06t1avX4T1GUNzM/t+TvJPXPx64fCn5Il3jpCNIxPEm3vmzfHI0dV0fhF1VeTKsK9lbtbtrqCrUlekB1wZfVf5rsJan3rQeK53LWk9WdfXaxx6XTWnPrNr9jjROK/XVTePHyDqcMO+MbJ+ZDTO6N4oA+MTcQJ79bvysve+q6irqK6+K89VqKvzXSGeaz6p10w1nqfv2w3vr/TuBXj7uxUKul759Cuwc+YL4AU3sPX9afDk4VnyxP4j5PGDU1E27z8QZdPkJNk4PkFgb21d4a6uUFeOKNV1+7gKdWWKoq7b1tUqqMdVOLfWdbW0TDTme/OTNc5r/eHDHxZJTo5qQyQuE+yYPgY0p91+ZJZsm5ohDHSpNjk5RXAG6RxXXuvKdEVd3evKhs9wZQfLco3nytOFMXhOZ+wBV6g2sACYcBXVZR/Jj13VucIR6bUGz1X0eTuGrhPOgce8CPs5MAHejtpSUywN7Y+JvKtDqMFVofbed+W50nkR6O801ncVvQ+FilRU17lCPNeYrMerHn7/40+icV7R9aPPcDjX+BwezSW8+8c1/vMCh8ExuKHPwcg5an1Whr6fzk9qcIV8nrX3ql3h6UaeJdynr65wJ2xHuSItuZr+9uzqXIE3jp0k+kyD0BV1JXK5vqvQldcm08+Q0RiurjTOew41X83xFj5DDDNJNP7z2QWG1g9xLyfw3KpP3I0OvNjVd5V2pQ0MYIyJCm0ZV9Zc4co6ON63F+1yxTlv9bsCLFy00RXObvYmcqcedhXeI+/V99QVsMGLLZeW/zJXtjRRSzduLY2c/ujNIfEc6rlA51vqPQjqVn2qwz1fniGet4bn/xyYNUq6Koz1+q48V+CWpeW/0LRqcGWbgCv7jeDKXuS7QtCu3xV7H4GoGlwhTmJ6qpHpSs9xrbqKPGRVjlFzA0pQdKx3/cbfiq7m5aveNQ51qOcCmLSOb0uUEFFO/P78IpaGug3vpVJXI3MLhuaumq+GzwIq6cowLRzr1eaqECfzXVEXRNXvKkp1rvTZNaxU57syKOp2cMXeR3hPUHWucP7KwXOyvPxPFM9bTs1QHSoc1GucvNj4HDy91uZdz9XcVcfgg5/MkZ5xhfv6GSdzXCFM9aor3oWnz4ePPgMh3xV09aqrwvPh19CVd6T5eA4bXKl28ebVeXAWsMQAL1C+WPffo/WxLKD9VM8LmtNqZqVxXsfXmpeG9asOd1XIo+px5dX6qnCl31/GFdBSD42VcVW4D7TgKlEXba8rbyurdsXeRyIJYWe7isbtdLE68d+IEmgeddOe819CcuY1aV06Z65v17lCG2Me1Ruumm5o1boaLqtV5ipn//uucva8VVfpcXHOtpqOWaLosSve+Nq7Vot9wL2lHDjni+q76klX+j3tctWSqK5w5X1bJ7vSfFJjL0a7mZuz9qDjXK/m6Y1NFL2vU8fIei0sfB6s/m+18Dt3HTlO9Hn7W0YOGf8CJqsXFg==');
 
-  SetTargetBitmap(img);
+  Finder.SetTarget(img);
 
-  // FindDTMS, entire client
-  FindDTMs(DTM, TPA);
+  // find all, entire client
+  TPA := Finder.FindDTM(DTM, -1);
   Assert(TPA.Length() = 8);
   Assert(TPA[0] = TreePoints[0]);
   Assert(TPA[1] = TreePoints[1]);
@@ -34,36 +34,23 @@ begin
   Assert(TPA[6] = TreePoints[6]);
   Assert(TPA[7] = TreePoints[7]);
 
-  // FindDTMS, area
-  FindDTMs(DTM, TPA, 4,4,29,42);
+  // find all, area
+  TPA := Finder.FindDTM(DTM, -1, [4,4,29,42]);
 
   Assert(TPA.Length() = 3);
   Assert(TPA[0] = TreePoints[0]);
   Assert(TPA[1] = TreePoints[1]);
   Assert(TPA[2] = TreePoints[2]);
 
-  // FindDTMS, area (TBox)
-  FindDTMs(DTM, TPA, TBox.Create(4,4,29,42));
-
-  Assert(TPA.Length() = 3);
+  // find one, entire client
+  TPA := Finder.FindDTM(DTM, 1);
+  Assert(TPA.Length() = 1);
   Assert(TPA[0] = TreePoints[0]);
-  Assert(TPA[1] = TreePoints[1]);
-  Assert(TPA[2] = TreePoints[2]);
 
-  // FindDTM, entire client
-  FindDTM(DTM, X, Y);
-  Assert(X=TreePoints[0].X);
-  Assert(Y=TreePoints[0].Y);
-
-  // FindDTM, area
-  FindDTM(DTM, X, Y, 25, 38,83, 95);
-  Assert(X=TreePoints[3].X);
-  Assert(Y=TreePoints[3].Y);
-
-  // FindDTM, area (TBox)
-  FindDTM(DTM, X, Y, TBox.Create(5,49,29,71));
-  Assert(X=TreePoints[3].X);
-  Assert(Y=TreePoints[3].Y);
+  // find one, area
+  TPA := Finder.FindDTM(DTM, 1, [25,38,83,95]);
+  Assert(TPA.Length() = 1);
+  Assert(TPA[0] = TreePoints[3]);
 
   dtm.Free();
   img.Free();

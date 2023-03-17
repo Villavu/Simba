@@ -247,12 +247,12 @@ function TMufasaBitmap.FindColors(out Points: TPointArray; Color: Integer): Bool
 *)
 procedure _LapeMufasaBitmap_FindColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PMufasaBitmap(Params^[0])^.FindColors(PPointArray(Params^[1])^, PInteger(Params^[2])^);
+  //PBoolean(Result)^ := PMufasaBitmap(Params^[0])^.FindColors(PPointArray(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeMufasaBitmap_FindColorsTolerance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PMufasaBitmap(Params^[0])^.FindColorsTolerance(PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+  //PBoolean(Result)^ := PMufasaBitmap(Params^[0])^.FindColorsTolerance(PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 (*
@@ -262,7 +262,7 @@ function TMufasaBitmap.FindBitmap(Bitmap: TMufasaBitmap; out X, Y: Integer; Tole
 *)
 procedure _LapeMufasaBitmap_FindBitmap(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PMufasaBitmap(Params^[0])^.FindBitmap(PMufasaBitmap(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+  //PBoolean(Result)^ := PMufasaBitmap(Params^[0])^.FindBitmap(PMufasaBitmap(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
 end;
 
 (*
@@ -272,7 +272,7 @@ function TMufasaBitmap.FindBitmaps(Bitmap: TMufasaBitmap; out Points: TPointArra
 *)
 procedure _LapeMufasaBitmap_FindBitmaps(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PMufasaBitmap(Params^[0])^.FindBitmaps(PMufasaBitmap(Params^[1])^, PPointArray(Params^[2])^, PInteger(Params^[3])^);
+  //PBoolean(Result)^ := PMufasaBitmap(Params^[0])^.FindBitmaps(PMufasaBitmap(Params^[1])^, PPointArray(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 (*
@@ -1032,7 +1032,7 @@ function TMufasaBitmap.FindColorsTolerance(out Points: TPointArray; Color, Toler
 *)
 procedure _LapeMufasaBitmap_FindColorsToleranceCTS1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PMufasaBitmap(Params^[0])^.FindColorsTolerance(PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+  //PBoolean(Result)^ := PMufasaBitmap(Params^[0])^.FindColorsTolerance(PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 (*
@@ -1042,7 +1042,7 @@ function TMufasaBitmap.FindColorsTolerance(out Points: TPointArray; Color, Toler
 *)
 procedure _LapeMufasaBitmap_FindColorsToleranceCTS2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PMufasaBitmap(Params^[0])^.FindColorsTolerance(PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+  //PBoolean(Result)^ := PMufasaBitmap(Params^[0])^.FindColorsTolerance(PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
 end;
 
 (*
@@ -1461,16 +1461,6 @@ begin
   PMufasaBitmap(Params^[0])^.FreeOnTerminate := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeMufasaBitmap_TestFindColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PMufasaBitmap(Params^[0])^.TestFindColors(PColorSpace(Params^[1])^, PInteger(Params^[2])^, PSingle(Params^[3])^, PChannelMultipliers(Params^[4])^);
-end;
-
-procedure _LapeMufasaBitmap_TestMatchColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSingleMatrix(Result)^ := PMufasaBitmap(Params^[0])^.TestMatchColors(PColorSpace(Params^[1])^, PInteger(Params^[2])^, PChannelMultipliers(Params^[3])^);
-end;
-
 procedure _LapeMufasaBitmap_DrawHSLCircle(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMufasaBitmap(Params^[0])^.DrawHSLCircle(PPoint(Params^[1])^, PInteger(Params^[2])^);
@@ -1505,9 +1495,6 @@ begin
     addClassVar('TMufasaBitmap', 'FontName', 'String', @_LapeMufasaBitmap_FontName_Read, @_LapeMufasaBitmap_FontName_Write);
     addClassVar('TMufasaBitmap', 'FontSize', 'Single', @_LapeMufasaBitmap_FontSize_Read, @_LapeMufasaBitmap_FontSize_Write);
     addClassVar('TMufasaBitmap', 'FontAntialiasing', 'Boolean', @_LapeMufasaBitmap_FontAntialiasing_Read, @_LapeMufasaBitmap_FontAntialiasing_Write);
-
-    addGlobalFunc('function TMufasaBitmap.TestFindColors(ColorSpace: EColorSpace; Color: Integer; Tolerance: Single; Multipliers: array[0..2] of Single): TPointArray;', @_LapeMufasaBitmap_TestFindColors);
-    addGlobalFunc('function TMufasaBitmap.TestMatchColors(ColorSpace: EColorSpace; Color: Integer; Multipliers: array[0..2] of Single): TSingleMatrix;', @_LapeMufasaBitmap_TestMatchColors);
 
     addGlobalFunc('function TMufasaBitmap.PointInBitmap(P: TPoint): Boolean; overload', @_LapeMufasaBitmap_PointInBitmap);
     addGlobalFunc('function TMufasaBitmap.PointInBitmap(X, Y: Integer): Boolean; overload', @_LapeMufasaBitmap_PointInBitmapEx);

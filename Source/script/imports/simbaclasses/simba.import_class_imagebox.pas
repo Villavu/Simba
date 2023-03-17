@@ -250,15 +250,15 @@ begin
   PBitmap(Result)^ := PSimbaImageBox(Params^[0])^.Background;
 end;
 
-procedure _LapeSimbaImageBox_FindDTMs(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PSimbaImageBox(Params^[0])^.FindDTMs(PDTM(Params^[1])^);
-end;
-
-procedure _LapeSimbaImageBox_FindColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PSimbaImageBox(Params^[0])^.FindColors(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
-end;
+//procedure _LapeSimbaImageBox_FindDTMs(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+//begin
+//  PPointArray(Result)^ := PSimbaImageBox(Params^[0])^.FindDTMs(PDTM(Params^[1])^);
+//end;
+//
+//procedure _LapeSimbaImageBox_FindColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+//begin
+//  PPointArray(Result)^ := PSimbaImageBox(Params^[0])^.FindColors(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+//end;
 
 procedure ImportSimbaImageBox(Compiler: TSimbaScript_Compiler);
 begin
@@ -306,8 +306,8 @@ begin
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(Bitmap: TMufasaBitmap); overload;', @_LapeSimbaImageBox_SetBackground_Bitmap);
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(IOManager: TIOManager; X1, Y1, X2, Y2: Integer); overload;', @_LapeSimbaImageBox_SetBackground_IOManagerArea);
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(IOManager: TIOManager); overload;', @_LapeSimbaImageBox_SetBackground_IOManager);
-    addGlobalFunc('function TSimbaImageBox.FindColors(CTS: Integer; Col, Tol: Integer; HueMod: Extended = 0.2; SatMod: Extended = 0.2): TPointArray;', @_LapeSimbaImageBox_FindColors);
-    addGlobalFunc('function TSimbaImageBox.FindDTM(DTM: TDTM): TPointArray;', @_LapeSimbaImageBox_FindDTMs);
+    //addGlobalFunc('function TSimbaImageBox.FindColors(CTS: Integer; Col, Tol: Integer; HueMod: Extended = 0.2; SatMod: Extended = 0.2): TPointArray;', @_LapeSimbaImageBox_FindColors);
+    //addGlobalFunc('function TSimbaImageBox.FindDTM(DTM: TDTM): TPointArray;', @_LapeSimbaImageBox_FindDTMs);
     addGlobalFunc('procedure TSimbaImageBox.Init(Owner: TComponent); override', @_LapeSimbaImageBox_Init);
   end;
 end;

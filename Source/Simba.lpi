@@ -314,7 +314,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="152">
+    <Units Count="153">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -606,10 +606,6 @@
         <Filename Value="script/imports/simba/simba.import_input.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit58>
-      <Unit59>
-        <Filename Value="script/imports/simba/simba.import_ocr.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit59>
       <Unit60>
         <Filename Value="script/imports/simba/simba.import_windowhandle.pas"/>
         <IsPartOfProject Value="True"/>
@@ -988,7 +984,7 @@
         <IsPartOfProject Value="True"/>
       </Unit148>
       <Unit149>
-        <Filename Value="finders/simba.finder_color_new.pas"/>
+        <Filename Value="finders/simba.finder_color.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit149>
       <Unit150>
@@ -996,9 +992,13 @@
         <IsPartOfProject Value="True"/>
       </Unit150>
       <Unit151>
-        <Filename Value="simba.finder_test.pas"/>
+        <Filename Value="simba.finder.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit151>
+      <Unit152>
+        <Filename Value="finders/simba.finder_bitmap.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit152>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
