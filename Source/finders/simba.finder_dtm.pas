@@ -5,32 +5,22 @@
 }
 unit simba.finder_dtm;
 
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
-
-{$IFOPT D-}
-  {$OPTIMIZATION LEVEL4}
-{$ENDIF}
 
 interface
 
 uses
-  classes, sysutils,
-  simba.mufasatypes, simba.dtm;
+  classes, sysutils, Graphics,
+  simba.mufasatypes, simba.dtm, simba.colormath_conversion;
 
 type
-  TFindDTMBuffer = record
-    Data: PRGB32;
-    Width: Integer;
+  TDTMFinder = record
+  public
+    function Find(DTM: TDTM; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; Offset: TPoint; MaxToFind: Integer = 0): TPointArray;
+    function FindRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; Offset: TPoint; MaxToFind: Integer = 0): TPointArray;
 
-    SearchWidth: Integer;
-    SearchHeight: Integer;
-
-    Offset: TPoint;
-
-    function FindDTMs(DTM: TDTM; MaxToFind: Integer = 0): TPointArray;
-    function FindDTMsRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = 0): TPointArray;
-
-    class operator Initialize(var Self: TFindDTMBuffer);
+    class operator Initialize(var Self: TDTMFinder);
   end;
 
 implementation
@@ -38,23 +28,57 @@ implementation
 uses
   simba.colormath_distance, simba.math, simba.overallocatearray;
 
-function TFindDTMBuffer.FindDTMs(DTM: TDTM; MaxToFind: Integer): TPointArray;
+function _DistanceRGB(const Color1: TColorRGB; const Color2: TColorBGRA): Single;
+begin
+  Result := DistanceRGB(Color1, Color2.ToRGB(), DefaultMultipliers);
+end;
+
+type
+  TSearchPoint = record
+    X, Y: Integer;
+    AreaSize: Integer;
+    Color: TColorRGB;
+    Tol: Single;
+  end;
+  TSearchPoints = array of TSearchPoint;
+
+function GetSearchPoints(DTM: TDTM): TSearchPoints;
 var
-  PointColors: TRGB32Array;
-  PointTolerances: TIntegerArray;
+  I: Integer;
+begin
+  SetLength(Result, DTM.PointCount);
+  for I := 0 to DTM.PointCount - 1 do
+    with DTM.Points[I] do
+    begin
+      Result[I].X := X;
+      Result[I].Y := Y;
+      Result[I].AreaSize := AreaSize;
+      Result[I].Color := TColor(Color).ToRGB();
+      Result[I].Tol := Tolerance;
+    end;
+end;
+
+function TDTMFinder.Find(DTM: TDTM; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; Offset: TPoint; MaxToFind: Integer): TPointArray;
+var
+  SearchPoints: TSearchPoints;
   Table: array of array of record
     Checked: Int64;
     Hit: Int64;
   end;
 
-  function FindPoint(const Index, Size: Integer; X, Y: Integer): Boolean;
+  function FindPoint(const Index: Integer; X, Y: Integer): Boolean;
   var
     StartX, StopX, StartY, StopY: Integer;
+    SearchPoint: TSearchPoint;
   begin
-    StartX := X - Size;
-    StartY := Y - Size;
-    StopX := X + Size;
-    StopY := Y + Size;
+    SearchPoint := SearchPoints[Index];
+    X += SearchPoint.X;
+    Y += SearchPoint.Y;
+
+    StartX := X - SearchPoint.AreaSize;
+    StartY := Y - SearchPoint.AreaSize;
+    StopX := X + SearchPoint.AreaSize;
+    StopY := Y + SearchPoint.AreaSize;
 
     for Y := StartY to StopY do
       for X := StartX to StopX do
@@ -73,7 +97,7 @@ var
               begin
                 Checked.SetBit(Index);
 
-                //if DistanceRGB(Data[Y * Width + X], PointColors[Index]) <= PointTolerances[Index] then
+                if _DistanceRGB(SearchPoint.Color, Buffer[Y * BufferWidth + X]) <= SearchPoint.Tol then
                 begin
                   Checked.SetBit(Index);
                   Hit.SetBit(Index);
@@ -106,9 +130,9 @@ var
 var
   I, H, X, Y: Integer;
   MainPointArea: TBox;
-  PointBuffer: specialize TSimbaOverAllocateArray<TPoint>;
+  PointBuffer: TSimbaPointBuffer;
 label
-  Next;
+  Next, Finished;
 begin
   if (not DTM.Valid()) then
     Exit(nil);
@@ -123,59 +147,48 @@ begin
   if (MainPointArea.X1 >= MainPointArea.X2) or (MainPointArea.Y1 >= MainPointArea.Y2) then
     Exit(nil);
 
-  SetLength(PointColors, DTM.PointCount);
-  SetLength(PointTolerances, DTM.PointCount);
-  for I := 0 to DTM.PointCount - 1 do
-  begin
-    //PointColors[I] := RGBToBGR(DTM.Points[I].Color);
-
-    if (DTM.Points[I].Tolerance = 0) then
-      PointTolerances[I] := Sqr(1)
-    else
-      PointTolerances[I] := Sqr(DTM.Points[I].Tolerance);
-  end;
-
-  PointBuffer.Init(256);
+  SearchPoints := GetSearchPoints(DTM);
   SetLength(Table, SearchHeight, SearchWidth);
-  H := DTM.PointCount - 1;
+  H := High(SearchPoints);
 
   for Y := MainPointArea.Y1 to MainPointArea.Y2 do
     for X := MainPointArea.X1 to MainPointArea.X2 do
     begin
       for I := 0 to H do
-        if not FindPoint(I, DTM.Points[I].AreaSize, X + DTM.Points[I].X, Y + DTM.Points[I].Y) then
+        if not FindPoint(I, X, Y) then
           goto Next;
 
       PointBuffer.Add(TPoint.Create(X + Offset.X, Y + Offset.Y));
       if (PointBuffer.Count = MaxToFind) then
-      begin
-        Result := PointBuffer.Trim();
-        Exit;
-      end;
+        goto Finished;
 
       Next:
     end;
+  Finished:
 
   Result := PointBuffer.Trim();
 end;
 
-function TFindDTMBuffer.FindDTMsRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer): TPointArray;
+function TDTMFinder.FindRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; Offset: TPoint; MaxToFind: Integer): TPointArray;
 var
-  PointColors: TRGB32Array;
-  PointTolerances: TIntegerArray;
+  H: Integer;
+  SearchPoints: TSearchPoints;
   Table: array of array of record
     Checked: Int64;
     Hit: Int64;
   end;
 
-  function FindPoint(const Index, Size: Integer; X, Y: Integer): Boolean;
+  function FindPoint(const Index: Integer; X, Y: Integer): Boolean;
   var
+    SearchPoint: TSearchPoint;
     StartX, StopX, StartY, StopY: Integer;
   begin
-    StartX := X - Size;
-    StartY := Y - Size;
-    StopX  := X + Size;
-    StopY  := Y + Size;
+    SearchPoint := SearchPoints[Index];
+
+    StartX := X - SearchPoint.AreaSize;
+    StartY := Y - SearchPoint.AreaSize;
+    StopX := X + SearchPoint.AreaSize;
+    StopY := Y + SearchPoint.AreaSize;
 
     for Y := StartY to StopY do
       for X := StartX to StopX do
@@ -194,7 +207,7 @@ var
               begin
                 Checked.SetBit(Index);
 
-                //if DistanceRGB(Data[Y * Width + X], PointColors[Index]) <= PointTolerances[Index] then
+                if _DistanceRGB(SearchPoint.Color, Buffer[Y * BufferWidth + X]) <= SearchPoint.Tol then
                 begin
                   Checked.SetBit(Index);
                   Hit.SetBit(Index);
@@ -209,16 +222,19 @@ var
     Result := False;
   end;
 
-  procedure RotateDTMPoints(const Points: TPointArray; var RotatedPoints : TPointArray; const A: Double; out Bounds: TBox); inline;
+  procedure RotateDTMPoints(var RotatedPoints: TPointArray; const A: Double; out Bounds: TBox); inline;
   var
-    I: Integer;
+    I, X, Y: Integer;
   begin
     Bounds := TBox.Create(0, 0, 0, 0);
 
-    for I := 1 to High(Points) do
+    for I := 1 to H do
     begin
-      RotatedPoints[I].X := Round(Cos(A) * Points[I].X - Sin(A) * Points[I].Y);
-      RotatedPoints[I].Y := Round(Sin(A) * Points[I].X + Cos(A) * Points[I].Y);
+      X := SearchPoints[I].X;
+      Y := SearchPoints[I].Y;
+
+      RotatedPoints[I].X := Round(Cos(A) * X - Sin(A) * Y);
+      RotatedPoints[I].Y := Round(Sin(A) * X + Cos(A) * Y);
 
       if (RotatedPoints[I].X < Bounds.X1) then Bounds.X1 := RotatedPoints[I].X;
       if (RotatedPoints[I].X > Bounds.X2) then Bounds.X2 := RotatedPoints[I].X;
@@ -235,7 +251,7 @@ var
   MainPointArea: TBox;
   Match: TMatch;
   MatchBuffer: TMatchBuffer;
-  Points, RotatedPoints: TPointArray;
+  RotatedPoints: TPointArray;
   MiddleAngle, SearchDegree: Double;
   AngleSteps: Integer;
   DTMBounds: TBox;
@@ -245,21 +261,10 @@ begin
   if (not DTM.Valid()) then
     Exit(nil);
 
-  SetLength(Points, DTM.PointCount);
-  SetLength(RotatedPoints, DTM.PointCount);
-  SetLength(PointColors, DTM.PointCount);
-  SetLength(PointTolerances, DTM.PointCount);
-  for I := 0 to DTM.PointCount - 1 do
-  begin
-    Points[I] := TPoint.Create(DTM.Points[I].X, DTM.Points[I].Y);
-    //PointColors[I] := RGBToBGR(DTM.Points[I].Color);
+  SearchPoints := GetSearchPoints(DTM);
+  H := High(SearchPoints);
 
-    if (DTM.Points[I].Tolerance = 0) then
-      PointTolerances[I] := Sqr(1)
-    else
-      PointTolerances[I] := Sqr(DTM.Points[I].Tolerance);
-  end;
-
+  SetLength(RotatedPoints, Length(SearchPoints));
   SetLength(Table, SearchHeight, SearchWidth);
 
   StartDegrees := FixD(StartDegrees);
@@ -281,7 +286,7 @@ begin
 
     Inc(AngleSteps);
 
-    RotateDTMPoints(Points, RotatedPoints, Radians(SearchDegree), DTMBounds);
+    RotateDTMPoints(RotatedPoints, Radians(SearchDegree), DTMBounds);
 
     MainPointArea.X1 := Abs(DTMBounds.X1);
     MainPointArea.Y1 := Abs(DTMBounds.Y1);
@@ -294,7 +299,7 @@ begin
       for X := MainPointArea.X1 to MainPointArea.X2 do
       begin
         for I := 0 to High(RotatedPoints) do
-          if not FindPoint(I, DTM.Points[I].AreaSize, X + RotatedPoints[I].X, Y + RotatedPoints[I].Y) then
+          if not FindPoint(I, X + RotatedPoints[I].X, Y + RotatedPoints[I].Y) then
             goto Next;
 
         Match.X := X;
@@ -322,9 +327,9 @@ begin
     end;
 end;
 
-class operator TFindDTMBuffer.Initialize(var Self: TFindDTMBuffer);
+class operator TDTMFinder.Initialize(var Self: TDTMFinder);
 begin
-  Self := Default(TFindDTMBuffer);
+  Self := Default(TDTMFinder);
 end;
 
 end.

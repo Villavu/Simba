@@ -29,7 +29,7 @@ uses
 
   // Simba classes
   simba.import_class_bitmap, simba.import_class_dtm, simba.import_matchtemplate,
-  simba.import_class_finder, simba.import_class_target, simba.import_class_iomanager,
+  simba.import_class_target, simba.import_class_iomanager,
   simba.import_class_client, simba.import_class_xml, simba.import_class_json,
   simba.import_class_imagebox, simba.import_class_shapebox,
 

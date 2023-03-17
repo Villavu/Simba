@@ -10,9 +10,9 @@ unit simba.imagebox;
 interface
 
 uses
-  classes, sysutils, forms, controls, graphics, dialogs, extctrls, comctrls,
+  classes, sysutils, forms, controls, graphics, dialogs, comctrls,
   lclintf, lcltype, IntfGraphics,
-  simba.mufasatypes, simba.bitmap, simba.dtm, simba.iomanager, simba.imagebox_bitmap, simba.colormath_conversion;
+  simba.mufasatypes, simba.bitmap, simba.dtm, simba.iomanager, simba.imagebox_bitmap, simba.colormath_conversion, simba.finder;
 
 type
   TSimbaImageBox_ScrollBox = class(TScrollBox)
@@ -95,11 +95,8 @@ type
     procedure MoveTo(X, Y: Integer);
     function IsVisible(X, Y: Integer): Boolean; overload;
 
-    function FindColors(CTS: Integer; Col, Tol: Integer; HueMod: Extended = 0.2; SatMod: Extended = 0.2): TPointArray;
-    function FindDTMs(DTM: TDTM): TPointArray;
-
-    function Test(ColorSpace: EColorSpace; Col: Integer; Tol: Single; Mods: TChannelMultipliers): TPointArray;
-    function Match(ColorSpace: EColorSpace; Col: Integer; Mods: TChannelMultipliers): TSingleMatrix;
+    function FindColor(ColorSpace: EColorSpace; AColor: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
+    function MatchColor(ColorSpace: EColorSpace; AColor: TColor; Multipliers: TChannelMultipliers): TSingleMatrix;
 
     procedure SetTempBackground(Bitmap: TMufasaBitmap; DoFreeBitmap: Boolean = False);
 
@@ -119,7 +116,7 @@ implementation
 
 uses
   math, fpimage, graphtype,
-  simba.nativeinterface, simba.bitmap_misc, simba.finder_dtm, simba.bitmap_helpers;
+  simba.nativeinterface, simba.bitmap_misc, simba.bitmap_helpers;
 
 procedure TSimbaImageBox_ScrollBox.GetPreferredSize(var PreferredWidth, PreferredHeight: integer; Raw: boolean; WithThemeSpace: boolean);
 begin
@@ -625,71 +622,26 @@ begin
             InRange(Y, FScrollBox.VertScrollBar.Position, FScrollBox.VertScrollBar.Position + FScrollBox.ClientHeight);
 end;
 
-function TSimbaImageBox.FindColors(CTS: Integer; Col, Tol: Integer; HueMod: Extended; SatMod: Extended): TPointArray;
-//var
-//  Bitmap: TMufasaBitmap;
-//  Buffer: TFindColorBuffer;
-//begin
-//  Bitmap := FBackground.ToMufasaBitmap();
-//
-//  with Buffer do
-//  begin
-//    Buffer.Data := Bitmap.Data;
-//    Buffer.Width := Bitmap.Width;
-//    Buffer.SearchWidth := Bitmap.Width;
-//    Buffer.SearchHeight := Bitmap.Height;
-//
-//    case CTS of
-//      0: FindCTS0(Result, Col, Tol);
-//      1: FindCTS1(Result, Col, Tol);
-//      2: FindCTS2(Result, Col, Tol, HueMod, SatMod);
-//    end;
-//  end;
-//
-//  Bitmap.Free();
-//end;
-begin
-
-end;
-
-function TSimbaImageBox.FindDTMs(DTM: TDTM): TPointArray;
-var
-  Bitmap: TMufasaBitmap;
-  Buffer: TFindDTMBuffer;
-begin
-  //Bitmap := FBackground.ToMufasaBitmap();
-  //
-  //with Buffer do
-  //begin
-  //  Buffer.Data := Bitmap.Data;
-  //  Buffer.Width := Bitmap.Width;
-  //  Buffer.SearchWidth := Bitmap.Width;
-  //  Buffer.SearchHeight := Bitmap.Height;
-  //
-  //  Result := FindDTMs(DTM);
-  //end;
-  //
-  //Bitmap.Free();
-end;
-
-function TSimbaImageBox.Test(ColorSpace: EColorSpace; Col: Integer; Tol: Single; Mods: TChannelMultipliers): TPointArray;
+function TSimbaImageBox.FindColor(ColorSpace: EColorSpace; AColor: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
 begin
   with FBackground.ToMufasaBitmap() do
   try
-    Result := TestFindColors(ColorSpace, Col, Tol, Mods);
+    Result := FindColor(ColorSpace, AColor, Tolerance, Multipliers);
   finally
     Free();
   end;
 end;
 
-function TSimbaImageBox.Match(ColorSpace: EColorSpace; Col: Integer; Mods: TChannelMultipliers): TSingleMatrix;
+function TSimbaImageBox.MatchColor(ColorSpace: EColorSpace; AColor: TColor; Multipliers: TChannelMultipliers): TSingleMatrix;
 begin
+  {
   with FBackground.ToMufasaBitmap() do
   try
-    Result := TestMatchColors(ColorSpace, Col, Mods);
+    Result := MatchColor(ColorSpace, Color, Mods);
   finally
     Free();
   end;
+  }
 end;
 
 procedure TSimbaImageBox.SetTempBackground(Bitmap: TMufasaBitmap; DoFreeBitmap: Boolean);

@@ -2,6 +2,8 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+
+  Find things on a target.
 }
 unit simba.finder;
 
@@ -10,593 +12,400 @@ unit simba.finder;
 interface
 
 uses
-  classes, sysutils, simba.bitmap, simba.dtm, simba.mufasatypes, simba.matchtemplate;
+  Classes, SysUtils, Graphics,
+  simba.mufasatypes, simba.colormath_conversion, simba.bitmap, simba.dtm,
+  simba.finder_color, simba.finder_bitmap, simba.finder_dtm;
 
 type
-  PMFinder = ^TMFinder;
-  TMFinder = class(TObject)
+  PColorSpace = ^TColorSpace;
+  TColorSpace = record
+    ColorSpace: EColorSpace;
+    Multipliers: TChannelMultipliers;
+  end;
+
+  PColorTolerance = ^TColorTolerance;
+  TColorTolerance = record
+    Color: Integer;
+    Tolerance: Single;
+    ColorSpace: EColorSpace;
+    Multipliers: TChannelMultipliers;
+  end;
+
+  {$PUSH}
+  {$SCOPEDENUMS ON}
+  ETargetType = (NONE, BITMAP, WINDOW);
+  {$POP}
+
+  PSimbaFinder = ^TSimbaFinder;
+  TSimbaFinder = record
   private
-    Client: TObject;
-    hueMod, satMod: Extended;
-    CTS3Modifier: Extended;
-    CTS: Integer;
+    FTargetType: ETargetType;
+    FTarget: record
+      Bitmap: TMufasaBitmap;
+      Window: TWindowHandle;
+    end;
+    FColorFinder: TColorFinder;
+    FBitmapFinder: TBitmapFinder;
+    FDTMFinder: TDTMFinder;
+
+    function DoFindDTM(DTM: TDTM; Bounds: TBox; MaxToFind: Integer): TPointArray;
+    function DoFindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox; MaxToFind: Integer): TPointArray;
+    function DoFindBitmap(Bitmap: TMufasaBitmap; Bounds: TBox; MaxToFind: Integer): TPointArray;
+
+    function DoFindColor(Bounds: TBox): TPointArray;
+    function DoCountColor(Bounds: TBox): Integer;
+
+    function ValidateTargetBounds(var Bounds: TBox): Boolean;
+    function GetTargetData(var Bounds: TBox; out Data: PColorBGRA; out DataWidth: Integer): Boolean;
+    procedure FreeTargetData(var Data: PColorBGRA);
   public
-    function GetData(out Data: TRetData; var X1, Y1, X2, Y2: Integer): Boolean;
-    function GetBitmap(out Bitmap: TMufasaBitmap; X1, Y1, X2, Y2: Integer; CopyData: Boolean = True): Boolean;
+    procedure SetTarget(Bitmap: TMufasaBitmap);
+    procedure SetTarget(Window: TWindowHandle);
 
-    function SimilarColors(Color1, Color2, Tolerance: Integer): Boolean;
+    function FindDTM(DTM: TDTM; MaxToFind: Integer; Bounds: TBox): TPointArray;
+    function FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer; Bounds: TBox): TPointArray;
 
-    function FindColor(out X, Y: Integer; Color: Integer; Area: TBox): Boolean;
-    function FindColorTolerance(out X, Y: Integer; Color, Tolerance: Integer; Area: TBox): Boolean;
-    function FindColors(out TPA: TPointArray; Color: Integer; Area: TBox): Boolean;
-    function FindColorsTolerance(out Points: TPointArray; Color, Tolerance: Integer; Area: TBox; MaxToFind: Integer = 0): Boolean;
+    function FindBitmap(Bitmap: TMufasaBitmap; Tolerance: Single; MaxToFind: Integer; Bounds: TBox): TPointArray;
+    function FindBitmapEx(Bitmap: TMufasaBitmap; Tolerance: Single; ColorSpace: TColorSpace; MaxToFind: Integer; Bounds: TBox): TPointArray;
 
-    function CountColorTolerance(Color: Integer; Tolerance: Integer; Area: TBox): Integer;
-    function CountColor(Color: Integer; Area: TBox): Integer;
+    function FindColor(Color: TColor; Bounds: TBox): TPointArray; // RGB Colorpace
+    function FindColor(Color: TColor; Tolerance: Single; Bounds: TBox): TPointArray; // RGB Colorpace
 
-    function FindBitmaps(Bitmap: TMufasaBitmap; out Points: TPointArray; Area: TBox; MaxToFind: Integer = 0): Boolean;
-    function FindBitmap(Bitmap: TMufasaBitmap; out X, Y: Integer; Area: TBox): Boolean;
-    function FindBitmapsTolerance(Bitmap: TMufasaBitmap; out Points: TPointArray; Area: TBox; Tolerance: Integer; MaxToFind: Integer = 0): Boolean;
-    function FindBitmapTolerance(Bitmap: TMufasaBitmap; out X, Y: Integer; Area: TBox; Tolerance: Integer): Boolean;
-    function FindDTMs(DTM: TDTM; out Points: TPointArray; Area: TBox; MaxToFind: Integer = 0): Boolean;
-    function FindDTM(DTM: TDTM; out x, y: Integer; Area: TBox): Boolean;
-    function FindDTMsRotated(DTM: TDTM; out Points: TPointArray; Area: TBox; sAngle, eAngle, aStep: Double; out aFound: TDoubleArray; MaxToFind: Integer = 0): Boolean;
-    function FindDTMRotated(DTM: TDTM; out x, y: Integer; Area: TBox; sAngle, eAngle, aStep: Double; out aFound: Double): Boolean;
+    function FindColor(Color: TColor; Tolerance: Single; ColorSpace: TColorSpace; Bounds: TBox): TPointArray;
+    function FindColorEx(Color: TColorTolerance; Bounds: TBox): TPointArray;
 
-    function FindTemplateEx(TemplImage: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; Area: TBox; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
-    function FindTemplate(TemplImage: TMufasaBitmap; out X,Y: Integer; Formula: ETMFormula; Area: TBox;  MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
+    function CountColor(Color: TColor; Bounds: TBox): Integer; // RGB Colorpace
+    function CountColor(Color: TColor; Tolerance: Single; Bounds: TBox): Integer; // RGB Colorpace
 
-    function GetColors(TPA: TPointArray): TIntegerArray;
-    function GetColorsMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix;
-    function GetColor(X, Y: Integer): Integer;
+    function CountColor(Color: TColor; Tolerance: Single; ColorSpace: TColorSpace; Bounds: TBox): Integer;
+    function CountColorEx(Color: TColorTolerance; Bounds: TBox): Integer;
 
-    function AverageBrightness(Area: TBox): Integer;
-    function PeakBrightness(Area: TBox): Integer;
+    function GetColor(X, Y: Integer): TColor;
+    function GetColors(Points: TPointArray): TColorArray;
+    function GetColorsMatrix(Bounds: TBox): TIntegerMatrix;
 
-    function GetPixelDifference(Area: TBox; WaitTime: Integer): Integer; overload;
-    function GetPixelDifference(Area: TBox; Tolerance: Integer; WaitTime: Integer): Integer; overload;
-    function GetPixelDifferenceTPA(Area: TBox; WaitTime: Integer): TPointArray; overload;
-    function GetPixelDifferenceTPA(Area: TBox; Tolerance: Integer; WaitTime: Integer): TPointArray; overload;
-
-    // tol speeds
-    procedure SetToleranceSpeed(nCTS: Integer);
-    function GetToleranceSpeed: Integer;
-    procedure SetToleranceSpeed2Modifiers(const nHue, nSat: Extended);
-    procedure GetToleranceSpeed2Modifiers(out hMod, sMod: Extended);
-    procedure SetToleranceSpeed3Modifier(modifier: Extended);
-    function GetToleranceSpeed3Modifier: Extended;
-
-    constructor Create(aClient: TObject);
+    class operator Initialize(var Self: TSimbaFinder);
   end;
 
 implementation
 
 uses
-  math,
-  simba.client, simba.tpa, simba.finder_dtm, simba.finder_bitmap,
-  simba.colormath_conversion;
+  simba.nativeinterface, simba.tpa;
 
-constructor TMFinder.Create(aClient: TObject);
-begin
-  inherited Create();
-
-  Self.Client := aClient;
-  Self.CTS := 1;
-  Self.hueMod := 0.2;
-  Self.satMod := 0.2;
-  Self.CTS3Modifier := 1;
-end;
-
-procedure TMFinder.SetToleranceSpeed(nCTS: Integer);
-begin
-  if (nCTS < 0) or (nCTS > 3) then
-    raise Exception.CreateFmt('The given CTS ([%d]) is invalid.',[nCTS]);
-  Self.CTS := nCTS;
-end;
-
-function TMFinder.GetToleranceSpeed: Integer;
-begin
-  Result := Self.CTS;
-end;
-
-procedure TMFinder.SetToleranceSpeed2Modifiers(const nHue, nSat: Extended);
-begin
-  Self.hueMod := nHue;
-  Self.satMod := nSat;
-end;
-
-procedure TMFinder.GetToleranceSpeed2Modifiers(out hMod, sMod: Extended);
-begin
-  hMod := Self.hueMod;
-  sMod := Self.satMod;
-end;
-
-procedure TMFinder.SetToleranceSpeed3Modifier(modifier: Extended);
-begin
-  CTS3Modifier := modifier;
-end;
-
-function TMFinder.GetToleranceSpeed3Modifier: Extended;
-begin
-  Result := CTS3Modifier;
-end;
-
-function TMFinder.GetData(out Data: TRetData; var X1, Y1, X2, Y2: Integer): Boolean;
+function TSimbaFinder.DoFindDTM(DTM: TDTM; Bounds: TBox; MaxToFind: Integer): TPointArray;
 var
-  ClientWidth, ClientHeight: Integer;
+  Data: PColorBGRA;
+  DataWidth: Integer;
 begin
-  TClient(Self.Client).IOManager.GetDimensions(ClientWidth, ClientHeight);
+  Result := nil;
 
-  if (X1 = -1) and (Y1 = -1) and (X2 = -1) and (Y2 = -1) then
-  begin
-    X1 := 0;
-    Y1 := 0;
-    X2 := ClientWidth - 1;
-    Y2 := ClientHeight - 1;
-  end else
-  begin
-    if (X1 < 0) then X1 := 0;
-    if (Y1 < 0) then Y1 := 0;
-    if (X2 >= ClientWidth)  then X2 := ClientWidth - 1;
-    if (Y2 >= ClientHeight) then Y2 := ClientHeight - 1;
-  end;
-
-  Data := TClient(Self.Client).IOManager.ReturnData(X1, Y1, X2 - X1 + 1, Y2 - Y1 + 1);
-  if (Data.Ptr = nil) then
-    SimbaDebugLn([EDebugLn.YELLOW], 'No image data returned. Is the target resizing?');
-
-  Result := Data.Ptr <> nil;
-end;
-
-function TMFinder.GetBitmap(out Bitmap: TMufasaBitmap; X1, Y1, X2, Y2: Integer; CopyData: Boolean): Boolean;
-var
-  ImageData: TRetData;
-begin
-  if GetData(ImageData, X1, Y1, X2, Y2) then
-    Bitmap := TMufasaBitmap.CreateFromData(X2-X1+1, Y2-Y1+1, PColorBGRA(ImageData.Ptr), CopyData)
-  else
-    Bitmap := nil;
-
-  Result := Bitmap <> nil;
-end;
-
-function TMFinder.GetColorsMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix;
-var
-  ClientWidth, ClientHeight: Integer;
-begin
-  TClient(Self.Client).IOManager.GetDimensions(ClientWidth, ClientHeight);
-
-  if (X1 = -1) and (Y1 = -1) and (X2 = -1) and (Y2 = -1) then
-  begin
-    X1 := 0;
-    Y1 := 0;
-    X2 := ClientWidth - 1;
-    Y2 := ClientHeight - 1;
-  end else
-  begin
-    if (X1 < 0) then X1 := 0;
-    if (Y1 < 0) then Y1 := 0;
-    if (X2 >= ClientWidth)  then X2 := ClientWidth - 1;
-    if (Y2 >= ClientHeight) then Y2 := ClientHeight - 1;
-  end;
-
-  Result := TClient(Self.Client).IOManager.ReturnMatrix(X1, Y1, X2 - X1 + 1, Y2 - Y1 + 1);
-  if (Result.Area = 0) then
-    SimbaDebugLn([EDebugLn.YELLOW], 'No image data returned. Is the target resizing?');
-end;
-
-function TMFinder.SimilarColors(Color1, Color2, Tolerance: Integer) : Boolean;
-begin
-  //case Self.CTS of
-  //  0: Result := TSameColorCTS0.Create(Color1, Tolerance).IsSame(RGBToBGR(Color2));
-  //  1: Result := TSameColorCTS1.Create(Color1, Tolerance).IsSame(RGBToBGR(Color2));
-  //  2: Result := TSameColorCTS2.Create(Color1, Tolerance, HueMod, SatMod).IsSame(RGBToBGR(Color2));
-  //  3: Result := TSameColorCTS3.Create(Color1, Tolerance, CTS3Modifier).IsSame(RGBToBGR(Color2));
-  //end;
-end;
-
-function TMFinder.CountColorTolerance(Color: Integer; Tolerance: Integer; Area: TBox): Integer;
-//var
-//  ImageData: TRetData;
-//  Buffer: TFindColorBuffer;
-//begin
-//  if GetData(ImageData, Area.X1, Area.Y1, Area.X2, Area.Y2) then
-//  begin
-//    Buffer.Data := PColorBGRA(ImageData.Ptr);
-//    Buffer.Width := ImageData.RowLen;
-//    Buffer.SearchWidth := Area.Width;
-//    Buffer.SearchHeight := Area.Height;
-//
-//    if (Tolerance = 0) then
-//      Result := Buffer.Count(Color)
-//    else
-//    case Self.CTS of
-//      0: Result := Buffer.CountCTS0(Color, Tolerance);
-//      1: Result := Buffer.CountCTS1(Color, Tolerance);
-//      2: Result := Buffer.CountCTS2(Color, Tolerance, HueMod, SatMod);
-//      3: Result := Buffer.CountCTS3(Color, Tolerance, CTS3Modifier);
-//    end;
-//  end else
-//    Result := 0;
-//end;
-begin
-
-end;
-
-function TMFinder.CountColor(Color: Integer; Area: TBox): Integer;
-begin
-  Result := CountColorTolerance(Color, 0, Area);
-end;
-
-function TMFinder.FindColor(out X, Y: Integer; Color: Integer; Area: TBox): Boolean;
-begin
-  Result := FindColorTolerance(X, Y, Color, 0, Area);
-end;
-
-function TMFinder.FindColorTolerance(out X, Y: Integer; Color, Tolerance: Integer; Area: TBox): Boolean;
-var
-  Points: TPointArray;
-begin
-  Result := FindColorsTolerance(Points, Color, Tolerance, Area, 1);
-
-  if Result then
-  begin
-    X := Points[0].X;
-    Y := Points[0].Y;
+  if GetTargetData(Bounds, Data, DataWidth) then
+  try
+    Result := FDTMFinder.Find(DTM, Data, DataWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft, MaxToFind);
+  finally
+    FreeTargetData(Data);
   end;
 end;
 
-function TMFinder.FindColorsTolerance(out Points: TPointArray; Color, Tolerance: Integer; Area: TBox; MaxToFind: Integer = 0): Boolean;
-//var
-//  ImageData: TRetData;
-//  Buffer: TFindColorBuffer;
-//begin
-//  if GetData(ImageData, Area.X1, Area.Y1, Area.X2, Area.Y2) then
-//  begin
-//    Buffer.Data := PColorBGRA(ImageData.Ptr);
-//    Buffer.Width := ImageData.RowLen;
-//    Buffer.SearchWidth := Area.Width;
-//    Buffer.SearchHeight := Area.Height;
-//    Buffer.Offset := Area.TopLeft;
-//
-//    if (Tolerance = 0) then
-//      Result := Buffer.Find(Points, Color, MaxToFind)
-//    else
-//    begin
-//      case Self.CTS of
-//        0: Result := Buffer.FindCTS0(Points, Color, Tolerance, MaxToFind);
-//        1: Result := Buffer.FindCTS1(Points, Color, Tolerance, MaxToFind);
-//        2: Result := Buffer.FindCTS2(Points, Color, Tolerance, HueMod, SatMod, MaxToFind);
-//        3: Result := Buffer.FindCTS2(Points, Color, Tolerance, CTS3Modifier, MaxToFind);
-//      end;
-//    end;
-//  end else
-//    Result := False;
-begin
-end;
-
-function TMFinder.FindColors(out TPA: TPointArray; Color: Integer; Area: TBox): Boolean;
-begin
-  Result := FindColorsTolerance(TPA, Color, 0, Area);
-end;
-
-function TMFinder.FindBitmaps(Bitmap: TMufasaBitmap; out Points: TPointArray; Area: TBox; MaxToFind: Integer): Boolean;
+function TSimbaFinder.DoFindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox; MaxToFind: Integer): TPointArray;
 var
-  ImageData: TRetData;
-  Buffer: TFindBitmapBuffer;
+  Data: PColorBGRA;
+  DataWidth: Integer;
 begin
-  if GetData(ImageData, Area.X1, Area.Y1, Area.X2, Area.Y2) then
-  begin
-    Buffer.Data := PColorBGRA(ImageData.Ptr);
-    Buffer.Width := ImageData.RowLen;
-    Buffer.SearchWidth := Area.Width;
-    Buffer.SearchHeight := Area.Height;
-    Buffer.Offset := Area.TopLeft;
+  Result := nil;
 
-    Result := Buffer.Find(Bitmap, Points, MaxToFind);
-  end else
-    Result := False;
-end;
-
-function TMFinder.FindBitmap(Bitmap: TMufasaBitmap; out X, Y: Integer; Area: TBox): Boolean;
-var
-  Points: TPointArray;
-begin
-  Result := FindBitmaps(Bitmap, Points, Area, 1);
-
-  if Result then
-  begin
-    X := Points[0].X;
-    Y := Points[0].Y;
+  if GetTargetData(Bounds, Data, DataWidth) then
+  try
+    Result := FDTMFinder.FindRotated(DTM, StartDegrees, EndDegrees, Step, FoundDegrees, Data, DataWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft, MaxToFind);
+  finally
+    FreeTargetData(Data);
   end;
 end;
 
-function TMFinder.FindBitmapsTolerance(Bitmap: TMufasaBitmap; out Points: TPointArray; Area: TBox; Tolerance: Integer; MaxToFind: Integer): Boolean;
+function TSimbaFinder.DoFindBitmap(Bitmap: TMufasaBitmap; Bounds: TBox; MaxToFind: Integer): TPointArray;
 var
-  ImageData: TRetData;
-  Buffer: TFindBitmapBuffer;
+  Data: PColorBGRA;
+  DataWidth: Integer;
 begin
-  if GetData(ImageData, Area.X1, Area.Y1, Area.X2, Area.Y2) then
-  begin
-    Buffer.Data := PColorBGRA(ImageData.Ptr);
-    Buffer.Width := ImageData.RowLen;
-    Buffer.SearchWidth := Area.Width;
-    Buffer.SearchHeight := Area.Height;
-    Buffer.Offset := Area.TopLeft;
+  Result := nil;
 
-    Result := Buffer.Find(Bitmap, Points, Tolerance, MaxToFind);
-  end else
-    Result := False;
-end;
-
-function TMFinder.FindBitmapTolerance(Bitmap: TMufasaBitmap; out X, Y: Integer; Area: TBox; Tolerance: Integer): Boolean;
-var
-  Points: TPointArray;
-begin
-  Result := FindBitmapsTolerance(Bitmap, Points, Area, Tolerance, 1);
-
-  if Result then
-  begin
-    X := Points[0].X;
-    Y := Points[0].Y;
+  if GetTargetData(Bounds, Data, DataWidth) then
+  try
+    Result := FBitmapFinder.Find(Bitmap, Data, DataWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft, MaxToFind);
+  finally
+    FreeTargetData(Data);
   end;
 end;
 
-{
-  Tries to find the given Bitmap / template using MatchTemplate
-}
-function TMFinder.FindTemplateEx(TemplImage: TMufasaBitmap; out TPA: TPointArray; Formula: ETMFormula; Area: TBox; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
+function TSimbaFinder.DoFindColor(Bounds: TBox): TPointArray;
 var
-  Y: Integer;
-  Image, Templ: TIntegerMatrix;
-  xcorr: TSingleMatrix;
-  ImageData : TRetData;
-  maxLo, maxHi: Single;
+  Data: PColorBGRA;
+  DataWidth: Integer;
 begin
-  if GetData(ImageData, Area.X1, Area.Y1, Area.X2, Area.Y2) then
-  begin
-    SetLength(Image, Area.Height, Area.Width);
-    SetLength(Templ, TemplImage.Height, TemplImage.Width);
+  Result := nil;
 
-    for Y := 0 to Area.Height - 1 do
-      Move(ImageData.Ptr[Y * ImageData.RowLen], Image[Y, 0], Area.Width * SizeOf(TRGB32));
-    for Y := 0 to TemplImage.Height - 1 do
-      Move(TemplImage.Data[Y * TemplImage.Width], Templ[Y, 0], TemplImage.Width * SizeOf(TRGB32));
+  if GetTargetData(Bounds, Data, DataWidth) then
+  try
+    Result := FColorFinder.Find(Data, DataWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft);
+  finally
+    FreeTargetData(Data);
+  end;
+end;
 
-    xcorr := MatchTemplate(Image, Templ, Formula);
+function TSimbaFinder.DoCountColor(Bounds: TBox): Integer;
+var
+  Data: PColorBGRA;
+  DataWidth: Integer;
+begin
+  Result := 0;
 
-    if Formula in [TM_SQDIFF, TM_SQDIFF_NORMED] then
-    begin
-      if DynamicAdjust then
+  if GetTargetData(Bounds, Data, DataWidth) then
+  try
+    Result := FColorFinder.Count(Data, DataWidth, Bounds.Width, Bounds.Height);
+  finally
+    FreeTargetData(Data);
+  end;
+end;
+
+procedure TSimbaFinder.FreeTargetData(var Data: PColorBGRA);
+begin
+  if (FTargetType in [ETargetType.WINDOW]) then
+    FreeMem(Data);
+end;
+
+function TSimbaFinder.ValidateTargetBounds(var Bounds: TBox): Boolean;
+var
+  Width, Height: Integer;
+  B: TBox;
+begin
+  Result := False;
+
+  case FTargetType of
+    ETargetType.BITMAP:
       begin
-        xcorr.MinMax(maxLo, maxHi);
-        MinMatch := Min(MinMatch, maxLo + 0.1e-2);
+        Result := True;
+
+        Width := FTarget.Bitmap.Width;
+        Height := FTarget.Bitmap.Height;
       end;
-      TPA := xcorr.Indices(MinMatch, __LE__).Offset(Area.TopLeft);
+
+    ETargetType.WINDOW:
+      begin
+        Result := SimbaNativeInterface.GetWindowBounds(FTarget.Window, B);
+
+        Width := B.Width;
+        Height := B.Height;
+      end;
+
+    else
+      raise Exception.Create('TSimbaFinder: Target not set');
+  end;
+
+  if Result then
+  begin
+    if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
+    begin
+      Bounds.X1 := 0;
+      Bounds.Y1 := 0;
+      Bounds.X2 := Width -1;
+      Bounds.Y2 := Height - 1;
     end else
     begin
-      if DynamicAdjust then
-      begin
-        xcorr.MinMax(maxLo, maxHi);
-        MinMatch := Max(MinMatch, maxHi - 0.1e-2);
-      end;
-      TPA := xcorr.Indices(MinMatch, __GE__).Offset(Area.TopLeft);
+      if (Bounds.X1 < 0)       then Bounds.X1 := 0;
+      if (Bounds.Y1 < 0)       then Bounds.Y1 := 0;
+      if (Bounds.X2 >= Width)  then Bounds.X2 := Width - 1;
+      if (Bounds.Y2 >= Height) then Bounds.Y2 := Height - 1;
     end;
-
-    Result := Length(TPA) > 0;
-  end else
-    Result := False;
-end;
-
-function TMFinder.FindTemplate(TemplImage: TMufasaBitmap; out X, Y: Integer; Formula: ETMFormula; Area: TBox; MinMatch: Extended; DynamicAdjust: Boolean): Boolean;
-var
-  TPA: TPointArray;
-begin
-  Result := Self.FindTemplateEx(TemplImage, TPA, Formula, Area, MinMatch, DynamicAdjust);
-
-  if Result then
-  begin
-    X := TPA[0].x;
-    Y := TPA[0].y;
-  end else
-  begin
-    X := -1;
-    Y := -1;
   end;
 end;
 
-function TMFinder.FindDTMs(DTM: TDTM; out Points: TPointArray; Area: TBox; MaxToFind: Integer): Boolean;
-var
-  ImageData: TRetData;
-  Buffer: TFindDTMBuffer;
+function TSimbaFinder.GetTargetData(var Bounds: TBox; out Data: PColorBGRA; out DataWidth: Integer): Boolean;
 begin
-  if GetData(ImageData, Area.X1, Area.Y1, Area.X2, Area.Y2) then
+  Result := False;
+  Data := nil;
+
+  if ValidateTargetBounds(Bounds) then
   begin
-    Buffer.Data := ImageData.Ptr;
-    Buffer.Width := ImageData.RowLen;
-    Buffer.SearchWidth := Area.Width;
-    Buffer.SearchHeight := Area.Height;
-    Buffer.Offset := Area.TopLeft;
+    case FTargetType of
+      ETargetType.BITMAP:
+        begin
+          DataWidth := FTarget.Bitmap.Width;
+          Data := FTarget.Bitmap.Data + (Bounds.Y1 * FTarget.Bitmap.Width) + Bounds.X1;
 
-    Points := Buffer.FindDTMs(DTM);
+          Result := True;
+        end;
 
-    Result := Length(Points) > 0;
-  end else
-    Result := False;
-end;
+      ETargetType.WINDOW:
+        begin
+          DataWidth := Bounds.Width;
 
-function TMFinder.FindDTM(DTM: TDTM; out x, y: Integer; Area: TBox): Boolean;
-var
-  Points: TPointArray;
-begin
-  Result := Self.FindDTMs(DTM, Points, Area, 1);
-  if Result then
-  begin
-    X := Points[0].X;
-    Y := Points[0].Y;
+          Result := SimbaNativeInterface.GetWindowImage(FTarget.Window, Bounds.X1, Bounds.Y1, Bounds.Width, Bounds.Height, Data);
+        end;
+      else
+        raise Exception.Create('TSimbaFinder: Target not set');
+    end;
   end;
 end;
 
-function TMFinder.FindDTMsRotated(DTM: TDTM; out Points: TPointArray; Area: TBox; sAngle, eAngle, aStep: Double; out aFound: TDoubleArray; MaxToFind: Integer): Boolean;
+procedure TSimbaFinder.SetTarget(Bitmap: TMufasaBitmap);
+begin
+  FTargetType := ETargetType.BITMAP;
+  FTarget.Bitmap := Bitmap;
+end;
+
+procedure TSimbaFinder.SetTarget(Window: TWindowHandle);
+begin
+  FTargetType := ETargetType.WINDOW;
+  FTarget.Window := Window;
+end;
+
+function TSimbaFinder.FindDTM(DTM: TDTM; MaxToFind: Integer; Bounds: TBox): TPointArray;
+begin
+  Result := DoFindDTM(DTM, Bounds, MaxToFind);
+end;
+
+function TSimbaFinder.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer; Bounds: TBox): TPointArray;
+begin
+  Result := DoFindDTMRotated(DTM, StartDegrees, EndDegrees, Step, FoundDegrees, Bounds, MaxToFind);
+end;
+
+function TSimbaFinder.FindBitmap(Bitmap: TMufasaBitmap; Tolerance: Single; MaxToFind: Integer; Bounds: TBox): TPointArray;
+begin
+  FBitmapFinder.Setup(EColorSpace.RGB, Tolerance, DefaultMultipliers);
+
+  Result := DoFindBitmap(Bitmap, Bounds, MaxToFind);
+end;
+
+function TSimbaFinder.FindBitmapEx(Bitmap: TMufasaBitmap; Tolerance: Single; ColorSpace: TColorSpace; MaxToFind: Integer; Bounds: TBox): TPointArray;
+begin
+  FBitmapFinder.Setup(ColorSpace.ColorSpace, Tolerance, ColorSpace.Multipliers);
+
+  Result := DoFindBitmap(Bitmap, Bounds, MaxToFind);
+end;
+
+function TSimbaFinder.FindColor(Color: TColor; Bounds: TBox): TPointArray;
+begin
+  FColorFinder.Setup(EColorSpace.RGB, Color, 1, DefaultMultipliers);
+
+  Result := DoFindColor(Bounds);
+end;
+
+function TSimbaFinder.FindColor(Color: TColor; Tolerance: Single; Bounds: TBox): TPointArray;
+begin
+  FColorFinder.Setup(EColorSpace.RGB, Color, Tolerance, DefaultMultipliers);
+
+  Result := DoFindColor(Bounds);
+end;
+
+function TSimbaFinder.FindColor(Color: TColor; Tolerance: Single; ColorSpace: TColorSpace; Bounds: TBox): TPointArray;
+begin
+  FColorFinder.Setup(ColorSpace.ColorSpace, Color, Tolerance, ColorSpace.Multipliers);
+
+  Result := DoFindColor(Bounds);
+end;
+
+function TSimbaFinder.FindColorEx(Color: TColorTolerance; Bounds: TBox): TPointArray;
+begin
+  FColorFinder.Setup(Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
+
+  Result := DoFindColor(Bounds);
+end;
+
+function TSimbaFinder.CountColor(Color: TColor; Bounds: TBox): Integer;
+begin
+  FColorFinder.Setup(EColorSpace.RGB, Color, 1, DefaultMultipliers);
+
+  Result := DoCountColor(Bounds);
+end;
+
+function TSimbaFinder.CountColor(Color: TColor; Tolerance: Single; Bounds: TBox): Integer;
+begin
+  FColorFinder.Setup(EColorSpace.RGB, Color, Tolerance, DefaultMultipliers);
+
+  Result := DoCountColor(Bounds);
+end;
+
+function TSimbaFinder.CountColor(Color: TColor; Tolerance: Single; ColorSpace: TColorSpace; Bounds: TBox): Integer;
+begin
+  FColorFinder.Setup(ColorSpace.ColorSpace, Color, Tolerance, DefaultMultipliers);
+
+  Result := DoCountColor(Bounds);
+end;
+
+function TSimbaFinder.CountColorEx(Color: TColorTolerance; Bounds: TBox): Integer;
+begin
+  FColorFinder.Setup(Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
+
+  Result := DoCountColor(Bounds);
+end;
+
+function TSimbaFinder.GetColor(X, Y: Integer): TColor;
 var
-  ImageData: TRetData;
-  Buffer: TFindDTMBuffer;
+  B: TBox;
+  Data: PColorBGRA;
+  DataWidth: Integer;
 begin
-  if GetData(ImageData, Area.X1, Area.Y1, Area.X2, Area.Y2) then
-  begin
-    Buffer.Data := ImageData.Ptr;
-    Buffer.Width := ImageData.RowLen;
-    Buffer.SearchWidth := Area.Width;
-    Buffer.SearchHeight := Area.Height;
-    Buffer.Offset := Area.TopLeft;
+  B.X1 := X; B.Y1 := Y;
+  B.X2 := X; B.Y2 := Y;
 
-    Points := Buffer.FindDTMsRotated(DTM, sAngle, eAngle, aStep, aFound);
-
-    Result := Length(Points) > 0;
-  end else
-    Result := False;
+  if GetTargetData(B, Data, DataWidth) then
+    Result := Data^.ToColor()
+  else
+    Result := -1;
 end;
 
-function TMFinder.FindDTMRotated(DTM: TDTM; out x, y: Integer; Area: TBox; sAngle, eAngle, aStep: Double; out aFound: Double): Boolean;
+function TSimbaFinder.GetColors(Points: TPointArray): TColorArray;
 var
-  Points: TPointArray;
-  Angles: TDoubleArray;
-begin
-  Result := FindDTMsRotated(DTM, Points, Area, sAngle, eAngle, aStep, Angles, 1);
-  if Result then
-  begin
-    X := Points[0].x;
-    Y := Points[0].y;
-    aFound := Angles[0];
-  end;
-end;
-
-function TMFinder.GetColors(TPA: TPointArray): TIntegerArray;
-//var
-//  Bounds: TBox;
-//  I, X, Y: Integer;
-//  ImageData: TRetData;
-//begin
-//  SetLength(Result, Length(TPA));
-//
-//  Bounds := TPA.Bounds();
-//  if GetData(ImageData, Bounds.X1, Bounds.Y1, Bounds.X2, Bounds.Y2) then
-//  begin
-//    for I := 0 to High(TPA) do
-//    begin
-//      X := TPA[I].X - Bounds.X1;
-//      Y := TPA[I].Y - Bounds.Y1;
-//
-//      //Result[I] := BGRToRGB(ImageData.Ptr[Y * ImageData.RowLen + X]);
-//    end;
-//  end else
-//    Result := nil;
-begin
-end;
-
-function TMFinder.GetColor(X, Y: Integer): Integer;
-begin
-  Result := TClient(Client).IOManager.GetColor(X, Y);
-end;
-
-function TMFinder.AverageBrightness(Area: TBox): Integer;
-var
-  Bitmap: TMufasaBitmap;
-begin
-  if GetBitmap(Bitmap, Area.X1, Area.Y1, Area.X2, Area.Y2, False) then
-  begin
-    Result := Bitmap.AverageBrightness();
-
-    Bitmap.Free();
-  end;
-end;
-
-function TMFinder.PeakBrightness(Area: TBox): Integer;
-var
-  Bitmap: TMufasaBitmap;
-begin
-  if GetBitmap(Bitmap, Area.X1, Area.Y1, Area.X2, Area.Y2, False) then
-  begin
-    Result := Bitmap.PeakBrightness();
-
-    Bitmap.Free();
-  end;
-end;
-
-function TMFinder.GetPixelDifference(Area: TBox; WaitTime: Integer): Integer;
-var
-  BitmapBefore, BitmapAfter: TMufasaBitmap;
-begin
-  Result := 0;
-
-  if GetBitmap(BitmapBefore, Area.X1, Area.Y1, Area.X2, Area.Y2) then
-  begin
-    Sleep(WaitTime);
-    if GetBitmap(BitmapAfter, Area.X1, Area.Y1, Area.X2, Area.Y2) and (BitmapBefore.Width = BitmapAfter.Width) and (BitmapBefore.Height = BitmapAfter.Height) then
-      Result := BitmapBefore.PixelDifference(BitmapAfter);
-  end;
-
-  if (BitmapBefore <> nil) then
-    BitmapBefore.Free();
-  if (BitmapAfter <> nil) then
-    BitmapAfter.Free();
-end;
-
-function TMFinder.GetPixelDifference(Area: TBox; Tolerance: Integer; WaitTime: Integer): Integer;
-var
-  BitmapBefore, BitmapAfter: TMufasaBitmap;
-begin
-  Result := 0;
-
-  if GetBitmap(BitmapBefore, Area.X1, Area.Y1, Area.X2, Area.Y2) then
-  begin
-    Sleep(WaitTime);
-    if GetBitmap(BitmapAfter, Area.X1, Area.Y1, Area.X2, Area.Y2) and (BitmapBefore.Width = BitmapAfter.Width) and (BitmapBefore.Height = BitmapAfter.Height) then
-      Result := BitmapBefore.PixelDifference(BitmapAfter, Tolerance);
-  end;
-
-  if (BitmapBefore <> nil) then
-    BitmapBefore.Free();
-  if (BitmapAfter <> nil) then
-    BitmapAfter.Free();
-end;
-
-function TMFinder.GetPixelDifferenceTPA(Area: TBox; WaitTime: Integer): TPointArray;
-var
-  BitmapBefore, BitmapAfter: TMufasaBitmap;
+  B: TBox;
+  Data: PColorBGRA;
+  DataWidth: Integer;
+  I, X, Y, Count: Integer;
 begin
   Result := nil;
 
-  if GetBitmap(BitmapBefore, Area.X1, Area.Y1, Area.X2, Area.Y2) then
+  B := Points.Bounds();
+  if GetTargetData(B, Data, DataWidth) then
   begin
-    Sleep(WaitTime);
-    if GetBitmap(BitmapAfter, Area.X1, Area.Y1, Area.X2, Area.Y2) and (BitmapBefore.Width = BitmapAfter.Width) and (BitmapBefore.Height = BitmapAfter.Height) then
-      Result := BitmapBefore.PixelDifferenceTPA(BitmapAfter);
-  end;
+    SetLength(Result, Length(Points));
 
-  if (BitmapBefore <> nil) then
-    BitmapBefore.Free();
-  if (BitmapAfter <> nil) then
-    BitmapAfter.Free();
+    Count := 0;
+    for I := 0 to High(Points) do
+    begin
+      X := Points[I].X - B.X1;
+      Y := Points[I].Y - B.Y1;
+
+      Result[Count] := Data[Y * DataWidth + X].ToColor();
+      Inc(Count);
+    end;
+    SetLength(Result, Count);
+  end;
 end;
 
-function TMFinder.GetPixelDifferenceTPA(Area: TBox; Tolerance: Integer; WaitTime: Integer): TPointArray;
+function TSimbaFinder.GetColorsMatrix(Bounds: TBox): TIntegerMatrix;
 var
-  BitmapBefore, BitmapAfter: TMufasaBitmap;
+  Data: PColorBGRA;
+  DataWidth: Integer;
+  Width, Height, X, Y: Integer;
 begin
   Result := nil;
 
-  if GetBitmap(BitmapBefore, Area.X1, Area.Y1, Area.X2, Area.Y2) then
+  if GetTargetData(Bounds, Data, DataWidth) then
   begin
-    Sleep(WaitTime);
-    if GetBitmap(BitmapAfter, Area.X1, Area.Y1, Area.X2, Area.Y2) and (BitmapBefore.Width = BitmapAfter.Width) and (BitmapBefore.Height = BitmapAfter.Height) then
-      Result := BitmapBefore.PixelDifferenceTPA(BitmapAfter, Tolerance);
-  end;
+    Width := Bounds.Width - 1;
+    Height := Bounds.Height - 1;
 
-  if (BitmapBefore <> nil) then
-    BitmapBefore.Free();
-  if (BitmapAfter <> nil) then
-    BitmapAfter.Free();
+    Result.SetSize(Width + 1, Height + 1);
+
+    for Y := 0 to Height do
+      for X := 0 to Width do
+        Result[Y, X] := Data[Y * DataWidth + X].ToColor();
+  end;
+end;
+
+class operator TSimbaFinder.Initialize(var Self: TSimbaFinder);
+begin
+  Self := Default(TSimbaFinder);
 end;
 
 end.
+

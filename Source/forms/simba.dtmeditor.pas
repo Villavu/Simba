@@ -420,7 +420,7 @@ begin
   DTM := GetDTM();
   try
     FDebugColor := [];
-    FDebugDTM   := FImageBox.FindDTMs(DTM);
+    //FDebugDTM   := FImageBox.FindDTMs(DTM);
 
     FImageBox.Paint();
   finally
@@ -482,7 +482,7 @@ begin
       FFlashing := False;
 
       FDebugDTM   := [];
-      FDebugColor := FImageBox.FindColors(1, Color, Tolerance);
+      //FDebugColor := FImageBox.FindColors(1, Color, Tolerance);
 
       FImageBox.Paint();
     end;

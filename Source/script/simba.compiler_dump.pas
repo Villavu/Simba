@@ -46,6 +46,7 @@ type
     function addGlobalFunc(Header: lpString; Body: TStringArray): TLapeTree_Method; override;
     function addGlobalType(Typ: TLapeType; AName: lpString; ACopy: Boolean): TLapeType; override;
     function addGlobalType(Str: lpString; AName: lpString): TLapeType; override;
+    function addGlobalVar(Typ: lpString; Value: lpString; AName: lpString): TLapeGlobalVar; override;
 
     procedure DumpToFile(FileName: String);
   end;
@@ -165,6 +166,13 @@ begin
   Result := inherited addGlobalType(Str, AName);
 
   addTypeDump(AName, Str);
+end;
+
+function TSimbaCompilerDump.addGlobalVar(Typ: lpString; Value: lpString; AName: lpString): TLapeGlobalVar;
+begin
+  Result := inherited addGlobalVar(Typ, Value, AName);
+
+  addCodeDump('var ' + AName + ': ' + Typ + ';');
 end;
 
 procedure TSimbaCompilerDump.DumpToFile(FileName: String);
