@@ -58,6 +58,8 @@ type
     function ValidateTargetBounds(var Bounds: TBox): Boolean;
     function GetTargetData(var Bounds: TBox; out Data: PColorBGRA; out DataWidth: Integer): Boolean;
     procedure FreeTargetData(var Data: PColorBGRA);
+
+    function GetDataAsBitmap(var Bounds: TBox; out Bitmap: TMufasaBitmap): Boolean;
   public
     procedure SetTarget(Bitmap: TMufasaBitmap);
     procedure SetTarget(Window: TWindowHandle);
@@ -83,6 +85,14 @@ type
     function GetColor(X, Y: Integer): TColor;
     function GetColors(Points: TPointArray): TColorArray;
     function GetColorsMatrix(Bounds: TBox): TIntegerMatrix;
+
+    function GetPixelDifference(WaitTime: Integer; Area: TBox): Integer; overload;
+    function GetPixelDifference(WaitTime: Integer; Tolerance: Integer; Area: TBox): Integer; overload;
+    function GetPixelDifferenceTPA(WaitTime: Integer; Area: TBox): TPointArray; overload;
+    function GetPixelDifferenceTPA(WaitTime: Integer; Tolerance: Integer; Area: TBox): TPointArray; overload;
+
+    function AverageBrightness(Area: TBox): Integer;
+    function PeakBrightness(Area: TBox): Integer;
 
     class operator Initialize(var Self: TSimbaFinder);
   end;
@@ -173,6 +183,23 @@ begin
     FreeMem(Data);
 end;
 
+function TSimbaFinder.GetDataAsBitmap(var Bounds: TBox; out Bitmap: TMufasaBitmap): Boolean;
+var
+  Data: PColorBGRA;
+  DataWidth: Integer;
+  Y: Integer;
+begin
+  Result := GetTargetData(Bounds, Data, DataWidth);
+  if Result then
+  begin
+    Bitmap := TMufasaBitmap.Create(Bounds.Width, Bounds.Height);
+    for Y := 0 to Bitmap.Height - 1 do
+      Move(Data[Y * DataWidth], Bitmap.Data[Y * Bitmap.Width], Bitmap.Width * SizeOf(TColorBGRA));
+
+    FreeTargetData(Data);
+  end;
+end;
+
 function TSimbaFinder.ValidateTargetBounds(var Bounds: TBox): Boolean;
 var
   Width, Height: Integer;
@@ -216,6 +243,8 @@ begin
       if (Bounds.X2 >= Width)  then Bounds.X2 := Width - 1;
       if (Bounds.Y2 >= Height) then Bounds.Y2 := Height - 1;
     end;
+
+    Result := (Bounds.Width > 0) and (Bounds.Height > 0);
   end;
 end;
 
@@ -399,6 +428,122 @@ begin
     for Y := 0 to Height do
       for X := 0 to Width do
         Result[Y, X] := Data[Y * DataWidth + X].ToColor();
+  end;
+end;
+
+function TSimbaFinder.GetPixelDifference(WaitTime: Integer; Area: TBox): Integer;
+var
+  BitmapBefore, BitmapAfter: TMufasaBitmap;
+begin
+  Result := 0;
+
+  BitmapBefore := nil;
+  BitmapAfter := nil;
+
+  if GetDataAsBitmap(Area, BitmapBefore) then
+  try
+    Sleep(WaitTime);
+    if GetDataAsBitmap(Area, BitmapAfter) and (BitmapBefore.Width = BitmapAfter.Width) and (BitmapBefore.Height = BitmapAfter.Height) then
+      Result := BitmapBefore.PixelDifference(BitmapAfter);
+  finally
+    if (BitmapBefore <> nil) then
+      BitmapBefore.Free();
+    if (BitmapAfter <> nil) then
+      BitmapAfter.Free();
+  end;
+end;
+
+function TSimbaFinder.GetPixelDifference(WaitTime: Integer; Tolerance: Integer; Area: TBox): Integer;
+var
+  BitmapBefore, BitmapAfter: TMufasaBitmap;
+begin
+  Result := 0;
+
+  BitmapBefore := nil;
+  BitmapAfter := nil;
+
+  if GetDataAsBitmap(Area, BitmapBefore) then
+  try
+    Sleep(WaitTime);
+    if GetDataAsBitmap(Area, BitmapAfter) and (BitmapBefore.Width = BitmapAfter.Width) and (BitmapBefore.Height = BitmapAfter.Height) then
+      Result := BitmapBefore.PixelDifference(BitmapAfter, Tolerance);
+  finally
+    if (BitmapBefore <> nil) then
+      BitmapBefore.Free();
+    if (BitmapAfter <> nil) then
+      BitmapAfter.Free();
+  end;
+end;
+
+function TSimbaFinder.GetPixelDifferenceTPA(WaitTime: Integer; Area: TBox): TPointArray;
+var
+  BitmapBefore, BitmapAfter: TMufasaBitmap;
+begin
+  Result := nil;
+
+  BitmapBefore := nil;
+  BitmapAfter := nil;
+
+  if GetDataAsBitmap(Area, BitmapBefore) then
+  try
+    Sleep(WaitTime);
+    if GetDataAsBitmap(Area, BitmapAfter) and (BitmapBefore.Width = BitmapAfter.Width) and (BitmapBefore.Height = BitmapAfter.Height) then
+      Result := BitmapBefore.PixelDifferenceTPA(BitmapAfter);
+  finally
+    if (BitmapBefore <> nil) then
+      BitmapBefore.Free();
+    if (BitmapAfter <> nil) then
+      BitmapAfter.Free();
+  end;
+end;
+
+function TSimbaFinder.GetPixelDifferenceTPA(WaitTime: Integer; Tolerance: Integer; Area: TBox): TPointArray;
+var
+  BitmapBefore, BitmapAfter: TMufasaBitmap;
+begin
+  Result := nil;
+
+  BitmapBefore := nil;
+  BitmapAfter := nil;
+
+  if GetDataAsBitmap(Area, BitmapBefore) then
+  try
+    Sleep(WaitTime);
+    if GetDataAsBitmap(Area, BitmapAfter) and (BitmapBefore.Width = BitmapAfter.Width) and (BitmapBefore.Height = BitmapAfter.Height) then
+      Result := BitmapBefore.PixelDifferenceTPA(BitmapAfter, Tolerance);
+  finally
+    if (BitmapBefore <> nil) then
+      BitmapBefore.Free();
+    if (BitmapAfter <> nil) then
+      BitmapAfter.Free();
+  end;
+end;
+
+function TSimbaFinder.AverageBrightness(Area: TBox): Integer;
+var
+  Bitmap: TMufasaBitmap;
+begin
+  Result := 0;
+
+  if GetDataAsBitmap(Area, Bitmap) then
+  try
+    Result := Bitmap.AverageBrightness();
+  finally
+    Bitmap.Free();
+  end;
+end;
+
+function TSimbaFinder.PeakBrightness(Area: TBox): Integer;
+var
+  Bitmap: TMufasaBitmap;
+begin
+  Result := 0;
+
+  if GetDataAsBitmap(Area, Bitmap) then
+  try
+    Result := Bitmap.PeakBrightness();
+  finally
+    Bitmap.Free();
   end;
 end;
 
