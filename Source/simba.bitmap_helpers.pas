@@ -22,6 +22,7 @@ type
     function MatchTemplateMask(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
 
     function FindColor(ColorSpace: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
+    function MatchColor(ColorSpace: EColorSpace; Color: TColor; Multipliers: TChannelMultipliers): TSingleMatrix;
 
     function FindEdges(MinDiff: Integer): TPointArray;
     function FindEdgesHSL(MinDiff: Integer; HueMod: Single = 0.2; SatMod: Single = 0.2): TPointArray;
@@ -45,14 +46,19 @@ end;
 function TMufasaBitmapHelpers.FindColor(ColorSpace: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
 var
   Finder: TSimbaFinder;
-  Space: TColorSpace;
 begin
   Finder.SetTarget(Self);
 
-  Space.ColorSpace := ColorSpace;
-  Space.Multipliers := Multipliers;
+  Result := Finder.FindColor(Color, Tolerance, ColorSpace, Multipliers, Box(-1,-1,-1,-1));
+end;
 
-  Result := Finder.FindColor(Color, Tolerance, Space, Box(0, 0, Width-1, Height-1));
+function TMufasaBitmapHelpers.MatchColor(ColorSpace: EColorSpace; Color: TColor; Multipliers: TChannelMultipliers): TSingleMatrix;
+var
+  Finder: TSimbaFinder;
+begin
+  Finder.SetTarget(Self);
+
+  Result := Finder.MatchColor(Color, ColorSpace, Multipliers, Box(-1,-1,-1,-1));
 end;
 
 function TMufasaBitmapHelpers.FindEdges(MinDiff: Integer): TPointArray;

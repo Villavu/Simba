@@ -95,10 +95,11 @@ type
     procedure MoveTo(X, Y: Integer);
     function IsVisible(X, Y: Integer): Boolean; overload;
 
-    function FindColor(ColorSpace: EColorSpace; AColor: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
-    function MatchColor(ColorSpace: EColorSpace; AColor: TColor; Multipliers: TChannelMultipliers): TSingleMatrix;
+    function FindColor(AColor: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
+    function MatchColor(AColor: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TSingleMatrix;
 
-    procedure SetTempBackground(Bitmap: TMufasaBitmap; DoFreeBitmap: Boolean = False);
+    procedure SetTempBackground(Bitmap: TMufasaBitmap);
+    procedure ClearTempBackground;
 
     procedure SetBackground(Data: PColorBGRA; AWidth, AHeight: Integer); overload;
     procedure SetBackground(FileName: String); overload;
@@ -622,7 +623,7 @@ begin
             InRange(Y, FScrollBox.VertScrollBar.Position, FScrollBox.VertScrollBar.Position + FScrollBox.ClientHeight);
 end;
 
-function TSimbaImageBox.FindColor(ColorSpace: EColorSpace; AColor: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
+function TSimbaImageBox.FindColor(AColor: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
 begin
   with FBackground.ToMufasaBitmap() do
   try
@@ -632,31 +633,26 @@ begin
   end;
 end;
 
-function TSimbaImageBox.MatchColor(ColorSpace: EColorSpace; AColor: TColor; Multipliers: TChannelMultipliers): TSingleMatrix;
+function TSimbaImageBox.MatchColor(AColor: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TSingleMatrix;
 begin
-  {
   with FBackground.ToMufasaBitmap() do
   try
-    Result := MatchColor(ColorSpace, Color, Mods);
+    Result := MatchColor(ColorSpace, AColor, Multipliers);
   finally
     Free();
   end;
-  }
 end;
 
-procedure TSimbaImageBox.SetTempBackground(Bitmap: TMufasaBitmap; DoFreeBitmap: Boolean);
+procedure TSimbaImageBox.SetTempBackground(Bitmap: TMufasaBitmap);
 begin
-  if (Bitmap <> nil) and (FTempBackground <> nil) then
-    raise Exception.Create('TSimbaImageBox.SetTempBackground: Already have a temp background');
+  ClearTempBackground();
 
-  if (Bitmap <> nil) then
-  begin
-    FTempBackground := TBitmap.Create();
-    FTempBackground.FromData(Bitmap.Data, Bitmap.Width, Bitmap.Height);
+  FTempBackground := TBitmap.Create();
+  FTempBackground.FromData(Bitmap.Data, Bitmap.Width, Bitmap.Height);
+end;
 
-    if DoFreeBitmap then
-      Bitmap.Free();
-  end else
+procedure TSimbaImageBox.ClearTempBackground;
+begin
   if (FTempBackground <> nil) then
     FreeAndNil(FTempBackground);
 end;
@@ -747,7 +743,7 @@ end;
 
 destructor TSimbaImageBox.Destroy;
 begin
-  SetTempBackground(nil);
+  ClearTempBackground();
 
   if (FBitmap <> nil) then
     FreeAndNil(FBitmap);

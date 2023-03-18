@@ -102,7 +102,6 @@ type
     FImageZoom: TSimbaImageBoxZoom;
     FZoomInfo: TLabel;
     FDebugTPA: TPointArray;
-    FDebugMatrix: TSingleMatrix;
     FDrawColor: TColor;
 
     procedure LoadHSLCircle(Radius: Integer);
@@ -383,18 +382,19 @@ var
   Col: Integer;
   Tol: Single;
   Multi: TChannelMultipliers;
-  bmp: TMufasaBitmap;
+  TempBackground: TMufasaBitmap;
 begin
   GetColorStuff(ColorSpace, Col, Tol, Multi);
 
   FDebugTPA := [];
-  //FDebugMatrix := FImageBox.Match(ColorSpace, Col, Multi);
 
-  bmp := TMufasaBitmap.Create(FDebugMatrix.Width, FDebugMatrix.Height);
-  bmp.DrawMatrix(FDebugMatrix);
-  FImageBox.SetTempBackground(nil);
-  FImageBox.SetTempBackground(bmp, True);
+  TempBackground := TMufasaBitmap.Create();
+  TempBackground.DrawMatrix(FImageBox.MatchColor(Col, ColorSpace, Multi));
+
+  FImageBox.SetTempBackground(TempBackground);
   FImageBox.Paint();
+
+  TempBackground.Free();
 end;
 
 procedure TSimbaACAForm.ButtonFindColorClick(Sender: TObject);
@@ -406,10 +406,9 @@ var
 begin
   GetColorStuff(ColorSpace, Col, Tol, Multi);
 
-  FDebugTPA := FImageBox.FindColor(ColorSpace, Col, Tol, Multi);
+  FDebugTPA := FImageBox.FindColor(Col, Tol, ColorSpace, Multi);
 
   FImageBox.StatusPanel.Text := Format('Found %.0n matches', [Double(Length(FDebugTPA))]);
-  FImageBox.SetTempBackground(nil);
   FImageBox.Paint();
 end;
 
@@ -457,9 +456,9 @@ end;
 
 procedure TSimbaACAForm.DoButtonClearImageClick(Sender: TObject);
 begin
-  FImageBox.SetTempBackground(nil);
   FDebugTPA := [];
 
+  FImageBox.ClearTempBackground();
   FImageBox.Paint();
 end;
 

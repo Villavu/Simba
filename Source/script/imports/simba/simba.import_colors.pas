@@ -12,7 +12,7 @@ interface
 implementation
 
 uses
-  classes, sysutils,
+  Classes, SysUtils, Graphics,
   simba.script_compiler;
 
 procedure ImportColors(Compiler: TSimbaScript_Compiler);
@@ -21,7 +21,12 @@ begin
   begin
     ImportingSection := 'System';
 
-    addGlobalType('Integer', 'TColor');
+    {$IF SizeOf(TColor) = 4}
+    addGlobalType('type Int32', 'TColor');
+    {$ELSE}
+    addGlobalType('type Int64', 'TColor');
+    {$ENDIF}
+
     addGlobalFunc(
       'function TColor.R: Byte;', [
       'type TRGB = packed record B,G,R,A: Byte; end;',
