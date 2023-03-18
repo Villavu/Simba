@@ -58,6 +58,9 @@ type
     procedure SetTarget(Bitmap: TMufasaBitmap); overload;
     procedure SetTarget(Window: TWindowHandle); overload;
 
+    function FindEdges(MinDiff: Single; Bounds: TBox): TPointArray; overload;
+    function FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPointArray; overload;
+
     function FindDTM(DTM: TDTM; MaxToFind: Integer; Bounds: TBox): TPointArray;
     function FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer; Bounds: TBox): TPointArray;
 
@@ -278,6 +281,34 @@ procedure TSimbaFinder.SetTarget(Window: TWindowHandle);
 begin
   FTargetType := ETargetType.WINDOW;
   FTarget.Window := Window;
+end;
+
+function TSimbaFinder.FindEdges(MinDiff: Single; Bounds: TBox): TPointArray;
+var
+  Bitmap: TMufasaBitmap;
+begin
+  Result := nil;
+
+  if GetDataAsBitmap(Bounds, Bitmap) then
+  try
+    Result := Bitmap.FindEdges(MinDiff);
+  finally
+    Bitmap.Free();
+  end;
+end;
+
+function TSimbaFinder.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPointArray;
+var
+  Bitmap: TMufasaBitmap;
+begin
+  Result := nil;
+
+  if GetDataAsBitmap(Bounds, Bitmap) then
+  try
+    Result := Bitmap.FindEdges(MinDiff, ColorSpace, Multipliers);
+  finally
+    Bitmap.Free();
+  end;
 end;
 
 function TSimbaFinder.FindDTM(DTM: TDTM; MaxToFind: Integer; Bounds: TBox): TPointArray;

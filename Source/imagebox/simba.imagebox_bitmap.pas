@@ -7,7 +7,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics, LCLType,
-  simba.mufasatypes, simba.bitmap_misc, simba.colormath_conversion;
+  simba.mufasatypes, simba.colormath_conversion;
 
 type
   PSimbaImageBoxBitmap = ^TSimbaImageBoxBitmap;
@@ -87,6 +87,9 @@ type
   end;
 
 implementation
+
+uses
+  simba.bitmap_utils;
 
 {$DEFINE MACRO_PIXEL :=
   var

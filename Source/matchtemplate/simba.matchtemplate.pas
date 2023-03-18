@@ -17,11 +17,8 @@ unit simba.matchtemplate;
   Mask template matching implemented from OpenCV's templmatch.cpp
 
 [==============================================================================}
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
-
-{$IFOPT D-}
-  {$OPTIMIZATION LEVEL4}
-{$ENDIF}
 
 {$MODESWITCH ARRAYOPERATORS OFF}
 
@@ -32,16 +29,6 @@ uses
   simba.mufasatypes, simba.baseclass, simba.bitmap;
 
 type
-  PTMFormula = ^ETMFormula;
-  ETMFormula = (
-    TM_CCORR,
-    TM_CCORR_NORMED,
-    TM_CCOEFF,
-    TM_CCOEFF_NORMED,
-    TM_SQDIFF,
-    TM_SQDIFF_NORMED
-  );
-
   PMatchTemplateCacheBase = ^TMatchTemplateCacheBase;
   TMatchTemplateCacheBase = class(TSimbaBaseClass)
   public

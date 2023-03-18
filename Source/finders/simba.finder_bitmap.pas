@@ -14,9 +14,6 @@ uses
   Classes, SysUtils, Graphics, Math,
   simba.mufasatypes, simba.bitmap, simba.colormath_conversion;
 
-const
-  DefaultMultipliers: TChannelMultipliers = (1, 1, 1);
-
 type
   TBitmapFinder = record
   private

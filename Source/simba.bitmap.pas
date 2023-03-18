@@ -12,7 +12,7 @@ interface
 
 uses
   classes, sysutils, graphtype, graphics,
-  simba.baseclass, simba.mufasatypes, simba.bitmap_textdrawer, simba.colormath_conversion;
+  simba.baseclass, simba.mufasatypes, simba.bitmap_textdrawer, simba.colormath_conversion, simba.dtm;
 
 type
   PBmpMirrorStyle = ^TBmpMirrorStyle;
@@ -161,14 +161,10 @@ type
     function Rotate(Radians: Single; Expand: Boolean): TMufasaBitmap; overload;
     function RotateBilinear(Radians: Single; Expand: Boolean): TMufasaBitmap; overload;
 
-    procedure Desaturate(TargetBitmap: TMufasaBitmap); overload;
-    procedure Desaturate; overload;
     procedure GreyScale(TargetBitmap: TMufasaBitmap); overload;
     procedure GreyScale; overload;
     procedure Brightness(TargetBitmap: TMufasaBitmap; br: Integer); overload;
     procedure Brightness(br: Integer); overload;
-    procedure Contrast(TargetBitmap: TMufasaBitmap; co: Extended); overload;
-    procedure Contrast(co: Extended); overload;
     procedure Invert(TargetBitmap: TMufasaBitmap); overload;
     procedure Invert; overload;
     procedure Posterize(TargetBitmap: TMufasaBitmap; Po: Integer); overload;
@@ -230,6 +226,16 @@ type
     function PixelDifference(Other: TMufasaBitmap; Tolerance: Integer): Integer; overload;
     function PixelDifferenceTPA(Other: TMufasaBitmap): TPointArray; overload;
     function PixelDifferenceTPA(Other: TMufasaBitmap; Tolerance: Integer): TPointArray; overload;
+
+    function MatchTemplate(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
+    function MatchTemplateMask(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
+
+    function FindDTM(DTM: TDTM): TPointArray;
+    function FindColor(ColorSpace: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
+    function MatchColor(ColorSpace: EColorSpace; Color: TColor; Multipliers: TChannelMultipliers): TSingleMatrix;
+
+    function FindEdges(MinDiff: Single): TPointArray; overload;
+    function FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray; overload;
   end;
 
   TMufasaBitmapArray = array of TMufasaBitmap;
@@ -252,7 +258,8 @@ implementation
 uses
   fpimage, math, intfgraphics, simba.overallocatearray, simba.geometry,
   simba.tpa, simba.colormath_distance, simba.client, simba.iomanager,
-  simba.bitmap_misc, simba.encoding, simba.compress, simba.math;
+  simba.bitmap_utils, simba.encoding, simba.compress, simba.math, simba.finder,
+  simba.matchtemplate;
 
 function GetDistinctColor(const Color, Index: Integer): Integer; inline;
 const
@@ -843,8 +850,8 @@ begin
 
   for I := 0 to FWidth * FHeight - 1 do
   begin
-    //if (DistanceRGB(Ptr^, OtherPtr^) > Tolerance) then
-    //  Inc(Result);
+    if (not SimilarColorsRGB(Ptr^.ToColor(), OtherPtr^.ToColor(), Tolerance, DefaultMultipliers)) then
+      Inc(Result);
 
     Inc(Ptr);
     Inc(OtherPtr);
@@ -897,8 +904,8 @@ begin
     for X := 0 to W do
     begin
       Index := Y * FWidth + X;
-      //if (DistanceRGB(FData[Index], Other.FData[Index]) > Tolerance) then
-      //  Buffer.Add(TPoint.Create(X, Y));
+      if (not (SimilarColorsRGB(FData[Index].ToColor(), Other.FData[Index].ToColor(), Tolerance, DefaultMultipliers))) then
+        Buffer.Add(TPoint.Create(X, Y));
     end;
 
   Result := Buffer.Trim();
@@ -1694,39 +1701,6 @@ begin
   Self.RotateBilinear(Radians, Expand, Result);
 end;
 
-procedure TMufasaBitmap.Desaturate;
-var
-  I: Integer;
-  He,Se,Le: extended;
-  Ptr: PColorBGRA;
-begin
-  Ptr := FData;
-  for i := (FHeight*FWidth-1) downto 0 do
-  begin
-    //RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,He,Se,Le);
-    //HSLtoRGB(He,0.0,Le,Ptr^.R,Ptr^.G,Ptr^.B);
-    inc(ptr);
-  end;
-end;
-
-procedure TMufasaBitmap.Desaturate(TargetBitmap: TMufasaBitmap);
-var
-  I: Integer;
-  He,Se,Le: extended;
-  PtrOld,PtrNew: PColorBGRA;
-begin
-  TargetBitmap.SetSize(FWidth,FHeight);
-  PtrOld := Self.FData;
-  PtrNew := TargetBitmap.FData;
-  for i := (FHeight*FWidth-1) downto 0 do
-  begin
-    //RGBToHSL(PtrOld^.R,PtrOld^.G,PtrOld^.B,He,Se,Le);
-    //HSLtoRGB(He,0.0,Le,PtrNew^.R,PtrNew^.G,PtrNew^.B);
-    inc(ptrOld);
-    inc(PtrNew);
-  end;
-end;
-
 procedure TMufasaBitmap.GreyScale(TargetBitmap: TMufasaBitmap);
 var
   I: Integer;
@@ -1820,39 +1794,6 @@ begin
   else if temp > 255 then
     temp := 255;
   Result := temp;
-end;
-
-procedure TMufasaBitmap.Contrast(co: Extended);
-var
-  I: Integer;
-  Ptr: PColorBGRA;
-begin
-  Ptr := Self.FData;
-  for i := (FHeight*FWidth-1) downto 0 do
-  begin
-    Ptr^.r := ContrastAdjust(Ptr^.r,co);
-    Ptr^.g := ContrastAdjust(Ptr^.g,co);
-    Ptr^.b := ContrastAdjust(Ptr^.b,co);
-    inc(ptr);
-  end;
-end;
-
-procedure TMufasaBitmap.Contrast(TargetBitmap: TMufasaBitmap; co: Extended);
-var
-  I: Integer;
-  PtrOld,PtrNew: PColorBGRA;
-begin
-  TargetBitmap.SetSize(FWidth,FHeight);
-  PtrOld := Self.FData;
-  PtrNew := TargetBitmap.FData;
-  for i := (FHeight*FWidth-1) downto 0 do
-  begin
-    PtrNew^.r := ContrastAdjust(PtrOld^.r,co);
-    PtrNew^.g := ContrastAdjust(PtrOld^.g,co);
-    PtrNew^.b := ContrastAdjust(PtrOld^.b,co);
-    inc(ptrOld);
-    inc(PtrNew);
-  end;
 end;
 
 procedure TMufasaBitmap.Invert;
@@ -2734,6 +2675,116 @@ end;
 function TMufasaBitmap.PointInBitmap(const X, Y: Integer): Boolean;
 begin
   Result := (X >= 0) and (Y >= 0) and (X < FWidth) and (Y < FHeight);
+end;
+
+function TMufasaBitmap.MatchTemplate(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
+begin
+  Result := simba.matchtemplate.MatchTemplate(Self.ToMatrixBGR(), Template.ToMatrixBGR(), Formula);
+end;
+
+function TMufasaBitmap.MatchTemplateMask(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
+begin
+  Result := simba.matchtemplate.MatchTemplateMask(Self.ToMatrixBGR(), Template.ToMatrixBGR(), Formula);
+end;
+
+function TMufasaBitmap.FindDTM(DTM: TDTM): TPointArray;
+var
+  Finder: TSimbaFinder;
+begin
+  Finder.SetTarget(Self);
+
+  Result := Finder.FindDTM(DTM, -1, Box(-1,-1,-1,-1));
+end;
+
+function TMufasaBitmap.FindColor(ColorSpace: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
+var
+  Finder: TSimbaFinder;
+begin
+  Finder.SetTarget(Self);
+
+  Result := Finder.FindColor(Color, Tolerance, ColorSpace, Multipliers, Box(-1,-1,-1,-1));
+end;
+
+function TMufasaBitmap.MatchColor(ColorSpace: EColorSpace; Color: TColor; Multipliers: TChannelMultipliers): TSingleMatrix;
+var
+  Finder: TSimbaFinder;
+begin
+  Finder.SetTarget(Self);
+
+  Result := Finder.MatchColor(Color, ColorSpace, Multipliers, Box(-1,-1,-1,-1));
+end;
+
+function TMufasaBitmap.FindEdges(MinDiff: Single): TPointArray;
+var
+  X, Y ,W, H: Integer;
+  Buffer: TSimbaPointBuffer;
+  First, Second, Third: TColor;
+begin
+  Buffer.Init();
+
+  W := FWidth - 2;
+  H := FHeight - 2;
+
+  for Y := 0 to H do
+    for X := 0 to W do
+    begin
+      First  := FData[Y*FWidth+X].ToColor();
+      Second := FData[Y*FWidth+(X+1)].ToColor();
+      Third  := FData[(Y+1)*FWidth+X].ToColor();
+
+      if (not SimilarColorsRGB(First, Second, MinDiff, DefaultMultipliers)) or
+         (not SimilarColorsRGB(First, Third, MinDiff, DefaultMultipliers)) then
+      begin
+        Buffer.Add(TPoint.Create(X, Y));
+
+        Continue;
+      end;
+    end;
+
+  Result := Buffer.Trim();
+end;
+
+function TMufasaBitmap.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
+type
+  TSimilarColorsFunc = function(const Color1, Color2: TColor; const Tolerance: Single; const mul: TChannelMultipliers): Boolean;
+var
+  X, Y ,W, H: Integer;
+  Buffer: TSimbaPointBuffer;
+  First, Second, Third: TColor;
+  SimilarColorsFunc: TSimilarColorsFunc;
+begin
+  Buffer.Init();
+
+  case ColorSpace of
+    EColorSpace.RGB: SimilarColorsFunc := @SimilarColorsRGB;
+    EColorSpace.HSV: SimilarColorsFunc := @SimilarColorsHSV;
+    EColorSpace.HSL: SimilarColorsFunc := @SimilarColorsHSL;
+    EColorSpace.XYZ: SimilarColorsFunc := @SimilarColorsXYZ;
+    EColorSpace.LAB: SimilarColorsFunc := @SimilarColorsLAB;
+    EColorSpace.LCH: SimilarColorsFunc := @SimilarColorsLCH;
+    EColorSpace.DELTAE: SimilarColorsFunc := @SimilarColorsDeltaE;
+  end;
+
+  W := FWidth - 2;
+  H := FHeight - 2;
+
+  for Y := 0 to H do
+    for X := 0 to W do
+    begin
+      First  := FData[Y*FWidth+X].ToColor();
+      Second := FData[Y*FWidth+(X+1)].ToColor();
+      Third  := FData[(Y+1)*FWidth+X].ToColor();
+
+      if (not SimilarColorsFunc(First, Second, MinDiff, Multipliers)) or
+         (not SimilarColorsFunc(First, Third, MinDiff, Multipliers)) then
+      begin
+        Buffer.Add(TPoint.Create(X, Y));
+
+        Continue;
+      end;
+    end;
+
+  Result := Buffer.Trim();
 end;
 
 constructor TMufasaBitmap.Create;

@@ -10,9 +10,8 @@ unit simba.imagebox;
 interface
 
 uses
-  classes, sysutils, forms, controls, graphics, dialogs, comctrls,
-  lclintf, lcltype, IntfGraphics,
-  simba.mufasatypes, simba.bitmap, simba.dtm, simba.iomanager, simba.imagebox_bitmap, simba.colormath_conversion, simba.finder;
+  Classes, SysUtils, Forms, Controls, Graphics, ComCtrls, LCLType,
+  simba.mufasatypes, simba.bitmap, simba.dtm, simba.iomanager, simba.imagebox_bitmap, simba.colormath_conversion;
 
 type
   TSimbaImageBox_ScrollBox = class(TScrollBox)
@@ -95,6 +94,7 @@ type
     procedure MoveTo(X, Y: Integer);
     function IsVisible(X, Y: Integer): Boolean; overload;
 
+    function FindDTM(DTM: TDTM): TPointArray;
     function FindColor(AColor: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
     function MatchColor(AColor: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TSingleMatrix;
 
@@ -116,8 +116,8 @@ type
 implementation
 
 uses
-  math, fpimage, graphtype,
-  simba.nativeinterface, simba.bitmap_misc, simba.bitmap_helpers;
+  Math, GraphType, LCLIntf,
+  simba.bitmap_utils;
 
 procedure TSimbaImageBox_ScrollBox.GetPreferredSize(var PreferredWidth, PreferredHeight: integer; Raw: boolean; WithThemeSpace: boolean);
 begin
@@ -621,6 +621,16 @@ begin
 
   Result := InRange(X, FScrollBox.HorzScrollBar.Position, FScrollBox.HorzScrollBar.Position + FScrollBox.ClientWidth) and
             InRange(Y, FScrollBox.VertScrollBar.Position, FScrollBox.VertScrollBar.Position + FScrollBox.ClientHeight);
+end;
+
+function TSimbaImageBox.FindDTM(DTM: TDTM): TPointArray;
+begin
+  with FBackground.ToMufasaBitmap() do
+  try
+    Result := FindDTM(DTM);
+  finally
+    Free();
+  end;
 end;
 
 function TSimbaImageBox.FindColor(AColor: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;

@@ -8,7 +8,7 @@ implementation
 
 uses
   classes, sysutils, graphics, lptypes, lpeval,
-  simba.script_compiler, simba.mufasatypes, simba.bitmap, simba.bitmap_helpers, simba.colormath_conversion;
+  simba.script_compiler, simba.mufasatypes, simba.bitmap, simba.colormath_conversion;
 
 type
   PObject = ^TObject;
@@ -336,26 +336,6 @@ begin
 end;
 
 (*
-TMufasaBitmap.Desaturate
-~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.Desaturate(TargetBitmap: TMufasaBitmap);
-*)
-procedure _LapeMufasaBitmap_Desaturate(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PMufasaBitmap(Params^[0])^.Desaturate(PMufasaBitmap(Params^[1])^);
-end;
-
-(*
-TMufasaBitmap.Desaturate
-~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.Desaturate;
-*)
-procedure _LapeMufasaBitmap_DesaturateEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PMufasaBitmap(Params^[0])^.Desaturate();
-end;
-
-(*
 TMufasaBitmap.GreyScale
 ~~~~~~~~~~~~~~~~~~~~~~~
 procedure TMufasaBitmap.GreyScale(TargetBitmap: TMufasaBitmap);
@@ -393,26 +373,6 @@ procedure TMufasaBitmap.Brightness(br: Integer);
 procedure _LapeMufasaBitmap_BrightnessEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMufasaBitmap(Params^[0])^.Brightness(PInteger(Params^[1])^);
-end;
-
-(*
-TMufasaBitmap.Contrast
-~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.Contrast(TargetBitmap: TMufasaBitmap; co: Extended);
-*)
-procedure _LapeMufasaBitmap_Contrast(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PMufasaBitmap(Params^[0])^.Contrast(PMufasaBitmap(Params^[1])^, PExtended(Params^[2])^);
-end;
-
-(*
-TMufasaBitmap.Contrast
-~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.Contrast(co: Extended);
-*)
-procedure _LapeMufasaBitmap_ContrastEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PMufasaBitmap(Params^[0])^.Contrast(PExtended(Params^[1])^);
 end;
 
 (*
@@ -1410,19 +1370,19 @@ TMufasaBitmap.FindEdges
 ~~~~~~~~~~~~~~~~~~~~~~~
 function TMufasaBitmap.FindEdges(MinDiff: Integer): TPointArray;
 *)
-procedure _LapeMufasaBitmap_FindEdges(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_FindEdges1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PMufasaBitmap(Params^[0])^.FindEdges(PInteger(Params^[1])^);
+  PPointArray(Result)^ := PMufasaBitmap(Params^[0])^.FindEdges(PSingle(Params^[1])^);
 end;
 
 (*
-TMufasaBitmap.FindEdgesHSL
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+TMufasaBitmap.FindEdges
+~~~~~~~~~~~~~~~~~~~~~~~
 function TMufasaBitmap.FindEdgesHSL(MinDiff: Integer; HueMod: Single = 0.2; SatMod: Single = 0.2): TPointArray;
 *)
-procedure _LapeMufasaBitmap_FindEdgesHSL(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_FindEdges2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PMufasaBitmap(Params^[0])^.FindEdgesHSL(PInteger(Params^[1])^, PSingle(Params^[2])^, PSingle(Params^[3])^);
+  PPointArray(Result)^ := PMufasaBitmap(Params^[0])^.FindEdges(PSingle(Params^[1])^, PColorSpace(Params^[2])^, PChannelMultipliers(Params^[3])^);
 end;
 
 (*
@@ -1522,8 +1482,8 @@ begin
     addGlobalFunc('function TMufasaBitmap.PixelDifferenceTPA(Other: TMufasaBitmap): TPointArray; overload', @_LapeMufasaBitmap_PixelDifferenceTPA);
     addGlobalFunc('function TMufasaBitmap.PixelDifferenceTPA(Other: TMufasaBitmap; Tolerance: Integer): TPointArray; overload', @_LapeMufasaBitmap_PixelDifferenceToleranceTPA);
 
-    addGlobalFunc('function TMufasaBitmap.FindEdges(MinDiff: Integer): TPointArray;', @_LapeMufasaBitmap_FindEdges);
-    addGlobalFunc('function TMufasaBitmap.FindEdgesHSL(MinDiff: Integer; HueMod: Single = 0.2; SatMod: Single = 0.2): TPointArray;', @_LapeMufasaBitmap_FindEdgesHSL);
+    addGlobalFunc('function TMufasaBitmap.FindEdges(MinDiff: Single): TPointArray; overload', @_LapeMufasaBitmap_FindEdges1);
+    addGlobalFunc('function TMufasaBitmap.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: array[0..2] of Single): TPointArray; overload', @_LapeMufasaBitmap_FindEdges2);
 
     addGlobalFunc('function TMufasaBitmap.TextWidth(Text: String): Integer;', @_LapeMufasaBitmap_TextWidth);
     addGlobalFunc('function TMufasaBitmap.TextHeight(Text: String): Integer;', @_LapeMufasaBitmap_TextHeight);
@@ -1601,14 +1561,10 @@ begin
     addGlobalFunc('function TMufasaBitmap.Rotate(Radians: Single; Expand: Boolean): TMufasaBitmap; overload', @_LapeMufasaBitmap_Rotate2);
     addGlobalFunc('function TMufasaBitmap.RotateBilinear(Radians: Single; Expand: Boolean): TMufasaBitmap; overload', @_LapeMufasaBitmap_RotateBilinear2);
 
-    addGlobalFunc('procedure TMufasaBitmap.Desaturate(TargetBitmap: TMufasaBitmap); overload', @_LapeMufasaBitmap_Desaturate);
-    addGlobalFunc('procedure TMufasaBitmap.Desaturate; overload', @_LapeMufasaBitmap_DesaturateEx);
     addGlobalFunc('procedure TMufasaBitmap.GreyScale(TargetBitmap: TMufasaBitmap); overload', @_LapeMufasaBitmap_GreyScale);
     addGlobalFunc('procedure TMufasaBitmap.GreyScale; overload', @_LapeMufasaBitmap_GreyScaleEx);
     addGlobalFunc('procedure TMufasaBitmap.Brightness(TargetBitmap: TMufasaBitmap; br: Integer); overload', @_LapeMufasaBitmap_Brightness);
     addGlobalFunc('procedure TMufasaBitmap.Brightness(br: Integer); overload', @_LapeMufasaBitmap_BrightnessEx);
-    addGlobalFunc('procedure TMufasaBitmap.Contrast(TargetBitmap: TMufasaBitmap; co: Extended); overload', @_LapeMufasaBitmap_Contrast);
-    addGlobalFunc('procedure TMufasaBitmap.Contrast(co: Extended); overload', @_LapeMufasaBitmap_ContrastEx);
     addGlobalFunc('procedure TMufasaBitmap.Invert(TargetBitmap: TMufasaBitmap);', @_LapeMufasaBitmap_Invert);
     addGlobalFunc('procedure TMufasaBitmap.Invert; overload', @_LapeMufasaBitmap_InvertEx);
     addGlobalFunc('procedure TMufasaBitmap.Posterize(TargetBitmap: TMufasaBitmap; Po: Integer); overload', @_LapeMufasaBitmap_Posterize);

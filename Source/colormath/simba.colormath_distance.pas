@@ -37,6 +37,14 @@ function DistanceLAB_Max(mul: TChannelMultipliers): Single; inline;
 function DistanceLCH_Max(mul: TChannelMultipliers): Single; inline;
 function DistanceDeltaE_Max(mul: TChannelMultipliers): Single; inline;
 
+function SimilarColorsRGB(const Color1, Color2: TColor; const Tolerance: Single; const mul: TChannelMultipliers): Boolean;
+function SimilarColorsHSV(const Color1, Color2: TColor; const Tolerance: Single; const mul: TChannelMultipliers): Boolean;
+function SimilarColorsHSL(const Color1, Color2: TColor; const Tolerance: Single; const mul: TChannelMultipliers): Boolean;
+function SimilarColorsXYZ(const Color1, Color2: TColor; const Tolerance: Single; const mul: TChannelMultipliers): Boolean;
+function SimilarColorsLAB(const Color1, Color2: TColor; const Tolerance: Single; const mul: TChannelMultipliers): Boolean;
+function SimilarColorsLCH(const Color1, Color2: TColor; const Tolerance: Single; const mul: TChannelMultipliers): Boolean;
+function SimilarColorsDeltaE(const Color1, Color2: TColor; const Tolerance: Single; const mul: TChannelMultipliers): Boolean;
+
 implementation
 
 // ----| RGB |-----------------------------------------------------------------
@@ -239,6 +247,41 @@ begin
   xDC /= xSC;
   xDH /= xSH;
   Result := Sqrt(Sqr(xDL * mul[0]) + Sqr(xDC * mul[1]) + Sqr(xDH * mul[2]));
+end;
+
+function SimilarColorsRGB(const Color1, Color2: TColor; const Tolerance: Single; const mul: TChannelMultipliers): Boolean;
+begin
+  Result := DistanceRGB(Color1.ToRGB(), Color2.ToRGB(), Mul) / DistanceRGB_Max(Mul) * 100 <= Tolerance;
+end;
+
+function SimilarColorsHSV(const Color1, Color2: TColor; const Tolerance: Single; const mul: TChannelMultipliers): Boolean;
+begin
+  Result := DistanceHSV(Color1.ToHSV(), Color2.ToHSV(), Mul) / DistanceHSV_Max(Mul) * 100 <= Tolerance;
+end;
+
+function SimilarColorsHSL(const Color1, Color2: TColor; const Tolerance: Single; const mul: TChannelMultipliers): Boolean;
+begin
+  Result := DistanceHSL(Color1.ToHSL(), Color2.ToHSL(), Mul) / DistanceHSL_Max(Mul) * 100 <= Tolerance;
+end;
+
+function SimilarColorsXYZ(const Color1, Color2: TColor; const Tolerance: Single; const mul: TChannelMultipliers): Boolean;
+begin
+  Result := DistanceXYZ(Color1.ToXYZ(), Color2.ToXYZ(), Mul) / DistanceXYZ_Max(Mul) * 100 <= Tolerance;
+end;
+
+function SimilarColorsLAB(const Color1, Color2: TColor; const Tolerance: Single; const mul: TChannelMultipliers): Boolean;
+begin
+  Result := DistanceLAB(Color1.ToLAB(), Color2.ToLAB(), Mul) / DistanceLAB_Max(Mul) * 100 <= Tolerance;
+end;
+
+function SimilarColorsLCH(const Color1, Color2: TColor; const Tolerance: Single; const mul: TChannelMultipliers): Boolean;
+begin
+  Result := DistanceLCH(Color1.ToLCH(), Color2.ToLCH(), Mul) / DistanceLCH_Max(Mul) * 100 <= Tolerance;
+end;
+
+function SimilarColorsDeltaE(const Color1, Color2: TColor; const Tolerance: Single; const mul: TChannelMultipliers): Boolean;
+begin
+  Result := DistanceDeltaE(Color1.ToLAB(), Color2.ToLAB(), Mul) / DistanceLAB_Max(Mul) * 100 <= Tolerance;
 end;
 
 end.

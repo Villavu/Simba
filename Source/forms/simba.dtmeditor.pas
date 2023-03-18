@@ -130,7 +130,7 @@ implementation
 
 uses
   math,
-  simba.windowhandle;
+  simba.windowhandle, simba.colormath_conversion;
 
 procedure TSimbaDTMEditorForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
@@ -139,13 +139,11 @@ var
   Point: TDTMPoint;
 begin
   FImageZoom.MoveTest(FImageBox, X, Y);
+  with FImageBox.Background.Canvas.Pixels[X, Y].ToRGB(), FImageBox.Background.Canvas.Pixels[X, Y].ToHSL() do
+    FZoomInfo.Caption := Format('Color: %d', [FImageBox.Background.Canvas.Pixels[X, Y]]) + LineEnding +
+                         Format('RGB: %d, %d, %d', [R, G, B])                            + LineEnding +
+                         Format('HSL: %.2f, %.2f, %.2f', [H, S, L])                      + LineEnding;
 
-  //ColorToRGB(FImageBox.Background.Canvas.Pixels[X, Y], R, G, B);
-  //ColorToHSL(FImageBox.Background.Canvas.Pixels[X, Y], H, S, L);
-
-  FZoomInfo.Caption := Format('Color: %d', [FImageBox.Background.Canvas.Pixels[X, Y]]) + LineEnding +
-                       Format('RGB: %d, %d, %d', [R, G, B])                            + LineEnding +
-                       Format('HSL: %.2f, %.2f, %.2f', [H, S, L])                      + LineEnding;
 
   if (FDragging > -1) then
   begin
@@ -420,7 +418,7 @@ begin
   DTM := GetDTM();
   try
     FDebugColor := [];
-    //FDebugDTM   := FImageBox.FindDTMs(DTM);
+    FDebugDTM   := FImageBox.FindDTM(DTM);
 
     FImageBox.Paint();
   finally
@@ -482,7 +480,7 @@ begin
       FFlashing := False;
 
       FDebugDTM   := [];
-      //FDebugColor := FImageBox.FindColors(1, Color, Tolerance);
+      FDebugColor := FImageBox.FindColor(Color, Tolerance, EColorSpace.RGB, DefaultMultipliers);
 
       FImageBox.Paint();
     end;
