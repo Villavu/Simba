@@ -13,7 +13,7 @@ implementation
 
 uses
   classes, sysutils, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.bitmap, simba.bitmap_helpers, simba.matchtemplate;
+  simba.script_compiler, simba.mufasatypes, simba.bitmap, simba.matchtemplate;
 
 procedure _LapeMatchTemplateCache_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin

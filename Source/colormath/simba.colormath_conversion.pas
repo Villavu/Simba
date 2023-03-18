@@ -134,6 +134,9 @@ type
   PColorSpace = ^EColorSpace;
   {$POP}
 
+const
+  DefaultMultipliers: TChannelMultipliers = (1,1,1);
+
 function ColorIntensity(Color: TColor): Byte; inline;
 function ColorToGray(Color: TColor): Byte; inline;
 function ColorToRGB(Color: TColor): TColorRGB; inline;

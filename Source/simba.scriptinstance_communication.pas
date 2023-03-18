@@ -52,7 +52,7 @@ type
 implementation
 
 uses
-  simba.scriptinstance, simba.bitmap_misc, simba.main, simba.debugimageform;
+  simba.scriptinstance, simba.main, simba.debugimageform, simba.bitmap_utils;
 
 procedure TSimbaScriptInstanceCommunication.OnMessage(MessageID: Integer; Params, Result: TMemoryStream);
 var
