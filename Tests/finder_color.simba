@@ -20,7 +20,7 @@ const
     22031,
     23668,
     39849,
-    53442
+    53443
   ];
 
 var
@@ -33,7 +33,7 @@ begin
   Finder.SetTarget(Bitmap);
 
   for I := 0 to High(TESTS) do
-    Assert(Finder.CountColorEx(TESTS[I]) = TEST_RESULTS[I]);
+    Assert(Finder.CountColor(TESTS[I]) = TEST_RESULTS[I]);
 
   Bitmap.Free();
 end.
