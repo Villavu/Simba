@@ -8,7 +8,7 @@
 {$IFOPT D+}
   {$DEFINE SIMBA_HAS_DEBUGINFO}
 {$ELSE}
-  {$IFDEF SIMBA_MAX_OPTIMIZATION} // O4 can be "unsafe" so this is not globally enabled.
+  {$IFDEF SIMBA_MAX_OPTIMIZATION} // O4 can do "unsafe" optimizations so this is not globally enabled.
     {$OPTIMIZATION LEVEL4}
   {$ENDIF}
 {$ENDIF}
