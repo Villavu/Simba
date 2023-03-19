@@ -5,11 +5,8 @@
 }
 unit simba.math;
 
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
-
-{$IFOPT D-}
-  {$OPTIMIZATION LEVEL4}
-{$ENDIF}
 
 interface
 
@@ -34,7 +31,7 @@ function Modulo(const X, Y: Double): Double; inline; overload;
 function Modulo(const X, Y: Single): Single; inline; overload;
 function Modulo(const X, Y: Integer): Integer; inline; overload;
 
-function CeilEx(const a: Single; const Precision: Int8 = 0): Double;
+function CeilTo(const a: Single; const Precision: Int8 = 0): Double;
 
 implementation
 
@@ -108,12 +105,12 @@ begin
   Result := RadToDeg(e);
 end;
 
-function CeilEx(const a: Single; const Precision: Int8 = 0): Double;
+function CeilTo(const a: Single; const Precision: Int8 = 0): Double;
 begin
   if (Precision = 0) then
     Result := Ceil(a)
   else
-    Result := RoundTo(a + 0.5 * 10**(-Double(precision)), -precision);
+    Result := RoundTo(a + 0.5 * 10**(-Double(Precision)), -Precision);
 end;
 
 end.

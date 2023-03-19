@@ -89,6 +89,8 @@ type
     function AverageBrightness(Area: TBox): Integer;
     function PeakBrightness(Area: TBox): Integer;
 
+    function FindTemplate(Templ: TMufasaBitmap; MinMatch: Single; Bounds: TBox): TPoint;
+
     class operator Initialize(var Self: TSimbaFinder);
   end;
 
@@ -568,6 +570,25 @@ begin
   if GetDataAsBitmap(Area, Bitmap) then
   try
     Result := Bitmap.PeakBrightness();
+  finally
+    Bitmap.Free();
+  end;
+end;
+
+function TSimbaFinder.FindTemplate(Templ: TMufasaBitmap; MinMatch: Single; Bounds: TBox): TPoint;
+var
+  Bitmap: TMufasaBitmap;
+  Mat: TSingleMatrix;
+  Best: TPoint;
+begin
+  Result := TPoint.Create(-1, -1);
+
+  if GetDataAsBitmap(Bounds, Bitmap) then
+  try
+    Mat := Bitmap.MatchTemplate(Templ, TM_CCOEFF_NORMED);
+    Best := Mat.ArgMax();
+    if (Mat[Best.Y, Best.X] >= MinMatch) then
+      Result := Best + Bounds.TopLeft;
   finally
     Bitmap.Free();
   end;

@@ -49,8 +49,8 @@ type
 class operator TSuperColor.:=(aValue: TColorRGB): TSuperColor;
 begin
   Result.A := aValue.R;
-  Result.B := aValue.B;
-  Result.C := aValue.G;
+  Result.B := aValue.G;
+  Result.C := aValue.B;
 end;
 
 class operator TSuperColor.:=(aValue: TColorXYZ): TSuperColor;
@@ -317,7 +317,6 @@ end;
 
 function GetBestColor(Formula: EColorSpace; Colors: TColorArray): TBestColor;
 var
-  i: Integer;
   delA,delB,delC: Double;
   ABC: TSuperColor;
   range: TColorRange;
@@ -325,6 +324,7 @@ var
   RGB: TColorRGB;
 begin
   Result := Default(TBestColor);
+
   range := ColorRange(Formula, Colors);
   hue   := ColorRangeHue(Formula, Colors);
 
@@ -355,9 +355,9 @@ begin
   Result.Mods[1] := 1 / Max(COLOR_FITTING_ACCURACY, delB);
   Result.Mods[2] := 1 / Max(COLOR_FITTING_ACCURACY, delC);
   Result.Mods := NormalizeMods(Result.Mods);
-  Result.Mods[0] := CeilEx(Result.Mods[0], 3);
-  Result.Mods[1] := CeilEx(Result.Mods[1], 3);
-  Result.Mods[2] := CeilEx(Result.Mods[2], 3);
+  Result.Mods[0] := CeilTo(Result.Mods[0], 3);
+  Result.Mods[1] := CeilTo(Result.Mods[1], 3);
+  Result.Mods[2] := CeilTo(Result.Mods[2], 3);
 
   case Formula of
     EColorSpace.RGB:
@@ -377,8 +377,7 @@ begin
     EColorSpace.DeltaE: Result.Color := TColorLCH(ABC).ToColor;
   end;
 
-  Result.Tolerance := GetTolerance(Formula, Result.Color, Colors, Result.Mods);
-  Result.Tolerance := CeilEx(Result.Tolerance, 3);
+  Result.Tolerance := CeilTo(GetTolerance(Formula, Result.Color, Colors, Result.Mods), 3);
 end;
 
 {

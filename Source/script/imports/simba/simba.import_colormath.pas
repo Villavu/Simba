@@ -8,130 +8,126 @@ implementation
 
 uses
   classes, sysutils, graphics, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.colormath_distance;
+  simba.script_compiler, simba.mufasatypes, simba.colormath_distance, simba.colormath_conversion;
 
-procedure _LapeColorToRGB(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorRGBToBGRA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  //ColorToRGB(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^);
+  PColorBGRA(Result)^ := PColorRGB(Params^[0])^.ToBGRA();
 end;
 
-procedure _LapeRGBtoColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorRGBToXYZ(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  //PColor(Result)^ := RGBtoColor(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^);
+  PColorXYZ(Result)^ := PColorRGB(Params^[0])^.ToXYZ();
 end;
 
-procedure _LapeColorToHSL(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorRGBToLAB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  //ColorToHSL(PInt32(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^);
+  PColorLAB(Result)^ := PColorRGB(Params^[0])^.ToLAB();
 end;
 
-procedure _LapeHSLToColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorRGBToLCH(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  //PColor(Result)^ := HSLToColor(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^);
+  PColorLCH(Result)^ := PColorRGB(Params^[0])^.ToLCH();
 end;
 
-procedure _LapeColorToXYZ(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorRGBToHSV(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
- // ColorToXYZ(PInt32(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^);
+  PColorHSV(Result)^ := PColorRGB(Params^[0])^.ToHSV();
 end;
 
-procedure _LapeXYZToColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorRGBToHSL(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  //PColor(Result)^ := XYZToColor(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^);
+  PColorHSL(Result)^ := PColorRGB(Params^[0])^.ToHSL();
 end;
 
-procedure _LapeRGBToHSL(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorRGBToColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
- // RGBToHSL(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+  PColor(Result)^ := PColorRGB(Params^[0])^.ToColor();
 end;
 
-procedure _LapeHSLtoRGB(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorToBGRA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  //HSLtoRGB(Pextended(Params^[0])^, Pextended(Params^[1])^, Pextended(Params^[2])^, PByte(Params^[3])^, PByte(Params^[4])^, PByte(Params^[5])^);
+  PColorBGRA(Result)^ := PColor(Params^[0])^.ToBGRA();
 end;
 
-procedure _LapeCalculateBestColor(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorToRGB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  //case PInteger(Params^[1])^ of
-  //  0: BestColor_CTS0(PIntegerArray(Params^[0])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
-  //  1: BestColor_CTS1(PIntegerArray(Params^[0])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
-  //  2: BestColor_CTS2(PIntegerArray(Params^[0])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
-  //end;
+  PColorRGB(Result)^ := PColor(Params^[0])^.ToRGB();
 end;
 
-procedure _LapeRGBToXYZ(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorToXYZ(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  //RGBToXYZ(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+  PColorXYZ(Result)^ := PColor(Params^[0])^.ToXYZ();
 end;
 
-procedure _LapeXYZToRGB(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorToLAB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
- // XYZToRGB(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^);
+  PColorLAB(Result)^ := PColor(Params^[0])^.ToLAB();
 end;
 
-procedure _LapeXYZToHSL(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorToLCH(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
- // HSLToXYZ(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+  PColorLCH(Result)^ := PColor(Params^[0])^.ToLCH();
 end;
 
-procedure _LapeHSLToXYZ(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorToHSV(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
- // HSLToXYZ(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+  PColorHSV(Result)^ := PColor(Params^[0])^.ToHSV();
 end;
 
-procedure _LapeXYZtoCIELab(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorToHSL(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
- // XYZtoCIELab(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+  PColorHSL(Result)^ := PColor(Params^[0])^.ToHSL();
 end;
 
-procedure _LapeCIELabtoXYZ(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorHSLToRGB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-//  CIELabToXYZ(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+  PColorRGB(Result)^ := PColorHSL(Params^[0])^.ToRGB();
 end;
 
-procedure _LapeCIELabToRGB(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorHSLToColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-//  CIELabToRGB(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^);
+  PColor(Result)^ := PColorHSL(Params^[0])^.ToColor();
 end;
 
-procedure _LapeRGBToCIELab(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorHSVToRGB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
- // RGBToCIELab(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+  PColorRGB(Result)^ := PColorHSV(Params^[0])^.ToRGB();
 end;
 
-procedure _LapeCIELabToColor(const Params: PParamArray; const Result : Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorHSVToColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  //PColor(Result)^ := CIELabToColor(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^);
+  PColor(Result)^ := PColorHSV(Params^[0])^.ToColor();
 end;
 
-procedure _LapeColorToCIELab(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorXYZToRGB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  //ColorToCIELab(PInt32(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^);
+  PColorRGB(Result)^ := PColorXYZ(Params^[0])^.ToRGB();
 end;
 
-procedure _LapeCIELabToHSL(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorXYZToColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  //CIELabToHSL(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+  PColor(Result)^ := PColorXYZ(Params^[0])^.ToColor();
 end;
 
-procedure _LapeHSLToCIELab(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorLABToRGB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  //HSLToCIELab(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+  PColorRGB(Result)^ := PColorLAB(Params^[0])^.ToRGB();
 end;
 
-procedure _LapeColorToGray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorLABToColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  //PColor(Result)^ := ColorToGray(PInt32(Params^[0])^);
+  PColor(Result)^ := PColorLAB(Params^[0])^.ToColor();
 end;
 
-procedure _LapeDistanceRGB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorLCHToRGB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  //PInteger(Result)^ := DistanceRGB(PInteger(Params^[0])^, PInteger(Params^[1])^);
+  PColorRGB(Result)^ := PColorLCH(Params^[0])^.ToRGB();
 end;
 
-procedure _LapeDistanceHSL(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorLCHToColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  //PSingle(Result)^ := DistanceHSL(PInteger(Params^[0])^, PInteger(Params^[1])^, PSingle(Params^[2])^, PSingle(Params^[3])^);
+  PColor(Result)^ := PColorLCH(Params^[0])^.ToColor();
 end;
 
 procedure ImportColorMath(Compiler: TSimbaScript_Compiler);
@@ -140,31 +136,44 @@ begin
   begin
     ImportingSection := 'Color Math';
 
-    addGlobalFunc('procedure ColorToRGB(Color: Int32; var r, g, b: Int32)', @_LapeColorToRGB);
-    addGlobalFunc('function RGBtoColor(r, g, b: Int32): TColor', @_LapeRGBtoColor);
-    addGlobalFunc('procedure ColorToHSL(Color: Int32; var h, s, l: Extended)', @_LapeColorToHSL);
-    addGlobalFunc('function HSLToColor(H, S, L: Extended): TColor', @_LapeHSLToColor);
-    addGlobalFunc('procedure ColorToXYZ(Color: Int32; var x, y, z: Extended)', @_LapeColorToXYZ);
-    addGlobalFunc('function XYZToColor(X, Y, Z: Extended): TColor', @_LapeXYZToColor);
-    addGlobalFunc('procedure RGBToHSL(R, G, B: Int32; var h, s, l: Extended)', @_LapeRGBToHSL);
-    addGlobalFunc('procedure HSLtoRGB(H, S, L: extended; var R, G, B: Byte)', @_LapeHSLtoRGB);
-    addGlobalFunc('procedure RGBToXYZ(R, G, B: Int32; var x, y, z: Extended)', @_LapeRGBToXYZ);
-    addGlobalFunc('procedure XYZToRGB(X, Y, Z: Extended; var R, G, B: Int32)', @_LapeXYZToRGB);
-    addGlobalFunc('procedure XYZToHSL(X, Y, Z: Extended; out H, S, L: Extended)', @_LapeXYZToHSL);
-    addGlobalFunc('procedure HSLToXYZ(H, S, L: Extended; out X, Y, Z: Extended)', @_LapeHSLToXYZ);
-    addGlobalFunc('procedure XYZtoCIELab(X, Y, Z: Extended; out L, a, b: Extended)', @_LapeXYZtoCIELab);
-    addGlobalFunc('procedure CIELabtoXYZ(L, a, b: Extended; out X, Y, Z: Extended)', @_LapeCIELabtoXYZ);
-    addGlobalFunc('procedure CIELabToRGB(L, a, b: Extended; out rr, gg, bb: Int32)', @_LapeCIELabToRGB);
-    addGlobalFunc('procedure RGBToCIELab(rr, gg, bb: Int32; out L, a, b: Extended)', @_LapeRGBToCIELab);
-    addGlobalFunc('function CIELabToColor(L, a, b: Extended): TColor', @_LapeCIELabToColor);
-    addGlobalFunc('procedure ColorToCIELab(Color: Int32; out L, a, b: Extended)', @_LapeColorToCIELab);
-    addGlobalFunc('procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended)', @_LapeCIELabToHSL);
-    addGlobalFunc('procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended)', @_LapeHSLToCIELab);
-    addGlobalFunc('function ColorToGray(const Color: Int32): TColor', @_LapeColorToGray);
-    addGlobalFunc('procedure CalculateBestColor(Colors: TIntegerArray; CTS: Integer; out Color, Tolerance: Integer; out Hue, Sat: Extended)', @_LapeCalculateBestColor);
+    addGlobalType('packed record B,G,R,A: Byte; end;', 'TColorBGRA');
+    addGlobalType('record R,G,B: Byte; end;', 'TColorRGB');
+    addGlobalType('record X,Y,Z: Single; end;', 'TColorXYZ');
+    addGlobalType('record L,A,B: Single; end;', 'TColorLAB');
+    addGlobalType('record L,C,H: Single; end;', 'TColorLCH');
+    addGlobalType('record H,S,V: Single; end;', 'TColorHSV');
+    addGlobalType('record H,S,L: Single; end;', 'TColorHSL');
 
-    addGlobalFunc('function DistanceHSL(const Color1, Color2: Integer; const HueMod: Single = 0.2; const SatMod: Single = 0.2): Single', @_LapeDistanceHSL);
-    addGlobalFunc('function DistanceRGB(const Color1, Color2: Integer): Integer', @_LapeDistanceRGB);
+    addGlobalFunc('function TColorRGB.ToBGRA: TColorBGRA', @_LapeColorRGBToBGRA);
+    addGlobalFunc('function TColorRGB.ToXYZ: TColorXYZ', @_LapeColorRGBToXYZ);
+    addGlobalFunc('function TColorRGB.ToLAB: TColorLAB', @_LapeColorRGBToLAB);
+    addGlobalFunc('function TColorRGB.ToLCH: TColorLCH', @_LapeColorRGBToLCH);
+    addGlobalFunc('function TColorRGB.ToHSV: TColorHSV', @_LapeColorRGBToHSV);
+    addGlobalFunc('function TColorRGB.ToHSL: TColorHSL', @_LapeColorRGBToHSL);
+    addGlobalFunc('function TColorRGB.ToColor: TColor', @_LapeColorRGBToColor);
+
+    addGlobalFunc('function TColorHSL.ToRGB: TColorRGB', @_LapeColorHSLToRGB);
+    addGlobalFunc('function TColorHSL.ToColor: TColor', @_LapeColorHSLToColor);
+
+    addGlobalFunc('function TColorHSV.ToRGB: TColorRGB', @_LapeColorHSVToRGB);
+    addGlobalFunc('function TColorHSV.ToColor: TColor', @_LapeColorHSVToColor);
+
+    addGlobalFunc('function TColorXYZ.ToRGB: TColorRGB', @_LapeColorXYZToRGB);
+    addGlobalFunc('function TColorXYZ.ToColor: TColor', @_LapeColorXYZToColor);
+
+    addGlobalFunc('function TColorLAB.ToRGB: TColorRGB', @_LapeColorLABToRGB);
+    addGlobalFunc('function TColorLAB.ToColor: TColor', @_LapeColorLABToColor);
+
+    addGlobalFunc('function TColorLCH.ToRGB: TColorRGB', @_LapeColorLCHToRGB);
+    addGlobalFunc('function TColorLCH.ToColor: TColor', @_LapeColorLCHToColor);
+
+    addGlobalFunc('function TColor.ToBGRA: TColorBGRA', @_LapeColorToBGRA);
+    addGlobalFunc('function TColor.ToRGB: TColorRGB', @_LapeColorToRGB);
+    addGlobalFunc('function TColor.ToXYZ: TColorXYZ', @_LapeColorToXYZ);
+    addGlobalFunc('function TColor.ToLAB: TColorLAB', @_LapeColorToLAB);
+    addGlobalFunc('function TColor.ToLCH: TColorLCH', @_LapeColorToLCH);
+    addGlobalFunc('function TColor.ToHSV: TColorHSV', @_LapeColorToHSV);
+    addGlobalFunc('function TColor.ToHSL: TColorHSL', @_LapeColorToHSL);
 
     ImportingSection := '';
   end;
