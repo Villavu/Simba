@@ -7,7 +7,8 @@ interface
 implementation
 
 uses
-  classes, sysutils, lptypes, ffi,
+  Classes, SysUtils, Graphics,
+  lptypes, lpparser, ffi,
   simba.script_compiler, simba.mufasatypes, simba.nativeinterface;
 
 procedure _LapeGetEnvironmentVariable(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -89,6 +90,13 @@ begin
     {$ELSEIF DEFINED(LINUX)}
     addBaseDefine('LINUX');
     {$ENDIF}
+
+    {$IF SizeOf(TColor) = 4}
+    addGlobalType('type Int32', 'TColor');
+    {$ELSE}
+    addGlobalType('type Int64', 'TColor');
+    {$ENDIF}
+    addGlobalType('array of TColor', 'TColorArray');
 
     addGlobalType('array of String', 'TStringArray');
     addGlobalType('array of Integer', 'TIntegerArray');

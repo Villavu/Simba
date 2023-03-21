@@ -14,8 +14,10 @@ interface
 implementation
 
 uses
-  classes, sysutils, Graphics, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.finder, simba.bitmap, simba.dtm, simba.colormath_conversion;
+  classes, sysutils, Graphics,
+  lptypes,
+  simba.script_compiler, simba.mufasatypes, simba.finder, simba.bitmap, simba.dtm,
+  simba.colormath, simba.colormath_distance;
 
 procedure _LapeSimbaFinder_SetTarget_Bitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -152,8 +154,6 @@ begin
   with Compiler do
   begin
     ImportingSection := 'Finder';
-
-    addGlobalType('array [0..2] of Single', 'TChannelMultipliers');
 
     addGlobalType([
       'record',

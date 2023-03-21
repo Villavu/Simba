@@ -10,10 +10,9 @@ unit simba.aca;
 interface
 
 uses
-  classes, sysutils, fileutil, dividerbevel, forms, controls,
-  graphics, dialogs, extctrls, comctrls, stdctrls, menus, colorbox, lcltype,
+  Classes, SysUtils, Forms, Controls, Dialogs, DividerBevel, Graphics, ExtCtrls, ComCtrls, StdCtrls, Menus, ColorBox,
   simba.client, simba.mufasatypes, simba.imagebox, simba.imagebox_zoom, simba.imagebox_bitmap,
-  simba.colormath_conversion;
+  simba.colormath, simba.colormath_distance;
 
 type
   TACABestColorEvent = procedure(CTS: Integer; Color, Tolerance: Integer; Hue, Sat: Extended) of object;
@@ -127,7 +126,7 @@ implementation
 {$R *.lfm}
 
 uses
-  Clipbrd, TypInfo,
+  Clipbrd, TypInfo, LCLType,
   simba.windowhandle, simba.bitmap, simba.colormath_aca;
 
 procedure TSimbaACAForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);

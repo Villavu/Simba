@@ -45,7 +45,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.target, simba.mufasatypes, simba.colormath_conversion, dynlibs;
+  simba.target, simba.mufasatypes, simba.colormath, dynlibs;
 
 type
   PEIOS_Client = ^TEIOS_Client;

@@ -12,7 +12,7 @@ interface
 
 uses
   classes, sysutils, graphics, macosall,
-  simba.mufasatypes, simba.nativeinterface, simba.colormath_conversion;
+  simba.mufasatypes, simba.nativeinterface, simba.colormath;
 
 type
   TVirtualWindow = packed record

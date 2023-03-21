@@ -196,6 +196,7 @@ function Max(const A, B: Double): Double; inline; overload;
 
 procedure Swap(var A, B: Byte); overload;
 procedure Swap(var A, B: Integer); overload;
+procedure Swap(var A, B: Single); overload;
 procedure Swap(var A, B: Double); overload;
 procedure Swap(var A, B: TPoint); overload;
 procedure Swap(var A, B: Pointer); overload;
@@ -393,6 +394,11 @@ end;
 procedure Swap(var A, B: Integer);
 begin
   specialize Swap<Integer>(A, B);
+end;
+
+procedure Swap(var A, B: Single);
+begin
+  specialize Swap<Single>(A, B);
 end;
 
 procedure Swap(var A, B: Double);

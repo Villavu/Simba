@@ -11,7 +11,8 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, ComCtrls, LCLType,
-  simba.mufasatypes, simba.bitmap, simba.dtm, simba.iomanager, simba.imagebox_bitmap, simba.colormath_conversion;
+  simba.mufasatypes, simba.bitmap, simba.dtm, simba.iomanager, simba.imagebox_bitmap,
+  simba.colormath, simba.colormath_distance;
 
 type
   TSimbaImageBox_ScrollBox = class(TScrollBox)

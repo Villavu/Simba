@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, lazfreetypefpimagedrawer, easylazfreetype, fpimage, graphics,
-  simba.mufasatypes, simba.colormath_conversion;
+  simba.mufasatypes, simba.colormath;
 
 type
   TSimbaTextDrawer = class(TFPImageFreeTypeDrawer)

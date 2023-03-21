@@ -1,6 +1,6 @@
 var
   FileName, Output: String;
-  Fails: Integer;
+  Fail, Pass: Integer;
 begin
   for FileName in FindFiles({$macro CURRENT_DIRECTORY}, ['simba']) do
   begin
@@ -10,15 +10,24 @@ begin
     WriteLn('Testing: ' + ExtractFileName(FileName));
 
     if RunScript(FileName, ['--silent=true'], Output) = 0 then
-      WriteLn('Passed')
-    else
+    begin
+      WriteLn('Passed');
+
+      Inc(Pass)
+    end else
     begin
       WriteLn('Failed "' + Trim(Output) + '"');
 
-      Inc(Fails);
+      Inc(Fail);
     end;
   end;
 
-  if (Fails > 0) then
-    raise IntToStr(Fails) + ' failed tests';
+  WriteLn();
+  WriteLn(Format('Ran %d tests in %.2f seconds', [Pass + Fail, (GetTimeRunning() / 1000)]));
+  WriteLn(Format('%3d / %d tests failed', [Fail, Pass + Fail]));
+  WriteLn(Format('%3d / %d tests passed', [Pass, Pass + Fail]));
+  WriteLn();
+
+  if (Fail > 0) then
+    raise 'Failed';
 end.

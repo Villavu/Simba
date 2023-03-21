@@ -16,7 +16,7 @@ interface
 
 uses
   Classes, SysUtils, Math, Graphics,
-  simba.mufasatypes, simba.colormath_conversion, simba.colormath_distance;
+  simba.mufasatypes, simba.colormath, simba.colormath_distance;
 
 type
   TColorFinder = record
@@ -43,42 +43,7 @@ type
 implementation
 
 uses
-  simba.overallocatearray;
-
-function _DistanceRGB(const Color1: PColorRGB; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
-begin
-  Result := DistanceRGB(Color1^, Color2.ToRGB(), Mul);
-end;
-
-function _DistanceHSV(const Color1: PColorHSV; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
-begin
-  Result := DistanceHSV(Color1^, Color2.ToHSV(), Mul);
-end;
-
-function _DistanceHSL(const Color1: PColorHSL; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
-begin
-  Result := DistanceHSL(Color1^, Color2.ToHSL(), Mul);
-end;
-
-function _DistanceXYZ(const Color1: PColorXYZ; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
-begin
-  Result := DistanceXYZ(Color1^, Color2.ToXYZ(), Mul);
-end;
-
-function _DistanceLAB(const Color1: PColorLAB; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
-begin
-  Result := DistanceLAB(Color1^, Color2.ToLAB(), Mul);
-end;
-
-function _DistanceLCH(const Color1: PColorLCH; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
-begin
-  Result := DistanceLCH(Color1^, Color2.ToLCH(), Mul);
-end;
-
-function _DistanceDeltaE(const Color1: PColorLAB; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
-begin
-  Result := DistanceDeltaE(Color1^, Color2.ToLAB(), Mul);
-end;
+  simba.overallocatearray, simba.colormath_distance_unrolled;
 
 procedure TColorFinder.Setup(Formula: EColorSpace; Color: TColor; Tolerance: Single; Multiplier: TChannelMultipliers);
 begin
@@ -90,49 +55,49 @@ begin
   case Formula of
     EColorSpace.RGB:
       begin
-        FCompareFunc := TCompareColorFunc(@_DistanceRGB);
+        FCompareFunc := TCompareColorFunc(@DistanceRGB_UnRolled);
         FMaxDistance := DistanceRGB_Max(Multiplier);
         PColorRGB(FColor)^ := Color.ToRGB();
       end;
 
     EColorSpace.HSV:
       begin
-        FCompareFunc := TCompareColorFunc(@_DistanceHSV);
+        FCompareFunc := TCompareColorFunc(@DistanceHSV_UnRolled);
         FMaxDistance := DistanceHSV_Max(Multiplier);
         PColorHSV(FColor)^ := Color.ToHSV();
       end;
 
     EColorSpace.HSL:
       begin
-        FCompareFunc := TCompareColorFunc(@_DistanceHSL);
+        FCompareFunc := TCompareColorFunc(@DistanceHSL_Unrolled);
         FMaxDistance := DistanceHSL_Max(Multiplier);
         PColorHSL(FColor)^ := Color.ToHSL();
       end;
 
     EColorSpace.XYZ:
       begin
-        FCompareFunc := TCompareColorFunc(@_DistanceXYZ);
+        FCompareFunc := TCompareColorFunc(@DistanceXYZ_UnRolled);
         FMaxDistance := DistanceXYZ_Max(Multiplier);
         PColorXYZ(FColor)^ := Color.ToXYZ();
       end;
 
     EColorSpace.LAB:
       begin
-        FCompareFunc := TCompareColorFunc(@_DistanceLAB);
+        FCompareFunc := TCompareColorFunc(@DistanceLAB_UnRolled);
         FMaxDistance := DistanceLAB_Max(Multiplier);
         PColorLAB(FColor)^ := Color.ToLAB();
       end;
 
     EColorSpace.LCH:
       begin
-        FCompareFunc := TCompareColorFunc(@_DistanceLCH);
+        FCompareFunc := TCompareColorFunc(@DistanceLCH_UnRolled);
         FMaxDistance := DistanceLCH_Max(Multiplier);
         PColorLCH(FColor)^ := Color.ToLCH();
       end;
 
     EColorSpace.DeltaE:
       begin
-        FCompareFunc := TCompareColorFunc(@_DistanceDeltaE);
+        FCompareFunc := TCompareColorFunc(@DistanceDeltaE_UnRolled);
         FMaxDistance := DistanceDeltaE_Max(Multiplier);
         PColorLAB(FColor)^ := Color.ToLAB();
       end;

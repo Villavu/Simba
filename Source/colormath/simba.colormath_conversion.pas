@@ -9,164 +9,19 @@
 }
 unit simba.colormath_conversion;
 
-{$DEFINE SIMBA_MAX_OPTIMIZATION}
-
 {$DEFINE B_BIT := 16}
 {$DEFINE G_BIT := 8}
 {$DEFINE R_BIT := 0}
+
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 
 {$i simba.inc}
 
 interface
 
 uses
-  Classes, SysUtils, Graphics,
-  simba.mufasatypes;
-
-type
-  TColorRGB = record
-    R,G,B: Byte;
-  end;
-
-  TColorXYZ = record
-    X,Y,Z: Single;
-  end;
-
-  TColorLAB = record
-    L,A,B: Single;
-  end;
-
-  TColorLCH = record
-    L,C,H: Single;
-  end;
-
-  TColorHSV = record
-    H,S,V: Single;
-  end;
-
-  TColorHSL = record
-    H,S,L: Single;
-  end;
-
-  TColorBGRA = packed record // for bitmaps etc
-  case Byte of
-    0: (B, G, R, A: Byte);
-    1: (AsInteger: Integer);
-  end;
-  TColorBGRAArray = array of TColorBGRA;
-
-  TColorHelper = type Helper for TColor
-    function ToBGRA: TColorBGRA;
-    function ToRGB: TColorRGB;
-    function ToXYZ: TColorXYZ;
-    function ToLAB: TColorLAB;
-    function ToLCH: TColorLCH;
-    function ToHSV: TColorHSV;
-    function ToHSL: TColorHSL;
-  end;
-
-  TColorRGB_Helper = record helper for TColorRGB
-    function ToBGRA: TColorBGRA;
-    function ToXYZ: TColorXYZ;
-    function ToLAB: TColorLAB;
-    function ToLCH: TColorLCH;
-    function ToHSV: TColorHSV;
-    function ToHSL: TColorHSL;
-    function ToColor: TColor;
-  end;
-
-  TColorBGRA_Helper = record helper for TColorBGRA
-    function ToRGB: TColorRGB;
-    function ToXYZ: TColorXYZ;
-    function ToLAB: TColorLAB;
-    function ToLCH: TColorLCH;
-    function ToHSV: TColorHSV;
-    function ToHSL: TColorHSL;
-    function ToColor: TColor;
-
-    function Equals(const Other: TColorBGRA): Boolean; inline;
-    function EqualsIgnoreAlpha(const Other: TColorBGRA): Boolean; inline;
-  end;
-
-  TColorHSL_Helper = record helper for TColorHSL
-    function ToRGB: TColorRGB;
-    function ToColor: TColor;
-  end;
-
-  TColorHSV_Helper = record helper for TColorHSV
-    function ToRGB: TColorRGB;
-    function ToColor: TColor;
-  end;
-
-  TColorXYZ_Helper = record helper for TColorXYZ
-    function ToRGB: TColorRGB;
-    function ToColor: TColor;
-  end;
-
-  TColorLAB_Helper = record helper for TColorLAB
-    function ToRGB: TColorRGB;
-    function ToColor: TColor;
-  end;
-
-  TColorLCH_Helper = record helper for TColorLCH
-    function ToRGB: TColorRGB;
-    function ToColor: TColor;
-  end;
-
-  PColorBGRA = ^TColorBGRA;
-  PColorBGRAArray = array of PColorBGRA;
-
-  PColorRGB = ^TColorRGB;
-  PColorXYZ = ^TColorXYZ;
-  PColorLAB = ^TColorLAB;
-  PColorLCH = ^TColorLCH;
-  PColorHSV = ^TColorHSV;
-  PColorHSL = ^TColorHSL;
-
-  TColorArray = array of TColor;
-
-  PChannelMultipliers = ^TChannelMultipliers;
-  TChannelMultipliers = array [0..2] of Single;
-
-  {$PUSH}
-  {$SCOPEDENUMS ON}
-  EColorSpace = (RGB, HSV, HSL, XYZ, LAB, LCH, DELTAE);
-  PColorSpace = ^EColorSpace;
-  {$POP}
-
-const
-  DefaultMultipliers: TChannelMultipliers = (1,1,1);
-
-function ColorIntensity(Color: TColor): Byte; inline;
-function ColorToGray(Color: TColor): Byte; inline;
-function ColorToRGB(Color: TColor): TColorRGB; inline;
-function ColorToBGRA(Color: TColor): TColorBGRA; inline;
-
-// RGBToXXX
-function RGBToColor(RGB: TColorRGB): TColor; inline;
-function RGBToBGRA(RGB: TColorRGB): TColorBGRA; inline;
-function RGBToXYZ(RGB: TColorRGB): TColorXYZ; inline;
-function RGBToLAB(RGB: TColorRGB): TColorLAB; inline;
-function RGBToLCH(RGB: TColorRGB): TColorLCH; inline;
-function RGBToHSV(RGB: TColorRGB): TColorHSV; inline;
-function RGBToHSL(RGB: TColorRGB): TColorHSL; inline;
-
-// XXXToRGB
-function XYZToRGB(XYZ: TColorXYZ): TColorRGB; inline;
-function LABToRGB(LAB: TColorLAB): TColorRGB; inline;
-function HSVToRGB(HSV: TColorHSV): TColorRGB; inline;
-function HSLToRGB(HSL: TColorHSL): TColorRGB; inline;
-function LCHToRGB(LCH: TColorLCH): TColorRGB; inline;
-function BGRAToRGB(BGRA: TColorBGRA): TColorRGB; inline;
-
-function LCHToLAB(LCH: TColorLCH): TColorLAB; inline;
-function LABToXYZ(LAB: TColorLAB): TColorXYZ; inline;
-
-implementation
-
-uses
-  Math,
-  simba.math;
+  Classes, SysUtils, Graphics, Math,
+  simba.mufasatypes, simba.math, simba.colormath;
 
 const
   XYZ_POW_2_4: array[0..255] of Single = (
@@ -181,66 +36,67 @@ const
   TWO_DIV_THREE:     Single =  2.0 / 3.0;
   NEG_ONE_DIV_THREE: Single = -1.0 / 3.0;
 
-(*
-  Converts an RGB integer representation to seprate R,G,B values
-*)
-function ColorToRGB(Color: TColor): TColorRGB;
-begin
-  Result.R := Color shr R_BIT and $FF;
-  Result.G := Color shr G_BIT and $FF;
-  Result.B := Color shr B_BIT and $FF;
-end;
+type
+  TSimbaColorConversion = class
+  public
+    class function ColorToBGRA(const Color: TColor): TColorBGRA; static; inline;
+    class function ColorToRGB(const Color: TColor): TColorRGB; static; inline;
+    class function RGBToColor(const RGB: TColorRGB): TColor; static; inline;
+    class function BGRAToRGB(const RGB: TColorBGRA): TColorRGB; static; inline;
+    class function RGBToBGRA(const RGB: TColorRGB): TColorBGRA; static; inline;
+    class function RGBToXYZ(const RGB: TColorRGB): TColorXYZ; static; inline;
+    class function RGBToLAB(const RGB: TColorRGB): TColorLAB; static; inline;
+    class function RGBToLCH(const RGB: TColorRGB): TColorLCH; static; inline;
+    class function RGBToHSV(const RGB: TColorRGB): TColorHSV; static; inline;
+    class function RGBToHSL(const RGB: TColorRGB): TColorHSL; static; inline;
+    class function LABToLCH(const LAB: TColorLAB): TColorLCH; static; inline;
+    class function XYZToRGB(const XYZ: TColorXYZ): TColorRGB; static; inline;
+    class function LABToRGB(const LAB: TColorLAB): TColorRGB; static; inline;
+    class function HSVToRGB(const HSV: TColorHSV): TColorRGB; static; inline;
+    class function HSLToRGB(const HSL: TColorHSL): TColorRGB; static; inline;
+    class function LCHToRGB(const LCH: TColorLCH): TColorRGB; static; inline;
+    class function LCHToLAB(const LCH: TColorLCH): TColorLAB; static; inline;
+    class function LABToXYZ(const LAB: TColorLAB): TColorXYZ; static; inline;
+  end;
 
-function ColorToBGRA(Color: TColor): TColorBGRA;
+implementation
+
+class function TSimbaColorConversion.ColorToBGRA(const Color: TColor): TColorBGRA;
 begin
-  Result.R := Color shr R_BIT and $FF;
-  Result.G := Color shr G_BIT and $FF;
   Result.B := Color shr B_BIT and $FF;
+  Result.G := Color shr G_BIT and $FF;
+  Result.R := Color shr R_BIT and $FF;
   Result.A := 0;
 end;
 
-(*
-  Converts R,G,B values to an integer representation of the Color
-*)
-function RGBToColor(RGB: TColorRGB): TColor;
+class function TSimbaColorConversion.ColorToRGB(const Color: TColor): TColorRGB;
 begin
-  {$IF R_BIT = 0}
-  Result := RGB.R or RGB.G shl 8 or RGB.B shl 16;
-  {$ELSE}
-  Result := RGB.B or RGB.G shl 8 or RGB.R shl 16;
-  {$EndIf}
+  Result.R := Color shr R_BIT and $FF;
+  Result.G := Color shr G_BIT and $FF;
+  Result.B := Color shr B_BIT and $FF;
 end;
 
-
-(*
-  Average of R,G,B - Can be used to measure intensity.
-*)
-function ColorIntensity(Color: TColor): Byte;
+class function TSimbaColorConversion.RGBToColor(const RGB: TColorRGB): TColor;
 begin
-  Result := ((Color and $FF) + (Color shr 8 and $FF) + (Color shr 16 and $FF)) div 3;
+  Result := RGB.R or RGB.G shl G_BIT or RGB.B shl B_BIT;
 end;
 
-
-(*
-  Convert Color(RGB) to Grayscale / Luma
-  Rec. 601: Y' = 0.299 R' + 0.587 G' + 0.114 B'
-*)
-function ColorToGray(Color: TColor): Byte;
+class function TSimbaColorConversion.BGRAToRGB(const RGB: TColorBGRA): TColorRGB;
 begin
-  Result := (29  * (Color shr R_BIT and $FF) +
-             150 * (Color shr G_BIT and $FF) +
-             76  * (Color shr B_BIT and $FF) + 255) shr 8;
-end;
-
-function RGBToBGRA(RGB: TColorRGB): TColorBGRA;
-begin
-  Result.B := RGB.B;
-  Result.G := RGB.G;
   Result.R := RGB.R;
+  Result.G := RGB.G;
+  Result.B := RGB.B;
+end;
+
+class function TSimbaColorConversion.RGBToBGRA(const RGB: TColorRGB): TColorBGRA;
+begin
+  Result.R := RGB.R;
+  Result.G := RGB.G;
+  Result.B := RGB.B;
   Result.A := 0;
 end;
 
-function RGBToXYZ(RGB: TColorRGB): TColorXYZ;
+class function TSimbaColorConversion.RGBToXYZ(const RGB: TColorRGB): TColorXYZ;
 var
   vR,vG,vB: Single;
 begin
@@ -261,38 +117,7 @@ begin
   Result.Z := (vR * 0.0193 + vG * 0.1192 + vB * 0.9505);
 end;
 
-(*
-  Converts XYZ to RGB
-  Input:
-    X,Y,Z in range [0..100]
-  Output:
-    R,G,B is in range of [0..255]
-*)
-function XYZToRGB(XYZ: TColorXYZ): TColorRGB;
-var
-  vR,vG,vB,vX,vY,vZ: Single;
-begin
-  vX := XYZ.X / 100;
-  vY := XYZ.Y / 100;
-  vZ := XYZ.Z / 100;
-
-  vR := vX *  3.2406 + vY * -1.5372 + vZ * -0.4986;
-  vG := vX * -0.9689 + vY *  1.8758 + vZ *  0.0415;
-  vB := vX *  0.0557 + vY * -0.2040 + vZ *  1.0570;
-
-  if (vR > 0.0031308) then vR := 1.055 * Power(vR, 1/2.4) - 0.055
-  else                     vR := 12.92 * vR;
-  if (vG > 0.0031308) then vG := 1.055 * Power(vG, 1/2.4) - 0.055
-  else                     vG := 12.92 * vG;
-  if (vB > 0.0031308) then vB := 1.055 * Power(vB, 1/2.4) - 0.055
-  else                     vB := 12.92 * vB;
-
-  Result.R := Round(Min(255, Max(0, vR * 255)));
-  Result.G := Round(Min(255, Max(0, vG * 255)));
-  Result.B := Round(Min(255, Max(0, vB * 255)));
-end;
-
-function RGBToLAB(RGB: TColorRGB): TColorLAB;
+class function TSimbaColorConversion.RGBToLAB(const RGB: TColorRGB): TColorLAB;
 var
   vR,vG,vB, X,Y,Z: Single;
 begin
@@ -321,39 +146,11 @@ begin
   Result.B := 200 * (Y - Z);
 end;
 
-function LABToXYZ(LAB: TColorLAB): TColorXYZ;
-var
-  vX,vY,vZ,vX3,vY3,vZ3: Single;
-begin
-  vY := (LAB.L + 16) / 116;
-  vX := LAB.A / 500 + vY;
-  vZ := vY - LAB.B / 200;
-
-  vX3 := vX*vX*vX;
-  vY3 := vY*vY*vY;
-  vZ3 := vZ*vZ*vZ;
-  if (vX3 > 0.008856) then vX := vX3
-  else                     vX := (vX - 16 / 116) / 7.787;
-  if (vY3 > 0.008856) then vY := vY3
-  else                     vY := (vY - 16 / 116) / 7.787;
-  if (vZ3 > 0.008856) then vZ := vZ3
-  else                     vZ := (vZ - 16 / 116) / 7.787;
-
-  Result.X := vX *  95.470;
-  Result.Y := vY * 100.000;
-  Result.Z := vZ * 108.883;
-end;
-
-function LABToRGB(LAB: TColorLAB): TColorRGB;
-begin
-  Result := XYZToRGB(LABToXYZ(LAB));
-end;
-
-function RGBToLCH(RGB: TColorRGB): TColorLCH;
+class function TSimbaColorConversion.RGBToLCH(const RGB: TColorRGB): TColorLCH;
 var
   LAB: TColorLAB;
 begin
-  LAB := RGB.ToLAB();
+  LAB := RGBToLab(RGB);
   Result.L := LAB.L;
   Result.C := Sqrt(Sqr(LAB.A) + Sqr(LAB.B));
   Result.H := ArcTan2(LAB.B, LAB.A);
@@ -364,65 +161,34 @@ begin
     Result.H := 360 - (Abs(Result.H) / PI) * 180;
 end;
 
-function LABToLCH(LAB: TColorLAB): TColorLCH;
-begin
-  Result.L := LAB.L;
-  Result.C := Sqrt(Sqr(LAB.A) + Sqr(LAB.B));
-  Result.H := ArcTan2(LAB.B, LAB.A);
-
-  if (Result.H > 0) then
-    Result.H := (Result.H / PI) * 180
-  else
-    Result.H := 360 - (Abs(Result.H) / PI) * 180;
-end;
-
-function LCHToLAB(LCH: TColorLCH): TColorLAB;
-begin
-  Result.L := LCH.L;
-  Result.A := Cos(DegToRad(LCH.H)) * LCH.C;
-  Result.B := Sin(DegToRad(LCH.H)) * LCH.C;
-end;
-
-function LCHToRGB(LCH: TColorLCH): TColorRGB;
-begin
-  Result := LABToRGB(LCHToLAB(LCH));
-end;
-
-function BGRAToRGB(BGRA: TColorBGRA): TColorRGB;
-begin
-  Result.R := BGRA.R;
-  Result.G := BGRA.G;
-  Result.B := BGRA.B;
-end;
-
-function RGBToHSV(RGB: TColorRGB): TColorHSV;
+class function TSimbaColorConversion.RGBToHSV(const RGB: TColorRGB): TColorHSV;
 var
-  chroma,t,R,G,B,K: Single;
+  Chroma,R,G,B,K: Single;
 begin
   R := RGB.R / 255;
   G := RGB.G / 255;
   B := RGB.B / 255;
   K := 0.0;
 
-  if (g < b) then
+  if (G < b) then
   begin
-    t := b; b := g; g := t;
+    Swap(G, B);
     K := -1.0;
   end;
 
-  if (r < g) then
+  if (R < G) then
   begin
-    t := r; r := g; g := t;
+    Swap(R, G);
     K := NEG_ONE_DIV_THREE - K;
   end;
 
-  chroma := r - Min(g, b);
-  Result.s := chroma / (r + 1.0e-10)  * 100;
-  if Result.s < 1.0e-10 then
-    Result.h := 0
+  Chroma := R - Min(G, B);
+  Result.S := Chroma / (R + 1.0e-10)  * 100;
+  if (Result.S < 1.0e-10) then
+    Result.H := 0
   else
-    Result.h := Abs(K + (g - b) / (6.0 * chroma + 1.0e-20)) * 360;
-  Result.v := r * 100;
+    Result.H := Abs(K + (G - B) / (6.0 * Chroma + 1.0e-20)) * 360;
+  Result.V := R * 100;
 end;
 
 (*
@@ -434,7 +200,7 @@ end;
   Output:
     R,G,B is in range of [0..255]
 *)
-function HSVToRGB(HSV: TColorHSV): TColorRGB;
+class function TSimbaColorConversion.HSVToRGB(const HSV: TColorHSV): TColorRGB;
 var
   h,s,v,i,f,p,q,t,R,G,B: Single;
 begin
@@ -501,7 +267,7 @@ end;
     H value is in degrees [0..360]
     S and L values are percentages [0..100]
 *)
-function RGBToHSL(RGB: TColorRGB): TColorHSL;
+class function TSimbaColorConversion.RGBToHSL(const RGB: TColorRGB): TColorHSL;
 var
   R,G,B,deltaC,cMax,cMin: Single;
 begin
@@ -513,7 +279,8 @@ begin
   deltaC := cMax - cMin;
 
   Result.L := (cMax + cMin) * 0.5;
-  if deltaC = 0 then begin
+  if deltaC = 0 then
+  begin
     Result.H := 0;
     Result.S := 0;
   end else
@@ -540,20 +307,20 @@ end;
   Output:
     R,G,B is in range of [0..255]
 *)
-function HSLToRGB(HSL: TColorHSL): TColorRGB;
+function Hue2RGB(v1, v2, vH: Single): Byte; inline;
+begin
+  if (vH < 0) then vH += 1;
+  if (vH > 1) then vH -= 1;
+  if (6 * vH < 1) then Exit(Round(255 * (v1 + (v2 - v1) * 6 * vH)));
+  if (2 * vH < 1) then Exit(Round(255 * v2));
+  if (3 * vH < 2) then Exit(Round(255 * (v1 + (v2 - v1) * (TWO_DIV_THREE - vH) * 6)));
+  Result := Round(255 * v1);
+end;
 
-  function Hue2RGB(v1, v2, vH: Single): Byte;
-  begin
-    if (vH < 0) then vH += 1;
-    if (vH > 1) then vH -= 1;
-    if (6 * vH < 1) then Exit(Round(255 * (v1 + (v2 - v1) * 6 * vH)));
-    if (2 * vH < 1) then Exit(Round(255 * v2));
-    if (3 * vH < 2) then Exit(Round(255 * (v1 + (v2 - v1) * (TWO_DIV_THREE - vH) * 6)));
-    Result := Round(255 * v1);
-  end;
-
+class function TSimbaColorConversion.HSLToRGB(const HSL: TColorHSL): TColorRGB;
 var
   tmp,tmp2: Single;
+  H,S,L: Single;
 begin
   if (HSL.S = 0) then
   begin
@@ -562,182 +329,100 @@ begin
     Result.B := Round(HSL.L * 2.55);
   end else
   begin
-    HSL.H /= 360;
-    HSL.S /= 100;
-    HSL.L /= 100;
-    if (HSL.L < 0.5) then tmp2 := (HSL.L) * (1 + HSL.S)
-    else                  tmp2 := (HSL.L + HSL.S) - (HSL.S * HSL.L);
+    H := HSL.H / 360;
+    S := HSL.S / 100;
+    L := HSL.L / 100;
+    if (L < 0.5) then tmp2 := (L) * (1 + S)
+    else              tmp2 := (L + S) - (S * L);
 
-    tmp := 2 * HSL.L - tmp2;
-    Result.R := Hue2RGB(tmp, tmp2, HSL.H + ONE_DIV_THREE);
-    Result.G := Hue2RGB(tmp, tmp2, HSL.H);
-    Result.B := Hue2RGB(tmp, tmp2, HSL.H - ONE_DIV_THREE);
+    tmp := 2 * L - tmp2;
+    Result.R := Hue2RGB(tmp, tmp2, H + ONE_DIV_THREE);
+    Result.G := Hue2RGB(tmp, tmp2, H);
+    Result.B := Hue2RGB(tmp, tmp2, H - ONE_DIV_THREE);
   end;
 end;
 
-function TColorHSV_Helper.ToRGB: TColorRGB;
+(*
+  Converts XYZ to RGB
+  Input:
+    X,Y,Z in range [0..100]
+  Output:
+    R,G,B is in range of [0..255]
+*)
+class function TSimbaColorConversion.XYZToRGB(const XYZ: TColorXYZ): TColorRGB;
+var
+  vR,vG,vB,vX,vY,vZ: Single;
 begin
-  Result := HSVToRGB(Self);
+  vX := XYZ.X / 100;
+  vY := XYZ.Y / 100;
+  vZ := XYZ.Z / 100;
+
+  vR := vX *  3.2406 + vY * -1.5372 + vZ * -0.4986;
+  vG := vX * -0.9689 + vY *  1.8758 + vZ *  0.0415;
+  vB := vX *  0.0557 + vY * -0.2040 + vZ *  1.0570;
+
+  if (vR > 0.0031308) then vR := 1.055 * Power(vR, 1/2.4) - 0.055
+  else                     vR := 12.92 * vR;
+  if (vG > 0.0031308) then vG := 1.055 * Power(vG, 1/2.4) - 0.055
+  else                     vG := 12.92 * vG;
+  if (vB > 0.0031308) then vB := 1.055 * Power(vB, 1/2.4) - 0.055
+  else                     vB := 12.92 * vB;
+
+  Result.R := Round(Min(255, Max(0, vR * 255)));
+  Result.G := Round(Min(255, Max(0, vG * 255)));
+  Result.B := Round(Min(255, Max(0, vB * 255)));
 end;
 
-function TColorHSV_Helper.ToColor: TColor;
+class function TSimbaColorConversion.LABToXYZ(const LAB: TColorLAB): TColorXYZ;
+var
+  vX,vY,vZ,vX3,vY3,vZ3: Single;
 begin
-  Result := HSVToRGB(Self).ToColor();
+  vY := (LAB.L + 16) / 116;
+  vX := LAB.A / 500 + vY;
+  vZ := vY - LAB.B / 200;
+
+  vX3 := vX*vX*vX;
+  vY3 := vY*vY*vY;
+  vZ3 := vZ*vZ*vZ;
+  if (vX3 > 0.008856) then vX := vX3
+  else                     vX := (vX - 16 / 116) / 7.787;
+  if (vY3 > 0.008856) then vY := vY3
+  else                     vY := (vY - 16 / 116) / 7.787;
+  if (vZ3 > 0.008856) then vZ := vZ3
+  else                     vZ := (vZ - 16 / 116) / 7.787;
+
+  Result.X := vX *  95.470;
+  Result.Y := vY * 100.000;
+  Result.Z := vZ * 108.883;
 end;
 
-function TColorLAB_Helper.ToRGB: TColorRGB;
+class function TSimbaColorConversion.LABToRGB(const LAB: TColorLAB): TColorRGB;
 begin
-  Result := LABToRGB(Self);
+  Result := XYZToRGB(LABToXYZ(LAB));
 end;
 
-function TColorLAB_Helper.ToColor: TColor;
+class function TSimbaColorConversion.LABToLCH(const LAB: TColorLAB): TColorLCH;
 begin
-  Result := LABToRGB(Self).ToColor();
+  Result.L := LAB.L;
+  Result.C := Sqrt(Sqr(LAB.A) + Sqr(LAB.B));
+  Result.H := ArcTan2(LAB.B, LAB.A);
+
+  if (Result.H > 0) then
+    Result.H := (Result.H / PI) * 180
+  else
+    Result.H := 360 - (Abs(Result.H) / PI) * 180;
 end;
 
-function TColorLCH_Helper.ToRGB: TColorRGB;
+class function TSimbaColorConversion.LCHToLAB(const LCH: TColorLCH): TColorLAB;
 begin
-  Result := LCHToRGB(Self);
+  Result.L := LCH.L;
+  Result.A := Cos(DegToRad(LCH.H)) * LCH.C;
+  Result.B := Sin(DegToRad(LCH.H)) * LCH.C;
 end;
 
-function TColorLCH_Helper.ToColor: TColor;
+class function TSimbaColorConversion.LCHToRGB(const LCH: TColorLCH): TColorRGB;
 begin
-  Result := LCHToRGB(Self).ToColor();
-end;
-
-function TColorXYZ_Helper.ToRGB: TColorRGB;
-begin
-  Result := XYZToRGB(Self);
-end;
-
-function TColorXYZ_Helper.ToColor: TColor;
-begin
-  Result := XYZToRGB(Self).ToColor();
-end;
-
-function TColorHSL_Helper.ToRGB: TColorRGB;
-begin
-  Result := HSLToRGB(Self);
-end;
-
-function TColorHSL_Helper.ToColor: TColor;
-begin
-  Result := ToRGB().ToColor();
-end;
-
-function TColorBGRA_Helper.ToRGB: TColorRGB;
-begin
-  Result := BGRAToRGB(Self);
-end;
-
-function TColorBGRA_Helper.ToXYZ: TColorXYZ;
-begin
-  Result := Self.ToRGB().ToXYZ();
-end;
-
-function TColorBGRA_Helper.ToLAB: TColorLAB;
-begin
-  Result := Self.ToRGB().ToLAB();
-end;
-
-function TColorBGRA_Helper.ToLCH: TColorLCH;
-begin
-  Result := Self.ToRGB().ToLCH();
-end;
-
-function TColorBGRA_Helper.ToHSV: TColorHSV;
-begin
-  Result := Self.ToRGB().ToHSV();
-end;
-
-function TColorBGRA_Helper.ToHSL: TColorHSL;
-begin
-  Result := Self.ToRGB().ToHSL();
-end;
-
-function TColorBGRA_Helper.ToColor: TColor;
-begin
-  Result := Self.ToRGB.ToColor();
-end;
-
-function TColorBGRA_Helper.Equals(const Other: TColorBGRA): Boolean;
-begin
-  Result := AsInteger = Other.AsInteger;
-end;
-
-function TColorBGRA_Helper.EqualsIgnoreAlpha(const Other: TColorBGRA): Boolean;
-begin
-  Result := (AsInteger and $FFFFFF) = (Other.AsInteger and $FFFFFF);
-end;
-
-function TColorRGB_Helper.ToXYZ: TColorXYZ;
-begin
-  Result := RGBToXYZ(Self);
-end;
-
-function TColorRGB_Helper.ToLAB: TColorLAB;
-begin
-  Result := RGBToLAB(Self);
-end;
-
-function TColorRGB_Helper.ToLCH: TColorLCH;
-begin
-  Result := RGBToLCH(Self);
-end;
-
-function TColorRGB_Helper.ToHSV: TColorHSV;
-begin
-  Result := RGBToHSV(Self);
-end;
-
-function TColorRGB_Helper.ToHSL: TColorHSL;
-begin
-  Result := RGBToHSL(Self);
-end;
-
-function TColorRGB_Helper.ToColor: TColor;
-begin
-  Result := RGBToColor(Self);
-end;
-
-function TColorRGB_Helper.ToBGRA: TColorBGRA;
-begin
-  Result := RGBToBGRA(Self);
-end;
-
-function TColorHelper.ToBGRA: TColorBGRA;
-begin
-  Result := ColorToBGRA(Self);
-end;
-
-function TColorHelper.ToRGB: TColorRGB;
-begin
-  Result := ColorToRGB(Self);
-end;
-
-function TColorHelper.ToXYZ: TColorXYZ;
-begin
-  Result := ToRGB.ToXYZ();
-end;
-
-function TColorHelper.ToLAB: TColorLAB;
-begin
-  Result := ToRGB.ToLAB();
-end;
-
-function TColorHelper.ToLCH: TColorLCH;
-begin
-  Result := ToRGB.ToLCH();
-end;
-
-function TColorHelper.ToHSV: TColorHSV;
-begin
-  Result := ToRGB.ToHSV();
-end;
-
-function TColorHelper.ToHSL: TColorHSL;
-begin
-  Result := ToRGB.ToHSL();
+  Result := LABToRGB(LCHToLAB(LCH));
 end;
 
 end.

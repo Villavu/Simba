@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.target, simba.bitmap, simba.mufasatypes, simba.colormath_conversion;
+  simba.target, simba.bitmap, simba.mufasatypes, simba.colormath;
 
 type
   PBitmapTarget = ^TBitmapTarget;

@@ -60,9 +60,6 @@
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
-            <CompilerMessages>
-              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True"/>
-            </CompilerMessages>
             <CustomOptions Value="-dStaticFFI
 -dLape_CDECL"/>
             <OtherDefines Count="2">
@@ -107,11 +104,12 @@
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
-            <CompilerMessages>
-              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True"/>
-            </CompilerMessages>
             <CustomOptions Value="-dStaticFFI
 -dLape_CDECL"/>
+            <OtherDefines Count="2">
+              <Define0 Value="StaticFFI"/>
+              <Define1 Value="Lape_CDECL"/>
+            </OtherDefines>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
@@ -314,7 +312,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="152">
+    <Units Count="155">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -980,7 +978,7 @@
         <IsPartOfProject Value="True"/>
       </Unit146>
       <Unit147>
-        <Filename Value="colormath/simba.colormath_conversion.pas"/>
+        <Filename Value="colormath/simba.colormath.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit147>
       <Unit148>
@@ -999,6 +997,18 @@
         <Filename Value="finders/simba.finder_bitmap.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit151>
+      <Unit152>
+        <Filename Value="colormath/simba.colormath_conversion.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit152>
+      <Unit153>
+        <Filename Value="colormath/rgb_to_hsl.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit153>
+      <Unit154>
+        <Filename Value="colormath/simba.colormath_distance_unrolled.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit154>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -1034,10 +1044,6 @@
       </CompilerMessages>
       <CustomOptions Value="-dStaticFFI
 -dLape_CDECL"/>
-      <OtherDefines Count="2">
-        <Define0 Value="StaticFFI"/>
-        <Define1 Value="Lape_CDECL"/>
-      </OtherDefines>
       <CreateMakefileOnBuild Value="True"/>
     </Other>
   </CompilerOptions>

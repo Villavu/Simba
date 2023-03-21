@@ -18,7 +18,7 @@ interface
 
 uses
   classes, sysutils, lazmethodlist,
-  simba.target, simba.target_exported, simba.bitmap, simba.mufasatypes, simba.colormath_conversion;
+  simba.target, simba.target_exported, simba.bitmap, simba.mufasatypes, simba.colormath;
 
 type
   PIOManager = ^TIOManager;
