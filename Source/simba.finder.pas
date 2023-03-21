@@ -13,7 +13,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics,
-  simba.mufasatypes, simba.colormath_conversion, simba.bitmap, simba.dtm,
+  simba.mufasatypes, simba.colormath, simba.colormath_distance, simba.bitmap, simba.dtm,
   simba.finder_color, simba.finder_bitmap, simba.finder_dtm;
 
 type

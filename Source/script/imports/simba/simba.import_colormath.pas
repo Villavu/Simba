@@ -8,7 +8,7 @@ implementation
 
 uses
   classes, sysutils, graphics, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.colormath_distance, simba.colormath_conversion;
+  simba.script_compiler, simba.mufasatypes, simba.colormath_distance, simba.colormath;
 
 procedure _LapeColorRGBToBGRA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -45,37 +45,37 @@ begin
   PColor(Result)^ := PColorRGB(Params^[0])^.ToColor();
 end;
 
-procedure _LapeColorToBGRA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTColorToBGRA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PColorBGRA(Result)^ := PColor(Params^[0])^.ToBGRA();
 end;
 
-procedure _LapeColorToRGB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTColorToRGB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PColorRGB(Result)^ := PColor(Params^[0])^.ToRGB();
 end;
 
-procedure _LapeColorToXYZ(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTColorToXYZ(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PColorXYZ(Result)^ := PColor(Params^[0])^.ToXYZ();
 end;
 
-procedure _LapeColorToLAB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTColorToLAB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PColorLAB(Result)^ := PColor(Params^[0])^.ToLAB();
 end;
 
-procedure _LapeColorToLCH(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTColorToLCH(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PColorLCH(Result)^ := PColor(Params^[0])^.ToLCH();
 end;
 
-procedure _LapeColorToHSV(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTColorToHSV(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PColorHSV(Result)^ := PColor(Params^[0])^.ToHSV();
 end;
 
-procedure _LapeColorToHSL(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTColorToHSL(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PColorHSL(Result)^ := PColor(Params^[0])^.ToHSL();
 end;
@@ -130,11 +130,69 @@ begin
   PColor(Result)^ := PColorLCH(Params^[0])^.ToColor();
 end;
 
+procedure _LapeColorIntensity(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PByte(Result)^ := ColorIntensity(PColor(Params^[0])^);
+end;
+
+procedure _LapeColorToGray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PByte(Result)^ := ColorToGray(PColor(Params^[0])^);
+end;
+
+procedure _LapeColorToRGB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PColorRGB(Result)^ := ColorToRGB(PColor(Params^[0])^);
+end;
+
+procedure _LapeColorToBGRA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PColorBGRA(Result)^ := ColorToBGRA(PColor(Params^[0])^);
+end;
+
+procedure _LapeColorToHSL(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PColorHSL(Result)^ := ColorToHSL(PColor(Params^[0])^);
+end;
+
+procedure _LapeColorToHSV(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PColorHSV(Result)^ := ColorToHSV(PColor(Params^[0])^);
+end;
+
+procedure _LapeColorToXYZ(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PColorXYZ(Result)^ := ColorToXYZ(PColor(Params^[0])^);
+end;
+
+procedure _LapeColorToLAB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PColorLAB(Result)^ := ColorToLAB(PColor(Params^[0])^);
+end;
+
+procedure _LapeColorToLCH(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PColorLCH(Result)^ := ColorToLCH(PColor(Params^[0])^);
+end;
+
+procedure _LapeSimilarColors1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := SimilarColors(PColor(Params^[0])^, PColor(Params^[1])^, PSingle(Params^[2])^);
+end;
+
+procedure _LapeSimilarColors2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := SimilarColors(PColor(Params^[0])^, PColor(Params^[1])^, PSingle(Params^[2])^, PColorSpace(Params^[3])^, PChannelMultipliers(Params^[4])^);
+end;
+
 procedure ImportColorMath(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
     ImportingSection := 'Color Math';
+
+    addGlobalType('(RGB, HSV, HSL, XYZ, LAB, LCH, DELTAE)', 'EColorSpace');
+    addGlobalType('array [0..2] of Single', 'TChannelMultipliers');
 
     addGlobalType('packed record B,G,R,A: Byte; end;', 'TColorBGRA');
     addGlobalType('record R,G,B: Byte; end;', 'TColorRGB');
@@ -167,13 +225,26 @@ begin
     addGlobalFunc('function TColorLCH.ToRGB: TColorRGB', @_LapeColorLCHToRGB);
     addGlobalFunc('function TColorLCH.ToColor: TColor', @_LapeColorLCHToColor);
 
-    addGlobalFunc('function TColor.ToBGRA: TColorBGRA', @_LapeColorToBGRA);
-    addGlobalFunc('function TColor.ToRGB: TColorRGB', @_LapeColorToRGB);
-    addGlobalFunc('function TColor.ToXYZ: TColorXYZ', @_LapeColorToXYZ);
-    addGlobalFunc('function TColor.ToLAB: TColorLAB', @_LapeColorToLAB);
-    addGlobalFunc('function TColor.ToLCH: TColorLCH', @_LapeColorToLCH);
-    addGlobalFunc('function TColor.ToHSV: TColorHSV', @_LapeColorToHSV);
-    addGlobalFunc('function TColor.ToHSL: TColorHSL', @_LapeColorToHSL);
+    addGlobalFunc('function TColor.ToBGRA: TColorBGRA', @_LapeTColorToBGRA);
+    addGlobalFunc('function TColor.ToRGB: TColorRGB', @_LapeTColorToRGB);
+    addGlobalFunc('function TColor.ToXYZ: TColorXYZ', @_LapeTColorToXYZ);
+    addGlobalFunc('function TColor.ToLAB: TColorLAB', @_LapeTColorToLAB);
+    addGlobalFunc('function TColor.ToLCH: TColorLCH', @_LapeTColorToLCH);
+    addGlobalFunc('function TColor.ToHSV: TColorHSV', @_LapeTColorToHSV);
+    addGlobalFunc('function TColor.ToHSL: TColorHSL', @_LapeTColorToHSL);
+
+    addGlobalFunc('function ColorIntensity(Color: TColor): Byte', @_LapeColorIntensity);
+    addGlobalFunc('function ColorToGray(Color: TColor): Byte', @_LapeColorToGray);
+    addGlobalFunc('function ColorToRGB(Color: TColor): TColorRGB', @_LapeColorToRGB);
+    addGlobalFunc('function ColorToBGRA(Color: TColor): TColorBGRA', @_LapeColorToBGRA);
+    addGlobalFunc('function ColorToHSL(Color: TColor): TColorHSL', @_LapeColorToHSL);
+    addGlobalFunc('function ColorToHSV(Color: TColor): TColorHSV', @_LapeColorToHSV);
+    addGlobalFunc('function ColorToXYZ(Color: TColor): TColorXYZ', @_LapeColorToXYZ);
+    addGlobalFunc('function ColorToLAB(Color: TColor): TColorLAB', @_LapeColorToLAB);
+    addGlobalFunc('function ColorToLCH(Color: TColor): TColorLCH', @_LapeColorToLCH);
+
+    addGlobalFunc('function SimilarColors(Color1, Color2: TColor; Tolerance: Single): Boolean; overload', @_LapeSimilarColors1);
+    addGlobalFunc('function SimilarColors(Color1, Color2: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): Boolean; overload;', @_LapeSimilarColors2);
 
     ImportingSection := '';
   end;

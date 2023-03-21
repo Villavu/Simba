@@ -12,7 +12,7 @@ interface
 
 uses
   classes, sysutils, graphtype, graphics,
-  simba.baseclass, simba.mufasatypes, simba.bitmap_textdrawer, simba.colormath_conversion, simba.dtm;
+  simba.baseclass, simba.mufasatypes, simba.bitmap_textdrawer, simba.colormath, simba.colormath_distance, simba.dtm;
 
 type
   PBmpMirrorStyle = ^TBmpMirrorStyle;
@@ -257,7 +257,7 @@ implementation
 
 uses
   fpimage, math, intfgraphics, simba.overallocatearray, simba.geometry,
-  simba.tpa, simba.colormath_distance, simba.client, simba.iomanager,
+  simba.tpa, simba.client, simba.iomanager,
   simba.bitmap_utils, simba.encoding, simba.compress, simba.math, simba.finder,
   simba.matchtemplate;
 
@@ -435,7 +435,7 @@ begin
 
   for Y := 0 to H do
     for X := 0 to W do
-      Result[Y][X] := BGRAToRGB(FData[Y * FWidth + X]).ToColor();
+      Result[Y][X] := FData[Y * FWidth + X].ToColor();
 end;
 
 function TMufasaBitmap.ToMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix;
@@ -451,7 +451,7 @@ begin
 
   for Y := Y1 to Y2 do
     for X := X1 to X2 do
-      Result[Y-Y1, X-X1] := BGRAToRGB(FData[Y * FWidth + X]).ToColor();
+      Result[Y-Y1, X-X1] := FData[Y * FWidth + X].ToColor();
 end;
 
 function TMufasaBitmap.ToRawImage: TRawImage;
@@ -850,7 +850,7 @@ begin
 
   for I := 0 to FWidth * FHeight - 1 do
   begin
-    if (not SimilarColorsRGB(Ptr^.ToColor(), OtherPtr^.ToColor(), Tolerance, DefaultMultipliers)) then
+    if (not SimilarColors(Ptr^.ToColor(), OtherPtr^.ToColor(), Tolerance)) then
       Inc(Result);
 
     Inc(Ptr);
@@ -904,7 +904,7 @@ begin
     for X := 0 to W do
     begin
       Index := Y * FWidth + X;
-      if (not (SimilarColorsRGB(FData[Index].ToColor(), Other.FData[Index].ToColor(), Tolerance, DefaultMultipliers))) then
+      if (not (SimilarColors(FData[Index].ToColor(), Other.FData[Index].ToColor(), Tolerance))) then
         Buffer.Add(TPoint.Create(X, Y));
     end;
 
@@ -2732,8 +2732,8 @@ begin
       Second := FData[Y*FWidth+(X+1)].ToColor();
       Third  := FData[(Y+1)*FWidth+X].ToColor();
 
-      if (not SimilarColorsRGB(First, Second, MinDiff, DefaultMultipliers)) or
-         (not SimilarColorsRGB(First, Third, MinDiff, DefaultMultipliers)) then
+      if (not SimilarColors(First, Second, MinDiff)) or
+         (not SimilarColors(First, Third, MinDiff)) then
       begin
         Buffer.Add(TPoint.Create(X, Y));
 
@@ -2745,25 +2745,12 @@ begin
 end;
 
 function TMufasaBitmap.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
-type
-  TSimilarColorsFunc = function(const Color1, Color2: TColor; const Tolerance: Single; const mul: TChannelMultipliers): Boolean;
 var
   X, Y ,W, H: Integer;
   Buffer: TSimbaPointBuffer;
   First, Second, Third: TColor;
-  SimilarColorsFunc: TSimilarColorsFunc;
 begin
   Buffer.Init();
-
-  case ColorSpace of
-    EColorSpace.RGB: SimilarColorsFunc := @SimilarColorsRGB;
-    EColorSpace.HSV: SimilarColorsFunc := @SimilarColorsHSV;
-    EColorSpace.HSL: SimilarColorsFunc := @SimilarColorsHSL;
-    EColorSpace.XYZ: SimilarColorsFunc := @SimilarColorsXYZ;
-    EColorSpace.LAB: SimilarColorsFunc := @SimilarColorsLAB;
-    EColorSpace.LCH: SimilarColorsFunc := @SimilarColorsLCH;
-    EColorSpace.DELTAE: SimilarColorsFunc := @SimilarColorsDeltaE;
-  end;
 
   W := FWidth - 2;
   H := FHeight - 2;
@@ -2775,8 +2762,8 @@ begin
       Second := FData[Y*FWidth+(X+1)].ToColor();
       Third  := FData[(Y+1)*FWidth+X].ToColor();
 
-      if (not SimilarColorsFunc(First, Second, MinDiff, Multipliers)) or
-         (not SimilarColorsFunc(First, Third, MinDiff, Multipliers)) then
+      if (not SimilarColors(First, Second, MinDiff, ColorSpace, Multipliers)) or
+         (not SimilarColors(First, Third, MinDiff, ColorSpace, Multipliers)) then
       begin
         Buffer.Add(TPoint.Create(X, Y));
 

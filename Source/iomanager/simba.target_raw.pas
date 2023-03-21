@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.mufasatypes, simba.target, simba.colormath_conversion;
+  simba.mufasatypes, simba.target, simba.colormath;
 
 type
   PRawTarget = ^TRawTarget;

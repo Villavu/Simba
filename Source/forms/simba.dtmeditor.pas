@@ -130,12 +130,10 @@ implementation
 
 uses
   math,
-  simba.windowhandle, simba.colormath_conversion;
+  simba.windowhandle, simba.colormath, simba.colormath_distance;
 
 procedure TSimbaDTMEditorForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
-  R, G, B: Byte;
-  H, S, L: Extended;
   Point: TDTMPoint;
 begin
   FImageZoom.MoveTest(FImageBox, X, Y);

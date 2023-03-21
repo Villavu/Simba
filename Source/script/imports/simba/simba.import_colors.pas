@@ -21,12 +21,6 @@ begin
   begin
     ImportingSection := 'System';
 
-    {$IF SizeOf(TColor) = 4}
-    addGlobalType('type Int32', 'TColor');
-    {$ELSE}
-    addGlobalType('type Int64', 'TColor');
-    {$ENDIF}
-
     addGlobalFunc(
       'function TColor.R: Byte;', [
       'type TRGB = packed record B,G,R,A: Byte; end;',

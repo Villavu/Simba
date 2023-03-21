@@ -12,7 +12,7 @@ interface
 
 uses
   classes, sysutils, Graphics,
-  simba.mufasatypes, simba.dtm, simba.colormath_conversion;
+  simba.mufasatypes, simba.dtm, simba.colormath;
 
 type
   TDTMFinder = record
@@ -27,11 +27,6 @@ implementation
 
 uses
   simba.colormath_distance, simba.math, simba.overallocatearray;
-
-function _DistanceRGB(const Color1: TColorRGB; const Color2: TColorBGRA): Single;
-begin
-  Result := DistanceRGB(Color1, Color2.ToRGB(), DefaultMultipliers);
-end;
 
 type
   TSearchPoint = record
@@ -97,7 +92,7 @@ var
               begin
                 Checked.SetBit(Index);
 
-                if _DistanceRGB(SearchPoint.Color, Buffer[Y * BufferWidth + X]) <= SearchPoint.Tol then
+                if DistanceRGB(SearchPoint.Color, Buffer[Y * BufferWidth + X].ToRGB(), DefaultMultipliers) <= SearchPoint.Tol then
                 begin
                   Checked.SetBit(Index);
                   Hit.SetBit(Index);
@@ -207,7 +202,7 @@ var
               begin
                 Checked.SetBit(Index);
 
-                if _DistanceRGB(SearchPoint.Color, Buffer[Y * BufferWidth + X]) <= SearchPoint.Tol then
+                if DistanceRGB(SearchPoint.Color, Buffer[Y * BufferWidth + X].ToRGB(), DefaultMultipliers) <= SearchPoint.Tol then
                 begin
                   Checked.SetBit(Index);
                   Hit.SetBit(Index);

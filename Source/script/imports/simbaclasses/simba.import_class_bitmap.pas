@@ -7,8 +7,9 @@ interface
 implementation
 
 uses
-  classes, sysutils, graphics, lptypes, lpeval,
-  simba.script_compiler, simba.mufasatypes, simba.bitmap, simba.colormath_conversion;
+  Classes, SysUtils, Graphics,
+  lptypes, lpeval,
+  simba.script_compiler, simba.mufasatypes, simba.bitmap, simba.colormath, simba.colormath_distance;
 
 type
   PObject = ^TObject;
@@ -1433,8 +1434,6 @@ begin
     ImportingSection := 'TMufasaBitmap';
 
     addClass('TMufasaBitmap');
-
-    addGlobalType('(RGB, HSV, HSL, XYZ, LAB, LCH, DELTAE)', 'EColorSpace');
 
     addGlobalType('array of TMufasaBitmap', 'TMufasaBitmapArray');
     addGlobalType('packed record B, G, R, A: Byte; end', 'TRGB32');

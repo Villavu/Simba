@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.mufasatypes, simba.nativeinterface, simba.colormath_conversion;
+  simba.mufasatypes, simba.nativeinterface, simba.colormath;
 
 type
   TSimbaNativeInterface_Windows = class(TSimbaNativeInterface)

@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.target, simba.mufasatypes, simba.colormath_conversion;
+  simba.target, simba.mufasatypes, simba.colormath;
 
 type
   PTarget_Exported = ^TTarget_Exported;

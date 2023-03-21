@@ -18,7 +18,7 @@ interface
 implementation
 
 uses
-  simba.import_system, simba.import_colors,
+  simba.import_system, simba.import_colormath, simba.import_colors,
   simba.import_matrix,
   simba.import_quad, simba.import_box, simba.import_boxarray, simba.import_point,
 
@@ -34,7 +34,7 @@ uses
   simba.import_class_imagebox, simba.import_class_shapebox,
 
   // Simba
-  simba.import_timing, simba.import_tpa, simba.import_atpa, simba.import_colormath,
+  simba.import_timing, simba.import_tpa, simba.import_atpa,
   simba.import_hash, simba.import_compress, simba.import_windowhandle,
   simba.import_debugimage, simba.import_dialogs, simba.import_file,
   simba.import_internal, simba.import_finder,
