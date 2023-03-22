@@ -43,9 +43,9 @@ begin
 
   if Copy then
   begin
-    FData := GetMem(FWidth * FHeight * SizeOf(TRGB32));
+    FData := GetMem(FWidth * FHeight * SizeOf(TColorBGRA));
 
-    Move(Source^, FData^, FWidth * FHeight * SizeOf(TRGB32));
+    Move(Source^, FData^, FWidth * FHeight * SizeOf(TColorBGRA));
   end else
     FData := Source;
 end;
@@ -86,9 +86,9 @@ var
 begin
   if ValidateImageCapture(X, Y, Width, Height, Bounds) then
   begin
-    Result := GetMem(Width * Height * SizeOf(TRGB32));
+    Result := GetMem(Width * Height * SizeOf(TColorBGRA));
     for Loop := 0 to Height - 1 do
-      Move(FData[(Y + Loop) * Bounds.X2 + X], Result[Loop * Width], Width * SizeOf(TRGB32));
+      Move(FData[(Y + Loop) * Bounds.X2 + X], Result[Loop * Width], Width * SizeOf(TColorBGRA));
   end else
     Result := nil;
 end;

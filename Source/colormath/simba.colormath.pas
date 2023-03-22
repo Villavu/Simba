@@ -20,37 +20,6 @@ uses
   simba.mufasatypes;
 
 type
-  TColorRGB = record
-    R,G,B: Byte;
-  end;
-
-  TColorXYZ = record
-    X,Y,Z: Single;
-  end;
-
-  TColorLAB = record
-    L,A,B: Single;
-  end;
-
-  TColorLCH = record
-    L,C,H: Single;
-  end;
-
-  TColorHSV = record
-    H,S,V: Single;
-  end;
-
-  TColorHSL = record
-    H,S,L: Single;
-  end;
-
-  TColorBGRA = packed record // for bitmaps etc
-  case Byte of
-    0: (B, G, R, A: Byte);
-    1: (AsInteger: Integer);
-  end;
-  TColorBGRAArray = array of TColorBGRA;
-
   TColorHelper = type Helper for TColor
     function ToBGRA: TColorBGRA;
     function ToRGB: TColorRGB;
@@ -109,18 +78,6 @@ type
     function ToRGB: TColorRGB;
     function ToColor: TColor;
   end;
-
-  PColorBGRA = ^TColorBGRA;
-  PColorBGRAArray = array of PColorBGRA;
-
-  PColorRGB = ^TColorRGB;
-  PColorXYZ = ^TColorXYZ;
-  PColorLAB = ^TColorLAB;
-  PColorLCH = ^TColorLCH;
-  PColorHSV = ^TColorHSV;
-  PColorHSL = ^TColorHSL;
-
-  TColorArray = array of TColor;
 
   {$PUSH}
   {$SCOPEDENUMS ON}

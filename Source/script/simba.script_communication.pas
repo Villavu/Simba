@@ -185,7 +185,7 @@ begin
     FOutputStream.Write(Bitmap.Height, SizeOf(Integer));
 
     for Y := 0 to Bitmap.Height - 1 do
-      FOutputStream.Write(Bitmap.Data[Y * Bitmap.Width], Bitmap.Width * SizeOf(TRGB32));
+      FOutputStream.Write(Bitmap.Data[Y * Bitmap.Width], Bitmap.Width * SizeOf(TColorBGRA));
 
     // Read result
     FInputStream.Read(Header, SizeOf(TSimbaIPCHeader));
@@ -220,7 +220,7 @@ begin
     FOutputStream.Write(Bitmap.Height, SizeOf(Integer));
 
     for Y := 0 to Bitmap.Height - 1 do
-      FOutputStream.Write(Bitmap.Data[Y * Bitmap.Width], Bitmap.Width * SizeOf(TRGB32));
+      FOutputStream.Write(Bitmap.Data[Y * Bitmap.Width], Bitmap.Width * SizeOf(TColorBGRA));
 
     // Read result
     FInputStream.Read(Header, SizeOf(TSimbaIPCHeader));

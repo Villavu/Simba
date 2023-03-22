@@ -171,7 +171,7 @@ begin
 
     addGlobalFunc('function SetDesktopAsClient: Integer', @_LapeSetDesktopAsClient);
     addGlobalFunc('function SetTargetWindow(Window: TWindowHandle): Integer', @_LapeSetTargetWindow);
-    addGlobalFunc('function SetTargetData(Data: PRGB32; W, H: Integer): Integer', @_LapeSetTargetData);
+    addGlobalFunc('function SetTargetData(Data: PColorBGRA; W, H: Integer): Integer', @_LapeSetTargetData);
     addGlobalFunc('function SetTargetBitmap(Bitmap: TMufasaBitmap): Integer', @_LapeSetTargetBitmap);
     addGlobalFunc('function SetEIOSTarget(Plugin, Args: String): Integer', @_LapeSetEIOSTarget);
     addGlobalFunc('function MouseSetClientArea(x1, y1, x2, y2: Integer): Boolean', @_LapeMouseSetClientArea);

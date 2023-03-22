@@ -75,7 +75,7 @@ begin
 
   if ValidateImageCapture(X, Y, Width, Height, Bounds) and SimbaNativeInterface.GetWindowImage(FWindowHandle, X, Y, Width, Height, FBuffer) then
   begin
-    Result.Ptr := PRGB32(FBuffer);
+    Result.Ptr := PColorBGRA(FBuffer);
     Result.IncPtrWith := 0;
     Result.RowLen := Width;
   end;

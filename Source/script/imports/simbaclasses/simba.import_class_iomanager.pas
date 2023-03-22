@@ -276,14 +276,14 @@ begin
 
     addGlobalType('record func1, func2, func3, func4, func5, func6, func7, func8, func9, func10, func11, func12, func13, func14, func15, func16: Pointer; end', 'TTarget_Exported');
     addGlobalFunc('function TIOManager.SetTarget(WindowHandle: PtrUInt): Integer; overload', @_LapeIOManager_SetTargetHandle);
-    addGlobalFunc('function TIOManager.SetTarget(Data: PRGB32; Width, Height: Integer): Integer; overload', @_LapeIOManager_SetTarget);
+    addGlobalFunc('function TIOManager.SetTarget(Data: PColorBGRA; Width, Height: Integer): Integer; overload', @_LapeIOManager_SetTarget);
     addGlobalFunc('function TIOManager.SetTarget(bmp : TMufasaBitmap): Integer; overload', @_LapeIOManager_SetTargetEx);
     addGlobalFunc('function TIOManager.SetTarget(name, initargs: string): Integer; overload', @_LapeIOManager_SetTargetExEx);
     addGlobalFunc('function TIOManager.TargetValid: Boolean;', @_LapeIOManager_TargetValid);
     addGlobalFunc('function TIOManager.GetColor(x,y : Integer): TColor;', @_LapeIOManager_GetColor);
-    addGlobalFunc('function TIOManager.CopyData(X, Y, Width, Height: Integer): PRGB32;', @_LapeIOManager_CopyData);
+    addGlobalFunc('function TIOManager.CopyData(X, Y, Width, Height: Integer): PColorBGRA;', @_LapeIOManager_CopyData);
     addGlobalFunc('function TIOManager.ReturnMatrix(X, Y, Width, Height: Integer): TIntegerMatrix;', @_LapeIOManager_ReturnMatrix);
-    addGlobalFunc('function TIOManager.ReturnData(X, Y, Width, Height: Integer): TRetData;', @_LapeIOManager_ReturnData);
+    addGlobalFunc('function TIOManager.ReturnData(X, Y, Width, Height: Integer): PColorBGRA;', @_LapeIOManager_ReturnData);
     addGlobalFunc('procedure TIOManager.FreeReturnData;', @_LapeIOManager_FreeReturnData);
     addGlobalFunc('function TIOManager.GetWidth: Boolean;', @_LapeIOManager_GetWidth);
     addGlobalFunc('function TIOManager.GetHeight: Boolean;', @_LapeIOManager_GetHeight);

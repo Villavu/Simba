@@ -113,7 +113,7 @@ begin
   if IsZero(FMaxDistance) or (SearchWidth <= 0) or (SearchHeight <= 0) or (Buffer = nil) or (BufferWidth <= 0) then
     Exit;
 
-  RowSize := BufferWidth * SizeOf(TRGB32);
+  RowSize := BufferWidth * SizeOf(TColorBGRA);
   RowPtr := PByte(Buffer);
 
   Dec(SearchHeight);
@@ -130,7 +130,7 @@ begin
           Exit;
       end;
 
-      Inc(Ptr, SizeOf(TRGB32));
+      Inc(Ptr, SizeOf(TColorBGRA));
     end;
 
     Inc(RowPtr, RowSize);
@@ -151,7 +151,7 @@ begin
 
   PointBuffer.Init(65536);
 
-  RowSize := BufferWidth * SizeOf(TRGB32);
+  RowSize := BufferWidth * SizeOf(TColorBGRA);
   RowPtr := PByte(Buffer);
 
   Dec(SearchHeight);
@@ -168,7 +168,7 @@ begin
           goto Finished;
       end;
 
-      Inc(Ptr, SizeOf(TRGB32));
+      Inc(Ptr, SizeOf(TColorBGRA));
     end;
 
     Inc(RowPtr, RowSize);
@@ -191,7 +191,7 @@ begin
 
   Result.SetSize(SearchWidth, SearchHeight);
 
-  RowSize := BufferWidth * SizeOf(TRGB32);
+  RowSize := BufferWidth * SizeOf(TColorBGRA);
   RowPtr := PByte(Buffer);
 
   Dec(SearchHeight);
@@ -203,7 +203,7 @@ begin
     begin
       Result[Y, X] := 1 - (FCompareFunc(FColor, PColorBGRA(Ptr)^, FMultipliers) / FMaxDistance);
 
-      Inc(Ptr, SizeOf(TRGB32));
+      Inc(Ptr, SizeOf(TColorBGRA));
     end;
 
     Inc(RowPtr, RowSize);

@@ -361,7 +361,7 @@ begin
   Result := Image <> nil;
   if Result then
   begin
-    ReAllocMem(ImageData, Width * Height * SizeOf(TRGB32));
+    ReAllocMem(ImageData, Width * Height * SizeOf(TColorBGRA));
     Move(Image^.Data^, PColorBGRA(ImageData)^, MemSize(ImageData));
 
     SimbaXLib.XDestroyImage(Image);
