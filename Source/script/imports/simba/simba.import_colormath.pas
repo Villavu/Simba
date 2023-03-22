@@ -194,13 +194,15 @@ begin
     addGlobalType('(RGB, HSV, HSL, XYZ, LAB, LCH, DELTAE)', 'EColorSpace');
     addGlobalType('array [0..2] of Single', 'TChannelMultipliers');
 
-    addGlobalType('packed record B,G,R,A: Byte; end;', 'TColorBGRA');
+    addGlobalType('record B,G,R,A: Byte; end;', 'TColorBGRA');
     addGlobalType('record R,G,B: Byte; end;', 'TColorRGB');
     addGlobalType('record X,Y,Z: Single; end;', 'TColorXYZ');
     addGlobalType('record L,A,B: Single; end;', 'TColorLAB');
     addGlobalType('record L,C,H: Single; end;', 'TColorLCH');
     addGlobalType('record H,S,V: Single; end;', 'TColorHSV');
     addGlobalType('record H,S,L: Single; end;', 'TColorHSL');
+
+    addGlobalType('^TColorBGRA', 'PColorBGRA');
 
     addGlobalFunc('function TColorRGB.ToBGRA: TColorBGRA', @_LapeColorRGBToBGRA);
     addGlobalFunc('function TColorRGB.ToXYZ: TColorXYZ', @_LapeColorRGBToXYZ);

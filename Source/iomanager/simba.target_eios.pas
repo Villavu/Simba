@@ -232,9 +232,9 @@ begin
   begin
     if ValidateImageCapture(X, Y, Width, Height, Bounds) then
     begin
-      Result := GetMem(Width * Height * SizeOf(TRGB32));
+      Result := GetMem(Width * Height * SizeOf(TColorBGRA));
       for Loop := 0 to Height - 1 do
-        Move(FBuffer[(Y + Loop) * Bounds.X2 + X], Result[Loop * Width], Width * SizeOf(TRGB32));
+        Move(FBuffer[(Y + Loop) * Bounds.X2 + X], Result[Loop * Width], Width * SizeOf(TColorBGRA));
     end else
       Result := nil;
   end else

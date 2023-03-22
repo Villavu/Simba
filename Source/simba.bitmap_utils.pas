@@ -19,7 +19,7 @@ function GetBitmapPixelFormat(Bitmap: TBitmap): String;
 
 type
   TBitmapHelper = type helper for TBitmap
-    // Draw TRGB32 data without changing bitmap format
+    // Draw TColorBGRA data without changing bitmap format
     procedure FromData(AData: PColorBGRA; AWidth, AHeight: Integer);
 
     function ToMufasaBitmap: TMufasaBitmap;
@@ -50,17 +50,6 @@ implementation
 
 uses
   BMPcomn, GraphType, IntfGraphics;
-
-type
-  PARGB = ^TARGB;
-  TARGB = packed record
-    A, R, G, B: Byte;
-  end;
-
-  PRGB24 = ^TRGB24;
-  TRGB24 = packed record
-    B, G, R : Byte;
-  end;
 
 procedure LoadBitmapAreaFromFile(Bitmap: TMufasaBitmap; FileName: String; Area: TBox);
 
@@ -227,10 +216,10 @@ var
 
       while PtrUInt(RowSource) < RowUpper do
       begin
-        PRGB24(RowDest)^ := PRGB24(RowSource)^; // Can just use first three bytes
+        PColorRGB(RowDest)^ := PColorRGB(RowSource)^; // Can just use first three bytes
 
-        Inc(RowSource, SizeOf(TRGB32));
-        Inc(RowDest, SizeOf(TRGB24));
+        Inc(RowSource, SizeOf(TColorBGRA));
+        Inc(RowDest, SizeOf(TColorRGB));
       end;
 
       Inc(Source, SourceBytesPerLine);
@@ -254,8 +243,8 @@ var
       begin
         PColorBGRA(RowDest)^ := PColorBGRA(RowSource)^;
 
-        Inc(RowSource, SizeOf(TRGB32));
-        Inc(RowDest, SizeOf(TRGB32));
+        Inc(RowSource, SizeOf(TColorBGRA));
+        Inc(RowDest, SizeOf(TColorBGRA));
       end;
       }
 
@@ -291,13 +280,13 @@ var
 
       while PtrUInt(RowSource) < RowUpper do
       begin
-        PARGB(RowDest)^.R := PColorBGRA(RowSource)^.R;
-        PARGB(RowDest)^.G := PColorBGRA(RowSource)^.G;
-        PARGB(RowDest)^.B := PColorBGRA(RowSource)^.B;
-        PARGB(RowDest)^.A := PColorBGRA(RowSource)^.A;
+        PColorARGB(RowDest)^.R := PColorBGRA(RowSource)^.R;
+        PColorARGB(RowDest)^.G := PColorBGRA(RowSource)^.G;
+        PColorARGB(RowDest)^.B := PColorBGRA(RowSource)^.B;
+        PColorARGB(RowDest)^.A := PColorBGRA(RowSource)^.A;
 
-        Inc(RowSource, SizeOf(TRGB32));
-        Inc(RowDest, SizeOf(TARGB));
+        Inc(RowSource, SizeOf(TColorBGRA));
+        Inc(RowDest, SizeOf(TColorARGB));
       end;
 
       Inc(Source, SourceBytesPerLine);
@@ -314,7 +303,7 @@ begin
   DestBytesPerLine := RawImage.Description.BytesPerLine;
 
   Source := PByte(AData);
-  SourceBytesPerLine := AWidth * SizeOf(TRGB32);
+  SourceBytesPerLine := AWidth * SizeOf(TColorBGRA);
 
   Upper := PtrUInt(Source + (SourceBytesPerLine * AHeight));
 
@@ -346,10 +335,10 @@ var
 
       while PtrUInt(RowSource) < RowUpper do
       begin
-        PRGB24(RowDest)^ := PRGB24(RowSource)^; // Can just use first three bytes
+        PColorRGB(RowDest)^ := PColorRGB(RowSource)^; // Can just use first three bytes
 
-        Inc(RowSource, SizeOf(TRGB24));
-        Inc(RowDest, SizeOf(TRGB32));
+        Inc(RowSource, SizeOf(TColorRGB));
+        Inc(RowDest, SizeOf(TColorBGRA));
       end;
 
       Inc(Source, SourceBytesPerLine);
@@ -374,8 +363,8 @@ var
       begin
         PColorBGRA(RowDest)^ := PColorBGRA(RowSource)^;
 
-        Inc(RowSource, SizeOf(TRGB32));
-        Inc(RowDest, SizeOf(TRGB32));
+        Inc(RowSource, SizeOf(TColorBGRA));
+        Inc(RowDest, SizeOf(TColorBGRA));
       end;
       }
 
@@ -397,13 +386,13 @@ var
 
       while PtrUInt(RowSource) < RowUpper do
       begin
-        PARGB(RowDest)^.R := PColorBGRA(RowSource)^.R;
-        PARGB(RowDest)^.G := PColorBGRA(RowSource)^.G;
-        PARGB(RowDest)^.B := PColorBGRA(RowSource)^.B;
-        PARGB(RowDest)^.A := PColorBGRA(RowSource)^.A;
+        PColorARGB(RowDest)^.R := PColorBGRA(RowSource)^.R;
+        PColorARGB(RowDest)^.G := PColorBGRA(RowSource)^.G;
+        PColorARGB(RowDest)^.B := PColorBGRA(RowSource)^.B;
+        PColorARGB(RowDest)^.A := PColorBGRA(RowSource)^.A;
 
-        Inc(RowSource, SizeOf(TARGB));
-        Inc(RowDest, SizeOf(TRGB32));
+        Inc(RowSource, SizeOf(TColorARGB));
+        Inc(RowDest, SizeOf(TColorBGRA));
       end;
 
       Inc(Source, SourceBytesPerLine);
@@ -416,7 +405,7 @@ begin
   Result.SetSize(Width, Height);
 
   Dest := PByte(Result.Data);
-  DestBytesPerLine := Width * SizeOf(TRGB32);
+  DestBytesPerLine := Width * SizeOf(TColorBGRA);
 
   Source := RawImage.Data;
   SourceBytesPerLine := RawImage.Description.BytesPerLine;

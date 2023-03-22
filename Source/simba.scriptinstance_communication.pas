@@ -242,7 +242,7 @@ procedure TSimbaScriptInstanceCommunication.DebugImage_Update;
         begin
           PRGB24(DestPtr)^ := PRGB24(SourcePtr)^; // Can just use first three bytes
 
-          Inc(SourcePtr, SizeOf(TRGB32));
+          Inc(SourcePtr, SizeOf(TColorBGRA));
           Inc(DestPtr, SizeOf(TRGB24));
         end;
 
@@ -281,12 +281,12 @@ procedure TSimbaScriptInstanceCommunication.DebugImage_Update;
 
         while (PtrUInt(SourcePtr) < SourceUpper) do
         begin
-          PARGB(DestPtr)^.R := PRGB32(SourcePtr)^.R;
-          PARGB(DestPtr)^.G := PRGB32(SourcePtr)^.G;
-          PARGB(DestPtr)^.B := PRGB32(SourcePtr)^.B;
-          PARGB(DestPtr)^.A := PRGB32(SourcePtr)^.A;
+          PARGB(DestPtr)^.R := PColorBGRA(SourcePtr)^.R;
+          PARGB(DestPtr)^.G := PColorBGRA(SourcePtr)^.G;
+          PARGB(DestPtr)^.B := PColorBGRA(SourcePtr)^.B;
+          PARGB(DestPtr)^.A := PColorBGRA(SourcePtr)^.A;
 
-          Inc(SourcePtr, SizeOf(TRGB32));
+          Inc(SourcePtr, SizeOf(TColorBGRA));
           Inc(DestPtr, SizeOf(TARGB));
         end;
 
@@ -306,7 +306,7 @@ procedure TSimbaScriptInstanceCommunication.DebugImage_Update;
     DestBytesPerLine := Bitmap.RawImage.Description.BytesPerLine;
     Dest             := Bitmap.RawImage.Data;
 
-    SourceBytesPerLine := Width * SizeOf(TRGB32);
+    SourceBytesPerLine := Width * SizeOf(TColorBGRA);
     Source             := GetMem(SourceBytesPerLine);
     SourceUpper        := PtrUInt(Source + SourceBytesPerLine);
 

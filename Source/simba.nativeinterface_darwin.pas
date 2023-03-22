@@ -234,10 +234,10 @@ begin
   begin
     if Result then
     begin
-      ReAllocMem(ImageData, Width * Height * SizeOf(TRGB32));
+      ReAllocMem(ImageData, Width * Height * SizeOf(TColorBGRA));
 
       ColorSpace := CGColorSpaceCreateDeviceRGB();
-      Context := CGBitmapContextCreate(ImageData, Width, Height, 8, Width * SizeOf(TRGB32), ColorSpace, kCGImageAlphaNoneSkipFirst or kCGBitmapByteOrder32Little);
+      Context := CGBitmapContextCreate(ImageData, Width, Height, 8, Width * SizeOf(TColorBGRA), ColorSpace, kCGImageAlphaNoneSkipFirst or kCGBitmapByteOrder32Little);
 
       CGContextDrawImage(Context, CGRectMake(0, 0, Width, Height), Image);
       CGContextRelease(Context);

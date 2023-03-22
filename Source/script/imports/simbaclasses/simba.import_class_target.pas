@@ -140,12 +140,12 @@ begin
   with Compiler do
   begin
     addClass('TTarget');
-    addGlobalType('record Ptr: PRGB32; IncPtrWith: integer; RowLen: integer; end', 'TRetData');
+    addGlobalType('record Ptr: PColorBGRA; IncPtrWith: integer; RowLen: integer; end', 'TRetData');
     addGlobalType('UInt32', 'TClickType');
     addGlobalFunc('procedure TTarget.GetTargetDimensions(out w, h: integer);', @_LapeTarget_GetTargetDimensions);
     addGlobalFunc('procedure TTarget.GetTargetPosition(out left, top: integer);', @_LapeTarget_GetTargetPosition);
     addGlobalFunc('function TTarget.GetColor(x,y : integer): TColor;', @_LapeTarget_GetColor);
-    addGlobalFunc('function TTarget.CopyData(X, Y, Width, Height: Integer): PRGB32;', @_LapeTarget_CopyData);
+    addGlobalFunc('function TTarget.CopyData(X, Y, Width, Height: Integer): PColorBGRA;', @_LapeTarget_CopyData);
     addGlobalFunc('function TTarget.ReturnData(xs, ys, width, height: Integer): TRetData;', @_LapeTarget_ReturnData);
     addGlobalFunc('procedure TTarget.FreeReturnData;', @_LapeTarget_FreeReturnData);
     addGlobalFunc('procedure TTarget.ActivateClient;', @_LapeTarget_ActivateClient);

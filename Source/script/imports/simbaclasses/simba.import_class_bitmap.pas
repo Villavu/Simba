@@ -1436,12 +1436,10 @@ begin
     addClass('TMufasaBitmap');
 
     addGlobalType('array of TMufasaBitmap', 'TMufasaBitmapArray');
-    addGlobalType('packed record B, G, R, A: Byte; end', 'TRGB32');
-    addGlobalType('^TRGB32', 'PRGB32');
     addGlobalType('(MirrorWidth, MirrorHeight, MirrorLine)', 'TBmpMirrorStyle');
     addGlobalType('(TM_Mean, TM_MinMax)', 'TBmpThreshMethod');
 
-    addClassVar('TMufasaBitmap', 'Data', 'PRGB32', @_LapeMufasaBitmap_Data_Read);
+    addClassVar('TMufasaBitmap', 'Data', 'PColorBGRA', @_LapeMufasaBitmap_Data_Read);
     addClassVar('TMufasaBitmap', 'Name', 'String', @_LapeMufasaBitmap_Name_Read, @_LapeMufasaBitmap_Name_Write);
     addClassVar('TMufasaBitmap', 'Width', 'Integer', @_LapeMufasaBitmap_Width_Read);
     addClassVar('TMufasaBitmap', 'Height', 'Integer', @_LapeMufasaBitmap_Height_Read);
@@ -1595,7 +1593,7 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.LoadFromFile(FileName: String); overload', @_LapeMufasaBitmap_LoadFromFile);
     addGlobalFunc('procedure TMufasaBitmap.LoadFromFile(FileName: String; Area: TBox); overload', @_LapeMufasaBitmap_LoadFromFileEx);
     addGlobalFunc('procedure TMufasaBitmap.LoadFromString(AWidth, AHeight: Integer; Str: String)', @_LapeMufasaBitmap_LoadFromString);
-    addGlobalFunc('procedure TMufasaBitmap.LoadFromData(AWidth, AHeight: Integer; AData: PRGB32; CopyData: Boolean = True)', @_LapeMufasaBitmap_LoadFromData);
+    addGlobalFunc('procedure TMufasaBitmap.LoadFromData(AWidth, AHeight: Integer; AData: PColorBGRA; CopyData: Boolean = True)', @_LapeMufasaBitmap_LoadFromData);
     addGlobalFunc('procedure TMufasaBitmap.LoadFromBitmap(Bitmap: TMufasaBitmap);', @_LapeMufasaBitmap_LoadFromBitmap);
 
     addGlobalFunc('function TMufasaBitmap.SaveToFile(FileName: String): Boolean;', @_LapeMufasaBitmap_SaveToFile);

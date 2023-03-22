@@ -322,10 +322,10 @@ begin
     BitmapInfo.bmiHeader.biWidth := Width;
     BitmapInfo.bmiHeader.biHeight := -Height;
     BitmapInfo.bmiHeader.biPlanes := 1;
-    BitmapInfo.bmiHeader.biBitCount := BitSizeOf(TRGB32);
+    BitmapInfo.bmiHeader.biBitCount := BitSizeOf(TColorBGRA);
     BitmapInfo.bmiHeader.biCompression := BI_RGB;
 
-    GetDIBits(MemoryDC, MemoryBitmap, 0, Height, ReAllocMem(ImageData, Width * Height * SizeOf(TRGB32)), BitmapInfo, DIB_RGB_COLORS);
+    GetDIBits(MemoryDC, MemoryBitmap, 0, Height, ReAllocMem(ImageData, Width * Height * SizeOf(TColorBGRA)), BitmapInfo, DIB_RGB_COLORS);
   end;
 
   SelectObject(MemoryDC, PreviousObject);

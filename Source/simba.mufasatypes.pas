@@ -10,7 +10,7 @@ unit simba.mufasatypes;
 interface
 
 uses
-  Classes, SysUtils, fpjson;
+  Classes, SysUtils, Graphics, fpjson;
 
 {$SCOPEDENUMS ON}
 type
@@ -44,19 +44,58 @@ type
   TSimbaScriptDebuggerEvents = array of TSimbaScriptDebuggerEvent;
   {$SCOPEDENUMS OFF}
 
-  TRGB32 = packed record
+  TColorRGB = record
+    R,G,B: Byte;
+  end;
+
+  TColorXYZ = record
+    X,Y,Z: Single;
+  end;
+
+  TColorLAB = record
+    L,A,B: Single;
+  end;
+
+  TColorLCH = record
+    L,C,H: Single;
+  end;
+
+  TColorHSV = record
+    H,S,V: Single;
+  end;
+
+  TColorHSL = record
+    H,S,L: Single;
+  end;
+
+  TColorARGB = packed record
+  case Byte of
+    0: (A, R, G, B: Byte);
+    1: (AsInteger: Integer);
+  end;
+  PColorARGB = ^TColorARGB;
+
+  TColorBGRA = packed record
   case Byte of
     0: (B, G, R, A: Byte);
     1: (AsInteger: Integer);
   end;
-  TRGB32Array = array of TRGB32;
+  TColorBGRAArray = array of TColorBGRA;
 
-  PPRGB32 = ^PRGB32; // Pointer to PRGB32
-  PRGB32 = ^TRGB32;
-  TPRGB32Array = array of PRGB32;
+  PColorBGRA = ^TColorBGRA;
+  PColorBGRAArray = array of PColorBGRA;
+
+  PColorRGB = ^TColorRGB;
+  PColorXYZ = ^TColorXYZ;
+  PColorLAB = ^TColorLAB;
+  PColorLCH = ^TColorLCH;
+  PColorHSV = ^TColorHSV;
+  PColorHSL = ^TColorHSL;
+
+  TColorArray = array of TColor;
 
   TRetData = record
-    Ptr: PRGB32;
+    Ptr: PColorBGRA;
     IncPtrWith: Integer;
     RowLen: Integer;
   end;
@@ -151,7 +190,6 @@ type
     {$i box.inc}
     {$i boxarray.inc}
     {$i point.inc}
-    {$i rgb32.inc}
     {$i integermatrix.inc}
     {$i singlematrix.inc}
     {$i matrix.inc}
@@ -200,7 +238,7 @@ procedure Swap(var A, B: Single); overload;
 procedure Swap(var A, B: Double); overload;
 procedure Swap(var A, B: TPoint); overload;
 procedure Swap(var A, B: Pointer); overload;
-procedure Swap(var A, B: TRGB32); overload;
+procedure Swap(var A, B: TColorBGRA); overload;
 
 type
   TProc       = procedure of object;
@@ -225,17 +263,12 @@ uses
   simba.math, simba.overallocatearray, simba.geometry, simba.heaparray,
   simba.algo_sort, simba.tpa, simba.random;
 
-{$IFOPT D-}
-  {$OPTIMIZATION LEVEL4}
-{$ENDIF}
-
 {$DEFINE BODY}
   {$i generics.inc}
   {$i quad.inc}
   {$i box.inc}
   {$i boxarray.inc}
   {$i point.inc}
-  {$i rgb32.inc}
   {$i integermatrix.inc}
   {$i singlematrix.inc}
   {$i matrix.inc}
@@ -416,9 +449,9 @@ begin
   specialize Swap<Pointer>(A, B);
 end;
 
-procedure Swap(var A, B: TRGB32);
+procedure Swap(var A, B: TColorBGRA);
 begin
-  specialize Swap<TRGB32>(A, B);
+  specialize Swap<TColorBGRA>(A, B);
 end;
 
 type
