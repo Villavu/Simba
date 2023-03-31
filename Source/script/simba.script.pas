@@ -13,7 +13,7 @@ uses
   classes, sysutils,
   lptypes, lpvartypes, lpcompiler, lpparser, lpinterpreter, lpmessages,
   simba.script_compiler, simba.script_communication, simba.script_debugger,
-  simba.client, simba.script_plugin, simba.mufasatypes, simba.windowhandle;
+  simba.script_plugin, simba.mufasatypes, simba.windowhandle;
 
 type
   TSimbaScript = class
@@ -28,8 +28,6 @@ type
     FCompiler: TSimbaScript_Compiler;
     FCompileTime: Double;
     FRunningTime: Double;
-
-    FClient: TClient;
 
     FDebugger: TSimbaScript_Debugger;
     FPlugins: TSimbaScriptPluginArray;
@@ -54,7 +52,6 @@ type
     property SimbaCommunication: TSimbaScriptCommunication read FSimbaCommunication;
     property SimbaCommunicationServer: String write SetSimbaCommunicationServer;
 
-    property Client: TClient read FClient;
     property TargetWindow: String write SetTargetWindow;
     property Debugger: TSimbaScript_Debugger read FDebugger write FDebugger;
 
@@ -72,7 +69,7 @@ type
 implementation
 
 uses
-  simba.files, simba.datetime, simba.httpclient;
+  simba.files, simba.datetime, simba.httpclient, simba.finder, simba.input;
 
 procedure TSimbaScript.DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
@@ -255,12 +252,12 @@ end;
 
 function TSimbaScript.Run: Boolean;
 begin
-  FClient := TClient.Create();
-  if (FTargetWindow > 0) then
-    FClient.IOManager.SetTarget(FTargetWindow);
+  if (FTargetWindow = 0) or (not FTargetWindow.IsValid()) then
+    FTargetWindow := GetDesktopWindow();
 
-  // Only available at runtime
-  PClient(FCompiler['Client'].Ptr)^ := FClient;
+  PSimbaInput(FCompiler['Input'].Ptr)^.SetTargetWindow(FTargetWindow);
+  PSimbaFinder(FCompiler['Finder'].Ptr)^.SetTargetWindow(FTargetWindow);
+
   PString(FCompiler['ScriptFile'].Ptr)^ := FScriptFileName;
   PString(FCompiler['ScriptName'].Ptr)^ := ExtractFileName(FScriptFileName);
 
@@ -304,8 +301,6 @@ begin
     Plugin.Free();
   FPlugins := nil;
 
-  if (FClient <> nil) then
-    FreeAndNil(FClient);
   if (FCompiler <> nil) then
     FreeAndNil(FCompiler);
   if (FSimbaCommunication <> nil) then

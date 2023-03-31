@@ -137,8 +137,7 @@ begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('ShowDebugImage requires Simba communication');
 
-  with SimbaScriptThread.Script.Client do
-    SimbaScriptThread.Script.SimbaCommunication.DebugImage_Display(PInteger(Params^[0])^, PInteger(Params^[1])^);
+  SimbaScriptThread.Script.SimbaCommunication.DebugImage_Display(PInteger(Params^[0])^, PInteger(Params^[1])^);
 end;
 
 (*
@@ -151,8 +150,7 @@ begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('ShowDebugImage requires Simba communication');
 
-  with SimbaScriptThread.Script.Client do
-    SimbaScriptThread.Script.SimbaCommunication.DebugImage_Display(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+  SimbaScriptThread.Script.SimbaCommunication.DebugImage_Display(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 (*
@@ -165,8 +163,7 @@ begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('SetDebugImgMaxSize requires Simba communication');
 
-  with SimbaScriptThread.Script.Client do
-    SimbaScriptThread.Script.SimbaCommunication.DebugImage_SetMaxSize(PInteger(Params^[0])^, PInteger(Params^[1])^);
+  SimbaScriptThread.Script.SimbaCommunication.DebugImage_SetMaxSize(PInteger(Params^[0])^, PInteger(Params^[1])^);
 end;
 
 (*
@@ -179,8 +176,7 @@ begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('HideDebugImage requires Simba communication');
 
-  with SimbaScriptThread.Script.Client do
-    SimbaScriptThread.Script.SimbaCommunication.DebugImage_Hide();
+  SimbaScriptThread.Script.SimbaCommunication.DebugImage_Hide();
 end;
 
 procedure ImportDebugImage(Compiler: TSimbaScript_Compiler);
@@ -302,7 +298,7 @@ begin
     addGlobalFunc(
       'procedure ShowOnClient(Quads: TQuadArray; Filled: Boolean = False); overload;', [
       'begin',
-      '  with TMufasaBitmap.CreateFromClient() do',
+      '  with TMufasaBitmap.CreateFromFinder() do',
       '  try',
       '    DrawQuadArray(Quads, Filled);',
       '    Show();',
@@ -322,7 +318,7 @@ begin
     addGlobalFunc(
       'procedure ShowOnClient(Boxes: TBoxArray; Filled: Boolean = False); overload;', [
       'begin',
-      '  with TMufasaBitmap.CreateFromClient() do',
+      '  with TMufasaBitmap.CreateFromFinder() do',
       '  try',
       '    DrawBoxArray(Boxes, Filled);',
       '    Show();',
@@ -342,7 +338,7 @@ begin
     addGlobalFunc(
       'procedure ShowOnClient(TPA: TPointArray; Color: Integer = $0000FF); overload;', [
       'begin',
-      '  with TMufasaBitmap.CreateFromClient() do',
+      '  with TMufasaBitmap.CreateFromFinder() do',
       '  try',
       '    DrawTPA(TPA, Color);',
       '    Show();',
@@ -355,7 +351,7 @@ begin
     addGlobalFunc(
       'procedure ShowOnClient(ATPA: T2DPointArray; Color: Integer = $0000FF); overload;', [
       'begin',
-      '  with TMufasaBitmap.CreateFromClient() do',
+      '  with TMufasaBitmap.CreateFromFinder() do',
       '  try',
       '    DrawATPA(ATPA);',
       '    Show();',

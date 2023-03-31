@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, ComCtrls, LCLType,
-  simba.mufasatypes, simba.bitmap, simba.dtm, simba.iomanager, simba.imagebox_bitmap,
+  simba.mufasatypes, simba.bitmap, simba.dtm, simba.imagebox_bitmap,
   simba.colormath, simba.colormath_distance;
 
 type
@@ -105,8 +105,7 @@ type
     procedure SetBackground(Data: PColorBGRA; AWidth, AHeight: Integer); overload;
     procedure SetBackground(FileName: String); overload;
     procedure SetBackground(Bitmap: TMufasaBitmap); overload;
-    procedure SetBackground(IOManager: TIOManager; X1, Y1, X2, Y2: Integer); overload;
-    procedure SetBackground(IOManager: TIOManager); overload;
+    procedure SetBackground(Window: TWindowHandle); overload;
 
     procedure Paint;
 
@@ -118,7 +117,7 @@ implementation
 
 uses
   Math, GraphType, LCLIntf,
-  simba.bitmap_utils;
+  simba.finder, simba.bitmap_utils, simba.windowhandle, simba.bitmap_finders;
 
 procedure TSimbaImageBox_ScrollBox.GetPreferredSize(var PreferredWidth, PreferredHeight: integer; Raw: boolean; WithThemeSpace: boolean);
 begin
@@ -628,7 +627,7 @@ function TSimbaImageBox.FindDTM(DTM: TDTM): TPointArray;
 begin
   with FBackground.ToMufasaBitmap() do
   try
-    Result := FindDTM(DTM);
+    Result := Finder.FindDTM(DTM, -1, NullBox);
   finally
     Free();
   end;
@@ -638,7 +637,7 @@ function TSimbaImageBox.FindColor(AColor: TColor; Tolerance: Single; ColorSpace:
 begin
   with FBackground.ToMufasaBitmap() do
   try
-    Result := FindColor(ColorSpace, AColor, Tolerance, Multipliers);
+    Result := Finder.FindColor(AColor, Tolerance, ColorSpace, Multipliers, NullBox);
   finally
     Free();
   end;
@@ -648,7 +647,7 @@ function TSimbaImageBox.MatchColor(AColor: TColor; ColorSpace: EColorSpace; Mult
 begin
   with FBackground.ToMufasaBitmap() do
   try
-    Result := MatchColor(ColorSpace, AColor, Multipliers);
+    Result := Finder.MatchColor(AColor, ColorSpace, Multipliers, NullBox);
   finally
     Free();
   end;
@@ -683,26 +682,19 @@ begin
   FBackground.FromData(Bitmap.Data, Bitmap.Width, Bitmap.Height);
 end;
 
-procedure TSimbaImageBox.SetBackground(IOManager: TIOManager; X1, Y1, X2, Y2: Integer);
+procedure TSimbaImageBox.SetBackground(Window: TWindowHandle);
 var
-  Data: PColorBGRA;
+  Image: TMufasaBitmap;
 begin
-  Data := IOManager.CopyData(X1, Y1, X2-X1+1, Y2-Y1+1);
-  if (Data <> nil) then
-  try
-    SetBackground(Data, X2-X1+1, Y2-Y1+1);
-  finally
-    FreeMem(Data);
+  if Window.IsValid() then
+  begin
+    Image := TMufasaBitmap.CreateFromWindow(Window);
+    try
+      SetBackground(Image);
+    finally
+      Image.Free();
+    end;
   end;
-end;
-
-procedure TSimbaImageBox.SetBackground(IOManager: TIOManager);
-var
-  Wid, Hei: Integer;
-begin
-  IOManager.GetDimensions(Wid, Hei);
-
-  SetBackground(IOManager, 0, 0, Wid-1, Hei-1);
 end;
 
 constructor TSimbaImageBox.Create(AOwner: TComponent);

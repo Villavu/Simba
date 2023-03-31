@@ -342,8 +342,10 @@ object SimbaACAForm: TSimbaACAForm
           BorderSpacing.Left = 10
           BorderSpacing.Top = 3
           Caption = 'RGB'
+          Checked = True
           OnClick = DoColorSpaceChanged
           TabOrder = 0
+          TabStop = True
         end
         object ButtonHSL: TRadioButton
           AnchorSideLeft.Control = ButtonRGB

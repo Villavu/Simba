@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, forms, controls, graphics, dialogs, extctrls, stdctrls,
-  simba.client, simba.iomanager, simba.imagebox_zoom, simba.mufasatypes;
+  simba.imagebox_zoom, simba.mufasatypes;
 
 type
   TSimbaColorPickerHint = class(THintWindow)
@@ -24,16 +24,16 @@ type
     constructor Create(AOwner: TComponent); override;
   end;
 
-  TSimbaColorPicker = class
+  TSimbaColorPicker = class(TObject)
   protected
     FForm: TForm;
-    FColor: Int32;
+    FColor: TColor;
     FPoint: TPoint;
-    FClient: TClient;
     FHint: TSimbaColorPickerHint;
     FImage: TImage;
     FPicked: Boolean;
     FImageX, FImageY: Integer;
+    FSelectedWindow: TWindowHandle;
 
     procedure FormClosed(Sender: TObject; var CloseAction: TCloseAction);
     procedure HintKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -41,18 +41,18 @@ type
     procedure ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   public
-    property Color: Int32 read FColor;
+    property Color: TColor read FColor;
     property Point: TPoint read FPoint;
     property Picked: Boolean read FPicked;
 
-    constructor Create(TargetWindow: TWindowHandle);
-    destructor Destroy; override;
+    constructor Create(SelectedWindow: TWindowHandle); reintroduce;
   end;
 
 implementation
 
 uses
-  lcltype, simba.bitmap;
+  LCLType,
+  simba.bitmap, simba.windowhandle;
 
 procedure TSimbaColorPickerHint.Paint;
 begin
@@ -88,7 +88,7 @@ procedure TSimbaColorPicker.FormClosed(Sender: TObject; var CloseAction: TCloseA
 begin
   if FPicked then
   begin
-    FClient.IOManager.GetMousePos(FPoint.X, FPoint.Y);
+    FPoint := FSelectedWindow.GetRelativeCursorPos();
     FColor := FImage.Picture.Bitmap.Canvas.Pixels[FImageX, FImageY];
   end;
 
@@ -122,7 +122,7 @@ begin
   FImageX := X;
   FImageY := Y;
 
-  FClient.IOManager.GetMousePos(FPoint.X, FPoint.Y);
+  FPoint := FSelectedWindow.GetRelativeCursorPos();
 
   with FImage.ClientToScreen(TPoint.Create(X + 25, Y - (FHint.Height div 2))) do
   begin
@@ -141,21 +141,23 @@ begin
   FForm.Close();
 end;
 
-constructor TSimbaColorPicker.Create(TargetWindow: TWindowHandle);
+constructor TSimbaColorPicker.Create(SelectedWindow: TWindowHandle);
 var
-  DesktopLeft, DesktopTop, DesktopWidth, DesktopHeight: Int32;
+  DesktopWindow: TWindowHandle;
+  DesktopBounds: TBox;
 begin
-  FClient := TClient.Create();
-  FClient.IOManager.GetPosition(DesktopLeft, DesktopTop);
-  FClient.IOManager.GetDimensions(DesktopWidth, DesktopHeight);
+  inherited Create();
+
+  DesktopWindow := GetDesktopWindow();
+  DesktopBounds := DesktopWindow.GetBounds();
 
   FForm := TForm.CreateNew(nil);
   with FForm do
   begin
-    Left := DesktopLeft;
-    Top := DesktopTop;
-    Width := DesktopWidth;
-    Height := DesktopHeight;
+    Left := DesktopBounds.X1;
+    Top := DesktopBounds.Y1;
+    Width := DesktopBounds.X2;
+    Height := DesktopBounds.Y2;
 
     BorderStyle := bsNone;
 
@@ -172,17 +174,19 @@ begin
     OnMouseUp := @ImageMouseUp;
     OnMouseMove := @ImageMouseMove;
 
-    with TMufasaBitmap.CreateFromClient(FClient) do
+    with TMufasaBitmap.CreateFromWindow(DesktopWindow) do
     try
-      Picture.Bitmap.LoadFromRawImage(ToRawImage(), False);
+      Picture.Bitmap.LoadFromRawImage(ToRawImage(), True);
+
+      DataOwner := False;
     finally
       Free();
     end;
   end;
 
-  FClient.IOManager.SetTarget(TargetWindow);
-  if not FClient.IOManager.TargetValid() then
-    FClient.IOManager.SetDesktop();
+  FSelectedWindow := SelectedWindow;
+  if (FSelectedWindow = 0) or (not FSelectedWindow.IsValid()) then
+    FSelectedWindow := GetDesktopWindow();
 
   FForm.ShowOnTop();
 
@@ -197,13 +201,6 @@ begin
 
     Sleep(25);
   end;
-end;
-
-destructor TSimbaColorPicker.Destroy;
-begin
-  FClient.Free();
-
-  inherited Destroy();
 end;
 
 end.

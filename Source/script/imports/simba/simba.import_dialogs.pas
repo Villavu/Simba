@@ -53,14 +53,14 @@ procedure _LapeShowDTMEditor(const Params: PParamArray); LAPE_WRAPPER_CALLING_CO
 
   procedure Execute;
   begin
-    with TSimbaDTMEditorForm.Create(SimbaScriptThread.Script.Client, False) do
-    begin
-      OnPrintDTMEx := @PrintDTM;
-      if (PString(Params^[0])^ <> '') then
-        Caption := PString(Params^[0])^;
-
-      ShowModal();
-    end;
+    //with TSimbaDTMEditorForm.Create(SimbaScriptThread.Script.Client, False) do
+    //begin
+    //  OnPrintDTMEx := @PrintDTM;
+    //  if (PString(Params^[0])^ <> '') then
+    //    Caption := PString(Params^[0])^;
+    //
+    //  ShowModal();
+    //end;
   end;
 
 begin
@@ -81,14 +81,14 @@ procedure _LapeShowACA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 
   procedure Execute;
   begin
-    with TSimbaACAForm.Create(SimbaScriptThread.Script.Client, False) do
-    begin
-      OnCalculateBestColorEx := @CalculateBestColor;
-      if (PString(Params^[0])^ <> '') then
-        Caption := PString(Params^[0])^;
-
-      ShowModal();
-    end;
+    //with TSimbaACAForm.Create(SimbaScriptThread.Script.Client, False) do
+    //begin
+    //  OnCalculateBestColorEx := @CalculateBestColor;
+    //  if (PString(Params^[0])^ <> '') then
+    //    Caption := PString(Params^[0])^;
+    //
+    //  ShowModal();
+    //end;
   end;
 
 begin

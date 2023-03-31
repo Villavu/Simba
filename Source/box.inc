@@ -51,6 +51,10 @@ type
   function Box(Mid: TPoint; XRad, YRad: Integer): TBox;
 
   operator = (const Left, Right: TBox): Boolean;
+
+const
+  NullBox: TBox = (X1: -1; Y1: -1; X2: -1; Y2: -1);
+
 {$ENDIF}
 
 {$IFDEF BODY}

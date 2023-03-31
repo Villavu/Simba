@@ -8,7 +8,7 @@ implementation
 
 uses
   classes, sysutils, controls, extctrls, comctrls, graphics, lptypes, ffi,
-  simba.script_compiler, simba.mufasatypes, simba.imagebox, simba.imagebox_bitmap, simba.bitmap, simba.dtm, simba.iomanager;
+  simba.script_compiler, simba.mufasatypes, simba.imagebox, simba.imagebox_bitmap, simba.bitmap, simba.dtm;
 
 type
   PComponent = ^TComponent;
@@ -150,16 +150,6 @@ begin
   PSimbaImageBox(Params^[0])^.SetBackground(PMufasaBitmap(Params^[1])^);
 end;
 
-procedure _LapeSimbaImageBox_SetBackground_IOManagerArea(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBox(Params^[0])^.SetBackground(PIOManager(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
-end;
-
-procedure _LapeSimbaImageBox_SetBackground_IOManager(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBox(Params^[0])^.SetBackground(PIOManager(Params^[1])^);
-end;
-
 procedure _LapeSimbaImageBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^ := TSimbaImageBox.Create(PComponent(Params^[1])^);
@@ -250,16 +240,6 @@ begin
   PBitmap(Result)^ := PSimbaImageBox(Params^[0])^.Background;
 end;
 
-//procedure _LapeSimbaImageBox_FindDTMs(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-//begin
-//  PPointArray(Result)^ := PSimbaImageBox(Params^[0])^.FindDTMs(PDTM(Params^[1])^);
-//end;
-//
-//procedure _LapeSimbaImageBox_FindColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-//begin
-//  PPointArray(Result)^ := PSimbaImageBox(Params^[0])^.FindColors(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
-//end;
-
 procedure ImportSimbaImageBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -304,10 +284,6 @@ begin
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(Data: PColorBGRA; AWidth, AHeight: Integer); overload;', @_LapeSimbaImageBox_SetBackground_Data);
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(FileName: String); overload;', @_LapeSimbaImageBox_SetBackground_FileName);
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(Bitmap: TMufasaBitmap); overload;', @_LapeSimbaImageBox_SetBackground_Bitmap);
-    addGlobalFunc('procedure TSimbaImageBox.SetBackground(IOManager: TIOManager; X1, Y1, X2, Y2: Integer); overload;', @_LapeSimbaImageBox_SetBackground_IOManagerArea);
-    addGlobalFunc('procedure TSimbaImageBox.SetBackground(IOManager: TIOManager); overload;', @_LapeSimbaImageBox_SetBackground_IOManager);
-    //addGlobalFunc('function TSimbaImageBox.FindColors(CTS: Integer; Col, Tol: Integer; HueMod: Extended = 0.2; SatMod: Extended = 0.2): TPointArray;', @_LapeSimbaImageBox_FindColors);
-    //addGlobalFunc('function TSimbaImageBox.FindDTM(DTM: TDTM): TPointArray;', @_LapeSimbaImageBox_FindDTMs);
     addGlobalFunc('procedure TSimbaImageBox.Init(Owner: TComponent); override', @_LapeSimbaImageBox_Init);
   end;
 end;

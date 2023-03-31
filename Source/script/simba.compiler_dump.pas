@@ -20,7 +20,7 @@ implementation
 
 uses
   lpparser, lptypes, lpvartypes, lptree,
-  simba.script_compiler;
+  simba.mufasatypes, simba.script_compiler;
 
 type
   TSimbaCompilerDump = class(TSimbaScript_Compiler)
@@ -206,6 +206,7 @@ begin
     if (FBaseTypes[BaseType] <> nil) then
       FDump['type %s = %s;'.Format([LapeTypeToString(BaseType), LapeTypeToString(BaseType)])] := 'System';
 
+  {
   // Variables & Constants
   for Decl in FGlobalDeclarations.GetByClass(TLapeGlobalVar, bTrue) do
     with TLapeGlobalVar(Decl) do
@@ -217,6 +218,7 @@ begin
 
       FDump[DoDump(Decl as TLapeGlobalVar)] := DocPos.FileName;
     end;
+  }
 
   // add internals
   FDump['procedure Delete(A: array; Index: Int32; Count: Int32 = Length(A)); external;'] := 'System';
