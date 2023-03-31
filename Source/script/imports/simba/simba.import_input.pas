@@ -12,252 +12,510 @@ uses
 implementation
 
 uses
-  simba.mufasatypes, simba.scriptthread;
+  simba.mufasatypes, simba.bitmap, simba.input, simba.internaltarget;
 
-procedure _LapeKeyDown(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+(*
+Input
+=====
+Input (Mouse & Keyboard) related methods.
+
+| Key codes and mouse buttons are both **scoped** enums.
+| For scoped a enum you **must** include the type of the enum.
+
+Example::
+
+  MouseButton.LEFT
+  KeyCode.A
+
+Available Mouse Buttons::
+
+  MouseButton.LEFT
+  MouseButton.RIGHT
+  MouseButton.MIDDLE
+  MouseButton.SCROLL_UP
+  MouseButton.SCROLL_DOWN
+
+Available Key Codes::
+
+  KeyCode.UNKNOWN
+  KeyCode.LBUTTON
+  KeyCode.RBUTTON
+  KeyCode.CANCEL
+  KeyCode.MBUTTON
+  KeyCode.XBUTTON1
+  KeyCode.XBUTTON2
+  KeyCode.BACK
+  KeyCode.TAB
+  KeyCode.CLEAR
+  KeyCode.RETURN
+  KeyCode.SHIFT
+  KeyCode.CONTROL
+  KeyCode.MENU
+  KeyCode.PAUSE
+  KeyCode.CAPITAL
+  KeyCode.ESCAPE
+  KeyCode.CONVERT
+  KeyCode.NONCONVERT
+  KeyCode.ACCEPT
+  KeyCode.MODECHANGE
+  KeyCode.SPACE
+  KeyCode.PRIOR
+  KeyCode.NEXT
+  KeyCode.END_KEY
+  KeyCode.HOME
+  KeyCode.LEFT
+  KeyCode.UP
+  KeyCode.RIGHT
+  KeyCode.DOWN
+  KeyCode.SELECT
+  KeyCode.PRINT
+  KeyCode.EXECUTE
+  KeyCode.SNAPSHOT
+  KeyCode.INSERT
+  KeyCode.DELETE
+  KeyCode.HELP
+  KeyCode.NUM_0
+  KeyCode.NUM_1
+  KeyCode.NUM_2
+  KeyCode.NUM_3
+  KeyCode.NUM_4
+  KeyCode.NUM_5
+  KeyCode.NUM_6
+  KeyCode.NUM_7
+  KeyCode.NUM_8
+  KeyCode.NUM_9
+  KeyCode.A
+  KeyCode.B
+  KeyCode.C
+  KeyCode.D
+  KeyCode.E
+  KeyCode.F
+  KeyCode.G
+  KeyCode.H
+  KeyCode.I
+  KeyCode.J
+  KeyCode.K
+  KeyCode.L
+  KeyCode.M
+  KeyCode.N
+  KeyCode.O
+  KeyCode.P
+  KeyCode.Q
+  KeyCode.R
+  KeyCode.S
+  KeyCode.T
+  KeyCode.U
+  KeyCode.V
+  KeyCode.W
+  KeyCode.X
+  KeyCode.Y
+  KeyCode.Z
+  KeyCode.LWIN
+  KeyCode.RWIN
+  KeyCode.APPS
+  KeyCode.SLEEP
+  KeyCode.NUMPAD_0
+  KeyCode.NUMPAD_1
+  KeyCode.NUMPAD_2
+  KeyCode.NUMPAD_3
+  KeyCode.NUMPAD_4
+  KeyCode.NUMPAD_5
+  KeyCode.NUMPAD_6
+  KeyCode.NUMPAD_7
+  KeyCode.NUMPAD_8
+  KeyCode.NUMPAD_9
+  KeyCode.MULTIPLY
+  KeyCode.ADD
+  KeyCode.SEPARATOR
+  KeyCode.SUBTRACT
+  KeyCode.DECIMAL
+  KeyCode.DIVIDE
+  KeyCode.F1
+  KeyCode.F2
+  KeyCode.F3
+  KeyCode.F4
+  KeyCode.F5
+  KeyCode.F6
+  KeyCode.F7
+  KeyCode.F8
+  KeyCode.F9
+  KeyCode.F10
+  KeyCode.F11
+  KeyCode.F12
+  KeyCode.F13
+  KeyCode.F14
+  KeyCode.F15
+  KeyCode.F16
+  KeyCode.F17
+  KeyCode.F18
+  KeyCode.F19
+  KeyCode.F20
+  KeyCode.F21
+  KeyCode.F22
+  KeyCode.F23
+  KeyCode.F24
+  KeyCode.NUMLOCK
+  KeyCode.SCROLL
+  KeyCode.LSHIFT
+  KeyCode.RSHIFT
+  KeyCode.LCONTROL
+  KeyCode.RCONTROL
+  KeyCode.LMENU
+  KeyCode.RMENU
+  KeyCode.BROWSER_BACK
+  KeyCode.BROWSER_FORWARD
+  KeyCode.BROWSER_REFRESH
+  KeyCode.BROWSER_STOP
+  KeyCode.BROWSER_SEARCH
+  KeyCode.BROWSER_FAVORITES
+  KeyCode.BROWSER_HOME
+  KeyCode.VOLUME_MUTE
+  KeyCode.VOLUME_DOWN
+  KeyCode.VOLUME_UP
+  KeyCode.MEDIA_NEXT_TRACK
+  KeyCode.MEDIA_PREV_TRACK
+  KeyCode.MEDIA_STOP
+  KeyCode.MEDIA_PLAY_PAUSE
+  KeyCode.LAUNCH_MAIL
+  KeyCode.LAUNCH_MEDIA_SELECT
+  KeyCode.LAUNCH_APP1
+  KeyCode.LAUNCH_APP2
+  KeyCode.OEM_1
+  KeyCode.OEM_PLUS
+  KeyCode.OEM_COMMA
+  KeyCode.OEM_MINUS
+  KeyCode.OEM_PERIOD
+  KeyCode.OEM_2
+  KeyCode.OEM_3
+  KeyCode.OEM_4
+  KeyCode.OEM_5
+  KeyCode.OEM_6
+  KeyCode.OEM_7
+  KeyCode.OEM_8
+  KeyCode.OEM_102
+  KeyCode.PROCESSKEY
+  KeyCode.ATTN
+  KeyCode.CRSEL
+  KeyCode.EXSEL
+  KeyCode.EREOF
+  KeyCode.PLAY
+  KeyCode.ZOOM
+*)
+
+procedure _LapeSimbaInput_SetTargetDesktop(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  SimbaScriptThread.Script.Client.IOManager.KeyDown(PInteger(Params^[0])^);
+  PSimbaInput(Params^[0])^.SetTargetDesktop();
 end;
 
-procedure _LapeKeyUp(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaInput_SetTargetBitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  SimbaScriptThread.Script.Client.IOManager.KeyUp(PInteger(Params^[0])^);
+  PSimbaInput(Params^[0])^.SetTargetBitmap(PMufasaBitmap(Params^[1])^);
 end;
 
-procedure _LapeSendKeys(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaInput_SetTargetWindow(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  SimbaScriptThread.Script.Client.IOManager.SendText(PString(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+  PSimbaInput(Params^[0])^.SetTargetWindow(PWindowHandle(Params^[1])^);
 end;
 
-procedure _LapeSendKeysEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaInput_SetTargetEIOS(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  SimbaScriptThread.Script.Client.IOManager.SendTextEx(PString(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+  PSimbaInput(Params^[0])^.SetTargetEIOS(PString(Params^[1])^, PString(Params^[2])^);
 end;
 
-procedure _LapePressKey(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaInput_GetTargetDimensions(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  SimbaScriptThread.Script.Client.IOManager.PressKey(PInteger(Params^[0])^);
+  PSimbaInput(Params^[0])^.GetTargetDimensions(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-procedure _LapeIsKeyDown(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaInput_MousePosition(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := SimbaScriptThread.Script.Client.IOManager.IsKeyDown(PInteger(Params^[0])^);
+  PPoint(Result)^ := PSimbaInput(Params^[0])^.MousePosition();
 end;
 
-procedure _LapeGetKeyCode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaInput_MousePressed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := SimbaScriptThread.Script.Client.IOManager.GetKeyCode(PChar(Params^[0])^);
+  PBoolean(Result)^ := PSimbaInput(Params^[0])^.MousePressed(PMouseButton(Params^[1])^);
 end;
 
-procedure _LapeMoveMouse(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaInput_MouseTeleport(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  SimbaScriptThread.Script.Client.IOManager.MoveMouse(PInteger(Params^[0])^, PInteger(Params^[1])^);
+  PSimbaInput(Params^[0])^.MouseTeleport(PPoint(Params^[1])^);
 end;
 
-procedure _LapeScrollMouse(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaInput_MouseClick(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  SimbaScriptThread.Script.Client.IOManager.ScrollMouse(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+  PSimbaInput(Params^[0])^.MouseClick(PMouseButton(Params^[1])^);
 end;
 
-procedure _LapeGetMousePos(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaInput_MouseDown(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  SimbaScriptThread.Script.Client.IOManager.GetMousePos(PInteger(Params^[0])^, PInteger(Params^[1])^);
+  PSimbaInput(Params^[0])^.MouseDown(PMouseButton(Params^[1])^);
 end;
 
-procedure _LapeHoldMouse(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaInput_MouseUp(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  SimbaScriptThread.Script.Client.IOManager.HoldMouse(PInteger(Params^[0])^, PInteger(Params^[1])^, PClickType(Params^[2])^);
+  PSimbaInput(Params^[0])^.MouseUp(PMouseButton(Params^[1])^);
 end;
 
-procedure _LapeReleaseMouse(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaInput_MouseScroll(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  SimbaScriptThread.Script.Client.IOManager.ReleaseMouse(PInteger(Params^[0])^, PInteger(Params^[1])^, PClickType(Params^[2])^);
+  PSimbaInput(Params^[0])^.MouseScroll(PInteger(Params^[1])^);
 end;
 
-procedure _LapeClickMouse(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaInput_KeyDown(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  SimbaScriptThread.Script.Client.IOManager.ClickMouse(PInteger(Params^[0])^, PInteger(Params^[1])^, PClickType(Params^[2])^);
+  PSimbaInput(Params^[0])^.KeyDown(PKeyCode(Params^[1])^);
 end;
 
-procedure _LapeIsMouseButtonDown(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaInput_KeyUp(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := SimbaScriptThread.Script.Client.IOManager.IsMouseButtonDown(PClickType(Params^[0])^);
+  PSimbaInput(Params^[0])^.KeyUp(PKeyCode(Params^[1])^);
 end;
 
-procedure ImportMouse(Compiler: TSimbaScript_Compiler);
+procedure _LapeSimbaInput_KeyPress(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaInput(Params^[0])^.KeyPress(PKeyCode(Params^[1])^);
+end;
+
+procedure _LapeSimbaInput_KeyPressed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaInput(Params^[0])^.KeyPressed(PKeyCode(Params^[1])^);
+end;
+
+procedure _LapeSimbaInput_KeySend(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaInput(Params^[0])^.KeySend(PString(Params^[1])^);
+end;
+
+procedure _LapeSimbaInput_CharToKeyCode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PKeyCode(Result)^ := PSimbaInput(Params^[0])^.CharToKeyCode(PChar(Params^[1])^);
+end;
+
+procedure ImportInput(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
     ImportingSection := 'Input';
 
-    addGlobalFunc('procedure KeyDown(Key: Integer)', @_LapeKeyDown);
-    addGlobalFunc('procedure KeyUp(Key: Integer)', @_LapeKeyUp);
-    addGlobalFunc('procedure SendKeys(const S: String; KeyWait, KeyModWait: Integer)', @_LapeSendKeys);
-    addGlobalFunc('procedure SendKeysEx(const S: String; MinKeyWait, MaxKeyWait: Integer)', @_LapeSendKeysEx);
-    addGlobalFunc('procedure PressKey(Key: Integer)', @_LapePressKey);
-    addGlobalFunc('function IsKeyDown(Key: Integer): Boolean', @_LapeIsKeyDown);
-    addGlobalFunc('function GetKeyCode(C: Char): Integer', @_LapeGetKeyCode);
+    addGlobalType([
+      'packed record',
+      '  InternalData: array[0..' + IntToStr(SizeOf(TSimbaInternalTarget) - 1)  + '] of Byte;',
+      '',
+      '  MinPressTime: Integer;',
+      '  MaxPressTime: Integer;',
+      '',
+      '  MinClickTime: Integer;',
+      '  MaxClickTime: Integer;',
+      'end;'],
+      'TSimbaInput'
+    );
 
-    addGlobalFunc('procedure MoveMouse(X, Y: Integer)', @_LapeMoveMouse);
-    addGlobalFunc('procedure ScrollMouse(X, Y: Integer; Clicks: Integer)', @_LapeScrollMouse);
-    addGlobalFunc('procedure GetMousePos(var X, Y: Integer)', @_LapeGetMousePos);
-    addGlobalFunc('procedure HoldMouse(X, Y: Integer; ClickType: Integer)', @_LapeHoldMouse);
-    addGlobalFunc('procedure ReleaseMouse(X, Y: Integer; ClickType: Integer)', @_LapeReleaseMouse);
-    addGlobalFunc('procedure ClickMouse(X, Y: Integer; ClickType: Integer)', @_LapeClickMouse);
-    addGlobalFunc('function IsMouseButtonDown(Button: Integer): Boolean', @_LapeIsMouseButtonDown);
+    with addGlobalVar('TSimbaInput', '[]', 'Input') do
+      Used := duTrue;
 
-    addGlobalVar(Integer(MOUSE_RIGHT),   'MOUSE_RIGHT').isConstant := True;
-    addGlobalVar(Integer(MOUSE_LEFT),    'MOUSE_LEFT').isConstant := True;
-    addGlobalVar(Integer(MOUSE_MIDDLE),  'MOUSE_MIDDLE').isConstant := True;
-    addGlobalVar(Integer(MOUSE_EXTRA_1), 'MOUSE_EXTRA_1').isConstant := True;
-    addGlobalVar(Integer(MOUSE_EXTRA_2), 'MOUSE_EXTRA_2').isConstant := True;
+    addGlobalType([
+      'enum(',
+      '  LEFT, RIGHT, MIDDLE, SCROLL_UP, SCROLL_DOWN',
+      ');'],
+      'MouseButton'
+    );
+    addGlobalType([
+      'enum(',
+      '  UNKNOWN             = 0,',
+      '  LBUTTON             = 1,',
+      '  RBUTTON             = 2,',
+      '  CANCEL              = 3,',
+      '  MBUTTON             = 4,',
+      '  XBUTTON1            = 5,',
+      '  XBUTTON2            = 6,',
+      '  BACK                = 8,',
+      '  TAB                 = 9,',
+      '  CLEAR               = 12,',
+      '  RETURN              = 13,',
+      '  SHIFT               = 16,',
+      '  CONTROL             = 17,',
+      '  MENU                = 18,',
+      '  PAUSE               = 19,',
+      '  CAPITAL             = 20,',
+      '  ESCAPE              = 27,',
+      '  CONVERT             = 28,',
+      '  NONCONVERT          = 29,',
+      '  ACCEPT              = 30,',
+      '  MODECHANGE          = 31,',
+      '  SPACE               = 32,',
+      '  PRIOR               = 33,',
+      '  NEXT                = 34,',
+      '  END_KEY             = 35,',
+      '  HOME                = 36,',
+      '  LEFT                = 37,',
+      '  UP                  = 38,',
+      '  RIGHT               = 39,',
+      '  DOWN                = 40,',
+      '  SELECT              = 41,',
+      '  PRINT               = 42,',
+      '  EXECUTE             = 43,',
+      '  SNAPSHOT            = 44,',
+      '  INSERT              = 45,',
+      '  DELETE              = 46,',
+      '  HELP                = 47,',
+      '  NUM_0               = 48,',
+      '  NUM_1               = 49,',
+      '  NUM_2               = 50,',
+      '  NUM_3               = 51,',
+      '  NUM_4               = 52,',
+      '  NUM_5               = 53,',
+      '  NUM_6               = 54,',
+      '  NUM_7               = 55,',
+      '  NUM_8               = 56,',
+      '  NUM_9               = 57,',
+      '  A                   = 65,',
+      '  B                   = 66,',
+      '  C                   = 67,',
+      '  D                   = 68,',
+      '  E                   = 69,',
+      '  F                   = 70,',
+      '  G                   = 71,',
+      '  H                   = 72,',
+      '  I                   = 73,',
+      '  J                   = 74,',
+      '  K                   = 75,',
+      '  L                   = 76,',
+      '  M                   = 77,',
+      '  N                   = 78,',
+      '  O                   = 79,',
+      '  P                   = 80,',
+      '  Q                   = 81,',
+      '  R                   = 82,',
+      '  S                   = 83,',
+      '  T                   = 84,',
+      '  U                   = 85,',
+      '  V                   = 86,',
+      '  W                   = 87,',
+      '  X                   = 88,',
+      '  Y                   = 89,',
+      '  Z                   = 90,',
+      '  LWIN                = 91,',
+      '  RWIN                = 92,',
+      '  APPS                = 93,',
+      '  SLEEP               = 95,',
+      '  NUMPAD_0            = 96,',
+      '  NUMPAD_1            = 97,',
+      '  NUMPAD_2            = 98,',
+      '  NUMPAD_3            = 99,',
+      '  NUMPAD_4            = 100,',
+      '  NUMPAD_5            = 101,',
+      '  NUMPAD_6            = 102,',
+      '  NUMPAD_7            = 103,',
+      '  NUMPAD_8            = 104,',
+      '  NUMPAD_9            = 105,',
+      '  MULTIPLY            = 106,',
+      '  ADD                 = 107,',
+      '  SEPARATOR           = 108,',
+      '  SUBTRACT            = 109,',
+      '  DECIMAL             = 110,',
+      '  DIVIDE              = 111,',
+      '  F1                  = 112,',
+      '  F2                  = 113,',
+      '  F3                  = 114,',
+      '  F4                  = 115,',
+      '  F5                  = 116,',
+      '  F6                  = 117,',
+      '  F7                  = 118,',
+      '  F8                  = 119,',
+      '  F9                  = 120,',
+      '  F10                 = 121,',
+      '  F11                 = 122,',
+      '  F12                 = 123,',
+      '  F13                 = 124,',
+      '  F14                 = 125,',
+      '  F15                 = 126,',
+      '  F16                 = 127,',
+      '  F17                 = 128,',
+      '  F18                 = 129,',
+      '  F19                 = 130,',
+      '  F20                 = 131,',
+      '  F21                 = 132,',
+      '  F22                 = 133,',
+      '  F23                 = 134,',
+      '  F24                 = 135,',
+      '  NUMLOCK             = 144,',
+      '  SCROLL              = 145,',
+      '  LSHIFT              = 160,',
+      '  RSHIFT              = 161,',
+      '  LCONTROL            = 162,',
+      '  RCONTROL            = 163,',
+      '  LMENU               = 164,',
+      '  RMENU               = 165,',
+      '  BROWSER_BACK        = 166,',
+      '  BROWSER_FORWARD     = 167,',
+      '  BROWSER_REFRESH     = 168,',
+      '  BROWSER_STOP        = 169,',
+      '  BROWSER_SEARCH      = 170,',
+      '  BROWSER_FAVORITES   = 171,',
+      '  BROWSER_HOME        = 172,',
+      '  VOLUME_MUTE         = 173,',
+      '  VOLUME_DOWN         = 174,',
+      '  VOLUME_UP           = 175,',
+      '  MEDIA_NEXT_TRACK    = 176,',
+      '  MEDIA_PREV_TRACK    = 177,',
+      '  MEDIA_STOP          = 178,',
+      '  MEDIA_PLAY_PAUSE    = 179,',
+      '  LAUNCH_MAIL         = 180,',
+      '  LAUNCH_MEDIA_SELECT = 181,',
+      '  LAUNCH_APP1         = 182,',
+      '  LAUNCH_APP2         = 183,',
+      '  OEM_1               = 186,',
+      '  OEM_PLUS            = 187,',
+      '  OEM_COMMA           = 188,',
+      '  OEM_MINUS           = 189,',
+      '  OEM_PERIOD          = 190,',
+      '  OEM_2               = 191,',
+      '  OEM_3               = 192,',
+      '  OEM_4               = 219,',
+      '  OEM_5               = 220,',
+      '  OEM_6               = 221,',
+      '  OEM_7               = 222,',
+      '  OEM_8               = 223,',
+      '  OEM_102             = 226,',
+      '  PROCESSKEY          = 231,',
+      '  ATTN                = 246,',
+      '  CRSEL               = 247,',
+      '  EXSEL               = 248,',
+      '  EREOF               = 249,',
+      '  PLAY                = 250,',
+      '  ZOOM                = 251',
+      ');'],
+      'KeyCode'
+    );
 
-    ImportingSection := 'Virtual Keys';
+    addGlobalFunc('procedure TSimbaInput.SetTargetDesktop', @_LapeSimbaInput_SetTargetDesktop);
+    addGlobalFunc('procedure TSimbaInput.SetTargetBitmap(Bitmap: TMufasaBitmap)', @_LapeSimbaInput_SetTargetBitmap);
+    addGlobalFunc('procedure TSimbaInput.SetTargetWindow(Window: TWindowHandle)', @_LapeSimbaInput_SetTargetWindow);
+    addGlobalFunc('procedure TSimbaInput.SetTargetEIOS(Plugin, Args: String)', @_LapeSimbaInput_SetTargetEIOS);
 
-    addGlobalVar(Integer(0), 'VK_UNKNOWN').isConstant := True;
-    addGlobalVar(Integer(1), 'VK_LBUTTON').isConstant := True;
-    addGlobalVar(Integer(2), 'VK_RBUTTON').isConstant := True;
-    addGlobalVar(Integer(3), 'VK_CANCEL').isConstant := True;
-    addGlobalVar(Integer(4), 'VK_MBUTTON').isConstant := True;
-    addGlobalVar(Integer(5), 'VK_XBUTTON1').isConstant := True;
-    addGlobalVar(Integer(6), 'VK_XBUTTON2').isConstant := True;
-    addGlobalVar(Integer(8), 'VK_BACK').isConstant := True;
-    addGlobalVar(Integer(9), 'VK_TAB').isConstant := True;
-    addGlobalVar(Integer(12), 'VK_CLEAR').isConstant := True;
-    addGlobalVar(Integer(13), 'VK_RETURN').isConstant := True;
-    addGlobalVar(Integer(16), 'VK_SHIFT').isConstant := True;
-    addGlobalVar(Integer(17), 'VK_CONTROL').isConstant := True;
-    addGlobalVar(Integer(18), 'VK_MENU').isConstant := True;
-    addGlobalVar(Integer(19), 'VK_PAUSE').isConstant := True;
-    addGlobalVar(Integer(20), 'VK_CAPITAL').isConstant := True;
-    addGlobalVar(Integer(27), 'VK_ESCAPE').isConstant := True;
-    addGlobalVar(Integer(32), 'VK_SPACE').isConstant := True;
-    addGlobalVar(Integer(33), 'VK_PRIOR').isConstant := True;
-    addGlobalVar(Integer(34), 'VK_NEXT').isConstant := True;
-    addGlobalVar(Integer(35), 'VK_END').isConstant := True;
-    addGlobalVar(Integer(36), 'VK_HOME').isConstant := True;
-    addGlobalVar(Integer(37), 'VK_LEFT').isConstant := True;
-    addGlobalVar(Integer(38), 'VK_UP').isConstant := True;
-    addGlobalVar(Integer(39), 'VK_RIGHT').isConstant := True;
-    addGlobalVar(Integer(40), 'VK_DOWN').isConstant := True;
-    addGlobalVar(Integer(41), 'VK_SELECT').isConstant := True;
-    addGlobalVar(Integer(42), 'VK_PRINT').isConstant := True;
-    addGlobalVar(Integer(43), 'VK_EXECUTE').isConstant := True;
-    addGlobalVar(Integer(44), 'VK_SNAPSHOT').isConstant := True;
-    addGlobalVar(Integer(45), 'VK_INSERT').isConstant := True;
-    addGlobalVar(Integer(46), 'VK_DELETE').isConstant := True;
-    addGlobalVar(Integer(47), 'VK_HELP').isConstant := True;
-    addGlobalVar(Integer(48), 'VK_0').isConstant := True;
-    addGlobalVar(Integer(49), 'VK_1').isConstant := True;
-    addGlobalVar(Integer(50), 'VK_2').isConstant := True;
-    addGlobalVar(Integer(51), 'VK_3').isConstant := True;
-    addGlobalVar(Integer(52), 'VK_4').isConstant := True;
-    addGlobalVar(Integer(53), 'VK_5').isConstant := True;
-    addGlobalVar(Integer(54), 'VK_6').isConstant := True;
-    addGlobalVar(Integer(55), 'VK_7').isConstant := True;
-    addGlobalVar(Integer(56), 'VK_8').isConstant := True;
-    addGlobalVar(Integer(57), 'VK_9').isConstant := True;
-    addGlobalVar(Integer(65), 'VK_A').isConstant := True;
-    addGlobalVar(Integer(66), 'VK_B').isConstant := True;
-    addGlobalVar(Integer(67), 'VK_C').isConstant := True;
-    addGlobalVar(Integer(68), 'VK_D').isConstant := True;
-    addGlobalVar(Integer(69), 'VK_E').isConstant := True;
-    addGlobalVar(Integer(70), 'VK_F').isConstant := True;
-    addGlobalVar(Integer(71), 'VK_G').isConstant := True;
-    addGlobalVar(Integer(72), 'VK_H').isConstant := True;
-    addGlobalVar(Integer(73), 'VK_I').isConstant := True;
-    addGlobalVar(Integer(74), 'VK_J').isConstant := True;
-    addGlobalVar(Integer(75), 'VK_K').isConstant := True;
-    addGlobalVar(Integer(76), 'VK_L').isConstant := True;
-    addGlobalVar(Integer(77), 'VK_M').isConstant := True;
-    addGlobalVar(Integer(78), 'VK_N').isConstant := True;
-    addGlobalVar(Integer(79), 'VK_O').isConstant := True;
-    addGlobalVar(Integer(80), 'VK_P').isConstant := True;
-    addGlobalVar(Integer(81), 'VK_Q').isConstant := True;
-    addGlobalVar(Integer(82), 'VK_R').isConstant := True;
-    addGlobalVar(Integer(83), 'VK_S').isConstant := True;
-    addGlobalVar(Integer(84), 'VK_T').isConstant := True;
-    addGlobalVar(Integer(85), 'VK_U').isConstant := True;
-    addGlobalVar(Integer(86), 'VK_V').isConstant := True;
-    addGlobalVar(Integer(87), 'VK_W').isConstant := True;
-    addGlobalVar(Integer(88), 'VK_X').isConstant := True;
-    addGlobalVar(Integer(89), 'VK_Y').isConstant := True;
-    addGlobalVar(Integer(90), 'VK_Z').isConstant := True;
-    addGlobalVar(Integer(91), 'VK_LWIN').isConstant := True;
-    addGlobalVar(Integer(92), 'VK_RWIN').isConstant := True;
-    addGlobalVar(Integer(93), 'VK_APPS').isConstant := True;
-    addGlobalVar(Integer(95), 'VK_SLEEP').isConstant := True;
-    addGlobalVar(Integer(96), 'VK_NUMPAD0').isConstant := True;
-    addGlobalVar(Integer(97), 'VK_NUMPAD1').isConstant := True;
-    addGlobalVar(Integer(98), 'VK_NUMPAD2').isConstant := True;
-    addGlobalVar(Integer(99), 'VK_NUMPAD3').isConstant := True;
-    addGlobalVar(Integer(100), 'VK_NUMPAD4').isConstant := True;
-    addGlobalVar(Integer(101), 'VK_NUMPAD5').isConstant := True;
-    addGlobalVar(Integer(102), 'VK_NUMPAD6').isConstant := True;
-    addGlobalVar(Integer(103), 'VK_NUMPAD7').isConstant := True;
-    addGlobalVar(Integer(104), 'VK_NUMPAD8').isConstant := True;
-    addGlobalVar(Integer(105), 'VK_NUMPAD9').isConstant := True;
-    addGlobalVar(Integer(106), 'VK_MULTIPLY').isConstant := True;
-    addGlobalVar(Integer(107), 'VK_ADD').isConstant := True;
-    addGlobalVar(Integer(108), 'VK_SEPARATOR').isConstant := True;
-    addGlobalVar(Integer(109), 'VK_SUBTRACT').isConstant := True;
-    addGlobalVar(Integer(110), 'VK_DECIMAL').isConstant := True;
-    addGlobalVar(Integer(111), 'VK_DIVIDE').isConstant := True;
-    addGlobalVar(Integer(112), 'VK_F1').isConstant := True;
-    addGlobalVar(Integer(113), 'VK_F2').isConstant := True;
-    addGlobalVar(Integer(114), 'VK_F3').isConstant := True;
-    addGlobalVar(Integer(115), 'VK_F4').isConstant := True;
-    addGlobalVar(Integer(116), 'VK_F5').isConstant := True;
-    addGlobalVar(Integer(117), 'VK_F6').isConstant := True;
-    addGlobalVar(Integer(118), 'VK_F7').isConstant := True;
-    addGlobalVar(Integer(119), 'VK_F8').isConstant := True;
-    addGlobalVar(Integer(120), 'VK_F9').isConstant := True;
-    addGlobalVar(Integer(121), 'VK_F10').isConstant := True;
-    addGlobalVar(Integer(122), 'VK_F11').isConstant := True;
-    addGlobalVar(Integer(123), 'VK_F12').isConstant := True;
-    addGlobalVar(Integer(124), 'VK_F13').isConstant := True;
-    addGlobalVar(Integer(125), 'VK_F14').isConstant := True;
-    addGlobalVar(Integer(126), 'VK_F15').isConstant := True;
-    addGlobalVar(Integer(127), 'VK_F16').isConstant := True;
-    addGlobalVar(Integer(128), 'VK_F17').isConstant := True;
-    addGlobalVar(Integer(129), 'VK_F18').isConstant := True;
-    addGlobalVar(Integer(130), 'VK_F19').isConstant := True;
-    addGlobalVar(Integer(131), 'VK_F20').isConstant := True;
-    addGlobalVar(Integer(132), 'VK_F21').isConstant := True;
-    addGlobalVar(Integer(133), 'VK_F22').isConstant := True;
-    addGlobalVar(Integer(134), 'VK_F23').isConstant := True;
-    addGlobalVar(Integer(135), 'VK_F24').isConstant := True;
-    addGlobalVar(Integer(144), 'VK_NUMLOCK').isConstant := True;
-    addGlobalVar(Integer(145), 'VK_SCROLL').isConstant := True;
-    addGlobalVar(Integer(160), 'VK_LSHIFT').isConstant := True;
-    addGlobalVar(Integer(161), 'VK_RSHIFT').isConstant := True;
-    addGlobalVar(Integer(162), 'VK_LCONTROL').isConstant := True;
-    addGlobalVar(Integer(163), 'VK_RCONTROL').isConstant := True;
-    addGlobalVar(Integer(164), 'VK_LMENU').isConstant := True;
-    addGlobalVar(Integer(165), 'VK_RMENU').isConstant := True;
-    addGlobalVar(Integer(166), 'VK_BROWSER_BACK').isConstant := True;
-    addGlobalVar(Integer(167), 'VK_BROWSER_FORWARD').isConstant := True;
-    addGlobalVar(Integer(168), 'VK_BROWSER_REFRESH').isConstant := True;
-    addGlobalVar(Integer(169), 'VK_BROWSER_STOP').isConstant := True;
-    addGlobalVar(Integer(170), 'VK_BROWSER_SEARCH').isConstant := True;
-    addGlobalVar(Integer(171), 'VK_BROWSER_FAVORITES').isConstant := True;
-    addGlobalVar(Integer(172), 'VK_BROWSER_HOME').isConstant := True;
-    addGlobalVar(Integer(173), 'VK_VOLUME_MUTE').isConstant := True;
-    addGlobalVar(Integer(174), 'VK_VOLUME_DOWN').isConstant := True;
-    addGlobalVar(Integer(175), 'VK_VOLUME_UP').isConstant := True;
-    addGlobalVar(Integer(176), 'VK_MEDIA_NEXT_TRACK').isConstant := True;
-    addGlobalVar(Integer(177), 'VK_MEDIA_PREV_TRACK').isConstant := True;
-    addGlobalVar(Integer(178), 'VK_MEDIA_STOP').isConstant := True;
-    addGlobalVar(Integer(179), 'VK_MEDIA_PLAY_PAUSE').isConstant := True;
-    addGlobalVar(Integer(250), 'VK_PLAY').isConstant := True;
-    addGlobalVar(Integer(251), 'VK_ZOOM').isConstant := True;
+    addGlobalFunc('procedure TSimbaInput.GetTargetDimensions(out Width, Height: Integer)', @_LapeSimbaInput_GetTargetDimensions);
 
-    ImportingSection := '';
+    addGlobalFunc('function TSimbaInput.MousePressed(Button: MouseButton): Boolean', @_LapeSimbaInput_MousePressed);
+    addGlobalFunc('function TSimbaInput.MousePosition: TPoint', @_LapeSimbaInput_MousePosition);
+    addGlobalFunc('procedure TSimbaInput.MouseTeleport(P: TPoint)', @_LapeSimbaInput_MouseTeleport);
+    addGlobalFunc('procedure TSimbaInput.MouseClick(Button: MouseButton)', @_LapeSimbaInput_MouseClick);
+    addGlobalFunc('procedure TSimbaInput.MouseDown(Button: MouseButton)', @_LapeSimbaInput_MouseDown);
+    addGlobalFunc('procedure TSimbaInput.MouseUp(Button: MouseButton)', @_LapeSimbaInput_MouseUp);
+    addGlobalFunc('procedure TSimbaInput.MouseScroll(Scrolls: Integer)', @_LapeSimbaInput_MouseScroll);
+
+    addGlobalFunc('procedure TSimbaInput.KeySend(Text: String)', @_LapeSimbaInput_KeySend);
+    addGlobalFunc('procedure TSimbaInput.KeyPress(Key: KeyCode)', @_LapeSimbaInput_KeyPress);
+    addGlobalFunc('procedure TSimbaInput.KeyDown(Key: KeyCode)', @_LapeSimbaInput_KeyDown);
+    addGlobalFunc('procedure TSimbaInput.KeyUp(Key: KeyCode)', @_LapeSimbaInput_KeyUp);
+    addGlobalFunc('function TSimbaInput.KeyPressed(Key: KeyCode): Boolean', @_LapeSimbaInput_KeyPressed);
+
+    addGlobalFunc('function TSimbaInput.CharToKeyCode(C: Char): KeyCode', @_LapeSimbaInput_CharToKeyCode);
   end;
 end;
 
 initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportMouse);
+  TSimbaScript_Compiler.RegisterImport(@ImportInput);
 
 end.
 

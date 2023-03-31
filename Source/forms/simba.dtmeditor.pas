@@ -12,7 +12,8 @@ interface
 uses
   classes, sysutils, fileutil, dividerbevel, forms, controls,
   graphics, dialogs, extctrls, comctrls, stdctrls, menus, lcltype,
-  simba.client, simba.dtm, simba.mufasatypes, simba.imagebox, simba.imagebox_bitmap, simba.imagebox_zoom;
+  simba.dtm, simba.mufasatypes,
+  simba.imagebox, simba.imagebox_bitmap, simba.imagebox_zoom;
 
 type
   TDTMPrintEvent   = procedure(DTM: String) of object;
@@ -89,8 +90,6 @@ type
     FImageBox: TSimbaImageBox;
     FImageZoom: TSimbaImageBoxZoom;
     FZoomInfo: TLabel;
-    FManageClient: Boolean;
-    FClient: TClient;
     FDragging: Integer;
     FDebugDTM: TPointArray;
     FDebugColor: TPointArray;
@@ -101,6 +100,7 @@ type
     FDrawColor: TColor;
     FFlashing: Boolean;
     FLastFlash: UInt64;
+    FWindow: TWindowHandle;
 
     procedure DoPaintArea(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; R: TRect);
 
@@ -116,9 +116,7 @@ type
 
     procedure DrawDTM;
   public
-    constructor Create(Client: TClient; ManageClient: Boolean); reintroduce;
     constructor Create(Window: TWindowHandle); reintroduce;
-    destructor Destroy; override;
 
     property OnPrintDTM: TDTMPrintEvent read FOnPrintDTM write FOnPrintDTM;
     property OnPrintDTMEx: TDTMPrintEventEx read FOnPrintDTMEx write FOnPrintDTMEx;
@@ -233,9 +231,9 @@ end;
 
 procedure TSimbaDTMEditorForm.ButtonUpdateImageClick(Sender: TObject);
 begin
-  if not FClient.IOManager.TargetValid() then
-    FClient.IOManager.SetDesktop();
-  FImageBox.SetBackground(FClient.IOManager);
+  //if not FClient.IOManager.TargetValid() then
+  //  FClient.IOManager.SetDesktop();
+  //FImageBox.SetBackground(FClient.IOManager);
 
   DrawDTM();
 end;
@@ -579,17 +577,13 @@ begin
   DrawDTM();
 end;
 
-destructor TSimbaDTMEditorForm.Destroy;
-begin
-  if FManageClient and (FClient <> nil) then
-    FreeAndNil(FClient);
-
-  inherited Destroy();
-end;
-
-constructor TSimbaDTMEditorForm.Create(Client: TClient; ManageClient: Boolean);
+constructor TSimbaDTMEditorForm.Create(Window: TWindowHandle);
 begin
   inherited Create(Application.MainForm);
+
+  FWindow := Window;
+  if (FWindow = 0) or (not FWindow.IsValid()) then
+    FWindow := GetDesktopWindow();
 
   FDrawColor := clRed;
   FDragging := -1;
@@ -601,6 +595,7 @@ begin
   FImageBox.OnMouseDown := @ClientImageMouseDown;
   FImageBox.OnMouseMove := @ClientImageMouseMove;
   FImageBox.OnMouseUp := @ClientImageMouseUp;
+  FImageBox.SetBackground(FWindow);
 
   FImageZoom := TSimbaImageBoxZoom.Create(Self);
   FImageZoom.Parent := PanelTop;
@@ -611,22 +606,6 @@ begin
   FZoomInfo.Parent := PanelTop;
   FZoomInfo.BorderSpacing.Right := 10;
   FZoomInfo.AnchorToNeighbour(akLeft, 10, FImageZoom);
-
-  FManageClient := ManageClient;
-  FClient := Client;
-
-  FImageBox.SetBackground(FClient.IOManager);
-end;
-
-constructor TSimbaDTMEditorForm.Create(Window: TWindowHandle);
-var
-  Client: TClient;
-begin
-  Client := TClient.Create();
-  if (Window > 0) and Window.IsValid() then
-    Client.IOManager.SetTarget(Window);
-
-  Create(Client, True);
 end;
 
 end.

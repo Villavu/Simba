@@ -6,7 +6,7 @@
 unit simba.nativeinterface_darwin;
 
 {$i simba.inc}
-{$modeswitch objectivec2}
+{$MODESWITCH OBJECTIVEC2}
 
 interface
 
@@ -44,10 +44,9 @@ type
   public
     constructor Create;
 
-    procedure HoldKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer = 0); override;
-    procedure ReleaseKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer = 0); override;
+    procedure KeyDownNativeKeyCode(KeyCode: Integer); override;
+    procedure KeyUpNativeKeyCode(KeyCode: Integer); override;
 
-    function VirtualKeyToNativeKeyCode(VirtualKey: Integer): Integer; override;
     function GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean; override;
 
     function GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean; override;
@@ -58,15 +57,16 @@ type
 
     function GetMousePosition: TPoint; override;
     function GetMousePosition(Window: TWindowHandle): TPoint; override;
-    procedure SetMousePosition(Window: TWindowHandle; Position: TPoint); override;
-    procedure ScrollMouse(Lines: Integer); override;
-    procedure HoldMouse(Button: TClickType); override;
-    procedure ReleaseMouse(Button: TClickType); override;
-    function IsMouseButtonHeld(Button: TClickType): Boolean; override;
-    function IsKeyHeld(Key: Integer): Boolean; override;
 
-    procedure HoldKey(Key: Integer; WaitTime: Integer = 0); override;
-    procedure ReleaseKey(Key: Integer; WaitTime: Integer = 0); override;
+    procedure MouseUp(Button: MouseButton); override;
+    procedure MouseDown(Button: MouseButton); override;
+    procedure MouseScroll(Scrolls: Integer); override;
+    procedure MouseTeleport(RelativeWindow: TWindowHandle; P: TPoint); override;
+    function MousePressed(Button: MouseButton): Boolean; override;
+
+    function KeyPressed(Key: KeyCode): Boolean; override;
+    procedure KeyDown(Key: KeyCode); override;
+    procedure KeyUp(Key: KeyCode); override;
 
     function GetProcessMemUsage(PID: SizeUInt): Int64; override;
     function GetProcessPath(PID: SizeUInt): String; override;
@@ -152,6 +152,130 @@ const
 
 function proc_pidpath(pid: longint; buffer: pbyte; bufferSize: longword): longint; cdecl; external 'libproc';
 function proc_pidinfo(pid: longint; flavor: longint; arg: UInt64; buffer: pointer; buffersize: longint): longint; cdecl; external 'libproc';
+
+function VirtualKeyToNativeKeyCode(VirtualKey: KeyCode): Integer;
+begin
+  case VirtualKey of
+    KeyCode.BACK:                Result := $33;
+    KeyCode.TAB:                 Result := $30;
+    KeyCode.CLEAR:               Result := $47;
+    KeyCode.RETURN:              Result := $24;
+    KeyCode.SHIFT:               Result := $38;
+    KeyCode.CONTROL:             Result := $3B;
+    KeyCode.MENU:                Result := $3A;
+    KeyCode.CAPITAL:             Result := $39;
+    KeyCode.ESCAPE:              Result := $35;
+    KeyCode.SPACE:               Result := $31;
+    KeyCode.PRIOR:               Result := $74;
+    KeyCode.NEXT:                Result := $79;
+    KeyCode.END_KEY:             Result := $77;
+    KeyCode.HOME:                Result := $73;
+    KeyCode.LEFT:                Result := $7B;
+    KeyCode.UP:                  Result := $7E;
+    KeyCode.RIGHT:               Result := $7C;
+    KeyCode.DOWN:                Result := $7D;
+    KeyCode.DELETE:              Result := $75;
+    KeyCode.HELP:                Result := $72;
+    KeyCode.NUM_0:               Result := $1D;
+    KeyCode.NUM_1:               Result := $12;
+    KeyCode.NUM_2:               Result := $13;
+    KeyCode.NUM_3:               Result := $14;
+    KeyCode.NUM_4:               Result := $15;
+    KeyCode.NUM_5:               Result := $17;
+    KeyCode.NUM_6:               Result := $16;
+    KeyCode.NUM_7:               Result := $1A;
+    KeyCode.NUM_8:               Result := $1C;
+    KeyCode.NUM_9:               Result := $19;
+    KeyCode.A:                   Result := $00;
+    KeyCode.B:                   Result := $0B;
+    KeyCode.C:                   Result := $08;
+    KeyCode.D:                   Result := $02;
+    KeyCode.E:                   Result := $0E;
+    KeyCode.F:                   Result := $03;
+    KeyCode.G:                   Result := $05;
+    KeyCode.H:                   Result := $04;
+    KeyCode.I:                   Result := $22;
+    KeyCode.J:                   Result := $26;
+    KeyCode.K:                   Result := $28;
+    KeyCode.L:                   Result := $25;
+    KeyCode.M:                   Result := $2E;
+    KeyCode.N:                   Result := $2D;
+    KeyCode.O:                   Result := $1F;
+    KeyCode.P:                   Result := $23;
+    KeyCode.Q:                   Result := $0C;
+    KeyCode.R:                   Result := $0F;
+    KeyCode.S:                   Result := $01;
+    KeyCode.T:                   Result := $11;
+    KeyCode.U:                   Result := $20;
+    KeyCode.V:                   Result := $09;
+    KeyCode.W:                   Result := $0D;
+    KeyCode.X:                   Result := $07;
+    KeyCode.Y:                   Result := $10;
+    KeyCode.Z:                   Result := $06;
+    KeyCode.LWIN:                Result := $37;
+    KeyCode.RWIN:                Result := $36;
+    KeyCode.APPS:                Result := $3D;
+    KeyCode.NUMPAD_0:            Result := $52;
+    KeyCode.NUMPAD_1:            Result := $53;
+    KeyCode.NUMPAD_2:            Result := $54;
+    KeyCode.NUMPAD_3:            Result := $55;
+    KeyCode.NUMPAD_4:            Result := $56;
+    KeyCode.NUMPAD_5:            Result := $57;
+    KeyCode.NUMPAD_6:            Result := $58;
+    KeyCode.NUMPAD_7:            Result := $59;
+    KeyCode.NUMPAD_8:            Result := $5B;
+    KeyCode.NUMPAD_9:            Result := $5C;
+    KeyCode.MULTIPLY:            Result := $43;
+    KeyCode.ADD:                 Result := $45;
+    KeyCode.SEPARATOR:           Result := $2B; // Separator used will be KeyCode.COMMA instead of KeyCode.PERIOD
+    KeyCode.SUBTRACT:            Result := $4E;
+    KeyCode.DECIMAL:             Result := $41;
+    KeyCode.DIVIDE:              Result := $4B;
+    KeyCode.F1:                  Result := $7A;
+    KeyCode.F2:                  Result := $78;
+    KeyCode.F3:                  Result := $63;
+    KeyCode.F4:                  Result := $76;
+    KeyCode.F5:                  Result := $60;
+    KeyCode.F6:                  Result := $61;
+    KeyCode.F7:                  Result := $62;
+    KeyCode.F8:                  Result := $64;
+    KeyCode.F9:                  Result := $65;
+    KeyCode.F10:                 Result := $6D;
+    KeyCode.F11:                 Result := $67;
+    KeyCode.F12:                 Result := $6F;
+    KeyCode.F13:                 Result := $69;
+    KeyCode.F14:                 Result := $6B;
+    KeyCode.F15:                 Result := $71;
+    KeyCode.F16:                 Result := $6A;
+    KeyCode.F17:                 Result := $40;
+    KeyCode.F18:                 Result := $4F;
+    KeyCode.F19:                 Result := $50;
+    KeyCode.F20:                 Result := $5A;
+    KeyCode.LSHIFT:              Result := $38;
+    KeyCode.RSHIFT:              Result := $3C;
+    KeyCode.LCONTROL:            Result := $3B;
+    KeyCode.RCONTROL:            Result := $3E;
+    KeyCode.LMENU:               Result := $3A;
+    KeyCode.RMENU:               Result := $3D;
+    KeyCode.VOLUME_MUTE:         Result := $4A;
+    KeyCode.VOLUME_DOWN:         Result := $49;
+    KeyCode.VOLUME_UP:           Result := $48;
+    KeyCode.OEM_1:               Result := $29;
+    KeyCode.OEM_PLUS:            Result := $45;
+    KeyCode.OEM_COMMA:           Result := $2B;
+    KeyCode.OEM_MINUS:           Result := $1B;
+    KeyCode.OEM_PERIOD:          Result := $2F;
+    KeyCode.OEM_2:               Result := $2C; // /?
+    KeyCode.OEM_3:               Result := $32; // `~
+    KeyCode.OEM_4:               Result := $21; // [{
+    KeyCode.OEM_5:               Result := $2A; // \|
+    KeyCode.OEM_6:               Result := $1E; // ]}
+    KeyCode.OEM_7:               Result := $27; // '"
+    KeyCode.OEM_102:             Result := $2A; // backslash RT-102
+  else
+    Result := $FFFF;
+  end;
+end;
 
 function TSimbaNativeInterface_Darwin.GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean;
 var
@@ -278,17 +402,17 @@ begin
   CFRelease(event);
 end;
 
-procedure TSimbaNativeInterface_Darwin.SetMousePosition(Window: TWindowHandle; Position: TPoint);
+procedure TSimbaNativeInterface_Darwin.MouseTeleport(RelativeWindow: TWindowHandle; P: TPoint);
 begin
-  with GetWindowBounds(Window) do
-    CGWarpMouseCursorPosition(CGPointMake(X1 + Position.X, Y1 + Position.Y));
+  with GetWindowBounds(RelativeWindow) do
+    CGWarpMouseCursorPosition(CGPointMake(X1 + P.X, Y1 + P.Y));
 end;
 
-procedure TSimbaNativeInterface_Darwin.ScrollMouse(Lines: Integer);
+procedure TSimbaNativeInterface_Darwin.MouseScroll(Scrolls: Integer);
 var
   ScrollEvent: CGEventRef;
 begin
-  ScrollEvent := CGEventCreateScrollWheelEvent(nil, kCGScrollEventUnitPixel, 1, -Lines * 10);
+  ScrollEvent := CGEventCreateScrollWheelEvent(nil, kCGScrollEventUnitPixel, 1, -Scrolls * 10);
   CGEventPost(kCGHIDEventTap, ScrollEvent);
   CFRelease(ScrollEvent);
 end;
@@ -305,37 +429,31 @@ const
   kCGEventScrollWheel  = 22;
 
 const
-  ClickTypeToMouseDownEvent: array[TClickType] of Integer = (
+  ClickTypeToMouseDownEvent: array[MouseButton] of Integer = (
     kCGEventRightMouseDown,
     kCGEventLeftMouseDown,
     kCGEventOtherMouseDown,
     kCGEventOtherMouseDown,
-    kCGEventOtherMouseDown,
-    -1,
-    -1
+    kCGEventOtherMouseDown
   );
 
-  ClickTypeToMouseButton: array[TClickType] of Integer = (
+  ClickTypeToMouseButton: array[MouseButton] of Integer = (
     kCGMouseButtonRight,
     kCGMouseButtonLeft,
     kCGMouseButtonCenter,
     3,
-    4,
-    -1,
-    -1
+    4
   );
 
-  ClickTypeToMouseUpEvent: array[TClickType] of Integer = (
+  ClickTypeToMouseUpEvent: array[MouseButton] of Integer = (
     kCGEventRightMouseUp,
     kCGEventLeftMouseUp,
     kCGEventOtherMouseUp,
     kCGEventOtherMouseUp,
-    kCGEventOtherMouseUp,
-    -1,
-    -1
+    kCGEventOtherMouseUp
   );
 
-procedure TSimbaNativeInterface_Darwin.HoldMouse(Button: TClickType);
+procedure TSimbaNativeInterface_Darwin.MouseDown(Button: MouseButton);
 var
   event: CGEventRef;
   eventType, mouseButton: Integer;
@@ -350,7 +468,7 @@ begin
   CFRelease(event);
 end;
 
-procedure TSimbaNativeInterface_Darwin.ReleaseMouse(Button: TClickType);
+procedure TSimbaNativeInterface_Darwin.MouseUp(Button: MouseButton);
 var
   event: CGEventRef;
   eventType, mouseButton: Integer;
@@ -365,175 +483,34 @@ begin
   CFRelease(event);
 end;
 
-function TSimbaNativeInterface_Darwin.IsMouseButtonHeld(Button: TClickType): Boolean;
+function TSimbaNativeInterface_Darwin.MousePressed(Button: MouseButton): Boolean;
 begin
   Result := CGEventSourceButtonState(kCGEventSourceStateCombinedSessionState, ClickTypeToMouseButton[Button]) > 0;
 end;
 
-function TSimbaNativeInterface_Darwin.IsKeyHeld(Key: Integer): Boolean;
+function TSimbaNativeInterface_Darwin.KeyPressed(Key: KeyCode): Boolean;
 begin
   Result := CGEventSourceKeyState(kCGEventSourceStateCombinedSessionState, VirtualKeyToNativeKeyCode(Key)) <> 0;
 end;
 
-procedure TSimbaNativeInterface_Darwin.HoldKey(Key: Integer; WaitTime: Integer);
+procedure TSimbaNativeInterface_Darwin.KeyDown(Key: KeyCode);
 begin
   CGPostKeyboardEvent(0, VirtualKeyToNativeKeyCode(Key), 1);
-
-  if (WaitTime > 0) then
-    PreciseSleep(WaitTime);
 end;
 
-procedure TSimbaNativeInterface_Darwin.ReleaseKey(Key: Integer; WaitTime: Integer);
+procedure TSimbaNativeInterface_Darwin.KeyUp(Key: KeyCode);
 begin
   CGPostKeyboardEvent(0, VirtualKeyToNativeKeyCode(Key), 0);
-
-  if (WaitTime > 0) then
-    PreciseSleep(WaitTime);
 end;
 
-procedure TSimbaNativeInterface_Darwin.HoldKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer);
+procedure TSimbaNativeInterface_Darwin.KeyDownNativeKeyCode(KeyCode: Integer);
 begin
   CGPostKeyboardEvent(0, KeyCode, 1);
-
-  if (WaitTime > 0) then
-    PreciseSleep(WaitTime);
 end;
 
-procedure TSimbaNativeInterface_Darwin.ReleaseKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer);
+procedure TSimbaNativeInterface_Darwin.KeyUpNativeKeyCode(KeyCode: Integer);
 begin
   CGPostKeyboardEvent(0, KeyCode, 0);
-
-  if (WaitTime > 0) then
-    PreciseSleep(WaitTime);
-end;
-
-function TSimbaNativeInterface_Darwin.VirtualKeyToNativeKeyCode(VirtualKey: Integer): Integer;
-begin
-  case VirtualKey of
-    VK_BACK:                Result := $33;
-    VK_TAB:                 Result := $30;
-    VK_CLEAR:               Result := $47;
-    VK_RETURN:              Result := $24;
-    VK_SHIFT:               Result := $38;
-    VK_CONTROL:             Result := $3B;
-    VK_MENU:                Result := $3A;
-    VK_CAPITAL:             Result := $39;
-    VK_KANA:                Result := $68;
-    VK_ESCAPE:              Result := $35;
-    VK_SPACE:               Result := $31;
-    VK_PRIOR:               Result := $74;
-    VK_NEXT:                Result := $79;
-    VK_END:                 Result := $77;
-    VK_HOME:                Result := $73;
-    VK_LEFT:                Result := $7B;
-    VK_UP:                  Result := $7E;
-    VK_RIGHT:               Result := $7C;
-    VK_DOWN:                Result := $7D;
-    VK_DELETE:              Result := $75;
-    VK_HELP:                Result := $72;
-    VK_0:                   Result := $1D;
-    VK_1:                   Result := $12;
-    VK_2:                   Result := $13;
-    VK_3:                   Result := $14;
-    VK_4:                   Result := $15;
-    VK_5:                   Result := $17;
-    VK_6:                   Result := $16;
-    VK_7:                   Result := $1A;
-    VK_8:                   Result := $1C;
-    VK_9:                   Result := $19;
-    VK_A:                   Result := $00;
-    VK_B:                   Result := $0B;
-    VK_C:                   Result := $08;
-    VK_D:                   Result := $02;
-    VK_E:                   Result := $0E;
-    VK_F:                   Result := $03;
-    VK_G:                   Result := $05;
-    VK_H:                   Result := $04;
-    VK_I:                   Result := $22;
-    VK_J:                   Result := $26;
-    VK_K:                   Result := $28;
-    VK_L:                   Result := $25;
-    VK_M:                   Result := $2E;
-    VK_N:                   Result := $2D;
-    VK_O:                   Result := $1F;
-    VK_P:                   Result := $23;
-    VK_Q:                   Result := $0C;
-    VK_R:                   Result := $0F;
-    VK_S:                   Result := $01;
-    VK_T:                   Result := $11;
-    VK_U:                   Result := $20;
-    VK_V:                   Result := $09;
-    VK_W:                   Result := $0D;
-    VK_X:                   Result := $07;
-    VK_Y:                   Result := $10;
-    VK_Z:                   Result := $06;
-    VK_LWIN:                Result := $37;
-    VK_RWIN:                Result := $36;
-    VK_APPS:                Result := $3D;
-    VK_NUMPAD0:             Result := $52;
-    VK_NUMPAD1:             Result := $53;
-    VK_NUMPAD2:             Result := $54;
-    VK_NUMPAD3:             Result := $55;
-    VK_NUMPAD4:             Result := $56;
-    VK_NUMPAD5:             Result := $57;
-    VK_NUMPAD6:             Result := $58;
-    VK_NUMPAD7:             Result := $59;
-    VK_NUMPAD8:             Result := $5B;
-    VK_NUMPAD9:             Result := $5C;
-    VK_MULTIPLY:            Result := $43;
-    VK_ADD:                 Result := $45;
-    VK_SEPARATOR:           Result := $2B; // Separator used will be VK_COMMA instead of VK_PERIOD
-    VK_SUBTRACT:            Result := $4E;
-    VK_DECIMAL:             Result := $41;
-    VK_DIVIDE:              Result := $4B;
-    VK_F1:                  Result := $7A;
-    VK_F2:                  Result := $78;
-    VK_F3:                  Result := $63;
-    VK_F4:                  Result := $76;
-    VK_F5:                  Result := $60;
-    VK_F6:                  Result := $61;
-    VK_F7:                  Result := $62;
-    VK_F8:                  Result := $64;
-    VK_F9:                  Result := $65;
-    VK_F10:                 Result := $6D;
-    VK_F11:                 Result := $67;
-    VK_F12:                 Result := $6F;
-    VK_F13:                 Result := $69;
-    VK_F14:                 Result := $6B;
-    VK_F15:                 Result := $71;
-    VK_F16:                 Result := $6A;
-    VK_F17:                 Result := $40;
-    VK_F18:                 Result := $4F;
-    VK_F19:                 Result := $50;
-    VK_F20:                 Result := $5A;
-    VK_LSHIFT:              Result := $38;
-    VK_RSHIFT:              Result := $3C;
-    VK_LCONTROL:            Result := $3B;
-    VK_RCONTROL:            Result := $3E;
-    VK_LMENU:               Result := $3A;
-    VK_RMENU:               Result := $3D;
-    VK_VOLUME_MUTE:         Result := $4A;
-    VK_VOLUME_DOWN:         Result := $49;
-    VK_VOLUME_UP:           Result := $48;
-    VK_OEM_1:               Result := $29;
-    VK_OEM_PLUS:            Result := $45;
-    VK_OEM_COMMA:           Result := $2B;
-    VK_OEM_MINUS:           Result := $1B;
-    VK_OEM_PERIOD:          Result := $2F;
-    VK_OEM_2:               Result := $2C; // /?
-    VK_OEM_3:               Result := $32; // `~
-    VK_OEM_4:               Result := $21; // [{
-    VK_OEM_5:               Result := $2A; // \|
-    VK_OEM_6:               Result := $1E; // ]}
-    VK_OEM_7:               Result := $27; // '"
-    $E1:                    Result := $18; //VK_EQUAL
-    VK_OEM_102:             Result := $2A; // backslash RT-102
-    $E3:                    Result := $51; //VK_KEYPAD_EQUALS
-    $E4:                    Result := $3F; //VK_FUNCTION
-    VK_OEM_CLEAR:           Result := $47;
-  else
-    Result := $FFFF;
-  end;
 end;
 
 function TSimbaNativeInterface_Darwin.GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean;
@@ -924,13 +901,12 @@ begin
       CFRelease(Event);
     end;
   end;
-end;
 
-initialization
   timeInfo.numer := 0;
   timeInfo.denom := 0;
 
   mach_timebase_info(timeInfo);
+end;
 
 end.
 

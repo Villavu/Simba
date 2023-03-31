@@ -12,7 +12,7 @@ interface
 
 uses
   classes, sysutils, graphtype, graphics,
-  simba.baseclass, simba.mufasatypes, simba.bitmap_textdrawer, simba.colormath, simba.colormath_distance, simba.dtm;
+  simba.baseclass, simba.mufasatypes, simba.bitmap_textdrawer, simba.colormath, simba.colormath_distance;
 
 type
   PBmpMirrorStyle = ^TBmpMirrorStyle;
@@ -32,10 +32,9 @@ type
     FTransparentColor: TColor;
 
     FData: PColorBGRA;
+    FDataOwner: Boolean;
 
-    FExternalData: Boolean;
     FTextDrawer: TSimbaTextDrawer;
-    FClient: TObject;
 
     procedure NotifyUnfreed; override;
 
@@ -56,16 +55,15 @@ type
   public
     constructor Create; overload;
     constructor Create(AWidth, AHeight: Integer); overload;
-    constructor CreateFromClient(Client: TObject); overload;
-    constructor CreateFromClient(Client: TObject; Area: TBox); overload;
     constructor CreateFromFile(FileName: String);
     constructor CreateFromString(AWidth, AHeight: Integer; Str: String);
     constructor CreateFromData(AWidth, AHeight: Integer; AData: PColorBGRA; CopyData: Boolean = True);
+    constructor CreateFromWindow(Window: TWindowHandle);
 
     destructor Destroy; override;
 
-    property Client: TObject read FClient write FClient;
     property Data: PColorBGRA read FData write FData;
+    property DataOwner: Boolean read FDataOwner write FDataOwner;
     property Width: Integer read FWidth;
     property Height: Integer read FHeight;
     property Center: TPoint read GetCenter;
@@ -139,17 +137,12 @@ type
 
     procedure DrawHSLCircle(ACenter: TPoint; Radius: Integer);
 
-    function AverageBrightness: Integer;
-    function PeakBrightness: Integer;
-
     procedure Fill(Color: TColor);
 
     procedure Clear;
     procedure Clear(Area: TBox);
     procedure ClearInverted(Area: TBox);
 
-    procedure DrawClient(Area: TBox; Position: TPoint); overload;
-    procedure DrawClient(Position: TPoint); overload;
     procedure DrawBitmap(Bitmap: TMufasaBitmap; Position: TPoint);
 
     procedure DrawToCanvas(x,y: Integer; Canvas: TCanvas);
@@ -211,9 +204,6 @@ type
 
     procedure LoadFromFile(FileName: String); overload;
     procedure LoadFromFile(FileName: String; Area: TBox); overload;
-
-    procedure LoadFromClient; overload;
-    procedure LoadFromClient(Area: TBox); overload;
     procedure LoadFromString(AWidth, AHeight: Integer; Str: String);
     procedure LoadFromData(AWidth, AHeight: Integer; AData: PColorBGRA; CopyData: Boolean = True);
     procedure LoadFromTBitmap(bmp: TBitmap);
@@ -229,13 +219,6 @@ type
 
     function MatchTemplate(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
     function MatchTemplateMask(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
-
-    function FindDTM(DTM: TDTM): TPointArray;
-    function FindColor(ColorSpace: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
-    function MatchColor(ColorSpace: EColorSpace; Color: TColor; Multipliers: TChannelMultipliers): TSingleMatrix;
-
-    function FindEdges(MinDiff: Single): TPointArray; overload;
-    function FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray; overload;
   end;
 
   TMufasaBitmapArray = array of TMufasaBitmap;
@@ -248,7 +231,6 @@ const
   sbeFileNotFound            = 'File not found "%s"';
   sbeResizeExternalData      = 'Cannot resize bitmap with external data';
   sbeImageFormatNotSupported = 'Image format "%s" not supported';
-  sbeInvalidClient           = 'Invalid client';
   sbeInvalidBitmapString     = 'Invalid bitmap string';
   sbeMustBeEqualDimensions   = 'Bitmaps must be equal dimensions';
   sbeMustBeEqualLengths      = 'Arrays must be equal lengths';
@@ -257,7 +239,7 @@ implementation
 
 uses
   fpimage, math, intfgraphics, simba.overallocatearray, simba.geometry,
-  simba.tpa, simba.client, simba.iomanager,
+  simba.tpa,
   simba.bitmap_utils, simba.encoding, simba.compress, simba.math, simba.finder,
   simba.matchtemplate;
 
@@ -348,7 +330,6 @@ end;
 function TMufasaBitmap.Copy: TMufasaBitmap;
 begin
   Result := TMufasaBitmap.Create();
-  Result.Client := FClient;
   Result.SetSize(FWidth, FHeight);
 
   Move(FData^, Result.FData^, FWidth * FHeight * SizeOf(TColorBGRA));
@@ -364,7 +345,6 @@ begin
     raise ESimbaBitmapException.CreateFmt(sbeOutOfBounds, [X2, Y2, FWidth, FHeight]);
 
   Result := TMufasaBitmap.Create();
-  Result.Client := FClient;
   Result.SetSize(X2-X1+1, Y2-Y1+1);
   for Y := Y1 to Y2 do
     Move(FData[Y * FWidth + X1], Result.FData[(Y-Y1) * Result.FWidth], Result.FWidth * SizeOf(TColorBGRA));
@@ -576,28 +556,6 @@ begin
   SetLength(Result, FHeight);
   for i := 0 to FHeight - 1 do
     Result[i] := FData + FWidth * i;
-end;
-
-procedure TMufasaBitmap.LoadFromClient;
-var
-  W, H: Integer;
-begin
-  if (not (FClient is TClient)) then
-    raise ESimbaBitmapException.Create(sbeInvalidClient);
-
-  TClient(FClient).IOManager.GetDimensions(W, H);
-
-  SetSize(W, H);
-  DrawClient(TPoint.Create(0, 0));
-end;
-
-procedure TMufasaBitmap.LoadFromClient(Area: TBox);
-begin
-  if (not (FClient is TClient)) then
-    raise ESimbaBitmapException.Create(sbeInvalidClient);
-
-  SetSize(Area.Width, Area.Height);
-  DrawClient(Area, TPoint.Create(0, 0));
 end;
 
 procedure TMufasaBitmap.LoadFromString(AWidth, AHeight: Integer; Str: String);
@@ -1274,24 +1232,6 @@ begin
   Bitmap.Free();
 end;
 
-function TMufasaBitmap.PeakBrightness: Integer;
-var
-  X, Y: Integer;
-begin
-  Result := 0;
-
-  for Y := 0 to FHeight - 1 do
-    for X := 0 to FWidth - 1 do
-      with FData[Y * FWidth + X] do
-      begin
-        if (R > Result) then Result := R;
-        if (G > Result) then Result := G;
-        if (B > Result) then Result := B;
-      end;
-
-  Result := Round(Result / 255 * 100);
-end;
-
 procedure TMufasaBitmap.Fill(Color: TColor);
 begin
   FillDWord(FData[0], FWidth * FHeight, Color.ToBGRA().AsInteger);
@@ -1310,59 +1250,6 @@ end;
 procedure TMufasaBitmap.ClearInverted(Area: TBox);
 begin
   DrawBoxInverted(Area, FTransparentColor);
-end;
-
-procedure TMufasaBitmap.DrawClient(Area: TBox; Position: TPoint);
-var
-  Y: Integer;
-  ClientData: TRetData;
-  W, H: Integer;
-  XOffset, YOffset: Integer;
-begin
-  if (not (FClient is TClient)) then
-    raise ESimbaBitmapException.Create(sbeInvalidClient);
-
-  ClientData := TClient(FClient).IOManager.ReturnData(Area.X1, Area.Y1, Area.Width, Area.Height);
-
-  if (ClientData.Ptr <> nil) then
-  begin
-    W := Area.Width;
-    H := Area.Height;
-    XOffset := 0;
-    YOffset := 0;
-
-    if (Position.X < 0) then
-    begin
-      XOffset := Abs(Position.X);
-      W -= XOffset;
-      Position.X := 0;
-    end;
-
-    if (Position.Y < 0) then
-    begin
-      YOffset := Abs(Position.Y);
-      H -= YOffset;
-      Position.Y := 0;
-    end;
-
-    if (Position.X + W > FWidth) then  W := W - (Position.X + W - FWidth);
-    if (Position.Y + H > FHeight) then H := H - (Position.Y + H - FHeight);
-
-    for Y := 0 to H - 1 do
-      Move(ClientData.Ptr[(Y+YOffset) * ClientData.RowLen + XOffset], FData[(Position.Y + Y) * FWidth + Position.X], W * SizeOf(TColorBGRA));
-  end;
-end;
-
-procedure TMufasaBitmap.DrawClient(Position: TPoint);
-var
-  W, H: Integer;
-begin
-  if (not (FClient is TClient)) then
-    raise ESimbaBitmapException.Create(sbeInvalidClient);
-
-  TClient(FClient).IOManager.GetDimensions(W, H);
-
-  DrawClient(TBox.Create(0,0,W-1,H-1), TPoint.Create(0, 0));
 end;
 
 procedure TMufasaBitmap.DrawBitmap(Bitmap: TMufasaBitmap; Position: TPoint);
@@ -1387,25 +1274,6 @@ begin
           FData[DestY * FWidth + DestX] := Bitmap.Data[Y * Bitmap.Width + X];
       end;
     end;
-end;
-
-function TMufasaBitmap.AverageBrightness: Integer;
-var
-  X, Y, Sum: Integer;
-begin
-  Result := 0;
-
-  for Y := 0 to FHeight - 1 do
-  begin
-    Sum := 0;
-    for X := 0 to FWidth - 1 do
-      with FData[Y * FWidth + X] do
-        Sum += Round((R + G + B) / 3 * 0.392);
-
-    Result += Sum div FWidth;
-  end;
-
-  Result := Round(Result / FHeight);
 end;
 
 function TMufasaBitmap.GetColors: TIntegerArray;
@@ -1782,20 +1650,6 @@ begin
   end;
 end;
 
-const
-  Grey = 128;
-function ContrastAdjust(Col:  byte; co: extended): byte;inline;
-var
-  temp: Integer;
-begin
-  Temp := floor((col - Grey) * co) + grey;
-  if temp < 0 then
-    temp := 0
-  else if temp > 255 then
-    temp := 255;
-  Result := temp;
-end;
-
 procedure TMufasaBitmap.Invert;
 var
   i: Integer;
@@ -1951,8 +1805,8 @@ procedure TMufasaBitmap.Convolute(TargetBitmap: TMufasaBitmap; Matrix: TDoubleMa
 var
   x,y,yy,xx,cx,cy: Integer;
   Row,RowT: PColorBGRAArray;
-  mW,mH,midx,midy:Integer;
-  valR,valG,valB: Extended;
+  mW,mH,midx,midy: Integer;
+  valR,valG,valB: Double;
 
   procedure ForceInBounds(x,y, Wid,Hig: Integer; out cx,cy: Integer); inline;
   begin
@@ -2262,7 +2116,7 @@ var
   NewData: PColorBGRA;
   i,minw,minh: Integer;
 begin
-  if FExternalData then
+  if (not FDataOwner) then
     raise ESimbaBitmapException.Create(sbeResizeExternalData);
 
   if (NewWidth <> FWidth) or (NewHeight <> FHeight) then
@@ -2293,7 +2147,7 @@ var
   NewData: PColorBGRA;
   x,y: Integer;
 begin
-  if FExternalData then
+  if (not FDataOwner) then
     raise ESimbaBitmapException.Create(sbeResizeExternalData);
 
   if (NewWidth <> FWidth) or (NewHeight <> FHeight) then
@@ -2328,7 +2182,7 @@ var
   NewData: PColorBGRA;
   W,H: Integer;
 begin
-  if FExternalData then
+  if (not FDataOwner) then
     raise ESimbaBitmapException.Create(sbeResizeExternalData);
 
   NewData := AllocMem(NewWidth * NewHeight * SizeOf(TColorBGRA));
@@ -2615,17 +2469,17 @@ procedure TMufasaBitmap.SetPersistentMemory(mem: PtrUInt; NewWidth, NewHeight: I
 begin
   SetSize(0, 0);
 
-  FExternalData := True;
   FWidth := NewWidth;
   FHeight := NewHeight;
   FData := PColorBGRA(mem);
+  FDataOwner := False;
 end;
 
 procedure TMufasaBitmap.ResetPersistentMemory;
 begin
-  if FExternalData then
+  if (not FDataOwner) then
   begin
-    FExternalData := False;
+    FDataOwner := True;
     FData := nil;
 
     SetSize(0, 0);
@@ -2687,97 +2541,11 @@ begin
   Result := simba.matchtemplate.MatchTemplateMask(Self.ToMatrixBGR(), Template.ToMatrixBGR(), Formula);
 end;
 
-function TMufasaBitmap.FindDTM(DTM: TDTM): TPointArray;
-var
-  Finder: TSimbaFinder;
-begin
-  Finder.SetTarget(Self);
-
-  Result := Finder.FindDTM(DTM, -1, Box(-1,-1,-1,-1));
-end;
-
-function TMufasaBitmap.FindColor(ColorSpace: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
-var
-  Finder: TSimbaFinder;
-begin
-  Finder.SetTarget(Self);
-
-  Result := Finder.FindColor(Color, Tolerance, ColorSpace, Multipliers, Box(-1,-1,-1,-1));
-end;
-
-function TMufasaBitmap.MatchColor(ColorSpace: EColorSpace; Color: TColor; Multipliers: TChannelMultipliers): TSingleMatrix;
-var
-  Finder: TSimbaFinder;
-begin
-  Finder.SetTarget(Self);
-
-  Result := Finder.MatchColor(Color, ColorSpace, Multipliers, Box(-1,-1,-1,-1));
-end;
-
-function TMufasaBitmap.FindEdges(MinDiff: Single): TPointArray;
-var
-  X, Y ,W, H: Integer;
-  Buffer: TSimbaPointBuffer;
-  First, Second, Third: TColor;
-begin
-  Buffer.Init();
-
-  W := FWidth - 2;
-  H := FHeight - 2;
-
-  for Y := 0 to H do
-    for X := 0 to W do
-    begin
-      First  := FData[Y*FWidth+X].ToColor();
-      Second := FData[Y*FWidth+(X+1)].ToColor();
-      Third  := FData[(Y+1)*FWidth+X].ToColor();
-
-      if (not SimilarColors(First, Second, MinDiff)) or
-         (not SimilarColors(First, Third, MinDiff)) then
-      begin
-        Buffer.Add(TPoint.Create(X, Y));
-
-        Continue;
-      end;
-    end;
-
-  Result := Buffer.Trim();
-end;
-
-function TMufasaBitmap.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
-var
-  X, Y ,W, H: Integer;
-  Buffer: TSimbaPointBuffer;
-  First, Second, Third: TColor;
-begin
-  Buffer.Init();
-
-  W := FWidth - 2;
-  H := FHeight - 2;
-
-  for Y := 0 to H do
-    for X := 0 to W do
-    begin
-      First  := FData[Y*FWidth+X].ToColor();
-      Second := FData[Y*FWidth+(X+1)].ToColor();
-      Third  := FData[(Y+1)*FWidth+X].ToColor();
-
-      if (not SimilarColors(First, Second, MinDiff, ColorSpace, Multipliers)) or
-         (not SimilarColors(First, Third, MinDiff, ColorSpace, Multipliers)) then
-      begin
-        Buffer.Add(TPoint.Create(X, Y));
-
-        Continue;
-      end;
-    end;
-
-  Result := Buffer.Trim();
-end;
-
 constructor TMufasaBitmap.Create;
 begin
   inherited Create();
 
+  FDataOwner := True;
   FTextDrawer := TSimbaTextDrawer.Create(Self);
 
   TransparentColorActive := True;
@@ -2789,24 +2557,6 @@ begin
   Create();
 
   SetSize(AWidth, AHeight);
-end;
-
-constructor TMufasaBitmap.CreateFromClient(Client: TObject);
-begin
-  Create();
-
-  FClient := Client;
-
-  LoadFromClient();
-end;
-
-constructor TMufasaBitmap.CreateFromClient(Client: TObject; Area: TBox);
-begin
-  Create();
-
-  FClient := Client;
-
-  LoadFromClient(Area);
 end;
 
 constructor TMufasaBitmap.CreateFromFile(FileName: String);
@@ -2830,9 +2580,28 @@ begin
   LoadFromData(AWidth, AHeight, AData, CopyData);
 end;
 
+constructor TMufasaBitmap.CreateFromWindow(Window: TWindowHandle);
+var
+  Finder: TSimbaFinder;
+  Image: TMufasaBitmap;
+begin
+  Create();
+
+  Finder.SetTargetWindow(Window);
+
+  Image := Finder.GetImage(NullBox);
+  Image.DataOwner := False;
+
+  FWidth := Image.Width;
+  FHeight := Image.Height;
+  FData := Image.FData;
+
+  Image.Free();
+end;
+
 destructor TMufasaBitmap.Destroy;
 begin
-  if not FExternalData then
+  if FDataOwner then
     SetSize(0, 0);
 
   if (FTextDrawer <> nil) then

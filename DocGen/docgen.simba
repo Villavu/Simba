@@ -18,6 +18,7 @@ begin
   SourceFiles += ['simba.import_random.pas',       'Random'        ];
   SourceFiles += ['simba.import_class_bitmap.pas', 'TMufasaBitmap' ];
   SourceFiles += ['simba.import_class_dtm.pas',    'TDTM'          ];
+  SourceFiles += ['simba.import_input.pas',        'Input'         ];
 end;
 
 const

@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.mufasatypes, simba.nativeinterface, simba.colormath;
+  simba.mufasatypes, simba.nativeinterface;
 
 type
   TSimbaNativeInterface_Windows = class(TSimbaNativeInterface)
@@ -27,10 +27,9 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    procedure HoldKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer = 0); override;
-    procedure ReleaseKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer = 0); override;
+    procedure KeyDownNativeKeyCode(KeyCode: Integer); override;
+    procedure KeyUpNativeKeyCode(KeyCode: Integer); override;
 
-    function VirtualKeyToNativeKeyCode(VirtualKey: Integer): Integer; override;
     function GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean; override;
 
     function GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean; override;
@@ -39,17 +38,18 @@ type
 
     function GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PColorBGRA): Boolean; override;
 
+    procedure MouseUp(Button: MouseButton); override;
+    procedure MouseDown(Button: MouseButton); override;
+    procedure MouseScroll(Scrolls: Integer); override;
+    procedure MouseTeleport(RelativeWindow: TWindowHandle; P: TPoint); override;
+    function MousePressed(Button: MouseButton): Boolean; override;
+
     function GetMousePosition: TPoint; override;
     function GetMousePosition(Window: TWindowHandle): TPoint; override;
-    procedure SetMousePosition(Window: TWindowHandle; Position: TPoint); override;
-    procedure ScrollMouse(Lines: Integer); override;
-    procedure HoldMouse(Button: TClickType); override;
-    procedure ReleaseMouse(Button: TClickType); override;
-    function IsMouseButtonHeld(Button: TClickType): Boolean; override;
-    function IsKeyHeld(Key: Integer): Boolean; override;
 
-    procedure HoldKey(VirtualKey: Integer; WaitTime: Integer = 0); override;
-    procedure ReleaseKey(VirtualKey: Integer; WaitTime: Integer = 0); override;
+    function KeyPressed(Key: KeyCode): Boolean; override;
+    procedure KeyDown(Key: KeyCode); override;
+    procedure KeyUp(Key: KeyCode); override;
 
     function GetProcessMemUsage(PID: SizeUInt): Int64; override;
     function GetProcessPath(PID: SizeUInt): String; override;
@@ -336,6 +336,82 @@ begin
   ReleaseDC(Window, WindowDC);
 end;
 
+procedure TSimbaNativeInterface_Windows.MouseUp(Button: MouseButton);
+var
+  Input: TInput;
+begin
+  Input := Default(TInput);
+  Input._Type := INPUT_MOUSE;
+
+  case Button of
+    MouseButton.LEFT: Input.mi.dwFlags := MOUSEEVENTF_LEFTUP;
+    MouseButton.MIDDLE: Input.mi.dwFlags := MOUSEEVENTF_MIDDLEUP;
+    MouseButton.RIGHT: Input.mi.dwFlags := MOUSEEVENTF_RIGHTUP;
+    MouseButton.SCROLL_UP:
+      begin
+        Input.mi.mouseData := XBUTTON1;
+        Input.mi.dwFlags := MOUSEEVENTF_XUP;
+      end;
+    MouseButton.SCROLL_DOWN:
+      begin
+        Input.mi.mouseData := XBUTTON2;
+        Input.mi.dwFlags := MOUSEEVENTF_XUP;
+      end;
+  end;
+
+  SendInput(1, @Input, SizeOf(Input));
+end;
+
+procedure TSimbaNativeInterface_Windows.MouseDown(Button: MouseButton);
+var
+  Input: TInput;
+begin
+  Input := Default(TInput);
+  Input._Type := INPUT_MOUSE;
+
+  case Button of
+    MouseButton.LEFT: Input.mi.dwFlags := MOUSEEVENTF_LEFTDOWN;
+    MouseButton.MIDDLE: Input.mi.dwFlags := MOUSEEVENTF_MIDDLEDOWN;
+    MouseButton.RIGHT: Input.mi.dwFlags := MOUSEEVENTF_RIGHTDOWN;
+    MouseButton.SCROLL_UP:
+      begin
+        Input.mi.mouseData := XBUTTON1;
+        Input.mi.dwFlags := MOUSEEVENTF_XDOWN;
+      end;
+    MouseButton.SCROLL_DOWN:
+      begin
+        Input.mi.mouseData := XBUTTON2;
+        Input.mi.dwFlags := MOUSEEVENTF_XDOWN;
+      end;
+  end;
+
+  SendInput(1, @Input, SizeOf(Input));
+end;
+
+procedure TSimbaNativeInterface_Windows.MouseScroll(Scrolls: Integer);
+var
+  Input: TInput;
+begin
+  Input := Default(TInput);
+  Input._Type := INPUT_MOUSE;
+  Input.mi.dwFlags := MOUSEEVENTF_WHEEL;
+  Input.mi.mouseData := -Scrolls * WHEEL_DELTA;
+
+  SendInput(1, @Input, SizeOf(Input));
+end;
+
+procedure TSimbaNativeInterface_Windows.MouseTeleport(RelativeWindow: TWindowHandle; P: TPoint);
+var
+  Bounds: TBox;
+begin
+  if Self.GetWindowBounds(RelativeWindow, Bounds) then
+  begin
+    Self.ApplyDPI(RelativeWindow, Bounds.X1, Bounds.Y1, P.X, P.Y);
+
+    SetCursorPos(Bounds.X1 + P.X, Bounds.Y1 + P.Y);
+  end;
+end;
+
 function TSimbaNativeInterface_Windows.GetMousePosition: TPoint;
 var
   _: Integer;
@@ -349,7 +425,7 @@ end;
 function TSimbaNativeInterface_Windows.GetMousePosition(Window: TWindowHandle): TPoint;
 var
   Bounds: TBox;
-  _: Integer;
+  _: Integer = 0;
 begin
   if not GetCursorPos(Result) then
     Exit(Default(TPoint));
@@ -361,114 +437,25 @@ begin
   Result.Y := Result.Y - Bounds.Y1;
 end;
 
-procedure TSimbaNativeInterface_Windows.SetMousePosition(Window: TWindowHandle; Position: TPoint);
-var
-  Bounds: TBox;
+function TSimbaNativeInterface_Windows.MousePressed(Button: MouseButton): Boolean;
 begin
-  if Self.GetWindowBounds(Window, Bounds) then
-  begin
-    Self.ApplyDPI(Window, Bounds.X1, Bounds.Y1, Position.X, Position.Y);
-
-    SetCursorPos(Bounds.X1 + Position.X, Bounds.Y1 + Position.Y);
-  end;
-end;
-
-procedure TSimbaNativeInterface_Windows.ScrollMouse(Lines: Integer);
-var
-  Input: TInput;
-  P: TPoint;
-begin
-  GetCursorPos(P); // unscaled on purpose
-
-  Input := Default(TInput);
-  Input._Type := INPUT_MOUSE;
-  Input.mi.dx := P.X;
-  Input.mi.dy := P.Y;
-  Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_WHEEL;
-  Input.mi.mouseData := -Lines * WHEEL_DELTA;
-
-  SendInput(1, @Input, SizeOf(Input));
-end;
-
-procedure TSimbaNativeInterface_Windows.HoldMouse(Button: TClickType);
-var
-  Input: TInput;
-  P: TPoint;
-begin
-  GetCursorPos(P); // unscaled on purpose
-
-  Input := Default(TInput);
-  Input._Type := INPUT_MOUSE;
-  Input.mi.dx := P.X;
-  Input.mi.dy := P.Y;
+  Result := False;
 
   case Button of
-    MOUSE_LEFT: Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTDOWN;
-    MOUSE_MIDDLE: Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_MIDDLEDOWN;
-    MOUSE_RIGHT: Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_RIGHTDOWN;
-    MOUSE_EXTRA_1:
-      begin
-        Input.mi.mouseData := XBUTTON1;
-        Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_XDOWN;
-      end;
-    MOUSE_EXTRA_2:
-      begin
-        Input.mi.mouseData := XBUTTON2;
-        Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_XDOWN;
-      end;
-  end;
-
-  SendInput(1, @Input, SizeOf(Input));
-end;
-
-procedure TSimbaNativeInterface_Windows.ReleaseMouse(Button: TClickType);
-var
-  Input: TInput;
-  P: TPoint;
-begin
-  GetCursorPos(P); // unscaled on purpose
-
-  Input := Default(TInput);
-  Input._Type := INPUT_MOUSE;
-  Input.mi.dx := P.X;
-  Input.mi.dy := P.Y;
-
-  case Button of
-    MOUSE_LEFT: Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTUP;
-    MOUSE_MIDDLE: Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_MIDDLEUP;
-    MOUSE_RIGHT: Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_RIGHTUP;
-    MOUSE_EXTRA_1:
-      begin
-        Input.mi.mouseData := XBUTTON1;
-        Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_XUP;
-      end;
-    MOUSE_EXTRA_2:
-      begin
-        Input.mi.mouseData := XBUTTON2;
-        Input.mi.dwFlags := MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_XUP;
-      end;
-  end;
-
-  SendInput(1, @Input, SizeOf(Input));
-end;
-
-function TSimbaNativeInterface_Windows.IsMouseButtonHeld(Button: TClickType): Boolean;
-begin
-  case Button of
-    MOUSE_LEFT:    Result := (GetAsyncKeyState(VK_LBUTTON) and $8000 <> 0);
-    MOUSE_MIDDLE:  Result := (GetAsyncKeyState(VK_MBUTTON) and $8000 <> 0);
-    MOUSE_RIGHT:   Result := (GetAsyncKeyState(VK_RBUTTON) and $8000 <> 0);
-    MOUSE_EXTRA_1: Result := (GetAsyncKeyState(VK_XBUTTON1) and $8000 <> 0);
-    MOUSE_EXTRA_2: Result := (GetAsyncKeyState(VK_XBUTTON2) and $8000 <> 0);
+    MouseButton.LEFT:        Result := (GetAsyncKeyState(VK_LBUTTON) and $8000 <> 0);
+    MouseButton.MIDDLE:      Result := (GetAsyncKeyState(VK_MBUTTON) and $8000 <> 0);
+    MouseButton.RIGHT:       Result := (GetAsyncKeyState(VK_RBUTTON) and $8000 <> 0);
+    MouseButton.SCROLL_UP:   Result := (GetAsyncKeyState(VK_XBUTTON1) and $8000 <> 0);
+    MouseButton.SCROLL_DOWN: Result := (GetAsyncKeyState(VK_XBUTTON2) and $8000 <> 0);
   end;
 end;
 
-function TSimbaNativeInterface_Windows.IsKeyHeld(Key: Integer): Boolean;
+function TSimbaNativeInterface_Windows.KeyPressed(Key: KeyCode): Boolean;
 begin
-  Result := (GetAsyncKeyState(Key) and $8000 <> 0); //only check if high-order bit is set
+  Result := (GetAsyncKeyState(Ord(Key)) and $8000 <> 0); //only check if high-order bit is set
 end;
 
-procedure TSimbaNativeInterface_Windows.HoldKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer = 0);
+procedure TSimbaNativeInterface_Windows.KeyDownNativeKeyCode(KeyCode: Integer);
 var
   Input: TInput;
 begin
@@ -478,12 +465,9 @@ begin
   Input.ki.wScan := MapVirtualKey(KeyCode, 0);
 
   SendInput(1, @Input, SizeOf(Input));
-
-  if (WaitTime > 0) then
-    PreciseSleep(WaitTime);
 end;
 
-procedure TSimbaNativeInterface_Windows.ReleaseKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer = 0);
+procedure TSimbaNativeInterface_Windows.KeyUpNativeKeyCode(KeyCode: Integer);
 var
   Input: TInput;
 begin
@@ -493,14 +477,6 @@ begin
   Input.ki.wScan := MapVirtualKey(KeyCode, 0);
 
   SendInput(1, @Input, SizeOf(Input));
-
-  if (WaitTime > 0) then
-    PreciseSleep(WaitTime);
-end;
-
-function TSimbaNativeInterface_Windows.VirtualKeyToNativeKeyCode(VirtualKey: Integer): Integer;
-begin
-  Result := VirtualKey;
 end;
 
 function TSimbaNativeInterface_Windows.GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean;
@@ -511,34 +487,28 @@ begin
   Modifiers := TShiftState(VKKeyScan(Character) shr 8 and $FF);
 end;
 
-procedure TSimbaNativeInterface_Windows.HoldKey(VirtualKey: Integer; WaitTime: Integer);
+procedure TSimbaNativeInterface_Windows.KeyDown(Key: KeyCode);
 var
   Input: TInput;
 begin
   Input := Default(TInput);
   Input._Type := INPUT_KEYBOARD;
   Input.ki.dwFlags := 0;
-  Input.ki.wVk := VirtualKey;
+  Input.ki.wVk := Ord(Key);
 
   SendInput(1, @Input, SizeOf(Input));
-
-  if (WaitTime > 0) then
-    PreciseSleep(WaitTime);
 end;
 
-procedure TSimbaNativeInterface_Windows.ReleaseKey(VirtualKey: Integer; WaitTime: Integer);
+procedure TSimbaNativeInterface_Windows.KeyUp(Key: KeyCode);
 var
   Input: TInput;
 begin
   Input := Default(TInput);
   Input._Type := INPUT_KEYBOARD;
   Input.ki.dwFlags := KEYEVENTF_KEYUP;
-  Input.ki.wVk := VirtualKey;
+  Input.ki.wVk := Ord(Key);
 
   SendInput(1, @Input, SizeOf(Input));
-
-  if (WaitTime > 0) then
-    PreciseSleep(WaitTime);
 end;
 
 function TSimbaNativeInterface_Windows.GetProcessMemUsage(PID: SizeUInt): Int64;
@@ -586,7 +556,7 @@ const
 var
   Handle: THandle;
   SystemInfo: TSystemInfo;
-  Wow64Process: LongBool;
+  Wow64Process: LongBool = False;
 begin
   Result := False;
 
@@ -643,7 +613,7 @@ function GetWindowsCallback(Window: HWND; Data: LPARAM): WINBOOL; stdcall;
 begin
   Result := True;
 
-  with PEnumWindowData(Data)^ do
+  with PEnumWindowData(PtrUInt(Data))^ do
   begin
     if Recursive or (not Recursive and (GetAncestor(Window, GA_PARENT) = Parent)) then
       Windows += [Window];
@@ -654,7 +624,7 @@ function GetTopWindowsCallback(Window: HWND; Data: LPARAM): WINBOOL; stdcall;
 begin
   Result := True;
 
-  with PEnumWindowData(Data)^ do
+  with PEnumWindowData(PtrUInt(Data))^ do
   begin
     if IsWindowVisible(Window) and (not IsIconic(Window)) and (GetAncestor(Window, GA_ROOT) = Window) then
       Windows += [Window];
@@ -665,7 +635,7 @@ function GetChildrenCallback(Window: HWND; Data: LPARAM): WINBOOL; stdcall;
 begin
   Result := True;
 
-  with PEnumWindowData(Data)^ do
+  with PEnumWindowData(PtrUInt(Data))^ do
   begin
     if Recursive or (not Recursive and (GetAncestor(Window, GA_PARENT) = Parent)) then
       Windows += [Window];
@@ -676,7 +646,7 @@ function GetVisibleWindowsCallback(Window: HWND; Data: LPARAM): WINBOOL; stdcall
 begin
   Result := True;
 
-  with PEnumWindowData(Data)^ do
+  with PEnumWindowData(PtrUInt(Data))^ do
   begin
     if IsWindowVisible(Window) and (not IsIconic(Window)) then
     begin
@@ -797,7 +767,8 @@ end;
 
 function TSimbaNativeInterface_Windows.ActivateWindow(Window: TWindowHandle): Boolean;
 var
-  CurrentThread, TargetThread, PID: UInt32;
+  PID: UInt32 = 0;
+  CurrentThread, TargetThread: UInt32;
   RootWindow: TWindowHandle;
   I: Integer;
 begin
@@ -833,7 +804,8 @@ end;
 
 function TSimbaNativeInterface_Windows.HighResolutionTime: Double;
 var
-  Frequency, Count: Int64;
+  Frequency: Int64 = 0;
+  Count: Int64 = 0;
 begin
   QueryPerformanceFrequency(Frequency);
   QueryPerformanceCounter(Count);
@@ -876,7 +848,7 @@ end;
 
 procedure TSimbaNativeInterface_Windows.ShowTerminal;
 var
-  PID: UInt32;
+  PID: UInt32 = 0;
 begin
   GetWindowThreadProcessId(GetConsoleWindow(), PID);
   if (PID = GetCurrentProcessID()) then
@@ -885,7 +857,7 @@ end;
 
 procedure TSimbaNativeInterface_Windows.HideTerminal;
 var
-  PID: UInt32;
+  PID: UInt32 = 0;
 begin
   GetWindowThreadProcessId(GetConsoleWindow(), PID);
   if (PID = GetCurrentProcessID()) then

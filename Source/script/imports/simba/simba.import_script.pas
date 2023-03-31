@@ -215,6 +215,38 @@ begin
       'end;'
     ]);
 
+    addDelayedCode([
+      'procedure SetTargetWindow(Window: TWindowHandle);',
+      'begin',
+      '  Input.SetTargetWindow(Window);',
+      '  Finder.SetTargetWindow(Window);',
+      'end;'
+    ]);
+
+     addDelayedCode([
+      'procedure SetTargetEIOS(Plugin: String; Args: String);',
+      'begin',
+      '  Input.SetTargetEIOS(Plugin, Args);',
+      '  Finder.SetTargetEIOS(Plugin, Args);',
+      'end;'
+    ]);
+
+     addDelayedCode([
+       'procedure SetTargetBitmap(Bitmap: TMufasaBitmap);',
+       'begin',
+       '  Input.SetTargetBitmap(Bitmap);',
+       '  Finder.SetTargetBitmap(Bitmap);',
+       'end;'
+     ]);
+
+     addDelayedCode([
+       'procedure SetTargetDesktop;',
+       'begin',
+       '  Input.SetTargetDesktop();',
+       '  Finder.SetTargetDesktop();',
+       'end;'
+     ]);
+
     ImportingSection := '';
 
     addDelayedCode([

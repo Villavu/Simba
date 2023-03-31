@@ -14,7 +14,7 @@ interface
 uses
   Classes, SysUtils, Graphics,
   simba.mufasatypes, simba.colormath, simba.colormath_distance, simba.bitmap, simba.dtm,
-  simba.finder_color, simba.finder_bitmap, simba.finder_dtm;
+  simba.finder_color, simba.finder_bitmap, simba.finder_dtm, simba.internaltarget;
 
 type
   PColorTolerance = ^TColorTolerance;
@@ -25,19 +25,10 @@ type
     Multipliers: TChannelMultipliers;
   end;
 
-  {$PUSH}
-  {$SCOPEDENUMS ON}
-  ETargetType = (NONE, BITMAP, WINDOW);
-  {$POP}
-
   PSimbaFinder = ^TSimbaFinder;
   TSimbaFinder = record
   private
-    FTargetType: ETargetType;
-    FTarget: record
-      Bitmap: TMufasaBitmap;
-      Window: TWindowHandle;
-    end;
+    FTarget: TSimbaInternalTarget;
     FColorFinder: TColorFinder;
     FBitmapFinder: TBitmapFinder;
     FDTMFinder: TDTMFinder;
@@ -49,17 +40,14 @@ type
     function DoFindColor(Bounds: TBox): TPointArray;
     function DoCountColor(Bounds: TBox): Integer;
 
-    function ValidateTargetBounds(var Bounds: TBox): Boolean;
-    function GetTargetData(var Bounds: TBox; out Data: PColorBGRA; out DataWidth: Integer): Boolean;
-    procedure FreeTargetData(var Data: PColorBGRA);
-
     function GetDataAsBitmap(var Bounds: TBox; out Bitmap: TMufasaBitmap): Boolean;
   public
-    procedure SetTarget(Bitmap: TMufasaBitmap); overload;
-    procedure SetTarget(Window: TWindowHandle); overload;
+    procedure SetTargetDesktop;
+    procedure SetTargetWindow(Window: TWindowHandle);
+    procedure SetTargetBitmap(Bitmap: TMufasaBitmap);
+    procedure SetTargetEIOS(Plugin, Args: String);
 
-    function FindEdges(MinDiff: Single; Bounds: TBox): TPointArray; overload;
-    function FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPointArray; overload;
+    procedure GetTargetDimensions(out Width, Height: Integer);
 
     function FindDTM(DTM: TDTM; MaxToFind: Integer; Bounds: TBox): TPointArray;
     function FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer; Bounds: TBox): TPointArray;
@@ -89,7 +77,12 @@ type
     function AverageBrightness(Area: TBox): Integer;
     function PeakBrightness(Area: TBox): Integer;
 
+    function FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPointArray; overload;
+    function FindEdges(MinDiff: Single; Bounds: TBox): TPointArray; overload;
+
     function FindTemplate(Templ: TMufasaBitmap; MinMatch: Single; Bounds: TBox): TPoint;
+
+    function GetImage(Bounds: TBox): TMufasaBitmap;
 
     class operator Initialize(var Self: TSimbaFinder);
   end;
@@ -97,7 +90,7 @@ type
 implementation
 
 uses
-  simba.nativeinterface, simba.tpa;
+  simba.nativeinterface, simba.tpa, simba.overallocatearray;
 
 function TSimbaFinder.DoFindDTM(DTM: TDTM; Bounds: TBox; MaxToFind: Integer): TPointArray;
 var
@@ -106,11 +99,11 @@ var
 begin
   Result := nil;
 
-  if GetTargetData(Bounds, Data, DataWidth) then
+  if FTarget.GetImageData(Bounds, Data, DataWidth) then
   try
     Result := FDTMFinder.Find(DTM, Data, DataWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft, MaxToFind);
   finally
-    FreeTargetData(Data);
+    FTarget.FreeImageData(Data);
   end;
 end;
 
@@ -121,11 +114,11 @@ var
 begin
   Result := nil;
 
-  if GetTargetData(Bounds, Data, DataWidth) then
+  if FTarget.GetImageData(Bounds, Data, DataWidth) then
   try
     Result := FDTMFinder.FindRotated(DTM, StartDegrees, EndDegrees, Step, FoundDegrees, Data, DataWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft, MaxToFind);
   finally
-    FreeTargetData(Data);
+    FTarget.FreeImageData(Data);
   end;
 end;
 
@@ -136,11 +129,11 @@ var
 begin
   Result := nil;
 
-  if GetTargetData(Bounds, Data, DataWidth) then
+  if FTarget.GetImageData(Bounds, Data, DataWidth) then
   try
     Result := FBitmapFinder.Find(Bitmap, Data, DataWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft, MaxToFind);
   finally
-    FreeTargetData(Data);
+    FTarget.FreeImageData(Data);
   end;
 end;
 
@@ -151,11 +144,11 @@ var
 begin
   Result := nil;
 
-  if GetTargetData(Bounds, Data, DataWidth) then
+  if FTarget.GetImageData(Bounds, Data, DataWidth) then
   try
     Result := FColorFinder.Find(Data, DataWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft);
   finally
-    FreeTargetData(Data);
+    FTarget.FreeImageData(Data);
   end;
 end;
 
@@ -166,151 +159,54 @@ var
 begin
   Result := 0;
 
-  if GetTargetData(Bounds, Data, DataWidth) then
+  if FTarget.GetImageData(Bounds, Data, DataWidth) then
   try
     Result := FColorFinder.Count(Data, DataWidth, Bounds.Width, Bounds.Height);
   finally
-    FreeTargetData(Data);
+    FTarget.FreeImageData(Data);
   end;
-end;
-
-procedure TSimbaFinder.FreeTargetData(var Data: PColorBGRA);
-begin
-  if (FTargetType in [ETargetType.WINDOW]) then
-    FreeMem(Data);
 end;
 
 function TSimbaFinder.GetDataAsBitmap(var Bounds: TBox; out Bitmap: TMufasaBitmap): Boolean;
 var
-  Data: PColorBGRA;
+  Data: PColorBGRA = nil;
   DataWidth: Integer;
   Y: Integer;
 begin
-  Result := GetTargetData(Bounds, Data, DataWidth);
+  Result := FTarget.GetImageData(Bounds, Data, DataWidth);
   if Result then
   begin
     Bitmap := TMufasaBitmap.Create(Bounds.Width, Bounds.Height);
     for Y := 0 to Bitmap.Height - 1 do
       Move(Data[Y * DataWidth], Bitmap.Data[Y * Bitmap.Width], Bitmap.Width * SizeOf(TColorBGRA));
 
-    FreeTargetData(Data);
+    FTarget.FreeImageData(Data);
   end;
 end;
 
-function TSimbaFinder.ValidateTargetBounds(var Bounds: TBox): Boolean;
-var
-  Width, Height: Integer;
-  B: TBox;
+procedure TSimbaFinder.SetTargetDesktop;
 begin
-  Result := False;
-
-  case FTargetType of
-    ETargetType.BITMAP:
-      begin
-        Result := True;
-
-        Width := FTarget.Bitmap.Width;
-        Height := FTarget.Bitmap.Height;
-      end;
-
-    ETargetType.WINDOW:
-      begin
-        Result := SimbaNativeInterface.GetWindowBounds(FTarget.Window, B);
-
-        Width := B.Width;
-        Height := B.Height;
-      end;
-
-    else
-      raise Exception.Create('TSimbaFinder: Target not set');
-  end;
-
-  if Result then
-  begin
-    if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
-    begin
-      Bounds.X1 := 0;
-      Bounds.Y1 := 0;
-      Bounds.X2 := Width -1;
-      Bounds.Y2 := Height - 1;
-    end else
-    begin
-      if (Bounds.X1 < 0)       then Bounds.X1 := 0;
-      if (Bounds.Y1 < 0)       then Bounds.Y1 := 0;
-      if (Bounds.X2 >= Width)  then Bounds.X2 := Width - 1;
-      if (Bounds.Y2 >= Height) then Bounds.Y2 := Height - 1;
-    end;
-
-    Result := (Bounds.Width > 0) and (Bounds.Height > 0);
-  end;
+  FTarget.SetDesktop();
 end;
 
-function TSimbaFinder.GetTargetData(var Bounds: TBox; out Data: PColorBGRA; out DataWidth: Integer): Boolean;
+procedure TSimbaFinder.SetTargetWindow(Window: TWindowHandle);
 begin
-  Result := False;
-  Data := nil;
-
-  if ValidateTargetBounds(Bounds) then
-  begin
-    case FTargetType of
-      ETargetType.BITMAP:
-        begin
-          DataWidth := FTarget.Bitmap.Width;
-          Data := FTarget.Bitmap.Data + (Bounds.Y1 * FTarget.Bitmap.Width) + Bounds.X1;
-
-          Result := True;
-        end;
-
-      ETargetType.WINDOW:
-        begin
-          DataWidth := Bounds.Width;
-
-          Result := SimbaNativeInterface.GetWindowImage(FTarget.Window, Bounds.X1, Bounds.Y1, Bounds.Width, Bounds.Height, Data);
-        end;
-      else
-        raise Exception.Create('TSimbaFinder: Target not set');
-    end;
-  end;
+  FTarget.SetWindow(Window);
 end;
 
-procedure TSimbaFinder.SetTarget(Bitmap: TMufasaBitmap);
+procedure TSimbaFinder.SetTargetBitmap(Bitmap: TMufasaBitmap);
 begin
-  FTargetType := ETargetType.BITMAP;
-  FTarget.Bitmap := Bitmap;
+  FTarget.SetBitmap(Bitmap);
 end;
 
-procedure TSimbaFinder.SetTarget(Window: TWindowHandle);
+procedure TSimbaFinder.SetTargetEIOS(Plugin, Args: String);
 begin
-  FTargetType := ETargetType.WINDOW;
-  FTarget.Window := Window;
+  FTarget.SetEIOS(Plugin, Args);
 end;
 
-function TSimbaFinder.FindEdges(MinDiff: Single; Bounds: TBox): TPointArray;
-var
-  Bitmap: TMufasaBitmap;
+procedure TSimbaFinder.GetTargetDimensions(out Width, Height: Integer);
 begin
-  Result := nil;
-
-  if GetDataAsBitmap(Bounds, Bitmap) then
-  try
-    Result := Bitmap.FindEdges(MinDiff);
-  finally
-    Bitmap.Free();
-  end;
-end;
-
-function TSimbaFinder.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPointArray;
-var
-  Bitmap: TMufasaBitmap;
-begin
-  Result := nil;
-
-  if GetDataAsBitmap(Bounds, Bitmap) then
-  try
-    Result := Bitmap.FindEdges(MinDiff, ColorSpace, Multipliers);
-  finally
-    Bitmap.Free();
-  end;
+  FTarget.GetDimensions(Width, Height);
 end;
 
 function TSimbaFinder.FindDTM(DTM: TDTM; MaxToFind: Integer; Bounds: TBox): TPointArray;
@@ -344,13 +240,13 @@ var
 begin
   Result := nil;
 
-  if GetTargetData(Bounds, Data, DataWidth) then
+  if FTarget.GetImageData(Bounds, Data, DataWidth) then
   try
     FColorFinder.Setup(ColorSpace, Color, 0, Multipliers);
 
     Result := FColorFinder.Match(Data, DataWidth, Bounds.Width, Bounds.Height);
   finally
-    FreeTargetData(Data);
+    FTarget.FreeImageData(Data);
   end;
 end;
 
@@ -402,13 +298,17 @@ var
   Data: PColorBGRA;
   DataWidth: Integer;
 begin
+  Result := -1;
+
   B.X1 := X; B.Y1 := Y;
   B.X2 := X; B.Y2 := Y;
 
-  if GetTargetData(B, Data, DataWidth) then
+  if FTarget.GetImageData(B, Data, DataWidth) then
+  try
     Result := Data^.ToColor()
-  else
-    Result := -1;
+  finally
+    FTarget.FreeImageData(Data);
+  end;
 end;
 
 function TSimbaFinder.GetColors(Points: TPointArray): TColorArray;
@@ -421,8 +321,8 @@ begin
   Result := nil;
 
   B := Points.Bounds();
-  if GetTargetData(B, Data, DataWidth) then
-  begin
+  if FTarget.GetImageData(B, Data, DataWidth) then
+  try
     SetLength(Result, Length(Points));
 
     Count := 0;
@@ -435,6 +335,8 @@ begin
       Inc(Count);
     end;
     SetLength(Result, Count);
+  finally
+    FTarget.FreeImageData(Data);
   end;
 end;
 
@@ -446,8 +348,8 @@ var
 begin
   Result := nil;
 
-  if GetTargetData(Bounds, Data, DataWidth) then
-  begin
+  if FTarget.GetImageData(Bounds, Data, DataWidth) then
+  try
     Width := Bounds.Width - 1;
     Height := Bounds.Height - 1;
 
@@ -456,6 +358,8 @@ begin
     for Y := 0 to Height do
       for X := 0 to Width do
         Result[Y, X] := Data[Y * DataWidth + X].ToColor();
+  finally
+    FTarget.FreeImageData(Data);
   end;
 end;
 
@@ -550,12 +454,23 @@ end;
 function TSimbaFinder.AverageBrightness(Area: TBox): Integer;
 var
   Bitmap: TMufasaBitmap;
+  X, Y, Sum: Integer;
 begin
   Result := 0;
 
   if GetDataAsBitmap(Area, Bitmap) then
   try
-    Result := Bitmap.AverageBrightness();
+    for Y := 0 to Bitmap.Height - 1 do
+    begin
+      Sum := 0;
+      for X := 0 to Bitmap.Width - 1 do
+        with Bitmap.Data[Y * Bitmap.Width + X] do
+          Sum += Round((R + G + B) / 3 * 0.392);
+
+      Result += Sum div Bitmap.Width;
+    end;
+
+    Result := Round(Result / Bitmap.Height);
   finally
     Bitmap.Free();
   end;
@@ -564,15 +479,66 @@ end;
 function TSimbaFinder.PeakBrightness(Area: TBox): Integer;
 var
   Bitmap: TMufasaBitmap;
+  X, Y: Integer;
 begin
   Result := 0;
 
   if GetDataAsBitmap(Area, Bitmap) then
   try
-    Result := Bitmap.PeakBrightness();
+    for Y := 0 to Bitmap.Height - 1 do
+      for X := 0 to Bitmap.Width - 1 do
+        with Bitmap.Data[Y * Bitmap.Width + X] do
+        begin
+          if (R > Result) then Result := R;
+          if (G > Result) then Result := G;
+          if (B > Result) then Result := B;
+        end;
+
+    Result := Round(Result / 255 * 100);
   finally
     Bitmap.Free();
   end;
+end;
+
+function TSimbaFinder.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPointArray;
+var
+  Bitmap: TMufasaBitmap;
+  X, Y ,W, H: Integer;
+  Buffer: TSimbaPointBuffer;
+  First, Second, Third: TColor;
+begin
+  Buffer.Init();
+
+  if GetDataAsBitmap(Bounds, Bitmap) then
+  try
+    W := Bitmap.Width - 2;
+    H := Bitmap.Height - 2;
+
+    for Y := 0 to H do
+      for X := 0 to W do
+      begin
+        First  := Bitmap.Data[Y*Bitmap.Width+X].ToColor();
+        Second := Bitmap.Data[Y*Bitmap.Width+(X+1)].ToColor();
+        Third  := Bitmap.Data[(Y+1)*Bitmap.Width+X].ToColor();
+
+        if (not SimilarColors(First, Second, MinDiff, ColorSpace, Multipliers)) or
+           (not SimilarColors(First, Third, MinDiff, ColorSpace, Multipliers)) then
+        begin
+          Buffer.Add(X, Y);
+
+          Continue;
+        end;
+      end;
+  finally
+    Bitmap.Free();
+  end;
+
+  Result := Buffer.Trim();
+end;
+
+function TSimbaFinder.FindEdges(MinDiff: Single; Bounds: TBox): TPointArray;
+begin
+  Result := FindEdges(MinDiff, EColorSpace.RGB, DefaultMultipliers, Bounds);
 end;
 
 function TSimbaFinder.FindTemplate(Templ: TMufasaBitmap; MinMatch: Single; Bounds: TBox): TPoint;
@@ -586,12 +552,19 @@ begin
   if GetDataAsBitmap(Bounds, Bitmap) then
   try
     Mat := Bitmap.MatchTemplate(Templ, TM_CCOEFF_NORMED);
+
     Best := Mat.ArgMax();
     if (Mat[Best.Y, Best.X] >= MinMatch) then
       Result := Best + Bounds.TopLeft;
   finally
     Bitmap.Free();
   end;
+end;
+
+function TSimbaFinder.GetImage(Bounds: TBox): TMufasaBitmap;
+begin
+  if not GetDataAsBitmap(Bounds, Result) then
+    Result := TMufasaBitmap.Create(0, 0);
 end;
 
 class operator TSimbaFinder.Initialize(var Self: TSimbaFinder);

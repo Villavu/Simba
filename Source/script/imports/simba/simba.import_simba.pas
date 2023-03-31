@@ -75,8 +75,8 @@ begin
 
     addGlobalFunc('procedure SetSimbaStatus(Status: String)', @_LapeStatus);
     addGlobalFunc('procedure SetSimbaTitle(Title: String)', @_LapeDisguise);
-    addGlobalFunc('function GetSimbaPID: PtrUInt', @_LapeGetSimbaPID);
-    addGlobalFunc('function GetSimbaTargetPID: PtrUInt', @_LapeGetSimbaTargetPID);
+    addGlobalFunc('function GetSimbaPID: TProcessID', @_LapeGetSimbaPID);
+    addGlobalFunc('function GetSimbaTargetPID: TProcessID', @_LapeGetSimbaTargetPID);
     addGlobalFunc('function GetSimbaTargetWindow: TWindowHandle', @_LapeGetSimbaTargetWindow);
 
     addGlobalFunc('function SetSimbaSetting(Name: String; DefValue: String = ""): String', @_LapeGetSimpleSetting);

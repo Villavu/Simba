@@ -16,28 +16,27 @@ uses
 type
   TSimbaNativeInterface = class
   public
-    procedure HoldKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer = 0); virtual; abstract;
-    procedure ReleaseKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer = 0); virtual; abstract;
+    procedure KeyDownNativeKeyCode(KeyCode: Integer); virtual; abstract;
+    procedure KeyUpNativeKeyCode(KeyCode: Integer); virtual; abstract;
 
-    function VirtualKeyToNativeKeyCode(VirtualKey: Integer): Integer; virtual; abstract;
     function GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean; virtual; abstract;
 
     function GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PColorBGRA): Boolean; virtual; abstract;
     function GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean; virtual; abstract;
     function GetWindowBounds(Window: TWindowHandle): TBox; virtual; abstract;
 
+    procedure MouseUp(Button: MouseButton); virtual; abstract;
+    procedure MouseDown(Button: MouseButton); virtual; abstract;
+    procedure MouseScroll(Scrolls: Integer); virtual; abstract;
+    procedure MouseTeleport(RelativeWindow: TWindowHandle; P: TPoint); virtual; abstract;
+    function MousePressed(Button: MouseButton): Boolean; virtual; abstract;
+
     function GetMousePosition: TPoint; virtual; abstract;
     function GetMousePosition(Window: TWindowHandle): TPoint; virtual; abstract;
-    procedure SetMousePosition(Window: TWindowHandle; Position: TPoint); virtual; abstract;
-    procedure ScrollMouse(Lines: Integer); virtual; abstract;
-    procedure HoldMouse(Button: TClickType); virtual; abstract;
-    procedure ReleaseMouse(Button: TClickType); virtual; abstract;
-    function IsMouseButtonHeld(Button: TClickType): Boolean; virtual; abstract;
 
-    function IsKeyHeld(Key: Integer): Boolean; virtual; abstract;
-
-    procedure HoldKey(VirtualKey: Integer; WaitTime: Integer = 0); virtual; abstract;
-    procedure ReleaseKey(VirtualKey: Integer; WaitTime: Integer = 0); virtual; abstract;
+    function KeyPressed(Key: KeyCode): Boolean; virtual; abstract;
+    procedure KeyDown(Key: KeyCode); virtual; abstract;
+    procedure KeyUp(Key: KeyCode); virtual; abstract;
 
     function GetProcessMemUsage(PID: SizeUInt): Int64; virtual; abstract;
     function GetProcessPath(PID: SizeUInt): String; virtual; abstract;
@@ -85,8 +84,7 @@ type
 
     function GetVirtualKeyCode(Character: Char): Integer; virtual;
 
-    procedure SendString(Text: String; KeyWait, KeyModWait: Integer); virtual;
-    procedure SendStringEx(Text: String; MinKeyWait, MaxMaxWait: Integer); virtual;
+    procedure KeySend(Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer); virtual;
   end;
 
 var
@@ -111,63 +109,33 @@ uses
   simba.nativeinterface_darwin;
   {$ENDIF}
 
-procedure TSimbaNativeInterface.SendString(Text: String; KeyWait, KeyModWait: Integer);
+procedure TSimbaNativeInterface.KeySend(Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
 var
-  Character: Char;
-  KeyCode: Integer;
+  NativeKeyCode: Integer;
   KeyModifiers: TShiftState;
 begin
-  for Character in Text do
+  if not GetNativeKeyCodeAndModifiers(Key, NativeKeyCode, KeyModifiers) then
+    raise Exception.CreateFmt('TSimbaNativeInterface.SendChar: Unknown key code for "%s"', [Key]);
+
+  if (KeyModifiers <> []) then
   begin
-    if not GetNativeKeyCodeAndModifiers(Character, KeyCode, KeyModifiers) then
-      raise Exception.CreateFmt('SendString: Unknown key code for "%s"', [Character]);
+    if (ssShift in KeyModifiers) then KeyDown(KeyCode.SHIFT);
+    if (ssCtrl  in KeyModifiers) then KeyDown(KeyCode.CONTROL);
+    if (ssAlt   in KeyModifiers) then KeyDown(KeyCode.MENU);
 
-    if (KeyModifiers <> []) then
-    begin
-      if (ssShift in KeyModifiers) then HoldKey(VK_SHIFT,   KeyModWait);
-      if (ssCtrl  in KeyModifiers) then HoldKey(VK_CONTROL, KeyModWait);
-      if (ssAlt   in KeyModifiers) then HoldKey(VK_MENU,    KeyModWait);
-    end;
-
-    HoldKeyNativeKeyCode(KeyCode,    KeyWait);
-    ReleaseKeyNativeKeyCode(KeyCode, KeyWait);
-
-    if (KeyModifiers <> []) then
-    begin
-      if (ssShift in KeyModifiers) then ReleaseKey(VK_SHIFT,   KeyModWait);
-      if (ssCtrl  in KeyModifiers) then ReleaseKey(VK_CONTROL, KeyModWait);
-      if (ssAlt   in KeyModifiers) then ReleaseKey(VK_MENU,    KeyModWait);
-    end;
+    PreciseSleep(ModifierDownTime);
   end;
-end;
 
-procedure TSimbaNativeInterface.SendStringEx(Text: String; MinKeyWait, MaxMaxWait: Integer);
-var
-  Character: Char;
-  KeyCode: Integer;
-  KeyModifiers: TShiftState;
-begin
-  for Character in Text do
+  KeyDownNativeKeyCode(NativeKeyCode); PreciseSleep(KeyDownTime);
+  KeyUpNativeKeyCode(NativeKeyCode);   PreciseSleep(KeyUpTime);
+
+  if (KeyModifiers <> []) then
   begin
-    if not GetNativeKeyCodeAndModifiers(Character, KeyCode, KeyModifiers) then
-      raise Exception.CreateFmt('SendStringEx: Unknown key code for "%s"', [Character]);
+    if (ssShift in KeyModifiers) then KeyUp(KeyCode.SHIFT);
+    if (ssCtrl  in KeyModifiers) then KeyUp(KeyCode.CONTROL);
+    if (ssAlt   in KeyModifiers) then KeyUp(KeyCode.MENU);
 
-    if (KeyModifiers <> []) then
-    begin
-      if (ssShift in KeyModifiers) then HoldKey(VK_SHIFT,   RandomLeft(MinKeyWait, MaxMaxWait));
-      if (ssCtrl  in KeyModifiers) then HoldKey(VK_CONTROL, RandomLeft(MinKeyWait, MaxMaxWait));
-      if (ssAlt   in KeyModifiers) then HoldKey(VK_MENU,    RandomLeft(MinKeyWait, MaxMaxWait));
-    end;
-
-    HoldKeyNativeKeyCode(KeyCode,    RandomLeft(MinKeyWait, MaxMaxWait));
-    ReleaseKeyNativeKeyCode(KeyCode, RandomLeft(MinKeyWait, MaxMaxWait));
-
-    if (KeyModifiers <> []) then
-    begin
-      if (ssShift in KeyModifiers) then ReleaseKey(VK_SHIFT,   RandomLeft(MinKeyWait, MaxMaxWait));
-      if (ssCtrl  in KeyModifiers) then ReleaseKey(VK_CONTROL, RandomLeft(MinKeyWait, MaxMaxWait));
-      if (ssAlt   in KeyModifiers) then ReleaseKey(VK_MENU,    RandomLeft(MinKeyWait, MaxMaxWait));
-    end;
+    PreciseSleep(ModifierUpTime);
   end;
 end;
 

@@ -29,8 +29,7 @@ uses
 
   // Simba classes
   simba.import_class_bitmap, simba.import_class_dtm, simba.import_matchtemplate,
-  simba.import_class_target, simba.import_class_iomanager,
-  simba.import_class_client, simba.import_class_xml, simba.import_class_json,
+  simba.import_class_xml, simba.import_class_json,
   simba.import_class_imagebox, simba.import_class_shapebox,
 
   // Simba
@@ -40,7 +39,7 @@ uses
   simba.import_internal, simba.import_finder,
   simba.import_math, simba.import_other, simba.import_input,
   simba.import_process, simba.import_script,  simba.import_slacktree,
-  simba.import_string, simba.import_internet, simba.import_target,
+  simba.import_string,
   simba.import_variant, simba.import_simba, simba.import_random;
 
 end.

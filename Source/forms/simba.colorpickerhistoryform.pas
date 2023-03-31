@@ -55,7 +55,7 @@ implementation
 
 uses
   lcltype, types,
-  simba.mufasatypes, simba.main, simba.settings;
+  simba.mufasatypes, simba.main, simba.settings, simba.colormath;
 
 type
   TColorHistoryValue = packed record
@@ -65,22 +65,22 @@ type
 
 procedure TSimbaColorPickerHistoryForm.ColorListBoxSelectionChange(Sender: TObject; User: Boolean);
 var
-  R, G, B: Integer;
-  H, S, L: Extended;
   Selected: Integer;
+  SelectedColor: TColor;
 begin
   Selected := ColorListBox.ItemIndex;
   if (Selected < 0) then
     Exit;
 
-  //ColorToRGB(Color[Selected], R, G, B);
-  //ColorToHSL(Color[Selected], H, S, L);
-
-  StringGrid.Cells[1, 0] := Format('%d', [Color[Selected]]);
-  StringGrid.Cells[1, 1] := Format('$%s', [HexStr(Color[Selected], 6)]);
-  StringGrid.Cells[1, 2] := Format('%d, %d, %d', [R, G, B]);
-  StringGrid.Cells[1, 3] := Format('%.2f, %.2f, %.2f', [H, S, L]);
-  StringGrid.Cells[1, 4] := Format('%d, %d', [Point[Selected].X, Point[Selected].Y]);
+  SelectedColor := Color[Selected];
+  with SelectedColor.ToRGB(), SelectedColor.ToHSL() do
+  begin
+    StringGrid.Cells[1, 0] := Format('%d', [SelectedColor]);
+    StringGrid.Cells[1, 1] := Format('$%s', [HexStr(SelectedColor, 6)]);
+    StringGrid.Cells[1, 2] := Format('%d, %d, %d', [R, G, B]);
+    StringGrid.Cells[1, 3] := Format('%.2f, %.2f, %.2f', [H, S, L]);
+    StringGrid.Cells[1, 4] := Format('%d, %d', [Point[Selected].X, Point[Selected].Y]);
+  end;
 end;
 
 procedure TSimbaColorPickerHistoryForm.HandleButtonClearClick(Sender: TObject);

@@ -16,10 +16,9 @@ uses
 type
   TSimbaNativeInterface_Linux = class(TSimbaNativeInterface)
   public
-    procedure HoldKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer = 0); override;
-    procedure ReleaseKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer = 0); override;
+    procedure KeyDownNativeKeyCode(KeyCode: Integer); override;
+    procedure KeyUpNativeKeyCode(KeyCode: Integer); override;
 
-    function VirtualKeyToNativeKeyCode(VirtualKey: Integer): Integer; override;
     function GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean; override;
 
     function GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean; override;
@@ -30,15 +29,16 @@ type
 
     function GetMousePosition: TPoint; override;
     function GetMousePosition(Window: TWindowHandle): TPoint; override;
-    procedure SetMousePosition(Window: TWindowHandle; Position: TPoint); override;
-    procedure ScrollMouse(Lines: Integer); override;
-    procedure HoldMouse(Button: TClickType); override;
-    procedure ReleaseMouse(Button: TClickType); override;
-    function IsMouseButtonHeld(Button: TClickType): Boolean; override;
-    function IsKeyHeld(Key: Integer): Boolean; override;
 
-    procedure HoldKey(VirtualKey: Integer; WaitTime: Integer = 0); override;
-    procedure ReleaseKey(VirtualKey: Integer; WaitTime: Integer = 0); override;
+    procedure MouseUp(Button: MouseButton); override;
+    procedure MouseDown(Button: MouseButton); override;
+    procedure MouseScroll(Scrolls: Integer); override;
+    procedure MouseTeleport(RelativeWindow: TWindowHandle; P: TPoint); override;
+    function MousePressed(Button: MouseButton): Boolean; override;
+
+    function KeyPressed(Key: KeyCode): Boolean; override;
+    procedure KeyDown(Key: KeyCode); override;
+    procedure KeyUp(Key: KeyCode); override;
 
     function GetProcessMemUsage(PID: SizeUInt): Int64; override;
     function GetProcessPath(PID: SizeUInt): String; override;
@@ -82,6 +82,124 @@ const
 
 function sysconf(i: cint): clong; cdecl; external name 'sysconf';
 
+function VirtualKeyToNativeKeyCode(VirtualKey: KeyCode): Integer;
+var
+  Symbol: TKeySym;
+begin
+  case VirtualKey of
+    KeyCode.BACK:      Symbol := XK_BackSpace;
+    KeyCode.TAB:       Symbol := XK_Tab;
+    KeyCode.CLEAR:     Symbol := XK_Clear;
+    KeyCode.RETURN:    Symbol := XK_Return;
+    KeyCode.SHIFT:     Symbol := XK_Shift_L;
+    KeyCode.CONTROL:   Symbol := XK_Control_L;
+    KeyCode.MENU:      Symbol := XK_Alt_R;
+    KeyCode.CAPITAL:   Symbol := XK_Caps_Lock;
+
+    KeyCode.ESCAPE:    Symbol := XK_Escape;
+    KeyCode.SPACE:     Symbol := XK_Space;
+    KeyCode.PRIOR:     Symbol := XK_Prior;
+    KeyCode.NEXT:      Symbol := XK_Next;
+    KeyCode.END_KEY:   Symbol := XK_End;
+    KeyCode.HOME:      Symbol := XK_Home;
+    KeyCode.LEFT:      Symbol := XK_Left;
+    KeyCode.UP:        Symbol := XK_Up;
+    KeyCode.RIGHT:     Symbol := XK_Right;
+    KeyCode.DOWN:      Symbol := XK_Down;
+    KeyCode.SELECT:    Symbol := XK_Select;
+    KeyCode.PRINT:     Symbol := XK_Print;
+    KeyCode.EXECUTE:   Symbol := XK_Execute;
+
+    KeyCode.INSERT:    Symbol := XK_Insert;
+    KeyCode.DELETE:    Symbol := XK_Delete;
+    KeyCode.HELP:      Symbol := XK_Help;
+    KeyCode.NUM_0:     Symbol := XK_0;
+    KeyCode.NUM_1:     Symbol := XK_1;
+    KeyCode.NUM_2:     Symbol := XK_2;
+    KeyCode.NUM_3:     Symbol := XK_3;
+    KeyCode.NUM_4:     Symbol := XK_4;
+    KeyCode.NUM_5:     Symbol := XK_5;
+    KeyCode.NUM_6:     Symbol := XK_6;
+    KeyCode.NUM_7:     Symbol := XK_7;
+    KeyCode.NUM_8:     Symbol := XK_8;
+    KeyCode.NUM_9:     Symbol := XK_9;
+
+    KeyCode.A:         Symbol := XK_A;
+    KeyCode.B:         Symbol := XK_B;
+    KeyCode.C:         Symbol := XK_C;
+    KeyCode.D:         Symbol := XK_D;
+    KeyCode.E:         Symbol := XK_E;
+    KeyCode.F:         Symbol := XK_F;
+    KeyCode.G:         Symbol := XK_G;
+    KeyCode.H:         Symbol := XK_H;
+    KeyCode.I:         Symbol := XK_I;
+    KeyCode.J:         Symbol := XK_J;
+    KeyCode.K:         Symbol := XK_K;
+    KeyCode.L:         Symbol := XK_L;
+    KeyCode.M:         Symbol := XK_M;
+    KeyCode.N:         Symbol := XK_N;
+    KeyCode.O:         Symbol := XK_O;
+    KeyCode.P:         Symbol := XK_P;
+    KeyCode.Q:         Symbol := XK_Q;
+    KeyCode.R:         Symbol := XK_R;
+    KeyCode.S:         Symbol := XK_S;
+    KeyCode.T:         Symbol := XK_T;
+    KeyCode.U:         Symbol := XK_U;
+    KeyCode.V:         Symbol := XK_V;
+    KeyCode.W:         Symbol := XK_W;
+    KeyCode.X:         Symbol := XK_X;
+    KeyCode.Y:         Symbol := XK_Y;
+    KeyCode.Z:         Symbol := XK_Z;
+
+    KeyCode.NUMPAD_0:  Symbol := XK_KP_0;
+    KeyCode.NUMPAD_1:  Symbol := XK_KP_1;
+    KeyCode.NUMPAD_2:  Symbol := XK_KP_2;
+    KeyCode.NUMPAD_3:  Symbol := XK_KP_3;
+    KeyCode.NUMPAD_4:  Symbol := XK_KP_4;
+    KeyCode.NUMPAD_5:  Symbol := XK_KP_5;
+    KeyCode.NUMPAD_6:  Symbol := XK_KP_6;
+    KeyCode.NUMPAD_7:  Symbol := XK_KP_7;
+    KeyCode.NUMPAD_8:  Symbol := XK_KP_8;
+    KeyCode.NUMPAD_9:  Symbol := XK_KP_9;
+    KeyCode.MULTIPLY:  Symbol := XK_KP_Multiply;
+    KeyCode.ADD:       Symbol := XK_KP_Add;
+    KeyCode.SEPARATOR: Symbol := XK_KP_Separator;
+    KeyCode.SUBTRACT:  Symbol := XK_KP_Subtract;
+    KeyCode.DECIMAL:   Symbol := XK_KP_Decimal;
+    KeyCode.DIVIDE:    Symbol := XK_KP_Divide;
+    KeyCode.F1:        Symbol := XK_F1;
+    KeyCode.F2:        Symbol := XK_F2;
+    KeyCode.F3:        Symbol := XK_F3;
+    KeyCode.F4:        Symbol := XK_F4;
+    KeyCode.F5:        Symbol := XK_F5;
+    KeyCode.F6:        Symbol := XK_F6;
+    KeyCode.F7:        Symbol := XK_F7;
+    KeyCode.F8:        Symbol := XK_F8;
+    KeyCode.F9:        Symbol := XK_F9;
+    KeyCode.F10:       Symbol := XK_F10;
+    KeyCode.F11:       Symbol := XK_F11;
+    KeyCode.F12:       Symbol := XK_F12;
+    KeyCode.F13:       Symbol := XK_F13;
+    KeyCode.F14:       Symbol := XK_F14;
+    KeyCode.F15:       Symbol := XK_F15;
+    KeyCode.F16:       Symbol := XK_F16;
+    KeyCode.F17:       Symbol := XK_F17;
+    KeyCode.F18:       Symbol := XK_F18;
+    KeyCode.F19:       Symbol := XK_F19;
+    KeyCode.F20:       Symbol := XK_F20;
+    KeyCode.F21:       Symbol := XK_F21;
+    KeyCode.F22:       Symbol := XK_F22;
+    KeyCode.F23:       Symbol := XK_F23;
+    KeyCode.F24:       Symbol := XK_F24;
+    KeyCode.NUMLOCK:   Symbol := XK_Num_Lock;
+    KeyCode.SCROLL:    Symbol := XK_Scroll_Lock;
+  else
+    Symbol := XK_VoidSymbol;
+  end;
+
+  Result := SimbaXLib.XKeySymToKeyCode(Symbol);
+end;
+
 function GetWindowProperty(Window: TWindow; Prop: TAtom): Int64;
 var
   Atom: TAtom;
@@ -107,140 +225,16 @@ begin
   Result := GetWindowProperty(Window, SimbaXLib.XInternAtom(PChar(Name), False)) > 0;
 end;
 
-function TSimbaNativeInterface_Linux.VirtualKeyToNativeKeyCode(VirtualKey: Integer): Integer;
-var
-  Symbol: TKeySym;
-begin
-  case VirtualKey of
-    VK_BACK:      Symbol := XK_BackSpace;
-    VK_TAB:       Symbol := XK_Tab;
-    VK_CLEAR:     Symbol := XK_Clear;
-    VK_RETURN:    Symbol := XK_Return;
-    VK_SHIFT:     Symbol := XK_Shift_L;
-    VK_CONTROL:   Symbol := XK_Control_L;
-    VK_MENU:      Symbol := XK_Alt_R;
-    VK_CAPITAL:   Symbol := XK_Caps_Lock;
-
-    VK_ESCAPE:    Symbol := XK_Escape;
-    VK_SPACE:     Symbol := XK_Space;
-    VK_PRIOR:     Symbol := XK_Prior;
-    VK_NEXT:      Symbol := XK_Next;
-    VK_END:       Symbol := XK_End;
-    VK_HOME:      Symbol := XK_Home;
-    VK_LEFT:      Symbol := XK_Left;
-    VK_UP:        Symbol := XK_Up;
-    VK_RIGHT:     Symbol := XK_Right;
-    VK_DOWN:      Symbol := XK_Down;
-    VK_SELECT:    Symbol := XK_Select;
-    VK_PRINT:     Symbol := XK_Print;
-    VK_EXECUTE:   Symbol := XK_Execute;
-
-    VK_INSERT:    Symbol := XK_Insert;
-    VK_DELETE:    Symbol := XK_Delete;
-    VK_HELP:      Symbol := XK_Help;
-    VK_0:         Symbol := XK_0;
-    VK_1:         Symbol := XK_1;
-    VK_2:         Symbol := XK_2;
-    VK_3:         Symbol := XK_3;
-    VK_4:         Symbol := XK_4;
-    VK_5:         Symbol := XK_5;
-    VK_6:         Symbol := XK_6;
-    VK_7:         Symbol := XK_7;
-    VK_8:         Symbol := XK_8;
-    VK_9:         Symbol := XK_9;
-
-    VK_A:         Symbol := XK_A;
-    VK_B:         Symbol := XK_B;
-    VK_C:         Symbol := XK_C;
-    VK_D:         Symbol := XK_D;
-    VK_E:         Symbol := XK_E;
-    VK_F:         Symbol := XK_F;
-    VK_G:         Symbol := XK_G;
-    VK_H:         Symbol := XK_H;
-    VK_I:         Symbol := XK_I;
-    VK_J:         Symbol := XK_J;
-    VK_K:         Symbol := XK_K;
-    VK_L:         Symbol := XK_L;
-    VK_M:         Symbol := XK_M;
-    VK_N:         Symbol := XK_N;
-    VK_O:         Symbol := XK_O;
-    VK_P:         Symbol := XK_P;
-    VK_Q:         Symbol := XK_Q;
-    VK_R:         Symbol := XK_R;
-    VK_S:         Symbol := XK_S;
-    VK_T:         Symbol := XK_T;
-    VK_U:         Symbol := XK_U;
-    VK_V:         Symbol := XK_V;
-    VK_W:         Symbol := XK_W;
-    VK_X:         Symbol := XK_X;
-    VK_Y:         Symbol := XK_Y;
-    VK_Z:         Symbol := XK_Z;
-
-    VK_NUMPAD0:   Symbol := XK_KP_0;
-    VK_NUMPAD1:   Symbol := XK_KP_1;
-    VK_NUMPAD2:   Symbol := XK_KP_2;
-    VK_NUMPAD3:   Symbol := XK_KP_3;
-    VK_NUMPAD4:   Symbol := XK_KP_4;
-    VK_NUMPAD5:   Symbol := XK_KP_5;
-    VK_NUMPAD6:   Symbol := XK_KP_6;
-    VK_NUMPAD7:   Symbol := XK_KP_7;
-    VK_NUMPAD8:   Symbol := XK_KP_8;
-    VK_NUMPAD9:   Symbol := XK_KP_9;
-    VK_MULTIPLY:  Symbol := XK_KP_Multiply;
-    VK_ADD:       Symbol := XK_KP_Add;
-    VK_SEPARATOR: Symbol := XK_KP_Separator;
-    VK_SUBTRACT:  Symbol := XK_KP_Subtract;
-    VK_DECIMAL:   Symbol := XK_KP_Decimal;
-    VK_DIVIDE:    Symbol := XK_KP_Divide;
-    VK_F1:        Symbol := XK_F1;
-    VK_F2:        Symbol := XK_F2;
-    VK_F3:        Symbol := XK_F3;
-    VK_F4:        Symbol := XK_F4;
-    VK_F5:        Symbol := XK_F5;
-    VK_F6:        Symbol := XK_F6;
-    VK_F7:        Symbol := XK_F7;
-    VK_F8:        Symbol := XK_F8;
-    VK_F9:        Symbol := XK_F9;
-    VK_F10:       Symbol := XK_F10;
-    VK_F11:       Symbol := XK_F11;
-    VK_F12:       Symbol := XK_F12;
-    VK_F13:       Symbol := XK_F13;
-    VK_F14:       Symbol := XK_F14;
-    VK_F15:       Symbol := XK_F15;
-    VK_F16:       Symbol := XK_F16;
-    VK_F17:       Symbol := XK_F17;
-    VK_F18:       Symbol := XK_F18;
-    VK_F19:       Symbol := XK_F19;
-    VK_F20:       Symbol := XK_F20;
-    VK_F21:       Symbol := XK_F21;
-    VK_F22:       Symbol := XK_F22;
-    VK_F23:       Symbol := XK_F23;
-    VK_F24:       Symbol := XK_F24;
-    VK_NUMLOCK:   Symbol := XK_Num_Lock;
-    VK_SCROLL:    Symbol := XK_Scroll_Lock;
-    else
-      Symbol := XK_VoidSymbol;
-  end;
-
-  Result := SimbaXLib.XKeySymToKeyCode(Symbol);
-end;
-
-procedure TSimbaNativeInterface_Linux.HoldKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer);
+procedure TSimbaNativeInterface_Linux.KeyDownNativeKeyCode(KeyCode: Integer);
 begin
   SimbaXLib.XTestFakeKeyEvent(KeyCode, True, 0);
   SimbaXLib.XSync(False);
-
-  if (WaitTime > 0) then
-    PreciseSleep(WaitTime);
 end;
 
-procedure TSimbaNativeInterface_Linux.ReleaseKeyNativeKeyCode(KeyCode: Integer; WaitTime: Integer);
+procedure TSimbaNativeInterface_Linux.KeyUpNativeKeyCode(KeyCode: Integer);
 begin
   SimbaXLib.XTestFakeKeyEvent(KeyCode, False, 0);
   SimbaXLib.XSync(False);
-
-  if (WaitTime > 0) then
-    PreciseSleep(WaitTime);
 end;
 
 function TSimbaNativeInterface_Linux.GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean;
@@ -390,66 +384,63 @@ begin
                           @Event.State);
 end;
 
-procedure TSimbaNativeInterface_Linux.SetMousePosition(Window: TWindowHandle; Position: TPoint);
+procedure TSimbaNativeInterface_Linux.MouseTeleport(RelativeWindow: TWindowHandle; P: TPoint);
 begin
-  SimbaXLib.XWarpPointer(None, Window, 0, 0, 0, 0, Position.X, Position.Y);
+  SimbaXLib.XWarpPointer(None, RelativeWindow, 0, 0, 0, 0, P.X, P.Y);
   SimbaXLib.XFlush();
 end;
 
-procedure TSimbaNativeInterface_Linux.ScrollMouse(Lines: Integer);
+procedure TSimbaNativeInterface_Linux.MouseScroll(Scrolls: Integer);
 var
-  Button: TClickType;
-  i: Integer;
+  I: Integer;
 begin
-  if Lines > 0 then
-    Button := MOUSE_SCROLL_DOWN
-  else
-    Button := MOUSE_SCROLL_UP;
-
-  for i := 1 to Abs(Lines) do
+  for I := 1 to Abs(Scrolls) do
   begin
-    HoldMouse(Button);
-    ReleaseMouse(Button);
+    if (Scrolls > 0) then
+    begin
+      MouseDown(MouseButton.SCROLL_DOWN);
+      MouseUp(MouseButton.SCROLL_DOWN);
+    end else
+    begin
+      MouseDown(MouseButton.SCROLL_UP);
+      MouseUp(MouseButton.SCROLL_UP);
+    end;
   end;
 end;
 
-procedure TSimbaNativeInterface_Linux.HoldMouse(Button: TClickType);
+procedure TSimbaNativeInterface_Linux.MouseDown(Button: MouseButton);
 var
   Number: Integer;
 begin
   case Button of
-    MOUSE_LEFT:        Number := Button1;
-    MOUSE_MIDDLE:      Number := Button2;
-    MOUSE_RIGHT:       Number := Button3;
-    MOUSE_SCROLL_DOWN: Number := Button5;
-    MOUSE_SCROLL_UP:   Number := Button4;
-    MOUSE_EXTRA_1:     Number := Button8;
-    MOUSE_EXTRA_2:     Number := Button9;
+    MouseButton.LEFT:        Number := Button1;
+    MouseButton.MIDDLE:      Number := Button2;
+    MouseButton.RIGHT:       Number := Button3;
+    MouseButton.SCROLL_DOWN: Number := Button5;
+    MouseButton.SCROLL_UP:   Number := Button4;
   end;
 
   SimbaXLib.XTestFakeButtonEvent(Number, True, CurrentTime);
   SimbaXLib.XFlush();
 end;
 
-procedure TSimbaNativeInterface_Linux.ReleaseMouse(Button: TClickType);
+procedure TSimbaNativeInterface_Linux.MouseUp(Button: MouseButton);
 var
   Number: Integer;
 begin
   case Button of
-    MOUSE_LEFT:        Number := Button1;
-    MOUSE_MIDDLE:      Number := Button2;
-    MOUSE_RIGHT:       Number := Button3;
-    MOUSE_SCROLL_DOWN: Number := Button5;
-    MOUSE_SCROLL_UP:   Number := Button4;
-    MOUSE_EXTRA_1:     Number := Button8;
-    MOUSE_EXTRA_2:     Number := Button9;
+    MouseButton.LEFT:        Number := Button1;
+    MouseButton.MIDDLE:      Number := Button2;
+    MouseButton.RIGHT:       Number := Button3;
+    MouseButton.SCROLL_DOWN: Number := Button5;
+    MouseButton.SCROLL_UP:   Number := Button4;
   end;
 
   SimbaXLib.XTestFakeButtonEvent(Number, False, CurrentTime);
   SimbaXLib.XFlush();
 end;
 
-function TSimbaNativeInterface_Linux.IsMouseButtonHeld(Button: TClickType): Boolean;
+function TSimbaNativeInterface_Linux.MousePressed(Button: MouseButton): Boolean;
 var
   Mask: Integer;
   Event: TXButtonEvent;
@@ -457,13 +448,11 @@ begin
   SimbaXLib.XSync(False);
 
   case Button of
-    MOUSE_LEFT:        begin Event.Button := Button1; Mask := Button1Mask; end;
-    MOUSE_MIDDLE:      begin Event.Button := Button2; Mask := Button2Mask; end;
-    MOUSE_RIGHT:       begin Event.Button := Button3; Mask := Button3Mask; end;
-    MOUSE_SCROLL_UP:   begin Event.Button := Button4; Mask := Button4Mask; end;
-    MOUSE_SCROLL_DOWN: begin Event.Button := Button5; Mask := Button5Mask; end;
-    MOUSE_EXTRA_1:     raise Exception.Create('IsMouseButtonHeld: MOUSE_EXTRA_1 not supported on Linux'); //begin Event.Button := Button8; Mask := Button8Mask; end;
-    MOUSE_EXTRA_2:     raise Exception.Create('IsMouseButtonHeld: MOUSE_EXTRA_2 not supported on Linux'); //begin Event.Button := Button9; Mask := Button9Mask; end;
+    MouseButton.LEFT:        begin Event.Button := Button1; Mask := Button1Mask; end;
+    MouseButton.MIDDLE:      begin Event.Button := Button2; Mask := Button2Mask; end;
+    MouseButton.RIGHT:       begin Event.Button := Button3; Mask := Button3Mask; end;
+    MouseButton.SCROLL_UP:   begin Event.Button := Button4; Mask := Button4Mask; end;
+    MouseButton.SCROLL_DOWN: begin Event.Button := Button5; Mask := Button5Mask; end;
   end;
 
   Event := Default(TXButtonEvent);
@@ -477,7 +466,7 @@ begin
   Result := ((Event.State and Mask) > 0);
 end;
 
-function TSimbaNativeInterface_Linux.IsKeyHeld(Key: Integer): Boolean;
+function TSimbaNativeInterface_Linux.KeyPressed(Key: KeyCode): Boolean;
 var
   Code: TKeySym;
   Keys: CharArr32;
@@ -490,22 +479,16 @@ begin
   Result := (Keys[Code shr 3] shr (Code and $07)) and $01 > 0;
 end;
 
-procedure TSimbaNativeInterface_Linux.HoldKey(VirtualKey: Integer; WaitTime: Integer);
+procedure TSimbaNativeInterface_Linux.KeyDown(Key: KeyCode);
 begin
-  SimbaXLib.XTestFakeKeyEvent(VirtualKeyToNativeKeyCode(VirtualKey), True, 0);
+  SimbaXLib.XTestFakeKeyEvent(VirtualKeyToNativeKeyCode(Key), True, 0);
   SimbaXLib.XSync(False);
-
-  if (WaitTime > 0) then
-    PreciseSleep(WaitTime);
 end;
 
-procedure TSimbaNativeInterface_Linux.ReleaseKey(VirtualKey: Integer; WaitTime: Integer);
+procedure TSimbaNativeInterface_Linux.KeyUp(Key: KeyCode);
 begin
-  SimbaXLib.XTestFakeKeyEvent(VirtualKeyToNativeKeyCode(VirtualKey), False, 0);
+  SimbaXLib.XTestFakeKeyEvent(VirtualKeyToNativeKeyCode(Key), False, 0);
   SimbaXLib.XSync(False);
-
-  if (WaitTime > 0) then
-    PreciseSleep(WaitTime);
 end;
 
 function TSimbaNativeInterface_Linux.GetProcessMemUsage(PID: SizeUInt): Int64;

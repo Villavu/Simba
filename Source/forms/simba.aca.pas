@@ -11,7 +11,8 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Dialogs, DividerBevel, Graphics, ExtCtrls, ComCtrls, StdCtrls, Menus, ColorBox,
-  simba.client, simba.mufasatypes, simba.imagebox, simba.imagebox_zoom, simba.imagebox_bitmap,
+  simba.mufasatypes,
+  simba.imagebox, simba.imagebox_zoom, simba.imagebox_bitmap,
   simba.colormath, simba.colormath_distance;
 
 type
@@ -95,8 +96,7 @@ type
     FOnCalculateBestColor: TACABestColorEvent;
     FOnCalculateBestColorEx: TACABestColorEventEx;
 
-    FManageClient: Boolean;
-    FClient: TClient;
+    FWindow: TWindowHandle;
     FImageBox: TSimbaImageBox;
     FImageZoom: TSimbaImageBoxZoom;
     FZoomInfo: TLabel;
@@ -113,9 +113,7 @@ type
     function GetColorSpaceStr: String;
     function GetColors: TColorArray;
   public
-    constructor Create(Client: TClient; ManageClient: Boolean); reintroduce;
     constructor Create(Window: TWindowHandle); reintroduce;
-    destructor Destroy; override;
 
     property OnCalculateBestColor: TACABestColorEvent read FOnCalculateBestColor write FOnCalculateBestColor;
     property OnCalculateBestColorEx: TACABestColorEventEx read FOnCalculateBestColorEx write FOnCalculateBestColorEx;
@@ -224,10 +222,10 @@ end;
 
 procedure TSimbaACAForm.ButtonUpdateImageClick(Sender: TObject);
 begin
-  if not FClient.IOManager.TargetValid() then
-    FClient.IOManager.SetDesktop();
+  //if not FClient.IOManager.TargetValid() then
+  //  FClient.IOManager.SetDesktop();
 
-  FImageBox.SetBackground(FClient.IOManager);
+  //FImageBox.SetBackground(FClient.IOManager);
 end;
 
 procedure TSimbaACAForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -461,11 +459,15 @@ begin
   FImageBox.Paint();
 end;
 
-constructor TSimbaACAForm.Create(Client: TClient; ManageClient: Boolean);
+constructor TSimbaACAForm.Create(Window: TWindowHandle);
 begin
   inherited Create(Application.MainForm);
 
   ColorListBox.Options := [];
+
+  FWindow := Window;
+  if (FWindow = 0) or (not FWindow.IsValid()) then
+    FWindow := GetDesktopWindow();
 
   FImageBox := TSimbaImageBox.Create(Self);
   FImageBox.Parent := PanelMain;
@@ -473,6 +475,7 @@ begin
   FImageBox.OnMouseDown := @ClientImageMouseDown;
   FImageBox.OnMouseMove := @ClientImageMouseMove;
   FImageBox.OnPaintArea := @DoPaintArea;
+  FImageBox.SetBackground(FWindow);
 
   FImageZoom := TSimbaImageBoxZoom.Create(Self);
   FImageZoom.Parent := PanelTop;
@@ -485,12 +488,6 @@ begin
   FZoomInfo.AnchorToNeighbour(akLeft, 10, FImageZoom);
 
   FDrawColor := clRed;
-  FManageClient := ManageClient;
-  FClient := Client;
-
-  FImageBox.SetBackground(FClient.IOManager);
-
-  ButtonRGB.Checked := True;
 
   with TBitmap.Create() do
   try
@@ -500,25 +497,6 @@ begin
   finally
     Free();
   end;
-end;
-
-constructor TSimbaACAForm.Create(Window: TWindowHandle);
-var
-  Client: TClient;
-begin
-  Client := TClient.Create();
-  if (Window > 0) and Window.IsValid() then
-    Client.IOManager.SetTarget(Window);
-
-  Create(Client, True);
-end;
-
-destructor TSimbaACAForm.Destroy;
-begin
-  if (FClient <> nil) and FManageClient then
-    FreeAndNil(FClient);
-
-  inherited Destroy();
 end;
 
 end.
