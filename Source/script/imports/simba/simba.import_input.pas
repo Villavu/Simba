@@ -202,91 +202,181 @@ Available Key Codes::
   KeyCode.ZOOM
 *)
 
+(*
+TSimbaInput.SetTargetDesktop
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure TSimbaInput.SetTargetDesktop;
+*)
 procedure _LapeSimbaInput_SetTargetDesktop(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.SetTargetDesktop();
 end;
 
+(*
+TSimbaInput.SetTargetBitmap
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure TSimbaInput.SetTargetBitmap(Bitmap: TMufasaBitmap);
+*)
 procedure _LapeSimbaInput_SetTargetBitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.SetTargetBitmap(PMufasaBitmap(Params^[1])^);
 end;
 
+(*
+TSimbaInput.SetTargetWindow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure TSimbaInput.SetTargetWindow(Window: TWindowHandle);
+*)
 procedure _LapeSimbaInput_SetTargetWindow(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.SetTargetWindow(PWindowHandle(Params^[1])^);
 end;
 
+(*
+TSimbaInput.SetTargetEIOS
+~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure TSimbaInput.SetTargetEIOS(Plugin, Args: String);
+*)
 procedure _LapeSimbaInput_SetTargetEIOS(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.SetTargetEIOS(PString(Params^[1])^, PString(Params^[2])^);
 end;
 
+(*
+TSimbaInput.GetTargetDimensions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure TSimbaInput.GetTargetDimensions(out Width, Height: Integer);
+*)
 procedure _LapeSimbaInput_GetTargetDimensions(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.GetTargetDimensions(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
+(*
+TSimbaInput.MousePosition
+~~~~~~~~~~~~~~~~~~~~~~~~~
+function TSimbaInput.MousePosition: TPoint;
+*)
 procedure _LapeSimbaInput_MousePosition(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPoint(Result)^ := PSimbaInput(Params^[0])^.MousePosition();
 end;
 
+(*
+TSimbaInput.MousePressed
+~~~~~~~~~~~~~~~~~~~~~~~~
+function TSimbaInput.MousePressed(Button: MouseButton): Boolean;
+*)
 procedure _LapeSimbaInput_MousePressed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaInput(Params^[0])^.MousePressed(PMouseButton(Params^[1])^);
 end;
 
+(*
+TSimbaInput.MouseTeleport
+~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure TSimbaInput.MouseTeleport(P: TPoint);
+*)
 procedure _LapeSimbaInput_MouseTeleport(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.MouseTeleport(PPoint(Params^[1])^);
 end;
 
+(*
+TSimbaInput.MouseClick
+~~~~~~~~~~~~~~~~~~~~~~
+procedure TSimbaInput.MouseClick(Button: MouseButton);
+*)
 procedure _LapeSimbaInput_MouseClick(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.MouseClick(PMouseButton(Params^[1])^);
 end;
 
+(*
+TSimbaInput.MouseDown
+~~~~~~~~~~~~~~~~~~~~~
+procedure TSimbaInput.MouseDown(Button: MouseButton);
+*)
 procedure _LapeSimbaInput_MouseDown(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.MouseDown(PMouseButton(Params^[1])^);
 end;
 
+(*
+TSimbaInput.MouseUp
+~~~~~~~~~~~~~~~~~~~
+procedure TSimbaInput.MouseUp(Button: MouseButton);
+*)
 procedure _LapeSimbaInput_MouseUp(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.MouseUp(PMouseButton(Params^[1])^);
 end;
 
+(*
+TSimbaInput.MouseScroll
+~~~~~~~~~~~~~~~~~~~~~~~
+procedure TSimbaInput.MouseScroll(Scrolls: Integer);
+*)
 procedure _LapeSimbaInput_MouseScroll(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.MouseScroll(PInteger(Params^[1])^);
 end;
 
+(*
+TSimbaInput.KeyDown
+~~~~~~~~~~~~~~~~~~~
+procedure TSimbaInput.KeyDown(Key: KeyCode);
+*)
 procedure _LapeSimbaInput_KeyDown(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.KeyDown(PKeyCode(Params^[1])^);
 end;
 
+(*
+TSimbaInput.KeyUp
+~~~~~~~~~~~~~~~~~
+procedure TSimbaInput.KeyUp(Key: KeyCode);
+*)
 procedure _LapeSimbaInput_KeyUp(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.KeyUp(PKeyCode(Params^[1])^);
 end;
 
+(*
+TSimbaInput.KeyPress
+~~~~~~~~~~~~~~~~~~~~
+procedure TSimbaInput.KeyPress(Key: KeyCode);
+*)
 procedure _LapeSimbaInput_KeyPress(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.KeyPress(PKeyCode(Params^[1])^);
 end;
 
+(*
+TSimbaInput.KeyPressed
+~~~~~~~~~~~~~~~~~~~~~~
+function TSimbaInput.KeyPressed(Key: KeyCode): Boolean;
+*)
 procedure _LapeSimbaInput_KeyPressed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaInput(Params^[0])^.KeyPressed(PKeyCode(Params^[1])^);
 end;
 
+(*
+TSimbaInput.KeySend
+~~~~~~~~~~~~~~~~~~~
+procedure TSimbaInput.KeySend(Text: String);
+*)
 procedure _LapeSimbaInput_KeySend(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.KeySend(PString(Params^[1])^);
 end;
 
+(*
+TSimbaInput.CharToKeyCode
+~~~~~~~~~~~~~~~~~~~~~~~~~
+function TSimbaInput.CharToKeyCode(C: Char): KeyCode;
+*)
 procedure _LapeSimbaInput_CharToKeyCode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PKeyCode(Result)^ := PSimbaInput(Params^[0])^.CharToKeyCode(PChar(Params^[1])^);

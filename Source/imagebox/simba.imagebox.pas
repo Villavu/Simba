@@ -428,17 +428,16 @@ begin
 
   with TBitmap.Create() do
   try
-    // Measure on slightly bigger font width
-    // Font width can be 0 so use GetFontData
+    // Measure on larger font size
+    // Font size can be 0 so use GetFontData
     Canvas.Font := Self.Font;
-    Canvas.Font.Size := Round(-GetFontData(Canvas.Font.Reference.Handle).Height * 72 / Canvas.Font.PixelsPerInch) + 3;
+    Canvas.Font.Size := Round(-GetFontData(Canvas.Font.Reference.Handle).Height * 72 / Canvas.Font.PixelsPerInch) + 6;
 
-    FMousePanel.Width := Canvas.TextWidth('(10000, 10000)');
+    FMousePanel.Width := Canvas.TextWidth('(1000, 1000)');
+    FDimensionsPanel.Width  := Canvas.TextWidth('1000x1000');
+    FZoomPanel.Width  := Canvas.TextWidth('100%');
 
-    FDimensionsPanel.Width  := Canvas.TextWidth('10000x10000');
-    FZoomPanel.Width  := Canvas.TextWidth('1000%');
-
-    FStatusBar.Height := Canvas.TextHeight('TaylorSwift');
+    FStatusBar.Height := Round(Canvas.TextHeight('Taylor Swift') * 0.8);
     FStatusBar.Font := Self.Font;
   finally
     Free();
