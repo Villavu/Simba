@@ -1258,6 +1258,17 @@ begin
   PMufasaBitmap(Params^[0])^.DrawHSLCircle(PPoint(Params^[1])^, PInteger(Params^[2])^);
 end;
 
+(*
+TMufasaBitmap.Finder
+~~~~~~~~~~~~~~~~~~~~
+function TMufasaBitmap.Finder: TSimbaFinder;
+*)
+// Done in simba.import_finder
+//procedure _LapeMufasaBitmap_Finder(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+//begin
+//  PSimbaFinder(Result)^ := PMufasaBitmap(Params^[0])^.Finder;
+//end;
+
 procedure ImportBitmap(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do

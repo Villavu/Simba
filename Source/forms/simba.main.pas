@@ -706,8 +706,12 @@ begin
 
   if (CurrentTab <> nil) then
   try
-    if (GetAction() in [Compile, Run, Debug]) and SimbaSettings.General.OutputClearOnCompile.Value then
-      CurrentTab.OutputBox.Empty();
+    if (GetAction() in [Compile, Run, Debug]) then
+    begin
+      CurrentTab.OutputBox.Tab.Show();
+      if SimbaSettings.General.OutputClearOnCompile.Value then
+        CurrentTab.OutputBox.Empty();
+    end;
 
     case GetAction() of
       Compile: CurrentTab.Compile();
@@ -745,16 +749,16 @@ begin
 
   with TBitmap.Create() do
   try
-    // Measure on slightly bigger font size
+    // Measure on larger font size
     // Font size can be 0 so use GetFontData
     Canvas.Font := Self.Font;
-    Canvas.Font.Size := Round(-GetFontData(Canvas.Font.Reference.Handle).Height * 72 / Canvas.Font.PixelsPerInch) + 3;
+    Canvas.Font.Size := Round(-GetFontData(Canvas.Font.Reference.Handle).Height * 72 / Canvas.Font.PixelsPerInch) + 6;
 
-    StatusBar.Height := Canvas.TextHeight('Taylor Swift');
+    StatusBar.Height := Round(Canvas.TextHeight('Taylor Swift') * 0.8);
 
-    StatusPanelCursor.Width := Canvas.TextWidth('(10000, 10000)');
-    StatusPanelState.Width  := Canvas.TextWidth('[000:000:000]');
-    StatusPanelCaret.Width  := Canvas.TextWidth('Line 10000, Col 10000');
+    StatusPanelCursor.Width := Canvas.TextWidth('(1000,1000)');
+    StatusPanelState.Width  := Canvas.TextWidth('[00:00:00]');
+    StatusPanelCaret.Width  := Canvas.TextWidth('Line 100, Col 100');
   finally
     Free();
   end;

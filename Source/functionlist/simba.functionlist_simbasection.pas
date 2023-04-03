@@ -22,7 +22,9 @@ const
     'Script        -> https://villavu.github.io/Simba/Script.html',
     'Variant       -> https://villavu.github.io/Simba/Variant.html',
     'TWindowHandle -> https://villavu.github.io/Simba/TWindowHandle.html',
-    'TMufasaBitmap -> https://villavu.github.io/Simba/TMufasaBitmap.html'
+    'TMufasaBitmap -> https://villavu.github.io/Simba/TMufasaBitmap.html',
+    'Finder        -> https://villavu.github.io/Simba/Finder.html',
+    'Input         -> https://villavu.github.io/Simba/Input.html'
   );
 
 function GetSectionDocLink(Section: String): String;
