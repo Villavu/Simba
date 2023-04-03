@@ -292,6 +292,12 @@ var
 begin
   Result := nil;
 
+  if (Decl is TDeclaration_TypeEnum) then
+  begin
+    Result := TDeclaration_TypeEnum(Decl).Elements;
+    Exit;
+  end;
+
   Depth := 0;
   while (Decl <> nil) and (Depth < 20) do
   begin
