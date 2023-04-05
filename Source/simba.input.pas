@@ -11,19 +11,19 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.internaltarget, simba.bitmap;
+  simba.mufasatypes, simba.target;
 
 type
   PSimbaInput = ^TSimbaInput;
   TSimbaInput = packed record
   const
-    DEFAULT_KEY_PRESS_MIN = 20;
-    DEFAULT_KEY_PRESS_MAX = 100;
+    DEFAULT_KEY_PRESS_MIN = 30;
+    DEFAULT_KEY_PRESS_MAX = 140;
 
-    DEFAULT_CLICK_MIN = 20;
-    DEFAULT_CLICK_MAX = 160;
+    DEFAULT_CLICK_MIN = 40;
+    DEFAULT_CLICK_MAX = 220;
   private
-    FTarget: TSimbaInternalTarget;
+    FTarget: TSimbaTarget;
 
     function GetKeyPressMin: Integer;
     function GetKeyPressMax: Integer;
@@ -36,13 +36,6 @@ type
 
     MouseClickMin: Integer;
     MouseClickMax: Integer;
-
-    procedure SetTargetDesktop;
-    procedure SetTargetWindow(Window: TWindowHandle);
-    procedure SetTargetBitmap(Bitmap: TMufasaBitmap);
-    procedure SetTargetEIOS(Plugin, Args: String);
-
-    procedure GetTargetDimensions(out Width, Height: Integer);
 
     function IsTargetValid: Boolean;
     function IsFocused: Boolean;
@@ -98,31 +91,6 @@ begin
   Result := MouseClickMax;
   if (Result = 0) then
     Result := DEFAULT_CLICK_MAX;
-end;
-
-procedure TSimbaInput.SetTargetDesktop;
-begin
-  FTarget.SetDesktop();
-end;
-
-procedure TSimbaInput.SetTargetWindow(Window: TWindowHandle);
-begin
-  FTarget.SetWindow(Window);
-end;
-
-procedure TSimbaInput.SetTargetBitmap(Bitmap: TMufasaBitmap);
-begin
-  FTarget.SetBitmap(Bitmap);
-end;
-
-procedure TSimbaInput.SetTargetEIOS(Plugin, Args: String);
-begin
-  FTarget.SetEIOS(Plugin, Args);
-end;
-
-procedure TSimbaInput.GetTargetDimensions(out Width, Height: Integer);
-begin
-  FTarget.GetDimensions(Width, Height);
 end;
 
 function TSimbaInput.IsTargetValid: Boolean;

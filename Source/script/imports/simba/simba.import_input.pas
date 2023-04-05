@@ -5,14 +5,13 @@ unit simba.import_input;
 interface
 
 uses
-  classes, sysutils,
-  lptypes, ffi,
-  simba.script_compiler;
+  Classes, SysUtils;
 
 implementation
 
 uses
-  simba.mufasatypes, simba.bitmap, simba.input, simba.internaltarget;
+  lptypes,
+  simba.script_compiler, simba.mufasatypes, simba.input, simba.target;
 
 (*
 Input
@@ -203,56 +202,6 @@ Available Key Codes::
 *)
 
 (*
-TSimbaInput.SetTargetDesktop
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaInput.SetTargetDesktop;
-*)
-procedure _LapeSimbaInput_SetTargetDesktop(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaInput(Params^[0])^.SetTargetDesktop();
-end;
-
-(*
-TSimbaInput.SetTargetBitmap
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaInput.SetTargetBitmap(Bitmap: TMufasaBitmap);
-*)
-procedure _LapeSimbaInput_SetTargetBitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaInput(Params^[0])^.SetTargetBitmap(PMufasaBitmap(Params^[1])^);
-end;
-
-(*
-TSimbaInput.SetTargetWindow
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaInput.SetTargetWindow(Window: TWindowHandle);
-*)
-procedure _LapeSimbaInput_SetTargetWindow(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaInput(Params^[0])^.SetTargetWindow(PWindowHandle(Params^[1])^);
-end;
-
-(*
-TSimbaInput.SetTargetEIOS
-~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaInput.SetTargetEIOS(Plugin, Args: String);
-*)
-procedure _LapeSimbaInput_SetTargetEIOS(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaInput(Params^[0])^.SetTargetEIOS(PString(Params^[1])^, PString(Params^[2])^);
-end;
-
-(*
-TSimbaInput.GetTargetDimensions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaInput.GetTargetDimensions(out Width, Height: Integer);
-*)
-procedure _LapeSimbaInput_GetTargetDimensions(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaInput(Params^[0])^.GetTargetDimensions(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-(*
 TSimbaInput.MousePosition
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 function TSimbaInput.MousePosition: TPoint;
@@ -383,6 +332,24 @@ begin
 end;
 
 procedure ImportInput(Compiler: TSimbaScript_Compiler);
+
+  // If target field is default value, use global target variable.
+  function GetOverrideBody(Name, Params: lpString; isFunction: Boolean): String;
+  begin
+    Result := 'begin'                                                                                                 + LineEnding +
+              '  if Self.Target.IsDefault() then'                                                                     + LineEnding +
+              '    ' + BoolToStr(isFunction, 'Result := ', '') + 'Self.GetGlobalInput().' + Name + '(' + Params + ')' + LineEnding +
+              '  else'                                                                                                + LineEnding +
+              '    ' + BoolToStr(isFunction, 'Result := ', '') + 'inherited();'                                       + LineEnding +
+              'end;';
+  end;
+
+  procedure addInputMethod(Header: lpString; Addr: Pointer);
+  begin
+    Compiler.addGlobalFunc(Header, Addr);
+    Compiler.addOverrideMethod(Header, @GetOverrideBody);
+  end;
+
 begin
   with Compiler do
   begin
@@ -390,7 +357,7 @@ begin
 
     addGlobalType([
       'packed record',
-      '  InternalData: array[0..' + IntToStr(SizeOf(TSimbaInternalTarget) - 1)  + '] of Byte;',
+      '  Target: TSimbaTarget;',
       '',
       '  MinPressTime: Integer;',
       '  MaxPressTime: Integer;',
@@ -579,28 +546,29 @@ begin
       'KeyCode'
     );
 
-    addGlobalFunc('procedure TSimbaInput.SetTargetDesktop', @_LapeSimbaInput_SetTargetDesktop);
-    addGlobalFunc('procedure TSimbaInput.SetTargetBitmap(Bitmap: TMufasaBitmap)', @_LapeSimbaInput_SetTargetBitmap);
-    addGlobalFunc('procedure TSimbaInput.SetTargetWindow(Window: TWindowHandle)', @_LapeSimbaInput_SetTargetWindow);
-    addGlobalFunc('procedure TSimbaInput.SetTargetEIOS(Plugin, Args: String)', @_LapeSimbaInput_SetTargetEIOS);
+    addGlobalFunc(
+      'function TSimbaInput.GetGlobalInput: TSimbaInput;', [
+      'begin',
+      '  Result := Self;',
+      '  Result.Target := System.Target;',
+      'end;'
+    ]);
 
-    addGlobalFunc('procedure TSimbaInput.GetTargetDimensions(out Width, Height: Integer)', @_LapeSimbaInput_GetTargetDimensions);
+    addInputMethod('function TSimbaInput.MousePressed(Button: MouseButton): Boolean', @_LapeSimbaInput_MousePressed);
+    addInputMethod('function TSimbaInput.MousePosition: TPoint', @_LapeSimbaInput_MousePosition);
+    addInputMethod('procedure TSimbaInput.MouseTeleport(P: TPoint)', @_LapeSimbaInput_MouseTeleport);
+    addInputMethod('procedure TSimbaInput.MouseClick(Button: MouseButton)', @_LapeSimbaInput_MouseClick);
+    addInputMethod('procedure TSimbaInput.MouseDown(Button: MouseButton)', @_LapeSimbaInput_MouseDown);
+    addInputMethod('procedure TSimbaInput.MouseUp(Button: MouseButton)', @_LapeSimbaInput_MouseUp);
+    addInputMethod('procedure TSimbaInput.MouseScroll(Scrolls: Integer)', @_LapeSimbaInput_MouseScroll);
 
-    addGlobalFunc('function TSimbaInput.MousePressed(Button: MouseButton): Boolean', @_LapeSimbaInput_MousePressed);
-    addGlobalFunc('function TSimbaInput.MousePosition: TPoint', @_LapeSimbaInput_MousePosition);
-    addGlobalFunc('procedure TSimbaInput.MouseTeleport(P: TPoint)', @_LapeSimbaInput_MouseTeleport);
-    addGlobalFunc('procedure TSimbaInput.MouseClick(Button: MouseButton)', @_LapeSimbaInput_MouseClick);
-    addGlobalFunc('procedure TSimbaInput.MouseDown(Button: MouseButton)', @_LapeSimbaInput_MouseDown);
-    addGlobalFunc('procedure TSimbaInput.MouseUp(Button: MouseButton)', @_LapeSimbaInput_MouseUp);
-    addGlobalFunc('procedure TSimbaInput.MouseScroll(Scrolls: Integer)', @_LapeSimbaInput_MouseScroll);
+    addInputMethod('procedure TSimbaInput.KeySend(Text: String)', @_LapeSimbaInput_KeySend);
+    addInputMethod('procedure TSimbaInput.KeyPress(Key: KeyCode)', @_LapeSimbaInput_KeyPress);
+    addInputMethod('procedure TSimbaInput.KeyDown(Key: KeyCode)', @_LapeSimbaInput_KeyDown);
+    addInputMethod('procedure TSimbaInput.KeyUp(Key: KeyCode)', @_LapeSimbaInput_KeyUp);
+    addInputMethod('function TSimbaInput.KeyPressed(Key: KeyCode): Boolean', @_LapeSimbaInput_KeyPressed);
 
-    addGlobalFunc('procedure TSimbaInput.KeySend(Text: String)', @_LapeSimbaInput_KeySend);
-    addGlobalFunc('procedure TSimbaInput.KeyPress(Key: KeyCode)', @_LapeSimbaInput_KeyPress);
-    addGlobalFunc('procedure TSimbaInput.KeyDown(Key: KeyCode)', @_LapeSimbaInput_KeyDown);
-    addGlobalFunc('procedure TSimbaInput.KeyUp(Key: KeyCode)', @_LapeSimbaInput_KeyUp);
-    addGlobalFunc('function TSimbaInput.KeyPressed(Key: KeyCode): Boolean', @_LapeSimbaInput_KeyPressed);
-
-    addGlobalFunc('function TSimbaInput.CharToKeyCode(C: Char): KeyCode', @_LapeSimbaInput_CharToKeyCode);
+    addInputMethod('function TSimbaInput.CharToKeyCode(C: Char): KeyCode', @_LapeSimbaInput_CharToKeyCode);
   end;
 end;
 

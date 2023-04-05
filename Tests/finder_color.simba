@@ -30,7 +30,7 @@ begin
   Bitmap := TMufasaBitmap.Create(500, 500);
   Bitmap.DrawHSLCircle(Bitmap.GetCenter(), 200);
 
-  Finder.SetTarget(Bitmap);
+  Target.SetBitmap(Bitmap);
 
   for I := 0 to High(TESTS) do
     Assert(Finder.CountColor(TESTS[I]) = TEST_RESULTS[I]);

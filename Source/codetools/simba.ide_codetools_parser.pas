@@ -225,6 +225,7 @@ type
   public
     function Elements: TDeclarationArray;
   end;
+  TDeclaration_TypeEnumScoped = class(TDeclaration_TypeEnum);
 
   TDeclaration_TypeMethod = class(TDeclaration_Type)
   protected
@@ -242,7 +243,6 @@ type
 
   TDeclaration_TypeSet = class(TDeclaration_Type);
   TDeclaration_TypeRange = class(TDeclaration_Type);
-  TDeclaration_TypeEnumScoped = class(TDeclaration_Type);
   TDeclaration_TypeUnion = class(TDeclaration_Type);
 
   TDeclaration_VarType = class(TDeclaration);

@@ -35,12 +35,12 @@ uses
   // Simba
   simba.import_timing, simba.import_tpa, simba.import_atpa,
   simba.import_hash, simba.import_compress, simba.import_windowhandle,
-  simba.import_debugimage, simba.import_dialogs, simba.import_file,
-  simba.import_internal, simba.import_finder,
-  simba.import_math, simba.import_other, simba.import_input,
-  simba.import_process, simba.import_script,  simba.import_slacktree,
-  simba.import_string,
-  simba.import_variant, simba.import_simba, simba.import_random;
+  simba.import_dialogs, simba.import_file, simba.import_internal,
+  simba.import_target, simba.import_finder, simba.import_math,
+  simba.import_other, simba.import_input, simba.import_process,
+  simba.import_script,  simba.import_slacktree, simba.import_string,
+  simba.import_variant, simba.import_simba, simba.import_random,
+  simba.import_debugimage;
 
 end.
 

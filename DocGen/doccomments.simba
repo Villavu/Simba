@@ -27,7 +27,7 @@ var
   end;
 
 begin
-  Contents := ReadFileContents('Source/script/imports/simba/simba.import_finder.pas');
+  Contents := ReadFileContents('Source/script/imports/simba/simba.import_target.pas');
 
   for DocComment in Contents.BetweenAll('(*','*)') do
   begin

@@ -19,7 +19,8 @@ begin
   SourceFiles += ['simba.import_class_bitmap.pas', 'TMufasaBitmap' ];
   SourceFiles += ['simba.import_class_dtm.pas',    'TDTM'          ];
   SourceFiles += ['simba.import_input.pas',        'Input'         ];
-  SourceFiles += ['simba.import_finder.pas',        'Finder'       ];
+  SourceFiles += ['simba.import_finder.pas',       'Finder'        ];
+  SourceFiles += ['simba.import_target.pas',       'Target'        ];
 end;
 
 const
@@ -92,18 +93,19 @@ end;
 
 procedure Build;
 var
-  I: Integer;
-  FileName: String;
+  I, J: Integer;
+  Files: TStringArray;
 begin
-  for FileName in FindFiles(SOURCE_ROOT_DIR, True) do
-  begin
-    if ExtractFileName(ExtractFileDir(FileName)) in SOURCE_IGNORE_DIRS then
-      Continue;
-
-    for I := 0 to High(SourceFiles) do
-      if (SourceFiles[I].FileName = ExtractFileName(FileName)) then
-        ParseComments(FileName, SourceFiles[I].Title);
-  end;
+  Files := FindFiles(SOURCE_ROOT_DIR, True);
+  for I := 0 to High(SourceFiles) do
+    for J := 0 to High(Files) do
+    begin
+      if (SourceFiles[I].FileName = ExtractFileName(Files[J])) then
+      begin
+        ParseComments(Files[J], SourceFiles[I].Title);
+        Break;
+      end;
+    end;
 end;
 
 var

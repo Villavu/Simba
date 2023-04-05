@@ -1010,7 +1010,7 @@
         <IsPartOfProject Value="True"/>
       </Unit155>
       <Unit156>
-        <Filename Value="simba.internaltarget.pas"/>
+        <Filename Value="simba.target.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit156>
       <Unit157>

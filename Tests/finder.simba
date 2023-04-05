@@ -12,7 +12,7 @@ begin
 end;
 
 begin
-  Finder.SetTarget(Bitmap := TMufasaBitmap.Create(100,100));
+  Target.SetBitmap(Bitmap := TMufasaBitmap.Create(100,100));
 
   Test(Colors.DARK_RED, 55, 18);
   Test(Colors.BLACK, 0, 0);
