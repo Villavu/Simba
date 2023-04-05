@@ -69,7 +69,7 @@ type
 implementation
 
 uses
-  simba.files, simba.datetime, simba.httpclient, simba.finder, simba.input;
+  simba.files, simba.datetime, simba.httpclient, simba.target;
 
 procedure TSimbaScript.DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
@@ -255,8 +255,7 @@ begin
   if (FTargetWindow = 0) or (not FTargetWindow.IsValid()) then
     FTargetWindow := GetDesktopWindow();
 
-  PSimbaInput(FCompiler['Input'].Ptr)^.SetTargetWindow(FTargetWindow);
-  PSimbaFinder(FCompiler['Finder'].Ptr)^.SetTargetWindow(FTargetWindow);
+  PSimbaTarget(FCompiler['Target'].Ptr)^.SetWindow(FTargetWindow);
 
   PString(FCompiler['ScriptFile'].Ptr)^ := FScriptFileName;
   PString(FCompiler['ScriptName'].Ptr)^ := ExtractFileName(FScriptFileName);

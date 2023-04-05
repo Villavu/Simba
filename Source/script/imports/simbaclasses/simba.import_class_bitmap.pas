@@ -1155,11 +1155,11 @@ end;
 (*
 TMufasaBitmap.LoadFromData
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.LoadFromData(AWidth, AHeight: Integer; Memory: PRGB32; CopyData: Boolean = True);
+procedure TMufasaBitmap.LoadFromData(AWidth, AHeight: Integer; Memory: PColorBGRA; DataWidth: Integer);
 *)
 procedure _LapeMufasaBitmap_LoadFromData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.LoadFromData(PInteger(Params^[1])^, PInteger(Params^[2])^, PPointer(Params^[3])^, PBoolean(Params^[4])^);
+  PMufasaBitmap(Params^[0])^.LoadFromData(PInteger(Params^[1])^, PInteger(Params^[2])^, PPointer(Params^[3])^, PInteger(Params^[4])^);
 end;
 
 (*
@@ -1413,7 +1413,7 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.LoadFromFile(FileName: String); overload', @_LapeMufasaBitmap_LoadFromFile);
     addGlobalFunc('procedure TMufasaBitmap.LoadFromFile(FileName: String; Area: TBox); overload', @_LapeMufasaBitmap_LoadFromFileEx);
     addGlobalFunc('procedure TMufasaBitmap.LoadFromString(AWidth, AHeight: Integer; Str: String)', @_LapeMufasaBitmap_LoadFromString);
-    addGlobalFunc('procedure TMufasaBitmap.LoadFromData(AWidth, AHeight: Integer; AData: PColorBGRA; CopyData: Boolean = True)', @_LapeMufasaBitmap_LoadFromData);
+    addGlobalFunc('procedure TMufasaBitmap.LoadFromData(AWidth, AHeight: Integer; AData: PColorBGRA; DataWidth: Integer)', @_LapeMufasaBitmap_LoadFromData);
     addGlobalFunc('procedure TMufasaBitmap.LoadFromBitmap(Bitmap: TMufasaBitmap);', @_LapeMufasaBitmap_LoadFromBitmap);
 
     addGlobalFunc('function TMufasaBitmap.SaveToFile(FileName: String): Boolean;', @_LapeMufasaBitmap_SaveToFile);
@@ -1426,24 +1426,6 @@ begin
 
     addGlobalFunc('procedure TMufasaBitmap.DebugUnfreedBitmaps(Directory: String); static;', @_LapeMufasaBitmap_DebugUnfreedBitmaps);
     addGlobalFunc('procedure TMufasaBitmap.FreeOnTerminate(Value: Boolean);', @_LapeMufasaBitmap_FreeOnTerminate);
-
-    // Will be overriden later, in finder import
-    addGlobalFunc(
-      'function TMufasaBitmap.CreateFromFinder(Area: TBox = [-1,-1,-1,-1]): TMufasaBitmap; static;', [
-      'begin',
-      'end;'
-    ]);
-
-    addDelayedCode([
-      'procedure Show(Bitmap: TMufasaBitmap; EnsureVisible: Boolean = True);',
-      'begin',
-      'end;',
-      '',
-      'procedure TMufasaBitmap.Show(EnsureVisible: Boolean = True);',
-      'begin',
-      '  Show(Self, EnsureVisible);',
-      'end;'
-    ]);
 
     ImportingSection := '';
   end;

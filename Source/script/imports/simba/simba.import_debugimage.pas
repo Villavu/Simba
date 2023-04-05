@@ -190,8 +190,18 @@ begin
     addGlobalFunc('procedure ShowDebugImage(X, Y, Width, Height: Integer); overload;', @_LapeShowDebugImage2);
     addGlobalFunc('procedure HideDebugImage;', @_LapeHideDebugImage);
     addGlobalFunc('procedure UpdateDebugImage(Bitmap: TMufasaBitmap);', @_LapeUpdateDebugImage);
+    addGlobalFunc('procedure Show(Bitmap: TMufasaBitmap; EnsureVisible: Boolean = True);', @_LapeShowBitmap);
 
-    addGlobalFunc('procedure Show(Bitmap: TMufasaBitmap; EnsureVisible: Boolean = True); override', @_LapeShowBitmap);
+    ImportingSection := 'TMufasaBitmap';
+
+    addGlobalFunc(
+      'procedure TMufasaBitmap.Show(EnsureVisible: Boolean = True);', [
+      'begin',
+      '  Show(Self, EnsureVisible);',
+      'end;'
+    ]);
+
+    ImportingSection := 'Debug Image';
 
     addGlobalFunc(
       'procedure Show(Matrix: TIntegerMatrix); overload;', [
@@ -298,7 +308,7 @@ begin
     addGlobalFunc(
       'procedure ShowOnClient(Quads: TQuadArray; Filled: Boolean = False); overload;', [
       'begin',
-      '  with TMufasaBitmap.CreateFromFinder() do',
+      '  with TMufasaBitmap.CreateFromTarget() do',
       '  try',
       '    DrawQuadArray(Quads, Filled);',
       '    Show();',
@@ -318,7 +328,7 @@ begin
     addGlobalFunc(
       'procedure ShowOnClient(Boxes: TBoxArray; Filled: Boolean = False); overload;', [
       'begin',
-      '  with TMufasaBitmap.CreateFromFinder() do',
+      '  with TMufasaBitmap.CreateFromTarget() do',
       '  try',
       '    DrawBoxArray(Boxes, Filled);',
       '    Show();',
@@ -338,7 +348,7 @@ begin
     addGlobalFunc(
       'procedure ShowOnClient(TPA: TPointArray; Color: Integer = $0000FF); overload;', [
       'begin',
-      '  with TMufasaBitmap.CreateFromFinder() do',
+      '  with TMufasaBitmap.CreateFromTarget() do',
       '  try',
       '    DrawTPA(TPA, Color);',
       '    Show();',
@@ -351,7 +361,7 @@ begin
     addGlobalFunc(
       'procedure ShowOnClient(ATPA: T2DPointArray; Color: Integer = $0000FF); overload;', [
       'begin',
-      '  with TMufasaBitmap.CreateFromFinder() do',
+      '  with TMufasaBitmap.CreateFromTarget() do',
       '  try',
       '    DrawATPA(ATPA);',
       '    Show();',

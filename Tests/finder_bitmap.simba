@@ -17,7 +17,7 @@ var
   templ: TMufasaBitmap := TMufasaBitmap.CreateFromString(10, 10, 'meJxjYCAA2A30IQxuvQA0BlwWKAIRBHLh6oFARFIeWQtECq4AKAtEQC5QFq4RWTuagWiGI9uIJgV3EsRwPF6Du5wYAAAGDQ9J');
   TPA: TPointArray;
 begin
-  Finder.SetTarget(img);
+  Target.SetBitmap(img);
 
   // find all, entire client
   TPA := Finder.FindBitmap(templ, 0, -1);

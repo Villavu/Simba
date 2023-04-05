@@ -17,7 +17,7 @@ implementation
 
 function TMufasaBitmapHelper.Finder: TSimbaFinder;
 begin
-  Result.SetTargetBitmap(Self);
+  Result.Target.SetBitmap(Self);
 end;
 
 end.

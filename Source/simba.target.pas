@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.internaltarget;
+unit simba.target;
 
 {$i simba.inc}
 
@@ -48,8 +48,9 @@ const
   TargetName: array[ETargetType] of String = ('NONE', 'BITMAP', 'WINDOW', 'EIOS');
 
 type
-  TSimbaInternalTarget = record
-  private
+  PSimbaTarget = ^TSimbaTarget;
+  TSimbaTarget = record
+  public
     FTargetType: ETargetType;
     FTargetBitmap: TSimbaBitmapTarget;
     FTargetWindow: TSimbaWindowTarget;
@@ -64,6 +65,10 @@ type
     function Focus: Boolean;
 
     procedure GetDimensions(out W, H: Integer);
+    function GetWidth: Integer;
+    function GetHeight: Integer;
+
+    function GetImage(Bounds: TBox): TMufasaBitmap;
 
     procedure SetDesktop;
     procedure SetWindow(Window: TWindowHandle);
@@ -94,13 +99,13 @@ implementation
 uses
   simba.nativeinterface, simba.random;
 
-procedure TSimbaInternalTarget.ChangeTarget(TargetType: ETargetType);
+procedure TSimbaTarget.ChangeTarget(TargetType: ETargetType);
 begin
   FTargetType := TargetType;
   FMethods := Default(TTargetMethods);
 end;
 
-function TSimbaInternalTarget.HasMethod(Method: PMethod; Name: String): Boolean;
+function TSimbaTarget.HasMethod(Method: PMethod; Name: String): Boolean;
 begin
   if (Method^.Code = nil) then
     raise Exception.CreateFmt('Target "%s" cannot %s', [TargetName[FTargetType], Name]);
@@ -108,36 +113,61 @@ begin
   Result := True;
 end;
 
-function TSimbaInternalTarget.IsValid: Boolean;
+function TSimbaTarget.IsValid: Boolean;
 begin
   if HasMethod(@FMethods.IsValid, 'IsValid') then
     Result := FMethods.IsValid();
 end;
 
-function TSimbaInternalTarget.IsFocused: Boolean;
+function TSimbaTarget.IsFocused: Boolean;
 begin
   if HasMethod(@FMethods.IsFocused, 'IsFocused') then
     Result := FMethods.IsFocused();
 end;
 
-function TSimbaInternalTarget.Focus: Boolean;
+function TSimbaTarget.Focus: Boolean;
 begin
   if HasMethod(@FMethods.Focus, 'Focus') then
     Result := FMethods.Focus();
 end;
 
-procedure TSimbaInternalTarget.GetDimensions(out W, H: Integer);
+procedure TSimbaTarget.GetDimensions(out W, H: Integer);
 begin
   if HasMethod(@FMethods.GetDimensions, 'GetDimensions') then
     FMethods.GetDimensions(W, H);
 end;
 
-procedure TSimbaInternalTarget.SetDesktop;
+function TSimbaTarget.GetWidth: Integer;
+var
+  _: Integer;
+begin
+  GetDimensions(Result, _);
+end;
+
+function TSimbaTarget.GetHeight: Integer;
+var
+  _: Integer;
+begin
+  GetDimensions(_, Result);
+end;
+
+function TSimbaTarget.GetImage(Bounds: TBox): TMufasaBitmap;
+var
+  Data: PColorBGRA;
+  DataWidth: Integer;
+begin
+  if GetImageData(Bounds, Data, DataWidth) then
+    Result := TMufasaBitmap.CreateFromData(Bounds.Width, Bounds.Height, Data, DataWidth)
+  else
+    Result := TMufasaBitmap.Create();
+end;
+
+procedure TSimbaTarget.SetDesktop;
 begin
   SetWindow(SimbaNativeInterface.GetDesktopWindow());
 end;
 
-procedure TSimbaInternalTarget.SetWindow(Window: TWindowHandle);
+procedure TSimbaTarget.SetWindow(Window: TWindowHandle);
 begin
   ChangeTarget(ETargetType.WINDOW);
 
@@ -163,7 +193,7 @@ begin
   FMethods.GetImageData := @FTargetWindow.GetImageData;
 end;
 
-procedure TSimbaInternalTarget.SetBitmap(Bitmap: TMufasaBitmap);
+procedure TSimbaTarget.SetBitmap(Bitmap: TMufasaBitmap);
 begin
   ChangeTarget(ETargetType.BITMAP);
 
@@ -173,7 +203,7 @@ begin
   FMethods.GetImageData := @FTargetBitmap.GetImageData;
 end;
 
-procedure TSimbaInternalTarget.SetEIOS(FileName, Args: String);
+procedure TSimbaTarget.SetEIOS(FileName, Args: String);
 begin
   ChangeTarget(ETargetType.EIOS);
 
@@ -195,69 +225,69 @@ begin
   FMethods.GetImageData := @FTargetEIOS.GetImageData;
 end;
 
-function TSimbaInternalTarget.MousePressed(Button: MouseButton): Boolean;
+function TSimbaTarget.MousePressed(Button: MouseButton): Boolean;
 begin
   if HasMethod(@FMethods.MousePressed, 'MousePressed') then
     Result := FMethods.MousePressed(Button);
 end;
 
-function TSimbaInternalTarget.MousePosition: TPoint;
+function TSimbaTarget.MousePosition: TPoint;
 begin
   if HasMethod(@FMethods.MousePosition, 'MousePosition') then
     Result := FMethods.MousePosition();
 end;
 
-procedure TSimbaInternalTarget.MouseTeleport(P: TPoint);
+procedure TSimbaTarget.MouseTeleport(P: TPoint);
 begin
   if HasMethod(@FMethods.MouseTeleport, 'MouseTeleport') then
     FMethods.MouseTeleport(P);
 end;
 
-procedure TSimbaInternalTarget.MouseUp(Button: MouseButton);
+procedure TSimbaTarget.MouseUp(Button: MouseButton);
 begin
   if HasMethod(@FMethods.MouseUp, 'MouseUp') then
     FMethods.MouseUp(Button);
 end;
 
-procedure TSimbaInternalTarget.MouseDown(Button: MouseButton);
+procedure TSimbaTarget.MouseDown(Button: MouseButton);
 begin
   if HasMethod(@FMethods.MouseDown, 'MouseDown') then
     FMethods.MouseDown(Button);
 end;
 
-procedure TSimbaInternalTarget.MouseClick(Button: MouseButton; ClickPressMin, ClickPressMax: Integer);
+procedure TSimbaTarget.MouseClick(Button: MouseButton; ClickPressMin, ClickPressMax: Integer);
 begin
   MouseDown(Button);
   SimbaNativeInterface.PreciseSleep(RandomLeft(ClickPressMin, ClickPressMax));
   MouseUp(Button);
 end;
 
-procedure TSimbaInternalTarget.MouseScroll(Scrolls: Integer);
+procedure TSimbaTarget.MouseScroll(Scrolls: Integer);
 begin
   if HasMethod(@FMethods.MouseScroll, 'MouseScroll') then
     FMethods.MouseScroll(Scrolls);
 end;
 
-procedure TSimbaInternalTarget.KeyDown(Key: KeyCode);
+procedure TSimbaTarget.KeyDown(Key: KeyCode);
 begin
   if HasMethod(@FMethods.KeyDown, 'KeyDown') then
     FMethods.KeyDown(Key);
 end;
 
-procedure TSimbaInternalTarget.KeyUp(Key: KeyCode);
+procedure TSimbaTarget.KeyUp(Key: KeyCode);
 begin
   if HasMethod(@FMethods.KeyDown, 'KeyUp') then
     FMethods.KeyDown(Key);
 end;
 
-procedure TSimbaInternalTarget.KeyPress(Key: KeyCode; KeyPressMin, KeyPressMax: Integer);
+procedure TSimbaTarget.KeyPress(Key: KeyCode; KeyPressMin, KeyPressMax: Integer);
 begin
   KeyDown(Key);
   SimbaNativeInterface.PreciseSleep(RandomLeft(KeyPressMin, KeyPressMax));
   KeyUp(Key);
 end;
 
-procedure TSimbaInternalTarget.KeySend(Text: String; KeyPressMin, KeyPressMax: Integer);
+procedure TSimbaTarget.KeySend(Text: String; KeyPressMin, KeyPressMax: Integer);
 var
   I: Integer;
 begin
@@ -266,13 +296,13 @@ begin
       FMethods.KeySend(Text[I], RandomLeft(KeyPressMin, KeyPressMax), RandomLeft(KeyPressMin, KeyPressMax), RandomLeft(KeyPressMin div 2, KeyPressMax div 2), RandomLeft(KeyPressMin div 2, KeyPressMax div 2));
 end;
 
-function TSimbaInternalTarget.KeyPressed(Key: KeyCode): Boolean;
+function TSimbaTarget.KeyPressed(Key: KeyCode): Boolean;
 begin
   if HasMethod(@FMethods.KeyPressed, 'KeyPressed') then
     Result := FMethods.KeyPressed(Key);
 end;
 
-function TSimbaInternalTarget.ValidateBounds(var Bounds: TBox): Boolean;
+function TSimbaTarget.ValidateBounds(var Bounds: TBox): Boolean;
 var
   Width, Height: Integer;
 begin
@@ -295,13 +325,14 @@ begin
   Result := (Bounds.Width > 0) and (Bounds.Height > 0);
 end;
 
-function TSimbaInternalTarget.GetImageData(var Bounds: TBox; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
+function TSimbaTarget.GetImageData(var Bounds: TBox; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
 begin
+  Data := nil;
   if HasMethod(@FMethods.GetImageData, 'GetImageData') then
     Result := ValidateBounds(Bounds) and FMethods.GetImageData(Bounds.X1, Bounds.Y1, Bounds.Width, Bounds.Height, Data, DataWidth);
 end;
 
-procedure TSimbaInternalTarget.FreeImageData(var Data: PColorBGRA);
+procedure TSimbaTarget.FreeImageData(var Data: PColorBGRA);
 begin
   if (FTargetType in [ETargetType.WINDOW]) then
     FreeMem(Data);

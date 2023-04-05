@@ -57,7 +57,7 @@ type
     constructor Create(AWidth, AHeight: Integer); overload;
     constructor CreateFromFile(FileName: String);
     constructor CreateFromString(AWidth, AHeight: Integer; Str: String);
-    constructor CreateFromData(AWidth, AHeight: Integer; AData: PColorBGRA; CopyData: Boolean = True);
+    constructor CreateFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
     constructor CreateFromWindow(Window: TWindowHandle);
 
     destructor Destroy; override;
@@ -205,7 +205,7 @@ type
     procedure LoadFromFile(FileName: String); overload;
     procedure LoadFromFile(FileName: String; Area: TBox); overload;
     procedure LoadFromString(AWidth, AHeight: Integer; Str: String);
-    procedure LoadFromData(AWidth, AHeight: Integer; AData: PColorBGRA; CopyData: Boolean = True);
+    procedure LoadFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
     procedure LoadFromTBitmap(bmp: TBitmap);
     procedure LoadFromBitmap(Bitmap: TMufasaBitmap);
     procedure LoadFromRawImage(RawImage: TRawImage);
@@ -241,7 +241,7 @@ uses
   fpimage, math, intfgraphics, simba.overallocatearray, simba.geometry,
   simba.tpa,
   simba.bitmap_utils, simba.encoding, simba.compress, simba.math, simba.finder,
-  simba.matchtemplate;
+  simba.matchtemplate, simba.nativeinterface;
 
 function GetDistinctColor(const Color, Index: Integer): Integer; inline;
 const
@@ -304,7 +304,7 @@ begin
     LazIntf.DataDescription := RawImageDesc;
     LazIntf.LoadFromFile(FileName);
 
-    LoadFromData(LazIntf.Width, LazIntf.Height, PColorBGRA(LazIntf.PixelData));
+    LoadFromData(LazIntf.Width, LazIntf.Height, PColorBGRA(LazIntf.PixelData), LazIntf.Width);
   finally
     LazIntf.Free;
   end;
@@ -590,15 +590,20 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.LoadFromData(AWidth, AHeight: Integer; AData: PColorBGRA; CopyData: Boolean);
+procedure TMufasaBitmap.LoadFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
+var
+  Y: Integer;
 begin
-  if CopyData then
+  SetSize(AWidth, AHeight);
+  if (AData = nil) then
+    Exit;
+
+  if (ADataWidth <> AWidth) then
   begin
-    SetSize(AWidth, AHeight);
-    if (AData <> nil) then
-      Move(AData^, FData^, AWidth * AHeight * SizeOf(TColorBGRA));
+    for Y := 0 to AHeight - 1 do
+      Move(AData[Y * ADataWidth], FData[Y * FWidth], FWidth * SizeOf(TColorBGRA))
   end else
-    SetPersistentMemory(PtrUInt(AData), AWidth, AHeight);
+    Move(AData^, FData^, FWidth * FHeight * SizeOf(TColorBGRA));
 end;
 
 procedure TMufasaBitmap.LoadFromRawImage(RawImage: TRawImage);
@@ -2573,30 +2578,27 @@ begin
   LoadFromString(AWidth, AHeight, Str);
 end;
 
-constructor TMufasaBitmap.CreateFromData(AWidth, AHeight: Integer; AData: PColorBGRA; CopyData: Boolean);
+constructor TMufasaBitmap.CreateFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
 begin
   Create();
 
-  LoadFromData(AWidth, AHeight, AData, CopyData);
+  LoadFromData(AWidth, AHeight, AData, ADataWidth);
 end;
 
 constructor TMufasaBitmap.CreateFromWindow(Window: TWindowHandle);
 var
-  Finder: TSimbaFinder;
-  Image: TMufasaBitmap;
+  B: TBox;
+  ImageData: PColorBGRA = nil;
 begin
   Create();
 
-  Finder.SetTargetWindow(Window);
-
-  Image := Finder.GetImage(NullBox);
-  Image.DataOwner := False;
-
-  FWidth := Image.Width;
-  FHeight := Image.Height;
-  FData := Image.FData;
-
-  Image.Free();
+  if SimbaNativeInterface.GetWindowBounds(Window, B) and
+     SimbaNativeInterface.GetWindowImage(Window, 0, 0, B.Width - 1, B.Height - 1, ImageData) then
+  try
+    LoadFromData(B.Width - 1, B.Height - 1, ImageData, B.Width - 1);
+  finally
+    FreeMem(ImageData);
+  end;
 end;
 
 destructor TMufasaBitmap.Destroy;

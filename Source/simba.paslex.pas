@@ -169,6 +169,8 @@ type
     procedure NextID(const ID: EPasToken);
     procedure NextNoJunk;
 
+    function IsNext(const Tok: EPasToken): Boolean;
+
     property LastIdentPos: Integer read FLastIdentPos;
     property LastNoSpace: EPasToken read FLastNoSpace;
     property LastNoSpacePos: Integer read FLastNoSpacePos;
@@ -274,7 +276,7 @@ begin
   FStringLen := ToHash - fToIdent;
 end;
 
-function TPasLexer.KeyComp(const Key: string): boolean;
+function TPasLexer.KeyComp(const Key: string): Boolean;
 var
   I: Integer;
 begin
@@ -909,7 +911,7 @@ begin
   end;
 end;
 
-function TPasLexer.InSymbols(const aChar: Char): boolean;
+function TPasLexer.InSymbols(const aChar: Char): Boolean;
 begin
   Result := aChar in ['#', '$', '&', #39, '(', ')', '*', '+', ',', '.', '/', ':', ';', '<', '=', '>', '@', '[', ']', '^'];
 end;
@@ -1284,6 +1286,15 @@ begin
   repeat
     Next();
   until not (FTokenID in [tkSlashesComment, tkAnsiComment, tkBorComment, tkLineEnding, tkSpace]);
+end;
+
+function TPasLexer.IsNext(const Tok: EPasToken): Boolean;
+begin
+  repeat
+    Next();
+  until (FTokenID in [Tok, tkNull]);
+
+  Result := FTokenID = Tok;
 end;
 
 initialization

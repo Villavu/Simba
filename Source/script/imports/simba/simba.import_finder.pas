@@ -11,69 +11,21 @@ unit simba.import_finder;
 
 interface
 
+uses
+  Classes, SysUtils, Graphics;
+
 implementation
 
 uses
-  classes, sysutils, Graphics,
   lptypes,
   simba.script_compiler, simba.mufasatypes, simba.finder, simba.bitmap, simba.dtm,
-  simba.colormath, simba.colormath_distance, simba.bitmap_finders;
+  simba.colormath, simba.colormath_distance, simba.bitmap_finders, simba.target;
 
 (*
 Finder
 ======
 Find Colors,Images,DTM on a target.
 *)
-
-(*
-TSimbaFinder.SetTargetDesktop
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaFinder.SetTargetDesktop;
-*)
-procedure _LapeSimbaFinder_SetTargetDesktop(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaFinder(Params^[0])^.SetTargetDesktop();
-end;
-
-(*
-TSimbaFinder.SetTargetBitmap
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaFinder.SetTargetBitmap(Bitmap: TMufasaBitmap);
-*)
-procedure _LapeSimbaFinder_SetTargetBitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaFinder(Params^[0])^.SetTargetBitmap(PMufasaBitmap(Params^[1])^);
-end;
-
-(*
-TSimbaFinder.SetTargetWindow
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaFinder.SetTargetWindow(Window: TWindowHandle);
-*)
-procedure _LapeSimbaFinder_SetTargetWindow(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaFinder(Params^[0])^.SetTargetWindow(PWindowHandle(Params^[1])^);
-end;
-
-(*
-TSimbaFinder.SetTargetEIOS
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaFinder.SetTargetEIOS(Plugin, Args: String);
-*)
-procedure _LapeSimbaFinder_SetTargetEIOS(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaFinder(Params^[0])^.SetTargetEIOS(PString(Params^[1])^, PString(Params^[2])^);
-end;
-
-(*
-TSimbaFinder.GetTargetDimensions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaFinder.GetTargetDimensions(out Width, Height: Integer);
-*)
-procedure _LapeSimbaFinder_GetTargetDimensions(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaFinder(Params^[0])^.GetTargetDimensions(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
 
 (*
 TSimbaFinder.FindEdges
@@ -315,22 +267,30 @@ begin
   PPoint(Result)^ := PSimbaFinder(Params^[0])^.FindTemplate(PMufasaBitmap(Params^[1])^, PSingle(Params^[2])^, PBox(Params^[3])^);
 end;
 
-(*
-TSimbaFinder.GetImage
-~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.GetImage(Area: TBox = [-1,-1,-1,-1]): TMufasaBitmap;
-*)
-procedure _LapeSimbaFinder_GetImage(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PMufasaBitmap(Result)^ := PSimbaFinder(Params^[0])^.GetImage(PBox(Params^[1])^);
-end;
-
 procedure _LapeMufasaBitmap_Finder(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaFinder(Result)^ := PMufasaBitmap(Params^[0])^.Finder;
 end;
 
 procedure ImportFinder(Compiler: TSimbaScript_Compiler);
+
+  // If target field is default value, use global target variable.
+  function GetOverrideBody(Name, Params: lpString; isFunction: Boolean): String;
+  begin
+    Result := 'begin'                                                                                                 + LineEnding +
+              '  if Self.Target.IsDefault() then'                                                                     + LineEnding +
+              '    ' + BoolToStr(isFunction, 'Result := ', '') + 'Self.GetGlobalFinder().' + Name + '(' + Params + ')' + LineEnding +
+              '  else'                                                                                                + LineEnding +
+              '    ' + BoolToStr(isFunction, 'Result := ', '') + 'inherited();'                                       + LineEnding +
+              'end;';
+  end;
+
+  procedure addInputMethod(Header: lpString; Addr: Pointer);
+  begin
+    Compiler.addGlobalFunc(Header, Addr);
+    Compiler.addOverrideMethod(Header, @GetOverrideBody);
+  end;
+
 begin
   with Compiler do
   begin
@@ -355,7 +315,8 @@ begin
 
     addGlobalType([
       'packed record',
-      '  InternalData: array[0..' + IntToStr(SizeOf(TSimbaFinder) - 1)  + '] of Byte;',
+      '  Target: TSimbaTarget;',
+      '  InternalData: array[0..' + IntToStr(SizeOf(TSimbaFinder) - SizeOf(TSimbaTarget) - 1)  + '] of Byte;',
       'end;'],
       'TSimbaFinder'
     );
@@ -363,70 +324,50 @@ begin
     with addGlobalVar('TSimbaFinder', '[]', 'Finder') do
       Used := duTrue;
 
-    addGlobalFunc('procedure TSimbaFinder.SetTargetDesktop', @_LapeSimbaFinder_SetTargetDesktop);
-    addGlobalFunc('procedure TSimbaFinder.SetTargetBitmap(Bitmap: TMufasaBitmap)', @_LapeSimbaFinder_SetTargetBitmap);
-    addGlobalFunc('procedure TSimbaFinder.SetTargetWindow(Window: TWindowHandle)', @_LapeSimbaFinder_SetTargetWindow);
-    addGlobalFunc('procedure TSimbaFinder.SetTargetEIOS(Plugin, Args: String)', @_LapeSimbaFinder_SetTargetEIOS);
+    addGlobalFunc(
+      'function TSimbaFinder.GetGlobalFinder: TSimbaFinder;', [
+      'begin',
+      '  Result := Self;',
+      '  Result.Target := System.Target;',
+      'end;'
+    ]);
 
-    addGlobalFunc('procedure TSimbaFinder.GetTargetDimensions(out Width, Height: Integer)', @_LapeSimbaFinder_GetTargetDimensions);
+    addInputMethod('function TSimbaFinder.FindEdges(MinDiff: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindEdges1);
+    addInputMethod('function TSimbaFinder.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindEdges2);
 
-    addGlobalFunc('function TSimbaFinder.FindEdges(MinDiff: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindEdges1);
-    addGlobalFunc('function TSimbaFinder.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindEdges2);
+    addInputMethod('function TSimbaFinder.FindDTM(DTM: TDTM; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray', @_LapeSimbaFinder_FindDTM);
+    addInputMethod('function TSimbaFinder.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray', @_LapeSimbaFinder_FindDTMRotated);
 
-    addGlobalFunc('function TSimbaFinder.FindDTM(DTM: TDTM; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray', @_LapeSimbaFinder_FindDTM);
-    addGlobalFunc('function TSimbaFinder.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray', @_LapeSimbaFinder_FindDTMRotated);
+    addInputMethod('function TSimbaFinder.FindBitmap(Bitmap: TMufasaBitmap; Tolerance: Single; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindBitmap1);
+    addInputMethod('function TSimbaFinder.FindBitmap(Bitmap: TMufasaBitmap; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindBitmap2);
+    addInputMethod('function TSimbaFinder.FindTemplate(Bitmap: TMufasaBitmap; MinMatch: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeSimbaFinder_FindTemplate);
 
-    addGlobalFunc('function TSimbaFinder.FindBitmap(Bitmap: TMufasaBitmap; Tolerance: Single; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindBitmap1);
-    addGlobalFunc('function TSimbaFinder.FindBitmap(Bitmap: TMufasaBitmap; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindBitmap2);
+    addInputMethod('function TSimbaFinder.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TSingleMatrix', @_LapeSimbaFinder_MatchColor);
 
-    addGlobalFunc('function TSimbaFinder.FindTemplate(Bitmap: TMufasaBitmap; MinMatch: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeSimbaFinder_FindTemplate);
+    addInputMethod('function TSimbaFinder.FindColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindColor1);
+    addInputMethod('function TSimbaFinder.FindColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindColor2);
+    addInputMethod('function TSimbaFinder.FindColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindColor3);
 
-    addGlobalFunc('function TSimbaFinder.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TSingleMatrix', @_LapeSimbaFinder_MatchColor);
+    addInputMethod('function TSimbaFinder.CountColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload;', @_LapeSimbaFinder_CountColor1);
+    addInputMethod('function TSimbaFinder.CountColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload;', @_LapeSimbaFinder_CountColor2);
+    addInputMethod('function TSimbaFinder.CountColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload;', @_LapeSimbaFinder_CountColor3);
 
-    addGlobalFunc('function TSimbaFinder.FindColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindColor1);
-    addGlobalFunc('function TSimbaFinder.FindColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindColor2);
-    addGlobalFunc('function TSimbaFinder.FindColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindColor3);
+    addInputMethod('function TSimbaFinder.GetColor(X, Y: Integer): TColor; overload', @_LapeSimbaFinder_GetColor1);
+    addInputMethod('function TSimbaFinder.GetColor(P: TPoint): TColor; overload', @_LapeSimbaFinder_GetColor2);
+    addInputMethod('function TSimbaFinder.GetColors(Points: TPointArray): TIntegerArray', @_LapeSimbaFinder_GetColors);
+    addInputMethod('function TSimbaFinder.GetColorsMatrix(Bounds: TBox = [-1,-1,-1,-1]): TIntegerMatrix', @_LapeSimbaFinder_GetColorsMatrix);
 
-    addGlobalFunc('function TSimbaFinder.CountColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload;', @_LapeSimbaFinder_CountColor1);
-    addGlobalFunc('function TSimbaFinder.CountColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload;', @_LapeSimbaFinder_CountColor2);
-    addGlobalFunc('function TSimbaFinder.CountColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload;', @_LapeSimbaFinder_CountColor3);
+    addInputMethod('function TSimbaFinder.GetPixelDifference(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): Integer; overload', @_LapeSimbaFinder_GetPixelDifference1);
+    addInputMethod('function TSimbaFinder.GetPixelDifference(WaitTime, Tolerance: Integer; Area: TBox = [-1,-1,-1,-1]): Integer; overload', @_LapeSimbaFinder_GetPixelDifference2);
+    addInputMethod('function TSimbaFinder.GetPixelDifferenceTPA(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_GetPixelDifferenceTPA1);
+    addInputMethod('function TSimbaFinder.GetPixelDifferenceTPA(WaitTime, Tolerance: Integer; Area: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_GetPixelDifferenceTPA2);
 
-    addGlobalFunc('function TSimbaFinder.GetColor(X, Y: Integer): TColor; overload', @_LapeSimbaFinder_GetColor1);
-    addGlobalFunc('function TSimbaFinder.GetColor(P: TPoint): TColor; overload', @_LapeSimbaFinder_GetColor2);
-    addGlobalFunc('function TSimbaFinder.GetColors(Points: TPointArray): TIntegerArray', @_LapeSimbaFinder_GetColors);
-    addGlobalFunc('function TSimbaFinder.GetColorsMatrix(Bounds: TBox = [-1,-1,-1,-1]): TIntegerMatrix', @_LapeSimbaFinder_GetColorsMatrix);
-
-    addGlobalFunc('function TSimbaFinder.GetPixelDifference(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): Integer; overload', @_LapeSimbaFinder_GetPixelDifference1);
-    addGlobalFunc('function TSimbaFinder.GetPixelDifference(WaitTime, Tolerance: Integer; Area: TBox = [-1,-1,-1,-1]): Integer; overload', @_LapeSimbaFinder_GetPixelDifference2);
-    addGlobalFunc('function TSimbaFinder.GetPixelDifferenceTPA(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_GetPixelDifferenceTPA1);
-    addGlobalFunc('function TSimbaFinder.GetPixelDifferenceTPA(WaitTime, Tolerance: Integer; Area: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_GetPixelDifferenceTPA2);
-
-    addGlobalFunc('function TSimbaFinder.AverageBrightness(Area: TBox = [-1,-1,-1,-1]): Integer', @_LapeSimbaFinder_AverageBrightness);
-    addGlobalFunc('function TSimbaFinder.PeakBrightness(Area: TBox = [-1,-1,-1,-1]): Integer', @_LapeSimbaFinder_PeakBrightness);
-
-    addGlobalFunc('function TSimbaFinder.GetImage(Area: TBox = [-1,-1,-1,-1]): TMufasaBitmap', @_LapeSimbaFinder_GetImage);
+    addInputMethod('function TSimbaFinder.AverageBrightness(Area: TBox = [-1,-1,-1,-1]): Integer', @_LapeSimbaFinder_AverageBrightness);
+    addInputMethod('function TSimbaFinder.PeakBrightness(Area: TBox = [-1,-1,-1,-1]): Integer', @_LapeSimbaFinder_PeakBrightness);
 
     ImportingSection := 'TMufasaBitmap';
 
     addGlobalFunc('function TMufasaBitmap.Finder: TSimbaFinder', @_LapeMufasaBitmap_Finder);
-    addGlobalFunc(
-      'function TMufasaBitmap.CreateFromFinder(Area: TBox = [-1,-1,-1,-1]): TMufasaBitmap; static; override;', [
-      'begin',
-      '  Result := Finder.GetImage(Area);',
-      'end;'
-    ]);
-    addGlobalFunc(
-      'function TMufasaBitmap.DrawFinder(P: TPoint; Area: TBox = [-1,-1,-1,-1]): TMufasaBitmap;', [
-      'var',
-      '  Image: TMufasaBitmap := TMufasaBitmap.CreateFromFinder(Area);',
-      'begin',
-      '  try',
-      '    Self.DrawBitmap(Image, P);',
-      '  finally',
-      '    Image.Free();',
-      '  end;',
-      'end;'
-    ]);
 
     ImportingSection := '';
   end;

@@ -14,7 +14,7 @@ interface
 uses
   Classes, SysUtils, Graphics,
   simba.mufasatypes, simba.colormath, simba.colormath_distance, simba.bitmap, simba.dtm,
-  simba.finder_color, simba.finder_bitmap, simba.finder_dtm, simba.internaltarget;
+  simba.finder_color, simba.finder_bitmap, simba.finder_dtm, simba.target;
 
 type
   PColorTolerance = ^TColorTolerance;
@@ -28,7 +28,7 @@ type
   PSimbaFinder = ^TSimbaFinder;
   TSimbaFinder = record
   private
-    FTarget: TSimbaInternalTarget;
+    FTarget: TSimbaTarget;
     FColorFinder: TColorFinder;
     FBitmapFinder: TBitmapFinder;
     FDTMFinder: TDTMFinder;
@@ -42,13 +42,6 @@ type
 
     function GetDataAsBitmap(var Bounds: TBox; out Bitmap: TMufasaBitmap): Boolean;
   public
-    procedure SetTargetDesktop;
-    procedure SetTargetWindow(Window: TWindowHandle);
-    procedure SetTargetBitmap(Bitmap: TMufasaBitmap);
-    procedure SetTargetEIOS(Plugin, Args: String);
-
-    procedure GetTargetDimensions(out Width, Height: Integer);
-
     function FindDTM(DTM: TDTM; MaxToFind: Integer; Bounds: TBox): TPointArray;
     function FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer; Bounds: TBox): TPointArray;
 
@@ -82,7 +75,7 @@ type
 
     function FindTemplate(Templ: TMufasaBitmap; MinMatch: Single; Bounds: TBox): TPoint;
 
-    function GetImage(Bounds: TBox): TMufasaBitmap;
+    property Target: TSimbaTarget read FTarget write FTarget;
 
     class operator Initialize(var Self: TSimbaFinder);
   end;
@@ -159,6 +152,9 @@ var
 begin
   Result := 0;
 
+  Writeln(FTarget.FTargetType);
+  WriteLn(Ftarget.FTargetWindow.Handle);
+
   if FTarget.GetImageData(Bounds, Data, DataWidth) then
   try
     Result := FColorFinder.Count(Data, DataWidth, Bounds.Width, Bounds.Height);
@@ -182,31 +178,6 @@ begin
 
     FTarget.FreeImageData(Data);
   end;
-end;
-
-procedure TSimbaFinder.SetTargetDesktop;
-begin
-  FTarget.SetDesktop();
-end;
-
-procedure TSimbaFinder.SetTargetWindow(Window: TWindowHandle);
-begin
-  FTarget.SetWindow(Window);
-end;
-
-procedure TSimbaFinder.SetTargetBitmap(Bitmap: TMufasaBitmap);
-begin
-  FTarget.SetBitmap(Bitmap);
-end;
-
-procedure TSimbaFinder.SetTargetEIOS(Plugin, Args: String);
-begin
-  FTarget.SetEIOS(Plugin, Args);
-end;
-
-procedure TSimbaFinder.GetTargetDimensions(out Width, Height: Integer);
-begin
-  FTarget.GetDimensions(Width, Height);
 end;
 
 function TSimbaFinder.FindDTM(DTM: TDTM; MaxToFind: Integer; Bounds: TBox): TPointArray;
@@ -559,12 +530,6 @@ begin
   finally
     Bitmap.Free();
   end;
-end;
-
-function TSimbaFinder.GetImage(Bounds: TBox): TMufasaBitmap;
-begin
-  if not GetDataAsBitmap(Bounds, Result) then
-    Result := TMufasaBitmap.Create(0, 0);
 end;
 
 class operator TSimbaFinder.Initialize(var Self: TSimbaFinder);
