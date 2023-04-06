@@ -1061,6 +1061,7 @@ function TDeclaration.GetTextNoCommentsSingleLine: String;
 
     while Result.Contains('  ') do
       Result := Result.Replace('  ', ' ');
+    Result := Result.Replace('( ', '(').Replace(' )', ')');
   end;
 
 begin
@@ -1260,7 +1261,7 @@ begin
 
       Continue;
     end else
-    if (Decl is TDeclaration_TypeEnum) then
+    if (Decl.ClassType = TDeclaration_TypeEnum) then
       FGlobals.Extend(TDeclaration_TypeEnum(Decl).Elements);
 
     FGlobals.Add(Decl);

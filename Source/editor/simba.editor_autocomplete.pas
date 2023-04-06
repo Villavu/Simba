@@ -12,7 +12,7 @@ unit simba.editor_autocomplete;
 interface
 
 uses
-  Classes, SysUtils, Graphics, Controls, Forms, LCLType, Types,
+  Classes, SysUtils, Graphics, StdCtrls, Controls, Forms, LCLType, Types, LMessages,
   SynEdit, SynEditTypes, SynCompletion, SynEditKeyCmds, SynEditHighlighter,
   simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_insight;
 
@@ -26,6 +26,7 @@ type
     procedure DoHide; override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
+    procedure WMMouseWheel(var Msg: TLMMouseEvent); message LM_MOUSEWHEEL;
   public
     AutoComplete: TSimbaAutoComplete;
 
@@ -37,7 +38,6 @@ type
     procedure SetBounds(ALeft, ATop, AWidth, AHeight: integer); override;
     procedure EraseBackground(DC: HDC); override;
     procedure Paint; override;
-    procedure RealSetText(const AValue: TCaption); override;
   public
     AutoComplete: TSimbaAutoComplete;
     TextWidth: Integer;
@@ -146,12 +146,6 @@ begin
   AutoComplete.OnPaintItem('', Canvas, AutoComplete.Form.DrawBorderWidth, 0, AutoComplete.Position = Index, Index);
 end;
 
-procedure TSimbaAutoComplete_Hint.RealSetText(const AValue: TCaption);
-begin
-  if (AValue <> '') then
-    inherited;
-end;
-
 constructor TSimbaAutoComplete_Hint.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -234,13 +228,20 @@ begin
   inherited KeyDown(Key, Shift);
 end;
 
+procedure TSimbaAutoComplete_Form.WMMouseWheel(var Msg: TLMMouseEvent);
+begin
+  FHint.Hide();
+
+  inherited;
+end;
+
 constructor TSimbaAutoComplete_Form.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
   if (FItemList <> nil) then
     FItemList.Free();
-  FItemList := TVirtualStringList.Create();
+  FItemList := TVirtualStringList.Create(){%H-};
 
   DrawBorderWidth := 4;
   DrawBorderColor := RGBToColor(240, 240, 240);
@@ -646,10 +647,9 @@ begin
   begin
     Canvas.Brush.Style := bsClear;
 
+    Text := GetHintText(Decl, Canvas = FHintForm.Canvas);
     if (Canvas = FHintForm.Canvas) then
-      Text := FHintForm.Caption
-    else
-      Text := GetHintText(Decl, False);
+      FHintForm.Caption := Text;
 
     Y := Y + FDrawOffsetY;
 
@@ -676,8 +676,7 @@ begin
 
   if (Decl <> nil) then
   begin
-    FHintForm.Caption := GetHintText(Decl, True);
-    FHintForm.TextWidth := FColumnWidth + Measure(Decl.Name, True) + Measure(FHintForm.Caption, False) + FForm.DrawBorderWidth;
+    FHintForm.TextWidth := FColumnWidth + Measure(Decl.Name, True) + Measure(GetHintText(Decl, True), False) + FForm.DrawBorderWidth;
 
     // Either clip to screen right or main form right, whatever is more right.
     MaxRight := Max(Application.MainForm.BoundsRect.Right, FForm.Monitor.BoundsRect.Right);

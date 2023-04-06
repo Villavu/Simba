@@ -21,12 +21,15 @@ type
     FCount: Integer;
 
     function GetString: String;
+    function GetPeek: Char;
   public
     class operator Initialize(var Self: TSimbaStringBuilder);
 
     procedure Append(const Str: String);
     procedure AppendLine(const Str: String);
     property Str: String read GetString;
+    property Count: Integer read FCount;
+    property Peek: Char read GetPeek;
   end;
 
 implementation
@@ -39,6 +42,13 @@ end;
 function TSimbaStringBuilder.GetString: String;
 begin
   Result := Copy(FData, 1, FCount);
+end;
+
+function TSimbaStringBuilder.GetPeek: Char;
+begin
+  if (FCount = 0) then
+    Exit(#0);
+  Result := FData[FCount + 1];
 end;
 
 procedure TSimbaStringBuilder.Append(const Str: String);
