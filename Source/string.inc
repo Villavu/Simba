@@ -1097,8 +1097,6 @@ begin
   Result := False;
 end;
 
-
-
 operator *(const Left: Char; Right: Int32): String;
 var
   i: Integer;
