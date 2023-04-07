@@ -21,21 +21,26 @@ Input (Mouse & Keyboard) related methods.
 | Key codes and mouse buttons are both **scoped** enums.
 | For scoped a enum you **must** include the type of the enum.
 
-Example::
+Example:
 
+```
   MouseButton.LEFT
   KeyCode.A
+```
 
-Available Mouse Buttons::
+Available Mouse Buttons:
 
+```
   MouseButton.LEFT
   MouseButton.RIGHT
   MouseButton.MIDDLE
   MouseButton.SCROLL_UP
   MouseButton.SCROLL_DOWN
+```
 
-Available Key Codes::
+Available Key Codes:
 
+```
   KeyCode.UNKNOWN
   KeyCode.LBUTTON
   KeyCode.RBUTTON
@@ -199,6 +204,7 @@ Available Key Codes::
   KeyCode.EREOF
   KeyCode.PLAY
   KeyCode.ZOOM
+```
 *)
 
 (*

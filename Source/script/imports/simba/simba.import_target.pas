@@ -24,6 +24,8 @@ Target related methods.
 TSimbaTarget.SetDesktop
 ~~~~~~~~~~~~~~~~~~~~~~~
 procedure TSimbaTarget.SetDesktop;
+
+Sets the desktop as the target.
 *)
 procedure _LapeSimbaTarget_SetDesktop(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -36,6 +38,8 @@ TSimbaTarget.SetBitmap
 procedure TSimbaTarget.SetBitmap(Bitmap: TMufasaBitmap);
 
 Sets the bitmap as a target.
+
+Note: Ownership of the bitmap is **not** taken. Make sure you do not free the bitmap while using this target.
 *)
 procedure _LapeSimbaTarget_SetBitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -46,6 +50,8 @@ end;
 TSimbaTarget.SetWindow
 ~~~~~~~~~~~~~~~~~~~~~~
 procedure TSimbaTarget.SetWindow(Window: TWindowHandle);
+
+Sets a window handle as a target.
 *)
 procedure _LapeSimbaTarget_SetWindow(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -56,6 +62,8 @@ end;
 TSimbaTarget.SetEIOS
 ~~~~~~~~~~~~~~~~~~~~
 procedure TSimbaTarget.SetEIOS(Plugin, Args: String);
+
+Sets a plugin (via EIOS API) as the target.
 *)
 procedure _LapeSimbaTarget_SetEIOS(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -200,9 +208,9 @@ begin
 
     addGlobalType([
       'packed record',
-      '{%CODETOOLS OFF}',
+      '  {%CODETOOLS OFF}',
       '  InternalData: array[0..' + IntToStr(SizeOf(TSimbaTarget) - 1)  + '] of Byte;',
-      '{%CODETOOLS ON}',
+      '  {%CODETOOLS ON}',
       'end;'],
       'TSimbaTarget'
     );

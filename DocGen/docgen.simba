@@ -65,6 +65,97 @@ Welcome to Simba documentation
 
 ";
 
+function Indent(Str: String; Size: Integer): String;
+var
+  Line: String;
+begin
+  for Line in Str.Split(LineEnding) do
+    Result := Result + (#32 * Size) + Line + LineEnding;
+end;
+
+// Code block to sphinx .. code-block::
+{
+```
+This is a code block
+```
+}
+procedure MakeCodeBlock(var Str: String);
+var
+  Start, Stop: Integer;
+  Block: String;
+begin
+  Start := 1;
+  while ((Start := Str.IndexOf('```', Start)) > 0) do
+  begin
+    Stop := Str.IndexOf('```', Start + 3) + 3;
+    if (Stop <= 3) then
+      Break;
+
+    Block := Str.CopyRange(Start, Stop);
+
+    Str.Delete(Start, Block.Length());
+    Str.Insert('.. code-block::' + (LineEnding * 2) + Indent(Block.Trim([#96, #10, #13]), 4), Start);
+
+    Start := Stop;
+  end;
+end;
+
+//Inline code to sphinx :code:
+{
+ This is `inline` code
+}
+procedure MakeInlineCode(var Str: String);
+var
+  Start, Stop: Integer;
+  Block: String;
+begin
+  Start := 1;
+  while ((Start := Str.IndexOf('`', Start)) > 0) do
+  begin
+    Stop := Str.IndexOf('`', Start + 1) + 1;
+    if (Stop <= 1) then
+      Break;
+
+    Str.Insert(':code:', Start);
+
+    Start := Stop + 6;
+  end;
+end;
+
+// Header to code block
+{
+Test
+****
+procedure Test;
+}
+procedure MakeCodeHeaders(var Str: String);
+var
+  Start, Stop: Integer;
+  P: Integer;
+  Header: String;
+begin
+  Start := 1;
+
+  for Header in ['function', 'procedure', 'operator', 'var', 'const'] do
+  begin
+    Start := 1;
+
+    while ((Start := Str.IndexOf(Header, Start)) > 0) do
+    begin
+      if Str.Copy(Start - Length(LineEnding), Length(LineEnding)) = LineEnding then
+      begin
+        Str.Insert('```', Start);
+        Start :=  Str.IndexOf(LineEnding, Start);
+        if (Start = 0) then
+          Exit;
+        Str.Insert('```', Start);
+      end;
+
+      Start += 1;
+    end;
+  end;
+end;
+
 function ParseComments(FileName, Name: String): Boolean;
 var
   Str, Comments: String;
@@ -79,12 +170,13 @@ begin
   Result := Length(Comments) > 0;
   if Result then
   begin
-    for Str in ['function', 'procedure', 'operator', 'type', 'var', 'const'] do
-      Comments := Comments.Replace(LineEnding + Str + ' ', LineEnding + '::' + LineEnding +  LineEnding + '  ' + Str + ' ');
+    MakeCodeHeaders(Comments);
+    MakeCodeBlock(Comments);
+    MakeInlineCode(Comments);
 
-    Comments := Comments.Replace('Image::', '.. figure::');
-    Comments := Comments.Replace('Note::', '.. note::');
-    Comments := Comments.Replace('Warning::', '.. warning::');
+    Comments := Comments.Replace('Image:', '.. figure::');
+    Comments := Comments.Replace('Note:', '.. note::');
+    Comments := Comments.Replace('Warning:', '.. warning::');
 
     WriteFileContents(INPUT_DIR + Name + '.rst', Comments);
     AppendFileContents(INPUT_DIR + 'index.rst', '   ' + Name + LineEnding);
@@ -111,8 +203,10 @@ end;
 var
   Str: String;
 begin
-  CreateDirectory(INPUT_DIR);
+  ClearDebug();
+
   CreateDirectory(OUTPUT_DIR);
+  CreateDirectory(INPUT_DIR);
   DeleteDirectory(INPUT_DIR, True);
 
   WriteFileContents(INPUT_DIR + 'index.rst', TOC_FILE);

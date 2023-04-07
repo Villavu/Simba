@@ -18,6 +18,7 @@ type
 (*
 TMufasaBitmap
 =============
+TMufasaBitmap is an Image data type.
 *)
 
 (*
@@ -1219,9 +1220,11 @@ procedure TMufasaBitmap.DebugUnfreedBitmaps(Directory: String); static;
 
 Saves unfreed bitmaps on script terminate.
 
-Example::
+Example:
 
+```
   TMufasaBitmap.DebugUnfreedBitmaps('some/directory/');
+```
 *)
 procedure _LapeMufasaBitmap_DebugUnfreedBitmaps(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin

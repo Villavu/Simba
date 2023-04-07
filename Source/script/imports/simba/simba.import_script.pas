@@ -144,12 +144,14 @@ Runs a simba script and instantly returns the scripts PID.
 - The script output will be printed normally.
 - The script PID can be used with process methods.
 
-Example::
+Example:
 
+```
   PID := RunScript('script.simba', []);
   while IsProcessRunning(PID) do
     Sleep(100);
   WriteLn('Script finished!');
+```
 *)
 procedure _LapeRunScriptEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -164,12 +166,14 @@ function RunScriptOutputToFile(Script: String; Parameters: TStringArray; OutputF
 - The script output will be redirected to the file `OutputFileName`
 - The script PID can be used with process methods.
 
-Example::
+Example:
 
+```
   PID := RunScriptOutputToFile('script.simba', [], 'output.txt');
   while IsProcessRunning(PID) do
     Sleep(100);
   WriteLn('Script finished!');
+```
 *)
 procedure _LapeRunScriptOutputToFile(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -214,38 +218,6 @@ begin
       '  Halt();',
       'end;'
     ]);
-
-    //addDelayedCode([
-    //  'procedure SetTargetWindow(Window: TWindowHandle);',
-    //  'begin',
-    //  '  Input.SetTargetWindow(Window);',
-    //  '  Finder.SetTargetWindow(Window);',
-    //  'end;'
-    //]);
-    //
-    // addDelayedCode([
-    //  'procedure SetTargetEIOS(Plugin: String; Args: String);',
-    //  'begin',
-    //  '  Input.SetTargetEIOS(Plugin, Args);',
-    //  '  Finder.SetTargetEIOS(Plugin, Args);',
-    //  'end;'
-    //]);
-    //
-    // addDelayedCode([
-    //   'procedure SetTargetBitmap(Bitmap: TMufasaBitmap);',
-    //   'begin',
-    //   '  Input.SetTargetBitmap(Bitmap);',
-    //   '  Finder.SetTargetBitmap(Bitmap);',
-    //   'end;'
-    // ]);
-    //
-    // addDelayedCode([
-    //   'procedure SetTargetDesktop;',
-    //   'begin',
-    //   '  Input.SetTargetDesktop();',
-    //   '  Finder.SetTargetDesktop();',
-    //   'end;'
-    // ]);
 
     ImportingSection := '';
 
