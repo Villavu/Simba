@@ -60,6 +60,12 @@ type
     procedure ChangeTarget(TargetType: ETargetType);
     function HasMethod(Method: PMethod; Name: String): Boolean;
   public
+    function IsWindowTarget: Boolean; overload;
+    function IsWindowTarget(out Window: TWindowHandle): Boolean; overload;
+    function IsBitmapTarget: Boolean; overload;
+    function IsBitmapTarget(out Bitmap: TMufasaBitmap): Boolean; overload;
+    function IsEIOSTarget: Boolean;
+
     function IsValid: Boolean;
     function IsFocused: Boolean;
     function Focus: Boolean;
@@ -111,6 +117,35 @@ begin
     raise Exception.CreateFmt('Target "%s" cannot %s', [TargetName[FTargetType], Name]);
 
   Result := True;
+end;
+
+function TSimbaTarget.IsWindowTarget: Boolean;
+begin
+  Result := FTargetType = ETargetType.WINDOW;
+end;
+
+function TSimbaTarget.IsWindowTarget(out Window: TWindowHandle): Boolean;
+begin
+  Result := FTargetType = ETargetType.WINDOW;
+  if Result then
+    Window := FTargetWindow.Handle;
+end;
+
+function TSimbaTarget.IsBitmapTarget: Boolean;
+begin
+  Result := FTargetType = ETargetType.BITMAP;
+end;
+
+function TSimbaTarget.IsBitmapTarget(out Bitmap: TMufasaBitmap): Boolean;
+begin
+  Result := FTargetType = ETargetType.BITMAP;
+  if Result then
+    Bitmap := FTargetBitmap.Bitmap;
+end;
+
+function TSimbaTarget.IsEIOSTarget: Boolean;
+begin
+  Result := FTargetType = ETargetType.EIOS;
 end;
 
 function TSimbaTarget.IsValid: Boolean;

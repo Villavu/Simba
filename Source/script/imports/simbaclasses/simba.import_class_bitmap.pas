@@ -43,7 +43,7 @@ end;
 (*
 TMufasaBitmap.GetData
 ~~~~~~~~~~~~~~~~~~~~~
-function TMufasaBitmap.GetData: PRGB32;
+function TMufasaBitmap.GetData: PColorBGRA;
 *)
 procedure _LapeMufasaBitmap_Data_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -438,16 +438,6 @@ function TMufasaBitmap.ToMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix;
 procedure _LapeMufasaBitmap_ToMatrixEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PIntegerMatrix(Result)^ := PMufasaBitmap(Params^[0])^.ToMatrix(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
-end;
-
-(*
-TMufasaBitmap.ToGreyMatrix
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TMufasaBitmap.ToGreyMatrix: TByteMatrix;
-*)
-procedure _LapeMufasaBitmap_ToGreyMatrix(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PByteMatrix(Result)^ := PMufasaBitmap(Params^[0])^.ToGreyMatrix();
 end;
 
 (*
@@ -1262,12 +1252,42 @@ end;
 TMufasaBitmap.Finder
 ~~~~~~~~~~~~~~~~~~~~
 function TMufasaBitmap.Finder: TSimbaFinder;
+
+Returns a TSimbaFinder targetted to the bitmap.
 *)
-// Done in simba.import_finder
-//procedure _LapeMufasaBitmap_Finder(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-//begin
-//  PSimbaFinder(Result)^ := PMufasaBitmap(Params^[0])^.Finder;
-//end;
+
+(*
+TMufasaBitmap.CreateFromTarget
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function TMufasaBitmap.CreateFromTarget(Target: TSimbaTarget; Bounds: TBox = [-1,-1,-1,-1]): TMufasaBitmap; static;
+
+Creates a bitmap from the given target and bounds.
+
+- The **Bounds** parameter defaults to the entire target.
+*)
+
+(*
+TMufasaBitmap.CreateFromTarget
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function TMufasaBitmap.CreateFromTarget(Bounds: TBox = [-1,-1,-1,-1]): TMufasaBitmap; static;
+
+Creates a bitmap from the bounds of the current target.
+
+- Current target is the global **Target** variable
+- The **Bounds** parameter defaults to the entire target.
+*)
+
+(*
+TMufasaBitmap.DrawTarget
+~~~~~~~~~~~~~~~~~~~~~~~~
+procedure TMufasaBitmap.DrawTarget(Target: TSimbaTarget; P: TPoint; Bounds: TBox = [-1,-1,-1,-1]);
+*)
+
+(*
+TMufasaBitmap.DrawTarget
+~~~~~~~~~~~~~~~~~~~~~~~~
+procedure TMufasaBitmap.DrawTarget(P: TPoint; Bounds: TBox = [-1,-1,-1,-1]); overload;
+*)
 
 procedure ImportBitmap(Compiler: TSimbaScript_Compiler);
 begin
@@ -1403,7 +1423,6 @@ begin
     addGlobalFunc('function TMufasaBitmap.GetColors: TIntegerArray;', @_LapeMufasaBitmap_GetColors);
     addGlobalFunc('function TMufasaBitmap.ToMatrix: TIntegerMatrix; overload', @_LapeMufasaBitmap_ToMatrix);
     addGlobalFunc('function TMufasaBitmap.ToMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix; overload', @_LapeMufasaBitmap_ToMatrixEx);
-    addGlobalFunc('function TMufasaBitmap.ToGreyMatrix: TByteMatrix;', @_LapeMufasaBitmap_ToGreyMatrix);
     addGlobalFunc('procedure TMufasaBitmap.ThresholdAdaptive(Alpha, Beta: Byte; AInvert: Boolean; Method: TBmpThreshMethod; k: Integer);', @_LapeMufasaBitmap_ThresholdAdaptive);
     addGlobalFunc('procedure TMufasaBitmap.ThresholdSauvola(Radius: Integer; AInvert: Boolean; k: Single);', @_LapeMufasaBitmap_ThresholdSauvola);
     addGlobalFunc('procedure TMufasaBitmap.Pad(Amount: Integer)', @_LapeMufasaBitmap_Pad);
