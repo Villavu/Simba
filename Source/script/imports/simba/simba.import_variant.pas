@@ -47,26 +47,26 @@ procedure _LapeVariantVarType(const Params: PParamArray; const Result: Pointer);
   function GetVarType(const v: Variant): EVariantType;
   begin
     case VarType(v) of
-      varboolean:  Result := EVariantType.Boolean;
+      varBoolean:  Result := EVariantType.Boolean;
 
-      varshortint: Result := EVariantType.Int8;
-      varsmallint: Result := EVariantType.Int16;
-      varinteger:  Result := EVariantType.Int32;
-      varint64:    Result := EVariantType.Int64;
+      varShortInt: Result := EVariantType.Int8;
+      varSmallInt: Result := EVariantType.Int16;
+      varInteger:  Result := EVariantType.Int32;
+      varInt64:    Result := EVariantType.Int64;
 
-      varbyte:     Result := EVariantType.UInt8;
-      varword:     Result := EVariantType.UInt16;
-      varlongword: Result := EVariantType.UInt32;
-      varqword:    Result := EVariantType.UInt64;
+      varByte:     Result := EVariantType.UInt8;
+      varWord:     Result := EVariantType.UInt16;
+      varLongWord: Result := EVariantType.UInt32;
+      varQWord:    Result := EVariantType.UInt64;
 
-      varsingle:   Result := EVariantType.Single;
-      vardouble:   Result := EVariantType.Double;
-      vardate:     Result := EVariantType.DateTime;
-      varcurrency: Result := EVariantType.Currency;
+      varSingle:   Result := EVariantType.Single;
+      varDouble:   Result := EVariantType.Double;
+      varDate:     Result := EVariantType.DateTime;
+      varCurrency: Result := EVariantType.Currency;
 
-      varolestr:   Result := EVariantType.WString;
-      varustring:  Result := EVariantType.UString;
-      varstring:   Result := EVariantType.AString;
+      varOleStr:   Result := EVariantType.WString;
+      varUString:  Result := EVariantType.UString;
+      varString:   Result := EVariantType.AString;
       else
         Result := EVariantType.Unknown;
     end;
@@ -133,9 +133,11 @@ function Variant.Null: Variant; static;
 
 Static method that returns a null variant variable.
 
-Example::
+Example:
 
+```
   v := Variant.Null;
+```
 *)
 procedure _LapeVariantNull(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -149,10 +151,12 @@ function Variant.Unassigned: Variant; static;
 
 Static method that returns a unassigned variant variable.
 
-Example::
+Example:
 
+```
   if (v = Variant.Unassigned) then
     WriteLn('The variant has not been assigned to!');
+```
 *)
 procedure _LapeVariantUnassigned(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin

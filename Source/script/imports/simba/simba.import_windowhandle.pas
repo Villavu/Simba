@@ -15,9 +15,11 @@ Window Handle
 =============
 TWindowHandle stores a handle to a native window with methods for simple window manipulation.
 
-Example::
+Example:
 
-  var Win: TWindowHandle;
+```
+  var
+    Win: TWindowHandle;
   begin
     Win := GetActiveWindow();
     WriteLn('Active window: ');
@@ -25,6 +27,7 @@ Example::
     Writeln('PID:    ', Win.GetPID());
     WriteLn('Bounds: ', Win.GetBounds());
   end;
+```
 *)
 
 (*

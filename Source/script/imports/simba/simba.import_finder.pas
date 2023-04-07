@@ -316,7 +316,9 @@ begin
     addGlobalType([
       'packed record',
       '  Target: TSimbaTarget;',
+      '  {%CODETOOLS OFF}',
       '  InternalData: array[0..' + IntToStr(SizeOf(TSimbaFinder) - SizeOf(TSimbaTarget) - 1)  + '] of Byte;',
+      '  {%CODETOOLS ON}',
       'end;'],
       'TSimbaFinder'
     );

@@ -197,9 +197,10 @@ begin
   PPoint(Result)^ := PPoint(Params^[0])^ * PDouble(Params^[1])^;
 end;
 
+
 (*
-TPoint *=
-~~~~~~~~~
+TPoint \*=
+~~~~~~~~~~
 operator *= (var L: TPoint; R: Double): TPoint;
 *)
 procedure _LapePoint_MultiplyAssign_Double(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
