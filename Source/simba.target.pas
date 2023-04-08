@@ -86,13 +86,11 @@ type
     procedure MouseTeleport(P: TPoint);
     procedure MouseUp(Button: MouseButton);
     procedure MouseDown(Button: MouseButton);
-    procedure MouseClick(Button: MouseButton; ClickPressMin, ClickPressMax: Integer);
     procedure MouseScroll(Scrolls: Integer);
 
     procedure KeyDown(Key: KeyCode);
     procedure KeyUp(Key: KeyCode);
-    procedure KeyPress(Key: KeyCode; KeyPressMin, KeyPressMax: Integer);
-    procedure KeySend(Text: String; KeyPressMin, KeyPressMax: Integer);
+    procedure KeySend(Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
     function KeyPressed(Key: KeyCode): Boolean;
 
     function ValidateBounds(var Bounds: TBox): Boolean;
@@ -290,13 +288,6 @@ begin
     FMethods.MouseDown(Button);
 end;
 
-procedure TSimbaTarget.MouseClick(Button: MouseButton; ClickPressMin, ClickPressMax: Integer);
-begin
-  MouseDown(Button);
-  SimbaNativeInterface.PreciseSleep(RandomLeft(ClickPressMin, ClickPressMax));
-  MouseUp(Button);
-end;
-
 procedure TSimbaTarget.MouseScroll(Scrolls: Integer);
 begin
   if HasMethod(@FMethods.MouseScroll, 'MouseScroll') then
@@ -315,20 +306,10 @@ begin
     FMethods.KeyDown(Key);
 end;
 
-procedure TSimbaTarget.KeyPress(Key: KeyCode; KeyPressMin, KeyPressMax: Integer);
-begin
-  KeyDown(Key);
-  SimbaNativeInterface.PreciseSleep(RandomLeft(KeyPressMin, KeyPressMax));
-  KeyUp(Key);
-end;
-
-procedure TSimbaTarget.KeySend(Text: String; KeyPressMin, KeyPressMax: Integer);
-var
-  I: Integer;
+procedure TSimbaTarget.KeySend(Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
 begin
   if HasMethod(@FMethods.KeySend, 'KeySend') then
-    for I := 1 to Length(Text) do
-      FMethods.KeySend(Text[I], RandomLeft(KeyPressMin, KeyPressMax), RandomLeft(KeyPressMin, KeyPressMax), RandomLeft(KeyPressMin div 2, KeyPressMax div 2), RandomLeft(KeyPressMin div 2, KeyPressMax div 2));
+    FMethods.KeySend(Key, KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime);
 end;
 
 function TSimbaTarget.KeyPressed(Key: KeyCode): Boolean;
