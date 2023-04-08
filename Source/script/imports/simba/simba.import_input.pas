@@ -231,6 +231,8 @@ end;
 TSimbaInput.MouseTeleport
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 procedure TSimbaInput.MouseTeleport(P: TPoint);
+
+Instantly moves the mouse to `P`
 *)
 procedure _LapeSimbaInput_MouseTeleport(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -275,6 +277,22 @@ procedure TSimbaInput.MouseScroll(Scrolls: Integer);
 procedure _LapeSimbaInput_MouseScroll(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.MouseScroll(PInteger(Params^[1])^);
+end;
+
+(*
+TSimbaInput.MouseMove
+~~~~~~~~~~~~~~~~~~~~~
+procedure TSimbaInput.MouseMove(Dest: TPoint);
+
+Move the mouse in a human-like way.
+
+Speed, Gravity and Wind variables affects this.
+
+Note: The algorithm used is WindMouse. For more details see <https://ben.land/post/2021/04/25/windmouse-human-mouse-movement>
+*)
+procedure _LapeSimbaInput_MouseMove(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaInput(Params^[0])^.MouseMove(PPoint(Params^[1])^);
 end;
 
 (*
@@ -370,6 +388,10 @@ begin
       '',
       '  MinClickTime: Integer;',
       '  MaxClickTime: Integer;',
+      '',
+      '  Speed: Integer;',
+      '  Gravity: Double;',
+      '  Wind: Double;',
       'end;'],
       'TSimbaInput'
     );
@@ -567,6 +589,7 @@ begin
     addInputMethod('procedure TSimbaInput.MouseDown(Button: MouseButton)', @_LapeSimbaInput_MouseDown);
     addInputMethod('procedure TSimbaInput.MouseUp(Button: MouseButton)', @_LapeSimbaInput_MouseUp);
     addInputMethod('procedure TSimbaInput.MouseScroll(Scrolls: Integer)', @_LapeSimbaInput_MouseScroll);
+    addInputMethod('procedure TSimbaInput.MouseMove(Dest: TPoint);', @_LapeSimbaInput_MouseMove);
 
     addInputMethod('procedure TSimbaInput.KeySend(Text: String)', @_LapeSimbaInput_KeySend);
     addInputMethod('procedure TSimbaInput.KeyPress(Key: KeyCode)', @_LapeSimbaInput_KeyPress);

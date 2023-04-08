@@ -22,14 +22,19 @@ type
 
     DEFAULT_CLICK_MIN = 40;
     DEFAULT_CLICK_MAX = 220;
+
+    DEFAULT_SPEED   = 12;
+    DEFAULT_GRAVITY = 9;
+    DEFAULT_WIND    = 6;
   private
     FTarget: TSimbaTarget;
 
-    function GetKeyPressMin: Integer;
-    function GetKeyPressMax: Integer;
+    function GetRandomKeyPressTime: Integer;
+    function GetRandomMouseClickTime: Integer;
 
-    function GetClickPressMin: Integer;
-    function GetClickPressMax: Integer;
+    function GetSpeed: Integer;
+    function GetGravity: Double;
+    function GetWind: Double;
   public
     KeyPressMin: Integer;
     KeyPressMax: Integer;
@@ -37,14 +42,20 @@ type
     MouseClickMin: Integer;
     MouseClickMax: Integer;
 
+    Speed: Integer;
+    Gravity: Double;
+    Wind: Double;
+
     function IsTargetValid: Boolean;
     function IsFocused: Boolean;
     function Focus: Boolean;
 
     function MousePosition: TPoint;
     function MousePressed(Button: MouseButton): Boolean;
+    procedure MouseMove(Dest: TPoint);
     procedure MouseClick(Button: MouseButton);
-    procedure MouseTeleport(P: TPoint);
+    procedure MouseTeleport(X, Y: Integer); overload;
+    procedure MouseTeleport(P: TPoint); overload;
     procedure MouseDown(Button: MouseButton);
     procedure MouseUp(Button: MouseButton);
     procedure MouseScroll(Scrolls: Integer);
@@ -63,34 +74,47 @@ type
 implementation
 
 uses
-  simba.nativeinterface;
+  Math,
+  simba.nativeinterface, simba.random;
 
-function TSimbaInput.GetKeyPressMin: Integer;
+function TSimbaInput.GetRandomKeyPressTime: Integer;
 begin
-  Result := KeyPressMin;
-  if (Result = 0) then
-    Result := DEFAULT_KEY_PRESS_MIN;
+  if (KeyPressMin = 0) and (KeyPressMax = 0) then
+    Result := RandomLeft(DEFAULT_KEY_PRESS_MIN, DEFAULT_KEY_PRESS_MAX)
+  else
+    Result := RandomLeft(KeyPressMin, KeyPressMax);
 end;
 
-function TSimbaInput.GetKeyPressMax: Integer;
+function TSimbaInput.GetRandomMouseClickTime: Integer;
 begin
-  Result := KeyPressMax;
-  if (Result = 0) then
-    Result := DEFAULT_KEY_PRESS_MAX;
+  if (MouseClickMin = 0) and (MouseClickMax = 0) then
+    Result := RandomLeft(DEFAULT_CLICK_MIN, DEFAULT_CLICK_MAX)
+  else
+    Result := RandomLeft(MouseClickMin, MouseClickMax);
 end;
 
-function TSimbaInput.GetClickPressMin: Integer;
+function TSimbaInput.GetSpeed: Integer;
 begin
-  Result := MouseClickMin;
-  if (Result = 0) then
-    Result := DEFAULT_CLICK_MIN;
+  if (Speed = 0) then
+    Result := DEFAULT_SPEED
+  else
+    Result := Speed;
 end;
 
-function TSimbaInput.GetClickPressMax: Integer;
+function TSimbaInput.GetGravity: Double;
 begin
-  Result := MouseClickMax;
-  if (Result = 0) then
-    Result := DEFAULT_CLICK_MAX;
+  if (Gravity = 0) then
+    Result := DEFAULT_GRAVITY
+  else
+    Result := Gravity;
+end;
+
+function TSimbaInput.GetWind: Double;
+begin
+  if (Wind = 0) then
+    Result := DEFAULT_WIND
+  else
+    Result := Wind;
 end;
 
 function TSimbaInput.IsTargetValid: Boolean;
@@ -118,9 +142,108 @@ begin
   Result := FTarget.MousePressed(Button);
 end;
 
+procedure TSimbaInput.MouseMove(Dest: TPoint);
+
+  // Credit: BenLand100 (https://github.com/BenLand100/SMART/blob/master/src/EventNazi.java#L201)
+  procedure WindMouse(xs, ys, xe, ye, gravity, wind, minWait, maxWait, maxStep, targetArea: Double);
+  const
+    SQRT_3 = Double(1.73205080756888);
+    SQRT_5 = Double(2.23606797749979);
+  var
+    x, y: Double;
+    veloX, veloY, windX, windY, veloMag, randomDist, step, idle: Double;
+    traveledDistance, remainingDistance: Double;
+  begin
+    veloX := 0; veloY := 0;
+    windX := 0; windY := 0;
+
+    x := xs;
+    y := ys;
+
+    while True do
+    begin
+      traveledDistance := Hypot(x - xs, y - ys);
+      remainingDistance := Hypot(x - xe, y - ye);
+      if (remainingDistance <= 1) then
+        Break;
+
+      wind := Min(wind, remainingDistance);
+      windX := windX / SQRT_3 + (Random(Round(wind) * 2 + 1) - wind) / SQRT_5;
+      windY := windY / SQRT_3 + (Random(Round(wind) * 2 + 1) - wind) / SQRT_5;
+
+      if (remainingDistance < targetArea) then
+        step := (remainingDistance / 2) + (Random() * 6 - 3)
+      else
+      if (traveledDistance < targetArea) then
+      begin
+        if (traveledDistance < 3) then
+          traveledDistance := 10 * Random();
+
+        step := traveledDistance * (1 + Random() * 3);
+      end else
+        step := maxStep;
+
+      step := Min(step, maxStep);
+      if (step < 3) then
+        step := 3 + (Random() * 3);
+
+      veloX := veloX + windX;
+      veloY := veloY + windY;
+      veloX := veloX + gravity * (xe - x) / remainingDistance;
+      veloY := veloY + gravity * (ye - y) / remainingDistance;
+
+      if (Hypot(veloX, veloY) > step) then
+      begin
+        randomDist := step / 3.0 + (step / 2 * Random());
+
+        veloMag := sqrt(veloX * veloX + veloY * veloY);
+        veloX := (veloX / veloMag) * randomDist;
+        veloY := (veloY / veloMag) * randomDist;
+      end;
+
+      idle := (maxWait - minWait) * (Hypot(veloX, veloY) / maxStep) + minWait;
+
+      x := x + veloX;
+      y := y + veloY;
+
+      Self.MouseTeleport(Round(x), Round(y));
+
+      SimbaNativeInterface.PreciseSleep(Round(idle));
+    end;
+
+    Self.MouseTeleport(Round(xe), Round(ye));
+  end;
+
+var
+  Start: TPoint;
+  RandSpeed, Exponential: Double;
+begin
+  Start := MousePosition();
+
+  // Further the distance the faster we move.
+  Exponential := Power(Hypot(Start.X - Dest.X, Start.Y - Dest.Y), 0.33) / 10;
+
+  RandSpeed := RandomLeft(GetSpeed(), GetSpeed() * 1.65);
+  RandSpeed *= Exponential;
+  RandSpeed /= 10;
+
+  WindMouse(
+    Start.X, Start.Y, Dest.X, Dest.Y,
+    GetGravity(), GetWind(),
+    5 / RandSpeed, 10 / RandSpeed, 20 * RandSpeed, 20 * RandSpeed
+  );
+end;
+
 procedure TSimbaInput.MouseClick(Button: MouseButton);
 begin
-  FTarget.MouseClick(Button, GetClickPressMin(), GetClickPressMax());
+  FTarget.MouseDown(Button);
+  SimbaNativeInterface.PreciseSleep(GetRandomMouseClickTime());
+  FTarget.MouseUp(Button);
+end;
+
+procedure TSimbaInput.MouseTeleport(X, Y: Integer);
+begin
+  FTarget.MouseTeleport(TPoint.Create(X, Y));
 end;
 
 procedure TSimbaInput.MouseTeleport(P: TPoint);
@@ -144,13 +267,18 @@ begin
 end;
 
 procedure TSimbaInput.KeySend(Text: String);
+var
+  I: Integer;
 begin
-  FTarget.KeySend(Text, GetKeyPressMin(), GetKeyPressMax());
+  for I := 1 to Length(Text) do
+    FTarget.KeySend(Text[I], GetRandomKeyPressTime() div 2, GetRandomKeyPressTime() div 2, GetRandomKeyPressTime() div 2, GetRandomKeyPressTime() div 2);
 end;
 
 procedure TSimbaInput.KeyPress(Key: KeyCode);
 begin
-  FTarget.KeyPress(Key, GetKeyPressMin(), GetKeyPressMax());
+  FTarget.KeyDown(Key);
+  SimbaNativeInterface.PreciseSleep(GetRandomKeyPressTime());
+  FTarget.KeyUp(Key);
 end;
 
 procedure TSimbaInput.KeyDown(Key: KeyCode);
