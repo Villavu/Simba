@@ -14,7 +14,11 @@ uses
   Classes, SysUtils;
 
 const
-  HALF_PI: Double = PI / 2;
+  HALF_PI = Double(PI / 2);
+
+  SQRT_2 = Double(1.4142135623731);
+  SQRT_3 = Double(1.73205080756888);
+  SQRT_5 = Double(2.23606797749979);
 
 function FixRad(const Rad: Extended): Extended;
 function FixD(const Degrees: Extended): Extended;
@@ -22,7 +26,7 @@ function Distance(const X1, Y1, X2, Y2: Integer): Integer; inline; overload;
 function Distance(const P1, P2: TPoint): Integer; inline; overload;
 function Radians(const e: Extended): Extended;
 function Degrees(const e: Extended): Extended;
-function NextPower2(const n: Integer): Integer; inline;
+function NextPower2(const n: Integer): Integer;
 
 function IsNumber(const n: Double): Boolean; inline; overload;
 function IsNumber(const n: Single): Boolean; inline; overload;
@@ -36,7 +40,7 @@ function CeilTo(const a: Single; const Precision: Int8 = 0): Double;
 implementation
 
 uses
-  math;
+  Math;
 
 function IsNumber(const n: Double): Boolean;
 begin

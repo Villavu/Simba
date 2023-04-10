@@ -16,6 +16,8 @@ uses
 
 type
   generic TSimbaList<_T> = class(TObject)
+  private
+    procedure SetItem(Index: Integer; AValue: _T);
   public type
     TArr = array of _T;
   protected
@@ -30,7 +32,7 @@ type
     function ToArray: TArr; virtual;
 
     property Count: Integer read FCount;
-    property Items[Index: Integer]: _T read GetItem; default;
+    property Items[Index: Integer]: _T read GetItem write SetItem; default;
   end;
 
   generic TSimbaObjectList<_T: class> = class(specialize TSimbaList<_T>)
@@ -44,7 +46,21 @@ type
     destructor Destroy; override;
   end;
 
+  TSimbaStringPair = record
+    Name: String;
+    Value: String;
+  end;
+  TSimbaStringPairList = specialize TSimbaList<TSimbaStringPair>;
+
 implementation
+
+procedure TSimbaList.SetItem(Index: Integer; AValue: _T);
+begin
+  if (Index < 0) or (Index >= FCount) then
+    raise Exception.CreateFmt('%s.SetItem: Index %d out of bounds', [ClassName, Index]);
+
+  FArr[Index] := AValue;
+end;
 
 // List
 function TSimbaList.GetItem(Index: Integer): _T;

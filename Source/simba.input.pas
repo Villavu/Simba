@@ -10,10 +10,13 @@ unit simba.input;
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils, Math,
   simba.mufasatypes, simba.target;
 
 type
+  TMouseTeleportEvent = procedure(Sender: Pointer; X, Y: Integer);
+  TMouseMovingEvent = function(Sender: Pointer; var X, Y: Double): Boolean;
+
   PSimbaInput = ^TSimbaInput;
   TSimbaInput = packed record
   const
@@ -46,6 +49,9 @@ type
     Gravity: Double;
     Wind: Double;
 
+    OnTeleport: TMouseTeleportEvent;
+    OnMoving: TMouseMovingEvent;
+
     function IsTargetValid: Boolean;
     function IsFocused: Boolean;
     function Focus: Boolean;
@@ -74,8 +80,7 @@ type
 implementation
 
 uses
-  Math,
-  simba.nativeinterface, simba.random;
+  simba.math, simba.nativeinterface, simba.random;
 
 function TSimbaInput.GetRandomKeyPressTime: Integer;
 begin
@@ -146,9 +151,6 @@ procedure TSimbaInput.MouseMove(Dest: TPoint);
 
   // Credit: BenLand100 (https://github.com/BenLand100/SMART/blob/master/src/EventNazi.java#L201)
   procedure WindMouse(xs, ys, xe, ye, gravity, wind, minWait, maxWait, maxStep, targetArea: Double);
-  const
-    SQRT_3 = Double(1.73205080756888);
-    SQRT_5 = Double(2.23606797749979);
   var
     x, y: Double;
     veloX, veloY, windX, windY, veloMag, randomDist, step, idle: Double;
@@ -162,6 +164,9 @@ procedure TSimbaInput.MouseMove(Dest: TPoint);
 
     while True do
     begin
+      if Assigned(OnMoving) and (not OnMoving(@Self, X, Y)) then
+        Exit;
+
       traveledDistance := Hypot(x - xs, y - ys);
       remainingDistance := Hypot(x - xe, y - ye);
       if (remainingDistance <= 1) then
@@ -241,14 +246,16 @@ begin
   FTarget.MouseUp(Button);
 end;
 
-procedure TSimbaInput.MouseTeleport(X, Y: Integer);
-begin
-  FTarget.MouseTeleport(TPoint.Create(X, Y));
-end;
-
 procedure TSimbaInput.MouseTeleport(P: TPoint);
 begin
   FTarget.MouseTeleport(P);
+  if Assigned(OnTeleport) then
+    OnTeleport(@Self, P.X, P.Y);
+end;
+
+procedure TSimbaInput.MouseTeleport(X, Y: Integer);
+begin
+  MouseTeleport(Point(X, Y));
 end;
 
 procedure TSimbaInput.MouseDown(Button: MouseButton);
