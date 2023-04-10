@@ -20,12 +20,12 @@ implementation
 
 uses
   lpparser, lptypes, lpvartypes, lptree,
-  simba.mufasatypes, simba.script_compiler;
+  simba.mufasatypes, simba.script_compiler, simba.list;
 
 type
   TSimbaCompilerDump = class(TSimbaScript_Compiler)
   protected
-    FList: TStringList;
+    FItems: TSimbaStringPairList;
 
     procedure InitBaseVariant; override;
     procedure InitBaseMath; override;
@@ -33,12 +33,16 @@ type
     procedure InitBaseDateTime; override;
     procedure InitBaseFile; override;
 
-    procedure IterateDump(Item: String; const Key: string; var Continue: Boolean);
+    procedure Add(Section, Str: String);
+    procedure AddMethod(Str: String);
+    procedure AddType(Name, Str: String);
+    procedure AddCode(Str: String);
 
-    procedure addMethodDump(Header: String);
-    procedure addTypeDump(Name, Str: String);
-    procedure addCodeDump(Str: String);
+    procedure Move(Str, FromSection, ToSection: String);
   public
+    constructor Create(ATokenizer: TLapeTokenizerBase; ManageTokenizer: Boolean=True; AEmitter: TLapeCodeEmitter = nil; ManageEmitter: Boolean = True); reintroduce; override;
+    destructor Destroy; override;
+
     procedure addBaseDefine(Define: lpString; Value: lpString = ''); override;
 
     function addDelayedCode(ACode: lpString; AFileName: lpString = ''; AfterCompilation: Boolean = True; IsGlobal: Boolean = True): TLapeTree_Base; override;
@@ -94,22 +98,42 @@ begin
   ImportingSection := '';
 end;
 
-procedure TSimbaCompilerDump.IterateDump(Item: String; const Key: string; var Continue: Boolean);
+procedure TSimbaCompilerDump.Add(Section, Str: String);
+var
+  Item: TSimbaStringPair;
 begin
-  FList.Values[Item] := FList.Values[Item] + Key + LineEnding;
+  Item.Name := Section;
+  Item.Value := Str;
+
+  FItems.Add(Item);
 end;
 
-procedure TSimbaCompilerDump.addMethodDump(Header: String);
+procedure TSimbaCompilerDump.Move(Str, FromSection, ToSection: String);
+var
+  I: Integer;
+  Item: TSimbaStringPair;
 begin
-  Header := Header.Trim();
-  if not Header.EndsWith(';') then
-    Header := Header + ';';
-  Header := Header + ' external;';
+  for I := 0 to FItems.Count - 1 do
+    if (FItems[I].Name = FromSection) and FItems[I].Value.StartsWith(Str) then
+    begin
+      Item := FItems[I];
+      Item.Name := ToSection;
 
-  FDump.Add(Header, ImportingSection);
+      FItems[I] := Item;
+    end;
 end;
 
-procedure TSimbaCompilerDump.addTypeDump(Name, Str: String);
+procedure TSimbaCompilerDump.AddMethod(Str: String);
+begin
+  Str := Str.Trim();
+  if not Str.EndsWith(';') then
+    Str := Str + ';';
+  Str := Str + ' external;';
+
+  Add(ImportingSection, Str);
+end;
+
+procedure TSimbaCompilerDump.AddType(Name, Str: String);
 begin
   if Name.StartsWith('!') then
     Exit;
@@ -118,175 +142,185 @@ begin
   if not Str.EndsWith(';') then
     Str := Str + ';';
 
-  FDump.Add(Str, ImportingSection);
+  Add(ImportingSection, Str);
 end;
 
-procedure TSimbaCompilerDump.addCodeDump(Str: String);
+procedure TSimbaCompilerDump.AddCode(Str: String);
 begin
-  FDump.Add(Str, ImportingSection);
+  Add(ImportingSection, Str);
+end;
+
+constructor TSimbaCompilerDump.Create(ATokenizer: TLapeTokenizerBase; ManageTokenizer: Boolean; AEmitter: TLapeCodeEmitter; ManageEmitter: Boolean);
+begin
+  FItems := TSimbaStringPairList.Create();
+
+  inherited Create(ATokenizer, ManageTokenizer, AEmitter, ManageEmitter);
+end;
+
+destructor TSimbaCompilerDump.Destroy;
+begin
+  if (FItems <> nil) then
+    FreeAndNil(FItems);
+
+  inherited Destroy();
 end;
 
 procedure TSimbaCompilerDump.addBaseDefine(Define: lpString; Value: lpString);
 begin
   inherited addBaseDefine(Define, Value);
 
-  addCodeDump('{$DEFINE ' + Define + '}');
+  AddCode('{$DEFINE ' + Define + '}');
 end;
 
 function TSimbaCompilerDump.addDelayedCode(ACode: lpString; AFileName: lpString; AfterCompilation: Boolean; IsGlobal: Boolean): TLapeTree_Base;
 begin
   Result := inherited addDelayedCode(ACode, AFileName, AfterCompilation, IsGlobal);
 
-  addCodeDump(ACode);
+  AddCode(ACode);
 end;
 
 function TSimbaCompilerDump.addGlobalFunc(Header: lpString; Value: Pointer): TLapeGlobalVar;
 begin
   Result := inherited addGlobalFunc(Header, Value);
 
-  addMethodDump(Header);
+  AddMethod(Header);
 end;
 
 function TSimbaCompilerDump.addGlobalFunc(Header: lpString; Body: TStringArray): TLapeTree_Method;
 begin
   Result := inherited addGlobalFunc(Header, Body);
 
-  addMethodDump(Header);
+  AddMethod(Header);
 end;
 
 function TSimbaCompilerDump.addGlobalType(Typ: TLapeType; AName: lpString; ACopy: Boolean): TLapeType;
 begin
   Result := inherited addGlobalType(Typ, AName, ACopy);
 
-  addTypeDump(AName, Typ.Name);
+  AddType(AName, Typ.Name);
 end;
 
 function TSimbaCompilerDump.addGlobalType(Str: lpString; AName: lpString): TLapeType;
 begin
   Result := inherited addGlobalType(Str, AName);
 
-  addTypeDump(AName, Str);
+  AddType(AName, Str);
 end;
 
 function TSimbaCompilerDump.addGlobalVar(Typ: lpString; Value: lpString; AName: lpString): TLapeGlobalVar;
 begin
   Result := inherited addGlobalVar(Typ, Value, AName);
-
-  addCodeDump('var ' + AName + ': ' + Typ + ';');
+  Result._DocPos.FileName := ImportingSection;
 end;
 
 procedure TSimbaCompilerDump.DumpToFile(FileName: String);
-
-  function DoDump(Decl: TLapeGlobalVar): String;
-  begin
-    if Decl.isConstant then
-      Result := 'const ' + UpperCase(Decl.Name) + ': ' + Decl.VarType.Name
-    else
-      Result := 'var ' + Decl.Name + ': ' + Decl.VarType.Name;
-
-    if Decl.isConstant or (not Decl.isNull) then
-    begin
-      if (Decl.VarType.BaseType in LapeCharTypes) then
-        Result := Result + ' = "' + Decl.AsString + '"'
-      else
-        Result := Result + ' = ' + Decl.AsString
-    end;
-
-    Result := Result + ';';
-  end;
-
 var
   BaseType: ELapeBaseType;
   Decl: TLapeDeclaration;
+  I: Integer;
+  Str: String;
 begin
   Import();
 
   // Base types
   for BaseType in ELapeBaseType do
     if (FBaseTypes[BaseType] <> nil) then
-      FDump['type %s = %s;'.Format([LapeTypeToString(BaseType), LapeTypeToString(BaseType)])] := 'System';
+      Add('System', 'type %s = %s;'.Format([LapeTypeToString(BaseType), LapeTypeToString(BaseType)]));
 
-  {
   // Variables & Constants
   for Decl in FGlobalDeclarations.GetByClass(TLapeGlobalVar, bTrue) do
     with TLapeGlobalVar(Decl) do
     begin
-      if (DocPos.FileName = '') or (DocPos.FileName[1] = '!') then
-        Continue;
-      if (Name = '') or (Name = 'nil') or (VarType = nil) or (VarType.Name = '') or (BaseType in [ltUnknown, ltScriptMethod, ltImportedMethod]) then
+      if (Name = '') or (VarType = nil) or (VarType.Name = '') or (BaseType in [ltUnknown, ltScriptMethod, ltImportedMethod]) then
         Continue;
 
-      FDump[DoDump(Decl as TLapeGlobalVar)] := DocPos.FileName;
+      if isConstant then
+        Str := 'const ' + UpperCase(Name) + ': ' + VarType.Name
+      else
+        Str := 'var ' + Name + ': ' + VarType.Name;
+
+      if isConstant or (not isNull) then
+      begin
+        if (VarType.BaseType in LapeCharTypes) then
+          Str := Str + ' = "' + AsString + '"'
+        else
+          Str := Str + ' = ' + AsString;
+      end;
+      Str := Str + ';';
+
+      Add(DocPos.FileName, Str);
     end;
-  }
 
   // add internals
-  FDump['procedure Delete(A: array; Index: Int32; Count: Int32 = Length(A)); external;'] := 'System';
-  FDump['procedure Insert(Item: Anything; A: array; Index: Int32); external;'] := 'System';
-  FDump['procedure Copy(A: array; Index: Int32 = 0; Count: Int32 = Length(A)); overload; external;'] := 'System';
-  FDump['procedure SetLength(A: array; Length: Int32); overload; external;'] := 'System';
-  FDump['function Low(A: array): Int32; external;'] := 'System';
-  FDump['function High(A: array): Int32; external;'] := 'System';
-  FDump['function Length(A: array): Int32; overload; external;'] := 'System';
-  FDump['procedure WriteLn(Args: Anything); external;'] := 'System';
-  FDump['procedure Write(Args: Anything); external;'] := 'System';
-  FDump['procedure Swap(var A, B: Anything); external;'] := 'System';
-  FDump['function SizeOf(A: Anything): Int32; external;'] := 'System';
-  FDump['function ToString(A: Anything): String; external;'] := 'System';
-  FDump['function ToStr(A: Anything): String; external;'] := 'System';
-  FDump['function Inc(var X: Ordinal; Amount: SizeInt = 1): Ordinal; overload; external;'] := 'System';
-  FDump['function Dec(var X: Ordinal; Amount: SizeInt = 1): Ordinal; overload; external;'] := 'System';
-  FDump['function Ord(X: Ordinal): Int32; external;'] := 'System';
-  FDump['function WaitUntil(Condition: Expression; Interval, Timeout: Int32): Boolean; external;'] := 'System';
-  FDump['function Default(T: AnyType): AnyType; external;'] := 'System';
-  FDump['procedure Sort(var A: array); overload; external;'] := 'System';
-  FDump['procedure Sort(var A: array; CompareFunc: function(constref L, R: Anything): Int32); overload; external;'] := 'System';
-  FDump['procedure Sort(var A: array; Weights: TIntegerArray; LowToHigh: Boolean); overload; external;'] := 'System';
-  FDump['procedure Sort(var A: array; Weights: TExtendedArray; LowToHigh: Boolean); overload; external;'] := 'System';
-  FDump['function Sorted(const A: array): array; overload; external;'] := 'System';
-  FDump['function Sorted(const A: array; CompareFunc: function(constref L, R: Anything): Int32): array; overload; external;'] := 'System';
-  FDump['function Sorted(const A: array; Weights: TIntegerArray; LowToHigh: Boolean): array; overload; external;'] := 'System';
-  FDump['function Sorted(const A: array; Weights: TExtendedArray; LowToHigh: Boolean): array; overload; external;'] := 'System';
-  FDump['function Unique(const A: array): array; external;'] := 'System';
-  FDump['procedure Reverse(var A: array); external;'] := 'System';
-  FDump['function Reversed(const A: array): array; external;'] := 'System';
-  FDump['function IndexOf(const Item: T; const A: array): Integer; external;'] := 'System';
-  FDump['function IndicesOf(const Item: T; const A: array): TIntegerArray; external;'] := 'System';
-  FDump['function Contains(const Item: T; const A: array): Boolean; external;'] := 'System';
+  Add('System', 'procedure Delete(A: array; Index: Int32; Count: Int32 = Length(A)); external;');
+  Add('System', 'procedure Insert(Item: Anything; A: array; Index: Int32); external;');
+  Add('System', 'procedure Copy(A: array; Index: Int32 = 0; Count: Int32 = Length(A)); overload; external;');
+  Add('System', 'procedure SetLength(A: array; Length: Int32); overload; external;');
+  Add('System', 'function Low(A: array): Int32; external;');
+  Add('System', 'function High(A: array): Int32; external;');
+  Add('System', 'function Length(A: array): Int32; overload; external;');
+  Add('System', 'procedure WriteLn(Args: Anything); external;');
+  Add('System', 'procedure Write(Args: Anything); external;');
+  Add('System', 'procedure Swap(var A, B: Anything); external;');
+  Add('System', 'function SizeOf(A: Anything): Int32; external;');
+  Add('System', 'function ToString(A: Anything): String; external;');
+  Add('System', 'function ToStr(A: Anything): String; external;');
+  Add('System', 'function Inc(var X: Ordinal; Amount: SizeInt = 1): Ordinal; overload; external;');
+  Add('System', 'function Dec(var X: Ordinal; Amount: SizeInt = 1): Ordinal; overload; external;');
+  Add('System', 'function Ord(X: Ordinal): Int32; external;');
+  Add('System', 'function WaitUntil(Condition: Expression; Interval, Timeout: Int32): Boolean; external;');
+  Add('System', 'function Default(T: AnyType): AnyType; external;');
+  Add('System', 'procedure Sort(var A: array); overload; external;');
+  Add('System', 'procedure Sort(var A: array; CompareFunc: function(constref L, R: Anything): Int32); overload; external;');
+  Add('System', 'procedure Sort(var A: array; Weights: TIntegerArray; LowToHigh: Boolean); overload; external;');
+  Add('System', 'procedure Sort(var A: array; Weights: TExtendedArray; LowToHigh: Boolean); overload; external;');
+  Add('System', 'function Sorted(const A: array): array; overload; external;');
+  Add('System', 'function Sorted(const A: array; CompareFunc: function(constref L, R: Anything): Int32): array; overload; external;');
+  Add('System', 'function Sorted(const A: array; Weights: TIntegerArray; LowToHigh: Boolean): array; overload; external;');
+  Add('System', 'function Sorted(const A: array; Weights: TExtendedArray; LowToHigh: Boolean): array; overload; external;');
+  Add('System', 'function Unique(const A: array): array; external;');
+  Add('System', 'procedure Reverse(var A: array); external;');
+  Add('System', 'function Reversed(const A: array): array; external;');
+  Add('System', 'function IndexOf(const Item: T; const A: array): Integer; external;');
+  Add('System', 'function IndicesOf(const Item: T; const A: array): TIntegerArray; external;');
+  Add('System', 'function Contains(const Item: T; const A: array): Boolean; external;');
 
-  FDump['function RTTIFields(constref AnyRecord): TRTTIFields; external;']      := 'System';
-  FDump['function RTTIClassFields(constref AnyRecord): TRTTIFields; external;'] := 'System';
+  Add('System', 'function RTTIFields(constref AnyRecord): TRTTIFields; external;');
+  Add('System', 'function RTTIClassFields(constref AnyRecord): TRTTIFields; external;');
 
-  FDump['function GetCallerAddress: Pointer; external;']    := 'System';
-  FDump['function GetCallerName: String; external;']        := 'System';
-  FDump['function GetCallerLocation: Pointer; external;']   := 'System';
-  FDump['function GetCallerLocationStr: String; external;'] := 'System';
+  Add('System', 'function GetCallerAddress: Pointer; external;');
+  Add('System', 'function GetCallerName: String; external;');
+  Add('System', 'function GetCallerLocation: Pointer; external;');
+  Add('System', 'function GetCallerLocationStr: String; external;');
 
-  FDump['function GetExceptionLocation: Pointer; external;']   := 'System';
-  FDump['function GetExceptionLocationStr: String; external;'] := 'System';
-  FDump['function GetExceptionMessage: String; external;']     := 'System';
+  Add('System', 'function GetExceptionLocation: Pointer; external;');
+  Add('System', 'function GetExceptionLocationStr: String; external;');
+  Add('System', 'function GetExceptionMessage: String; external;');
 
-  FDump['function GetScriptMethodName(Address: Pointer): String; external;'] := 'System';
-  FDump['function DumpCallStack(Start: Integer = 0): String; external;']     := 'System';
+  Add('System', 'function GetScriptMethodName(Address: Pointer): String; external;');
+  Add('System', 'function DumpCallStack(Start: Integer = 0): String; external;');
 
   // Move lape stuff to better sections
-  FDump['function Random(min, max: Int64): Int64; overload; external;']       := 'Random';
-  FDump['function Random(min, max: Extended): Extended; overload; external;'] := 'Random';
-  FDump['function Random(l: Int64): Int64; overload; external;']              := 'Random';
-  FDump['function Random: Extended; overload; external;']                     := 'Random';
-  FDump['procedure Randomize; external;']                                     := 'Random';
-  FDump['var RandSeed: UInt32 = ' + IntToStr(RandSeed) + ';']                 := 'Random';
+  Move('function Random(min, max: Int64): Int64;', 'Math', 'Random');
+  Move('function Random(min, max: Extended): Extended', 'Math', 'Random');
+  Move('function Random(l: Int64): Int64', 'Math', 'Random');
+  Move('function Random: Extended', 'Math', 'Random');
+  Move('procedure Randomize', 'Math', 'Random');
+  Move('var RandSeed', 'Math', 'Random');
 
-  FDump['function GetTickCount: UInt64; external;']                           := 'Timing';
-  FDump['procedure Sleep(MilliSeconds: UInt32); external;']                   := 'Timing';
+  Move('function GetTickCount: UInt64', 'DateTime', 'Timing');
+  Move('procedure Sleep(MilliSeconds: UInt32);', 'DateTime', 'Timing');
 
-  FList := TStringList.Create();
-  FList.LineBreak := #0;
+  with TStringList.Create() do
+  try
+    LineBreak := #0;
+    for I := 0 to FItems.Count - 1 do
+      Values[FItems[I].Name] := Values[FItems[I].Name] + FItems[I].Value + LineEnding;
 
-  FDump.Iterate(@IterateDump);
-
-  FList.SaveToFile(FileName);
-  FList.Free();
+    SaveToFile(FileName);
+  finally
+    Free();
+  end;
 end;
 
 end.

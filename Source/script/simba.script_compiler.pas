@@ -34,7 +34,6 @@ type
     end;
   protected
     FImportingSection: String;
-    FDump: TFPStringHashTable;
 
     function GetImportingSection: String;
 
@@ -72,9 +71,6 @@ type
 
     procedure InvokeProc(Name: String);
     procedure InvokeProcFFI(Name: String);
-
-    constructor Create(ATokenizer: TLapeTokenizerBase; ManageTokenizer: Boolean=True; AEmitter: TLapeCodeEmitter=nil; ManageEmitter: Boolean=True); reintroduce; override;
-    destructor Destroy; override;
   end;
 
 implementation
@@ -171,7 +167,7 @@ end;
 
 function TSimbaScript_Compiler.addCallbackType(Str: String): TLapeType;
 begin
-  Result := addGlobalType(Str.After('='), Str.Before('='), FFI_DEFAULT_ABI);
+  Result := addGlobalType(Str.After('=').Trim(), Str.Before('=').Trim(), FFI_DEFAULT_ABI);
 end;
 
 procedure TSimbaScript_Compiler.addClass(Name: lpString; Parent: lpString);
@@ -257,21 +253,6 @@ begin
   finally
     Closure.Free();
   end;
-end;
-
-constructor TSimbaScript_Compiler.Create(ATokenizer: TLapeTokenizerBase; ManageTokenizer: Boolean; AEmitter: TLapeCodeEmitter; ManageEmitter: Boolean);
-begin
-  FDump := TFPStringHashTable.Create();
-
-  inherited Create(ATokenizer, ManageTokenizer, AEmitter, ManageEmitter);
-end;
-
-destructor TSimbaScript_Compiler.Destroy;
-begin
-  if (FDump <> nil) then
-    FreeAndNil(FDump);
-
-  inherited Destroy();
 end;
 
 function TSimbaScript_Compiler.GetImportingSection: String;

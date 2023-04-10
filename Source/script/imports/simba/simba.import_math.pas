@@ -166,7 +166,10 @@ begin
   begin
     ImportingSection := 'Math';
 
-    addGlobalVar(ltDouble, @HALF_PI, 'HALF_PI').isConstant := True;
+    addGlobalVar(HALF_PI, 'HALF_PI').isConstant := True;
+    addGlobalVar(SQRT_2, 'SQRT_2').isConstant := True;
+    addGlobalVar(SQRT_3, 'SQRT_3').isConstant := True;
+    addGlobalVar(SQRT_5, 'SQRT_5').isConstant := True;
 
     addGlobalFunc('function Distance(const X1, Y1, X2, Y2: Integer): Integer; overload', @_LapeDistance);
     addGlobalFunc('function Distance(const P1, P2: TPoint): Integer; overload', @_LapeDistanceEx);

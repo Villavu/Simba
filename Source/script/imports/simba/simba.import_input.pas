@@ -379,6 +379,9 @@ begin
   begin
     ImportingSection := 'Input';
 
+    addCallbackType('TMouseTeleportEvent = procedure(Sender: Pointer; X, Y: Integer)');
+    addCallbackType('TMouseMovingEvent = function(Sender: Pointer; var X, Y: Double): Boolean');
+
     addGlobalType([
       'packed record',
       '  Target: TSimbaTarget;',
@@ -392,6 +395,9 @@ begin
       '  Speed: Integer;',
       '  Gravity: Double;',
       '  Wind: Double;',
+      '',
+      '  OnTeleport: TMouseTeleportEvent;',
+      '  OnMoving: TMouseMovingEvent;',
       'end;'],
       'TSimbaInput'
     );

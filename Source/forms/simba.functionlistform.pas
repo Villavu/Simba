@@ -159,7 +159,7 @@ var
   I: Integer;
 begin
   for I := 0 to Decls.Count - 1 do
-    if (Decls[I].Name <> '') then
+    if (Decls[I].Name <> '') and (not Decls[I].isOverrideMethod) then
       AddNode(ParentNode, TFunctionList_InternalDeclNode.Create(Self, Decls.Items[I]));
 end;
 
