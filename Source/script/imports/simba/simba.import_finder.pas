@@ -17,7 +17,7 @@ uses
 implementation
 
 uses
-  lptypes,
+  lptypes, lpvartypes,
   simba.script_compiler, simba.mufasatypes, simba.finder, simba.bitmap, simba.dtm,
   simba.colormath, simba.colormath_distance, simba.bitmap_finders, simba.target;
 
@@ -322,6 +322,8 @@ begin
       'end;'],
       'TSimbaFinder'
     );
+    if (getGlobalType('TSimbaFinder').Size <> SizeOf(TSimbaFinder)) then
+      raise Exception.Create('SizeOf(TSimbaFinder) is wrong!');
 
     with addGlobalVar('TSimbaFinder', '[]', 'Finder') do
       Used := duTrue;

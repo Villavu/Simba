@@ -10,7 +10,7 @@ uses
 implementation
 
 uses
-  lptypes,
+  lptypes, lpvartypes,
   simba.script_compiler, simba.mufasatypes, simba.bitmap, simba.target;
 
 
@@ -214,6 +214,8 @@ begin
       'end;'],
       'TSimbaTarget'
     );
+    if (getGlobalType('TSimbaTarget').Size <> SizeOf(TSimbaTarget)) then
+      raise Exception.Create('SizeOf(TSimbaTarget) is wrong!');
 
     with addGlobalVar('TSimbaTarget', '[]', 'Target') do
       Used := duTrue;

@@ -48,7 +48,12 @@ uses
   simba.mufasatypes, simba.colormath, dynlibs;
 
 type
-  TEIOSExports = record
+  PEIOSTarget = ^TEIOSTarget;
+  TEIOSTarget = record
+    Lib: TLibHandle;
+    ImageBuffer: PColorBGRA;
+    Target: Pointer;
+
     RequestTarget: function(Data: PChar): Pointer; stdcall;
     ReleaseTarget: procedure(Target: Pointer); stdcall;
 
@@ -73,181 +78,206 @@ type
     GetKeyCode: function(Target: Pointer; Character: Char): Integer; stdcall;
  end;
 
-  TEIOSTarget = record
-  private
-    FLib: TLibHandle;
-    FExports: TEIOSExports;
-    FImageBuffer: PColorBGRA;
-    FTarget: Pointer;
-  public
-    procedure Load(FileName: String; Args: String);
+function LoadEIOS(FileName, Args: String): TEIOSTarget;
 
-    function GetImageData(X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
-    procedure GetDimensions(out W, H: Integer);
+function EIOSTarget_GetImageData(Target: Pointer; X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
+procedure EIOSTarget_GetDimensions(Target: Pointer; out Width, Height: Integer);
 
-    procedure KeyDown(Key: KeyCode);
-    procedure KeyUp(Key: KeyCode);
-    procedure KeySend(Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
-    function KeyPressed(Key: KeyCode): Boolean;
+procedure EIOSTarget_KeyDown(Target: Pointer; Key: KeyCode);
+procedure EIOSTarget_KeyUp(Target: Pointer; Key: KeyCode);
+procedure EIOSTarget_KeySend(Target: Pointer; Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
+function EIOSTarget_KeyPressed(Target: Pointer; Key: KeyCode): Boolean;
 
-    function MousePressed(Button: MouseButton): Boolean;
-    function MousePosition: TPoint;
-    procedure MouseTeleport(P: TPoint);
-    procedure MouseDown(Button: MouseButton);
-    procedure MouseUp(Button: MouseButton);
-    procedure MouseScroll(Scrolls: Integer);
-  end;
+function EIOSTarget_MousePressed(Target: Pointer; Button: MouseButton): Boolean;
+function EIOSTarget_MousePosition(Target: Pointer): TPoint;
+procedure EIOSTarget_MouseTeleport(Target: Pointer; P: TPoint);
+procedure EIOSTarget_MouseDown(Target: Pointer; Button: MouseButton);
+procedure EIOSTarget_MouseUp(Target: Pointer; Button: MouseButton);
+procedure EIOSTarget_MouseScroll(Target: Pointer; Scrolls: Integer);
 
 implementation
 
 uses
   simba.script_pluginloader;
 
-procedure TEIOSTarget.Load(FileName: String; Args: String);
+function LoadEIOS(FileName, Args: String): TEIOSTarget;
 begin
-  try
-    FLib := LoadPlugin(FileName);
-  except
-    on E: Exception do
-      raise Exception.Create('EIOS: ' + E.Message);
-  end;
-
-  with FExports do
+  with Result do
   begin
-    Pointer(RequestTarget) := GetProcedureAddress(FLib, 'EIOS_RequestTarget');
-    Pointer(ReleaseTarget) := GetProcedureAddress(FLib, 'EIOS_ReleaseTarget');
+    try
+      Lib := LoadPlugin(FileName);
+    except
+      on E: Exception do
+        raise Exception.Create('EIOS: ' + E.Message);
+    end;
 
-    Pointer(GetTargetPosition) := GetProcedureAddress(FLib, 'EIOS_GetTargetPosition');
-    Pointer(GetTargetDimensions) := GetProcedureAddress(FLib, 'EIOS_GetTargetDimensions');
-    Pointer(GetImageBuffer) := GetProcedureAddress(FLib, 'EIOS_GetImageBuffer');
-    Pointer(UpdateImageBuffer) := GetProcedureAddress(FLib, 'EIOS_UpdateImageBuffer');
-    Pointer(UpdateImageBufferEx) := GetProcedureAddress(FLib, 'EIOS_UpdateImageBufferEx');
-    Pointer(UpdateImageBufferBounds) := GetProcedureAddress(FLib, 'EIOS_UpdateImageBufferBounds');
+    Pointer(RequestTarget) := GetProcedureAddress(Lib, 'EIOS_RequestTarget');
+    Pointer(ReleaseTarget) := GetProcedureAddress(Lib, 'EIOS_ReleaseTarget');
 
-    Pointer(GetMousePosition) := GetProcedureAddress(FLib, 'EIOS_GetMousePosition');
-    Pointer(MoveMouse) := GetProcedureAddress(FLib, 'EIOS_MoveMouse');
-    Pointer(ScrollMouse) := GetProcedureAddress(FLib, 'EIOS_ScrollMouse');
-    Pointer(HoldMouse) := GetProcedureAddress(FLib, 'EIOS_HoldMouse');
-    Pointer(ReleaseMouse) := GetProcedureAddress(FLib, 'EIOS_ReleaseMouse');
-    Pointer(IsMouseButtonHeld) := GetProcedureAddress(FLib, 'EIOS_IsMouseButtonHeld');
+    Pointer(GetTargetPosition) := GetProcedureAddress(Lib, 'EIOS_GetTargetPosition');
+    Pointer(GetTargetDimensions) := GetProcedureAddress(Lib, 'EIOS_GetTargetDimensions');
+    Pointer(GetImageBuffer) := GetProcedureAddress(Lib, 'EIOS_GetImageBuffer');
+    Pointer(UpdateImageBuffer) := GetProcedureAddress(Lib, 'EIOS_UpdateImageBuffer');
+    Pointer(UpdateImageBufferEx) := GetProcedureAddress(Lib, 'EIOS_UpdateImageBufferEx');
+    Pointer(UpdateImageBufferBounds) := GetProcedureAddress(Lib, 'EIOS_UpdateImageBufferBounds');
 
-    Pointer(SendString) := GetProcedureAddress(FLib, 'EIOS_SendString');
-    Pointer(HoldKey) := GetProcedureAddress(FLib, 'EIOS_HoldKey');
-    Pointer(ReleaseKey) := GetProcedureAddress(FLib, 'EIOS_ReleaseKey');
-    Pointer(IsKeyHeld) := GetProcedureAddress(FLib, 'EIOS_IsKeyHeld');
-    Pointer(GetKeyCode) := GetProcedureAddress(FLib, 'EIOS_GetKeyCode');
+    Pointer(GetMousePosition) := GetProcedureAddress(Lib, 'EIOS_GetMousePosition');
+    Pointer(MoveMouse) := GetProcedureAddress(Lib, 'EIOS_MoveMouse');
+    Pointer(ScrollMouse) := GetProcedureAddress(Lib, 'EIOS_ScrollMouse');
+    Pointer(HoldMouse) := GetProcedureAddress(Lib, 'EIOS_HoldMouse');
+    Pointer(ReleaseMouse) := GetProcedureAddress(Lib, 'EIOS_ReleaseMouse');
+    Pointer(IsMouseButtonHeld) := GetProcedureAddress(Lib, 'EIOS_IsMouseButtonHeld');
+
+    Pointer(SendString) := GetProcedureAddress(Lib, 'EIOS_SendString');
+    Pointer(HoldKey) := GetProcedureAddress(Lib, 'EIOS_HoldKey');
+    Pointer(ReleaseKey) := GetProcedureAddress(Lib, 'EIOS_ReleaseKey');
+    Pointer(IsKeyHeld) := GetProcedureAddress(Lib, 'EIOS_IsKeyHeld');
+    Pointer(GetKeyCode) := GetProcedureAddress(Lib, 'EIOS_GetKeyCode');
+
+    if Assigned(RequestTarget) then
+    begin
+      Target := RequestTarget(PChar(Args));
+      if (Target = nil) then
+        raise Exception.Create('EIOS: RequestTarget returned nil');
+    end else
+      raise Exception.Create('EIOS: RequestTarget not exported');
+
+    if Assigned(GetImageBuffer) then
+      ImageBuffer := GetImageBuffer(Target);
   end;
-
-  if Assigned(FExports.RequestTarget) then
-  begin
-    FTarget := FExports.RequestTarget(PChar(Args));
-    if (FTarget = nil) then
-      raise Exception.Create('EIOS: RequestTarget returned nil');
-  end else
-    raise Exception.Create('EIOS: RequestTarget not exported');
-
-  if Assigned(FExports.GetImageBuffer) then
-    FImageBuffer := FExports.GetImageBuffer(FTarget);
 end;
 
-function TEIOSTarget.GetImageData(X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
+function EIOSTarget_GetImageData(Target: Pointer; X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
 var
-  TargetWidth, TargetHeight: Integer;
+  BufferWidth, BufferHeight: Integer;
 begin
-  if Pointer(FExports.UpdateImageBufferBounds) <> nil then
-    FExports.UpdateImageBufferBounds(FTarget, X, Y, X + Width, Y + Height)
-  else
-  if Pointer(FExports.UpdateImageBufferEx) <> nil then
-    FImageBuffer := FExports.UpdateImageBufferEx(FTarget)
-  else
-  if Pointer(FExports.UpdateImageBuffer) <> nil then
-    FExports.UpdateImageBuffer(FTarget);
+  with PEIOSTarget(Target)^ do
+  begin
+    if Assigned(UpdateImageBufferBounds) then
+      UpdateImageBufferBounds(Target, X, Y, X + Width, Y + Height)
+    else
+    if Assigned(UpdateImageBufferEx) then
+      ImageBuffer := UpdateImageBufferEx(Target)
+    else
+    if Assigned(UpdateImageBuffer) then
+      UpdateImageBuffer(Target);
 
-  FExports.GetTargetDimensions(FTarget, TargetWidth, TargetHeight);
+    GetTargetDimensions(Target, BufferWidth, BufferHeight);
 
-  Result := (FImageBuffer <> nil);
-  if Result then
-    Data := @FImageBuffer[Y * TargetWidth + X];
-  DataWidth := TargetWidth;
+    Result := (ImageBuffer <> nil);
+    if Result then
+    begin
+      Data := @ImageBuffer[Y * BufferWidth + X];
+      DataWidth := BufferWidth;
+    end;
+  end;
 end;
 
-procedure TEIOSTarget.GetDimensions(out W, H: Integer);
+procedure EIOSTarget_GetDimensions(Target: Pointer; out Width, Height: Integer);
 begin
-  W := 0;
-  H := 0;
-
-  if Assigned(FExports.GetTargetDimensions) then
-    FExports.GetTargetDimensions(FTarget, W, H);
+  with PEIOSTarget(Target)^ do
+  begin
+    Width := 0;
+    Height := 0;
+    if Assigned(GetTargetDimensions) then
+      GetTargetDimensions(Target, Width, Height);
+  end;
 end;
 
-function TEIOSTarget.MousePressed(Button: MouseButton): Boolean;
+function EIOSTarget_MousePressed(Target: Pointer; Button: MouseButton): Boolean;
 begin
-  if Assigned(FExports.IsMouseButtonHeld) then
-    Result := FExports.IsMouseButtonHeld(FTarget, Int32(Button))
-  else
-    Result := False;
+  with PEIOSTarget(Target)^ do
+  begin
+    if Assigned(IsMouseButtonHeld) then
+      Result := IsMouseButtonHeld(Target, Int32(Button))
+    else
+      Result := False;
+  end;
 end;
 
-function TEIOSTarget.KeyPressed(Key: KeyCode): Boolean;
+function EIOSTarget_KeyPressed(Target: Pointer; Key: KeyCode): Boolean;
 begin
-  if Assigned(FExports.IsKeyHeld) then
-    Result := FExports.IsKeyHeld(FTarget, Int32(Key))
-  else
-    Result := False;
+  with PEIOSTarget(Target)^ do
+  begin
+    if Assigned(IsKeyHeld) then
+      Result := IsKeyHeld(Target, Int32(Key))
+    else
+      Result := False;
+  end;
 end;
 
-function TEIOSTarget.MousePosition: TPoint;
+function EIOSTarget_MousePosition(Target: Pointer): TPoint;
 begin
-  Result.X := 0;
-  Result.Y := 0;
-
-  if Assigned(FExports.GetMousePosition) then
-    FExports.GetMousePosition(FTarget, Result.X, Result.Y);
+  with PEIOSTarget(Target)^ do
+  begin
+    Result.X := 0;
+    Result.Y := 0;
+    if Assigned(GetMousePosition) then
+      GetMousePosition(Target, Result.X, Result.Y);
+  end;
 end;
 
-procedure TEIOSTarget.MouseTeleport(P: TPoint);
+procedure EIOSTarget_MouseTeleport(Target: Pointer; P: TPoint);
 begin
-  if Assigned(FExports.MoveMouse) then
-    FExports.MoveMouse(FTarget, P.X, P.Y);
+  with PEIOSTarget(Target)^ do
+  begin
+    if Assigned(MoveMouse) then
+      MoveMouse(Target, P.X, P.Y);
+  end;
 end;
 
-procedure TEIOSTarget.MouseDown(Button: MouseButton);
+procedure EIOSTarget_MouseDown(Target: Pointer; Button: MouseButton);
 begin
-  if Assigned(FExports.HoldMouse) then
-    with MousePosition() do
-      FExports.HoldMouse(FTarget, X, Y, Int32(Button));
+  with PEIOSTarget(Target)^, EIOSTarget_MousePosition(Target) do
+  begin
+    if Assigned(HoldMouse) then
+      HoldMouse(Target, X, Y, Int32(Button));
+  end;
 end;
 
-procedure TEIOSTarget.MouseUp(Button: MouseButton);
+procedure EIOSTarget_MouseUp(Target: Pointer; Button: MouseButton);
 begin
-  if Assigned(FExports.ReleaseMouse) then
-    with MousePosition() do
-      FExports.ReleaseMouse(FTarget, X, Y, Int32(Button));
+  with PEIOSTarget(Target)^, EIOSTarget_MousePosition(Target) do
+  begin
+    if Assigned(ReleaseMouse) then
+      ReleaseMouse(Target, X, Y, Int32(Button));
+  end;
 end;
 
-procedure TEIOSTarget.MouseScroll(Scrolls: Integer);
+procedure EIOSTarget_MouseScroll(Target: Pointer; Scrolls: Integer);
 begin
-  if Assigned(FExports.ScrollMouse) then
-    with MousePosition() do
-      FExports.ScrollMouse(FTarget, X, Y, Scrolls);
+  with PEIOSTarget(Target)^, EIOSTarget_MousePosition(Target) do
+  begin
+    if Assigned(ScrollMouse) then
+      ScrollMouse(Target, X, Y, Scrolls);
+  end;
 end;
 
-procedure TEIOSTarget.KeyDown(Key: KeyCode);
+procedure EIOSTarget_KeyDown(Target: Pointer; Key: KeyCode);
 begin
-  if Assigned(FExports.HoldKey) then
-    FExports.HoldKey(FTarget, Int32(Key));
+  with PEIOSTarget(Target)^ do
+  begin
+    if Assigned(HoldKey) then
+      HoldKey(Target, Int32(Key));
+  end;
 end;
 
-procedure TEIOSTarget.KeyUp(Key: KeyCode);
+procedure EIOSTarget_KeyUp(Target: Pointer; Key: KeyCode);
 begin
-  if Assigned(FExports.ReleaseKey) then
-    FExports.ReleaseKey(FTarget, Int32(Key));
+  with PEIOSTarget(Target)^ do
+  begin
+    if Assigned(ReleaseKey) then
+      ReleaseKey(Target, Int32(Key));
+  end;
 end;
 
-procedure TEIOSTarget.KeySend(Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
+procedure EIOSTarget_KeySend(Target: Pointer; Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
 begin
-  if Assigned(FExports.SendString) then
-    FExports.SendString(FTarget, PChar(String(Key)), KeyDownTime, ModifierDownTime);
+  with PEIOSTarget(Target)^ do
+  begin
+    if Assigned(SendString) then
+      SendString(Target, PChar(String(Key)), KeyDownTime, ModifierDownTime);
+  end;
 end;
 
 end.

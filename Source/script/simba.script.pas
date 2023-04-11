@@ -278,8 +278,8 @@ begin
     FPlugins.CallOnStop();
 
     if FUserTerminated then
-      FCompiler.InvokeProcFFI('_CallOnUserTerminate');
-    FCompiler.InvokeProcFFI('_CallOnTerminate');
+      FCompiler.CallProc('_CallOnUserTerminate', True);
+    FCompiler.CallProc('_CallOnTerminate', True);
   end;
 
   Result := True;
@@ -314,7 +314,7 @@ begin
     ESimbaScriptState.STATE_RUNNING:
       begin
         FPlugins.CallOnResume();
-        FCompiler.InvokeProcFFI('_CallOnResume');
+        FCompiler.CallProc('_CallOnResume', True);
 
         FState := bTrue;
       end;
@@ -324,7 +324,7 @@ begin
         FState := bUnknown;
 
         FPlugins.CallOnPause();
-        FCompiler.InvokeProcFFI('_CallOnPause');
+        FCompiler.CallProc('_CallOnPause', True);
       end;
 
     ESimbaScriptState.STATE_STOP:

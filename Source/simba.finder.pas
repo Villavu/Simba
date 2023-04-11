@@ -26,7 +26,7 @@ type
   end;
 
   PSimbaFinder = ^TSimbaFinder;
-  TSimbaFinder = record
+  TSimbaFinder = packed record
   private
     FTarget: TSimbaTarget;
     FColorFinder: TColorFinder;
@@ -151,9 +151,6 @@ var
   DataWidth: Integer;
 begin
   Result := 0;
-
-  Writeln(FTarget.FTargetType);
-  WriteLn(Ftarget.FTargetWindow.Handle);
 
   if FTarget.GetImageData(Bounds, Data, DataWidth) then
   try

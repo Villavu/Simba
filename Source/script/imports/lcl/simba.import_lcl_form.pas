@@ -1064,9 +1064,9 @@ begin
     addGlobalType('(biSystemMenu, biMinimize, biMaximize, biHelp)', 'TBorderIcon');
     addGlobalType('set of TBorderIcon', 'TBorderIcons');
 
-    addCallbackType('TDropFilesEvent = procedure(Sender: TObject; const FileNames: TStringArray) of object');
-    addCallbackType('TCloseEvent = procedure(Sender: TObject; var CloseAction: TCloseAction) of object');
-    addCallbackType('TCloseQueryEvent = procedure(Sender: TObject; var CanClose: Boolean) of object');
+    addGlobalType('procedure(Sender: TObject; const FileNames: TStringArray) of object', 'TDropFilesEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TObject; var CloseAction: TCloseAction) of object', 'TCloseEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TObject; var CanClose: Boolean) of object', 'TCloseQueryEvent', FFI_DEFAULT_ABI);
 
     addClass('TSizeConstraints');
     addClassVar('TSizeConstraints', 'Control', 'TControl', @_LapeSizeConstraints_Control_Read);

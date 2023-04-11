@@ -418,6 +418,12 @@ procedure Threaded(Methods: TProcArray; Interval: Integer = 0); overload;
 
 procedure ThreadedAndForget(Method: TNestedProc);
 
+type
+  ESimbaException = class(Exception);
+
+procedure SimbaException(Message: String; Args: array of const); overload;
+procedure SimbaException(Message: String); overload;
+
 // Writable const
 const
   SimbaProcessType: ESimbaProcessType = ESimbaProcessType.UNKNOWN;
@@ -449,6 +455,16 @@ end;
 procedure DebugLn(const Msg: String; Args: array of const);
 begin
   DebugLogger.DebugLn(Msg, Args);
+end;
+
+procedure SimbaException(Message: String; Args: array of const);
+begin
+  raise ESimbaException.CreateFmt(Message, Args);
+end;
+
+procedure SimbaException(Message: String);
+begin
+  raise ESimbaException.Create(Message);
 end;
 
 procedure AssertMainThread(const Method: String);
