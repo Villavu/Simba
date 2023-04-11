@@ -261,7 +261,7 @@ begin
     addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawBoxTransparent(Box: TBox; Color: TColor; Transparency: Single);', @_LapeSimbaImageBoxBitmap_DrawBoxTransparent);
     addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawEllipse(Center: TPoint; RadiusX, RadiusY: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawEllipse);
 
-    addCallbackType('TSimbaImageBoxPaintAreaEvent = procedure(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; Rect: TRect) of object');
+    addGlobalType('procedure(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; Rect: TRect) of object', 'TSimbaImageBoxPaintAreaEvent', FFI_DEFAULT_ABI);
 
     addClass('TSimbaImageBox', 'TWinControl');
 

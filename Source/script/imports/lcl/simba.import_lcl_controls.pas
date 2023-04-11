@@ -831,12 +831,12 @@ begin
     addGlobalType('set of TShiftStateEnum', 'TShiftState');
     addGlobalType('(mbLeft, mbRight, mbMiddle, mbExtra1, mbExtra2)', 'TMouseButton');
 
-    addCallbackType('TKeyEvent = procedure(Sender: TObject; var Key: Int16; Shift: TShiftState) of object');
-    addCallbackType('TKeyPressEvent = procedure(Sender: TObject; var Key: Char) of object');
-    addCallbackType('TMouseEvent = procedure(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer) of object');
-    addCallbackType('TMouseMoveEvent = procedure(Sender: TObject; Shift: TShiftState; X, Y: Integer) of object');
-    addCallbackType('TMouseWheelEvent = procedure(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean) of object');
-    addCallbackType('TMouseWheelUpDownEvent = procedure(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean) of object');
+    addGlobalType('procedure(Sender: TObject; var Key: Int16; Shift: TShiftState) of object', 'TKeyEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TObject; var Key: Char) of object', 'TKeyPressEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer) of object', 'TMouseEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TObject; Shift: TShiftState; X, Y: Integer) of object', 'TMouseMoveEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean) of object', 'TMouseWheelEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean) of object', 'TMouseWheelUpDownEvent', FFI_DEFAULT_ABI);
 
     addGlobalType('(sbHorizontal, sbVertical)', 'TScrollBarKind');
     addGlobalType('(alNone, alTop, alBottom, alLeft, alRight, alClient, alCustom)', 'TAlign');

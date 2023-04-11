@@ -24,24 +24,24 @@ type
   {$POP}
 
   TTargetMethods = record
-    GetDimensions: procedure(out W, H: Integer) of object;
-    GetImageData: function(X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean of object;
+    GetDimensions: procedure(Target: Pointer; out W, H: Integer);
+    GetImageData: function(Target: Pointer; X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
 
-    IsValid: function: Boolean of object;
-    IsFocused: function: Boolean of object;
-    Focus: function: Boolean of object;
+    IsValid: function(Target: Pointer): Boolean;
+    IsFocused: function(Target: Pointer): Boolean;
+    Focus: function(Target: Pointer): Boolean;
 
-    KeyDown: procedure(Key: KeyCode) of object;
-    KeyUp: procedure(Key: KeyCode) of object;
-    KeySend: procedure(Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer) of object;
-    KeyPressed: function(Key: KeyCode): Boolean of object;
+    KeyDown: procedure(Target: Pointer; Key: KeyCode);
+    KeyUp: procedure(Target: Pointer; Key: KeyCode);
+    KeySend: procedure(Target: Pointer; Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
+    KeyPressed: function(Target: Pointer; Key: KeyCode): Boolean;
 
-    MouseTeleport: procedure(P: TPoint) of object;
-    MousePosition: function: TPoint of object;
-    MousePressed: function(Button: MouseButton): Boolean of object;
-    MouseDown: procedure(Button: MouseButton) of object;
-    MouseUp: procedure(Button: MouseButton) of object;
-    MouseScroll: procedure(Scrolls: Integer) of object;
+    MouseTeleport: procedure(Target: Pointer; P: TPoint);
+    MousePosition: function(Target: Pointer): TPoint;
+    MousePressed: function(Target: Pointer; Button: MouseButton): Boolean;
+    MouseDown: procedure(Target: Pointer; Button: MouseButton);
+    MouseUp: procedure(Target: Pointer; Button: MouseButton);
+    MouseScroll: procedure(Target: Pointer; Scrolls: Integer);
   end;
 
 const
@@ -49,16 +49,17 @@ const
 
 type
   PSimbaTarget = ^TSimbaTarget;
-  TSimbaTarget = record
+  TSimbaTarget = packed record
   public
     FTargetType: ETargetType;
-    FTargetBitmap: TSimbaBitmapTarget;
-    FTargetWindow: TSimbaWindowTarget;
+    FTarget: Pointer;
+    FTargetBitmap: TMufasaBitmap;
+    FTargetWindow: TWindowHandle;
     FTargetEIOS: TEIOSTarget;
     FMethods: TTargetMethods; // Targets need to provide these. They are filled in SetWindow,SetEIOS etc.
 
     procedure ChangeTarget(TargetType: ETargetType);
-    function HasMethod(Method: PMethod; Name: String): Boolean;
+    function HasMethod(Method: Pointer; Name: String): Boolean;
   public
     function IsWindowTarget: Boolean; overload;
     function IsWindowTarget(out Window: TWindowHandle): Boolean; overload;
@@ -96,12 +97,14 @@ type
     function ValidateBounds(var Bounds: TBox): Boolean;
     function GetImageData(var Bounds: TBox; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
     procedure FreeImageData(var Data: PColorBGRA);
+
+    class operator Initialize(var Self: TSimbaTarget);
   end;
 
 implementation
 
 uses
-  simba.nativeinterface, simba.random;
+  simba.nativeinterface;
 
 procedure TSimbaTarget.ChangeTarget(TargetType: ETargetType);
 begin
@@ -109,9 +112,9 @@ begin
   FMethods := Default(TTargetMethods);
 end;
 
-function TSimbaTarget.HasMethod(Method: PMethod; Name: String): Boolean;
+function TSimbaTarget.HasMethod(Method: Pointer; Name: String): Boolean;
 begin
-  if (Method^.Code = nil) then
+  if (Method = nil) then
     raise Exception.CreateFmt('Target "%s" cannot %s', [TargetName[FTargetType], Name]);
 
   Result := True;
@@ -126,7 +129,7 @@ function TSimbaTarget.IsWindowTarget(out Window: TWindowHandle): Boolean;
 begin
   Result := FTargetType = ETargetType.WINDOW;
   if Result then
-    Window := FTargetWindow.Handle;
+    Window := FTargetWindow;
 end;
 
 function TSimbaTarget.IsBitmapTarget: Boolean;
@@ -138,7 +141,7 @@ function TSimbaTarget.IsBitmapTarget(out Bitmap: TMufasaBitmap): Boolean;
 begin
   Result := FTargetType = ETargetType.BITMAP;
   if Result then
-    Bitmap := FTargetBitmap.Bitmap;
+    Bitmap := FTargetBitmap;
 end;
 
 function TSimbaTarget.IsEIOSTarget: Boolean;
@@ -149,25 +152,25 @@ end;
 function TSimbaTarget.IsValid: Boolean;
 begin
   if HasMethod(@FMethods.IsValid, 'IsValid') then
-    Result := FMethods.IsValid();
+    Result := FMethods.IsValid(FTarget);
 end;
 
 function TSimbaTarget.IsFocused: Boolean;
 begin
   if HasMethod(@FMethods.IsFocused, 'IsFocused') then
-    Result := FMethods.IsFocused();
+    Result := FMethods.IsFocused(FTarget);
 end;
 
 function TSimbaTarget.Focus: Boolean;
 begin
   if HasMethod(@FMethods.Focus, 'Focus') then
-    Result := FMethods.Focus();
+    Result := FMethods.Focus(FTarget);
 end;
 
 procedure TSimbaTarget.GetDimensions(out W, H: Integer);
 begin
   if HasMethod(@FMethods.GetDimensions, 'GetDimensions') then
-    FMethods.GetDimensions(W, H);
+    FMethods.GetDimensions(FTarget, W, H);
 end;
 
 function TSimbaTarget.GetWidth: Integer;
@@ -204,118 +207,121 @@ procedure TSimbaTarget.SetWindow(Window: TWindowHandle);
 begin
   ChangeTarget(ETargetType.WINDOW);
 
-  FTargetWindow.Handle := Window;
+  FTargetWindow := Window;
+  FTarget := @FTargetWindow;
 
-  FMethods.Focus := @FTargetWindow.Focus;
-  FMethods.IsFocused := @FTargetWindow.IsFocused;
-  FMethods.IsValid := @FTargetWindow.IsValid;
+  FMethods.Focus := @WindowTarget_Focus;
+  FMethods.IsFocused := @WindowTarget_IsFocused;
+  FMethods.IsValid := @WindowTarget_IsValid;
 
-  FMethods.KeyDown := @FTargetWindow.KeyDown;
-  FMethods.KeyUp := @FTargetWindow.KeyUp;
-  FMethods.KeySend := @FTargetWindow.KeySend;
-  FMethods.KeyPressed := @FTargetWindow.KeyPressed;
+  FMethods.KeyDown := @WindowTarget_KeyDown;
+  FMethods.KeyUp := @WindowTarget_KeyUp;
+  FMethods.KeySend := @WindowTarget_KeySend;
+  FMethods.KeyPressed := @WindowTarget_KeyPressed;
 
-  FMethods.MouseTeleport := @FTargetWindow.MouseTeleport;
-  FMethods.MousePosition := @FTargetWindow.MousePosition;
-  FMethods.MousePressed := @FTargetWindow.MousePressed;
-  FMethods.MouseDown := @FTargetWindow.MouseDown;
-  FMethods.MouseUp := @FTargetWindow.MouseUp;
-  FMethods.MouseScroll := @FTargetWindow.MouseScroll;
+  FMethods.MouseTeleport := @WindowTarget_MouseTeleport;
+  FMethods.MousePosition := @WindowTarget_MousePosition;
+  FMethods.MousePressed := @WindowTarget_MousePressed;
+  FMethods.MouseDown := @WindowTarget_MouseDown;
+  FMethods.MouseUp := @WindowTarget_MouseUp;
+  FMethods.MouseScroll := @WindowTarget_MouseScroll;
 
-  FMethods.GetDimensions := @FTargetWindow.GetDimensions;
-  FMethods.GetImageData := @FTargetWindow.GetImageData;
+  FMethods.GetDimensions := @WindowTarget_GetDimensions;
+  FMethods.GetImageData := @WindowTarget_GetImageData;
 end;
 
 procedure TSimbaTarget.SetBitmap(Bitmap: TMufasaBitmap);
 begin
   ChangeTarget(ETargetType.BITMAP);
 
-  FTargetBitmap.Bitmap := Bitmap;
+  FTargetBitmap := Bitmap;
+  FTarget := FTargetBitmap;
 
-  FMethods.GetDimensions := @FTargetBitmap.GetDimensions;
-  FMethods.GetImageData := @FTargetBitmap.GetImageData;
+  FMethods.GetDimensions := @BitmapTarget_GetDimensions;
+  FMethods.GetImageData := @BitmapTarget_GetImageData;
 end;
 
 procedure TSimbaTarget.SetEIOS(FileName, Args: String);
 begin
   ChangeTarget(ETargetType.EIOS);
 
-  FTargetEIOS.Load(FileName, Args);
+  FTargetEIOS := LoadEIOS(FileName, Args);
+  FTarget := @FTargetEIOS;
 
-  FMethods.KeyDown := @FTargetEIOS.KeyDown;
-  FMethods.KeyUp := @FTargetEIOS.KeyUp;
-  FMethods.KeySend := @FTargetEIOS.KeySend;
-  FMethods.KeyPressed := @FTargetEIOS.KeyPressed;
+  FMethods.KeyDown := @EIOSTarget_KeyDown;
+  FMethods.KeyUp := @EIOSTarget_KeyUp;
+  FMethods.KeySend := @EIOSTarget_KeySend;
+  FMethods.KeyPressed := @EIOSTarget_KeyPressed;
 
-  FMethods.MouseTeleport := @FTargetEIOS.MouseTeleport;
-  FMethods.MousePosition := @FTargetEIOS.MousePosition;
-  FMethods.MousePressed := @FTargetEIOS.MousePressed;
-  FMethods.MouseDown := @FTargetEIOS.MouseDown;
-  FMethods.MouseUp := @FTargetEIOS.MouseUp;
-  FMethods.MouseScroll := @FTargetEIOS.MouseScroll;
+  FMethods.MouseTeleport := @EIOSTarget_MouseTeleport;
+  FMethods.MousePosition := @EIOSTarget_MousePosition;
+  FMethods.MousePressed := @EIOSTarget_MousePressed;
+  FMethods.MouseDown := @EIOSTarget_MouseDown;
+  FMethods.MouseUp := @EIOSTarget_MouseUp;
+  FMethods.MouseScroll := @EIOSTarget_MouseScroll;
 
-  FMethods.GetDimensions := @FTargetEIOS.GetDimensions;
-  FMethods.GetImageData := @FTargetEIOS.GetImageData;
+  FMethods.GetDimensions := @EIOSTarget_GetDimensions;
+  FMethods.GetImageData := @EIOSTarget_GetImageData;
 end;
 
 function TSimbaTarget.MousePressed(Button: MouseButton): Boolean;
 begin
   if HasMethod(@FMethods.MousePressed, 'MousePressed') then
-    Result := FMethods.MousePressed(Button);
+    Result := FMethods.MousePressed(FTarget, Button);
 end;
 
 function TSimbaTarget.MousePosition: TPoint;
 begin
   if HasMethod(@FMethods.MousePosition, 'MousePosition') then
-    Result := FMethods.MousePosition();
+    Result := FMethods.MousePosition(FTarget);
 end;
 
 procedure TSimbaTarget.MouseTeleport(P: TPoint);
 begin
   if HasMethod(@FMethods.MouseTeleport, 'MouseTeleport') then
-    FMethods.MouseTeleport(P);
+    FMethods.MouseTeleport(FTarget, P);
 end;
 
 procedure TSimbaTarget.MouseUp(Button: MouseButton);
 begin
   if HasMethod(@FMethods.MouseUp, 'MouseUp') then
-    FMethods.MouseUp(Button);
+    FMethods.MouseUp(FTarget, Button);
 end;
 
 procedure TSimbaTarget.MouseDown(Button: MouseButton);
 begin
   if HasMethod(@FMethods.MouseDown, 'MouseDown') then
-    FMethods.MouseDown(Button);
+    FMethods.MouseDown(FTarget, Button);
 end;
 
 procedure TSimbaTarget.MouseScroll(Scrolls: Integer);
 begin
   if HasMethod(@FMethods.MouseScroll, 'MouseScroll') then
-    FMethods.MouseScroll(Scrolls);
+    FMethods.MouseScroll(FTarget, Scrolls);
 end;
 
 procedure TSimbaTarget.KeyDown(Key: KeyCode);
 begin
   if HasMethod(@FMethods.KeyDown, 'KeyDown') then
-    FMethods.KeyDown(Key);
+    FMethods.KeyDown(FTarget, Key);
 end;
 
 procedure TSimbaTarget.KeyUp(Key: KeyCode);
 begin
   if HasMethod(@FMethods.KeyDown, 'KeyUp') then
-    FMethods.KeyDown(Key);
+    FMethods.KeyDown(FTarget, Key);
 end;
 
 procedure TSimbaTarget.KeySend(Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
 begin
   if HasMethod(@FMethods.KeySend, 'KeySend') then
-    FMethods.KeySend(Key, KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime);
+    FMethods.KeySend(FTarget, Key, KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime);
 end;
 
 function TSimbaTarget.KeyPressed(Key: KeyCode): Boolean;
 begin
   if HasMethod(@FMethods.KeyPressed, 'KeyPressed') then
-    Result := FMethods.KeyPressed(Key);
+    Result := FMethods.KeyPressed(FTarget, Key);
 end;
 
 function TSimbaTarget.ValidateBounds(var Bounds: TBox): Boolean;
@@ -345,13 +351,18 @@ function TSimbaTarget.GetImageData(var Bounds: TBox; var Data: PColorBGRA; var D
 begin
   Data := nil;
   if HasMethod(@FMethods.GetImageData, 'GetImageData') then
-    Result := ValidateBounds(Bounds) and FMethods.GetImageData(Bounds.X1, Bounds.Y1, Bounds.Width, Bounds.Height, Data, DataWidth);
+    Result := ValidateBounds(Bounds) and FMethods.GetImageData(FTarget, Bounds.X1, Bounds.Y1, Bounds.Width, Bounds.Height, Data, DataWidth);
 end;
 
 procedure TSimbaTarget.FreeImageData(var Data: PColorBGRA);
 begin
   if (FTargetType in [ETargetType.WINDOW]) then
     FreeMem(Data);
+end;
+
+class operator TSimbaTarget.Initialize(var Self: TSimbaTarget);
+begin
+  Self := Default(TSimbaTarget);
 end;
 
 end.

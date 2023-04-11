@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.bitmap, simba.finder;
+  simba.bitmap, simba.finder, simba.mufasatypes;
 
 type
   TMufasaBitmapHelper = class helper for TMufasaBitmap

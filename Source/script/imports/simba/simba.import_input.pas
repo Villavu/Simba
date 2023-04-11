@@ -11,6 +11,7 @@ implementation
 
 uses
   lptypes,
+  ffi,
   simba.script_compiler, simba.mufasatypes, simba.input, simba.target;
 
 (*
@@ -379,8 +380,8 @@ begin
   begin
     ImportingSection := 'Input';
 
-    addCallbackType('TMouseTeleportEvent = procedure(Sender: Pointer; X, Y: Integer)');
-    addCallbackType('TMouseMovingEvent = function(Sender: Pointer; var X, Y: Double): Boolean');
+    addGlobalType('procedure(Sender: Pointer; X, Y: Integer)', 'TMouseTeleportEvent', FFI_DEFAULT_ABI);
+    addGlobalType('function(Sender: Pointer; var X, Y: Double): Boolean', 'TMouseMovingEvent', FFI_DEFAULT_ABI);
 
     addGlobalType([
       'packed record',
@@ -401,6 +402,8 @@ begin
       'end;'],
       'TSimbaInput'
     );
+    if (getGlobalType('TSimbaInput').Size <> SizeOf(TSimbaInput)) then
+      raise Exception.Create('SizeOf(TSimbaInput) is wrong!');
 
     with addGlobalVar('TSimbaInput', '[]', 'Input') do
       Used := duTrue;

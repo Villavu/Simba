@@ -13,23 +13,22 @@ uses
   Classes, SysUtils,
   simba.mufasatypes, simba.bitmap;
 
-type
-  TSimbaBitmapTarget = record
-    Bitmap: TMufasaBitmap;
-
-    procedure GetDimensions(out W, H: Integer);
-    function GetImageData(X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
-  end;
+procedure BitmapTarget_GetDimensions(Target: Pointer; out W, H: Integer);
+function BitmapTarget_GetImageData(Target: Pointer; X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
 
 implementation
 
-procedure TSimbaBitmapTarget.GetDimensions(out W, H: Integer);
+procedure BitmapTarget_GetDimensions(Target: Pointer; out W, H: Integer);
+var
+  Bitmap: TMufasaBitmap absolute Target;
 begin
   W := Bitmap.Width;
   H := Bitmap.Height;
 end;
 
-function TSimbaBitmapTarget.GetImageData(X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
+function BitmapTarget_GetImageData(Target: Pointer; X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
+var
+  Bitmap: TMufasaBitmap absolute Target;
 begin
   Result := True;
 

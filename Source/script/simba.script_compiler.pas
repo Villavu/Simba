@@ -10,28 +10,22 @@ unit simba.script_compiler;
 interface
 
 uses
-  classes, sysutils, typinfo, contnrs,
+  Classes, SysUtils, TypInfo,
   ffi, lpffi, lpcompiler, lptypes, lpvartypes, lpparser, lptree, lpffiwrappers, lpinterpreter,
   simba.mufasatypes;
-
 
 type
   TOverridingMethod = function(Name, Params: lpString; isFunction: Boolean): String is nested;
 
-type
   TSimbaScript_Compiler = class;
   TSimbaImport = procedure(Compiler: TSimbaScript_Compiler);
   TSimbaImportArray = array of TSimbaImport;
 
+  TManagedImportClosure = class(TLapeDeclaration)
+    Closure: TImportClosure;
+  end;
+
   TSimbaScript_Compiler = class(TLapeCompiler)
-  protected class var
-    Imports: TSimbaImportArray;
-  public
-    class procedure RegisterImport(Proc: TSimbaImport);
-  public type
-    TManagedImportClosure = class(TLapeDeclaration)
-      Closure: TImportClosure;
-    end;
   protected
     FImportingSection: String;
 
@@ -40,7 +34,8 @@ type
     procedure InitBaseVariant; override;
     procedure InitBaseDefinitions; override;
   public
-    property ImportingSection: String read GetImportingSection write FImportingSection;
+    class var Imports: TSimbaImportArray;
+    class procedure RegisterImport(Proc: TSimbaImport);
 
     function getIntegerArray: TLapeType; override;
     function getFloatArray: TLapeType; override;
@@ -61,16 +56,14 @@ type
     function addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType; virtual; overload;
     function addGlobalType(Str: TStringArray; Name: String): TLapeType; virtual; overload;
 
-    function addCallbackType(Str: String): TLapeType;
-
     procedure addClass(Name: lpString; Parent: lpString = 'TObject'); virtual;
     procedure addClassVar(Obj, Item, Typ: lpString; ARead: Pointer; AWrite: Pointer = nil; Arr: Boolean = False; ArrType: lpString = 'Integer'); virtual;
 
     procedure Import; virtual;
     function Compile: Boolean; override;
 
-    procedure InvokeProc(Name: String);
-    procedure InvokeProcFFI(Name: String);
+    procedure CallProc(ProcName: String; UseFFI: Boolean);
+    property ImportingSection: String read GetImportingSection write FImportingSection;
   end;
 
 implementation
@@ -165,11 +158,6 @@ begin
   Result := addGlobalType(LineEnding.Join(Str), Name);
 end;
 
-function TSimbaScript_Compiler.addCallbackType(Str: String): TLapeType;
-begin
-  Result := addGlobalType(Str.After('=').Trim(), Str.Before('=').Trim(), FFI_DEFAULT_ABI);
-end;
-
 procedure TSimbaScript_Compiler.addClass(Name: lpString; Parent: lpString);
 begin
   addGlobalType(Format('type %s', [Parent]), Name);
@@ -229,30 +217,25 @@ begin
   Result := inherited Compile();
 end;
 
-procedure TSimbaScript_Compiler.InvokeProc(Name: String);
+procedure TSimbaScript_Compiler.CallProc(ProcName: String; UseFFI: Boolean);
 var
   Method: TLapeGlobalVar;
 begin
-  Method := Globals[Name];
-  if (Method <> nil) then
+  Method := Globals[ProcName];
+  if (Method = nil) or (Method.BaseType <> ltScriptMethod) or
+     (TLapeType_Method(Method.VarType).Res <> nil) or (TLapeType_Method(Method.VarType).Params.Count <> 0) then
+    SimbaException('CallProc: Invalid procedure "%s"', [ProcName]);
+
+  if UseFFI then
+  begin
+    with LapeExportWrapper(Method) do
+    try
+      TProcedure(Func)();
+    finally
+      Free();
+    end;
+  end else
     RunCode(FEmitter, [], PCodePos(Method.Ptr)^);
-end;
-
-procedure TSimbaScript_Compiler.InvokeProcFFI(Name: String);
-var
-  Method: TLapeGlobalVar;
-  Closure: TExportClosure;
-begin
-  Method := Globals[Name];
-
-  if (Method <> nil) then
-  try
-    Closure := LapeExportWrapper(Method);
-
-    TProcedure(Closure.Func)();
-  finally
-    Closure.Free();
-  end;
 end;
 
 function TSimbaScript_Compiler.GetImportingSection: String;
