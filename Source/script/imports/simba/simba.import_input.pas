@@ -19,6 +19,18 @@ Input
 =====
 Input (Mouse & Keyboard) related methods.
 
+- If the `TSimbaInput.Target` field is set, the global "Target" variable will be used. Which by default is set to Simba's target selection.
+- There is a pre-defined variable `Input` to use.
+
+Example:
+
+```
+  Input.MouseMove([200,200]); // Move the mouse to x: 200, y: 200
+  Input.MouseClick(MouseButton.LEFT); // And left click
+```
+
+----
+
 | Key codes and mouse buttons are both **scoped** enums.
 | For scoped a enum you **must** include the type of the enum.
 

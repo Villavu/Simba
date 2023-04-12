@@ -24,7 +24,16 @@ uses
 (*
 Finder
 ======
-Find Colors,Images,DTM on a target.
+Find Colors,Images,DTM and more on a target.
+
+- If the `TSimbaFinder.Target` field is set, the global "Target" variable will be used. Which by default is set to Simba's target selection.
+- There is a pre-defined variable `Finder` to use.
+
+Example:
+
+```
+  WriteLn Finder.CountColor($0000FF, 10); // Count a red color with 10 tolerance.
+```
 *)
 
 (*

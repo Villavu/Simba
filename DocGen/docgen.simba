@@ -25,9 +25,6 @@ end;
 
 const
   SOURCE_ROOT_DIR = 'Source/script/imports/';
-  SOURCE_IGNORE_DIRS = [
-    'backup'
-  ];
 
   OUTPUT_DIR = 'DocGen/output/';
   INPUT_DIR  = 'DocGen/input/';
@@ -192,6 +189,10 @@ begin
   for I := 0 to High(SourceFiles) do
     for J := 0 to High(Files) do
     begin
+      // ignore files in lazarus backup/ dirs
+      if ExtractFileName(ExtractFileDir(Files[J])) = 'backup' then
+        Continue;
+
       if (SourceFiles[I].FileName = ExtractFileName(Files[J])) then
       begin
         ParseComments(Files[J], SourceFiles[I].Title);
@@ -206,6 +207,7 @@ begin
   ClearDebug();
 
   CreateDirectory(OUTPUT_DIR);
+  DeleteDirectory(OUTPUT_DIR, True);
   CreateDirectory(INPUT_DIR);
   DeleteDirectory(INPUT_DIR, True);
 
