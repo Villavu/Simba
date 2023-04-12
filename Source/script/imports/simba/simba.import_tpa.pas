@@ -382,6 +382,10 @@ end;
 TPointArray.ExcludePie
 ~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ExcludePie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray;
+
+Returns all points from `Self` are **not** inside the "pie slice" defined by StartDegree, EndDegree and MinRadius, MaxRadius and Center.
+
+Note: Inverse of `ExcludePie`
 *)
 procedure _LapeTPAExcludePie(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -392,6 +396,10 @@ end;
 TPointArray.ExcludeDist
 ~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ExcludeDist(Center: TPoint; MinDist, MaxDist: Double): TPointArray;
+
+Returns all points from `Self` that are **not** within `MinDist` and `MaxDist` from `Center`
+
+Note: Inverse of `ExtractDist`
 *)
 procedure _LapeTPAExcludeDist(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -402,6 +410,8 @@ end;
 TPointArray.ExcludePoints
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ExcludePoints(Points: TPointArray): TPointArray;
+
+Returns all points from `Self` that are **not** inside the `Points` array.
 *)
 procedure _LapeTPAExcludePoints(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -413,9 +423,9 @@ TPointArray.ExcludePolygon
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ExcludePolygon(Polygon: TPointArray): TPointArray;
 
-Returns all points from `Self` that are *not* inside the polygon.
+Returns all points from `Self` that are **not** inside the polygon.
 
-Inverse of `ExtractPolygon`
+Note: Inverse of `ExtractPolygon`
 *)
 procedure _LapeTPAExcludePolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -427,9 +437,9 @@ TPointArray.ExcludeBox
 ~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ExcludeBox(Box: TBox): TPointArray;
 
-Returns all points from `Self` that *not* inside the box.
+Returns all points from `Self` that **not** inside the box.
 
-Inverse of `ExtractBox`
+Note: Inverse of `ExtractBox`
 *)
 procedure _LapeTPAExcludeBox(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -441,9 +451,9 @@ TPointArray.ExcludeQuad
 ~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ExcludeQuad(Quad: TQuad): TPointArray;
 
-Returns all points from `Self` that *not* inside the quad.
+Returns all points from `Self` that **not** inside the quad.
 
-Inverse of `ExtractQuad`
+Note: Inverse of `ExtractQuad`
 *)
 procedure _LapeTPAExcludeQuad(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -455,9 +465,9 @@ TPointArray.ExtractDist
 ~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ExtractDist(Center: TPoint; MinDist, MaxDist: Double): TPointArray;
 
-Returns all points from `Self` that *not* within `MinDist` and `MaxDist` from `Center`
+Returns all points from `Self` that **are** within `MinDist` and `MaxDist` from `Center`
 
-Inverse of `ExtractDist`
+Note: Inverse of `ExtractDist`
 *)
 procedure _LapeTPAExtractDist(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -469,7 +479,7 @@ TPointArray.ExtractPolygon
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ExtractPolygon(Polygon: TPointArray): TPointArray;
 
-Returns all points from `Self` that are inside the polygon.
+Returns all points from `Self` that are **inside** the polygon.
 *)
 procedure _LapeTPAExtractPolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -481,7 +491,7 @@ TPointArray.ExtractBox
 ~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ExtractBox(Box: TBox): TPointArray;
 
-Returns all points from `Self` that inside the box.
+Returns all points from `Self` that are **inside** the box.
 *)
 procedure _LapeTPAExtractBox(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -493,7 +503,7 @@ TPointArray.ExtractQuad
 ~~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ExtractQuad(Quad: TQuad): TPointArray;
 
-Returns all points from `Self` that inside the quad.
+Returns all points from `Self` that are **inside** the quad.
 *)
 procedure _LapeTPAExtractQuad(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -505,7 +515,7 @@ TPointArray.ExtractPie
 ~~~~~~~~~~~~~~~~~~~~~~
 function TPointArray.ExtractPie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray;
 
-Returns all points from `Self` are inside the "pie slice" defined by StartDegree, EndDegree and MinRadius, MaxRadius and Center.
+Returns all points from `Self` are **inside** the "pie slice" defined by StartDegree, EndDegree and MinRadius, MaxRadius and Center.
 *)
 procedure _LapeTPAExtractPie(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
