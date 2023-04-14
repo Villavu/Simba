@@ -51,10 +51,15 @@ jobs:
           date_year=$(date +"%Y")
           date_month_day=$(date +"%m-%d")
 
-          mkdir -p "Simba-Build-Archive/$date_year/$date_month_day | ${{ github.event.workflow_run.head_sha }}"
-          mv binaries/* "Simba-Build-Archive/$date_year/$date_month_day | ${{ github.event.workflow_run.head_sha }}/"
+          branch=${{ github.event.workflow_run.head_branch }}
+          commit=${{ github.event.workflow_run.head_sha }}
 
           cd Simba-Build-Archive
+          
+          mkdir -p "$date_year/$date_month_day $branch $commit"
+          mv ../binaries/* "$date_year/$date_month_day $branch $commit"
+
+          sed -i "6 i $date_year/$date_month_day | $branch | [$commit](https://github.com/Villavu/Simba/commit/$commit) | [Link](https://github.com/Villavu/Simba-Build-Archive/tree/main/$date_year/$date_month_day%20$branch%20$commit)" README.md
 
           git add .
           git commit --message "${{ github.event.workflow_run.head_sha }}"
