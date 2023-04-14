@@ -94,7 +94,7 @@ function TSimbaScript.DoCompilerHandleDirective(Sender: TLapeCompiler; Directive
     if Result then
     begin
       URL    := Argument.ToUpper().Between('URL(', ')');
-      Source := TSimbaHTTPClient.SimpleGet(URL, [HTTP_OK]);
+      Source := TSimbaHTTPClient.SimpleGet(URL, [EHTTPStatus.OK]);
 
       FCompiler.pushTokenizer(TLapeTokenizerString.Create(Source, '!' + URL));
     end;

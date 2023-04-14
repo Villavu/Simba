@@ -174,7 +174,7 @@ var
         try
           RequestHeader['If-None-Match'] := ETag; // ETag is added as a comment on the first line
 
-          Result := Head(URL) = HTTP_NOT_MODIFIED;
+          Result := Head(URL) = EHTTPStatus.NOT_MODIFIED;
         finally
           Free();
         end;
@@ -188,7 +188,7 @@ var
   begin
     with TSimbaHTTPClient.Create() do
     try
-      Cache.Text := Get(URL, [HTTP_OK]);
+      Cache.Text := Get(URL, [EHTTPStatus.OK]);
 
       ETag := ResponseHeader['ETag'];
     finally

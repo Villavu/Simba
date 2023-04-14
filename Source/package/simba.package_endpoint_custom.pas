@@ -73,7 +73,7 @@ begin
   try
     with TSimbaHTTPClient.Create() do
     try
-      Result := Get(URL, [HTTP_OK]);
+      Result := Get(URL, [EHTTPStatus.OK]);
     finally
       Free();
     end;
