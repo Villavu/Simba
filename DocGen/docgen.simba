@@ -21,6 +21,7 @@ begin
   SourceFiles += ['simba.import_input.pas',        'Input'         ];
   SourceFiles += ['simba.import_finder.pas',       'Finder'        ];
   SourceFiles += ['simba.import_target.pas',       'Target'        ];
+  SourceFiles += ['simba.import_internet.pas',     'Intenet'       ];
 end;
 
 const

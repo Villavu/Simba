@@ -40,7 +40,7 @@ uses
   simba.import_other, simba.import_input, simba.import_process,
   simba.import_script,  simba.import_slacktree, simba.import_string,
   simba.import_variant, simba.import_simba, simba.import_random,
-  simba.import_debugimage;
+  simba.import_debugimage, simba.import_internet;
 
 end.
 

@@ -235,18 +235,15 @@ begin
         Continue;
 
       if isConstant then
-        Str := 'const ' + UpperCase(Name) + ': ' + VarType.Name
-      else
-        Str := 'var ' + Name + ': ' + VarType.Name;
-
-      if isConstant or (not isNull) then
       begin
+        Str := 'const ' + UpperCase(Name) + ': ' + VarType.Name;
+
         if (VarType.BaseType in LapeCharTypes) then
-          Str := Str + ' = "' + AsString + '"'
+          Str := Str + ' = "' + AsString + '";'
         else
-          Str := Str + ' = ' + AsString;
-      end;
-      Str := Str + ';';
+          Str := Str + ' = ' + AsString + ';';
+      end else
+        Str := 'var ' + Name + ': ' + VarType.Name + ';';
 
       Add(DocPos.FileName, Str);
     end;

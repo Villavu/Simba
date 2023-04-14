@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, synedit, syncobjs,
-  simba.package;
+  simba.package, simba.httpclient;
 
 type
   TSimbaPackageInstallOptions = record
@@ -37,7 +37,7 @@ type
     procedure DoConnectingProgress(Sender: TObject; URL: String);
     procedure DoDownloadingProgress(Sender: TObject; URL, ContentType: String; Pos, Size: Int64);
     procedure DoExtractingProgress(Sender: TObject; FileName: String; Percent: Double);
-    procedure DoResponseCode(Sender: TObject; Code: Integer);
+    procedure DoResponseStatus(Sender: TObject; Code: EHTTPStatus);
 
     procedure DoDownloadingFinished(Sender: TObject);
     procedure DoExtractingFinished(Sender: TObject);
@@ -58,7 +58,7 @@ implementation
 
 uses
   Forms, FileUtil,
-  simba.mufasatypes, simba.httpclient, simba.files;
+  simba.mufasatypes, simba.files;
 
 function TSimbaPackageInstaller.InternalInstall(URL: String; Path: String; IgnoreList: TStringArray; Flat: Boolean): Boolean;
 
@@ -69,7 +69,7 @@ function TSimbaPackageInstaller.InternalInstall(URL: String; Path: String; Ignor
       OnConnecting       := @DoConnectingProgress;
       OnDownloadProgress := @DoDownloadingProgress;
       OnExtractProgress  := @DoExtractingProgress;
-      OnResponseCode     := @DoResponseCode;
+      OnResponseStatus   := @DoResponseStatus;
 
       OnDownloadingFinished := @DoDownloadingFinished;
       OnExtractingFinished  := @DoExtractingFinished;
@@ -204,7 +204,7 @@ begin
   Log(FExtractProgress.Progress);
 end;
 
-procedure TSimbaPackageInstaller.DoResponseCode(Sender: TObject; Code: Integer);
+procedure TSimbaPackageInstaller.DoResponseStatus(Sender: TObject; Code: EHTTPStatus);
 begin
   Log('HTTP response: %d'.Format([Code]));
 end;
@@ -249,7 +249,7 @@ var
     with TSimbaHTTPClient.Create() do
     try
       Strings.Text := Get(Version.OptionsURL, []);
-      if (ResponseCode <> HTTP_OK) then
+      if (ResponseStatus <> EHTTPStatus.OK) then
         Strings.Text := '';
     finally
       Free();

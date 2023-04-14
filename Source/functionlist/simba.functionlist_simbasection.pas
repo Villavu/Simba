@@ -24,7 +24,9 @@ const
     'TWindowHandle -> https://villavu.github.io/Simba/TWindowHandle.html',
     'TMufasaBitmap -> https://villavu.github.io/Simba/TMufasaBitmap.html',
     'Finder        -> https://villavu.github.io/Simba/Finder.html',
-    'Input         -> https://villavu.github.io/Simba/Input.html'
+    'Input         -> https://villavu.github.io/Simba/Input.html',
+    'Target        -> https://villavu.github.io/Simba/Target.html',
+    'Internet      -> https://villavu.github.io/Simba/Internet.html'
   );
 
 function GetSectionDocLink(Section: String): String;

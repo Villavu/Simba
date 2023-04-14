@@ -10,165 +10,184 @@ unit simba.httpclient;
 interface
 
 uses
-  classes, sysutils,
-  simba.fphttpclient, simba.mufasatypes;
+  Classes, SysUtils,
+  simba.mufasatypes, simba.baseclass, simba.fphttpclient;
 
-const
-  // Information
-  HTTP_CONTINUE = 100;
-  HTTP_SWITCHING_PROTOCOLS = 101;
+{$PUSH}
+{$SCOPEDENUMS ON}
+type
+  EHTTPStatus = (
+    // Information
+    CONTINUE = 100,
+    SWITCHING_PROTOCOLS = 101,
+    PROCESSING = 102,
+    EARLY_HINTS = 103,
 
-  // Success
-  HTTP_OK = 200;
-  HTTP_CREATED = 201;
-  HTTP_ACCEPTED = 202;
-  HTTP_NONAUTHORITATIVE_INFORMATION = 203;
-  HTTP_NO_CONTENT = 204;
-  HTTP_RESET_CONTENT = 205;
-  HTTP_PARTIAL_CONTENT = 206;
+    // Success
+    OK = 200,
+    CREATED = 201,
+    ACCEPTED = 202,
+    NONAUTHORITATIVE_INFORMATION = 203,
+    NO_CONTENT = 204,
+    RESET_CONTENT = 205,
+    PARTIAL_CONTENT = 206,
 
-  // Redirection
-  HTTP_MULTIPLE_CHOICES = 300;
-  HTTP_MOVED_PERMANENTLY = 301;
-  HTTP_FOUND = 302;
-  HTTP_SEE_OTHER = 303;
-  HTTP_NOT_MODIFIED = 304;
-  HTTP_USE_PROXY = 305;
-  HTTP_UNUSED = 306;
-  HTTP_TEMPORARY_REDIRECT = 307;
+    // Redirection
+    MULTIPLE_CHOICES = 300,
+    MOVED_PERMANENTLY = 301,
+    FOUND = 302,
+    SEE_OTHER = 303,
+    NOT_MODIFIED = 304,
+    USE_PROXY = 305,
+    TEMPORARY_REDIRECT = 307,
+    PERMANENT_REDIRECT = 308,
 
-  // Client Error
-  HTTP_BAD_REQUEST = 400;
-  HTTP_UNAUTHORIZED  = 401;
-  HTTP_PAYMENT_REQUIRED = 402;
-  HTTP_FORBIDDEN = 403;
-  HTTP_NOT_FOUND = 404;
-  HTTP_METHOD_NOT_ALLOWED = 405;
-  HTTP_NOT_ACCEPTABLE = 406;
-  HTTP_PROXY_AUTHENTICATION_REQUIRED = 407;
-  HTTP_REQUEST_TIMEOUT = 408;
-  HTTP_CONFLICT = 409;
-  HTTP_GONE = 410;
-  HTTP_LENGTH_REQUIRED = 411;
-  HTTP_PRECONDITION_FAILED = 412;
-  HTTP_REQUEST_ENTITY_TOO_LARGE = 413;
-  HTTP_REQUEST_URI_TOO_LONG = 414;
-  HTTP_UNSUPPORTED_MEDIA_TYPE = 415;
-  HTTP_REQUESTED_RANGE_NOT_SATISFIABLE = 416;
-  HTTP_EXPECTATION_FAILED = 417;
+    // Client Error
+    BAD_REQUEST = 400,
+    UNAUTHORIZED  = 401,
+    PAYMENT_REQUIRED = 402,
+    FORBIDDEN = 403,
+    NOT_FOUND = 404,
+    METHOD_NOT_ALLOWED = 405,
+    NOT_ACCEPTABLE = 406,
+    PROXY_AUTHENTICATION_REQUIRED = 407,
+    REQUEST_TIMEOUT = 408,
+    CONFLICT = 409,
+    GONE = 410,
+    LENGTH_REQUIRED = 411,
+    PRECONDITION_FAILED = 412,
+    REQUEST_ENTITY_TOO_LARGE = 413,
+    REQUEST_URI_TOO_LONG = 414,
+    UNSUPPORTED_MEDIA_TYPE = 415,
+    REQUESTED_RANGE_NOT_SATISFIABLE = 416,
+    EXPECTATION_FAILED = 417,
+    IM_A_TEAPOT = 418,
+    MISDIRECTED_REQUEST = 421,
+    UNPROCESSABLE_ENTITY = 422,
+    LOCKED = 423,
+    FAILED_DEPENDENCY = 424,
+    TOO_EARLY = 425,
+    UPGRADE_REQUIRED = 426,
+    PRECONDITION_REQUIRED = 428,
+    TOO_MANY_REQUESTS = 429,
+    REQUEST_HEADER_FIELDS_TOO_LARGE = 431,
+    UNAVAILABLE_FOR_LEGAL_REASONS = 451,
 
-  // Server Error
-  HTTP_INTERNAL_SERVER_ERROR = 500;
-  HTTP_NOT_IMPLEMENTED = 501;
-  HTTP_BAD_GATEWAY = 502;
-  HTTP_SERVICE_UNAVAILABLE = 503;
-  HTTP_GATEWAY_TIMEOUT = 504;
-  HTTP_VERSION_NOT_SUPPORTED = 505;
+    // Server Error
+    INTERNAL_SERVER_ERROR = 500,
+    NOT_IMPLEMENTED = 501,
+    BAD_GATEWAY = 502,
+    SERVICE_UNAVAILABLE = 503,
+    GATEWAY_TIMEOUT = 504,
+    VERSION_NOT_SUPPORTED = 505
+   );
+   THTTPStatusArray = array of EHTTPStatus;
+
+   PHTTPStatus = ^EHTTPStatus;
+   PHTTPStatusArray = ^THTTPStatusArray;
+{$POP}
 
 type
-  THTTPClientHeadersEvent = procedure(Sender: TObject) of object;
-  THTTPClientConnectingEvent = procedure(Sender: TObject; URL: String) of object;
-  THTTPClientExtractEvent = procedure(Sender: TObject; URL: String; Percent: Double) of object;
-  THTTPClientResponseCodeEvent = procedure(Sender: TObject; ResponseCode: Integer) of object;
+  TSimbaHTTPConnectingEvent  = procedure(Sender: TObject; URL: String) of object;
+  TSimbaHTTPExtractingEvent  = procedure(Sender: TObject; URL: String; Percent: Double) of object;
+  TSimbaHTTPStatusEvent      = procedure(Sender: TObject; ResponseStatus: EHTTPStatus) of object;
+  TSimbaHTTPDownloadingEvent = procedure(Sender: TObject; URL, ContentType: String; Position, Size: Int64) of object;
 
-  TSimbaHTTPProgressEvent = procedure(Sender: TObject; URL, ContentType: String; Position, Size: Int64) of object;
-  TSimbaHTTPClientProxy = record
-    Host: String;
-    Port: Int32;
-    UserName: String;
-    Password: String;
-  end;
-
-type
-  TSimbaHTTPClient = class
+  TSimbaHTTPClient = class(TSimbaBaseClass)
   protected
     FHTTPClient: TSimbaFPHTTPClient;
     FURL: String;
     FContentType: String;
-    FOnDownloadProgress: TSimbaHTTPProgressEvent;
-    FOnExtractProgress: THTTPClientExtractEvent;
-    FOnConnecting: THTTPClientConnectingEvent;
-    FOnHeaders: THTTPClientHeadersEvent;
-    FOnResponseCode: THTTPClientResponseCodeEvent;
+    FOnDownloadProgress: TSimbaHTTPDownloadingEvent;
+    FOnExtractProgress: TSimbaHTTPExtractingEvent;
+    FOnConnecting: TSimbaHTTPConnectingEvent;
+    FOnHeaders: TNotifyEvent;
+    FOnResponseStatus: TSimbaHTTPStatusEvent;
     FDownloadingFinished: TNotifyEvent;
     FExtractingFinished: TNotifyEvent;
+
+    function StatusCodesToIntegerArray(StatusCodes: THTTPStatusArray): TIntegerArray;
+    function SetURL(URL: String): String;
 
     procedure DoExtractProgress(Sender: TObject; FileName: String; Percent: Double);
     procedure DoDownloadProgress(Sender: TObject; const Size, Position: Int64);
     procedure DoRedirect(Sender: TObject; const Source: String; var Dest: String);
     procedure DoConnecting(Sender: TObject; URL: String);
     procedure DoHeaders(Sender: TObject);
-    procedure DoResponseCode(Sender: TObject; ResponseCode: Integer);
+    procedure DoResponseStatus(Sender: TObject; ResponseStatus: Integer);
 
-    function GetResponseHeader(Name: String): String;
-    function GetResponseCode: Int32;
+    function GetResponseHeader(AName: String): String;
+    function GetResponseStatus: EHTTPStatus;
     function GetResponseHeaders: TStringList;
-    function GetRequestHeader(Name: String): String;
+    function GetRequestHeader(AName: String): String;
     function GetRequestHeaders: TStringList;
     function GetCookies: TStringList;
-    function GetProxy: TSimbaHTTPClientProxy;
     function GetRequestContentType: String;
+    function GetUserAgent: String;
 
+    procedure SetUserAgent(Value: String);
     procedure SetRequestContentType(Value: String);
-    procedure SetRequestHeader(Name: String; Value: String);
-    procedure SetProxy(Value: TSimbaHTTPClientProxy);
+    procedure SetRequestHeader(AName: String; Value: String);
+    procedure SetCookies(Value: TStringList);
   public
-    property OnDownloadProgress: TSimbaHTTPProgressEvent read FOnDownloadProgress write FOnDownloadProgress;
-    property OnExtractProgress: THTTPClientExtractEvent read FOnExtractProgress write FOnExtractProgress;
-    property OnConnecting: THTTPClientConnectingEvent read FOnConnecting write FOnConnecting;
-    property OnHeadersReceived: THTTPClientHeadersEvent read FOnHeaders write FOnHeaders;
-    property OnResponseCode: THTTPClientResponseCodeEvent read FOnResponseCode write FOnResponseCode;
-
+    property OnDownloadProgress: TSimbaHTTPDownloadingEvent read FOnDownloadProgress write FOnDownloadProgress;
+    property OnExtractProgress: TSimbaHTTPExtractingEvent read FOnExtractProgress write FOnExtractProgress;
+    property OnConnecting: TSimbaHTTPConnectingEvent read FOnConnecting write FOnConnecting;
+    property OnHeadersReceived: TNotifyEvent read FOnHeaders write FOnHeaders;
+    property OnResponseStatus: TSimbaHTTPStatusEvent read FOnResponseStatus write FOnResponseStatus;
     property OnDownloadingFinished: TNotifyEvent read FDownloadingFinished write FDownloadingFinished;
     property OnExtractingFinished: TNotifyEvent read FExtractingFinished write FExtractingFinished;
 
-    property ResponseCode: Int32 read GetResponseCode;
-    property ResponseHeader[Name: String]: String read GetResponseHeader;
+    property ResponseStatus: EHTTPStatus read GetResponseStatus;
+    property ResponseHeader[AName: String]: String read GetResponseHeader;
     property ResponseHeaders: TStringList read GetResponseHeaders;
 
-    property RequestHeader[Name: String]: String read GetRequestHeader write SetRequestHeader;
+    property RequestHeader[AName: String]: String read GetRequestHeader write SetRequestHeader;
     property RequestHeaders: TStringList read GetRequestHeaders;
-
     property RequestContentType: String read GetRequestContentType write SetRequestContentType;
 
-    property Cookies: TStringList read GetCookies;
-    property Proxy: TSimbaHTTPClientProxy read GetProxy write SetProxy;
+    property Cookies: TStringList read GetCookies write SetCookies;
+    property UserAgent: String read GetUserAgent write SetUserAgent;
+
+    procedure SetProxy(Host: String; Port: Integer; UserName, Password: String);
+    procedure ClearProxy;
+
+    // Clear cookies and request data
+    procedure Reset;
 
     // Header request, returns response code
-    function Head(URL: String): Integer;
+    function Head(URL: String): EHTTPStatus;
 
     // Writes page contents to result
-    function Get(URL: String; AllowedResponseCodes: array of Integer): String; overload;
-
-    // Writes page contents to stream.
-    procedure Get(URL: String; Stream: TStream; AllowedResponseCodes: array of Integer); overload;
+    function Get(URL: String; AllowedStatusCodes: THTTPStatusArray): String;
 
     // Writes page contents to a file.
-    procedure Get(URL: String; FileName: String; AllowedResponseCodes: array of Integer); overload;
+    procedure GetFile(URL, LocalFileName: String; AllowedStatusCodes: THTTPStatusArray);
 
     // Extracts page contents to file treating contents as .zip
-    procedure GetZip(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
+    procedure GetZip(URL, OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
 
-    // Post string (URL parameters) returns response
-    function Post(URL: String; Parameters: TStringArray): String; overload;
+    // Post data in request body returns response
+    function Post(URL, PostData: String): String;
 
-    // Posts string (URL parameters) and writes response to stream
-    procedure Post(URL: String; Parameters: TStringArray; Response: TMemoryStream); overload;
+    // Post Form data (www-urlencoded) in request body.
+    // Return response
+    function PostForm(URL, Data: String): String;
+    // Post a file
+    // Return respose
+    function PostFormFile(URL, FieldName, FileName: string): String;
 
-    // Post string (form data) returns response
-    function Post(URL: String; Data: String): String; overload;
+    function Patch(URL, Data: String): String;
+    function Put(URL, Data: String): String;
+    function Delete(URL, Data: String): String;
 
-    // Post string (form data) and writes response to stream
-    procedure Post(URL: String; Data: String; Response: TMemoryStream); overload;
-
-    function FormPost(const URL, FieldName, FileName: string): String; overload;
-    function FormPost(const URL, FieldName, FileName: string; Stream: TStream): String; overload;
-
-    class function SimpleGet(URL: String; AllowedResponseCodes: array of Integer): String; static;
+    class function SimpleGet(URL: String; AllowedStatusCodes: THTTPStatusArray): String; static;
 
     constructor Create;
     destructor Destroy; override;
   end;
+
+  PSimbaHTTPClient = ^TSimbaHTTPClient;
 
 implementation
 
@@ -198,15 +217,15 @@ begin
     OnHeadersReceived(Self);
 end;
 
-procedure TSimbaHTTPClient.DoResponseCode(Sender: TObject; ResponseCode: Integer);
+procedure TSimbaHTTPClient.DoResponseStatus(Sender: TObject; ResponseStatus: Integer);
 begin
-  if Assigned(FOnResponseCode) then
-    FOnResponseCode(Self, ResponseCode);
+  if Assigned(FOnResponseStatus) then
+    FOnResponseStatus(Self, EHTTPStatus(ResponseStatus));
 end;
 
-function TSimbaHTTPClient.GetRequestHeader(Name: String): String;
+function TSimbaHTTPClient.GetRequestHeader(AName: String): String;
 begin
-  Result := FHTTPClient.GetHeader(Name);
+  Result := FHTTPClient.GetHeader(AName);
 end;
 
 function TSimbaHTTPClient.GetRequestHeaders: TStringList;
@@ -219,32 +238,38 @@ begin
   Result := FHTTPClient.Cookies as TStringList;
 end;
 
-function TSimbaHTTPClient.GetProxy: TSimbaHTTPClientProxy;
+procedure TSimbaHTTPClient.SetRequestHeader(AName: String; Value: String);
 begin
-  Result.Host := FHTTPClient.Proxy.Host;
-  Result.Port := FHTTPClient.Proxy.Port;
-  Result.UserName := FHTTPClient.Proxy.UserName;
-  Result.Password := FHTTPClient.Proxy.Password;
+  FHTTPClient.AddHeader(AName, Value);
 end;
 
-procedure TSimbaHTTPClient.SetRequestHeader(Name: String; Value: String);
+procedure TSimbaHTTPClient.SetProxy(Host: String; Port: Integer; UserName, Password: String);
 begin
-  FHTTPClient.AddHeader(Name, Value);
+  FHTTPClient.Proxy.Host := Host;
+  FHTTPClient.Proxy.Port := Port;
+  FHTTPClient.Proxy.UserName := UserName;
+  FHTTPClient.Proxy.Password := Password;
 end;
 
-procedure TSimbaHTTPClient.SetProxy(Value: TSimbaHTTPClientProxy);
+procedure TSimbaHTTPClient.ClearProxy;
 begin
-  FHTTPClient.Proxy.Host := Value.Host;
-  FHTTPClient.Proxy.Port := Value.Port;
-  FHTTPClient.Proxy.UserName := Value.UserName;
-  FHTTPClient.Proxy.Password := Value.Password;
+  FHTTPClient.Proxy.Host := '';
+  FHTTPClient.Proxy.Port := 0;
+  FHTTPClient.Proxy.UserName := '';
+  FHTTPClient.Proxy.Password := '';
 end;
 
-function TSimbaHTTPClient.Head(URL: String): Integer;
+procedure TSimbaHTTPClient.Reset;
 begin
-  FHTTPClient.HTTPMethod('HEAD', URL, nil, []);
+  FHTTPClient.Cookies.Clear();
+  FHTTPClient.RequestHeaders.Clear();
+end;
 
-  Result := FHTTPClient.ResponseStatusCode;
+function TSimbaHTTPClient.Head(URL: String): EHTTPStatus;
+begin
+  FHTTPClient.HTTPMethod('HEAD', SetURL(URL), nil, []);
+
+  Result := GetResponseStatus();
 end;
 
 function TSimbaHTTPClient.GetRequestContentType: String;
@@ -255,6 +280,39 @@ end;
 procedure TSimbaHTTPClient.SetRequestContentType(Value: String);
 begin
   RequestHeader['Content-Type'] := Value;
+end;
+
+procedure TSimbaHTTPClient.SetCookies(Value: TStringList);
+begin
+  FHTTPClient.Cookies := Value;
+end;
+
+function TSimbaHTTPClient.GetUserAgent: String;
+begin
+  Result := RequestHeader['User-Agent'];
+end;
+
+procedure TSimbaHTTPClient.SetUserAgent(Value: String);
+begin
+  RequestHeader['User-Agent'] := Value;
+end;
+
+function TSimbaHTTPClient.StatusCodesToIntegerArray(StatusCodes: THTTPStatusArray): TIntegerArray;
+var
+  I: Integer;
+begin
+  SetLength(Result, Length(StatusCodes));
+  for I := 0 to High(StatusCodes) do
+    Result[I] := Ord(StatusCodes[I]);
+end;
+
+function TSimbaHTTPClient.SetURL(URL: String): String;
+begin
+  FURL := URL;
+  if (not FURL.StartsWith('http://', False)) and (not FURL.StartsWith('https://', False)) then
+    FURL := 'http://' + FURL;
+
+  Result := FURL;
 end;
 
 procedure TSimbaHTTPClient.DoExtractProgress(Sender: TObject; FileName: String; Percent: Double);
@@ -269,34 +327,23 @@ begin
     FOnDownloadProgress(Self, FURL, FContentType, Position, Size);
 end;
 
-function TSimbaHTTPClient.GetResponseHeader(Name: String): String;
+function TSimbaHTTPClient.GetResponseHeader(AName: String): String;
 begin
-  Result := FHTTPClient.GetHeader(FHTTPClient.ResponseHeaders, Name);
+  Result := FHTTPClient.GetHeader(FHTTPClient.ResponseHeaders, AName);
 end;
 
-function TSimbaHTTPClient.GetResponseCode: Int32;
+function TSimbaHTTPClient.GetResponseStatus: EHTTPStatus;
 begin
-  Result := FHTTPClient.ResponseStatusCode;
+  Result := EHTTPStatus(FHTTPClient.ResponseStatusCode);
 end;
 
-procedure TSimbaHTTPClient.Get(URL: String; Stream: TStream; AllowedResponseCodes: array of Integer);
-begin
-  FURL := URL;
-  if (not FURL.StartsWith('http://', False)) and (not FURL.StartsWith('https://', False)) then
-    FURL := 'http://' + FURL;
-
-  FHTTPClient.HTTPMethod('GET', FURL, Stream, AllowedResponseCodes);
-end;
-
-function TSimbaHTTPClient.Get(URL: String; AllowedResponseCodes: array of Integer): String;
+function TSimbaHTTPClient.Get(URL: String; AllowedStatusCodes: THTTPStatusArray): String;
 var
   Stream: TRawByteStringStream;
 begin
-  Result := '';
-
   Stream := TRawByteStringStream.Create();
   try
-    Get(URL, Stream, AllowedResponseCodes);
+    FHTTPClient.HTTPMethod('GET', SetURL(URL), Stream, StatusCodesToIntegerArray(AllowedStatusCodes));
 
     Result := Stream.DataString;
   finally
@@ -304,19 +351,19 @@ begin
   end;
 end;
 
-procedure TSimbaHTTPClient.Get(URL: String; FileName: String; AllowedResponseCodes: array of Integer);
+procedure TSimbaHTTPClient.GetFile(URL, LocalFileName: String; AllowedStatusCodes: THTTPStatusArray);
 var
   Stream: TFileStream;
 begin
-  Stream := TFileStream.Create(FileName, fmCreate);
+  Stream := TFileStream.Create(LocalFileName, fmCreate);
   try
-    Get(URL, Stream, AllowedResponseCodes);
+    FHTTPClient.HTTPMethod('GET', SetURL(URL), Stream, StatusCodesToIntegerArray(AllowedStatusCodes));
   finally
     Stream.Free();
   end;
 end;
 
-procedure TSimbaHTTPClient.GetZip(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
+procedure TSimbaHTTPClient.GetZip(URL, OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
 var
   Stream: TMemoryStream;
   Extractor: TSimbaZipExtractor;
@@ -324,96 +371,44 @@ begin
   Stream := TMemoryStream.Create();
 
   try
-    Get(URL, Stream, [HTTP_OK]);
+    FHTTPClient.HTTPMethod('GET', SetURL(URL), Stream, [200]);
 
-    if (ResponseCode = HTTP_OK) then
-    begin
-      Extractor := TSimbaZipExtractor.Create();
-      Extractor.OnProgress := @DoExtractProgress;
-      Extractor.OnExtractingFinished := FExtractingFinished;
-      Extractor.InputStream := Stream;
-      Extractor.OutputPath := OutputPath;
-      Extractor.Flat := Flat;
-      Extractor.IgnoreList.AddStrings(IgnoreList);
+    Extractor := TSimbaZipExtractor.Create();
+    Extractor.OnProgress := @DoExtractProgress;
+    Extractor.OnExtractingFinished := FExtractingFinished;
+    Extractor.InputStream := Stream;
+    Extractor.OutputPath := OutputPath;
+    Extractor.Flat := Flat;
+    Extractor.IgnoreList.AddStrings(IgnoreList);
 
-      try
-        Extractor.Extract();
-      finally
-        Extractor.Free();
-      end;
+    try
+      Extractor.Extract();
+    finally
+      Extractor.Free();
     end;
   finally
-    Stream.Free();
+    if (Stream <> nil) then
+      Stream.Free();
   end;
 end;
 
-function TSimbaHTTPClient.Post(URL: String; Parameters: TStringArray): String;
-var
-  i: Int32;
+function TSimbaHTTPClient.Post(URL, PostData: String): String;
 begin
-  FURL := URL;
-
-  if (FURL <> '') then
-  begin
-    if FURL[Length(FURL)] <> '?' then
-      FURL := FURL + '?';
-    for i := 0 to High(Parameters) do
-      FURL := FURL + Parameters[i] + '&';
-
-    Result := Get(FURL, [HTTP_OK]);
-  end;
-end;
-
-procedure TSimbaHTTPClient.Post(URL: String; Parameters: TStringArray; Response: TMemoryStream);
-var
-  i: Int32;
-begin
-  FURL := URL;
-
-  if (FURL <> '') then
-  begin
-    if FURL[Length(FURL)] <> '?' then
-      FURL := FURL + '?';
-    for i := 0 to High(Parameters) do
-      FURL := FURL + '&' + Parameters[i];
-
-    Get(FURL, Response, [HTTP_OK]);
-  end;
-end;
-
-function TSimbaHTTPClient.Post(URL: String; Data: String): String;
-begin
-  FURL := URL;
-
-  Result := FHTTPClient.FormPost(FURL, Data);
-end;
-
-procedure TSimbaHTTPClient.Post(URL: String; Data: String; Response: TMemoryStream);
-begin
-  FURL := URL;
-
-  FHTTPClient.FormPost(FURL, Data, Response);
-end;
-
-function TSimbaHTTPClient.FormPost(const URL, FieldName, FileName: string): String;
-var
-  Response: TStringStream;
-begin
-  Result := '';
-
-  Response := TStringStream.Create();
-
+  FHTTPClient.RequestBody := TStringStream.Create(PostData);
   try
-    FURL := URL;
-    FHTTPClient.FileFormPost(URL, FieldName, FileName, Response);
+    Result := FHTTPClient.Post(SetURL(URL));
   finally
-    Result := Response.DataString;
-
-    Response.Free();
+    FHTTPClient.RequestBody.Free();
+    FHTTPClient.RequestBody := nil;
   end;
 end;
 
-function TSimbaHTTPClient.FormPost(const URL, FieldName, FileName: string; Stream: TStream): String;
+function TSimbaHTTPClient.PostForm(URL, Data: String): String;
+begin
+  Result := FHTTPClient.FormPost(SetURL(URL), Data);
+end;
+
+function TSimbaHTTPClient.PostFormFile(URL, FieldName, FileName: string): String;
 var
   Response: TStringStream;
 begin
@@ -421,8 +416,7 @@ begin
 
   Response := TStringStream.Create();
   try
-    FURL := URL;
-    FHTTPClient.StreamFormPost(URL, FieldName, FileName, Stream, Response);
+    FHTTPClient.FileFormPost(SetURL(URL), FieldName, FileName, Response);
   finally
     Result := Response.DataString;
 
@@ -430,13 +424,54 @@ begin
   end;
 end;
 
-class function TSimbaHTTPClient.SimpleGet(URL: String; AllowedResponseCodes: array of Integer): String;
+function TSimbaHTTPClient.Patch(URL, Data: String): String;
+var
+  Response: TStringStream;
+begin
+  Response := TStringStream.Create();
+
+  FHTTPClient.RequestBody := TStringStream.Create(Data);
+  try
+    FHTTPClient.HTTPMethod('PATCH', SetURL(URL), Response, []);
+
+    Result := Response.DataString;
+  finally
+    Response.Free();
+
+    FHTTPClient.RequestBody.Free();
+    FHTTPClient.RequestBody := nil;
+  end;
+end;
+
+function TSimbaHTTPClient.Put(URL, Data: String): String;
+begin
+  FHTTPClient.RequestBody := TStringStream.Create(Data);
+  try
+    Result := FHTTPClient.Put(SetURL(URL));
+  finally
+    FHTTPClient.RequestBody.Free();
+    FHTTPClient.RequestBody := nil;
+  end;
+end;
+
+function TSimbaHTTPClient.Delete(URL, Data: String): String;
+begin
+  FHTTPClient.RequestBody := TStringStream.Create(Data);
+  try
+    Result := FHTTPClient.Delete(SetURL(URL));
+  finally
+    FHTTPClient.RequestBody.Free();
+    FHTTPClient.RequestBody := nil;
+  end;
+end;
+
+class function TSimbaHTTPClient.SimpleGet(URL: String; AllowedStatusCodes: THTTPStatusArray): String;
 begin
   Result := '';
 
   with TSimbaHTTPClient.Create() do
   try
-    Result := Get(URL, AllowedResponseCodes);
+    Result := Get(URL, AllowedStatusCodes);
   finally
     Free();
   end;
@@ -452,8 +487,9 @@ begin
   FHTTPClient.OnRedirect := @DoRedirect;
   FHTTPClient.OnConnecting := @DoConnecting;
   FHTTPClient.OnHeaders := @DoHeaders;
-  FHTTPClient.OnResponseCode := @DoResponseCode;
-  FHTTPClient.AddHeader('User-Agent', Format('Mozilla/5.0 (compatible; Simba/%d; Target/%s)', [SIMBA_VERSION, {$I %FPCTARGETOS%} + '-' + {$I %FPCTARGETCPU%}]));
+  FHTTPClient.OnResponseCode := @DoResponseStatus;
+
+  UserAgent := Format('Mozilla/5.0 (compatible; Simba/%d; Target/%s)', [SIMBA_VERSION, {$I %FPCTARGETOS%} + '-' + {$I %FPCTARGETCPU%}]);
 end;
 
 destructor TSimbaHTTPClient.Destroy;
