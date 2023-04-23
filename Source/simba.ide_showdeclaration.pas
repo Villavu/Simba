@@ -6,18 +6,47 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.ide_codetools_parser;
+  simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_insight;
+
+procedure FindAndShowDeclaration(Script, ScriptFileName: String; CaretPos: Integer; What: String);
 
 procedure ShowDeclaration(StartPos, EndPos, Line: Integer; FileName: String); overload;
 procedure ShowDeclaration(Declaration: TDeclaration); overload;
 procedure ShowInternalDeclaration(Header: String; FileName: String);
 
-function ShowDeclarationDialog(Decls: TDeclarationArray): TDeclaration;
+procedure ShowDeclarationDialog(Decls: TDeclarationArray);
 
 implementation
 
 uses
   simba.scripttabsform, simba.showdeclarationform;
+
+procedure FindAndShowDeclaration(Script, ScriptFileName: String; CaretPos: Integer; What: String);
+var
+  Decl: TDeclaration;
+  Codeinsight: TCodeinsight;
+begin
+  Codeinsight := TCodeinsight.Create();
+
+  try
+    Codeinsight.SetScript(Script, ScriptFileName, CaretPos);
+    Codeinsight.Run();
+
+    Decl := Codeinsight.ParseExpression(What, []);
+    if (Decl <> nil) then
+    begin
+      if (Decl.ClassType = TDeclaration_Method) and (Length(Codeinsight.GetOverloads(Decl)) > 1) then
+        ShowDeclarationDialog(Codeinsight.GetOverloads(Decl))
+      else
+        ShowDeclaration(Decl);
+    end;
+  except
+    on E: Exception do
+      DebugLn('FindAndShowDeclaration: ' + E.ToString());
+  end;
+
+  Codeinsight.Free();
+end;
 
 procedure ShowDeclaration(StartPos, EndPos, Line: Integer; FileName: String);
 begin
@@ -75,10 +104,8 @@ begin
   SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in Simba: ' + FileName, 'Declaration:', Header]);
 end;
 
-function ShowDeclarationDialog(Decls: TDeclarationArray): TDeclaration;
+procedure ShowDeclarationDialog(Decls: TDeclarationArray);
 begin
-  Result := nil;
-
   with TShowDeclarationForm.Create(nil) do
   try
     Execute(Decls);

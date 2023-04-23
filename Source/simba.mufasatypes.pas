@@ -14,7 +14,6 @@ uses
 
 {$PUSH}
 {$SCOPEDENUMS ON}
-
 type
   KeyCode = (
     UNKNOWN             = 0,
@@ -214,7 +213,6 @@ type
     Exception: Boolean;
   end;
   TSimbaScriptDebuggerEvents = array of TSimbaScriptDebuggerEvent;
-
 {$POP}
 
   TColorRGB = record
@@ -266,13 +264,6 @@ type
   PColorHSL = ^TColorHSL;
 
   TColorArray = array of TColor;
-
-  TRetData = record
-    Ptr: PColorBGRA;
-    IncPtrWith: Integer;
-    RowLen: Integer;
-  end;
-  PRetData = ^TRetData;
 
   PWindowHandle = ^TWindowHandle;
   PWindowHandleArray = ^TWindowHandleArray;
@@ -380,8 +371,8 @@ procedure DebugLn(const Msg: String; Args: array of const); overload;
 procedure SimbaDebugLn(const Flags: EDebugLnFlags; const Msg: String); overload;
 procedure SimbaDebugLn(const Flags: EDebugLnFlags; const Msg: TStringArray); overload;
 
-function FlagsToString(const Flags: EDebugLnFlags): String; inline;
-function FlagsFromString(var Str: String): EDebugLnFlags; inline;
+function FlagsToString(const Flags: EDebugLnFlags): String;
+function FlagsFromString(var Str: String): EDebugLnFlags;
 
 procedure AssertMainThread(const Method: String);
 
@@ -402,21 +393,7 @@ procedure Swap(var A, B: TPoint); overload;
 procedure Swap(var A, B: Pointer); overload;
 procedure Swap(var A, B: TColorBGRA); overload;
 
-type
-  TProc       = procedure of object;
-  TProcArray  = array of TProc;
-
-  TNestedProc      = procedure is nested;
-  TNestedProcArray = array of TNestedProc;
-
-procedure Sync(Method: TProc); overload;
-procedure Sync(Method: TNestedProc); overload;
-
-function Threaded(Method: TNestedProc): TThread; overload;
-function Threaded(Method: TProc): TThread; overload;
-procedure Threaded(Methods: TProcArray; Interval: Integer = 0); overload;
-
-procedure ThreadedAndForget(Method: TNestedProc);
+function IfThen(const Val: Boolean; const IfTrue, IfFalse: String): String; inline; overload;
 
 type
   ESimbaException = class(Exception);
@@ -636,137 +613,14 @@ begin
   specialize Swap<TColorBGRA>(A, B);
 end;
 
-type
-  TSyncObject = object
-    Proc: TProc;
-    NestedProc: TNestedProc;
-
-    procedure Execute;
-  end;
-
-procedure TSyncObject.Execute;
+function IfThen(const Val: Boolean; const IfTrue, IfFalse: String): String;
 begin
-  try
-    if Assigned(Proc)       then Proc();
-    if Assigned(NestedProc) then NestedProc();
-  except
-    on E: Exception do
-      DebugLn('Sync :: ' + E.Message);
-  end;
+  if Val then
+    Result := IfTrue
+  else
+    Result := IfFalse;
 end;
 
-procedure Sync(Method: TProc);
-var
-  SyncObject: TSyncObject;
-begin
-  if (GetCurrentThreadID() <> MainThreadID) then
-  begin
-    SyncObject.Proc       := Method;
-    SyncObject.NestedProc := nil;
-
-    TThread.Synchronize(nil, @SyncObject.Execute);
-  end else
-    Method();
-end;
-
-procedure Sync(Method: TNestedProc);
-var
-  SyncObject: TSyncObject;
-begin
-  if (GetCurrentThreadID() <> MainThreadID) then
-  begin
-    SyncObject.Proc       := nil;
-    SyncObject.NestedProc := Method;
-
-    TThread.Synchronize(nil, @SyncObject.Execute);
-  end else
-    Method();
-end;
-
-type
-  TThreaded = class(TThread)
-  protected
-    FProc: TProc;
-    FNestedProc: TNestedProc;
-
-    procedure DoTerminated(Sender: TObject);
-    procedure Execute; override;
-  public
-    constructor Create(Proc: TNestedProc; Forget: Boolean); reintroduce;
-    constructor Create(Proc: TProc; Forget: Boolean); reintroduce;
-  end;
-
-procedure TThreaded.DoTerminated(Sender: TObject);
-begin
-  Flush(Output);
-end;
-
-procedure TThreaded.Execute;
-begin
-  if Assigned(FNestedProc) then FNestedProc();
-  if Assigned(FProc)       then FProc();
-end;
-
-constructor TThreaded.Create(Proc: TNestedProc; Forget: Boolean);
-begin
-  inherited Create(False, 512*512);
-
-  if Forget then
-  begin
-    FreeOnTerminate := True;
-    OnTerminate := @DoTerminated;
-  end;
-
-  FNestedProc := Proc;
-end;
-
-constructor TThreaded.Create(Proc: TProc; Forget: Boolean);
-begin
-  inherited Create(False, 512*512);
-
-  if Forget then
-  begin
-    FreeOnTerminate := True;
-    OnTerminate := @DoTerminated;
-  end;
-
-  FProc := Proc;
-end;
-
-function Threaded(Method: TNestedProc): TThread;
-begin
-  Result := TThreaded.Create(Method, False);
-end;
-
-function Threaded(Method: TProc): TThread;
-begin
-  Result := TThreaded.Create(Method, False);
-end;
-
-procedure Threaded(Methods: TProcArray; Interval: Integer);
-var
-  Threads: array of TThread;
-  I: Integer;
-begin
-  SetLength(Threads, Length(Methods));
-  for I := 0 to High(Threads) do
-  begin
-    Threads[I] := TThreaded.Create(Methods[I], False);
-    if (Interval > 0) then
-      Sleep(Interval);
-  end;
-
-  for I := 0 to High(Threads) do
-  begin
-    Threads[I].WaitFor();
-    Threads[I].Free();
-  end;
-end;
-
-procedure ThreadedAndForget(Method: TNestedProc);
-begin
-  TThreaded.Create(Method, True);
-end;
 
 initialization
   DoSimbaDebugLn := @DebugLogger.DebugLn;

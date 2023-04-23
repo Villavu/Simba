@@ -11,12 +11,10 @@ interface
 
 uses
   classes, sysutils, forms, controls, graphics, dialogs,
-  extctrls, comctrls, extendednotebook, menus, StdCtrls, Buttons, synedit, synedittypes,
-  simba.scripttab, simba.editor, simba.editor_findreplace;
+  extctrls, comctrls, menus, StdCtrls, Buttons, synedit, synedittypes,
+  simba.scripttab, simba.editor, simba.editor_findreplace, simba.component_tabcontrol;
 
 type
-  TEditorSearchEvent = procedure(MatchCount: Integer) of object;
-
   TSimbaScriptTabsForm = class(TForm)
     FindCheckBoxCaseSens: TCheckBox;
     FindCheckboxWholeWord: TCheckBox;
@@ -48,16 +46,12 @@ type
     FindPanel: TPanel;
     FindButtonClose: TSpeedButton;
     TabPopupMenu: TPopupMenu;
-    Notebook: TExtendedNotebook;
     EditorPopupMenu: TPopupMenu;
 
     procedure DoEditorPopupClick(Sender: TObject);
     procedure DoEditorPopupShow(Sender: TObject);
     procedure DoOnDropFiles(Sender: TObject; const FileNames: array of String);
     procedure DoTabPopupClick(Sender: TObject);
-    procedure DoTabPopupOpen(Sender: TObject);
-    // Open new tab if empty tab area on the right is clicked
-    procedure DoDoubleClick(Sender: TObject);
     procedure FindButtonClick(Sender: TObject);
     procedure FindButtonResize(Sender: TObject);
     procedure FindButtonKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -67,29 +61,16 @@ type
     procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FormMouseLeave(Sender: TObject);
     procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-    procedure DoTabChanging(Sender: TObject; var AllowChange: Boolean);
-    procedure DoTabChange(Sender: TObject);
-    // Keep output tabs in same order
-    procedure NotebookTabDragOverEx(Sender, Source: TObject; OldIndex, NewIndex: Integer; CopyDrag: Boolean; var Accept: Boolean);
-    procedure NotebookTabEndDrag(Sender, Target: TObject; X, Y: Integer);
-    procedure NotebookTabStartDrag(Sender: TObject; var DragObject: TDragObject);
   protected
-    FDraggingTab: record
-      StartIndex: Integer;
-      EndIndex: Integer;
-    end;
-    FOutputChangingLock: Integer;
+    FTabControl: TSimbaTabControl;
 
     FEditorReplace: TSimbaEditorReplace;
     FEditorFind: TSimbaEditorFind;
 
-    FOnEditorAdded: TNotifyEvent;
-    FOnEditorChanged: TNotifyEvent;
-    FOnEditorLoaded: TNotifyEvent;
-    FOnEditorCaretChanged: TNotifyEvent;
-    FOnSearch: TEditorSearchEvent;
+    function CanAnchorDocking(X, Y: Integer): Boolean;
 
-    procedure CaretMoved(Sender: TObject; Changes: TSynStatusChanges);
+    procedure DoTabMoved(Sender: TSimbaTabControl; AFrom, ATo: Integer);
+    procedure DoTabClosed(Sender: TSimbaTabControl; Tab: TSimbaTab; var CanClose: Boolean);
 
     function GetTabCount: Integer;
     function GetTab(Index: Integer): TSimbaScriptTab;
@@ -99,12 +80,6 @@ type
     procedure SetCurrentTab(Value: TSimbaScriptTab);
   public
     constructor Create(AOwner: TComponent); override;
-
-    property OnEditorAdded: TNotifyEvent read FOnEditorAdded write FOnEditorAdded;
-    property OnEditorLoaded: TNotifyEvent read FOnEditorLoaded write FOnEditorLoaded;
-    property OnEditorChanged: TNotifyEvent read FOnEditorChanged write FOnEditorChanged;
-    property OnEditorCaretChanged: TNotifyEvent read FOnEditorCaretChanged write FOnEditorCaretChanged;
-    property OnSearch: TEditorSearchEvent read FOnSearch write FOnSearch;
 
     property TabCount: Integer read GetTabCount;
     property Tabs[Index: Integer]: TSimbaScriptTab read GetTab;
@@ -121,15 +96,12 @@ type
 
     function AddTab: TSimbaScriptTab;
 
-    function CloseTab(Tab: TSimbaScriptTab): Boolean;
+    function CloseTab(Tab: TSimbaScriptTab; KeepOne: Boolean): Boolean;
     function CloseOtherTabs(Tab: TSimbaScriptTab): Boolean;
     function CloseAllTabs: Boolean;
 
     function Open(FileName: String; CheckOtherTabs: Boolean = True): Boolean; overload;
     procedure Open; overload;
-
-    procedure LockOutputChanging;
-    procedure UnlockOutputChanging;
   end;
 
 var
@@ -142,7 +114,7 @@ implementation
 uses
   LCLType,
   simba.mufasatypes, simba.files, simba.editor_docgenerator,
-  simba.dockinghelpers, simba.nativeinterface, simba.outputform;
+  simba.dockinghelpers, simba.nativeinterface, simba.outputform, simba.ide_events;
 
 procedure TSimbaScriptTabsForm.DoEditorPopupShow(Sender: TObject);
 var
@@ -205,32 +177,21 @@ end;
 
 procedure TSimbaScriptTabsForm.DoTabPopupClick(Sender: TObject);
 var
-  Tab: Integer;
+  Tab: TSimbaScriptTab;
 begin
   if (Sender = MenuItemNewTab) then
     AddTab()
   else
   begin
-    Tab := Notebook.IndexOfPageAt(NoteBook.ScreenToClient(TabPopupMenu.PopupPoint));
+    with FTabControl.ScreenToClient(TabPopupMenu.PopupPoint) do
+      Tab := TSimbaScriptTab(FTabControl.GetTabAt(X, Y));
 
-    if (Tab >= 0) and (Tab < TabCount) then
+    if Assigned(Tab) then
     begin
-      if (Sender = MenuItemCloseTab)       then CloseTab(Tabs[Tab]);
-      if (Sender = MenuItemCloseOtherTabs) then CloseOtherTabs(Tabs[Tab]);
+      if (Sender = MenuItemCloseTab)       then CloseTab(Tab, True);
+      if (Sender = MenuItemCloseOtherTabs) then CloseOtherTabs(Tab);
     end;
   end;
-end;
-
-procedure TSimbaScriptTabsForm.DoTabPopupOpen(Sender: TObject);
-begin
-  MenuItemCloseTab.Enabled := Notebook.IndexOfPageAt(NoteBook.ScreenToClient(TabPopupMenu.PopupPoint)) >= 0;
-  MenuItemCloseOtherTabs.Enabled := Notebook.IndexOfPageAt(NoteBook.ScreenToClient(TabPopupMenu.PopupPoint)) >= 0;
-end;
-
-procedure TSimbaScriptTabsForm.DoDoubleClick(Sender: TObject);
-begin
-  if (ScreenToClient(Mouse.CursorPos).Y < NoteBook.TabRect(0).Height) then
-    AddTab();
 end;
 
 procedure TSimbaScriptTabsForm.FindButtonClick(Sender: TObject);
@@ -288,11 +249,7 @@ end;
 procedure TSimbaScriptTabsForm.FindEditChange(Sender: TObject);
 begin
   if (CurrentEditor <> nil) then
-  begin
     FEditorFind.ExecuteNoDialog(CurrentEditor, FindEdit.Text, FindCheckBoxCaseSens.Checked, FindCheckboxWholeWord.Checked);
-    if Assigned(FOnSearch) then
-      FOnSearch(FEditorFind.Matches);
-  end;
 end;
 
 procedure TSimbaScriptTabsForm.FindPanelResize(Sender: TObject);
@@ -307,7 +264,7 @@ end;
 
 procedure TSimbaScriptTabsForm.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  if (HostDockSite is TSimbaAnchorDockHostSite) then
+  if CanAnchorDocking(X, Y) and (HostDockSite is TSimbaAnchorDockHostSite) then
     TSimbaAnchorDockHostSite(HostDockSite).Header.MouseDown(Button, Shift, X, Y);
 end;
 
@@ -319,103 +276,64 @@ end;
 
 procedure TSimbaScriptTabsForm.FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin
-  if (HostDockSite is TSimbaAnchorDockHostSite) then
+  if CanAnchorDocking(X, Y) and (HostDockSite is TSimbaAnchorDockHostSite) then
     TSimbaAnchorDockHostSite(HostDockSite).Header.MouseMove(Shift, X, Y);
 end;
 
-procedure TSimbaScriptTabsForm.DoTabChanging(Sender: TObject; var AllowChange: Boolean);
-var
-  Tab: TSimbaScriptTab;
+function TSimbaScriptTabsForm.CanAnchorDocking(X, Y: Integer): Boolean;
 begin
-  Tab := CurrentTab;
-  if (Tab <> nil) then
-  begin
-    if (Tab.FunctionList <> nil) then
-      Tab.FunctionList.Hide();
-    if (Tab.OutputBox <> nil) and (FOutputChangingLock = 0) then
-      CurrentTab.OutputBox.Hide();
-  end;
-
-  AllowChange := True;
+  Result := FTabControl.InEmptySpace(X, Y) and (not FTabControl.Dragging);
 end;
 
-procedure TSimbaScriptTabsForm.DoTabChange(Sender: TObject);
-var
-  Tab: TSimbaScriptTab;
+procedure TSimbaScriptTabsForm.DoTabClosed(Sender: TSimbaTabControl; Tab: TSimbaTab; var CanClose: Boolean);
 begin
-  Tab := CurrentTab;
-  if (Tab <> nil) then
-  begin
-    if (Tab.FunctionList <> nil) then
-      Tab.FunctionList.Show();
-    if (Tab.OutputBox <> nil) and (FOutputChangingLock = 0) then
-      Tab.OutputBox.Show();
-    if (Tab.Editor <> nil) and Tab.Editor.CanSetFocus() then
-      Tab.Editor.SetFocus();
-  end;
-
-  if (FOnEditorChanged <> nil) then
-    FOnEditorChanged(CurrentTab);
+  CanClose := TSimbaScriptTab(Tab).CanClose();
+  if CanClose and (FTabControl.TabCount <= 1) and FTabControl.IsClickingCloseButton then
+    AddTab();
 end;
 
-procedure TSimbaScriptTabsForm.NotebookTabDragOverEx(Sender, Source: TObject; OldIndex, NewIndex: Integer; CopyDrag: Boolean; var Accept: Boolean);
+procedure TSimbaScriptTabsForm.DoTabMoved(Sender: TSimbaTabControl; AFrom, ATo: Integer);
 begin
-  FDraggingTab.EndIndex := NewIndex;
-end;
-
-procedure TSimbaScriptTabsForm.NotebookTabEndDrag(Sender, Target: TObject; X, Y: Integer);
-begin
- if (FDraggingTab.StartIndex <> FDraggingTab.EndIndex) then
-   TCustomTabControl(SimbaOutputForm.PageControl).Pages.Move(FDraggingTab.StartIndex + 1, FDraggingTab.EndIndex + 1);
-end;
-
-procedure TSimbaScriptTabsForm.NotebookTabStartDrag(Sender: TObject; var DragObject: TDragObject);
-begin
-  FDraggingTab.StartIndex := Notebook.DraggingTabIndex;
-end;
-
-procedure TSimbaScriptTabsForm.CaretMoved(Sender: TObject; Changes: TSynStatusChanges);
-begin
-  if (FOnEditorCaretChanged <> nil) then
-    FOnEditorCaretChanged(Sender);
+  SimbaOutputForm.MoveTab(AFrom, ATo);
 end;
 
 procedure TSimbaScriptTabsForm.SetCurrentTab(Value: TSimbaScriptTab);
 begin
-  Notebook.ActivePage := Value;
+  FTabControl.ActiveTab := Value;
 end;
 
 constructor TSimbaScriptTabsForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
+  FTabControl := TSimbaTabControl.Create(Self, TSimbaScriptTab);
+  FTabControl.Parent := Self;
+  FTabControl.Align := alClient;
+  FTabControl.PopupMenu := TabPopupMenu;
+  FTabControl.OnTabMoved := @DoTabMoved;
+  FTabControl.OnTabClose := @DoTabClosed;
+  FTabControl.OnMouseMove := @FormMouseMove;
+  FTabControl.OnMouseDown := @FormMouseDown;
+  FTabControl.OnMouseLeave := @FormMouseLeave;
+  FTabControl.DefaultTitle := 'Untitled';
+
   FEditorReplace := TSimbaEditorReplace.Create(Self);
   FEditorFind := TSimbaEditorFind.Create(Self);
-
-  OnDblClick := @DoDoubleClick;
 end;
 
 function TSimbaScriptTabsForm.GetTabCount: Integer;
 begin
-  Result := Notebook.PageCount;
+  Result := FTabControl.TabCount;
 end;
 
 function TSimbaScriptTabsForm.GetTab(Index: Integer): TSimbaScriptTab;
 begin
-  Result := Notebook.Pages[Index] as TSimbaScriptTab;
+  Result := FTabControl.Tabs[Index] as TSimbaScriptTab;
 end;
 
 function TSimbaScriptTabsForm.GetCurrentTab: TSimbaScriptTab;
 begin
-  if (Notebook.TabIndex = -1) then
-  begin
-    DebugLn('[TSimbaScriptTabsForm.GetCurrentTab]: TabIndex = -1');
-
-    Result := nil;
-    Exit;
-  end;
-
-  Result := Notebook.Pages[Notebook.TabIndex] as TSimbaScriptTab;
+  Result := TSimbaScriptTab(FTabControl.ActiveTab);
 end;
 
 function TSimbaScriptTabsForm.GetCurrentEditor: TSimbaEditor;
@@ -467,34 +385,16 @@ end;
 
 function TSimbaScriptTabsForm.AddTab: TSimbaScriptTab;
 begin
-  Result := TSimbaScriptTab.Create(Notebook);
-  Result.Parent := Notebook;
-  Result.Editor.PopupMenu := EditorPopupMenu;
-  Result.Editor.RegisterStatusChangedHandler(@CaretMoved, [scCaretX, scCaretY]);
-
-  if (Result.TabIndex = 0) then
-  begin
-    NoteBook.TabIndex := Result.TabIndex;
-    if (Notebook.OnChange <> nil) then
-      NoteBook.OnChange(Self);
-  end else
-    NoteBook.TabIndex := Result.TabIndex;
+  Result := FTabControl.AddTab() as TSimbaScriptTab;
+  //Result.Editor.PopupMenu := EditorPopupMenu;
+  //Result.Caption := Result.ScriptTitle;
 end;
 
-function TSimbaScriptTabsForm.CloseTab(Tab: TSimbaScriptTab): Boolean;
+function TSimbaScriptTabsForm.CloseTab(Tab: TSimbaScriptTab; KeepOne: Boolean): Boolean;
 begin
-  Result := Tab.CanClose();
-
-  if Result then
-  begin
-    if (TabCount = 1) then
-    begin
-      Tab.Reset();
-      if (Notebook.OnChange <> nil) then
-        Notebook.OnChange(Self);
-    end else
-      Tab.Free();
-  end;
+  Result := FTabControl.DeleteTab(Tab);
+  if KeepOne and (FTabControl.TabCount = 0) then
+    AddTab();
 end;
 
 function TSimbaScriptTabsForm.CloseOtherTabs(Tab: TSimbaScriptTab): Boolean;
@@ -504,7 +404,7 @@ begin
   Result := True;
 
   for I := TabCount - 1 downto 0 do
-    if (Tabs[I] <> Tab) and (not CloseTab(Tabs[I])) then
+    if (Tabs[I] <> Tab) and (not CloseTab(Tabs[I], True)) then
     begin
       Result := False;
       Exit;
@@ -518,11 +418,12 @@ begin
   Result := True;
 
   for I := TabCount - 1 downto 0 do
-    if not CloseTab(Tabs[I]) then
+    if not CloseTab(Tabs[I], False) then
     begin
       Result := False;
       Exit;
     end;
+
 end;
 
 function TSimbaScriptTabsForm.Open(FileName: String; CheckOtherTabs: Boolean): Boolean;
@@ -548,8 +449,6 @@ begin
       CurrentTab := AddTab();
 
     Result := CurrentTab.Load(FileName);
-    if Result and (FOnEditorLoaded <> nil) then
-      FOnEditorLoaded(CurrentTab);
   end;
 end;
 
@@ -559,7 +458,7 @@ var
 begin
   try
     OpenDialog.InitialDir := ExtractFileDir(CurrentTab.ScriptFileName);
-    if OpenDialog.InitialDir = '' then
+    if (OpenDialog.InitialDir = '') then
       OpenDialog.InitialDir := GetScriptPath();
 
     if OpenDialog.Execute() then
@@ -569,16 +468,6 @@ begin
     on E: Exception do
       ShowMessage('Exception while opening file: ' + E.Message);
   end;
-end;
-
-procedure TSimbaScriptTabsForm.LockOutputChanging;
-begin
-  Inc(FOutputChangingLock);
-end;
-
-procedure TSimbaScriptTabsForm.UnlockOutputChanging;
-begin
-  Dec(FOutputChangingLock);
 end;
 
 end.

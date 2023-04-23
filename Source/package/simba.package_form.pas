@@ -65,7 +65,7 @@ implementation
 
 uses
   simba.mufasatypes, simba.package_installform,
-  simba.package_installer, simba.fonthelpers, simba.dialog;
+  simba.package_installer, simba.fonthelpers, simba.dialog, simba.threading;
 
 procedure TSimbaPackageForm.FormShow(Sender: TObject);
 begin

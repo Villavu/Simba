@@ -41,6 +41,9 @@ type
 
 implementation
 
+uses
+  simba.threading;
+
 class procedure SimbaIDEInitialization.Call(Methods: TMethods; Name: String);
 var
   I: Integer;

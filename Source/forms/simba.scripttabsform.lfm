@@ -1,12 +1,12 @@
 object SimbaScriptTabsForm: TSimbaScriptTabsForm
-  Left = 3908
-  Height = 262
-  Top = 1042
-  Width = 1079
+  Left = 4292
+  Height = 192
+  Top = 19
+  Width = 816
   AllowDropFiles = True
   Caption = 'Editor'
-  ClientHeight = 262
-  ClientWidth = 1079
+  ClientHeight = 192
+  ClientWidth = 816
   DesignTimePPI = 120
   OnDestroy = FormDestroy
   OnDropFiles = DoOnDropFiles
@@ -14,36 +14,17 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
   OnMouseLeave = FormMouseLeave
   OnMouseMove = FormMouseMove
   LCLVersion = '2.2.4.0'
-  object Notebook: TExtendedNotebook
-    Left = 0
-    Height = 177
-    Top = 0
-    Width = 1079
-    TabStop = False
-    Align = alClient
-    Images = SimbaForm.Images
-    PopupMenu = TabPopupMenu
-    TabOrder = 0
-    OnChange = DoTabChange
-    OnChanging = DoTabChanging
-    Options = [nboDoChangeOnSetIndex]
-    OnTabDragOverEx = NotebookTabDragOverEx
-    OnTabEndDrag = NotebookTabEndDrag
-    OnTabStartDrag = NotebookTabStartDrag
-    TabDragMode = dmAutomatic
-    TabDragAcceptMode = dmAutomatic
-  end
   object FindPanel: TPanel
     Left = 0
     Height = 85
-    Top = 177
-    Width = 1079
+    Top = 107
+    Width = 816
     Align = alBottom
     AutoSize = True
     BevelOuter = bvNone
     ClientHeight = 85
-    ClientWidth = 1079
-    TabOrder = 1
+    ClientWidth = 816
+    TabOrder = 0
     Visible = False
     OnResize = FindPanelResize
     object FindEdit: TEdit
@@ -68,7 +49,7 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = FindPanel
       AnchorSideBottom.Side = asrBottom
-      Left = 1042
+      Left = 779
       Height = 75
       Top = 5
       Width = 27
@@ -151,7 +132,6 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
   end
   object TabPopupMenu: TPopupMenu
     Images = SimbaForm.Images
-    OnPopup = DoTabPopupOpen
     Left = 320
     Top = 20
     object MenuItemNewTab: TMenuItem
