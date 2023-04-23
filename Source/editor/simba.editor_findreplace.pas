@@ -49,7 +49,7 @@ implementation
 
 uses
   controls, forms, stdctrls, extctrls, graphics,
-  simba.editor;
+  simba.editor, simba.ide_events;
 
 type
   TSimbaEditorHelper = class helper for TSimbaEditor
@@ -301,6 +301,8 @@ begin
 
     SearchReplaceEx(FDialog.FindText, '', SearchOptions, Point(1, 1));
   end;
+
+  SimbaIDEEvents.CallOnEditorSearchMethods(Self);
 end;
 
 procedure TSimbaEditorFind.FindPrev(Editor: TSynEdit);

@@ -58,7 +58,7 @@ implementation
 
 uses
   Forms, FileUtil,
-  simba.mufasatypes, simba.files;
+  simba.mufasatypes, simba.files, simba.threading;
 
 function TSimbaPackageInstaller.InternalInstall(URL: String; Path: String; IgnoreList: TStringArray; Flat: Boolean): Boolean;
 
@@ -153,7 +153,7 @@ procedure TSimbaPackageInstaller.FlushLog;
   end;
 
 begin
-  Sync(@Execute);
+  ExecuteOnMainThread(@Execute);
 end;
 
 procedure TSimbaPackageInstaller.Log(S: String; Flush: Boolean);

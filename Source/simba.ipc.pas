@@ -65,8 +65,7 @@ type
 implementation
 
 uses
-  lazloggerbase,
-  simba.mufasatypes;
+  simba.mufasatypes, simba.threading;
 
 procedure TSimbaIPCServer.Execute;
 var

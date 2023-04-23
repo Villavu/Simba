@@ -228,6 +228,8 @@ type
     FAreaSelector: TSimbaAreaSelector;
     FAreaSelection: TBox;
 
+    procedure AddRecentFile(FileName: String);
+
     procedure SetDefaultDocking(IsResetting: Boolean = False);
     procedure SetupDocking;
     procedure SetupCompleted;
@@ -246,9 +248,11 @@ type
     procedure HandleException(Sender: TObject; E: Exception);
     procedure HandleFormCreated(Sender: TObject; Form: TCustomForm);
     procedure HandleEditorChanged(Sender: TObject);
-    procedure HandleEditorLoaded(Sender: TObject);
-    procedure HandleEditorCaretChange(Sender: TObject);
-    procedure HandleEditorSearch(Count: Integer);
+
+    procedure DoTabLoaded(Sender: TObject);
+    procedure DoTabSearch(Sender: TObject);
+    procedure DoTabModified(Sender: TObject);
+    procedure DoTabCaretMoved(Sender: TObject);
 
     procedure SetToolbarSize(Value: Integer);
     procedure SetToolbarPosition(Value: String);
@@ -281,7 +285,7 @@ uses
 
   simba.package_form, simba.package_autoupdater,
 
-  simba.associate, simba.ide_initialization,
+  simba.associate, simba.ide_initialization, simba.ide_events,
   simba.functionlist_simbasection, simba.functionlist_updater,
   simba.scripttab, simba.editor,
   simba.aca, simba.dtmeditor,
@@ -290,7 +294,7 @@ uses
 
   simba.openssl, simba.files, simba.process,
   simba.dockinghelpers, simba.datetime, simba.nativeinterface,
-  simba.scriptformatter, simba.windowhandle;
+  simba.scriptformatter, simba.windowhandle, simba.editor_findreplace;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 
@@ -544,6 +548,15 @@ begin
   Close();
 end;
 
+procedure TSimbaForm.AddRecentFile(FileName: String);
+begin
+  if FRecentFiles.IndexOf(FileName) >= 0 then
+    FRecentFiles.Delete(FRecentFiles.IndexOf(FileName));
+  FRecentFiles.Insert(0, FileName);
+  while (FRecentFiles.Count > 10) do
+    FRecentFiles.Pop();
+end;
+
 procedure TSimbaForm.SetDefaultDocking(IsResetting: Boolean);
 var
   I: Integer;
@@ -600,10 +613,11 @@ end;
 
 procedure TSimbaForm.Setup(Data: PtrInt);
 begin
-  SimbaScriptTabsForm.OnEditorLoaded := @HandleEditorLoaded;
-  SimbaScriptTabsForm.OnEditorChanged := @HandleEditorChanged;
-  SimbaScriptTabsForm.OnEditorCaretChanged := @HandleEditorCaretChange;
-  SimbaScriptTabsForm.OnSearch := @HandleEditorSearch;
+  SimbaIDEEvents.RegisterMethodOnEditorLoaded(@DoTabLoaded);
+  SimbaIDEEvents.RegisterMethodOnEditorSearch(@DoTabSearch);
+  SimbaIDEEvents.RegisterMethodOnEditorModified(@DoTabModified);
+  SimbaIDEEvents.RegisterMethodOnEditorCaretMoved(@DoTabCaretMoved);
+
   SimbaScriptTabsForm.AddTab();
 
   SimbaFunctionListUpdater := TSimbaFunctionListUpdater.Create();
@@ -784,7 +798,7 @@ end;
 
 procedure TSimbaForm.MenuCloseTabClick(Sender: TObject);
 begin
-  SimbaScriptTabsForm.CloseTab(SimbaScriptTabsForm.CurrentTab);
+  SimbaScriptTabsForm.CloseTab(SimbaScriptTabsForm.CurrentTab, True);
 end;
 
 procedure TSimbaForm.MenuCopyClick(Sender: TObject);
@@ -1066,6 +1080,7 @@ end;
 
 procedure TSimbaForm.HandleEditorChanged(Sender: TObject);
 begin
+  {
   with Sender as TSimbaScriptTab do
   begin
     if (ScriptFileName <> '') then
@@ -1075,34 +1090,58 @@ begin
 
     StatusPanelCaret.Caption := 'Line ' + IntToStr(Editor.CaretY) + ', Col ' + IntToStr(Editor.CaretX);
 
-    MenuItemSaveAll.Enabled := PageControl.PageCount > 1;
-    ToolbarButtonSaveAll.Enabled := PageControl.PageCount > 1;
-  end;
+
+    //SimbaIDEEvents.RegisterMethodOnEditorLoaded();
+    //SimbaIDEEvents.RegisterMethodOnEditorSearch();
+
+    //MenuItemSaveAll.Enabled := PageControl.PageCount > 1;
+    //ToolbarButtonSaveAll.Enabled := PageControl.PageCount > 1;
+  end;  }
 end;
 
-procedure TSimbaForm.HandleEditorLoaded(Sender: TObject);
+procedure TSimbaForm.DoTabLoaded(Sender: TObject);
 begin
-  with Sender as TSimbaScriptTab do
-  begin
-    StatusPanelFileName.Caption := ScriptFileName;
+  if (Sender is TSimbaScriptTab) then
+    with TSimbaScriptTab(Sender) do
+    begin
+      StatusPanelFileName.Caption := ScriptFileName;
 
-    if FRecentFiles.IndexOf(ScriptFileName) >= 0 then
-      FRecentFiles.Delete(FRecentFiles.IndexOf(ScriptFileName));
-    FRecentFiles.Insert(0, ScriptFileName);
-    while (FRecentFiles.Count > 10) do
-      FRecentFiles.Pop();
-  end;
+      AddRecentFile(ScriptFileName);
+    end;
 end;
 
-procedure TSimbaForm.HandleEditorCaretChange(Sender: TObject);
+procedure TSimbaForm.DoTabSearch(Sender: TObject);
 begin
-  with Sender as TSimbaEditor do
-    StatusPanelCaret.Caption := 'Line ' + IntToStr(CaretY) + ', Col ' + IntToStr(CaretX);
+  if (Sender is TSimbaEditorFind) then
+    StatusPanelFileName.Caption := 'Find matches: ' + IntToStr(TSimbaEditorFind(Sender).Matches);
 end;
 
-procedure TSimbaForm.HandleEditorSearch(Count: Integer);
+procedure TSimbaForm.DoTabModified(Sender: TObject);
 begin
-  StatusPanelFileName.Caption := 'Find matches: ' + IntToStr(Count);
+  if (Sender is TSimbaScriptTab) then
+    with TSimbaScriptTab(Sender) do
+    begin
+      if ScriptChanged then
+      begin
+        SimbaForm.ToolbarButtonSave.Enabled := True;
+        SimbaForm.MenuItemSave.Enabled := True;
+
+        Caption := '*' + ScriptTitle;
+      end else
+      begin
+        SimbaForm.ToolbarButtonSave.Enabled := False;
+        SimbaForm.MenuItemSave.Enabled := False;
+
+        Caption := ScriptTitle;
+      end;
+    end;
+end;
+
+procedure TSimbaForm.DoTabCaretMoved(Sender: TObject);
+begin
+  if (Sender is TSimbaScriptTab) then
+    with TSimbaScriptTab(Sender) do
+      SimbaForm.StatusPanelCaret.Caption := 'Line ' + IntToStr(Editor.CaretX) + ', Col ' + IntToStr(Editor.CaretY);
 end;
 
 procedure TSimbaForm.MenuEditClick(Sender: TObject);

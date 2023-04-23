@@ -106,7 +106,7 @@ implementation
 uses
   inifiles, dateutils, fileutil, lazfileutils,
   simba.files, simba.mufasatypes, simba.httpclient,
-  simba.package_endpoint_github, simba.package_endpoint_custom;
+  simba.package_endpoint_github, simba.package_endpoint_custom, simba.threading;
 
 function LoadPackageURLs: TStringArray;
 var
@@ -164,7 +164,7 @@ end;
 function LoadPackages: TSimbaPackageArray;
 var
   URLs: TStringArray;
-  Procs: TProcArray;
+  Procs: TProcedureOfObjectArray;
   I: Integer;
 begin
   URLs := LoadPackageURLs();

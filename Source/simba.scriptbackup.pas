@@ -15,7 +15,7 @@ interface
 uses
   Classes, SysUtils, Forms, ExtCtrls,
   simba.scripttabsform, simba.mufasatypes, simba.files,
-  simba.zip, simba.ide_initialization, simba.settings;
+  simba.zip, simba.ide_initialization, simba.settings, simba.threading;
 
 type
   TSimbaScriptBackup = class(TComponent)
@@ -147,7 +147,7 @@ procedure SetupScriptBackup;
   end;
 
 begin
-  Sync(@Execute); // TTimer needs to be called on main thread
+  ExecuteOnMainThread(@Execute); // TTimer needs to be called on main thread
 end;
 
 initialization

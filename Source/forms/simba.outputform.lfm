@@ -4,23 +4,11 @@ object SimbaOutputForm: TSimbaOutputForm
   Top = 1203
   Width = 676
   Caption = 'Output'
-  ClientHeight = 140
-  ClientWidth = 676
   DesignTimePPI = 120
   OnMouseDown = FormMouseDown
   OnMouseLeave = FormMouseLeave
   OnMouseMove = FormMouseMove
   LCLVersion = '2.2.4.0'
-  object PageControl: TPageControl
-    Left = 0
-    Height = 140
-    Top = 0
-    Width = 676
-    TabStop = False
-    Align = alClient
-    Images = SimbaForm.Images
-    TabOrder = 0
-  end
   object ContextMenu: TPopupMenu
     Left = 40
     Top = 56

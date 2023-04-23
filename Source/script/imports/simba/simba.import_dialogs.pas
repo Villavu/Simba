@@ -9,7 +9,7 @@ implementation
 uses
   classes, sysutils, dialogs, controls, lptypes,
   simba.script_compiler, simba.mufasatypes, simba.scriptthread, simba.aca, simba.dtmeditor,
-  simba.dialog;
+  simba.dialog, simba.threading;
 
 procedure _LapeInputCombo(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 
@@ -19,7 +19,7 @@ procedure _LapeInputCombo(const Params: PParamArray; const Result: Pointer); LAP
   end;
 
 begin
-  Sync(@Execute);
+  ExecuteOnMainThread(@Execute);
 end;
 
 procedure _LapeInputQuery(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -30,7 +30,7 @@ procedure _LapeInputQuery(const Params: PParamArray; const Result: Pointer); LAP
   end;
 
 begin
-  Sync(@Execute);
+  ExecuteOnMainThread(@Execute);
 end;
 
 procedure _LapeShowMessage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -41,7 +41,7 @@ procedure _LapeShowMessage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
   end;
 
 begin
-  Sync(@Execute);
+  ExecuteOnMainThread(@Execute);
 end;
 
 procedure _LapeShowDTMEditor(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -64,7 +64,7 @@ procedure _LapeShowDTMEditor(const Params: PParamArray); LAPE_WRAPPER_CALLING_CO
   end;
 
 begin
-  Sync(@Execute);
+  ExecuteOnMainThread(@Execute);
 end;
 
 procedure _LapeShowACA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -92,7 +92,7 @@ procedure _LapeShowACA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
   end;
 
 begin
-  Sync(@Execute);
+  ExecuteOnMainThread(@Execute);
 end;
 
 procedure _LapeSelectDirectory(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -103,7 +103,7 @@ procedure _LapeSelectDirectory(const Params: PParamArray; const Result: Pointer)
   end;
 
 begin
-  Sync(@Execute);
+  ExecuteOnMainThread(@Execute);
 end;
 
 procedure _LapeShowQuestionDialog(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -114,7 +114,7 @@ procedure _LapeShowQuestionDialog(const Params: PParamArray; const Result: Point
   end;
 
 begin
-  Sync(@Execute);
+  ExecuteOnMainThread(@Execute);
 end;
 
 procedure _LapeShowTrayNotification(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV

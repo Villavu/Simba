@@ -130,7 +130,7 @@ begin
 
   if FErrorSet then
   try
-    SimbaScriptTabsForm.LockOutputChanging();
+    SimbaOutputForm.LockTabChange();
 
     ScriptTab := SimbaScriptTabsForm.FindTab(Self);
     if (ScriptTab <> nil) then
@@ -145,7 +145,7 @@ begin
         SimbaScriptTabsForm.CurrentEditor.FocusLine(Error.Line, Error.Column, $0000A5);
     end;
   finally
-    SimbaScriptTabsForm.UnlockOutputChanging();
+    SimbaOutputForm.UnlockTabChange();
   end;
 
   State := ESimbaScriptState.STATE_STOP;
