@@ -31,8 +31,6 @@ type
     procedure TabHide; override;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
-    procedure ScriptStateChanged(Sender: TObject);
-
     procedure DoEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure DoEditorStatusChanges(Sender: TObject; Changes: TSynStatusChanges);
 
@@ -59,6 +57,7 @@ type
     procedure Undo;
     procedure Redo;
 
+    function IsActiveTab: Boolean;
     function CanClose: Boolean;
 
     function ScriptState: ESimbaScriptState;
@@ -93,8 +92,6 @@ end;
 
 procedure TSimbaScriptTab.TabShow;
 begin
-  FOutputBox.Tab.Show();
-
   FFunctionList.Show();
   if Editor.CanSetFocus() then
     Editor.SetFocus();
@@ -115,16 +112,6 @@ begin
   end;
 
   inherited Notification(AComponent, Operation);
-end;
-
-procedure TSimbaScriptTab.ScriptStateChanged(Sender: TObject);
-begin
-  case TSimbaScriptInstance(Sender).State of
-    ESimbaScriptState.STATE_RUNNING: FOutputBox.Tab.ImageIndex := IMAGE_PLAY;
-    ESimbaScriptState.STATE_PAUSED:  FOutputBox.Tab.ImageIndex := IMAGE_PAUSE;
-    else
-      FOutputBox.Tab.ImageIndex := IMAGE_STOP;
-  end;
 end;
 
 procedure TSimbaScriptTab.DoEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -187,6 +174,7 @@ begin
 
   try
     FEditor.Lines.SaveToFile(FileName);
+    FEditor.FileName := FileName;
 
     Result := True;
   except
@@ -202,8 +190,6 @@ begin
   FScriptFileName := FileName;
   FSavedText := FEditor.Text;
 
-  FOutputBox.Tab.Caption := FScriptTitle;
-
   Caption := FScriptTitle;
 end;
 
@@ -215,6 +201,7 @@ begin
 
   try
     FEditor.Lines.LoadFromFile(FileName);
+    FEditor.FileName := FileName;
 
     Result := True;
   except
@@ -229,8 +216,6 @@ begin
   FScriptFileName := FileName;
   FSavedText := FEditor.Text;
 
-  FOutputBox.Tab.Caption := FScriptTitle;
-
   Caption := FScriptTitle;
   if Result then
     SimbaIDEEvents.CallOnEditorLoadedMethods(Self);
@@ -244,6 +229,11 @@ end;
 procedure TSimbaScriptTab.Redo;
 begin
   FEditor.Redo();
+end;
+
+function TSimbaScriptTab.IsActiveTab: Boolean;
+begin
+  Result := TabControl.ActiveTab = Self;
 end;
 
 function TSimbaScriptTab.CanClose: Boolean;
@@ -307,7 +297,6 @@ begin
       Save(FScriptFileName);
 
     FScriptInstance := TSimbaScriptInstance.Create(Self, FOutputBox);
-    FScriptInstance.RegisterStateChangeHandler(@ScriptStateChanged);
     FScriptInstance.Target := Target;
     if (FScriptFileName = '') then
       FScriptInstance.ScriptFile := CreateTempFile(Script, ScriptTitle)

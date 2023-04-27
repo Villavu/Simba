@@ -10,7 +10,7 @@ unit simba.scriptinstance;
 interface
 
 uses
-  classes, sysutils, process, LazMethodList,
+  classes, sysutils, process,
   simba.mufasatypes, simba.scriptinstance_communication, simba.debuggerform, simba.windowhandle, simba.outputform;
 
 type
@@ -23,7 +23,6 @@ type
 
   TSimbaScriptInstance = class(TComponent)
   protected
-    FStateChangeHandlerList: TMethodList;
     FProcess: TProcess;
 
     FSimbaCommunication: TSimbaScriptInstanceCommunication;
@@ -59,6 +58,7 @@ type
     property DebuggerForm: TSimbaDebuggerForm read FDebuggingForm;
     property Process: TProcess read FProcess;
     property State: ESimbaScriptState read FState write SetState;
+    property OutputBox: TSimbaOutputBox read FOutputBox;
 
     // Parameters to pass to script
     property ScriptFile: String write FScriptFile;
@@ -80,17 +80,16 @@ type
     procedure Stop;
     procedure Kill;
 
-    procedure RegisterStateChangeHandler(Event: TNotifyEvent);
-    procedure UnRegisterStateChangeHandler(Event: TNotifyEvent);
+    function IsActiveTab: Boolean;
 
-    constructor Create(AOwner: TComponent; OutputBox: TSimbaOutputBox); reintroduce;
+    constructor Create(AOwner: TComponent; AOutputBox: TSimbaOutputBox); reintroduce;
     destructor Destroy; override;
   end;
 
 implementation
 
 uses
-  forms, simba.scripttabsform, simba.scripttab;
+  forms, simba.scripttabsform, simba.scripttab, simba.ide_events;
 
 procedure TSimbaScriptInstance.DoOutputThread;
 var
@@ -148,14 +147,15 @@ begin
     SimbaOutputForm.UnlockTabChange();
   end;
 
-  State := ESimbaScriptState.STATE_STOP;
-
   Self.Free();
 end;
 
 function TSimbaScriptInstance.GetTimeRunning: UInt64;
 begin
-  Result := GetTickCount64() - FStartTime;
+  if (FStartTime = 0) then
+    Result := 0
+  else
+    Result := GetTickCount64() - FStartTime;
 end;
 
 function TSimbaScriptInstance.GetExitCode: Int32;
@@ -171,7 +171,8 @@ end;
 procedure TSimbaScriptInstance.SetState(Value: ESimbaScriptState);
 begin
   FState := Value;
-  FStateChangeHandlerList.CallNotifyEvents(Self);
+
+  SimbaIDEEvents.CallOnScriptStateChange(Self);
 end;
 
 procedure TSimbaScriptInstance.SetError(Value: TSimbaScriptError);
@@ -182,7 +183,7 @@ end;
 
 procedure TSimbaScriptInstance.Start(Args: array of String);
 begin
-  State := ESimbaScriptState.STATE_RUNNING;
+  FStartTime := GetTickCount64();
 
   FProcess.Parameters.Add('--simbacommunication=%s', [FSimbaCommunication.ClientID]);
   FProcess.Parameters.Add('--target=' + FTarget.AsString());
@@ -193,7 +194,7 @@ begin
   FOutputThread := TThread.ExecuteInThread(@DoOutputThread);
   FOutputThread.OnTerminate := @DoOutputThreadTerminated;
 
-  FStartTime := GetTickCount64();
+  State := ESimbaScriptState.STATE_RUNNING;
 end;
 
 procedure TSimbaScriptInstance.Run(DebuggingForm: TSimbaDebuggerForm);
@@ -235,12 +236,11 @@ begin
   end;
 end;
 
-constructor TSimbaScriptInstance.Create(AOwner: TComponent; OutputBox: TSimbaOutputBox);
+constructor TSimbaScriptInstance.Create(AOwner: TComponent; AOutputBox: TSimbaOutputBox);
 begin
   inherited Create(AOwner);
 
-  FOutputBox := OutputBox;
-  FStateChangeHandlerList := TMethodList.Create();
+  FOutputBox := AOutputBox;
   FState := ESimbaScriptState.STATE_RUNNING;
   FSimbaCommunication := TSimbaScriptInstanceCommunication.Create(Self);
 
@@ -258,24 +258,17 @@ begin
   FProcess.Terminate(0);
 end;
 
-procedure TSimbaScriptInstance.RegisterStateChangeHandler(Event: TNotifyEvent);
+function TSimbaScriptInstance.IsActiveTab: Boolean;
 begin
-  FStateChangeHandlerList.Add(TMethod(Event));
-
-  Event(Self);
-end;
-
-procedure TSimbaScriptInstance.UnRegisterStateChangeHandler(Event: TNotifyEvent);
-begin
-  FStateChangeHandlerList.Remove(TMethod(Event));
+  Result := (Owner is TSimbaScriptTab) and TSimbaScriptTab(Owner).IsActiveTab();
 end;
 
 destructor TSimbaScriptInstance.Destroy;
 begin
   DebugLn('TSimbaScriptInstance.Destroy');
 
-  if (FStateChangeHandlerList <> nil) then
-    FreeAndNil(FStateChangeHandlerList);
+  State := ESimbaScriptState.STATE_NONE;
+
   if (FProcess <> nil) then
     FreeAndNil(FProcess);
   if (FSimbaCommunication <> nil) then

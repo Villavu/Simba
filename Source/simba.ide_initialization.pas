@@ -6,8 +6,9 @@
 
   Handler for managing initialization methods setup Simba's IDE.
 
-  RegisterMethodOnCreate -> Called before any forms are created.
-  RegisterMethodOnAfterCreate -> Called **on another thread** after all forms are created just before show.
+  RegisterMethodOnBeforeCreate -> Called before form creation.
+  RegisterMethodOnCreated      -> Called when forms have been created, just before show.
+  RegisterMethodOnAfterCreate  -> Called **on another thread** after create.
 }
 unit simba.ide_initialization;
 
@@ -29,13 +30,16 @@ type
     end;
     class procedure Call(Methods: TMethods; Name: String);
   class var
-    FCreateMethods: TMethods;
+    FBeforeCreateMethods: TMethods;
+    FCreatedMethods: TMethods;
     FAfterCreateMethods: TMethods;
   public
-    class procedure RegisterMethodOnCreate(Proc: TProcedure; Name: String);
+    class procedure RegisterMethodOnBeforeCreate(Proc: TProcedure; Name: String);
+    class procedure RegisterMethodOnCreated(Proc: TProcedure; Name: String);
     class procedure RegisterMethodOnAfterCreate(Proc: TProcedure; Name: String);
 
-    class procedure CallOnCreateMethods;
+    class procedure CallOnBeforeCreateMethods;
+    class procedure CallOnCreatedMethods;
     class procedure CallOnAfterCreateMethods;
   end;
 
@@ -57,20 +61,28 @@ begin
     try
       Methods[I].Proc();
 
-      DebugLn('[%s]: %s finished in %f ms'.Format([Name, Methods[I].Name, HighResolutionTime() - T]));
+      DebugLn('[%s]: %s (%f ms)'.Format([Name, Methods[I].Name, HighResolutionTime() - T]));
     except
       on E: Exception do
-        DebugLn('[%s]: %s failed (%s) in %f ms'.Format([Name, Methods[I].Name, E.Message, HighResolutionTime() - T]));
+        DebugLn('[%s]: %s Exception: (%s)'.Format([Name, Methods[I].Name, E.Message]));
     end;
   end;
 end;
 
-class procedure SimbaIDEInitialization.RegisterMethodOnCreate(Proc: TProcedure; Name: String);
+class procedure SimbaIDEInitialization.RegisterMethodOnBeforeCreate(Proc: TProcedure; Name: String);
 begin
-  SetLength(FCreateMethods, Length(FCreateMethods) + 1);
+  SetLength(FBeforeCreateMethods, Length(FBeforeCreateMethods) + 1);
 
-  FCreateMethods[High(FCreateMethods)].Proc := Proc;
-  FCreateMethods[High(FCreateMethods)].Name := Name;
+  FBeforeCreateMethods[High(FBeforeCreateMethods)].Proc := Proc;
+  FBeforeCreateMethods[High(FBeforeCreateMethods)].Name := Name;
+end;
+
+class procedure SimbaIDEInitialization.RegisterMethodOnCreated(Proc: TProcedure; Name: String);
+begin
+  SetLength(FCreatedMethods, Length(FCreatedMethods) + 1);
+
+  FCreatedMethods[High(FCreatedMethods)].Proc := Proc;
+  FCreatedMethods[High(FCreatedMethods)].Name := Name;
 end;
 
 class procedure SimbaIDEInitialization.RegisterMethodOnAfterCreate(Proc: TProcedure; Name: String);
@@ -81,9 +93,14 @@ begin
   FAfterCreateMethods[High(FAfterCreateMethods)].Name := Name;
 end;
 
-class procedure SimbaIDEInitialization.CallOnCreateMethods;
+class procedure SimbaIDEInitialization.CallOnBeforeCreateMethods;
 begin
-  Call(FCreateMethods, 'SimbaIDEInitialization.CallOnCreateMethods');
+  Call(FBeforeCreateMethods, 'SimbaIDEInitialization.CallOnBeforeCreateMethods');
+end;
+
+class procedure SimbaIDEInitialization.CallOnCreatedMethods;
+begin
+  Call(FCreatedMethods, 'SimbaIDEInitialization.CallOnCreatedMethods');
 end;
 
 class procedure SimbaIDEInitialization.CallOnAfterCreateMethods;

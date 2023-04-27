@@ -4,7 +4,7 @@ object SimbaForm: TSimbaForm
   Top = 567
   Width = 910
   Caption = 'Simba'
-  ClientHeight = 540
+  ClientHeight = 565
   ClientWidth = 910
   DesignTimePPI = 120
   KeyPreview = True
@@ -56,7 +56,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolbarDivider1: TToolButton
       Left = 261
-      Height = 28
+      Height = 5
       Top = 2
       Style = tbsDivider
     end
@@ -86,7 +86,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolbarDivider2: TToolButton
       Left = 171
-      Height = 28
+      Height = 5
       Top = 2
       Style = tbsDivider
     end
@@ -100,7 +100,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolbarDivider3: TToolButton
       Left = 81
-      Height = 28
+      Height = 5
       Top = 2
       Style = tbsDivider
     end
@@ -132,7 +132,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolbarDivider4: TToolButton
       Left = 106
-      Height = 28
+      Height = 5
       Top = 2
       Style = tbsDivider
     end
@@ -145,7 +145,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolbarDivider5: TToolButton
       Left = 236
-      Height = 28
+      Height = 5
       Top = 2
       Style = tbsDivider
     end
@@ -166,77 +166,15 @@ object SimbaForm: TSimbaForm
       ShowCaption = False
     end
   end
-  object StatusBar: TPanel
-    Left = 0
-    Height = 35
-    Top = 505
-    Width = 910
-    Align = alBottom
-    BevelOuter = bvNone
-    ClientHeight = 35
-    ClientWidth = 910
-    ParentColor = False
-    TabOrder = 1
-    object StatusPanelCursor: TPanel
-      Left = 0
-      Height = 35
-      Top = 0
-      Width = 212
-      Align = alLeft
-      Alignment = taLeftJustify
-      BevelOuter = bvNone
-      Caption = '(-1, -1)'
-      ParentColor = False
-      TabOrder = 0
-      OnPaint = StatusPanelPaint
-    end
-    object StatusPanelState: TPanel
-      Left = 212
-      Height = 35
-      Top = 0
-      Width = 212
-      Align = alLeft
-      Alignment = taLeftJustify
-      BevelOuter = bvNone
-      Caption = 'Stopped'
-      ParentColor = False
-      TabOrder = 1
-      OnPaint = StatusPanelPaint
-    end
-    object StatusPanelCaret: TPanel
-      Left = 424
-      Height = 35
-      Top = 0
-      Width = 212
-      Align = alLeft
-      Alignment = taLeftJustify
-      BevelOuter = bvNone
-      ParentColor = False
-      TabOrder = 2
-      OnPaint = StatusPanelPaint
-    end
-    object StatusPanelFileName: TPanel
-      Left = 636
-      Height = 35
-      Top = 0
-      Width = 274
-      Align = alClient
-      Alignment = taLeftJustify
-      BevelOuter = bvNone
-      ParentColor = False
-      TabOrder = 3
-      OnPaint = StatusPanelPaint
-    end
-  end
   object DockPanel: TAnchorDockPanel
     Left = 0
-    Height = 473
+    Height = 508
     Top = 32
     Width = 910
     Align = alClient
     BevelOuter = bvNone
     ParentFont = False
-    TabOrder = 2
+    TabOrder = 1
   end
   object MainMenu: TMainMenu
     Left = 224
@@ -3021,13 +2959,6 @@ object SimbaForm: TSimbaForm
       ImageIndex = 8
       OnClick = TrayPopupExitClick
     end
-  end
-  object ScriptStateTimer: TTimer
-    Enabled = False
-    Interval = 800
-    OnTimer = DoScriptStateTimer
-    Left = 64
-    Top = 160
   end
   object PackageMenuTimer: TTimer
     Enabled = False

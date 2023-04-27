@@ -17,12 +17,9 @@ uses
 
 type
   TSimbaMouseLogger = class(TThread)
-  public type
-    TChangeEvent = procedure(Sender: TObject; X, Y: Integer; HotkeyPressed: Boolean) of object;
   protected
     FWindowHandle: TWindowHandle;
     FWindowHandleChanged: Boolean;
-    FOnChange: TChangeEvent;
     FHotkey: Integer;
     FIdle: TSimpleWaitableLock;
 
@@ -33,10 +30,12 @@ type
     procedure Execute; override;
     procedure TerminatedSet; override;
   public
+    X, Y: Integer;
+    HotkeyPressed: Boolean;
+
     constructor Create; reintroduce;
     destructor Destroy; override;
 
-    property OnChange: TChangeEvent read FOnChange write FOnChange;
     property Hotkey: Integer read FHotkey write FHotkey;
     property WindowHandle: TWindowHandle read FWindowHandle write SetWindowHandle;
   end;
@@ -44,7 +43,8 @@ type
 implementation
 
 uses
-  forms, lclintf, lcltype;
+  forms, lclintf, lcltype,
+  simba.ide_events;
 
 procedure TSimbaMouseLogger.SetWindowHandle(Value: TWindowHandle);
 begin
@@ -69,14 +69,11 @@ procedure TSimbaMouseLogger.DoChange(Data: PtrInt);
 var
   Point: TSmallPoint absolute Data;
 begin
-  if Assigned(OnChange) then
-  begin
-    OnChange(
-      Self,
-      Point.X, Point.Y,
-      (Hotkey <> VK_UNKNOWN) and ((GetKeyState(FHotkey) and $8000) <> 0)
-    );
-  end;
+  X := Point.X;
+  Y := Point.Y;
+  HotkeyPressed := (Hotkey <> VK_UNKNOWN) and ((GetKeyState(FHotkey) and $8000) <> 0);
+
+  SimbaIDEEvents.CallOnMouseLoggerChange(Self);
 end;
 
 procedure TSimbaMouseLogger.Execute;

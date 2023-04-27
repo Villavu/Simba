@@ -203,7 +203,7 @@ begin
 end;
 
 initialization
-  SimbaIDEInitialization.RegisterMethodOnCreate(@CreateFunctionListFormatter, 'FunctionListFormatter');
+  SimbaIDEInitialization.RegisterMethodOnBeforeCreate(@CreateFunctionListFormatter, 'FunctionListFormatter');
 
 finalization
   if (FunctionListFormatter <> nil) then

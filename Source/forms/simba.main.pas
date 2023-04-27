@@ -12,9 +12,11 @@ interface
 uses
   classes, sysutils, fileutil, anchordockpanel, forms, controls, graphics, dialogs,
   stdctrls, menus, comctrls, extctrls, buttons, imglist,
-  simba.settings, simba.mufasatypes, simba.mouselogger, simba.areaselector, simba.scriptbackup;
+  simba.settings, simba.mufasatypes, simba.mouselogger, simba.areaselector, simba.scriptbackup,
+  simba.scriptinstance;
 
 const
+  IMAGE_NONE                = -1;
   IMAGE_COMPILE             = 0;
   IMAGE_PACKAGE             = 1;
   IMAGE_COPY                = 2;
@@ -53,6 +55,7 @@ const
   IMAGE_CONSTANT            = 35;
   IMAGE_VARIABLE            = 36;
   IMAGE_OPERATOR            = 39;
+  IMAGE_FONT                = 42;
   IMAGE_PACKAGE_UPDATE      = 45;
 
 type
@@ -133,13 +136,7 @@ type
     MenuItemUndo: TMenuItem;
     MenuTools: TMenuItem;
     MenuView: TMenuItem;
-    StatusBar: TPanel;
-    StatusPanelCaret: TPanel;
-    StatusPanelCursor: TPanel;
-    StatusPanelFileName: TPanel;
-    StatusPanelState: TPanel;
     StopButtonStop: TToolButton;
-    ScriptStateTimer: TTimer;
     PackageMenuTimer: TTimer;
     ToolBar: TToolBar;
     ToolbarButtonClearOutput: TToolButton;
@@ -209,8 +206,6 @@ type
     procedure MenuUndoClick(Sender: TObject);
     procedure MenuViewClick(Sender: TObject);
     procedure DoPackageMenuTimer(Sender: TObject);
-    procedure DoScriptStateTimer(Sender: TObject);
-    procedure StatusPanelPaint(Sender: TObject);
     procedure ToolbarButtonColorPickerClick(Sender: TObject);
     procedure ToolbarButtonPackagesClick(Sender: TObject);
     procedure ToolbarButtonSaveAllClick(Sender: TObject);
@@ -229,17 +224,13 @@ type
     FAreaSelection: TBox;
 
     procedure AddRecentFile(FileName: String);
+    procedure SetButtonStates(Instance: TSimbaScriptInstance);
 
     procedure SetDefaultDocking(IsResetting: Boolean = False);
     procedure SetupDocking;
     procedure SetupCompleted;
 
     procedure DoColorPicked(Data: PtrInt);
-    procedure DoMouseLoggerChange(Sender: TObject; X, Y: Integer; HotkeyPressed: Boolean);
-
-    procedure FontChanged(Sender: TObject); override;
-
-    procedure SizeComponents;
 
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
 
@@ -247,12 +238,11 @@ type
     procedure HandlePrintDTM(DTM: String);
     procedure HandleException(Sender: TObject; E: Exception);
     procedure HandleFormCreated(Sender: TObject; Form: TCustomForm);
-    procedure HandleEditorChanged(Sender: TObject);
 
     procedure DoTabLoaded(Sender: TObject);
-    procedure DoTabSearch(Sender: TObject);
     procedure DoTabModified(Sender: TObject);
-    procedure DoTabCaretMoved(Sender: TObject);
+    procedure DoScriptTabChange(Sender: TObject);
+    procedure DoScriptStateChange(Sender: TObject);
 
     procedure SetToolbarSize(Value: Integer);
     procedure SetToolbarPosition(Value: String);
@@ -281,20 +271,19 @@ uses
   simba.shapeboxform, simba.openexampleform, simba.colorpickerhistoryform,
   simba.debugimageform, simba.bitmaptostringform, simba.aboutform,
   simba.outputform, simba.filebrowserform, simba.notesform, simba.settingsform,
-  simba.functionlistform, simba.scripttabsform,
+  simba.functionlistform, simba.scripttabsform, simba.ide_mainstatusbar,
 
   simba.package_form, simba.package_autoupdater,
 
   simba.associate, simba.ide_initialization, simba.ide_events,
   simba.functionlist_simbasection, simba.functionlist_updater,
-  simba.scripttab, simba.editor,
   simba.aca, simba.dtmeditor,
 
   simba.windowselector, simba.colorpicker,
 
   simba.openssl, simba.files, simba.process,
-  simba.dockinghelpers, simba.datetime, simba.nativeinterface,
-  simba.scriptformatter, simba.windowhandle, simba.editor_findreplace;
+  simba.dockinghelpers, simba.nativeinterface,
+  simba.scriptformatter, simba.windowhandle, simba.scripttab;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 
@@ -487,26 +476,6 @@ begin
   UpdatePackages();
 end;
 
-procedure TSimbaForm.StatusPanelPaint(Sender: TObject);
-var
-  Style: TTextStyle;
-begin
-  Style := Default(TTextStyle);
-  Style.Layout := tlCenter;
-
-  with Sender as TPanel do
-  begin
-    Canvas.Brush.Color := Color;
-    Canvas.FillRect(ClientRect);
-
-    Canvas.Pen.Color := clActiveBorder;
-    Canvas.Line(0, 0, ClientWidth, 0);
-    Canvas.Line(0, 0, 0, ClientHeight);
-
-    Canvas.TextRect(ClientRect, 5, 0, Caption, Style);
-  end;
-end;
-
 procedure TSimbaForm.MenuItemFormatScriptClick(Sender: TObject);
 var
   Script: String;
@@ -555,6 +524,53 @@ begin
   FRecentFiles.Insert(0, FileName);
   while (FRecentFiles.Count > 10) do
     FRecentFiles.Pop();
+end;
+
+procedure TSimbaForm.SetButtonStates(Instance: TSimbaScriptInstance);
+begin
+  if (Instance = nil) or (Instance.State in [ESimbaScriptState.STATE_NONE, ESimbaScriptState.STATE_PAUSED]) then
+  begin
+    ToolbarButtonRun.Enabled := True;
+    ToolbarButtonPause.Enabled := False;
+    ToolbarButtonCompile.Enabled := True;
+
+    StopButtonStop.Enabled := False;
+    StopButtonStop.ImageIndex := IMAGE_STOP;
+
+    Exit;
+  end;
+
+  case Instance.State of
+    ESimbaScriptState.STATE_PAUSED:
+      begin
+        ToolbarButtonRun.Enabled := True;
+        ToolbarButtonPause.Enabled := False;
+        ToolbarButtonCompile.Enabled := True;
+
+        StopButtonStop.Enabled := True;
+        StopButtonStop.ImageIndex := IMAGE_STOP;
+      end;
+
+    ESimbaScriptState.STATE_STOP:
+      begin
+        ToolbarButtonRun.Enabled := False;
+        ToolbarButtonPause.Enabled := False;
+        ToolbarButtonCompile.Enabled := False;
+
+        StopButtonStop.Enabled := True;
+        StopButtonStop.ImageIndex := IMAGE_POWER;
+      end;
+
+    ESimbaScriptState.STATE_RUNNING:
+      begin
+        ToolbarButtonRun.Enabled := False;
+        ToolbarButtonPause.Enabled := True;
+        ToolbarButtonCompile.Enabled := False;
+
+        StopButtonStop.Enabled := True;
+        StopButtonStop.ImageIndex := IMAGE_STOP;
+      end;
+   end;
 end;
 
 procedure TSimbaForm.SetDefaultDocking(IsResetting: Boolean);
@@ -613,12 +629,13 @@ end;
 
 procedure TSimbaForm.Setup(Data: PtrInt);
 begin
-  SimbaIDEEvents.RegisterMethodOnEditorLoaded(@DoTabLoaded);
-  SimbaIDEEvents.RegisterMethodOnEditorSearch(@DoTabSearch);
-  SimbaIDEEvents.RegisterMethodOnEditorModified(@DoTabModified);
-  SimbaIDEEvents.RegisterMethodOnEditorCaretMoved(@DoTabCaretMoved);
+  SimbaIDEInitialization.CallOnCreatedMethods();
 
-  SimbaScriptTabsForm.AddTab();
+  SimbaIDEEvents.RegisterMethodOnEditorLoaded(@DoTabLoaded);
+  SimbaIDEEvents.RegisterMethodOnEditorModified(@DoTabModified);
+  SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoTabModified); // Also do this
+  SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoScriptTabChange);
+  SimbaIDEEvents.RegisterMethodOnScriptStateChange(@DoScriptStateChange);
 
   SimbaFunctionListUpdater := TSimbaFunctionListUpdater.Create();
 
@@ -632,12 +649,12 @@ begin
   SimbaSettingChanged(SimbaSettings.General.ConsoleVisible);
   SimbaSettingChanged(SimbaSettings.General.MacOSKeystrokes);
 
-  SizeComponents();
+  SimbaScriptTabsForm.AddTab();
+
   SetupDocking();
   SetupCompleted();
 
   FMouseLogger := TSimbaMouseLogger.Create();
-  FMouseLogger.OnChange := @DoMouseLoggerChange;
   FMouseLogger.Hotkey := VK_F1;
 
   SimbaIDEInitialization.CallOnAfterCreateMethods();
@@ -645,7 +662,7 @@ end;
 
 procedure TSimbaForm.FormCreate(Sender: TObject);
 begin
-  SimbaIDEInitialization.CallOnCreateMethods();
+  SimbaIDEInitialization.CallOnBeforeCreateMethods();
 
   Application.CaptureExceptions := True;
   Application.OnException := @SimbaForm.HandleException;
@@ -749,35 +766,6 @@ begin
     SimbaColorPickerHistoryForm.ColorListBox.ItemIndex := SimbaColorPickerHistoryForm.ColorListBox.Count - 1;
 end;
 
-procedure TSimbaForm.FontChanged(Sender: TObject);
-begin
-  inherited FontChanged(Sender);
-
-  SizeComponents();
-end;
-
-procedure TSimbaForm.SizeComponents;
-begin
-  if (ControlCount = 0) then
-    Exit;
-
-  with TBitmap.Create() do
-  try
-    // Measure on larger font size
-    // Font size can be 0 so use GetFontData
-    Canvas.Font := Self.Font;
-    Canvas.Font.Size := Round(-GetFontData(Canvas.Font.Reference.Handle).Height * 72 / Canvas.Font.PixelsPerInch) + 6;
-
-    StatusBar.Height := Round(Canvas.TextHeight('Taylor Swift') * 0.8);
-
-    StatusPanelCursor.Width := Canvas.TextWidth('(1000,1000)');
-    StatusPanelState.Width  := Canvas.TextWidth('[00:00:00]');
-    StatusPanelCaret.Width  := Canvas.TextWidth('Line 100, Col 100');
-  finally
-    Free();
-  end;
-end;
-
 procedure TSimbaForm.SimbaSettingChanged(Setting: TSimbaSetting);
 begin
   if (Setting = SimbaSettings.General.ToolbarPosition) then
@@ -845,7 +833,6 @@ var
   I: Integer;
   Item: TMenuItem;
 begin
-  MenuItemSaveAll.Enabled := SimbaScriptTabsForm.TabCount > 1;
   MenuItemOpenRecent.Clear();
 
   I := 0;
@@ -974,65 +961,6 @@ begin
   SimbaSettings.General.TrayIconVisible.Value := TMenuItem(Sender).Checked;
 end;
 
-procedure TSimbaForm.DoScriptStateTimer(Sender: TObject);
-var
-  Tab: TSimbaScriptTab;
-begin
-  Tab := SimbaScriptTabsForm.CurrentTab;
-  if (Tab = nil) then
-    Exit;
-
-  case Tab.ScriptState of
-    ESimbaScriptState.STATE_PAUSED:
-      begin
-        ToolbarButtonRun.Enabled := True;
-        ToolbarButtonPause.Enabled := False;
-        ToolbarButtonCompile.Enabled := True;
-
-        StopButtonStop.Enabled := True;
-        StopButtonStop.ImageIndex := IMAGE_STOP;
-
-        StatusPanelState.Caption := 'Paused';
-      end;
-
-    ESimbaScriptState.STATE_STOP:
-      begin
-        ToolbarButtonRun.Enabled := False;
-        ToolbarButtonPause.Enabled := False;
-        ToolbarButtonCompile.Enabled := False;
-
-        StopButtonStop.Enabled := True;
-        StopButtonStop.ImageIndex := IMAGE_POWER;
-
-        StatusPanelState.Caption := 'Stopping';
-      end;
-
-    ESimbaScriptState.STATE_RUNNING:
-      begin
-        ToolbarButtonRun.Enabled := False;
-        ToolbarButtonPause.Enabled := True;
-        ToolbarButtonCompile.Enabled := False;
-
-        StopButtonStop.Enabled := True;
-        StopButtonStop.ImageIndex := IMAGE_STOP;
-
-        StatusPanelState.Caption := FormatMilliseconds(Tab.ScriptTimeRunning(), 'hh:mm:ss');
-      end;
-
-    ESimbaScriptState.STATE_NONE:
-      begin
-        ToolbarButtonRun.Enabled := True;
-        ToolbarButtonPause.Enabled := False;
-        ToolbarButtonCompile.Enabled := True;
-
-        StopButtonStop.Enabled := False;
-        StopButtonStop.ImageIndex := IMAGE_STOP;
-
-        StatusPanelState.Caption := 'Stopped';
-      end;
-  end;
-end;
-
 procedure TSimbaForm.ToolbarButtonPackagesClick(Sender: TObject);
 begin
   SimbaPackageForm.OnHide := @DoPackageMenuTimer;
@@ -1078,42 +1006,10 @@ begin
   end;
 end;
 
-procedure TSimbaForm.HandleEditorChanged(Sender: TObject);
-begin
-  {
-  with Sender as TSimbaScriptTab do
-  begin
-    if (ScriptFileName <> '') then
-      StatusPanelFileName.Caption := ScriptFileName
-    else
-      StatusPanelFileName.Caption := ScriptTitle;
-
-    StatusPanelCaret.Caption := 'Line ' + IntToStr(Editor.CaretY) + ', Col ' + IntToStr(Editor.CaretX);
-
-
-    //SimbaIDEEvents.RegisterMethodOnEditorLoaded();
-    //SimbaIDEEvents.RegisterMethodOnEditorSearch();
-
-    //MenuItemSaveAll.Enabled := PageControl.PageCount > 1;
-    //ToolbarButtonSaveAll.Enabled := PageControl.PageCount > 1;
-  end;  }
-end;
-
 procedure TSimbaForm.DoTabLoaded(Sender: TObject);
 begin
   if (Sender is TSimbaScriptTab) then
-    with TSimbaScriptTab(Sender) do
-    begin
-      StatusPanelFileName.Caption := ScriptFileName;
-
-      AddRecentFile(ScriptFileName);
-    end;
-end;
-
-procedure TSimbaForm.DoTabSearch(Sender: TObject);
-begin
-  if (Sender is TSimbaEditorFind) then
-    StatusPanelFileName.Caption := 'Find matches: ' + IntToStr(TSimbaEditorFind(Sender).Matches);
+    AddRecentFile(TSimbaScriptTab(Sender).ScriptFileName);
 end;
 
 procedure TSimbaForm.DoTabModified(Sender: TObject);
@@ -1137,11 +1033,22 @@ begin
     end;
 end;
 
-procedure TSimbaForm.DoTabCaretMoved(Sender: TObject);
+procedure TSimbaForm.DoScriptTabChange(Sender: TObject);
 begin
   if (Sender is TSimbaScriptTab) then
     with TSimbaScriptTab(Sender) do
-      SimbaForm.StatusPanelCaret.Caption := 'Line ' + IntToStr(Editor.CaretX) + ', Col ' + IntToStr(Editor.CaretY);
+    begin
+      SetButtonStates(ScriptInstance);
+
+      MenuItemSaveAll.Enabled      := TabControl.TabCount > 1;
+      ToolbarButtonSaveAll.Enabled := TabControl.TabCount > 1;
+    end;
+end;
+
+procedure TSimbaForm.DoScriptStateChange(Sender: TObject);
+begin
+  if (Sender is TSimbaScriptInstance) and TSimbaScriptInstance(Sender).IsActiveTab() then
+    SetButtonStates(TSimbaScriptInstance(Sender));
 end;
 
 procedure TSimbaForm.MenuEditClick(Sender: TObject);
@@ -1283,7 +1190,7 @@ end;
 
 procedure TSimbaForm.SetupCompleted;
 begin
-  ScriptStateTimer.Enabled := True;
+  //ScriptStateTimer.Enabled := True;
   PackageMenuTimer.Enabled := True;
 
   if SimbaSettings.FirstLaunch then
@@ -1304,13 +1211,6 @@ begin
         ToolbarButtonRun.Click();
     end;
   end;
-end;
-
-procedure TSimbaForm.DoMouseLoggerChange(Sender: TObject; X, Y: Integer; HotkeyPressed: Boolean);
-begin
-  StatusPanelCursor.Caption := '(' + IntToStr(X) + ', ' + IntToStr(Y) + ')';
-  if HotkeyPressed then
-    SimbaDebugLn([EDebugLn.FOCUS], StatusPanelCursor.Caption);
 end;
 
 end.

@@ -45,6 +45,8 @@ type
     // Enable/Disable TSynEditMarkupHighlightAllCaret depending on has selection
     procedure DoStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
   public
+    FileName: String;
+
     property AutoComplete: TSimbaAutoComplete read FAutoComplete;
     property ParamHint: TSimbaParamHint read FParamHint;
     property TextView;
@@ -87,7 +89,8 @@ uses
   SynEditPointClasses,
   simba.fonthelpers, simba.editor_blockcompletion,
   simba.editor_docgenerator, simba.editor_commentblock,
-  simba.editor_mousewheelzoom, simba.editor_multicaret;
+  simba.editor_mousewheelzoom, simba.editor_multicaret,
+  simba.editor_popupmenu;
 
 function TSimbaEditor.IsHighlighterAttribute(Values: TStringArray): Boolean;
 var
@@ -410,6 +413,8 @@ begin
   OnDragOver := @DoDragOver;
 
   FFontChangedHandlerList := TMethodList.Create();
+
+  PopupMenu := GetSimbaEditorPopupMenu();
 
   Options := Options + [eoTabIndent, eoKeepCaretX, eoDragDropEditing, eoScrollPastEof] - [eoSmartTabs];
   Options2 := Options2 + [eoCaretSkipsSelection];

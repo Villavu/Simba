@@ -1,7 +1,7 @@
 object SimbaScriptTabsForm: TSimbaScriptTabsForm
-  Left = 4292
+  Left = 2895
   Height = 192
-  Top = 19
+  Top = 716
   Width = 816
   AllowDropFiles = True
   Caption = 'Editor'
@@ -147,95 +147,6 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
       Caption = 'Close All Other Tabs'
       ImageIndex = 9
       OnClick = DoTabPopupClick
-    end
-  end
-  object EditorPopupMenu: TPopupMenu
-    Images = SimbaForm.Images
-    OnPopup = DoEditorPopupShow
-    Left = 440
-    Top = 20
-    object MenuItemFindDeclaration: TMenuItem
-      Caption = 'Find Declaration'
-      OnClick = DoEditorPopupClick
-    end
-    object MenuItemSeperator1: TMenuItem
-      Caption = '-'
-    end
-    object MenuItemUndo: TMenuItem
-      Caption = 'Undo'
-      ImageIndex = 17
-      ShortCut = 16474
-      OnClick = DoEditorPopupClick
-    end
-    object MenuItemRedo: TMenuItem
-      Caption = 'Redo'
-      ImageIndex = 13
-      ShortCut = 24666
-      OnClick = DoEditorPopupClick
-    end
-    object MenuItemSeperator2: TMenuItem
-      Caption = '-'
-    end
-    object MenuItemCut: TMenuItem
-      Caption = 'Cut'
-      ImageIndex = 3
-      ShortCut = 16472
-      OnClick = DoEditorPopupClick
-    end
-    object MenuItemCopy: TMenuItem
-      Caption = 'Copy'
-      ImageIndex = 2
-      ShortCut = 16451
-      OnClick = DoEditorPopupClick
-    end
-    object MenuItemPaste: TMenuItem
-      Caption = 'Paste'
-      ImageIndex = 5
-      ShortCut = 16470
-      OnClick = DoEditorPopupClick
-    end
-    object MenuItemDelete: TMenuItem
-      Caption = 'Delete'
-      OnClick = DoEditorPopupClick
-    end
-    object MenuItemSelectAll: TMenuItem
-      Caption = 'Select All'
-      ShortCut = 16449
-      OnClick = DoEditorPopupClick
-    end
-    object MenuItemSeperator3: TMenuItem
-      Caption = '-'
-    end
-    object MenuItemCopyFileName: TMenuItem
-      Caption = 'Copy Filename'
-      OnClick = DoEditorPopupClick
-    end
-    object MenuItemOpenFileDir: TMenuItem
-      Caption = 'Open File Directory'
-      OnClick = DoEditorPopupClick
-    end
-    object MenuItemSeperator4: TMenuItem
-      Caption = '-'
-    end
-    object MenuItemFind: TMenuItem
-      Caption = 'Find ...'
-      ImageIndex = 18
-      ShortCut = 16454
-      OnClick = DoEditorPopupClick
-    end
-    object MenuItemReplace: TMenuItem
-      Caption = 'Replace ...'
-      ShortCut = 16466
-      OnClick = DoEditorPopupClick
-    end
-    object MenuItem1: TMenuItem
-      Caption = '-'
-    end
-    object MenuItemDocumentation: TMenuItem
-      Caption = 'Insert Documentation'
-      ImageIndex = 42
-      ShortCut = 16452
-      OnClick = DoEditorPopupClick
     end
   end
   object OpenDialog: TOpenDialog

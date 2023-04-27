@@ -12,7 +12,11 @@ type
   SimbaIDEEvents = class
   private
   type
-    EMethodType = (TAB_CARETMOVED, TAB_MODIFIED, TAB_LOADED, TAB_SEARCH);
+    EMethodType = (
+      TAB_CARETMOVED, TAB_MODIFIED, TAB_LOADED, TAB_SEARCH, TAB_CHANGE,
+      MOUSELOGGER_CHANGE,
+      SCRIPTSTATE_CHANGE
+    );
   class var
     FMethodLists: array[EMethodType] of TMethodList;
 
@@ -23,10 +27,19 @@ type
     class constructor Create;
     class destructor Destroy;
 
+    class procedure CallOnScriptStateChange(Sender: TObject); // Sender = TSimbaScriptInstance
+    class procedure CallOnScriptTabChange(Sender: TObject); // Sender = TSimbaScriptTab
     class procedure CallOnEditorLoadedMethods(Sender: TObject);
     class procedure CallOnEditorSearchMethods(Sender: TObject);
     class procedure CallOnEditorCaretMoved(Sender: TObject);
     class procedure CallOnEditorModified(Sender: TObject);
+    class procedure CallOnMouseLoggerChange(Sender: TObject);
+
+    class procedure RegisterMethodOnScriptStateChange(Proc: TNotifyEvent);
+    class procedure RegisterMethodOnScriptTabChange(Proc: TNotifyEvent);
+
+    class procedure RegisterMethodOnMouseLoggerChange(Proc: TNotifyEvent);
+    class procedure UnRegisterMethodOnMouseLoggerChange(Proc: TNotifyEvent);
 
     class procedure UnRegisterMethodOnEditorLoaded(Proc: TNotifyEvent);
     class procedure UnRegisterMethodOnEditorSearch(Proc: TNotifyEvent);
@@ -72,6 +85,16 @@ begin
       FreeAndNil(FMethodLists[Typ]);
 end;
 
+class procedure SimbaIDEEvents.CallOnScriptStateChange(Sender: TObject);
+begin
+  Call(SCRIPTSTATE_CHANGE, Sender);
+end;
+
+class procedure SimbaIDEEvents.CallOnScriptTabChange(Sender: TObject);
+begin
+  Call(TAB_CHANGE, Sender);
+end;
+
 class procedure SimbaIDEEvents.CallOnEditorLoadedMethods(Sender: TObject);
 begin
   Call(TAB_LOADED, Sender);
@@ -90,6 +113,31 @@ end;
 class procedure SimbaIDEEvents.CallOnEditorModified(Sender: TObject);
 begin
   Call(TAB_MODIFIED, Sender);
+end;
+
+class procedure SimbaIDEEvents.CallOnMouseLoggerChange(Sender: TObject);
+begin
+  Call(MOUSELOGGER_CHANGE, Sender);
+end;
+
+class procedure SimbaIDEEvents.RegisterMethodOnScriptStateChange(Proc: TNotifyEvent);
+begin
+  RegisterMethod(SCRIPTSTATE_CHANGE, Proc);
+end;
+
+class procedure SimbaIDEEvents.RegisterMethodOnScriptTabChange(Proc: TNotifyEvent);
+begin
+  RegisterMethod(TAB_CHANGE, Proc);
+end;
+
+class procedure SimbaIDEEvents.RegisterMethodOnMouseLoggerChange(Proc: TNotifyEvent);
+begin
+  RegisterMethod(MOUSELOGGER_CHANGE, Proc);
+end;
+
+class procedure SimbaIDEEvents.UnRegisterMethodOnMouseLoggerChange(Proc: TNotifyEvent);
+begin
+  UnRegisterMethod(MOUSELOGGER_CHANGE, Proc);
 end;
 
 class procedure SimbaIDEEvents.UnRegisterMethodOnEditorLoaded(Proc: TNotifyEvent);
