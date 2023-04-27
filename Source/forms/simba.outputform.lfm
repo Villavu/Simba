@@ -1,7 +1,7 @@
 object SimbaOutputForm: TSimbaOutputForm
-  Left = 4075
+  Left = 4227
   Height = 140
-  Top = 1203
+  Top = 24
   Width = 676
   Caption = 'Output'
   DesignTimePPI = 120

@@ -53,7 +53,7 @@ implementation
 
 uses
   simba.scriptinstance, simba.main, simba.debugimageform, simba.bitmap_utils,
-  simba.threading;
+  simba.threading, simba.ide_mainstatusbar;
 
 procedure TSimbaScriptInstanceCommunication.OnMessage(MessageID: Integer; Params, Result: TMemoryStream);
 var
@@ -80,7 +80,7 @@ procedure TSimbaScriptInstanceCommunication.Status;
 
   procedure Execute;
   begin
-    SimbaForm.StatusPanelFileName.Caption := FParams.ReadAnsiString();
+    SimbaMainStatusBar.SetMainPanelText(FParams.ReadAnsiString());
   end;
 
 begin

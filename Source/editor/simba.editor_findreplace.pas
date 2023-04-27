@@ -189,9 +189,9 @@ begin
           TButton(FFindForm.Components[I]).Free()
         else
         if (TButton(FFindForm.Components[I]).Caption = 'Cancel') then
-          TButton(FFindForm.Components[I]).Align:=alBottom
+          TButton(FFindForm.Components[I]).Align := alBottom
         else
-          TButton(FFindForm.Components[I]).Align:=alTop;
+          TButton(FFindForm.Components[I]).Align := alTop;
       end;
 
     CalcPosition(FFindForm);

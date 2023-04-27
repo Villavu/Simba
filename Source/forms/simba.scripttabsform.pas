@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, forms, controls, graphics, dialogs,
-  extctrls, comctrls, menus, StdCtrls, Buttons, synedit, synedittypes,
+  extctrls, comctrls, menus, StdCtrls, Buttons,
   simba.scripttab, simba.editor, simba.editor_findreplace, simba.component_tabcontrol;
 
 type
@@ -21,24 +21,6 @@ type
     FindButtonDown: TBitBtn;
     FindButtonUp: TBitBtn;
     FindEdit: TEdit;
-    MenuItem1: TMenuItem;
-    MenuItemOpenFileDir: TMenuItem;
-    MenuItemCopyFileName: TMenuItem;
-    MenuItemDocumentation: TMenuItem;
-    MenuItemUndo: TMenuItem;
-    MenuItemCopy: TMenuItem;
-    MenuItemPaste: TMenuItem;
-    MenuItemCut: TMenuItem;
-    MenuItemRedo: TMenuItem;
-    MenuItemFindDeclaration: TMenuItem;
-    MenuItemSeperator4: TMenuItem;
-    MenuItemSeperator1: TMenuItem;
-    MenuItemFind: TMenuItem;
-    MenuItemReplace: TMenuItem;
-    MenuItemSelectAll: TMenuItem;
-    MenuItemSeperator3: TMenuItem;
-    MenuItemDelete: TMenuItem;
-    MenuItemSeperator2: TMenuItem;
     OpenDialog: TOpenDialog;
     MenuItemNewTab: TMenuItem;
     MenuItemCloseTab: TMenuItem;
@@ -46,10 +28,7 @@ type
     FindPanel: TPanel;
     FindButtonClose: TSpeedButton;
     TabPopupMenu: TPopupMenu;
-    EditorPopupMenu: TPopupMenu;
 
-    procedure DoEditorPopupClick(Sender: TObject);
-    procedure DoEditorPopupShow(Sender: TObject);
     procedure DoOnDropFiles(Sender: TObject; const FileNames: array of String);
     procedure DoTabPopupClick(Sender: TObject);
     procedure FindButtonClick(Sender: TObject);
@@ -69,6 +48,7 @@ type
 
     function CanAnchorDocking(X, Y: Integer): Boolean;
 
+    procedure DoTabChange(Sender: TSimbaTabControl; NewTab: TSimbaTab);
     procedure DoTabMoved(Sender: TSimbaTabControl; AFrom, ATo: Integer);
     procedure DoTabClosed(Sender: TSimbaTabControl; Tab: TSimbaTab; var CanClose: Boolean);
 
@@ -115,57 +95,6 @@ uses
   LCLType,
   simba.mufasatypes, simba.files, simba.editor_docgenerator,
   simba.dockinghelpers, simba.nativeinterface, simba.outputform, simba.ide_events;
-
-procedure TSimbaScriptTabsForm.DoEditorPopupShow(Sender: TObject);
-var
-  CurrentWord: String;
-begin
-  if (CurrentEditor = nil) then
-    EditorPopupMenu.Close()
-  else
-  begin
-    CurrentWord := CurrentEditor.GetWordAtRowCol(CurrentEditor.CaretXY);
-
-    if (CurrentWord <> '') then
-    begin
-      MenuItemFindDeclaration.Caption := 'Find Declaration of ' + CurrentWord;
-      MenuItemFindDeclaration.Enabled := True;
-    end else
-    begin
-      MenuItemFindDeclaration.Caption := 'Find Declaration';
-      MenuItemFindDeclaration.Enabled := False;
-    end;
-
-    MenuItemUndo.Enabled   := CurrentEditor.CanUndo;
-    MenuItemRedo.Enabled   := CurrentEditor.CanRedo;
-    MenuItemPaste.Enabled  := CurrentEditor.CanPaste;
-    MenuItemCut.Enabled    := CurrentEditor.SelAvail;
-    MenuItemCopy.Enabled   := CurrentEditor.SelAvail;
-    MenuItemDelete.Enabled := CurrentEditor.SelAvail;
-  end;
-end;
-
-procedure TSimbaScriptTabsForm.DoEditorPopupClick(Sender: TObject);
-begin
-  if (CurrentTab = nil) or (CurrentEditor = nil) then
-    Exit;
-
-  if (Sender = MenuItemFindDeclaration) then CurrentEditor.OnClickLink(Self, mbLeft, [], CurrentEditor.CaretX, CurrentEditor.CaretY);
-  if (Sender = MenuItemUndo)            then CurrentEditor.Undo();
-  if (Sender = MenuItemRedo)            then CurrentEditor.Redo();
-  if (Sender = MenuItemCut)             then CurrentEditor.CutToClipboard();
-  if (Sender = MenuItemCopy)            then CurrentEditor.CopyToClipboard();
-  if (Sender = MenuItemPaste)           then CurrentEditor.PasteFromClipboard();
-  if (Sender = MenuItemDelete)          then CurrentEditor.ClearSelection();
-  if (Sender = MenuItemSelectAll)       then CurrentEditor.SelectAll();
-  if (Sender = MenuItemDocumentation)   then CurrentEditor.ExecuteSimpleCommand(TSimbaEditorPlugin_DocGenerator.EditorCommand);
-  if (Sender = MenuItemCopyFileName)    then CurrentEditor.DoCopyToClipboard(CurrentTab.ScriptFileName);
-
-  if (Sender = MenuItemFind)            then Self.Find();
-  if (Sender = MenuItemReplace)         then Self.Replace();
-
-  if (Sender = MenuItemOpenFileDir)     then SimbaNativeInterface.OpenDirectory(ExtractFileDir(CurrentTab.ScriptFileName));
-end;
 
 procedure TSimbaScriptTabsForm.DoOnDropFiles(Sender: TObject; const FileNames: array of String);
 var
@@ -285,6 +214,11 @@ begin
   Result := FTabControl.InEmptySpace(X, Y) and (not FTabControl.Dragging);
 end;
 
+procedure TSimbaScriptTabsForm.DoTabChange(Sender: TSimbaTabControl; NewTab: TSimbaTab);
+begin
+  SimbaIDEEvents.CallOnScriptTabChange(NewTab);
+end;
+
 procedure TSimbaScriptTabsForm.DoTabClosed(Sender: TSimbaTabControl; Tab: TSimbaTab; var CanClose: Boolean);
 begin
   CanClose := TSimbaScriptTab(Tab).CanClose();
@@ -312,6 +246,7 @@ begin
   FTabControl.PopupMenu := TabPopupMenu;
   FTabControl.OnTabMoved := @DoTabMoved;
   FTabControl.OnTabClose := @DoTabClosed;
+  FTabControl.OnTabChange := @DoTabChange;
   FTabControl.OnMouseMove := @FormMouseMove;
   FTabControl.OnMouseDown := @FormMouseDown;
   FTabControl.OnMouseLeave := @FormMouseLeave;
@@ -386,8 +321,6 @@ end;
 function TSimbaScriptTabsForm.AddTab: TSimbaScriptTab;
 begin
   Result := FTabControl.AddTab() as TSimbaScriptTab;
-  //Result.Editor.PopupMenu := EditorPopupMenu;
-  //Result.Caption := Result.ScriptTitle;
 end;
 
 function TSimbaScriptTabsForm.CloseTab(Tab: TSimbaScriptTab; KeepOne: Boolean): Boolean;
@@ -423,7 +356,6 @@ begin
       Result := False;
       Exit;
     end;
-
 end;
 
 function TSimbaScriptTabsForm.Open(FileName: String; CheckOtherTabs: Boolean): Boolean;

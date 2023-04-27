@@ -59,6 +59,8 @@ type
   TSimbaOutputTab = class(TSimbaTab)
   protected
     FOutputBox: TSimbaOutputBox;
+
+    procedure DoScriptStateChange(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
 
@@ -92,6 +94,7 @@ type
 
     function CanAnchorDocking(X, Y: Integer): Boolean;
 
+    procedure DoScriptTabChange(Sender: TObject);
     procedure DoTabCanChange(Sender: TSimbaTabControl; OldTab, NewTab: TSimbaTab; var AllowChange: Boolean);
 
     procedure DebugLn(const S: String);
@@ -120,7 +123,21 @@ implementation
 uses
   SynEditMarkupBracket, SynEditMarkupWordGroup,
   simba.dockinghelpers, simba.fonthelpers, simba.scripttabsform,
-  simba.nativeinterface, simba.settingsform, simba.main;
+  simba.nativeinterface, simba.settingsform, simba.main, simba.scriptinstance,
+  simba.scripttab, simba.ide_events;
+
+procedure TSimbaOutputTab.DoScriptStateChange(Sender: TObject);
+begin
+  if (Sender is TSimbaScriptInstance) and (TSimbaScriptInstance(Sender).OutputBox = FOutputBox) then
+  begin
+    case TSimbaScriptInstance(Sender).State of
+      ESimbaScriptState.STATE_RUNNING: ImageIndex := IMAGE_PLAY;
+      ESimbaScriptState.STATE_PAUSED:  ImageIndex := IMAGE_PAUSE;
+      ESimbaScriptState.STATE_STOP:    ImageIndex := IMAGE_STOP;
+      ESimbaScriptState.STATE_NONE:    ImageIndex := IMAGE_STOP;
+    end;
+  end;
+end;
 
 constructor TSimbaOutputTab.Create(AOwner: TComponent);
 begin
@@ -129,6 +146,8 @@ begin
   FOutputBox := TSimbaOutputBox.Create(Self);
   FOutputBox.Parent := Self;
   FOutputBox.Align := alClient;
+
+  SimbaIDEEvents.RegisterMethodOnScriptStateChange(@DoScriptStateChange);
 end;
 
 function TSimbaOutputBox.GetAntialiasing: Boolean;
@@ -558,6 +577,12 @@ begin
   Result := FTabControl.InEmptySpace(X, Y) and (not FTabControl.Dragging);
 end;
 
+procedure TSimbaOutputForm.DoScriptTabChange(Sender: TObject);
+begin
+  if (Sender is TSimbaScriptTab) then
+    TSimbaScriptTab(Sender).OutputBox.Tab.Show();
+end;
+
 procedure TSimbaOutputForm.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   if CanAnchorDocking(X, Y) and (HostDockSite is TSimbaAnchorDockHostSite) then
@@ -595,6 +620,8 @@ begin
   FSimbaOutputBox := AddSimbaOutput();
 
   DoSimbaDebugLn := @DebugLn;
+
+  SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoScriptTabChange);
 end;
 
 end.

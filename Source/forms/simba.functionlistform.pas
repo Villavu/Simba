@@ -96,8 +96,8 @@ begin
   if (FTreeView.Selected is TFunctionListNode) then
   begin
     Str := TFunctionListNode(FTreeView.Selected).Hint;
-    if (Str <> '') then
-      SimbaForm.StatusPanelFileName.Caption := TFunctionListNode(FTreeView.Selected).Hint;
+    //if (Str <> '') then
+    //  SimbaForm.StatusPanelFileName.Caption := TFunctionListNode(FTreeView.Selected).Hint;
   end;
 end;
 

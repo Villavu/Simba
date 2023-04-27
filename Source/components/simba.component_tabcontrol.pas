@@ -24,6 +24,8 @@ type
     function GetTabData: TATTabData;
     procedure SetImageIndex(Value: TImageIndex);
   public
+    constructor Create(AOwner: TComponent); override;
+
     property TabControl: TSimbaTabControl read GetTabControl;
     property ImageIndex: TImageIndex read GetImageIndex write SetImageIndex;
   end;
@@ -35,12 +37,14 @@ type
     TTabMovedEvent     = procedure(Sender: TSimbaTabControl; AFrom, ATo: Integer) of object;
     TTabCanChangeEvent = procedure(Sender: TSimbaTabControl; OldTab, NewTab: TSimbaTab; var AllowChange: Boolean) of object;
     TTabCloseEvent     = procedure(Sender: TSimbaTabControl; Tab: TSimbaTab; var CanClose: Boolean) of object;
+    TTabChangeEvent    = procedure(Sender: TSimbaTabControl; NewTab: TSimbaTab) of object;
   protected
     FTabs: TATTabs;
     FTabClass: TSimbaTabClass;
     FTabMovedEvent: TTabMovedEvent;
     FTabCloseEvent: TTabCloseEvent;
     FTabCanChangeEvent: TTabCanChangeEvent;
+    FTabChangeEvent: TTabChangeEvent;
     FDefaultTitle: String;
 
     function GetTabHeight: Integer;
@@ -48,6 +52,8 @@ type
     procedure ShowControl(AControl: TControl); override;
     procedure FontChanged(Sender: TObject); override;
     procedure Paint; override;
+
+    procedure CallTabChanged;
 
     procedure DoTabMoved(Sender: TObject; AIndexFrom, AIndexTo: Integer);
     procedure DoTabChanged(Sender: TObject);
@@ -98,6 +104,7 @@ type
     property OnTabMoved: TTabMovedEvent read FTabMovedEvent write FTabMovedEvent;
     property OnTabClose: TTabCloseEvent read FTabCloseEvent write FTabCloseEvent;
     property OnTabCanChange: TTabCanChangeEvent read FTabCanChangeEvent write FTabCanChangeEvent;
+    property OnTabChange: TTabChangeEvent read FTabChangeEvent write FTabChangeEvent;
 
     function InEmptySpace(X, Y: Integer): Boolean;
     function GetTabAt(X, Y: Integer): TSimbaTab;
@@ -106,7 +113,7 @@ type
 implementation
 
 uses
-  simba.main, simba.mufasatypes;
+  simba.main, simba.mufasatypes, simba.threading;
 
 function TSimbaTab.GetImageIndex: TImageIndex;
 begin
@@ -121,6 +128,13 @@ end;
 procedure TSimbaTab.SetImageIndex(Value: TImageIndex);
 begin
   GetTabData().TabImageIndex := Value;
+end;
+
+constructor TSimbaTab.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  ControlStyle := ControlStyle + [csOpaque];
 end;
 
 function TSimbaTab.GetTabData: TATTabData;
@@ -317,6 +331,12 @@ begin
   Canvas.FillRect(0, FTabs.Height, Width, FTabs.Height + FTabs.BorderSpacing.Bottom);
 end;
 
+procedure TSimbaTabControl.CallTabChanged;
+begin
+  if Assigned(FTabs) then
+    DoTabChanged(FTabs);
+end;
+
 procedure TSimbaTabControl.DoTabMoved(Sender: TObject; AIndexFrom, AIndexTo: Integer);
 begin
   if (AIndexFrom = -1) or (AIndexTo = -1) then
@@ -331,8 +351,14 @@ var
   NewTab: TSimbaTab;
 begin
   NewTab := GetTabByIndex(FTabs.TabIndex);
+
   if Assigned(NewTab) then
+  begin
     NewTab.Show();
+
+    if Assigned(FTabChangeEvent) then
+      FTabChangeEvent(Self, NewTab);
+  end;
 end;
 
 procedure TSimbaTabControl.DoTabPlusClick(Sender: TObject);
@@ -341,6 +367,7 @@ begin
 end;
 
 procedure TSimbaTabControl.DoTabClose(Sender: TObject; ATabIndex: Integer; var ACanClose, ACanContinue: Boolean);
+
 var
   Tab: TSimbaTab;
 begin
@@ -356,7 +383,10 @@ begin
     end;
 
     if ACanClose then
+    begin
       Tab.Free();
+      QueueOnMainThread(@CallTabChanged);
+    end;
   end;
 end;
 
@@ -385,6 +415,8 @@ end;
 constructor TSimbaTabControl.Create(AOwner: TComponent; TabClass: TSimbaTabClass; ADefaultTitle: String);
 begin
   inherited Create(AOwner);
+
+  ControlStyle := ControlStyle + [csOpaque];
 
   FDefaultTitle := ADefaultTitle;
   FTabClass := TabClass;
@@ -425,6 +457,8 @@ begin
 end;
 
 function TSimbaTabControl.AddTab(Title: String): TSimbaTab;
+var
+  NeedChangeEvent: Boolean;
 begin
   Result := FTabClass.Create(Self);
   Result.Parent := Self;
@@ -437,8 +471,13 @@ begin
   Result.AnchorSide[akRight].Control := Self;
   Result.AnchorSide[akRight].Side := asrRight;
 
+  NeedChangeEvent := FTabs.TabCount = 0;
+
   FTabs.AddTab(FTabs.TabCount, IfThen(Title <> '', Title, FDefaultTitle), Result).TabPopupMenu := PopupMenu;
   FTabs.TabIndex := FTabs.TabCount - 1;
+
+  if NeedChangeEvent and Assigned(FTabChangeEvent) then
+    FTabChangeEvent(Self, Result);
 end;
 
 procedure TSimbaTabControl.MoveTab(AFrom, ATo: Integer);
