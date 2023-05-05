@@ -1426,16 +1426,11 @@ begin
   FHintForUser4:= '4';
 
   FBitmap:= TBitmap.Create;
-  FBitmap.PixelFormat:= pf24bit;
   BitmapResize(FBitmap, 1600, 60);
 
   FBitmapAngleL:= TBitmap.Create;
-  FBitmapAngleL.PixelFormat:= pf24bit;
   FBitmapAngleR:= TBitmap.Create;
-  FBitmapAngleR.PixelFormat:= pf24bit;
-
   FBitmapRound:= TBitmap.Create;
-  FBitmapRound.PixelFormat:= pf24bit;
   BitmapResize(FBitmapRound, _InitRoundedBitmapSize, _InitRoundedBitmapSize);
 
   FTabIndex:= -1;

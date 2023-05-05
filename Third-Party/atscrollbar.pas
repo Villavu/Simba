@@ -331,7 +331,6 @@ begin
   FPageSize:= 20;
 
   FBitmap:= TBitmap.Create;
-  FBitmap.PixelFormat:= pf24bit;
   BitmapResize(FBitmap, 600, 50);
 
   FTimer:= TTimer.Create(Self);

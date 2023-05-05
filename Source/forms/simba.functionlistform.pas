@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, TreeFilterEdit,
-  simba.ide_codetools_parser, simba.ide_codetools_insight, simba.hintwindow, simba.simplelock;
+  simba.ide_codetools_parser, simba.ide_codetools_insight, simba.simplelock, simba.component_treeview;
 
 type
   TSimbaFunctionList = class;
@@ -33,18 +33,15 @@ type
   TSimbaFunctionList = class(TCustomControl)
   protected
     FRefCount: TSimpleLock;
-    FTreeView: TTreeView;
-    FFilter: TTreeFilterEdit;
-    FHint: TSimbaHintWindow;
-
+    FTreeView: TSimbaTreeView;
     FScriptNode: TTreeNode;
     FPluginsNode: TTreeNode;
     FIncludesNode: TTreeNode;
 
     procedure DoTreeViewSelectionChanged(Sender: TObject);
     procedure DoTreeViewDoubleClick(Sender: TObject);
-    procedure DoTreeViewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure DoAfterFilter(Sender: TObject);
+    function DoGetNodeHint(Node: TTreeNode): String;
   public
     IncludesHash: String;
     ExpandedState: TTreeNodeExpandedState;
@@ -60,7 +57,7 @@ type
     procedure AddInternalDecls(ParentNode: TTreeNode; Decls: TDeclarationList);
     procedure AddInclude(Include: TCodeParser);
 
-    property TreeView: TTreeView read FTreeView;
+    property TreeView: TSimbaTreeView read FTreeView;
     property ScriptNode: TTreeNode read FScriptNode;
     property PluginsNode: TTreeNode read FPluginsNode;
     property IncludesNode: TTreeNode read FIncludesNode;
@@ -74,7 +71,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.main, simba.functionlist_nodes;
+  simba.main, simba.functionlist_nodes, simba.ide_mainstatusbar;
 
 procedure TSimbaFunctionListStaticSection.SetLoaded(Value: Boolean);
 begin
@@ -91,53 +88,42 @@ end;
 
 procedure TSimbaFunctionList.DoTreeViewSelectionChanged(Sender: TObject);
 var
-  Str: String;
+  Node: TFunctionListNode;
 begin
-  if (FTreeView.Selected is TFunctionListNode) then
-  begin
-    Str := TFunctionListNode(FTreeView.Selected).Hint;
-    //if (Str <> '') then
-    //  SimbaForm.StatusPanelFileName.Caption := TFunctionListNode(FTreeView.Selected).Hint;
-  end;
+  Node := TFunctionListNode(FTreeView.Selected);
+  if (Node is TFunctionListNode) and Node.HasHint() then
+    SimbaMainStatusBar.SetMainPanelText(Node.Hint);
 end;
 
 procedure TSimbaFunctionList.DoTreeViewDoubleClick(Sender: TObject);
+var
+  Node: TFunctionListNode;
 begin
-  if (FTreeView.Selected is TFunctionListNode) then
+  Node := TFunctionListNode(FTreeView.Selected);
+  if (Node is TFunctionListNode) then
     TFunctionListNode(FTreeView.Selected).Open();
 end;
 
-procedure TSimbaFunctionList.DoTreeViewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-var
-  Node: TTreeNode;
-  Str: String;
+procedure TSimbaFunctionList.DoAfterFilter(Sender: TObject);
 begin
-  Node := FTreeView.GetNodeAt(X, Y);
-
-  if (Node is TFunctionListNode) then
+  if (Sender is TTreeFilterEdit) and (TTreeFilterEdit(Sender).Filter = '') then
   begin
-    Str := TFunctionListNode(Node).Hint;
-
-    if (Length(Str) > 125) then
-      FHint.Show(Node, Copy(Str, 1, 125) + ' ...')
-    else
-    if (Length(Str) > 0) then
-      FHint.Show(Node, Str);
+    FTreeView.FullCollapse();
+    FTreeView.ExpandTopLevelNode('Script');
+    FTreeView.ExpandTopLevelNode('Simba');
   end;
 end;
 
-procedure TSimbaFunctionList.DoAfterFilter(Sender: TObject);
-var
-  I: Integer;
+function TSimbaFunctionList.DoGetNodeHint(Node: TTreeNode): String;
 begin
-  Assert(Sender is TTreeFilterEdit);
-  if (TTreeFilterEdit(Sender).Filter <> '') then
-    Exit;
-
-  FTreeView.FullCollapse();
-  for I := 0 to TreeView.Items.TopLvlCount - 1 do
-    if (FTreeView.Items.TopLvlItems[I] <> FIncludesNode) and (FTreeView.Items.TopLvlItems[I] <> FPluginsNode) then
-      FTreeView.Items.TopLvlItems[I].Expanded := True;
+  if (Node is TFunctionListNode) then
+    with TFunctionListNode(Node) do
+    begin
+      if (Length(Hint) > 125) then
+        Result := Copy(Hint, 1, 125) + ' ...'
+      else
+        Result := Hint;
+    end;
 end;
 
 function TSimbaFunctionList.AddNode(ParentNode: TTreeNode; Node: TTreeNode): TTreeNode;
@@ -200,45 +186,29 @@ constructor TSimbaFunctionList.Create;
 begin
   inherited Create(nil);
 
-  FTreeView := TTreeView.Create(Self);
-  FTreeView.BorderSpacing.Left := 3;
-  FTreeView.BorderSpacing.Right := 3;
+  FTreeView := TSimbaTreeView.Create(Self);
   FTreeView.Parent := Self;
   FTreeView.Align := alClient;
   FTreeView.BorderStyle := bsNone;
   FTreeView.Images := SimbaForm.Images;
-  FTreeView.OnDblClick := @DoTreeViewDoubleClick;
-  FTreeView.OnSelectionChanged := @DoTreeViewSelectionChanged;
-  FTreeView.OnMouseMove := @DoTreeViewMouseMove;
-  FTreeView.Options := FTreeView.Options + [tvoRightClickSelect, tvoReadOnly, tvoAutoItemHeight] - [tvoToolTips, tvoThemedDraw];
+  FTreeView.OnDoubleClick := @DoTreeViewDoubleClick;
+  FTreeView.OnSelectionChange := @DoTreeViewSelectionChanged;
   FTreeView.TabStop := False;
-  FTreeView.DragMode := dmAutomatic;
+  FTreeView.OnAfterFilter := @DoAfterFilter;
+  FTreeView.OnGetNodeHint := @DoGetNodeHint;
 
-  ExpandedState := TTreeNodeExpandedState.Create(FTreeView);
+  //ExpandedState := TTreeNodeExpandedState.Create(FTreeView);
 
-  FFilter := TTreeFilterEdit.Create(Self);
-  FFilter.BorderSpacing.Around := 3;
-  FFilter.Parent := Self;
-  FFilter.Align := alBottom;
-  FFilter.FilteredTreeview := FTreeView;
-  FFilter.OnAfterFilter := @DoAfterFilter;
-  FFilter.Spacing := 2;
-  FFilter.TextHint := '(search)';
-  FFilter.Flat := True;
-  FFilter.ExpandAllInitially := True;
-  FFilter.TabStop := False;
 
-  FHint := TSimbaHintWindow.Create(FTreeView);
-
-  FScriptNode := FTreeView.Items.Add(nil, 'Script');
+  FScriptNode := FTreeView.AddNode('Script');
   FScriptNode.ImageIndex := IMAGE_DIRECTORY;
   FScriptNode.SelectedIndex := IMAGE_DIRECTORY;
 
-  FPluginsNode := FTreeView.Items.Add(nil, 'Plugins');
+  FPluginsNode := FTreeView.AddNode('Plugins');
   FPluginsNode.ImageIndex := IMAGE_DIRECTORY;
   FPluginsNode.SelectedIndex := IMAGE_DIRECTORY;
 
-  FIncludesNode := FTreeView.Items.Add(nil, 'Includes');
+  FIncludesNode := FTreeView.AddNode('Includes');
   FIncludesNode.ImageIndex := IMAGE_DIRECTORY;
   FIncludesNode.SelectedIndex := IMAGE_DIRECTORY;
 

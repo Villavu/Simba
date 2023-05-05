@@ -308,7 +308,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="167">
+    <Units Count="169">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1053,6 +1053,14 @@
         <Filename Value="editor/simba.editor_popupmenu.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit166>
+      <Unit167>
+        <Filename Value="components/simba.component_treeview.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit167>
+      <Unit168>
+        <Filename Value="components/simba.component_edit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit168>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

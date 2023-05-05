@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, graphics,
-  simba.mufasatypes, simba.colormath;
+  simba.mufasatypes;
 
 type
   TSimbaNativeInterface = class
@@ -100,7 +100,6 @@ implementation
 
 uses
   LCLType, LCLIntf,
-  simba.random,
   {$IF DEFINED(WINDOWS)}
   simba.nativeinterface_windows;
   {$ELSEIF DEFINED(LINUX)}

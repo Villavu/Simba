@@ -255,7 +255,7 @@ TBox.Clip
 ~~~~~~~~~
 procedure TBox.Clip(Other: TBox);
 *)
-procedure _LapeBox_Clip(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeBox_Clip(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PBox(Params^[0])^.Clip(PBox(Params^[1])^);
 end;

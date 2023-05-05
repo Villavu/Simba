@@ -13,6 +13,7 @@ type
   public
     Hint: String;
 
+    function HasHint: Boolean;
     procedure Open; virtual;
   end;
 
@@ -71,6 +72,11 @@ begin
 
   ImageIndex    := IMAGE_FILE;
   SelectedIndex := IMAGE_FILE;
+end;
+
+function TFunctionListNode.HasHint: Boolean;
+begin
+  Result := Hint <> '';
 end;
 
 procedure TFunctionListNode.Open;
