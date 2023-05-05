@@ -7,35 +7,36 @@ object SimbaFileBrowserForm: TSimbaFileBrowserForm
   DesignTimePPI = 120
   LCLVersion = '2.2.4.0'
   object Popup: TPopupMenu
+    Images = SimbaForm.Images
     OnPopup = PopupPopup
     Left = 110
     Top = 46
     object PopupMenu_Open: TMenuItem
       Caption = 'Open'
-      ImageIndex = 2
-      OnClick = PopupItemClick
+      ImageIndex = 28
+      OnClick = DoPopupClick
     end
     object PopupMenu_OpenExternally: TMenuItem
       Caption = 'Open Externally'
-      OnClick = PopupItemClick
+      OnClick = DoPopupClick
     end
     object PopupMenu_Seperator1: TMenuItem
       Caption = '-'
     end
-    object PopupMenu_CopyPath: TMenuItem
-      Caption = 'Copy Path'
-      OnClick = PopupItemClick
+    object PopupMenu_CopyFullPath: TMenuItem
+      Caption = 'Copy Full Path'
+      OnClick = DoPopupClick
     end
     object PopupMenu_CopyRelativePath: TMenuItem
       Caption = 'Copy Relative Path'
-      OnClick = PopupItemClick
+      OnClick = DoPopupClick
     end
     object PopupMenu_Seperator2: TMenuItem
       Caption = '-'
     end
     object PopupMenu_Refresh: TMenuItem
       Caption = 'Refresh'
-      OnClick = PopupItemClick
+      OnClick = DoUpdate
     end
   end
 end

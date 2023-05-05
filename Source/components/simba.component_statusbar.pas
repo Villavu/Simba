@@ -1,15 +1,18 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+
+  Custom drawn status bar.
+}
 unit simba.component_statusbar;
-
-
-// editor popup menu
-// aca,dtm script, rename to ShowACA/ShowDTM
 
 {$i simba.inc}
 
 interface
 
 uses
-  Classes, SysUtils, Controls, Graphics, LCLType, Grids, LMessages,
+  Classes, SysUtils, Controls, Graphics, LCLType, LMessages,
   simba.mufasatypes;
 
 type
@@ -174,7 +177,7 @@ begin
 
   Canvas.Font.Color := clWhite;
   Canvas.Pen.Color := clWhite;
-  Canvas.Brush.Color := $4A4136;
+  Canvas.Brush.Color := $322F2D;
 
   R := PanelRect(Index);
 

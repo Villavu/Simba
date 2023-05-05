@@ -65,6 +65,7 @@ var
 begin
   AssertMainThread('TSimbaFunctionListUpdater.BeginUpdate');
 
+
   if (SimbaScriptTabsForm <> nil) and (SimbaScriptTabsForm.CurrentTab <> nil) then
   begin
     Tab := SimbaScriptTabsForm.CurrentTab;
@@ -77,7 +78,7 @@ begin
       FFunctionList := Tab.FunctionList;
       FFunctionList.IncRef();
       FFunctionList.TreeView.BeginUpdate();
-      FFunctionList.ExpandedState.CreateChildNodes(FFunctionList.ScriptNode);
+      //FFunctionList.ExpandedState.CreateChildNodes(FFunctionList.ScriptNode);
 
       FCodeinsight.SetScript(Tab.Script, Tab.ScriptFileName);
     end;
@@ -88,7 +89,7 @@ procedure TSimbaFunctionListUpdater.EndUpdate;
 begin
   AssertMainThread('TSimbaFunctionListUpdater.EndUpdate');
 
-  FFunctionList.ExpandedState.Apply(FFunctionList.TreeView);
+  //FFunctionList.ExpandedState.Apply(FFunctionList.TreeView);
   FFunctionList.ScriptNode.Expanded := True;
   FFunctionList.TreeView.EndUpdate();
   FFunctionList.DecRef();

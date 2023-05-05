@@ -9,7 +9,7 @@ implementation
 uses
   Classes, SysUtils, Graphics,
   lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.bitmap, simba.colormath, simba.colormath_distance;
+  simba.script_compiler, simba.mufasatypes, simba.bitmap;
 
 type
   PCanvas = ^TCanvas;

@@ -3,9 +3,9 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 
-  Hint window for TTreeview which ensures the hint is hidden under under multiple circumstances.
+  Custom drawn hint window for TTreeView which ensures the hint is hidden under under multiple circumstances.
 }
-unit simba.hintwindow;
+unit simba.component_treeviewhint;
 
 {$i simba.inc}
 
@@ -15,7 +15,7 @@ uses
   classes, sysutils, controls, comctrls, graphics, forms, extctrls;
 
 type
-  TSimbaHintWindow = class(TComponent)
+  TSimbaTreeViewHint = class(TComponent)
   protected
     FTreeView: TTreeView;
     FHintWindow: THintWindow;
@@ -35,11 +35,21 @@ type
 
 implementation
 
+uses
+  LCLType;
+
 type
   TCustomHintWindow = class(THintWindow)
   protected
     procedure Paint; override;
+  public
+    procedure EraseBackground(DC: HDC); override;
   end;
+
+procedure TCustomHintWindow.EraseBackground(DC: HDC);
+begin
+  { nothing }
+end;
 
 procedure TCustomHintWindow.Paint;
 var
@@ -48,36 +58,36 @@ begin
   TextStyle := Default(TTextStyle);
   TextStyle.Layout := tlCenter;
 
-  Canvas.Font := TSimbaHintWindow(Owner).FTreeView.Font;
-  Canvas.Font.Color := clWindowText;
-  Canvas.Pen.Color := clWindowText;
-  Canvas.Brush.Color := clWindow;
+  Canvas.Font := TSimbaTreeViewHint(Owner).FTreeView.Font;
+  Canvas.Font.Color := clWhite;
+  Canvas.Pen.Color := $D77800;
+  Canvas.Brush.Color := $322F2D;
   Canvas.Rectangle(ClientRect);
   Canvas.TextRect(ClientRect, 3, 0, Caption, TextStyle);
 end;
 
-procedure TSimbaHintWindow.DoTimerExecute(Sender: TObject);
+procedure TSimbaTreeViewHint.DoTimerExecute(Sender: TObject);
 begin
   if (not FNodeRect.Contains(Mouse.CursorPos)) or (not FTreeView.Visible) or (not Application.Active) then
     FHintWindow.Visible := False;
 end;
 
-procedure TSimbaHintWindow.DoHintWindowHide(Sender: TObject);
+procedure TSimbaTreeViewHint.DoHintWindowHide(Sender: TObject);
 begin
   FTimer.Enabled := False;
 end;
 
-procedure TSimbaHintWindow.DoHintWindowShow(Sender: TObject);
+procedure TSimbaTreeViewHint.DoHintWindowShow(Sender: TObject);
 begin
   FTimer.Enabled := True;
 end;
 
-constructor TSimbaHintWindow.Create(AOwner: TTreeView);
+constructor TSimbaTreeViewHint.Create(AOwner: TTreeView);
 begin
   inherited Create(AOwner);
 
   if (not (Owner is TTreeView)) then
-    raise Exception.Create('TSimbaHintWindow.Create: Owner is not a TTreeView');
+    raise Exception.Create('TSimbaTreeViewHint.Create: Owner is not a TTreeView');
 
   FTimer          := TTimer.Create(Self);
   FTimer.Enabled  := False;
@@ -87,11 +97,12 @@ begin
   FHintWindow        := TCustomHintWindow.Create(Self);
   FHintWindow.OnHide := @DoHintWindowHide;
   FHintWindow.OnShow := @DoHintWindowShow;
+  FHintWindow.Color := clRed; // disable "UseBGThemes" to stop flickering. We custom draw so this color doesn't matter.
 
   FTreeView := AOwner;
 end;
 
-destructor TSimbaHintWindow.Destroy;
+destructor TSimbaTreeViewHint.Destroy;
 begin
   FTimer.Enabled := False;
   if (FHintWindow <> nil) then
@@ -100,22 +111,22 @@ begin
   inherited Destroy();
 end;
 
-procedure TSimbaHintWindow.Show(Node: TTreeNode; Caption: String);
+procedure TSimbaTreeViewHint.Show(Node: TTreeNode; Caption: String);
 begin
-  if (not Application.Active) then
+  if (Caption = '') then
+  begin
+    FHintWindow.Visible := False;
     Exit;
+  end;
 
   FNodeRect := Node.DisplayRect(True);
-  FNodeRect.SetLocation(FTreeView.ClientToScreen(FNodeRect.TopLeft));
+  FNodeRect.Offset(FTreeView.ClientOrigin);
   FNodeRect.Right := FNodeRect.Left + FHintWindow.Canvas.TextWidth(Caption) + 6;
 
-  FHintWindow.HintRect := FNodeRect;
   FHintWindow.ActivateHint(FNodeRect, Caption);
-
-  FNodeRect.Left := FTreeView.ClientOrigin.X + Node.DisplayIconLeft;
 end;
 
-procedure TSimbaHintWindow.Hide;
+procedure TSimbaTreeViewHint.Hide;
 begin
   FHintWindow.Visible := False;
 end;

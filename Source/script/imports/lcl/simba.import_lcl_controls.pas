@@ -42,7 +42,7 @@ begin
   PAnchorSideReference(Result)^ := PAnchorSide(Params^[0])^.Side;
 end;
 
-procedure _LapeAnchorSide_Side_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeAnchorSide_Side_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PAnchorSide(Params^[0])^.Side := PAnchorSideReference(Params^[1])^;
 end;
@@ -397,7 +397,7 @@ begin
   PAnchors(Result)^ := PControl(Params^[0])^.Anchors;
 end;
 
-procedure _LapeControl_Anchors_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeControl_Anchors_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PControl(Params^[0])^.Anchors := PAnchors(Params^[1])^;
 end;

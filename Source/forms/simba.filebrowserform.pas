@@ -10,50 +10,21 @@ unit simba.filebrowserform;
 interface
 
 uses
-  classes, sysutils, forms, controls, graphics, dialogs, comctrls, menus,
-  extctrls, treefilteredit,
-  simba.hintwindow;
+  Classes, SysUtils, Forms, Controls, ComCtrls, Menus,
+  simba.mufasatypes, simba.component_treeview;
 
 type
-  TFileInfo = record
-    FileName: String;
-    Name: String;
-    ImageIndex: Integer;
-    Directory: Boolean;
-  end;
-
-  PDirectoryInfo = ^TDirectoryInfo;
-  TDirectoryInfo = record
-    Info: TFileInfo;
-    Files: array of TFileInfo;
-    Directories: array of TDirectoryInfo;
-  end;
-
   TSimbaFileBrowserNode = class(TTreeNode)
   public
-    FileInfo: TFileInfo;
-  end;
-
-  TSimbaFileBrowser = class(TTreeView)
-  protected
-    FHint: TSimbaHintWindow;
-    FFiles: TDirectoryInfo;
-    FUpdating: Boolean;
-
-    procedure DoFindFiles;
-    procedure DoPopluateTreeView(Sender: TObject);
-    procedure DoCreateNodeClass(var NodeClass: TTreeNodeClass); override;
-
-    procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
-  public
-    procedure Fill;
-
-    constructor Create(AOwner: TComponent); override;
+    FileName: String;
+    IsDirectory: Boolean;
+    IsSimbaScript: Boolean;
   end;
 
   TSimbaFileBrowserForm = class(TForm)
+  published
     PopupMenu_CopyRelativePath: TMenuItem;
-    PopupMenu_CopyPath: TMenuItem;
+    PopupMenu_CopyFullPath: TMenuItem;
     PopupMenu_Seperator1: TMenuItem;
     PopupMenu_Open: TMenuItem;
     PopupMenu_OpenExternally: TMenuItem;
@@ -61,16 +32,38 @@ type
     PopupMenu_Refresh: TMenuItem;
     Popup: TPopupMenu;
 
-    procedure PopupItemClick(Sender: TObject);
+    procedure DoUpdate(Sender: TObject);
+    procedure DoPopupClick(Sender: TObject);
     procedure PopupPopup(Sender: TObject);
   protected
-    FFileBrowser: TSimbaFileBrowser;
-    FFilter: TTreeFilterEdit;
+  type
+    TFileInfo = record
+      FileName: String;
+      Name: String;
+      IsDirectory: Boolean;
+      IsSimbaScript: Boolean;
+    end;
 
-    procedure DoFileBrowserDoubleClick(Sender: TObject);
+    PDirectoryInfo = ^TDirectoryInfo;
+    TDirectoryInfo = record
+      Info: TFileInfo;
+      Files: array of TFileInfo;
+      Directories: array of TDirectoryInfo;
+    end;
+  protected
+    FTreeView: TSimbaTreeView;
+    FFiles: TDirectoryInfo;
+    FUpdating: Boolean;
+
+    procedure DoFindFiles;
+    procedure DoPopluateTreeView(Sender: TObject);
+    function DoGetNodeHint(Node: TTreeNode): String;
+    procedure DoDoubleClick(Sender: TObject);
     procedure DoAfterFilter(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
+
+    procedure Fill;
   end;
 
 var
@@ -81,29 +74,17 @@ implementation
 {$R *.lfm}
 
 uses
-  fileutil, clipbrd, lazfileutils,
-  simba.scripttabsform, simba.main, simba.nativeinterface;
+  FileUtil, LazFileUtils, Clipbrd, TreeFilterEdit,
+  simba.main, simba.scripttabsform, simba.nativeinterface;
 
-procedure TSimbaFileBrowser.DoCreateNodeClass(var NodeClass: TTreeNodeClass);
-begin
-  NodeClass := TSimbaFileBrowserNode;
-end;
+procedure TSimbaFileBrowserForm.DoFindFiles;
 
-procedure TSimbaFileBrowser.DoFindFiles;
-
-  function FileInfo(const FileName: String; const Directory: Boolean): TFileInfo; inline;
+  function FileInfo(const FileName: String; const IsDirectory: Boolean): TFileInfo; inline;
   begin
     Result.FileName := FileName;
-    Result.Directory := Directory;
     Result.Name := ExtractFileName(ExcludeTrailingPathDelimiter(FileName));
-
-    if Directory then
-      Result.ImageIndex := IMAGE_DIRECTORY
-    else
-    if ExtractFileExt(FileName) = '.simba' then
-      Result.ImageIndex := IMAGE_SIMBA
-    else
-      Result.ImageIndex := IMAGE_FILE;
+    Result.IsDirectory := IsDirectory;
+    Result.IsSimbaScript := FileName.EndsWith('.simba');
   end;
 
   procedure Build(const Node: PDirectoryInfo);
@@ -137,72 +118,58 @@ begin
   Build(@FFiles);
 end;
 
-procedure TSimbaFileBrowser.DoPopluateTreeView(Sender: TObject);
+procedure TSimbaFileBrowserForm.DoPopluateTreeView(Sender: TObject);
 
   procedure Populate(ParentNode: TTreeNode; Dir: TDirectoryInfo);
   var
     I: Integer;
+    Node: TTreeNode;
   begin
     if (ParentNode = nil) then
-      ParentNode := Items.Add(nil, 'Simba')
+      ParentNode := FTreeView.AddNode('Simba', IMAGE_DIRECTORY)
     else
-      ParentNode := Items.AddChild(ParentNode, Dir.Info.Name);
+      ParentNode := FTreeView.AddChildNode(ParentNode, Dir.Info.Name, IMAGE_DIRECTORY);
 
-    with TSimbaFileBrowserNode(ParentNode) do
-    begin
-      FileInfo := Dir.Info;
-
-      SelectedIndex := FileInfo.ImageIndex;
-      ImageIndex := FileInfo.ImageIndex;
-    end;
+    TSimbaFileBrowserNode(ParentNode).IsDirectory := True;
+    TSimbaFileBrowserNode(ParentNode).FileName := Dir.Info.FileName;
 
     for I := 0 to High(Dir.Directories) do
       Populate(ParentNode, Dir.Directories[i]);
 
     for I := 0 to High(Dir.Files) do
-      with TSimbaFileBrowserNode(Items.AddChild(ParentNode, Dir.Files[i].Name)) do
-      begin
-        FileInfo := Dir.Files[i];
+    begin
+      if Dir.Files[I].IsSimbaScript then
+        Node := FTreeView.AddChildNode(ParentNode, Dir.Files[I].Name, IMAGE_SIMBA)
+      else
+        Node := FTreeView.AddChildNode(ParentNode, Dir.Files[I].Name, IMAGE_FILE);
 
-        SelectedIndex := FileInfo.ImageIndex;
-        ImageIndex := FileInfo.ImageIndex;
-      end;
+      TSimbaFileBrowserNode(Node).IsSimbaScript := Dir.Files[I].IsSimbaScript;
+      TSimbaFileBrowserNode(Node).FileName := Dir.Files[I].FileName;
+    end;
   end;
 
 begin
-  Items.BeginUpdate();
-  Items.Clear();
+  FTreeView.BeginUpdate();
+  FTreeView.Clear();
 
   Populate(nil, FFiles);
 
-  if (Items.GetFirstNode() <> nil) then
-    Items.GetFirstNode().Expanded := True;
-  Items.EndUpdate();
+  FTreeView.ExpandFirstNode();
+  FTreeView.EndUpdate();
 
   FFiles := Default(TDirectoryInfo);
   FUpdating := False;
 end;
 
-procedure TSimbaFileBrowser.MouseMove(Shift: TShiftState; X, Y: Integer);
-var
-  Node: TTreeNode;
-  FileName: String;
+function TSimbaFileBrowserForm.DoGetNodeHint(Node: TTreeNode): String;
 begin
-  inherited MouseMove(Shift, X, Y);
-
-  Node := GetNodeAt(X, Y);
   if (Node is TSimbaFileBrowserNode) then
-  begin
-    FileName := CreateRelativePath(TSimbaFileBrowserNode(Node).FileInfo.FileName, Application.Location);
-    if (FileName = '')  then
-      Exit;
-
-    FHint.Show(Node, FileName);
-  end else
-    FHint.Hide();
+    Result := CreateRelativePath(TSimbaFileBrowserNode(Node).FileName, Application.Location)
+  else
+    Result := '';
 end;
 
-procedure TSimbaFileBrowser.Fill;
+procedure TSimbaFileBrowserForm.Fill;
 begin
   if FUpdating then
     Exit;
@@ -211,83 +178,89 @@ begin
   TThread.ExecuteInThread(@DoFindFiles, @DoPopluateTreeView);
 end;
 
-constructor TSimbaFileBrowser.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-
-  FHint := TSimbaHintWindow.Create(Self);
-end;
-
-procedure TSimbaFileBrowserForm.PopupItemClick(Sender: TObject);
+procedure TSimbaFileBrowserForm.DoPopupClick(Sender: TObject);
 var
-  FileInfo: TFileInfo;
+  Node: TSimbaFileBrowserNode;
 begin
-  if (FFileBrowser.Selected is TSimbaFileBrowserNode) then
-  begin
-    FileInfo := TSimbaFileBrowserNode(FFileBrowser.Selected).FileInfo;
+  Node := TSimbaFileBrowserNode(FTreeView.Selected);
 
-    if (Sender = PopupMenu_Open) then
-      SimbaScriptTabsForm.Open(FileInfo.FileName)
-    else
-    if (Sender = PopupMenu_OpenExternally) then
-    begin
-      if FileInfo.Directory then
-        SimbaNativeInterface.OpenDirectory(FileInfo.FileName)
-      else
-        SimbaNativeInterface.OpenFile(FileInfo.FileName);
-    end else
-    if (Sender = PopupMenu_CopyPath) then
-      Clipboard.AsText := FileInfo.FileName
+  if (Node is TSimbaFileBrowserNode) then
+  begin
+    if (Sender = PopupMenu_CopyFullPath) then
+      Clipboard.AsText := Node.FileName
     else
     if (Sender = PopupMenu_CopyRelativePath) then
-      Clipboard.AsText := CreateRelativePath(FileInfo.FileName, Application.Location);
-  end;
-
-  if (Sender = PopupMenu_Refresh) then
-  begin
-    FFilter.ResetFilter();
-    FFileBrowser.Fill();
+      Clipboard.AsText := CreateRelativePath(Node.FileName, Application.Location)
+    else
+    if (Sender = PopupMenu_Open) then
+      SimbaScriptTabsForm.Open(Node.FileName)
+    else
+    if (Sender = PopupMenu_OpenExternally) and Node.IsDirectory then
+      SimbaNativeInterface.OpenDirectory(Node.FileName)
+    else
+    if (Sender = PopupMenu_OpenExternally) then
+      SimbaNativeInterface.OpenFile(Node.FileName);
   end;
 end;
 
 procedure TSimbaFileBrowserForm.PopupPopup(Sender: TObject);
 var
-  FileInfo: TFileInfo;
+  Node: TSimbaFileBrowserNode;
 begin
-  if (FFileBrowser.Selected is TSimbaFileBrowserNode) then
-  begin
-    FileInfo := TSimbaFileBrowserNode(FFileBrowser.Selected).FileInfo;
+  Node := TSimbaFileBrowserNode(FTreeView.Selected);
 
-    PopupMenu_Open.Enabled := not FileInfo.Directory;
-    PopupMenu_OpenExternally.Enabled := True;
+  if (Node is TSimbaFileBrowserNode) then
+  begin
+    if Node.IsDirectory then
+    begin
+      PopupMenu_Open.Caption := 'Open';
+      PopupMenu_Open.Enabled := False;
+    end else
+    begin
+      PopupMenu_Open.Caption := 'Open "' + Node.Text + '"';
+      PopupMenu_Open.Enabled := True;
+    end;
+
+    PopupMenu_Open.Caption := 'Open "' + Node.Text + '"';
+    PopupMenu_OpenExternally.Caption := 'Open Externally "' + Node.Text + '"';
   end else
   begin
+    PopupMenu_Open.Caption := 'Open';
     PopupMenu_Open.Enabled := False;
+    PopupMenu_OpenExternally.Caption := 'Open Externally';
     PopupMenu_OpenExternally.Enabled := False;
   end;
 end;
 
-procedure TSimbaFileBrowserForm.DoFileBrowserDoubleClick(Sender: TObject);
-var
-  FileInfo: TFileInfo;
+procedure TSimbaFileBrowserForm.DoUpdate(Sender: TObject);
 begin
-  if (FFileBrowser.Selected is TSimbaFileBrowserNode) then
+  Fill();
+end;
+
+procedure TSimbaFileBrowserForm.DoDoubleClick(Sender: TObject);
+var
+  Node: TSimbaFileBrowserNode;
+begin
+  Node := TSimbaFileBrowserNode(FTreeView.Selected);
+
+  if (Node is TSimbaFileBrowserNode) then
   begin
-    FileInfo := TSimbaFileBrowserNode(FFileBrowser.Selected).FileInfo;
-    if (not FileInfo.Directory) then
-      SimbaScriptTabsForm.Open(FileInfo.FileName);
+    if Node.IsDirectory then
+      SimbaNativeInterface.OpenDirectory(Node.FileName)
+    else
+    if Node.IsSimbaScript then
+      SimbaScriptTabsForm.Open(Node.FileName)
+    else
+      SimbaNativeInterface.OpenFile(Node.FileName);
   end;
 end;
 
 procedure TSimbaFileBrowserForm.DoAfterFilter(Sender: TObject);
 begin
-  if (FFilter.Filter <> '') then
-    FFileBrowser.FullExpand()
-  else
+  if (Sender is TTreeFilterEdit) and (TTreeFilterEdit(Sender).Filter = '') then
   begin
-    FFileBrowser.FullCollapse();
-    if (FFileBrowser.Items.GetFirstNode() <> nil) then
-      FFileBrowser.Items.GetFirstNode().Expanded := True;
+    FTreeView.FullCollapse();
+    FTreeView.ExpandFirstNode();
   end;
 end;
 
@@ -295,29 +268,16 @@ constructor TSimbaFileBrowserForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  FFileBrowser := TSimbaFileBrowser.Create(Self);
-  FFileBrowser.Parent := Self;
-  FFileBrowser.Align := alClient;
-  FFileBrowser.BorderSpacing.Left := 3;
-  FFileBrowser.BorderSpacing.Right := 3;
-  FFileBrowser.Images := SimbaForm.Images;
-  FFileBrowser.Options := FFileBrowser.Options + [tvoRightClickSelect, tvoReadOnly, tvoAutoItemHeight] - [tvoToolTips, tvoThemedDraw];
-  FFileBrowser.PopupMenu := Popup;
-  FFileBrowser.OnDblClick := @DoFileBrowserDoubleClick;
-  FFileBrowser.BorderStyle := bsNone;
-  FFileBrowser.Fill();
-  FFileBrowser.TabStop := False;
+  FTreeView := TSimbaTreeView.Create(Self, TSimbaFileBrowserNode);
+  FTreeView.Parent := Self;
+  FTreeView.Align := alClient;
+  FTreeView.Images := SimbaForm.Images;
+  FTreeView.OnGetNodeHint := @DoGetNodeHint;
+  FTreeView.OnDoubleClick := @DoDoubleClick;
+  FTreeView.OnAfterFilter := @DoAfterFilter;
+  FTreeView.PopupMenu := Popup;
 
-  FFilter := TTreeFilterEdit.Create(Self);
-  FFilter.FilteredTreeview := FFileBrowser;
-  FFilter.BorderSpacing.Around := 3;
-  FFilter.Parent := Self;
-  FFilter.Align := alBottom;
-  FFilter.OnAfterFilter := @DoAfterFilter;
-  FFilter.TextHint := '(search)';
-  FFilter.Spacing := 2;
-  FFilter.Flat := True;
-  FFilter.TabStop := False;
+  Fill();
 end;
 
 end.

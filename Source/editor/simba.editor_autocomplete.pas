@@ -139,7 +139,7 @@ begin
   if (AutoComplete.Position = Index) then
     Canvas.Brush.Color := AutoComplete.SelectedColor
   else
-    Canvas.Brush.Color := Color;
+    Canvas.Brush.Color := AutoComplete.Form.Color;
   with ClientRect do
     Canvas.FillRect(AutoComplete.Form.DrawBorderWidth, Top, Right, Bottom);
 
@@ -149,6 +149,8 @@ end;
 constructor TSimbaAutoComplete_Hint.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+
+  Color := clRed; // disable "UseBGThemes" to stop flickering. We custom draw so this color doesn't matter.
 
   {$IFDEF WINDOWS}
   SetClassLong(Handle); // Clear CS_DROPSHADOW
