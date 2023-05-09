@@ -1,14 +1,13 @@
 object SimbaForm: TSimbaForm
-  Left = 1231
-  Height = 565
-  Top = 567
+  Left = 3237
+  Height = 578
+  Top = 716
   Width = 910
   Caption = 'Simba'
-  ClientHeight = 565
+  ClientHeight = 578
   ClientWidth = 910
   DesignTimePPI = 120
   KeyPreview = True
-  Menu = MainMenu
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -16,98 +15,102 @@ object SimbaForm: TSimbaForm
   LCLVersion = '2.2.4.0'
   object ToolBar: TToolBar
     Left = 0
+    Height = 28
     Top = 0
     Width = 910
     AutoSize = True
     ButtonHeight = 28
     ButtonWidth = 0
     Caption = 'ToolBar'
-    EdgeBorders = [ebTop, ebBottom]
+    EdgeBorders = []
+    EdgeInner = esNone
+    EdgeOuter = esNone
     Images = Images
+    Indent = 0
     ParentFont = False
     ParentShowHint = False
     ShowHint = True
     TabOrder = 0
     object ToolbarButtonRun: TToolButton
-      Left = 111
+      Left = 110
       Hint = 'Run Script (Alt + R)'
-      Top = 2
+      Top = 0
       Caption = '&Run'
       ImageIndex = 14
       OnClick = MenuItemScriptStateClick
     end
     object ToolbarButtonPause: TToolButton
-      Left = 131
+      Left = 130
       Hint = 'Pause Script'
-      Top = 2
+      Top = 0
       Caption = '&Pause'
       Enabled = False
       ImageIndex = 12
       OnClick = MenuItemScriptStateClick
     end
     object StopButtonStop: TToolButton
-      Left = 151
+      Left = 150
       Hint = 'Stop Script (Alt + S)'
-      Top = 2
+      Top = 0
       Caption = '&Stop'
       Enabled = False
       ImageIndex = 16
       OnClick = MenuItemScriptStateClick
     end
     object ToolbarDivider1: TToolButton
-      Left = 261
-      Height = 5
-      Top = 2
+      Left = 260
+      Height = 28
+      Top = 0
       Style = tbsDivider
     end
     object ToolbarButtonClearOutput: TToolButton
-      Left = 241
+      Left = 240
       Hint = 'Clear Script Output'
-      Top = 2
+      Top = 0
       Caption = 'Clear'
       ImageIndex = 7
       OnClick = MenuClearOutputClick
     end
     object ToolbarButtonColorPicker: TToolButton
-      Left = 176
+      Left = 175
       Hint = 'Color Picker'
-      Top = 2
+      Top = 0
       Caption = 'ToolbarButtonColorPicker'
       ImageIndex = 19
       OnClick = ToolbarButtonColorPickerClick
     end
     object ToolbarButtonTargetSelector: TToolButton
-      Left = 216
+      Left = 215
       Hint = 'Target Selector'
-      Top = 2
+      Top = 0
       Caption = 'ToolbarButtonTargetSelector'
       ImageIndex = 20
       OnMouseDown = ToolbarButtonSelectTargetClick
     end
     object ToolbarDivider2: TToolButton
-      Left = 171
-      Height = 5
-      Top = 2
+      Left = 170
+      Height = 28
+      Top = 0
       Style = tbsDivider
     end
     object ToolbarButtonNew: TToolButton
-      Left = 1
+      Left = 0
       Hint = 'New'
-      Top = 2
+      Top = 0
       Caption = '&New'
       ImageIndex = 11
       OnClick = MenuNewClick
     end
     object ToolbarDivider3: TToolButton
-      Left = 81
-      Height = 5
-      Top = 2
+      Left = 80
+      Height = 28
+      Top = 0
       Style = tbsDivider
     end
     object ToolbarButtonOpen: TToolButton
-      Left = 21
+      Left = 20
       Hint = 'Open Script (Ctrl + O)'
-      Top = 2
+      Top = 0
       Caption = '&Open'
       ImageIndex = 4
       OnClick = MenuOpenClick
@@ -115,52 +118,52 @@ object SimbaForm: TSimbaForm
       ShowHint = True
     end
     object ToolbarButtonSave: TToolButton
-      Left = 41
+      Left = 40
       Hint = 'Save Script (Ctrl + S)'
-      Top = 2
+      Top = 0
       Caption = '&Save'
       ImageIndex = 6
       OnClick = MenuSaveClick
     end
     object ToolbarButtonSaveAll: TToolButton
-      Left = 61
+      Left = 60
       Hint = 'Save All'
-      Top = 2
+      Top = 0
       Caption = 'Save All'
       ImageIndex = 15
       OnClick = ToolbarButtonSaveAllClick
     end
     object ToolbarDivider4: TToolButton
-      Left = 106
-      Height = 5
-      Top = 2
+      Left = 105
+      Height = 28
+      Top = 0
       Style = tbsDivider
     end
     object ToolbarButtonCompile: TToolButton
-      Left = 86
+      Left = 85
       Hint = 'Compile Script (Alt + C)'
-      Top = 2
+      Top = 0
       ImageIndex = 0
       OnClick = MenuItemScriptStateClick
     end
     object ToolbarDivider5: TToolButton
-      Left = 236
-      Height = 5
-      Top = 2
+      Left = 235
+      Height = 28
+      Top = 0
       Style = tbsDivider
     end
     object ToolbarButtonPackages: TToolButton
-      Left = 266
+      Left = 265
       Hint = 'Open Packages'
-      Top = 2
+      Top = 0
       Caption = 'ToolbarButtonPackages'
       ImageIndex = 1
       OnClick = ToolbarButtonPackagesClick
     end
     object ToolButtonAreaSelector: TToolButton
-      Left = 196
+      Left = 195
       Hint = 'Area Selector'
-      Top = 2
+      Top = 0
       ImageIndex = 38
       OnClick = ToolButtonAreaSelectorClick
       ShowCaption = False
@@ -168,341 +171,13 @@ object SimbaForm: TSimbaForm
   end
   object DockPanel: TAnchorDockPanel
     Left = 0
-    Height = 508
-    Top = 32
+    Height = 550
+    Top = 28
     Width = 910
     Align = alClient
     BevelOuter = bvNone
     ParentFont = False
     TabOrder = 1
-  end
-  object MainMenu: TMainMenu
-    Left = 224
-    Top = 64
-    object MenuFile: TMenuItem
-      Caption = '&File'
-      SubMenuImages = Images
-      OnClick = MenuFileClick
-      object MenuItemNew: TMenuItem
-        Caption = '&New'
-        ImageIndex = 11
-        ShortCut = 16462
-        OnClick = MenuNewClick
-      end
-      object MenuItemDivider11: TMenuItem
-        Caption = '-'
-      end
-      object MenuItemOpen: TMenuItem
-        Caption = '&Open'
-        ImageIndex = 4
-        ShortCut = 16463
-        OnClick = MenuOpenClick
-      end
-      object MenuItemOpenRecent: TMenuItem
-        Caption = 'Open &Recent'
-        ImageIndex = 22
-      end
-      object MenuItem7: TMenuItem
-        Caption = '-'
-      end
-      object MenuItemExample: TMenuItem
-        Caption = 'Open Example ...'
-        OnClick = MenuNewTemplateClick
-      end
-      object MenuItem8: TMenuItem
-        Caption = '-'
-      end
-      object MenuItemSave: TMenuItem
-        Caption = '&Save'
-        ImageIndex = 6
-        ShortCut = 16467
-        OnClick = MenuSaveClick
-      end
-      object MenuItemSaveAs: TMenuItem
-        Caption = 'Save As ...'
-        OnClick = MenuSaveAsClick
-      end
-      object MenuItemSaveDefault: TMenuItem
-        Caption = 'Save As Default'
-        OnClick = MenuSaveAsDefaultClick
-      end
-      object MenuItemSaveAll: TMenuItem
-        Caption = 'Save All'
-        ImageIndex = 15
-        OnClick = MenuSaveClick
-      end
-      object MenuItemDivider2: TMenuItem
-        Caption = '-'
-      end
-      object MenuItemCloseTab: TMenuItem
-        Caption = '&Close Tab'
-        ImageIndex = 8
-        ShortCut = 16471
-        OnClick = MenuCloseTabClick
-      end
-      object MenuItemCloseTabs: TMenuItem
-        Caption = 'Close All Tabs'
-        ImageIndex = 9
-        OnClick = MenuCloseAllTabsClick
-      end
-      object MenuItemDivider6: TMenuItem
-        Caption = '-'
-      end
-      object MenuItemMainExit: TMenuItem
-        Caption = '&Exit'
-        ImageIndex = 10
-        ShortCut = 16465
-        OnClick = MenuExitClick
-      end
-    end
-    object MenuEdit: TMenuItem
-      Caption = '&Edit'
-      SubMenuImages = Images
-      OnClick = MenuEditClick
-      object MenuItemUndo: TMenuItem
-        Caption = 'Undo'
-        ImageIndex = 17
-        ShortCut = 16474
-        OnClick = MenuUndoClick
-      end
-      object MenuItemRedo: TMenuItem
-        Caption = 'Redo'
-        ImageIndex = 13
-        ShortCut = 24666
-        OnClick = MenuRedoClick
-      end
-      object MenuItemDivider3: TMenuItem
-        Caption = '-'
-      end
-      object MenuItemCut: TMenuItem
-        Caption = 'Cu&t'
-        ImageIndex = 3
-        OnClick = MenuCutClick
-      end
-      object MenuItemCopy: TMenuItem
-        Caption = '&Copy'
-        ImageIndex = 2
-        OnClick = MenuCopyClick
-      end
-      object MenuItemPaste: TMenuItem
-        Caption = '&Paste'
-        ImageIndex = 4
-        OnClick = MenuPasteClick
-      end
-      object MenuItemDivider4: TMenuItem
-        Caption = '-'
-      end
-      object MenuItemSelectAll: TMenuItem
-        Caption = '&Select All'
-        ShortCut = 16449
-        OnClick = MenuSelectAllClick
-      end
-      object MenuItemDivider5: TMenuItem
-        Caption = '-'
-      end
-      object MenuItemFind: TMenuItem
-        Caption = 'Find ...'
-        ImageIndex = 18
-        ShortCut = 16454
-        OnClick = MenuFindClick
-      end
-      object MenuItemFindNext: TMenuItem
-        Caption = 'Find Next'
-        ShortCut = 114
-        OnClick = MenuItemFindNextClick
-      end
-      object MenuItemFindPrev: TMenuItem
-        Caption = 'Find Previous'
-        ShortCut = 8306
-        OnClick = MenuItemFindPrevClick
-      end
-      object MenuItem2: TMenuItem
-        Caption = '-'
-      end
-      object MenuItemReplace: TMenuItem
-        Caption = 'Replace ...'
-        ShortCut = 16466
-        OnClick = MenuReplaceClick
-      end
-      object MenuItemDivider14: TMenuItem
-        Caption = '-'
-      end
-      object MenuItemGoto: TMenuItem
-        Caption = 'Goto Line ...'
-        ShortCut = 16455
-        OnClick = MenuGotoClick
-      end
-    end
-    object MenuItemScript: TMenuItem
-      Caption = '&Script'
-      SubMenuImages = Images
-      object MenuItemCompile: TMenuItem
-        Caption = 'Compile'
-        Hint = 'Compile Script'
-        ImageIndex = 0
-        ShortCut = 32835
-        OnClick = MenuItemScriptStateClick
-      end
-      object MenuItemRun: TMenuItem
-        Caption = '&Run'
-        ImageIndex = 14
-        ShortCut = 32850
-        OnClick = MenuItemScriptStateClick
-      end
-      object MenuItemPause: TMenuItem
-        Caption = '&Pause'
-        ImageIndex = 12
-        OnClick = MenuItemScriptStateClick
-      end
-      object MenuItemStop: TMenuItem
-        Caption = '&Stop'
-        ImageIndex = 16
-        ShortCut = 32851
-        OnClick = MenuItemScriptStateClick
-      end
-      object MenuItem5: TMenuItem
-        Caption = '-'
-      end
-      object MenuItemRunWithDebugging: TMenuItem
-        Caption = 'Run with Debugging'
-        ImageIndex = 37
-        OnClick = MenuItemScriptStateClick
-      end
-    end
-    object MenuTools: TMenuItem
-      Caption = '&Tools'
-      SubMenuImages = Images
-      object MenuItemSettings: TMenuItem
-        Caption = 'Settings'
-        ImageIndex = 21
-        OnClick = MenuItemSettingsClick
-      end
-      object MenuItemPackages: TMenuItem
-        Caption = 'Packages'
-        ImageIndex = 1
-        OnClick = ToolbarButtonPackagesClick
-      end
-      object MenuItem6: TMenuItem
-        Caption = '-'
-      end
-      object MenuItemAssociateScripts: TMenuItem
-        Caption = 'Associate Scripts'
-        ImageIndex = 28
-        OnClick = MenuItemAssociateScriptsClick
-      end
-      object MenuItem1: TMenuItem
-        Caption = '-'
-      end
-      object MenuItemBitmapConv: TMenuItem
-        Caption = '&Bitmap Conversion'
-        OnClick = MenuItemBitmapConvClick
-      end
-      object MenuItemACA: TMenuItem
-        Caption = 'ACA'
-        OnClick = MenuItemACAClick
-      end
-      object MenuItemDTMEditor: TMenuItem
-        Caption = 'DTM Editor'
-        OnClick = MenuItemDTMEditorClick
-      end
-      object MenuItemShapeBox: TMenuItem
-        Caption = 'Shape Box'
-        ImageIndex = 41
-        OnClick = MenuItemShapeBoxClick
-      end
-      object MenuItemDivider10: TMenuItem
-        Caption = '-'
-      end
-      object MenuItemFormatScript: TMenuItem
-        Caption = 'Format Script'
-        OnClick = MenuItemFormatScriptClick
-      end
-    end
-    object MenuView: TMenuItem
-      Caption = '&View'
-      SubMenuImages = Images
-      OnClick = MenuViewClick
-      object MenuItemTrayIcon: TMenuItem
-        AutoCheck = True
-        Caption = 'Tray Icon'
-        ShowAlwaysCheckable = True
-        OnClick = MenuItemTrayIconClick
-      end
-      object MenuItemConsole: TMenuItem
-        AutoCheck = True
-        Caption = 'Console'
-        OnClick = MenuItemConsoleClick
-      end
-      object MenuItem4: TMenuItem
-        Caption = '-'
-      end
-      object MenuItemColourHistory: TMenuItem
-        AutoCheck = True
-        Caption = '&Colour Picker History'
-      end
-      object MenuItemDebugImage: TMenuItem
-        AutoCheck = True
-        Caption = '&Debug Image'
-      end
-      object MenuItemEditor: TMenuItem
-        AutoCheck = True
-        Caption = 'Editor'
-      end
-      object MenuItemFunctionList: TMenuItem
-        AutoCheck = True
-        Caption = '&Function List'
-      end
-      object MenuItemNotes: TMenuItem
-        AutoCheck = True
-        Caption = '&Notes'
-      end
-      object MenuItemFileBrowser: TMenuItem
-        AutoCheck = True
-        Caption = 'File Browser'
-      end
-      object MenuItemOutput: TMenuItem
-        AutoCheck = True
-        Caption = 'Output'
-      end
-      object MenuItemDebugger: TMenuItem
-        Caption = 'Debugger'
-        OnClick = MenuItemDebuggerClick
-      end
-      object MenuItem3: TMenuItem
-        Caption = '-'
-      end
-      object MenuItemResetLayout: TMenuItem
-        Caption = 'Reset Layout'
-        OnClick = MenuItemResetLayoutClick
-      end
-      object MenuItemLockLayout: TMenuItem
-        AutoCheck = True
-        Caption = 'Lock Layout'
-        OnClick = MenuItemLockLayoutClick
-      end
-    end
-    object MenuHelp: TMenuItem
-      Caption = '&Help'
-      SubMenuImages = Images
-      object MenuItemAbout: TMenuItem
-        Caption = 'About'
-        OnClick = MenuItemAboutClick
-      end
-      object MenuItemReportBug: TMenuItem
-        Caption = '&Report a Bug'
-        ImageIndex = 24
-        OnClick = MenuItemReportBugClick
-      end
-      object MenuItemGithub: TMenuItem
-        Caption = 'Simba Github'
-        ImageIndex = 34
-        OnClick = MenuItemGithubClick
-      end
-      object MenuItemDocumentation: TMenuItem
-        Caption = 'Online Documentation'
-        OnClick = MenuItemDocumentationClick
-      end
-    end
   end
   object TrayIcon: TTrayIcon
     PopUpMenu = TrayPopup
@@ -547,13 +222,13 @@ object SimbaForm: TSimbaForm
     }
     Visible = True
     OnClick = TrayIconClick
-    Left = 144
-    Top = 64
+    Left = 50
+    Top = 150
   end
   object Images: TImageList
     ShareImages = True
-    Left = 64
-    Top = 64
+    Left = 50
+    Top = 60
     Bitmap = {
       4C7A370000001000000010000000FE3500000000000078DAED9D075C1457F7F7
       479A5DEC5DEC15BB29C698C4126B124191D851EC3DF6425D3AD29B284D45548A
@@ -2952,8 +2627,8 @@ object SimbaForm: TSimbaForm
   end
   object TrayPopup: TPopupMenu
     Images = Images
-    Left = 320
-    Top = 64
+    Left = 390
+    Top = 260
     object TrayPopupExit: TMenuItem
       Caption = 'Exit'
       ImageIndex = 8
@@ -2965,7 +2640,334 @@ object SimbaForm: TSimbaForm
     Interval = 300000
     OnTimer = DoPackageMenuTimer
     OnStartTimer = DoPackageMenuTimer
-    Left = 64
-    Top = 256
+    Left = 160
+    Top = 60
+  end
+  object MainMenuFile: TPopupMenu
+    Images = Images
+    Left = 390
+    Top = 160
+    object MenuItemNew: TMenuItem
+      Caption = '&New'
+      ImageIndex = 11
+      ShortCut = 16462
+      OnClick = MenuNewClick
+    end
+    object MenuItemDivider11: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemOpen: TMenuItem
+      Caption = '&Open'
+      ImageIndex = 4
+      ShortCut = 16463
+      OnClick = MenuOpenClick
+    end
+    object MenuItemOpenRecent: TMenuItem
+      Caption = 'Open &Recent'
+      ImageIndex = 22
+    end
+    object MenuItem7: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemExample: TMenuItem
+      Caption = 'Open Example ...'
+      OnClick = MenuNewTemplateClick
+    end
+    object MenuItem8: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemSave: TMenuItem
+      Caption = '&Save'
+      ImageIndex = 6
+      ShortCut = 16467
+      OnClick = MenuSaveClick
+    end
+    object MenuItemSaveAs: TMenuItem
+      Caption = 'Save As ...'
+      OnClick = MenuSaveAsClick
+    end
+    object MenuItemSaveDefault: TMenuItem
+      Caption = 'Save As Default'
+      OnClick = MenuSaveAsDefaultClick
+    end
+    object MenuItemSaveAll: TMenuItem
+      Caption = 'Save All'
+      ImageIndex = 15
+      OnClick = MenuSaveClick
+    end
+    object MenuItemDivider2: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemCloseTab: TMenuItem
+      Caption = '&Close Tab'
+      ImageIndex = 8
+      ShortCut = 16471
+      OnClick = MenuCloseTabClick
+    end
+    object MenuItemCloseTabs: TMenuItem
+      Caption = 'Close All Tabs'
+      ImageIndex = 9
+      OnClick = MenuCloseAllTabsClick
+    end
+    object MenuItemDivider6: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemMainExit: TMenuItem
+      Caption = '&Exit'
+      ImageIndex = 10
+      ShortCut = 16465
+      OnClick = MenuExitClick
+    end
+  end
+  object MainMenuEdit: TPopupMenu
+    Images = Images
+    Left = 740
+    Top = 60
+    object MenuItemUndo: TMenuItem
+      Caption = 'Undo'
+      ImageIndex = 17
+      ShortCut = 16474
+      OnClick = MenuUndoClick
+    end
+    object MenuItemRedo: TMenuItem
+      Caption = 'Redo'
+      ImageIndex = 13
+      ShortCut = 24666
+      OnClick = MenuRedoClick
+    end
+    object MenuItemDivider3: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemCut: TMenuItem
+      Caption = 'Cu&t'
+      ImageIndex = 3
+      OnClick = MenuCutClick
+    end
+    object MenuItemCopy: TMenuItem
+      Caption = '&Copy'
+      ImageIndex = 2
+      OnClick = MenuCopyClick
+    end
+    object MenuItemPaste: TMenuItem
+      Caption = '&Paste'
+      ImageIndex = 4
+      OnClick = MenuPasteClick
+    end
+    object MenuItemDivider4: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemSelectAll: TMenuItem
+      Caption = '&Select All'
+      ShortCut = 16449
+      OnClick = MenuSelectAllClick
+    end
+    object MenuItemDivider5: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemFind: TMenuItem
+      Caption = 'Find ...'
+      ImageIndex = 18
+      ShortCut = 16454
+      OnClick = MenuFindClick
+    end
+    object MenuItemFindNext: TMenuItem
+      Caption = 'Find Next'
+      ShortCut = 114
+      OnClick = MenuItemFindNextClick
+    end
+    object MenuItemFindPrev: TMenuItem
+      Caption = 'Find Previous'
+      ShortCut = 8306
+      OnClick = MenuItemFindPrevClick
+    end
+    object MenuItem2: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemReplace: TMenuItem
+      Caption = 'Replace ...'
+      ShortCut = 16466
+      OnClick = MenuReplaceClick
+    end
+    object MenuItemDivider14: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemGoto: TMenuItem
+      Caption = 'Goto Line ...'
+      ShortCut = 16455
+      OnClick = MenuGotoClick
+    end
+  end
+  object MainMenuScript: TPopupMenu
+    Images = Images
+    Left = 510
+    Top = 160
+    object MenuItemCompile: TMenuItem
+      Caption = 'Compile'
+      Hint = 'Compile Script'
+      ImageIndex = 0
+      ShortCut = 32835
+      OnClick = MenuItemScriptStateClick
+    end
+    object MenuItemRun: TMenuItem
+      Caption = '&Run'
+      ImageIndex = 14
+      ShortCut = 32850
+      OnClick = MenuItemScriptStateClick
+    end
+    object MenuItemPause: TMenuItem
+      Caption = '&Pause'
+      ImageIndex = 12
+      OnClick = MenuItemScriptStateClick
+    end
+    object MenuItemStop: TMenuItem
+      Caption = '&Stop'
+      ImageIndex = 16
+      ShortCut = 32851
+      OnClick = MenuItemScriptStateClick
+    end
+    object MenuItem5: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemRunWithDebugging: TMenuItem
+      Caption = 'Run with Debugging'
+      ImageIndex = 37
+      OnClick = MenuItemScriptStateClick
+    end
+  end
+  object MainMenuTools: TPopupMenu
+    Images = Images
+    Left = 630
+    Top = 60
+    object MenuItemSettings: TMenuItem
+      Caption = 'Settings'
+      ImageIndex = 21
+      OnClick = MenuItemSettingsClick
+    end
+    object MenuItemPackages: TMenuItem
+      Caption = 'Packages'
+      ImageIndex = 1
+      OnClick = ToolbarButtonPackagesClick
+    end
+    object MenuItem6: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemAssociateScripts: TMenuItem
+      Caption = 'Associate Scripts'
+      ImageIndex = 28
+      OnClick = MenuItemAssociateScriptsClick
+    end
+    object MenuItem1: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemBitmapConv: TMenuItem
+      Caption = '&Bitmap Conversion'
+      OnClick = MenuItemBitmapConvClick
+    end
+    object MenuItemACA: TMenuItem
+      Caption = 'ACA'
+      OnClick = MenuItemACAClick
+    end
+    object MenuItemDTMEditor: TMenuItem
+      Caption = 'DTM Editor'
+      OnClick = MenuItemDTMEditorClick
+    end
+    object MenuItemShapeBox: TMenuItem
+      Caption = 'Shape Box'
+      ImageIndex = 41
+      OnClick = MenuItemShapeBoxClick
+    end
+    object MenuItemDivider10: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemFormatScript: TMenuItem
+      Caption = 'Format Script'
+      OnClick = MenuItemFormatScriptClick
+    end
+  end
+  object MainMenuView: TPopupMenu
+    Images = Images
+    Left = 390
+    Top = 60
+    object MenuItemTrayIcon: TMenuItem
+      AutoCheck = True
+      Caption = 'Tray Icon'
+      ShowAlwaysCheckable = True
+      OnClick = MenuItemTrayIconClick
+    end
+    object MenuItemConsole: TMenuItem
+      AutoCheck = True
+      Caption = 'Console'
+      OnClick = MenuItemConsoleClick
+    end
+    object MenuItem4: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemColourHistory: TMenuItem
+      AutoCheck = True
+      Caption = '&Colour Picker History'
+    end
+    object MenuItemDebugImage: TMenuItem
+      AutoCheck = True
+      Caption = '&Debug Image'
+    end
+    object MenuItemEditor: TMenuItem
+      AutoCheck = True
+      Caption = 'Editor'
+    end
+    object MenuItemFunctionList: TMenuItem
+      AutoCheck = True
+      Caption = '&Function List'
+    end
+    object MenuItemNotes: TMenuItem
+      AutoCheck = True
+      Caption = '&Notes'
+    end
+    object MenuItemFileBrowser: TMenuItem
+      AutoCheck = True
+      Caption = 'File Browser'
+    end
+    object MenuItemOutput: TMenuItem
+      AutoCheck = True
+      Caption = 'Output'
+    end
+    object MenuItemDebugger: TMenuItem
+      Caption = 'Debugger'
+      OnClick = MenuItemDebuggerClick
+    end
+    object MenuItem3: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemResetLayout: TMenuItem
+      Caption = 'Reset Layout'
+      OnClick = MenuItemResetLayoutClick
+    end
+    object MenuItemLockLayout: TMenuItem
+      AutoCheck = True
+      Caption = 'Lock Layout'
+      OnClick = MenuItemLockLayoutClick
+    end
+  end
+  object MainMenuHelp: TPopupMenu
+    Images = Images
+    Left = 510
+    Top = 60
+    object MenuItemAbout: TMenuItem
+      Caption = 'About'
+      OnClick = MenuItemAboutClick
+    end
+    object MenuItemReportBug: TMenuItem
+      Caption = '&Report a Bug'
+      ImageIndex = 24
+      OnClick = MenuItemReportBugClick
+    end
+    object MenuItemGithub: TMenuItem
+      Caption = 'Simba Github'
+      ImageIndex = 34
+      OnClick = MenuItemGithubClick
+    end
+    object MenuItemDocumentation: TMenuItem
+      Caption = 'Online Documentation'
+      OnClick = MenuItemDocumentationClick
+    end
   end
 end

@@ -36,7 +36,8 @@ type
 implementation
 
 uses
-  LCLType;
+  LCLType,
+  simba.theme;
 
 type
   TCustomHintWindow = class(THintWindow)
@@ -60,10 +61,10 @@ begin
 
   Canvas.Font := TSimbaTreeViewHint(Owner).FTreeView.Font;
   Canvas.Font.Color := clWhite;
-  Canvas.Pen.Color := $D77800;
-  Canvas.Brush.Color := $322F2D;
+  Canvas.Pen.Color := SimbaTheme.ColorActive;
+  Canvas.Brush.Color := SimbaTheme.ColorBackground;
   Canvas.Rectangle(ClientRect);
-  Canvas.TextRect(ClientRect, 3, 0, Caption, TextStyle);
+  Canvas.TextRect(ClientRect, 4, 0, Caption, TextStyle);
 end;
 
 procedure TSimbaTreeViewHint.DoTimerExecute(Sender: TObject);
@@ -97,7 +98,7 @@ begin
   FHintWindow        := TCustomHintWindow.Create(Self);
   FHintWindow.OnHide := @DoHintWindowHide;
   FHintWindow.OnShow := @DoHintWindowShow;
-  FHintWindow.Color := clRed; // disable "UseBGThemes" to stop flickering. We custom draw so this color doesn't matter.
+  FHintWindow.Color  := clRed; // disable "UseBGThemes" to stop flickering. We custom draw so this color doesn't matter.
 
   FTreeView := AOwner;
 end;
@@ -121,7 +122,8 @@ begin
 
   FNodeRect := Node.DisplayRect(True);
   FNodeRect.Offset(FTreeView.ClientOrigin);
-  FNodeRect.Right := FNodeRect.Left + FHintWindow.Canvas.TextWidth(Caption) + 6;
+  FNodeRect.Left := FNodeRect.Left - 1;
+  FNodeRect.Right := FNodeRect.Left + FHintWindow.Canvas.TextWidth(Caption) + 8;
 
   FHintWindow.ActivateHint(FNodeRect, Caption);
 end;

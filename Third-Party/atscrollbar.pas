@@ -67,6 +67,7 @@ type
 type
   PATScrollbarTheme = ^TATScrollbarTheme;
   TATScrollbarTheme = record
+    ColorCorner: TColor;
     ColorBG: TColor;
     ColorBorder: TColor;
     ColorThumbBorder: TColor;
@@ -951,7 +952,6 @@ begin
   end;
 end;
 
-
 procedure TATScrollbar.SetMax(Value: Int64);
 begin
   if FMax<>Value then
@@ -1068,7 +1068,7 @@ end;
 procedure TATScrollbar.DoPaintStd_Corner(C: TCanvas; const R: TRect);
 begin
   if IsRectEmpty(R) then exit;
-  C.Brush.Color:= ColorToRGB(FTheme^.ColorBG);
+  C.Brush.Color:= ColorToRGB(FTheme^.ColorCorner);
   C.FillRect(R);
 end;
 
@@ -1133,6 +1133,7 @@ initialization
 
   with ATScrollbarTheme do
   begin
+    ColorCorner := $d0d0d0;
     ColorBG:= $d0d0d0;
     ColorBorder:= clLtGray;
     ColorThumbBorder:= $808080;

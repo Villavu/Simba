@@ -13,7 +13,7 @@ uses
   classes, sysutils, fileutil, anchordockpanel, forms, controls, graphics, dialogs,
   stdctrls, menus, comctrls, extctrls, buttons, imglist,
   simba.settings, simba.mufasatypes, simba.mouselogger, simba.areaselector, simba.scriptbackup,
-  simba.scriptinstance;
+  simba.scriptinstance, simba.component_menubar, LMessages;
 
 const
   IMAGE_NONE                = -1;
@@ -61,11 +61,13 @@ const
 type
   TSimbaForm = class(TForm)
     DockPanel: TAnchorDockPanel;
+    MainMenuTools: TPopupMenu;
+    MainMenuView: TPopupMenu;
+    MainMenuHelp: TPopupMenu;
     MenuItemShapeBox: TMenuItem;
     MenuItemDocumentation: TMenuItem;
     MenuItemGithub: TMenuItem;
     Images: TImageList;
-    MainMenu: TMainMenu;
     MenuEdit: TMenuItem;
     MenuFile: TMenuItem;
     MenuHelp: TMenuItem;
@@ -136,6 +138,9 @@ type
     MenuItemUndo: TMenuItem;
     MenuTools: TMenuItem;
     MenuView: TMenuItem;
+    MainMenuFile: TPopupMenu;
+    MainMenuEdit: TPopupMenu;
+    MainMenuScript: TPopupMenu;
     StopButtonStop: TToolButton;
     PackageMenuTimer: TTimer;
     ToolBar: TToolBar;
@@ -163,6 +168,7 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormShortCut(var Msg: TLMKey; var Handled: Boolean);
     procedure MenuClearOutputClick(Sender: TObject);
     procedure MenuCloseAllTabsClick(Sender: TObject);
     procedure MenuCloseTabClick(Sender: TObject);
@@ -210,9 +216,11 @@ type
     procedure ToolbarButtonPackagesClick(Sender: TObject);
     procedure ToolbarButtonSaveAllClick(Sender: TObject);
     procedure ToolbarButtonSelectTargetClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure ToolBarPaint(Sender: TObject);
     procedure ToolButtonAreaSelectorClick(Sender: TObject);
     procedure TrayIconClick(Sender: TObject);
     procedure TrayPopupExitClick(Sender: TObject);
+
   protected
     FWindowSelection: TWindowHandle;
     FProcessSelection: Integer;
@@ -222,6 +230,8 @@ type
 
     FAreaSelector: TSimbaAreaSelector;
     FAreaSelection: TBox;
+
+    procedure DoPaintSeperatorButton(Sender: TObject);
 
     procedure AddRecentFile(FileName: String);
     procedure SetButtonStates(Instance: TSimbaScriptInstance);
@@ -283,7 +293,7 @@ uses
 
   simba.openssl, simba.files, simba.process,
   simba.dockinghelpers, simba.nativeinterface,
-  simba.scriptformatter, simba.windowhandle, simba.scripttab;
+  simba.scriptformatter, simba.windowhandle, simba.scripttab, simba.theme;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 
@@ -353,7 +363,7 @@ begin
   ToolBar.ImagesWidth := Value;
 
   ToolBar.ButtonWidth  := Value + Scale96ToScreen(8);
-  ToolBar.ButtonHeight := Value + Scale96ToScreen(8);
+  ToolBar.ButtonHeight := Value + Scale96ToScreen(16);
 end;
 
 procedure TSimbaForm.SetToolbarPosition(Value: String);
@@ -436,7 +446,7 @@ begin
   if Value then Find := ssCtrl else Find := ssMeta;
   if Value then Replace := ssMeta else Replace := ssCtrl;
 
-  SetMacOSKeystroke(MainMenu.Items);
+  //SetMacOSKeystroke(MainMenu.Items);
 end;
 
 procedure TSimbaForm.HandleFormCreated(Sender: TObject; Form: TCustomForm);
@@ -627,8 +637,28 @@ begin
   EnsureVisible();
 end;
 
-procedure TSimbaForm.Setup(Data: PtrInt);
+procedure TSimbaForm.DoPaintSeperatorButton(Sender: TObject);
 begin
+  with TToolButton(Sender) do
+  begin
+    Canvas.Brush.Color := SimbaTheme.ColorFrame;
+    Canvas.Pen.Color := SimbaTheme.ColorLine;
+    Canvas.FillRect(ClientRect);
+    Canvas.Line(Width div 2, 4, (Width div 2), Height - 4);
+  end;
+end;
+
+type
+  __TToolButton = class(TToolButton);
+
+procedure TSimbaForm.Setup(Data: PtrInt);
+var
+  I: Integer;
+begin
+  for i:=0 to ToolBar.ButtonCount-1 do
+    if (ToolBar.Buttons[i].Style=tbsDivider) then
+      __TToolButton(ToolBar.Buttons[i]).onPaint := @DoPaintSeperatorButton;
+
   SimbaIDEInitialization.CallOnCreatedMethods();
 
   SimbaIDEEvents.RegisterMethodOnEditorLoaded(@DoTabLoaded);
@@ -658,6 +688,19 @@ begin
   FMouseLogger.Hotkey := VK_F1;
 
   SimbaIDEInitialization.CallOnAfterCreateMethods();
+
+  with TSimbaMainMenuBar.Create(Self) do
+  begin
+    Parent := Self;
+    Align := alTop;
+
+    AddMenu('File', MainMenuFile);
+    AddMenu('Edit', MainMenuEdit);
+    AddMenu('Script', MainMenuScript);
+    AddMenu('Tools', MainMenuTools);
+    AddMenu('View', MainMenuView);
+    AddMenu('Help', MainMenuHelp);
+  end;
 end;
 
 procedure TSimbaForm.FormCreate(Sender: TObject);
@@ -665,12 +708,15 @@ begin
   SimbaIDEInitialization.CallOnBeforeCreateMethods();
 
   Application.CaptureExceptions := True;
-  Application.OnException := @SimbaForm.HandleException;
+  Application.OnException := @Self.HandleException;
+  Application.OnShortcut := @Self.FormShortCut;
 
-  Screen.AddHandlerFormAdded(@SimbaForm.HandleFormCreated, True);
+  Screen.AddHandlerFormAdded(@Self.HandleFormCreated, True);
 
   FRecentFiles := TStringList.Create();
   FRecentFiles.Text := SimbaSettings.General.RecentFiles.Value;
+
+  ToolBar.Color := SimbaTheme.ColorFrame;
 end;
 
 procedure TSimbaForm.FormDestroy(Sender: TObject);
@@ -697,6 +743,13 @@ begin
   end;
 
   SimbaSettings.Save();
+end;
+
+procedure TSimbaForm.FormShortCut(var Msg: TLMKey; var Handled: Boolean);
+begin
+  Handled := MainMenuFile.IsShortcut(Msg)  or MainMenuView.IsShortcut(Msg)   or
+             MainMenuEdit.IsShortcut(Msg)  or MainMenuScript.IsShortcut(Msg) or
+             MainMenuTools.IsShortcut(Msg) or MainMenuHelp.IsShortcut(Msg);
 end;
 
 procedure TSimbaForm.MenuItemDebuggerClick(Sender: TObject);
@@ -1129,6 +1182,11 @@ begin
   end;
 end;
 
+procedure TSimbaForm.ToolBarPaint(Sender: TObject);
+begin
+  Writeln('yo');
+end;
+
 procedure TSimbaForm.ToolButtonAreaSelectorClick(Sender: TObject);
 begin
   try
@@ -1150,7 +1208,7 @@ begin
 
   try
     DockMaster.BeginUpdate();
-    DockMaster.SplitterWidth := 5;
+    DockMaster.SplitterWidth := 10;
     DockMaster.HeaderClass := TSimbaAnchorDockHeader;
     DockMaster.SplitterClass := TSimbaAnchorDockSplitter;
     DockMaster.SiteClass := TSimbaAnchorDockHostSite;
@@ -1190,7 +1248,6 @@ end;
 
 procedure TSimbaForm.SetupCompleted;
 begin
-  //ScriptStateTimer.Enabled := True;
   PackageMenuTimer.Enabled := True;
 
   if SimbaSettings.FirstLaunch then

@@ -13,8 +13,8 @@ unit simba.editor_attributes;
 interface
 
 uses
-  classes, sysutils,
-  synedit, synedithighlighter;
+  Classes, SysUtils,
+  SynEdit, SynEditHighlighter, SynGutterLineOverview;
 
 type
   TSimbaEditor_Attribute = class(TSynHighlighterAttributes)
@@ -71,6 +71,12 @@ type
   end;
 
   TSimbaEditor_DividerAttribute = class(TSimbaEditor_Attribute)
+  protected
+    procedure DoChange; override;
+    procedure Init; override;
+  end;
+
+  TSimbaEditor_RightGutterAttribute = class(TSimbaEditor_Attribute)
   protected
     procedure DoChange; override;
     procedure Init; override;
@@ -276,6 +282,19 @@ begin
   Foreground := clNone;
 end;
 
+procedure TSimbaEditor_RightGutterAttribute.DoChange;
+begin
+  if (Editor <> nil) then
+    Editor.RightGutter.LineOverviewPart.MarkupInfo.Background := Foreground;
+end;
+
+procedure TSimbaEditor_RightGutterAttribute.Init;
+begin
+  inherited Init;
+
+  Foreground := cl3DDkShadow;
+end;
+
 constructor TSimbaEditor_Attributes.Create(Editor: TSynEdit);
 
   procedure Add(AName: String; Attribute: TSynHighlighterAttributes);
@@ -313,7 +332,7 @@ begin
   Add('Editor.Selected', Editor.SelectedColor);
   Add('Editor.Highlight All', Editor.HighlightAllColor);
   Add('Editor.Mouse Link', Editor.MouseLinkColor);
-  Add('Editor.Background', TSimbaEditor_BackgroundColorAttribute.Create());
+  //Add('Editor.Background', TSimbaEditor_BackgroundColorAttribute.Create());
   Add('Editor.Indent Line', TSimbaEditor_IndentColorAttribute.Create());
   Add('Editor.Caret', TSimbaEditor_CaretColorAttribute.Create());
   Add('Editor.Right Edge', TSimbaEditor_RightEdgeColorAttribute.Create());
@@ -329,6 +348,17 @@ begin
   Add('Gutter.Marks', Editor.Gutter.MarksPart().MarkupInfo);
   Add('Gutter.Code Fold', Editor.Gutter.CodeFoldPart().MarkupInfo);
   Add('Gutter.Line Number', Editor.Gutter.LineNumberPart().MarkupInfo);
+
+  Add('RightGutter.Background', TSimbaEditor_RightGutterAttribute.Create());
+
+  //Editor.Gutter.Color:=255;
+  //Editor.RightGutter.Color:=$00FF00;
+  //Editor.RightGutter.LineOverviewPart.MarkupInfo.Foreground:=255;
+  //Editor.RightGutter.LineOverviewPart.MarkupInfo.Background:=255;
+  //Editor.RightGutter.LineOverviewPart.MarkupInfo.FrameColor:=255;
+  //TSimbaEditor(Editor).ModifiedLinesGutter.Color:=255;
+  //TSimbaEditor(Editor).ModifiedLinesGutter.ColorSaved:=$FFFFFF;
+  //Add('RightGutter.Changes', TSimbaEditor(Editor).ModifiedLinesGutter.Color);
 end;
 
 destructor TSimbaEditor_Attributes.Destroy;

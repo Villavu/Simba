@@ -53,7 +53,7 @@ type
     procedure FontChanged(Sender: TObject); override;
     procedure Paint; override;
 
-    procedure CallTabChanged;
+    procedure CallTabChanged(Data: PtrInt);
 
     procedure DoTabMoved(Sender: TObject; AIndexFrom, AIndexTo: Integer);
     procedure DoTabChanged(Sender: TObject);
@@ -82,6 +82,7 @@ type
     procedure SetOnMouseMove(Value: TMouseMoveEvent);
   public
     constructor Create(AOwner: TComponent; TabClass: TSimbaTabClass; ADefaultTitle: String = ''); reintroduce;
+    destructor Destroy; override;
 
     function AddTab(Title: String = ''): TSimbaTab;
     function DeleteTab(Tab: TSimbaTab): Boolean;
@@ -113,7 +114,7 @@ type
 implementation
 
 uses
-  simba.main, simba.mufasatypes, simba.threading;
+  simba.main, simba.mufasatypes, simba.theme;
 
 function TSimbaTab.GetImageIndex: TImageIndex;
 begin
@@ -286,12 +287,10 @@ function TSimbaTabControl.GetTabHeight: Integer;
 begin
   with TBitmap.Create() do
   try
-    // Measure on larger font size
-    // Font size can be 0 so use GetFontData
     Canvas.Font := Self.Font;
-    Canvas.Font.Size := Round(-GetFontData(Canvas.Font.Reference.Handle).Height * 72 / Canvas.Font.PixelsPerInch) + 4;
+    Canvas.Font.Size := Round(Abs(GetFontData(Canvas.Font.Handle).Height) * 72 / Canvas.Font.PixelsPerInch) + 4; // Measure on larger font size - Font size can be 0
 
-    Result := Canvas.TextHeight('TaylorSwift');
+    Result := Canvas.TextHeight('Tay');
   finally
     Free();
   end;
@@ -327,11 +326,11 @@ end;
 
 procedure TSimbaTabControl.Paint;
 begin
-  Canvas.Brush.Color := clHighlight;
+  Canvas.Brush.Color := SimbaTheme.ColorActive;
   Canvas.FillRect(0, FTabs.Height, Width, FTabs.Height + FTabs.BorderSpacing.Bottom);
 end;
 
-procedure TSimbaTabControl.CallTabChanged;
+procedure TSimbaTabControl.CallTabChanged(Data: PtrInt);
 begin
   if Assigned(FTabs) then
     DoTabChanged(FTabs);
@@ -385,7 +384,8 @@ begin
     if ACanClose then
     begin
       Tab.Free();
-      QueueOnMainThread(@CallTabChanged);
+
+      Application.QueueAsyncCall(@CallTabChanged, 0);
     end;
   end;
 end;
@@ -431,7 +431,7 @@ begin
   FTabs.OnTabClose := @DoTabClose;
   FTabs.OnTabChangeQuery := @DoTabChangeQuery;
   FTabs.OnContextPopup := @DoTabRightClick;
-  FTabs.ColorFont := clWhite;
+  FTabs.ColorFont := SimbaTheme.ColorFont;
   FTabs.Images := SimbaForm.Images;
   FTabs.BorderSpacing.Bottom := 5;
 
@@ -447,13 +447,22 @@ begin
   FTabs.OptTabHeight := FTabs.Height;
   FTabs.OptShowFlat := True;
 
-  FTabs.ColorBg := $4A4136;
-  FTabs.ColorTabPassive := $4A4136;
-  FTabs.ColorTabOver := clHighlight;
-  FTabs.ColorSeparator := clWhite;
-  FTabs.ColorTabActive := clHighlight;
-  FTabs.ColorActiveMark := clHighlight;
+  FTabs.ColorArrow := SimbaTheme.ColorLine;
+  FTabs.ColorCloseX := SimbaTheme.ColorLine;
+  FTabs.ColorBg := SimbaTheme.ColorFrame;
+  FTabs.ColorTabPassive := SimbaTheme.ColorActive;
+  FTabs.ColorTabOver := SimbaTheme.ColorActive;
+  FTabs.ColorSeparator := SimbaTheme.ColorFont;
+  FTabs.ColorTabActive := SimbaTheme.ColorActive;
+  FTabs.ColorActiveMark := SimbaTheme.ColorActive;
   FTabs.ColorCloseBgOver := clNone;
+end;
+
+destructor TSimbaTabControl.Destroy;
+begin
+  Application.RemoveAsyncCalls(Self);
+
+  inherited Destroy();
 end;
 
 function TSimbaTabControl.AddTab(Title: String): TSimbaTab;

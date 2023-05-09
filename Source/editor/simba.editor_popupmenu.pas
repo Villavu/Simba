@@ -12,6 +12,7 @@ type
   protected
     procedure DoPopup(Sender: TObject);
     procedure DoClick(Sender: TObject);
+    procedure DoScriptTabChange(Sender: TObject);
   public
     FindDeclaration: TMenuItem;
     Undo: TMenuItem;
@@ -35,7 +36,9 @@ function GetSimbaEditorPopupMenu: TPopupMenu;
 implementation
 
 uses
-  simba.main, simba.editor, simba.editor_docgenerator, simba.nativeinterface, simba.scripttabsform;
+  simba.main, simba.editor, simba.editor_docgenerator, simba.nativeinterface,
+  simba.scripttab, simba.scripttabsform,
+  simba.ide_events;
 
 var
   SimbaEditorPopupMenu: TSimbaEditorPopupMenu;
@@ -43,7 +46,10 @@ var
 function GetSimbaEditorPopupMenu: TPopupMenu;
 begin
   if (SimbaEditorPopupMenu = nil) then
+  begin
     SimbaEditorPopupMenu := TSimbaEditorPopupMenu.Create(Application.MainForm);
+    SimbaIDEEvents.RegisterMethodOnScriptTabChange(@SimbaEditorPopupMenu.DoScriptTabChange);
+  end;
 
   Result := SimbaEditorPopupMenu;
 end;
@@ -98,6 +104,12 @@ begin
 
     if (Sender = OpenFileDir)     then SimbaNativeInterface.OpenDirectory(ExtractFileDir(Editor.FileName));
   end;
+end;
+
+procedure TSimbaEditorPopupMenu.DoScriptTabChange(Sender: TObject);
+begin
+  if (Sender is TSimbaScriptTab) then
+    PopupComponent := TSimbaScriptTab(Sender).Editor;
 end;
 
 constructor TSimbaEditorPopupMenu.Create(AOwner: TComponent);

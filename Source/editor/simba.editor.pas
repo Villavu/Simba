@@ -15,10 +15,10 @@ uses
   SynEditKeyCmds, SynEditHighlighter, SynHighlighterPas_Simba, SynEditMarkupHighAll,
   LazSynEditMouseCmdsTypes, LazMethodList,
   simba.mufasatypes, simba.settings, simba.editor_autocomplete, simba.editor_paramhint,
-  simba.editor_attributes, simba.editor_modifiedlinegutter;
+  simba.editor_attributes, simba.editor_modifiedlinegutter, simba.component_synedit;
 
 type
-  TSimbaEditor = class(TSynEdit)
+  TSimbaEditor = class(TSimbaSynEdit)
   protected
     FAutoComplete: TSimbaAutoComplete;
     FParamHint: TSimbaParamHint;
@@ -37,7 +37,7 @@ type
     procedure FontChanged(Sender: TObject); override;
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
 
-    procedure DoDragDrop(Sender, Source: TObject; X,Y: Integer);
+    procedure DoDragDrop(Sender, Source: TObject; X, Y: Integer);
     procedure DoDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
 
     // Temp line coloring
@@ -86,11 +86,11 @@ type
 implementation
 
 uses
-  SynEditPointClasses,
+  SynEditPointClasses, SynGutterBase,
   simba.fonthelpers, simba.editor_blockcompletion,
   simba.editor_docgenerator, simba.editor_commentblock,
   simba.editor_mousewheelzoom, simba.editor_multicaret,
-  simba.editor_popupmenu;
+  simba.editor_popupmenu, simba.theme;
 
 function TSimbaEditor.IsHighlighterAttribute(Values: TStringArray): Boolean;
 var
@@ -406,6 +406,8 @@ begin
 end;
 
 constructor TSimbaEditor.Create(AOwner: TComponent; LoadColors: Boolean);
+var
+  I: Integer;
 begin
   inherited Create(AOwner);
 
@@ -473,12 +475,9 @@ begin
     MarkupInfo.BackAlpha := 115;
   end;
 
-  FAttributes := TSimbaEditor_Attributes.Create(Self);
-
   Gutter.MarksPart.Visible := False;
   Gutter.SeparatorPart.Visible := False;
   Gutter.LeftOffset := 10;
-  Gutter.ChangesPart.ModifiedColor := RGBToColor(255, 192, 0);
 
   with TSynGutterLineOverview.Create(RightGutter.Parts) do
   begin
@@ -487,7 +486,9 @@ begin
     FModifiedLinesGutter.Color := Gutter.ChangesPart.ModifiedColor;
     FModifiedLinesGutter.ColorSaved := Gutter.ChangesPart.SavedColor;
 
-    TSynGutterLOvProviderCurrentPage.Create(Providers);
+    AutoSize := False;
+    Width := Scale96ToScreen(2);
+    //TSynGutterLOvProviderCurrentPage.Create(Providers);
   end;
 
   TSimbaEditorPlugin_MultiCaret.Create(Self);
@@ -500,9 +501,28 @@ begin
   Keystrokes.Delete(KeyStrokes.FindCommand(ecNormalSelect));
   Keystrokes.Delete(KeyStrokes.FindCommand(ecColumnSelect));
 
-  if LoadColors then
-    SimbaSettingChanged(SimbaSettings.Editor.CustomColors);
+  FAttributes := TSimbaEditor_Attributes.Create(Self);
 
+  Gutter.Color := SimbaTheme.ColorBackground;
+
+  for I := 0 to Gutter.Parts.Count - 1 do
+    Gutter.Parts[i].Visible := False;
+
+  Gutter.ChangesPart().Visible    := True;
+  Gutter.LineNumberPart().Visible := True;
+  Gutter.CodeFoldPart().Visible   := True;
+
+  for I := 0 to Gutter.Parts.Count - 1 do
+    if (Gutter.Parts[I] is TSynGutterPartBase) then
+      TSynGutterPartBase(Gutter.Parts[I]).MarkupInfo.Background := Gutter.Color;
+
+  RightGutter.Color := SimbaTheme.ColorBackground;
+  for I := 0 to RightGutter.Parts.Count - 1 do
+    if (RightGutter.Parts[I] is TSynGutterPartBase) then
+      TSynGutterPartBase(RightGutter.Parts[I]).MarkupInfo.Background := RightGutter.Color;
+
+  //if LoadColors then
+  //  SimbaSettingChanged(SimbaSettings.Editor.CustomColors);
   SimbaSettingChanged(SimbaSettings.Editor.AllowCaretPastEOL);
   SimbaSettingChanged(SimbaSettings.Editor.RightMarginVisible);
   SimbaSettingChanged(SimbaSettings.Editor.AntiAliased);

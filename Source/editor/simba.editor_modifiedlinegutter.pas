@@ -43,6 +43,9 @@ procedure TSimbaEditorModifiedLinesGutter.Paint(Canvas: TCanvas; AClip: TRect; T
 var
   I, Y1, Y2: Integer;
 begin
+  if (SynEdit is TSimbaEditor) then
+    AClip.Right := TSimbaEditor(SynEdit).RightGutter.Width*3;
+
   inherited Paint(Canvas, AClip, TopOffset);
 
   if FPaintMarks then

@@ -18,6 +18,7 @@ type
   protected
     procedure Paint; override;
 
+    procedure CalculatePreferredSize(var PreferredWidth, PreferredHeight: integer; WithThemeSpace: Boolean); override;
     procedure SetAlign(Value: TAlign); override;
   public
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
@@ -72,7 +73,8 @@ type
 implementation
 
 uses
-  anchordockstorage, xmlpropstorage, lazloggerbase, lazconfigstorage;
+  anchordockstorage, xmlpropstorage, lazloggerbase, lazconfigstorage,
+  simba.theme;
 
 procedure TSimbaAnchorDockHeader.Paint;
 var
@@ -83,6 +85,19 @@ begin
   Style.Alignment := taCenter;
 
   Canvas.TextRect(ClientRect, 0, 0, Self.Caption, Style);
+end;
+
+procedure TSimbaAnchorDockHeader.CalculatePreferredSize(var PreferredWidth, PreferredHeight: integer; WithThemeSpace: Boolean);
+begin
+  with TBitmap.Create() do
+  try
+    Canvas.Font := Self.Font;
+    Canvas.Font.Size := Round(Abs(GetFontData(Canvas.Font.Handle).Height) * 72 / Canvas.Font.PixelsPerInch) + 2; // Measure on larger font size - Font size can be 0
+
+    PreferredHeight := Canvas.TextHeight('Tay');
+  finally
+    Free();
+  end;
 end;
 
 procedure TSimbaAnchorDockHeader.SetAlign(Value: TAlign);
@@ -114,8 +129,10 @@ begin
   CloseButton.Parent := nil;
   //MinimizeButton.Parent := nil;
 
-  BorderSpacing.Top := 2;
-  BorderSpacing.Bottom := 2;
+  Font.Color := SimbaTheme.ColorFont;
+  Font.Size := Round(Abs(GetFontData(Font.Handle).Height) * 72 / Font.PixelsPerInch) + 2;
+
+  Color := SimbaTheme.ColorFrame;
 end;
 
 function TSimbaAnchorDockHostSite.GetHeader: TSimbaAnchorDockHeader;
@@ -190,31 +207,9 @@ begin
 end;
 
 procedure TSimbaAnchorDockSplitter.Paint;
-var
-  CenterW, CenterH: Integer;
 begin
-  Canvas.Brush.Color := Color;
+  Canvas.Brush.Color := SimbaTheme.ColorFrame;
   Canvas.FillRect(ClientRect);
-  Canvas.Brush.Color := cl3DShadow;
-
-  CenterW := Width div 2;
-  CenterH := Height div 2;
-
-  case ResizeAnchor of
-    // vertical
-    akLeft, akRight:
-      Canvas.FillRect(
-        CenterW - 1, CenterH - GRIPPER_SIZE,
-        CenterW + 2, CenterH + GRIPPER_SIZE
-      );
-
-    // horz
-    akTop, akBottom:
-      Canvas.FillRect(
-        CenterW - GRIPPER_SIZE, CenterH - 1,
-        CenterW + GRIPPER_SIZE, CenterH + 2
-      );
-  end;
 end;
 
 procedure TAnchorDockMasterHelper.MakeDockable(Form: TCustomForm; MenuItem: TMenuItem);
