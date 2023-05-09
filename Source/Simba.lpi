@@ -308,7 +308,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="169">
+    <Units Count="173">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1061,6 +1061,22 @@
         <Filename Value="components/simba.component_edit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit168>
+      <Unit169>
+        <Filename Value="components/simba.component_synedit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit169>
+      <Unit170>
+        <Filename Value="simba.theme.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit170>
+      <Unit171>
+        <Filename Value="../Third-Party/win32menustyler.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit171>
+      <Unit172>
+        <Filename Value="components/simba.component_menubar.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit172>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

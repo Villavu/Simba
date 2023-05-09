@@ -230,9 +230,9 @@ begin
   with TBitmap.Create() do
   try
     Canvas.Font := Self.Font;
-    Canvas.Font.Size := Round(-GetFontData(Canvas.Font.Reference.Handle).Height * 72 / Canvas.Font.PixelsPerInch) + 2;
+    Canvas.Font.Size := Round(Abs(GetFontData(Canvas.Font.Handle).Height) * 72 / Canvas.Font.PixelsPerInch) + 2; // Measure on larger font size - Font size can be 0
 
-    Result := Canvas.TextHeight('Olly') + (BorderWidth * 2);
+    Result := Canvas.TextHeight('Tay') + (BorderWidth * 2);
   finally
     Free();
   end;

@@ -3672,9 +3672,6 @@ procedure TATTabs.DoPaintArrowTo(C: TCanvas; ATyp: TATTabTriangle; ARect: TRect;
 var
   NColor: TColor;
 begin
-  if not AEnabled then
-    NColor:= ColorBlendHalf(FColorArrow, FColorBg)
-  else
   if AActive and not _IsDrag then
     NColor:= FColorArrowOver
   else

@@ -123,7 +123,7 @@ procedure TPackageUpdater.DoTerminateOnMainThread(Sender: TObject);
 begin
   AssertMainThread('TPackageUpdater.DoTerminateOnMainThread');
 
-  BuildMenus(SimbaForm.MainMenu);
+  //BuildMenus(SimbaForm.MainMenu);
   UpdateIcon(SimbaForm.ToolbarButtonPackages);
 end;
 

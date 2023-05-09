@@ -12,7 +12,7 @@ unit simba.component_statusbar;
 interface
 
 uses
-  Classes, SysUtils, Controls, Graphics, LCLType, LMessages,
+  Classes, SysUtils, Controls, Forms, Graphics, LCLType, LMessages,
   simba.mufasatypes;
 
 type
@@ -28,6 +28,7 @@ type
     procedure WMPaint(var Message: TLMPaint); message LM_PAINT;
 
     procedure CalculateSizes;
+    procedure FontChanged(Sender: TObject); override;
     procedure Paint; override;
     procedure PaintPanel(Index: Integer);
 
@@ -54,7 +55,8 @@ type
 implementation
 
 uses
-  LCLIntf;
+  LCLIntf,
+  simba.theme;
 
 procedure TSimbaStatusBar.CheckIndex(Index: Integer);
 begin
@@ -123,18 +125,23 @@ var
 begin
   with TBitmap.Create() do
   try
-    // Measure on larger font size
-    // Font size can be 0 so use GetFontData
     Canvas.Font := Self.Font;
-    Canvas.Font.Size := Round(-GetFontData(Canvas.Font.Reference.Handle).Height * 72 / Canvas.Font.PixelsPerInch) + 3;
+    Canvas.Font.Size := Round(Abs(GetFontData(Canvas.Font.Handle).Height) * 72 / Canvas.Font.PixelsPerInch) + 4; // Measure on larger font size - Font size can be 0
 
     for I := 0 to FPanelCount - 1 do
       FPanelWidths[I] := Canvas.TextWidth(FPanelTextMeasure[I]);
 
-    Self.Height := Canvas.TextHeight('TaylorSwift');
+    Self.Height := Canvas.TextHeight('Tay');
   finally
     Free();
   end;
+end;
+
+procedure TSimbaStatusBar.FontChanged(Sender: TObject);
+begin
+  inherited FontChanged(Sender);
+
+  CalculateSizes();
 end;
 
 procedure TSimbaStatusBar.EraseBackground(DC: HDC);
@@ -148,8 +155,8 @@ var
 begin
   if (FPanelCount = 0) then
   begin
-    Canvas.Pen.Color := clWhite;
-    Canvas.Brush.Color := $4A4136;
+    Canvas.Pen.Color := SimbaTheme.ColorLine;
+    Canvas.Brush.Color := SimbaTheme.ColorFrame;
     Canvas.Line(0, 0, Width, 0);
     Canvas.FillRect(0, 1, Width, Height);
   end else
@@ -175,9 +182,9 @@ begin
   Style := Canvas.TextStyle;
   Style.Layout := tlCenter;
 
-  Canvas.Font.Color := clWhite;
-  Canvas.Pen.Color := clWhite;
-  Canvas.Brush.Color := $322F2D;
+  Canvas.Font.Color := SimbaTheme.ColorFont;
+  Canvas.Pen.Color := SimbaTheme.ColorLine;
+  Canvas.Brush.Color := SimbaTheme.ColorFrame;
 
   R := PanelRect(Index);
 
