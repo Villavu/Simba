@@ -10,23 +10,21 @@ unit simba.scripttabsform;
 interface
 
 uses
-  classes, sysutils, forms, controls, graphics, dialogs,
-  extctrls, comctrls, menus, StdCtrls, Buttons,
-  simba.scripttab, simba.editor, simba.editor_findreplace, simba.component_tabcontrol;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls, Menus, StdCtrls, Buttons,
+  simba.scripttab,
+  simba.editor, simba.editor_findreplace,
+  simba.component_tabcontrol, simba.component_button, simba.component_edit;
 
 type
   TSimbaScriptTabsForm = class(TForm)
-    FindCheckBoxCaseSens: TCheckBox;
-    FindCheckboxWholeWord: TCheckBox;
-    FindButtonDown: TBitBtn;
-    FindButtonUp: TBitBtn;
-    FindEdit: TEdit;
     OpenDialog: TOpenDialog;
     MenuItemNewTab: TMenuItem;
     MenuItemCloseTab: TMenuItem;
     MenuItemCloseOtherTabs: TMenuItem;
     FindPanel: TPanel;
     FindButtonClose: TSpeedButton;
+    FindEditPanel: TPanel;
+    FindButtonPanel: TPanel;
     TabPopupMenu: TPopupMenu;
 
     procedure DoOnDropFiles(Sender: TObject; const FileNames: array of String);
@@ -45,6 +43,15 @@ type
 
     FEditorReplace: TSimbaEditorReplace;
     FEditorFind: TSimbaEditorFind;
+
+    FFindEdit: TSimbaEdit;
+    FFindButtonDown: TSimbaButton;
+    FFindButtonUp: TSimbaButton;
+    FFindButtonCaseSens: TSimbaToggleButton;
+    FFindButtonWholeWord: TSimbaToggleButton;
+
+    procedure FontChanged(Sender: TObject); override;
+    procedure CalculateFindButtonSizes;
 
     function CanAnchorDocking(X, Y: Integer): Boolean;
 
@@ -93,8 +100,9 @@ implementation
 
 uses
   LCLType,
-  simba.mufasatypes, simba.files, simba.editor_docgenerator,
-  simba.dockinghelpers, simba.nativeinterface, simba.outputform, simba.ide_events;
+  simba.mufasatypes, simba.files, simba.editor_docgenerator, simba.main,
+  simba.dockinghelpers, simba.nativeinterface, simba.outputform,
+  simba.ide_events, simba.theme;
 
 procedure TSimbaScriptTabsForm.DoOnDropFiles(Sender: TObject; const FileNames: array of String);
 var
@@ -125,10 +133,10 @@ end;
 
 procedure TSimbaScriptTabsForm.FindButtonClick(Sender: TObject);
 begin
-  if Sender.Equals(FindButtonUp) then
+  if Sender.Equals(FFindButtonUp) then
     FindPrevious()
   else
-  if Sender.Equals(FindButtonDown) then
+  if Sender.Equals(FFindButtonDown) then
     FindNext()
   else
   if Sender.Equals(FindButtonClose) then
@@ -163,13 +171,13 @@ begin
 
     VK_UP:
       begin
-        FindButtonUp.Click();
+        FFindButtonUp.Click();
         Key := 0;
       end;
 
     VK_RETURN, VK_DOWN:
       begin
-        FindButtonDown.Click();
+        FFindButtonDown.Click();
         Key := 0;
       end;
   end;
@@ -178,12 +186,12 @@ end;
 procedure TSimbaScriptTabsForm.FindEditChange(Sender: TObject);
 begin
   if (CurrentEditor <> nil) then
-    FEditorFind.ExecuteNoDialog(CurrentEditor, FindEdit.Text, FindCheckBoxCaseSens.Checked, FindCheckboxWholeWord.Checked);
+    FEditorFind.ExecuteNoDialog(CurrentEditor, FFindEdit.Text, FFindButtonCaseSens.Down, FFindButtonWholeWord.Down);
 end;
 
 procedure TSimbaScriptTabsForm.FindPanelResize(Sender: TObject);
 begin
-  FindEdit.Width := FindPanel.Width div 3;
+  FFindEdit.Width := FindPanel.Width div 3;
 end;
 
 procedure TSimbaScriptTabsForm.FormDestroy(Sender: TObject);
@@ -207,6 +215,33 @@ procedure TSimbaScriptTabsForm.FormMouseMove(Sender: TObject; Shift: TShiftState
 begin
   if CanAnchorDocking(X, Y) and (HostDockSite is TSimbaAnchorDockHostSite) then
     TSimbaAnchorDockHostSite(HostDockSite).Header.MouseMove(Shift, X, Y);
+end;
+
+procedure TSimbaScriptTabsForm.FontChanged(Sender: TObject);
+begin
+  inherited FontChanged(Sender);
+
+  CalculateFindButtonSizes();
+end;
+
+procedure TSimbaScriptTabsForm.CalculateFindButtonSizes;
+begin
+  with TBitmap.Create() do
+  try
+    Canvas.Font := Self.Font;
+    Canvas.Font.Bold := True;
+    Canvas.Font.Size := Round(Abs(GetFontData(Canvas.Font.Handle).Height) * 72 / Canvas.Font.PixelsPerInch) + 2; // Measure on larger font size - Font size can be 0
+
+    with Canvas.TextExtent('AaW') do
+    begin
+      FFindButtonDown.Width := Width;
+      FFindButtonUp.Width := Width;
+      FFindButtonCaseSens.Width := Width;
+      FFindButtonWholeWord.Width := Width;
+    end;
+  finally
+    Free();
+  end;
 end;
 
 function TSimbaScriptTabsForm.CanAnchorDocking(X, Y: Integer): Boolean;
@@ -254,6 +289,71 @@ begin
 
   FEditorReplace := TSimbaEditorReplace.Create(Self);
   FEditorFind := TSimbaEditorFind.Create(Self);
+
+  FindPanel.Color := SimbaTheme.ColorFrame;
+
+  FFindEdit := TSimbaEdit.Create(Self);
+  FFindEdit.Parent := FindButtonPanel;
+  FFindEdit.Align := alLeft;
+  FFindEdit.BorderSpacing.Around := 5;
+  FFindEdit.OnChange := @FindEditChange;
+  FFindEdit.OnKeyDown := @FindButtonKeyDown;
+
+  FFindButtonWholeWord := TSimbaToggleButton.Create(Self);
+  with FFindButtonWholeWord do
+  begin
+    Parent := FindEditPanel;
+    Caption := 'W';
+    Font.Bold := True;
+    Align := alLeft;
+    Hint := 'Match whole words';
+    ShowHint := True;
+    BorderSpacing.Around := 5;
+    OnClick := @FindEditChange;
+  end;
+
+  FFindButtonCaseSens := TSimbaToggleButton.Create(Self);
+  with FFindButtonCaseSens do
+  begin
+    Parent := FindEditPanel;
+    Caption := 'Aa';
+    Font.Bold := True;
+    Align := alLeft;
+    Hint := 'Case sensitive';
+    ShowHint := True;
+    BorderSpacing.Around := 5;
+    OnClick := @FindEditChange;
+  end;
+
+  FFindButtonDown := TSimbaToggleButton.Create(Self);
+  with FFindButtonDown do
+  begin
+    Images := SimbaForm.Images;
+    Parent := FindEditPanel;
+    Align := alLeft;
+    ImageINdex := 44;
+    Hint := 'Find Next';
+    ShowHint := True;
+    BorderSpacing.Around := 5;
+    OnClick := @FindButtonClick;
+  end;
+
+  FFindButtonUp := TSimbaToggleButton.Create(Self);
+  with FFindButtonUp do
+  begin
+    Images := SimbaForm.Images;
+    Parent := FindEditPanel;
+    Align := alLeft;
+    ImageIndex := 43;
+    Hint := 'Find Previous';
+    ShowHint := True;
+    BorderSpacing.Around := 5;
+    OnClick := @FindButtonClick;
+  end;
+
+  FindButtonClose.Font.Color := SimbaTheme.ColorFont;
+
+  CalculateFindButtonSizes();
 end;
 
 function TSimbaScriptTabsForm.GetTabCount: Integer;
@@ -288,8 +388,8 @@ end;
 procedure TSimbaScriptTabsForm.Find;
 begin
   FindPanel.Show();
-  if FindEdit.CanSetFocus() then
-    FindEdit.SetFocus();
+  if FFindEdit.CanSetFocus() then
+    FFindEdit.SetFocus();
 end;
 
 procedure TSimbaScriptTabsForm.FindNext;

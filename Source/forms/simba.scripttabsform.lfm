@@ -1,11 +1,11 @@
 object SimbaScriptTabsForm: TSimbaScriptTabsForm
-  Left = 3624
-  Height = 192
-  Top = 1099
+  Left = 3840
+  Height = 206
+  Top = 25
   Width = 816
   AllowDropFiles = True
   Caption = 'Editor'
-  ClientHeight = 192
+  ClientHeight = 206
   ClientWidth = 816
   DesignTimePPI = 120
   OnDestroy = FormDestroy
@@ -16,44 +16,44 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
   LCLVersion = '2.2.4.0'
   object FindPanel: TPanel
     Left = 0
-    Height = 85
-    Top = 107
+    Height = 34
+    Top = 172
     Width = 816
     Align = alBottom
     AutoSize = True
     BevelOuter = bvNone
-    ClientHeight = 85
+    ClientHeight = 34
     ClientWidth = 816
+    ParentColor = False
     TabOrder = 0
     Visible = False
     OnResize = FindPanelResize
-    object FindEdit: TEdit
-      AnchorSideLeft.Control = FindPanel
-      AnchorSideTop.Control = FindPanel
-      AnchorSideBottom.Control = FindPanel
-      AnchorSideBottom.Side = asrBottom
-      Left = 5
-      Height = 28
-      Top = 5
-      Width = 209
-      BorderSpacing.Left = 5
-      BorderSpacing.Top = 5
-      BorderSpacing.Bottom = 2
-      OnChange = FindEditChange
-      OnKeyDown = FindButtonKeyDown
+    object FindEditPanel: TPanel
+      Left = 0
+      Height = 34
+      Top = 0
+      Width = 0
+      Align = alLeft
+      AutoSize = True
+      BevelOuter = bvNone
       TabOrder = 0
     end
+    object FindButtonPanel: TPanel
+      Left = 0
+      Height = 34
+      Top = 0
+      Width = 0
+      Align = alLeft
+      AutoSize = True
+      BevelOuter = bvNone
+      TabOrder = 1
+    end
     object FindButtonClose: TSpeedButton
-      AnchorSideTop.Control = FindPanel
-      AnchorSideRight.Control = FindPanel
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = FindPanel
-      AnchorSideBottom.Side = asrBottom
       Left = 779
-      Height = 75
+      Height = 24
       Top = 5
       Width = 27
-      Anchors = [akTop, akRight, akBottom]
+      Align = alRight
       BorderSpacing.Top = 5
       BorderSpacing.Right = 10
       BorderSpacing.Bottom = 5
@@ -61,73 +61,6 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
       Flat = True
       Spacing = 0
       OnClick = FindButtonClick
-    end
-    object FindButtonUp: TBitBtn
-      AnchorSideLeft.Control = FindButtonDown
-      AnchorSideLeft.Side = asrBottom
-      AnchorSideTop.Control = FindEdit
-      AnchorSideBottom.Control = FindEdit
-      AnchorSideBottom.Side = asrBottom
-      Left = 266
-      Height = 28
-      Top = 5
-      Width = 42
-      Anchors = [akTop, akLeft, akBottom]
-      AutoSize = True
-      BorderSpacing.Left = 5
-      Images = SimbaForm.Images
-      ImageIndex = 43
-      OnClick = FindButtonClick
-      OnKeyDown = FindButtonKeyDown
-      OnResize = FindButtonResize
-      Spacing = 0
-      TabOrder = 2
-    end
-    object FindButtonDown: TBitBtn
-      AnchorSideLeft.Control = FindEdit
-      AnchorSideLeft.Side = asrBottom
-      AnchorSideTop.Control = FindEdit
-      AnchorSideBottom.Control = FindEdit
-      AnchorSideBottom.Side = asrBottom
-      Left = 219
-      Height = 28
-      Top = 5
-      Width = 42
-      Anchors = [akTop, akLeft, akBottom]
-      AutoSize = True
-      BorderSpacing.Left = 5
-      Images = SimbaForm.Images
-      ImageIndex = 44
-      OnClick = FindButtonClick
-      OnKeyDown = FindButtonKeyDown
-      OnResize = FindButtonResize
-      Spacing = 0
-      TabOrder = 1
-    end
-    object FindCheckBoxCaseSens: TCheckBox
-      AnchorSideLeft.Control = FindEdit
-      AnchorSideTop.Control = FindCheckboxWholeWord
-      AnchorSideTop.Side = asrBottom
-      Left = 5
-      Height = 24
-      Top = 59
-      Width = 117
-      BorderSpacing.Bottom = 2
-      Caption = 'Case Sensitive'
-      OnChange = FindEditChange
-      TabOrder = 3
-    end
-    object FindCheckboxWholeWord: TCheckBox
-      AnchorSideLeft.Control = FindEdit
-      AnchorSideTop.Control = FindEdit
-      AnchorSideTop.Side = asrBottom
-      Left = 5
-      Height = 24
-      Top = 35
-      Width = 148
-      Caption = 'Whole Words Only'
-      OnChange = FindEditChange
-      TabOrder = 4
     end
   end
   object TabPopupMenu: TPopupMenu

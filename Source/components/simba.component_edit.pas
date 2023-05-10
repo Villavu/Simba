@@ -54,6 +54,7 @@ type
 
     procedure ClearCache;
 
+    procedure CalculatePreferredSize(var PreferredWidth, PreferredHeight: integer; WithThemeSpace: Boolean); override;
     function GetTextWidthCache(const Cache: EPaintCache; const Str: String): Integer;
 
     procedure SelectAll;
@@ -114,7 +115,7 @@ type
 implementation
 
 uses
-  Math, Clipbrd;
+  Math, Clipbrd, simba.theme;
 
 procedure TSimbaEdit.SetHintText(Value: String);
 begin
@@ -152,6 +153,13 @@ begin
     FTextWidthCache[Cache].Str   := '';
     FTextWidthCache[Cache].Width := 0;
   end;
+end;
+
+procedure TSimbaEdit.CalculatePreferredSize(var PreferredWidth, PreferredHeight: integer; WithThemeSpace: Boolean);
+begin
+  inherited CalculatePreferredSize(PreferredWidth, PreferredHeight, WithThemeSpace);
+
+  PreferredHeight := CalculateHeight();
 end;
 
 procedure TSimbaEdit.WMSetFocus(var Message: TLMSetFocus);
@@ -230,7 +238,7 @@ begin
   with TBitmap.Create() do
   try
     Canvas.Font := Self.Font;
-    Canvas.Font.Size := Round(Abs(GetFontData(Canvas.Font.Handle).Height) * 72 / Canvas.Font.PixelsPerInch) + 2; // Measure on larger font size - Font size can be 0
+    Canvas.Font.Size := Round(Abs(GetFontData(Canvas.Font.Handle).Height) * 72 / Canvas.Font.PixelsPerInch) + 1; // Measure on larger font size - Font size can be 0
 
     Result := Canvas.TextHeight('Tay') + (BorderWidth * 2);
   finally
@@ -257,6 +265,9 @@ var
 begin
   if (Ord(C) < 32) then
     Exit;
+
+  if HasSelection then
+    DeleteSelection();
 
   Inc(FCaretX);
   NewText := Text;
@@ -400,6 +411,7 @@ var
   OldFontColor: TColor;
   TextWidth: Integer;
   X1, X2: Integer;
+  DrawCaretX: Integer;
 begin
   Canvas.Brush.Color := Color;
   Canvas.FillRect(ClientRect);
@@ -421,7 +433,7 @@ begin
     end;
 
     if (FDrawOffsetX = 0) then
-      FDrawOffsetX := (BorderWidth*2);
+      FDrawOffsetX := (BorderWidth * 2);
 
     // Selection
     if HasSelection() then
@@ -452,18 +464,6 @@ begin
     Canvas.Brush.Color := Color;
     Canvas.FillRect(0, 0, 2, Height);
     Canvas.FillRect(Width - 2, 0, Width, Height);
-
-    // Caret
-    if FCaretTimer.Enabled then
-    begin
-      Inc(FCaretFlash);
-      if Odd(FCaretFlash) then
-        Canvas.Pen.Color := clWhite
-      else
-        Canvas.Pen.Color := clBlack;
-      Canvas.Pen.Mode := pmXor;
-      Canvas.Line((FDrawOffsetX + TextWidth) - 1, BorderWidth, (FDrawOffsetX + TextWidth) - 1, Height - BorderWidth);
-    end;
   end else
   if (FHintText <> '') then
   begin
@@ -480,8 +480,28 @@ begin
   end;
 
   if Focused then
-    Canvas.Brush.Color := ColorBorderActive
-  else
+  begin
+    // Caret
+    if FCaretTimer.Enabled then
+    begin
+      Inc(FCaretFlash);
+      if Odd(FCaretFlash) then
+        Canvas.Pen.Color := clWhite
+      else
+        Canvas.Pen.Color := clBlack;
+
+      Canvas.Pen.Mode := pmXor;
+
+      if (Text = '') then
+        DrawCaretX := (BorderWidth * 2)
+      else
+        DrawCaretX := (FDrawOffsetX + TextWidth) - 1;
+
+      Canvas.Line(DrawCaretX, BorderWidth, DrawCaretX, Height - BorderWidth);
+    end;
+
+    Canvas.Brush.Color := ColorBorderActive;
+  end else
     Canvas.Brush.Color := ColorBorder;
 
   Canvas.FrameRect(0, 0, Width, Height);
@@ -611,17 +631,19 @@ begin
   ControlStyle := ControlStyle + [csOpaque];
   Cursor := crIBeam;
   TabStop := True;
-  Height := CalculateHeight();
 
   HintTextStyle := [fsItalic];
   HintTextColor := cl3DDkShadow;
 
-  Color := clWindow;
-  ColorSelection := clHighlight;
-  ColorBorder := cl3DDkShadow;
-  ColorBorderActive := cl3DDkShadow;
+  Font.Color := SimbaTheme.ColorFont;
+  Color := SimbaTheme.ColorBackground;
+  ColorSelection := SimbaTheme.ColorActive;
+  ColorBorder := SimbaTheme.ColorFrame;
+  ColorBorderActive := SimbaTheme.ColorActive;
 
   BorderWidth := 3;
+
+  Height := CalculateHeight();
 end;
 
 procedure TSimbaEdit.Clear;
