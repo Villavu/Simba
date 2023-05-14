@@ -380,7 +380,6 @@ begin
   FEditor := TSimbaEditor.Create(Self);
   FEditor.Parent := Self;
   FEditor.Align := alClient;
-  FEditor.BorderStyle := bsNone;
   FEditor.TabStop := False;
   FEditor.Text := SimbaSettings.Editor.DefaultScript.Value;
   FEditor.MarkTextAsSaved();

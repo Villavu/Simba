@@ -152,7 +152,6 @@ begin
   FFilterEdit.Parent := Self;
   FFilterEdit.Align := alBottom;
   FFilterEdit.OnChange := @DoFilterChange;
-
   FFilterEdit.Color := SimbaTheme.ColorBackground;
   FFilterEdit.ColorBorder := SimbaTheme.ColorFrame;
   FFilterEdit.ColorBorderActive := SimbaTheme.ColorActive;

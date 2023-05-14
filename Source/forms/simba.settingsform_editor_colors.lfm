@@ -8,8 +8,8 @@ object EditorColorsFrame: TEditorColorsFrame
   DesignTimePPI = 120
   ParentFont = False
   TabOrder = 0
-  DesignLeft = 3817
-  DesignTop = 395
+  DesignLeft = 3635
+  DesignTop = 367
   object Panel1: TPanel
     Left = 0
     Height = 877

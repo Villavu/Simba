@@ -34,6 +34,9 @@ type
       Color: TColor;
     end;
 
+    FColorModified: TColor;
+    FColorSaved: TColor;
+
     procedure FontChanged(Sender: TObject); override;
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
 
@@ -44,21 +47,25 @@ type
     procedure DoSpecialLineColor(Sender: TObject; Line: Integer; var Special: Boolean; AMarkup: TSynSelectedColor);
     // Enable/Disable TSynEditMarkupHighlightAllCaret depending on has selection
     procedure DoStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
+
+    procedure SetColorModified(Value: TColor);
+    procedure SetColorSaved(Value: TColor);
   public
     FileName: String;
 
+    property TextView;
     property AutoComplete: TSimbaAutoComplete read FAutoComplete;
     property ParamHint: TSimbaParamHint read FParamHint;
-    property TextView;
     property ModifiedLinesGutter: TSimbaEditorModifiedLinesGutter read FModifiedLinesGutter;
     property Attributes: TSimbaEditor_Attributes read FAttributes;
+
+    property ColorSaved: TColor read FColorSaved write SetColorSaved;
+    property ColorModified: TColor read FColorModified write SetColorModified;
 
     function GetCaretPos(GoBackToWord: Boolean): Integer;
 
     // Is highlighter attribute at caret
     function IsHighlighterAttribute(Values: TStringArray): Boolean;
-    // Is highlighter attribute at caret + offset
-    function IsHighlighterAttributeEx(Values: TStringArray; Offset: TPoint): Boolean;
 
     // Is value ahead of caret
     function IsTextAhead(Values: TStringArray): Boolean;
@@ -69,7 +76,7 @@ type
     // Execute a command that needs no extra data
     procedure ExecuteSimpleCommand(Command: TSynEditorCommand);
     // Repaint some extra things when saved
-    procedure MarkTextAsSaved; reintroduce;
+    procedure InvalidateGutter; override;
 
     procedure RegisterFontChangedHandler(Handler: TNotifyEvent);
     procedure UnRegisterFontChangedHandler(Handler: TNotifyEvent);
@@ -86,7 +93,7 @@ type
 implementation
 
 uses
-  SynEditPointClasses, SynGutterBase,
+  SynEditPointClasses, SynGutterBase, SynEditMarkupWordGroup,
   simba.fonthelpers, simba.editor_blockcompletion,
   simba.editor_docgenerator, simba.editor_commentblock,
   simba.editor_mousewheelzoom, simba.editor_multicaret,
@@ -100,18 +107,6 @@ var
 begin
   P := LogicalCaretXY;
   P.X -= 1;
-
-  Result := GetHighlighterAttriAtRowCol(P, Token, Attri) and Attri.Name.ContainsAny(Values, False);
-end;
-
-function TSimbaEditor.IsHighlighterAttributeEx(Values: TStringArray; Offset: TPoint): Boolean;
-var
-  Token: String;
-  Attri: TSynHighlighterAttributes;
-  P: TPoint;
-begin
-  P := LogicalCaretXY;
-  P.Offset(Offset);
 
   Result := GetHighlighterAttriAtRowCol(P, Token, Attri) and Attri.Name.ContainsAny(Values, False);
 end;
@@ -135,12 +130,12 @@ begin
   CommandProcessor(Command, '', Pointer(nil));
 end;
 
-procedure TSimbaEditor.MarkTextAsSaved;
+procedure TSimbaEditor.InvalidateGutter;
 begin
-  inherited MarkTextAsSaved();
+  if Assigned(FModifiedLinesGutter) then
+    FModifiedLinesGutter.ReCalc();
 
-  InvalidateGutter();
-  ModifiedLinesGutter.ReCalc();
+  inherited;
 end;
 
 procedure TSimbaEditor.RegisterFontChangedHandler(Handler: TNotifyEvent);
@@ -214,10 +209,8 @@ end;
 procedure TSimbaEditor.DoDragDrop(Sender, Source: TObject; X, Y: Integer);
 begin
   if (Source is TTreeView) and (TTreeView(Source).Selected <> nil) then
-  begin
     TextBetweenPoints[PixelsToRowColumn(TPoint.Create(X, Y)),
                       PixelsToRowColumn(TPoint.Create(X, Y))] := TTreeView(Source).Selected.Text;
-  end;
 end;
 
 procedure TSimbaEditor.DoDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
@@ -243,6 +236,26 @@ begin
   if GoBackToWord then
     while (Result > 1) and (Result <= Length(TheText)) and (TheText[Result] <= #32) do
       Dec(Result);
+end;
+
+procedure TSimbaEditor.SetColorModified(Value: TColor);
+begin
+  if (FColorModified = Value) then
+    Exit;
+  FColorModified := Value;
+
+  Gutter.ChangesPart.ModifiedColor := FColorModified;
+  ModifiedLinesGutter.Color := FColorModified;
+end;
+
+procedure TSimbaEditor.SetColorSaved(Value: TColor);
+begin
+  if (FColorSaved = Value) then
+    Exit;
+  FColorSaved := Value;
+
+  Gutter.ChangesPart.SavedColor := FColorSaved;
+  ModifiedLinesGutter.ColorSaved := FColorSaved;
 end;
 
 procedure TSimbaEditor.FontChanged(Sender: TObject);
@@ -411,6 +424,8 @@ var
 begin
   inherited Create(AOwner);
 
+  BorderStyle := bsNone;
+
   OnDragDrop := @DoDragDrop;
   OnDragOver := @DoDragOver;
 
@@ -434,25 +449,6 @@ begin
   RegisterStatusChangedHandler(@DoStatusChanged, [scCaretX, scCaretY, scModified, scSelection]);
 
   Highlighter := TSynFreePascalSyn.Create(Self);
-  with TSynFreePascalSyn(Highlighter) do
-  begin
-    IdentifierAttri.Foreground := clDefault;
-    NumberAttri.Foreground := clNavy;
-    StringAttri.Foreground := clBlue;
-    SymbolAttri.Foreground := clRed;
-    CommentAttri.Foreground := clBlue;
-    CommentAttri.Style := [fsBold];
-    DirectiveAttri.Foreground := clRed;
-    DirectiveAttri.Style := [fsBold];
-    BracketMatchColor.Background := clGray;
-    BracketMatchColor.BackAlpha := 115;
-    BracketMatchColor.Style := [];
-
-    NestedComments := True;
-    StringKeywordMode := spsmNone;
-    TypeHelpers := True;
-    StringMultilineMode := [spmsmDoubleQuote];
-  end;
 
   FScreenCaretPainterClass := TSynEditScreenCaretPainterInternal;
   if (FScreenCaret.Painter.ClassType <> TSynEditScreenCaretPainterInternal) then
@@ -467,17 +463,7 @@ begin
   FAutoComplete.ExecCommandID := ecNone;
   FAutoComplete.ShowSizeDrag := True;
 
-  with TSynEditMarkupHighlightAllCaret(MarkupByClass[TSynEditMarkupHighlightAllCaret]) do
-  begin
-    Enabled := False;
-    WaitTime := 1;
-    MarkupInfo.Background := clGray;
-    MarkupInfo.BackAlpha := 115;
-  end;
-
-  Gutter.MarksPart.Visible := False;
-  Gutter.SeparatorPart.Visible := False;
-  Gutter.LeftOffset := 10;
+  MarkupByClass[TSynEditMarkupWordGroup].Enabled := False;
 
   with TSynGutterLineOverview.Create(RightGutter.Parts) do
   begin
@@ -487,7 +473,7 @@ begin
     FModifiedLinesGutter.ColorSaved := Gutter.ChangesPart.SavedColor;
 
     AutoSize := False;
-    Width := Scale96ToScreen(2);
+    Width := Scale96ToScreen(4);
     //TSynGutterLOvProviderCurrentPage.Create(Providers);
   end;
 
@@ -503,23 +489,12 @@ begin
 
   FAttributes := TSimbaEditor_Attributes.Create(Self);
 
-  Gutter.Color := SimbaTheme.ColorBackground;
-
+  Gutter.LeftOffset := Scale96ToScreen(10);
   for I := 0 to Gutter.Parts.Count - 1 do
-    Gutter.Parts[i].Visible := False;
-
+    Gutter.Parts[I].Visible := False;
   Gutter.ChangesPart().Visible    := True;
   Gutter.LineNumberPart().Visible := True;
   Gutter.CodeFoldPart().Visible   := True;
-
-  for I := 0 to Gutter.Parts.Count - 1 do
-    if (Gutter.Parts[I] is TSynGutterPartBase) then
-      TSynGutterPartBase(Gutter.Parts[I]).MarkupInfo.Background := Gutter.Color;
-
-  RightGutter.Color := SimbaTheme.ColorBackground;
-  for I := 0 to RightGutter.Parts.Count - 1 do
-    if (RightGutter.Parts[I] is TSynGutterPartBase) then
-      TSynGutterPartBase(RightGutter.Parts[I]).MarkupInfo.Background := RightGutter.Color;
 
   //if LoadColors then
   //  SimbaSettingChanged(SimbaSettings.Editor.CustomColors);

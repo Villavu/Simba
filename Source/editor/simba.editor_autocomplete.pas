@@ -12,21 +12,30 @@ unit simba.editor_autocomplete;
 interface
 
 uses
-  Classes, SysUtils, Graphics, StdCtrls, Controls, Forms, LCLType, Types, LMessages,
+  Classes, SysUtils, Graphics, StdCtrls, Controls, Forms, LCLType, Types, LMessages, ATScrollBar,
   SynEdit, SynEditTypes, SynCompletion, SynEditKeyCmds, SynEditHighlighter,
   simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_insight;
 
 type
+  TSimbaAutoCompleteSizeDrag = class(TSynBaseCompletionFormSizeDrag)
+    procedure Paint; override;
+  end;
+
   TSimbaAutoComplete = class;
   TSimbaAutoComplete_Form = class(TSynCompletionForm)
   protected
+    RealScroll: TATScrollbar;
+
+    procedure DoPaintSizeDrag(Sender: TObject);
+    procedure DoScrollChange(Sender: TObject);
+
     procedure FontChanged(Sender: TObject); override;
 
+    procedure Paint; override;
     procedure DoShow; override;
     procedure DoHide; override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
-    procedure WMMouseWheel(var Msg: TLMMouseEvent); message LM_MOUSEWHEEL;
   public
     AutoComplete: TSimbaAutoComplete;
 
@@ -95,7 +104,7 @@ type
 implementation
 
 uses
-  simba.settings, simba.algo_sort, simba.editor, simba.ide_codetools_setup;
+  simba.settings, simba.algo_sort, simba.editor, simba.ide_codetools_setup, simba.theme;
 
 {$IFDEF WINDOWS}
 function SetClassLong(Handle: HWND; Index: Integer = -26; Value: Integer = 0): UInt32; stdcall; external 'user32' name 'SetClassLongA';
@@ -113,6 +122,24 @@ type
     procedure Clear; override;
     property Count: Integer read GetCount write SetCount;
   end;
+
+procedure TSimbaAutoCompleteSizeDrag.Paint;
+var
+  I: Integer;
+begin
+  Canvas.Brush.Color := SimbaTheme.ColorScrollBarInActive;
+  Canvas.Pen.Color := SimbaTheme.ColorLine;
+
+  Canvas.FillRect(ClientRect);
+
+  I := 2;
+  while (I < Height-3) do
+  begin
+    Canvas.MoveTo(ClientRect.Right-I, ClientRect.Bottom-1-1);
+    Canvas.LineTo(ClientRect.Right-1, ClientRect.Bottom-I-1);
+    Inc(I, 3);
+  end;
+end;
 
 procedure TVirtualStringList.Clear;
 begin
@@ -140,8 +167,7 @@ begin
     Canvas.Brush.Color := AutoComplete.SelectedColor
   else
     Canvas.Brush.Color := AutoComplete.Form.Color;
-  with ClientRect do
-    Canvas.FillRect(AutoComplete.Form.DrawBorderWidth, Top, Right, Bottom);
+  Canvas.FillRect(ClientRect);
 
   AutoComplete.OnPaintItem('', Canvas, AutoComplete.Form.DrawBorderWidth, 0, AutoComplete.Position = Index, Index);
 end;
@@ -174,6 +200,19 @@ begin
   { nothing }
 end;
 
+procedure TSimbaAutoComplete_Form.DoPaintSizeDrag(Sender: TObject);
+begin
+  Canvas.Brush.Color := 255;
+  Canvas.FillRect(ClientRect);
+end;
+
+procedure TSimbaAutoComplete_Form.DoScrollChange(Sender: TObject);
+begin
+  Scroll.Position:=RealScroll.Position;
+  //Position:=Scroll.Position;
+  //Invalidate;
+end;
+
 procedure TSimbaAutoComplete_Form.FontChanged(Sender: TObject);
 var
   Size: TSize;
@@ -191,6 +230,17 @@ begin
     AutoComplete.FColumnWidth := Size.Width;
     AutoComplete.FDrawOffsetY := (((FFontHeight - 2) - Size.Height) div 2) - 1;
   end;
+end;
+
+procedure TSimbaAutoComplete_Form.Paint;
+begin
+  inherited Paint;
+
+  RealScroll.Max := ItemList.Count;
+  RealScroll.LargeChange := NbLinesInWindow;
+  RealScroll.PageSize := NbLinesInWindow;
+  RealScroll.Position := Scroll.Position;
+  RealScroll.Update();
 end;
 
 procedure TSimbaAutoComplete_Form.DoShow;
@@ -230,28 +280,51 @@ begin
   inherited KeyDown(Key, Shift);
 end;
 
-procedure TSimbaAutoComplete_Form.WMMouseWheel(var Msg: TLMMouseEvent);
-begin
-  FHint.Hide();
-
-  inherited;
-end;
-
 constructor TSimbaAutoComplete_Form.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+
+  Scroll.Width := 0;
+
+  RealScroll := TATScrollbar.Create(Self);
+  RealScroll.Parent := Self;
+  RealScroll.Kind := sbVertical;
+  RealScroll.OnEnter := @ScrollGetFocus;
+  RealScroll.OnChange := @DoScrollChange;
+  RealScroll.Anchors := [akTop,akRight, akBottom];
+  RealScroll.AnchorSide[akTop].Side := asrTop;
+  RealScroll.AnchorSide[akTop].Control := self;
+  RealScroll.AnchorSide[akRight].Side := asrBottom;
+  RealScroll.AnchorSide[akRight].Control := Self;
+  RealScroll.AnchorSide[akBottom].Side := asrTop;
+
+  SizeDrag.Free();
+  SizeDrag := TSimbaAutoCompleteSizeDrag.Create(Self);
+  SizeDrag.Parent := Self;
+  SizeDrag.BevelInner := bvNone;
+  SizeDrag.BevelOuter := bvNone;
+  SizeDrag.Caption := '';
+  SizeDrag.AutoSize := False;
+  SizeDrag.BorderStyle := bsNone;
+  SizeDrag.Anchors := [akBottom, akRight, akLeft];
+  SizeDrag.AnchorSideLeft.Side := asrTop;
+  SizeDrag.AnchorSideLeft.Control := RealScroll;
+  SizeDrag.AnchorSideRight.Side := asrBottom;
+  SizeDrag.AnchorSideRight.Control := Self;
+  SizeDrag.AnchorSideBottom.Side := asrBottom;
+  SizeDrag.AnchorSideBottom.Control := Self;
+  SizeDrag.Cursor := crSizeNWSE;
+  SizeDrag.Visible := False;
+  SizeDrag.Constraints.MinHeight := RealScroll.Width-DrawBorderWidth;
+  SizeDrag.Constraints.MaxHeight := RealScroll.Width-DrawBorderWidth;
+
+  RealScroll.AnchorSide[akBottom].Control := SizeDrag;
 
   if (FItemList <> nil) then
     FItemList.Free();
   FItemList := TVirtualStringList.Create(){%H-};
 
   DrawBorderWidth := 4;
-  DrawBorderColor := RGBToColor(240, 240, 240);
-  BackgroundColor := RGBToColor(240, 240, 240);
-  ClSelect        := RGBToColor(159, 180, 208);
-
-  TextColor         := clBlack;
-  TextSelectedColor := clBlack;
 
   {$IFDEF WINDOWS}
   SetClassLong(FHint.Handle); // Clear CS_DROPSHADOW
@@ -371,7 +444,14 @@ end;
 procedure TSimbaAutoComplete.DoExecute(Sender: TObject);
 begin
   if (Editor <> nil) then
+  begin
+    FForm.TextColor := Editor.Highlighter.IdentifierAttribute.Foreground;
+    FForm.TextSelectedColor := Editor.Highlighter.IdentifierAttribute.Foreground;
+    FForm.DrawBorderColor := SimbaTheme.ColorScrollBarInActive;
+    FForm.BackgroundColor := SimbaTheme.ColorScrollBarInActive;
+    Fform.ClSelect := Editor.SelectedColor.Background;
     FForm.Font := Editor.Font;
+  end;
 end;
 
 function TSimbaAutoComplete.GetHintText(Decl: TDeclaration; IsHint: Boolean): String;
