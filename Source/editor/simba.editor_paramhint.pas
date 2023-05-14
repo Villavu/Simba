@@ -65,7 +65,7 @@ implementation
 
 uses
   mPasLexTypes, mPasLex,
-  simba.editor, simba.mufasatypes, simba.ide_codetools_setup;
+  simba.editor, simba.mufasatypes, simba.ide_codetools_setup, simba.theme;
 
 procedure TSimbaParamHintForm.SetBoldIndex(AValue: Integer);
 begin
@@ -102,8 +102,8 @@ var
 begin
   if (not FMeasuring) then
   begin
-    Canvas.Brush.Color := cl3DLight;
-    Canvas.Pen.Color := clBlack;
+    Canvas.Brush.Color := SimbaTheme.ColorScrollBarActive;
+    Canvas.Pen.Color := SimbaTheme.ColorLine;
     Canvas.Rectangle(ClientRect);
   end;
 
@@ -410,6 +410,7 @@ begin
       if (Length(Decls) > 0) then
       begin
         FHintForm.Font := Font;
+        FHintForm.Font.Color := Editor.Highlighter.IdentifierAttribute.Foreground;
         FHintForm.BoldIndex := GetParameterIndexAtCaret();
         FHintForm.Show(ClientToScreen(RowColumnToPixels(LogicalToPhysicalPos(FDisplayPoint))), Decls);
       end else

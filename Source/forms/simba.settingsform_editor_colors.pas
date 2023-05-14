@@ -152,10 +152,6 @@ begin
   with FEditor do
   begin
     Font.Size := 8;
-    BorderSpacing.Top := 5;
-    BorderSpacing.Left := 10;
-    BorderSpacing.Right := 10;
-    BorderSpacing.Bottom := 10;
     Parent := GroupBox2;
     Align := alClient;
     ReadOnly := True;

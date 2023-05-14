@@ -10,7 +10,7 @@ unit simba.editor_findreplace;
 interface
 
 uses
-  classes, sysutils, dialogs, synedit, synedittypes, syneditsearch;
+  classes, sysutils, dialogs, synedit, synedittypes, syneditsearch, SynEditMarkupHighAll;
 
 type
   TSimbaEditorFind = class(TComponent)
@@ -62,6 +62,9 @@ type
 
 procedure TSimbaEditorHelper.HideMarks(Sender: TObject);
 begin
+  with TSynEditMarkupHighlightAll(MarkupByClass[TSynEditMarkupHighlightAll]) do
+    Enabled := False;
+
   ModifiedLinesGutter.HideMarks();
 
   if (Sender <> nil) then
@@ -101,6 +104,22 @@ var
   SearchStart, SearchEnd, FoundStart, FoundEnd: TPoint;
 begin
   Result := 0;
+
+  with TSynEditMarkupHighlightAll(MarkupByClass[TSynEditMarkupHighlightAll]) do
+  begin
+    if CaseSensitive then
+      SearchOptions := SearchOptions + [ssoMatchCase]
+    else
+      SearchOptions := SearchOptions - [ssoMatchCase];
+
+    if WholeWorld then
+      SearchOptions := SearchOptions + [ssoWholeWord]
+    else
+      SearchOptions := SearchOptions - [ssoWholeWord];
+
+    SearchString := Pattern;
+    Enabled := True;
+  end;
 
   ModifiedLinesGutter.ClearMarks();
 

@@ -14,7 +14,7 @@ interface
 
 uses
   Classes, SysUtils,
-  SynEdit, SynEditHighlighter, SynGutterLineOverview;
+  SynEdit, SynEditHighlighter, SynGutterLineOverview, SynGutterBase;
 
 type
   TSimbaEditor_Attribute = class(TSynHighlighterAttributes)
@@ -46,37 +46,25 @@ type
     procedure Init; override;
   end;
 
+  TSimbaEditor_GutterColorModifiedAttribute = class(TSimbaEditor_Attribute)
+  protected
+    procedure DoChange; override;
+    procedure Init; override;
+  end;
+
+  TSimbaEditor_GutterColorSavedAttribute = class(TSimbaEditor_Attribute)
+  protected
+    procedure DoChange; override;
+    procedure Init; override;
+  end;
+
   TSimbaEditor_RightEdgeColorAttribute = class(TSimbaEditor_Attribute)
   protected
     procedure DoChange; override;
     procedure Init; override;
   end;
 
-  TSimbaEditor_AutoCompleteBackgroundAttribute = class(TSimbaEditor_Attribute)
-  protected
-    procedure DoChange; override;
-    procedure Init; override;
-  end;
-
-  TSimbaEditor_AutoCompleteSelectedAttribute = class(TSimbaEditor_Attribute)
-  protected
-    procedure DoChange; override;
-    procedure Init; override;
-  end;
-
-  TSimbaEditor_AutoCompleteTextAttribute = class(TSimbaEditor_Attribute)
-  protected
-    procedure DoChange; override;
-    procedure Init; override;
-  end;
-
   TSimbaEditor_DividerAttribute = class(TSimbaEditor_Attribute)
-  protected
-    procedure DoChange; override;
-    procedure Init; override;
-  end;
-
-  TSimbaEditor_RightGutterAttribute = class(TSimbaEditor_Attribute)
   protected
     procedure DoChange; override;
     procedure Init; override;
@@ -101,12 +89,50 @@ type
 implementation
 
 uses
-  graphics, syneditmarkupwordgroup, syneditmarkuphighall, SynEditPointClasses, SynEditMarkupFoldColoring, inifiles,
-  simba.editor;
+  graphics, syneditmarkuphighall, SynEditPointClasses, SynEditMarkupFoldColoring, inifiles,
+  simba.editor, simba.theme, SynHighlighterPas_Simba;
 
 type
   TSynAttributeProtectedAccess = class(TSynHighlighterAttributes);
   TSynEditProtectedAccess = class(TSynEdit);
+
+procedure TSimbaEditor_GutterColorModifiedAttribute.DoChange;
+begin
+  if (Editor = nil) then
+    Exit;
+
+  with TSimbaEditor(Editor) do
+  begin
+    ColorModified := Foreground;
+    Invalidate();
+  end;
+end;
+
+procedure TSimbaEditor_GutterColorModifiedAttribute.Init;
+begin
+  inherited;
+
+  Foreground := RGBToColor(254, 221, 0);
+end;
+
+procedure TSimbaEditor_GutterColorSavedAttribute.DoChange;
+begin
+  if (Editor = nil) then
+    Exit;
+
+  with TSimbaEditor(Editor) do
+  begin
+    ColorSaved := Foreground;
+    Invalidate();
+  end;
+end;
+
+procedure TSimbaEditor_GutterColorSavedAttribute.Init;
+begin
+  inherited;
+
+  Foreground := RGBToColor(0, 128, 0);
+end;
 
 procedure TSimbaEditor_RightEdgeColorAttribute.DoChange;
 begin
@@ -119,25 +145,37 @@ end;
 
 procedure TSimbaEditor_RightEdgeColorAttribute.Init;
 begin
-  inherited Init();
+  inherited;
 
   Foreground := clGray;
 end;
 
 procedure TSimbaEditor_GutterColorAttribute.DoChange;
+var
+  I: Integer;
 begin
-  if (Editor <> nil) and (TSimbaEditor(Editor).Gutter <> nil) then
-  begin
-    TSimbaEditor(Editor).Gutter.Color := Foreground;
-    TSimbaEditor(Editor).Invalidate();
-  end;
+  if (Editor <> nil) then
+    with Editor do
+    begin
+      Gutter.Color := Foreground;
+      for I := 0 to Gutter.Parts.Count - 1 do
+        if (Gutter.Parts[I] is TSynGutterPartBase) then
+          TSynGutterPartBase(Gutter.Parts[I]).MarkupInfo.Background := Foreground;
+
+      RightGutter.Color := Foreground;
+      for I := 0 to RightGutter.Parts.Count - 1 do
+        if (RightGutter.Parts[I] is TSynGutterPartBase) then
+          TSynGutterPartBase(RightGutter.Parts[I]).MarkupInfo.Background := Foreground;
+
+      Editor.Invalidate();
+    end;
 end;
 
 procedure TSimbaEditor_GutterColorAttribute.Init;
 begin
-  inherited Init();
+  inherited;
 
-  Foreground := clBtnFace;
+  Foreground := SimbaTheme.ColorBackground;
 end;
 
 procedure TSimbaEditor_IndentColorAttribute.DoChange;
@@ -172,7 +210,7 @@ end;
 
 procedure TSimbaEditor_IndentColorAttribute.Init;
 begin
-  inherited Init();
+  inherited;
 
   Foreground := clGray;
 end;
@@ -188,9 +226,9 @@ end;
 
 procedure TSimbaEditor_BackgroundColorAttribute.Init;
 begin
-  inherited Init();
+  inherited;
 
-  Foreground := clWhite;
+  Foreground := SimbaTheme.ColorBackground;
 end;
 
 procedure TSimbaEditor_CaretColorAttribute.DoChange;
@@ -206,54 +244,9 @@ end;
 
 procedure TSimbaEditor_CaretColorAttribute.Init;
 begin
-  inherited Init();
+  inherited;
 
-  Foreground := clDefault;
-end;
-
-procedure TSimbaEditor_AutoCompleteBackgroundAttribute.DoChange;
-begin
-  if (Editor <> nil) then
-  begin
-    TSimbaEditor(Editor).AutoComplete.TheForm.BackgroundColor := Foreground;
-    TSimbaEditor(Editor).AutoComplete.TheForm.DrawBorderColor := Foreground;
-  end;
-end;
-
-procedure TSimbaEditor_AutoCompleteBackgroundAttribute.Init;
-begin
-  inherited Init();
-
-  Foreground := RGBToColor(240, 240, 240);
-end;
-
-procedure TSimbaEditor_AutoCompleteSelectedAttribute.DoChange;
-begin
-  if (Editor <> nil) then
-    TSimbaEditor(Editor).AutoComplete.SelectedColor := Foreground;
-end;
-
-procedure TSimbaEditor_AutoCompleteSelectedAttribute.Init;
-begin
-  inherited Init();
-
-  Foreground := RGBToColor(159, 180, 208);
-end;
-
-procedure TSimbaEditor_AutoCompleteTextAttribute.Init;
-begin
-  inherited Init();
-
-  Foreground := clBlack;
-end;
-
-procedure TSimbaEditor_AutoCompleteTextAttribute.DoChange;
-begin
-  if (Editor <> nil) then
-  begin
-    TSimbaEditor(Editor).AutoComplete.TheForm.TextColor := Foreground;
-    TSimbaEditor(Editor).AutoComplete.TheForm.TextSelectedColor := Foreground;
-  end;
+  Foreground := SimbaTheme.ColorBackground;
 end;
 
 procedure TSimbaEditor_DividerAttribute.DoChange;
@@ -277,22 +270,9 @@ end;
 
 procedure TSimbaEditor_DividerAttribute.Init;
 begin
-  inherited Init();
+  inherited;
 
   Foreground := clNone;
-end;
-
-procedure TSimbaEditor_RightGutterAttribute.DoChange;
-begin
-  if (Editor <> nil) then
-    Editor.RightGutter.LineOverviewPart.MarkupInfo.Background := Foreground;
-end;
-
-procedure TSimbaEditor_RightGutterAttribute.Init;
-begin
-  inherited Init;
-
-  Foreground := cl3DDkShadow;
 end;
 
 constructor TSimbaEditor_Attributes.Create(Editor: TSynEdit);
@@ -316,14 +296,43 @@ var
 begin
   inherited Create();
 
+  if (Editor.Highlighter is TSynFreePascalSyn) then
+    with TSynFreePascalSyn(Editor.Highlighter) do
+    begin
+      KeywordAttribute.Foreground := RGBToColor(199, 125, 187);
+      StringAttribute.Foreground := RGBToColor(232, 191, 106);
+      SymbolAttri.Foreground := RGBToColor(190, 20, 20);
+      CommentAttri.Foreground := RGBToColor(95, 130, 107);
+      CommentAttri.Style := [fsBold];
+      IdentifierAttri.Foreground := RGBToColor(242, 242, 242);
+      NumberAttri.Foreground := RGBToColor(87, 170, 247);
+      DirectiveAttri.Foreground := RGBToColor(13, 161, 149);
+      DirectiveAttri.Style := [fsBold];
+
+      NestedComments := True;
+      TypeHelpers := True;
+      StringKeywordMode := spsmNone;
+      StringMultilineMode := [spmsmDoubleQuote];
+    end;
+
+  Editor.BracketMatchColor.FrameColor := RGBToColor(190, 20, 20);
+
+  Editor.SelectedColor.Background := SimbaTheme.ColorActive;
+  Editor.SelectedColor.BackAlpha := 220;
+
+  Editor.LineHighlightColor.Background := $FFFFFF;
+  Editor.LineHighlightColor.BackAlpha := 15;
+
   for I := 0 to Editor.Highlighter.AttrCount - 1 do
     Add('Highlighter.' + Editor.Highlighter.Attribute[I].StoredName, Editor.Highlighter.Attribute[I]);
 
-  with Editor.MarkupByClass[TSynEditMarkupWordGroup] do
-    Add('Editor.Word Group', MarkupInfo);
+  with Editor.MarkupByClass[TSynEditMarkupHighlightAll] as TSynEditMarkupHighlightAll do
+  begin
+    MarkupInfo.Background := RGBToColor(128, 0, 128);
+    MarkupInfo.BackAlpha := 220;
 
-  with Editor.MarkupByClass[TSynEditMarkupHighlightAllCaret] as TSynEditMarkupHighlightAllCaret do
-    Add('Editor.Highlight All Caret', MarkupInfo);
+    Add('Editor.Highlight All', MarkupInfo);
+  end;
 
   Add('Editor.Line Highlight', Editor.LineHighlightColor);
   Add('Editor.Folded Code', Editor.FoldedCodeColor);
@@ -332,33 +341,17 @@ begin
   Add('Editor.Selected', Editor.SelectedColor);
   Add('Editor.Highlight All', Editor.HighlightAllColor);
   Add('Editor.Mouse Link', Editor.MouseLinkColor);
-  //Add('Editor.Background', TSimbaEditor_BackgroundColorAttribute.Create());
+  Add('Editor.Background', TSimbaEditor_BackgroundColorAttribute.Create());
   Add('Editor.Indent Line', TSimbaEditor_IndentColorAttribute.Create());
   Add('Editor.Caret', TSimbaEditor_CaretColorAttribute.Create());
   Add('Editor.Right Edge', TSimbaEditor_RightEdgeColorAttribute.Create());
   Add('Editor.Divider', TSimbaEditor_DividerAttribute.Create());
 
-  Add('AutoComplete.Background', TSimbaEditor_AutoCompleteBackgroundAttribute.Create());
-  Add('AutoComplete.Selected', TSimbaEditor_AutoCompleteSelectedAttribute.Create());
-  Add('AutoComplete.Text', TSimbaEditor_AutoCompleteTextAttribute.Create());
-
   Add('Gutter.Background', TSimbaEditor_GutterColorAttribute.Create());
-  Add('Gutter.Seperator', Editor.Gutter.SeparatorPart().MarkupInfo);
-  Add('Gutter.Changes', Editor.Gutter.ChangesPart().MarkupInfo);
-  Add('Gutter.Marks', Editor.Gutter.MarksPart().MarkupInfo);
+  Add('Gutter.Saved Changes', TSimbaEditor_GutterColorSavedAttribute.Create());
+  Add('Gutter.Modified Changes', TSimbaEditor_GutterColorModifiedAttribute.Create());
   Add('Gutter.Code Fold', Editor.Gutter.CodeFoldPart().MarkupInfo);
   Add('Gutter.Line Number', Editor.Gutter.LineNumberPart().MarkupInfo);
-
-  Add('RightGutter.Background', TSimbaEditor_RightGutterAttribute.Create());
-
-  //Editor.Gutter.Color:=255;
-  //Editor.RightGutter.Color:=$00FF00;
-  //Editor.RightGutter.LineOverviewPart.MarkupInfo.Foreground:=255;
-  //Editor.RightGutter.LineOverviewPart.MarkupInfo.Background:=255;
-  //Editor.RightGutter.LineOverviewPart.MarkupInfo.FrameColor:=255;
-  //TSimbaEditor(Editor).ModifiedLinesGutter.Color:=255;
-  //TSimbaEditor(Editor).ModifiedLinesGutter.ColorSaved:=$FFFFFF;
-  //Add('RightGutter.Changes', TSimbaEditor(Editor).ModifiedLinesGutter.Color);
 end;
 
 destructor TSimbaEditor_Attributes.Destroy;
@@ -366,7 +359,7 @@ var
   I: Integer;
 begin
   for I := 0 to High(FAttributes) do
-    if FAttributes[I] is TSimbaEditor_Attribute then
+    if (FAttributes[I] is TSimbaEditor_Attribute) then
       TSimbaEditor_Attribute(FAttributes[I]).Free();
 
   FAttributes := nil;
