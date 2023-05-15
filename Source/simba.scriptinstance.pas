@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, process,
-  simba.mufasatypes, simba.scriptinstance_communication, simba.debuggerform, simba.windowhandle, simba.outputform;
+  simba.mufasatypes, simba.scriptinstance_communication, simba.windowhandle, simba.outputform;
 
 type
   TSimbaScriptError = record
@@ -38,8 +38,6 @@ type
 
     FState: ESimbaScriptState;
 
-    FDebuggingForm: TSimbaDebuggerForm;
-
     FErrorSet: Boolean;
     FError: TSimbaScriptError;
 
@@ -55,7 +53,7 @@ type
     procedure SetState(Value: ESimbaScriptState);
     procedure SetError(Value: TSimbaScriptError);
   public
-    property DebuggerForm: TSimbaDebuggerForm read FDebuggingForm;
+
     property Process: TProcess read FProcess;
     property State: ESimbaScriptState read FState write SetState;
     property OutputBox: TSimbaOutputBox read FOutputBox;
@@ -71,7 +69,7 @@ type
     property Error: TSimbaScriptError read FError write SetError;
 
     // Start
-    procedure Run(DebuggingForm: TSimbaDebuggerForm = nil);
+    procedure Run;
     procedure Compile;
 
     // Change the state
@@ -197,15 +195,9 @@ begin
   State := ESimbaScriptState.STATE_RUNNING;
 end;
 
-procedure TSimbaScriptInstance.Run(DebuggingForm: TSimbaDebuggerForm);
+procedure TSimbaScriptInstance.Run;
 begin
-  if (DebuggingForm <> nil) then
-  begin
-    FDebuggingForm := DebuggingForm;
-
-    Start(['--debugging', '--run']);
-  end else
-    Start(['--run']);
+  Start(['--run']);
 end;
 
 procedure TSimbaScriptInstance.Compile;

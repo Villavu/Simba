@@ -105,8 +105,7 @@ begin
       Application.Params[Application.ParamCount],
       Application.GetOptionValue('simbacommunication'),
       Application.GetOptionValue('target'),
-      Application.HasOption('compile'),
-      Application.HasOption('debugging')
+      Application.HasOption('compile')
     );
   end else
   begin

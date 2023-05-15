@@ -45,7 +45,8 @@ procedure TSimbaTheme.DoColorTitle(Data: PtrInt);
 const
   DWMWA_CAPTION_COLOR = 35;
 begin
-  DwmSetWindowAttribute(TCustomForm(Data).Handle, DWMWA_CAPTION_COLOR, @Self.ColorFrame, SizeOf(TColor));
+  if Assigned(DwmSetWindowAttribute) then
+    DwmSetWindowAttribute(TCustomForm(Data).Handle, DWMWA_CAPTION_COLOR, @Self.ColorFrame, SizeOf(TColor));
 end;
 {$ENDIF}
 

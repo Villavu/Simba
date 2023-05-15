@@ -102,6 +102,9 @@ procedure TSimbaCompilerDump.Add(Section, Str: String);
 var
   Item: TSimbaStringPair;
 begin
+  if Section.StartsWith('!') then
+    Exit;
+
   Item.Name := Section;
   Item.Value := Str;
 

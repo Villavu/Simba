@@ -188,6 +188,7 @@ type
     FNameButton: TButton;
     FDeleteButton: TButton;
     FDeleteAllButton: TButton;
+    FPrintButton: TButton;
 
     FUserDataSize: Integer;
     FQueryNameOnNew: Boolean;
@@ -220,6 +221,7 @@ type
     procedure DoShapeDeleteClick(Sender: TObject);
     procedure DoShapeDeleteAllClick(Sender: TObject);
     procedure DoShapeNameClick(Sender: TObject);
+    procedure DoShapePrintClick(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -252,6 +254,7 @@ type
     property NameButton: TButton read FNameButton;
     property DeleteButton: TButton read FDeleteButton;
     property DeleteAllButton: TButton read FDeleteAllButton;
+    property PrintButton: TButton read FPrintButton;
 
     property ShapeIndex: Integer read GetShapeIndex;
     property ShapeCount: Integer read GetShapeCount;
@@ -844,6 +847,12 @@ begin
       InternalNameShape(FListBox.ItemIndex, Value);
 end;
 
+procedure TSimbaShapeBox.DoShapePrintClick(Sender: TObject);
+begin
+  if CheckIndex(FListBox.ItemIndex) then
+    SimbaDebugLn([EDebugLn.FOCUS], FShapes[FListBox.ItemIndex].ToStr);
+end;
+
 function TSimbaShapeBox.GetShapeAt(P: TPoint): TSimbaShapeBoxShape;
 var
   I: Integer;
@@ -1281,6 +1290,17 @@ begin
     Align := alTop;
     Caption := 'New Path';
     OnClick := @DoShapeAddButtonClick;
+    AutoSize := True;
+    BorderSpacing.Around := 5;
+  end;
+
+  FPrintButton := TButton.Create(FPanel);
+  with FPrintButton do
+  begin
+    Parent := FPanel;
+    Align := alBottom;
+    Caption := 'Print Shape';
+    OnClick := @DoShapePrintClick;
     AutoSize := True;
     BorderSpacing.Around := 5;
   end;

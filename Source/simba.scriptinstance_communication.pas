@@ -42,9 +42,6 @@ type
     procedure DebugImage_Hide;
     procedure DebugImage_Display;
     procedure DebugImage_DisplayXY;
-
-    procedure DebugMethodName;
-    procedure DebugEvents;
   public
     constructor Create(ScriptInstance: TObject); reintroduce;
   end;
@@ -373,22 +370,6 @@ begin
   ExecuteOnMainThread(@Execute);
 end;
 
-// threadsafe
-procedure TSimbaScriptInstanceCommunication.DebugMethodName;
-begin
-  TSimbaScriptInstance(FScriptInstance).DebuggerForm.AddMethod(FParams.ReadAnsiString());
-end;
-
-// threadsafe
-procedure TSimbaScriptInstanceCommunication.DebugEvents;
-var
-  Count: Integer;
-begin
-  FParams.Read(Count, SizeOf(Integer));
-
-  TSimbaScriptInstance(FScriptInstance).DebuggerForm.AddEvents(FParams.Memory + FParams.Position, Count);
-end;
-
 constructor TSimbaScriptInstanceCommunication.Create(ScriptInstance: TObject);
 begin
   inherited Create();
@@ -410,8 +391,6 @@ begin
   FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_MOVETO]     := @DebugImage_MoveTo;
   FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY]    := @DebugImage_Display;
   FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY_XY] := @DebugImage_DisplayXY;
-  FMethods[ESimbaCommunicationMessage.DEBUG_METHOD_NAME]     := @DebugMethodName;
-  FMethods[ESimbaCommunicationMessage.DEBUG_EVENTS]          := @DebugEvents;
 end;
 
 end.

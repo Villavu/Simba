@@ -75,7 +75,6 @@ type
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
-    MenuItem5: TMenuItem;
     MenuItem6: TMenuItem;
     MenuItem7: TMenuItem;
     MenuItem8: TMenuItem;
@@ -90,7 +89,6 @@ type
     MenuItemConsole: TMenuItem;
     MenuItemCopy: TMenuItem;
     MenuItemCut: TMenuItem;
-    MenuItemDebugger: TMenuItem;
     MenuItemDebugImage: TMenuItem;
     MenuItemDivider10: TMenuItem;
     MenuItemDivider11: TMenuItem;
@@ -125,7 +123,6 @@ type
     MenuItemReportBug: TMenuItem;
     MenuItemResetLayout: TMenuItem;
     MenuItemRun: TMenuItem;
-    MenuItemRunWithDebugging: TMenuItem;
     MenuItemSave: TMenuItem;
     MenuItemSaveAll: TMenuItem;
     MenuItemSaveAs: TMenuItem;
@@ -186,7 +183,6 @@ type
     procedure MenuItemBitmapConvClick(Sender: TObject);
     procedure MenuItemCloseTabsClick(Sender: TObject);
     procedure MenuItemConsoleClick(Sender: TObject);
-    procedure MenuItemDebuggerClick(Sender: TObject);
     procedure MenuItemDocumentationClick(Sender: TObject);
     procedure MenuItemDTMEditorClick(Sender: TObject);
     procedure MenuItemFindNextClick(Sender: TObject);
@@ -210,7 +206,6 @@ type
     procedure MenuSaveClick(Sender: TObject);
     procedure MenuSelectAllClick(Sender: TObject);
     procedure MenuUndoClick(Sender: TObject);
-    procedure MenuViewClick(Sender: TObject);
     procedure DoPackageMenuTimer(Sender: TObject);
     procedure ToolbarButtonColorPickerClick(Sender: TObject);
     procedure ToolbarButtonPackagesClick(Sender: TObject);
@@ -474,11 +469,6 @@ end;
 procedure TSimbaForm.MenuNewTemplateClick(Sender: TObject);
 begin
   SimbaOpenExampleForm.ShowModal();
-end;
-
-procedure TSimbaForm.MenuViewClick(Sender: TObject);
-begin
-  MenuItemDebugger.Enabled := SimbaScriptTabsForm.CurrentTab.DebuggingForm <> nil;
 end;
 
 procedure TSimbaForm.DoPackageMenuTimer(Sender: TObject);
@@ -752,12 +742,6 @@ begin
              MainMenuTools.IsShortcut(Msg) or MainMenuHelp.IsShortcut(Msg);
 end;
 
-procedure TSimbaForm.MenuItemDebuggerClick(Sender: TObject);
-begin
-  if (SimbaScriptTabsForm.CurrentTab.DebuggingForm <> nil) then
-    SimbaScriptTabsForm.CurrentTab.DebuggingForm.ShowOnTop();
-end;
-
 procedure TSimbaForm.MenuItemDocumentationClick(Sender: TObject);
 begin
   OpenURL(SIMBA_DOCS_URL);
@@ -770,7 +754,7 @@ end;
 
 procedure TSimbaForm.MenuItemScriptStateClick(Sender: TObject);
 type
-  EAction = (Unknown, Compile, Run, Debug, Pause, Stop);
+  EAction = (Unknown, Compile, Run, Pause, Stop);
 
   function GetAction: EAction;
   begin
@@ -778,7 +762,6 @@ type
     if (Sender = MenuItemRun)     or (Sender = ToolbarButtonRun)     then Exit(Run);
     if (Sender = MenuItemPause)   or (Sender = ToolbarButtonPause)   then Exit(Pause);
     if (Sender = MenuItemStop)    or (Sender = StopButtonStop)       then Exit(Stop);
-    if (Sender = MenuItemRunWithDebugging)                           then Exit(Debug);
 
     DebugLn('[TSimbaForm.MenuItemScriptStateClick]: Unknown component "' + Sender.ClassName + '"');
   end;
@@ -790,7 +773,7 @@ begin
 
   if (CurrentTab <> nil) then
   try
-    if (GetAction() in [Compile, Run, Debug]) then
+    if (GetAction() in [Compile, Run]) then
     begin
       CurrentTab.OutputBox.Tab.Show();
       if SimbaSettings.General.OutputClearOnCompile.Value then
@@ -800,7 +783,6 @@ begin
     case GetAction() of
       Compile: CurrentTab.Compile();
       Run:     CurrentTab.Run(FWindowSelection);
-      Debug:   CurrentTab.RunWithDebugging(FWindowSelection);
       Pause:   CurrentTab.Pause();
       Stop:    CurrentTab.Stop();
     end;

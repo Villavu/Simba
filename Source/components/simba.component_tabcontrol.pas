@@ -70,6 +70,7 @@ type
     function GetTabCount: Integer;
     function GetShowCloseButtons: Boolean;
     function GetOnMouseDown: TMouseEvent;
+    function GetOnMouseUp: TMouseEvent;
     function GetOnMouseLeave: TNotifyEvent;
     function GetOnMouseMove: TMouseMoveEvent;
 
@@ -78,6 +79,7 @@ type
     procedure SetCanMoveTabs(Value: Boolean);
     procedure SetShowCloseButtons(Value: Boolean);
     procedure SetOnMouseDown(Value: TMouseEvent);
+    procedure SetOnMouseUp(Value: TMouseEvent);
     procedure SetOnMouseLeave(Value: TNotifyEvent);
     procedure SetOnMouseMove(Value: TMouseMoveEvent);
   public
@@ -99,6 +101,7 @@ type
     property ActiveTab: TSimbaTab read GetActiveTab write SetActiveTab;
 
     property OnMouseDown: TMouseEvent read GetOnMouseDown write SetOnMouseDown;
+    property OnMouseUp: TMouseEvent read GetOnMouseUp write SetOnMouseUp;
     property OnMouseMove: TMouseMoveEvent read GetOnMouseMove write SetOnMouseMove;
     property OnMouseLeave: TNotifyEvent read GetOnMouseLeave write SetOnMouseLeave;
 
@@ -258,6 +261,11 @@ begin
   Result := FTabs.OnMouseDown;
 end;
 
+function TSimbaTabControl.GetOnMouseUp: TMouseEvent;
+begin
+  Result := FTabs.OnMouseUp;
+end;
+
 function TSimbaTabControl.GetOnMouseLeave: TNotifyEvent;
 begin
   Result := FTabs.OnMouseLeave;
@@ -271,6 +279,11 @@ end;
 procedure TSimbaTabControl.SetOnMouseDown(Value: TMouseEvent);
 begin
   FTabs.OnMouseDown := Value;
+end;
+
+procedure TSimbaTabControl.SetOnMouseUp(Value: TMouseEvent);
+begin
+  FTabs.OnMouseUp := Value;
 end;
 
 procedure TSimbaTabControl.SetOnMouseLeave(Value: TNotifyEvent);

@@ -13,7 +13,7 @@ uses
   Classes, SysUtils, ComCtrls, Controls, Dialogs,
   SynEdit, SynEditTypes,
   simba.mufasatypes, simba.editor, simba.scriptinstance,
-  simba.debuggerform, simba.functionlistform, simba.outputform, simba.component_tabcontrol;
+  simba.functionlistform, simba.outputform, simba.component_tabcontrol;
 
 type
   TSimbaScriptTab = class(TSimbaTab)
@@ -24,7 +24,6 @@ type
     FScriptTitle: String;
     FScriptInstance: TSimbaScriptInstance;
     FFunctionList: TSimbaFunctionList;
-    FDebuggingForm: TSimbaDebuggerForm;
     FOutputBox: TSimbaOutputBox;
 
     procedure TabShow; override;
@@ -37,7 +36,6 @@ type
     function GetScript: String;
     function GetScriptChanged: Boolean;
   public
-    property DebuggingForm: TSimbaDebuggerForm read FDebuggingForm;
     property FunctionList: TSimbaFunctionList read FFunctionList;
     property OutputBox: TSimbaOutputBox read FOutputBox;
 
@@ -64,7 +62,6 @@ type
     function ScriptTimeRunning: UInt64;
 
     procedure Run(Target: THandle);
-    procedure RunWithDebugging(Target: THandle);
     procedure Compile;
     procedure Pause;
     procedure Stop;
@@ -305,33 +302,6 @@ begin
 
     FScriptInstance.Run();
   end;
-end;
-
-procedure TSimbaScriptTab.RunWithDebugging(Target: THandle);
-begin
-  DebugLn('TSimbaScriptTab.RunWithDebugging :: ' + ScriptTitle + ' ' + ScriptFileName);
-
-  if (FScriptInstance <> nil) then // Already running
-    Exit;
-
-  if (FDebuggingForm = nil) then
-    FDebuggingForm := TSimbaDebuggerForm.Create(Self);
-  FDebuggingForm.Caption := 'Debugger - ' + FScriptTitle;
-  FDebuggingForm.Clear();
-  FDebuggingForm.ShowOnTop();
-
-  if (FScriptFileName <> '') then
-    Save(FScriptFileName);
-
-  FScriptInstance := TSimbaScriptInstance.Create(Self, FOutputBox);
-  FScriptInstance.Target := Target;
-
-  if (FScriptFileName = '') then
-    FScriptInstance.ScriptFile := CreateTempFile(Script, ScriptTitle)
-  else
-    FScriptInstance.ScriptFile := ScriptFileName;
-
-  FScriptInstance.Run(FDebuggingForm);
 end;
 
 procedure TSimbaScriptTab.Compile;

@@ -46,6 +46,11 @@ begin
   PButton(Result)^ := PSimbaShapeBox(Params^[0])^.PathButton;
 end;
 
+procedure _LapeSimbaShapeBox_PrintButton(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PButton(Result)^ := PSimbaShapeBox(Params^[0])^.PrintButton;
+end;
+
 procedure _LapeSimbaShapeBox_PolyButton(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PButton(Result)^ := PSimbaShapeBox(Params^[0])^.PolyButton;
@@ -199,6 +204,7 @@ begin
     addGlobalFunc('function TSimbaShapeBox.BoxButton: TButton;', @_LapeSimbaShapeBox_BoxButton);
     addGlobalFunc('function TSimbaShapeBox.PolyButton: TButton;', @_LapeSimbaShapeBox_PolyButton);
     addGlobalFunc('function TSimbaShapeBox.PathButton: TButton;', @_LapeSimbaShapeBox_PathButton);
+    addGlobalFunc('function TSimbaShapeBox.PrintButton: TButton;', @_LapeSimbaShapeBox_PrintButton);
     addGlobalFunc('function TSimbaShapeBox.NameButton: TButton;', @_LapeSimbaShapeBox_NameButton);
     addGlobalFunc('function TSimbaShapeBox.DeleteButton: TButton;', @_LapeSimbaShapeBox_DeleteButton);
     addGlobalFunc('function TSimbaShapeBox.DeleteAllButton: TButton;', @_LapeSimbaShapeBox_DeleteAllButton);
