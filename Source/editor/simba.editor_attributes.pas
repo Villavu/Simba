@@ -14,7 +14,7 @@ interface
 
 uses
   Classes, SysUtils,
-  SynEdit, SynEditHighlighter, SynGutterLineOverview, SynGutterBase;
+  SynEdit, SynEditHighlighter;
 
 type
   TSimbaEditor_Attribute = class(TSynHighlighterAttributes)
@@ -89,8 +89,9 @@ type
 implementation
 
 uses
-  graphics, syneditmarkuphighall, SynEditPointClasses, SynEditMarkupFoldColoring, inifiles,
-  simba.editor, simba.theme, SynHighlighterPas_Simba;
+  Graphics, IniFiles,
+  SynGutterBase, SynEditMarkupHighAll, SynEditMarkupFoldColoring, SynEditPointClasses, SynHighlighterPas_Simba,
+  simba.editor, simba.theme;
 
 type
   TSynAttributeProtectedAccess = class(TSynHighlighterAttributes);

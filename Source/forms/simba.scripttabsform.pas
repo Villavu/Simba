@@ -38,6 +38,7 @@ type
     procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FormMouseLeave(Sender: TObject);
     procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    procedure FormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   protected
     FTabControl: TSimbaTabControl;
 
@@ -49,6 +50,9 @@ type
     FFindButtonUp: TSimbaButton;
     FFindButtonCaseSens: TSimbaToggleButton;
     FFindButtonWholeWord: TSimbaToggleButton;
+
+    FMouseDown: Boolean;
+    FMouseDownX, FMouseDownY: Integer;
 
     procedure FontChanged(Sender: TObject); override;
     procedure CalculateFindButtonSizes;
@@ -201,20 +205,35 @@ end;
 
 procedure TSimbaScriptTabsForm.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  if CanAnchorDocking(X, Y) and (HostDockSite is TSimbaAnchorDockHostSite) then
-    TSimbaAnchorDockHostSite(HostDockSite).Header.MouseDown(Button, Shift, X, Y);
+  FMouseDown := True;
+  FMouseDownX := X;
+  FMouseDownY := Y;
 end;
 
 procedure TSimbaScriptTabsForm.FormMouseLeave(Sender: TObject);
 begin
+  FMouseDown := False;
   if (HostDockSite is TSimbaAnchorDockHostSite) then
     TSimbaAnchorDockHostSite(HostDockSite).Header.MouseLeave();
 end;
 
 procedure TSimbaScriptTabsForm.FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin
-  if CanAnchorDocking(X, Y) and (HostDockSite is TSimbaAnchorDockHostSite) then
-    TSimbaAnchorDockHostSite(HostDockSite).Header.MouseMove(Shift, X, Y);
+  if FMouseDown and CanAnchorDocking(X, Y) and (HostDockSite is TSimbaAnchorDockHostSite) then
+  begin
+    if TSimbaAnchorDockHostSite(HostDockSite).Header.Dragging then
+      TSimbaAnchorDockHostSite(HostDockSite).Header.MouseMove(Shift, X, Y)
+    else
+      TSimbaAnchorDockHostSite(HostDockSite).Header.MouseDown(mbLeft, Shift, X, Y);
+  end;
+end;
+
+procedure TSimbaScriptTabsForm.FormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  FMouseDown := False;
+
+  if (HostDockSite is TSimbaAnchorDockHostSite) then
+    TSimbaAnchorDockHostSite(HostDockSite).Header.MouseUp(Button, Shift, X, Y);
 end;
 
 procedure TSimbaScriptTabsForm.FontChanged(Sender: TObject);
@@ -244,9 +263,12 @@ begin
   end;
 end;
 
+// Needs special handling so double click to add tabs works
+// Forwarding all mouse events to header wont work.
+// Only forward events if dragged > 10 distance.
 function TSimbaScriptTabsForm.CanAnchorDocking(X, Y: Integer): Boolean;
 begin
-  Result := FTabControl.InEmptySpace(X, Y) and (not FTabControl.Dragging);
+  Result := FTabControl.InEmptySpace(X, Y) and (not FTabControl.Dragging) and (Abs(X - FMouseDownX) > 10) and (Abs(Y - FMouseDownY) > 10);
 end;
 
 procedure TSimbaScriptTabsForm.DoTabChange(Sender: TSimbaTabControl; NewTab: TSimbaTab);
@@ -284,8 +306,10 @@ begin
   FTabControl.OnTabChange := @DoTabChange;
   FTabControl.OnMouseMove := @FormMouseMove;
   FTabControl.OnMouseDown := @FormMouseDown;
+  FTabControl.OnMouseUp := @FormMouseUp;
   FTabControl.OnMouseLeave := @FormMouseLeave;
   FTabControl.DefaultTitle := 'Untitled';
+  FTabControl.CanAddTabOnDoubleClick := True;
 
   FEditorReplace := TSimbaEditorReplace.Create(Self);
   FEditorFind := TSimbaEditorFind.Create(Self);

@@ -12,7 +12,7 @@ interface
 uses
   classes, sysutils,
   lptypes, lpvartypes, lpcompiler, lpparser, lpinterpreter, lpmessages,
-  simba.script_compiler, simba.script_communication, simba.script_debugger,
+  simba.script_compiler, simba.script_communication,
   simba.script_plugin, simba.mufasatypes, simba.windowhandle;
 
 type
@@ -29,7 +29,6 @@ type
     FCompileTime: Double;
     FRunningTime: Double;
 
-    FDebugger: TSimbaScript_Debugger;
     FPlugins: TSimbaScriptPluginArray;
     FSimbaCommunication: TSimbaScriptCommunication;
 
@@ -53,7 +52,6 @@ type
     property SimbaCommunicationServer: String write SetSimbaCommunicationServer;
 
     property TargetWindow: String write SetTargetWindow;
-    property Debugger: TSimbaScript_Debugger read FDebugger write FDebugger;
 
     function Compile: Boolean;
     function Run: Boolean;
@@ -240,8 +238,6 @@ begin
     FCompiler.addBaseDefine('SIMBAHEADLESS');
 
   FCompiler.Import();
-  if (FDebugger <> nil) then
-    FDebugger.Compile();
 
   FCompileTime := HighResolutionTime();
   FCompiler.Compile();
@@ -262,18 +258,9 @@ begin
 
   FRunningTime := HighResolutionTime();
   try
-    if (FDebugger <> nil) then
-      FDebugger.Run();
-
     RunCode(FCompiler.Emitter, FState);
   finally
     FRunningTime := HighResolutionTime() - FRunningTime;
-
-    if (FDebugger <> nil) then
-    begin
-      FDebugger.Terminate();
-      FDebugger.WaitFor();
-    end;
 
     FPlugins.CallOnStop();
 

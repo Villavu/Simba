@@ -13,6 +13,7 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
   OnMouseDown = FormMouseDown
   OnMouseLeave = FormMouseLeave
   OnMouseMove = FormMouseMove
+  OnMouseUp = FormMouseUp
   LCLVersion = '2.2.4.0'
   object FindPanel: TPanel
     Left = 0

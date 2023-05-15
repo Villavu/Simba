@@ -44,7 +44,7 @@ type
 
     constructor Create(FileName: String;
       SimbaCommunication, TargetWindow: String;
-      CompileOnly, Debugging: Boolean
+      CompileOnly: Boolean
     ); reintroduce;
   end;
 
@@ -58,7 +58,7 @@ uses
   cocoaall, cocoaint, cocoautils,
   {$ENDIF}
   forms, fileutil, lpmessages,
-  simba.files, simba.datetime, simba.script_communication, simba.script_debugger;
+  simba.files, simba.datetime, simba.script_communication;
 
 procedure TSimbaScriptRunner.DebugLnGreen(S: String);
 begin
@@ -198,7 +198,7 @@ begin
   end;
 end;
 
-constructor TSimbaScriptRunner.Create(FileName: String; SimbaCommunication, TargetWindow: String; CompileOnly, Debugging: Boolean);
+constructor TSimbaScriptRunner.Create(FileName: String; SimbaCommunication, TargetWindow: String; CompileOnly: Boolean);
 begin
   inherited Create(False);
 
@@ -212,9 +212,6 @@ begin
   FScript.ScriptFileName := FileName;
   FScript.SimbaCommunicationServer := SimbaCommunication;
   FScript.TargetWindow := TargetWindow;
-
-  if Debugging then
-    FScript.Debugger := TSimbaScript_Debugger.Create(FScript);
 
   // Simba created a temp file. Most likely default script.
   if FileIsInDirectory(FileName, GetDataPath()) then

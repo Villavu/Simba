@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 3768
+  Left = 4012
   Height = 578
-  Top = 380
+  Top = 62
   Width = 910
   Caption = 'Simba'
   ClientHeight = 578
@@ -2825,14 +2825,6 @@ object SimbaForm: TSimbaForm
       ShortCut = 32851
       OnClick = MenuItemScriptStateClick
     end
-    object MenuItem5: TMenuItem
-      Caption = '-'
-    end
-    object MenuItemRunWithDebugging: TMenuItem
-      Caption = 'Run with Debugging'
-      ImageIndex = 37
-      OnClick = MenuItemScriptStateClick
-    end
   end
   object MainMenuTools: TPopupMenu
     Images = Images
@@ -2929,10 +2921,6 @@ object SimbaForm: TSimbaForm
     object MenuItemOutput: TMenuItem
       AutoCheck = True
       Caption = 'Output'
-    end
-    object MenuItemDebugger: TMenuItem
-      Caption = 'Debugger'
-      OnClick = MenuItemDebuggerClick
     end
     object MenuItem3: TMenuItem
       Caption = '-'

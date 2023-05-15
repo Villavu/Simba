@@ -245,6 +245,43 @@ begin
     addGlobalFunc('function ColorToLAB(Color: TColor): TColorLAB', @_LapeColorToLAB);
     addGlobalFunc('function ColorToLCH(Color: TColor): TColorLCH', @_LapeColorToLCH);
 
+    addGlobalFunc(
+      'function RGBToColor(R, G, B: Byte): TColor;', [
+      'begin',
+      '  Result := TColorRGB([R, G, B]).ToColor();',
+      'end;'
+    ]);
+    addGlobalFunc(
+      'function HSLToColor(H, S, L: Single): TColor;', [
+      'begin',
+      '  Result := TColorHSL([H, S, L]).ToColor();',
+      'end;'
+    ]);
+     addGlobalFunc(
+      'function HSVToColor(H, S, V: Single): TColor;', [
+      'begin',
+      '  Result := TColorHSV([H, S, V]).ToColor();',
+      'end;'
+    ]);
+    addGlobalFunc(
+       'function XYZToColor(X, Y, Z: Single): TColor;', [
+       'begin',
+       '  Result := TColorXYZ([X, Y, Z]).ToColor();',
+       'end;'
+     ]);
+     addGlobalFunc(
+       'function LABToColor(L, A, B: Single): TColor;', [
+       'begin',
+       '  Result := TColorLAB([L, A, B]).ToColor();',
+       'end;'
+     ]);
+     addGlobalFunc(
+       'function LCHToColor(L, C, H: Single): TColor;', [
+       'begin',
+       '  Result := TColorLCH([L, C, H]).ToColor();',
+       'end;'
+     ]);
+
     addGlobalFunc('function SimilarColors(Color1, Color2: TColor; Tolerance: Single): Boolean; overload', @_LapeSimilarColors1);
     addGlobalFunc('function SimilarColors(Color1, Color2: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): Boolean; overload;', @_LapeSimilarColors2);
 

@@ -34,9 +34,6 @@ type
     procedure DebugImage_Hide;
     procedure DebugImage_Display(Width, Height: Integer); overload;
     procedure DebugImage_Display(X, Y, Width, Height: Integer); overload;
-
-    procedure DebugMethodName(Name: String);
-    procedure DebugEvents(Events: TMemoryStream);
   end;
 
 implementation
@@ -268,37 +265,6 @@ begin
     FParams.Write(Y, SizeOf(Integer));
     FParams.Write(Width, SizeOf(Integer));
     FParams.Write(Height, SizeOf(Integer));
-
-    Invoke();
-  finally
-    EndInvoke();
-  end;
-end;
-
-procedure TSimbaScriptCommunication.DebugMethodName(Name: String);
-begin
-  BeginInvoke(Integer(ESimbaCommunicationMessage.DEBUG_METHOD_NAME));
-
-  try
-    FParams.WriteAnsiString(Name);
-
-    Invoke();
-  finally
-    EndInvoke();
-  end;
-end;
-
-procedure TSimbaScriptCommunication.DebugEvents(Events: TMemoryStream);
-var
-  Count: Integer;
-begin
-  BeginInvoke(Integer(ESimbaCommunicationMessage.DEBUG_EVENTS));
-
-  try
-    Count := Events.Position div SizeOf(TSimbaScriptDebuggerEvent);
-
-    FParams.Write(Count, SizeOf(Integer));
-    FParams.Write(Events.Memory^, Events.Position);
 
     Invoke();
   finally

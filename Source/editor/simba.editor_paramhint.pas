@@ -88,8 +88,9 @@ begin
   with TBitmap.Create() do
   try
     Canvas.Font := Self.Font;
+    Canvas.Font.Size := Round(Abs(GetFontData(Canvas.Font.Handle).Height) * 72 / Canvas.Font.PixelsPerInch) + 1; // Measure on larger font size - Font size can be 0
 
-    FLineHeight := Canvas.TextHeight('TaylorSwift');
+    FLineHeight := Canvas.TextHeight('Tay');
   finally
     Free();
   end;
