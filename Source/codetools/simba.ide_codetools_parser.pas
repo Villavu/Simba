@@ -304,9 +304,8 @@ type
     function Dump: String; override;
   end;
 
-  TOnFindInclude = function(Sender: TmwBasePasLex; var FileName: string): Boolean of object;
-  TOnHandleInclude = function(Sender: TmwBasePasLex): Boolean of object;
-  TOnHandleLibrary = function(Sender: TmwBasePasLex): Boolean of object;
+  TFindIncludeEvent = function(Sender: TmwBasePasLex; var FileName: string; var Handled: Boolean): Boolean of object;
+  TFindPluginEvent  = function(Sender: TmwBasePasLex; var FileName: string): Boolean of object;
 
   TCodeParser = class(TmwSimplePasPar)
   protected
@@ -315,15 +314,16 @@ type
     FRoot: TDeclaration;
     FItems: TDeclarationList;
     FStack: TDeclarationStack;
-    FOnFindInclude: TOnFindInclude;
-    FOnHandleInclude: TOnHandleInclude;
-    FOnHandleLibrary: TOnHandleLibrary;
+    FOnFindInclude: TFindIncludeEvent;
+    FOnFindPlugin: TFindPluginEvent;
 
     FLocals: TDeclarationList;
     FGlobals: TDeclarationList;
     FTypeMethods: TDeclarationMap;
 
     FHash: TNullableString;
+
+    FPlugins: TStringList;
 
     procedure FindLocals;
     procedure FindGlobals;
@@ -406,14 +406,15 @@ type
     procedure EnumeratedTypeItem; override;                                     //Enum Element
     procedure QualifiedIdentifier; override;                                    //Enum Element Name
   public
+    property Plugins: TStringList read FPlugins;
+
     property Items: TDeclarationList read FItems;
     property Locals: TDeclarationList read FLocals;
     property Globals: TDeclarationList read FGlobals;
     property TypeMethods: TDeclarationMap read FTypeMethods;
 
-    property OnFindInclude: TOnFindInclude read FOnFindInclude write FOnFindInclude;
-    property OnHandleInclude: TOnHandleInclude read FOnHandleInclude write FOnHandleInclude;
-    property OnHandleLibrary: TOnHandleLibrary read FOnHandleLibrary write FOnHandleLibrary;
+    property OnFindPlugin: TFindPluginEvent read FOnFindPlugin write FOnFindPlugin;
+    property OnFindInclude: TFindIncludeEvent read FOnFindInclude write FOnFindInclude;
 
     property CaretPos: Integer read GetCaretPos write SetCaretPos;
 
@@ -1357,6 +1358,8 @@ constructor TCodeParser.Create;
 begin
   inherited Create();
 
+  FPlugins := TStringList.Create();
+
   FManagedItems := TDeclarationList.Create();
   FLocals := TDeclarationList.Create();
   FGlobals := TDeclarationList.Create();
@@ -1373,6 +1376,7 @@ destructor TCodeParser.Destroy;
 begin
   Reset();
 
+  FPlugins.Free();
   FLocals.Free();
   FGlobals.Free();
   FTypeMethods.Free();
@@ -1412,29 +1416,37 @@ begin
 end;
 
 procedure TCodeParser.OnLibraryDirect(Sender: TmwBasePasLex);
+var
+  FileName: String;
 begin
-  if Sender.IsJunk or (Assigned(FOnHandleLibrary) and FOnHandleLibrary(Sender)) then
+  if Sender.IsJunk or (not Assigned(FOnFindPlugin)) then
     Exit;
 
-  DebugLn('Library "' + Sender.DirectiveParamAsFileName + '" not handled');
+  FileName := Sender.DirectiveParamAsFileName;
+  if FOnFindPlugin(Sender, FileName) then
+    FPlugins.Add(FileName);
 end;
 
 procedure TCodeParser.OnIncludeDirect(Sender: TmwBasePasLex);
 var
   FileName: String;
+  Handled: Boolean;
 begin
-  if Sender.IsJunk or (Assigned(FOnHandleInclude) and FOnHandleInclude(Sender)) then
+  if Sender.IsJunk or (not Assigned(FOnFindInclude)) then
     Exit;
 
+  Handled := False;
   FileName := Sender.DirectiveParamAsFileName;
-  if Assigned(FOnFindInclude) and FOnFindInclude(Sender, FileName) then
+
+  if FOnFindInclude(Sender, FileName, Handled) then
   begin
     if (Sender.TokenID = tokIncludeOnceDirect) and HasFile(FileName) then
       Exit;
+    if Handled then
+      Exit;
 
     PushLexer(TmwPasLex.CreateFromFile(FileName));
-  end else
-    DebugLn('Include "' + Sender.DirectiveParamAsFileName + '" not handled');
+  end;
 end;
 
 procedure TCodeParser.WithStatement;
@@ -1911,6 +1923,7 @@ begin
   FHash.IsNull := True;
   FManagedItems.Clear(True);
 
+  FPlugins.Clear();
   FGlobals.Clear();
   FLocals.Clear();
   FTypeMethods.Clear();
