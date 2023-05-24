@@ -1,3 +1,15 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+
+  The main class for code insight used for things like:
+
+    - AutoComplete
+    - ParamHint
+    - FunctionList
+    - Jump To Declaration
+}
 unit simba.ide_codetools_insight;
 
 {$i simba.inc}
@@ -16,19 +28,22 @@ type
   {$SCOPEDENUMS OFF}
 
   TCodeinsight = class(TObject)
-  public
   class var
     FBaseIncludes: TCodeParserList;
     FBaseDefines: TStringList;
   protected
+    FCreatedPlugins: Boolean;
+    FPlugins: TCodeParserList;
     FIncludes: TCodeParserList;
     FScriptParser: TCodeParser;
 
-    function DoHandleInclude(Sender: TmwBasePasLex): Boolean;
-    function DoHandleLibrary(Sender: TmwBasePasLex): Boolean;
+    function DoFindInclude(Sender: TmwBasePasLex; var FileName: String; var Handled: Boolean): Boolean;
+    function DoFindPlugin(Sender: TmwBasePasLex; var FileName: String): Boolean;
 
     function GetIncludes: TCodeParserArray;
     function GetIncludesHash: String;
+    function GetPluginsHash: String;
+    function GetPlugins: TCodeParserList;
 
     procedure Reset;
   public
@@ -36,6 +51,9 @@ type
     class procedure AddBaseDefine(Def: String);
     class constructor Create;
     class destructor Destroy;
+
+    property Plugins: TCodeParserList read GetPlugins;
+    property PluginsHash: String read GetPluginsHash;
 
     property Includes: TCodeParserList read FIncludes;
     property IncludesHash: String read GetIncludesHash;
@@ -70,7 +88,8 @@ type
 implementation
 
 uses
-  simba.mufasatypes, simba.ide_codetools_cache, simba.ide_codetools_arrayhelpers;
+  simba.mufasatypes, simba.ide_codetools_includes, simba.ide_codetools_arrayhelpers,
+  simba.ide_codetools_plugins;
 
 function TCodeinsight.GetIncludesHash: String;
 var
@@ -81,13 +100,50 @@ begin
     Result := Result + FIncludes[I].Hash;
 end;
 
-function TCodeinsight.DoHandleInclude(Sender: TmwBasePasLex): Boolean;
+function TCodeinsight.GetPluginsHash: String;
 var
   I: Integer;
-  FileName: String;
+begin
+  Result := '';
+  for I := 0 to FPlugins.Count - 1 do
+    Result := Result + FPlugins[I].Hash;
+end;
+
+function TCodeinsight.GetPlugins: TCodeParserList;
+var
+  I: Integer;
+  Parser: TCodeParser;
+  FileNames: TStringList;
+begin
+  if (not FCreatedPlugins) then
+  begin
+    FCreatedPlugins := True;
+
+    FileNames := TStringList.Create();
+    FileNames.AddStrings(FScriptParser.Plugins);
+    for I := 0 to FIncludes.Count - 1 do
+      FileNames.AddStrings(FIncludes[I].Plugins);
+
+    for I := 0 to FileNames.Count - 1 do
+    begin
+      Parser := CodetoolsPlugins.Get(FileNames[I]);
+      if Assigned(Parser) then
+        FPlugins.Add(Parser);
+    end;
+
+    FileNames.Free();
+  end;
+
+  Result := FPlugins;
+end;
+
+function TCodeinsight.DoFindInclude(Sender: TmwBasePasLex; var FileName: String; var Handled: Boolean): Boolean;
+var
+  I: Integer;
   Include: TCodeParser;
 begin
-  Result := True;
+  Result := False;
+  Handled := True;
 
   if (Sender.TokenID = tokIncludeOnceDirect) then
   begin
@@ -97,20 +153,16 @@ begin
         Exit;
   end;
 
-  Include := GetCachedInclude(Sender);
+  Include := CodetoolsIncludes.Get(Sender);
   if (Include <> nil) then
     FIncludes.Add(Include);
 end;
 
-function TCodeinsight.DoHandleLibrary(Sender: TmwBasePasLex): Boolean;
-var
-  Include: TCodeParser;
+function TCodeinsight.DoFindPlugin(Sender: TmwBasePasLex; var FileName: String): Boolean;
 begin
-  Result := True;
+  FileName := FindInclude(Sender);
 
-  Include := GetCachedInclude(Sender);
-  if (Include <> nil) then
-    FIncludes.Add(Include);
+  Result := FileName <> '';
 end;
 
 function TCodeinsight.GetIncludes: TCodeParserArray;
@@ -120,8 +172,12 @@ end;
 
 procedure TCodeinsight.Reset;
 begin
-  ReleaseCachedIncludes(FIncludes);
+  FCreatedPlugins := False;
 
+  CodetoolsIncludes.Release(FIncludes);
+  CodetoolsPlugins.Release(FPlugins);
+
+  FPlugins.Clear();
   FIncludes.Clear();
   FScriptParser.Reset();
 end;
@@ -481,10 +537,11 @@ begin
   inherited Create();
 
   FScriptParser := TCodeParser.Create();
-  FScriptParser.OnHandleInclude := @DoHandleInclude;
-  FScriptParser.OnHandleLibrary := @DoHandleLibrary;
+  FScriptParser.OnFindInclude := @DoFindInclude;
+  FScriptParser.OnFindPlugin := @DoFindPlugin;
 
   FIncludes := TCodeParserList.Create();
+  FPlugins := TCodeParserList.Create();
 end;
 
 destructor TCodeinsight.Destroy;
@@ -495,6 +552,8 @@ begin
     FreeAndNil(FScriptParser);
   if (FIncludes <> nil) then
     FreeAndNil(FIncludes);
+  if (FPlugins <> nil) then
+    FreeAndNil(FPlugins);
 
   inherited Destroy();
 end;

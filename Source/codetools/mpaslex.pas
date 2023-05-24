@@ -166,7 +166,6 @@ type
   public
     OnErrorMessage: TErrorMessageEvent;
 
-    IsLibrary: Boolean;
     CaretPos: Integer;
 
     constructor Create(Doc: String; AFileName: String = ''); virtual;
