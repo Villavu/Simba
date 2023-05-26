@@ -7,7 +7,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics, LCLType,
-  simba.mufasatypes, simba.colormath_conversion;
+  simba.mufasatypes;
 
 type
   PSimbaImageBoxBitmap = ^TSimbaImageBoxBitmap;

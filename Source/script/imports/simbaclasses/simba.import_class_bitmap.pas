@@ -932,16 +932,6 @@ begin
 end;
 
 (*
-TMufasaBitmap.GetFonts
-~~~~~~~~~~~~~~~~~~~~~~
-function TMufasaBitmap.GetFonts: TStringArray;
-*)
-procedure _LapeMufasaBitmap_Fonts_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PStringArray(Result)^ := PMufasaBitmap(Params^[0])^.Fonts;
-end;
-
-(*
 TMufasaBitmap.GetFontName
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 function TMufasaBitmap.GetFontName: String;
@@ -999,6 +989,46 @@ procedure TMufasaBitmap.SetFontAntialiasing(Value: Boolean);
 procedure _LapeMufasaBitmap_FontAntialiasing_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PMufasaBitmap(Params^[0])^.FontAntialiasing := PBoolean(Params^[1])^;
+end;
+
+(*
+TMufasaBitmap.GetFontBold
+~~~~~~~~~~~~~~~~~~~~~~~~~
+function TMufasaBitmap.GetFontBold: Boolean;
+*)
+procedure _LapeMufasaBitmap_FontBold_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PMufasaBitmap(Params^[0])^.FontBold;
+end;
+
+(*
+TMufasaBitmap.SetFontBold
+~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure TMufasaBitmap.SetFontBold(Value: Boolean);
+*)
+procedure _LapeMufasaBitmap_FontBold_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMufasaBitmap(Params^[0])^.FontBold := PBoolean(Params^[1])^;
+end;
+
+(*
+TMufasaBitmap.GetFontItalic
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function TMufasaBitmap.GetFontItalic: Boolean;
+*)
+procedure _LapeMufasaBitmap_FontItalic_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PMufasaBitmap(Params^[0])^.FontItalic;
+end;
+
+(*
+TMufasaBitmap.SetFontItalic
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure TMufasaBitmap.SetFontItalic(Value: Boolean);
+*)
+procedure _LapeMufasaBitmap_FontItalic_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMufasaBitmap(Params^[0])^.FontItalic := PBoolean(Params^[1])^;
 end;
 
 (*
@@ -1232,6 +1262,30 @@ begin
 end;
 
 (*
+TMufasaBitmap.LoadFonts
+~~~~~~~~~~~~~~~~~~~~~~~
+function TMufasaBitmap.LoadFonts(Dir: String): Boolean; static;
+
+Loads all ".ttf" fonts in the passed directory.
+*)
+procedure _LapeMufasaBitmap_LoadFonts(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := TMufasaBitmap.LoadFonts(PString(Params^[0])^);
+end;
+
+(*
+TMufasaBitmap.GetFontNames
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+function TMufasaBitmap.GetFontNames: TStringArray; static;
+
+Returns all the available font names.
+*)
+procedure _LapeMufasaBitmap_GetFontNames(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PStringArray(Result)^ := TMufasaBitmap.FontNames();
+end;
+
+(*
 TMufasaBitmap.FreeOnTerminate
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 procedure TMufasaBitmap.FreeOnTerminate(Value: Boolean);
@@ -1256,7 +1310,7 @@ TMufasaBitmap.Finder
 ~~~~~~~~~~~~~~~~~~~~
 function TMufasaBitmap.Finder: TSimbaFinder;
 
-Returns a TSimbaFinder targetted to the bitmap.
+Returns a TSimbaFinder which is targetted to the bitmap.
 *)
 
 (*
@@ -1312,10 +1366,14 @@ begin
     addClassVar('TMufasaBitmap', 'TransparentColor', 'Integer', @_LapeMufasaBitmap_TransparentColor_Read, @_LapeMufasaBitmap_TransparentColor_Write);
     addClassVar('TMufasaBitmap', 'TransparentColorActive', 'Boolean', @_LapeMufasaBitmap_TransparentColorActive_Read, @_LapeMufasaBitmap_TransparentColorActive_Write);
 
-    addClassVar('TMufasaBitmap', 'Fonts', 'TStringArray', @_LapeMufasaBitmap_Fonts_Read);
     addClassVar('TMufasaBitmap', 'FontName', 'String', @_LapeMufasaBitmap_FontName_Read, @_LapeMufasaBitmap_FontName_Write);
     addClassVar('TMufasaBitmap', 'FontSize', 'Single', @_LapeMufasaBitmap_FontSize_Read, @_LapeMufasaBitmap_FontSize_Write);
     addClassVar('TMufasaBitmap', 'FontAntialiasing', 'Boolean', @_LapeMufasaBitmap_FontAntialiasing_Read, @_LapeMufasaBitmap_FontAntialiasing_Write);
+    addClassVar('TMufasaBitmap', 'FontBold', 'Boolean', @_LapeMufasaBitmap_FontBold_Read, @_LapeMufasaBitmap_FontBold_Write);
+    addClassVar('TMufasaBitmap', 'FontItalic', 'Boolean', @_LapeMufasaBitmap_FontItalic_Read, @_LapeMufasaBitmap_FontItalic_Write);
+
+    addGlobalFunc('function TMufasaBitmap.GetFontNames: TStringArray; static;', @_LapeMufasaBitmap_GetFontNames);
+    addGlobalFunc('function TMufasaBitmap.LoadFonts(Dir: String): Boolean; static;', @_LapeMufasaBitmap_LoadFonts);
 
     addGlobalFunc('function TMufasaBitmap.PointInBitmap(P: TPoint): Boolean; overload', @_LapeMufasaBitmap_PointInBitmap);
     addGlobalFunc('function TMufasaBitmap.PointInBitmap(X, Y: Integer): Boolean; overload', @_LapeMufasaBitmap_PointInBitmapEx);

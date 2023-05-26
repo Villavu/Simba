@@ -16,8 +16,6 @@ uses
 
 type
   generic TSimbaList<_T> = class(TObject)
-  private
-    procedure SetItem(Index: Integer; AValue: _T);
   public type
     TArr = array of _T;
   protected
@@ -25,6 +23,7 @@ type
     FCount: Integer;
 
     function GetItem(Index: Integer): _T; virtual;
+    procedure SetItem(Index: Integer; AValue: _T); virtual;
   public
     procedure Add(Item: _T); virtual;
     procedure Clear; virtual;
@@ -90,8 +89,9 @@ begin
   if (Index < 0) or (Index >= FCount) then
     raise Exception.CreateFmt('%s.Delete: Index %d out of bounds', [ClassName, Index]);
 
+  if (Index < FCount - 1) then
+    Move(FArr[Index + 1], FArr[Index], (FCount - (Index + 1)) * SizeOf(_T));
   FCount := FCount - 1;
-  Move(FArr[Index + 1], FArr[Index], (FCount - Index) * SizeOf(_T));
 end;
 
 function TSimbaList.ToArray: TArr;

@@ -42,14 +42,17 @@ type
     function GetCenter: TPoint;
     function GetFontAntialiasing: Boolean;
     function GetFontName: String;
-    function GetFonts: TStringArray;
     function GetFontSize: Single;
+    function GetFontBold: Boolean;
+    function GetFontItalic: Boolean;
 
     procedure SetPixel(X, Y: Integer; Color: TColor);
     procedure SetTransparentColor(Value: TColor);
     procedure SetFontAntialiasing(Value: Boolean);
     procedure SetFontName(Value: String);
     procedure SetFontSize(Value: Single);
+    procedure SetFontBold(Value: Boolean);
+    procedure SetFontItalic(Value: Boolean);
   public
     class var DebugUnfreedBitmaps: ShortString;
   public
@@ -74,16 +77,20 @@ type
 
     property Pixel[X, Y: Integer]: TColor read GetPixel write SetPixel; default;
 
-    property Fonts: TStringArray read GetFonts;
     property FontName: String read GetFontName write SetFontName;
     property FontSize: Single read GetFontSize write SetFontSize;
     property FontAntialiasing: Boolean read GetFontAntialiasing write SetFontAntialiasing;
+    property FontBold: Boolean read GetFontBold write SetFontBold;
+    property FontItalic: Boolean read GetFontItalic write SetFontItalic;
 
     function PointInBitmap(const P: TPoint): Boolean; overload;
     function PointInBitmap(const X, Y: Integer): Boolean; overload;
 
     function Equals(Other: TObject): Boolean; override;
     function Equals(Other: TMufasaBitmap): Boolean; overload;
+
+    class function LoadFonts(Dir: String): Boolean;
+    class function FontNames: TStringArray;
 
     function TextWidth(Text: String): Integer;
     function TextHeight(Text: String): Integer;
@@ -1305,6 +1312,11 @@ begin
             (CompareMem(FData, Other.FData, FWidth * FHeight * SizeOf(TColorBGRA)));
 end;
 
+class function TMufasaBitmap.LoadFonts(Dir: String): Boolean;
+begin
+  Result := SimbaFreeTypeFontLoader.LoadFonts(Dir);
+end;
+
 procedure TMufasaBitmap.ReplaceColor(OldColor, NewColor: TColor);
 var
   I: Integer;
@@ -2050,14 +2062,24 @@ begin
   Result := FTextDrawer.FontName;
 end;
 
-function TMufasaBitmap.GetFonts: TStringArray;
+class function TMufasaBitmap.FontNames: TStringArray;
 begin
-  Result := FTextDrawer.Fonts;
+  Result := SimbaFreeTypeFontLoader.FontNames;
 end;
 
 function TMufasaBitmap.GetFontSize: Single;
 begin
-  Result := FTextDrawer.FontSize;
+  Result := FTextDrawer.Size;
+end;
+
+function TMufasaBitmap.GetFontBold: Boolean;
+begin
+  Result := FTextDrawer.Bold;
+end;
+
+function TMufasaBitmap.GetFontItalic: Boolean;
+begin
+  Result := FTextDrawer.Italic;
 end;
 
 procedure TMufasaBitmap.SetFontAntialiasing(Value: Boolean);
@@ -2072,7 +2094,17 @@ end;
 
 procedure TMufasaBitmap.SetFontSize(Value: Single);
 begin
-  FTextDrawer.FontSize := Value;
+  FTextDrawer.Size := Value;
+end;
+
+procedure TMufasaBitmap.SetFontBold(Value: Boolean);
+begin
+  FTextDrawer.Bold := Value;
+end;
+
+procedure TMufasaBitmap.SetFontItalic(Value: Boolean);
+begin
+  FTextDrawer.Italic := Value;
 end;
 
 function TMufasaBitmap.TextWidth(Text: String): Integer;
