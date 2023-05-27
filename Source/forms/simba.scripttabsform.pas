@@ -59,6 +59,7 @@ type
 
     function CanAnchorDocking(X, Y: Integer): Boolean;
 
+    procedure DoTabCanChange(Sender: TSimbaTabControl; OldTab, NewTab: TSimbaTab; var AllowChange: Boolean);
     procedure DoTabChange(Sender: TSimbaTabControl; NewTab: TSimbaTab);
     procedure DoTabMoved(Sender: TSimbaTabControl; AFrom, ATo: Integer);
     procedure DoTabClosed(Sender: TSimbaTabControl; Tab: TSimbaTab; var CanClose: Boolean);
@@ -271,6 +272,12 @@ begin
   Result := FTabControl.InEmptySpace(X, Y) and (not FTabControl.Dragging) and (Abs(X - FMouseDownX) > 10) and (Abs(Y - FMouseDownY) > 10);
 end;
 
+procedure TSimbaScriptTabsForm.DoTabCanChange(Sender: TSimbaTabControl; OldTab, NewTab: TSimbaTab; var AllowChange: Boolean);
+begin
+  if Assigned(OldTab) then
+    SimbaIDEEvents.CallOnBeforeTabChange(OldTab);
+end;
+
 procedure TSimbaScriptTabsForm.DoTabChange(Sender: TSimbaTabControl; NewTab: TSimbaTab);
 begin
   SimbaIDEEvents.CallOnScriptTabChange(NewTab);
@@ -303,6 +310,7 @@ begin
   FTabControl.PopupMenu := TabPopupMenu;
   FTabControl.OnTabMoved := @DoTabMoved;
   FTabControl.OnTabClose := @DoTabClosed;
+  FTabControl.OnTabCanChange := @DoTabCanChange;
   FTabControl.OnTabChange := @DoTabChange;
   FTabControl.OnMouseMove := @FormMouseMove;
   FTabControl.OnMouseDown := @FormMouseDown;
@@ -527,4 +535,3 @@ begin
 end;
 
 end.
-

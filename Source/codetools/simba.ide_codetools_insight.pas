@@ -28,6 +28,7 @@ type
   {$SCOPEDENUMS OFF}
 
   TCodeinsight = class(TObject)
+  protected
   class var
     FBaseIncludes: TCodeParserList;
     FBaseDefines: TStringList;
@@ -49,6 +50,7 @@ type
   public
     class procedure AddBaseInclude(Include: TCodeParser);
     class procedure AddBaseDefine(Def: String);
+    class property BaseIncludes: TCodeParserList read FBaseIncludes;
     class constructor Create;
     class destructor Destroy;
 

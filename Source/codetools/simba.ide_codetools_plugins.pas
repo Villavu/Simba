@@ -47,21 +47,21 @@ type
     RefCount: Integer;
     LastUsed: Integer;
 
-    constructor Create(FileName: String); reintroduce;
+    constructor Create(AFileName: String); reintroduce;
 
     function IsOutdated: Boolean;
     function IncRef: TCachedPlugin;
     function DecRef: TCachedPlugin;
   end;
 
-constructor TCachedPlugin.Create(FileName: String);
+constructor TCachedPlugin.Create(AFileName: String);
 begin
   inherited Create();
 
   LastUsed := 0;
   RefCount := 1;
 
-  SetScript(FindPluginExports(FileName), FileName);
+  SetScript(FindPluginExports(AFileName), AFileName);
 end;
 
 function TCachedPlugin.IsOutdated: Boolean;

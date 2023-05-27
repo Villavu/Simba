@@ -120,31 +120,39 @@ end;
 
 procedure TSimbaFileBrowserForm.DoPopluateTreeView(Sender: TObject);
 
+  function Add(ParentNode: TTreeNode; AName, AFileName: String; AIsDirectory, AIsSimbaScript: Boolean): TTreeNode;
+  begin
+    Result := FTreeView.AddNode(ParentNode, AName);
+
+    with TSimbaFileBrowserNode(Result) do
+    begin
+      FileName := AFileName;
+      IsDirectory := AIsDirectory;
+      IsSimbaScript := AIsSimbaScript;
+
+      if IsDirectory   then ImageIndex := IMAGE_DIRECTORY else
+      if IsSimbaScript then ImageIndex := IMAGE_SIMBA     else
+                            ImageIndex := IMAGE_FILE;
+
+      SelectedIndex := ImageIndex;
+    end;
+  end;
+
   procedure Populate(ParentNode: TTreeNode; Dir: TDirectoryInfo);
   var
     I: Integer;
     Node: TTreeNode;
   begin
-    if (ParentNode = nil) then
-      ParentNode := FTreeView.AddNode('Simba', IMAGE_DIRECTORY)
-    else
-      ParentNode := FTreeView.AddChildNode(ParentNode, Dir.Info.Name, IMAGE_DIRECTORY);
-
-    TSimbaFileBrowserNode(ParentNode).IsDirectory := True;
-    TSimbaFileBrowserNode(ParentNode).FileName := Dir.Info.FileName;
-
+    ParentNode := Add(ParentNode, Dir.Info.Name, Dir.Info.FileName, True, False);
     for I := 0 to High(Dir.Directories) do
       Populate(ParentNode, Dir.Directories[i]);
 
     for I := 0 to High(Dir.Files) do
     begin
       if Dir.Files[I].IsSimbaScript then
-        Node := FTreeView.AddChildNode(ParentNode, Dir.Files[I].Name, IMAGE_SIMBA)
+        Add(ParentNode, Dir.Files[I].Name, Dir.Files[I].FileName, False, True)
       else
-        Node := FTreeView.AddChildNode(ParentNode, Dir.Files[I].Name, IMAGE_FILE);
-
-      TSimbaFileBrowserNode(Node).IsSimbaScript := Dir.Files[I].IsSimbaScript;
-      TSimbaFileBrowserNode(Node).FileName := Dir.Files[I].FileName;
+        Add(ParentNode, Dir.Files[I].Name, Dir.Files[I].FileName, False, False);
     end;
   end;
 
@@ -154,7 +162,8 @@ begin
 
   Populate(nil, FFiles);
 
-  FTreeView.ExpandFirstNode();
+  if Assigned(FTreeView.Items.GetFirstNode()) then
+    FTreeView.Items.GetFirstNode.Expanded := True;
   FTreeView.EndUpdate();
 
   FFiles := Default(TDirectoryInfo);
@@ -257,11 +266,11 @@ end;
 
 procedure TSimbaFileBrowserForm.DoAfterFilter(Sender: TObject);
 begin
-  if (Sender is TTreeFilterEdit) and (TTreeFilterEdit(Sender).Filter = '') then
-  begin
-    FTreeView.FullCollapse();
-    FTreeView.ExpandFirstNode();
-  end;
+  //if (Sender is TTreeFilterEdit) and (TTreeFilterEdit(Sender).Filter = '') then
+  //begin
+  //  FTreeView.FullCollapse();
+  //  FTreeView.ExpandFirstNode();
+  //end;
 end;
 
 constructor TSimbaFileBrowserForm.Create(AOwner: TComponent);
@@ -274,7 +283,7 @@ begin
   FTreeView.Images := SimbaForm.Images;
   FTreeView.OnGetNodeHint := @DoGetNodeHint;
   FTreeView.OnDoubleClick := @DoDoubleClick;
-  FTreeView.OnAfterFilter := @DoAfterFilter;
+  //FTreeView.OnAfterFilter := @DoAfterFilter;
   FTreeView.PopupMenu := Popup;
 
   Fill();

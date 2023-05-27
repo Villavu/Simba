@@ -211,11 +211,9 @@ type
     procedure ToolbarButtonPackagesClick(Sender: TObject);
     procedure ToolbarButtonSaveAllClick(Sender: TObject);
     procedure ToolbarButtonSelectTargetClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure ToolBarPaint(Sender: TObject);
     procedure ToolButtonAreaSelectorClick(Sender: TObject);
     procedure TrayIconClick(Sender: TObject);
     procedure TrayPopupExitClick(Sender: TObject);
-
   protected
     FWindowSelection: TWindowHandle;
     FProcessSelection: Integer;
@@ -281,7 +279,6 @@ uses
   simba.package_form, simba.package_autoupdater,
 
   simba.associate, simba.ide_initialization, simba.ide_events,
-  simba.functionlist_simbasection, simba.functionlist_updater,
   simba.aca, simba.dtmeditor,
 
   simba.windowselector, simba.colorpicker,
@@ -656,8 +653,6 @@ begin
   SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoTabModified); // Also do this
   SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoScriptTabChange);
   SimbaIDEEvents.RegisterMethodOnScriptStateChange(@DoScriptStateChange);
-
-  SimbaFunctionListUpdater := TSimbaFunctionListUpdater.Create();
 
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
 
@@ -1164,11 +1159,6 @@ begin
   end;
 end;
 
-procedure TSimbaForm.ToolBarPaint(Sender: TObject);
-begin
-  Writeln('yo');
-end;
-
 procedure TSimbaForm.ToolButtonAreaSelectorClick(Sender: TObject);
 begin
   try
@@ -1190,7 +1180,7 @@ begin
 
   try
     DockMaster.BeginUpdate();
-    DockMaster.SplitterWidth := 10;
+    DockMaster.SplitterWidth := Scale96ToScreen(8);
     DockMaster.HeaderClass := TSimbaAnchorDockHeader;
     DockMaster.SplitterClass := TSimbaAnchorDockSplitter;
     DockMaster.SiteClass := TSimbaAnchorDockHostSite;

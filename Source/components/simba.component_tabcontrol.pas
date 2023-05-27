@@ -421,7 +421,7 @@ end;
 
 procedure TSimbaTabControl.DoTabChangeQuery(Sender: TObject; ANewTabIndex: Integer; var ACanChange: Boolean);
 begin
-  if Assigned(FTabCanChangeEvent) then
+  if Assigned(FTabCanChangeEvent) and (FTabs.TabIndex <> ANewTabIndex) then
     FTabCanChangeEvent(Self, GetTabByIndex(FTabs.TabIndex), GetTabByIndex(ANewTabIndex), ACanChange);
 end;
 

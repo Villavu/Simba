@@ -13,30 +13,31 @@ uses
   Classes, SysUtils, ComCtrls, Controls, Dialogs,
   SynEdit, SynEditTypes,
   simba.mufasatypes, simba.editor, simba.scriptinstance,
-  simba.functionlistform, simba.outputform, simba.component_tabcontrol;
+  simba.outputform, simba.component_tabcontrol;
 
 type
   TSimbaScriptTab = class(TSimbaTab)
   protected
+    FUID: Integer;
     FEditor: TSimbaEditor;
     FSavedText: String;
     FScriptFileName: String;
     FScriptTitle: String;
     FScriptInstance: TSimbaScriptInstance;
-    FFunctionList: TSimbaFunctionList;
     FOutputBox: TSimbaOutputBox;
 
     procedure TabShow; override;
     procedure TabHide; override;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
+    procedure DoEditorModified(Sender: TObject);
     procedure DoEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure DoEditorStatusChanges(Sender: TObject; Changes: TSynStatusChanges);
 
     function GetScript: String;
     function GetScriptChanged: Boolean;
   public
-    property FunctionList: TSimbaFunctionList read FFunctionList;
+    property UID: Integer read FUID;
     property OutputBox: TSimbaOutputBox read FOutputBox;
 
     property ScriptInstance: TSimbaScriptInstance read FScriptInstance;
@@ -75,7 +76,10 @@ implementation
 uses
   LazFileUtils,
   simba.settings, simba.ide_events,
-  simba.main, simba.files, simba.functionlist_updater, simba.ide_showdeclaration, simba.threading;
+  simba.main, simba.files, simba.ide_showdeclaration, simba.threading;
+
+var
+  __UID: Integer = 0;
 
 function TSimbaScriptTab.GetScript: String;
 begin
@@ -89,14 +93,14 @@ end;
 
 procedure TSimbaScriptTab.TabShow;
 begin
-  FFunctionList.Show();
+ // FFunctionList.Show();
   if Editor.CanSetFocus() then
     Editor.SetFocus();
 end;
 
 procedure TSimbaScriptTab.TabHide;
 begin
-  FFunctionList.Hide();
+ // FFunctionList.Hide();
 end;
 
 procedure TSimbaScriptTab.Notification(AComponent: TComponent; Operation: TOperation);
@@ -109,6 +113,11 @@ begin
   end;
 
   inherited Notification(AComponent, Operation);
+end;
+
+procedure TSimbaScriptTab.DoEditorModified(Sender: TObject);
+begin
+  SimbaIDEEvents.CallOnEditorModified(Self);
 end;
 
 procedure TSimbaScriptTab.DoEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -131,7 +140,6 @@ end;
 procedure TSimbaScriptTab.DoEditorStatusChanges(Sender: TObject; Changes: TSynStatusChanges);
 begin
   SimbaIDEEvents.CallOnEditorCaretMoved(Self);
-  SimbaIDEEvents.CallOnEditorModified(Self);
 end;
 
 function TSimbaScriptTab.SaveAsDialog: String;
@@ -344,6 +352,9 @@ constructor TSimbaScriptTab.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
+  Inc(__UID);
+
+  FUID := __UID;
   FScriptTitle := 'Untitled';
   FScriptFileName := '';
 
@@ -355,10 +366,7 @@ begin
   FEditor.MarkTextAsSaved();
   FEditor.RegisterStatusChangedHandler(@DoEditorStatusChanges, [scCaretX, scCaretY, scModified]);
   FEditor.OnClickLink := @DoEditorLinkClick;
-
-  FFunctionList := TSimbaFunctionList.Create();
-  FFunctionList.Parent := SimbaFunctionListForm;
-  FFunctionList.Align := alClient;
+  FEditor.OnModified := @DoEditorModified;
 
   FOutputBox := SimbaOutputForm.AddScriptOutput('Untitled');
   FOutputBox.Tab.ImageIndex := IMAGE_STOP;
@@ -368,14 +376,12 @@ end;
 
 destructor TSimbaScriptTab.Destroy;
 begin
+  SimbaIDEEvents.CallOnScriptTabClose(Self);
+
   if Assigned(SimbaOutputForm) then
     SimbaOutputForm.RemoveTab(FOutputBox);
-
-  FFunctionList.DecRef();
-  FFunctionList := nil;
 
   inherited Destroy();
 end;
 
 end.
-

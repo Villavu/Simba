@@ -14,7 +14,7 @@ implementation
 
 uses
   simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_insight,
-  simba.ide_initialization, simba.process, simba.files, simba.functionlist_simbasection, simba.functionlistform;
+  simba.ide_initialization, simba.process, simba.files, simba.ide_events;
 
 procedure SetupCodeTools;
 var
@@ -38,11 +38,6 @@ begin
 
       TCodeinsight.AddBaseInclude(Parser);
     end;
-
-    TCodeinsight.AddBaseDefine('!EXPLICTSELF');
-
-    SimbaFunctionList_SimbaSection.Load(TCodeinsight.FBaseIncludes);
-    SimbaFunctionList_SimbaSection.Loaded := True;
   except
     on E: Exception do
       DebugLn('[TSimbaForm.SetupCodeTools]: ' + E.ToString());
@@ -52,10 +47,11 @@ begin
     List.Free();
 
   CodetoolsSetup := True;
+
+  SimbaIDEEvents.CallOnCodetoolsSetup(nil);
 end;
 
 initialization
   SimbaIDEInitialization.RegisterMethodOnAfterCreate(@SetupCodeTools, 'CodeTools');
 
 end.
-
