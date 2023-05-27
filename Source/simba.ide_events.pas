@@ -13,7 +13,8 @@ type
   private
   type
     EMethodType = (
-      TAB_CARETMOVED, TAB_MODIFIED, TAB_LOADED, TAB_SEARCH, TAB_CHANGE,
+      CODETOOLS_SETUP,
+      TAB_CARETMOVED, TAB_MODIFIED, TAB_LOADED, TAB_SEARCH, TAB_BEFORECHANGE, TAB_CHANGE, TAB_CLOSED,
       MOUSELOGGER_CHANGE,
       SCRIPTSTATE_CHANGE
     );
@@ -27,7 +28,12 @@ type
     class constructor Create;
     class destructor Destroy;
 
+    // Sender = TSimbaScriptTab
+    class procedure RegisterOnTabClosed(Proc: TNotifyEvent);
+    class procedure CallOnScriptTabClose(Sender: TObject);
+
     class procedure CallOnScriptStateChange(Sender: TObject); // Sender = TSimbaScriptInstance
+    class procedure CallOnBeforeTabChange(Sender: TObject);
     class procedure CallOnScriptTabChange(Sender: TObject); // Sender = TSimbaScriptTab
     class procedure CallOnEditorLoadedMethods(Sender: TObject);
     class procedure CallOnEditorSearchMethods(Sender: TObject);
@@ -37,6 +43,7 @@ type
 
     class procedure RegisterMethodOnScriptStateChange(Proc: TNotifyEvent);
     class procedure RegisterMethodOnScriptTabChange(Proc: TNotifyEvent);
+    class procedure RegisterOnBeforeTabChange(Proc: TNotifyEvent);
 
     class procedure RegisterMethodOnMouseLoggerChange(Proc: TNotifyEvent);
     class procedure UnRegisterMethodOnMouseLoggerChange(Proc: TNotifyEvent);
@@ -49,6 +56,10 @@ type
 
     class procedure RegisterMethodOnEditorLoaded(Proc: TNotifyEvent); // Sender = TSimbaScriptTab
     class procedure RegisterMethodOnEditorSearch(Proc: TNotifyEvent); // Sender = TSimbaEditorFind
+
+    class procedure RegisterOnCodetoolsSetup(Proc: TNotifyEvent);
+    class procedure UnRegisterOnCodetoolsSetup(Proc: TNotifyEvent);
+    class procedure CallOnCodetoolsSetup(Sender: TObject);
   end;
 
 implementation
@@ -85,9 +96,24 @@ begin
       FreeAndNil(FMethodLists[Typ]);
 end;
 
+class procedure SimbaIDEEvents.RegisterOnTabClosed(Proc: TNotifyEvent);
+begin
+  RegisterMethod(TAB_CLOSED, Proc);
+end;
+
+class procedure SimbaIDEEvents.CallOnScriptTabClose(Sender: TObject);
+begin
+  Call(TAB_CLOSED, Sender);
+end;
+
 class procedure SimbaIDEEvents.CallOnScriptStateChange(Sender: TObject);
 begin
   Call(SCRIPTSTATE_CHANGE, Sender);
+end;
+
+class procedure SimbaIDEEvents.CallOnBeforeTabChange(Sender: TObject);
+begin
+  Call(TAB_BEFORECHANGE, Sender);
 end;
 
 class procedure SimbaIDEEvents.CallOnScriptTabChange(Sender: TObject);
@@ -130,6 +156,11 @@ begin
   RegisterMethod(TAB_CHANGE, Proc);
 end;
 
+class procedure SimbaIDEEvents.RegisterOnBeforeTabChange(Proc: TNotifyEvent);
+begin
+  RegisterMethod(TAB_BEFORECHANGE, Proc);
+end;
+
 class procedure SimbaIDEEvents.RegisterMethodOnMouseLoggerChange(Proc: TNotifyEvent);
 begin
   RegisterMethod(MOUSELOGGER_CHANGE, Proc);
@@ -170,5 +201,21 @@ begin
   RegisterMethod(TAB_SEARCH, Proc);
 end;
 
+class procedure SimbaIDEEvents.RegisterOnCodetoolsSetup(Proc: TNotifyEvent);
+begin
+  RegisterMethod(CODETOOLS_SETUP, Proc);
+end;
+
+class procedure SimbaIDEEvents.UnRegisterOnCodetoolsSetup(Proc: TNotifyEvent);
+begin
+  UnRegisterMethod(CODETOOLS_SETUP, Proc);
+end;
+
+class procedure SimbaIDEEvents.CallOnCodetoolsSetup(Sender: TObject);
+begin
+  Call(CODETOOLS_SETUP, Sender);
+end;
+
 end.
+
 

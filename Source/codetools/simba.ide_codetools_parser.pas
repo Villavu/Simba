@@ -308,6 +308,8 @@ type
   TFindPluginEvent  = function(Sender: TmwBasePasLex; var FileName: string): Boolean of object;
 
   TCodeParser = class(TmwSimplePasPar)
+  private
+    function GetFileName: String;
   protected
     FManagedItems: TDeclarationList;
 
@@ -408,6 +410,7 @@ type
   public
     property Plugins: TStringList read FPlugins;
 
+    property FileName: String read GetFileName;
     property Items: TDeclarationList read FItems;
     property Locals: TDeclarationList read FLocals;
     property Globals: TDeclarationList read FGlobals;
@@ -1169,6 +1172,14 @@ begin
   FStack.Pop().fEndPos := fLastNoJunkPos;
 end;
 
+function TCodeParser.GetFileName: String;
+begin
+  if Assigned(FLexer) then
+    Result := FLexer.FileName
+  else
+    Result := '';
+end;
+
 procedure TCodeParser.FindLocals;
 
   procedure CheckMethod(Decl: TDeclaration);
@@ -1417,35 +1428,35 @@ end;
 
 procedure TCodeParser.OnLibraryDirect(Sender: TmwBasePasLex);
 var
-  FileName: String;
+  Str: String;
 begin
   if Sender.IsJunk or (not Assigned(FOnFindPlugin)) then
     Exit;
 
-  FileName := Sender.DirectiveParamAsFileName;
-  if FOnFindPlugin(Sender, FileName) then
-    FPlugins.Add(FileName);
+  Str := Sender.DirectiveParamAsFileName;
+  if FOnFindPlugin(Sender, Str) then
+    FPlugins.Add(Str);
 end;
 
 procedure TCodeParser.OnIncludeDirect(Sender: TmwBasePasLex);
 var
-  FileName: String;
+  Str: String;
   Handled: Boolean;
 begin
   if Sender.IsJunk or (not Assigned(FOnFindInclude)) then
     Exit;
 
   Handled := False;
-  FileName := Sender.DirectiveParamAsFileName;
+  Str := Sender.DirectiveParamAsFileName;
 
-  if FOnFindInclude(Sender, FileName, Handled) then
+  if FOnFindInclude(Sender, Str, Handled) then
   begin
-    if (Sender.TokenID = tokIncludeOnceDirect) and HasFile(FileName) then
+    if (Sender.TokenID = tokIncludeOnceDirect) and HasFile(Str) then
       Exit;
     if Handled then
       Exit;
 
-    PushLexer(TmwPasLex.CreateFromFile(FileName));
+    PushLexer(TmwPasLex.CreateFromFile(Str));
   end;
 end;
 

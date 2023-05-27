@@ -12,7 +12,7 @@ type
   TProcedureOfObject      = procedure of object;
   TProcedureOfObjectArray = array of TProcedureOfObject;
 
-  TProcedureNested = procedure is nested;
+  TProcedureNested   = procedure is nested;
   TProcedureNestedEx = procedure(Params: TVariantArray) is nested;
 
 procedure ExecuteOnMainThread(Method: TProcedureOfObject); overload;

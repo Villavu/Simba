@@ -37,6 +37,9 @@ type
     FColorModified: TColor;
     FColorSaved: TColor;
 
+    FLastTextChangeStamp: Int64;
+    FModifiedEvent: TNotifyEvent;
+
     procedure FontChanged(Sender: TObject); override;
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
 
@@ -48,6 +51,8 @@ type
     // Enable/Disable TSynEditMarkupHighlightAllCaret depending on has selection
     procedure DoStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
 
+    procedure SetUpdateState(NewUpdating: Boolean; Sender: TObject); override;
+
     procedure SetColorModified(Value: TColor);
     procedure SetColorSaved(Value: TColor);
   public
@@ -58,6 +63,8 @@ type
     property ParamHint: TSimbaParamHint read FParamHint;
     property ModifiedLinesGutter: TSimbaEditorModifiedLinesGutter read FModifiedLinesGutter;
     property Attributes: TSimbaEditor_Attributes read FAttributes;
+
+    property OnModified: TNotifyEvent read FModifiedEvent write FModifiedEvent;
 
     property ColorSaved: TColor read FColorSaved write SetColorSaved;
     property ColorModified: TColor read FColorModified write SetColorModified;
@@ -222,8 +229,21 @@ procedure TSimbaEditor.DoStatusChanged(Sender: TObject; Changes: TSynStatusChang
 begin
   ClearFocusedLines();
 
-  if (scSelection in Changes) then
-    MarkupByClass[TSynEditMarkupHighlightAllCaret].Enabled := SelAvail;
+  //if (scSelection in Changes) then
+  //  MarkupByClass[TSynEditMarkupHighlightAllCaret].Enabled := SelAvail;
+end;
+
+procedure TSimbaEditor.SetUpdateState(NewUpdating: Boolean; Sender: TObject);
+begin
+  inherited SetUpdateState(NewUpdating, Sender);
+
+  if (not NewUpdating) and (FLastTextChangeStamp <> ChangeStamp) then
+  begin
+    if Assigned(FModifiedEvent) then
+      FModifiedEvent(Self);
+
+    FLastTextChangeStamp := ChangeStamp;
+  end;
 end;
 
 function TSimbaEditor.GetCaretPos(GoBackToWord: Boolean): Integer;
@@ -522,4 +542,5 @@ begin
 end;
 
 end.
+
 

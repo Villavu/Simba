@@ -12,7 +12,7 @@ unit simba.component_treeview;
 interface
 
 uses
-  Classes, SysUtils, Controls, Forms, Graphics, StdCtrls, ComCtrls, LMessages, LCLType, TreeFilterEdit, ImgList,
+  Classes, SysUtils, Controls, Forms, Graphics, StdCtrls, ComCtrls, LMessages, LCLType, ImgList,
   ATScrollBar,
   simba.component_edit, simba.component_treeviewhint;
      
@@ -21,6 +21,7 @@ type
 
   TSimbaInternalTreeView = class(TTreeView)
   protected
+    FLoading: Boolean;
     FScrollbarVert: TATScrollbar;
     FScrollbarHorz: TATScrollbar;
 
@@ -32,67 +33,77 @@ type
     procedure CMChanged(var Message: TLMessage); message CM_CHANGED;
     function DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean; override;
     procedure DoDrawArrow(Sender: TCustomTreeView; const ARect: TRect; ACollapsed: Boolean);
+    procedure Paint; override;
+    procedure SetLoading(Value: Boolean);
   public
+    property Loading: Boolean read FLoading write SetLoading;
+
     constructor Create(AnOwner: TComponent); override;
   end;
 
   TNodeHintEvent = function(Node: TTreeNode): String of object;
+  TNodeForEachEvent = procedure(Node: TTreeNode) is nested;
 
   TSimbaTreeView = class(TCustomControl)
-  private
-    function GetImages: TCustomImageList;
-    function GetOnAfterFilter: TNotifyEvent;
-    function GetOnDoubleClick: TNotifyEvent;
-    function GetOnSelectionChange: TNotifyEvent;
-    procedure SetImages(Value: TCustomImageList);
-    procedure SetOnAfterFilter(Value: TNotifyEvent);
-    procedure SetOnDoubleClick(Value: TNotifyEvent);
-    procedure SetOnSelectionChange(Value: TNotifyEvent);
   protected
-    FHint: TSimbaTreeViewHint;
     FFilterEdit: TSimbaEdit;
-    FFilter: TTreeFilterEdit;
+    FHint: TSimbaTreeViewHint;
     FTree: TSimbaInternalTreeView;
     FScrollbarVert: TATScrollbar;
     FScrollbarHorz: TATScrollbar;
     FOnGetNodeHint: TNodeHintEvent;
     FNodeClass: TTreeNodeClass;
+    FOnAfterFilter: TNotifyEvent;
+
+    procedure UpdateFilter;
+
+    function GetImages: TCustomImageList;
+    function GetLoading: Boolean;
+    function GetOnDoubleClick: TNotifyEvent;
+    function GetOnSelectionChange: TNotifyEvent;
+    procedure SetFilter(Value: String);
+    procedure SetImages(Value: TCustomImageList);
+    procedure SetLoading(Value: Boolean);
+    procedure SetOnDoubleClick(Value: TNotifyEvent);
+    procedure SetOnSelectionChange(Value: TNotifyEvent);
 
     function GetItems: TTreeNodes;
     function GetSelected: TTreeNode;
+    function GetFilter: String;
 
+    procedure DoFilterEditChange(Sender: TObject);
     procedure DoMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure DoCreateNodeClass(Sender: TCustomTreeView; var NodeClass: TTreeNodeClass);
-    procedure DoFilterChange(Sender: TObject);
 
     procedure ScrollHorzChange(Sender: TObject);
     procedure ScrollVertChange(Sender: TObject);
   public
     constructor Create(AOwner: TComponent; NodeClass: TTreeNodeClass = nil); reintroduce;
 
-    procedure ExpandTopLevelNode(const NodeText: String);
-    procedure ExpandFirstNode;
-
     procedure FullCollapse;
     procedure FullExpand;
+
+    procedure ForEachTopLevel(Func: TNodeForEachEvent; NodeClass: TTreeNodeClass); overload;
+    procedure ForEachTopLevel(Func: TNodeForEachEvent); overload;
 
     procedure BeginUpdate;
     procedure EndUpdate;
     procedure Clear;
-    procedure ClearFilter;
 
     procedure Invalidate; override;
 
     property OnGetNodeHint: TNodeHintEvent read FOnGetNodeHint write FOnGetNodeHint;
     property OnDoubleClick: TNotifyEvent read GetOnDoubleClick write SetOnDoubleClick;
     property OnSelectionChange: TNotifyEvent read GetOnSelectionChange write SetOnSelectionChange;
-    property OnAfterFilter: TNotifyEvent read GetOnAfterFilter write SetOnAfterFilter;
+    property OnAfterFilter: TNotifyEvent read FOnAfterFilter write FOnAfterFilter;
     property Images: TCustomImageList read GetImages write SetImages;
     property Items: TTreeNodes read GetItems;
     property Selected: TTreeNode read GetSelected;
+    property Filter: String read GetFilter write SetFilter;
+    property Loading: Boolean read GetLoading write SetLoading;
 
-    function AddNode(Str: String; ImageIndex: Integer = -1): TTreeNode;
-    function AddChildNode(Node: TTreeNode; Str: String; ImageIndex: Integer = -1): TTreeNode;
+    function AddNode(const NodeText: String; const ImageIndex: Integer = -1): TTreeNode; overload;
+    function AddNode(const ParentNode: TTreeNode; const NodeText: String; const ImageIndex: Integer = -1): TTreeNode; overload;
   end;
 
 implementation
@@ -104,23 +115,25 @@ constructor TSimbaTreeView.Create(AOwner: TComponent; NodeClass: TTreeNodeClass)
 begin
   inherited Create(AOwner);
 
+  ControlStyle := ControlStyle + [csOpaque];
+
   FNodeClass := NodeClass;
 
   FScrollbarVert := TATScrollbar.Create(Self);
-  FScrollbarVert.Parent:= Self;
-  FScrollbarVert.Kind:= sbVertical;
-  FScrollbarVert.Align:= alRight;
-  FScrollbarVert.Width:= ATScrollbarTheme.InitialSize;
-  FScrollbarVert.OnChange:= @ScrollVertChange;
+  FScrollbarVert.Parent := Self;
+  FScrollbarVert.Kind := sbVertical;
+  FScrollbarVert.Align := alRight;
+  FScrollbarVert.Width := ATScrollbarTheme.InitialSize;
+  FScrollbarVert.OnChange := @ScrollVertChange;
   FScrollbarVert.Visible := True;
 
   FScrollbarHorz := TATScrollbar.Create(Self);
-  FScrollbarHorz.Parent:= Self;
-  FScrollbarHorz.Kind:= sbHorizontal;
-  FScrollbarHorz.Align:= alBottom;
-  FScrollbarHorz.Height:= ATScrollbarTheme.InitialSize;
+  FScrollbarHorz.Parent := Self;
+  FScrollbarHorz.Kind := sbHorizontal;
+  FScrollbarHorz.Align := alBottom;
+  FScrollbarHorz.Height := ATScrollbarTheme.InitialSize;
   FScrollbarHorz.IndentCorner := 100;
-  FScrollbarHorz.OnChange:= @ScrollHorzChange;
+  FScrollbarHorz.OnChange := @ScrollHorzChange;
   FScrollbarHorz.Visible := True;
 
   FTree := TSimbaInternalTreeView.Create(Self);
@@ -142,16 +155,12 @@ begin
   FTree.DragMode := dmAutomatic;
   FTree.TabStop := False;
 
-  FFilter := TTreeFilterEdit.Create(Self);
-  FFilter.FilteredTreeview := FTree;
-  FFilter.ExpandAllInitially := True;
-
   FHint := TSimbaTreeViewHint.Create(FTree);
 
   FFilterEdit := TSimbaEdit.Create(Self);
   FFilterEdit.Parent := Self;
   FFilterEdit.Align := alBottom;
-  FFilterEdit.OnChange := @DoFilterChange;
+  FFilterEdit.OnChange := @DoFilterEditChange;
   FFilterEdit.Color := SimbaTheme.ColorBackground;
   FFilterEdit.ColorBorder := SimbaTheme.ColorFrame;
   FFilterEdit.ColorBorderActive := SimbaTheme.ColorActive;
@@ -163,7 +172,7 @@ begin
   with ATScrollbarTheme do
   begin
     InitialSize := Scale96ToScreen(16);
-    ThumbMinSize := Scale96ToScreen(36);
+    ThumbMinSize := Scale96ToScreen(24);
     ThumbRoundedRect := False;
     DirectJumpOnClickPageUpDown := True;
 
@@ -180,21 +189,6 @@ begin
   end;
 end;
 
-procedure TSimbaTreeView.ExpandTopLevelNode(const NodeText: String);
-var
-  Node: TTreeNode;
-begin
-  Node := FTree.Items.FindTopLvlNode(NodeText);
-  if Assigned(Node) then
-    Node.Expanded := True;
-end;
-
-procedure TSimbaTreeView.ExpandFirstNode;
-begin
-  if (FTree.Items.GetFirstNode() <> nil) then
-    FTree.Items.GetFirstNode().Expanded := True;
-end;
-
 procedure TSimbaTreeView.FullCollapse;
 begin
   FTree.FullCollapse();
@@ -203,6 +197,22 @@ end;
 procedure TSimbaTreeView.FullExpand;
 begin
   FTree.FullExpand();
+end;
+
+procedure TSimbaTreeView.ForEachTopLevel(Func: TNodeForEachEvent; NodeClass: TTreeNodeClass);
+var
+  I: Integer;
+begin
+  FTree.BeginUpdate();
+  for I := 0 to FTree.Items.TopLvlCount - 1 do
+    if (FTree.Items.TopLvlItems[I] is NodeClass) then
+      Func(FTree.Items.TopLvlItems[I]);
+  FTree.EndUpdate();
+end;
+
+procedure TSimbaTreeView.ForEachTopLevel(Func: TNodeForEachEvent);
+begin
+  ForEachTopLevel(Func, TTreeNode);
 end;
 
 procedure TSimbaTreeView.BeginUpdate;
@@ -221,11 +231,6 @@ begin
   FFilterEdit.Clear();
 end;
 
-procedure TSimbaTreeView.ClearFilter;
-begin
-  FFilterEdit.Clear();
-end;
-
 procedure TSimbaTreeView.Invalidate;
 begin
   inherited;
@@ -236,18 +241,65 @@ begin
   FScrollbarVert.Invalidate();
 end;
 
-function TSimbaTreeView.AddNode(Str: String; ImageIndex: Integer): TTreeNode;
+function TSimbaTreeView.AddNode(const NodeText: String; const ImageIndex: Integer): TTreeNode;
 begin
-  Result := FTree.Items.Add(nil, Str);
+  Result := FTree.Items.Add(nil, NodeText);
   Result.ImageIndex := ImageIndex;
   Result.SelectedIndex := ImageIndex;
 end;
 
-function TSimbaTreeView.AddChildNode(Node: TTreeNode; Str: String; ImageIndex: Integer): TTreeNode;
+function TSimbaTreeView.AddNode(const ParentNode: TTreeNode; const NodeText: String; const ImageIndex: Integer): TTreeNode;
 begin
-  Result := FTree.Items.AddChild(Node, Str);
+  if (ParentNode = nil) then
+    Result := FTree.Items.Add(nil, NodeText)
+  else
+    Result := FTree.Items.AddChild(ParentNode, NodeText);
+
   Result.ImageIndex := ImageIndex;
   Result.SelectedIndex := ImageIndex;
+end;
+
+function TSimbaTreeView.GetFilter: String;
+begin
+  Result := FFilterEdit.Text;
+end;
+
+procedure TSimbaTreeView.UpdateFilter;
+var
+  Node, NodeParent: TTreeNode;
+  FilterText: String;
+begin
+  FilterText := LowerCase(FFilterEdit.Text);
+
+  Items.BeginUpdate();
+
+  try
+    Node := Items.GetFirstNode();
+    while Assigned(Node) do
+    begin
+      Node.Visible := (FilterText = '') or (Pos(FilterText, LowerCase(Node.Text)) > 0);
+
+      if Node.Visible then
+      begin
+        Node.Expanded := True;
+
+        NodeParent := Node.Parent;
+        while Assigned(NodeParent) do
+        begin
+          NodeParent.Expanded := True;
+          NodeParent.Visible := True;
+          NodeParent := NodeParent.Parent;
+        end;
+      end;
+
+      Node := Node.GetNext();
+    end;
+
+    if Assigned(FOnAfterFilter) then
+      FOnAfterFilter(Self);
+  finally
+    Items.EndUpdate();
+  end;
 end;
 
 function TSimbaTreeView.GetImages: TCustomImageList;
@@ -255,9 +307,9 @@ begin
   Result := FTree.Images;
 end;
 
-function TSimbaTreeView.GetOnAfterFilter: TNotifyEvent;
+function TSimbaTreeView.GetLoading: Boolean;
 begin
-  Result := FFilter.OnAfterFilter;
+  Result := FTree.Loading;
 end;
 
 function TSimbaTreeView.GetOnDoubleClick: TNotifyEvent;
@@ -270,14 +322,20 @@ begin
   Result := FTree.OnSelectionChanged;
 end;
 
+procedure TSimbaTreeView.SetFilter(Value: String);
+begin
+  if (FFilterEdit.Text <> Value) then
+    FFilterEdit.Text := Value;
+end;
+
 procedure TSimbaTreeView.SetImages(Value: TCustomImageList);
 begin
   FTree.Images := Value;
 end;
 
-procedure TSimbaTreeView.SetOnAfterFilter(Value: TNotifyEvent);
+procedure TSimbaTreeView.SetLoading(Value: Boolean);
 begin
-  FFilter.OnAfterFilter := Value;
+  FTree.Loading := Value;
 end;
 
 procedure TSimbaTreeView.SetOnDoubleClick(Value: TNotifyEvent);
@@ -298,6 +356,11 @@ end;
 function TSimbaTreeView.GetSelected: TTreeNode;
 begin
   Result := FTree.Selected;
+end;
+
+procedure TSimbaTreeView.DoFilterEditChange(Sender: TObject);
+begin
+  UpdateFilter();
 end;
 
 procedure TSimbaTreeView.DoMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -327,11 +390,6 @@ begin
     NodeClass := FNodeClass
   else
     NodeClass := TTreeNode;
-end;
-
-procedure TSimbaTreeView.DoFilterChange(Sender: TObject);
-begin
-  FFilter.Text := TSimbaEdit(Sender).Text;
 end;
 
 procedure TSimbaTreeView.ScrollVertChange(Sender: TObject);
@@ -396,6 +454,26 @@ begin
   Sender.Canvas.Pen.Width := 2;
   Sender.Canvas.Pen.Color := SimbaTheme.ColorLine;
   Sender.Canvas.Polyline(Points);
+end;
+
+procedure TSimbaInternalTreeView.Paint;
+begin
+  if FLoading then
+  begin
+    Canvas.Brush.Color := BackgroundColor;
+    Canvas.FillRect(ClientRect);
+
+    Exit;
+  end;
+
+  inherited Paint();
+end;
+
+procedure TSimbaInternalTreeView.SetLoading(Value: Boolean);
+begin
+  FLoading := Value;
+
+  Invalidate();
 end;
 
 constructor TSimbaInternalTreeView.Create(AnOwner: TComponent);

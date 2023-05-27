@@ -65,6 +65,7 @@ end;
 
 procedure ShowDeclaration(Declaration: TDeclaration);
 begin
+  {
   if Declaration.Lexer.IsLibrary then
   begin
     if (Declaration is TDeclaration_Method) then
@@ -73,6 +74,7 @@ begin
       SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in plugin: ' + Declaration.Lexer.FileName, Declaration.Text])
   end
   else
+  }
   if (Declaration.Lexer.FileName = '') or FileExists(Declaration.Lexer.FileName) then
   begin
     if FileExists(Declaration.Lexer.FileName) then

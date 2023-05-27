@@ -51,13 +51,13 @@ type
     // Add InDefines to hash
     function GetHash: String; override;
 
-    function DoFindPlugin(Sender: TmwBasePasLex; var FileName: String): Boolean;
-    function DoFindInclude(Sender: TmwBasePasLex; var FileName: String; var Handled: Boolean): Boolean;
+    function DoFindPlugin(Sender: TmwBasePasLex; var AFileName: String): Boolean;
+    function DoFindInclude(Sender: TmwBasePasLex; var AFileName: String; var Handled: Boolean): Boolean;
   public
     RefCount: Integer;
     LastUsed: Integer;
 
-    constructor Create(Sender: TmwBasePasLex; FileName: String); reintroduce;
+    constructor Create(Sender: TmwBasePasLex; AFileName: String); reintroduce;
 
     function IsOutdated: Boolean;
     function IncRef: TCachedInclude;
@@ -74,18 +74,18 @@ begin
   Result := FHash.Value;
 end;
 
-function TCachedInclude.DoFindPlugin(Sender: TmwBasePasLex; var FileName: String): Boolean;
+function TCachedInclude.DoFindPlugin(Sender: TmwBasePasLex; var AFileName: String): Boolean;
 begin
-  FileName := FindInclude(Sender);
+  AFileName := FindInclude(Sender);
 
-  Result := FileName <> '';
+  Result := AFileName <> '';
 end;
 
-function TCachedInclude.DoFindInclude(Sender: TmwBasePasLex; var FileName: String; var Handled: Boolean): Boolean;
+function TCachedInclude.DoFindInclude(Sender: TmwBasePasLex; var AFileName: String; var Handled: Boolean): Boolean;
 begin
-  FileName := FindInclude(Sender);
+  AFileName := FindInclude(Sender);
 
-  Result := FileName <> '';
+  Result := AFileName <> '';
 end;
 
 function TCachedInclude.IsOutdated: Boolean;
@@ -122,7 +122,7 @@ begin
   {$ENDIF}
 end;
 
-constructor TCachedInclude.Create(Sender: TmwBasePasLex; FileName: String);
+constructor TCachedInclude.Create(Sender: TmwBasePasLex; AFileName: String);
 begin
   inherited Create();
 
@@ -133,7 +133,7 @@ begin
   OnFindInclude := @DoFindInclude;
   OnFindPlugin := @DoFindPlugin;
 
-  SetFile(FileName);
+  SetFile(AFileName);
 
   Lexer.LoadDefines(FInDefines);
 end;
