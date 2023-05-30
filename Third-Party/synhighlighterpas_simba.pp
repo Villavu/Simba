@@ -78,6 +78,7 @@ type
     rsAtPropertyOrReadWrite, // very first word after property (name of the property) or after read write in property
     rsInterface,
     rsImplementation,   // Program or Implementation
+    rsCompilerModeSet,  // there was an explicit {$mode ...
 
     // we need to detect:    type TFoo = procedure; // must not fold
     //                       var  foo: procedure;   // must not fold
@@ -89,6 +90,7 @@ type
     // or full class declaration  TFoo = class ... end;
     // Also included after class modifiers "sealed" and "abstract"
     rsAtClass,
+    rsInObjcProtocol,
     rsAfterClass,
     rsAfterIdentifierOrValue, // anywhere where a ^ deref can happen "foo^", "foo^^", "foo()^", "foo[]^"
     rsAfterIdentifierOrValueAdd,
@@ -503,6 +505,7 @@ type
     procedure SlashContinueProc;
     procedure SpaceProc;
     procedure StringProc;
+    procedure DoubleQuoteProc;
     procedure StringProc_MultiLineDQ;
     procedure SymbolProc;
     function TypeHelpersIsStored: Boolean;
@@ -1083,8 +1086,10 @@ begin
         if tfb = cfbtClassSection then
           EndPascalCodeFoldBlockLastLine;
         // after class-section either a class OR a record can close with the same "end"
-        if TopPascalCodeFoldBlockType = cfbtClass then
-          EndPascalCodeFoldBlock
+        if TopPascalCodeFoldBlockType = cfbtClass then begin
+          EndPascalCodeFoldBlock;
+          fRange := fRange - [rsInObjcProtocol];
+        end
         else
         if TopPascalCodeFoldBlockType = cfbtRecord then
           EndPascalCodeFoldBlock;
@@ -1108,13 +1113,21 @@ end;
 
 function TSynPasSyn.Func25: TtkTokenKind;
 begin
-  if KeyComp('Far') then Result := tkKey else Result := tkIdentifier;
+  if (PasCodeFoldRange.BracketNestLevel = 0) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed) and
+     KeyComp('Far')
+  then begin
+    Result := tkKey;
+    FRange := FRange + [rsInProcHeader];
+  end
+  else Result := tkIdentifier;
 end;
 
 function TSynPasSyn.Func27: TtkTokenKind;
 begin
   if KeyComp('Cdecl') and
-     (PasCodeFoldRange.BracketNestLevel = 0) and
+     (PasCodeFoldRange.BracketNestLevel in [0, 1]) and
      (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
      (TopPascalCodeFoldBlockType in ProcModifierAllowed)
   then begin
@@ -1194,6 +1207,27 @@ begin
       EndPascalCodeFoldBlockLastLine;
     StartPascalCodeFoldBlock(cfbtAsm);
   end
+  else
+  if (fRange * [rsAfterClass, rsInObjcProtocol, rsInProcHeader] = [rsAfterClass, rsInObjcProtocol]) and
+     ((CompilerMode = pcmMacPas) or not (rsCompilerModeSet in fRange)) and
+     KeyComp('name') and
+     (PasCodeFoldRange.BracketNestLevel = 0) and
+     (TopPascalCodeFoldBlockType in [cfbtClass])
+  then
+  begin
+    Result := tkKey;
+    fRange := fRange + [rsAtClass];
+  end
+  else
+  if (PasCodeFoldRange.BracketNestLevel = 0) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed) and
+     KeyComp('name') // procedure foo; public name 'abc';
+  then
+  begin
+    Result := tkIdentifier;
+    FRange := FRange + [rsInProcHeader];
+  end
   else Result := tkIdentifier;
 end;
 
@@ -1237,7 +1271,15 @@ end;
 
 function TSynPasSyn.Func38: TtkTokenKind;
 begin
-  if KeyComp('Near') then Result := tkKey else Result := tkIdentifier;
+  if (PasCodeFoldRange.BracketNestLevel = 0) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed) and
+     KeyComp('Near')
+  then begin
+    Result := tkKey;
+    FRange := FRange + [rsInProcHeader];
+  end
+  else Result := tkIdentifier;
 end;
 
 function TSynPasSyn.Func39: TtkTokenKind;
@@ -1306,8 +1348,13 @@ end;
 
 function TSynPasSyn.Func42: TtkTokenKind;
 begin
-  if KeyComp('Alias') then
-    Result := tkKey
+  if (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed) and
+     KeyComp('Alias')
+  then begin
+    Result := tkKey;
+    FRange := FRange + [rsInProcHeader];
+  end
   else
   if KeyComp('Final') and
      (TopPascalCodeFoldBlockType in [cfbtClass, cfbtClassSection]) and
@@ -1386,7 +1433,7 @@ end;
 function TSynPasSyn.Func52: TtkTokenKind;
 begin
   if KeyComp('Pascal') and
-     (PasCodeFoldRange.BracketNestLevel = 0) and
+     (PasCodeFoldRange.BracketNestLevel in [0,1]) and
      (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
      (TopPascalCodeFoldBlockType in ProcModifierAllowed)
   then begin
@@ -1472,7 +1519,7 @@ end;
 function TSynPasSyn.Func59: TtkTokenKind;
 begin
   if KeyComp('Safecall') and
-     (PasCodeFoldRange.BracketNestLevel = 0) and
+     (PasCodeFoldRange.BracketNestLevel in [0, 1]) and
      (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
      (TopPascalCodeFoldBlockType in ProcModifierAllowed)
   then begin
@@ -1494,7 +1541,23 @@ end;
 
 function TSynPasSyn.Func61: TtkTokenKind;
 begin
-  if KeyComp('Dispid') or KeyComp('Generic') then
+  if (PasCodeFoldRange.BracketNestLevel = 0) and
+     (fRange * [rsAtPropertyOrReadWrite, rsInProcHeader, rsAfterEqualOrColon] = []) and
+     ( (rsProperty in fRange) or
+       ( (fRange * [rsProperty, rsWasInProcHeader] = [rsWasInProcHeader]) and
+         (TopPascalCodeFoldBlockType in ProcModifierAllowed)
+       )
+     ) and
+     KeyComp('Dispid')
+  then begin
+    Result := tkKey;
+   if rsWasInProcHeader in fRange then
+     FRange := FRange + [rsInProcHeader];
+   if rsProperty in fRange then
+     fRange := fRange + [rsAtPropertyOrReadWrite] - [rsVarTypeInSpecification];
+  end
+  else
+  if KeyComp('Generic') then
     Result := tkKey
   else
     Result := tkIdentifier;
@@ -1509,7 +1572,14 @@ begin
       if (TopPascalCodeFoldBlockType=cfbtClassSection) then
         EndPascalCodeFoldBlockLastLine;
       StartPascalCodeFoldBlock(cfbtClassSection);
-    end;
+    end
+    else
+    // outside class: procedure foo; public name 'abc';
+    if (PasCodeFoldRange.BracketNestLevel = 0) and
+       (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+       (TopPascalCodeFoldBlockType in ProcModifierAllowed)
+    then
+      FRange := FRange + [rsInProcHeader];
   end
   else if KeyComp('Record') then begin
     StartPascalCodeFoldBlock(cfbtRecord);
@@ -1525,7 +1595,16 @@ begin
       StartPascalCodeFoldBlock(cfbtTry);
     Result := tkKey;
   end
-  else if KeyComp('Inline') then Result := tkKey else Result := tkIdentifier;
+  else
+  if (PasCodeFoldRange.BracketNestLevel in [0, 1]) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed) and
+     KeyComp('Inline')
+  then begin
+    Result := tkKey;
+    FRange := FRange + [rsInProcHeader];
+  end
+  else Result := tkIdentifier;
 end;
 
 function TSynPasSyn.Func64: TtkTokenKind;
@@ -1611,8 +1690,14 @@ begin
     else
       Result := tkIdentifier;
   end else
-  if KeyComp('Dynamic') then
-    Result := tkKey
+  if (PasCodeFoldRange.BracketNestLevel = 0) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed) and
+     KeyComp('Dynamic')
+  then begin
+    Result := tkKey;
+    FRange := FRange + [rsInProcHeader];
+  end
   else
   if KeyComp('Message') and
      (fRange * [rsAfterClassMembers, rsInProcHeader, rsProperty] = [rsAfterClassMembers]) and
@@ -1627,7 +1712,7 @@ end;
 function TSynPasSyn.Func71: TtkTokenKind;
 begin
   if KeyComp('Stdcall') and
-     (PasCodeFoldRange.BracketNestLevel = 0) and
+     (PasCodeFoldRange.BracketNestLevel in [0, 1]) and
      (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
      (TopPascalCodeFoldBlockType in ProcModifierAllowed)
   then begin
@@ -1720,9 +1805,12 @@ function TSynPasSyn.Func81: TtkTokenKind;
 var
   tbf: TPascalCodeFoldBlockType;
 begin
-  if KeyComp('Stored') then
-  begin
-    if rsProperty in fRange then Result := tkKey else Result := tkIdentifier;
+  if (fRange * [rsProperty, rsAtPropertyOrReadWrite, rsAfterEqualOrColon] =  [rsProperty]) and
+     (PasCodeFoldRange.BracketNestLevel = 0) and
+     KeyComp('Stored')
+  then begin
+    Result := tkKey;
+    fRange := fRange + [rsAtPropertyOrReadWrite] - [rsVarTypeInSpecification];
   end
   else if KeyComp('Interface') then begin
     if (rsAfterEqual in fRange) and (PasCodeFoldRange.BracketNestLevel = 0)
@@ -1778,7 +1866,9 @@ begin
     if not (rsAfterClassMembers in fRange) then
       Result := tkIdentifier;
   end
-  else if KeyComp('ObjcClass') then begin
+  else if ((CompilerMode = pcmMacPas) or not (rsCompilerModeSet in fRange)) and
+    KeyComp('ObjcClass')
+  then begin
     Result := tkKey;
     if (rsAfterEqualOrColon in fRange) and (PasCodeFoldRange.BracketNestLevel = 0) then
     begin
@@ -1792,7 +1882,11 @@ end;
 
 function TSynPasSyn.Func85: TtkTokenKind;
 begin
-  if KeyComp('Forward') then begin
+  if (PasCodeFoldRange.BracketNestLevel = 0) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed) and
+     KeyComp('Forward')
+  then begin
     Result := tkKey;
     if TopPascalCodeFoldBlockType = cfbtProcedure then begin
       EndPascalCodeFoldBlock(True);
@@ -1811,7 +1905,15 @@ end;
 
 function TSynPasSyn.Func86: TtkTokenKind;
 begin
-  if KeyComp('VarArgs') then Result := tkKey else Result := tkIdentifier;
+  if (PasCodeFoldRange.BracketNestLevel in [0, 1]) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed) and
+     KeyComp('VarArgs')
+  then begin
+    Result := tkKey;
+    FRange := FRange + [rsInProcHeader];
+  end
+  else Result := tkIdentifier;
 end;
 
 function TSynPasSyn.Func87: TtkTokenKind;
@@ -1831,7 +1933,7 @@ begin
     Result := tkKey;
   end
   else if KeyComp('Mwpascal') and
-     (PasCodeFoldRange.BracketNestLevel = 0) and
+     (PasCodeFoldRange.BracketNestLevel in [0, 1]) and
      (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
      (TopPascalCodeFoldBlockType in ProcModifierAllowed)
   then begin
@@ -1957,18 +2059,44 @@ end;
 
 function TSynPasSyn.Func92: TtkTokenKind;
 begin
-  if D4syntax and KeyComp('overload') then Result := tkKey else
-    if KeyComp('NoInline') then Result := tkKey else
-      if KeyComp('Inherited') then Result := tkKey else Result := tkIdentifier;
+  if D4syntax and
+     (PasCodeFoldRange.BracketNestLevel in [0, 1]) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed) and
+     KeyComp('overload')
+  then begin
+    Result := tkKey;
+    FRange := FRange + [rsInProcHeader];
+  end
+  else
+  if KeyComp('NoInline') then Result := tkKey
+  else
+  if KeyComp('Inherited') then Result := tkKey
+  else Result := tkIdentifier;
 end;
 
 function TSynPasSyn.Func94: TtkTokenKind;
 begin
-  if KeyComp('Assembler') then Result := tkKey else
-    if KeyComp('Readonly') then
-    begin
-      if rsProperty in fRange then Result := tkKey else Result := tkIdentifier;
-    end else Result := tkIdentifier;
+  if (PasCodeFoldRange.BracketNestLevel = 0) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed) and
+     KeyComp('Assembler')
+  then begin
+    Result := tkKey;
+    FRange := FRange + [rsInProcHeader];
+  end
+  else
+  if KeyComp('Readonly') then
+  begin
+    if (fRange * [rsProperty, rsAtPropertyOrReadWrite, rsAfterEqualOrColon] =  [rsProperty]) and
+       (PasCodeFoldRange.BracketNestLevel = 0)
+    then begin
+      Result := tkKey;
+      FOldRange := FOldRange - [rsAtPropertyOrReadWrite];
+    end
+    else
+      Result := tkIdentifier;
+  end else Result := tkIdentifier;
 end;
 
 function TSynPasSyn.Func95: TtkTokenKind;
@@ -1993,20 +2121,45 @@ begin
       StartPascalCodeFoldBlock(cfbtClassSection);
     end;
   end
-  else if KeyComp('Override') then
-    Result := tkKey
+  else
+  if (PasCodeFoldRange.BracketNestLevel = 0) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed) and
+     KeyComp('Override')
+  then begin
+    Result := tkKey;
+    FRange := FRange + [rsInProcHeader];
+  end
   else
     Result := tkIdentifier;
 end;
 
 function TSynPasSyn.Func97: TtkTokenKind;
 begin
-  if KeyComp('Threadvar') then Result := tkKey else Result := tkIdentifier;
+  if KeyComp('Threadvar') then Result := tkKey
+  else
+  if (rsInObjcProtocol in fRange) and
+     KeyComp('required') and
+     (PasCodeFoldRange.BracketNestLevel = 0) and
+     (TopPascalCodeFoldBlockType in [cfbtClass, cfbtClassSection])
+  then begin
+    Result := tkKey;
+    fRange := fRange - [rsAfterClassMembers, rsVarTypeInSpecification];
+    StartPascalCodeFoldBlock(cfbtClassSection);
+  end
+  else Result := tkIdentifier;
 end;
 
 function TSynPasSyn.Func98: TtkTokenKind;
 begin
-  if KeyComp('Export') then Result := tkKey else
+  if (PasCodeFoldRange.BracketNestLevel in [0, 1]) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed) and
+     KeyComp('Export')
+  then begin
+    Result := tkKey;
+  end
+  else
     if KeyComp('Nodefault') then
     begin
       if rsProperty in fRange then Result := tkKey else Result := tkIdentifier;
@@ -2014,13 +2167,22 @@ begin
 end;
 
 function TSynPasSyn.Func99: TtkTokenKind;
+var
+  tbf: TPascalCodeFoldBlockType;
 begin
-  if KeyComp('External') then begin
+  tbf := TopPascalCodeFoldBlockType;
+  if (PasCodeFoldRange.BracketNestLevel = 0) and
+     ( (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+       (tbf in ProcModifierAllowed)
+     ) and
+     KeyComp('External')
+  then begin
     Result := tkKey;
-    if TopPascalCodeFoldBlockType = cfbtProcedure then begin
+    if tbf = cfbtProcedure then begin
       EndPascalCodeFoldBlock(True);
     end;
-  end else Result := tkIdentifier;
+  end
+  else Result := tkIdentifier;
 end;
 
 function TSynPasSyn.Func100: TtkTokenKind;
@@ -2041,7 +2203,7 @@ var
   tbf: TPascalCodeFoldBlockType;
 begin
   if KeyComp('Register') and
-     (PasCodeFoldRange.BracketNestLevel = 0) and
+     (PasCodeFoldRange.BracketNestLevel in [0, 1]) and
      (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
      (TopPascalCodeFoldBlockType in ProcModifierAllowed)
   then begin
@@ -2095,12 +2257,30 @@ begin
     fRange := fRange + [rsInProcHeader];
     Result := tkKey;
   end
+  else
+  if (rsInObjcProtocol in fRange) and
+     KeyComp('optional') and
+     (PasCodeFoldRange.BracketNestLevel = 0) and
+     (TopPascalCodeFoldBlockType in [cfbtClass, cfbtClassSection])
+  then begin
+    Result := tkKey;
+    fRange := fRange - [rsAfterClassMembers, rsVarTypeInSpecification];
+    StartPascalCodeFoldBlock(cfbtClassSection);
+  end
   else Result := tkIdentifier;
 end;
 
 function TSynPasSyn.Func103: TtkTokenKind;
 begin
-  if KeyComp('Virtual') then Result := tkKey else Result := tkIdentifier;
+  if (PasCodeFoldRange.BracketNestLevel = 0) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed) and
+     KeyComp('Virtual')
+  then begin
+    Result := tkKey;
+    FRange := FRange + [rsInProcHeader];
+  end
+  else Result := tkIdentifier;
 end;
 
 function TSynPasSyn.Func105: TtkTokenKind;
@@ -2152,6 +2332,8 @@ begin
 end;
 
 function TSynPasSyn.Func108: TtkTokenKind;
+var
+  InClass: Boolean;
 begin
   if KeyComp('Operator') then
   begin
@@ -2161,10 +2343,16 @@ begin
       CloseBeginEndBlocksBeforeProc;
       if TopPascalCodeFoldBlockType in [cfbtVarType, cfbtLocalVarType] then
         EndPascalCodeFoldBlockLastLine;
-      if ((rsImplementation in fRange) and
-        not(TopPascalCodeFoldBlockType in [cfbtClass, cfbtClassSection, cfbtRecord])) then
+
+      InClass := TopPascalCodeFoldBlockType in [{cfbtClass,} cfbtClassSection, cfbtRecord]; // only in records
+      if ( (rsImplementation in fRange) and (not InClass) ) then
         StartPascalCodeFoldBlock(cfbtProcedure);
+
+      if InClass then
+        fRange := fRange + [rsAfterClassMembers];
+      //fRange := fRange + [rsAtProcName];
     end;
+    fRange := fRange + [rsInProcHeader];
     Result := tkKey;
   end
   else
@@ -2204,12 +2392,13 @@ end;
 
 function TSynPasSyn.Func124: TtkTokenKind;
 begin
-  if KeyComp('ObjcCategory') then
-  begin
+  if ((CompilerMode = pcmMacPas) or not (rsCompilerModeSet in fRange)) and
+     KeyComp('ObjcCategory')
+  then begin
     Result := tkKey;
     if (rsAfterEqualOrColon in fRange) and (PasCodeFoldRange.BracketNestLevel = 0) then
     begin
-      fRange := fRange + [rsAtClass];
+      fRange := fRange + [rsAtClass] - [rsVarTypeInSpecification, rsAfterEqual];
       StartPascalCodeFoldBlock(cfbtClass);
     end;
   end
@@ -2219,8 +2408,17 @@ end;
 
 function TSynPasSyn.Func125: TtkTokenKind;
 begin
-  if (KeyComp('NoReturn') or KeyComp('Ms_abi_cdecl')) and
+  if KeyComp('NoReturn') and
      (PasCodeFoldRange.BracketNestLevel = 0) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed)
+  then begin
+    Result := tkKey;
+    FRange := FRange + [rsInProcHeader];
+  end
+  else
+  if KeyComp('Ms_abi_cdecl') and
+     (PasCodeFoldRange.BracketNestLevel in [0, 1]) and
      (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
      (TopPascalCodeFoldBlockType in ProcModifierAllowed)
   then begin
@@ -2236,8 +2434,16 @@ begin
   if D4syntax and KeyComp('Implements') then
   begin
     if rsProperty in fRange then Result := tkKey else Result := tkIdentifier;
-  end else if KeyComp('NoStackFrame') then
-    Result := tkKey
+  end
+  else
+  if (PasCodeFoldRange.BracketNestLevel in [0, 1]) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed) and
+     KeyComp('NoStackFrame')
+  then begin
+    Result := tkKey;
+    FRange := FRange + [rsInProcHeader];
+  end
   else
     Result := tkIdentifier;
 end;
@@ -2255,9 +2461,9 @@ begin
   if KeyComp('Dispinterface') then
   begin
     Result := tkKey;
-    if (rsAfterEqualOrColon in fRange) and (PasCodeFoldRange.BracketNestLevel = 0) then
+    if (rsAfterEqual in fRange) and (PasCodeFoldRange.BracketNestLevel = 0) then
     begin
-      fRange := fRange + [rsAtClass];
+      fRange := fRange + [rsAtClass] - [rsVarTypeInSpecification, rsAfterEqual];
       StartPascalCodeFoldBlock(cfbtClass);
     end;
   end
@@ -2278,7 +2484,16 @@ end;
 
 function TSynPasSyn.Func132: TtkTokenKind;
 begin
-  if D4syntax and KeyComp('Reintroduce') then Result := tkKey else
+  if D4syntax and
+     (PasCodeFoldRange.BracketNestLevel = 0) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed) and
+     KeyComp('Reintroduce')
+  then begin
+    Result := tkKey;
+    FRange := FRange + [rsInProcHeader];
+  end
+  else
     Result := tkIdentifier;
 end;
 
@@ -2311,7 +2526,10 @@ end;
 
 function TSynPasSyn.Func139: TtkTokenKind;
 begin
-  if KeyComp('WeakExternal') then
+  if (PasCodeFoldRange.BracketNestLevel = 0) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed) and
+     KeyComp('WeakExternal') then
   begin
     Result := tkKey;
     if TopPascalCodeFoldBlockType = cfbtProcedure then
@@ -2378,20 +2596,27 @@ begin
     end;
     Result := tkKey;
   end else
-  if KeyComp('compilerproc') then // fpc modifier
-    Result := tkKey
+  if (PasCodeFoldRange.BracketNestLevel = 0) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed) and
+     KeyComp('compilerproc')
+  then begin// fpc modifier
+    Result := tkKey;
+    FRange := FRange + [rsInProcHeader];
+  end
   else
     Result := tkIdentifier;
 end;
 
 function TSynPasSyn.Func144: TtkTokenKind;
 begin
-  if KeyComp('ObjcProtocol') then
-  begin
+  if ((CompilerMode = pcmMacPas) or not (rsCompilerModeSet in fRange)) and
+     KeyComp('ObjcProtocol')
+  then begin
     Result := tkKey;
     if (rsAfterEqualOrColon in fRange) and (PasCodeFoldRange.BracketNestLevel = 0) then
     begin
-      fRange := fRange + [rsAtClass];
+      fRange := fRange + [rsAtClass, rsInObjcProtocol] - [rsVarTypeInSpecification, rsAfterEqual];
       StartPascalCodeFoldBlock(cfbtClass);
     end;
   end
@@ -2474,7 +2699,7 @@ begin
     Result := tkKey
   else
   if KeyComp('Ms_abi_default') and
-     (PasCodeFoldRange.BracketNestLevel = 0) and
+     (PasCodeFoldRange.BracketNestLevel in [0, 1]) and
      (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
      (TopPascalCodeFoldBlockType in ProcModifierAllowed)
   then begin
@@ -2545,7 +2770,7 @@ end;
 function TSynPasSyn.Func178: TtkTokenKind;
 begin
   if KeyComp('Sysv_abi_cdecl') and
-     (PasCodeFoldRange.BracketNestLevel = 0) and
+     (PasCodeFoldRange.BracketNestLevel in [0, 1]) and
      (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
      (TopPascalCodeFoldBlockType in ProcModifierAllowed)
   then begin
@@ -2559,7 +2784,7 @@ end;
 function TSynPasSyn.Func220: TtkTokenKind;
 begin
   if KeyComp('Sysv_abi_default') and
-     (PasCodeFoldRange.BracketNestLevel = 0) and
+     (PasCodeFoldRange.BracketNestLevel in [0, 1]) and
      (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
      (TopPascalCodeFoldBlockType in ProcModifierAllowed)
   then begin
@@ -2603,7 +2828,7 @@ begin
       '%': fProcTable[I] := @BinaryProc;
       '&': fProcTable[I] := @OctalProc;
       #39: fProcTable[I] := @StringProc;
-      '"': fProcTable[I] := @StringProc_MultiLineDQ;
+      '"': fProcTable[I] := @DoubleQuoteProc;
       '0'..'9': fProcTable[I] := @NumberProc;
       'A'..'Z', 'a'..'z', '_':
         fProcTable[I] := @IdentProc;
@@ -2845,6 +3070,7 @@ begin
   if TextComp('mode') then begin
     // $mode directive
     inc(Run,4);
+    include(fRange, rsCompilerModeSet);
     // skip space
     while (fLine[Run] in [' ',#9,#10,#13]) do inc(Run);
     if TextComp('objfpc') then
@@ -2858,7 +3084,9 @@ begin
     else if TextComp('tp') then
       CompilerMode:=pcmTP
     else if TextComp('macpas') then
-      CompilerMode:=pcmMacPas;
+      CompilerMode:=pcmMacPas
+    else
+      exclude(fRange, rsCompilerModeSet);
   end;
   repeat
     case fLine[Run] of
@@ -3036,6 +3264,13 @@ begin
        ( (rsProperty in fRange) or not(rsAfterClassMembers in fRange) )
     then
       fRange := fRange + [rsVarTypeInSpecification];
+
+    // modifiers "alias: 'foo';"
+    if (PasCodeFoldRange.BracketNestLevel = 0) and
+       (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsInProcHeader]) and
+       (TopPascalCodeFoldBlockType in ProcModifierAllowed)
+    then
+      FRange := FRange + [rsInProcHeader];
   end;
 end;
 
@@ -3276,6 +3511,10 @@ procedure TSynPasSyn.SquareOpenProc;
 begin
   inc(Run);
   fTokenID := tkSymbol;
+  if (PasCodeFoldRange.BracketNestLevel = 0) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader])
+  then
+    FOldRange := FOldRange - [rsWasInProcHeader];
   PasCodeFoldRange.IncBracketNestLevel;
 end;
 
@@ -3285,6 +3524,12 @@ begin
   fTokenID := tkSymbol;
   fRange := fRange + [rsAfterIdentifierOrValueAdd];
   PasCodeFoldRange.DecBracketNestLevel;
+
+  if (PasCodeFoldRange.BracketNestLevel = 0) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsWasInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed)
+  then
+    FRange := FRange + [rsInProcHeader] - [rsWasInProcHeader]; // rsWasInProcHeader was removed from FOldRange
 end;
 
 procedure TSynPasSyn.EqualSignProc;
@@ -3314,8 +3559,10 @@ begin
   if tfb = cfbtUses then
     EndPascalCodeFoldBlock;
 
-  if (tfb = cfbtClass) and ((rsAfterClass in fRange) or InSkipBlocks) then
+  if (tfb = cfbtClass) and ((rsAfterClass in fRange) or InSkipBlocks) then begin
     EndPascalCodeFoldBlock(True, True);
+    fRange := fRange - [rsInObjcProtocol];
+  end;
 
   while (tfb in [cfbtIfThen,cfbtIfElse,cfbtForDo,cfbtWhileDo,cfbtWithDo]) do begin
     EndPascalCodeFoldBlock(True);
@@ -3409,39 +3656,42 @@ begin
     end;
     Inc(Run);
   end;
+
+  // modifiers like "alias" take a string as argument
+  if (PasCodeFoldRange.BracketNestLevel = 0) and
+     (fRange * [rsInProcHeader, rsProperty, rsAfterEqualOrColon, rsWasInProcHeader] = [rsInProcHeader]) and
+     (TopPascalCodeFoldBlockType in ProcModifierAllowed)
+  then
+    FRange := FRange + [rsInProcHeader];
+end;
+
+procedure TSynPasSyn.DoubleQuoteProc;
+begin
+  if (spmsmDoubleQuote in FStringMultilineMode) then begin
+    Inc(Run);
+    StringProc_MultiLineDQ();
+  end
+  else
+    SymbolProc();
 end;
 
 procedure TSynPasSyn.StringProc_MultiLineDQ;
 begin
-  if (not (spmsmDoubleQuote in FStringMultilineMode)) then
-  begin
-    SymbolProc();
-    Exit;
-  end;
   fTokenID := tkString;
+  fRange := fRange + [rsAnsiMultiDQ];
 
-  if (rsAnsiMultiDQ in fRange) and (fLine[Run] = '"') then
+  while (fLine[Run] <> #0) do
   begin
-    Inc(Run);
-    fRange := fRange - [rsAnsiMultiDQ];
-  end else
-  begin
-    Inc(Run);
-    fRange := fRange + [rsAnsiMultiDQ];
-
-    while (fLine[Run] <> #0) do
+    if (fLine[Run] = '"') then
     begin
-      if (fLine[Run] = '"') then
-      begin
-        Inc(Run);
-        if (fLine[Run] <> '"') then
-        begin
-          fRange := fRange - [rsAnsiMultiDQ];
-          Break;
-        end;
-      end;
       Inc(Run);
+      if (fLine[Run] <> '"') then
+      begin
+        fRange := fRange - [rsAnsiMultiDQ];
+        Break;
+      end;
     end;
+    Inc(Run);
   end;
 end;
 
@@ -3497,6 +3747,8 @@ begin
         SlashContinueProc
       else begin
         FOldRange := fRange;
+        if (PasCodeFoldRange.BracketNestLevel = 1) then // procedure foo; [attr...]
+          FOldRange := FOldRange - [rsWasInProcHeader];
         FTokenFlags := [];
         //if rsAtEqual in fRange then
         //  fRange := fRange + [rsAfterEqualOrColon] - [rsAtEqual]
@@ -4932,4 +5184,5 @@ finalization
   FreeAndNil(KeywordsList);
 
 end.
+
 
