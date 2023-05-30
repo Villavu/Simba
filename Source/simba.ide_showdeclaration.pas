@@ -12,7 +12,8 @@ procedure FindAndShowDeclaration(Script, ScriptFileName: String; CaretPos: Integ
 
 procedure ShowDeclaration(StartPos, EndPos, Line: Integer; FileName: String); overload;
 procedure ShowDeclaration(Declaration: TDeclaration); overload;
-procedure ShowInternalDeclaration(Header: String; FileName: String);
+procedure ShowSimbaDeclaration(Header: String; FileName: String);
+procedure ShowPluginDeclaration(Header: String; FileName: String);
 
 procedure ShowDeclarationDialog(Decls: TDeclarationArray);
 
@@ -98,12 +99,20 @@ begin
   end;
 end;
 
-procedure ShowInternalDeclaration(Header: String; FileName: String);
+procedure ShowSimbaDeclaration(Header: String; FileName: String);
 begin
   if (Header = '') then
     Exit;
 
   SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in Simba: ' + FileName, 'Declaration:', Header]);
+end;
+
+procedure ShowPluginDeclaration(Header: String; FileName: String);
+begin
+  if (Header = '') then
+    Exit;
+
+  SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in plugin "' + FileName + '"', 'Declaration:', Header]);
 end;
 
 procedure ShowDeclarationDialog(Decls: TDeclarationArray);

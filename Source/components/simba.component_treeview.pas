@@ -41,8 +41,8 @@ type
     constructor Create(AnOwner: TComponent); override;
   end;
 
-  TNodeHintEvent = function(Node: TTreeNode): String of object;
-  TNodeForEachEvent = procedure(Node: TTreeNode) is nested;
+  TNodeHintEvent = function(const Node: TTreeNode): String of object;
+  TNodeForEachEvent = procedure(const Node: TTreeNode) is nested;
 
   TSimbaTreeView = class(TCustomControl)
   protected
@@ -61,15 +61,22 @@ type
     function GetLoading: Boolean;
     function GetOnDoubleClick: TNotifyEvent;
     function GetOnSelectionChange: TNotifyEvent;
+
     procedure SetFilter(Value: String);
     procedure SetImages(Value: TCustomImageList);
     procedure SetLoading(Value: Boolean);
     procedure SetOnDoubleClick(Value: TNotifyEvent);
     procedure SetOnSelectionChange(Value: TNotifyEvent);
+    procedure SetScrolledLeft(Value: Integer);
+    procedure SetScrolledTop(Value: Integer);
+
+    function GetScrolledLeft: Integer;
+    function GetScrolledTop: Integer;
 
     function GetItems: TTreeNodes;
     function GetSelected: TTreeNode;
     function GetFilter: String;
+    function GetTopLevelCount: Integer;
 
     procedure DoFilterEditChange(Sender: TObject);
     procedure DoMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -83,8 +90,7 @@ type
     procedure FullCollapse;
     procedure FullExpand;
 
-    procedure ForEachTopLevel(Func: TNodeForEachEvent; NodeClass: TTreeNodeClass); overload;
-    procedure ForEachTopLevel(Func: TNodeForEachEvent); overload;
+    procedure ForEachTopLevel(Func: TNodeForEachEvent);
 
     procedure BeginUpdate;
     procedure EndUpdate;
@@ -101,6 +107,9 @@ type
     property Selected: TTreeNode read GetSelected;
     property Filter: String read GetFilter write SetFilter;
     property Loading: Boolean read GetLoading write SetLoading;
+    property ScrolledLeft: Integer read GetScrolledLeft write SetScrolledLeft;
+    property ScrolledTop: Integer read GetScrolledTop write SetScrolledTop;
+    property TopLevelCount: Integer read GetTopLevelCount;
 
     function AddNode(const NodeText: String; const ImageIndex: Integer = -1): TTreeNode; overload;
     function AddNode(const ParentNode: TTreeNode; const NodeText: String; const ImageIndex: Integer = -1): TTreeNode; overload;
@@ -199,20 +208,14 @@ begin
   FTree.FullExpand();
 end;
 
-procedure TSimbaTreeView.ForEachTopLevel(Func: TNodeForEachEvent; NodeClass: TTreeNodeClass);
+procedure TSimbaTreeView.ForEachTopLevel(Func: TNodeForEachEvent);
 var
   I: Integer;
 begin
   FTree.BeginUpdate();
   for I := 0 to FTree.Items.TopLvlCount - 1 do
-    if (FTree.Items.TopLvlItems[I] is NodeClass) then
-      Func(FTree.Items.TopLvlItems[I]);
+    Func(FTree.Items.TopLvlItems[I]);
   FTree.EndUpdate();
-end;
-
-procedure TSimbaTreeView.ForEachTopLevel(Func: TNodeForEachEvent);
-begin
-  ForEachTopLevel(Func, TTreeNode);
 end;
 
 procedure TSimbaTreeView.BeginUpdate;
@@ -262,6 +265,33 @@ end;
 function TSimbaTreeView.GetFilter: String;
 begin
   Result := FFilterEdit.Text;
+end;
+
+function TSimbaTreeView.GetScrolledLeft: Integer;
+begin
+  Result := FTree.ScrolledLeft;
+end;
+
+function TSimbaTreeView.GetScrolledTop: Integer;
+begin
+  Result := FTree.ScrolledTop;
+end;
+
+procedure TSimbaTreeView.SetScrolledLeft(Value: Integer);
+begin
+  FTree.ScrolledLeft := Value;
+  FTree.UpdateScrollBars();
+end;
+
+procedure TSimbaTreeView.SetScrolledTop(Value: Integer);
+begin
+  FTree.ScrolledTop := Value;
+  FTree.UpdateScrollBars();
+end;
+
+function TSimbaTreeView.GetTopLevelCount: Integer;
+begin
+  Result := FTree.Items.TopLvlCount;
 end;
 
 procedure TSimbaTreeView.UpdateFilter;
@@ -335,6 +365,7 @@ end;
 
 procedure TSimbaTreeView.SetLoading(Value: Boolean);
 begin
+  FTree.Enabled := not Value;
   FTree.Loading := Value;
 end;
 
@@ -471,6 +502,8 @@ end;
 
 procedure TSimbaInternalTreeView.SetLoading(Value: Boolean);
 begin
+  if (Value = FLoading) then
+    Exit;
   FLoading := Value;
 
   Invalidate();

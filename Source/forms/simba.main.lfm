@@ -1,11 +1,11 @@
 object SimbaForm: TSimbaForm
-  Left = 3347
+  Left = 4167
   Height = 578
-  Top = 630
+  Top = 737
   Width = 910
   Caption = 'Simba'
-  ClientHeight = 578
-  ClientWidth = 910
+  ClientHeight = 0
+  ClientWidth = 0
   DesignTimePPI = 120
   KeyPreview = True
   OnClose = FormClose

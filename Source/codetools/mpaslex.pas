@@ -1280,7 +1280,7 @@ begin
     Inc(StartPos);
 
   EndPos := StartPos + 1;
-  while (fDoc[EndPos] <> #0) and (fDoc[EndPos] <> '}') do
+  while (EndPos < Length(fDoc)) and (fDoc[EndPos] <> #0) and (fDoc[EndPos] <> '}') do
     Inc(EndPos);
 
   SetLength(Result, (EndPos - StartPos) - 1);
