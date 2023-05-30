@@ -107,8 +107,8 @@ var
   I: Integer;
 begin
   Result := '';
-  for I := 0 to FPlugins.Count - 1 do
-    Result := Result + FPlugins[I].Hash;
+  for I := 0 to Plugins.Count - 1 do
+    Result := Result + Plugins[I].Hash;
 end;
 
 function TCodeinsight.GetPlugins: TCodeParserList;
