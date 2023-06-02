@@ -332,7 +332,7 @@ begin
     MarkupInfo.Background := RGBToColor(128, 0, 128);
     MarkupInfo.BackAlpha := 220;
 
-    Add('Editor.Highlight All', MarkupInfo);
+    Add('Editor.Find Matches', MarkupInfo);
   end;
 
   Add('Editor.Line Highlight', Editor.LineHighlightColor);
@@ -340,7 +340,6 @@ begin
   Add('Editor.Folded Code Line', Editor.FoldedCodeLineColor);
   Add('Editor.Bracket Match', Editor.BracketMatchColor);
   Add('Editor.Selected', Editor.SelectedColor);
-  Add('Editor.Highlight All', Editor.HighlightAllColor);
   Add('Editor.Mouse Link', Editor.MouseLinkColor);
   Add('Editor.Background', TSimbaEditor_BackgroundColorAttribute.Create());
   Add('Editor.Indent Line', TSimbaEditor_IndentColorAttribute.Create());

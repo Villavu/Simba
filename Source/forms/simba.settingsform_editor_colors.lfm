@@ -1,243 +1,90 @@
 object EditorColorsFrame: TEditorColorsFrame
   Left = 0
-  Height = 877
+  Height = 894
   Top = 0
-  Width = 1111
-  ClientHeight = 877
-  ClientWidth = 1111
+  Width = 1362
+  ClientHeight = 894
+  ClientWidth = 1362
   DesignTimePPI = 120
+  OnResize = FrameResize
   ParentFont = False
   TabOrder = 0
-  DesignLeft = 3635
-  DesignTop = 367
+  DesignLeft = 2858
+  DesignTop = 179
   object Panel1: TPanel
     Left = 0
-    Height = 877
+    Height = 894
     Top = 0
-    Width = 1111
+    Width = 1362
     Align = alClient
+    Anchors = [akTop, akLeft, akRight]
     BevelOuter = bvNone
-    ClientHeight = 877
-    ClientWidth = 1111
+    ClientHeight = 894
+    ClientWidth = 1362
     TabOrder = 0
-    object GroupBox1: TGroupBox
-      AnchorSideLeft.Control = Panel1
-      AnchorSideTop.Control = Panel1
-      Left = 0
-      Height = 227
-      Top = 5
-      Width = 192
-      BorderSpacing.Top = 5
-      Caption = 'Presets'
-      ClientHeight = 202
-      ClientWidth = 188
-      TabOrder = 0
-      object PresetListBox: TListBox
-        Left = 10
-        Height = 187
-        Top = 5
-        Width = 168
-        Align = alClient
-        BorderSpacing.Left = 10
-        BorderSpacing.Top = 5
-        BorderSpacing.Right = 10
-        BorderSpacing.Bottom = 10
-        Items.Strings = (
-          'Light'
-          'Dark'
-        )
-        ItemHeight = 20
-        OnSelectionChange = DoPresetChanged
-        Options = []
-        TabOrder = 0
-      end
-    end
-    object GroupBox2: TGroupBox
-      AnchorSideLeft.Control = GroupBox1
-      AnchorSideLeft.Side = asrBottom
-      AnchorSideTop.Control = Panel1
-      AnchorSideRight.Control = Panel1
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = GroupBox1
-      AnchorSideBottom.Side = asrBottom
-      Left = 202
-      Height = 227
-      Top = 5
-      Width = 899
-      Anchors = [akTop, akLeft, akRight, akBottom]
-      BorderSpacing.Left = 10
-      BorderSpacing.Top = 5
-      BorderSpacing.Right = 10
-      Caption = 'Preview'
-      TabOrder = 1
-    end
     object GroupBox3: TGroupBox
       AnchorSideLeft.Control = Panel1
-      AnchorSideTop.Control = GroupBox1
+      AnchorSideTop.Control = Panel3
       AnchorSideTop.Side = asrBottom
       AnchorSideRight.Control = Panel1
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = Panel1
       AnchorSideBottom.Side = asrBottom
       Left = 0
-      Height = 635
-      Top = 242
-      Width = 1106
+      Height = 622
+      Top = 272
+      Width = 1357
       Anchors = [akTop, akLeft, akRight, akBottom]
       AutoSize = True
-      BorderSpacing.Top = 10
       BorderSpacing.Right = 5
       Caption = 'Customize'
-      ClientHeight = 610
-      ClientWidth = 1102
-      TabOrder = 2
+      ClientHeight = 597
+      ClientWidth = 1353
+      TabOrder = 0
       object TreeView: TTreeView
         AnchorSideLeft.Control = GroupBox3
         AnchorSideTop.Control = GroupBox3
-        AnchorSideBottom.Control = GroupBox3
-        AnchorSideBottom.Side = asrBottom
-        Left = 10
-        Height = 595
+        AnchorSideBottom.Control = ButtonResetAttribute
+        Left = 5
+        Height = 552
         Top = 5
-        Width = 300
+        Width = 200
         Align = alCustom
         Anchors = [akTop, akLeft, akRight, akBottom]
         AutoExpand = True
-        BorderSpacing.Left = 10
+        BorderSpacing.Left = 5
         BorderSpacing.Top = 5
-        BorderSpacing.Bottom = 10
-        Constraints.MaxWidth = 315
-        Constraints.MinWidth = 200
+        BorderSpacing.Bottom = 5
+        Constraints.MaxWidth = 250
+        Constraints.MinWidth = 175
         ReadOnly = True
         ScrollBars = ssAutoBoth
+        ShowRoot = False
         TabOrder = 0
+        OnDeletion = TreeViewDeletion
         OnSelectionChanged = TreeViewSelectionChanged
-        Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
-      end
-      object BoldCheckBox: TCheckBox
-        AnchorSideLeft.Control = LabelFontStyles
-        AnchorSideTop.Control = LabelFontStyles
-        AnchorSideTop.Side = asrBottom
-        AnchorSideBottom.Control = LoadButton
-        Left = 320
-        Height = 24
-        Top = 481
-        Width = 55
-        Anchors = [akLeft, akBottom]
-        BorderSpacing.Top = 5
-        BorderSpacing.Bottom = 30
-        Caption = 'Bold'
-        OnMouseUp = FontStyleChangeHandler
-        TabOrder = 1
-      end
-      object StrikeCheckBox: TCheckBox
-        AnchorSideLeft.Control = BoldCheckBox
-        AnchorSideLeft.Side = asrBottom
-        AnchorSideTop.Control = BoldCheckBox
-        Left = 387
-        Height = 24
-        Top = 481
-        Width = 61
-        BorderSpacing.Left = 12
-        Caption = 'Strike'
-        OnMouseUp = FontStyleChangeHandler
-        TabOrder = 2
-      end
-      object UnderlineCheckBox: TCheckBox
-        AnchorSideLeft.Control = StrikeCheckBox
-        AnchorSideLeft.Side = asrBottom
-        AnchorSideTop.Control = BoldCheckBox
-        Left = 460
-        Height = 24
-        Top = 481
-        Width = 88
-        BorderSpacing.Left = 12
-        Caption = 'Underline'
-        OnMouseUp = FontStyleChangeHandler
-        TabOrder = 3
-      end
-      object ItalicCheckBox: TCheckBox
-        AnchorSideLeft.Control = UnderlineCheckBox
-        AnchorSideLeft.Side = asrBottom
-        AnchorSideTop.Control = BoldCheckBox
-        Left = 560
-        Height = 24
-        Top = 481
-        Width = 56
-        BorderSpacing.Left = 12
-        Caption = 'Italic'
-        OnMouseUp = FontStyleChangeHandler
-        TabOrder = 4
-      end
-      object LabelFontStyles: TLabel
-        AnchorSideLeft.Control = TreeView
-        AnchorSideLeft.Side = asrBottom
-        AnchorSideTop.Side = asrBottom
-        AnchorSideBottom.Control = BoldCheckBox
-        Left = 320
-        Height = 20
-        Top = 456
-        Width = 71
-        Anchors = [akLeft, akBottom]
-        BorderSpacing.Left = 10
-        BorderSpacing.Top = 5
-        Caption = 'Font Styles'
-        ParentColor = False
-      end
-      object SaveAsButton: TButton
-        AnchorSideLeft.Control = LoadButton
-        AnchorSideTop.Control = GroupBox3
-        AnchorSideRight.Control = LoadButton
-        AnchorSideRight.Side = asrBottom
-        AnchorSideBottom.Control = TreeView
-        AnchorSideBottom.Side = asrBottom
-        Left = 320
-        Height = 30
-        Top = 570
-        Width = 124
-        Anchors = [akLeft, akRight, akBottom]
-        AutoSize = True
-        Caption = 'Save To File'
-        OnClick = SaveAsButtonClick
-        TabOrder = 5
-      end
-      object LoadButton: TButton
-        AnchorSideLeft.Control = TreeView
-        AnchorSideLeft.Side = asrBottom
-        AnchorSideRight.Side = asrBottom
-        AnchorSideBottom.Control = SaveAsButton
-        Left = 320
-        Height = 30
-        Top = 535
-        Width = 124
-        Anchors = [akLeft, akBottom]
-        AutoSize = True
-        BorderSpacing.Left = 10
-        BorderSpacing.Bottom = 5
-        Caption = 'Load From File'
-        OnClick = LoadButtonClick
-        TabOrder = 6
+        Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoToolTips, tvoThemedDraw]
       end
       object Panel2: TPanel
         AnchorSideLeft.Control = TreeView
         AnchorSideLeft.Side = asrBottom
-        AnchorSideTop.Control = GroupBox3
+        AnchorSideTop.Control = DividerBevel1
+        AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = GroupBox3
         AnchorSideRight.Side = asrBottom
-        AnchorSideBottom.Control = LabelFontStyles
-        Left = 315
-        Height = 446
-        Top = 5
-        Width = 777
+        AnchorSideBottom.Control = TreeView
+        AnchorSideBottom.Side = asrBottom
+        Left = 210
+        Height = 402
+        Top = 155
+        Width = 1133
         Anchors = [akTop, akLeft, akRight, akBottom]
         BorderSpacing.Left = 5
-        BorderSpacing.Top = 5
         BorderSpacing.Right = 10
-        BorderSpacing.Bottom = 5
         BevelOuter = bvNone
-        ClientHeight = 446
-        ClientWidth = 777
-        TabOrder = 7
+        ClientHeight = 402
+        ClientWidth = 1133
+        TabOrder = 1
         OnResize = Panel2Resize
         object ForegoundColorBox: TColorListBox
           AnchorSideLeft.Control = LabelForeground
@@ -247,14 +94,13 @@ object EditorColorsFrame: TEditorColorsFrame
           AnchorSideBottom.Control = Panel2
           AnchorSideBottom.Side = asrBottom
           Left = 5
-          Height = 424
+          Height = 380
           Top = 22
           Width = 202
           ColorRectWidth = 31
           Style = [cbStandardColors, cbCustomColor, cbPrettyNames]
           Anchors = [akTop, akLeft, akBottom]
           BorderSpacing.Top = 2
-          BorderSpacing.Right = 10
           ItemHeight = 0
           OnSelectionChange = ForegoundColorBoxSelectionChange
           TabOrder = 0
@@ -290,13 +136,13 @@ object EditorColorsFrame: TEditorColorsFrame
           AnchorSideBottom.Control = Panel2
           AnchorSideBottom.Side = asrBottom
           Left = 217
-          Height = 424
+          Height = 380
           Top = 22
           Width = 177
           ColorRectWidth = 31
           Style = [cbStandardColors, cbCustomColor, cbPrettyNames]
           Anchors = [akTop, akLeft, akBottom]
-          BorderSpacing.Left = 5
+          BorderSpacing.Left = 10
           BorderSpacing.Top = 2
           ItemHeight = 0
           OnSelectionChange = BackgroundColorBoxSelectionChange
@@ -310,14 +156,14 @@ object EditorColorsFrame: TEditorColorsFrame
           AnchorSideRight.Side = asrBottom
           AnchorSideBottom.Control = Panel2
           AnchorSideBottom.Side = asrBottom
-          Left = 399
-          Height = 424
+          Left = 404
+          Height = 380
           Top = 22
           Width = 200
           ColorRectWidth = 31
           Style = [cbStandardColors, cbCustomColor, cbPrettyNames]
           Anchors = [akTop, akLeft, akBottom]
-          BorderSpacing.Left = 5
+          BorderSpacing.Left = 10
           BorderSpacing.Top = 2
           ItemHeight = 0
           OnSelectionChange = FrameColorBoxSelectionChange
@@ -326,7 +172,7 @@ object EditorColorsFrame: TEditorColorsFrame
         object LabelFrame: TLabel
           AnchorSideLeft.Control = FrameColorBox
           AnchorSideTop.Control = Panel2
-          Left = 399
+          Left = 404
           Height = 20
           Top = 0
           Width = 41
@@ -334,6 +180,166 @@ object EditorColorsFrame: TEditorColorsFrame
           ParentColor = False
         end
       end
+      object ButtonResetAttribute: TButton
+        AnchorSideLeft.Control = TreeView
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = TreeView
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = GroupBox3
+        AnchorSideBottom.Side = asrBottom
+        Left = 5
+        Height = 30
+        Top = 562
+        Width = 200
+        Align = alCustom
+        Anchors = [akLeft, akRight, akBottom]
+        AutoSize = True
+        BorderSpacing.Bottom = 5
+        Caption = 'Reset Selected'
+        OnClick = ButtonResetAttributeClick
+        TabOrder = 2
+      end
+      object DividerBevel1: TDividerBevel
+        AnchorSideLeft.Control = TreeView
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = CheckListBox1
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = GroupBox3
+        AnchorSideRight.Side = asrBottom
+        Left = 215
+        Height = 20
+        Top = 135
+        Width = 1138
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Left = 10
+        BorderSpacing.Top = 5
+        Style = gsHorLines
+      end
+      object Label1: TLabel
+        AnchorSideLeft.Control = Panel2
+        AnchorSideTop.Control = TreeView
+        Left = 215
+        Height = 20
+        Top = 5
+        Width = 71
+        BorderSpacing.Left = 5
+        Caption = 'Font Styles'
+        ParentColor = False
+      end
+      object CheckListBox1: TCheckListBox
+        AnchorSideLeft.Control = Panel2
+        AnchorSideTop.Control = Label1
+        AnchorSideTop.Side = asrBottom
+        Left = 215
+        Height = 100
+        Top = 30
+        Width = 160
+        BorderSpacing.Left = 5
+        BorderSpacing.Top = 5
+        Items.Strings = (
+          'Bold'
+          'Italic'
+          'Underline'
+        )
+        ItemHeight = 21
+        OnClickCheck = CheckListBox1ClickCheck
+        TabOrder = 3
+        Data = {
+          03000000000000
+        }
+      end
+    end
+    object SaveAsButton: TButton
+      AnchorSideLeft.Control = Panel1
+      AnchorSideTop.Control = ButtonLoadFromURL
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = ButtonLoadFromURL
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = TreeView
+      AnchorSideBottom.Side = asrBottom
+      Left = 2
+      Height = 30
+      Top = 75
+      Width = 343
+      Anchors = [akTop, akLeft, akRight]
+      AutoSize = True
+      BorderSpacing.Left = 2
+      BorderSpacing.Top = 5
+      Caption = 'Save To File'
+      OnClick = DoSaveButtonClick
+      TabOrder = 1
+    end
+    object LoadButton: TButton
+      AnchorSideLeft.Control = Panel1
+      AnchorSideTop.Control = Panel1
+      AnchorSideRight.Control = ButtonLoadFromURL
+      AnchorSideRight.Side = asrBottom
+      Left = 2
+      Height = 30
+      Top = 5
+      Width = 343
+      Anchors = [akTop, akLeft, akRight]
+      AutoSize = True
+      BorderSpacing.Left = 2
+      BorderSpacing.Top = 5
+      BorderSpacing.Bottom = 5
+      Caption = 'Load From File'
+      OnClick = LoadButtonClick
+      TabOrder = 2
+    end
+    object ButtonLoadFromURL: TButton
+      AnchorSideLeft.Control = Panel1
+      AnchorSideTop.Control = LoadButton
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = Panel3
+      Left = 2
+      Height = 30
+      Top = 40
+      Width = 343
+      Anchors = [akTop, akLeft, akRight]
+      AutoSize = True
+      BorderSpacing.Left = 2
+      BorderSpacing.Top = 5
+      BorderSpacing.Right = 10
+      Caption = 'Load From URL'
+      OnClick = ButtonLoadFromURLClick
+      TabOrder = 3
+    end
+    object ResetButton: TButton
+      AnchorSideLeft.Control = Panel1
+      AnchorSideTop.Control = SaveAsButton
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = ButtonLoadFromURL
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = TreeView
+      AnchorSideBottom.Side = asrBottom
+      Left = 2
+      Height = 30
+      Top = 110
+      Width = 343
+      Anchors = [akTop, akLeft, akRight]
+      AutoSize = True
+      BorderSpacing.Left = 2
+      BorderSpacing.Top = 5
+      Caption = 'Reset'
+      OnClick = DoResetButtonClick
+      TabOrder = 4
+    end
+    object Panel3: TPanel
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Panel1
+      AnchorSideRight.Control = Panel1
+      AnchorSideRight.Side = asrBottom
+      Left = 355
+      Height = 265
+      Top = 5
+      Width = 1002
+      Anchors = [akTop, akRight]
+      BorderSpacing.Top = 5
+      BorderSpacing.Right = 5
+      BorderSpacing.Bottom = 2
+      BevelOuter = bvNone
+      TabOrder = 5
     end
   end
 end

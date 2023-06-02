@@ -20,6 +20,7 @@ uses
 type
   TSimbaEditor = class(TSimbaSynEdit)
   protected
+    FUseSimbaColors: Boolean;
     FAutoComplete: TSimbaAutoComplete;
     FParamHint: TSimbaParamHint;
 
@@ -42,19 +43,19 @@ type
 
     procedure FontChanged(Sender: TObject); override;
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
+    procedure DoSimbaSettingChanged_Colors(Setting: TSimbaSetting);
 
     procedure DoDragDrop(Sender, Source: TObject; X, Y: Integer);
     procedure DoDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
 
     // Temp line coloring
     procedure DoSpecialLineColor(Sender: TObject; Line: Integer; var Special: Boolean; AMarkup: TSynSelectedColor);
-    // Enable/Disable TSynEditMarkupHighlightAllCaret depending on has selection
-    procedure DoStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
 
     procedure SetUpdateState(NewUpdating: Boolean; Sender: TObject); override;
 
     procedure SetColorModified(Value: TColor);
     procedure SetColorSaved(Value: TColor);
+    procedure SetUseSimbaColors(Value: Boolean);
   public
     FileName: String;
 
@@ -68,6 +69,7 @@ type
 
     property ColorSaved: TColor read FColorSaved write SetColorSaved;
     property ColorModified: TColor read FColorModified write SetColorModified;
+    property UseSimbaColors: Boolean read FUseSimbaColors write SetUseSimbaColors;
 
     function GetCaretPos(GoBackToWord: Boolean): Integer;
 
@@ -93,7 +95,7 @@ type
     procedure ClearFocusedLines;
     procedure FocusLine(Line, Column: Integer; AColor: TColor);
 
-    constructor Create(AOwner: TComponent; LoadColors: Boolean = True); reintroduce;
+    constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
   end;
 
@@ -225,20 +227,13 @@ begin
   Accept := Source is TTreeView;
 end;
 
-procedure TSimbaEditor.DoStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
-begin
-  ClearFocusedLines();
-
-  //if (scSelection in Changes) then
-  //  MarkupByClass[TSynEditMarkupHighlightAllCaret].Enabled := SelAvail;
-end;
-
 procedure TSimbaEditor.SetUpdateState(NewUpdating: Boolean; Sender: TObject);
 begin
   inherited SetUpdateState(NewUpdating, Sender);
 
   if (not NewUpdating) and (FLastTextChangeStamp <> ChangeStamp) then
   begin
+    ClearFocusedLines();
     if Assigned(FModifiedEvent) then
       FModifiedEvent(Self);
 
@@ -278,6 +273,16 @@ begin
   ModifiedLinesGutter.ColorSaved := FColorSaved;
 end;
 
+procedure TSimbaEditor.SetUseSimbaColors(Value: Boolean);
+begin
+  if (FUseSimbaColors = Value) then
+    Exit;
+  FUseSimbaColors := Value;
+
+  if FUseSimbaColors then
+    FAttributes.LoadFromFile(SimbaSettings.Editor.CustomColors.Value);
+end;
+
 procedure TSimbaEditor.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
@@ -299,11 +304,6 @@ begin
       begin
         if IsFontFixed(Setting.Value) then
           Font.Name := Setting.Value;
-      end;
-
-    'Editor.CustomColors':
-      begin
-        FAttributes.LoadFromFile(Setting.Value);
       end;
 
     'Editor.RightMargin':
@@ -358,6 +358,12 @@ begin
         end;
       end;
   end;
+end;
+
+procedure TSimbaEditor.DoSimbaSettingChanged_Colors(Setting: TSimbaSetting);
+begin
+  if FUseSimbaColors then
+    FAttributes.LoadFromFile(Setting.Value);
 end;
 
 procedure TSimbaEditor.DoSpecialLineColor(Sender: TObject; Line: Integer; var Special: Boolean; AMarkup: TSynSelectedColor);
@@ -438,7 +444,7 @@ begin
   Result := GetExpression(EndX - 1, Y);
 end;
 
-constructor TSimbaEditor.Create(AOwner: TComponent; LoadColors: Boolean);
+constructor TSimbaEditor.Create(AOwner: TComponent);
 var
   I: Integer;
 begin
@@ -465,8 +471,6 @@ begin
   OnSpecialLineMarkup := @DoSpecialLineColor;
 
   MouseActions.AddCommand(emcOverViewGutterScrollTo, False, LazSynEditMouseCmdsTypes.mbLeft, ccSingle, cdDown, [], []);
-
-  RegisterStatusChangedHandler(@DoStatusChanged, [scCaretX, scCaretY, scModified, scSelection]);
 
   Highlighter := TSynFreePascalSyn.Create(Self);
 
@@ -516,8 +520,6 @@ begin
   Gutter.LineNumberPart().Visible := True;
   Gutter.CodeFoldPart().Visible   := True;
 
-  //if LoadColors then
-  //  SimbaSettingChanged(SimbaSettings.Editor.CustomColors);
   SimbaSettingChanged(SimbaSettings.Editor.AllowCaretPastEOL);
   SimbaSettingChanged(SimbaSettings.Editor.RightMarginVisible);
   SimbaSettingChanged(SimbaSettings.Editor.AntiAliased);
@@ -526,6 +528,9 @@ begin
   SimbaSettingChanged(SimbaSettings.General.MacOSKeystrokes);
 
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
+
+  with SimbaSettings do
+    RegisterChangeHandler(Self, Editor.CustomColors, @DoSimbaSettingChanged_Colors);
 end;
 
 destructor TSimbaEditor.Destroy;
