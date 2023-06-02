@@ -11,50 +11,54 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, StdCtrls, Graphics,
-  Dialogs, ColorBox, SynEditHighlighter,
+  Dialogs, ColorBox, CheckLst, SynEditHighlighter, DividerBevel,
   simba.editor;
 
 type
   TEditorColorsFrame = class(TFrame)
-    GroupBox1: TGroupBox;
-    GroupBox2: TGroupBox;
+    ButtonResetAttribute: TButton;
+    ButtonLoadFromURL: TButton;
+    CheckListBox1: TCheckListBox;
+    DividerBevel1: TDividerBevel;
     GroupBox3: TGroupBox;
+    Label1: TLabel;
     LabelBackground: TLabel;
     Panel2: TPanel;
-    PresetListBox: TListBox;
     FrameColorBox: TColorListBox;
     LabelFrame: TLabel;
+    Panel3: TPanel;
     SaveAsButton: TButton;
-    BoldCheckBox: TCheckBox;
     LoadButton: TButton;
-    ItalicCheckBox: TCheckBox;
-    UnderlineCheckBox: TCheckBox;
-    StrikeCheckBox: TCheckBox;
     BackgroundColorBox: TColorListBox;
     ForegoundColorBox: TColorListBox;
     LabelForeground: TLabel;
-    LabelFontStyles: TLabel;
     Panel1: TPanel;
+    ResetButton: TButton;
     TreeView: TTreeView;
 
-    procedure DoPresetChanged(Sender: TObject; User: boolean);
+    procedure ButtonLoadFromURLClick(Sender: TObject);
+    procedure ButtonResetAttributeClick(Sender: TObject);
+    procedure CheckListBox1ClickCheck(Sender: TObject);
     procedure FrameColorBoxSelectionChange(Sender: TObject; User: Boolean);
+    procedure FrameResize(Sender: TObject);
     procedure Panel2Resize(Sender: TObject);
-    procedure SaveAsButtonClick(Sender: TObject);
+    procedure DoSaveButtonClick(Sender: TObject);
     procedure LoadButtonClick(Sender: TObject);
     procedure ForegoundColorBoxSelectionChange(Sender: TObject; User: Boolean);
     procedure BackgroundColorBoxSelectionChange(Sender: TObject; User: Boolean);
-    procedure FontStyleChangeHandler(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure DoResetButtonClick(Sender: TObject);
+    procedure TreeViewDeletion(Sender: TObject; Node: TTreeNode);
     procedure TreeViewSelectionChanged(Sender: TObject);
   protected
     FEditor: TSimbaEditor;
 
-    procedure AddCustomColor(CustomColor: TColor; ColorListBox: TColorListBox);
+    procedure CreateHandle; override;
+
+    procedure SelectColor(CustomColor: TColor; ColorListBox: TColorListBox);
     function SelectedAttr: TSynHighlighterAttributes;
   public
     property Editor: TSimbaEditor read FEditor;
 
-    procedure Reset;
     procedure Load;
     procedure Save;
 
@@ -66,34 +70,22 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.settings, simba.editor_attributes, simba.files, simba.mufasatypes;
+  simba.settings, simba.editor_attributes, simba.files, simba.mufasatypes,
+  simba.httpclient;
 
-{$i simba.editor_colorpresets.inc}
+type
+  TNodeData = record
+    Attri: TSynHighlighterAttributes;
+    DefaultAttri: TSynHighlighterAttributes;
+  end;
 
 procedure TEditorColorsFrame.TreeViewSelectionChanged(Sender: TObject);
 begin
   if SelectedAttr <> nil then
   begin
-    ForegoundColorBox.ItemIndex := ForegoundColorBox.Items.IndexOfObject(TObject(PtrUInt(SelectedAttr.Foreground)));
-    if ForegoundColorBox.ItemIndex = -1 then
-    begin
-      ForegoundColorBox.Items.Objects[0] := TObject(PtrUInt(SelectedAttr.Foreground));
-      ForegoundColorBox.ItemIndex := 0;
-    end;
-
-    BackgroundColorBox.ItemIndex := BackgroundColorBox.Items.IndexOfObject(TObject(PtrUInt(SelectedAttr.Background)));
-    if BackgroundColorBox.ItemIndex = -1 then
-    begin
-      BackgroundColorBox.Items.Objects[0] := TObject(PtrUInt(SelectedAttr.Background));
-      BackgroundColorBox.ItemIndex := 0;
-    end;
-
-    FrameColorBox.ItemIndex := FrameColorBox.Items.IndexOfObject(TObject(PtrUInt(SelectedAttr.FrameColor)));
-    if FrameColorBox.ItemIndex = -1 then
-    begin
-      FrameColorBox.Items.Objects[0] := TObject(PtrUInt(SelectedAttr.FrameColor));
-      FrameColorBox.ItemIndex := 0;
-    end;
+    SelectColor(SelectedAttr.Foreground, ForegoundColorBox);
+    SelectColor(SelectedAttr.Background, BackgroundColorBox);
+    SelectColor(SelectedAttr.FrameColor, FrameColorBox);
 
     if SelectedAttr is TSimbaEditor_Attribute then
     begin
@@ -115,109 +107,51 @@ begin
       LabelFrame.Show();
     end;
 
-    BoldCheckBox.Checked := fsBold in SelectedAttr.Style;
-    ItalicCheckBox.Checked := fsItalic in SelectedAttr.Style;
-    UnderlineCheckBox.Checked := fsUnderline in SelectedAttr.Style;
-    StrikeCheckBox.Checked := fsStrikeOut in SelectedAttr.Style;
+    CheckListBox1.Checked[0] := fsBold in SelectedAttr.Style;
+    CheckListBox1.Checked[1] := fsItalic in SelectedAttr.Style;
+    CheckListBox1.Checked[2] := fsUnderline in SelectedAttr.Style;
   end;
 end;
 
-procedure TEditorColorsFrame.Reset;
-
-  procedure AddAttribute(Attri: TSynHighlighterAttributes);
-  var
-    Node: TTreeNode;
-    Name: TStringArray;
-  begin
-    Name := Attri.StoredName.Split(['.']);
-
-    if (Length(Name) = 2) then
-    begin
-      Node := TreeView.Items.FindNodeWithText(Name[0]);
-      if Node = nil then
-        Node := TreeView.Items.Add(nil, Name[0]);
-
-      Node := TreeView.Items.AddChild(Node, Name[1]);
-      Node.Data := Attri;
-    end;
-  end;
-
-var
-  I: Int32;
+procedure TEditorColorsFrame.CreateHandle;
 begin
-  if (FEditor <> nil) then
-    FEditor.Free();
-  FEditor := TSimbaEditor.Create(Self, FEditor = nil);
+  inherited CreateHandle;
 
-  with FEditor do
-  begin
-    Font.Size := 8;
-    Parent := GroupBox2;
-    Align := alClient;
-    ReadOnly := True;
-    Text := 'program Highlight;                                      ' + LineEnding +
-            '{  brace }                                              ' + LineEnding +
-            '(* round *)                                             ' + LineEnding +
-            '// slash                                                ' + LineEnding +
-            '                                                        ' + LineEnding +
-            '{$I SRL/osr.simba}                                      ' + LineEnding +
-            '                                                        ' + LineEnding +
-            'procedure Test(var i: Integer);                         ' + LineEnding +
-            'var                                                     ' + LineEnding +
-            '  s: String;                                            ' + LineEnding +
-            'begin                                                   ' + LineEnding +
-            '  i := 1000 * (5 + 7);                                  ' + LineEnding +
-            '  s := ' + #39 + 'The number is :' + #39 + ' + ToStr(i);' + LineEnding +
-            '                                                        ' + LineEnding +
-            '  case Random(5) of                                     ' + LineEnding +
-            '    1: ;                                                ' + LineEnding +
-            '    2..4: ;                                             ' + LineEnding +
-            '  end;                                                  ' + LineEnding +
-            'end;                                                    ' + LineEnding +
-            '                                                        ' + LineEnding +
-            'function TPoint.Test: Boolean; overload;                ' + LineEnding +
-            'begin                                                   ' + LineEnding +
-            '  Result := True;                                       ' + LineEnding +
-            'end;                                                    ';
-  end;
-
-  TreeView.BeginUpdate();
-  TreeView.Items.Clear();
-
-  for I := 0 to High(FEditor.Attributes.Attributes) do
-    AddAttribute(FEditor.Attributes.Attributes[I]);
-
-  TreeView.AlphaSort();
-  TreeView.EndUpdate();
+  CheckListBox1.Height := CheckListBox1.ItemRect(2).Bottom + 5;
 end;
 
 procedure TEditorColorsFrame.Load;
 begin
-  { nothing }
+  FEditor.Attributes.LoadFromFile(SimbaSettings.Editor.CustomColors.Value);
+
+  TreeView.Selected := TreeView.Items.FindNodeWithText('Background');
 end;
 
-procedure TEditorColorsFrame.AddCustomColor(CustomColor: TColor; ColorListBox: TColorListBox);
+procedure TEditorColorsFrame.SelectColor(CustomColor: TColor; ColorListBox: TColorListBox);
 var
-  I: Int32;
+  I: Integer;
+  Found: Boolean;
 begin
-  for I := 1 to ColorListBox.Count - 1 do
-  begin
-    if (CustomColor = ColorListBox.Colors[I]) then
+  Found := False;
+  for I := 1 to ColorListBox.Items.Count - 1 do
+    if (ColorListBox.Items.Objects[I] = TObject(PtrUInt(CustomColor))) then
     begin
-      ColorListBox.ItemIndex := I;
-
-      Exit;
+      Found := True;
+      Break;
     end;
-  end;
 
-  ColorListBox.Items.AddObject('Custom (%d, %d, %d)', [Red(UInt32(CustomColor)), Green(UInt32(CustomColor)), Blue(UInt32(CustomColor))], TObject(PtrUInt(CustomColor)));
+  if (not Found) then
+    ColorListBox.Items.AddObject('Custom (%d, %d, %d)', [Red(UInt32(CustomColor)), Green(UInt32(CustomColor)), Blue(UInt32(CustomColor))], TObject(PtrUInt(CustomColor)));
+
+  ColorListBox.Selected := CustomColor;
+  ColorListBox.MakeCurrentVisible();
 end;
 
 function TEditorColorsFrame.SelectedAttr: TSynHighlighterAttributes;
 begin
   Result := nil;
   if (TreeView.Selected <> nil) and (TreeView.Selected.Data <> nil) then
-    Result := TSynHighlighterAttributes(TreeView.Selected.Data);
+    Result := TNodeData(TreeView.Selected.Data^).Attri;
 end;
 
 procedure TEditorColorsFrame.Save;
@@ -232,7 +166,7 @@ begin
   SimbaSettings.Changed(SimbaSettings.Editor.CustomColors);
 end;
 
-procedure TEditorColorsFrame.SaveAsButtonClick(Sender: TObject);
+procedure TEditorColorsFrame.DoSaveButtonClick(Sender: TObject);
 begin
   with TSaveDialog.Create(Self) do
   try
@@ -271,69 +205,139 @@ begin
   end;
 end;
 
-procedure TEditorColorsFrame.FontStyleChangeHandler(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-  if SelectedAttr <> nil then
-  begin
-    SelectedAttr.BeginUpdate();
-    SelectedAttr.Style := [];
-
-    if BoldCheckBox.Checked then
-      SelectedAttr.Style := SelectedAttr.Style + [fsBold];
-    if ItalicCheckBox.Checked then
-      SelectedAttr.Style := SelectedAttr.Style + [fsItalic];
-    if UnderlineCheckBox.Checked then
-      SelectedAttr.Style := SelectedAttr.Style + [fsUnderline];
-    if StrikeCheckBox.Checked then
-      SelectedAttr.Style := SelectedAttr.Style + [fsStrikeOut];
-
-    SelectedAttr.EndUpdate();
-  end;
-end;
-
 procedure TEditorColorsFrame.ForegoundColorBoxSelectionChange(Sender: TObject; User: Boolean);
 begin
   if (SelectedAttr <> nil) and (ForegoundColorBox.ItemIndex > -1) then
     SelectedAttr.Foreground := ForegoundColorBox.Selected;
+  SelectColor(SelectedAttr.Foreground, ForegoundColorBox);
 
-  if ForegoundColorBox.ItemIndex = 0 then
-    AddCustomColor(ForegoundColorBox.Selected, ForegoundColorBox);
+  FEditor.Invalidate();
 end;
 
 procedure TEditorColorsFrame.BackgroundColorBoxSelectionChange(Sender: TObject; User: Boolean);
 begin
   if (SelectedAttr <> nil) and (BackgroundColorBox.ItemIndex > -1) then
     SelectedAttr.Background := BackgroundColorBox.Selected;
+  SelectColor(SelectedAttr.Background, BackgroundColorBox);
 
-  if BackgroundColorBox.ItemIndex = 0 then
-    AddCustomColor(BackgroundColorBox.Selected, BackgroundColorBox);
+  FEditor.Invalidate();
+end;
+
+procedure TEditorColorsFrame.DoResetButtonClick(Sender: TObject);
+var
+  Node: TTreeNode;
+begin
+  Node := TreeView.Items.GetFirstNode();
+  while Assigned(Node) do
+  begin
+    if Assigned(Node.Data) then
+      with TNodeData(Node.Data^) do
+        Attri.Assign(DefaultAttri);
+
+    Node := Node.GetNext();
+  end;
+
+  FEditor.Invalidate();
+end;
+
+procedure TEditorColorsFrame.TreeViewDeletion(Sender: TObject; Node: TTreeNode);
+begin
+  if Assigned(Node.Data) then
+    FreeMem(Node.Data);
 end;
 
 procedure TEditorColorsFrame.FrameColorBoxSelectionChange(Sender: TObject; User: Boolean);
 begin
   if (SelectedAttr <> nil) and (FrameColorBox.ItemIndex > -1) then
     SelectedAttr.FrameColor := FrameColorBox.Selected;
+  SelectColor(SelectedAttr.FrameColor, FrameColorBox);
 
-  if FrameColorBox.ItemIndex = 0 then
-    AddCustomColor(FrameColorBox.Selected, FrameColorBox);
+  FEditor.Invalidate();
+end;
+
+procedure TEditorColorsFrame.FrameResize(Sender: TObject);
+begin
+  Panel3.Width := Width - (TreeView.Width + 20);
+end;
+
+procedure TEditorColorsFrame.ButtonResetAttributeClick(Sender: TObject);
+begin
+  if (TreeView.Selected <> nil) and (TreeView.Selected.Data <> nil) then
+  begin
+    with TNodeData(TreeView.Selected.Data^) do
+      Attri.Assign(DefaultAttri);
+    FEditor.Invalidate();
+    TreeViewSelectionChanged(nil);
+  end;
+end;
+
+procedure TEditorColorsFrame.CheckListBox1ClickCheck(Sender: TObject);
+begin
+  if SelectedAttr <> nil then
+  begin
+    SelectedAttr.BeginUpdate();
+    SelectedAttr.Style := [];
+
+    if CheckListBox1.Checked[0] then
+      SelectedAttr.Style := SelectedAttr.Style + [fsBold];
+    if CheckListBox1.Checked[1] then
+      SelectedAttr.Style := SelectedAttr.Style + [fsItalic];
+    if CheckListBox1.Checked[2] then
+      SelectedAttr.Style := SelectedAttr.Style + [fsUnderline];
+
+    SelectedAttr.EndUpdate();
+  end;
+end;
+
+procedure TEditorColorsFrame.ButtonLoadFromURLClick(Sender: TObject);
+var
+  Value, Contents: String;
+begin
+  if InputQuery('Simba - Editor Colors', 'Enter URL', Value) then
+  try
+    Contents := TSimbaHTTPClient.SimpleGet(Value, [EHTTPStatus.OK]);
+    if (Contents <> '') then
+      FEditor.Attributes.LoadFromStream(TStringStream.Create(Contents), True);
+  except
+    on E: Exception do
+      ShowMessage(E.Message);
+  end;
 end;
 
 procedure TEditorColorsFrame.Panel2Resize(Sender: TObject);
 begin
-  ForegoundColorBox.Width  := (TPanel(Sender).Width - 20) div 3;
-  BackgroundColorBox.Width := (TPanel(Sender).Width - 20) div 3;
-  FrameColorBox.Width      := (TPanel(Sender).Width - 20) div 3;
-end;
-
-procedure TEditorColorsFrame.DoPresetChanged(Sender: TObject; User: boolean);
-begin
-  case PresetListBox.GetSelectedText() of
-    'Light': FEditor.Attributes.LoadFromStream(TStringStream.Create(LineEnding.Join(EDITOR_PRESET_LIGHT)), True);
-    'Dark':  FEditor.Attributes.LoadFromStream(TStringStream.Create(LineEnding.Join(EDITOR_PRESET_DARK)), True);
-  end;
+  ForegoundColorBox.Width  := (TPanel(Sender).Width - 25) div 3;
+  BackgroundColorBox.Width := (TPanel(Sender).Width - 25) div 3;
+  FrameColorBox.Width      := (TPanel(Sender).Width - 25) div 3;
+  CheckListBox1.Width      := (TPanel(Sender).Width - 25) div 3;
 end;
 
 constructor TEditorColorsFrame.Create(AOwner: TComponent);
+
+  procedure AddAttribute(Attri: TSynHighlighterAttributes; DefaultAttr: TSynHighlighterAttributes);
+  var
+    Node: TTreeNode;
+    Name: TStringArray;
+  begin
+    Name := Attri.StoredName.Split(['.']);
+
+    if (Length(Name) = 2) then
+    begin
+      Node := TreeView.Items.FindNodeWithText(Name[0]);
+      if Node = nil then
+        Node := TreeView.Items.Add(nil, Name[0]);
+
+      Node := TreeView.Items.AddChild(Node, Name[1]);
+      Node.Data := GetMem(SizeOf(TNodeData));
+
+      TNodeData(Node.Data^).Attri := Attri;
+      TNodeData(Node.Data^).DefaultAttri := DefaultAttr;
+    end;
+  end;
+
+var
+  DefaultEditor: TSimbaEditor;
+  I: Integer;
 begin
   inherited Create(AOwner);
 
@@ -345,7 +349,49 @@ begin
   ForegoundColorBox.Height := Scale96ToScreen(ForegoundColorBox.Height);
   FrameColorBox.Height := Scale96ToScreen(FrameColorBox.Height);
 
-  Reset();
+  FEditor := TSimbaEditor.Create(Self);
+
+  with FEditor do
+  begin
+    Parent := Panel3;
+    Align := alClient;
+    ReadOnly := True;
+    Text := 'program Highlight;                                      ' + LineEnding +
+            '{  brace }                                              ' + LineEnding +
+            '(* round *)                                             ' + LineEnding +
+            '// slash                                                ' + LineEnding +
+            '                                                        ' + LineEnding +
+            '{$I SRL/osr.simba}                                      ' + LineEnding +
+            '                                                        ' + LineEnding +
+            'procedure Test(var i: Integer);                         ' + LineEnding +
+            'var                                                     ' + LineEnding +
+            '  s: String;                                            ' + LineEnding +
+            'begin                                                   ' + LineEnding +
+            '  i := 1000 * (5 + 7);                                  ' + LineEnding +
+            '  s := ' + #39 + 'The number is :' + #39 + ' + ToStr(i);' + LineEnding +
+            '  case Random(5) of                                     ' + LineEnding +
+            '    1: ;                                                ' + LineEnding +
+            '    2..4: ;                                             ' + LineEnding +
+            '  end;                                                  ' + LineEnding +
+            'end;                                                    ' + LineEnding +
+            '                                                        ' + LineEnding +
+            'function TPoint.Test: Boolean; overload;                ' + LineEnding +
+            'begin                                                   ' + LineEnding +
+            '  Result := True;                                       ' + LineEnding +
+            'end;                                                    ';
+
+    UseSimbaColors := True;
+  end;
+
+  TreeView.BeginUpdate();
+  TreeView.Items.Clear();
+
+  DefaultEditor := TSimbaEditor.Create(Self);
+  for I := 0 to High(FEditor.Attributes.Attributes) do
+    AddAttribute(FEditor.Attributes.Attributes[I], DefaultEditor.Attributes.Attributes[I]);
+
+  TreeView.AlphaSort();
+  TreeView.EndUpdate();
 end;
 
 end.

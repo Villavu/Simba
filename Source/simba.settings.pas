@@ -25,6 +25,7 @@ type
     FName: String;
     FValue: Variant;
     FDefaultValue: Variant;
+    FChangeEventList: TMethodList;
 
     procedure CheckValue(AValue: Variant); virtual; abstract;
     procedure ReadValue(INI: TINIFile); virtual; abstract;
@@ -34,6 +35,7 @@ type
     procedure SetValue(AValue: Variant);
   public
     constructor Create(ASettings: TSimbaSettings; ASection, AName: String; DefaultValue: Variant);
+    destructor Destroy; override;
 
     procedure SetDefault;
 
@@ -145,8 +147,11 @@ type
     procedure Load;
     procedure Save;
 
-    procedure RegisterChangeHandler(Event: TSimbaSettingChangedEvent);
-    procedure UnRegisterChangeHandler(Event: TSimbaSettingChangedEvent);
+    procedure RegisterChangeHandler(Event: TSimbaSettingChangedEvent); overload;
+    procedure UnRegisterChangeHandler(Event: TSimbaSettingChangedEvent); overload;
+
+    procedure RegisterChangeHandler(Owner: TComponent; Setting: TSimbaSetting; Event: TSimbaSettingChangedEvent); overload;
+    procedure UnRegisterChangeHandler(Owner: TComponent; Setting: TSimbaSetting; Event: TSimbaSettingChangedEvent); overload;
 
     procedure Changed(Setting: TSimbaSetting);
 
@@ -253,6 +258,8 @@ begin
 end;
 
 procedure TSimbaSetting.SetValue(AValue: Variant);
+var
+  i: Integer;
 begin
   CheckValue(AValue);
   if (AValue = FValue) then
@@ -274,6 +281,15 @@ begin
   FName := AName;
   FDefaultValue := DefaultValue;
   FValue := FDefaultValue;
+
+  FChangeEventList := TMethodList.Create();
+end;
+
+destructor TSimbaSetting.Destroy;
+begin
+  FreeAndNil(FChangeEventList);
+
+  inherited Destroy();
 end;
 
 procedure TSimbaSetting.SetDefault;
@@ -287,6 +303,10 @@ var
 begin
   if (FChangeEventList = nil) or (FChangeEventList.Count = 0) then
     Exit;
+
+  i := Setting.FChangeEventList.Count;
+  while Setting.FChangeEventList.NextDownIndex(i) do
+    TSimbaSettingChangedEvent(Setting.FChangeEventList.Items[i])(Setting);
 
   DebugLn('[TSimbaSettings.Changed] Setting changed: ' + Setting.Name);
 
@@ -303,6 +323,43 @@ end;
 procedure TSimbaSettings.UnRegisterChangeHandler(Event: TSimbaSettingChangedEvent);
 begin
   FChangeEventList.Remove(TMethod(Event));
+end;
+
+type
+  TManagedSimbaSetting = class(TComponent)
+  public
+    Setting: TSimbaSetting;
+    Event: TSimbaSettingChangedEvent;
+
+    constructor Create(AOwner: TComponent; ASetting: TSimbaSetting; AEvent: TSimbaSettingChangedEvent); reintroduce;
+    destructor Destroy; override;
+  end;
+
+constructor TManagedSimbaSetting.Create(AOwner: TComponent; ASetting: TSimbaSetting; AEvent: TSimbaSettingChangedEvent);
+begin
+  inherited Create(AOwner);
+
+  Setting := ASetting;
+  Event := AEvent;
+end;
+
+destructor TManagedSimbaSetting.Destroy;
+begin
+  SimbaSettings.UnRegisterChangeHandler(Owner, Setting, Event);
+
+  inherited Destroy;
+end;
+
+procedure TSimbaSettings.RegisterChangeHandler(Owner: TComponent; Setting: TSimbaSetting; Event: TSimbaSettingChangedEvent);
+begin
+  TManagedSimbaSetting.Create(Owner, Setting, Event);
+
+  Setting.FChangeEventList.Add(TMethod(Event));
+end;
+
+procedure TSimbaSettings.UnRegisterChangeHandler(Owner: TComponent; Setting: TSimbaSetting; Event: TSimbaSettingChangedEvent);
+begin
+  Setting.FChangeEventList.Remove(TMethod(Event));
 end;
 
 procedure TSimbaSettings.Load;

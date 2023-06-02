@@ -367,6 +367,7 @@ begin
   FEditor.RegisterStatusChangedHandler(@DoEditorStatusChanges, [scCaretX, scCaretY, scModified]);
   FEditor.OnClickLink := @DoEditorLinkClick;
   FEditor.OnModified := @DoEditorModified;
+  FEditor.UseSimbaColors := True;
 
   FOutputBox := SimbaOutputForm.AddScriptOutput('Untitled');
   FOutputBox.Tab.ImageIndex := IMAGE_STOP;

@@ -73,7 +73,6 @@ type
     // Sort so order is: Types, Constants, Variables, Methods
     function CompareDecl(A, B: TTreeNode): Integer;
   public
-
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
   end;
