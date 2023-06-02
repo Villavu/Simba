@@ -237,7 +237,10 @@ begin
   if (Editor <> nil) then
   begin
     with TSynEditProtectedAccess(Editor) do
-      TSynEditScreenCaretPainterInternal(FScreenCaret.Painter).Color := Foreground;
+      if (Foreground = Editor.Color) then
+        TSynEditScreenCaretPainterInternal(FScreenCaret.Painter).Color := Foreground
+      else
+        TSynEditScreenCaretPainterInternal(FScreenCaret.Painter).Color := (Foreground and $FF000000) or (not (Foreground xor Editor.Color) and $00FFFFFF);
 
     Editor.Invalidate();
   end;
