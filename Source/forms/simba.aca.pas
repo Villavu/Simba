@@ -13,12 +13,9 @@ uses
   Classes, SysUtils, Forms, Controls, Dialogs, DividerBevel, Graphics, ExtCtrls, ComCtrls, StdCtrls, Menus, ColorBox,
   simba.mufasatypes,
   simba.imagebox, simba.imagebox_zoom, simba.imagebox_bitmap,
-  simba.colormath, simba.colormath_distance;
+  simba.colormath, simba.finder;
 
 type
-  TACABestColorEvent = procedure(CTS: Integer; Color, Tolerance: Integer; Hue, Sat: Extended) of object;
-  TACABestColorEventEx = procedure(CTS: Integer; Color, Tolerance: Integer; Hue, Sat: Extended) is nested;
-
   TSimbaACAForm = class(TForm)
     ButtonRemoveColor: TButton;
     ButtonRemoveAllColors: TButton;
@@ -93,9 +90,7 @@ type
     procedure MenuItemLoadHSLCircleExClick(Sender: TObject);
     procedure PanelRightResize(Sender: TObject);
   protected
-    FOnCalculateBestColor: TACABestColorEvent;
-    FOnCalculateBestColorEx: TACABestColorEventEx;
-
+    FFreeOnClose: Boolean;
     FWindow: TWindowHandle;
     FImageBox: TSimbaImageBox;
     FImageZoom: TSimbaImageBoxZoom;
@@ -107,16 +102,15 @@ type
     procedure DoPaintArea(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; R: TRect);
     procedure CalculateBestColor;
 
-    procedure GetColorStuff(out ColorSpace: EColorSpace; out Col: Integer; out Tol: Single; out Mods: TChannelMultipliers);
-
+    function GetBestColorTol: TColorTolerance;
     function GetColorSpace: EColorSpace;
     function GetColorSpaceStr: String;
     function GetColors: TColorArray;
   public
     constructor Create(Window: TWindowHandle); reintroduce;
 
-    property OnCalculateBestColor: TACABestColorEvent read FOnCalculateBestColor write FOnCalculateBestColor;
-    property OnCalculateBestColorEx: TACABestColorEventEx read FOnCalculateBestColorEx write FOnCalculateBestColorEx;
+    property BestColor: TColorTolerance read GetBestColorTol;
+    property FreeOnClose: Boolean read FFreeOnClose write FFreeOnClose;
   end;
 
 implementation
@@ -222,15 +216,15 @@ end;
 
 procedure TSimbaACAForm.ButtonUpdateImageClick(Sender: TObject);
 begin
-  //if not FClient.IOManager.TargetValid() then
-  //  FClient.IOManager.SetDesktop();
-
-  //FImageBox.SetBackground(FClient.IOManager);
+  if (not FWindow.IsValid()) then
+    FWindow := GetDesktopWindow();
+  FImageBox.SetBackground(FWindow);
 end;
 
 procedure TSimbaACAForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  CloseAction := caFree;
+  if FFreeOnClose then
+    CloseAction := caFree;
 end;
 
 procedure TSimbaACAForm.ButtonCTSClick(Sender: TObject);
@@ -340,21 +334,16 @@ begin
     BestMulti2Edit.Clear();
     BestMulti3Edit.Clear();
   end;
-
-  //  if Assigned(OnCalculateBestColor) then
-  //    OnCalculateBestColor(CTS, Col, Tol, Hue, Sat);
-  //  if Assigned(OnCalculateBestColorEx) then
-  //    OnCalculateBestColorEx(CTS, Col, Tol, Hue, Sat);
 end;
 
-procedure TSimbaACAForm.GetColorStuff(out ColorSpace: EColorSpace; out Col: Integer; out Tol: Single; out Mods: TChannelMultipliers);
+function TSimbaACAForm.GetBestColorTol: TColorTolerance;
 begin
-  ColorSpace := GetColorSpace();
-  Col := String(BestColorEdit.Text).ToInteger(0);
-  Tol := String(BestToleranceEdit.Text).ToSingle(0);
-  Mods[0] := String(BestMulti1Edit.Text).ToSingle(0);
-  Mods[1] := String(BestMulti2Edit.Text).ToSingle(0);
-  Mods[2] := String(BestMulti3Edit.Text).ToSingle(0);
+  Result.ColorSpace := GetColorSpace();
+  Result.Color := String(BestColorEdit.Text).ToInteger(0);
+  Result.Tolerance := String(BestToleranceEdit.Text).ToSingle(0);
+  Result.Multipliers[0] := String(BestMulti1Edit.Text).ToSingle(0);
+  Result.Multipliers[1] := String(BestMulti2Edit.Text).ToSingle(0);
+  Result.Multipliers[2] := String(BestMulti3Edit.Text).ToSingle(0);
 end;
 
 function TSimbaACAForm.GetColorSpace: EColorSpace;
@@ -375,38 +364,31 @@ end;
 
 procedure TSimbaACAForm.ButtonMatchColorClick(Sender: TObject);
 var
-  ColorSpace: EColorSpace;
-  Col: Integer;
-  Tol: Single;
-  Multi: TChannelMultipliers;
   TempBackground: TMufasaBitmap;
 begin
-  GetColorStuff(ColorSpace, Col, Tol, Multi);
+  with BestColor do
+  begin
+    FDebugTPA := [];
 
-  FDebugTPA := [];
+    TempBackground := TMufasaBitmap.Create();
+    TempBackground.DrawMatrix(FImageBox.MatchColor(Color, ColorSpace, Multipliers));
 
-  TempBackground := TMufasaBitmap.Create();
-  TempBackground.DrawMatrix(FImageBox.MatchColor(Col, ColorSpace, Multi));
+    FImageBox.SetTempBackground(TempBackground);
+    FImageBox.Paint();
 
-  FImageBox.SetTempBackground(TempBackground);
-  FImageBox.Paint();
-
-  TempBackground.Free();
+    TempBackground.Free();
+  end;
 end;
 
 procedure TSimbaACAForm.ButtonFindColorClick(Sender: TObject);
-var
-  ColorSpace: EColorSpace;
-  Col: Integer;
-  Tol: Single;
-  Multi: TChannelMultipliers;
 begin
-  GetColorStuff(ColorSpace, Col, Tol, Multi);
+  with BestColor do
+  begin
+    FDebugTPA := FImageBox.FindColor(Color, Tolerance, ColorSpace, Multipliers);
 
-  FDebugTPA := FImageBox.FindColor(Col, Tol, ColorSpace, Multi);
-
-  FImageBox.StatusPanel.Text := Format('Found %.0n matches', [Double(Length(FDebugTPA))]);
-  FImageBox.Paint();
+    FImageBox.StatusPanel.Text := Format('Found %.0n matches', [Double(Length(FDebugTPA))]);
+    FImageBox.Paint();
+  end;
 end;
 
 procedure TSimbaACAForm.ButtonRemoveColorClick(Sender: TObject);
@@ -468,6 +450,8 @@ begin
   FWindow := Window;
   if (FWindow = 0) or (not FWindow.IsValid()) then
     FWindow := GetDesktopWindow();
+
+  FFreeOnClose := True;
 
   FImageBox := TSimbaImageBox.Create(Self);
   FImageBox.Parent := PanelMain;

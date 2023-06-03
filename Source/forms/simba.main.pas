@@ -238,7 +238,6 @@ type
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
 
     procedure HandleRecentFileClick(Sender: TObject);
-    procedure HandlePrintDTM(DTM: String);
     procedure HandleException(Sender: TObject; E: Exception);
     procedure HandleFormCreated(Sender: TObject; Form: TCustomForm);
 
@@ -902,18 +901,9 @@ begin
   SimbaScriptTabsForm.AddTab();
 end;
 
-procedure TSimbaForm.HandlePrintDTM(DTM: String);
-begin
-  SimbaDebugLn([EDebugLn.FOCUS], 'DTM := TDTM.CreateFromString(' + #39 + DTM + #39 + ');');
-end;
-
 procedure TSimbaForm.MenuItemDTMEditorClick(Sender: TObject);
 begin
-  with TSimbaDTMEditorForm.Create(WindowSelection) do
-  begin
-    OnPrintDTM := @HandlePrintDTM;
-    ShowOnTop();
-  end;
+ TSimbaDTMEditorForm.Create(WindowSelection).ShowOnTop();
 end;
 
 procedure TSimbaForm.MenuOpenClick(Sender: TObject);
