@@ -16,9 +16,6 @@ uses
   simba.imagebox, simba.imagebox_bitmap, simba.imagebox_zoom;
 
 type
-  TDTMPrintEvent   = procedure(DTM: String) of object;
-  TDTMPrintEventEx = procedure(DTM: String) is nested;
-
   TSimbaDTMEditorForm = class(TForm)
     ButtonUpdateImage: TButton;
     ButtonClearImage: TButton;
@@ -69,6 +66,7 @@ type
     procedure ButtonDebugColorClick(Sender: TObject);
     procedure ButtonDeletePointClick(Sender: TObject);
     procedure CenterDivider(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure MenuItemOffsetDTMClick(Sender: TObject);
     procedure MenuItemLoadImageClick(Sender: TObject);
@@ -79,7 +77,6 @@ type
     procedure FindDTMClick(Sender: TObject);
     procedure PointFlash(Sender: TObject);
     procedure LoadDTMClick(Sender: TObject);
-    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure ChangeDrawColor(Sender: TObject);
     procedure ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure ClientImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -87,6 +84,7 @@ type
     procedure ClientImageClear(Sender: TObject);
     procedure ButtonUpdateImageClick(Sender: TObject);
   protected
+    FFreeOnClose: Boolean;
     FImageBox: TSimbaImageBox;
     FImageZoom: TSimbaImageBoxZoom;
     FZoomInfo: TLabel;
@@ -94,13 +92,11 @@ type
     FDebugDTM: TPointArray;
     FDebugColor: TPointArray;
 
-    FOnPrintDTM: TDTMPrintEvent;
-    FOnPrintDTMEx: TDTMPrintEventEx;
-
     FDrawColor: TColor;
     FFlashing: Boolean;
     FLastFlash: UInt64;
     FWindow: TWindowHandle;
+    FDTMString: String;
 
     procedure DoPaintArea(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; R: TRect);
 
@@ -118,8 +114,8 @@ type
   public
     constructor Create(Window: TWindowHandle); reintroduce;
 
-    property OnPrintDTM: TDTMPrintEvent read FOnPrintDTM write FOnPrintDTM;
-    property OnPrintDTMEx: TDTMPrintEventEx read FOnPrintDTMEx write FOnPrintDTMEx;
+    property FreeOnClose: Boolean read FFreeOnClose write FFreeOnClose;
+    property DTMString: String read FDTMString;
   end;
 
 implementation
@@ -231,9 +227,9 @@ end;
 
 procedure TSimbaDTMEditorForm.ButtonUpdateImageClick(Sender: TObject);
 begin
-  //if not FClient.IOManager.TargetValid() then
-  //  FClient.IOManager.SetDesktop();
-  //FImageBox.SetBackground(FClient.IOManager);
+  if (not FWindow.IsValid()) then
+    FWindow := GetDesktopWindow();
+  FImageBox.SetBackground(FWindow);
 
   DrawDTM();
 end;
@@ -361,11 +357,6 @@ begin
     Result.AddPoint(Points[i]);
 end;
 
-procedure TSimbaDTMEditorForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
-begin
-  CloseAction := caFree;
-end;
-
 procedure TSimbaDTMEditorForm.LoadDTMClick(Sender: TObject);
 var
   Value: String;
@@ -429,10 +420,9 @@ begin
   DTM := GetDTM();
 
   try
-    if Assigned(OnPrintDTM) then
-      OnPrintDTM(DTM.SaveToString());
-    if Assigned(OnPrintDTMEx) then
-      OnPrintDTMEx(DTM.SaveToString());
+    FDTMString := DTM.SaveToString();
+
+    SimbaDebugLn([EDebugLn.FOCUS], 'DTM := TDTM.CreateFromString(' + #39 + FDTMString + #39 + ');');
   finally
     DTM.Free();
   end;
@@ -496,6 +486,12 @@ var
   Divider: TDividerBevel absolute Sender;
 begin
   Divider.LeftIndent := (Divider.Width div 2) - (Divider.Canvas.TextWidth(Divider.Caption) div 2) - Divider.CaptionSpacing;
+end;
+
+procedure TSimbaDTMEditorForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+begin
+  if FFreeOnClose then
+    CloseAction := caFree;
 end;
 
 procedure TSimbaDTMEditorForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -584,6 +580,8 @@ begin
   FWindow := Window;
   if (FWindow = 0) or (not FWindow.IsValid()) then
     FWindow := GetDesktopWindow();
+
+  FFreeOnClose := True;
 
   FDrawColor := clRed;
   FDragging := -1;

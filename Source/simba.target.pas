@@ -61,6 +61,7 @@ type
     procedure ChangeTarget(TargetType: ETargetType);
     function HasMethod(Method: Pointer; Name: String): Boolean;
   public
+    function GetWindowTarget: TWindowHandle;
     function IsWindowTarget: Boolean; overload;
     function IsWindowTarget(out Window: TWindowHandle): Boolean; overload;
     function IsBitmapTarget: Boolean; overload;
@@ -118,6 +119,14 @@ begin
     raise Exception.CreateFmt('Target "%s" cannot %s', [TargetName[FTargetType], Name]);
 
   Result := True;
+end;
+
+function TSimbaTarget.GetWindowTarget: TWindowHandle;
+begin
+  if (FTargetType = ETargetType.WINDOW) then
+    Result := FTargetWindow
+  else
+    Result := 0;
 end;
 
 function TSimbaTarget.IsWindowTarget: Boolean;
