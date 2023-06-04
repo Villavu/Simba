@@ -50,7 +50,6 @@ type
     end;
     FMousePoint: TPoint;
     FBitmap: TSimbaImageBoxBitmap;
-    FTempBackground: TBitmap;
 
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
     procedure DoPaintArea(Bitmap: TSimbaImageBoxBitmap; R: TRect); virtual;
@@ -98,9 +97,6 @@ type
     function FindDTM(DTM: TDTM): TPointArray;
     function FindColor(AColor: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
     function MatchColor(AColor: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TSingleMatrix;
-
-    procedure SetTempBackground(Bitmap: TMufasaBitmap);
-    procedure ClearTempBackground;
 
     procedure SetBackground(Data: PColorBGRA; AWidth, AHeight: Integer); overload;
     procedure SetBackground(FileName: String); overload;
@@ -367,10 +363,7 @@ begin
   end else
     LocalRect        := ScreenRect;
 
-  if (FTempBackground <> nil) then
-    BackgroundBitmap := FTempBackground
-  else
-    BackgroundBitmap := FBackground;
+  BackgroundBitmap := FBackground;
 
   LocalRect.Right  := Min(LocalRect.Right,  BackgroundBitmap.Width);
   LocalRect.Bottom := Min(LocalRect.Bottom, BackgroundBitmap.Height);
@@ -652,20 +645,6 @@ begin
   end;
 end;
 
-procedure TSimbaImageBox.SetTempBackground(Bitmap: TMufasaBitmap);
-begin
-  ClearTempBackground();
-
-  FTempBackground := TBitmap.Create();
-  FTempBackground.FromData(Bitmap.Data, Bitmap.Width, Bitmap.Height);
-end;
-
-procedure TSimbaImageBox.ClearTempBackground;
-begin
-  if (FTempBackground <> nil) then
-    FreeAndNil(FTempBackground);
-end;
-
 procedure TSimbaImageBox.SetBackground(Data: PColorBGRA; AWidth, AHeight: Integer);
 begin
   FBackground.FromData(Data, AWidth, AHeight);
@@ -745,8 +724,6 @@ end;
 
 destructor TSimbaImageBox.Destroy;
 begin
-  ClearTempBackground();
-
   if (FBitmap <> nil) then
     FreeAndNil(FBitmap);
   if (FBackground <> nil) then

@@ -96,6 +96,7 @@ type
     FImageZoom: TSimbaImageBoxZoom;
     FZoomInfo: TLabel;
     FDebugTPA: TPointArray;
+    FDebugMat: TSingleMatrix;
     FDrawColor: TColor;
 
     procedure LoadHSLCircle(Radius: Integer);
@@ -183,7 +184,10 @@ end;
 procedure TSimbaACAForm.DoPaintArea(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; R: TRect);
 begin
   if (Length(FDebugTPA) > 0) then
-    Bitmap.DrawPoints(FDebugTPA, FDrawColor);
+    Bitmap.DrawPoints(FDebugTPA, FDrawColor)
+  else
+  if (Length(FDebugMat) > 0) then
+    Bitmap.DrawHeatmap(FDebugMat);
 end;
 
 procedure TSimbaACAForm.ChangeDrawColor(Sender: TObject);
@@ -363,20 +367,13 @@ begin
 end;
 
 procedure TSimbaACAForm.ButtonMatchColorClick(Sender: TObject);
-var
-  TempBackground: TMufasaBitmap;
 begin
   with BestColor do
   begin
     FDebugTPA := [];
+    FDebugMat := FImageBox.MatchColor(Color, ColorSpace, Multipliers).NormMinMax(0, 1);
 
-    TempBackground := TMufasaBitmap.Create();
-    TempBackground.DrawMatrix(FImageBox.MatchColor(Color, ColorSpace, Multipliers));
-
-    FImageBox.SetTempBackground(TempBackground);
     FImageBox.Paint();
-
-    TempBackground.Free();
   end;
 end;
 
@@ -384,6 +381,7 @@ procedure TSimbaACAForm.ButtonFindColorClick(Sender: TObject);
 begin
   with BestColor do
   begin
+    FDebugMat := [];
     FDebugTPA := FImageBox.FindColor(Color, Tolerance, ColorSpace, Multipliers);
 
     FImageBox.StatusPanel.Text := Format('Found %.0n matches', [Double(Length(FDebugTPA))]);
@@ -436,8 +434,8 @@ end;
 procedure TSimbaACAForm.DoButtonClearImageClick(Sender: TObject);
 begin
   FDebugTPA := [];
+  FDebugMat := [];
 
-  FImageBox.ClearTempBackground();
   FImageBox.Paint();
 end;
 
