@@ -97,6 +97,8 @@ type
     FIdentBuffer: PChar;
     FIdentBufferUpper: PtrUInt;
 
+    function getChar(const Pos: Integer): Char; inline;
+
     function GetPosXY: TTokenPoint;
     procedure SetRunPos(Value: Integer);
     procedure AddressOpProc;
@@ -336,6 +338,14 @@ begin
     Frame^.Next := nil;
 end;
 
+function TmwBasePasLex.getChar(const Pos: Integer): Char;
+begin
+  if (Pos >= 1) and (Pos <= Length(fDoc)) then
+    Result := fDoc[Pos]
+  else
+    Result := #0;
+end;
+
 function TmwBasePasLex.GetPosXY: TTokenPoint;
 begin
   Result.X := FTokenPos - FLinePos;
@@ -346,7 +356,7 @@ constructor TmwBasePasLex.Create(Doc: String; AFileName: String = '');
 begin
   inherited Create();
 
-  fDoc := Doc + #0;
+  fDoc := Doc;
   fCommentState := csNo;
   fRun := 1;
   fFileName := AFileName;
@@ -407,7 +417,7 @@ end;
 
 procedure TmwBasePasLex.AddressOpProc;
 begin
-  case fDoc[fRun + 1] of
+  case getChar(fRun + 1) of
     '@':
       begin
         fTokenID := tokDoubleAddressOp;
@@ -425,13 +435,13 @@ procedure TmwBasePasLex.AsciiCharProc;
 begin
   fTokenID := tokAsciiChar;
   Inc(fRun);
-  if fDoc[fRun] = '$' then
+  if getChar(fRun) = '$' then
   begin
     Inc(fRun);
-    while fDoc[fRun] in ['0'..'9', 'A'..'F', 'a'..'f'] do Inc(fRun);
+    while getChar(fRun) in ['0'..'9', 'A'..'F', 'a'..'f'] do Inc(fRun);
   end else
   begin
-    while fDoc[fRun] in ['0'..'9'] do
+    while getChar(fRun) in ['0'..'9'] do
       Inc(fRun);
   end;
 end;
@@ -448,7 +458,7 @@ procedure TmwBasePasLex.BraceOpenProc;
 var
   Param, Def: string;
 begin
-  case fDoc[fRun + 1] of
+  case getChar(fRun + 1) of
     '$':
       begin
         BorProc(); // Skip comment
@@ -619,7 +629,7 @@ end;
 
 procedure TmwBasePasLex.ColonProc;
 begin
-  if (fDoc[fRun + 1] = '=') then
+  if (getChar(fRun + 1) = '=') then
   begin
     Inc(fRun, 2);
     fTokenID := tokAssign;
@@ -645,7 +655,7 @@ begin
       fTokenID := tokCRLF;
   end;
 
-  case fDoc[fRun + 1] of
+  case getChar(fRun + 1) of
     #10: Inc(fRun, 2);
     else
       Inc(fRun);
@@ -689,7 +699,7 @@ end;
 
 procedure TmwBasePasLex.GreaterProc;
 begin
-  case fDoc[fRun + 1] of
+  case getChar(fRun + 1) of
     '=':
       begin
         Inc(fRun, 2);
@@ -719,11 +729,11 @@ var
   Ptr: PChar;
 begin
   Ptr := FIdentBuffer;
-  while (fDoc[fRun] in ['0'..'9', 'A'..'Z', '_', 'a'..'z']) do
+  while (getChar(fRun) in ['0'..'9', 'A'..'Z', '_', 'a'..'z']) do
   begin
     if (PtrUInt(Ptr) < FIdentBufferUpper) then
     begin
-      Ptr^ := fDoc[fRun];
+      Ptr^ := getChar(fRun);
       if (Ptr^ in [#65..#90]) then // change to lowercase
         Ptr^ := Char(Ord(Ptr^) + 32);
       Inc(Ptr);
@@ -745,7 +755,7 @@ procedure TmwBasePasLex.IntegerProc;
 begin
   Inc(fRun);
   fTokenID := tokIntegerConst;
-  while fDoc[fRun] in ['0'..'9', 'A'..'F', 'a'..'f'] do
+  while getChar(fRun) in ['0'..'9', 'A'..'F', 'a'..'f'] do
     Inc(fRun);
 end;
 
@@ -769,7 +779,7 @@ end;
 
 procedure TmwBasePasLex.LowerProc;
 begin
-  case fDoc[fRun + 1] of
+  case getChar(fRun + 1) of
     '=':
       begin
         Inc(fRun, 2);
@@ -791,7 +801,7 @@ end;
 procedure TmwBasePasLex.MinusProc;
 begin
   Inc(fRun);
-  if fDoc[fRun] = '=' then
+  if getChar(fRun) = '=' then
   begin
     Inc(fRun);
     fTokenID := tokMinusAsgn;
@@ -808,11 +818,11 @@ procedure TmwBasePasLex.NumberProc;
 begin
   Inc(fRun);
   fTokenID := tokIntegerConst;
-  while fDoc[fRun] in ['0'..'9', '.', 'e', 'E'] do
+  while getChar(fRun) in ['0'..'9', '.', 'e', 'E'] do
   begin
-    case fDoc[fRun] of
+    case getChar(fRun) of
       '.':
-        if fDoc[fRun + 1] = '.' then
+        if getChar(fRun + 1) = '.' then
           break
         else fTokenID := tokFloat
     end;
@@ -823,7 +833,7 @@ end;
 procedure TmwBasePasLex.PlusProc;
 begin
   Inc(fRun);
-  if fDoc[fRun] = '=' then
+  if getChar(fRun) = '=' then
   begin
     Inc(fRun);
     fTokenID := tokPlusAsgn;
@@ -839,7 +849,7 @@ end;
 
 procedure TmwBasePasLex.PointProc;
 begin
-  case fDoc[fRun + 1] of
+  case getChar(fRun + 1) of
     '.':
       begin
         Inc(fRun, 2);
@@ -879,12 +889,12 @@ var
 begin
   fTokenID := tokAnsiComment;
 
-  while fDoc[fRun] <> #0 do
+  while getChar(fRun) <> #0 do
   begin
-    case fDoc[fRun] of
+    case getChar(fRun) of
       '(':
         begin
-          if (fDoc[fRun + 1] = '*') then
+          if (getChar(fRun + 1) = '*') then
           begin
             Inc(fRun);
             Inc(Depth);
@@ -894,7 +904,7 @@ begin
 
       '*':
         begin
-          if (fDoc[fRun + 1] = ')') then
+          if (getChar(fRun + 1) = ')') then
           begin
             Inc(fRun);
             Dec(Depth);
@@ -914,7 +924,7 @@ begin
 	    #13:
 		    begin
 			    Inc(fRun);
-			    if fDoc[fRun] = #10 then
+			    if getChar(fRun) = #10 then
             Inc(fRun);
 			    Inc(fLineNumber);
 			    fLinePos := fRun;
@@ -934,8 +944,8 @@ var
 begin
   fTokenID := tokBorComment;
 
-  while fDoc[fRun] <> #0 do
-	  case fDoc[fRun] of
+  while getChar(fRun) <> #0 do
+	  case getChar(fRun) of
       '{':
         begin
           Inc(fRun);
@@ -961,7 +971,7 @@ begin
       #13:
 		    begin
 			    Inc(fRun);
-			    if fDoc[fRun] = #10 then
+			    if getChar(fRun) = #10 then
             Inc(fRun);
 			    Inc(fLineNumber);
 
@@ -977,7 +987,7 @@ end;
 
 procedure TmwBasePasLex.RoundOpenProc;
 begin
-  if (fDoc[fRun + 1] = '*') then
+  if (getChar(fRun + 1) = '*') then
   begin
     FCommentState := csAnsi;
     Next();
@@ -996,14 +1006,14 @@ end;
 
 procedure TmwBasePasLex.SlashProc;
 begin
-  case fDoc[fRun + 1] of
+  case getChar(fRun + 1) of
     '/':
       begin
         Inc(fRun, 2);
         fTokenID := tokSlashesComment;
-        while fDoc[fRun] <> #0 do
+        while getChar(fRun) <> #0 do
         begin
-          case fDoc[fRun] of
+          case getChar(fRun) of
             #10, #13: break;
           end;
           Inc(fRun);
@@ -1026,7 +1036,7 @@ procedure TmwBasePasLex.SpaceProc;
 begin
   Inc(fRun);
   fTokenID := tokSpace;
-  while fDoc[fRun] in [#1..#9, #11, #12, #14..#32] do
+  while getChar(fRun) in [#1..#9, #11, #12, #14..#32] do
     Inc(fRun);
 end;
 
@@ -1045,7 +1055,7 @@ end;
 procedure TmwBasePasLex.StarProc;
 begin
   Inc(fRun);
-  case fDoc[fRun]  of
+  case getChar(fRun)  of
     '=':
       begin
         Inc(fRun);
@@ -1054,7 +1064,7 @@ begin
     '*':
       begin
         Inc(fRun);
-        if fDoc[fRun] = '=' then
+        if getChar(fRun) = '=' then
         begin
           Inc(fRun);
           fTokenID := tokPowAsgn;
@@ -1071,22 +1081,22 @@ begin
   fTokenID := tokStringConst;
   repeat
     Inc(fRun);
-    case fDoc[fRun] of
+    case getChar(fRun) of
       #0, #10, #13:
         begin
           Error('Unterminated string');
           Break;
         end;
       #39:
-        while (fDoc[fRun] = #39) and (fDoc[fRun + 1] = #39) do
+        while (getChar(fRun) = #39) and (getChar(fRun + 1) = #39) do
           Inc(fRun, 2);
     end;
-  until fDoc[fRun] = #39;
+  until (getChar(fRun) = #39);
 
-  if fDoc[fRun] = #39 then
+  if (getChar(fRun) = #39) then
   begin
     Inc(fRun);
-    if TokenLen = 3 then
+    if (TokenLen = 3) then
       fTokenID := tokAsciiChar;
   end;
 end;
@@ -1114,7 +1124,7 @@ begin
     csBor: BorProc;
     csNo:
       begin
-        case fDoc[fRun] of
+        case getChar(fRun) of
           #0: NullProc();
           #10: LFProc();
           #13: CRProc();
@@ -1196,14 +1206,14 @@ begin
   else
   begin
     StartPos := fTokenPos;
-    while (fDoc[StartPos] <> #0) and (fDoc[StartPos] <> '$') do
+    while (not (getChar(StartPos) in [#0, '$'])) do
       Inc(StartPos);
     StartPos := StartPos + 1;
     EndPos := StartPos;
-    while (fDoc[EndPos] <> #0) and (not (fDoc[EndPos] in [' ', '}'])) do
+    while (not (getChar(EndPos) in [#0, ' ', '}'])) do
       Inc(EndPos);
 
-    Result := UpperCase(Copy(fDoc, StartPos, EndPos-StartPos));
+    Result := UpperCase(Copy(fDoc, StartPos, EndPos - StartPos));
   end;
 end;
 
@@ -1215,20 +1225,16 @@ begin
   Result := tokCompDirect;
 
   StartPos := fTokenPos;
-  while (fDoc[StartPos] <> #0) and (fDoc[StartPos] <> '$') do
+  while (not (getChar(StartPos) in [#0, '$'])) do
     Inc(StartPos);
   StartPos := StartPos + 1;
   EndPos := StartPos;
-  while (fDoc[EndPos] <> #0) and (not (fDoc[EndPos] in [' ', '}'])) do
+  while (not (getChar(EndPos) in [#0, ' ', '}'])) do
     Inc(EndPos);
 
-  SetLength(Directive, EndPos - StartPos);
+  Directive := UpperCase(Copy(fDoc, StartPos, EndPos - StartPos));
   if (Length(Directive) > 0) then
   begin
-    Move(fDoc[StartPos], Directive[1], Length(Directive));
-
-    Directive := UpperCase(Directive);
-
     if (Directive = 'I')            then Result := tokIncludeDirect     else
     if (Directive = 'IF')           then Result := tokIfDirect          else
     if (Directive = 'IFDEF')        then Result := tokIfDefDirect       else
@@ -1250,25 +1256,19 @@ var
   StartPos, EndPos: Integer;
   Directive: String;
 begin
-  Result := tokCompDirect;
-
   StartPos := fTokenPos;
-  while (fDoc[StartPos] <> #0) and (fDoc[StartPos] <> '%') do
+  while (not (getChar(StartPos) in [#0, '%'])) do
     Inc(StartPos);
   StartPos := StartPos + 1;
   EndPos := StartPos;
-  while (fDoc[EndPos] <> #0) and (not (fDoc[EndPos] in [' ', '}'])) do
+  while (not (getChar(EndPos) in [#0, ' ', '}'])) do
     Inc(EndPos);
 
-  SetLength(Directive, EndPos - StartPos);
-  if (Length(Directive) > 0) then
-  begin
-    Move(fDoc[StartPos], Directive[1], Length(Directive));
-
-    Directive := UpperCase(Directive);
-    if (Directive = 'CODETOOLS') then
-      Result := tokIDECodeTools;
-  end;
+  Directive := UpperCase(Copy(fDoc, StartPos, EndPos - StartPos));
+  if (Directive = 'CODETOOLS') then
+    Result := tokIDECodeTools
+  else
+    Result := tokCompDirect;
 end;
 
 function TmwBasePasLex.GetDirectiveParamOriginal: string;
@@ -1276,16 +1276,14 @@ var
   StartPos, EndPos: Integer;
 begin
   StartPos := fTokenPos;
-  while (fDoc[StartPos] <> #0) and (fDoc[StartPos] <> ' ') do
+  while (not (getChar(StartPos) in [#0, ' '])) do
     Inc(StartPos);
 
   EndPos := StartPos + 1;
-  while (EndPos < Length(fDoc)) and (fDoc[EndPos] <> #0) and (fDoc[EndPos] <> '}') do
+  while (not (getChar(EndPos) in [#0, '}'])) do
     Inc(EndPos);
 
-  SetLength(Result, (EndPos - StartPos) - 1);
-  if (Length(Result) > 0) then
-    Move(fDoc[StartPos + 1], Result[1], Length(Result));
+  Result := Copy(fDoc, StartPos + 1, (EndPos - StartPos) - 1);
 end;
 
 function TmwBasePasLex.GetDirectiveParam: string;
@@ -1427,19 +1425,19 @@ begin
   fTokenID := tokStringConst;
   repeat
     Inc(fRun);
-    case fDoc[fRun] of
+    case getChar(fRun) of
       #0{, #10, #13}:
         begin
           Error('Unterminated string');
           break;
         end;
       #34:
-        while (fDoc[fRun] = #34) and (fDoc[fRun + 1] = #34) do
+        while (getChar(fRun) = #34) and (getChar(fRun + 1) = #34) do
           Inc(fRun, 2);
     end;
-  until fDoc[fRun] = #34;
+  until (getChar(fRun) = #34);
 
-  if fDoc[fRun] = #34 then
+  if (getChar(fRun) = #34) then
   begin
     Inc(fRun);
     if TokenLen = 3 then
@@ -1451,7 +1449,7 @@ procedure TmwBasePasLex.AmpersandOpProc;
 begin
   FTokenID := tokAmpersand;
   Inc(fRun);
-  while fDoc[fRun] in ['a'..'z', 'A'..'Z','0'..'9'] do
+  while getChar(fRun) in ['a'..'z', 'A'..'Z','0'..'9'] do
     Inc(fRun);
   FTokenID := tokIdentifier;
 end;
