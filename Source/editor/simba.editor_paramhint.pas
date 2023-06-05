@@ -46,7 +46,6 @@ type
     function GetParameterIndexAtCaret: Integer;
 
     procedure DoEditorTopLineChanged(Sender: TObject; Changes: TSynStatusChanges);
-    procedure DoEditorFontChanged(Sender: TObject);
     procedure DoEditorCaretMove(Sender: TObject);
     procedure DoEditorCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
     procedure DoEditorKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -55,6 +54,8 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+
+    property Form: TSimbaParamHintForm read FHintForm;
   public
     class var ParamHintCommand: TSynEditorCommand;
     class function IsParamHintCommand(Command: TSynEditorCommand; AChar: TUTF8Char): Boolean;
@@ -331,12 +332,6 @@ begin
   end;
 end;
 
-procedure TSimbaParamHint.DoEditorFontChanged(Sender: TObject);
-begin
-  if IsShowing then
-    FHintForm.Hide();
-end;
-
 procedure TSimbaParamHint.DoEditorCaretMove(Sender: TObject);
 begin
   if IsShowing then
@@ -432,7 +427,6 @@ begin
   if (Value is TSimbaEditor) then
     with TSimbaEditor(Value) do
     begin
-      RegisterFontChangedHandler(@DoEditorFontChanged);
       RegisterCaretMoveHandler(@DoEditorCaretMove);
       RegisterBeforeKeyDownHandler(@DoEditorKeyDown);
       RegisterCommandHandler(@DoEditorCommand, nil, [hcfPostExec]);
@@ -452,7 +446,6 @@ begin
   if (Value is TSimbaEditor) then
     with TSimbaEditor(Value) do
     begin
-      UnRegisterFontChangedHandler(@DoEditorFontChanged);
       UnRegisterCaretMoveHandler(@DoEditorCaretMove);
       UnRegisterBeforeKeyDownHandler(@DoEditorKeyDown);
       UnRegisterCommandHandler(@DoEditorCommand);

@@ -502,7 +502,7 @@ begin
 
   OutputBox.FontColor       := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'FontColor', clBlack);
   OutputBox.Color           := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'Color', clWhite);
-  OutputBox.FontSize        := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'FontSize', SynDefaultFontHeight);
+  OutputBox.FontSize        := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'FontSize', SynDefaultFontSize);
   OutputBox.FontName        := TSimbaSetting_String.Create(Self, 'OutputBox', 'FontName', SynDefaultFontName);
   OutputBox.FontAntiAliased := TSimbaSetting_Boolean.Create(Self, 'OutputBox', 'FontAntiAliased', True);
 

@@ -10,13 +10,18 @@ unit simba.notesform;
 interface
 
 uses
-  classes, sysutils, forms, controls, graphics, dialogs, stdctrls;
+  Classes, SysUtils, Forms, Controls,
+  simba.component_synedit, simba.settings;
 
 type
   TSimbaNotesForm = class(TForm)
-    Memo: TMemo;
+  published
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+  public
+    SynEdit: TSimbaSynEdit;
+
+    constructor Create(AOwner: TComponent); override;
   end;
 
 var
@@ -24,19 +29,30 @@ var
 
 implementation
 
-{$R *.lfm}
-
 uses
-  simba.settings;
+  SynEdit;
+
+{$R *.lfm}
 
 procedure TSimbaNotesForm.FormDestroy(Sender: TObject);
 begin
-  SimbaSettings.General.Notes.Value := Memo.Lines.Text;
+  SimbaSettings.General.Notes.Value := SynEdit.Text;
 end;
 
 procedure TSimbaNotesForm.FormCreate(Sender: TObject);
 begin
-  Memo.Lines.Text := SimbaSettings.General.Notes.Value;
+  SynEdit.Text := SimbaSettings.General.Notes.Value;
+end;
+
+constructor TSimbaNotesForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  SynEdit := TSimbaSynEdit.Create(Self);
+  SynEdit.Parent := Self;
+  SynEdit.Align := alClient;
+  SynEdit.Gutter.Visible := False;
+  SynEdit.RightGutter.Visible := False;
 end;
 
 end.

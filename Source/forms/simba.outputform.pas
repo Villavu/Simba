@@ -40,8 +40,6 @@ type
     procedure DoMouseLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 
     function GetTab: TSimbaTab;
-    function GetAntialiasing: Boolean;
-    procedure SetAntialiasing(Value: Boolean);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -53,7 +51,6 @@ type
     procedure Flush;
 
     property Tab: TSimbaTab read GetTab;
-    property Antialiasing: Boolean read GetAntialiasing write SetAntialiasing;
   end;
 
   TSimbaOutputTab = class(TSimbaTab)
@@ -150,19 +147,6 @@ begin
   SimbaIDEEvents.RegisterMethodOnScriptStateChange(@DoScriptStateChange);
 end;
 
-function TSimbaOutputBox.GetAntialiasing: Boolean;
-begin
-  Result := (Font.Quality = fqCleartypeNatural);
-end;
-
-procedure TSimbaOutputBox.SetAntialiasing(Value: Boolean);
-begin
-  case Value of
-    True:  Font.Quality := fqCleartypeNatural;
-    False: Font.Quality := fqNonAntialiased;
-  end;
-end;
-
 function TSimbaOutputBox.GetTab: TSimbaTab;
 begin
   if (not (Parent is TSimbaTab)) then
@@ -173,15 +157,16 @@ end;
 
 procedure TSimbaOutputBox.SimbaSettingChanged(Setting: TSimbaSetting);
 begin
-  if Setting.Equals(SimbaSettings.OutputBox.FontAntiAliased) then
-    Antialiasing := Setting.Value
-  else
+
   //if Setting.Equals(SimbaSettings.OutputBox.Color) then
   //  Color := Setting.Value
   //else
   //if Setting.Equals(SimbaSettings.OutputBox.FontColor) then
   //  Font.Color := Setting.Value
   //else
+  if Setting.Equals(SimbaSettings.OutputBox.FontAntiAliased) then
+    FontAntialising := Setting.Value
+  else
   if Setting.Equals(SimbaSettings.OutputBox.FontSize) then
     Font.Size := Setting.Value
   else
