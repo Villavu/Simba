@@ -128,9 +128,7 @@ type
     OutputBox: record
       FontName: TSimbaSetting;
       FontSize: TSimbaSetting;
-      FontColor: TSimbaSetting;
       FontAntiAliased: TSimbaSetting;
-      Color: TSimbaSetting;
     end;
 
     ScriptBackup: record
@@ -170,7 +168,7 @@ implementation
 uses
   Forms, SynEdit,
   simba.mufasatypes, simba.encoding, simba.files, simba.editor_docgenerator,
-  simba.ide_initialization;
+  simba.ide_initialization, simba.theme;
 
 var
   SimbaSettingsInstance: TSimbaSettings = nil;
@@ -258,8 +256,6 @@ begin
 end;
 
 procedure TSimbaSetting.SetValue(AValue: Variant);
-var
-  i: Integer;
 begin
   CheckValue(AValue);
   if (AValue = FValue) then
@@ -500,8 +496,6 @@ begin
   Editor.AutoCompleteWidth := TSimbaSetting_Integer.Create(Self, 'Editor', 'AutoCompleteWidth', 400);
   Editor.AutoCompleteLines := TSimbaSetting_Integer.Create(Self, 'Editor', 'AutoCompleteLines', 8);
 
-  OutputBox.FontColor       := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'FontColor', clBlack);
-  OutputBox.Color           := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'Color', clWhite);
   OutputBox.FontSize        := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'FontSize', SynDefaultFontSize);
   OutputBox.FontName        := TSimbaSetting_String.Create(Self, 'OutputBox', 'FontName', SynDefaultFontName);
   OutputBox.FontAntiAliased := TSimbaSetting_Boolean.Create(Self, 'OutputBox', 'FontAntiAliased', True);

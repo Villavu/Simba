@@ -1,11 +1,11 @@
 object SimbaForm: TSimbaForm
-  Left = 4167
+  Left = 3939
   Height = 578
-  Top = 737
+  Top = 740
   Width = 910
   Caption = 'Simba'
-  ClientHeight = 0
-  ClientWidth = 0
+  ClientHeight = 578
+  ClientWidth = 910
   DesignTimePPI = 120
   KeyPreview = True
   OnClose = FormClose
@@ -13,6 +13,16 @@ object SimbaForm: TSimbaForm
   OnDestroy = FormDestroy
   Position = poScreenCenter
   LCLVersion = '2.2.4.0'
+  object DockPanel: TAnchorDockPanel
+    Left = 0
+    Height = 550
+    Top = 28
+    Width = 910
+    Align = alClient
+    BevelOuter = bvNone
+    ParentFont = False
+    TabOrder = 0
+  end
   object ToolBar: TToolBar
     Left = 0
     Height = 28
@@ -30,7 +40,7 @@ object SimbaForm: TSimbaForm
     ParentFont = False
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 0
+    TabOrder = 1
     object ToolbarButtonRun: TToolButton
       Left = 110
       Hint = 'Run Script (Alt + R)'
@@ -62,6 +72,7 @@ object SimbaForm: TSimbaForm
       Height = 28
       Top = 0
       Style = tbsDivider
+      Visible = False
     end
     object ToolbarButtonClearOutput: TToolButton
       Left = 240
@@ -92,6 +103,7 @@ object SimbaForm: TSimbaForm
       Height = 28
       Top = 0
       Style = tbsDivider
+      Visible = False
     end
     object ToolbarButtonNew: TToolButton
       Left = 0
@@ -106,6 +118,7 @@ object SimbaForm: TSimbaForm
       Height = 28
       Top = 0
       Style = tbsDivider
+      Visible = False
     end
     object ToolbarButtonOpen: TToolButton
       Left = 20
@@ -138,6 +151,7 @@ object SimbaForm: TSimbaForm
       Height = 28
       Top = 0
       Style = tbsDivider
+      Visible = False
     end
     object ToolbarButtonCompile: TToolButton
       Left = 85
@@ -151,6 +165,7 @@ object SimbaForm: TSimbaForm
       Height = 28
       Top = 0
       Style = tbsDivider
+      Visible = False
     end
     object ToolbarButtonPackages: TToolButton
       Left = 265
@@ -169,15 +184,15 @@ object SimbaForm: TSimbaForm
       ShowCaption = False
     end
   end
-  object DockPanel: TAnchorDockPanel
+  object MainMenuPanel: TPanel
     Left = 0
-    Height = 550
-    Top = 28
+    Height = 0
+    Top = 0
     Width = 910
-    Align = alClient
+    Align = alTop
+    AutoSize = True
     BevelOuter = bvNone
-    ParentFont = False
-    TabOrder = 1
+    TabOrder = 2
   end
   object TrayIcon: TTrayIcon
     PopUpMenu = TrayPopup

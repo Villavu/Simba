@@ -12,7 +12,7 @@ interface
 
 uses
   classes, sysutils, graphics,
-  simba.mufasatypes, simba.bitmap, simba.colormath;
+  simba.mufasatypes, simba.bitmap;
 
 procedure LoadBitmapAreaFromFile(Bitmap: TMufasaBitmap; FileName: String; Area: TBox);
 function GetBitmapPixelFormat(Bitmap: TBitmap): String;

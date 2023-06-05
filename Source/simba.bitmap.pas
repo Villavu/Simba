@@ -247,7 +247,7 @@ implementation
 uses
   fpimage, math, intfgraphics, simba.overallocatearray, simba.geometry,
   simba.tpa,
-  simba.bitmap_utils, simba.encoding, simba.compress, simba.math, simba.finder,
+  simba.bitmap_utils, simba.encoding, simba.compress, simba.math,
   simba.matchtemplate, simba.nativeinterface;
 
 function GetDistinctColor(const Color, Index: Integer): Integer; inline;

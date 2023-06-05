@@ -10,10 +10,10 @@ unit simba.main;
 interface
 
 uses
-  classes, sysutils, fileutil, anchordockpanel, forms, controls, graphics, dialogs,
-  stdctrls, menus, comctrls, extctrls, buttons, imglist,
-  simba.settings, simba.mufasatypes, simba.mouselogger, simba.areaselector, simba.scriptbackup,
-  simba.scriptinstance, simba.component_menubar, LMessages;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ComCtrls, ExtCtrls,
+  Menus, ImgList, LMessages, AnchorDockPanel,
+  simba.settings, simba.mufasatypes, simba.mouselogger, simba.areaselector,
+  simba.scriptbackup, simba.scriptinstance, simba.component_menubar;
 
 const
   IMAGE_NONE                = -1;
@@ -138,6 +138,7 @@ type
     MainMenuFile: TPopupMenu;
     MainMenuEdit: TPopupMenu;
     MainMenuScript: TPopupMenu;
+    MainMenuPanel: TPanel;
     StopButtonStop: TToolButton;
     PackageMenuTimer: TTimer;
     ToolBar: TToolBar;
@@ -219,12 +220,11 @@ type
     FProcessSelection: Integer;
     FRecentFiles: TStringList;
 
+    FMenuBar: TSimbaMainMenuBar;
     FMouseLogger: TSimbaMouseLogger;
 
     FAreaSelector: TSimbaAreaSelector;
     FAreaSelection: TBox;
-
-    procedure DoPaintSeperatorButton(Sender: TObject);
 
     procedure AddRecentFile(FileName: String);
     procedure SetButtonStates(Instance: TSimbaScriptInstance);
@@ -268,7 +268,7 @@ implementation
 {$R *.lfm}
 
 uses
-  LCLType, LCLIntf, AnchorDocking, Toolwin, LazFileUtils,
+  LCLType, LCLIntf, LazFileUtils, AnchorDocking, ToolWin,
 
   simba.shapeboxform, simba.openexampleform, simba.colorpickerhistoryform,
   simba.debugimageform, simba.bitmaptostringform, simba.aboutform,
@@ -358,9 +358,9 @@ begin
 end;
 
 procedure TSimbaForm.SetToolbarPosition(Value: String);
-var
-  I: Integer;
 begin
+  MainMenuPanel.Align := alNone;
+
   case Value of
     'Top':   ToolBar.Align := alTop;
     'Left':  ToolBar.Align := alLeft;
@@ -372,9 +372,7 @@ begin
   else
     ToolBar.EdgeBorders := [];
 
-  for I := 0 to Toolbar.ButtonCount - 1 do
-    if (ToolBar.Buttons[I].Style = tbsDivider) then
-      ToolBar.Buttons[I].Visible := Value = 'Top';
+  MainMenuPanel.Align := alTop;
 end;
 
 procedure TSimbaForm.SetCustomFontSize(Value: Integer);
@@ -623,28 +621,8 @@ begin
   EnsureVisible();
 end;
 
-procedure TSimbaForm.DoPaintSeperatorButton(Sender: TObject);
-begin
-  with TToolButton(Sender) do
-  begin
-    Canvas.Brush.Color := SimbaTheme.ColorFrame;
-    Canvas.Pen.Color := SimbaTheme.ColorLine;
-    Canvas.FillRect(ClientRect);
-    Canvas.Line(Width div 2, 4, (Width div 2), Height - 4);
-  end;
-end;
-
-type
-  __TToolButton = class(TToolButton);
-
 procedure TSimbaForm.Setup(Data: PtrInt);
-var
-  I: Integer;
 begin
-  for i:=0 to ToolBar.ButtonCount-1 do
-    if (ToolBar.Buttons[i].Style=tbsDivider) then
-      __TToolButton(ToolBar.Buttons[i]).onPaint := @DoPaintSeperatorButton;
-
   SimbaIDEInitialization.CallOnCreatedMethods();
 
   SimbaIDEEvents.RegisterMethodOnEditorLoaded(@DoTabLoaded);
@@ -652,16 +630,6 @@ begin
   SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoTabModified); // Also do this
   SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoScriptTabChange);
   SimbaIDEEvents.RegisterMethodOnScriptStateChange(@DoScriptStateChange);
-
-  SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
-
-  SimbaSettingChanged(SimbaSettings.General.ToolbarSize);
-  SimbaSettingChanged(SimbaSettings.General.ToolbarPosition);
-  SimbaSettingChanged(SimbaSettings.General.CustomFontSize);
-  SimbaSettingChanged(SimbaSettings.General.LockLayout);
-  SimbaSettingChanged(SimbaSettings.General.TrayIconVisible);
-  SimbaSettingChanged(SimbaSettings.General.ConsoleVisible);
-  SimbaSettingChanged(SimbaSettings.General.MacOSKeystrokes);
 
   SimbaScriptTabsForm.AddTab();
 
@@ -673,18 +641,25 @@ begin
 
   SimbaIDEInitialization.CallOnAfterCreateMethods();
 
-  with TSimbaMainMenuBar.Create(Self) do
-  begin
-    Parent := Self;
-    Align := alTop;
+  FMenuBar := TSimbaMainMenuBar.Create(Self);
+  FMenuBar.Parent := MainMenuPanel;
+  FMenuBar.Align := alTop;
+  FMenuBar.AddMenu('File', MainMenuFile);
+  FMenuBar.AddMenu('Edit', MainMenuEdit);
+  FMenuBar.AddMenu('Script', MainMenuScript);
+  FMenuBar.AddMenu('Tools', MainMenuTools);
+  FMenuBar.AddMenu('View', MainMenuView);
+  FMenuBar.AddMenu('Help', MainMenuHelp);
 
-    AddMenu('File', MainMenuFile);
-    AddMenu('Edit', MainMenuEdit);
-    AddMenu('Script', MainMenuScript);
-    AddMenu('Tools', MainMenuTools);
-    AddMenu('View', MainMenuView);
-    AddMenu('Help', MainMenuHelp);
-  end;
+  SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
+
+  SimbaSettingChanged(SimbaSettings.General.ToolbarSize);
+  SimbaSettingChanged(SimbaSettings.General.ToolbarPosition);
+  SimbaSettingChanged(SimbaSettings.General.CustomFontSize);
+  SimbaSettingChanged(SimbaSettings.General.LockLayout);
+  SimbaSettingChanged(SimbaSettings.General.TrayIconVisible);
+  SimbaSettingChanged(SimbaSettings.General.ConsoleVisible);
+  SimbaSettingChanged(SimbaSettings.General.MacOSKeystrokes);
 end;
 
 procedure TSimbaForm.FormCreate(Sender: TObject);

@@ -29,6 +29,9 @@ type
   public
     constructor Create(AOwner: TComponent); override;
 
+    // Hide gutters etc so the synedit acts more like the "memo" component.
+    procedure HideSynEditThings;
+
     property FontAntialising: Boolean read GetFontAntialising write SetFontAntialising;
   end;
 
@@ -135,6 +138,13 @@ begin
   Font.Name := SynDefaultFontName;
 
   FontAntialising := True;
+end;
+
+procedure TSimbaSynEdit.HideSynEditThings;
+begin
+  Gutter.Visible := False;
+  RightGutter.Visible := False;
+  Options := Options + [eoHideRightMargin];
 end;
 
 end.

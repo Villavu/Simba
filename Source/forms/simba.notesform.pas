@@ -51,8 +51,7 @@ begin
   SynEdit := TSimbaSynEdit.Create(Self);
   SynEdit.Parent := Self;
   SynEdit.Align := alClient;
-  SynEdit.Gutter.Visible := False;
-  SynEdit.RightGutter.Visible := False;
+  SynEdit.HideSynEditThings();
 end;
 
 end.
