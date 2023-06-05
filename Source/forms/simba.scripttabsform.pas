@@ -10,9 +10,8 @@ unit simba.scripttabsform;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls, Menus, StdCtrls, Buttons,
-  simba.scripttab,
-  simba.editor, simba.editor_findreplace,
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls, Menus, Buttons,
+  simba.scripttab, simba.editor, simba.editor_findreplace,
   simba.component_tabcontrol, simba.component_button, simba.component_edit;
 
 type

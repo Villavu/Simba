@@ -17,7 +17,7 @@ interface
 
 uses
   Classes, SysUtils, Math,
-  simba.mufasatypes, simba.colormath, simba.colormath_distance;
+  simba.mufasatypes, simba.colormath_distance;
 
 function DistanceRGB_UnRolled(const C1: PColorRGB; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
 function DistanceHSL_UnRolled(const C1: PColorHSL; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;

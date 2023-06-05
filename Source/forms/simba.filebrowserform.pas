@@ -74,7 +74,7 @@ implementation
 {$R *.lfm}
 
 uses
-  FileUtil, LazFileUtils, Clipbrd, TreeFilterEdit,
+  FileUtil, LazFileUtils, Clipbrd,
   simba.main, simba.scripttabsform, simba.nativeinterface;
 
 procedure TSimbaFileBrowserForm.DoFindFiles;
@@ -141,7 +141,6 @@ procedure TSimbaFileBrowserForm.DoPopluateTreeView(Sender: TObject);
   procedure Populate(ParentNode: TTreeNode; Dir: TDirectoryInfo);
   var
     I: Integer;
-    Node: TTreeNode;
   begin
     ParentNode := Add(ParentNode, Dir.Info.Name, Dir.Info.FileName, True, False);
     for I := 0 to High(Dir.Directories) do

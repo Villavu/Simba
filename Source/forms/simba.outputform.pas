@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, forms, controls, comctrls, graphics, menus, extctrls, syncobjs,
-  synedit, synedittypes, syneditmiscclasses, syneditmousecmds,
+  synedit, syneditmiscclasses, syneditmousecmds,
   simba.settings, simba.mufasatypes, simba.component_tabcontrol, simba.component_synedit;
 
 type
@@ -157,13 +157,6 @@ end;
 
 procedure TSimbaOutputBox.SimbaSettingChanged(Setting: TSimbaSetting);
 begin
-
-  //if Setting.Equals(SimbaSettings.OutputBox.Color) then
-  //  Color := Setting.Value
-  //else
-  //if Setting.Equals(SimbaSettings.OutputBox.FontColor) then
-  //  Font.Color := Setting.Value
-  //else
   if Setting.Equals(SimbaSettings.OutputBox.FontAntiAliased) then
     FontAntialising := Setting.Value
   else
@@ -259,11 +252,6 @@ begin
   OnClickLink         := @DoMouseLinkClick;
   OnSpecialLineMarkup := @DoSpecialLineMarkup;
 
-  TabStop := False;
-  BorderStyle := bsNone;
-  Options := Options + [eoHideRightMargin];
-
-  Gutter.Visible := False;
   MouseLinkColor.Style := [fsUnderline];
 
   MarkupByClass[TSynEditMarkupBracket].Enabled := False;
@@ -274,8 +262,10 @@ begin
   with MouseTextActions.Add() do
     Command := emcMouseLink;
 
+  HideSynEditThings();
+
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
-  for Setting in [{SimbaSettings.OutputBox.Color, SimbaSettings.OutputBox.FontColor, }SimbaSettings.OutputBox.FontSize, SimbaSettings.OutputBox.FontName, SimbaSettings.OutputBox.FontAntiAliased] do
+  for Setting in [SimbaSettings.OutputBox.FontSize, SimbaSettings.OutputBox.FontName, SimbaSettings.OutputBox.FontAntiAliased] do
     SimbaSettingChanged(Setting);
 end;
 

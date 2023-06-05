@@ -191,7 +191,7 @@ begin
   begin
     ImportingSection := 'Color Math';
 
-    addGlobalType('(RGB, HSV, HSL, XYZ, LAB, LCH, DELTAE)', 'EColorSpace');
+    addGlobalType('enum(RGB, HSV, HSL, XYZ, LAB, LCH, DELTAE)', 'EColorSpace');
     addGlobalType('array [0..2] of Single', 'TChannelMultipliers');
 
     addGlobalType('record B,G,R,A: Byte; end;', 'TColorBGRA');

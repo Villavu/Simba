@@ -21,7 +21,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics, Math,
-  simba.mufasatypes, simba.math, simba.colormath;
+  simba.mufasatypes, simba.math;
 
 const
   XYZ_POW_2_4: array[0..255] of Single = (
