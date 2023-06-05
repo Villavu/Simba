@@ -11,11 +11,8 @@ interface
 
 uses
   Classes, SysUtils, Graphics, Controls, ComCtrls, LCLType,
-  SynEdit, SynEditTypes, SynGutterLineOverview, SynEditMouseCmds, SynEditMiscClasses,
-  SynEditKeyCmds, SynEditHighlighter, SynHighlighterPas_Simba, SynEditMarkupHighAll,
-  LazSynEditMouseCmdsTypes, LazMethodList,
-  simba.mufasatypes, simba.settings, simba.editor_autocomplete, simba.editor_paramhint,
-  simba.editor_attributes, simba.editor_modifiedlinegutter, simba.component_synedit;
+  SynEdit, SynEditTypes, SynGutterLineOverview, SynEditMouseCmds, SynEditMiscClasses, SynEditKeyCmds, SynEditHighlighter,
+  simba.mufasatypes, simba.settings, simba.editor_autocomplete, simba.editor_paramhint, simba.editor_attributes, simba.editor_modifiedlinegutter, simba.component_synedit;
 
 type
   TSimbaEditor = class(TSimbaSynEdit)
@@ -26,7 +23,6 @@ type
 
     FAttributes: TSimbaEditor_Attributes;
     FModifiedLinesGutter: TSimbaEditorModifiedLinesGutter;
-    FFontChangedHandlerList: TMethodList;
 
     FFocusedLinesUpdating: Boolean;
     FFocusedLinesCount: Integer;
@@ -42,9 +38,11 @@ type
     FModifiedEvent: TNotifyEvent;
 
     procedure FontChanged(Sender: TObject); override;
+
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
     procedure DoSimbaSettingChanged_Colors(Setting: TSimbaSetting);
 
+    // Accept drop from TTreeView
     procedure DoDragDrop(Sender, Source: TObject; X, Y: Integer);
     procedure DoDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
 
@@ -87,8 +85,6 @@ type
     // Repaint some extra things when saved
     procedure InvalidateGutter; override;
 
-    procedure RegisterFontChangedHandler(Handler: TNotifyEvent);
-    procedure UnRegisterFontChangedHandler(Handler: TNotifyEvent);
     procedure RegisterCaretMoveHandler(Handler: TNotifyEvent);
     procedure UnRegisterCaretMoveHandler(Handler: TNotifyEvent);
 
@@ -102,7 +98,8 @@ type
 implementation
 
 uses
-  SynEditPointClasses, SynGutterBase, SynEditMarkupWordGroup,
+  SynEditPointClasses, SynGutterBase, SynEditMarkupWordGroup, SynHighlighterPas_Simba,
+  LazSynEditMouseCmdsTypes,
   simba.fonthelpers, simba.editor_blockcompletion,
   simba.editor_docgenerator, simba.editor_commentblock,
   simba.editor_mousewheelzoom, simba.editor_multicaret,
@@ -145,16 +142,6 @@ begin
     FModifiedLinesGutter.ReCalc();
 
   inherited;
-end;
-
-procedure TSimbaEditor.RegisterFontChangedHandler(Handler: TNotifyEvent);
-begin
-  FFontChangedHandlerList.Add(TMethod(Handler));
-end;
-
-procedure TSimbaEditor.UnRegisterFontChangedHandler(Handler: TNotifyEvent);
-begin
-  FFontChangedHandlerList.Remove(TMethod(Handler));
 end;
 
 procedure TSimbaEditor.RegisterCaretMoveHandler(Handler: TNotifyEvent);
@@ -287,7 +274,10 @@ procedure TSimbaEditor.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
 
-  FFontChangedHandlerList.CallNotifyEvents(Self);
+  if (FAutoComplete <> nil) then
+    FAutoComplete.Form.Hide();
+  if (FParamHint <> nil) then
+    FParamHint.Form.Hide();
 end;
 
 procedure TSimbaEditor.SimbaSettingChanged(Setting: TSimbaSetting);
@@ -321,10 +311,7 @@ begin
 
     'Editor.AntiAliased':
       begin
-        if Setting.Value then
-          Font.Quality := fqCleartypeNatural
-        else
-          Font.Quality := fqNonAntialiased;
+        FontAntialising := Setting.Value;
       end;
 
     'Editor.AllowCaretPastEOL':
@@ -450,12 +437,8 @@ var
 begin
   inherited Create(AOwner);
 
-  BorderStyle := bsNone;
-
   OnDragDrop := @DoDragDrop;
   OnDragOver := @DoDragOver;
-
-  FFontChangedHandlerList := TMethodList.Create();
 
   PopupMenu := GetSimbaEditorPopupMenu();
 
@@ -540,8 +523,6 @@ begin
 
   if (FAttributes <> nil) then
     FreeAndNil(FAttributes);
-  if (FFontChangedHandlerList <> nil) then
-    FreeAndNil(FFontChangedHandlerList);
 
   inherited Destroy();
 end;

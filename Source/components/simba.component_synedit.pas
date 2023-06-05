@@ -5,7 +5,7 @@ unit simba.component_synedit;
 interface
 
 uses
-  Classes, SysUtils, Controls, Forms, StdCtrls,
+  Classes, SysUtils, Controls, Forms, StdCtrls, Graphics,
   SynEdit, SynEditTypes, SynEditFoldedView, SynEditTextBuffer, SynEditMarkupSelection,
   LazSynEditText,
   ATScrollBar;
@@ -23,14 +23,32 @@ type
     procedure StatusChanged(AChanges: TSynStatusChanges); override;
     procedure DoLineChanges(Sender: TSynEditStrings; aIndex, aCount: Integer);
     procedure SetParent(NewParent: TWinControl); override;
+
+    function GetFontAntialising: Boolean;
+    procedure SetFontAntialising(Value: Boolean);
   public
     constructor Create(AOwner: TComponent); override;
+
+    property FontAntialising: Boolean read GetFontAntialising write SetFontAntialising;
   end;
 
 implementation
 
 uses
   simba.mufasatypes, simba.theme;
+
+function TSimbaSynEdit.GetFontAntialising: Boolean;
+begin
+  Result := (Font.Quality = fqCleartypeNatural);
+end;
+
+procedure TSimbaSynEdit.SetFontAntialising(Value: Boolean);
+begin
+  case Value of
+    True:  Font.Quality := fqCleartypeNatural;
+    False: Font.Quality := fqNonAntialiased;
+  end;
+end;
 
 procedure TSimbaSynEdit.DoVertScrollBarChange(Sender: TObject);
 begin
@@ -106,12 +124,17 @@ begin
   TextView.AddChangeHandler(senrLineCount, @DoLineChanges);
 
   ScrollBars := ssNone;
+  BorderStyle := bsNone;
 
   TSynEditMarkupSelection(MarkupByClass[TSynEditMarkupSelection]).MarkupInfoSeletion.Background := SimbaTheme.ColorActive;
 
-
   Color := SimbaTheme.ColorBackground;
+
   Font.Color := SimbaTheme.ColorFont;
+  Font.Size := SynDefaultFontSize;
+  Font.Name := SynDefaultFontName;
+
+  FontAntialising := True;
 end;
 
 end.
