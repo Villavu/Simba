@@ -1,7 +1,7 @@
 object SimbaSettingsForm: TSimbaSettingsForm
-  Left = 4199
+  Left = 3652
   Height = 625
-  Top = 622
+  Top = 427
   Width = 750
   Caption = 'Settings'
   ClientHeight = 625
@@ -20,9 +20,10 @@ object SimbaSettingsForm: TSimbaSettingsForm
     BorderSpacing.Right = 1
     ReadOnly = True
     ScrollBars = ssAutoBoth
+    ShowRoot = False
     TabOrder = 0
     OnSelectionChanged = TreeViewSelectionChanged
-    Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
+    Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoToolTips, tvoThemedDraw]
   end
   object Notebook: TNotebook
     Left = 211

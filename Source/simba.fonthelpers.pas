@@ -10,9 +10,10 @@ unit simba.fonthelpers;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, Controls;
 
 function GetDefaultFontSize: Integer;
+function GetFontSize(Control: TWinControl; IncAmount: Integer = 0): Integer;
 function IsFontFixed(FontName: String): Boolean;
 function GetFixedFonts: TStringArray;
 
@@ -25,10 +26,15 @@ function GetDefaultFontSize: Integer;
 begin
   with TBitmap.Create() do
   try
-    Result := Round((GetFontData(Canvas.Font.Reference.Handle).Height * 72 / Canvas.Font.PixelsPerInch) * -1);
+    Result := Round(Abs(GetFontData(Canvas.Font.Reference.Handle).Height) * 72 / Canvas.Font.PixelsPerInch);
   finally
     Free();
   end;
+end;
+
+function GetFontSize(Control: TWinControl; IncAmount: Integer): Integer;
+begin
+  Result := Round(Abs(GetFontData(Control.Font.Handle).Height) * 72 / Control.Font.PixelsPerInch) + IncAmount;
 end;
 
 function FontIsPitched(var Font: TEnumLogFontEx; var Metric: TNewTextMetricEx; FontType: LongInt; Data: LParam): LongInt; stdcall;

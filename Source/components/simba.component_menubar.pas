@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.component_menubar;
 
 {$i simba.inc}
@@ -5,7 +10,8 @@ unit simba.component_menubar;
 interface
 
 uses
-  Classes, SysUtils, Controls, Forms, Menus, Graphics;
+  Classes, SysUtils, Controls, Forms, Menus, Graphics,
+  simba.settings;
 
 type
   TSimbaMainMenuBar = class(TCustomControl)
@@ -29,6 +35,8 @@ type
     procedure MouseLeave; override;
 
     procedure DoMenuClose(Sender: TObject);
+
+    procedure MaybeReplaceModifiers(Menu: TPopupMenu);
   public
     constructor Create(AOwner: TComponent); override;
 
@@ -86,6 +94,7 @@ begin
   Style.Alignment := taCenter;
   Style.Layout := tlCenter;
 
+  Canvas.Font.Color := SimbaTheme.ColorFont;
   Canvas.Brush.Color := SimbaTheme.ColorFrame;
   Canvas.FillRect(ClientRect);
 
@@ -160,12 +169,41 @@ begin
       FItems[I].ClosedAt := GetTickCount64();
 end;
 
+procedure TSimbaMainMenuBar.MaybeReplaceModifiers(Menu: TPopupMenu);
+
+  procedure ReplaceModifiers(const MenuItem: TMenuItem);
+  var
+    I: Integer;
+    Key: Word;
+    Shift: TShiftState;
+  begin
+    if (MenuItem.ShortCut > 0) then
+    begin
+      ShortCutToKey(MenuItem.ShortCut, Key, Shift);
+      if (ssCtrl in Shift) then
+        MenuItem.ShortCut := ShortCut(Key, Shift - [ssCtrl] + [ssMeta]);
+    end;
+
+    for I := 0 to MenuItem.Count - 1 do
+      ReplaceModifiers(MenuItem.Items[I]);
+  end;
+
+var
+  I: Integer;
+begin
+  if Application.HasOption('no-macos-commandkey') then
+    Exit;
+
+  for I := 0 to Menu.Items.Count - 1 do
+    ReplaceModifiers(Menu.Items[I]);
+end;
+
 constructor TSimbaMainMenuBar.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
+  ParentFont := True;
   ControlStyle := ControlStyle + [csOpaque];
-  Font.Color := SimbaTheme.ColorFont;
 
   CalculateSizes();
 end;
@@ -176,6 +214,10 @@ begin
   FItems[High(FItems)].Text := Title;
   FItems[High(FItems)].Menu := APopupMenu;
   APopupMenu.OnClose := @DoMenuClose;
+
+  {$IFDEF DARWIN}
+  MaybeReplaceModifiers(APopupMenu);
+  {$ENDIF}
 
   CalculateSizes();
 end;

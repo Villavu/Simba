@@ -23,7 +23,7 @@ procedure ExtractOpenSSL;
 implementation
 
 uses
-  lcltype,
+  lcltype, Forms,
   simba.mufasatypes, simba.gz, simba.settings, simba.files, simba.ide_initialization;
 
 function IsFileHash(FileName: String; Hash: String): Boolean;
@@ -88,13 +88,15 @@ end;
 
 procedure ExtractOpenSSL;
 begin
-  if SimbaSettings.General.OpenSSLExtractOnLaunch.Value then
+  if Application.HasOption('no-openssl-extract') then
+    Exit;
+
   try
     EnumResourceNames(HINSTANCE, RT_RCDATA, @ExtractLibCrypto, 0);
     EnumResourceNames(HINSTANCE, RT_RCDATA, @ExtractLibSSL, 0);
   except
     on E: Exception do
-      DebugLn('Exception while extracting OpenSSL: ' + E.Message);
+      DebugLn('ExtractOpenSSL Exception: ' + E.Message);
   end;
 end;
 

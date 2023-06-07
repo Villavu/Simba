@@ -8,18 +8,23 @@ object SimbaOutputBoxFrame: TSimbaOutputBoxFrame
   DesignTimePPI = 120
   ParentFont = False
   TabOrder = 0
-  DesignLeft = 2916
-  DesignTop = 866
+  DesignLeft = 3236
+  DesignTop = 917
   object FontNameComboBox: TComboBox
-    AnchorSideTop.Control = Owner
+    AnchorSideLeft.Control = Label3
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = DividerBevel1
+    AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 124
+    Left = 103
     Height = 28
-    Top = 5
-    Width = 476
+    Top = 69
+    Width = 487
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 5
+    BorderSpacing.Left = 25
+    BorderSpacing.Top = 10
+    BorderSpacing.Right = 10
     ItemHeight = 20
     OnChange = FontNameComboBoxChange
     TabOrder = 0
@@ -29,11 +34,12 @@ object SimbaOutputBoxFrame: TSimbaOutputBoxFrame
     AnchorSideTop.Control = FontNameComboBox
     AnchorSideBottom.Control = FontNameComboBox
     AnchorSideBottom.Side = asrBottom
-    Left = 0
+    Left = 5
     Height = 28
-    Top = 5
+    Top = 69
     Width = 73
     Anchors = [akTop, akLeft, akBottom]
+    BorderSpacing.Left = 5
     Caption = 'Font Name'
     Layout = tlCenter
     ParentColor = False
@@ -43,65 +49,122 @@ object SimbaOutputBoxFrame: TSimbaOutputBoxFrame
     AnchorSideTop.Control = FontSizeSpinEdit
     AnchorSideBottom.Control = FontSizeSpinEdit
     AnchorSideBottom.Side = asrBottom
-    Left = 0
+    Left = 5
     Height = 28
-    Top = 38
+    Top = 102
     Width = 60
     Anchors = [akTop, akLeft, akBottom]
+    BorderSpacing.Left = 5
     Caption = 'Font Size'
     Layout = tlCenter
     ParentColor = False
   end
   object FontSizeSpinEdit: TSpinEdit
+    AnchorSideLeft.Control = FontNameComboBox
     AnchorSideTop.Control = FontNameComboBox
     AnchorSideTop.Side = asrBottom
-    Left = 124
+    Left = 103
     Height = 28
-    Top = 38
+    Top = 102
     Width = 142
     BorderSpacing.Top = 5
     OnChange = FontSizeSpinEditChange
     TabOrder = 1
   end
-  object Label5: TLabel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = FontSizeSpinEdit
-    AnchorSideTop.Side = asrBottom
-    Left = 0
-    Height = 20
-    Top = 71
-    Width = 84
-    BorderSpacing.Top = 5
-    Caption = 'Anti Aliasing'
-    ParentColor = False
-  end
-  object AntiAliasingCheckbox: TCheckBox
-    AnchorSideLeft.Control = FontSizeSpinEdit
-    AnchorSideTop.Control = Label5
-    AnchorSideBottom.Control = Label5
-    AnchorSideBottom.Side = asrBottom
-    Left = 124
-    Height = 20
-    Top = 71
-    Width = 24
-    Anchors = [akTop, akLeft, akBottom]
-    OnChange = AntiAliasingCheckboxChange
-    TabOrder = 2
-  end
   object ButtonReset: TButton
+    AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = AntiAliasingCheckbox
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 467
+    Left = 421
     Height = 30
-    Top = 96
-    Width = 133
+    Top = 168
+    Width = 169
     Anchors = [akTop, akRight]
     AutoSize = True
-    BorderSpacing.Top = 5
-    Caption = 'Reset to Default'
+    BorderSpacing.Left = 5
+    BorderSpacing.Top = 10
+    BorderSpacing.Right = 10
+    Caption = 'Reset Font To Default'
     OnClick = ButtonResetClick
+    TabOrder = 2
+  end
+  object DividerBevel1: TDividerBevel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = CheckBox1
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 5
+    Height = 20
+    Top = 39
+    Width = 590
+    Caption = 'Font'
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 5
+    BorderSpacing.Top = 5
+    BorderSpacing.Right = 5
+    Style = gsHorLines
+  end
+  object CheckBox1: TCheckBox
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    Left = 5
+    Height = 24
+    Hint = 'Clear output box when script is compiled or run.'
+    Top = 10
+    Width = 214
+    BorderSpacing.Left = 5
+    BorderSpacing.Top = 10
+    Caption = 'Clear On Script Compile/Run'
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 3
+  end
+  object Panel1: TPanel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = FontSizeSpinEdit
+    AnchorSideTop.Side = asrBottom
+    Left = 5
+    Height = 23
+    Top = 135
+    Width = 123
+    AutoSize = True
+    BorderSpacing.Left = 5
+    BorderSpacing.Top = 5
+    BevelOuter = bvNone
+    ClientHeight = 23
+    ClientWidth = 123
+    TabOrder = 4
+    object Label5: TLabel
+      AnchorSideLeft.Control = Panel1
+      AnchorSideTop.Control = Panel1
+      AnchorSideBottom.Control = Panel1
+      AnchorSideBottom.Side = asrBottom
+      Left = 0
+      Height = 23
+      Top = 0
+      Width = 84
+      Anchors = [akTop, akLeft, akBottom]
+      Caption = 'Anti Aliasing'
+      Layout = tlCenter
+      ParentColor = False
+    end
+    object AntiAliasingCheckbox: TCheckBox
+      AnchorSideLeft.Control = Label5
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Panel1
+      AnchorSideBottom.Control = Panel1
+      AnchorSideBottom.Side = asrBottom
+      Left = 99
+      Height = 23
+      Top = 0
+      Width = 24
+      Anchors = [akTop, akLeft, akBottom]
+      BorderSpacing.Left = 15
+      OnChange = AntiAliasingCheckboxChange
+      TabOrder = 0
+    end
   end
 end
