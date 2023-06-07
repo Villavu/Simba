@@ -39,6 +39,8 @@ type
 
     procedure FontChanged(Sender: TObject); override;
 
+    procedure MaybeReplaceModifiers;
+
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
     procedure DoSimbaSettingChanged_Colors(Setting: TSimbaSetting);
 
@@ -99,7 +101,7 @@ implementation
 
 uses
   SynEditPointClasses, SynGutterBase, SynEditMarkupWordGroup, SynHighlighterPas_Simba,
-  LazSynEditMouseCmdsTypes,
+  LazSynEditMouseCmdsTypes, Forms,
   simba.fonthelpers, simba.editor_blockcompletion,
   simba.editor_docgenerator, simba.editor_commentblock,
   simba.editor_mousewheelzoom, simba.editor_multicaret,
@@ -280,6 +282,14 @@ begin
     FParamHint.Form.Hide();
 end;
 
+procedure TSimbaEditor.MaybeReplaceModifiers;
+begin
+  if Application.HasOption('no-macos-commandkey') then
+    Exit;
+
+  ReplaceKeyStrokeModifiers(ssCtrl, ssMeta);
+end;
+
 procedure TSimbaEditor.SimbaSettingChanged(Setting: TSimbaSetting);
 var
   I: Integer;
@@ -320,29 +330,6 @@ begin
           Options := Options + [eoTrimTrailingSpaces, eoScrollPastEol]
         else
           Options := Options - [eoTrimTrailingSpaces, eoScrollPastEol];
-      end;
-
-    'General.MacOSKeystrokes':
-      begin
-        if Setting.Value then
-        begin
-          for I := 0 to Keystrokes.Count - 1 do
-            if (ssCtrl in Keystrokes[i].Shift) then
-              Keystrokes[I].Shift := Keystrokes[I].Shift - [ssCtrl] + [ssMeta];
-
-          for I := 0 to MouseActions.Count - 1 do
-            if (ssCtrl in MouseActions[i].Shift) then
-              MouseActions[I].Shift := MouseActions[I].Shift - [ssCtrl] + [ssMeta];
-        end else
-        begin
-          for I := 0 to Keystrokes.Count - 1 do
-            if (ssMeta in Keystrokes[i].Shift) then
-              Keystrokes[I].Shift := Keystrokes[I].Shift - [ssMeta] + [ssCtrl];
-
-          for I := 0 to MouseActions.Count - 1 do
-            if (ssMeta in MouseActions[i].Shift) then
-              MouseActions[I].Shift := MouseActions[I].Shift - [ssMeta] + [ssCtrl];
-        end;
       end;
   end;
 end;
@@ -503,12 +490,15 @@ begin
   Gutter.LineNumberPart().Visible := True;
   Gutter.CodeFoldPart().Visible   := True;
 
+  {$IFDEF DARWIN}
+  MaybeReplaceModifiers();
+  {$ENDIF}
+
   SimbaSettingChanged(SimbaSettings.Editor.AllowCaretPastEOL);
   SimbaSettingChanged(SimbaSettings.Editor.RightMarginVisible);
   SimbaSettingChanged(SimbaSettings.Editor.AntiAliased);
   SimbaSettingChanged(SimbaSettings.Editor.FontSize);
   SimbaSettingChanged(SimbaSettings.Editor.FontName);
-  SimbaSettingChanged(SimbaSettings.General.MacOSKeystrokes);
 
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
 

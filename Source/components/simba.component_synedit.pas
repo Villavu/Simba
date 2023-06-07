@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.component_synedit;
 
 {$i simba.inc}
@@ -8,13 +13,13 @@ uses
   Classes, SysUtils, Controls, Forms, StdCtrls, Graphics,
   SynEdit, SynEditTypes, SynEditFoldedView, SynEditTextBuffer, SynEditMarkupSelection,
   LazSynEditText,
-  ATScrollBar;
+  simba.component_scrollbar;
 
 type
   TSimbaSynEdit = class(TSynEdit)
   protected
-    FScrollbarVert: TATScrollbar;
-    FScrollbarHorz: TATScrollbar;
+    FScrollbarVert: TSimbaScrollBar;
+    FScrollbarHorz: TSimbaScrollBar;
 
     procedure DoVertScrollBarChange(Sender: TObject);
     procedure DoHorzScrollBarChange(Sender: TObject);
@@ -31,6 +36,7 @@ type
 
     // Hide gutters etc so the synedit acts more like the "memo" component.
     procedure HideSynEditThings;
+    procedure ReplaceKeyStrokeModifiers(const Find, Replace: TShiftStateEnum);
 
     property FontAntialising: Boolean read GetFontAntialising write SetFontAntialising;
   end;
@@ -114,11 +120,11 @@ constructor TSimbaSynEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  FScrollbarVert := TATScrollbar.Create(Self);
+  FScrollbarVert := TSimbaScrollBar.Create(Self);
   FScrollbarVert.Kind := sbVertical;
   FScrollbarVert.OnChange := @DoVertScrollBarChange;
 
-  FScrollbarHorz := TATScrollbar.Create(Self);
+  FScrollbarHorz := TSimbaScrollBar.Create(Self);
   FScrollbarHorz.Kind := sbHorizontal;
   FScrollbarHorz.OnChange := @DoHorzScrollBarChange;
 
@@ -145,6 +151,19 @@ begin
   Gutter.Visible := False;
   RightGutter.Visible := False;
   Options := Options + [eoHideRightMargin];
+end;
+
+procedure TSimbaSynEdit.ReplaceKeyStrokeModifiers(const Find, Replace: TShiftStateEnum);
+var
+  I: Integer;
+begin
+  for I := 0 to Keystrokes.Count - 1 do
+    if (Find in Keystrokes[I].Shift) then
+      Keystrokes[I].Shift := Keystrokes[I].Shift - [Find] + [Replace];
+
+  for I := 0 to MouseActions.Count - 1 do
+    if (Find in MouseActions[I].Shift) then
+      MouseActions[I].Shift := MouseActions[I].Shift - [Find] + [Replace];
 end;
 
 end.

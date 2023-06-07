@@ -16,6 +16,7 @@ uses
 type
   TSimbaAnchorDockHeader = class(TAnchorDockHeader)
   protected
+    procedure ParentFontChanged; override;
     procedure Paint; override;
 
     procedure CalculatePreferredSize(var PreferredWidth, PreferredHeight: integer; WithThemeSpace: Boolean); override;
@@ -75,7 +76,18 @@ implementation
 
 uses
   anchordockstorage, xmlpropstorage, lazloggerbase, lazconfigstorage,
-  simba.theme;
+  simba.theme, simba.fonthelpers;
+
+procedure TSimbaAnchorDockHeader.ParentFontChanged;
+begin
+  inherited ParentFontChanged();
+
+  if Assigned(Parent) and Assigned(Parent.Font) then
+  begin
+    Font.Size := GetFontSize(Parent, 2);
+    Font.Color := SimbaTheme.ColorFont;
+  end;
+end;
 
 procedure TSimbaAnchorDockHeader.Paint;
 var
@@ -93,7 +105,7 @@ begin
   with TBitmap.Create() do
   try
     Canvas.Font := Self.Font;
-    Canvas.Font.Size := Round(Abs(GetFontData(Canvas.Font.Handle).Height) * 72 / Canvas.Font.PixelsPerInch) + 2; // Measure on larger font size - Font size can be 0
+    Canvas.Font.Size := GetFontSize(Self, 1);
 
     PreferredHeight := Canvas.TextHeight('Tay');
   finally
@@ -135,9 +147,7 @@ begin
   CloseButton.Parent := nil;
   //MinimizeButton.Parent := nil;
 
-  Font.Color := SimbaTheme.ColorFont;
-  Font.Size := Round(Abs(GetFontData(Font.Handle).Height) * 72 / Font.PixelsPerInch) + 2;
-
+  ParentFont := True;
   Color := SimbaTheme.ColorFrame;
 end;
 

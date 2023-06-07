@@ -13,8 +13,7 @@ interface
 
 uses
   Classes, SysUtils, Controls, Forms, Graphics, StdCtrls, ComCtrls, LMessages, LCLType, ImgList,
-  ATScrollBar,
-  simba.component_edit, simba.component_treeviewhint;
+  simba.component_edit, simba.component_treeviewhint, simba.component_scrollbar;
      
 type
   TSimbaTreeView = class;
@@ -22,8 +21,8 @@ type
   TSimbaInternalTreeView = class(TTreeView)
   protected
     FLoading: Boolean;
-    FScrollbarVert: TATScrollbar;
-    FScrollbarHorz: TATScrollbar;
+    FScrollbarVert: TSimbaScrollBar;
+    FScrollbarHorz: TSimbaScrollBar;
 
     procedure UpdateScrollBars;
     procedure DoSelectionChanged; override;
@@ -49,11 +48,13 @@ type
     FFilterEdit: TSimbaEdit;
     FHint: TSimbaTreeViewHint;
     FTree: TSimbaInternalTreeView;
-    FScrollbarVert: TATScrollbar;
-    FScrollbarHorz: TATScrollbar;
+    FScrollbarVert: TSimbaScrollBar;
+    FScrollbarHorz: TSimbaScrollBar;
     FOnGetNodeHint: TNodeHintEvent;
     FNodeClass: TTreeNodeClass;
     FOnAfterFilter: TNotifyEvent;
+
+    procedure FontChanged(Sender: TObject); override;
 
     procedure UpdateFilter;
 
@@ -128,19 +129,17 @@ begin
 
   FNodeClass := NodeClass;
 
-  FScrollbarVert := TATScrollbar.Create(Self);
+  FScrollbarVert := TSimbaScrollBar.Create(Self);
   FScrollbarVert.Parent := Self;
   FScrollbarVert.Kind := sbVertical;
   FScrollbarVert.Align := alRight;
-  FScrollbarVert.Width := ATScrollbarTheme.InitialSize;
   FScrollbarVert.OnChange := @ScrollVertChange;
   FScrollbarVert.Visible := True;
 
-  FScrollbarHorz := TATScrollbar.Create(Self);
+  FScrollbarHorz := TSimbaScrollBar.Create(Self);
   FScrollbarHorz.Parent := Self;
   FScrollbarHorz.Kind := sbHorizontal;
   FScrollbarHorz.Align := alBottom;
-  FScrollbarHorz.Height := ATScrollbarTheme.InitialSize;
   FScrollbarHorz.IndentCorner := 100;
   FScrollbarHorz.OnChange := @ScrollHorzChange;
   FScrollbarHorz.Visible := True;
@@ -156,13 +155,13 @@ begin
   FTree.ExpandSignType := tvestArrow;
   FTree.ExpandSignColor := clWhite;
   FTree.TreeLinePenStyle := psClear;
-  FTree.Font.Color := SimbaTheme.ColorFont;
-  FTree.BackgroundColor := SimbaTheme.ColorBackground;
-  FTree.SelectionColor := SimbaTheme.ColorActive;
   FTree.OnCreateNodeClass := @DoCreateNodeClass;
   FTree.OnMouseMove := @DoMouseMove;
   FTree.DragMode := dmAutomatic;
   FTree.TabStop := False;
+  FTree.BackgroundColor := SimbaTheme.ColorBackground;
+  FTree.SelectionColor := SimbaTheme.ColorActive;
+  FTree.Font.Color := SimbaTheme.ColorFont;
 
   FHint := TSimbaTreeViewHint.Create(FTree);
 
@@ -177,25 +176,6 @@ begin
   FFilterEdit.Font.Color := SimbaTheme.ColorFont;
   FFilterEdit.HintTextColor := clLtGray;
   FFilterEdit.HintText := '(search)';
-
-  with ATScrollbarTheme do
-  begin
-    InitialSize := Scale96ToScreen(16);
-    ThumbMinSize := Scale96ToScreen(24);
-    ThumbRoundedRect := False;
-    DirectJumpOnClickPageUpDown := True;
-
-    ColorCorner := SimbaTheme.ColorFrame;
-    ColorBG := SimbaTheme.ColorScrollBarInActive;
-    ColorThumbBorder := SimbaTheme.ColorScrollBarActive;
-    ColorThumbFill := SimbaTheme.ColorScrollBarActive;
-    ColorThumbFillOver := SimbaTheme.ColorScrollBarActive;
-    ColorThumbFillPressed := SimbaTheme.ColorScrollBarActive;
-    ColorThumbDecor := SimbaTheme.ColorScrollBarActive;
-    ColorArrowFill := SimbaTheme.ColorScrollBarActive;
-    ColorArrowBorder := SimbaTheme.ColorScrollBarActive;
-    ColorArrowSign := SimbaTheme.ColorLine;
-  end;
 end;
 
 procedure TSimbaTreeView.FullCollapse;
@@ -292,6 +272,14 @@ end;
 function TSimbaTreeView.GetTopLevelCount: Integer;
 begin
   Result := FTree.Items.TopLvlCount;
+end;
+
+procedure TSimbaTreeView.FontChanged(Sender: TObject);
+begin
+  inherited FontChanged(Sender);
+
+  FTree.Font := Self.Font;
+  FTree.Font.Color := SimbaTheme.ColorFont;
 end;
 
 procedure TSimbaTreeView.UpdateFilter;

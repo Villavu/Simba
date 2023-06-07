@@ -234,6 +234,7 @@ type
     procedure SetupCompleted;
 
     procedure DoColorPicked(Data: PtrInt);
+    procedure DoSettingChanged_Toolbar(Setting: TSimbaSetting);
 
     procedure SimbaSettingChanged(Setting: TSimbaSetting);
 
@@ -252,7 +253,6 @@ type
     procedure SetConsoleVisible(Value: Boolean);
     procedure SetLayoutLocked(Value: Boolean);
     procedure SetTrayIconVisible(Value: Boolean);
-    procedure SetMacOSKeystokes(Value: Boolean);
   public
     property WindowSelection: TWindowHandle read FWindowSelection;
     property ProcessSelection: Integer read FProcessSelection;
@@ -379,7 +379,7 @@ procedure TSimbaForm.SetCustomFontSize(Value: Integer);
 var
   I: Integer;
 begin
-  CreateHandle;
+  HandleNeeded();
   for I := 0 to Screen.CustomFormCount - 1 do
     Screen.CustomForms[I].Font.Size := Value;
 end;
@@ -407,35 +407,6 @@ begin
   MenuItemTrayIcon.Checked := Value;
 
   TrayIcon.Visible := Value;
-end;
-
-procedure TSimbaForm.SetMacOSKeystokes(Value: Boolean);
-var
-  Find: TShiftStateEnum;
-  Replace: TShiftStateEnum;
-
-  procedure SetMacOSKeystroke(const MenuItem: TMenuItem);
-  var
-    I: Integer;
-    Key: Word;
-    Shift: TShiftState;
-  begin
-    if (MenuItem.ShortCut > 0) then
-    begin
-      ShortCutToKey(MenuItem.ShortCut, Key, Shift);
-      if (Find in Shift) then
-        MenuItem.ShortCut := ShortCut(Key, Shift - [Find] + [Replace]);
-    end;
-
-    for I := 0 to MenuItem.Count - 1 do
-      SetMacOSKeystroke(MenuItem.Items[I]);
-  end;
-
-begin
-  if Value then Find := ssCtrl else Find := ssMeta;
-  if Value then Replace := ssMeta else Replace := ssCtrl;
-
-  //SetMacOSKeystroke(MainMenu.Items);
 end;
 
 procedure TSimbaForm.HandleFormCreated(Sender: TObject; Form: TCustomForm);
@@ -653,13 +624,17 @@ begin
 
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
 
-  SimbaSettingChanged(SimbaSettings.General.ToolbarSize);
-  SimbaSettingChanged(SimbaSettings.General.ToolbarPosition);
+  with SimbaSettings do
+  begin
+    RegisterChangeHandler(Self, General.ToolbarSize, @DoSettingChanged_Toolbar, True);
+    RegisterChangeHandler(Self, General.ToolbarPosition, @DoSettingChanged_Toolbar, True);
+    RegisterChangeHandler(Self, General.ToolBarSpacing, @DoSettingChanged_Toolbar, True);
+  end;
+
   SimbaSettingChanged(SimbaSettings.General.CustomFontSize);
   SimbaSettingChanged(SimbaSettings.General.LockLayout);
   SimbaSettingChanged(SimbaSettings.General.TrayIconVisible);
   SimbaSettingChanged(SimbaSettings.General.ConsoleVisible);
-  SimbaSettingChanged(SimbaSettings.General.MacOSKeystrokes);
 end;
 
 procedure TSimbaForm.FormCreate(Sender: TObject);
@@ -675,6 +650,7 @@ begin
   FRecentFiles := TStringList.Create();
   FRecentFiles.Text := SimbaSettings.General.RecentFiles.Value;
 
+  Self.Color := SimbaTheme.ColorFrame;
   ToolBar.Color := SimbaTheme.ColorFrame;
 end;
 
@@ -745,7 +721,7 @@ begin
     if (GetAction() in [Compile, Run]) then
     begin
       CurrentTab.OutputBox.Tab.Show();
-      if SimbaSettings.General.OutputClearOnCompile.Value then
+      if SimbaSettings.OutputBox.ClearOnCompile.Value then
         CurrentTab.OutputBox.Empty();
     end;
 
@@ -770,12 +746,49 @@ begin
     SimbaColorPickerHistoryForm.ColorListBox.ItemIndex := SimbaColorPickerHistoryForm.ColorListBox.Count - 1;
 end;
 
+procedure TSimbaForm.DoSettingChanged_Toolbar(Setting: TSimbaSetting);
+begin
+  if Setting.Equals(SimbaSettings.General.ToolbarSize) then
+  begin
+    ToolBar.ImagesWidth := Setting.Value;
+
+    ToolBar.ButtonWidth  := Setting.Value + Scale96ToScreen(8);
+    ToolBar.ButtonHeight := Setting.Value + Scale96ToScreen(16);
+  end;
+
+  if Setting.Equals(SimbaSettings.General.ToolbarPosition) then
+  begin
+    MainMenuPanel.Align := alNone;
+
+    case String(Setting.Value) of
+      'Top':
+        begin
+          ToolBar.Align := alTop;
+          ToolBar.EdgeBorders := [ebTop, ebBottom];
+        end;
+      'Left':
+        begin
+          ToolBar.Align := alLeft;
+          ToolBar.EdgeBorders := [];
+        end;
+      'Right':
+        begin
+          ToolBar.Align := alRight;
+          ToolBar.EdgeBorders := [];
+        end;
+    end;
+
+    MainMenuPanel.Align := alTop;
+  end;
+
+  if Setting.Equals(SimbaSettings.General.ToolBarSpacing) then
+  begin
+    ToolBar.BorderSpacing.Around := Setting.Value;
+  end;
+end;
+
 procedure TSimbaForm.SimbaSettingChanged(Setting: TSimbaSetting);
 begin
-  if (Setting = SimbaSettings.General.ToolbarPosition) then
-    SetToolbarPosition(Setting.Value);
-  if (Setting = SimbaSettings.General.ToolbarSize) then
-    SetToolbarSize(Setting.Value);
   if (Setting = SimbaSettings.General.CustomFontSize) then
     SetCustomFontSize(Setting.Value);
   if (Setting = SimbaSettings.General.ConsoleVisible) then
@@ -784,8 +797,6 @@ begin
     SetLayoutLocked(Setting.Value);
   if (Setting = SimbaSettings.General.TrayIconVisible) then
     SetTrayIconVisible(Setting.Value);
-  if (Setting = SimbaSettings.General.MacOSKeystrokes) then
-    SetMacOSKeystokes(Setting.Value);
 end;
 
 procedure TSimbaForm.MenuCloseTabClick(Sender: TObject);

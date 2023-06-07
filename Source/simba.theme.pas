@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.theme;
 
 {$i simba.inc}
@@ -5,7 +10,8 @@ unit simba.theme;
 interface
 
 uses
-  Classes, SysUtils, Graphics, Forms;
+  Classes, SysUtils, Graphics, Forms,
+  ATScrollBar;
 
 type
   TSimbaTheme = class
@@ -14,6 +20,12 @@ type
     procedure DoFormAdded(Sender: TObject; Form: TCustomForm);
     procedure DoColorTitle(Data: PtrInt);
     {$ENDIF}
+
+    function GetScrollBarArrowSize: Integer;
+    function GetScrollBarSize: Integer;
+
+    procedure SetScrollBarArrowSize(Value: Integer);
+    procedure SetScrollBarSize(Value: Integer);
   public
     ColorBackground: TColor;
     ColorFrame: TColor;
@@ -23,6 +35,9 @@ type
 
     ColorFont: TColor;
     ColorLine: TColor;
+
+    property ScrollBarSize: Integer read GetScrollBarSize write SetScrollBarSize;
+    property ScrollBarArrowSize: Integer read GetScrollBarArrowSize write SetScrollBarArrowSize;
 
     constructor Create;
   end;
@@ -50,6 +65,26 @@ begin
 end;
 {$ENDIF}
 
+function TSimbaTheme.GetScrollBarArrowSize: Integer;
+begin
+  Result := ATScrollbarTheme.ArrowSize;
+end;
+
+function TSimbaTheme.GetScrollBarSize: Integer;
+begin
+  Result := ATScrollbarTheme.InitialSize;
+end;
+
+procedure TSimbaTheme.SetScrollBarArrowSize(Value: Integer);
+begin
+  ATScrollbarTheme.ArrowSize := Value;
+end;
+
+procedure TSimbaTheme.SetScrollBarSize(Value: Integer);
+begin
+  ATScrollbarTheme.InitialSize := Value;
+end;
+
 constructor TSimbaTheme.Create;
 begin
   ColorFrame := $262628;
@@ -59,6 +94,28 @@ begin
   ColorScrollBarInActive := $2D2E2F;
   ColorLine := $657076;
   ColorFont := $f2f2f2;
+
+  with ATScrollbarTheme do
+  begin
+    InitialSize := 14;
+    ThumbMinSize := 24;
+    ThumbRoundedRect := False;
+    DirectJumpOnClickPageUpDown := True;
+
+    ColorCorner := ColorFrame;
+    ColorBG := ColorScrollBarInActive;
+    ColorThumbBorder := ColorScrollBarActive;
+    ColorThumbFill := ColorScrollBarActive;
+    ColorThumbFillOver := ColorScrollBarActive;
+    ColorThumbFillPressed := ColorScrollBarActive;
+    ColorThumbDecor := ColorScrollBarActive;
+    ColorArrowFill := ColorScrollBarActive;
+    ColorArrowBorder := ColorScrollBarActive;
+    ColorArrowSign := ColorLine;
+
+    ColorArrowFillOver := ColorScrollBarActive;
+    ColorArrowFillPressed := ColorScrollBarActive;
+  end;
 
   {$IFDEF WINDOWS}
   if (Win32BuildNumber >= 22000) then // DWMWA_CAPTION_COLOR

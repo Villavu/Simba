@@ -677,6 +677,8 @@ begin
 
   FCodeinsight.Free();
 
+  FSavedStates.Free();
+
   inherited Destroy();
 end;
 

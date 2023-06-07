@@ -88,12 +88,7 @@ begin
   SimbaGeneralFrame.FontSizeTrackBar.Position := SimbaSettings.General.CustomFontSize.Value;
   SimbaGeneralFrame.FontSizeTrackBar.OnChange(nil);
 
-  SimbaGeneralFrame.ToolbarPosition := SimbaSettings.General.ToolbarPosition.Value;
-
-  SimbaGeneralFrame.CheckGroup1.Checked[0] := SimbaSettings.General.OutputClearOnCompile.Value;
-  SimbaGeneralFrame.CheckGroup1.Checked[1] := SimbaSettings.General.OpenSSLExtractOnLaunch.Value;
-  SimbaGeneralFrame.CheckGroup1.Checked[2] := SimbaSettings.General.MacOSKeystrokes.Value;
-
+  SimbaGeneralFrame.Load();
   EditorGeneralFrame.Load();
   EditorColorsFrame.Load();
   SimbaOutputBoxFrame.Load();
@@ -117,22 +112,17 @@ begin
   SimbaSettings.Editor.AutomaticallyCompleteIndex.Value := EditorGeneralFrame.CompleteIndexCheckbox.Checked;
   SimbaSettings.Editor.AutomaticallyCompleteParentheses.Value := EditorGeneralFrame.CompleteParenthesesCheckbox.Checked;
 
-  if (SimbaGeneralFrame.ToolbarSizeTrackBar.Position = SimbaGeneralFrame.ToolbarSizeTrackBar.Min) then
-    SimbaSettings.General.ToolbarSize.Value := SimbaSettings.General.ToolbarSize.DefaultValue
-  else
-    SimbaSettings.General.ToolbarSize.Value := SimbaGeneralFrame.ToolbarSizeTrackBar.Position;
+  //if (SimbaGeneralFrame.ToolbarSizeTrackBar.Position = SimbaGeneralFrame.ToolbarSizeTrackBar.Min) then
+  //  SimbaSettings.General.ToolbarSize.Value := SimbaSettings.General.ToolbarSize.DefaultValue
+  //else
+  //  SimbaSettings.General.ToolbarSize.Value := SimbaGeneralFrame.ToolbarSizeTrackBar.Position;
+  //
+  //if (SimbaGeneralFrame.FontSizeTrackBar.Position = SimbaGeneralFrame.FontSizeTrackBar.Min) then
+  //  SimbaSettings.General.CustomFontSize.Value := SimbaSettings.General.CustomFontSize.DefaultValue
+  //else
+  //  SimbaSettings.General.CustomFontSize.Value := SimbaGeneralFrame.FontSizeTrackBar.Position;
 
-  if (SimbaGeneralFrame.FontSizeTrackBar.Position = SimbaGeneralFrame.FontSizeTrackBar.Min) then
-    SimbaSettings.General.CustomFontSize.Value := SimbaSettings.General.CustomFontSize.DefaultValue
-  else
-    SimbaSettings.General.CustomFontSize.Value := SimbaGeneralFrame.FontSizeTrackBar.Position;
-
-  SimbaSettings.General.ToolbarPosition.Value := SimbaGeneralFrame.ToolbarPosition;
-
-  SimbaSettings.General.OutputClearOnCompile.Value := SimbaGeneralFrame.CheckGroup1.Checked[0];
-  SimbaSettings.General.OpenSSLExtractOnLaunch.Value := SimbaGeneralFrame.CheckGroup1.Checked[1];
-  SimbaSettings.General.MacOSKeystrokes.Value := SimbaGeneralFrame.CheckGroup1.Checked[2];
-
+  SimbaGeneralFrame.Save();
   EditorGeneralFrame.Save();
   EditorColorsFrame.Save();
   SimbaOutputBoxFrame.Save();

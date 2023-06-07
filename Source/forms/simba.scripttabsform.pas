@@ -245,6 +245,9 @@ end;
 
 procedure TSimbaScriptTabsForm.CalculateFindButtonSizes;
 begin
+  if (FFindButtonDown = nil) or (FFindButtonUp = nil) or (FFindButtonCaseSens = nil) or (FFindButtonWholeWord = nil) then
+    Exit;
+
   with TBitmap.Create() do
   try
     Canvas.Font := Self.Font;

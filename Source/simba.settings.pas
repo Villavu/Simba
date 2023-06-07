@@ -38,6 +38,7 @@ type
     destructor Destroy; override;
 
     procedure SetDefault;
+    function IsDefault: Boolean;
 
     property DefaultValue: Variant read FDefaultValue;
     property Value: Variant read FValue write SetValue;
@@ -93,14 +94,14 @@ type
       CustomFontSize: TSimbaSetting;
       ToolbarSize: TSimbaSetting;
       ToolbarPosition: TSimbaSetting;
+      ToolBarSpacing: TSimbaSetting;
       ColorPickerHistory: TSimbaSetting;
-      MacOSKeystrokes: TSimbaSetting;
 
-      OutputClearOnCompile: TSimbaSetting;
-
-      OpenSSLExtractOnLaunch: TSimbaSetting;
       OpenSSLCryptoHash: TSimbaSetting;
       OpenSSLHash: TSimbaSetting;
+
+      ScrollBarSize: TSimbaSetting; // in 96 DPI
+      ScrollBarArrowSize: TSimbaSetting;
     end;
 
     Editor: record
@@ -129,6 +130,8 @@ type
       FontName: TSimbaSetting;
       FontSize: TSimbaSetting;
       FontAntiAliased: TSimbaSetting;
+
+      ClearOnCompile: TSimbaSetting;
     end;
 
     ScriptBackup: record
@@ -145,10 +148,10 @@ type
     procedure Load;
     procedure Save;
 
-    procedure RegisterChangeHandler(Event: TSimbaSettingChangedEvent); overload;
+    procedure RegisterChangeHandler(Event: TSimbaSettingChangedEvent); overload; deprecated;
     procedure UnRegisterChangeHandler(Event: TSimbaSettingChangedEvent); overload;
 
-    procedure RegisterChangeHandler(Owner: TComponent; Setting: TSimbaSetting; Event: TSimbaSettingChangedEvent); overload;
+    procedure RegisterChangeHandler(Owner: TComponent; Setting: TSimbaSetting; Event: TSimbaSettingChangedEvent; CallEventInitially: Boolean = False); overload;
     procedure UnRegisterChangeHandler(Owner: TComponent; Setting: TSimbaSetting; Event: TSimbaSettingChangedEvent); overload;
 
     procedure Changed(Setting: TSimbaSetting);
@@ -168,7 +171,7 @@ implementation
 uses
   Forms, SynEdit,
   simba.mufasatypes, simba.encoding, simba.files, simba.editor_docgenerator,
-  simba.ide_initialization, simba.theme;
+  simba.ide_initialization, simba.theme, simba.fonthelpers;
 
 var
   SimbaSettingsInstance: TSimbaSettings = nil;
@@ -293,6 +296,11 @@ begin
   Value := FDefaultValue;
 end;
 
+function TSimbaSetting.IsDefault: Boolean;
+begin
+  Result := Value = FDefaultValue;
+end;
+
 procedure TSimbaSettings.Changed(Setting: TSimbaSetting);
 var
   i: Integer;
@@ -346,11 +354,14 @@ begin
   inherited Destroy;
 end;
 
-procedure TSimbaSettings.RegisterChangeHandler(Owner: TComponent; Setting: TSimbaSetting; Event: TSimbaSettingChangedEvent);
+procedure TSimbaSettings.RegisterChangeHandler(Owner: TComponent; Setting: TSimbaSetting; Event: TSimbaSettingChangedEvent; CallEventInitially: Boolean);
 begin
   TManagedSimbaSetting.Create(Owner, Setting, Event);
 
   Setting.FChangeEventList.Add(TMethod(Event));
+
+  if CallEventInitially then
+    Event(Setting);
 end;
 
 procedure TSimbaSettings.UnRegisterChangeHandler(Owner: TComponent; Setting: TSimbaSetting; Event: TSimbaSettingChangedEvent);
@@ -463,17 +474,17 @@ begin
   General.Layout             := TSimbaSetting_BinaryString.Create(Self, 'General', 'Layout', '');
   General.Notes              := TSimbaSetting_BinaryString.Create(Self, 'General', 'Notes', '');
   General.RecentFiles        := TSimbaSetting_BinaryString.Create(Self, 'General', 'RecentFiles', '');
-  General.CustomFontSize     := TSimbaSetting_Integer.Create(Self, 'General', 'CustomFontSize', 0);
+  General.CustomFontSize     := TSimbaSetting_Integer.Create(Self, 'General', 'CustomFontSize', GetDefaultFontSize());
   General.ToolbarSize        := TSimbaSetting_Integer.Create(Self, 'General', 'ToolbarSize', 24);
   General.ToolbarPosition    := TSimbaSetting_String.Create(Self, 'General', 'ToolbarPosition', 'Top');
+  General.ToolbarSpacing     := TSimbaSetting_Integer.Create(Self, 'General', 'ToolbarSpacing', 0);
   General.ColorPickerHistory := TSimbaSetting_BinaryString.Create(Self, 'General', 'ColorPickerHistory', '');
-  General.MacOSKeystrokes    := TSimbaSetting_Boolean.Create(Self, 'General', 'MacOSKeystrokes', {$IFDEF DARWIN}True{$ELSE}False{$ENDIF});
 
-  General.OutputClearOnCompile  := TSimbaSetting_Boolean.Create(Self, 'General', 'OutputClearOnCompile', False);
-
-  General.OpenSSLExtractOnLaunch := TSimbaSetting_Boolean.Create(Self, 'General', 'OpenSSLExtractOnLaunch', True);
   General.OpenSSLCryptoHash      := TSimbaSetting_String.Create(Self, 'General', 'OpenSSLCryptoHash', '');
   General.OpenSSLHash            := TSimbaSetting_String.Create(Self, 'General', 'OpenSSLHash', '');
+
+  General.ScrollBarSize      := TSimbaSetting_Integer.Create(Self, 'General', 'ScrollBarSize', SimbaTheme.ScrollBarSize);
+  General.ScrollBarArrowSize := TSimbaSetting_Integer.Create(Self, 'General', 'ScrollBarArrowSize', SimbaTheme.ScrollBarArrowSize);
 
   // Editor
   Editor.DefaultScript                   := TSimbaSetting_BinaryString.Create(Self, 'Editor', 'DefaultScript', 'program new;' + LineEnding + 'begin' + LineEnding + 'end.');
@@ -497,8 +508,9 @@ begin
   Editor.AutoCompleteLines := TSimbaSetting_Integer.Create(Self, 'Editor', 'AutoCompleteLines', 8);
 
   OutputBox.FontSize        := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'FontSize', SynDefaultFontSize);
-  OutputBox.FontName        := TSimbaSetting_String.Create(Self, 'OutputBox', 'FontName', SynDefaultFontName);
+  OutputBox.FontName        := TSimbaSetting_String.Create(Self,  'OutputBox', 'FontName', SynDefaultFontName);
   OutputBox.FontAntiAliased := TSimbaSetting_Boolean.Create(Self, 'OutputBox', 'FontAntiAliased', True);
+  OutputBox.ClearOnCompile  := TSimbaSetting_Boolean.Create(Self, 'OutputBox', 'OutputClearOnCompile', False);
 
   ScriptBackup.Enabled  := TSimbaSetting_Boolean.Create(Self, 'ScriptBackup', 'Enabled', True);
   ScriptBackup.Interval := TSimbaSetting_Integer.Create(Self, 'ScriptBackup', 'Interval', 5);
