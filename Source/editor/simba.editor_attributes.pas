@@ -90,7 +90,7 @@ implementation
 
 uses
   Graphics, IniFiles,
-  SynGutterBase, SynEditMarkupHighAll, SynEditMarkupFoldColoring, SynEditPointClasses, SynHighlighterPas_Simba,
+  SynGutterBase, SynEditMarkupHighAll, SynEditMarkupWordGroup, SynEditMarkupFoldColoring, SynEditPointClasses, SynHighlighterPas_Simba,
   simba.editor, simba.theme;
 
 type
@@ -336,6 +336,13 @@ begin
     MarkupInfo.BackAlpha := 220;
 
     Add('Editor.Find Matches', MarkupInfo);
+  end;
+
+  with Editor.MarkupByClass[TSynEditMarkupWordGroup] as TSynEditMarkupWordGroup do
+  begin
+    MarkupInfo.FrameColor := RGBToColor(199, 125, 187);
+
+    Add('Editor.Word Group', MarkupInfo);
   end;
 
   Add('Editor.Line Highlight', Editor.LineHighlightColor);
