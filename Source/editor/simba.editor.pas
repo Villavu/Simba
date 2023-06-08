@@ -457,8 +457,6 @@ begin
   FAutoComplete.ExecCommandID := ecNone;
   FAutoComplete.ShowSizeDrag := True;
 
-  MarkupByClass[TSynEditMarkupWordGroup].Enabled := False;
-
   with TSynGutterLineOverview.Create(RightGutter.Parts) do
   begin
     FModifiedLinesGutter := TSimbaEditorModifiedLinesGutter.Create(Providers);
