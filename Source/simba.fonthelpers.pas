@@ -22,6 +22,7 @@ implementation
 uses
   Graphics, LCLIntf, LCLType;
 
+// Font size can be zero, so this is needed!
 function GetDefaultFontSize: Integer;
 begin
   with TBitmap.Create() do
@@ -32,6 +33,7 @@ begin
   end;
 end;
 
+// Font size can be zero, so this is needed!
 function GetFontSize(Control: TWinControl; IncAmount: Integer): Integer;
 begin
   Result := Round(Abs(GetFontData(Control.Font.Handle).Height) * 72 / Control.Font.PixelsPerInch) + IncAmount;

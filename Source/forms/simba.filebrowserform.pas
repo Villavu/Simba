@@ -265,11 +265,12 @@ end;
 
 procedure TSimbaFileBrowserForm.DoAfterFilter(Sender: TObject);
 begin
-  //if (Sender is TTreeFilterEdit) and (TTreeFilterEdit(Sender).Filter = '') then
-  //begin
-  //  FTreeView.FullCollapse();
-  //  FTreeView.ExpandFirstNode();
-  //end;
+  if (FTreeView.Filter = '') then
+  begin
+    FTreeView.FullCollapse();
+    if Assigned(FTreeView.Items.GetFirstNode()) then
+      FTreeView.Items.GetFirstNode.Expanded := True;
+  end;
 end;
 
 constructor TSimbaFileBrowserForm.Create(AOwner: TComponent);
@@ -282,7 +283,7 @@ begin
   FTreeView.Images := SimbaForm.Images;
   FTreeView.OnGetNodeHint := @DoGetNodeHint;
   FTreeView.OnDoubleClick := @DoDoubleClick;
-  //FTreeView.OnAfterFilter := @DoAfterFilter;
+  FTreeView.OnAfterFilter := @DoAfterFilter;
   FTreeView.PopupMenu := Popup;
 
   Fill();

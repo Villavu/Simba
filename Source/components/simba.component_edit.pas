@@ -115,7 +115,8 @@ type
 implementation
 
 uses
-  Math, Clipbrd, simba.theme;
+  Math, Clipbrd,
+  simba.theme, simba.fonthelpers;
 
 procedure TSimbaEdit.SetHintText(Value: String);
 begin
@@ -238,7 +239,7 @@ begin
   with TBitmap.Create() do
   try
     Canvas.Font := Self.Font;
-    Canvas.Font.Size := Round(Abs(GetFontData(Canvas.Font.Handle).Height) * 72 / Canvas.Font.PixelsPerInch) + 1; // Measure on larger font size - Font size can be 0
+    Canvas.Font.Size := GetFontSize(Self, 1);
 
     Result := Canvas.TextHeight('Tay') + (BorderWidth * 2);
   finally
@@ -381,10 +382,18 @@ begin
 end;
 
 procedure TSimbaEdit.FontChanged(Sender: TObject);
+var
+  NewHeight: Integer;
 begin
   inherited FontChanged(Sender);
 
-  Height := CalculateHeight();
+  Font.Color := SimbaTheme.ColorFont;
+
+  NewHeight := CalculateHeight();
+
+  Constraints.MinHeight := NewHeight;
+  Constraints.MaxHeight := NewHeight;
+
   ClearCache();
 end;
 
@@ -636,12 +645,13 @@ begin
   HintTextColor := cl3DDkShadow;
 
   Font.Color := SimbaTheme.ColorFont;
+
   Color := SimbaTheme.ColorBackground;
   ColorSelection := SimbaTheme.ColorActive;
   ColorBorder := SimbaTheme.ColorFrame;
   ColorBorderActive := SimbaTheme.ColorActive;
 
-  BorderWidth := 3;
+  BorderWidth := 2;
 
   Height := CalculateHeight();
 end;
