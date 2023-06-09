@@ -58,6 +58,7 @@ type
 
     function CanAnchorDocking(X, Y: Integer): Boolean;
 
+    procedure DoFindPanelVisibleChanged(Sender: TObject);
     procedure DoTabCanChange(Sender: TSimbaTabControl; OldTab, NewTab: TSimbaTab; var AllowChange: Boolean);
     procedure DoTabChange(Sender: TSimbaTabControl; NewTab: TSimbaTab);
     procedure DoTabMoved(Sender: TSimbaTabControl; AFrom, ATo: Integer);
@@ -106,7 +107,7 @@ uses
   LCLType,
   simba.mufasatypes, simba.files, simba.editor_docgenerator, simba.main,
   simba.dockinghelpers, simba.nativeinterface, simba.outputform,
-  simba.ide_events, simba.theme;
+  simba.ide_events, simba.theme, simba.settings;
 
 procedure TSimbaScriptTabsForm.DoOnDropFiles(Sender: TObject; const FileNames: array of String);
 var
@@ -168,8 +169,6 @@ begin
     VK_ESCAPE:
       begin
         FindPanel.Hide();
-        if (CurrentEditor <> nil) and CurrentEditor.CanSetFocus() then
-          CurrentEditor.SetFocus();
         Key := 0;
       end;
 
@@ -274,6 +273,14 @@ begin
   Result := FTabControl.InEmptySpace(X, Y) and (not FTabControl.Dragging) and (Abs(X - FMouseDownX) > 10) and (Abs(Y - FMouseDownY) > 10);
 end;
 
+procedure TSimbaScriptTabsForm.DoFindPanelVisibleChanged(Sender: TObject);
+begin
+  if (not FindPanel.Visible) and (CurrentEditor <> nil) and CurrentEditor.CanSetFocus() then
+    CurrentEditor.SetFocus();
+
+  SimbaSettings.Editor.FindPanelVisible.Value := FindPanel.Visible;
+end;
+
 procedure TSimbaScriptTabsForm.DoTabCanChange(Sender: TSimbaTabControl; OldTab, NewTab: TSimbaTab; var AllowChange: Boolean);
 begin
   if Assigned(OldTab) then
@@ -325,6 +332,8 @@ begin
   FEditorFind := TSimbaEditorFind.Create(Self);
 
   FindPanel.Color := SimbaTheme.ColorFrame;
+  FindPanel.Visible := SimbaSettings.Editor.FindPanelVisible.Value;
+  FindPanel.AddHandlerOnVisibleChanged(@DoFindPanelVisibleChanged);
 
   FFindEdit := TSimbaEdit.Create(Self);
   FFindEdit.Parent := FindButtonPanel;
@@ -421,6 +430,12 @@ end;
 
 procedure TSimbaScriptTabsForm.Find;
 begin
+  if FFindEdit.Focused() then
+  begin
+    FindPanel.Hide();
+    Exit;
+  end;
+
   FindPanel.Show();
   if FFindEdit.CanSetFocus() then
     FFindEdit.SetFocus();

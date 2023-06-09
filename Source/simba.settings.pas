@@ -124,6 +124,8 @@ type
       AutoCompleteLines: TSimbaSetting;
 
       DocumentationComment: TSimbaSetting;
+
+      FindPanelVisible: TSimbaSetting;
     end;
 
     OutputBox: record
@@ -499,6 +501,7 @@ begin
   Editor.RightMargin                     := TSimbaSetting_Integer.Create(Self, 'Editor', 'RightMargin', 80);
   Editor.RightMarginVisible              := TSimbaSetting_Boolean.Create(Self, 'Editor', 'RightMarginVisible', False);
   Editor.DocumentationComment            := TSimbaSetting_BinaryString.Create(Self, 'Editor', 'DocumentationComment', DEFAULT_DOCUMENTATION_COMMENT);
+  Editor.FindPanelVisible                := TSimbaSetting_Boolean.Create(Self, 'Editor', 'FindPanelVisible', False);
 
   Editor.AutomaticallyCompleteBegin       := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteBegin', True);
   Editor.AutomaticallyCompleteParentheses := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteParentheses', False);

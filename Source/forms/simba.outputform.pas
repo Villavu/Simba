@@ -252,6 +252,8 @@ begin
   OnClickLink         := @DoMouseLinkClick;
   OnSpecialLineMarkup := @DoSpecialLineMarkup;
 
+  TabStop := False;
+
   MouseLinkColor.Style := [fsUnderline];
 
   MarkupByClass[TSynEditMarkupBracket].Enabled := False;

@@ -123,6 +123,7 @@ begin
   FScrollbarVert := TSimbaScrollBar.Create(Self);
   FScrollbarVert.Kind := sbVertical;
   FScrollbarVert.OnChange := @DoVertScrollBarChange;
+  FScrollbarVert.ForwardScrollControl := Self;
 
   FScrollbarHorz := TSimbaScrollBar.Create(Self);
   FScrollbarHorz.Kind := sbHorizontal;

@@ -13,7 +13,7 @@ interface
 
 uses
   Classes, SysUtils, Controls, Forms, Graphics, StdCtrls, ComCtrls, LMessages, LCLType, ImgList,
-  simba.component_edit, simba.component_treeviewhint, simba.component_scrollbar;
+  simba.component_edit, simba.component_treeviewhint, simba.component_scrollbar, simba.component_button;
      
 type
   TSimbaTreeView = class;
@@ -45,7 +45,9 @@ type
 
   TSimbaTreeView = class(TCustomControl)
   protected
+    FFilterPanel: TCustomControl;
     FFilterEdit: TSimbaEdit;
+    FFilterClearButton: TSimbaButton;
     FHint: TSimbaTreeViewHint;
     FTree: TSimbaInternalTreeView;
     FScrollbarVert: TSimbaScrollBar;
@@ -79,12 +81,14 @@ type
     function GetFilter: String;
     function GetTopLevelCount: Integer;
 
+    procedure DoClearFilterClick(Sender: TObject);
     procedure DoFilterEditChange(Sender: TObject);
     procedure DoMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure DoCreateNodeClass(Sender: TCustomTreeView; var NodeClass: TTreeNodeClass);
 
     procedure ScrollHorzChange(Sender: TObject);
     procedure ScrollVertChange(Sender: TObject);
+    procedure DoScrollBarVertResize(Sender: TObject);
   public
     constructor Create(AOwner: TComponent; NodeClass: TTreeNodeClass = nil); reintroduce;
 
@@ -119,9 +123,11 @@ type
 implementation
 
 uses
-  Math, simba.theme;
+  Math, EditBtn, simba.theme;
 
 constructor TSimbaTreeView.Create(AOwner: TComponent; NodeClass: TTreeNodeClass);
+var
+  test: TCustomControl;
 begin
   inherited Create(AOwner);
 
@@ -129,15 +135,20 @@ begin
 
   FNodeClass := NodeClass;
 
+  test := TCustomControl.Create(Self);
+  test.Parent := Self;
+  test.Align := alClient;
+
   FScrollbarVert := TSimbaScrollBar.Create(Self);
-  FScrollbarVert.Parent := Self;
+  FScrollbarVert.Parent := test;
   FScrollbarVert.Kind := sbVertical;
   FScrollbarVert.Align := alRight;
   FScrollbarVert.OnChange := @ScrollVertChange;
   FScrollbarVert.Visible := True;
+  FScrollbarVert.OnResize := @DoScrollBarVertResize;
 
   FScrollbarHorz := TSimbaScrollBar.Create(Self);
-  FScrollbarHorz.Parent := Self;
+  FScrollbarHorz.Parent := test;
   FScrollbarHorz.Kind := sbHorizontal;
   FScrollbarHorz.Align := alBottom;
   FScrollbarHorz.IndentCorner := 100;
@@ -145,7 +156,7 @@ begin
   FScrollbarHorz.Visible := True;
 
   FTree := TSimbaInternalTreeView.Create(Self);
-  FTree.Parent := Self;
+  FTree.Parent := test;
   FTree.Align := alClient;
   FTree.ScrollBars := ssNone;
   FTree.FScrollbarVert := FScrollbarVert;
@@ -163,29 +174,51 @@ begin
   FTree.SelectionColor := SimbaTheme.ColorActive;
   FTree.Font.Color := SimbaTheme.ColorFont;
 
+  FScrollbarVert.ForwardScrollControl := FTree;
+
   FHint := TSimbaTreeViewHint.Create(FTree);
 
+  FFilterPanel := TCustomControl.Create(Self);
+  FFilterPanel.Parent := Self;
+  FFilterPanel.Align := alBottom;
+  FFilterPanel.AutoSize := True;
+  FFilterPanel.Color := SimbaTheme.ColorFrame;
+
   FFilterEdit := TSimbaEdit.Create(Self);
-  FFilterEdit.Parent := Self;
-  FFilterEdit.Align := alBottom;
+  FFilterEdit.Parent := FFilterPanel;
+  FFilterEdit.Align := alClient;
   FFilterEdit.OnChange := @DoFilterEditChange;
   FFilterEdit.Color := SimbaTheme.ColorBackground;
-  FFilterEdit.ColorBorder := SimbaTheme.ColorFrame;
+  FFilterEdit.ColorBorder := SimbaTheme.ColorBackground;
   FFilterEdit.ColorBorderActive := SimbaTheme.ColorActive;
   FFilterEdit.ColorSelection := SimbaTheme.ColorActive;
   FFilterEdit.Font.Color := SimbaTheme.ColorFont;
   FFilterEdit.HintTextColor := clLtGray;
   FFilterEdit.HintText := '(search)';
+
+  FFilterClearButton := TSimbaButton.Create(Self, ResBtnListFilter);
+  FFilterClearButton.Parent := FFilterPanel;
+  FFilterClearButton.Align := alRight;
+  FFilterClearButton.AutoSize := True;
+  FFilterClearButton.VertPadding := 4;
+  FFilterClearButton.Olly := True;
+  FFilterClearButton.OnClick := @DoClearFilterClick;
+  FFilterClearButton.Hint := 'Clear Filter';
+  FFilterClearButton.ShowHint := True;
 end;
 
 procedure TSimbaTreeView.FullCollapse;
 begin
+  FTree.BeginUpdate();
   FTree.FullCollapse();
+  FTree.EndUpdate();
 end;
 
 procedure TSimbaTreeView.FullExpand;
 begin
+  FTree.BeginUpdate();
   FTree.FullExpand();
+  FTree.EndUpdate();
 end;
 
 procedure TSimbaTreeView.ForEachTopLevel(Func: TNodeForEachEvent);
@@ -274,12 +307,19 @@ begin
   Result := FTree.Items.TopLvlCount;
 end;
 
+procedure TSimbaTreeView.DoClearFilterClick(Sender: TObject);
+begin
+  Filter := '';
+end;
+
 procedure TSimbaTreeView.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
 
   FTree.Font := Self.Font;
   FTree.Font.Color := SimbaTheme.ColorFont;
+
+  FFilterEdit.Font := Self.Font;
 end;
 
 procedure TSimbaTreeView.UpdateFilter;
@@ -414,6 +454,11 @@ end;
 procedure TSimbaTreeView.ScrollVertChange(Sender: TObject);
 begin
   FTree.ScrolledTop := FScrollbarVert.Position;
+end;
+
+procedure TSimbaTreeView.DoScrollBarVertResize(Sender: TObject);
+begin
+  FFilterClearButton.BorderSpacing.Right := FScrollbarVert.Width;
 end;
 
 procedure TSimbaTreeView.ScrollHorzChange(Sender: TObject);
