@@ -479,7 +479,7 @@ begin
   H := Bitmap.Height - 1;
 
   for Y := 0 to H do
-    Result[0, Y] := Bitmap.Data[Y*Bitmap.Width];
+    Result[Y, 0] := Bitmap.Data[Y*Bitmap.Width];
 
   for Y := 1 to H do
     for X := 0 to W do

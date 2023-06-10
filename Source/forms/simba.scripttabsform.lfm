@@ -1,7 +1,7 @@
 object SimbaScriptTabsForm: TSimbaScriptTabsForm
-  Left = 3840
+  Left = 2780
   Height = 206
-  Top = 25
+  Top = 1080
   Width = 816
   AllowDropFiles = True
   Caption = 'Editor'
@@ -17,51 +17,46 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
   LCLVersion = '2.2.4.0'
   object FindPanel: TPanel
     Left = 0
-    Height = 34
-    Top = 172
+    Height = 0
+    Top = 206
     Width = 816
     Align = alBottom
     AutoSize = True
     BevelOuter = bvNone
-    ClientHeight = 34
+    ClientHeight = 0
     ClientWidth = 816
     ParentColor = False
     TabOrder = 0
     Visible = False
     OnResize = FindPanelResize
     object FindEditPanel: TPanel
+      AnchorSideLeft.Control = FindPanel
+      AnchorSideTop.Control = FindPanel
+      AnchorSideBottom.Control = FindPanel
+      AnchorSideBottom.Side = asrBottom
       Left = 0
-      Height = 34
+      Height = 0
       Top = 0
       Width = 0
-      Align = alLeft
+      Anchors = [akTop, akLeft, akBottom]
       AutoSize = True
       BevelOuter = bvNone
       TabOrder = 0
     end
     object FindButtonPanel: TPanel
+      AnchorSideLeft.Control = FindEditPanel
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = FindPanel
+      AnchorSideBottom.Control = FindPanel
+      AnchorSideBottom.Side = asrBottom
       Left = 0
-      Height = 34
+      Height = 0
       Top = 0
       Width = 0
-      Align = alLeft
+      Anchors = [akTop, akLeft, akBottom]
       AutoSize = True
       BevelOuter = bvNone
       TabOrder = 1
-    end
-    object FindButtonClose: TSpeedButton
-      Left = 779
-      Height = 24
-      Top = 5
-      Width = 27
-      Align = alRight
-      BorderSpacing.Top = 5
-      BorderSpacing.Right = 10
-      BorderSpacing.Bottom = 5
-      Caption = '🗙'
-      Flat = True
-      Spacing = 0
-      OnClick = FindButtonClick
     end
   end
   object TabPopupMenu: TPopupMenu

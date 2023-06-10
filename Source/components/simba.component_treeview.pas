@@ -88,7 +88,6 @@ type
 
     procedure ScrollHorzChange(Sender: TObject);
     procedure ScrollVertChange(Sender: TObject);
-    procedure DoScrollBarVertResize(Sender: TObject);
   public
     constructor Create(AOwner: TComponent; NodeClass: TTreeNodeClass = nil); reintroduce;
 
@@ -123,7 +122,7 @@ type
 implementation
 
 uses
-  Math, EditBtn, simba.theme;
+  Math, simba.theme;
 
 constructor TSimbaTreeView.Create(AOwner: TComponent; NodeClass: TTreeNodeClass);
 var
@@ -145,7 +144,6 @@ begin
   FScrollbarVert.Align := alRight;
   FScrollbarVert.OnChange := @ScrollVertChange;
   FScrollbarVert.Visible := True;
-  FScrollbarVert.OnResize := @DoScrollBarVertResize;
 
   FScrollbarHorz := TSimbaScrollBar.Create(Self);
   FScrollbarHorz.Parent := test;
@@ -196,15 +194,14 @@ begin
   FFilterEdit.HintTextColor := clLtGray;
   FFilterEdit.HintText := '(search)';
 
-  FFilterClearButton := TSimbaButton.Create(Self, ResBtnListFilter);
+  FFilterClearButton := TSimbaTransparentButton.Create(Self);
   FFilterClearButton.Parent := FFilterPanel;
   FFilterClearButton.Align := alRight;
   FFilterClearButton.AutoSize := True;
-  FFilterClearButton.VertPadding := 4;
-  FFilterClearButton.Olly := True;
   FFilterClearButton.OnClick := @DoClearFilterClick;
   FFilterClearButton.Hint := 'Clear Filter';
   FFilterClearButton.ShowHint := True;
+  FFilterClearButton.SetClearFilterGlyph();
 end;
 
 procedure TSimbaTreeView.FullCollapse;
@@ -454,11 +451,6 @@ end;
 procedure TSimbaTreeView.ScrollVertChange(Sender: TObject);
 begin
   FTree.ScrolledTop := FScrollbarVert.Position;
-end;
-
-procedure TSimbaTreeView.DoScrollBarVertResize(Sender: TObject);
-begin
-  FFilterClearButton.BorderSpacing.Right := FScrollbarVert.Width;
 end;
 
 procedure TSimbaTreeView.ScrollHorzChange(Sender: TObject);

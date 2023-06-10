@@ -1184,7 +1184,7 @@ procedure TCodeParser.FindLocals;
 
   procedure CheckMethod(Decl: TDeclaration);
   var
-    SelfDecl, ResultDecl: TDeclaration;
+    SelfDecl, ResultDecl, ParamListDecl: TDeclaration;
   begin
     if (Decl = nil) then
       Exit;
@@ -1212,8 +1212,10 @@ procedure TCodeParser.FindLocals;
       FLocals.Extend(Decl.Items.GetByClass(TDeclaration_Const, True));
       FLocals.Extend(Decl.Items.GetByClass(TDeclaration_Type));
       FLocals.Extend(Decl.Items.GetByClass(TDeclaration_EnumElement));
-      if (FItems.GetByClassEx(TDeclaration_ParamList) <> nil) then
-        FLocals.Extend(FItems.GetByClassEx(TDeclaration_ParamList).Items.GetByClass(TDeclaration_Parameter, False, True));
+
+      ParamListDecl := FItems.GetByClassEx(TDeclaration_ParamList, True, True);
+      if Assigned(ParamListDecl) then
+        FLocals.Extend(ParamListDecl.Items.GetByClass(TDeclaration_Parameter, False, True));
 
       Decl := Decl.GetOwnerByClass(TDeclaration_Method);
     end;

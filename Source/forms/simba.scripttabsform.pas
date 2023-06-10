@@ -21,7 +21,6 @@ type
     MenuItemCloseTab: TMenuItem;
     MenuItemCloseOtherTabs: TMenuItem;
     FindPanel: TPanel;
-    FindButtonClose: TSpeedButton;
     FindEditPanel: TPanel;
     FindButtonPanel: TPanel;
     TabPopupMenu: TPopupMenu;
@@ -49,6 +48,7 @@ type
     FFindButtonUp: TSimbaButton;
     FFindButtonCaseSens: TSimbaToggleButton;
     FFindButtonWholeWord: TSimbaToggleButton;
+    FFindButtonClose: TSimbaTransparentButton;
 
     FMouseDown: Boolean;
     FMouseDownX, FMouseDownY: Integer;
@@ -144,7 +144,7 @@ begin
   if Sender.Equals(FFindButtonDown) then
     FindNext()
   else
-  if Sender.Equals(FindButtonClose) then
+  if Sender.Equals(FFindButtonClose) then
     FindPanel.Hide();
 end;
 
@@ -336,8 +336,9 @@ begin
   FindPanel.AddHandlerOnVisibleChanged(@DoFindPanelVisibleChanged);
 
   FFindEdit := TSimbaEdit.Create(Self);
-  FFindEdit.Parent := FindButtonPanel;
-  FFindEdit.Align := alLeft;
+  FFindEdit.Parent := FindEditPanel;
+  FFindEdit.Align := alClient;
+  FFindEdit.AnchorVerticalCenterTo(FindEditPanel);
   FFindEdit.BorderSpacing.Around := 5;
   FFindEdit.OnChange := @FindEditChange;
   FFindEdit.OnKeyDown := @FindButtonKeyDown;
@@ -345,7 +346,7 @@ begin
   FFindButtonWholeWord := TSimbaToggleButton.Create(Self);
   with FFindButtonWholeWord do
   begin
-    Parent := FindEditPanel;
+    Parent := FindButtonPanel;
     Caption := 'W';
     Font.Bold := True;
     Align := alLeft;
@@ -358,7 +359,7 @@ begin
   FFindButtonCaseSens := TSimbaToggleButton.Create(Self);
   with FFindButtonCaseSens do
   begin
-    Parent := FindEditPanel;
+    Parent := FindButtonPanel;
     Caption := 'Aa';
     Font.Bold := True;
     Align := alLeft;
@@ -372,7 +373,7 @@ begin
   with FFindButtonDown do
   begin
     Images := SimbaForm.Images;
-    Parent := FindEditPanel;
+    Parent := FindButtonPanel;
     Align := alLeft;
     ImageINdex := 44;
     Hint := 'Find Next';
@@ -385,7 +386,7 @@ begin
   with FFindButtonUp do
   begin
     Images := SimbaForm.Images;
-    Parent := FindEditPanel;
+    Parent := FindButtonPanel;
     Align := alLeft;
     ImageIndex := 43;
     Hint := 'Find Previous';
@@ -394,7 +395,16 @@ begin
     OnClick := @FindButtonClick;
   end;
 
-  FindButtonClose.Font.Color := SimbaTheme.ColorFont;
+  FFindButtonClose := TSimbaTransparentButton.Create(Self);
+  with FFindButtonClose do
+  begin
+    Images := SimbaForm.Images;
+    Parent := FindPanel;
+    Align := alRight;
+    BorderSpacing.Around := 5;
+    SetCloseGlyph();
+    OnClick := @FindButtonClick;
+  end;
 
   CalculateFindButtonSizes();
 end;
