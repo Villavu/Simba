@@ -19,57 +19,85 @@ type
     procedure PaintBackground(var PaintRect: TRect); override;
   public
     VertPadding: Integer;
-    Olly: Boolean;
 
-    constructor Create(AOwner: TComponent; LCLGlyphName: String); overload;
+    constructor Create(AOwner: TComponent); override;
+
+    procedure SetCloseGlyph;
+    procedure SetClearFilterGlyph;
   end;
 
   TSimbaToggleButton = class(TSimbaButton)
+  public
+    constructor Create(AOwner: TComponent); override;
+  end;
+
+  TSimbaTransparentButton = class(TSimbaButton)
+  protected
+    procedure PaintBackground(var PaintRect: TRect); override;
+  public
     constructor Create(AOwner: TComponent); override;
   end;
 
 implementation
 
 uses
-  simba.theme;
+  simba.theme,
+  ATCanvasPrimitives;
+
+procedure TSimbaTransparentButton.PaintBackground(var PaintRect: TRect);
+begin
+  if Down or MouseInClient then
+    Canvas.Brush.Color := SimbaTheme.ColorActive
+  else
+    Canvas.Brush.Color := Color;
+
+  Canvas.FillRect(PaintRect);
+  if Down or MouseInClient then
+    CanvasPaintRoundedCorners(Canvas, PaintRect, [acckLeftTop, acckRightTop, acckLeftBottom, acckRightBottom], Color, Canvas.Brush.Color, Canvas.Brush.Color);
+end;
+
+constructor TSimbaTransparentButton.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  ParentColor := True;
+end;
 
 procedure TSimbaButton.CalculatePreferredSize(var PreferredWidth, PreferredHeight: integer; WithThemeSpace: Boolean);
 begin
   inherited CalculatePreferredSize(PreferredWidth, PreferredHeight, WithThemeSpace);
 
-  PreferredWidth += VertPadding*2;
+  PreferredWidth += VertPadding * 2;
 end;
 
 procedure TSimbaButton.PaintBackground(var PaintRect: TRect);
 begin
-  if Olly then
-  begin
-    if Down or MouseInClient then
-      Canvas.Brush.Color := SimbaTheme.ColorActive
-    else
-      Canvas.Brush.Color := SimbaTheme.ColorBackground;
-
-    Canvas.FillRect(PaintRect);
-
-    Exit;
-  end;
-
-  Canvas.FillRect(PaintRect);
-  Canvas.Pen.Color := SimbaTheme.ColorFrame;
   if Down or MouseInClient then
     Canvas.Brush.Color := SimbaTheme.ColorActive
   else
     Canvas.Brush.Color := SimbaTheme.ColorScrollBarActive;
-  Canvas.Brush.Color := SimbaTheme.ColorBackground;
 
-  Canvas.RoundRect(PaintRect, Width div 5, Width div 5);
+  Canvas.FillRect(PaintRect);
+  CanvasPaintRoundedCorners(Canvas, PaintRect, [acckLeftTop, acckRightTop, acckLeftBottom, acckRightBottom], SimbaTheme.ColorFrame, Canvas.Brush.Color, Canvas.Brush.Color);
 end;
 
-constructor TSimbaButton.Create(AOwner: TComponent; LCLGlyphName: String);
+constructor TSimbaButton.Create(AOwner: TComponent);
 begin
-  inherited Create(Owner);
+  inherited Create(AOwner);
 
-  ButtonGlyph.LCLGlyphName := LCLGlyphName;
+  AutoSize := True;
+
+  VertPadding := 5;
+end;
+
+procedure TSimbaButton.SetCloseGlyph;
+begin
+  ButtonGlyph.LCLGlyphName := 'btn_cancel';
+end;
+
+procedure TSimbaButton.SetClearFilterGlyph;
+begin
+  ButtonGlyph.LCLGlyphName := 'btnfiltercancel';
 end;
 
 constructor TSimbaToggleButton.Create(AOwner: TComponent);
@@ -77,7 +105,7 @@ begin
   inherited Create(AOwner);
 
   AllowAllUp := True;
-  GroupIndex := 1+AOwner.ComponentCount;
+  GroupIndex := 1 + AOwner.ComponentCount;
 
   Font.Color := SimbaTheme.ColorFont;
 end;

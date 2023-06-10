@@ -635,6 +635,11 @@ begin
   SimbaSettingChanged(SimbaSettings.General.LockLayout);
   SimbaSettingChanged(SimbaSettings.General.TrayIconVisible);
   SimbaSettingChanged(SimbaSettings.General.ConsoleVisible);
+
+  // Finally, give the editor focus as default.
+  if Assigned(SimbaScriptTabsForm.CurrentEditor) then
+    if SimbaScriptTabsForm.CurrentEditor.CanSetFocus() then
+      SimbaScriptTabsForm.CurrentEditor.SetFocus();
 end;
 
 procedure TSimbaForm.FormCreate(Sender: TObject);
@@ -684,7 +689,8 @@ procedure TSimbaForm.FormShortCut(var Msg: TLMKey; var Handled: Boolean);
 begin
   Handled := MainMenuFile.IsShortcut(Msg)  or MainMenuView.IsShortcut(Msg)   or
              MainMenuEdit.IsShortcut(Msg)  or MainMenuScript.IsShortcut(Msg) or
-             MainMenuTools.IsShortcut(Msg) or MainMenuHelp.IsShortcut(Msg);
+             MainMenuTools.IsShortcut(Msg) or MainMenuHelp.IsShortcut(Msg)   or
+             (KeyDataToShiftState(Msg.KeyData) = [ssAlt]); // Suppress windows freaking out
 end;
 
 procedure TSimbaForm.MenuItemDocumentationClick(Sender: TObject);

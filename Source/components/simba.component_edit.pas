@@ -76,6 +76,8 @@ type
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
 
+    procedure ParentFontChanged; override;
+
     procedure FontChanged(Sender: TObject); override;
     procedure TextChanged; override;
     procedure Paint; override;
@@ -368,6 +370,19 @@ begin
   FSelectingEndX := CharIndexAtXY(X, Y);
 end;
 
+procedure TSimbaEdit.ParentFontChanged;
+begin
+  inherited ParentFontChanged;
+
+  if Assigned(Parent) then
+  begin
+    Font.BeginUpdate();
+    Font := Parent.Font;
+    Font.Color := SimbaTheme.ColorFont;
+    Font.EndUpdate();
+  end;
+end;
+
 procedure TSimbaEdit.SetCaretPos(Pos: Integer);
 begin
   if (Pos < 0) then
@@ -386,8 +401,6 @@ var
   NewHeight: Integer;
 begin
   inherited FontChanged(Sender);
-
-  Font.Color := SimbaTheme.ColorFont;
 
   NewHeight := CalculateHeight();
 
@@ -643,8 +656,6 @@ begin
 
   HintTextStyle := [fsItalic];
   HintTextColor := cl3DDkShadow;
-
-  Font.Color := SimbaTheme.ColorFont;
 
   Color := SimbaTheme.ColorBackground;
   ColorSelection := SimbaTheme.ColorActive;

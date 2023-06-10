@@ -2375,37 +2375,52 @@ end;
 
 procedure TMufasaBitmap.ThresholdSauvola(Window: Integer; AInvert: Boolean; K: Single);
 var
-  SumTable: TIntegerMatrix;
-  SumTableSquared: TIntegerMatrix;
+  SumTable: TDoubleMatrix;
+  SumTableSquared: TDoubleMatrix;
 
-  function CreateSumTable(Matrix: TByteMatrix; Squared: Boolean): TIntegerMatrix;
+  function CreateSumTable(Matrix: TByteMatrix): TDoubleMatrix;
   var
     W, H, X, Y: Integer;
   begin
-    Result.SetSize(Matrix.Width, Matrix.Height);
+    SetLength(Result, Matrix.Height, Matrix.Width);
 
-    W := Matrix.Width - 1;
-    H := Matrix.Height - 1;
+    W := Result.Width - 1;
+    H := Result.Height - 1;
 
-    for Y := 0 to W do
-      if Squared then
-        Result[0, Y] := Sqr(Matrix[0, Y])
-      else
-        Result[0, Y] := Matrix[0, Y];
+    for Y := 0 to H do
+      Result[0, Y] := Matrix[0, Y];
 
     for Y := 1 to H do
       for X := 0 to W do
-        if Squared then
-          Result[Y, X] := Sqr(Matrix[Y, X]) + Result[Y-1, X]
-        else
-          Result[Y, X] := Matrix[Y, X] + Result[Y-1, X];
+        Result[Y, X] := Matrix[Y,X] + Result[Y-1, X];
 
     for Y := 0 to H do
       for X := 1 to W do
         Result[Y, X] += Result[Y, X-1];
   end;
 
-  function QuerySumTable(Table: TIntegerMatrix; X1, Y1, X2, Y2: Integer): Integer;
+  function CreateSumTableSquared(Matrix: TByteMatrix): TDoubleMatrix;
+  var
+    W, H, X, Y: Integer;
+  begin
+    SetLength(Result, Matrix.Height, Matrix.Width);
+
+    W := Result.Width - 1;
+    H := Result.Height - 1;
+
+    for Y := 0 to H do
+      Result[0, Y] := Sqr(Matrix[0, Y]);
+
+    for Y := 1 to H do
+      for X := 0 to W do
+        Result[Y, X] := Sqr(Matrix[Y,X]) + Result[Y-1, X];
+
+    for Y := 0 to H do
+      for X := 1 to W do
+        Result[Y, X] += Result[Y, X-1];
+  end;
+
+  function QuerySumTable(Table: TDoubleMatrix; X1, Y1, X2, Y2: Integer): Double;
   begin
     Result := Table[Y2, X2];
 
@@ -2443,8 +2458,8 @@ begin
 
   Matrix := ToGreyMatrix();
 
-  SumTable := CreateSumTable(Matrix, False);
-  SumTableSquared := CreateSumTable(Matrix, True);
+  SumTable := CreateSumTable(Matrix);
+  SumTableSquared := CreateSumTableSquared(Matrix);
 
   W := FWidth - 1;
   H := FHeight - 1;

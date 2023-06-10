@@ -55,9 +55,6 @@ type
 
   TSimbaAnchorDockSplitter = class(TAnchorDockSplitter)
   protected
-  const
-    GRIPPER_SIZE = 75;
-  protected
     procedure Paint; override;
   end;
 
@@ -226,6 +223,12 @@ procedure TSimbaAnchorDockSplitter.Paint;
 begin
   Canvas.Brush.Color := SimbaTheme.ColorFrame;
   Canvas.FillRect(ClientRect);
+
+  if MouseInClient then
+  begin
+    Canvas.Brush.Color := SimbaTheme.ColorActive;
+    Canvas.FillRect(3, 3, Width-3, Height-3);
+  end;
 end;
 
 procedure TAnchorDockMasterHelper.MakeDockable(Form: TCustomForm; MenuItem: TMenuItem);

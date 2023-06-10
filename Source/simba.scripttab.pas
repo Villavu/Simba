@@ -361,7 +361,7 @@ begin
   FEditor := TSimbaEditor.Create(Self);
   FEditor.Parent := Self;
   FEditor.Align := alClient;
-  FEditor.TabStop := False;
+  FEditor.TabStop := True;
   FEditor.Text := SimbaSettings.Editor.DefaultScript.Value;
   FEditor.MarkTextAsSaved();
   FEditor.RegisterStatusChangedHandler(@DoEditorStatusChanges, [scCaretX, scCaretY, scModified]);

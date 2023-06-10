@@ -23,7 +23,10 @@ uses
 
 type
   {$SCOPEDENUMS ON}
-  EParseExpressionFlag = (WantVarType, WantMethodResult);
+  EParseExpressionFlag = (
+    WantVarType,     // if found decl is a variable, return the variables type
+    WantMethodResult // if found decl is a function, return the result type
+  );
   EParseExpressionFlags = set of EParseExpressionFlag;
   {$SCOPEDENUMS OFF}
 
@@ -350,6 +353,7 @@ var
 begin
   Result := nil;
 
+  Decl := EnsureTypeDeclaration(Decl);
   if (Decl is TDeclaration_TypeEnum) then
   begin
     Result := TDeclaration_TypeEnum(Decl).Elements;
@@ -427,36 +431,15 @@ function TCodeinsight.ParseExpression(Expr: TExpressionItems; Flags: EParseExpre
       if Decl.IsName(Expr.Text) then
       begin
         if (Decl is TDeclaration_Var) and (TDeclaration_Var(Decl).VarType <> nil) then
-        begin
-          Result := EnsureTypeDeclaration(TDeclaration_Var(Decl).VarType);
-          Exit;
-        end;
+          Result := EnsureTypeDeclaration(TDeclaration_Var(Decl).VarType)
+        else
+        if Expr.IsLastItem then
+          Result := Decl
+        else
+        if (Decl is TDeclaration_Method) and Assigned(TDeclaration_Method(Decl).ResultType) then
+          Result := EnsureTypeDeclaration(TDeclaration_Method(Decl).ResultType);
 
-        if (Decl is TDeclaration_Method) then
-        begin
-          if Expr.IsLastItem then
-          begin
-            case (EParseExpressionFlag.WantMethodResult in Flags) of
-              True:
-                if (TDeclaration_Method(Decl).ResultType <> nil) then
-                begin
-                  Result := EnsureTypeDeclaration(TDeclaration_Method(Decl).ResultType);
-                  Exit;
-                end;
-              False:
-                begin
-                  Result := Decl;
-                  Exit;
-                end;
-            end;
-          end;
-
-          if (TDeclaration_Method(Decl).ResultType <> nil) then
-          begin
-            Result := EnsureTypeDeclaration(TDeclaration_Method(Decl).ResultType);
-            Exit;
-          end;
-        end;
+        Exit;
       end;
   end;
 
@@ -527,6 +510,10 @@ begin
   end;
 
   Result := Decl;
+
+  if (EParseExpressionFlag.WantMethodResult in Flags) then
+    if (Result is TDeclaration_Method) and Assigned(TDeclaration_Method(Result).ResultType) then
+      Result := EnsureTypeDeclaration(TDeclaration_Method(Result).ResultType);
 end;
 
 function TCodeinsight.ParseExpression(Expr: String; Flags: EParseExpressionFlags): TDeclaration;

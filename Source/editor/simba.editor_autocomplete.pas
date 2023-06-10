@@ -12,9 +12,10 @@ unit simba.editor_autocomplete;
 interface
 
 uses
-  Classes, SysUtils, Graphics, StdCtrls, Controls, Forms, LCLType, Types, ATScrollBar,
+  Classes, SysUtils, Graphics, StdCtrls, Controls, Forms, LCLType, Types,
   SynEdit, SynEditTypes, SynCompletion, SynEditKeyCmds, SynEditHighlighter,
-  simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_insight;
+  simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_insight,
+  simba.component_scrollbar;
 
 type
   TSimbaAutoCompleteSizeDrag = class(TSynBaseCompletionFormSizeDrag)
@@ -24,7 +25,7 @@ type
   TSimbaAutoComplete = class;
   TSimbaAutoComplete_Form = class(TSynCompletionForm)
   protected
-    RealScroll: TATScrollbar;
+    RealScroll: TSimbaScrollBar;
 
     procedure DoPaintSizeDrag(Sender: TObject);
     procedure DoScrollChange(Sender: TObject);
@@ -286,12 +287,12 @@ begin
 
   Scroll.Width := 0;
 
-  RealScroll := TATScrollbar.Create(Self);
+  RealScroll := TSimbaScrollBar.Create(Self);
   RealScroll.Parent := Self;
   RealScroll.Kind := sbVertical;
   RealScroll.OnEnter := @ScrollGetFocus;
   RealScroll.OnChange := @DoScrollChange;
-  RealScroll.Anchors := [akTop,akRight, akBottom];
+  RealScroll.Anchors := [akTop, akRight, akBottom];
   RealScroll.AnchorSide[akTop].Side := asrTop;
   RealScroll.AnchorSide[akTop].Control := self;
   RealScroll.AnchorSide[akRight].Side := asrBottom;
