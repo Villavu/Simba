@@ -151,11 +151,11 @@ end;
 (*
 TPointArray.FloodFill
 ~~~~~~~~~~~~~~~~~~~~~
-function TPointArray.FloodFill(StartPoint: TPoint): TPointArray;
+function TPointArray.FloodFill(const StartPoint: TPoint; const EightWay: Boolean): TPointArray;
 *)
 procedure _LapeTPAFloodFill(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PPointArray(Params^[0])^.FloodFill(PPoint(Params^[1])^);
+  PPointArray(Result)^ := PPointArray(Params^[0])^.FloodFill(PPoint(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 (*
@@ -742,7 +742,7 @@ begin
     addGlobalFunc('function TPointArray.Columns: T2DPointArray', @_LapeTPAColumns);
     addGlobalFunc('function TPointArray.Offset(P: TPoint): TPointArray; overload', @_LapeTPAOffset1);
     addGlobalFunc('function TPointArray.Offset(X, Y: Integer): TPointArray; overload', @_LapeTPAOffset2);
-    addGlobalFunc('function TPointArray.FloodFill(StartPoint: TPoint): TPointArray;', @_LapeTPAFloodFill);
+    addGlobalFunc('function TPointArray.FloodFill(const StartPoint: TPoint; const EightWay: Boolean): TPointArray;', @_LapeTPAFloodFill);
     addGlobalFunc('function TPointArray.ShapeFill: TPointArray', @_LapeTPAShapeFill);
 
     addGlobalFunc('function TPointArray.Extremes: TPointArray', @_LapeTPAExtremes);

@@ -62,7 +62,7 @@ type
     function Edges: TPointArray;
     function Border: TPointArray;
     function Skeleton(FMin: Integer = 2; FMax: Integer = 6): TPointArray;
-    function FloodFill(StartPoint: TPoint): TPointArray;
+    function FloodFill(const StartPoint: TPoint; const EightWay: Boolean): TPointArray;
     function ShapeFill: TPointArray;
 
     function ConvexHull: TPointArray;
@@ -742,7 +742,7 @@ begin
   end;
 end;
 
-function TPointArrayHelper.FloodFill(StartPoint: TPoint): TPointArray;
+function TPointArrayHelper.FloodFill(const StartPoint: TPoint; const EightWay: Boolean): TPointArray;
 var
   B: TBox;
   Width, Height: Integer;
@@ -767,12 +767,13 @@ var
       Push(P.X + 1, P.Y);
       Push(P.X, P.Y + 1);
 
-      {
-      Push(P.X - 1, P.Y - 1);
-      Push(P.X + 1, P.Y - 1);
-      Push(P.X -1, P.Y + 1);
-      Push(P.X + 1, P.Y + 1);
-      }
+      if EightWay then
+      begin
+        Push(P.X - 1, P.Y - 1);
+        Push(P.X + 1, P.Y - 1);
+        Push(P.X -1, P.Y + 1);
+        Push(P.X + 1, P.Y + 1);
+      end;
 
       Arr.Add(Point(P.X + B.X1, P.Y + B.Y1));
     end;
@@ -793,10 +794,7 @@ begin
   for I := 0 to High(Self) do
     Checked[Self[I].Y - B.Y1, Self[I].X - B.X1] := True;
 
-  StartPoint.X -= B.X1;
-  StartPoint.Y -= B.Y1;
-
-  CheckNeighbours(StartPoint);
+  CheckNeighbours(StartPoint.Offset(-B.X1, -B.Y1));
   while (Queue.Count > 0) do
     CheckNeighbours(Queue.Pop());
 
