@@ -846,7 +846,7 @@ end;
 
 procedure TSimbaForm.MenuClearOutputClick(Sender: TObject);
 begin
-  SimbaScriptTabsForm.CurrentTab.OutputBox.Empty();
+  SimbaOutputForm.CurrentTab.Empty();
 end;
 
 procedure TSimbaForm.MenuFileClick(Sender: TObject);
@@ -867,7 +867,7 @@ begin
     end;
 
     Item := TMenuItem.Create(MenuItemOpenRecent);
-    Item.Caption := ShortDisplayFilename(FRecentFiles[I], 100);
+    Item.Caption := ShortDisplayFilename(FRecentFiles[I], 80);
     Item.OnClick := @HandleRecentFileClick;
     Item.Hint := FRecentFiles[I];
 
