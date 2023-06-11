@@ -153,7 +153,7 @@ type
     procedure DrawBitmap(Bitmap: TMufasaBitmap; Position: TPoint);
 
     procedure DrawToCanvas(x,y: Integer; Canvas: TCanvas);
-    function GetColors: TIntegerArray;
+    function GetColors: TColorArray;
     procedure ReplaceColor(OldColor, NewColor: TColor);
     procedure ReplaceColors(OldColors, NewColors: TColorArray);
     procedure Rotate(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap); overload;
@@ -1288,7 +1288,7 @@ begin
     end;
 end;
 
-function TMufasaBitmap.GetColors: TIntegerArray;
+function TMufasaBitmap.GetColors: TColorArray;
 var
   I: Integer;
 begin

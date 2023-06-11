@@ -194,21 +194,21 @@ end;
 (*
 TMufasaBitmap.DrawATPA
 ~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray; Color: Integer);
+procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawATPAEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawATPA(P2DPointArray(Params^[1])^, PInteger(Params^[2])^);
+  PMufasaBitmap(Params^[0])^.DrawATPA(P2DPointArray(Params^[1])^, PColor(Params^[2])^);
 end;
 
 (*
 TMufasaBitmap.DrawTPA
 ~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawTPA(TPA: TPointArray; Color: Integer);
+procedure TMufasaBitmap.DrawTPA(TPA: TPointArray; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawTPA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawTPA(PPointArray(Params^[1])^, PInteger(Params^[2])^);
+  PMufasaBitmap(Params^[0])^.DrawTPA(PPointArray(Params^[1])^, PColor(Params^[2])^);
 end;
 
 (*
@@ -224,7 +224,7 @@ end;
 (*
 TMufasaBitmap.ReplaceColor
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.ReplaceColor(OldColor, NewColor: Integer);
+procedure TMufasaBitmap.ReplaceColor(OldColor, NewColor: TColor);
 *)
 procedure _LapeMufasaBitmap_ReplaceColor(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -234,7 +234,7 @@ end;
 (*
 TMufasaBitmap.ReplaceColors
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.ReplaceColors(OldColors, NewColors: TIntegerArray);
+procedure TMufasaBitmap.ReplaceColors(OldColors, NewColors: TColorArray);
 *)
 procedure _LapeMufasaBitmap_ReplaceColors(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -414,11 +414,11 @@ end;
 (*
 TMufasaBitmap.GetColors
 ~~~~~~~~~~~~~~~~~~~~~~~
-function TMufasaBitmap.GetColors: TIntegerArray;
+function TMufasaBitmap.GetColors: TColorArray;
 *)
 procedure _LapeMufasaBitmap_GetColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PIntegerArray(Result)^ := PMufasaBitmap(Params^[0])^.GetColors();
+  PColorArray(Result)^ := PMufasaBitmap(Params^[0])^.GetColors();
 end;
 
 (*
@@ -514,21 +514,21 @@ end;
 (*
 TMufasaBitmap.SetTransparentColor
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.SetTransparentColor(Value: Integer);
+procedure TMufasaBitmap.SetTransparentColor(Value: TColor);
 *)
 procedure _LapeMufasaBitmap_TransparentColor_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.TransparentColor := PInteger(Params^[1])^;
+  PMufasaBitmap(Params^[0])^.TransparentColor := PColor(Params^[1])^;
 end;
 
 (*
 TMufasaBitmap.GetTransparentColor
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TMufasaBitmap.GetTransparentColor: Integer;
+function TMufasaBitmap.GetTransparentColor: TColor;
 *)
 procedure _LapeMufasaBitmap_TransparentColor_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := PMufasaBitmap(Params^[0])^.TransparentColor;
+  PColor(Result)^ := PMufasaBitmap(Params^[0])^.TransparentColor;
 end;
 
 (*
@@ -554,27 +554,27 @@ end;
 (*
 TMufasaBitmap.GetPixel
 ~~~~~~~~~~~~~~~~~~~~~~
-function TMufasaBitmap.GetPixel(X, Y: Integer): Integer;
+function TMufasaBitmap.GetPixel(X, Y: Integer): TColor;
 *)
 procedure _LapeMufasaBitmap_GetPixel(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := PMufasaBitmap(Params^[0])^[PInteger(Params^[1])^, PInteger(Params^[2])^];
+  PColor(Result)^ := PMufasaBitmap(Params^[0])^[PInteger(Params^[1])^, PInteger(Params^[2])^];
 end;
 
 (*
 TMufasaBitmap.SetPixel
 ~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.SetPixel(X, Y: Integer; Color: Integer);
+procedure TMufasaBitmap.SetPixel(X, Y: Integer; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_SetPixel(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^[PInteger(Params^[1])^, PInteger(Params^[2])^] := PInteger(Params^[3])^;
+  PMufasaBitmap(Params^[0])^[PInteger(Params^[1])^, PInteger(Params^[2])^] := PColor(Params^[3])^;
 end;
 
 (*
 TMufasaBitmap.SetPixels
 ~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.SetPixels(Points: TPointArray; Colors: TIntegerArray);
+procedure TMufasaBitmap.SetPixels(Points: TPointArray; Colors: TColorArray);
 *)
 procedure _LapeMufasaBitmap_SetPixels(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -584,11 +584,11 @@ end;
 (*
 TMufasaBitmap.GetPixels
 ~~~~~~~~~~~~~~~~~~~~~~~
-function TMufasaBitmap.GetPixels(Points: TPointArray): TIntegerArray;
+function TMufasaBitmap.GetPixels(Points: TPointArray): TColorArray;
 *)
 procedure _LapeMufasaBitmap_GetPixels(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PIntegerArray(Result)^ := PMufasaBitmap(Params^[0])^.GetPixels(PPointArray(Params^[1])^);
+  PColorArray(Result)^ := PMufasaBitmap(Params^[0])^.GetPixels(PPointArray(Params^[1])^);
 end;
 
 (*
@@ -644,157 +644,157 @@ end;
 (*
 TMufasaBitmap.DrawCross
 ~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawCross(ACenter: TPoint; Radius: Integer; Color: Integer);
+procedure TMufasaBitmap.DrawCross(ACenter: TPoint; Radius: Integer; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawCross(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawCross(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+  PMufasaBitmap(Params^[0])^.DrawCross(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
 end;
 
 (*
 TMufasaBitmap.DrawCrosshairs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: Integer);
+procedure TMufasaBitmap.DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawCrosshairs(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawCrosshairs(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+  PMufasaBitmap(Params^[0])^.DrawCrosshairs(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
 end;
 
 (*
 TMufasaBitmap.DrawLine
 ~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawLine(Start, Stop: TPoint; Color: Integer);
+procedure TMufasaBitmap.DrawLine(Start, Stop: TPoint; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawLine(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^, PInteger(Params^[3])^);
+  PMufasaBitmap(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^);
 end;
 
 (*
 TMufasaBitmap.DrawLine
 ~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawLine(Start, Stop: TPoint; Color: Integer);
+procedure TMufasaBitmap.DrawLine(Start, Stop: TPoint; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawLineEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^, PInteger(Params^[3])^);
+  PMufasaBitmap(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^);
 end;
 
 (*
 TMufasaBitmap.DrawPolygon
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawPolygon(Points: TPointArray; Color: Integer);
+procedure TMufasaBitmap.DrawPolygon(Points: TPointArray; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawPolygon(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawPolygon(PPointArray(Params^[1])^, PInteger(Params^[2])^);
+  PMufasaBitmap(Params^[0])^.DrawPolygon(PPointArray(Params^[1])^, PColor(Params^[2])^);
 end;
 
 (*
 TMufasaBitmap.DrawPolygonFilled
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawPolygonFilled(Points: TPointArray; Color: Integer);
+procedure TMufasaBitmap.DrawPolygonFilled(Points: TPointArray; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawPolygonFilled(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawPolygonFilled(PPointArray(Params^[1])^, PInteger(Params^[2])^);
+  PMufasaBitmap(Params^[0])^.DrawPolygonFilled(PPointArray(Params^[1])^, PColor(Params^[2])^);
 end;
 
 (*
 TMufasaBitmap.DrawPolygonInverted
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawPolygonInverted(Points: TPointArray; Color: Integer);
+procedure TMufasaBitmap.DrawPolygonInverted(Points: TPointArray; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawPolygonInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawPolygonInverted(PPointArray(Params^[1])^, PInteger(Params^[2])^);
+  PMufasaBitmap(Params^[0])^.DrawPolygonInverted(PPointArray(Params^[1])^, PColor(Params^[2])^);
 end;
 
 (*
 TMufasaBitmap.DrawCircle
 ~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawCircle(ACenter: TPoint; Radius: Integer; Color: Integer);
+procedure TMufasaBitmap.DrawCircle(ACenter: TPoint; Radius: Integer; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawCircle(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawCircle(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+  PMufasaBitmap(Params^[0])^.DrawCircle(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
 end;
 
 (*
 TMufasaBitmap.DrawCircleFilled
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: Integer);
+procedure TMufasaBitmap.DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawCircleFilled(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawCircleFilled(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+  PMufasaBitmap(Params^[0])^.DrawCircleFilled(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
 end;
 
 (*
 TMufasaBitmap.DrawCircleInverted
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: Integer);
+procedure TMufasaBitmap.DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawCircleInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawCircleInverted(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+  PMufasaBitmap(Params^[0])^.DrawCircleInverted(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
 end;
 
 (*
 TMufasaBitmap.DrawBox
 ~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawBox(B: TBox; Color: Integer);
+procedure TMufasaBitmap.DrawBox(B: TBox; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawBox(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawBox(PBox(Params^[1])^, PInteger(Params^[2])^);
+  PMufasaBitmap(Params^[0])^.DrawBox(PBox(Params^[1])^, PColor(Params^[2])^);
 end;
 
 (*
 TMufasaBitmap.DrawBoxFilled
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawBoxFilled(B: TBox; Color: Integer);
+procedure TMufasaBitmap.DrawBoxFilled(B: TBox; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawBoxFilled(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawBoxFilled(PBox(Params^[1])^, PInteger(Params^[2])^);
+  PMufasaBitmap(Params^[0])^.DrawBoxFilled(PBox(Params^[1])^, PColor(Params^[2])^);
 end;
 
 (*
 TMufasaBitmap.DrawBoxInverted
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawBoxInverted(B: TBox; Color: Integer);
+procedure TMufasaBitmap.DrawBoxInverted(B: TBox; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawBoxInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawBoxInverted(PBox(Params^[1])^, PInteger(Params^[2])^);
+  PMufasaBitmap(Params^[0])^.DrawBoxInverted(PBox(Params^[1])^, PColor(Params^[2])^);
 end;
 
 (*
 TMufasaBitmap.DrawQuad
 ~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawQuad(B: TBox; Color: Integer);
+procedure TMufasaBitmap.DrawQuad(B: TBox; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawQuad(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawQuad(PQuad(Params^[1])^, PInteger(Params^[2])^);
+  PMufasaBitmap(Params^[0])^.DrawQuad(PQuad(Params^[1])^, PColor(Params^[2])^);
 end;
 
 (*
 TMufasaBitmap.DrawQuadFilled
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawQuadFilled(B: TBox; Color: Integer);
+procedure TMufasaBitmap.DrawQuadFilled(B: TBox; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawQuadFilled(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawQuadFilled(PQuad(Params^[1])^, PInteger(Params^[2])^);
+  PMufasaBitmap(Params^[0])^.DrawQuadFilled(PQuad(Params^[1])^, PColor(Params^[2])^);
 end;
 
 (*
 TMufasaBitmap.DrawQuadInverted
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawQuadInverted(B: TBox; Color: Integer);
+procedure TMufasaBitmap.DrawQuadInverted(B: TBox; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawQuadInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -804,61 +804,61 @@ end;
 (*
 TMufasaBitmap.DrawQuadArray
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; Color: Integer = -1);
+procedure TMufasaBitmap.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; Color: TColor = -1);
 *)
 procedure _LapeMufasaBitmap_DrawQuadArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawQuadArray(PQuadArray(Params^[1])^, PBoolean(Params^[2])^, PInteger(Params^[3])^);
+  PMufasaBitmap(Params^[0])^.DrawQuadArray(PQuadArray(Params^[1])^, PBoolean(Params^[2])^, PColor(Params^[3])^);
 end;
 
 (*
 TMufasaBitmap.DrawBoxArray
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: Integer = -1);
+procedure TMufasaBitmap.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: TColor = -1);
 *)
 procedure _LapeMufasaBitmap_DrawBoxArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawBoxArray(PBoxArray(Params^[1])^, PBoolean(Params^[2])^, PInteger(Params^[3])^);
+  PMufasaBitmap(Params^[0])^.DrawBoxArray(PBoxArray(Params^[1])^, PBoolean(Params^[2])^, PColor(Params^[3])^);
 end;
 
 (*
 TMufasaBitmap.DrawPolygonArray
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: Integer = -1);
+procedure TMufasaBitmap.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: TColor = -1);
 *)
 procedure _LapeMufasaBitmap_DrawPolygonArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawPolygonArray(P2DPointArray(Params^[1])^, PBoolean(Params^[2])^, PInteger(Params^[3])^);
+  PMufasaBitmap(Params^[0])^.DrawPolygonArray(P2DPointArray(Params^[1])^, PBoolean(Params^[2])^, PColor(Params^[3])^);
 end;
 
 (*
 TMufasaBitmap.DrawCircleArray
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawCircleArray(Points: TPointArray; Radius: Integer; Filled: Boolean; Color: Integer = -1);
+procedure TMufasaBitmap.DrawCircleArray(Points: TPointArray; Radius: Integer; Filled: Boolean; Color: TColor = -1);
 *)
 procedure _LapeMufasaBitmap_DrawCircleArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawCircleArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^, PInteger(Params^[4])^);
+  PMufasaBitmap(Params^[0])^.DrawCircleArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^, PColor(Params^[4])^);
 end;
 
 (*
 TMufasaBitmap.DrawCrossArray
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawCrossArray(Points: TPointArray; Radius: Integer; Color: Integer = -1);
+procedure TMufasaBitmap.DrawCrossArray(Points: TPointArray; Radius: Integer; Color: TColor = -1);
 *)
 procedure _LapeMufasaBitmap_DrawCrossArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawCrossArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+  PMufasaBitmap(Params^[0])^.DrawCrossArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
 end;
 
 (*
 TMufasaBitmap.Fill
 ~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.Fill(Color: Integer);
+procedure TMufasaBitmap.Fill(Color: TColor);
 *)
 procedure _LapeMufasaBitmap_Fill(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.Fill(PInteger(Params^[1])^);
+  PMufasaBitmap(Params^[0])^.Fill(PColor(Params^[1])^);
 end;
 
 (*
@@ -1064,27 +1064,27 @@ end;
 (*
 TMufasaBitmap.DrawText
 ~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawText(Text: String; Position: TPoint; Color: Integer);
+procedure TMufasaBitmap.DrawText(Text: String; Position: TPoint; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawText(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawText(PString(Params^[1])^, PPoint(Params^[2])^, PInteger(Params^[3])^);
+  PMufasaBitmap(Params^[0])^.DrawText(PString(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^);
 end;
 
 (*
 TMufasaBitmap.DrawText
 ~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawText(Text: String; Box: TBox; Center: Boolean; Color: Integer);
+procedure TMufasaBitmap.DrawText(Text: String; Box: TBox; Center: Boolean; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawTextEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Params^[0])^.DrawText(PString(Params^[1])^, PBox(Params^[2])^, PBoolean(Params^[3])^, PInteger(Params^[4])^);
+  PMufasaBitmap(Params^[0])^.DrawText(PString(Params^[1])^, PBox(Params^[2])^, PBoolean(Params^[3])^, PColor(Params^[4])^);
 end;
 
 (*
 TMufasaBitmap.DrawTextLines
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TMufasaBitmap.DrawTextLines(Text: TStringArray; Position: TPoint; Color: Integer);
+procedure TMufasaBitmap.DrawTextLines(Text: TStringArray; Position: TPoint; Color: TColor);
 *)
 procedure _LapeMufasaBitmap_DrawTextLines(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -1385,11 +1385,11 @@ begin
 
     addGlobalFunc('function TMufasaBitmap.Equals(Other: TMufasaBitmap): Boolean;', @_LapeMufasaBitmap_Equals);
 
-    addGlobalFunc('procedure TMufasaBitmap.SetPixel(X, Y: Integer; Color: Integer);', @_LapeMufasaBitmap_SetPixel);
-    addGlobalFunc('function TMufasaBitmap.GetPixel(X, Y: Integer): Integer;', @_LapeMufasaBitmap_GetPixel);
+    addGlobalFunc('procedure TMufasaBitmap.SetPixel(X, Y: Integer; Color: TColor);', @_LapeMufasaBitmap_SetPixel);
+    addGlobalFunc('function TMufasaBitmap.GetPixel(X, Y: Integer): TColor;', @_LapeMufasaBitmap_GetPixel);
 
-    addGlobalFunc('procedure TMufasaBitmap.SetPixels(Points: TPointArray; Colors: TIntegerArray);', @_LapeMufasaBitmap_SetPixels);
-    addGlobalFunc('function TMufasaBitmap.GetPixels(Points: TPointArray): TIntegerArray;', @_LapeMufasaBitmap_GetPixels);
+    addGlobalFunc('procedure TMufasaBitmap.SetPixels(Points: TPointArray; Colors: TColorArray);', @_LapeMufasaBitmap_SetPixels);
+    addGlobalFunc('function TMufasaBitmap.GetPixels(Points: TPointArray): TColorArray;', @_LapeMufasaBitmap_GetPixels);
 
     addGlobalFunc('function TMufasaBitmap.PixelDifference(Other: TMufasaBitmap): Integer; overload', @_LapeMufasaBitmap_PixelDifference);
     addGlobalFunc('function TMufasaBitmap.PixelDifference(Other: TMufasaBitmap; Tolerance: Integer): Integer; overload', @_LapeMufasaBitmap_PixelDifferenceTolerance);
@@ -1400,41 +1400,41 @@ begin
     addGlobalFunc('function TMufasaBitmap.TextWidth(Text: String): Integer;', @_LapeMufasaBitmap_TextWidth);
     addGlobalFunc('function TMufasaBitmap.TextHeight(Text: String): Integer;', @_LapeMufasaBitmap_TextHeight);
     addGlobalFunc('function TMufasaBitmap.TextSize(Text: String): TPoint;', @_LapeMufasaBitmap_TextSize);
-    addGlobalFunc('procedure TMufasaBitmap.DrawText(Text: String; Position: TPoint; Color: Integer); overload', @_LapeMufasaBitmap_DrawText);
-    addGlobalFunc('procedure TMufasaBitmap.DrawText(Text: String; Box: TBox; Center: Boolean; Color: Integer); overload', @_LapeMufasaBitmap_DrawTextEx);
-    addGlobalFunc('procedure TMufasaBitmap.DrawTextLines(Text: TStringArray; Position: TPoint; Color: Integer);', @_LapeMufasaBitmap_DrawTextLines);
+    addGlobalFunc('procedure TMufasaBitmap.DrawText(Text: String; Position: TPoint; Color: TColor); overload', @_LapeMufasaBitmap_DrawText);
+    addGlobalFunc('procedure TMufasaBitmap.DrawText(Text: String; Box: TBox; Center: Boolean; Color: TColor); overload', @_LapeMufasaBitmap_DrawTextEx);
+    addGlobalFunc('procedure TMufasaBitmap.DrawTextLines(Text: TStringArray; Position: TPoint; Color: TColor);', @_LapeMufasaBitmap_DrawTextLines);
 
     addGlobalFunc('procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray); overload', @_LapeMufasaBitmap_DrawATPA);
-    addGlobalFunc('procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray; Color: Integer); overload', @_LapeMufasaBitmap_DrawATPAEx);
-    addGlobalFunc('procedure TMufasaBitmap.DrawTPA(TPA: TPointArray; Color: Integer);', @_LapeMufasaBitmap_DrawTPA);
+    addGlobalFunc('procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray; Color: TColor); overload', @_LapeMufasaBitmap_DrawATPAEx);
+    addGlobalFunc('procedure TMufasaBitmap.DrawTPA(TPA: TPointArray; Color: TColor);', @_LapeMufasaBitmap_DrawTPA);
 
-    addGlobalFunc('procedure TMufasaBitmap.DrawCrosshairs(ACenter: TPoint; Size: Integer; Thickness: Integer; Color: Integer);', @_LapeMufasaBitmap_DrawCrosshairs);
-    addGlobalFunc('procedure TMufasaBitmap.DrawCross(ACenter: TPoint; Radius: Integer; Thickness: Integer; Color: Integer);', @_LapeMufasaBitmap_DrawCross);
+    addGlobalFunc('procedure TMufasaBitmap.DrawCrosshairs(ACenter: TPoint; Size: Integer; Thickness: Integer; Color: TColor);', @_LapeMufasaBitmap_DrawCrosshairs);
+    addGlobalFunc('procedure TMufasaBitmap.DrawCross(ACenter: TPoint; Radius: Integer; Thickness: Integer; Color: TColor);', @_LapeMufasaBitmap_DrawCross);
 
-    addGlobalFunc('procedure TMufasaBitmap.DrawLine(Start, Stop: TPoint; Color: Integer); overload', @_LapeMufasaBitmap_DrawLine);
-    addGlobalFunc('procedure TMufasaBitmap.DrawLine(Start, Stop: TPoint; Thickness: Integer; Color: Integer); overload', @_LapeMufasaBitmap_DrawLineEx);
+    addGlobalFunc('procedure TMufasaBitmap.DrawLine(Start, Stop: TPoint; Color: TColor); overload', @_LapeMufasaBitmap_DrawLine);
+    addGlobalFunc('procedure TMufasaBitmap.DrawLine(Start, Stop: TPoint; Thickness: Integer; Color: TColor); overload', @_LapeMufasaBitmap_DrawLineEx);
 
-    addGlobalFunc('procedure TMufasaBitmap.DrawPolygon(Points: TPointArray; Color: Integer);', @_LapeMufasaBitmap_DrawPolygon);
-    addGlobalFunc('procedure TMufasaBitmap.DrawPolygonFilled(Points: TPointArray; Color: Integer);', @_LapeMufasaBitmap_DrawPolygonFilled);
-    addGlobalFunc('procedure TMufasaBitmap.DrawPolygonInverted(Points: TPointArray; Color: Integer);', @_LapeMufasaBitmap_DrawPolygonInverted);
+    addGlobalFunc('procedure TMufasaBitmap.DrawPolygon(Points: TPointArray; Color: TColor);', @_LapeMufasaBitmap_DrawPolygon);
+    addGlobalFunc('procedure TMufasaBitmap.DrawPolygonFilled(Points: TPointArray; Color: TColor);', @_LapeMufasaBitmap_DrawPolygonFilled);
+    addGlobalFunc('procedure TMufasaBitmap.DrawPolygonInverted(Points: TPointArray; Color: TColor);', @_LapeMufasaBitmap_DrawPolygonInverted);
 
-    addGlobalFunc('procedure TMufasaBitmap.DrawCircle(ACenter: TPoint; Radius: Integer; Color: Integer);', @_LapeMufasaBitmap_DrawCircle);
-    addGlobalFunc('procedure TMufasaBitmap.DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: Integer);', @_LapeMufasaBitmap_DrawCircleFilled);
-    addGlobalFunc('procedure TMufasaBitmap.DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: Integer);', @_LapeMufasaBitmap_DrawCircleInverted);
+    addGlobalFunc('procedure TMufasaBitmap.DrawCircle(ACenter: TPoint; Radius: Integer; Color: TColor);', @_LapeMufasaBitmap_DrawCircle);
+    addGlobalFunc('procedure TMufasaBitmap.DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor);', @_LapeMufasaBitmap_DrawCircleFilled);
+    addGlobalFunc('procedure TMufasaBitmap.DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: TColor);', @_LapeMufasaBitmap_DrawCircleInverted);
 
-    addGlobalFunc('procedure TMufasaBitmap.DrawBox(B: TBox; Color: Integer);', @_LapeMufasaBitmap_DrawBox);
-    addGlobalFunc('procedure TMufasaBitmap.DrawBoxFilled(B: TBox; Color: Integer);', @_LapeMufasaBitmap_DrawBoxFilled);
-    addGlobalFunc('procedure TMufasaBitmap.DrawBoxInverted(B: TBox; Color: Integer);', @_LapeMufasaBitmap_DrawBoxInverted);
+    addGlobalFunc('procedure TMufasaBitmap.DrawBox(B: TBox; Color: TColor);', @_LapeMufasaBitmap_DrawBox);
+    addGlobalFunc('procedure TMufasaBitmap.DrawBoxFilled(B: TBox; Color: TColor);', @_LapeMufasaBitmap_DrawBoxFilled);
+    addGlobalFunc('procedure TMufasaBitmap.DrawBoxInverted(B: TBox; Color: TColor);', @_LapeMufasaBitmap_DrawBoxInverted);
 
-    addGlobalFunc('procedure TMufasaBitmap.DrawQuad(Quad: TQuad; Color: Integer);', @_LapeMufasaBitmap_DrawQuad);
-    addGlobalFunc('procedure TMufasaBitmap.DrawQuadFilled(Quad: TQuad; Color: Integer);', @_LapeMufasaBitmap_DrawQuadFilled);
-    addGlobalFunc('procedure TMufasaBitmap.DrawQuadInverted(Quad: TQuad; Color: Integer);', @_LapeMufasaBitmap_DrawQuadInverted);
+    addGlobalFunc('procedure TMufasaBitmap.DrawQuad(Quad: TQuad; Color: TColor);', @_LapeMufasaBitmap_DrawQuad);
+    addGlobalFunc('procedure TMufasaBitmap.DrawQuadFilled(Quad: TQuad; Color: TColor);', @_LapeMufasaBitmap_DrawQuadFilled);
+    addGlobalFunc('procedure TMufasaBitmap.DrawQuadInverted(Quad: TQuad; Color: TColor);', @_LapeMufasaBitmap_DrawQuadInverted);
 
-    addGlobalFunc('procedure TMufasaBitmap.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; Color: Integer = -1);', @_LapeMufasaBitmap_DrawQuadArray);
-    addGlobalFunc('procedure TMufasaBitmap.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: Integer = -1);', @_LapeMufasaBitmap_DrawBoxArray);
-    addGlobalFunc('procedure TMufasaBitmap.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: Integer = -1);', @_LapeMufasaBitmap_DrawPolygonArray);
-    addGlobalFunc('procedure TMufasaBitmap.DrawCircleArray(Points: TPointArray; Radius: Integer; Filled: Boolean; Color: Integer = -1);', @_LapeMufasaBitmap_DrawCircleArray);
-    addGlobalFunc('procedure TMufasaBitmap.DrawCrossArray(Points: TPointArray; Radius: Integer; Thickness: Integer; Color: Integer = -1);', @_LapeMufasaBitmap_DrawCrossArray);
+    addGlobalFunc('procedure TMufasaBitmap.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; Color: TColor = -1);', @_LapeMufasaBitmap_DrawQuadArray);
+    addGlobalFunc('procedure TMufasaBitmap.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: TColor = -1);', @_LapeMufasaBitmap_DrawBoxArray);
+    addGlobalFunc('procedure TMufasaBitmap.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: TColor = -1);', @_LapeMufasaBitmap_DrawPolygonArray);
+    addGlobalFunc('procedure TMufasaBitmap.DrawCircleArray(Points: TPointArray; Radius: Integer; Filled: Boolean; Color: TColor = -1);', @_LapeMufasaBitmap_DrawCircleArray);
+    addGlobalFunc('procedure TMufasaBitmap.DrawCrossArray(Points: TPointArray; Radius: Integer; Thickness: Integer; Color: TColor = -1);', @_LapeMufasaBitmap_DrawCrossArray);
 
     addGlobalFunc('procedure TMufasaBitmap.Clear; overload', @_LapeMufasaBitmap_Clear);
     addGlobalFunc('procedure TMufasaBitmap.Clear(Area: TBox); overload', @_LapeMufasaBitmap_ClearEx);
@@ -1452,9 +1452,9 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.SetPersistentMemory(Memory: PtrUInt; AWidth, AHeight: Integer);', @_LapeMufasaBitmap_SetPersistentMemory);
     addGlobalFunc('procedure TMufasaBitmap.ResetPersistentMemory;', @_LapeMufasaBitmap_ResetPersistentMemory);
 
-    addGlobalFunc('procedure TMufasaBitmap.Fill(Color: Integer);', @_LapeMufasaBitmap_Fill);
-    addGlobalFunc('procedure TMufasaBitmap.ReplaceColor(OldColor, NewColor: Integer);', @_LapeMufasaBitmap_ReplaceColor);
-    addGlobalFunc('procedure TMufasaBitmap.ReplaceColors(OldColors, NewColors: TIntegerArray);', @_LapeMufasaBitmap_ReplaceColors);
+    addGlobalFunc('procedure TMufasaBitmap.Fill(Color: TColor);', @_LapeMufasaBitmap_Fill);
+    addGlobalFunc('procedure TMufasaBitmap.ReplaceColor(OldColor, NewColor: TColor);', @_LapeMufasaBitmap_ReplaceColor);
+    addGlobalFunc('procedure TMufasaBitmap.ReplaceColors(OldColors, NewColors: TColorArray);', @_LapeMufasaBitmap_ReplaceColors);
     addGlobalFunc('procedure TMufasaBitmap.Rotate(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap); overload', @_LapeMufasaBitmap_Rotate1);
     addGlobalFunc('procedure TMufasaBitmap.RotateBilinear(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap); overload', @_LapeMufasaBitmap_RotateBilinear1);
 
@@ -1481,7 +1481,7 @@ begin
     addGlobalFunc('function TMufasaBitmap.Copy(X1, Y1, X2, Y2: Integer): TMufasaBitmap; overload', @_LapeMufasaBitmap_Copy);
     addGlobalFunc('function TMufasaBitmap.Copy: TMufasaBitmap; overload', @_LapeMufasaBitmap_CopyEx);
     addGlobalFunc('procedure TMufasaBitmap.Crop(X1, Y1, X2, Y2: Integer);', @_LapeMufasaBitmap_Crop);
-    addGlobalFunc('function TMufasaBitmap.GetColors: TIntegerArray;', @_LapeMufasaBitmap_GetColors);
+    addGlobalFunc('function TMufasaBitmap.GetColors: TColorArray;', @_LapeMufasaBitmap_GetColors);
     addGlobalFunc('function TMufasaBitmap.ToMatrix: TIntegerMatrix; overload', @_LapeMufasaBitmap_ToMatrix);
     addGlobalFunc('function TMufasaBitmap.ToMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix; overload', @_LapeMufasaBitmap_ToMatrixEx);
     addGlobalFunc('procedure TMufasaBitmap.ThresholdAdaptive(Alpha, Beta: Byte; AInvert: Boolean; Method: TBmpThreshMethod; k: Integer);', @_LapeMufasaBitmap_ThresholdAdaptive);
