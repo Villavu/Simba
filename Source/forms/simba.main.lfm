@@ -76,7 +76,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolbarButtonClearOutput: TToolButton
       Left = 240
-      Hint = 'Clear Script Output'
+      Hint = 'Clear Output Box'
       Top = 0
       Caption = 'Clear'
       ImageIndex = 7
@@ -2660,6 +2660,7 @@ object SimbaForm: TSimbaForm
   end
   object MainMenuFile: TPopupMenu
     Images = Images
+    OnPopup = MenuFileClick
     Left = 390
     Top = 160
     object MenuItemNew: TMenuItem
@@ -2736,6 +2737,7 @@ object SimbaForm: TSimbaForm
   end
   object MainMenuEdit: TPopupMenu
     Images = Images
+    OnPopup = MenuEditClick
     Left = 740
     Top = 60
     object MenuItemUndo: TMenuItem
