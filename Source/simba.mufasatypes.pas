@@ -204,14 +204,6 @@ type
     DEBUGIMAGE_MOVETO, DEBUGIMAGE_MAXSIZE, DEBUGIMAGE_SHOW, DEBUGIMAGE_HIDE,
     DEBUGIMAGE_DISPLAY, DEBUGIMAGE_DISPLAY_XY
   );
-
-  PSimbaScriptDebuggerEvent = ^TSimbaScriptDebuggerEvent;
-  TSimbaScriptDebuggerEvent = packed record
-    Method: Int16;
-    Depth: Int16;
-    Exception: Boolean;
-  end;
-  TSimbaScriptDebuggerEvents = array of TSimbaScriptDebuggerEvent;
 {$POP}
 
   TColorRGB = record
@@ -263,6 +255,7 @@ type
   PColorHSL = ^TColorHSL;
 
   TColorArray = array of TColor;
+  PColorArray = ^TColorArray;
 
   PWindowHandle = ^TWindowHandle;
   PWindowHandleArray = ^TWindowHandleArray;

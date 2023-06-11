@@ -19,11 +19,6 @@ type
   protected
     procedure TextChanged; override;
 
-    procedure SetVisible(Value: Boolean); override;
-
-    procedure TabShow; virtual;
-    procedure TabHide; virtual;
-
     function GetImageIndex: TImageIndex;
     function GetTabControl: TSimbaTabControl;
     function GetTabData: TATTabData;
@@ -172,31 +167,6 @@ begin
     if (I > -1) then
       GetTabData(I).TabCaption := Self.Caption;
   end;
-end;
-
-procedure TSimbaTab.SetVisible(Value: Boolean);
-var
-  ValueChanged: Boolean;
-begin
-  ValueChanged := Value <> Visible;
-
-  inherited SetVisible(Value);
-
-  if ValueChanged then
-    if Visible then
-      TabShow()
-    else
-      TabHide();
-end;
-
-procedure TSimbaTab.TabShow;
-begin
-
-end;
-
-procedure TSimbaTab.TabHide;
-begin
-
 end;
 
 function TSimbaTabControl.GetActiveTab: TSimbaTab;

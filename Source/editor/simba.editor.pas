@@ -100,7 +100,7 @@ type
 implementation
 
 uses
-  SynEditPointClasses, SynGutterBase, SynEditMarkupWordGroup, SynHighlighterPas_Simba,
+  SynEditPointClasses, SynGutterBase, SynGutter, SynEditMarkupWordGroup, SynHighlighterPas_Simba,
   LazSynEditMouseCmdsTypes, Forms,
   simba.fonthelpers, simba.editor_blockcompletion,
   simba.editor_docgenerator, simba.editor_commentblock,
@@ -419,8 +419,6 @@ begin
 end;
 
 constructor TSimbaEditor.Create(AOwner: TComponent);
-var
-  I: Integer;
 begin
   inherited Create(AOwner);
 
@@ -482,11 +480,17 @@ begin
   FAttributes := TSimbaEditor_Attributes.Create(Self);
 
   Gutter.LeftOffset := Scale96ToScreen(10);
-  for I := 0 to Gutter.Parts.Count - 1 do
-    Gutter.Parts[I].Visible := False;
-  Gutter.ChangesPart().Visible    := True;
-  Gutter.LineNumberPart().Visible := True;
-  Gutter.CodeFoldPart().Visible   := True;
+  Gutter.MarksPart.Visible := False;
+  Gutter.SeparatorPart.Visible := False;
+
+  with TSynGutterSeparator.Create(Gutter.Parts) do
+  begin
+    MarkupInfo.Foreground := Gutter.Color;
+    AutoSize := False;
+    LineWidth := Scale96ToScreen(4);
+    Width := Scale96ToScreen(4);
+    Index := Gutter.LineNumberPart().Index + 1;
+  end;
 
   {$IFDEF DARWIN}
   MaybeReplaceModifiers();
