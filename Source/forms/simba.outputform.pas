@@ -95,8 +95,11 @@ type
     procedure DoTabCanChange(Sender: TSimbaTabControl; OldTab, NewTab: TSimbaTab; var AllowChange: Boolean);
 
     procedure DebugLn(const S: String);
+
+    function GetCurrentTab: TSimbaOutputBox;
   public
     property SimbaOutputBox: TSimbaOutputBox read FSimbaOutputBox;
+    property CurrentTab: TSimbaOutputBox read GetCurrentTab;
 
     function AddSimbaOutput: TSimbaOutputBox;
     function AddScriptOutput(TabTitle: String): TSimbaOutputBox;
@@ -470,6 +473,11 @@ end;
 procedure TSimbaOutputForm.DebugLn(const S: String);
 begin
   SimbaOutputBox.Add(S + LineEnding);
+end;
+
+function TSimbaOutputForm.GetCurrentTab: TSimbaOutputBox;
+begin
+  Result := TSimbaOutputTab(FTabControl.ActiveTab).OutputBox;
 end;
 
 function TSimbaOutputForm.AddSimbaOutput: TSimbaOutputBox;

@@ -26,8 +26,9 @@ type
     FScriptInstance: TSimbaScriptInstance;
     FOutputBox: TSimbaOutputBox;
 
-    procedure TabShow; override;
-    procedure TabHide; override;
+    // Keep output tab in sync
+    procedure TextChanged; override;
+
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
     procedure DoEditorModified(Sender: TObject);
@@ -91,16 +92,12 @@ begin
   Result := FEditor.Text <> FSavedText;
 end;
 
-procedure TSimbaScriptTab.TabShow;
+procedure TSimbaScriptTab.TextChanged;
 begin
- // FFunctionList.Show();
-  if Editor.CanSetFocus() then
-    Editor.SetFocus();
-end;
+  inherited TextChanged();
 
-procedure TSimbaScriptTab.TabHide;
-begin
- // FFunctionList.Hide();
+  if Assigned(FOutputBox) then
+    FOutputBox.Tab.Caption := Caption;
 end;
 
 procedure TSimbaScriptTab.Notification(AComponent: TComponent; Operation: TOperation);

@@ -290,6 +290,9 @@ end;
 procedure TSimbaScriptTabsForm.DoTabChange(Sender: TSimbaTabControl; NewTab: TSimbaTab);
 begin
   SimbaIDEEvents.CallOnScriptTabChange(NewTab);
+
+  if (NewTab is TSimbaScriptTab) and TSimbaScriptTab(NewTab).Editor.CanSetFocus() then
+    TSimbaScriptTab(NewTab).Editor.SetFocus();
 end;
 
 procedure TSimbaScriptTabsForm.DoTabClosed(Sender: TSimbaTabControl; Tab: TSimbaTab; var CanClose: Boolean);
