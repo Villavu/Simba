@@ -10,7 +10,7 @@ unit simba.component_menubar;
 interface
 
 uses
-  Classes, SysUtils, Controls, Forms, Menus, Graphics,
+  Classes, SysUtils, Controls, Forms, Menus, Graphics, ExtCtrls,
   simba.settings;
 
 type
@@ -20,11 +20,19 @@ type
       Text: String;
       Rect: TRect;
       Menu: TPopupMenu;
-      ClosedAt: UInt64;
     end;
     FHotIndex: Integer;
+    FTrackTimer: TTimer;
+    FPopupIndex: Integer;
+
+    procedure SetHotIndex(Index: Integer);
 
     function IndexAtXY(X, Y: Integer): Integer;
+    procedure Popup(Index: Integer);
+
+    procedure DoTrackTimer(Sender: TObject);
+    procedure DoChangePopupMenu(Data: PtrInt);
+    procedure ClearPopupIndex(Data: PtrInt);
 
     procedure CalculateSizes;
     procedure Paint; override;
@@ -46,7 +54,17 @@ type
 implementation
 
 uses
+  LMessages, LCLIntf,
   simba.theme;
+
+procedure TSimbaMainMenuBar.SetHotIndex(Index: Integer);
+begin
+  FHotIndex := Index;
+  if (FHotIndex = -1) and (FPopupIndex > -1) then
+    FHotIndex := FPopupIndex;
+
+  Invalidate();
+end;
 
 function TSimbaMainMenuBar.IndexAtXY(X, Y: Integer): Integer;
 var
@@ -54,8 +72,57 @@ var
 begin
   Result := -1;
   for I := 0 to High(FItems) do
-    if (X >= FItems[I].Rect.Left) and (X <= FItems[I].Rect.Right) then
+    if (X >= FItems[I].Rect.Left) and (X <= FItems[I].Rect.Right) and (Y >= 0) and (Y < FItems[I].Rect.Height) then
       Exit(I);
+end;
+
+procedure TSimbaMainMenuBar.Popup(Index: Integer);
+begin
+  if (FPopupIndex = Index) then
+    Exit;
+  FPopupIndex := Index;
+  if (FPopupIndex = -1) then
+    Exit;
+
+  FTrackTimer.Enabled := True;
+
+  with ClientToScreen(TPoint.Create(FItems[Index].Rect.Left, Height)) do
+  begin
+    FItems[Index].Menu.PopupComponent := Self;
+    FItems[Index].Menu.PopUp(X, Y);
+  end;
+end;
+
+procedure TSimbaMainMenuBar.DoTrackTimer(Sender: TObject);
+var
+  NewIndex: Integer;
+begin
+  with ScreenToClient(Mouse.CursorPos) do
+  begin
+    NewIndex := IndexAtXY(X, Y);
+    SetHotIndex(NewIndex);
+
+    if (NewIndex <> -1) and (NewIndex <> FPopupIndex) then
+    begin
+      if (GetCapture <> 0) then
+        SendMessage(GetCapture(), LM_CANCELMODE, 0, 0);
+      ReleaseCapture();
+
+      Application.QueueAsyncCall(@DoChangePopupMenu, NewIndex);
+    end;
+  end;
+end;
+
+procedure TSimbaMainMenuBar.DoChangePopupMenu(Data: PtrInt);
+begin
+  Popup(Data);
+end;
+
+procedure TSimbaMainMenuBar.ClearPopupIndex(Data: PtrInt);
+begin
+  FPopupIndex := -1;
+
+  SetHotIndex(-1);
 end;
 
 procedure TSimbaMainMenuBar.CalculateSizes;
@@ -69,10 +136,14 @@ begin
 
     if (Length(FItems) > 0) then
     begin
+      FItems[0].Rect.Top := 0;
+      FItems[0].Rect.Bottom := Self.Height;
       FItems[0].Rect.Left  := 5;
       FItems[0].Rect.Right := FItems[0].Rect.Left + Canvas.TextWidth(FItems[0].Text);
       for I := 1 to High(FItems) do
       begin
+        FItems[I].Rect.Top := 0;
+        FItems[I].Rect.Bottom := Self.Height;
         FItems[I].Rect.Left := FItems[I-1].Rect.Right + 5;
         FItems[I].Rect.Right := FItems[I].Rect.Left + Canvas.TextWidth(FItems[I].Text);
       end;
@@ -112,6 +183,7 @@ begin
 
     Canvas.TextRect(R, R.Left, R.Top, FItems[I].Text, Style);
   end;
+
   Canvas.Pen.Color := SimbaTheme.ColorLine;
   Canvas.Line(0, Height - 1, Width, Height - 1);
 end;
@@ -124,49 +196,32 @@ begin
 end;
 
 procedure TSimbaMainMenuBar.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-var
-  I: Integer;
 begin
   inherited MouseDown(Button, Shift, X, Y);
 
-  I := IndexAtXY(X, Y);
-  if (I > -1) and (GetTickCount64() - FItems[I].ClosedAt > 100) then
-    with ClientToScreen(TPoint.Create(FItems[I].Rect.Left, Height)) do
-      FItems[I].Menu.PopUp(X, Y);
+  Popup(IndexAtXY(X, Y));
 end;
 
 procedure TSimbaMainMenuBar.MouseMove(Shift: TShiftState; X, Y: Integer);
-var
-  n: Integer;
 begin
   inherited MouseMove(Shift, X, Y);
 
-  n := IndexAtXY(X,Y);
-  if (n <> FHotIndex) then
-  begin
-    FHotIndex := n;
-    Invalidate();
-  end;
+  SetHotIndex(IndexAtXY(X, Y));
 end;
 
 procedure TSimbaMainMenuBar.MouseLeave;
 begin
   inherited MouseLeave();
 
-  if (FHotIndex > -1) then
-  begin
-    FHotIndex := -1;
-    Invalidate();
-  end;
+  if (FPopupIndex = -1) then
+    SetHotIndex(-1);
 end;
 
 procedure TSimbaMainMenuBar.DoMenuClose(Sender: TObject);
-var
-  I: Integer;
 begin
-  for I := 0 to High(FItems) do
-    if (FItems[I].Menu = Sender) then
-      FItems[I].ClosedAt := GetTickCount64();
+  FTrackTimer.Enabled := False;
+
+  Application.QueueAsyncCall(@ClearPopupIndex, 0);
 end;
 
 procedure TSimbaMainMenuBar.MaybeReplaceModifiers(Menu: TPopupMenu);
@@ -202,7 +257,14 @@ constructor TSimbaMainMenuBar.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  ParentFont := True;
+  FPopupIndex := -1;
+  FHotIndex := -1;
+
+  FTrackTimer := TTimer.Create(Self);
+  FTrackTimer.Enabled := False;
+  FTrackTimer.Interval := 100;
+  FTrackTimer.OnTimer := @DoTrackTimer;
+
   ControlStyle := ControlStyle + [csOpaque];
 
   CalculateSizes();
