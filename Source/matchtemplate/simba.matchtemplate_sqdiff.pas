@@ -7,10 +7,7 @@ unit simba.matchtemplate_sqdiff;
 
 {$i simba.inc}
 
-{$IFOPT D-}
-  {$OPTIMIZATION LEVEL4}
-{$ENDIF}
-
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$MODESWITCH ARRAYOPERATORS OFF}
 
 interface
@@ -131,6 +128,8 @@ begin
     SimbaThreadPool.RunParallel(Tasks);
   end else
     DoMatchTemplate(0);
+
+  Result.ReplaceNaNAndInf(0);
 end;
 
 function MatchTemplateMask_SQDIFF(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
@@ -169,6 +168,8 @@ begin
       for X := 0 to W do
         Result[Y, X] := Result[Y, X] / Sqrt(Templ2Mask2Sum * TempResult[Y, X]);
   end;
+
+  Result.ReplaceNaNAndInf(0);
 end;
 
 function MatchTemplateMask_SQDIFF_MT(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;

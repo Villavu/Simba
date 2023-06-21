@@ -160,6 +160,16 @@ begin
   PBoolean(Result)^ := TSimbaGeometry.PointInEllipse(PPoint(Params^[0])^, PPoint(Params^[1])^, PDouble(Params^[2])^, PDouble(Params^[3])^);
 end;
 
+procedure _LapeIsNumberS(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := IsNumber(PSingle(Params^[0])^);
+end;
+
+procedure _LapeIsNumberD(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := IsNumber(PDouble(Params^[0])^);
+end;
+
 procedure ImportMath(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -170,6 +180,9 @@ begin
     addGlobalVar(SQRT_2, 'SQRT_2').isConstant := True;
     addGlobalVar(SQRT_3, 'SQRT_3').isConstant := True;
     addGlobalVar(SQRT_5, 'SQRT_5').isConstant := True;
+
+    addGlobalFunc('function IsNumber(const Value: Single): Boolean; overload', @_LapeIsNumberS);
+    addGlobalFunc('function IsNumber(const Value: Double): Boolean; overload', @_LapeIsNumberD);
 
     addGlobalFunc('function Distance(const X1, Y1, X2, Y2: Integer): Integer; overload', @_LapeDistance);
     addGlobalFunc('function Distance(const P1, P2: TPoint): Integer; overload', @_LapeDistanceEx);

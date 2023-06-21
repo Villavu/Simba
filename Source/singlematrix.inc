@@ -30,6 +30,8 @@ type
     function ArgMulti(Count: Integer;  HiLo: Boolean): TPointArray;
     procedure Smoothen(Block: Integer);
     function Sum: Double;
+    function Equals(Other: TSingleMatrix; Epsilon: Single = 0): Boolean;
+    procedure ReplaceNaNAndInf(const ReplaceWith: Single);
   end;
 {$ENDIF}
 
@@ -450,4 +452,35 @@ begin
           Result := Result + Value;
       end;
 end;
+
+function TSingleMatrixHelper.Equals(Other: TSingleMatrix; Epsilon: Single): Boolean;
+var
+  X, Y, W, H: Integer;
+begin
+  Result := False;
+  if (Self.Width <> Other.Width) or (Self.Height <> Other.Height) then
+    Exit;
+
+  if Self.GetSizeMinusOne(W, H) then
+  begin
+    for Y := 0 to H do
+      for X := 0 to W do
+        if (not SameValue(Self[Y,X], Other[Y,X], Epsilon)) then
+          Exit;
+
+    Result := True;
+  end;
+end;
+
+procedure TSingleMatrixHelper.ReplaceNaNAndInf(const ReplaceWith: Single);
+var
+  X, Y, W, H: Integer;
+begin
+  if Self.GetSizeMinusOne(W, H) then
+    for Y := 0 to H do
+      for X := 0 to W do
+        if not IsNumber(Self[Y,X]) then
+          Self[Y,X] := ReplaceWith;
+end;
+
 {$ENDIF}
