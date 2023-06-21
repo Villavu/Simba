@@ -7,10 +7,7 @@ unit simba.matchtemplate_ccoeff;
 
 {$i simba.inc}
 
-{$IFOPT D-}
-  {$OPTIMIZATION LEVEL4}
-{$ENDIF}
-
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$MODESWITCH ARRAYOPERATORS OFF}
 
 interface
@@ -124,6 +121,8 @@ begin
   Result := CrossCorrRGB(ImageChannels, TemplxMask).Merge() - (ImgMaskCorr * (TemplxMaskSum[0] / MaskSum) + (TemplxMaskSum[1] / MaskSum) + (TemplxMaskSum[2] / MaskSum));
   if Normed then
     Result /= ImgNormCorr * Norm(TemplxMask);
+
+  Result.ReplaceNaNAndInf(0);
 end;
 
 function MatchTemplateMask_CCOEFF_MT(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
@@ -190,6 +189,8 @@ begin
     SimbaThreadPool.RunParallel(Tasks);
   end else
     DoMatchTemplate(0);
+
+  Result.ReplaceNaNAndInf(0);
 end;
 
 function MatchTemplate_CCOEFF(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
