@@ -7,10 +7,7 @@ unit simba.matchtemplate_ccorr;
 
 {$i simba.inc}
 
-{$IFOPT D-}
-  {$OPTIMIZATION LEVEL4}
-{$ENDIF}
-
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$MODESWITCH ARRAYOPERATORS OFF}
 
 interface
@@ -118,6 +115,8 @@ begin
       for X := 0 to W do
         Result[Y, X] := Result[Y, X] / Sqrt(Templ2Mask2Sum * TempResult[Y, X]);
   end;
+
+  Result.ReplaceNaNAndInf(0);
 end;
 
 function MatchTemplateMask_CCORR_Cache(ACache: TMatchTemplateCacheBase; Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
@@ -176,6 +175,8 @@ begin
     SimbaThreadPool.RunParallel(Tasks);
   end else
     DoMatchTemplate(0);
+
+  Result.ReplaceNaNAndInf(0);
 end;
 
 function MatchTemplateMask_CCORR_MT(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
