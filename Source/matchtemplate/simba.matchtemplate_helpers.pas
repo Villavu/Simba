@@ -144,7 +144,7 @@ begin
 
   if (ImageW - TemplW > 200) and (ImageH - TemplH > 250) then // not worth
   begin
-    for I := Min(TThread.ProcessorCount, 4) downto 2 do // more than 4 threads loses effectiveness very quickly
+    for I := SimbaThreadPool.ThreadCount - 1 downto 2 do // more than 4 threads loses effectiveness very quickly
       if ((ImageH div I) + TemplH) > 200 then
         Exit(I);
   end;
@@ -187,7 +187,7 @@ var
   ImageSlices: TImageSlices;
   RowSize: Integer;
 
-  procedure DoMatchTemplate(SliceIndex: Integer);
+  procedure DoMatchTemplate(const SliceIndex: Integer);
   var
     SliceOffset, Y: Integer;
     Mat: TSingleMatrix;
@@ -200,7 +200,7 @@ var
   end;
 
 var
-  Tasks: TSimbaThreadPoolTasks;
+  //Tasks: TSimbaThreadPoolTaskArray;
   I: Integer;
 begin
   if CalculateSlices(Image.Width, Image.Height, Templ.Width, Templ.Height) > 1 then
@@ -212,11 +212,13 @@ begin
     RowSize := Result.Width * SizeOf(Single);
     ImageSlices := SliceImage(Image, Templ);
 
+    {
     SetLength(Tasks, Length(ImageSlices));
     for I := 0 to High(Tasks) do
-      Tasks[I] := TSimbaThreadPoolTask.Create(@DoMatchTemplate);
+      Tasks[I] := TSimbaThreadPoolTask_NestedMethod.Create(@DoMatchTemplate);
 
     SimbaThreadPool.RunParallel(Tasks);
+    }
   end else
     Result := MatchTemplate(Image, Templ, Normed);
 end;

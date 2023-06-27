@@ -167,9 +167,9 @@ var
       Move(Mat[Y, 0], Result[SliceOffset + Y, 0], RowSize);
   end;
 
-var
-  Tasks: TSimbaThreadPoolTasks;
-  I: Integer;
+//var
+  //Tasks: TSimbaThreadPoolTasks;
+  //I: Integer;
 begin
   if (not (ACache is TMatchTemplateCache_CCOEFF)) then
     raise Exception.Create('[MatchTemplateMask_CCOEFF]: Invalid cache');
@@ -182,11 +182,11 @@ begin
 
   if Length(Cache.Slices) > 1 then
   begin
-    SetLength(Tasks, Length(Cache.Slices));
-    for I := 0 to High(Tasks) do
-      Tasks[I] := TSimbaThreadPoolTask.Create(@DoMatchTemplate);
+    //SetLength(Tasks, Length(Cache.Slices));
+    //for I := 0 to High(Tasks) do
+    //  Tasks[I] := TSimbaThreadPoolTask.Create(@DoMatchTemplate);
 
-    SimbaThreadPool.RunParallel(Tasks);
+    //SimbaThreadPool.RunParallel(Tasks);
   end else
     DoMatchTemplate(0);
 
