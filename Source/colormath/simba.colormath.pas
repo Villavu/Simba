@@ -20,7 +20,17 @@ uses
   simba.mufasatypes;
 
 type
-  TColorHelper = type Helper for TColor
+  {$PUSH}
+  {$SCOPEDENUMS ON}
+  EColorSpace = (RGB, HSV, HSL, XYZ, LAB, LCH, DELTAE);
+  PColorSpace = ^EColorSpace;
+  {$POP}
+
+  EColorSpaceHelper = type helper for EColorSpace
+    function AsString: String;
+  end;
+
+  TColorHelper = type helper for TColor
     function ToBGRA: TColorBGRA;
     function ToRGB: TColorRGB;
     function ToXYZ: TColorXYZ;
@@ -41,8 +51,8 @@ type
   end;
 
   TColorBGRA_Helper = record helper for TColorBGRA
-    function Equals(const Other: TColorBGRA): Boolean;
-    function EqualsIgnoreAlpha(const Other: TColorBGRA): Boolean;
+    function Equals(const Other: TColorBGRA): Boolean; inline;
+    function EqualsIgnoreAlpha(const Other: TColorBGRA): Boolean; inline;
 
     function ToRGB: TColorRGB;
     function ToXYZ: TColorXYZ;
@@ -79,12 +89,6 @@ type
     function ToColor: TColor;
   end;
 
-  {$PUSH}
-  {$SCOPEDENUMS ON}
-  EColorSpace = (RGB, HSV, HSL, XYZ, LAB, LCH, DELTAE);
-  PColorSpace = ^EColorSpace;
-  {$POP}
-
 function ColorIntensity(const Color: TColor): Byte;
 function ColorToGray(const Color: TColor): Byte;
 function ColorToRGB(const Color: TColor): TColorRGB;
@@ -98,7 +102,13 @@ function ColorToLCH(const Color: TColor): TColorLCH;
 implementation
 
 uses
+  TypInfo,
   simba.colormath_conversion;
+
+function EColorSpaceHelper.AsString: String;
+begin
+  Result := GetEnumName(TypeInfo(Self), Ord(Self));
+end;
 
 function ColorToRGB(const Color: TColor): TColorRGB;
 begin

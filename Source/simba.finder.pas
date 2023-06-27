@@ -29,16 +29,12 @@ type
   TSimbaFinder = packed record
   private
     FTarget: TSimbaTarget;
-    FColorFinder: TColorFinder;
     FBitmapFinder: TBitmapFinder;
     FDTMFinder: TDTMFinder;
 
     function DoFindDTM(DTM: TDTM; Bounds: TBox; MaxToFind: Integer): TPointArray;
     function DoFindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox; MaxToFind: Integer): TPointArray;
     function DoFindBitmap(Bitmap: TMufasaBitmap; Bounds: TBox; MaxToFind: Integer): TPointArray;
-
-    function DoFindColor(Bounds: TBox): TPointArray;
-    function DoCountColor(Bounds: TBox): Integer;
 
     function GetDataAsBitmap(var Bounds: TBox; out Bitmap: TMufasaBitmap): Boolean;
   public
@@ -130,36 +126,6 @@ begin
   end;
 end;
 
-function TSimbaFinder.DoFindColor(Bounds: TBox): TPointArray;
-var
-  Data: PColorBGRA;
-  DataWidth: Integer;
-begin
-  Result := nil;
-
-  if FTarget.GetImageData(Bounds, Data, DataWidth) then
-  try
-    Result := FColorFinder.Find(Data, DataWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft);
-  finally
-    FTarget.FreeImageData(Data);
-  end;
-end;
-
-function TSimbaFinder.DoCountColor(Bounds: TBox): Integer;
-var
-  Data: PColorBGRA;
-  DataWidth: Integer;
-begin
-  Result := 0;
-
-  if FTarget.GetImageData(Bounds, Data, DataWidth) then
-  try
-    Result := FColorFinder.Count(Data, DataWidth, Bounds.Width, Bounds.Height);
-  finally
-    FTarget.FreeImageData(Data);
-  end;
-end;
-
 function TSimbaFinder.GetDataAsBitmap(var Bounds: TBox; out Bitmap: TMufasaBitmap): Boolean;
 var
   Data: PColorBGRA = nil;
@@ -202,62 +168,38 @@ begin
 end;
 
 function TSimbaFinder.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TSingleMatrix;
-var
-  Data: PColorBGRA;
-  DataWidth: Integer;
 begin
-  Result := nil;
-
-  if FTarget.GetImageData(Bounds, Data, DataWidth) then
-  try
-    FColorFinder.Setup(ColorSpace, Color, 0, Multipliers);
-
-    Result := FColorFinder.Match(Data, DataWidth, Bounds.Width, Bounds.Height);
-  finally
-    FTarget.FreeImageData(Data);
-  end;
+  Result := MatchColorsOnTarget(FTarget, Bounds, ColorSpace, Color, DefaultMultipliers);
 end;
 
 function TSimbaFinder.FindColor(Color: TColor; Tolerance: Single; Bounds: TBox): TPointArray;
 begin
-  FColorFinder.Setup(EColorSpace.RGB, Color, Tolerance, DefaultMultipliers);
-
-  Result := DoFindColor(Bounds);
+  Result := FindColorsOnTarget(FTarget, Bounds, EColorSpace.RGB, Color, Tolerance, DefaultMultipliers);
 end;
 
 function TSimbaFinder.FindColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPointArray;
 begin
-  FColorFinder.Setup(ColorSpace, Color, Tolerance, Multipliers);
-
-  Result := DoFindColor(Bounds);
+  Result := FindColorsOnTarget(FTarget, Bounds, ColorSpace, Color, Tolerance, Multipliers);
 end;
 
 function TSimbaFinder.FindColor(Color: TColorTolerance; Bounds: TBox): TPointArray;
 begin
-  FColorFinder.Setup(Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
-
-  Result := DoFindColor(Bounds);
+  Result := FindColorsOnTarget(FTarget, Bounds, Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
 end;
 
 function TSimbaFinder.CountColor(Color: TColor; Tolerance: Single; Bounds: TBox): Integer;
 begin
-  FColorFinder.Setup(EColorSpace.RGB, Color, Tolerance, DefaultMultipliers);
-
-  Result := DoCountColor(Bounds);
+  Result := CountColorsOnTarget(FTarget, Bounds, EColorSpace.RGB, Color, Tolerance, DefaultMultipliers);
 end;
 
 function TSimbaFinder.CountColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): Integer;
 begin
-  FColorFinder.Setup(ColorSpace, Color, Tolerance, Multipliers);
-
-  Result := DoCountColor(Bounds);
+  Result := CountColorsOnTarget(FTarget, Bounds, ColorSpace, Color, Tolerance, Multipliers);
 end;
 
 function TSimbaFinder.CountColor(Color: TColorTolerance; Bounds: TBox): Integer;
 begin
-  FColorFinder.Setup(Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
-
-  Result := DoCountColor(Bounds);
+  Result := CountColorsOnTarget(FTarget, Bounds, Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
 end;
 
 function TSimbaFinder.GetColor(X, Y: Integer): TColor;
@@ -535,4 +477,5 @@ begin
 end;
 
 end.
+
 

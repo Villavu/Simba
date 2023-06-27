@@ -19,7 +19,7 @@ implementation
 uses
   lptypes, lpvartypes,
   simba.script_compiler, simba.mufasatypes, simba.finder, simba.bitmap, simba.dtm,
-  simba.colormath, simba.colormath_distance, simba.bitmap_finders, simba.target;
+  simba.colormath, simba.colormath_distance, simba.bitmap_finders, simba.target, simba.finder_color;
 
 (*
 Finder
@@ -304,6 +304,10 @@ begin
   with Compiler do
   begin
     ImportingSection := 'Finder';
+
+    addGlobalVar(ltBoolean, @ColorFinderMT_Enabled, 'ColorFinderMT_Enabled');
+    addGlobalVar(ltInt32, @ColorFinderMT_SliceHeight, 'ColorFinderMT_SliceHeight');
+    addGlobalVar(ltInt32, @ColorFinderMT_SliceWidth, 'ColorFinderMT_SliceWidth');
 
     addGlobalType([
       'record',
