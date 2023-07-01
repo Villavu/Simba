@@ -42,7 +42,8 @@ function MatchTemplateMask_CCOEFF_Cache(ACache: TMatchTemplateCacheBase; Templat
 implementation
 
 uses
-  simba.threadpool, simba.simplelock;
+  simba.threadpool, simba.simplelock,
+  simba.singlematrix, simba.integermatrix;
 
 // MatchTemplate_CCOEFF
 function __MatchTemplate_CCOEFF(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;

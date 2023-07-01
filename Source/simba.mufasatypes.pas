@@ -263,17 +263,6 @@ type
   TWindowHandle = type UInt64;
   TWindowHandleArray = array of TWindowHandle;
 
-type
-  PTMFormula = ^ETMFormula;
-  ETMFormula = (
-    TM_CCORR,
-    TM_CCORR_NORMED,
-    TM_CCOEFF,
-    TM_CCOEFF_NORMED,
-    TM_SQDIFF,
-    TM_SQDIFF_NORMED
-  );
-
   PStringArray = ^TStringArray;
 
   PPoint = ^TPoint;
@@ -329,16 +318,44 @@ type
   PBoxArray = ^TBoxArray;
   TBoxArray = array of TBox;
 
+  TComplex = record
+    Re, Im: Single;
+  end;
+  TComplexArray  = array of TComplex;
+  TComplexMatrix = array of TComplexArray;
+
   {$DEFINE HEADER}
     {$i generics.inc}
     {$i quad.inc}
     {$i box.inc}
     {$i boxarray.inc}
     {$i point.inc}
-    {$i integermatrix.inc}
-    {$i singlematrix.inc}
-    {$i matrix.inc}
     {$i string.inc}
+
+    {$DEFINE MACRO_HELPER_NAME := TComplexMatrixBaseHelper}
+    {$DEFINE MACRO_MATRIX_NAME := TComplexMatrix}
+    {$i matrix.inc}
+
+    {$DEFINE MACRO_HELPER_NAME := TByteMatrixBaseHelper}
+    {$DEFINE MACRO_MATRIX_NAME := TByteMatrix}
+    {$i matrix.inc}
+
+    {$DEFINE MACRO_HELPER_NAME := TIntegerMatrixBaseHelper}
+    {$DEFINE MACRO_MATRIX_NAME := TIntegerMatrix}
+    {$i matrix.inc}
+
+    {$DEFINE MACRO_HELPER_NAME := TSingleMatrixBaseHelper}
+    {$DEFINE MACRO_MATRIX_NAME := TSingleMatrix}
+    {$i matrix.inc}
+
+    {$DEFINE MACRO_HELPER_NAME := TDoubleMatrixBaseHelper}
+    {$DEFINE MACRO_MATRIX_NAME := TDoubleMatrix}
+    {$i matrix.inc}
+
+    {$DEFINE MACRO_HELPER_NAME := TBooleanMatrixBaseHelper}
+    {$DEFINE MACRO_MATRIX_NAME := TBooleanMatrix}
+    {$i matrix.inc}
+
   {$UNDEF HEADER}
 
 {$PUSH}
@@ -366,8 +383,6 @@ procedure SimbaDebugLn(const Flags: EDebugLnFlags; const Msg: TStringArray); ove
 function FlagsToString(const Flags: EDebugLnFlags): String;
 function FlagsFromString(var Str: String): EDebugLnFlags;
 
-procedure AssertMainThread(const Method: String);
-
 function Min(const A, B: Integer): Integer; inline; overload;
 function Max(const A, B: Integer): Integer; inline; overload;
 function Min(const A, B: Int64): Int64; inline; overload;
@@ -393,6 +408,8 @@ type
 procedure SimbaException(Message: String; Args: array of const); overload;
 procedure SimbaException(Message: String); overload;
 
+procedure AssertMainThread(const Method: String);
+
 // Writable const
 const
   SimbaProcessType: ESimbaProcessType = ESimbaProcessType.UNKNOWN;
@@ -401,7 +418,7 @@ implementation
 
 uses
   math, forms, lazloggerbase, uregexpr, strutils, jsonparser, jsonscanner,
-  simba.math, simba.overallocatearray, simba.geometry, simba.heaparray,
+  simba.math, simba.overallocatearray, simba.geometry,
   simba.algo_sort, simba.tpa, simba.random;
 
 {$DEFINE BODY}
@@ -410,10 +427,32 @@ uses
   {$i box.inc}
   {$i boxarray.inc}
   {$i point.inc}
-  {$i integermatrix.inc}
-  {$i singlematrix.inc}
-  {$i matrix.inc}
   {$i string.inc}
+
+  {$DEFINE MACRO_HELPER_NAME := TComplexMatrixBaseHelper}
+  {$DEFINE MACRO_MATRIX_NAME := TComplexMatrix}
+  {$i matrix.inc}
+
+  {$DEFINE MACRO_HELPER_NAME := TByteMatrixBaseHelper}
+  {$DEFINE MACRO_MATRIX_NAME := TByteMatrix}
+  {$i matrix.inc}
+
+  {$DEFINE MACRO_HELPER_NAME := TIntegerMatrixBaseHelper}
+  {$DEFINE MACRO_MATRIX_NAME := TIntegerMatrix}
+  {$i matrix.inc}
+
+  {$DEFINE MACRO_HELPER_NAME := TSingleMatrixBaseHelper}
+  {$DEFINE MACRO_MATRIX_NAME := TSingleMatrix}
+  {$i matrix.inc}
+
+  {$DEFINE MACRO_HELPER_NAME := TDoubleMatrixBaseHelper}
+  {$DEFINE MACRO_MATRIX_NAME := TDoubleMatrix}
+  {$i matrix.inc}
+
+  {$DEFINE MACRO_HELPER_NAME := TBooleanMatrixBaseHelper}
+  {$DEFINE MACRO_MATRIX_NAME := TBooleanMatrix}
+  {$i matrix.inc}
+
 {$UNDEF BODY}
 
 procedure DebugLn(const Msg: String);
@@ -439,7 +478,7 @@ end;
 procedure AssertMainThread(const Method: String);
 begin
   if (GetCurrentThreadID() <> MainThreadID) then
-    raise Exception('Not called on main thread: ' + Method);
+    SimbaException('Not called on main thread: ' + Method);
 end;
 
 procedure SimbaDebugLn(const Msg: String);
@@ -612,7 +651,6 @@ begin
   else
     Result := IfFalse;
 end;
-
 
 initialization
   DoSimbaDebugLn := @DebugLogger.DebugLn;

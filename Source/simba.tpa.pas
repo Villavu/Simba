@@ -135,7 +135,8 @@ implementation
 uses
   math,
   simba.overallocatearray, simba.geometry, simba.math,
-  simba.algo_sort, simba.slacktree, simba.algo_unique;
+  simba.algo_sort, simba.slacktree, simba.algo_unique,
+  simba.singlematrix, simba.integermatrix;
 
 procedure GetAdjacent4(var Adj: TPointArray; const P: TPoint); inline;
 begin

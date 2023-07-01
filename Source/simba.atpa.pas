@@ -67,7 +67,7 @@ implementation
 
 uses
   math,
-  simba.tpa, simba.algo_sort, simba.overallocatearray;
+  simba.tpa, simba.algo_sort, simba.overallocatearray, simba.integermatrix;
 
 function T2DPointArrayHelper.Sort(Weights: TIntegerArray; LowToHigh: Boolean): T2DPointArray;
 var

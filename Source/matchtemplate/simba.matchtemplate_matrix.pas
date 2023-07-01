@@ -14,33 +14,18 @@ unit simba.matchtemplate_matrix;
   See the License for the specific language governing permissions and
   limitations under the License.
 [==============================================================================}
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
-
-{$IFOPT D-}
-  {$OPTIMIZATION LEVEL4}
-{$ENDIF}
 
 {$MODESWITCH ARRAYOPERATORS OFF}
 
 interface
 
 uses
-  classes, sysutils,
+  Classes, SysUtils,
   simba.mufasatypes;
 
 type
-  TComplex = record
-    Re, Im: Single;
-  end;
-  TComplexArray  = array of TComplex;
-  TComplexMatrix = array of TComplexArray;
-  TComplexMatrixHelper = type helper for TComplexMatrix
-  public
-    procedure SetSize(AWidth, AHeight: Integer);
-    function Width: Integer;
-    function Height: Integer;
-  end;
-
   TRGBComplexMatrix = record
     Width: Integer;
     Height: Integer;
@@ -83,6 +68,9 @@ function SumsPd(const Matrix: TSingleMatrix; out Square: TDoubleMatrix): TDouble
 function Rot90(const Matrix: TComplexMatrix): TComplexMatrix;
 
 implementation
+
+uses
+  simba.singlematrix;
 
 function SumsPd(const Matrix: TSingleMatrix; out Square: TDoubleMatrix): TDoubleMatrix;
 var
@@ -427,24 +415,6 @@ begin
   for Y := 0 to H do
     for X := 0 to W do
       Result[Y, X] := Left[Y, X] / Right[Y, X];
-end;
-
-procedure TComplexMatrixHelper.SetSize(AWidth, AHeight: Integer);
-begin
-  SetLength(Self, AHeight, AWidth);
-end;
-
-function TComplexMatrixHelper.Width: Integer;
-begin
-  if (Length(Self) > 0) then
-    Result := Length(Self[0])
-  else
-    Result := 0;
-end;
-
-function TComplexMatrixHelper.Height: Integer;
-begin
-  Result := Length(Self);
 end;
 
 procedure TRGBMatrix.SetSize(AWidth, AHeight: Integer);
