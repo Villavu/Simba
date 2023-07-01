@@ -3,188 +3,49 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
+
+{
+  MatchTemplateMask implemented from OpenCV's templmatch.cpp
+
+  Copyright (C) 2000-2022, Intel Corporation, all rights reserved.
+  Copyright (C) 2009-2011, Willow Garage Inc., all rights reserved.
+  Copyright (C) 2009-2016, NVIDIA Corporation, all rights reserved.
+  Copyright (C) 2010-2013, Advanced Micro Devices, Inc., all rights reserved.
+  Copyright (C) 2015-2023, OpenCV Foundation, all rights reserved.
+  Copyright (C) 2008-2016, Itseez Inc., all rights reserved.
+  Copyright (C) 2019-2023, Xperience AI, all rights reserved.
+  Copyright (C) 2019-2022, Shenzhen Institute of Artificial Intelligence and Robotics for Society, all rights reserved.
+  Copyright (C) 2022-2023, Southern University of Science And Technology, all rights reserved.
+
+  Third party copyrights are property of their respective owners.
+}
+
 unit simba.matchtemplate_ccorr;
 
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
-{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$MODESWITCH ARRAYOPERATORS OFF}
 
 interface
 
 uses
-  classes, sysutils,
-  simba.mufasatypes, simba.matchtemplate,
-  simba.matchtemplate_matrix, simba.matchtemplate_helpers;
-
-function MatchTemplateMask_CCORR_CreateCache(Image, Template: TIntegerMatrix): TMatchTemplateCacheBase;
-function MatchTemplateMask_CCORR_CreateCache_MT(Image, Template: TIntegerMatrix): TMatchTemplateCacheBase;
-
-function MatchTemplateMask_CCORR(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
-function MatchTemplateMask_CCORR_Cache(ACache: TMatchTemplateCacheBase; Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
-function MatchTemplateMask_CCORR_MT(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+  Classes, SysUtils,
+  simba.mufasatypes, simba.matchtemplate, simba.matchtemplate_matrix, simba.matchtemplate_helpers;
 
 function MatchTemplate_CCORR(Image, Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
-function MatchTemplate_CCORR_MT(Image, Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+function MatchTemplateMask_CCORR(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+
+function MatchTemplateMask_CCORR_CreateCache(Image, Template: TIntegerMatrix): TMatchTemplateCacheBase;
+function MatchTemplateMask_CCORR_Cache(ACache: TMatchTemplateCacheBase; Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
 
 implementation
 
 uses
-  simba.threadpool;
+  simba.threadpool, simba.simplelock;
 
-type
-  TMatchTemplateCache_CCORR = class(TMatchTemplateCacheBase)
-  public
-    Slices: array of record
-      ImageChannels, MaskChannels: TRGBMatrix;
-      Mask2: TRGBMatrix;
-      TempResult: TSingleMatrix;
-    end;
-
-    constructor Create(Image, Template: TIntegerMatrix; Multithread: Boolean);
-  end;
-
-constructor TMatchTemplateCache_CCORR.Create(Image, Template: TIntegerMatrix; Multithread: Boolean);
-var
-  Img2: TRGBMatrix;
-  ImageSlices: TImageSlices;
-  I: Integer;
-begin
-  inherited Create();
-
-  if Multithread then
-    ImageSlices := SliceImage(Image, Template)
-  else
-    ImageSlices := [Image];
-
-  Width := Image.Width;
-  Height := Image.Height;
-
-  SetLength(Slices, Length(ImageSlices));
-  for I := 0 to High(ImageSlices) do
-    with Slices[I] do
-    begin
-      MaskChannels := MaskFromTemplate(Template);
-      ImageChannels := TRGBMatrix.Create(ImageSlices[I]);
-      Img2 := (ImageChannels * ImageChannels);
-      Mask2 := (MaskChannels * MaskChannels);
-      TempResult := CrossCorrRGB(Img2, Mask2).Merge();
-    end;
-end;
-
-function MatchTemplateMask_CCORR_CreateCache(Image, Template: TIntegerMatrix): TMatchTemplateCacheBase;
-begin
-  Result := TMatchTemplateCache_CCORR.Create(Image, Template, False);
-end;
-
-function MatchTemplateMask_CCORR_CreateCache_MT(Image, Template: TIntegerMatrix): TMatchTemplateCacheBase;
-begin
-  Result := TMatchTemplateCache_CCORR.Create(Image, Template, True);
-end;
-
-function MatchTemplateMask_CCORR(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
-var
-  MaskChannels, TemplateChannels, ImageChannels: TRGBMatrix;
-  Img2, Mask2: TRGBMatrix;
-  Templ2Mask2Sum: Double;
-  TempResult: TSingleMatrix;
-  W, H, X, Y: Integer;
-begin
-  MaskChannels     := MaskFromTemplate(Template);
-  TemplateChannels := TRGBMatrix.Create(Template);
-  ImageChannels    := TRGBMatrix.Create(Image);
-
-  Result := CrossCorrRGB(ImageChannels, TemplateChannels * (MaskChannels * MaskChannels)).Merge();
-
-  if Normed then
-  begin
-    // img.mul(img);
-    Img2 := (ImageChannels * ImageChannels);
-    // mask.mul(mask);
-    Mask2 := (MaskChannels * MaskChannels);
-    // double templ2_mask2_sum = norm(templ.mul(mask), NORM_L2SQR);
-    Templ2Mask2Sum := SumOfSquares(TemplateChannels * MaskChannels);
-
-    // crossCorr(img2, mask2, temp_result, Point(0, 0), 0, 0);
-    TempResult := CrossCorrRGB(Img2, Mask2).Merge();
-
-    // sqrt(templ2_mask2_sum * temp_result, temp_result);
-    W := Result.Width - 1;
-    H := Result.Height - 1;
-    for Y := 0 to H do
-      for X := 0 to W do
-        Result[Y, X] := Result[Y, X] / Sqrt(Templ2Mask2Sum * TempResult[Y, X]);
-  end;
-
-  Result.ReplaceNaNAndInf(0);
-end;
-
-function MatchTemplateMask_CCORR_Cache(ACache: TMatchTemplateCacheBase; Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
-var
-  Cache: TMatchTemplateCache_CCORR absolute ACache;
-  RowSize: Integer;
-
-  procedure DoMatchTemplate(SliceIndex: Integer);
-  var
-    Mat: TSingleMatrix;
-    SliceOffset, X, Y, W, H: Integer;
-    TemplChannels: TRGBMatrix;
-    Templ2Mask2Sum: Double;
-  begin
-    with Cache.Slices[SliceIndex] do
-    begin
-      TemplChannels := TRGBMatrix.Create(Template);
-      Mat := CrossCorrRGB(ImageChannels, TemplChannels * Mask2).Merge();
-
-      if Normed then
-      begin
-        Templ2Mask2Sum := SumOfSquares(TemplChannels * MaskChannels);
-
-        W := Mat.Width - 1;
-        H := Mat.Height - 1;
-        for Y := 0 to H do
-          for X := 0 to W do
-            Mat[Y, X] := Mat[Y, X] / Sqrt(Templ2Mask2Sum * TempResult[Y, X]);
-      end;
-    end;
-
-    SliceOffset := (Cache.Height div Length(Cache.Slices)) * SliceIndex;
-    for Y := 0 to Mat.Height - 1 do
-      Move(Mat[Y, 0], Result[SliceOffset + Y, 0], RowSize);
-  end;
-
-//var
-  //Tasks: TSimbaThreadPoolTasks;
-  //I: Integer;
-begin
-  if (not (ACache is TMatchTemplateCache_CCORR)) then
-    raise Exception.Create('[MatchTemplateMask_CCORR]: Invalid cache');
-
-  Result.SetSize(
-    (Cache.Width - Template.Width) + 1,
-    (Cache.Height - Template.Height) + 1
-  );
-  RowSize := Result.Width * SizeOf(Single);
-
-  if Length(Cache.Slices) > 1 then
-  begin
-    //SetLength(Tasks, Length(Cache.Slices));
-    //for I := 0 to High(Tasks) do
-    //  Tasks[I] := TSimbaThreadPoolTask.Create(@DoMatchTemplate);
-
-    //SimbaThreadPool.RunParallel(Tasks);
-  end else
-    DoMatchTemplate(0);
-
-  Result.ReplaceNaNAndInf(0);
-end;
-
-function MatchTemplateMask_CCORR_MT(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
-begin
-  Result := Multithread(Image, Template, @MatchTemplateMask_CCORR, Normed);
-end;
-
-function MatchTemplate_CCORR(Image, Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+// MatchTemplate_CCORR
+function __MatchTemplate_CCORR(Image, Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
 var
   x,y,w,h,tw,th,iw,ih: Integer;
   invSize, numer, denom, tplSdv, tplMean, tplSigma, mR,mG,mB, sR,sG,sB, wndSum2: Double;
@@ -235,14 +96,190 @@ begin
 
       if Abs(numer) < denom then
         Result[Y, X] := numer / denom
-      else if abs(numer) < denom*1.25 then
+      else if Abs(numer) < denom*1.25 then
         if numer > 0 then Result[Y, X] := 1 else Result[Y, X] := -1;
     end;
 end;
 
-function MatchTemplate_CCORR_MT(Image, Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+function MatchTemplate_CCORR(Image, Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
 begin
-  Result := Multithread(Image, Templ, @MatchTemplate_CCORR, Normed);
+  Result := Multithread(Image, Templ, @__MatchTemplate_CCORR, Normed);
+end;
+
+// MatchTemplateMask_CCORR
+function __MatchTemplateMask_CCORR(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+var
+  MaskChannels, TemplateChannels, ImageChannels: TRGBMatrix;
+  Img2, Mask2: TRGBMatrix;
+  Templ2Mask2Sum: Double;
+  TempResult: TSingleMatrix;
+  W, H, X, Y: Integer;
+begin
+  MaskChannels     := MaskFromTemplate(Template);
+  TemplateChannels := TRGBMatrix.Create(Template);
+  ImageChannels    := TRGBMatrix.Create(Image);
+
+  Result := CrossCorrRGB(ImageChannels, TemplateChannels * (MaskChannels * MaskChannels)).Merge();
+
+  if Normed then
+  begin
+    // img.mul(img);
+    Img2 := (ImageChannels * ImageChannels);
+    // mask.mul(mask);
+    Mask2 := (MaskChannels * MaskChannels);
+    // double templ2_mask2_sum = norm(templ.mul(mask), NORM_L2SQR);
+    Templ2Mask2Sum := SumOfSquares(TemplateChannels * MaskChannels);
+
+    // crossCorr(img2, mask2, temp_result, Point(0, 0), 0, 0);
+    TempResult := CrossCorrRGB(Img2, Mask2).Merge();
+
+    // sqrt(templ2_mask2_sum * temp_result, temp_result);
+    W := Result.Width - 1;
+    H := Result.Height - 1;
+    for Y := 0 to H do
+      for X := 0 to W do
+        Result[Y, X] := Result[Y, X] / Sqrt(Templ2Mask2Sum * TempResult[Y, X]);
+  end;
+
+  Result.ReplaceNaNAndInf(0);
+end;
+
+function MatchTemplateMask_CCORR(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+begin
+  Result := Multithread(Image, Template, @__MatchTemplateMask_CCORR, Normed);
+end;
+
+// MatchTemplateMask_CCORR_Cache
+type
+  TMatchTemplateCache_CCORR = class(TMatchTemplateCacheBase)
+  public
+  type
+    TSliceCache = record
+      Lo, Hi: Integer;
+      Img: TSingleMatrix;
+      TempResult: TSingleMatrix;
+      ImgFFT: TRGBComplexMatrix;
+    end;
+  public
+    Lock: TSimpleEnterableLock;
+    SliceCaches: array of TSliceCache;
+
+    Img2, Mask2: TRGBMatrix;
+    TempResult: TSingleMatrix;
+
+    ImageChannels: TRGBMatrix;
+    MaskChannels: TRGBMatrix;
+
+    Img: TIntegerMatrix;
+
+    function GetSliceCache(Lo, Hi: Integer): TSliceCache;
+
+    constructor Create(Image, Template: TIntegerMatrix);
+  end;
+
+function TMatchTemplateCache_CCORR.GetSliceCache(Lo, Hi: Integer): TSliceCache;
+var
+  ImgSlice: TRGBMatrix;
+  I, Y: Integer;
+begin
+  Lock.Enter();
+
+  try
+    for I := 0 to High(SliceCaches) do
+      if (SliceCaches[I].Lo = Lo) and (SliceCaches[I].Hi = Hi) then
+        Exit(SliceCaches[I]);
+
+    //DebugLn('TMatchTemplateCache_CCORR.GetSliceCache(%d, %d)', [Lo, Hi]);
+
+    ImgSlice := ImageChannels.Copy(Lo, Hi);
+
+    Result.Lo := Lo;
+    Result.Hi := Hi;
+    Result.Img := ImgSlice.Merge();
+    Result.ImgFFT := FFT2_RGB(ImgSlice);
+
+    Result.TempResult := TempResult.Copy(Lo, Lo + (Hi - Lo) - MaskChannels.Height + 1);
+
+    SetLength(SliceCaches, Length(SliceCaches) + 1);
+    SliceCaches[High(SliceCaches)] := Result;
+  finally
+    Lock.Leave();
+  end;
+end;
+
+constructor TMatchTemplateCache_CCORR.Create(Image, Template: TIntegerMatrix);
+begin
+  inherited Create();
+
+  Img := Image;
+
+  ImageChannels := TRGBMatrix.Create(Image);
+  MaskChannels  := MaskFromTemplate(Template);
+
+  Img2 := (ImageChannels * ImageChannels);
+  Mask2 := (MaskChannels * MaskChannels);
+  TempResult := CrossCorrRGB(Img2, Mask2).Merge();
+
+  Width := Image.Width;
+  Height := Image.Height;
+end;
+
+function MatchTemplateMask_CCORR_CreateCache(Image, Template: TIntegerMatrix): TMatchTemplateCacheBase;
+begin
+  Result := TMatchTemplateCache_CCORR.Create(Image, Template);
+end;
+
+function MatchTemplateMask_CCORR_Cache_Sliced(Cache: TMatchTemplateCache_CCORR; Template: TIntegerMatrix; Normed: Boolean; ImgStartY, ImgEndY: Integer): TSingleMatrix;
+var
+  TemplChannels: TRGBMatrix;
+  SliceCache: TMatchTemplateCache_CCORR.TSliceCache;
+  Templ2Mask2Sum: Double;
+  X, Y, W, H: Integer;
+begin
+  SliceCache := Cache.GetSliceCache(ImgStartY, ImgEndY);
+  TemplChannels := TRGBMatrix.Create(Template);
+
+  Result := CrossCorrRGB(SliceCache.ImgFFT, TemplChannels * Cache.Mask2).Merge();
+
+  if Normed then
+  begin
+    Templ2Mask2Sum := SumOfSquares(TemplChannels * Cache.MaskChannels);
+
+    Result.GetSizeMinusOne(W, H);
+    for Y := 0 to H do
+      for X := 0 to W do
+        Result[Y, X] := Result[Y, X] / Sqrt(Templ2Mask2Sum * SliceCache.TempResult[Y, X]);
+  end;
+
+  Result.ReplaceNaNAndInf(0);
+end;
+
+function MatchTemplateMask_CCORR_Cache(ACache: TMatchTemplateCacheBase; Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+var
+  Cache: TMatchTemplateCache_CCORR absolute ACache;
+  RowSize: Integer;
+
+  procedure Execute(const Index, Lo, Hi: Integer);
+  var
+    Mat: TSingleMatrix;
+    Y: Integer;
+  begin
+    Mat := MatchTemplateMask_CCORR_Cache_Sliced(Cache, Template, Normed, Lo, Min(Hi + Template.Height, Cache.Height));
+    for Y := 0 to Mat.Height - 1 do
+      Move(Mat[Y, 0], Result[Lo + Y, 0], RowSize);
+  end;
+
+begin
+  if (not (ACache is TMatchTemplateCache_CCORR)) then
+    raise Exception.Create('[MatchTemplateMask_CCORR_Cache]: Invalid cache type');
+
+  Result.SetSize(
+    (Cache.Width - Template.Width) + 1,
+    (Cache.Height - Template.Height) + 1
+  );
+  RowSize := Result.Width * SizeOf(Single);
+
+  SimbaThreadPool.RunParallel(CalculateSlices(Cache.Width, Cache.Height), 0, Cache.Height, @Execute);
 end;
 
 end.
