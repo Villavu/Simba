@@ -9,8 +9,8 @@ type
     function Area: Integer;
     function GetSize(out AWidth, AHeight: Integer): Boolean;
     procedure SetSize(AWidth, AHeight: Integer);
-    function Copy: TIntegerMatrix;
-
+    function Copy: TIntegerMatrix; overload;
+    function Copy(Y1, Y2: Integer): TIntegerMatrix; overload;
     function GetValues(Indices: TPointArray): TIntegerArray;
     procedure SetValues(Indices: TPointArray; Values: TIntegerArray);
     procedure SetValue(Indices: TPointArray; Value: Integer);
@@ -60,6 +60,17 @@ begin
   SetLength(Result, Self.Height);
   for Y := 0 to High(Result) do
     Result[Y] := System.Copy(Self[Y]);
+end;
+
+function TIntegerMatrixHelper.Copy(Y1, Y2: Integer): TIntegerMatrix;
+var
+  RowSize, Y: Integer;
+begin
+  RowSize := Width * SizeOf(Integer);
+
+  Result.SetSize(Width, Y2-Y1);
+  for Y := 0 to Result.Height - 1 do
+    Move(Self[Y1+Y, 0], Result[Y, 0], RowSize);
 end;
 
 function TIntegerMatrixHelper.GetValues(Indices: TPointArray): TIntegerArray;

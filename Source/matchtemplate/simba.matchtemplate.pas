@@ -13,9 +13,6 @@ unit simba.matchtemplate;
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-
-  Mask template matching implemented from OpenCV's templmatch.cpp
-
 [==============================================================================}
 {$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
@@ -25,7 +22,7 @@ unit simba.matchtemplate;
 interface
 
 uses
-  classes, sysutils,
+  Classes, SysUtils,
   simba.mufasatypes, simba.baseclass, simba.bitmap;
 
 type
@@ -44,10 +41,64 @@ function MatchTemplateMask(Image, Template: TIntegerMatrix; Formula: ETMFormula)
 
 function MatchTemplate(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
 
+function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;
+
+type
+  TMatchTemplate = function(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+
+function Multithread(Image, Templ: TIntegerMatrix; MatchTemplate: TMatchTemplate; Normed: Boolean): TSingleMatrix;
+
+var
+  MatchTemplateMT_Enabled:     Boolean = True;
+  MatchTemplateMT_SliceHeight: Integer = 125;
+  MatchTemplateMT_SliceWidth:  Integer = 250;
+
 implementation
 
 uses
-  simba.matchtemplate_ccorr, simba.matchtemplate_sqdiff, simba.matchtemplate_ccoeff;
+  simba.matchtemplate_ccorr, simba.matchtemplate_sqdiff, simba.matchtemplate_ccoeff,
+  simba.threadpool;
+
+// How much to "Slice" (vertically) the image up for multithreading.
+function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;
+var
+  I: Integer;
+begin
+  Result := 1;
+
+  if MatchTemplateMT_Enabled and (SearchWidth >= MatchTemplateMT_SliceWidth) and (SearchHeight >= (MatchTemplateMT_SliceHeight * 2)) then // not worth
+  begin
+    for I := SimbaThreadPool.ThreadCount - 1 downto 2 do
+      if (SearchHeight div I) > MatchTemplateMT_SliceHeight then // Each slice is at least `MatchTemplateMT_SliceHeight` pixels
+        Exit(I);
+  end;
+
+  // not possible to slice into at least `MatchTemplateMT_SliceHeight` pixels
+end;
+
+function Multithread(Image, Templ: TIntegerMatrix; MatchTemplate: TMatchTemplate; Normed: Boolean): TSingleMatrix;
+var
+  RowSize: Integer;
+
+  procedure Execute(const Index, Lo, Hi: Integer);
+  var
+    Mat: TSingleMatrix;
+    Y: Integer;
+  begin
+    Mat := MatchTemplate(Image.Copy(Lo, Min(Hi + Templ.Height, Image.Height)), Templ, Normed);
+    for Y := 0 to Mat.Height - 1 do
+      Move(Mat[Y, 0], Result[Lo+Y, 0], RowSize);
+  end;
+
+begin
+  Result.SetSize(
+    (Image.Width - Templ.Width) + 1,
+    (Image.Height - Templ.Height) + 1
+  );
+  RowSize := Result.Width * SizeOf(Single);
+
+  SimbaThreadPool.RunParallel(CalculateSlices(Image.Width, Image.Height), 0, Image.Height, @Execute);
+end;
 
 procedure Validate(ImageWidth, ImageHeight, TemplateWidth, TemplateHeight: Integer);
 begin
@@ -65,11 +116,11 @@ begin
 
   case Formula of
     TM_CCOEFF, TM_CCOEFF_NORMED:
-      Result := MatchTemplateMask_CCOEFF_CreateCache_MT(Image, Template);
+      Result := MatchTemplateMask_CCOEFF_CreateCache(Image, Template);
     TM_CCORR, TM_CCORR_NORMED:
-      Result := MatchTemplateMask_CCORR_CreateCache_MT(Image, Template);
+      Result := MatchTemplateMask_CCORR_CreateCache(Image, Template);
     TM_SQDIFF, TM_SQDIFF_NORMED:
-      Result := MatchTemplateMask_SQDIFF_CreateCache_MT(Image, Template);
+      Result := MatchTemplateMask_SQDIFF_CreateCache(Image, Template);
   end;
 end;
 
@@ -102,12 +153,12 @@ begin
   Validate(Image.Width, Image.Height, Template.Width, Template.Height);
 
   case Formula of
-    TM_CCOEFF:        Result := MatchTemplateMask_CCOEFF_MT(Image, Template, False);
-    TM_CCOEFF_NORMED: Result := MatchTemplateMask_CCOEFF_MT(Image, Template, True);
-    TM_SQDIFF:        Result := MatchTemplateMask_SQDIFF_MT(Image, Template, False);
-    TM_SQDIFF_NORMED: Result := MatchTemplateMask_SQDIFF_MT(Image, Template, True);
-    TM_CCORR:         Result := MatchTemplateMask_CCORR_MT(Image, Template, False);
-    TM_CCORR_NORMED:  Result := MatchTemplateMask_CCORR_MT(Image, Template, True);
+    TM_CCOEFF:        Result := MatchTemplateMask_CCOEFF(Image, Template, False);
+    TM_CCOEFF_NORMED: Result := MatchTemplateMask_CCOEFF(Image, Template, True);
+    TM_SQDIFF:        Result := MatchTemplateMask_SQDIFF(Image, Template, False);
+    TM_SQDIFF_NORMED: Result := MatchTemplateMask_SQDIFF(Image, Template, True);
+    TM_CCORR:         Result := MatchTemplateMask_CCORR(Image, Template, False);
+    TM_CCORR_NORMED:  Result := MatchTemplateMask_CCORR(Image, Template, True);
   end;
 end;
 
@@ -116,12 +167,12 @@ begin
   Validate(Image.Width, Image.Height, Template.Width, Template.Height);
 
   case Formula of
-    TM_CCOEFF:        Result := MatchTemplate_CCOEFF_MT(Image, Template, False);
-    TM_CCOEFF_NORMED: Result := MatchTemplate_CCOEFF_MT(Image, Template, True);
-    TM_SQDIFF:        Result := MatchTemplate_SQDIFF_MT(Image, Template, False);
-    TM_SQDIFF_NORMED: Result := MatchTemplate_SQDIFF_MT(Image, Template, True);
-    TM_CCORR:         Result := MatchTemplate_CCORR_MT(Image, Template, False);
-    TM_CCORR_NORMED:  Result := MatchTemplate_CCORR_MT(Image, Template, True);
+    TM_CCOEFF:        Result := MatchTemplate_CCOEFF(Image, Template, False);
+    TM_CCOEFF_NORMED: Result := MatchTemplate_CCOEFF(Image, Template, True);
+    TM_SQDIFF:        Result := MatchTemplate_SQDIFF(Image, Template, False);
+    TM_SQDIFF_NORMED: Result := MatchTemplate_SQDIFF(Image, Template, True);
+    TM_CCORR:         Result := MatchTemplate_CCORR(Image, Template, False);
+    TM_CCORR_NORMED:  Result := MatchTemplate_CCORR(Image, Template, True);
   end;
 end;
 

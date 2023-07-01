@@ -51,6 +51,8 @@ type
   TRGBMatrix = record
     R, G, B: TSingleMatrix;
 
+    procedure SetSize(AWidth, AHeight: Integer);
+    function Copy(Y1, Y2: Integer): TRGBMatrix;
     function Merge: TSingleMatrix;
     function Width: Integer;
     function Height: Integer;
@@ -443,6 +445,28 @@ end;
 function TComplexMatrixHelper.Height: Integer;
 begin
   Result := Length(Self);
+end;
+
+procedure TRGBMatrix.SetSize(AWidth, AHeight: Integer);
+begin
+  SetLength(Self.R, AHeight, AWidth);
+  SetLength(Self.G, AHeight, AWidth);
+  SetLength(Self.B, AHeight, AWidth);
+end;
+
+function TRGBMatrix.Copy(Y1, Y2: Integer): TRGBMatrix;
+var
+  RowSize, Y: Integer;
+begin
+  RowSize := Width * SizeOf(Single);
+
+  Result.SetSize(Width, Y2-Y1);
+  for Y := 0 to Result.Height - 1 do
+  begin
+    Move(Self.R[Y1+Y, 0], Result.R[Y, 0], RowSize);
+    Move(Self.G[Y1+Y, 0], Result.G[Y, 0], RowSize);
+    Move(Self.B[Y1+Y, 0], Result.B[Y, 0], RowSize);
+  end;
 end;
 
 function TRGBMatrix.Merge: TSingleMatrix;

@@ -41,8 +41,8 @@ function MatchColorsOnTarget(Target: TSimbaTarget; Bounds: TBox;
 
 var
   ColorFinderMT_Enabled:     Boolean = True;
-  ColorFinderMT_SliceHeight: Integer = 150;
-  ColorFinderMT_SliceWidth:  Integer = 300;
+  ColorFinderMT_SliceHeight: Integer = 125;
+  ColorFinderMT_SliceWidth:  Integer = 250;
 
 implementation
 

@@ -10,7 +10,8 @@ type
     function GetSize(out AWidth, AHeight: Integer): Boolean;
     function GetSizeMinusOne(out AWidth, AHeight: Integer): Boolean;
     procedure SetSize(AWidth, AHeight: Integer);
-    function Copy: TSingleMatrix;
+    function Copy: TSingleMatrix; overload;
+    function Copy(Y1, Y2: Integer): TSingleMatrix; overload;
     function GetValues(Indices: TPointArray): TSingleArray;
     procedure SetValues(Indices: TPointArray;  Values: TSingleArray);
     procedure SetValue(Indices: TPointArray;  Value: Single);
@@ -85,6 +86,17 @@ begin
   SetLength(Result, Self.Height);
   for Y := 0 to High(Result) do
     Result[Y] := System.Copy(Self[Y]);
+end;
+
+function TSingleMatrixHelper.Copy(Y1, Y2: Integer): TSingleMatrix;
+var
+  RowSize, Y: Integer;
+begin
+  RowSize := Width * SizeOf(Single);
+
+  Result.SetSize(Width, Y2-Y1);
+  for Y := 0 to Result.Height - 1 do
+    Move(Self[Y1+Y, 0], Result[Y, 0], RowSize);
 end;
 
 function TSingleMatrixHelper.GetValues(Indices: TPointArray): TSingleArray;
