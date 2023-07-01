@@ -23,9 +23,19 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.baseclass, simba.bitmap;
+  simba.mufasatypes, simba.baseclass;
 
 type
+  PTMFormula = ^ETMFormula;
+  ETMFormula = (
+    TM_CCORR,
+    TM_CCORR_NORMED,
+    TM_CCOEFF,
+    TM_CCOEFF_NORMED,
+    TM_SQDIFF,
+    TM_SQDIFF_NORMED
+  );
+
   PMatchTemplateCacheBase = ^TMatchTemplateCacheBase;
   TMatchTemplateCacheBase = class(TSimbaBaseClass)
   public
@@ -34,11 +44,8 @@ type
   end;
 
 function MatchTemplateCache(Image, Template: TIntegerMatrix; Formula: ETMFormula): TMatchTemplateCacheBase; overload;
-function MatchTemplateCache(Image, Template: TMufasaBitmap; Formula: ETMFormula): TMatchTemplateCacheBase; overload;
 function MatchTemplateMask(Cache: TMatchTemplateCacheBase; Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix; overload;
-function MatchTemplateMask(Cache: TMatchTemplateCacheBase; Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix; overload;
 function MatchTemplateMask(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix; overload;
-
 function MatchTemplate(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
 
 function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;
@@ -57,7 +64,8 @@ implementation
 
 uses
   simba.matchtemplate_ccorr, simba.matchtemplate_sqdiff, simba.matchtemplate_ccoeff,
-  simba.threadpool;
+  simba.threadpool,
+  simba.singlematrix, simba.integermatrix;
 
 // How much to "Slice" (vertically) the image up for multithreading.
 function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;
@@ -124,11 +132,6 @@ begin
   end;
 end;
 
-function MatchTemplateCache(Image, Template: TMufasaBitmap; Formula: ETMFormula): TMatchTemplateCacheBase;
-begin
-  Result := MatchTemplateCache(Image.ToMatrixBGR(), Template.ToMatrixBGR(), Formula);
-end;
-
 function MatchTemplateMask(Cache: TMatchTemplateCacheBase; Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
 begin
   Validate(Cache.Width, Cache.Height, Template.Width, Template.Height);
@@ -141,11 +144,6 @@ begin
     TM_CCORR:         Result := MatchTemplateMask_CCORR_Cache(Cache, Template, False);
     TM_CCORR_NORMED:  Result := MatchTemplateMask_CCORR_Cache(Cache, Template, True);
   end;
-end;
-
-function MatchTemplateMask(Cache: TMatchTemplateCacheBase; Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
-begin
-  Result := MatchTemplateMask(Cache, Template.ToMatrixBGR(), Formula);
 end;
 
 function MatchTemplateMask(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;

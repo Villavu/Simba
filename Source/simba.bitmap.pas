@@ -12,7 +12,7 @@ interface
 
 uses
   classes, sysutils, graphtype, graphics,
-  simba.baseclass, simba.mufasatypes, simba.bitmap_textdrawer, simba.colormath, simba.colormath_distance;
+  simba.baseclass, simba.mufasatypes, simba.bitmap_textdrawer, simba.colormath, simba.colormath_distance, simba.matchtemplate;
 
 type
   PBmpMirrorStyle = ^TBmpMirrorStyle;
@@ -248,7 +248,8 @@ uses
   fpimage, math, intfgraphics, simba.overallocatearray, simba.geometry,
   simba.tpa,
   simba.bitmap_utils, simba.encoding, simba.compress, simba.math,
-  simba.matchtemplate, simba.nativeinterface;
+  simba.nativeinterface,
+  simba.singlematrix, simba.integermatrix;
 
 function GetDistinctColor(const Color, Index: Integer): Integer; inline;
 const

@@ -14,7 +14,7 @@ interface
 uses
   Classes, SysUtils, Graphics,
   simba.mufasatypes, simba.colormath, simba.colormath_distance, simba.bitmap, simba.dtm,
-  simba.finder_color, simba.finder_bitmap, simba.finder_dtm, simba.target;
+  simba.finder_color, simba.finder_bitmap, simba.finder_dtm, simba.target, simba.matchtemplate;
 
 type
   PColorTolerance = ^TColorTolerance;
@@ -79,7 +79,8 @@ type
 implementation
 
 uses
-  simba.nativeinterface, simba.tpa, simba.overallocatearray;
+  simba.nativeinterface, simba.tpa, simba.overallocatearray,
+  simba.integermatrix, simba.singlematrix;
 
 function TSimbaFinder.DoFindDTM(DTM: TDTM; Bounds: TBox; MaxToFind: Integer): TPointArray;
 var

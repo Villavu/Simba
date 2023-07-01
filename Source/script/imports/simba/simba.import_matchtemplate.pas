@@ -22,7 +22,7 @@ end;
 
 procedure _LapeMatchTemplateCache_CreateEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMatchTemplateCacheBase(Result)^ := MatchTemplateCache(PMufasaBitmap(Params^[0])^, PMufasaBitmap(Params^[1])^, PTMFormula(Params^[2])^);
+  PMatchTemplateCacheBase(Result)^ := MatchTemplateCache(PMufasaBitmap(Params^[0])^.ToMatrixBGR(), PMufasaBitmap(Params^[1])^.ToMatrixBGR(), PTMFormula(Params^[2])^);
 end;
 
 procedure _LapeMatchTemplateCache_FreeOnTerminate(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -37,7 +37,7 @@ end;
 
 procedure _LapeMatchTemplateMaskCacheEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSingleMatrix(Result)^ := MatchTemplateMask(PMatchTemplateCacheBase(Params^[0])^, PMufasaBitmap(Params^[1])^, PTMFormula(Params^[2])^);
+  PSingleMatrix(Result)^ := MatchTemplateMask(PMatchTemplateCacheBase(Params^[0])^, PMufasaBitmap(Params^[1])^.ToMatrixBGR(), PTMFormula(Params^[2])^);
 end;
 
 procedure _LapeMatchTemplateMask(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV

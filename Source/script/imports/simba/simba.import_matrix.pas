@@ -8,7 +8,8 @@ implementation
 
 uses
   classes, sysutils, lptypes,
-  simba.script_compiler, simba.mufasatypes;
+  simba.script_compiler, simba.mufasatypes,
+  simba.integermatrix, simba.singlematrix;
 
 // Integer
 procedure _LapeIntegerMatrix_Width(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -69,6 +70,16 @@ end;
 procedure _LapeIntegerMatrix_Indices(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PIntegerMatrix(Params^[0])^.Indices(PInteger(Params^[1])^, PComparator(Params^[2])^);
+end;
+
+procedure _LapeIntegerMatrix_Copy1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PIntegerMatrix(Result)^ := PIntegerMatrix(Params^[0])^.Copy();
+end;
+
+procedure _LapeIntegerMatrix_Copy2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PIntegerMatrix(Result)^ := PIntegerMatrix(Params^[0])^.Copy(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 // Byte
@@ -239,6 +250,21 @@ begin
   PSingleMatrix(Params^[0])^.Smoothen(PInteger(Params^[1])^);
 end;
 
+procedure _LapeSingleMatrix_Equals(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSingleMatrix(Params^[0])^.Equals(PSingleMatrix(Params^[1])^, PSingle(Params^[2])^);
+end;
+
+procedure _LapeSingleMatrix_Copy1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSingleMatrix(Result)^ := PSingleMatrix(Params^[0])^.Copy();
+end;
+
+procedure _LapeSingleMatrix_Copy2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSingleMatrix(Result)^ := PSingleMatrix(Params^[0])^.Copy(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
 // Double
 procedure _LapeDoubleMatrix_Width(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -301,6 +327,9 @@ begin
     addGlobalFunc('function TSingleMatrix.Indices(Value: Single; Comparator: EComparator): TPointArray;', @_LapeSingleMatrix_Indices);
     addGlobalFunc('function TSingleMatrix.ArgMulti(Count: Integer; HiLo: Boolean): TPointArray;', @_LapeSingleMatrix_ArgMulti);
     addGlobalFunc('procedure TSingleMatrix.Smoothen(Block: Integer);', @_LapeSingleMatrix_Smoothen);
+    addGlobalFunc('function TSingleMatrix.Equals(Other: TSingleMatrix; Epsilon: Single = 0): Boolean;', @_LapeSingleMatrix_Equals);
+    addGlobalFunc('function TSingleMatrix.Copy: TSingleMatrix; overload', @_LapeSingleMatrix_Copy1);
+    addGlobalFunc('function TSingleMatrix.Copy(Y1, Y2: Integer): TSingleMatrix; overload', @_LapeSingleMatrix_Copy2);
 
     // integer
     addGlobalFunc('function TIntegerMatrix.Width: Integer;', @_LapeIntegerMatrix_Width);
@@ -315,6 +344,8 @@ begin
     addGlobalFunc('procedure TIntegerMatrix.Fill(Value: Integer); overload', @_LapeIntegerMatrix_Fill);
     addGlobalFunc('function TIntegerMatrix.Flatten: TIntegerArray', @_LapeIntegerMatrix_Flatten);
     addGlobalFunc('function TIntegerMatrix.Indices(Value: Integer; Comparator: EComparator): TPointArray;', @_LapeIntegerMatrix_Indices);
+    addGlobalFunc('function TIntegerMatrix.Copy: TIntegerMatrix; overload', @_LapeIntegerMatrix_Copy1);
+    addGlobalFunc('function TIntegerMatrix.Copy(Y1, Y2: Integer): TIntegerMatrix; overload', @_LapeIntegerMatrix_Copy2);
 
     // boolean
     addGlobalFunc('function TBooleanMatrix.Width: Integer;', @_LapeBooleanMatrix_Width);

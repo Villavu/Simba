@@ -90,7 +90,8 @@ type
 implementation
 
 uses
-  simba.bitmap_utils;
+  simba.bitmap_utils,
+  simba.singlematrix, simba.integermatrix;
 
 const
   HEATMAP_LOOKUP_TABLE: array[0..837] of TColor = (

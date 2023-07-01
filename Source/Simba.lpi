@@ -308,7 +308,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="172">
+    <Units Count="174">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1072,6 +1072,14 @@
         <Filename Value="components/simba.component_scrollbar.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit171>
+      <Unit172>
+        <Filename Value="simba.singlematrix.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit172>
+      <Unit173>
+        <Filename Value="simba.integermatrix.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit173>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
