@@ -7,6 +7,10 @@ on:
   pull_request:
     branches:
       - '**'
+
+env:
+  FPC_VER: release_3_2_2
+  LAZ_VER: lazarus_2_2_4
       
 jobs:
   build:
@@ -55,12 +59,12 @@ jobs:
             
     steps:
       - name: Install Lazarus
-        uses: ollydev/setup-lazarus-fpcup@v3.1
+        uses: ollydev/setup-lazarus-fpcup@v3.2
         with:
-          laz: lazarus_2_2_4
-          fpc: fixes_3_2
+          laz: ${{ env.LAZ_VER }}
+          fpc: ${{ env.FPC_VER }}
 
-      - uses: actions/checkout@v3.1.0 
+      - uses: actions/checkout@v3.5.3 
         with: 
           submodules: true
 
@@ -103,7 +107,7 @@ jobs:
           ./${{ matrix.config.test }} --run "Tests/tester.simba"
           
       - name: Upload Binary 
-        uses: actions/upload-artifact@v3.0.0
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: ${{ matrix.config.binary }}
           path: ${{ matrix.config.binary }}
