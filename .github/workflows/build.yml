@@ -59,7 +59,7 @@ jobs:
             
     steps:
       - name: Install Lazarus
-        uses: ollydev/setup-lazarus-fpcup@v3.2
+        uses: ollydev/setup-lazarus-fpcup@v3.3
         with:
           laz: ${{ env.LAZ_VER }}
           fpc: ${{ env.FPC_VER }}
@@ -71,7 +71,6 @@ jobs:
       - name: Build Simba
         run: |
           export GITHUB_SHORT_SHA=$(git rev-parse --short HEAD)
-          
           lazbuild --build-mode=${{ matrix.config.build-mode }} "Source/Simba.lpi"
 
       - name: Sign MacOS App Bundle
