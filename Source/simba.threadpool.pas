@@ -70,7 +70,12 @@ begin
       Method(Index, Lo, Hi);
     except
       on E: Exception do
-        DebugLn('Exception whilst invoking method in thread pool: ' + E.Message);
+      begin
+        DebugLn('[SimbaThreadPool]: Exception occurred while executing a method: ' + E.Message);
+        {$IFDEF SIMBA_HAS_DEBUGINFO}
+        DumpExceptionBacktrace(Output);
+        {$ENDIF}
+      end;
     end;
 
     Method := nil;

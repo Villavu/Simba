@@ -28,7 +28,7 @@ implementation
 
 uses
   simba.FFTPACK4, simba.threadpool,
-  simba.singlematrix, simba.integermatrix;
+  simba.singlematrix;
 
 function DoFFT2(const Matrix: TSingleMatrix; const outW, outH: Integer): TComplexMatrix;
 var
@@ -41,7 +41,7 @@ begin
   H := Matrix.Height - 1;
   for Y := 0 to H do
     for X := 0 to W do
-      Spec[Y, X].Re := Matrix[Y, X];
+      Spec[Y, X].Re := Matrix[Y, X];  // WTF!!
 
   Result := FFTPACK.FFT2(Spec);
 end;

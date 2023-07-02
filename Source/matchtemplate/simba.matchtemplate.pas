@@ -105,7 +105,7 @@ begin
   );
   RowSize := Result.Width * SizeOf(Single);
 
-  SimbaThreadPool.RunParallel(CalculateSlices(Image.Width, Image.Height), 0, Image.Height, @Execute);
+  SimbaThreadPool.RunParallel(CalculateSlices(Image.Width, Image.Height), 0, Image.Height - Templ.Height, @Execute);
 end;
 
 procedure Validate(ImageWidth, ImageHeight, TemplateWidth, TemplateHeight: Integer);
