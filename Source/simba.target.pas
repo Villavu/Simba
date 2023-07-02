@@ -51,6 +51,10 @@ type
   PSimbaTarget = ^TSimbaTarget;
   TSimbaTarget = packed record
   public
+  type
+    PInvalidTargetEvent = ^TInvalidTargetEvent;
+    TInvalidTargetEvent = procedure(var Target: TSimbaTarget) of object;
+  private
     FTargetType: ETargetType;
     FTarget: Pointer;
     FTargetBitmap: TMufasaBitmap;
@@ -58,9 +62,18 @@ type
     FTargetEIOS: TEIOSTarget;
     FMethods: TTargetMethods; // Targets need to provide these. They are filled in SetWindow,SetEIOS etc.
     FClientArea: TBox;
+    FAutoSetFocus: Boolean;
+    FInvalidTargetHandlers: array[0..9] of TInvalidTargetEvent;
 
     procedure ChangeTarget(TargetType: ETargetType);
     function HasMethod(Method: Pointer; Name: String): Boolean;
+
+    procedure CheckInvalidTarget;
+    procedure CheckAutoFocus;
+
+    procedure SetClientArea(B: TBox);
+    function GetClientArea: TBox;
+    procedure SetAutoSetFocus(Value: Boolean);
   public
     function GetWindowTarget: TWindowHandle;
     function IsWindowTarget: Boolean; overload;
@@ -100,9 +113,15 @@ type
     function GetImageData(var Bounds: TBox; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
     procedure FreeImageData(var Data: PColorBGRA);
 
-    procedure ResetClientArea;
-    procedure SetClientArea(B: TBox);
-    function GetClientArea: TBox;
+    function AddHandlerOnInvalidTarget(Event: TInvalidTargetEvent): TInvalidTargetEvent;
+    procedure RemoveHandlerOnInvalidTarget(Event: TInvalidTargetEvent);
+
+    procedure ClearClientArea;
+
+    property ClientArea: TBox read GetClientArea write SetClientArea;
+    property AutoSetFocus: Boolean read FAutoSetFocus write SetAutoSetFocus;
+
+    function ToString: String;
 
     class operator Initialize(var Self: TSimbaTarget);
   end;
@@ -111,6 +130,11 @@ implementation
 
 uses
   simba.nativeinterface;
+
+procedure TSimbaTarget.SetAutoSetFocus(Value: Boolean);
+begin
+  FAutoSetFocus := Value;
+end;
 
 procedure TSimbaTarget.ChangeTarget(TargetType: ETargetType);
 begin
@@ -124,6 +148,61 @@ begin
     SimbaException('Target "%s" cannot %s', [TargetName[FTargetType], Name]);
 
   Result := True;
+end;
+
+procedure TSimbaTarget.CheckInvalidTarget;
+
+  function HasInvalidTargetHandler: Boolean;
+  var
+    I: Integer;
+  begin
+    Result := False;
+
+    for I := 0 to High(FInvalidTargetHandlers) do
+      if Assigned(FInvalidTargetHandlers[I]) then
+        Exit(True);
+  end;
+
+  function CallInvalidTargetHandler: Boolean;
+  var
+    I: Integer;
+  begin
+    Result := False;
+
+    for I := 0 to High(FInvalidTargetHandlers) do
+      if Assigned(FInvalidTargetHandlers[I]) then
+      begin
+        FInvalidTargetHandlers[I](Self);
+        if IsValid() then
+          Exit(True);
+      end;
+  end;
+
+var
+  Attempt: Integer;
+begin
+  if IsValid() then
+    Exit;
+
+  if HasInvalidTargetHandler() then
+  begin
+    for Attempt := 1 to 5 do
+    begin
+      Sleep(100);
+      if CallInvalidTargetHandler() then
+        Exit;
+    end;
+  end;
+
+  SimbaException('Target is invalid: %s', [ToString()]);
+end;
+
+procedure TSimbaTarget.CheckAutoFocus;
+begin
+  if (not FAutoSetFocus) or IsFocused() then
+    Exit;
+
+  Focus();
 end;
 
 function TSimbaTarget.GetWindowTarget: TWindowHandle;
@@ -183,6 +262,8 @@ end;
 
 procedure TSimbaTarget.GetDimensions(out W, H: Integer);
 begin
+  CheckInvalidTarget();
+
   if HasMethod(@FMethods.GetDimensions, 'GetDimensions') then
     FMethods.GetDimensions(FTarget, W, H);
 end;
@@ -295,6 +376,8 @@ end;
 
 procedure TSimbaTarget.MouseTeleport(P: TPoint);
 begin
+  CheckAutoFocus();
+
   P.X += FClientArea.X1;
   P.Y += FClientArea.Y1;
 
@@ -304,36 +387,48 @@ end;
 
 procedure TSimbaTarget.MouseUp(Button: MouseButton);
 begin
+  CheckAutoFocus();
+
   if HasMethod(@FMethods.MouseUp, 'MouseUp') then
     FMethods.MouseUp(FTarget, Button);
 end;
 
 procedure TSimbaTarget.MouseDown(Button: MouseButton);
 begin
+  CheckAutoFocus();
+
   if HasMethod(@FMethods.MouseDown, 'MouseDown') then
     FMethods.MouseDown(FTarget, Button);
 end;
 
 procedure TSimbaTarget.MouseScroll(Scrolls: Integer);
 begin
+  CheckAutoFocus();
+
   if HasMethod(@FMethods.MouseScroll, 'MouseScroll') then
     FMethods.MouseScroll(FTarget, Scrolls);
 end;
 
 procedure TSimbaTarget.KeyDown(Key: KeyCode);
 begin
+  CheckAutoFocus();
+
   if HasMethod(@FMethods.KeyDown, 'KeyDown') then
     FMethods.KeyDown(FTarget, Key);
 end;
 
 procedure TSimbaTarget.KeyUp(Key: KeyCode);
 begin
+  CheckAutoFocus();
+
   if HasMethod(@FMethods.KeyDown, 'KeyUp') then
     FMethods.KeyDown(FTarget, Key);
 end;
 
 procedure TSimbaTarget.KeySend(Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
 begin
+  CheckAutoFocus();
+
   if HasMethod(@FMethods.KeySend, 'KeySend') then
     FMethods.KeySend(FTarget, Key, KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime);
 end;
@@ -399,9 +494,49 @@ begin
     FreeMem(Data);
 end;
 
-procedure TSimbaTarget.ResetClientArea;
+function TSimbaTarget.AddHandlerOnInvalidTarget(Event: TInvalidTargetEvent): TInvalidTargetEvent;
+var
+  I: Integer;
+begin
+  Result := Event;
+  for I := 0 to High(FInvalidTargetHandlers) do
+    if (FInvalidTargetHandlers[I] = Event) then
+      Exit;
+
+  for I := 0 to High(FInvalidTargetHandlers) do
+    if (FInvalidTargetHandlers[I] = nil) then
+    begin
+      FInvalidTargetHandlers[I] := Event;
+      Exit;
+    end;
+end;
+
+procedure TSimbaTarget.RemoveHandlerOnInvalidTarget(Event: TInvalidTargetEvent);
+var
+  I: Integer;
+begin
+  for I := 0 to High(FInvalidTargetHandlers) do
+    if (FInvalidTargetHandlers[I] = Event) then
+      FInvalidTargetHandlers[I] := nil;
+end;
+
+procedure TSimbaTarget.ClearClientArea;
 begin
   FClientArea := TBox.Default;
+end;
+
+function TSimbaTarget.ToString: String;
+begin
+  Result := 'ETargetType.' + TargetName[FTargetType];
+
+  case FTargetType of
+    ETargetType.BITMAP:
+      Result := 'ETargetType.BITMAP: TMufasaBitmap(%P), Size=%dx%d'.Format([Pointer(FTargetBitmap), FTargetBitmap.Width, FTargetBitmap.Height]);
+    ETargetType.WINDOW:
+      Result := 'ETargetType.WINDOW: Handle=%d, Valid: %s'.Format([FTargetWindow, BoolToStr(IsValid(), True)]);
+    ETargetType.EIOS:
+      Result := 'ETargetType.EIOS: Target=%P'.Format([FTargetEIOS.Target]);
+  end;
 end;
 
 procedure TSimbaTarget.SetClientArea(B: TBox);

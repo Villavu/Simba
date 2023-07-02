@@ -10,7 +10,7 @@ uses
 implementation
 
 uses
-  lptypes, lpvartypes,
+  lptypes, lpvartypes, ffi,
   simba.script_compiler, simba.mufasatypes, simba.bitmap, simba.target;
 
 
@@ -200,19 +200,44 @@ begin
   PBoolean(Result)^ := CompareMem(PSimbaTarget(Params^[0]), @Default(TSimbaTarget), SizeOf(TSimbaTarget));
 end;
 
-procedure _LapeSimbaTarget_ResetClientArea(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaTarget_ClearClientArea(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaTarget(Params^[0])^.ResetClientArea();
+  PSimbaTarget(Params^[0])^.ClearClientArea();
 end;
 
 procedure _LapeSimbaTarget_SetClientArea(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaTarget(Params^[0])^.SetClientArea(PBox(Params^[1])^);
+  PSimbaTarget(Params^[0])^.ClientArea := PBox(Params^[1])^;
 end;
 
 procedure _LapeSimbaTarget_GetClientArea(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBox(Result)^ := PSimbaTarget(Params^[0])^.GetClientArea;
+  PBox(Result)^ := PSimbaTarget(Params^[0])^.ClientArea;
+end;
+
+procedure _LapeSimbaTarget_SetAutoFocus(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaTarget(Params^[0])^.AutoSetFocus := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeSimbaTarget_GetAutoFocus(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaTarget(Params^[0])^.AutoSetFocus;
+end;
+
+procedure _LapeSimbaTarget_AddHandlerOnInvalidTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  TSimbaTarget.PInvalidTargetEvent(Result)^ := PSimbaTarget(Params^[0])^.AddHandlerOnInvalidTarget(TSimbaTarget.PInvalidTargetEvent(Params^[1])^);
+end;
+
+procedure _LapeSimbaTarget_RemoveHandlerOnInvalidTarget(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaTarget(Params^[0])^.RemoveHandlerOnInvalidTarget(TSimbaTarget.PInvalidTargetEvent(Params^[1])^);
+end;
+
+procedure _LapeSimbaTarget_ToString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PSimbaTarget(Params^[0])^.ToString();
 end;
 
 procedure ImportTarget(Compiler: TSimbaScript_Compiler);
@@ -235,7 +260,15 @@ begin
     with addGlobalVar('TSimbaTarget', '[]', 'Target') do
       Used := duTrue;
 
-    addGlobalFunc('procedure TSimbaTarget.ResetClientArea', @_LapeSimbaTarget_ResetClientArea);
+    addGlobalType('procedure(var Target: TSimbaTarget) of object', 'TInvalidTargetEvent', FFI_DEFAULT_ABI);
+
+    addGlobalFunc('function TSimbaTarget.AddHandlerOnInvalidTarget(Event: TInvalidTargetEvent): TInvalidTargetEvent', @_LapeSimbaTarget_AddHandlerOnInvalidTarget);
+    addGlobalFunc('procedure TSimbaTarget.RemoveHandlerOnInvalidTarget(Event: TInvalidTargetEvent)', @_LapeSimbaTarget_RemoveHandlerOnInvalidTarget);
+
+    addGlobalFunc('function TSimbaTarget.GetAutoFocus: Boolean', @_LapeSimbaTarget_GetAutoFocus);
+    addGlobalFunc('procedure TSimbaTarget.SetAutoFocus(Value: Boolean)', @_LapeSimbaTarget_SetAutoFocus);
+
+    addGlobalFunc('procedure TSimbaTarget.ClearClientArea', @_LapeSimbaTarget_ClearClientArea);
     addGlobalFunc('procedure TSimbaTarget.SetClientArea(B: TBox)', @_LapeSimbaTarget_SetClientArea);
     addGlobalFunc('function TSimbaTarget.GetClientArea: TBox', @_LapeSimbaTarget_GetClientArea);
 
@@ -261,12 +294,15 @@ begin
 
     addGlobalFunc('function TSimbaTarget.IsDefault: Boolean', @_LapeSimbaTarget_IsDefault);
 
+    addGlobalFunc('function ToString(constref Target: TSimbaTarget): String; override;', @_LapeSimbaTarget_ToString);
+
+
     ImportingSection := 'TMufasaBitmap';
 
     addGlobalFunc(
       'function TMufasaBitmap.CreateFromTarget(Target: TSimbaTarget; Bounds: TBox = [-1,-1,-1,-1]): TMufasaBitmap; static; overload;', [
       'begin',
-      '  Result := Target.GetImage();',
+      '  Result := Target.GetImage(Bounds);',
       'end;'
     ]);
     addGlobalFunc(
