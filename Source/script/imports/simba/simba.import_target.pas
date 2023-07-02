@@ -200,6 +200,21 @@ begin
   PBoolean(Result)^ := CompareMem(PSimbaTarget(Params^[0]), @Default(TSimbaTarget), SizeOf(TSimbaTarget));
 end;
 
+procedure _LapeSimbaTarget_ResetClientArea(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaTarget(Params^[0])^.ResetClientArea();
+end;
+
+procedure _LapeSimbaTarget_SetClientArea(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaTarget(Params^[0])^.SetClientArea(PBox(Params^[1])^);
+end;
+
+procedure _LapeSimbaTarget_GetClientArea(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBox(Result)^ := PSimbaTarget(Params^[0])^.GetClientArea;
+end;
+
 procedure ImportTarget(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -219,6 +234,10 @@ begin
 
     with addGlobalVar('TSimbaTarget', '[]', 'Target') do
       Used := duTrue;
+
+    addGlobalFunc('procedure TSimbaTarget.ResetClientArea', @_LapeSimbaTarget_ResetClientArea);
+    addGlobalFunc('procedure TSimbaTarget.SetClientArea(B: TBox)', @_LapeSimbaTarget_SetClientArea);
+    addGlobalFunc('function TSimbaTarget.GetClientArea: TBox', @_LapeSimbaTarget_GetClientArea);
 
     addGlobalFunc('procedure TSimbaTarget.SetDesktop', @_LapeSimbaTarget_SetDesktop);
     addGlobalFunc('procedure TSimbaTarget.SetBitmap(Bitmap: TMufasaBitmap)', @_LapeSimbaTarget_SetBitmap);
