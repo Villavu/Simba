@@ -7,7 +7,7 @@ unit simba.target;
 
 {$i simba.inc}
 
-// todo, autoactivate & addhandleroninvalidtarget & clientarea
+// todo, autoactivate & addhandleroninvalidtarget
 
 interface
 
@@ -57,6 +57,7 @@ type
     FTargetWindow: TWindowHandle;
     FTargetEIOS: TEIOSTarget;
     FMethods: TTargetMethods; // Targets need to provide these. They are filled in SetWindow,SetEIOS etc.
+    FClientArea: TBox;
 
     procedure ChangeTarget(TargetType: ETargetType);
     function HasMethod(Method: Pointer; Name: String): Boolean;
@@ -99,6 +100,10 @@ type
     function GetImageData(var Bounds: TBox; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
     procedure FreeImageData(var Data: PColorBGRA);
 
+    procedure ResetClientArea;
+    procedure SetClientArea(B: TBox);
+    function GetClientArea: TBox;
+
     class operator Initialize(var Self: TSimbaTarget);
   end;
 
@@ -116,7 +121,7 @@ end;
 function TSimbaTarget.HasMethod(Method: Pointer; Name: String): Boolean;
 begin
   if (Method = nil) then
-    raise Exception.CreateFmt('Target "%s" cannot %s', [TargetName[FTargetType], Name]);
+    SimbaException('Target "%s" cannot %s', [TargetName[FTargetType], Name]);
 
   Result := True;
 end;
@@ -283,10 +288,16 @@ function TSimbaTarget.MousePosition: TPoint;
 begin
   if HasMethod(@FMethods.MousePosition, 'MousePosition') then
     Result := FMethods.MousePosition(FTarget);
+
+  Result.X -= FClientArea.X1;
+  Result.Y -= FClientArea.Y1;
 end;
 
 procedure TSimbaTarget.MouseTeleport(P: TPoint);
 begin
+  P.X += FClientArea.X1;
+  P.Y += FClientArea.Y1;
+
   if HasMethod(@FMethods.MouseTeleport, 'MouseTeleport') then
     FMethods.MouseTeleport(FTarget, P);
 end;
@@ -334,24 +345,43 @@ begin
 end;
 
 function TSimbaTarget.ValidateBounds(var Bounds: TBox): Boolean;
+
+  procedure ValidateBoundsInClientArea;
+  begin
+    if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
+      Bounds := FClientArea
+    else
+    begin
+      Bounds := Bounds.Offset(FClientArea.TopLeft);
+
+      if (Bounds.X1 < FClientArea.X1)  then Bounds.X1 := FClientArea.X1;
+      if (Bounds.Y1 < FClientArea.Y1)  then Bounds.Y1 := FClientArea.Y1;
+      if (Bounds.X2 >= FClientArea.X2) then Bounds.X2 := FClientArea.X2 - 1;
+      if (Bounds.Y2 >= FClientArea.Y2) then Bounds.Y2 := FClientArea.Y2 - 1;
+    end;
+  end;
+
 var
   Width, Height: Integer;
 begin
   GetDimensions(Width, Height);
 
-  if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
-  begin
-    Bounds.X1 := 0;
-    Bounds.Y1 := 0;
-    Bounds.X2 := Width - 1;
-    Bounds.Y2 := Height - 1;
-  end else
-  begin
-    if (Bounds.X1 < 0)       then Bounds.X1 := 0;
-    if (Bounds.Y1 < 0)       then Bounds.Y1 := 0;
-    if (Bounds.X2 >= Width)  then Bounds.X2 := Width - 1;
-    if (Bounds.Y2 >= Height) then Bounds.Y2 := Height - 1;
-  end;
+  if FClientArea.IsDefault() then
+    if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
+    begin
+      Bounds.X1 := 0;
+      Bounds.Y1 := 0;
+      Bounds.X2 := Width - 1;
+      Bounds.Y2 := Height - 1;
+    end else
+    begin
+      if (Bounds.X1 < 0)       then Bounds.X1 := 0;
+      if (Bounds.Y1 < 0)       then Bounds.Y1 := 0;
+      if (Bounds.X2 >= Width)  then Bounds.X2 := Width - 1;
+      if (Bounds.Y2 >= Height) then Bounds.Y2 := Height - 1;
+    end
+  else
+    ValidateBoundsInClientArea();
 
   Result := (Bounds.Width > 0) and (Bounds.Height > 0);
 end;
@@ -367,6 +397,21 @@ procedure TSimbaTarget.FreeImageData(var Data: PColorBGRA);
 begin
   if (FTargetType in [ETargetType.WINDOW]) then
     FreeMem(Data);
+end;
+
+procedure TSimbaTarget.ResetClientArea;
+begin
+  FClientArea := TBox.Default;
+end;
+
+procedure TSimbaTarget.SetClientArea(B: TBox);
+begin
+  FClientArea := B;
+end;
+
+function TSimbaTarget.GetClientArea: TBox;
+begin
+  Result := FClientArea;
 end;
 
 class operator TSimbaTarget.Initialize(var Self: TSimbaTarget);

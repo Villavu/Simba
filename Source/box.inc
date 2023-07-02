@@ -11,6 +11,7 @@ type
     class function Create(X1, Y1, X2, Y2: Integer): TBox; static; overload;
     class function Create(Center: TPoint; XRad, YRad: Integer): TBox; static; overload;
     class function Default: TBox; static;
+    function IsDefault: Boolean;
 
     function RandomPoint: TPoint;
     function RandomPointCenter: TPoint;
@@ -95,6 +96,11 @@ end;
 class function TBoxHelper.Default: TBox;
 begin
   Result := System.Default(TBox);
+end;
+
+function TBoxHelper.IsDefault: Boolean;
+begin
+  Result := CompareMem(@Self, @System.Default(TBox), SizeOf(TBox));
 end;
 
 function TBoxHelper.RandomPoint: TPoint;
