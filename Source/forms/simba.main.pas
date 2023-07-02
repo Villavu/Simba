@@ -182,7 +182,6 @@ type
     procedure MenuItemACAClick(Sender: TObject);
     procedure MenuItemAssociateScriptsClick(Sender: TObject);
     procedure MenuItemBitmapConvClick(Sender: TObject);
-    procedure MenuItemCloseTabsClick(Sender: TObject);
     procedure MenuItemConsoleClick(Sender: TObject);
     procedure MenuItemDocumentationClick(Sender: TObject);
     procedure MenuItemDTMEditorClick(Sender: TObject);
@@ -885,7 +884,8 @@ end;
 
 procedure TSimbaForm.MenuCloseAllTabsClick(Sender: TObject);
 begin
-  SimbaScriptTabsForm.CloseAllTabs();
+  if SimbaScriptTabsForm.CloseAllTabs() then
+    SimbaScriptTabsForm.AddTab();
 end;
 
 procedure TSimbaForm.MenuNewClick(Sender: TObject);
@@ -1072,11 +1072,6 @@ begin
       MenuItemCopy.Enabled := SelText <> '';
       MenuItemPaste.Enabled := SelText <> '';
     end;
-end;
-
-procedure TSimbaForm.MenuItemCloseTabsClick(Sender: TObject);
-begin
-  SimbaScriptTabsForm.CloseAllTabs();
 end;
 
 procedure TSimbaForm.MenuItemReportBugClick(Sender: TObject);
