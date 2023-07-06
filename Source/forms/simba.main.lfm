@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 4022
+  Left = 4202
   Height = 578
-  Top = 670
+  Top = 175
   Width = 910
   Caption = 'Simba'
   ClientHeight = 578

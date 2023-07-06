@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.ide_mainstatusbar;
 
 {$i simba.inc}
@@ -21,6 +26,7 @@ type
     procedure DoTabSearch(Sender: TObject);
     procedure DoTabChange(Sender: TObject);
     procedure DoScriptStateChange(Sender: TObject);
+    procedure DoScriptRunning(Sender: TObject);
   public
     constructor Create;
 
@@ -89,6 +95,14 @@ begin
     SetScriptStatePanel(TSimbaScriptInstance(Sender));
 end;
 
+procedure TSimbaMainStatusBar.DoScriptRunning(Sender: TObject);
+var
+  ScriptInstance: TSimbaScriptInstance absolute Sender;
+begin
+  if (Sender is TSimbaScriptInstance) and ScriptInstance.IsActiveTab() and (ScriptInstance.State <> ESimbaScriptState.STATE_PAUSED) then
+    FStatusBar.PanelText[1] := FormatMilliseconds(ScriptInstance.TimeRunning, 'hh:mm:ss');
+end;
+
 constructor TSimbaMainStatusBar.Create;
 begin
   FStatusBar := TSimbaStatusBar.Create(Application.MainForm);
@@ -106,6 +120,7 @@ begin
   SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoTabLoaded);
   SimbaIDEEvents.RegisterMethodOnScriptStateChange(@DoScriptStateChange);
   SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoTabChange);
+  SimbaIDEEvents.RegisterMethodOnScriptRunning(@DoScriptRunning);
 end;
 
 procedure TSimbaMainStatusBar.SetMainPanelText(Str: String);

@@ -23,6 +23,9 @@ type
 
   TSimbaScriptInstance = class(TComponent)
   protected
+  const
+    EXIT_CODE_FORCE_STOP = 1000;
+  protected
     FProcess: TProcess;
 
     FSimbaCommunication: TSimbaScriptInstanceCommunication;
@@ -31,14 +34,11 @@ type
 
     FStartTime: UInt64;
     FScriptFile: String;
-    //FScriptName: String;
 
     FOutputBox: TSimbaOutputBox;
     FOutputThread: TThread;
 
     FState: ESimbaScriptState;
-
-    FErrorSet: Boolean;
     FError: TSimbaScriptError;
 
     procedure Start(Args: array of String);
@@ -47,32 +47,24 @@ type
     procedure DoOutputThreadTerminated(Sender: TObject);
 
     function GetTimeRunning: UInt64;
-    function GetExitCode: Int32;
-    function GetPID: UInt32;
 
     procedure SetState(Value: ESimbaScriptState);
-    procedure SetError(Value: TSimbaScriptError);
   public
-
     property Process: TProcess read FProcess;
     property State: ESimbaScriptState read FState write SetState;
     property OutputBox: TSimbaOutputBox read FOutputBox;
-
-    // Parameters to pass to script
     property ScriptFile: String write FScriptFile;
     property Target: TWindowHandle write FTarget;
-
-    // Stats
     property TimeRunning: UInt64 read GetTimeRunning;
-    property ExitCode: Int32 read GetExitCode;
-    property PID: UInt32 read GetPID;
-    property Error: TSimbaScriptError read FError write SetError;
+
+    // Set an error to be processed when process ends
+    property Error: TSimbaScriptError read FError write FError;
 
     // Start
     procedure Run;
     procedure Compile;
 
-    // Change the state
+    // Change the running state
     procedure Resume;
     procedure Pause;
     procedure Stop;
@@ -87,30 +79,44 @@ type
 implementation
 
 uses
-  forms, simba.scripttabsform, simba.scripttab, simba.ide_events;
+  forms, simba.scripttabsform, simba.scripttab, simba.ide_events, simba.threading, simba.datetime;
 
 procedure TSimbaScriptInstance.DoOutputThread;
 var
-  Buffer: array[1..4096] of Char;
-  Remaining: String;
-  Count: Integer;
+  ReadBuffer, RemainingBuffer: String;
+
+  procedure EmptyProcessOutput;
+  var
+    Count: Integer;
+  begin
+    while (FProcess.Output.NumBytesAvailable > 0) do
+    begin
+      Count := FProcess.Output.Read(ReadBuffer[1], Length(ReadBuffer));
+      if (Count > 0) then
+        RemainingBuffer := FOutputBox.Add(RemainingBuffer + Copy(ReadBuffer, 1, Count));
+    end;
+
+    SimbaIDEEvents.CallOnScriptRunning(Self);
+  end;
+
 begin
   try
-    Remaining := '';
+    SetLength(ReadBuffer, 8192);
+    SetLength(RemainingBuffer, 0);
 
-    repeat
-      Count := FProcess.Output.Read(Buffer[1], Length(Buffer));
+    while FProcess.Running do
+    begin
+      EmptyProcessOutput();
 
-      if (Count > 0) then
-      begin
-        Remaining := FOutputBox.Add(Remaining + Copy(Buffer, 1, Count));
-        if (Count < Length(Buffer)) then
-          Sleep(500);
-      end;
-    until (Count = 0);
+      Sleep(500);
+    end;
+
+    DebugLn('Script process[%d] terminated. Exit code: %d', [FProcess.ProcessID, FProcess.ExitCode]);
+
+    EmptyProcessOutput();
   except
     on E: Exception do
-      DebugLn('Listener thread exception: ' + E.Message);
+      DebugLn('Script process[%d] output thread crashed: %s', [FProcess.ProcessID, E.Message]);
   end;
 end;
 
@@ -118,31 +124,38 @@ procedure TSimbaScriptInstance.DoOutputThreadTerminated(Sender: TObject);
 var
   ScriptTab: TSimbaScriptTab;
 begin
-  Assert(GetCurrentThreadID = MainThreadID);
-
-  DebugLn('TSimbaScriptInstance.DoOutputThreadTerminated');
-
+  AssertMainThread('TSimbaScriptInstance.DoOutputThreadTerminated');
   if FProcess.Running then
-    FProcess.Terminate(100);
+    FProcess.Terminate(EXIT_CODE_FORCE_STOP);
 
-  if FErrorSet then
-  try
-    SimbaOutputForm.LockTabChange();
+  if (Owner is TSimbaScriptTab) then
+  begin
+    ScriptTab := TSimbaScriptTab(Owner);
 
-    ScriptTab := SimbaScriptTabsForm.FindTab(Self);
-    if (ScriptTab <> nil) then
-    begin
-      // Check error is not in a include
-      if (SameFileName(ScriptTab.ScriptFileName, Error.FileName)) or ((ScriptTab.ScriptFileName = '') and (ScriptTab.ScriptTitle = Error.FileName)) then
+    try
+      SimbaOutputForm.LockTabChange();
+
+      if (FProcess.ExitCode = EXIT_CODE_FORCE_STOP) then
       begin
         ScriptTab.Show();
-        ScriptTab.Editor.FocusLine(Error.Line, Error.Column, $0000A5);
-      end else
-      if SimbaScriptTabsForm.Open(Error.FileName) then
-        SimbaScriptTabsForm.CurrentEditor.FocusLine(Error.Line, Error.Column, $0000A5);
+        ScriptTab.OutputBox.AddLine([EDebugLn.FOCUS, EDebugLn.GREEN], 'Script was force terminated after ' + FormatMilliseconds(TimeRunning, '\[hh:mm:ss\].'));
+      end;
+
+      if not IsDefault(FError, SizeOf(TSimbaScriptError)) then
+      begin
+        // Check error is not in a include
+        if (SameFileName(ScriptTab.ScriptFileName, Error.FileName)) or ((ScriptTab.ScriptFileName = '') and (ScriptTab.ScriptTitle = Error.FileName)) then
+        begin
+          ScriptTab.Show();
+          ScriptTab.Editor.FocusLine(Error.Line, Error.Column, $0000A5);
+        end else
+        // else, open the file and display.
+        if SimbaScriptTabsForm.Open(Error.FileName) then
+          SimbaScriptTabsForm.CurrentEditor.FocusLine(Error.Line, Error.Column, $0000A5);
+      end;
+    finally
+      SimbaOutputForm.UnlockTabChange();
     end;
-  finally
-    SimbaOutputForm.UnlockTabChange();
   end;
 
   Self.Free();
@@ -156,27 +169,11 @@ begin
     Result := GetTickCount64() - FStartTime;
 end;
 
-function TSimbaScriptInstance.GetExitCode: Int32;
-begin
-  Result := FProcess.ExitCode;
-end;
-
-function TSimbaScriptInstance.GetPID: UInt32;
-begin
-  Result := FProcess.ProcessID;
-end;
-
 procedure TSimbaScriptInstance.SetState(Value: ESimbaScriptState);
 begin
   FState := Value;
 
   SimbaIDEEvents.CallOnScriptStateChange(Self);
-end;
-
-procedure TSimbaScriptInstance.SetError(Value: TSimbaScriptError);
-begin
-  FErrorSet := True;
-  FError := Value;
 end;
 
 procedure TSimbaScriptInstance.Start(Args: array of String);
@@ -189,7 +186,7 @@ begin
   FProcess.Parameters.Add(FScriptFile);
   FProcess.Execute();
 
-  FOutputThread := TThread.ExecuteInThread(@DoOutputThread);
+  FOutputThread := Threaded(@DoOutputThread);
   FOutputThread.OnTerminate := @DoOutputThreadTerminated;
 
   State := ESimbaScriptState.STATE_RUNNING;
@@ -220,7 +217,7 @@ end;
 procedure TSimbaScriptInstance.Stop;
 begin
   if (FState = ESimbaScriptState.STATE_STOP) then
-    FProcess.Terminate(0)
+    FProcess.Terminate(EXIT_CODE_FORCE_STOP)
   else
   begin
     FState := ESimbaScriptState.STATE_STOP;
@@ -245,8 +242,6 @@ end;
 
 procedure TSimbaScriptInstance.Kill;
 begin
-  DebugLn('TSimbaScriptInstance.Kill');
-
   FProcess.Terminate(0);
 end;
 
@@ -257,8 +252,6 @@ end;
 
 destructor TSimbaScriptInstance.Destroy;
 begin
-  DebugLn('TSimbaScriptInstance.Destroy');
-
   State := ESimbaScriptState.STATE_NONE;
 
   if (FProcess <> nil) then
