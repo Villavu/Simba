@@ -47,6 +47,7 @@ type
     procedure GetWordBoundsAtRowCol(const XY: TPoint; out StartX, EndX: integer); override;
 
     function Add(const S: String): String;
+    procedure AddLine(Flags: EDebugLnFlags; const S: String);
     procedure Empty;
     procedure Flush;
 
@@ -394,6 +395,13 @@ begin
 
     FLock.Leave();
   end;
+end;
+
+procedure TSimbaOutputBox.AddLine(Flags: EDebugLnFlags; const S: String);
+begin
+  FLock.Enter();
+  FBuffer.AddObject(S, TObject(PtrUInt(Integer(Flags))));
+  FLock.Leave();
 end;
 
 procedure TSimbaOutputBox.Empty;

@@ -84,8 +84,6 @@ type
     procedure FindNext;
     procedure FindPrevious;
 
-    function FindTab(ScriptInstance: TObject): TSimbaScriptTab;
-
     function AddTab: TSimbaScriptTab;
 
     function CloseTab(Tab: TSimbaScriptTab; KeepOne: Boolean): Boolean;
@@ -464,20 +462,6 @@ procedure TSimbaScriptTabsForm.FindPrevious;
 begin
   if (CurrentEditor <> nil) then
     FEditorFind.FindPrev(CurrentEditor);
-end;
-
-function TSimbaScriptTabsForm.FindTab(ScriptInstance: TObject): TSimbaScriptTab;
-var
-  I: Integer;
-begin
-  for I := 0 to TabCount - 1 do
-    if (Tabs[I].ScriptInstance = ScriptInstance) then
-    begin
-      Result := Tabs[I];
-      Exit;
-    end;
-
-  Result := nil;
 end;
 
 function TSimbaScriptTabsForm.AddTab: TSimbaScriptTab;

@@ -16,7 +16,7 @@ type
       CODETOOLS_SETUP,
       TAB_CARETMOVED, TAB_MODIFIED, TAB_LOADED, TAB_SEARCH, TAB_BEFORECHANGE, TAB_CHANGE, TAB_CLOSED,
       MOUSELOGGER_CHANGE,
-      SCRIPTSTATE_CHANGE
+      SCRIPTSTATE_CHANGE, SCRIPT_RUNNING
     );
   class var
     FMethodLists: array[EMethodType] of TMethodList;
@@ -32,6 +32,7 @@ type
     class procedure RegisterOnTabClosed(Proc: TNotifyEvent);
     class procedure CallOnScriptTabClose(Sender: TObject);
 
+
     class procedure CallOnScriptStateChange(Sender: TObject); // Sender = TSimbaScriptInstance
     class procedure CallOnBeforeTabChange(Sender: TObject);
     class procedure CallOnScriptTabChange(Sender: TObject); // Sender = TSimbaScriptTab
@@ -40,6 +41,14 @@ type
     class procedure CallOnEditorCaretMoved(Sender: TObject);
     class procedure CallOnEditorModified(Sender: TObject);
     class procedure CallOnMouseLoggerChange(Sender: TObject);
+
+
+    // Called every 500ms from a script instance while a script is running.
+    // Sender = TSimbaScriptInstance
+    class procedure CallOnScriptRunning(Sender: TObject);
+    class procedure RegisterMethodOnScriptRunning(Proc: TNotifyEvent);
+    class procedure UnRegisterMethodOnScriptRunning(Proc: TNotifyEvent);
+
 
     class procedure RegisterMethodOnScriptStateChange(Proc: TNotifyEvent);
     class procedure RegisterMethodOnScriptTabChange(Proc: TNotifyEvent);
@@ -106,6 +115,11 @@ begin
   Call(TAB_CLOSED, Sender);
 end;
 
+class procedure SimbaIDEEvents.CallOnScriptRunning(Sender: TObject);
+begin
+  Call(SCRIPT_RUNNING, Sender);
+end;
+
 class procedure SimbaIDEEvents.CallOnScriptStateChange(Sender: TObject);
 begin
   Call(SCRIPTSTATE_CHANGE, Sender);
@@ -144,6 +158,16 @@ end;
 class procedure SimbaIDEEvents.CallOnMouseLoggerChange(Sender: TObject);
 begin
   Call(MOUSELOGGER_CHANGE, Sender);
+end;
+
+class procedure SimbaIDEEvents.RegisterMethodOnScriptRunning(Proc: TNotifyEvent);
+begin
+  RegisterMethod(SCRIPT_RUNNING, Proc);
+end;
+
+class procedure SimbaIDEEvents.UnRegisterMethodOnScriptRunning(Proc: TNotifyEvent);
+begin
+  UnRegisterMethod(SCRIPT_RUNNING, Proc);
 end;
 
 class procedure SimbaIDEEvents.RegisterMethodOnScriptStateChange(Proc: TNotifyEvent);
