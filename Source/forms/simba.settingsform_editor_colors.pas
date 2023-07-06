@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, StdCtrls, Graphics,
-  Dialogs, ColorBox, CheckLst, SynEditHighlighter, DividerBevel,
+  Dialogs, ColorBox, CheckLst, Spin, SynEditHighlighter, DividerBevel,
   simba.editor;
 
 type
@@ -22,11 +22,15 @@ type
     DividerBevel1: TDividerBevel;
     GroupBox3: TGroupBox;
     Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    AlphaLabel: TLabel;
     LabelBackground: TLabel;
     Panel2: TPanel;
     FrameColorBox: TColorListBox;
     LabelFrame: TLabel;
     Panel3: TPanel;
+    AlphaPanel: TPanel;
     SaveAsButton: TButton;
     LoadButton: TButton;
     BackgroundColorBox: TColorListBox;
@@ -34,11 +38,15 @@ type
     LabelForeground: TLabel;
     Panel1: TPanel;
     ResetButton: TButton;
+    ForegroundAlphaEdit: TSpinEdit;
+    BackgroundAlphaEdit: TSpinEdit;
     TreeView: TTreeView;
 
+    procedure BackgroundAlphaEditChange(Sender: TObject);
     procedure ButtonLoadFromURLClick(Sender: TObject);
     procedure ButtonResetAttributeClick(Sender: TObject);
     procedure CheckListBox1ClickCheck(Sender: TObject);
+    procedure ForegroundAlphaEditChange(Sender: TObject);
     procedure FrameColorBoxSelectionChange(Sender: TObject; User: Boolean);
     procedure FrameResize(Sender: TObject);
     procedure Panel2Resize(Sender: TObject);
@@ -70,6 +78,7 @@ implementation
 {$R *.lfm}
 
 uses
+  SynEditMiscClasses,
   simba.settings, simba.editor_attributes, simba.files, simba.mufasatypes,
   simba.httpclient;
 
@@ -86,6 +95,19 @@ begin
     SelectColor(SelectedAttr.Foreground, ForegoundColorBox);
     SelectColor(SelectedAttr.Background, BackgroundColorBox);
     SelectColor(SelectedAttr.FrameColor, FrameColorBox);
+
+    if SelectedAttr is TSynSelectedColor then
+    begin
+      BackgroundAlphaEdit.Value := TSynSelectedColor(SelectedAttr).BackAlpha;
+      ForegroundAlphaEdit.Value := TSynSelectedColor(SelectedAttr).ForeAlpha;
+
+      AlphaLabel.Show();
+      AlphaPanel.Show();
+    end else
+    begin
+      AlphaLabel.Hide();
+      AlphaPanel.Hide();
+    end;
 
     if SelectedAttr is TSimbaEditor_Attribute then
     begin
@@ -289,6 +311,12 @@ begin
   end;
 end;
 
+procedure TEditorColorsFrame.ForegroundAlphaEditChange(Sender: TObject);
+begin
+  if SelectedAttr is TSynSelectedColor then
+    TSynSelectedColor(SelectedAttr).ForeAlpha := TSpinEdit(Sender).Value;
+end;
+
 procedure TEditorColorsFrame.ButtonLoadFromURLClick(Sender: TObject);
 var
   Value, Contents: String;
@@ -302,6 +330,12 @@ begin
     on E: Exception do
       ShowMessage(E.Message);
   end;
+end;
+
+procedure TEditorColorsFrame.BackgroundAlphaEditChange(Sender: TObject);
+begin
+  if SelectedAttr is TSynSelectedColor then
+    TSynSelectedColor(SelectedAttr).BackAlpha := TSpinEdit(Sender).Value;
 end;
 
 procedure TEditorColorsFrame.Panel2Resize(Sender: TObject);

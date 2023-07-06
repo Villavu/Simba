@@ -68,7 +68,7 @@ type
     function GetSelectedText: String;
 
     procedure AddCharAtCursor(C: Char);
-    procedure AddStringAtCursor(Str: String);
+    procedure AddStringAtCursor(Str: String; ADeleteSelection: Boolean = False);
     procedure DeleteCharAtCursor;
     procedure DeleteSelection;
 
@@ -278,10 +278,13 @@ begin
   Text := NewText;
 end;
 
-procedure TSimbaEdit.AddStringAtCursor(Str: String);
+procedure TSimbaEdit.AddStringAtCursor(Str: String; ADeleteSelection: Boolean);
 var
   NewText: String;
 begin
+  if ADeleteSelection then
+    DeleteSelection();
+
   NewText := Text;
 
   Insert(Str, NewText, FCaretX + 1);
@@ -435,6 +438,7 @@ var
   X1, X2: Integer;
   DrawCaretX: Integer;
 begin
+  Canvas.Font := Font;
   Canvas.Brush.Color := Color;
   Canvas.FillRect(ClientRect);
 
@@ -544,7 +548,7 @@ begin
 
       VK_V:
         begin
-          AddStringAtCursor(Clipboard.AsText);
+          AddStringAtCursor(Clipboard.AsText, True);
 
           Key := 0;
         end;
@@ -647,22 +651,23 @@ begin
 
   FCaretTimer := TTimer.Create(Self);
   FCaretTimer.Enabled := False;
-  FCaretTimer.Interval := 530;
+  FCaretTimer.Interval := 500;
   FCaretTimer.OnTimer := @DoCaretTimer;
 
   ControlStyle := ControlStyle + [csOpaque];
   Cursor := crIBeam;
   TabStop := True;
+  BorderWidth := 2;
 
-  HintTextStyle := [fsItalic];
-  HintTextColor := cl3DDkShadow;
+  Font.Color := SimbaTheme.ColorFont;
 
   Color := SimbaTheme.ColorBackground;
-  ColorSelection := SimbaTheme.ColorActive;
-  ColorBorder := SimbaTheme.ColorFrame;
+  ColorBorder := SimbaTheme.ColorBackground;
   ColorBorderActive := SimbaTheme.ColorActive;
+  ColorSelection := SimbaTheme.ColorActive;
 
-  BorderWidth := 2;
+  HintTextStyle := [fsItalic];
+  HintTextColor := clLtGray;
 
   Height := CalculateHeight();
 end;

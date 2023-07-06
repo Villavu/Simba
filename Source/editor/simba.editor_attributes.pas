@@ -90,7 +90,7 @@ implementation
 
 uses
   Graphics, IniFiles,
-  SynGutterBase, SynEditMarkupHighAll, SynEditMarkupWordGroup, SynEditMarkupFoldColoring, SynEditPointClasses, SynHighlighterPas_Simba,
+  SynGutterBase, SynEditMiscClasses, SynEditMarkupHighAll, SynEditMarkupWordGroup, SynEditMarkupFoldColoring, SynEditPointClasses, SynHighlighterPas_Simba,
   simba.editor, simba.theme;
 
 type
@@ -330,6 +330,14 @@ begin
   for I := 0 to Editor.Highlighter.AttrCount - 1 do
     Add('Highlighter.' + Editor.Highlighter.Attribute[I].StoredName, Editor.Highlighter.Attribute[I]);
 
+  with Editor.MarkupByClass[TSynEditMarkupHighlightAllCaret] as TSynEditMarkupHighlightAllCaret do
+  begin
+    MarkupInfo.Background := $FFFFFF;
+    MarkupInfo.BackAlpha := 50;
+
+    Add('Editor.Caret Selection', MarkupInfo);
+  end;
+
   with Editor.MarkupByClass[TSynEditMarkupHighlightAll] as TSynEditMarkupHighlightAll do
   begin
     MarkupInfo.Background := RGBToColor(128, 0, 128);
@@ -394,6 +402,14 @@ begin
 
       FrameColor := INI.ReadInteger(StoredName, 'Frame', FrameColor);
 
+      if FAttributes[I] is TSynSelectedColor then
+      begin
+        if INI.ValueExists(StoredName, 'BackAlpha') then
+          TSynSelectedColor(FAttributes[I]).BackAlpha := INI.ReadInteger(StoredName, 'BackAlpha', 0);
+        if INI.ValueExists(StoredName, 'ForeAlpha') then
+          TSynSelectedColor(FAttributes[I]).ForeAlpha := INI.ReadInteger(StoredName, 'ForeAlpha', 0);
+      end;
+
       Changed();
     end;
 
@@ -427,6 +443,12 @@ begin
         INI.WriteInteger(StoredName, 'StyleMask', IntegerStyleMask);
 
         INI.WriteInteger(StoredName, 'Frame', FrameColor);
+
+        if FAttributes[I] is TSynSelectedColor then
+        begin
+          INI.WriteInteger(StoredName, 'BackAlpha', TSynSelectedColor(FAttributes[I]).BackAlpha);
+          INI.WriteInteger(StoredName, 'ForeAlpha', TSynSelectedColor(FAttributes[I]).ForeAlpha);
+        end;
       end;
 
     INI.UpdateFile();

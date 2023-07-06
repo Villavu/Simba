@@ -186,12 +186,6 @@ begin
   FFilterEdit.Parent := FFilterPanel;
   FFilterEdit.Align := alClient;
   FFilterEdit.OnChange := @DoFilterEditChange;
-  FFilterEdit.Color := SimbaTheme.ColorBackground;
-  FFilterEdit.ColorBorder := SimbaTheme.ColorBackground;
-  FFilterEdit.ColorBorderActive := SimbaTheme.ColorActive;
-  FFilterEdit.ColorSelection := SimbaTheme.ColorActive;
-  FFilterEdit.Font.Color := SimbaTheme.ColorFont;
-  FFilterEdit.HintTextColor := clLtGray;
   FFilterEdit.HintText := '(search)';
 
   FFilterClearButton := TSimbaTransparentButton.Create(Self);
@@ -317,6 +311,7 @@ begin
   FTree.Font.Color := SimbaTheme.ColorFont;
 
   FFilterEdit.Font := Self.Font;
+  FFilterEdit.Font.Color := SimbaTheme.ColorFont;
 end;
 
 procedure TSimbaTreeView.UpdateFilter;

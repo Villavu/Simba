@@ -100,7 +100,7 @@ type
 implementation
 
 uses
-  SynEditPointClasses, SynGutterBase, SynGutter, SynEditMarkupWordGroup, SynHighlighterPas_Simba,
+  SynEditPointClasses, SynGutterBase, SynGutter, SynEditMarkupWordGroup, SynHighlighterPas_Simba, SynEditMarkupHighAll,
   LazSynEditMouseCmdsTypes, Forms,
   simba.fonthelpers, simba.editor_blockcompletion,
   simba.editor_docgenerator, simba.editor_commentblock,
@@ -455,6 +455,13 @@ begin
   FAutoComplete.ExecCommandID := ecNone;
   FAutoComplete.ShowSizeDrag := True;
 
+  with TSynEditMarkupHighlightAllCaret(MarkupByClass[TSynEditMarkupHighlightAllCaret]) do
+  begin
+    Enabled := True;
+    WaitTime := 1;
+    IgnoreKeywords := True;
+  end;
+
   with TSynGutterLineOverview.Create(RightGutter.Parts) do
   begin
     FModifiedLinesGutter := TSimbaEditorModifiedLinesGutter.Create(Providers);
@@ -479,7 +486,7 @@ begin
 
   FAttributes := TSimbaEditor_Attributes.Create(Self);
 
-  Gutter.LeftOffset := Scale96ToScreen(10);
+  Gutter.LeftOffset := Scale96ToScreen(12);
   Gutter.MarksPart.Visible := False;
   Gutter.SeparatorPart.Visible := False;
 
@@ -487,8 +494,8 @@ begin
   begin
     MarkupInfo.Foreground := Gutter.Color;
     AutoSize := False;
-    LineWidth := Scale96ToScreen(4);
-    Width := Scale96ToScreen(4);
+    LineWidth := Scale96ToScreen(6);
+    Width := Scale96ToScreen(6);
     Index := Gutter.LineNumberPart().Index + 1;
   end;
 
