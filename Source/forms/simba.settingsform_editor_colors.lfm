@@ -9,8 +9,8 @@ object EditorColorsFrame: TEditorColorsFrame
   OnResize = FrameResize
   ParentFont = False
   TabOrder = 0
-  DesignLeft = 2858
-  DesignTop = 179
+  DesignLeft = 2689
+  DesignTop = 285
   object Panel1: TPanel
     Left = 0
     Height = 894
@@ -247,6 +247,93 @@ object EditorColorsFrame: TEditorColorsFrame
         Data = {
           03000000000000
         }
+      end
+      object AlphaLabel: TLabel
+        AnchorSideLeft.Control = CheckListBox1
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = TreeView
+        Left = 385
+        Height = 20
+        Top = 5
+        Width = 39
+        BorderSpacing.Left = 10
+        Caption = 'Alpha'
+        ParentColor = False
+      end
+      object AlphaPanel: TPanel
+        AnchorSideLeft.Control = AlphaLabel
+        AnchorSideTop.Control = CheckListBox1
+        AnchorSideBottom.Control = CheckListBox1
+        AnchorSideBottom.Side = asrBottom
+        Left = 385
+        Height = 100
+        Top = 30
+        Width = 195
+        Anchors = [akTop, akLeft, akBottom]
+        AutoSize = True
+        BevelOuter = bvNone
+        ClientHeight = 100
+        ClientWidth = 195
+        TabOrder = 4
+        object Label3: TLabel
+          AnchorSideLeft.Control = AlphaPanel
+          AnchorSideTop.Control = ForegroundAlphaEdit
+          AnchorSideBottom.Control = ForegroundAlphaEdit
+          AnchorSideBottom.Side = asrBottom
+          Left = 0
+          Height = 28
+          Top = 31
+          Width = 77
+          Anchors = [akTop, akLeft, akBottom]
+          Caption = 'Foreground'
+          Layout = tlCenter
+          ParentColor = False
+        end
+        object Label2: TLabel
+          AnchorSideLeft.Control = AlphaPanel
+          AnchorSideTop.Control = BackgroundAlphaEdit
+          AnchorSideBottom.Control = BackgroundAlphaEdit
+          AnchorSideBottom.Side = asrBottom
+          Left = 0
+          Height = 28
+          Top = 0
+          Width = 79
+          Anchors = [akTop, akLeft, akBottom]
+          Caption = 'Background'
+          Layout = tlCenter
+          ParentColor = False
+        end
+        object ForegroundAlphaEdit: TSpinEdit
+          AnchorSideLeft.Control = Label2
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Control = BackgroundAlphaEdit
+          AnchorSideTop.Side = asrBottom
+          Left = 84
+          Height = 28
+          Top = 31
+          Width = 106
+          BorderSpacing.Left = 5
+          BorderSpacing.Top = 3
+          BorderSpacing.Right = 5
+          MaxValue = 255
+          OnChange = ForegroundAlphaEditChange
+          TabOrder = 0
+        end
+        object BackgroundAlphaEdit: TSpinEdit
+          AnchorSideLeft.Control = Label2
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Control = AlphaPanel
+          AnchorSideRight.Side = asrBottom
+          Left = 84
+          Height = 28
+          Top = 0
+          Width = 106
+          BorderSpacing.Left = 5
+          BorderSpacing.Right = 5
+          MaxValue = 255
+          OnChange = BackgroundAlphaEditChange
+          TabOrder = 1
+        end
       end
     end
     object SaveAsButton: TButton
