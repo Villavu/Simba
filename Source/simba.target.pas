@@ -244,19 +244,19 @@ end;
 
 function TSimbaTarget.IsValid: Boolean;
 begin
-  if HasMethod(@FMethods.IsValid, 'IsValid') then
+  if HasMethod(FMethods.IsValid, 'IsValid') then
     Result := FMethods.IsValid(FTarget);
 end;
 
 function TSimbaTarget.IsFocused: Boolean;
 begin
-  if HasMethod(@FMethods.IsFocused, 'IsFocused') then
+  if HasMethod(FMethods.IsFocused, 'IsFocused') then
     Result := FMethods.IsFocused(FTarget);
 end;
 
 function TSimbaTarget.Focus: Boolean;
 begin
-  if HasMethod(@FMethods.Focus, 'Focus') then
+  if HasMethod(FMethods.Focus, 'Focus') then
     Result := FMethods.Focus(FTarget);
 end;
 
@@ -264,7 +264,7 @@ procedure TSimbaTarget.GetDimensions(out W, H: Integer);
 begin
   CheckInvalidTarget();
 
-  if HasMethod(@FMethods.GetDimensions, 'GetDimensions') then
+  if HasMethod(FMethods.GetDimensions, 'GetDimensions') then
     FMethods.GetDimensions(FTarget, W, H);
 end;
 
@@ -334,6 +334,7 @@ begin
 
   FMethods.GetDimensions := @BitmapTarget_GetDimensions;
   FMethods.GetImageData := @BitmapTarget_GetImageData;
+  FMethods.IsValid := @BitmapTarget_IsValid;
 end;
 
 procedure TSimbaTarget.SetEIOS(FileName, Args: String);
@@ -361,13 +362,13 @@ end;
 
 function TSimbaTarget.MousePressed(Button: MouseButton): Boolean;
 begin
-  if HasMethod(@FMethods.MousePressed, 'MousePressed') then
+  if HasMethod(FMethods.MousePressed, 'MousePressed') then
     Result := FMethods.MousePressed(FTarget, Button);
 end;
 
 function TSimbaTarget.MousePosition: TPoint;
 begin
-  if HasMethod(@FMethods.MousePosition, 'MousePosition') then
+  if HasMethod(FMethods.MousePosition, 'MousePosition') then
     Result := FMethods.MousePosition(FTarget);
 
   Result.X -= FClientArea.X1;
@@ -381,7 +382,7 @@ begin
   P.X += FClientArea.X1;
   P.Y += FClientArea.Y1;
 
-  if HasMethod(@FMethods.MouseTeleport, 'MouseTeleport') then
+  if HasMethod(FMethods.MouseTeleport, 'MouseTeleport') then
     FMethods.MouseTeleport(FTarget, P);
 end;
 
@@ -389,7 +390,7 @@ procedure TSimbaTarget.MouseUp(Button: MouseButton);
 begin
   CheckAutoFocus();
 
-  if HasMethod(@FMethods.MouseUp, 'MouseUp') then
+  if HasMethod(FMethods.MouseUp, 'MouseUp') then
     FMethods.MouseUp(FTarget, Button);
 end;
 
@@ -397,7 +398,7 @@ procedure TSimbaTarget.MouseDown(Button: MouseButton);
 begin
   CheckAutoFocus();
 
-  if HasMethod(@FMethods.MouseDown, 'MouseDown') then
+  if HasMethod(FMethods.MouseDown, 'MouseDown') then
     FMethods.MouseDown(FTarget, Button);
 end;
 
@@ -405,7 +406,7 @@ procedure TSimbaTarget.MouseScroll(Scrolls: Integer);
 begin
   CheckAutoFocus();
 
-  if HasMethod(@FMethods.MouseScroll, 'MouseScroll') then
+  if HasMethod(FMethods.MouseScroll, 'MouseScroll') then
     FMethods.MouseScroll(FTarget, Scrolls);
 end;
 
@@ -413,7 +414,7 @@ procedure TSimbaTarget.KeyDown(Key: KeyCode);
 begin
   CheckAutoFocus();
 
-  if HasMethod(@FMethods.KeyDown, 'KeyDown') then
+  if HasMethod(FMethods.KeyDown, 'KeyDown') then
     FMethods.KeyDown(FTarget, Key);
 end;
 
@@ -421,7 +422,7 @@ procedure TSimbaTarget.KeyUp(Key: KeyCode);
 begin
   CheckAutoFocus();
 
-  if HasMethod(@FMethods.KeyDown, 'KeyUp') then
+  if HasMethod(FMethods.KeyDown, 'KeyUp') then
     FMethods.KeyDown(FTarget, Key);
 end;
 
@@ -429,13 +430,13 @@ procedure TSimbaTarget.KeySend(Key: Char; KeyDownTime, KeyUpTime, ModifierDownTi
 begin
   CheckAutoFocus();
 
-  if HasMethod(@FMethods.KeySend, 'KeySend') then
+  if HasMethod(FMethods.KeySend, 'KeySend') then
     FMethods.KeySend(FTarget, Key, KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime);
 end;
 
 function TSimbaTarget.KeyPressed(Key: KeyCode): Boolean;
 begin
-  if HasMethod(@FMethods.KeyPressed, 'KeyPressed') then
+  if HasMethod(FMethods.KeyPressed, 'KeyPressed') then
     Result := FMethods.KeyPressed(FTarget, Key);
 end;
 
@@ -484,7 +485,7 @@ end;
 function TSimbaTarget.GetImageData(var Bounds: TBox; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
 begin
   Data := nil;
-  if HasMethod(@FMethods.GetImageData, 'GetImageData') then
+  if HasMethod(FMethods.GetImageData, 'GetImageData') then
     Result := ValidateBounds(Bounds) and FMethods.GetImageData(FTarget, Bounds.X1, Bounds.Y1, Bounds.Width, Bounds.Height, Data, DataWidth);
 end;
 

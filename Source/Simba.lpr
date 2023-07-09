@@ -83,9 +83,9 @@ begin
     Halt();
   end;
 
-  DebugLogger.CloseLogFileBetweenWrites := True;
-  if Application.HasOption('silent') then
-    DebugLogger.OnDebugLn := @Application.DebugLnSilent;
+  //DebugLogger.CloseLogFileBetweenWrites := True;
+  //if Application.HasOption('silent') then
+  //  DebugLogger.OnDebugLn := @Application.DebugLnSilent;
 
   if (not Application.HasOption('open')) and (Application.HasOption('run') or Application.HasOption('compile')) then
   begin
