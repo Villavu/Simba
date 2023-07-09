@@ -42,6 +42,8 @@ type
     class function FileLastWriteTime(FileName: String): TDateTime;
     class function FileSize(FileName: String): Int64;
     class function FileSizeInMegaBytes(FileName: String): Single;
+
+    class function FileHash(FileName: String; HashType: String): String;
   end;
 
   TSimbaPath = class
@@ -92,7 +94,8 @@ uses
   {$IFDEF UNIX}
   BaseUnix,
   {$ENDIF}
-  FileUtil, LazFileUtils, Zipper, IniFiles;
+  FileUtil, LazFileUtils, Zipper, IniFiles,
+  simba.encoding, md5, sha1;
 
 class function TSimbaDir.DirList(Path: String; Recursive: Boolean): TStringArray;
 var
@@ -456,6 +459,18 @@ end;
 class function TSimbaFile.FileSizeInMegaBytes(FileName: String): Single;
 begin
   Result := FileUtil.FileSize(FileName) / (1024 * 1024);
+end;
+
+class function TSimbaFile.FileHash(FileName: String; HashType: String): String;
+begin
+  case HashType.ToUpper() of
+    'SHA1':   Result := SHA1Print(SHA1File(FileName));
+    'SHA256': Result := SHA256File(FileName);
+    'SHA512': Result := SHA512File(FileName);
+    'MD5':    Result := MD5Print(MD5File(FileName));
+    else
+      SimbaException('Invalid hashtype. Expected: SHA1,SHA256,SHA512,MD5');
+  end;
 end;
 
 procedure ZipFiles(const ArchiveFileName: String; const Files: TStringArray);

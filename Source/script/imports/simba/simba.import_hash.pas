@@ -61,21 +61,19 @@ begin
   PString(Result)^ := MD5Print(MD5String(PString(Params^[0])^));
 end;
 
-procedure _LapeMD5File(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  if FileExists(PString(Params^[0])^) then
-    PString(Result)^ := MD5Print(MD5File(PString(Params^[0])^));
-end;
-
 procedure _LapeSHA1String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := SHA1Print(SHA1String(PString(Params^[0])^));
 end;
 
-procedure _LapeSHA1File(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSHA256String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  if FileExists(PString(Params^[0])^) then
-    PString(Result)^ := SHA1Print(SHA1File(PString(Params^[0])^));
+  PString(Result)^ := SHA256String(PString(Params^[0])^);
+end;
+
+procedure _LapeSHA512String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := SHA512String(PString(Params^[0])^);
 end;
 
 procedure _LapeHMACMD5(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -142,9 +140,9 @@ begin
     addGlobalFunc('function BlowFishEncrypt(const Data, Password: String): String', @_LapeBlowFishEncrypt);
     addGlobalFunc('function BlowFishDecrypt(const Data, Password: String): String', @_LapeBlowFishDecrypt);
     addGlobalFunc('function MD5String(const Data: String): String', @_LapeMD5String);
-    addGlobalFunc('function MD5File(const FileName: String): String', @_LapeMD5File);
     addGlobalFunc('function SHA1String(const Data: String): String', @_LapeSHA1String);
-    addGlobalFunc('function SHA1File(const FileName: String): String', @_LapeSHA1File);
+    addGlobalFunc('function SHA256String(const Data: String): String', @_LapeSHA256String);
+    addGlobalFunc('function SHA512String(const Data: String): String', @_LapeSHA512String);
     addGlobalFunc('function HMACMD5(const Key, Message: String): String', @_LapeHMACMD5);
     addGlobalFunc('function HMACSHA1(const Key, Message: String): String', @_LapeHMACSHA1);
 

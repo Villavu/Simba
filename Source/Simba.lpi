@@ -308,7 +308,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="174">
+    <Units Count="177">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1080,6 +1080,18 @@
         <Filename Value="simba.integermatrix.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit173>
+      <Unit174>
+        <Filename Value="../Third-Party/fpsha512_simba.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit174>
+      <Unit175>
+        <Filename Value="../Third-Party/fpsha256_simba.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit175>
+      <Unit176>
+        <Filename Value="../Third-Party/fphashutils_simba.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit176>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
