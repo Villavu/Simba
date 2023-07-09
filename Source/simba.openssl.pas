@@ -24,7 +24,7 @@ implementation
 
 uses
   lcltype, Forms,
-  simba.mufasatypes, simba.gz, simba.settings, simba.files, simba.ide_initialization;
+  simba.mufasatypes, simba.gz, simba.settings, simba.env, simba.ide_initialization;
 
 function IsFileHash(FileName: String; Hash: String): Boolean;
 begin

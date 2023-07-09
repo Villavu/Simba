@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, Menus, ExtCtrls,
-  simba.shapebox, simba.files;
+  simba.mufasatypes, simba.shapebox, simba.env;
 
 type
   TSimbaShapeBoxForm = class(TForm)
@@ -37,9 +37,6 @@ var
   SimbaShapeBoxForm: TSimbaShapeBoxForm;
 
 implementation
-
-uses
-  simba.mufasatypes;
 
 procedure TSimbaShapeBoxForm.FormCreate(Sender: TObject);
 begin

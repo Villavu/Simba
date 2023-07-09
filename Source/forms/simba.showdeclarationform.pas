@@ -29,7 +29,7 @@ var
 implementation
 
 uses
-  simba.main, simba.ide_showdeclaration, simba.files;
+  simba.main, simba.ide_showdeclaration, simba.env;
 
 {$R *.lfm}
 

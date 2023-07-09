@@ -281,7 +281,7 @@ uses
 
   simba.windowselector, simba.colorpicker,
 
-  simba.openssl, simba.files, simba.process,
+  simba.openssl, simba.env, simba.process,
   simba.dockinghelpers, simba.nativeinterface,
   simba.scriptformatter, simba.windowhandle, simba.scripttab, simba.theme;
 

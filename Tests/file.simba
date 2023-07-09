@@ -1,0 +1,37 @@
+{$assertions on}
+
+const
+  TESTFILE = SIMBAPATH + 'test.txt';
+
+begin
+  Assert(FileCreate(TESTFILE));
+  Assert(FileDelete(TESTFILE));
+  Assert(not FileExists(TESTFILE));
+  Assert(FileCreate(TESTFILE));
+  Assert(FileAppend(TESTFILE, 'Append'));
+  Assert(FileRead(TESTFILE) = 'Append');
+  Assert(FileAppend(TESTFILE, 'Append'));
+  Assert(FileRead(TESTFILE) = 'AppendAppend');
+  Assert(FileReadEx(TESTFILE, 10)='nd');
+
+  Assert(FileWrite(TESTFILE, 'Write'));
+  Assert(FileRead(TESTFILE) = 'Write');
+
+  Assert(MilliSecondsBetween(Now(), FileLastWriteTime(TESTFILE)) < 1000);
+
+  Assert(FileSize(TESTFILE) = Length('Write'));
+  Assert(FileWrite(TESTFILE, '0' * Round(0.25 * (1024 * 1024))));
+  Assert(FileSizeInMegaBytes(TESTFILE) = 0.25);
+
+  if FileExists('renamed.txt') then
+    FileDelete('renamed.txt');
+
+  Assert(FileRename(TESTFILE, 'renamed.txt'));
+  Assert(FileExists('renamed.txt'));
+  Assert(not FileExists(TESTFILE));
+
+  Assert(FileCopy('renamed.txt', 'copied.txt'));
+  Assert(FileCopy('renamed.txt', 'copied.txt'));
+  Assert(FileExists('copied.txt'));
+  Assert(FileExists('renamed.txt'));
+end.

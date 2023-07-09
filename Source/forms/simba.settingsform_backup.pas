@@ -34,7 +34,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.files, simba.settings;
+  simba.env, simba.settings;
 
 constructor TSimbaBackupFrame.Create(AOwner: TComponent);
 begin

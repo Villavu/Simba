@@ -31,6 +31,7 @@ type
 
     function GetImportingSection: String;
 
+    procedure InitBaseFile; override;
     procedure InitBaseVariant; override;
     procedure InitBaseDefinitions; override;
   public
@@ -244,6 +245,11 @@ begin
     FImportingSection := '!Simba';
 
   Result := FImportingSection;
+end;
+
+procedure TSimbaScript_Compiler.InitBaseFile;
+begin
+  { nothing, we import our own file }
 end;
 
 procedure TSimbaScript_Compiler.InitBaseVariant;

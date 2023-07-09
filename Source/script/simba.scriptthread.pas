@@ -52,7 +52,7 @@ uses
   cocoaall, cocoaint, cocoautils,
   {$ENDIF}
   Forms, FileUtil,
-  simba.files, simba.datetime, simba.script_communication;
+  simba.env, simba.files, simba.datetime, simba.script_communication;
 
 procedure TSimbaScriptRunner.DoDebugLn(Flags: EDebugLnFlags; Text: String);
 begin
@@ -162,7 +162,7 @@ begin
   FCompileOnly := CompileOnly;
 
   FScript := TSimbaScript.Create();
-  FScript.Script := ReadFile(FileName);
+  FScript.Script := TSimbaFile.FileRead(FileName);
   FScript.ScriptFileName := FileName;
   FScript.SimbaCommunicationServer := SimbaCommunication;
   FScript.TargetWindow := TargetWindow;

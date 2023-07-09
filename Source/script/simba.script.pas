@@ -67,7 +67,7 @@ type
 implementation
 
 uses
-  simba.files, simba.datetime, simba.httpclient, simba.target;
+  simba.env, simba.datetime, simba.httpclient, simba.target;
 
 procedure TSimbaScript.DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin

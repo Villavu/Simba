@@ -47,7 +47,7 @@ function FindPluginExports(FileName: String): String;
 implementation
 
 uses
-  simba.mufasatypes, simba.files, simba.process;
+  simba.mufasatypes, simba.env, simba.process;
 
 procedure TNullableString.SetValue(const AValue: String);
 begin
