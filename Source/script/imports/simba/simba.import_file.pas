@@ -138,6 +138,11 @@ begin
   PSingle(Result)^ := TSimbaFile.FileSizeInMegaBytes(PString(Params^[0])^);
 end;
 
+procedure _LapeFileHash(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := TSimbaFile.FileHash(PString(Params^[0])^, PString(Params^[1])^);
+end;
+
 procedure _LapePathExists(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := TSimbaPath.PathExists(PString(Params^[0])^);
@@ -342,6 +347,7 @@ begin
     addGlobalFunc('function FileLastWriteTime(FileName: String): TDateTime', @_LapeFileLastWriteTime);
     addGlobalFunc('function FileSize(FileName: String): Int64', @_LapeFileSize);
     addGlobalFunc('function FileSizeInMegaBytes(FileName: String): Single', @_LapeFileSizeInMegaBytes);
+    addGlobalFunc('function FileHash(FileName: String; HashType: String = "SHA1"): String', @_LapeFileHash);
 
     addGlobalFunc('function PathExists(Path: String): Boolean', @_LapePathExists);
     addGlobalFunc('function PathNormalize(Path: String): String', @_LapePathNormalize);
