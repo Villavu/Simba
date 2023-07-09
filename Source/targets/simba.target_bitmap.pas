@@ -15,6 +15,7 @@ uses
 
 procedure BitmapTarget_GetDimensions(Target: Pointer; out W, H: Integer);
 function BitmapTarget_GetImageData(Target: Pointer; X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
+function BitmapTarget_IsValid(Target: Pointer): Boolean;
 
 implementation
 
@@ -34,6 +35,11 @@ begin
 
   Data := @Bitmap.Data[Y * Bitmap.Width + X];
   DataWidth := Bitmap.Width;
+end;
+
+function BitmapTarget_IsValid(Target: Pointer): Boolean;
+begin
+  Result := Assigned(Target);
 end;
 
 end.

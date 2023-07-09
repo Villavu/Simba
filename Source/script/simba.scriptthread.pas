@@ -9,17 +9,14 @@ unit simba.scriptthread;
 
 {$IFDEF DARWIN}
   {$DEFINE COCOA_TERMINATE_FIX} // https://gitlab.com/freepascal.org/lazarus/lazarus/-/issues/39496
-{$ENDIF}
-
-{$IFDEF COCOA_TERMINATE_FIX}
-  {$MODESWITCH objectivec1}
+  {$MODESWITCH OBJECTIVEC1}
 {$ENDIF}
 
 interface
 
 uses
   Classes, SysUtils,
-  lptypes, lpvartypes,
+  lptypes, lpvartypes, lpmessages,
   simba.script, simba.mufasatypes;
 
 type
@@ -28,15 +25,12 @@ type
     FScript: TSimbaScript;
     FCompileOnly: Boolean;
 
-    procedure DebugLnGreen(S: String);
-    procedure DebugLnRed(S: String);
-    procedure DebugLnYellow(S: String);
-
+    procedure DoDebugLn(Flags: EDebugLnFlags; Text: String);
     procedure DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 
-    procedure HandleTerminate(Sender: TObject);
-    procedure HandleInput;
-    procedure HandleException(E: Exception);
+    procedure DoTerm(Sender: TObject);
+    procedure DoInputThread;
+    procedure DoError(E: Exception);
 
     procedure Execute; override;
   public
@@ -57,55 +51,34 @@ uses
   {$IFDEF COCOA_TERMINATE_FIX}
   cocoaall, cocoaint, cocoautils,
   {$ENDIF}
-  forms, fileutil, lpmessages,
+  Forms, FileUtil,
   simba.files, simba.datetime, simba.script_communication;
 
-procedure TSimbaScriptRunner.DebugLnGreen(S: String);
+procedure TSimbaScriptRunner.DoDebugLn(Flags: EDebugLnFlags; Text: String);
 begin
-  if (SimbaProcessType = ESimbaProcessType.SCRIPT_WITH_COMMUNICATION) then
-    SimbaDebugLn([EDebugLn.GREEN], S)
+  if (SimbaProcessType = ESimbaProcessType.SCRIPT_WITH_COMMUNICATION) then // Only add flags if we have communication with simba to use them
+    SimbaDebugLn(Flags, Text)
   else
-    DebugLn(S);
-end;
+  begin
+    if Application.HasOption('silent') and (Flags * [EDebugLn.YELLOW, EDebugLn.GREEN] <> []) then
+      Exit;
 
-procedure TSimbaScriptRunner.DebugLnRed(S: String);
-begin
-  if (SimbaProcessType = ESimbaProcessType.SCRIPT_WITH_COMMUNICATION) then
-    SimbaDebugLn([EDebugLn.RED], S)
-  else
-    DebugLn(S);
-end;
-
-procedure TSimbaScriptRunner.DebugLnYellow(S: String);
-begin
-  if (SimbaProcessType = ESimbaProcessType.SCRIPT_WITH_COMMUNICATION) then
-    SimbaDebugLn([EDebugLn.YELLOW], S)
-  else
-    DebugLn(S);
+    DebugLn(Text);
+  end;
 end;
 
 procedure TSimbaScriptRunner.DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
-  DebugLnYellow(Hint);
+  DoDebugLn([EDebugLn.YELLOW], Hint);
 end;
 
-procedure TSimbaScriptRunner.HandleTerminate(Sender: TObject);
+procedure TSimbaScriptRunner.DoTerm(Sender: TObject);
 begin
-  {$IFDEF WINDOWS}
-  if (StartupConsoleMode <> 0) then
-  begin
-    DebugLn('Press enter to exit');
-
-    ReadLn();
-  end;
-  {$ENDIF}
-
   Application.Terminate();
   while (not Application.Terminated) do
     Application.ProcessMessages();
 
   {$IFDEF COCOA_TERMINATE_FIX}
-  // https://gitlab.com/freepascal.org/lazarus/lazarus/-/issues/39496
   NSApplication.sharedApplication.postEvent_AtStart(
     nsEvent.otherEventWithType_location_modifierFlags_timestamp_windowNumber_context_subtype_data1_data2(
       NSApplicationDefined, GetNSPoint(0, 0), 0, NSTimeIntervalSince1970, 0, nil, 0, 0, 0
@@ -115,7 +88,7 @@ begin
   {$ENDIF}
 end;
 
-procedure TSimbaScriptRunner.HandleInput;
+procedure TSimbaScriptRunner.DoInputThread;
 var
   Stream: THandleStream;
   State: ESimbaScriptState;
@@ -123,78 +96,59 @@ begin
   Stream := THandleStream.Create(StdInputHandle);
   while Stream.Read(State, SizeOf(ESimbaScriptState)) = SizeOf(ESimbaScriptState) do
     FScript.State := State;
-
   Stream.Free();
 end;
 
-procedure TSimbaScriptRunner.HandleException(E: Exception);
+procedure TSimbaScriptRunner.DoError(E: Exception);
 var
   Line: String;
 begin
-  DebugLnRed(E.Message);
+  ExitCode := 1;
+
+  DoDebugLn([EDebugLn.RED], E.Message);
 
   if (E is lpException) then
-  begin
     with lpException(E) do
     begin
-      for Line in lpException(E).StackTrace.Split(LineEnding) do
+      for Line in StackTrace.Split(LineEnding) do
         if (Line <> '') then
-          DebugLnRed(Line);
+          DoDebugLn([EDebugLn.RED], Line);
 
       if (FScript.SimbaCommunication <> nil) then
-        FScript.SimbaCommunication.ScriptError(E.Message, DocPos.Line, DocPos.Col, DocPos.FileName)
-      else
-        FScript.SimbaCommunication.ScriptError(E.Message, 0, 0, '');
+        FScript.SimbaCommunication.ScriptError(Message, DocPos.Line, DocPos.Col, DocPos.FileName);
     end;
-  end;
-
-  if (FScript.SimbaCommunication = nil) then
-    ExitCode := 1;
 end;
 
 procedure TSimbaScriptRunner.Execute;
-{$IFDEF SIMBA_HAS_DEBUGINFO}
-var
-  I: Integer;
-{$ENDIF}
 begin
   try
-    ExecuteInThread(@HandleInput);
+    ExecuteInThread(@DoInputThread);
 
-    if FScript.Compile() then
-    begin
-      DebugLnGreen('Succesfully compiled in %.2f milliseconds.'.Format([FScript.CompileTime]));
-
-      if (not FCompileOnly) then
+    try
+      if FScript.Compile() then
+        DoDebugLn([EDebugLn.GREEN], 'Succesfully compiled in %.2f milliseconds.'.Format([FScript.CompileTime]));
+    except
+      on E: Exception do
       begin
-        FScript.Run();
-
-        if (Script.RunningTime < 10000) then
-          DebugLnGreen('Succesfully executed in %.2f milliseconds.'.Format([Script.RunningTime]))
-        else
-          DebugLnGreen('Succesfully executed in %s.'.Format([FormatMilliseconds(Script.RunningTime, '\[hh:mm:ss\]')]));
+        DoError(E);
+        Exit;
       end;
     end;
-  except
-    on E: Exception do
-      HandleException(E);
-  end;
 
-  // Free the script in the thread so it (hopefully) doesn't mess up the rest of the process if something goes wrong.
-  try
-    FScript.Free();
-  except
-    on E: Exception do
-    begin
-      DebugLn('Exception occurred while cleaning up the script: ' + E.Message);
+    if not FCompileOnly then
+    try
+      FScript.Run();
 
-      {$IFDEF SIMBA_HAS_DEBUGINFO}
-      DebugLn('Stack trace:');
-      DebugLn(BackTraceStrFunc(ExceptAddr));
-      for I := 0 to ExceptFrameCount - 1 do
-        DebugLn(BackTraceStrFunc(ExceptFrames[I]));
-      {$ENDIF}
+      if (FScript.RunningTime < 10000) then
+        DoDebugLn([EDebugLn.GREEN], 'Succesfully executed in %.2f milliseconds.'.Format([FScript.RunningTime]))
+      else
+        DoDebugLn([EDebugLn.GREEN], 'Succesfully executed in %s.'.Format([FormatMilliseconds(FScript.RunningTime, '\[hh:mm:ss\]')]));
+    except
+      on E: Exception do
+        DoError(E);
     end;
+  finally
+    FScript.Free(); // Free the script in thread so it hopefully doesn't nuke the process
   end;
 end;
 
@@ -203,7 +157,7 @@ begin
   inherited Create(False);
 
   FreeOnTerminate := True;
-  OnTerminate := @HandleTerminate;
+  OnTerminate := @DoTerm;
 
   FCompileOnly := CompileOnly;
 
@@ -225,4 +179,3 @@ begin
 end;
 
 end.
-
