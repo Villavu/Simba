@@ -45,7 +45,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.mufasatypes, simba.files, simba.fonthelpers, simba.dialog;
+  simba.mufasatypes, simba.env, simba.fonthelpers, simba.dialog;
 
 constructor TSimbaPackageInstallForm.Create(AOwner: TComponent; APackage: TSimbaPackage);
 var

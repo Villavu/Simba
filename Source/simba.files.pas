@@ -10,33 +10,74 @@ unit simba.files;
 interface
 
 uses
-  classes, sysutils,
+  Classes, SysUtils,
   simba.mufasatypes;
 
-  function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
-  function FindFiles(Directories: TStringArray; WildCard: String; Recursive: Boolean = False): TStringArray;
-  function FindPlugin(var FileName: String; const Directories: array of String): Boolean;
-  procedure CopyPlugin(var FileName: String);
+type
+  TSimbaFile = class
+  protected
+    class function DoFileRead(const FileName: String; var Buffer; const Len: Integer; Offset: Integer = 0): Boolean;
+    class function DoFileWrite(const FileName: String; const Data; const Len: Integer): Boolean;
+    class function DoFileAppend(const FileName: String; const Data; const Len: Integer): Boolean;
+  public
+    // Read/Write String
+    class function FileRead(FileName: String): String;
+    class function FileReadEx(FileName: String; Offset: Integer): String;
+    class function FileWrite(FileName: String; Text: String): Boolean;
+    class function FileAppend(FileName: String; Text: String): Boolean;
+    class function FileReadLines(FileName: String): TStringArray;
+
+    // Read/Write Byte
+    class function FileReadBytes(FileName: String): TByteArray;
+    class function FileReadBytesEx(FileName: String; Offset: Integer): TByteArray;
+    class function FileWriteBytes(FileName: String; Bytes: TByteArray): Boolean;
+    class function FileAppendBytes(FileName: String; Bytes: TByteArray): Boolean;
+
+    class function FileCopy(SourceFileName, DestFileName: String; OverwriteIfExists: Boolean = True): Boolean;
+    class function FileRename(SourceFileName, DestFileName: String): Boolean;
+    class function FileDelete(FileName: String): Boolean;
+    class function FileCreate(FileName: String): Boolean;
+    class function FileExists(FileName: String): Boolean;
+    class function FileCreationTime(FileName: String): TDateTime;
+    class function FileLastWriteTime(FileName: String): TDateTime;
+    class function FileSize(FileName: String): Int64;
+    class function FileSizeInMegaBytes(FileName: String): Single;
+  end;
+
+  TSimbaPath = class
+  public
+    class function PathExists(Path: String): Boolean;
+    class function PathNormalize(Path: String): String;
+    class function PathIsFile(Path: String): Boolean;
+    class function PathIsDirectory(Path: String): Boolean;
+    class function PathExtractName(Path: String): String;
+    class function PathExtractNameWithoutExt(Path: String): String;
+    class function PathExtractExt(Path: String): String;
+    class function PathExtractDir(Path: String): String;
+    class function PathJoin(Paths: TStringArray): String;
+    class function PathSetSeperators(Path: String): String;
+    class function PathExcludeTrailingSep(Path: String): String;
+    class function PathIncludeTrailingSep(Path: String): String;
+    class function PathExcludeLeadingSep(Path: String): String;
+    class function PathIncludeLeadingSep(Path: String): String;
+  end;
+
+  TSimbaDir = class
+  public
+    class function DirList(Path: String; Recursive: Boolean): TStringArray;
+    class function DirSearch(Path: String; Mask: String; Recursive: Boolean): TStringArray;
+    class function DirDelete(Path: String; OnlyChildren: Boolean): Boolean;
+    class function DirCreate(Path: String): Boolean;
+    class function DirExists(Path: String): Boolean;
+    class function DirParent(Path: String): String;
+    class function DirIsEmpty(Path: String): Boolean;
+    class function DirSize(Path: String): Int64;
+    class function DirSizeInMegaBytes(Path: String): Single;
+  end;
+
   procedure ZipFiles(const ArchiveFileName: String; const Files: TStringArray);
   procedure UnZipFile(const ArchiveFileName, OutputDirectory: String);
   function UnZipOneFile(const ArchiveFileName, FileName, OutputDirectory: String): Boolean;
-
-  function HashFile(const FileName: String): String;
-  function ReadFile(const FileName: String): String;
-  function WriteFile(const FileName, Contents: String): Boolean;
-  function CreateTempFile(const Contents, Prefix: String): String;
-
-  function GetSimbaPath: String;
-  function GetDataPath: String;
-  function GetIncludePath: String;
-  function GetPluginPath: String;
-  function GetPluginCopyPath: String;
-  function GetScriptPath: String;
-  function GetPackagePath: String;
-  function GetOldPackagePath: String;
-  function GetBackupsPath: String;
-  function GetDumpPath: String;
-  function GetScreenshotPath: String;
 
   function ReadINI(const Section, KeyName: string; FileName: string): string;
   procedure DeleteINI(const Section, KeyName : string; FileName : string);
@@ -45,74 +86,396 @@ uses
 implementation
 
 uses
-  forms, inifiles, fileutil, zipper, sha1;
+  {$IFDEF WINDOWS}
+  Windows,
+  {$ENDIF}
+  {$IFDEF UNIX}
+  BaseUnix,
+  {$ENDIF}
+  FileUtil, LazFileUtils, Zipper, IniFiles;
 
-function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
+class function TSimbaDir.DirList(Path: String; Recursive: Boolean): TStringArray;
 var
-  I: Int32;
+  SearchRec: TSearchRec;
 begin
-  Result := False;
+  Result := [];
 
-  if FileExists(FileName) then
-  begin
-    FileName := ExpandFileName(FileName);
+  Path := CleanAndExpandDirectory(Path);
+  if (FindFirst(Path + '*', faAnyFile and faDirectory, SearchRec) = 0) then
+  repeat
+    if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
+    begin
+      if (SearchRec.Attr = faDirectory) and Recursive then
+        Result := Result + DirList(Path + SearchRec.Name, Recursive);
+      Result := Result + [Path + SearchRec.Name];
+    end;
+  until FindNext(SearchRec) <> 0;
+  SysUtils.FindClose(SearchRec);
+end;
 
-    Exit(True);
+class function TSimbaDir.DirSearch(Path: String; Mask: String; Recursive: Boolean): TStringArray;
+begin
+  with FindAllFiles(Path, Mask, Recursive) do
+  try
+    Result := ToStringArray();
+  finally
+    Free();
+  end;
+end;
+
+class function TSimbaDir.DirDelete(Path: String; OnlyChildren: Boolean): Boolean;
+begin
+  Result := DeleteDirectory(Path, OnlyChildren);
+end;
+
+class function TSimbaDir.DirCreate(Path: String): Boolean;
+begin
+  Result := DirectoryExists(Path) or ForceDirectory(Path);
+end;
+
+class function TSimbaDir.DirExists(Path: String): Boolean;
+begin
+  Result := DirectoryExists(Path);
+end;
+
+class function TSimbaDir.DirParent(Path: String): String;
+begin
+  Result := ExpandFileName(IncludeTrailingPathDelimiter(Path) + '..');
+end;
+
+class function TSimbaDir.DirIsEmpty(Path: String): Boolean;
+var
+  SearchRec: TSearchRec;
+begin
+  Result := True;
+  if (FindFirst(Path, faAnyFile, SearchRec) = 0) then
+  repeat
+    Result := (SearchRec.Name = '.') or (SearchRec.Name = '..');
+  until Result and (FindNext(SearchRec) = 0);
+  SysUtils.FindClose(SearchRec);
+end;
+
+class function TSimbaDir.DirSize(Path: String): Int64;
+var
+  FileName: String;
+begin
+  Result := 0;
+  for FileName in DirList(Path, True) do
+    Result := Result + TSimbaFile.FileSize(FileName);
+end;
+
+class function TSimbaDir.DirSizeInMegaBytes(Path: String): Single;
+begin
+  Result := DirSize(Path) / (1024 * 1024);
+end;
+
+class function TSimbaPath.PathExists(Path: String): Boolean;
+begin
+  Result := FileExists(Path) or DirectoryExists(Path);
+end;
+
+class function TSimbaPath.PathNormalize(Path: String): String;
+begin
+  Result := ExpandFileName(Path);
+end;
+
+class function TSimbaPath.PathIsFile(Path: String): Boolean;
+begin
+  Result := FileExists(Path) and (not DirectoryExists(Path));
+end;
+
+class function TSimbaPath.PathIsDirectory(Path: String): Boolean;
+begin
+  Result := DirectoryExists(Path);
+end;
+
+class function TSimbaPath.PathExtractName(Path: String): String;
+begin
+  Result := ExtractFileName(Path);
+end;
+
+class function TSimbaPath.PathExtractNameWithoutExt(Path: String): String;
+begin
+  Result := ExtractFileNameWithoutExt(ExtractFileName(Path));
+end;
+
+class function TSimbaPath.PathExtractExt(Path: String): String;
+begin
+  Result := ExtractFileExt(Path);
+end;
+
+class function TSimbaPath.PathExtractDir(Path: String): String;
+begin
+  Result := ExtractFileDir(ExcludeTrailingPathDelimiter(Path));
+end;
+
+class function TSimbaPath.PathJoin(Paths: TStringArray): String;
+begin
+  Result := ConcatPaths(Paths);
+end;
+
+class function TSimbaPath.PathSetSeperators(Path: String): String;
+begin
+  Result := GetForcedPathDelims(Path);
+end;
+
+class function TSimbaPath.PathExcludeTrailingSep(Path: String): String;
+begin
+  Result := ExcludeTrailingPathDelimiter(Path);
+end;
+
+class function TSimbaPath.PathIncludeTrailingSep(Path: String): String;
+begin
+  Result := IncludeTrailingPathDelimiter(Path);
+end;
+
+class function TSimbaPath.PathExcludeLeadingSep(Path: String): String;
+begin
+  Result := ExcludeLeadingPathDelimiter(Path);
+end;
+
+class function TSimbaPath.PathIncludeLeadingSep(Path: String): String;
+begin
+  Result := IncludeLeadingPathDelimiter(Path);
+end;
+
+class function TSimbaFile.DoFileRead(const FileName: String; var Buffer; const Len: Integer; Offset: Integer): Boolean;
+var
+  Stream: TFileStream;
+begin
+  Stream := nil;
+  try
+    Stream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
+    Stream.Seek(Offset, soBeginning);
+    Stream.ReadBuffer(Buffer, Len);
+
+    Result := True;
+  except
+    Result := False;
   end;
 
-  for I := 0 to High(Directories) do
-    if FileExists(IncludeTrailingPathDelimiter(Directories[I]) + FileName + Extension) then
-    begin
-      FileName := ExpandFileName(IncludeTrailingPathDelimiter(Directories[I]) + FileName + Extension);
-
-      Exit(True);
-    end;
+  if (Stream <> nil) then
+    Stream.Free();
 end;
 
-function FindFiles(Directories: TStringArray; WildCard: String; Recursive: Boolean): TStringArray;
+class function TSimbaFile.DoFileWrite(const FileName: String; const Data; const Len: Integer): Boolean;
 var
-  I: Integer;
-  Path: String;
+  Stream: TFileStream;
 begin
-  Result := Default(TStringArray);
-  if Length(Directories) = 0 then
+  Result := False;
+  if (Len = 0) then
     Exit;
 
-  I := Pos('*', WildCard) - 1;
-  if (I > 0) then
-  begin
-    Path := Copy(Wildcard, 1, I);
-    Wildcard := Copy(WildCard, I+1);
-  end else
-    Path := '';
+  Stream := nil;
+  try
+    if FileExists(FileName) then
+      Stream := TFileStream.Create(FileName, fmOpenReadWrite or fmShareDenyWrite)
+    else
+      Stream := TFileStream.Create(FileName, fmCreate or fmShareDenyWrite);
+    Stream.Seek(0, soBeginning);
+    Stream.Size := 0;
 
-  for I := 0 to High(Directories) do
-    if DirectoryExists(Directories[I]) then
-    begin
-      Directories[I] := ExpandFileName(ConcatPaths([Directories[I], Path]));
+    Result := Stream.Write(Data, Len) = Len;
+  except
+  end;
 
-      with FindAllFiles(Directories[I], WildCard, Recursive) do
-      try
-        Sort(); // sort, else it's dependant on how filesystem orders
-
-        Result := ToStringArray();
-        if Length(Result) > 0 then
-          Exit;
-      finally
-        Free();
-      end;
-    end;
+  if (Stream <> nil) then
+    Stream.Free();
 end;
 
-function FindPlugin(var FileName: String; const Directories: array of String): Boolean;
+class function TSimbaFile.DoFileAppend(const FileName: String; const Data; const Len: Integer): Boolean;
+var
+  Stream: TFileStream;
 begin
-  Result := FindFile(FileName, '', Directories) or
-            {$IFDEF CPUAARCH64} 
-            FindFile(FileName, '.' + SharedSuffix + '.aarch64', Directories) or
-            FindFile(FileName, {$IFDEF CPU32}'32'{$ELSE}'64'{$ENDIF} + '.' + SharedSuffix + '.aarch64', Directories) or
-            {$ENDIF}
-            FindFile(FileName, '.' + SharedSuffix, Directories) or
-            FindFile(FileName, {$IFDEF CPU32}'32'{$ELSE}'64'{$ENDIF} + '.' + SharedSuffix, Directories);
+  Result := False;
+  if (Len = 0) then
+    Exit;
+
+  Stream := nil;
+  try
+    if FileExists(FileName) then
+      Stream := TFileStream.Create(FileName, fmOpenReadWrite or fmShareDenyWrite)
+    else
+      Stream := TFileStream.Create(FileName, fmCreate or fmShareDenyWrite);
+    Stream.Seek(0, soEnd);
+
+    Result := Stream.Write(Data, Len) = Len;
+  except
+  end;
+
+  if (Stream <> nil) then
+    Stream.Free();
+end;
+
+class function TSimbaFile.FileRead(FileName: String): String;
+begin
+  SetLength(Result, FileSize(FileName));
+
+  if not DoFileRead(FileName, Result[1], Length(Result)) then
+    Result := '';
+end;
+
+class function TSimbaFile.FileReadEx(FileName: String; Offset: Integer): String;
+begin
+  SetLength(Result, FileSize(FileName) - Offset);
+  if not DoFileRead(FileName, Result[1], Length(Result), Offset) then
+    Result := '';
+end;
+
+class function TSimbaFile.FileWrite(FileName: String; Text: String): Boolean;
+begin
+  Result := (Length(Text) > 0) and DoFileWrite(FileName, Text[1], Length(Text));
+end;
+
+class function TSimbaFile.FileAppend(FileName: String; Text: String): Boolean;
+begin
+  Result := (Length(Text) > 0) and DoFileAppend(FileName, Text[1], Length(Text));
+end;
+
+class function TSimbaFile.FileReadLines(FileName: String): TStringArray;
+begin
+  Result := FileRead(FileName).Split(LineEnding);
+end;
+
+class function TSimbaFile.FileReadBytes(FileName: String): TByteArray;
+begin
+  SetLength(Result, FileSize(FileName));
+
+  if not DoFileRead(FileName, Result[1], Length(Result)) then
+    Result := [];
+end;
+
+class function TSimbaFile.FileReadBytesEx(FileName: String; Offset: Integer): TByteArray;
+begin
+  SetLength(Result, FileSize(FileName) - Offset);
+  if not DoFileRead(FileName, Result[0], Length(Result), Offset) then
+    Result := [];
+end;
+
+class function TSimbaFile.FileWriteBytes(FileName: String; Bytes: TByteArray): Boolean;
+begin
+  Result := (Length(Bytes) > 0) and DoFileWrite(FileName, Bytes[0], Length(Bytes));
+end;
+
+class function TSimbaFile.FileAppendBytes(FileName: String; Bytes: TByteArray): Boolean;
+begin
+  Result := (Length(Bytes) > 0) and DoFileAppend(FileName, Bytes[0], Length(Bytes));
+end;
+
+class function TSimbaFile.FileCopy(SourceFileName, DestFileName: String; OverwriteIfExists: Boolean): Boolean;
+begin
+  if OverwriteIfExists then
+    Result := FileUtil.CopyFile(ExpandFileName(SourceFileName), ExpandFileName(DestFileName), [cffOverwriteFile, cffCreateDestDirectory])
+  else
+    Result := FileUtil.CopyFile(ExpandFileName(SourceFileName), ExpandFileName(DestFileName), [cffCreateDestDirectory])
+end;
+
+class function TSimbaFile.FileRename(SourceFileName, DestFileName: String): Boolean;
+begin
+  Result := RenameFile(SourceFileName, DestFileName);
+end;
+
+class function TSimbaFile.FileDelete(FileName: String): Boolean;
+begin
+  Result := SysUtils.DeleteFile(FileName);
+end;
+
+class function TSimbaFile.FileCreate(FileName: String): Boolean;
+begin
+  if SysUtils.FileExists(FileName) then
+    Exit(True);
+
+  try
+    FileClose(SysUtils.FileCreate(FileName));
+  except
+  end;
+
+  Result := SysUtils.FileExists(FileName);
+end;
+
+class function TSimbaFile.FileExists(FileName: String): Boolean;
+begin
+  Result := SysUtils.FileExists(FileName);
+end;
+
+class function TSimbaFile.FileCreationTime(FileName: String): TDateTime;
+{$IFDEF UNIX}
+var
+  Info: stat;
+begin
+  Result := 0;
+
+  if (fpstat(FileName, Info) = 0) then
+    Result := FileDateToDateTime(Info.st_ctime);
+end;
+{$ENDIF}
+{$IFDEF WINDOWS}
+var
+  FileAttribute: TWin32FileAttributeData;
+  SystemTime: TSystemTime;
+  FileTime: TFileTime;
+begin
+  Result := 0;
+
+  if GetFileAttributesEx(PChar(FileName), GetFileExInfoStandard, @FileAttribute) then
+    if FileTimeToLocalFileTime(FileAttribute.ftCreationTime, FileTime) and FileTimeToSystemTime(FileTime, SystemTime) then
+      Result := SystemTimeToDateTime(SystemTime);
+end;
+{$ENDIF}
+
+class function TSimbaFile.FileLastWriteTime(FileName: String): TDateTime;
+{$IFDEF UNIX}
+var
+  Info: stat;
+begin
+  Result := 0;
+
+  if (fpstat(FileName, Info) = 0) then
+    Result := FileDateToDateTime(Info.st_mtime);
+end;
+{$ENDIF}
+{$IFDEF WINDOWS}
+var
+  FileAttribute: TWin32FileAttributeData;
+  SystemTime: TSystemTime;
+  FileTime: TFileTime;
+begin
+  Result := 0;
+
+  if GetFileAttributesEx(PChar(FileName), GetFileExInfoStandard, @FileAttribute) then
+    if FileTimeToLocalFileTime(FileAttribute.ftLastWriteTime, FileTime) and FileTimeToSystemTime(FileTime, SystemTime) then
+      Result := SystemTimeToDateTime(SystemTime);
+end;
+{$ENDIF}
+
+class function TSimbaFile.FileSize(FileName: String): Int64;
+begin
+  Result := FileUtil.FileSize(FileName);
+end;
+
+class function TSimbaFile.FileSizeInMegaBytes(FileName: String): Single;
+begin
+  Result := FileUtil.FileSize(FileName) / (1024 * 1024);
+end;
+
+procedure ZipFiles(const ArchiveFileName: String; const Files: TStringArray);
+var
+  Zipper: TZipper;
+  I: Integer;
+begin
+  if (Length(Files) = 0) then
+    raise Exception.Create('ZipFiles: No files to zip');
+
+  Zipper := TZipper.Create;
+  try
+    Zipper.FileName := ArchiveFileName;
+    for I := 0 to High(Files) do
+      Zipper.Entries.AddFileEntry(Files[I], ExtractFileName(Files[I]));
+
+    Zipper.ZipAllFiles();
+  finally
+    Zipper.Free;
+  end;
 end;
 
 procedure UnZipFile(const ArchiveFileName, OutputDirectory: String);
@@ -161,191 +524,6 @@ begin
   end;
 end;
 
-// Make a copy of the plugin to data/plugins/ so we can delete/update if it's loaded
-procedure CopyPlugin(var FileName: String);
-var
-  NewFileName: String;
-begin
-  NewFileName := GetPluginCopyPath() + HashFile(FileName) + ExtractFileExt(FileName);
-  if CopyFile(FileName, NewFileName, [], True) then
-    FileName := NewFileName;
-end;
-
-procedure ZipFiles(const ArchiveFileName: String; const Files: TStringArray);
-var
-  Zipper: TZipper;
-  I: Integer;
-begin
-  if (Length(Files) = 0) then
-    raise Exception.Create('ZipFiles: No files to zip');
-
-  Zipper := TZipper.Create;
-  try
-    Zipper.FileName := ArchiveFileName;
-    for I := 0 to High(Files) do
-      Zipper.Entries.AddFileEntry(Files[I], ExtractFileName(Files[I]));
-
-    Zipper.ZipAllFiles();
-  finally
-    Zipper.Free;
-  end;
-end;
-
-function HashFile(const FileName: String): String;
-begin
-  try
-    Result := SHA1Print(SHA1File(FileName, 256*256));
-  except
-    Result := '';
-  end;
-end;
-
-function ReadFile(const FileName: String): String;
-var
-  Stream: TFileStream;
-begin
-  Result := '';
-  if not FileExists(FileName) then
-    Exit;
-
-  Stream := nil;
-  try
-    Stream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
-
-    SetLength(Result, Stream.Size);
-    if Length(Result) > 0 then
-      Stream.Read(Result[1], Length(Result));
-  except
-  end;
-
-  if (Stream <> nil) then
-    Stream.Free();
-end;
-
-function WriteFile(const FileName, Contents: String): Boolean;
-var
-  Stream: TFileStream;
-begin
-  Result := False;
-
-  Stream := nil;
-  try
-    Stream := TFileStream.Create(FileName, fmCreate or fmShareDenyWrite);
-    if Stream.Write(Contents[1], Length(Contents)) = Length(Contents) then
-      Result := True;
-  except
-  end;
-
-  if (Stream <> nil) then
-    Stream.Free();
-end;
-
-function CreateTempFile(const Contents, Prefix: String): String;
-var
-  Number: Integer = 0;
-begin
-  Result := Format('%s%s.%d', [GetDataPath(), Prefix, Number]);
-  while FileExists(Result) do
-  begin
-    Inc(Number);
-
-    Result := Format('%s%s.%d', [GetDataPath(), Prefix, Number]);
-  end;
-
-  with TStringList.Create() do
-  try
-    Text := Contents;
-
-    SaveToFile(Result);
-  finally
-    Free();
-  end;
-end;
-
-function GetSimbaPath: String;
-begin
-  Result := IncludeTrailingPathDelimiter(Application.Location);
-end;
-
-function GetDataPath: String;
-begin
-  Result := GetSimbaPath() + 'Data' + DirectorySeparator;
-end;
-
-function GetIncludePath: String;
-begin
-  Result := GetSimbaPath() + 'Includes' + DirectorySeparator;
-end;
-
-function GetPluginPath: String;
-begin
-  Result := GetSimbaPath() + 'Plugins' + DirectorySeparator;
-end;
-
-function GetPluginCopyPath: String;
-begin
-  Result := GetDataPath() + 'plugincopies' + DirectorySeparator;
-end;
-
-function GetScriptPath: String;
-begin
-  Result := GetSimbaPath() + 'Scripts' + DirectorySeparator;
-end;
-
-function GetPackagePath: String;
-begin
-  Result := GetDataPath() + 'packages' + DirectorySeparator;
-end;
-
-function GetOldPackagePath: String;
-begin
-  Result := GetDataPath() + 'oldpackages' + DirectorySeparator;
-end;
-
-function GetBackupsPath: String;
-begin
-  Result := GetDataPath() + 'backups' + DirectorySeparator;
-end;
-
-function GetDumpPath: String;
-begin
-  Result := GetDataPath() + 'dumps' + DirectorySeparator;
-end;
-
-function GetScreenshotPath: String;
-begin
-  Result := GetSimbaPath() + 'Screenshots' + DirectorySeparator;
-end;
-
-procedure CreateBaseDirectories;
-var
-  Directory: String;
-begin
-  // Root directories
-  for Directory in [GetIncludePath(), GetScriptPath(), GetPluginPath(), GetDataPath(), GetScreenshotPath()] do
-  begin
-     if DirectoryExists(Directory) then
-       Continue;
-
-    if CreateDir(Directory) then
-      DebugLn('[CreateBaseDirectories]: ' + Directory)
-    else
-      DebugLn('[CreateBaseDirectories]: Failed ' + Directory);
-  end;
-
-  // Data directories
-  for Directory in [GetPackagePath(), GetPluginCopyPath(), GetOldPackagePath(), GetBackupsPath(), GetDumpPath()] do
-  begin
-    if DirectoryExists(Directory) then
-      Continue;
-
-    if CreateDir(Directory) then
-      DebugLn('[CreateBaseDirectories]: ' + Directory)
-    else
-      DebugLn('[CreateBaseDirectories]: Failed ' + Directory);
-  end;
-end;
-
 function ReadINI(const Section, KeyName: string; FileName: string): string;
 begin
   with TINIFile.Create(ExpandFileName(FileName)) do
@@ -378,9 +556,6 @@ begin
 	  Free();
   end;
 end;
-
-initialization
-  CreateBaseDirectories();
 
 end.
 

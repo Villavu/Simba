@@ -15,7 +15,7 @@ interface
 uses
   Classes, SysUtils, Forms, ExtCtrls,
   simba.scripttabsform, simba.mufasatypes, simba.files,
-  simba.zip, simba.ide_initialization, simba.settings, simba.threading;
+  simba.zip, simba.ide_initialization, simba.settings, simba.threading, simba.env;
 
 type
   TSimbaScriptBackup = class(TComponent)

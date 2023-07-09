@@ -172,7 +172,7 @@ implementation
 
 uses
   Forms, SynEdit,
-  simba.mufasatypes, simba.encoding, simba.files, simba.editor_docgenerator,
+  simba.mufasatypes, simba.encoding, simba.env, simba.editor_docgenerator,
   simba.ide_initialization, simba.theme, simba.fonthelpers;
 
 var

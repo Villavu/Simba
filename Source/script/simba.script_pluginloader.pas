@@ -12,7 +12,7 @@ function LoadPlugin(FileName: String; ExtraSearchDirs: TStringArray = nil): TLib
 implementation
 
 uses
-  simba.mufasatypes, simba.files;
+  simba.mufasatypes, simba.env;
 
 function LoadPlugin(FileName: String; ExtraSearchDirs: TStringArray): TLibHandle;
 begin

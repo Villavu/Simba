@@ -77,7 +77,7 @@ implementation
 uses
   LazFileUtils,
   simba.settings, simba.ide_events,
-  simba.main, simba.files, simba.ide_showdeclaration, simba.threading;
+  simba.main, simba.env, simba.ide_showdeclaration, simba.threading;
 
 var
   __UID: Integer = 0;

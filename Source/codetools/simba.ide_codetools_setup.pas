@@ -14,7 +14,7 @@ implementation
 
 uses
   simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_insight,
-  simba.ide_initialization, simba.process, simba.files, simba.ide_events;
+  simba.ide_initialization, simba.process, simba.env, simba.ide_events;
 
 procedure SetupCodeTools;
 var

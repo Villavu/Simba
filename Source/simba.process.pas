@@ -53,7 +53,7 @@ implementation
 
 uses
   forms, process, lazloggerbase,
-  simba.files, simba.nativeinterface;
+  simba.env, simba.nativeinterface;
 
 type
   TProcessTimeout = class(TProcess)
