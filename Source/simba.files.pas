@@ -13,6 +13,10 @@ uses
   Classes, SysUtils,
   simba.mufasatypes;
 
+const
+  PATH_SEP = DirectorySeparator;
+  LINE_SEP = LineEnding;
+
 type
   TSimbaFile = class
   protected
@@ -62,6 +66,7 @@ type
     class function PathIncludeTrailingSep(Path: String): String;
     class function PathExcludeLeadingSep(Path: String): String;
     class function PathIncludeLeadingSep(Path: String): String;
+    class function PathExtractRelative(BasePath, DestPath: String): String;
   end;
 
   TSimbaDir = class
@@ -75,11 +80,13 @@ type
     class function DirIsEmpty(Path: String): Boolean;
     class function DirSize(Path: String): Int64;
     class function DirSizeInMegaBytes(Path: String): Single;
+    class function DirCopy(SourceDir, DestDir: String): Boolean;
   end;
 
-  procedure ZipFiles(const ArchiveFileName: String; const Files: TStringArray);
-  procedure UnZipFile(const ArchiveFileName, OutputDirectory: String);
-  function UnZipOneFile(const ArchiveFileName, FileName, OutputDirectory: String): Boolean;
+  function ZipExtractAll(ZipFileName, OutputDir: String): Boolean;
+  function ZipExtractOne(ZipFileName, FileName, OutputDir: String): Boolean;
+  function ZipFiles(ZipFileName: String; Files: TStringArray): Boolean;
+  function ZipEntries(ZipFileName: String): TStringArray;
 
   function ReadINI(const Section, KeyName: string; FileName: string): string;
   procedure DeleteINI(const Section, KeyName : string; FileName : string);
@@ -94,8 +101,8 @@ uses
   {$IFDEF UNIX}
   BaseUnix,
   {$ENDIF}
-  FileUtil, LazFileUtils, Zipper, IniFiles,
-  simba.encoding, md5, sha1;
+  FileUtil, LazFileUtils, Zipper, IniFiles, md5, sha1,
+  simba.encoding;
 
 class function TSimbaDir.DirList(Path: String; Recursive: Boolean): TStringArray;
 var
@@ -172,6 +179,11 @@ begin
   Result := DirSize(Path) / (1024 * 1024);
 end;
 
+class function TSimbaDir.DirCopy(SourceDir, DestDir: String): Boolean;
+begin
+  Result := CopyDirTree(SourceDir, DestDir);
+end;
+
 class function TSimbaPath.PathExists(Path: String): Boolean;
 begin
   Result := FileExists(Path) or DirectoryExists(Path);
@@ -240,6 +252,11 @@ end;
 class function TSimbaPath.PathIncludeLeadingSep(Path: String): String;
 begin
   Result := IncludeLeadingPathDelimiter(Path);
+end;
+
+class function TSimbaPath.PathExtractRelative(BasePath, DestPath: String): String;
+begin
+  Result := ExtractRelativePath(BasePath, DestPath);
 end;
 
 class function TSimbaFile.DoFileRead(const FileName: String; var Buffer; const Len: Integer; Offset: Integer): Boolean;
@@ -464,77 +481,115 @@ end;
 class function TSimbaFile.FileHash(FileName: String; HashType: String): String;
 begin
   case HashType.ToUpper() of
+    'MD5':    Result := MD5Print(MD5File(FileName));
     'SHA1':   Result := SHA1Print(SHA1File(FileName));
     'SHA256': Result := SHA256File(FileName);
     'SHA512': Result := SHA512File(FileName);
-    'MD5':    Result := MD5Print(MD5File(FileName));
     else
       SimbaException('Invalid hashtype. Expected: SHA1,SHA256,SHA512,MD5');
   end;
 end;
 
-procedure ZipFiles(const ArchiveFileName: String; const Files: TStringArray);
-var
-  Zipper: TZipper;
-  I: Integer;
-begin
-  if (Length(Files) = 0) then
-    raise Exception.Create('ZipFiles: No files to zip');
-
-  Zipper := TZipper.Create;
-  try
-    Zipper.FileName := ArchiveFileName;
-    for I := 0 to High(Files) do
-      Zipper.Entries.AddFileEntry(Files[I], ExtractFileName(Files[I]));
-
-    Zipper.ZipAllFiles();
-  finally
-    Zipper.Free;
-  end;
-end;
-
-procedure UnZipFile(const ArchiveFileName, OutputDirectory: String);
+function ZipExtractAll(ZipFileName, OutputDir: String): Boolean;
 var
   UnZipper: TUnZipper;
 begin
-  if (not FileExists(ArchiveFileName)) then
-    raise Exception.CreateFmt('UnZipFile: Archive "%s" does not exist', [ArchiveFileName]);
+  Result := False;
 
-  UnZipper := TUnZipper.Create();
-  try
-    UnZipper.FileName := ArchiveFileName;
-    UnZipper.OutputPath := OutputDirectory;
-    UnZipper.Examine();
-    UnZipper.UnZipAllFiles();
-  finally
+  if FileExists(ZipFileName) then
+  begin
+    UnZipper := TUnZipper.Create();
+
+    try
+      UnZipper.FileName := ZipFileName;
+      UnZipper.OutputPath := OutputDir;
+      UnZipper.UnZipAllFiles();
+
+      Result := True;
+    except
+    end;
+
     UnZipper.Free();
   end;
 end;
 
-function UnZipOneFile(const ArchiveFileName, FileName, OutputDirectory: String): Boolean;
+function ZipExtractOne(ZipFileName, FileName, OutputDir: String): Boolean;
 var
   UnZipper: TUnZipper;
-  I: Int32;
+  I: Integer;
 begin
   Result := False;
 
-  UnZipper := TUnZipper.Create();
-  UnZipper.Files.Add(FileName);
+  if FileExists(ZipFileName) then
+  begin
+    UnZipper := TUnZipper.Create();
 
-  try
-    UnZipper.FileName := ArchiveFileName;
-    UnZipper.OutputPath := OutputDirectory;
-    UnZipper.Examine();
+    try
+      UnZipper.Files.Add(FileName);
+      UnZipper.FileName := ZipFileName;
+      UnZipper.OutputPath := OutputDir;
+      UnZipper.Examine();
 
-    for I := 0 to UnZipper.Entries.Count - 1 do
-      if (UnZipper.Entries[I].ArchiveFileName = FileName) then
-      begin
-        UnZipper.UnZipAllFiles();
+      for I := 0 to UnZipper.Entries.Count - 1 do
+        if (UnZipper.Entries[I].ArchiveFileName = FileName) then
+        begin
+          UnZipper.UnZipAllFiles();
 
-        Result := True;
-        Break;
-      end;
-  finally
+          Result := True;
+          Break;
+        end;
+    except
+    end;
+
+    UnZipper.Free();
+  end;
+end;
+
+function ZipFiles(ZipFileName: String; Files: TStringArray): Boolean;
+var
+  Zipper: TZipper;
+  I: Integer;
+begin
+  Result := False;
+
+  if (Length(Files) > 0) then
+  begin
+    Zipper := TZipper.Create();
+
+    try
+      Zipper.FileName := ZipFileName;
+      for I := 0 to High(Files) do
+        Zipper.Entries.AddFileEntry(Files[I], ExtractFileName(Files[I]));
+
+      Zipper.ZipAllFiles();
+
+      Result := True;
+    except
+    end;
+
+    Zipper.Free();
+  end;
+end;
+
+function ZipEntries(ZipFileName: String): TStringArray;
+var
+  UnZipper: TUnZipper;
+  I: Integer;
+begin
+  Result := [];
+
+  if FileExists(ZipFileName) then
+  begin
+    UnZipper := TUnZipper.Create();
+    try
+      UnZipper.FileName := ZipFileName;
+      UnZipper.Examine();
+
+      SetLength(Result, UnZipper.Entries.Count);
+      for I := 0 to UnZipper.Entries.Count - 1 do
+        Result[I] := UnZipper.Entries[I].ArchiveFileName;
+    except
+    end;
     UnZipper.Free();
   end;
 end;

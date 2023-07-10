@@ -11,11 +11,6 @@ uses
   lptypes, lpparser, ffi,
   simba.script_compiler, simba.mufasatypes, simba.nativeinterface;
 
-procedure _LapeGetEnvironmentVariable(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := GetEnvironmentVariable(PString(Params^[0])^);
-end;
-
 procedure _LapeGetCurrentThreadID(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPtrUInt(Result)^ := PtrUInt(GetCurrentThreadID());
@@ -24,11 +19,6 @@ end;
 procedure _LapeGetMainThreadID(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPtrUInt(Result)^ := PtrUInt(MainThreadID);
-end;
-
-procedure _LapeWait(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  Sleep(PUInt32(Params^[0])^);
 end;
 
 procedure _LapePreciseSleep(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -65,6 +55,33 @@ begin
   PPtrUInt(Result)^ := TThread.ProcessorCount;
 end;
 
+procedure _LapeGetEnvVar(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := GetEnvironmentVariable(PString(Params^[0])^);
+end;
+
+procedure _LapeGetEnvVars(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+
+  function _GetEnvVars: TStringArray;
+  var
+    Count, I: Integer;
+  begin
+    Count := 0;
+
+    SetLength(Result, GetEnvironmentVariableCount() + 1);
+    for I := 1 to GetEnvironmentVariableCount() do
+      if (GetEnvironmentString(I) <> '') then
+      begin
+        Result[Count] := GetEnvironmentString(I);
+        Inc(Count);
+      end;
+    SetLength(Result, Count);
+  end;
+
+begin
+  PStringArray(Result)^ := _GetEnvVars();
+end;
+
 procedure ImportSystem(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -99,9 +116,9 @@ begin
     addGlobalType('array of TColor', 'TColorArray');
 
     addGlobalType('array of String', 'TStringArray');
+    addGlobalType('array of TStringArray', 'T2DStringArray');
     addGlobalType('array of Integer', 'TIntegerArray');
     addGlobalType('array of TIntegerArray', 'T2DIntegerArray');
-    addGlobalType('array of T2DIntegerArray', 'T3DIntegerArray');
     addGlobalType('array of Int64', 'TInt64Array');
     addGlobalType('array of Byte', 'TByteArray');
     addGlobalType('array of Single', 'TSingleArray');
@@ -127,7 +144,6 @@ begin
     addGlobalFunc('function GetThreadCount: Integer', @_LapeGetThreadCount);
     addGlobalFunc('function GetMainThreadID: PtrUInt', @_LapeGetMainThreadID);
     addGlobalFunc('function GetCurrentThreadID: PtrUInt', @_LapeGetCurrentThreadID);
-    addGlobalFunc('function GetEnvironmentVariable(const Name: String): String', @_LapeGetEnvironmentVariable);
 
     addGlobalType('procedure() of object', 'TSyncMethod', {$IF DEFINED(CPU32) and DEFINED(LAPE_CDECL)}FFI_CDECL{$ELSE}FFI_DEFAULT_ABI{$ENDIF});
     addGlobalFunc('procedure Sync(Method: TSyncMethod)', @_LapeSync);
@@ -138,6 +154,9 @@ begin
       '  Move(Src, Dst, Size);',
       'end;'
     ]);
+
+    addGlobalFunc('function GetEnvVar(Name: String): String', @_LapeGetEnvVar);
+    addGlobalFunc('function GetEnvVars: TStringArray', @_LapeGetEnvVars);
 
     ImportingSection := '';
   end;
