@@ -16,7 +16,7 @@ uses
 
 function LoadPlugin(FileName: String; ExtraSearchDirs: TStringArray): TLibHandle;
 begin
-  if (not FindPlugin(FileName, [GetPluginPath(), GetSimbaPath()] + ExtraSearchDirs)) then
+  if (not FindPlugin(FileName, ExtraSearchDirs)) then
     raise Exception.CreateFmt('Unable to find plugin "%s"', [FileName]);
 
   Result := LoadLibrary(FileName);

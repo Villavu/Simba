@@ -188,7 +188,7 @@ end;
 
 function GetSimbaSettingsFileName: String;
 begin
-  Result := GetDataPath() + 'settings.ini';
+  Result := SimbaEnv.DataPath + 'settings.ini';
 end;
 
 procedure TSimbaSetting_Integer.CheckValue(AValue: Variant);

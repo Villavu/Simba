@@ -168,7 +168,7 @@ begin
   FScript.TargetWindow := TargetWindow;
 
   // Simba created a temp file. Most likely default script.
-  if FileIsInDirectory(FileName, GetDataPath()) then
+  if FileIsInDirectory(FileName, SimbaEnv.DataPath) then
   begin
     FScript.ScriptFileName := ChangeFileExt(ExtractFileName(FileName), '');
 

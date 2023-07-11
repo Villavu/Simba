@@ -101,7 +101,7 @@ begin
     end else
       Log('Release "%s" has no install options'.Format([Rel.Name]));
 
-  PathEdit.Text        := GetIncludePath() + FPackage.Info.Name;
+  PathEdit.Text        := SimbaEnv.IncludesPath + FPackage.Info.Name;
   FlatCheckbox.Checked := False;
   IgnoreListMemo.Clear();
 end;
@@ -150,10 +150,10 @@ begin
   Options.IgnoreList := IgnoreListMemo.Lines.ToStringArray();
   Options.AutoUpdate := False;
 
-  if GetSelectedRelease(Rel) and (SimbaQuestionDlg('Install Package', 'Install "%s" to "%s" ?'.Format([FPackage.Info.FullName, ExtractRelativePath(GetSimbaPath(), Options.Path)])) = ESimbaDialogResult.YES) then
+  if GetSelectedRelease(Rel) and (SimbaQuestionDlg('Install Package', 'Install "%s" to "%s" ?'.Format([FPackage.Info.FullName, ExtractRelativePath(SimbaEnv.SimbaPath, Options.Path)])) = ESimbaDialogResult.YES) then
     FInstaller.Install(Rel, Options)
   else
-  if GetSelectedBranch(Branch) and (SimbaQuestionDlg('Install Package', 'Install "%s" to "%s" ?'.Format([FPackage.Info.FullName, ExtractRelativePath(GetSimbaPath(), Options.Path)])) = ESimbaDialogResult.YES) then
+  if GetSelectedBranch(Branch) and (SimbaQuestionDlg('Install Package', 'Install "%s" to "%s" ?'.Format([FPackage.Info.FullName, ExtractRelativePath(SimbaEnv.SimbaPath, Options.Path)])) = ESimbaDialogResult.YES) then
     FInstaller.InstallBranch(Branch, Options.Path);
 end;
 

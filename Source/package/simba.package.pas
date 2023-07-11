@@ -132,7 +132,7 @@ begin
     Thread.WaitFor();
     Thread.Free();
 
-    with TIniFile.Create(GetPackagePath() + 'packages.ini') do
+    with TIniFile.Create(SimbaEnv.PackagesPath + 'packages.ini') do
     try
       ReadSections(Sections);
 
@@ -247,7 +247,7 @@ begin
   Keys := TStringList.Create();
 
   try
-    with TIniFile.Create(GetPackagePath() + 'packages.ini') do
+    with TIniFile.Create(SimbaEnv.PackagesPath + 'packages.ini') do
     try
       ReadSection(FURL, Keys);
       for Key in Keys do
@@ -266,7 +266,7 @@ end;
 procedure TSimbaPackage.WriteConfig(Key: String; Value: String);
 begin
   try
-    with TIniFile.Create(GetPackagePath() + 'packages.ini') do
+    with TIniFile.Create(SimbaEnv.PackagesPath + 'packages.ini') do
     try
       WriteInteger('Settings', 'Version', PACKAGE_SETTINGS_VERSION);
       WriteString(FURL, Key, Value);
@@ -282,7 +282,7 @@ end;
 function TSimbaPackage.ReadConfig(Key: String): String;
 begin
   try
-    with TIniFile.Create(GetPackagePath() + 'packages.ini') do
+    with TIniFile.Create(SimbaEnv.PackagesPath + 'packages.ini') do
     try
       Result := ReadString(FURL, Key, '');
     finally
@@ -360,7 +360,7 @@ begin
 
   if Result then
   begin
-    if RemoveFiles and PathIsInPath(InstalledPath, GetSimbaPath()) then
+    if RemoveFiles and PathIsInPath(InstalledPath, SimbaEnv.SimbaPath) then
       DeleteDirectory(InstalledPath, False);
 
     ClearConfig();

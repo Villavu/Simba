@@ -325,7 +325,7 @@ begin
 
     DumpStack(Log);
 
-    FileName := GetDataPath() + FormatDateTime('dd-mm_hh-mm-ss', Now()) + '.crash';
+    FileName := SimbaEnv.DataPath + FormatDateTime('dd-mm_hh-mm-ss', Now()) + '.crash';
 
     Log.SaveToFile(FileName);
     Log.Free();
@@ -337,7 +337,7 @@ begin
                ''                                                       + LineEnding +
                'A crash log has been saved in the data directory.';
 
-    if MessageDlg(Format(Message, [E.Message, ExtractRelativePath(GetSimbaPath(), FileName)]), mtError, mbOKCancel, 0) = mrOk then
+    if MessageDlg(Format(Message, [E.Message, ExtractRelativePath(SimbaEnv.DataPath, FileName)]), mtError, mbOKCancel, 0) = mrOk then
     begin
       SimbaScriptTabsForm.CloseAllTabs();
 

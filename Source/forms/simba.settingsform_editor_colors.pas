@@ -180,7 +180,7 @@ procedure TEditorColorsFrame.Save;
 var
   FileName: String;
 begin
-  FileName := GetDataPath() + 'colors_editor.ini';
+  FileName := SimbaEnv.DataPath + 'colors_editor.ini';
 
   FEditor.Attributes.SaveToFile(FileName);
 
@@ -192,7 +192,7 @@ procedure TEditorColorsFrame.DoSaveButtonClick(Sender: TObject);
 begin
   with TSaveDialog.Create(Self) do
   try
-    InitialDir := GetDataPath();
+    InitialDir := SimbaEnv.DataPath;
     Title := 'Save Editor Colors';
     Filter := 'Colors Files (*.ini)|*.ini';
     FileName := 'colors';
@@ -216,7 +216,7 @@ procedure TEditorColorsFrame.LoadButtonClick(Sender: TObject);
 begin
   with TOpenDialog.Create(Self) do
   try
-    InitialDir := GetDataPath();
+    InitialDir := SimbaEnv.DataPath;
     Title := 'Load Editor Colors';
     Filter := 'INI Files (*.ini)|*.ini';
 

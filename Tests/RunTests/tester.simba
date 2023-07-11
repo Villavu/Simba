@@ -2,11 +2,8 @@ var
   FileName, Output: String;
   Fail, Pass: Integer;
 begin
-  for FileName in DirSearch({$macro CURRENT_DIRECTORY}, '*.simba') do
+  for FileName in DirSearch(DirParent({$macro CURRENT_DIRECTORY}), '*.simba') do
   begin
-    if (FileName = {$macro CURRENT_FILE}) then
-      Continue;
-
     WriteLn('Testing: ' + PathExtractNameWithoutExt(FileName));
 
     if RunScript(FileName, ['--silent=true'], Output) = 0 then

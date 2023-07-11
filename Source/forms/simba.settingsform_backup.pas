@@ -40,7 +40,7 @@ constructor TSimbaBackupFrame.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  LabelBackupDirectory.Caption := GetBackupsPath();
+  LabelBackupDirectory.Caption := SimbaEnv.BackupsPath;
 end;
 
 procedure TSimbaBackupFrame.Load;
