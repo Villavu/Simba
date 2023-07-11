@@ -22,21 +22,21 @@ var
     HeaderName := Header.After(' ');
     HeaderName := HeaderName.CopyRange(1, HeaderName.IndexOfAny(['(',':',';']) - 1);
 
-    Doc := '(*%s%s%s%s%s%s%s*)'.format([LineEnding, HeaderName, LineEnding, '~' * Length(HeaderName), LineEnding, Header, LineEnding]);
+    Doc := '(*%s%s%s%s%s%s%s*)'.format([LINE_SEP, HeaderName, LINE_SEP, '~' * Length(HeaderName), LINE_SEP, Header, LINE_SEP]);
     Map += [WrapperName, Doc];
   end;
 
 begin
-  Contents := ReadFileContents('Source/script/imports/simba/simba.import_internet.pas');
+  Contents := FileRead('Source/script/imports/simba/simba.import_file.pas');
 
   for DocComment in Contents.BetweenAll('(*','*)') do
   begin
     if DocComment.Contains('===') then // section title
       Continue;
-    Contents := Contents.Replace('(*' + DocComment + '*)' + LineEnding, '');
+    Contents := Contents.Replace('(*' + DocComment + '*)' + LINE_SEP, '');
   end;
 
-  for Import in Contents.BetweenAll("addClassVar(", ");" + LineEnding) do
+  for Import in Contents.BetweenAll("addClassVar(", ");" + LINE_SEP) do
   begin
     ReadWrapperName := Import.Between('@', '_Read');
     WriteWrapperName := Import.Between('_Read, @', '_Write');
@@ -50,7 +50,7 @@ begin
       Add('procedure ' + Params[0] + '.Set' + Params[1] + '(Value: ' + Params[2] + ')', WriteWrapperName + '_Write');
   end;
 
-  for Import in Contents.BetweenAll("addGlobalFunc(", ");" + LineEnding) do
+  for Import in Contents.BetweenAll("addGlobalFunc(", ");" + LINE_SEP) do
   begin
     WrapperName := Import.After('@');
     Header := Import.Between(#39, #39);
@@ -58,22 +58,22 @@ begin
       Add(Header, WrapperName);
   end;
 
-  for Line in Contents.Split(LineEnding) do
+  for Line in Contents.Split(LINE_SEP) do
   begin
     for I := 0 to High(Map) do
       if (Line.Contains('procedure ' + Map[i].WrapperName + '(')) then
       begin
-        NewContents += Map[I].DocComment + LineEnding;
+        NewContents += Map[I].DocComment + LINE_SEP;
         Map.Delete(I, 1);
         Break;
       end;
 
-    NewContents += Line + LineEnding;
+    NewContents += Line + LINE_SEP;
   end;
 
   Map.Reverse();
   for I := 0 to High(Map) do
-    NewContents := Map[I].DocComment + LineEnding*2 + NewContents;
+    NewContents := Map[I].DocComment + LINE_SEP*2 + NewContents;
 
   ClearDebug();
   WriteLn(NewContents);
