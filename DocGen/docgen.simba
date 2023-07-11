@@ -22,6 +22,7 @@ begin
   SourceFiles += ['simba.import_finder.pas',       'Finder'        ];
   SourceFiles += ['simba.import_target.pas',       'Target'        ];
   SourceFiles += ['simba.import_internet.pas',     'Intenet'       ];
+  SourceFiles += ['simba.import_file.pas',         'File'          ];
 end;
 
 const
@@ -67,8 +68,8 @@ function Indent(Str: String; Size: Integer): String;
 var
   Line: String;
 begin
-  for Line in Str.Split(LineEnding) do
-    Result := Result + (#32 * Size) + Line + LineEnding;
+  for Line in Str.Split(LINE_SEP) do
+    Result := Result + (#32 * Size) + Line + LINE_SEP;
 end;
 
 // Code block to sphinx .. code-block::
@@ -92,7 +93,7 @@ begin
     Block := Str.CopyRange(Start, Stop);
 
     Str.Delete(Start, Block.Length());
-    Str.Insert('.. code-block::' + (LineEnding * 2) + Indent(Block.Trim([#96, #10, #13]), 4), Start);
+    Str.Insert('.. code-block::' + (LINE_SEP * 2) + Indent(Block.Trim([#96, #10, #13]), 4), Start);
 
     Start := Stop;
   end;
@@ -140,10 +141,10 @@ begin
 
     while ((Start := Str.IndexOf(Header, Start)) > 0) do
     begin
-      if Str.Copy(Start - Length(LineEnding), Length(LineEnding)) = LineEnding then
+      if Str.Copy(Start - Length(LINE_SEP), Length(LINE_SEP)) = LINE_SEP then
       begin
         Str.Insert('```', Start);
-        Start :=  Str.IndexOf(LineEnding, Start);
+        Start :=  Str.IndexOf(LINE_SEP, Start);
         if (Start = 0) then
           Exit;
         Str.Insert('```', Start);
@@ -158,10 +159,10 @@ function ParseComments(FileName, Name: String): Boolean;
 var
   Str, Comments: String;
 begin
-  for Str in ReadFileContents(FileName).BetweenAll('(*', '*)') do
+  for Str in FileRead(FileName).BetweenAll('(*', '*)') do
   begin
     if (Comments <> '') then
-      Comments += LineEnding + '----' + LineEnding;
+      Comments += LINE_SEP + '----' + LINE_SEP;
     Comments += Str;
   end;
 
@@ -176,8 +177,8 @@ begin
     Comments := Comments.Replace('Note:', '.. note::');
     Comments := Comments.Replace('Warning:', '.. warning::');
 
-    WriteFileContents(INPUT_DIR + Name + '.rst', Comments);
-    AppendFileContents(INPUT_DIR + 'index.rst', '   ' + Name + LineEnding);
+    FileWrite(INPUT_DIR + Name + '.rst', Comments);
+    FileAppend(INPUT_DIR + 'index.rst', '   ' + Name + LINE_SEP);
   end;
 end;
 
@@ -186,15 +187,15 @@ var
   I, J: Integer;
   Files: TStringArray;
 begin
-  Files := FindFiles(SOURCE_ROOT_DIR, True);
+  Files := DirList(SOURCE_ROOT_DIR, True);
   for I := 0 to High(SourceFiles) do
     for J := 0 to High(Files) do
     begin
       // ignore files in lazarus backup/ dirs
-      if ExtractFileName(ExtractFileDir(Files[J])) = 'backup' then
+      if DirParent(PathExtractDir(Files[J])) = 'backup' then
         Continue;
 
-      if (SourceFiles[I].FileName = ExtractFileName(Files[J])) then
+      if (SourceFiles[I].FileName = PathExtractName(Files[J])) then
       begin
         ParseComments(Files[J], SourceFiles[I].Title);
         Break;
@@ -207,14 +208,14 @@ var
 begin
   ClearDebug();
 
-  CreateDirectory(OUTPUT_DIR);
-  DeleteDirectory(OUTPUT_DIR, True);
-  CreateDirectory(INPUT_DIR);
-  DeleteDirectory(INPUT_DIR, True);
+  DirCreate(OUTPUT_DIR);
+  DirDelete(OUTPUT_DIR, True);
+  DirCreate(INPUT_DIR);
+  DirDelete(INPUT_DIR, True);
 
-  WriteFileContents(INPUT_DIR + 'index.rst', TOC_FILE);
-  WriteFileContents(INPUT_DIR + 'conf.py', CONFIG_FILE);
-  WriteFileContents(INPUT_DIR + 'layout.html', TEMPLATE_FILE);
+  FileWrite(INPUT_DIR + 'index.rst', TOC_FILE);
+  FileWrite(INPUT_DIR + 'conf.py', CONFIG_FILE);
+  FileWrite(INPUT_DIR + 'layout.html', TEMPLATE_FILE);
 
   Build();
 
@@ -222,5 +223,5 @@ begin
   if (Str <> '') then
     WriteLn(Str);
 
-  WriteLn('Link: "' + ExpandFileName(OUTPUT_DIR) + 'index.html"');
+  WriteLn('Link: "' + PathNormalize(OUTPUT_DIR) + 'index.html"');
 end.
