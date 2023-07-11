@@ -88,10 +88,10 @@ begin
   if Assigned(OnStartInstall) then
     OnStartInstall(Self);
 
-  // Move old files to Data/OldPackages/
+  // Move old files to Data/Temp/
   if DirectoryExists(Path) then
   begin
-    FileName := GetOldPackagePath() + ExtractFileName(Path);
+    FileName := SimbaEnv.TempPath + ExtractFileName(Path);
     if DirectoryExists(FileName) then
       DeleteDirectory(FileName, False);
 
@@ -288,9 +288,9 @@ begin
   end;
 
   if (Options.Path = '') then
-    Options.Path := ConcatPaths([GetIncludePath(), FPackage.Info.Name])
+    Options.Path := ConcatPaths([SimbaEnv.IncludesPath, FPackage.Info.Name])
   else
-    Options.Path := ConcatPaths([GetSimbaPath(), SetDirSeparators(Options.Path)]);
+    Options.Path := ConcatPaths([SimbaEnv.SimbaPath, SetDirSeparators(Options.Path)]);
 
   Thread.Free();
   Strings.Free();

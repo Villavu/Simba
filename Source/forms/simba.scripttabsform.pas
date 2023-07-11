@@ -537,7 +537,7 @@ begin
   try
     OpenDialog.InitialDir := ExtractFileDir(CurrentTab.ScriptFileName);
     if (OpenDialog.InitialDir = '') then
-      OpenDialog.InitialDir := GetScriptPath();
+      OpenDialog.InitialDir := SimbaEnv.ScriptsPath;
 
     if OpenDialog.Execute() then
       for I := 0 to OpenDialog.Files.Count - 1 do

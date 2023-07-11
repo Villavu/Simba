@@ -39,7 +39,7 @@ type
 
     function RunCommandTimeout(Executable: String; Commands: TStringArray; out Output: String; Timeout: Int32): Boolean;
 
-    function RunDump(Hash: String; Commands: TStringArray): TStringList;
+    function RunDump(FileName: String; Commands: TStringArray): TStringList;
 
     function RunScript(Script: String; Parameters: TStringArray; out Output: String): TProcessExitStatus; overload;
     function RunScript(Script: String; Parameters: TStringArray): TProcessID; overload;
@@ -53,7 +53,7 @@ implementation
 
 uses
   forms, process, lazloggerbase,
-  simba.env, simba.nativeinterface;
+  simba.env, simba.files, simba.nativeinterface;
 
 type
   TProcessTimeout = class(TProcess)
@@ -214,30 +214,27 @@ begin
   end;
 end;
 
-function TSimbaProcess.RunDump(Hash: String; Commands: TStringArray): TStringList;
+function TSimbaProcess.RunDump(FileName: String; Commands: TStringArray): TStringList;
 var
-  ProcessOutput, FileName: String;
+  DumpFileName, ProcessOutput: String;
 begin
-  FileName := GetDumpPath() + Hash;
+  DumpFileName := SimbaEnv.DumpsPath + TSimbaFile.FileHash(FileName);
 
   Result := TStringList.Create();
   Result.LineBreak := #0;
 
-  if FileExists(FileName) then
+  if FileExists(DumpFileName) then
   begin
-    Result.LoadFromFile(FileName);
+    Result.LoadFromFile(DumpFileName);
 
     Exit;
   end;
 
-  if not DirectoryExists(GetDumpPath()) then
-    ForceDirectories(GetDumpPath());
-
   try
-    if not SimbaProcess.RunCommandTimeout(Application.ExeName, Commands + [FileName], ProcessOutput, 5000) then
+    if not SimbaProcess.RunCommandTimeout(Application.ExeName, Commands + [DumpFileName], ProcessOutput, 5000) then
       raise Exception.Create('Timed out');
 
-    Result.LoadFromFile(FileName);
+    Result.LoadFromFile(DumpFileName);
   except
     on E: Exception do
       raise Exception.Create(E.Message + ' :: ' + ProcessOutput);

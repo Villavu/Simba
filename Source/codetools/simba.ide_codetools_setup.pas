@@ -25,7 +25,7 @@ begin
   List := nil;
 
   try
-    List := SimbaProcess.RunDump(HashFile(Application.ExeName), ['--dumpcompiler']);
+    List := SimbaProcess.RunDump(Application.ExeName, ['--dumpcompiler']);
 
     for I := 0 to List.Count - 1 do
     begin

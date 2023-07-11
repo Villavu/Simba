@@ -160,13 +160,13 @@ begin
   case Sender.TokenID of
     tokLibraryDirect:
       begin
-        if FindPlugin(FileName, [ExtractFileDir(Sender.FileName), GetPluginPath(), GetSimbaPath()]) then
+        if FindPlugin(FileName, [ExtractFileDir(Sender.FileName)]) then
           Result := FileName;
       end;
 
     tokIncludeDirect, tokIncludeOnceDirect:
       begin
-        if FindFile(FileName, '', [ExtractFileDir(Sender.FileName), GetIncludePath(), GetSimbaPath()]) then
+        if simba.env.FindInclude(FileName, [ExtractFileDir(Sender.FileName)]) then
           Result := FileName;
       end;
   end;
@@ -180,7 +180,7 @@ begin
 
   List := nil;
   try
-    List := SimbaProcess.RunDump(HashFile(FileName), ['--dumpplugin=' + FileName]);
+    List := SimbaProcess.RunDump(FileName, ['--dumpplugin=' + FileName]);
 
     Result := List.Text;
   except

@@ -51,7 +51,7 @@ end;
 procedure TSimbaShapeBoxForm.FormHide(Sender: TObject);
 begin
   ShapeBox.PrintShapes();
-  ShapeBox.SaveToFile(GetDataPath() + 'shapes');
+  ShapeBox.SaveToFile(SimbaEnv.DataPath + 'shapes');
   if (not HasBackground) then
     ShapeBox.Background.SetSize(0, 0);
 end;
@@ -65,7 +65,7 @@ begin
     ShapeBox.Background.SetSize(1000, 1000);
   end;
 
-  ShapeBox.LoadFromFile(GetDataPath() + 'shapes');
+  ShapeBox.LoadFromFile(SimbaEnv.DataPath + 'shapes');
 end;
 
 procedure TSimbaShapeBoxForm.MenuItem3Click(Sender: TObject);

@@ -38,7 +38,7 @@ implementation
 
 uses
   lclintf, lazversion,
-  simba.env;
+  simba.files;
 
 procedure TSimbaAboutForm.DoFirstShow(Sender: TObject);
 begin
@@ -56,7 +56,7 @@ begin
   AboutMemo.Lines.Add('  FPC %d.%d.%d', [FPC_VERSION, FPC_RELEASE, FPC_PATCH]);
   AboutMemo.Lines.Add('  Lazarus version %s', [LAZ_VERSION]);
   AboutMemo.Lines.Add('');
-  AboutMemo.Lines.Add('Binary hash: %s', [HashFile(Application.ExeName)]);
+  AboutMemo.Lines.Add('Simba SHA1 hash: %s', [TSimbaFile.FileHash(Application.ExeName)]);
 
   if (SIMBA_COMMIT <> '') then
   begin

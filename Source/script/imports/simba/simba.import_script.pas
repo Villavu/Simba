@@ -186,8 +186,7 @@ begin
   begin
     ImportingSection := 'Script';
 
-    addGlobalVar('', 'ScriptFile').isConstant := True;
-    addGlobalVar('', 'ScriptName').isConstant := True;
+    addGlobalVar('', 'SCRIPT_FILE').isConstant := True;
 
     addGlobalFunc('function RunScript(Script: String; Parameters: TStringArray; out Output: String): TProcessExitStatus; overload', @_LapeRunScript);
     addGlobalFunc('function RunScript(Script: String; Parameters: TStringArray): TProcessID; overload', @_LapeRunScriptEx);

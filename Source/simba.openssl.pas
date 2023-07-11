@@ -24,11 +24,11 @@ implementation
 
 uses
   lcltype, Forms,
-  simba.mufasatypes, simba.gz, simba.settings, simba.env, simba.ide_initialization;
+  simba.mufasatypes, simba.gz, simba.settings, simba.env, simba.files, simba.ide_initialization;
 
 function IsFileHash(FileName: String; Hash: String): Boolean;
 begin
-  Result := FileExists(FileName) and (HashFile(FileName) = Hash);
+  Result := FileExists(FileName) and (TSimbaFile.FileHash(FileName) = Hash);
 end;
 
 function ExtractLib(Stream: TStream; FileName: String): String;
@@ -49,7 +49,7 @@ begin
   InputStream.Free();
   OutputStream.Free();
 
-  Result := HashFile(FileName);
+  Result := TSimbaFile.FileHash(FileName);
 end;
 
 function ExtractLibCrypto(ResourceHandle: TFPResourceHMODULE; ResourceType, ResourceName: PChar; Param: PtrInt): LongBool; stdcall;
@@ -60,7 +60,7 @@ begin
 
   if Name.StartsWith('libcrypto') then
   begin
-    FileName := GetSimbaPath() + Name;
+    FileName := SimbaEnv.SimbaPath + Name;
     if not IsFileHash(FileName, SimbaSettings.General.OpenSSLCryptoHash.Value) then
       SimbaSettings.General.OpenSSLCryptoHash.Value := ExtractLib(TResourceStream.Create(HINSTANCE, ResourceName, ResourceType), FileName);
 
@@ -77,7 +77,7 @@ begin
 
   if Name.StartsWith('libssl') then
   begin
-    FileName := GetSimbaPath() + Name;
+    FileName := SimbaEnv.SimbaPath + Name;
     if not IsFileHash(FileName, SimbaSettings.General.OpenSSLHash.Value) then
       SimbaSettings.General.OpenSSLHash.Value := ExtractLib(TResourceStream.Create(HINSTANCE, ResourceName, ResourceType), FileName);
 

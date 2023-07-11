@@ -149,7 +149,7 @@ begin
     Options := Options + [ofOverwritePrompt];
     InitialDir := ExtractFileDir(FScriptFileName);
     if (InitialDir = '') then
-      InitialDir := GetScriptPath();
+      InitialDir := SimbaEnv.ScriptsPath;
 
     if Execute() then
     begin
@@ -301,7 +301,7 @@ begin
     FScriptInstance := TSimbaScriptInstance.Create(Self, FOutputBox);
     FScriptInstance.Target := Target;
     if (FScriptFileName = '') then
-      FScriptInstance.ScriptFile := CreateTempFile(Script, ScriptTitle)
+      FScriptInstance.ScriptFile := SimbaEnv.WriteTempFile(Script, ScriptTitle)
     else
       FScriptInstance.ScriptFile := ScriptFileName;
 
@@ -321,7 +321,7 @@ begin
     FScriptInstance := TSimbaScriptInstance.Create(Self, FOutputBox);
 
     if (FScriptFileName = '') then
-      FScriptInstance.ScriptFile := CreateTempFile(Script, ScriptTitle)
+      FScriptInstance.ScriptFile := SimbaEnv.WriteTempFile(Script, ScriptTitle)
     else
       FScriptInstance.ScriptFile := ScriptFileName;
 

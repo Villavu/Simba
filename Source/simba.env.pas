@@ -13,34 +13,48 @@ uses
   classes, sysutils,
   simba.mufasatypes;
 
-  function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
-  function FindFiles(Directories: TStringArray; WildCard: String; Recursive: Boolean = False): TStringArray;
-  function FindPlugin(var FileName: String; const Directories: array of String): Boolean;
+  function FindInclude(var FileName: String; ExtraSearchDirs: TStringArray): Boolean;
+  function FindPlugin(var FileName: String; ExtraSearchDirs: TStringArray): Boolean;
   procedure CopyPlugin(var FileName: String);
 
-  function HashFile(const FileName: String): String;
-  function ReadFile(const FileName: String): String;
-  function WriteFile(const FileName, Contents: String): Boolean;
-  function CreateTempFile(const Contents, Prefix: String): String;
+type
+  SimbaEnv = class
+  private
+  class var
+    FSimbaPath: String;
+    FIncludesPath: String;
+    FPluginsPath: String;
+    FDataPath: String;
+    FTempPath: String;
+    FDumpsPath: String;
+    FScriptsPath: String;
+    FPackagesPath: String;
+    FScreenshotsPath: String;
+    FBackupsPath: String;
+  public
+    class constructor Create;
 
-  function GetSimbaPath: String;
-  function GetDataPath: String;
-  function GetIncludePath: String;
-  function GetPluginPath: String;
-  function GetPluginCopyPath: String;
-  function GetScriptPath: String;
-  function GetPackagePath: String;
-  function GetOldPackagePath: String;
-  function GetBackupsPath: String;
-  function GetDumpPath: String;
-  function GetScreenshotPath: String;
+    class function WriteTempFile(const Contents, Prefix: String): String;
+
+    class property SimbaPath: String read FSimbaPath;
+    class property IncludesPath: String read FIncludesPath;
+    class property PluginsPath: String read FPluginsPath;
+    class property ScriptsPath: String read FScriptsPath;
+    class property DataPath: String read FDataPath;
+    class property TempPath: String read FTempPath;
+    class property PackagesPath: String read FPackagesPath;
+    class property DumpsPath: String read FDumpsPath;
+    class property ScreenshotsPath: String read FScreenshotsPath;
+    class property BackupsPath: String read FBackupsPath;
+  end;
 
 implementation
 
 uses
-  forms, inifiles, fileutil, zipper, sha1;
+  Forms,
+  simba.files;
 
-function FindFile(var FileName: string; Extension: String; const Directories: array of String): Boolean;
+function FindFile(var FileName: string; Ext: String; const SearchPaths: array of String): Boolean;
 var
   I: Int32;
 begin
@@ -53,265 +67,87 @@ begin
     Exit(True);
   end;
 
-  for I := 0 to High(Directories) do
-    if FileExists(IncludeTrailingPathDelimiter(Directories[I]) + FileName + Extension) then
+  for I := 0 to High(SearchPaths) do
+    if FileExists(IncludeTrailingPathDelimiter(SearchPaths[I]) + FileName + Ext) then
     begin
-      FileName := ExpandFileName(IncludeTrailingPathDelimiter(Directories[I]) + FileName + Extension);
+      FileName := ExpandFileName(IncludeTrailingPathDelimiter(SearchPaths[I]) + FileName + Ext);
 
       Exit(True);
     end;
 end;
 
-function FindFiles(Directories: TStringArray; WildCard: String; Recursive: Boolean): TStringArray;
-var
-  I: Integer;
-  Path: String;
+function FindInclude(var FileName: String; ExtraSearchDirs: TStringArray): Boolean;
 begin
-  Result := Default(TStringArray);
-  if Length(Directories) = 0 then
-    Exit;
-
-  I := Pos('*', WildCard) - 1;
-  if (I > 0) then
-  begin
-    Path := Copy(Wildcard, 1, I);
-    Wildcard := Copy(WildCard, I+1);
-  end else
-    Path := '';
-
-  for I := 0 to High(Directories) do
-    if DirectoryExists(Directories[I]) then
-    begin
-      Directories[I] := ExpandFileName(ConcatPaths([Directories[I], Path]));
-
-      with FindAllFiles(Directories[I], WildCard, Recursive) do
-      try
-        Sort(); // sort, else it's dependant on how filesystem orders
-
-        Result := ToStringArray();
-        if Length(Result) > 0 then
-          Exit;
-      finally
-        Free();
-      end;
-    end;
+  Result := FindFile(FileName, '', ExtraSearchDirs + [SimbaEnv.IncludesPath, SimbaEnv.SimbaPath]);
 end;
 
-function FindPlugin(var FileName: String; const Directories: array of String): Boolean;
+function FindPlugin(var FileName: String; ExtraSearchDirs: TStringArray): Boolean;
+const
+  {$IF DEFINED(CPUAARCH64)}
+  // lib.aarch64
+  SimbaSuffix = SharedSuffix + '.aarch64';
+  {$ELSE}
+  // lib32.dll
+  // lib64.dll
+  SimbaSuffix = {$IFDEF CPU32}'32'{$ELSE}'64'{$ENDIF} + '.' + SharedSuffix;
+  {$ENDIF}
 begin
-  Result := FindFile(FileName, '', Directories) or
-            {$IFDEF CPUAARCH64} 
-            FindFile(FileName, '.' + SharedSuffix + '.aarch64', Directories) or
-            FindFile(FileName, {$IFDEF CPU32}'32'{$ELSE}'64'{$ENDIF} + '.' + SharedSuffix + '.aarch64', Directories) or
-            {$ENDIF}
-            FindFile(FileName, '.' + SharedSuffix, Directories) or
-            FindFile(FileName, {$IFDEF CPU32}'32'{$ELSE}'64'{$ENDIF} + '.' + SharedSuffix, Directories);
+  ExtraSearchDirs := ExtraSearchDirs + [SimbaEnv.PluginsPath, SimbaEnv.SimbaPath];
+
+  Result := FindFile(FileName, '',                 ExtraSearchDirs) or
+            FindFile(FileName, '.' + SharedSuffix, ExtraSearchDirs) or
+            FindFile(FileName, SimbaSuffix,        ExtraSearchDirs);
 end;
-
-
 
 // Make a copy of the plugin to data/plugins/ so we can delete/update if it's loaded
 procedure CopyPlugin(var FileName: String);
 var
   NewFileName: String;
 begin
-  NewFileName := GetPluginCopyPath() + HashFile(FileName) + ExtractFileExt(FileName);
-  if CopyFile(FileName, NewFileName, [], True) then
+  NewFileName := SimbaEnv.TempPath + TSimbaFile.FileHash(FileName) + TSimbaPath.PathExtractExt(FileName);
+  if TSimbaFile.FileExists(NewFileName) or TSimbaFile.FileCopy(FileName, NewFileName) then
     FileName := NewFileName;
 end;
 
-
-
-function HashFile(const FileName: String): String;
-begin
-  try
-    Result := SHA1Print(SHA1File(FileName, 256*256));
-  except
-    Result := '';
-  end;
-end;
-
-function ReadFile(const FileName: String): String;
-var
-  Stream: TFileStream;
-begin
-  Result := '';
-  if not FileExists(FileName) then
-    Exit;
-
-  Stream := nil;
-  try
-    Stream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
-
-    SetLength(Result, Stream.Size);
-    if Length(Result) > 0 then
-      Stream.Read(Result[1], Length(Result));
-  except
-  end;
-
-  if (Stream <> nil) then
-    Stream.Free();
-end;
-
-function WriteFile(const FileName, Contents: String): Boolean;
-var
-  Stream: TFileStream;
-begin
-  Result := False;
-
-  Stream := nil;
-  try
-    Stream := TFileStream.Create(FileName, fmCreate or fmShareDenyWrite);
-    if Stream.Write(Contents[1], Length(Contents)) = Length(Contents) then
-      Result := True;
-  except
-  end;
-
-  if (Stream <> nil) then
-    Stream.Free();
-end;
-
-function CreateTempFile(const Contents, Prefix: String): String;
+class function SimbaEnv.WriteTempFile(const Contents, Prefix: String): String;
 var
   Number: Integer = 0;
 begin
-  Result := Format('%s%s.%d', [GetDataPath(), Prefix, Number]);
+  Result := Format('%s%s.%d', [SimbaEnv.TempPath, Prefix, Number]);
   while FileExists(Result) do
   begin
     Inc(Number);
 
-    Result := Format('%s%s.%d', [GetDataPath(), Prefix, Number]);
+    Result := Format('%s%s.%d', [SimbaEnv.TempPath, Prefix, Number]);
   end;
 
-  with TStringList.Create() do
-  try
-    Text := Contents;
-
-    SaveToFile(Result);
-  finally
-    Free();
-  end;
+  TSimbaFile.FileWrite(Result, Contents);
 end;
 
-function GetSimbaPath: String;
-begin
-  Result := IncludeTrailingPathDelimiter(Application.Location);
-end;
+class constructor SimbaEnv.Create;
 
-function GetDataPath: String;
-begin
-  Result := GetSimbaPath() + 'Data' + DirectorySeparator;
-end;
-
-function GetIncludePath: String;
-begin
-  Result := GetSimbaPath() + 'Includes' + DirectorySeparator;
-end;
-
-function GetPluginPath: String;
-begin
-  Result := GetSimbaPath() + 'Plugins' + DirectorySeparator;
-end;
-
-function GetPluginCopyPath: String;
-begin
-  Result := GetDataPath() + 'plugincopies' + DirectorySeparator;
-end;
-
-function GetScriptPath: String;
-begin
-  Result := GetSimbaPath() + 'Scripts' + DirectorySeparator;
-end;
-
-function GetPackagePath: String;
-begin
-  Result := GetDataPath() + 'packages' + DirectorySeparator;
-end;
-
-function GetOldPackagePath: String;
-begin
-  Result := GetDataPath() + 'oldpackages' + DirectorySeparator;
-end;
-
-function GetBackupsPath: String;
-begin
-  Result := GetDataPath() + 'backups' + DirectorySeparator;
-end;
-
-function GetDumpPath: String;
-begin
-  Result := GetDataPath() + 'dumps' + DirectorySeparator;
-end;
-
-function GetScreenshotPath: String;
-begin
-  Result := GetSimbaPath() + 'Screenshots' + DirectorySeparator;
-end;
-
-procedure CreateBaseDirectories;
-var
-  Directory: String;
-begin
-  // Root directories
-  for Directory in [GetIncludePath(), GetScriptPath(), GetPluginPath(), GetDataPath(), GetScreenshotPath()] do
+  function Setup(Dir: String): String;
   begin
-     if DirectoryExists(Directory) then
-       Continue;
+    if (not DirectoryExists(Dir)) then
+      ForceDirectories(Dir);
 
-    if CreateDir(Directory) then
-      DebugLn('[CreateBaseDirectories]: ' + Directory)
-    else
-      DebugLn('[CreateBaseDirectories]: Failed ' + Directory);
+    Result := IncludeTrailingPathDelimiter(Dir);
   end;
 
-  // Data directories
-  for Directory in [GetPackagePath(), GetPluginCopyPath(), GetOldPackagePath(), GetBackupsPath(), GetDumpPath()] do
-  begin
-    if DirectoryExists(Directory) then
-      Continue;
-
-    if CreateDir(Directory) then
-      DebugLn('[CreateBaseDirectories]: ' + Directory)
-    else
-      DebugLn('[CreateBaseDirectories]: Failed ' + Directory);
-  end;
-end;
-
-function ReadINI(const Section, KeyName: string; FileName: string): string;
 begin
-  with TINIFile.Create(ExpandFileName(FileName)) do
-  try
-    Result := ReadString(Section, KeyName, '');
-  finally
-    Free();
-  end;
-end;
+  FSimbaPath := IncludeTrailingPathDelimiter(Application.Location);
 
-procedure DeleteINI(const Section, KeyName : string; FileName : string);
-begin
-  with TIniFile.Create(ExpandFileName(FileName)) do
-  try
-    if (KeyName = '') then
-	    EraseSection(Section)
-	  else
-	    DeleteKey(Section, KeyName);
-  finally
-    Free();
-  end;
-end;
+  FIncludesPath    := Setup(FSimbaPath + 'Includes');
+  FPluginsPath     := Setup(FSimbaPath + 'Plugins');
+  FScriptsPath     := Setup(FSimbaPath + 'Scripts');
+  FScreenshotsPath := Setup(FSimbaPath + 'Screenshots');
+  FDataPath        := Setup(FSimbaPath + 'Data');
 
-procedure WriteINI(const Section, KeyName, NewString : string; FileName : string);
-begin
-  with TINIFile.Create(ExpandFileName(FileName)) do
-  try
-	  WriteString(Section, KeyName, NewString);
-  finally
-	  Free();
-  end;
+  FDumpsPath    := Setup(FDataPath + 'Dumps');
+  FTempPath     := Setup(FDataPath + 'Temp');
+  FPackagesPath := Setup(FDataPath + 'Packages');
+  FBackupsPath  := Setup(FDataPath + 'Backups');
 end;
-
-initialization
-  CreateBaseDirectories();
 
 end.
 

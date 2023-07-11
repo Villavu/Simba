@@ -47,7 +47,7 @@ type
     class function FileSize(FileName: String): Int64;
     class function FileSizeInMegaBytes(FileName: String): Single;
 
-    class function FileHash(FileName: String; HashType: String): String;
+    class function FileHash(FileName: String; HashType: String = 'SHA1'): String;
   end;
 
   TSimbaPath = class

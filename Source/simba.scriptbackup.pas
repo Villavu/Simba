@@ -76,7 +76,7 @@ begin
       Continue;
 
     Duplicate := False;
-    ZipPath := GetBackupsPath() + ExtractFileNameOnly(FFiles[I].FileName) + '.zip';
+    ZipPath := SimbaEnv.BackupsPath + ExtractFileNameOnly(FFiles[I].FileName) + '.zip';
     try
       if FileExists(ZipPath) then
         with TUnZipper.Create() do

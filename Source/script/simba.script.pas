@@ -77,7 +77,7 @@ end;
 function TSimbaScript.DoCompilerFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
 begin
   Result := nil;
-  if (not FindFile(FileName, '', [IncludeTrailingPathDelimiter(ExtractFileDir(Sender.Tokenizer.FileName)), GetIncludePath(), GetSimbaPath()])) then
+  if (not FindInclude(FileName, [ExtractFileDir(Sender.Tokenizer.FileName)])) then
     FileName := '';
 end;
 
@@ -106,7 +106,7 @@ function TSimbaScript.DoCompilerHandleDirective(Sender: TLapeCompiler; Directive
     if InIgnore or InPeek then
       Exit;
 
-    if not FindPlugin(Argument, [FCompiler.CurrentDir(), GetPluginPath(), GetSimbaPath()]) then
+    if not FindPlugin(Argument, [FCompiler.CurrentDir()]) then
       raise Exception.Create('Plugin "' + Argument + '" not found');
 
     CopyPlugin(Argument);
@@ -124,7 +124,7 @@ function TSimbaScript.DoCompilerHandleDirective(Sender: TLapeCompiler; Directive
     if InIgnore then
       FCompiler.pushConditional(False, Sender.DocPos)
     else
-      FCompiler.pushConditional(FindPlugin(Argument, [FCompiler.CurrentDir(), GetPluginPath(), GetSimbaPath()]), Sender.DocPos);
+      FCompiler.pushConditional(FindPlugin(Argument, [FCompiler.CurrentDir()]), Sender.DocPos);
   end;
 
   function DoHasFile: Boolean;
@@ -134,7 +134,7 @@ function TSimbaScript.DoCompilerHandleDirective(Sender: TLapeCompiler; Directive
     if InIgnore then
       FCompiler.pushConditional(False, Sender.DocPos)
     else
-      FCompiler.pushConditional(FindFile(Argument, '', [FCompiler.CurrentDir(), GetIncludePath(), GetSimbaPath()]), Sender.DocPos);
+      FCompiler.pushConditional(FindInclude(Argument, [FCompiler.CurrentDir()]), Sender.DocPos);
   end;
 
   function DoError: Boolean;
@@ -190,7 +190,7 @@ function TSimbaScript.DoFindMacro(Sender: TLapeCompiler; Name: lpString; var Val
     Result := Lib <> '';
     if Result then
     begin
-      if not FindPlugin(Lib, [FCompiler.CurrentDir(), GetPluginPath(), GetSimbaPath()]) then
+      if not FindPlugin(Lib, [FCompiler.CurrentDir()]) then
         Lib := '';
 
       Value := '"' + Lib + '"';
@@ -252,9 +252,7 @@ begin
     FTargetWindow := GetDesktopWindow();
 
   PSimbaTarget(FCompiler['Target'].Ptr)^.SetWindow(FTargetWindow);
-
-  PString(FCompiler['ScriptFile'].Ptr)^ := FScriptFileName;
-  PString(FCompiler['ScriptName'].Ptr)^ := ExtractFileName(FScriptFileName);
+  PString(FCompiler['SCRIPT_FILE'].Ptr)^ := FScriptFileName;
 
   FRunningTime := HighResolutionTime();
   try

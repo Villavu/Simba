@@ -209,7 +209,7 @@ var
 begin
   Result := '';
 
-  CacheFileName := GetPackagePath() + FOwner + '-' + FName + '.' + Key;
+  CacheFileName := SimbaEnv.PackagesPath + FOwner + '-' + FName + '.' + Key;
   Cache := TStringList.Create();
 
   try

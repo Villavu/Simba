@@ -400,7 +400,6 @@ procedure Swap(var A, B: TPoint); overload;
 procedure Swap(var A, B: Pointer); overload;
 procedure Swap(var A, B: TColorBGRA); overload;
 
-function IsDefault(const Item; const Size: SizeInt): Boolean;
 function IfThen(const Val: Boolean; const IfTrue, IfFalse: String): String; overload;
 
 type
@@ -643,25 +642,6 @@ end;
 procedure Swap(var A, B: TColorBGRA);
 begin
   specialize Swap<TColorBGRA>(A, B);
-end;
-
-function IsDefault(const Item; const Size: SizeInt): Boolean;
-var
-  Ptr: PByte;
-  Upper: PtrUInt;
-begin
-  Result := False;
-
-  Ptr := PByte(@Item);
-  Upper := PtrUInt(Ptr) + Size;
-  while (PtrUInt(Ptr) <= Upper) do
-  begin
-    if (Ptr^ <> 0) then
-      Exit;
-    Inc(Ptr);
-  end;
-
-  Result := True;
 end;
 
 function IfThen(const Val: Boolean; const IfTrue, IfFalse: String): String;

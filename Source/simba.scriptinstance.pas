@@ -141,7 +141,7 @@ begin
         ScriptTab.OutputBox.AddLine([EDebugLn.FOCUS, EDebugLn.GREEN], 'Script was force terminated after ' + FormatMilliseconds(TimeRunning, '\[hh:mm:ss\].'));
       end;
 
-      if not IsDefault(FError, SizeOf(TSimbaScriptError)) then
+      if (FError.Column <> 0) or (FError.Line <> 0) or (FError.Message <> '') or (FError.FileName <> '') then
       begin
         // Check error is not in a include
         if (SameFileName(ScriptTab.ScriptFileName, Error.FileName)) or ((ScriptTab.ScriptFileName = '') and (ScriptTab.ScriptTitle = Error.FileName)) then

@@ -1,7 +1,7 @@
 {$assertions on}
 
 const
-  TESTFILE = SIMBAPATH + 'test.txt';
+  TESTFILE = SIMBA_PATH + 'test.txt';
 
 begin
   Assert(FileCreate(TESTFILE));

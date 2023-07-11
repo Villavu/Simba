@@ -96,7 +96,7 @@ begin
 
       Grid.Cells[1, Grid.FixedRows + I] := TDeclaration_Method(Decls[I]).HeaderString;
       Grid.Cells[2, Grid.FixedRows + I] := TDeclaration_Method(Decls[I]).Line.ToString();
-      Grid.Cells[3, Grid.FixedRows + I] := ExtractRelativePath(GetSimbaPath(), TDeclaration_Method(Decls[I]).Lexer.FileName);
+      Grid.Cells[3, Grid.FixedRows + I] := ExtractRelativePath(SimbaEnv.SimbaPath, TDeclaration_Method(Decls[I]).Lexer.FileName);
     end;
 
   Grid.AutoSizeColumns();

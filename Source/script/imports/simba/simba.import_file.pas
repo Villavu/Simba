@@ -292,12 +292,12 @@ begin
     addGlobalVar(PATH_SEP, 'PATH_SEP').isConstant := True;
     addGlobalVar(LINE_SEP, 'LINE_SEP').isConstant := True;
 
-    addGlobalVar(GetIncludePath(), 'IncludePath').isConstant := True;
-    addGlobalVar(GetPluginPath(), 'PluginPath').isConstant := True;
-    addGlobalVar(GetSimbaPath(), 'SimbaPath').isConstant := True;
-    addGlobalVar(GetScriptPath(), 'ScriptPath').isConstant := True;
-    addGlobalVar(GetDataPath(), 'DataPath').isConstant := True;
-    addGlobalVar(GetScreenshotPath(), 'ScreenshotPath').isConstant := True;
+    addGlobalVar(SimbaEnv.IncludesPath,    'INCLUDES_PATH').isConstant := True;
+    addGlobalVar(SimbaEnv.PluginsPath,     'PLUGINS_PATH').isConstant := True;
+    addGlobalVar(SimbaEnv.SimbaPath,       'SIMBA_PATH').isConstant := True;
+    addGlobalVar(SimbaEnv.ScriptsPath,     'SCRIPTS_PATH').isConstant := True;
+    addGlobalVar(SimbaEnv.DataPath,        'SIMBA_DATA_PATH').isConstant := True;
+    addGlobalVar(SimbaEnv.ScreenshotsPath, 'SCREENSHOTS_PATH').isConstant := True;
 
     addGlobalFunc('procedure WriteINI(Section, KeyName, NewString, FileName: String)', @_LapeWriteINI);
     addGlobalFunc('function ReadINI(Section, KeyName, FileName: String): String', @_LapeReadINI);
