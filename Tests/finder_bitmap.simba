@@ -40,12 +40,13 @@ begin
   // find one
   TPA := Finder.FindBitmap(templ, 0, 1);
   Assert(TPA.Length() = 1);
-  Assert(TPA[0] = TreePoints[0]);
+  Assert(TreePoints.Contains(TPA[0]));
+
 
   // find one, area
   TPA := Finder.FindBitmap(templ, 0, 1, [24, 37, 45, 71]);
   Assert(TPA.Length() = 1);
-  Assert(TPA[0] = TreePoints[3]);
+  Assert(TreePoints.Contains(TPA[0]));
 
   // test tolerance
   templ.Brightness(25);

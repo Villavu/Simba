@@ -29,7 +29,6 @@ type
   TSimbaFinder = packed record
   private
     FTarget: TSimbaTarget;
-    FBitmapFinder: TBitmapFinder;
     FDTMFinder: TDTMFinder;
 
     function DoFindDTM(DTM: TDTM; Bounds: TBox; MaxToFind: Integer): TPointArray;
@@ -113,18 +112,8 @@ begin
 end;
 
 function TSimbaFinder.DoFindBitmap(Bitmap: TMufasaBitmap; Bounds: TBox; MaxToFind: Integer): TPointArray;
-var
-  Data: PColorBGRA;
-  DataWidth: Integer;
 begin
-  Result := nil;
-
-  if FTarget.GetImageData(Bounds, Data, DataWidth) then
-  try
-    Result := FBitmapFinder.Find(Bitmap, Data, DataWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft, MaxToFind);
-  finally
-    FTarget.FreeImageData(Data);
-  end;
+  Result := FindBitmapOnTarget(FTarget, Bitmap, Bounds, EColorSpace.RGB, 0, DefaultMultipliers, MaxToFind);
 end;
 
 function TSimbaFinder.GetDataAsBitmap(var Bounds: TBox; out Bitmap: TMufasaBitmap): Boolean;
@@ -134,6 +123,7 @@ var
   Y: Integer;
 begin
   Result := FTarget.GetImageData(Bounds, Data, DataWidth);
+
   if Result then
   begin
     Bitmap := TMufasaBitmap.Create(Bounds.Width, Bounds.Height);
@@ -156,16 +146,12 @@ end;
 
 function TSimbaFinder.FindBitmap(Bitmap: TMufasaBitmap; Tolerance: Single; MaxToFind: Integer; Bounds: TBox): TPointArray;
 begin
-  FBitmapFinder.Setup(EColorSpace.RGB, Tolerance, DefaultMultipliers);
-
-  Result := DoFindBitmap(Bitmap, Bounds, MaxToFind);
+  Result := FindBitmapOnTarget(FTarget, Bitmap, Bounds, EColorSpace.RGB, Tolerance, DefaultMultipliers, MaxToFind);
 end;
 
 function TSimbaFinder.FindBitmap(Bitmap: TMufasaBitmap; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer; Bounds: TBox): TPointArray;
 begin
-  FBitmapFinder.Setup(ColorSpace, Tolerance, Multipliers);
-
-  Result := DoFindBitmap(Bitmap, Bounds, MaxToFind);
+  Result := FindBitmapOnTarget(FTarget, Bitmap, Bounds, ColorSpace, Tolerance, Multipliers, MaxToFind);
 end;
 
 function TSimbaFinder.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TSingleMatrix;
