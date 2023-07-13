@@ -2,125 +2,85 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+
+  The simple bitmap finder.
 }
 unit simba.finder_bitmap;
 
 {$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
+{.$DEFINE SIMBA_BENCHMARKS}
+
 interface
 
 uses
-  Classes, SysUtils, Graphics, Math,
-  simba.mufasatypes, simba.bitmap, simba.colormath, simba.colormath_distance;
+  Classes, SysUtils, Graphics,
+  simba.mufasatypes, simba.colormath, simba.colormath_distance, simba.target, simba.bitmap,
+  simba.colormath_distance_unrolled, simba.simplelock;
 
-type
-  TBitmapFinder = record
-  private
-  type
-    TCompareColorFunc = function(const C1: Pointer; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
-  private
-    FColorSpace: EColorSpace;
-    FCompareColorFunc: TCompareColorFunc;
-    FTolerance: Single;
-    FMultipliers: TChannelMultipliers;
-    FMaxDistance: Single;
-  public
-    procedure Setup(Formula: EColorSpace; Tolerance: Single; Multiplier: TChannelMultipliers);
+function FindBitmapOnTarget(Target: TSimbaTarget; Bitmap: TMufasaBitmap; Bounds: TBox;
+                            Formula: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1): TPointArray;
 
-    function GetBitmapColors(Bitmap: TMufasaBitmap; out ColorSize: Integer): PByte;
-    function Find(Bitmap: TMufasaBitmap; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; Offset: TPoint; MaxToFind: Integer = -1): TPointArray;
+function FindBitmapOnBuffer(var Limit: TSimpleThreadsafeLimit;
+                            Bitmap: TMufasaBitmap;
+                            ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers;
+                            Buffer: PColorBGRA; BufferWidth: Integer;
+                            SearchWidth, SearchHeight: Integer): TPointArray;
 
-    class operator Initialize(var Self: TBitmapFinder);
-  end;
+var
+  BitmapFinderMT_Enabled:     Boolean = True;
+  BitmapFinderMT_SliceHeight: Integer = 125;
+  BitmapFinderMT_SliceWidth:  Integer = 250;
 
 implementation
 
 uses
-  simba.overallocatearray, simba.colormath_distance_unrolled;
+  simba.datetime,
+  simba.overallocatearray,
+  simba.threadpool, simba.tpa, simba.atpa;
 
-procedure TBitmapFinder.Setup(Formula: EColorSpace; Tolerance: Single; Multiplier: TChannelMultipliers);
+// How much to "Slice" (vertically) the image up for multithreading.
+function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;
+var
+  I: Integer;
 begin
-  FColorSpace := Formula;
-  FTolerance := Tolerance;
-  FMultipliers := Multiplier;
+  Result := 1;
 
-  case Formula of
-    EColorSpace.RGB:
-      begin
-        FCompareColorFunc := TCompareColorFunc(@DistanceRGB_UnRolled);
-        FMaxDistance := DistanceRGB_Max(Multiplier);
-      end;
-
-    EColorSpace.HSV:
-      begin
-        FCompareColorFunc := TCompareColorFunc(@DistanceHSV_UnRolled);
-        FMaxDistance := DistanceHSV_Max(Multiplier);
-      end;
-
-    EColorSpace.HSL:
-      begin
-        FCompareColorFunc := TCompareColorFunc(@DistanceHSL_UnRolled);
-        FMaxDistance := DistanceHSL_Max(Multiplier);
-      end;
-
-    EColorSpace.XYZ:
-      begin
-        FCompareColorFunc := TCompareColorFunc(@DistanceXYZ_UnRolled);
-        FMaxDistance := DistanceXYZ_Max(Multiplier);
-      end;
-
-    EColorSpace.LAB:
-      begin
-        FCompareColorFunc := TCompareColorFunc(@DistanceLAB_UnRolled);
-        FMaxDistance := DistanceLAB_Max(Multiplier);
-      end;
-
-    EColorSpace.LCH:
-      begin
-        FCompareColorFunc := TCompareColorFunc(@DistanceLCH_UnRolled);
-        FMaxDistance := DistanceLCH_Max(Multiplier);
-      end;
-
-    EColorSpace.DeltaE:
-      begin
-        FCompareColorFunc := TCompareColorFunc(@DistanceDeltaE_UnRolled);
-        FMaxDistance := DistanceDeltaE_Max(Multiplier);
-      end;
+  if BitmapFinderMT_Enabled and (SearchWidth >= BitmapFinderMT_SliceWidth) and (SearchHeight >= (BitmapFinderMT_SliceHeight * 2)) then // not worth
+  begin
+    for I := SimbaThreadPool.ThreadCount - 1 downto 2 do
+      if (SearchHeight div I) > BitmapFinderMT_SliceHeight then // Each slice is at least `MatchTemplateMT_SliceHeight` pixels
+        Exit(I);
   end;
+
+  // not possible to slice into at least `MatchTemplateMT_SliceHeight` pixels
 end;
+
+const
+  BitmapColorSize = SizeOf(TColorHSL) + SizeOf(Boolean);
 
 // Pre calculate color space
 // and "transparent" (aka ignore) colors.
-function TBitmapFinder.GetBitmapColors(Bitmap: TMufasaBitmap; out ColorSize: Integer): PByte;
+function ConvertBitmapColors(Bitmap: TMufasaBitmap; ColorSpace: EColorSpace): PByte;
 var
   I: Integer;
   Source: PColorBGRA;
   Dest, DestFix: PByte;
 begin
-  case FColorSpace of
-    EColorSpace.RGB:    ColorSize := SizeOf(TColorRGB) + 1;
-    EColorSpace.HSV:    ColorSize := SizeOf(TColorHSV) + 1;
-    EColorSpace.HSL:    ColorSize := SizeOf(TColorHSL) + 1;
-    EColorSpace.XYZ:    ColorSize := SizeOf(TColorXYZ) + 1;
-    EColorSpace.LCH:    ColorSize := SizeOf(TColorLCH) + 1;
-    EColorSpace.LAB:    ColorSize := SizeOf(TColorLAB) + 1;
-    EColorSpace.DeltaE: ColorSize := SizeOf(TColorLAB) + 1;
-  end;
-
-  // packed record Transparent: ByteBool; Color: TColorXXX; end;
-  Result := AllocMem((Bitmap.Width * Bitmap.Height) * ColorSize);
+  // packed record Transparent: Boolean; Color: TColorXXX; end;
+  Result := GetMem((Bitmap.Width * Bitmap.Height) * BitmapColorSize);
 
   Source := Bitmap.Data;
   Dest := Result;
+
   for I := 0 to (Bitmap.Width * Bitmap.Height) - 1 do
   begin
-    if (Bitmap.TransparentColorActive and Source^.EqualsIgnoreAlpha(Bitmap.TransparentRGB)) then
-      PByteBool(Dest)^ := True
-    else
+    PBoolean(Dest)^ := (Bitmap.TransparentColorActive and Source^.EqualsIgnoreAlpha(Bitmap.TransparentRGB));
+    if not PBoolean(Dest)^ then
     begin
       DestFix := Dest + 1; // temp fix, https://gitlab.com/freepascal.org/fpc/source/-/commit/851af5033fb80d4e19c4a7b5c44d50a36f456374
-      case FColorSpace of
+      case ColorSpace of
         EColorSpace.RGB:    PColorRGB(DestFix)^ := Source^.ToRGB();
         EColorSpace.HSV:    PColorHSV(DestFix)^ := Source^.ToHSV();
         EColorSpace.HSL:    PColorHSL(DestFix)^ := Source^.ToHSL();
@@ -132,23 +92,75 @@ begin
     end;
 
     Inc(Source);
-    Inc(Dest, ColorSize);
+    Inc(Dest, BitmapColorSize);
   end;
 end;
 
-function TBitmapFinder.Find(Bitmap: TMufasaBitmap; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; Offset: TPoint; MaxToFind: Integer): TPointArray;
+function FindBitmapOnTarget(Target: TSimbaTarget; Bitmap: TMufasaBitmap; Bounds: TBox; Formula: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer): TPointArray;
+var
+  Buffer: PColorBGRA;
+  BufferWidth: Integer;
+
+  SliceResults: T2DPointArray;
+
+  Limit: TSimpleThreadsafeLimit;
+
+  procedure Execute(const Index, Lo, Hi: Integer);
+  var
+    TPA: TPointArray;
+  begin
+    TPA := FindBitmapOnBuffer(
+      Limit,
+      Bitmap, Formula, Tolerance, Multipliers,
+      @Buffer[Lo * BufferWidth], BufferWidth, Bounds.Width, (Hi - Lo) + Bitmap.Height
+    );
+
+    SliceResults[Index] := TPA.Offset(Bounds.X1, Bounds.Y1 + Lo);
+  end;
+
+var
+  T: Double;
+  ThreadsUsed: Integer;
+begin
+  Result := [];
+
+  Limit := TSimpleThreadsafeLimit.Create(MaxToFind);
+
+  if Target.GetImageData(Bounds, Buffer, BufferWidth) then
+  try
+    {$IFDEF SIMBA_BENCHMARKS}
+    T := HighResolutionTime();
+    {$ENDIF}
+
+    SetLength(SliceResults, CalculateSlices(Bounds.Width, Bounds.Height)); // Cannot exceed this
+    ThreadsUsed := SimbaThreadPool.RunParallel(Length(SliceResults), 0, Bounds.Height - Bitmap.Height, @Execute);
+    Result := SliceResults.Merge();
+    if (MaxToFind > -1) and (Length(Result) > MaxToFind) then
+      SetLength(Result, MaxToFind);
+
+    {$IFDEF SIMBA_BENCHMARKS}
+    DebugLn('FindBitmap: ColorSpace=%s Width=%d Height=%d ThreadsUsed=%d Time=%f', [Formula.AsString(), Bounds.Width, Bounds.Height, ThreadsUsed, HighResolutionTime() - T]);
+    {$ENDIF}
+  finally
+    Target.FreeImageData(Buffer);
+  end;
+end;
+
+function FindBitmapOnBuffer(var Limit: TSimpleThreadsafeLimit; Bitmap: TMufasaBitmap; ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TPointArray;
 var
   BitmapColors: PByte;
-  BitmapColorSize: Integer;
+
+  CompareFunc: TColorDistanceFunc;
+  MaxDistance: Single;
 
   function IsTransparent(const BitmapPtr: Pointer): Boolean; inline;
   begin
-    Result := PByteBool(BitmapPtr)^;
+    Result := PBoolean(BitmapPtr)^;
   end;
 
   function Match(const BufferPtr: TColorBGRA; const BitmapPtr: PByte): Boolean; inline;
   begin
-    Result := (Self.FCompareColorFunc(BitmapPtr + 1, BufferPtr, FMultipliers) / FMaxDistance * 100 <= FTolerance);
+    Result := (CompareFunc(BitmapPtr + 1, BufferPtr, Multipliers) / MaxDistance * 100 <= Tolerance);
   end;
 
   function Hit(BufferPtr: PColorBGRA): Boolean;
@@ -179,14 +191,58 @@ var
   X, Y: Integer;
   RowPtr: PColorBGRA;
   PointBuffer: TSimbaPointBuffer;
-label
-  Finished;
 begin
-  Result := nil;
-  if IsZero(FMaxDistance) or (Bitmap = nil) or (Bitmap.Width = 0) or (Bitmap.Height = 0) then
-    Exit;
+  Result := [];
 
-  BitmapColors := GetBitmapColors(Bitmap, BitmapColorSize);
+  case ColorSpace of
+    EColorSpace.RGB:
+      begin
+        CompareFunc := TColorDistanceFunc(@DistanceRGB_UnRolled);
+        MaxDistance := DistanceRGB_Max(Multipliers);
+      end;
+
+    EColorSpace.HSV:
+      begin
+        CompareFunc := TColorDistanceFunc(@DistanceHSV_UnRolled);
+        MaxDistance := DistanceHSV_Max(Multipliers);
+      end;
+
+    EColorSpace.HSL:
+      begin
+        CompareFunc := TColorDistanceFunc(@DistanceHSL_Unrolled);
+        MaxDistance := DistanceHSL_Max(Multipliers);
+      end;
+
+    EColorSpace.XYZ:
+      begin
+        CompareFunc := TColorDistanceFunc(@DistanceXYZ_UnRolled);
+        MaxDistance := DistanceXYZ_Max(Multipliers);
+      end;
+
+    EColorSpace.LAB:
+      begin
+        CompareFunc := TColorDistanceFunc(@DistanceLAB_UnRolled);
+        MaxDistance := DistanceLAB_Max(Multipliers);
+      end;
+
+    EColorSpace.LCH:
+      begin
+        CompareFunc := TColorDistanceFunc(@DistanceLCH_UnRolled);
+        MaxDistance := DistanceLCH_Max(Multipliers);
+      end;
+
+    EColorSpace.DeltaE:
+      begin
+        CompareFunc := TColorDistanceFunc(@DistanceDeltaE_UnRolled);
+        MaxDistance := DistanceDeltaE_Max(Multipliers);
+      end;
+
+    else
+      SimbaException('FindBitmapOnBuffer: Formula invalid!');
+  end;
+
+  BitmapColors := ConvertBitmapColors(Bitmap, ColorSpace);
+
   try
     Dec(SearchWidth, Bitmap.Width);
     Dec(SearchHeight, Bitmap.Height);
@@ -199,26 +255,23 @@ begin
       begin
         if Hit(RowPtr) then
         begin
-          PointBuffer.Add(X + Offset.X, Y + Offset.Y);
-          if (PointBuffer.Count = MaxToFind) then
-            goto Finished;
+          PointBuffer.Add(X, Y);
+
+          Limit.Inc();
         end;
 
         Inc(RowPtr);
       end;
-    end;
 
-    Finished:
+      // Check if we reached the limit every row.
+      if Limit.Reached() then
+        Break;
+    end;
 
     Result := PointBuffer.Trim();
   finally
     FreeMem(BitmapColors);
   end;
-end;
-
-class operator TBitmapFinder.Initialize(var Self: TBitmapFinder);
-begin
-  Self := Default(TBitmapFinder);
 end;
 
 end.

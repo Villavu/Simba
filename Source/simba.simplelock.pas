@@ -53,7 +53,35 @@ type
     class operator Finalize(var Self: TSimpleEnterableLock);
   end;
 
+  TSimpleThreadsafeLimit = record
+  private
+    FCounter: Integer;
+    FLimit: Integer;
+  public
+    procedure Inc; inline;
+    function Reached: Boolean; inline;
+
+    class function Create(Limit: Integer): TSimpleThreadsafeLimit; static;
+  end;
+
 implementation
+
+procedure TSimpleThreadsafeLimit.Inc;
+begin
+  if (FLimit > 0) then
+    InterlockedIncrement(FCounter);
+end;
+
+function TSimpleThreadsafeLimit.Reached: Boolean;
+begin
+  Result := (FLimit > 0) and (InterlockedCompareExchange(FCounter, FLimit, FLimit) >= FLimit);
+end;
+
+class function TSimpleThreadsafeLimit.Create(Limit: Integer): TSimpleThreadsafeLimit;
+begin
+  Result.FCounter := 0;
+  Result.FLimit   := Limit;
+end;
 
 procedure TSimpleEnterableLock.Enter;
 begin
@@ -78,7 +106,7 @@ end;
 
 procedure TSimpleLock.IncLock;
 begin
-  InterlockedIncrement(FLock)
+  InterlockedIncrement(FLock);
 end;
 
 procedure TSimpleLock.DecLock;

@@ -19,7 +19,8 @@ implementation
 uses
   lptypes, lpvartypes,
   simba.script_compiler, simba.mufasatypes, simba.finder, simba.bitmap, simba.dtm,
-  simba.colormath, simba.colormath_distance, simba.bitmap_finders, simba.target, simba.finder_color;
+  simba.colormath, simba.colormath_distance, simba.bitmap_finders, simba.target,
+  simba.finder_color, simba.finder_bitmap;
 
 (*
 Finder
@@ -309,6 +310,10 @@ begin
     addGlobalVar(ltInt32, @ColorFinderMT_SliceHeight, 'ColorFinderMT_SliceHeight');
     addGlobalVar(ltInt32, @ColorFinderMT_SliceWidth, 'ColorFinderMT_SliceWidth');
 
+    addGlobalVar(ltBoolean, @BitmapFinderMT_Enabled, 'BitmapFinderMT_Enabled');
+    addGlobalVar(ltInt32, @BitmapFinderMT_SliceHeight, 'BitmapFinderMT_SliceHeight');
+    addGlobalVar(ltInt32, @BitmapFinderMT_SliceWidth, 'BitmapFinderMT_SliceWidth');
+
     addGlobalType([
       'record',
       '  Color: TColor;',
@@ -329,9 +334,6 @@ begin
     addGlobalType([
       'packed record',
       '  Target: TSimbaTarget;',
-      '  {%CODETOOLS OFF}',
-      '  InternalData: array[0..' + IntToStr(SizeOf(TSimbaFinder) - SizeOf(TSimbaTarget) - 1)  + '] of Byte;',
-      '  {%CODETOOLS ON}',
       'end;'],
       'TSimbaFinder'
     );
