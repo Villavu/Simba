@@ -60,7 +60,8 @@
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
-            <CustomOptions Value="-dStaticFFI
+            <CustomOptions Value="-CfSSE3
+-dStaticFFI
 -dLape_CDECL"/>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
@@ -100,7 +101,8 @@
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
-            <CustomOptions Value="-dStaticFFI
+            <CustomOptions Value="-CfSSE64
+-dStaticFFI
 -dLape_CDECL"/>
             <OtherDefines Count="2">
               <Define0 Value="StaticFFI"/>
@@ -146,7 +148,8 @@
             <CompilerMessages>
               <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-dLape_CDECL"/>
+            <CustomOptions Value="-CfSSE64
+-dLape_CDECL"/>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
@@ -228,7 +231,8 @@
             <CompilerMessages>
               <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-dLape_CDECL"/>
+            <CustomOptions Value="-CfSSE64
+-dLape_CDECL"/>
             <ExecuteAfter>
               <Command Value="macosbundle/make.sh"/>
               <ShowAllMessages Value="True"/>
@@ -941,7 +945,8 @@
       <CompilerMessages>
         <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True"/>
       </CompilerMessages>
-      <CustomOptions Value="-dStaticFFI
+      <CustomOptions Value="-CfSSE64
+-dStaticFFI
 -dLape_CDECL"/>
       <OtherDefines Count="2">
         <Define0 Value="StaticFFI"/>

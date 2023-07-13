@@ -13,11 +13,12 @@
   {$ENDIF}
 {$ENDIF}
 
-{$IF Defined(CPU386)}
-  {$FPUTYPE SSE3}
-{$ELSEIF Defined(CPUX86_64)}
-  {$FPUTYPE SSE64}
-{$ENDIF}
+// Set in project options > custom options.. "-CfSSE"
+//{$IF Defined(CPU386)}
+//  {$FPUTYPE SSE3}
+//{$ELSEIF Defined(CPUX86_64)}
+//  {$FPUTYPE SSE64}
+//{$ENDIF}
 
 {$MODESWITCH ADVANCEDRECORDS}
 {$MODESWITCH TYPEHELPERS}
