@@ -15,6 +15,14 @@
         <DpiAware Value="True/PM"/>
       </XPManifest>
       <Icon Value="0"/>
+      <Resources Count="6">
+        <Resource_0 FileName="..\Examples\array.simba" Type="RCDATA" ResourceName="EXAMPLE_ARRAY"/>
+        <Resource_1 FileName="..\Examples\bitmap.simba" Type="RCDATA" ResourceName="EXAMPLE_BITMAP"/>
+        <Resource_2 FileName="..\Examples\function.simba" Type="RCDATA" ResourceName="EXAMPLE_FUNCTION"/>
+        <Resource_3 FileName="..\Examples\loop.simba" Type="RCDATA" ResourceName="EXAMPLE_LOOP"/>
+        <Resource_4 FileName="..\Examples\procedure.simba" Type="RCDATA" ResourceName="EXAMPLE_PROCEDURE"/>
+        <Resource_5 FileName="..\Examples\timing.simba" Type="RCDATA" ResourceName="EXAMPLE_TIMING"/>
+      </Resources>
     </General>
     <VersionInfo>
       <UseVersionInfo Value="True"/>
@@ -312,7 +320,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="131">
+    <Units Count="133">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -912,6 +920,14 @@
         <Filename Value="../Third-Party/fphashutils_simba.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit130>
+      <Unit131>
+        <Filename Value="package/simba.package_menubuilder.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit131>
+      <Unit132>
+        <Filename Value="components/simba.component_buttonpanel.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit132>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -99,6 +99,7 @@ type
     procedure BeginUpdate;
     procedure EndUpdate;
     procedure Clear;
+    procedure ClearSelection;
 
     procedure Invalidate; override;
 
@@ -122,7 +123,8 @@ type
 implementation
 
 uses
-  Math, simba.theme;
+  Math,
+  simba.theme, simba.main;
 
 constructor TSimbaTreeView.Create(AOwner: TComponent; NodeClass: TTreeNodeClass);
 var
@@ -171,6 +173,7 @@ begin
   FTree.BackgroundColor := SimbaTheme.ColorBackground;
   FTree.SelectionColor := SimbaTheme.ColorActive;
   FTree.Font.Color := SimbaTheme.ColorFont;
+  FTree.Images := SimbaForm.Images;
 
   FScrollbarVert.ForwardScrollControl := FTree;
 
@@ -236,6 +239,11 @@ procedure TSimbaTreeView.Clear;
 begin
   FTree.Items.Clear();
   FFilterEdit.Clear();
+end;
+
+procedure TSimbaTreeView.ClearSelection;
+begin
+  FTree.ClearSelection();
 end;
 
 procedure TSimbaTreeView.Invalidate;

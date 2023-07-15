@@ -18,7 +18,7 @@ type
   protected
     {$IFDEF WINDOWS}
     procedure DoFormAdded(Sender: TObject; Form: TCustomForm);
-    procedure DoColorTitle(Data: PtrInt);
+    procedure DoColorTitle(Sender: TObject);
     {$ENDIF}
 
     function GetScrollBarArrowSize: Integer;
@@ -53,15 +53,15 @@ uses
 
 procedure TSimbaTheme.DoFormAdded(Sender: TObject; Form: TCustomForm);
 begin
-  Application.QueueAsyncCall(@DoColorTitle, PtrUInt(Form));
+  Form.AddHandlerOnVisibleChanged(@DoColorTitle, True);
 end;
 
-procedure TSimbaTheme.DoColorTitle(Data: PtrInt);
+procedure TSimbaTheme.DoColorTitle(Sender: TObject);
 const
   DWMWA_CAPTION_COLOR = 35;
 begin
-  if Assigned(DwmSetWindowAttribute) then
-    DwmSetWindowAttribute(TCustomForm(Data).Handle, DWMWA_CAPTION_COLOR, @Self.ColorFrame, SizeOf(TColor));
+  if (Sender is TCustomForm) and TCustomForm(Sender).Visible and Assigned(DwmSetWindowAttribute) then
+    DwmSetWindowAttribute(TCustomForm(Sender).Handle, DWMWA_CAPTION_COLOR, @Self.ColorFrame, SizeOf(TColor));
 end;
 {$ENDIF}
 
@@ -118,7 +118,7 @@ begin
   end;
 
   {$IFDEF WINDOWS}
-  if (Win32BuildNumber >= 22000) then // DWMWA_CAPTION_COLOR
+  if (Win32BuildNumber >= 22000) then // DWMWA_CAPTION_COLOR (Sadly windows 11)
     Screen.AddHandlerFormAdded(@Self.DoFormAdded);
   {$ENDIF}
 end;

@@ -75,8 +75,7 @@ type
 implementation
 
 uses
-  LazFileUtils,
-  simba.settings, simba.ide_events,
+  simba.files, simba.settings, simba.ide_events,
   simba.main, simba.env, simba.ide_showdeclaration, simba.threading;
 
 var
@@ -188,7 +187,7 @@ begin
     end;
   end;
 
-  FScriptTitle := ExtractFileNameOnly(FileName);
+  FScriptTitle := TSimbaPath.PathExtractNameWithoutExt(FileName);
   FScriptFileName := FileName;
   FSavedText := FEditor.Text;
 
@@ -214,7 +213,7 @@ begin
     end;
   end;
 
-  FScriptTitle := ExtractFileNameOnly(FileName);
+  FScriptTitle := TSimbaPath.PathExtractNameWithoutExt(FileName);
   FScriptFileName := FileName;
   FSavedText := FEditor.Text;
 

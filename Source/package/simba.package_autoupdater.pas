@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.package_autoupdater;
 
 {$i simba.inc}
@@ -12,9 +17,9 @@ procedure UpdatePackages;
 implementation
 
 uses
-  Menus, ComCtrls, LazFileUtils,
-  simba.mufasatypes, simba.package, simba.package_configfile, simba.scripttabsform,
-  simba.main, simba.outputform, simba.package_installer;
+  Menus,
+  simba.mufasatypes, simba.package, simba.scripttabsform, simba.main,
+  simba.outputform, simba.package_installer, simba.package_menubuilder;
 
 type
   TPackageMenuItem = class(TMenuItem)
@@ -42,7 +47,6 @@ type
   TPackageUpdater = class(TThread)
   protected
     FPackages: TSimbaPackageArray;
-    FConfigFiles: TSimbaPackageConfigFileArray;
     FUpdates: TStringList;
 
     procedure DoTerminateOnMainThread(Sender: TObject);
@@ -53,78 +57,22 @@ type
   end;
 
 procedure TPackageUpdater.DoTerminateOnMainThread(Sender: TObject);
-
-  procedure BuildMenus(MainMenu: TMainMenu);
-
-    function AddMenu(Name: String): TPackageMenuItem;
-    var
-      I: Integer;
-    begin
-      for I := 0 to MainMenu.Items.Count - 1 do
-        if (MainMenu.Items[I] is TPackageMenuItem) and (MainMenu.Items[I].Caption = Name) then
-          Exit(MainMenu.Items[I] as TPackageMenuItem);
-
-      Result := TPackageMenuItem.Create(MainMenu);
-      Result.Caption := Name;
-
-      MainMenu.Items.Add(Result);
-    end;
-
-    function AddFileMenu(Parent: TMenuItem; Caption, FileName: String): TPackageMenuItem_File;
-    begin
-      Result := TPackageMenuItem_File.Create(Parent);
-      Result.Caption := Caption;
-      Result.FileName := FileName;
-
-      Parent.Add(Result);
-    end;
-
-  var
-    I: Integer;
-    Menu: TPackageMenuItem;
-    MenuItem: TPackageMenuItem_File;
-    Script: String;
-  begin
-    for I := 0 to High(FPackages) do
-    begin
-      if (Length(FConfigFiles[I].Scripts) = 0) then
-        Continue;
-
-      Menu := AddMenu(FPackages[I].Info.Name);
-      if (Menu.Hash = FConfigFiles[I].Hash) then // No changes
-        Continue;
-
-      Menu.Hash := FConfigFiles[I].Hash;
-      Menu.Clear();
-
-      for Script in FConfigFiles[I].Scripts do
-      begin
-        MenuItem := AddFileMenu(Menu, ExtractFileNameOnly(Script), '');
-
-        AddFileMenu(MenuItem, 'Run', Script);
-        AddFileMenu(MenuItem, 'Open', Script);
-      end;
-    end;
-  end;
-
-  procedure UpdateIcon(Button: TToolButton);
-  begin
-    if (FUpdates.Count > 0) then
-    begin
-      Button.Hint       := 'Open packages' + LineEnding + FUpdates.Text;
-      Button.ImageIndex := IMAGE_PACKAGE_UPDATE + Min(FUpdates.Count, 9);
-    end else
-    begin
-      Button.Hint       := 'Open packages';
-      Button.ImageIndex := IMAGE_PACKAGE;
-    end;
-  end;
-
 begin
-  AssertMainThread('TPackageUpdater.DoTerminateOnMainThread');
+  AssertMainThread('TPackageUpdater');
 
-  //BuildMenus(SimbaForm.MainMenu);
-  UpdateIcon(SimbaForm.ToolbarButtonPackages);
+  // Update main menu
+  BuildPackageMenus(FPackages, SimbaForm.MenuBar);
+
+  // Update icon
+  if (FUpdates.Count > 0) then
+  begin
+    SimbaForm.ToolbarButtonPackages.Hint       := 'Open packages' + LineEnding + FUpdates.Text;
+    SimbaForm.ToolbarButtonPackages.ImageIndex := IMAGE_PACKAGE_UPDATE + Min(FUpdates.Count, 9);
+  end else
+  begin
+    SimbaForm.ToolbarButtonPackages.Hint       := 'Open packages';
+    SimbaForm.ToolbarButtonPackages.ImageIndex := IMAGE_PACKAGE;
+  end;
 end;
 
 procedure TPackageUpdater.Execute;
@@ -161,18 +109,14 @@ begin
     end;
   end;
 
-  SetLength(FConfigFiles, Length(FPackages));
   for I := 0 to High(FPackages) do
-  begin
-    FConfigFiles[I] := ParsePackageConfigFile(Package.ConfigPath);
     if Package.HasUpdate() then
       FUpdates.Add('%s can be updated to version %s', [Package.Info.FullName, Package.LatestVersion]);
-  end;
 end;
 
 constructor TPackageUpdater.Create;
 begin
-  inherited Create(False, 1024*1024);
+  inherited Create(False, 512 * 512);
 
   FreeOnTerminate := True;
   OnTerminate := @DoTerminateOnMainThread;

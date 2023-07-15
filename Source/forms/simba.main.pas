@@ -255,6 +255,7 @@ type
   public
     property WindowSelection: TWindowHandle read FWindowSelection;
     property ProcessSelection: Integer read FProcessSelection;
+    property MenuBar: TSimbaMainMenuBar read FMenuBar;
 
     procedure Setup(Data: PtrInt);
   end;

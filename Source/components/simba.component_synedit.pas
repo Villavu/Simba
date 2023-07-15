@@ -28,13 +28,14 @@ type
     procedure StatusChanged(AChanges: TSynStatusChanges); override;
     procedure DoLineChanges(Sender: TSynEditStrings; aIndex, aCount: Integer);
     procedure SetParent(NewParent: TWinControl); override;
+    procedure SetVisible(Value: Boolean); override;
 
     function GetFontAntialising: Boolean;
     procedure SetFontAntialising(Value: Boolean);
   public
     constructor Create(AOwner: TComponent); override;
 
-    // Hide gutters etc so the synedit acts more like the "memo" component.
+    // Hide gutters and such so the synedit acts more like the "memo" component.
     procedure HideSynEditThings;
     procedure ReplaceKeyStrokeModifiers(const Find, Replace: TShiftStateEnum);
 
@@ -114,6 +115,14 @@ begin
   FScrollbarHorz.IndentCorner := 100;
   FScrollbarVert.Parent := NewParent;
   FScrollbarVert.Align := alRight;
+end;
+
+procedure TSimbaSynEdit.SetVisible(Value: Boolean);
+begin
+  inherited SetVisible(Value);
+
+  FScrollbarHorz.Visible := Value;
+  FScrollbarVert.Visible := Value;
 end;
 
 constructor TSimbaSynEdit.Create(AOwner: TComponent);
