@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.package;
 
 {$i simba.inc}
@@ -5,7 +10,8 @@ unit simba.package;
 interface
 
 uses
-  classes, sysutils;
+  Classes, SysUtils,
+  simba.mufasatypes;
 
 const
   PACKAGE_SETTINGS_VERSION = 1;
@@ -61,7 +67,6 @@ type
     procedure SetInstalledVersionTime(Value: TDateTime);
     procedure SetInstalledPath(Value: String);
 
-    function GetConfigPath: String;
     function GetAutoUpdateEnabled: Boolean;
     function GetInstalledPath: String;
     function GetInstalledVersion: String;
@@ -82,7 +87,6 @@ type
     property Releases: TSimbaPackageReleaseArray read FReleases;
     property Info: TSimbaPackageInfo read FInfo;
 
-    property ConfigPath: String read GetConfigPath;
     property InstalledPath: String read GetInstalledPath write SetInstalledPath;
     property InstalledVersion: String read GetInstalledVersion write SetInstalledVersion;
     property InstalledVersionTime: TDateTime read GetInstalledVersionTime write SetInstalledVersionTime;
@@ -96,17 +100,25 @@ type
 
     function HasUpdate: Boolean;
     function HasReleases: Boolean;
+
+    // if file extension is ".packageexample.simba" the file is added to the "file > open example" form.
+    function GetExamples: TStringArray;
+    // if file extension is ".packagescript.simba" the file is to simba's main menu bar.
+    function GetScripts: TStringArray;
   end;
   TSimbaPackageArray = array of TSimbaPackage;
 
   function LoadPackages: TSimbaPackageArray;
+  function GetInstalledPackages: TSimbaPackageArray;
+  procedure FreePackages(Packages: TSimbaPackageArray);
 
 implementation
 
 uses
   inifiles, dateutils, fileutil, lazfileutils,
-  simba.env, simba.mufasatypes, simba.httpclient,
-  simba.package_endpoint_github, simba.package_endpoint_custom, simba.threading;
+  simba.env, simba.httpclient,
+  simba.package_endpoint_github, simba.package_endpoint_custom, simba.threading,
+  simba.files;
 
 function LoadPackageURLs: TStringArray;
 var
@@ -188,6 +200,45 @@ begin
       specialize MoveElement<TSimbaPackage>(Result, I, 0);
 end;
 
+function GetInstalledPackages: TSimbaPackageArray;
+var
+  Sections: TStringList;
+  I: Integer;
+begin
+  Result := [];
+
+  Sections := TStringList.Create();
+  try
+    with TIniFile.Create(SimbaEnv.PackagesPath + 'packages.ini') do
+    try
+      ReadSections(Sections);
+
+      if (Sections.Count > 0) and (ReadInteger('Settings', 'Version', -1) = PACKAGE_SETTINGS_VERSION) then
+      begin
+        for I := 0 to Sections.Count - 1 do
+        begin
+          if (Sections[I] = 'Settings') or (ReadString(Sections[I], 'InstalledVersion', '') = '') then
+            Continue;
+          if DirectoryExists(ReadString(Sections[I], 'InstalledPath', '')) then
+            Result := Result + [TSimbaPackage.Create(Sections[I])];
+        end;
+      end;
+    finally
+      Free();
+    end;
+  except
+  end;
+  Sections.Free();
+end;
+
+procedure FreePackages(Packages: TSimbaPackageArray);
+var
+  I: Integer;
+begin
+  for I := 0 to High(Packages) do
+    Packages[I].Free();
+end;
+
 function TSimbaPackage.GetLatestVersion: String;
 begin
   Result := '';
@@ -230,13 +281,6 @@ begin
     True:  Self.WriteConfig('AutoUpdate', 'True');
     False: Self.WriteConfig('AutoUpdate', 'False');
   end;
-end;
-
-function TSimbaPackage.GetConfigPath: String;
-begin
-  Result := '';
-  if IsInstalled and FileExists(InstalledPath + '.simbapackage') then
-    Result := InstalledPath + '.simbapackage';
 end;
 
 procedure TSimbaPackage.ClearConfig;
@@ -375,6 +419,22 @@ end;
 function TSimbaPackage.HasReleases: Boolean;
 begin
   Result := Length(FReleases) > 0;
+end;
+
+function TSimbaPackage.GetExamples: TStringArray;
+begin
+  if IsInstalled() then
+    Result := TSimbaDir.DirSearch(InstalledPath, '*.packageexample.simba', True)
+  else
+    Result := [];
+end;
+
+function TSimbaPackage.GetScripts: TStringArray;
+begin
+  if IsInstalled() then
+    Result := TSimbaDir.DirSearch(InstalledPath, '*.packagescript.simba', True)
+  else
+    Result := [];
 end;
 
 end.

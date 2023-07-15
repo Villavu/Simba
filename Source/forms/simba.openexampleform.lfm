@@ -1,169 +1,42 @@
 object SimbaOpenExampleForm: TSimbaOpenExampleForm
-  Left = 1139
+  Left = 2791
   Height = 750
-  Top = 19
+  Top = 494
   Width = 1125
   Caption = 'Open Example'
   ClientHeight = 750
   ClientWidth = 1125
+  Constraints.MinHeight = 300
+  Constraints.MinWidth = 400
   DesignTimePPI = 120
   OnCreate = FormCreate
-  OnDestroy = FormDestroy
   OnShow = FormShow
   Position = poMainFormCenter
   LCLVersion = '2.2.4.0'
-  object TreeView: TTreeView
+  object LeftPanel: TPanel
     Left = 0
-    Height = 696
+    Height = 750
     Top = 0
-    Width = 225
+    Width = 213
     Align = alLeft
-    AutoExpand = True
-    Images = SimbaForm.Images
-    ParentFont = False
-    ReadOnly = True
-    ScrollBars = ssAutoBoth
-    ShowButtons = False
-    ShowRoot = False
+    BevelOuter = bvNone
     TabOrder = 0
-    OnDblClick = ButtonOkClick
-    OnDeletion = TreeViewDeletion
-    OnSelectionChanged = TreeViewSelectionChanged
-    Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowLines, tvoToolTips, tvoNoDoubleClickExpand, tvoThemedDraw]
-  end
-  object ButtonPanel: TButtonPanel
-    Left = 8
-    Height = 38
-    Top = 704
-    Width = 1109
-    BorderSpacing.Around = 8
-    OKButton.Name = 'OKButton'
-    OKButton.DefaultCaption = True
-    OKButton.OnClick = ButtonOkClick
-    HelpButton.Name = 'HelpButton'
-    HelpButton.DefaultCaption = True
-    CloseButton.Name = 'CloseButton'
-    CloseButton.DefaultCaption = True
-    CancelButton.Name = 'CancelButton'
-    CancelButton.DefaultCaption = True
-    TabOrder = 1
-    ShowButtons = [pbOK, pbCancel]
   end
   object Splitter: TSplitter
-    Left = 225
-    Height = 696
+    Left = 213
+    Height = 750
     Top = 0
-    Width = 7
+    Width = 6
+    OnPaint = SplitterPaint
   end
-  object EditorPanel: TPanel
-    Left = 232
-    Height = 696
+  object RightPanel: TPanel
+    Left = 219
+    Height = 750
     Top = 0
-    Width = 893
+    Width = 906
     Align = alClient
     BevelOuter = bvNone
-    Caption = '(no file selected)'
-    ClientHeight = 696
-    ClientWidth = 893
-    ParentFont = False
-    TabOrder = 3
-    inline Editor: TSynEdit
-      Left = 0
-      Height = 696
-      Top = 0
-      Width = 893
-      Align = alClient
-      Font.Height = -17
-      Font.Name = 'Courier New'
-      Font.Pitch = fpFixed
-      Font.Quality = fqNonAntialiased
-      ParentColor = False
-      ParentFont = False
-      TabOrder = 0
-      Gutter.Width = 72
-      Gutter.MouseActions = <>
-      RightGutter.Visible = False
-      RightGutter.Width = 0
-      RightGutter.MouseActions = <>
-      Highlighter = Highlighter
-      Keystrokes = <      
-        item
-          Command = ecCopy
-          ShortCut = 16451
-        end      
-        item
-          Command = ecSelectAll
-          ShortCut = 16449
-        end>
-      MouseActions = <>
-      MouseTextActions = <>
-      MouseSelActions = <>
-      Options = [eoAutoIndent, eoBracketHighlight, eoGroupUndo, eoHideRightMargin, eoScrollPastEol, eoSmartTabs, eoTabsToSpaces, eoTrimTrailingSpaces]
-      VisibleSpecialChars = [vscSpace, vscTabAtLast]
-      ReadOnly = True
-      ScrollBars = ssAutoBoth
-      SelectedColor.BackPriority = 50
-      SelectedColor.ForePriority = 50
-      SelectedColor.FramePriority = 50
-      SelectedColor.BoldPriority = 50
-      SelectedColor.ItalicPriority = 50
-      SelectedColor.UnderlinePriority = 50
-      SelectedColor.StrikeOutPriority = 50
-      BracketHighlightStyle = sbhsBoth
-      BracketMatchColor.Background = clNone
-      BracketMatchColor.Foreground = clNone
-      BracketMatchColor.Style = [fsBold]
-      FoldedCodeColor.Background = clNone
-      FoldedCodeColor.Foreground = clGray
-      FoldedCodeColor.FrameColor = clGray
-      MouseLinkColor.Background = clNone
-      MouseLinkColor.Foreground = clBlue
-      LineHighlightColor.Background = clNone
-      LineHighlightColor.Foreground = clNone
-      inline SynLeftGutterPartList1: TSynGutterPartList
-        object SynGutterMarks1: TSynGutterMarks
-          Width = 30
-          MouseActions = <>
-        end
-        object SynGutterLineNumber1: TSynGutterLineNumber
-          Width = 21
-          MouseActions = <>
-          MarkupInfo.Background = clBtnFace
-          MarkupInfo.Foreground = clNone
-          DigitCount = 2
-          ShowOnlyLineNumbersMultiplesOf = 1
-          ZeroStart = False
-          LeadingZeros = False
-        end
-        object SynGutterChanges1: TSynGutterChanges
-          Width = 5
-          MouseActions = <>
-          ModifiedColor = 59900
-          SavedColor = clGreen
-        end
-        object SynGutterSeparator1: TSynGutterSeparator
-          Width = 3
-          MouseActions = <>
-          MarkupInfo.Background = clWhite
-          MarkupInfo.Foreground = clGray
-        end
-        object SynGutterCodeFolding1: TSynGutterCodeFolding
-          Width = 13
-          MouseActions = <>
-          MarkupInfo.Background = clNone
-          MarkupInfo.Foreground = clGray
-          MouseActionsExpanded = <>
-          MouseActionsCollapsed = <>
-        end
-      end
-    end
-  end
-  object Highlighter: TSynFreePascalSyn
-    Enabled = False
-    CompilerMode = pcmObjFPC
-    NestedComments = True
-    TypeHelpers = False
-    Left = 850
-    Top = 30
+    Caption = '(no example selected)'
+    TabOrder = 2
   end
 end

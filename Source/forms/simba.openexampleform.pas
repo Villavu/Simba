@@ -5,35 +5,35 @@
 }
 unit simba.openexampleform;
 
+// "Project options > Resources" to add examples
+
 {$i simba.inc}
-{$R ../../Examples/examples.res}
 
 interface
 
 uses
-  classes, sysutils, forms, controls, graphics, dialogs, comctrls, extctrls,
-  buttonpanel, synedit, synhighlighterpas,
-  simba.settings;
+  Classes, SysUtils, Forms, Controls, Graphics, ComCtrls, ExtCtrls,
+  simba.mufasatypes, simba.editor,
+  simba.component_treeview, simba.component_buttonpanel;
 
 type
   TSimbaOpenExampleForm = class(TForm)
-    ButtonPanel: TButtonPanel;
-    EditorPanel: TPanel;
+    TreeView: TSimbaTreeView;
+    Editor: TSimbaEditor;
+    LeftPanel: TPanel;
+    RightPanel: TPanel;
     Splitter: TSplitter;
-    Editor: TSynEdit;
-    Highlighter: TSynFreePascalSyn;
-    TreeView: TTreeView;
+    ButtonPanel: TSimbaButtonPanel;
 
     procedure FormCreate(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure TreeViewDeletion(Sender: TObject; Node: TTreeNode);
-    procedure TreeViewSelectionChanged(Sender: TObject);
-    procedure ButtonOkClick(Sender: TObject);
-  public
-    procedure SimbaSettingChanged(Setting: TSimbaSetting);
+    procedure SplitterPaint(Sender: TObject);
+  protected
+    procedure DoButtonOkClick(Sender: TObject);
+    procedure DoSplitterEnterExit(Sender: TObject);
+    procedure DoTreeViewSelectionChanged(Sender: TObject);
 
-    procedure LoadPackageExamples;
+    procedure AddPackageExamples;
   end;
 
 var
@@ -44,181 +44,176 @@ implementation
 {$R *.lfm}
 
 uses
-  lazloggerbase, lazfileutils, lcltype,
-  simba.main, simba.package, simba.package_configfile, simba.fonthelpers, simba.scripttabsform;
+  LCLType, AnchorDocking,
+  simba.main, simba.package, simba.scripttabsform, simba.files, simba.theme;
 
-procedure TSimbaOpenExampleForm.LoadPackageExamples;
-var
-  I: Integer;
-  ParentNode, Node: TTreeNode;
-  Package: TSimbaPackage;
-  FileName: String;
-  Config: TSimbaPackageConfigFile;
+function ReadResourceString(ResourceName: String): String;
 begin
-  TreeView.BeginUpdate();
-  for I := 1 to TreeView.Items.TopLvlCount - 1 do
-    TreeView.Items.TopLvlItems[I].Free();
+  Result := '';
 
-  for Package in LoadPackages() do
-  begin
-    Config := ParsePackageConfigFile(Package.ConfigPath);
-    if (Length(Config.Examples) = 0) then
-      Continue;
+  with TResourceStream.Create(HINSTANCE, ResourceName, RT_RCDATA) do
+  try
+    SetLength(Result, Size);
 
-    ParentNode := TreeView.Items.Add(nil, Package.Info.FullName);
-    ParentNode.ImageIndex := IMAGE_PACKAGE;
-    ParentNode.SelectedIndex := IMAGE_PACKAGE;
+    Read(Result[1], Size);
+  finally
+    Free();
+  end;
+end;
 
-    for FileName in Config.Examples do
-    begin
-      Node := TreeView.Items.AddChild(ParentNode, ExtractFileNameOnly(FileName));
-      Node.ImageIndex := IMAGE_SIMBA;
-      Node.SelectedIndex := IMAGE_SIMBA;
-      Node.Data := NewStr(FileName);
-    end;
-
-    Package.Free();
+type
+  TExampleNode = class(TTreeNode)
+  public
+    FileName: String;
+    Script: String;
   end;
 
-  TreeView.Width := TreeView.Indent + TreeView.Items[0].DisplayTextLeft + TreeView.Canvas.TextWidth('ollydev/SRL-Development');
-  TreeView.EndUpdate();
+procedure TSimbaOpenExampleForm.AddPackageExamples;
 
-  Editor.Visible := False;
+  procedure AddNode(const AParentNode: TTreeNode; const AFileName: String);
+  begin
+    with TExampleNode(TreeView.AddNode(AParentNode, TSimbaPath.PathExtractNameWithoutExt(AFileName), IMAGE_SIMBA)) do
+      FileName := AFileName;
+  end;
+
+var
+  I: Integer;
+  ParentNode: TTreeNode;
+  FileName: String;
+  Files: TStringArray;
+  Packages: TSimbaPackageArray;
+  Str: String;
+begin
+  TreeView.BeginUpdate();
+  for I := 1 to TreeView.Items.TopLvlCount - 1 do // I := 1 to skip Simba node
+    TreeView.Items.TopLvlItems[I].Free();
+
+  Packages := GetInstalledPackages();
+  for I := 0 to High(Packages) do
+  begin
+    Files := Packages[I].GetExamples();
+    if (Length(Files) = 0) then
+      Continue;
+
+    Str := Packages[I].URL;
+    while (Str.Count('/') > 1) do
+      Str := Str.After('/');
+
+    ParentNode := TreeView.AddNode(Str, IMAGE_PACKAGE);
+    for FileName in Files do
+      AddNode(ParentNode, FileName);
+  end;
+  FreePackages(Packages);
+
+  TreeView.EndUpdate();
 end;
 
 procedure TSimbaOpenExampleForm.FormShow(Sender: TObject);
 begin
-  LoadPackageExamples();
+  Splitter.Width := DockMaster.SplitterWidth;
+
+  AddPackageExamples();
+
+  TreeView.ClearSelection();
+  TreeView.FullExpand();
 end;
 
-procedure TSimbaOpenExampleForm.TreeViewDeletion(Sender: TObject; Node: TTreeNode);
+procedure TSimbaOpenExampleForm.SplitterPaint(Sender: TObject);
 begin
-  if (Node <> nil) and (Node.Data <> nil) then
-    DisposeStr(PString(Node.Data));
-end;
-
-procedure TSimbaOpenExampleForm.ButtonOkClick(Sender: TObject);
-var
-  Node: TTreeNode;
-begin
-  Node := TreeView.Selected;
-  if (Node = nil) or (Node.Data = nil) then
-    Exit;
-
-  SimbaScriptTabsForm.AddTab().Editor.Text := Editor.Text;
-  if (Sender = TreeView) then
-    Close();
-end;
-
-procedure TSimbaOpenExampleForm.SimbaSettingChanged(Setting: TSimbaSetting);
-begin
-  if (Setting = SimbaSettings.Editor.FontSize) then
-    Editor.Font.Size := Setting.Value;
-
-  if (Setting = SimbaSettings.Editor.FontName) then
+  with TSplitter(Sender) do
   begin
-    if IsFontFixed(Setting.Value) then
-      Editor.Font.Name := Setting.Value;
-  end;
+    Canvas.Brush.Color := SimbaTheme.ColorFrame;
+    Canvas.FillRect(ClientRect);
 
-  if SimbaSettings.Editor.AntiAliased.Value then
-    Editor.Font.Quality := fqCleartypeNatural
-  else
-    Editor.Font.Quality := fqNonAntialiased;
-end;
-
-function ExtractExamples(ResourceHandle: TFPResourceHMODULE; ResourceType, ResourceName: PChar; Param: PtrInt): LongBool; stdcall;
-var
-  Name, Value: String;
-begin
-  Result := True;
-
-  Name := ResourceName;
-  if Name.EndsWith('.SIMBA') then
-  begin
-    with TResourceStream.Create(HINSTANCE, ResourceName, ResourceType) do
-    try
-      SetLength(Value, Size);
-      Read(Value[1], Size);
-    finally
-      Free();
+    if MouseInClient then
+    begin
+      Canvas.Brush.Color := SimbaTheme.ColorActive;
+      Canvas.FillRect(3, 3, Width-3, Height-3);
     end;
-
-    TStringList(Param).Values[Name] := Value;
   end;
+end;
+
+procedure TSimbaOpenExampleForm.DoButtonOkClick(Sender: TObject);
+begin
+  if Editor.Visible then
+  begin
+    SimbaScriptTabsForm.AddTab().Editor.Text := Editor.Text;
+    if (Sender is TTreeView) then
+      Close();
+  end;
+end;
+
+procedure TSimbaOpenExampleForm.DoSplitterEnterExit(Sender: TObject);
+begin
+  Splitter.Invalidate();
 end;
 
 procedure TSimbaOpenExampleForm.FormCreate(Sender: TObject);
 var
-  List: TStringList;
-  SimbaNode, Node: TTreeNode;
-  I: Integer;
+  SimbaNode: TTreeNode;
+
+  procedure AddNode(const Name, ResourceName: String);
+  begin
+    with TExampleNode(TreeView.AddNode(SimbaNode, Name, IMAGE_SIMBA)) do
+      Script := ReadResourceString(ResourceName);
+  end;
+
 begin
   Width := Scale96ToScreen(800);
   Height := Scale96ToScreen(600);
 
-  with Highlighter as TSynFreePascalSyn do
-  begin
-    CommentAttri.Foreground := clBlue;
-    CommentAttri.Style := [fsBold];
-    IdentifierAttri.Foreground := clDefault;
-    NumberAttri.Foreground := clNavy;
-    StringAttri.Foreground := clBlue;
-    SymbolAttri.Foreground := clRed;
-    DirectiveAttri.Foreground := clRed;
-    DirectiveAttri.Style := [fsBold];
-    NestedComments := True;
-    StringKeywordMode := spsmNone;
-    TypeHelpers := True;
-    ExtendedKeywordsMode := True;
-  end;
+  TreeView := TSimbaTreeView.Create(Self, TExampleNode);
+  TreeView.Parent := LeftPanel;
+  TreeView.Align := alClient;
+  TreeView.OnSelectionChange := @DoTreeViewSelectionChanged;
+  TreeView.OnDoubleClick := @DoButtonOkClick;
 
-  SimbaSettingChanged(SimbaSettings.Editor.FontSize);
-  SimbaSettingChanged(SimbaSettings.Editor.FontName);
-  SimbaSettingChanged(SimbaSettings.Editor.AntiAliased);
+  Editor := TSimbaEditor.Create(Self);
+  Editor.Parent := RightPanel;
+  Editor.Align := alClient;
+  Editor.Visible := False;
 
-  SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
+  Splitter.OnEnter := @DoSplitterEnterExit;
+  Splitter.OnExit := @DoSplitterEnterExit;
 
-  List := TStringList.Create();
-  List.LineBreak := #0;
-  EnumResourceNames(HINSTANCE, RT_RCDATA, @ExtractExamples, PtrInt(List));
+  RightPanel.Color := SimbaTheme.ColorBackground;
+  RightPanel.Font.Color := SimbaTheme.ColorFont;
 
-  SimbaNode := TreeView.Items.Add(nil, 'Simba');
-  SimbaNode.ImageIndex := IMAGE_PACKAGE;
-  SimbaNode.SelectedIndex := IMAGE_PACKAGE;
-  for I := 0 to List.Count - 1 do
-  begin
-    Node := TreeView.Items.AddChild(SimbaNode, ExtractFileNameWithoutExt(List.Names[I]).ToLower());
-    Node.ImageIndex := IMAGE_SIMBA;
-    Node.SelectedIndex := IMAGE_SIMBA;
-    Node.Data := NewStr(List.ValueFromIndex[I]);
-  end;
+  ButtonPanel := TSimbaButtonPanel.Create(Self);
+  ButtonPanel.Parent := Self;
+  ButtonPanel.ButtonOk.OnClick := @DoButtonOkClick;
 
-  List.Free();
+  SimbaNode := TExampleNode(TreeView.AddNode('Simba', IMAGE_PACKAGE));
+
+  AddNode('Array',     'EXAMPLE_ARRAY'    );
+  AddNode('Bitmap',    'EXAMPLE_BITMAP'   );
+  AddNode('Function',  'EXAMPLE_FUNCTION' );
+  AddNode('Loop',      'EXAMPLE_LOOP'     );
+  AddNode('Procedure', 'EXAMPLE_PROCEDURE');
+  AddNode('Timing',    'EXAMPLE_TIMING'   );
 end;
 
-procedure TSimbaOpenExampleForm.FormDestroy(Sender: TObject);
-begin
-  SimbaSettings.UnRegisterChangeHandler(@SimbaSettingChanged);
-end;
-
-procedure TSimbaOpenExampleForm.TreeViewSelectionChanged(Sender: TObject);
+procedure TSimbaOpenExampleForm.DoTreeViewSelectionChanged(Sender: TObject);
 var
-  Node: TTreeNode;
+  Node: TExampleNode;
 begin
-  Node := TreeView.Selected;
-  if (Node = nil) or (Node.Data = nil) then
-    Exit;
+  Node := TExampleNode(TreeView.Selected);
 
-  try
-    if (Node.Parent.Text = 'Simba') then
-      Editor.Lines.Text := PString(Node.Data)^
-    else
-      Editor.Lines.LoadFromFile(PString(Node.Data)^);
-  except
-  end;
-
-  Editor.Visible := True;
+  if (Node is TExampleNode) then
+  begin
+    if (Node.Script <> '') then
+    begin
+      Editor.Lines.Text := Node.Script;
+      Editor.Visible := True;
+    end else
+    if (Node.FileName <> '') and TSimbaFile.FileExists(Node.FileName) then
+    begin
+      Editor.Lines.LoadFromFile(Node.FileName);
+      Editor.Visible := True;
+    end else
+      Editor.Visible := False;
+  end else
+    Editor.Visible := False;
 end;
 
 end.

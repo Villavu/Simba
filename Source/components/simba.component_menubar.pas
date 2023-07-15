@@ -14,6 +14,8 @@ uses
   simba.settings;
 
 type
+  TPopupMenuArray = array of TPopupMenu;
+
   TSimbaMainMenuBar = class(TCustomControl)
   protected
     FItems: array of record
@@ -45,9 +47,12 @@ type
     procedure DoMenuClose(Sender: TObject);
 
     procedure MaybeReplaceModifiers(Menu: TPopupMenu);
+
+    function GetMenus: TPopupMenuArray;
   public
     constructor Create(AOwner: TComponent); override;
 
+    property Menus: TPopupMenuArray read GetMenus;
     procedure AddMenu(Title: String; APopupMenu: TPopupMenu);
   end;
 
@@ -55,7 +60,16 @@ implementation
 
 uses
   LMessages, LCLIntf,
-  simba.theme;
+  simba.theme, simba.fonthelpers;
+
+function TSimbaMainMenuBar.GetMenus: TPopupMenuArray;
+var
+  I: Integer;
+begin
+  SetLength(Result, Length(FItems));
+  for I := 0 to High(Result) do
+    Result[I] := FItems[I].Menu;
+end;
 
 procedure TSimbaMainMenuBar.SetHotIndex(Index: Integer);
 begin
@@ -132,23 +146,25 @@ begin
   with TBitmap.Create() do
   try
     Canvas.Font := Self.Font;
-    Canvas.Font.Size := Round(Abs(GetFontData(Canvas.Font.Handle).Height) * 72 / Canvas.Font.PixelsPerInch) + 4; // Measure on larger font size - Font size can be 0
+    Canvas.Font.Size := GetFontSize(Self);
 
     if (Length(FItems) > 0) then
     begin
       FItems[0].Rect.Top := 0;
       FItems[0].Rect.Bottom := Self.Height;
       FItems[0].Rect.Left  := 5;
-      FItems[0].Rect.Right := FItems[0].Rect.Left + Canvas.TextWidth(FItems[0].Text);
+      FItems[0].Rect.Right := FItems[0].Rect.Left + Canvas.TextWidth(FItems[0].Text) + 10;
+
       for I := 1 to High(FItems) do
       begin
         FItems[I].Rect.Top := 0;
         FItems[I].Rect.Bottom := Self.Height;
         FItems[I].Rect.Left := FItems[I-1].Rect.Right + 5;
-        FItems[I].Rect.Right := FItems[I].Rect.Left + Canvas.TextWidth(FItems[I].Text);
+        FItems[I].Rect.Right := FItems[I].Rect.Left + Canvas.TextWidth(FItems[I].Text) + 10;
       end;
     end;
 
+    Canvas.Font.Size := GetFontSize(Self, 3);
     Self.Height := Canvas.TextHeight('Tay');
   finally
     Free();
@@ -271,7 +287,13 @@ begin
 end;
 
 procedure TSimbaMainMenuBar.AddMenu(Title: String; APopupMenu: TPopupMenu);
+var
+  I: Integer;
 begin
+  for I := 0 to High(FItems) do
+    if (FItems[I].Menu = APopupMenu) then
+      Exit;
+
   SetLength(FItems, Length(FItems) + 1);
   FItems[High(FItems)].Text := Title;
   FItems[High(FItems)].Menu := APopupMenu;
@@ -282,6 +304,7 @@ begin
   {$ENDIF}
 
   CalculateSizes();
+  Invalidate();
 end;
 
 end.

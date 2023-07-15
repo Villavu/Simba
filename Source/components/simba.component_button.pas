@@ -22,6 +22,7 @@ type
 
     constructor Create(AOwner: TComponent); override;
 
+    procedure SetOkGlpyh;
     procedure SetCloseGlyph;
     procedure SetClearFilterGlyph;
   end;
@@ -86,8 +87,13 @@ begin
   inherited Create(AOwner);
 
   AutoSize := True;
-
+  Font.Color := SimbaTheme.ColorFont;
   VertPadding := 5;
+end;
+
+procedure TSimbaButton.SetOkGlpyh;
+begin
+  ButtonGlyph.LCLGlyphName := 'btn_ok';
 end;
 
 procedure TSimbaButton.SetCloseGlyph;
