@@ -38,9 +38,6 @@ type
     class var Imports: TSimbaImportArray;
     class procedure RegisterImport(Proc: TSimbaImport);
 
-    function getIntegerArray: TLapeType; override;
-    function getFloatArray: TLapeType; override;
-
     function CurrentDir: String;
 
     procedure addOverrideMethod(Header: lpString; GetBody: TOverridingMethod);
@@ -188,7 +185,7 @@ begin
   StartImporting();
 
   try
-    Options := Options + [lcoLooseSemicolon, lcoAutoInvoke, lcoExplicitSelf, lcoAutoObjectify, lcoRelativeFileNames];
+    Options := Options + [lcoLooseSemicolon, lcoAutoInvoke, lcoExplicitSelf, lcoAutoObjectify, lcoRelativeFileNames] - [lcoInheritableRecords];
 
     ImportingSection := 'System';
 
@@ -276,20 +273,6 @@ begin
   addGlobalType(getPointerType(ltChar, False).createCopy(), 'PChar');
 
   inherited InitBaseDefinitions();
-end;
-
-function TSimbaScript_Compiler.getIntegerArray: TLapeType;
-begin
-  Result := getGlobalType('TIntegerArray');
-  if (Result = nil) then
-    Result := inherited;
-end;
-
-function TSimbaScript_Compiler.getFloatArray: TLapeType;
-begin
-  Result := getGlobalType('TExtendedArray');
-  if (Result = nil) then
-    Result := inherited;
 end;
 
 procedure TSimbaScript_Compiler.pushTokenizer(ATokenizer: TLapeTokenizerBase);

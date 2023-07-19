@@ -128,12 +128,12 @@ end;
 
 procedure _LapeArraySum_SingleArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PExtended(Result)^ := specialize Sum<Single, Double>(PSingleArray(Params^[0])^);
+  PDouble(Result)^ := specialize Sum<Single, Double>(PSingleArray(Params^[0])^);
 end;
 
 procedure _LapeArraySum_DoubleArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PExtended(Result)^ := specialize Sum<Double, Double>(PDoubleArray(Params^[0])^);
+  PDouble(Result)^ := specialize Sum<Double, Double>(PDoubleArray(Params^[0])^);
 end;
 
 // Min
@@ -289,8 +289,8 @@ begin
 
     addGlobalFunc('function _ArraySum(const a: TPointArray): TPoint; overload', @_LapeArraySum_PointArray);
     addGlobalFunc('function _ArraySum(const a: TIntegerArray): Int64; overload', @_LapeArraySum_IntegerArray);
-    addGlobalFunc('function _ArraySum(const a: TSingleArray): Extended; overload', @_LapeArraySum_SingleArray);
-    addGlobalFunc('function _ArraySum(const a: TDoubleArray): Extended; overload', @_LapeArraySum_DoubleArray);
+    addGlobalFunc('function _ArraySum(const a: TSingleArray): Double; overload', @_LapeArraySum_SingleArray);
+    addGlobalFunc('function _ArraySum(const a: TDoubleArray): Double; overload', @_LapeArraySum_DoubleArray);
 
     addGlobalFunc('function _ArrayMin(const a: TIntegerArray): Int64; overload', @_LapeArrayMin_IntegerArray);
     addGlobalFunc('function _ArrayMin(const a: TSingleArray): Single; overload', @_LapeArrayMin_SingleArray);
