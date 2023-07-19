@@ -272,7 +272,7 @@ end;
 
 procedure _LapeString_ExtractFloat(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PExtended(Result)^ := PString(Params^[0])^.ExtractFloat(PInt64(Params^[1])^);
+  PDouble(Result)^ := PString(Params^[0])^.ExtractFloat(PInt64(Params^[1])^);
 end;
 
 procedure _LapeString_IsAlphaNum(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -374,16 +374,6 @@ end;
 procedure _LapeString_ToDoubleDef(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDouble(Result)^ := PString(Params^[0])^.ToDouble(PDouble(Params^[1])^);
-end;
-
-procedure _LapeString_ToExtended(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PExtended(Result)^ := PString(Params^[0])^.ToExtended();
-end;
-
-procedure _LapeString_ToExtendedDef(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PExtended(Result)^ := PString(Params^[0])^.ToExtended(PExtended(Params^[1])^);
 end;
 
 procedure _LapeString_MUL_Integer(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -535,7 +525,7 @@ begin
 
     addGlobalFunc('function String.Extract(Chars: array of Char): String;', @_LapeString_Extract);
     addGlobalFunc('function String.ExtractInteger(Default: Int64 = -1): Int64;', @_LapeString_ExtractInteger);
-    addGlobalFunc('function String.ExtractFloat(Default: Extended = -1): Extended;', @_LapeString_ExtractFloat);
+    addGlobalFunc('function String.ExtractFloat(Default: Double = -1): Double;', @_LapeString_ExtractFloat);
 
     addGlobalFunc('function String.IsAlphaNum(): Boolean;', @_LapeString_IsAlphaNum);
     addGlobalFunc('function String.IsInteger(): Boolean;', @_LapeString_IsInteger);
@@ -587,8 +577,6 @@ begin
     addGlobalFunc('function String.ToSingle(Default: Single): Single; overload;', @_LapeString_ToSingleDef);
     addGlobalFunc('function String.ToDouble: Double; overload;', @_LapeString_ToDouble);
     addGlobalFunc('function String.ToDouble(Default: Double): Double; overload;', @_LapeString_ToDoubleDef);
-    addGlobalFunc('function String.ToExtended: Extended; overload;', @_LapeString_ToExtended);
-    addGlobalFunc('function String.ToExtended(Default: Extended): Extended; overload;', @_LapeString_ToExtendedDef);
 
     addGlobalFunc('operator *(Left: String; Right: Integer): String', @_LapeString_MUL_Integer);
     addGlobalFunc('operator in(Left: String; Right: String): Boolean', @_LapeString_IN_String);
