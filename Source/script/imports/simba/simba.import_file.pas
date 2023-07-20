@@ -25,33 +25,53 @@ File, Path, Directory related methods.
 *)
 
 (*
-WriteINI
-~~~~~~~~
-procedure WriteINI(Section, KeyName, NewString, FileName: String);
+INIFileWrite
+~~~~~~~~~~~~~
+function INIFileWrite(FileName: String; Section, Key, Value: String): Boolean
 *)
-procedure _LapeWriteINI(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeINIFileWrite(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  WriteINI(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^, PString(Params^[3])^);
+  PBoolean(Result)^ := INIFileWrite(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^, PString(Params^[3])^);
 end;
 
 (*
-ReadINI
-~~~~~~~
-function ReadINI(Section, KeyName, FileName: String): String;
+INIFileRead
+~~~~~~~~~~~~~
+function INIFileRead(FileName: String; Section, Key, Value: String): String
 *)
-procedure _LapeReadINI(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeINIFileRead(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := ReadINI(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
+  PString(Result)^ := INIFileRead(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^, PString(Params^[3])^);
 end;
 
 (*
-DeleteINI
-~~~~~~~~~
-procedure DeleteINI(Section, KeyName, FileName: String);
+INIFileDelete
+~~~~~~~~~~~~~
+function INIFileDelete(FileName: String; Section, Key: String): Boolean
 *)
-procedure _LapeDeleteINI(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeINIFileDelete(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  DeleteINI(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[1])^);
+  PBoolean(Result)^ := INIFileDelete(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
+end;
+
+(*
+INIFileKeys
+~~~~~~~~~~~
+function INIFileKeys(FileName: String; Section: String): TStringArray
+*)
+procedure _LapeINIFileKeys(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PStringArray(Result)^ := INIFileKeys(PString(Params^[0])^, PString(Params^[1])^);
+end;
+
+(*
+INIFileSections
+~~~~~~~~~~~~~~~
+function INIFileSections(FileName: String): TStringArray
+*)
+procedure _LapeINIFileSections(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PStringArray(Result)^ := INIFileSections(PString(Params^[0])^);
 end;
 
 (*
@@ -570,9 +590,11 @@ begin
     addGlobalVar(SimbaEnv.DataPath,        'SIMBA_DATA_PATH').isConstant := True;
     addGlobalVar(SimbaEnv.ScreenshotsPath, 'SCREENSHOTS_PATH').isConstant := True;
 
-    addGlobalFunc('procedure WriteINI(Section, KeyName, NewString, FileName: String)', @_LapeWriteINI);
-    addGlobalFunc('function ReadINI(Section, KeyName, FileName: String): String', @_LapeReadINI);
-    addGlobalFunc('procedure DeleteINI(Section, KeyName, FileName: String)', @_LapeDeleteINI);
+    addGlobalFunc('function INIFileWrite(FileName: String; Section, Key, Value: String): Boolean', @_LapeINIFileWrite);
+    addGlobalFunc('function INIFileRead(FileName: String; Section, Key, Value: String): String', @_LapeINIFileRead);
+    addGlobalFunc('function INIFileDelete(FileName: String; Section, Key: String): Boolean', @_LapeINIFileDelete);
+    addGlobalFunc('function INIFileKeys(FileName: String; Section: String): TStringArray', @_LapeINIFileKeys);
+    addGlobalFunc('function INIFileSections(FileName: String): TStringArray', @_LapeINIFileSections);
 
     addGlobalFunc('function ZipExtractAll(ZipFileName, OutputDir: String): Boolean', @_LapeZipExtractAll);
     addGlobalFunc('function ZipExtractOne(ZipFileName, FileName, OutputDir: String): Boolean', @_LapeZipExtractOne);

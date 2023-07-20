@@ -92,6 +92,12 @@ type
   procedure DeleteINI(const Section, KeyName : string; FileName : string);
   procedure WriteINI(const Section, KeyName, NewString : string; FileName : string);
 
+  function INIFileWrite(FileName: String; Section, Key, Value: String): Boolean;
+  function INIFileRead(FileName: String; Section, Key, Value: String): String;
+  function INIFileDelete(FileName: String; Section, Key: String): Boolean;
+  function INIFileKeys(FileName: String; Section: String): TStringArray;
+  function INIFileSections(FileName: String): TStringArray;
+
 implementation
 
 uses
@@ -627,6 +633,104 @@ begin
   finally
 	  Free();
   end;
+end;
+
+function INIFileWrite(FileName: String; Section, Key, Value: String): Boolean;
+begin
+  Result := True;
+
+  try
+    with TINIFile.Create(FileName) do
+    try
+	    WriteString(Section, Key, Value);
+    finally
+	    Free();
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+function INIFileRead(FileName: String; Section, Key, Value: String): String;
+begin
+  Result := '';
+
+  try
+    with TINIFile.Create(FileName) do
+    try
+	    Result := ReadString(Section, Key, Value);
+    finally
+	    Free();
+    end;
+  except
+  end;
+end;
+
+function INIFileDelete(FileName: String; Section, Key: String): Boolean;
+begin
+  Result := True;
+
+  try
+    with TIniFile.Create(FileName) do
+    try
+      if (Key = '') then
+	      EraseSection(Section)
+	    else
+	      DeleteKey(Section, Key);
+    finally
+      Free();
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+function INIFileKeys(FileName: String; Section: String): TStringArray;
+var
+  List: TStringList;
+begin
+  Result := [];
+
+  List := nil;
+  try
+    with TIniFile.Create(FileName) do
+    try
+      List := TStringList.Create();
+      ReadSection(Section, List);
+
+      Result := List.ToStringArray();
+    finally
+      Free();
+    end;
+  except
+
+  end;
+  if Assigned(List) then
+    List.Free();
+end;
+
+function INIFileSections(FileName: String): TStringArray;
+var
+  List: TStringList;
+begin
+  Result := [];
+
+  List := nil;
+  try
+    with TIniFile.Create(FileName) do
+    try
+      List := TStringList.Create();
+      ReadSections(List);
+
+      Result := List.ToStringArray();
+    finally
+      Free();
+    end;
+  except
+  end;
+
+  if Assigned(List) then
+    List.Free();
 end;
 
 end.
