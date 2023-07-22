@@ -5,6 +5,7 @@
 }
 unit simba.algo_difference;
 
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 interface

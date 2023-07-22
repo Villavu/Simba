@@ -28,11 +28,8 @@
 
 unit simba.tpa;
 
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
-
-{$IFOPT D-}
-  {$OPTIMIZATION LEVEL4}
-{$ENDIF}
 
 interface
 
@@ -105,6 +102,7 @@ type
     function NearestPoint(Other: TPoint): TPoint;
 
     function Sort(Weights: TIntegerArray; LowToHigh: Boolean = True): TPointArray; overload;
+    function Sort(Weights: TSingleArray; LowToHigh: Boolean = True): TPointArray; overload;
     function Sort(Weights: TDoubleArray; LowToHigh: Boolean = True): TPointArray; overload;
 
     function SortFrom(From: TPoint): TPointArray;
@@ -128,6 +126,8 @@ type
     function Partition(Dist: Integer): T2DPointArray; overload;
     function PartitionEx(StartPoint: TPoint; BoxWidth, BoxHeight: Integer): T2DPointArray; overload;
     function PartitionEx(BoxWidth, BoxHeight: Integer): T2DPointArray; overload;
+
+    function Intersection(Other: TPointArray): TPointArray;
   end;
 
 implementation
@@ -135,7 +135,7 @@ implementation
 uses
   math,
   simba.overallocatearray, simba.geometry, simba.math,
-  simba.algo_sort, simba.slacktree, simba.algo_unique,
+  simba.algo_sort, simba.algo_intersection, simba.slacktree, simba.algo_unique,
   simba.singlematrix, simba.integermatrix;
 
 procedure GetAdjacent4(var Adj: TPointArray; const P: TPoint); inline;
@@ -1504,12 +1504,17 @@ end;
 
 function TPointArrayHelper.Sort(Weights: TIntegerArray; LowToHigh: Boolean): TPointArray;
 begin
-  Result := specialize Sorted<TPoint>(Self, Weights, LowToHigh);
+  Result := specialize Sorted<TPoint, Integer>(Self, Weights, LowToHigh);
+end;
+
+function TPointArrayHelper.Sort(Weights: TSingleArray; LowToHigh: Boolean): TPointArray;
+begin
+  Result := specialize Sorted<TPoint, Single>(Self, Weights, LowToHigh);
 end;
 
 function TPointArrayHelper.Sort(Weights: TDoubleArray; LowToHigh: Boolean): TPointArray;
 begin
-  Result := specialize Sorted<TPoint>(Self, Weights, LowToHigh);
+  Result := specialize Sorted<TPoint, Double>(Self, Weights, LowToHigh);
 end;
 
 function TPointArrayHelper.SortFrom(From: TPoint): TPointArray;
@@ -2114,6 +2119,11 @@ end;
 function TPointArrayHelper.PartitionEx(BoxWidth, BoxHeight: Integer): T2DPointArray;
 begin
   Result := PartitionEx(TPoint.Create(Integer.MaxValue, Integer.MaxValue), BoxWidth, BoxHeight);
+end;
+
+function TPointArrayHelper.Intersection(Other: TPointArray): TPointArray;
+begin
+  Result := Algo_Point_Intersection(Self, Other);
 end;
 
 end.
