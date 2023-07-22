@@ -77,7 +77,7 @@ begin
   for I := 0 to High(Result) do
     Result[I] := Copy(Self[I]);
 
-  specialize Sort<TPointArray>(Result, Weights, LowToHigh);
+  specialize Sort<TPointArray, Integer>(Result, Weights, LowToHigh);
 end;
 
 function T2DPointArrayHelper.Sort(Weights: TDoubleArray; LowToHigh: Boolean): T2DPointArray;
@@ -88,7 +88,7 @@ begin
   for I := 0 to High(Result) do
     Result[I] := Copy(Self[I]);
 
-  specialize Sort<TPointArray>(Result, Weights, LowToHigh);
+  specialize Sort<TPointArray, Double>(Result, Weights, LowToHigh);
 end;
 
 function T2DPointArrayHelper.SortFromSize(Size: Integer): T2DPointArray;
@@ -131,7 +131,7 @@ begin
   for I := 0 to High(Self) do
     Weights[I] := Sqr(From.X - Self[I][0].X) + Sqr(From.Y - Self[I][0].Y);
 
-  specialize Sort<TPointArray>(Result, Weights, True);
+  specialize Sort<TPointArray, Integer>(Result, Weights, True);
 end;
 
 function T2DPointArrayHelper.SortFromFirstPointX(From: TPoint): T2DPointArray;
@@ -145,7 +145,7 @@ begin
   for I := 0 to High(Self) do
     Weights[I] := Sqr(From.X - Self[I][0].X);
 
-  specialize Sort<TPointArray>(Result, Weights, True);
+  specialize Sort<TPointArray, Integer>(Result, Weights, True);
 end;
 
 function T2DPointArrayHelper.SortFromFirstPointY(From: TPoint): T2DPointArray;
@@ -159,7 +159,7 @@ begin
   for I := 0 to High(Self) do
     Weights[I] := Sqr(From.Y - Self[I][0].Y);
 
-  specialize Sort<TPointArray>(Result, Weights, True);
+  specialize Sort<TPointArray, Integer>(Result, Weights, True);
 end;
 
 function T2DPointArrayHelper.SortFrom(From: TPoint): T2DPointArray;

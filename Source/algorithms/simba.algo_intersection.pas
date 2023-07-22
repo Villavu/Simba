@@ -5,6 +5,7 @@
 }
 unit simba.algo_intersection;
 
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 interface

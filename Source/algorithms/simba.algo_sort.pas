@@ -3,13 +3,11 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
+
 unit simba.algo_sort;
 
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
-
-{$IFOPT D-}
-  {$OPTIMIZATION LEVEL4}
-{$ENDIF}
 
 interface
 
@@ -25,13 +23,11 @@ generic procedure QuickSortFunc<_T>(var AValues: array of _T; ALeft, ARight: Siz
 generic procedure QuickSort<_T>(var AValues: array of _T; ALeft, ARight: SizeInt);
 generic procedure QuickSortWeighted<_T, _W>(var Arr: array of _T; var Weights: array of _W; iLo, iHi: SizeInt; SortUp: Boolean);
 
-generic procedure Sort<_T>(var Arr: array of _T);
-generic procedure Sort<_T>(var Arr: array of _T; Weights: TIntegerArray; SortUp: Boolean); overload;
-generic procedure Sort<_T>(var Arr: array of _T; Weights: TDoubleArray; SortUp: Boolean); overload;
+generic procedure Sort<_T>(var Arr: specialize TArray<_T>); overload;
+generic procedure Sort<_T, _W>(var Arr: specialize TArray<_T>; Weights: specialize TArray<_W>; SortUp: Boolean); overload;
 
 generic function Sorted<_T>(const Arr: specialize TArray<_T>): specialize TArray<_T>; overload;
-generic function Sorted<_T>(const Arr: specialize TArray<_T>; Weights: TIntegerArray; SortUp: Boolean): specialize TArray<_T>; overload;
-generic function Sorted<_T>(const Arr: specialize TArray<_T>; Weights: TDoubleArray; SortUp: Boolean): specialize TArray<_T>; overload;
+generic function Sorted<_T, _W>(const Arr: specialize TArray<_T>; Weights: specialize TArray<_W>; SortUp: Boolean): specialize TArray<_T>; overload;
 
 implementation
 
@@ -185,23 +181,16 @@ begin
   until iLo >= iHi;
 end;
 
-generic procedure Sort<_T>(var Arr: array of _T);
+generic procedure Sort<_T>(var Arr: specialize TArray<_T>);
 begin
   specialize QuickSort<_T>(Arr, Low(Arr), High(Arr));
 end;
 
-generic procedure Sort<_T>(var Arr: array of _T; Weights: TIntegerArray; SortUp: Boolean);
+generic procedure Sort<_T, _W>(var Arr: specialize TArray<_T>; Weights: specialize TArray<_W>; SortUp: Boolean);
 begin
   Weights := Copy(Weights);
 
-  specialize QuickSortWeighted<_T, Integer>(Arr, Weights, Low(Arr), High(Arr), SortUp);
-end;
-
-generic procedure Sort<_T>(var Arr: array of _T; Weights: TDoubleArray; SortUp: Boolean);
-begin
-  Weights := Copy(Weights);
-
-  specialize QuickSortWeighted<_T, Double>(Arr, Weights, Low(Arr), High(Arr), SortUp);
+  specialize QuickSortWeighted<_T, _W>(Arr, Weights, Low(Arr), High(Arr), SortUp);
 end;
 
 generic function Sorted<_T>(const Arr: specialize TArray<_T>): specialize TArray<_T>;
@@ -211,20 +200,12 @@ begin
   specialize QuickSort<_T>(Result, Low(Result), High(Result));
 end;
 
-generic function Sorted<_T>(const Arr: specialize TArray<_T>; Weights: TIntegerArray; SortUp: Boolean): specialize TArray<_T>;
+generic function Sorted<_T, _W>(const Arr: specialize TArray<_T>; Weights: specialize TArray<_W>; SortUp: Boolean): specialize TArray<_T>;
 begin
   Weights := Copy(Weights);
   Result := Copy(Arr);
 
-  specialize QuickSortWeighted<_T, Integer>(Result, Weights, Low(Result), High(Result), SortUp);
-end;
-
-generic function Sorted<_T>(const Arr: specialize TArray<_T>; Weights: TDoubleArray; SortUp: Boolean): specialize TArray<_T>;
-begin
-  Weights := Copy(Weights);
-  Result := Copy(Arr);
-
-  specialize QuickSortWeighted<_T, Double>(Result, Weights, Low(Result), High(Result), SortUp);
+  specialize QuickSortWeighted<_T, _W>(Result, Weights, Low(Result), High(Result), SortUp);
 end;
 
 end.

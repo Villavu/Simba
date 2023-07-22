@@ -299,12 +299,12 @@ end;
 
 function TBoxArrayHelper.Sort(Weights: TIntegerArray; LowToHigh: Boolean): TBoxArray;
 begin
-  Result := specialize Sorted<TBox>(Self, Weights, LowToHigh);
+  Result := specialize Sorted<TBox, Integer>(Self, Weights, LowToHigh);
 end;
 
 function TBoxArrayHelper.Sort(Weights: TDoubleArray; LowToHigh: Boolean): TBoxArray;
 begin
-  Result := specialize Sorted<TBox>(Self, Weights, LowToHigh);
+  Result := specialize Sorted<TBox, Double>(Self, Weights, LowToHigh);
 end;
 {$ENDIF}
 

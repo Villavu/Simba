@@ -1,3 +1,17 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
+
+{
+ Jarl Holta - https://github.com/slackydev
+
+  - ArgMulti
+  - ArgExtrema
+
+}
+
 unit simba.singlematrix;
 
 {$DEFINE SIMBA_MAX_OPTIMIZATION}
@@ -10,6 +24,26 @@ uses
   simba.mufasatypes;
 
 type
+  TSingleSum = record
+    Value: Double;
+
+    class operator :=(const Right: Single): TSingleSum;
+
+    class operator +(const Left: TSingleSum; const Right: Single): TSingleSum;
+    class operator -(const Left: TSingleSum; const Right: Single): TSingleSum;
+
+    class operator +(const Left, Right: TSingleSum): TSingleSum;
+    class operator -(const Left, Right: TSingleSum): TSingleSum;
+  end;
+  TSingleSumTable = array of array of TSingleSum;
+
+  TSingleSumTableHelper = type helper for TSingleSumTable
+  public
+    class function Create(Mat: TSingleMatrix): TSingleSumTable; static;
+
+    function Query(Area: TBox): TSingleSum;
+  end;
+
   TSingleMatrixHelper = type Helper(TSingleMatrixBaseHelper) for TSingleMatrix
   public
     function GetSizeMinusOne(out AWidth, AHeight: Integer): Boolean;
@@ -37,13 +71,73 @@ type
     function Sum: Double;
     function Equals(Other: TSingleMatrix; Epsilon: Single = 0): Boolean;
     procedure ReplaceNaNAndInf(const ReplaceWith: Single);
+    function Rot90: TSingleMatrix;
+    function ArgExtrema(Count: Int32; HiLo: Boolean = True): TPointArray;
   end;
 
 implementation
 
 uses
   Math,
-  simba.math, simba.overallocatearray, simba.heaparray;
+  simba.math, simba.overallocatearray, simba.heaparray, simba.tpa;
+
+class operator TSingleSum.:=(const Right: Single): TSingleSum;
+begin
+  Result.Value := Right;
+end;
+
+class operator TSingleSum.+(const Left: TSingleSum; const Right: Single): TSingleSum;
+begin
+  Result.Value := Left.Value + Right;
+end;
+
+class operator TSingleSum.-(const Left: TSingleSum; const Right: Single): TSingleSum;
+begin
+  Result.Value := Left.Value - Right;
+end;
+
+class operator TSingleSum.+(const Left, Right: TSingleSum): TSingleSum;
+begin
+  Result.Value := Left.Value + Right.Value;
+end;
+
+class operator TSingleSum.-(const Left, Right: TSingleSum): TSingleSum;
+begin
+  Result.Value := Left.Value - Right.Value;
+end;
+
+class function TSingleSumTableHelper.Create(Mat: TSingleMatrix): TSingleSumTable;
+var
+  W, H, X, Y: Integer;
+begin
+  SetLength(Result, Mat.Height, Mat.Width);
+
+  W := Mat.Width - 1;
+  H := Mat.Height - 1;
+
+  for Y := 0 to H do
+    Result[Y, 0] := Mat[Y,0];
+
+  for Y := 1 to H do
+    for X := 0 to W do
+      Result[Y, X] := Mat[Y,X] + Result[Y-1, X];
+
+  for Y := 0 to H do
+    for X := 1 to W do
+      Result[Y, X] += Result[Y, X-1];
+end;
+
+function TSingleSumTableHelper.Query(Area: TBox): TSingleSum;
+begin
+  Result := Self[Area.Y2, Area.X2];
+
+  if (Area.Y1 > 0) then
+    Result.Value := Result.Value - Self[Area.Y1 - 1, Area.X2].Value;
+  if (Area.X1 > 0) then
+    Result.Value := Result.Value - Self[Area.Y2, Area.X1 - 1].Value;
+  if (Area.Y1 > 0) and (Area.X1 > 0) then
+    Result.Value := Result.Value + Self[Area.Y1 - 1, Area.X1 - 1].Value;
+end;
 
 function TSingleMatrixHelper.GetSizeMinusOne(out AWidth, AHeight: Integer): Boolean;
 begin
@@ -392,6 +486,38 @@ begin
   end;
 end;
 
+{
+procedure TSingleMatrixHelper.Smoothen(Block: Integer);
+var
+  X, Y, W, H: Integer;
+  Size: Integer;
+  B: TBox;
+  SumTable: TSingleSumTable;
+begin
+  Size := Sqr(Block);
+  if (Size <= 1) or (Block mod 2 = 0) then
+    Exit;
+
+  Block := Block div 2;
+  SumTable := TSingleSumTable.Create(Self);
+
+  Self.GetSizeMinusOne(W,H);
+
+  for Y := 0 to H do
+    for X := 0 to W do
+    begin
+      B.X1 := Math.Max(X-Block, 0);
+      B.Y1 := Math.Max(Y-Block, 0);
+      B.X2 := Math.Min(X+Block, W);
+      B.Y2 := Math.Min(Y+Block, H);
+
+      Size := B.Area;
+      with SumTable.Query(B) do
+        Self[Y,X] := Value / Size;
+    end;
+end;
+}
+
 procedure TSingleMatrixHelper.Smoothen(Block: Integer);
 var
   W, H, X, Y, Radius, fx, fy, Count: Integer;
@@ -477,6 +603,84 @@ begin
       for X := 0 to W do
         if not IsNumber(Self[Y,X]) then
           Self[Y,X] := ReplaceWith;
+end;
+
+function TSingleMatrixHelper.Rot90: TSingleMatrix;
+var
+  W, H, X, Y: Integer;
+begin
+  SetLength(Result, Self.Width, Self.Height);
+
+  if Self.GetSizeMinusOne(W, H) then
+    for Y := 0 to H do
+      for X := 0 to W do
+        Result[X, Y] := Self[Y, X];
+end;
+
+function TSingleMatrixHelper.ArgExtrema(Count: Int32; HiLo: Boolean = True): TPointArray;
+var
+  W, H: Integer;
+  Buffer: TSimbaPointBuffer;
+
+  function pass_x(): TPointArray;
+  var
+    X,Y: Integer;
+  begin
+    Buffer.Clear();
+
+    for Y:=0 to H-1 do
+    begin
+      X := 1;
+      while (X < W) do
+      begin
+        while (X < W) and (Self[Y,X] >= Self[Y,X-1]) do Inc(X);
+        Buffer.Add(X-1,Y);
+        while (X < W) and (Self[Y,X] <= Self[Y,X-1]) do Inc(X);
+      end;
+    end;
+
+    Result := Buffer.Copy();
+  end;
+
+  function pass_y(): TPointArray;
+  var
+    X,Y: Integer;
+  begin
+    Buffer.Clear();
+
+    for X:=0 to W-1 do
+    begin
+      Y := 1;
+      while (Y < H) do
+      begin
+        while (Y < H) and (Self[Y,X] >= Self[Y-1,X]) do Inc(Y);
+        Buffer.Add(X,Y-1);
+        while (Y < H) and (Self[Y,X] <= Self[Y-1,X]) do Inc(Y);
+      end;
+    end;
+
+    Result := Buffer.Copy();
+  end;
+
+var
+  I: Integer;
+  Weights: TSingleArray;
+begin
+  W := Self.Width();
+  H := Self.Height();
+
+  Buffer.Init(Math.Max(2, Ceil(Sqrt(W * H))));
+
+  Result := pass_x().Intersection(pass_y());
+
+  // just use sort, since there arn't that many peaks
+  SetLength(Weights, Length(Result));
+  for I := 0 to High(Result) do
+    Weights[I] := Self[Result[I].Y, Result[I].X];
+
+  Result := Result.Sort(Weights, not HiLo);
+  if (Length(Result) > Count) then
+    SetLength(Result, Count);
 end;
 
 end.

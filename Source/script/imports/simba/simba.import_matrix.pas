@@ -265,6 +265,16 @@ begin
   PSingleMatrix(Result)^ := PSingleMatrix(Params^[0])^.Copy(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
+procedure _LapeSingleMatrix_Rot90(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSingleMatrix(Result)^ := PSingleMatrix(Params^[0])^.Rot90();
+end;
+
+procedure _LapeSingleMatrix_ArgExtrema(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PSingleMatrix(Params^[0])^.ArgExtrema(PInteger(Params^[1])^, PBoolean(Params^[2])^);
+end;
+
 // Double
 procedure _LapeDoubleMatrix_Width(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -330,6 +340,8 @@ begin
     addGlobalFunc('function TSingleMatrix.Equals(Other: TSingleMatrix; Epsilon: Single = 0): Boolean;', @_LapeSingleMatrix_Equals);
     addGlobalFunc('function TSingleMatrix.Copy: TSingleMatrix; overload', @_LapeSingleMatrix_Copy1);
     addGlobalFunc('function TSingleMatrix.Copy(Y1, Y2: Integer): TSingleMatrix; overload', @_LapeSingleMatrix_Copy2);
+    addGlobalFunc('function TSingleMatrix.Rot90: TSingleMatrix;', @_LapeSingleMatrix_Rot90);
+    addGlobalFunc('function TSingleMatrix.ArgExtrema(Count: Int32; HiLo: Boolean = True): TPointArray;', @_LapeSingleMatrix_ArgExtrema);
 
     // integer
     addGlobalFunc('function TIntegerMatrix.Width: Integer;', @_LapeIntegerMatrix_Width);

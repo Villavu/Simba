@@ -5,6 +5,7 @@
 }
 unit simba.algo_unique;
 
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 interface

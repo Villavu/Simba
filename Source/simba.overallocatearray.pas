@@ -65,8 +65,12 @@ begin
   begin
     FLength := FLength + Len;
     if (FLength < 32) then
-      FLength := 32;
-    FLength := FLength * 2;
+      FLength := 32
+    else
+    if (FLength > 256000) then
+      FLength := FLength * 4
+    else
+      FLength := FLength * 2;
 
     SetLength(FArr, FLength);
   end;
