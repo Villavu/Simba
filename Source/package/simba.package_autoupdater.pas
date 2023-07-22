@@ -17,31 +17,8 @@ procedure UpdatePackages;
 implementation
 
 uses
-  Menus,
-  simba.mufasatypes, simba.package, simba.scripttabsform, simba.main,
-  simba.outputform, simba.package_installer, simba.package_menubuilder;
-
-type
-  TPackageMenuItem = class(TMenuItem)
-  public
-    Hash: UInt32;
-  end;
-
-  TPackageMenuItem_File = class(TMenuItem)
-  public
-    FileName: String;
-
-    procedure Click; override;
-  end;
-
-procedure TPackageMenuItem_File.Click;
-begin
-  if (FileName = '') then
-    Exit;
-
-  if SimbaScriptTabsForm.Open(FileName, True) and (Caption = 'Run') then
-    SimbaForm.MenuItemRun.Click();
-end;
+  simba.mufasatypes, simba.package, simba.package_installer,
+  simba.main, simba.outputform, simba.package_menubuilder;
 
 type
   TPackageUpdater = class(TThread)

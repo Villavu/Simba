@@ -10,24 +10,15 @@ program Simba;
 
 uses
   simba.init,
-  classes, sysutils, interfaces, forms, lazlogger,
-  simba.settings, simba.main, simba.aboutform, simba.debugimageform,
-  simba.bitmaptostringform, simba.functionlistform, simba.scripttabsform,
-  simba.outputform, simba.colorpickerhistoryform, simba.filebrowserform,
-  simba.notesform, simba.settingsform, simba.associate, simba.openexampleform,
-  simba.scriptthread, simba.package_form, simba.mufasatypes, simba.shapeboxform,
+  Classes, SysUtils, Interfaces, Forms, LazLogger,
+  simba.mufasatypes, simba.main,
+  simba.aboutform, simba.debugimageform, simba.bitmaptostringform,
+  simba.functionlistform, simba.scripttabsform, simba.outputform,
+  simba.colorpickerhistoryform, simba.filebrowserform, simba.notesform,
+  simba.settingsform, simba.associate, simba.openexampleform,
+  simba.package_form, simba.shapeboxform, simba.backupsform,
   simba.compiler_dump, simba.plugin_dump,
-  simba.ide_analytics, simba.ide_codetools_setup, simba.ide_codetools_insight;
-
-type
-  TApplicationHelper = class helper for TApplication
-    procedure DebugLnSilent(Sender: TObject; S: string; var Handled: Boolean);
-  end;
-
-procedure TApplicationHelper.DebugLnSilent(Sender: TObject; S: string; var Handled: Boolean);
-begin
-  Handled := True;
-end;
+  simba.scriptthread;
 
 begin
   {$IF DECLARED(SetHeapTraceOutput)}
@@ -83,10 +74,6 @@ begin
     Halt();
   end;
 
-  //DebugLogger.CloseLogFileBetweenWrites := True;
-  //if Application.HasOption('silent') then
-  //  DebugLogger.OnDebugLn := @Application.DebugLnSilent;
-
   if (not Application.HasOption('open')) and (Application.HasOption('run') or Application.HasOption('compile')) then
   begin
     if not FileExists(Application.Params[Application.ParamCount]) then
@@ -126,6 +113,7 @@ begin
     Application.CreateForm(TSimbaColorPickerHistoryForm, SimbaColorPickerHistoryForm);
     Application.CreateForm(TSimbaPackageForm, SimbaPackageForm);
     Application.CreateForm(TSimbaShapeBoxForm, SimbaShapeBoxForm);
+    Application.CreateForm(TSimbaBackupsForm, SimbaBackupsForm);
 
     Application.QueueAsyncCall(@SimbaForm.Setup, 0);
   end;

@@ -326,7 +326,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="133">
+    <Units Count="134">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -934,6 +934,13 @@
         <Filename Value="components/simba.component_buttonpanel.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit132>
+      <Unit133>
+        <Filename Value="forms/simba.backupsform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SimbaBackupsForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit133>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

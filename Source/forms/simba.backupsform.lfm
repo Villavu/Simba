@@ -1,0 +1,41 @@
+object SimbaBackupsForm: TSimbaBackupsForm
+  Left = 1333
+  Height = 450
+  Top = 543
+  Width = 739
+  Caption = 'SimbaBackupsForm'
+  ClientHeight = 450
+  ClientWidth = 739
+  DesignTimePPI = 120
+  OnCreate = FormCreate
+  OnShow = FormShow
+  Position = poMainFormCenter
+  ShowInTaskBar = stAlways
+  LCLVersion = '2.2.4.0'
+  object LeftPanel: TPanel
+    Left = 0
+    Height = 450
+    Top = 0
+    Width = 213
+    Align = alLeft
+    BevelOuter = bvNone
+    TabOrder = 0
+  end
+  object Splitter: TSplitter
+    Left = 213
+    Height = 450
+    Top = 0
+    Width = 6
+    OnPaint = SplitterPaint
+  end
+  object RightPanel: TPanel
+    Left = 219
+    Height = 450
+    Top = 0
+    Width = 520
+    Align = alClient
+    BevelOuter = bvNone
+    Caption = '(no file selected)'
+    TabOrder = 2
+  end
+end
