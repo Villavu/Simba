@@ -458,11 +458,13 @@ uses
 procedure DebugLn(const Msg: String);
 begin
   DebugLogger.DebugLn(Msg);
+  Flush(Output);
 end;
 
 procedure DebugLn(const Msg: String; Args: array of const);
 begin
   DebugLogger.DebugLn(Msg, Args);
+  Flush(Output);
 end;
 
 procedure SimbaException(Message: String; Args: array of const);

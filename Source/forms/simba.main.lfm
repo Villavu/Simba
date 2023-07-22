@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 4202
+  Left = 1238
   Height = 578
-  Top = 175
+  Top = 594
   Width = 910
   Caption = 'Simba'
   ClientHeight = 578
@@ -2688,6 +2688,10 @@ object SimbaForm: TSimbaForm
     object MenuItemExample: TMenuItem
       Caption = 'Open Example ...'
       OnClick = MenuNewTemplateClick
+    end
+    object MenuItemBackups: TMenuItem
+      Caption = 'Open Backup ...'
+      OnClick = MenuItemBackupsClick
     end
     object MenuItem8: TMenuItem
       Caption = '-'

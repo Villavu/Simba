@@ -64,6 +64,7 @@ type
     MainMenuTools: TPopupMenu;
     MainMenuView: TPopupMenu;
     MainMenuHelp: TPopupMenu;
+    MenuItemBackups: TMenuItem;
     MenuItemShapeBox: TMenuItem;
     MenuItemDocumentation: TMenuItem;
     MenuItemGithub: TMenuItem;
@@ -177,6 +178,7 @@ type
     procedure MenuFileClick(Sender: TObject);
     procedure MenuFindClick(Sender: TObject);
     procedure MenuGotoClick(Sender: TObject);
+    procedure MenuItemBackupsClick(Sender: TObject);
     procedure MenuItemShapeBoxClick(Sender: TObject);
     procedure MenuItemAboutClick(Sender: TObject);
     procedure MenuItemACAClick(Sender: TObject);
@@ -284,7 +286,8 @@ uses
 
   simba.openssl, simba.env, simba.process,
   simba.dockinghelpers, simba.nativeinterface,
-  simba.scriptformatter, simba.windowhandle, simba.scripttab, simba.theme;
+  simba.scriptformatter, simba.windowhandle, simba.scripttab, simba.theme,
+  simba.backupsform;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 
@@ -605,7 +608,6 @@ begin
   SimbaScriptTabsForm.AddTab();
 
   SetupDocking();
-  SetupCompleted();
 
   FMouseLogger := TSimbaMouseLogger.Create();
   FMouseLogger.Hotkey := VK_F1;
@@ -640,6 +642,8 @@ begin
   if Assigned(SimbaScriptTabsForm.CurrentEditor) then
     if SimbaScriptTabsForm.CurrentEditor.CanSetFocus() then
       SimbaScriptTabsForm.CurrentEditor.SetFocus();
+
+  SetupCompleted();
 end;
 
 procedure TSimbaForm.FormCreate(Sender: TObject);
@@ -837,6 +841,11 @@ begin
     if InputQuery('Goto line', 'Goto line:', Value) and (StrToIntDef(Value, -1) > -1) then
       SimbaScriptTabsForm.CurrentEditor.TopLine := StrToInt(Value) - (SimbaScriptTabsForm.CurrentEditor.LinesInWindow div 2);
   end;
+end;
+
+procedure TSimbaForm.MenuItemBackupsClick(Sender: TObject);
+begin
+  SimbaBackupsForm.ShowModal();
 end;
 
 procedure TSimbaForm.MenuItemShapeBoxClick(Sender: TObject);

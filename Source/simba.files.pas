@@ -71,8 +71,8 @@ type
 
   TSimbaDir = class
   public
-    class function DirList(Path: String; Recursive: Boolean): TStringArray;
-    class function DirSearch(Path: String; Mask: String; Recursive: Boolean): TStringArray;
+    class function DirList(Path: String; Recursive: Boolean = False): TStringArray;
+    class function DirSearch(Path: String; Mask: String; Recursive: Boolean = False): TStringArray;
     class function DirDelete(Path: String; OnlyChildren: Boolean): Boolean;
     class function DirCreate(Path: String): Boolean;
     class function DirExists(Path: String): Boolean;
@@ -87,10 +87,8 @@ type
   function ZipExtractOne(ZipFileName, FileName, OutputDir: String): Boolean;
   function ZipFiles(ZipFileName: String; Files: TStringArray): Boolean;
   function ZipEntries(ZipFileName: String): TStringArray;
-
-  function ReadINI(const Section, KeyName: string; FileName: string): string;
-  procedure DeleteINI(const Section, KeyName : string; FileName : string);
-  procedure WriteINI(const Section, KeyName, NewString : string; FileName : string);
+  function ZipHasEntryCrc(ZipFileName: String; Crc32: UInt32): Boolean;
+  function ZipAppend(ZipFileName: String; FileName, FileContents: String): Boolean;
 
   function INIFileWrite(FileName: String; Section, Key, Value: String): Boolean;
   function INIFileRead(FileName: String; Section, Key, Value: String): String;
@@ -108,7 +106,7 @@ uses
   BaseUnix,
   {$ENDIF}
   FileUtil, LazFileUtils, Zipper, IniFiles, md5, sha1,
-  simba.encoding;
+  simba.encoding, DateUtils;
 
 class function TSimbaDir.DirList(Path: String; Recursive: Boolean): TStringArray;
 var
@@ -602,36 +600,116 @@ begin
   end;
 end;
 
-function ReadINI(const Section, KeyName: string; FileName: string): string;
+function ZipHasEntryCrc(ZipFileName: String; Crc32: UInt32): Boolean;
+var
+  UnZipper: TUnZipper;
+  I: Integer;
 begin
-  with TINIFile.Create(ExpandFileName(FileName)) do
-  try
-    Result := ReadString(Section, KeyName, '');
-  finally
-    Free();
+  Result := False;
+
+  if FileExists(ZipFileName) then
+  begin
+    UnZipper := TUnZipper.Create();
+    try
+      UnZipper.FileName := ZipFileName;
+      UnZipper.Examine();
+
+      for I := 0 to UnZipper.Entries.Count - 1 do
+        if (UnZipper.Entries[I].CRC32 = Crc32) then
+        begin
+          Result := True;
+          Break;
+        end;
+    except
+    end;
+    UnZipper.Free();
   end;
 end;
 
-procedure DeleteINI(const Section, KeyName : string; FileName : string);
+type
+  TZipAppender = class(TObject)
+  protected
+    FUnZip: TUnZipper;
+    FZip: TZipper;
+
+    procedure DoCreateStream(Sender : TObject; var AStream : TStream; AItem : TFullZipFileEntry);
+    procedure DoDoneStream(Sender : TObject; var AStream : TStream; AItem : TFullZipFileEntry);
+  public
+    constructor Create(AFileName: String);
+    destructor Destroy; override;
+
+    procedure Add(FileName, FileContents: String);
+  end;
+
+procedure TZipAppender.DoCreateStream(Sender: TObject; var AStream: TStream; AItem: TFullZipFileEntry);
 begin
-  with TIniFile.Create(ExpandFileName(FileName)) do
-  try
-    if (KeyName = '') then
-	    EraseSection(Section)
-	  else
-	    DeleteKey(Section, KeyName);
-  finally
-    Free();
+  AStream := TMemoryStream.Create();
+end;
+
+procedure TZipAppender.DoDoneStream(Sender: TObject; var AStream: TStream; AItem: TFullZipFileEntry);
+begin
+  with FZip.Entries.Add() as TZipFileEntry do
+  begin
+    Assign(AItem);
+
+    Stream := AStream;
+    Stream.Position := 0;
   end;
 end;
 
-procedure WriteINI(const Section, KeyName, NewString : string; FileName : string);
+constructor TZipAppender.Create(AFileName: String);
 begin
-  with TINIFile.Create(ExpandFileName(FileName)) do
+  inherited Create();
+
+  if FileExists(AFileName) then
+  begin
+    FUnZip := TUnZipper.Create();
+    FUnZip.FileName := AFileName;
+    FUnZip.OnCreateStream := @DoCreateStream;
+    FUnZip.OnDoneStream := @DoDoneStream;
+  end;
+
+  FZip := TZipper.Create();
+  FZip.FileName := AFileName;
+end;
+
+destructor TZipAppender.Destroy;
+begin
+  if Assigned(FUnZip) then
+    FreeAndNil(FUnZip);
+  if Assigned(FZip) then
+    FreeAndNil(FZip);
+
+  inherited Destroy();
+end;
+
+procedure TZipAppender.Add(FileName, FileContents: String);
+var
+  I: Integer;
+begin
+  if Assigned(FUnZip) then
+    FUnZip.UnZipAllFiles();
+
+  FZip.Entries.AddFileEntry(TStringStream.Create(FileContents), IfThen(FileName = '', FZip.Entries.Count.ToString(), FileName));
+  FZip.ZipAllFiles();
+
+  for I := 0 to FZip.Entries.Count - 1 do
+    if (FZip.Entries[I].Stream <> nil) then
+    begin
+      FZip.Entries[I].Stream.Free();
+      FZip.Entries[I].Stream := nil;
+    end;
+end;
+
+function ZipAppend(ZipFileName: String; FileName, FileContents: String): Boolean;
+begin
+  Result := True;
+
+  with TZipAppender.Create(ZipFileName) do
   try
-	  WriteString(Section, KeyName, NewString);
+    Add(FileName, FileContents);
   finally
-	  Free();
+    Free();
   end;
 end;
 
@@ -732,6 +810,8 @@ begin
   if Assigned(List) then
     List.Free();
 end;
+
+
 
 end.
 
