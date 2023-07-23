@@ -619,7 +619,7 @@ function TSimbaImageBox.FindDTM(DTM: TDTM): TPointArray;
 begin
   with FBackground.ToMufasaBitmap() do
   try
-    Result := Finder.FindDTM(DTM, -1, NullBox);
+    Result := Finder.FindDTMEx(DTM, -1, NullBox);
   finally
     Free();
   end;
