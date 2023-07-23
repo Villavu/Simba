@@ -2,6 +2,8 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+
+  The DTM finder.
 }
 unit simba.finder_dtm;
 
@@ -11,17 +13,28 @@ unit simba.finder_dtm;
 interface
 
 uses
-  classes, sysutils, Graphics,
-  simba.mufasatypes, simba.dtm, simba.colormath;
+  Classes, SysUtils, Graphics,
+  simba.mufasatypes, simba.colormath, simba.target, simba.simplelock,
+  simba.dtm;
 
-type
-  TDTMFinder = record
-  public
-    function Find(DTM: TDTM; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; Offset: TPoint; MaxToFind: Integer = 0): TPointArray;
-    function FindRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; Offset: TPoint; MaxToFind: Integer = 0): TPointArray;
+function FindDTMOnBuffer(var Limit: TSimpleThreadsafeLimit;
+                         DTM: TDTM;
+                         Buffer: PColorBGRA; BufferWidth: Integer;
+                         SearchWidth, SearchHeight: Integer;
+                         OffsetX, OffsetY: Integer): TPointArray;
 
-    class operator Initialize(var Self: TDTMFinder);
-  end;
+function FindDTMRotatedOnBuffer(var Limit: TSimpleThreadsafeLimit;
+                                Buffer: PColorBGRA; BufferWidth: Integer;
+                                SearchWidth, SearchHeight: Integer;
+                                DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray;
+                                OffsetX, OffsetY: Integer): TPointArray;
+
+function FindDTMOnTarget(Target: TSimbaTarget;
+                         DTM: TDTM; Bounds: TBox; MaxToFind: Integer): TPointArray;
+
+function FindDTMRotatedOnTarget(Target: TSimbaTarget;
+                                DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray;
+                                Bounds: TBox; MaxToFind: Integer): TPointArray;
 
 implementation
 
@@ -53,7 +66,7 @@ begin
     end;
 end;
 
-function TDTMFinder.Find(DTM: TDTM; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; Offset: TPoint; MaxToFind: Integer): TPointArray;
+function FindDTMOnBuffer(var Limit: TSimpleThreadsafeLimit; DTM: TDTM; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; OffsetX, OffsetY: Integer): TPointArray;
 var
   SearchPoints: TSearchPoints;
   Table: array of array of record
@@ -127,7 +140,7 @@ var
   MainPointArea: TBox;
   PointBuffer: TSimbaPointBuffer;
 label
-  Next, Finished;
+  Next;
 begin
   if (not DTM.Valid()) then
     Exit(nil);
@@ -147,24 +160,28 @@ begin
   H := High(SearchPoints);
 
   for Y := MainPointArea.Y1 to MainPointArea.Y2 do
+  begin
     for X := MainPointArea.X1 to MainPointArea.X2 do
     begin
       for I := 0 to H do
         if not FindPoint(I, X, Y) then
           goto Next;
 
-      PointBuffer.Add(TPoint.Create(X + Offset.X, Y + Offset.Y));
-      if (PointBuffer.Count = MaxToFind) then
-        goto Finished;
+      PointBuffer.Add(X + OffsetX, Y + OffsetY);
+      Limit.Inc();
 
       Next:
     end;
-  Finished:
+
+    // Check if we reached the limit every row.
+    if Limit.Reached() then
+      Break;
+  end;
 
   Result := PointBuffer.Trim();
 end;
 
-function TDTMFinder.FindRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; Offset: TPoint; MaxToFind: Integer): TPointArray;
+function FindDTMRotatedOnBuffer(var Limit: TSimpleThreadsafeLimit; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; OffsetX, OffsetY: Integer): TPointArray;
 var
   H: Integer;
   SearchPoints: TSearchPoints;
@@ -251,7 +268,7 @@ var
   AngleSteps: Integer;
   DTMBounds: TBox;
 label
-  Next, Finished;
+  Next;
 begin
   if (not DTM.Valid()) then
     Exit(nil);
@@ -291,41 +308,98 @@ begin
       Continue;
 
     for Y := MainPointArea.Y1 to MainPointArea.Y2 do
+    begin
       for X := MainPointArea.X1 to MainPointArea.X2 do
       begin
         for I := 0 to High(RotatedPoints) do
           if not FindPoint(I, X + RotatedPoints[I].X, Y + RotatedPoints[I].Y) then
             goto Next;
 
-        Match.X := X;
-        Match.Y := Y;
+        Match.X := X + OffsetX;
+        Match.Y := Y + OffsetY;
         Match.Deg := SearchDegree;
         MatchBuffer.Add(Match);
 
-        if (MatchBuffer.Count = MaxToFind) then
-          goto Finished;
+        Limit.Inc();
 
         Next:
       end;
-  end;
 
-  Finished:
+      // Check if we reached the limit every row.
+      if Limit.Reached() then
+        Break;
+    end;
+  end;
 
   SetLength(Result,       MatchBuffer.Count);
   SetLength(FoundDegrees, MatchBuffer.Count);
   for I := 0 to MatchBuffer.Count - 1 do
     with MatchBuffer[I] do
     begin
-      Result[I].X := X + Offset.X;
-      Result[I].Y := Y + Offset.Y;
+      Result[I].X := X;
+      Result[I].Y := Y;
       FoundDegrees[I] := Deg;
     end;
 end;
 
-class operator TDTMFinder.Initialize(var Self: TDTMFinder);
+function FindDTMOnTarget(Target: TSimbaTarget; DTM: TDTM; Bounds: TBox; MaxToFind: Integer): TPointArray;
+var
+  Buffer: PColorBGRA;
+  BufferWidth: Integer;
+  Limit: TSimpleThreadsafeLimit;
 begin
-  Self := Default(TDTMFinder);
+  Result := [];
+
+  Limit := TSimpleThreadsafeLimit.Create(MaxToFind);
+
+  if Target.GetImageData(Bounds, Buffer, BufferWidth) then
+  try
+    {$IFDEF SIMBA_BENCHMARKS}
+    T := HighResolutionTime();
+    {$ENDIF}
+
+    Result := FindDTMOnBuffer(Limit, DTM, Buffer, BufferWidth, Bounds.Width, Bounds.Height, Bounds.X1, Bounds.Y1);
+    if (MaxToFind > 0) and (Length(Result) > MaxToFind) then
+      SetLength(Result, MaxToFind);
+
+    {$IFDEF SIMBA_BENCHMARKS}
+    DebugLn('FindBitmap: ColorSpace=%s Width=%d Height=%d ThreadsUsed=%d Time=%f', [Formula.AsString(), Bounds.Width, Bounds.Height, ThreadsUsed, HighResolutionTime() - T]);
+    {$ENDIF}
+  finally
+    Target.FreeImageData(Buffer);
+  end;
+end;
+
+function FindDTMRotatedOnTarget(Target: TSimbaTarget; DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox; MaxToFind: Integer): TPointArray;
+var
+  Buffer: PColorBGRA;
+  BufferWidth: Integer;
+  Limit: TSimpleThreadsafeLimit;
+begin
+  Result := [];
+
+  Limit := TSimpleThreadsafeLimit.Create(MaxToFind);
+
+  if Target.GetImageData(Bounds, Buffer, BufferWidth) then
+  try
+    {$IFDEF SIMBA_BENCHMARKS}
+    T := HighResolutionTime();
+    {$ENDIF}
+
+    Result := FindDTMRotatedOnBuffer(Limit,
+                                     Buffer, BufferWidth, Bounds.Width, Bounds.Height,
+                                     DTM, StartDegrees, EndDegrees, Step, FoundDegrees,
+                                     Bounds.X1, Bounds.Y1);
+
+    if (MaxToFind > 0) and (Length(Result) > MaxToFind) then
+      SetLength(Result, MaxToFind);
+
+    {$IFDEF SIMBA_BENCHMARKS}
+    DebugLn('FindDTM: ColorSpace=%s Width=%d Height=%d ThreadsUsed=%d Time=%f', [Formula.AsString(), Bounds.Width, Bounds.Height, ThreadsUsed, HighResolutionTime() - T]);
+    {$ENDIF}
+  finally
+    Target.FreeImageData(Buffer);
+  end;
 end;
 
 end.
-

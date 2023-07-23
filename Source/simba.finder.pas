@@ -13,8 +13,10 @@ interface
 
 uses
   Classes, SysUtils, Graphics,
-  simba.mufasatypes, simba.colormath, simba.colormath_distance, simba.bitmap, simba.dtm,
-  simba.finder_dtm, simba.target, simba.matchtemplate;
+  simba.mufasatypes,
+  simba.colormath, simba.colormath_distance,
+  simba.bitmap, simba.dtm,
+  simba.target;
 
 type
   PColorTolerance = ^TColorTolerance;
@@ -29,22 +31,18 @@ type
   TSimbaFinder = packed record
   private
     FTarget: TSimbaTarget;
-    FDTMFinder: TDTMFinder;
-
-    function DoFindDTM(DTM: TDTM; Bounds: TBox; MaxToFind: Integer): TPointArray;
-    function DoFindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox; MaxToFind: Integer): TPointArray;
-    function DoFindBitmap(Bitmap: TMufasaBitmap; Bounds: TBox; MaxToFind: Integer): TPointArray;
 
     function GetDataAsBitmap(var Bounds: TBox; out Bitmap: TMufasaBitmap): Boolean;
   public
-    function FindDTM(DTM: TDTM; MaxToFind: Integer; Bounds: TBox): TPointArray;
-    function FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer; Bounds: TBox): TPointArray;
+    function FindDTMEx(DTM: TDTM; MaxToFind: Integer; Bounds: TBox): TPointArray;
+    function FindDTMRotatedEx(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer; Bounds: TBox): TPointArray;
 
-    // Find until MaxToFind
+    function FindDTM(DTM: TDTM; Bounds: TBox): TPoint;
+    function FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox): TPoint;
+
     function FindImageEx(Bitmap: TMufasaBitmap; Tolerance: Single; MaxToFind: Integer; Bounds: TBox): TPointArray; overload;
     function FindImageEx(Bitmap: TMufasaBitmap; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer; Bounds: TBox): TPointArray; overload;
 
-    // Find just one, return TPoint. -1,-1 if not found
     function FindImage(Bitmap: TMufasaBitmap; Tolerance: Single; Bounds: TBox): TPoint; overload;
     function FindImage(Bitmap: TMufasaBitmap; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPoint; overload;
 
@@ -83,43 +81,8 @@ type
 implementation
 
 uses
-  simba.overallocatearray, simba.singlematrix, simba.tpa,
-  simba.finder_color, simba.finder_bitmap;
-
-function TSimbaFinder.DoFindDTM(DTM: TDTM; Bounds: TBox; MaxToFind: Integer): TPointArray;
-var
-  Data: PColorBGRA;
-  DataWidth: Integer;
-begin
-  Result := nil;
-
-  if FTarget.GetImageData(Bounds, Data, DataWidth) then
-  try
-    Result := FDTMFinder.Find(DTM, Data, DataWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft, MaxToFind);
-  finally
-    FTarget.FreeImageData(Data);
-  end;
-end;
-
-function TSimbaFinder.DoFindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox; MaxToFind: Integer): TPointArray;
-var
-  Data: PColorBGRA;
-  DataWidth: Integer;
-begin
-  Result := nil;
-
-  if FTarget.GetImageData(Bounds, Data, DataWidth) then
-  try
-    Result := FDTMFinder.FindRotated(DTM, StartDegrees, EndDegrees, Step, FoundDegrees, Data, DataWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft, MaxToFind);
-  finally
-    FTarget.FreeImageData(Data);
-  end;
-end;
-
-function TSimbaFinder.DoFindBitmap(Bitmap: TMufasaBitmap; Bounds: TBox; MaxToFind: Integer): TPointArray;
-begin
-  Result := FindBitmapOnTarget(FTarget, Bitmap, Bounds, DefaultColorSpace, 0, DefaultMultipliers, MaxToFind);
-end;
+  simba.overallocatearray, simba.singlematrix, simba.tpa, simba.matchtemplate,
+  simba.finder_color, simba.finder_bitmap, simba.finder_dtm;
 
 function TSimbaFinder.GetDataAsBitmap(var Bounds: TBox; out Bitmap: TMufasaBitmap): Boolean;
 var
@@ -139,14 +102,36 @@ begin
   end;
 end;
 
-function TSimbaFinder.FindDTM(DTM: TDTM; MaxToFind: Integer; Bounds: TBox): TPointArray;
+function TSimbaFinder.FindDTMEx(DTM: TDTM; MaxToFind: Integer; Bounds: TBox): TPointArray;
 begin
-  Result := DoFindDTM(DTM, Bounds, MaxToFind);
+  Result := FindDTMOnTarget(FTarget, DTM, Bounds, MaxToFind);
 end;
 
-function TSimbaFinder.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer; Bounds: TBox): TPointArray;
+function TSimbaFinder.FindDTMRotatedEx(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer; Bounds: TBox): TPointArray;
 begin
-  Result := DoFindDTMRotated(DTM, StartDegrees, EndDegrees, Step, FoundDegrees, Bounds, MaxToFind);
+  Result := FindDTMRotatedOnTarget(FTarget, DTM, StartDegrees, EndDegrees, Step, FoundDegrees, Bounds, MaxToFind);
+end;
+
+function TSimbaFinder.FindDTM(DTM: TDTM; Bounds: TBox): TPoint;
+var
+  TPA: TPointArray;
+begin
+  TPA := FindDTMOnTarget(FTarget, DTM, Bounds, 1);
+  if (Length(TPA) > 0) then
+    Result := TPA[0]
+  else
+    Result := TPoint.Create(-1, -1);
+end;
+
+function TSimbaFinder.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox): TPoint;
+var
+  TPA: TPointArray;
+begin
+  TPA := FindDTMRotatedOnTarget(FTarget, DTM, StartDegrees, EndDegrees, Step, FoundDegrees, Bounds, 1);
+  if (Length(TPA) > 0) then
+    Result := TPA[0]
+  else
+    Result := TPoint.Create(-1, -1);
 end;
 
 function TSimbaFinder.FindImageEx(Bitmap: TMufasaBitmap; Tolerance: Single; MaxToFind: Integer; Bounds: TBox): TPointArray;
