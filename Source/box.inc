@@ -40,16 +40,16 @@ type
     function Intersect(P: TPoint): TPoint;
     function Corners: TPointArray;
 
-    procedure Clip(Other: TBox);
-    procedure Normalize;
+    function Clip(Other: TBox): TBox;
+    function Normalize: TBox;
 
     property Width: Integer read GetWidth;
     property Height: Integer read GetHeight;
     property Center: TPoint read GetCenter;
   end;
 
-  function Box(X1, Y1, X2, Y2: Integer): TBox;
-  function Box(Mid: TPoint; XRad, YRad: Integer): TBox;
+  function Box(const X1, Y1, X2, Y2: Integer): TBox; inline;
+  function Box(const Mid: TPoint; const XRad, YRad: Integer): TBox; inline;
 
   operator = (const Left, Right: TBox): Boolean;
 
@@ -61,10 +61,8 @@ const
 {$IFDEF BODY}
 function TBoxHelper.GetCenter: TPoint;
 begin
-  Result := TPoint.Create(
-    (Self.X2 + Self.X1 + 1) div 2,
-    (Self.Y2 + Self.Y1 + 1) div 2
-  );
+  Result.X := (Self.X2 + Self.X1 + 1) div 2;
+  Result.Y := (Self.Y2 + Self.Y1 + 1) div 2;
 end;
 
 function TBoxHelper.GetWidth: Integer;
@@ -100,7 +98,7 @@ end;
 
 function TBoxHelper.IsDefault: Boolean;
 begin
-  Result := CompareMem(@Self, @System.Default(TBox), SizeOf(TBox));
+  Result := (Int64(TopLeft) = 0) and (Int64(BottomRight) = 0);
 end;
 
 function TBoxHelper.RandomPoint: TPoint;
@@ -329,28 +327,32 @@ begin
   Result := [TPoint.Create(X1, Y1), TPoint.Create(X2, Y1), TPoint.Create(X2, Y2), TPoint.Create(X1, Y2)];
 end;
 
-procedure TBoxHelper.Clip(Other: TBox);
+function TBoxHelper.Clip(Other: TBox): TBox;
 begin
-  if (Self.X1 < Other.X1) then Self.X1 := Other.X1;
-  if (Self.X1 > Other.X2) then Self.X1 := Other.X2;
-  if (Self.X2 < Other.X1) then Self.X2 := Other.X1;
-  if (Self.X2 > Other.X2) then Self.X2 := Other.X2;
+  Result := Self;
 
-  if (Self.Y1 < Other.Y1) then Self.Y1 := Other.Y1;
-  if (Self.Y1 > Other.Y2) then Self.Y1 := Other.Y2;
-  if (Self.Y2 < Other.Y1) then Self.Y2 := Other.Y1;
-  if (Self.Y2 > Other.Y2) then Self.Y2 := Other.Y2;
+  if (Result.X1 < Other.X1) then Result.X1 := Other.X1;
+  if (Result.X1 > Other.X2) then Result.X1 := Other.X2;
+  if (Result.X2 < Other.X1) then Result.X2 := Other.X1;
+  if (Result.X2 > Other.X2) then Result.X2 := Other.X2;
+
+  if (Result.Y1 < Other.Y1) then Result.Y1 := Other.Y1;
+  if (Result.Y1 > Other.Y2) then Result.Y1 := Other.Y2;
+  if (Result.Y2 < Other.Y1) then Result.Y2 := Other.Y1;
+  if (Result.Y2 > Other.Y2) then Result.Y2 := Other.Y2;
 end;
 
-procedure TBoxHelper.Normalize;
+function TBoxHelper.Normalize: TBox;
 begin
-  if (Self.X1 > Self.X2) then
-    Swap(Self.X1, Self.X2);
-  if (Self.Y1 > Self.Y2) then
-    Swap(Self.Y1, Self.Y2);
+  Result := Self;
+
+  if (Result.X1 > Result.X2) then
+    Swap(Result.X1, Result.X2);
+  if (Result.Y1 > Result.Y2) then
+    Swap(Result.Y1, Result.Y2);
 end;
 
-function Box(X1, Y1, X2, Y2: Integer): TBox;
+function Box(const X1, Y1, X2, Y2: Integer): TBox;
 begin
   Result.X1 := X1;
   Result.Y1 := Y1;
@@ -358,7 +360,7 @@ begin
   Result.Y2 := Y2;
 end;
 
-function Box(Mid: TPoint; XRad, YRad: Integer): TBox;
+function Box(const Mid: TPoint; const XRad, YRad: Integer): TBox;
 begin
   Result.X1 := Mid.X-XRad;
   Result.Y1 := Mid.Y-YRad;
@@ -368,7 +370,8 @@ end;
 
 operator = (const Left, Right: TBox): Boolean;
 begin
-  Result := CompareMem(@Left, @Right, SizeOf(TBox));
+  Result := (Int64(Left.TopLeft)     = Int64(Right.TopLeft)) and
+            (Int64(Left.BottomRight) = Int64(Right.BottomRight));
 end;
 {$ENDIF}
 
