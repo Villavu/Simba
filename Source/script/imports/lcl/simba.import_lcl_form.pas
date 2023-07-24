@@ -126,11 +126,6 @@ begin
   Pboolean(Result)^ := PCustomForm(Params^[0])^.CloseQuery();
 end;
 
-procedure _LapeCustomForm_DefocusControl(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomForm(Params^[0])^.DefocusControl(PWinControl(Params^[1])^, PBoolean(Params^[2])^);
-end;
-
 procedure _LapeCustomForm_EnsureVisible(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomForm(Params^[0])^.EnsureVisible(PBoolean(Params^[1])^);
@@ -139,16 +134,6 @@ end;
 procedure _LapeCustomForm_FocusControl(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomForm(Params^[0])^.FocusControl(PWinControl(Params^[1])^);
-end;
-
-procedure _LapeCustomForm_FormIsUpdating(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  Pboolean(Result)^ := PCustomForm(Params^[0])^.FormIsUpdating();
-end;
-
-procedure _LapeCustomForm_GetFormImage(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBitmap(Result)^ := PCustomForm(Params^[0])^.GetFormImage();
 end;
 
 procedure _LapeCustomForm_Hide(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -285,16 +270,6 @@ end;
 procedure _LapeCustomForm_KeyPreview_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomForm(Params^[0])^.KeyPreview := PBoolean(Params^[1])^;
-end;
-
-procedure _LapeCustomForm_PopupParent_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomForm(Result)^ := PCustomForm(Params^[0])^.PopupParent;
-end;
-
-procedure _LapeCustomForm_PopupParent_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomForm(Params^[0])^.PopupParent := PCustomForm(Params^[1])^;
 end;
 
 procedure _LapeCustomForm_PixelsPerInch_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -1081,10 +1056,8 @@ begin
     addGlobalFunc('procedure TCustomForm.InitNew(AOwner: TComponent; Num: Integer)', @_LapeCustomForm_CreateNew);
     addGlobalFunc('procedure TCustomForm.Close;', @_LapeCustomForm_Close);
     addGlobalFunc('function TCustomForm.CloseQuery: Boolean;', @_LapeCustomForm_CloseQuery);
-    addGlobalFunc('procedure TCustomForm.DefocusControl(Control: TWinControl; Removing: Boolean);', @_LapeCustomForm_DefocusControl);
     addGlobalFunc('procedure TCustomForm.EnsureVisible(AMoveToTop: Boolean);', @_LapeCustomForm_EnsureVisible);
     addGlobalFunc('procedure TCustomForm.FocusControl(WinControl: TWinControl);', @_LapeCustomForm_FocusControl);
-    addGlobalFunc('function TCustomForm.GetFormImage: TBitmap;', @_LapeCustomForm_GetFormImage);
     addGlobalFunc('function TCustomForm.SetFocusedControl(Control: TWinControl): Boolean;', @_LapeCustomForm_SetFocusedControl);
     addGlobalFunc('procedure TCustomForm.SetRestoredBounds(ALeft, ATop, AWidth, AHeight: Integer);', @_LapeCustomForm_SetRestoredBounds);
     addGlobalFunc('function TCustomForm.ShowModal: Integer;', @_LapeCustomForm_ShowModal);
@@ -1093,13 +1066,11 @@ begin
     addClassVar('TCustomForm', 'BorderIcons', 'TBorderIcons', @_LapeCustomForm_Read_BorderIcons, @_LapeCustomForm_Write_BorderIcons);
     addClassVar('TCustomForm', 'Active', 'Boolean', @_LapeCustomForm_Active_Read);
     addClassVar('TCustomForm', 'ActiveControl', 'TWinControl', @_LapeCustomForm_ActiveControl_Read, @_LapeCustomForm_ActiveControl_Write);
-    addClassVar('TCustomForm', 'ActiveDefaultControl', 'TControl', @_LapeCustomForm_ActiveDefaultControl_Read, @_LapeCustomForm_ActiveDefaultControl_Write);
     addClassVar('TCustomForm', 'AllowDropFiles', 'Boolean', @_LapeCustomForm_AllowDropFiles_Read, @_LapeCustomForm_AllowDropFiles_Write);
     addClassVar('TCustomForm', 'AlphaBlend', 'Boolean', @_LapeCustomForm_AlphaBlend_Read, @_LapeCustomForm_AlphaBlend_Write);
     addClassVar('TCustomForm', 'AlphaBlendValue', 'Byte', @_LapeCustomForm_AlphaBlendValue_Read, @_LapeCustomForm_AlphaBlendValue_Write);
     addClassVar('TCustomForm', 'DefaultControl', 'TControl', @_LapeCustomForm_DefaultControl_Read, @_LapeCustomForm_DefaultControl_Write);
     addClassVar('TCustomForm', 'KeyPreview', 'Boolean', @_LapeCustomForm_KeyPreview_Read, @_LapeCustomForm_KeyPreview_Write);
-    addClassVar('TCustomForm', 'PopupParent', 'TCustomForm', @_LapeCustomForm_PopupParent_Read, @_LapeCustomForm_PopupParent_Write);
     addClassVar('TCustomForm', 'PixelsPerInch', 'Integer', @_LapeCustomForm_PixelsPerInch_Read, @_LapeCustomForm_PixelsPerInch_Write);
     addClassVar('TCustomForm', 'RestoredLeft', 'Integer', @_LapeCustomForm_RestoredLeft_Read);
     addClassVar('TCustomForm', 'RestoredTop', 'Integer', @_LapeCustomForm_RestoredTop_Read);

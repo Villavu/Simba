@@ -663,9 +663,7 @@ begin
     addGlobalFunc('function TObject.ClassName: String;', @_LapeObject_ClassName);
 
     addGlobalType('procedure(Sender: TObject) of object', 'TNotifyEvent', FFI_DEFAULT_ABI);
-    addGlobalType('UInt32', 'THandle');
-    addGlobalType('String', 'TComponentName');
-    addGlobalType('String', 'TCaption');
+    addGlobalType('PtrUInt', 'THandle');
     addGlobalType('(soBeginning, soCurrent, soEnd)', 'TSeekOrigin');
 
     addClass('TComponent');
@@ -677,7 +675,7 @@ begin
     addClassVar('TComponent', 'ComponentCount', 'Integer', @_LapeComponent_ComponentCount_Read);
     addClassVar('TComponent', 'ComponentIndex', 'Integer', @_LapeComponent_ComponentIndex_Read, @_LapeComponent_ComponentIndex_Write);
     addClassVar('TComponent', 'Owner', 'TComponent', @_LapeComponent_Owner_Read);
-    addClassVar('TComponent', 'Name', 'TComponentName', @_LapeComponent_Name_Read, @_LapeComponent_Name_Write);
+    addClassVar('TComponent', 'Name', 'String', @_LapeComponent_Name_Read, @_LapeComponent_Name_Write);
     addClassVar('TComponent', 'Tag', 'PtrInt', @_LapeComponent_Tag_Read, @_LapeComponent_Tag_Write);
 
     addClass('TStream');

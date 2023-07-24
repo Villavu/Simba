@@ -340,26 +340,6 @@ begin
   PCanvas(Params^[0])^.Changed();
 end;
 
-procedure _LapeCanvas_SaveHandleState(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCanvas(Params^[0])^.SaveHandleState();
-end;
-
-procedure _LapeCanvas_RestoreHandleState(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCanvas(Params^[0])^.RestoreHandleState();
-end;
-
-procedure _LapeCanvas_Arc(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCanvas(Params^[0])^.Arc(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PInteger(Params^[8])^);
-end;
-
-procedure _LapeCanvas_Chord(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCanvas(Params^[0])^.Chord(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PInteger(Params^[8])^);
-end;
-
 procedure _LapeCanvas_CopyRect(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCanvas(Params^[0])^.CopyRect(PRect(Params^[1])^, PCanvas(Params^[2])^, PRect(Params^[3])^);
@@ -380,24 +360,9 @@ begin
   PCanvas(Params^[0])^.FillRect(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
 end;
 
-procedure _LapeCanvas_FloodFill(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCanvas(Params^[0])^.FloodFill(PInteger(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^, PFillStyle(Params^[4])^);
-end;
-
-procedure _LapeCanvas_RadialPie(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCanvas(Params^[0])^.RadialPie(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^);
-end;
-
 procedure _LapeCanvas_Pie(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCanvas(Params^[0])^.Pie(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PInteger(Params^[8])^);
-end;
-
-procedure _LapeCanvas_PolyBezierEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCanvas(Params^[0])^.PolyBezier(PPointArray(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
 end;
 
 procedure _LapeCanvas_Polygon(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -485,16 +450,6 @@ begin
   PCanvas(Params^[0])^.Brush := PBrush(Params^[1])^;
 end;
 
-procedure _LapeCanvas_CopyMode_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCopyMode(Result)^ := PCanvas(Params^[0])^.CopyMode;
-end;
-
-procedure _LapeCanvas_CopyMode_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCanvas(Params^[0])^.CopyMode := PCopyMode(Params^[1])^;
-end;
-
 procedure _LapeCanvas_Font_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PFont(Result)^ := PCanvas(Params^[0])^.Font;
@@ -505,11 +460,6 @@ begin
   PCanvas(Params^[0])^.Font := PFont(Params^[1])^;
 end;
 
-procedure _LapeCanvas_Height_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  Pinteger(Result)^ := PCanvas(Params^[0])^.Height;
-end;
-
 procedure _LapeCanvas_Pen_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPen(Result)^ := PCanvas(Params^[0])^.Pen;
@@ -518,11 +468,6 @@ end;
 procedure _LapeCanvas_Pen_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCanvas(Params^[0])^.Pen := PPen(Params^[1])^;
-end;
-
-procedure _LapeCanvas_Width_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  Pinteger(Result)^ := PCanvas(Params^[0])^.Width;
 end;
 
 procedure _LapeCanvas_OnChange_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -545,18 +490,6 @@ begin
   PCanvas(Params^[0])^.OnChanging := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeCanvas_GetPixels(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-var
-  TPA: TPointArray;
-  i, h: Integer;
-begin
-  TPA := PPointArray(Params^[1])^;
-  h := High(TPA);
-  SetLength(PIntegerArray(Result)^, h + 1);
-  for i := 0 to h do
-    PIntegerArray(Result)^[i] := PCanvas(Params^[0])^.Pixels[TPA[i].x, TPA[i].y];
-end;
-
 procedure _LapeCanvas_Get_Pixel(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PColor(Result)^ := PCanvas(Params^[0])^.Pixels[PInteger(Params^[1])^, PInteger(Params^[2])^];
@@ -565,34 +498,6 @@ end;
 procedure _LapeCanvas_Set_Pixel(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCanvas(Params^[0])^.Pixels[PInteger(Params^[1])^, PInteger(Params^[2])^] := PColor(Params^[3])^;
-end;
-
-procedure _LapeCanvas_Set_Pixels(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-var
-  TPA: TPointArray;
-  i, h: Integer;
-  Col: TColor;
-begin
-  TPA := PPointArray(Params^[1])^;
-  Col := PColor(Params^[2])^;
-  h := High(TPA);
-
-  for i := 0 to h do
-    PCanvas(Params^[0])^.Pixels[TPA[i].x, TPA[i].y] := Col;
-end;
-
-procedure _LapeCanvas_SetPixels(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-var
-  TPA: TPointArray;
-  Cols: TIntegerArray;
-  i, h: Integer;
-begin
-  TPA := PPointArray(Params^[1])^;
-  Cols := PIntegerArray(Params^[2])^;
-  h := High(TPA);
-
-  for i := 0 to h do
-    PCanvas(Params^[0])^.Pixels[TPA[i].x, TPA[i].y] := Cols[i];
 end;
 
 procedure _LapeCanvas_Draw(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -618,21 +523,6 @@ end;
 procedure _LapeCanvas_Frame(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCanvas(Params^[0])^.Frame(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
-end;
-
-procedure _LapeCanvas_Frame3D(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCanvas(Params^[0])^.Frame3D(PRect(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
-end;
-
-procedure _LapeCanvas_LineTo(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCanvas(Params^[0])^.LineTo(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-procedure _LapeCanvas_MoveTo(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCanvas(Params^[0])^.MoveTo(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeCanvas_AntialiasingMode_Set(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -695,26 +585,6 @@ begin
   PGraphic(Params^[0])^.OnChange := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeGraphic_Palette_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PGraphic(Params^[0])^.Palette;
-end;
-
-procedure _LapeGraphic_Palette_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PGraphic(Params^[0])^.Palette := PInteger(Params^[1])^;
-end;
-
-procedure _LapeGraphic_PaletteModified_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PGraphic(Params^[0])^.PaletteModified;
-end;
-
-procedure _LapeGraphic_PaletteModified_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PGraphic(Params^[0])^.PaletteModified := PBoolean(Params^[1])^;
-end;
-
 procedure _LapeGraphic_Transparent_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PGraphic(Params^[0])^.Transparent;
@@ -765,21 +635,6 @@ begin
   PBitmap(Params^[0])^.FreeImage();
 end;
 
-procedure _LapeBitmap_BitmapHandleAllocated(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PBitmap(Params^[0])^.BitmapHandleAllocated();
-end;
-
-procedure _LapeBitmap_MaskHandleAllocated(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PBitmap(Params^[0])^.MaskHandleAllocated();
-end;
-
-procedure _LapeBitmap_PaletteAllocated(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PBitmap(Params^[0])^.PaletteAllocated();
-end;
-
 procedure _LapeBitmap_LoadFromStream(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PBitmap(Params^[0])^.LoadFromStream(PStream(Params^[1])^);
@@ -800,26 +655,6 @@ begin
   PBitmap(Params^[0])^.GetSize(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-procedure _LapeBitmap_Mask(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBitmap(Params^[0])^.Mask(PColor(Params^[1])^);
-end;
-
-procedure _LapeBitmap_ReleaseBitmapHandle(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PHandle(Result)^ := PBitmap(Params^[0])^.ReleaseBitmapHandle();
-end;
-
-procedure _LapeBitmap_ReleaseMaskHandle(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PHandle(Result)^ := PBitmap(Params^[0])^.ReleaseMaskHandle();
-end;
-
-procedure _LapeBitmap_ReleasePalette(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PHandle(Result)^ := PBitmap(Params^[0])^.ReleasePalette();
-end;
-
 procedure _LapeBitmap_Canvas_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PCanvas(Result)^ := PBitmap(Params^[0])^.Canvas;
@@ -838,26 +673,6 @@ end;
 procedure _LapeBitmap_BitmapHandle_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PBitmap(Params^[0])^.BitmapHandle := PHandle(Params^[1])^;
-end;
-
-procedure _LapeBitmap_Masked_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PBitmap(Params^[0])^.Masked;
-end;
-
-procedure _LapeBitmap_Masked_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBitmap(Params^[0])^.Masked := PBoolean(Params^[1])^;
-end;
-
-procedure _LapeBitmap_MaskHandle_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PHandle(Result)^ := PBitmap(Params^[0])^.MaskHandle;
-end;
-
-procedure _LapeBitmap_MaskHandle_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBitmap(Params^[0])^.MaskHandle := PHandle(Params^[1])^;
 end;
 
 procedure _LapeBitmap_TransparentColor_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -893,41 +708,6 @@ end;
 procedure _LapeBitmap_Transparent_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PBitmap(Params^[0])^.Transparent;
-end;
-
-procedure _LapeBitmap_ToString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-var
-  x, y, w, h: Integer;
-  Addition, Data: String;
-begin
-  PBitmap(Params^[0])^.GetSize(w, h);
-  Data := '';
-
-  for x := 0 to (w - 1) do
-    for y := 0 to (h - 1) do
-    begin
-      Addition := IntToHex(PBitmap(Params^[0])^.Canvas.Pixels[x, y], 1);
-
-      while (length(Addition) < 6) do
-        Addition := '0' + Addition;
-
-      Data := (Data + Addition);
-    end;
-
-  PString(Result)^ := Format('%d, %d, ''', [w, h]) + Data + '''';
-end;
-
-procedure _LapeBitmap_LoadFromString(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-var
-  x, y: Integer;
-begin
-  PBitmap(Params^[0])^.SetSize(PInteger(Params^[1])^, PInteger(Params^[2])^);
-
-  for x := (PInteger(Params^[1])^ - 1) downto 0 do
-    for y := (PInteger(Params^[2])^ - 1) downto 0 do
-      PBitmap(Params^[0])^.Canvas.Pixels[x, y] := StrToInt('$' + Copy(PString(Params^[4])^, y * 6 + x * PInteger(Params^[2])^ * 6 + 1, 6));
-
-  PBitmap(Params^[0])^.Mask(PInteger(Params^[3])^);
 end;
 
 procedure _LapePicture_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -1024,11 +804,9 @@ begin
     addGlobalType('(fqDefault, fqDraft, fqProof, fqNonAntialiased, fqAntialiased, fqCleartype, fqCleartypeNatural)', 'TFontQuality');
     addGlobalType('set of TFontStyle', 'TFontStyles');
     addGlobalType('(fpDefault, fpVariable, fpFixed)', 'TFontPitch');
-    addGlobalType('Integer', 'TCopyMode');
     addGlobalType('(psSolid, psDash, psDot, psDashDot, psDashDotDot, psInsideFrame, psPattern, psClear)', 'TPenStyle');
-    addGlobalType('(pmBlack, pmWhite, pmNop, pmNot, pmCopy, pmNotCopy,pmMergePenNot, pmMaskPenNot, pmMergeNotPen, pmMaskNotPen, pmMerge, pmNotMerge, pmMask, pmNotMask, pmXor, pmNotXor)', 'TPenMode');
-    addGlobalType('(bsSolid, bsClear, bsHorizontal, bsVertical, bsFDiagonal,bsBDiagonal, bsCross, bsDiagCross, bsImage, bsPattern)', 'TBrushStyle');
-    addGlobalType('(fsSurface, fsBorder)', 'TFillStyle');
+    addGlobalType('(pmBlack, pmWhite, pmNop, pmNot, pmCopy, pmNotCopy, pmMergePenNot, pmMaskPenNot, pmMergeNotPen, pmMaskNotPen, pmMerge, pmNotMerge, pmMask, pmNotMask, pmXor, pmNotXor)', 'TPenMode');
+    addGlobalType('(bsSolid, bsClear, bsHorizontal, bsVertical, bsFDiagonal, bsBDiagonal, bsCross, bsDiagCross, bsImage, bsPattern)', 'TBrushStyle');
     addGlobalType('(tmAuto, tmFixed)', 'TTransparentMode');
     addGlobalType('(amDontCare, amOn, amOff)', 'TAntialiasingMode');
     addGlobalType('(tlTop, tlCenter, tlBottom)', 'TTextLayout');
@@ -1080,8 +858,6 @@ begin
     addClassVar('TGraphic', 'Height', 'Integer', @_LapeGraphic_Height_Read, @_LapeGraphic_Height_Write);
     addClassVar('TGraphic', 'Modified', 'Boolean', @_LapeGraphic_Modified_Read, @_LapeGraphic_Modified_Write);
     addClassVar('TGraphic', 'OnChange', 'TNotifyEvent', @_LapeGraphic_OnChange_Read, @_LapeGraphic_OnChange_Write);
-    addClassVar('TGraphic', 'Palette', 'Integer', @_LapeGraphic_Palette_Read, @_LapeGraphic_Palette_Write);
-    addClassVar('TGraphic', 'PaletteModified', 'Boolean', @_LapeGraphic_PaletteModified_Read, @_LapeGraphic_PaletteModified_Write);
     addClassVar('TGraphic', 'Transparent', 'Boolean', @_LapeGraphic_Transparent_Read, @_LapeGraphic_Transparent_Write);
     addClassVar('TGraphic', 'Width', 'Integer', @_LapeGraphic_Width_Read, @_LapeGraphic_Width_Write);
 
@@ -1092,19 +868,12 @@ begin
     addGlobalFunc('procedure TCanvas.Refresh;', @_LapeCanvas_Refresh);
     addGlobalFunc('procedure TCanvas.Changing;', @_LapeCanvas_Changing);
     addGlobalFunc('procedure TCanvas.Changed;', @_LapeCanvas_Changed);
-    addGlobalFunc('procedure TCanvas.SaveHandleState;', @_LapeCanvas_SaveHandleState);
-    addGlobalFunc('procedure TCanvas.RestoreHandleState;', @_LapeCanvas_RestoreHandleState);
-    addGlobalFunc('procedure TCanvas.Arc(ALeft, ATop, ARight, ABottom, SX, SY, EX, EY: Integer);', @_LapeCanvas_Arc);
-    addGlobalFunc('procedure TCanvas.Chord(x1, y1, x2, y2, SX, SY, EX, EY: Integer);', @_LapeCanvas_Chord);
     addGlobalFunc('procedure TCanvas.CopyRect(Dest: TRect; SrcCanvas: TCanvas; Source: TRect);', @_LapeCanvas_CopyRect);
     addGlobalFunc('procedure TCanvas.Draw(X,Y: Integer; SrcGraphic: TGraphic);', @_LapeCanvas_Draw);
     addGlobalFunc('procedure TCanvas.DrawFocusRect(ARect: TRect);', @_LapeCanvas_DrawFocusRect);
     addGlobalFunc('procedure TCanvas.Ellipse(x1, y1, x2, y2: Integer);', @_LapeCanvas_Ellipse);
     addGlobalFunc('procedure TCanvas.FillRect(X1,Y1,X2,Y2: Integer);', @_LapeCanvas_FillRect);
-    addGlobalFunc('procedure TCanvas.FloodFill(X, Y: Integer; FillColor: TColor;FillStyle: TFillStyle);', @_LapeCanvas_FloodFill);
-    addGlobalFunc('procedure TCanvas.RadialPie(x1, y1, x2, y2, StartAngle16Deg, Angle16DegLength: Integer);', @_LapeCanvas_RadialPie);
     addGlobalFunc('procedure TCanvas.Pie(EllipseX1,EllipseY1,EllipseX2,EllipseY2, StartX,StartY,EndX,EndY: Integer);', @_LapeCanvas_Pie);
-    addGlobalFunc('procedure TCanvas.PolyBezier(Points: TPointArray;Filled: Boolean; Continuous: Boolean); overload', @_LapeCanvas_PolyBezierEx);
     addGlobalFunc('procedure TCanvas.Polygon(Points: TPointArray;Winding: Boolean;StartIndex: Integer; NumPts: Integer);', @_LapeCanvas_Polygon);
     addGlobalFunc('procedure TCanvas.Polygon(Points: TPointArray); overload', @_LapeCanvas_PolygonExEx);
     addGlobalFunc('procedure TCanvas.Polyline(Points: TPointArray;StartIndex: Integer;NumPts: Integer);', @_LapeCanvas_Polyline);
@@ -1119,22 +888,13 @@ begin
     addGlobalFunc('function TCanvas.TextWidth(Text: String): Integer;', @_LapeCanvas_TextWidth);
     addGlobalFunc('function TCanvas.HandleAllocated: Boolean;', @_LapeCanvas_HandleAllocated);
     addGlobalFunc('function TCanvas.GetPixel(x, y: Integer): TColor;', @_LapeCanvas_Get_Pixel);
-    addGlobalFunc('procedure TCanvas.SetPixel(x, y: Integer; Colour: TColor);', @_LapeCanvas_Set_Pixel);
-    addGlobalFunc('procedure TCanvas.SetPixels(TPA: TPointArray; Colour: TColor);', @_LapeCanvas_Set_Pixels);
-    addGlobalFunc('procedure TCanvas.SetPixels(TPA: TPointArray; Cols: TIntegerArray); overload', @_LapeCanvas_SetPixels);
-    addGlobalFunc('function TCanvas.GetPixels(const TPA: TPointArray): TIntegerArray;', @_LapeCanvas_GetPixels);
+    addGlobalFunc('procedure TCanvas.SetPixel(x, y: Integer; Color: TColor);', @_LapeCanvas_Set_Pixel);
     addGlobalFunc('procedure TCanvas.Clear;', @_LapeCanvas_Clear);
-    addGlobalFunc('procedure TCanvas.MoveTo(x, y: Integer);', @_LapeCanvas_MoveTo);
-    addGlobalFunc('procedure TCanvas.LineTo(x, y: Integer);', @_LapeCanvas_LineTo);
-    addGlobalFunc('procedure TCanvas.Frame3D(var ARect: TRect; TopColor, BottomColor: TColor; const FrameWidth: Integer);', @_LapeCanvas_Frame3D);
     addGlobalFunc('procedure TCanvas.Frame(X1, Y1, X2, Y2: Integer);', @_LapeCanvas_Frame);
     addClassVar('TCanvas', 'AutoRedraw', 'Boolean', @_LapeCanvas_AutoRedraw_Read, @_LapeCanvas_AutoRedraw_Write);
     addClassVar('TCanvas', 'Brush', 'TBrush', @_LapeCanvas_Brush_Read, @_LapeCanvas_Brush_Write);
-    addClassVar('TCanvas', 'CopyMode', 'TCopyMode', @_LapeCanvas_CopyMode_Read, @_LapeCanvas_CopyMode_Write);
     addClassVar('TCanvas', 'Font', 'TFont', @_LapeCanvas_Font_Read, @_LapeCanvas_Font_Write);
-    addClassVar('TCanvas', 'Height', 'Integer', @_LapeCanvas_Height_Read);
     addClassVar('TCanvas', 'Pen', 'TPen', @_LapeCanvas_Pen_Read, @_LapeCanvas_Pen_Write);
-    addClassVar('TCanvas', 'Width', 'Integer', @_LapeCanvas_Width_Read);
     addClassVar('TCanvas', 'OnChange', 'TNotifyEvent', @_LapeCanvas_OnChange_Read, @_LapeCanvas_OnChange_Write);
     addClassVar('TCanvas', 'OnChanging', 'TNotifyEvent', @_LapeCanvas_OnChanging_Read, @_LapeCanvas_OnChanging_Write);
     addClassVar('TCanvas', 'AntialiasingMode', 'TAntialiasingMode', @_LapeCanvas_AntialiasingMode_Get, @_LapeCanvas_AntialiasingMode_Set);
@@ -1145,24 +905,13 @@ begin
     addGlobalFunc('procedure TBitmap.BeginUpdate(ACanvasOnly: Boolean);', @_LapeBitmap_BeginUpdate);
     addGlobalFunc('procedure TBitmap.EndUpdate(AStreamIsValid: Boolean);', @_LapeBitmap_EndUpdate);
     addGlobalFunc('procedure TBitmap.FreeImage;', @_LapeBitmap_FreeImage);
-    addGlobalFunc('function TBitmap.BitmapHandleAllocated: Boolean;', @_LapeBitmap_BitmapHandleAllocated);
-    addGlobalFunc('function TBitmap.MaskHandleAllocated: Boolean;', @_LapeBitmap_MaskHandleAllocated);
-    addGlobalFunc('function TBitmap.PaletteAllocated: Boolean;', @_LapeBitmap_PaletteAllocated);
     addGlobalFunc('procedure TBitmap.LoadFromStream(AStream: TStream);', @_LapeBitmap_LoadFromStream);
     addGlobalFunc('procedure TBitmap.LoadFromStream(AStream: TStream; ASize: UInt32); overload', @_LapeBitmap_LoadFromStreamEx);
     addGlobalFunc('procedure TBitmap.SaveToStream(AStream: TStream);', @_LapeBitmap_SaveToStream);
     addGlobalFunc('procedure TBitmap.GetSize(var AWidth, AHeight: Integer);', @_LapeBitmap_GetSize);
-    addGlobalFunc('procedure TBitmap.Mask(ATransparentColor: TColor);', @_LapeBitmap_Mask);
-    addGlobalFunc('function TBitmap.ReleaseBitmapHandle: THandle;', @_LapeBitmap_ReleaseBitmapHandle);
-    addGlobalFunc('function TBitmap.ReleaseMaskHandle: THandle;', @_LapeBitmap_ReleaseMaskHandle);
-    addGlobalFunc('function TBitmap.ReleasePalette: THandle;', @_LapeBitmap_ReleasePalette);
-    addGlobalFunc('function TBitmap.ToString: String;', @_LapeBitmap_ToString);
-    addGlobalFunc('procedure TBitmap.LoadFromString(w, h, TransparentColor: Integer; data: String);', @_LapeBitmap_LoadFromString);
     addGlobalFunc('function TBitmap.HandleAllocated: Boolean;', @_LapeBitmap_HandleAllocated);
     addClassVar('TBitmap', 'Canvas', 'TCanvas', @_LapeBitmap_Canvas_Read);
     addClassVar('TBitmap', 'BitmapHandle', 'THandle', @_LapeBitmap_BitmapHandle_Read, @_LapeBitmap_BitmapHandle_Write);
-    addClassVar('TBitmap', 'Masked', 'Boolean', @_LapeBitmap_Masked_Read, @_LapeBitmap_Masked_Write);
-    addClassVar('TBitmap', 'MaskHandle', 'THandle', @_LapeBitmap_MaskHandle_Read, @_LapeBitmap_MaskHandle_Write);
     addClassVar('TBitmap', 'TransparentColor', 'TColor', @_LapeBitmap_TransparentColor_Read, @_LapeBitmap_TransparentColor_Write);
     addClassVar('TBitmap', 'TransparentMode', 'TTransparentMode', @_LapeBitmap_TransparentMode_Read, @_LapeBitmap_TransparentMode_Write);
 

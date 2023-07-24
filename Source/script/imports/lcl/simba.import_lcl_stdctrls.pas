@@ -951,11 +951,6 @@ begin
   PBoolean(Result)^ := PCustomLabel(Params^[0])^.AdjustFontForOptimalFill();
 end;
 
-procedure _LapeCustomLabel_Paint(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomLabel(Params^[0])^.Paint();
-end;
-
 procedure _LapeCustomLabel_SetBounds(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomLabel(Params^[0])^.SetBounds(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
@@ -1071,16 +1066,6 @@ begin
   PCustomSpeedButton(Params^[0])^.Glyph := PBitmap(Params^[1])^;
 end;
 
-procedure _LapeCustomSpeedButton_GroupIndex_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PCustomSpeedButton(Params^[0])^.GroupIndex;
-end;
-
-procedure _LapeCustomSpeedButton_GroupIndex_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomSpeedButton(Params^[0])^.GroupIndex := PInteger(Params^[1])^;
-end;
-
 procedure _LapeCustomSpeedButton_Layout_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PButtonLayout(Result)^ := PCustomSpeedButton(Params^[0])^.Layout;
@@ -1099,26 +1084,6 @@ end;
 procedure _LapeCustomSpeedButton_Margin_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomSpeedButton(Params^[0])^.Margin := Pinteger(Params^[1])^;
-end;
-
-procedure _LapeCustomSpeedButton_NumGlyphs_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PCustomSpeedButton(Params^[0])^.NumGlyphs;
-end;
-
-procedure _LapeCustomSpeedButton_NumGlyphs_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomSpeedButton(Params^[0])^.NumGlyphs := PInteger(Params^[1])^;
-end;
-
-procedure _LapeCustomSpeedButton_ShowAccelChar_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PCustomSpeedButton(Params^[0])^.ShowAccelChar;
-end;
-
-procedure _LapeCustomSpeedButton_ShowAccelChar_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomSpeedButton(Params^[0])^.ShowAccelChar := PBoolean(Params^[1])^;
 end;
 
 procedure _LapeCustomSpeedButton_ShowCaption_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -1338,7 +1303,6 @@ begin
     addClass('TCustomLabel', 'TGraphicControl');
     addGlobalFunc('procedure TCustomLabel.Init(TheOwner: TComponent); override', @_LapeCustomLabel_Init);
     addGlobalFunc('function TCustomLabel.AdjustFontForOptimalFill: Boolean;', @_LapeCustomLabel_AdjustFontForOptimalFill);
-    addGlobalFunc('procedure TCustomLabel.Paint;', @_LapeCustomLabel_Paint);
 
     addClass('TLabel', 'TCustomLabel');
     addClassVar('TLabel', 'Alignment', 'TAlignment', @_LapeLabel_Alignment_Read, @_LapeLabel_Alignment_Write);
@@ -1354,11 +1318,8 @@ begin
     addClassVar('TCustomSpeedButton', 'Down', 'Boolean', @_LapeCustomSpeedButton_Down_Read, @_LapeCustomSpeedButton_Down_Write);
     addClassVar('TCustomSpeedButton', 'Flat', 'Boolean', @_LapeCustomSpeedButton_Flat_Read, @_LapeCustomSpeedButton_Flat_Write);
     addClassVar('TCustomSpeedButton', 'Glyph', 'TBitmap', @_LapeCustomSpeedButton_Glyph_Read, @_LapeCustomSpeedButton_Glyph_Write);
-    addClassVar('TCustomSpeedButton', 'GroupIndex', 'Integer', @_LapeCustomSpeedButton_GroupIndex_Read, @_LapeCustomSpeedButton_GroupIndex_Write);
     addClassVar('TCustomSpeedButton', 'Layout', 'TButtonLayout', @_LapeCustomSpeedButton_Layout_Read, @_LapeCustomSpeedButton_Layout_Write);
     addClassVar('TCustomSpeedButton', 'Margin', 'Integer', @_LapeCustomSpeedButton_Margin_Read, @_LapeCustomSpeedButton_Margin_Write);
-    addClassVar('TCustomSpeedButton', 'NumGlyphs', 'Integer', @_LapeCustomSpeedButton_NumGlyphs_Read, @_LapeCustomSpeedButton_NumGlyphs_Write);
-    addClassVar('TCustomSpeedButton', 'ShowAccelChar', 'Boolean', @_LapeCustomSpeedButton_ShowAccelChar_Read, @_LapeCustomSpeedButton_ShowAccelChar_Write);
     addClassVar('TCustomSpeedButton', 'ShowCaption', 'Boolean', @_LapeCustomSpeedButton_ShowCaption_Read, @_LapeCustomSpeedButton_ShowCaption_Write);
     addClassVar('TCustomSpeedButton', 'Spacing', 'Integer', @_LapeCustomSpeedButton_Spacing_Read, @_LapeCustomSpeedButton_Spacing_Write);
     addClassVar('TCustomSpeedButton', 'Transparent', 'Boolean', @_LapeCustomSpeedButton_Transparent_Read, @_LapeCustomSpeedButton_Transparent_Write);

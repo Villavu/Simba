@@ -81,16 +81,6 @@ begin
   PCustomProgressBar(Params^[0])^.Min := PInteger(Params^[1])^;
 end;
 
-procedure _LapeCustomProgressBar_Orientation_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProgressBarOrientation(Result)^ := PCustomProgressBar(Params^[0])^.Orientation;
-end;
-
-procedure _LapeCustomProgressBar_Orientation_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomProgressBar(Params^[0])^.Orientation := PProgressBarOrientation(Params^[1])^;
-end;
-
 procedure _LapeCustomProgressBar_Position_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PCustomProgressBar(Params^[0])^.Position;
@@ -119,16 +109,6 @@ end;
 procedure _LapeCustomProgressBar_Step_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomProgressBar(Params^[0])^.Step := PInteger(Params^[1])^;
-end;
-
-procedure _LapeCustomProgressBar_Style_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProgressBarStyle(Result)^ := PCustomProgressBar(Params^[0])^.Style;
-end;
-
-procedure _LapeCustomProgressBar_Style_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomProgressBar(Params^[0])^.Style := PProgressBarStyle(Params^[1])^;
 end;
 
 procedure _LapeCustomProgressBar_BarShowText_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -254,16 +234,6 @@ end;
 procedure _LapeCustomTrackBar_Reversed_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomTrackBar(Params^[0])^.Reversed := PBoolean(Params^[1])^;
-end;
-
-procedure _LapeCustomTrackBar_ScalePos_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PTrackBarScalePos(Result)^ := PCustomTrackBar(Params^[0])^.ScalePos;
-end;
-
-procedure _LapeCustomTrackBar_ScalePos_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomTrackBar(Params^[0])^.ScalePos := PTrackBarScalePos(Params^[1])^;
 end;
 
 procedure _LapeCustomTrackBar_SelEnd_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -516,16 +486,6 @@ begin
   Pboolean(Result)^ := PCustomTabControl(Params^[0])^.CanChangePageIndex();
 end;
 
-procedure _LapeCustomTabControl_GetMinimumTabWidth(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PCustomTabControl(Params^[0])^.GetMinimumTabWidth();
-end;
-
-procedure _LapeCustomTabControl_GetMinimumTabHeight(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PCustomTabControl(Params^[0])^.GetMinimumTabHeight();
-end;
-
 procedure _LapeCustomTabControl_TabToPageIndex(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PCustomTabControl(Params^[0])^.TabToPageIndex(PInteger(Params^[1])^);
@@ -536,16 +496,6 @@ begin
   PInteger(Result)^ := PCustomTabControl(Params^[0])^.PageToTabIndex(PInteger(Params^[1])^);
 end;
 
-procedure _LapeCustomTabControl_MultiLine_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PCustomTabControl(Params^[0])^.MultiLine;
-end;
-
-procedure _LapeCustomTabControl_MultiLine_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomTabControl(Params^[0])^.MultiLine := PBoolean(Params^[1])^;
-end;
-
 procedure _LapeCustomTabControl_OnChanging_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PTabChangingEvent(Result)^ := PCustomTabControl(Params^[0])^.OnChanging;
@@ -554,16 +504,6 @@ end;
 procedure _LapeCustomTabControl_OnChanging_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomTabControl(Params^[0])^.OnChanging := PTabChangingEvent(Params^[1])^;
-end;
-
-procedure _LapeCustomTabControl_Options_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PTabControlOptions(Result)^ := PCustomTabControl(Params^[0])^.Options;
-end;
-
-procedure _LapeCustomTabControl_Options_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomTabControl(Params^[0])^.Options := PTabControlOptions(Params^[1])^;
 end;
 
 procedure _LapeCustomTabControl_Page_Index_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -704,26 +644,6 @@ end;
 procedure _LapeStatusPanel_Alignment_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PStatusPanel(Params^[0])^.Alignment := PAlignment(Params^[1])^;
-end;
-
-procedure _LapeStatusPanel_Bevel_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PStatusPanelBevel(Result)^ := PStatusPanel(Params^[0])^.Bevel;
-end;
-
-procedure _LapeStatusPanel_Bevel_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PStatusPanel(Params^[0])^.Bevel := PStatusPanelBevel(Params^[1])^;
-end;
-
-procedure _LapeStatusPanel_Style_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PStatusPanelStyle(Result)^ := PStatusPanel(Params^[0])^.Style;
-end;
-
-procedure _LapeStatusPanel_Style_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PStatusPanel(Params^[0])^.Style := PStatusPanelStyle(Params^[1])^;
 end;
 
 procedure _LapeStatusPanel_Text_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -870,22 +790,12 @@ procedure ImportLCLComCtrls(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    addGlobalType('(pbHorizontal, pbVertical, pbRightToLeft, pbTopDown)', 'TProgressBarOrientation');
-    addGlobalType('(pbstNormal, pbstMarquee)', 'TProgressBarStyle');
-    addGlobalType('(trHorizontal, trVertical)', 'TTrackBarOrientation');
     addGlobalType('(tmBottomRight, tmTopLeft, tmBoth)', 'TTickMark');
     addGlobalType('(tsNone, tsAuto, tsManual)', 'TTickStyle');
-    addGlobalType('(trLeft, trRight, trTop, trBottom)', 'TTrackBarScalePos');
     addGlobalType('procedure(Sender: TObject; Index: Integer) of object', 'TCheckListClicked', FFI_DEFAULT_ABI);
     addGlobalType('procedure(Sender: TObject; var AllowChange: Boolean) of object', 'TTabChangingEvent', FFI_DEFAULT_ABI);
-    addGlobalType('(tsTabs, tsButtons, tsFlatButtons)', 'TTabStyle');
     addGlobalType('(tpTop, tpBottom, tpLeft, tpRight)', 'TTabPosition');
-    addGlobalType('(nboShowCloseButtons, nboMultiLine, nboHidePageListPopup, nboKeyboardTabSwitch, nboShowAddTabButton)', 'TCTabControlOption');
-    addGlobalType('set of TCTabControlOption', 'TCTabControlOptions');
-    addGlobalType('(ppText, ppBorder, ppWidth)', 'TPanelPart');
-    addGlobalType('set of TPanelPart', 'TPanelParts');
-    addGlobalType('(psText, psOwnerDraw)', 'TStatusPanelStyle');
-    addGlobalType('(pbNone, pbLowered, pbRaised)', 'TStatusPanelBevel');
+    addGlobalType('(trHorizontal, trVertical)', 'TTrackBarOrientation');
 
     addClass('TCustomProgressBar', 'TWinControl');
     addGlobalFunc('procedure TCustomProgressBar.Init(AOwner: TComponent); override', @_LapeCustomProgressBar_Init);
@@ -893,11 +803,9 @@ begin
     addGlobalFunc('procedure TCustomProgressBar.StepBy(Delta: Integer);', @_LapeCustomProgressBar_StepBy);
     addClassVar('TCustomProgressBar', 'Max', 'Integer', @_LapeCustomProgressBar_Max_Read, @_LapeCustomProgressBar_Max_Write);
     addClassVar('TCustomProgressBar', 'Min', 'Integer', @_LapeCustomProgressBar_Min_Read, @_LapeCustomProgressBar_Min_Write);
-    addClassVar('TCustomProgressBar', 'Orientation', 'TProgressBarOrientation', @_LapeCustomProgressBar_Orientation_Read, @_LapeCustomProgressBar_Orientation_Write);
     addClassVar('TCustomProgressBar', 'Position', 'Integer', @_LapeCustomProgressBar_Position_Read, @_LapeCustomProgressBar_Position_Write);
     addClassVar('TCustomProgressBar', 'Smooth', 'boolean', @_LapeCustomProgressBar_Smooth_Read, @_LapeCustomProgressBar_Smooth_Write);
     addClassVar('TCustomProgressBar', 'Step', 'Integer', @_LapeCustomProgressBar_Step_Read, @_LapeCustomProgressBar_Step_Write);
-    addClassVar('TCustomProgressBar', 'Style', 'TProgressBarStyle', @_LapeCustomProgressBar_Style_Read, @_LapeCustomProgressBar_Style_Write);
     addClassVar('TCustomProgressBar', 'BarShowText', 'boolean', @_LapeCustomProgressBar_BarShowText_Read, @_LapeCustomProgressBar_BarShowText_Write);
 
     addClass('TProgressBar', 'TCustomProgressBar');
@@ -915,7 +823,6 @@ begin
     addClassVar('TCustomTrackBar', 'PageSize', 'Integer', @_LapeCustomTrackBar_PageSize_Read, @_LapeCustomTrackBar_PageSize_Write);
     addClassVar('TCustomTrackBar', 'Position', 'Integer', @_LapeCustomTrackBar_Position_Read, @_LapeCustomTrackBar_Position_Write);
     addClassVar('TCustomTrackBar', 'Reversed', 'Boolean', @_LapeCustomTrackBar_Reversed_Read, @_LapeCustomTrackBar_Reversed_Write);
-    addClassVar('TCustomTrackBar', 'ScalePos', 'TTrackBarScalePos', @_LapeCustomTrackBar_ScalePos_Read, @_LapeCustomTrackBar_ScalePos_Write);
     addClassVar('TCustomTrackBar', 'SelEnd', 'Integer', @_LapeCustomTrackBar_SelEnd_Read, @_LapeCustomTrackBar_SelEnd_Write);
     addClassVar('TCustomTrackBar', 'SelStart', 'Integer', @_LapeCustomTrackBar_SelStart_Read, @_LapeCustomTrackBar_SelStart_Write);
     addClassVar('TCustomTrackBar', 'ShowSelRange', 'Boolean', @_LapeCustomTrackBar_ShowSelRange_Read, @_LapeCustomTrackBar_ShowSelRange_Write);
@@ -953,10 +860,8 @@ begin
     addGlobalFunc('function TCustomTabControl.GetImageIndex(ThePageIndex: Integer): Integer;', @_LapeCustomTabControl_GetImageIndex);
     addGlobalFunc('function TCustomTabControl.CustomPage(Index: integer): TCustomPage;', @_LapeCustomTabControl_CustomPage);
     addGlobalFunc('function TCustomTabControl.TabToPageIndex(AIndex: integer): integer;', @_LapeCustomTabControl_TabToPageIndex);
-    addGlobalFunc('function TCustomTabControl.PageToTabIndex(AIndex: integer): integer;', @_LapeCustomTabControl_PageToTabIndex);;
-    addClassVar('TCustomTabControl', 'MultiLine', 'Boolean', @_LapeCustomTabControl_MultiLine_Read, @_LapeCustomTabControl_MultiLine_Write);
+    addGlobalFunc('function TCustomTabControl.PageToTabIndex(AIndex: integer): integer;', @_LapeCustomTabControl_PageToTabIndex);
     addClassVar('TCustomTabControl', 'OnChanging', 'TTabChangingEvent', @_LapeCustomTabControl_OnChanging_Read, @_LapeCustomTabControl_OnChanging_Write);
-    addClassVar('TCustomTabControl', 'Options', 'TCTabControlOptions', @_LapeCustomTabControl_Options_Read, @_LapeCustomTabControl_Options_Write);
     addClassVar('TCustomTabControl', 'Page', 'TCustomPage', @_LapeCustomTabControl_Page_Index_Read);
     addClassVar('TCustomTabControl', 'PageCount', 'integer', @_LapeCustomTabControl_PageCount_Read);
     addClassVar('TCustomTabControl', 'PageIndex', 'Integer', @_LapeCustomTabControl_PageIndex_Read, @_LapeCustomTabControl_PageIndex_Write);
@@ -982,9 +887,7 @@ begin
     addClass('TStatusPanel');
     addGlobalFunc('function TStatusPanel.StatusBar: TStatusBar;', @_LapeStatusPanel_StatusBar);
     addClassVar('TStatusPanel', 'Alignment', 'TAlignment', @_LapeStatusPanel_Alignment_Read, @_LapeStatusPanel_Alignment_Write);
-    addClassVar('TStatusPanel', 'Bevel', 'TStatusPanelBevel', @_LapeStatusPanel_Bevel_Read, @_LapeStatusPanel_Bevel_Write);
-    addClassVar('TStatusPanel', 'Style', 'TStatusPanelStyle', @_LapeStatusPanel_Style_Read, @_LapeStatusPanel_Style_Write);
-    addClassVar('TStatusPanel', 'Text', 'TCaption', @_LapeStatusPanel_Text_Read, @_LapeStatusPanel_Text_Write);
+    addClassVar('TStatusPanel', 'Text', 'String', @_LapeStatusPanel_Text_Read, @_LapeStatusPanel_Text_Write);
     addClassVar('TStatusPanel', 'Width', 'Integer', @_LapeStatusPanel_Width_Read, @_LapeStatusPanel_Width_Write);
 
     addClass('TStatusPanels');
@@ -997,7 +900,7 @@ begin
     addClassVar('TStatusBar', 'Canvas', 'TCanvas', @_LapeStatusBar_Canvas_Read);
     addClassVar('TStatusBar', 'AutoHint', 'Boolean', @_LapeStatusBar_AutoHint_Read, @_LapeStatusBar_AutoHint_Write);
     addClassVar('TStatusBar', 'Panels', 'TStatusPanels', @_LapeStatusBar_Panels_Read, @_LapeStatusBar_Panels_Write);
-    addClassVar('TStatusBar', 'SimpleText', 'TCaption', @_LapeStatusBar_SimpleText_Read, @_LapeStatusBar_SimpleText_Write);
+    addClassVar('TStatusBar', 'SimpleText', 'String', @_LapeStatusBar_SimpleText_Read, @_LapeStatusBar_SimpleText_Write);
     addClassVar('TStatusBar', 'SimplePanel', 'Boolean', @_LapeStatusBar_SimplePanel_Read, @_LapeStatusBar_SimplePanel_Write);
     addClassVar('TStatusBar', 'SizeGrip', 'Boolean', @_LapeStatusBar_SizeGrip_Read, @_LapeStatusBar_SizeGrip_Write);
     addClassVar('TStatusBar', 'OnHint', 'TNotifyEvent', @_LapeStatusBar_OnHint_Read, @_LapeStatusBar_OnHint_Write);
