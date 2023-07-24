@@ -476,7 +476,6 @@
       <Unit23>
         <Filename Value="finders/simba.finder_dtm.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="simba.finder_dtm"/>
       </Unit23>
       <Unit24>
         <Filename Value="script/imports/simba/simba.import_tpa.pas"/>

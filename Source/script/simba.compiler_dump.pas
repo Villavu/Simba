@@ -176,7 +176,8 @@ function TSimbaCompilerDump.addDelayedCode(ACode: lpString; AFileName: lpString;
 begin
   Result := inherited addDelayedCode(ACode, AFileName, AfterCompilation, IsGlobal);
 
-  AddCode(ACode);
+  if (not AFileName.StartsWith('!')) then
+    AddCode(ACode);
 end;
 
 function TSimbaCompilerDump.addGlobalFunc(Header: lpString; Value: Pointer): TLapeGlobalVar;
@@ -233,6 +234,8 @@ begin
     begin
       if (Name = '') or (VarType = nil) or (VarType.Name = '') or (BaseType in [ltUnknown, ltScriptMethod, ltImportedMethod]) then
         Continue;
+      if DocPos.FileName.StartsWith('!') then
+        Continue;
 
       if isConstant then
       begin
@@ -268,13 +271,11 @@ begin
   Add('System', 'function WaitUntil(Condition: Expression; Interval, Timeout: Int32): Boolean; external;');
   Add('System', 'function Default(T: AnyType): AnyType; external;');
   Add('System', 'procedure Sort(var A: array); overload; external;');
+  Add('System', 'procedure Sort(var A: array; Weights: array of Ordinal; LowToHigh: Boolean); overload; external;');
   Add('System', 'procedure Sort(var A: array; CompareFunc: function(constref L, R: Anything): Int32); overload; external;');
-  Add('System', 'procedure Sort(var A: array; Weights: TIntegerArray; LowToHigh: Boolean); overload; external;');
-  Add('System', 'procedure Sort(var A: array; Weights: TExtendedArray; LowToHigh: Boolean); overload; external;');
   Add('System', 'function Sorted(const A: array): array; overload; external;');
   Add('System', 'function Sorted(const A: array; CompareFunc: function(constref L, R: Anything): Int32): array; overload; external;');
-  Add('System', 'function Sorted(const A: array; Weights: TIntegerArray; LowToHigh: Boolean): array; overload; external;');
-  Add('System', 'function Sorted(const A: array; Weights: TExtendedArray; LowToHigh: Boolean): array; overload; external;');
+  Add('System', 'function Sorted(const A: array; Weights: array of Ordinal; LowToHigh: Boolean): array; overload; external;');
   Add('System', 'function Unique(const A: array): array; external;');
   Add('System', 'procedure Reverse(var A: array); external;');
   Add('System', 'function Reversed(const A: array): array; external;');

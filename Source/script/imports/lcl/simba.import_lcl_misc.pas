@@ -295,21 +295,6 @@ begin
   PInteger(Result)^ := PProcess(Params^[0])^.ExitCode;
 end;
 
-procedure _LapeCustomFloatSpinEdit_GetLimitedValue(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDouble(Result)^ := PCustomFloatSpinEdit(Params^[0])^.GetLimitedValue(PDouble(Params^[1])^);
-end;
-
-procedure _LapeCustomFloatSpinEdit_ValueToStr(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := PCustomFloatSpinEdit(Params^[0])^.ValueToStr(PDouble(Params^[1])^);
-end;
-
-procedure _LapeCustomFloatSpinEdit_StrToValue(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDouble(Result)^ := PCustomFloatSpinEdit(Params^[0])^.StrToValue(PString(Params^[1])^);
-end;
-
 procedure _LapeCustomFloatSpinEdit_DecimalPlaces_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PCustomFloatSpinEdit(Params^[0])^.DecimalPlaces;
@@ -856,9 +841,6 @@ begin
   with Compiler do
   begin
     addClass('TCustomFloatSpinEdit', 'TCustomEdit');
-    addGlobalFunc('function TCustomFloatSpinEdit.GetLimitedValue(const AValue: Double): Double;', @_LapeCustomFloatSpinEdit_GetLimitedValue);
-    addGlobalFunc('function TCustomFloatSpinEdit.ValueToStr(const AValue: Double): String;', @_LapeCustomFloatSpinEdit_ValueToStr);
-    addGlobalFunc('function TCustomFloatSpinEdit.StrToValue(const S: String): Double;', @_LapeCustomFloatSpinEdit_StrToValue);
     addClassVar('TCustomFloatSpinEdit', 'DecimalPlaces', 'Integer', @_LapeCustomFloatSpinEdit_DecimalPlaces_Read, @_LapeCustomFloatSpinEdit_DecimalPlaces_Write);
     addClassVar('TCustomFloatSpinEdit', 'Increment', 'Double', @_LapeCustomFloatSpinEdit_Increment_Read, @_LapeCustomFloatSpinEdit_Increment_Write);
     addClassVar('TCustomFloatSpinEdit', 'MinValue', 'Double', @_LapeCustomFloatSpinEdit_MinValue_Read, @_LapeCustomFloatSpinEdit_MinValue_Write);
