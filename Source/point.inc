@@ -21,7 +21,7 @@ type
     function Random(Value: Integer): TPoint; overload;
   end;
 
-  function Point(X, Y: Integer): TPoint;
+  function Point(const X, Y: Integer): TPoint; inline;
 
   operator = (const Left, Right: TPoint): Boolean;
   operator + (const Left, Right: TPoint): TPoint;
@@ -141,7 +141,7 @@ begin
   Result := Left.InBox(Right);
 end;
 
-function Point(X, Y: Integer): TPoint;
+function Point(const X, Y: Integer): TPoint;
 begin
   Result.X := X;
   Result.Y := Y;

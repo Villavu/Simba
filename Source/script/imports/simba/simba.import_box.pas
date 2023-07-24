@@ -21,7 +21,7 @@ Box
 ~~~
 function Box(X1, Y1, X2, Y2: Integer): TBox;
 *)
-procedure _LapeBox(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeBox1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBox(Result)^ := Box(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
@@ -31,7 +31,7 @@ Box
 ~~~
 function Box(Mid: TPoint; XRad, YRad: Integer): TBox;
 *)
-procedure _LapeBoxEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeBox2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBox(Result)^ := Box(PPoint(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
@@ -253,21 +253,21 @@ end;
 (*
 TBox.Clip
 ~~~~~~~~~
-procedure TBox.Clip(Other: TBox);
+function TBox.Clip(Other: TBox): TBox;
 *)
-procedure _LapeBox_Clip(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeBox_Clip(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBox(Params^[0])^.Clip(PBox(Params^[1])^);
+  PBox(Result)^ := PBox(Params^[0])^.Clip(PBox(Params^[1])^);
 end;
 
 (*
 TBox.Normalize
 ~~~~~~~~~~~~~~
-procedure TBox.Normalize;
+function TBox.Normalize: TBox;
 *)
-procedure _LapeBox_Normalize(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeBox_Normalize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBox(Params^[0])^.Normalize();
+  PBox(Result)^ := PBox(Params^[0])^.Normalize();
 end;
 
 (*
@@ -352,8 +352,8 @@ begin
   begin
     ImportingSection := 'TBox';
 
-    addGlobalFunc('function Box(X1, Y1, X2, Y2: Integer): TBox; overload', @_LapeBox);
-    addGlobalFunc('function Box(Mid: TPoint; XRad, YRad: Integer): TBox; overload', @_LapeBoxEx);
+    addGlobalFunc('function Box(X1, Y1, X2, Y2: Integer): TBox; overload', @_LapeBox1);
+    addGlobalFunc('function Box(Mid: TPoint; XRad, YRad: Integer): TBox; overload', @_LapeBox2);
 
     addGlobalFunc('function TBox.Create(X1, Y1, X2, Y2: Integer): TBox; static; overload;', @_LapeBox_Create1);
     addGlobalFunc('function TBox.Create(Center: TPoint; XRad, YRad: Integer): TBox; static; overload;', @_LapeBox_Create2);
@@ -380,8 +380,8 @@ begin
     addGlobalFunc('function TBox.NearestEdge(P: TPoint): TPoint;', @_LapeBox_NearestEdge);
     addGlobalFunc('function TBox.Intersect(P: TPoint): TPoint;', @_LapeBox_Intersect);
 
-    addGlobalFunc('procedure TBox.Clip(Other: TBox);', @_LapeBox_Clip);
-    addGlobalFunc('procedure TBox.Normalize;', @_LapeBox_Normalize);
+    addGlobalFunc('function TBox.Clip(Other: TBox): TBox', @_LapeBox_Clip);
+    addGlobalFunc('function TBox.Normalize: TBox', @_LapeBox_Normalize);
     addGlobalFunc('function TBox.Corners: TPointArray;', @_LapeBox_Corners);
 
     addGlobalFunc('function TBox.Width: Integer;', @_LapeBox_Width);
