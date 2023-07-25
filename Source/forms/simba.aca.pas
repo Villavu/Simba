@@ -171,9 +171,9 @@ end;
 
 procedure TSimbaACAForm.LoadHSLCircle(Radius: Integer);
 var
-  Bitmap: TMufasaBitmap;
+  Bitmap: TSimbaImage;
 begin
-  Bitmap := TMufasaBitmap.Create(Radius*2, Radius*2);
+  Bitmap := TSimbaImage.Create(Radius*2, Radius*2);
   Bitmap.DrawHSLCircle(Bitmap.Center, Radius);
 
   FImageBox.SetBackground(Bitmap);

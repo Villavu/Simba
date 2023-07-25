@@ -14,7 +14,7 @@ uses
   classes, sysutils, graphics,
   simba.mufasatypes, simba.bitmap;
 
-procedure LoadBitmapAreaFromFile(Bitmap: TMufasaBitmap; FileName: String; Area: TBox);
+procedure LoadBitmapAreaFromFile(Bitmap: TSimbaImage; FileName: String; Area: TBox);
 function GetBitmapPixelFormat(Bitmap: TBitmap): String;
 
 type
@@ -22,7 +22,7 @@ type
     // Draw TColorBGRA data without changing bitmap format
     procedure FromData(AData: PColorBGRA; AWidth, AHeight: Integer);
 
-    function ToMufasaBitmap: TMufasaBitmap;
+    function ToMufasaBitmap: TSimbaImage;
     procedure LoadFromFile(FileName: String);
   end;
 
@@ -41,7 +41,7 @@ type
 
   TRGBSumTableHelper = type helper for TRGBSumTable
   public
-    class function Create(Bitmap: TMufasaBitmap): TRGBSumTable; static;
+    class function Create(Bitmap: TSimbaImage): TRGBSumTable; static;
 
     function Query(Area: TBox): TRGBSum;
   end;
@@ -51,7 +51,7 @@ implementation
 uses
   BMPcomn, GraphType, IntfGraphics;
 
-procedure LoadBitmapAreaFromFile(Bitmap: TMufasaBitmap; FileName: String; Area: TBox);
+procedure LoadBitmapAreaFromFile(Bitmap: TSimbaImage; FileName: String; Area: TBox);
 
   function ColorRGBToBGRA(const ColorRGB: TColorRGB): TColorBGRA; inline;
   begin
@@ -316,7 +316,7 @@ begin
   EndUpdate();
 end;
 
-function TBitmapHelper.ToMufasaBitmap: TMufasaBitmap;
+function TBitmapHelper.ToMufasaBitmap: TSimbaImage;
 var
   Source, Dest: PByte;
   SourceBytesPerLine, DestBytesPerLine: Integer;
@@ -401,7 +401,7 @@ var
   end;
 
 begin
-  Result := TMufasaBitmap.Create();
+  Result := TSimbaImage.Create();
   Result.SetSize(Width, Height);
 
   Dest := PByte(Result.Data);
@@ -469,7 +469,7 @@ begin
   Result.B := Left.B - Right.B;
 end;
 
-class function TRGBSumTableHelper.Create(Bitmap: TMufasaBitmap): TRGBSumTable;
+class function TRGBSumTableHelper.Create(Bitmap: TSimbaImage): TRGBSumTable;
 var
   W, H, X, Y: Integer;
 begin

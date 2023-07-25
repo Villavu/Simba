@@ -33,7 +33,7 @@ type
 
     procedure Move(Image: TImage; X, Y: Integer); overload;
     procedure Move(Image: TBitmap; X, Y: Integer); overload;
-    procedure Move(Image: TMufasaBitmap; X, Y: Integer); overload;
+    procedure Move(Image: TSimbaImage; X, Y: Integer); overload;
   end;
 
 implementation
@@ -166,7 +166,7 @@ begin
   Invalidate();
 end;
 
-procedure TSimbaImageBoxZoom.Move(Image: TMufasaBitmap; X, Y: Integer);
+procedure TSimbaImageBoxZoom.Move(Image: TSimbaImage; X, Y: Integer);
 var
   LoopX, LoopY: Integer;
 begin

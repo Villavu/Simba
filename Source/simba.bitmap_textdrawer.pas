@@ -42,7 +42,7 @@ type
     FHeight: Integer;
     FData: PColorBGRA;
     FCurrentColor: PColorBGRA;
-    FBitmap: TObject;
+    FSimbaImage: TObject;
     FFonts: TStringArray;
     FFont: TFreeTypeFont;
     FFontName: String;
@@ -74,7 +74,7 @@ type
     function TextHeight(Text: String): Integer;
     function TextSize(Text: String): TPoint;
 
-    constructor Create(Bitmap: TObject); reintroduce;
+    constructor Create(SimbaImage: TObject); reintroduce;
   end;
 
 var
@@ -293,7 +293,7 @@ procedure TSimbaTextDrawer.BeginDrawing;
 begin
   FLock.Enter();
 
-  with TMufasaBitmap(FBitmap) do
+  with TSimbaImage(FSimbaImage) do
   begin
     Self.FData := Data;
     Self.FWidth := Width;
@@ -313,9 +313,9 @@ begin
   FLock.Leave();
 end;
 
-constructor TSimbaTextDrawer.Create(Bitmap: TObject);
+constructor TSimbaTextDrawer.Create(SimbaImage: TObject);
 begin
-  FBitmap := Bitmap;
+  FSimbaImage := SimbaImage;
   FSize := 18;
   FFontAntialised := True;
 end;

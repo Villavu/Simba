@@ -19,11 +19,11 @@ uses
   simba.mufasatypes, simba.colormath, simba.colormath_distance, simba.target, simba.bitmap,
   simba.colormath_distance_unrolled, simba.simplelock;
 
-function FindBitmapOnTarget(Target: TSimbaTarget; Bitmap: TMufasaBitmap; Bounds: TBox;
+function FindBitmapOnTarget(Target: TSimbaTarget; Bitmap: TSimbaImage; Bounds: TBox;
                             Formula: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1): TPointArray;
 
 function FindBitmapOnBuffer(var Limit: TSimpleThreadsafeLimit;
-                            Bitmap: TMufasaBitmap;
+                            Bitmap: TSimbaImage;
                             ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers;
                             Buffer: PColorBGRA; BufferWidth: Integer;
                             SearchWidth, SearchHeight: Integer): TPointArray;
@@ -62,7 +62,7 @@ const
 
 // Pre calculate color space
 // and "transparent" (aka ignore) colors.
-function ConvertBitmapColors(Bitmap: TMufasaBitmap; ColorSpace: EColorSpace): PByte;
+function ConvertBitmapColors(Bitmap: TSimbaImage; ColorSpace: EColorSpace): PByte;
 var
   I: Integer;
   Source: PColorBGRA;
@@ -96,7 +96,7 @@ begin
   end;
 end;
 
-function FindBitmapOnTarget(Target: TSimbaTarget; Bitmap: TMufasaBitmap; Bounds: TBox; Formula: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer): TPointArray;
+function FindBitmapOnTarget(Target: TSimbaTarget; Bitmap: TSimbaImage; Bounds: TBox; Formula: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer): TPointArray;
 var
   Buffer: PColorBGRA;
   BufferWidth: Integer;
@@ -146,7 +146,7 @@ begin
   end;
 end;
 
-function FindBitmapOnBuffer(var Limit: TSimpleThreadsafeLimit; Bitmap: TMufasaBitmap; ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TPointArray;
+function FindBitmapOnBuffer(var Limit: TSimpleThreadsafeLimit; Bitmap: TSimbaImage; ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TPointArray;
 var
   BitmapColors: PByte;
 

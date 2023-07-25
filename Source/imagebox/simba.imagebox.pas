@@ -100,7 +100,7 @@ type
 
     procedure SetBackground(Data: PColorBGRA; AWidth, AHeight: Integer); overload;
     procedure SetBackground(FileName: String); overload;
-    procedure SetBackground(Bitmap: TMufasaBitmap); overload;
+    procedure SetBackground(Bitmap: TSimbaImage); overload;
     procedure SetBackground(Window: TWindowHandle); overload;
 
     procedure Paint;
@@ -113,7 +113,7 @@ implementation
 
 uses
   Math, GraphType, LCLIntf,
-  simba.finder, simba.bitmap_utils, simba.windowhandle, simba.bitmap_finders;
+  simba.finder, simba.bitmap_utils, simba.windowhandle;
 
 procedure TSimbaImageBox_ScrollBox.GetPreferredSize(var PreferredWidth, PreferredHeight: integer; Raw: boolean; WithThemeSpace: boolean);
 begin
@@ -616,32 +616,47 @@ begin
 end;
 
 function TSimbaImageBox.FindDTM(DTM: TDTM): TPointArray;
+var
+  Finder: TSimbaFinder;
+  Img: TSimbaImage;
 begin
-  with FBackground.ToMufasaBitmap() do
+  Img := FBackground.ToMufasaBitmap();
   try
-    Result := Finder.FindDTMEx(DTM, -1, NullBox);
+    Finder.Target.SetImage(Img);
+
+    Result := Finder.FindDTMEx(DTM, -1, Box(-1, -1, -1, -1));
   finally
-    Free();
+    Img.Free();
   end;
 end;
 
 function TSimbaImageBox.FindColor(AColor: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
+var
+  Finder: TSimbaFinder;
+  Img: TSimbaImage;
 begin
-  with FBackground.ToMufasaBitmap() do
+  Img := FBackground.ToMufasaBitmap();
   try
-    Result := Finder.FindColor(AColor, Tolerance, ColorSpace, Multipliers, NullBox);
+    Finder.Target.SetImage(Img);
+
+    Result := Finder.FindColor(AColor, Tolerance, ColorSpace, Multipliers, Box(-1, -1, -1, -1));
   finally
-    Free();
+    Img.Free();
   end;
 end;
 
 function TSimbaImageBox.MatchColor(AColor: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TSingleMatrix;
+var
+  Finder: TSimbaFinder;
+  Img: TSimbaImage;
 begin
-  with FBackground.ToMufasaBitmap() do
+  Img := FBackground.ToMufasaBitmap();
   try
-    Result := Finder.MatchColor(AColor, ColorSpace, Multipliers, NullBox);
+    Finder.Target.SetImage(Img);
+
+    Result := Finder.MatchColor(AColor, ColorSpace, Multipliers, Box(-1, -1, -1, -1));
   finally
-    Free();
+    Img.Free();
   end;
 end;
 
@@ -655,18 +670,18 @@ begin
   FBackground.LoadFromFile(FileName);
 end;
 
-procedure TSimbaImageBox.SetBackground(Bitmap: TMufasaBitmap);
+procedure TSimbaImageBox.SetBackground(Bitmap: TSimbaImage);
 begin
   FBackground.FromData(Bitmap.Data, Bitmap.Width, Bitmap.Height);
 end;
 
 procedure TSimbaImageBox.SetBackground(Window: TWindowHandle);
 var
-  Image: TMufasaBitmap;
+  Image: TSimbaImage;
 begin
   if Window.IsValid() then
   begin
-    Image := TMufasaBitmap.CreateFromWindow(Window);
+    Image := TSimbaImage.CreateFromWindow(Window);
     try
       SetBackground(Image);
     finally
