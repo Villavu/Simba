@@ -32,7 +32,7 @@ type
   private
     FTarget: TSimbaTarget;
 
-    function GetDataAsBitmap(var Bounds: TBox; out Bitmap: TMufasaBitmap): Boolean;
+    function GetDataAsBitmap(var Bounds: TBox; out Bitmap: TSimbaImage): Boolean;
   public
     function FindDTMEx(DTM: TDTM; MaxToFind: Integer; Bounds: TBox): TPointArray;
     function FindDTMRotatedEx(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer; Bounds: TBox): TPointArray;
@@ -40,11 +40,11 @@ type
     function FindDTM(DTM: TDTM; Bounds: TBox): TPoint;
     function FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox): TPoint;
 
-    function FindImageEx(Bitmap: TMufasaBitmap; Tolerance: Single; MaxToFind: Integer; Bounds: TBox): TPointArray; overload;
-    function FindImageEx(Bitmap: TMufasaBitmap; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer; Bounds: TBox): TPointArray; overload;
+    function FindImageEx(Bitmap: TSimbaImage; Tolerance: Single; MaxToFind: Integer; Bounds: TBox): TPointArray; overload;
+    function FindImageEx(Bitmap: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer; Bounds: TBox): TPointArray; overload;
 
-    function FindImage(Bitmap: TMufasaBitmap; Tolerance: Single; Bounds: TBox): TPoint; overload;
-    function FindImage(Bitmap: TMufasaBitmap; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPoint; overload;
+    function FindImage(Bitmap: TSimbaImage; Tolerance: Single; Bounds: TBox): TPoint; overload;
+    function FindImage(Bitmap: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPoint; overload;
 
     function MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TSingleMatrix;
 
@@ -71,7 +71,7 @@ type
     function FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPointArray; overload;
     function FindEdges(MinDiff: Single; Bounds: TBox): TPointArray; overload;
 
-    function FindTemplate(Templ: TMufasaBitmap; MinMatch: Single; Bounds: TBox): TPoint;
+    function FindTemplate(Templ: TSimbaImage; MinMatch: Single; Bounds: TBox): TPoint;
 
     property Target: TSimbaTarget read FTarget write FTarget;
 
@@ -84,7 +84,7 @@ uses
   simba.overallocatearray, simba.singlematrix, simba.tpa, simba.matchtemplate,
   simba.finder_color, simba.finder_bitmap, simba.finder_dtm;
 
-function TSimbaFinder.GetDataAsBitmap(var Bounds: TBox; out Bitmap: TMufasaBitmap): Boolean;
+function TSimbaFinder.GetDataAsBitmap(var Bounds: TBox; out Bitmap: TSimbaImage): Boolean;
 var
   Data: PColorBGRA = nil;
   DataWidth: Integer;
@@ -94,7 +94,7 @@ begin
 
   if Result then
   begin
-    Bitmap := TMufasaBitmap.Create(Bounds.Width, Bounds.Height);
+    Bitmap := TSimbaImage.Create(Bounds.Width, Bounds.Height);
     for Y := 0 to Bitmap.Height - 1 do
       Move(Data[Y * DataWidth], Bitmap.Data[Y * Bitmap.Width], Bitmap.Width * SizeOf(TColorBGRA));
 
@@ -134,17 +134,17 @@ begin
     Result := TPoint.Create(-1, -1);
 end;
 
-function TSimbaFinder.FindImageEx(Bitmap: TMufasaBitmap; Tolerance: Single; MaxToFind: Integer; Bounds: TBox): TPointArray;
+function TSimbaFinder.FindImageEx(Bitmap: TSimbaImage; Tolerance: Single; MaxToFind: Integer; Bounds: TBox): TPointArray;
 begin
   Result := FindBitmapOnTarget(FTarget, Bitmap, Bounds, DefaultColorSpace, Tolerance, DefaultMultipliers, MaxToFind);
 end;
 
-function TSimbaFinder.FindImageEx(Bitmap: TMufasaBitmap; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer; Bounds: TBox): TPointArray;
+function TSimbaFinder.FindImageEx(Bitmap: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer; Bounds: TBox): TPointArray;
 begin
   Result := FindBitmapOnTarget(FTarget, Bitmap, Bounds, ColorSpace, Tolerance, Multipliers, MaxToFind);
 end;
 
-function TSimbaFinder.FindImage(Bitmap: TMufasaBitmap; Tolerance: Single; Bounds: TBox): TPoint;
+function TSimbaFinder.FindImage(Bitmap: TSimbaImage; Tolerance: Single; Bounds: TBox): TPoint;
 var
   TPA: TPointArray;
 begin
@@ -155,7 +155,7 @@ begin
     Result := TPoint.Create(-1, -1);
 end;
 
-function TSimbaFinder.FindImage(Bitmap: TMufasaBitmap; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPoint;
+function TSimbaFinder.FindImage(Bitmap: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPoint;
 var
   TPA: TPointArray;
 begin
@@ -274,7 +274,7 @@ end;
 
 function TSimbaFinder.GetPixelDifference(WaitTime: Integer; Area: TBox): Integer;
 var
-  BitmapBefore, BitmapAfter: TMufasaBitmap;
+  BitmapBefore, BitmapAfter: TSimbaImage;
 begin
   Result := 0;
 
@@ -296,7 +296,7 @@ end;
 
 function TSimbaFinder.GetPixelDifference(WaitTime: Integer; Tolerance: Integer; Area: TBox): Integer;
 var
-  BitmapBefore, BitmapAfter: TMufasaBitmap;
+  BitmapBefore, BitmapAfter: TSimbaImage;
 begin
   Result := 0;
 
@@ -318,7 +318,7 @@ end;
 
 function TSimbaFinder.GetPixelDifferenceTPA(WaitTime: Integer; Area: TBox): TPointArray;
 var
-  BitmapBefore, BitmapAfter: TMufasaBitmap;
+  BitmapBefore, BitmapAfter: TSimbaImage;
 begin
   Result := nil;
 
@@ -340,7 +340,7 @@ end;
 
 function TSimbaFinder.GetPixelDifferenceTPA(WaitTime: Integer; Tolerance: Integer; Area: TBox): TPointArray;
 var
-  BitmapBefore, BitmapAfter: TMufasaBitmap;
+  BitmapBefore, BitmapAfter: TSimbaImage;
 begin
   Result := nil;
 
@@ -362,7 +362,7 @@ end;
 
 function TSimbaFinder.AverageBrightness(Area: TBox): Integer;
 var
-  Bitmap: TMufasaBitmap;
+  Bitmap: TSimbaImage;
   X, Y, Sum: Integer;
 begin
   Result := 0;
@@ -387,7 +387,7 @@ end;
 
 function TSimbaFinder.PeakBrightness(Area: TBox): Integer;
 var
-  Bitmap: TMufasaBitmap;
+  Bitmap: TSimbaImage;
   X, Y: Integer;
 begin
   Result := 0;
@@ -411,7 +411,7 @@ end;
 
 function TSimbaFinder.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPointArray;
 var
-  Bitmap: TMufasaBitmap;
+  Bitmap: TSimbaImage;
   X, Y ,W, H: Integer;
   Buffer: TSimbaPointBuffer;
   First, Second, Third: TColor;
@@ -450,9 +450,9 @@ begin
   Result := FindEdges(MinDiff, DefaultColorSpace, DefaultMultipliers, Bounds);
 end;
 
-function TSimbaFinder.FindTemplate(Templ: TMufasaBitmap; MinMatch: Single; Bounds: TBox): TPoint;
+function TSimbaFinder.FindTemplate(Templ: TSimbaImage; MinMatch: Single; Bounds: TBox): TPoint;
 var
-  Bitmap: TMufasaBitmap;
+  Bitmap: TSimbaImage;
   Mat: TSingleMatrix;
   Best: TPoint;
 begin

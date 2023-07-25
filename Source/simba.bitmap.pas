@@ -21,8 +21,8 @@ type
   PBmpThreshMethod = ^TBmpThreshMethod;
   TBmpThreshMethod = (TM_Mean, TM_MinMax);
 
-  PMufasaBitmap = ^TMufasaBitmap;
-  TMufasaBitmap = class(TSimbaBaseClass)
+  PSimbaImage = ^TSimbaImage;
+  TSimbaImage = class(TSimbaBaseClass)
   protected
     FWidth: Integer;
     FHeight: Integer;
@@ -54,7 +54,7 @@ type
     procedure SetFontBold(Value: Boolean);
     procedure SetFontItalic(Value: Boolean);
   public
-    class var DebugUnfreedBitmaps: ShortString;
+    class var SaveUnfreedDir: ShortString;
   public
     constructor Create; overload;
     constructor Create(AWidth, AHeight: Integer); overload;
@@ -87,7 +87,7 @@ type
     function PointInBitmap(const X, Y: Integer): Boolean; overload;
 
     function Equals(Other: TObject): Boolean; override;
-    function Equals(Other: TMufasaBitmap): Boolean; overload;
+    function Equals(Other: TSimbaImage): Boolean; overload;
 
     class function LoadFonts(Dir: String): Boolean;
     class function FontNames: TStringArray;
@@ -150,41 +150,42 @@ type
     procedure Clear(Area: TBox);
     procedure ClearInverted(Area: TBox);
 
-    procedure DrawBitmap(Bitmap: TMufasaBitmap; Position: TPoint);
+    procedure Draw(Image: TSimbaImage; X, Y: Integer); overload;
+    procedure Draw(Image: TSimbaImage; Position: TPoint); overload;
 
     procedure DrawToCanvas(x,y: Integer; Canvas: TCanvas);
     function GetColors: TColorArray;
     procedure ReplaceColor(OldColor, NewColor: TColor);
     procedure ReplaceColors(OldColors, NewColors: TColorArray);
-    procedure Rotate(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap); overload;
-    procedure RotateBilinear(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap); overload;
-    function Rotate(Radians: Single; Expand: Boolean): TMufasaBitmap; overload;
-    function RotateBilinear(Radians: Single; Expand: Boolean): TMufasaBitmap; overload;
+    procedure Rotate(Radians: Single; Expand: Boolean; TargetBitmap: TSimbaImage); overload;
+    procedure RotateBilinear(Radians: Single; Expand: Boolean; TargetBitmap: TSimbaImage); overload;
+    function Rotate(Radians: Single; Expand: Boolean): TSimbaImage; overload;
+    function RotateBilinear(Radians: Single; Expand: Boolean): TSimbaImage; overload;
 
-    procedure GreyScale(TargetBitmap: TMufasaBitmap); overload;
+    procedure GreyScale(TargetBitmap: TSimbaImage); overload;
     procedure GreyScale; overload;
-    procedure Brightness(TargetBitmap: TMufasaBitmap; br: Integer); overload;
+    procedure Brightness(TargetBitmap: TSimbaImage; br: Integer); overload;
     procedure Brightness(br: Integer); overload;
-    procedure Invert(TargetBitmap: TMufasaBitmap); overload;
+    procedure Invert(TargetBitmap: TSimbaImage); overload;
     procedure Invert; overload;
-    procedure Posterize(TargetBitmap: TMufasaBitmap; Po: Integer); overload;
+    procedure Posterize(TargetBitmap: TSimbaImage; Po: Integer); overload;
     procedure Posterize(Po: Integer); overload;
-    procedure Convolute(TargetBitmap: TMufasaBitmap; Matrix: TDoubleMatrix);
+    procedure Convolute(TargetBitmap: TSimbaImage; Matrix: TDoubleMatrix);
 
     procedure Mirror(MirrorStyle: TBmpMirrorStyle); overload;
-    procedure Mirror(TargetBitmap: TMufasaBitmap; MirrorStyle: TBmpMirrorStyle); overload;
+    procedure Mirror(TargetBitmap: TSimbaImage; MirrorStyle: TBmpMirrorStyle); overload;
 
-    procedure Blur(TargetBitmap: TMufasaBitmap; Block: Integer); overload;
+    procedure Blur(TargetBitmap: TSimbaImage; Block: Integer); overload;
     procedure Blur(Block: Integer); overload;
 
     procedure Blend(Points: TPointArray; Radius: Integer); overload;
-    procedure Blend(TargetBitmap: TMufasaBitmap; Points: TPointArray; Radius: Integer); overload;
+    procedure Blend(TargetBitmap: TSimbaImage; Points: TPointArray; Radius: Integer); overload;
 
     procedure Downsample(Scale: Integer); overload;
-    procedure Downsample(TargetBitmap: TMufasaBitmap; Scale: Integer); overload;
+    procedure Downsample(TargetBitmap: TSimbaImage; Scale: Integer); overload;
 
-    function Copy(X1, Y1, X2, Y2: Integer): TMufasaBitmap; overload;
-    function Copy: TMufasaBitmap; overload;
+    function Copy(X1, Y1, X2, Y2: Integer): TSimbaImage; overload;
+    function Copy: TSimbaImage; overload;
 
     procedure Crop(X1, Y1, X2, Y2: Integer);
 
@@ -214,21 +215,21 @@ type
     procedure LoadFromString(AWidth, AHeight: Integer; Str: String);
     procedure LoadFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
     procedure LoadFromTBitmap(bmp: TBitmap);
-    procedure LoadFromBitmap(Bitmap: TMufasaBitmap);
+    procedure LoadFromImage(Image: TSimbaImage);
     procedure LoadFromRawImage(RawImage: TRawImage);
 
-    function Compare(Other: TMufasaBitmap): Single;
+    function Compare(Other: TSimbaImage): Single;
 
-    function PixelDifference(Other: TMufasaBitmap): Integer; overload;
-    function PixelDifference(Other: TMufasaBitmap; Tolerance: Integer): Integer; overload;
-    function PixelDifferenceTPA(Other: TMufasaBitmap): TPointArray; overload;
-    function PixelDifferenceTPA(Other: TMufasaBitmap; Tolerance: Integer): TPointArray; overload;
+    function PixelDifference(Other: TSimbaImage): Integer; overload;
+    function PixelDifference(Other: TSimbaImage; Tolerance: Integer): Integer; overload;
+    function PixelDifferenceTPA(Other: TSimbaImage): TPointArray; overload;
+    function PixelDifferenceTPA(Other: TSimbaImage; Tolerance: Integer): TPointArray; overload;
 
-    function MatchTemplate(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
-    function MatchTemplateMask(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
+    function MatchTemplate(Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix;
+    function MatchTemplateMask(Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix;
   end;
 
-  TMufasaBitmapArray = array of TMufasaBitmap;
+  TMufasaBitmapArray = array of TSimbaImage;
 
 type
   ESimbaBitmapException = class(Exception);
@@ -262,7 +263,7 @@ begin
     Result := DISTINCT_COLORS[Index mod Length(DISTINCT_COLORS)];
 end;
 
-function TMufasaBitmap.SaveToFile(FileName: String): Boolean;
+function TSimbaImage.SaveToFile(FileName: String): Boolean;
 var
   Image: TLazIntfImage;
   Stream: TFileStream;
@@ -301,7 +302,7 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.LoadFromFile(FileName: String);
+procedure TSimbaImage.LoadFromFile(FileName: String);
 var
   LazIntf: TLazIntfImage;
   RawImageDesc: TRawImageDescription;
@@ -318,7 +319,7 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.LoadFromFile(FileName: String; Area: TBox);
+procedure TSimbaImage.LoadFromFile(FileName: String; Area: TBox);
 begin
   if (not FileExists(FileName)) then
     raise ESimbaBitmapException.CreateFmt(sbeFileNotFound, [FileName]);
@@ -335,15 +336,15 @@ begin
   end;
 end;
 
-function TMufasaBitmap.Copy: TMufasaBitmap;
+function TSimbaImage.Copy: TSimbaImage;
 begin
-  Result := TMufasaBitmap.Create();
+  Result := TSimbaImage.Create();
   Result.SetSize(FWidth, FHeight);
 
   Move(FData^, Result.FData^, FWidth * FHeight * SizeOf(TColorBGRA));
 end;
 
-function TMufasaBitmap.Copy(X1, Y1, X2, Y2: Integer): TMufasaBitmap;
+function TSimbaImage.Copy(X1, Y1, X2, Y2: Integer): TSimbaImage;
 var
   Y: Integer;
 begin
@@ -352,13 +353,13 @@ begin
   if (not PointInBitmap(X1, Y1)) then
     raise ESimbaBitmapException.CreateFmt(sbeOutOfBounds, [X2, Y2, FWidth, FHeight]);
 
-  Result := TMufasaBitmap.Create();
+  Result := TSimbaImage.Create();
   Result.SetSize(X2-X1+1, Y2-Y1+1);
   for Y := Y1 to Y2 do
     Move(FData[Y * FWidth + X1], Result.FData[(Y-Y1) * Result.FWidth], Result.FWidth * SizeOf(TColorBGRA));
 end;
 
-procedure TMufasaBitmap.Crop(X1, Y1, X2, Y2: Integer);
+procedure TSimbaImage.Crop(X1, Y1, X2, Y2: Integer);
 var
   Y: Integer;
 begin
@@ -373,13 +374,13 @@ begin
   SetSize(X2-X1+1, Y2-Y1+1);
 end;
 
-function TMufasaBitmap.ToTBitmap: TBitmap;
+function TSimbaImage.ToTBitmap: TBitmap;
 begin
   Result := TBitmap.Create();
   Result.LoadFromRawImage(Self.ToRawImage(), False);
 end;
 
-function TMufasaBitmap.SaveToString: String;
+function TSimbaImage.SaveToString: String;
 type
   PRGB24 = ^TRGB24;
   TRGB24 = packed record
@@ -403,7 +404,7 @@ begin
   Result := 'm' + Base64Encode(CompressString(DataStr));
 end;
 
-function TMufasaBitmap.ToMatrixBGR: TIntegerMatrix;
+function TSimbaImage.ToMatrixBGR: TIntegerMatrix;
 var
   Y: Integer;
 begin
@@ -412,7 +413,7 @@ begin
     Move(FData[Y * FWidth], Result[Y, 0], FWidth * SizeOf(Integer));
 end;
 
-function TMufasaBitmap.ToMatrix: TIntegerMatrix;
+function TSimbaImage.ToMatrix: TIntegerMatrix;
 var
   X, Y, W, H: Integer;
 begin
@@ -426,7 +427,7 @@ begin
       Result[Y][X] := FData[Y * FWidth + X].ToColor();
 end;
 
-function TMufasaBitmap.ToMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix;
+function TSimbaImage.ToMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix;
 var
   X, Y: Integer;
 begin
@@ -442,7 +443,7 @@ begin
       Result[Y-Y1, X-X1] := FData[Y * FWidth + X].ToColor();
 end;
 
-function TMufasaBitmap.ToRawImage: TRawImage;
+function TSimbaImage.ToRawImage: TRawImage;
 begin
   Result.Init();
 
@@ -472,7 +473,7 @@ begin
   Result.Data := PByte(FData);
 end;
 
-procedure TMufasaBitmap.DrawMatrix(Matrix: TByteMatrix);
+procedure TSimbaImage.DrawMatrix(Matrix: TByteMatrix);
 var
   X, Y, W, H: Integer;
 begin
@@ -491,7 +492,7 @@ begin
       end;
 end;
 
-procedure TMufasaBitmap.DrawMatrix(Matrix: TIntegerMatrix);
+procedure TSimbaImage.DrawMatrix(Matrix: TIntegerMatrix);
 var
   X, Y, W, H: Integer;
 begin
@@ -505,7 +506,7 @@ begin
       FData[Y * FWidth + X] := ColorToBGRA(Matrix[Y, X]);
 end;
 
-procedure TMufasaBitmap.DrawMatrix(Matrix: TSingleMatrix; ColorMapID: Integer = 0); overload;
+procedure TSimbaImage.DrawMatrix(Matrix: TSingleMatrix; ColorMapID: Integer = 0); overload;
 var
   X,Y, W,H: TColor;
   Normed: TSingleMatrix;
@@ -557,7 +558,7 @@ begin
     end;
 end;
 
-function TMufasaBitmap.RowPtrs: PColorBGRAArray;
+function TSimbaImage.RowPtrs: PColorBGRAArray;
 var
   I: Integer;
 begin
@@ -566,7 +567,7 @@ begin
     Result[i] := FData + FWidth * i;
 end;
 
-procedure TMufasaBitmap.LoadFromString(AWidth, AHeight: Integer; Str: String);
+procedure TSimbaImage.LoadFromString(AWidth, AHeight: Integer; Str: String);
 type
   PRGB24 = ^TRGB24;
   TRGB24 = packed record
@@ -598,7 +599,7 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.LoadFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
+procedure TSimbaImage.LoadFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
 var
   Y: Integer;
 begin
@@ -614,7 +615,7 @@ begin
     Move(AData^, FData^, FWidth * FHeight * SizeOf(TColorBGRA));
 end;
 
-procedure TMufasaBitmap.LoadFromRawImage(RawImage: TRawImage);
+procedure TSimbaImage.LoadFromRawImage(RawImage: TRawImage);
 var
   x,y: Integer;
   _24_old_p: PByte;
@@ -625,21 +626,21 @@ begin
   Self.SetSize(0,0);
 
   if (RawImage.Description.BitsPerPixel <> 24) and (RawImage.Description.BitsPerPixel <> 32) then
-    raise Exception.CreateFmt('TMufasaBitmap.LoadFromRawImage - BitsPerPixel is %d', [RawImage.Description.BitsPerPixel]);
+    raise Exception.CreateFmt('TSimbaImage.LoadFromRawImage - BitsPerPixel is %d', [RawImage.Description.BitsPerPixel]);
 
   {writeln('Bits per pixel: ' + Inttostr(RawImage.Description.BitsPerPixel));   }
   if RawImage.Description.LineOrder <> riloTopToBottom then
-    raise Exception.Create('TMufasaBitmap.LoadFromRawImage - LineOrder is not riloTopToBottom');
+    raise Exception.Create('TSimbaImage.LoadFromRawImage - LineOrder is not riloTopToBottom');
 
  { writeln(format('LineOrder: theirs: %d, ours: %d', [RawImage.Description.LineOrder, riloTopToBottom]));  }
 
  { if RawImage.Description.LineEnd <> rileDWordBoundary then
-    raise Exception.Create('TMufasaBitmap.LoadFromRawImage - LineEnd is not rileDWordBoundary');         }
+    raise Exception.Create('TSimbaImage.LoadFromRawImage - LineEnd is not rileDWordBoundary');         }
 
   //writeln(format('LineEnd: t', [RawImage.Description.LineEnd]));
 
   if RawImage.Description.Format<>ricfRGBA then
-    raise Exception.Create('TMufasaBitmap.LoadFromRawImage - Format is not ricfRGBA');
+    raise Exception.Create('TSimbaImage.LoadFromRawImage - Format is not ricfRGBA');
 
   // Set w,h and alloc mem.
   Self.SetSize(RawImage.Description.Width, RawImage.Description.Height);
@@ -696,7 +697,7 @@ end;
 
 // TM_CCOEFF_NORMED
 // Author: slackydev
-function TMufasaBitmap.Compare(Other: TMufasaBitmap): Single;
+function TSimbaImage.Compare(Other: TSimbaImage): Single;
 var
   invSize, sigmaR, sigmaG, sigmaB, isum, tsum: Single;
   x, y, W, H: Integer;
@@ -780,7 +781,7 @@ begin
   Result := Result / Sqrt(isum * tsum);
 end;
 
-function TMufasaBitmap.PixelDifference(Other: TMufasaBitmap): Integer;
+function TSimbaImage.PixelDifference(Other: TSimbaImage): Integer;
 var
   I: Integer;
   Ptr, OtherPtr: PColorBGRA;
@@ -802,7 +803,7 @@ begin
   end;
 end;
 
-function TMufasaBitmap.PixelDifference(Other: TMufasaBitmap; Tolerance: Integer): Integer;
+function TSimbaImage.PixelDifference(Other: TSimbaImage; Tolerance: Integer): Integer;
 var
   I: Integer;
   Ptr, OtherPtr: PColorBGRA;
@@ -829,7 +830,7 @@ begin
   end;
 end;
 
-function TMufasaBitmap.PixelDifferenceTPA(Other: TMufasaBitmap): TPointArray;
+function TSimbaImage.PixelDifferenceTPA(Other: TSimbaImage): TPointArray;
 var
   X, Y, W, H: Integer;
   Index: Integer;
@@ -853,7 +854,7 @@ begin
   Result := Buffer.Trim();
 end;
 
-function TMufasaBitmap.PixelDifferenceTPA(Other: TMufasaBitmap; Tolerance: Integer): TPointArray;
+function TSimbaImage.PixelDifferenceTPA(Other: TSimbaImage; Tolerance: Integer): TPointArray;
 var
   X, Y, W, H: Integer;
   Index: Integer;
@@ -882,19 +883,19 @@ begin
   Result := Buffer.Trim();
 end;
 
-procedure TMufasaBitmap.LoadFromTBitmap(bmp: TBitmap);
+procedure TSimbaImage.LoadFromTBitmap(bmp: TBitmap);
 begin
   LoadFromRawImage(bmp.RawImage);
 end;
 
-procedure TMufasaBitmap.LoadFromBitmap(Bitmap: TMufasaBitmap);
+procedure TSimbaImage.LoadFromImage(Image: TSimbaImage);
 begin
-  SetSize(Bitmap.Width, Bitmap.Height);
+  SetSize(Image.Width, Image.Height);
 
-  Move(Bitmap.Data^, FData^, FWidth * FHeight * SizeOf(TColorBGRA));
+  Move(Image.FData^, FData^, FWidth * FHeight * SizeOf(TColorBGRA));
 end;
 
-procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray);
+procedure TSimbaImage.DrawATPA(ATPA: T2DPointArray);
 var
   I: Integer;
 begin
@@ -902,7 +903,7 @@ begin
     DrawTPA(ATPA[I], GetDistinctColor(-1, I));
 end;
 
-procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray; Color: TColor);
+procedure TSimbaImage.DrawATPA(ATPA: T2DPointArray; Color: TColor);
 var
   I: Integer;
 begin
@@ -910,7 +911,7 @@ begin
     DrawTPA(ATPA[I], Color);
 end;
 
-procedure TMufasaBitmap.DrawTPA(Points: TPointArray; Color: TColor);
+procedure TSimbaImage.DrawTPA(Points: TPointArray; Color: TColor);
 var
   I: Integer;
   P: TPoint;
@@ -929,7 +930,7 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor);
+procedure TSimbaImage.DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor);
 begin
   Size := Max(1, Size);
 
@@ -940,7 +941,7 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.DrawCross(ACenter: TPoint; Radius: Integer; Color: TColor);
+procedure TSimbaImage.DrawCross(ACenter: TPoint; Radius: Integer; Color: TColor);
 begin
   Radius := Max(1, Round(Radius/2*Sqrt(2)));
 
@@ -951,7 +952,7 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.DrawLine(Start, Stop: TPoint; Color: TColor);
+procedure TSimbaImage.DrawLine(Start, Stop: TPoint; Color: TColor);
 var
   BGR: TColorBGRA;
 
@@ -1000,12 +1001,12 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.DrawPolygon(Points: TPointArray; Color: TColor);
+procedure TSimbaImage.DrawPolygon(Points: TPointArray; Color: TColor);
 begin
   Self.DrawTPA(Points.Connect(), Color);
 end;
 
-procedure TMufasaBitmap.DrawPolygonFilled(Points: TPointArray; Color: TColor);
+procedure TSimbaImage.DrawPolygonFilled(Points: TPointArray; Color: TColor);
 var
   X, Y, Hi: Integer;
   Bounds: TBox;
@@ -1026,7 +1027,7 @@ begin
         FData[Y*FWidth+X] := RGB;
 end;
 
-procedure TMufasaBitmap.DrawPolygonInverted(Points: TPointArray; Color: TColor);
+procedure TSimbaImage.DrawPolygonInverted(Points: TPointArray; Color: TColor);
 var
   X, Y, Hi: Integer;
   Bounds: TBox;
@@ -1049,7 +1050,7 @@ begin
         FData[Y*FWidth+X] := RGB;
 end;
 
-procedure TMufasaBitmap.DrawCircle(ACenter: TPoint; Radius: Integer; Color: TColor);
+procedure TSimbaImage.DrawCircle(ACenter: TPoint; Radius: Integer; Color: TColor);
 begin
   if (Radius < 1) then
     Exit;
@@ -1057,7 +1058,7 @@ begin
   DrawTPA(TPointArray.CreateFromCircle(ACenter, Radius, False), Color);
 end;
 
-procedure TMufasaBitmap.DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor);
+procedure TSimbaImage.DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor);
 begin
   if (Radius < 1) then
     Exit;
@@ -1065,7 +1066,7 @@ begin
   DrawTPA(TPointArray.CreateFromCircle(ACenter, Radius, True), Color);
 end;
 
-procedure TMufasaBitmap.DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: TColor);
+procedure TSimbaImage.DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: TColor);
 var
   X, Y: Integer;
   Bounds: TBox;
@@ -1086,12 +1087,12 @@ begin
         FData[Y*FWidth+X] := RGB;
 end;
 
-procedure TMufasaBitmap.DrawBox(B: TBox; Color: TColor);
+procedure TSimbaImage.DrawBox(B: TBox; Color: TColor);
 begin
   Self.DrawTPA(TPointArray.CreateFromBox(B, False), Color);
 end;
 
-procedure TMufasaBitmap.DrawBoxFilled(B: TBox; Color: TColor);
+procedure TSimbaImage.DrawBoxFilled(B: TBox; Color: TColor);
 var
   Y, Size: Integer;
 begin
@@ -1106,7 +1107,7 @@ begin
     FillDWord(FData[Y * FWidth + B.X1], Size, Color);
 end;
 
-procedure TMufasaBitmap.DrawBoxInverted(B: TBox; Color: TColor);
+procedure TSimbaImage.DrawBoxInverted(B: TBox; Color: TColor);
 begin
   Self.DrawBoxFilled(Box(0,    0,    B.X1,     B.Y1),      Color); //Top Left
   Self.DrawBoxFilled(Box(0,    B.Y1, B.X1,     B.Y2),      Color); //Mid Left
@@ -1118,7 +1119,7 @@ begin
   Self.DrawBoxFilled(Box(B.X2, B.Y1, FWidth-1, FHeight-1), Color); //Btm Right
 end;
 
-procedure TMufasaBitmap.DrawQuad(Quad: TQuad; Color: TColor);
+procedure TSimbaImage.DrawQuad(Quad: TQuad; Color: TColor);
 begin
   DrawLine(Quad.Top, Quad.Right, Color);
   DrawLine(Quad.Right, Quad.Bottom, Color);
@@ -1126,7 +1127,7 @@ begin
   DrawLine(Quad.Left, Quad.Top, Color);
 end;
 
-procedure TMufasaBitmap.DrawQuadFilled(Quad: TQuad; Color: TColor);
+procedure TSimbaImage.DrawQuadFilled(Quad: TQuad; Color: TColor);
 var
   X, Y: Integer;
   Bounds: TBox;
@@ -1143,7 +1144,7 @@ begin
         FData[Y*FWidth+X] := RGB;
 end;
 
-procedure TMufasaBitmap.DrawQuadInverted(Quad: TQuad; Color: TColor);
+procedure TSimbaImage.DrawQuadInverted(Quad: TQuad; Color: TColor);
 var
   X, Y: Integer;
   Bounds: TBox;
@@ -1162,7 +1163,7 @@ begin
         FData[Y*FWidth+X] := RGB;
 end;
 
-procedure TMufasaBitmap.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; Color: TColor);
+procedure TSimbaImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; Color: TColor);
 var
   I: Integer;
 begin
@@ -1173,7 +1174,7 @@ begin
       DrawQuad(Quads[I], GetDistinctColor(Color, I));
 end;
 
-procedure TMufasaBitmap.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: TColor);
+procedure TSimbaImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: TColor);
 var
   I: Integer;
 begin
@@ -1184,7 +1185,7 @@ begin
       DrawBox(Boxes[I], GetDistinctColor(Color, I));
 end;
 
-procedure TMufasaBitmap.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: TColor);
+procedure TSimbaImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: TColor);
 var
   I: Integer;
 begin
@@ -1195,7 +1196,7 @@ begin
       DrawPolygon(Polygons[I], GetDistinctColor(Color, I));
 end;
 
-procedure TMufasaBitmap.DrawCircleArray(Points: TPointArray; Radius: Integer; Filled: Boolean; Color: TColor);
+procedure TSimbaImage.DrawCircleArray(Points: TPointArray; Radius: Integer; Filled: Boolean; Color: TColor);
 var
   I: Integer;
 begin
@@ -1206,7 +1207,7 @@ begin
       DrawCircle(Points[I], Radius, GetDistinctColor(Color, I));
 end;
 
-procedure TMufasaBitmap.DrawCrossArray(Points: TPointArray; Radius: Integer; Color: TColor);
+procedure TSimbaImage.DrawCrossArray(Points: TPointArray; Radius: Integer; Color: TColor);
 var
   I: Integer;
 begin
@@ -1214,7 +1215,7 @@ begin
     DrawCross(Points[I], Radius, GetDistinctColor(Color, I));
 end;
 
-procedure TMufasaBitmap.DrawHSLCircle(ACenter: TPoint; Radius: Integer);
+procedure TSimbaImage.DrawHSLCircle(ACenter: TPoint; Radius: Integer);
 var
   HSL: TColorHSL;
   X, Y: Integer;
@@ -1236,7 +1237,7 @@ begin
     end;
 end;
 
-procedure TMufasaBitmap.DrawToCanvas(x,y: Integer; Canvas: TCanvas);
+procedure TSimbaImage.DrawToCanvas(x,y: Integer; Canvas: TCanvas);
 var
   Bitmap: Graphics.TBitmap;
 begin
@@ -1245,51 +1246,56 @@ begin
   Bitmap.Free();
 end;
 
-procedure TMufasaBitmap.Fill(Color: TColor);
+procedure TSimbaImage.Fill(Color: TColor);
 begin
   FillDWord(FData[0], FWidth * FHeight, Color.ToBGRA().AsInteger);
 end;
 
-procedure TMufasaBitmap.Clear;
+procedure TSimbaImage.Clear;
 begin
   DrawBoxFilled(Box(0, 0, FWidth-1, FHeight-1), FTransparentColor);
 end;
 
-procedure TMufasaBitmap.Clear(Area: TBox);
+procedure TSimbaImage.Clear(Area: TBox);
 begin
   DrawBoxFilled(Area, FTransparentColor);
 end;
 
-procedure TMufasaBitmap.ClearInverted(Area: TBox);
+procedure TSimbaImage.ClearInverted(Area: TBox);
 begin
   DrawBoxInverted(Area, FTransparentColor);
 end;
 
-procedure TMufasaBitmap.DrawBitmap(Bitmap: TMufasaBitmap; Position: TPoint);
+procedure TSimbaImage.Draw(Image: TSimbaImage; X, Y: Integer);
 var
-  X, Y, W, H: Integer;
+  LoopX, LoopY, W, H: Integer;
   DestX, DestY: Integer;
   Color: TColorBGRA;
 begin
-  W := Bitmap.Width - 1;
-  H := Bitmap.Height - 1;
+  W := Image.Width - 1;
+  H := Image.Height - 1;
 
-  for X := 0 to W do
-    for Y := 0 to H do
+  for LoopY := 0 to H do
+    for LoopX := 0 to W do
     begin
-      DestX := X + Position.X;
-      DestY := Y + Position.Y;
+      DestX := LoopX + X;
+      DestY := LoopY + Y;
 
       if (DestX >= 0) and (DestY >= 0) and (DestX < FWidth) and (DestY < FHeight) then
       begin
-        Color := Bitmap.Data[Y * Bitmap.Width + X];
+        Color := Image.Data[LoopY * Image.Width + LoopX];
         if (not Self.TransparentColorActive) or (not Color.EqualsIgnoreAlpha(FTransparentRGB)) then
-          FData[DestY * FWidth + DestX] := Bitmap.Data[Y * Bitmap.Width + X];
+          FData[DestY * FWidth + DestX] := Image.FData[LoopY * Image.Width + LoopX];
       end;
     end;
 end;
 
-function TMufasaBitmap.GetColors: TColorArray;
+procedure TSimbaImage.Draw(Image: TSimbaImage; Position: TPoint);
+begin
+  Draw(Image, Position.X, Position.Y);
+end;
+
+function TSimbaImage.GetColors: TColorArray;
 var
   I: Integer;
 begin
@@ -1298,27 +1304,27 @@ begin
     Result[I] := FData[I].ToColor();
 end;
 
-function TMufasaBitmap.Equals(Other: TObject): Boolean;
+function TSimbaImage.Equals(Other: TObject): Boolean;
 begin
-  if (Other is TMufasaBitmap) then
-    Result := Equals(TMufasaBitmap(Other))
+  if (Other is TSimbaImage) then
+    Result := Equals(TSimbaImage(Other))
   else
     Result := inherited Equals(Other);
 end;
 
-function TMufasaBitmap.Equals(Other: TMufasaBitmap): Boolean;
+function TSimbaImage.Equals(Other: TSimbaImage): Boolean;
 begin
   Result := (FWidth  = Other.FWidth) and
             (FHeight = Other.FHeight) and
             (CompareMem(FData, Other.FData, FWidth * FHeight * SizeOf(TColorBGRA)));
 end;
 
-class function TMufasaBitmap.LoadFonts(Dir: String): Boolean;
+class function TSimbaImage.LoadFonts(Dir: String): Boolean;
 begin
   Result := SimbaFreeTypeFontLoader.LoadFonts(Dir);
 end;
 
-procedure TMufasaBitmap.ReplaceColor(OldColor, NewColor: TColor);
+procedure TSimbaImage.ReplaceColor(OldColor, NewColor: TColor);
 var
   I: Integer;
   OldRGB, NewRGB: TColorBGRA;
@@ -1331,7 +1337,7 @@ begin
       FData[I] := NewRGB;
 end;
 
-procedure TMufasaBitmap.ReplaceColors(OldColors, NewColors: TColorArray);
+procedure TSimbaImage.ReplaceColors(OldColors, NewColors: TColorArray);
 var
   I, J, H: Integer;
   OldRGBs, NewRGBs: TColorBGRAArray;
@@ -1373,7 +1379,7 @@ begin
   Result := B.Bounds();
 end;
 
-procedure TMufasaBitmap.Rotate(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap);
+procedure TSimbaImage.Rotate(Radians: Single; Expand: Boolean; TargetBitmap: TSimbaImage);
 var
   CosAngle, SinAngle: Single;
 
@@ -1437,7 +1443,7 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.RotateBilinear(Radians: Single; Expand: Boolean; TargetBitmap: TMufasaBitmap);
+procedure TSimbaImage.RotateBilinear(Radians: Single; Expand: Boolean; TargetBitmap: TSimbaImage);
 var
   CosAngle, SinAngle: Single;
 
@@ -1573,21 +1579,21 @@ begin
   end;
 end;
 
-function TMufasaBitmap.Rotate(Radians: Single; Expand: Boolean): TMufasaBitmap;
+function TSimbaImage.Rotate(Radians: Single; Expand: Boolean): TSimbaImage;
 begin
-  Result := TMufasaBitmap.Create();
+  Result := TSimbaImage.Create();
 
   Self.Rotate(Radians, Expand, Result);
 end;
 
-function TMufasaBitmap.RotateBilinear(Radians: Single; Expand: Boolean): TMufasaBitmap;
+function TSimbaImage.RotateBilinear(Radians: Single; Expand: Boolean): TSimbaImage;
 begin
-  Result := TMufasaBitmap.Create();
+  Result := TSimbaImage.Create();
 
   Self.RotateBilinear(Radians, Expand, Result);
 end;
 
-procedure TMufasaBitmap.GreyScale(TargetBitmap: TMufasaBitmap);
+procedure TSimbaImage.GreyScale(TargetBitmap: TSimbaImage);
 var
   I: Integer;
   Lum: byte;
@@ -1607,7 +1613,7 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.GreyScale;
+procedure TSimbaImage.GreyScale;
 var
   I: Integer;
   Lum: Byte;
@@ -1635,7 +1641,7 @@ begin
     temp := 255;
   Result := temp;
 end;
-procedure TMufasaBitmap.Brightness(br: Integer);
+procedure TSimbaImage.Brightness(br: Integer);
 var
   I: Integer;
   Ptr: PColorBGRA;
@@ -1650,7 +1656,7 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.Brightness(TargetBitmap: TMufasaBitmap; br: Integer);
+procedure TSimbaImage.Brightness(TargetBitmap: TSimbaImage; br: Integer);
 var
   I: Integer;
   PtrOld,PtrNew: PColorBGRA;
@@ -1668,7 +1674,7 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.Invert;
+procedure TSimbaImage.Invert;
 var
   i: Integer;
 begin
@@ -1680,7 +1686,7 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.Invert(TargetBitmap: TMufasaBitmap);
+procedure TSimbaImage.Invert(TargetBitmap: TSimbaImage);
 var
   I: Integer;
   PtrOld,PtrNew: PColorBGRA;
@@ -1698,7 +1704,7 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.Posterize(TargetBitmap: TMufasaBitmap; Po: Integer);
+procedure TSimbaImage.Posterize(TargetBitmap: TSimbaImage; Po: Integer);
 var
   I: Integer;
   PtrOld,PtrNew: PColorBGRA;
@@ -1719,7 +1725,7 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.Posterize(Po: Integer);
+procedure TSimbaImage.Posterize(Po: Integer);
 var
   I: Integer;
   Ptr: PColorBGRA;
@@ -1739,7 +1745,7 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.Blur(TargetBitmap: TMufasaBitmap; Block: Integer); overload;
+procedure TSimbaImage.Blur(TargetBitmap: TSimbaImage; Block: Integer); overload;
 var
   X, Y, W, H: Integer;
   Size: Integer;
@@ -1780,7 +1786,7 @@ begin
     end;
 end;
 
-procedure TMufasaBitmap.Blur(Block: Integer); overload;
+procedure TSimbaImage.Blur(Block: Integer); overload;
 var
   X, Y, W, H: Integer;
   Size: Integer;
@@ -1819,7 +1825,7 @@ begin
     end;
 end;
 
-procedure TMufasaBitmap.Convolute(TargetBitmap: TMufasaBitmap; Matrix: TDoubleMatrix);
+procedure TSimbaImage.Convolute(TargetBitmap: TSimbaImage; Matrix: TDoubleMatrix);
 var
   x,y,yy,xx,cx,cy: Integer;
   Row,RowT: PColorBGRAArray;
@@ -1865,7 +1871,7 @@ begin
     end;
 end;
 
-procedure TMufasaBitmap.Mirror(MirrorStyle: TBmpMirrorStyle);
+procedure TSimbaImage.Mirror(MirrorStyle: TBmpMirrorStyle);
 var
   NewWidth, NewHeight: Integer;
   NewData: PColorBGRA;
@@ -1902,13 +1908,13 @@ begin
   FHeight := NewHeight;
 end;
 
-procedure TMufasaBitmap.Mirror(TargetBitmap: TMufasaBitmap; MirrorStyle: TBmpMirrorStyle);
+procedure TSimbaImage.Mirror(TargetBitmap: TSimbaImage; MirrorStyle: TBmpMirrorStyle);
 begin
-  TargetBitmap.LoadFromBitmap(Self);
+  TargetBitmap.LoadFromImage(Self);
   TargetBitmap.Mirror(MirrorStyle);
 end;
 
-procedure TMufasaBitmap.Blend(Points: TPointArray; Radius: Integer);
+procedure TSimbaImage.Blend(Points: TPointArray; Radius: Integer);
 var
   P: TPoint;
   X, Y, Count: Integer;
@@ -1954,13 +1960,13 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.Blend(TargetBitmap: TMufasaBitmap; Points: TPointArray; Radius: Integer);
+procedure TSimbaImage.Blend(TargetBitmap: TSimbaImage; Points: TPointArray; Radius: Integer);
 begin
-  TargetBitmap.LoadFromBitmap(Self);
+  TargetBitmap.LoadFromImage(Self);
   TargetBitmap.Blend(Points, Radius);
 end;
 
-procedure TMufasaBitmap.Downsample(Scale: Integer);
+procedure TSimbaImage.Downsample(Scale: Integer);
 var
   Area: Double;
 
@@ -2041,99 +2047,99 @@ begin
   FHeight := NewHeight;
 end;
 
-procedure TMufasaBitmap.Downsample(TargetBitmap: TMufasaBitmap; Scale: Integer);
+procedure TSimbaImage.Downsample(TargetBitmap: TSimbaImage; Scale: Integer);
 begin
-  TargetBitmap.LoadFromBitmap(Self);
+  TargetBitmap.LoadFromImage(Self);
   TargetBitmap.Downsample(Scale);
 end;
 
-function TMufasaBitmap.GetCenter: TPoint;
+function TSimbaImage.GetCenter: TPoint;
 begin
   Result.X := FWidth div 2;
   Result.Y := FHeight div 2;
 end;
 
-function TMufasaBitmap.GetFontAntialiasing: Boolean;
+function TSimbaImage.GetFontAntialiasing: Boolean;
 begin
   Result := FTextDrawer.Antialiased;
 end;
 
-function TMufasaBitmap.GetFontName: String;
+function TSimbaImage.GetFontName: String;
 begin
   Result := FTextDrawer.FontName;
 end;
 
-class function TMufasaBitmap.FontNames: TStringArray;
+class function TSimbaImage.FontNames: TStringArray;
 begin
   Result := SimbaFreeTypeFontLoader.FontNames;
 end;
 
-function TMufasaBitmap.GetFontSize: Single;
+function TSimbaImage.GetFontSize: Single;
 begin
   Result := FTextDrawer.Size;
 end;
 
-function TMufasaBitmap.GetFontBold: Boolean;
+function TSimbaImage.GetFontBold: Boolean;
 begin
   Result := FTextDrawer.Bold;
 end;
 
-function TMufasaBitmap.GetFontItalic: Boolean;
+function TSimbaImage.GetFontItalic: Boolean;
 begin
   Result := FTextDrawer.Italic;
 end;
 
-procedure TMufasaBitmap.SetFontAntialiasing(Value: Boolean);
+procedure TSimbaImage.SetFontAntialiasing(Value: Boolean);
 begin
   FTextDrawer.Antialiased := Value;
 end;
 
-procedure TMufasaBitmap.SetFontName(Value: String);
+procedure TSimbaImage.SetFontName(Value: String);
 begin
   FTextDrawer.FontName := Value;
 end;
 
-procedure TMufasaBitmap.SetFontSize(Value: Single);
+procedure TSimbaImage.SetFontSize(Value: Single);
 begin
   FTextDrawer.Size := Value;
 end;
 
-procedure TMufasaBitmap.SetFontBold(Value: Boolean);
+procedure TSimbaImage.SetFontBold(Value: Boolean);
 begin
   FTextDrawer.Bold := Value;
 end;
 
-procedure TMufasaBitmap.SetFontItalic(Value: Boolean);
+procedure TSimbaImage.SetFontItalic(Value: Boolean);
 begin
   FTextDrawer.Italic := Value;
 end;
 
-function TMufasaBitmap.TextWidth(Text: String): Integer;
+function TSimbaImage.TextWidth(Text: String): Integer;
 begin
   Result := FTextDrawer.TextWidth(Text);
 end;
 
-function TMufasaBitmap.TextHeight(Text: String): Integer;
+function TSimbaImage.TextHeight(Text: String): Integer;
 begin
   Result := FTextDrawer.TextHeight(Text);
 end;
 
-function TMufasaBitmap.TextSize(Text: String): TPoint;
+function TSimbaImage.TextSize(Text: String): TPoint;
 begin
   Result := FTextDrawer.TextSize(Text);
 end;
 
-procedure TMufasaBitmap.DrawText(Text: String; Position: TPoint; Color: TColor);
+procedure TSimbaImage.DrawText(Text: String; Position: TPoint; Color: TColor);
 begin
   FTextDrawer.DrawText(Text, Position, Color);
 end;
 
-procedure TMufasaBitmap.DrawText(Text: String; Box: TBox; ACenter: Boolean; Color: TColor);
+procedure TSimbaImage.DrawText(Text: String; Box: TBox; ACenter: Boolean; Color: TColor);
 begin
   FTextDrawer.DrawText(Text, Box, ACenter, Color);
 end;
 
-procedure TMufasaBitmap.DrawTextLines(Text: TStringArray; Position: TPoint; Color: TColor);
+procedure TSimbaImage.DrawTextLines(Text: TStringArray; Position: TPoint; Color: TColor);
 var
   I, LineHeight: Integer;
 begin
@@ -2149,7 +2155,7 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.SetSize(NewWidth, NewHeight: Integer);
+procedure TSimbaImage.SetSize(NewWidth, NewHeight: Integer);
 var
   NewData: PColorBGRA;
   i,minw,minh: Integer;
@@ -2180,7 +2186,7 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.Resize(NewWidth, NewHeight: Integer);
+procedure TSimbaImage.Resize(NewWidth, NewHeight: Integer);
 var
   NewData: PColorBGRA;
   x,y: Integer;
@@ -2210,7 +2216,7 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.ResizeBilinear(NewWidth, NewHeight: Integer);
+procedure TSimbaImage.ResizeBilinear(NewWidth, NewHeight: Integer);
 var
   X,Y,OldX,OldY: Integer;
   p0,p1,p2,p3: TColorBGRA;
@@ -2277,7 +2283,7 @@ begin
   FHeight := NewHeight;
 end;
 
-function TMufasaBitmap.GetPixels(Points: TPointArray): TColorArray;
+function TSimbaImage.GetPixels(Points: TPointArray): TColorArray;
 var
   I: Integer;
 begin
@@ -2292,7 +2298,7 @@ begin
     end;
 end;
 
-procedure TMufasaBitmap.SetPixels(Points: TPointArray; Colors: TColorArray);
+procedure TSimbaImage.SetPixels(Points: TPointArray; Colors: TColorArray);
 var
   I: Integer;
 begin
@@ -2309,7 +2315,7 @@ begin
     end;
 end;
 
-procedure TMufasaBitmap.ThresholdAdaptive(Alpha, Beta: Byte; AInvert: Boolean; Method: TBmpThreshMethod; K: Integer);
+procedure TSimbaImage.ThresholdAdaptive(Alpha, Beta: Byte; AInvert: Boolean; Method: TBmpThreshMethod; K: Integer);
 var
   i,size: Integer;
   upper: PtrUInt;
@@ -2374,7 +2380,7 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.ThresholdSauvola(Window: Integer; AInvert: Boolean; K: Single);
+procedure TSimbaImage.ThresholdSauvola(Window: Integer; AInvert: Boolean; K: Single);
 var
   SumTable: TDoubleMatrix;
   SumTableSquared: TDoubleMatrix;
@@ -2484,7 +2490,7 @@ begin
     end;
 end;
 
-procedure TMufasaBitmap.Pad(Amount: Integer);
+procedure TSimbaImage.Pad(Amount: Integer);
 var
   OldWidth, OldHeight: Integer;
   Y: Integer;
@@ -2506,7 +2512,7 @@ begin
   end;
 end;
 
-function TMufasaBitmap.ToGreyMatrix: TByteMatrix;
+function TSimbaImage.ToGreyMatrix: TByteMatrix;
 var
   X, Y: Integer;
 begin
@@ -2518,7 +2524,7 @@ begin
         Result[Y, X] := Round(R * 0.3 + G * 0.59 + B * 0.11);
 end;
 
-procedure TMufasaBitmap.SetPersistentMemory(mem: PtrUInt; NewWidth, NewHeight: Integer);
+procedure TSimbaImage.SetPersistentMemory(mem: PtrUInt; NewWidth, NewHeight: Integer);
 begin
   SetSize(0, 0);
 
@@ -2528,7 +2534,7 @@ begin
   FDataOwner := False;
 end;
 
-procedure TMufasaBitmap.ResetPersistentMemory;
+procedure TSimbaImage.ResetPersistentMemory;
 begin
   if (not FDataOwner) then
   begin
@@ -2539,20 +2545,20 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.NotifyUnfreed;
+procedure TSimbaImage.NotifyUnfreed;
 begin
   inherited NotifyUnfreed();
 
-  if (DebugUnfreedBitmaps <> '') then
+  if (SaveUnfreedDir <> '') then
   try
-    SaveToFile(IncludeTrailingPathDelimiter(SetDirSeparators(DebugUnfreedBitmaps)) + IntToStr(PtrUInt(Self)) + '.bmp');
+    SaveToFile(IncludeTrailingPathDelimiter(SetDirSeparators(SaveUnfreedDir)) + IntToStr(PtrUInt(Self)) + '.bmp');
   except
     on E: Exception do
       DebugLn(E.ToString);
   end;
 end;
 
-function TMufasaBitmap.GetPixel(X, Y: Integer): TColor;
+function TSimbaImage.GetPixel(X, Y: Integer): TColor;
 begin
   if not PointInBitmap(X, Y) then
     raise ESimbaBitmapException.CreateFmt(sbeOutOfBounds, [X, Y, FWidth, FHeight]);
@@ -2560,7 +2566,7 @@ begin
   Result := FData[Y * FWidth + X].ToColor();
 end;
 
-procedure TMufasaBitmap.SetPixel(X, Y: Integer; Color: TColor);
+procedure TSimbaImage.SetPixel(X, Y: Integer; Color: TColor);
 begin
   if not PointInBitmap(X, Y) then
     raise ESimbaBitmapException.CreateFmt(sbeOutOfBounds, [X, Y, FWidth, FHeight]);
@@ -2568,33 +2574,33 @@ begin
   FData[Y * FWidth + X] := Color.ToBGRA();
 end;
 
-procedure TMufasaBitmap.SetTransparentColor(Value: TColor);
+procedure TSimbaImage.SetTransparentColor(Value: TColor);
 begin
   FTransparentColor := Value;
   FTransparentRGB := Value.ToBGRA();
 end;
 
-function TMufasaBitmap.PointInBitmap(const P: TPoint): Boolean;
+function TSimbaImage.PointInBitmap(const P: TPoint): Boolean;
 begin
   Result := (P.X >= 0) and (P.Y >= 0) and (P.X < FWidth) and (P.Y < FHeight);
 end;
 
-function TMufasaBitmap.PointInBitmap(const X, Y: Integer): Boolean;
+function TSimbaImage.PointInBitmap(const X, Y: Integer): Boolean;
 begin
   Result := (X >= 0) and (Y >= 0) and (X < FWidth) and (Y < FHeight);
 end;
 
-function TMufasaBitmap.MatchTemplate(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
+function TSimbaImage.MatchTemplate(Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix;
 begin
   Result := simba.matchtemplate.MatchTemplate(Self.ToMatrixBGR(), Template.ToMatrixBGR(), Formula);
 end;
 
-function TMufasaBitmap.MatchTemplateMask(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;
+function TSimbaImage.MatchTemplateMask(Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix;
 begin
   Result := simba.matchtemplate.MatchTemplateMask(Self.ToMatrixBGR(), Template.ToMatrixBGR(), Formula);
 end;
 
-constructor TMufasaBitmap.Create;
+constructor TSimbaImage.Create;
 begin
   inherited Create();
 
@@ -2605,35 +2611,35 @@ begin
   TransparentColor := 0;
 end;
 
-constructor TMufasaBitmap.Create(AWidth, AHeight: Integer);
+constructor TSimbaImage.Create(AWidth, AHeight: Integer);
 begin
   Create();
 
   SetSize(AWidth, AHeight);
 end;
 
-constructor TMufasaBitmap.CreateFromFile(FileName: String);
+constructor TSimbaImage.CreateFromFile(FileName: String);
 begin
   Create();
 
   LoadFromFile(FileName);
 end;
 
-constructor TMufasaBitmap.CreateFromString(AWidth, AHeight: Integer; Str: String);
+constructor TSimbaImage.CreateFromString(AWidth, AHeight: Integer; Str: String);
 begin
   Create();
 
   LoadFromString(AWidth, AHeight, Str);
 end;
 
-constructor TMufasaBitmap.CreateFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
+constructor TSimbaImage.CreateFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
 begin
   Create();
 
   LoadFromData(AWidth, AHeight, AData, ADataWidth);
 end;
 
-constructor TMufasaBitmap.CreateFromWindow(Window: TWindowHandle);
+constructor TSimbaImage.CreateFromWindow(Window: TWindowHandle);
 var
   B: TBox;
   ImageData: PColorBGRA = nil;
@@ -2649,7 +2655,7 @@ begin
   end;
 end;
 
-destructor TMufasaBitmap.Destroy;
+destructor TSimbaImage.Destroy;
 begin
   if FDataOwner then
     SetSize(0, 0);

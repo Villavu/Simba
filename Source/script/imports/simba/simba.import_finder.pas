@@ -19,7 +19,7 @@ implementation
 uses
   lptypes, lpvartypes,
   simba.script_compiler, simba.mufasatypes, simba.finder, simba.bitmap, simba.dtm,
-  simba.colormath, simba.colormath_distance, simba.bitmap_finders, simba.target,
+  simba.colormath, simba.colormath_distance, simba.target,
   simba.finder_color, simba.finder_bitmap;
 
 (*
@@ -100,41 +100,41 @@ end;
 (*
 TSimbaFinder.FindImageEx
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.FindImageEx(Bitmap: TMufasaBitmap; Tolerance: Single; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+function TSimbaFinder.FindImageEx(Bitmap: TSimbaImage; Tolerance: Single; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
 *)
 procedure _LapeSimbaFinder_FindImageEx1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.FindImageEx(PMufasaBitmap(Params^[1])^, PSingle(Params^[2])^, PInteger(Params^[3])^, PBox(Params^[4])^);
+  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.FindImageEx(PSimbaImage(Params^[1])^, PSingle(Params^[2])^, PInteger(Params^[3])^, PBox(Params^[4])^);
 end;
 
 (*
 TSimbaFinder.FindImageEx
 ~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.FindImageEx(Bitmap: TMufasaBitmap; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+function TSimbaFinder.FindImageEx(Bitmap: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
 *)
 procedure _LapeSimbaFinder_FindImageEx2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.FindImageEx(PMufasaBitmap(Params^[1])^, PSingle(Params^[2])^, PColorSpace(Params^[3])^, PChannelMultipliers(Params^[4])^, PInteger(Params^[5])^, PBox(Params^[6])^);
+  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.FindImageEx(PSimbaImage(Params^[1])^, PSingle(Params^[2])^, PColorSpace(Params^[3])^, PChannelMultipliers(Params^[4])^, PInteger(Params^[5])^, PBox(Params^[6])^);
 end;
 
 (*
 TSimbaFinder.FindImage
 ~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.FindImage(Bitmap: TMufasaBitmap; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
+function TSimbaFinder.FindImage(Bitmap: TSimbaImage; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
 *)
 procedure _LapeSimbaFinder_FindImage1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPoint(Result)^ := PSimbaFinder(Params^[0])^.FindImage(PMufasaBitmap(Params^[1])^, PSingle(Params^[2])^, PBox(Params^[3])^);
+  PPoint(Result)^ := PSimbaFinder(Params^[0])^.FindImage(PSimbaImage(Params^[1])^, PSingle(Params^[2])^, PBox(Params^[3])^);
 end;
 
 (*
 TSimbaFinder.FindImage
 ~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.FindImage(Bitmap: TMufasaBitmap; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
+function TSimbaFinder.FindImage(Bitmap: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
 *)
 procedure _LapeSimbaFinder_FindImage2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPoint(Result)^ := PSimbaFinder(Params^[0])^.FindImage(PMufasaBitmap(Params^[1])^, PSingle(Params^[2])^, PColorSpace(Params^[3])^, PChannelMultipliers(Params^[4])^, PBox(Params^[5])^);
+  PPoint(Result)^ := PSimbaFinder(Params^[0])^.FindImage(PSimbaImage(Params^[1])^, PSingle(Params^[2])^, PColorSpace(Params^[3])^, PChannelMultipliers(Params^[4])^, PBox(Params^[5])^);
 end;
 
 (*
@@ -310,16 +310,11 @@ end;
 (*
 TSimbaFinder.FindTemplate
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.FindTemplate(Bitmap: TMufasaBitmap; MinMatch: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
+function TSimbaFinder.FindTemplate(Bitmap: TSimbaImage; MinMatch: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
 *)
 procedure _LapeSimbaFinder_FindTemplate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPoint(Result)^ := PSimbaFinder(Params^[0])^.FindTemplate(PMufasaBitmap(Params^[1])^, PSingle(Params^[2])^, PBox(Params^[3])^);
-end;
-
-procedure _LapeMufasaBitmap_Finder(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaFinder(Result)^ := PMufasaBitmap(Params^[0])^.Finder;
+  PPoint(Result)^ := PSimbaFinder(Params^[0])^.FindTemplate(PSimbaImage(Params^[1])^, PSingle(Params^[2])^, PBox(Params^[3])^);
 end;
 
 procedure ImportFinder(Compiler: TSimbaScript_Compiler);
@@ -400,12 +395,12 @@ begin
     addInputMethod('function TSimbaFinder.FindDTM(DTM: TDTM; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeSimbaFinder_FindDTM);
     addInputMethod('function TSimbaFinder.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeSimbaFinder_FindDTMRotated);
 
-    addInputMethod('function TSimbaFinder.FindImageEx(Bitmap: TMufasaBitmap; Tolerance: Single; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindImageEx1);
-    addInputMethod('function TSimbaFinder.FindImageEx(Bitmap: TMufasaBitmap; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindImageEx2);
-    addInputMethod('function TSimbaFinder.FindImage(Bitmap: TMufasaBitmap; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeSimbaFinder_FindImage1);
-    addInputMethod('function TSimbaFinder.FindImage(Bitmap: TMufasaBitmap; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeSimbaFinder_FindImage2);
+    addInputMethod('function TSimbaFinder.FindImageEx(Bitmap: TSimbaImage; Tolerance: Single; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindImageEx1);
+    addInputMethod('function TSimbaFinder.FindImageEx(Bitmap: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindImageEx2);
+    addInputMethod('function TSimbaFinder.FindImage(Bitmap: TSimbaImage; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeSimbaFinder_FindImage1);
+    addInputMethod('function TSimbaFinder.FindImage(Bitmap: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeSimbaFinder_FindImage2);
 
-    addInputMethod('function TSimbaFinder.FindTemplate(Bitmap: TMufasaBitmap; MinMatch: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeSimbaFinder_FindTemplate);
+    addInputMethod('function TSimbaFinder.FindTemplate(Bitmap: TSimbaImage; MinMatch: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeSimbaFinder_FindTemplate);
 
     addInputMethod('function TSimbaFinder.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TSingleMatrix', @_LapeSimbaFinder_MatchColor);
 
@@ -430,9 +425,15 @@ begin
     addInputMethod('function TSimbaFinder.AverageBrightness(Area: TBox = [-1,-1,-1,-1]): Integer', @_LapeSimbaFinder_AverageBrightness);
     addInputMethod('function TSimbaFinder.PeakBrightness(Area: TBox = [-1,-1,-1,-1]): Integer', @_LapeSimbaFinder_PeakBrightness);
 
-    ImportingSection := 'TMufasaBitmap';
+    ImportingSection := 'TSimbaImage';
 
-    addGlobalFunc('function TMufasaBitmap.Finder: TSimbaFinder', @_LapeMufasaBitmap_Finder);
+    addGlobalFunc(
+      'function TSimbaImage.Finder: TSimbaFinder;', [
+      'begin',
+      '  Result.Target.SetImage(Self);',
+      'end;'
+      ]
+    );
 
     ImportingSection := '';
   end;

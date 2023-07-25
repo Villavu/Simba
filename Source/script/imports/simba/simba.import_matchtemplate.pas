@@ -22,7 +22,7 @@ end;
 
 procedure _LapeMatchTemplateCache_CreateEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMatchTemplateCacheBase(Result)^ := MatchTemplateCache(PMufasaBitmap(Params^[0])^.ToMatrixBGR(), PMufasaBitmap(Params^[1])^.ToMatrixBGR(), PTMFormula(Params^[2])^);
+  PMatchTemplateCacheBase(Result)^ := MatchTemplateCache(PSimbaImage(Params^[0])^.ToMatrixBGR(), PSimbaImage(Params^[1])^.ToMatrixBGR(), PTMFormula(Params^[2])^);
 end;
 
 procedure _LapeMatchTemplateCache_FreeOnTerminate(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -37,7 +37,7 @@ end;
 
 procedure _LapeMatchTemplateMaskCacheEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSingleMatrix(Result)^ := MatchTemplateMask(PMatchTemplateCacheBase(Params^[0])^, PMufasaBitmap(Params^[1])^.ToMatrixBGR(), PTMFormula(Params^[2])^);
+  PSingleMatrix(Result)^ := MatchTemplateMask(PMatchTemplateCacheBase(Params^[0])^, PSimbaImage(Params^[1])^.ToMatrixBGR(), PTMFormula(Params^[2])^);
 end;
 
 procedure _LapeMatchTemplateMask(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -52,12 +52,12 @@ end;
 
 procedure _LapeMufasaBitmap_MatchTemplate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSingleMatrix(Result)^ := PMufasaBitmap(Params^[0])^.MatchTemplate(PMufasaBitmap(Params^[1])^, PTMFormula(Params^[2])^);
+  PSingleMatrix(Result)^ := PSimbaImage(Params^[0])^.MatchTemplate(PSimbaImage(Params^[1])^, PTMFormula(Params^[2])^);
 end;
 
 procedure _LapeMufasaBitmap_MatchTemplateMask(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSingleMatrix(Result)^ := PMufasaBitmap(Params^[0])^.MatchTemplateMask(PMufasaBitmap(Params^[1])^, PTMFormula(Params^[2])^);
+  PSingleMatrix(Result)^ := PSimbaImage(Params^[0])^.MatchTemplateMask(PSimbaImage(Params^[1])^, PTMFormula(Params^[2])^);
 end;
 
 procedure ImportMatchTemplate(Compiler: TSimbaScript_Compiler);
@@ -74,17 +74,17 @@ begin
     addGlobalType('(TM_CCORR, TM_CCORR_NORMED, TM_CCOEFF, TM_CCOEFF_NORMED, TM_SQDIFF, TM_SQDIFF_NORMED)', 'ETMFormula');
 
     addGlobalFunc('function TMatchTemplateCache.Create(Image, Template: TIntegerMatrix; Formula: ETMFormula): TMatchTemplateCache; static; overload', @_LapeMatchTemplateCache_Create);
-    addGlobalFunc('function TMatchTemplateCache.Create(Image, Template: TMufasaBitmap; Formula: ETMFormula): TMatchTemplateCache; static; overload', @_LapeMatchTemplateCache_CreateEx);
+    addGlobalFunc('function TMatchTemplateCache.Create(Image, Template: TSimbaImage; Formula: ETMFormula): TMatchTemplateCache; static; overload', @_LapeMatchTemplateCache_CreateEx);
     addGlobalFunc('procedure TMatchTemplateCache.FreeOnTerminate(Enable: Boolean);', @_LapeMatchTemplateCache_FreeOnTerminate);
 
     addGlobalFunc('function MatchTemplateMask(Cache: TMatchTemplateCache; Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix; overload', @_LapeMatchTemplateMaskCache);
-    addGlobalFunc('function MatchTemplateMask(Cache: TMatchTemplateCache; Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix; overload', @_LapeMatchTemplateMaskCacheEx);
+    addGlobalFunc('function MatchTemplateMask(Cache: TMatchTemplateCache; Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix; overload', @_LapeMatchTemplateMaskCacheEx);
     addGlobalFunc('function MatchTemplateMask(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix; overload', @_LapeMatchTemplateMask);
 
     addGlobalFunc('function MatchTemplate(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix', @_LapeMatchTemplate);
 
-    addGlobalFunc('function TMufasaBitmap.MatchTemplate(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;', @_LapeMufasaBitmap_MatchTemplate);
-    addGlobalFunc('function TMufasaBitmap.MatchTemplateMask(Template: TMufasaBitmap; Formula: ETMFormula): TSingleMatrix;', @_LapeMufasaBitmap_MatchTemplateMask);
+    addGlobalFunc('function TSimbaImage.MatchTemplate(Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix;', @_LapeMufasaBitmap_MatchTemplate);
+    addGlobalFunc('function TSimbaImage.MatchTemplateMask(Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix;', @_LapeMufasaBitmap_MatchTemplateMask);
 
     ImportingSection := '';
   end;

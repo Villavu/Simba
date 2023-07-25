@@ -7,8 +7,6 @@ unit simba.target;
 
 {$i simba.inc}
 
-// todo, autoactivate & addhandleroninvalidtarget
-
 interface
 
 uses
@@ -19,7 +17,7 @@ uses
 type
   {$PUSH}
   {$SCOPEDENUMS ON}
-  ETargetType = (NONE, BITMAP, WINDOW, EIOS);
+  ETargetType = (NONE, IMAGE, WINDOW, EIOS);
   ETargetTypes = set of ETargetType;
   {$POP}
 
@@ -45,7 +43,7 @@ type
   end;
 
 const
-  TargetName: array[ETargetType] of String = ('NONE', 'BITMAP', 'WINDOW', 'EIOS');
+  TargetName: array[ETargetType] of String = ('NONE', 'IMAGE', 'WINDOW', 'EIOS');
 
 type
   PSimbaTarget = ^TSimbaTarget;
@@ -57,7 +55,7 @@ type
   private
     FTargetType: ETargetType;
     FTarget: Pointer;
-    FTargetBitmap: TMufasaBitmap;
+    FTargetImage: TSimbaImage;
     FTargetWindow: TWindowHandle;
     FTargetEIOS: TEIOSTarget;
     FMethods: TTargetMethods; // Targets need to provide these. They are filled in SetWindow,SetEIOS etc.
@@ -78,8 +76,8 @@ type
     function GetWindowTarget: TWindowHandle;
     function IsWindowTarget: Boolean; overload;
     function IsWindowTarget(out Window: TWindowHandle): Boolean; overload;
-    function IsBitmapTarget: Boolean; overload;
-    function IsBitmapTarget(out Bitmap: TMufasaBitmap): Boolean; overload;
+    function IsImageTarget: Boolean; overload;
+    function IsImageTarget(out Image: TSimbaImage): Boolean; overload;
     function IsEIOSTarget: Boolean;
 
     function IsValid: Boolean;
@@ -90,11 +88,11 @@ type
     function GetWidth: Integer;
     function GetHeight: Integer;
 
-    function GetImage(Bounds: TBox): TMufasaBitmap;
+    function GetImage(Bounds: TBox): TSimbaImage;
 
     procedure SetDesktop;
     procedure SetWindow(Window: TWindowHandle);
-    procedure SetBitmap(Bitmap: TMufasaBitmap);
+    procedure SetImage(Image: TSimbaImage);
     procedure SetEIOS(FileName, Args: String);
 
     function MousePressed(Button: MouseButton): Boolean;
@@ -225,16 +223,16 @@ begin
     Window := FTargetWindow;
 end;
 
-function TSimbaTarget.IsBitmapTarget: Boolean;
+function TSimbaTarget.IsImageTarget: Boolean;
 begin
-  Result := FTargetType = ETargetType.BITMAP;
+  Result := FTargetType = ETargetType.IMAGE;
 end;
 
-function TSimbaTarget.IsBitmapTarget(out Bitmap: TMufasaBitmap): Boolean;
+function TSimbaTarget.IsImageTarget(out Image: TSimbaImage): Boolean;
 begin
-  Result := FTargetType = ETargetType.BITMAP;
+  Result := FTargetType = ETargetType.IMAGE;
   if Result then
-    Bitmap := FTargetBitmap;
+    Image := FTargetImage;
 end;
 
 function TSimbaTarget.IsEIOSTarget: Boolean;
@@ -282,15 +280,15 @@ begin
   GetDimensions(_, Result);
 end;
 
-function TSimbaTarget.GetImage(Bounds: TBox): TMufasaBitmap;
+function TSimbaTarget.GetImage(Bounds: TBox): TSimbaImage;
 var
   Data: PColorBGRA;
   DataWidth: Integer;
 begin
   if GetImageData(Bounds, Data, DataWidth) then
-    Result := TMufasaBitmap.CreateFromData(Bounds.Width, Bounds.Height, Data, DataWidth)
+    Result := TSimbaImage.CreateFromData(Bounds.Width, Bounds.Height, Data, DataWidth)
   else
-    Result := TMufasaBitmap.Create();
+    Result := TSimbaImage.Create();
 end;
 
 procedure TSimbaTarget.SetDesktop;
@@ -325,16 +323,16 @@ begin
   FMethods.GetImageData := @WindowTarget_GetImageData;
 end;
 
-procedure TSimbaTarget.SetBitmap(Bitmap: TMufasaBitmap);
+procedure TSimbaTarget.SetImage(Image: TSimbaImage);
 begin
-  ChangeTarget(ETargetType.BITMAP);
+  ChangeTarget(ETargetType.IMAGE);
 
-  FTargetBitmap := Bitmap;
-  FTarget := FTargetBitmap;
+  FTargetImage := Image;
+  FTarget := FTargetImage;
 
-  FMethods.GetDimensions := @BitmapTarget_GetDimensions;
-  FMethods.GetImageData := @BitmapTarget_GetImageData;
-  FMethods.IsValid := @BitmapTarget_IsValid;
+  FMethods.GetDimensions := @ImageTarget_GetDimensions;
+  FMethods.GetImageData := @ImageTarget_GetImageData;
+  FMethods.IsValid := @ImageTarget_IsValid;
 end;
 
 procedure TSimbaTarget.SetEIOS(FileName, Args: String);
@@ -531,8 +529,8 @@ begin
   Result := 'ETargetType.' + TargetName[FTargetType];
 
   case FTargetType of
-    ETargetType.BITMAP:
-      Result := 'ETargetType.BITMAP: TMufasaBitmap(%P), Size=%dx%d'.Format([Pointer(FTargetBitmap), FTargetBitmap.Width, FTargetBitmap.Height]);
+    ETargetType.IMAGE:
+      Result := 'ETargetType.IMAGE: TSimbaImage(%P), Size=%dx%d'.Format([Pointer(FTargetImage), FTargetImage.Width, FTargetImage.Height]);
     ETargetType.WINDOW:
       Result := 'ETargetType.WINDOW: Handle=%d, Valid: %s'.Format([FTargetWindow, BoolToStr(IsValid(), True)]);
     ETargetType.EIOS:

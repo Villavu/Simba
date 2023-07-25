@@ -104,27 +104,27 @@ procedure ShowOnClient(ATPA: T2DPointArray; Color: Integer = $0000FF);
 (*
 Show
 ~~~~
-procedure Show(Bitmap: TMufasaBitmap; EnsureVisible: Boolean = True);
+procedure Show(Bitmap: TSimbaImage; EnsureVisible: Boolean = True);
 *)
 procedure _LapeShowBitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('ShowBitmap requires Simba communication');
 
-  SimbaScriptThread.Script.SimbaCommunication.DebugImage_Show(PMufasaBitmap(Params^[0])^, PBoolean(Params^[1])^);
+  SimbaScriptThread.Script.SimbaCommunication.DebugImage_Show(PSimbaImage(Params^[0])^, PBoolean(Params^[1])^);
 end;
 
 (*
 UpdateDebugImage
 ~~~~~~~~~~~~~~~~
-procedure UpdateDebugImage(Bitmap: TMufasaBitmap);
+procedure UpdateDebugImage(Bitmap: TSimbaImage);
 *)
 procedure _LapeUpdateDebugImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   if (SimbaScriptThread.Script.SimbaCommunication = nil) then
     raise Exception.Create('DrawBitmapDebugImg requires Simba communication');
 
-  SimbaScriptThread.Script.SimbaCommunication.DebugImage_Update(PMufasaBitmap(Params^[0])^);
+  SimbaScriptThread.Script.SimbaCommunication.DebugImage_Update(PSimbaImage(Params^[0])^);
 end;
 
 (*
@@ -189,13 +189,13 @@ begin
     addGlobalFunc('procedure ShowDebugImage(Width, Height: Integer); overload;', @_LapeShowDebugImage1);
     addGlobalFunc('procedure ShowDebugImage(X, Y, Width, Height: Integer); overload;', @_LapeShowDebugImage2);
     addGlobalFunc('procedure HideDebugImage;', @_LapeHideDebugImage);
-    addGlobalFunc('procedure UpdateDebugImage(Bitmap: TMufasaBitmap);', @_LapeUpdateDebugImage);
-    addGlobalFunc('procedure Show(Bitmap: TMufasaBitmap; EnsureVisible: Boolean = True);', @_LapeShowBitmap);
+    addGlobalFunc('procedure UpdateDebugImage(Bitmap: TSimbaImage);', @_LapeUpdateDebugImage);
+    addGlobalFunc('procedure Show(Bitmap: TSimbaImage; EnsureVisible: Boolean = True);', @_LapeShowBitmap);
 
-    ImportingSection := 'TMufasaBitmap';
+    ImportingSection := 'TSimbaImage';
 
     addGlobalFunc(
-      'procedure TMufasaBitmap.Show(EnsureVisible: Boolean = True);', [
+      'procedure TSimbaImage.Show(EnsureVisible: Boolean = True);', [
       'begin',
       '  Show(Self, EnsureVisible);',
       'end;'
@@ -206,7 +206,7 @@ begin
     addGlobalFunc(
       'procedure Show(Matrix: TIntegerMatrix); overload;', [
       'begin',
-      '  with TMufasaBitmap.Create(Matrix.Width(), Matrix.Height()) do',
+      '  with TSimbaImage.Create(Matrix.Width(), Matrix.Height()) do',
       '  try',
       '    DrawMatrix(Matrix);',
       '    Show();',
@@ -219,7 +219,7 @@ begin
     addGlobalFunc(
       'procedure Show(Matrix: TSingleMatrix; ColorMapID: Integer = 0); overload;', [
       'begin',
-      '  with TMufasaBitmap.Create(Matrix.Width(), Matrix.Height()) do',
+      '  with TSimbaImage.Create(Matrix.Width(), Matrix.Height()) do',
       '  try',
       '    DrawMatrix(Matrix, ColorMapID);',
       '    Show();',
@@ -233,7 +233,7 @@ begin
       'procedure Show(Boxes: TBoxArray; Filled: Boolean = False); overload;', [
       'begin',
       '  with Boxes.Merge() do',
-      '    with TMufasaBitmap.Create(X1+X2+1, Y1+Y2+1) do',
+      '    with TSimbaImage.Create(X1+X2+1, Y1+Y2+1) do',
       '    try',
       '      DrawBoxArray(Boxes, Filled);',
       '      Show();',
@@ -254,7 +254,7 @@ begin
       'procedure Show(TPA: TPointArray; Color: Integer = $0000FF); overload;', [
       'begin',
       '  with TPA.Bounds() do',
-      '    with TMufasaBitmap.Create(X1+X2+1, Y1+Y2+1) do',
+      '    with TSimbaImage.Create(X1+X2+1, Y1+Y2+1) do',
       '    try',
       '      DrawTPA(TPA, Color);',
       '      Show();',
@@ -268,7 +268,7 @@ begin
       'procedure Show(ATPA: T2DPointArray; Color: Integer = $0000FF); overload;', [
       'begin',
       '  with ATPA.Bounds() do',
-      '    with TMufasaBitmap.Create(X1+X2+1, Y1+Y2+1) do',
+      '    with TSimbaImage.Create(X1+X2+1, Y1+Y2+1) do',
       '    try',
       '      DrawATPA(ATPA);',
       '      Show();',
@@ -288,7 +288,7 @@ begin
       '    Boxes += Quad.Bounds();',
       '',
       '  with Boxes.Merge() do',
-      '    with TMufasaBitmap.Create(X1+X2+1, Y1+Y2+1) do',
+      '    with TSimbaImage.Create(X1+X2+1, Y1+Y2+1) do',
       '    try',
       '      DrawQuadArray(Quads, Filled);',
       '      Show();',
@@ -308,7 +308,7 @@ begin
     addGlobalFunc(
       'procedure ShowOnClient(Quads: TQuadArray; Filled: Boolean = False); overload;', [
       'begin',
-      '  with TMufasaBitmap.CreateFromTarget() do',
+      '  with TSimbaImage.CreateFromTarget() do',
       '  try',
       '    DrawQuadArray(Quads, Filled);',
       '    Show();',
@@ -328,7 +328,7 @@ begin
     addGlobalFunc(
       'procedure ShowOnClient(Boxes: TBoxArray; Filled: Boolean = False); overload;', [
       'begin',
-      '  with TMufasaBitmap.CreateFromTarget() do',
+      '  with TSimbaImage.CreateFromTarget() do',
       '  try',
       '    DrawBoxArray(Boxes, Filled);',
       '    Show();',
@@ -348,7 +348,7 @@ begin
     addGlobalFunc(
       'procedure ShowOnClient(TPA: TPointArray; Color: Integer = $0000FF); overload;', [
       'begin',
-      '  with TMufasaBitmap.CreateFromTarget() do',
+      '  with TSimbaImage.CreateFromTarget() do',
       '  try',
       '    DrawTPA(TPA, Color);',
       '    Show();',
@@ -361,7 +361,7 @@ begin
     addGlobalFunc(
       'procedure ShowOnClient(ATPA: T2DPointArray; Color: Integer = $0000FF); overload;', [
       'begin',
-      '  with TMufasaBitmap.CreateFromTarget() do',
+      '  with TSimbaImage.CreateFromTarget() do',
       '  try',
       '    DrawATPA(ATPA);',
       '    Show();',

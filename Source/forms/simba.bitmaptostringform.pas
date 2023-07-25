@@ -26,7 +26,7 @@ type
     procedure OpenButtonClick(Sender: TObject);
     procedure ToStringButtonClick(Sender: TObject);
   public
-    dispPic: TMufasaBitmap;
+    dispPic: TSimbaImage;
   end; 
 
 var
@@ -45,14 +45,14 @@ const
 
 procedure TSimbaBitmapConversionForm.OpenButtonClick(Sender: TObject);
 var
-  x : TMufasaBitmap;
+  x : TSimbaImage;
 begin
   if OpenPictureDialog.Execute then
   begin
     try
       ImagePreview.Picture.LoadFromFile(OpenPictureDialog.FileName);
       GroupBox.Caption:= Format(BmpSizeTxt,[ImagePreview.Picture.Width,ImagePreview.Picture.Height]);
-      x := TMufasaBitmap.Create;
+      x := TSimbaImage.Create;
       x.LoadFromFile(OpenPictureDialog.FileName);
       if dispPic <> nil then
         dispPic.Free;
@@ -75,7 +75,7 @@ begin
     if Assigned(dispPic) then
       FreeAndNil(dispPic);
 
-    dispPic := TMufasaBitmap.Create();
+    dispPic := TSimbaImage.Create();
     dispPic.LoadFromTBitmap(ImagePreview.Picture.Bitmap);
   except
     on E: Exception do
@@ -104,7 +104,7 @@ begin
     if PadOutput.Checked then
     begin
       Builder := TStringList.Create();
-      Builder.Add('  BMP := TMufasaBitmap.CreateFromString(%d, %d,', [dispPic.Width, dispPic.Height]);
+      Builder.Add('  BMP := TSimbaImage.CreateFromString(%d, %d,', [dispPic.Width, dispPic.Height]);
 
       Offset := 1;
       while (Offset < Length(Str) - PAD_WIDTH) do
@@ -115,7 +115,7 @@ begin
       end;
       Builder.Add('    ' + #39 + Copy(Str, Offset) + #39 + ');');
     end else
-      Builder.Add(Format('  BMP := TMufasaBitmap.CreateFromString(%d, %d, %s);', [dispPic.Width, dispPic.Height, QuotedStr(Str)]));
+      Builder.Add(Format('  BMP := TSimbaImage.CreateFromString(%d, %d, %s);', [dispPic.Width, dispPic.Height, QuotedStr(Str)]));
 
     SimbaDebugLn([EDebugLn.FOCUS], Builder.Text);
 

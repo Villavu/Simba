@@ -29,8 +29,8 @@ type
     procedure Disguse(S: String);
 
     procedure DebugImage_SetMaxSize(Width, Height: Integer);
-    procedure DebugImage_Show(Bitmap: TMufasaBitmap; EnsureVisible: Boolean);
-    procedure DebugImage_Update(Bitmap: TMufasaBitmap);
+    procedure DebugImage_Show(Bitmap: TSimbaImage; EnsureVisible: Boolean);
+    procedure DebugImage_Update(Bitmap: TSimbaImage);
     procedure DebugImage_Hide;
     procedure DebugImage_Display(Width, Height: Integer); overload;
     procedure DebugImage_Display(X, Y, Width, Height: Integer); overload;
@@ -162,7 +162,7 @@ begin
 end;
 
 // Send chunked ... faster & less memory needed.
-procedure TSimbaScriptCommunication.DebugImage_Show(Bitmap: TMufasaBitmap; EnsureVisible: Boolean);
+procedure TSimbaScriptCommunication.DebugImage_Show(Bitmap: TSimbaImage; EnsureVisible: Boolean);
 var
   Header: TSimbaIPCHeader;
   Y: Integer;
@@ -198,7 +198,7 @@ end;
 
 // Send chunked ... faster & less memory needed.
 // Data is sent row by row
-procedure TSimbaScriptCommunication.DebugImage_Update(Bitmap: TMufasaBitmap);
+procedure TSimbaScriptCommunication.DebugImage_Update(Bitmap: TSimbaImage);
 var
   Header: TSimbaIPCHeader;
   Y: Integer;

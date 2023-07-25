@@ -13,31 +13,31 @@ uses
   Classes, SysUtils,
   simba.mufasatypes, simba.bitmap;
 
-procedure BitmapTarget_GetDimensions(Target: Pointer; out W, H: Integer);
-function BitmapTarget_GetImageData(Target: Pointer; X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
-function BitmapTarget_IsValid(Target: Pointer): Boolean;
+procedure ImageTarget_GetDimensions(Target: Pointer; out W, H: Integer);
+function ImageTarget_GetImageData(Target: Pointer; X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
+function ImageTarget_IsValid(Target: Pointer): Boolean;
 
 implementation
 
-procedure BitmapTarget_GetDimensions(Target: Pointer; out W, H: Integer);
+procedure ImageTarget_GetDimensions(Target: Pointer; out W, H: Integer);
 var
-  Bitmap: TMufasaBitmap absolute Target;
+  Image: TSimbaImage absolute Target;
 begin
-  W := Bitmap.Width;
-  H := Bitmap.Height;
+  W := Image.Width;
+  H := Image.Height;
 end;
 
-function BitmapTarget_GetImageData(Target: Pointer; X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
+function ImageTarget_GetImageData(Target: Pointer; X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
 var
-  Bitmap: TMufasaBitmap absolute Target;
+  Image: TSimbaImage absolute Target;
 begin
   Result := True;
 
-  Data := @Bitmap.Data[Y * Bitmap.Width + X];
-  DataWidth := Bitmap.Width;
+  Data := @Image.Data[Y * Image.Width + X];
+  DataWidth := Image.Width;
 end;
 
-function BitmapTarget_IsValid(Target: Pointer): Boolean;
+function ImageTarget_IsValid(Target: Pointer): Boolean;
 begin
   Result := Assigned(Target);
 end;

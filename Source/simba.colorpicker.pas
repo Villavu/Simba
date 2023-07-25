@@ -174,7 +174,7 @@ begin
     OnMouseUp := @ImageMouseUp;
     OnMouseMove := @ImageMouseMove;
 
-    with TMufasaBitmap.CreateFromWindow(DesktopWindow) do
+    with TSimbaImage.CreateFromWindow(DesktopWindow) do
     try
       Picture.Bitmap.LoadFromRawImage(ToRawImage(), True);
 

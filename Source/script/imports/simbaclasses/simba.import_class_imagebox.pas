@@ -147,7 +147,7 @@ end;
 
 procedure _LapeSimbaImageBox_SetBackground_Bitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImageBox(Params^[0])^.SetBackground(PMufasaBitmap(Params^[1])^);
+  PSimbaImageBox(Params^[0])^.SetBackground(PSimbaImage(Params^[1])^);
 end;
 
 procedure _LapeSimbaImageBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -283,7 +283,7 @@ begin
     addGlobalFunc('procedure TSimbaImageBox.Paint;', @_LapeSimbaImageBox_Paint);
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(Data: PColorBGRA; AWidth, AHeight: Integer); overload;', @_LapeSimbaImageBox_SetBackground_Data);
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(FileName: String); overload;', @_LapeSimbaImageBox_SetBackground_FileName);
-    addGlobalFunc('procedure TSimbaImageBox.SetBackground(Bitmap: TMufasaBitmap); overload;', @_LapeSimbaImageBox_SetBackground_Bitmap);
+    addGlobalFunc('procedure TSimbaImageBox.SetBackground(Bitmap: TSimbaImage); overload;', @_LapeSimbaImageBox_SetBackground_Bitmap);
     addGlobalFunc('procedure TSimbaImageBox.Init(Owner: TComponent); override', @_LapeSimbaImageBox_Init);
   end;
 end;

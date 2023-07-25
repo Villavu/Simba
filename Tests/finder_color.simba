@@ -24,13 +24,13 @@ const
   ];
 
 var
-  Bitmap: TMufasaBitmap;
+  Bitmap: TSimbaImage;
   I: Integer;
 begin
-  Bitmap := TMufasaBitmap.Create(500, 500);
+  Bitmap := TSimbaImage.Create(500, 500);
   Bitmap.DrawHSLCircle(Bitmap.GetCenter(), 200);
 
-  Target.SetBitmap(Bitmap);
+  Target.SetImage(Bitmap);
 
   for I := 0 to High(TESTS) do
     Assert(Finder.CountColor(TESTS[I]) = TEST_RESULTS[I]);

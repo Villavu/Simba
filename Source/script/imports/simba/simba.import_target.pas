@@ -33,17 +33,17 @@ begin
 end;
 
 (*
-TSimbaTarget.SetBitmap
+TSimbaTarget.SetImage
 ~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaTarget.SetBitmap(Bitmap: TMufasaBitmap);
+procedure TSimbaTarget.SetImage(TSimbaImage: TSimbaImage);
 
-Sets the bitmap as a target.
+Sets the TSimbaImage as a target.
 
-Note: Ownership of the bitmap is **not** taken. Make sure you do not free the bitmap while using this target.
+Note: Ownership of the TSimbaImage is **not** taken. Make sure you do not free the image while using this target.
 *)
-procedure _LapeSimbaTarget_SetBitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaTarget_SetImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaTarget(Params^[0])^.SetBitmap(PMufasaBitmap(Params^[1])^);
+  PSimbaTarget(Params^[0])^.SetImage(PSimbaImage(Params^[1])^);
 end;
 
 (*
@@ -73,11 +73,11 @@ end;
 (*
 TSimbaTarget.GetImage
 ~~~~~~~~~~~~~~~~~~~~~
-function TSimbaTarget.GetImage(Bounds: TBox = [-1,-1,-1,-1]): TMufasaBitmap;
+function TSimbaTarget.GetImage(Bounds: TBox = [-1,-1,-1,-1]): TSimbaImage;
 *)
 procedure _LapeSimbaTarget_GetImage(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMufasaBitmap(Result)^ := PSimbaTarget(Params^[0])^.GetImage(PBox(Params^[1])^);
+  PSimbaImage(Result)^ := PSimbaTarget(Params^[0])^.GetImage(PBox(Params^[1])^);
 end;
 
 (*
@@ -161,23 +161,23 @@ begin
 end;
 
 (*
-TSimbaTarget.IsBitmapTarget
+TSimbaTarget.IsImageTarget
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaTarget.IsBitmapTarget: Boolean;
+function TSimbaTarget.IsImageTarget: Boolean;
 *)
-procedure _LapeSimbaTarget_IsBitmapTarget1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaTarget_IsImageTarget1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PSimbaTarget(Params^[0])^.IsBitmapTarget();
+  PBoolean(Result)^ := PSimbaTarget(Params^[0])^.IsImageTarget();
 end;
 
 (*
-TSimbaTarget.IsBitmapTarget
+TSimbaTarget.IsImageTarget
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaTarget.IsBitmapTarget(out Bitmap: TMufasaBitmap): Boolean;
+function TSimbaTarget.IsImageTarget(out Image: TSimbaImage): Boolean;
 *)
-procedure _LapeSimbaTarget_IsBitmapTarget2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaTarget_IsImageTarget2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PSimbaTarget(Params^[0])^.IsBitmapTarget(PMufasaBitmap(Params^[1])^);
+  PBoolean(Result)^ := PSimbaTarget(Params^[0])^.IsImageTarget(PSimbaImage(Params^[1])^);
 end;
 
 (*
@@ -273,11 +273,11 @@ begin
     addGlobalFunc('function TSimbaTarget.GetClientArea: TBox', @_LapeSimbaTarget_GetClientArea);
 
     addGlobalFunc('procedure TSimbaTarget.SetDesktop', @_LapeSimbaTarget_SetDesktop);
-    addGlobalFunc('procedure TSimbaTarget.SetBitmap(Bitmap: TMufasaBitmap)', @_LapeSimbaTarget_SetBitmap);
+    addGlobalFunc('procedure TSimbaTarget.SetImage(TSimbaImage: TSimbaImage)', @_LapeSimbaTarget_SetImage);
     addGlobalFunc('procedure TSimbaTarget.SetWindow(Window: TWindowHandle)', @_LapeSimbaTarget_SetWindow);
     addGlobalFunc('procedure TSimbaTarget.SetEIOS(Plugin, Args: String)', @_LapeSimbaTarget_SetEIOS);
 
-    addGlobalFunc('function TSimbaTarget.GetImage(Bounds: TBox = [-1,-1,-1,-1]): TMufasaBitmap', @_LapeSimbaTarget_GetImage);
+    addGlobalFunc('function TSimbaTarget.GetImage(Bounds: TBox = [-1,-1,-1,-1]): TSimbaImage', @_LapeSimbaTarget_GetImage);
     addGlobalFunc('procedure TSimbaTarget.GetDimensions(out Width, Height: Integer)', @_LapeSimbaTarget_GetDimensions);
     addGlobalFunc('function TSimbaTarget.GetWidth: Integer', @_LapeSimbaTarget_GetWidth);
     addGlobalFunc('function TSimbaTarget.GetHeight: Integer', @_LapeSimbaTarget_GetHeight);
@@ -288,8 +288,8 @@ begin
 
     addGlobalFunc('function TSimbaTarget.IsWindowTarget: Boolean; overload', @_LapeSimbaTarget_IsWindowTarget1);
     addGlobalFunc('function TSimbaTarget.IsWindowTarget(out Window: TWindowHandle): Boolean; overload', @_LapeSimbaTarget_IsWindowTarget2);
-    addGlobalFunc('function TSimbaTarget.IsBitmapTarget: Boolean; overload', @_LapeSimbaTarget_IsBitmapTarget1);
-    addGlobalFunc('function TSimbaTarget.IsBitmapTarget(out Bitmap: TMufasaBitmap): Boolean; overload', @_LapeSimbaTarget_IsBitmapTarget2);
+    addGlobalFunc('function TSimbaTarget.IsImageTarget: Boolean; overload', @_LapeSimbaTarget_IsImageTarget1);
+    addGlobalFunc('function TSimbaTarget.IsImageTarget(out TSimbaImage: TSimbaImage): Boolean; overload', @_LapeSimbaTarget_IsImageTarget2);
     addGlobalFunc('function TSimbaTarget.IsEIOSTarget: Boolean', @_LapeSimbaTarget_IsEIOSTarget);
 
     addGlobalFunc('function TSimbaTarget.IsDefault: Boolean', @_LapeSimbaTarget_IsDefault);
@@ -297,33 +297,33 @@ begin
     addGlobalFunc('function ToString(constref Target: TSimbaTarget): String; override;', @_LapeSimbaTarget_ToString);
 
 
-    ImportingSection := 'TMufasaBitmap';
+    ImportingSection := 'TSimbaImage';
 
     addGlobalFunc(
-      'function TMufasaBitmap.CreateFromTarget(Target: TSimbaTarget; Bounds: TBox = [-1,-1,-1,-1]): TMufasaBitmap; static; overload;', [
+      'function TSimbaImage.CreateFromTarget(Target: TSimbaTarget; Bounds: TBox = [-1,-1,-1,-1]): TSimbaImage; static; overload;', [
       'begin',
       '  Result := Target.GetImage(Bounds);',
       'end;'
     ]);
     addGlobalFunc(
-      'function TMufasaBitmap.CreateFromTarget(Bounds: TBox = [-1,-1,-1,-1]): TMufasaBitmap; static; overload;', [
+      'function TSimbaImage.CreateFromTarget(Bounds: TBox = [-1,-1,-1,-1]): TSimbaImage; static; overload;', [
       'begin',
-      '  Result := TMufasaBitmap.CreateFromTarget(System.Target, Bounds);',
+      '  Result := TSimbaImage.CreateFromTarget(System.Target, Bounds);',
       'end;'
     ]);
 
     addGlobalFunc(
-      'procedure TMufasaBitmap.DrawTarget(Target: TSimbaTarget; P: TPoint; Bounds: TBox = [-1,-1,-1,-1]); overload;', [
+      'procedure TSimbaImage.DrawTarget(Target: TSimbaTarget; P: TPoint; Bounds: TBox = [-1,-1,-1,-1]); overload;', [
       'var',
-      '  Image: TMufasaBitmap;',
+      '  Image: TSimbaImage;',
       'begin',
-      '  Image := TMufasaBitmap.CreateFromTarget(Target, Bounds);',
-      '  Self.DrawBitmap(Image, P);',
+      '  Image := TSimbaImage.CreateFromTarget(Target, Bounds);',
+      '  Self.Draw(Image, P);',
       '  Image.Free();',
       'end;'
     ]);
     addGlobalFunc(
-      'procedure TMufasaBitmap.DrawTarget(P: TPoint; Bounds: TBox = [-1,-1,-1,-1]); overload;', [
+      'procedure TSimbaImage.DrawTarget(P: TPoint; Bounds: TBox = [-1,-1,-1,-1]); overload;', [
       'begin',
       '  Self.DrawTarget(System.Target, P, Bounds);',
       'end;'
