@@ -2872,9 +2872,9 @@ object SimbaForm: TSimbaForm
     object MenuItem1: TMenuItem
       Caption = '-'
     end
-    object MenuItemBitmapConv: TMenuItem
-      Caption = '&Bitmap Conversion'
-      OnClick = MenuItemBitmapConvClick
+    object MenuItemImageToString: TMenuItem
+      Caption = 'Image To String'
+      OnClick = MenuItemImageToStringClick
     end
     object MenuItemACA: TMenuItem
       Caption = 'ACA'

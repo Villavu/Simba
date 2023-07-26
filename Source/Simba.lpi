@@ -348,9 +348,9 @@
         <ResourceBaseClass Value="Form"/>
       </Unit2>
       <Unit3>
-        <Filename Value="forms/simba.bitmaptostringform.pas"/>
+        <Filename Value="forms/simba.imagetostringform.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="SimbaBitmapConversionForm"/>
+        <ComponentName Value="SimbaImageToStringForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit3>
