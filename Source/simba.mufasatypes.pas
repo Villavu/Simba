@@ -245,8 +245,6 @@ type
   TColorBGRAArray = array of TColorBGRA;
 
   PColorBGRA = ^TColorBGRA;
-  PColorBGRAArray = array of PColorBGRA;
-
   PColorRGB = ^TColorRGB;
   PColorXYZ = ^TColorXYZ;
   PColorLAB = ^TColorLAB;
@@ -458,13 +456,11 @@ uses
 procedure DebugLn(const Msg: String);
 begin
   DebugLogger.DebugLn(Msg);
-  Flush(Output);
 end;
 
 procedure DebugLn(const Msg: String; Args: array of const);
 begin
   DebugLogger.DebugLn(Msg, Args);
-  Flush(Output);
 end;
 
 procedure SimbaException(Message: String; Args: array of const);

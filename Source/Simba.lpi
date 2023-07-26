@@ -68,6 +68,9 @@
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
+            <CompilerMessages>
+              <IgnoredMessages idx5024="True" idx4055="True"/>
+            </CompilerMessages>
             <CustomOptions Value="-CfSSE3
 -dStaticFFI
 -dLape_CDECL
@@ -110,14 +113,13 @@
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
+            <CompilerMessages>
+              <IgnoredMessages idx5024="True" idx4055="True"/>
+            </CompilerMessages>
             <CustomOptions Value="-CfSSE64
 -dStaticFFI
 -dLape_CDECL
 -dLape_NoExtended"/>
-            <OtherDefines Count="2">
-              <Define0 Value="StaticFFI"/>
-              <Define1 Value="Lape_CDECL"/>
-            </OtherDefines>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>

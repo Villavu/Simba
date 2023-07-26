@@ -22,23 +22,43 @@ TSimbaImage is an Image data type.
 *)
 
 (*
-TSimbaImage.PointInBitmap
+TSimbaImage.PointInImage
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaImage.PointInBitmap(P: TPoint): Boolean;
+function TSimbaImage.PointInImage(P: TPoint): Boolean;
 *)
-procedure _LapeMufasaBitmap_PointInBitmap(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_PointInImage1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PSimbaImage(Params^[0])^.PointInBitmap(PPoint(Params^[1])^);
+  PBoolean(Result)^ := PSimbaImage(Params^[0])^.PointInImage(PPoint(Params^[1])^);
 end;
 
 (*
-TSimbaImage.PointInBitmap
+TSimbaImage.PointInImage
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaImage.PointInBitmap(X, Y: Integer): Boolean;
+function TSimbaImage.PointInImage(X, Y: Integer): Boolean;
 *)
-procedure _LapeMufasaBitmap_PointInBitmapEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_PointInImage2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PSimbaImage(Params^[0])^.PointInBitmap(PInteger(Params^[1])^, PInteger(Params^[2])^);
+  PBoolean(Result)^ := PSimbaImage(Params^[0])^.PointInImage(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+(*
+TSimbaImage.EnsureInImage
+~~~~~~~~~~~~~~~~~~~~~~~~~
+function TSimbaImage.EnsureInImage(var P: TPoint): Boolean;
+*)
+procedure _LapeMufasaBitmap_EnsureInImage1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImage(Params^[0])^.PointInImage(PPoint(Params^[1])^);
+end;
+
+(*
+TSimbaImage.EnsureInImage
+~~~~~~~~~~~~~~~~~~~~~~~~~
+function TSimbaImage.EnsureInImage(var X, Y: Integer): Boolean;
+*)
+procedure _LapeMufasaBitmap_EnsureInImage2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImage(Params^[0])^.PointInImage(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
@@ -82,23 +102,23 @@ begin
 end;
 
 (*
-TSimbaImage.Resize
-~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.Resize(AWidth, AHeight: Integer);
+TSimbaImage.ResizeNN
+~~~~~~~~~~~~~~~~~~~~
+function TSimbaImage.ResizeNN(AWidth, AHeight: Integer): TSimbaImage;
 *)
-procedure _LapeMufasaBitmap_Resize(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_ResizeNN(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.Resize(PInteger(Params^[1])^, PInteger(Params^[2])^);
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.ResizeNN(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
 TSimbaImage.ResizeBilinear
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.ResizeBilinear(AWidth, AHeight: Integer);
+function TSimbaImage.ResizeBilinear(AWidth, AHeight: Integer): TSimbaImage;
 *)
-procedure _LapeMufasaBitmap_ResizeBilinear(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_ResizeBilinear(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.ResizeBilinear(PInteger(Params^[1])^, PInteger(Params^[2])^);
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.ResizeBilinear(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
@@ -212,23 +232,13 @@ begin
 end;
 
 (*
-TSimbaImage.DrawToCanvas
-~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.DrawToCanvas(x, y: Integer; Canvas: TCanvas);
-*)
-procedure _LapeMufasaBitmap_DrawToCanvas(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.DrawToCanvas(PInteger(Params^[1])^, PInteger(Params^[2])^, PCanvas(Params^[3])^);
-end;
-
-(*
 TSimbaImage.ReplaceColor
 ~~~~~~~~~~~~~~~~~~~~~~~~
 procedure TSimbaImage.ReplaceColor(OldColor, NewColor: TColor);
 *)
 procedure _LapeMufasaBitmap_ReplaceColor(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.ReplaceColor(PInteger(Params^[1])^, PInteger(Params^[2])^);
+  PSimbaImage(Params^[0])^.ReplaceColor(PColor(Params^[1])^, PColor(Params^[2])^);
 end;
 
 (*
@@ -238,37 +248,17 @@ procedure TSimbaImage.ReplaceColors(OldColors, NewColors: TColorArray);
 *)
 procedure _LapeMufasaBitmap_ReplaceColors(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.ReplaceColors(PIntegerArray(Params^[1])^, PIntegerArray(Params^[2])^);
+  PSimbaImage(Params^[0])^.ReplaceColors(PColorArray(Params^[1])^, PColorArray(Params^[2])^);
 end;
 
 (*
-TSimbaImage.Rotate
-~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.Rotate(Radians: Single; Expand: Boolean; TargetBitmap: TSimbaImage);
+TSimbaImage.RotateNN
+~~~~~~~~~~~~~~~~~~~~
+function TSimbaImage.RotateNN(Radians: Single; Expand: Boolean): TSimbaImage;
 *)
-procedure _LapeMufasaBitmap_Rotate1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_RotateNN(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.Rotate(PSingle(Params^[1])^, PBoolean(Params^[2])^, PSimbaImage(Params^[3])^);
-end;
-
-(*
-TSimbaImage.RotateBilinear
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.RotateBilinear(Radians: Single; Expand: Boolean; TargetBitmap: TSimbaImage);
-*)
-procedure _LapeMufasaBitmap_RotateBilinear1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.RotateBilinear(PSingle(Params^[1])^, PBoolean(Params^[2])^, PSimbaImage(Params^[3])^);
-end;
-
-(*
-TSimbaImage.Rotate
-~~~~~~~~~~~~~~~~~~
-function TSimbaImage.Rotate(Radians: Single; Expand: Boolean): TSimbaImage;
-*)
-procedure _LapeMufasaBitmap_Rotate2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.Rotate(PSingle(Params^[1])^, PBoolean(Params^[2])^);
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.RotateNN(PSingle(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 (*
@@ -276,7 +266,7 @@ TSimbaImage.RotateBilinear
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TSimbaImage.RotateBilinear(Radians: Single; Expand: Boolean): TSimbaImage;
 *)
-procedure _LapeMufasaBitmap_RotateBilinear2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_RotateBilinear(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.RotateBilinear(PSingle(Params^[1])^, PBoolean(Params^[2])^);
 end;
@@ -284,91 +274,51 @@ end;
 (*
 TSimbaImage.GreyScale
 ~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.GreyScale(TargetBitmap: TSimbaImage);
+function TSimbaImage.GreyScale: TSimbaImage;
 *)
-procedure _LapeMufasaBitmap_GreyScale(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_GreyScale(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.GreyScale(PSimbaImage(Params^[1])^);
-end;
-
-(*
-TSimbaImage.GreyScale
-~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.GreyScale;
-*)
-procedure _LapeMufasaBitmap_GreyScaleEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.GreyScale();
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.GreyScale();
 end;
 
 (*
 TSimbaImage.Brightness
 ~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.Brightness(TargetBitmap: TSimbaImage; br: Integer);
+function TSimbaImage.Brightness(Value: Integer): TSimbaImage;
 *)
-procedure _LapeMufasaBitmap_Brightness(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_Brightness(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.Brightness(PSimbaImage(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-(*
-TSimbaImage.Brightness
-~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.Brightness(br: Integer);
-*)
-procedure _LapeMufasaBitmap_BrightnessEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.Brightness(PInteger(Params^[1])^);
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.Brightness(PInteger(Params^[1])^);
 end;
 
 (*
 TSimbaImage.Invert
 ~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.Invert(TargetBitmap: TSimbaImage);
+function TSimbaImage.Invert: TSimbaImage;
 *)
-procedure _LapeMufasaBitmap_Invert(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_Invert(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.Invert(PSimbaImage(Params^[1])^);
-end;
-
-(*
-TSimbaImage.Invert
-~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.Invert;
-*)
-procedure _LapeMufasaBitmap_InvertEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.Invert();
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.Invert();
 end;
 
 (*
 TSimbaImage.Posterize
 ~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.Posterize(TargetBitmap: TSimbaImage; Po: Integer);
+function TSimbaImage.Posterize(Value: Integer): TSimbaImage;
 *)
-procedure _LapeMufasaBitmap_Posterize(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_Posterize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.Posterize(PSimbaImage(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-(*
-TSimbaImage.Posterize
-~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.Posterize(Po: Integer);
-*)
-procedure _LapeMufasaBitmap_PosterizeEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.Posterize(PInteger(Params^[1])^);
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.Posterize(PInteger(Params^[1])^);
 end;
 
 (*
 TSimbaImage.Convolute
 ~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.Convolute(TargetBitmap: TSimbaImage; Matrix: TDoubleMatrix);
+function TSimbaImage.Convolute(Matrix: TDoubleMatrix): TSimbaImage;
 *)
-procedure _LapeMufasaBitmap_Convolute(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_Convolute(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.Convolute(PSimbaImage(Params^[1])^, PDoubleMatrix(Params^[2])^);
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.Convolute(PDoubleMatrix(Params^[1])^);
 end;
 
 (*
@@ -446,7 +396,7 @@ TSimbaImage.DrawMatrix
 ~~~~~~~~~~~~~~~~~~~~~~
 procedure TSimbaImage.DrawMatrix(Matrix: TIntegerMatrix);
 *)
-procedure _LapeMufasaBitmap_DrawMatrix(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_DrawMatrixI(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(Params^[0])^.DrawMatrix(PIntegerMatrix(Params^[1])^);
 end;
@@ -462,33 +412,23 @@ begin
 end;
 
 (*
-TSimbaImage.DrawMatrix
-~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.DrawMatrix(Matrix: TByteMatrix);
-*)
-procedure _LapeMufasaBitmap_DrawMatrixB(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.DrawMatrix(PByteMatrix(Params^[1])^);
-end;
-
-(*
 TSimbaImage.ThresholdAdaptive
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.ThresholdAdaptive(Alpha, Beta: Byte; AInvert: Boolean; Method: TBmpThreshMethod; k: Integer);
+function TSimbaImage.ThresholdAdaptive(Alpha, Beta: Byte; AInvert: Boolean; Method: ESimbaImageThreshMethod; k: Integer): TSimbaImage;
 *)
-procedure _LapeMufasaBitmap_ThresholdAdaptive(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_ThresholdAdaptive(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.ThresholdAdaptive(PByte(Params^[1])^, PByte(Params^[2])^, PBoolean(Params^[3])^, PBmpThreshMethod(Params^[4])^, PInteger(Params^[5])^);
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.ThresholdAdaptive(PByte(Params^[1])^, PByte(Params^[2])^, PBoolean(Params^[3])^, ESimbaImageThreshMethod(Params^[4]^), PInteger(Params^[5])^);
 end;
 
 (*
 TSimbaImage.ThresholdSauvola
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.ThresholdSauvola(Radius: Integer; AInvert: Boolean; k: Single);
+function TSimbaImage.ThresholdSauvola(Radius: Integer; AInvert: Boolean; k: Single): TSimbaImage;
 *)
-procedure _LapeMufasaBitmap_ThresholdSauvola(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_ThresholdSauvola(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.ThresholdSauvola(PInteger(Params^[1])^, PBoolean(Params^[2])^, PSingle(Params^[3])^);
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.ThresholdSauvola(PInteger(Params^[1])^, PBoolean(Params^[2])^, PSingle(Params^[3])^);
 end;
 
 (*
@@ -594,41 +534,21 @@ end;
 (*
 TSimbaImage.Blur
 ~~~~~~~~~~~~~~~~
-procedure TSimbaImage.Blur(Block: Integer);
+function TSimbaImage.Blur(Block: Integer): TSimbaImage;
 *)
-procedure _LapeMufasaBitmap_Blur(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_Blur(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.Blur(PInteger(Params^[1])^);
-end;
-
-(*
-TSimbaImage.Blur
-~~~~~~~~~~~~~~~~
-procedure TSimbaImage.Blur(TargetBitmap: TSimbaImage; Block: Integer);
-*)
-procedure _LapeMufasaBitmap_BlurEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.Blur(PSimbaImage(Params^[1])^, PInteger(Params^[2])^);
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.Blur(PInteger(Params^[1])^);
 end;
 
 (*
 TSimbaImage.Downsample
 ~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.Downsample(Scale: Integer);
+function TSimbaImage.Downsample(Scale: Integer): TSimbaImage;
 *)
-procedure _LapeMufasaBitmap_DownSample(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_DownSample(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.Downsample(PInteger(Params^[1])^);
-end;
-
-(*
-TSimbaImage.Downsample
-~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.Downsample(TargetBitmap: TSimbaImage; Scale: Integer);
-*)
-procedure _LapeMufasaBitmap_DownSampleEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.Downsample(PSimbaImage(Params^[1])^, PInteger(Params^[2])^);
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.Downsample(PInteger(Params^[1])^);
 end;
 
 (*
@@ -914,21 +834,11 @@ end;
 (*
 TSimbaImage.Blend
 ~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.Blend(Points: TPointArray; Size: Integer);
+function TSimbaImage.Blend(Points: TPointArray; Size: Integer): TSimbaImage;
 *)
-procedure _LapeMufasaBitmap_Blend(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_Blend(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.Blend(PPointArray(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-(*
-TSimbaImage.Blend
-~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.Blend(TargetBitmap: TSimbaImage; Points: TPointArray; Size: Integer);
-*)
-procedure _LapeMufasaBitmap_BlendEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.Blend(PSimbaImage(Params^[1])^, PPointArray(Params^[2])^, PInteger(Params^[3])^);
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.Blend(PPointArray(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
@@ -1104,21 +1014,11 @@ end;
 (*
 TSimbaImage.Mirror
 ~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.Mirror(MirrorStyle: TBmpMirrorStyle);
+function TSimbaImage.Mirror(Style: ESimbaImageMirrorStyle): TSimbaImage;
 *)
-procedure _LapeMufasaBitmap_Mirror(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_Mirror(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.Mirror(PBmpMirrorStyle(Params^[1])^);
-end;
-
-(*
-TSimbaImage.Mirror
-~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.Mirror(TargetBitmap: TSimbaImage; MirrorStyle: TBmpMirrorStyle);
-*)
-procedure _LapeMufasaBitmap_MirrorEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.Mirror(PSimbaImage(Params^[1])^, PBmpMirrorStyle(Params^[2])^);
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.Mirror(ESimbaImageMirrorStyle(Params^[1]^));
 end;
 
 (*
@@ -1126,7 +1026,7 @@ TSimbaImage.Equals
 ~~~~~~~~~~~~~~~~~~
 function TSimbaImage.Equals(Other: TSimbaImage): Boolean;
 
-Are the two bitmaps equal?
+Are the two bitmaps exactly equal?
 *)
 procedure _LapeMufasaBitmap_Equals(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -1254,21 +1154,21 @@ begin
 end;
 
 (*
-TSimbaImage.SaveUnfreedDir
-~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.SaveUnfreedDir(Directory: String); static;
+TSimbaImage.SaveUnfreedImages
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure TSimbaImage.SaveUnfreedImages(Directory: String); static;
 
-Saves unfreed bitmaps on script terminate.
+Saves unfreed images on script terminate.
 
 Example:
 
 ```
-  TSimbaImage.SaveUnfreedDir('some/directory/');
+  TSimbaImage.SaveUnfreedImages('some/directory/');
 ```
 *)
-procedure _LapeMufasaBitmap_SaveUnfreedDir(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_SaveUnfreedImages(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  TSimbaImage.SaveUnfreedDir := PString(Params^[0])^;
+  TSimbaImage.SaveUnfreedImages := PString(Params^[0])^;
 end;
 
 (*
@@ -1313,6 +1213,16 @@ procedure TSimbaImage.DrawHSLCircle(ACenter: TPoint; Radius: Integer);
 procedure _LapeMufasaBitmap_DrawHSLCircle(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(Params^[0])^.DrawHSLCircle(PPoint(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+(*
+TSimbaImage.RowPtrs
+~~~~~~~~~~~~~~~~~~~
+function TSimbaImage.RowPtrs: TSimbaImageRowPtrs;
+*)
+procedure _LapeMufasaBitmap_RowPtrs(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  TSimbaImageRowPtrs(Result^) := PSimbaImage(Params^[0])^.RowPtrs();
 end;
 
 (*
@@ -1365,8 +1275,9 @@ begin
     addClass('TSimbaImage');
 
     addGlobalType('array of TSimbaImage', 'TSimbaImageArray');
-    addGlobalType('(MirrorWidth, MirrorHeight, MirrorLine)', 'TBmpMirrorStyle');
-    addGlobalType('(TM_Mean, TM_MinMax)', 'TBmpThreshMethod');
+    addGlobalType('array of PColorBGRA', 'TSimbaImageRowPtrs');
+    addGlobalType('enum(WIDTH, HEIGHT, LINE)', 'ESimbaImageMirrorStyle');
+    addGlobalType('enum(MEAN, MIN_MAX)', 'ESimbaImageThreshMethod');
 
     addClassVar('TSimbaImage', 'Data', 'PColorBGRA', @_LapeMufasaBitmap_Data_Read);
     addClassVar('TSimbaImage', 'Name', 'String', @_LapeMufasaBitmap_Name_Read, @_LapeMufasaBitmap_Name_Write);
@@ -1382,11 +1293,15 @@ begin
     addClassVar('TSimbaImage', 'FontBold', 'Boolean', @_LapeMufasaBitmap_FontBold_Read, @_LapeMufasaBitmap_FontBold_Write);
     addClassVar('TSimbaImage', 'FontItalic', 'Boolean', @_LapeMufasaBitmap_FontItalic_Read, @_LapeMufasaBitmap_FontItalic_Write);
 
+    addGlobalFunc('function TSimbaImage.RowPtrs: TSimbaImageRowPtrs', @_LapeMufasaBitmap_RowPtrs);
+
     addGlobalFunc('function TSimbaImage.GetFontNames: TStringArray; static;', @_LapeMufasaBitmap_GetFontNames);
     addGlobalFunc('function TSimbaImage.LoadFonts(Dir: String): Boolean; static;', @_LapeMufasaBitmap_LoadFonts);
 
-    addGlobalFunc('function TSimbaImage.PointInBitmap(P: TPoint): Boolean; overload', @_LapeMufasaBitmap_PointInBitmap);
-    addGlobalFunc('function TSimbaImage.PointInBitmap(X, Y: Integer): Boolean; overload', @_LapeMufasaBitmap_PointInBitmapEx);
+    addGlobalFunc('function TSimbaImage.PointInImage(P: TPoint): Boolean; overload', @_LapeMufasaBitmap_PointInImage1);
+    addGlobalFunc('function TSimbaImage.PointInImage(X, Y: Integer): Boolean; overload', @_LapeMufasaBitmap_PointInImage2);
+    addGlobalFunc('procedure TSimbaImage.EnsureInImage(var P: TPoint); overload', @_LapeMufasaBitmap_EnsureInImage1);
+    addGlobalFunc('procedure TSimbaImage.EnsureInImage(var X, Y: Integer); overload', @_LapeMufasaBitmap_EnsureInImage2);
 
     addGlobalFunc('function TSimbaImage.Create: TSimbaImage; static; overload', @_LapeMufasaBitmap_Create);
     addGlobalFunc('function TSimbaImage.Create(Width, Height: Integer): TSimbaImage; static; overload', @_LapeMufasaBitmap_CreateEx);
@@ -1446,6 +1361,8 @@ begin
     addGlobalFunc('procedure TSimbaImage.DrawCircleArray(Points: TPointArray; Radius: Integer; Filled: Boolean; Color: TColor = -1);', @_LapeMufasaBitmap_DrawCircleArray);
     addGlobalFunc('procedure TSimbaImage.DrawCrossArray(Points: TPointArray; Radius: Integer; Thickness: Integer; Color: TColor = -1);', @_LapeMufasaBitmap_DrawCrossArray);
 
+    addGlobalFunc('procedure TSimbaImage.DrawHSLCircle(ACenter: TPoint; Radius: Integer)', @_LapeMufasaBitmap_DrawHSLCircle);
+
     addGlobalFunc('procedure TSimbaImage.Clear; overload', @_LapeMufasaBitmap_Clear);
     addGlobalFunc('procedure TSimbaImage.Clear(Area: TBox); overload', @_LapeMufasaBitmap_ClearEx);
     addGlobalFunc('procedure TSimbaImage.ClearInverted(Area: TBox);', @_LapeMufasaBitmap_ClearInverted);
@@ -1453,53 +1370,42 @@ begin
     addGlobalFunc('procedure TSimbaImage.Draw(Image: TSimbaImage; X, Y: Integer); overload', @_LapeMufasaBitmap_Draw1);
     addGlobalFunc('procedure TSimbaImage.Draw(Image: TSimbaImage; Position: TPoint); overload', @_LapeMufasaBitmap_Draw2);
 
-    addGlobalFunc('procedure TSimbaImage.DrawMatrix(Matrix: TIntegerMatrix); overload', @_LapeMufasaBitmap_DrawMatrix);
+    addGlobalFunc('procedure TSimbaImage.DrawMatrix(Matrix: TIntegerMatrix); overload', @_LapeMufasaBitmap_DrawMatrixI);
     addGlobalFunc('procedure TSimbaImage.DrawMatrix(Matrix: TSingleMatrix; ColorMapID: Integer = 0); overload', @_LapeMufasaBitmap_DrawMatrixF);
-    addGlobalFunc('procedure TSimbaImage.DrawMatrix(Matrix: TByteMatrix); overload', @_LapeMufasaBitmap_DrawMatrixB);
 
     addGlobalFunc('procedure TSimbaImage.SetSize(AWidth, AHeight: Integer);', @_LapeMufasaBitmap_SetSize);
-    addGlobalFunc('procedure TSimbaImage.Resize(AWidth, AHeight: Integer);', @_LapeMufasaBitmap_Resize);
-    addGlobalFunc('procedure TSimbaImage.ResizeBilinear(AWidth, AHeight: Integer);', @_LapeMufasaBitmap_ResizeBilinear);
     addGlobalFunc('procedure TSimbaImage.SetPersistentMemory(Memory: PtrUInt; AWidth, AHeight: Integer);', @_LapeMufasaBitmap_SetPersistentMemory);
     addGlobalFunc('procedure TSimbaImage.ResetPersistentMemory;', @_LapeMufasaBitmap_ResetPersistentMemory);
+
+    addGlobalFunc('function TSimbaImage.ResizeNN(AWidth, AHeight: Integer): TSimbaImage', @_LapeMufasaBitmap_ResizeNN);
+    addGlobalFunc('function TSimbaImage.ResizeBilinear(AWidth, AHeight: Integer): TSimbaImage', @_LapeMufasaBitmap_ResizeBilinear);
+
+    addGlobalFunc('function TSimbaImage.RotateNN(Radians: Single; Expand: Boolean): TSimbaImage', @_LapeMufasaBitmap_RotateNN);
+    addGlobalFunc('function TSimbaImage.RotateBilinear(Radians: Single; Expand: Boolean): TSimbaImage', @_LapeMufasaBitmap_RotateBilinear);
 
     addGlobalFunc('procedure TSimbaImage.Fill(Color: TColor);', @_LapeMufasaBitmap_Fill);
     addGlobalFunc('procedure TSimbaImage.ReplaceColor(OldColor, NewColor: TColor);', @_LapeMufasaBitmap_ReplaceColor);
     addGlobalFunc('procedure TSimbaImage.ReplaceColors(OldColors, NewColors: TColorArray);', @_LapeMufasaBitmap_ReplaceColors);
-    addGlobalFunc('procedure TSimbaImage.Rotate(Radians: Single; Expand: Boolean; TargetBitmap: TSimbaImage); overload', @_LapeMufasaBitmap_Rotate1);
-    addGlobalFunc('procedure TSimbaImage.RotateBilinear(Radians: Single; Expand: Boolean; TargetBitmap: TSimbaImage); overload', @_LapeMufasaBitmap_RotateBilinear1);
 
-    addGlobalFunc('function TSimbaImage.Rotate(Radians: Single; Expand: Boolean): TSimbaImage; overload', @_LapeMufasaBitmap_Rotate2);
-    addGlobalFunc('function TSimbaImage.RotateBilinear(Radians: Single; Expand: Boolean): TSimbaImage; overload', @_LapeMufasaBitmap_RotateBilinear2);
+    addGlobalFunc('function TSimbaImage.GreyScale: TSimbaImage', @_LapeMufasaBitmap_GreyScale);
+    addGlobalFunc('function TSimbaImage.Brightness(Value: Integer): TSimbaImage', @_LapeMufasaBitmap_Brightness);
+    addGlobalFunc('function TSimbaImage.Invert: TSimbaImage', @_LapeMufasaBitmap_Invert);
+    addGlobalFunc('function TSimbaImage.Posterize(Value: Integer): TSimbaImage', @_LapeMufasaBitmap_Posterize);
+    addGlobalFunc('function TSimbaImage.Convolute(Matrix: TDoubleMatrix): TSimbaImage', @_LapeMufasaBitmap_Convolute);
+    addGlobalFunc('function TSimbaImage.Mirror(Style: ESimbaImageMirrorStyle): TSimbaImage', @_LapeMufasaBitmap_Mirror);
+    addGlobalFunc('function TSimbaImage.Blur(Block: Integer): TSimbaImage', @_LapeMufasaBitmap_Blur);
+    addGlobalFunc('function TSimbaImage.Blend(Points: TPointArray; Radius: Integer): TSimbaImage', @_LapeMufasaBitmap_Blend);
+    addGlobalFunc('function TSimbaImage.Downsample(Scale: Integer): TSimbaImage', @_LapeMufasaBitmap_Downsample);
 
-    addGlobalFunc('procedure TSimbaImage.GreyScale(TargetBitmap: TSimbaImage); overload', @_LapeMufasaBitmap_GreyScale);
-    addGlobalFunc('procedure TSimbaImage.GreyScale; overload', @_LapeMufasaBitmap_GreyScaleEx);
-    addGlobalFunc('procedure TSimbaImage.Brightness(TargetBitmap: TSimbaImage; br: Integer); overload', @_LapeMufasaBitmap_Brightness);
-    addGlobalFunc('procedure TSimbaImage.Brightness(br: Integer); overload', @_LapeMufasaBitmap_BrightnessEx);
-    addGlobalFunc('procedure TSimbaImage.Invert(TargetBitmap: TSimbaImage);', @_LapeMufasaBitmap_Invert);
-    addGlobalFunc('procedure TSimbaImage.Invert; overload', @_LapeMufasaBitmap_InvertEx);
-    addGlobalFunc('procedure TSimbaImage.Posterize(TargetBitmap: TSimbaImage; Po: Integer); overload', @_LapeMufasaBitmap_Posterize);
-    addGlobalFunc('procedure TSimbaImage.Posterize(Po: Integer); overload', @_LapeMufasaBitmap_PosterizeEx);
-    addGlobalFunc('procedure TSimbaImage.Blur(Block: Integer); overload', @_LapeMufasaBitmap_Blur);
-    addGlobalFunc('procedure TSimbaImage.Blur(TargetBitmap: TSimbaImage; Block: Integer); overload', @_LapeMufasaBitmap_BlurEx);
-    addGlobalFunc('procedure TSimbaImage.Mirror(MirrorStyle: TBmpMirrorStyle); overload', @_LapeMufasaBitmap_Mirror);
-    addGlobalFunc('procedure TSimbaImage.Mirror(TargetBitmap: TSimbaImage; MirrorStyle: TBmpMirrorStyle); overload', @_LapeMufasaBitmap_MirrorEx);
-    addGlobalFunc('procedure TSimbaImage.Downsample(Scale: Integer); overload', @_LapeMufasaBitmap_DownSample);
-    addGlobalFunc('procedure TSimbaImage.Downsample(TargetBitmap: TSimbaImage; Scale: Integer); overload', @_LapeMufasaBitmap_DownSampleEx);
-    addGlobalFunc('procedure TSimbaImage.Blend(Points: TPointArray; Size: Integer); overload', @_LapeMufasaBitmap_Blend);
-    addGlobalFunc('procedure TSimbaImage.Blend(TargetBitmap: TSimbaImage; Points: TPointArray; Size: Integer); overload', @_LapeMufasaBitmap_BlendEx);
-    addGlobalFunc('procedure TSimbaImage.Convolute(TargetBitmap: TSimbaImage; Matrix: TDoubleMatrix);', @_LapeMufasaBitmap_Convolute);
     addGlobalFunc('function TSimbaImage.Copy(X1, Y1, X2, Y2: Integer): TSimbaImage; overload', @_LapeMufasaBitmap_Copy);
     addGlobalFunc('function TSimbaImage.Copy: TSimbaImage; overload', @_LapeMufasaBitmap_CopyEx);
     addGlobalFunc('procedure TSimbaImage.Crop(X1, Y1, X2, Y2: Integer);', @_LapeMufasaBitmap_Crop);
     addGlobalFunc('function TSimbaImage.GetColors: TColorArray;', @_LapeMufasaBitmap_GetColors);
     addGlobalFunc('function TSimbaImage.ToMatrix: TIntegerMatrix; overload', @_LapeMufasaBitmap_ToMatrix);
     addGlobalFunc('function TSimbaImage.ToMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix; overload', @_LapeMufasaBitmap_ToMatrixEx);
-    addGlobalFunc('procedure TSimbaImage.ThresholdAdaptive(Alpha, Beta: Byte; AInvert: Boolean; Method: TBmpThreshMethod; k: Integer);', @_LapeMufasaBitmap_ThresholdAdaptive);
-    addGlobalFunc('procedure TSimbaImage.ThresholdSauvola(Radius: Integer; AInvert: Boolean; k: Single);', @_LapeMufasaBitmap_ThresholdSauvola);
+    addGlobalFunc('function TSimbaImage.ThresholdAdaptive(Alpha, Beta: Byte; AInvert: Boolean; Method: ESimbaImageThreshMethod; k: Integer): TSimbaImage', @_LapeMufasaBitmap_ThresholdAdaptive);
+    addGlobalFunc('function TSimbaImage.ThresholdSauvola(Radius: Integer; AInvert: Boolean; k: Single): TSimbaImage', @_LapeMufasaBitmap_ThresholdSauvola);
     addGlobalFunc('procedure TSimbaImage.Pad(Amount: Integer)', @_LapeMufasaBitmap_Pad);
-
-    addGlobalFunc('procedure TSimbaImage.DrawHSLCircle(ACenter: TPoint; Radius: Integer)', @_LapeMufasaBitmap_DrawHSLCircle);
 
     addGlobalFunc('procedure TSimbaImage.LoadFromFile(FileName: String); overload', @_LapeMufasaBitmap_LoadFromFile);
     addGlobalFunc('procedure TSimbaImage.LoadFromFile(FileName: String; Area: TBox); overload', @_LapeMufasaBitmap_LoadFromFileEx);
@@ -1511,11 +1417,10 @@ begin
     addGlobalFunc('function TSimbaImage.SaveToString: String;', @_LapeMufasaBitmap_SaveToString);
 
     addGlobalFunc('function TSimbaImage.ToTBitmap: TBitmap;', @_LapeMufasaBitmap_ToTBitmap);
-    addGlobalFunc('procedure TSimbaImage.DrawToCanvas(x, y: Integer; Canvas: TCanvas);', @_LapeMufasaBitmap_DrawToCanvas);
     addGlobalFunc('procedure TSimbaImage.LoadFromTBitmap(bmp: TBitmap);', @_LapeMufasaBitmap_LoadFromTBitmap);
     addGlobalFunc('function TSimbaImage.Compare(Other: TSimbaImage): Single;', @_LapeMufasaBitmap_Compare);
 
-    addGlobalFunc('procedure TSimbaImage.SaveUnfreedImages(Directory: String); static;', @_LapeMufasaBitmap_SaveUnfreedDir);
+    addGlobalFunc('procedure TSimbaImage.SaveUnfreedImages(Directory: String); static;', @_LapeMufasaBitmap_SaveUnfreedImages);
     addGlobalFunc('procedure TSimbaImage.FreeOnTerminate(Value: Boolean);', @_LapeMufasaBitmap_FreeOnTerminate);
 
     ImportingSection := '';
