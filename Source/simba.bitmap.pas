@@ -11,15 +11,16 @@ unit simba.bitmap;
 interface
 
 uses
-  classes, sysutils, graphtype, graphics,
-  simba.baseclass, simba.mufasatypes, simba.bitmap_textdrawer, simba.colormath, simba.colormath_distance, simba.matchtemplate;
+  Classes, SysUtils, GraphType, Graphics, IntfGraphics, FPImage, Math,
+  simba.baseclass, simba.mufasatypes, simba.bitmap_textdrawer,
+  simba.colormath, simba.colormath_distance, simba.matchtemplate;
 
 type
-  {$push}
-  {$scopedenums on}
+  {$PUSH}
+  {$SCOPEDENUMS ON}
   ESimbaImageMirrorStyle = (WIDTH, HEIGHT, LINE);
   ESimbaImageThreshMethod = (MEAN, MIN_MAX);
-  {$pop}
+  {$POP}
 
   TSimbaImageRowPtrs = array of PColorBGRA;
 
@@ -58,7 +59,7 @@ type
   public
     class var SaveUnfreedImages: ShortString;
     class function LoadFonts(Dir: String): Boolean;
-    class function FontNames: TStringArray;
+    class function LoadedFontNames: TStringArray;
   public
     constructor Create; overload;
     constructor Create(AWidth, AHeight: Integer); overload;
@@ -87,10 +88,9 @@ type
     property FontBold: Boolean read GetFontBold write SetFontBold;
     property FontItalic: Boolean read GetFontItalic write SetFontItalic;
 
-    function PointInImage(const P: TPoint): Boolean; overload;
-    function PointInImage(const X, Y: Integer): Boolean; overload;
-    procedure EnsureInImage(var P: TPoint); overload;
+    function InImage(const X, Y: Integer): Boolean; overload;
     procedure EnsureInImage(var X, Y: Integer); overload;
+    procedure AssertInImage(const Method: String; const X, Y: Integer);
 
     function Equals(Other: TObject): Boolean; override;
     function Equals(Other: TSimbaImage): Boolean; overload;
@@ -114,8 +114,8 @@ type
     function GetPixels(Points: TPointArray): TColorArray;
     procedure SetPixels(Points: TPointArray; Colors: TColorArray);
 
-    procedure SetPersistentMemory(mem: PtrUInt; NewWidth, NewHeight: Integer);
-    procedure ResetPersistentMemory;
+    procedure SetExternalData(AData: PColorBGRA; AWidth, AHeight: Integer);
+    procedure ResetExternalData;
 
     procedure DrawATPA(ATPA: T2DPointArray); overload;
     procedure DrawATPA(ATPA: T2DPointArray; Color: TColor); overload;
@@ -195,7 +195,7 @@ type
 
     function RowPtrs: TSimbaImageRowPtrs;
 
-    function SaveToFile(FileName: String): Boolean;
+    function SaveToFile(FileName: String; OverwriteIfExists: Boolean = False): Boolean;
     function SaveToString: String;
 
     procedure LoadFromFile(FileName: String); overload;
@@ -204,7 +204,6 @@ type
     procedure LoadFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
     procedure LoadFromTBitmap(bmp: TBitmap);
     procedure LoadFromImage(Image: TSimbaImage);
-    procedure LoadFromRawImage(RawImage: TRawImage);
 
     function Compare(Other: TSimbaImage): Single;
 
@@ -219,26 +218,12 @@ type
 
   TSimbaImageArray = array of TSimbaImage;
 
-type
-  ESimbaBitmapException = class(Exception);
-
-const
-  sbeOutOfBounds             = 'Point (%d, %d) is not within the bounds of the bitmap (0, 0, %d, %d)';
-  sbeFileNotFound            = 'File not found "%s"';
-  sbeResizeExternalData      = 'Cannot resize bitmap with external data';
-  sbeImageFormatNotSupported = 'Image format "%s" not supported';
-  sbeInvalidBitmapString     = 'Invalid bitmap string';
-  sbeMustBeEqualDimensions   = 'Bitmaps must be equal dimensions';
-  sbeMustBeEqualLengths      = 'Arrays must be equal lengths';
-
 implementation
 
 uses
-  fpimage, math, intfgraphics, simba.overallocatearray, simba.geometry,
-  simba.tpa,
+  simba.overallocatearray, simba.geometry, simba.tpa,
   simba.bitmap_utils, simba.encoding, simba.compress, simba.math,
-  simba.nativeinterface,
-  simba.singlematrix;
+  simba.nativeinterface, simba.singlematrix;
 
 function GetDistinctColor(const Color, Index: Integer): Integer; inline;
 const
@@ -251,7 +236,7 @@ begin
     Result := DISTINCT_COLORS[Index mod Length(DISTINCT_COLORS)];
 end;
 
-function TSimbaImage.SaveToFile(FileName: String): Boolean;
+function TSimbaImage.SaveToFile(FileName: String; OverwriteIfExists: Boolean): Boolean;
 var
   Image: TLazIntfImage;
   Stream: TFileStream;
@@ -260,33 +245,36 @@ var
 begin
   Result := False;
 
-  if not FileExists(FileName) then
-  begin
-    Writer := nil;
-    Stream := nil;
-    Image  := nil;
+  if FileExists(FileName) and (not OverwriteIfExists) then
+    SimbaException('TSimbaImage.SaveToFile: File already exists "%s"', [FileName]);
 
-    WriterClass := TFPCustomImage.FindWriterFromFileName(FileName);
-    if (WriterClass = nil) then
-      raise Exception.Create('Unknown image format: ' + FileName);
+  Writer := nil;
+  Stream := nil;
+  Image  := nil;
+
+  WriterClass := TFPCustomImage.FindWriterFromFileName(FileName);
+  if (WriterClass = nil) then
+    SimbaException('TSimbaImage.SaveToFile: Unknown image format "%s"', [FileName]);
+
+  try
     Writer := WriterClass.Create();
 
-    try
-      Stream := TFileStream.Create(FileName, fmCreate or fmShareExclusive);
+    if FileExists(FileName) then
+      Stream := TFileStream.Create(FileName, fmOpenReadWrite or fmShareDenyWrite)
+    else
+      Stream := TFileStream.Create(FileName, fmCreate or fmShareDenyWrite);
 
-      Image := TLazIntfImage.Create(Self.ToRawImage(), False);
-      Image.SaveToStream(Stream, Writer);
+    Image := TLazIntfImage.Create(Self.ToRawImage(), False);
+    Image.SaveToStream(Stream, Writer);
 
-      Result := True;
-    except
-    end;
-
+    Result := True;
+  finally
     if (Writer <> nil) then
-      FreeAndNil(Writer);
+      Writer.Free();
     if (Stream <> nil) then
-      FreeAndNil(Stream);
+      Stream.Free();
     if (Image <> nil) then
-      FreeAndNil(Image);
+      Image.Free();
   end;
 end;
 
@@ -295,9 +283,12 @@ var
   LazIntf: TLazIntfImage;
   RawImageDesc: TRawImageDescription;
 begin
+  if (not FileExists(FileName)) then
+    SimbaException('TSimbaImage.LoadFromFile: File not found "%s"', [FileName]);
+
   try
     LazIntf := TLazIntfImage.Create(0, 0);
-    RawImageDesc.Init_BPP32_B8G8R8_BIO_TTB(LazIntf.Width, LazIntf.Height); // TColorBGRA image
+    RawImageDesc.Init_BPP32_B8G8R8_BIO_TTB(0, 0); // TColorBGRA format
     LazIntf.DataDescription := RawImageDesc;
     LazIntf.LoadFromFile(FileName);
 
@@ -310,7 +301,7 @@ end;
 procedure TSimbaImage.LoadFromFile(FileName: String; Area: TBox);
 begin
   if (not FileExists(FileName)) then
-    raise ESimbaBitmapException.CreateFmt(sbeFileNotFound, [FileName]);
+    SimbaException('TSimbaImage.LoadFromFile: File not found "%s"', [FileName]);
 
   if FileName.EndsWith('.bmp', False) then
     LoadBitmapAreaFromFile(Self, FileName, Area)
@@ -336,10 +327,8 @@ function TSimbaImage.Copy(X1, Y1, X2, Y2: Integer): TSimbaImage;
 var
   Y: Integer;
 begin
-  if (not PointInImage(X1, Y1)) then
-    raise ESimbaBitmapException.CreateFmt(sbeOutOfBounds, [X1, Y1, FWidth, FHeight]);
-  if (not PointInImage(X1, Y1)) then
-    raise ESimbaBitmapException.CreateFmt(sbeOutOfBounds, [X2, Y2, FWidth, FHeight]);
+  AssertInImage('Copy', X1, Y1);
+  AssertInImage('Copy', X2, Y2);
 
   Result := TSimbaImage.Create();
   Result.SetSize(X2-X1+1, Y2-Y1+1);
@@ -351,10 +340,8 @@ procedure TSimbaImage.Crop(X1, Y1, X2, Y2: Integer);
 var
   Y: Integer;
 begin
-  if (not PointInImage(X1, Y1)) then
-    raise ESimbaBitmapException.CreateFmt(sbeOutOfBounds, [X1, Y1, FWidth, FHeight]);
-  if (not PointInImage(X1, Y1)) then
-    raise ESimbaBitmapException.CreateFmt(sbeOutOfBounds, [X2, Y2, FWidth, FHeight]);
+  AssertInImage('Crop', X1, Y1);
+  AssertInImage('Crop', X2, Y2);
 
   for Y := Y1 to Y2 do
     Move(FData[Y * FWidth + X1], FData[(Y-Y1) * FWidth], FWidth * SizeOf(TColorBGRA));
@@ -365,7 +352,7 @@ end;
 function TSimbaImage.ToTBitmap: TBitmap;
 begin
   Result := TBitmap.Create();
-  Result.LoadFromRawImage(Self.ToRawImage(), False);
+  Result.FromData(FData, FWidth, FHeight);
 end;
 
 function TSimbaImage.ToGreyMatrix: TByteMatrix;
@@ -431,10 +418,8 @@ function TSimbaImage.ToMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix;
 var
   X, Y: Integer;
 begin
-  if (not PointInImage(X1, Y1)) then
-    raise ESimbaBitmapException.CreateFmt(sbeOutOfBounds, [X1, Y1, FWidth, FHeight]);
-  if (not PointInImage(X1, Y1)) then
-    raise ESimbaBitmapException.CreateFmt(sbeOutOfBounds, [X2, Y2, FWidth, FHeight]);
+  AssertInImage('ToMatrix', X1, Y1);
+  AssertInImage('ToMatrix', X2, Y2);
 
   Result.SetSize(X2-X1+1, Y2-Y1+1);
 
@@ -567,7 +552,7 @@ begin
 
   Source := DecompressString(Base64Decode(Str));
   if (Source = '') then
-    raise ESimbaBitmapException.Create(sbeInvalidBitmapString);
+    SimbaException('TSimbaImage.LoadFromString: Invalid string');
 
   SourcePtr := @Source[1];
   DestPtr := PColorBGRA(FData);
@@ -596,86 +581,6 @@ begin
     Move(AData^, FData^, FWidth * FHeight * SizeOf(TColorBGRA));
 end;
 
-procedure TSimbaImage.LoadFromRawImage(RawImage: TRawImage);
-var
-  x,y: Integer;
-  _24_old_p: PByte;
-  rs,gs,bs:byte;
-  NewData: PColorBGRA;
-begin
-  // clear data
-  Self.SetSize(0,0);
-
-  if (RawImage.Description.BitsPerPixel <> 24) and (RawImage.Description.BitsPerPixel <> 32) then
-    raise Exception.CreateFmt('TSimbaImage.LoadFromRawImage - BitsPerPixel is %d', [RawImage.Description.BitsPerPixel]);
-
-  {writeln('Bits per pixel: ' + Inttostr(RawImage.Description.BitsPerPixel));   }
-  if RawImage.Description.LineOrder <> riloTopToBottom then
-    raise Exception.Create('TSimbaImage.LoadFromRawImage - LineOrder is not riloTopToBottom');
-
- { writeln(format('LineOrder: theirs: %d, ours: %d', [RawImage.Description.LineOrder, riloTopToBottom]));  }
-
- { if RawImage.Description.LineEnd <> rileDWordBoundary then
-    raise Exception.Create('TSimbaImage.LoadFromRawImage - LineEnd is not rileDWordBoundary');         }
-
-  //writeln(format('LineEnd: t', [RawImage.Description.LineEnd]));
-
-  if RawImage.Description.Format<>ricfRGBA then
-    raise Exception.Create('TSimbaImage.LoadFromRawImage - Format is not ricfRGBA');
-
-  // Set w,h and alloc mem.
-  Self.SetSize(RawImage.Description.Width, RawImage.Description.Height);
-
-  {writeln(format('Image size: %d, %d', [FWidth,FHeight]));  }
-  rs := RawImage.Description.RedShift shr 3;
-  gs := RawImage.Description.GreenShift shr 3;
-  bs := RawImage.Description.BlueShift shr 3;
- { writeln(format('Shifts(R,G,B): %d, %d, %d', [rs,gs,bs]));
-  writeln(format('Bits per line %d, expected: %d',
-  [RawImage.Description.BitsPerLine, RawImage.Description.BitsPerPixel * self.FWidth]));
-  }
-
-  if RawImage.Description.BitsPerPixel = 32 then
-    Move(RawImage.Data[0], Self.FData[0],  self.FWidth * self.FHeight * SizeOf(TColorBGRA))
-  else
-  begin
-    //FillChar(Self.FData[0], self.FWidth * self.FHeight * SizeOf(TColorBGRA), 0);
-    NewData := self.FData;
-
-    _24_old_p := RawImage.Data;
-    for y := 0 to self.FHeight -1 do
-    begin
-      for x := 0 to self.FWidth -1 do
-      begin
-        // b is the first byte in the record.
-        NewData^.b := _24_old_p[bs];
-        NewData^.g := _24_old_p[gs];
-        NewData^.r := _24_old_p[rs];
-        NewData^.a := 0;
-
-        inc(_24_old_p, 3);
-        inc(NewData);
-      end;
-
-      case RawImage.Description.LineEnd of
-        rileTight, rileByteBoundary: ; // do nothing
-        rileWordBoundary:
-          while (_24_old_p - RawImage.Data) mod 2 <> 0 do
-            inc(_24_old_p);
-        rileDWordBoundary:
-          while (_24_old_p - RawImage.Data) mod 4 <> 0 do
-            inc(_24_old_p);
-        rileQWordBoundary:
-          while (_24_old_p - RawImage.Data) mod 4 <> 0 do
-            inc(_24_old_p);
-        rileDQWordBoundary:
-          while (_24_old_p - RawImage.Data) mod 8 <> 0 do
-            inc(_24_old_p);
-        end;
-    end;
-  end;
-end;
-
 // TM_CCOEFF_NORMED
 // Author: slackydev
 function TSimbaImage.Compare(Other: TSimbaImage): Single;
@@ -685,7 +590,7 @@ var
   tcR, tcG, tcB, icR, icG, icB: TSingleMatrix;
 begin
   if (FWidth <> Other.Width) or (FHeight <> Other.Height) then
-    raise ESimbaBitmapException.Create(sbeMustBeEqualDimensions);
+    SimbaException('TSimbaImage.Compare: Both images must be equal dimensions');
 
   invSize := 1 / (FWidth * FHeight);
 
@@ -769,7 +674,7 @@ var
 begin
   Result := 0;
   if (FWidth <> Other.Width) or (FHeight <> Other.Height) then
-    raise ESimbaBitmapException.Create(sbeMustBeEqualDimensions);
+    SimbaException('TSimbaImage.PixelDifference: Both images must be equal dimensions');
 
   Ptr := Data;
   OtherPtr := Other.Data;
@@ -789,12 +694,11 @@ var
   I: Integer;
   Ptr, OtherPtr: PColorBGRA;
 begin
-  if (Tolerance = 0) then
-    Exit(PixelDifference(Other));
-
   Result := 0;
   if (FWidth <> Other.Width) or (FHeight <> Other.Height) then
-    raise ESimbaBitmapException.Create(sbeMustBeEqualDimensions);
+    SimbaException('TSimbaImage.PixelDifference: Both images must be equal dimensions');
+  if (Tolerance = 0) then
+    Exit(PixelDifference(Other));
 
   Tolerance := Sqr(Tolerance);
 
@@ -817,9 +721,9 @@ var
   Index: Integer;
   Buffer: specialize TSimbaOverAllocateArray<TPoint>;
 begin
-  Buffer.Init();
   if (FWidth <> Other.Width) or (FHeight <> Other.Height) then
-    raise ESimbaBitmapException.Create(sbeMustBeEqualDimensions);
+    SimbaException('TSimbaImage.PixelDifference: Both images must be equal dimensions');
+  Buffer.Init();
 
   W := FWidth - 1;
   H := FHeight - 1;
@@ -841,12 +745,12 @@ var
   Index: Integer;
   Buffer: specialize TSimbaOverAllocateArray<TPoint>;
 begin
+  if (FWidth <> Other.Width) or (FHeight <> Other.Height) then
+    SimbaException('TSimbaImage.PixelDifference: Both images must be equal dimensions');
   if (Tolerance = 0) then
     Exit(PixelDifferenceTPA(Other));
 
   Buffer.Init();
-  if (FWidth <> Other.Width) or (FHeight <> Other.Height) then
-    raise ESimbaBitmapException.Create(sbeMustBeEqualDimensions);
 
   Tolerance := Sqr(Tolerance);
 
@@ -865,8 +769,19 @@ begin
 end;
 
 procedure TSimbaImage.LoadFromTBitmap(bmp: TBitmap);
+var
+  TempBitmap: TSimbaImage;
 begin
-  LoadFromRawImage(bmp.RawImage);
+  SetSize(0, 0);
+
+  TempBitmap := Bmp.ToMufasaBitmap();
+  TempBitmap.DataOwner := False;
+
+  FData := TempBitmap.Data;
+  FWidth := TempBitmap.Width;
+  FHeight := TempBitmap.Height;
+
+  TempBitmap.Free();
 end;
 
 procedure TSimbaImage.LoadFromImage(Image: TSimbaImage);
@@ -1293,43 +1208,56 @@ end;
 
 procedure TSimbaImage.ReplaceColor(OldColor, NewColor: TColor);
 var
-  I: Integer;
-  OldRGB, NewRGB: TColorBGRA;
+  Old, New: TColorBGRA;
+  Ptr: PColorBGRA;
+  Upper: PtrUInt;
 begin
-  OldRGB := OldColor.ToBGRA();
-  NewRGB := NewColor.ToBGRA();
+  Old := OldColor.ToBGRA();
+  New := NewColor.ToBGRA();
 
-  for I := 0 to FWidth * FHeight - 1 do
-    if FData[I].EqualsIgnoreAlpha(OldRGB) then
-      FData[I] := NewRGB;
+  Upper := PtrUInt(@FData[FWidth * FHeight]);
+  Ptr := FData;
+
+  while (PtrUInt(Ptr) < Upper) do
+  begin
+    if Ptr^.EqualsIgnoreAlpha(Old) then
+      Ptr^ := New;
+
+    Inc(Ptr);
+  end;
 end;
 
 procedure TSimbaImage.ReplaceColors(OldColors, NewColors: TColorArray);
 var
-  I, J, H: Integer;
-  OldRGBs, NewRGBs: TColorBGRAArray;
+  I, H: Integer;
+  Arr: array of record
+    Old, New: TColorBGRA;
+  end;
+  Ptr: PColorBGRA;
+  Upper: PtrUInt;
 begin
   if (Length(OldColors) <> Length(NewColors)) then
-    raise ESimbaBitmapException.Create(sbeMustBeEqualLengths);
+    SimbaException('TSimbaImage.ReplaceColors: Color arrays must be same lengths (%d, %s)', [Length(OldColors), Length(NewColors)]);
 
-  SetLength(OldRGBs, Length(OldColors));
-  SetLength(NewRGBs, Length(NewColors));
-
-  H := High(OldColors);
-  for I := 0 to High(OldColors) do
+  SetLength(Arr, Length(OldColors));
+  for I := 0 to High(Arr) do
   begin
-    OldRGBs[I] := OldColors[I].ToBGRA();
-    NewRGBs[I] := NewColors[I].ToBGRA();
+    Arr[I].Old := OldColors[I].ToBGRA();
+    Arr[I].New := NewColors[I].ToBGRA();
   end;
 
-  for I := 0 to FWidth * FHeight - 1 do
-    for J := 0 to H do
-      if FData[I].EqualsIgnoreAlpha(OldRGBs[J]) then
-      begin
-        FData[I] := NewRGBs[J];
+  H := High(Arr);
+  Upper := PtrUInt(@FData[FWidth * FHeight]);
+  Ptr := FData;
 
-        Break;
-      end;
+  while (PtrUInt(Ptr) < Upper) do
+  begin
+    for I := 0 to H do
+      if Ptr^.EqualsIgnoreAlpha(Arr[I].Old) then
+        Ptr^ := Arr[I].New;
+
+    Inc(Ptr);
+  end;
 end;
 
 function GetRotatedSize(W, H: Integer; Angle: Single): TBox;
@@ -1403,7 +1331,7 @@ var
 begin
   Result := TSimbaImage.Create();
 
-  SinCos(Radians, CosAngle, SinAngle);
+  SinCos(Radians, SinAngle, CosAngle);
 
   case Expand of
     True:  RotateExpand();
@@ -1540,7 +1468,7 @@ var
 begin
   Result := TSimbaImage.Create();
 
-  SinCos(Radians, CosAngle, SinAngle);
+  SinCos(Radians, SinAngle, CosAngle);
 
   case Expand of
     True:  RotateExpand();
@@ -1890,7 +1818,7 @@ begin
   Result := FTextDrawer.FontName;
 end;
 
-class function TSimbaImage.FontNames: TStringArray;
+class function TSimbaImage.LoadedFontNames: TStringArray;
 begin
   Result := SimbaFreeTypeFontLoader.FontNames;
 end;
@@ -1982,7 +1910,7 @@ var
   i,minw,minh: Integer;
 begin
   if (not FDataOwner) then
-    raise ESimbaBitmapException.Create(sbeResizeExternalData);
+    SimbaException('TSimbaImage.SetSize: Cannot resize a image with external memory');
 
   if (NewWidth <> FWidth) or (NewHeight <> FHeight) then
   begin
@@ -2086,8 +2014,7 @@ begin
   for I := 0 to High(Points) do
     with Points[I] do
     begin
-      if not PointInImage(X, Y) then
-        raise ESimbaBitmapException.CreateFmt(sbeOutOfBounds, [X, Y, FWidth, FHeight]);
+      AssertInImage('GetPixels', X, Y);
 
       Result[I] := FData[Y * FWidth + X].ToColor();
     end;
@@ -2098,21 +2025,41 @@ var
   I: Integer;
 begin
   if (Length(Points) <> Length(Colors)) then
-    raise ESimbaBitmapException.Create(sbeMustBeEqualLengths);
+    SimbaException('TSimbaImage.SetPixels: Pixel & Color arrays must be same lengths (%d, %s)', [Length(Points), Length(Colors)]);
 
   for I := 0 to High(Points) do
     with Points[I] do
     begin
-      if not PointInImage(X, Y) then
-        raise ESimbaBitmapException.CreateFmt(sbeOutOfBounds, [X, Y, FWidth, FHeight]);
+      AssertInImage('SetPixels', X, Y);
 
       FData[Y * FWidth + X] := Colors[I].ToBGRA();
     end;
 end;
 
+procedure TSimbaImage.SetExternalData(AData: PColorBGRA; AWidth, AHeight: Integer);
+begin
+  SetSize(0, 0);
+
+  FWidth := AWidth;
+  FHeight := AHeight;
+  FData := AData;
+  FDataOwner := False;
+end;
+
+procedure TSimbaImage.ResetExternalData;
+begin
+  if FDataOwner then
+    Exit;
+
+  FDataOwner := True;
+  FData := nil;
+
+  SetSize(0, 0);
+end;
+
 function TSimbaImage.ThresholdAdaptive(Alpha, Beta: Byte; AInvert: Boolean; Method: ESimbaImageThreshMethod; K: Integer): TSimbaImage;
 var
-  I, Size: Integer;
+  I: Integer;
   vMin, vMax, Threshold: UInt8;
   Counter: Int64;
   Tab: array[0..256] of UInt8;
@@ -2124,9 +2071,6 @@ begin
   if Alpha = Beta then Exit;
   if Alpha > Beta then Swap(Alpha, Beta);
 
-  Size := (Self.Width * Self.Height) - 1;
-  Upper := PtrUInt(@FData[Size]);
-
   //Finding the threshold - While at it convert image to grayscale.
   Threshold := 0;
   case Method of
@@ -2135,6 +2079,8 @@ begin
       begin
         SrcPtr := FData;
         DestPtr := Result.Data;
+        Upper := PtrUInt(@FData[FWidth * FHeight]);
+
         Counter := 0;
 
         while (PtrUInt(SrcPtr) < Upper) do
@@ -2147,7 +2093,7 @@ begin
           Inc(DestPtr);
         end;
 
-        Threshold := (Counter div Size) + K;
+        Threshold := (Counter div ((FWidth * FHeight) - 1)) + K;
       end;
 
     //Middle of Min- and Max-value
@@ -2158,6 +2104,7 @@ begin
 
         SrcPtr := FData;
         DestPtr := Result.Data;
+        Upper := PtrUInt(@FData[FWidth * FHeight]);
 
         while (PtrUInt(SrcPtr) < Upper) do
         begin
@@ -2178,7 +2125,7 @@ begin
   for I:=0 to Threshold - 1 do Tab[I] := Alpha;
   for I:=Threshold to 255   do Tab[I] := Beta;
 
-  Upper := PtrUInt(@Result.Data[Size]);
+  Upper := PtrUInt(@Result.Data[Result.Width * Result.Height]);
   DestPtr := Result.Data;
   while (PtrUInt(DestPtr) < Upper) do
   begin
@@ -2322,27 +2269,6 @@ begin
   end;
 end;
 
-procedure TSimbaImage.SetPersistentMemory(mem: PtrUInt; NewWidth, NewHeight: Integer);
-begin
-  SetSize(0, 0);
-
-  FWidth := NewWidth;
-  FHeight := NewHeight;
-  FData := PColorBGRA(mem);
-  FDataOwner := False;
-end;
-
-procedure TSimbaImage.ResetPersistentMemory;
-begin
-  if (not FDataOwner) then
-  begin
-    FDataOwner := True;
-    FData := nil;
-
-    SetSize(0, 0);
-  end;
-end;
-
 procedure TSimbaImage.NotifyUnfreed;
 begin
   inherited NotifyUnfreed();
@@ -2358,16 +2284,14 @@ end;
 
 function TSimbaImage.GetPixel(X, Y: Integer): TColor;
 begin
-  if not PointInImage(X, Y) then
-    raise ESimbaBitmapException.CreateFmt(sbeOutOfBounds, [X, Y, FWidth, FHeight]);
+  AssertInImage('GetPixel', X, Y);
 
   Result := FData[Y * FWidth + X].ToColor();
 end;
 
 procedure TSimbaImage.SetPixel(X, Y: Integer; Color: TColor);
 begin
-  if not PointInImage(X, Y) then
-    raise ESimbaBitmapException.CreateFmt(sbeOutOfBounds, [X, Y, FWidth, FHeight]);
+  AssertInImage('SetPixel', X, Y);
 
   FData[Y * FWidth + X] := Color.ToBGRA();
 end;
@@ -2378,23 +2302,9 @@ begin
   FTransparentRGB := Value.ToBGRA();
 end;
 
-function TSimbaImage.PointInImage(const P: TPoint): Boolean;
-begin
-  Result := (P.X >= 0) and (P.Y >= 0) and (P.X < FWidth) and (P.Y < FHeight);
-end;
-
-function TSimbaImage.PointInImage(const X, Y: Integer): Boolean;
+function TSimbaImage.InImage(const X, Y: Integer): Boolean;
 begin
   Result := (X >= 0) and (Y >= 0) and (X < FWidth) and (Y < FHeight);
-end;
-
-procedure TSimbaImage.EnsureInImage(var P: TPoint);
-begin
-  if      (P.X < 0)       then P.X := 0
-  else if (P.X >= FWidth) then P.X := FWidth - 1;
-
-  if      (P.Y < 0)        then P.Y := 0
-  else if (P.Y >= FHeight) then P.Y := FHeight - 1;
 end;
 
 procedure TSimbaImage.EnsureInImage(var X, Y: Integer);
@@ -2404,6 +2314,12 @@ begin
 
   if      (Y < 0)        then Y := 0
   else if (Y >= FHeight) then Y := FHeight - 1;
+end;
+
+procedure TSimbaImage.AssertInImage(const Method: String; const X, Y: Integer);
+begin
+  if (X < 0) or (Y < 0) or (X >= FWidth) or (Y >= FHeight) then
+    SimbaException('TSimbaImage.%s: %d,%d is outside the image bounds: %d,%d,%d,%d', [Method, X, Y, 0,0,FWidth-1,FHeight-1]);
 end;
 
 function TSimbaImage.MatchTemplate(Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix;

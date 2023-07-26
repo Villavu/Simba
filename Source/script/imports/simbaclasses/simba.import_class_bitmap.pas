@@ -22,33 +22,13 @@ TSimbaImage is an Image data type.
 *)
 
 (*
-TSimbaImage.PointInImage
-~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaImage.PointInImage(P: TPoint): Boolean;
+TSimbaImage.InImage
+~~~~~~~~~~~~~~~~~~~
+function TSimbaImage.InImage(X, Y: Integer): Boolean;
 *)
-procedure _LapeMufasaBitmap_PointInImage1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_InImage(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PSimbaImage(Params^[0])^.PointInImage(PPoint(Params^[1])^);
-end;
-
-(*
-TSimbaImage.PointInImage
-~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaImage.PointInImage(X, Y: Integer): Boolean;
-*)
-procedure _LapeMufasaBitmap_PointInImage2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PSimbaImage(Params^[0])^.PointInImage(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-(*
-TSimbaImage.EnsureInImage
-~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaImage.EnsureInImage(var P: TPoint): Boolean;
-*)
-procedure _LapeMufasaBitmap_EnsureInImage1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.PointInImage(PPoint(Params^[1])^);
+  PBoolean(Result)^ := PSimbaImage(Params^[0])^.InImage(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
@@ -56,9 +36,9 @@ TSimbaImage.EnsureInImage
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 function TSimbaImage.EnsureInImage(var X, Y: Integer): Boolean;
 *)
-procedure _LapeMufasaBitmap_EnsureInImage2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_EnsureInImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.PointInImage(PInteger(Params^[1])^, PInteger(Params^[2])^);
+  PSimbaImage(Params^[0])^.EnsureInImage(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
@@ -142,33 +122,33 @@ begin
 end;
 
 (*
-TSimbaImage.SetPersistentMemory
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.SetPersistentMemory(Memory: PtrUInt; AWidth, AHeight: Integer);
+TSimbaImage.SetExternalData
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure TSimbaImage.SetExternalData(AData: PColorBGRA; AWidth, AHeight: Integer);
 *)
 procedure _LapeMufasaBitmap_SetPersistentMemory(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.SetPersistentMemory(PPtrUInt(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+  PSimbaImage(Params^[0])^.SetExternalData(PPointer(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 (*
-TSimbaImage.ResetPersistentMemory
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.ResetPersistentMemory;
+TSimbaImage.ResetExternalData
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure TSimbaImage.ResetExternalData;
 *)
 procedure _LapeMufasaBitmap_ResetPersistentMemory(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.ResetPersistentMemory();
+  PSimbaImage(Params^[0])^.ResetExternalData();
 end;
 
 (*
 TSimbaImage.SaveToFile
 ~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaImage.SaveToFile(FileName: String): Boolean;
+function TSimbaImage.SaveToFile(FileName: String; OverwriteIfExists: Boolean = False): Boolean;
 *)
 procedure _LapeMufasaBitmap_SaveToFile(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PSimbaImage(Params^[0])^.SaveToFile(PString(Params^[1])^);
+  PBoolean(Result)^ := PSimbaImage(Params^[0])^.SaveToFile(PString(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 (*
@@ -1190,9 +1170,9 @@ function TSimbaImage.GetFontNames: TStringArray; static;
 
 Returns all the available font names.
 *)
-procedure _LapeMufasaBitmap_GetFontNames(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMufasaBitmap_LoadedFontNames(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PStringArray(Result)^ := TSimbaImage.FontNames();
+  PStringArray(Result)^ := TSimbaImage.LoadedFontNames();
 end;
 
 (*
@@ -1295,13 +1275,11 @@ begin
 
     addGlobalFunc('function TSimbaImage.RowPtrs: TSimbaImageRowPtrs', @_LapeMufasaBitmap_RowPtrs);
 
-    addGlobalFunc('function TSimbaImage.GetFontNames: TStringArray; static;', @_LapeMufasaBitmap_GetFontNames);
+    addGlobalFunc('function TSimbaImage.LoadedFontNames: TStringArray; static;', @_LapeMufasaBitmap_LoadedFontNames);
     addGlobalFunc('function TSimbaImage.LoadFonts(Dir: String): Boolean; static;', @_LapeMufasaBitmap_LoadFonts);
 
-    addGlobalFunc('function TSimbaImage.PointInImage(P: TPoint): Boolean; overload', @_LapeMufasaBitmap_PointInImage1);
-    addGlobalFunc('function TSimbaImage.PointInImage(X, Y: Integer): Boolean; overload', @_LapeMufasaBitmap_PointInImage2);
-    addGlobalFunc('procedure TSimbaImage.EnsureInImage(var P: TPoint); overload', @_LapeMufasaBitmap_EnsureInImage1);
-    addGlobalFunc('procedure TSimbaImage.EnsureInImage(var X, Y: Integer); overload', @_LapeMufasaBitmap_EnsureInImage2);
+    addGlobalFunc('function TSimbaImage.InImage(X, Y: Integer): Boolean', @_LapeMufasaBitmap_InImage);
+    addGlobalFunc('procedure TSimbaImage.EnsureInImage(var X, Y: Integer)', @_LapeMufasaBitmap_EnsureInImage);
 
     addGlobalFunc('function TSimbaImage.Create: TSimbaImage; static; overload', @_LapeMufasaBitmap_Create);
     addGlobalFunc('function TSimbaImage.Create(Width, Height: Integer): TSimbaImage; static; overload', @_LapeMufasaBitmap_CreateEx);
@@ -1413,7 +1391,7 @@ begin
     addGlobalFunc('procedure TSimbaImage.LoadFromData(AWidth, AHeight: Integer; AData: PColorBGRA; DataWidth: Integer)', @_LapeMufasaBitmap_LoadFromData);
     addGlobalFunc('procedure TSimbaImage.LoadFromImage(Image: TSimbaImage);', @_LapeMufasaBitmap_LoadFromImage);
 
-    addGlobalFunc('function TSimbaImage.SaveToFile(FileName: String): Boolean;', @_LapeMufasaBitmap_SaveToFile);
+    addGlobalFunc('function TSimbaImage.SaveToFile(FileName: String; OverwriteIfExists: Boolean = False): Boolean;', @_LapeMufasaBitmap_SaveToFile);
     addGlobalFunc('function TSimbaImage.SaveToString: String;', @_LapeMufasaBitmap_SaveToString);
 
     addGlobalFunc('function TSimbaImage.ToTBitmap: TBitmap;', @_LapeMufasaBitmap_ToTBitmap);
