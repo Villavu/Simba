@@ -177,7 +177,7 @@ begin
 
   for LoopX := 0 to FBitmap.Width - 1 do
     for LoopY := 0 to FBitmap.Height - 1 do
-      if Image.PointInImage(X + LoopX, Y + LoopY) then
+      if Image.InImage(X + LoopX, Y + LoopY) then
         FBitmap.Canvas.Pixels[LoopX, LoopY] := Image.Pixel[X + LoopX, Y + LoopY]
       else
         FBitmap.Canvas.Pixels[LoopX, LoopY] := clBlack;
