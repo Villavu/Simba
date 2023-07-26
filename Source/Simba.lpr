@@ -25,6 +25,8 @@ begin
   SetHeapTraceOutput(IntToStr(GetProcessID()) + '.trc');
   {$ENDIF}
 
+  DebugLogger.CloseLogFileBetweenWrites := True;
+
   Application.CaptureExceptions := False;
   Application.Initialize();
 
