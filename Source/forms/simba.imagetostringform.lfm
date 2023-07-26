@@ -1,24 +1,26 @@
-object SimbaBitmapConversionForm: TSimbaBitmapConversionForm
+object SimbaImageToStringForm: TSimbaImageToStringForm
   Left = 2712
-  Height = 466
+  Height = 600
   Top = 537
-  Width = 755
-  AutoSize = True
-  Caption = 'Bitmap conversion'
-  ClientHeight = 466
-  ClientWidth = 755
-  Constraints.MinHeight = 360
-  Constraints.MinWidth = 560
+  Width = 1000
+  AllowDropFiles = True
+  Caption = 'Image To String'
+  ClientHeight = 600
+  ClientWidth = 1000
+  Constraints.MinHeight = 250
+  Constraints.MinWidth = 350
   DesignTimePPI = 120
+  OnCreate = FormCreate
+  OnDropFiles = FormDropFiles
   Position = poMainFormCenter
-  LCLVersion = '2.2.2.0'
+  LCLVersion = '2.2.4.0'
   object ToStringButton: TButton
     AnchorSideTop.Control = ClipboardButton
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 622
+    Left = 867
     Height = 30
-    Top = 428
+    Top = 562
     Width = 125
     Anchors = [akTop, akRight]
     AutoSize = True
@@ -34,9 +36,9 @@ object SimbaBitmapConversionForm: TSimbaBitmapConversionForm
     AnchorSideRight.Control = ToStringButton
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = ToStringButton
-    Left = 636
+    Left = 881
     Height = 24
-    Top = 396
+    Top = 530
     Width = 97
     Anchors = [akLeft, akBottom]
     BorderSpacing.Top = 10
@@ -55,7 +57,7 @@ object SimbaBitmapConversionForm: TSimbaBitmapConversionForm
     AnchorSideBottom.Control = ClipboardButton
     Left = 8
     Height = 30
-    Top = 393
+    Top = 527
     Width = 213
     Anchors = [akLeft, akRight, akBottom]
     AutoSize = True
@@ -68,9 +70,9 @@ object SimbaBitmapConversionForm: TSimbaBitmapConversionForm
   object GroupBox: TGroupBox
     AnchorSideBottom.Control = OpenButton
     Left = 8
-    Height = 377
+    Height = 511
     Top = 8
-    Width = 739
+    Width = 984
     Align = alTop
     Anchors = [akBottom]
     AutoSize = True
@@ -78,14 +80,14 @@ object SimbaBitmapConversionForm: TSimbaBitmapConversionForm
     BorderSpacing.Top = 8
     BorderSpacing.Right = 8
     Caption = 'Image'
-    ClientHeight = 352
-    ClientWidth = 735
+    ClientHeight = 486
+    ClientWidth = 980
     TabOrder = 3
     object ImagePreview: TImage
       Left = 0
-      Height = 352
+      Height = 486
       Top = 0
-      Width = 735
+      Width = 980
       Align = alClient
       Center = True
       Proportional = True
@@ -100,7 +102,7 @@ object SimbaBitmapConversionForm: TSimbaBitmapConversionForm
     AnchorSideBottom.Side = asrBottom
     Left = 8
     Height = 30
-    Top = 428
+    Top = 562
     Width = 213
     Anchors = [akLeft, akBottom]
     AutoSize = True

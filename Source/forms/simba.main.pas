@@ -13,7 +13,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ComCtrls, ExtCtrls,
   Menus, ImgList, LMessages, AnchorDockPanel,
   simba.settings, simba.mufasatypes, simba.mouselogger, simba.areaselector,
-  simba.scriptbackup, simba.scriptinstance, simba.component_menubar;
+  simba.scriptinstance, simba.component_menubar;
 
 const
   IMAGE_NONE                = -1;
@@ -82,7 +82,7 @@ type
     MenuItemAbout: TMenuItem;
     MenuItemACA: TMenuItem;
     MenuItemAssociateScripts: TMenuItem;
-    MenuItemBitmapConv: TMenuItem;
+    MenuItemImageToString: TMenuItem;
     MenuItemCloseTab: TMenuItem;
     MenuItemCloseTabs: TMenuItem;
     MenuItemColourHistory: TMenuItem;
@@ -183,7 +183,7 @@ type
     procedure MenuItemAboutClick(Sender: TObject);
     procedure MenuItemACAClick(Sender: TObject);
     procedure MenuItemAssociateScriptsClick(Sender: TObject);
-    procedure MenuItemBitmapConvClick(Sender: TObject);
+    procedure MenuItemImageToStringClick(Sender: TObject);
     procedure MenuItemConsoleClick(Sender: TObject);
     procedure MenuItemDocumentationClick(Sender: TObject);
     procedure MenuItemDTMEditorClick(Sender: TObject);
@@ -273,7 +273,7 @@ uses
   LCLType, LCLIntf, LazFileUtils, AnchorDocking, ToolWin,
 
   simba.shapeboxform, simba.openexampleform, simba.colorpickerhistoryform,
-  simba.debugimageform, simba.bitmaptostringform, simba.aboutform,
+  simba.debugimageform, simba.imagetostringform, simba.aboutform,
   simba.outputform, simba.filebrowserform, simba.notesform, simba.settingsform,
   simba.functionlistform, simba.scripttabsform, simba.ide_mainstatusbar,
 
@@ -1009,9 +1009,9 @@ begin
     SimbaScriptTabsForm.CurrentTab.Save('');
 end;
 
-procedure TSimbaForm.MenuItemBitmapConvClick(Sender: TObject);
+procedure TSimbaForm.MenuItemImageToStringClick(Sender: TObject);
 begin
-  SimbaBitmapConversionForm.Show();
+  SimbaImageToStringForm.Show();
 end;
 
 procedure TSimbaForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);

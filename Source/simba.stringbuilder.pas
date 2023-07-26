@@ -5,6 +5,11 @@
 
   Simple managed string builder.
 }
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.stringbuilder;
 
 {$i simba.inc}
@@ -26,7 +31,7 @@ type
     class operator Initialize(var Self: TSimbaStringBuilder);
 
     procedure Append(const Str: String);
-    procedure AppendLine(const Str: String);
+    procedure AppendLine(const Str: String = '');
     property Str: String read GetString;
     property Count: Integer read FCount;
     property Peek: Char read GetPeek;

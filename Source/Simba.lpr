@@ -12,7 +12,7 @@ uses
   simba.init,
   Classes, SysUtils, Interfaces, Forms, LazLogger,
   simba.mufasatypes, simba.main,
-  simba.aboutform, simba.debugimageform, simba.bitmaptostringform,
+  simba.aboutform, simba.debugimageform, simba.imagetostringform,
   simba.functionlistform, simba.scripttabsform, simba.outputform,
   simba.colorpickerhistoryform, simba.filebrowserform, simba.notesform,
   simba.settingsform, simba.associate, simba.openexampleform,
@@ -110,7 +110,7 @@ begin
     Application.CreateForm(TSimbaFileBrowserForm, SimbaFileBrowserForm);
     Application.CreateForm(TSimbaAboutForm, SimbaAboutForm);
     Application.CreateForm(TSimbaSettingsForm, SimbaSettingsForm);
-    Application.CreateForm(TSimbaBitmapConversionForm, SimbaBitmapConversionForm);
+  Application.CreateForm(TSimbaImageToStringForm, SimbaImageToStringForm);
     Application.CreateForm(TSimbaOpenExampleForm, SimbaOpenExampleForm);
     Application.CreateForm(TSimbaColorPickerHistoryForm, SimbaColorPickerHistoryForm);
     Application.CreateForm(TSimbaPackageForm, SimbaPackageForm);
