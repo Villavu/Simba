@@ -18,14 +18,6 @@ uses
   Classes, SysUtils, Graphics,
   simba.mufasatypes, simba.colormath;
 
-type
-  PChannelMultipliers = ^TChannelMultipliers;
-  TChannelMultipliers = array [0..2] of Single;
-
-const
-  DefaultMultipliers: TChannelMultipliers = (1, 1, 1);
-  DefaultColorSpace = EColorSpace.RGB;
-
 function DistanceRGB(const Color1, Color2: TColorRGB; const mul: TChannelMultipliers): Single; inline;
 function DistanceHSV(const Color1, Color2: TColorHSV; const mul: TChannelMultipliers): Single; inline;
 function DistanceHSL(const Color1, Color2: TColorHSL; const mul: TChannelMultipliers): Single; inline;

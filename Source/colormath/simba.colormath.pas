@@ -26,6 +26,14 @@ type
   PColorSpace = ^EColorSpace;
   {$POP}
 
+  PChannelMultipliers = ^TChannelMultipliers;
+  TChannelMultipliers = array [0..2] of Single;
+
+const
+  DefaultMultipliers: TChannelMultipliers = (1, 1, 1);
+  DefaultColorSpace = EColorSpace.RGB;
+
+type
   EColorSpaceHelper = type helper for EColorSpace
     function AsString: String;
   end;

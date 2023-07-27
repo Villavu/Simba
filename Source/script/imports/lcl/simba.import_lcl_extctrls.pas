@@ -11,8 +11,6 @@ uses
   simba.script_compiler;
 
 type
-  PBrush = ^TBrush;
-  PPen = ^TPen;
   PAlignment = ^TAlignment;
   PNotifyEvent = ^TNotifyEvent;
   PBevelWidth = ^TBevelWidth;

@@ -19,8 +19,7 @@ implementation
 uses
   lptypes, lpvartypes,
   simba.script_compiler, simba.mufasatypes, simba.finder, simba.bitmap, simba.dtm,
-  simba.colormath, simba.colormath_distance, simba.target,
-  simba.finder_color, simba.finder_bitmap;
+  simba.colormath, simba.target, simba.finder_color, simba.finder_bitmap;
 
 (*
 Finder
