@@ -33,7 +33,6 @@ type
   PComponent = ^TComponent;
   PWinControl = ^TWinControl;
   PFormBorderStyle = ^TFormBorderStyle;
-  PBitmap = ^TBitmap;
   PCanvas = ^TCanvas;
   PFont = ^TFont;
   PKeyEvent = ^TKeyEvent;

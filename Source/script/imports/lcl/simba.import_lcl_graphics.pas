@@ -16,8 +16,6 @@ type
   PBrush = ^TBrush;
   PBrushStyle = ^TBrushStyle;
   PCanvas = ^TCanvas;
-  PCopyMode = ^TCopyMode;
-  PFillStyle = ^TFillStyle;
   PFont = ^TFont;
   PFontPitch = ^TFontPitch;
   PFontQuality = ^TFontQuality;

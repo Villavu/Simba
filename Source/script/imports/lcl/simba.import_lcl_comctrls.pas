@@ -29,22 +29,16 @@ type
   PCustomTrackBar = ^TCustomTrackBar;
   PPageControl = ^TPageControl;
   PProgressBar = ^TProgressBar;
-  PProgressBarOrientation = ^TProgressBarOrientation;
-  PProgressBarStyle = ^TProgressBarStyle;
   PStatusBar = ^TStatusBar;
   PStatusPanel = ^TStatusPanel;
-  PStatusPanelBevel = ^TStatusPanelBevel;
   PStatusPanels = ^TStatusPanels;
-  PStatusPanelStyle = ^TStatusPanelStyle;
   PTabChangingEvent = ^TTabChangingEvent;
-  PTabControlOptions = ^TCTabControlOptions;
   PTabPosition = ^TTabPosition;
   PTabSheet = ^TTabSheet;
   PTickMark = ^TTickMark;
   PTickStyle = ^TTickStyle;
   PTrackBar = ^TTrackBar;
   PTrackBarOrientation = ^TTrackBarOrientation;
-  PTrackBarScalePos = ^TTrackBarScalePos;
 
 procedure _LapeCustomProgressBar_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin

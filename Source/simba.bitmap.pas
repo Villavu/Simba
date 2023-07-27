@@ -208,9 +208,9 @@ type
     function Compare(Other: TSimbaImage): Single;
 
     function PixelDifference(Other: TSimbaImage): Integer; overload;
-    function PixelDifference(Other: TSimbaImage; Tolerance: Integer): Integer; overload;
+    function PixelDifference(Other: TSimbaImage; Tolerance: Single): Integer; overload;
     function PixelDifferenceTPA(Other: TSimbaImage): TPointArray; overload;
-    function PixelDifferenceTPA(Other: TSimbaImage; Tolerance: Integer): TPointArray; overload;
+    function PixelDifferenceTPA(Other: TSimbaImage; Tolerance: Single): TPointArray; overload;
 
     function MatchTemplate(Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix;
     function MatchTemplateMask(Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix;
@@ -689,7 +689,7 @@ begin
   end;
 end;
 
-function TSimbaImage.PixelDifference(Other: TSimbaImage; Tolerance: Integer): Integer;
+function TSimbaImage.PixelDifference(Other: TSimbaImage; Tolerance: Single): Integer;
 var
   I: Integer;
   Ptr, OtherPtr: PColorBGRA;
@@ -739,7 +739,7 @@ begin
   Result := Buffer.Trim();
 end;
 
-function TSimbaImage.PixelDifferenceTPA(Other: TSimbaImage; Tolerance: Integer): TPointArray;
+function TSimbaImage.PixelDifferenceTPA(Other: TSimbaImage; Tolerance: Single): TPointArray;
 var
   X, Y, W, H: Integer;
   Index: Integer;
