@@ -4,11 +4,17 @@ unit simba.import_class_json;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportJson(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.script_compiler, simba.jsonparser;
+  lptypes,
+  simba.jsonparser;
 
 type
   PStringList = ^TStringList;
@@ -503,9 +509,6 @@ begin
     addGlobalFunc('function TJSONObject.toString(indentFactor, indent : integer): string; overload', @_LapeJSONObject_toStringExEx);
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportJSON);
 
 end.
 

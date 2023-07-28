@@ -9,11 +9,17 @@ unit simba.import_matchtemplate;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportMatchTemplate(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.bitmap, simba.matchtemplate;
+  lptypes,
+  simba.bitmap, simba.matchtemplate;
 
 procedure _LapeMatchTemplateCache_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -89,9 +95,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportMatchTemplate);
 
 end.
 

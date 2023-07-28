@@ -4,11 +4,16 @@ unit simba.import_lcl_stdctrls;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportLCLStdCtrls(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, controls, extctrls, stdctrls, comctrls, forms, graphics, buttons, lptypes, ffi,
-  simba.script_compiler;
+  controls, extctrls, stdctrls, comctrls, forms, graphics, buttons, lptypes, ffi;
 
 type
   PObject = ^TObject;
@@ -1332,9 +1337,6 @@ begin
     addGlobalFunc('procedure TRadioButton.Init(AOwner: TComponent); override', @_LapeRadioButton_Init);
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportLCLStdCtrls);
 
 end.
 

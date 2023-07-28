@@ -1,18 +1,21 @@
-unit simba.import_internet;
+unit simba.import_web;
 
 {$i simba.inc}
 
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportWeb(Compiler: TSimbaScript_Compiler);
 
 implementation
 
 uses
-  fphttpclient,
   lptypes, ffi,
-  simba.script_compiler, simba.nativeinterface, simba.httpclient;
+  fphttpclient,
+  simba.nativeinterface, simba.httpclient;
 
 (*
 Internet
@@ -401,11 +404,11 @@ begin
   PSimbaHTTPClient(Params^[0])^.OnExtractProgress := TSimbaHTTPExtractingEvent(Params^[1]^);
 end;
 
-procedure ImportInternet(Compiler: TSimbaScript_Compiler);
+procedure ImportWeb(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    ImportingSection := 'Internet';
+    ImportingSection := 'Web';
 
     addGlobalType([
       'enum(',
@@ -541,9 +544,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportInternet);
 
 end.
 

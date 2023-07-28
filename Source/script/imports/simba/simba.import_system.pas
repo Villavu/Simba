@@ -4,12 +4,18 @@ unit simba.import_system;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportSystem(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  Classes, SysUtils, Graphics,
+  Graphics,
   lptypes, lpparser, ffi,
-  simba.script_compiler, simba.mufasatypes, simba.nativeinterface;
+  simba.nativeinterface;
 
 procedure _LapeGetCurrentThreadID(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -155,9 +161,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportSystem);
 
 end.
 

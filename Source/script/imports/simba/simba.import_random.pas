@@ -18,11 +18,17 @@ unit simba.import_random;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportRandom(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.random;
+  lptypes,
+  simba.random;
 
 (*
 Random
@@ -166,9 +172,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportRandom);
 
 end.
 

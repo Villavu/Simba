@@ -4,11 +4,16 @@ unit simba.import_compress;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportCompress(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes, ffi,
-  synlz, simba.script_compiler,  simba.compress;
+  lptypes, ffi, synlz, simba.compress;
 
 procedure _LapeCompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -103,9 +108,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportCompress);
 
 end.
 

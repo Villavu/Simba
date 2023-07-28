@@ -4,12 +4,18 @@ unit simba.import_class_bitmap;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportSimbaImage(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  Classes, SysUtils, Graphics,
+  Graphics,
   lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.bitmap;
+  simba.bitmap;
 
 type
   PBitmap = ^TBitmap;
@@ -1245,7 +1251,7 @@ TSimbaImage.DrawTarget
 procedure TSimbaImage.DrawTarget(P: TPoint; Bounds: TBox = [-1,-1,-1,-1]); overload;
 *)
 
-procedure ImportImage(Compiler: TSimbaScript_Compiler);
+procedure ImportSimbaImage(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
@@ -1403,9 +1409,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportImage);
 
 end.
 

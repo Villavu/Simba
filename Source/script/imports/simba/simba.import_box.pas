@@ -4,11 +4,16 @@ unit simba.import_box;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportBox(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.mufasatypes, simba.script_compiler;
+  lptypes;
 
 (*
 TBox
@@ -394,9 +399,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportBox);
 
 end.
 

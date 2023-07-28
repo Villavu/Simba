@@ -4,11 +4,17 @@ unit simba.import_internal;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportInternal(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lazloggerbase, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.tpa, simba.algo_sort, simba.algo_unique,
+  lazloggerbase, lptypes,
+  simba.tpa, simba.algo_sort, simba.algo_unique,
   simba.algo_difference, simba.algo_intersection, simba.algo_symmetricDifference;
 
 procedure _LapeWrite(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -313,9 +319,6 @@ begin
     addGlobalFunc('function TInt64Array.Intersection(Other: TInt64Array): TInt64Array', @_Lape_Int64_Intersection);
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportInternal);
 
 end.
 

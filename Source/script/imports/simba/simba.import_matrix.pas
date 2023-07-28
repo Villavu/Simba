@@ -4,11 +4,16 @@ unit simba.import_matrix;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportMatrix(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.script_compiler, simba.mufasatypes,
+  lptypes,
   simba.integermatrix, simba.singlematrix;
 
 // Integer
@@ -383,9 +388,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportMatrix);
 
 end.
 

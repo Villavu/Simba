@@ -4,11 +4,17 @@ unit simba.import_atpa;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportATPA(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.atpa;
+  lptypes,
+  simba.atpa;
 
 (*
 T2DPointArray
@@ -367,9 +373,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportATPA);
 
 end.
 

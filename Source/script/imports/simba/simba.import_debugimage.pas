@@ -4,11 +4,17 @@ unit simba.import_debugimage;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportDebugImage(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.script_compiler, simba.scriptthread, simba.bitmap;
+  lptypes,
+  simba.scriptthread, simba.bitmap;
 
 (*
 Debug Image
@@ -374,9 +380,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportDebugImage);
 
 end.
 

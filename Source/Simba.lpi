@@ -560,7 +560,7 @@
         <IsPartOfProject Value="True"/>
       </Unit43>
       <Unit44>
-        <Filename Value="script/imports/simba/simba.import_internet.pas"/>
+        <Filename Value="script/imports/simba/simba.import_web.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit44>
       <Unit45>

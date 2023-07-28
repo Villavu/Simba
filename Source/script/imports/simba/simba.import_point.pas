@@ -4,11 +4,16 @@ unit simba.import_point;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportPoint(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.mufasatypes, simba.script_compiler;
+  lptypes;
 
 (*
 TPoint
@@ -274,9 +279,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportPoint);
 
 end.
 

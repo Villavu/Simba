@@ -4,11 +4,17 @@ unit simba.import_slacktree;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportSlackTree(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.slacktree;
+  lptypes,
+  simba.slacktree;
 
 procedure _LapeSlackTreeInit(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -106,9 +112,6 @@ begin
     addGlobalFunc('function TSlackTree.RefArray: TSlackRefArray;', @_LapeSlackTreeRefArray);
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportSlackTree);
 
 end.
 

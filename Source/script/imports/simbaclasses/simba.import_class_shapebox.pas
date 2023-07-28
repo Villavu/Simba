@@ -4,12 +4,17 @@ unit simba.import_class_shapebox;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportSimbaShapeBox(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, controls, stdctrls, extctrls, comctrls, graphics, lptypes, ffi,
-  simba.script_compiler, simba.mufasatypes, simba.imagebox,
-  simba.shapebox;
+  controls, stdctrls, extctrls, comctrls, graphics, lptypes, ffi,
+  simba.imagebox, simba.shapebox;
 
 type
   PComponent = ^TComponent;
@@ -221,9 +226,6 @@ begin
     addGlobalFunc('function TSimbaShapeBox.Panel: TPanel;', @_LapeSimbaShapeBox_Panel);
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportSimbaShapeBox);
 
 end.
 

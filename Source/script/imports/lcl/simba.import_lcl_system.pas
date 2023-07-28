@@ -4,11 +4,16 @@ unit simba.import_lcl_system;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportLCLSystem(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes, ffi,
-  simba.script_compiler;
+  lptypes, ffi;
 
 type
   PObject = ^TObject;
@@ -772,9 +777,6 @@ begin
     addGlobalFunc('procedure TStringList.CustomSort(CompareFn: TStringListSortCompare);', @_LapeStringList_CustomSort);
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportLCLSystem);
 
 end.
 

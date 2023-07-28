@@ -4,11 +4,17 @@ unit simba.import_timing;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportTiming(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.script_compiler, simba.datetime, simba.nativeinterface, simba.scriptthread;
+  lptypes,
+  simba.datetime, simba.nativeinterface, simba.scriptthread;
 
 procedure _LapePreciseSleep(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -145,9 +151,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportTiming);
 
 end.
 

@@ -4,11 +4,16 @@ unit simba.import_lcl_form;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportLCLForm(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, controls, extctrls, comctrls, graphics, forms, dialogs, lptypes, ffi,
-  simba.script_compiler;
+  controls, extctrls, comctrls, graphics, forms, dialogs, lptypes, ffi;
 
 type
   PStrings = ^TStrings;
@@ -1144,9 +1149,6 @@ begin
     addGlobalFunc('procedure TColorDialog.Init(AOwner: TComponent); override', @_LapeColorDialog_Init);
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportLCLForm);
 
 end.
 

@@ -5,14 +5,17 @@ unit simba.import_input;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportInput(Compiler: TSimbaScript_Compiler);
 
 implementation
 
 uses
   lptypes,
   ffi,
-  simba.script_compiler, simba.mufasatypes, simba.input, simba.target;
+  simba.input, simba.target;
 
 (*
 Input
@@ -621,9 +624,6 @@ begin
     addInputMethod('function TSimbaInput.CharToKeyCode(C: Char): KeyCode', @_LapeSimbaInput_CharToKeyCode);
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportInput);
 
 end.
 

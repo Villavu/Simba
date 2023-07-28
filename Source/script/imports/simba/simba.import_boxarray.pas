@@ -4,11 +4,16 @@ unit simba.import_boxarray;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportBoxArray(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.mufasatypes, simba.script_compiler,
+  lptypes,
   simba.algo_difference, simba.algo_intersection, simba.algo_symmetricDifference;
 
 (*
@@ -264,9 +269,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportBoxArray);
 
 end.
 

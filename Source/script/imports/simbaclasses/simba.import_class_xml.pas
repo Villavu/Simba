@@ -4,11 +4,17 @@ unit simba.import_class_xml;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportXML(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.script_compiler, simba.xmlparser;
+  lptypes,
+  simba.xmlparser;
 
 type
   PStream = ^TStream;
@@ -285,9 +291,6 @@ begin
     //addGlobalFunc('procedure TXml.Free()', @_LapeVerySimpleXml_Free);
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportXML);
 
 end.
 

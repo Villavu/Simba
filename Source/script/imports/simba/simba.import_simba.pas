@@ -4,11 +4,17 @@ unit simba.import_simba;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportSimba(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.script_compiler, simba.scriptthread, simba.mufasatypes, simba.settings;
+  lptypes,
+  simba.scriptthread, simba.settings;
 
 procedure _LapeClearDebug(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -85,9 +91,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportSimba);
 
 end.
 

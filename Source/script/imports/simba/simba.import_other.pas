@@ -4,12 +4,18 @@ unit simba.import_other;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportOther(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, clipbrd, lptypes,
-  simba.script_compiler, simba.nativeinterface, simba.scriptthread,
-  simba.settings, simba.mufasatypes, simba.compress, simba.encoding;
+  clipbrd, lptypes,
+  simba.nativeinterface, simba.scriptthread,
+  simba.settings, simba.compress, simba.encoding;
 
 procedure _LapePlaySound(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -72,9 +78,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportOther);
 
 end.
 

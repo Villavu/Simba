@@ -4,11 +4,16 @@ unit simba.import_lcl_extctrls;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportLCLExtCtrls(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, controls, extctrls, graphics, customtimer, lptypes, ffi,
-  simba.script_compiler;
+  controls, extctrls, graphics, customtimer, lptypes, ffi;
 
 type
   PAlignment = ^TAlignment;
@@ -340,9 +345,6 @@ begin
     //addGlobalFunc('procedure TPanel.Free;', @_LapePanel_Free);
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportLCLExtCtrls);
 
 end.
 

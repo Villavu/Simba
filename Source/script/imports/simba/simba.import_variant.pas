@@ -11,12 +11,16 @@ unit simba.import_variant;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportVariant(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,  variants,
-  simba.script_compiler;
-
+  lptypes, variants;
 
 (*
 Variant
@@ -184,9 +188,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportVariant);
 
 end.
 

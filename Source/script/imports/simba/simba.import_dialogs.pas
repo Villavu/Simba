@@ -4,11 +4,17 @@ unit simba.import_dialogs;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportDialogs(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, dialogs, controls, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.scriptthread, simba.aca, simba.dtmeditor,
+  dialogs, controls, lptypes,
+  simba.scriptthread, simba.aca, simba.dtmeditor,
   simba.dialog, simba.threading, simba.target, simba.finder;
 
 procedure _LapeInputCombo(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -144,9 +150,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportDialogs);
 
 end.
 
