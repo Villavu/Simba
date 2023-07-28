@@ -9,11 +9,17 @@ unit simba.import_file;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportFile(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.script_compiler, simba.env, simba.files;
+  lptypes,
+  simba.env, simba.files;
 
 type
   PByteArray = ^TByteArray;
@@ -656,9 +662,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportFile);
 
 end.
 

@@ -4,12 +4,17 @@ unit simba.import_lcl_misc;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportLCLMisc(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, process, spin, pipes, menus, graphics, ListFilterEdit, StdCtrls, Buttons, ButtonPanel,
-  lptypes, ffi,
-  simba.script_compiler;
+  process, spin, pipes, menus, graphics, ListFilterEdit, StdCtrls, Buttons, ButtonPanel,
+  lptypes, ffi;
 
 type
   PBitmap = ^TBitmap;
@@ -970,8 +975,5 @@ begin
     addClassVar('TButtonPanel', 'ShowGlyphs', 'TButtonPanelButtons', @_LapeButtonPanel_ShowGlyphs_Read, @_LapeButtonPanel_ShowGlyphs_Write);
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportLCLMisc);
 
 end.

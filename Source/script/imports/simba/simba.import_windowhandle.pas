@@ -4,11 +4,17 @@ unit simba.import_windowhandle;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportWindowHandle(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.windowhandle;
+  lptypes,
+  simba.windowhandle;
 
 (*
 Window Handle
@@ -307,9 +313,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportWindowHandle);
 
 end.
 

@@ -4,11 +4,16 @@ unit simba.import_lcl_graphics;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportLCLGraphics(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, graphics, clipbrd, lptypes, ffi,
-  simba.mufasatypes, simba.script_compiler;
+  graphics, clipbrd, lptypes, ffi;
 
 type
   PAntialiasingMode = ^TAntialiasingMode;
@@ -929,9 +934,6 @@ begin
     addClassVar('TPicture', 'OnChange', 'TNotifyEvent', @_LapePicture_OnChange_Read, @_LapePicture_OnChange_Write);
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportLCLGraphics);
 
 end.
 

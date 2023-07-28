@@ -4,11 +4,16 @@ unit simba.import_lcl_comctrls;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportLCLComCtrls(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, controls, extctrls, comctrls, graphics, checklst, stdctrls, lptypes, ffi,
-  simba.script_compiler;
+  controls, extctrls, comctrls, graphics, checklst, stdctrls, lptypes, ffi;
 
 type
   PRect = ^TRect;
@@ -901,9 +906,6 @@ begin
     addGlobalFunc('procedure TStatusBar.Init(TheOwner: TComponent); override', @_LapeStatusBar_Init);
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportLCLComCtrls);
 
 end.
 

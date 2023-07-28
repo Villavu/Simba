@@ -4,13 +4,18 @@ unit simba.import_tpa;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportTPA(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.tpa,
-  simba.algo_difference, simba.algo_intersection, simba.algo_symmetricDifference,
-  simba.geometry;
+  lptypes,
+  simba.tpa, simba.geometry,
+  simba.algo_difference, simba.algo_intersection, simba.algo_symmetricDifference;
 
 (*
 TPointArray
@@ -796,8 +801,5 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportTPA);
 
 end.

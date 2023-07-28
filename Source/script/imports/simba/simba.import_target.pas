@@ -5,14 +5,16 @@ unit simba.import_target;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportTarget(Compiler: TSimbaScript_Compiler);
 
 implementation
 
 uses
   lptypes, lpvartypes, ffi,
-  simba.script_compiler, simba.mufasatypes, simba.bitmap, simba.target;
-
+  simba.bitmap, simba.target;
 
 (*
 Target
@@ -330,9 +332,6 @@ begin
     ]);
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportTarget);
 
 end.
 

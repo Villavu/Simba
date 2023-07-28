@@ -12,13 +12,16 @@ unit simba.import_finder;
 interface
 
 uses
-  Classes, SysUtils, Graphics;
+  Classes, SysUtils, Graphics,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportFinder(Compiler: TSimbaScript_Compiler);
 
 implementation
 
 uses
   lptypes, lpvartypes,
-  simba.script_compiler, simba.mufasatypes, simba.finder, simba.bitmap, simba.dtm,
+  simba.finder, simba.bitmap, simba.dtm,
   simba.colormath, simba.target, simba.finder_color, simba.finder_bitmap;
 
 (*
@@ -437,9 +440,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportFinder);
 
 end.
 

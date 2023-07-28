@@ -4,11 +4,17 @@ unit simba.import_hash;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportHash(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes, blowfish, md5, sha1, hmac,
-  simba.script_compiler, simba.encoding;
+  lptypes, blowfish, md5, sha1, hmac,
+  simba.encoding;
 
 procedure _LapeBlowFishEncrypt(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 var
@@ -149,9 +155,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportHash);
 
 end.
 

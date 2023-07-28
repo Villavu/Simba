@@ -4,11 +4,17 @@ unit simba.import_class_imagebox;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportSimbaImageBox(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, controls, extctrls, comctrls, graphics, lptypes, ffi,
-  simba.script_compiler, simba.mufasatypes, simba.imagebox, simba.imagebox_bitmap,
+  controls, extctrls, comctrls, graphics, lptypes, ffi,
+  simba.imagebox, simba.imagebox_bitmap,
   simba.bitmap, simba.dtm, simba.colormath;
 
 type
@@ -319,9 +325,6 @@ begin
     addGlobalFunc('procedure TSimbaImageBox.Init(Owner: TComponent); override', @_LapeSimbaImageBox_Init);
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportSimbaImageBox);
 
 end.
 

@@ -9,11 +9,13 @@ unit simba.import_colors;
 
 interface
 
-implementation
-
 uses
-  Classes, SysUtils, Graphics,
-  simba.script_compiler;
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportColors(Compiler: TSimbaScript_Compiler);
+
+implementation
 
 procedure ImportColors(Compiler: TSimbaScript_Compiler);
 begin
@@ -199,9 +201,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportColors);
 
 end.
 

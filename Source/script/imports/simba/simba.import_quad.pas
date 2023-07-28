@@ -4,11 +4,16 @@ unit simba.import_quad;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportQuad(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.mufasatypes, simba.script_compiler;
+  lptypes;
 
 (*
 TQuad
@@ -285,9 +290,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportQuad);
 
 end.
 

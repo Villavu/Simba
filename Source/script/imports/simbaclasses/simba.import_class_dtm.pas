@@ -4,11 +4,17 @@ unit simba.import_class_dtm;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportDTM(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.dtm;
+  lptypes,
+  simba.dtm;
 
 (*
 DTM
@@ -301,9 +307,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportDTM);
 
 end.
 

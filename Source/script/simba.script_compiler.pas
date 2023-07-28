@@ -35,9 +35,6 @@ type
     procedure InitBaseVariant; override;
     procedure InitBaseDefinitions; override;
   public
-    class var Imports: TSimbaImportArray;
-    class procedure RegisterImport(Proc: TSimbaImport);
-
     function CurrentDir: String;
 
     procedure addOverrideMethod(Header: lpString; GetBody: TOverridingMethod);
@@ -68,7 +65,7 @@ implementation
 
 uses
   lpeval,
-  {%H-}simba.script_imports, simba.paslex,
+  simba.script_imports, simba.paslex,
   simba.script_compiler_waituntil, simba.script_compiler_rtti;
 
 procedure TSimbaScript_Compiler.addOverrideMethod(Header: lpString; GetBody: TOverridingMethod);
@@ -195,8 +192,7 @@ begin
 
     ImportingSection := '';
 
-    for Proc in Imports do
-      Proc(Self);
+    AddSimbaImports(Self);
   finally
     EndImporting();
   end;
@@ -252,11 +248,6 @@ end;
 procedure TSimbaScript_Compiler.InitBaseVariant;
 begin
   { nothing, we import our own variant }
-end;
-
-class procedure TSimbaScript_Compiler.RegisterImport(Proc: TSimbaImport);
-begin
-  Imports += [Proc];
 end;
 
 function TSimbaScript_Compiler.CurrentDir: String;

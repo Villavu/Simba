@@ -4,11 +4,17 @@ unit simba.import_script;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportScript(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.process, simba.scriptthread;
+  lptypes,
+  simba.process, simba.scriptthread;
 
 (*
 Script
@@ -311,9 +317,6 @@ begin
     ]);
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportScript);
 
 end.
 

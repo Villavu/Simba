@@ -4,11 +4,17 @@ unit simba.import_colormath;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportColorMath(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, graphics, lptypes,
-  simba.script_compiler, simba.mufasatypes, simba.colormath_distance, simba.colormath;
+  Graphics, lptypes,
+  simba.colormath_distance, simba.colormath;
 
 procedure _LapeColorRGBToBGRA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -288,9 +294,6 @@ begin
     ImportingSection := '';
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportColorMath);
 
 end.
 

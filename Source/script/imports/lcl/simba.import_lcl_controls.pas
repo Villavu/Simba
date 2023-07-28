@@ -4,11 +4,16 @@ unit simba.import_lcl_controls;
 
 interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes, simba.script_compiler;
+
+procedure ImportLCLControls(Compiler: TSimbaScript_Compiler);
+
 implementation
 
 uses
-  classes, sysutils, controls, extctrls, comctrls, graphics, forms, lptypes, ffi,
-  simba.script_compiler;
+  controls, extctrls, comctrls, graphics, forms, lptypes, ffi;
 
 type
   PAlign = ^TAlign;
@@ -973,9 +978,6 @@ begin
     addClassVar('TGraphicControl', 'Canvas', 'TCanvas', @_LapeGraphicControl_Canvas_Read);
   end;
 end;
-
-initialization
-  TSimbaScript_Compiler.RegisterImport(@ImportLCLControls);
 
 end.
 
