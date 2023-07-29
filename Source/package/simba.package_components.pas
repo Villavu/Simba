@@ -5,7 +5,7 @@ unit simba.package_components;
 interface
 
 uses
-  classes, sysutils, forms, controls, graphics, stdctrls, extctrls, grids,
+  classes, sysutils, forms, controls, graphics, stdctrls, extctrls, grids, LCLVersion,
   simba.package;
 
 type
@@ -74,7 +74,7 @@ type
     procedure DoLineWrapping(Foo: PtrInt);
     procedure DoFontCalculate;
 
-    procedure DrawCellText(aCol, aRow: Integer; aRect: TRect; aState: TGridDrawState; aText: String); override;
+    procedure DrawCellText(aCol, aRow: Integer; aRect: TRect; aState: TGridDrawState; {$if LCL_FULLVERSION >= 3000001}const{$ENDIF} aText: String); override;
     procedure DrawFocusRect(aCol, aRow: Integer; ARect: TRect); override;
     procedure PrepareCanvas(aCol, aRow: Integer; aState: TGridDrawState); override;
   public
@@ -561,7 +561,7 @@ begin
   Application.QueueAsyncCall(@DoLineWrapping, 0);
 end;
 
-procedure TPackageVersionGrid.DrawCellText(aCol, aRow: Integer; aRect: TRect; aState: TGridDrawState; aText: String);
+procedure TPackageVersionGrid.DrawCellText(aCol, aRow: Integer; aRect: TRect; aState: TGridDrawState; {$if LCL_FULLVERSION >= 3000001}const{$ENDIF} aText: String);
 var
   Data: TObject;
   Info: TVersionInfo absolute Data;
