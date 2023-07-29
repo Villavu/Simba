@@ -1,0 +1,76 @@
+{$assertions on}
+
+const
+  TEST = '{'                                               + LINE_SEP +
+          '  "ThisIsAInteger" : 1,'                        + LINE_SEP +
+          '  "ThisIsALargeInteger" : 9223372036854775807,' + LINE_SEP +
+          '  "ThisIsAFloat" : 1.5000000000000000E+000,'    + LINE_SEP +
+          '  "ThisIsAString" : "HelloWorld",'              + LINE_SEP +
+          '  "ThisIsTrue" : -1,'                           + LINE_SEP +
+          '  "ThisIsFalse" : 0,'                           + LINE_SEP +
+          '  "ThisIsAObject" : {'                          + LINE_SEP +
+          '    "ObjectKey" : "ObjectValue"'                + LINE_SEP +
+          '  },'                                           + LINE_SEP +
+          '  "ThisIsAArray" : ['                           + LINE_SEP +
+          '    1,'                                         + LINE_SEP +
+          '    "2",'                                       + LINE_SEP +
+          '    3.0000000000000000E+000,'                   + LINE_SEP +
+          '    {'                                          + LINE_SEP +
+          '      "Key" : "Value"'                          + LINE_SEP +
+          '    }'                                          + LINE_SEP +
+          '  ]'                                            + LINE_SEP +
+          '}';
+
+  TEST2 = '{'                                              + LINE_SEP +
+          '  "fruits_clone" : {'                           + LINE_SEP +
+          '    "apple" : "red",'                           + LINE_SEP +
+          '    "bananna" : "yellow"'                       + LINE_SEP +
+          '  },'                                           + LINE_SEP +
+          '  "apple_clone" : "red"'                        + LINE_SEP +
+          '}';
+
+var
+  Parser: TJSONParser;
+  Element: TJSONElement;
+begin
+  Parser := TJSONParser.Create('');
+  Parser.AddValue('ThisIsAInteger', 1);
+  Parser.AddValue('ThisIsALargeInteger', High(Int64));
+  Parser.AddValue('ThisIsAFloat', 1.5);
+  Parser.AddValue('ThisIsAString', 'HelloWorld');
+  Parser.AddValue('ThisIsTrue', True);
+  Parser.AddValue('ThisIsFalse', False);
+  Parser.AddObject('ThisIsAObject').AddValue('ObjectKey', 'ObjectValue');
+
+  Element := Parser.AddArray('ThisIsAArray');
+  Element.AddValue('', 1);
+  Element.AddValue('', '2');
+  Element.AddValue('', 3.0);
+
+  Element := Element.AddObject('ArrayObject');
+  Element.AddValue('Key', 'Value');
+
+  Assert(Parser.AsString() = TEST);
+
+  Assert(Parser.FindPath('ThisIsAArray[1]', Element));
+  Assert(Element.IsValue());
+  Assert(Element.GetValue() = '2');
+
+  Assert(Parser.FindPath('ThisIsAObject.ObjectKey', Element));
+  Assert(Element.IsValue());
+  Assert(Element.ValueType = EJSONValueType.STR);
+  Assert(Element.GetValue() = 'ObjectValue');
+
+  Parser.Clear();
+  Parser.AddObject('fruits').AddValue('apple', 'red');
+  Assert(Parser.Find('fruits', Element));
+  Element.AddValue('bananna', 'yellow');
+
+  Parser.AddElement('fruits_clone', Element.Clone());
+  Parser.AddElement('apple_clone', Element.GetItem(0).Clone());
+  Parser.Delete('fruits');
+
+  Assert(Parser.AsString = TEST2);
+
+  Parser.Free();
+end;

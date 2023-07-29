@@ -29,8 +29,7 @@ uses
 
   // Simba classes
   simba.import_class_bitmap, simba.import_class_dtm, simba.import_matchtemplate,
-  simba.import_class_xml, simba.import_class_json,
-  simba.import_class_imagebox, simba.import_class_shapebox,
+  simba.import_class_json, simba.import_class_imagebox, simba.import_class_shapebox,
 
   // Simba
   simba.import_timing, simba.import_tpa, simba.import_atpa,
@@ -66,7 +65,6 @@ begin
   ImportSimbaImage(Compiler);
   ImportDTM(Compiler);
   ImportMatchTemplate(Compiler);
-  ImportXML(Compiler);
   ImportJSON(Compiler);
   ImportSimbaImageBox(Compiler);
   ImportSimbaShapeBox(Compiler);
