@@ -190,7 +190,7 @@ begin
       'end;'
     ], 'TShapeBoxShape');
 
-    addGlobalFunc('procedure TSimbaShapeBox.Init(Owner: TComponent); override', @_LapeSimbaShapeBox_Init);
+    addGlobalFunc('procedure TSimbaShapeBox.Init(Owner: TLazComponent); override', @_LapeSimbaShapeBox_Init);
 
     addGlobalFunc('function TSimbaShapeBox.GetShape(Index: Integer): TShapeBoxShape', @_LapeSimbaShapeBox_GetShape);
     addGlobalFunc('function TSimbaShapeBox.ShapeCount: Integer', @_LapeSimbaShapeBox_GetShapeCount);
@@ -205,14 +205,14 @@ begin
     addGlobalFunc('procedure TSimbaShapeBox.SaveToFile(FileName: String);', @_LapeSimbaShapeBox_SaveToFile);
     addGlobalFunc('procedure TSimbaShapeBox.LoadFromFile(FileName: String);', @_LapeSimbaShapeBox_LoadFromFile);
 
-    addGlobalFunc('function TSimbaShapeBox.PointButton: TButton;', @_LapeSimbaShapeBox_PointButton);
-    addGlobalFunc('function TSimbaShapeBox.BoxButton: TButton;', @_LapeSimbaShapeBox_BoxButton);
-    addGlobalFunc('function TSimbaShapeBox.PolyButton: TButton;', @_LapeSimbaShapeBox_PolyButton);
-    addGlobalFunc('function TSimbaShapeBox.PathButton: TButton;', @_LapeSimbaShapeBox_PathButton);
-    addGlobalFunc('function TSimbaShapeBox.PrintButton: TButton;', @_LapeSimbaShapeBox_PrintButton);
-    addGlobalFunc('function TSimbaShapeBox.NameButton: TButton;', @_LapeSimbaShapeBox_NameButton);
-    addGlobalFunc('function TSimbaShapeBox.DeleteButton: TButton;', @_LapeSimbaShapeBox_DeleteButton);
-    addGlobalFunc('function TSimbaShapeBox.DeleteAllButton: TButton;', @_LapeSimbaShapeBox_DeleteAllButton);
+    addGlobalFunc('function TSimbaShapeBox.PointButton: TLazButton;', @_LapeSimbaShapeBox_PointButton);
+    addGlobalFunc('function TSimbaShapeBox.BoxButton: TLazButton;', @_LapeSimbaShapeBox_BoxButton);
+    addGlobalFunc('function TSimbaShapeBox.PolyButton: TLazButton;', @_LapeSimbaShapeBox_PolyButton);
+    addGlobalFunc('function TSimbaShapeBox.PathButton: TLazButton;', @_LapeSimbaShapeBox_PathButton);
+    addGlobalFunc('function TSimbaShapeBox.PrintButton: TLazButton;', @_LapeSimbaShapeBox_PrintButton);
+    addGlobalFunc('function TSimbaShapeBox.NameButton: TLazButton;', @_LapeSimbaShapeBox_NameButton);
+    addGlobalFunc('function TSimbaShapeBox.DeleteButton: TLazButton;', @_LapeSimbaShapeBox_DeleteButton);
+    addGlobalFunc('function TSimbaShapeBox.DeleteAllButton: TLazButton;', @_LapeSimbaShapeBox_DeleteAllButton);
 
     addGlobalFunc('procedure TSimbaShapeBox.ManualAddPoint(Point: TPoint; AName: String = ""); overload', @_LapeSimbaShapeBox_ManualAddPoint1);
     addGlobalFunc('procedure TSimbaShapeBox.ManualAddPoint(Point: TPoint; AName: String; constref UserData); overload; ', @_LapeSimbaShapeBox_ManualAddPoint2);
@@ -223,7 +223,7 @@ begin
     addGlobalFunc('procedure TSimbaShapeBox.ManualAddPath(Path: TPointArray; AName: String = "");', @_LapeSimbaShapeBox_ManualAddPath1);
     addGlobalFunc('procedure TSimbaShapeBox.ManualAddPath(Point: TPointArray; AName: String; constref UserData); overload; ', @_LapeSimbaShapeBox_ManualAddPath2);
 
-    addGlobalFunc('function TSimbaShapeBox.Panel: TPanel;', @_LapeSimbaShapeBox_Panel);
+    addGlobalFunc('function TSimbaShapeBox.Panel: TLazPanel;', @_LapeSimbaShapeBox_Panel);
   end;
 end;
 

@@ -327,13 +327,23 @@ begin
 end;
 
 (*
-TSimbaImage.ToTBitmap
-~~~~~~~~~~~~~~~~~~~~~
-function TSimbaImage.ToTBitmap: TBitmap;
+TSimbaImage.ToLazBitmap
+~~~~~~~~~~~~~~~~~~~~~~~
+function TSimbaImage.ToLazBitmap: TLazBitmap;
 *)
-procedure _LapeSimbaImage_ToTBitmap(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaImage_ToLazBitmap(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBitmap(Result)^ := PSimbaImage(Params^[0])^.ToTBitmap();
+  PBitmap(Result)^ := PSimbaImage(Params^[0])^.ToLazBitmap();
+end;
+
+(*
+TSimbaImage.LoadFromLazBitmap
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure TSimbaImage.LoadFromLazBitmap(LazBitmap: TLazBitmap);
+*)
+procedure _LapeSimbaImage_LoadFromLazBitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImage(Params^[0])^.LoadFromLazBitmap(PBitmap(Params^[1])^);
 end;
 
 (*
@@ -424,16 +434,6 @@ procedure TSimbaImage.Pad(Amount: Integer);
 procedure _LapeSimbaImage_Pad(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(Params^[0])^.Pad(PInteger(Params^[1])^);
-end;
-
-(*
-TSimbaImage.LoadFromTBitmap
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaImage.LoadFromTBitmap(bmp: TBitmap);
-*)
-procedure _LapeSimbaImage_LoadFromTBitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.LoadFromTBitmap(PBitmap(Params^[1])^);
 end;
 
 (*
@@ -1399,8 +1399,8 @@ begin
     addGlobalFunc('function TSimbaImage.SaveToFile(FileName: String; OverwriteIfExists: Boolean = False): Boolean;', @_LapeSimbaImage_SaveToFile);
     addGlobalFunc('function TSimbaImage.SaveToString: String;', @_LapeSimbaImage_SaveToString);
 
-    addGlobalFunc('function TSimbaImage.ToTBitmap: TBitmap;', @_LapeSimbaImage_ToTBitmap);
-    addGlobalFunc('procedure TSimbaImage.LoadFromTBitmap(bmp: TBitmap);', @_LapeSimbaImage_LoadFromTBitmap);
+    addGlobalFunc('function TSimbaImage.ToLazBitmap: TLazBitmap;', @_LapeSimbaImage_ToLazBitmap);
+    addGlobalFunc('procedure TSimbaImage.LoadFromLazBitmap(LazBitmap: TLazBitmap);', @_LapeSimbaImage_LoadFromLazBitmap);
     addGlobalFunc('function TSimbaImage.Compare(Other: TSimbaImage): Single;', @_LapeSimbaImage_Compare);
 
     addGlobalFunc('procedure TSimbaImage.SaveUnfreedImages(Directory: String); static;', @_LapeSimbaImage_SaveUnfreedImages);

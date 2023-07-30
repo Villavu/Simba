@@ -297,52 +297,52 @@ procedure ImportLCLExtCtrls(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    addClass('TCustomTimer', 'TComponent');
-    addGlobalFunc('procedure TCustomTimer.Init(AOwner: TComponent); override', @_LapeCustomTimer_Init);
-    addClassVar('TCustomTimer', 'Enabled', 'Boolean', @_LapeCustomTimer_Enabled_Read, @_LapeCustomTimer_Enabled_Write);
-    addClassVar('TCustomTimer', 'Interval', 'UInt32', @_LapeCustomTimer_Interval_Read, @_LapeCustomTimer_Interval_Write);
-    addClassVar('TCustomTimer', 'OnTimer', 'TNotifyEvent', @_LapeCustomTimer_OnTimer_Read, @_LapeCustomTimer_OnTimer_Write);
-    addClassVar('TCustomTimer', 'OnStartTimer', 'TNotifyEvent', @_LapeCustomTimer_OnStartTimer_Read, @_LapeCustomTimer_OnStartTimer_Write);
-    addClassVar('TCustomTimer', 'OnStopTimer', 'TNotifyEvent', @_LapeCustomTimer_OnStopTimer_Read, @_LapeCustomTimer_OnStopTimer_Write);
-    //addGlobalFunc('procedure TCustomTimer.Free;', @_LapeCustomTimer_Free);
+    addClass('TLazCustomTimer', 'TLazComponent');
+    addGlobalFunc('procedure TLazCustomTimer.Init(AOwner: TLazComponent); override', @_LapeCustomTimer_Init);
+    addClassVar('TLazCustomTimer', 'Enabled', 'Boolean', @_LapeCustomTimer_Enabled_Read, @_LapeCustomTimer_Enabled_Write);
+    addClassVar('TLazCustomTimer', 'Interval', 'UInt32', @_LapeCustomTimer_Interval_Read, @_LapeCustomTimer_Interval_Write);
+    addClassVar('TLazCustomTimer', 'OnTimer', 'TLazNotifyEvent', @_LapeCustomTimer_OnTimer_Read, @_LapeCustomTimer_OnTimer_Write);
+    addClassVar('TLazCustomTimer', 'OnStartTimer', 'TLazNotifyEvent', @_LapeCustomTimer_OnStartTimer_Read, @_LapeCustomTimer_OnStartTimer_Write);
+    addClassVar('TLazCustomTimer', 'OnStopTimer', 'TLazNotifyEvent', @_LapeCustomTimer_OnStopTimer_Read, @_LapeCustomTimer_OnStopTimer_Write);
+    //addGlobalFunc('procedure TLazCustomTimer.Free;', @_LapeCustomTimer_Free);
 
-    addClass('TTimer', 'TCustomTimer');
-    addGlobalFunc('procedure TTimer.Init(AOwner: TComponent); override', @_LapeTimer_Init);
-    //addGlobalFunc('procedure TTimer.Free;', @_LapeTimer_Free);
+    addClass('TLazTimer', 'TLazCustomTimer');
+    addGlobalFunc('procedure TLazTimer.Init(AOwner: TLazComponent); override', @_LapeTimer_Init);
+    //addGlobalFunc('procedure TLazTimer.Free;', @_LapeTimer_Free);
 
-    addClass('TCustomImage', 'TGraphicControl');
-    addGlobalFunc('procedure TCustomImage.Init(AOwner: TComponent); override', @_LapeCustomImage_Init);
-    //addClassVar('TCustomImage', 'Canvas', 'TCanvas', @_LapeCustomImage_Canvas_Read);
-    addGlobalFunc('function TCustomImage.DestRect: TRect;', @_LapeCustomImage_DestRect);
-    addClassVar('TCustomImage', 'Center', 'Boolean', @_LapeCustomImage_Center_Read, @_LapeCustomImage_Center_Write);
-    addClassVar('TCustomImage', 'Picture', 'TPicture', @_LapeCustomImage_Picture_Read, @_LapeCustomImage_Picture_Write);
-    addClassVar('TCustomImage', 'Stretch', 'Boolean', @_LapeCustomImage_Stretch_Read, @_LapeCustomImage_Stretch_Write);
-    addClassVar('TCustomImage', 'Transparent', 'Boolean', @_LapeCustomImage_Transparent_Read, @_LapeCustomImage_Transparent_Write);
-    addClassVar('TCustomImage', 'Proportional', 'Boolean', @_LapeCustomImage_Proportional_Read, @_LapeCustomImage_Proportional_Write);
-    addClassVar('TCustomImage', 'OnPictureChanged', 'TNotifyEvent', @_LapeCustomImage_OnPictureChanged_Read, @_LapeCustomImage_OnPictureChanged_Write);
-    addClassVar('TCustomImage', 'OnMouseDown', 'TMouseEvent', nil, @_LapeCustomImage_OnMouseDown_Write);
-    addClassVar('TCustomImage', 'OnMouseUp', 'TMouseEvent', nil, @_LapeCustomImage_OnMouseUp_Write);
-    //addGlobalFunc('procedure TCustomImage.Free;', @_LapeCustomImage_Free);
+    addClass('TLazCustomImage', 'TLazGraphicControl');
+    addGlobalFunc('procedure TLazCustomImage.Init(AOwner: TLazComponent); override', @_LapeCustomImage_Init);
+    //addClassVar('TLazCustomImage', 'Canvas', 'TLazCanvas', @_LapeCustomImage_Canvas_Read);
+    addGlobalFunc('function TLazCustomImage.DestRect: TLazRect;', @_LapeCustomImage_DestRect);
+    addClassVar('TLazCustomImage', 'Center', 'Boolean', @_LapeCustomImage_Center_Read, @_LapeCustomImage_Center_Write);
+    addClassVar('TLazCustomImage', 'Picture', 'TLazPicture', @_LapeCustomImage_Picture_Read, @_LapeCustomImage_Picture_Write);
+    addClassVar('TLazCustomImage', 'Stretch', 'Boolean', @_LapeCustomImage_Stretch_Read, @_LapeCustomImage_Stretch_Write);
+    addClassVar('TLazCustomImage', 'Transparent', 'Boolean', @_LapeCustomImage_Transparent_Read, @_LapeCustomImage_Transparent_Write);
+    addClassVar('TLazCustomImage', 'Proportional', 'Boolean', @_LapeCustomImage_Proportional_Read, @_LapeCustomImage_Proportional_Write);
+    addClassVar('TLazCustomImage', 'OnPictureChanged', 'TLazNotifyEvent', @_LapeCustomImage_OnPictureChanged_Read, @_LapeCustomImage_OnPictureChanged_Write);
+    addClassVar('TLazCustomImage', 'OnMouseDown', 'TLazMouseEvent', nil, @_LapeCustomImage_OnMouseDown_Write);
+    addClassVar('TLazCustomImage', 'OnMouseUp', 'TLazMouseEvent', nil, @_LapeCustomImage_OnMouseUp_Write);
+    //addGlobalFunc('procedure TLazCustomImage.Free;', @_LapeCustomImage_Free);
 
-    addClass('TImage', 'TCustomImage');
-    addGlobalFunc('procedure TImage.Init(AOwner: TComponent); override', @_LapeImage_Init);
-    //addGlobalFunc('procedure TImage.Free;', @_LapeImage_Free);
-    addClassVar('TImage', 'OnMouseEnter', 'TNotifyEvent', @_LapeImage_OnMouseEnter_Read, @_LapeImage_OnMouseEnter_Write);
-    addClassVar('TImage', 'OnMouseLeave', 'TNotifyEvent', @_LapeImage_OnMouseLeave_Read, @_LapeImage_OnMouseLeave_Write);
-    addClassVar('TImage', 'OnMouseMove', 'TMouseMoveEvent', @_LapeImage_OnMouseMove_Read, @_LapeImage_OnMouseMove_Write);
+    addClass('TLazImage', 'TLazCustomImage');
+    addGlobalFunc('procedure TLazImage.Init(AOwner: TLazComponent); override', @_LapeImage_Init);
+    //addGlobalFunc('procedure TLazImage.Free;', @_LapeImage_Free);
+    addClassVar('TLazImage', 'OnMouseEnter', 'TLazNotifyEvent', @_LapeImage_OnMouseEnter_Read, @_LapeImage_OnMouseEnter_Write);
+    addClassVar('TLazImage', 'OnMouseLeave', 'TLazNotifyEvent', @_LapeImage_OnMouseLeave_Read, @_LapeImage_OnMouseLeave_Write);
+    addClassVar('TLazImage', 'OnMouseMove', 'TLazMouseMoveEvent', @_LapeImage_OnMouseMove_Read, @_LapeImage_OnMouseMove_Write);
 
-    addClass('TCustomPanel', 'TCustomControl');
-    addGlobalType('(bvNone, bvLowered, bvRaised, bvSpace)', 'TPanelBevel');
-    addClassVar('TCustomPanel', 'Alignment', 'TAlignment', @_LapeCustomPanel_Alignment_Read, @_LapeCustomPanel_Alignment_Write);
-    addClassVar('TCustomPanel', 'BevelInner', 'TPanelBevel', @_LapeCustomPanel_BevelInner_Read, @_LapeCustomPanel_BevelInner_Write);
-    addClassVar('TCustomPanel', 'BevelOuter', 'TPanelBevel', @_LapeCustomPanel_BevelOuter_Read, @_LapeCustomPanel_BevelOuter_Write);
-    addClassVar('TCustomPanel', 'BevelWidth', 'Integer', @_LapeCustomPanel_BevelWidth_Read, @_LapeCustomPanel_BevelWidth_Write);
-    addGlobalFunc('procedure TCustomPanel.Init(TheOwner: TComponent); override', @_LapeCustomPanel_Init);
-    //addGlobalFunc('procedure TCustomPanel.Free;', @_LapeCustomPanel_Free);
+    addClass('TLazCustomPanel', 'TLazCustomControl');
+    addGlobalType('(bvNone, bvLowered, bvRaised, bvSpace)', 'TLazPanelBevel');
+    addClassVar('TLazCustomPanel', 'Alignment', 'TLazAlignment', @_LapeCustomPanel_Alignment_Read, @_LapeCustomPanel_Alignment_Write);
+    addClassVar('TLazCustomPanel', 'BevelInner', 'TLazPanelBevel', @_LapeCustomPanel_BevelInner_Read, @_LapeCustomPanel_BevelInner_Write);
+    addClassVar('TLazCustomPanel', 'BevelOuter', 'TLazPanelBevel', @_LapeCustomPanel_BevelOuter_Read, @_LapeCustomPanel_BevelOuter_Write);
+    addClassVar('TLazCustomPanel', 'BevelWidth', 'Integer', @_LapeCustomPanel_BevelWidth_Read, @_LapeCustomPanel_BevelWidth_Write);
+    addGlobalFunc('procedure TLazCustomPanel.Init(TheOwner: TLazComponent); override', @_LapeCustomPanel_Init);
+    //addGlobalFunc('procedure TLazCustomPanel.Free;', @_LapeCustomPanel_Free);
 
-    addClass('TPanel', 'TCustomPanel');
-    addGlobalFunc('procedure TPanel.Init(TheOwner: TComponent); override', @_LapePanel_Init);
-    //addGlobalFunc('procedure TPanel.Free;', @_LapePanel_Free);
+    addClass('TLazPanel', 'TLazCustomPanel');
+    addGlobalFunc('procedure TLazPanel.Init(TheOwner: TLazComponent); override', @_LapePanel_Init);
+    //addGlobalFunc('procedure TLazPanel.Free;', @_LapePanel_Free);
   end;
 end;
 
