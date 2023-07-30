@@ -24,10 +24,10 @@ const
   ];
 
 var
-  Bitmap: TSimbaImage;
+  Bitmap: TImage;
   I: Integer;
 begin
-  Bitmap := TSimbaImage.Create(500, 500);
+  Bitmap := TImage.Create(500, 500);
   Bitmap.DrawHSLCircle(Bitmap.GetCenter(), 200);
 
   Target.SetImage(Bitmap);

@@ -1,7 +1,7 @@
 {$assertions on}
 
 var
-  Bitmap: TSimbaImage;
+  Bitmap: TImage;
 
 procedure Test(Color: TColor; ExpectedPeak, ExpectedAverage: Integer);
 begin
@@ -12,7 +12,7 @@ begin
 end;
 
 begin
-  Target.SetImage(Bitmap := TSimbaImage.Create(100,100));
+  Target.SetImage(Bitmap := TImage.Create(100,100));
 
   Test(Colors.DARK_RED, 55, 18);
   Test(Colors.BLACK, 0, 0);

@@ -397,12 +397,12 @@ begin
     addInputMethod('function TSimbaFinder.FindDTM(DTM: TDTM; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeSimbaFinder_FindDTM);
     addInputMethod('function TSimbaFinder.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeSimbaFinder_FindDTMRotated);
 
-    addInputMethod('function TSimbaFinder.FindImageEx(Bitmap: TSimbaImage; Tolerance: Single; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindImageEx1);
-    addInputMethod('function TSimbaFinder.FindImageEx(Bitmap: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindImageEx2);
-    addInputMethod('function TSimbaFinder.FindImage(Bitmap: TSimbaImage; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeSimbaFinder_FindImage1);
-    addInputMethod('function TSimbaFinder.FindImage(Bitmap: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeSimbaFinder_FindImage2);
+    addInputMethod('function TSimbaFinder.FindImageEx(Bitmap: TImage; Tolerance: Single; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindImageEx1);
+    addInputMethod('function TSimbaFinder.FindImageEx(Bitmap: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeSimbaFinder_FindImageEx2);
+    addInputMethod('function TSimbaFinder.FindImage(Bitmap: TImage; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeSimbaFinder_FindImage1);
+    addInputMethod('function TSimbaFinder.FindImage(Bitmap: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeSimbaFinder_FindImage2);
 
-    addInputMethod('function TSimbaFinder.FindTemplate(Bitmap: TSimbaImage; MinMatch: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeSimbaFinder_FindTemplate);
+    addInputMethod('function TSimbaFinder.FindTemplate(Bitmap: TImage; MinMatch: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeSimbaFinder_FindTemplate);
 
     addInputMethod('function TSimbaFinder.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TSingleMatrix', @_LapeSimbaFinder_MatchColor);
 
@@ -427,10 +427,10 @@ begin
     addInputMethod('function TSimbaFinder.AverageBrightness(Area: TBox = [-1,-1,-1,-1]): Integer', @_LapeSimbaFinder_AverageBrightness);
     addInputMethod('function TSimbaFinder.PeakBrightness(Area: TBox = [-1,-1,-1,-1]): Integer', @_LapeSimbaFinder_PeakBrightness);
 
-    ImportingSection := 'TSimbaImage';
+    ImportingSection := 'TImage';
 
     addGlobalFunc(
-      'function TSimbaImage.Finder: TSimbaFinder;', [
+      'function TImage.Finder: TSimbaFinder;', [
       'begin',
       '  Result.Target.SetImage(Self);',
       'end;'
