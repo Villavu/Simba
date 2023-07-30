@@ -320,7 +320,7 @@ begin
     addGlobalFunc('procedure TSimbaImageBox.Paint;', @_LapeSimbaImageBox_Paint);
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(Data: PColorBGRA; AWidth, AHeight: Integer); overload;', @_LapeSimbaImageBox_SetBackground_Data);
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(FileName: String); overload;', @_LapeSimbaImageBox_SetBackground_FileName);
-    addGlobalFunc('procedure TSimbaImageBox.SetBackground(Image: TSimbaImage); overload;', @_LapeSimbaImageBox_SetBackground_Bitmap);
+    addGlobalFunc('procedure TSimbaImageBox.SetBackground(Image: TImage); overload;', @_LapeSimbaImageBox_SetBackground_Bitmap);
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(Window: TWindowHandle); overload;', @_LapeSimbaImageBox_SetBackground_Window);
     addGlobalFunc('procedure TSimbaImageBox.Init(Owner: TLazComponent); override', @_LapeSimbaImageBox_Init);
   end;

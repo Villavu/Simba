@@ -275,11 +275,11 @@ begin
     addGlobalFunc('function TSimbaTarget.GetClientArea: TBox', @_LapeSimbaTarget_GetClientArea);
 
     addGlobalFunc('procedure TSimbaTarget.SetDesktop', @_LapeSimbaTarget_SetDesktop);
-    addGlobalFunc('procedure TSimbaTarget.SetImage(TSimbaImage: TSimbaImage)', @_LapeSimbaTarget_SetImage);
+    addGlobalFunc('procedure TSimbaTarget.SetImage(TImage: TImage)', @_LapeSimbaTarget_SetImage);
     addGlobalFunc('procedure TSimbaTarget.SetWindow(Window: TWindowHandle)', @_LapeSimbaTarget_SetWindow);
     addGlobalFunc('procedure TSimbaTarget.SetEIOS(Plugin, Args: String)', @_LapeSimbaTarget_SetEIOS);
 
-    addGlobalFunc('function TSimbaTarget.GetImage(Bounds: TBox = [-1,-1,-1,-1]): TSimbaImage', @_LapeSimbaTarget_GetImage);
+    addGlobalFunc('function TSimbaTarget.GetImage(Bounds: TBox = [-1,-1,-1,-1]): TImage', @_LapeSimbaTarget_GetImage);
     addGlobalFunc('procedure TSimbaTarget.GetDimensions(out Width, Height: Integer)', @_LapeSimbaTarget_GetDimensions);
     addGlobalFunc('function TSimbaTarget.GetWidth: Integer', @_LapeSimbaTarget_GetWidth);
     addGlobalFunc('function TSimbaTarget.GetHeight: Integer', @_LapeSimbaTarget_GetHeight);
@@ -291,7 +291,7 @@ begin
     addGlobalFunc('function TSimbaTarget.IsWindowTarget: Boolean; overload', @_LapeSimbaTarget_IsWindowTarget1);
     addGlobalFunc('function TSimbaTarget.IsWindowTarget(out Window: TWindowHandle): Boolean; overload', @_LapeSimbaTarget_IsWindowTarget2);
     addGlobalFunc('function TSimbaTarget.IsImageTarget: Boolean; overload', @_LapeSimbaTarget_IsImageTarget1);
-    addGlobalFunc('function TSimbaTarget.IsImageTarget(out TSimbaImage: TSimbaImage): Boolean; overload', @_LapeSimbaTarget_IsImageTarget2);
+    addGlobalFunc('function TSimbaTarget.IsImageTarget(out TImage: TImage): Boolean; overload', @_LapeSimbaTarget_IsImageTarget2);
     addGlobalFunc('function TSimbaTarget.IsEIOSTarget: Boolean', @_LapeSimbaTarget_IsEIOSTarget);
 
     addGlobalFunc('function TSimbaTarget.IsDefault: Boolean', @_LapeSimbaTarget_IsDefault);
@@ -299,33 +299,33 @@ begin
     addGlobalFunc('function ToString(constref Target: TSimbaTarget): String; override;', @_LapeSimbaTarget_ToString);
 
 
-    ImportingSection := 'TSimbaImage';
+    ImportingSection := 'TImage';
 
     addGlobalFunc(
-      'function TSimbaImage.CreateFromTarget(Target: TSimbaTarget; Bounds: TBox = [-1,-1,-1,-1]): TSimbaImage; static; overload;', [
+      'function TImage.CreateFromTarget(Target: TSimbaTarget; Bounds: TBox = [-1,-1,-1,-1]): TImage; static; overload;', [
       'begin',
       '  Result := Target.GetImage(Bounds);',
       'end;'
     ]);
     addGlobalFunc(
-      'function TSimbaImage.CreateFromTarget(Bounds: TBox = [-1,-1,-1,-1]): TSimbaImage; static; overload;', [
+      'function TImage.CreateFromTarget(Bounds: TBox = [-1,-1,-1,-1]): TImage; static; overload;', [
       'begin',
-      '  Result := TSimbaImage.CreateFromTarget(System.Target, Bounds);',
+      '  Result := TImage.CreateFromTarget(System.Target, Bounds);',
       'end;'
     ]);
 
     addGlobalFunc(
-      'procedure TSimbaImage.DrawTarget(Target: TSimbaTarget; P: TPoint; Bounds: TBox = [-1,-1,-1,-1]); overload;', [
+      'procedure TImage.DrawTarget(Target: TSimbaTarget; P: TPoint; Bounds: TBox = [-1,-1,-1,-1]); overload;', [
       'var',
-      '  Image: TSimbaImage;',
+      '  Image: TImage;',
       'begin',
-      '  Image := TSimbaImage.CreateFromTarget(Target, Bounds);',
+      '  Image := TImage.CreateFromTarget(Target, Bounds);',
       '  Self.Draw(Image, P);',
       '  Image.Free();',
       'end;'
     ]);
     addGlobalFunc(
-      'procedure TSimbaImage.DrawTarget(P: TPoint; Bounds: TBox = [-1,-1,-1,-1]); overload;', [
+      'procedure TImage.DrawTarget(P: TPoint; Bounds: TBox = [-1,-1,-1,-1]); overload;', [
       'begin',
       '  Self.DrawTarget(System.Target, P, Bounds);',
       'end;'
