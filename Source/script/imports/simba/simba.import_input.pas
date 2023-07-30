@@ -226,7 +226,7 @@ Available Key Codes:
 (*
 TSimbaInput.MousePosition
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaInput.MousePosition: TPoint;
+> function TSimbaInput.MousePosition: TPoint;
 *)
 procedure _LapeSimbaInput_MousePosition(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -236,7 +236,7 @@ end;
 (*
 TSimbaInput.MousePressed
 ~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaInput.MousePressed(Button: MouseButton): Boolean;
+> function TSimbaInput.MousePressed(Button: MouseButton): Boolean;
 *)
 procedure _LapeSimbaInput_MousePressed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -246,7 +246,7 @@ end;
 (*
 TSimbaInput.MouseTeleport
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaInput.MouseTeleport(P: TPoint);
+> procedure TSimbaInput.MouseTeleport(P: TPoint);
 
 Instantly moves the mouse to `P`
 *)
@@ -258,7 +258,7 @@ end;
 (*
 TSimbaInput.MouseClick
 ~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaInput.MouseClick(Button: MouseButton);
+> procedure TSimbaInput.MouseClick(Button: MouseButton);
 *)
 procedure _LapeSimbaInput_MouseClick(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -268,7 +268,7 @@ end;
 (*
 TSimbaInput.MouseDown
 ~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaInput.MouseDown(Button: MouseButton);
+> procedure TSimbaInput.MouseDown(Button: MouseButton);
 *)
 procedure _LapeSimbaInput_MouseDown(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -278,7 +278,7 @@ end;
 (*
 TSimbaInput.MouseUp
 ~~~~~~~~~~~~~~~~~~~
-procedure TSimbaInput.MouseUp(Button: MouseButton);
+> procedure TSimbaInput.MouseUp(Button: MouseButton);
 *)
 procedure _LapeSimbaInput_MouseUp(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -288,7 +288,7 @@ end;
 (*
 TSimbaInput.MouseScroll
 ~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaInput.MouseScroll(Scrolls: Integer);
+> procedure TSimbaInput.MouseScroll(Scrolls: Integer);
 *)
 procedure _LapeSimbaInput_MouseScroll(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -298,7 +298,7 @@ end;
 (*
 TSimbaInput.MouseMove
 ~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaInput.MouseMove(Dest: TPoint);
+> procedure TSimbaInput.MouseMove(Dest: TPoint);
 
 Move the mouse in a human-like way.
 
@@ -314,7 +314,7 @@ end;
 (*
 TSimbaInput.KeyDown
 ~~~~~~~~~~~~~~~~~~~
-procedure TSimbaInput.KeyDown(Key: KeyCode);
+> procedure TSimbaInput.KeyDown(Key: KeyCode);
 *)
 procedure _LapeSimbaInput_KeyDown(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -324,7 +324,7 @@ end;
 (*
 TSimbaInput.KeyUp
 ~~~~~~~~~~~~~~~~~
-procedure TSimbaInput.KeyUp(Key: KeyCode);
+> procedure TSimbaInput.KeyUp(Key: KeyCode);
 *)
 procedure _LapeSimbaInput_KeyUp(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -334,7 +334,7 @@ end;
 (*
 TSimbaInput.KeyPress
 ~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaInput.KeyPress(Key: KeyCode);
+> procedure TSimbaInput.KeyPress(Key: KeyCode);
 *)
 procedure _LapeSimbaInput_KeyPress(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -344,7 +344,7 @@ end;
 (*
 TSimbaInput.KeyPressed
 ~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaInput.KeyPressed(Key: KeyCode): Boolean;
+> function TSimbaInput.KeyPressed(Key: KeyCode): Boolean;
 *)
 procedure _LapeSimbaInput_KeyPressed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -354,7 +354,7 @@ end;
 (*
 TSimbaInput.KeySend
 ~~~~~~~~~~~~~~~~~~~
-procedure TSimbaInput.KeySend(Text: String);
+> procedure TSimbaInput.KeySend(Text: String);
 *)
 procedure _LapeSimbaInput_KeySend(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -364,7 +364,7 @@ end;
 (*
 TSimbaInput.CharToKeyCode
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaInput.CharToKeyCode(C: Char): KeyCode;
+> function TSimbaInput.CharToKeyCode(C: Char): KeyCode;
 *)
 procedure _LapeSimbaInput_CharToKeyCode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -626,4 +626,3 @@ begin
 end;
 
 end.
-

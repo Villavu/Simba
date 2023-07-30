@@ -42,7 +42,7 @@ Example:
 (*
 TSimbaFinder.FindEdges
 ~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.FindEdges(MinDiff: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+> function TSimbaFinder.FindEdges(MinDiff: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
 *)
 procedure _LapeSimbaFinder_FindEdges1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -52,7 +52,7 @@ end;
 (*
 TSimbaFinder.FindEdges
 ~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+> function TSimbaFinder.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
 *)
 procedure _LapeSimbaFinder_FindEdges2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -62,7 +62,7 @@ end;
 (*
 TSimbaFinder.FindDTMEx
 ~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.FindDTMEx(DTM: TDTM; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+> function TSimbaFinder.FindDTMEx(DTM: TDTM; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
 *)
 procedure _LapeSimbaFinder_FindDTMEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -72,7 +72,7 @@ end;
 (*
 TSimbaFinder.FindDTMRotatedEx
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.FindDTMRotatedEx(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+> function TSimbaFinder.FindDTMRotatedEx(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
 *)
 procedure _LapeSimbaFinder_FindDTMRotatedEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -82,7 +82,7 @@ end;
 (*
 TSimbaFinder.FindDTM
 ~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.FindDTM(DTM: TDTM; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
+> function TSimbaFinder.FindDTM(DTM: TDTM; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
 *)
 procedure _LapeSimbaFinder_FindDTM(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -92,7 +92,7 @@ end;
 (*
 TSimbaFinder.FindDTMRotated
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
+> function TSimbaFinder.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
 *)
 procedure _LapeSimbaFinder_FindDTMRotated(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -102,7 +102,7 @@ end;
 (*
 TSimbaFinder.FindImageEx
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.FindImageEx(Bitmap: TImage; Tolerance: Single; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+> function TSimbaFinder.FindImageEx(Bitmap: TImage; Tolerance: Single; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
 *)
 procedure _LapeSimbaFinder_FindImageEx1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -112,7 +112,7 @@ end;
 (*
 TSimbaFinder.FindImageEx
 ~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.FindImageEx(Bitmap: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+> function TSimbaFinder.FindImageEx(Bitmap: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
 *)
 procedure _LapeSimbaFinder_FindImageEx2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -122,7 +122,7 @@ end;
 (*
 TSimbaFinder.FindImage
 ~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.FindImage(Bitmap: TImage; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
+> function TSimbaFinder.FindImage(Bitmap: TImage; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
 *)
 procedure _LapeSimbaFinder_FindImage1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -132,7 +132,7 @@ end;
 (*
 TSimbaFinder.FindImage
 ~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.FindImage(Bitmap: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
+> function TSimbaFinder.FindImage(Bitmap: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
 *)
 procedure _LapeSimbaFinder_FindImage2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -142,7 +142,7 @@ end;
 (*
 TSimbaFinder.MatchColor
 ~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TSingleMatrix;
+> function TSimbaFinder.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TSingleMatrix;
 *)
 procedure _LapeSimbaFinder_MatchColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -152,7 +152,7 @@ end;
 (*
 TSimbaFinder.FindColor
 ~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.FindColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+> function TSimbaFinder.FindColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
 *)
 procedure _LapeSimbaFinder_FindColor1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -162,7 +162,7 @@ end;
 (*
 TSimbaFinder.FindColor
 ~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.FindColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+> function TSimbaFinder.FindColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
 *)
 procedure _LapeSimbaFinder_FindColor2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -172,7 +172,7 @@ end;
 (*
 TSimbaFinder.FindColor
 ~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.FindColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+> function TSimbaFinder.FindColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
 *)
 procedure _LapeSimbaFinder_FindColor3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -182,7 +182,7 @@ end;
 (*
 TSimbaFinder.CountColor
 ~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.CountColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): Integer;
+> function TSimbaFinder.CountColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): Integer;
 *)
 procedure _LapeSimbaFinder_CountColor1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -192,7 +192,7 @@ end;
 (*
 TSimbaFinder.CountColor
 ~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.CountColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): Integer;
+> function TSimbaFinder.CountColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): Integer;
 *)
 procedure _LapeSimbaFinder_CountColor2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -202,7 +202,7 @@ end;
 (*
 TSimbaFinder.CountColor
 ~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.CountColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): Integer;
+> function TSimbaFinder.CountColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): Integer;
 *)
 procedure _LapeSimbaFinder_CountColor3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -212,7 +212,7 @@ end;
 (*
 TSimbaFinder.GetColor
 ~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.GetColor(X, Y: Integer): TColor;
+> function TSimbaFinder.GetColor(X, Y: Integer): TColor;
 *)
 procedure _LapeSimbaFinder_GetColor1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -222,7 +222,7 @@ end;
 (*
 TSimbaFinder.GetColor
 ~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.GetColor(P: TPoint): TColor;
+> function TSimbaFinder.GetColor(P: TPoint): TColor;
 *)
 procedure _LapeSimbaFinder_GetColor2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -232,7 +232,7 @@ end;
 (*
 TSimbaFinder.GetColors
 ~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.GetColors(Points: TPointArray): TIntegerArray;
+> function TSimbaFinder.GetColors(Points: TPointArray): TIntegerArray;
 *)
 procedure _LapeSimbaFinder_GetColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -242,7 +242,7 @@ end;
 (*
 TSimbaFinder.GetColorsMatrix
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.GetColorsMatrix(Bounds: TBox = [-1,-1,-1,-1]): TIntegerMatrix;
+> function TSimbaFinder.GetColorsMatrix(Bounds: TBox = [-1,-1,-1,-1]): TIntegerMatrix;
 *)
 procedure _LapeSimbaFinder_GetColorsMatrix(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -252,7 +252,7 @@ end;
 (*
 TSimbaFinder.GetPixelDifference
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.GetPixelDifference(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): Integer;
+> function TSimbaFinder.GetPixelDifference(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): Integer;
 *)
 procedure _LapeSimbaFinder_GetPixelDifference1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -262,7 +262,7 @@ end;
 (*
 TSimbaFinder.GetPixelDifference
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.GetPixelDifference(WaitTime, Tolerance: Integer; Area: TBox = [-1,-1,-1,-1]): Integer;
+> function TSimbaFinder.GetPixelDifference(WaitTime, Tolerance: Integer; Area: TBox = [-1,-1,-1,-1]): Integer;
 *)
 procedure _LapeSimbaFinder_GetPixelDifference2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -272,7 +272,7 @@ end;
 (*
 TSimbaFinder.GetPixelDifferenceTPA
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.GetPixelDifferenceTPA(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): TPointArray;
+> function TSimbaFinder.GetPixelDifferenceTPA(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): TPointArray;
 *)
 procedure _LapeSimbaFinder_GetPixelDifferenceTPA1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -282,7 +282,7 @@ end;
 (*
 TSimbaFinder.GetPixelDifferenceTPA
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.GetPixelDifferenceTPA(WaitTime, Tolerance: Integer; Area: TBox = [-1,-1,-1,-1]): TPointArray;
+> function TSimbaFinder.GetPixelDifferenceTPA(WaitTime, Tolerance: Integer; Area: TBox = [-1,-1,-1,-1]): TPointArray;
 *)
 procedure _LapeSimbaFinder_GetPixelDifferenceTPA2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -292,7 +292,7 @@ end;
 (*
 TSimbaFinder.AverageBrightness
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.AverageBrightness(Area: TBox = [-1,-1,-1,-1]): Integer;
+> function TSimbaFinder.AverageBrightness(Area: TBox = [-1,-1,-1,-1]): Integer;
 *)
 procedure _LapeSimbaFinder_AverageBrightness(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -302,7 +302,7 @@ end;
 (*
 TSimbaFinder.PeakBrightness
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.PeakBrightness(Area: TBox = [-1,-1,-1,-1]): Integer;
+> function TSimbaFinder.PeakBrightness(Area: TBox = [-1,-1,-1,-1]): Integer;
 *)
 procedure _LapeSimbaFinder_PeakBrightness(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -312,7 +312,7 @@ end;
 (*
 TSimbaFinder.FindTemplate
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaFinder.FindTemplate(Bitmap: TImage; MinMatch: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
+> function TSimbaFinder.FindTemplate(Bitmap: TImage; MinMatch: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
 *)
 procedure _LapeSimbaFinder_FindTemplate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -442,4 +442,3 @@ begin
 end;
 
 end.
-

@@ -37,7 +37,7 @@ type
 (*
 Variant.VarType
 ~~~~~~~~~~~~~~~
-function Variant.VarType: EVariantVarType;
+> function Variant.VarType: EVariantVarType;
 
 Returns the variants var type.
 
@@ -83,7 +83,7 @@ end;
 (*
 Variant.IsNumeric
 ~~~~~~~~~~~~~~~~~
-function Variant.IsNumeric: Boolean;
+> function Variant.IsNumeric: Boolean;
 *)
 procedure _LapeVariantIsNumeric(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -93,7 +93,7 @@ end;
 (*
 Variant.IsString
 ~~~~~~~~~~~~~~~~
-function Variant.IsString: Boolean;
+> function Variant.IsString: Boolean;
 *)
 procedure _LapeVariantIsString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -103,7 +103,7 @@ end;
 (*
 Variant.IsOrdinal
 ~~~~~~~~~~~~~~~~~
-function Variant.IsOrdinal: Boolean;
+> function Variant.IsOrdinal: Boolean;
 *)
 procedure _LapeVariantIsOrdinal(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -113,7 +113,7 @@ end;
 (*
 Variant.IsFloat
 ~~~~~~~~~~~~~~~
-function Variant.IsFloat: Boolean;
+> function Variant.IsFloat: Boolean;
 *)
 procedure _LapeVariantIsFloat(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -123,7 +123,7 @@ end;
 (*
 Variant.IsBoolean
 ~~~~~~~~~~~~~~~~~
-function Variant.IsBoolean: Boolean;
+> function Variant.IsBoolean: Boolean;
 *)
 procedure _LapeVariantIsBoolean(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -133,7 +133,7 @@ end;
 (*
 Variant.Null
 ~~~~~~~~~~~~
-function Variant.Null: Variant; static;
+> function Variant.Null: Variant; static;
 
 Static method that returns a null variant variable.
 
@@ -151,7 +151,7 @@ end;
 (*
 Variant.Unassigned
 ~~~~~~~~~~~~~~~~~~
-function Variant.Unassigned: Variant; static;
+> function Variant.Unassigned: Variant; static;
 
 Static method that returns a unassigned variant variable.
 
@@ -190,4 +190,3 @@ begin
 end;
 
 end.
-

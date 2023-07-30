@@ -25,8 +25,8 @@ Script related methods
 (*
 AddOnTerminate
 ~~~~~~~~~~~~~~
-procedure AddOnTerminate(Proc: procedure);
-procedure AddOnTerminate(Proc: procedure of object);
+> procedure AddOnTerminate(Proc: procedure);
+> procedure AddOnTerminate(Proc: procedure of object);
 
 Adds a procedure to be called when the script is terminated.
 *)
@@ -34,8 +34,8 @@ Adds a procedure to be called when the script is terminated.
 (*
 AddOnUserTerminate
 ~~~~~~~~~~~~~~~~~~
-procedure AddOnUserTerminate(Proc: procedure);
-procedure AddOnUserTerminate(Proc: procedure of object);
+> procedure AddOnUserTerminate(Proc: procedure);
+> procedure AddOnUserTerminate(Proc: procedure of object);
 
 Adds a procedure to be called when the script is terminated with the stop button being clicked.
 *)
@@ -43,8 +43,8 @@ Adds a procedure to be called when the script is terminated with the stop button
 (*
 AddOnPause
 ~~~~~~~~~~
-procedure AddOnPause(Proc: procedure);
-procedure AddOnPause(Proc: procedure of object);
+> procedure AddOnPause(Proc: procedure);
+> procedure AddOnPause(Proc: procedure of object);
 
 Adds a procedure to be called when the script is paused.
 *)
@@ -52,8 +52,8 @@ Adds a procedure to be called when the script is paused.
 (*
 AddOnResume
 ~~~~~~~~~~~
-procedure AddOnResume(Proc: procedure);
-procedure AddOnResume(Proc: procedure of object);
+> procedure AddOnResume(Proc: procedure);
+> procedure AddOnResume(Proc: procedure of object);
 
 Adds a procedure to be called when the script is resumed from pause.
 *)
@@ -61,8 +61,8 @@ Adds a procedure to be called when the script is resumed from pause.
 (*
 AddOnResume
 ~~~~~~~~~~~
-procedure AddOnResume(Proc: procedure);
-procedure AddOnResume(Proc: procedure of object);
+> procedure AddOnResume(Proc: procedure);
+> procedure AddOnResume(Proc: procedure of object);
 
 Adds a procedure to be called when the script is resumed from pause.
 *)
@@ -70,8 +70,8 @@ Adds a procedure to be called when the script is resumed from pause.
 (*
 TerminateScript
 ~~~~~~~~~~~~~~~
-procedure TerminateScript;
-procedure TerminateScript(Reason: String);
+> procedure TerminateScript;
+> procedure TerminateScript(Reason: String);
 
 Instantly terminates the script!
 *)
@@ -79,7 +79,7 @@ Instantly terminates the script!
 (*
 PauseScript
 ~~~~~~~~~~~
-procedure PauseScript;
+> procedure PauseScript;
 
 Programmatically pauses the script. The only way for the script to resumed is by the user clicking the play button.
 *)
@@ -91,7 +91,7 @@ end;
 (*
 GetScriptPID
 ~~~~~~~~~~~~
-function GetScriptPID: TProcessID;
+> function GetScriptPID: TProcessID;
 
 Returns the process ID of the running script.
 *)
@@ -103,7 +103,7 @@ end;
 (*
 GetScriptParameters
 ~~~~~~~~~~~~~~~~~~~
-function GetScriptParameters: TStringArray;
+> function GetScriptParameters: TStringArray;
 
 Returns all command line parameters passed to the script.
 *)
@@ -115,7 +115,7 @@ end;
 (*
 GetScriptParameter
 ~~~~~~~~~~~~~~~~~~
-function GetScriptParameter(Name: String): String;
+> function GetScriptParameter(Name: String): String;
 
 Returns a command line parameter value passed to the script.
 Parameters should be passed as a key-pair value: `Name=Value`
@@ -128,7 +128,7 @@ end;
 (*
 RunScript
 ~~~~~~~~~
-function RunScript(Script: String; Parameters: TStringArray; out Output: String): TProcessExitStatus;
+> function RunScript(Script: String; Parameters: TStringArray; out Output: String): TProcessExitStatus;
 
 Runs a simba script and **will wait** until the script has finished.
 
@@ -143,7 +143,7 @@ end;
 (*
 RunScript
 ~~~~~~~~~
-function RunScript(Script: String; Parameters: TStringArray): TProcessID;
+> function RunScript(Script: String; Parameters: TStringArray): TProcessID;
 
 Runs a simba script and instantly returns the scripts PID.
 
@@ -167,7 +167,7 @@ end;
 (*
 RunScriptOutputToFile
 ~~~~~~~~~~~~~~~~~~~~~
-function RunScriptOutputToFile(Script: String; Parameters: TStringArray; OutputFileName: String): TProcessID;
+> function RunScriptOutputToFile(Script: String; Parameters: TStringArray; OutputFileName: String): TProcessID;
 
 - The script output will be redirected to the file `OutputFileName`
 - The script PID can be used with process methods.
@@ -319,4 +319,3 @@ begin
 end;
 
 end.
-
