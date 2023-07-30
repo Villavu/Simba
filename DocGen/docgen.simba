@@ -1,3 +1,9 @@
+// To run to locally build docs you need:
+//
+// 1) Python installed, on PATH too so Simba can execute "Python"
+// 2) "sphinx" and "sphinx_rtd_theme" installed:
+//      pip3 install sphinx sphinx_rtd_theme
+
 var
   SourceFiles: array of record
     FileName: String;
@@ -5,29 +11,29 @@ var
   end;
 
 begin
-  SourceFiles += ['simba.import_point.pas',        'TPoint'        ];
-  SourceFiles += ['simba.import_tpa.pas',          'TPointArray'   ];
-  SourceFiles += ['simba.import_atpa.pas',         'T2DPointArray' ];
-  SourceFiles += ['simba.import_box.pas',          'TBox'          ];
-  SourceFiles += ['simba.import_boxarray.pas',     'TBoxArray'     ];
-  SourceFiles += ['simba.import_quad.pas',         'TQuad'         ];
-  SourceFiles += ['simba.import_windowhandle.pas', 'TWindowHandle' ];
-  SourceFiles += ['simba.import_debugimage.pas',   'Debug Image'   ];
-  SourceFiles += ['simba.import_variant.pas',      'Variant'       ];
-  SourceFiles += ['simba.import_script.pas',       'Script'        ];
-  SourceFiles += ['simba.import_random.pas',       'Random'        ];
-  SourceFiles += ['simba.import_class_bitmap.pas', 'TMufasaBitmap' ];
-  SourceFiles += ['simba.import_class_dtm.pas',    'TDTM'          ];
-  SourceFiles += ['simba.import_input.pas',        'Input'         ];
-  SourceFiles += ['simba.import_finder.pas',       'Finder'        ];
-  SourceFiles += ['simba.import_target.pas',       'Target'        ];
-  SourceFiles += ['simba.import_internet.pas',     'Intenet'       ];
-  SourceFiles += ['simba.import_file.pas',         'File'          ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_point.pas',        'TPoint'        ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_tpa.pas',          'TPointArray'   ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_atpa.pas',         'T2DPointArray' ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_box.pas',          'TBox'          ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_boxarray.pas',     'TBoxArray'     ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_quad.pas',         'TQuad'         ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_windowhandle.pas', 'TWindowHandle' ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_debugimage.pas',   'Debug Image'   ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_variant.pas',      'Variant'       ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_script.pas',       'Script'        ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_random.pas',       'Random'        ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_input.pas',        'Input'         ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_finder.pas',       'Finder'        ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_target.pas',       'Target'        ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_web.pas',          'Web'           ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_file.pas',         'File'          ];
+
+  SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_json.pas',   'JSON'  ];
+  SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_bitmap.pas', 'Image' ];
+  SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_dtm.pas',    'DTM'   ];
 end;
 
 const
-  SOURCE_ROOT_DIR = 'Source/script/imports/';
-
   OUTPUT_DIR = 'DocGen/output/';
   INPUT_DIR  = 'DocGen/input/';
 
@@ -129,30 +135,23 @@ procedure Test;
 }
 procedure MakeCodeHeaders(var Str: String);
 var
-  Start, Stop: Integer;
-  P: Integer;
-  Header: String;
+  I: Integer;
+  Lines: TStringArray;
 begin
-  Start := 1;
-
-  for Header in ['function', 'procedure', 'operator', 'var', 'const'] do
+  Lines := Str.Split(LINE_SEP);
+  while (I < Length(Lines)) do
   begin
-    Start := 1;
-
-    while ((Start := Str.IndexOf(Header, Start)) > 0) do
+    if Lines[I].StartsWith('> ') then
     begin
-      if Str.Copy(Start - Length(LINE_SEP), Length(LINE_SEP)) = LINE_SEP then
-      begin
-        Str.Insert('```', Start);
-        Start :=  Str.IndexOf(LINE_SEP, Start);
-        if (Start = 0) then
-          Exit;
-        Str.Insert('```', Start);
-      end;
-
-      Start += 1;
+      Lines[I].Delete(1,2);
+      Lines.Insert('```', I);
+      Lines.Insert('```', I+2);
+      Inc(I,2);
     end;
+    Inc(I);
   end;
+
+  Str := LINE_SEP.Join(Lines);
 end;
 
 function ParseComments(FileName, Name: String): Boolean;
@@ -182,29 +181,9 @@ begin
   end;
 end;
 
-procedure Build;
-var
-  I, J: Integer;
-  Files: TStringArray;
-begin
-  Files := DirList(SOURCE_ROOT_DIR, True);
-  for I := 0 to High(SourceFiles) do
-    for J := 0 to High(Files) do
-    begin
-      // ignore files in lazarus backup/ dirs
-      if DirParent(PathExtractDir(Files[J])) = 'backup' then
-        Continue;
-
-      if (SourceFiles[I].FileName = PathExtractName(Files[J])) then
-      begin
-        ParseComments(Files[J], SourceFiles[I].Title);
-        Break;
-      end;
-    end;
-end;
-
 var
   Str: String;
+  I: Integer;
 begin
   ClearDebug();
 
@@ -217,7 +196,8 @@ begin
   FileWrite(INPUT_DIR + 'conf.py', CONFIG_FILE);
   FileWrite(INPUT_DIR + 'layout.html', TEMPLATE_FILE);
 
-  Build();
+  for I := 0 to High(SourceFiles) do
+    ParseComments(SourceFiles[I].FileName, SourceFiles[I].Title);
 
   WriteLn('Sphinx exit code: ', RunCommand('sphinx-build', ['-q', '-E', INPUT_DIR, OUTPUT_DIR], Str));
   if (Str <> '') then

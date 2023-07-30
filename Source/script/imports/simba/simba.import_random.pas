@@ -39,7 +39,7 @@ Methods relating to generating random numbers.
 (*
 RandomCenterTPA
 ~~~~~~~~~~~~~~~
-function RandomCenterTPA(Amount: Integer; Box: TBox): TPointArray;
+> function RandomCenterTPA(Amount: Integer; Box: TBox): TPointArray;
 
 Generates random points in `Box` weighted towards the center.
 *)
@@ -51,7 +51,7 @@ end;
 (*
 RandomTPA
 ~~~~~~~~~
-function RandomTPA(Amount: Integer; Box: TBox): TPointArray;
+> function RandomTPA(Amount: Integer; Box: TBox): TPointArray;
 
 Generates random points in `Box`.
 *)
@@ -63,8 +63,8 @@ end;
 (*
 RandomLeft
 ~~~~~~~~~~
-function RandomLeft(Lo, Hi: Double): Double;
-function RandomLeft(Lo, Hi: Int64): Int64;
+> function RandomLeft(Lo, Hi: Double): Double;
+> function RandomLeft(Lo, Hi: Int64): Int64;
 
 Generates a random number between `Lo` and `Hi` weighted towards `Lo`
 *)
@@ -81,8 +81,8 @@ end;
 (*
 RandomRight
 ~~~~~~~~~~~
-function RandomRight(Lo, Hi: Double): Double;
-function RandomRight(Lo, Hi: Int64): Int64;
+> function RandomRight(Lo, Hi: Double): Double;
+> function RandomRight(Lo, Hi: Int64): Int64;
 
 Generates a random number between `Lo` and `Hi` weighted towards `Hi`
 *)
@@ -99,8 +99,8 @@ end;
 (*
 RandomMean
 ~~~~~~~~~~
-function RandomMean(Lo, Hi: Double): Double;
-function RandomMean(Lo, Hi: Int64): Int64;
+> function RandomMean(Lo, Hi: Double): Double;
+> function RandomMean(Lo, Hi: Int64): Int64;
 
 Generates a random number between `Lo` and `Hi` weighted towards the mean of Lo,Hi
 *)
@@ -117,8 +117,8 @@ end;
 (*
 RandomMode
 ~~~~~~~~~~
-function RandomMode(Mode, Lo, Hi: Double): Double;
-function RandomMode(Mode, Lo, Hi: Int64): Int64;
+> function RandomMode(Mode, Lo, Hi: Double): Double;
+> function RandomMode(Mode, Lo, Hi: Int64): Int64;
 
 Generates a random number between `Lo` and `Hi` weighted torwards `Mode`
 *)
@@ -135,7 +135,7 @@ end;
 (*
 GaussRand
 ~~~~~~~~~
-function GaussRand(Mean, Dev: Double): Double
+> function GaussRand(Mean, Dev: Double): Double
 
 Generates a random gaussian/normal number.
 *)
@@ -174,4 +174,3 @@ begin
 end;
 
 end.
-

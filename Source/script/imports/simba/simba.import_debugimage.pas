@@ -26,91 +26,91 @@ Debug Image
 (*
 Show
 ~~~~
-procedure Show(Matrix: TIntegerMatrix);
+> procedure Show(Matrix: TIntegerMatrix);
 *)
 
 (*
 Show
 ~~~~
-procedure Show(Matrix: TSingleMatrix; ColorMapID: Integer = 0);
+> procedure Show(Matrix: TSingleMatrix; ColorMapID: Integer = 0);
 *)
 
 (*
 Show
 ~~~~
-procedure Show(Boxes: TBoxArray; Filled: Boolean = False);
+> procedure Show(Boxes: TBoxArray; Filled: Boolean = False);
 *)
 
 (*
 Show
 ~~~~
-procedure Show(Box: TBox; Filled: Boolean = False);
+> procedure Show(Box: TBox; Filled: Boolean = False);
 *)
 
 (*
 Show
 ~~~~
-procedure Show(Quads: TQuadArray; Filled: Boolean = False);
+> procedure Show(Quads: TQuadArray; Filled: Boolean = False);
 *)
 
 (*
 Show
 ~~~~
-procedure Show(Quad: TQuad; Filled: Boolean = False);
+> procedure Show(Quad: TQuad; Filled: Boolean = False);
 *)
 
 (*
 Show
 ~~~~
-procedure Show(TPA: TPointArray; Color: Integer = $0000FF);
+> procedure Show(TPA: TPointArray; Color: Integer = $0000FF);
 *)
 
 (*
 Show
 ~~~~
-procedure Show(ATPA: T2DPointArray; Color: Integer = $0000FF);
+> procedure Show(ATPA: T2DPointArray; Color: Integer = $0000FF);
 *)
 
 (*
 ShowOnClient
 ~~~~~~~~~~~~
-procedure ShowOnClient(Boxes: TBoxArray; Filled: Boolean = False);
+> procedure ShowOnClient(Boxes: TBoxArray; Filled: Boolean = False);
 *)
 
 (*
 ShowOnClient
 ~~~~~~~~~~~~
-procedure ShowOnClient(Box: TBox; Filled: Boolean = False);
+> procedure ShowOnClient(Box: TBox; Filled: Boolean = False);
 *)
 
 (*
 ShowOnClient
 ~~~~~~~~~~~~
-procedure ShowOnClient(Quads: TQuadArray; Filled: Boolean = False);
+> procedure ShowOnClient(Quads: TQuadArray; Filled: Boolean = False);
 *)
 
 (*
 ShowOnClient
 ~~~~~~~~~~~~
-procedure ShowOnClient(Quad: TQuad; Filled: Boolean = False);
+> procedure ShowOnClient(Quad: TQuad; Filled: Boolean = False);
 *)
 
 (*
 ShowOnClient
 ~~~~~~~~~~~~
-procedure ShowOnClient(TPA: TPointArray; Color: Integer = $0000FF);
+> procedure ShowOnClient(TPA: TPointArray; Color: Integer = $0000FF);
 *)
 
 (*
 ShowOnClient
 ~~~~~~~~~~~~
-procedure ShowOnClient(ATPA: T2DPointArray; Color: Integer = $0000FF);
+> procedure ShowOnClient(ATPA: T2DPointArray; Color: Integer = $0000FF);
 *)
 
 (*
 Show
 ~~~~
-procedure Show(Bitmap: TSimbaImage; EnsureVisible: Boolean = True);
+> procedure Show(Bitmap: TSimbaImage; EnsureVisible: Boolean = True);
 *)
 procedure _LapeShowBitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -123,7 +123,7 @@ end;
 (*
 UpdateDebugImage
 ~~~~~~~~~~~~~~~~
-procedure UpdateDebugImage(Bitmap: TSimbaImage);
+> procedure UpdateDebugImage(Bitmap: TSimbaImage);
 *)
 procedure _LapeUpdateDebugImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -136,7 +136,7 @@ end;
 (*
 ShowDebugImage
 ~~~~~~~~~~~~~~
-procedure ShowDebugImage(Width, Height: Integer);
+> procedure ShowDebugImage(Width, Height: Integer);
 *)
 procedure _LapeShowDebugImage1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -149,7 +149,7 @@ end;
 (*
 ShowDebugImage
 ~~~~~~~~~~~~~~
-procedure ShowDebugImage(X, Y,Width, Height: Integer);
+> procedure ShowDebugImage(X, Y,Width, Height: Integer);
 *)
 procedure _LapeShowDebugImage2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -162,7 +162,7 @@ end;
 (*
 SetDebugImageMaxSize
 ~~~~~~~~~~~~~~~~~~~~
-procedure SetDebugImageMaxSize(MaxWidth, MaxHeight: Integer);
+> procedure SetDebugImageMaxSize(MaxWidth, MaxHeight: Integer);
 *)
 procedure _LapeSetDebugImageMaxSize(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -175,7 +175,7 @@ end;
 (*
 HideDebugImage
 ~~~~~~~~~~~~~~
-procedure HideDebugImage;
+> procedure HideDebugImage;
 *)
 procedure _LapeHideDebugImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -382,4 +382,3 @@ begin
 end;
 
 end.
-

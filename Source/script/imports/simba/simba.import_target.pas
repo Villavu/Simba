@@ -25,7 +25,7 @@ Target related methods.
 (*
 TSimbaTarget.SetDesktop
 ~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaTarget.SetDesktop;
+> procedure TSimbaTarget.SetDesktop;
 
 Sets the desktop as the target.
 *)
@@ -37,7 +37,7 @@ end;
 (*
 TSimbaTarget.SetImage
 ~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaTarget.SetImage(TSimbaImage: TSimbaImage);
+> procedure TSimbaTarget.SetImage(TSimbaImage: TSimbaImage);
 
 Sets the TSimbaImage as a target.
 
@@ -51,7 +51,7 @@ end;
 (*
 TSimbaTarget.SetWindow
 ~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaTarget.SetWindow(Window: TWindowHandle);
+> procedure TSimbaTarget.SetWindow(Window: TWindowHandle);
 
 Sets a window handle as a target.
 *)
@@ -63,7 +63,7 @@ end;
 (*
 TSimbaTarget.SetEIOS
 ~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaTarget.SetEIOS(Plugin, Args: String);
+> procedure TSimbaTarget.SetEIOS(Plugin, Args: String);
 
 Sets a plugin (via EIOS API) as the target.
 *)
@@ -75,7 +75,7 @@ end;
 (*
 TSimbaTarget.GetImage
 ~~~~~~~~~~~~~~~~~~~~~
-function TSimbaTarget.GetImage(Bounds: TBox = [-1,-1,-1,-1]): TSimbaImage;
+> function TSimbaTarget.GetImage(Bounds: TBox = [-1,-1,-1,-1]): TSimbaImage;
 *)
 procedure _LapeSimbaTarget_GetImage(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -85,7 +85,7 @@ end;
 (*
 TSimbaTarget.GetDimensions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-procedure TSimbaTarget.GetDimensions(out Width, Height: Integer);
+> procedure TSimbaTarget.GetDimensions(out Width, Height: Integer);
 *)
 procedure _LapeSimbaTarget_GetDimensions(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -95,7 +95,7 @@ end;
 (*
 TSimbaTarget.GetWidth
 ~~~~~~~~~~~~~~~~~~~~~
-function TSimbaTarget.GetWidth: Integer;
+> function TSimbaTarget.GetWidth: Integer;
 *)
 procedure _LapeSimbaTarget_GetWidth(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -105,7 +105,7 @@ end;
 (*
 TSimbaTarget.GetHeight
 ~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaTarget.GetHeight: Integer;
+> function TSimbaTarget.GetHeight: Integer;
 *)
 procedure _LapeSimbaTarget_GetHeight(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -115,7 +115,7 @@ end;
 (*
 TSimbaTarget.IsValid
 ~~~~~~~~~~~~~~~~~~~~
-function TSimbaTarget.IsValid: Boolean;
+> function TSimbaTarget.IsValid: Boolean;
 *)
 procedure _LapeSimbaTarget_IsValid(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -125,7 +125,7 @@ end;
 (*
 TSimbaTarget.IsFocused
 ~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaTarget.IsFocused: Boolean;
+> function TSimbaTarget.IsFocused: Boolean;
 *)
 procedure _LapeSimbaTarget_IsFocused(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -135,7 +135,7 @@ end;
 (*
 TSimbaTarget.Focus
 ~~~~~~~~~~~~~~~~~~
-function TSimbaTarget.Focus: Boolean;
+> function TSimbaTarget.Focus: Boolean;
 *)
 procedure _LapeSimbaTarget_Focus(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -145,7 +145,7 @@ end;
 (*
 TSimbaTarget.IsWindowTarget
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaTarget.IsWindowTarget: Boolean;
+> function TSimbaTarget.IsWindowTarget: Boolean;
 *)
 procedure _LapeSimbaTarget_IsWindowTarget1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -155,7 +155,7 @@ end;
 (*
 TSimbaTarget.IsWindowTarget
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaTarget.IsWindowTarget(out Window: TWindowHandle): Boolean;
+> function TSimbaTarget.IsWindowTarget(out Window: TWindowHandle): Boolean;
 *)
 procedure _LapeSimbaTarget_IsWindowTarget2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -165,7 +165,7 @@ end;
 (*
 TSimbaTarget.IsImageTarget
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaTarget.IsImageTarget: Boolean;
+> function TSimbaTarget.IsImageTarget: Boolean;
 *)
 procedure _LapeSimbaTarget_IsImageTarget1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -175,7 +175,7 @@ end;
 (*
 TSimbaTarget.IsImageTarget
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaTarget.IsImageTarget(out Image: TSimbaImage): Boolean;
+> function TSimbaTarget.IsImageTarget(out Image: TSimbaImage): Boolean;
 *)
 procedure _LapeSimbaTarget_IsImageTarget2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -185,7 +185,7 @@ end;
 (*
 TSimbaTarget.IsEIOSTarget
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaTarget.IsEIOSTarget: Boolean;
+> function TSimbaTarget.IsEIOSTarget: Boolean;
 *)
 procedure _LapeSimbaTarget_IsEIOSTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -195,7 +195,7 @@ end;
 (*
 TSimbaTarget.IsDefault
 ~~~~~~~~~~~~~~~~~~~~~~
-function TSimbaTarget.IsDefault: Boolean;
+> function TSimbaTarget.IsDefault: Boolean;
 *)
 procedure _LapeSimbaTarget_IsDefault(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -334,4 +334,3 @@ begin
 end;
 
 end.
-
