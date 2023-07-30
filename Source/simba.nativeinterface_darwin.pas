@@ -430,24 +430,24 @@ const
 
 const
   ClickTypeToMouseDownEvent: array[MouseButton] of Integer = (
-    kCGEventRightMouseDown,
     kCGEventLeftMouseDown,
+    kCGEventRightMouseDown,
     kCGEventOtherMouseDown,
     kCGEventOtherMouseDown,
     kCGEventOtherMouseDown
   );
 
   ClickTypeToMouseButton: array[MouseButton] of Integer = (
-    kCGMouseButtonRight,
     kCGMouseButtonLeft,
+    kCGMouseButtonRight,
     kCGMouseButtonCenter,
     3,
     4
   );
 
   ClickTypeToMouseUpEvent: array[MouseButton] of Integer = (
-    kCGEventRightMouseUp,
     kCGEventLeftMouseUp,
+    kCGEventRightMouseUp,
     kCGEventOtherMouseUp,
     kCGEventOtherMouseUp,
     kCGEventOtherMouseUp
