@@ -182,7 +182,8 @@ type
     procedure Crop(X1, Y1, X2, Y2: Integer);
     procedure Pad(Amount: Integer);
 
-    function ToTBitmap: TBitmap;
+    function ToLazBitmap: TBitmap;
+    procedure LoadFromLazBitmap(LazBitmap: TBitmap);
 
     function ToGreyMatrix: TByteMatrix;
     function ToMatrixBGR: TIntegerMatrix;
@@ -202,7 +203,6 @@ type
     procedure LoadFromFile(FileName: String; Area: TBox); overload;
     procedure LoadFromString(AWidth, AHeight: Integer; Str: String);
     procedure LoadFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
-    procedure LoadFromTBitmap(bmp: TBitmap);
     procedure LoadFromImage(Image: TSimbaImage);
 
     function Compare(Other: TSimbaImage): Single;
@@ -349,7 +349,7 @@ begin
   SetSize(X2-X1+1, Y2-Y1+1);
 end;
 
-function TSimbaImage.ToTBitmap: TBitmap;
+function TSimbaImage.ToLazBitmap: TBitmap;
 begin
   Result := TBitmap.Create();
   Result.FromData(FData, FWidth, FHeight);
@@ -768,13 +768,13 @@ begin
   Result := Buffer.Trim();
 end;
 
-procedure TSimbaImage.LoadFromTBitmap(bmp: TBitmap);
+procedure TSimbaImage.LoadFromLazBitmap(LazBitmap: TBitmap);
 var
   TempBitmap: TSimbaImage;
 begin
   SetSize(0, 0);
 
-  TempBitmap := Bmp.ToMufasaBitmap();
+  TempBitmap := LazBitmap.ToMufasaBitmap();
   TempBitmap.DataOwner := False;
 
   FData := TempBitmap.Data;

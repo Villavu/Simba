@@ -294,21 +294,21 @@ begin
     addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawEllipse(Center: TPoint; RadiusX, RadiusY: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawEllipse);
     addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawHeatmap(const Mat: TSingleMatrix);', @_LapeSimbaImageBoxBitmap_DrawHeatmap);
 
-    addGlobalType('procedure(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; Rect: TRect) of object', 'TSimbaImageBoxPaintAreaEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; Rect: TLazRect) of object', 'TSimbaImageBoxPaintAreaEvent', FFI_DEFAULT_ABI);
 
-    addClass('TSimbaImageBox', 'TWinControl');
+    addClass('TSimbaImageBox', 'TLazWinControl');
 
     addClassVar('TSimbaImageBox', 'MousePoint', 'TPoint', @_LapeSimbaImageBox_MousePoint_Read);
-    addClassVar('TSimbaImageBox', 'Background', 'TBitmap', @_LapeSimbaImageBox_Background_Read);
+    addClassVar('TSimbaImageBox', 'Background', 'TLazBitmap', @_LapeSimbaImageBox_Background_Read);
     addClassVar('TSimbaImageBox', 'Zoom', 'Single', @_LapeSimbaImageBox_Zoom_Read, @_LapeSimbaImageBox_Zoom_Write);
-    addClassVar('TSimbaImageBox', 'StatusBar', 'TStatusBar', @_LapeSimbaImageBox_StatusBar_Read);
-    addClassVar('TSimbaImageBox', 'StatusPanel', 'TStatusPanel', @_LapeSimbaImageBox_StatusPanel_Read);
-    addClassVar('TSimbaImageBox', 'OnMouseMove', 'TMouseMoveEvent', @_LapeSimbaImageBox_OnMouseMove_Read, @_LapeSimbaImageBox_OnMouseMove_Write);
-    addClassVar('TSimbaImageBox', 'OnMouseDown', 'TMouseEvent', @_LapeSimbaImageBox_OnMouseDown_Read, @_LapeSimbaImageBox_OnMouseDown_Write);
-    addClassVar('TSimbaImageBox', 'OnMouseUp', 'TMouseEvent', @_LapeSimbaImageBox_OnMouseUp_Read, @_LapeSimbaImageBox_OnMouseUp_Write);
-    addClassVar('TSimbaImageBox', 'OnMouseLeave', 'TNotifyEvent', @_LapeSimbaImageBox_OnMouseLeave_Read, @_LapeSimbaImageBox_OnMouseLeave_Write);
-    addClassVar('TSimbaImageBox', 'OnMouseEnter', 'TNotifyEvent', @_LapeSimbaImageBox_OnMouseEnter_Read, @_LapeSimbaImageBox_OnMouseEnter_Write);
-    addClassVar('TSimbaImageBox', 'OnDblClick', 'TNotifyEvent', @_LapeSimbaImageBox_OnDblClick_Read, @_LapeSimbaImageBox_OnDblClick_Write);
+    addClassVar('TSimbaImageBox', 'StatusBar', 'TLazStatusBar', @_LapeSimbaImageBox_StatusBar_Read);
+    addClassVar('TSimbaImageBox', 'StatusPanel', 'TLazStatusPanel', @_LapeSimbaImageBox_StatusPanel_Read);
+    addClassVar('TSimbaImageBox', 'OnMouseMove', 'TLazMouseMoveEvent', @_LapeSimbaImageBox_OnMouseMove_Read, @_LapeSimbaImageBox_OnMouseMove_Write);
+    addClassVar('TSimbaImageBox', 'OnMouseDown', 'TLazMouseEvent', @_LapeSimbaImageBox_OnMouseDown_Read, @_LapeSimbaImageBox_OnMouseDown_Write);
+    addClassVar('TSimbaImageBox', 'OnMouseUp', 'TLazMouseEvent', @_LapeSimbaImageBox_OnMouseUp_Read, @_LapeSimbaImageBox_OnMouseUp_Write);
+    addClassVar('TSimbaImageBox', 'OnMouseLeave', 'TLazNotifyEvent', @_LapeSimbaImageBox_OnMouseLeave_Read, @_LapeSimbaImageBox_OnMouseLeave_Write);
+    addClassVar('TSimbaImageBox', 'OnMouseEnter', 'TLazNotifyEvent', @_LapeSimbaImageBox_OnMouseEnter_Read, @_LapeSimbaImageBox_OnMouseEnter_Write);
+    addClassVar('TSimbaImageBox', 'OnDblClick', 'TLazNotifyEvent', @_LapeSimbaImageBox_OnDblClick_Read, @_LapeSimbaImageBox_OnDblClick_Write);
     addClassVar('TSimbaImageBox', 'OnPaintArea', 'TSimbaImageBoxPaintAreaEvent', @_LapeSimbaImageBox_OnPaintArea_Read, @_LapeSimbaImageBox_OnPaintArea_Write);
 
     addGlobalFunc('function TSimbaImageBox.FindDTM(DTM: TDTM): TPointArray', @_LapeSimbaImageBox_FindDTM);
@@ -322,7 +322,7 @@ begin
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(FileName: String); overload;', @_LapeSimbaImageBox_SetBackground_FileName);
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(Image: TSimbaImage); overload;', @_LapeSimbaImageBox_SetBackground_Bitmap);
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(Window: TWindowHandle); overload;', @_LapeSimbaImageBox_SetBackground_Window);
-    addGlobalFunc('procedure TSimbaImageBox.Init(Owner: TComponent); override', @_LapeSimbaImageBox_Init);
+    addGlobalFunc('procedure TSimbaImageBox.Init(Owner: TLazComponent); override', @_LapeSimbaImageBox_Init);
   end;
 end;
 
