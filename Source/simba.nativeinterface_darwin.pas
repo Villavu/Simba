@@ -348,9 +348,9 @@ begin
   R.Bottom := WindowBounds.Y1 + Y + Height;
 
   if Window = GetDesktopWindow() then
-    Image := CGWindowListCreateImage(RectToCGRect(R), kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageBoundsIgnoreFraming)
+    Image := CGWindowListCreateImage(RectToCGRect(R), kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageBoundsIgnoreFraming or kCGWindowImageNominalResolution)
   else
-    Image := CGWindowListCreateImage(RectToCGRect(R), kCGWindowListOptionIncludingWindow, Window, kCGWindowImageBoundsIgnoreFraming);
+    Image := CGWindowListCreateImage(RectToCGRect(R), kCGWindowListOptionIncludingWindow, Window, kCGWindowImageBoundsIgnoreFraming or kCGWindowImageNominalResolution);
 
   Result := (Image <> nil) and (CGImageGetWidth(Image) = Width) and (CGImageGetHeight(Image) = Height);
 
