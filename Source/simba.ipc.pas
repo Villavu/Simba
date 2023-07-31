@@ -24,11 +24,16 @@ type
     MessageID: Integer;
   end;
 
+  TSimbaIPCInputStream = class(TInputPipeStream)
+  public
+    function Read(var Buffer; Count: Longint): LongInt; override;
+  end;
+
   TSimbaIPCServer = class
   protected
     FInputClient: TOutputPipeStream;
-    FInputStream: TInputPipeStream;
-    FOutputClient: TInputPipeStream;
+    FInputStream: TSimbaIPCInputStream;
+    FOutputClient: TSimbaIPCInputStream;
     FOutputStream: TOutputPipeStream;
 
     FClientID: String;
@@ -46,7 +51,7 @@ type
 
   TSimbaIPCClient = class
   protected
-    FInputStream: TInputPipeStream;
+    FInputStream: TSimbaIPCInputStream;
     FOutputStream: TOutputPipeStream;
     FLock: TCriticalSection;
 
@@ -66,6 +71,14 @@ implementation
 
 uses
   simba.mufasatypes, simba.threading;
+
+function TSimbaIPCInputStream.Read(var Buffer; Count: Longint): longint;
+begin
+  Result := 0;
+  repeat
+    Inc(Result, inherited Read(PByte(@Buffer)[Result], Count - Result));
+  until (Result = Count);
+end;
 
 procedure TSimbaIPCServer.Execute;
 var
@@ -142,7 +155,7 @@ begin
   if (not CreatePipeHandles(InputHandle, OutputHandle, 4096)) then
     raise Exception.Create('Unable to create input pipe');
 
-  FInputStream := TInputPipeStream.Create(InputHandle);
+  FInputStream := TSimbaIPCInputStream.Create(InputHandle);
   FInputClient := TOutputPipeStream.Create(DuplicateHandle(OutputHandle));
 
   // Output
@@ -150,7 +163,7 @@ begin
     raise Exception.Create('Unable to create output pipe');
 
   FOutputStream := TOutputPipeStream.Create(OutputHandle);
-  FOutputClient := TInputPipeStream.Create(DuplicateHandle(InputHandle));
+  FOutputClient := TSimbaIPCInputStream.Create(DuplicateHandle(InputHandle));
 
   FClientID := IntToHex(FInputClient.Handle, 16) + IntToHex(FOutputClient.Handle, 16);
   FThread := Threaded(@Execute);
@@ -233,7 +246,7 @@ begin
   FLock := TCriticalSection.Create();
 
   FOutputStream := TOutputPipeStream.Create(StrToInt('$' + Copy(ServerID, 1, 16)));
-  FInputStream := TInputPipeStream.Create(StrToInt('$' + Copy(ServerID, 16+1, 16)));
+  FInputStream := TSimbaIPCInputStream.Create(StrToInt('$' + Copy(ServerID, 16+1, 16)));
 
   FParams := TMemoryStream.Create();
   FResult := TMemoryStream.Create();
