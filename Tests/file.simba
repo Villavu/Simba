@@ -1,9 +1,11 @@
 {$assertions on}
 
 const
-  TESTFILE = SIMBA_PATH + 'test.txt';
-
+  TESTFILE := GetTempFileName();
+  TESTFILE_RENAMED := TESTFILE + '.renamed';
+  TESTFILE_COPY := TESTFILE + '.copied';
 begin
+  Assert(not FileExists(TESTFILE));
   Assert(FileCreate(TESTFILE));
   Assert(FileDelete(TESTFILE));
   Assert(not FileExists(TESTFILE));
@@ -23,15 +25,15 @@ begin
   Assert(FileWrite(TESTFILE, '0' * Round(0.25 * (1024 * 1024))));
   Assert(FileSizeInMegaBytes(TESTFILE) = 0.25);
 
-  if FileExists('renamed.txt') then
-    FileDelete('renamed.txt');
+  if FileExists(TESTFILE_RENAMED) then
+    FileDelete(TESTFILE_RENAMED);
 
-  Assert(FileRename(TESTFILE, 'renamed.txt'));
-  Assert(FileExists('renamed.txt'));
+  Assert(FileRename(TESTFILE, TESTFILE_RENAMED));
+  Assert(FileExists(TESTFILE_RENAMED));
   Assert(not FileExists(TESTFILE));
 
-  Assert(FileCopy('renamed.txt', 'copied.txt'));
-  Assert(FileCopy('renamed.txt', 'copied.txt'));
-  Assert(FileExists('copied.txt'));
-  Assert(FileExists('renamed.txt'));
+  Assert(FileCopy(TESTFILE_RENAMED, TESTFILE_COPY));
+  Assert(FileCopy(TESTFILE_RENAMED, TESTFILE_COPY));
+  Assert(FileExists(TESTFILE_COPY));
+  Assert(FileExists(TESTFILE_RENAMED));
 end.

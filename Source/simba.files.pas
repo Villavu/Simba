@@ -337,14 +337,14 @@ class function TSimbaFile.FileRead(FileName: String): String;
 begin
   SetLength(Result, FileSize(FileName));
 
-  if not DoFileRead(FileName, Result[1], Length(Result)) then
+  if (Length(Result) > 0) and (not DoFileRead(FileName, Result[1], Length(Result))) then
     Result := '';
 end;
 
 class function TSimbaFile.FileReadEx(FileName: String; Offset: Integer): String;
 begin
   SetLength(Result, FileSize(FileName) - Offset);
-  if not DoFileRead(FileName, Result[1], Length(Result), Offset) then
+  if (Length(Result) > 0) and (not DoFileRead(FileName, Result[1], Length(Result), Offset)) then
     Result := '';
 end;
 
@@ -367,7 +367,7 @@ class function TSimbaFile.FileReadBytes(FileName: String): TByteArray;
 begin
   SetLength(Result, FileSize(FileName));
 
-  if not DoFileRead(FileName, Result[1], Length(Result)) then
+  if (Length(Result) > 0) and (not DoFileRead(FileName, Result[1], Length(Result))) then
     Result := [];
 end;
 
