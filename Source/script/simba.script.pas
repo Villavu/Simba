@@ -16,6 +16,7 @@ uses
   simba.script_plugin, simba.mufasatypes, simba.windowhandle;
 
 type
+  PSimbaScript = ^TSimbaScript;
   TSimbaScript = class
   protected
     FState: TInitBool;
@@ -253,6 +254,7 @@ begin
 
   PSimbaTarget(FCompiler['Target'].Ptr)^.SetWindow(FTargetWindow);
   PString(FCompiler['SCRIPT_FILE'].Ptr)^ := FScriptFileName;
+  PPointer(FCompiler['_SimbaScript'].Ptr)^ := Self;
 
   FRunningTime := HighResolutionTime();
   try

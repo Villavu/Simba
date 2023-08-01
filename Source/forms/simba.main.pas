@@ -13,7 +13,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ComCtrls, ExtCtrls,
   Menus, ImgList, LMessages, AnchorDockPanel,
   simba.settings, simba.mufasatypes, simba.mouselogger, simba.areaselector,
-  simba.scriptinstance, simba.component_menubar;
+  simba.scriptinstance, simba.component_menubar, simba.process;
 
 const
   IMAGE_NONE                = -1;
@@ -218,7 +218,7 @@ type
     procedure TrayPopupExitClick(Sender: TObject);
   protected
     FWindowSelection: TWindowHandle;
-    FProcessSelection: Integer;
+    FProcessSelection: TProcessID;
     FRecentFiles: TStringList;
 
     FMenuBar: TSimbaMainMenuBar;
@@ -256,7 +256,7 @@ type
     procedure SetTrayIconVisible(Value: Boolean);
   public
     property WindowSelection: TWindowHandle read FWindowSelection;
-    property ProcessSelection: Integer read FProcessSelection;
+    property ProcessSelection: TProcessID read FProcessSelection;
     property MenuBar: TSimbaMainMenuBar read FMenuBar;
 
     procedure Setup(Data: PtrInt);
@@ -284,7 +284,7 @@ uses
 
   simba.windowselector, simba.colorpicker,
 
-  simba.openssl, simba.env, simba.process,
+  simba.openssl, simba.env,
   simba.dockinghelpers, simba.nativeinterface,
   simba.scriptformatter, simba.windowhandle, simba.scripttab, simba.theme,
   simba.backupsform;

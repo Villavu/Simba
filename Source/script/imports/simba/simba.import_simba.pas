@@ -14,51 +14,11 @@ implementation
 
 uses
   lptypes,
-  simba.scriptthread, simba.settings;
+  simba.settings;
 
-procedure _LapeClearDebug(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure ClearScriptOutput(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaDebugLn([EDebugLn.CLEAR], '');
-end;
-
-procedure _LapeDisguise(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('Disguise requires Simba communication');
-
-  SimbaScriptThread.Script.SimbaCommunication.Disguse(PString(Params^[0])^);
-end;
-
-procedure _LapeStatus(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('Status requires Simba communication');
-
-  SimbaScriptThread.Script.SimbaCommunication.Status(PString(Params^[0])^);
-end;
-
-procedure _LapeGetSimbaPID(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('GetSimbaPID requires Simba communication');
-
-  PPtrUInt(Result)^ := SimbaScriptThread.Script.SimbaCommunication.GetSimbaPID();
-end;
-
-procedure _LapeGetSimbaTargetPID(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('GetSimbaTargetPID requires Simba communication');
-
-  PPtrUInt(Result)^ := SimbaScriptThread.Script.SimbaCommunication.GetSimbaTargetPID();
-end;
-
-procedure _LapeGetSimbaTargetWindow(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('GetSimbaTargetWindow requires Simba communication');
-
-  PPtrUInt(Result)^ := SimbaScriptThread.Script.SimbaCommunication.GetSimbaTargetWindow();
 end;
 
 procedure _LapeGetSimpleSetting(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -77,13 +37,39 @@ begin
   begin
     ImportingSection := 'Simba';
 
-    addGlobalFunc('procedure ClearDebug', @_LapeClearDebug);
+    addGlobalFunc('procedure ClearScriptOutput', @ClearScriptOutput);
 
-    addGlobalFunc('procedure SetSimbaStatus(Status: String)', @_LapeStatus);
-    addGlobalFunc('procedure SetSimbaTitle(Title: String)', @_LapeDisguise);
-    addGlobalFunc('function GetSimbaPID: TProcessID', @_LapeGetSimbaPID);
-    addGlobalFunc('function GetSimbaTargetPID: TProcessID', @_LapeGetSimbaTargetPID);
-    addGlobalFunc('function GetSimbaTargetWindow: TWindowHandle', @_LapeGetSimbaTargetWindow);
+    addGlobalFunc(
+      'procedure SetSimbaStatus(S: String);', [
+      'begin',
+      '  _SimbaScript.SetSimbaStatus(S);',
+      'end;'
+    ]);
+    addGlobalFunc(
+      'procedure SetSimbaTitle(S: String);', [
+      'begin',
+      '  _SimbaScript.SetSimbaTitle(S);',
+      'end;'
+    ]);
+
+    addGlobalFunc(
+      'function GetSimbaPID: TProcessID;', [
+      'begin',
+      '  Result := _SimbaScript.GetSimbaPID();',
+      'end;'
+    ]);
+    addGlobalFunc(
+      'function GetSimbaTargetPID: TProcessID;', [
+      'begin',
+      '  Result := _SimbaScript.GetSimbaTargetPID();',
+      'end;'
+    ]);
+    addGlobalFunc(
+      'function GetSimbaTargetWindow: TWindowHandle;', [
+      'begin',
+      '  Result := _SimbaScript.GetSimbaTargetWindow();',
+      'end;'
+    ]);
 
     addGlobalFunc('function SetSimbaSetting(Name: String; DefValue: String = ""): String', @_LapeGetSimpleSetting);
     addGlobalFunc('procedure GetSimbaSetting(Name, Value: String);', @_LapeSetSimpleSetting);

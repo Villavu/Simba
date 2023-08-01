@@ -42,8 +42,6 @@ type
     ); reintroduce;
   end;
 
-var
-  SimbaScriptThread: TSimbaScriptRunner;
 
 implementation
 

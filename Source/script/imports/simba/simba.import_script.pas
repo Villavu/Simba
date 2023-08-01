@@ -14,7 +14,7 @@ implementation
 
 uses
   lptypes,
-  simba.process, simba.scriptthread;
+  simba.process;
 
 (*
 Script
@@ -83,10 +83,6 @@ PauseScript
 
 Programmatically pauses the script. The only way for the script to resumed is by the user clicking the play button.
 *)
-procedure _LapePauseScript(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  SimbaScriptThread.Script.State := ESimbaScriptState.STATE_PAUSED;
-end;
 
 (*
 GetScriptPID
@@ -202,7 +198,12 @@ begin
     addGlobalFunc('function GetScriptParameters: TStringArray', @_LapeGetScriptParameters);
     addGlobalFunc('function GetScriptParameter(Name: String): String', @_LapeGetScriptParameter);
 
-    addGlobalFunc('procedure PauseScript', @_LapePauseScript);
+    addGlobalFunc(
+      'procedure PauseScript;', [
+      'begin',
+      '  _SimbaScript.Pause();',
+      'end;'
+    ]);
 
     addGlobalFunc(
       'procedure TerminateScript(WriteCallStack: Boolean = False); overload;', [

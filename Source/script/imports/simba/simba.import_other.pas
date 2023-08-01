@@ -14,7 +14,7 @@ implementation
 
 uses
   clipbrd, lptypes,
-  simba.nativeinterface, simba.scriptthread,
+  simba.nativeinterface,
   simba.settings, simba.compress, simba.encoding;
 
 procedure _LapePlaySound(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -53,14 +53,6 @@ begin
     PString(Result)^ := Clipboard.AsText;
   except
   end;
-end;
-
-procedure _LapeStatus(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('Status requires Simba communication');
-
-  SimbaScriptThread.Script.SimbaCommunication.Status(PString(Params^[0])^);
 end;
 
 procedure ImportOther(Compiler: TSimbaScript_Compiler);
