@@ -90,7 +90,7 @@ begin
     else
       SimbaProcessType := ESimbaProcessType.SCRIPT;
 
-    SimbaScriptThread := TSimbaScriptRunner.Create(
+    TSimbaScriptRunner.Create(
       Application.Params[Application.ParamCount],
       Application.GetOptionValue('simbacommunication'),
       Application.GetOptionValue('target'),
@@ -110,7 +110,7 @@ begin
     Application.CreateForm(TSimbaFileBrowserForm, SimbaFileBrowserForm);
     Application.CreateForm(TSimbaAboutForm, SimbaAboutForm);
     Application.CreateForm(TSimbaSettingsForm, SimbaSettingsForm);
-  Application.CreateForm(TSimbaImageToStringForm, SimbaImageToStringForm);
+    Application.CreateForm(TSimbaImageToStringForm, SimbaImageToStringForm);
     Application.CreateForm(TSimbaOpenExampleForm, SimbaOpenExampleForm);
     Application.CreateForm(TSimbaColorPickerHistoryForm, SimbaColorPickerHistoryForm);
     Application.CreateForm(TSimbaPackageForm, SimbaPackageForm);

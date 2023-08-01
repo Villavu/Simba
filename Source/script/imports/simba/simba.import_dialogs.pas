@@ -14,8 +14,7 @@ implementation
 
 uses
   dialogs, controls, lptypes,
-  simba.scriptthread, simba.aca, simba.dtmeditor,
-  simba.dialog, simba.threading, simba.target, simba.finder;
+  simba.aca, simba.dtmeditor, simba.dialog, simba.threading, simba.target, simba.finder;
 
 procedure _LapeInputCombo(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 
@@ -122,14 +121,6 @@ begin
   ExecuteOnMainThread(@Execute);
 end;
 
-procedure _LapeShowTrayNotification(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('ShowTrayNotification requires Simba communication');
-
-  SimbaScriptThread.Script.SimbaCommunication.ShowTrayNotification(PString(Params^[0])^, PString(Params^[1])^, PInteger(Params^[2])^);
-end;
-
 procedure ImportDialogs(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -142,10 +133,16 @@ begin
     addGlobalFunc('function ShowQueryDialog(Caption, Prompt: String; var Value: String): Boolean', @_LapeInputQuery);
     addGlobalFunc('function ShowComboDialog(Caption, Prompt: string; List: TStringArray): Integer', @_LapeInputCombo);
     addGlobalFunc('procedure ShowMessage(Message: String)', @_LapeShowMessage);
-    addGlobalFunc('procedure ShowTrayNotification(Title, Message: String; Timeout: Integer = 3000)', @_LapeShowTrayNotification);
     addGlobalFunc('function ShowQuestionDialog(Title, Question: String): ESimbaDialogResult', @_LapeShowQuestionDialog);
     addGlobalFunc('function ShowDTMEditor(Target: TSimbaTarget; Title: String): String', @_LapeShowDTMEditor);
     addGlobalFunc('function ShowACA(Target: TSimbaTarget; Title: String): TColorTolerance', @_LapeShowACA);
+
+    addGlobalFunc(
+      'procedure ShowTrayNotification(Title, Message: String; Timeout: Integer = 3000);', [
+      'begin',
+      '  _SimbaScript.ShowTrayNotification(Title, Message, Timeout);',
+      'end;'
+    ]);
 
     ImportingSection := '';
   end;

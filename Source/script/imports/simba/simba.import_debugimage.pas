@@ -13,8 +13,7 @@ procedure ImportDebugImage(Compiler: TSimbaScript_Compiler);
 implementation
 
 uses
-  lptypes,
-  simba.scriptthread, simba.bitmap;
+  lptypes;
 
 (*
 Debug Image
@@ -112,78 +111,36 @@ Show
 ~~~~
 > procedure Show(Bitmap: TSimbaImage; EnsureVisible: Boolean = True);
 *)
-procedure _LapeShowBitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('ShowBitmap requires Simba communication');
-
-  SimbaScriptThread.Script.SimbaCommunication.DebugImage_Show(PSimbaImage(Params^[0])^, PBoolean(Params^[1])^);
-end;
 
 (*
 UpdateDebugImage
 ~~~~~~~~~~~~~~~~
 > procedure UpdateDebugImage(Bitmap: TSimbaImage);
 *)
-procedure _LapeUpdateDebugImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('DrawBitmapDebugImg requires Simba communication');
-
-  SimbaScriptThread.Script.SimbaCommunication.DebugImage_Update(PSimbaImage(Params^[0])^);
-end;
 
 (*
 ShowDebugImage
 ~~~~~~~~~~~~~~
 > procedure ShowDebugImage(Width, Height: Integer);
 *)
-procedure _LapeShowDebugImage1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('ShowDebugImage requires Simba communication');
-
-  SimbaScriptThread.Script.SimbaCommunication.DebugImage_Display(PInteger(Params^[0])^, PInteger(Params^[1])^);
-end;
 
 (*
 ShowDebugImage
 ~~~~~~~~~~~~~~
 > procedure ShowDebugImage(X, Y,Width, Height: Integer);
 *)
-procedure _LapeShowDebugImage2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('ShowDebugImage requires Simba communication');
-
-  SimbaScriptThread.Script.SimbaCommunication.DebugImage_Display(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
-end;
 
 (*
 SetDebugImageMaxSize
 ~~~~~~~~~~~~~~~~~~~~
 > procedure SetDebugImageMaxSize(MaxWidth, MaxHeight: Integer);
 *)
-procedure _LapeSetDebugImageMaxSize(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('SetDebugImgMaxSize requires Simba communication');
-
-  SimbaScriptThread.Script.SimbaCommunication.DebugImage_SetMaxSize(PInteger(Params^[0])^, PInteger(Params^[1])^);
-end;
 
 (*
 HideDebugImage
 ~~~~~~~~~~~~~~
 > procedure HideDebugImage;
 *)
-procedure _LapeHideDebugImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  if (SimbaScriptThread.Script.SimbaCommunication = nil) then
-    raise Exception.Create('HideDebugImage requires Simba communication');
-
-  SimbaScriptThread.Script.SimbaCommunication.DebugImage_Hide();
-end;
 
 procedure ImportDebugImage(Compiler: TSimbaScript_Compiler);
 begin
@@ -191,12 +148,47 @@ begin
   begin
     ImportingSection := 'Debug Image';
 
-    addGlobalFunc('procedure SetDebugImageMaxSize(MaxWidth, MaxHeight: Integer)', @_LapeSetDebugImageMaxSize);
-    addGlobalFunc('procedure ShowDebugImage(Width, Height: Integer); overload;', @_LapeShowDebugImage1);
-    addGlobalFunc('procedure ShowDebugImage(X, Y, Width, Height: Integer); overload;', @_LapeShowDebugImage2);
-    addGlobalFunc('procedure HideDebugImage;', @_LapeHideDebugImage);
-    addGlobalFunc('procedure UpdateDebugImage(Bitmap: TImage);', @_LapeUpdateDebugImage);
-    addGlobalFunc('procedure Show(Bitmap: TImage; EnsureVisible: Boolean = True);', @_LapeShowBitmap);
+    addGlobalFunc(
+      'procedure SetDebugImageMaxSize(MaxWidth, MaxHeight: Integer);', [
+      'begin',
+      '  _SimbaScript.DebugImage_SetMaxSize(MaxWidth, MaxHeight);',
+      'end;'
+    ]);
+
+    addGlobalFunc(
+      'procedure ShowDebugImage(Width, Height: Integer); overload;', [
+      'begin',
+      '  _SimbaScript.DebugImage_Display(Width, Height);',
+      'end;'
+    ]);
+
+    addGlobalFunc(
+      'procedure ShowDebugImage(X, Y, Width, Height: Integer); overload;', [
+      'begin',
+      '  _SimbaScript.DebugImage_Display(X, Y, Width, Height);',
+      'end;'
+    ]);
+
+    addGlobalFunc(
+      'procedure HideDebugImage;', [
+      'begin',
+      '  _SimbaScript.DebugImage_Hide();',
+      'end;'
+    ]);
+
+    addGlobalFunc(
+      'procedure UpdateDebugImage(Image: TImage);', [
+      'begin',
+      '  _SimbaScript.DebugImage_Update(Image);',
+      'end;'
+    ]);
+
+    addGlobalFunc(
+      'procedure Show(Image: TImage; EnsureVisible: Boolean = True);', [
+      'begin',
+      '  _SimbaScript.DebugImage_Show(Image, EnsureVisible);',
+      'end;'
+    ]);
 
     ImportingSection := 'TImage';
 

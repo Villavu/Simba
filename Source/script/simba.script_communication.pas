@@ -11,22 +11,22 @@ interface
 
 uses
   classes, sysutils,
-  simba.ipc, simba.mufasatypes, simba.bitmap;
+  simba.ipc, simba.mufasatypes, simba.bitmap, simba.process;
 
 type
   TSimbaScriptCommunication = class(TSimbaIPCClient)
   public
-    function GetSimbaTargetWindow: PtrUInt;
-    function GetSimbaTargetPID: PtrUInt;
-    function GetSimbaPID: PtrUInt;
+    function GetSimbaTargetWindow: TWindowHandle;
+    function GetSimbaTargetPID: TProcessID;
+    function GetSimbaPID: TProcessID;
 
     procedure ScriptError(Message: String; Line, Column: Integer; FileName: String);
     procedure ScriptStateChanged(State: ESimbaScriptState);
 
     procedure ShowTrayNotification(Title, Message: String; Timeout: Integer);
 
-    procedure Status(S: String);
-    procedure Disguse(S: String);
+    procedure SetSimbaStatus(S: String);
+    procedure SetSimbaTitle(S: String);
 
     procedure DebugImage_SetMaxSize(Width, Height: Integer);
     procedure DebugImage_Show(Bitmap: TSimbaImage; EnsureVisible: Boolean);
@@ -38,40 +38,40 @@ type
 
 implementation
 
-function TSimbaScriptCommunication.GetSimbaTargetWindow: PtrUInt;
+function TSimbaScriptCommunication.GetSimbaTargetWindow: TWindowHandle;
 begin
   BeginInvoke(Integer(ESimbaCommunicationMessage.SIMBA_TARGET_WINDOW));
 
   try
     Invoke();
 
-    FResult.Read(Result, SizeOf(PtrUInt));
+    FResult.Read(Result, SizeOf(TWindowHandle));
   finally
     EndInvoke();
   end;
 end;
 
-function TSimbaScriptCommunication.GetSimbaTargetPID: PtrUInt;
+function TSimbaScriptCommunication.GetSimbaTargetPID: TProcessID;
 begin
   BeginInvoke(Integer(ESimbaCommunicationMessage.SIMBA_TARGET_PID));
 
   try
     Invoke();
 
-    FResult.Read(Result, SizeOf(PtrUInt));
+    FResult.Read(Result, SizeOf(TProcessID));
   finally
     EndInvoke();
   end;
 end;
 
-function TSimbaScriptCommunication.GetSimbaPID: PtrUInt;
+function TSimbaScriptCommunication.GetSimbaPID: TProcessID;
 begin
   BeginInvoke(Integer(ESimbaCommunicationMessage.SIMBA_PID));
 
   try
     Invoke();
 
-    FResult.Read(Result, SizeOf(PtrUInt));
+    FResult.Read(Result, SizeOf(TProcessID));
   finally
     EndInvoke();
   end;
@@ -121,7 +121,7 @@ begin
   end;
 end;
 
-procedure TSimbaScriptCommunication.Status(S: String);
+procedure TSimbaScriptCommunication.SetSimbaStatus(S: String);
 begin
   BeginInvoke(Integer(ESimbaCommunicationMessage.STATUS));
 
@@ -134,7 +134,7 @@ begin
   end;
 end;
 
-procedure TSimbaScriptCommunication.Disguse(S: String);
+procedure TSimbaScriptCommunication.SetSimbaTitle(S: String);
 begin
   BeginInvoke(Integer(ESimbaCommunicationMessage.DISGUSE));
 

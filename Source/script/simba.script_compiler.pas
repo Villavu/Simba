@@ -176,8 +176,6 @@ begin
 end;
 
 procedure TSimbaScript_Compiler.Import;
-var
-  Proc: TSimbaImport;
 begin
   StartImporting();
 

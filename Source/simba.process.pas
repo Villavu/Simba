@@ -17,7 +17,7 @@ type
   PProcessID = ^TProcessID;
   PProcessExitStatus = ^TProcessExitStatus;
 
-  TProcessID = type SizeUInt;
+  TProcessID = type Integer;
   TProcessExitStatus = type Integer;
 
   TSimbaProcess = record

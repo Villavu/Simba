@@ -14,7 +14,7 @@ implementation
 
 uses
   lptypes,
-  simba.datetime, simba.nativeinterface, simba.scriptthread;
+  simba.datetime, simba.nativeinterface;
 
 procedure _LapePreciseSleep(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -34,11 +34,6 @@ end;
 procedure _LapeConvertTime64(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   ConvertTime64(PUInt64(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^);
-end;
-
-procedure _LapeGetTimeRunning(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PUInt64(Result)^ := Round(HighResolutionTime() - SimbaScriptThread.Script.RunningTime);
 end;
 
 procedure _LapePerformanceTimer(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -67,10 +62,19 @@ begin
 
     addGlobalFunc('procedure ConvertTime(Time: Integer; var h, m, s: Integer)', @_LapeConvertTime);
     addGlobalFunc('procedure ConvertTime64(Time: UInt64; var y, m, w, d, h, min, s: Integer)', @_LapeConvertTime64);
-    addGlobalFunc('function GetTimeRunning: UInt64', @_LapeGetTimeRunning);
     addGlobalFunc('function PerformanceTimer: Double;', @_LapePerformanceTimer);
     addGlobalFunc('function FormatMilliseconds(Time: Double; Format: String): String; overload;', @_LapeFormatMilliseconds);
     addGlobalFunc('function FormatMilliseconds(Time: Double; TimeSymbols: Boolean = False): String; overload;', @_LapeFormatMillisecondsEx);
+
+    addDelayedCode([
+      'const',
+      '  ScriptStartTime: UInt64 := GetTickCount();',
+      '',
+      'function GetTimeRunning: UInt64;',
+      'begin',
+      '  Result := GetTickCount() - ScriptStartTime;',
+      'end;'
+    ], 'Timing');
 
     addDelayedCode([
       'type',

@@ -72,7 +72,7 @@ begin
   begin
     ImportingSection := 'Process';
 
-    addGlobalType('type SizeUInt', 'TProcessID');
+    addGlobalType('type Integer', 'TProcessID');
     addGlobalType('type Integer', 'TProcessExitStatus');
     addGlobalFunc('function IsProcessRunning(PID: TProcessID): Boolean', @_LapeIsProcessRunning);
     addGlobalFunc('function IsProcess64Bit(PID: TProcessID): Boolean', @_LapeIsProcess64Bit);
