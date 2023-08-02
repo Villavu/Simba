@@ -182,14 +182,9 @@ begin
   PSimbaImageBox(Params^[0])^.SetBackground(PWindowHandle(Params^[1])^);
 end;
 
-procedure _LapeSimbaImageBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaImageBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImageBox(Params^[0])^ := TSimbaImageBox.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeSimbaImageBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBox(Params^[0])^.Free();
+  PSimbaImageBox(Result)^ := TSimbaImageBox.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeSimbaImageBox_Cursor_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -322,7 +317,7 @@ begin
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(FileName: String); overload;', @_LapeSimbaImageBox_SetBackground_FileName);
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(Image: TImage); overload;', @_LapeSimbaImageBox_SetBackground_Bitmap);
     addGlobalFunc('procedure TSimbaImageBox.SetBackground(Window: TWindowHandle); overload;', @_LapeSimbaImageBox_SetBackground_Window);
-    addGlobalFunc('procedure TSimbaImageBox.Init(Owner: TLazComponent); override', @_LapeSimbaImageBox_Init);
+    addClassConstructor('TSimbaImageBox', '(Owner: TLazComponent)', @_LapeSimbaImageBox_Create);
   end;
 end;
 

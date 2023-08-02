@@ -21,11 +21,6 @@ begin
   SimbaNativeInterface.PreciseSleep(PUInt32(Params^[0])^);
 end;
 
-procedure _LapeWait(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  Sleep(PUInt32(Params^[0])^);
-end;
-
 procedure _LapeConvertTime(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   ConvertTime(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
@@ -58,8 +53,6 @@ begin
     ImportingSection := 'Timing';
 
     addGlobalFunc('procedure PreciseSleep(Milliseconds: UInt32);', @_LapePreciseSleep);
-    addGlobalFunc('procedure Wait(Milliseconds: UInt32)', @_LapeWait);
-
     addGlobalFunc('procedure ConvertTime(Time: Integer; var h, m, s: Integer)', @_LapeConvertTime);
     addGlobalFunc('procedure ConvertTime64(Time: UInt64; var y, m, w, d, h, min, s: Integer)', @_LapeConvertTime64);
     addGlobalFunc('function PerformanceTimer: Double;', @_LapePerformanceTimer);

@@ -127,9 +127,9 @@ begin
   PControl(Params^[0])^.SetBounds(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
 end;
 
-procedure _LapeControl_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeControl_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PControl(Params^[0])^ := TControl.Create(PComponent(Params^[1])^);
+  PControl(Result)^ := TControl.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeControl_BringToFront(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -563,14 +563,9 @@ begin
   PWinControl(Params^[0])^.SetBounds(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
 end;
 
-procedure _LapeWinControl_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeWinControl_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PWinControl(Params^[0])^ := TWinControl.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeWinControl_CreateParented(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PWinControl(Params^[0])^ := TWinControl.CreateParented(Phandle(Params^[1])^);
+  PWinControl(Result)^ := TWinControl.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeWinControl_CanFocus(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -648,9 +643,9 @@ begin
   PWinControl(Params^[0])^.SetShape(PBitmap(Params^[1])^);
 end;
 
-procedure _LapeCustomControl_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCustomControl_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomControl(Params^[0])^ := TCustomControl.Create(PComponent(Params^[1])^);
+  PCustomControl(Result)^ := TCustomControl.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeCustomControl_Canvas_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -673,9 +668,9 @@ begin
   PCustomControl(Params^[0])^.OnPaint := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeControlScrollBar_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeControlScrollBar_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PControlScrollBar(Params^[0])^ := TControlScrollBar.Create(PWinControl(Params^[1])^, PScrollBarKind(Params^[2])^);
+  PControlScrollBar(Result)^ := TControlScrollBar.Create(PWinControl(Params^[0])^, PScrollBarKind(Params^[1])^);
 end;
 
 procedure _LapeControlScrollBar_IsScrollBarVisible(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -783,9 +778,9 @@ begin
   PControlScrollBar(Params^[0])^.Visible := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeScrollingWinControl_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeScrollingWinControl_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PScrollingWinControl(Params^[0])^ := TScrollingWinControl.Create(PComponent(Params^[1])^);
+  PScrollingWinControl(Result)^ := TScrollingWinControl.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeScrollingWinControl_UpdateScrollbars(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -878,7 +873,7 @@ begin
     addClassVar('TLazControl', 'AnchorSideBottom', 'TLazAnchorSide',  @_LapeControl_AnchorSideBottom_Read);
 
     addGlobalFunc('procedure TLazControl.SetBounds(ALeft, ATop, AWidth, AHeight: Integer);', @_LapeControl_SetBounds);
-    addGlobalFunc('procedure TLazControl.Init(AOwner: TLazComponent); override', @_LapeControl_Init);
+    addClassConstructor('TLazControl', '(AOwner: TLazComponent)', @_LapeControl_Create);
     addGlobalFunc('procedure TLazControl.BringToFront;', @_LapeControl_BringToFront);
     addGlobalFunc('procedure TLazControl.Hide;', @_LapeControl_Hide);
     addGlobalFunc('procedure TLazControl.Refresh;', @_LapeControl_Refresh);
@@ -931,8 +926,7 @@ begin
     addClassVar('TLazWinControl', 'OnKeyUp', 'TLazKeyEvent', nil, @_LapeWinControl_OnKeyUp_Write);
     addClassVar('TLazWinControl', 'ParentWindow', 'TLazHandle', @_LapeWinControl_ParentWindow_Read, @_LapeWinControl_ParentWindow_Write);
     addClassVar('TLazWinControl', 'Showing', 'Boolean', @_LapeWinControl_Showing_Read);
-    addGlobalFunc('procedure TLazWinControl.Init(TheOwner: TLazComponent); override', @_LapeWinControl_Init);
-    addGlobalFunc('procedure TLazWinControl.CreateParented(AParentWindow: TLazHandle);', @_LapeWinControl_CreateParented);
+    addClassConstructor('TLazWinControl', '(TheOwner: TLazComponent)', @_LapeWinControl_Create);
     addGlobalFunc('function TLazWinControl.CanFocus: Boolean;', @_LapeWinControl_CanFocus);
     addGlobalFunc('function TLazWinControl.Focused: Boolean;', @_LapeWinControl_Focused);
     addGlobalFunc('function TLazWinControl.FindChildControl(const ControlName: String): TLazControl;', @_LapeWinControl_FindChildControl);
@@ -947,12 +941,12 @@ begin
     addGlobalFunc('procedure TLazWinControl.SetShape(AShape: TLazBitmap);', @_LapeWinControl_SetShape);
 
     addClass('TLazCustomControl', 'TLazWinControl');
-    addGlobalFunc('procedure TLazCustomControl.Init(AOwner: TLazComponent); override', @_LapeCustomControl_Init);
+    addClassConstructor('TLazCustomControl', '(AOwner: TLazComponent)', @_LapeCustomControl_Create);
     addClassVar('TLazCustomControl', 'Canvas', 'TLazCanvas', @_LapeCustomControl_Canvas_Read, @_LapeCustomControl_Canvas_Write);
     addClassVar('TLazCustomControl', 'OnPaint', 'TLazNotifyEvent', @_LapeCustomControl_OnPaint_Read, @_LapeCustomControl_OnPaint_Write);
 
     addClass('TLazControlScrollBar');
-    addGlobalFunc('procedure TLazControlScrollBar.Init(AControl: TLazWinControl; AKind: TLazScrollBarKind)', @_LapeControlScrollBar_Init);
+    addClassConstructor('TLazControlScrollBar' ,'(AControl: TLazWinControl; AKind: TLazScrollBarKind)', @_LapeControlScrollBar_Create);
     addGlobalFunc('function TLazControlScrollBar.IsScrollBarVisible: Boolean;', @_LapeControlScrollBar_IsScrollBarVisible);
     addGlobalFunc('function TLazControlScrollBar.ScrollPos: Integer;', @_LapeControlScrollBar_ScrollPos);
     addGlobalFunc('function TLazControlScrollBar.GetOtherScrollBar: TLazControlScrollBar;', @_LapeControlScrollBar_GetOtherScrollBar);
@@ -969,7 +963,7 @@ begin
     addClassVar('TLazControlScrollBar', 'Visible', 'Boolean', @_LapeControlScrollBar_Visible_Read, @_LapeControlScrollBar_Visible_Write);
 
     addClass('TLazScrollingWinControl', 'TLazCustomControl');
-    addGlobalFunc('procedure TLazScrollingWinControl.Init(AOwner: TLazComponent); override', @_LapeScrollingWinControl_Init);
+    addClassConstructor('TLazScrollingWinControl', '(AOwner: TLazComponent)', @_LapeScrollingWinControl_Create);
     addGlobalFunc('procedure TLazScrollingWinControl.UpdateScrollbars;', @_LapeScrollingWinControl_UpdateScrollbars);
     addClassVar('TLazScrollingWinControl', 'HorzScrollBar', 'TLazControlScrollBar', @_LapeScrollingWinControl_HorzScrollBar_Read, @_LapeScrollingWinControl_HorzScrollBar_Write);
     addClassVar('TLazScrollingWinControl', 'VertScrollBar', 'TLazControlScrollBar', @_LapeScrollingWinControl_VertScrollBar_Read, @_LapeScrollingWinControl_VertScrollBar_Write);

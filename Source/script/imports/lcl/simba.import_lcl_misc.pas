@@ -55,14 +55,9 @@ begin
   PInteger(Result)^ := POutputPipeStream(Params^[0])^.Read(PPointer(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-procedure _LapeOutputPipeStream_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeOutputPipeStream_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  POutputPipeStream(Params^[0])^ := TOutputPipeStream.Create(PHandle(Params^[1])^);
-end;
-
-procedure _LapeOutputPipeStream_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  POutputPipeStream(Params^[0])^.Free();
+  POutputPipeStream(Result)^ := TOutputPipeStream.Create(PHandle(Params^[0])^);
 end;
 
 procedure _LapeInputPipeStream_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -85,14 +80,9 @@ begin
   PUInt32(Result)^ := PInputPipeStream(Params^[0])^.NumBytesAvailable;
 end;
 
-procedure _LapeInputPipeStream_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeInputPipeStream_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInputPipeStream(Params^[0])^ := TInputPipeStream.Create(PHandle(Params^[1])^);
-end;
-
-procedure _LapeInputPipeStream_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInputPipeStream(Params^[0])^.Free();
+  PInputPipeStream(Result)^ := TInputPipeStream.Create(PHandle(Params^[0])^);
 end;
 
 procedure _LapeProcess_Execute(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -270,14 +260,9 @@ begin
   PBoolean(Result)^ := PProcess(Params^[0])^.Running;
 end;
 
-procedure _LapeProcess_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeProcess_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PProcess(Params^[0])^ := TProcess.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeProcess_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Params^[0])^.Free();
+  PProcess(Result)^ := TProcess.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeProcess_Input_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -360,24 +345,14 @@ begin
   PCustomFloatSpinEdit(Params^[0])^.ValueEmpty := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomFloatSpinEdit_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCustomFloatSpinEdit_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomFloatSpinEdit(Params^[0])^ := TCustomFloatSpinEdit.Create(PComponent(Params^[1])^);
+  PCustomFloatSpinEdit(Result)^ := TCustomFloatSpinEdit.Create(PComponent(Params^[0])^);
 end;
 
-procedure _LapeCustomFloatSpinEdit_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFloatSpinEdit_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomFloatSpinEdit(Params^[0])^.Free();
-end;
-
-procedure _LapeFloatSpinEdit_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PFloatSpinEdit(Params^[0])^ := TFloatSpinEdit.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeFloatSpinEdit_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PFloatSpinEdit(Params^[0])^.Free();
+  PFloatSpinEdit(Result)^ := TFloatSpinEdit.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeCustomSpinEdit_Value_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -420,24 +395,14 @@ begin
   PCustomSpinEdit(Params^[0])^.Increment := Pinteger(Params^[1])^;
 end;
 
-procedure _LapeCustomSpinEdit_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCustomSpinEdit_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomSpinEdit(Params^[0])^ := TCustomSpinEdit.Create(PComponent(Params^[1])^);
+  PCustomSpinEdit(Result)^ := TCustomSpinEdit.Create(PComponent(Params^[0])^);
 end;
 
-procedure _LapeCustomSpinEdit_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSpinEdit_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomSpinEdit(Params^[0])^.Free();
-end;
-
-procedure _LapeSpinEdit_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSpinEdit(Params^[0])^ := TSpinEdit.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeSpinEdit_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSpinEdit(Params^[0])^.Free();
+  PSpinEdit(Result)^ := TSpinEdit.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeMenuItem_Find(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -630,14 +595,9 @@ begin
   PMenuItem(Params^[0])^.OnClick := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeMenuItem_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMenuItem_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMenuItem(Params^[0])^ := TMenuItem.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeMenuItem_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PMenuItem(Params^[0])^.Free();
+  PMenuItem(Result)^ := TMenuItem.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeMenuItem_Caption_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -704,14 +664,9 @@ begin
   PMenuItem(Result)^ := PMenu(Params^[0])^.Items;
 end;
 
-procedure _LapeMenu_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMenu_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMenu(Params^[0])^ := TMenu.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeMenu_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PMenu(Params^[0])^.Free();
+  PMenu(Result)^ := TMenu.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeMenu_AddMenu(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -721,19 +676,14 @@ begin
   PMenu(Params^[0])^.Items.Add(PMenuItem(Result)^);
 end;
 
-procedure _LapeMainMenu_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMainMenu_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMainMenu(Params^[0])^ := TMainMenu.Create(PComponent(Params^[1])^);
+  PMainMenu(Result)^ := TMainMenu.Create(PComponent(Params^[0])^);
 end;
 
-procedure _LapeMainMenu_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeListFilterEdit_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMainMenu(Params^[0])^.Free();
-end;
-
-procedure _LapeListFilterEdit_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PListFilterEdit(Params^[0])^ := TListFilterEdit.Create(PComponent(Params^[1])^);
+  PListFilterEdit(Result)^ := TListFilterEdit.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeListFilterEdit_FilteredListBox_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -816,9 +766,9 @@ begin
   PListFilterEdit(Params^[0])^.OnChange := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeButtonPanel_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeButtonPanel_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PButtonPanel(Params^[0])^ := TButtonPanel.Create(PComponent(Params^[1])^);
+  PButtonPanel(Result)^ := TButtonPanel.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeButtonPanel_ShowButtons_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -852,31 +802,31 @@ begin
     addClassVar('TLazCustomFloatSpinEdit', 'MaxValue', 'Double', @_LapeCustomFloatSpinEdit_MaxValue_Read, @_LapeCustomFloatSpinEdit_MaxValue_Write);
     addClassVar('TLazCustomFloatSpinEdit', 'Value', 'Double', @_LapeCustomFloatSpinEdit_Value_Read, @_LapeCustomFloatSpinEdit_Value_Write);
     addClassVar('TLazCustomFloatSpinEdit', 'ValueEmpty', 'Boolean', @_LapeCustomFloatSpinEdit_ValueEmpty_Read, @_LapeCustomFloatSpinEdit_ValueEmpty_Write);
-    addGlobalFunc('procedure TLazCustomFloatSpinEdit.Init(TheOwner: TLazComponent); override', @_LapeCustomFloatSpinEdit_Init);
+    addClassConstructor('TLazCustomFloatSpinEdit', '(TheOwner: TLazComponent)', @_LapeCustomFloatSpinEdit_Create);
 
     addClass('TLazFloatSpinEdit', 'TLazCustomFloatSpinEdit');
-    addGlobalFunc('procedure TLazFloatSpinEdit.Init(TheOwner: TLazComponent); override', @_LapeFloatSpinEdit_Init);
+    addClassConstructor('TLazFloatSpinEdit', '(TheOwner: TLazComponent)', @_LapeFloatSpinEdit_Create);
 
     addClass('TLazCustomSpinEdit', 'TLazCustomFloatSpinEdit');
     addClassVar('TLazCustomSpinEdit', 'Value', 'Integer', @_LapeCustomSpinEdit_Value_Read, @_LapeCustomSpinEdit_Value_Write);
     addClassVar('TLazCustomSpinEdit', 'MinValue', 'Integer', @_LapeCustomSpinEdit_MinValue_Read, @_LapeCustomSpinEdit_MinValue_Write);
     addClassVar('TLazCustomSpinEdit', 'MaxValue', 'Integer', @_LapeCustomSpinEdit_MaxValue_Read, @_LapeCustomSpinEdit_MaxValue_Write);
     addClassVar('TLazCustomSpinEdit', 'Increment', 'Integer', @_LapeCustomSpinEdit_Increment_Read, @_LapeCustomSpinEdit_Increment_Write);
-    addGlobalFunc('procedure TLazCustomSpinEdit.Init(TheOwner: TLazComponent); override', @_LapeCustomSpinEdit_Init);
+    addClassConstructor('TLazCustomSpinEdit', '(TheOwner: TLazComponent)', @_LapeCustomSpinEdit_Create);
 
     addClass('TLazSpinEdit', 'TLazCustomSpinEdit');
-    addGlobalFunc('procedure TLazSpinEdit.Init(TheOwner: TLazComponent); override', @_LapeSpinEdit_Init);
+    addClassConstructor('TLazSpinEdit', '(TheOwner: TLazComponent)', @_LapeSpinEdit_Create);
 
     addGlobalType('(poRunSuspended,poWaitOnExit,poUsePipes,poStderrToOutPut,poNoConsole,poNewConsole,poDefaultErrorMode,poNewProcessGroup,poDebugProcess,poDebugOnlyThisProcess,poDetached,poPassInput,poRunIdle)', 'TLazProcessOption');
     addGlobalType('(ppHigh,ppIdle,ppNormal,ppRealTime)', 'TLazProcessPriority');
     addGlobalType('set of TLazProcessOption', 'TLazProcessOptions');
 
     addClass('TLazOutputPipeStream', 'TLazHandleStream');
-    addGlobalFunc('procedure TLazOutputPipeStream.Init(AHandle: TLazHandle); override', @_LapeOutputPipeStream_Init);
+    addClassConstructor('TLazOutputPipeStream', '(AHandle: TLazHandle)', @_LapeOutputPipeStream_Create);
 
     addClass('TLazInputPipeStream', 'TLazHandleStream');
-    addClassVar('TLazInputPipeStream', 'NumBytesAvailable', 'UInt32', @_LapeInputPipeStream_NumBytesAvailable_Read, nil);
-    addGlobalFunc('procedure TLazInputPipeStream.Init(AHandle: TLazHandle); override', @_LapeInputPipeStream_Init);
+    addClassVar('TLazInputPipeStream', 'NumBytesAvailable', 'UInt32', @_LapeInputPipeStream_NumBytesAvailable_Read);
+    addClassConstructor('TLazInputPipeStream', '(AHandle: TLazHandle)', @_LapeInputPipeStream_Create);
 
     addClass('TLazProcess', 'TLazComponent');
     addGlobalFunc('procedure TLazProcess.Execute;', @_LapeProcess_Execute);
@@ -905,8 +855,7 @@ begin
     addClassVar('TLazProcess', 'Options', 'TLazProcessOptions', @_LapeProcess_Options_Read, @_LapeProcess_Options_Write);
     addClassVar('TLazProcess', 'Priority', 'TLazProcessPriority', @_LapeProcess_Priority_Read, @_LapeProcess_Priority_Write);
     addClassVar('TLazProcess', 'Running', 'Boolean', @_LapeProcess_Running_Read);
-    addGlobalFunc('procedure TLazProcess.Init(AOwner : TLazComponent); override', @_LapeProcess_Init);
-    //addGlobalFunc('procedure TLazProcess.Free;', @_LapeProcess_Free);
+    addClassConstructor('TLazProcess', '(AOwner : TLazComponent)', @_LapeProcess_Create);
 
     addClass('TLazMenu', 'TLazComponent');
     addClass('TLazMenuItem', 'TLazComponent');
@@ -943,22 +892,19 @@ begin
     addClassVar('TLazMenuItem', 'RadioItem', 'Boolean', @_LapeMenuItem_RadioItem_Read, @_LapeMenuItem_RadioItem_Write);
     addClassVar('TLazMenuItem', 'OnClick', 'TLazNotifyEvent', @_LapeMenuItem_OnClick_Read, @_LapeMenuItem_OnClick_Write);
     addClassVar('TLazMenuItem', 'Caption', 'String', @_LapeMenuItem_Caption_Read, @_LapeMenuItem_Caption_Write);
-    addGlobalFunc('procedure TLazMenuItem.Init(AOwner: TLazComponent); override', @_LapeMenuItem_Init);
-    // addGlobalFunc('procedure TLazMenuItem.Free;', @_LapeMenuItem_Free);
+    addClassConstructor('TLazMenuItem', '(AOwner: TLazComponent)', @_LapeMenuItem_Create);
 
     addGlobalFunc('function TLazMenu.DispatchCommand(ACommand: Int16): Boolean;', @_LapeMenu_DispatchCommand);
     addGlobalFunc('function TLazMenu.AddMenu(Name: string): TLazMenuItem;', @_LapeMenu_AddMenu);
     addClassVar('TLazMenu', 'Parent', 'TLazComponent', @_LapeMenu_Parent_Read, @_LapeMenu_Parent_Write);
     addClassVar('TLazMenu', 'Items', 'TLazMenuItem', @_LapeMenu_Items_Read);
-    addGlobalFunc('procedure TLazMenu.Init(AOwner: TLazComponent); override', @_LapeMenu_Init);
-    //addGlobalFunc('procedure TLazMenu.Free;', @_LapeMenu_Free);
+    addClassConstructor('TLazMenu', '(AOwner: TLazComponent)', @_LapeMenu_Create);
 
     addClass('TLazMainMenu', 'TLazMenu');
-    addGlobalFunc('procedure TLazMainMenu.Init(AOwner: TLazComponent); override', @_LapeMainMenu_Init);
-    //addGlobalFunc('procedure TLazMainMenu.Free;', @_LapeMainMenu_Free);
+    addClassConstructor('TLazMainMenu', '(AOwner: TLazComponent)', @_LapeMainMenu_Create);
 
     addClass('TLazListFilterEdit', 'TLazCustomControl');
-    addGlobalFunc('procedure TLazListFilterEdit.Init(AOwner: TLazComponent); override', @_LapeListFilterEdit_Init);
+    addClassConstructor('TLazListFilterEdit', '(AOwner: TLazComponent)', @_LapeListFilterEdit_Create);
     addClassVar('TLazListFilterEdit', 'FilteredListBox', 'TLazListBox', @_LapeListFilterEdit_FilteredListBox_Read, @_LapeListFilterEdit_FilteredListBox_Write);
     addClassVar('TLazListFilterEdit', 'Filter', 'String', @_LapeListFilterEdit_Filter_Read, @_LapeListFilterEdit_Filter_Write);
     addClassVar('TLazListFilterEdit', 'Flat', 'Boolean', @_LapeListFilterEdit_Flat_Read, @_LapeListFilterEdit_Flat_Write);
@@ -970,7 +916,7 @@ begin
 
     addClass('TLazButtonPanel', 'TLazCustomPanel');
     addGlobalType('set of (pbOK, pbCancel, pbClose, pbHelp)', 'TLazButtonPanelButtons');
-    addGlobalFunc('procedure TLazButtonPanel.Init(AOwner: TLazComponent); override', @_LapeButtonPanel_Init);
+    addClassConstructor('TLazButtonPanel', '(AOwner: TLazComponent)', @_LapeButtonPanel_Create);
     addClassVar('TLazButtonPanel', 'ShowButtons', 'TLazButtonPanelButtons', @_LapeButtonPanel_ShowButtons_Read, @_LapeButtonPanel_ShowButtons_Write);
     addClassVar('TLazButtonPanel', 'ShowGlyphs', 'TLazButtonPanelButtons', @_LapeButtonPanel_ShowGlyphs_Read, @_LapeButtonPanel_ShowGlyphs_Write);
   end;

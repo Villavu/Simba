@@ -21,9 +21,9 @@ type
   PPanel = ^TPanel;
   PButton = ^TButton;
 
-procedure _LapeSimbaShapeBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaShapeBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImageBox(Params^[0])^ := TSimbaShapeBox.Create(PComponent(Params^[1])^);
+  PSimbaImageBox(Result)^ := TSimbaShapeBox.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeSimbaShapeBox_SaveToFile(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -190,7 +190,7 @@ begin
       'end;'
     ], 'TShapeBoxShape');
 
-    addGlobalFunc('procedure TSimbaShapeBox.Init(Owner: TLazComponent); override', @_LapeSimbaShapeBox_Init);
+    addClassConstructor('TSimbaShapeBox', '(Owner: TLazComponent)', @_LapeSimbaShapeBox_Create);
 
     addGlobalFunc('function TSimbaShapeBox.GetShape(Index: Integer): TShapeBoxShape', @_LapeSimbaShapeBox_GetShape);
     addGlobalFunc('function TSimbaShapeBox.ShapeCount: Integer', @_LapeSimbaShapeBox_GetShapeCount);
