@@ -1,3 +1,5 @@
+// some monstrosity
+
 var
   Contents, NewContents, Import, WrapperName, Header, DocComment, Line: String;
   I: Integer;
@@ -9,25 +11,25 @@ var
   Params: TStringArray;
   ReadWrapperName, WriteWrapperName: String;
 
-  procedure Add(Header, WrapperName: String);
-  var
-    HeaderName, Doc: String;
-  begin
-    // Strip overload
-    if Header.EndsWith('overload') or Header.EndsWith('overload;') then
-      Header := Header.Before('overload');
-    Header := Header.Trim();
-    if not Header.EndsWith(';') then
-      Header += ';';
-    HeaderName := Header.After(' ');
-    HeaderName := HeaderName.CopyRange(1, HeaderName.IndexOfAny(['(',':',';']) - 1);
+procedure Add(Header, WrapperName: String);
+var
+  HeaderName, Doc: String;
+begin
+  // Strip overload
+  if Header.EndsWith('overload') or Header.EndsWith('overload;') then
+    Header := Header.Before('overload');
+  Header := Header.Trim();
+  if not Header.EndsWith(';') then
+    Header += ';';
+  HeaderName := Header.After(' ');
+  HeaderName := HeaderName.CopyRange(1, HeaderName.IndexOfAny(['(',':',';']) - 1);
 
-    Doc := '(*%s%s%s%s%s%s%s*)'.format([LINE_SEP, HeaderName, LINE_SEP, '~' * Length(HeaderName), LINE_SEP, Header, LINE_SEP]);
-    Map += [WrapperName, Doc];
-  end;
+  Doc := '(*%s%s%s%s%s> %s%s*)'.format([LINE_SEP, HeaderName, LINE_SEP, '~' * Length(HeaderName), LINE_SEP, Header, LINE_SEP]);
+  Map += [WrapperName, Doc];
+end;
 
 begin
-  Contents := FileRead('Source/script/imports/simbaclasses/simba.import_class_json.pas');
+  Contents := FileRead('Source/script/imports/simba/simba.import_encoding.pas');
 
   for DocComment in Contents.BetweenAll('(*','*)') do
   begin
@@ -75,7 +77,7 @@ begin
   for I := 0 to High(Map) do
     NewContents := Map[I].DocComment + LINE_SEP*2 + NewContents;
 
-  ClearDebug();
+  ClearScriptOutput();
   WriteLn(NewContents);
   SetClipBoard(NewContents);
 end.

@@ -21,9 +21,12 @@ type
   PBitmap = ^TBitmap;
 
 (*
-TImage
-======
-TImage is an Image data type.
+Image
+=====
+TImage is a data type that holds an image.
+
+This is used anipulate and process an image such as resizing, rotating, bluring and much more.
+Or simply get/set a pixel color at a given (x,y) coord.
 *)
 
 (*
@@ -1255,7 +1258,7 @@ procedure ImportSimbaImage(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    ImportingSection := 'TImage';
+    ImportingSection := 'Image';
 
     addClass('TImage');
 

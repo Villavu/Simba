@@ -131,11 +131,12 @@ begin
     'Script':        Result := 'https://villavu.github.io/Simba/Script.html';
     'Variant':       Result := 'https://villavu.github.io/Simba/Variant.html';
     'TWindowHandle': Result := 'https://villavu.github.io/Simba/TWindowHandle.html';
-    'TMufasaBitmap': Result := 'https://villavu.github.io/Simba/TMufasaBitmap.html';
+    'Image':         Result := 'https://villavu.github.io/Simba/Image.html';
     'Finder':        Result := 'https://villavu.github.io/Simba/Finder.html';
     'Input':         Result := 'https://villavu.github.io/Simba/Input.html';
     'Target':        Result := 'https://villavu.github.io/Simba/Target.html';
-    'Internet':      Result := 'https://villavu.github.io/Simba/Internet.html';
+    'Web':           Result := 'https://villavu.github.io/Simba/Web.html';
+    'Encoding':      Result := 'https://villavu.github.io/Simba/Encoding.html';
   end;
 end;
 

@@ -27,6 +27,7 @@ begin
   SourceFiles += ['Source\script\imports\simba\simba.import_target.pas',       'Target'        ];
   SourceFiles += ['Source\script\imports\simba\simba.import_web.pas',          'Web'           ];
   SourceFiles += ['Source\script\imports\simba\simba.import_file.pas',         'File'          ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_encoding.pas',     'Encoding'      ];
 
   SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_json.pas',   'JSON'  ];
   SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_bitmap.pas', 'Image' ];
@@ -185,7 +186,7 @@ var
   Str: String;
   I: Integer;
 begin
-  ClearDebug();
+  ClearScriptOutput();
 
   DirCreate(OUTPUT_DIR);
   DirDelete(OUTPUT_DIR, True);

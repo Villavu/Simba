@@ -32,8 +32,8 @@ uses
   simba.import_class_json, simba.import_class_imagebox, simba.import_class_shapebox,
 
   // Simba
-  simba.import_timing, simba.import_tpa, simba.import_atpa, simba.import_hash,
-  simba.import_compress, simba.import_file, simba.import_process,
+  simba.import_timing, simba.import_tpa, simba.import_atpa, simba.import_encoding,
+  simba.import_file, simba.import_process,
   simba.import_internal, simba.import_target, simba.import_finder,
   simba.import_math, simba.import_other, simba.import_input,
   simba.import_script,  simba.import_slacktree, simba.import_string,
@@ -71,8 +71,7 @@ begin
   ImportTiming(Compiler);
   ImportTPA(Compiler);
   ImportATPA(Compiler);
-  ImportHash(Compiler);
-  ImportCompress(Compiler);
+  ImportEncoding(Compiler);
   ImportFile(Compiler);
   ImportProcess(Compiler);
   ImportInternal(Compiler);
