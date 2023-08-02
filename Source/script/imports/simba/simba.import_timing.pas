@@ -57,7 +57,7 @@ begin
   begin
     ImportingSection := 'Timing';
 
-    addGlobalFunc('procedure PreciseSleep(MilliSeconds: UInt32);', @_LapePreciseSleep);
+    addGlobalFunc('procedure PreciseSleep(Milliseconds: UInt32);', @_LapePreciseSleep);
     addGlobalFunc('procedure Wait(Milliseconds: UInt32)', @_LapeWait);
 
     addGlobalFunc('procedure ConvertTime(Time: Integer; var h, m, s: Integer)', @_LapeConvertTime);
@@ -74,28 +74,28 @@ begin
       'begin',
       '  Result := GetTickCount() - ScriptStartTime;',
       'end;'
-    ], 'Timing');
+    ]);
 
     addDelayedCode([
       'type',
-      '  TSimbaTimer = record',
+      '  TStopwatch = record',
       '    Name: String;',
       '    StartTime: UInt64;',
       '    StopTime: UInt64;',
       '  end;',
       '',
-      'procedure TSimbaTimer.Start(AName: String = "");',
+      'procedure TStopwatch.Start(AName: String = "");',
       'begin',
       '  Self.Name := AName;',
       '  Self.StartTime := GetTickCount();',
       'end;',
       '',
-      'procedure TSimbaTimer.Stop;',
+      'procedure TStopwatch.Stop;',
       'begin',
       '  Self.StopTime := GetTickCount();',
       'end;',
       '',
-      'function TSimbaTimer.Elapsed: UInt64;',
+      'function TStopwatch.Elapsed: UInt64;',
       'begin',
       '  if (Self.StopTime > 0) then',
       '    Result := Self.StopTime - Self.StartTime',
@@ -103,37 +103,37 @@ begin
       '    Result := GetTickCount() - Self.StartTime;',
       'end;',
       '',
-      'function TSimbaTimer.ElapsedFmt(Format: String = "u"): String;',
+      'function TStopwatch.ElapsedFmt(Format: String = "u"): String;',
       'begin',
       '  Result := FormatMilliseconds(Self.Elapsed(), Format);',
       'end;',
       '',
-      'procedure TSimbaTimer.Reset;',
+      'procedure TStopwatch.Reset;',
       'begin',
       '  Self.StopTime := Self.StartTime := 0;',
       'end;'
-    ],'Timers');
+    ]);
 
     addDelayedCode([
       'type',
-      '  TSimbaPerformanceTimer = record',
+      '  TPerformanceStopwatch = record',
       '    Name: String;',
       '    StartTime: Double;',
       '    StopTime: Double;',
       '  end;',
       '',
-      'procedure TSimbaPerformanceTimer.Start(AName: String = "");',
+      'procedure TPerformanceStopwatch.Start(AName: String = "");',
       'begin',
       '  Self.Name := AName;',
       '  Self.StartTime := PerformanceTimer();',
       'end;',
       '',
-      'procedure TSimbaPerformanceTimer.Stop;',
+      'procedure TPerformanceStopwatch.Stop;',
       'begin',
       '  Self.StopTime := PerformanceTimer();',
       'end;',
       '',
-      'function TSimbaPerformanceTimer.Elapsed: Double;',
+      'function TPerformanceStopwatch.Elapsed: Double;',
       'begin',
       '  if (Self.StopTime > 0) then',
       '    Result := Self.StopTime - Self.StartTime',
@@ -141,16 +141,16 @@ begin
       '    Result := PerformanceTimer() - Self.StartTime;',
       'end;',
       '',
-      'function TSimbaPerformanceTimer.ElapsedFmt(Format: String = "u"): String;',
+      'function TPerformanceStopwatch.ElapsedFmt(Format: String = "u"): String;',
       'begin',
       '  Result := FormatMilliseconds(Self.Elapsed(), Format);',
       'end;',
       '',
-      'procedure TSimbaPerformanceTimer.Reset;',
+      'procedure TPerformanceStopwatch.Reset;',
       'begin',
       '  Self.StopTime := Self.StartTime := 0;',
       'end;'
-    ],'Timers');
+    ]);
 
     ImportingSection := '';
   end;
