@@ -488,7 +488,7 @@
         <IsPartOfProject Value="True"/>
       </Unit25>
       <Unit26>
-        <Filename Value="script/imports/simba/simba.import_hash.pas"/>
+        <Filename Value="script/imports/simba/simba.import_encoding.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit26>
       <Unit27>
