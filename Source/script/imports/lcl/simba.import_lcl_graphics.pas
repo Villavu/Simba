@@ -58,19 +58,14 @@ begin
   PGraphicsObject(Params^[0])^.OnChange := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeGraphicsObject_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeGraphicsObject_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PGraphicsObject(Params^[0])^ := TGraphicsObject.Create();
+  PGraphicsObject(Result)^ := TGraphicsObject.Create();
 end;
 
-procedure _LapeGraphicsObject_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFont_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PGraphicsObject(Params^[0])^.Free();
-end;
-
-procedure _LapeFont_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PFont(Params^[0])^ := TFont.Create();
+  PFont(Result)^ := TFont.Create();
 end;
 
 procedure _LapeFont_Assign(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -213,14 +208,9 @@ begin
   PFont(Params^[0])^.Quality := PFontQuality(Params^[1])^;
 end;
 
-procedure _LapeFont_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapePen_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PFont(Params^[0])^.Free();
-end;
-
-procedure _LapePen_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPen(Params^[0])^ := TPen.Create();
+  PPen(Result)^ := TPen.Create();
 end;
 
 procedure _LapePen_Color_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -273,19 +263,14 @@ begin
   PPen(Params^[0])^.Width := Pinteger(Params^[1])^;
 end;
 
-procedure _LapePen_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPen(Params^[0])^.Free();
-end;
-
 procedure _LapeBrush_Assign(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PBrush(Params^[0])^.Assign(PPersistent(Params^[1])^);
 end;
 
-procedure _LapeBrush_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeBrush_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBrush(Params^[0])^ := TBrush.Create();
+  PBrush(Result)^ := TBrush.Create();
 end;
 
 procedure _LapeBrush_Color_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -306,11 +291,6 @@ end;
 procedure _LapeBrush_Style_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PBrush(Params^[0])^.Style := PBrushStyle(Params^[1])^;
-end;
-
-procedure _LapeBrush_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBrush(Params^[0])^.Free();
 end;
 
 procedure _LapeCanvas_Lock(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -508,14 +488,9 @@ begin
   PCanvas(Params^[0])^.Draw(PInteger(Params^[1])^, PInteger(Params^[2])^, PGraphic(Params^[3])^);
 end;
 
-procedure _LapeCanvas_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCanvas_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCanvas(Params^[0])^ := TCanvas.Create();
-end;
-
-procedure _LapeCanvas_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCanvas(Params^[0])^.Free();
+  PCanvas(Result)^ := TCanvas.Create();
 end;
 
 procedure _LapeCanvas_Clear(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -608,19 +583,14 @@ begin
   PGraphic(Params^[0])^.Width := PInteger(Params^[1])^;
 end;
 
-procedure _LapeGraphic_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PGraphic(Params^[0])^.Free();
-end;
-
 procedure _LapeGraphic_LoadFromClipboardFormat(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PGraphic(Params^[0])^.LoadFromClipboardFormat(CF_Bitmap);
 end;
 
-procedure _LapeBitmap_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeBitmap_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBitmap(Params^[0])^ := TBitmap.Create();
+  PBitmap(Result)^ := TBitmap.Create();
 end;
 
 procedure _LapeBitmap_BeginUpdate(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -698,11 +668,6 @@ begin
   PBitmap(Params^[0])^.TransparentMode := PTransparentMode(Params^[1])^;
 end;
 
-procedure _LapeBitmap_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBitmap(Params^[0])^.Free();
-end;
-
 procedure _LapeBitmap_Transparent_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PBitmap(Params^[0])^.Transparent := PBoolean(Params^[1])^;
@@ -713,9 +678,9 @@ begin
   PBoolean(Result)^ := PBitmap(Params^[0])^.Transparent;
 end;
 
-procedure _LapePicture_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapePicture_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPicture(Params^[0])^ := TPicture.Create();
+  PPicture(Result)^ := TPicture.Create();
 end;
 
 procedure _LapePicture_Clear(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -793,11 +758,6 @@ begin
   PPicture(Params^[0])^.OnChange := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapePicture_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPicture(Params^[0])^.Free();
-end;
-
 procedure ImportLCLGraphics(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -817,10 +777,10 @@ begin
     addClass('TLazGraphicsObject');
     addClassVar('TLazGraphicsObject', 'OnChanging', 'TLazNotifyEvent', @_LapeGraphicsObject_OnChanging_Read, @_LapeGraphicsObject_OnChanging_Write);
     addClassVar('TLazGraphicsObject', 'OnChange', 'TLazNotifyEvent', @_LapeGraphicsObject_OnChange_Read, @_LapeGraphicsObject_OnChange_Write);
-    addGlobalFunc('procedure TLazGraphicsObject.Init', @_LapeGraphicsObject_Init);
+    addClassConstructor('TLazGraphicsObject', '', @_LapeGraphicsObject_Create);
 
     addClass('TLazFont', 'TLazGraphicsObject');
-    addGlobalFunc('procedure TLazFont.Init; override', @_LapeFont_Init);
+    addClassConstructor('TLazFont', '', @_LapeFont_Create);
     addGlobalFunc('procedure TLazFont.BeginUpdate;', @_LapeFont_BeginUpdate);
     addGlobalFunc('procedure TLazFont.EndUpdate;', @_LapeFont_EndUpdate);
     addGlobalFunc('function TLazFont.HandleAllocated: Boolean;', @_LapeFont_HandleAllocated);
@@ -840,7 +800,7 @@ begin
     addClassVar('TLazFont', 'Quality', 'TLazFontQuality', @_LapeFont_Quality_Read, @_LapeFont_Quality_Write);
 
     addClass('TLazPen', 'TLazGraphicsObject');
-    addGlobalFunc('procedure TLazPen.Init; override', @_LapePen_Init);
+    addClassConstructor('TLazPen', '', @_LapePen_Create);
     addClassVar('TLazPen', 'Color', 'Integer', @_LapePen_Color_Read, @_LapePen_Color_Write);
     addClassVar('TLazPen', 'Cosmetic', 'Boolean', @_LapePen_Cosmetic_Read, @_LapePen_Cosmetic_Write);
     addClassVar('TLazPen', 'Mode', 'TLazPenMode', @_LapePen_Mode_Read, @_LapePen_Mode_Write);
@@ -848,7 +808,7 @@ begin
     addClassVar('TLazPen', 'Width', 'Integer', @_LapePen_Width_Read, @_LapePen_Width_Write);
 
     addClass('TLazBrush', 'TLazGraphicsObject');
-    addGlobalFunc('procedure TLazBrush.Init; override', @_LapeBrush_Init);
+    addClassConstructor('TLazBrush', '', @_LapeBrush_Create);
     addClassVar('TLazBrush', 'Color', 'Integer', @_LapeBrush_Color_Read, @_LapeBrush_Color_Write);
     addClassVar('TLazBrush', 'Style', 'TLazBrushStyle', @_LapeBrush_Style_Read, @_LapeBrush_Style_Write);
 
@@ -901,10 +861,10 @@ begin
     addClassVar('TLazCanvas', 'OnChange', 'TLazNotifyEvent', @_LapeCanvas_OnChange_Read, @_LapeCanvas_OnChange_Write);
     addClassVar('TLazCanvas', 'OnChanging', 'TLazNotifyEvent', @_LapeCanvas_OnChanging_Read, @_LapeCanvas_OnChanging_Write);
     addClassVar('TLazCanvas', 'AntialiasingMode', 'TLazAntialiasingMode', @_LapeCanvas_AntialiasingMode_Get, @_LapeCanvas_AntialiasingMode_Set);
-    addGlobalFunc('procedure TLazCanvas.Init', @_LapeCanvas_Init);
+    addClassConstructor('TLazCanvas', '', @_LapeCanvas_Create);
 
     addClass('TLazBitmap', 'TLazGraphic');
-    addGlobalFunc('procedure TLazBitmap.Init', @_LapeBitmap_Init);
+    addClassConstructor('TLazBitmap', '', @_LapeBitmap_Create);
     addGlobalFunc('procedure TLazBitmap.BeginUpdate(ACanvasOnly: Boolean);', @_LapeBitmap_BeginUpdate);
     addGlobalFunc('procedure TLazBitmap.EndUpdate(AStreamIsValid: Boolean);', @_LapeBitmap_EndUpdate);
     addGlobalFunc('procedure TLazBitmap.FreeImage;', @_LapeBitmap_FreeImage);
@@ -919,7 +879,7 @@ begin
     addClassVar('TLazBitmap', 'TransparentMode', 'TLazTransparentMode', @_LapeBitmap_TransparentMode_Read, @_LapeBitmap_TransparentMode_Write);
 
     addClass('TLazPicture');
-    addGlobalFunc('procedure TLazPicture.Init;', @_LapePicture_Init);
+    addClassConstructor('TLazPicture', '', @_LapePicture_Create);
     addGlobalFunc('procedure TLazPicture.Clear;', @_LapePicture_Clear);
     addGlobalFunc('procedure TLazPicture.LoadFromFile(const Filename: String);', @_LapePicture_LoadFromFile);
     addGlobalFunc('procedure TLazPicture.LoadFromStream(Stream: TLazStream);', @_LapePicture_LoadFromStream);

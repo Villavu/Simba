@@ -51,6 +51,7 @@ type
     function addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType; virtual; overload;
     function addGlobalType(Str: TStringArray; Name: String): TLapeType; virtual; overload;
 
+    function addClassConstructor(Obj, Params: lpString; Func: Pointer): TLapeGlobalVar; virtual;
     procedure addClass(Name: lpString; Parent: lpString = 'TObject'); virtual;
     procedure addClassVar(Obj, Item, Typ: lpString; ARead: Pointer; AWrite: Pointer = nil; Arr: Boolean = False; ArrType: lpString = 'Integer'); virtual;
 
@@ -151,6 +152,11 @@ end;
 function TSimbaScript_Compiler.addGlobalType(Str: TStringArray; Name: String): TLapeType;
 begin
   Result := addGlobalType(LineEnding.Join(Str), Name);
+end;
+
+function TSimbaScript_Compiler.addClassConstructor(Obj, Params: lpString; Func: Pointer): TLapeGlobalVar;
+begin
+  Result := addGlobalFunc(Format('function %s.Create%s: %s; static;', [Obj, Params, Obj]), Func);
 end;
 
 procedure TSimbaScript_Compiler.addClass(Name: lpString; Parent: lpString);

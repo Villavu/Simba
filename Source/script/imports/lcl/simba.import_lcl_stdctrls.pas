@@ -56,9 +56,9 @@ type
   PRect = ^TRect;
   PCanvas = ^TCanvas;
 
-procedure _LapeCustomComboBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCustomComboBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomComboBox(Params^[0])^ := TCustomComboBox.Create(PComponent(Params^[1])^);
+  PCustomComboBox(Result)^ := TCustomComboBox.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeCustomComboBox_AddItem(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -246,14 +246,9 @@ begin
   PCustomComboBox(Params^[0])^.Text := PString(Params^[1])^;
 end;
 
-procedure _LapeCustomComboBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeComboBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomComboBox(Params^[0])^.Free();
-end;
-
-procedure _LapeComboBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PComboBox(Params^[0])^ := TComboBox.Create(PComponent(Params^[1])^);
+  PComboBox(Result)^ := TComboBox.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeCustomComboBox_OnChange_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -266,14 +261,9 @@ begin
   PComboBox(Params^[0])^.OnChange := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeComboBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCustomListBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PComboBox(Params^[0])^.Free();
-end;
-
-procedure _LapeCustomListBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomListBox(Params^[0])^ := TCustomListBox.Create(PComponent(Params^[1])^);
+  PCustomListBox(Result)^ := TCustomListBox.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeCustomListBox_AddItem(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -501,11 +491,6 @@ begin
   PCustomListBox(Params^[0])^.Style := PListBoxStyle(Params^[1])^;
 end;
 
-procedure _LapeCustomListBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomListBox(Params^[0])^.Free();
-end;
-
 procedure _LapeCustomListBox_OnSelectionChange_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSelectionChangeEvent(Result)^ := PCustomListBox(Params^[0])^.OnSelectionChange;
@@ -536,19 +521,14 @@ begin
   PCustomListBox(Params^[0])^.OnDrawItem := PDrawItemEvent(Params^[1])^;
 end;
 
-procedure _LapeListBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeListBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PListBox(Params^[0])^ := TListBox.Create(PComponent(Params^[1])^);
+  PListBox(Result)^ := TListBox.Create(PComponent(Params^[0])^);
 end;
 
-procedure _LapeListBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCustomEdit_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PListBox(Params^[0])^.Free();
-end;
-
-procedure _LapeCustomEdit_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomEdit(Params^[0])^ := TCustomEdit.Create(PComponent(Params^[1])^);
+  PCustomEdit(Result)^ := TCustomEdit.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeCustomEdit_Clear(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -701,14 +681,9 @@ begin
   PCustomEdit(Params^[0])^.Text := PString(Params^[1])^;
 end;
 
-procedure _LapeCustomEdit_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeEdit_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomEdit(Params^[0])^.Free();
-end;
-
-procedure _LapeEdit_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PEdit(Params^[0])^ := TEdit.Create(PComponent(Params^[1])^);
+  PEdit(Result)^ := TEdit.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeEdit_OnEditingDone_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -721,34 +696,19 @@ begin
   PEdit(Params^[0])^.OnEditingDone := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeEdit_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCustomGroupBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PEdit(Params^[0])^.Free();
+  PCustomGroupBox(Result)^ := TCustomGroupBox.Create(PComponent(Params^[0])^);
 end;
 
-procedure _LapeCustomGroupBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeGroupBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomGroupBox(Params^[0])^ := TCustomGroupBox.Create(PComponent(Params^[1])^);
+  PGroupBox(Result)^ := TGroupBox.Create(PComponent(Params^[0])^);
 end;
 
-procedure _LapeCustomGroupBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCustomMemo_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomGroupBox(Params^[0])^.Free();
-end;
-
-procedure _LapeGroupBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PGroupBox(Params^[0])^ := TGroupBox.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeGroupBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PGroupBox(Params^[0])^.Free();
-end;
-
-procedure _LapeCustomMemo_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomMemo(Params^[0])^ := TCustomMemo.Create(PComponent(Params^[1])^);
+  PCustomMemo(Result)^ := TCustomMemo.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeCustomMemo_Append(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -826,34 +786,19 @@ begin
   PCustomMemo(Params^[0])^.WordWrap := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomMemo_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMemo_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomMemo(Params^[0])^.Free();
+  PMemo(Result)^ := TMemo.Create(PComponent(Params^[0])^);
 end;
 
-procedure _LapeMemo_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeButtonControl_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMemo(Params^[0])^ := TMemo.Create(PComponent(Params^[1])^);
+  PButtonControl(Result)^ := TButtonControl.Create(PComponent(Params^[0])^);
 end;
 
-procedure _LapeMemo_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCustomButton_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMemo(Params^[0])^.Free();
-end;
-
-procedure _LapeButtonControl_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PButtonControl(Params^[0])^ := TButtonControl.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeButtonControl_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PButtonControl(Params^[0])^.Free();
-end;
-
-procedure _LapeCustomButton_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomButton(Params^[0])^ := TCustomButton.Create(PComponent(Params^[1])^);
+  PCustomButton(Result)^ := TCustomButton.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeCustomButton_Active_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -881,24 +826,14 @@ begin
   PCustomButton(Params^[0])^.Cancel := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomButton_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeButton_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomButton(Params^[0])^.Free();
+  PButton(Result)^ := TButton.Create(PComponent(Params^[0])^);
 end;
 
-procedure _LapeButton_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCustomCheckBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PButton(Params^[0])^ := TButton.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeButton_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PButton(Params^[0])^.Free();
-end;
-
-procedure _LapeCustomCheckBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomCheckBox(Params^[0])^ := TCustomCheckBox.Create(PComponent(Params^[1])^);
+  PCustomCheckBox(Result)^ := TCustomCheckBox.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeCustomCheckBox_AllowGrayed_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -931,24 +866,14 @@ begin
   PCustomCheckBox(Params^[0])^.OnChange := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeCustomCheckBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCheckBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomCheckBox(Params^[0])^.Free();
+  PCheckBox(Result)^ := TCheckBox.Create(PComponent(Params^[0])^);
 end;
 
-procedure _LapeCheckBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCustomLabel_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCheckBox(Params^[0])^ := TCheckBox.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeCheckBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCheckBox(Params^[0])^.Free();
-end;
-
-procedure _LapeCustomLabel_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomLabel(Params^[0])^ := TCustomLabel.Create(PComponent(Params^[1])^);
+  PCustomLabel(Result)^ := TCustomLabel.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeCustomLabel_AdjustFontForOptimalFill(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -959,11 +884,6 @@ end;
 procedure _LapeCustomLabel_SetBounds(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomLabel(Params^[0])^.SetBounds(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
-end;
-
-procedure _LapeCustomLabel_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomLabel(Params^[0])^.Free();
 end;
 
 procedure _LapeLabel_Alignment_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -1016,14 +936,9 @@ begin
   PLabel(Params^[0])^.OptimalFill := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeLabel_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeLabel_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PLabel(Params^[0])^ := TLabel.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeLabel_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PLabel(Params^[0])^.Free();
+  PLabel(Result)^ := TLabel.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeCustomSpeedButton_FindDownButton(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -1121,34 +1036,19 @@ begin
   PCustomSpeedButton(Params^[0])^.Transparent := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeCustomSpeedButton_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCustomSpeedButton_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomSpeedButton(Params^[0])^ := TCustomSpeedButton.Create(PComponent(Params^[1])^);
+  PCustomSpeedButton(Result)^ := TCustomSpeedButton.Create(PComponent(Params^[0])^);
 end;
 
-procedure _LapeCustomSpeedButton_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSpeedButton_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomSpeedButton(Params^[0])^.Free();
+  PSpeedButton(Result)^ := TSpeedButton.Create(PComponent(Params^[0])^);
 end;
 
-procedure _LapeSpeedButton_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeRadioButton_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSpeedButton(Params^[0])^ := TSpeedButton.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeSpeedButton_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSpeedButton(Params^[0])^.Free();
-end;
-
-procedure _LapeRadioButton_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PRadioButton(Params^[0])^ := TRadioButton.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeRadioButton_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PRadioButton(Params^[0])^.Free();
+  PRadioButton(Result)^ := TRadioButton.Create(PComponent(Params^[0])^);
 end;
 
 procedure ImportLCLStdCtrls(Compiler: TSimbaScript_Compiler);
@@ -1168,7 +1068,7 @@ begin
     addGlobalType('procedure(Control: TLazWinControl; Index: Integer; var AHeight: Integer) of object', 'TLazMeasureItemEvent', FFI_DEFAULT_ABI);
 
     addClass('TLazCustomComboBox', 'TLazWinControl');
-    addGlobalFunc('procedure TLazCustomComboBox.Init(TheOwner: TLazComponent); override', @_LapeCustomComboBox_Init);
+    addClassConstructor('TLazCustomComboBox', '(TheOwner: TLazComponent)', @_LapeCustomComboBox_Create);
     addGlobalFunc('procedure TLazCustomComboBox.AddItem(const Item: String; AnObject: TObject);', @_LapeCustomComboBox_AddItem);
     addGlobalFunc('procedure TLazCustomComboBox.AddHistoryItem(const Item: string; MaxHistoryCount: Integer;SetAsText, CaseSensitive: Boolean);', @_LapeCustomComboBox_AddHistoryItem);
     addGlobalFunc('procedure TLazCustomComboBox.AddHistoryItem(const Item: string; AnObject: TObject;MaxHistoryCount: Integer; SetAsText, CaseSensitive: Boolean); overload', @_LapeCustomComboBox_AddHistoryItemEx);
@@ -1193,11 +1093,11 @@ begin
     addClassVar('TLazCustomComboBox', 'Text', 'string', @_LapeCustomComboBox_Text_Read, @_LapeCustomComboBox_Text_Write);
 
     addClass('TLazComboBox', 'TLazCustomComboBox');
-    addGlobalFunc('procedure TLazComboBox.Init(TheOwner: TLazComponent); override', @_LapeComboBox_Init);
+    addClassConstructor('TLazComboBox', '(TheOwner: TLazComponent)', @_LapeComboBox_Create);
     addClassVar('TLazComboBox', 'OnChange', 'TLazNotifyEvent', @_LapeCustomComboBox_OnChange_Read, @_LapeCustomComboBox_OnChange_Write);
 
     addClass('TLazCustomListBox', 'TLazWinControl');
-    addGlobalFunc('procedure TLazCustomListBox.Init(TheOwner: TLazComponent); override', @_LapeCustomListBox_Init);
+    addClassConstructor('TLazCustomListBox', '(TheOwner: TLazComponent)', @_LapeCustomListBox_Create);
     addGlobalFunc('procedure TLazCustomListBox.AddItem(const Item: String; AnObject: TObject);', @_LapeCustomListBox_AddItem);
     addGlobalFunc('procedure TLazCustomListBox.Click;', @_LapeCustomListBox_Click);
     addGlobalFunc('procedure TLazCustomListBox.Clear;', @_LapeCustomListBox_Clear);
@@ -1235,10 +1135,10 @@ begin
     addClassVar('TLazCustomListBox', 'OnSelectionChange', 'TLazSelectionChangeEvent', @_LapeCustomListBox_OnSelectionChange_Read, @_LapeCustomListBox_OnSelectionChange_Write);
 
     addClass('TLazListBox', 'TLazCustomListBox');
-    addGlobalFunc('procedure TLazListBox.Init(AOwner: TLazComponent); override', @_LapeListBox_Init);
+    addClassConstructor('TLazListBox', '(AOwner: TLazComponent)', @_LapeListBox_Create);
 
     addClass('TLazCustomEdit', 'TLazWinControl');
-    addGlobalFunc('procedure TLazCustomEdit.Init(AOwner: TLazComponent); override', @_LapeCustomEdit_Init);
+    addClassConstructor('TLazCustomEdit', '(AOwner: TLazComponent)', @_LapeCustomEdit_Create);
     addGlobalFunc('procedure TLazCustomEdit.Clear;', @_LapeCustomEdit_Clear);
     addGlobalFunc('procedure TLazCustomEdit.SelectAll;', @_LapeCustomEdit_SelectAll);
     addGlobalFunc('procedure TLazCustomEdit.ClearSelection;', @_LapeCustomEdit_ClearSelection);
@@ -1261,17 +1161,17 @@ begin
 
     addClass('TLazEdit', 'TLazCustomEdit');
     addClassVar('TLazEdit', 'OnEditingDone', 'TLazNotifyEvent', @_LapeEdit_OnEditingDone_Read, @_LapeEdit_OnEditingDone_Write);
-    addGlobalFunc('procedure TLazEdit.Init(AOwner: TLazComponent); override', @_LapeEdit_Init);
+    addClassConstructor('TLazEdit', '(AOwner: TLazComponent)', @_LapeEdit_Create);
 
     addClass('TLazCustomGroupBox', 'TLazWinControl');
-    addGlobalFunc('procedure TLazCustomGroupBox.Init(AOwner: TLazComponent); override', @_LapeCustomGroupBox_Init);
+    addClassConstructor('TLazCustomGroupBox', '(AOwner: TLazComponent)', @_LapeCustomGroupBox_Create);
 
     addClass('TLazGroupBox', 'TLazCustomGroupBox');
-    addGlobalFunc('procedure TLazGroupBox.Init(AOwner: TLazComponent); override', @_LapeGroupBox_Init);
+    addClassConstructor('TLazGroupBox', '(AOwner: TLazComponent)', @_LapeGroupBox_Create);
 
     addClass('TLazMemoScrollBar', 'TLazControlScrollBar');
     addClass('TLazCustomMemo', 'TLazCustomEdit');
-    addGlobalFunc('procedure TLazCustomMemo.Init(AOwner: TLazComponent); override', @_LapeCustomMemo_Init);
+    addClassConstructor('TLazCustomMemo', '(AOwner: TLazComponent)', @_LapeCustomMemo_Create);
     addGlobalFunc('procedure TLazCustomMemo.Append(const Value: String);', @_LapeCustomMemo_Append);
     addClassVar('TLazCustomMemo', 'Lines', 'TLazStrings', @_LapeCustomMemo_Lines_Read, @_LapeCustomMemo_Lines_Write);
     addClassVar('TLazCustomMemo', 'HorzScrollBar', 'TLazMemoScrollBar', @_LapeCustomMemo_HorzScrollBar_Read, @_LapeCustomMemo_HorzScrollBar_Write);
@@ -1282,31 +1182,31 @@ begin
     addClassVar('TLazCustomMemo', 'WordWrap', 'Boolean', @_LapeCustomMemo_WordWrap_Read, @_LapeCustomMemo_WordWrap_Write);
 
     addClass('TLazMemo', 'TLazCustomMemo');
-    addGlobalFunc('procedure TLazMemo.Init(AOwner: TLazComponent); override', @_LapeMemo_Init);
+    addClassConstructor('TLazMemo', '(AOwner: TLazComponent)', @_LapeMemo_Create);
 
     addClass('TLazButtonControl', 'TLazWinControl');
-    addGlobalFunc('procedure TLazButtonControl.Init(TheOwner: TLazComponent); override', @_LapeButtonControl_Init);
+    addClassConstructor('TLazButtonControl', '(TheOwner: TLazComponent)', @_LapeButtonControl_Create);
 
     addClass('TLazCustomButton', 'TLazButtonControl');
-    addGlobalFunc('procedure TLazCustomButton.Init(TheOwner: TLazComponent); override', @_LapeCustomButton_Init);
+    addClassConstructor('TLazCustomButton', '(TheOwner: TLazComponent)', @_LapeCustomButton_Create);
     addClassVar('TLazCustomButton', 'Active', 'Boolean', @_LapeCustomButton_Active_Read);
     addClassVar('TLazCustomButton', 'Default', 'Boolean', @_LapeCustomButton_Default_Read, @_LapeCustomButton_Default_Write);
     addClassVar('TLazCustomButton', 'Cancel', 'Boolean', @_LapeCustomButton_Cancel_Read, @_LapeCustomButton_Cancel_Write);
 
     addClass('TLazButton', 'TLazCustomButton');
-    addGlobalFunc('procedure TLazButton.Init(TheOwner: TLazComponent); override', @_LapeButton_Init);
+    addClassConstructor('TLazButton', '(TheOwner: TLazComponent)', @_LapeButton_Create);
 
     addClass('TLazCustomCheckBox', 'TLazButtonControl');
-    addGlobalFunc('procedure TLazCustomCheckBox.Init(TheOwner: TLazComponent); override', @_LapeCustomCheckBox_Init);
+    addClassConstructor('TLazCustomCheckBox', '(TheOwner: TLazComponent)', @_LapeCustomCheckBox_Create);
     addClassVar('TLazCustomCheckBox', 'AllowGrayed', 'Boolean', @_LapeCustomCheckBox_AllowGrayed_Read, @_LapeCustomCheckBox_AllowGrayed_Write);
     addClassVar('TLazCustomCheckBox', 'State', 'TLazCheckBoxState', @_LapeCustomCheckBox_State_Read, @_LapeCustomCheckBox_State_Write);
     addClassVar('TLazCustomCheckBox', 'OnChange', 'TLazNotifyEvent', @_LapeCustomCheckBox_OnChange_Read, @_LapeCustomCheckBox_OnChange_Write);
 
     addClass('TLazCheckBox', 'TLazCustomCheckBox');
-    addGlobalFunc('procedure TLazCheckBox.Init(TheOwner: TLazComponent); override', @_LapeCheckBox_Init);
+    addClassConstructor('TLazCheckBox', '(TheOwner: TLazComponent)', @_LapeCheckBox_Create);
 
     addClass('TLazCustomLabel', 'TLazGraphicControl');
-    addGlobalFunc('procedure TLazCustomLabel.Init(TheOwner: TLazComponent); override', @_LapeCustomLabel_Init);
+    addClassConstructor('TLazCustomLabel', '(TheOwner: TLazComponent)', @_LapeCustomLabel_Create);
     addGlobalFunc('function TLazCustomLabel.AdjustFontForOptimalFill: Boolean;', @_LapeCustomLabel_AdjustFontForOptimalFill);
 
     addClass('TLazLabel', 'TLazCustomLabel');
@@ -1315,7 +1215,7 @@ begin
     addClassVar('TLazLabel', 'Transparent', 'Boolean', @_LapeLabel_Transparent_Read, @_LapeLabel_Transparent_Write);
     addClassVar('TLazLabel', 'WordWrap', 'Boolean', @_LapeLabel_WordWrap_Read, @_LapeLabel_WordWrap_Write);
     addClassVar('TLazLabel', 'OptimalFill', 'Boolean', @_LapeLabel_OptimalFill_Read, @_LapeLabel_OptimalFill_Write);
-    addGlobalFunc('procedure TLazLabel.Init(TheOwner: TLazComponent); override', @_LapeLabel_Init);
+    addClassConstructor('TLazLabel', '(TheOwner: TLazComponent)', @_LapeLabel_Create);
 
     addClass('TLazCustomSpeedButton', 'TLazGraphicControl');
     addGlobalFunc('function TLazCustomSpeedButton.FindDownButton: TLazCustomSpeedButton;', @_LapeCustomSpeedButton_FindDownButton);
@@ -1328,13 +1228,13 @@ begin
     addClassVar('TLazCustomSpeedButton', 'ShowCaption', 'Boolean', @_LapeCustomSpeedButton_ShowCaption_Read, @_LapeCustomSpeedButton_ShowCaption_Write);
     addClassVar('TLazCustomSpeedButton', 'Spacing', 'Integer', @_LapeCustomSpeedButton_Spacing_Read, @_LapeCustomSpeedButton_Spacing_Write);
     addClassVar('TLazCustomSpeedButton', 'Transparent', 'Boolean', @_LapeCustomSpeedButton_Transparent_Read, @_LapeCustomSpeedButton_Transparent_Write);
-    addGlobalFunc('procedure TLazCustomSpeedButton.Init(AOwner: TLazComponent); override', @_LapeCustomSpeedButton_Init);
+    addClassConstructor('TLazCustomSpeedButton', '(AOwner: TLazComponent)', @_LapeCustomSpeedButton_Create);
 
     addClass('TLazSpeedButton', 'TLazCustomSpeedButton');
-    addGlobalFunc('procedure TLazSpeedButton.Init(AOwner: TLazComponent); override', @_LapeSpeedButton_Init);
+    addClassConstructor('TLazSpeedButton', '(AOwner: TLazComponent)', @_LapeSpeedButton_Create);
 
     addClass('TLazRadioButton', 'TLazCustomCheckBox');
-    addGlobalFunc('procedure TLazRadioButton.Init(AOwner: TLazComponent); override', @_LapeRadioButton_Init);
+    addClassConstructor('TLazRadioButton', '(AOwner: TLazComponent)', @_LapeRadioButton_Create);
   end;
 end;
 

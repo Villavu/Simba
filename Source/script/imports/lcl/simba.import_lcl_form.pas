@@ -105,19 +105,9 @@ begin
   PSizeConstraints(Params^[0])^.MinWidth := PConstraintSize(Params^[1])^;
 end;
 
-procedure _LapeSizeConstraints_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCustomForm_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSizeConstraints(Params^[0])^.Free();
-end;
-
-procedure _LapeCustomForm_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomForm(Params^[0])^ := TCustomForm.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeCustomForm_CreateNew(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomForm(Params^[0])^ := TCustomForm.CreateNew(PComponent(Params^[1])^, PInteger(Params^[2])^);
+  PCustomForm(Result)^ := TCustomForm.CreateNew(PComponent(Params^[0])^);
 end;
 
 procedure _LapeCustomForm_Close(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -346,15 +336,13 @@ begin
   PCustomForm(Params^[0])^.ShowInTaskBar := PShowInTaskBar(Params^[1])^;
 end;
 
-procedure _LapeCustomForm_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeForm_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomForm(Params^[0])^.Free;
-end;
+  if (GetCurrentThreadID() <> MainThreadID) then
+    SimbaException('TForm.Create must be called on main thread (Use Sync)');
 
-procedure _LapeForm_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PForm(Params^[0])^ := TForm.Create(PComponent(Params^[1])^);
-  PForm(Params^[0])^.ShowInTaskBar := stAlways;
+  PForm(Result)^ := TForm.CreateNew(PComponent(Params^[0])^);
+  PForm(Result)^.ShowInTaskBar := stAlways;
 end;
 
 procedure _LapeForm_Show(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -712,11 +700,6 @@ begin
   PCustomForm(Params^[0])^.AutoScroll := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeForm_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PForm(Params^[0])^.Free();
-end;
-
 procedure _LapeForm_OnMouseMove_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PMouseMoveEvent(Result)^ := PForm(Params^[0])^.OnMouseMove;
@@ -777,14 +760,9 @@ begin
   PKeyPressEvent(Result)^ := PForm(Params^[0])^.OnKeyPress;
 end;
 
-procedure _LapeScrollBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeScrollBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PScrollBox(Params^[0])^ := TScrollBox.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeScrollBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PScrollBox(Params^[0])^.Free();
+  PScrollBox(Result)^ := TScrollBox.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeCommonDialog_Execute(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -947,14 +925,9 @@ begin
   PFileDialog(Params^[0])^.OnTypeChange := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeFileDialog_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFileDialog_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PFileDialog(Params^[0])^ := TFileDialog.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeFileDialog_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PFileDialog(Params^[0])^.Free();
+  PFileDialog(Result)^ := TFileDialog.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeOpenDialog_IntfSetOption(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -992,14 +965,9 @@ begin
   POpenDialog(Params^[0])^.OnSelectionChange := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeOpenDialog_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeOpenDialog_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  POpenDialog(Params^[0])^ := TOpenDialog.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeOpenDialog_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  POpenDialog(Params^[0])^.Free();
+  POpenDialog(Result)^ := TOpenDialog.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeColorDialog_Color_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -1022,14 +990,9 @@ begin
   PColorDialog(Params^[0])^.CustomColors := PStrings(Params^[1])^;
 end;
 
-procedure _LapeColorDialog_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeColorDialog_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PColorDialog(Params^[0])^ := TColorDialog.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeColorDialog_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PColorDialog(Params^[0])^.Free();
+  PColorDialog(Result)^ := TColorDialog.Create(PComponent(Params^[0])^);
 end;
 
 procedure ImportLCLForm(Compiler: TSimbaScript_Compiler);
@@ -1056,8 +1019,7 @@ begin
     addClassVar('TLazSizeConstraints', 'MinWidth', 'Integer', @_LapeSizeConstraints_MinWidth_Read, @_LapeSizeConstraints_MinWidth_Write);
 
     addClass('TLazCustomForm', 'TLazScrollingWinControl');
-    addGlobalFunc('procedure TLazCustomForm.Init(AOwner: TLazComponent); override', @_LapeCustomForm_Init);
-    addGlobalFunc('procedure TLazCustomForm.InitNew(AOwner: TLazComponent; Num: Integer)', @_LapeCustomForm_CreateNew);
+    addClassConstructor('TLazCustomForm', '(AOwner: TLazCustomForm)', @_LapeCustomForm_Create);
     addGlobalFunc('procedure TLazCustomForm.Close;', @_LapeCustomForm_Close);
     addGlobalFunc('function TLazCustomForm.CloseQuery: Boolean;', @_LapeCustomForm_CloseQuery);
     addGlobalFunc('procedure TLazCustomForm.EnsureVisible(AMoveToTop: Boolean);', @_LapeCustomForm_EnsureVisible);
@@ -1087,7 +1049,7 @@ begin
     addClassVar('TLazCustomForm', 'StayOnTop', 'Boolean', @_LapeCustomForm_StayOnTop_Read, @_LapeCustomForm_StayOnTop_Write);
 
     addClass('TLazForm', 'TLazCustomForm');
-    addGlobalFunc('procedure TLazForm.Init(TheOwner: TLazComponent); override', @_LapeForm_Init);
+    addClassConstructor('TLazForm', '(TheOwner: TLazComponent)', @_LapeForm_Create);
 
     addClassVar('TLazForm', 'OnActivate', 'TLazNotifyEvent', @_LapeForm_OnActivate_Read, @_LapeForm_OnActivate_Write);
     addClassVar('TLazForm', 'OnClose', 'TLazCloseEvent', @_LapeForm_OnClose_Read, @_LapeForm_OnClose_Write);
@@ -1110,7 +1072,7 @@ begin
     addClassVar('TLazForm', 'OnWindowStateChange', 'TLazNotifyEvent', @_LapeForm_OnWindowStateChange_Read, @_LapeForm_OnWindowStateChange_Write);
 
     addClass('TLazScrollBox', 'TLazScrollingWinControl');
-    addGlobalFunc('procedure TLazScrollBox.Init(AOwner: TLazComponent); override', @_LapeScrollBox_Init);
+    addClassConstructor('TLazScrollBox', '(AOwner: TLazComponent)', @_LapeScrollBox_Create);
 
     addGlobalType('(ofReadOnly, ofOverwritePrompt, ofHideReadOnly, ofNoChangeDir, ofShowHelp, ofNoValidate, ofAllowMultiSelect, ofExtensionDifferent, ofPathMustExist, ofFileMustExist, ofCreatePrompt, ofShareAware, ofNoReadOnlyReturn, ofNoTestFileCreate, ofNoNetworkButton, ofNoLongNames, ofOldStyleDialog, ofNoDereferenceLinks, ofEnableIncludeNotify, ofEnableSizing, ofDontAddToRecent, ofForceShowHidden, ofViewDetail, ofAutoPreview)', 'TLazOpenOption');
     addGlobalType('set of TLazOpenOption', 'TLazOpenOptions');
@@ -1126,7 +1088,7 @@ begin
     addClassVar('TLazCommonDialog', 'Height', 'Integer', @_LapeCommonDialog_Height_Read, @_LapeCommonDialog_Height_Write);
 
     AddClass('TLazFileDialog', 'TLazCommonDialog');
-    addClassVar('TLazFileDialog', 'Files', 'TLazStrings', @_LapeFileDialog_Files_Read, nil);
+    addClassVar('TLazFileDialog', 'Files', 'TLazStrings', @_LapeFileDialog_Files_Read);
     addClassVar('TLazFileDialog', 'HistoryList', 'TLazStrings', @_LapeFileDialog_HistoryList_Read, @_LapeFileDialog_HistoryList_Write);
     addClassVar('TLazFileDialog', 'DefaultExt', 'String', @_LapeFileDialog_DefaultExt_Read, @_LapeFileDialog_DefaultExt_Write);
     addClassVar('TLazFileDialog', 'FileName', 'String', @_LapeFileDialog_FileName_Read, @_LapeFileDialog_FileName_Write);
@@ -1135,18 +1097,18 @@ begin
     addClassVar('TLazFileDialog', 'InitialDir', 'String', @_LapeFileDialog_InitialDir_Read, @_LapeFileDialog_InitialDir_Write);
     addClassVar('TLazFileDialog', 'OnHelpClicked', 'TLazNotifyEvent', @_LapeFileDialog_OnHelpClicked_Read, @_LapeFileDialog_OnHelpClicked_Write);
     addClassVar('TLazFileDialog', 'OnTypeChange', 'TLazNotifyEvent', @_LapeFileDialog_OnTypeChange_Read, @_LapeFileDialog_OnTypeChange_Write);
-    addGlobalFunc('procedure TLazFileDialog.Init(AOwner: TLazComponent); override', @_LapeFileDialog_Init);
+    addClassConstructor('TLazFileDialog', '(AOwner: TLazComponent)', @_LapeFileDialog_Create);
 
     addClass('TLazOpenDialog', 'TLazFileDialog');
     addClassVar('TLazOpenDialog', 'Options', 'TLazOpenOptions', @_LapeOpenDialog_Options_Read, @_LapeOpenDialog_Options_Write);
     addClassVar('TLazOpenDialog', 'OnFolderChange', 'TLazNotifyEvent', @_LapeOpenDialog_OnFolderChange_Read, @_LapeOpenDialog_OnFolderChange_Write);
     addClassVar('TLazOpenDialog', 'OnSelectionChange', 'TLazNotifyEvent', @_LapeOpenDialog_OnSelectionChange_Read, @_LapeOpenDialog_OnSelectionChange_Write);
-    addGlobalFunc('procedure TLazOpenDialog.Init(AOwner: TLazComponent); override', @_LapeOpenDialog_Init);
+    addClassConstructor('TLazOpenDialog', '(AOwner: TLazComponent)', @_LapeOpenDialog_Create);
 
     addClass('TLazColorDialog', 'TLazCommonDialog');
     addClassVar('TLazColorDialog', 'Color', 'TColor', @_LapeColorDialog_Color_Read, @_LapeColorDialog_Color_Write);
     addClassVar('TLazColorDialog', 'CustomColors', 'TLazStrings', @_LapeColorDialog_CustomColors_Read, @_LapeColorDialog_CustomColors_Write);
-    addGlobalFunc('procedure TLazColorDialog.Init(AOwner: TLazComponent); override', @_LapeColorDialog_Init);
+    addClassConstructor('TLazColorDialog', '(AOwner: TLazComponent)', @_LapeColorDialog_Create);
   end;
 end;
 

@@ -45,9 +45,9 @@ type
   PTrackBar = ^TTrackBar;
   PTrackBarOrientation = ^TTrackBarOrientation;
 
-procedure _LapeCustomProgressBar_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCustomProgressBar_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomProgressBar(Params^[0])^ := TCustomProgressBar.Create(PComponent(Params^[1])^);
+  PCustomProgressBar(Result)^ := TCustomProgressBar.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeCustomProgressBar_StepIt(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -120,24 +120,14 @@ begin
   PCustomProgressBar(Params^[0])^.BarShowText := Pboolean(Params^[1])^;
 end;
 
-procedure _LapeCustomProgressBar_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeProgressBar_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomProgressBar(Params^[0])^.Free();
+  PProgressBar(Result)^ := TProgressBar.Create(PComponent(Params^[0])^);
 end;
 
-procedure _LapeProgressBar_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCustomTrackBar_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PProgressBar(Params^[0])^ := TProgressBar.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeProgressBar_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProgressBar(Params^[0])^.Free();
-end;
-
-procedure _LapeCustomTrackBar_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomTrackBar(Params^[0])^ := TCustomTrackBar.Create(PComponent(Params^[1])^);
+  PCustomTrackBar(Result)^ := TCustomTrackBar.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeCustomTrackBar_SetTick(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -285,19 +275,9 @@ begin
   PCustomTrackBar(Params^[0])^.TickStyle := PTickStyle(Params^[1])^;
 end;
 
-procedure _LapeCustomTrackBar_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTrackBar_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomTrackBar(Params^[0])^.Free();
-end;
-
-procedure _LapeTrackBar_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PTrackBar(Params^[0])^ := TTrackBar.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeTrackBar_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PTrackBar(Params^[0])^.Free();
+  PTrackBar(Result)^ := TTrackBar.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeCustomCheckListBox_MeasureItem(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -370,14 +350,9 @@ begin
   PCustomCheckListBox(Params^[0])^.OnClickCheck := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeCustomCheckListBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCustomCheckListBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomCheckListBox(Params^[0])^ := TCustomCheckListBox.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeCustomCheckListBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomCheckListBox(Params^[0])^.Free();
+  PCustomCheckListBox(Result)^ := TCustomCheckListBox.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeCustomCheckListBox_OnCheckListClicked_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -385,14 +360,9 @@ begin
   PCustomCheckListBox(Params^[0])^.OnItemClick := PCheckListClicked(Params^[1])^;
 end;
 
-procedure _LapeCheckListBox_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCheckListBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCheckListBox(Params^[0])^ := TCheckListBox.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeCheckListBox_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCheckListBox(Params^[0])^.Free();
+  PCheckListBox(Result)^ := TCheckListBox.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeCustomPage_CanTab(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -455,14 +425,9 @@ begin
   PCustomPage(Params^[0])^.OnShow := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeCustomPage_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCustomPage_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomPage(Params^[0])^ := TCustomPage.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeCustomPage_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomPage(Params^[0])^.Free();
+  PCustomPage(Result)^ := TCustomPage.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeCustomTabControl_TabRect(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -555,14 +520,9 @@ begin
   PCustomTabControl(Params^[0])^.TabPosition := PTabPosition(Params^[1])^;
 end;
 
-procedure _LapeCustomTabControl_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCustomTabControl_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomTabControl(Params^[0])^ := TCustomTabControl.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeCustomTabControl_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomTabControl(Params^[0])^.Free();
+  PCustomTabControl(Result)^ := TCustomTabControl.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeTabSheet_TabIndex_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -570,14 +530,9 @@ begin
   PInteger(Result)^ := PTabSheet(Params^[0])^.TabIndex;
 end;
 
-procedure _LapeTabSheet_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTabSheet_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PTabSheet(Params^[0])^ := TTabSheet.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeTabSheet_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PTabSheet(Params^[0])^.Free();
+  PTabSheet(Result)^ := TTabSheet.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapePageControl_SelectNextPage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -620,14 +575,9 @@ begin
   PPageControl(Params^[0])^.ActivePage := PTabSheet(Params^[1])^;
 end;
 
-procedure _LapePageControl_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapePageControl_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPageControl(Params^[0])^ := TPageControl.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapePageControl_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPageControl(Params^[0])^.Free();
+  PPageControl(Result)^ := TPageControl.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeStatusPanel_StatusBar(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -665,19 +615,14 @@ begin
   PStatusPanel(Params^[0])^.Width := PInteger(Params^[1])^;
 end;
 
-procedure _LapeStatusPanel_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeStatusPanel_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PStatusPanel(Params^[0])^ := TStatusPanel.Create(PCollection(Params^[1])^);
+  PStatusPanel(Result)^ := TStatusPanel.Create(PCollection(Params^[0])^);
 end;
 
-procedure _LapeStatusPanel_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeStatusPanels_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PStatusPanel(Params^[0])^.Free();
-end;
-
-procedure _LapeStatusPanels_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PStatusPanels(Params^[0])^ := TStatusPanels.Create(PStatusBar(Params^[1])^);
+  PStatusPanels(Result)^ := TStatusPanels.Create(PStatusBar(Params^[0])^);
 end;
 
 procedure _LapeStatusPanels_Add(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -698,11 +643,6 @@ end;
 procedure _LapeStatusPanels_StatusBar_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PStatusBar(Result)^ := PStatusPanels(Params^[0])^.StatusBar;
-end;
-
-procedure _LapeStatusPanels_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PStatusPanels(Params^[0])^.Free();
 end;
 
 procedure _LapeStatusBar_GetPanelIndexAt(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -775,14 +715,9 @@ begin
   PStatusBar(Params^[0])^.OnHint := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeStatusBar_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeStatusBar_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PStatusBar(Params^[0])^ := TStatusBar.Create(PComponent(Params^[1])^);
-end;
-
-procedure _LapeStatusBar_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PStatusBar(Params^[0])^.Free();
+  PStatusBar(Result)^ := TStatusBar.Create(PComponent(Params^[0])^);
 end;
 
 procedure ImportLCLComCtrls(Compiler: TSimbaScript_Compiler);
@@ -797,7 +732,7 @@ begin
     addGlobalType('(trHorizontal, trVertical)', 'TLazTrackBarOrientation');
 
     addClass('TLazCustomProgressBar', 'TLazWinControl');
-    addGlobalFunc('procedure TLazCustomProgressBar.Init(AOwner: TLazComponent); override', @_LapeCustomProgressBar_Init);
+    addClassConstructor('TLazCustomProgressBar', '(AOwner: TLazComponent)', @_LapeCustomProgressBar_Create);
     addGlobalFunc('procedure TLazCustomProgressBar.StepIt;', @_LapeCustomProgressBar_StepIt);
     addGlobalFunc('procedure TLazCustomProgressBar.StepBy(Delta: Integer);', @_LapeCustomProgressBar_StepBy);
     addClassVar('TLazCustomProgressBar', 'Max', 'Integer', @_LapeCustomProgressBar_Max_Read, @_LapeCustomProgressBar_Max_Write);
@@ -808,10 +743,10 @@ begin
     addClassVar('TLazCustomProgressBar', 'BarShowText', 'boolean', @_LapeCustomProgressBar_BarShowText_Read, @_LapeCustomProgressBar_BarShowText_Write);
 
     addClass('TLazProgressBar', 'TLazCustomProgressBar');
-    addGlobalFunc('procedure TLazProgressBar.Init(AOwner: TLazComponent); override', @_LapeProgressBar_Init);
+    addClassConstructor('TLazProgressBar', '(AOwner: TLazComponent)', @_LapeProgressBar_Create);
 
     addClass('TLazCustomTrackBar', 'TLazWinControl');
-    addGlobalFunc('procedure TLazCustomTrackBar.Init(AOwner: TLazComponent); override', @_LapeCustomTrackBar_Init);
+    addClassConstructor('TLazCustomTrackBar', '(AOwner: TLazComponent)', @_LapeCustomTrackBar_Create);
     addGlobalFunc('procedure TLazCustomTrackBar.SetTick(Value: Integer);', @_LapeCustomTrackBar_SetTick);
     addClassVar('TLazCustomTrackBar', 'Frequency', 'Integer', @_LapeCustomTrackBar_Frequency_Read, @_LapeCustomTrackBar_Frequency_Write);
     addClassVar('TLazCustomTrackBar', 'LineSize', 'Integer', @_LapeCustomTrackBar_LineSize_Read, @_LapeCustomTrackBar_LineSize_Write);
@@ -829,7 +764,7 @@ begin
     addClassVar('TLazCustomTrackBar', 'TickStyle', 'TLazStickStyle', @_LapeCustomTrackBar_TickStyle_Read, @_LapeCustomTrackBar_TickStyle_Write);
 
     addClass('TLazTrackBar', 'TLazCustomTrackBar');
-    addGlobalFunc('procedure TLazTrackBar.Init(AOwner: TLazComponent); override', @_LapeTrackBar_Init);
+    addClassConstructor('TLazTrackBar', '(AOwner: TLazComponent)', @_LapeTrackBar_Create);
 
     addClass('TLazCustomCheckListBox', 'TLazCustomListBox');
     addGlobalFunc('procedure TLazCustomCheckListBox.Toggle(AIndex: Integer);', @_LapeCustomCheckListBox_Toggle);
@@ -840,13 +775,13 @@ begin
     addClassVar('TLazCustomCheckListBox', 'State', 'TLazCheckBoxState', @_LapeCustomCheckListBox_State_Read, @_LapeCustomCheckListBox_State_Write, True);
     addClassVar('TLazCustomCheckListBox', 'OnClickCheck', 'TLazNotifyEvent', @_LapeCustomCheckListBox_OnClickCheck_Read, @_LapeCustomCheckListBox_OnClickCheck_Write);
     addClassVar('TLazCustomCheckListBox', 'OnItemClick', 'TLazCheckListClickedEvent', nil, @_LapeCustomCheckListBox_OnCheckListClicked_Write);
-    addGlobalFunc('procedure TLazCustomCheckListBox.Init(AOwner: TLazComponent)', @_LapeCustomCheckListBox_Init);
+    addClassConstructor('TLazCustomCheckListBox', '(AOwner: TLazComponent)', @_LapeCustomCheckListBox_Create);
 
     addClass('TLazCheckListBox', 'TLazCustomCheckListBox');
-    addGlobalFunc('procedure TLazCheckListBox.Init(AOwner: TLazComponent); override', @_LapeCheckListBox_Init);
+    addClassConstructor('TLazCheckListBox', '(AOwner: TLazComponent)', @_LapeCheckListBox_Create);
 
     addClass('TLazCustomPage', 'TLazWinControl');
-    addGlobalFunc('procedure TLazCustomPage.Init(TheOwner: TLazComponent); override', @_LapeCustomPage_Init);
+    addClassConstructor('TLazCustomPage', '(TheOwner: TLazComponent)', @_LapeCustomPage_Create);
     addGlobalFunc('function TLazCustomPage.CanTab: boolean;', @_LapeCustomPage_CanTab);
     addGlobalFunc('function TLazCustomPage.VisibleIndex: Integer;', @_LapeCustomPage_VisibleIndex);
     addClassVar('TLazCustomPage', 'PageIndex', 'Integer', @_LapeCustomPage_PageIndex_Read, @_LapeCustomPage_PageIndex_Write);
@@ -867,11 +802,11 @@ begin
     addClassVar('TLazCustomTabControl', 'Pages', 'TLazStrings', @_LapeCustomTabControl_Pages_Read, @_LapeCustomTabControl_Pages_Write);
     addClassVar('TLazCustomTabControl', 'ShowTabs', 'Boolean', @_LapeCustomTabControl_ShowTabs_Read, @_LapeCustomTabControl_ShowTabs_Write);
     addClassVar('TLazCustomTabControl', 'TabPosition', 'TLazTabPosition', @_LapeCustomTabControl_TabPosition_Read, @_LapeCustomTabControl_TabPosition_Write);
-    addGlobalFunc('procedure TLazCustomTabControl.Init(TheOwner: TLazComponent); override', @_LapeCustomTabControl_Init);
+    addClassConstructor('TLazCustomTabControl', '(TheOwner: TLazComponent)', @_LapeCustomTabControl_Create);
 
     addClass('TLazTabSheet', 'TLazCustomPage');
     addClassVar('TLazTabSheet', 'TabIndex', 'Integer', @_LapeTabSheet_TabIndex_Read);
-    addGlobalFunc('procedure TLazTabSheet.Init(TheOwner: TLazComponent); override', @_LapeTabSheet_Init);
+    addClassConstructor('TLazTabSheet', '(TheOwner: TLazComponent)', @_LapeTabSheet_Create);
 
     addClass('TLazPageControl', 'TLazCustomTabControl');
     addGlobalFunc('procedure TLazPageControl.SelectNextPage(GoForward: Boolean; CheckTabVisible: Boolean);', @_LapePageControl_SelectNextPageEx);
@@ -880,7 +815,7 @@ begin
     addGlobalFunc('function TLazPageControl.IndexOfTabAt(X, Y: Integer): Integer;', @_LapePageControl_IndexOfTabAt);
     addClassVar('TLazPageControl', 'Pages', 'Integer', @_LapePageControl_Pages_Read);
     addClassVar('TLazPageControl', 'ActivePage', 'TLazTabSheet', @_LapePageControl_ActivePage_Read, @_LapePageControl_ActivePage_Write);
-    addGlobalFunc('procedure TLazPageControl.Init(TheOwner: TLazComponent); override', @_LapePageControl_Init);
+    addClassConstructor('TLazPageControl', '(TheOwner: TLazComponent)', @_LapePageControl_Create);
 
     addClass('TLazStatusBar', 'TLazWinControl');
     addClass('TLazStatusPanel');
@@ -890,7 +825,7 @@ begin
     addClassVar('TLazStatusPanel', 'Width', 'Integer', @_LapeStatusPanel_Width_Read, @_LapeStatusPanel_Width_Write);
 
     addClass('TLazStatusPanels');
-    addGlobalFunc('procedure TLazStatusPanels.Init(AStatusBar: TLazStatusBar)', @_LapeStatusPanels_Init);
+    addClassConstructor('TLazStatusPanels', '(AStatusBar: TLazStatusBar)', @_LapeStatusPanels_Create);
     addGlobalFunc('function TLazStatusPanels.Add: TLazStatusPanel;', @_LapeStatusPanels_Add);
     addClassVar('TLazStatusPanels', 'Items', 'TLazStatusPanel', @_LapeStatusPanels_Items_Index_Read, @_LapeStatusPanels_Items_Index_Write, True);
     addClassVar('TLazStatusPanels', 'StatusBar', 'TLazStatusBar', @_LapeStatusPanels_StatusBar_Read);
@@ -903,7 +838,7 @@ begin
     addClassVar('TLazStatusBar', 'SimplePanel', 'Boolean', @_LapeStatusBar_SimplePanel_Read, @_LapeStatusBar_SimplePanel_Write);
     addClassVar('TLazStatusBar', 'SizeGrip', 'Boolean', @_LapeStatusBar_SizeGrip_Read, @_LapeStatusBar_SizeGrip_Write);
     addClassVar('TLazStatusBar', 'OnHint', 'TLazNotifyEvent', @_LapeStatusBar_OnHint_Read, @_LapeStatusBar_OnHint_Write);
-    addGlobalFunc('procedure TLazStatusBar.Init(TheOwner: TLazComponent); override', @_LapeStatusBar_Init);
+    addClassConstructor('TLazStatusBar', '(TheOwner: TLazComponent)', @_LapeStatusBar_Create);
   end;
 end;
 

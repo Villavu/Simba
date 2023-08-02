@@ -128,19 +128,14 @@ begin
   PStream(Params^[0])^.Size := PInt64(Params^[1])^;
 end;
 
-procedure _LapeStream_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeStream_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PStream(Params^[0])^ := TStream.Create();
+  PStream(Result)^ := TStream.Create();
 end;
 
-procedure _LapeStream_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeHandleStream_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PStream(Params^[0])^.Free();
-end;
-
-procedure _LapeHandleStream_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PHandleStream(Params^[0])^ := THandleStream.Create(PHandle(Params^[1])^);
+  PHandleStream(Result)^ := THandleStream.Create(PHandle(Params^[0])^);
 end;
 
 procedure _LapeHandleStream_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -163,29 +158,14 @@ begin
   PHandle(Result)^ := PHandleStream(Params^[0])^.Handle;
 end;
 
-procedure _LapeHandleStream_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFileStream_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PHandleStream(Params^[0])^.Free();
-end;
-
-procedure _LapeFileStream_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PFileStream(Params^[0])^ := TFileStream.Create(PString(Params^[1])^, PWord(Params^[2])^);
-end;
-
-procedure _LapeFileStream_InitEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PFileStream(Params^[0])^ := TFileStream.Create(PString(Params^[1])^, PWord(Params^[2])^, PCardinal(Params^[3])^);
+  PFileStream(Result)^ := TFileStream.Create(PString(Params^[0])^, PWord(Params^[1])^);
 end;
 
 procedure _LapeFileStream_FileName_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PFileStream(Params^[0])^.FileName;
-end;
-
-procedure _LapeFileStream_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PFileStream(Params^[0])^.Free();
 end;
 
 procedure _LapeCustomMemoryStream_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -213,14 +193,9 @@ begin
   PPointer(Result)^ := PCustomMemoryStream(Params^[0])^.Memory;
 end;
 
-procedure _LapeCustomMemoryStream_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeCustomMemoryStream_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomMemoryStream(Params^[0])^ := TCustomMemoryStream.Create();
-end;
-
-procedure _LapeCustomMemoryStream_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomMemoryStream(Params^[0])^.Free();
+  PCustomMemoryStream(Result)^ := TCustomMemoryStream.Create();
 end;
 
 procedure _LapeMemoryStream_Clear(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -248,19 +223,14 @@ begin
   PInteger(Result)^ := PMemoryStream(Params^[0])^.Write(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-procedure _LapeMemoryStream_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMemoryStream_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMemoryStream(Params^[0])^ := TMemoryStream.Create();
+  PMemoryStream(Result)^ := TMemoryStream.Create();
 end;
 
-procedure _LapeMemoryStream_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeStringStream_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMemoryStream(Params^[0])^.Free();
-end;
-
-procedure _LapeStringStream_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PStringStream(Params^[0])^ := TStringStream.Create(PString(Params^[1])^);
+  PStringStream(Result)^ := TStringStream.Create(PString(Params^[0])^);
 end;
 
 procedure _LapeStringStream_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -291,11 +261,6 @@ end;
 procedure _LapeStringStream_DataString_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PStringStream(Params^[0])^.DataString;
-end;
-
-procedure _LapeStringStream_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PStringStream(Params^[0])^.Free();
 end;
 
 procedure _LapeStrings_Add(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -473,14 +438,9 @@ begin
   PStrings(Params^[0])^.Text := PString(Params^[1])^;
 end;
 
-procedure _LapeStrings_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeStrings_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PStrings(Params^[0])^ := TStrings.Create();
-end;
-
-procedure _LapeStrings_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PStrings(Params^[0])^.Free();
+  PStrings(Result)^ := TStrings.Create();
 end;
 
 procedure _LapeStringList_Add(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -578,19 +538,14 @@ begin
   PStringList(Params^[0])^.OwnsObjects := Pboolean(Params^[1])^;
 end;
 
-procedure _LapeStringList_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeStringList_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PStringList(Params^[0])^ := TStringList.Create();
+  PStringList(Result)^ := TStringList.Create();
 end;
 
-procedure _LapeStringList_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeComponent_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PStringList(Params^[0])^.Free();
-end;
-
-procedure _LapeComponent_Init(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PComponent(Params^[0])^ := TComponent.Create(PComponent(Params^[1])^);
+  PComponent(Result)^ := TComponent.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeComponent_FindComponent(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -653,11 +608,6 @@ begin
   PComponent(Params^[0])^.Tag := PPtrInt(Params^[1])^;
 end;
 
-procedure _LapeComponent_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PComponent(Params^[0])^.Free();
-end;
-
 procedure ImportLCLSystem(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -672,7 +622,7 @@ begin
     addGlobalType('(soBeginning, soCurrent, soEnd)', 'TLazSeekOrigin');
 
     addClass('TLazComponent');
-    addGlobalFunc('procedure TLazComponent.Init(AOwner: TLazComponent)', @_LapeComponent_Init);
+    addClassConstructor('TLazComponent', '(AOwner: TLazComponent)', @_LapeComponent_Create);
     addGlobalFunc('function TLazComponent.FindComponent(const AName: String): TLazComponent;', @_LapeComponent_FindComponent);
     addGlobalFunc('procedure TLazComponent.InsertComponent(AComponent: TLazComponent);', @_LapeComponent_InsertComponent);
     addGlobalFunc('procedure TLazComponent.RemoveComponent(AComponent: TLazComponent);', @_LapeComponent_RemoveComponent);
@@ -699,34 +649,33 @@ begin
     addGlobalFunc('procedure TLazStream.WriteAnsiString(const S: String);', @_LapeStream_WriteAnsiString);
     addClassVar('TLazStream', 'Position', 'Integer', @_LapeStream_Position_Read, @_LapeStream_Position_Write);
     addClassVar('TLazStream', 'Size', 'Integer', @_LapeStream_Size_Read, @_LapeStream_Size_Write);
-    addGlobalFunc('procedure TLazStream.Init', @_LapeStream_Init);
-    addGlobalFunc('procedure TLazStream.Free;', @_LapeStream_Free);
+    addClassConstructor('TLazStream', '(AOwner: TLazComponent)', @_LapeStream_Create);
 
     addClass('TLazHandleStream', 'TLazStream');
     addClassVar('TLazHandleStream', 'Handle', 'TLazHandle', @_LapeHandleStream_Handle_Read);
-    addGlobalFunc('procedure TLazHandleStream.Init(AHandle: TLazHandle)', @_LapeHandleStream_Init);
+    addClassConstructor('TLazHandleStream', '(AHandle: TLazHandle)', @_LapeHandleStream_Create);
 
     addClass('TLazFileStream', 'TLazHandleStream');
     addClassVar('TLazFileStream', 'FileName', 'String', @_LapeFileStream_FileName_Read);
-    addGlobalFunc('procedure TLazFileStream.Init(const AFileName: String; Mode: Int16)', @_LapeFileStream_Init);
+    addClassConstructor('TLazFileStream', '(const AFileName: String; Mode: Int16)', @_LapeFileStream_Create);
 
     addClass('TLazCustomMemoryStream', 'TLazStream');
     addGlobalFunc('function TLazCustomMemoryStream.Seek(const Offset: Integer; Origin: TLazSeekOrigin): Int64;', @_LapeCustomMemoryStream_Seek);
     addGlobalFunc('procedure TLazCustomMemoryStream.SaveToStream(Stream: TLazStream);', @_LapeCustomMemoryStream_SaveToStream);
     addGlobalFunc('procedure TLazCustomMemoryStream.SaveToFile(const FileName: String);', @_LapeCustomMemoryStream_SaveToFile);
     addClassVar('TLazCustomMemoryStream', 'Memory', 'Pointer', @_LapeCustomMemoryStream_Memory_Read);
-    addGlobalFunc('procedure TLazCustomMemoryStream.Init; override', @_LapeCustomMemoryStream_Init);
+    addClassConstructor('TLazCustomMemoryStream', '', @_LapeCustomMemoryStream_Create);
 
     addClass('TLazMemoryStream', 'TLazCustomMemoryStream');
     addGlobalFunc('procedure TLazMemoryStream.Clear;', @_LapeMemoryStream_Clear);
     addGlobalFunc('procedure TLazMemoryStream.LoadFromStream(Stream: TLazStream);', @_LapeMemoryStream_LoadFromStream);
     addGlobalFunc('procedure TLazMemoryStream.LoadFromFile(const FileName: String);', @_LapeMemoryStream_LoadFromFile);
     addGlobalFunc('procedure TLazMemoryStream.SetSize(NewSize: PtrInt);', @_LapeMemoryStream_SetSize);
-    addGlobalFunc('procedure TLazMemoryStream.Init; override', @_LapeMemoryStream_Init);
+    addClassConstructor('TLazMemoryStream', '', @_LapeMemoryStream_Create);
 
     addClass('TLazStringStream', 'TLazStream');
     addClassVar('TLazStringStream', 'DataString', 'String', @_LapeStringStream_DataString_Read);
-    addGlobalFunc('procedure TLazStringStream.Init(const AString: String)', @_LapeStringStream_Init);
+    addClassConstructor('TLazStringStream', '(const AString: String)', @_LapeStringStream_Create);
     addGlobalFunc('function TLazStringStream.ReadString(Count: Integer): String;', @_LapeStringStream_ReadString);
     addGlobalFunc('procedure TLazStringStream.WriteString(const AString: String);', @_LapeStringStream_WriteString);
 
@@ -760,7 +709,7 @@ begin
     addClassVar('TLazStrings', 'Names', 'String', @_LapeStrings_Names_Read, nil, True);
     addClassVar('TLazStrings', 'ValueFromIndex', 'String', @_LapeStrings_ValueFromIndex_Read, @_LapeStrings_ValueFromIndex_Write, True);
     addClassVar('TLazStrings', 'Text', 'String', @_LapeStrings_Text_Read, @_LapeStrings_Text_Write);
-    addGlobalFunc('procedure TLazStrings.Init', @_LapeStrings_Init);
+    addClassConstructor('TLazStrings', '', @_LapeStrings_Create);
 
     addClass('TStringList', 'TLazStrings');
 
@@ -771,7 +720,7 @@ begin
     addClassVar('TStringList', 'OnChanging', 'TLazNotifyEvent', @_LapeStringList_OnChanging_Read, @_LapeStringList_OnChanging_Write);
     addClassVar('TStringList', 'OwnsObjects', 'boolean', @_LapeStringList_OwnsObjects_Read, @_LapeStringList_OwnsObjects_Write);
 
-    addGlobalFunc('procedure TStringList.Init; override', @_LapeStringList_Init);
+    addClassConstructor('TStringList', '', @_LapeStringList_Create);
     addGlobalFunc('function TStringList.Find(const S: String; Out Index: Integer): Boolean;', @_LapeStringList_Find);
     addGlobalFunc('procedure TStringList.Sort;', @_LapeStringList_Sort);
     addGlobalFunc('procedure TStringList.CustomSort(CompareFn: TStringListSortCompare);', @_LapeStringList_CustomSort);
