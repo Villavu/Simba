@@ -161,7 +161,7 @@ end;
 
 procedure TSimbaScript_Compiler.addClass(Name: lpString; Parent: lpString);
 begin
-  addGlobalType(Format('type %s', [Parent]), Name);
+  addGlobalType(Format('strict %s', [Parent]), Name);
 end;
 
 procedure TSimbaScript_Compiler.addClassVar(Obj, Item, Typ: lpString; ARead: Pointer; AWrite: Pointer; Arr: Boolean; ArrType: lpString);

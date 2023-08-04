@@ -3551,8 +3551,9 @@ begin
   end else
     NextToken();
 
-  if (Lexer.TokenID = tokType) then
+  if (Lexer.TokenID in [tokType, tokStrict]) then
   begin
+    NextToken();
     ExplicitType;
     Exit;
   end;
@@ -3627,7 +3628,7 @@ end;
 
 procedure TmwSimplePasPar.ExplicitType;
 begin
-  Expected(tokType);
+  //Expected(tokType);
   TypeIdentifer;
 end;
 
@@ -3669,6 +3670,11 @@ begin
           TypeKind;
         end else
           PointerType;
+      end;
+    tokStrict:
+      begin
+        NextToken;
+        TypeKind;
       end;
   end;
 end;
