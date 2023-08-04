@@ -315,18 +315,36 @@ end;
 
 function TCodeinsight.GetMembersOfType(Decl: TDeclaration): TDeclarationArray;
 
+  function FilterStaticMethods(const Arr: TDeclarationArray; NeedFilter: Boolean): TDeclarationArray;
+  var
+    I, C: Integer;
+  begin
+    if (Length(Arr) = 0) or (not NeedFilter) then
+      Exit(Arr);
+
+    C := 0;
+    SetLength(Result, Length(Arr));
+    for I := 0 to High(Arr) do
+      if not Arr[I].isStaticMethod then
+      begin
+        Result[C] := Arr[I];
+        Inc(C);
+      end;
+    SetLength(Result, C);
+  end;
+
   procedure CheckRecord(Decl: TDeclaration);
   begin
     Result := Result + Decl.Items.GetByClass(TDeclaration_Var);
   end;
 
-  procedure CheckMethods(Decl: TDeclaration);
+  procedure CheckMethods(Decl: TDeclaration; RemoveStatic: Boolean);
   var
     Include: TCodeParser;
   begin
     for Include in GetIncludes() do
-      Result := Result + Include.TypeMethods.Get(Decl.Name);
-    Result := Result + FScriptParser.TypeMethods.Get(Decl.Name);
+      Result := Result + FilterStaticMethods(Include.TypeMethods.Get(Decl.Name), RemoveStatic);
+    Result := Result + FilterStaticMethods(FScriptParser.TypeMethods.Get(Decl.Name), RemoveStatic);
 
     Include := GetArrayHelpers(Decl);
     if (Include <> nil) then
@@ -365,7 +383,7 @@ begin
   begin
     if (Decl is TDeclaration_TypeRecord) then
       CheckRecord(Decl);
-    CheckMethods(Decl);
+    CheckMethods(Decl, Depth>0);
 
     ParentDecl := GetParent(Decl);
     if (ParentDecl <> Decl) then
