@@ -23,221 +23,263 @@ Target related methods.
 *)
 
 (*
-TSimbaTarget.SetDesktop
-~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TSimbaTarget.SetDesktop;
+TTarget.SetDesktop
+~~~~~~~~~~~~~~~~~~
+> procedure TTarget.SetDesktop;
 
 Sets the desktop as the target.
 *)
-procedure _LapeSimbaTarget_SetDesktop(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_SetDesktop(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaTarget(Params^[0])^.SetDesktop();
 end;
 
 (*
-TSimbaTarget.SetImage
-~~~~~~~~~~~~~~~~~~~~~~
-> procedure TSimbaTarget.SetImage(TSimbaImage: TSimbaImage);
+TTarget.SetImage
+~~~~~~~~~~~~~~~~
+> procedure TTarget.SetImage(TImage: TImage);
 
 Sets the TSimbaImage as a target.
 
-Note: Ownership of the TSimbaImage is **not** taken. Make sure you do not free the image while using this target.
+Note:: Ownership of the TSimbaImage is **not** taken. Make sure you do not free the image while using this target.
 *)
-procedure _LapeSimbaTarget_SetImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_SetImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaTarget(Params^[0])^.SetImage(PSimbaImage(Params^[1])^);
 end;
 
 (*
-TSimbaTarget.SetWindow
-~~~~~~~~~~~~~~~~~~~~~~
-> procedure TSimbaTarget.SetWindow(Window: TWindowHandle);
+TTarget.SetWindow
+~~~~~~~~~~~~~~~~~
+> procedure TTarget.SetWindow(Window: TWindowHandle);
 
 Sets a window handle as a target.
 *)
-procedure _LapeSimbaTarget_SetWindow(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_SetWindow(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaTarget(Params^[0])^.SetWindow(PWindowHandle(Params^[1])^);
 end;
 
 (*
-TSimbaTarget.SetEIOS
-~~~~~~~~~~~~~~~~~~~~
-> procedure TSimbaTarget.SetEIOS(Plugin, Args: String);
+TTarget.SetEIOS
+~~~~~~~~~~~~~~~
+> procedure TTarget.SetEIOS(Plugin, Args: String);
 
 Sets a plugin (via EIOS API) as the target.
 *)
-procedure _LapeSimbaTarget_SetEIOS(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_SetEIOS(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaTarget(Params^[0])^.SetEIOS(PString(Params^[1])^, PString(Params^[2])^);
 end;
 
 (*
-TSimbaTarget.GetImage
-~~~~~~~~~~~~~~~~~~~~~
-> function TSimbaTarget.GetImage(Bounds: TBox = [-1,-1,-1,-1]): TSimbaImage;
+TTarget.GetImage
+~~~~~~~~~~~~~~~~
+> function TTarget.GetImage(Bounds: TBox = [-1,-1,-1,-1]): TImage;
 *)
-procedure _LapeSimbaTarget_GetImage(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_GetImage(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(Result)^ := PSimbaTarget(Params^[0])^.GetImage(PBox(Params^[1])^);
 end;
 
 (*
-TSimbaTarget.GetDimensions
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TSimbaTarget.GetDimensions(out Width, Height: Integer);
+TTarget.GetDimensions
+~~~~~~~~~~~~~~~~~~~~~
+> procedure TTarget.GetDimensions(out Width, Height: Integer);
 *)
-procedure _LapeSimbaTarget_GetDimensions(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_GetDimensions(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaTarget(Params^[0])^.GetDimensions(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
-TSimbaTarget.GetWidth
-~~~~~~~~~~~~~~~~~~~~~
-> function TSimbaTarget.GetWidth: Integer;
+TTarget.GetWidth
+~~~~~~~~~~~~~~~~
+> function TTarget.GetWidth: Integer;
 *)
-procedure _LapeSimbaTarget_GetWidth(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_GetWidth(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PSimbaTarget(Params^[0])^.GetWidth();
 end;
 
 (*
-TSimbaTarget.GetHeight
-~~~~~~~~~~~~~~~~~~~~~~
-> function TSimbaTarget.GetHeight: Integer;
+TTarget.GetHeight
+~~~~~~~~~~~~~~~~~
+> function TTarget.GetHeight: Integer;
 *)
-procedure _LapeSimbaTarget_GetHeight(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_GetHeight(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PSimbaTarget(Params^[0])^.GetHeight();
 end;
 
 (*
-TSimbaTarget.IsValid
-~~~~~~~~~~~~~~~~~~~~
-> function TSimbaTarget.IsValid: Boolean;
+TTarget.IsValid
+~~~~~~~~~~~~~~~
+> function TTarget.IsValid: Boolean;
 *)
-procedure _LapeSimbaTarget_IsValid(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_IsValid(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaTarget(Params^[0])^.IsValid();
 end;
 
 (*
-TSimbaTarget.IsFocused
-~~~~~~~~~~~~~~~~~~~~~~
-> function TSimbaTarget.IsFocused: Boolean;
+TTarget.IsFocused
+~~~~~~~~~~~~~~~~~
+> function TTarget.IsFocused: Boolean;
 *)
-procedure _LapeSimbaTarget_IsFocused(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_IsFocused(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaTarget(Params^[0])^.IsFocused();
 end;
 
 (*
-TSimbaTarget.Focus
-~~~~~~~~~~~~~~~~~~
-> function TSimbaTarget.Focus: Boolean;
+TTarget.Focus
+~~~~~~~~~~~~~
+> function TTarget.Focus: Boolean;
 *)
-procedure _LapeSimbaTarget_Focus(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_Focus(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaTarget(Params^[0])^.Focus();
 end;
 
 (*
-TSimbaTarget.IsWindowTarget
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> function TSimbaTarget.IsWindowTarget: Boolean;
+TTarget.IsWindowTarget
+~~~~~~~~~~~~~~~~~~~~~~
+> function TTarget.IsWindowTarget: Boolean;
 *)
-procedure _LapeSimbaTarget_IsWindowTarget1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_IsWindowTarget1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaTarget(Params^[0])^.IsWindowTarget();
 end;
 
 (*
-TSimbaTarget.IsWindowTarget
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> function TSimbaTarget.IsWindowTarget(out Window: TWindowHandle): Boolean;
+TTarget.IsWindowTarget
+~~~~~~~~~~~~~~~~~~~~~~
+> function TTarget.IsWindowTarget(out Window: TWindowHandle): Boolean;
 *)
-procedure _LapeSimbaTarget_IsWindowTarget2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_IsWindowTarget2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaTarget(Params^[0])^.IsWindowTarget(PWindowHandle(Params^[1])^)
 end;
 
 (*
-TSimbaTarget.IsImageTarget
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> function TSimbaTarget.IsImageTarget: Boolean;
+TTarget.IsImageTarget
+~~~~~~~~~~~~~~~~~~~~~
+> function TTarget.IsImageTarget: Boolean;
 *)
-procedure _LapeSimbaTarget_IsImageTarget1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_IsImageTarget1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaTarget(Params^[0])^.IsImageTarget();
 end;
 
 (*
-TSimbaTarget.IsImageTarget
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> function TSimbaTarget.IsImageTarget(out Image: TSimbaImage): Boolean;
+TTarget.IsImageTarget
+~~~~~~~~~~~~~~~~~~~~~
+> function TTarget.IsImageTarget(out TImage: TImage): Boolean;
 *)
-procedure _LapeSimbaTarget_IsImageTarget2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_IsImageTarget2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaTarget(Params^[0])^.IsImageTarget(PSimbaImage(Params^[1])^);
 end;
 
 (*
-TSimbaTarget.IsEIOSTarget
-~~~~~~~~~~~~~~~~~~~~~~~~~
-> function TSimbaTarget.IsEIOSTarget: Boolean;
+TTarget.IsEIOSTarget
+~~~~~~~~~~~~~~~~~~~~
+> function TTarget.IsEIOSTarget: Boolean;
 *)
-procedure _LapeSimbaTarget_IsEIOSTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_IsEIOSTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaTarget(Params^[0])^.IsEIOSTarget();
 end;
 
 (*
-TSimbaTarget.IsDefault
-~~~~~~~~~~~~~~~~~~~~~~
-> function TSimbaTarget.IsDefault: Boolean;
+TTarget.IsDefault
+~~~~~~~~~~~~~~~~~
+> function TTarget.IsDefault: Boolean;
 *)
-procedure _LapeSimbaTarget_IsDefault(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_IsDefault(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := CompareMem(PSimbaTarget(Params^[0]), @Default(TSimbaTarget), SizeOf(TSimbaTarget));
 end;
 
-procedure _LapeSimbaTarget_ClearClientArea(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+(*
+TTarget.ClearCustomClientArea
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> procedure TTarget.ClearCustomClientArea;
+*)
+procedure _LapeTarget_ClearCustomClientArea(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaTarget(Params^[0])^.ClearClientArea();
+  PSimbaTarget(Params^[0])^.ClearCustomClientArea();
 end;
 
-procedure _LapeSimbaTarget_SetClientArea(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+(*
+TTarget.SetCustomClientArea
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> procedure TTarget.SetCustomClientArea(B: TBox);
+
+Set a custom client area within the bounds of the target.
+
+```
+Target.SetCustomClientArea([100,100,600,600]);
+Input.MouseMove([1,1]); // Will move the mouse to [101,101]
+```
+*)
+procedure _LapeTarget_SetCustomClientArea(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaTarget(Params^[0])^.ClientArea := PBox(Params^[1])^;
+  PSimbaTarget(Params^[0])^.CustomClientArea := PBox(Params^[1])^;
 end;
 
-procedure _LapeSimbaTarget_GetClientArea(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+(*
+TTarget.GetCustomClientArea
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> function TTarget.GetCustomClientArea: TBox;
+*)
+procedure _LapeTarget_GetCustomClientArea(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBox(Result)^ := PSimbaTarget(Params^[0])^.ClientArea;
+  PBox(Result)^ := PSimbaTarget(Params^[0])^.CustomClientArea;
 end;
 
-procedure _LapeSimbaTarget_SetAutoFocus(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+(*
+TTarget.SetAutoFocus
+~~~~~~~~~~~~~~~~~~~~
+> procedure TTarget.SetAutoFocus(Value: Boolean);
+*)
+procedure _LapeTarget_SetAutoFocus(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaTarget(Params^[0])^.AutoSetFocus := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeSimbaTarget_GetAutoFocus(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+(*
+TTarget.GetAutoFocus
+~~~~~~~~~~~~~~~~~~~~
+> function TTarget.GetAutoFocus: Boolean;
+*)
+procedure _LapeTarget_GetAutoFocus(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaTarget(Params^[0])^.AutoSetFocus;
 end;
 
-procedure _LapeSimbaTarget_AddHandlerOnInvalidTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+(*
+TTarget.AddHandlerOnInvalidTarget
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> function TTarget.AddHandlerOnInvalidTarget(Event: TInvalidTargetEvent): TInvalidTargetEvent;
+*)
+procedure _LapeTarget_AddHandlerOnInvalidTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   TSimbaTarget.PInvalidTargetEvent(Result)^ := PSimbaTarget(Params^[0])^.AddHandlerOnInvalidTarget(TSimbaTarget.PInvalidTargetEvent(Params^[1])^);
 end;
 
-procedure _LapeSimbaTarget_RemoveHandlerOnInvalidTarget(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+(*
+TTarget.RemoveHandlerOnInvalidTarget
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> procedure TTarget.RemoveHandlerOnInvalidTarget(Event: TInvalidTargetEvent);
+*)
+procedure _LapeTarget_RemoveHandlerOnInvalidTarget(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaTarget(Params^[0])^.RemoveHandlerOnInvalidTarget(TSimbaTarget.PInvalidTargetEvent(Params^[1])^);
 end;
 
-procedure _LapeSimbaTarget_ToString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_ToString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PSimbaTarget(Params^[0])^.ToString();
 end;
@@ -254,54 +296,54 @@ begin
       '  InternalData: array[0..' + IntToStr(SizeOf(TSimbaTarget) - 1)  + '] of Byte;',
       '  {%CODETOOLS ON}',
       'end;'],
-      'TSimbaTarget'
+      'TTarget'
     );
-    if (getGlobalType('TSimbaTarget').Size <> SizeOf(TSimbaTarget)) then
-      raise Exception.Create('SizeOf(TSimbaTarget) is wrong!');
+    if (getGlobalType('TTarget').Size <> SizeOf(TSimbaTarget)) then
+      raise Exception.Create('SizeOf(TTarget) is wrong!');
 
-    with addGlobalVar('TSimbaTarget', '[]', 'Target') do
+    with addGlobalVar('TTarget', '[]', 'Target') do
       Used := duTrue;
 
-    addGlobalType('procedure(var Target: TSimbaTarget) of object', 'TInvalidTargetEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(var Target: TTarget) of object', 'TInvalidTargetEvent', FFI_DEFAULT_ABI);
 
-    addGlobalFunc('function TSimbaTarget.AddHandlerOnInvalidTarget(Event: TInvalidTargetEvent): TInvalidTargetEvent', @_LapeSimbaTarget_AddHandlerOnInvalidTarget);
-    addGlobalFunc('procedure TSimbaTarget.RemoveHandlerOnInvalidTarget(Event: TInvalidTargetEvent)', @_LapeSimbaTarget_RemoveHandlerOnInvalidTarget);
+    addGlobalFunc('function TTarget.AddHandlerOnInvalidTarget(Event: TInvalidTargetEvent): TInvalidTargetEvent', @_LapeTarget_AddHandlerOnInvalidTarget);
+    addGlobalFunc('procedure TTarget.RemoveHandlerOnInvalidTarget(Event: TInvalidTargetEvent)', @_LapeTarget_RemoveHandlerOnInvalidTarget);
 
-    addGlobalFunc('function TSimbaTarget.GetAutoFocus: Boolean', @_LapeSimbaTarget_GetAutoFocus);
-    addGlobalFunc('procedure TSimbaTarget.SetAutoFocus(Value: Boolean)', @_LapeSimbaTarget_SetAutoFocus);
+    addGlobalFunc('function TTarget.GetAutoFocus: Boolean', @_LapeTarget_GetAutoFocus);
+    addGlobalFunc('procedure TTarget.SetAutoFocus(Value: Boolean)', @_LapeTarget_SetAutoFocus);
 
-    addGlobalFunc('procedure TSimbaTarget.ClearClientArea', @_LapeSimbaTarget_ClearClientArea);
-    addGlobalFunc('procedure TSimbaTarget.SetClientArea(B: TBox)', @_LapeSimbaTarget_SetClientArea);
-    addGlobalFunc('function TSimbaTarget.GetClientArea: TBox', @_LapeSimbaTarget_GetClientArea);
+    addGlobalFunc('procedure TTarget.ClearCustomClientArea', @_LapeTarget_ClearCustomClientArea);
+    addGlobalFunc('procedure TTarget.SetCustomClientArea(B: TBox)', @_LapeTarget_SetCustomClientArea);
+    addGlobalFunc('function TTarget.GetCustomClientArea: TBox', @_LapeTarget_GetCustomClientArea);
 
-    addGlobalFunc('procedure TSimbaTarget.SetDesktop', @_LapeSimbaTarget_SetDesktop);
-    addGlobalFunc('procedure TSimbaTarget.SetImage(TImage: TImage)', @_LapeSimbaTarget_SetImage);
-    addGlobalFunc('procedure TSimbaTarget.SetWindow(Window: TWindowHandle)', @_LapeSimbaTarget_SetWindow);
-    addGlobalFunc('procedure TSimbaTarget.SetEIOS(Plugin, Args: String)', @_LapeSimbaTarget_SetEIOS);
+    addGlobalFunc('procedure TTarget.SetDesktop', @_LapeTarget_SetDesktop);
+    addGlobalFunc('procedure TTarget.SetImage(TImage: TImage)', @_LapeTarget_SetImage);
+    addGlobalFunc('procedure TTarget.SetWindow(Window: TWindowHandle)', @_LapeTarget_SetWindow);
+    addGlobalFunc('procedure TTarget.SetEIOS(Plugin, Args: String)', @_LapeTarget_SetEIOS);
 
-    addGlobalFunc('function TSimbaTarget.GetImage(Bounds: TBox = [-1,-1,-1,-1]): TImage', @_LapeSimbaTarget_GetImage);
-    addGlobalFunc('procedure TSimbaTarget.GetDimensions(out Width, Height: Integer)', @_LapeSimbaTarget_GetDimensions);
-    addGlobalFunc('function TSimbaTarget.GetWidth: Integer', @_LapeSimbaTarget_GetWidth);
-    addGlobalFunc('function TSimbaTarget.GetHeight: Integer', @_LapeSimbaTarget_GetHeight);
+    addGlobalFunc('function TTarget.GetImage(Bounds: TBox = [-1,-1,-1,-1]): TImage', @_LapeTarget_GetImage);
+    addGlobalFunc('procedure TTarget.GetDimensions(out Width, Height: Integer)', @_LapeTarget_GetDimensions);
+    addGlobalFunc('function TTarget.GetWidth: Integer', @_LapeTarget_GetWidth);
+    addGlobalFunc('function TTarget.GetHeight: Integer', @_LapeTarget_GetHeight);
 
-    addGlobalFunc('function TSimbaTarget.IsValid: Boolean', @_LapeSimbaTarget_IsValid);
-    addGlobalFunc('function TSimbaTarget.IsFocused: Boolean', @_LapeSimbaTarget_IsFocused);
-    addGlobalFunc('function TSimbaTarget.Focus: Boolean', @_LapeSimbaTarget_Focus);
+    addGlobalFunc('function TTarget.IsValid: Boolean', @_LapeTarget_IsValid);
+    addGlobalFunc('function TTarget.IsFocused: Boolean', @_LapeTarget_IsFocused);
+    addGlobalFunc('function TTarget.Focus: Boolean', @_LapeTarget_Focus);
 
-    addGlobalFunc('function TSimbaTarget.IsWindowTarget: Boolean; overload', @_LapeSimbaTarget_IsWindowTarget1);
-    addGlobalFunc('function TSimbaTarget.IsWindowTarget(out Window: TWindowHandle): Boolean; overload', @_LapeSimbaTarget_IsWindowTarget2);
-    addGlobalFunc('function TSimbaTarget.IsImageTarget: Boolean; overload', @_LapeSimbaTarget_IsImageTarget1);
-    addGlobalFunc('function TSimbaTarget.IsImageTarget(out TImage: TImage): Boolean; overload', @_LapeSimbaTarget_IsImageTarget2);
-    addGlobalFunc('function TSimbaTarget.IsEIOSTarget: Boolean', @_LapeSimbaTarget_IsEIOSTarget);
+    addGlobalFunc('function TTarget.IsWindowTarget: Boolean; overload', @_LapeTarget_IsWindowTarget1);
+    addGlobalFunc('function TTarget.IsWindowTarget(out Window: TWindowHandle): Boolean; overload', @_LapeTarget_IsWindowTarget2);
+    addGlobalFunc('function TTarget.IsImageTarget: Boolean; overload', @_LapeTarget_IsImageTarget1);
+    addGlobalFunc('function TTarget.IsImageTarget(out TImage: TImage): Boolean; overload', @_LapeTarget_IsImageTarget2);
+    addGlobalFunc('function TTarget.IsEIOSTarget: Boolean', @_LapeTarget_IsEIOSTarget);
 
-    addGlobalFunc('function TSimbaTarget.IsDefault: Boolean', @_LapeSimbaTarget_IsDefault);
+    addGlobalFunc('function TTarget.IsDefault: Boolean', @_LapeTarget_IsDefault);
 
-    addGlobalFunc('function ToString(constref Target: TSimbaTarget): String; override;', @_LapeSimbaTarget_ToString);
+    addGlobalFunc('function ToString(constref Target: TTarget): String; override;', @_LapeTarget_ToString);
 
     ImportingSection := 'Image';
 
     addGlobalFunc(
-      'function TImage.CreateFromTarget(Target: TSimbaTarget; Bounds: TBox = [-1,-1,-1,-1]): TImage; static; overload;', [
+      'function TImage.CreateFromTarget(Target: TTarget; Bounds: TBox = [-1,-1,-1,-1]): TImage; static; overload;', [
       'begin',
       '  Result := Target.GetImage(Bounds);',
       'end;'
@@ -314,7 +356,7 @@ begin
     ]);
 
     addGlobalFunc(
-      'procedure TImage.DrawTarget(Target: TSimbaTarget; P: TPoint; Bounds: TBox = [-1,-1,-1,-1]); overload;', [
+      'procedure TImage.DrawTarget(Target: TTarget; P: TPoint; Bounds: TBox = [-1,-1,-1,-1]); overload;', [
       'var',
       '  Image: TImage;',
       'begin',

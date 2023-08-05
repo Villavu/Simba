@@ -370,7 +370,7 @@ begin
 
     addGlobalType([
       'packed record',
-      '  Target: TSimbaTarget;',
+      '  Target: TTarget;',
       'end;'],
       'TSimbaFinder'
     );
@@ -427,7 +427,7 @@ begin
     addInputMethod('function TSimbaFinder.AverageBrightness(Area: TBox = [-1,-1,-1,-1]): Integer', @_LapeSimbaFinder_AverageBrightness);
     addInputMethod('function TSimbaFinder.PeakBrightness(Area: TBox = [-1,-1,-1,-1]): Integer', @_LapeSimbaFinder_PeakBrightness);
 
-    ImportingSection := 'TImage';
+    ImportingSection := 'Image';
 
     addGlobalFunc(
       'function TImage.Finder: TSimbaFinder;', [

@@ -18,8 +18,8 @@ uses
   simba.nativeinterface, simba.httpclient;
 
 (*
-Internet
-========
+Web
+===
 Internet HTTP request/post methods.
 
 - There is a pre-defined variable `HTTPClient` to use.
@@ -83,7 +83,7 @@ Create a SimbaHTTPClient. This must be freed.
 Example:
 
 ```
-> var
+var
   AnotherHTTPClient: TSimbaHTTPClient;
 begin
   AnotherHTTPClient := TSimbaHTTPClient.Create();
@@ -144,8 +144,8 @@ TSimbaHTTPClient.Get
 
 Return a webpages content as a string.
 
-Note: | If `AllowedStatusCodes` is empty **any** response code is accepted.
-      | If the response code is **not** in `AllowedStatusCodes` an exception is raised.
+Note:: | If `AllowedStatusCodes` is empty **any** response code is accepted.
+       | If the response code is **not** in `AllowedStatusCodes` an exception is raised.
 *)
 procedure _LapeSimbaHTTPClient_Get(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -159,8 +159,8 @@ TSimbaHTTPClient.GetFile
 
 Save a webpages content to a local file.
 
-Note: | If `AllowedStatusCodes` is empty **any** response code is accepted.
-      | If the response code is **not** in `AllowedStatusCodes` an exception is raised.
+Note:: | If `AllowedStatusCodes` is empty **any** response code is accepted.
+       | If the response code is **not** in `AllowedStatusCodes` an exception is raised.
 *)
 procedure _LapeSimbaHTTPClient_GetFile(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
