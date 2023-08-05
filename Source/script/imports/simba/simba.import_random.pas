@@ -151,13 +151,25 @@ end;
 (*
 GaussRand
 ~~~~~~~~~
-> function GaussRand(Mean, Dev: Double): Double
+> function GaussRand(Mean, Dev: Double): Double;
 
 Generates a random gaussian/normal number.
 *)
 procedure _LapeGaussRand(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDouble(Result)^ := GaussRand(PDouble(Params^[0])^, PDouble(Params^[1])^);
+end;
+
+(*
+Randomize
+~~~~~~~~~
+> procedure Randomize;
+
+Generates a new `RandSeed`
+*)
+procedure _LapeRandomize(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  BetterRandomize();
 end;
 
 procedure ImportRandom(Compiler: TSimbaScript_Compiler);
@@ -167,6 +179,8 @@ begin
     ImportingSection := 'Random';
 
     addGlobalVar(ltDouble, @RandCutoff, 'RandCutoff');
+
+    addGlobalFunc('procedure Randomize; override;', @_LapeRandomize);
 
     addGlobalFunc('function RandomCenterTPA(Amount: Integer; Box: TBox): TPointArray', @_LapeRandomCenterTPA);
     addGlobalFunc('function RandomTPA(Amount: Integer; Box: TBox): TPointArray', @_LapeRandomTPA);
