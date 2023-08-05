@@ -18,7 +18,12 @@ uses
 (*
 TBox
 ====
-The TBox type is a record which defines a box.
+The `TBox` type is a record which defines a box from top left and bottom right coords.
+
+- `X1` is the **top left** `X` coord
+- `Y1` is the **top left** `Y` coord
+- `X2` is the **bottom right** `X` coord
+- `Y2` is the **bottom right** `Y` coord
 *)
 
 (*
@@ -344,7 +349,7 @@ TBox.RandomPointCenter
 ~~~~~~~~~~~~~~~~~~~~~~
 > function TBox.RandomPointCenter: TPoint;
 
-Returns a random point in the box which is weighted torwards the box center.
+Returns a random point in the box which is weighted towards the box center.
 *)
 procedure _LapeBox_RandomPointCenter(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin

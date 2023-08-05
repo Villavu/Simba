@@ -173,9 +173,9 @@ begin
     MakeCodeBlock(Comments);
     MakeInlineCode(Comments);
 
-    Comments := Comments.Replace('Image:', '.. figure::');
-    Comments := Comments.Replace('Note:', '.. note::');
-    Comments := Comments.Replace('Warning:', '.. warning::');
+    Comments := Comments.Replace('Image::', '.. figure::');
+    Comments := Comments.Replace('Note::', '.. note::');
+    Comments := Comments.Replace('Warning::', '.. warning::');
 
     FileWrite(INPUT_DIR + Name + '.rst', Comments);
     FileAppend(INPUT_DIR + 'index.rst', '   ' + Name + LINE_SEP);

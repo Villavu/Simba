@@ -59,7 +59,7 @@ type
     FTargetWindow: TWindowHandle;
     FTargetEIOS: TEIOSTarget;
     FMethods: TTargetMethods; // Targets need to provide these. They are filled in SetWindow,SetEIOS etc.
-    FClientArea: TBox;
+    FCustomClientArea: TBox;
     FAutoSetFocus: Boolean;
     FInvalidTargetHandlers: array[0..9] of TInvalidTargetEvent;
 
@@ -69,8 +69,8 @@ type
     procedure CheckInvalidTarget;
     procedure CheckAutoFocus;
 
-    procedure SetClientArea(B: TBox);
-    function GetClientArea: TBox;
+    procedure SetCustomClientArea(B: TBox);
+    function GetCustomClientArea: TBox;
     procedure SetAutoSetFocus(Value: Boolean);
   public
     function GetWindowTarget: TWindowHandle;
@@ -114,9 +114,9 @@ type
     function AddHandlerOnInvalidTarget(Event: TInvalidTargetEvent): TInvalidTargetEvent;
     procedure RemoveHandlerOnInvalidTarget(Event: TInvalidTargetEvent);
 
-    procedure ClearClientArea;
+    procedure ClearCustomClientArea;
 
-    property ClientArea: TBox read GetClientArea write SetClientArea;
+    property CustomClientArea: TBox read GetCustomClientArea write SetCustomClientArea;
     property AutoSetFocus: Boolean read FAutoSetFocus write SetAutoSetFocus;
 
     function ToString: String;
@@ -369,16 +369,16 @@ begin
   if HasMethod(FMethods.MousePosition, 'MousePosition') then
     Result := FMethods.MousePosition(FTarget);
 
-  Result.X -= FClientArea.X1;
-  Result.Y -= FClientArea.Y1;
+  Result.X -= FCustomClientArea.X1;
+  Result.Y -= FCustomClientArea.Y1;
 end;
 
 procedure TSimbaTarget.MouseTeleport(P: TPoint);
 begin
   CheckAutoFocus();
 
-  P.X += FClientArea.X1;
-  P.Y += FClientArea.Y1;
+  P.X += FCustomClientArea.X1;
+  P.Y += FCustomClientArea.Y1;
 
   if HasMethod(FMethods.MouseTeleport, 'MouseTeleport') then
     FMethods.MouseTeleport(FTarget, P);
@@ -440,18 +440,18 @@ end;
 
 function TSimbaTarget.ValidateBounds(var Bounds: TBox): Boolean;
 
-  procedure ValidateBoundsInClientArea;
+  procedure ValidateBoundsInCustomClientArea;
   begin
     if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
-      Bounds := FClientArea
+      Bounds := FCustomClientArea
     else
     begin
-      Bounds := Bounds.Offset(FClientArea.TopLeft);
+      Bounds := Bounds.Offset(FCustomClientArea.TopLeft);
 
-      if (Bounds.X1 < FClientArea.X1)  then Bounds.X1 := FClientArea.X1;
-      if (Bounds.Y1 < FClientArea.Y1)  then Bounds.Y1 := FClientArea.Y1;
-      if (Bounds.X2 >= FClientArea.X2) then Bounds.X2 := FClientArea.X2 - 1;
-      if (Bounds.Y2 >= FClientArea.Y2) then Bounds.Y2 := FClientArea.Y2 - 1;
+      if (Bounds.X1 < FCustomClientArea.X1)  then Bounds.X1 := FCustomClientArea.X1;
+      if (Bounds.Y1 < FCustomClientArea.Y1)  then Bounds.Y1 := FCustomClientArea.Y1;
+      if (Bounds.X2 >= FCustomClientArea.X2) then Bounds.X2 := FCustomClientArea.X2 - 1;
+      if (Bounds.Y2 >= FCustomClientArea.Y2) then Bounds.Y2 := FCustomClientArea.Y2 - 1;
     end;
   end;
 
@@ -460,7 +460,7 @@ var
 begin
   GetDimensions(Width, Height);
 
-  if FClientArea.IsDefault() then
+  if FCustomClientArea.IsDefault() then
     if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
     begin
       Bounds.X1 := 0;
@@ -475,7 +475,7 @@ begin
       if (Bounds.Y2 >= Height) then Bounds.Y2 := Height - 1;
     end
   else
-    ValidateBoundsInClientArea();
+    ValidateBoundsInCustomClientArea();
 
   Result := (Bounds.Width > 0) and (Bounds.Height > 0);
 end;
@@ -519,9 +519,9 @@ begin
       FInvalidTargetHandlers[I] := nil;
 end;
 
-procedure TSimbaTarget.ClearClientArea;
+procedure TSimbaTarget.ClearCustomClientArea;
 begin
-  FClientArea := TBox.Default;
+  FCustomClientArea := TBox.Default;
 end;
 
 function TSimbaTarget.ToString: String;
@@ -530,7 +530,7 @@ begin
 
   case FTargetType of
     ETargetType.IMAGE:
-      Result := 'ETargetType.IMAGE: TSimbaImage(%P), Size=%dx%d'.Format([Pointer(FTargetImage), FTargetImage.Width, FTargetImage.Height]);
+      Result := 'ETargetType.IMAGE: TImage(%P), Size=%dx%d'.Format([Pointer(FTargetImage), FTargetImage.Width, FTargetImage.Height]);
     ETargetType.WINDOW:
       Result := 'ETargetType.WINDOW: Handle=%d, Valid: %s'.Format([FTargetWindow, BoolToStr(IsValid(), True)]);
     ETargetType.EIOS:
@@ -538,14 +538,14 @@ begin
   end;
 end;
 
-procedure TSimbaTarget.SetClientArea(B: TBox);
+procedure TSimbaTarget.SetCustomClientArea(B: TBox);
 begin
-  FClientArea := B;
+  FCustomClientArea := B;
 end;
 
-function TSimbaTarget.GetClientArea: TBox;
+function TSimbaTarget.GetCustomClientArea: TBox;
 begin
-  Result := FClientArea;
+  Result := FCustomClientArea;
 end;
 
 class operator TSimbaTarget.Initialize(var Self: TSimbaTarget);

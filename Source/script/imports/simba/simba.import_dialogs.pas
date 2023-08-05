@@ -134,8 +134,8 @@ begin
     addGlobalFunc('function ShowComboDialog(Caption, Prompt: string; List: TStringArray): Integer', @_LapeInputCombo);
     addGlobalFunc('procedure ShowMessage(Message: String)', @_LapeShowMessage);
     addGlobalFunc('function ShowQuestionDialog(Title, Question: String): ESimbaDialogResult', @_LapeShowQuestionDialog);
-    addGlobalFunc('function ShowDTMEditor(Target: TSimbaTarget; Title: String): String', @_LapeShowDTMEditor);
-    addGlobalFunc('function ShowACA(Target: TSimbaTarget; Title: String): TColorTolerance', @_LapeShowACA);
+    addGlobalFunc('function ShowDTMEditor(Target: TTarget; Title: String): String', @_LapeShowDTMEditor);
+    addGlobalFunc('function ShowACA(Target: TTarget; Title: String): TColorTolerance', @_LapeShowACA);
 
     addGlobalFunc(
       'procedure ShowTrayNotification(Title, Message: String; Timeout: Integer = 3000);', [

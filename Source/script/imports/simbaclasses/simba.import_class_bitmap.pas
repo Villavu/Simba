@@ -821,7 +821,7 @@ end;
 
 (*
 TImage.Blend
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 > function TImage.Blend(Points: TPointArray; Size: Integer): TImage;
 *)
 procedure _LapeImage_Blend(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -1011,7 +1011,7 @@ end;
 
 (*
 TImage.Equals
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 > function TImage.Equals(Other: TImage): Boolean;
 
 Are the two images exactly equal?
@@ -1228,7 +1228,7 @@ TImage.CreateFromTarget
 
 Creates an image from the given target and bounds.
 
-- The **Bounds** parameter defaults to the entire target.
+- The `Bounds` parameter defaults to the entire target.
 *)
 
 (*
@@ -1239,7 +1239,7 @@ TImage.CreateFromTarget
 Creates an image from the bounds of the current target.
 
 - Current target is the global **Target** variable
-- The **Bounds** parameter defaults to the entire target.
+- The `Bounds` parameter defaults to the entire target.
 *)
 
 (*
@@ -1416,13 +1416,6 @@ begin
 
     addGlobalFunc('procedure TImage.SaveUnfreedImages(Directory: String); static;', @_LapeImage_SaveUnfreedImages);
     addGlobalFunc('procedure TImage.FreeOnTerminate(Value: Boolean);', @_LapeImage_FreeOnTerminate);
-
-    // overrided in debugimage import
-    addGlobalFunc(
-      'procedure TImage.Show(EnsureVisible: Boolean = True);', [
-      'begin',
-      'end;'
-    ]);
 
     ImportingSection := '';
   end;

@@ -37,6 +37,22 @@ Methods relating to generating random numbers.
 *)
 
 (*
+RandSeed
+~~~~~~~~~~
+> var RandSeed: UInt32;
+
+The random seed used for all random number generation.
+*)
+
+(*
+RandCutoff
+~~~~~~~~~~
+> var RandCutoff: Double;
+
+Cutoff for `RandomLeft`, `RandomRight`, `RandomMode`, `RandomMean`
+*)
+
+(*
 RandomCenterTPA
 ~~~~~~~~~~~~~~~
 > function RandomCenterTPA(Amount: Integer; Box: TBox): TPointArray;

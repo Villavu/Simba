@@ -126,7 +126,7 @@ DebugImageDisplay
 
 (*
 DebugImageDisplay
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 > procedure DebugImageDisplay(X, Y,Width, Height: Integer);
 *)
 
@@ -195,6 +195,17 @@ begin
       '  _SimbaScript.DebugImage_Show(Image, EnsureVisible);',
       'end;'
     ]);
+
+    ImportingSection := 'Image';
+
+    addGlobalFunc(
+      'procedure TImage.Show(EnsureVisible: Boolean = True);', [
+      'begin',
+      '  _SimbaScript.DebugImage_Show(Self, EnsureVisible);',
+      'end;'
+    ]);
+
+    ImportingSection := 'Debug Image';
 
     addGlobalFunc(
       'procedure Show(Matrix: TIntegerMatrix); overload;', [
@@ -361,13 +372,6 @@ begin
       '  finally',
       '    Free();',
       '  end;',
-      'end;'
-    ]);
-
-    addGlobalFunc(
-      'procedure TImage.Show(EnsureVisible: Boolean = True); override;', [
-      'begin',
-      '  _SimbaScript.DebugImage_Show(Self, EnsureVisible);',
       'end;'
     ]);
 
