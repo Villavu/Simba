@@ -19,7 +19,8 @@ uses
   {$IFDEF UNIX}
   cthreads,
   {$ENDIF}
-  classes, sysutils, lazlogger;
+  Classes, SysUtils,
+  simba.random;
 
 implementation
 
@@ -61,12 +62,12 @@ initialization
   LinuxInitialization();
   {$ENDIF}
 
-  Randomize();
-
   FormatSettings.ThousandSeparator := ',';
   FormatSettings.DecimalSeparator := '.';
   FormatSettings.DateSeparator := '-';
   FormatSettings.TimeSeparator := ':';
+
+  BetterRandomize();
 
 finalization
   {$IFDEF DARWIN}

@@ -10,7 +10,7 @@ unit simba.random;
 interface
 
 uses
-  classes, sysutils,
+  Classes, SysUtils,
   simba.mufasatypes;
 
 function RandomCenterTPA(Amount: Integer; Box: TBox): TPointArray;
@@ -30,13 +30,16 @@ function RandomMode(Mode, Lo, Hi: Int64): Int64; overload;
 
 function GaussRand(Mean, Dev: Double): Double;
 
+procedure BetterRandomize;
+
 var
   RandCutoff: Double = 5;
 
 implementation
 
 uses
-  math;
+  Math,
+  simba.process;
 
 function nzRandom: Double;
 begin
@@ -137,6 +140,33 @@ var
 begin
   Len := Dev * Sqrt(-2 * Ln(nzRandom()));
   Result := Mean + Len * Cos(2 * PI * Random());
+end;
+
+{$R-}{$Q-}
+
+// https://github.com/dajobe/libmtwist/blob/master/seed.c
+procedure BetterRandomize;
+
+  procedure Mix(var A, B, C: UInt32);
+  begin
+    A -= C;  A := A xor ((C shl 4)  or (C shr (32-4)));  C += B;
+    B -= A;  B := B xor ((A shl 6)  or (A shr (32-6)));  A += C;
+    C -= B;  C := C xor ((B shl 8)  or (B shr (32-8)));  B += A;
+    A -= C;  A := A xor ((C shl 16) or (C shr (32-16))); C += B;
+    B -= A;  B := B xor ((A shl 19) or (A shr (32-19))); A += C;
+    C -= B;  C := C xor ((B shl 4)  or (B shr (32-4)));  B += A;
+  end;
+
+var
+  A, B, C: UInt32;
+begin
+  A := UInt32(GetTickCount64());
+  B := UInt32(GetProcessID());
+  C := UInt32(SimbaProcess.GetProcessRunnningTime(GetProcessID()));
+
+  Mix(A, B, C);
+
+  RandSeed := C;
 end;
 
 end.
