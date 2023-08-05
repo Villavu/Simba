@@ -1254,6 +1254,14 @@ TImage.DrawTarget
 > procedure TImage.DrawTarget(P: TPoint; Bounds: TBox = [-1,-1,-1,-1]); overload;
 *)
 
+(*
+TImage.Show
+~~~~~~~~~~~
+> procedure TImage.Show;
+
+Show a image on the debug image.
+*)
+
 procedure ImportSimbaImage(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -1408,6 +1416,13 @@ begin
 
     addGlobalFunc('procedure TImage.SaveUnfreedImages(Directory: String); static;', @_LapeImage_SaveUnfreedImages);
     addGlobalFunc('procedure TImage.FreeOnTerminate(Value: Boolean);', @_LapeImage_FreeOnTerminate);
+
+    // overrided in debugimage import
+    addGlobalFunc(
+      'procedure TImage.Show(EnsureVisible: Boolean = True);', [
+      'begin',
+      'end;'
+    ]);
 
     ImportingSection := '';
   end;

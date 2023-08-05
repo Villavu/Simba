@@ -113,33 +113,39 @@ Show
 *)
 
 (*
-UpdateDebugImage
+DebugImageUpdate
 ~~~~~~~~~~~~~~~~
-> procedure UpdateDebugImage(Bitmap: TSimbaImage);
+> procedure DebugImageUpdate(Bitmap: TSimbaImage);
 *)
 
 (*
-ShowDebugImage
-~~~~~~~~~~~~~~
-> procedure ShowDebugImage(Width, Height: Integer);
+DebugImageDisplay
+~~~~~~~~~~~~~~~~~
+> procedure DebugImageDisplay(Width, Height: Integer);
 *)
 
 (*
-ShowDebugImage
-~~~~~~~~~~~~~~
-> procedure ShowDebugImage(X, Y,Width, Height: Integer);
+DebugImageDisplay
+~~~~~~~~~~~~~~~~
+> procedure DebugImageDisplay(X, Y,Width, Height: Integer);
 *)
 
 (*
-SetDebugImageMaxSize
+DebugImageClose
+~~~~~~~~~~~~~~~
+> procedure DebugImageClose;
+*)
+
+(*
+DebugImageSetMaxSize
 ~~~~~~~~~~~~~~~~~~~~
-> procedure SetDebugImageMaxSize(MaxWidth, MaxHeight: Integer);
+> procedure DebugImageSetMaxSize(MaxWidth, MaxHeight: Integer);
 *)
 
 (*
-HideDebugImage
+DebugImageShow
 ~~~~~~~~~~~~~~
-> procedure HideDebugImage;
+> procedure DebugImageShow(Image: TImage; EnsureVisible: Boolean = True);
 *)
 
 procedure ImportDebugImage(Compiler: TSimbaScript_Compiler);
@@ -149,57 +155,46 @@ begin
     ImportingSection := 'Debug Image';
 
     addGlobalFunc(
-      'procedure SetDebugImageMaxSize(MaxWidth, MaxHeight: Integer);', [
+      'procedure DebugImageSetMaxSize(MaxWidth, MaxHeight: Integer);', [
       'begin',
       '  _SimbaScript.DebugImage_SetMaxSize(MaxWidth, MaxHeight);',
       'end;'
     ]);
 
     addGlobalFunc(
-      'procedure ShowDebugImage(Width, Height: Integer); overload;', [
+      'procedure DebugImageDisplay(Width, Height: Integer); overload;', [
       'begin',
       '  _SimbaScript.DebugImage_Display(Width, Height);',
       'end;'
     ]);
 
     addGlobalFunc(
-      'procedure ShowDebugImage(X, Y, Width, Height: Integer); overload;', [
+      'procedure DebugImageDisplay(X, Y, Width, Height: Integer); overload;', [
       'begin',
       '  _SimbaScript.DebugImage_Display(X, Y, Width, Height);',
       'end;'
     ]);
 
     addGlobalFunc(
-      'procedure HideDebugImage;', [
+      'procedure DebugImageClose;', [
       'begin',
       '  _SimbaScript.DebugImage_Hide();',
       'end;'
     ]);
 
     addGlobalFunc(
-      'procedure UpdateDebugImage(Image: TImage);', [
+      'procedure DebugImageUpdate(Image: TImage);', [
       'begin',
       '  _SimbaScript.DebugImage_Update(Image);',
       'end;'
     ]);
 
     addGlobalFunc(
-      'procedure Show(Image: TImage; EnsureVisible: Boolean = True);', [
+      'procedure DebugImageShow(Image: TImage; EnsureVisible: Boolean = True);', [
       'begin',
       '  _SimbaScript.DebugImage_Show(Image, EnsureVisible);',
       'end;'
     ]);
-
-    ImportingSection := 'TImage';
-
-    addGlobalFunc(
-      'procedure TImage.Show(EnsureVisible: Boolean = True);', [
-      'begin',
-      '  Show(Self, EnsureVisible);',
-      'end;'
-    ]);
-
-    ImportingSection := 'Debug Image';
 
     addGlobalFunc(
       'procedure Show(Matrix: TIntegerMatrix); overload;', [
@@ -366,6 +361,13 @@ begin
       '  finally',
       '    Free();',
       '  end;',
+      'end;'
+    ]);
+
+    addGlobalFunc(
+      'procedure TImage.Show(EnsureVisible: Boolean = True); override;', [
+      'begin',
+      '  _SimbaScript.DebugImage_Show(Self, EnsureVisible);',
       'end;'
     ]);
 
