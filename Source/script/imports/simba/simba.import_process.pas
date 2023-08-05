@@ -61,6 +61,16 @@ begin
   PInt64(Result)^ := SimbaProcess.GetProcessMemUsage(PProcessID(Params^[0])^);
 end;
 
+procedure _LapeGetProcessStartTime(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDateTime(Result)^ := SimbaProcess.GetProcessStartTime(PProcessID(Params^[0])^);
+end;
+
+procedure _LapeGetProcessRunningTime(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PUInt64(Result)^ := SimbaProcess.GetProcessRunnningTime(PProcessID(Params^[0])^);
+end;
+
 procedure _LapeTerminateProcess(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaProcess.TerminateProcess(PProcessID(Params^[0])^);
@@ -78,6 +88,8 @@ begin
     addGlobalFunc('function IsProcess64Bit(PID: TProcessID): Boolean', @_LapeIsProcess64Bit);
     addGlobalFunc('function GetProcessPath(PID: TProcessID): String', @_LapeGetProcessPath);
     addGlobalFunc('function GetProcessMemUsage(PID: TProcessID): Int64', @_LapeGetProcessMemUsage);
+    addGlobalFunc('function GetProcessStartTime(PID: TProcessID): TDateTime', @_LapeGetProcessStartTime);
+    addGlobalFunc('function GetProcessRunnningTime(PID: TProcessID): UInt64', @_LapeGetProcessRunningTime);
     addGlobalFunc('procedure TerminateProcess(PID: TProcessID)', @_LapeTerminateProcess);
     addGlobalFunc('function RunCommandInDir(Directory, Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus; overload', @_LapeRunCommandInDirOutput);
     addGlobalFunc('function RunCommandInDir(Directory, Executable: String; Commands: TStringArray): TProcessID; overload', @_LapeRunCommandInDir);

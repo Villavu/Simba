@@ -38,6 +38,7 @@ type
     procedure KeyDown(Key: KeyCode); virtual; abstract;
     procedure KeyUp(Key: KeyCode); virtual; abstract;
 
+    function GetProcessStartTime(PID: SizeUInt): TDateTime; virtual; abstract;
     function GetProcessMemUsage(PID: SizeUInt): Int64; virtual; abstract;
     function GetProcessPath(PID: SizeUInt): String; virtual; abstract;
     function IsProcess64Bit(PID: SizeUInt): Boolean; virtual; abstract;

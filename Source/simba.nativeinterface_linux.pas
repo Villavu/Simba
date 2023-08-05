@@ -40,6 +40,7 @@ type
     procedure KeyDown(Key: KeyCode); override;
     procedure KeyUp(Key: KeyCode); override;
 
+    function GetProcessStartTime(PID: SizeUInt): TDateTime; override;
     function GetProcessMemUsage(PID: SizeUInt): Int64; override;
     function GetProcessPath(PID: SizeUInt): String; override;
     function IsProcess64Bit(PID: SizeUInt): Boolean; override;
@@ -489,6 +490,16 @@ procedure TSimbaNativeInterface_Linux.KeyUp(Key: KeyCode);
 begin
   SimbaXLib.XTestFakeKeyEvent(VirtualKeyToNativeKeyCode(Key), False, 0);
   SimbaXLib.XSync(False);
+end;
+
+function TSimbaNativeInterface_Linux.GetProcessStartTime(PID: SizeUInt): TDateTime;
+var
+  Info: stat;
+begin
+  Result := 0;
+
+  if (fpstat('/proc/' + IntToStr(PID), Info) = 0) then
+    Result := FileDateToDateTime(Info.st_ctime);
 end;
 
 function TSimbaNativeInterface_Linux.GetProcessMemUsage(PID: SizeUInt): Int64;
