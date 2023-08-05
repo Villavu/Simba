@@ -29,6 +29,8 @@ type
     function IsProcessRunning(PID: TProcessID): Boolean;
     function GetProcessPath(PID: TProcessID): String;
     function GetProcessMemUsage(PID: TProcessID): Int64;
+    function GetProcessStartTime(PID: TProcessID): TDateTime;
+    function GetProcessRunnningTime(PID: TProcessID): UInt64;
     procedure TerminateProcess(PID: TProcessID);
 
     function RunCommandInDir(Directory, Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus; overload;
@@ -52,7 +54,7 @@ var
 implementation
 
 uses
-  forms, process, lazloggerbase,
+  Forms, Process, DateUtils,
   simba.env, simba.files, simba.nativeinterface;
 
 type
@@ -134,6 +136,16 @@ end;
 function TSimbaProcess.GetProcessMemUsage(PID: TProcessID): Int64;
 begin
   Result := SimbaNativeInterface.GetProcessMemUsage(PID);
+end;
+
+function TSimbaProcess.GetProcessStartTime(PID: TProcessID): TDateTime;
+begin
+  Result := SimbaNativeInterface.GetProcessStartTime(PID);
+end;
+
+function TSimbaProcess.GetProcessRunnningTime(PID: TProcessID): UInt64;
+begin
+  Result := MillisecondsBetween(GetProcessStartTime(PID), Now());
 end;
 
 procedure TSimbaProcess.TerminateProcess(PID: TProcessID);

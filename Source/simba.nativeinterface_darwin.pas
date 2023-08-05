@@ -68,6 +68,7 @@ type
     procedure KeyDown(Key: KeyCode); override;
     procedure KeyUp(Key: KeyCode); override;
 
+    function GetProcessStartTime(PID: SizeUInt): TDateTime; override;
     function GetProcessMemUsage(PID: SizeUInt): Int64; override;
     function GetProcessPath(PID: SizeUInt): String; override;
     function IsProcess64Bit(PID: SizeUInt): Boolean; override;
@@ -105,7 +106,7 @@ type
 implementation
 
 uses
-  baseunix, unix, lcltype, cocoaall, cocoautils,
+  BaseUnix, Unix, LCLType, CocoaAll, CocoaUtils, DateUtils,
   simba.process, simba.darwin_axui, simba.windowhandle;
 
 type
@@ -125,14 +126,13 @@ function mach_timebase_info(var TimebaseInfoData: TTimebaseInfoData): Int64; cde
 function mach_absolute_time: QWORD; cdecl; external 'libc';
 
 type
-  TProcTaskInfo = record
+  proc_taskinfo = record
     virtual_size: uint64;
     resident_size: uint64;
     total_user: uint64;
     total_system: uint64;
     threads_user: uint64;
     threads_system: uint64;
-
     policy: int32;
     faults: int32;
     pageins: int32;
@@ -147,7 +147,33 @@ type
     priority: int32;
   end;
 
+  proc_bsdinfo = record
+    pbi_flags: uint32;
+    pbi_status: uint32;
+    pbi_xstatus: uint32;
+    pbi_pid: uint32;
+    pbi_ppid: uint32;
+    pbi_uid: int32;
+    pbi_gid: int32;
+    pbi_ruid: int32;
+    pbi_rgid: int32;
+    pbi_svuid: int32;
+    pbi_svgid: int32;
+    rfu_1: uint32;
+    pbi_comm: array[1..16] of Char;
+    pbi_name: array[1..32] of Char;
+    pbi_nfiles: uint32;
+    pbi_pgid: uint32;
+    pbi_pjobc: uint32;
+    e_tdev: uint32;
+    e_tpgid: uint32;
+    pbi_nice: int32;
+    pbi_start_tvsec: uint64;
+    pbi_start_tvusec: uint64;
+  end;
+
 const
+  PROC_PIDTBSDINFO = 3;
   PROC_PIDTASKINFO = 4;
 
 function proc_pidpath(pid: longint; buffer: pbyte; bufferSize: longword): longint; cdecl; external 'libproc';
@@ -524,13 +550,23 @@ begin
   end
 end;
 
-function TSimbaNativeInterface_Darwin.GetProcessMemUsage(PID: SizeUInt): Int64;
+function TSimbaNativeInterface_Darwin.GetProcessStartTime(PID: SizeUInt): TDateTime;
 var
-  info: TProcTaskInfo;
+  info: proc_bsdinfo;
 begin
   Result := 0;
 
-  if proc_pidinfo(PID, PROC_PIDTASKINFO, 0, @info, SizeOf(TProcTaskInfo)) > 0 then
+  if proc_pidinfo(PID, PROC_PIDTBSDINFO, 0, @info, sizeof(proc_bsdinfo)) > 0 then
+    Result := UnixToDateTime(info.pbi_start_tvsec)
+end;
+
+function TSimbaNativeInterface_Darwin.GetProcessMemUsage(PID: SizeUInt): Int64;
+var
+  info: proc_taskinfo;
+begin
+  Result := 0;
+
+  if proc_pidinfo(PID, PROC_PIDTASKINFO, 0, @info, SizeOf(proc_taskinfo)) > 0 then
     Result := info.resident_size;
 end;
 

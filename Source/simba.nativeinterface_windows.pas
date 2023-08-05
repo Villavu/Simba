@@ -51,6 +51,7 @@ type
     procedure KeyDown(Key: KeyCode); override;
     procedure KeyUp(Key: KeyCode); override;
 
+    function GetProcessStartTime(PID: SizeUInt): TDateTime; override;
     function GetProcessMemUsage(PID: SizeUInt): Int64; override;
     function GetProcessPath(PID: SizeUInt): String; override;
     function IsProcess64Bit(PID: SizeUInt): Boolean; override;
@@ -509,6 +510,25 @@ begin
   Input.ki.wVk := Ord(Key);
 
   SendInput(1, @Input, SizeOf(Input));
+end;
+
+function TSimbaNativeInterface_Windows.GetProcessStartTime(PID: SizeUInt): TDateTime;
+var
+  CreationTime, ExitTime, KernelTime, UserTime: TFileTime;
+  FileTime: TFileTime;
+  SystemTime: TSystemTime;
+  Handle: THandle;
+begin
+  Result := 0;
+
+  Handle := OpenProcess(PROCESS_VM_READ or PROCESS_QUERY_INFORMATION, False, PID);
+  if (Handle = 0) then
+    Exit;
+  if GetProcessTimes(Handle, CreationTime, ExitTime, KernelTime, UserTime) then
+    if FileTimeToLocalFileTime(CreationTime, FileTime) and FileTimeToSystemTime(FileTime, SystemTime) then
+      Result := SystemTimeToDateTime(SystemTime);
+
+  CloseHandle(Handle);
 end;
 
 function TSimbaNativeInterface_Windows.GetProcessMemUsage(PID: SizeUInt): Int64;
