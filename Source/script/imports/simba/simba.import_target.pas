@@ -298,8 +298,7 @@ begin
 
     addGlobalFunc('function ToString(constref Target: TSimbaTarget): String; override;', @_LapeSimbaTarget_ToString);
 
-
-    ImportingSection := 'TImage';
+    ImportingSection := 'Image';
 
     addGlobalFunc(
       'function TImage.CreateFromTarget(Target: TSimbaTarget; Bounds: TBox = [-1,-1,-1,-1]): TImage; static; overload;', [
