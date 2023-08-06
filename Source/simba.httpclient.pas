@@ -182,6 +182,7 @@ type
     function Delete(URL, Data: String): String;
 
     class function SimpleGet(URL: String; AllowedStatusCodes: THTTPStatusArray): String; static;
+    class procedure SimpleGetFile(URL, LocalFileName: String; AllowedStatusCodes: THTTPStatusArray); static;
 
     constructor Create;
     destructor Destroy; override;
@@ -472,6 +473,16 @@ begin
   with TSimbaHTTPClient.Create() do
   try
     Result := Get(URL, AllowedStatusCodes);
+  finally
+    Free();
+  end;
+end;
+
+class procedure TSimbaHTTPClient.SimpleGetFile(URL, LocalFileName: String; AllowedStatusCodes: THTTPStatusArray);
+begin
+  with TSimbaHTTPClient.Create() do
+  try
+    GetFile(URL, LocalFileName, AllowedStatusCodes);
   finally
     Free();
   end;
