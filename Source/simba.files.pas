@@ -67,6 +67,7 @@ type
     class function PathExcludeLeadingSep(Path: String): String;
     class function PathIncludeLeadingSep(Path: String): String;
     class function PathExtractRelative(BasePath, DestPath: String): String;
+    class function PathChangeExt(Path, NewExt: String): String;
   end;
 
   TSimbaDir = class
@@ -263,6 +264,11 @@ end;
 class function TSimbaPath.PathExtractRelative(BasePath, DestPath: String): String;
 begin
   Result := ExtractRelativePath(BasePath, DestPath);
+end;
+
+class function TSimbaPath.PathChangeExt(Path, NewExt: String): String;
+begin
+  Result := ChangeFileExt(Path, NewExt);
 end;
 
 class function TSimbaFile.DoFileRead(const FileName: String; var Buffer; const Len: Integer; Offset: Integer): Boolean;

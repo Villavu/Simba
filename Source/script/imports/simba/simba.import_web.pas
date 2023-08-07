@@ -26,11 +26,11 @@ Internet HTTP request/post methods.
 *)
 
 (*
-OpenURL
-~~~~~~~
-> procedure OpenURL(URL: String);
+URLOpenInBrowser
+~~~~~~~~~~~~~~~~
+> procedure URLOpenInBrowser(URL: String);
 
-Open a URL in the default internet browser.
+Opens a URL in the systems default internet browser.
 *)
 procedure _LapeURLOpenInBrowser(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin

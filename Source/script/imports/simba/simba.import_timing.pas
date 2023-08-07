@@ -60,12 +60,9 @@ begin
     addGlobalFunc('function FormatMilliseconds(Time: Double; TimeSymbols: Boolean = False): String; overload;', @_LapeFormatMillisecondsEx);
 
     addDelayedCode([
-      'const',
-      '  ScriptStartTime: UInt64 := GetTickCount();',
-      '',
       'function GetTimeRunning: UInt64;',
       'begin',
-      '  Result := GetTickCount() - ScriptStartTime;',
+      '  Result := GetTickCount() - SCRIPT_START_TIME;',
       'end;'
     ]);
 

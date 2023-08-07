@@ -608,7 +608,7 @@ begin
     end;
 
     for Decl in Parser.Items.ToArray do
-      if (Decl.Name <> '') and (not Decl.isOverrideMethod) then
+      if (Decl.Name <> '') and (not Decl.isOverrideMethod) and (Decl.Name[1] <> '_') then
         AddSimbaDecl(ParentNode, Decl);
 
     ParentNode.CustomSort(@CompareDecl);
