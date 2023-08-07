@@ -186,7 +186,7 @@ var
   Str: String;
   I: Integer;
 begin
-  ClearScriptOutput();
+  ClearSimbaOutput();
 
   DirCreate(OUTPUT_DIR);
   DirDelete(OUTPUT_DIR, True);

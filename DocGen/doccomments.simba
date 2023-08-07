@@ -77,7 +77,7 @@ begin
   for I := 0 to High(Map) do
     NewContents := Map[I].DocComment + LINE_SEP*2 + NewContents;
 
-  ClearScriptOutput();
+  ClearSimbaOutput();
   WriteLn(NewContents);
   SetClipBoard(NewContents);
 end.

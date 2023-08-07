@@ -15,7 +15,7 @@ implementation
 uses
   Graphics,
   lptypes, lpparser, ffi,
-  simba.nativeinterface;
+  simba.nativeinterface, simba.env;
 
 procedure _LapeGetCurrentThreadID(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -131,7 +131,7 @@ begin
     addGlobalType('array of TPoint', 'TPointArray');
     addGlobalType('array of TPointArray', 'T2DPointArray');
 
-    addGlobalType('record Top: TPoint; Right: TPoint; Bottom: TPoint; Left: TPoint; end;', 'TQuad');
+    addGlobalType('record Top, Right, Bottom, Left: TPoint; end;', 'TQuad');
     addGlobalType('array of TQuad', 'TQuadArray');
 
     addGlobalType('record X1, Y1, X2, Y2: Integer; end', 'TBox');
@@ -148,15 +148,17 @@ begin
     addGlobalType('procedure() of object', 'TSyncMethod', {$IF DEFINED(CPU32) and DEFINED(LAPE_CDECL)}FFI_CDECL{$ELSE}FFI_DEFAULT_ABI{$ENDIF});
     addGlobalFunc('procedure Sync(Method: TSyncMethod)', @_LapeSync);
 
-    addGlobalFunc(
-      'procedure MemMove(constref Src; var Dst; Size: SizeInt); deprecated "Use Move";', [
-      'begin',
-      '  Move(Src, Dst, Size);',
-      'end;'
-    ]);
-
     addGlobalFunc('function GetEnvVar(Name: String): String', @_LapeGetEnvVar);
     addGlobalFunc('function GetEnvVars: TStringArray', @_LapeGetEnvVars);
+
+    addGlobalVar('', 'SCRIPT_FILE').isConstant := True; // Filled in later
+    addGlobalVar(GetTickCount64(), 'SCRIPT_START_TIME').isConstant := True;
+    addGlobalVar(SimbaEnv.IncludesPath, 'INCLUDES_DIR').isConstant := True;
+    addGlobalVar(SimbaEnv.PluginsPath, 'PLUGINS_DIR').isConstant := True;
+    addGlobalVar(SimbaEnv.SimbaPath, 'SIMBA_DIR').isConstant := True;
+    addGlobalVar(SimbaEnv.ScriptsPath, 'SCRIPTS_DIR').isConstant := True;
+    addGlobalVar(SimbaEnv.DataPath, 'SIMBA_DATA_DIR').isConstant := True;
+    addGlobalVar(SimbaEnv.ScreenshotsPath, 'SCREENSHOTS_DIR').isConstant := True;
 
     ImportingSection := '';
   end;

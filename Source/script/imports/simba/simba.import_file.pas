@@ -19,7 +19,7 @@ implementation
 
 uses
   lptypes,
-  simba.env, simba.files;
+  simba.files;
 
 type
   PByteArray = ^TByteArray;
@@ -461,6 +461,16 @@ begin
 end;
 
 (*
+PathChangeExt
+~~~~~~~~~~~~~
+> function PathChangeExt(Path, NewExt: String): String;
+*)
+procedure _LapePathChangeExt(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := TSimbaPath.PathChangeExt(PString(Params^[0])^, PString(Params^[1])^);
+end;
+
+(*
 DirList
 ~~~~~~~
 > function DirList(Path: String; Recursive: Boolean = False): TStringArray;
@@ -589,13 +599,6 @@ begin
     addGlobalVar(PATH_SEP, 'PATH_SEP').isConstant := True;
     addGlobalVar(LINE_SEP, 'LINE_SEP').isConstant := True;
 
-    addGlobalVar(SimbaEnv.IncludesPath,    'INCLUDES_PATH').isConstant := True;
-    addGlobalVar(SimbaEnv.PluginsPath,     'PLUGINS_PATH').isConstant := True;
-    addGlobalVar(SimbaEnv.SimbaPath,       'SIMBA_PATH').isConstant := True;
-    addGlobalVar(SimbaEnv.ScriptsPath,     'SCRIPTS_PATH').isConstant := True;
-    addGlobalVar(SimbaEnv.DataPath,        'SIMBA_DATA_PATH').isConstant := True;
-    addGlobalVar(SimbaEnv.ScreenshotsPath, 'SCREENSHOTS_PATH').isConstant := True;
-
     addGlobalFunc('function INIFileWrite(FileName: String; Section, Key, Value: String): Boolean', @_LapeINIFileWrite);
     addGlobalFunc('function INIFileRead(FileName: String; Section, Key, Value: String): String', @_LapeINIFileRead);
     addGlobalFunc('function INIFileDelete(FileName: String; Section, Key: String): Boolean', @_LapeINIFileDelete);
@@ -648,6 +651,7 @@ begin
     addGlobalFunc('function PathExcludeLeadingSep(Path: String): String', @_LapePathExcludeLeadingSep);
     addGlobalFunc('function PathIncludeLeadingSep(Path: String): String', @_LapePathIncludeLeadingSep);
     addGlobalFunc('function PathExtractRelative(BasePath, DestPath: String): String', @_LapePathExtractRelative);
+    addGlobalFunc('function PathChangeExt(Path, NewExt: String): String', @_LapePathChangeExt);
 
     addGlobalFunc('function DirList(Path: String; Recursive: Boolean = False): TStringArray', @_LapeDirList);
     addGlobalFunc('function DirSearch(Path: String; Mask: String; Recursive: Boolean = False): TStringArray', @_LapeDirSearch);

@@ -18,7 +18,7 @@ implementation
 
 uses
   // Simba
-  simba.import_system, simba.import_colormath, simba.import_colors,
+  simba.import_system, simba.import_colormath,
   simba.import_matrix, simba.import_windowhandle,
   simba.import_quad, simba.import_box, simba.import_boxarray, simba.import_point,
 
@@ -35,16 +35,15 @@ uses
   simba.import_timing, simba.import_tpa, simba.import_atpa, simba.import_encoding,
   simba.import_file, simba.import_process,
   simba.import_internal, simba.import_target, simba.import_finder,
-  simba.import_math, simba.import_other, simba.import_input,
+  simba.import_math, simba.import_misc, simba.import_input,
   simba.import_script,  simba.import_slacktree, simba.import_string,
-  simba.import_variant, simba.import_simba, simba.import_random,
+  simba.import_variant, simba.import_random,
   simba.import_debugimage, simba.import_web, simba.import_dialogs;
 
 procedure AddSimbaImports(Compiler: TSimbaScript_Compiler);
 begin
   ImportSystem(Compiler);
   ImportColorMath(Compiler);
-  ImportColors(Compiler);
   ImportMatrix(Compiler);
   ImportWindowHandle(Compiler);
   ImportQuad(Compiler);
@@ -78,13 +77,12 @@ begin
   ImportTarget(Compiler);
   ImportFinder(Compiler);
   ImportMath(Compiler);
-  ImportOther(Compiler);
+  ImportMisc(Compiler);
   ImportInput(Compiler);
   ImportScript(Compiler);
   ImportSlackTree(Compiler);
   ImportString(Compiler);
   ImportVariant(Compiler);
-  ImportSimba(Compiler);
   ImportRandom(Compiler);
   ImportDebugImage(Compiler);
   ImportWeb(Compiler);
