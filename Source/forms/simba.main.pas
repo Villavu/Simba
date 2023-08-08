@@ -57,6 +57,7 @@ const
   IMAGE_OPERATOR            = 39;
   IMAGE_FONT                = 42;
   IMAGE_PACKAGE_UPDATE      = 45;
+  IMAGE_ENUM                = 55;
 
 type
   TSimbaForm = class(TForm)

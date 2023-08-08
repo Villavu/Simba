@@ -87,13 +87,14 @@ implementation
 uses
   StrUtils,
   simba.main, simba.ide_mainstatusbar, simba.ide_events, simba.threading,
-  simba.scripttabsform, simba.scripttab, simba.ide_showdeclaration;
+  simba.scripttabsform, simba.scripttab, simba.ide_showdeclaration, simba.nativeinterface;
 
 function GetImage(const Decl: TDeclaration): Integer;
 begin
   if (Decl is TDeclaration_Method) and Decl.isFunction       then Result := IMAGE_FUNCTION  else
   if (Decl is TDeclaration_Method) and Decl.isProcedure      then Result := IMAGE_PROCEDURE else
   if (Decl is TDeclaration_Method) and Decl.isOperatorMethod then Result := IMAGE_OPERATOR  else
+  if (Decl is TDeclaration_EnumElement)                      then Result := IMAGE_ENUM      else
   if (Decl is TDeclaration_Type)                             then Result := IMAGE_TYPE      else
   if (Decl is TDeclaration_Const)                            then Result := IMAGE_CONSTANT  else
   if (Decl is TDeclaration_Var)                              then Result := IMAGE_VARIABLE  else Result := -1;
@@ -141,7 +142,7 @@ begin
 end;
 
 type
-  ENodeType = (ntUnknown, ntDecl, ntSimbaDecl, ntPluginDecl, ntIncludes, ntPlugins, ntIncludeFile, ntPluginFile);
+  ENodeType = (ntUnknown, ntSimbaSection, ntDecl, ntSimbaDecl, ntPluginDecl, ntIncludes, ntPlugins, ntIncludeFile, ntPluginFile);
 
 type
   TSimbaFunctionListNode = class(TTreeNode)
@@ -294,12 +295,15 @@ begin
   Node := TSimbaFunctionListNode(FTreeView.Selected);
 
   if (Node is TSimbaFunctionListNode) then
+  begin
     case Node.NodeType of
-      ntSimbaDecl:   ShowSimbaDeclaration(Node.Hint, Node.FileName);
-      ntDecl:        ShowDeclaration(Node.StartPos, Node.EndPos, Node.Line, Node.FileName);
-      ntPluginDecl:  ShowPluginDeclaration(Node.Hint, Node.FileName);
-      ntIncludeFile: SimbaScriptTabsForm.Open(Node.FileName);
+      ntSimbaDecl:    ShowSimbaDeclaration(Node.Hint, Node.FileName);
+      ntDecl:         ShowDeclaration(Node.StartPos, Node.EndPos, Node.Line, Node.FileName);
+      ntPluginDecl:   ShowPluginDeclaration(Node.Hint, Node.FileName);
+      ntIncludeFile:  SimbaScriptTabsForm.Open(Node.FileName);
+      ntSimbaSection: SimbaNativeInterface.OpenURL(Node.FileName);
     end;
+  end;
 end;
 
 procedure TSimbaFunctionListForm.DoCodetoolsSetup(Sender: TObject);
@@ -532,6 +536,8 @@ begin
 end;
 
 function TSimbaFunctionListForm.AddSimbaDecl(ParentNode: TTreeNode; Decl: TDeclaration): TTreeNode;
+var
+  I: Integer;
 begin
   Result := FTreeView.AddNode(ParentNode, Decl.Name);
   with TSimbaFunctionListNode(Result) do
@@ -541,9 +547,14 @@ begin
     FileName := Decl.Lexer.FileName;
 
     Text := GetText(Decl);
-    Hint := GetHint(Decl);
     ImageIndex := GetImage(Decl);
     SelectedIndex := GetImage(Decl);
+
+    if (Decl is TDeclaration_TypeRecord) or (Decl is TDeclaration_TypeEnum) then
+      for I := 0 to Decl.Items.Count - 1 do
+        AddSimbaDecl(Result, Decl.Items[I])
+    else
+      Hint := GetHint(Decl);
   end;
 end;
 
@@ -602,6 +613,7 @@ begin
     ParentNode := FTreeView.AddNode(FSimbaNode, Parser.FileName, IMAGE_FILE);
     with TSimbaFunctionListNode(ParentNode) do
     begin
+      NodeType := ntSimbaSection;
       FileName := GetURL(Parser.FileName);
       if (FileName <> '') then
         Hint := Text + ' (double click to open online documentation)';
