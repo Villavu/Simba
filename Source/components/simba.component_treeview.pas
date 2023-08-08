@@ -32,6 +32,7 @@ type
     procedure CMChanged(var Message: TLMessage); message CM_CHANGED;
     function DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean; override;
     procedure DoDrawArrow(Sender: TCustomTreeView; const ARect: TRect; ACollapsed: Boolean);
+    procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure Paint; override;
     procedure SetLoading(Value: Boolean);
   public
@@ -162,7 +163,8 @@ begin
   FTree.FScrollbarVert := FScrollbarVert;
   FTree.FScrollbarHorz := FScrollbarHorz;
   FTree.BorderStyle := bsNone;
-  FTree.Options := FTree.Options + [tvoRightClickSelect, tvoReadOnly, tvoAutoItemHeight] - [tvoToolTips, tvoThemedDraw];
+  FTree.Options := FTree.Options + [tvoReadOnly, tvoAutoItemHeight, tvoNoDoubleClickExpand] - [tvoToolTips, tvoThemedDraw];
+
   FTree.ExpandSignType := tvestArrow;
   FTree.ExpandSignColor := clWhite;
   FTree.TreeLinePenStyle := psClear;
@@ -431,7 +433,7 @@ begin
   begin
     Node := FTree.GetNodeAt(X, Y);
 
-    if Assigned(Node) then
+    if Assigned(Node) and (X > Node.DisplayTextLeft) and (X < Node.DisplayTextRight) then
     begin
       HintText := FOnGetNodeHint(Node);
 
@@ -513,6 +515,20 @@ begin
   Sender.Canvas.Pen.Width := 2;
   Sender.Canvas.Pen.Color := SimbaTheme.ColorLine;
   Sender.Canvas.Polyline(Points);
+end;
+
+procedure TSimbaInternalTreeView.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  n: TTreeNode;
+begin
+  inherited MouseUp(Button, Shift, X, Y);
+
+  if (Button = mbLeft) and (not (ssDouble in Shift)) then
+  begin
+    n := GetNodeAt(X,Y);
+    if Assigned(n) then
+      n.Expanded := not n.Expanded;
+  end;
 end;
 
 procedure TSimbaInternalTreeView.Paint;
