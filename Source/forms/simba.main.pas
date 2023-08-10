@@ -59,9 +59,26 @@ const
   IMAGE_PACKAGE_UPDATE      = 45;
   IMAGE_ENUM                = 55;
 
+  IMG_TOOLBAR_PLAY    = 0;
+  IMG_TOOLBAR_PAUSE   = 1;
+  IMG_TOOLBAR_STOP    = 2;
+  IMG_TOOLBAR_POWER   = 3;
+  IMG_TOOLBAR_COMPILE = 4;
+  IMG_TOOLBAR_NEW     = 5;
+  IMG_TOOLBAR_OPEN    = 6;
+  IMG_TOOLBAR_SAVE    = 7;
+  IMG_TOOLBAR_SAVEALL = 8;
+  IMG_TOOLBAR_PIPETTE = 9;
+  IMG_TOOLBAR_AREA    = 10;
+  IMG_TOOLBAR_TARGET  = 11;
+  IMG_TOOLBAR_ERASER  = 12;
+  IMG_TOOLBAR_PACKAGE = 13;
+
 type
   TSimbaForm = class(TForm)
     DockPanel: TAnchorDockPanel;
+    RecentFilesPopup: TPopupMenu;
+    ToolbarImages: TImageList;
     MainMenuTools: TPopupMenu;
     MainMenuView: TPopupMenu;
     MainMenuHelp: TPopupMenu;
@@ -147,7 +164,6 @@ type
     ToolbarButtonClearOutput: TToolButton;
     ToolbarButtonColorPicker: TToolButton;
     ToolbarButtonCompile: TToolButton;
-    ToolbarButtonNew: TToolButton;
     ToolbarButtonOpen: TToolButton;
     ToolbarButtonPackages: TToolButton;
     ToolbarButtonPause: TToolButton;
@@ -155,11 +171,7 @@ type
     ToolbarButtonSave: TToolButton;
     ToolbarButtonSaveAll: TToolButton;
     ToolbarButtonTargetSelector: TToolButton;
-    ToolbarDivider1: TToolButton;
-    ToolbarDivider2: TToolButton;
-    ToolbarDivider3: TToolButton;
-    ToolbarDivider4: TToolButton;
-    ToolbarDivider5: TToolButton;
+    ToolButtonNew: TToolButton;
     ToolButtonAreaSelector: TToolButton;
     TrayIcon: TTrayIcon;
     TrayPopup: TPopupMenu;
@@ -210,10 +222,12 @@ type
     procedure MenuSelectAllClick(Sender: TObject);
     procedure MenuUndoClick(Sender: TObject);
     procedure DoPackageMenuTimer(Sender: TObject);
+    procedure RecentFilesPopupPopup(Sender: TObject);
     procedure ToolbarButtonColorPickerClick(Sender: TObject);
     procedure ToolbarButtonPackagesClick(Sender: TObject);
     procedure ToolbarButtonSaveAllClick(Sender: TObject);
     procedure ToolbarButtonSelectTargetClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure ToolBarPaintButton(Sender: TToolButton; State: integer);
     procedure ToolButtonAreaSelectorClick(Sender: TObject);
     procedure TrayIconClick(Sender: TObject);
     procedure TrayPopupExitClick(Sender: TObject);
@@ -271,7 +285,7 @@ implementation
 {$R *.lfm}
 
 uses
-  LCLType, LCLIntf, LazFileUtils, AnchorDocking, ToolWin,
+  LCLType, LCLIntf, LazFileUtils, AnchorDocking, ToolWin, ATCanvasPrimitives, Types, GraphType,
 
   simba.shapeboxform, simba.openexampleform, simba.colorpickerhistoryform,
   simba.debugimageform, simba.imagetostringform, simba.aboutform,
@@ -357,7 +371,7 @@ procedure TSimbaForm.SetToolbarSize(Value: Integer);
 begin
   ToolBar.ImagesWidth := Value;
 
-  ToolBar.ButtonWidth  := Value + Scale96ToScreen(8);
+  ToolBar.ButtonWidth  := Value + Scale96ToScreen(10);
   ToolBar.ButtonHeight := Value + Scale96ToScreen(16);
 end;
 
@@ -445,6 +459,34 @@ begin
   UpdatePackages();
 end;
 
+procedure TSimbaForm.RecentFilesPopupPopup(Sender: TObject);
+var
+  I: Integer;
+  Item: TMenuItem;
+begin
+  RecentFilesPopup.Items.Clear();
+
+  I := 0;
+  while (I < FRecentFiles.Count) do
+  begin
+    if (not FileExists(FRecentFiles[I])) then
+    begin
+      FRecentFiles.Delete(I);
+
+      Continue;
+    end;
+
+    Item := TMenuItem.Create(RecentFilesPopup);
+    Item.Caption := ShortDisplayFilename(FRecentFiles[I], 80);
+    Item.OnClick := @HandleRecentFileClick;
+    Item.Hint := FRecentFiles[I];
+
+    RecentFilesPopup.Items.Add(Item);
+
+    Inc(I);
+  end;
+end;
+
 procedure TSimbaForm.MenuItemFormatScriptClick(Sender: TObject);
 var
   Script: String;
@@ -497,49 +539,57 @@ end;
 
 procedure TSimbaForm.SetButtonStates(Instance: TSimbaScriptInstance);
 begin
-  if (Instance = nil) or (Instance.State in [ESimbaScriptState.STATE_NONE, ESimbaScriptState.STATE_PAUSED]) then
+  if Assigned(Instance) then
+    case Instance.State of
+      ESimbaScriptState.STATE_PAUSED:
+        begin
+          ToolbarButtonRun.Enabled := True;
+          ToolbarButtonPause.Enabled := False;
+          ToolbarButtonCompile.Enabled := True;
+
+          StopButtonStop.Enabled := True;
+          StopButtonStop.ImageIndex := IMG_TOOLBAR_STOP;
+        end;
+
+      ESimbaScriptState.STATE_STOP:
+        begin
+          ToolbarButtonRun.Enabled := False;
+          ToolbarButtonPause.Enabled := False;
+          ToolbarButtonCompile.Enabled := False;
+
+          StopButtonStop.Enabled := True;
+          StopButtonStop.ImageIndex := IMG_TOOLBAR_POWER;
+        end;
+
+      ESimbaScriptState.STATE_RUNNING:
+        begin
+          ToolbarButtonRun.Enabled := False;
+          ToolbarButtonPause.Enabled := True;
+          ToolbarButtonCompile.Enabled := False;
+
+          StopButtonStop.Enabled := True;
+          StopButtonStop.ImageIndex := IMG_TOOLBAR_STOP;
+        end;
+
+      ESimbaScriptState.STATE_NONE:
+        begin
+          ToolbarButtonRun.Enabled := True;
+          ToolbarButtonPause.Enabled := False;
+          ToolbarButtonCompile.Enabled := True;
+
+          StopButtonStop.Enabled := False;
+          StopButtonStop.ImageIndex := IMG_TOOLBAR_STOP;
+        end;
+     end
+  else
   begin
     ToolbarButtonRun.Enabled := True;
     ToolbarButtonPause.Enabled := False;
     ToolbarButtonCompile.Enabled := True;
 
     StopButtonStop.Enabled := False;
-    StopButtonStop.ImageIndex := IMAGE_STOP;
-
-    Exit;
+    StopButtonStop.ImageIndex := IMG_TOOLBAR_STOP;
   end;
-
-  case Instance.State of
-    ESimbaScriptState.STATE_PAUSED:
-      begin
-        ToolbarButtonRun.Enabled := True;
-        ToolbarButtonPause.Enabled := False;
-        ToolbarButtonCompile.Enabled := True;
-
-        StopButtonStop.Enabled := True;
-        StopButtonStop.ImageIndex := IMAGE_STOP;
-      end;
-
-    ESimbaScriptState.STATE_STOP:
-      begin
-        ToolbarButtonRun.Enabled := False;
-        ToolbarButtonPause.Enabled := False;
-        ToolbarButtonCompile.Enabled := False;
-
-        StopButtonStop.Enabled := True;
-        StopButtonStop.ImageIndex := IMAGE_POWER;
-      end;
-
-    ESimbaScriptState.STATE_RUNNING:
-      begin
-        ToolbarButtonRun.Enabled := False;
-        ToolbarButtonPause.Enabled := True;
-        ToolbarButtonCompile.Enabled := False;
-
-        StopButtonStop.Enabled := True;
-        StopButtonStop.ImageIndex := IMAGE_STOP;
-      end;
-   end;
 end;
 
 procedure TSimbaForm.SetDefaultDocking(IsResetting: Boolean);
@@ -1144,6 +1194,76 @@ begin
       on E: Exception do
         ShowMessage('Exception while selecting window: ' + E.ToString());
     end;
+  end;
+end;
+
+{
+procedure TSimbaForm.ToolBarPaintButton(Sender: TObject);
+var
+  ArrowRect: TRect;
+begin
+  with TToolButton(Sender) do
+  begin
+    ArrowRect := ClientRect;
+    ArrowRect.Left := ArrowRect.Right-ToolBar.DropDownWidth;
+
+    CanvasPaintTriangleDown(Canvas, $FFFFFF, ArrowRect.CenterPoint, 2);
+  end;
+end;
+}
+
+procedure TSimbaForm.ToolBarPaintButton(Sender: TToolButton; State: integer);
+var
+  IconSize: TSize;
+  IconPos: TPoint;
+  MainBtnRect: TRect;
+  DropDownRect: TRect;
+  R: TRect;
+begin
+  with Sender do
+  begin
+    if Style = tbsDivider then
+    begin
+      Canvas.Pen.Color := SimbaTheme.ColorLine;
+      with ClientRect.CenterPoint do
+        Canvas.Line(X,3,X,Height-3);
+      Exit;
+    end;
+
+    IconSize := ToolBar.Images.SizeForPPI[ToolBar.ImagesWidth, ToolBar.Font.PixelsPerInch];
+    if IconSize.cy <= 0 then
+      IconSize.cx := 0;
+
+    MainBtnRect := ClientRect;
+    if Sender.Style = tbsButtonDrop then
+    begin
+      DropDownRect := MainBtnRect;
+      DropDownRect.Left := DropDownRect.Right - ToolBar.DropDownWidth;
+      MainBtnRect.Right := DropDownRect.Left;
+    end;
+
+    IconPos.X := (MainBtnRect.Left+MainBtnRect.Right-IconSize.cx) div 2;
+    IconPos.Y := (MainBtnRect.Top+MainBtnRect.Bottom-IconSize.cy) div 2;
+
+    Canvas.Brush.Color := SimbaTheme.ColorFrame;
+    Canvas.FillRect(ClientRect);
+
+    if State in [2,3] then
+    begin
+      R := ClientRect;
+      R.Inflate(-1,-2);
+      Canvas.Brush.Color := SimbaTheme.ColorActive;
+      Canvas.FillRect(R);
+      CanvasPaintRoundedCorners(Canvas, R, [acckLeftTop, acckRightTop, acckLeftBottom, acckRightBottom], Color, Canvas.Brush.Color, Canvas.Brush.Color);
+    end;
+
+    if Sender.Enabled then
+      ToolBar.Images.ResolutionForPPI[ToolBar.ImagesWidth, Font.PixelsPerInch, GetCanvasScaleFactor].Draw(Canvas, IconPos.X, IconPos.Y, ImageIndex)
+    else
+      ToolBar.Images.ResolutionForPPI[ToolBar.ImagesWidth, Font.PixelsPerInch, GetCanvasScaleFactor].Draw(Canvas, IconPos.X, IconPos.Y, ImageIndex, gdeDisabled);
+
+    if (Style = tbsButtonDrop) then
+      CanvasPaintTriangleDown(Canvas, SimbaTheme.ColorFont, DropDownRect.CenterPoint, 2);
   end;
 end;
 
