@@ -22,7 +22,7 @@ Input
 =====
 Input (Mouse & Keyboard) related methods.
 
-- If the `TSimbaInput.Target` field is set, the global "Target" variable will be used. Which by default is set to Simba's target selection.
+- If the `TInput.Target` field is set, the global "Target" variable will be used. Which by default is set to Simba's target selection.
 - There is a pre-defined variable `Input` to use.
 
 Example:
@@ -224,81 +224,81 @@ Available Key Codes:
 *)
 
 (*
-TSimbaInput.MousePosition
-~~~~~~~~~~~~~~~~~~~~~~~~~
-> function TSimbaInput.MousePosition: TPoint;
+TInput.MousePosition
+~~~~~~~~~~~~~~~~~~~~
+> function TInput.MousePosition: TPoint;
 *)
-procedure _LapeSimbaInput_MousePosition(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeInput_MousePosition(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPoint(Result)^ := PSimbaInput(Params^[0])^.MousePosition();
 end;
 
 (*
-TSimbaInput.MousePressed
-~~~~~~~~~~~~~~~~~~~~~~~~
-> function TSimbaInput.MousePressed(Button: MouseButton): Boolean;
+TInput.MousePressed
+~~~~~~~~~~~~~~~~~~~
+> function TInput.MousePressed(Button: MouseButton): Boolean;
 *)
-procedure _LapeSimbaInput_MousePressed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeInput_MousePressed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaInput(Params^[0])^.MousePressed(PMouseButton(Params^[1])^);
 end;
 
 (*
-TSimbaInput.MouseTeleport
-~~~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TSimbaInput.MouseTeleport(P: TPoint);
+TInput.MouseTeleport
+~~~~~~~~~~~~~~~~~~~~
+> procedure TInput.MouseTeleport(P: TPoint);
 
 Instantly moves the mouse to `P`
 *)
-procedure _LapeSimbaInput_MouseTeleport(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeInput_MouseTeleport(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.MouseTeleport(PPoint(Params^[1])^);
 end;
 
 (*
-TSimbaInput.MouseClick
-~~~~~~~~~~~~~~~~~~~~~~
-> procedure TSimbaInput.MouseClick(Button: MouseButton);
+TInput.MouseClick
+~~~~~~~~~~~~~~~~~
+> procedure TInput.MouseClick(Button: MouseButton);
 *)
-procedure _LapeSimbaInput_MouseClick(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeInput_MouseClick(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.MouseClick(PMouseButton(Params^[1])^);
 end;
 
 (*
-TSimbaInput.MouseDown
-~~~~~~~~~~~~~~~~~~~~~
-> procedure TSimbaInput.MouseDown(Button: MouseButton);
+TInput.MouseDown
+~~~~~~~~~~~~~~~~
+> procedure TInput.MouseDown(Button: MouseButton);
 *)
-procedure _LapeSimbaInput_MouseDown(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeInput_MouseDown(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.MouseDown(PMouseButton(Params^[1])^);
 end;
 
 (*
-TSimbaInput.MouseUp
-~~~~~~~~~~~~~~~~~~~
-> procedure TSimbaInput.MouseUp(Button: MouseButton);
+TInput.MouseUp
+~~~~~~~~~~~~~~
+> procedure TInput.MouseUp(Button: MouseButton);
 *)
-procedure _LapeSimbaInput_MouseUp(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeInput_MouseUp(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.MouseUp(PMouseButton(Params^[1])^);
 end;
 
 (*
-TSimbaInput.MouseScroll
-~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TSimbaInput.MouseScroll(Scrolls: Integer);
+TInput.MouseScroll
+~~~~~~~~~~~~~~~~~~
+> procedure TInput.MouseScroll(Scrolls: Integer);
 *)
-procedure _LapeSimbaInput_MouseScroll(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeInput_MouseScroll(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.MouseScroll(PInteger(Params^[1])^);
 end;
 
 (*
-TSimbaInput.MouseMove
-~~~~~~~~~~~~~~~~~~~~~
-> procedure TSimbaInput.MouseMove(Dest: TPoint);
+TInput.MouseMove
+~~~~~~~~~~~~~~~~
+> procedure TInput.MouseMove(Dest: TPoint);
 
 Move the mouse in a human-like way.
 
@@ -306,67 +306,67 @@ Speed, Gravity and Wind variables affects this.
 
 Note:: The algorithm used is WindMouse. For more details see <https://ben.land/post/2021/04/25/windmouse-human-mouse-movement>
 *)
-procedure _LapeSimbaInput_MouseMove(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeInput_MouseMove(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.MouseMove(PPoint(Params^[1])^);
 end;
 
 (*
-TSimbaInput.KeyDown
-~~~~~~~~~~~~~~~~~~~
-> procedure TSimbaInput.KeyDown(Key: KeyCode);
+TInput.KeyDown
+~~~~~~~~~~~~~~
+> procedure TInput.KeyDown(Key: KeyCode);
 *)
-procedure _LapeSimbaInput_KeyDown(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeInput_KeyDown(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.KeyDown(PKeyCode(Params^[1])^);
 end;
 
 (*
-TSimbaInput.KeyUp
-~~~~~~~~~~~~~~~~~
-> procedure TSimbaInput.KeyUp(Key: KeyCode);
+TInput.KeyUp
+~~~~~~~~~~~~
+> procedure TInput.KeyUp(Key: KeyCode);
 *)
-procedure _LapeSimbaInput_KeyUp(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeInput_KeyUp(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.KeyUp(PKeyCode(Params^[1])^);
 end;
 
 (*
-TSimbaInput.KeyPress
-~~~~~~~~~~~~~~~~~~~~
-> procedure TSimbaInput.KeyPress(Key: KeyCode);
+TInput.KeyPress
+~~~~~~~~~~~~~~~
+> procedure TInput.KeyPress(Key: KeyCode);
 *)
-procedure _LapeSimbaInput_KeyPress(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeInput_KeyPress(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.KeyPress(PKeyCode(Params^[1])^);
 end;
 
 (*
-TSimbaInput.KeyPressed
-~~~~~~~~~~~~~~~~~~~~~~
-> function TSimbaInput.KeyPressed(Key: KeyCode): Boolean;
+TInput.KeyPressed
+~~~~~~~~~~~~~~~~~
+> function TInput.KeyPressed(Key: KeyCode): Boolean;
 *)
-procedure _LapeSimbaInput_KeyPressed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeInput_KeyPressed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaInput(Params^[0])^.KeyPressed(PKeyCode(Params^[1])^);
 end;
 
 (*
-TSimbaInput.KeySend
-~~~~~~~~~~~~~~~~~~~
-> procedure TSimbaInput.KeySend(Text: String);
+TInput.KeySend
+~~~~~~~~~~~~~~
+> procedure TInput.KeySend(Text: String);
 *)
-procedure _LapeSimbaInput_KeySend(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeInput_KeySend(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaInput(Params^[0])^.KeySend(PString(Params^[1])^);
 end;
 
 (*
-TSimbaInput.CharToKeyCode
-~~~~~~~~~~~~~~~~~~~~~~~~~
-> function TSimbaInput.CharToKeyCode(C: Char): KeyCode;
+TInput.CharToKeyCode
+~~~~~~~~~~~~~~~~~~~~
+> function TInput.CharToKeyCode(C: Char): KeyCode;
 *)
-procedure _LapeSimbaInput_CharToKeyCode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeInput_CharToKeyCode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PKeyCode(Result)^ := PSimbaInput(Params^[0])^.CharToKeyCode(PChar(Params^[1])^);
 end;
@@ -415,12 +415,12 @@ begin
       '  OnTeleport: TMouseTeleportEvent;',
       '  OnMoving: TMouseMovingEvent;',
       'end;'],
-      'TSimbaInput'
+      'TInput'
     );
-    if (getGlobalType('TSimbaInput').Size <> SizeOf(TSimbaInput)) then
-      raise Exception.Create('SizeOf(TSimbaInput) is wrong!');
+    if (getGlobalType('TInput').Size <> SizeOf(TSimbaInput)) then
+      raise Exception.Create('SizeOf(TInput) is wrong!');
 
-    with addGlobalVar('TSimbaInput', '[]', 'Input') do
+    with addGlobalVar('TInput', '[]', 'Input') do
       Used := duTrue;
 
     addGlobalType([
@@ -599,29 +599,29 @@ begin
     );
 
     addGlobalFunc(
-      'function TSimbaInput.GetGlobalInput: TSimbaInput;', [
+      'function TInput.GetGlobalInput: TInput;', [
       'begin',
       '  Result := Self;',
       '  Result.Target := System.Target;',
       'end;'
     ]);
 
-    addInputMethod('function TSimbaInput.MousePressed(Button: MouseButton): Boolean', @_LapeSimbaInput_MousePressed);
-    addInputMethod('function TSimbaInput.MousePosition: TPoint', @_LapeSimbaInput_MousePosition);
-    addInputMethod('procedure TSimbaInput.MouseTeleport(P: TPoint)', @_LapeSimbaInput_MouseTeleport);
-    addInputMethod('procedure TSimbaInput.MouseClick(Button: MouseButton)', @_LapeSimbaInput_MouseClick);
-    addInputMethod('procedure TSimbaInput.MouseDown(Button: MouseButton)', @_LapeSimbaInput_MouseDown);
-    addInputMethod('procedure TSimbaInput.MouseUp(Button: MouseButton)', @_LapeSimbaInput_MouseUp);
-    addInputMethod('procedure TSimbaInput.MouseScroll(Scrolls: Integer)', @_LapeSimbaInput_MouseScroll);
-    addInputMethod('procedure TSimbaInput.MouseMove(Dest: TPoint);', @_LapeSimbaInput_MouseMove);
+    addInputMethod('function TInput.MousePressed(Button: MouseButton): Boolean', @_LapeInput_MousePressed);
+    addInputMethod('function TInput.MousePosition: TPoint', @_LapeInput_MousePosition);
+    addInputMethod('procedure TInput.MouseTeleport(P: TPoint)', @_LapeInput_MouseTeleport);
+    addInputMethod('procedure TInput.MouseClick(Button: MouseButton)', @_LapeInput_MouseClick);
+    addInputMethod('procedure TInput.MouseDown(Button: MouseButton)', @_LapeInput_MouseDown);
+    addInputMethod('procedure TInput.MouseUp(Button: MouseButton)', @_LapeInput_MouseUp);
+    addInputMethod('procedure TInput.MouseScroll(Scrolls: Integer)', @_LapeInput_MouseScroll);
+    addInputMethod('procedure TInput.MouseMove(Dest: TPoint);', @_LapeInput_MouseMove);
 
-    addInputMethod('procedure TSimbaInput.KeySend(Text: String)', @_LapeSimbaInput_KeySend);
-    addInputMethod('procedure TSimbaInput.KeyPress(Key: KeyCode)', @_LapeSimbaInput_KeyPress);
-    addInputMethod('procedure TSimbaInput.KeyDown(Key: KeyCode)', @_LapeSimbaInput_KeyDown);
-    addInputMethod('procedure TSimbaInput.KeyUp(Key: KeyCode)', @_LapeSimbaInput_KeyUp);
-    addInputMethod('function TSimbaInput.KeyPressed(Key: KeyCode): Boolean', @_LapeSimbaInput_KeyPressed);
+    addInputMethod('procedure TInput.KeySend(Text: String)', @_LapeInput_KeySend);
+    addInputMethod('procedure TInput.KeyPress(Key: KeyCode)', @_LapeInput_KeyPress);
+    addInputMethod('procedure TInput.KeyDown(Key: KeyCode)', @_LapeInput_KeyDown);
+    addInputMethod('procedure TInput.KeyUp(Key: KeyCode)', @_LapeInput_KeyUp);
+    addInputMethod('function TInput.KeyPressed(Key: KeyCode): Boolean', @_LapeInput_KeyPressed);
 
-    addInputMethod('function TSimbaInput.CharToKeyCode(C: Char): KeyCode', @_LapeSimbaInput_CharToKeyCode);
+    addInputMethod('function TInput.CharToKeyCode(C: Char): KeyCode', @_LapeInput_CharToKeyCode);
   end;
 end;
 
