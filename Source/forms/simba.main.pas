@@ -302,7 +302,7 @@ uses
   simba.openssl, simba.env,
   simba.dockinghelpers, simba.nativeinterface,
   simba.scriptformatter, simba.windowhandle, simba.scripttab, simba.theme,
-  simba.backupsform;
+  simba.scriptbackup, simba.backupsform;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 
