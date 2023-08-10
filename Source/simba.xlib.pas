@@ -255,7 +255,8 @@ var
 implementation
 
 uses
-  dl, lazloggerbase;
+  dl,
+  simba.mufasatypes;
 
 function dlmopen(ID: SizeInt; Path: PChar; Flags: Integer): Pointer; cdecl; external;
 

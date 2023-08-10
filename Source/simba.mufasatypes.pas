@@ -370,8 +370,9 @@ type
 {$POP}
 
 var
-  DoSimbaDebugLn: procedure(const S: String) of object;
+  DoSimbaDebugLn: procedure(const S: String) of object = nil;
 
+procedure Debug(const Msg: String);
 procedure DebugLn(const Msg: String); overload;
 procedure DebugLn(const Msg: String; Args: array of const); overload;
 
@@ -415,7 +416,7 @@ const
 implementation
 
 uses
-  math, forms, lazloggerbase, uregexpr, strutils, jsonparser, jsonscanner,
+  math, forms, uregexpr, strutils, jsonparser, jsonscanner,
   simba.math, simba.overallocatearray, simba.geometry,
   simba.algo_sort, simba.tpa, simba.random;
 
@@ -453,14 +454,27 @@ uses
 
 {$UNDEF BODY}
 
+procedure Debug(const Msg: String);
+begin
+  {$I-}
+  Write(Msg);
+  {$I+}
+end;
+
 procedure DebugLn(const Msg: String);
 begin
-  DebugLogger.DebugLn(Msg);
+  {$I-}
+  WriteLn(Msg);
+  Flush(Output);
+  {$I+}
 end;
 
 procedure DebugLn(const Msg: String; Args: array of const);
 begin
-  DebugLogger.DebugLn(Msg, Args);
+  {$I-}
+  WriteLn(Format(Msg, Args));
+  Flush(Output);
+  {$I+}
 end;
 
 procedure SimbaException(Message: String; Args: array of const);
@@ -535,12 +549,15 @@ end;
 
 procedure SimbaDebugLn(const Flags: EDebugLnFlags; const Msg: String);
 begin
-  DoSimbaDebugLn(FlagsToString(Flags) + Msg);
+  if Assigned(DoSimbaDebugLn) then
+    DoSimbaDebugLn(FlagsToString(Flags) + Msg)
+  else
+    DebugLn(FlagsToString(Flags) + Msg);
 end;
 
 procedure SimbaDebugLn(const Flags: EDebugLnFlags; const Msg: TStringArray);
 begin
-  DoSimbaDebugLn(FlagsToString(Flags) + LineEnding.Join(Msg));
+  SimbaDebugLn(Flags, LineEnding.Join(Msg));
 end;
 
 function Min(const A, B: Integer): Integer;
@@ -649,9 +666,6 @@ begin
   else
     Result := IfFalse;
 end;
-
-initialization
-  DoSimbaDebugLn := @DebugLogger.DebugLn;
 
 end.
 

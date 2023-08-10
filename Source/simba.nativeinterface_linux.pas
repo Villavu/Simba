@@ -75,7 +75,7 @@ type
 implementation
 
 uses
-  x, xatom, keysym, baseunix, unix, linux, lcltype, lazloggerbase, ctypes,
+  x, xatom, keysym, baseunix, unix, linux, lcltype, ctypes,
   simba.process, simba.xlib, simba.windowhandle;
 
 const

@@ -72,7 +72,7 @@ type
 implementation
 
 uses
-  anchordockstorage, xmlpropstorage, lazloggerbase, lazconfigstorage,
+  anchordockstorage, xmlpropstorage, lazconfigstorage,
   simba.theme, simba.fonthelpers;
 
 procedure TSimbaAnchorDockHeader.ParentFontChanged;
