@@ -37,7 +37,8 @@ interface
 
 uses
   SysUtils, Classes,
-  mPasLexTypes, mPasLex;
+  mPasLexTypes, mPasLex,
+  simba.mufasatypes;
 
 const
   ClassMethodDirectiveEnum = [
@@ -366,11 +367,10 @@ type
 
 implementation
 
+{$IFDEF PARSER_BENCHMARK}
 uses
-  LazLoggerBase
-  {$IFDEF PARSER_BENCHMARK},
-  simba.datetime
-  {$ENDIF};
+  simba.datetime;
+{$ENDIF}
 
 procedure TmwSimplePasPar.ForwardDeclaration;
 begin

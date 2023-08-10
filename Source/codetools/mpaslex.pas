@@ -37,7 +37,7 @@ interface
 
 uses
   SysUtils, Classes,
-  simba.list, simba.stack,
+  simba.mufasatypes, simba.list, simba.stack,
   mPasLexTypes;
 
 type
@@ -247,9 +247,6 @@ type
   TLexerList = specialize TSimbaObjectList<TmwPasLex>;
 
 implementation
-
-uses
-  lazloggerbase;
 
 procedure TmwBasePasLex.ClearDefines;
 var

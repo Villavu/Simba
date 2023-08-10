@@ -13,19 +13,19 @@ procedure ImportInternal(Compiler: TSimbaScript_Compiler);
 implementation
 
 uses
-  lazloggerbase, lptypes,
+  lptypes,
   simba.tpa, simba.algo_sort, simba.algo_unique,
   simba.algo_difference, simba.algo_intersection, simba.algo_symmetricDifference,
   simba.script, simba.bitmap, simba.process;
 
 procedure _LapeWrite(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  DbgOut(PString(Params^[0])^);
+  Debug(PString(Params^[0])^);
 end;
 
 procedure _LapeWriteLn(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  DebugLn();
+  DebugLn('');
 end;
 
 // Sort

@@ -10,7 +10,7 @@ program Simba;
 
 uses
   simba.init,
-  Classes, SysUtils, Interfaces, Forms, LazLogger,
+  Classes, SysUtils, Interfaces, Forms,
   simba.mufasatypes, simba.main,
   simba.aboutform, simba.debugimageform, simba.imagetostringform,
   simba.functionlistform, simba.scripttabsform, simba.outputform,
@@ -24,8 +24,6 @@ begin
   {$IF DECLARED(SetHeapTraceOutput)}
   SetHeapTraceOutput(IntToStr(GetProcessID()) + '.trc');
   {$ENDIF}
-
-  DebugLogger.CloseLogFileBetweenWrites := True;
 
   Application.CaptureExceptions := False;
   Application.Initialize();
