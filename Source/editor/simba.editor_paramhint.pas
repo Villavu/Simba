@@ -197,7 +197,7 @@ begin
   if (Method is TDeclaration_TypeMethod) then
     ResultString := TDeclaration_TypeMethod(Method).ResultString;
 
-  Decl := Method.Items.GetByClassEx(TDeclaration_ParamList);
+  Decl := Method.Items.GetByClassFirst(TDeclaration_ParamList);
   if (Decl = nil) then
     DrawText(NameString + '()' + ResultString + ';')
   else

@@ -31,11 +31,8 @@ type
     function GetItem(const Index: Integer): TDeclaration;
     procedure SetItem(const Index: Integer; const Value: TDeclaration);
   public
-    function GetByClassAndName(const AClass: TDeclarationClass; const AName: String; const SubSearch: Boolean = False): TDeclarationArray;
-    function GetByName(const AName: String; const SubSearch: Boolean = False): TDeclarationArray;
-
     function GetByClass(const AClass: TDeclarationClass; const ExactClass: Boolean = False; const SubSearch: Boolean = False): TDeclarationArray;
-    function GetByClassEx(const AClass: TDeclarationClass; const ExactClass: Boolean = False; const SubSearch: Boolean = False): TDeclaration;
+    function GetByClassFirst(const AClass: TDeclarationClass; const ExactClass: Boolean = False; const SubSearch: Boolean = False): TDeclaration;
     function GetByPosition(const Position: Integer): TDeclaration;
 
     function GetTextOfClass(AClass: TDeclarationClass): String;
@@ -435,11 +432,30 @@ type
   TCodeParserArray = array of TCodeParser;
   TCodeParserList = specialize TSimbaObjectList<TCodeParser>;
 
+  function Filter(Decls: TDeclarationArray; Name: String; DeclClass: TDeclarationClass = nil): TDeclarationArray;
+
 implementation
+
+function Filter(Decls: TDeclarationArray; Name: String; DeclClass: TDeclarationClass): TDeclarationArray;
+var
+  I, Count: Integer;
+begin
+  SetLength(Result, Length(Decls));
+  Count := 0;
+
+  for I := 0 to High(Decls) do
+    if Decls[I].IsName(Name) and ((DeclClass = nil) or (DeclClass.ClassType = DeclClass)) then
+    begin
+      Result[Count] := Decls[I];
+      Inc(Count);
+    end;
+
+  SetLength(Result, Count);
+end;
 
 function TDeclaration_TypeNativeMethod.GetMethod: TDeclaration;
 begin
-  Result := FItems.GetByClassEx(TDeclaration_ParentType);
+  Result := FItems.GetByClassFirst(TDeclaration_ParentType);
 end;
 
 function TDeclaration_TypeMethod.GetResultString: String;
@@ -521,17 +537,17 @@ end;
 
 function TDeclaration_TypeAlias.VarType: TDeclaration;
 begin
-  Result := Items.GetByClassEx(TDeclaration_VarType);
+  Result := Items.GetByClassFirst(TDeclaration_VarType);
 end;
 
 function TDeclaration_TypeCopy.VarType: TDeclaration;
 begin
-  Result := Items.GetByClassEx(TDeclaration_VarType);
+  Result := Items.GetByClassFirst(TDeclaration_VarType);
 end;
 
 function TDeclaration_TypePointer.VarType: TDeclaration;
 begin
-  Result := Items.GetByClassEx(TDeclaration_VarType);
+  Result := Items.GetByClassFirst(TDeclaration_VarType);
 end;
 
 function TDeclaration_TypeArray.Dump: String;
@@ -545,10 +561,10 @@ var
 begin
   Result := 1;
 
-  Decl := Items.GetByClassEx(TDeclaration_TypeArray);
+  Decl := Items.GetByClassFirst(TDeclaration_TypeArray);
   while (Decl <> nil) and (Decl.Owner is TDeclaration_TypeArray) do
   begin
-    Decl := Decl.Items.GetByClassEx(TDeclaration_TypeArray);
+    Decl := Decl.Items.GetByClassFirst(TDeclaration_TypeArray);
 
     Inc(Result);
   end;
@@ -556,17 +572,17 @@ end;
 
 function TDeclaration_TypeArray.VarType: TDeclaration;
 begin
-  Result := Items.GetByClassEx(TDeclaration_VarType);
+  Result := Items.GetByClassFirst(TDeclaration_VarType);
 end;
 
 function TDeclaration_TypeArray.IsStatic: Boolean;
 begin
-  Result := Items.GetByClassEx(TDeclaration_OrdinalType) <> nil;
+  Result := Items.GetByClassFirst(TDeclaration_OrdinalType) <> nil;
 end;
 
 function TDeclaration_TypeRecord.Parent: TDeclaration;
 begin
-  Result := Items.GetByClassEx(TDeclaration_ParentType);
+  Result := Items.GetByClassFirst(TDeclaration_ParentType);
 end;
 
 function TDeclaration_TypeRecord.Fields: TDeclarationArray;
@@ -576,7 +592,7 @@ end;
 
 function TDeclaration_Var.GetVarType: TDeclaration;
 begin
-  Result := Items.GetByClassEx(TDeclaration_VarType);
+  Result := Items.GetByClassFirst(TDeclaration_VarType);
 end;
 
 function TDeclaration_Var.GetVarTypeString: String;
@@ -613,9 +629,9 @@ end;
 
 function TDeclaration_Method.ResultType: TDeclaration;
 begin
-  Result := Items.GetByClassEx(TDeclaration_MethodResult);
+  Result := Items.GetByClassFirst(TDeclaration_MethodResult);
   if (Result <> nil) then
-    Result := Result.Items.GetByClassEx(TDeclaration_VarType);
+    Result := Result.Items.GetByClassFirst(TDeclaration_VarType);
 end;
 
 function TDeclaration_Method.Dump: String;
@@ -725,6 +741,7 @@ begin
 end;
 {$ENDIF}
 
+{
 function TDeclarationList.GetByClassAndName(const AClass: TDeclarationClass; const AName: String; const SubSearch: Boolean): TDeclarationArray;
 var
   Size: Integer;
@@ -786,6 +803,7 @@ begin
 
   SetLength(Result, Size);
 end;
+}
 
 function TDeclarationList.GetByClass(const AClass: TDeclarationClass; const ExactClass: Boolean; const SubSearch: Boolean): TDeclarationArray;
 var
@@ -818,7 +836,7 @@ begin
   SetLength(Result, Size);
 end;
 
-function TDeclarationList.GetByClassEx(const AClass: TDeclarationClass; const ExactClass: Boolean; const SubSearch: Boolean): TDeclaration;
+function TDeclarationList.GetByClassFirst(const AClass: TDeclarationClass; const ExactClass: Boolean; const SubSearch: Boolean): TDeclaration;
 
   procedure DoSearch(const Item: TDeclaration);
   var
@@ -879,7 +897,7 @@ var
 begin
   Result := '';
 
-  Declaration := GetByClassEx(AClass);
+  Declaration := GetByClassFirst(AClass);
   if Declaration <> nil then
     Result := Declaration.GetText();
 end;
@@ -890,7 +908,7 @@ var
 begin
   Result := '';
 
-  Declaration := GetByClassEx(AClass);
+  Declaration := GetByClassFirst(AClass);
   if Declaration <> nil then
     Result := Declaration.GetTextNoComments();
 end;
@@ -899,7 +917,7 @@ function TDeclarationList.GetTextOfClassNoCommentsSingleLine(AClass: TDeclaratio
 var
   Decl: TDeclaration;
 begin
-  Decl := GetByClassEx(AClass);
+  Decl := GetByClassFirst(AClass);
 
   if (Decl <> nil) then
   begin
@@ -1197,13 +1215,13 @@ procedure TCodeParser.FindLocals;
     begin
       if (SelfDecl = nil) then
       begin
-        SelfDecl := Decl.Items.GetByClassEx(TDeclaration_MethodObjectName, True);
+        SelfDecl := Decl.Items.GetByClassFirst(TDeclaration_MethodObjectName, True);
         if (SelfDecl <> nil) then
           FLocals.Add(SelfDecl);
       end;
       if (ResultDecl = nil) then
       begin
-        ResultDecl := Decl.Items.GetByClassEx(TDeclaration_MethodResult, True);
+        ResultDecl := Decl.Items.GetByClassFirst(TDeclaration_MethodResult, True);
         if (ResultDecl <> nil) then
           FLocals.Add(ResultDecl);
       end;
@@ -1213,7 +1231,7 @@ procedure TCodeParser.FindLocals;
       FLocals.Extend(Decl.Items.GetByClass(TDeclaration_Type));
       FLocals.Extend(Decl.Items.GetByClass(TDeclaration_EnumElement));
 
-      ParamListDecl := FItems.GetByClassEx(TDeclaration_ParamList, True, True);
+      ParamListDecl := FItems.GetByClassFirst(TDeclaration_ParamList, True, True);
       if Assigned(ParamListDecl) then
         FLocals.Extend(ParamListDecl.Items.GetByClass(TDeclaration_Parameter, False, True));
 
@@ -1228,8 +1246,8 @@ procedure TCodeParser.FindLocals;
 
     while (Decl is TDeclaration_WithStatement) do
     begin
-      if (Decl.Items.GetByClassEx(TDeclaration_WithVariableList) <> nil) then
-        FLocals.Extend(Decl.Items.GetByClassEx(TDeclaration_WithVariableList).Items.GetByClass(TDeclaration_WithVariable));
+      if (Decl.Items.GetByClassFirst(TDeclaration_WithVariableList) <> nil) then
+        FLocals.Extend(Decl.Items.GetByClassFirst(TDeclaration_WithVariableList).Items.GetByClass(TDeclaration_WithVariable));
 
       Decl := Decl.GetOwnerByClass(TDeclaration_WithStatement);
     end;
@@ -1320,8 +1338,8 @@ var
   NewDecl: TDeclaration_Var;
   I: Integer;
 begin
-  VarType := VarStub.Items.GetByClassEx(TDeclaration_VarType);
-  VarDefault := VarStub.Items.GetByClassEx(TDeclaration_VarDefault);
+  VarType := VarStub.Items.GetByClassFirst(TDeclaration_VarType);
+  VarDefault := VarStub.Items.GetByClassFirst(TDeclaration_VarDefault);
 
   for I := 0 to VarStub.NameCount - 1 do
   begin
@@ -1346,8 +1364,8 @@ var
   NewDecl: TDeclaration_Parameter;
   I: Integer;
 begin
-  VarType := ParamStub.Items.GetByClassEx(TDeclaration_VarType);
-  VarDefault := ParamStub.Items.GetByClassEx(TDeclaration_VarDefault);
+  VarType := ParamStub.Items.GetByClassFirst(TDeclaration_VarType);
+  VarDefault := ParamStub.Items.GetByClassFirst(TDeclaration_VarDefault);
 
   for I := 0 to ParamStub.NameCount - 1 do
   begin

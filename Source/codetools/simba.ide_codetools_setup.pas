@@ -36,7 +36,7 @@ begin
       Parser.SetScript(List.ValueFromIndex[I], List.Names[I]);
       Parser.Run();
 
-      TCodeinsight.AddBaseInclude(Parser);
+      TCodeinsight.AddBaseParser(Parser);
     end;
   except
     on E: Exception do

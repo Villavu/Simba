@@ -209,9 +209,7 @@ end;
 
 procedure TSimbaAutoComplete_Form.DoScrollChange(Sender: TObject);
 begin
-  Scroll.Position:=RealScroll.Position;
-  //Position:=Scroll.Position;
-  //Invalidate;
+  Scroll.Position := RealScroll.Position;
 end;
 
 procedure TSimbaAutoComplete_Form.FontChanged(Sender: TObject);
@@ -226,7 +224,7 @@ begin
 
   if (AutoComplete <> nil) then
   begin
-    Size := Canvas.TextExtent('class const  ');
+    Size := Canvas.TextExtent('class const ');
 
     AutoComplete.FColumnWidth := Size.Width;
     AutoComplete.FDrawOffsetY := (((FFontHeight - 2) - Size.Height) div 2) - 1;
@@ -246,6 +244,8 @@ end;
 
 procedure TSimbaAutoComplete_Form.DoShow;
 begin
+  RealScroll.Position := 0;
+
   Width           := SimbaSettings.Editor.AutoCompleteWidth.Value;
   NbLinesInWindow := SimbaSettings.Editor.AutoCompleteLines.Value;
 
