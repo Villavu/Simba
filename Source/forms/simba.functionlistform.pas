@@ -243,8 +243,8 @@ var
     for I := 0 to FCodeinsight.ScriptParser.Items.Count - 1 do
       AddDecl(FScriptNode, FCodeinsight.ScriptParser.Items[I]);
 
-    AddIncludesNode(FCodeInsight.Includes, FCodeinsight.IncludesHash);
-    AddPluginsNode(FCodeInsight.Plugins, FCodeinsight.PluginsHash);
+    AddIncludesNode(FCodeInsight.IncludeParsers, FCodeinsight.IncludesHash);
+    AddPluginsNode(FCodeInsight.PluginParsers, FCodeinsight.PluginsHash);
     PurgeNodes();
 
     FScriptNode.Expanded := ExpandScriptNode;
@@ -397,6 +397,7 @@ begin
         NodeType := ntPluginFile;
         Hint := Plugins[I].FileName;
       end;
+      WriteLn(Plugins[I].Items.Count);
 
       for Decl in Plugins[I].Items.ToArray do
         if (Decl.Name <> '') then
@@ -604,9 +605,9 @@ var
 begin
   FTreeView.BeginUpdate();
 
-  for I := 0 to TCodeinsight.BaseIncludes.Count - 1 do
+  for I := 0 to TCodeinsight.BaseParsers.Count - 1 do
   begin
-    Parser := TCodeinsight.BaseIncludes[I];
+    Parser := TCodeinsight.BaseParsers[I];
     if (Parser = nil) or (Parser.Items.Count = 0) or (Parser.FileName.StartsWith('!')) then
       Continue;
 
