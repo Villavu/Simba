@@ -131,7 +131,7 @@ begin
   StartImporting();
 
   try
-    Options := Options + [lcoLooseSemicolon, lcoAutoInvoke, lcoExplicitSelf, lcoAutoObjectify, lcoRelativeFileNames] - [lcoInheritableRecords];
+    Options := Options + [lcoAutoInvoke, lcoExplicitSelf, lcoAutoObjectify, lcoRelativeFileNames] - [lcoInheritableRecords];
 
     ImportingSection := 'System';
 

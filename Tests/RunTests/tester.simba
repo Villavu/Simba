@@ -10,7 +10,7 @@ begin
     begin
       WriteLn('Passed');
 
-      Inc(Pass)
+      Inc(Pass);
     end else
     begin
       WriteLn('Failed "' + Trim(Output) + '"');
